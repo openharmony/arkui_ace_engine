@@ -210,13 +210,9 @@ public:
     }
 
     // Set by node container.
-    void SetOnTouchEvent(TouchEventFunc&& touchEventFunc)
-    {
-        if (!touchEventActuator_) {
-            touchEventActuator_ = MakeRefPtr<TouchEventActuator>();
-        }
-        touchEventActuator_->SetOnTouchEvent(std::move(touchEventFunc));
-    }
+    void SetOnTouchEvent(TouchEventFunc&& touchEventFunc);
+    // Set by JS FrameNode.
+    void SetJSFrameNodeOnTouchEvent(TouchEventFunc&& touchEventFunc);
 
     void AddTouchEvent(const RefPtr<TouchEventImpl>& touchEvent)
     {
@@ -250,6 +246,9 @@ public:
     // Set by user define, which will replace old one.
     void SetUserOnClick(GestureEventFunc&& clickEvent);
 
+     // Set by JS FrameNode.
+    void SetJSFrameNodeOnClick(GestureEventFunc&& clickEvent);
+    
     void SetOnGestureJudgeBegin(GestureJudgeFunc&& gestureJudgeFunc);
 
     void SetOnTouchIntercept(TouchInterceptFunc&& touchInterceptFunc);
@@ -271,6 +270,10 @@ public:
     // When the event param is undefined, it will clear the callback.
     void ClearUserOnClick();
     void ClearUserOnTouch();
+
+
+    void ClearJSFrameNodeOnClick();
+    void ClearJSFrameNodeOnTouch();
 
     void AddClickEvent(const RefPtr<ClickEvent>& clickEvent);
 

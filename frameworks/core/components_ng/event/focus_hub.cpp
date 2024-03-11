@@ -690,6 +690,15 @@ bool FocusHub::OnKeyEventNode(const KeyEvent& keyEvent)
             GetFrameName().c_str(), GetFrameId(), keyEvent.code, keyEvent.action, retCallback);
     }
 
+    auto onJSFrameNodeKeyCallback = GetOnJSFrameNodeKeyCallback();
+    if (onJSFrameNodeKeyCallback) {
+        onJSFrameNodeKeyCallback(info);
+        retCallback = info.IsStopPropagation();
+        TAG_LOGI(AceLogTag::ACE_FOCUS,
+            "OnKeyEventUser: Node %{public}s/%{public}d handle KeyEvent(%{public}d, %{public}d) return: %{public}d",
+            GetFrameName().c_str(), GetFrameId(), keyEvent.code, keyEvent.action, retCallback);
+    }
+
     if (!retInternal && !retCallback && keyEvent.action == KeyAction::DOWN) {
         auto ret = false;
         switch (keyEvent.code) {
@@ -1178,6 +1187,10 @@ void FocusHub::OnFocusNode()
         if (onFocusCallback) {
             onFocusCallback();
         }
+        auto onJSFrameNodeFocusCallback = focusHub->GetOnJSFrameNodeFocusCallback();
+        if (onJSFrameNodeFocusCallback) {
+            onJSFrameNodeFocusCallback();
+        }
     });
     auto parentFocusHub = GetParentFocusHub();
     if (parentFocusHub) {
@@ -1219,6 +1232,10 @@ void FocusHub::OnBlurNode()
         auto onBlurCallback = focusHub->GetOnBlurCallback();
         if (onBlurCallback) {
             onBlurCallback();
+        }
+        auto onJSFrameNodeBlurCallback_ = focusHub->GetOnJSFrameNodeBlurCallback();
+        if (onJSFrameNodeBlurCallback_) {
+            onJSFrameNodeBlurCallback_();
         }
     });
     if (blurReason_ != BlurReason::FRAME_DESTROY) {

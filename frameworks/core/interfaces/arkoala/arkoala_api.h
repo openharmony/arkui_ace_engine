@@ -3020,7 +3020,7 @@ struct ArkUIFrameNodeModifier {
     ArkUI_Bool (*insertChildAfter)(ArkUINodeHandle node, ArkUINodeHandle child, ArkUINodeHandle sibling);
     void (*removeChild)(ArkUINodeHandle node, ArkUINodeHandle child);
     void (*clearChildren)(ArkUINodeHandle node);
-    ArkUI_Uint32 (*getChildrenNumber)(ArkUINodeHandle node);
+    ArkUI_Uint32 (*getChildrenCount)(ArkUINodeHandle node);
     ArkUINodeHandle (*getChild)(ArkUINodeHandle node, ArkUI_Int32 index);
     ArkUINodeHandle (*getFirst)(ArkUINodeHandle node);
     ArkUINodeHandle (*getNextSibling)(ArkUINodeHandle node);

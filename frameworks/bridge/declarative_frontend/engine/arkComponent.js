@@ -3329,6 +3329,39 @@ const isInteger = (val) => Number.isInteger(val);
 const isNonEmptyMap = (val) => val instanceof Map && val.size > 0;
 const isTruthyString = (val) => typeof val === 'string' && val.trim() !== '';
 
+class UICommonEvent {
+  constructor(nodePtr) {
+      this._nodePtr = nodePtr;
+  }
+  setOnClick(callback) {
+      getUINativeModule().frameNode.setOnClick(this._nodePtr, callback);
+  }
+  setOnTouch(callback) {
+      getUINativeModule().frameNode.setOnTouch(this._nodePtr, callback);
+  }
+  setOnAppear(callback) {
+      getUINativeModule().frameNode.setOnAppear(this._nodePtr, callback);
+  }
+  setOnDisappear(callback) {
+      getUINativeModule().frameNode.setOnDisappear(this._nodePtr, callback);
+  }
+  setOnKeyEvent(callback) {
+      getUINativeModule().frameNode.setOnKeyEvent(this._nodePtr, callback);
+  }
+  setOnFocus(callback) {
+      getUINativeModule().frameNode.setOnFocus(this._nodePtr, callback);
+  }
+  setOnBlur(callback) {
+      getUINativeModule().frameNode.setOnBlur(this._nodePtr, callback);
+  }
+  setOnHover(callback) {
+      getUINativeModule().frameNode.setOnHover(this._nodePtr, callback);
+  }
+  setOnMouse(callback) {
+      getUINativeModule().frameNode.setOnMouse(this._nodePtr, callback);
+  }
+}
+
 /// <reference path='./import.ts' />
 class BlankColorModifier extends ModifierWithKey {
   constructor(value) {
@@ -19613,3 +19646,4 @@ if (globalThis.RemoteWindow !== undefined) {
     component.applyModifierPatch();
   };
 }
+

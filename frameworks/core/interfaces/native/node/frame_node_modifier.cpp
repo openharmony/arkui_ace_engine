@@ -89,7 +89,7 @@ void ClearChildrenInFrameNode(ArkUINodeHandle node)
     currentNode->MarkNeedFrameFlushDirty(NG::PROPERTY_UPDATE_MEASURE);
 }
 
-ArkUI_Uint32 GetChildrenNumber(ArkUINodeHandle node)
+ArkUI_Uint32 GetChildrenCount(ArkUINodeHandle node)
 {
     auto* currentNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_RETURN(currentNode, 0);
@@ -205,10 +205,9 @@ namespace NodeModifier {
 const ArkUIFrameNodeModifier* GetFrameNodeModifier()
 {
     static const ArkUIFrameNodeModifier modifier = { IsModifiable, AppendChildInFrameNode, InsertChildAfterInFrameNode,
-        RemoveChildInFrameNode, ClearChildrenInFrameNode, GetChildrenNumber, GetChild, GetFirst, GetNextSibling,
+        RemoveChildInFrameNode, ClearChildrenInFrameNode, GetChildrenCount, GetChild, GetFirst, GetNextSibling,
         GetPreviousSibling, GetParent, GetIdByNodePtr, GetPositionToParent, GetPositionToWindow,
         GetFrameNodeById, GetFrameNodeByKey };
-
     return &modifier;
 }
 } // namespace NodeModifier

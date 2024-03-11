@@ -22,6 +22,7 @@ class FrameNode {
   private type_: string;
   private instance_ : ArkComponent;
   private _commonAttributes: CommonModifier;
+  private _commonEvents: UICommonEvent;
   constructor(uiContext: UIContext, type: string) {
     this.uiContext_ = uiContext;
     this.nodeId_ = -1;
@@ -211,7 +212,7 @@ class FrameNode {
     return this.convertToFrameNode(nodePtr);
   }
   getChildrenCount(): number {
-    const number = getUINativeModule().frameNode.getChildNumber(this.nodePtr_);
+    const number = getUINativeModule().frameNode.getChildrenCount(this.nodePtr_);
     return number;
   }
   getPositionToParent(): Position {
@@ -237,6 +238,15 @@ class FrameNode {
     }
     applyUIAttributes(this._commonAttributes, this.nodePtr_, this.instance_);
     this.instance_.applyModifierPatch();
+  }
+  get commonEvents(): UICommonEvent {
+    if (this._commonEvents === undefined) {
+      this._commonEvents = new UICommonEvent(this.nodePtr_);
+    }
+    if (this._commonEvents._nodePtr !== this.nodePtr_) {
+      this._commonEvents._nodePtr === this.nodePtr_;
+    }
+    return this._commonEvents;
   }
 }
 
