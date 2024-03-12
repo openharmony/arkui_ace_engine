@@ -307,6 +307,8 @@ void JSAlertDialog::Show(const JSCallbackInfo& args)
                 properties.backgroundBlurStyle = blurStyle;
             }
         }
+        // Parse transition.
+        properties.transitionEffect = ParseJsTransitionEffect(args);
         JSViewAbstract::SetDialogProperties(obj, properties);
         AlertDialogModel::GetInstance()->SetShowDialog(properties);
     }

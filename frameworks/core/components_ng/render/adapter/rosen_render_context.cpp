@@ -4601,6 +4601,16 @@ void RosenRenderContext::OnTransitionInFinish()
     }
     // when all transition in/out animations are finished, we should remove the default transition effect.
     RemoveDefaultTransition();
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto parent = host->GetParent();
+    CHECK_NULL_VOID(parent);
+    if (host->IsVisible()) {
+        // trigger transition through visibility
+        if (transitionInCallback_) {
+            transitionInCallback_();
+        }
+    }
 }
 
 void RosenRenderContext::GetBestBreakPoint(RefPtr<UINode>& breakPointChild, RefPtr<UINode>& breakPointParent)
@@ -5029,6 +5039,11 @@ void RosenRenderContext::SetTranslate(float translateX, float translateY, float 
 {
     CHECK_NULL_VOID(rsNode_);
     rsNode_->SetTranslate(translateX, translateY, translateZ);
+}
+
+void RosenRenderContext::SetTransitionInCallback(std::function<void()>&& callback)
+{
+    transitionInCallback_ = std::move(callback);
 }
 
 void RosenRenderContext::SetTransitionOutCallback(std::function<void()>&& callback)
