@@ -1482,7 +1482,7 @@ void RichEditorPattern::HandleClickEvent(GestureEvent& info)
     if (!focusHub->IsFocusable()) {
         return;
     }
-    if (dataDetectorAdapter_->hasClickedAISpan_ && !isMousePressed_) {
+    if (dataDetectorAdapter_->hasClickedAISpan_) {
         dataDetectorAdapter_->hasClickedAISpan_ = false;
     } else if (hasClicked_) {
         hasClicked_ = false;
@@ -1520,9 +1520,6 @@ void RichEditorPattern::HandleSingleClickEvent(OHOS::Ace::GestureEvent& info)
     if (dataDetectorAdapter_->hasClickedAISpan_) {
         if (selectOverlayProxy_ && !selectOverlayProxy_->IsClosed()) {
             selectOverlayProxy_->DisableMenu(true);
-        }
-        if (!isMousePressed_) {
-            dataDetectorAdapter_->hasClickedAISpan_ = false;
         }
         return;
     }
@@ -1637,11 +1634,12 @@ bool RichEditorPattern::ClickAISpan(const PointF& textOffset, const AISpan& aiSp
     std::vector<RectF> aiRects = paragraphs_.GetRects(aiSpan.start, aiSpan.end);
     for (auto&& rect : aiRects) {
         if (rect.IsInRegion(textOffset)) {
-            dataDetectorAdapter_->hasClickedAISpan_ = true;
             dataDetectorAdapter_->clickedAISpan_ = aiSpan;
             if (leftMousePress_) {
+                dataDetectorAdapter_->pressedByLeftMouse_ = true;
                 return true;
             }
+            dataDetectorAdapter_->hasClickedAISpan_ = true;
             ShowUIExtensionMenu(aiSpan, calculateHandleFunc, showSelectOverlayFunc);
             return true;
         }
@@ -3803,19 +3801,20 @@ void RichEditorPattern::HandleMouseLeftButtonMove(const MouseInfo& info)
         }
         return;
     }
+
+    auto textPaintOffset = GetTextRect().GetOffset() - OffsetF(0.0, std::min(baselineOffset_, 0.0f));
+    Offset textOffset = { info.GetLocalLocation().GetX() - textPaintOffset.GetX(),
+        info.GetLocalLocation().GetY() - textPaintOffset.GetY() };
+    if (dataDetectorAdapter_->pressedByLeftMouse_) {
+        dataDetectorAdapter_->pressedByLeftMouse_ = false;
+        MoveCaretAndStartFocus(textOffset);
+    }
+
     auto focusHub = GetFocusHub();
     CHECK_NULL_VOID(focusHub);
     if (!focusHub->IsCurrentFocus()) {
         return;
     }
-    auto textPaintOffset = GetTextRect().GetOffset() - OffsetF(0.0, std::min(baselineOffset_, 0.0f));
-    Offset textOffset = { info.GetLocalLocation().GetX() - textPaintOffset.GetX(),
-        info.GetLocalLocation().GetY() - textPaintOffset.GetY() };
-    if (dataDetectorAdapter_->hasClickedAISpan_) {
-        dataDetectorAdapter_->hasClickedAISpan_ = false;
-        MoveCaretAndStartFocus(textOffset);
-    }
-
     mouseStatus_ = MouseStatus::MOVE;
     if (isFirstMouseSelect_) {
         int32_t extend = paragraphs_.GetIndex(textOffset);
@@ -3870,8 +3869,9 @@ void RichEditorPattern::HandleMouseLeftButtonPress(const MouseInfo& info)
     mouseStatus_ = MouseStatus::PRESSED;
     blockPress_ = false;
     caretUpdateType_ = CaretUpdateType::PRESSED;
+    dataDetectorAdapter_->pressedByLeftMouse_ = false;
     HandleClickAISpanEvent(PointF(textOffset.GetX(), textOffset.GetY()));
-    if (dataDetectorAdapter_->hasClickedAISpan_) {
+    if (dataDetectorAdapter_->pressedByLeftMouse_) {
         return;
     }
     UseHostToUpdateTextFieldManager();
@@ -3888,9 +3888,9 @@ void RichEditorPattern::HandleMouseLeftButtonRelease(const MouseInfo& info)
     isMousePressed_ = false;
     isFirstMouseSelect_ = true;
 
-    if (dataDetectorAdapter_->hasClickedAISpan_ && oldMouseStatus != MouseStatus::MOVE && !IsDragging()) {
+    if (dataDetectorAdapter_->pressedByLeftMouse_ && oldMouseStatus != MouseStatus::MOVE && !IsDragging()) {
         dataDetectorAdapter_->ResponseBestMatchItem(dataDetectorAdapter_->clickedAISpan_);
-        dataDetectorAdapter_->hasClickedAISpan_ = false;
+        dataDetectorAdapter_->pressedByLeftMouse_ = false;
         return;
     }
 

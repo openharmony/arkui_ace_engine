@@ -19,7 +19,7 @@ class RichEditorEnableDataDetectorModifier extends ModifierWithKey<boolean> {
     super(value);
   }
   static identity: Symbol = Symbol('richEditorEnableDataDetector');
-  applyPeer(node: KNode, reset: boolean) {
+  applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
       getUINativeModule().richEditor.resetEnableDataDetector(node);
     } else {
