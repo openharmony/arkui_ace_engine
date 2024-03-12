@@ -87,16 +87,15 @@ void JSSpan::SetFontSize(const JSCallbackInfo& info)
     if (info.Length() < 1) {
         return;
     }
-    auto theme = GetTheme<TextTheme>();
-    CHECK_NULL_VOID(theme);
-    CalcDimension fontSize = theme->GetTextStyle().GetFontSize();
-    if (!ParseJsDimensionFpNG(info[0], fontSize, false)) {
+    CalcDimension fontSize;
+    if (!ParseJsDimensionFpNG(info[0], fontSize, false) || fontSize.IsNegative()) {
+        auto pipelineContext = PipelineBase::GetCurrentContext();
+        CHECK_NULL_VOID(pipelineContext);
+        auto theme = pipelineContext->GetTheme<TextTheme>();
+        CHECK_NULL_VOID(theme);
         fontSize = theme->GetTextStyle().GetFontSize();
         SpanModel::GetInstance()->SetFontSize(fontSize);
         return;
-    }
-    if (fontSize.IsNegative()) {
-        fontSize = theme->GetTextStyle().GetFontSize();
     }
 
     SpanModel::GetInstance()->SetFontSize(fontSize);
