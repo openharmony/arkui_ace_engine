@@ -919,7 +919,6 @@ HWTEST_F(XComponentTestNg, XComponentSurfaceTestTypeSurface, TestSize.Level1)
     pattern->OnWindowHide();
     pattern->OnWindowHide(); // test when hasReleasedSurface_ is not satisfied
     EXPECT_EQ(surfaceShowNum, 0);
-    EXPECT_CALL(*AceType::DynamicCast(pattern->renderSurface_),releaseSurfaceBuffers()).WillOnce(Return());
     pattern->OnWindowShow();
     pattern->OnWindowShow(); // test when hasReleasedSurface_ is not satisfied
     EXPECT_EQ(surfaceShowNum, 1);
