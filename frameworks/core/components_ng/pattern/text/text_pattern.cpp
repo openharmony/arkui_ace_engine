@@ -670,7 +670,7 @@ void TextPattern::HandleSingleClickEvent(GestureEvent& info)
         ResetSelection();
     }
     bool isClickOnSpan = false;
-    HandleSpanSingleClickEvent(info, textContentRect, textOffset, isClickOnSpan);
+    HandleSpanSingleClickEvent(info, textContentRect, isClickOnSpan);
 
     if (onClick_ && !isClickOnSpan) {
         auto onClick = onClick_;
@@ -705,48 +705,85 @@ void TextPattern::HandleClickAISpanEvent(const PointF& textOffset)
     }
 }
 
-void TextPattern::HandleSpanSingleClickEvent(
-    GestureEvent& info, RectF textContentRect, PointF textOffset, bool& isClickOnSpan)
+bool TextPattern::CheckClickedOnSpanOrText(RectF textContentRect, const Offset& localLocation)
 {
+    clickedSpanPosition_ = -1;
     auto host = GetHost();
-    CHECK_NULL_VOID(host);
+    CHECK_NULL_RETURN(host, false);
     auto renderContext = host->GetRenderContext();
-    CHECK_NULL_VOID(renderContext);
+    CHECK_NULL_RETURN(host, false);
+    PointF textOffset = { static_cast<float>(localLocation.GetX()) - textContentRect.GetX(),
+        static_cast<float>(localLocation.GetY()) - textContentRect.GetY() };
     if (renderContext->GetClipEdge().has_value() && !renderContext->GetClipEdge().value() && overlayMod_) {
         textContentRect = overlayMod_->GetBoundsRect();
         textContentRect.SetTop(contentRect_.GetY() - std::min(baselineOffset_, 0.0f));
     }
-    if (textContentRect.IsInRegion(PointF(info.GetLocalLocation().GetX(), info.GetLocalLocation().GetY())) &&
+    if (textContentRect.IsInRegion(
+            PointF(static_cast<float>(localLocation.GetX()), static_cast<float>(localLocation.GetY()))) &&
         !spans_.empty() && paragraph_) {
-        int32_t start = 0;
-        for (const auto& item : spans_) {
-            if (!item) {
-                continue;
-            }
-            std::vector<RectF> selectedRects;
-            paragraph_->GetRectsForRange(start, item->position, selectedRects);
-            start = item->position;
-            for (auto&& rect : selectedRects) {
-                if (rect.IsInRegion(textOffset)) {
-                    if (!item->onClick) {
-                        break;
-                    }
-                    GestureEvent spanClickinfo = info;
-                    EventTarget target = info.GetTarget();
-                    target.area.SetWidth(Dimension(0.0f));
-                    target.area.SetHeight(Dimension(0.0f));
-                    spanClickinfo.SetTarget(target);
-                    item->onClick(spanClickinfo);
-                    if (Recorder::EventRecorder::Get().IsComponentRecordEnable()) {
-                        Recorder::EventParamsBuilder builder;
-                        builder.SetId(item->inspectId).SetText(item->content).SetDescription(item->description);
-                        Recorder::EventRecorder::Get().OnClick(std::move(builder));
-                    }
-                    isClickOnSpan = true;
-                    return;
-                }
+        if (CalculateClickedSpanPosition(textOffset)) {
+            return true;
+        }
+    }
+    if (onClick_) {
+        return true;
+    }
+    return false;
+}
+
+bool TextPattern::CalculateClickedSpanPosition(const PointF& textOffset)
+{
+    int32_t start = 0;
+    for (const auto& item : spans_) {
+        clickedSpanPosition_++;
+        if (!item) {
+            continue;
+        }
+        std::vector<RectF> selectedRects;
+        paragraph_->GetRectsForRange(start, item->position, selectedRects);
+        start = item->position;
+        for (auto && rect : selectedRects) {
+            if (rect.IsInRegion(textOffset)) {
+                CHECK_NULL_RETURN(!item->onClick, true);
+                clickedSpanPosition_ = -1;
+                break;
             }
         }
+        if (clickedSpanPosition_ == -1) {
+            break;
+        }
+    }
+    return false;
+}
+
+void TextPattern::HandleSpanSingleClickEvent(GestureEvent& info, RectF textContentRect, bool& isClickOnSpan)
+{
+    if (copyOption_ != CopyOptions::None) {
+        CheckClickedOnSpanOrText(textContentRect, info.GetLocalLocation());
+    }
+    TAG_LOGD(AceLogTag::ACE_TEXT, "HandleSpanSingleClickEvent clickedSpanPosition_: %{public}d", clickedSpanPosition_);
+    CHECK_NULL_VOID(clickedSpanPosition_ != -1);
+    isClickOnSpan = true;
+    auto iter = spans_.begin();
+    std::advance(iter, clickedSpanPosition_);
+    RefPtr<SpanItem> span;
+    if (iter == spans_.end()) {
+        span = spans_.back();
+    } else {
+        span = *iter;
+    }
+    CHECK_NULL_VOID(span);
+    CHECK_NULL_VOID(span->onClick);
+    GestureEvent spanClickinfo = info;
+    EventTarget target = info.GetTarget();
+    target.area.SetWidth(Dimension(0.0f));
+    target.area.SetHeight(Dimension(0.0f));
+    spanClickinfo.SetTarget(target);
+    span->onClick(spanClickinfo);
+    if (Recorder::EventRecorder::Get().IsComponentRecordEnable()) {
+        Recorder::EventParamsBuilder builder;
+        builder.SetId(span->inspectId).SetText(span->content).SetDescription(span->description);
+        Recorder::EventRecorder::Get().OnClick(std::move(builder));
     }
 }
 
@@ -868,7 +905,7 @@ void TextPattern::CheckOnClickEvent(GestureEvent& info)
     textContentRect.SetHeight(contentRect_.Height() - std::max(baselineOffset_, 0.0f));
     PointF textOffset = { info.GetLocalLocation().GetX() - textContentRect.GetX(),
         info.GetLocalLocation().GetY() - textContentRect.GetY() };
-    HandleSpanSingleClickEvent(info, textContentRect, textOffset, isClickOnSpan);
+    HandleSpanSingleClickEvent(info, textContentRect, isClickOnSpan);
     if (onClick_ && !isClickOnSpan) {
         auto onClick = onClick_;
         onClick(info);
@@ -885,6 +922,26 @@ void TextPattern::InitClickEvent(const RefPtr<GestureEventHub>& gestureHub)
         pattern->HandleClickEvent(info);
     };
     auto clickListener = MakeRefPtr<ClickEvent>(std::move(clickCallback));
+    clickListener->SetSysJudge([weak = WeakClaim(this)](const RefPtr<GestureInfo>& gestureInfo,
+                                   const std::shared_ptr<BaseGestureEvent>& info) -> GestureJudgeResult {
+        auto textPattern = weak.Upgrade();
+        CHECK_NULL_RETURN(textPattern, GestureJudgeResult::CONTINUE);
+        if (info->GetFingerList().empty()) {
+            return GestureJudgeResult::CONTINUE;
+        }
+        auto localLocation = info->GetFingerList().begin()->localLocation_;
+        auto contentRect = textPattern->GetTextContentRect();
+        auto baselineOffset = textPattern->GetBaselineOffset();
+
+        RectF textContentRect = contentRect;
+        textContentRect.SetTop(contentRect.GetY() - std::min(baselineOffset, 0.0f));
+        textContentRect.SetHeight(contentRect.Height() - std::max(baselineOffset, 0.0f));
+        if (textPattern->GetCopyOptions() == CopyOptions::None &&
+            !textPattern->CheckClickedOnSpanOrText(textContentRect, localLocation)) {
+            return GestureJudgeResult::REJECT;
+        }
+        return GestureJudgeResult::CONTINUE;
+    });
     gestureHub->AddClickEvent(clickListener);
     clickEventInitialized_ = true;
 }

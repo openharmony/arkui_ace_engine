@@ -490,6 +490,12 @@ public:
 
     void HandleSelectionChange(int32_t start, int32_t end);
 
+    CopyOptions GetCopyOptions() const
+    {
+        return copyOption_;
+    }
+    bool CheckClickedOnSpanOrText(RectF textContentRect, const Offset& localLocation);
+
 protected:
     void OnAttachToFrameNode() override;
     void OnDetachFromFrameNode(FrameNode* node) override;
@@ -505,7 +511,7 @@ protected:
     void HandleClickEvent(GestureEvent& info);
     void HandleSingleClickEvent(GestureEvent& info);
     void HandleClickAISpanEvent(const PointF& info);
-    void HandleSpanSingleClickEvent(GestureEvent& info, RectF textContentRect, PointF textOffset, bool& isClickOnSpan);
+    void HandleSpanSingleClickEvent(GestureEvent& info, RectF textContentRect, bool& isClickOnSpan);
     void HandleDoubleClickEvent(GestureEvent& info);
     void CheckOnClickEvent(GestureEvent& info);
     bool ShowUIExtensionMenu(const AISpan& aiSpan, const CalculateHandleFunc& calculateHandleFunc = nullptr,
@@ -517,8 +523,8 @@ protected:
     void CalculateHandleOffsetAndShowOverlay(bool isUsingMouse = false);
     void PushSelectedByMouseInfoToManager();
     void ShowSelectOverlay(const RectF& firstHandle, const RectF& secondHandle);
-    void ShowSelectOverlay(const RectF& firstHandle, const RectF& secondHandle,
-        bool animation, bool isUsingMouse = false, bool isShowMenu = true);
+    void ShowSelectOverlay(const RectF& firstHandle, const RectF& secondHandle, bool animation,
+        bool isUsingMouse = false, bool isShowMenu = true);
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
     bool IsSelectAll();
     virtual int32_t GetHandleIndex(const Offset& offset) const;
@@ -529,6 +535,7 @@ protected:
     void UpdateSelectionType(const SelectionInfo& selection);
     void CopyBindSelectionMenuParams(SelectOverlayInfo& selectInfo, std::shared_ptr<SelectionMenuParams> menuParams);
     bool IsSelectedBindSelectionMenu();
+    bool CalculateClickedSpanPosition(const PointF& textOffset);
     std::shared_ptr<SelectionMenuParams> GetMenuParams(TextSpanType type, TextResponseType responseType);
 
     virtual bool CanStartAITask()
@@ -613,6 +620,7 @@ private:
     bool blockPress_ = false;
     bool hasClicked_ = false;
     bool isDoubleClick_ = false;
+    int32_t clickedSpanPosition_ = -1;
     TimeStamp lastClickTimeStamp_;
 
     RefPtr<Paragraph> paragraph_;
