@@ -1797,7 +1797,7 @@ export class CounterComponent extends ViewPU {
                                 center: { anchor: "__container__", align: VerticalAlign.Center },
                                 middle: { anchor: "__container__", align: HorizontalAlign.Center }
                             });
-                            TextInput.width(9.6 * this.getValueLength());
+                            TextInput.width(Math.min(9.6 * this.getValueLength(), this.textWidth));
                             TextInput.height("20vp");
                             TextInput.padding(0);
                             TextInput.borderRadius(0);
