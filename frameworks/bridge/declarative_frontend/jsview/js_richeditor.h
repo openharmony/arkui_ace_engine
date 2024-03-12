@@ -99,7 +99,8 @@ public:
     void ParseJsTextStyle(
         const JSRef<JSObject>& styleObject, TextStyle& style, struct UpdateSpanStyle& updateSpanStyle);
     void ParseJsLineHeightLetterSpacingTextStyle(
-        const JSRef<JSObject>& styleObject, TextStyle& style, struct UpdateSpanStyle& updateSpanStyle, bool isVisible = true);
+        const JSRef<JSObject>& styleObject, TextStyle& style, struct UpdateSpanStyle& updateSpanStyle, 
+        bool isSupportPercent = true);
     void ParseJsSymbolSpanStyle(
         const JSRef<JSObject>& styleObject, TextStyle& style, struct UpdateSpanStyle& updateSpanStyle);
     ImageSpanOptions CreateJsImageOptions(const JSCallbackInfo& args);

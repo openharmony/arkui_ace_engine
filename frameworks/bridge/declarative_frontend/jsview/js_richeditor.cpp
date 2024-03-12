@@ -852,7 +852,7 @@ ImageSpanAttribute JSRichEditorController::ParseJsImageSpanAttribute(JSRef<JSObj
 }
 
 void JSRichEditorController::ParseJsLineHeightLetterSpacingTextStyle(
-    const JSRef<JSObject>& styleObject, TextStyle& style, struct UpdateSpanStyle& updateSpanStyle, bool isVisible)
+    const JSRef<JSObject>& styleObject, TextStyle& style, struct UpdateSpanStyle& updateSpanStyle, bool isSupportPercent)
 {
     JSRef<JSVal> lineHeight = styleObject->GetProperty("lineHeight");
     CalcDimension height;
