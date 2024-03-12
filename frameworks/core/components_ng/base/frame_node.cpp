@@ -110,8 +110,6 @@ public:
             totalCount_ += count;
         }
         cursor_ = children_.begin();
-        startIndex_ = -1;
-        endIndex_ = -1;
     }
 
     static void AddFrameNode(const RefPtr<UINode>& UiNode, std::list<RefPtr<LayoutWrapper>>& allFrameNodeChildren,
@@ -256,11 +254,6 @@ public:
 
     void SetActiveChildRange(int32_t start, int32_t end)
     {
-        if (startIndex_ == start && endIndex_ == end) {
-            return;
-        }
-        startIndex_ = start;
-        endIndex_ = end;
         for (auto itor = partFrameNodeChildren_.begin(); itor != partFrameNodeChildren_.end();) {
             int32_t index = itor->first;
             if ((start <= end && index >= start && index <= end) ||
@@ -345,8 +338,6 @@ private:
     bool inUse_ = false;
     bool delayReset_ = false;
     bool needResetChild_ = false;
-    int32_t startIndex_ = -1;
-    int32_t endIndex_ = -1;
 }; // namespace OHOS::Ace::NG
 
 FrameNode::FrameNode(
