@@ -1311,7 +1311,7 @@ export struct CounterComponent {
                 center: {anchor: '__container__', align: VerticalAlign.Center},
                 middle: {anchor: '__container__', align: HorizontalAlign.Center}
               })
-              .width(this.getValueLength() * 9.6)
+              .width(Math.min(this.getValueLength() * 9.6,this.textWidth))
               .height('20vp')
               .padding(0)
               .borderRadius(0)
