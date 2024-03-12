@@ -389,6 +389,65 @@ class NodeController {
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+class FrameNodeAttributeMap  {
+    constructor() {
+        this.map_ = new Map();
+      }
+      clear() {
+        this.map_.clear();
+      }
+      delete(key) {
+        return this.map_.delete(key);
+      }
+      forEach(callbackfn, thisArg) {
+        this.map_.forEach(callbackfn, thisArg);
+      }
+      get(key) {
+        return this.map_.get(key);
+      }
+      has(key) {
+        return this.map_.has(key);
+      }
+      set(key, value) {
+        const _a = this.changeCallback;
+        this.map_.set(key, value);
+        _a === null || _a === void 0 ? void 0 : _a(key, value);
+        return this;
+      }
+      get size() {
+        return this.map_.size;
+      }
+      entries() {
+        return this.map_.entries();
+      }
+      keys() {
+        return this.map_.keys();
+      }
+      values() {
+        return this.map_.values();
+      }
+      [Symbol.iterator]() {
+        return this.map_.entries();
+      }
+      get [Symbol.toStringTag]() {
+        return 'FrameNodeAttributeMapTag';
+      }
+      setOnChange(callback) {
+        if (this.changeCallback === undefined) {
+          this.changeCallback = callback;
+        }
+      }
+}
+
+class FrameNodeModifier extends ArkComponent {
+    constructor(nodePtr) {
+      super(nodePtr);
+      this._modifiersWithKeys = new FrameNodeAttributeMap();
+      this._modifiersWithKeys.setOnChange((key, value)=>{
+        value.applyStage(this.nativePtr);
+      })
+    }
+  }
 class FrameNode {
     constructor(uiContext, type) {
         this.uiContext_ = uiContext;
@@ -406,7 +465,7 @@ class FrameNode {
         FrameNodeFinalizationRegisterProxy.register(this, this.nodeId_);
         this.renderNode_.setNodePtr(this.nodePtr_);
         this.renderNode_.setBaseNode(this.baseNode_);
-        this.instance_ = new ArkComponent(this.nodePtr_);
+        this.instance_ = new FrameNodeModifier(this.nodePtr_);
     }
     getRenderNode() {
         if (this.renderNode_ !== undefined &&
@@ -593,20 +652,12 @@ class FrameNode {
         }
         return null;
     }
-
     get commonAttributes() {
         if (this._commonAttributes === undefined) {
-            const CommonModifier = requireNapi('arkui.modifier').CommonModifier;
-            this._commonAttributes = new CommonModifier();
+            this._commonAttributes = new FrameNodeModifier(this.nodePtr_);
         }
+        this._commonAttributes.nativePtr = this.nodePtr_;
         return this._commonAttributes;
-    }
-    flushAttribute() {
-        if (this.type_ === "BuilderNode" || this.type_ === "ArkTsNode" || this._commonAttributes == undefined) {
-            return;
-        }
-        applyUIAttributes(this._commonAttributes, this.nodePtr_, this.instance_);
-        this.instance_.applyModifierPatch();
     }
     get commonEvents() {
         if (this._commonEvents === undefined) {
