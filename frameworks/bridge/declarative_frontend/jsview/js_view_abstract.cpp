@@ -488,15 +488,15 @@ void ReplaceHolder(std::string& originStr, JSRef<JSArray> params, int32_t contai
 
 bool ParseLocationProps(const JSCallbackInfo& info, CalcDimension& x, CalcDimension& y)
 {
-    std::vector<JSCallbackInfoType> checkList { JSCallbackInfoType::OBJECT };
-    if (!CheckJSCallbackInfo("ParseLocationProps", info, checkList)) {
+    JSRef<JSVal> arg = info[0];
+    if (!arg->IsObject()) {
         return false;
     }
-    JSRef<JSObject> sizeObj = JSRef<JSObject>::Cast(info[0]);
+    JSRef<JSObject> sizeObj = JSRef<JSObject>::Cast(arg);
     JSRef<JSVal> xVal = sizeObj->GetProperty("x");
     JSRef<JSVal> yVal = sizeObj->GetProperty("y");
-    bool hasX = JSViewAbstract::ParseJsDimensionVp(xVal, x);
-    bool hasY = JSViewAbstract::ParseJsDimensionVp(yVal, y);
+    bool hasX = JSViewAbstract::ParseJsDimension(xVal, x, DimensionUnit::VP);
+    bool hasY = JSViewAbstract::ParseJsDimension(yVal, y, DimensionUnit::VP);
     return hasX || hasY;
 }
 
@@ -1311,21 +1311,16 @@ void JSViewAbstract::JsScaleY(const JSCallbackInfo& info)
 void JSViewAbstract::JsOpacity(const JSCallbackInfo& info)
 {
     double opacity = 0.0;
-    std::vector<JSCallbackInfoType> checkList { JSCallbackInfoType::OBJECT, JSCallbackInfoType::NUMBER,
-        JSCallbackInfoType::STRING };
-    if (!CheckJSCallbackInfo("Opacity", info, checkList)) {
+    if (!ParseJsDouble(info[0], opacity)) {
         ViewAbstractModel::GetInstance()->SetOpacity(1.0f);
         return;
     }
-    if (!ParseJsDouble(info[0], opacity)) {
-        return;
-    }
-    if (Container::LessThanAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
+    if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
+        opacity = std::clamp(opacity, 0.0, 1.0);
+    } else {
         if (opacity > 1.0 || LessNotEqual(opacity, 0.0)) {
             opacity = 1.0;
         }
-    } else {
-        opacity = std::clamp(opacity, 0.0, 1.0);
     }
     ViewAbstractModel::GetInstance()->SetOpacity(opacity);
 }
@@ -1961,14 +1956,12 @@ void JSViewAbstract::JsOffset(const JSCallbackInfo& info)
 
 void JSViewAbstract::JsEnabled(const JSCallbackInfo& info)
 {
-    bool enabled;
-    if (!info[0]->IsBoolean()) {
-        enabled = true;
+    auto arg = info[0];
+    if (!arg->IsBoolean()) {
+        ViewAbstractModel::GetInstance()->SetEnabled(true);
     } else {
-        enabled = info[0]->ToBoolean();
+        ViewAbstractModel::GetInstance()->SetEnabled(arg->ToBoolean());
     }
-
-    ViewAbstractModel::GetInstance()->SetEnabled(enabled);
 }
 
 void JSViewAbstract::JsAspectRatio(const JSCallbackInfo& info)
@@ -4091,10 +4084,6 @@ bool JSViewAbstract::ParseJsDimensionNG(
 
 bool JSViewAbstract::ParseJsDimension(const JSRef<JSVal>& jsValue, CalcDimension& result, DimensionUnit defaultUnit)
 {
-    if (!jsValue->IsNumber() && !jsValue->IsString() && !jsValue->IsObject()) {
-        return false;
-    }
-
     if (jsValue->IsNumber()) {
         result = CalcDimension(jsValue->ToNumber<double>(), defaultUnit);
         return true;
@@ -4102,6 +4091,9 @@ bool JSViewAbstract::ParseJsDimension(const JSRef<JSVal>& jsValue, CalcDimension
     if (jsValue->IsString()) {
         result = StringUtils::StringToCalcDimension(jsValue->ToString(), false, defaultUnit);
         return true;
+    }
+    if (!jsValue->IsObject()) {
+        return false;
     }
     JSRef<JSObject> jsObj = JSRef<JSObject>::Cast(jsValue);
     CompleteResourceObject(jsObj);
