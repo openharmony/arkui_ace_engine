@@ -462,9 +462,9 @@ public:
         }
     }
 
-    bool isDragForbidden();
+    bool IsDragForbidden();
 
-    void setDragForbiddenForcely(bool isDragForbidden);
+    void SetDragForbiddenForcely(bool isDragForbidden);
 
     bool GetTextDraggable() const
     {

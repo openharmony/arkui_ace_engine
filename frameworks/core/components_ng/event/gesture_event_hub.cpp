@@ -1474,7 +1474,7 @@ void GestureEventHub::SetDragForbiddenForcely(bool isDragForbidden)
     isDragForbidden_ = isDragForbidden;
 }
 
-bool GestureEventHub::IsDragFrobidden()
+bool GestureEventHub::IsDragForbidden()
 {
     return isDragForbidden_;
 }
