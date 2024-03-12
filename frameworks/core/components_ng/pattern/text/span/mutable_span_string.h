@@ -40,7 +40,6 @@ public:
     void InsertString(int32_t start, const std::string& other);
     void RemoveString(int32_t start, int32_t length);
     void ReplaceSpan(int32_t start, int32_t length, const RefPtr<SpanBase>& span);
-    void AddSpan(const RefPtr<SpanBase>& span);
     void RemoveSpan(int32_t start, int32_t length, SpanType key);
     void RemoveSpans(int32_t start, int32_t length);
     void ClearAllSpans();
@@ -49,12 +48,7 @@ public:
     void AppendSpanString(const RefPtr<SpanString>& spanString);
 
 private:
-    void SortSpans(std::list<RefPtr<SpanBase>>& spans);
-    bool CanMerge(const RefPtr<SpanBase>& a, const RefPtr<SpanBase>& b);
-    void MergeIntervals(std::list<RefPtr<SpanBase>>& spans);
     void KeepSpansOrder();
-    void SplitInterval(std::list<RefPtr<SpanBase>>& spans, std::pair<int32_t, int32_t> interval);
-    void ApplyToSpans(const RefPtr<SpanBase>& spans, std::pair<int32_t, int32_t> interval, SpanOperation operation);
     void ApplyReplaceStringToSpans(int32_t start, int32_t length, const std::string& other);
     void ApplyRemoveStringToSpans(int32_t start, int32_t length);
     void ApplyInsertStringToSpans(int32_t start, const std::string& other);

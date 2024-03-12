@@ -41,6 +41,10 @@ public:
     virtual void CloseSelectionMenu() = 0;
 };
 
+class ACE_EXPORT SpanStringBase : public AceType {
+    DECLARE_ACE_TYPE(SpanStringBase, AceType);
+};
+
 class ACE_EXPORT TextModel {
 public:
     static TextModel* GetInstance();
