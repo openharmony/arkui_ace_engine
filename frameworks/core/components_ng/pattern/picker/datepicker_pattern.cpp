@@ -94,6 +94,12 @@ bool DatePickerPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& di
 
 void DatePickerPattern::OnModifyDone()
 {
+    if (isFiredDateChange_ && !isForceUpdate_) {
+        isFiredDateChange_ = false;
+        return;
+    }
+
+    isForceUpdate_ = false;
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     InitDisabled();
@@ -120,8 +126,6 @@ void DatePickerPattern::OnModifyDone()
     if (focusHub) {
         InitOnKeyEvent(focusHub);
     }
-    isFirstUpdate_ = false;
-    isContentUpdateOnly_ = false;
 }
 
 void DatePickerPattern::InitDisabled()
@@ -481,9 +485,9 @@ void DatePickerPattern::FlushColumn()
     yearColumnPattern->SetShowCount(GetShowCount());
     monthColumnPattern->SetShowCount(GetShowCount());
     dayColumnPattern->SetShowCount(GetShowCount());
-    yearColumnPattern->FlushCurrentOptions(false, isContentUpdateOnly_);
-    monthColumnPattern->FlushCurrentOptions(false, isContentUpdateOnly_);
-    dayColumnPattern->FlushCurrentOptions(false, isContentUpdateOnly_);
+    yearColumnPattern->FlushCurrentOptions();
+    monthColumnPattern->FlushCurrentOptions();
+    dayColumnPattern->FlushCurrentOptions();
 }
 
 void DatePickerPattern::FlushMonthDaysColumn()
@@ -528,8 +532,8 @@ void DatePickerPattern::FlushMonthDaysColumn()
 
     monthDaysColumnPattern->SetShowCount(GetShowCount());
     yearColumnPattern->SetShowCount(GetShowCount());
-    monthDaysColumnPattern->FlushCurrentOptions(false, isContentUpdateOnly_);
-    yearColumnPattern->FlushCurrentOptions(false, isContentUpdateOnly_);
+    monthDaysColumnPattern->FlushCurrentOptions();
+    yearColumnPattern->FlushCurrentOptions();
 }
 
 void DatePickerPattern::FireChangeEvent(bool refresh)
@@ -541,6 +545,7 @@ void DatePickerPattern::FireChangeEvent(bool refresh)
         auto info = std::make_shared<DatePickerChangeEvent>(str);
         datePickerEventHub->FireChangeEvent(info.get());
         datePickerEventHub->FireDialogChangeEvent(str);
+        firedDateStr_ = str;
     }
 }
 
