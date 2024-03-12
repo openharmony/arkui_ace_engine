@@ -65,6 +65,7 @@ void SliderPattern::OnModifyDone()
     stepRatio_ = step / (max - min);
     UpdateCircleCenterOffset();
     UpdateBlock();
+    InitClickEvent(gestureHub);
     InitTouchEvent(gestureHub);
     InitPanEvent(gestureHub);
     InitMouseEvent(inputEventHub);
@@ -154,6 +155,16 @@ bool SliderPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty,
     }
 
     return true;
+}
+
+void SliderPattern::InitClickEvent(const RefPtr<GestureEventHub>& gestureHub)
+{
+    if (clickListener_) {
+        return;
+    }
+    auto clickCallback = [](const GestureEvent& info) {};
+    clickListener_ = MakeRefPtr<ClickEvent>(std::move(clickCallback));
+    gestureHub->AddClickEvent(clickListener_);
 }
 
 void SliderPattern::InitTouchEvent(const RefPtr<GestureEventHub>& gestureHub)
