@@ -273,6 +273,7 @@ private:
     static void RemoveOldPopInfoIfExsited(bool isShowInSubWindow, int32_t nodeId);
     void RenderLayoutBoundary(bool isDebugBoundary);
     static void EnableSystemParameterTraceLayoutCallback(const char* key, const char* value, void* context);
+    static void EnableSystemParameterTraceInputEventCallback(const char* key, const char* value, void* context);
     static void EnableSystemParameterSecurityDevelopermodeCallback(const char* key, const char* value, void* context);
     static void EnableSystemParameterDebugStatemgrCallback(const char* key, const char* value, void* context);
     static void EnableSystemParameterDebugBoundaryCallback(const char* key, const char* value, void* context);
