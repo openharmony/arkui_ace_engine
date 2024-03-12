@@ -716,8 +716,8 @@ void GestureEventHub::HandleOnDragStart(const GestureEvent& info)
     CHECK_NULL_VOID(dragDropManager);
     dragDropManager->SetDraggingPointer(info.GetPointerId());
     dragDropManager->SetDraggingPressedState(true);
-    if (dragDropInfo.inspectorId != "") {
-        auto dragPreviewPixelMap = DragEventActuator::GetPreviewPixelMap(dragDropInfo.inspectorId, frameNode);
+    if (dragPreviewInfo.inspectorId != "") {
+        auto dragPreviewPixelMap = DragEventActuator::GetPreviewPixelMap(dragPreviewInfo.inspectorId, frameNode);
         CHECK_NULL_VOID(dragPreviewPixelMap);
         dragDropInfo.pixelMap = dragPreviewPixelMap;
         OnDragStart(info, pipeline, frameNode, dragDropInfo, event);
