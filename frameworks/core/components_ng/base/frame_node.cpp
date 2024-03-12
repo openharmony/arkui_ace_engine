@@ -1041,6 +1041,20 @@ void FrameNode::SetOnSizeChangeCallback(OnSizeChangedFunc&& callback)
     eventHub_->SetOnSizeChanged(std::move(callback));
 }
 
+RectF FrameNode::GetRectWithRender()
+{
+    auto currFrameRect = geometryNode_->GetFrameRect();
+    if (renderContext_ && renderContext_->GetPositionProperty()) {
+        if (renderContext_->GetPositionProperty()->HasPosition()) {
+            auto renderPosition = ContextPositionConvertToPX(
+                renderContext_, layoutProperty_->GetLayoutConstraint()->percentReference);
+            currFrameRect.SetOffset(
+                { static_cast<float>(renderPosition.first), static_cast<float>(renderPosition.second) });
+        }
+    }
+    return currFrameRect;
+}
+
 void FrameNode::TriggerOnSizeChangeCallback()
 {
     if (!IsActive()) {

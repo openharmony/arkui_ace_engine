@@ -735,6 +735,7 @@ public:
     OffsetF CalculateCachedTransformRelativeOffset(uint64_t nanoTimestamp);
 
     void PaintDebugBoundary(bool flag) override;
+    RectF GetRectWithRender();
 
 private:
     void MarkNeedRender(bool isRenderBoundary);
