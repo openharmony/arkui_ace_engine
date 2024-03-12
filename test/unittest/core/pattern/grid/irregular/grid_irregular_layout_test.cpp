@@ -1471,4 +1471,34 @@ HWTEST_F(GridIrregularLayoutTest, Integrated001, TestSize.Level1)
     EXPECT_EQ(info.endMainLineIndex_, 5);
     EXPECT_EQ(info.gridMatrix_, MATRIX_DEMO_8);
 }
+
+/**
+ * @tc.name: GridIrregularLayout::Gaps001
+ * @tc.desc: Test changing gaps
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridIrregularLayoutTest, Gaps001, TestSize.Level1)
+{
+    Create([](GridModelNG model) {
+        model.SetColumnsTemplate("1fr 1fr");
+        model.SetLayoutOptions(GetOptionDemo6());
+        model.SetColumnsGap(Dimension { 1.0f });
+        model.SetRowsGap(Dimension { 1.0f });
+        CreateItem(12, -1, 200.0f);
+    });
+
+    EXPECT_EQ(GetChildRect(frameNode_, 1).GetX(), 240.5f);
+    EXPECT_EQ(GetChildRect(frameNode_, 4).GetY(), 402.0f);
+
+    layoutProperty_->UpdateColumnsGap(Dimension { 5.0f });
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(GetChildRect(frameNode_, 1).GetX(), 242.5f);
+    EXPECT_EQ(GetChildSize(frameNode_, 1).Width(), 237.5f);
+    EXPECT_EQ(GetChildRect(frameNode_, 4).GetY(), 402.0f);
+
+    layoutProperty_->UpdateRowsGap(Dimension { 3.0f });
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(GetChildRect(frameNode_, 1).GetX(), 242.5f);
+    EXPECT_EQ(GetChildRect(frameNode_, 4).GetY(), 406.0f);
+}
 } // namespace OHOS::Ace::NG
