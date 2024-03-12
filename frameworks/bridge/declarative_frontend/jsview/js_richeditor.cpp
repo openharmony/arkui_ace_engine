@@ -855,17 +855,17 @@ void JSRichEditorController::ParseJsLineHeightTextStyle(
     const JSRef<JSObject>& styleObject, TextStyle& style, struct UpdateSpanStyle& updateSpanStyle)
 {
     JSRef<JSVal> lineHeight = styleObject->GetProperty("lineHeight");
-    CalcDimension lineHigh; 
-    if (!lineHeight->IsNull() && JSContainerBase::ParseJsDimensionFpNG(lineHeight, lineHigh) &&
-        !lineHigh.IsNegative() && lineHigh.Unit() != DimensionUnit::PERCENT) {
-        updateSpanStyle.updateLineHeight = lineHigh;
-        style.SetLineHeight(lineHigh);
-    } else if (lineHigh.IsNegative() || lineHigh.Unit() == DimensionUnit::PERCENT) {
+    CalcDimension height;
+    if (!lineHeight->IsNull() && JSContainerBase::ParseJsDimensionFpNG(lineHeight, height) &&
+        !height.IsNegative() && height.Unit() != DimensionUnit::PERCENT) {
+        updateSpanStyle.updateLineHeight = height;
+        style.SetLineHeight(height);
+    } else if (height.IsNegative() || height.Unit() == DimensionUnit::PERCENT) {
         auto theme = JSContainerBase::GetTheme<TextTheme>();
         CHECK_NULL_VOID(theme);
-        lineHigh = theme->GetTextStyle().GetLineHeight();
-        updateSpanStyle.updateLineHeight = lineHigh;
-        style.SetLineHeight(lineHigh);
+        height = theme->GetTextStyle().GetLineHeight();
+        updateSpanStyle.updateLineHeight = height;
+        style.SetLineHeight(height);
     }
 }
 
@@ -912,7 +912,7 @@ void JSRichEditorController::ParseJsTextStyle(
         style.SetFontSize(size);
     }
     ParseJsLineHeightTextStyle(styleObject, style, updateSpanStyle);
-    ParseJsLetterSpacingTextStyle(styleObject, style, updateSpanStyle, false);	
+    ParseJsLetterSpacingTextStyle(styleObject, style, updateSpanStyle);	
     JSRef<JSVal> fontStyle = styleObject->GetProperty("fontStyle");
     if (!fontStyle->IsNull() && fontStyle->IsNumber()) {
         updateSpanStyle.updateItalicFontStyle = static_cast<FontStyle>(fontStyle->ToNumber<int32_t>());
@@ -963,7 +963,7 @@ void JSRichEditorController::ParseJsSymbolSpanStyle(
         style.SetFontSize(size);
     }	
     ParseJsLineHeightTextStyle(styleObject, style, updateSpanStyle);
-    ParseJsLetterSpacingTextStyle(styleObject, style, updateSpanStyle, false);
+    ParseJsLetterSpacingTextStyle(styleObject, style, updateSpanStyle);
     JSRef<JSVal> fontWeight = styleObject->GetProperty("fontWeight");
     std::string weight;
     if (!fontWeight->IsNull() && (fontWeight->IsNumber() || JSContainerBase::ParseJsString(fontWeight, weight))) {
@@ -1670,10 +1670,10 @@ JSRef<JSObject> JSRichEditorController::CreateTypingStyleResult(const struct Upd
     if (typingStyle.updateFontSize.has_value()) {
         tyingStyleObj->SetProperty<double>("fontSize", typingStyle.updateFontSize.value().ConvertToVp());
     }
-    if(typingStyle.updateLineHeight.has_value()) {
+    if (typingStyle.updateLineHeight.has_value()) {
         tyingStyleObj->SetProperty<double>("lineHeight", typingStyle.updateLineHeight.value().ConvertToVp());
     }
-    if(typingStyle.updateLetterSpacing.has_value()) {
+    if (typingStyle.updateLetterSpacing.has_value()) {
         tyingStyleObj->SetProperty<double>("letterSpacing", typingStyle.updateLetterSpacing.value().ConvertToVp());
     }
     if (typingStyle.updateTextColor.has_value()) {
