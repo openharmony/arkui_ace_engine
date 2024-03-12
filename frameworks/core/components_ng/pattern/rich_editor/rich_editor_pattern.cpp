@@ -911,7 +911,7 @@ void RichEditorPattern::CopyTextSpanLineStyle(
         target->UpdateLetterSpacing(source->GetLetterSpacingValue(Dimension()));
         target->AddPropertyInfo(PropertyInfo::LETTERSPACE);
     }
-	
+
     if (needLeadingMargin && source->HasLeadingMargin()) {
         target->UpdateLeadingMargin(source->GetLeadingMarginValue({}));
         target->AddPropertyInfo(PropertyInfo::LEADING_MARGIN);

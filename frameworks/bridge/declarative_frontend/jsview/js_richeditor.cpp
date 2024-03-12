@@ -172,7 +172,7 @@ JSRef<JSObject> JSRichEditor::CreateJSTextStyleResult(const TextStyleResult& tex
     textStyleObj->SetProperty<double>("fontSize", textStyleResult.fontSize);
     textStyleObj->SetProperty<int32_t>("fontStyle", textStyleResult.fontStyle);
     textStyleObj->SetProperty<double>("lineHeight", textStyleResult.lineHeight);
-    textStyleObj->SetProperty<double>("letterSpacing", textStyleResult.letterSpacing);	
+    textStyleObj->SetProperty<double>("letterSpacing", textStyleResult.letterSpacing);
     textStyleObj->SetProperty<int32_t>("fontWeight", textStyleResult.fontWeight);
     textStyleObj->SetProperty<std::string>("fontFamily", textStyleResult.fontFamily);
     JSRef<JSObject> decorationObj = JSRef<JSObject>::New();
@@ -851,12 +851,12 @@ ImageSpanAttribute JSRichEditorController::ParseJsImageSpanAttribute(JSRef<JSObj
     return imageStyle;
 }
 
-void JSRichEditorController::ParseJsLineHeightTextStyle(
-    const JSRef<JSObject>& styleObject, TextStyle& style, struct UpdateSpanStyle& updateSpanStyle)
+void JSRichEditorController::ParseJsLineHeightLetterSpacingTextStyle(
+    const JSRef<JSObject>& styleObject, TextStyle& style, struct UpdateSpanStyle& updateSpanStyle, bool isVisible)
 {
     JSRef<JSVal> lineHeight = styleObject->GetProperty("lineHeight");
     CalcDimension height;
-    if (!lineHeight->IsNull() && JSContainerBase::ParseJsDimensionFpNG(lineHeight, height) &&
+    if (!lineHeight->IsNull() && JSContainerBase::ParseJsDimensionFpNG(lineHeight, height, isVisible) &&
         !height.IsNegative() && height.Unit() != DimensionUnit::PERCENT) {
         updateSpanStyle.updateLineHeight = height;
         style.SetLineHeight(height);
@@ -867,15 +867,10 @@ void JSRichEditorController::ParseJsLineHeightTextStyle(
         updateSpanStyle.updateLineHeight = height;
         style.SetLineHeight(height);
     }
-}
-
-void JSRichEditorController::ParseJsLetterSpacingTextStyle(
-    const JSRef<JSObject>& styleObject, TextStyle& style, struct UpdateSpanStyle& updateSpanStyle)
-{
     JSRef<JSVal> letterSpacing = styleObject->GetProperty("letterSpacing");
     CalcDimension letters;
-    if (JSContainerBase::ParseJsDimensionFpNG(letterSpacing, letters, false) &&
-         letters.Unit() != DimensionUnit::PERCENT) {
+    if (JSContainerBase::ParseJsDimensionFpNG(letterSpacing, letters, isVisible) &&
+        letters.Unit() != DimensionUnit::PERCENT) {
         updateSpanStyle.updateLetterSpacing = letters;
         style.SetLetterSpacing(letters);
     } else if (letters.Unit() == DimensionUnit::PERCENT) {
@@ -911,8 +906,7 @@ void JSRichEditorController::ParseJsTextStyle(
         updateSpanStyle.updateFontSize = size;
         style.SetFontSize(size);
     }
-    ParseJsLineHeightTextStyle(styleObject, style, updateSpanStyle);
-    ParseJsLetterSpacingTextStyle(styleObject, style, updateSpanStyle);	
+    ParseJsLineHeightLetterSpacingTextStyle(styleObject, style, updateSpanStyle);
     JSRef<JSVal> fontStyle = styleObject->GetProperty("fontStyle");
     if (!fontStyle->IsNull() && fontStyle->IsNumber()) {
         updateSpanStyle.updateItalicFontStyle = static_cast<FontStyle>(fontStyle->ToNumber<int32_t>());
@@ -961,9 +955,8 @@ void JSRichEditorController::ParseJsSymbolSpanStyle(
         size = theme->GetTextStyle().GetFontSize();
         updateSpanStyle.updateFontSize = size;
         style.SetFontSize(size);
-    }	
-    ParseJsLineHeightTextStyle(styleObject, style, updateSpanStyle);
-    ParseJsLetterSpacingTextStyle(styleObject, style, updateSpanStyle);
+    }
+    ParseJsLineHeightLetterSpacingTextStyle(styleObject, style, updateSpanStyle, false);
     JSRef<JSVal> fontWeight = styleObject->GetProperty("fontWeight");
     std::string weight;
     if (!fontWeight->IsNull() && (fontWeight->IsNumber() || JSContainerBase::ParseJsString(fontWeight, weight))) {

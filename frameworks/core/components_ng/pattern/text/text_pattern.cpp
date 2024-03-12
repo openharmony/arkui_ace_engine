@@ -1686,14 +1686,6 @@ float TextPattern::GetLineHeight() const
     return selectedRects.front().Height();
 }
 
-float TextPattern::GetLetterSpacing() const
-{
-    std::vector<RectF> selectedRects;
-    paragraph_->GetRectsForRange(textSelector_.GetTextStart(), textSelector_.GetTextEnd(), selectedRects);
-    CHECK_NULL_RETURN(!selectedRects.empty(), 0.0f);
-    return selectedRects.front().Width();
-}
-
 std::vector<RectF> TextPattern::GetTextBoxes()
 {
     std::vector<RectF> selectedRects;

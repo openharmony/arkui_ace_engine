@@ -343,7 +343,7 @@ public:
     void OnColorConfigurationUpdate() override;
     bool IsDisabled() const;
     float GetLineHeight() const override;
-    float GetLetterSpacing() const override;
+    float GetLetterSpacing() const;
     std::vector<RectF> GetTextBoxes() override;
     bool OnBackPressed() override;
 
