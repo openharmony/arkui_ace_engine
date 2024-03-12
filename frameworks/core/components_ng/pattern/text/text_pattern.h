@@ -578,6 +578,8 @@ protected:
     bool textDetectEnable_ = false;
     RefPtr<DataDetectorAdapter> dataDetectorAdapter_ = MakeRefPtr<DataDetectorAdapter>();
 
+    OffsetF parentGlobalOffset_;
+
 private:
     void HandleOnCopy();
     void InitLongPressEvent(const RefPtr<GestureEventHub>& gestureHub);
@@ -631,7 +633,6 @@ private:
 
     OffsetF mouseReleaseOffset_;
     OffsetF contentOffset_;
-    OffsetF parentGlobalOffset_;
     GestureEventFunc onClick_;
     RefPtr<DragWindow> dragWindow_;
     RefPtr<DragDropProxy> dragDropProxy_;
