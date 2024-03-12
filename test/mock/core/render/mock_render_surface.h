@@ -27,6 +27,7 @@ public:
     ~MockRenderSurface() override = default;
     MOCK_CONST_METHOD0(IsSurfaceValid, bool());
     MOCK_METHOD2(AdjustNativeWindowSize, void(uint32_t, uint32_t));
+    MOCK_METHOD0(releaseSurfaceBuffers, void());
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_MOCK_RENDER_SURFACE_H

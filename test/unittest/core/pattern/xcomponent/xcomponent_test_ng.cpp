@@ -71,6 +71,7 @@ const float CHILD_OFFSET_WIDTH = 50.0f;
 const float CHILD_OFFSET_HEIGHT = 0.0f;
 TestProperty testProperty;
 bool isFocus = false;
+int g_surfaceShowNum = 1;
 const float SURFACE_WIDTH = 250.0f;
 const float SURFACE_HEIGHT = 150.0f;
 const float SURFACE_OFFSETX = 10.0f;
@@ -796,6 +797,86 @@ HWTEST_F(XComponentTestNg, XComponentTextureTypeTest011, TestSize.Level1)
         AdjustNativeWindowSize(MAX_WIDTH, MAX_HEIGHT))
         .WillOnce(Return());
     pattern->InitNativeWindow(MAX_WIDTH, MAX_HEIGHT);
+}
+
+/**
+ * @tc.name: XComponentSurfaceTestTypeSurface
+ * @tc.desc: Test SurfaceHide/SurfaceShow callback
+ * @tc.type: FUNC
+ */
+HWTEST_F(XComponentTestNg, XComponentSurfaceTestTypeSurface, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. set type = XCOMPONENT_SURFACE_TYPE and call CreateXComponentNode
+     * @tc.expected: xcomponent frameNode create successfully
+     */
+    testProperty.xcType = XCOMPONENT_SURFACE_TYPE_VALUE;
+    auto frameNode = CreateXComponentNode(testProperty);
+    ASSERT_TRUE(frameNode);
+    auto pattern = frameNode->GetPattern<XComponentPattern>();
+    ASSERT_TRUE(pattern);
+
+    /**
+     * @tc.steps: step2. create nativeXComponent instance
+     * @tc.expected: nativeXComponent instance create successfully
+     */
+    auto host = pattern->GetHost();
+    ASSERT_TRUE(host);
+    auto pair = pattern->GetNativeXComponent();
+    auto weakNativeXComponent = pair.second;
+    auto nativeXComponent = weakNativeXComponent.lock();
+    auto nativeXComponentImpl = pair.first;
+    ASSERT_TRUE(nativeXComponent);
+    ASSERT_TRUE(nativeXComponentImpl);
+    pattern->hasXComponentInit_ = true;
+
+
+    /**
+     * @tc.steps: step3. call surfaceHide and surfaceShow event without register callbacks
+     * @tc.expected: no error happens and g_surfaceShowNum remains the same
+     */
+    pattern->OnWindowHide();
+    EXPECT_EQ(g_surfaceShowNum, 1);
+    pattern->OnWindowShow();
+    EXPECT_EQ(g_surfaceShowNum, 1);
+
+    /**
+     * @tc.steps: step4. register surfaceHide/Show event for nativeXComponent instance and trigger callback
+     * @tc.expected: callback is triggered successfully
+     */
+    nativeXComponent->RegisterSurfaceShowCallback(
+        [](OH_NativeXComponent* /* nativeXComponent */, void* /* window */) { g_surfaceShowNum += 1; });
+    nativeXComponent->RegisterSurfaceHideCallback(
+        [](OH_NativeXComponent* /* nativeXComponent */, void* /* window */) { g_surfaceShowNum -= 1; });
+    EXPECT_CALL(*AceType::DynamicCast<MockRenderSurface>(pattern->renderSurface_), releaseSurfaceBuffers())
+        .WillOnce(Return());
+    pattern->OnWindowHide();
+    pattern->OnWindowHide(); // test when hasReleasedSurface_ is not satisfied
+    EXPECT_EQ(g_surfaceShowNum, 0);
+    pattern->OnWindowShow();
+    pattern->OnWindowShow(); // test when hasReleasedSurface_ is not satisfied
+    EXPECT_EQ(g_surfaceShowNum, 1);
+
+    /**
+     * @tc.steps: step5. call OnWindowHide and OnWindowShoww when the pre-judgment of the function is not satisfied
+     * @tc.expected: callback will be triggered only once
+     */
+    bool initConditions[2] = { false, true };
+    bool typeConditions[2] = { false, true };
+    EXPECT_CALL(*AceType::DynamicCast<MockRenderSurface>(pattern->renderSurface_), releaseSurfaceBuffers())
+        .WillOnce(Return());
+    for (bool initCondition : initConditions) {
+        for (bool typeCondition : typeConditions) {
+            pattern->hasXComponentInit_ = initCondition;
+            pattern->type_ = typeCondition ? XCOMPONENT_TEXTURE_TYPE_VALUE : XCOMPONENT_COMPONENT_TYPE_VALUE;
+            pattern->OnWindowHide();
+            if (initCondition && typeCondition) {
+                EXPECT_EQ(g_surfaceShowNum, 0);
+            }
+            pattern->OnWindowShow();
+            EXPECT_EQ(g_surfaceShowNum, 1);
+        }
+    }
 }
 
 /**
