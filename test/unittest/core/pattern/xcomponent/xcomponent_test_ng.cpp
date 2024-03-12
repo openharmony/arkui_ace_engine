@@ -71,7 +71,7 @@ const float CHILD_OFFSET_WIDTH = 50.0f;
 const float CHILD_OFFSET_HEIGHT = 0.0f;
 TestProperty testProperty;
 bool isFocus = false;
-int surfaceShowNum = 1;
+int g_surfaceShowNum = 1;
 const float SURFACE_WIDTH = 250.0f;
 const float SURFACE_HEIGHT = 150.0f;
 const float SURFACE_OFFSETX = 10.0f;
@@ -832,48 +832,48 @@ HWTEST_F(XComponentTestNg, XComponentSurfaceTestTypeSurface, TestSize.Level1)
 
     /**
      * @tc.steps: step3. call surfaceHide and surfaceShow event without register callbacks
-     * @tc.expected: no error happens and surfaceShowNum remains the same
+     * @tc.expected: no error happens and g_surfaceShowNum remains the same
      */
     pattern->OnWindowHide();
-    EXPECT_EQ(surfaceShowNum, 1);
+    EXPECT_EQ(g_surfaceShowNum, 1);
     pattern->OnWindowShow();
-    EXPECT_EQ(surfaceShowNum, 1);
+    EXPECT_EQ(g_surfaceShowNum, 1);
 
     /**
      * @tc.steps: step4. register surfaceHide/Show event for nativeXComponent instance and trigger callback
      * @tc.expected: callback is triggered successfully
      */
     nativeXComponent->RegisterSurfaceShowCallback(
-        [](OH_NativeXComponent* /* nativeXComponent */, void* /* window */) { surfaceShowNum += 1; });
+        [](OH_NativeXComponent* /* nativeXComponent */, void* /* window */) { g_surfaceShowNum += 1; });
     nativeXComponent->RegisterSurfaceHideCallback(
-        [](OH_NativeXComponent* /* nativeXComponent */, void* /* window */) { surfaceShowNum -= 1; });
-    EXPECT_CALL(*AceType::DynamicCast<MockRenderSurface>(pattern->renderSurface_),releaseSurfaceBuffers())
+        [](OH_NativeXComponent* /* nativeXComponent */, void* /* window */) { g_surfaceShowNum -= 1; });
+    EXPECT_CALL(*AceType::DynamicCast<MockRenderSurface>(pattern->renderSurface_), releaseSurfaceBuffers())
         .WillOnce(Return());
     pattern->OnWindowHide();
     pattern->OnWindowHide(); // test when hasReleasedSurface_ is not satisfied
-    EXPECT_EQ(surfaceShowNum, 0);
+    EXPECT_EQ(g_surfaceShowNum, 0);
     pattern->OnWindowShow();
     pattern->OnWindowShow(); // test when hasReleasedSurface_ is not satisfied
-    EXPECT_EQ(surfaceShowNum, 1);
+    EXPECT_EQ(g_surfaceShowNum, 1);
 
     /**
      * @tc.steps: step5. call OnWindowHide and OnWindowShoww when the pre-judgment of the function is not satisfied
      * @tc.expected: callback will be triggered only once
      */
-    bool hasXComponentInit_[2] = { false, true };
-    bool type_[2] = { false, true };
-    EXPECT_CALL(*AceType::DynamicCast<MockRenderSurface>(pattern->renderSurface_),releaseSurfaceBuffers())
+    bool initConditions[2] = { false, true };
+    bool typeConditions[2] = { false, true };
+    EXPECT_CALL(*AceType::DynamicCast<MockRenderSurface>(pattern->renderSurface_), releaseSurfaceBuffers())
         .WillOnce(Return());
-    for (bool initCondition : hasXComponentInit_) {
-        for (bool typeCondition : type_) {
+    for (bool initCondition : initConditions) {
+        for (bool typeCondition : typeConditions) {
             pattern->hasXComponentInit_ = initCondition;
             pattern->type_ = typeCondition ? XCOMPONENT_TEXTURE_TYPE_VALUE : XCOMPONENT_COMPONENT_TYPE_VALUE;
             pattern->OnWindowHide();
             if (initCondition && typeCondition) {
-                EXPECT_EQ(surfaceShowNum, 0);
+                EXPECT_EQ(g_surfaceShowNum, 0);
             }
             pattern->OnWindowShow();
-            EXPECT_EQ(surfaceShowNum, 1);
+            EXPECT_EQ(g_surfaceShowNum, 1);
         }
     }
 }
