@@ -271,7 +271,6 @@ typedef enum {
 
     /** 手势事件取消。 */
     ARKUI_GESTURE_EVENT_ACTION_CANCEL = 0x08,
-
 } ArkUIGestureEventActionType;
 
 
@@ -293,7 +292,7 @@ struct ArkUITouchEvent {
      *
      */
     ArkUITouchEventAction action;
-    
+
     /** Time stamp of the current event. */
     ArkUI_Int64 timeStamp;
 
@@ -891,8 +890,8 @@ struct ArkUINodeAsyncEvent {
 struct ArkUIAPIEventGestureAsyncEvent {
     ArkUI_Int32 subKind;
     ArkUI_Int32 repeat;
-    ArkUI_Int32 x;
-    ArkUI_Int32 y;
+    ArkUI_Float32 x;
+    ArkUI_Float32 y;
     ArkUI_Int32 angle;
     ArkUI_Int32 scale;
     ArkUI_Int32 pinchCenterX;
@@ -904,9 +903,9 @@ struct ArkUIAPIEventGestureAsyncEvent {
     ArkUI_Int32 tiltX;
     ArkUI_Int32 tiltY;
     ArkUI_Int32 sourceTool;
-    ArkUI_Int32 velocityX;
-    ArkUI_Int32 velocityY;
-    ArkUI_Int32 velocity;
+    ArkUI_Float32 velocityX;
+    ArkUI_Float32 velocityY;
+    ArkUI_Float32 velocity;
 };
 
 struct ArkUINodeEvent {

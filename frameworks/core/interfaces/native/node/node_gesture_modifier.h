@@ -20,6 +20,5 @@
 
 namespace OHOS::Ace::NG::NodeModifier {
     const ArkUIGestureModifier* GetGestureModifier();
-
 } // namespace OHOS::Ace::NG::NodeModifier
 #endif

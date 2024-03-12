@@ -276,7 +276,7 @@ void UnregisterOnEvent()
 
 void HandleInnerNodeEvent(ArkUINodeEvent* innerEvent)
 {
-   if (!g_eventReceiver) {
+    if (!g_eventReceiver) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "event receiver is not register");
         return;
     }

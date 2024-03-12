@@ -105,15 +105,31 @@
     },
     {
         "first_introduced": "12",
-        "name": "OH_ArkUI_QueryModuleInterface"
-    },
-    {
-        "first_introduced": "12",
         "name": "OH_ArkUI_GetNodeHandleFromNapiValue"
     },
     {
         "first_introduced": "12",
         "name": "OH_ArkUI_GestureEvent_GetActionType"
+    },
+    {
+        "first_introduced": "12",
+        "name": "OH_ArkUI_PanGesture_GetVelocity"
+    },
+    {
+        "first_introduced": "12",
+        "name": "OH_ArkUI_PanGesture_GetVelocityY"
+    },
+    {
+        "first_introduced": "12",
+        "name": "OH_ArkUI_PanGesture_GetVelocityX"
+    },
+    {
+        "first_introduced": "12",
+        "name": "OH_ArkUI_PanGesture_GetOffsetX"
+    },
+    {
+        "first_introduced": "12",
+        "name": "OH_ArkUI_PanGesture_GetOffsetY"
     },
     {
         "first_introduced": "12",

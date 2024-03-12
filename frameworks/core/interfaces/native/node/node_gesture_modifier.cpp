@@ -52,14 +52,15 @@ ArkUIGesture* createPanGesture(ArkUI_Int32 fingers, ArkUI_Int32 direction, ArkUI
             panDirection.type = panDirection.NONE;
             break;
     }
-    PanGesture *panGestureObject = new PanGesture(fingers, panDirection, distance);
-    return reinterpret_cast<ArkUIGesture*>(panGestureObject);
+    auto panGestureObject = AceType::MakeRefPtr<PanGesture>(fingers, panDirection, distance);
+    panGestureObject->IncRefCount();
+    return reinterpret_cast<ArkUIGesture*>(AceType::RawPtr(panGestureObject));
 }
 
 void dispose(ArkUIGesture* recognizer)
 {
     Gesture* gestureRef = reinterpret_cast<Gesture*>(recognizer);
-    delete gestureRef;
+    gestureRef->DecRefCount();
 }
 
 ArkUIAPIEventGestureAsyncEvent getGestureEvent(GestureEvent& info)
@@ -69,7 +70,22 @@ ArkUIAPIEventGestureAsyncEvent getGestureEvent(GestureEvent& info)
     ret.velocityX = info.GetVelocity().GetVelocityX();
     ret.velocityY = info.GetVelocity().GetVelocityY();
     ret.velocity = info.GetVelocity().GetVelocityValue();
+    ret.x = info.GetOffsetX();
+    ret.y = info.GetOffsetY();
     return ret;
+}
+
+void setCancelActionFunc(Gesture* gestureRef, void* extraParam)
+{
+    auto onActionCancel = [extraParam]() {
+        ArkUINodeEvent *eventData = new ArkUINodeEvent();
+        eventData->kind = GESTURE_ASYNC_EVENT;
+        eventData->nodeId = 0;
+        eventData->extraParam = reinterpret_cast<ArkUI_Int64>(extraParam);
+        eventData->gestureAsyncEvent.subKind = ON_ACTION_CANCEL;
+        SendArkUIAsyncEvent(eventData);
+    };
+    gestureRef->SetOnActionCancelId(onActionCancel);
 }
 
 void registerGestureEvent(ArkUIGesture* gesture, ArkUI_Uint32 actionTypeMask, void* extraParam)
@@ -112,6 +128,9 @@ void registerGestureEvent(ArkUIGesture* gesture, ArkUI_Uint32 actionTypeMask, vo
         };
         gestureRef->SetOnActionEndId(onActionEnd);
     }
+    if (actionTypeMask & ARKUI_GESTURE_EVENT_ACTION_CANCEL) {
+        setCancelActionFunc(gestureRef, extraParam);
+    }
 }
 
 void addGestureToNode(ArkUINodeHandle node, ArkUIGesture* gesture, ArkUI_Int32 priorityNum, ArkUI_Uint32 mask)
@@ -147,15 +166,16 @@ void removeGestureFromNode(ArkUINodeHandle node, ArkUIGesture* gesture)
 }
 
 namespace NodeModifier {
-    const ArkUIGestureModifier* GetGestureModifier() {
-            static const ArkUIGestureModifier modifier = {
-            createPanGesture,
-            dispose,
-            registerGestureEvent,
-            addGestureToNode,
-            removeGestureFromNode,
-            };
-            return &modifier;
-    }
+const ArkUIGestureModifier* GetGestureModifier()
+{
+    static const ArkUIGestureModifier modifier = {
+        createPanGesture,
+        dispose,
+        registerGestureEvent,
+        addGestureToNode,
+        removeGestureFromNode,
+        };
+    return &modifier;
 }
-}
+} // namespace NodeModifier
+} // namespace OHOS::Ace::NG

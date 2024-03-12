@@ -96,7 +96,8 @@ ArkUI_AnyNativeAPI* OH_ArkUI_GetNativeAPI(ArkUI_NativeAPIVariantKind type, int32
     return OH_ArkUI_QueryModuleInterface(type, version);
 }
 
-ArkUI_AnyNativeAPI* OH_ArkUI_QueryModuleInterface(ArkUI_NativeAPIVariantKind type, int32_t version) {
+ArkUI_AnyNativeAPI* OH_ArkUI_QueryModuleInterface(ArkUI_NativeAPIVariantKind type, int32_t version)
+{
     if (!OHOS::Ace::NodeModel::GetFullImpl()) {
         TAG_LOGE(OHOS::Ace::AceLogTag::ACE_NATIVE_NODE,
             "fail to get %{public}d node api family of %{public}d version, impl library is not found", type, version);
@@ -126,6 +127,7 @@ ArkUI_AnyNativeAPI* OH_ArkUI_QueryModuleInterface(ArkUI_NativeAPIVariantKind typ
                     return nullptr;
                 }
             }
+        }
         case ARKUI_NATIVE_GESTURE: {
             switch (version) {
                 case CURRENT_NATIVE_GESTURE_API_VERSION:
@@ -144,9 +146,7 @@ ArkUI_AnyNativeAPI* OH_ArkUI_QueryModuleInterface(ArkUI_NativeAPIVariantKind typ
             return nullptr;
         }
     }
-
 }
-
 
 #ifdef __cplusplus
 };

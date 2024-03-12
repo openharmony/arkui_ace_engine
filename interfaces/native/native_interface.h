@@ -64,13 +64,10 @@ typedef struct {
 typedef enum {
     /** API related to UI components. */
     ARKUI_NATIVE_NODE,
-<<<<<<< HEAD
     /** API related to dialog boxes. */
     ARKUI_NATIVE_DIALOG,
-=======
      /** API type related to UI gesture system. */
     ARKUI_NATIVE_GESTURE,
->>>>>>> be67ff5461... C-API 新增手势事件
 } ArkUI_NativeAPIVariantKind;
 
 /**
@@ -81,11 +78,6 @@ typedef enum {
 typedef enum {
     /** The ARKUI_NATIVE_NODE type supports the structure {@link ArkUI_NativeNodeAPI_1} of version 1. */
     ARKUI_NATIVE_NODE_VERSION_1 = 1,
-<<<<<<< HEAD
-=======
-     /** The ARKUI_NATIVE_NODE type supports the structure {@link ArkUI_NativeGestureAPI_1} of version 1. */
-    ARKUI_NATIVE_GESTURE_VERSION_1 = 1,
->>>>>>> be67ff5461... C-API 新增手势事件
 } ArkUI_NativeNodeAPIVersion;
 
 /**

@@ -44,20 +44,21 @@ struct ArkUI_GestureEvent {
 #endif
 
 
-ArkUI_GestureEventActionType OH_ArkUI_GestureEvent_GetActionType(const ArkUI_GestureEvent* event) {
+ArkUI_GestureEventActionType OH_ArkUI_GestureEvent_GetActionType(const ArkUI_GestureEvent* event)
+{
     ArkUI_GestureEventActionType ret;
     switch (event->eventData.subKind) {
         case ON_ACTION:
         case ON_ACTION_START:
             ret = GESTURE_EVENT_ACTION_ACCEPT;
             break;
-        case ON_ACTION_UPDATE: 
+        case ON_ACTION_UPDATE:
             ret = GESTURE_EVENT_ACTION_UPDATE;
             break;
         case ON_ACTION_END:
             ret = GESTURE_EVENT_ACTION_END;
             break;
-        case ON_ACTION_CANCEL: 
+        case ON_ACTION_CANCEL:
             ret = GESTURE_EVENT_ACTION_CANCEL;
             break;
         default:
@@ -65,6 +66,31 @@ ArkUI_GestureEventActionType OH_ArkUI_GestureEvent_GetActionType(const ArkUI_Ges
             break;
     }
     return ret;
+}
+
+float OH_ArkUI_PanGesture_GetVelocity(const ArkUI_GestureEvent* event)
+{
+    return event->eventData.velocity;
+}
+
+float OH_ArkUI_PanGesture_GetVelocityX(const ArkUI_GestureEvent* event)
+{
+    return event->eventData.velocityX;
+}
+
+float OH_ArkUI_PanGesture_GetVelocityY(const ArkUI_GestureEvent* event)
+{
+    return event->eventData.velocityY;
+}
+
+float OH_ArkUI_PanGesture_GetOffsetX(const ArkUI_GestureEvent* event)
+{
+    return event->eventData.x;
+}
+
+float OH_ArkUI_PanGesture_GetOffsetY(const ArkUI_GestureEvent* event)
+{
+    return event->eventData.y;
 }
 
 namespace OHOS::Ace::GestureModel {
@@ -88,8 +114,8 @@ void DisposeGesture(ArkUI_GestureRecognizer* recognizer)
     delete recognizer;
 }
 
-int32_t SetGestureEventTarget(ArkUI_GestureRecognizer* recognizer, ArkUI_GestureEventActionTypeMask mask, void* extraParam,
-    void (*targetReceiver)(ArkUI_GestureEvent* event, void* extraParam))
+int32_t SetGestureEventTarget(ArkUI_GestureRecognizer* recognizer, ArkUI_GestureEventActionTypeMask mask,
+    void* extraParam, void (*targetReceiver)(ArkUI_GestureEvent* event, void* extraParam))
 {
     // 手势事件通过通用的异步事件接口进行处理。(HandleGestureEvent)
     // 把回调函数和上下文都封装到内部结构体中。
@@ -102,7 +128,8 @@ int32_t SetGestureEventTarget(ArkUI_GestureRecognizer* recognizer, ArkUI_Gesture
     return 0;
 }
 
-void AddGestureToNode(ArkUI_NodeHandle node, ArkUI_GestureRecognizer* recognizer, ArkUI_GesturePriority priorityNum, ArkUI_GestureMask mask)
+void AddGestureToNode(ArkUI_NodeHandle node, ArkUI_GestureRecognizer* recognizer, ArkUI_GesturePriority priorityNum,
+    ArkUI_GestureMask mask)
 {
     OHOS::Ace::NodeModel::GetFullImpl()->getNodeModifiers()->getGestureModifier()->addGestureToNode(
         node->uiNodeHandle, recognizer->gesture, priorityNum, mask);
