@@ -32,7 +32,7 @@ RefPtr<FrameNode> WaterFlowItemNode::GetOrCreateFlowItem(
     return node;
 }
 
-bool WaterFlowItemNode::RequestParentDirty()
+bool WaterFlowItemNode::RequestParentDirty(bool /* childExpansiveAndMark */)
 {
     auto parent = GetAncestorNodeOfFrame();
     CHECK_NULL_RETURN(parent, false);

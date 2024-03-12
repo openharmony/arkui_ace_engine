@@ -440,10 +440,10 @@ void UINode::AdjustParentLayoutFlag(PropertyChangeFlag& flag)
     }
 }
 
-void UINode::MarkDirtyNode(PropertyChangeFlag extraFlag)
+void UINode::MarkDirtyNode(PropertyChangeFlag extraFlag, bool childExpansiveAndMark)
 {
     for (const auto& child : GetChildren()) {
-        child->MarkDirtyNode(extraFlag);
+        child->MarkDirtyNode(extraFlag, childExpansiveAndMark);
     }
 }
 
