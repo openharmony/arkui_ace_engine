@@ -39,6 +39,9 @@ public:
     // app swiper scroll
     static constexpr char APP_SWIPER_SCROLL[] = "APP_SWIPER_SCROLL";
 
+    // app tab switch
+    static constexpr char APP_TAB_SWITCH[] = "APP_TAB_SWITCH";
+
     // volume bar show
     static constexpr char VOLUME_BAR_SHOW[] = "VOLUME_BAR_SHOW";
 
