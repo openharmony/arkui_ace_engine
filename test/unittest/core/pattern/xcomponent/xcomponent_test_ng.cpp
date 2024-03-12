@@ -870,7 +870,7 @@ HWTEST_F(XComponentTestNg, XComponentControllerTest, TestSize.Level1)
 
 /**
  * @tc.name: XComponentSurfaceTestTypeSurface
- * @tc.desc: Test SurfaceHide/SurfaceShow
+ * @tc.desc: Test SurfaceHide/SurfaceShow callback
  * @tc.type: FUNC
  */
 HWTEST_F(XComponentTestNg, XComponentSurfaceTestTypeSurface, TestSize.Level1)
@@ -900,41 +900,45 @@ HWTEST_F(XComponentTestNg, XComponentSurfaceTestTypeSurface, TestSize.Level1)
 
     /**
      * @tc.steps: step3. call surfaceHide and surfaceShow event without register callbacks
-     * @tc.expected: no error happens
+     * @tc.expected: no error happens and isSurfaceShow remains the same
      */
     pattern->OnWindowHide();
+    EXPECT_TRUE(isSurfaceShow);
     pattern->OnWindowShow();
+    EXPECT_TRUE(isSurfaceShow);
 
     /**
-     * @tc.steps: step4. call NativeSurfaceHide and NativeSurfaceShow without register callbacks
-     * @tc.expected: no error happens
-     */
-    pattern->NativeSurfaceHide();
-    pattern->NativeSurfaceShow();
-
-    /**
-     * @tc.steps: step5. register surfaceHide and surfaceShow event for nativeXComponent instance
+     * @tc.steps: step4. register surfaceHide/Show event for nativeXComponent instance and trigger callback
+     * @tc.expected: callback is triggered successfully
      */
     nativeXComponent->RegisterSurfaceShowCallback(
         [](OH_NativeXComponent* /* nativeXComponent */, void* /* window */) { isSurfaceShow = true; });
     nativeXComponent->RegisterSurfaceHideCallback(
         [](OH_NativeXComponent* /* nativeXComponent */, void* /* window */) { isSurfaceShow = false; });
-    EXPECT_TRUE(isSurfaceShow);
-
-    /**
-     * @tc.steps: step6. call surfaceHide and surfaceShow event
-     * @tc.expected: the callbacks registered in step3 are called
-     */
+    EXPECT_CALL(*AceType::DynamicCast(pattern->renderSurface_),releaseSurfaceBuffers()).WillOnce(Return());
     pattern->OnWindowHide();
+    pattern->OnWindowHide(); // test when hasReleasedSurface_ is not satisfied
     EXPECT_FALSE(isSurfaceShow);
+    EXPECT_CALL(*AceType::DynamicCast(pattern->renderSurface_),releaseSurfaceBuffers()).WillOnce(Return());
     pattern->OnWindowShow();
+    pattern->OnWindowShow(); // test when hasReleasedSurface_ is not satisfied
     EXPECT_TRUE(isSurfaceShow);
 
     /**
-     * @tc.steps: step7. call NativeSurfaceHide and NativeSurfaceShow
-     * @tc.expected: no error happens
+     * @tc.steps: step5. call OnWindowHide and OnWindowShoww when the pre-judgment of the function is not satisfied
+     * @tc.expected: callback will be triggered only once
      */
-    pattern->NativeSurfaceHide();
-    pattern->NativeSurfaceShow();
+    bool hasXComponentInit_[2] = { false, true };
+    bool type_[2] = { false, true };
+    EXPECT_CALL(*AceType::DynamicCast(pattern->renderSurface_),releaseSurfaceBuffers()).WillOnce(Return());
+    for (bool initCondition : hasXComponentInit_) {
+        for (bool typeCondition : type_) {
+            pattern->hasXComponentInit_ = initCondition;
+            pattern->type_ = typeCondition ? XCOMPONENT_TEXTURE_TYPE_VALUE : XCOMPONENT_COMPONENT_TYPE_VALUE;
+            pattern->OnWindowHide();
+            pattern->OnWindowShow();
+        }
+    }
+    EXPECT_TRUE(isSurfaceShow);
 }
 } // namespace OHOS::Ace::NG
