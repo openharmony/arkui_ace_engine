@@ -22,6 +22,7 @@
 #include "base/utils/utils.h"
 #include "core/common/container.h"
 #include "core/components/scroll/scroll_controller_base.h"
+#include "core/components_ng/base/observer_handler.h"
 #include "core/components_ng/pattern/grid/grid_adaptive/grid_adaptive_layout_algorithm.h"
 #include "core/components_ng/pattern/grid/grid_item_layout_property.h"
 #include "core/components_ng/pattern/grid/grid_item_pattern.h"
@@ -264,6 +265,8 @@ bool GridPattern::IsItemSelected(const GestureEvent& info)
 
 void GridPattern::FireOnScrollStart()
 {
+    UIObserverHandler::GetInstance().NotifyScrollEventStateChange(AceType::WeakClaim(this),
+        ScrollEventType::SCROLL_START);
     PerfMonitor::GetPerfMonitor()->Start(PerfConstants::APP_LIST_FLING, PerfActionType::FIRST_MOVE, "");
     if (GetScrollAbort()) {
         return;
