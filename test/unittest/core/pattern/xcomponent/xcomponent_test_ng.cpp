@@ -75,7 +75,7 @@ const float SURFACE_WIDTH = 250.0f;
 const float SURFACE_HEIGHT = 150.0f;
 const float SURFACE_OFFSETX = 10.0f;
 const float SURFACE_OFFSETY = 20.0f;
-bool isSurfaceShow = true;
+int surfaceShowNum = 1;
 
 TouchType ConvertXComponentTouchType(const OH_NativeXComponent_TouchEventType& type)
 {
@@ -900,29 +900,29 @@ HWTEST_F(XComponentTestNg, XComponentSurfaceTestTypeSurface, TestSize.Level1)
 
     /**
      * @tc.steps: step3. call surfaceHide and surfaceShow event without register callbacks
-     * @tc.expected: no error happens and isSurfaceShow remains the same
+     * @tc.expected: no error happens and surfaceShowNum remains the same
      */
     pattern->OnWindowHide();
-    EXPECT_TRUE(isSurfaceShow);
+    EXPECT_EQ(surfaceShowNum, 1);
     pattern->OnWindowShow();
-    EXPECT_TRUE(isSurfaceShow);
+    EXPECT_EQ(surfaceShowNum, 1);
 
     /**
      * @tc.steps: step4. register surfaceHide/Show event for nativeXComponent instance and trigger callback
      * @tc.expected: callback is triggered successfully
      */
     nativeXComponent->RegisterSurfaceShowCallback(
-        [](OH_NativeXComponent* /* nativeXComponent */, void* /* window */) { isSurfaceShow = true; });
+        [](OH_NativeXComponent* /* nativeXComponent */, void* /* window */) { surfaceShowNum += 1; });
     nativeXComponent->RegisterSurfaceHideCallback(
-        [](OH_NativeXComponent* /* nativeXComponent */, void* /* window */) { isSurfaceShow = false; });
+        [](OH_NativeXComponent* /* nativeXComponent */, void* /* window */) { surfaceShowNum -= 1; });
     EXPECT_CALL(*AceType::DynamicCast(pattern->renderSurface_),releaseSurfaceBuffers()).WillOnce(Return());
     pattern->OnWindowHide();
     pattern->OnWindowHide(); // test when hasReleasedSurface_ is not satisfied
-    EXPECT_FALSE(isSurfaceShow);
+    EXPECT_EQ(surfaceShowNum, 0);
     EXPECT_CALL(*AceType::DynamicCast(pattern->renderSurface_),releaseSurfaceBuffers()).WillOnce(Return());
     pattern->OnWindowShow();
     pattern->OnWindowShow(); // test when hasReleasedSurface_ is not satisfied
-    EXPECT_TRUE(isSurfaceShow);
+    EXPECT_EQ(surfaceShowNum, 1);
 
     /**
      * @tc.steps: step5. call OnWindowHide and OnWindowShoww when the pre-judgment of the function is not satisfied
@@ -936,9 +936,12 @@ HWTEST_F(XComponentTestNg, XComponentSurfaceTestTypeSurface, TestSize.Level1)
             pattern->hasXComponentInit_ = initCondition;
             pattern->type_ = typeCondition ? XCOMPONENT_TEXTURE_TYPE_VALUE : XCOMPONENT_COMPONENT_TYPE_VALUE;
             pattern->OnWindowHide();
+            if (initCondition && typeCondition) {
+                EXPECT_EQ(surfaceShowNum, 0);
+            }
             pattern->OnWindowShow();
+            EXPECT_EQ(surfaceShowNum, 1);
         }
     }
-    EXPECT_TRUE(isSurfaceShow);
 }
 } // namespace OHOS::Ace::NG
