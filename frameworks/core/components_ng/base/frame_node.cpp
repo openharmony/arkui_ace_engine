@@ -29,6 +29,7 @@
 #include "base/utils/utils.h"
 #include "core/common/ace_application_info.h"
 #include "core/common/container.h"
+#include "core/common/recorder/event_recorder.h"
 #include "core/common/recorder/node_data_cache.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components/common/layout/grid_system_manager.h"
@@ -3270,6 +3271,9 @@ void FrameNode::OnInspectorIdUpdate(const std::string& id)
 void FrameNode::RecordExposureIfNeed(const std::string& inspectorId)
 {
     if (exposureProcessor_) {
+        return;
+    }
+    if (!Recorder::EventRecorder::Get().IsExposureRecordEnable()) {
         return;
     }
     auto pageUrl = Recorder::GetPageUrlByNode(Claim(this));
