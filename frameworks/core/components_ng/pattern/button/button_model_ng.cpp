@@ -487,4 +487,9 @@ Color ButtonModelNG::GetFontColor(FrameNode* frameNode)
     ACE_GET_NODE_LAYOUT_PROPERTY(ButtonLayoutProperty, FontColor, value, frameNode);
     return value;
 }
+
+void ButtonModelNG::ResetBorderRadius()
+{
+    ACE_RESET_LAYOUT_PROPERTY(ButtonLayoutProperty, BorderRadius);
+}
 } // namespace OHOS::Ace::NG
