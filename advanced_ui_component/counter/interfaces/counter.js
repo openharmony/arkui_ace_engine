@@ -767,8 +767,8 @@ export class CounterComponent extends ViewPU {
     updateNumberStyleOptions() {
         var t, e, o;
         void 0 === this.numberStyleOptions.label && (this.numberStyleOptions.label = "");
-        if (void 0 !== this.numberStyleOptions.value && void 0 === this.value) {
-            this.value = this.numberStyleOptions.value;
+        if (void 0 === this.value) {
+            this.value = void 0 !== this.numberStyleOptions.value ? this.numberStyleOptions.value : 0;
             null === (t = this.onChange) || void 0 === t || t.call(this, this.value);
             this.inputValue = this.value.toString()
         }
@@ -815,8 +815,8 @@ export class CounterComponent extends ViewPU {
 
     updateInlineStyleOptions() {
         var t, e, o;
-        if (void 0 !== this.inlineStyleOptions.value && void 0 === this.value) {
-            this.value = this.inlineStyleOptions.value;
+        if (void 0 === this.value) {
+            this.value = void 0 !== this.inlineStyleOptions.value ? this.inlineStyleOptions.value : 0;
             null === (t = this.onChange) || void 0 === t || t.call(this, this.value);
             this.inputValue = this.value.toString()
         }
