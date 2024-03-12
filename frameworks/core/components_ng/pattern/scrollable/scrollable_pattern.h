@@ -469,7 +469,9 @@ public:
     
     void SetAnimateCanOverScroll(bool animateCanOverScroll)
     {
-        animateCanOverScroll_ = animateCanOverScroll;
+        CHECK_NULL_VOID(scrollableEvent_);
+        auto canScroll = scrollableEvent_->GetEnable();
+        animateCanOverScroll_ = canScroll && animateCanOverScroll;
     }
 
 protected:
