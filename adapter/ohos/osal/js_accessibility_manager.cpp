@@ -1078,7 +1078,8 @@ static void UpdateAccessibilityElementInfo(const RefPtr<NG::FrameNode>& node, Ac
     auto accessibilityProperty = node->GetAccessibilityProperty<NG::AccessibilityProperty>();
     CHECK_NULL_VOID(accessibilityProperty);
 
-    nodeInfo.SetContent(accessibilityProperty->GetAccessibilityText());
+    nodeInfo.SetContent(accessibilityProperty->GetText());
+    nodeInfo.SetAccessibilityText(accessibilityProperty->GetAccessibilityText());
     if (accessibilityProperty->HasRange()) {
         RangeInfo rangeInfo = ConvertAccessibilityValue(accessibilityProperty->GetAccessibilityValue());
         nodeInfo.SetRange(rangeInfo);
@@ -1140,6 +1141,7 @@ static void UpdateWebAccessibilityElementInfo(
     RefPtr<NG::WebAccessibilityNode> node, AccessibilityElementInfo& nodeInfo)
 {
     nodeInfo.SetContent(node->GetContent());
+    nodeInfo.SetAccessibilityText(node->GetContent());
     RangeInfo rangeInfo(static_cast<int32_t>(node->GetRangeInfoMin()), static_cast<int32_t>(node->GetRangeInfoMax()),
         static_cast<int32_t>(node->GetRangeInfoCurrent()));
     nodeInfo.SetRange(rangeInfo);
