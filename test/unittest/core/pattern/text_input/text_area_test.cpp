@@ -556,4 +556,214 @@ HWTEST_F(TextFieldUXTest, OnHandleMove004, TestSize.Level1)
     RectF handleRect;
     pattern_->OnHandleMove(handleRect, true);
 }
+
+
+/**
+ * @tc.name: HandleSelect001
+ * @tc.desc: Test the caret move upAndDown
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldUXTest, HandleSelect001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: steps1. Initialize text input and Move the handles and then do handle selection.
+     */
+    int32_t start = 5;
+    int32_t end = 10;
+    CreateTextField(DEFAULT_TEXT, DEFAULT_PLACE_HOLDER);
+
+    /**
+     * @tc.steps: Move the handles and selection up.
+     *            Verify the selection data.
+     */
+    EXPECT_TRUE(pattern_->IsTextArea());
+    pattern_->HandleSetSelection(start, end, false);
+    pattern_->HandleSelect(CaretMoveIntent::Up);
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(pattern_->selectController_->GetFirstHandleInfo().index, start);
+    EXPECT_EQ(pattern_->selectController_->GetSecondHandleInfo().index, 0);
+
+    /**
+     * @tc.steps: Move the handles and selection down.
+     *            Verify the selection data.
+     */
+    EXPECT_TRUE(pattern_->IsTextArea());
+    pattern_->HandleSetSelection(start, end, false);
+    pattern_->HandleSelect(CaretMoveIntent::Down);
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(pattern_->selectController_->GetFirstHandleInfo().index, start);
+    EXPECT_EQ(pattern_->selectController_->GetSecondHandleInfo().index, 26);
+}
+
+/**
+ * @tc.name: HandleSelect002
+ * @tc.desc: Test the caret move right
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldUXTest, HandleSelect002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Initialize text input.
+     */
+    CreateTextField(DEFAULT_TEXT);
+
+    /**
+     * @tc.steps: Move the handles and selection Right.
+     *            Verify the selection data.
+     */
+    pattern_->HandleSelect(CaretMoveIntent::Right);
+    EXPECT_EQ(pattern_->selectController_->GetFirstHandleInfo().index, 26);
+    EXPECT_EQ(pattern_->selectController_->GetSecondHandleInfo().index, 26);
+}
+
+/**
+ * @tc.name: SetSelectionFlag001
+ * @tc.desc: Test SetSelectionFlag
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldUXTest, SetSelectionFlag001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Initialize text input.
+     */
+    auto start = 5;
+    auto end = 5;
+    CreateTextField(DEFAULT_TEXT);
+    pattern_->SetSelectionFlag(start, end);
+
+    /**
+     * @tc.steps: set start = end, Verify the caret position.
+     */
+    GetFocus();
+    pattern_->SetSelectionFlag(start, end);
+    EXPECT_EQ(pattern_->selectController_->GetCaretIndex(), 5);
+    
+    /**
+     * @tc.steps: set start != end, Verify the caret position.
+     */
+    GetFocus();
+    end = 10;
+    pattern_->SetSelectionFlag(start, end);
+    EXPECT_EQ(pattern_->selectController_->GetFirstHandleInfo().index, 5);
+    EXPECT_EQ(pattern_->selectController_->GetSecondHandleInfo().index, 10);
+}
+
+/**
+ * @tc.name: OnBackPressed001
+ * @tc.desc: Test OnBackPressed
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldUXTest, OnBackPressed001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Initialize text input.
+     */
+    CreateTextField(DEFAULT_TEXT);
+
+    /**
+     * @tc.steps: call OnBackPressed.
+     */
+    pattern_->HandleSetSelection(5, 10, false);
+    EXPECT_FALSE(pattern_->OnBackPressed());
+}
+
+/**
+ * @tc.name: TextInputTypeToString001
+ * @tc.desc: Test TextInputTypeToString
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldUXTest, TextInputTypeToString001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Initialize show number icon text input.
+     */
+    CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) {
+        model.SetType(TextInputType::NUMBER);
+    });
+
+    /**
+     * @tc.steps: step2. Call TextInputTypeToString.
+     */
+    EXPECT_EQ(pattern_->TextInputTypeToString(), "InputType.Number");
+}
+
+/**
+ * @tc.name: TextInputTypeToString002
+ * @tc.desc: Test TextInputTypeToString
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldUXTest, TextInputTypeToString002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Initialize show number icon text input.
+     */
+    CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) {
+        model.SetType(TextInputType::EMAIL_ADDRESS);
+    });
+
+    /**
+     * @tc.steps: step2. Call TextInputTypeToString.
+     */
+    EXPECT_EQ(pattern_->TextInputTypeToString(), "InputType.Email");
+}
+
+/**
+ * @tc.name: TextInputTypeToString003
+ * @tc.desc: Test TextInputTypeToString
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldUXTest, TextInputTypeToString003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Initialize show number icon text input.
+     */
+    CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) {
+        model.SetType(TextInputType::VISIBLE_PASSWORD);
+    });
+
+    /**
+     * @tc.steps: step2. Call TextInputTypeToString.
+     */
+    EXPECT_EQ(pattern_->TextInputTypeToString(), "InputType.Password");
+}
+
+/**
+ * @tc.name: TextInputTypeToString004
+ * @tc.desc: Test TextInputTypeToString
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldUXTest, TextInputTypeToString004, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Initialize show number icon text input.
+     */
+    CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) {
+        model.SetType(TextInputType::USER_NAME);
+    });
+
+    /**
+     * @tc.steps: step2. Call TextInputTypeToString.
+     */
+    EXPECT_EQ(pattern_->TextInputTypeToString(), "InputType.USER_NAME");
+}
+
+/**
+ * @tc.name: TextInputTypeToString005
+ * @tc.desc: Test TextInputTypeToString
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldUXTest, TextInputTypeToString005, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Initialize show number icon text input.
+     */
+    CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) {
+        model.SetType(TextInputType::NEW_PASSWORD);
+    });
+
+    /**
+     * @tc.steps: step2. Call TextInputTypeToString.
+     */
+    EXPECT_EQ(pattern_->TextInputTypeToString(), "InputType.NEW_PASSWORD");
+}
 }
