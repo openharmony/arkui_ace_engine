@@ -132,7 +132,7 @@ typedef void (*ComponentAsyncEventHandler)(ArkUINodeHandle node, void* extraPara
 /* clang-format off */
 const ComponentAsyncEventHandler commonNodeAsyncEventHandlers[] = {
     NodeModifier::SetOnAppear,
-    nullptr,
+    NodeModifier::SetOnDisappear,
     NodeModifier::SetOnTouch,
     NodeModifier::SetOnClick,
     nullptr,
@@ -159,12 +159,15 @@ const ComponentAsyncEventHandler textInputNodeAsyncEventHandlers[] = {
     NodeModifier::SetOnTextInputChange,
     NodeModifier::SetOnTextInputCut,
     NodeModifier::SetOnTextInputPaste,
+    NodeModifier::SetOnTextInputSelectionChange,
 };
 
 const ComponentAsyncEventHandler textAreaNodeAsyncEventHandlers[] = {
     nullptr,
     nullptr,
     NodeModifier::SetOnTextAreaChange,
+    NodeModifier::SetOnTextAreaPaste,
+    NodeModifier::SetOnTextAreaSelectionChange,
 };
 
 const ComponentAsyncEventHandler refreshNodeAsyncEventHandlers[] = {

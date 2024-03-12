@@ -39,6 +39,8 @@ ArkUI_Int32 ConvertOriginEventType(ArkUI_NodeEventType type)
             return ON_SCROLL_STOP;
         case NODE_EVENT_ON_APPEAR:
             return ON_APPEAR;
+        case NODE_EVENT_ON_DISAPPEAR:
+            return ON_DISAPPEAR;
         case NODE_EVENT_ON_AREA_CHANGE:
             return ON_AREA_CHANGE;
         case NODE_TEXT_AREA_ON_CHANGE:
@@ -79,6 +81,12 @@ ArkUI_Int32 ConvertOriginEventType(ArkUI_NodeEventType type)
             return ON_TEXT_INPUT_CUT;
         case NODE_TEXT_INPUT_ON_PASTE:
             return ON_TEXT_INPUT_PASTE;
+        case NODE_TEXT_INPUT_ON_TEXT_SELECTION_CHANGE:
+            return ON_TEXT_INPUT_TEXT_SELECTION_CHANGE;
+        case NODE_TEXT_AREA_ON_PASTE:
+            return ON_TEXTAREA_PASTE;
+        case NODE_TEXT_AREA_ON_TEXT_SELECTION_CHANGE:
+            return ON_TEXTAREA_TEXT_SELECTION_CHANGE;
         default:
             return -1;
     }
@@ -99,6 +107,8 @@ ArkUI_Int32 ConvertToNodeEventType(ArkUIEventSubKind type)
             return NODE_SCROLL_EVENT_ON_SCROLL_STOP;
         case ON_APPEAR:
             return NODE_EVENT_ON_APPEAR;
+        case ON_DISAPPEAR:
+            return NODE_EVENT_ON_DISAPPEAR;
         case ON_AREA_CHANGE:
             return NODE_EVENT_ON_AREA_CHANGE;
         case ON_TEXTAREA_CHANGE:
@@ -139,6 +149,12 @@ ArkUI_Int32 ConvertToNodeEventType(ArkUIEventSubKind type)
             return NODE_TEXT_INPUT_ON_CUT;
         case ON_TEXT_INPUT_PASTE:
             return NODE_TEXT_INPUT_ON_PASTE;
+        case ON_TEXT_INPUT_TEXT_SELECTION_CHANGE:
+            return NODE_TEXT_INPUT_ON_TEXT_SELECTION_CHANGE;
+        case ON_TEXTAREA_PASTE:
+            return NODE_TEXT_AREA_ON_PASTE;
+        case ON_TEXTAREA_TEXT_SELECTION_CHANGE:
+            return NODE_TEXT_AREA_ON_TEXT_SELECTION_CHANGE;
         default:
             return -1;
     }
@@ -151,6 +167,7 @@ bool IsStringEvent(ArkUI_Int32 type)
         case NODE_TEXT_INPUT_ON_CUT:
         case NODE_TEXT_INPUT_ON_PASTE:
         case NODE_TEXT_AREA_ON_CHANGE:
+        case NODE_TEXT_AREA_ON_PASTE:
             return true;
         default:
             return false;

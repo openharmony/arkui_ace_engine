@@ -535,4 +535,20 @@ Color ToggleModelNG::GetSwitchPointColor(FrameNode* frameNode)
     return value;
 }
 
+void ToggleModelNG::SetSwitchIsOn(FrameNode* frameNode, bool isOn)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetEventHub<SwitchEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetCurrentUIState(UI_STATE_SELECTED, isOn);
+    ACE_UPDATE_NODE_PAINT_PROPERTY(SwitchPaintProperty, IsOn, isOn, frameNode);
+}
+
+bool ToggleModelNG::GetSwitchIsOn(FrameNode* frameNode)
+{
+    bool value = false;
+    CHECK_NULL_RETURN(frameNode, value);
+    ACE_GET_NODE_PAINT_PROPERTY_WITH_DEFAULT_VALUE(SwitchPaintProperty, IsOn, value, frameNode, value);
+    return value;
+}
 } // namespace OHOS::Ace::NG
