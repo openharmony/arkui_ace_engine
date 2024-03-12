@@ -286,10 +286,7 @@ void XComponentPattern::OnAreaChangedInner()
 void XComponentPattern::SetSurfaceNodeToGraphic()
 {
 #ifdef ENABLE_ROSEN_BACKEND
-    if (type_ != XComponentType::SURFACE) {
-        return;
-    }
-    if (!Rosen::RSExtNodeOperation::GetInstance().CheckNeedToProcess(GetId())) {
+    if (type_ != XComponentType::SURFACE || !Rosen::RSExtNodeOperation::GetInstance().CheckNeedToProcess(GetId())) {
         return;
     }
     auto host = GetHost();
@@ -307,8 +304,7 @@ void XComponentPattern::SetSurfaceNodeToGraphic()
     CHECK_NULL_VOID(context);
     std::shared_ptr<Rosen::RSNode> rsNode = context->GetRSNode();
     CHECK_NULL_VOID(rsNode);
-    std::shared_ptr<Rosen::RSSurfaceNode> rsSurfaceNode =
-        std::static_pointer_cast<Rosen::RSSurfaceNode>(rsNode);
+    std::shared_ptr<Rosen::RSSurfaceNode> rsSurfaceNode = std::static_pointer_cast<Rosen::RSSurfaceNode>(rsNode);
     CHECK_NULL_VOID(rsSurfaceNode);
 
     Rosen::RSExtNodeOperation::GetInstance().ProcessRSExtNode(GetId(), parentNode->GetId(),
