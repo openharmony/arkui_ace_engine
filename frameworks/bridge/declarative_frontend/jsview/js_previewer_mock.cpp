@@ -45,7 +45,7 @@ PreviewMockModel* PreviewMockModel::GetInstance()
 
 namespace OHOS::Ace::Framework {
 
-void CreateMockComponent(const std::string inspectorTag)
+void CreateMockComponent(const std::string& inspectorTag)
 {
     OHOS::Ace::PreviewMockModel::GetInstance()->Create(inspectorTag);
 }

@@ -415,7 +415,7 @@ void SortAccessibilityInfosByBreadth(std::list<AccessibilityElementInfo>& infos,
     while (!accessibilityIdQueue.empty()) {
         auto accessibilityId = accessibilityIdQueue.front();
         accessibilityIdQueue.pop_front();
-        for (std::list<AccessibilityElementInfo>::iterator info = infos.begin(); info != infos.end(); info++) {
+        for (std::list<AccessibilityElementInfo>::iterator info = infos.begin(); info != infos.end(); ++info) {
             if (accessibilityId != info->GetAccessibilityId()) {
                 continue;
             }
@@ -3282,7 +3282,7 @@ void JsAccessibilityManager::JsInteractionOperation::ExecuteAction(const int64_t
 }
 
 bool JsAccessibilityManager::AccessibilityActionEvent(const ActionType& action,
-    const std::map<std::string, std::string> actionArguments, const RefPtr<AccessibilityNode>& node,
+    const std::map<std::string, std::string>& actionArguments, const RefPtr<AccessibilityNode>& node,
     const RefPtr<PipelineContext>& context)
 {
     if (!node || !context) {

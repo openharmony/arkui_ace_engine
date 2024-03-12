@@ -366,7 +366,7 @@ void UpdateRootComponent(const panda::Local<panda::ObjectRef>& obj)
 }
 
 #ifdef USE_COMPONENTS_LIB
-void JSBindLibs(const std::string moduleName, const std::string exportModuleName, bool isController = false)
+void JSBindLibs(const std::string& moduleName, const std::string& exportModuleName, bool isController = false)
 {
     auto runtime = std::static_pointer_cast<ArkJSRuntime>(JsiDeclarativeEngineInstance::GetCurrentRuntime());
     std::shared_ptr<JsValue> global = runtime->GetGlobal();

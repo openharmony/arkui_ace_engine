@@ -210,7 +210,7 @@ public:
         return dragBehavior_;
     }
 
-    void SetUdKey(const std::string udKey)
+    void SetUdKey(const std::string& udKey)
     {
         udKey_ = udKey;
     }

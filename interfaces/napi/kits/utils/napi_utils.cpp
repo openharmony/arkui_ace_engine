@@ -188,7 +188,7 @@ RefPtr<ResourceWrapper> CreateResourceWrapper(const ResourceInfo& info)
     return resourceWrapper;
 }
 
-napi_value CreateNapiString(napi_env env, std::string rawStr)
+napi_value CreateNapiString(napi_env env, const std::string& rawStr)
 {
     napi_value retVal = nullptr;
     napi_create_string_utf8(env, rawStr.c_str(), rawStr.length(), &retVal);

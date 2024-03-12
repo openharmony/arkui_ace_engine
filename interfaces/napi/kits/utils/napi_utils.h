@@ -62,7 +62,7 @@ void NapiThrow(napi_env env, const std::string& message, int32_t errCode);
 
 napi_value ParseCurve(napi_env env, napi_value value, std::string& curveTypeString, std::vector<float>& curveValue);
 
-napi_value CreateNapiString(napi_env env, std::string rawStr);
+napi_value CreateNapiString(napi_env env, const std::string& rawStr);
 
 void CompleteResourceParam(napi_env env, napi_value value);
 
