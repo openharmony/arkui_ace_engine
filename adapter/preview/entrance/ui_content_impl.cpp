@@ -424,6 +424,10 @@ void UIContentImpl::UpdateViewportConfig(const ViewportConfig& config, OHOS::Ros
     LOGI("ViewportConfig: %{public}s", config.ToString().c_str());
     auto container = AceContainer::GetContainerInstance(instanceId_);
     CHECK_NULL_VOID(container);
+    auto context = container->GetPipelineContext();
+    CHECK_NULL_VOID(context);
+    context->SetDisplayWindowRectInfo(
+        Rect(Offset(config.Left(), config.Top()), Size(config.Width(), config.Height())));
     auto viewPtr = container->GetAceView();
     CHECK_NULL_VOID(viewPtr);
     SystemProperties::InitDeviceInfo(
