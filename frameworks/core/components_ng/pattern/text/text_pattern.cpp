@@ -1296,7 +1296,7 @@ void TextPattern::AddUdmfData(const RefPtr<Ace::DragEvent>& event)
     for (const auto& resultObj : dragResultObjects_) {
         if (finalResult.empty() || resultObj.type != SelectSpanType::TYPESPAN || type != SelectSpanType::TYPESPAN) {
             type = resultObj.type;
-            finalSelEnd.emplace_back(resultObj);
+            finalResult.emplace_back(resultObj);
         } else {
             txtPreProcessor(resultObj, finalResult.back());
         }
