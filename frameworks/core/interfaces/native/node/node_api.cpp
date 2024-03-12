@@ -99,7 +99,6 @@ void SetCustomCallback(ArkUINodeHandle node, ArkUI_Int32 callback)
 ArkUINodeHandle CreateNode(ArkUINodeType type, int peerId, ArkUI_Int32 flags)
 {
     auto* node = reinterpret_cast<ArkUINodeHandle>(ViewModel::CreateNode(type, peerId));
-    ViewModel::RegisterCompanion(node, peerId, flags);
     return node;
 }
 

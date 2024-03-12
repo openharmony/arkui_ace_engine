@@ -999,9 +999,6 @@ void SetAlign(ArkUINodeHandle node, ArkUI_Int32 align)
     CHECK_NULL_VOID(frameNode);
     Alignment alignment = ParseAlignment(align);
     ViewAbstract::SetAlign(frameNode, alignment);
-    auto* companion = ViewModel::GetCompanion(node);
-    CHECK_NULL_VOID(companion);
-    companion->alignment = align;
 }
 
 void ResetAlign(ArkUINodeHandle node)
