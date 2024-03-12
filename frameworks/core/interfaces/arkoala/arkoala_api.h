@@ -115,14 +115,14 @@ enum ArkUISourceType {
 
 struct ArkUITouchPoint {
     /**
-     * Time stamp when touch is pressed
-     */
-    ArkUI_Int64 pressedTime;
-
-    /**
      * Pointer identifier
      */
     ArkUI_Int32 id;
+
+    /**
+     * Time stamp when touch is pressed
+     */
+    ArkUI_Int64 pressedTime;
 
     /**
      * X coordinate of the touch position on the screen
@@ -164,7 +164,7 @@ struct ArkUITouchPoint {
      * Pressure value. The value range is [0.0, 1.0]. The value 0.0 indicates that the pressure is not supported.
      *
      */
-    ArkUI_Float32 pressure;
+    double pressure;
 
     /**
      * Width of the contact area when touch is pressed
@@ -182,12 +182,12 @@ struct ArkUITouchPoint {
      * Angle relative to the YZ plane. The value range is [-90, 90]. A positive value indicates a rightward tilt.
      *
      */
-    ArkUI_Float32 tiltX;
+    double tiltX;
 
     /**
      * Angle relative to the XZ plane. The value range is [-90, 90]. A positive value indicates a downward tilt.
      */
-    ArkUI_Float32 tiltY;
+    double tiltY;
 
     /**
      * Center point X of the tool area
@@ -239,26 +239,27 @@ enum ArkUITouchEventAction {
 };
 
 struct ArkUIHistoricalTouchPoint {
-    /** Time stamp of the historical event. */
-    ArkUI_Int64 timeStamp;
     /**
      * Touch action
      */
     ArkUITouchEventAction action;
+    /** Time stamp of the historical event. */
+    ArkUI_Int64 timeStamp;
     /** touch point info of the historical event. */
     ArkUITouchPoint actionTouch;
     ArkUISourceType sourceType;
 };
 
 struct ArkUITouchEvent {
-    /** Time stamp of the current event. */
-    ArkUI_Int64 timeStamp;
-
     /**
      * Touch action
      *
      */
     ArkUITouchEventAction action;
+    
+    /** Time stamp of the current event. */
+    ArkUI_Int64 timeStamp;
+
     /**
      * curent action touch point info.
      */
@@ -283,14 +284,14 @@ struct ArkUITouchEvent {
      * @brief Prevents events from bubbling further to the parent node for processing.
      *
      */
-    ArkUI_Bool stopPropagation;
+    bool stopPropagation;
 
     /**
      * @brief Blocks the current node's default event handling behavior, allowing events
      * to bubble up further.
      *
      */
-    ArkUI_Bool preventDefault;
+    bool preventDefault;
 };
 
 struct ArkUIStringAndFloat {
