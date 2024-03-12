@@ -32,6 +32,8 @@ public:
     MOCK_METHOD1(AnimateHoverEffectScale, void(bool));
     MOCK_METHOD1(SetVisible, void(bool));
     MOCK_METHOD4(SetBounds, void(float, float, float, float));
+    MOCK_METHOD1(DoTextureExport, bool(uint64_t));
+    MOCK_METHOD0(StopTextureExport, bool());
 
     void ResetBlendBgColor() override
     {
