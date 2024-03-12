@@ -1002,11 +1002,21 @@ void JSTextPicker::SetDivider(const JSCallbackInfo& info)
     NG::ItemDivider divider;
     if (info.Length() >= 1 && info[0]->IsObject()) {
         auto pickerTheme = GetTheme<PickerTheme>();
+        // Set default strokeWidth and color
+        if (pickerTheme) {
+            divider.strokeWidth = pickerTheme->GetDividerThickness();
+            divider.color = pickerTheme->GetDividerColor();
+        }
         JSRef<JSObject> obj = JSRef<JSObject>::Cast(info[0]);
         bool needReset = obj->GetProperty("strokeWidth")->IsString() &&
             !std::regex_match(obj->GetProperty("strokeWidth")->ToString(), DIMENSION_REGEX);
-        if (needReset || !ConvertFromJSValue(obj->GetProperty("strokeWidth"), divider.strokeWidth)) {
-            divider.strokeWidth = 0.0_vp;
+        if (needReset || !ConvertFromJSValue(obj->GetProperty("strokeWidth"), divider.strokeWidth) ||
+            divider.strokeWidth.ConvertToPx() < 0) {
+            if (pickerTheme) {
+                divider.strokeWidth = pickerTheme->GetDividerThickness();
+            } else {
+                divider.strokeWidth = 0.0_vp;
+            }
         }
         if (!ConvertFromJSValue(obj->GetProperty("color"), divider.color)) {
             // Failed to get color from param, using default color defined in theme
@@ -1029,7 +1039,6 @@ void JSTextPicker::SetDivider(const JSCallbackInfo& info)
         }
     }
     TextPickerModel::GetInstance()->SetDivider(divider);
-    info.ReturnSelf();
 }
 
 void JSTextPicker::OnAccept(const JSCallbackInfo& info) {}

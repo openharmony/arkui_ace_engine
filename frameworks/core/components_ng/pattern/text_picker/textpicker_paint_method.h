@@ -65,7 +65,11 @@ private:
 
     WeakPtr<Pattern> pattern_;
 
-    bool NeedPaintDividerLines(RectF contentRect, DividerInfo& info);
+    bool NeedPaintDividerLines(const RectF &contentRect, const ItemDivider &divider, double dividerHeight,
+        DividerInfo& info);
+    void PaintDefaultDividerLines(RSCanvas& canvas, const RectF &contentRect, double dividerHeight);
+    void PaintCustomDividerLines(RSCanvas& canvas, const RectF &contentRect, const RectF &frameRect,
+        const ItemDivider &divider, double dividerHeight);
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_TEXT_PICKER_TEXT_PICKER_PAINT_METHOD_H
