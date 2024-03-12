@@ -2584,4 +2584,64 @@ HWTEST_F(FrameNodeTestNg, TriggerOnSizeChangeCallback001, TestSize.Level1)
     FRAME_NODE2->TriggerOnSizeChangeCallback();
     EXPECT_FALSE(flag);
 }
+
+/**
+ * @tc.name: OnTouchInterceptTest001
+ * @tc.desc: Test onTouchIntercept method
+ * @tc.type: FUNC
+ */
+HWTEST_F(FrameNodeTestNg, OnTouchInterceptTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. construct TouchTest parameters.
+     */
+    PointF globalPoint;
+    PointF parentLocalPoint;
+    TouchRestrict touchRestrict;
+    TouchTestResult result;
+
+    /**
+     * @tc.steps: step2. create node and set callback.
+     */
+    auto childNode = FrameNode::CreateFrameNode("main", 2, AceType::MakeRefPtr<Pattern>(), true);
+    childNode->SetExclusiveEventForChild(true);
+    auto mockRenderContextforChild = AceType::MakeRefPtr<MockRenderContext>();
+    childNode->renderContext_ = mockRenderContextforChild;
+    auto localPoint = PointF(10, 10);
+    mockRenderContextforChild->rect_ = RectF(0, 0, 100, 100);
+    EXPECT_CALL(*mockRenderContextforChild, GetPointWithTransform(_))
+        .WillRepeatedly(DoAll(SetArgReferee<0>(localPoint)));
+    auto childEventHub = childNode->GetOrCreateGestureEventHub();
+    childEventHub->SetHitTestMode(HitTestMode::HTMBLOCK);
+    childNode->SetActive(true);
+    EXPECT_NE(childNode->eventHub_->GetGestureEventHub(), nullptr);
+    auto callback = [](TouchEventInfo& event) -> HitTestMode { return HitTestMode::HTMNONE; };
+    childEventHub->SetOnTouchIntercept(callback);
+
+    /**
+     * @tc.steps: step3. trigger touch test.
+     * @tc.expected: expect the touch test mode is correct.
+     */
+    HitTestMode hitTestModeofChilds[] = { HitTestMode::HTMDEFAULT, HitTestMode::HTMBLOCK, HitTestMode::HTMTRANSPARENT,
+        HitTestMode::HTMNONE, HitTestMode::HTMTRANSPARENT_SELF };
+    for (auto hitTestModeofChild : hitTestModeofChilds) {
+        childEventHub->SetHitTestMode(hitTestModeofChild);
+        childNode->TouchTest(globalPoint, parentLocalPoint, parentLocalPoint, touchRestrict, result, 1);
+        auto mode = childEventHub->GetHitTestMode();
+        EXPECT_EQ(mode, HitTestMode::HTMNONE);
+    }
+
+    /**
+     * @tc.steps: step4. modify callback and trigger touch test.
+     * @tc.expected: expect the touch test mode is correct.
+     */
+    auto blockCallback = [](TouchEventInfo& event) -> HitTestMode { return HitTestMode::HTMBLOCK; };
+    childEventHub->SetOnTouchIntercept(blockCallback);
+    for (auto hitTestModeofChild : hitTestModeofChilds) {
+        childEventHub->SetHitTestMode(hitTestModeofChild);
+        childNode->TouchTest(globalPoint, parentLocalPoint, parentLocalPoint, touchRestrict, result, 1);
+        auto mode = childEventHub->GetHitTestMode();
+        EXPECT_EQ(mode, HitTestMode::HTMBLOCK);
+    }
+}
 } // namespace OHOS::Ace::NG
