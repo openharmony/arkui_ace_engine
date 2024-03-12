@@ -30,19 +30,13 @@
 
 namespace OHOS::Ace {
 
-struct Deleter {
-    void operator()(uint8_t* p)
-    {
-        delete[] p;
-    }
-};
-
 class DataProviderRes {
 public:
-    DataProviderRes(std::unique_ptr<uint8_t[], Deleter>&& data, int64_t size) : data_(std::move(data)), size_(size) {}
+    DataProviderRes(std::unique_ptr<uint8_t[]>&& data, int64_t size) : data_(std::move(data)), size_(size) {}
+    DataProviderRes(uint8_t* dataRes, int64_t size) : data_(std::unique_ptr<uint8_t[]>(dataRes)), size_(size) {}
     ~DataProviderRes() = default;
 
-    std::unique_ptr<uint8_t[], Deleter>&& GetData()
+    std::unique_ptr<uint8_t[]>&& GetData()
     {
         return std::move(data_);
     }
@@ -52,7 +46,7 @@ public:
     }
 
 private:
-    std::unique_ptr<uint8_t[], Deleter> data_;
+    std::unique_ptr<uint8_t[]> data_;
     int64_t size_ = 0;
 
     ACE_DISALLOW_COPY_AND_MOVE(DataProviderRes);

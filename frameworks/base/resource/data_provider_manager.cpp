@@ -72,9 +72,8 @@ std::unique_ptr<DataProviderRes> DataProviderManagerStandard::GetDataProviderRes
         LOGW("Read file fail");
         return nullptr;
     }
-    auto header = std::unique_ptr<uint8_t[], Deleter>(buffer.release());
 
-    auto result = std::make_unique<DataProviderRes>(std::move(header), size);
+    auto result = std::make_unique<DataProviderRes>(std::move(buffer), size);
     return result;
 }
 
