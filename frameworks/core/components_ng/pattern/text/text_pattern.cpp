@@ -626,7 +626,7 @@ void TextPattern::OnHandleTouchUp()
 
 void TextPattern::HandleClickEvent(GestureEvent& info)
 {
-    if (dataDetectorAdapter_->hasClickedAISpan_ && !isMousePressed_) {
+    if (dataDetectorAdapter_->hasClickedAISpan_) {
         dataDetectorAdapter_->hasClickedAISpan_ = false;
     } else if (hasClicked_) {
         hasClicked_ = false;
@@ -658,9 +658,6 @@ void TextPattern::HandleSingleClickEvent(GestureEvent& info)
     if (dataDetectorAdapter_->hasClickedAISpan_) {
         if (selectOverlayProxy_ && !selectOverlayProxy_->IsClosed()) {
             selectOverlayProxy_->DisableMenu(true);
-        }
-        if (!isMousePressed_) {
-            dataDetectorAdapter_->hasClickedAISpan_ = false;
         }
         return;
     }
@@ -1046,7 +1043,6 @@ void TextPattern::HandleMouseLeftReleaseAction(const MouseInfo& info, const Offs
             if (selectOverlayProxy_ && !selectOverlayProxy_->IsClosed()) {
                 selectOverlayProxy_->DisableMenu(true);
             }
-            dataDetectorAdapter_->hasClickedAISpan_ = false;
             isMousePressed_ = false;
             leftMousePressed_ = false;
             return;
@@ -1097,7 +1093,6 @@ void TextPattern::HandleMouseRightButton(const MouseInfo& info, const Offset& te
             HandleClickAISpanEvent(PointF(textOffset.GetX(), textOffset.GetY()));
             if (dataDetectorAdapter_->hasClickedAISpan_) {
                 isMousePressed_ = false;
-                dataDetectorAdapter_->hasClickedAISpan_ = false;
                 return;
             }
         }
