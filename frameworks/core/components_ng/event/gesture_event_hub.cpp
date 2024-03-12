@@ -1468,4 +1468,14 @@ void GestureEventHub::SetJSFrameNodeOnTouchEvent(TouchEventFunc&& touchEventFunc
     }
     touchEventActuator_->SetJSFrameNodeOnTouchEvent(std::move(touchEventFunc));
 }
+
+void GestureEventHub::SetDragForbiddenForcely(bool isDragForbidden)
+{
+    isDragForbidden_ = isDragForbidden;
+}
+
+bool GestureEventHub::IsDragFrobidden()
+{
+    return isDragForbidden_;
+}
 } // namespace OHOS::Ace::NG
