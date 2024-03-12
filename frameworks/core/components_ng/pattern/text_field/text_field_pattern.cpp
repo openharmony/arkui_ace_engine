@@ -256,10 +256,11 @@ std::u16string TextFieldPattern::CreateDisplayText(
     if (!content.empty() && needObscureText) {
         auto text =
             TextFieldPattern::CreateObscuredText(static_cast<int32_t>(StringUtils::ToWstring(content).length()));
-        if (nakedCharPosition >= 0 && nakedCharPosition < static_cast<int32_t>(content.length())
-            && !showPasswordDirectly) {
-            auto rawContent = StringUtils::Str8ToStr16(content);
-            text[nakedCharPosition] = rawContent[nakedCharPosition];
+        if (nakedCharPosition >= 0 && nakedCharPosition < static_cast<int32_t>(content.length())) {
+            if (Container::LessThanAPIVersion(PlatformVersion::VERSION_TWELVE) || !showPasswordDirectly) {
+                auto rawContent = StringUtils::Str8ToStr16(content);
+                text[nakedCharPosition] = rawContent[nakedCharPosition];
+            }
         }
         return text;
     }
