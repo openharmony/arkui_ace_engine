@@ -897,6 +897,8 @@ HWTEST_F(XComponentTestNg, XComponentSurfaceTestTypeSurface, TestSize.Level1)
     auto nativeXComponentImpl = pair.first;
     ASSERT_TRUE(nativeXComponent);
     ASSERT_TRUE(nativeXComponentImpl);
+    pattern->hasXComponentInit_ = true;
+
 
     /**
      * @tc.steps: step3. call surfaceHide and surfaceShow event without register callbacks
@@ -915,7 +917,8 @@ HWTEST_F(XComponentTestNg, XComponentSurfaceTestTypeSurface, TestSize.Level1)
         [](OH_NativeXComponent* /* nativeXComponent */, void* /* window */) { surfaceShowNum += 1; });
     nativeXComponent->RegisterSurfaceHideCallback(
         [](OH_NativeXComponent* /* nativeXComponent */, void* /* window */) { surfaceShowNum -= 1; });
-    EXPECT_CALL(*AceType::DynamicCast(pattern->renderSurface_),releaseSurfaceBuffers()).WillOnce(Return());
+    EXPECT_CALL(*AceType::DynamicCast<MockRenderSurface>(pattern->renderSurface_),releaseSurfaceBuffers())
+        .WillOnce(Return());
     pattern->OnWindowHide();
     pattern->OnWindowHide(); // test when hasReleasedSurface_ is not satisfied
     EXPECT_EQ(surfaceShowNum, 0);
@@ -929,7 +932,8 @@ HWTEST_F(XComponentTestNg, XComponentSurfaceTestTypeSurface, TestSize.Level1)
      */
     bool hasXComponentInit_[2] = { false, true };
     bool type_[2] = { false, true };
-    EXPECT_CALL(*AceType::DynamicCast(pattern->renderSurface_),releaseSurfaceBuffers()).WillOnce(Return());
+    EXPECT_CALL(*AceType::DynamicCast<MockRenderSurface>(pattern->renderSurface_),releaseSurfaceBuffers())
+        .WillOnce(Return());
     for (bool initCondition : hasXComponentInit_) {
         for (bool typeCondition : type_) {
             pattern->hasXComponentInit_ = initCondition;
