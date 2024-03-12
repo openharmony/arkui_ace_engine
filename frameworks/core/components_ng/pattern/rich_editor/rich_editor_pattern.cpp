@@ -1068,7 +1068,7 @@ void RichEditorPattern::FireOnSelectionChange(const int32_t caretPosition)
 
 void RichEditorPattern::FireOnSelectionChange(const TextSelector& selector)
 {
-    if (selector.SelectNothing() || caretTwinkling_) {
+    if (selector.SelectNothing()) {
         return;
     }
     FireOnSelectionChange(selector.GetStart(), selector.GetEnd());
