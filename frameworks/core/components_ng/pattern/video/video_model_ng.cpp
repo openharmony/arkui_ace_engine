@@ -223,7 +223,7 @@ void VideoModelNG::AddDragFrameNodeToManager() const
     CHECK_NULL_VOID(pipeline);
     auto dragDropManager = pipeline->GetDragDropManager();
     CHECK_NULL_VOID(dragDropManager);
-    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    auto frameNode = AceType::Claim(ViewStackProcessor::GetInstance()->GetMainFrameNode());
     CHECK_NULL_VOID(frameNode);
 
     dragDropManager->AddDragFrameNode(frameNode->GetId(), frameNode);

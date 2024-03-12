@@ -192,7 +192,7 @@ std::function<float(float)> ParseCallBackFunction(const JSRef<JSObject>& curveOb
     std::function<float(float)> customCallBack = nullptr;
     JSRef<JSVal> onCallBack = curveObj->GetProperty("__curveCustomFunc");
     if (onCallBack->IsFunction()) {
-        WeakPtr<NG::FrameNode> frameNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+        auto frameNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
         RefPtr<JsFunction> jsFuncCallBack =
             AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(onCallBack));
         customCallBack = [func = std::move(jsFuncCallBack), id = Container::CurrentIdSafely(), node = frameNode](
@@ -390,7 +390,7 @@ void JSViewContext::JSAnimation(const JSCallbackInfo& info)
     JSRef<JSVal> onFinish = obj->GetProperty("onFinish");
     std::function<void()> onFinishEvent;
     if (onFinish->IsFunction()) {
-        WeakPtr<NG::FrameNode> frameNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+        auto frameNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
         RefPtr<JsFunction> jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(onFinish));
         onFinishEvent = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc),
                             id = Container::CurrentIdSafely(), node = frameNode]() mutable {
@@ -470,7 +470,7 @@ void JSViewContext::AnimateToInner(const JSCallbackInfo& info, bool immediately)
     std::function<void()> onFinishEvent;
     auto traceStreamPtr = std::make_shared<std::stringstream>();
     if (onFinish->IsFunction()) {
-        WeakPtr<NG::FrameNode> frameNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+        auto frameNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
         RefPtr<JsFunction> jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(onFinish));
         onFinishEvent = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc),
                             id = Container::CurrentIdSafely(), traceStreamPtr, node = frameNode]() mutable {

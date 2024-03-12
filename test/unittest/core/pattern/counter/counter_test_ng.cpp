@@ -75,7 +75,7 @@ HWTEST_F(CounterTestNg, CounterPatternTest001, TestSize.Level1)
 
     CounterModelNG counterModelNG;
     counterModelNG.Create();
-    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->GetMainElementNode());
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainElementNode();
     EXPECT_NE(frameNode, nullptr);
     counterModelNG.Create();
     auto frameNode1 = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());

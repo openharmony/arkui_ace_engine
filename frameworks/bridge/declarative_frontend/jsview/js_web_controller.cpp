@@ -336,7 +336,7 @@ public:
         JSRef<JSVal> tsCallback = JSRef<JSVal>::Cast(obj);
         std::function<void(std::string)> callback = nullptr;
         if (tsCallback->IsFunction()) {
-            WeakPtr<NG::FrameNode> frameNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+            auto frameNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
             auto jsCallback = AceType::MakeRefPtr<JsWebViewFunction>(JSRef<JSFunc>::Cast(tsCallback));
             callback = [execCtx = args.GetExecutionContext(), func = std::move(jsCallback), node = frameNode](
                             std::string result) {
@@ -676,7 +676,7 @@ void JSWebController::ExecuteTypeScript(const JSCallbackInfo& args)
     JSRef<JSVal> tsCallback = obj->GetProperty("callback");
     std::function<void(std::string)> callback = nullptr;
     if (tsCallback->IsFunction()) {
-        WeakPtr<NG::FrameNode> frameNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+        auto frameNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
         auto jsCallback = AceType::MakeRefPtr<JsWebViewFunction>(JSRef<JSFunc>::Cast(tsCallback));
         callback = [execCtx = args.GetExecutionContext(), func = std::move(jsCallback), node = frameNode](
                         std::string result) {

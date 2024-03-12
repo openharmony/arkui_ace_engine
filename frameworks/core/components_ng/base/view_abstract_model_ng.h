@@ -525,7 +525,7 @@ public:
                 overlayNode = AceType::DynamicCast<FrameNode>(buildNodeFunc());
                 CHECK_NULL_VOID(overlayNode);
                 frameNode->SetOverlayNode(overlayNode);
-                overlayNode->SetParent(AceType::WeakClaim(AceType::RawPtr(frameNode)));
+                overlayNode->SetParent(AceType::WeakClaim(frameNode));
                 overlayNode->SetActive(true);
             } else {
                 overlayNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
@@ -1017,7 +1017,7 @@ public:
     void BindPopup(const RefPtr<PopupParam>& param, const RefPtr<AceType>& customNode) override
     {
         auto targetNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
-        ViewAbstract::BindPopup(param, targetNode, AceType::DynamicCast<UINode>(customNode));
+        ViewAbstract::BindPopup(param, AceType::Claim(targetNode), AceType::DynamicCast<UINode>(customNode));
     }
 
     void DismissDialog() override

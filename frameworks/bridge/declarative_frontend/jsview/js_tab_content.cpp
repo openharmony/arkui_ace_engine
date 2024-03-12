@@ -526,7 +526,7 @@ void JSTabContent::SetOnWillShow(const JSCallbackInfo& info)
         return;
     }
     auto willShowHandler = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(info[0]));
-    WeakPtr<NG::FrameNode> frameNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    WeakPtr<NG::FrameNode> frameNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
     auto onWillShow = [executionContext = info.GetExecutionContext(), func = std::move(willShowHandler)]() {
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(executionContext);
         ACE_SCORING_EVENT("TabContent.onWillShow");
@@ -541,7 +541,7 @@ void JSTabContent::SetOnWillHide(const JSCallbackInfo& info)
         return;
     }
     auto willHideHandler = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(info[0]));
-    WeakPtr<NG::FrameNode> frameNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    WeakPtr<NG::FrameNode> frameNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
     auto onWillHide = [executionContext = info.GetExecutionContext(), func = std::move(willHideHandler)]() {
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(executionContext);
         ACE_SCORING_EVENT("TabContent.onWillHide");

@@ -483,7 +483,7 @@ void TextFieldModelNG::AddDragFrameNodeToManager() const
     CHECK_NULL_VOID(dragDropManager);
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
-    dragDropManager->AddTextFieldDragFrameNode(frameNode->GetId(), AceType::WeakClaim(AceType::RawPtr(frameNode)));
+    dragDropManager->AddTextFieldDragFrameNode(frameNode->GetId(), AceType::WeakClaim(frameNode));
 }
 
 void TextFieldModelNG::SetForegroundColor(const Color& value)

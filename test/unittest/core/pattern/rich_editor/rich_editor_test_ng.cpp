@@ -570,7 +570,7 @@ HWTEST_F(RichEditorTestNg, RichEditorModel011, TestSize.Level1)
     options.value = INIT_VALUE_1;
     richEditorModel.SetPlaceholder(options);
 
-    auto richEditorNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    auto richEditorNode = AceType::Claim(ViewStackProcessor::GetInstance()->GetMainFrameNode());
     ASSERT_NE(richEditorNode, nullptr);
     auto richEditorPattern = richEditorNode->GetPattern<RichEditorPattern>();
     ASSERT_NE(richEditorPattern, nullptr);
@@ -637,7 +637,7 @@ HWTEST_F(RichEditorTestNg, RichEditorModel012, TestSize.Level1)
     options.fontFamilies = FONT_FAMILY_VALUE;
     richEditorModel.SetPlaceholder(options);
 
-    auto richEditorNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    auto richEditorNode = AceType::Claim(ViewStackProcessor::GetInstance()->GetMainFrameNode());
     ASSERT_NE(richEditorNode, nullptr);
     auto richEditorPattern = richEditorNode->GetPattern<RichEditorPattern>();
     ASSERT_NE(richEditorPattern, nullptr);
@@ -683,7 +683,7 @@ HWTEST_F(RichEditorTestNg, RichEditorModel013, TestSize.Level1)
     options.value = INIT_VALUE_1;
     richEditorModel.SetPlaceholder(options);
 
-    auto richEditorNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    auto richEditorNode = AceType::Claim(ViewStackProcessor::GetInstance()->GetMainFrameNode());
     ASSERT_NE(richEditorNode, nullptr);
     auto richEditorPattern = richEditorNode->GetPattern<RichEditorPattern>();
     ASSERT_NE(richEditorPattern, nullptr);

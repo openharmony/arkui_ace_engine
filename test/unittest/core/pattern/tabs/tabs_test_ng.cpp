@@ -92,7 +92,7 @@ void TabsTestNg::Create(const std::function<void(TabsModelNG)>& callback, BarPos
     if (callback) {
         callback(model);
     }
-    auto tabNode = AceType::DynamicCast<TabsNode>(ViewStackProcessor::GetInstance()->GetMainElementNode());
+    auto tabNode = AceType::DynamicCast<TabsNode>(ViewStackProcessor::GetInstance()->GetMainFrameNode());
     auto tabBarNode = AceType::DynamicCast<FrameNode>(tabNode->GetTabBar());
     tabBarNode->GetOrCreateFocusHub();
     model.Pop();
