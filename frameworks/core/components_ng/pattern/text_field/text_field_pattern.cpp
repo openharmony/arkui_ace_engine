@@ -4742,9 +4742,11 @@ std::string TextFieldPattern::TextInputTypeToString() const
     CHECK_NULL_RETURN(layoutProperty, "");
     switch (layoutProperty->GetTextInputTypeValue(TextInputType::UNSPECIFIED)) {
         case TextInputType::NUMBER:
-            return "InputType.Number";
+            return IsTextArea() ? "TextAreaType.NUMBER" : "InputType.Number";
         case TextInputType::EMAIL_ADDRESS:
-            return "InputType.Email";
+            return IsTextArea() ? "TextAreaType.EMAIL" : "InputType.Email";
+        case TextInputType::PHONE:
+            return IsTextArea() ? "TextAreaType.PHONE_NUMBER" : "InputType.PhoneNumber";
         case TextInputType::VISIBLE_PASSWORD:
             return "InputType.Password";
         case TextInputType::USER_NAME:
@@ -4752,7 +4754,7 @@ std::string TextFieldPattern::TextInputTypeToString() const
         case TextInputType::NEW_PASSWORD:
             return "InputType.NEW_PASSWORD";
         default:
-            return "InputType.Normal";
+            return isTextInput_ ? "InputType.Normal" : "TextAreaType.NORMAL";
     }
 }
 

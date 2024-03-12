@@ -1906,6 +1906,9 @@ void TextPattern::ToJsonValue(std::unique_ptr<JsonValue>& json) const
     auto jsonValue = JsonUtil::Create(true);
     jsonValue->Put("types", "");
     json->Put("dataDetectorConfig", jsonValue->ToString().c_str());
+    const auto& selector = GetTextSelector();
+    auto result = "[" + std::to_string(selector.GetTextStart()) + "," + std::to_string(selector.GetTextEnd()) + "]";
+    json->Put("selection", result.c_str());
 }
 
 void TextPattern::OnAfterModifyDone()
