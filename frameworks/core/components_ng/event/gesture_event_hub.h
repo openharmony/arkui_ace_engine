@@ -648,7 +648,7 @@ private:
     TouchInterceptFunc touchInterceptFunc_;
 
     MenuPreviewMode previewMode_ = MenuPreviewMode::NONE;
-    bool isDragForbidden = false;
+    bool isDragForbidden_ = false;
     bool textDraggable_ = false;
     bool isTextDraggable_ = false;
     bool monopolizeEvents_ = false;
