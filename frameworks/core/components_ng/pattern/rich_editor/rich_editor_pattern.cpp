@@ -5733,13 +5733,12 @@ Color RichEditorPattern::GetCaretColor()
 {
     if (caretColor_.has_value()) {
         return caretColor_.value();
-    } else {
-        auto pipeline = PipelineContext::GetCurrentContext();
-        CHECK_NULL_RETURN(pipeline, SYSTEM_CARET_COLOR);
-        auto richEditorTheme = pipeline->GetTheme<RichEditorTheme>();
-        CHECK_NULL_RETURN(richEditorTheme, SYSTEM_CARET_COLOR);
-        return richEditorTheme->GetCaretColor();
     }
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_RETURN(pipeline, SYSTEM_CARET_COLOR);
+    auto richEditorTheme = pipeline->GetTheme<RichEditorTheme>();
+    CHECK_NULL_RETURN(richEditorTheme, SYSTEM_CARET_COLOR);
+    return richEditorTheme->GetCaretColor();
 }
 
 Color RichEditorPattern::GetSelectedBackgroundColor()

@@ -762,7 +762,7 @@ void JSRichEditor::JsDataDetectorConfig(const JSCallbackInfo& info)
 void JSRichEditor::SetCaretColor(const JSCallbackInfo& info)
 {
     if (info.Length() < 1) {
-        TAG_LOGE(AceLogTag::ACE_GRID, "CaretColor input value is abnormal");
+        TAG_LOGE(AceLogTag::ACE_RICH_TEXT, "Info length error");
         return;
     }
     Color color;
@@ -779,7 +779,7 @@ void JSRichEditor::SetCaretColor(const JSCallbackInfo& info)
 void JSRichEditor::SetSelectedBackgroundColor(const JSCallbackInfo& info)
 {
     if (info.Length() < 1) {
-        TAG_LOGE(AceLogTag::ACE_GRID, "SelectedBackgroundColor input value is abnormal");
+        TAG_LOGE(AceLogTag::ACE_RICH_TEXT, "Info length error");
         return;
     }
     Color selectedColor;
