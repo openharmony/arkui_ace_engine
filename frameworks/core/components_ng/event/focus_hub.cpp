@@ -278,7 +278,7 @@ void FocusHub::RemoveSelf(BlurReason reason)
     TAG_LOGD(AceLogTag::ACE_FOCUS, "%{public}s/%{public}d remove self focus.", GetFrameName().c_str(), GetFrameId());
     auto frameNode = GetFrameNode();
     auto focusView = frameNode ? frameNode->GetPattern<FocusView>() : nullptr;
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = PipelineContext::GetCurrentContextSafely();
     auto screenNode = pipeline ? pipeline->GetScreenNode() : nullptr;
     auto screenFocusHub = screenNode ? screenNode->GetFocusHub() : nullptr;
     auto parent = GetParentFocusHub();

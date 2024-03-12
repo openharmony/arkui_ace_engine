@@ -1852,7 +1852,7 @@ bool ScrollablePattern::HandleOverScroll(float velocity)
 
 void ScrollablePattern::ExecuteScrollFrameBegin(float& mainDelta, ScrollState state)
 {
-    auto context = PipelineContext::GetCurrentContext();
+    auto context = PipelineContext::GetCurrentContextSafely();
     if (!context || !scrollFrameBeginCallback_) {
         return;
     }
