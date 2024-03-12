@@ -1913,11 +1913,16 @@ void PipelineContext::CompensateTouchMoveEvent(const TouchEvent& event)
         auto lastEventIter = idToTouchPoints_.find(event.id);
         if (lastEventIter != idToTouchPoints_.end()) {
             auto iter = lastDispatchTime_.find(lastEventIter->first);
-            if (static_cast<uint64_t>(iter != lastDispatchTime_.end() &&
-                                        lastEventIter->second.time.time_since_epoch().count()) > iter->second) {
-                eventManager_->SetLastMoveBeforeUp(event.sourceType == SourceType::MOUSE);
-                eventManager_->DispatchTouchEvent(lastEventIter->second);
-                eventManager_->SetLastMoveBeforeUp(false);
+            if (iter != lastDispatchTime_.end()) {
+                ACE_SCOPED_TRACE("CompensateTouchMoveEvent last move event time: %s last dispatch time: %s",
+                    std::to_string(static_cast<uint64_t>(lastEventIter->second.time.time_since_epoch().count()))
+                        .c_str(),
+                    std::to_string(iter->second).c_str());
+                if (static_cast<uint64_t>(lastEventIter->second.time.time_since_epoch().count()) > iter->second) {
+                    eventManager_->SetLastMoveBeforeUp(event.sourceType == SourceType::MOUSE);
+                    eventManager_->DispatchTouchEvent(lastEventIter->second);
+                    eventManager_->SetLastMoveBeforeUp(false);
+                }
             }
         }
     }
