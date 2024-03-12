@@ -183,11 +183,7 @@ ArkUINativeModuleValue DataPanelBridge::SetTrackShadow(ArkUIRuntimeCallInfo* run
     auto jsOffsetY = obj->Get(vm, panda::StringRef::NewFromUtf8(vm, "offsetY"));
     RefPtr<DataPanelTheme> theme = ArkTSUtils::GetTheme<DataPanelTheme>();
     double radius = 0.0;
-    if (!ArkTSUtils::ParseJsDouble(vm, jsRadius, radius)) {
-        radius = theme->GetTrackShadowRadius().ConvertToVp();
-    }
-
-    if (NonPositive(radius)) {
+    if (!ArkTSUtils::ParseJsDouble(vm, jsRadius, radius) || NonPositive(radius)) {
         radius = theme->GetTrackShadowRadius().ConvertToVp();
     }
 
