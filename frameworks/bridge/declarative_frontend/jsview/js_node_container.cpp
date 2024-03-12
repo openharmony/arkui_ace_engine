@@ -184,7 +184,7 @@ void JSNodeContainer::SetOnTouchEventFunc(const JSRef<JSObject>& object, JsiExec
     auto onTouchEventCallback = object->GetProperty("onTouchEvent");
     CHECK_NULL_VOID(onTouchEventCallback->IsFunction());
     RefPtr<JsTouchFunction> jsOnTouchFunc =
-        AceType::MakeRefPtr<JsTouchFunction>(JSRef<JSFunc>::Cast(onTouchEventCallback));
+        AceType::MakeRefPtr<JsTouchFunction>(JSRef<JSObject>(object), JSRef<JSFunc>::Cast(onTouchEventCallback));
     WeakPtr<NG::FrameNode> frameNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
     auto onTouch = [execCtx, func = std::move(jsOnTouchFunc), node = frameNode](TouchEventInfo& info) {
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
