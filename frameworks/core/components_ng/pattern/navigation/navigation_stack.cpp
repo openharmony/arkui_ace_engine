@@ -275,6 +275,9 @@ void NavigationStack::UpdateRemovedNavPathList()
         if (index == removeArray[removeIndex]) {
             it = navPathList_.erase(it);
             removeIndex++;
+            if (removeIndex >= static_cast<int32_t>(removeArray.size())) {
+                break;
+            }
         } else {
             ++it;
         }
