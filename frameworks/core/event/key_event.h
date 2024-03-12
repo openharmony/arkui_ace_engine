@@ -647,6 +647,7 @@ enum class BlurReason : int32_t {
     FOCUS_SWITCH = 0,
     WINDOW_BLUR = 1,
     FRAME_DESTROY = 2,
+    VIEW_SWITCH = 3,
 };
 
 using OnKeyEventFunc = std::function<bool(const KeyEvent&)>;

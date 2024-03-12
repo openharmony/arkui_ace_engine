@@ -145,12 +145,15 @@ void FocusHub::DumpFocusNodeTree(int32_t depth)
             information += "(Node)";
         }
         information += (" id:" + std::to_string(GetFrameId()));
+        information += (GetInspectorKey().has_value() ? " idstr:" + GetInspectorKey().value() : "");
         if (!IsFocusable()) {
             information = "(-)" + information;
-            information += (" Enabled:" + std::to_string(IsEnabled()) + " Show:" + std::to_string(IsShow()) +
-                            " Focusable:" + std::to_string(focusable_) +
-                            " ParentFocusable:" + std::to_string(parentFocusable_));
+            information += IsEnabled() ? "" : " Enabled:false";
+            information += IsShow() ? "" : " Show:false";
+            information += focusable_ ? "" : " Focusable:false";
+            information += parentFocusable_ ? "" : " ParentFocusable:false";
         }
+        information += IsDefaultFocus() ? "[Default]" : "";
         DumpLog::GetInstance().Print(depth, information, 0);
     }
 }
@@ -167,14 +170,15 @@ void FocusHub::DumpFocusScopeTree(int32_t depth)
             information += "(Scope)";
         }
         information += (" id:" + std::to_string(GetFrameId()));
+        information += (GetInspectorKey().has_value() ? " idstr:" + GetInspectorKey().value() : "");
         if (!IsFocusable()) {
             information = "(-)" + information;
-            if (!IsFocusableNode()) {
-                information += (" Enabled:" + std::to_string(IsEnabled()) + " Show:" + std::to_string(IsShow()) +
-                                " Focusable:" + std::to_string(focusable_) +
-                                " ParentFocusable:" + std::to_string(parentFocusable_));
-            }
+            information += IsEnabled() ? "" : " Enabled:false";
+            information += IsShow() ? "" : " Show:false";
+            information += focusable_ ? "" : " Focusable:false";
+            information += parentFocusable_ ? "" : " ParentFocusable:false";
         }
+        information += IsDefaultFocus() ? "[Default]" : "";
         DumpLog::GetInstance().Print(depth, information, static_cast<int32_t>(focusNodes.size()));
     }
 
@@ -213,10 +217,10 @@ bool FocusHub::RequestFocusImmediately(bool isJudgeRootTree)
 
     auto parent = GetParentFocusHub();
     if (parent) {
-        auto mainView = GetCurrentMainView();
-        auto mainViewRootScope = mainView ? mainView->GetMainViewRootScope() : nullptr;
-        if (mainViewRootScope && parent == mainViewRootScope) {
-            mainView->SetIsViewRootScopeFocused(mainViewRootScope, false);
+        auto curFocusView = FocusView::GetCurrentFocusView();
+        auto viewRootScope = curFocusView ? curFocusView->GetViewRootScope() : nullptr;
+        if (viewRootScope && parent == viewRootScope) {
+            curFocusView->SetIsViewRootScopeFocused(false);
         }
         parent->SwitchFocus(AceType::Claim(this));
     }
@@ -230,155 +234,23 @@ void FocusHub::UpdateAccessibilityFocusInfo()
     // Need update
 }
 
-RefPtr<FocusHub> FocusHub::GetChildMainView()
-{
-    std::list<RefPtr<FocusHub>> children;
-    FlushChildrenFocusHub(children);
-    RefPtr<FocusHub> curFocusMainView = nullptr;
-    RefPtr<FocusHub> focusableMainView = nullptr;
-    for (const auto& child : children) {
-        if (!child) {
-            continue;
-        }
-        auto frameName = child->GetFrameName();
-        if (frameName == V2::PAGE_ETS_TAG || frameName == V2::DIALOG_ETS_TAG || frameName == V2::MODAL_PAGE_TAG ||
-            frameName == V2::MENU_ETS_TAG || frameName == V2::SHEET_PAGE_TAG || frameName == V2::POPUP_ETS_TAG ||
-            frameName == V2::WINDOW_SCENE_ETS_TAG) {
-            if (!curFocusMainView && child->IsCurrentFocus() && child->IsFocusable()) {
-                curFocusMainView = child;
-            }
-            if (!focusableMainView && child->IsFocusable()) {
-                focusableMainView = child;
-            }
-        }
-    }
-    if (curFocusMainView) {
-        return curFocusMainView;
-    }
-    if (focusableMainView) {
-        return focusableMainView;
-    }
-    for (const auto& child : children) {
-        if (!child) {
-            continue;
-        }
-        auto result = child->GetChildMainView();
-        if (result) {
-            return result;
-        }
-    }
-    return nullptr;
-}
-
-RefPtr<FocusHub> FocusHub::GetCurrentMainView()
-{
-    auto pipeline = PipelineContext::GetCurrentContextSafely();
-    CHECK_NULL_RETURN(pipeline, nullptr);
-    auto screenNode = pipeline->GetScreenNode();
-    if (screenNode) {
-        auto screenNodeFocusHub = screenNode->GetFocusHub();
-        CHECK_NULL_RETURN(screenNodeFocusHub, nullptr);
-        return screenNodeFocusHub->GetChildMainView();
-    }
-    auto rootNode = pipeline->GetRootElement();
-    CHECK_NULL_RETURN(rootNode, nullptr);
-    auto rootFocusHub = rootNode->GetFocusHub();
-    CHECK_NULL_RETURN(rootFocusHub, nullptr);
-    return rootFocusHub->GetChildMainView();
-}
-
-RefPtr<FocusHub> FocusHub::GetMainViewRootScope()
-{
-    static const std::list<int32_t> DEEPTH_OF_MENU = { 0, 0 };
-    static const std::list<int32_t> DEEPTH_OF_DIALOG = { 0, 0 };
-    static const std::list<int32_t> DEEPTH_OF_PAGE = { 0 };
-    static const std::list<int32_t> DEEPTH_OF_POPUP = { 0, 0 };
-    static const std::list<int32_t> DEEPTH_OF_SHEET_PAGE = { 1, 0 };
-    auto frameName = GetFrameName();
-    std::list<int32_t> rootScopeDeepth;
-    if (frameName == V2::MENU_ETS_TAG) {
-        rootScopeDeepth = DEEPTH_OF_MENU;
-    } else if (frameName == V2::DIALOG_ETS_TAG) {
-        rootScopeDeepth = DEEPTH_OF_DIALOG;
-    } else if (frameName == V2::POPUP_ETS_TAG) {
-        rootScopeDeepth = DEEPTH_OF_POPUP;
-    } else if (frameName == V2::SHEET_PAGE_TAG) {
-        rootScopeDeepth = DEEPTH_OF_SHEET_PAGE;
-    } else {
-        rootScopeDeepth = DEEPTH_OF_PAGE;
-    }
-    RefPtr<FocusHub> rootScope = AceType::Claim(this);
-    for (const auto& index : rootScopeDeepth) {
-        CHECK_NULL_RETURN(rootScope, nullptr);
-        auto children = rootScope->GetChildren();
-        auto iter = children.begin();
-        std::advance(iter, index);
-        if (iter == children.end()) {
-            TAG_LOGI(AceLogTag::ACE_FOCUS, "Index: %{public}d of %{public}s/%{public}d 's children is invalid.", index,
-                rootScope->GetFrameName().c_str(), rootScope->GetFrameId());
-            return nullptr;
-        }
-        rootScope = *iter;
-    }
-    CHECK_NULL_RETURN(rootScope, nullptr);
-    if (rootScope->GetFocusType() != FocusType::SCOPE) {
-        return rootScope->GetParentFocusHub();
-    }
-    return rootScope;
-}
-
 void FocusHub::LostFocusToViewRoot()
 {
-    auto mainView = GetCurrentMainView();
-    CHECK_NULL_VOID(mainView);
-    auto mainViewRootScope = mainView->GetMainViewRootScope();
-    CHECK_NULL_VOID(mainViewRootScope);
+    auto curFocusView = FocusView::GetCurrentFocusView();
+    CHECK_NULL_VOID(curFocusView);
+    auto viewRootScope = curFocusView->GetViewRootScope();
+    CHECK_NULL_VOID(viewRootScope);
     TAG_LOGD(AceLogTag::ACE_FOCUS, "Lost focus to view root: %{public}s/%{public}d",
-        mainViewRootScope->GetFrameName().c_str(), mainViewRootScope->GetFrameId());
-    if (!mainViewRootScope->IsCurrentFocus()) {
+        viewRootScope->GetFrameName().c_str(), viewRootScope->GetFrameId());
+    if (!viewRootScope->IsCurrentFocus()) {
         TAG_LOGI(AceLogTag::ACE_FOCUS, "View root: %{public}s/%{public}d is not on focusing.",
-            mainViewRootScope->GetFrameName().c_str(), mainViewRootScope->GetFrameId());
+            viewRootScope->GetFrameName().c_str(), viewRootScope->GetFrameId());
         return;
     }
-    mainView->SetIsViewRootScopeFocused(mainViewRootScope, true);
-    auto focusedChild = mainViewRootScope->lastWeakFocusNode_.Upgrade();
+    curFocusView->SetIsViewRootScopeFocused(true);
+    auto focusedChild = viewRootScope->lastWeakFocusNode_.Upgrade();
     CHECK_NULL_VOID(focusedChild);
     focusedChild->LostFocus();
-}
-
-bool FocusHub::HandleFocusOnMainView()
-{
-    auto viewRootScope = GetMainViewRootScope();
-    CHECK_NULL_RETURN(viewRootScope, false);
-    if (!viewRootScope->IsCurrentFocus()) {
-        TAG_LOGI(AceLogTag::ACE_FOCUS,
-            "Current view root: %{public}s/%{public}d is not on focusing. Cannot handle focus.",
-            viewRootScope->GetFrameName().c_str(), viewRootScope->GetFrameId());
-        return false;
-    }
-    if (viewRootScope->GetFocusDependence() != FocusDependence::SELF) {
-        TAG_LOGI(AceLogTag::ACE_FOCUS,
-            "Current view root: %{public}s/%{public}d is not focus depend self. Do not need handle focus.",
-            viewRootScope->GetFrameName().c_str(), viewRootScope->GetFrameId());
-        return false;
-    }
-
-    TabIndexNodeList tabIndexNodes;
-    tabIndexNodes.clear();
-    CollectTabIndexNodes(tabIndexNodes);
-    if (tabIndexNodes.empty()) {
-        // No tabIndex node in current main view. Extend focus from viewRootScope to children.
-        SetIsDefaultHasFocused(true);
-        SetIsViewRootScopeFocused(viewRootScope, false);
-        viewRootScope->OnFocusScope(true);
-        return true;
-    }
-
-    // First tabIndex node need get focus.
-    tabIndexNodes.sort([](std::pair<int32_t, WeakPtr<FocusHub>>& a, std::pair<int32_t, WeakPtr<FocusHub>>& b) {
-        return a.first < b.first;
-    });
-    return GoToFocusByTabNodeIdx(tabIndexNodes, 0);
 }
 
 void FocusHub::LostFocus(BlurReason reason)
@@ -403,12 +275,14 @@ void FocusHub::LostSelfFocus()
 
 void FocusHub::RemoveSelf(BlurReason reason)
 {
-    TAG_LOGD(AceLogTag::ACE_FOCUS, "Node %{public}s/%{public}d remove self.", GetFrameName().c_str(), GetFrameId());
+    TAG_LOGD(AceLogTag::ACE_FOCUS, "%{public}s/%{public}d remove self focus.", GetFrameName().c_str(), GetFrameId());
+    auto frameNode = GetFrameNode();
+    auto focusView = frameNode ? frameNode->GetPattern<FocusView>() : nullptr;
     auto pipeline = PipelineContext::GetCurrentContext();
     auto screenNode = pipeline ? pipeline->GetScreenNode() : nullptr;
     auto screenFocusHub = screenNode ? screenNode->GetFocusHub() : nullptr;
     auto parent = GetParentFocusHub();
-    if (parent && parent != screenFocusHub) {
+    if (parent && parent != screenFocusHub && !focusView) {
         parent->RemoveChild(AceType::Claim(this), reason);
     } else {
         LostFocus(reason);
@@ -429,10 +303,10 @@ void FocusHub::RemoveChild(const RefPtr<FocusHub>& focusNode, BlurReason reason)
         // Try to goto next focus, otherwise goto previous focus.
         if (!GoToNextFocusLinear(FocusStep::TAB) && !GoToNextFocusLinear(FocusStep::SHIFT_TAB)) {
             lastWeakFocusNode_ = nullptr;
-            auto mainView = GetCurrentMainView();
-            auto mainViewRootScope = mainView ? mainView->GetMainViewRootScope() : nullptr;
+            auto focusView = FocusView::GetCurrentFocusView();
+            auto mainViewRootScope = focusView ? focusView->GetViewRootScope() : nullptr;
             if (mainViewRootScope && mainViewRootScope == AceType::Claim(this)) {
-                mainView->SetIsViewRootScopeFocused(mainViewRootScope, true);
+                focusView->SetIsViewRootScopeFocused(true);
             } else {
                 RemoveSelf(reason);
             }
@@ -765,12 +639,18 @@ bool FocusHub::OnKeyEventScope(const KeyEvent& keyEvent)
             return RequestNextFocus(FocusStep::RIGHT, GetRect());
         case KeyCode::KEY_TAB: {
             auto context = NG::PipelineContext::GetCurrentContext();
+            CHECK_NULL_RETURN(context, false);
+            auto curFocusView = FocusView::GetCurrentFocusView();
+            auto entryFocusView = curFocusView ? curFocusView->GetEntryFocusView() : nullptr;
+            auto entryFocusViewHub = entryFocusView ? entryFocusView->GetFocusHub() : nullptr;
+            auto focusParent = GetParentFocusHub();
+            bool isCurrentHandledByFocusView =
+                (entryFocusViewHub && entryFocusViewHub == this) || !focusParent || !focusParent->IsCurrentFocus();
             bool ret = false;
             if (keyEvent.pressedCodes.size() == 1) {
                 context->SetIsFocusingByTab(true);
                 ret = RequestNextFocus(FocusStep::TAB, GetRect());
-                auto focusParent = GetParentFocusHub();
-                if (!focusParent || !focusParent->IsCurrentFocus()) {
+                if (!ret && isCurrentHandledByFocusView) {
                     if (context->IsFocusWindowIdSetted()) {
                         FocusToHeadOrTailChild(true);
                         return false;
@@ -781,8 +661,7 @@ bool FocusHub::OnKeyEventScope(const KeyEvent& keyEvent)
             } else if (keyEvent.IsShiftWith(KeyCode::KEY_TAB)) {
                 context->SetIsFocusingByTab(true);
                 ret = RequestNextFocus(FocusStep::SHIFT_TAB, GetRect());
-                auto focusParent = GetParentFocusHub();
-                if (!focusParent || !focusParent->IsCurrentFocus()) {
+                if (!ret && isCurrentHandledByFocusView) {
                     if (context->IsFocusWindowIdSetted()) {
                         FocusToHeadOrTailChild(false);
                         return false;
@@ -811,35 +690,6 @@ void FocusHub::RequestFocus() const
     auto context = NG::PipelineContext::GetCurrentContextSafely();
     CHECK_NULL_VOID(context);
     context->AddDirtyFocus(GetFrameNode());
-}
-
-void FocusHub::RequestFocusWithDefaultFocusFirstly()
-{
-    TAG_LOGD(AceLogTag::ACE_FOCUS, "Request focus with default focus on node: %{public}s/%{public}d.",
-        GetFrameName().c_str(), GetFrameId());
-    auto pipeline = PipelineContext::GetCurrentContextSafely();
-    CHECK_NULL_VOID(pipeline);
-
-    RefPtr<FocusHub> viewScope;
-    if (GetFrameName() == V2::MENU_WRAPPER_ETS_TAG) {
-        viewScope = GetChildren().front();
-    } else {
-        viewScope = Claim(this);
-    }
-    if (!viewScope) {
-        pipeline->AddDirtyDefaultFocus(GetFrameNode());
-        return;
-    }
-
-    auto screenNode = pipeline->GetScreenNode();
-    if (!screenNode || viewScope->GetFrameName() != V2::PAGE_ETS_TAG) {
-        auto viewRootScope = viewScope->GetMainViewRootScope();
-        if (viewRootScope && viewScope->GetIsViewRootScopeFocused()) {
-            viewRootScope->SetFocusDependence(FocusDependence::SELF);
-        }
-    }
-
-    pipeline->AddDirtyDefaultFocus(viewScope->GetFrameNode());
 }
 
 bool FocusHub::RequestNextFocus(FocusStep moveStep, const RectF& rect)
@@ -1104,6 +954,7 @@ void FocusHub::OnFocus()
     CHECK_NULL_VOID(frameNode);
     auto curPattern = frameNode->GetPattern<NG::Pattern>();
     CHECK_NULL_VOID(curPattern);
+    UpdateFocusView();
     bool isNeedKeyboard = curPattern->NeedSoftKeyboard();
     auto pipeline = PipelineContext::GetCurrentContextSafely();
     CHECK_NULL_VOID(pipeline);
@@ -1797,6 +1648,17 @@ RefPtr<FocusHub> FocusHub::GetChildFocusNodeByType(FocusNodeType nodeType)
     std::list<RefPtr<FocusHub>> focusNodes;
     FlushChildrenFocusHub(focusNodes);
     for (const auto& child : focusNodes) {
+        if (!child) {
+            continue;
+        }
+        auto childFrame = child->GetFrameNode();
+        if (!childFrame) {
+            continue;
+        }
+        auto childFocusView = childFrame->GetPattern<FocusView>();
+        if (childFocusView && childFocusView->IsFocusViewLegal()) {
+            continue;
+        }
         auto findNode = child->GetChildFocusNodeByType(nodeType);
         if (findNode) {
             return findNode;
@@ -1821,6 +1683,29 @@ RefPtr<FocusHub> FocusHub::GetChildFocusNodeById(const std::string& id)
             if (findNode) {
                 return findNode;
             }
+        }
+    }
+    return nullptr;
+}
+
+RefPtr<FocusView> FocusHub::GetFirstChildFocusView()
+{
+    auto frameNode = GetFrameNode();
+    CHECK_NULL_RETURN(frameNode, nullptr);
+    auto focusView = frameNode->GetPattern<FocusView>();
+    if (focusView) {
+        return focusView;
+    }
+    std::list<RefPtr<FocusHub>> children;
+    FlushChildrenFocusHub(children);
+    for (auto iter = children.rbegin(); iter != children.rend(); ++iter) {
+        auto childFocusHub = *iter;
+        if (!childFocusHub) {
+            continue;
+        }
+        auto childResult = childFocusHub->GetFirstChildFocusView();
+        if (childResult) {
+            return childResult;
         }
     }
     return nullptr;
@@ -2058,6 +1943,34 @@ RefPtr<FocusHub> FocusHub::GetNearestNodeByProjectArea(const std::list<RefPtr<Fo
     TAG_LOGD(AceLogTag::ACE_FOCUS, "Next focus node is %{public}s/%{public}d. Min distance is %{public}f.",
         nextNode ? nextNode->GetFrameName().c_str() : "NULL", nextNode ? nextNode->GetFrameId() : -1, resDistance);
     return nextNode;
+}
+
+bool FocusHub::UpdateFocusView()
+{
+    CHECK_NULL_RETURN(IsCurrentFocus(), false);
+    auto frameNode = GetFrameNode();
+    CHECK_NULL_RETURN(frameNode, false);
+    auto focusView = frameNode->GetPattern<FocusView>();
+    CHECK_NULL_RETURN(focusView, false);
+    auto focusedChild = lastWeakFocusNode_.Upgrade();
+    while (focusedChild) {
+        auto focusedChildFrame = focusedChild->GetFrameNode();
+        if (!focusedChildFrame) {
+            focusedChild = focusedChild->lastWeakFocusNode_.Upgrade();
+            continue;
+        }
+        auto focusedChildFocusView = focusedChildFrame->GetPattern<FocusView>();
+        if (focusedChildFocusView) {
+            return false;
+        }
+        focusedChild = focusedChild->lastWeakFocusNode_.Upgrade();
+    }
+    auto curFocusView = FocusView::GetCurrentFocusView();
+    if (focusView && focusView->IsFocusViewLegal() && focusView != curFocusView) {
+        focusView->SetIsViewRootScopeFocused(false);
+        focusView->FocusViewShow();
+    }
+    return true;
 }
 
 void FocusHub::CloseKeyboard()

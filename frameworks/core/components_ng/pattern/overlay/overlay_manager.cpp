@@ -1716,7 +1716,8 @@ void OverlayManager::CloseDialog(const RefPtr<FrameNode>& dialogNode)
     TAG_LOGD(AceLogTag::ACE_OVERLAY, "close dialog enter");
     DeleteDialogHotAreas(dialogNode);
     auto dialogLayoutProp = AceType::DynamicCast<DialogLayoutProperty>(dialogNode->GetLayoutProperty());
-    if (dialogLayoutProp->GetShowInSubWindowValue(false) && dialogLayoutProp->GetIsModal().value_or(true)) {
+    if (dialogLayoutProp && dialogLayoutProp->GetShowInSubWindowValue(false) &&
+        dialogLayoutProp->GetIsModal().value_or(true)) {
         auto parentPipelineContext = PipelineContext::GetMainPipelineContext();
         CHECK_NULL_VOID(parentPipelineContext);
         auto parentOverlayManager = parentPipelineContext->GetOverlayManager();
@@ -2170,117 +2171,18 @@ bool OverlayManager::RemoveOverlayInSubwindow()
 void OverlayManager::FocusOverlayNode(const RefPtr<FrameNode>& overlayNode, bool isInSubWindow)
 {
     CHECK_NULL_VOID(overlayNode);
-    auto focusHub = overlayNode->GetOrCreateFocusHub();
-    CHECK_NULL_VOID(focusHub);
-    focusHub->SetParentFocusable(true);
-    focusHub->RequestFocusWithDefaultFocusFirstly();
+    auto overlayHub = overlayNode->GetFocusHub();
+    CHECK_NULL_VOID(overlayHub);
+    auto focusView = overlayHub->GetFirstChildFocusView();
+    CHECK_NULL_VOID(focusView);
+    focusView->FocusViewShow();
 }
 
-void OverlayManager::BlurOverlayNode(const RefPtr<FrameNode>& currentOverlay, bool isInSubWindow)
-{
-    auto currentFocusHub = currentOverlay->GetOrCreateFocusHub();
-    CHECK_NULL_VOID(currentFocusHub);
-    currentFocusHub->SetParentFocusable(false);
-    currentFocusHub->LostFocus();
+void OverlayManager::BlurOverlayNode(const RefPtr<FrameNode>& currentOverlay, bool isInSubWindow) {}
 
-    auto rootNode = rootNodeWeak_.Upgrade();
-    CHECK_NULL_VOID(rootNode);
-    if (rootNode->GetChildren().size() > 1) {
-        auto collection = rootNode->GetChildren();
-        for (auto iter = collection.rbegin(); iter != collection.rend(); ++iter) {
-            auto overlay = DynamicCast<FrameNode>(*iter);
-            CHECK_NULL_VOID(overlay);
-            auto pattern = overlay->GetPattern();
-            if (currentOverlay != overlay &&
-                (InstanceOf<DialogPattern>(pattern) || InstanceOf<MenuWrapperPattern>(pattern) ||
-                    InstanceOf<SheetPresentationPattern>(pattern) || InstanceOf<ModalPresentationPattern>(pattern)) &&
-                overlay->GetTag() != V2::SELECT_OVERLAY_ETS_TAG &&
-                !overlay->IsRemoving()) {
-                // Focus returns to the previous in the overlay
-                FocusOverlayNode(overlay, isInSubWindow);
-                return;
-            }
-        }
-    }
-    if (isInSubWindow) {
-        // no need to set page request focus in sub window.
-        return;
-    }
+void OverlayManager::BlurLowerNode(const RefPtr<FrameNode>& currentOverlay) {}
 
-    auto pageNode = GetLastPage();
-    CHECK_NULL_VOID(pageNode);
-    auto pageFocusHub = pageNode->GetFocusHub();
-    CHECK_NULL_VOID(pageFocusHub);
-    pageFocusHub->SetParentFocusable(true);
-    pageFocusHub->RequestFocus();
-}
-
-void OverlayManager::BlurLowerNode(const RefPtr<FrameNode>& currentOverlay)
-{
-    auto root = DynamicCast<FrameNode>(currentOverlay->GetParent());
-    CHECK_NULL_VOID(root);
-    auto children = root->GetChildren();
-    for (auto iter = children.rbegin(); iter != children.rend(); ++iter) {
-        auto node = DynamicCast<FrameNode>(*iter);
-        CHECK_NULL_VOID(node);
-        if (currentOverlay == node) {
-            continue;
-        }
-        if (node->GetTag() == V2::STAGE_ETS_TAG) {
-            auto pageNode = GetLastPage();
-            CHECK_NULL_VOID(pageNode);
-            auto pageFocusHub = pageNode->GetFocusHub();
-            CHECK_NULL_VOID(pageFocusHub);
-            pageFocusHub->SetParentFocusable(false);
-            pageFocusHub->LostFocus();
-            return;
-        }
-        auto focusHub = node->GetOrCreateFocusHub();
-        if (focusHub->IsCurrentFocus()) {
-            focusHub->SetParentFocusable(false);
-            focusHub->LostFocus();
-            return;
-        }
-    }
-}
-
-void OverlayManager::ResetLowerNodeFocusable(const RefPtr<FrameNode>& currentOverlay)
-{
-    CHECK_NULL_VOID(currentOverlay);
-    auto root = DynamicCast<FrameNode>(currentOverlay->GetParent());
-    CHECK_NULL_VOID(root);
-    auto children = root->GetChildren();
-    for (auto iter = children.rbegin(); iter != children.rend(); ++iter) {
-        auto node = DynamicCast<FrameNode>(*iter);
-        CHECK_NULL_VOID(node);
-        if (currentOverlay == node) {
-            continue;
-        }
-        if (node->GetTag() == V2::STAGE_ETS_TAG) {
-            auto parent = node->GetParent();
-            if (parent && parent->GetTag() != V2::PAGE_ETS_TAG) {
-                return;
-            }
-            auto pageNode = GetLastPage();
-            CHECK_NULL_VOID(pageNode);
-            auto pageFocusHub = pageNode->GetFocusHub();
-            CHECK_NULL_VOID(pageFocusHub);
-            pageFocusHub->SetParentFocusable(true);
-            return;
-        }
-        if (node->GetTag() == V2::ATOMIC_SERVICE_ETS_TAG || node->GetTag() == V2::SHEET_WRAPPER_TAG) {
-            auto currentFocusHub = node->GetFocusHub();
-            CHECK_NULL_VOID(currentFocusHub);
-            currentFocusHub->SetParentFocusable(true);
-            return;
-        }
-        auto focusHub = node->GetOrCreateFocusHub();
-        if (focusHub->IsCurrentFocus()) {
-            focusHub->SetParentFocusable(true);
-            return;
-        }
-    }
-}
+void OverlayManager::ResetLowerNodeFocusable(const RefPtr<FrameNode>& currentOverlay) {}
 
 void OverlayManager::SaveLastModalNode()
 {
@@ -2474,50 +2376,16 @@ void OverlayManager::BindContentCover(bool isShow, std::function<void(const std:
 
 void OverlayManager::FireModalPageShow()
 {
-    auto pipeline = PipelineContext::GetCurrentContext();
-    CHECK_NULL_VOID(pipeline);
-    auto pageNode = pipeline->GetStageManager()->GetLastPage();
-    CHECK_NULL_VOID(pageNode);
-    auto pageFocusHub = pageNode->GetFocusHub();
-    CHECK_NULL_VOID(pageFocusHub);
-    pageFocusHub->SetParentFocusable(false);
-    pageFocusHub->LostFocus();
-    for (auto modal = modalList_.begin(); modal != modalList_.end(); modal++) {
-        auto modalNode = (*modal).Upgrade();
-        CHECK_NULL_VOID(modalNode);
-        auto modalFocusHub = modalNode->GetFocusHub();
-        CHECK_NULL_VOID(modalFocusHub);
-        modalFocusHub->SetParentFocusable(false);
-        modalFocusHub->LostFocus();
-    }
-    if (modalList_.empty()) {
-        return;
-    }
     auto topModalNode = modalList_.back().Upgrade();
     CHECK_NULL_VOID(topModalNode);
-    auto topModalFocusHub = topModalNode->GetFocusHub();
-    CHECK_NULL_VOID(topModalFocusHub);
-    topModalFocusHub->SetParentFocusable(true);
-    topModalFocusHub->RequestFocusWithDefaultFocusFirstly();
+    auto topModalFocusView = topModalNode->GetPattern<FocusView>();
+    CHECK_NULL_VOID(topModalFocusView);
+    topModalFocusView->FocusViewShow();
 }
 
-void OverlayManager::ModalPageLostFocus(const RefPtr<FrameNode>& node)
-{
-    auto modalFocusHub = node->GetFocusHub();
-    CHECK_NULL_VOID(modalFocusHub);
-    modalFocusHub->SetParentFocusable(false);
-    modalFocusHub->LostFocus();
-}
+void OverlayManager::ModalPageLostFocus(const RefPtr<FrameNode>& node) {}
 
-void OverlayManager::FireModalPageHide()
-{
-    auto lastModalNode = lastModalNode_.Upgrade();
-    CHECK_NULL_VOID(lastModalNode);
-    auto lastModalFocusHub = lastModalNode->GetFocusHub();
-    CHECK_NULL_VOID(lastModalFocusHub);
-    lastModalFocusHub->SetParentFocusable(true);
-    lastModalFocusHub->RequestFocus();
-}
+void OverlayManager::FireModalPageHide() {}
 
 void OverlayManager::PlayDefaultModalTransition(const RefPtr<FrameNode>& modalNode, bool isTransitionIn)
 {
@@ -3881,16 +3749,5 @@ float OverlayManager::GetRootHeight() const
     return rootHeight;
 }
 
-void OverlayManager::CheckReturnFocus(RefPtr<FrameNode> node)
-{
-    auto focusHub = node->GetFocusHub();
-    CHECK_NULL_VOID(focusHub);
-    if (focusHub->IsCurrentFocus()) {
-        auto pageNode = GetLastPage();
-        CHECK_NULL_VOID(pageNode);
-        auto pageFocusHub = pageNode->GetFocusHub();
-        CHECK_NULL_VOID(pageFocusHub);
-        pageFocusHub->RequestFocusWithDefaultFocusFirstly();
-    }
-}
+void OverlayManager::CheckReturnFocus(RefPtr<FrameNode> node) {}
 } // namespace OHOS::Ace::NG

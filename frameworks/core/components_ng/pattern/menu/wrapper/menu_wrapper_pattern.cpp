@@ -109,10 +109,9 @@ void MenuWrapperPattern::HideSubMenu()
         // SelectOverlay's custom menu does not need to be focused.
         auto isCustomMenu = IsSelectOverlayCustomMenu(menuHub);
         if (!isCustomMenu) {
-            auto focusHub = menuHub->GetFocusHub();
-            CHECK_NULL_VOID(focusHub);
-            focusHub->SetParentFocusable(true);
-            focusHub->RequestFocusImmediately();
+            auto menuPattern = menuHub->GetPattern<MenuPattern>();
+            CHECK_NULL_VOID(menuPattern);
+            menuPattern->FocusViewShow();
         }
     }
     host->RemoveChild(subMenu);
