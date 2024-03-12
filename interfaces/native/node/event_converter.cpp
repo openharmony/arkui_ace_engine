@@ -174,8 +174,8 @@ bool ConvertEvent(ArkUINodeEvent* origin, ArkUI_NodeEvent* event)
         case COMPONENT_ASYNC_EVENT: {
             ArkUIEventSubKind subKind = static_cast<ArkUIEventSubKind>(origin->componentAsyncEvent.subKind);
             event->kind = ConvertToNodeEventType(subKind);
-            if (memcpy_sp(event->componentEvent.data, MAX_COMPONENT_EVENT_ARG_NUM, origin->componentAsyncEvent.data,
-                MAX_COMPONENT_EVENT_ARG_NUM) != 0) {
+            if (memcpy_sp(event->componentEvent.data, MAX_COMPONENT_EVENT_ARG_NUM * sizeof(ArkUI_NumberValue),
+                origin->componentAsyncEvent.data, MAX_COMPONENT_EVENT_ARG_NUM * sizeof(ArkUI_NumberValue)) != 0) {
                 TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "fail to convert origin event data");
                 return false;
             }
@@ -211,8 +211,8 @@ bool ConvertEventResult(ArkUI_NodeEvent* event, ArkUINodeEvent* origin)
         return true;
     }
     if (!IsStringEvent(event->kind)) {
-        if (memcpy_sp(origin->componentAsyncEvent.data, MAX_COMPONENT_EVENT_ARG_NUM, event->componentEvent.data,
-                MAX_COMPONENT_EVENT_ARG_NUM) != 0) {
+        if (memcpy_sp(origin->componentAsyncEvent.data, MAX_COMPONENT_EVENT_ARG_NUM * sizeof(ArkUI_NumberValue),
+            event->componentEvent.data, MAX_COMPONENT_EVENT_ARG_NUM * sizeof(ArkUI_NumberValue)) != 0) {
             TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "fail to convert event result data");
             return false;
         }

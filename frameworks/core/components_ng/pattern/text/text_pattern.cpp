@@ -68,7 +68,7 @@ const std::wstring WIDE_NEWLINE = StringUtils::ToWstring(NEWLINE);
 
 void TextPattern::OnAttachToFrameNode()
 {
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = PipelineContext::GetCurrentContextSafely();
     CHECK_NULL_VOID(pipeline);
     auto host = GetHost();
     CHECK_NULL_VOID(host);
@@ -86,7 +86,7 @@ void TextPattern::OnDetachFromFrameNode(FrameNode* node)
 {
     dataDetectorAdapter_->aiDetectDelayTask_.Cancel();
     CloseSelectOverlay();
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = PipelineContext::GetCurrentContextSafely();
     CHECK_NULL_VOID(pipeline);
     if (HasSurfaceChangedCallback()) {
         pipeline->UnregisterSurfaceChangedCallback(surfaceChangedCallbackId_.value_or(-1));
@@ -447,7 +447,7 @@ void TextPattern::SetTextSelection(int32_t selectionStart, int32_t selectionEnd)
     CHECK_NULL_VOID(host);
     auto eventHub = host->GetEventHub<EventHub>();
     CHECK_NULL_VOID(eventHub);
-    auto context = PipelineContext::GetCurrentContext();
+    auto context = PipelineContext::GetCurrentContextSafely();
     if (context) {
         context->AddAfterLayoutTask([weak = WeakClaim(this), selectionStart, selectionEnd, eventHub]() {
             auto textPattern = weak.Upgrade();
@@ -550,7 +550,7 @@ void TextPattern::HandleOnSelectAll()
 {
     auto textSize = static_cast<int32_t>(GetWideText().length()) + placeholderCount_;
     HandleSelectionChange(0, textSize);
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = PipelineContext::GetCurrentContextSafely();
     CHECK_NULL_VOID(pipeline);
     auto selectOverlayInfo = pipeline->GetSelectOverlayManager()->GetSelectOverlayInfo();
     CalculateHandleOffsetAndShowOverlay();
@@ -1129,7 +1129,7 @@ void TextPattern::HandlePanStart(const GestureEvent& info)
     if (!IsDraggable(offset)) {
         return;
     }
-    auto pipelineContext = PipelineContext::GetCurrentContext();
+    auto pipelineContext = PipelineContext::GetCurrentContextSafely();
     CHECK_NULL_VOID(pipelineContext);
 
 #if !defined(PREVIEW)
@@ -1725,7 +1725,7 @@ OffsetF TextPattern::GetParentGlobalOffset() const
 {
     auto host = GetHost();
     CHECK_NULL_RETURN(host, {});
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = PipelineContext::GetCurrentContextSafely();
     CHECK_NULL_RETURN(pipeline, {});
     auto rootOffset = pipeline->GetRootRect().GetOffset();
     return host->GetPaintRectOffset() - rootOffset;
@@ -1773,8 +1773,8 @@ void TextPattern::OnModifyDone()
         paragraph_.Reset();
     }
 
-    if (!(PipelineContext::GetCurrentContext() &&
-            PipelineContext::GetCurrentContext()->GetMinPlatformVersion() > API_PROTEXTION_GREATER_NINE)) {
+    if (!(PipelineContext::GetCurrentContextSafely() &&
+            PipelineContext::GetCurrentContextSafely()->GetMinPlatformVersion() > API_PROTEXTION_GREATER_NINE)) {
         bool shouldClipToContent =
             textLayoutProperty->GetTextOverflow().value_or(TextOverflow::CLIP) == TextOverflow::CLIP;
         host->GetRenderContext()->SetClipToFrame(shouldClipToContent);
@@ -1814,7 +1814,7 @@ void TextPattern::OnModifyDone()
     auto gestureEventHub = host->GetOrCreateGestureEventHub();
     CHECK_NULL_VOID(gestureEventHub);
     if (copyOption_ != CopyOptions::None) {
-        auto context = PipelineContext::GetCurrentContext();
+        auto context = PipelineContext::GetCurrentContextSafely();
         CHECK_NULL_VOID(context);
         if (!clipboard_ && context) {
             clipboard_ = ClipboardProxy::GetInstance()->GetClipboard(context->GetTaskExecutor());
@@ -1907,7 +1907,7 @@ void TextPattern::UpdateSelectOverlayOrCreate(SelectOverlayInfo& selectInfo, boo
         selectOverlayProxy_->UpdateFirstAndSecondHandleInfo(firstHandleInfo, secondHandleInfo);
         selectOverlayProxy_->ShowOrHiddenMenu(!firstHandleInfo.isShow && !secondHandleInfo.isShow);
     } else {
-        auto pipeline = PipelineContext::GetCurrentContext();
+        auto pipeline = PipelineContext::GetCurrentContextSafely();
         CHECK_NULL_VOID(pipeline);
         auto host = GetHost();
         CHECK_NULL_VOID(host);
@@ -2112,7 +2112,7 @@ void TextPattern::GetGlobalOffset(Offset& offset)
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = PipelineContext::GetCurrentContextSafely();
     CHECK_NULL_VOID(pipeline);
     auto rootOffset = pipeline->GetRootRect().GetOffset();
     auto globalOffset = host->GetPaintRectOffset() - rootOffset;
@@ -2138,7 +2138,7 @@ void TextPattern::OnVisibleChange(bool isVisible)
 
 void TextPattern::InitSurfaceChangedCallback()
 {
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = PipelineContext::GetCurrentContextSafely();
     CHECK_NULL_VOID(pipeline);
     if (!HasSurfaceChangedCallback()) {
         auto callbackId = pipeline->RegisterSurfaceChangedCallback(
@@ -2164,7 +2164,7 @@ void TextPattern::HandleSurfaceChanged(int32_t newWidth, int32_t newHeight, int3
 
 void TextPattern::InitSurfacePositionChangedCallback()
 {
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = PipelineContext::GetCurrentContextSafely();
     CHECK_NULL_VOID(pipeline);
     if (!HasSurfacePositionChangedCallback()) {
         auto callbackId =
@@ -2392,7 +2392,7 @@ void TextPattern::SetAccessibilityAction()
 
 void TextPattern::OnColorConfigurationUpdate()
 {
-    auto context = PipelineContext::GetCurrentContext();
+    auto context = PipelineContext::GetCurrentContextSafely();
     CHECK_NULL_VOID(context);
     auto theme = context->GetTheme<TextTheme>();
     CHECK_NULL_VOID(theme);
@@ -2544,7 +2544,7 @@ void TextPattern::OnAreaChangedInner()
 
 void TextPattern::RemoveAreaChangeInner()
 {
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = PipelineContext::GetCurrentContextSafely();
     CHECK_NULL_VOID(pipeline);
     auto host = GetHost();
     CHECK_NULL_VOID(host);

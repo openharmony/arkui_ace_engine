@@ -340,12 +340,12 @@ int32_t UnConvertAnimationDirection(int32_t animationPlayMode)
     return animationPlayMode;
 }
 
-bool isLeapYear(uint32_t year)
+bool IsLeapYear(uint32_t year)
 {
     return (year % NUM_4 == 0 && year % NUM_100 != 0) || (year % NUM_400 == 0);
 }
 
-bool isValidDate(uint32_t year, uint32_t month, uint32_t day)
+bool IsValidDate(uint32_t year, uint32_t month, uint32_t day)
 {
     if (year <= 0) {
         return false;
@@ -353,7 +353,7 @@ bool isValidDate(uint32_t year, uint32_t month, uint32_t day)
     if (month < NUM_1 || month > NUM_12) {
         return false;
     }
-    int daysInMonth[] = { 31, isLeapYear(year) ? 29 : 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31};
+    int daysInMonth[] = { 31, IsLeapYear(year) ? 29 : 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31};
     if (day < NUM_1 || day > daysInMonth[month - 1]) {
         return false;
     }
@@ -6399,7 +6399,7 @@ int32_t SetSelectedDate(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
     if (actualSize < 0) {
         return ERROR_CODE_PARAM_INVALID;
     }
-    if (!isValidDate(item->value[SELECTED_YEAR_INDEX].u32,
+    if (!IsValidDate(item->value[SELECTED_YEAR_INDEX].u32,
         item->value[SELECTED_MONTH_INDEX].u32, item->value[SELECTED_DAY_INDEX].u32)) {
         return ERROR_CODE_PARAM_INVALID;
     }
