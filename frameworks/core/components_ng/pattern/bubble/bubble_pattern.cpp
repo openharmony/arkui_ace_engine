@@ -83,6 +83,10 @@ bool BubblePattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty,
 
 void BubblePattern::OnModifyDone()
 {
+    if (SystemProperties::GetColorMode() != colorMode_ && !isCustomPopup_) {
+        colorMode_ = SystemProperties::GetColorMode();
+        UpdateBubbleText();
+    }
     Pattern::OnModifyDone();
     InitTouchEvent();
     RegisterButtonOnHover();
@@ -658,11 +662,35 @@ void BubblePattern::OnWindowHide()
     }
 }
 
-void BubblePattern::OnColorConfigurationUpdate()
+
+void BubblePattern::UpdateText(const RefPtr<UINode>& node, const RefPtr<PopupTheme>& popupTheme)
 {
-    if (isCustomPopup_) {
-        return;
+    if (node->GetTag() == V2::TEXT_ETS_TAG) {
+        auto textNode = DynamicCast<FrameNode>(node);
+        CHECK_NULL_VOID(textNode);
+        auto textLayoutProperty = textNode->GetLayoutProperty<TextLayoutProperty>();
+        CHECK_NULL_VOID(textLayoutProperty);
+        auto parentNode = node->GetParent();
+        if (parentNode && parentNode->GetTag() == V2::BUTTON_ETS_TAG &&
+            !(Container::LessThanAPIVersion(PlatformVersion::VERSION_ELEVEN))) {
+            textLayoutProperty->UpdateTextColor(popupTheme->GetButtonFontColor());
+        } else if (!isSetMessageColor_) {
+            if ((Container::LessThanAPIVersion(PlatformVersion::VERSION_ELEVEN))) {
+                textLayoutProperty->UpdateTextColor(popupTheme->GetFontColor());
+            } else {
+                textLayoutProperty->UpdateTextColor(popupTheme->GetFontPrimaryColor());
+            }
+        }
+        textNode->MarkModifyDone();
+    } else {
+        for (const auto& childNode : node->GetChildren()) {
+            UpdateText(childNode, popupTheme);
+        }
     }
+}
+
+void BubblePattern::UpdateBubbleText()
+{
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     host->SetNeedCallChildrenUpdate(false);
@@ -670,26 +698,17 @@ void BubblePattern::OnColorConfigurationUpdate()
     CHECK_NULL_VOID(context);
     auto popupTheme = context->GetTheme<PopupTheme>();
     CHECK_NULL_VOID(popupTheme);
-    auto buttonRowNode = GetButtonRowNode();
-    CHECK_NULL_VOID(buttonRowNode);
-    for (const auto& child : buttonRowNode->GetChildren()) {
-        auto buttonNode = AceType::DynamicCast<FrameNode>(child);
-        CHECK_NULL_VOID(buttonNode);
-        if (buttonNode->GetTag() != V2::BUTTON_ETS_TAG) {
-            return;
-        }
-        auto renderContext = buttonNode->GetRenderContext();
-        CHECK_NULL_VOID(renderContext);
-        auto childText = buttonNode->GetFirstChild();
-        CHECK_NULL_VOID(childText);
-        auto textNode = DynamicCast<FrameNode>(childText);
-        CHECK_NULL_VOID(textNode);
-        auto textLayoutProperty = textNode->GetLayoutProperty<TextLayoutProperty>();
-        CHECK_NULL_VOID(textLayoutProperty);
-        textLayoutProperty->UpdateTextColor(popupTheme->GetFontColor());
-        textNode->MarkDirtyNode();
-    }
+    UpdateText(host, popupTheme);
     host->MarkDirtyNode();
+}
+
+void BubblePattern::OnColorConfigurationUpdate()
+{
+    if (isCustomPopup_) {
+        return;
+    }
+    colorMode_ = SystemProperties::GetColorMode();
+    UpdateBubbleText();
 }
 
 } // namespace OHOS::Ace::NG

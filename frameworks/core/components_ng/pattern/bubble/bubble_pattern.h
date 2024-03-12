@@ -117,6 +117,13 @@ public:
     bool IsOnShow();
     bool IsExiting();
     void OnColorConfigurationUpdate() override;
+    void UpdateBubbleText();
+    void UpdateText(const RefPtr<UINode>& node, const RefPtr<PopupTheme>& popupTheme);
+
+    void SetMessageColor(bool isSetMessageColor)
+    {
+        isSetMessageColor_ = isSetMessageColor;
+    }
 
     void SetMessageNode(RefPtr<FrameNode> messageNode)
     {
@@ -224,6 +231,8 @@ private:
     float arrowHeight_ = Dimension(8.0_vp).ConvertToPx();
 
     bool showArrow_ = false;
+    ColorMode colorMode_ = ColorMode::COLOR_MODE_UNDEFINED;
+    bool isSetMessageColor_ = false;
 
     TransitionStatus transitionStatus_ = TransitionStatus::INVISIABLE;
 
