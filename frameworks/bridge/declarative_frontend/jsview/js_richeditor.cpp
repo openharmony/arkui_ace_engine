@@ -759,6 +759,40 @@ void JSRichEditor::JsDataDetectorConfig(const JSCallbackInfo& info)
     RichEditorModel::GetInstance()->SetTextDetectConfig(textTypes, std::move(onResult));
 }
 
+void JSRichEditor::SetCaretColor(const JSCallbackInfo& info)
+{
+    if (info.Length() < 1) {
+        TAG_LOGE(AceLogTag::ACE_GRID, "CaretColor input value is abnormal");
+        return;
+    }
+    Color color;
+    if (!ParseJsColor(info[0], color)) {
+        auto pipeline = PipelineBase::GetCurrentContext();
+        CHECK_NULL_VOID(pipeline);
+        auto theme = pipeline->GetThemeManager()->GetTheme<NG::RichEditorTheme>();
+        CHECK_NULL_VOID(theme);
+        color = theme->GetCaretColor();
+    }
+    RichEditorModel::GetInstance()->SetCaretColor(color);
+}
+
+void JSRichEditor::SetSelectedBackgroundColor(const JSCallbackInfo& info)
+{
+    if (info.Length() < 1) {
+        TAG_LOGE(AceLogTag::ACE_GRID, "SelectedBackgroundColor input value is abnormal");
+        return;
+    }
+    Color selectedColor;
+    if (!ParseJsColor(info[0], selectedColor)) {
+        auto pipeline = PipelineBase::GetCurrentContext();
+        CHECK_NULL_VOID(pipeline);
+        auto theme = pipeline->GetThemeManager()->GetTheme<NG::RichEditorTheme>();
+        CHECK_NULL_VOID(theme);
+        selectedColor = theme->GetSelectedBackgroundColor();
+    }
+    RichEditorModel::GetInstance()->SetSelectedBackgroundColor(selectedColor);
+}
+
 void JSRichEditor::JSBind(BindingTarget globalObj)
 {
     JSClass<JSRichEditor>::Declare("RichEditor");
@@ -785,6 +819,8 @@ void JSRichEditor::JSBind(BindingTarget globalObj)
     JSClass<JSRichEditor>::StaticMethod("enableDataDetector", &JSRichEditor::JsEnableDataDetector);
     JSClass<JSRichEditor>::StaticMethod("dataDetectorConfig", &JSRichEditor::JsDataDetectorConfig);
     JSClass<JSRichEditor>::StaticMethod("placeholder", &JSRichEditor::SetPlaceholder);
+    JSClass<JSRichEditor>::StaticMethod("caretColor", &JSRichEditor::SetCaretColor);
+    JSClass<JSRichEditor>::StaticMethod("selectedBackgroundColor", &JSRichEditor::SetSelectedBackgroundColor);
     JSClass<JSRichEditor>::InheritAndBind<JSViewAbstract>(globalObj);
 }
 

@@ -48,6 +48,40 @@ class RichEditorCopyOptionsModifier extends ModifierWithKey<CopyOptions> {
   }
 }
 
+class RichEditorSelectedBackgroundColorModifier extends ModifierWithKey<ResourceColor> {
+  constructor(value: ResourceColor) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('richEditorSelectedBackgroundColor');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().richEditor.resetSelectedBackgroundColor(node);
+    } else {
+      getUINativeModule().richEditor.setSelectedBackgroundColor(node, this.value!);
+    }
+  }
+  checkObjectDiff(): boolean {
+    return this.stageValue !== this.value;
+  }
+}
+
+class RichEditorCaretColorModifier extends ModifierWithKey<ResourceColor> {
+  constructor(value: ResourceColor) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('richEditorCaretColor');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().richEditor.resetCaretColor(node);
+    } else {
+      getUINativeModule().richEditor.setCaretColor(node, this.value!);
+    }
+  }
+  checkObjectDiff(): boolean {
+    return this.stageValue !== this.value;
+  }
+}
+
 class ArkRichEditorComponent extends ArkComponent implements CommonMethod<RichEditorAttribute> {
   constructor(nativePtr: KNode) {
     super(nativePtr);
@@ -65,6 +99,17 @@ class ArkRichEditorComponent extends ArkComponent implements CommonMethod<RichEd
     modifierWithKey(this._modifiersWithKeys, RichEditorCopyOptionsModifier.identity, RichEditorCopyOptionsModifier, value);
     return this;
   }
+
+  caretColor(value: ResourceColor): RichEditorAttribute {
+    modifierWithKey(this._modifiersWithKeys, RichEditorCaretColorModifier.identity, RichEditorCaretColorModifier, value);
+    return this;
+  }
+
+  selectedBackgroundColor(value: ResourceColor): RichEditorAttribute {
+    modifierWithKey(this._modifiersWithKeys, RichEditorSelectedBackgroundColorModifier.identity, RichEditorSelectedBackgroundColorModifier, value);
+    return this;
+  }
+
   onPaste(callback: (event?: PasteEvent) => void): RichEditorAttribute {
     throw new Error('Method not implemented.');
   }

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -5360,6 +5360,43 @@ class RichEditorCopyOptionsModifier extends ModifierWithKey {
   }
 }
 RichEditorCopyOptionsModifier.identity = Symbol('richEditorCopyOptions');
+
+class RichEditorCaretColorModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().richEditor.resetCaretColor(node);
+    }
+    else {
+      getUINativeModule().richEditor.setCaretColor(node, this.value);
+    }
+  }
+  checkObjectDiff() {
+    return this.stageValue !== this.value;
+  }
+}
+RichEditorCaretColorModifier.identity = Symbol('richEditorCaretColor');
+
+class RichEditorSelectedBackgroundColorModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().richEditor.resetSelectedBackgroundColor(node);
+    }
+    else {
+      getUINativeModule().richEditor.setSelectedBackgroundColor(node, this.value);
+    }
+  }
+  checkObjectDiff() {
+    return this.stageValue !== this.value;
+  }
+}
+RichEditorSelectedBackgroundColorModifier.identity = Symbol('richEditorSelectedBackgroundColor');
+
 class ArkRichEditorComponent extends ArkComponent {
   constructor(nativePtr) {
     super(nativePtr);
@@ -5375,6 +5412,17 @@ class ArkRichEditorComponent extends ArkComponent {
     modifierWithKey(this._modifiersWithKeys, RichEditorCopyOptionsModifier.identity, RichEditorCopyOptionsModifier, value);
     return this;
   }
+
+  caretColor(value) {
+    modifierWithKey(this._modifiersWithKeys, RichEditorCaretColorModifier.identity, RichEditorCaretColorModifier, value);
+    return this;
+  }
+
+  selectedBackgroundColor(value) {
+    modifierWithKey(this._modifiersWithKeys, RichEditorSelectedBackgroundColorModifier.identity, RichEditorSelectedBackgroundColorModifier, value);
+    return this;
+  }
+
   onPaste(callback) {
     throw new Error('Method not implemented.');
   }

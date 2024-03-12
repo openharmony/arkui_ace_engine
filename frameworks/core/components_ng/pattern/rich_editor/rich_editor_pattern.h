@@ -451,6 +451,20 @@ public:
 
     void OnVirtualKeyboardAreaChanged() override;
 
+    void SetCaretColor(const Color& caretColor)
+    {
+        caretColor_ = caretColor;
+    }
+
+    Color GetCaretColor();
+
+    void SetSelectedBackgroundColor(const Color& selectedBackgroundColor)
+    {
+        selectedBackgroundColor_ = selectedBackgroundColor;
+    }
+
+    Color GetSelectedBackgroundColor();
+
 protected:
     bool CanStartAITask() override;
 
@@ -661,7 +675,8 @@ private:
     std::optional<struct UpdateSpanStyle> typingStyle_;
     std::optional<TextStyle> typingTextStyle_;
     std::list<ResultObject> dragResultObjects_;
-
+    std::optional<Color> caretColor_;
+    std::optional<Color> selectedBackgroundColor_;
     std::function<void()> customKeyboardBuilder_;
     RefPtr<OverlayManager> keyboardOverlay_;
     Offset selectionMenuOffset_;

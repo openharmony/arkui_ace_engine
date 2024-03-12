@@ -2855,6 +2855,10 @@ struct ArkUIRichEditorModifier {
     void (*resetRichEditorEnableDataDetector)(ArkUINodeHandle node);
     void (*setRichEditorCopyOptions)(ArkUINodeHandle node, ArkUI_Int32 copyOptionsValue);
     void (*resetRichEditorCopyOptions)(ArkUINodeHandle node);
+    void (*setRichEditorCaretColor)(ArkUINodeHandle node, ArkUI_Uint32 color);
+    void (*resetRichEditorCaretColor)(ArkUINodeHandle node);
+    void (*setRichEditorSelectedBackgroundColor)(ArkUINodeHandle node, ArkUI_Uint32 color);
+    void (*resetRichEditorSelectedBackgroundColor)(ArkUINodeHandle node);
 };
 
 struct ArkUIRichEditorControllerModifier {

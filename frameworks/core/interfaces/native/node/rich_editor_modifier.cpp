@@ -19,6 +19,7 @@
 #include "core/components_ng/base/view_abstract.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components_ng/pattern/rich_editor/rich_editor_model_ng.h"
+#include "core/components_ng/pattern/rich_editor/rich_editor_theme.h"
 
 namespace OHOS::Ace::NG {
 constexpr bool DEFAULT_ENABLE_TEXT_DETECTOR = false;
@@ -53,11 +54,50 @@ void ResetRichEditorCopyOptions(ArkUINodeHandle node)
     RichEditorModelNG::SetCopyOption(frameNode, defaultCopyOptions);
 }
 
+void SetRichEditorCaretColor(ArkUINodeHandle node, ArkUI_Uint32 color)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    RichEditorModelNG::SetCaretColor(frameNode, Color(color));
+}
+
+void ResetRichEditorCaretColor(ArkUINodeHandle node)
+{
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto richEditorTheme = pipeline->GetTheme<RichEditorTheme>();
+    CHECK_NULL_VOID(richEditorTheme);
+    auto caretColor = richEditorTheme->GetCaretColor();
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    RichEditorModelNG::SetCaretColor(frameNode, caretColor);
+}
+
+void SetRichEditorSelectedBackgroundColor(ArkUINodeHandle node, ArkUI_Uint32 color)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    RichEditorModelNG::SetSelectedBackgroundColor(frameNode, Color(color));
+}
+
+void ResetRichEditorSelectedBackgroundColor(ArkUINodeHandle node)
+{
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto richEditorTheme = pipeline->GetTheme<RichEditorTheme>();
+    CHECK_NULL_VOID(richEditorTheme);
+    auto selectedBackgroundColor = richEditorTheme->GetSelectedBackgroundColor();
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    RichEditorModelNG::SetSelectedBackgroundColor(frameNode, selectedBackgroundColor);
+}
+
 namespace NodeModifier {
 const ArkUIRichEditorModifier* GetRichEditorModifier()
 {
     static const ArkUIRichEditorModifier modifier = { SetRichEditorDetectEnable, ResetRichEditorDetectEnable,
-        SetRichEditorCopyOptions, ResetRichEditorCopyOptions };
+        SetRichEditorCopyOptions, ResetRichEditorCopyOptions, SetRichEditorCaretColor, ResetRichEditorCaretColor,
+        SetRichEditorSelectedBackgroundColor, ResetRichEditorSelectedBackgroundColor };
     return &modifier;
 }
 }

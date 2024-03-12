@@ -224,6 +224,8 @@ public:
     virtual void SetPlaceholder(PlaceholderOptions& options) = 0;
     virtual void SetTextDetectEnable(bool value) = 0;
     virtual void SetTextDetectConfig(const std::string& value, std::function<void(const std::string&)>&& onResult) = 0;
+    virtual void SetSelectedBackgroundColor(const Color& selectedColor) = 0;
+    virtual void SetCaretColor(const Color& color) = 0;
 private:
     static std::unique_ptr<RichEditorModel> instance_;
     static std::mutex mutex_;
