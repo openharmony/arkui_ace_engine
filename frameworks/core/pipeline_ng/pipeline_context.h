@@ -44,6 +44,7 @@
 #ifdef WINDOW_SCENE_SUPPORTED
 #include "core/components_ng/pattern/ui_extension/ui_extension_manager.h"
 #endif
+#include "core/components_ng/manager/focus/focus_manager.h"
 #include "core/components_ng/pattern/overlay/overlay_manager.h"
 #include "core/components_ng/pattern/stage/stage_manager.h"
 #include "core/components_ng/property/safe_area_insets.h"
@@ -323,6 +324,11 @@ public:
 
     const RefPtr<DragDropManager>& GetDragDropManager();
 
+    const RefPtr<FocusManager>& GetFocusManager()
+    {
+        return focusManager_;
+    }
+
     const RefPtr<FrameRateManager>& GetFrameRateManager()
     {
         return frameRateManager_;
@@ -393,10 +399,8 @@ public:
 
     bool ChangeMouseStyle(int32_t nodeId, MouseFormat format);
 
-    bool RequestDefaultFocus(const RefPtr<FocusHub>& mainView);
     bool RequestFocus(const std::string& targetNodeId) override;
     void AddDirtyFocus(const RefPtr<FrameNode>& node);
-    void AddDirtyDefaultFocus(const RefPtr<FrameNode>& node);
     void AddDirtyRequestFocus(const RefPtr<FrameNode>& node);
     void RootLostFocus(BlurReason reason = BlurReason::FOCUS_SWITCH) const;
 
@@ -567,6 +571,16 @@ public:
         return screenNode_.Upgrade();
     }
 
+    void SetFocusedWindowSceneNode(const RefPtr<FrameNode>& node)
+    {
+        CHECK_NULL_VOID(node);
+        windowSceneNode_ = AceType::WeakClaim(AceType::RawPtr(node));
+    }
+    RefPtr<FrameNode> GetFocusedWindowSceneNode() const
+    {
+        return windowSceneNode_.Upgrade();
+    }
+
     void SetJSViewActive(bool active, WeakPtr<CustomNode> custom);
 
     void UpdateCurrentActiveNode(const WeakPtr<FrameNode>& node) override
@@ -666,6 +680,8 @@ private:
     void FlushWindowSizeChangeCallback(int32_t width, int32_t height, WindowSizeChangeReason type);
 
     void FlushTouchEvents();
+
+    void FlushFocusView();
 
     void ProcessDelayTasks();
 
@@ -768,6 +784,7 @@ private:
     RefPtr<FullScreenManager> fullScreenManager_;
     RefPtr<SelectOverlayManager> selectOverlayManager_;
     RefPtr<DragDropManager> dragDropManager_;
+    RefPtr<FocusManager> focusManager_;
     RefPtr<SharedOverlayManager> sharedTransitionManager_;
 #ifdef WINDOW_SCENE_SUPPORTED
     RefPtr<UIExtensionManager> uiExtensionManager_;
@@ -778,9 +795,9 @@ private:
     std::unordered_map<size_t, TouchTestResult> touchTestResults_;
     WeakPtr<FrameNode> dirtyFocusNode_;
     WeakPtr<FrameNode> dirtyFocusScope_;
-    WeakPtr<FrameNode> dirtyDefaultFocusNode_;
     WeakPtr<FrameNode> dirtyRequestFocusNode_;
     WeakPtr<FrameNode> screenNode_;
+    WeakPtr<FrameNode> windowSceneNode_;
     uint32_t nextScheduleTaskId_ = 0;
     int32_t mouseStyleNodeId_ = -1;
     uint64_t resampleTimeStamp_ = 0;

@@ -36,8 +36,8 @@ namespace OHOS::Ace::NG {
 using namespace Framework;
 using OnNavigationAnimation = std::function<NavigationTransition(NavContentInfo, NavContentInfo,
         NavigationOperation)>;
-class NavigationPattern : public Pattern {
-    DECLARE_ACE_TYPE(NavigationPattern, Pattern);
+class NavigationPattern : public Pattern, public FocusView {
+    DECLARE_ACE_TYPE(NavigationPattern, Pattern, FocusView);
 
 public:
     NavigationPattern();
@@ -80,6 +80,11 @@ public:
     ScopeFocusAlgorithm GetScopeFocusAlgorithm() override
     {
         return { false, true, ScopeType::FLEX };
+    }
+
+    std::list<int32_t> GetRouteOfFirstScope() override
+    {
+        return {};
     }
 
     void SetNavDestination(std::function<void(std::string)>&& builder)

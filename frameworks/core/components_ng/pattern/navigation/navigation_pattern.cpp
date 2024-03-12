@@ -368,16 +368,9 @@ void NavigationPattern::CheckTopNavPathChange(
                 CHECK_NULL_VOID(eventHub);
                 NotifyPageHide(preTopNavPath->first);
             }
-            auto focusHub = preTopNavDestination->GetOrCreateFocusHub();
-            focusHub->SetParentFocusable(false);
-            focusHub->LostFocus();
         }
     } else {
         // navBar to new top page case
-        auto navBarNode = AceType::DynamicCast<NavBarNode>(hostNode->GetNavBarNode());
-        CHECK_NULL_VOID(navBarNode);
-        auto focusHub = navBarNode->GetOrCreateFocusHub();
-        focusHub->LostFocus();
     }
     RefPtr<NavDestinationGroupNode> newTopNavDestination;
     // fire onShown and requestFocus Event
@@ -391,11 +384,10 @@ void NavigationPattern::CheckTopNavPathChange(
             if (!navDestinationPattern->GetIsOnShow()) {
                 NotifyPageShow(newTopNavPath->first);
             }
-            auto focusHub = newTopNavDestination->GetOrCreateFocusHub();
-            context->AddAfterLayoutTask([focusHub]() {
-                focusHub->SetParentFocusable(true);
-                focusHub->RequestFocus();
-            });
+            auto navDestinationFocusView = AceType::DynamicCast<FocusView>(navDestinationPattern);
+            CHECK_NULL_VOID(navDestinationFocusView);
+            navDestinationFocusView->SetIsViewRootScopeFocused(false);
+            navDestinationFocusView->FocusViewShow();
         }
     } else {
         // back to navBar case
@@ -418,8 +410,10 @@ void NavigationPattern::CheckTopNavPathChange(
             }
         }
         navBarNode->GetEventHub<EventHub>()->SetEnabledInternal(true);
-        auto focusHub = navBarNode->GetOrCreateFocusHub();
-        focusHub->RequestFocus();
+        auto navBarFocusView = navBarNode->GetPattern<FocusView>();
+        CHECK_NULL_VOID(navBarFocusView);
+        navBarFocusView->SetIsViewRootScopeFocused(false);
+        navBarFocusView->FocusViewShow();
     }
     bool isShow = false;
     bool isDialog =
@@ -851,16 +845,21 @@ bool NavigationPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& di
                     navBarLayoutProperty->UpdateVisibility(VisibleType::VISIBLE);
                     navBarNode->SetJSViewActive(true);
                 }
-                if (navDestinationNode->GetChildren().size() <= EMPTY_DESTINATION_CHILD_SIZE &&
+                auto navDestinationFocusHub = navDestinationNode->GetFocusHub();
+                CHECK_NULL_VOID(navDestinationFocusHub);
+                auto defaultFocusHub = navDestinationFocusHub->GetChildFocusNodeByType(FocusNodeType::DEFAULT);
+                if (!defaultFocusHub && navDestinationNode->GetChildren().size() <= EMPTY_DESTINATION_CHILD_SIZE &&
                     navDestinationPattern->GetBackButtonState()) {
-                    auto focusHub = navDestinationNode->GetOrCreateFocusHub();
-                    focusHub->SetFocusable(true);
-                    focusHub->SetParentFocusable(true);
                     auto titleBarNode = AceType::DynamicCast<TitleBarNode>(navDestinationNode->GetTitleBarNode());
-                    CHECK_NULL_VOID(titleBarNode);
-                    auto backButtonNode = AceType::DynamicCast<FrameNode>(titleBarNode->GetBackButton());
-                    backButtonNode->GetOrCreateFocusHub()->SetIsDefaultFocus(true);
-                    focusHub->RequestFocusWithDefaultFocusFirstly();
+                    if (titleBarNode) {
+                        auto backButtonNode = AceType::DynamicCast<FrameNode>(titleBarNode->GetBackButton());
+                        backButtonNode->GetOrCreateFocusHub()->SetIsDefaultFocus(true);
+                    }
+                }
+                auto navDestinationFocusView = navDestinationNode->GetPattern<FocusView>();
+                if (navDestinationFocusView) {
+                    navDestinationFocusView->SetIsViewRootScopeFocused(false);
+                    navDestinationFocusView->FocusViewShow();
                 }
             },
             TaskExecutor::TaskType::UI);

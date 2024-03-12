@@ -28,11 +28,12 @@
 #include "core/components_ng/pattern/navrouter/navdestination_layout_property.h"
 #include "core/components_ng/pattern/pattern.h"
 #include "core/components_ng/syntax/shallow_builder.h"
+#include "core/components_v2/inspector/inspector_constants.h"
 
 namespace OHOS::Ace::NG {
 
-class NavDestinationPattern : public Pattern {
-    DECLARE_ACE_TYPE(NavDestinationPattern, Pattern);
+class NavDestinationPattern : public Pattern, public FocusView {
+    DECLARE_ACE_TYPE(NavDestinationPattern, Pattern, FocusView);
 
 public:
     explicit NavDestinationPattern(const RefPtr<ShallowBuilder>& shallowBuilder) : shallowBuilder_(shallowBuilder) {}
@@ -127,6 +128,20 @@ public:
     FocusPattern GetFocusPattern() const override
     {
         return { FocusType::SCOPE, true };
+    }
+
+    std::list<int32_t> GetRouteOfFirstScope() override
+    {
+        return { 2, 0 };
+    }
+
+    std::string GetEntryFocusViewName() override
+    {
+        /*
+        |-> Navigation (root focus view)
+          |-> NavDestination
+        */
+        return V2::NAVIGATION_VIEW_ETS_TAG;
     }
 
     void SetIsOnShow(bool isOnShow)

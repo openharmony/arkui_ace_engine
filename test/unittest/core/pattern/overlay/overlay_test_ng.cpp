@@ -804,7 +804,6 @@ HWTEST_F(OverlayTestNg, MenuTest005, TestSize.Level1)
     ASSERT_NE(menuPattern, nullptr);
     auto focusHub = menuWrapperNode->GetOrCreateFocusHub();
     ASSERT_NE(focusHub, nullptr);
-    focusHub->parentFocusable_ = false;
     menuPattern->SetPreviewMode(MenuPreviewMode::CUSTOM);
     /**
      * @tc.steps: step2. call ShowMenuAnimation and call StartShowAnimation of menu pattern
@@ -815,7 +814,6 @@ HWTEST_F(OverlayTestNg, MenuTest005, TestSize.Level1)
     menuWrapperPattern->StartShowAnimation();
     pipeline->taskExecutor_ = nullptr;
 
-    EXPECT_TRUE(focusHub->parentFocusable_);
     auto previewPattern = previewNode->GetPattern<MenuPreviewPattern>();
     ASSERT_NE(previewPattern, nullptr);
     EXPECT_TRUE(previewPattern->isFirstShow_);

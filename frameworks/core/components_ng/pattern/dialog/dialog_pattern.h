@@ -24,6 +24,7 @@
 #include "base/memory/referenced.h"
 #include "core/components/dialog/dialog_properties.h"
 #include "core/components/dialog/dialog_theme.h"
+#include "core/components_ng/manager/focus/focus_view.h"
 #include "core/components_ng/pattern/dialog//dialog_event_hub.h"
 #include "core/components_ng/pattern/dialog/dialog_accessibility_property.h"
 #include "core/components_ng/pattern/dialog/dialog_layout_algorithm.h"
@@ -37,8 +38,8 @@ enum class DialogDismissReason {
     DIALOG_TOUCH_OUTSIDE,
     DIALOG_CLOSE_BUTTON,
 };
-class DialogPattern : public PopupBasePattern {
-    DECLARE_ACE_TYPE(DialogPattern, PopupBasePattern);
+class DialogPattern : public PopupBasePattern, public FocusView {
+    DECLARE_ACE_TYPE(DialogPattern, PopupBasePattern, FocusView);
 
 public:
     DialogPattern(const RefPtr<DialogTheme>& dialogTheme, const RefPtr<UINode>& customNode)
@@ -94,6 +95,11 @@ public:
     FocusPattern GetFocusPattern() const override
     {
         return { FocusType::SCOPE, true };
+    }
+
+    std::list<int32_t> GetRouteOfFirstScope() override
+    {
+        return { 0, 0 };
     }
 
     void BuildChild(const DialogProperties& dialogProperties);

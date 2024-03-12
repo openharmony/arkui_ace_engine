@@ -856,8 +856,14 @@ void FrameNode::OnVisibleChange(bool isVisible)
 
 void FrameNode::OnDetachFromMainTree(bool recursive)
 {
-    if (auto focusHub = GetFocusHub()) {
-        focusHub->RemoveSelf();
+    auto focusHub = GetFocusHub();
+    if (focusHub) {
+        auto focusView = focusHub->GetFirstChildFocusView();
+        if (focusView) {
+            focusView->FocusViewClose();
+        } else {
+            focusHub->RemoveSelf();
+        }
     }
     pattern_->OnDetachFromMainTree();
     eventHub_->FireOnDisappear();

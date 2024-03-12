@@ -22,6 +22,7 @@
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
 #include "core/components/common/properties/alignment.h"
+#include "core/components_ng/manager/focus/focus_view.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_algorithm.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_property.h"
@@ -32,8 +33,8 @@
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
-class ACE_EXPORT SheetPresentationPattern : public LinearLayoutPattern, public PopupBasePattern {
-    DECLARE_ACE_TYPE(SheetPresentationPattern, LinearLayoutPattern, PopupBasePattern);
+class ACE_EXPORT SheetPresentationPattern : public LinearLayoutPattern, public PopupBasePattern, public FocusView {
+    DECLARE_ACE_TYPE(SheetPresentationPattern, LinearLayoutPattern, PopupBasePattern, FocusView);
 
 public:
     SheetPresentationPattern(
@@ -204,6 +205,11 @@ public:
     FocusPattern GetFocusPattern() const override
     {
         return { FocusType::SCOPE, true };
+    }
+
+    std::list<int32_t> GetRouteOfFirstScope() override
+    {
+        return { 1, 0 };
     }
 
     bool IsExecuteOnDisappear() const
