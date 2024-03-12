@@ -133,11 +133,14 @@ void DragEventActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset, co
     auto dragDropManager = pipeline->GetDragDropManager();
     CHECK_NULL_VOID(dragDropManager);
     dragDropManager->SetPrepareDragFrameNode(nullptr);
-    if (dragDropManager->IsDragging() || dragDropManager->IsMsdpDragging() ||
-        (!frameNode->IsDraggable() && frameNode->IsCustomerSet())) {
+    if (dragDropManager->IsDragging() || dragDropManager->IsMsdpDragging()) {
         TAG_LOGI(AceLogTag::ACE_DRAG, "No need to collect drag gestures result, dragging is %{public}d,"
-            "MSDP dragging is %{public}d, frameNode draggable is %{public}d, custom set is %{public}d",
-            dragDropManager->IsDragging(), dragDropManager->IsMsdpDragging(),
+            "MSDP dragging is %{public}d", dragDropManager->IsDragging(), dragDropManager->IsMsdpDragging());
+        return;
+    }
+    if (gestureHub->IsDragForbidden() || (!frameNode->IsDraggable() && frameNode->IsCustomerSet())) {
+        TAG_LOGI(AceLogTag::ACE_DRAG, "No need to collect drag gestures result, drag forbidden set is %{public}d,"
+            "frameNode draggable is %{public}d, custom set is %{public}d", gestureHub->IsDragForbidden(),
             frameNode->IsDraggable(), frameNode->IsCustomerSet());
         return;
     }
