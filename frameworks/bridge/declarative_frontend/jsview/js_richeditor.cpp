@@ -851,12 +851,12 @@ ImageSpanAttribute JSRichEditorController::ParseJsImageSpanAttribute(JSRef<JSObj
     return imageStyle;
 }
 
-void JSRichEditorController::ParseJsLineHeightLetterSpacingTextStyle(
-    const JSRef<JSObject>& styleObject, TextStyle& style, struct UpdateSpanStyle& updateSpanStyle, bool isSupportPercent)
+void JSRichEditorController::ParseJsLineHeightLetterSpacingTextStyle(const JSRef<JSObject>& styleObject,
+    TextStyle& style, struct UpdateSpanStyle& updateSpanStyle, bool isSupportPercent)
 {
     JSRef<JSVal> lineHeight = styleObject->GetProperty("lineHeight");
     CalcDimension height;
-    if (!lineHeight->IsNull() && JSContainerBase::ParseJsDimensionFpNG(lineHeight, height, isVisible) &&
+    if (!lineHeight->IsNull() && JSContainerBase::ParseJsDimensionFpNG(lineHeight, height, isSupportPercent) &&
         !height.IsNegative() && height.Unit() != DimensionUnit::PERCENT) {
         updateSpanStyle.updateLineHeight = height;
         style.SetLineHeight(height);
@@ -869,7 +869,7 @@ void JSRichEditorController::ParseJsLineHeightLetterSpacingTextStyle(
     }
     JSRef<JSVal> letterSpacing = styleObject->GetProperty("letterSpacing");
     CalcDimension letters;
-    if (JSContainerBase::ParseJsDimensionFpNG(letterSpacing, letters, isVisible) &&
+    if (JSContainerBase::ParseJsDimensionFpNG(letterSpacing, letters, isSupportPercent) &&
         letters.Unit() != DimensionUnit::PERCENT) {
         updateSpanStyle.updateLetterSpacing = letters;
         style.SetLetterSpacing(letters);
