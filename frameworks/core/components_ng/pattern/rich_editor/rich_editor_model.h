@@ -145,9 +145,11 @@ struct UpdateParagraphStyle {
     {
         textAlign.reset();
         leadingMargin.reset();
+        wordBreak.reset();
     }
     std::optional<TextAlign> textAlign;
     std::optional<NG::LeadingMargin> leadingMargin;
+    std::optional<WordBreak> wordBreak;
 };
 
 struct RangeOptions {

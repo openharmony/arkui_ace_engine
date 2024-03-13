@@ -258,6 +258,7 @@ enum class PropertyInfo {
     SYMBOL_COLOR,
     SYMBOL_RENDERING_STRATEGY,
     SYMBOL_EFFECT_STRATEGY,
+    WORD_BREAK,
 };
 
 class ACE_EXPORT BaseSpan : public virtual AceType {
@@ -367,6 +368,7 @@ public:
     DEFINE_SPAN_FONT_STYLE_ITEM(SymbolEffectStrategy, uint32_t);
     DEFINE_SPAN_TEXT_LINE_STYLE_ITEM(LineHeight, Dimension);
     DEFINE_SPAN_TEXT_LINE_STYLE_ITEM(TextAlign, TextAlign);
+    DEFINE_SPAN_TEXT_LINE_STYLE_ITEM(WordBreak, WordBreak);
     DEFINE_SPAN_TEXT_LINE_STYLE_ITEM(LeadingMargin, LeadingMargin);
 
     // Mount to the previous Span node or Text node.
@@ -417,7 +419,7 @@ public:
             PropertyInfo::FONTSTYLE, PropertyInfo::FONTWEIGHT, PropertyInfo::FONTFAMILY, PropertyInfo::TEXTDECORATION,
             PropertyInfo::TEXTCASE, PropertyInfo::LETTERSPACE, PropertyInfo::LINEHEIGHT, PropertyInfo::TEXT_ALIGN,
             PropertyInfo::LEADING_MARGIN, PropertyInfo::TEXTSHADOW, PropertyInfo::SYMBOL_COLOR,
-            PropertyInfo::SYMBOL_RENDERING_STRATEGY, PropertyInfo::SYMBOL_EFFECT_STRATEGY };
+            PropertyInfo::SYMBOL_RENDERING_STRATEGY, PropertyInfo::SYMBOL_EFFECT_STRATEGY, PropertyInfo::WORD_BREAK };
         set_difference(propertyInfoContainer.begin(), propertyInfoContainer.end(), propertyInfo_.begin(),
             propertyInfo_.end(), inserter(inheritPropertyInfo, inheritPropertyInfo.begin()));
         return inheritPropertyInfo;

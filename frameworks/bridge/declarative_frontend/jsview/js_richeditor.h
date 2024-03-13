@@ -130,6 +130,7 @@ private:
     static JSRef<JSVal> CreateJSSpansInfo(const SelectionInfo& info);
     static JSRef<JSVal> CreateJSParagraphsInfo(const std::vector<ParagraphInfo>& info);
     static JSRef<JSObject> CreateTypingStyleResult(const struct UpdateSpanStyle& typingStyle);
+    static void ParseWordBreakParagraphStyle(const JSRef<JSObject>& styleObject, struct UpdateParagraphStyle& style);
 
     WeakPtr<RichEditorControllerBase> controllerWeak_;
     ACE_DISALLOW_COPY_AND_MOVE(JSRichEditorController);

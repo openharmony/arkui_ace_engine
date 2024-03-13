@@ -178,6 +178,7 @@ JSRef<JSObject> JSRichEditor::CreateJSTextStyleResult(const TextStyleResult& tex
     decorationObj->SetProperty<std::string>("color", textStyleResult.decorationColor);
     textStyleObj->SetPropertyObject("decoration", decorationObj);
     textStyleObj->SetProperty<int32_t>("textAlign", textStyleResult.textAlign);
+    textStyleObj->SetProperty<int32_t>("wordBreak", textStyleResult.wordBreak);
     JSRef<JSArray> leadingMarginArray = JSRef<JSArray>::New();
     leadingMarginArray->SetValueAt(0, JSRef<JSVal>::Make(ToJSValue(textStyleResult.leadingMarginSize[0])));
     leadingMarginArray->SetValueAt(1, JSRef<JSVal>::Make(ToJSValue(textStyleResult.leadingMarginSize[1])));
@@ -230,6 +231,7 @@ JSRef<JSObject> JSRichEditor::CreateParagraphStyleResult(const ParagraphInfo& in
 {
     auto obj = JSRef<JSObject>::New();
     obj->SetProperty<int32_t>("textAlign", info.textAlign);
+    obj->SetProperty<int32_t>("wordBreak", info.wordBreak);
 
     auto lmObj = JSRef<JSObject>::New();
     auto size = JSRef<JSArray>::New();
@@ -1479,6 +1481,20 @@ std::pair<int32_t, int32_t> ParseRange(const JSRef<JSObject>& object)
 }
 } // namespace
 
+void JSRichEditorController::ParseWordBreakParagraphStyle(const JSRef<JSObject>& styleObject,
+    struct UpdateParagraphStyle& style)
+{
+    auto wordBreakObj = styleObject->GetProperty("wordBreak");
+    if (wordBreakObj->IsNull() || !wordBreakObj->IsNumber()) {
+        return;
+    }
+    auto index = wordBreakObj->ToNumber<int32_t>();
+    if (index < 0 || index >= static_cast<int32_t>(WORD_BREAK_TYPES.size())) {
+        index = static_cast<int32_t>(WordBreak::BREAK_WORD);
+    }
+    style.wordBreak = WORD_BREAK_TYPES[index];
+}
+
 bool JSRichEditorController::ParseParagraphStyle(const JSRef<JSObject>& styleObject, struct UpdateParagraphStyle& style)
 {
     ContainerScope scope(instanceId_ < 0 ? Container::CurrentId() : instanceId_);
@@ -1490,6 +1506,9 @@ bool JSRichEditorController::ParseParagraphStyle(const JSRef<JSObject>& styleObj
         }
         style.textAlign = align;
     }
+
+    ParseWordBreakParagraphStyle(styleObject, style);
+
     auto lm = styleObject->GetProperty("leadingMargin");
     if (lm->IsObject()) {
         // [LeadingMarginPlaceholder]

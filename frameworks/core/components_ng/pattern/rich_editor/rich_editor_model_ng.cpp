@@ -31,6 +31,7 @@ void RichEditorModelNG::Create()
         V2::RICH_EDITOR_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<RichEditorPattern>(); });
     stack->Push(frameNode);
     ACE_UPDATE_LAYOUT_PROPERTY(TextLayoutProperty, TextAlign, TextAlign::START);
+    ACE_UPDATE_LAYOUT_PROPERTY(TextLayoutProperty, WordBreak, WordBreak::BREAK_WORD);
     ACE_UPDATE_LAYOUT_PROPERTY(LayoutProperty, Alignment, Alignment::TOP_LEFT);
     CHECK_NULL_VOID(frameNode);
     auto richEditorPattern = frameNode->GetPattern<RichEditorPattern>();

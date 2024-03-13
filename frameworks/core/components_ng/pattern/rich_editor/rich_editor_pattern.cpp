@@ -916,6 +916,11 @@ void RichEditorPattern::CopyTextSpanLineStyle(
         target->UpdateTextAlign(source->GetTextAlignValue(TextAlign::LEFT));
         target->AddPropertyInfo(PropertyInfo::TEXT_ALIGN);
     }
+
+    if (source->HasWordBreak()) {
+        target->UpdateWordBreak(source->GetWordBreakValue(WordBreak::BREAK_WORD));
+        target->AddPropertyInfo(PropertyInfo::WORD_BREAK);
+    }
 }
 
 int32_t RichEditorPattern::TextSpanSplit(int32_t position, bool needLeadingMargin)
@@ -1320,6 +1325,7 @@ std::vector<ParagraphInfo> RichEditorPattern::GetParagraphInfo(int32_t start, in
                 .leadingMarginSize = { Dimension(lm.size.Width()).ConvertToVp(),
                     Dimension(lm.size.Height()).ConvertToVp() },
                 .textAlign = static_cast<int32_t>((*it)->GetTextAlignValue(TextAlign::START)),
+                .wordBreak = static_cast<int32_t>((*it)->GetWordBreakValue(WordBreak::BREAK_WORD)),
                 .range = { paraStart, (*it)->GetSpanItem()->position },
             });
             paraStart = (*it)->GetSpanItem()->position;
@@ -1415,6 +1421,7 @@ void RichEditorPattern::UpdateParagraphStyle(int32_t start, int32_t end, const s
         } else {
             spanNode->UpdateTextAlign(TextAlign::START);
         }
+        spanNode->UpdateWordBreak(style.wordBreak.value_or(WordBreak::BREAK_WORD));
         if (style.leadingMargin.has_value()) {
             spanNode->GetSpanItem()->leadingMargin = *style.leadingMargin;
             spanNode->UpdateLeadingMargin(*style.leadingMargin);
@@ -2784,6 +2791,7 @@ void RichEditorPattern::ResetFirstNodeStyle()
         auto&& firstNode = DynamicCast<SpanNode>(*(spans.begin()));
         if (firstNode) {
             firstNode->ResetTextAlign();
+            firstNode->ResetWordBreak();
             firstNode->ResetLeadingMargin();
             tmpHost->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
         }
