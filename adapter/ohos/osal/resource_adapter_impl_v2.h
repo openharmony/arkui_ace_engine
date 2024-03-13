@@ -77,6 +77,7 @@ public:
     uint32_t GetResourceLimitKeys() const override;
     uint32_t GetSymbolByName(const char* resName) const override;
     uint32_t GetSymbolById(uint32_t resId) const override;
+    RefPtr<ThemeStyle> GetPatternByName(const std::string& patternName) override;
 
 private:
     std::string GetActualResourceName(const std::string& resName) const;

@@ -44,18 +44,16 @@ public:
             if (!themeConstants) {
                 return theme;
             }
-            ParseColorPattern(themeConstants->GetThemeStyle(), theme);
-            ParseDimensionPattern(themeConstants->GetThemeStyle(), theme);
+            ParseColorPattern(themeConstants, theme);
+            ParseDimensionPattern(themeConstants, theme);
             return theme;
         }
 
     private:
-        void ParseColorPattern(const RefPtr<ThemeStyle>& themeStyle, const RefPtr<AdvancedPatternTheme>& theme) const
+        void ParseColorPattern(
+            const RefPtr<ThemeConstants>& themeConstants, const RefPtr<AdvancedPatternTheme>& theme) const
         {
-            if (!themeStyle) {
-                return;
-            }
-            auto advancedPattern = themeStyle->GetAttr<RefPtr<ThemeStyle>>(THEME_PATTERN_ADVANCED_PATTERN, nullptr);
+            RefPtr<ThemeStyle> advancedPattern = themeConstants->GetPatternByName(THEME_PATTERN_ADVANCED_PATTERN);
             if (!advancedPattern) {
                 return;
             }
@@ -86,13 +84,10 @@ public:
             theme->primaryContrary_ = advancedPattern->GetAttr<Color>("color_text_primary_contrary", Color());
         }
 
-        void ParseDimensionPattern(const RefPtr<ThemeStyle>& themeStyle,
-            const RefPtr<AdvancedPatternTheme>& theme) const
+        void ParseDimensionPattern(
+            const RefPtr<ThemeConstants>& themeConstants, const RefPtr<AdvancedPatternTheme>& theme) const
         {
-            if (!themeStyle) {
-                return;
-            }
-            auto advancedPattern = themeStyle->GetAttr<RefPtr<ThemeStyle>>(THEME_PATTERN_ADVANCED_PATTERN, nullptr);
+            RefPtr<ThemeStyle> advancedPattern = themeConstants->GetPatternByName(THEME_PATTERN_ADVANCED_PATTERN);
             if (!advancedPattern) {
                 return;
             }

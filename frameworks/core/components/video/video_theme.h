@@ -45,17 +45,13 @@ public:
             if (!themeConstants) {
                 return theme;
             }
-            ParsePattern(themeConstants->GetThemeStyle(), theme);
+            ParsePattern(themeConstants, theme);
             return theme;
         }
 
-        void ParsePattern(const RefPtr<ThemeStyle>& themeStyle, const RefPtr<VideoTheme>& theme) const
+        void ParsePattern(const RefPtr<ThemeConstants>& themeConstants, const RefPtr<VideoTheme>& theme) const
         {
-            if (!themeStyle) {
-                LOGW("Video parse pattern failed, theme style is null");
-                return;
-            }
-            auto videoPattern = themeStyle->GetAttr<RefPtr<ThemeStyle>>(THEME_PATTERN_VIDEO, nullptr);
+            RefPtr<ThemeStyle> videoPattern = themeConstants->GetPatternByName(THEME_PATTERN_VIDEO);
             if (!videoPattern) {
                 LOGW("find pattern of video fail");
                 return;
