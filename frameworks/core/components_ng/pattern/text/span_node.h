@@ -181,7 +181,8 @@ public:
     virtual void UpdateTextStyleForAISpan(
         const std::string& content, const RefPtr<Paragraph>& builder, const std::optional<TextStyle>& textStyle);
     virtual void UpdateTextStyle(
-        const std::string& content, const RefPtr<Paragraph>& builder, const std::optional<TextStyle>& textStyle);
+        const std::string& content, const RefPtr<Paragraph>& builder, const std::optional<TextStyle>& textStyle,
+        const int32_t selStart, const int32_t selEnd);
     virtual void UpdateContentTextStyle(
         const std::string& content, const RefPtr<Paragraph>& builder, const std::optional<TextStyle>& textStyle);
     virtual void SetAiSpanTextStyle(std::optional<TextStyle>& textStyle);

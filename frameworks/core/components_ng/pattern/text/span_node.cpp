@@ -219,7 +219,7 @@ int32_t SpanItem::UpdateParagraph(const RefPtr<FrameNode>& frameNode,
     if (pattern->NeedShowAIDetect() && !aiSpanMap.empty()) {
         UpdateTextStyleForAISpan(spanContent, builder, textStyle);
     } else {
-        UpdateTextStyle(spanContent, builder, textStyle);
+        UpdateTextStyle(spanContent, builder, textStyle, selectedStart, selectedEnd);
     }
     textStyle_ = textStyle;
 
@@ -313,22 +313,18 @@ void SpanItem::UpdateTextStyleForAISpan(
             aiSpanMap.erase(aiSpanMap.begin());
             continue;
         }
+        int32_t contentStart = preEnd - spanStart;
         if (preEnd < aiSpanStartInSpan) {
             auto beforeContent =
                 StringUtils::ToString(wSpanContent.substr(preEnd - spanStart, aiSpanStartInSpan - preEnd));
-            UpdateContentTextStyle(beforeContent, builder, textStyle);
+            UpdateTextStyle(beforeContent, builder, textStyle, selectedStart - contentStart,
+                selectedEnd - contentStart);
+            contentStart = contentStart + aiSpanStartInSpan - preEnd;
         }
-        auto pipelineContext = PipelineContext::GetCurrentContext();
-        TextStyle normalStyle =
-            !pipelineContext ? TextStyle()
-                                : CreateTextStyleUsingTheme(nullptr, nullptr, pipelineContext->GetTheme<TextTheme>());
-        TextStyle selectedTextStyle = textStyle.value_or(normalStyle);
-        Color color = selectedTextStyle.GetTextColor().ChangeAlpha(DRAGGED_TEXT_OPACITY);
-        selectedTextStyle.SetTextColor(color);
-        auto midTextStyle = !IsDragging() ? aiSpanTextStyle : selectedTextStyle;
         auto displayContent = StringUtils::ToWstring(
             aiSpan.content).substr(aiSpanStartInSpan - aiSpan.start, aiSpanEndInSpan - aiSpanStartInSpan);
-        UpdateContentTextStyle(StringUtils::ToString(displayContent), builder, midTextStyle);
+        UpdateTextStyle(StringUtils::ToString(displayContent), builder, aiSpanTextStyle, selectedStart - contentStart,
+            selectedEnd - contentStart);
         preEnd = aiSpanEndInSpan;
         if (aiSpan.end > position) {
             return;
@@ -337,8 +333,9 @@ void SpanItem::UpdateTextStyleForAISpan(
         }
     }
     if (preEnd < position) {
+        int32_t contentStart = preEnd - spanStart;
         auto afterContent = StringUtils::ToString(wSpanContent.substr(preEnd - spanStart, position - preEnd));
-        UpdateContentTextStyle(afterContent, builder, textStyle);
+        UpdateTextStyle(afterContent, builder, textStyle, selectedStart - contentStart, selectedEnd - contentStart);
     }
 }
 
@@ -395,7 +392,8 @@ void SpanItem::FontRegisterCallback(const RefPtr<FrameNode>& frameNode, const Te
 }
 
 void SpanItem::UpdateTextStyle(
-    const std::string& content, const RefPtr<Paragraph>& builder, const std::optional<TextStyle>& textStyle)
+    const std::string& content, const RefPtr<Paragraph>& builder, const std::optional<TextStyle>& textStyle,
+    const int32_t selStart, const int32_t selEnd)
 {
     if (!IsDragging()) {
         UpdateContentTextStyle(content, builder, textStyle);
@@ -405,9 +403,22 @@ void SpanItem::UpdateTextStyle(
         }
         auto displayContent = StringUtils::Str8ToStr16(content);
         auto contentLength = static_cast<int32_t>(displayContent.length());
-        auto beforeSelectedText = displayContent.substr(0, selectedStart);
-        UpdateContentTextStyle(StringUtils::Str16ToStr8(beforeSelectedText), builder, textStyle);
-        if (selectedStart < contentLength) {
+        if (selStart > 0) {
+            auto beforeSelectedText = displayContent.substr(0, selectedStart);
+            UpdateContentTextStyle(StringUtils::Str16ToStr8(beforeSelectedText), builder, textStyle);
+        }
+        auto finalSelStart = selStart;
+        if (finalSelStart < 0) {
+            finalSelStart = 0;
+        }
+        auto finalSelEnd = selEnd;
+        if (finalSelEnd < 0) {
+            finalSelEnd = 0;
+        }
+        if (finalSelEnd > 0 && finalSelEnd > contentLength) {
+            finalSelEnd = contentLength;
+        }
+        if (finalSelStart < contentLength) {
             auto pipelineContext = PipelineContext::GetCurrentContext();
             TextStyle normalStyle =
                 !pipelineContext ? TextStyle()
@@ -415,12 +426,12 @@ void SpanItem::UpdateTextStyle(
             TextStyle selectedTextStyle = textStyle.value_or(normalStyle);
             Color color = selectedTextStyle.GetTextColor().ChangeAlpha(DRAGGED_TEXT_OPACITY);
             selectedTextStyle.SetTextColor(color);
-            auto selectedText = displayContent.substr(selectedStart, selectedEnd - selectedStart);
+            auto selectedText = displayContent.substr(finalSelStart, finalSelEnd - finalSelStart);
             UpdateContentTextStyle(StringUtils::Str16ToStr8(selectedText), builder, selectedTextStyle);
         }
 
-        if (selectedEnd < contentLength) {
-            auto afterSelectedText = displayContent.substr(selectedEnd);
+        if (finalSelEnd < contentLength) {
+            auto afterSelectedText = displayContent.substr(finalSelEnd);
             UpdateContentTextStyle(StringUtils::Str16ToStr8(afterSelectedText), builder, textStyle);
         }
     }
