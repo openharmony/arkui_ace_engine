@@ -121,7 +121,8 @@ public:
     void ClearToastInSubwindow();
     void ClearToast();
     void ShowToast(const std::string& message, int32_t duration, const std::string& bottom, bool isRightToLeft,
-        const ToastShowMode& showMode = ToastShowMode::DEFAULT);
+        const ToastShowMode& showMode = ToastShowMode::DEFAULT, int32_t alignment = -1,
+        std::optional<DimensionOffset> offset = std::nullopt);
 
     std::unordered_map<int32_t, RefPtr<FrameNode>> GetDialogMap()
     {
@@ -457,6 +458,8 @@ private:
 
     void OpenDialogAnimation(const RefPtr<FrameNode>& node);
     void CloseDialogAnimation(const RefPtr<FrameNode>& node);
+    void SetDialogTransitionEffect(const RefPtr<FrameNode>& node);
+    void CloseDialogMatchTransition(const RefPtr<FrameNode>& node);
     void SetContainerButtonEnable(bool isEnabled);
 
     void SaveLastModalNode();

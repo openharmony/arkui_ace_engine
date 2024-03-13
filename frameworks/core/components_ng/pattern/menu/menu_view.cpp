@@ -204,44 +204,12 @@ RefPtr<MenuPattern> GetMenuPattern(const RefPtr<FrameNode>& menuNode)
     return menuHostNode->GetPattern<MenuPattern>();
 }
 
-void ShowPixelMapAnimation(const RefPtr<FrameNode>& imageNode, const RefPtr<FrameNode>& menuNode)
+void ShowBorderRadiusAndShadowAnimation(const RefPtr<MenuTheme>& menuTheme, const RefPtr<RenderContext>& imageContext)
 {
-    auto menuPattern = GetMenuPattern(menuNode);
-    CHECK_NULL_VOID(menuPattern);
-    auto scaleBefore = menuPattern->GetPreviewBeforeAnimationScale();
-    auto scaleAfter = menuPattern->GetPreviewAfterAnimationScale();
-    auto imageContext = imageNode->GetRenderContext();
-    CHECK_NULL_VOID(imageContext);
-    imageContext->SetClipToBounds(true);
-    auto pipeline = PipelineBase::GetCurrentContext();
-    CHECK_NULL_VOID(pipeline);
-    auto menuTheme = pipeline->GetTheme<NG::MenuTheme>();
-    CHECK_NULL_VOID(menuTheme);
-
-    auto previewBeforeAnimationScale =
-        LessNotEqual(scaleBefore, 0.0) ? menuTheme->GetPreviewBeforeAnimationScale() : scaleBefore;
-    auto previewAfterAnimationScale =
-        LessNotEqual(scaleAfter, 0.0) ? menuTheme->GetPreviewAfterAnimationScale() : scaleAfter;
-
-    imageContext->UpdateTransformScale(VectorF(previewBeforeAnimationScale, previewBeforeAnimationScale));
     auto shadow = imageContext->GetBackShadow();
     if (!shadow.has_value()) {
         shadow = Shadow::CreateShadow(ShadowStyle::None);
     }
-
-    AnimationOption scaleOption = AnimationOption();
-    auto motion = AceType::MakeRefPtr<ResponsiveSpringMotion>(
-        menuTheme->GetSpringMotionResponse(), menuTheme->GetSpringMotionDampingFraction());
-    scaleOption.SetCurve(motion);
-    AnimationUtils::Animate(
-        scaleOption,
-        [imageContext, previewAfterAnimationScale]() {
-            if (imageContext) {
-                imageContext->UpdateTransformScale(VectorF(previewAfterAnimationScale, previewAfterAnimationScale));
-            }
-        },
-        scaleOption.GetOnFinishEvent());
-
     AnimationOption option;
     option.SetDuration(menuTheme->GetPreviewAnimationDuration());
     option.SetCurve(Curves::SHARP);
@@ -260,6 +228,45 @@ void ShowPixelMapAnimation(const RefPtr<FrameNode>& imageNode, const RefPtr<Fram
             }
         },
         option.GetOnFinishEvent());
+}
+
+void ShowPixelMapAnimation(const RefPtr<FrameNode>& imageNode, const RefPtr<FrameNode>& menuNode)
+{
+    auto menuPattern = GetMenuPattern(menuNode);
+    CHECK_NULL_VOID(menuPattern);
+    auto scaleBefore = menuPattern->GetPreviewBeforeAnimationScale();
+    auto scaleAfter = menuPattern->GetPreviewAfterAnimationScale();
+    auto imageContext = imageNode->GetRenderContext();
+    CHECK_NULL_VOID(imageContext);
+    imageContext->SetClipToBounds(true);
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto menuTheme = pipeline->GetTheme<NG::MenuTheme>();
+    CHECK_NULL_VOID(menuTheme);
+
+    DragEventActuator::ExecutePreDragAction(PreDragStatus::PREVIEW_LIFT_STARTED);
+    auto previewBeforeAnimationScale =
+        LessNotEqual(scaleBefore, 0.0) ? menuTheme->GetPreviewBeforeAnimationScale() : scaleBefore;
+    auto previewAfterAnimationScale =
+        LessNotEqual(scaleAfter, 0.0) ? menuTheme->GetPreviewAfterAnimationScale() : scaleAfter;
+
+    imageContext->UpdateTransformScale(VectorF(previewBeforeAnimationScale, previewBeforeAnimationScale));
+
+    AnimationOption scaleOption = AnimationOption();
+    auto motion = AceType::MakeRefPtr<ResponsiveSpringMotion>(
+        menuTheme->GetSpringMotionResponse(), menuTheme->GetSpringMotionDampingFraction());
+    scaleOption.SetCurve(motion);
+    scaleOption.SetOnFinishEvent(
+        []() { DragEventActuator::ExecutePreDragAction(PreDragStatus::PREVIEW_LIFT_FINISHED); });
+    AnimationUtils::Animate(
+        scaleOption,
+        [imageContext, previewAfterAnimationScale]() {
+            if (imageContext) {
+                imageContext->UpdateTransformScale(VectorF(previewAfterAnimationScale, previewAfterAnimationScale));
+            }
+        },
+        scaleOption.GetOnFinishEvent());
+    ShowBorderRadiusAndShadowAnimation(menuTheme, imageContext);
 }
 
 void HandleDragEnd(float offsetX, float offsetY, float velocity, const RefPtr<FrameNode>& menuWrapper)
@@ -302,8 +309,7 @@ void SetPixelMap(const RefPtr<FrameNode>& target, const RefPtr<FrameNode>& menuN
     CHECK_NULL_VOID(pixelMap);
     auto width = pixelMap->GetWidth();
     auto height = pixelMap->GetHeight();
-    auto offsetX = GetFloatImageOffset(target).GetX();
-    auto offsetY = GetFloatImageOffset(target).GetY();
+    auto imageOffset = GetFloatImageOffset(target);
     auto imageNode = FrameNode::GetOrCreateFrameNode(V2::IMAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
         []() { return AceType::MakeRefPtr<ImagePattern>(); });
     auto renderProps = imageNode->GetPaintProperty<ImageRenderProperty>();
@@ -316,13 +322,13 @@ void SetPixelMap(const RefPtr<FrameNode>& target, const RefPtr<FrameNode>& menuN
     props->UpdateImageFit(ImageFit::FILL);
     auto hub = imageNode->GetEventHub<EventHub>();
     CHECK_NULL_VOID(hub);
-    gestureHub = hub->GetOrCreateGestureEventHub();
-    CHECK_NULL_VOID(gestureHub);
-    InitPanEvent(gestureHub, menuNode);
+    auto imageGestureHub = hub->GetOrCreateGestureEventHub();
+    CHECK_NULL_VOID(imageGestureHub);
+    InitPanEvent(imageGestureHub, menuNode);
 
     auto imageContext = imageNode->GetRenderContext();
     CHECK_NULL_VOID(imageContext);
-    imageContext->UpdatePosition(OffsetT<Dimension>(Dimension(offsetX), Dimension(offsetY)));
+    imageContext->UpdatePosition(OffsetT<Dimension>(Dimension(imageOffset.GetX()), Dimension(imageOffset.GetY())));
     imageNode->MarkModifyDone();
     imageNode->MountToParent(menuNode);
     ShowPixelMapAnimation(imageNode, menuNode);

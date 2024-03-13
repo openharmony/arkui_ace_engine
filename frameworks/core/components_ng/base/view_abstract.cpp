@@ -1070,6 +1070,13 @@ void ViewAbstract::SetOnDragStart(
     eventHub->SetOnDragStart(std::move(onDragStart));
 }
 
+void ViewAbstract::SetOnPreDrag(std::function<void(const PreDragStatus)> &&onPreDragFunc)
+{
+    auto eventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<EventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnPreDrag(std::move(onPreDragFunc));
+}
+
 void ViewAbstract::SetOnDragEnter(
     std::function<void(const RefPtr<OHOS::Ace::DragEvent> &, const std::string &)> &&onDragEnter)
 {
@@ -2896,6 +2903,14 @@ void ViewAbstract::SetOnAppear(FrameNode* frameNode, std::function<void()> &&onA
     eventHub->SetOnAppear(std::move(onAppear));
 }
 
+void ViewAbstract::SetOnDisappear(FrameNode* frameNode, std::function<void()> &&onDisappear)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetEventHub<EventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnDisappear(std::move(onDisappear));
+}
+
 void ViewAbstract::SetOnAreaChanged(FrameNode* frameNode, std::function<void(const RectF &oldRect,
     const OffsetF &oldOrigin, const RectF &rect, const OffsetF &origin)> &&onAreaChanged)
 {
@@ -3502,5 +3517,149 @@ TranslateOptions ViewAbstract::GetTranslate(FrameNode* frameNode)
     auto target = frameNode->GetRenderContext();
     CHECK_NULL_RETURN(target, value);
     return target->GetTransformTranslateValue(value);
+}
+
+void ViewAbstract::SetJSFrameNodeOnClick(FrameNode* frameNode, GestureEventFunc&& clickEventFunc)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto gestureHub = frameNode->GetOrCreateGestureEventHub();
+    CHECK_NULL_VOID(gestureHub);
+    gestureHub->SetJSFrameNodeOnClick(std::move(clickEventFunc));
+}
+
+void ViewAbstract::ClearJSFrameNodeOnClick(FrameNode* frameNode)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto gestureHub = frameNode->GetOrCreateGestureEventHub();
+    CHECK_NULL_VOID(gestureHub);
+    gestureHub->ClearJSFrameNodeOnClick();
+}
+
+void ViewAbstract::SetJSFrameNodeOnTouch(FrameNode* frameNode, TouchEventFunc&& touchEventFunc)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto gestureHub = frameNode->GetOrCreateGestureEventHub();
+    CHECK_NULL_VOID(gestureHub);
+    gestureHub->SetJSFrameNodeOnTouchEvent(std::move(touchEventFunc));
+}
+
+void ViewAbstract::ClearJSFrameNodeOnTouch(FrameNode* frameNode)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto gestureHub = frameNode->GetOrCreateGestureEventHub();
+    CHECK_NULL_VOID(gestureHub);
+    gestureHub->ClearJSFrameNodeOnTouch();
+}
+
+void ViewAbstract::SetJSFrameNodeOnAppear(FrameNode* frameNode, std::function<void()>&& onAppear)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetEventHub<NG::EventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetJSFrameNodeOnAppear(std::move(onAppear));
+}
+
+void ViewAbstract::ClearJSFrameNodeOnAppear(FrameNode* frameNode)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetEventHub<NG::EventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->ClearJSFrameNodeOnAppear();
+}
+
+void ViewAbstract::SetJSFrameNodeOnDisappear(FrameNode* frameNode, std::function<void()>&& onDisappear)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetEventHub<NG::EventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetJSFrameNodeOnDisappear(std::move(onDisappear));
+}
+
+void ViewAbstract::ClearJSFrameNodeOnDisappear(FrameNode* frameNode)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetEventHub<NG::EventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->ClearJSFrameNodeOnDisappear();
+}
+
+void ViewAbstract::SetJSFrameNodeOnKeyCallback(FrameNode* frameNode, OnKeyCallbackFunc&& onKeyCallback)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto focusHub = frameNode->GetOrCreateFocusHub();
+    CHECK_NULL_VOID(focusHub);
+    focusHub->SetJSFrameNodeOnKeyCallback(std::move(onKeyCallback));
+}
+
+void ViewAbstract::ClearJSFrameNodeOnKeyCallback(FrameNode* frameNode)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto focusHub = frameNode->GetOrCreateFocusHub();
+    CHECK_NULL_VOID(focusHub);
+    focusHub->ClearJSFrameNodeOnKeyCallback();
+}
+
+void ViewAbstract::SetJSFrameNodeOnFocusCallback(FrameNode* frameNode, OnFocusFunc&& onFocusCallback)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto focusHub = frameNode->GetOrCreateFocusHub();
+    CHECK_NULL_VOID(focusHub);
+    focusHub->SetJSFrameNodeOnFocusCallback(std::move(onFocusCallback));
+}
+
+void ViewAbstract::ClearJSFrameNodeOnFocusCallback(FrameNode* frameNode)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto focusHub = frameNode->GetOrCreateFocusHub();
+    CHECK_NULL_VOID(focusHub);
+    focusHub->ClearJSFrameNodeOnFocusCallback();
+}
+
+void ViewAbstract::SetJSFrameNodeOnBlurCallback(FrameNode* frameNode, OnBlurFunc&& onBlurCallback)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto focusHub = frameNode->GetOrCreateFocusHub();
+    CHECK_NULL_VOID(focusHub);
+    focusHub->SetJSFrameNodeOnBlurCallback(std::move(onBlurCallback));
+}
+
+void ViewAbstract::ClearJSFrameNodeOnBlurCallback(FrameNode* frameNode)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto focusHub = frameNode->GetOrCreateFocusHub();
+    CHECK_NULL_VOID(focusHub);
+    focusHub->ClearJSFrameNodeOnBlurCallback();
+}
+
+void ViewAbstract::SetJSFrameNodeOnHover(FrameNode* frameNode, OnHoverFunc&& onHoverEventFunc)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetOrCreateInputEventHub();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetJSFrameNodeOnHoverEvent(std::move(onHoverEventFunc));
+}
+
+void ViewAbstract::ClearJSFrameNodeOnHover(FrameNode* frameNode)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetOrCreateInputEventHub();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->ClearJSFrameNodeOnHover();
+}
+
+void ViewAbstract::SetJSFrameNodeOnMouse(FrameNode* frameNode, OnMouseEventFunc&& onMouseEventFunc)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetOrCreateInputEventHub();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetJSFrameNodeOnMouseEvent(std::move(onMouseEventFunc));
+}
+
+void ViewAbstract::ClearJSFrameNodeOnMouse(FrameNode* frameNode)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetOrCreateInputEventHub();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->ClearJSFrameNodeOnMouse();
 }
 } // namespace OHOS::Ace::NG

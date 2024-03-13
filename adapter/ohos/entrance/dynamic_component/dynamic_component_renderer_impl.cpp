@@ -153,6 +153,7 @@ void DynamicComponentRendererImpl::AttachRenderContext()
             auto renderContext = rootElement->GetRenderContext();
             CHECK_NULL_VOID(renderContext);
 
+            pipeline->SetAppBgColor(Color::TRANSPARENT);
             renderContext->SetClipToFrame(true);
             renderContext->SetClipToBounds(true);
 

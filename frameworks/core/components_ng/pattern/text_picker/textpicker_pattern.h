@@ -192,7 +192,6 @@ public:
     void SetCascadeOptions(const std::vector<NG::TextCascadePickerOptions>& options,
         const std::vector<NG::TextCascadePickerOptions>& cascadeOptions)
     {
-        isContentUpdateOnly_ = !isFirstUpdate_;
         cascadeOptions_.clear();
         cascadeOriginptions_.clear();
         for (auto& option : cascadeOptions) {
@@ -241,7 +240,6 @@ public:
 
     void SetValues(const std::vector<std::string>& values)
     {
-        isContentUpdateOnly_ = !isFirstUpdate_;
         values_.clear();
         for (auto& value : values) {
             values_.emplace_back(value);
@@ -313,6 +311,16 @@ public:
 
     void CheckAndUpdateColumnSize(SizeF& size);
 
+    void SetDivider(const ItemDivider& divider)
+    {
+        divider_ = divider;
+    }
+
+    ItemDivider GetDivider()
+    {
+        return divider_;
+    }
+
 private:
     void OnModifyDone() override;
     void OnAttachToFrameNode() override;
@@ -371,8 +379,9 @@ private:
 
     WeakPtr<NG::FrameNode> contentRowNode_;
     bool isPicker_ = true;
-    bool isFirstUpdate_ = true;
-    bool isContentUpdateOnly_ = false;
+    bool isFiredSelectsChange_ = false;
+    std::optional<std::string> firedSelectsStr_;
+    ItemDivider divider_;
 };
 } // namespace OHOS::Ace::NG
 

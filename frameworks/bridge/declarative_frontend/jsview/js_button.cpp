@@ -581,8 +581,11 @@ void JSButton::JsSize(const JSCallbackInfo& info)
 void JSButton::JsRadius(const JSCallbackInfo& info)
 {
     CalcDimension radius;
-    ParseJsDimensionVp(info[0], radius);
-    ButtonModel::GetInstance()->SetBorderRadius(radius);
+    if (!ParseJsDimensionVpNG(info[0], radius)) {
+        ButtonModel::GetInstance()->ResetBorderRadius();
+    } else {
+        ButtonModel::GetInstance()->SetBorderRadius(radius);
+    }
     HandleDifferentRadius(info[0]);
 }
 

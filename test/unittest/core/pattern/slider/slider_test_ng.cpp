@@ -115,6 +115,10 @@ constexpr Dimension BUBBLE_VERTICAL_HEIGHT = 32.0_vp;
 constexpr Dimension BUBBLE_HORIZONTAL_WIDTH = 48.0_vp;
 constexpr Dimension BUBBLE_HORIZONTAL_HEIGHT = 40.0_vp;
 const OffsetF SLIDER_GLOBAL_OFFSET = { 200.0f, 200.0f };
+constexpr Dimension ARROW_HEIGHT = 8.0_vp;
+constexpr Dimension ARROW_WIDTH = 16.0_vp;
+constexpr Dimension CIRCULAR_HORIZON_OFFSET = 13.86_vp;
+constexpr Dimension TEXT_MAX = 36.0_vp;
 } // namespace
 class SliderTestNg : public testing::Test {
 public:
@@ -3284,4 +3288,88 @@ HWTEST_F(SliderTestNg, SliderPatternDistributed001, TestSize.Level1)
     sliderPattern->OnRestoreInfo(restoreInfo_);
     EXPECT_EQ(sliderPaintProperty->GetValue().value_or(0), 2);
 }
+
+/**
+ * @tc.name: SliderPatternOnIsFocusActiveUpdate001
+ * @tc.desc: Test Is not Focus when slider active update
+ * @tc.type: FUNC
+ */
+HWTEST_F(SliderTestNg, SliderPatternOnIsFocusActiveUpdate001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create frameNode.
+     */
+    RefPtr<SliderPattern> sliderPattern = AceType::MakeRefPtr<SliderPattern>();
+    ASSERT_NE(sliderPattern, nullptr);
+    auto frameNode = FrameNode::CreateFrameNode(V2::SLIDER_ETS_TAG, -1, sliderPattern);
+    ASSERT_NE(frameNode, nullptr);
+    auto sliderPaintProperty = sliderPattern->GetPaintProperty<SliderPaintProperty>();
+    ASSERT_NE(sliderPaintProperty, nullptr);
+
+    /**
+     * @tc.steps: step2. slider is focus,showtip is true.expect bubbleFlag_ is true.
+     * @tc.expected: Function ProvideRestoreInfo is called.
+     */
+    sliderPaintProperty->UpdateShowTips(true);
+    sliderPattern->OnModifyDone();
+    sliderPattern->focusFlag_ = true;
+    sliderPattern->OnIsFocusActiveUpdate(true);
+    EXPECT_TRUE(sliderPattern->bubbleFlag_);
+}
+
+/**
+ * @tc.name: SliderTipModifierPaintText001
+ * @tc.desc: Test offset of text on slider
+ * @tc.type: FUNC
+ */
+HWTEST_F(SliderTestNg, SliderTipModifierPaintText001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create frameNode and sliderTipModifier.
+     */
+    RefPtr<SliderPattern> sliderPattern = AceType::MakeRefPtr<SliderPattern>();
+    ASSERT_NE(sliderPattern, nullptr);
+    auto frameNode = FrameNode::CreateFrameNode(V2::SLIDER_ETS_TAG, -1, sliderPattern);
+    ASSERT_NE(frameNode, nullptr);
+    auto sliderLayoutProperty = frameNode->GetLayoutProperty<SliderLayoutProperty>();
+    ASSERT_NE(sliderLayoutProperty, nullptr);
+    SliderTipModifier sliderTipModifier(
+        [sliderPattern]() { return sliderPattern->GetBubbleVertexPosition(OffsetF(), 0.0f, SizeF()); });
+    /**
+     * @tc.steps: step2. set sliderTipModifier's axis is HORIZONTAL and call PaintText function.
+     * @tc.expected: text's offsetX is equal to half of vertex_'s width.
+     */
+    auto arrowSizeWidth = static_cast<float>(ARROW_WIDTH.ConvertToPx());
+    auto arrowSizeHeight = static_cast<float>(ARROW_HEIGHT.ConvertToPx());
+    auto circularOffset = static_cast<float>(CIRCULAR_HORIZON_OFFSET.ConvertToPx());
+    sliderTipModifier.SetSliderGlobalOffset(SLIDER_GLOBAL_OFFSET);
+    sliderTipModifier.tipFlag_ = AceType::MakeRefPtr<PropertyBool>(true);
+    Testing::MockCanvas canvas;
+    MockCanvasFunction(canvas);
+    DrawingContext context { canvas, SLIDER_WIDTH, SLIDER_HEIGHT };
+    sliderTipModifier.axis_ = Axis::HORIZONTAL;
+    sliderTipModifier.isMask_ = true;
+    auto paragraph = MockParagraph::GetOrCreateMockParagraph();
+    sliderTipModifier.SetParagraph(paragraph);
+    sliderTipModifier.PaintTip(context);
+    SizeF textSize = { 0, 0 };
+    textSize =
+        SizeF(std::min(sliderTipModifier.paragraph_->GetLongestLine(), static_cast<float>(TEXT_MAX.ConvertToPx())),
+            sliderTipModifier.paragraph_->GetHeight());
+    EXPECT_EQ(sliderTipModifier.textOffset_.GetX(), sliderTipModifier.vertex_.GetX() - textSize.Width() * HALF);
+    EXPECT_EQ(sliderTipModifier.textOffset_.GetY(),
+        sliderTipModifier.vertex_.GetY() -
+            (sliderTipModifier.bubbleSize_.Height() + textSize.Height() + arrowSizeHeight) * HALF);
+    /**
+     * @tc.steps: step2. set sliderTipModifier's axis is VERTICAL and call PaintText function.
+     */
+    sliderTipModifier.axis_ = Axis::VERTICAL;
+    sliderTipModifier.PaintText(context);
+    EXPECT_EQ(sliderTipModifier.textOffset_.GetY(), sliderTipModifier.vertex_.GetY() - textSize.Height() * HALF);
+    EXPECT_EQ(sliderTipModifier.textOffset_.GetX(),
+        sliderTipModifier.vertex_.GetX() - (sliderTipModifier.bubbleSize_.Width() + textSize.Width() + arrowSizeHeight +
+                                               circularOffset - arrowSizeWidth) *
+                                               HALF);
+}
+
 } // namespace OHOS::Ace::NG

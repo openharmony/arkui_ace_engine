@@ -90,6 +90,8 @@ const std::vector<std::string> FONT_FAMILY_VALUE = { "cursive" };
 
 class OverlayManagerTestNg : public testing::Test {
 public:
+    void SetUp() override;
+    void TearDown() override;
     static void SetUpTestCase();
     static void TearDownTestCase();
     std::function<RefPtr<UINode>()> builderFunc_;
@@ -100,8 +102,18 @@ protected:
     static RefPtr<FrameNode> CreateTargetNode();
     static void CreateSheetStyle(SheetStyle& sheetStyle);
     void CreateSheetBuilder();
+    int32_t minPlatformVersion_ = 0;
 };
 
+void OverlayManagerTestNg::SetUp()
+{
+    minPlatformVersion_ = PipelineBase::GetCurrentContext()->GetMinPlatformVersion();
+}
+
+void OverlayManagerTestNg::TearDown()
+{
+    PipelineBase::GetCurrentContext()->SetMinPlatformVersion(minPlatformVersion_);
+}
 
 void OverlayManagerTestNg::SetUpTestCase()
 {
@@ -1295,12 +1307,96 @@ HWTEST_F(OverlayManagerTestNg, TestSheetAvoidSafeArea2, TestSize.Level1)
 }
 
 /**
+ * @tc.type: FUNC
+ * @tc.name: Test BindSheet
+ * @tc.desc: Test SheetPresentationPattern::AvoidSafeArea() when sheetType is Center.
+ */
+HWTEST_F(OverlayManagerTestNg, TestSheetAvoidSafeArea3, TestSize.Level1)
+{
+    MockPipelineContext::GetCurrent()->SetMinPlatformVersion(static_cast<int32_t>(PlatformVersion::VERSION_ELEVEN));
+    /**
+     * @tc.steps: step1. create sheet node and initialize sheet pattern.
+     */
+    auto sheetNode = FrameNode::CreateFrameNode(
+        V2::SHEET_PAGE_TAG, 1, AceType::MakeRefPtr<SheetPresentationPattern>(-1, V2::BUTTON_ETS_TAG, nullptr));
+    auto dragBarNode = FrameNode::CreateFrameNode(
+        "SheetDragBar", ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<SheetDragBarPattern>());
+    auto scroll = FrameNode::CreateFrameNode(
+        V2::SCROLL_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<ScrollPattern>());
+    auto builderContent =
+        FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG, 0, AceType::MakeRefPtr<LinearLayoutPattern>(false));
+    builderContent->MountToParent(scroll);
+    dragBarNode->MountToParent(sheetNode);
+    scroll->MountToParent(sheetNode);
+    sheetNode->GetFocusHub()->currentFocus_ = true;
+    auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
+    sheetPattern->sheetType_ = SheetType::SHEET_CENTER;
+    auto renderContext = sheetNode->GetRenderContext();
+    auto safeAreaManager = AceType::MakeRefPtr<SafeAreaManager>();
+    auto geometryNode = sheetNode->GetGeometryNode();
+    ASSERT_NE(geometryNode, nullptr);
+    geometryNode->SetFrameSize(SizeF(800, 1800));
+    MockPipelineContext::GetCurrent()->safeAreaManager_ = safeAreaManager;
+    MockPipelineContext::GetCurrent()->SetRootSize(800, 2000);
+    auto textFieldManager = AceType::MakeRefPtr<TextFieldManagerNG>();
+    textFieldManager->SetHeight(20);
+    MockPipelineContext::GetCurrent()->SetTextFieldManager(textFieldManager);
+    SafeAreaInsets::Inset upKeyboard { 0, 200 };
+    sheetPattern->pageHeight_ = 2000;
+    sheetPattern->sheetHeight_ = 1800;
+    /**
+     * @tc.steps: step2. keyboard up, and sheet will goes to correct position.
+     * @tc.cases: case1. keyboard up, but sheet needs not up beacure hsafe is enough.
+     */
+    safeAreaManager->keyboardInset_ = upKeyboard;
+    textFieldManager->SetClickPosition(Offset(0, 1000));
+    sheetPattern->height_ = 1800;
+    sheetPattern->AvoidSafeArea();
+    EXPECT_EQ(sheetPattern->keyboardHeight_, 200);
+    /**
+     * @tc.cases: case2. keyboard up, sheet needs not to go up.
+     */
+    sheetPattern->keyboardHeight_ = 0;
+    textFieldManager->SetClickPosition(Offset(0, 300));
+    sheetPattern->AvoidSafeArea();
+    EXPECT_EQ(static_cast<int>(renderContext->GetTransformTranslate()->y.ConvertToPx()), 2000 - sheetPattern->height_);
+    /**
+     * @tc.cases: case3. sheet offset = 1800, sheet goes up with h and not goes up to LARGE.
+     */
+    sheetPattern->keyboardHeight_ = 0;
+    textFieldManager->SetClickPosition(Offset(0, 1900));
+    sheetPattern->AvoidSafeArea();
+    EXPECT_EQ(static_cast<int>(renderContext->GetTransformTranslate()->y.ConvertToPx()), 56);
+    EXPECT_FALSE(sheetPattern->isScrolling_);
+    /**
+     * @tc.cases: case4. sheet offset = 1800, sheet goes up to LARGE and scrolling.
+     */
+    sheetPattern->keyboardHeight_ = 0;
+    sheetPattern->height_ = 1950;
+    textFieldManager->SetClickPosition(Offset(0, 1900));
+    sheetPattern->AvoidSafeArea();
+    EXPECT_EQ(static_cast<int>(renderContext->GetTransformTranslate()->y.ConvertToPx()), 8);
+    EXPECT_EQ(sheetPattern->scrollHeight_, 102.0f);
+    EXPECT_TRUE(sheetPattern->isScrolling_);
+    /**
+     * @tc.cases: case5. softkeyboard is down.
+     */
+    SafeAreaInsets::Inset downKeyboard { 0, 0 };
+    safeAreaManager->keyboardInset_ = downKeyboard;
+    sheetPattern->AvoidSafeArea();
+    EXPECT_EQ(static_cast<int>(renderContext->GetTransformTranslate()->y.ConvertToPx()), 50);
+    EXPECT_EQ(sheetPattern->keyboardHeight_, 0);
+    EXPECT_FALSE(sheetPattern->isScrolling_);
+}
+
+/**
  * @tc.name: TestOnBindSheet
  * @tc.desc: Test Sheet avoids aiBar.
  * @tc.type: FUNC
  */
 HWTEST_F(OverlayManagerTestNg, TestSheetAvoidaiBar, TestSize.Level1)
 {
+    MockPipelineContext::GetCurrent()->SetMinPlatformVersion(static_cast<int32_t>(PlatformVersion::VERSION_ELEVEN));
     auto operationColumn = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG,
         ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<LinearLayoutPattern>(true));
     auto callback = [](const std::string&) {};

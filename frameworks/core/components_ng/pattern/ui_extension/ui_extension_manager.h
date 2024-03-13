@@ -33,7 +33,7 @@ namespace Rosen {
 class AvoidArea;
 enum class WSError;
 class OccupiedAreaChangeInfo;
-} // namespace OHOS::Rosen
+} // namespace Rosen
 } // namespace OHOS
 
 namespace OHOS::Ace::NG {
@@ -61,8 +61,8 @@ public:
     bool OnBackPressed();
     const RefPtr<FrameNode> GetFocusUiExtensionNode();
     bool IsWrapExtensionAbilityId(int64_t elementId);
-    bool SendAccessibilityEventInfo(const Accessibility::AccessibilityEventInfo& eventInfo,
-        int64_t uiExtensionOffset, const RefPtr<PipelineBase>& pipeline);
+    bool SendAccessibilityEventInfo(const Accessibility::AccessibilityEventInfo& eventInfo, int64_t uiExtensionOffset,
+        const RefPtr<PipelineBase>& pipeline);
     std::pair<int64_t, int64_t> UnWrapExtensionAbilityId(int64_t extensionOffset, int64_t elementId);
     int32_t ApplyExtensionId();
     void RecycleExtensionId(int32_t id);
@@ -91,7 +91,8 @@ public:
 
     bool NotifyOccupiedAreaChangeInfo(const sptr<Rosen::OccupiedAreaChangeInfo>& info);
 
-    void OnSizeChanged(WindowSizeChangeReason type, const std::shared_ptr<Rosen::RSTransaction>& rsTransaction);
+    void NotifySizeChangeReason(
+        WindowSizeChangeReason type, const std::shared_ptr<Rosen::RSTransaction>& rsTransaction);
 
 private:
     class UIExtensionIdUtility {

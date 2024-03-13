@@ -3329,6 +3329,39 @@ const isInteger = (val) => Number.isInteger(val);
 const isNonEmptyMap = (val) => val instanceof Map && val.size > 0;
 const isTruthyString = (val) => typeof val === 'string' && val.trim() !== '';
 
+class UICommonEvent {
+  constructor(nodePtr) {
+      this._nodePtr = nodePtr;
+  }
+  setOnClick(callback) {
+      getUINativeModule().frameNode.setOnClick(this._nodePtr, callback);
+  }
+  setOnTouch(callback) {
+      getUINativeModule().frameNode.setOnTouch(this._nodePtr, callback);
+  }
+  setOnAppear(callback) {
+      getUINativeModule().frameNode.setOnAppear(this._nodePtr, callback);
+  }
+  setOnDisappear(callback) {
+      getUINativeModule().frameNode.setOnDisappear(this._nodePtr, callback);
+  }
+  setOnKeyEvent(callback) {
+      getUINativeModule().frameNode.setOnKeyEvent(this._nodePtr, callback);
+  }
+  setOnFocus(callback) {
+      getUINativeModule().frameNode.setOnFocus(this._nodePtr, callback);
+  }
+  setOnBlur(callback) {
+      getUINativeModule().frameNode.setOnBlur(this._nodePtr, callback);
+  }
+  setOnHover(callback) {
+      getUINativeModule().frameNode.setOnHover(this._nodePtr, callback);
+  }
+  setOnMouse(callback) {
+      getUINativeModule().frameNode.setOnMouse(this._nodePtr, callback);
+  }
+}
+
 /// <reference path='./import.ts' />
 class BlankColorModifier extends ModifierWithKey {
   constructor(value) {
@@ -5327,6 +5360,43 @@ class RichEditorCopyOptionsModifier extends ModifierWithKey {
   }
 }
 RichEditorCopyOptionsModifier.identity = Symbol('richEditorCopyOptions');
+
+class RichEditorCaretColorModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().richEditor.resetCaretColor(node);
+    }
+    else {
+      getUINativeModule().richEditor.setCaretColor(node, this.value);
+    }
+  }
+  checkObjectDiff() {
+    return this.stageValue !== this.value;
+  }
+}
+RichEditorCaretColorModifier.identity = Symbol('richEditorCaretColor');
+
+class RichEditorSelectedBackgroundColorModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().richEditor.resetSelectedBackgroundColor(node);
+    }
+    else {
+      getUINativeModule().richEditor.setSelectedBackgroundColor(node, this.value);
+    }
+  }
+  checkObjectDiff() {
+    return this.stageValue !== this.value;
+  }
+}
+RichEditorSelectedBackgroundColorModifier.identity = Symbol('richEditorSelectedBackgroundColor');
+
 class ArkRichEditorComponent extends ArkComponent {
   constructor(nativePtr) {
     super(nativePtr);
@@ -5342,6 +5412,17 @@ class ArkRichEditorComponent extends ArkComponent {
     modifierWithKey(this._modifiersWithKeys, RichEditorCopyOptionsModifier.identity, RichEditorCopyOptionsModifier, value);
     return this;
   }
+
+  caretColor(value) {
+    modifierWithKey(this._modifiersWithKeys, RichEditorCaretColorModifier.identity, RichEditorCaretColorModifier, value);
+    return this;
+  }
+
+  selectedBackgroundColor(value) {
+    modifierWithKey(this._modifiersWithKeys, RichEditorSelectedBackgroundColorModifier.identity, RichEditorSelectedBackgroundColorModifier, value);
+    return this;
+  }
+
   onPaste(callback) {
     throw new Error('Method not implemented.');
   }
@@ -19613,3 +19694,4 @@ if (globalThis.RemoteWindow !== undefined) {
     component.applyModifierPatch();
   };
 }
+

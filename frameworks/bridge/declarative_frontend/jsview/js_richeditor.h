@@ -54,7 +54,8 @@ public:
     static JSRef<JSObject> CreateJSValueResource(const RefPtr<ResourceObject>& valueResource);
     static JSRef<JSObject> CreateJSImageStyleResult(const ImageStyleResult& imageStyleResult);
     static JSRef<JSObject> CreateParagraphStyleResult(const ParagraphInfo& info);
-
+    static void SetCaretColor(const JSCallbackInfo& info);
+    static void SetSelectedBackgroundColor(const JSCallbackInfo& info);
 private:
     static void CreateTextStyleObj(JSRef<JSObject>& textStyleObj, const NG::RichEditorAbstractSpanResult& spanResult);
     static void CreateImageStyleObj(JSRef<JSObject>& imageStyleObj, JSRef<JSObject>& spanResultObj,
@@ -98,6 +99,8 @@ public:
     ImageSpanAttribute ParseJsImageSpanAttribute(JSRef<JSObject> imageAttribute);
     void ParseJsTextStyle(
         const JSRef<JSObject>& styleObject, TextStyle& style, struct UpdateSpanStyle& updateSpanStyle);
+    void ParseJsLineHeightLetterSpacingTextStyle(const JSRef<JSObject>& styleObject, TextStyle& style,
+        struct UpdateSpanStyle& updateSpanStyle, bool isSupportPercent = true);
     void ParseJsSymbolSpanStyle(
         const JSRef<JSObject>& styleObject, TextStyle& style, struct UpdateSpanStyle& updateSpanStyle);
     ImageSpanOptions CreateJsImageOptions(const JSCallbackInfo& args);
@@ -130,6 +133,7 @@ private:
     static JSRef<JSVal> CreateJSSpansInfo(const SelectionInfo& info);
     static JSRef<JSVal> CreateJSParagraphsInfo(const std::vector<ParagraphInfo>& info);
     static JSRef<JSObject> CreateTypingStyleResult(const struct UpdateSpanStyle& typingStyle);
+    static void ParseWordBreakParagraphStyle(const JSRef<JSObject>& styleObject, struct UpdateParagraphStyle& style);
 
     WeakPtr<RichEditorControllerBase> controllerWeak_;
     ACE_DISALLOW_COPY_AND_MOVE(JSRichEditorController);

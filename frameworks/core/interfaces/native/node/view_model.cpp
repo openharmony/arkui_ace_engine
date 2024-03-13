@@ -355,13 +355,6 @@ void AddChild(void* parentNode, void* childNode)
     CHECK_NULL_VOID(childNode);
     auto* parent = reinterpret_cast<UINode*>(parentNode);
     auto* child = reinterpret_cast<UINode*>(childNode);
-
-    auto* companionNodeParent = GetCompanion(parentNode);
-    auto* companionNodeChild = GetCompanion(childNode);
-    CHECK_NULL_VOID(companionNodeParent);
-    CHECK_NULL_VOID(companionNodeChild);
-    companionNodeParent->addChild(companionNodeChild);
-
     parent->AddChild(AceType::Claim(child));
     auto* frameNode = AceType::DynamicCast<FrameNode>(child);
     if (frameNode) {
@@ -375,13 +368,6 @@ void RemoveChild(void* parentNode, void* childNode)
     CHECK_NULL_VOID(childNode);
     auto* parent = reinterpret_cast<UINode*>(parentNode);
     auto* child = reinterpret_cast<UINode*>(childNode);
-
-    auto* companionNodeParent = GetCompanion(parentNode);
-    auto* companionNodeChild = GetCompanion(childNode);
-    CHECK_NULL_VOID(companionNodeParent);
-    CHECK_NULL_VOID(companionNodeChild);
-    companionNodeParent->removeChild(companionNodeChild);
-
     parent->RemoveChild(AceType::Claim(child));
 }
 
@@ -391,14 +377,7 @@ void InsertChildAfter(void* parentNode, void* childNode, void* siblingNode)
     CHECK_NULL_VOID(childNode);
     auto* parent = reinterpret_cast<UINode*>(parentNode);
     auto* child = reinterpret_cast<UINode*>(childNode);
-
-    auto* companionNodeParent = GetCompanion(parentNode);
-    auto* companionNodeChild = GetCompanion(childNode);
-    auto* companionNodeSibling = GetCompanion(siblingNode);
-    CHECK_NULL_VOID(companionNodeParent);
-    CHECK_NULL_VOID(companionNodeChild);
-    companionNodeParent->insertChildAfter(companionNodeChild, companionNodeSibling);
-
+    
     if (AceType::InstanceOf<GroupNode>(parent)) {
         auto* groupNode = AceType::DynamicCast<GroupNode>(parent);
         groupNode->AddChildToGroup(AceType::Claim(child));

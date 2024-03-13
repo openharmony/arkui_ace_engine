@@ -34,7 +34,7 @@ InputEventActuator::InputEventActuator(const WeakPtr<InputEventHub>& inputEventH
 void InputEventActuator::OnCollectMouseEvent(
     const OffsetF& coordinateOffset, const GetEventTargetImpl& getEventTargetImpl, TouchTestResult& result)
 {
-    if (inputEvents_.empty() && !userCallback_) {
+    if (inputEvents_.empty() && !userCallback_ && !userJSFrameNodeCallback_) {
         return;
     }
 
@@ -51,6 +51,10 @@ void InputEventActuator::OnCollectMouseEvent(
         if (userEvent) {
             (*userEvent)(info);
         }
+        auto userJSFrameNodeCallback = actuator->userJSFrameNodeCallback_;
+        if (userJSFrameNodeCallback) {
+            (*userJSFrameNodeCallback)(info);
+        }
     };
     mouseEventTarget_->SetCallback(onMouseCallback);
     mouseEventTarget_->SetCoordinateOffset(Offset(coordinateOffset.GetX(), coordinateOffset.GetY()));
@@ -61,7 +65,7 @@ void InputEventActuator::OnCollectMouseEvent(
 void InputEventActuator::OnCollectHoverEvent(
     const OffsetF& coordinateOffset, const GetEventTargetImpl& getEventTargetImpl, TouchTestResult& result)
 {
-    if (inputEvents_.empty() && !userCallback_) {
+    if (inputEvents_.empty() && !userCallback_ && !userJSFrameNodeCallback_) {
         return;
     }
 
@@ -78,6 +82,10 @@ void InputEventActuator::OnCollectHoverEvent(
         auto userEvent = actuator->userCallback_;
         if (userEvent) {
             (*userEvent)(info, hoverInfo);
+        }
+        auto userJSFrameNodeCallback = actuator->userJSFrameNodeCallback_;
+        if (userJSFrameNodeCallback) {
+            (*userJSFrameNodeCallback)(info, hoverInfo);
         }
     };
     hoverEventTarget_->SetCallback(onHoverCallback);

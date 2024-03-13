@@ -22,6 +22,7 @@
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
 #include "core/components/common/properties/alignment.h"
+#include "core/components_ng/manager/focus/focus_view.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_algorithm.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_property.h"
@@ -32,8 +33,8 @@
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
-class ACE_EXPORT SheetPresentationPattern : public LinearLayoutPattern, public PopupBasePattern {
-    DECLARE_ACE_TYPE(SheetPresentationPattern, LinearLayoutPattern, PopupBasePattern);
+class ACE_EXPORT SheetPresentationPattern : public LinearLayoutPattern, public PopupBasePattern, public FocusView {
+    DECLARE_ACE_TYPE(SheetPresentationPattern, LinearLayoutPattern, PopupBasePattern, FocusView);
 
 public:
     SheetPresentationPattern(
@@ -151,10 +152,12 @@ public:
 
     bool IsScrollable() const;
     void AvoidAiBar();
+
     void AvoidSafeArea();
     void CheckBuilderChange();
     float GetSheetHeightChange();
     void ScrollTo(float height);
+    bool AdditionalScrollTo(const RefPtr<FrameNode>& scroll, float height);
     float InitialSingleGearHeight(NG::SheetStyle& sheetStyle);
 
     // initial drag gesture event
@@ -204,6 +207,11 @@ public:
     FocusPattern GetFocusPattern() const override
     {
         return { FocusType::SCOPE, true };
+    }
+
+    std::list<int32_t> GetRouteOfFirstScope() override
+    {
+        return { 1, 0 };
     }
 
     bool IsExecuteOnDisappear() const
@@ -326,6 +334,27 @@ public:
         return show_;
     }
 
+    // Get ScrollHeight before avoid keyboard
+    float GetScrollHeight() const
+    {
+        if (sheetType_ == SheetType::SHEET_CENTER) {
+            return centerHeight_;
+        }
+        return height_;
+    }
+
+    bool IsAvoidingKeyboard() const
+    {
+        return Positive(keyboardHeight_);
+    }
+
+    bool IsTypeNeedAvoidAiBar() const
+    {
+        return sheetType_ == SheetType::SHEET_BOTTOM || sheetType_ == SheetType::SHEET_BOTTOMLANDSPACE;
+    }
+
+    void GetBuilderInitHeight();
+    void DumpAdvanceInfo() override;
 protected:
     void OnDetachFromFrameNode(FrameNode* frameNode) override;
 
@@ -371,18 +400,18 @@ private:
     float currentOffset_ = 0.0f;
 
     float height_ = 0.0f; // sheet height, start from the bottom
-    float sheetHeight_ = 0.0f;
-    float pageHeight_ = 0.0f;
+    float sheetHeight_ = 0.0f; // sheet frameSize Height
+    float pageHeight_ = 0.0f; // root Height, = maxSize.Height()
     float scrollHeight_ = 0.0f;
     float statusBarHeight_ = .0f;
     bool isExecuteOnDisappear_ = false;
     bool windowRotate_ = false;
     bool firstMeasure_ = true;
     bool isScrolling_ = false;
-
-    float sheetMaxHeight_ = 0.0f;
+    float builderHeight_ = 0.0f;
+    float sheetMaxHeight_ = 0.0f; // start from the bottom, pageHeight - statusBarHeight
     float sheetMaxWidth_ = 0.0f;
-    float centerHeight_ = 0.0f;
+    float centerHeight_ = 0.0f; // node height, not translate height
     float sheetFitContentHeight_ = 0.0f;
     float sheetOffsetX_ = 0.0f;
     float sheetOffsetY_ = 0.0f;

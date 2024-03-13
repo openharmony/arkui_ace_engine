@@ -47,7 +47,6 @@ public:
     virtual RefPtr<SpanBase> GetSubSpan(int32_t start, int32_t end) = 0;
     virtual SpanType GetSpanType() const = 0;
     virtual void ApplyToSpanItem(const RefPtr<NG::SpanItem>& spanItem) const = 0;
-    virtual void RemoveToSpanItem(const RefPtr<NG::SpanItem>& spanItem) const = 0;
     virtual RefPtr<NG::SpanItem> CreateNewSpanItem() const = 0;
     int32_t GetStartIndex() const;
     int32_t GetEndIndex() const;
@@ -73,7 +72,6 @@ public:
     SpanType GetSpanType() const override;
     std::string ToString() const override;
     void ApplyToSpanItem(const RefPtr<NG::SpanItem>& spanItem) const override;
-    void RemoveToSpanItem(const RefPtr<NG::SpanItem>& spanItem) const override;
     RefPtr<NG::SpanItem> CreateNewSpanItem() const override;
     static RefPtr<SpanBase> CreateDefaultSpan();
 

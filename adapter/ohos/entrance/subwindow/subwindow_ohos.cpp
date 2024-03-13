@@ -579,7 +579,6 @@ void SubwindowOhos::HideMenuNG(const RefPtr<NG::FrameNode>& menu, int32_t target
     HideFilter();
 }
 
-
 void SubwindowOhos::UpdateHideMenuOffsetNG(const NG::OffsetF& offset)
 {
     ContainerScope scope(childContainerId_);
@@ -991,8 +990,8 @@ void SubwindowOhos::ClearToast()
     HideWindow();
 }
 
-void SubwindowOhos::ShowToastForAbility(
-    const std::string& message, int32_t duration, const std::string& bottom, const NG::ToastShowMode& showMode)
+void SubwindowOhos::ShowToastForAbility(const std::string& message, int32_t duration, const std::string& bottom,
+    const NG::ToastShowMode& showMode, int32_t alignment, std::optional<DimensionOffset> offset)
 {
     TAG_LOGD(AceLogTag::ACE_SUB_WINDOW, "show toast for ability enter, containerId : %{public}d", childContainerId_);
     SubwindowManager::GetInstance()->SetCurrentSubwindow(AceType::Claim(this));
@@ -1017,11 +1016,11 @@ void SubwindowOhos::ShowToastForAbility(
         ResizeWindow();
         window_->SetTouchable(false);
     }
-    delegate->ShowToast(message, duration, bottom, showMode);
+    delegate->ShowToast(message, duration, bottom, showMode, alignment, offset);
 }
 
-void SubwindowOhos::ShowToastForService(
-    const std::string& message, int32_t duration, const std::string& bottom, const NG::ToastShowMode& showMode)
+void SubwindowOhos::ShowToastForService(const std::string& message, int32_t duration, const std::string& bottom,
+    const NG::ToastShowMode& showMode, int32_t alignment, std::optional<DimensionOffset> offset)
 {
     TAG_LOGD(AceLogTag::ACE_SUB_WINDOW, "show toast for Service enter");
     bool ret = CreateEventRunner();
@@ -1074,14 +1073,14 @@ void SubwindowOhos::ShowToastForService(
     }
 }
 
-void SubwindowOhos::ShowToast(
-    const std::string& message, int32_t duration, const std::string& bottom, const NG::ToastShowMode& showMode)
+void SubwindowOhos::ShowToast(const std::string& message, int32_t duration, const std::string& bottom,
+    const NG::ToastShowMode& showMode, int32_t alignment, std::optional<DimensionOffset> offset)
 {
     TAG_LOGD(AceLogTag::ACE_SUB_WINDOW, "show toast enter");
     if (parentContainerId_ >= MIN_PA_SERVICE_ID || parentContainerId_ < 0) {
-        ShowToastForService(message, duration, bottom, showMode);
+        ShowToastForService(message, duration, bottom, showMode, alignment, offset);
     } else {
-        ShowToastForAbility(message, duration, bottom, showMode);
+        ShowToastForAbility(message, duration, bottom, showMode, alignment, offset);
     }
 }
 

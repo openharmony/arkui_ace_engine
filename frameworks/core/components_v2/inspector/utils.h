@@ -479,12 +479,12 @@ inline std::string ConvertWrapWordBreakToString(WordBreak wordBreak)
 inline std::string ConvertEllipsisModeToString(EllipsisMode value)
 {
     static const LinearEnumMapNode<EllipsisMode, std::string> modalTable[] = {
-        { EllipsisMode::HEAD, "head" },
-        { EllipsisMode::MIDDLE, "middle" },
-        { EllipsisMode::TAIL, "tail" },
+        { EllipsisMode::HEAD, "EllipsisMode.START" },
+        { EllipsisMode::MIDDLE, "EllipsisMode.CENTER" },
+        { EllipsisMode::TAIL, "EllipsisMode.END" },
     };
     auto index = BinarySearchFindIndex(modalTable, ArraySize(modalTable), value);
-    return index < 0 ? "tail" : modalTable[index].value;
+    return index < 0 ? "EllipsisMode.END" : modalTable[index].value;
 }
 
 inline std::string ConvertColorToString(Color color)

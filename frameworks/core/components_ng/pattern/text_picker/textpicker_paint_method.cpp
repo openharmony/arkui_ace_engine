@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -42,7 +42,6 @@ CanvasDrawFunction TextPickerPaintMethod::GetForegroundDrawFunction(PaintWrapper
     CHECK_NULL_RETURN(pickerNode, nullptr);
     auto layoutProperty = pickerNode->GetLayoutProperty<TextPickerLayoutProperty>();
     CHECK_NULL_RETURN(layoutProperty, nullptr);
-
     return
         [weak = WeakClaim(this), layoutProperty, frameRect, enabled = enabled_, pattern = pattern_](RSCanvas& canvas) {
             auto picker = weak.Upgrade();
@@ -51,6 +50,8 @@ CanvasDrawFunction TextPickerPaintMethod::GetForegroundDrawFunction(PaintWrapper
             CHECK_NULL_VOID(textPickerPattern);
 
             PaddingPropertyF padding = layoutProperty->CreatePaddingAndBorder();
+            auto divider = textPickerPattern->GetDivider();
+
             RectF contentRect = { padding.left.value_or(0), padding.top.value_or(0),
                 frameRect.Width() - padding.Width(), frameRect.Height() - padding.Height() };
 
@@ -59,40 +60,70 @@ CanvasDrawFunction TextPickerPaintMethod::GetForegroundDrawFunction(PaintWrapper
                 dividerHeight = textPickerPattern->GetResizePickerItemHeight();
             }
 
-            if (contentRect.Width() >= 0.0f && contentRect.Height() >= dividerHeight) {
-                picker->PaintDividerLines(canvas, contentRect, dividerHeight);
+            if (contentRect.Width() >= 0.0f && (contentRect.Height() >= dividerHeight)) {
+                DividerInfo info;
+                info.dividerHeight = dividerHeight;
+                info.startMargin = std::max(0.0, divider.startMargin.ConvertToPx());
+                info.endMargin = std::max(0.0, divider.endMargin.ConvertToPx());
+                if (divider.strokeWidth.ConvertToPx() > contentRect.Height()) {
+                    info.dividerWidth = contentRect.Height();
+                } else {
+                    info.dividerWidth = divider.strokeWidth.ConvertToPx();
+                }
+                info.dividerColor = divider.color;
+                if (picker->NeedPaintDividerLines(contentRect, info)) {
+                    picker->PaintDividerLines(canvas, contentRect, info);
+                } else {
+                    picker->PaintDisable(canvas, frameRect.Width(), frameRect.Height());
+                }
             }
-
             if (!enabled) {
                 picker->PaintDisable(canvas, frameRect.Width(), frameRect.Height());
             }
         };
 }
 
-void TextPickerPaintMethod::PaintDividerLines(RSCanvas& canvas, RectF contentRect, double dividerHeight)
+bool TextPickerPaintMethod::NeedPaintDividerLines(RectF contentRect, DividerInfo& info)
 {
-    auto pipeline = PipelineContext::GetCurrentContext();
-    CHECK_NULL_VOID(pipeline);
-    auto theme = pipeline->GetTheme<PickerTheme>();
-    auto dividerColor = theme->GetDividerColor();
-    auto dividerLineWidth = theme->GetDividerThickness().ConvertToPx();
-
+    if (info.dividerWidth <= 0) {
+        return false;
+    }
     auto dividerLength = contentRect.Width();
     auto dividerMargin = contentRect.GetX();
     auto textPickerPattern = DynamicCast<TextPickerPattern>(pattern_.Upgrade());
-    CHECK_NULL_VOID(textPickerPattern);
+    if (!textPickerPattern) {
+        return false;
+    }
     if (textPickerPattern->GetIsShowInDialog()) {
         dividerLength -= PICKER_DIALOG_DIVIDER_MARGIN.ConvertToPx() * DOUBLE;
         dividerMargin += PICKER_DIALOG_DIVIDER_MARGIN.ConvertToPx();
     }
 
-    DividerPainter dividerPainter(dividerLineWidth, dividerLength, false, dividerColor, LineCap::SQUARE);
-    double upperLine = (contentRect.Height() - dividerHeight) / 2.0 + contentRect.GetY();
-    double downLine = (contentRect.Height() + dividerHeight) / 2.0 + contentRect.GetY();
+    float checkMargin = dividerLength - info.startMargin - info.endMargin;
+    if (NearZero(checkMargin)) {
+        return false;
+    }
+    if (LessNotEqual(checkMargin, 0.0f)) {
+        LOGE("StartMagin and endMargin are set to 0, because the parameters are wrong");
+        info.startMargin = 0.0f;
+        info.endMargin = 0.0f;
+    }
+    dividerMargin += info.startMargin;
+    dividerLength = dividerLength - info.startMargin - info.endMargin;
+    info.dividerMargin = dividerMargin;
+    info.dividerLength = dividerLength;
+    return true;
+}
 
-    OffsetF offset = OffsetF(dividerMargin, upperLine);
+void TextPickerPaintMethod::PaintDividerLines(RSCanvas& canvas, RectF contentRect, const DividerInfo &info)
+{
+    DividerPainter dividerPainter(info.dividerWidth, info.dividerLength, false, info.dividerColor, LineCap::SQUARE);
+    double upperLine = (contentRect.Height() - info.dividerHeight) / 2.0 + contentRect.GetY();
+    double downLine = (contentRect.Height() + info.dividerHeight) / 2.0 + contentRect.GetY();
+
+    OffsetF offset = OffsetF(info.dividerMargin, upperLine);
     dividerPainter.DrawLine(canvas, offset);
-    OffsetF offsetY = OffsetF(dividerMargin, downLine);
+    OffsetF offsetY = OffsetF(info.dividerMargin, downLine);
     dividerPainter.DrawLine(canvas, offsetY);
 }
 

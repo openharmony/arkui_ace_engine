@@ -23,7 +23,6 @@
 #include "core/animation/curve.h"
 #include "core/common/resource/resource_manager.h"
 #include "core/common/resource/resource_object.h"
-#include "core/common/resource/resource_wrapper.h"
 #include "frameworks/bridge/common/utils/utils.h"
 
 namespace OHOS::Ace::Napi {
@@ -683,4 +682,17 @@ std::optional<Color> GetOptionalColor(napi_env env, napi_value argv, napi_valuet
     }
 }
 
+bool ParseIntegerToString(const ResourceInfo& info, std::string& result)
+{
+    auto resourceWrapper = CreateResourceWrapper(info);
+    if (info.type == static_cast<int>(ResourceType::INTEGER)) {
+        if (info.resId == UNKNOWN_RESOURCE_ID) {
+            result = std::to_string(resourceWrapper->GetIntByName(info.params[0]));
+        } else {
+            result = std::to_string(resourceWrapper->GetInt(info.resId));
+        }
+        return true;
+    }
+    return true;
+}
 } // namespace OHOS::Ace::Napi

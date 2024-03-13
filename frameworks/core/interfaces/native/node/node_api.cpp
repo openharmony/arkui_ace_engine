@@ -99,7 +99,6 @@ void SetCustomCallback(ArkUINodeHandle node, ArkUI_Int32 callback)
 ArkUINodeHandle CreateNode(ArkUINodeType type, int peerId, ArkUI_Int32 flags)
 {
     auto* node = reinterpret_cast<ArkUINodeHandle>(ViewModel::CreateNode(type, peerId));
-    ViewModel::RegisterCompanion(node, peerId, flags);
     return node;
 }
 
@@ -132,7 +131,7 @@ typedef void (*ComponentAsyncEventHandler)(ArkUINodeHandle node, void* extraPara
 /* clang-format off */
 const ComponentAsyncEventHandler commonNodeAsyncEventHandlers[] = {
     NodeModifier::SetOnAppear,
-    nullptr,
+    NodeModifier::SetOnDisappear,
     NodeModifier::SetOnTouch,
     NodeModifier::SetOnClick,
     nullptr,
@@ -159,12 +158,15 @@ const ComponentAsyncEventHandler textInputNodeAsyncEventHandlers[] = {
     NodeModifier::SetOnTextInputChange,
     NodeModifier::SetOnTextInputCut,
     NodeModifier::SetOnTextInputPaste,
+    NodeModifier::SetOnTextInputSelectionChange,
 };
 
 const ComponentAsyncEventHandler textAreaNodeAsyncEventHandlers[] = {
     nullptr,
     nullptr,
     NodeModifier::SetOnTextAreaChange,
+    NodeModifier::SetOnTextAreaPaste,
+    NodeModifier::SetOnTextAreaSelectionChange,
 };
 
 const ComponentAsyncEventHandler refreshNodeAsyncEventHandlers[] = {
@@ -354,6 +356,11 @@ void MarkDirty(ArkUINodeHandle nodePtr, ArkUI_Uint32 flag)
     }
 }
 
+void ContainerScopeBind()
+{
+    ContainerScope scope(Container::CurrentIdSafely());
+}
+
 static void SetCallbackMethod(ArkUIAPICallbackMethod* method)
 {
     ViewModel::SetCallbackMethod(method);
@@ -498,6 +505,7 @@ const ArkUIBasicAPI* GetBasicAPI()
 
         ApplyModifierFinish,
         MarkDirty,
+        ContainerScopeBind,
     };
     /* clang-format on */
 

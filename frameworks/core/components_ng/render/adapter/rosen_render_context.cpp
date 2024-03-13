@@ -127,6 +127,13 @@ constexpr float PARTICLE_DEFAULT_ANGLE = 0.0f;
 constexpr float PARTICLE_DEFAULT_SPIN = 0.0f;
 constexpr int64_t PARTICLE_DEFAULT_LIFETIME = 1000;
 constexpr int32_t PARTICLE_DEFAULT_EMITTER_RATE = 5;
+constexpr double HALF = 0.5;
+constexpr double PARENT_PAGE_OFFSET = 0.2;
+constexpr int32_t MASK_DURATION = 350;
+constexpr int32_t DEFAULT_ANIMATION_DURATION = 450;
+const Color MASK_COLOR = Color::FromARGB(25, 0, 0, 0);
+const Color DEFAULT_MASK_COLOR = Color::FromARGB(0, 0, 0, 0);
+const RefPtr<InterpolatingSpring> springCurve = AceType::MakeRefPtr<InterpolatingSpring>(0.0f, 1.0f, 342.0f, 37.0f);
 
 Rosen::Gravity GetRosenGravity(RenderFit renderFit)
 {
@@ -769,7 +776,7 @@ void RosenRenderContext::SetBackBlurFilter()
 void RosenRenderContext::SetFrontBlurFilter()
 {
     CHECK_NULL_VOID(rsNode_);
-    auto context = PipelineBase::GetCurrentContext();
+    auto context = PipelineBase::GetCurrentContextSafely();
     CHECK_NULL_VOID(context);
     const auto& foreground = GetForeground();
     CHECK_NULL_VOID(foreground);
@@ -804,8 +811,8 @@ void RosenRenderContext::UpdateBackBlurStyle(const std::optional<BlurStyleOption
             return;
         }
         if (bgBlurStyle->blurOption.grayscale.size() > 1) {
-            rsNode_->SetGreyCoef1(bgBlurStyle->blurOption.grayscale[0]);
-            rsNode_->SetGreyCoef2(bgBlurStyle->blurOption.grayscale[1]);
+            Rosen::Vector2f grayScale(bgBlurStyle->blurOption.grayscale[0], bgBlurStyle->blurOption.grayscale[1]);
+            rsNode_->SetGreyCoef(grayScale);
         }
     } else {
         groupProperty->propBlurStyleOption = bgBlurStyle;
@@ -842,8 +849,8 @@ void RosenRenderContext::UpdateBackgroundEffect(const std::optional<EffectOption
             static_cast<Rosen::BLUR_COLOR_MODE>(fastAverage));
     rsNode_->SetBackgroundFilter(backFilter);
     if (effectOption->blurOption.grayscale.size() > 1) {
-        rsNode_->SetGreyCoef1(effectOption->blurOption.grayscale[0]);
-        rsNode_->SetGreyCoef2(effectOption->blurOption.grayscale[1]);
+        Rosen::Vector2f grayScale(effectOption->blurOption.grayscale[0], effectOption->blurOption.grayscale[1]);
+        rsNode_->SetGreyCoef(grayScale);
     }
 }
 
@@ -858,8 +865,8 @@ void RosenRenderContext::UpdateFrontBlurStyle(const std::optional<BlurStyleOptio
             return;
         }
         if (fgBlurStyle->blurOption.grayscale.size() > 1) {
-            rsNode_->SetGreyCoef1(fgBlurStyle->blurOption.grayscale[0]);
-            rsNode_->SetGreyCoef2(fgBlurStyle->blurOption.grayscale[1]);
+            Rosen::Vector2f grayScale(fgBlurStyle->blurOption.grayscale[0], fgBlurStyle->blurOption.grayscale[1]);
+            rsNode_->SetGreyCoef(grayScale);
         }
     } else {
         groupProperty->propBlurStyleOption = fgBlurStyle;
@@ -2837,8 +2844,8 @@ void RosenRenderContext::PaintFocusState(
     frameRect.SetRect(RectF(0, 0, bounds.z_, bounds.w_));
     frameRect.SetCornerRadius(RoundRect::CornerPos::TOP_LEFT_POS, radius.x_, radius.x_);
     frameRect.SetCornerRadius(RoundRect::CornerPos::TOP_RIGHT_POS, radius.y_, radius.y_);
-    frameRect.SetCornerRadius(RoundRect::CornerPos::BOTTOM_LEFT_POS, radius.z_, radius.z_);
-    frameRect.SetCornerRadius(RoundRect::CornerPos::BOTTOM_RIGHT_POS, radius.w_, radius.w_);
+    frameRect.SetCornerRadius(RoundRect::CornerPos::BOTTOM_RIGHT_POS, radius.z_, radius.z_);
+    frameRect.SetCornerRadius(RoundRect::CornerPos::BOTTOM_LEFT_POS, radius.w_, radius.w_);
 
     PaintFocusState(frameRect, focusPaddingVp, paintColor, paintWidth);
 }
@@ -3160,8 +3167,8 @@ void RosenRenderContext::UpdateBackBlur(const Dimension& radius, const BlurOptio
     groupProperty->propBlurRadius = radius;
     SetBackBlurFilter();
     if (blurOption.grayscale.size() > 1) {
-        rsNode_->SetGreyCoef1(blurOption.grayscale[0]);
-        rsNode_->SetGreyCoef2(blurOption.grayscale[1]);
+        Rosen::Vector2f grayScale(blurOption.grayscale[0], blurOption.grayscale[0]);
+        rsNode_->SetGreyCoef(grayScale);
     }
 }
 
@@ -3187,8 +3194,8 @@ void RosenRenderContext::UpdateFrontBlur(const Dimension& radius, const BlurOpti
     groupProperty->propBlurRadius = radius;
     SetFrontBlurFilter();
     if (blurOption.grayscale.size() > 1) {
-        rsNode_->SetGreyCoef1(blurOption.grayscale[0]);
-        rsNode_->SetGreyCoef2(blurOption.grayscale[1]);
+        Rosen::Vector2f grayScale(blurOption.grayscale[0], blurOption.grayscale[1]);
+        rsNode_->SetGreyCoef(grayScale);
     }
 }
 
@@ -3760,29 +3767,52 @@ void RosenRenderContext::OnProgressMaskUpdate(const RefPtr<ProgressMaskProperty>
 
 RefPtr<PageTransitionEffect> RosenRenderContext::GetDefaultPageTransition(PageTransitionType type)
 {
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, nullptr);
     auto resultEffect = AceType::MakeRefPtr<PageTransitionEffect>(type, PageTransitionOption());
     resultEffect->SetScaleEffect(ScaleOptions(1.0f, 1.0f, 1.0f, 0.5_pct, 0.5_pct));
     TranslateOptions translate;
     auto rect = GetPaintRectWithoutTransform();
+    auto frameSize = host->GetGeometryNode()->GetFrameSize();
+    auto initialBackgroundColor = DEFAULT_MASK_COLOR;
+    auto backgroundColor = DEFAULT_MASK_COLOR;
+    RectF pageTransitionRectF;
     switch (type) {
         case PageTransitionType::ENTER_PUSH:
         case PageTransitionType::EXIT_POP:
-            translate.x = Dimension(rect.Width());
+            initialBackgroundColor = DEFAULT_MASK_COLOR;
+            backgroundColor = DEFAULT_MASK_COLOR;
+            pageTransitionRectF = RectF(frameSize.Width() * HALF, 0.0f, frameSize.Width() * HALF, frameSize.Height());
+            translate.x = Dimension(rect.Width() * HALF);
             break;
         case PageTransitionType::ENTER_POP:
+            initialBackgroundColor = MASK_COLOR;
+            backgroundColor = DEFAULT_MASK_COLOR;
+            pageTransitionRectF = RectF(0.0f, 0.0f, frameSize.Width() * PARENT_PAGE_OFFSET, frameSize.Height());
+            translate.x = Dimension(-rect.Width() * PARENT_PAGE_OFFSET);
+            break;
         case PageTransitionType::EXIT_PUSH:
-            translate.x = Dimension(-rect.Width());
+            initialBackgroundColor = DEFAULT_MASK_COLOR;
+            backgroundColor = MASK_COLOR;
+            pageTransitionRectF = RectF(0.0f, 0.0f, frameSize.Width() * PARENT_PAGE_OFFSET, frameSize.Height());
+            translate.x = Dimension(-rect.Width() * PARENT_PAGE_OFFSET);
             break;
         default:
             break;
     }
     resultEffect->SetTranslateEffect(translate);
     resultEffect->SetOpacityEffect(1);
+    resultEffect->SetPageTransitionRectF(pageTransitionRectF);
+    resultEffect->SetInitialBackgroundColor(initialBackgroundColor);
+    resultEffect->SetBackgroundColor(backgroundColor);
     return resultEffect;
 }
 
 RefPtr<PageTransitionEffect> RosenRenderContext::GetPageTransitionEffect(const RefPtr<PageTransitionEffect>& transition)
 {
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, nullptr);
+    auto frameSize = host->GetGeometryNode()->GetFrameSize();
     auto resultEffect = AceType::MakeRefPtr<PageTransitionEffect>(
         transition->GetPageTransitionType(), transition->GetPageTransitionOption());
     resultEffect->SetScaleEffect(
@@ -3816,6 +3846,9 @@ RefPtr<PageTransitionEffect> RosenRenderContext::GetPageTransitionEffect(const R
     }
     resultEffect->SetTranslateEffect(translate);
     resultEffect->SetOpacityEffect(transition->GetOpacityEffect().value_or(1));
+    resultEffect->SetPageTransitionRectF(RectF(0.0f, 0.0f, frameSize.Width(), frameSize.Height()));
+    resultEffect->SetInitialBackgroundColor(DEFAULT_MASK_COLOR);
+    resultEffect->SetBackgroundColor(DEFAULT_MASK_COLOR);
     return resultEffect;
 }
 
@@ -3837,6 +3870,7 @@ bool RosenRenderContext::TriggerPageTransition(PageTransitionType type, const st
     auto transition = pattern->FindPageTransitionEffect(type);
     RefPtr<PageTransitionEffect> effect;
     AnimationOption option;
+    auto frameSize = host->GetGeometryNode()->GetFrameSize();
     if (transition) {
         effect = GetPageTransitionEffect(transition);
         option.SetCurve(transition->GetCurve());
@@ -3844,9 +3878,8 @@ bool RosenRenderContext::TriggerPageTransition(PageTransitionType type, const st
         option.SetDelay(transition->GetDelay());
     } else {
         effect = GetDefaultPageTransition(type);
-        const int32_t pageTransitionDuration = 300;
-        option.SetCurve(Curves::LINEAR);
-        option.SetDuration(pageTransitionDuration);
+        option.SetCurve(springCurve);
+        option.SetDuration(DEFAULT_ANIMATION_DURATION);
 #ifdef QUICK_PUSH_TRANSITION
         auto pipeline = PipelineBase::GetCurrentContext();
         if (pipeline) {
@@ -3873,22 +3906,44 @@ bool RosenRenderContext::TriggerPageTransition(PageTransitionType type, const st
         UpdateTransformScale(VectorF(scaleOptions->xScale, scaleOptions->yScale));
         UpdateTransformTranslate(translateOptions.value());
         UpdateOpacity(effect->GetOpacityEffect().value());
+        ClipWithRRect(effect->GetPageTransitionRectF().value(), RadiusF(EdgeF(0.0f, 0.0f)));
         AnimationUtils::OpenImplicitAnimation(option, option.GetCurve(), onFinish);
         UpdateTransformScale(VectorF(1.0f, 1.0f));
         UpdateTransformTranslate({ 0.0f, 0.0f, 0.0f });
         UpdateOpacity(1.0);
+        ClipWithRRect(RectF(0.0f, 0.0f, frameSize.Width(), frameSize.Height()),
+            RadiusF(EdgeF(0.0f, 0.0f)));
         AnimationUtils::CloseImplicitAnimation();
+        MaskAnimation(host->GetRenderContext(),
+            effect->GetInitialBackgroundColor().value(), effect->GetBackgroundColor().value());
         return true;
     }
     UpdateTransformScale(VectorF(1.0f, 1.0f));
     UpdateTransformTranslate({ 0.0f, 0.0f, 0.0f });
     UpdateOpacity(1.0);
+    ClipWithRRect(RectF(0.0f, 0.0f, frameSize.Width(), frameSize.Height()),
+        RadiusF(EdgeF(0.0f, 0.0f)));
     AnimationUtils::OpenImplicitAnimation(option, option.GetCurve(), onFinish);
     UpdateTransformScale(VectorF(scaleOptions->xScale, scaleOptions->yScale));
     UpdateTransformTranslate(translateOptions.value());
     UpdateOpacity(effect->GetOpacityEffect().value());
+    ClipWithRRect(effect->GetPageTransitionRectF().value(), RadiusF(EdgeF(0.0f, 0.0f)));
     AnimationUtils::CloseImplicitAnimation();
+    MaskAnimation(host->GetRenderContext(),
+        effect->GetInitialBackgroundColor().value(), effect->GetBackgroundColor().value());
     return true;
+}
+
+void RosenRenderContext::MaskAnimation(const RefPtr<RenderContext>& transitionOutNodeContext,
+    const Color& initialBackgroundColor, const Color& backgroundColor)
+{
+    AnimationOption maskOption;
+    maskOption.SetCurve(Curves::FRICTION);
+    maskOption.SetDuration(MASK_DURATION);
+    transitionOutNodeContext->SetActualForegroundColor(initialBackgroundColor);
+    AnimationUtils::OpenImplicitAnimation(maskOption, maskOption.GetCurve(), nullptr);
+    transitionOutNodeContext->SetActualForegroundColor(backgroundColor);
+    AnimationUtils::CloseImplicitAnimation();
 }
 
 void RosenRenderContext::PaintOverlayText()
@@ -4546,6 +4601,16 @@ void RosenRenderContext::OnTransitionInFinish()
     }
     // when all transition in/out animations are finished, we should remove the default transition effect.
     RemoveDefaultTransition();
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto parent = host->GetParent();
+    CHECK_NULL_VOID(parent);
+    if (host->IsVisible()) {
+        // trigger transition through visibility
+        if (transitionInCallback_) {
+            transitionInCallback_();
+        }
+    }
 }
 
 void RosenRenderContext::GetBestBreakPoint(RefPtr<UINode>& breakPointChild, RefPtr<UINode>& breakPointParent)
@@ -4974,6 +5039,11 @@ void RosenRenderContext::SetTranslate(float translateX, float translateY, float 
 {
     CHECK_NULL_VOID(rsNode_);
     rsNode_->SetTranslate(translateX, translateY, translateZ);
+}
+
+void RosenRenderContext::SetTransitionInCallback(std::function<void()>&& callback)
+{
+    transitionInCallback_ = std::move(callback);
 }
 
 void RosenRenderContext::SetTransitionOutCallback(std::function<void()>&& callback)

@@ -88,7 +88,7 @@ public:
     void DeleteHotAreas(int32_t overlayId) override;
     void ClearToast() override;
     void ShowToast(const std::string& message, int32_t duration, const std::string& bottom,
-        const NG::ToastShowMode& showMode) override;
+        const NG::ToastShowMode& showMode, int32_t alignment, std::optional<DimensionOffset> offset) override;
     void ShowDialog(const std::string& title, const std::string& message, const std::vector<ButtonInfo>& buttons,
         bool autoCancel, std::function<void(int32_t, int32_t)>&& callback,
         const std::set<std::string>& callbacks) override;
@@ -147,10 +147,10 @@ private:
         int32_t& width, int32_t& height, int32_t& posX, int32_t& posY, float& density) const;
     bool InitToastDialogWindow(int32_t width, int32_t height, int32_t posX, int32_t posY, bool isToast = false);
     bool InitToastDialogView(int32_t width, int32_t height, float density);
-    void ShowToastForAbility(
-        const std::string& message, int32_t duration, const std::string& bottom, const NG::ToastShowMode& showMode);
-    void ShowToastForService(
-        const std::string& message, int32_t duration, const std::string& bottom, const NG::ToastShowMode& showMode);
+    void ShowToastForAbility(const std::string& message, int32_t duration, const std::string& bottom,
+        const NG::ToastShowMode& showMode, int32_t alignment, std::optional<DimensionOffset> offset);
+    void ShowToastForService(const std::string& message, int32_t duration, const std::string& bottom,
+        const NG::ToastShowMode& showMode, int32_t alignment, std::optional<DimensionOffset> offset);
     void ShowDialogForAbility(const std::string& title, const std::string& message,
         const std::vector<ButtonInfo>& buttons, bool autoCancel, std::function<void(int32_t, int32_t)>&& callback,
         const std::set<std::string>& callbacks);

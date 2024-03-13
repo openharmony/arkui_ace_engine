@@ -57,6 +57,8 @@ void GridScrollLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     MinusPaddingToSize(gridLayoutProperty->CreatePaddingAndBorder(), idealSize);
     gridLayoutInfo_.contentEndPadding_ = ScrollableUtils::CheckHeightExpansion(gridLayoutProperty, axis);
     idealSize.AddHeight(gridLayoutInfo_.contentEndPadding_);
+    auto&& safeAreaOpts = gridLayoutProperty->GetSafeAreaExpandOpts();
+    expandSafeArea_ = safeAreaOpts && safeAreaOpts->Expansive();
 
     InitialItemsCrossSize(gridLayoutProperty, idealSize, gridLayoutInfo_.childrenCount_);
 
@@ -245,7 +247,7 @@ void GridScrollLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
             translate = Alignment::GetAlignPosition(blockSize, wrapper->GetGeometryNode()->GetMarginFrameSize(), align);
 
             wrapper->GetGeometryNode()->SetMarginFrameOffset(offset + translate);
-            if (wrapper->CheckNeedForceMeasureAndLayout()) {
+            if (expandSafeArea_ || wrapper->CheckNeedForceMeasureAndLayout()) {
                 wrapper->Layout();
             } else {
                 SyncGeometry(wrapper);
@@ -1650,7 +1652,7 @@ int32_t GridScrollLayoutAlgorithm::MeasureChildPlaced(const SizeF& frameSize, in
 bool GridScrollLayoutAlgorithm::CheckNeedMeasure(const RefPtr<LayoutWrapper>& layoutWrapper,
     const LayoutConstraintF& layoutConstraint) const
 {
-    if (layoutWrapper->CheckNeedForceMeasureAndLayout()) {
+    if (expandSafeArea_ || layoutWrapper->CheckNeedForceMeasureAndLayout()) {
         return true;
     }
     auto geometryNode = layoutWrapper->GetGeometryNode();

@@ -456,9 +456,9 @@ HWTEST_F(MenuTestNg, MenuWrapperPatternTestNg005, TestSize.Level1)
     contextMenuTouchUpEventInfo.touches_.clear();
     contextMenuTouchUpEventInfo.touches_.emplace_back(touchUpLocationInfo);
     wrapperPattern->OnTouchEvent(contextMenuTouchUpEventInfo);
-    wrapperPattern->isHided_ = true;
+    wrapperPattern->SetMenuStatus(MenuStatus::HIDE);
     wrapperPattern->OnTouchEvent(contextMenuTouchUpEventInfo);
-    wrapperPattern->isHided_ = false;
+    wrapperPattern->SetMenuStatus(MenuStatus::SHOW);
     wrapperPattern->OnTouchEvent(contextMenuTouchUpEventInfo);
     EXPECT_EQ(contextMenuTouchUpEventInfo.touches_.size(), 1);
     /**
@@ -7386,17 +7386,17 @@ HWTEST_F(MenuTestNg, MenuPreviewPatternTestNg0100, TestSize.Level1)
     EXPECT_FALSE(panEventActuator->panEvents_.empty());
     auto menuWrapperPattern = menuWrapperNode->GetPattern<MenuWrapperPattern>();
     ASSERT_NE(menuWrapperPattern, nullptr);
-    menuWrapperPattern->isHided_ = false;
+    menuWrapperPattern->SetMenuStatus(MenuStatus::SHOW);
     GestureEvent info;
     info.offsetY_ = 1.0;
 
     /**
      * @tc.steps: step3. call pan task
-     * @tc.expected: menuWrapperPattern's isHided_ is true
+     * @tc.expected: menuWrapperPattern's IsHide() is false
      */
     auto endTask = panEventActuator->panEvents_.front()->GetActionEndEventFunc();
     endTask(info);
-    EXPECT_TRUE(menuWrapperPattern->isHided_);
+    EXPECT_FALSE(menuWrapperPattern->IsHide());
 
     /**
      * @tc.steps: step4. call SetFirstShow

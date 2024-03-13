@@ -106,6 +106,8 @@ template("ace_core_interfaces_native_node") {
       "node/water_flow_modifier.cpp",
     ]
 
+    deps = [ "$ace_root/frameworks/core/components/theme:build_theme_code" ]
+
     include_dirs = [ "${ace_root}/interfaces/inner_api/ace" ]
 
     if (defined(config.xcomponent_components_support) &&

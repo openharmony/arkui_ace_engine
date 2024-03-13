@@ -21,6 +21,7 @@
 
 namespace {
 
+constexpr int32_t NONE_API_VERSION = 0;
 constexpr int32_t CURRENT_NATIVE_NODE_API_VERSION = 1;
 ArkUI_NativeNodeAPI_1 nodeImpl_1 = {
     CURRENT_NATIVE_NODE_API_VERSION,
@@ -49,6 +50,11 @@ extern "C" {
 
 ArkUI_AnyNativeAPI* OH_ArkUI_GetNativeAPI(ArkUI_NativeAPIVariantKind type, int32_t version)
 {
+    return OH_ArkUI_QueryModuleInterface(type, version);
+}
+
+ArkUI_AnyNativeAPI* OH_ArkUI_QueryModuleInterface(ArkUI_NativeAPIVariantKind type, int32_t version)
+{
     if (!OHOS::Ace::NodeModel::GetFullImpl()) {
         TAG_LOGE(OHOS::Ace::AceLogTag::ACE_NATIVE_NODE,
             "fail to get %{public}d node api family of %{public}d version, impl library is not found", type, version);
@@ -57,6 +63,7 @@ ArkUI_AnyNativeAPI* OH_ArkUI_GetNativeAPI(ArkUI_NativeAPIVariantKind type, int32
     switch (type) {
         case ARKUI_NATIVE_NODE: {
             switch (version) {
+                case NONE_API_VERSION:
                 case CURRENT_NATIVE_NODE_API_VERSION:
                     return reinterpret_cast<ArkUI_AnyNativeAPI*>(&nodeImpl_1);
                 default: {

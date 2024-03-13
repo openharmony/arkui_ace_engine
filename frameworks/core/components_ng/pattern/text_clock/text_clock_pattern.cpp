@@ -242,7 +242,7 @@ void TextClockPattern::InitUpdateTimeTextCallBack()
 
 void TextClockPattern::UpdateTimeText(bool isTimeChange)
 {
-    if (!isStart_ || !isSetVisible_ || !isInVisibleArea_ || !isFormVisible_) {
+    if (!isStart_ || (!isTimeChange && (!isSetVisible_ || !isInVisibleArea_ || !isFormVisible_))) {
         return;
     }
     RequestUpdateForNextSecond();

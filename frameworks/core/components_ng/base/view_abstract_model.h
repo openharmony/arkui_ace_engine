@@ -231,6 +231,7 @@ public:
     virtual void SetDraggable(bool draggable) = 0;
     virtual void SetDragPreviewOptions(const NG::DragPreviewOption& previewOption) = 0;
     virtual void SetOnDragStart(NG::OnDragStartFunc&& onDragStart) = 0;
+    virtual void SetOnPreDrag(NG::OnPreDragFunc&& onPreDrag) = 0;
     virtual void SetOnDragEnter(NG::OnDragDropFunc&& onDragEnter) = 0;
     virtual void SetOnDragEnd(OnNewDragFunc&& onDragEnd) = 0;
     virtual void SetOnDragLeave(NG::OnDragDropFunc&& onDragLeave) = 0;

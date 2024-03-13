@@ -557,6 +557,7 @@ void ScrollablePattern::SetEdgeEffect(EdgeEffect edgeEffect)
         scrollEffect_ = fadeEdgeEffect;
         gestureHub->AddScrollEdgeEffect(GetAxis(), scrollEffect_);
     }
+    CHECK_NULL_VOID(scrollableEvent_);
     auto scrollable = scrollableEvent_->GetScrollable();
     CHECK_NULL_VOID(scrollable);
     scrollable->SetEdgeEffect(edgeEffect);
@@ -1851,7 +1852,7 @@ bool ScrollablePattern::HandleOverScroll(float velocity)
 
 void ScrollablePattern::ExecuteScrollFrameBegin(float& mainDelta, ScrollState state)
 {
-    auto context = PipelineContext::GetCurrentContext();
+    auto context = PipelineContext::GetCurrentContextSafely();
     if (!context || !scrollFrameBeginCallback_) {
         return;
     }

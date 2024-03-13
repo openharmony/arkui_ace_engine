@@ -43,6 +43,7 @@ public:
         const std::string& name, const std::string& path, NG::RouterPageState state);
     void OnDensityChange(double density);
     bool NapiEqual(napi_value cb);
+    void OnDrawOrLayout();
 
 private:
     napi_value GetNapiCallback();

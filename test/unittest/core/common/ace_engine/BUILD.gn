@@ -59,6 +59,8 @@ ohos_unittest("ace_engine_special_test") {
     "$ace_root/frameworks/core/components_ng/layout/layout_wrapper_node.cpp",
     "$ace_root/frameworks/core/components_ng/manager/display_sync/ui_display_sync.cpp",
     "$ace_root/frameworks/core/components_ng/manager/display_sync/ui_display_sync_manager.cpp",
+    "$ace_root/frameworks/core/components_ng/manager/focus/focus_manager.cpp",
+    "$ace_root/frameworks/core/components_ng/manager/focus/focus_view.cpp",
     "$ace_root/frameworks/core/components_ng/manager/frame_rate/frame_rate_manager.cpp",
     "$ace_root/frameworks/core/components_ng/manager/safe_area/safe_area_manager.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/custom/custom_node.cpp",

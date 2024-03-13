@@ -24,16 +24,6 @@
 namespace OHOS::Ace {
 bool HoverEventTarget::HandleHoverEvent(bool isHovered, const MouseEvent& event)
 {
-    if (AceApplicationInfo::GetInstance().IsAccessibilityEnabled()) {
-        AccessibilityEvent event;
-        event.type = isHovered ? AccessibilityEventType::HOVER_ENTER_EVENT : AccessibilityEventType::HOVER_EXIT_EVENT;
-        auto frameNode = ElementRegister::GetInstance()->GetSpecificItemById<NG::FrameNode>(GetNodeId());
-        event.nodeId = frameNode ? frameNode->GetAccessibilityId() : -1;
-        auto pipeline = PipelineBase::GetCurrentContext();
-        if (pipeline) {
-            pipeline->SendEventToAccessibility(event);
-        }
-    }
     if (!onHoverEventCallback_) {
         return false;
     }

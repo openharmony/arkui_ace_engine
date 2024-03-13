@@ -113,6 +113,7 @@ void JSTextField::CreateTextInput(const JSCallbackInfo& info)
             if (changeEventVal->IsFunction()) {
                 textValue = valueObj->GetProperty("value");
             }
+            value = "";
             if (ParseJsString(textValue, text)) {
                 value = text;
             }
@@ -941,6 +942,43 @@ void JSTextField::SetShowUnderline(const JSCallbackInfo& info)
     TextFieldModel::GetInstance()->SetShowUnderline(info[0]->ToBoolean());
 }
 
+void JSTextField::SetUnderlineColor(const JSCallbackInfo& info)
+{
+    if (info.Length() < 1) {
+        return;
+    }
+    Color underlineColor;
+    if (ParseJsColor(info[0], underlineColor)) {
+        TextFieldModel::GetInstance()->SetNormalUnderlineColor(underlineColor);
+    } else if (info[0]->IsObject()) {
+        auto param = JSRef<JSObject>::Cast(info[0]);
+        UserUnderlineColor userColor = UserUnderlineColor();
+        auto typingColorProp = param->GetProperty("typing");
+        Color typing;
+        if (ParseJsColor(typingColorProp, typing)) {
+            userColor.typing = typing;
+        }
+        auto normalColorProp = param->GetProperty("normal");
+        Color normal;
+        if (ParseJsColor(normalColorProp, normal)) {
+            userColor.normal = normal;
+        }
+        auto errorColorProp = param->GetProperty("error");
+        Color error;
+        if (ParseJsColor(errorColorProp, error)) {
+            userColor.error = error;
+        }
+        auto disableColorProp = param->GetProperty("disable");
+        Color disable;
+        if (ParseJsColor(disableColorProp, disable)) {
+            userColor.disable = disable;
+        }
+        TextFieldModel::GetInstance()->SetUserUnderlineColor(userColor);
+    } else {
+        TextFieldModel::GetInstance()->SetUserUnderlineColor(UserUnderlineColor());
+    }
+}
+
 void JSTextField::SetPasswordIcon(const JSCallbackInfo& info)
 {
     if (!Container::IsCurrentUseNewPipeline()) {
@@ -1267,5 +1305,64 @@ void JSTextField::SetSelectAllValue(const JSCallbackInfo& info)
 
     bool isSetSelectAllValue = infoValue->ToBoolean();
     TextFieldModel::GetInstance()->SetSelectAllValue(isSetSelectAllValue);
+}
+
+void JSTextField::SetDecoration(const JSCallbackInfo& info)
+{
+    do {
+        auto tmpInfo = info[0];
+        if (!tmpInfo->IsObject()) {
+            break;
+        }
+        JSRef<JSObject> obj = JSRef<JSObject>::Cast(tmpInfo);
+        JSRef<JSVal> typeValue = obj->GetProperty("type");
+        JSRef<JSVal> colorValue = obj->GetProperty("color");
+        JSRef<JSVal> styleValue = obj->GetProperty("style");
+
+        auto pipelineContext = PipelineBase::GetCurrentContext();
+        CHECK_NULL_VOID(pipelineContext);
+        auto theme = pipelineContext->GetTheme<TextFieldTheme>();
+        CHECK_NULL_VOID(theme);
+        TextDecoration textDecoration = theme->GetTextStyle().GetTextDecoration();
+        if (typeValue->IsNumber()) {
+            textDecoration = static_cast<TextDecoration>(typeValue->ToNumber<int32_t>());
+        }
+        Color result = theme->GetTextStyle().GetTextDecorationColor();
+        ParseJsColor(colorValue, result, Color::BLACK);
+        std::optional<TextDecorationStyle> textDecorationStyle;
+        if (styleValue->IsNumber()) {
+            textDecorationStyle = static_cast<TextDecorationStyle>(styleValue->ToNumber<int32_t>());
+        }
+        TextFieldModel::GetInstance()->SetTextDecoration(textDecoration);
+        TextFieldModel::GetInstance()->SetTextDecorationColor(result);
+        if (textDecorationStyle) {
+            TextFieldModel::GetInstance()->SetTextDecorationStyle(textDecorationStyle.value());
+        }
+    } while (false);
+}
+
+void JSTextField::SetLetterSpacing(const JSCallbackInfo& info)
+{
+    CalcDimension value;
+    if (!ParseJsDimensionFpNG(info[0], value, false)) {
+        value.Reset();
+        TextFieldModel::GetInstance()->SetLetterSpacing(value);
+        return;
+    }
+    TextFieldModel::GetInstance()->SetLetterSpacing(value);
+}
+
+void JSTextField::SetLineHeight(const JSCallbackInfo& info)
+{
+    CalcDimension value;
+    if (!ParseJsDimensionFpNG(info[0], value)) {
+        value.Reset();
+        TextFieldModel::GetInstance()->SetLineHeight(value);
+        return;
+    }
+    if (value.IsNegative()) {
+        value.Reset();
+    }
+    TextFieldModel::GetInstance()->SetLineHeight(value);
 }
 } // namespace OHOS::Ace::Framework

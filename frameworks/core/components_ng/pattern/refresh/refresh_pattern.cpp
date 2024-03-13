@@ -270,7 +270,7 @@ void RefreshPattern::InitProgressColumn()
     auto layoutProperty = host->GetLayoutProperty<RefreshLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
     loadingTextLayoutProperty->UpdateContent(layoutProperty->GetLoadingTextValue());
-    auto context = PipelineContext::GetCurrentContext();
+    auto context = PipelineContext::GetCurrentContextSafely();
     CHECK_NULL_VOID(context);
     auto theme = context->GetTheme<RefreshTheme>();
     CHECK_NULL_VOID(theme);
@@ -294,7 +294,7 @@ void RefreshPattern::OnColorConfigurationUpdate()
     CHECK_NULL_VOID(loadingProgressLayoutProperty);
     auto loadingProgressRenderContext = progressChild_->GetRenderContext();
     CHECK_NULL_VOID(loadingProgressRenderContext);
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = PipelineContext::GetCurrentContextSafely();
     CHECK_NULL_VOID(pipeline);
     auto themeManager = pipeline->GetThemeManager();
     CHECK_NULL_VOID(themeManager);
@@ -805,7 +805,7 @@ void RefreshPattern::SpeedTriggerAnimation(float speed)
             CHECK_NULL_VOID(pattern);
             pattern->SpeedAnimationFinish();
         });
-    auto context = PipelineContext::GetCurrentContext();
+    auto context = PipelineContext::GetCurrentContextSafely();
     CHECK_NULL_VOID(context);
     context->RequestFrame();
 }

@@ -417,6 +417,7 @@ private:
     bool forwardFeature_ = false;
     bool backwardFeature_ = false;
     bool isNeedCheckOffset_ = false;
+    bool expandSafeArea_ = false;
 
     int32_t totalItemCount_ = 0;
 

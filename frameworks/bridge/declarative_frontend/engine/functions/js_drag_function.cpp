@@ -448,6 +448,13 @@ void JsDragFunction::ItemDropExecute(const ItemDragInfo& info, int32_t itemIndex
     JsFunction::ExecuteJS(4, params);
 }
 
+void JsDragFunction::PreDragExecute(const PreDragStatus preDragStatus)
+{
+    JSRef<JSVal> preDragStatusParam = JSRef<JSVal>::Make(ToJSValue(static_cast<int32_t>(preDragStatus)));
+    JSRef<JSVal> params[] = { preDragStatusParam };
+    JsFunction::ExecuteJS(1, params);
+}
+
 JSRef<JSObject> JsDragFunction::CreateDragEvent(const RefPtr<DragEvent>& info)
 {
     JSRef<JSObject> dragObj = JSClass<JsDragEvent>::NewInstance();

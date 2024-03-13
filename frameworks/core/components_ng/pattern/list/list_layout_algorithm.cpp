@@ -77,6 +77,8 @@ void ListLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     contentEndOffset_ += expandHeight;
     // expand contentSize
     contentConstraint.MinusPadding(std::nullopt, std::nullopt, std::nullopt, -expandHeight);
+    auto&& safeAreaOpts = listLayoutProperty->GetSafeAreaExpandOpts();
+    expandSafeArea_ = safeAreaOpts && safeAreaOpts->Expansive();
 
     auto contentIdealSize = CreateIdealSize(
         contentConstraint, axis_, listLayoutProperty->GetMeasureType(MeasureType::MATCH_PARENT_CROSS_AXIS));
@@ -170,7 +172,7 @@ void ListLayoutAlgorithm::SetCacheCount(LayoutWrapper* layoutWrapper, int32_t ca
 
 bool ListLayoutAlgorithm::CheckNeedMeasure(const RefPtr<LayoutWrapper>& layoutWrapper) const
 {
-    if (layoutWrapper->CheckNeedForceMeasureAndLayout()) {
+    if (expandSafeArea_ || layoutWrapper->CheckNeedForceMeasureAndLayout()) {
         return true;
     }
     auto geometryNode = layoutWrapper->GetGeometryNode();
@@ -1218,7 +1220,7 @@ void ListLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
         pos.second.startPos -= currentOffset_;
         pos.second.endPos -= currentOffset_;
         LayoutItem(wrapper, pos.first, pos.second, startIndex, crossSize);
-        if (wrapper->CheckNeedForceMeasureAndLayout()) {
+        if (expandSafeArea_ || wrapper->CheckNeedForceMeasureAndLayout()) {
             wrapper->Layout();
         } else {
             SyncGeometry(wrapper);

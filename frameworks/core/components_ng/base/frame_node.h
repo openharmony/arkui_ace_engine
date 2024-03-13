@@ -128,10 +128,11 @@ public:
 
     virtual void MarkModifyDone();
 
-    void MarkDirtyNode(PropertyChangeFlag extraFlag = PROPERTY_UPDATE_NORMAL) override;
-
     void MarkDirtyNode(
-        bool isMeasureBoundary, bool isRenderBoundary, PropertyChangeFlag extraFlag = PROPERTY_UPDATE_NORMAL);
+        PropertyChangeFlag extraFlag = PROPERTY_UPDATE_NORMAL, bool childExpansiveAndMark = false) override;
+
+    void MarkDirtyNode(bool isMeasureBoundary, bool isRenderBoundary,
+        PropertyChangeFlag extraFlag = PROPERTY_UPDATE_NORMAL, bool childExpansiveAndMark = false);
 
     void ProcessPropertyDiff()
     {
@@ -630,6 +631,11 @@ public:
 
     void SetActive(bool active = true) override;
 
+    bool GetBypass() const
+    {
+        return bypass_;
+    }
+
     bool IsOutOfLayout() const override
     {
         return renderContext_->HasPosition();
@@ -735,6 +741,7 @@ public:
     OffsetF CalculateCachedTransformRelativeOffset(uint64_t nanoTimestamp);
 
     void PaintDebugBoundary(bool flag) override;
+    RectF GetRectWithRender();
 
 private:
     void MarkNeedRender(bool isRenderBoundary);
@@ -749,7 +756,7 @@ private:
      *
      * @return true if Parent is successfully marked dirty.
      */
-    virtual bool RequestParentDirty();
+    virtual bool RequestParentDirty(bool childExpansiveAndMark = false);
 
     void UpdateChildrenLayoutWrapper(const RefPtr<LayoutWrapperNode>& self, bool forceMeasure, bool forceLayout);
     void AdjustLayoutWrapperTree(const RefPtr<LayoutWrapperNode>& parent, bool forceMeasure, bool forceLayout) override;

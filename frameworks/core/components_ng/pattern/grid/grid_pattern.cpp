@@ -22,6 +22,7 @@
 #include "base/utils/utils.h"
 #include "core/common/container.h"
 #include "core/components/scroll/scroll_controller_base.h"
+#include "core/components_ng/base/observer_handler.h"
 #include "core/components_ng/pattern/grid/grid_adaptive/grid_adaptive_layout_algorithm.h"
 #include "core/components_ng/pattern/grid/grid_item_layout_property.h"
 #include "core/components_ng/pattern/grid/grid_item_pattern.h"
@@ -77,7 +78,9 @@ RefPtr<LayoutAlgorithm> GridPattern::CreateLayoutAlgorithm()
     if (!gridLayoutProperty->GetLayoutOptions().has_value()) {
         result = MakeRefPtr<GridScrollLayoutAlgorithm>(gridLayoutInfo_, crossCount, mainCount);
     } else if (SystemProperties::GetGridIrregularLayoutEnabled()) {
-        return MakeRefPtr<GridIrregularLayoutAlgorithm>(gridLayoutInfo_, CanOverScroll(GetScrollSource()));
+        auto algo = MakeRefPtr<GridIrregularLayoutAlgorithm>(gridLayoutInfo_, CanOverScroll(GetScrollSource()));
+        algo->SetEnableSkip(ScrollablePattern::AnimateRunning());
+        return algo;
     } else {
         result = MakeRefPtr<GridScrollWithOptionsLayoutAlgorithm>(gridLayoutInfo_, crossCount, mainCount);
     }
@@ -264,6 +267,8 @@ bool GridPattern::IsItemSelected(const GestureEvent& info)
 
 void GridPattern::FireOnScrollStart()
 {
+    UIObserverHandler::GetInstance().NotifyScrollEventStateChange(AceType::WeakClaim(this),
+        ScrollEventType::SCROLL_START);
     PerfMonitor::GetPerfMonitor()->Start(PerfConstants::APP_LIST_FLING, PerfActionType::FIRST_MOVE, "");
     if (GetScrollAbort()) {
         return;

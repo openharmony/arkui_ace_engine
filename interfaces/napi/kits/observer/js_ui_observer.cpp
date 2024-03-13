@@ -59,6 +59,8 @@ constexpr char NAVDESTINATION_UPDATE[] = "navDestinationUpdate";
 constexpr char ROUTERPAGE_UPDATE[] = "routerPageUpdate";
 constexpr char SCROLL_EVENT[] = "scrollEvent";
 constexpr char DENSITY_UPDATE[] = "densityUpdate";
+constexpr char LAYOUT_DONE[] = "didLayout";
+constexpr char DRAW_COMMAND_SEND[] = "willDraw";
 
 bool IsUIAbilityContext(napi_env env, napi_value context)
 {
@@ -135,12 +137,16 @@ ObserverProcess::ObserverProcess()
         { SCROLL_EVENT, &ObserverProcess::ProcessScrollEventRegister },
         { ROUTERPAGE_UPDATE, &ObserverProcess::ProcessRouterPageRegister },
         { DENSITY_UPDATE, &ObserverProcess::ProcessDensityRegister },
+        { LAYOUT_DONE, &ObserverProcess::ProcessLayoutDoneRegister },
+        { DRAW_COMMAND_SEND, &ObserverProcess::ProcessDrawCommandSendRegister },
     };
     unregisterProcess_ = {
         { NAVDESTINATION_UPDATE, &ObserverProcess::ProcessNavigationUnRegister },
         { SCROLL_EVENT, &ObserverProcess::ProcessScrollEventUnRegister },
         { ROUTERPAGE_UPDATE, &ObserverProcess::ProcessRouterPageUnRegister },
         { DENSITY_UPDATE, &ObserverProcess::ProcessDensityUnRegister },
+        { LAYOUT_DONE, &ObserverProcess::ProcessLayoutDoneUnRegister },
+        { DRAW_COMMAND_SEND, &ObserverProcess::ProcessDrawCommandSendUnRegister},
     };
 }
 
@@ -401,6 +407,116 @@ napi_value ObserverProcess::ProcessDensityUnRegister(napi_env env, napi_callback
     return result;
 }
 
+napi_value ObserverProcess::ProcessDrawCommandSendRegister(napi_env env, napi_callback_info info)
+{
+    GET_PARAMS(env, info, 3);
+
+    if (argc == 2 && MatchValueType(env, argv[1], napi_function)) {
+        auto listener = std::make_shared<UIObserverListener>(env, argv[1]);
+        int32_t instanceId = ContainerScope::CurrentId();
+        UIObserver::RegisterDrawCallback(instanceId, listener);
+    }
+    if (argc == 3 && MatchValueType(env, argv[1], napi_object) && MatchValueType(env, argv[2], napi_function)) {
+        auto context = argv[1];
+        if (context) {
+            auto listener = std::make_shared<UIObserverListener>(env, argv[2]);
+            auto uiContextInstanceId = GetUIContextInstanceId(env, context);
+            UIObserver::RegisterDrawCallback(uiContextInstanceId, listener);
+        }
+    }
+    napi_value result = nullptr;
+    return result;
+}
+
+napi_value ObserverProcess::ProcessDrawCommandSendUnRegister(napi_env env, napi_callback_info info)
+{
+    GET_PARAMS(env, info, 3);
+
+    if (argc == 1) {
+        int32_t instanceId = ContainerScope::CurrentId();
+        UIObserver::UnRegisterDrawCallback(instanceId, nullptr);
+    }
+
+    if (argc == 2 && MatchValueType(env, argv[1], napi_object)) {
+        napi_value context = argv[1];
+        if (context) {
+            auto uiContextInstanceId = GetUIContextInstanceId(env, context);
+            UIObserver::UnRegisterDrawCallback(uiContextInstanceId, nullptr);
+        }
+    }
+
+    if (argc == 2 && MatchValueType(env, argv[1], napi_function)) {
+        int32_t instanceId = ContainerScope::CurrentId();
+        UIObserver::UnRegisterDrawCallback(instanceId, argv[1]);
+    }
+
+    if (argc == 3 && MatchValueType(env, argv[1], napi_object) && MatchValueType(env, argv[2], napi_function)) {
+        napi_value context = argv[1];
+        if (context) {
+            auto uiContextInstanceId = GetUIContextInstanceId(env, context);
+            UIObserver::UnRegisterDrawCallback(uiContextInstanceId, argv[2]);
+        }
+    }
+
+    napi_value result = nullptr;
+    return result;
+}
+
+napi_value ObserverProcess::ProcessLayoutDoneRegister(napi_env env, napi_callback_info info)
+{
+    GET_PARAMS(env, info, 3);
+
+    if (argc == 2 && MatchValueType(env, argv[1], napi_function)) {
+        auto listener = std::make_shared<UIObserverListener>(env, argv[1]);
+        int32_t instanceId = ContainerScope::CurrentId();
+        UIObserver::RegisterLayoutCallback(instanceId, listener);
+    }
+    if (argc == 3 && MatchValueType(env, argv[1], napi_object) && MatchValueType(env, argv[2], napi_function)) {
+        auto context = argv[1];
+        if (context) {
+            auto listener = std::make_shared<UIObserverListener>(env, argv[2]);
+            auto uiContextInstanceId = GetUIContextInstanceId(env, context);
+            UIObserver::RegisterLayoutCallback(uiContextInstanceId, listener);
+        }
+    }
+    napi_value result = nullptr;
+    return result;
+}
+
+napi_value ObserverProcess::ProcessLayoutDoneUnRegister(napi_env env, napi_callback_info info)
+{
+    GET_PARAMS(env, info, 3);
+
+    if (argc == 1) {
+        int32_t instanceId = ContainerScope::CurrentId();
+        UIObserver::UnRegisterLayoutCallback(instanceId, nullptr);
+    }
+
+    if (argc == 2 && MatchValueType(env, argv[1], napi_object)) {
+        napi_value context = argv[1];
+        if (context) {
+            auto uiContextInstanceId = GetUIContextInstanceId(env, context);
+            UIObserver::UnRegisterLayoutCallback(uiContextInstanceId, nullptr);
+        }
+    }
+
+    if (argc == 2 && MatchValueType(env, argv[1], napi_function)) {
+        int32_t instanceId = ContainerScope::CurrentId();
+        UIObserver::UnRegisterLayoutCallback(instanceId, argv[1]);
+    }
+
+    if (argc == 3 && MatchValueType(env, argv[1], napi_object) && MatchValueType(env, argv[2], napi_function)) {
+        napi_value context = argv[1];
+        if (context) {
+            auto uiContextInstanceId = GetUIContextInstanceId(env, context);
+            UIObserver::UnRegisterLayoutCallback(uiContextInstanceId, argv[2]);
+        }
+    }
+
+    napi_value result = nullptr;
+    return result;
+}
+
 napi_value ObserverOn(napi_env env, napi_callback_info info)
 {
     return ObserverProcess::GetInstance().ProcessRegister(env, info);
@@ -417,6 +533,8 @@ static napi_value UIObserverExport(napi_env env, napi_value exports)
     NG::UIObserverHandler::GetInstance().SetHandleScrollEventChangeFunc(&UIObserver::HandleScrollEventStateChange);
     NG::UIObserverHandler::GetInstance().SetHandleRouterPageChangeFunc(&UIObserver::HandleRouterPageStateChange);
     NG::UIObserverHandler::GetInstance().SetHandleDensityChangeFunc(&UIObserver::HandleDensityChange);
+    NG::UIObserverHandler::GetInstance().SetLayoutDoneHandleFunc(&UIObserver::HandLayoutDoneChange);
+    NG::UIObserverHandler::GetInstance().SetDrawCommandSendHandleFunc(&UIObserver::HandDrawCommandSendChange);
     napi_value navDestinationState = nullptr;
     napi_create_object(env, &navDestinationState);
     napi_value prop = nullptr;

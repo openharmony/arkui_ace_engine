@@ -255,6 +255,8 @@ public:
     static void SetDragPreviewOptions(const DragPreviewOption& previewOption);
     static void SetOnDragStart(
         std::function<DragDropInfo(const RefPtr<OHOS::Ace::DragEvent> &, const std::string &)> &&onDragStart);
+    static void SetOnPreDrag(
+        std::function<void(const PreDragStatus)> &&onPreDragFunc);
     static void SetOnDragEnter(
         std::function<void(const RefPtr<OHOS::Ace::DragEvent> &, const std::string &)> &&onDragEnter);
     static void SetOnDragLeave(
@@ -495,6 +497,7 @@ public:
         const std::vector<ModifierKey>& keys, std::function<void()>&& onKeyboardShortcutAction);
 
     static void SetOnAppear(FrameNode* frameNode, std::function<void()> &&onAppear);
+    static void SetOnDisappear(FrameNode* frameNode, std::function<void()> &&onDisappear);
     static void SetOnAreaChanged(FrameNode* frameNode, std::function<void(const RectF &oldRect,
         const OffsetF &oldOrigin, const RectF &rect, const OffsetF &origin)> &&onAreaChanged);
     static void SetOnFocus(FrameNode* frameNode, OnFocusFunc &&onFocusCallback);
@@ -529,6 +532,25 @@ public:
     static TextDirection GetDirection(FrameNode* frameNode);
     static std::map<AlignDirection, AlignRule> GetAlignRules(FrameNode* frameNode);
     static FlexAlign GetAlignSelf(FrameNode* frameNode);
+    // used in JS FrameNode
+    static void SetJSFrameNodeOnClick(FrameNode* frameNode, GestureEventFunc&& clickEventFunc);
+    static void SetJSFrameNodeOnTouch(FrameNode* frameNode, TouchEventFunc&& touchEventFunc);
+    static void SetJSFrameNodeOnAppear(FrameNode* frameNode, std::function<void()>&& onAppear);
+    static void SetJSFrameNodeOnDisappear(FrameNode* frameNode, std::function<void()>&& onDisappear);
+    static void SetJSFrameNodeOnKeyCallback(FrameNode* frameNode, OnKeyCallbackFunc&& onKeyCallback);
+    static void SetJSFrameNodeOnFocusCallback(FrameNode* frameNode, OnFocusFunc&& onFocusCallback);
+    static void SetJSFrameNodeOnBlurCallback(FrameNode* frameNode, OnBlurFunc&& onBlurCallback);
+    static void SetJSFrameNodeOnHover(FrameNode* frameNode, OnHoverFunc&& onHoverEventFunc);
+    static void SetJSFrameNodeOnMouse(FrameNode* frameNode, OnMouseEventFunc&& onMouseEventFunc);
+    static void ClearJSFrameNodeOnClick(FrameNode* frameNode);
+    static void ClearJSFrameNodeOnTouch(FrameNode* frameNode);
+    static void ClearJSFrameNodeOnAppear(FrameNode* frameNode);
+    static void ClearJSFrameNodeOnDisappear(FrameNode* frameNode);
+    static void ClearJSFrameNodeOnKeyCallback(FrameNode* frameNode);
+    static void ClearJSFrameNodeOnFocusCallback(FrameNode* frameNode);
+    static void ClearJSFrameNodeOnBlurCallback(FrameNode* frameNode);
+    static void ClearJSFrameNodeOnHover(FrameNode* frameNode);
+    static void ClearJSFrameNodeOnMouse(FrameNode* frameNode);
 
     static float GetFlexGrow(FrameNode* frameNode);
     static float GetFlexShrink(FrameNode* frameNode);

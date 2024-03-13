@@ -28,8 +28,8 @@
 
 namespace OHOS::Ace::NG {
 
-class NavBarPattern : public Pattern {
-    DECLARE_ACE_TYPE(NavBarPattern, Pattern);
+class NavBarPattern : public Pattern, public FocusView {
+    DECLARE_ACE_TYPE(NavBarPattern, Pattern, FocusView);
 
 public:
     NavBarPattern() = default;
@@ -127,6 +127,20 @@ public:
     FocusPattern GetFocusPattern() const override
     {
         return { FocusType::SCOPE, true };
+    }
+
+    std::list<int32_t> GetRouteOfFirstScope() override
+    {
+        return { 2, 0 };
+    }
+
+    std::string GetEntryFocusViewName() override
+    {
+        /*
+        |-> Navigation (root focus view)
+          |-> NavBar
+        */
+        return V2::NAVIGATION_VIEW_ETS_TAG;
     }
 
     int32_t GetMaxMenuNum() const

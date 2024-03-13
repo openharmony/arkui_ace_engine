@@ -171,6 +171,8 @@ JSRef<JSObject> JSRichEditor::CreateJSTextStyleResult(const TextStyleResult& tex
     textStyleObj->SetProperty<std::string>("fontColor", textStyleResult.fontColor);
     textStyleObj->SetProperty<double>("fontSize", textStyleResult.fontSize);
     textStyleObj->SetProperty<int32_t>("fontStyle", textStyleResult.fontStyle);
+    textStyleObj->SetProperty<double>("lineHeight", textStyleResult.lineHeight);
+    textStyleObj->SetProperty<double>("letterSpacing", textStyleResult.letterSpacing);
     textStyleObj->SetProperty<int32_t>("fontWeight", textStyleResult.fontWeight);
     textStyleObj->SetProperty<std::string>("fontFamily", textStyleResult.fontFamily);
     JSRef<JSObject> decorationObj = JSRef<JSObject>::New();
@@ -178,6 +180,7 @@ JSRef<JSObject> JSRichEditor::CreateJSTextStyleResult(const TextStyleResult& tex
     decorationObj->SetProperty<std::string>("color", textStyleResult.decorationColor);
     textStyleObj->SetPropertyObject("decoration", decorationObj);
     textStyleObj->SetProperty<int32_t>("textAlign", textStyleResult.textAlign);
+    textStyleObj->SetProperty<int32_t>("wordBreak", textStyleResult.wordBreak);
     JSRef<JSArray> leadingMarginArray = JSRef<JSArray>::New();
     leadingMarginArray->SetValueAt(0, JSRef<JSVal>::Make(ToJSValue(textStyleResult.leadingMarginSize[0])));
     leadingMarginArray->SetValueAt(1, JSRef<JSVal>::Make(ToJSValue(textStyleResult.leadingMarginSize[1])));
@@ -191,6 +194,8 @@ JSRef<JSObject> JSRichEditor::CreateJSSymbolSpanStyleResult(const SymbolSpanStyl
     JSRef<JSObject> symbolSpanStyleObj = JSRef<JSObject>::New();
     symbolSpanStyleObj->SetProperty<std::string>("fontColor", symbolSpanStyle.symbolColor);
     symbolSpanStyleObj->SetProperty<double>("fontSize", symbolSpanStyle.fontSize);
+    symbolSpanStyleObj->SetProperty<double>("lineHeight", symbolSpanStyle.lineHeight);
+    symbolSpanStyleObj->SetProperty<double>("letterSpacing", symbolSpanStyle.letterSpacing);
     symbolSpanStyleObj->SetProperty<int32_t>("fontWeight", symbolSpanStyle.fontWeight);
     symbolSpanStyleObj->SetProperty<uint32_t>("renderingStrategy", symbolSpanStyle.renderingStrategy);
     symbolSpanStyleObj->SetProperty<uint32_t>("effectStrategy", symbolSpanStyle.effectStrategy);
@@ -230,6 +235,7 @@ JSRef<JSObject> JSRichEditor::CreateParagraphStyleResult(const ParagraphInfo& in
 {
     auto obj = JSRef<JSObject>::New();
     obj->SetProperty<int32_t>("textAlign", info.textAlign);
+    obj->SetProperty<int32_t>("wordBreak", info.wordBreak);
 
     auto lmObj = JSRef<JSObject>::New();
     auto size = JSRef<JSArray>::New();
@@ -451,6 +457,8 @@ JSRef<JSVal> JSRichEditor::CreateJsOnIMEInputComplete(const NG::RichEditorAbstra
     decorationObj->SetProperty<std::string>("color", textSpanResult.GetColor());
     textStyleObj->SetProperty<std::string>("fontColor", textSpanResult.GetFontColor());
     textStyleObj->SetProperty<double>("fontSize", textSpanResult.GetFontSize());
+    textStyleObj->SetProperty<double>("lineHeight", textSpanResult.GetTextStyle().lineHeight);
+    textStyleObj->SetProperty<double>("letterSpacing", textSpanResult.GetTextStyle().letterSpacing);
     textStyleObj->SetProperty<int32_t>("fontStyle", static_cast<int32_t>(textSpanResult.GetFontStyle()));
     textStyleObj->SetProperty<int32_t>("fontWeight", textSpanResult.GetFontWeight());
     textStyleObj->SetProperty<std::string>("fontFamily", textSpanResult.GetFontFamily());
@@ -515,6 +523,8 @@ void JSRichEditor::CreateTextStyleObj(JSRef<JSObject>& textStyleObj, const NG::R
     decorationObj->SetProperty<std::string>("color", spanResult.GetColor());
     textStyleObj->SetProperty<std::string>("fontColor", spanResult.GetFontColor());
     textStyleObj->SetProperty<double>("fontSize", spanResult.GetFontSize());
+    textStyleObj->SetProperty<double>("lineHeight", spanResult.GetTextStyle().lineHeight);
+    textStyleObj->SetProperty<double>("letterSpacing", spanResult.GetTextStyle().letterSpacing);
     textStyleObj->SetProperty<int32_t>("fontStyle", static_cast<int32_t>(spanResult.GetFontStyle()));
     textStyleObj->SetProperty<int32_t>("fontWeight", spanResult.GetFontWeight());
     textStyleObj->SetProperty<std::string>("fontFamily", spanResult.GetFontFamily());
@@ -759,6 +769,40 @@ void JSRichEditor::JsDataDetectorConfig(const JSCallbackInfo& info)
     RichEditorModel::GetInstance()->SetTextDetectConfig(textTypes, std::move(onResult));
 }
 
+void JSRichEditor::SetCaretColor(const JSCallbackInfo& info)
+{
+    if (info.Length() < 1) {
+        TAG_LOGE(AceLogTag::ACE_RICH_TEXT, "Info length error");
+        return;
+    }
+    Color color;
+    if (!ParseJsColor(info[0], color)) {
+        auto pipeline = PipelineBase::GetCurrentContext();
+        CHECK_NULL_VOID(pipeline);
+        auto theme = pipeline->GetThemeManager()->GetTheme<NG::RichEditorTheme>();
+        CHECK_NULL_VOID(theme);
+        color = theme->GetCaretColor();
+    }
+    RichEditorModel::GetInstance()->SetCaretColor(color);
+}
+
+void JSRichEditor::SetSelectedBackgroundColor(const JSCallbackInfo& info)
+{
+    if (info.Length() < 1) {
+        TAG_LOGE(AceLogTag::ACE_RICH_TEXT, "Info length error");
+        return;
+    }
+    Color selectedColor;
+    if (!ParseJsColor(info[0], selectedColor)) {
+        auto pipeline = PipelineBase::GetCurrentContext();
+        CHECK_NULL_VOID(pipeline);
+        auto theme = pipeline->GetThemeManager()->GetTheme<NG::RichEditorTheme>();
+        CHECK_NULL_VOID(theme);
+        selectedColor = theme->GetSelectedBackgroundColor();
+    }
+    RichEditorModel::GetInstance()->SetSelectedBackgroundColor(selectedColor);
+}
+
 void JSRichEditor::JSBind(BindingTarget globalObj)
 {
     JSClass<JSRichEditor>::Declare("RichEditor");
@@ -785,6 +829,8 @@ void JSRichEditor::JSBind(BindingTarget globalObj)
     JSClass<JSRichEditor>::StaticMethod("enableDataDetector", &JSRichEditor::JsEnableDataDetector);
     JSClass<JSRichEditor>::StaticMethod("dataDetectorConfig", &JSRichEditor::JsDataDetectorConfig);
     JSClass<JSRichEditor>::StaticMethod("placeholder", &JSRichEditor::SetPlaceholder);
+    JSClass<JSRichEditor>::StaticMethod("caretColor", &JSRichEditor::SetCaretColor);
+    JSClass<JSRichEditor>::StaticMethod("selectedBackgroundColor", &JSRichEditor::SetSelectedBackgroundColor);
     JSClass<JSRichEditor>::InheritAndBind<JSViewAbstract>(globalObj);
 }
 
@@ -843,6 +889,37 @@ ImageSpanAttribute JSRichEditorController::ParseJsImageSpanAttribute(JSRef<JSObj
     return imageStyle;
 }
 
+void JSRichEditorController::ParseJsLineHeightLetterSpacingTextStyle(const JSRef<JSObject>& styleObject,
+    TextStyle& style, struct UpdateSpanStyle& updateSpanStyle, bool isSupportPercent)
+{
+    JSRef<JSVal> lineHeight = styleObject->GetProperty("lineHeight");
+    CalcDimension height;
+    if (!lineHeight->IsNull() && JSContainerBase::ParseJsDimensionFpNG(lineHeight, height, isSupportPercent) &&
+        !height.IsNegative() && height.Unit() != DimensionUnit::PERCENT) {
+        updateSpanStyle.updateLineHeight = height;
+        style.SetLineHeight(height);
+    } else if (height.IsNegative() || height.Unit() == DimensionUnit::PERCENT) {
+        auto theme = JSContainerBase::GetTheme<TextTheme>();
+        CHECK_NULL_VOID(theme);
+        height = theme->GetTextStyle().GetLineHeight();
+        updateSpanStyle.updateLineHeight = height;
+        style.SetLineHeight(height);
+    }
+    JSRef<JSVal> letterSpacing = styleObject->GetProperty("letterSpacing");
+    CalcDimension letters;
+    if (JSContainerBase::ParseJsDimensionFpNG(letterSpacing, letters, isSupportPercent) &&
+        letters.Unit() != DimensionUnit::PERCENT) {
+        updateSpanStyle.updateLetterSpacing = letters;
+        style.SetLetterSpacing(letters);
+    } else if (letters.Unit() == DimensionUnit::PERCENT) {
+        auto theme = JSContainerBase::GetTheme<TextTheme>();
+        CHECK_NULL_VOID(theme);
+        letters = theme->GetTextStyle().GetLetterSpacing();
+        updateSpanStyle.updateLetterSpacing = letters;
+        style.SetLetterSpacing(letters);
+    }
+}
+
 void JSRichEditorController::ParseJsTextStyle(
     const JSRef<JSObject>& styleObject, TextStyle& style, struct UpdateSpanStyle& updateSpanStyle)
 {
@@ -867,6 +944,7 @@ void JSRichEditorController::ParseJsTextStyle(
         updateSpanStyle.updateFontSize = size;
         style.SetFontSize(size);
     }
+    ParseJsLineHeightLetterSpacingTextStyle(styleObject, style, updateSpanStyle);
     JSRef<JSVal> fontStyle = styleObject->GetProperty("fontStyle");
     if (!fontStyle->IsNull() && fontStyle->IsNumber()) {
         updateSpanStyle.updateItalicFontStyle = static_cast<FontStyle>(fontStyle->ToNumber<int32_t>());
@@ -916,6 +994,7 @@ void JSRichEditorController::ParseJsSymbolSpanStyle(
         updateSpanStyle.updateFontSize = size;
         style.SetFontSize(size);
     }
+    ParseJsLineHeightLetterSpacingTextStyle(styleObject, style, updateSpanStyle, false);
     JSRef<JSVal> fontWeight = styleObject->GetProperty("fontWeight");
     std::string weight;
     if (!fontWeight->IsNull() && (fontWeight->IsNumber() || JSContainerBase::ParseJsString(fontWeight, weight))) {
@@ -1479,6 +1558,20 @@ std::pair<int32_t, int32_t> ParseRange(const JSRef<JSObject>& object)
 }
 } // namespace
 
+void JSRichEditorController::ParseWordBreakParagraphStyle(const JSRef<JSObject>& styleObject,
+    struct UpdateParagraphStyle& style)
+{
+    auto wordBreakObj = styleObject->GetProperty("wordBreak");
+    if (wordBreakObj->IsNull() || !wordBreakObj->IsNumber()) {
+        return;
+    }
+    auto index = wordBreakObj->ToNumber<int32_t>();
+    if (index < 0 || index >= static_cast<int32_t>(WORD_BREAK_TYPES.size())) {
+        index = static_cast<int32_t>(WordBreak::BREAK_WORD);
+    }
+    style.wordBreak = WORD_BREAK_TYPES[index];
+}
+
 bool JSRichEditorController::ParseParagraphStyle(const JSRef<JSObject>& styleObject, struct UpdateParagraphStyle& style)
 {
     ContainerScope scope(instanceId_ < 0 ? Container::CurrentId() : instanceId_);
@@ -1490,6 +1583,9 @@ bool JSRichEditorController::ParseParagraphStyle(const JSRef<JSObject>& styleObj
         }
         style.textAlign = align;
     }
+
+    ParseWordBreakParagraphStyle(styleObject, style);
+
     auto lm = styleObject->GetProperty("leadingMargin");
     if (lm->IsObject()) {
         // [LeadingMarginPlaceholder]
@@ -1621,6 +1717,12 @@ JSRef<JSObject> JSRichEditorController::CreateTypingStyleResult(const struct Upd
     }
     if (typingStyle.updateFontSize.has_value()) {
         tyingStyleObj->SetProperty<double>("fontSize", typingStyle.updateFontSize.value().ConvertToVp());
+    }
+    if (typingStyle.updateLineHeight.has_value()) {
+        tyingStyleObj->SetProperty<double>("lineHeight", typingStyle.updateLineHeight.value().ConvertToVp());
+    }
+    if (typingStyle.updateLetterSpacing.has_value()) {
+        tyingStyleObj->SetProperty<double>("letterSpacing", typingStyle.updateLetterSpacing.value().ConvertToVp());
     }
     if (typingStyle.updateTextColor.has_value()) {
         tyingStyleObj->SetProperty<std::string>("fontColor", typingStyle.updateTextColor.value().ColorToString());

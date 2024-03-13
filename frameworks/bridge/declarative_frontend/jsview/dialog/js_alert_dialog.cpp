@@ -277,8 +277,12 @@ void JSAlertDialog::Show(const JSCallbackInfo& args)
         // Parse showInSubWindowValue.
         auto showInSubWindowValue = obj->GetProperty("showInSubWindow");
         if (showInSubWindowValue->IsBoolean()) {
-            LOGI("Parse showInSubWindowValue");
+#if defined(PREVIEW)
+            LOGW("[Engine Log] Unable to use the SubWindow in the Previewer. Perform this operation on the "
+                 "emulator or a real device instead.");
+#else
             properties.isShowInSubWindow = showInSubWindowValue->ToBoolean();
+#endif
         }
 
         // Parse isModal.
@@ -303,6 +307,9 @@ void JSAlertDialog::Show(const JSCallbackInfo& args)
                 properties.backgroundBlurStyle = blurStyle;
             }
         }
+        // Parse transition.
+        properties.transitionEffect = ParseJsTransitionEffect(args);
+        JSViewAbstract::SetDialogProperties(obj, properties);
         AlertDialogModel::GetInstance()->SetShowDialog(properties);
     }
 }
@@ -314,5 +321,4 @@ void JSAlertDialog::JSBind(BindingTarget globalObj)
 
     JSClass<JSAlertDialog>::InheritAndBind<JSViewAbstract>(globalObj);
 }
-
 } // namespace OHOS::Ace::Framework
