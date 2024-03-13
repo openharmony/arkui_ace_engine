@@ -149,6 +149,12 @@ public:
 private:
     bool UpdateNavDestinationVisibility(const RefPtr<NavDestinationGroupNode>& navDestination,
         const RefPtr<UINode>& remainChild, int32_t index, size_t destinationSize);
+    bool ReorderNavDestination(
+        const std::vector<std::pair<std::string, RefPtr<UINode>>>& navDestinationNodes,
+        RefPtr<FrameNode>& navigationContentNode, int32_t& slot, bool& hasChanged);
+    void RemoveRedundantNavDestination(RefPtr<FrameNode>& navigationContentNode,
+        const RefPtr<UINode>& remainChild, size_t slot, bool& hasChanged);
+
     RefPtr<UINode> navBarNode_;
     RefPtr<UINode> contentNode_;
     RefPtr<UINode> dividerNode_;
