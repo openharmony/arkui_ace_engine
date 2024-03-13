@@ -523,6 +523,10 @@ int32_t RichEditorPattern::AddTextSpanOperation(
         spanNode->AddPropertyInfo(PropertyInfo::NONE);
         spanNode->UpdateTextShadow(options.style.value().GetTextShadows());
         spanNode->AddPropertyInfo(PropertyInfo::TEXTSHADOW);
+        spanNode->UpdateLineHeight(options.style.value().GetLineHeight());
+        spanNode->AddPropertyInfo(PropertyInfo::LINEHEIGHT);
+        spanNode->UpdateLetterSpacing(options.style.value().GetLetterSpacing());
+        spanNode->AddPropertyInfo(PropertyInfo::LETTERSPACE);
     }
     auto spanItem = spanNode->GetSpanItem();
     spanItem->content = options.value;
@@ -912,6 +916,11 @@ void RichEditorPattern::CopyTextSpanLineStyle(
         target->AddPropertyInfo(PropertyInfo::TEXTSHADOW);
     }
 
+    if (source->HasLetterSpacing()) {
+        target->UpdateLetterSpacing(source->GetLetterSpacingValue(Dimension()));
+        target->AddPropertyInfo(PropertyInfo::LETTERSPACE);
+    }
+
     if (needLeadingMargin && source->HasLeadingMargin()) {
         target->UpdateLeadingMargin(source->GetLeadingMarginValue({}));
         target->AddPropertyInfo(PropertyInfo::LEADING_MARGIN);
@@ -1138,6 +1147,14 @@ void RichEditorPattern::UpdateTextStyle(
         spanNode->UpdateTextColor(textStyle.GetTextColor());
         spanNode->AddPropertyInfo(PropertyInfo::FONTCOLOR);
     }
+    if (updateSpanStyle.updateLineHeight.has_value()) {
+        spanNode->UpdateLineHeight(textStyle.GetLineHeight());
+        spanNode->AddPropertyInfo(PropertyInfo::LINEHEIGHT);
+    }
+    if (updateSpanStyle.updateLetterSpacing.has_value()) {
+        spanNode->UpdateLetterSpacing(textStyle.GetLetterSpacing());
+        spanNode->AddPropertyInfo(PropertyInfo::LETTERSPACE);
+    }
     if (updateSpanStyle.updateFontSize.has_value()) {
         spanNode->UpdateFontSize(textStyle.GetFontSize());
         spanNode->AddPropertyInfo(PropertyInfo::FONTSIZE);
@@ -1181,6 +1198,14 @@ void RichEditorPattern::UpdateSymbolStyle(
     if (updateSpanStyle.updateFontSize.has_value()) {
         spanNode->UpdateFontSize(textStyle.GetFontSize());
         spanNode->AddPropertyInfo(PropertyInfo::FONTSIZE);
+    }
+    if (updateSpanStyle.updateLineHeight.has_value()) {
+        spanNode->UpdateLineHeight(textStyle.GetLineHeight());
+        spanNode->AddPropertyInfo(PropertyInfo::LINEHEIGHT);
+    }
+    if (updateSpanStyle.updateLetterSpacing.has_value()) {
+        spanNode->UpdateLetterSpacing(textStyle.GetLetterSpacing());
+        spanNode->AddPropertyInfo(PropertyInfo::LETTERSPACE);
     }
     if (updateSpanStyle.updateFontWeight.has_value()) {
         spanNode->UpdateFontWeight(textStyle.GetFontWeight());
@@ -2769,6 +2794,7 @@ void RichEditorPattern::AfterIMEInsertValue(const RefPtr<SpanNode>& spanNode, in
     retInfo.SetFontSize(spanNode->GetFontSizeValue(Dimension(16.0f, DimensionUnit::VP)).ConvertToVp());
     retInfo.SetFontStyle(spanNode->GetItalicFontStyleValue(OHOS::Ace::FontStyle::NORMAL));
     retInfo.SetFontWeight(static_cast<int32_t>(spanNode->GetFontWeightValue(FontWeight::NORMAL)));
+    retInfo.SetTextStyle(GetTextStyleObject(spanNode));
     std::string fontFamilyValue;
     auto fontFamily = spanNode->GetFontFamilyValue({ "HarmonyOS Sans" });
     for (const auto& str : fontFamily) {
@@ -3628,6 +3654,13 @@ int32_t RichEditorPattern::DeleteValueSetTextSpan(
     auto contentStartPosition = spanItem->position - StringUtils::ToWstring(spanItem->content).length();
     spanResult.SetSpanRangeStart(contentStartPosition);
     int32_t eraseLength = 0;
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, 1);
+    auto uiNode = host->GetChildAtIndex(spanResult.GetSpanIndex());
+    CHECK_NULL_RETURN(uiNode, 1);
+    auto spanNode = DynamicCast<SpanNode>(uiNode);
+    CHECK_NULL_RETURN(spanNode, 1);
+    spanResult.SetTextStyle(GetTextStyleObject(spanNode));
     if (spanItem->position - currentPosition >= length) {
         eraseLength = length;
     } else {
@@ -4818,6 +4851,13 @@ float RichEditorPattern::GetLineHeight() const
     auto selectedRects = paragraphs_.GetRects(textSelector_.GetTextStart(), textSelector_.GetTextEnd());
     CHECK_NULL_RETURN(selectedRects.size(), 0.0f);
     return selectedRects.front().Height();
+}
+
+float RichEditorPattern::GetLetterSpacing() const
+{
+    auto selectedRects = paragraphs_.GetRects(textSelector_.GetTextStart(), textSelector_.GetTextEnd());
+    CHECK_NULL_RETURN(!selectedRects.empty(), 0.0f);
+    return selectedRects.front().Width();
 }
 
 void RichEditorPattern::UpdateSelectMenuInfo(bool hasData, SelectOverlayInfo& selectInfo, bool isCopyAll)
