@@ -3607,12 +3607,25 @@ int32_t RichEditorPattern::DeleteValueSetImageSpan(
     CHECK_NULL_RETURN(uiNode, IMAGE_SPAN_LENGTH);
     auto imageNode = AceType::DynamicCast<FrameNode>(uiNode);
     CHECK_NULL_RETURN(imageNode, IMAGE_SPAN_LENGTH);
+    auto imageRenderCtx = imageNode->GetRenderContext();
+    if (imageRenderCtx->GetBorderRadius()) {
+        BorderRadiusProperty brp;
+        auto jsonObject = JsonUtil::Create(true);
+        auto jsonBorder = JsonUtil::Create(true);
+        imageRenderCtx->GetBorderRadiusValue(brp).ToJsonValue(jsonObject, jsonBorder);
+        spanResult.SetBorderRadius(jsonObject->GetValue("borderRadius")->IsObject()
+                                       ? jsonObject->GetValue("borderRadius")->ToString()
+                                       : jsonObject->GetString("borderRadius"));
+    }
     auto geometryNode = imageNode->GetGeometryNode();
     CHECK_NULL_RETURN(geometryNode, IMAGE_SPAN_LENGTH);
     auto imageLayoutProperty = DynamicCast<ImageLayoutProperty>(imageNode->GetLayoutProperty());
     CHECK_NULL_RETURN(imageLayoutProperty, IMAGE_SPAN_LENGTH);
     spanResult.SetSizeWidth(geometryNode->GetMarginFrameSize().Width());
     spanResult.SetSizeHeight(geometryNode->GetMarginFrameSize().Height());
+    if (imageLayoutProperty->GetMarginProperty()) {
+        spanResult.SetMargin(imageLayoutProperty->GetMarginProperty()->ToString());
+    }
     if (!imageLayoutProperty->GetImageSourceInfo()->GetPixmap()) {
         spanResult.SetValueResourceStr(imageLayoutProperty->GetImageSourceInfo()->GetSrc());
     } else {
@@ -3654,13 +3667,6 @@ int32_t RichEditorPattern::DeleteValueSetTextSpan(
     auto contentStartPosition = spanItem->position - StringUtils::ToWstring(spanItem->content).length();
     spanResult.SetSpanRangeStart(contentStartPosition);
     int32_t eraseLength = 0;
-    auto host = GetHost();
-    CHECK_NULL_RETURN(host, 1);
-    auto uiNode = host->GetChildAtIndex(spanResult.GetSpanIndex());
-    CHECK_NULL_RETURN(uiNode, 1);
-    auto spanNode = DynamicCast<SpanNode>(uiNode);
-    CHECK_NULL_RETURN(spanNode, 1);
-    spanResult.SetTextStyle(GetTextStyleObject(spanNode));
     if (spanItem->position - currentPosition >= length) {
         eraseLength = length;
     } else {
@@ -3683,6 +3689,13 @@ int32_t RichEditorPattern::DeleteValueSetTextSpan(
     }
     spanResult.SetColor(spanItem->GetTextStyle()->GetTextDecorationColor().ColorToString());
     spanResult.SetTextDecoration(spanItem->GetTextStyle()->GetTextDecoration());
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, eraseLength);
+    auto uiNode = host->GetChildAtIndex(spanResult.GetSpanIndex());
+    CHECK_NULL_RETURN(uiNode, eraseLength);
+    auto spanNode = DynamicCast<SpanNode>(uiNode);
+    CHECK_NULL_RETURN(spanNode, eraseLength);
+    spanResult.SetTextStyle(GetTextStyleObject(spanNode));
     return eraseLength;
 }
 

@@ -1743,8 +1743,8 @@ ResultObject TextPattern::GetImageResultObject(RefPtr<UINode> uinode, int32_t in
         if (imageLayoutProperty->HasVerticalAlign()) {
             resultObject.imageStyle.verticalAlign = static_cast<int32_t>(imageLayoutProperty->GetVerticalAlignValue());
         }
-        if (geometryNode->GetMargin()) {
-            resultObject.imageStyle.margin = geometryNode->GetMargin()->ToJsonString();
+        if (imageLayoutProperty->GetMarginProperty()) {
+            resultObject.imageStyle.margin = imageLayoutProperty->GetMarginProperty()->ToString();
         }
         auto imageRenderCtx = imageNode->GetRenderContext();
         if (imageRenderCtx->GetBorderRadius()) {
@@ -1752,7 +1752,9 @@ ResultObject TextPattern::GetImageResultObject(RefPtr<UINode> uinode, int32_t in
             auto jsonObject = JsonUtil::Create(true);
             auto jsonBorder = JsonUtil::Create(true);
             imageRenderCtx->GetBorderRadiusValue(brp).ToJsonValue(jsonObject, jsonBorder);
-            resultObject.imageStyle.borderRadius = jsonObject->ToString();
+            resultObject.imageStyle.borderRadius = jsonObject->GetValue("borderRadius")->IsObject()
+                                                       ? jsonObject->GetValue("borderRadius")->ToString()
+                                                       : jsonObject->GetString("borderRadius");
         }
     }
     return resultObject;
