@@ -200,21 +200,30 @@ void JSSelect::Value(const JSCallbackInfo& info)
     SelectModel::GetInstance()->SetValue(value);
 }
 
+void ResetFont(void)
+{
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto selectTheme = pipeline->GetTheme<SelectTheme>();
+    CHECK_NULL_VOID(selectTheme);
+    auto textTheme = pipeline->GetTheme<TextTheme>();
+    CHECK_NULL_VOID(textTheme);
+    if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
+        SelectModel::GetInstance()->SetFontSize(selectTheme->GetFontSize());
+    } else {
+        auto controlSize = SelectModel::GetInstance()->GetControlSize();
+        SelectModel::GetInstance()->SetFontSize(selectTheme->GetFontSize(controlSize));
+    }
+    SelectModel::GetInstance()->SetFontWeight(FontWeight::MEDIUM);
+    SelectModel::GetInstance()->SetFontFamily(textTheme->GetTextStyle().GetFontFamilies());
+    SelectModel::GetInstance()->SetItalicFontStyle(textTheme->GetTextStyle().GetFontStyle());
+    return;
+}
+
 void JSSelect::Font(const JSCallbackInfo& info)
 {
     if (info[0]->IsUndefined() || info[0]->IsNull()) {
-        auto pipeline = PipelineBase::GetCurrentContext();
-        CHECK_NULL_VOID(pipeline);
-        auto selectTheme = pipeline->GetTheme<SelectTheme>();
-        CHECK_NULL_VOID(selectTheme);
-        auto textTheme = pipeline->GetTheme<TextTheme>();
-        CHECK_NULL_VOID(textTheme);
-        auto controlSize = SelectModel::GetInstance()->GetControlSize();
-        SelectModel::GetInstance()->SetFontSize(selectTheme->GetFontSize(controlSize));
-        SelectModel::GetInstance()->SetFontWeight(FontWeight::MEDIUM);
-        SelectModel::GetInstance()->SetFontFamily(textTheme->GetTextStyle().GetFontFamilies());
-        SelectModel::GetInstance()->SetItalicFontStyle(textTheme->GetTextStyle().GetFontStyle());
-        return;
+        ResetFont();
     }
 
     if (!info[0]->IsObject()) {
@@ -841,6 +850,9 @@ void JSSelect::SetMenuBackgroundBlurStyle(const JSCallbackInfo& info)
 
 void JSSelect::SetControlSize(const JSCallbackInfo& info)
 {
+    if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
+        return;
+    }
     if (info.Length() < 1) {
         return;
     }

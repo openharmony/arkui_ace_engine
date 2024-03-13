@@ -483,7 +483,11 @@ void SelectPattern::BuildChild()
     // set bgColor and border
     auto renderContext = select->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
-    renderContext->UpdateBackgroundColor(theme->GetBackgroundColor());
+    if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
+        renderContext->UpdateBackgroundColor(theme->GetBackgroundColor());
+    } else {
+        renderContext->UpdateBackgroundColor(theme->GetButtonBackgroundColor());
+    }
     renderContext->SetClipToFrame(true);
     BorderRadiusProperty border;
     border.SetRadius(theme->GetSelectBorderRadius());
@@ -846,30 +850,7 @@ void SelectPattern::ToJsonValue(std::unique_ptr<JsonValue>& json) const
 {
     json->Put("options", InspectorGetOptions().c_str());
     json->Put("selected", std::to_string(selected_).c_str());
-
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    if (!host->GetChildren().empty()) {
-        auto row = FrameNode::GetFrameNode(host->GetFirstChild()->GetTag(), host->GetFirstChild()->GetId());
-        CHECK_NULL_VOID(row);
-        auto rowProps = row->GetLayoutProperty<FlexLayoutProperty>();
-        CHECK_NULL_VOID(rowProps);
-        json->Put("space", rowProps->GetSpace()->ToString().c_str());
-
-        if (rowProps->GetFlexDirection().value() == FlexDirection::ROW) {
-            json->Put("arrowPosition", "ArrowPosition.END");
-        } else {
-            json->Put("arrowPosition", "ArrowPosition.START");
-        }
-    }
-
-    auto props = text_->GetLayoutProperty<TextLayoutProperty>();
-    CHECK_NULL_VOID(props);
-    json->Put("value", props->GetContent().value_or("").c_str());
-    Color fontColor = props->GetTextColor().value_or(Color::BLACK);
-    json->Put("fontColor", fontColor.ColorToString().c_str());
-    json->Put("font", props->InspectorGetTextFont().c_str());
-    json->Put("controlSize", ConvertControlSizeToString(controlSize_).c_str()); //DEV中显示属性值
+    ToJsonArrowAndText(json);
     json->Put("selectedOptionBgColor", selectedBgColor_->ColorToString().c_str());
     json->Put("selectedOptionFont", InspectorGetSelectedFont().c_str());
     json->Put("selectedOptionFontColor", selectedFont_.FontColor.value_or(Color::BLACK).ColorToString().c_str());
@@ -900,6 +881,36 @@ void SelectPattern::ToJsonValue(std::unique_ptr<JsonValue>& json) const
     std::string optionHeight =  std::to_string(menuLayoutProps->GetSelectModifiedHeightValue(0.0f));
     json->Put("optionHeight", optionHeight.c_str());
     ToJsonMenuBackgroundStyle(json);
+}
+
+void SelectPattern::ToJsonArrowAndText(std::unique_ptr<JsonValue>& json) const
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    if (!host->GetChildren().empty()) {
+        auto row = FrameNode::GetFrameNode(host->GetFirstChild()->GetTag(), host->GetFirstChild()->GetId());
+        CHECK_NULL_VOID(row);
+        auto rowProps = row->GetLayoutProperty<FlexLayoutProperty>();
+        CHECK_NULL_VOID(rowProps);
+        json->Put("space", rowProps->GetSpace()->ToString().c_str());
+
+        if (rowProps->GetFlexDirection().value() == FlexDirection::ROW) {
+            json->Put("arrowPosition", "ArrowPosition.END");
+        } else {
+            json->Put("arrowPosition", "ArrowPosition.START");
+        }
+    }
+
+    auto props = text_->GetLayoutProperty<TextLayoutProperty>();
+    CHECK_NULL_VOID(props);
+    json->Put("value", props->GetContent().value_or("").c_str());
+    Color fontColor = props->GetTextColor().value_or(Color::BLACK);
+    json->Put("fontColor", fontColor.ColorToString().c_str());
+    json->Put("font", props->InspectorGetTextFont().c_str());
+
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
+        json->Put("controlSize", ConvertControlSizeToString(controlSize_).c_str());
+    }
 }
 
 void SelectPattern::ToJsonMenuBackgroundStyle(std::unique_ptr<JsonValue>& json) const
@@ -1245,23 +1256,21 @@ void SelectPattern::SetMenuBackgroundBlurStyle(const BlurStyleOption& blurStyle)
     renderContext->UpdateBackBlurStyle(blurStyle);
 }
 
-void SelectPattern::ReSetpara()
+void SelectPattern::ResetParams()
 {
+    if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
+        return;
+    }
     auto pipeline = PipelineBase::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
     auto selectTheme = pipeline->GetTheme<SelectTheme>();
     auto select = GetHost();
     auto layoutProperty = select->GetLayoutProperty();
     CHECK_NULL_VOID(layoutProperty);
-    //设置最小宽度
     layoutProperty->UpdateCalcMinSize(CalcSize(CalcLength(selectTheme->GetSelectMinWidth(controlSize_)),
         std::nullopt));
-    //设置高度
     ViewAbstract::SetHeight(NG::CalcLength(selectTheme->GetSelectDefaultHeight(controlSize_)));
-    //设置字体大小
     SetFontSize(selectTheme->GetFontSize(controlSize_));
-
-    //设置三角图标宽高
     auto spinnerLayoutProperty = spinner_->GetLayoutProperty<ImageLayoutProperty>();
     CHECK_NULL_VOID(spinnerLayoutProperty);
     CalcSize idealSize = { CalcLength(selectTheme->GetSpinnerWidth(controlSize_)),
@@ -1269,7 +1278,6 @@ void SelectPattern::ReSetpara()
     MeasureProperty layoutConstraint;
     layoutConstraint.selfIdealSize = idealSize;
     spinnerLayoutProperty->UpdateCalcLayoutProperty(layoutConstraint);
-    //设置圆角
     auto renderContext = select->GetRenderContext();
     BorderRadiusProperty border;
     border.SetRadius(selectTheme->GetSelectDefaultBorderRadius(controlSize_));
@@ -1285,8 +1293,11 @@ void SelectPattern::ReSetpara()
 
 void SelectPattern::SetControlSize(const ControlSize& controlSize)
 {
+    if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
+        return;
+    }
     controlSize_ = controlSize;
-    ReSetpara();
+    ResetParams();
 }
 
 ControlSize SelectPattern::GetControlSize()

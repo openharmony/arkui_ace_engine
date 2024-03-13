@@ -36,7 +36,14 @@ void SetSelectDefaultSize(const RefPtr<FrameNode>& select)
 
     auto layoutProperty = select->GetLayoutProperty();
     CHECK_NULL_VOID(layoutProperty);
-    layoutProperty->UpdateCalcMinSize(CalcSize(CalcLength(theme->GetSelectMinWidth()), std::nullopt));
+    if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
+        layoutProperty->UpdateCalcMinSize(CalcSize(CalcLength(theme->GetSelectMinWidth()), std::nullopt));
+    } else {
+        auto pattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<SelectPattern>();
+        CHECK_NULL_VOID(pattern);
+        layoutProperty->UpdateCalcMinSize(
+            CalcSize(CalcLength(theme->GetSelectMinWidth(pattern->GetControlSize())), std::nullopt));
+    }
 }
 
 static constexpr Dimension SELECT_MARGIN_VP = 8.0_vp;
@@ -59,7 +66,7 @@ void SelectModelNG::Create(const std::vector<SelectParam>& params)
     CHECK_NULL_VOID(pipeline);
     if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
         pattern->SetSelectDefaultTheme();
-
+    
         NG::PaddingProperty paddings;
         paddings.top = std::nullopt;
         paddings.bottom = std::nullopt;
@@ -459,6 +466,9 @@ void SelectModelNG::SetHasOptionWidth(bool hasOptionWidth)
 
 void SelectModelNG::SetControlSize(const std::optional<ControlSize>& controlSize)
 {
+    if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
+        return;
+    }
     if (controlSize.has_value()) {
         auto pattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<SelectPattern>();
         CHECK_NULL_VOID(pattern);
@@ -466,9 +476,28 @@ void SelectModelNG::SetControlSize(const std::optional<ControlSize>& controlSize
     }
 }
 
+void SelectModelNG::SetControlSize(FrameNode* frameNode, const std::optional<ControlSize>& controlSize)
+{
+    if (controlSize.has_value()) {
+        auto pattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<SelectPattern>(frameNode);
+        CHECK_NULL_VOID(pattern);
+        pattern->SetControlSize(controlSize.value());
+    }
+}
+
 ControlSize SelectModelNG::GetControlSize()
 {
+    if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
+        return ControlSize::NORMAL;
+    }
     auto pattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<SelectPattern>();
+    CHECK_NULL_RETURN(pattern, ControlSize::NORMAL);
+    return pattern->GetControlSize();
+}
+
+ControlSize SelectModelNG::GetControlSize(FrameNode* frameNode)
+{
+    auto pattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<SelectPattern>(frameNode);
     CHECK_NULL_RETURN(pattern, ControlSize::NORMAL);
     return pattern->GetControlSize();
 }

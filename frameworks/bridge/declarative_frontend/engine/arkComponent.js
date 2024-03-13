@@ -10702,6 +10702,10 @@ class ArkSelectComponent extends ArkComponent {
     modifierWithKey(this._modifiersWithKeys, MenuAlignModifier.identity, MenuAlignModifier, menuAlign);
     return this;
   }
+  controlSize(controlSize) {
+    modifierWithKey(this._modifiersWithKeys, ControlSizeModifier.identity, ControlSizeModifier, controlSize);
+    return this;
+  }
 }
 class FontModifier extends ModifierWithKey {
   constructor(value) {
@@ -10795,6 +10799,23 @@ class MenuAlignModifier extends ModifierWithKey {
   }
 }
 MenuAlignModifier.identity = Symbol('selectMenuAlign');
+class ControlSizeModifier extends ModifierWithKey {
+    constructor(value) {
+        super(value);
+    }
+    applyPeer(node, reset) {
+        if (reset) {
+            getUINativeModule().select.resetControlSize(node);
+        }
+        else {
+            getUINativeModule().select.setControlSize(node, this.value);
+        }
+    }
+    checkObjectDiff() {
+        return this.stageValue !== this.value;
+    }
+}
+ControlSizeModifier.identity = Symbol('controlSize');
 class ArrowPositionModifier extends ModifierWithKey {
   constructor(value) {
     super(value);

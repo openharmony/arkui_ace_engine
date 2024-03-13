@@ -80,10 +80,12 @@ public:
             const double bgColorSelectedAlpha = 0.2;
 
             theme->fontSize_ = pattern->GetAttr<Dimension>(PATTERN_TEXT_SIZE, theme->fontSize_);
-            theme->selectFontSizeMap_.insert(std::pair<ControlSize, Dimension>(ControlSize::NORMAL,
-                theme->fontSize_));
-            theme->selectFontSizeMap_.insert(std::pair<ControlSize, Dimension>(
-                ControlSize::SMALL, pattern->GetAttr<Dimension>("small_text_font_size", 0.0_vp)));
+            if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
+                theme->selectFontSizeMap_.insert(
+                    std::pair<ControlSize, Dimension>(ControlSize::NORMAL, theme->fontSize_));
+                theme->selectFontSizeMap_.insert(std::pair<ControlSize, Dimension>(
+                    ControlSize::SMALL, pattern->GetAttr<Dimension>("small_text_font_size", 0.0_vp)));
+            }
             theme->menuFontSize_ = pattern->GetAttr<Dimension>("menu_text_font_size", theme->menuFontSize_);
             theme->menuTitleFontSize_ =
                 pattern->GetAttr<Dimension>("menu_title_text_font_size", theme->menuTitleFontSize_);
@@ -108,6 +110,10 @@ public:
             theme->selectedColorText_ = pattern->GetAttr<Color>(PATTERN_TEXT_COLOR_SELECTED, theme->selectedColorText_);
             theme->hoverColor_ = pattern->GetAttr<Color>(PATTERN_BG_COLOR_HOVERED, theme->hoverColor_);
             theme->backgroundColor_ = pattern->GetAttr<Color>("bg_color", theme->backgroundColor_);
+            if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
+                theme->backgroundColorButton_ =
+                    pattern->GetAttr<Color>("bg_color_select_button", theme->backgroundColorButton_);
+            }
             theme->disabledBackgroundColor_ =
                 theme->disabledBackgroundColor_.BlendOpacity(theme->disabledFontColorAlpha_);
             theme->lineColor_ = pattern->GetAttr<Color>("line_color", theme->lineColor_);
@@ -136,27 +142,35 @@ public:
             theme->menuAnimationOffset_ =
                 pattern->GetAttr<Dimension>("menu_animation_offset", theme->menuAnimationOffset_);
             theme->spinnerWidth_ = pattern->GetAttr<Dimension>("spinner_width", theme->spinnerWidth_);
-            theme->selectSpinnerWidthMap_.insert(std::pair<ControlSize, Dimension>(ControlSize::NORMAL,
-                theme->spinnerWidth_));
-            theme->selectSpinnerWidthMap_.insert(std::pair<ControlSize, Dimension>(
-                ControlSize::SMALL, pattern->GetAttr<Dimension>("small_spinner_width", 0.0_vp)));
+            if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
+                theme->selectSpinnerWidthMap_.insert(
+                    std::pair<ControlSize, Dimension>(ControlSize::NORMAL, theme->spinnerWidth_));
+                theme->selectSpinnerWidthMap_.insert(std::pair<ControlSize, Dimension>(
+                    ControlSize::SMALL, pattern->GetAttr<Dimension>("small_spinner_width", 0.0_vp)));
+            }
             theme->spinnerHeight_ = pattern->GetAttr<Dimension>("spinner_height", theme->spinnerHeight_);
-            theme->selectSpinnerHeightMap_.insert(std::pair<ControlSize, Dimension>(ControlSize::NORMAL,
-                theme->spinnerHeight_));
-            theme->selectSpinnerHeightMap_.insert(std::pair<ControlSize, Dimension>(
-                ControlSize::SMALL, pattern->GetAttr<Dimension>("small_spinner_height", 0.0_vp)));
+            if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
+                theme->selectSpinnerHeightMap_.insert(
+                    std::pair<ControlSize, Dimension>(ControlSize::NORMAL, theme->spinnerHeight_));
+                theme->selectSpinnerHeightMap_.insert(std::pair<ControlSize, Dimension>(
+                    ControlSize::SMALL, pattern->GetAttr<Dimension>("small_spinner_height", 0.0_vp)));
+            }
             theme->defaultDividerWidth_ =
                 pattern->GetAttr<Dimension>("default_divider_width", theme->defaultDividerWidth_);
             theme->selectMinWidth_ = pattern->GetAttr<Dimension>("select_min_width", theme->selectMinWidth_);
-            theme->selectMinWidthMap_.insert(std::pair<ControlSize, Dimension>(ControlSize::NORMAL,
-                theme->selectMinWidth_));
-            theme->selectMinWidthMap_.insert(std::pair<ControlSize, Dimension>(
-                ControlSize::SMALL, pattern->GetAttr<Dimension>("small_select_min_width", 0.0_vp)));
+            if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
+                theme->selectMinWidthMap_.insert(std::pair<ControlSize, Dimension>(
+                    ControlSize::NORMAL, pattern->GetAttr<Dimension>("normal_select_min_width", 0.0_vp)));
+                theme->selectMinWidthMap_.insert(std::pair<ControlSize, Dimension>(
+                    ControlSize::SMALL, pattern->GetAttr<Dimension>("small_select_min_width", 0.0_vp)));
+            }
             theme->selectDefaultHeight_ = pattern->GetAttr<Dimension>("select_min_height", theme->selectDefaultHeight_);
-            theme->selectMinHeightMap_.insert(std::pair<ControlSize, Dimension>(ControlSize::NORMAL,
-                theme->selectDefaultHeight_));
-            theme->selectMinHeightMap_.insert(std::pair<ControlSize, Dimension>(
-                ControlSize::SMALL, pattern->GetAttr<Dimension>("small_select_min_height", 0.0_vp)));
+            if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
+                theme->selectMinHeightMap_.insert(
+                    std::pair<ControlSize, Dimension>(ControlSize::NORMAL, theme->selectDefaultHeight_));
+                theme->selectMinHeightMap_.insert(std::pair<ControlSize, Dimension>(
+                    ControlSize::SMALL, pattern->GetAttr<Dimension>("small_select_min_height", 0.0_vp)));
+            }
             theme->iconSideLength_ = pattern->GetAttr<Dimension>("icon_side_length", theme->iconSideLength_);
             theme->endIconWidth_ = MENU_END_ICON_WIDTH;
             theme->endIconHeight_ = MENU_END_ICON_HEIGHT;
@@ -165,10 +179,12 @@ public:
                 pattern->GetAttr<Color>("select_default_bg_color", theme->selectDefaultBgColor_);
             theme->selectDefaultBorderRadius_ =
                 pattern->GetAttr<Dimension>("select_default_border_radius", theme->selectDefaultBorderRadius_);
-            theme->selectBorderRadiusMap_.insert(std::pair<ControlSize, Dimension>(ControlSize::NORMAL,
-                theme->selectDefaultBorderRadius_));
-            theme->selectBorderRadiusMap_.insert(std::pair<ControlSize, Dimension>(
-                ControlSize::SMALL, pattern->GetAttr<Dimension>("small_select_border_radius", 0.0_vp)));
+            if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
+                theme->selectBorderRadiusMap_.insert(
+                    std::pair<ControlSize, Dimension>(ControlSize::NORMAL, theme->selectDefaultBorderRadius_));
+                theme->selectBorderRadiusMap_.insert(std::pair<ControlSize, Dimension>(
+                    ControlSize::SMALL, pattern->GetAttr<Dimension>("small_select_border_radius", 0.0_vp)));
+            }
             if (Container::LessThanAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
                 theme->expandDisplay_ = false;
             } else {
@@ -302,6 +318,7 @@ public:
         theme->spinnerColor_ = spinnerColor_;
         theme->disabledSpinnerColor_ = disabledSpinnerColor_;
         theme->backgroundColor_ = backgroundColor_;
+        theme->backgroundColorButton_ = backgroundColorButton_;
         theme->disabledBackgroundColor_ = disabledBackgroundColor_;
         theme->hoverColor_ = hoverColor_;
         theme->selectedColorText_ = selectedColorText_;
@@ -361,6 +378,14 @@ public:
         return backgroundColor_;
     }
 
+    const Color& GetButtonBackgroundColor() const
+    {
+        if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
+            return backgroundColorButton_;
+        }
+        return backgroundColor_;
+    }
+
     const Color& GetDisabledBackgroundColor() const
     {
         return disabledBackgroundColor_;
@@ -401,9 +426,11 @@ public:
 
     const Dimension& GetFontSize(ControlSize controlSize) const
     {
-        auto result = selectFontSizeMap_.find(controlSize);
-        if (result != selectFontSizeMap_.end()) {
-            return result->second;
+        if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
+            auto result = selectFontSizeMap_.find(controlSize);
+            if (result != selectFontSizeMap_.end()) {
+                return result->second;
+            }
         }
         return fontSize_;
     }
@@ -847,9 +874,11 @@ public:
 
     const Dimension& GetSpinnerWidth(ControlSize controlSize) const
     {
-        auto result = selectSpinnerWidthMap_.find(controlSize);
-        if (result != selectSpinnerWidthMap_.end()) {
-            return result->second;
+        if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
+            auto result = selectSpinnerWidthMap_.find(controlSize);
+            if (result != selectSpinnerWidthMap_.end()) {
+                return result->second;
+            }
         }
         return spinnerWidth_;
     }
@@ -861,9 +890,11 @@ public:
 
     const Dimension& GetSpinnerHeight(ControlSize controlSize) const
     {
-        auto result = selectSpinnerHeightMap_.find(controlSize);
-        if (result != selectSpinnerHeightMap_.end()) {
-            return result->second;
+        if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
+            auto result = selectSpinnerHeightMap_.find(controlSize);
+            if (result != selectSpinnerHeightMap_.end()) {
+                return result->second;
+            }
         }
         return spinnerHeight_;
     }
@@ -880,9 +911,11 @@ public:
 
     const Dimension& GetSelectMinWidth(ControlSize controlSize) const
     {
-        auto result = selectMinWidthMap_.find(controlSize);
-        if (result != selectMinWidthMap_.end()) {
-            return result->second;
+        if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
+            auto result = selectMinWidthMap_.find(controlSize);
+            if (result != selectMinWidthMap_.end()) {
+                return result->second;
+            }
         }
         return selectMinWidth_;
     }
@@ -894,9 +927,11 @@ public:
 
     const Dimension& GetSelectDefaultHeight(ControlSize controlSize) const
     {
-        auto result = selectMinHeightMap_.find(controlSize);
-        if (result != selectMinHeightMap_.end()) {
-            return result->second;
+        if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
+            auto result = selectMinHeightMap_.find(controlSize);
+            if (result != selectMinHeightMap_.end()) {
+                return result->second;
+            }
         }
         return selectDefaultHeight_;
     }
@@ -933,9 +968,11 @@ public:
 
     const Dimension& GetSelectDefaultBorderRadius(ControlSize controlSize) const
     {
-        auto result = selectBorderRadiusMap_.find(controlSize);
-        if (result != selectBorderRadiusMap_.end()) {
-            return result->second;
+        if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
+            auto result = selectBorderRadiusMap_.find(controlSize);
+            if (result != selectBorderRadiusMap_.end()) {
+                return result->second;
+            }
         }
         return selectDefaultBorderRadius_;
     }
@@ -961,6 +998,7 @@ private:
     Color selectedColor_;
 
     Color backgroundColor_ = Color::WHITE;
+    Color backgroundColorButton_ = Color::WHITE;
     Color disabledBackgroundColor_;
     Color hoverColor_ = Color(0x0c000000);
     Color selectedColorText_ = Color(0xff0a59f7);

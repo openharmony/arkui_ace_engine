@@ -66,6 +66,8 @@ public:
     void SetControlSize(const std::optional<ControlSize>& controlSize) override;
     ControlSize GetControlSize() override;
 
+    static void SetControlSize(FrameNode* frameNode, const std::optional<ControlSize>& controlSize);
+    static ControlSize GetControlSize(FrameNode* frameNode);
     static void SetArrowPosition(FrameNode* frameNode, const ArrowPosition value);
     static void SetSpace(FrameNode* frameNode, const Dimension& value);
     static void SetMenuAlign(FrameNode* frameNode, const MenuAlign& menuAlign);

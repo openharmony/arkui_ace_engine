@@ -261,7 +261,7 @@ private:
     void InitTextProps(const RefPtr<TextLayoutProperty>& textProps, const RefPtr<SelectTheme>& theme);
     void InitSpinner(
         const RefPtr<FrameNode>& spinner, const RefPtr<IconTheme>& iconTheme, const RefPtr<SelectTheme>& selectTheme);
-    void ReSetpara();
+    void ResetParams();
 
     std::vector<RefPtr<FrameNode>> options_;
     RefPtr<FrameNode> menuWrapper_ = nullptr;
@@ -286,6 +286,7 @@ private:
     std::optional<Color> optionBgColor_;
 
     void ToJsonValue(std::unique_ptr<JsonValue>& json) const override;
+    void ToJsonArrowAndText(std::unique_ptr<JsonValue>& json) const;
     void ToJsonOptionAlign(std::unique_ptr<JsonValue>& json) const;
     void ToJsonMenuBackgroundStyle(std::unique_ptr<JsonValue>& json) const;
     // XTS inspector helper functions

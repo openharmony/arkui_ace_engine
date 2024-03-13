@@ -26,10 +26,10 @@
 extern "C" {
 #endif
 
-#define ARKUI_FULL_API_VERSION 75
+#define ARKUI_FULL_API_VERSION 76
 // When changing ARKUI_BASIC_API_VERSION, ARKUI_FULL_API_VERSION must be
 // increased as well.
-#define ARKUI_NODE_API_VERSION 75
+#define ARKUI_NODE_API_VERSION 76
 
 #define ARKUI_BASIC_API_VERSION 6
 #define ARKUI_EXTENDED_API_VERSION 6
@@ -2788,6 +2788,8 @@ struct ArkUISelectModifier {
     void (*resetSelectOptionWidth)(ArkUINodeHandle node);
     void (*setSelectOptionHeight)(ArkUINodeHandle node, ArkUI_Float32 value, ArkUI_Int32 unit);
     void (*resetSelectOptionHeight)(ArkUINodeHandle node);
+    void (*setControlSize)(ArkUINodeHandle node, ArkUI_Int32 controlSize);
+    void (*resetControlSize)(ArkUINodeHandle node);
 };
 
 /** Common for all API variants.*/

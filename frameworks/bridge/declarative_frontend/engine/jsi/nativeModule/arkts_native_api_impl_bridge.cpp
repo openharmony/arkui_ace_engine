@@ -1622,6 +1622,10 @@ void ArkUINativeModule::RegisterSelectAttributes(Local<panda::ObjectRef> object,
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), SelectBridge::SetSize));
     select->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetSize"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), SelectBridge::ResetSize));
+    select->Set(vm, panda::StringRef::NewFromUtf8(vm, "setControlSize"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), SelectBridge::SetControlSize));
+    select->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetControlSize"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), SelectBridge::ResetControlSize));
     object->Set(vm, panda::StringRef::NewFromUtf8(vm, "select"), select);
 }
 
