@@ -341,6 +341,19 @@ public:
         return resAdapter_;
     }
 
+    RefPtr<ThemeStyle> GetPatternByName(const std::string& patternName)
+    {
+        auto patternStyle = currentThemeStyle_->GetAttr<RefPtr<ThemeStyle>>(patternName, nullptr);
+        if (!patternStyle && resAdapter_) {
+            LOGI("FZY Get new pattern from resAdapter");
+            patternStyle = resAdapter_->GetPatternByName(patternName);
+            ResValueWrapper value = { .type = ThemeConstantsType::PATTERN,
+                .value = patternStyle };
+            currentThemeStyle_->SetAttr(patternName, value);
+        }
+        return patternStyle;
+    }
+
 private:
     static const ResValueWrapper* GetPlatformConstants(uint32_t key);
     static const ResValueWrapper* styleMapDefault[];

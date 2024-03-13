@@ -24,7 +24,7 @@ RefPtr<IconTheme> IconTheme::Builder::Build(const RefPtr<ThemeConstants>& /* the
     return nullptr;
 }
 
-void IconTheme::Builder::ParsePattern(const RefPtr<ThemeStyle>& themeStyle, const RefPtr<IconTheme>& theme) const {}
+void IconTheme::Builder::ParsePattern(const RefPtr<ThemeConstants>&, const RefPtr<IconTheme>& theme) const {}
 
 std::string IconTheme::GetIconPath(const InternalResource::ResourceId& resourceId) const
 {

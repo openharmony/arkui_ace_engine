@@ -40,7 +40,7 @@ void CheckThemeId(int32_t& themeId)
 }
 
 const char* PATTERN_MAP[] = {
-    THEME_PATTERN_BUTTON,
+    // THEME_PATTERN_BUTTON,
     THEME_PATTERN_CHECKBOX,
     THEME_PATTERN_DATA_PANEL,
     THEME_PATTERN_RADIO,
@@ -259,6 +259,28 @@ RefPtr<ThemeStyle> ResourceAdapterImplV2::GetTheme(int32_t themeId)
     theme->ParseContent();
     theme->patternAttrs_.clear();
     return theme;
+}
+
+RefPtr<ThemeStyle> ResourceAdapterImplV2::GetPatternByName(const std::string& patternName)
+{
+    auto patternStyle = AceType::MakeRefPtr<ResourceThemeStyle>(AceType::Claim(this));
+    patternStyle->SetName(patternName);
+    constexpr char OHFlag[] = "ohos_"; // fit with resource/base/theme.json and pattern.json
+    auto manager = GetResourceManager();
+    if (manager) {
+        ResourceThemeStyle::RawAttrMap attrMap;
+        std::string patternTag = std::string(OHFlag) + patternName;
+        auto state = manager->GetPatternByName(patternTag.c_str(), attrMap);
+        if (state != Global::Resource::SUCCESS) {
+            TAG_LOGW(AceLogTag::ACE_RESOURCE, "Get pattern by name error, name=%{public}s", patternName.c_str());
+        }
+        if (attrMap.empty()) {
+            TAG_LOGW(AceLogTag::ACE_RESOURCE, "Get pattern %{public}s empty!", patternName.c_str());
+        }
+        patternStyle->rawAttrs_ = attrMap;
+        patternStyle->ParseContent();
+    }
+    return patternStyle;
 }
 
 Color ResourceAdapterImplV2::GetColor(uint32_t resId)
