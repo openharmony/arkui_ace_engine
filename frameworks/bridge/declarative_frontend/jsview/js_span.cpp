@@ -108,9 +108,6 @@ void JSSpan::SetFontWeight(const std::string& value)
 
 void JSSpan::SetTextColor(const JSCallbackInfo& info)
 {
-    if (info.Length() < 1) {
-        return;
-    }
     Color textColor;
     if (!ParseJsColor(info[0], textColor)) {
         auto pipelineContext = PipelineBase::GetCurrentContext();
