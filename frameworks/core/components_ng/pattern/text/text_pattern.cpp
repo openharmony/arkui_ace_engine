@@ -1286,7 +1286,7 @@ void TextPattern::AddUdmfData(const RefPtr<Ace::DragEvent>& event)
     auto txtPreProcessor = [weak = WeakClaim(this)](const ResultObject src, ResultObject& result) {
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
-        auto valueString =pattern->GetSelectedSpanText(StringUtils::ToWstring(src.valueString),
+        auto valueString = pattern->GetSelectedSpanText(StringUtils::ToWstring(src.valueString),
             src.offsetInSpan[RichEditorSpanRange::RANGESTART],
             src.offsetInSpan[RichEditorSpanRange::RANGEEND]);
         result.valueString = result.valueString + valueString;
