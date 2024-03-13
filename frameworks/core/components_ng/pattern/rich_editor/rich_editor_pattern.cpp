@@ -4097,6 +4097,7 @@ void RichEditorPattern::OnHandleMoveDone(const RectF& handleRect, bool isFirstHa
     if (selectOverlayProxy_) {
         SelectHandleInfo handleInfo;
         if (!selectOverlayProxy_->IsSingleHandle() && textSelector_.StartEqualToDest()) {
+            selectOverlayProxy_->ShowOrHiddenMenu(true);
             CloseSelectOverlay();
             StartTwinkling();
             return;
