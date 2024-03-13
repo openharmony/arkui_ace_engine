@@ -4946,4 +4946,790 @@ HWTEST_F(NavigationTestNg, NavigationPatternTest057, TestSize.Level1)
     navigationPattern->realDividerWidth_ = 0.0f;
     navigationPattern->AddDividerHotZoneRect();
 }
+
+/**
+ * @tc.name: HandleBack001
+ * @tc.desc: Test HandleBack and match all conditions of "!isOverride && !isLastChild".
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationTestNg, HandleBack001, TestSize.Level1)
+{
+    auto navigationNode = NavigationGroupNode::GetOrCreateGroupNode(
+        "navigationNode", 11, []() { return AceType::MakeRefPtr<NavigationPattern>(); });
+    auto navigationPattern = navigationNode->GetPattern<NavigationPattern>();
+    RefPtr<NavigationStack> navigationStack = AceType::MakeRefPtr<NavigationStack>();
+    navigationPattern->SetNavigationStack(std::move(navigationStack));
+
+    bool isLastChild = true, isOverride = true;
+    ASSERT_TRUE(isLastChild && isOverride);
+    navigationNode->HandleBack(nullptr, isLastChild, isOverride);
+
+    isOverride = false;
+    ASSERT_TRUE(isLastChild && !isOverride);
+    navigationNode->HandleBack(nullptr, isLastChild, isOverride);
+
+    isLastChild = false;
+    ASSERT_TRUE(!isLastChild && !isOverride);
+    navigationNode->HandleBack(nullptr, isLastChild, isOverride);
+}
+
+/**
+ * @tc.name: HandleBack002
+ * @tc.desc: Test HandleBack and match all conditions of "isLastChild &&...".
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationTestNg, HandleBack002, TestSize.Level1)
+{
+    auto navigationNode = NavigationGroupNode::GetOrCreateGroupNode(
+        "navigationNode", 11, []() { return AceType::MakeRefPtr<NavigationPattern>(); });
+    auto navigationPattern = navigationNode->GetPattern<NavigationPattern>();
+    RefPtr<NavigationStack> navigationStack = AceType::MakeRefPtr<NavigationStack>();
+    navigationPattern->SetNavigationStack(std::move(navigationStack));
+
+    auto navDestinationNode = NavDestinationGroupNode::GetOrCreateGroupNode(
+        "navDestinationNode", 3, []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
+    bool isLastChild = false, isOverride = true;
+    ASSERT_TRUE(!isLastChild && isOverride);
+    navigationNode->HandleBack(navDestinationNode, isLastChild, isOverride);
+
+    isLastChild = true;
+    ASSERT_TRUE(isLastChild && isOverride);
+    ASSERT_NE(navigationPattern->GetNavigationMode(), NavigationMode::SPLIT);
+    ASSERT_NE(navigationPattern->GetNavigationMode(), NavigationMode::STACK);
+    navigationNode->HandleBack(navDestinationNode, isLastChild, isOverride);
+
+    navigationPattern->navigationMode_ = NavigationMode::STACK;
+    ASSERT_EQ(navigationPattern->GetNavigationMode(), NavigationMode::STACK);
+    auto layoutProperty = navigationNode->GetLayoutProperty<NavigationLayoutProperty>();
+    ASSERT_FALSE(layoutProperty->GetHideNavBar().value_or(false));
+    navigationNode->HandleBack(navDestinationNode, isLastChild, isOverride);
+
+    layoutProperty->propHideNavBar_ = true;
+    ASSERT_TRUE(layoutProperty->GetHideNavBar().value_or(false));
+    navigationNode->HandleBack(navDestinationNode, isLastChild, isOverride);
+
+    navigationPattern->navigationMode_ = NavigationMode::SPLIT;
+    ASSERT_EQ(navigationPattern->GetNavigationMode(), NavigationMode::SPLIT);
+    navigationNode->HandleBack(navDestinationNode, isLastChild, isOverride);
+}
+
+/**
+ * @tc.name: TransitionWithPop001
+ * @tc.desc: Test TransitionWithPop and match all conditions of "isLastChild" and "isNavBar".
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationTestNg, TransitionWithPop001, TestSize.Level1)
+{
+    auto navigationNode = NavigationGroupNode::GetOrCreateGroupNode(
+        "navigationNode", 11, []() { return AceType::MakeRefPtr<NavigationPattern>(); });
+    auto navigationPattern = navigationNode->GetPattern<NavigationPattern>();
+    RefPtr<NavigationStack> navigationStack = AceType::MakeRefPtr<NavigationStack>();
+    navigationPattern->SetNavigationStack(std::move(navigationStack));
+
+    auto preNode = NavDestinationGroupNode::GetOrCreateGroupNode(
+        "navDestinationNode", 3, []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
+    auto titleBarNode = AceType::MakeRefPtr<TitleBarNode>("TitleBarNode", 66, AceType::MakeRefPtr<TitleBarPattern>());
+    auto backButtonNode = FrameNode::CreateFrameNode(
+        V2::BACK_BUTTON_ETS_TAG, 7, AceType::MakeRefPtr<ButtonPattern>());
+    titleBarNode->backButton_ = backButtonNode;
+    preNode->titleBarNode_ = titleBarNode;
+
+    RefPtr<FrameNode> curNode1 = nullptr;
+    bool isNavBar = false;
+    auto preTitleNode = AceType::DynamicCast<TitleBarNode>(preNode->GetTitleBarNode());
+    ASSERT_TRUE(preTitleNode);
+    ASSERT_TRUE(preTitleNode->GetBackButton());
+    ASSERT_FALSE(curNode1);
+    ASSERT_FALSE(isNavBar);
+    navigationNode->TransitionWithPop(preNode, curNode1, isNavBar);
+
+    auto curNode2 = NavDestinationGroupNode::GetOrCreateGroupNode(
+        "navDestinationNode", 3, []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
+    ASSERT_TRUE(curNode2);
+    auto curNavDestinationTest = AceType::DynamicCast<NavDestinationGroupNode>(curNode2);
+    ASSERT_TRUE(curNavDestinationTest);
+    ASSERT_TRUE(AceType::DynamicCast<TitleBarNode>(curNavDestinationTest->GetTitleBarNode()));
+    navigationNode->TransitionWithPop(preNode, curNode2, isNavBar);
+
+    isNavBar = true;
+    auto curNode3 = NavBarNode::GetOrCreateNavBarNode(
+        "navBarNode", 33, []() { return AceType::MakeRefPtr<NavBarPattern>(); });
+    ASSERT_TRUE(isNavBar);
+    ASSERT_TRUE(curNode3);
+    curNode3->titleBarNode_ = TitleBarNode::GetOrCreateTitleBarNode(
+        "titleBarNode", 66, []() { return AceType::MakeRefPtr<TitleBarPattern>(); });
+    auto navBarNodeTest = AceType::DynamicCast<NavBarNode>(curNode3);
+    ASSERT_TRUE(navBarNodeTest);
+    ASSERT_TRUE(AceType::DynamicCast<TitleBarNode>(navBarNodeTest->GetTitleBarNode()));
+    navigationNode->TransitionWithPop(preNode, curNode3, isNavBar);
+}
+
+/**
+ * @tc.name: TransitionWithPop002
+ * @tc.desc: Test TransitionWithPop and match the logic of the callback as follows:
+ *               shallowBuilder is true/false
+ *               IsCacheNode return true/false
+ *               GetContentNode return true/false
+ *           In addition, the conditions GetTransitionType return true/false have been covered by the last case
+ *           TransitionWithPop001, which is affected by the curNode.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationTestNg, TransitionWithPop002, TestSize.Level1)
+{
+    auto navigationNode = NavigationGroupNode::GetOrCreateGroupNode(
+        "navigationNode", 11, []() { return AceType::MakeRefPtr<NavigationPattern>(); });
+    auto navigationPattern = navigationNode->GetPattern<NavigationPattern>();
+    RefPtr<NavigationStack> navigationStack = AceType::MakeRefPtr<NavigationStack>();
+    navigationPattern->SetNavigationStack(std::move(navigationStack));
+
+    auto preNode = NavDestinationGroupNode::GetOrCreateGroupNode(
+        "navDestinationNode", 3, []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
+    auto titleBarNode = AceType::MakeRefPtr<TitleBarNode>("TitleBarNode", 66, AceType::MakeRefPtr<TitleBarPattern>());
+    auto backButtonNode = FrameNode::CreateFrameNode(
+        V2::BACK_BUTTON_ETS_TAG, 7, AceType::MakeRefPtr<ButtonPattern>());
+    titleBarNode->backButton_ = backButtonNode;
+    preNode->titleBarNode_ = titleBarNode;
+
+    preNode->isCacheNode_ = true;
+    auto preTitleNode = AceType::DynamicCast<TitleBarNode>(preNode->GetTitleBarNode());
+    ASSERT_TRUE(preTitleNode);
+    ASSERT_TRUE(preTitleNode->GetBackButton());
+    ASSERT_TRUE(preNode->IsCacheNode());
+    navigationNode->TransitionWithPop(preNode, nullptr, false);
+
+    preNode->isCacheNode_ = false;
+    auto prePattern = preNode->GetPattern<NavDestinationPattern>();
+    ASSERT_TRUE(prePattern);
+    prePattern->shallowBuilder_ = AceType::MakeRefPtr<ShallowBuilder>(
+        []() { return FrameNode::CreateFrameNode("temp", 234, AceType::MakeRefPtr<ButtonPattern>()); });
+    ASSERT_TRUE(prePattern->GetShallowBuilder());
+    ASSERT_FALSE(preNode->IsCacheNode());
+    ASSERT_FALSE(preNode->GetContentNode());
+    navigationNode->TransitionWithPop(preNode, nullptr, false);
+
+    preNode->contentNode_ = FrameNode::CreateFrameNode("temp", 235, AceType::MakeRefPtr<ButtonPattern>());
+    ASSERT_TRUE(preNode->GetContentNode());
+    navigationNode->TransitionWithPop(preNode, nullptr, false);
+}
+
+/**
+ * @tc.name: TransitionWithPush001
+ * @tc.desc: Test TransitionWithPush and match the logic as follows:
+ *               isNavBar is false
+ *               needSetInvisible is false
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationTestNg, TransitionWithPush001, TestSize.Level1)
+{
+    auto navigationNode = NavigationGroupNode::GetOrCreateGroupNode(
+        "navigationNode", 101, []() { return AceType::MakeRefPtr<NavigationPattern>(); });
+    auto navigationPattern = navigationNode->GetPattern<NavigationPattern>();
+    RefPtr<NavigationStack> navigationStack = AceType::MakeRefPtr<NavigationStack>();
+    navigationPattern->SetNavigationStack(std::move(navigationStack));
+    auto titleBarNode = AceType::MakeRefPtr<TitleBarNode>("TitleBarNode", 201, AceType::MakeRefPtr<TitleBarPattern>());
+
+    bool isNavBar = false;
+    auto preNode = NavDestinationGroupNode::GetOrCreateGroupNode(
+        "navDestinationNode", 301, []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
+    // Make needSetInvisible false
+    auto curNode = preNode;
+    ASSERT_TRUE(curNode);
+    // Make preTitleNode and curTitleNode not NULL
+    preNode->titleBarNode_ = titleBarNode;
+
+    // Make sure isNavBar is false
+    ASSERT_FALSE(isNavBar);
+    ASSERT_TRUE(AceType::DynamicCast<TitleBarNode>(preNode->GetTitleBarNode()));
+    ASSERT_TRUE(AceType::DynamicCast<TitleBarNode>(curNode->GetTitleBarNode()));
+    navigationNode->TransitionWithPush(preNode, curNode, isNavBar);
+}
+
+/**
+ * @tc.name: TransitionWithPush002
+ * @tc.desc: Test TransitionWithPush and match the logic as follows:
+ *               isNavBar is true
+ *               needSetInvisible is true
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationTestNg, TransitionWithPush002, TestSize.Level1)
+{
+    auto navigationNode = NavigationGroupNode::GetOrCreateGroupNode(
+        "navigationNode", 101, []() { return AceType::MakeRefPtr<NavigationPattern>(); });
+    auto navigationPattern = navigationNode->GetPattern<NavigationPattern>();
+    RefPtr<NavigationStack> navigationStack = AceType::MakeRefPtr<NavigationStack>();
+    navigationPattern->SetNavigationStack(std::move(navigationStack));
+    auto titleBarNode = AceType::MakeRefPtr<TitleBarNode>("TitleBarNode", 201, AceType::MakeRefPtr<TitleBarPattern>());
+
+    bool isNavBar = true;
+    // Make needSetInvisible true
+    auto preNode = NavBarNode::GetOrCreateNavBarNode(
+        "navBarNode", 301, []() { return AceType::MakeRefPtr<NavBarPattern>(); });
+    auto curNode = NavDestinationGroupNode::GetOrCreateGroupNode(
+        "navDestinationNode", 401, []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
+    // Make preTitleNode and curTitleNode not NULL
+    preNode->titleBarNode_ = titleBarNode;
+    curNode->titleBarNode_ = titleBarNode;
+
+    // Make sure isNavBar is true
+    ASSERT_TRUE(isNavBar);
+    ASSERT_TRUE(AceType::DynamicCast<TitleBarNode>(preNode->GetTitleBarNode()));
+    ASSERT_TRUE(AceType::DynamicCast<TitleBarNode>(curNode->GetTitleBarNode()));
+    navigationNode->TransitionWithPush(preNode, curNode, isNavBar);
+}
+
+/**
+ * @tc.name: TransitionWithPush003
+ * @tc.desc: Test TransitionWithPush and match the logic as follows:
+ *               isNavBar is false
+ *               needSetInvisible is true
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationTestNg, TransitionWithPush003, TestSize.Level1)
+{
+    auto navigationNode = NavigationGroupNode::GetOrCreateGroupNode(
+        "navigationNode", 101, []() { return AceType::MakeRefPtr<NavigationPattern>(); });
+    auto navigationPattern = navigationNode->GetPattern<NavigationPattern>();
+    RefPtr<NavigationStack> navigationStack = AceType::MakeRefPtr<NavigationStack>();
+    navigationPattern->SetNavigationStack(std::move(navigationStack));
+    auto titleBarNode = AceType::MakeRefPtr<TitleBarNode>("TitleBarNode", 201, AceType::MakeRefPtr<TitleBarPattern>());
+
+    bool isNavBar = false;
+    // Make needSetInvisible true
+    auto preNode = NavDestinationGroupNode::GetOrCreateGroupNode(
+        "navDestinationNode", 301, []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
+    auto curNode = NavDestinationGroupNode::GetOrCreateGroupNode(
+        "navDestinationNode", 302, []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
+    // Make preTitleNode and curTitleNode not NULL
+    preNode->titleBarNode_ = titleBarNode;
+    curNode->titleBarNode_ = titleBarNode;
+
+    // Make sure isNavBar is false
+    ASSERT_FALSE(isNavBar);
+    ASSERT_TRUE(AceType::DynamicCast<TitleBarNode>(preNode->GetTitleBarNode()));
+    ASSERT_TRUE(AceType::DynamicCast<TitleBarNode>(curNode->GetTitleBarNode()));
+    navigationNode->TransitionWithPush(preNode, curNode, isNavBar);
+}
+
+/**
+ * @tc.name: TransitionWithReplace001
+ * @tc.desc: Test TransitionWithReplace and cover all conditions.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationTestNg, TransitionWithReplace001, TestSize.Level1)
+{
+    auto navigationNode = NavigationGroupNode::GetOrCreateGroupNode(
+        "navigationNode", 11, []() { return AceType::MakeRefPtr<NavigationPattern>(); });
+    auto navigationPattern = navigationNode->GetPattern<NavigationPattern>();
+    RefPtr<NavigationStack> navigationStack = AceType::MakeRefPtr<NavigationStack>();
+    navigationPattern->SetNavigationStack(std::move(navigationStack));
+
+    auto preNode1 = NavBarNode::GetOrCreateNavBarNode(
+        "navBarNode", 33, []() { return AceType::MakeRefPtr<NavBarPattern>(); });
+    auto curNode = NavDestinationGroupNode::GetOrCreateGroupNode(
+        "navDestinationNode", 3, []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
+
+    bool isNavBar = true;
+    ASSERT_TRUE(preNode1);
+    ASSERT_TRUE(curNode);
+    // Make sure isNavBar is true
+    ASSERT_TRUE(isNavBar);
+    navigationNode->TransitionWithReplace(preNode1, curNode, isNavBar);
+
+    isNavBar = false;
+    // Make sure isNavBar is false
+    ASSERT_FALSE(isNavBar);
+    // Make sure navDestination is false
+    ASSERT_FALSE(AceType::DynamicCast<NavDestinationGroupNode>(preNode1));
+    navigationNode->TransitionWithReplace(preNode1, curNode, isNavBar);
+
+    auto preNode2 = NavDestinationGroupNode::GetOrCreateGroupNode(
+        "navDestinationNode", 4, []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
+    // Make sure navDestination is true
+    ASSERT_TRUE(AceType::DynamicCast<NavDestinationGroupNode>(preNode2));
+    navigationNode->TransitionWithReplace(preNode2, curNode, isNavBar);
+}
+
+/**
+ * @tc.name: DealNavigationExit001
+ * @tc.desc: Test DealNavigationExit and make the logic as follows:
+ *               GetEventHub return false
+ *               isNavBar is false
+ *               shallowBuilder is false
+ *               GetContentNode is false
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationTestNg, DealNavigationExit001, TestSize.Level1)
+{
+    auto navigationNode = NavigationGroupNode::GetOrCreateGroupNode(
+        "navigationNode", 101, []() { return AceType::MakeRefPtr<NavigationPattern>(); });
+    auto navigationPattern = navigationNode->GetPattern<NavigationPattern>();
+    RefPtr<NavigationStack> navigationStack = AceType::MakeRefPtr<NavigationStack>();
+    navigationPattern->SetNavigationStack(std::move(navigationStack));
+
+    auto preNode = NavDestinationGroupNode::GetOrCreateGroupNode(
+        "navDestinationNode", 301, []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
+    preNode->eventHub_ = nullptr;
+    bool isNavBar = false;
+
+    ASSERT_FALSE(preNode->GetEventHub<EventHub>());
+    ASSERT_FALSE(isNavBar);
+    // Make sure navDestination is true
+    auto navDestinationNode = AceType::DynamicCast<NavDestinationGroupNode>(preNode);
+    ASSERT_TRUE(navDestinationNode);
+    ASSERT_FALSE(navDestinationNode->GetPattern<NavDestinationPattern>()->GetShallowBuilder());
+    ASSERT_FALSE(navDestinationNode->GetContentNode());
+    navigationNode->DealNavigationExit(preNode, isNavBar, true);
+    preNode->eventHub_ = preNode->GetPattern<NavDestinationPattern>()->CreateEventHub();
+}
+
+/**
+ * @tc.name: DealNavigationExit002
+ * @tc.desc: Test DealNavigationExit and make the logic as follows:
+ *               GetEventHub return true
+ *               isNavBar is true
+ *               isAnimated is false
+ *               shallowBuilder is true
+ *               GetContentNode is true
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationTestNg, DealNavigationExit002, TestSize.Level1)
+{
+    auto navigationNode = NavigationGroupNode::GetOrCreateGroupNode(
+        "navigationNode", 101, []() { return AceType::MakeRefPtr<NavigationPattern>(); });
+    auto navigationPattern = navigationNode->GetPattern<NavigationPattern>();
+    RefPtr<NavigationStack> navigationStack = AceType::MakeRefPtr<NavigationStack>();
+    navigationPattern->SetNavigationStack(std::move(navigationStack));
+
+    auto preNode = NavDestinationGroupNode::GetOrCreateGroupNode(
+        "navDestinationNode", 201, []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
+    auto prePattern = preNode->GetPattern<NavDestinationPattern>();
+    prePattern->shallowBuilder_ = AceType::MakeRefPtr<ShallowBuilder>(
+        []() { return FrameNode::CreateFrameNode("shallowBuilder", 301, AceType::MakeRefPtr<ButtonPattern>()); });
+    preNode->contentNode_ = FrameNode::CreateFrameNode("button", 401, AceType::MakeRefPtr<ButtonPattern>());
+    bool isNavBar = true, isAnimated = false;
+
+    ASSERT_TRUE(preNode->GetEventHub<EventHub>());
+    ASSERT_TRUE(isNavBar && !isAnimated);
+    // Make sure navDestination is true
+    auto navDestinationNode = AceType::DynamicCast<NavDestinationGroupNode>(preNode);
+    ASSERT_TRUE(navDestinationNode);
+    ASSERT_TRUE(navDestinationNode->GetPattern<NavDestinationPattern>()->GetShallowBuilder());
+    ASSERT_TRUE(navDestinationNode->GetContentNode());
+    navigationNode->DealNavigationExit(preNode, isNavBar, isAnimated);
+}
+
+/**
+ * @tc.name: DealNavigationExit003
+ * @tc.desc: Test DealNavigationExit and make the logic as follows:
+ *               GetEventHub return true
+ *               isNavBar is true
+ *               isAnimated is true
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationTestNg, DealNavigationExit003, TestSize.Level1)
+{
+    auto navigationNode = NavigationGroupNode::GetOrCreateGroupNode(
+        "navigationNode", 101, []() { return AceType::MakeRefPtr<NavigationPattern>(); });
+    auto navigationPattern = navigationNode->GetPattern<NavigationPattern>();
+    RefPtr<NavigationStack> navigationStack = AceType::MakeRefPtr<NavigationStack>();
+    navigationPattern->SetNavigationStack(std::move(navigationStack));
+
+    auto preNode = NavDestinationGroupNode::GetOrCreateGroupNode(
+        "navDestinationNode", 201, []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
+    bool isNavBar = true, isAnimated = true;
+
+    ASSERT_TRUE(preNode->GetEventHub<EventHub>());
+    ASSERT_TRUE(isNavBar && isAnimated);
+    navigationNode->DealNavigationExit(preNode, isNavBar, isAnimated);
+}
+
+/**
+ * @tc.name: UpdateNavDestinationVisibility001
+ * @tc.desc: Test UpdateNavDestinationVisibility and make the logic as follows:
+ *               index is not destinationSize - 1
+ *               index < lastStandardIndex_
+ *               GetCustomNode is remainChild
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationTestNg, UpdateNavDestinationVisibility001, TestSize.Level1)
+{
+    auto navigationNode = NavigationGroupNode::GetOrCreateGroupNode(
+        "navigationNode", 101, []() { return AceType::MakeRefPtr<NavigationPattern>(); });
+    auto navigationPattern = navigationNode->GetPattern<NavigationPattern>();
+    RefPtr<NavigationStack> navigationStack = AceType::MakeRefPtr<NavigationStack>();
+    navigationPattern->SetNavigationStack(std::move(navigationStack));
+
+    auto navDestinationNode = NavDestinationGroupNode::GetOrCreateGroupNode(
+        "navDestinationNode", 201, []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
+    auto remainChild = NavDestinationGroupNode::GetOrCreateGroupNode(
+        "navDestinationNode", 202, []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
+    navigationNode->lastStandardIndex_ = 0;
+    int32_t index = 1;
+    size_t destinationSize = 1;
+    auto navDestinationPattern = navDestinationNode->GetPattern<NavDestinationPattern>();
+    navDestinationPattern->customNode_ = remainChild;
+
+    ASSERT_TRUE(navDestinationNode->GetEventHub<NavDestinationEventHub>());
+    ASSERT_FALSE(index == static_cast<int32_t>(destinationSize) - 1);
+    ASSERT_FALSE(index < navigationNode->lastStandardIndex_);
+    ASSERT_FALSE(navDestinationPattern->GetCustomNode() != remainChild);
+    bool ret = navigationNode->UpdateNavDestinationVisibility(navDestinationNode, remainChild, index, destinationSize);
+    ASSERT_FALSE(ret);
+}
+
+/**
+ * @tc.name: UpdateNavDestinationVisibility002
+ * @tc.desc: Test UpdateNavDestinationVisibility and make the logic as follows:
+ *               index is destinationSize - 1
+ *               hasChanged is true
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationTestNg, UpdateNavDestinationVisibility002, TestSize.Level1)
+{
+    auto navigationNode = NavigationGroupNode::GetOrCreateGroupNode(
+        "navigationNode", 101, []() { return AceType::MakeRefPtr<NavigationPattern>(); });
+    auto navigationPattern = navigationNode->GetPattern<NavigationPattern>();
+    RefPtr<NavigationStack> navigationStack = AceType::MakeRefPtr<NavigationStack>();
+    navigationPattern->SetNavigationStack(std::move(navigationStack));
+
+    auto navDestinationNode = NavDestinationGroupNode::GetOrCreateGroupNode(
+        "navDestinationNode", 201, []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
+    int32_t index = 0;
+    size_t destinationSize = 1;
+    
+    ASSERT_TRUE(navDestinationNode->GetEventHub<NavDestinationEventHub>());
+    ASSERT_EQ(index, static_cast<int32_t>(destinationSize) - 1);
+    ASSERT_TRUE(CheckNeedMeasure(navDestinationNode->GetLayoutProperty()->GetPropertyChangeFlag()));
+    bool ret = navigationNode->UpdateNavDestinationVisibility(navDestinationNode, nullptr, index, destinationSize);
+    ASSERT_TRUE(ret);
+}
+
+/**
+ * @tc.name: UpdateNavDestinationVisibility003
+ * @tc.desc: Test UpdateNavDestinationVisibility and make the logic as follows:
+ *               index is destinationSize - 1
+ *               hasChanged is false
+ *               IsAutoHeight return false
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationTestNg, UpdateNavDestinationVisibility003, TestSize.Level1)
+{
+    auto navigationNode = NavigationGroupNode::GetOrCreateGroupNode(
+        "navigationNode", 101, []() { return AceType::MakeRefPtr<NavigationPattern>(); });
+    auto navigationPattern = navigationNode->GetPattern<NavigationPattern>();
+    RefPtr<NavigationStack> navigationStack = AceType::MakeRefPtr<NavigationStack>();
+    navigationPattern->SetNavigationStack(std::move(navigationStack));
+
+    auto navDestinationNode = NavDestinationGroupNode::GetOrCreateGroupNode(
+        "navDestinationNode", 201, []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
+    int32_t index = 0;
+    // Make index destinationSize - 1
+    size_t destinationSize = 1;
+    // Make hasChanged false
+    navDestinationNode->GetLayoutProperty()->propertyChangeFlag_ = PROPERTY_UPDATE_NORMAL;
+    
+    ASSERT_TRUE(navDestinationNode->GetEventHub<NavDestinationEventHub>());
+    ASSERT_EQ(index, static_cast<int32_t>(destinationSize) - 1);
+    ASSERT_FALSE(CheckNeedMeasure(navDestinationNode->GetLayoutProperty()->GetPropertyChangeFlag()));
+    auto navigationLayoutProperty = navigationNode->GetLayoutProperty<NavigationLayoutProperty>();
+    ASSERT_FALSE(NavigationLayoutAlgorithm::IsAutoHeight(navigationLayoutProperty));
+    bool ret = navigationNode->UpdateNavDestinationVisibility(navDestinationNode, nullptr, index, destinationSize);
+    ASSERT_FALSE(ret);
+}
+
+/**
+ * @tc.name: UpdateNavDestinationVisibility004
+ * @tc.desc: Test UpdateNavDestinationVisibility and make the logic as follows:
+ *               index is destinationSize - 1
+ *               hasChanged is false
+ *               IsAutoHeight return true
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationTestNg, UpdateNavDestinationVisibility004, TestSize.Level1)
+{
+    auto navigationNode = NavigationGroupNode::GetOrCreateGroupNode(
+        "navigationNode", 101, []() { return AceType::MakeRefPtr<NavigationPattern>(); });
+    auto navigationPattern = navigationNode->GetPattern<NavigationPattern>();
+    RefPtr<NavigationStack> navigationStack = AceType::MakeRefPtr<NavigationStack>();
+    navigationPattern->SetNavigationStack(std::move(navigationStack));
+
+    auto navDestinationNode = NavDestinationGroupNode::GetOrCreateGroupNode(
+        "navDestinationNode", 201, []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
+    int32_t index = 0;
+    // Make index destinationSize - 1
+    size_t destinationSize = 1;
+    // Make hasChanged false
+    navDestinationNode->GetLayoutProperty()->propertyChangeFlag_ = PROPERTY_UPDATE_NORMAL;
+    // Make IsAutoHeight return true
+    auto navigationLayoutProperty = navigationNode->GetLayoutProperty<NavigationLayoutProperty>();
+    navigationLayoutProperty->calcLayoutConstraint_ = std::make_unique<MeasureProperty>();
+    auto& calcLayoutConstraint = navigationLayoutProperty->GetCalcLayoutConstraint();
+    ASSERT_TRUE(calcLayoutConstraint);
+    auto calcSize = CalcSize();
+    calcSize.height_ = CalcLength("auto");
+    calcLayoutConstraint->selfIdealSize = calcSize;
+
+    ASSERT_TRUE(navDestinationNode->GetEventHub<NavDestinationEventHub>());
+    ASSERT_EQ(index, static_cast<int32_t>(destinationSize) - 1);
+    ASSERT_FALSE(CheckNeedMeasure(navDestinationNode->GetLayoutProperty()->GetPropertyChangeFlag()));
+    ASSERT_TRUE(NavigationLayoutAlgorithm::IsAutoHeight(navigationLayoutProperty));
+    bool ret = navigationNode->UpdateNavDestinationVisibility(navDestinationNode, nullptr, index, destinationSize);
+    ASSERT_TRUE(ret);
+}
+
+/**
+ * @tc.name: UpdateNavDestinationVisibility005
+ * @tc.desc: Test UpdateNavDestinationVisibility and make the logic as follows:
+ *               index is not destinationSize - 1
+ *               index is less than lastStandardIndex_
+ *               IsOnAnimation return true
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationTestNg, UpdateNavDestinationVisibility005, TestSize.Level1)
+{
+    auto navigationNode = NavigationGroupNode::GetOrCreateGroupNode(
+        "navigationNode", 101, []() { return AceType::MakeRefPtr<NavigationPattern>(); });
+    auto navigationPattern = navigationNode->GetPattern<NavigationPattern>();
+    RefPtr<NavigationStack> navigationStack = AceType::MakeRefPtr<NavigationStack>();
+    navigationPattern->SetNavigationStack(std::move(navigationStack));
+
+    auto navDestinationNode = NavDestinationGroupNode::GetOrCreateGroupNode(
+        "navDestinationNode", 201, []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
+    int32_t index = 1;
+    // Make index not destinationSize - 1
+    size_t destinationSize = 1;
+    // Make index less than lastStandardIndex_
+    navigationNode->lastStandardIndex_ = 2;
+    // Make IsOnAnimation return true
+    navDestinationNode->isOnAnimation_ = true;
+
+    ASSERT_TRUE(navDestinationNode->GetEventHub<NavDestinationEventHub>());
+    ASSERT_NE(index, static_cast<int32_t>(destinationSize) - 1);
+    ASSERT_TRUE(index < navigationNode->lastStandardIndex_);
+    ASSERT_TRUE(navDestinationNode->IsOnAnimation());
+    bool ret = navigationNode->UpdateNavDestinationVisibility(navDestinationNode, nullptr, index, destinationSize);
+    ASSERT_FALSE(ret);
+}
+
+/**
+ * @tc.name: UpdateNavDestinationVisibility006
+ * @tc.desc: Test UpdateNavDestinationVisibility and make the logic as follows:
+ *               index is not destinationSize - 1
+ *               index is less than lastStandardIndex_
+ *               IsOnAnimation return false
+ *               GetIsOnShow return false
+ *               GetCustomNode is remainChild
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationTestNg, UpdateNavDestinationVisibility006, TestSize.Level1)
+{
+    auto navigationNode = NavigationGroupNode::GetOrCreateGroupNode(
+        "navigationNode", 101, []() { return AceType::MakeRefPtr<NavigationPattern>(); });
+    auto navigationPattern = navigationNode->GetPattern<NavigationPattern>();
+    RefPtr<NavigationStack> navigationStack = AceType::MakeRefPtr<NavigationStack>();
+    navigationPattern->SetNavigationStack(std::move(navigationStack));
+
+    auto navDestinationNode = NavDestinationGroupNode::GetOrCreateGroupNode(
+        "navDestinationNode", 201, []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
+    auto remainChild = NavDestinationGroupNode::GetOrCreateGroupNode(
+        "navDestinationNode", 202, []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
+    int32_t index = 1;
+    // Make index not destinationSize - 1
+    size_t destinationSize = 1;
+    // Make index less than lastStandardIndex_
+    navigationNode->lastStandardIndex_ = 2;
+    // Make IsOnAnimation return false
+    navDestinationNode->isOnAnimation_ = false;
+    auto navDestinationPattern = navDestinationNode->GetPattern<NavDestinationPattern>();
+    // Make GetIsOnShow return false
+    navDestinationPattern->isOnShow_ = false;
+    // Make GetCustomNode is remainChild
+    navDestinationPattern->customNode_ = remainChild;
+
+    ASSERT_TRUE(navDestinationNode->GetEventHub<NavDestinationEventHub>());
+    ASSERT_NE(index, static_cast<int32_t>(destinationSize) - 1);
+    ASSERT_TRUE(index < navigationNode->lastStandardIndex_);
+    ASSERT_FALSE(navDestinationNode->IsOnAnimation());
+    ASSERT_FALSE(navDestinationPattern->GetIsOnShow());
+    ASSERT_FALSE(navDestinationPattern->GetCustomNode() != remainChild);
+    bool ret = navigationNode->UpdateNavDestinationVisibility(navDestinationNode, remainChild, index, destinationSize);
+    ASSERT_FALSE(ret);
+}
+
+/**
+ * @tc.name: UpdateNavDestinationVisibility007
+ * @tc.desc: Test UpdateNavDestinationVisibility and make the logic as follows:
+ *               index is not destinationSize - 1
+ *               index is less than lastStandardIndex_
+ *               IsOnAnimation return false
+ *               GetIsOnShow return true
+ *               GetCustomNode is not remainChild
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationTestNg, UpdateNavDestinationVisibility007, TestSize.Level1)
+{
+    auto navigationNode = NavigationGroupNode::GetOrCreateGroupNode(
+        "navigationNode", 101, []() { return AceType::MakeRefPtr<NavigationPattern>(); });
+    auto navigationPattern = navigationNode->GetPattern<NavigationPattern>();
+    RefPtr<NavigationStack> navigationStack = AceType::MakeRefPtr<NavigationStack>();
+    navigationPattern->SetNavigationStack(std::move(navigationStack));
+
+    auto navDestinationNode = NavDestinationGroupNode::GetOrCreateGroupNode(
+        "navDestinationNode", 201, []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
+    auto remainChild = NavDestinationGroupNode::GetOrCreateGroupNode(
+        "navDestinationNode", 202, []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
+    int32_t index = 1;
+    // Make index not destinationSize - 1
+    size_t destinationSize = 1;
+    // Make index less than lastStandardIndex_
+    navigationNode->lastStandardIndex_ = 2;
+    // Make IsOnAnimation return false
+    navDestinationNode->isOnAnimation_ = false;
+    auto navDestinationPattern = navDestinationNode->GetPattern<NavDestinationPattern>();
+    // Make GetIsOnShow return true
+    navDestinationPattern->isOnShow_ = true;
+    // Make GetCustomNode is not remainChild
+    navDestinationPattern->customNode_ = nullptr;
+
+    ASSERT_TRUE(navDestinationNode->GetEventHub<NavDestinationEventHub>());
+    ASSERT_NE(index, static_cast<int32_t>(destinationSize) - 1);
+    ASSERT_TRUE(index < navigationNode->lastStandardIndex_);
+    ASSERT_FALSE(navDestinationNode->IsOnAnimation());
+    ASSERT_TRUE(navDestinationPattern->GetIsOnShow());
+    ASSERT_TRUE(navDestinationPattern->GetCustomNode() != remainChild);
+    bool ret = navigationNode->UpdateNavDestinationVisibility(navDestinationNode, remainChild, index, destinationSize);
+    ASSERT_FALSE(ret);
+}
+
+/**
+ * @tc.name: UpdateNavDestinationVisibility008
+ * @tc.desc: Test UpdateNavDestinationVisibility and make the logic as follows:
+ *               index is not destinationSize - 1
+ *               index is not less than lastStandardIndex_
+ *               GetCustomNode is not remainChild
+ *               IsOnAnimation return true
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationTestNg, UpdateNavDestinationVisibility008, TestSize.Level1)
+{
+    auto navigationNode = NavigationGroupNode::GetOrCreateGroupNode(
+        "navigationNode", 101, []() { return AceType::MakeRefPtr<NavigationPattern>(); });
+    auto navigationPattern = navigationNode->GetPattern<NavigationPattern>();
+    RefPtr<NavigationStack> navigationStack = AceType::MakeRefPtr<NavigationStack>();
+    navigationPattern->SetNavigationStack(std::move(navigationStack));
+
+    auto navDestinationNode = NavDestinationGroupNode::GetOrCreateGroupNode(
+        "navDestinationNode", 201, []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
+    auto remainChild = NavDestinationGroupNode::GetOrCreateGroupNode(
+        "navDestinationNode", 202, []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
+    int32_t index = 1;
+    // Make index not destinationSize - 1
+    size_t destinationSize = 1;
+    // Make index not less than lastStandardIndex_
+    navigationNode->lastStandardIndex_ = 1;
+    auto navDestinationPattern = navDestinationNode->GetPattern<NavDestinationPattern>();
+    // Make GetCustomNode is not remainChild
+    navDestinationPattern->customNode_ = nullptr;
+    // Make IsOnAnimation return true
+    navDestinationNode->isOnAnimation_ = true;
+
+    ASSERT_TRUE(navDestinationNode->GetEventHub<NavDestinationEventHub>());
+    ASSERT_NE(index, static_cast<int32_t>(destinationSize) - 1);
+    ASSERT_FALSE(index < navigationNode->lastStandardIndex_);
+    ASSERT_TRUE(navDestinationPattern->GetCustomNode() != remainChild);
+    ASSERT_TRUE(navDestinationNode->IsOnAnimation());
+    bool ret = navigationNode->UpdateNavDestinationVisibility(navDestinationNode, remainChild, index, destinationSize);
+    ASSERT_FALSE(ret);
+}
+
+/**
+ * @tc.name: UpdateNavDestinationVisibility009
+ * @tc.desc: Test UpdateNavDestinationVisibility and make the logic as follows:
+ *               index is not destinationSize - 1
+ *               index is not less than lastStandardIndex_
+ *               GetCustomNode is not remainChild
+ *               IsOnAnimation return false
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationTestNg, UpdateNavDestinationVisibility009, TestSize.Level1)
+{
+    auto navigationNode = NavigationGroupNode::GetOrCreateGroupNode(
+        "navigationNode", 101, []() { return AceType::MakeRefPtr<NavigationPattern>(); });
+    auto navigationPattern = navigationNode->GetPattern<NavigationPattern>();
+    RefPtr<NavigationStack> navigationStack = AceType::MakeRefPtr<NavigationStack>();
+    navigationPattern->SetNavigationStack(std::move(navigationStack));
+
+    auto navDestinationNode = NavDestinationGroupNode::GetOrCreateGroupNode(
+        "navDestinationNode", 201, []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
+    auto remainChild = NavDestinationGroupNode::GetOrCreateGroupNode(
+        "navDestinationNode", 202, []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
+    int32_t index = 1;
+    // Make index not destinationSize - 1
+    size_t destinationSize = 1;
+    // Make index not less than lastStandardIndex_
+    navigationNode->lastStandardIndex_ = 1;
+    auto navDestinationPattern = navDestinationNode->GetPattern<NavDestinationPattern>();
+    // Make GetCustomNode is not remainChild
+    navDestinationPattern->customNode_ = nullptr;
+    // Make IsOnAnimation return false
+    navDestinationNode->isOnAnimation_ = false;
+
+    ASSERT_TRUE(navDestinationNode->GetEventHub<NavDestinationEventHub>());
+    ASSERT_NE(index, static_cast<int32_t>(destinationSize) - 1);
+    ASSERT_FALSE(index < navigationNode->lastStandardIndex_);
+    ASSERT_TRUE(navDestinationPattern->GetCustomNode() != remainChild);
+    ASSERT_FALSE(navDestinationNode->IsOnAnimation());
+    bool ret = navigationNode->UpdateNavDestinationVisibility(navDestinationNode, remainChild, index, destinationSize);
+    ASSERT_FALSE(ret);
+}
+
+/**
+ * @tc.name: OnDetachFromMainTree001
+ * @tc.desc: Test OnDetachFromMainTree and cover all conditions.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationTestNg, OnDetachFromMainTree001, TestSize.Level1)
+{
+    auto navigationNode = NavigationGroupNode::GetOrCreateGroupNode(
+        "navigationNode", 101, []() { return AceType::MakeRefPtr<NavigationPattern>(); });
+    auto navigationPattern = navigationNode->GetPattern<NavigationPattern>();
+    RefPtr<NavigationStack> navigationStack = AceType::MakeRefPtr<NavigationStack>();
+    navigationPattern->SetNavigationStack(std::move(navigationStack));
+
+    auto prePattern = navigationNode->GetPattern();
+    ASSERT_TRUE(AceType::DynamicCast<NavigationPattern>(prePattern));
+    navigationNode->OnDetachFromMainTree(false);
+
+    navigationNode->pattern_ = AceType::MakeRefPtr<NavDestinationPattern>();
+    ASSERT_FALSE(AceType::DynamicCast<NavigationPattern>(navigationNode->GetPattern()));
+    navigationNode->OnDetachFromMainTree(false);
+    // Reset pattern_ or crash will happen in ~NavigationGroupNode()
+    navigationNode->pattern_ = prePattern;
+    ASSERT_TRUE(AceType::DynamicCast<NavigationPattern>(navigationNode->GetPattern()));
+}
+
+/**
+ * @tc.name: OnAttachToMainTree001
+ * @tc.desc: Test OnAttachToMainTree and cover all conditions.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationTestNg, OnAttachToMainTree001, TestSize.Level1)
+{
+    auto navigationNode = NavigationGroupNode::GetOrCreateGroupNode(
+        "navigationNode", 101, []() { return AceType::MakeRefPtr<NavigationPattern>(); });
+    auto navigationPattern = navigationNode->GetPattern<NavigationPattern>();
+    RefPtr<NavigationStack> navigationStack = AceType::MakeRefPtr<NavigationStack>();
+    navigationPattern->SetNavigationStack(std::move(navigationStack));
+
+    auto prePattern = navigationNode->GetPattern();
+    ASSERT_TRUE(AceType::DynamicCast<NavigationPattern>(prePattern));
+    navigationNode->OnAttachToMainTree(false);
+
+    navigationNode->pattern_ = AceType::MakeRefPtr<NavDestinationPattern>();
+    ASSERT_FALSE(AceType::DynamicCast<NavigationPattern>(navigationNode->GetPattern()));
+    navigationNode->OnAttachToMainTree(false);
+    // Reset pattern_ or crash will happen in ~NavigationGroupNode()
+    navigationNode->pattern_ = prePattern;
+    ASSERT_TRUE(AceType::DynamicCast<NavigationPattern>(navigationNode->GetPattern()));
+}
 } // namespace OHOS::Ace::NG
