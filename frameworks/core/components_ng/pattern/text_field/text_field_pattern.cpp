@@ -991,6 +991,11 @@ void TextFieldPattern::HandleBlurEvent()
         CloseKeyboard(true);
         TAG_LOGI(AceLogTag::ACE_KEYBOARD, "TextFieldPattern Blur, Close Keyboard.");
     }
+#ifndef OHOS_PLATFORM
+    if (HasConnection()) {
+        CloseKeyboard(true);
+    }
+#endif
     selectController_->UpdateCaretIndex(selectController_->GetCaretIndex());
     NotifyOnEditChanged(false);
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
