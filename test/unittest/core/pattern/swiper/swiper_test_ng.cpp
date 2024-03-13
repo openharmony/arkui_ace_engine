@@ -10433,15 +10433,15 @@ HWTEST_F(SwiperTestNg, SwiperPatternHandleScroll005, TestSize.Level1)
     swiperPattern->GetPaintProperty<SwiperPaintProperty>()->UpdateEdgeEffect(EdgeEffect::SPRING);
     swiperPattern->itemPosition_.insert({ 0, SwiperItemInfo { .startPos = -0.5 } });
     auto res = swiperPattern->HandleScroll(5.0f, SCROLL_FROM_UPDATE, NestedState::CHILD_SCROLL);
-    EXPECT_EQ(res.remain, 5.0f);
+    EXPECT_EQ(res.remain, 4.5f);
     // three level nesting
     auto mockScroll = AceType::MakeRefPtr<MockNestableScrollContainer>();
-    EXPECT_CALL(*mockScroll, HandleScroll(5.0f, SCROLL_FROM_UPDATE, NestedState::CHILD_SCROLL, 0.f))
+    EXPECT_CALL(*mockScroll, HandleScroll(4.5f, SCROLL_FROM_UPDATE, NestedState::CHILD_SCROLL, 0.f))
         .Times(1)
-        .WillOnce(Return(ScrollResult { .remain = 5.0f, .reachEdge = true }));
-    EXPECT_CALL(*mockScroll, HandleScroll(5.0f, SCROLL_FROM_UPDATE, NestedState::CHILD_OVER_SCROLL, 0.f))
+        .WillOnce(Return(ScrollResult { .remain = 4.5f, .reachEdge = true }));
+    EXPECT_CALL(*mockScroll, HandleScroll(4.5f, SCROLL_FROM_UPDATE, NestedState::CHILD_OVER_SCROLL, 0.f))
         .Times(1)
-        .WillOnce(Return(ScrollResult { .remain = 5.0f, .reachEdge = true }));
+        .WillOnce(Return(ScrollResult { .remain = 4.5f, .reachEdge = true }));
     swiperPattern->parent_ = mockScroll;
     NestedScrollOptions nestedOpt = {
         .forward = NestedScrollMode::SELF_FIRST,
@@ -10449,7 +10449,7 @@ HWTEST_F(SwiperTestNg, SwiperPatternHandleScroll005, TestSize.Level1)
     };
     swiperPattern->SetNestedScroll(nestedOpt);
     res = swiperPattern->HandleScroll(5.0f, SCROLL_FROM_UPDATE, NestedState::CHILD_SCROLL, 0.f);
-    EXPECT_EQ(res.remain, 5.0f);
+    EXPECT_EQ(res.remain, 4.5f);
 }
 
 /**
