@@ -11698,7 +11698,7 @@ class ArkSliderComponent extends ArkComponent {
     throw new Error('Method not implemented.');
   }
   showSteps(value) {
-    modifier(this._modifiers, ShowStepsModifier, value);
+    modifierWithKey(this._modifiersWithKeys, ShowStepsModifier.identity, ShowStepsModifier, value);
     return this;
   }
   showTips(value, content) {

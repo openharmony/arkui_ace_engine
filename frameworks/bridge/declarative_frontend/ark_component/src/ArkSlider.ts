@@ -40,7 +40,7 @@ class ArkSliderComponent extends ArkComponent implements SliderAttribute {
     throw new Error('Method not implemented.');
   }
   showSteps(value: boolean): this {
-    modifier(this._modifiers, ShowStepsModifier, value);
+    modifierWithKey(this._modifiersWithKeys, ShowStepsModifier.identity, ShowStepsModifier, value);
     return this;
   }
   showTips(value: boolean, content?: any): this {

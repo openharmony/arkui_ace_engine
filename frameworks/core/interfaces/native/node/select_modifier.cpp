@@ -95,6 +95,10 @@ void SetArrowPosition(ArkUINodeHandle node, ArkUI_Int32 arrowPosition)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
+    if (static_cast<OHOS::Ace::ArrowPosition>(arrowPosition) != OHOS::Ace::ArrowPosition::START &&
+        static_cast<OHOS::Ace::ArrowPosition>(arrowPosition) != OHOS::Ace::ArrowPosition::END) {
+        arrowPosition = 0;
+    }
     SelectModelNG::SetArrowPosition(frameNode, static_cast<ArrowPosition>(arrowPosition));
 }
 
