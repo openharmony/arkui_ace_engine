@@ -202,4 +202,36 @@ void RichEditorModelNG::SetTextDetectEnable(FrameNode* frameNode, bool value)
     CHECK_NULL_VOID(richEditorPattern);
     richEditorPattern->SetTextDetectEnable(value);
 }
+
+void RichEditorModelNG::SetSelectedBackgroundColor(const Color& selectedColor)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<RichEditorPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetSelectedBackgroundColor(selectedColor);
+}
+
+void RichEditorModelNG::SetSelectedBackgroundColor(FrameNode* frameNode, const Color& selectedColor)
+{
+    auto pattern = frameNode->GetPattern<RichEditorPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetSelectedBackgroundColor(selectedColor);
+}
+
+void RichEditorModelNG::SetCaretColor(const Color& color)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<RichEditorPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetCaretColor(color);
+}
+
+void RichEditorModelNG::SetCaretColor(FrameNode* frameNode, const Color& color)
+{
+    auto pattern = frameNode->GetPattern<RichEditorPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetCaretColor(color);
+}
 } // namespace OHOS::Ace::NG

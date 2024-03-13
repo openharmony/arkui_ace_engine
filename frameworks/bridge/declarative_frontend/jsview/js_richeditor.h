@@ -54,7 +54,8 @@ public:
     static JSRef<JSObject> CreateJSValueResource(const RefPtr<ResourceObject>& valueResource);
     static JSRef<JSObject> CreateJSImageStyleResult(const ImageStyleResult& imageStyleResult);
     static JSRef<JSObject> CreateParagraphStyleResult(const ParagraphInfo& info);
-
+    static void SetCaretColor(const JSCallbackInfo& info);
+    static void SetSelectedBackgroundColor(const JSCallbackInfo& info);
 private:
     static void CreateTextStyleObj(JSRef<JSObject>& textStyleObj, const NG::RichEditorAbstractSpanResult& spanResult);
     static void CreateImageStyleObj(JSRef<JSObject>& imageStyleObj, JSRef<JSObject>& spanResultObj,

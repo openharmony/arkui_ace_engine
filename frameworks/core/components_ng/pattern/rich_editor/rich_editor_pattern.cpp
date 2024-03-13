@@ -96,6 +96,11 @@ constexpr float TIME_UNIT = 1000.0f;
 constexpr float DOUBLE_CLICK_INTERVAL_MS = 300.0f;
 constexpr float BOX_EPSILON = 0.5f;
 constexpr uint32_t RECORD_MAX_LENGTH = 20;
+constexpr float DEFAILT_OPACITY = 0.2f;
+constexpr int64_t COLOR_OPAQUE = 255;
+
+constexpr Color SYSTEM_CARET_COLOR = Color(0xff007dff);
+constexpr Color SYSTEM_SELECT_BACKGROUND_COLOR = Color(0x33007dff);
 
 const std::wstring lineSeparator = L"\n";
 // hen do ai anaylsis, we should limit the left an right limit of the string
@@ -5723,5 +5728,36 @@ void RichEditorPattern::SetPlaceholder(std::vector<std::list<RefPtr<SpanItem>>>&
     newGroup.push_back(spanItem);
     spanItemList.push_back(std::move(newGroup));
     isShowPlaceholder_ = true;
+}
+
+Color RichEditorPattern::GetCaretColor()
+{
+    if (caretColor_.has_value()) {
+        return caretColor_.value();
+    }
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_RETURN(pipeline, SYSTEM_CARET_COLOR);
+    auto richEditorTheme = pipeline->GetTheme<RichEditorTheme>();
+    CHECK_NULL_RETURN(richEditorTheme, SYSTEM_CARET_COLOR);
+    return richEditorTheme->GetCaretColor();
+}
+
+Color RichEditorPattern::GetSelectedBackgroundColor()
+{
+    Color selectedBackgroundColor;
+    if (selectedBackgroundColor_.has_value()) {
+        selectedBackgroundColor = selectedBackgroundColor_.value();
+    } else {
+        auto pipeline = PipelineContext::GetCurrentContext();
+        CHECK_NULL_RETURN(pipeline, SYSTEM_SELECT_BACKGROUND_COLOR);
+        auto richEditorTheme = pipeline->GetTheme<RichEditorTheme>();
+        CHECK_NULL_RETURN(richEditorTheme, SYSTEM_SELECT_BACKGROUND_COLOR);
+        selectedBackgroundColor = richEditorTheme->GetSelectedBackgroundColor();
+    }
+    // Alpha == 255 Means completely opaque
+    if (selectedBackgroundColor.GetAlpha() == COLOR_OPAQUE) {
+        selectedBackgroundColor = selectedBackgroundColor.ChangeOpacity(DEFAILT_OPACITY);
+    }
+    return selectedBackgroundColor;
 }
 } // namespace OHOS::Ace::NG
