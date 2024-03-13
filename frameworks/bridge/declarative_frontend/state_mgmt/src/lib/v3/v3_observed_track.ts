@@ -13,16 +13,10 @@
  * limitations under the License.
  */
 
-
-
 /**
- * @monitor function decorator implementation and supporting classes MonitorV3 and AsyncMonitorV3
- */
-
-/**
- * @observe class and @track class property decorators
+ * @ObservedV2 class and @trace class property decorators
  * ObserveV3 core helper class to keep track of all the object -> UINode/elmtId 
- * and Monitor/watchId dependencies.
+ * Monitor/watchId, Computed/computedId dependencies.
  */
 
 class ObserveV3 {
@@ -43,7 +37,7 @@ class ObserveV3 {
 
   // see MonitorV3.observeObjectAccess: bindCmp is the MonitorV3
   // see modified observeComponentCreation, bindCmp is the ViewPU
-  private bindCmp_: MonitorV3 | ViewPU | ComputedV3 | null = null;
+  private bindCmp_:  ViewPU | MonitorV3 | ComputedV3 | null = null;
 
   // bindId: UINode elmtId or watchId, depending on what is being observed
   private bindId_: number = UINodeRegisterProxy.notRecordingDependencies;
@@ -117,8 +111,46 @@ class ObserveV3 {
     delete this.id2targets_[id]
     delete this.id2cmp_[id]
 
-    stateMgmtConsole.propertyAccess(`clearBinding (at the end): id2cmp_ ${JSON.stringify(Object.keys(this.id2cmp_))}`);
+    stateMgmtConsole.propertyAccess(`clearBinding (at the end): id2cmp_ length=${Object.keys(this.id2cmp_).length}, entries=${JSON.stringify(Object.keys(this.id2cmp_))} `);
+    stateMgmtConsole.propertyAccess(`... id2targets_ length=${Object.keys(this.id2targets_).length}, entries=${JSON.stringify(Object.keys(this.id2targets_))} `);
   }
+
+  /**
+   * Method only for testing
+   *
+   * @param expectedLength
+   * @returns true if length matches
+   */
+  public get id2CompLength(): number {
+    return Object.keys(this.id2cmp_).length;
+  }
+
+  public assertOnId2Comp(expectedLength: number): boolean {
+    const result = expectedLength == this.id2CompLength;
+    if (!result) {
+      stateMgmtConsole.error(`assertOnId2Comp expected length ${expectedLength}, actual ${this.id2CompLength}, entries=${JSON.stringify(Object.keys(this.id2cmp_))}`);
+    }
+    return result;
+  }
+
+  /**
+   * Method only for testing
+   * 
+   * @param expectedLength 
+   * @returns true if length matches
+   */
+  public get id2TargetsLength(): number {
+    return Object.keys(this.id2targets_).length;
+  }
+
+  public assertOnId2Targets(expectedLength: number): boolean {
+    const result = expectedLength == Object.keys(this.id2cmp_).length;
+    if (!result) {
+      stateMgmtConsole.error(`assertOnId2Target expected length ${expectedLength}, actual ${Object.keys(this.id2targets_)}, entries=${JSON.stringify(Object.keys(this.id2targets_))}`);
+    }
+    return result;
+  }
+
 
   // add dependency view model object 'target' property 'attrName'
   // to current this.bindId
@@ -225,6 +257,10 @@ class ObserveV3 {
   // mark view model object 'target' property 'attrName' as changed
   // notify affected watchIds and elmtIds
   public fireChange(target: object, attrName: string): void {
+    // enable to get more fine grained traces
+    // including 2 (!) .end calls.
+    // aceTrace.begin(`ObservedV3.FireChange '${attrName}'`)
+
     if (!target[ObserveV3.SYMBOL_REFS] || this.disabled_) {
       return;
     }
@@ -270,7 +306,6 @@ class ObserveV3 {
         this.monitorIdsChanged_.add(id);
       }
     } // for
-
     // aceTrace.end();
   }
 
@@ -288,7 +323,7 @@ class ObserveV3 {
     UINodeRegisterProxy.unregisterElmtIdsFromViewPUs();
 
     // priority order of processing:
-    // 1- update computed propers until no more need computed props update 
+    // 1- update computed properties until no more need computed props update 
     // 2- update monitors until no more monitors and no more computed props
     // 3- update UINodes until no more monitors, no more computed props, and no more UINodes
     // FIXME prevent infinite loops
@@ -348,10 +383,10 @@ class ObserveV3 {
       if (monitor instanceof MonitorV3) {
         if (((monitorTarget=monitor.getTarget()) instanceof ViewPU) && !monitorTarget.isViewActive()) {
         // FIXME @Component freeze enable
-        // monitor fireChange delayed if target is a View that is not active
+        // monitor notifyChange delayed if target is a View that is not active
         // monitorTarget.addDelayedMonitorIds(watchId);
         } else {
-          monitor.fireChange();
+          monitor.notifyChange();
         }
       }
     });
@@ -390,14 +425,18 @@ class ObserveV3 {
   // On next VSYNC runs FlushDirtyNodesUpdate to call rerender to call UpdateElement. Much longer code path
   // much slower
   private updateUINodes(elmtIds: Array<number>): void {
-    stateMgmtConsole.debug(`ObserveV3.updateUINodesSlow: ${elmtIds.length} elmtIds: ${JSON.stringify(elmtIds)} ...`);
-    aceTrace.begin(`ObserveV3.updateUINodesSlow: ${elmtIds.length} elmtId`)
+    stateMgmtConsole.debug(`ObserveV3.updateUINodesSlow: ${elmtIds.length} elmtIds need rerender: ${JSON.stringify(elmtIds)} ...`);
+    aceTrace.begin(`ObserveV3.updateUINodesSlow: ${elmtIds.length} elmtId`);
+    let viewWeak : WeakRef<Object>;
+    let view : Object | undefined;
     elmtIds.forEach((elmtId) => {
-      const view = this.id2cmp_[elmtId];
-      if (view && view instanceof ViewPU) {
+      viewWeak = this.id2cmp_[elmtId];
+      if (viewWeak && "deref" in viewWeak && (view=viewWeak.deref()) && view instanceof ViewPU) {
         if (view.isViewActive()) {
           view.uiNodeNeedUpdateV3(elmtId);
-        } 
+        } else {
+          // FIXME delayed update
+        }
       }
     });
     aceTrace.end();
@@ -406,10 +445,13 @@ class ObserveV3 {
   public constructMonitor(target: Object, name: string): void {
     let watchProp = Symbol.for(MonitorV3.WATCH_PREFIX + name)
     if (target && (typeof target == "object") && target[watchProp]) {
-      Object.entries(target[watchProp]).forEach(([key, val]) => {
-       this.addWatch(target, key, val)
-      })
-    }
+      Object.entries(target[watchProp]).forEach(([funcName, func]) => {
+        if (func && funcName && typeof func == "function") {
+          new MonitorV3(target, funcName, func as (m: IMonitor) => void).InitRun();
+        }
+        // FIXME Else handle error
+      });
+    } // if target[watchProp]
   }
 
   public constructComputed(target: Object, name: string): void {
@@ -420,10 +462,6 @@ class ObserveV3 {
         new ComputedV3(target, propertyName, computeFunc as unknown as () => any).InitRun();
       })
     }
-  }
-
-  public addWatch(target, props, func): number {
-    return new MonitorV3(target, props, func).InitRun()
   }
 
   public clearWatch(id: number): void {
@@ -651,7 +689,7 @@ class ObserveV3 {
 } // class ObserveV3
 
 /**
- * @track class property decorator 
+ * @Trace class property decorator 
  * 
  * @param target  class prototype object
  * @param propertyKey  class property name
@@ -666,7 +704,6 @@ const Trace = (target: Object, propertyKey: string) => {
   ConfigureStateMgmt.instance.usingV2ObservedTrack(`@track`, propertyKey);
   return trackInternal(target, propertyKey);
 }
-const track = Trace;
 
 const trackInternal = (target: any, propertyKey: string) => {
   if (typeof target === "function" && !Reflect.has(target, propertyKey)) {
@@ -698,8 +735,8 @@ const trackInternal = (target: any, propertyKey: string) => {
 
 
 /**
- * @observe class decorator
- * only @observe classes can have functional @track attributes inside.
+ * @ObservedV2 class decorator
+ * only @ObservedV2 classes can have functional @track attributes inside.
  * and only changes of such decorated properties can be deep observed
  * (decorated along the entire path from root object to property)
  * 
@@ -718,7 +755,6 @@ function ObservedV2<T extends ConstructorV3>(BaseClass: T) : ConstructorV3 {
     stateMgmtConsole.applicationError(error);
     throw new Error(error);
   }
-  const observed = ObservedV2;
 
 
   if (BaseClass.prototype && !Reflect.has(BaseClass.prototype, ObserveV3.V3_DECO_META)) {
@@ -728,19 +764,16 @@ function ObservedV2<T extends ConstructorV3>(BaseClass: T) : ConstructorV3 {
 
   // Use ID_REFS only if number of observed attrs is significant
   const attrList = Object.getOwnPropertyNames(BaseClass.prototype);
-  const prefix= ObserveV3.OB_PREFIX;
-  const count = attrList.filter(attr => attr.startsWith(prefix)).length;
+  const count = attrList.filter(attr => attr.startsWith(ObserveV3.OB_PREFIX)).length;
   if (count > 5) {
     BaseClass.prototype[ObserveV3.ID_REFS] = {};
   }
+
   return class extends BaseClass {
     constructor(...args) {
       super(...args)
-      // After a "new" object, no matter how many times the watched value is assigned,
-      // only the last initial value is recognized. Therefore, you need to add "Monitor" asynchronously.
-      // Promise.resolve(true).then(() => constructMonitor(this, BaseClass.name)) // Low performance
-      AsyncAddMonitorV3.addWatch(this, BaseClass.name)
-      AsyncAddComputedV3.addComputed(this, BaseClass.name)
+        AsyncAddMonitorV3.addMonitor(this, BaseClass.name)
+        AsyncAddComputedV3.addComputed(this, BaseClass.name)
     }
   }
 }

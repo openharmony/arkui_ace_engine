@@ -38,8 +38,8 @@ class ComputedV3 {
   private propertyComputeFunc_: () => any;
   private computedId_: number; 
 
-  public static readonly COMPUTED_PREFIX = "__comp_";
-  public static readonly COMPUTED_CACHED_PREFIX = "__cached_";
+  public static readonly COMPUTED_PREFIX =  "___comp_";
+  public static readonly COMPUTED_CACHED_PREFIX = "___comp_cached_";
 
   constructor(target: object, prop: string, func: (...args: any[]) => any) {
     this.target_ = target;
@@ -129,6 +129,7 @@ class AsyncAddComputedV3 {
    * @from 12
    *
    */
+  /*
 const computed = (target: Object, propertyKey: string, descriptor: PropertyDescriptor) => {
   stateMgmtConsole.debug(`@computed ${propertyKey}`);
   let watchProp = Symbol.for(ComputedV3.COMPUTED_PREFIX + target.constructor.name);
@@ -136,3 +137,5 @@ const computed = (target: Object, propertyKey: string, descriptor: PropertyDescr
   target[watchProp] ? target[watchProp][propertyKey] = computeFunction 
                     : target[watchProp] = { [propertyKey]: computeFunction };
 }
+
+*/

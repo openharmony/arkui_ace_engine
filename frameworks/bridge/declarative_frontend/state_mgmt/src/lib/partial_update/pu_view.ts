@@ -179,7 +179,11 @@ abstract class ViewPU extends NativeViewPartialUpdate
     let usesStateMgmtVersion = 0;
     Object.getOwnPropertyNames(this)
       .filter((propName) => {
-        return (propName.startsWith("__") && !propName.startsWith(ObserveV3.OB_PREFIX))
+        // do not include backing store, and ObserveV3/MonitorV3/ComputedV3 meta data objects
+        return (propName.startsWith("__") 
+        && !propName.startsWith(ObserveV3.OB_PREFIX) 
+        && !propName.startsWith(MonitorV3.WATCH_PREFIX)
+        && !propName.startsWith(ComputedV3.COMPUTED_PREFIX))
       })
       .forEach((propName) => {
         const stateVar = Reflect.get(this, propName) as Object;
@@ -779,8 +783,6 @@ abstract class ViewPU extends NativeViewPartialUpdate
     this.monitorIdsDelayedUpdate.clear();
     this.computedIdsDelayedUpdate.clear();
   }
-
-   other revision: 864b565fa4 (@computed properties part 2, works with @monitor, component freeze not tested)
 }
    */
 
@@ -1024,7 +1026,7 @@ abstract class ViewPU extends NativeViewPartialUpdate
 
       // if V2 @Observed/@Track used anywhere in the app (there is no more fine grained criteria), 
       // enable V2 object deep observation
-      // FIXME: A @Component should only use PU or V2 state, but RN dynamic viewer uses both.
+      // FIXME: A @Component should only use PU or V2 state, but ReactNative dynamic viewer uses both.
       if (ConfigureStateMgmt.instance.needsV2Observe()) {
         // FIXME: like in V2 setting bindId_ in ObserveV3 does not work with 'stacked' 
         // update + initial render calls, like in if and ForEach case, convert to stack as well
@@ -1618,6 +1620,8 @@ abstract class ViewPU extends NativeViewPartialUpdate
     // FIXME, can we skip for apps that do not use V3 at all?
     ObserveV3.getObserve().constructMonitor(this, this.constructor.name);
     ObserveV3.getObserve().constructComputed(this, this.constructor.name);
+
+    // FIME ProvideConsumeUtilV3.setupConsumeVarsV3(this);
 
     // Always use ID_REFS in ViewPU
     this[ObserveV3.ID_REFS] = {};

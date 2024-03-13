@@ -23,23 +23,23 @@
 
 class stateMgmtConsole {
   public static log(...args: any): void {
-    aceConsole.error(...args);
+    aceConsole.log(...args);
   }
   public static debug(...args: any): void {
-    aceConsole.error(...args);
+    aceConsole.debug(...args);
   }
   public static info(...args: any): void {
-    aceConsole.error(...args);
+    aceConsole.info(...args);
   }
   public static warn(...args: any): void {
-    aceConsole.error(...args);
+    aceConsole.warn(...args);
   }
   public static error(...args: any): void {
     aceConsole.error(...args);
   }
   public static propertyAccess(...args: any): void {
     // enable for fine grain debugging variable observation
-    aceConsole.error(...args)
+    // aceConsole.error(...args)
   }
   public static applicationError(...args: any): void {
     aceConsole.error(`FIX THIS APPLICATION ERROR \n`, ...args);

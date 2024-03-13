@@ -2006,23 +2006,23 @@ Environment.instance_ = undefined;
 */
 class stateMgmtConsole {
     static log(...args) {
-        aceConsole.error(...args);
+        aceConsole.log(...args);
     }
     static debug(...args) {
-        aceConsole.error(...args);
+        aceConsole.debug(...args);
     }
     static info(...args) {
-        aceConsole.error(...args);
+        aceConsole.info(...args);
     }
     static warn(...args) {
-        aceConsole.error(...args);
+        aceConsole.warn(...args);
     }
     static error(...args) {
         aceConsole.error(...args);
     }
     static propertyAccess(...args) {
         // enable for fine grain debugging variable observation
-        aceConsole.error(...args);
+        // aceConsole.error(...args)
     }
     static applicationError(...args) {
         aceConsole.error(`FIX THIS APPLICATION ERROR \n`, ...args);
@@ -5325,7 +5325,11 @@ class ViewPU extends NativeViewPartialUpdate {
         let usesStateMgmtVersion = 0;
         Object.getOwnPropertyNames(this)
             .filter((propName) => {
-            return (propName.startsWith("__") && !propName.startsWith(ObserveV3.OB_PREFIX));
+            // do not include backing store, and ObserveV3/MonitorV3/ComputedV3 meta data objects
+            return (propName.startsWith("__")
+                && !propName.startsWith(ObserveV3.OB_PREFIX)
+                && !propName.startsWith(MonitorV3.WATCH_PREFIX)
+                && !propName.startsWith(ComputedV3.COMPUTED_PREFIX));
         })
             .forEach((propName) => {
             const stateVar = Reflect.get(this, propName);
@@ -5813,8 +5817,6 @@ class ViewPU extends NativeViewPartialUpdate {
       this.monitorIdsDelayedUpdate.clear();
       this.computedIdsDelayedUpdate.clear();
     }
-  
-     other revision: 864b565fa4 (@computed properties part 2, works with @monitor, component freeze not tested)
   }
      */
     performDelayedUpdate() {
@@ -6031,7 +6033,7 @@ class ViewPU extends NativeViewPartialUpdate {
             }
             // if V2 @Observed/@Track used anywhere in the app (there is no more fine grained criteria), 
             // enable V2 object deep observation
-            // FIXME: A @Component should only use PU or V2 state, but RN dynamic viewer uses both.
+            // FIXME: A @Component should only use PU or V2 state, but ReactNative dynamic viewer uses both.
             if (ConfigureStateMgmt.instance.needsV2Observe()) {
                 // FIXME: like in V2 setting bindId_ in ObserveV3 does not work with 'stacked' 
                 // update + initial render calls, like in if and ForEach case, convert to stack as well
@@ -6559,6 +6561,7 @@ class ViewPU extends NativeViewPartialUpdate {
         // FIXME, can we skip for apps that do not use V3 at all?
         ObserveV3.getObserve().constructMonitor(this, this.constructor.name);
         ObserveV3.getObserve().constructComputed(this, this.constructor.name);
+        // FIME ProvideConsumeUtilV3.setupConsumeVarsV3(this);
         // Always use ID_REFS in ViewPU
         this[ObserveV3.ID_REFS] = {};
     }
@@ -6826,12 +6829,9 @@ function makeBuilderParameterProxy(builderName, source) {
  * limitations under the License.
  */
 /**
- * @monitor function decorator implementation and supporting classes MonitorV3 and AsyncMonitorV3
- */
-/**
- * @observe class and @track class property decorators
+ * @ObservedV2 class and @trace class property decorators
  * ObserveV3 core helper class to keep track of all the object -> UINode/elmtId
- * and Monitor/watchId dependencies.
+ * Monitor/watchId, Computed/computedId dependencies.
  */
 class ObserveV3 {
     constructor() {
@@ -6902,6 +6902,39 @@ class ObserveV3 {
         delete this.id2targets_[id];
         delete this.id2cmp_[id];
         
+        
+    }
+    /**
+     * Method only for testing
+     *
+     * @param expectedLength
+     * @returns true if length matches
+     */
+    get id2CompLength() {
+        return Object.keys(this.id2cmp_).length;
+    }
+    assertOnId2Comp(expectedLength) {
+        const result = expectedLength == this.id2CompLength;
+        if (!result) {
+            stateMgmtConsole.error(`assertOnId2Comp expected length ${expectedLength}, actual ${this.id2CompLength}, entries=${JSON.stringify(Object.keys(this.id2cmp_))}`);
+        }
+        return result;
+    }
+    /**
+     * Method only for testing
+     *
+     * @param expectedLength
+     * @returns true if length matches
+     */
+    get id2TargetsLength() {
+        return Object.keys(this.id2targets_).length;
+    }
+    assertOnId2Targets(expectedLength) {
+        const result = expectedLength == Object.keys(this.id2cmp_).length;
+        if (!result) {
+            stateMgmtConsole.error(`assertOnId2Target expected length ${expectedLength}, actual ${Object.keys(this.id2targets_)}, entries=${JSON.stringify(Object.keys(this.id2targets_))}`);
+        }
+        return result;
     }
     // add dependency view model object 'target' property 'attrName'
     // to current this.bindId
@@ -7004,6 +7037,9 @@ class ObserveV3 {
     // mark view model object 'target' property 'attrName' as changed
     // notify affected watchIds and elmtIds
     fireChange(target, attrName) {
+        // enable to get more fine grained traces
+        // including 2 (!) .end calls.
+        // aceTrace.begin(`ObservedV3.FireChange '${attrName}'`)
         if (!target[ObserveV3.SYMBOL_REFS] || this.disabled_) {
             return;
         }
@@ -7060,7 +7096,7 @@ class ObserveV3 {
         UINodeRegisterProxy.obtainDeletedElmtIds();
         UINodeRegisterProxy.unregisterElmtIdsFromViewPUs();
         // priority order of processing:
-        // 1- update computed propers until no more need computed props update 
+        // 1- update computed properties until no more need computed props update 
         // 2- update monitors until no more monitors and no more computed props
         // 3- update UINodes until no more monitors, no more computed props, and no more UINodes
         // FIXME prevent infinite loops
@@ -7116,11 +7152,11 @@ class ObserveV3 {
             if (monitor instanceof MonitorV3) {
                 if (((monitorTarget = monitor.getTarget()) instanceof ViewPU) && !monitorTarget.isViewActive()) {
                     // FIXME @Component freeze enable
-                    // monitor fireChange delayed if target is a View that is not active
+                    // monitor notifyChange delayed if target is a View that is not active
                     // monitorTarget.addDelayedMonitorIds(watchId);
                 }
                 else {
-                    monitor.fireChange();
+                    monitor.notifyChange();
                 }
             }
         });
@@ -7160,11 +7196,16 @@ class ObserveV3 {
     updateUINodes(elmtIds) {
         
         aceTrace.begin(`ObserveV3.updateUINodesSlow: ${elmtIds.length} elmtId`);
+        let viewWeak;
+        let view;
         elmtIds.forEach((elmtId) => {
-            const view = this.id2cmp_[elmtId];
-            if (view && view instanceof ViewPU) {
+            viewWeak = this.id2cmp_[elmtId];
+            if (viewWeak && "deref" in viewWeak && (view = viewWeak.deref()) && view instanceof ViewPU) {
                 if (view.isViewActive()) {
                     view.uiNodeNeedUpdateV3(elmtId);
+                }
+                else {
+                    // FIXME delayed update
                 }
             }
         });
@@ -7173,10 +7214,13 @@ class ObserveV3 {
     constructMonitor(target, name) {
         let watchProp = Symbol.for(MonitorV3.WATCH_PREFIX + name);
         if (target && (typeof target == "object") && target[watchProp]) {
-            Object.entries(target[watchProp]).forEach(([key, val]) => {
-                this.addWatch(target, key, val);
+            Object.entries(target[watchProp]).forEach(([funcName, func]) => {
+                if (func && funcName && typeof func == "function") {
+                    new MonitorV3(target, funcName, func).InitRun();
+                }
+                // FIXME Else handle error
             });
-        }
+        } // if target[watchProp]
     }
     constructComputed(target, name) {
         let watchProp = Symbol.for(ComputedV3.COMPUTED_PREFIX + name);
@@ -7187,9 +7231,6 @@ class ObserveV3 {
                 new ComputedV3(target, propertyName, computeFunc).InitRun();
             });
         }
-    }
-    addWatch(target, props, func) {
-        return new MonitorV3(target, props, func).InitRun();
     }
     clearWatch(id) {
         this.clearBinding(id);
@@ -7413,7 +7454,7 @@ ObserveV3.arraySetMapProxy = {
     }
 };
 /**
- * @track class property decorator
+ * @Trace class property decorator
  *
  * @param target  class prototype object
  * @param propertyKey  class property name
@@ -7428,7 +7469,6 @@ const Trace = (target, propertyKey) => {
     ConfigureStateMgmt.instance.usingV2ObservedTrack(`@track`, propertyKey);
     return trackInternal(target, propertyKey);
 };
-const track = Trace;
 const trackInternal = (target, propertyKey) => {
     var _a;
     var _b;
@@ -7466,25 +7506,20 @@ function ObservedV2(BaseClass) {
         stateMgmtConsole.applicationError(error);
         throw new Error(error);
     }
-    const observed = ObservedV2;
     if (BaseClass.prototype && !Reflect.has(BaseClass.prototype, ObserveV3.V3_DECO_META)) {
         // not an error, suspicious of developer oversight
         stateMgmtConsole.warn(`'@observed class ${BaseClass === null || BaseClass === void 0 ? void 0 : BaseClass.name}': no @track property inside. Is thi intended? Check our application.`);
     }
     // Use ID_REFS only if number of observed attrs is significant
     const attrList = Object.getOwnPropertyNames(BaseClass.prototype);
-    const prefix = ObserveV3.OB_PREFIX;
-    const count = attrList.filter(attr => attr.startsWith(prefix)).length;
+    const count = attrList.filter(attr => attr.startsWith(ObserveV3.OB_PREFIX)).length;
     if (count > 5) {
         BaseClass.prototype[ObserveV3.ID_REFS] = {};
     }
     return class extends BaseClass {
         constructor(...args) {
             super(...args);
-            // After a "new" object, no matter how many times the watched value is assigned,
-            // only the last initial value is recognized. Therefore, you need to add "Monitor" asynchronously.
-            // Promise.resolve(true).then(() => constructMonitor(this, BaseClass.name)) // Low performance
-            AsyncAddMonitorV3.addWatch(this, BaseClass.name);
+            AsyncAddMonitorV3.addMonitor(this, BaseClass.name);
             AsyncAddComputedV3.addComputed(this, BaseClass.name);
         }
     };
@@ -7503,64 +7538,120 @@ function ObservedV2(BaseClass) {
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-/**
- * @monitor function decorator implementation and supporting classes MonitorV3 and AsyncMonitorV3
- */
+class MonitorValueV3 {
+    constructor(path) {
+        this.path = path;
+        this.dirty = false;
+        this.props = path.split(".");
+    }
+    setValue(isInit, newValue) {
+        this.now = newValue;
+        if (isInit) {
+            this.before = this.now;
+        }
+        this.dirty = this.before !== this.now;
+        return this.dirty;
+    }
+    // mv newValue to oldValue, set dirty to false
+    reset() {
+        this.before = this.now;
+        this.dirty = false;
+    }
+    isDirty() {
+        return this.dirty;
+    }
+}
 /**
  * MonitorV3
- * one MonitorV3 object per @monitor function
+ * one MonitorV3 object per @Monitor function
  * watchId - similar to elmtId, identify one MonitorV3 in Observe.idToCmp Map
  * observeObjectAccess = get each object on the 'path' to create dependency and add them with Observe.addRef
- * fireChange - exec @monitor function and re-new dependencies with observeObjectAccess
+ * fireChange - exec @Monitor function and re-new dependencies with observeObjectAccess
  */
 class MonitorV3 {
-    constructor(target, props, func) {
+    constructor(target, pathsString, func) {
         var _a;
         var _b;
-        this.target_ = new WeakRef(target);
-        this.func_ = func;
+        this.values_ = new Array();
+        this.target_ = target;
+        this.monitorFunction = func;
         this.watchId_ = ++MonitorV3.nextWatchId_;
-        this.props_ = props.split(".");
+        // split space separated array of paths
+        let paths = pathsString.split(/\s+/g);
+        paths.forEach(path => this.values_.push(new MonitorValueV3(path)));
+        // add watchId to owning ViewPU or view model data object
+        // ViewPU uses to call clearBinding(id)
+        // FIXME data object leave data inside ObservedV3, because they can not 
+        // call clearBinding(id) before they get deleted.
         const meta = (_a = target[_b = MonitorV3.WATCH_INSTANCE_PREFIX]) !== null && _a !== void 0 ? _a : (target[_b] = {});
-        meta[props] = this.watchId_;
+        meta[pathsString] = this.watchId_;
     }
     getTarget() {
         return this.target_;
     }
-    InitRun() {
-        this.value_ = this.observeObjectAccess(true);
-        return this.watchId_;
-    }
-    fireChange() {
-        let newVal = this.observeObjectAccess();
-        if (this.value_ !== newVal) {
-            let target;
-            if (target = this.target_.deref()) {
-                
-                this.func_.call(target, newVal, this.value_);
+    /**
+        Return array of those monitored paths
+        that changed since previous invocation
+     */
+    get dirty() {
+        let ret = new Array();
+        this.values_.forEach(monitorValue => {
+            if (monitorValue.isDirty()) {
+                ret.push(monitorValue.path);
             }
-            this.value_ = newVal;
-        }
-    }
-    // register current watchId while exec. analysisPath
-    observeObjectAccess(isInit = false) {
-        ObserveV3.getObserve().startBind(this, this.watchId_);
-        let ret = this.analysisPath(isInit);
-        ObserveV3.getObserve().startBind(null, 0);
+        });
         return ret;
     }
-    // traverse objects on the given monitor path and add dependency for
-    // watchId to each of the,
-    // this needs to be done at @monitor init and repeated every time
-    // one of the objects has changes
-    analysisPath(isInit) {
-        let obj = this.target_.deref();
-        for (const prop of this.props_) {
-            if (obj && typeof obj == "object" && Reflect.has(obj, prop)) {
+    /**
+     * return IMonitorValue for given path
+     * or if no path is specified any dirty (changed) monitor value
+     */
+    value(path) {
+        for (let monitorValue of this.values_) {
+            if ((path === undefined && monitorValue.isDirty()) || monitorValue.path === path) {
+                return monitorValue;
+            }
+        }
+        return undefined;
+    }
+    InitRun() {
+        this.bindRun(true);
+        return this;
+    }
+    notifyChange() {
+        if (this.bindRun(/* is init / first run */ false)) {
+            
+            // exec @Monitor function
+            this.monitorFunction.call(this.target_, this);
+            // now -> before value
+            this.reset();
+        }
+    }
+    // called after @Monitor function call
+    reset() {
+        this.values_.forEach(item => item.reset());
+    }
+    // analysisProp for each monitored path
+    bindRun(isInit = false) {
+        ObserveV3.getObserve().startBind(this, this.watchId_);
+        let ret = false;
+        this.values_.forEach((item) => {
+            let dirty = item.setValue(isInit, this.analysisProp(isInit, item));
+            ret = ret || dirty;
+        });
+        ObserveV3.getObserve().startBind(null, -1);
+        return ret;
+    }
+    // record / update object dependencies by reading each object along the path
+    // return the value, i.e. the value of the last path item
+    analysisProp(isInit, monitoredValue) {
+        let obj = this.target_;
+        for (let prop of monitoredValue.props) {
+            if (typeof obj == "object" && Reflect.has(obj, prop)) {
                 obj = obj[prop];
             }
             else {
-                isInit && stateMgmtConsole.warn(`@monitor("${this.props_.join(".")}"): path currently does not exist (can be ok when monitoring union type values)`);
+                isInit && stateMgmtConsole.warn(`watch prop "${monitoredValue.path}" initialize not found, make sure it exists!`);
                 return undefined;
             }
         }
@@ -7577,29 +7668,14 @@ class MonitorV3 {
         Array.from(Object.values(meta)).forEach((watchId) => ObserveV3.getObserve().clearWatch(watchId));
     }
 }
-//0x1.0000.0000.0000,
+MonitorV3.WATCH_PREFIX = "___watch_";
+MonitorV3.WATCH_INSTANCE_PREFIX = "___watch__obj_";
 // start with high number to avoid same id as elmtId for components.
 MonitorV3.MIN_WATCH_ID = 0x1000000000000;
 MonitorV3.nextWatchId_ = MonitorV3.MIN_WATCH_ID;
-// added to the prototype of target, 
-// ViewPU extended class prototype, or @Observed class proto
-MonitorV3.WATCH_PREFIX = "__wa_";
-// added to target, ie. to extended ViewPU or @Observed class object instance
-MonitorV3.WATCH_INSTANCE_PREFIX = Symbol("__wa_instance_");
-/**
- * @monitor("variable.path.expression") function decorator
- */
-const monitor = function (key) {
-    return function (target, _, descriptor) {
-        
-        let watchProp = Symbol.for(MonitorV3.WATCH_PREFIX + target.constructor.name);
-        target[watchProp] ? target[watchProp][key] = descriptor.value
-            : target[watchProp] = { [key]: descriptor.value };
-    };
-};
 // Performance Improvement
 class AsyncAddMonitorV3 {
-    static addWatch(target, name) {
+    static addMonitor(target, name) {
         if (AsyncAddMonitorV3.watches.length === 0) {
             Promise.resolve(true).then(AsyncAddMonitorV3.run);
         }
@@ -7613,6 +7689,18 @@ class AsyncAddMonitorV3 {
     }
 }
 AsyncAddMonitorV3.watches = [];
+/**
+ * @Monitor("variable.path.expression [, variable.path.expression") function decorator
+ */
+const Monitor = function (path, ...paths) {
+    const pathsUniqueString = paths ? [path, ...paths].join(" ") : path;
+    return function (target, _, descriptor) {
+        
+        let watchProp = Symbol.for(MonitorV3.WATCH_PREFIX + target.constructor.name);
+        const monitorFunc = descriptor.value;
+        target[watchProp] ? target[watchProp][pathsUniqueString] = monitorFunc : target[watchProp] = { [pathsUniqueString]: monitorFunc };
+    };
+};
 /*
  * Copyright (c) 2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -7680,8 +7768,8 @@ class ComputedV3 {
 // start with high number to avoid same id as elmtId for components.
 ComputedV3.MIN_COMPUTED_ID = 0x1000000000;
 ComputedV3.nextCompId_ = ComputedV3.MIN_COMPUTED_ID;
-ComputedV3.COMPUTED_PREFIX = "__comp_";
-ComputedV3.COMPUTED_CACHED_PREFIX = "__cached_";
+ComputedV3.COMPUTED_PREFIX = "___comp_";
+ComputedV3.COMPUTED_CACHED_PREFIX = "___comp_cached_";
 class AsyncAddComputedV3 {
     static addComputed(target, name) {
         if (AsyncAddComputedV3.computedVars.length === 0) {
@@ -7713,13 +7801,16 @@ AsyncAddComputedV3.computedVars = new Array();
    * @from 12
    *
    */
-const computed = (target, propertyKey, descriptor) => {
-    
-    let watchProp = Symbol.for(ComputedV3.COMPUTED_PREFIX + target.constructor.name);
-    const computeFunction = descriptor.get;
-    target[watchProp] ? target[watchProp][propertyKey] = computeFunction
-        : target[watchProp] = { [propertyKey]: computeFunction };
-};
+/*
+const computed = (target: Object, propertyKey: string, descriptor: PropertyDescriptor) => {
+
+let watchProp = Symbol.for(ComputedV3.COMPUTED_PREFIX + target.constructor.name);
+const computeFunction = descriptor.get;
+target[watchProp] ? target[watchProp][propertyKey] = computeFunction
+                  : target[watchProp] = { [propertyKey]: computeFunction };
+}
+
+*/ 
 /*
  * Copyright (c) 2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -7745,10 +7836,12 @@ const computed = (target, propertyKey, descriptor) => {
  * @from 12
  *
  */
-const state = (target, propertyKey) => {
+/*
+const state = (target: Object, propertyKey: string) => {
     ObserveV3.addVariableDecoMeta(target, propertyKey, "@state");
     return trackInternal(target, propertyKey);
-};
+  }
+  */
 /**
  * @param class property decorator
  *
@@ -7767,33 +7860,38 @@ const state = (target, propertyKey) => {
  * @from 12
  *
  */
-const param = (target, propertyKey) => {
-    ObserveV3.addVariableDecoMeta(target, propertyKey, "@param");
-    let storeProp = ObserveV3.OB_PREFIX + propertyKey;
-    target[storeProp] = target[propertyKey];
-    Reflect.defineProperty(target, propertyKey, {
-        get() {
-            ObserveV3.getObserve().addRef(this, propertyKey);
-            return ObserveV3.autoProxyObject(this, ObserveV3.OB_PREFIX + propertyKey);
-        },
-        set(_) {
-            stateMgmtConsole.applicationError(`@param ${propertyKey.toString()}: can not assign a new value, application error.`);
-            return;
-        },
-        // @param can not be assigned, no setter
-        enumerable: true
-    });
-}; // param
+/*
+const param = (target : Object, propertyKey : string) => {
+  ObserveV3.addVariableDecoMeta(target, propertyKey, "@param");
+
+  let storeProp = ObserveV3.OB_PREFIX + propertyKey
+  target[storeProp] = target[propertyKey]
+  Reflect.defineProperty(target, propertyKey, {
+    get() {
+      ObserveV3.getObserve().addRef(this, propertyKey)
+      return ObserveV3.autoProxyObject(this, ObserveV3.OB_PREFIX + propertyKey)
+    },
+    set(_) {
+      stateMgmtConsole.applicationError(`@param ${propertyKey.toString()}: can not assign a new value, application error.`)
+      return;
+    },
+    // @param can not be assigned, no setter
+    enumerable: true
+  })
+} // param
+*/
 /**
  * @event @Component/ViewPU variable decorator
  *
  * @param target
  * @param propertyKey
  */
+/*
 const event = (target, propertyKey) => {
-    ObserveV3.addVariableDecoMeta(target, propertyKey, "@event");
-    target[propertyKey] = () => { };
-};
+  ObserveV3.addVariableDecoMeta(target, propertyKey, "@event");
+  target[propertyKey] = () => {};
+}
+*/
 // The prop parameter is not carried when the component is updated.
 // FIXME what is the purpose of this ?
 /*

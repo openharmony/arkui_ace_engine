@@ -26,11 +26,12 @@
  * @from 12
  *
  */
+/*
 const state = (target: Object, propertyKey: string) => {
     ObserveV3.addVariableDecoMeta(target, propertyKey, "@state");
     return trackInternal(target, propertyKey);
   }
-  
+  */
   
   /**
    * @param class property decorator 
@@ -50,6 +51,7 @@ const state = (target: Object, propertyKey: string) => {
    * @from 12
    *
    */
+  /*
   const param = (target : Object, propertyKey : string) => {
     ObserveV3.addVariableDecoMeta(target, propertyKey, "@param");
   
@@ -68,7 +70,7 @@ const state = (target: Object, propertyKey: string) => {
       enumerable: true
     })
   } // param
-  
+  */
   
   /**
    * @event @Component/ViewPU variable decorator
@@ -77,11 +79,13 @@ const state = (target: Object, propertyKey: string) => {
    * @param propertyKey 
    */
   
+  /*
   const event = (target, propertyKey) => {
     ObserveV3.addVariableDecoMeta(target, propertyKey, "@event");
     target[propertyKey] = () => {};
   }
-  
+  */
+ 
   // The prop parameter is not carried when the component is updated.
   // FIXME what is the purpose of this ?
   /*
