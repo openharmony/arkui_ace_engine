@@ -560,9 +560,10 @@ HWTEST_F(FormTestNg, RemoveSubContainer, TestSize.Level1)
      * @tc.steps: step1. Build a FormPattern and build a subContainer .
      */
     RefPtr<FrameNode> frameNode = CreateFromNode();
+    ASSERT_NE(frameNode, nullptr);
     auto pattern = frameNode->GetPattern<FormPattern>();
-    frameNode->eventHub_ = nullptr;
     ASSERT_NE(pattern, nullptr);
+    frameNode->eventHub_ = pattern->CreateEventHub();
     WeakPtr<PipelineBase> context = WeakPtr<PipelineBase>();
     auto subContainer = AceType::MakeRefPtr<MockSubContainer>(context);
     subContainer->instanceId_ = 0;
