@@ -748,19 +748,24 @@ void OverlayManager::ShowToast(const std::string& message, int32_t duration, con
     toastNode->MountToParent(rootNode);
     rootNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
     toastMap_[toastId] = toastNode;
+    OpenToastAnimation(toastNode, duration);
+}
+
+void OverlayManager::OpenToastAnimation(const RefPtr<FrameNode>& toastNode, int32_t duration)
+{
+    auto toastId = toastNode->GetId();
     AnimationOption option;
     auto curve = AceType::MakeRefPtr<CubicCurve>(0.2f, 0.0f, 0.1f, 1.0f);
     option.SetCurve(curve);
     option.SetDuration(TOAST_ANIMATION_DURATION);
     option.SetFillMode(FillMode::FORWARDS);
     duration = std::max(duration, AceApplicationInfo::GetInstance().GetBarrierfreeDuration());
-    auto&& callback = [weak = WeakClaim(this), toastId, duration, id = Container::CurrentId()]() {
+    continuousTask_.Reset([weak = WeakClaim(this), toastId, duration, id = Container::CurrentId()]() {
         auto overlayManager = weak.Upgrade();
         CHECK_NULL_VOID(overlayManager);
         ContainerScope scope(id);
         overlayManager->PopToast(toastId);
-    };
-    continuousTask_.Reset(callback);
+    });
     option.SetOnFinishEvent([continuousTask = continuousTask_, duration, id = Container::CurrentId()] {
         ContainerScope scope(id);
         auto context = PipelineContext::GetCurrentContext();

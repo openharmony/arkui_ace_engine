@@ -496,6 +496,7 @@ private:
         AnimationOption option, float showHeight);
     void PlayDefaultModalOut(const RefPtr<FrameNode>& modalNode, const RefPtr<RenderContext>& context,
         AnimationOption option, float showHeight);
+    void OpenToastAnimation(const RefPtr<FrameNode>& toastNode, int32_t duration);
 
     // Key: target Id, Value: PopupInfo
     std::unordered_map<int32_t, NG::PopupInfo> popupMap_;
