@@ -4061,7 +4061,19 @@ JSRef<JSVal> EmbedLifecycleChangeToJSValue(const NativeEmbedDataInfo& eventInfo)
     requestObj->SetProperty("width", eventInfo.GetEmebdInfo().width);
     requestObj->SetProperty("height", eventInfo.GetEmebdInfo().height);
     requestObj->SetProperty("url", eventInfo.GetEmebdInfo().url);
-    requestObj->SetProperty("params", eventInfo.GetEmebdInfo().params);
+
+    JSRef<JSObject> positionObj = objectTemplate->NewInstance();
+    positionObj->SetProperty("x", eventInfo.GetEmebdInfo().x);
+    positionObj->SetProperty("y", eventInfo.GetEmebdInfo().y);
+    requestObj->SetProperty("position", positionObj);
+
+    auto params = eventInfo.GetEmebdInfo().params;
+    JSRef<JSObject> paramsObj = objectTemplate->NewInstance();
+    for (const auto& item : params) {
+        paramsObj->SetProperty(item.first.c_str(), item.second.c_str());
+    }
+    requestObj->SetPropertyObject("params", paramsObj);
+
     obj->SetPropertyObject("info", requestObj);
 
     return JSRef<JSVal>::Cast(obj);
