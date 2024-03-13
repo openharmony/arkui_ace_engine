@@ -1283,14 +1283,29 @@ NG::DragDropInfo TextPattern::OnDragStart(const RefPtr<Ace::DragEvent>& event, c
 void TextPattern::AddUdmfData(const RefPtr<Ace::DragEvent>& event)
 {
     RefPtr<UnifiedData> unifiedData = UdmfClient::GetInstance()->CreateUnifiedData();
+    auto txtPreProcessor = [weak = WeakClaim(this)](const ResultObject src, ResultObject& result) {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        auto valueString = pattern->GetSelectedSpanText(StringUtils::ToWstring(src.valueString),
+            src.offsetInSpan[RichEditorSpanRange::RANGESTART],
+            src.offsetInSpan[RichEditorSpanRange::RANGEEND]);
+        result.valueString = result.valueString + valueString;
+    };
+    std::list<ResultObject> finalResult;
+    auto type = SelectSpanType::TYPESPAN;
+    for (const auto& resultObj : dragResultObjects_) {
+        if (finalResult.empty() || resultObj.type != SelectSpanType::TYPESPAN || type != SelectSpanType::TYPESPAN) {
+            type = resultObj.type;
+            finalResult.emplace_back(resultObj);
+        } else {
+            txtPreProcessor(resultObj, finalResult.back());
+        }
+    }
     auto resultProcessor = [unifiedData, weak = WeakClaim(this)](const ResultObject& result) {
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
         if (result.type == SelectSpanType::TYPESPAN) {
-            auto data = pattern->GetSelectedSpanText(StringUtils::ToWstring(result.valueString),
-                result.offsetInSpan[RichEditorSpanRange::RANGESTART],
-                result.offsetInSpan[RichEditorSpanRange::RANGEEND]);
-            UdmfClient::GetInstance()->AddPlainTextRecord(unifiedData, data);
+            UdmfClient::GetInstance()->AddPlainTextRecord(unifiedData, result.valueString);
             return;
         }
         if (result.type == SelectSpanType::TYPEIMAGE) {
@@ -1307,7 +1322,7 @@ void TextPattern::AddUdmfData(const RefPtr<Ace::DragEvent>& event)
             }
         }
     };
-    for (const auto& resultObj : dragResultObjects_) {
+    for (const auto& resultObj : finalResult) {
         resultProcessor(resultObj);
     }
     event->SetData(unifiedData);
