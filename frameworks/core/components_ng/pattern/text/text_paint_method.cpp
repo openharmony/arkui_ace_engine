@@ -29,6 +29,18 @@ RefPtr<Modifier> TextPaintMethod::GetContentModifier(PaintWrapper* paintWrapper)
     return textContentModifier_;
 }
 
+void TextPaintMethod::UpdateParagraphAndImageSpanNodeList()
+{
+    CHECK_NULL_VOID(textContentModifier_);
+    auto textPattern = DynamicCast<TextPattern>(pattern_.Upgrade());
+    CHECK_NULL_VOID(textPattern);
+    auto paragraph = textPattern->GetParagraph();
+    CHECK_NULL_VOID(paragraph);
+
+    textContentModifier_->SetParagraph(paragraph);
+    textContentModifier_->SetImageSpanNodeList(textPattern->GetImageSpanNodeList());
+}
+
 void TextPaintMethod::UpdateContentModifier(PaintWrapper* paintWrapper)
 {
     CHECK_NULL_VOID(paintWrapper);
@@ -39,7 +51,7 @@ void TextPaintMethod::UpdateContentModifier(PaintWrapper* paintWrapper)
     auto paragraph = textPattern->GetParagraph();
     CHECK_NULL_VOID(paragraph);
 
-    textContentModifier_->SetParagraph(paragraph);
+    UpdateParagraphAndImageSpanNodeList();
 
     SizeF contentSize = paintWrapper->GetContentSize();
     textContentModifier_->SetContentSize(contentSize);
