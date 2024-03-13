@@ -127,6 +127,7 @@ const std::string SUBWINDOW_PREFIX = "ARK_APP_SUBWINDOW_";
 const std::string SUBWINDOW_TOAST_DIALOG_PREFIX = "ARK_APP_SUBWINDOW_TOAST_DIALOG_";
 const char ENABLE_DEBUG_BOUNDARY_KEY[] = "persist.ace.debug.boundary.enabled";
 const char ENABLE_TRACE_LAYOUT_KEY[] = "persist.ace.trace.layout.enabled";
+const char ENABLE_TRACE_INPUTEVENT_KEY[] = "persist.ace.trace.inputEvent.enabled";
 const char ENABLE_SECURITY_DEVELOPERMODE_KEY[] = "const.security.developermode.state";
 const char ENABLE_DEBUG_STATEMGR_KEY[] = "persist.ace.debug.statemgr.enabled";
 const int32_t REQUEST_CODE = -1;
@@ -1691,6 +1692,8 @@ void UIContentImpl::Destroy()
     SystemProperties::RemoveWatchSystemParameter(
         ENABLE_TRACE_LAYOUT_KEY, this, EnableSystemParameterTraceLayoutCallback);
     SystemProperties::RemoveWatchSystemParameter(
+        ENABLE_TRACE_INPUTEVENT_KEY, this, EnableSystemParameterTraceInputEventCallback);
+    SystemProperties::RemoveWatchSystemParameter(
         ENABLE_SECURITY_DEVELOPERMODE_KEY, this, EnableSystemParameterSecurityDevelopermodeCallback);
     SystemProperties::RemoveWatchSystemParameter(
         ENABLE_DEBUG_STATEMGR_KEY, this, EnableSystemParameterDebugStatemgrCallback);
@@ -2874,6 +2877,13 @@ void UIContentImpl::EnableSystemParameterTraceLayoutCallback(const char* key, co
     }
 }
 
+void UIContentImpl::EnableSystemParameterTraceInputEventCallback(const char* key, const char* value, void* context)
+{
+    if (strcmp(value, "true") == 0 || strcmp(value, "false") == 0) {
+        SystemProperties::SetInputEventTraceEnabled(strcmp(value, "true") == 0);
+    }
+}
+
 void UIContentImpl::EnableSystemParameterSecurityDevelopermodeCallback(
     const char* key, const char* value, void* context)
 {
@@ -2900,6 +2910,8 @@ void UIContentImpl::EnableSystemParameterDebugBoundaryCallback(const char* key, 
 void UIContentImpl::AddWatchSystemParameter()
 {
     SystemProperties::AddWatchSystemParameter(ENABLE_TRACE_LAYOUT_KEY, this, EnableSystemParameterTraceLayoutCallback);
+    SystemProperties::AddWatchSystemParameter(
+        ENABLE_TRACE_INPUTEVENT_KEY, this, EnableSystemParameterTraceInputEventCallback);
     SystemProperties::AddWatchSystemParameter(
         ENABLE_SECURITY_DEVELOPERMODE_KEY, this, EnableSystemParameterSecurityDevelopermodeCallback);
     SystemProperties::AddWatchSystemParameter(
