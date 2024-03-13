@@ -522,6 +522,13 @@ HWTEST_F(ScrollTestNg, Event002, TestSize.Level1)
     isTrigger = false;
     pattern_->ScrollToEdge(ScrollEdgeType::SCROLL_TOP, false);
     EXPECT_TRUE(isTrigger);
+
+    /**
+     * @tc.steps: step6. Trigger event by ScrollToEdge,check offset
+     * @tc.expected: offset is equal to GetTotalOffset
+     */
+    auto scrollOffSet = accessibilityProperty_->GetScrollOffSet();
+    EXPECT_EQ(scrollOffSet, pattern_->GetTotalOffset());
 }
 
 /**
