@@ -1520,7 +1520,6 @@ napi_value JSPromptOpenCustomDialog(napi_env env, napi_callback_info info)
 #else
     auto delegate = EngineHelper::GetCurrentDelegateSafely();
     if (delegate) {
-        promptDialogAttr.showInSubWindow = false;
         delegate->OpenCustomDialog(promptDialogAttr, std::move(callBack));
     } else {
         // throw internal error
