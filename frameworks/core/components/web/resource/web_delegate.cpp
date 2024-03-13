@@ -5717,7 +5717,7 @@ void WebDelegate::OnNativeEmbedLifecycleChange(std::shared_ptr<OHOS::NWeb::NWebN
         return;
     }
 
-    EmbedInfo info = {0, };
+    EmbedInfo info;
     std::string embedId;
     std::string surfaceId;
     OHOS::Ace::NativeEmbedStatus status = OHOS::Ace::NativeEmbedStatus::CREATE;
