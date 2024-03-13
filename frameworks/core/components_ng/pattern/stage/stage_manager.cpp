@@ -39,6 +39,7 @@
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/pipeline_ng/pipeline_context.h"
 #include "core/pipeline_ng/ui_task_scheduler.h"
+#include "core/components_ng/render/adapter/rosen_render_context.h"
 
 namespace OHOS::Ace::NG {
 
@@ -91,6 +92,9 @@ void FirePageTransition(const RefPtr<FrameNode>& page, PageTransitionType transi
             auto context = PipelineContext::GetCurrentContext();
             CHECK_NULL_VOID(context);
             context->MarkNeedFlushMouseEvent();
+            constexpr float REMOVE_CLIP_SIZE = 10000.0f;
+            page->GetRenderContext()->ClipWithRRect(RectF(0.0f, 0.0f, REMOVE_CLIP_SIZE, REMOVE_CLIP_SIZE),
+                RadiusF(EdgeF(0.0f, 0.0f)));
         });
 }
 } // namespace
