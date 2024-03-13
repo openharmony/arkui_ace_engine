@@ -1920,21 +1920,16 @@ void RichEditorPattern::HandleDoubleClickOrLongPress(GestureEvent& info)
     InitSelection(textOffset);
     auto selectEnd = std::max(textSelector_.baseOffset, textSelector_.destinationOffset);
     auto selectStart = std::min(textSelector_.baseOffset, textSelector_.destinationOffset);
-
-    auto textSelectInfo = GetSpansInfo(selectStart, selectEnd, GetSpansMethod::ONSELECT);
-    UpdateSelectionType(textSelectInfo);
+    
+    FireOnSelect(selectStart, selectEnd);
+    SetCaretPosition(std::min(selectEnd, GetTextContentLength()));
+    MoveCaretToContentRect();
     CalculateHandleOffsetAndShowOverlay();
     if (IsShowSelectMenuUsingMouse()) {
         CloseSelectOverlay();
     }
     selectionMenuOffset_ = info.GetGlobalLocation();
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
-    auto eventHub = host->GetEventHub<RichEditorEventHub>();
-    CHECK_NULL_VOID(eventHub);
-    if (!textSelectInfo.GetSelection().resultObjects.empty()) {
-        eventHub->FireOnSelect(&textSelectInfo);
-    }
-    SetCaretPosition(std::min(selectEnd, GetTextContentLength()));
     focusHub->RequestFocusImmediately();
     if (overlayMod_) {
         RequestKeyboard(false, true, true);
@@ -4051,15 +4046,9 @@ void RichEditorPattern::OnHandleMoveDone(const RectF& handleRect, bool isFirstHa
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto eventHub = host->GetEventHub<RichEditorEventHub>();
-    CHECK_NULL_VOID(eventHub);
     auto selectStart = std::min(textSelector_.baseOffset, textSelector_.destinationOffset);
     auto selectEnd = std::max(textSelector_.baseOffset, textSelector_.destinationOffset);
-    auto textSelectInfo = GetSpansInfo(selectStart, selectEnd, GetSpansMethod::ONSELECT);
-    if (!textSelectInfo.GetSelection().resultObjects.empty()) {
-        eventHub->FireOnSelect(&textSelectInfo);
-    }
-    UpdateSelectionType(textSelectInfo);
+    FireOnSelect(selectStart, selectEnd);
     SetCaretPosition(selectEnd);
     CalculateHandleOffsetAndShowOverlay();
     StopAutoScroll();
