@@ -27,6 +27,17 @@
 
 namespace OHOS::Ace {
 
+enum class SpanOperation {
+    ADD = 0,
+    REMOVE,
+};
+
+enum class SpanStringOperation {
+    REPLACE = 0,
+    INSERT,
+    REMOVE
+};
+
 class ACE_EXPORT SpanString : public SpanStringBase {
     DECLARE_ACE_TYPE(SpanString, SpanStringBase);
 
