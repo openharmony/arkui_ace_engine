@@ -3811,6 +3811,14 @@ void OverlayManager::MarkDirty(PropertyChangeFlag flag)
         // first child is Stage node in main window, subwindow not has Stage node.
         if (child != root->GetFirstChild() || pipeline->IsSubPipeline()) {
             child->MarkDirtyNode(flag);
+            // sheetPage Node will MarkDirty when VirtualKeyboard Height Changes
+            auto sheetParent = DynamicCast<FrameNode>(child);
+            if (sheetParent && sheetParent->GetTag() == V2::SHEET_WRAPPER_TAG) {
+                auto sheet = sheetParent->GetChildAtIndex(0);
+                if (sheet) {
+                    sheet->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+                }
+            }
         }
     }
 }
