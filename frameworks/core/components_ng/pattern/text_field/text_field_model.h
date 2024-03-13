@@ -277,6 +277,12 @@ public:
 
     virtual void SetSelectAllValue(bool isSetSelectAllValue) = 0;
 
+    virtual void SetLetterSpacing(const Dimension& value) {};
+    virtual void SetLineHeight(const Dimension& value) {};
+    virtual void SetTextDecoration(Ace::TextDecoration value) {};
+    virtual void SetTextDecorationColor(const Color& value) {};
+    virtual void SetTextDecorationStyle(Ace::TextDecorationStyle value) {};
+
 private:
     static std::unique_ptr<TextFieldModel> instance_;
     static std::mutex mutex_;

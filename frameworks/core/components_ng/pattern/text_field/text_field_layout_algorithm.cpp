@@ -427,6 +427,7 @@ void TextFieldLayoutAlgorithm::UpdateTextStyle(const RefPtr<FrameNode>& frameNod
     if (layoutProperty->HasTextAlign()) {
         textStyle.SetTextAlign(layoutProperty->GetTextAlign().value());
     }
+    UpdateTextStyleMore(frameNode, layoutProperty, theme, textStyle, isDisabled);
 }
 
 void TextFieldLayoutAlgorithm::UpdatePlaceholderTextStyle(const RefPtr<FrameNode>& frameNode,
@@ -477,6 +478,7 @@ void TextFieldLayoutAlgorithm::UpdatePlaceholderTextStyle(const RefPtr<FrameNode
     }
     textStyle.SetTextOverflow(TextOverflow::ELLIPSIS);
     textStyle.SetTextAlign(layoutProperty->GetTextAlignValue(TextAlign::START));
+    UpdatePlaceholderTextStyleMore(frameNode, layoutProperty, theme, textStyle, isDisabled);
 }
 
 LayoutConstraintF TextFieldLayoutAlgorithm::CalculateContentMaxSizeWithCalculateConstraint(
@@ -679,6 +681,9 @@ void TextFieldLayoutAlgorithm::SetPropertyToModifier(
     modifier->SetTextColor(textStyle.GetTextColor());
     modifier->SetFontStyle(textStyle.GetFontStyle());
     modifier->SetTextOverflow(textStyle.GetTextOverflow());
+    modifier->SetTextDecorationColor(textStyle.GetTextDecorationColor());
+    modifier->SetTextDecorationStyle(textStyle.GetTextDecorationStyle());
+    modifier->SetTextDecoration(textStyle.GetTextDecoration());
 }
 
 void TextFieldLayoutAlgorithm::UpdateUnitLayout(LayoutWrapper* layoutWrapper)
@@ -708,6 +713,48 @@ void TextFieldLayoutAlgorithm::UpdateUnitLayout(LayoutWrapper* layoutWrapper)
             childWrapper->GetGeometryNode()->SetFrameSize(SizeF({ unitWidth_, size.Height() }));
         }
         childWrapper->Layout();
+    }
+}
+
+void TextFieldLayoutAlgorithm::UpdateTextStyleMore(const RefPtr<FrameNode>& frameNode,
+    const RefPtr<TextFieldLayoutProperty>& layoutProperty, const RefPtr<TextFieldTheme>& theme,
+    TextStyle& textStyle, bool isDisabled)
+{
+    if (layoutProperty->HasTextDecoration()) {
+        textStyle.SetTextDecoration(layoutProperty->GetTextDecoration().value());
+    }
+    if (layoutProperty->HasTextDecorationColor()) {
+        textStyle.SetTextDecorationColor(layoutProperty->GetTextDecorationColor().value());
+    }
+    if (layoutProperty->HasTextDecorationStyle()) {
+        textStyle.SetTextDecorationStyle(layoutProperty->GetTextDecorationStyle().value());
+    }
+    if (layoutProperty->HasLetterSpacing()) {
+        textStyle.SetLetterSpacing(layoutProperty->GetLetterSpacing().value());
+    }
+    if (layoutProperty->HasLineHeight()) {
+        textStyle.SetLineHeight(layoutProperty->GetLineHeight().value());
+    }
+}
+
+void TextFieldLayoutAlgorithm::UpdatePlaceholderTextStyleMore(const RefPtr<FrameNode>& frameNode,
+    const RefPtr<TextFieldLayoutProperty>& layoutProperty, const RefPtr<TextFieldTheme>& theme,
+    TextStyle& placeholderTextStyle, bool isDisabled)
+{
+    if (layoutProperty->HasTextDecoration()) {
+        placeholderTextStyle.SetTextDecoration(layoutProperty->GetTextDecoration().value());
+    }
+    if (layoutProperty->HasTextDecorationColor()) {
+        placeholderTextStyle.SetTextDecorationColor(layoutProperty->GetTextDecorationColor().value());
+    }
+    if (layoutProperty->HasTextDecorationStyle()) {
+        placeholderTextStyle.SetTextDecorationStyle(layoutProperty->GetTextDecorationStyle().value());
+    }
+    if (layoutProperty->HasLetterSpacing()) {
+        placeholderTextStyle.SetLetterSpacing(layoutProperty->GetLetterSpacing().value());
+    }
+    if (layoutProperty->HasLineHeight()) {
+        placeholderTextStyle.SetLineHeight(layoutProperty->GetLineHeight().value());
     }
 }
 } // namespace OHOS::Ace::NG

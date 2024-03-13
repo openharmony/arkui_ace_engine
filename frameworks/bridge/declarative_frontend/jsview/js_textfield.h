@@ -100,6 +100,9 @@ public:
     static JSRef<JSVal> CreateJSTextCommonEvent(NG::TextCommonEvent& event);
     static void CreateJsTextFieldCommonEvent(const JSCallbackInfo& info);
     static Local<JSValueRef> JsKeepEditableState(panda::JsiRuntimeCallInfo *info);
+    static void SetDecoration(const JSCallbackInfo& info);
+    static void SetLetterSpacing(const JSCallbackInfo& info);
+    static void SetLineHeight(const JSCallbackInfo& info);
 };
 
 } // namespace OHOS::Ace::Framework

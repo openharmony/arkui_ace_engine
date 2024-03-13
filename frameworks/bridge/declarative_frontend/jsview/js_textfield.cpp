@@ -1306,4 +1306,63 @@ void JSTextField::SetSelectAllValue(const JSCallbackInfo& info)
     bool isSetSelectAllValue = infoValue->ToBoolean();
     TextFieldModel::GetInstance()->SetSelectAllValue(isSetSelectAllValue);
 }
+
+void JSTextField::SetDecoration(const JSCallbackInfo& info)
+{
+    do {
+        auto tmpInfo = info[0];
+        if (!tmpInfo->IsObject()) {
+            break;
+        }
+        JSRef<JSObject> obj = JSRef<JSObject>::Cast(tmpInfo);
+        JSRef<JSVal> typeValue = obj->GetProperty("type");
+        JSRef<JSVal> colorValue = obj->GetProperty("color");
+        JSRef<JSVal> styleValue = obj->GetProperty("style");
+
+        auto pipelineContext = PipelineBase::GetCurrentContext();
+        CHECK_NULL_VOID(pipelineContext);
+        auto theme = pipelineContext->GetTheme<TextFieldTheme>();
+        CHECK_NULL_VOID(theme);
+        TextDecoration textDecoration = theme->GetTextStyle().GetTextDecoration();
+        if (typeValue->IsNumber()) {
+            textDecoration = static_cast<TextDecoration>(typeValue->ToNumber<int32_t>());
+        }
+        Color result = theme->GetTextStyle().GetTextDecorationColor();
+        ParseJsColor(colorValue, result, Color::BLACK);
+        std::optional<TextDecorationStyle> textDecorationStyle;
+        if (styleValue->IsNumber()) {
+            textDecorationStyle = static_cast<TextDecorationStyle>(styleValue->ToNumber<int32_t>());
+        }
+        TextFieldModel::GetInstance()->SetTextDecoration(textDecoration);
+        TextFieldModel::GetInstance()->SetTextDecorationColor(result);
+        if (textDecorationStyle) {
+            TextFieldModel::GetInstance()->SetTextDecorationStyle(textDecorationStyle.value());
+        }
+    } while (false);
+}
+
+void JSTextField::SetLetterSpacing(const JSCallbackInfo& info)
+{
+    CalcDimension value;
+    if (!ParseJsDimensionFpNG(info[0], value, false)) {
+        value.Reset();
+        TextFieldModel::GetInstance()->SetLetterSpacing(value);
+        return;
+    }
+    TextFieldModel::GetInstance()->SetLetterSpacing(value);
+}
+
+void JSTextField::SetLineHeight(const JSCallbackInfo& info)
+{
+    CalcDimension value;
+    if (!ParseJsDimensionFpNG(info[0], value)) {
+        value.Reset();
+        TextFieldModel::GetInstance()->SetLineHeight(value);
+        return;
+    }
+    if (value.IsNegative()) {
+        value.Reset();
+    }
+    TextFieldModel::GetInstance()->SetLineHeight(value);
+}
 } // namespace OHOS::Ace::Framework
