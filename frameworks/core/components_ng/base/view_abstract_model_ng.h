@@ -1161,6 +1161,11 @@ public:
         ViewAbstract::SetBloom(value);
     }
 
+    void SetDragEventStrictReportingEnabled(bool dragEventStrictReportingEnabled) override
+    {
+        ViewAbstract::SetDragEventStrictReportingEnabled(dragEventStrictReportingEnabled);
+    }
+
     static void SetAccessibilityGroup(FrameNode* frameNode, bool accessible);
     static void SetUseShadowBatching(FrameNode* frameNode, bool useShadowBatching)
     {

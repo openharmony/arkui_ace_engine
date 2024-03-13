@@ -370,6 +370,8 @@ public:
     static void ParseMenuOptions(
         const JSCallbackInfo& info, const JSRef<JSArray>& jsArray, std::vector<NG::MenuOptionsParam>& items);
 
+    static void JsSetDragEventStrictReportingEnabled(const JSCallbackInfo& info);
+
 #ifndef WEARABLE_PRODUCT
     static void JsBindPopup(const JSCallbackInfo& info);
     static void SetPopupDismiss(

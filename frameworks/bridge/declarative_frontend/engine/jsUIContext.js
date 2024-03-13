@@ -120,6 +120,12 @@ class DragController {
         __JSScopeUtil__.restoreInstanceId();
         return dragPreview;
     }
+
+    setDragEventStrictReportingEnabled(enable) {
+        __JSScopeUtil__.syncInstanceId(this.instanceId_);
+        JSViewAbstract.setDragEventStrictReportingEnabled(enable);
+        __JSScopeUtil__.restoreInstanceId();
+    }
 }
 
 class UIObserver {

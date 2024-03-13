@@ -76,6 +76,16 @@ public:
         textFieldDragFrameNodes_.try_emplace(id, dragFrameNode);
     }
 
+    void SetEventStrictReportingEnabled(bool dragEventStrictReportingEnabled)
+    {
+        eventStrictReportingEnabled_ = dragEventStrictReportingEnabled;
+    }
+
+    bool IsEventStrictReportingEnabled()
+    {
+        return eventStrictReportingEnabled_;
+    }
+
     void UpdateDragWindowPosition(int32_t globalX, int32_t globalY);
     void OnDragStart(const Point& point);
     void OnDragStart(const Point& point, const RefPtr<FrameNode>& frameNode);
@@ -127,6 +137,8 @@ public:
         RefPtr<NotifyDragEvent>& notifyEvent, const Point& point, const DragEventType dragEventType);
     bool CheckDragDropProxy(int64_t id) const;
     void FireOnEditableTextComponent(const RefPtr<FrameNode>& frameNode, DragEventType type);
+    void FireOnDragLeave(const RefPtr<FrameNode>& preTargetFrameNode_, const Point& point,
+        const std::string& extraInfo);
 
     bool IsWindowConsumed() const
     {
@@ -420,6 +432,7 @@ private:
     std::vector<RefPtr<PixelMap>> gatherPixelMaps_;
     bool hasGatherNode_ = false;
     bool isShowBadgeAnimation_ = true;
+    bool eventStrictReportingEnabled_ = false;
 
     ACE_DISALLOW_COPY_AND_MOVE(DragDropManager);
 };

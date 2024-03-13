@@ -569,12 +569,7 @@ void DragDropManager::OnDragMove(const PointerEvent& pointerEvent, const std::st
         return;
     }
 
-    if (preTargetFrameNode_) {
-        auto preRect = preTargetFrameNode_->GetTransformRectRelativeToWindow();
-        if (!preRect.IsInnerRegion(PointF(static_cast<float>(point.GetX()), static_cast<float>(point.GetY())))) {
-            FireOnDragEvent(preTargetFrameNode_, point, DragEventType::LEAVE, extraInfo);
-        }
-    }
+    FireOnDragLeave(preTargetFrameNode_, point, extraInfo);
     PrintDragFrameNode(point, dragFrameNode);
     FireOnDragEvent(dragFrameNode, point, DragEventType::ENTER, extraInfo);
     preTargetFrameNode_ = dragFrameNode;
@@ -1653,5 +1648,25 @@ void DragDropManager::PushGatherPixelMap(DragDataCore& dragData, float scale)
     }
     gatherPixelMaps_.clear();
     return;
+}
+
+void DragDropManager::FireOnDragLeave(
+    const RefPtr<FrameNode>& preTargetFrameNode, const Point& point, const std::string& extraInfo)
+{
+    if (preTargetFrameNode) {
+        auto preRect = preTargetFrameNode->GetTransformRectRelativeToWindow();
+        // If the point is out of the pre node, it means we are totally inside a new node, notify leave anyway
+        if (!preRect.IsInnerRegion(PointF(static_cast<float>(point.GetX()), static_cast<float>(point.GetY())))) {
+            FireOnDragEvent(preTargetFrameNode, point, DragEventType::LEAVE, extraInfo);
+            return;
+        }
+
+        // If reach here, it means we are entering one new node's area, but without leaving the area of the pre
+        // one, this usually happens when moving from parent into its child.
+        // Check the configuration to decide the notify to parent node.
+        if (eventStrictReportingEnabled_) {
+            FireOnDragEvent(preTargetFrameNode_, point, DragEventType::LEAVE, extraInfo);
+        }
+    }
 }
 } // namespace OHOS::Ace::NG
