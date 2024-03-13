@@ -295,9 +295,9 @@ void GeometryTransition::ModifyLayoutConstraint(const RefPtr<LayoutWrapper>& lay
     TAG_LOGD(AceLogTag::ACE_GEOMETRY_TRANSITION, "node: %{public}d modify size to: %{public}s",
         self->GetId(), targetSize.ToString().c_str());
     // if node has aspect ratio we'll ignore it in active state
-    const auto& magicItemProperty = layoutProperty->GetMagicItemProperty();
-    if (magicItemProperty && magicItemProperty->HasAspectRatio()) {
-        magicItemProperty->ResetAspectRatio();
+    auto& magicItemProperty = layoutProperty->GetMagicItemProperty();
+    if (magicItemProperty.HasAspectRatio()) {
+        magicItemProperty.ResetAspectRatio();
     }
 }
 
