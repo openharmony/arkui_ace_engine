@@ -33,11 +33,11 @@ const RESOURCE_TYPE_SYMBOL = 40000;
 const DEFAULT_VALUE = 0;
 
 export var OperationType;
-(function (z12) {
-  z12[z12['TEXT_ARROW'] = 0] = 'TEXT_ARROW';
-  z12[z12['BUTTON'] = 1] = 'BUTTON';
-  z12[z12['ICON_GROUP'] = 2] = 'ICON_GROUP';
-  z12[z12['LOADING'] = 3] = 'LOADING';
+(function (f13) {
+  f13[f13.TEXT_ARROW = 0] = 'TEXT_ARROW';
+  f13[f13.BUTTON = 1] = 'BUTTON';
+  f13[f13.ICON_GROUP = 2] = 'ICON_GROUP';
+  f13[f13.LOADING = 3] = 'LOADING';
 })(OperationType || (OperationType = {}));
 
 class IconOptions {
@@ -53,42 +53,50 @@ class FontStyle {
   }
 }
 
-function __Text__secondaryTitleStyles(x12) {
-  var y12;
+function __Text__secondaryTitleStyles(d13) {
+  let e13;
   Text.fontSize({ id: -1, type: 10002, params: ['sys.float.Subtitle_S'], bundleName: '', moduleName: '' });
-  Text.fontColor((y12 = x12 === null || x12 === void 0 ? void 0 : x12.fontColor) !== null && y12 !== void 0 ? y12 : { id: -1, type: 10001, params: ['sys.color.font_secondary'], bundleName: '', moduleName: '' });
-  Text.fontWeight(x12 === null || x12 === void 0 ? void 0 : x12.fontWeight);
-  Text.maxLines(x12 === null || x12 === void 0 ? void 0 : x12.maxLines);
+  Text.fontColor((e13 = d13 === null || d13 === void 0 ? void 0 : d13.fontColor) !== null && e13 !== void 0 ?
+    e13 : { id: -1, type: 10001, params: ['sys.color.font_secondary'], bundleName: '', moduleName: '' });
+  Text.fontWeight(d13 === null || d13 === void 0 ? void 0 : d13.fontWeight);
+  Text.maxLines(d13 === null || d13 === void 0 ? void 0 : d13.maxLines);
   Text.textOverflow({ overflow: TextOverflow.Ellipsis });
-  Text.align(x12 === null || x12 === void 0 ? void 0 : x12.alignment);
+  Text.align(d13 === null || d13 === void 0 ? void 0 : d13.alignment);
 }
 
-function __Text__primaryTitleStyles(w12) {
+function __Text__primaryTitleStyles(c13) {
   Text.fontSize({ id: -1, type: 10002, params: ['sys.float.Subtitle_L'], bundleName: '', moduleName: '' });
   Text.fontColor({ id: -1, type: 10001, params: ['sys.color.font_primary'], bundleName: '', moduleName: '' });
-  Text.fontWeight(w12 === null || w12 === void 0 ? void 0 : w12.fontWeight);
-  Text.maxLines(w12 === null || w12 === void 0 ? void 0 : w12.maxLines);
+  Text.fontWeight(c13 === null || c13 === void 0 ? void 0 : c13.fontWeight);
+  Text.maxLines(c13 === null || c13 === void 0 ? void 0 : c13.maxLines);
   Text.textOverflow({ overflow: TextOverflow.Ellipsis });
-  Text.align(w12 === null || w12 === void 0 ? void 0 : w12.alignment);
+  Text.align(c13 === null || c13 === void 0 ? void 0 : c13.alignment);
 }
 
 export class SubHeader extends ViewPU {
-  constructor(q12, r12, s12, t12 = -1, u12 = undefined, v12) {
-    super(q12, s12, t12, v12);
-    if (typeof u12 === 'function') {
-      this.paramsGenerator_ = u12;
+  constructor(w12, x12, y12, z12 = -1, a13 = undefined, b13) {
+    super(w12, y12, z12, b13);
+    if (typeof a13 === 'function') {
+      this.paramsGenerator_ = a13;
     }
-    this.__icon = new SynchedPropertyObjectOneWayPU(r12.icon, this, 'icon');
+    this.__icon = new SynchedPropertyObjectOneWayPU(x12.icon, this, 'icon');
     this.iconSymbolOptions = null;
-    this.__primaryTitle = new SynchedPropertyObjectOneWayPU(r12.primaryTitle, this, 'primaryTitle');
-    this.__secondaryTitle = new SynchedPropertyObjectOneWayPU(r12.secondaryTitle, this, 'secondaryTitle');
-    this.__select = new SynchedPropertyObjectOneWayPU(r12.select, this, 'select');
-    this.__operationType = new SynchedPropertySimpleOneWayPU(r12.operationType, this, 'operationType');
+    this.__primaryTitle = new SynchedPropertyObjectOneWayPU(x12.primaryTitle, this, 'primaryTitle');
+    this.__secondaryTitle = new SynchedPropertyObjectOneWayPU(x12.secondaryTitle, this, 'secondaryTitle');
+    this.__select = new SynchedPropertyObjectOneWayPU(x12.select, this, 'select');
+    this.__operationType = new SynchedPropertySimpleOneWayPU(x12.operationType, this, 'operationType');
     this.operationItem = null;
     this.operationSymbolOptions = null;
     this.__isDuplicateLine = new ObservedPropertySimplePU(false, this, 'isDuplicateLine');
-    this.__textArrowBgColor = new ObservedPropertyObjectPU({ id: -1, type: 10001, params: ['sys.color.ohos_id_color_sub_background_transparent'], bundleName: '', moduleName: '' }, this, 'textArrowBgColor');
-    this.__buttonBgColor = new ObservedPropertyObjectPU({ id: -1, type: 10001, params: ['sys.color.ohos_id_color_sub_background_transparent'], bundleName: '', moduleName: '' }, this, 'buttonBgColor');
+    this.__textArrowBgColor = new ObservedPropertyObjectPU({
+      id: -1, type: 10001, params: ['sys.color.ohos_id_color_sub_background_transparent'],
+      bundleName: '', moduleName: ''
+    }, this, 'textArrowBgColor');
+    this.__buttonBgColor = new ObservedPropertyObjectPU({
+      id: -1, type: 10001,
+      params: ['sys.color.ohos_id_color_sub_background_transparent'], bundleName: '', moduleName: ''
+    },
+      this, 'buttonBgColor');
     this.__flexWidth = new ObservedPropertySimplePU(0, this, 'flexWidth');
     this.__textArrowWidth = new ObservedPropertySimplePU(0, this, 'textArrowWidth');
     this.__textArrowFocus = new ObservedPropertySimplePU(false, this, 'textArrowFocus');
@@ -97,93 +105,93 @@ export class SubHeader extends ViewPU {
     this.__buttonWidth = new ObservedPropertySimplePU(0, this, 'buttonWidth');
     this.focusBorderWidth = BORDER_WIDTH;
     this.__flexAlign = new ObservedPropertySimplePU(FlexAlign.SpaceBetween, this, 'flexAlign');
-    this.setInitiallyProvidedValue(r12);
+    this.setInitiallyProvidedValue(x12);
   }
 
-  setInitiallyProvidedValue(p12) {
-    if (p12.icon === undefined) {
+  setInitiallyProvidedValue(v12) {
+    if (v12.icon === undefined) {
       this.__icon.set(null);
     }
-    if (p12.iconSymbolOptions !== undefined) {
-      this.iconSymbolOptions = p12.iconSymbolOptions;
+    if (v12.iconSymbolOptions !== undefined) {
+      this.iconSymbolOptions = v12.iconSymbolOptions;
     }
-    if (p12.primaryTitle === undefined) {
+    if (v12.primaryTitle === undefined) {
       this.__primaryTitle.set(null);
     }
-    if (p12.secondaryTitle === undefined) {
+    if (v12.secondaryTitle === undefined) {
       this.__secondaryTitle.set(null);
     }
-    if (p12.select === undefined) {
+    if (v12.select === undefined) {
       this.__select.set(null);
     }
-    if (p12.operationType === undefined) {
+    if (v12.operationType === undefined) {
       this.__operationType.set(OperationType.BUTTON);
     }
-    if (p12.operationItem !== undefined) {
-      this.operationItem = p12.operationItem;
+    if (v12.operationItem !== undefined) {
+      this.operationItem = v12.operationItem;
     }
-    if (p12.operationSymbolOptions !== undefined) {
-      this.operationSymbolOptions = p12.operationSymbolOptions;
+    if (v12.operationSymbolOptions !== undefined) {
+      this.operationSymbolOptions = v12.operationSymbolOptions;
     }
-    if (p12.isDuplicateLine !== undefined) {
-      this.isDuplicateLine = p12.isDuplicateLine;
+    if (v12.isDuplicateLine !== undefined) {
+      this.isDuplicateLine = v12.isDuplicateLine;
     }
-    if (p12.textArrowBgColor !== undefined) {
-      this.textArrowBgColor = p12.textArrowBgColor;
+    if (v12.textArrowBgColor !== undefined) {
+      this.textArrowBgColor = v12.textArrowBgColor;
     }
-    if (p12.buttonBgColor !== undefined) {
-      this.buttonBgColor = p12.buttonBgColor;
+    if (v12.buttonBgColor !== undefined) {
+      this.buttonBgColor = v12.buttonBgColor;
     }
-    if (p12.flexWidth !== undefined) {
-      this.flexWidth = p12.flexWidth;
+    if (v12.flexWidth !== undefined) {
+      this.flexWidth = v12.flexWidth;
     }
-    if (p12.textArrowWidth !== undefined) {
-      this.textArrowWidth = p12.textArrowWidth;
+    if (v12.textArrowWidth !== undefined) {
+      this.textArrowWidth = v12.textArrowWidth;
     }
-    if (p12.textArrowFocus !== undefined) {
-      this.textArrowFocus = p12.textArrowFocus;
+    if (v12.textArrowFocus !== undefined) {
+      this.textArrowFocus = v12.textArrowFocus;
     }
-    if (p12.buttonFocus !== undefined) {
-      this.buttonFocus = p12.buttonFocus;
+    if (v12.buttonFocus !== undefined) {
+      this.buttonFocus = v12.buttonFocus;
     }
-    if (p12.arrowWidth !== undefined) {
-      this.arrowWidth = p12.arrowWidth;
+    if (v12.arrowWidth !== undefined) {
+      this.arrowWidth = v12.arrowWidth;
     }
-    if (p12.buttonWidth !== undefined) {
-      this.buttonWidth = p12.buttonWidth;
+    if (v12.buttonWidth !== undefined) {
+      this.buttonWidth = v12.buttonWidth;
     }
-    if (p12.focusBorderWidth !== undefined) {
-      this.focusBorderWidth = p12.focusBorderWidth;
+    if (v12.focusBorderWidth !== undefined) {
+      this.focusBorderWidth = v12.focusBorderWidth;
     }
-    if (p12.flexAlign !== undefined) {
-      this.flexAlign = p12.flexAlign;
+    if (v12.flexAlign !== undefined) {
+      this.flexAlign = v12.flexAlign;
     }
   }
 
-  updateStateVars(o12) {
-    this.__icon.reset(o12.icon);
-    this.__primaryTitle.reset(o12.primaryTitle);
-    this.__secondaryTitle.reset(o12.secondaryTitle);
-    this.__select.reset(o12.select);
-    this.__operationType.reset(o12.operationType);
+  updateStateVars(u12) {
+    this.__icon.reset(u12.icon);
+    this.__primaryTitle.reset(u12.primaryTitle);
+    this.__secondaryTitle.reset(u12.secondaryTitle);
+    this.__select.reset(u12.select);
+    this.__operationType.reset(u12.operationType);
   }
 
-  purgeVariableDependenciesOnElmtId(n12) {
-    this.__icon.purgeDependencyOnElmtId(n12);
-    this.__primaryTitle.purgeDependencyOnElmtId(n12);
-    this.__secondaryTitle.purgeDependencyOnElmtId(n12);
-    this.__select.purgeDependencyOnElmtId(n12);
-    this.__operationType.purgeDependencyOnElmtId(n12);
-    this.__isDuplicateLine.purgeDependencyOnElmtId(n12);
-    this.__textArrowBgColor.purgeDependencyOnElmtId(n12);
-    this.__buttonBgColor.purgeDependencyOnElmtId(n12);
-    this.__flexWidth.purgeDependencyOnElmtId(n12);
-    this.__textArrowWidth.purgeDependencyOnElmtId(n12);
-    this.__textArrowFocus.purgeDependencyOnElmtId(n12);
-    this.__buttonFocus.purgeDependencyOnElmtId(n12);
-    this.__arrowWidth.purgeDependencyOnElmtId(n12);
-    this.__buttonWidth.purgeDependencyOnElmtId(n12);
-    this.__flexAlign.purgeDependencyOnElmtId(n12);
+  purgeVariableDependenciesOnElmtId(t12) {
+    this.__icon.purgeDependencyOnElmtId(t12);
+    this.__primaryTitle.purgeDependencyOnElmtId(t12);
+    this.__secondaryTitle.purgeDependencyOnElmtId(t12);
+    this.__select.purgeDependencyOnElmtId(t12);
+    this.__operationType.purgeDependencyOnElmtId(t12);
+    this.__isDuplicateLine.purgeDependencyOnElmtId(t12);
+    this.__textArrowBgColor.purgeDependencyOnElmtId(t12);
+    this.__buttonBgColor.purgeDependencyOnElmtId(t12);
+    this.__flexWidth.purgeDependencyOnElmtId(t12);
+    this.__textArrowWidth.purgeDependencyOnElmtId(t12);
+    this.__textArrowFocus.purgeDependencyOnElmtId(t12);
+    this.__buttonFocus.purgeDependencyOnElmtId(t12);
+    this.__arrowWidth.purgeDependencyOnElmtId(t12);
+    this.__buttonWidth.purgeDependencyOnElmtId(t12);
+    this.__flexAlign.purgeDependencyOnElmtId(t12);
   }
 
   aboutToBeDeleted() {
@@ -210,129 +218,129 @@ export class SubHeader extends ViewPU {
     return this.__icon.get();
   }
 
-  set icon(m12) {
-    this.__icon.set(m12);
+  set icon(s12) {
+    this.__icon.set(s12);
   }
 
   get primaryTitle() {
     return this.__primaryTitle.get();
   }
 
-  set primaryTitle(l12) {
-    this.__primaryTitle.set(l12);
+  set primaryTitle(r12) {
+    this.__primaryTitle.set(r12);
   }
 
   get secondaryTitle() {
     return this.__secondaryTitle.get();
   }
-  
-  set secondaryTitle(k12) {
-    this.__secondaryTitle.set(k12);
+
+  set secondaryTitle(q12) {
+    this.__secondaryTitle.set(q12);
   }
 
   get select() {
     return this.__select.get();
   }
 
-  set select(j12) {
-    this.__select.set(j12);
+  set select(p12) {
+    this.__select.set(p12);
   }
 
   get operationType() {
     return this.__operationType.get();
   }
 
-  set operationType(i12) {
-    this.__operationType.set(i12);
+  set operationType(o12) {
+    this.__operationType.set(o12);
   }
 
   get isDuplicateLine() {
     return this.__isDuplicateLine.get();
   }
 
-  set isDuplicateLine(h12) {
-    this.__isDuplicateLine.set(h12);
+  set isDuplicateLine(n12) {
+    this.__isDuplicateLine.set(n12);
   }
 
   get textArrowBgColor() {
     return this.__textArrowBgColor.get();
   }
 
-  set textArrowBgColor(g12) {
-    this.__textArrowBgColor.set(g12);
+  set textArrowBgColor(m12) {
+    this.__textArrowBgColor.set(m12);
   }
 
   get buttonBgColor() {
     return this.__buttonBgColor.get();
   }
 
-  set buttonBgColor(f12) {
-    this.__buttonBgColor.set(f12);
+  set buttonBgColor(l12) {
+    this.__buttonBgColor.set(l12);
   }
 
   get flexWidth() {
     return this.__flexWidth.get();
   }
 
-  set flexWidth(e12) {
-    this.__flexWidth.set(e12);
+  set flexWidth(k12) {
+    this.__flexWidth.set(k12);
   }
 
   get textArrowWidth() {
     return this.__textArrowWidth.get();
   }
 
-  set textArrowWidth(d12) {
-    this.__textArrowWidth.set(d12);
+  set textArrowWidth(j12) {
+    this.__textArrowWidth.set(j12);
   }
 
   get textArrowFocus() {
     return this.__textArrowFocus.get();
   }
 
-  set textArrowFocus(c12) {
-    this.__textArrowFocus.set(c12);
+  set textArrowFocus(i12) {
+    this.__textArrowFocus.set(i12);
   }
 
   get buttonFocus() {
     return this.__buttonFocus.get();
   }
 
-  set buttonFocus(b12) {
-    this.__buttonFocus.set(b12);
+  set buttonFocus(h12) {
+    this.__buttonFocus.set(h12);
   }
 
   get arrowWidth() {
     return this.__arrowWidth.get();
   }
 
-  set arrowWidth(a12) {
-    this.__arrowWidth.set(a12);
+  set arrowWidth(g12) {
+    this.__arrowWidth.set(g12);
   }
 
   get buttonWidth() {
     return this.__buttonWidth.get();
   }
 
-  set buttonWidth(z11) {
-    this.__buttonWidth.set(z11);
+  set buttonWidth(f12) {
+    this.__buttonWidth.set(f12);
   }
 
   get flexAlign() {
     return this.__flexAlign.get();
   }
 
-  set flexAlign(y11) {
-    this.__flexAlign.set(y11);
+  set flexAlign(e12) {
+    this.__flexAlign.set(e12);
   }
 
   initialRender() {
-    this.observeComponentCreation2((s11, t11) => {
+    this.observeComponentCreation2((y11, z11) => {
       Flex.create({ justifyContent: this.flexAlign, alignItems: ItemAlign.End });
       Flex.focusable(true);
-      Flex.onAreaChange((v11, w11) => {
-        let x11 = Number(parseInt(w11.width.toString(), DEFAULT_VALUE));
-        this.flexWidth = x11;
+      Flex.onAreaChange((b12, c12) => {
+        let d12 = Number(parseInt(c12.width.toString(), DEFAULT_VALUE));
+        this.flexWidth = d12;
       });
       Flex.height(this.isDuplicateLine ? DOUBLE_LINE_HEIGHT : SINGLE_LINE_HEIGHT);
     }, Flex);
@@ -341,8 +349,8 @@ export class SubHeader extends ViewPU {
     Flex.pop();
   }
 
-  leftArea(h11 = null) {
-    this.observeComponentCreation2((j11, k11) => {
+  leftArea(n11 = null) {
+    this.observeComponentCreation2((p11, q11) => {
       If.create();
       if (this.secondaryTitle && this.icon) {
         this.ifElseBranchUpdateFunction(0, () => {
@@ -356,12 +364,14 @@ export class SubHeader extends ViewPU {
       }
       else if (this.secondaryTitle && this.primaryTitle) {
         this.ifElseBranchUpdateFunction(1, () => {
-          this.SubTitleStyle.bind(this)(makeBuilderParameterProxy('SubTitleStyle', { content: () => this.primaryTitle, subContent: () => this.secondaryTitle }));
+          this.SubTitleStyle.bind(this)(makeBuilderParameterProxy('SubTitleStyle',
+            { content: () => this.primaryTitle, subContent: () => this.secondaryTitle }));
         });
       }
       else if (this.secondaryTitle) {
         this.ifElseBranchUpdateFunction(2, () => {
-          this.SecondTitleStyle.bind(this)(makeBuilderParameterProxy('SecondTitleStyle', { content: () => this.secondaryTitle }));
+          this.SecondTitleStyle.bind(this)(makeBuilderParameterProxy('SecondTitleStyle',
+            { content: () => this.secondaryTitle }));
         });
       }
       else if (this.select) {
@@ -371,7 +381,8 @@ export class SubHeader extends ViewPU {
       }
       else if (this.primaryTitle) {
         this.ifElseBranchUpdateFunction(4, () => {
-          this.PrimaryTitleStyle.bind(this)(makeBuilderParameterProxy('PrimaryTitleStyle', { content: () => this.primaryTitle }));
+          this.PrimaryTitleStyle.bind(this)(makeBuilderParameterProxy('PrimaryTitleStyle',
+            { content: () => this.primaryTitle }));
         });
       }
       else {
@@ -383,8 +394,8 @@ export class SubHeader extends ViewPU {
     If.pop();
   }
 
-  rightArea(m10 = null) {
-    this.observeComponentCreation2((d11, e11) => {
+  rightArea(s10 = null) {
+    this.observeComponentCreation2((j11, k11) => {
       If.create();
       if (this.operationType === OperationType.BUTTON && (this.operationItem && this.operationItem.length > 0)) {
         this.ifElseBranchUpdateFunction(0, () => {
@@ -397,7 +408,7 @@ export class SubHeader extends ViewPU {
       }
     }, If);
     If.pop();
-    this.observeComponentCreation2((z10, a11) => {
+    this.observeComponentCreation2((f11, g11) => {
       If.create();
       if (this.operationType === OperationType.ICON_GROUP && (this.operationItem && this.operationItem.length > 0)) {
         this.ifElseBranchUpdateFunction(0, () => {
@@ -410,7 +421,7 @@ export class SubHeader extends ViewPU {
       }
     }, If);
     If.pop();
-    this.observeComponentCreation2((v10, w10) => {
+    this.observeComponentCreation2((b11, c11) => {
       If.create();
       if (this.operationType === OperationType.TEXT_ARROW && (this.operationItem && this.operationItem.length > 0)) {
         this.ifElseBranchUpdateFunction(0, () => {
@@ -423,7 +434,7 @@ export class SubHeader extends ViewPU {
       }
     }, If);
     If.pop();
-    this.observeComponentCreation2((r10, s10) => {
+    this.observeComponentCreation2((x10, y10) => {
       If.create();
       if (this.operationType === OperationType.LOADING) {
         this.ifElseBranchUpdateFunction(0, () => {
@@ -438,8 +449,8 @@ export class SubHeader extends ViewPU {
     If.pop();
   }
 
-  IconSecondTitleStyle(d9, e9 = null) {
-    this.observeComponentCreation2((j10, k10) => {
+  IconSecondTitleStyle(j9, k9 = null) {
+    this.observeComponentCreation2((p10, q10) => {
       Row.create();
       Row.width(this.flexWidth / DIVIDEND_NUM * DIVIDEND_NUM_TWO);
       Row.padding({
@@ -457,51 +468,71 @@ export class SubHeader extends ViewPU {
         this.changeFlexAlign(FlexAlign.SpaceBetween);
       });
     }, Row);
-    this.observeComponentCreation2((k9, l9) => {
-      var m9;
+    this.observeComponentCreation2((q9, r9) => {
+      let s9;
       If.create();
-      if (Util.isSymbolicResource((m9 = d9.iconOptions) === null || m9 === void 0 ? void 0 : m9.icon)) {
+      if (Util.isSymbolicResource((s9 = j9.iconOptions) === null || s9 === void 0 ? void 0 : s9.icon)) {
         this.ifElseBranchUpdateFunction(0, () => {
-          this.observeComponentCreation2((u9, v9) => {
-            var w9;
-            var x9;
-            var y9;
-            var z9;
-            var a10;
-            var b10;
-            var c10;
-            var d10;
-            var e10;
-            var f10;
-            var g10;
-            var h10;
-            var i10;
-            SymbolGlyph.create((w9 = d9.iconOptions) === null || w9 === void 0 ? void 0 : w9.icon);
+          this.observeComponentCreation2((a10, b10) => {
+            let c10;
+            let d10;
+            let e10;
+            let f10;
+            let g10;
+            let h10;
+            let i10;
+            let j10;
+            let k10;
+            let l10;
+            let m10;
+            let n10;
+            let o10;
+            SymbolGlyph.create((c10 = j9.iconOptions) === null || c10 === void 0 ? void 0 : c10.icon);
             SymbolGlyph.focusable(true);
-            SymbolGlyph.fontSize((z9 = (y9 = (x9 = d9.iconOptions) === null || x9 === void 0 ? void 0 : x9.symbolicIconOption) === null || y9 === void 0 ? void 0 : y9.fontSize) !== null && z9 !== void 0 ? z9 : IMAGE_WIDTH_NUM);
-            SymbolGlyph.fontColor((c10 = (b10 = (a10 = d9.iconOptions) === null || a10 === void 0 ? void 0 : a10.symbolicIconOption) === null || b10 === void 0 ? void 0 : b10.fontColor) !== null && c10 !== void 0 ? c10 : [{ id: -1, type: 10001, params: ['sys.color.icon_secondary'], bundleName: '', moduleName: '' }]);
-            SymbolGlyph.fontWeight((e10 = (d10 = d9.iconOptions) === null || d10 === void 0 ? void 0 : d10.symbolicIconOption) === null || e10 === void 0 ? void 0 : e10.fontWeight);
-            SymbolGlyph.renderingStrategy((g10 = (f10 = d9.iconOptions) === null || f10 === void 0 ? void 0 : f10.symbolicIconOption) === null || g10 === void 0 ? void 0 : g10.renderingStrategy);
-            SymbolGlyph.effectStrategy((i10 = (h10 = d9.iconOptions) === null || h10 === void 0 ? void 0 : h10.symbolicIconOption) === null || i10 === void 0 ? void 0 : i10.effectStrategy);
-            SymbolGlyph.margin({ right: { id: -1, type: 10002, params: ['sys.float.padding_level4'], bundleName: '', moduleName: '' } });
+            SymbolGlyph.fontSize((f10 = (e10 = (d10 = j9.iconOptions) === null || d10 === void 0 ?
+              void 0 : d10.symbolicIconOption) === null || e10 === void 0
+              ? void 0 : e10.fontSize) !== null && f10 !== void 0 ? f10 : IMAGE_WIDTH_NUM);
+            SymbolGlyph.fontColor((i10 = (h10 = (g10 = j9.iconOptions) === null || g10 === void 0 ?
+              void 0 : g10.symbolicIconOption) === null || h10 === void 0 ? void 0 : h10.fontColor) !== null &&
+              i10 !== void 0 ? i10 : [{
+                id: -1, type: 10001, params: ['sys.color.icon_secondary'],
+                bundleName: '', moduleName: ''
+              }]);
+            SymbolGlyph.fontWeight((k10 = (j10 = j9.iconOptions) === null || j10 === void 0 ?
+              void 0 : j10.symbolicIconOption) === null || k10 === void 0 ? void 0 : k10.fontWeight);
+            SymbolGlyph.renderingStrategy((m10 = (l10 = j9.iconOptions) === null || l10 === void 0 ?
+              void 0 : l10.symbolicIconOption) === null || m10 === void 0 ? void 0 : m10.renderingStrategy);
+            SymbolGlyph.effectStrategy((o10 = (n10 = j9.iconOptions) === null || n10 === void 0 ?
+              void 0 : n10.symbolicIconOption) === null || o10 === void 0 ? void 0 : o10.effectStrategy);
+            SymbolGlyph.margin({
+              right: {
+                id: -1, type: 10002, params: ['sys.float.padding_level4'],
+                bundleName: '', moduleName: ''
+              }
+            });
           }, SymbolGlyph);
         });
       }
       else {
         this.ifElseBranchUpdateFunction(1, () => {
-          this.observeComponentCreation2((p9, q9) => {
-            var r9;
-            Image.create((r9 = d9.iconOptions) === null || r9 === void 0 ? void 0 : r9.icon);
+          this.observeComponentCreation2((v9, w9) => {
+            let x9;
+            Image.create((x9 = j9.iconOptions) === null || x9 === void 0 ? void 0 : x9.icon);
             Image.width(IMAGE_WIDTH_NUM);
             Image.height(IMAGE_WIDTH_NUM);
-            Image.margin({ right: { id: -1, type: 10002, params: ['sys.float.padding_level4'], bundleName: '', moduleName: '' } });
+            Image.margin({
+              right: {
+                id: -1, type: 10002, params: ['sys.float.padding_level4'],
+                bundleName: '', moduleName: ''
+              }
+            });
           }, Image);
         });
       }
     }, If);
     If.pop();
-    this.observeComponentCreation2((i9, j9) => {
-      Text.create(d9.content);
+    this.observeComponentCreation2((o9, p9) => {
+      Text.create(j9.content);
       __Text__secondaryTitleStyles({
         maxLines: DOUBLE_LINE_NUM,
         fontWeight: FontWeight.Medium,
@@ -512,8 +543,8 @@ export class SubHeader extends ViewPU {
     Row.pop();
   }
 
-  SubTitleStyle(r8, s8 = null) {
-    this.observeComponentCreation2((a9, b9) => {
+  SubTitleStyle(x8, y8 = null) {
+    this.observeComponentCreation2((g9, h9) => {
       Column.create();
       Column.width(this.flexWidth / DIVIDEND_NUM * DIVIDEND_NUM_TWO);
       Column.margin({
@@ -532,8 +563,8 @@ export class SubHeader extends ViewPU {
         this.changeFlexAlign(FlexAlign.SpaceBetween);
       });
     }, Column);
-    this.observeComponentCreation2((y8, z8) => {
-      Text.create(r8.content);
+    this.observeComponentCreation2((e9, f9) => {
+      Text.create(x8.content);
       __Text__primaryTitleStyles({
         fontWeight: FontWeight.Medium,
         maxLines: SINGLE_LINE_NUM,
@@ -541,8 +572,8 @@ export class SubHeader extends ViewPU {
       });
     }, Text);
     Text.pop();
-    this.observeComponentCreation2((w8, x8) => {
-      Text.create(r8.subContent);
+    this.observeComponentCreation2((c9, d9) => {
+      Text.create(x8.subContent);
       __Text__secondaryTitleStyles({
         maxLines: SINGLE_LINE_NUM,
         fontWeight: FontWeight.Regular,
@@ -556,8 +587,8 @@ export class SubHeader extends ViewPU {
     Column.pop();
   }
 
-  SecondTitleStyle(i8, j8 = null) {
-    this.observeComponentCreation2((p8, q8) => {
+  SecondTitleStyle(o8, p8 = null) {
+    this.observeComponentCreation2((v8, w8) => {
       Column.create();
       Column.alignItems(HorizontalAlign.Start);
       Column.width(this.flexWidth / DIVIDEND_NUM * DIVIDEND_NUM_TWO);
@@ -572,8 +603,8 @@ export class SubHeader extends ViewPU {
         right: { id: -1, type: 10002, params: ['sys.float.margin_right'], bundleName: '', moduleName: '' },
       });
     }, Column);
-    this.observeComponentCreation2((m8, n8) => {
-      Text.create(i8.content);
+    this.observeComponentCreation2((s8, t8) => {
+      Text.create(o8.content);
       __Text__secondaryTitleStyles({
         maxLines: DOUBLE_LINE_NUM,
         fontWeight: FontWeight.Medium,
@@ -588,8 +619,8 @@ export class SubHeader extends ViewPU {
     Column.pop();
   }
 
-  SelectStyle(w7, x7 = null) {
-    this.observeComponentCreation2((f8, g8) => {
+  SelectStyle(c8, d8 = null) {
+    this.observeComponentCreation2((l8, m8) => {
       Column.create();
       Column.width(this.flexWidth / DIVIDEND_NUM * DIVIDEND_NUM_TWO);
       Column.alignItems(HorizontalAlign.Start);
@@ -602,13 +633,13 @@ export class SubHeader extends ViewPU {
         this.changeFlexAlign(FlexAlign.SpaceBetween);
       });
     }, Column);
-    this.observeComponentCreation2((a8, b8) => {
-      Select.create(w7.options);
-      Select.selected(w7.selected);
-      Select.value(w7.value);
-      Select.onSelect((d8, e8) => {
-        if (w7.onSelect) {
-          w7.onSelect(d8, e8);
+    this.observeComponentCreation2((g8, h8) => {
+      Select.create(c8.options);
+      Select.selected(c8.selected);
+      Select.value(c8.value);
+      Select.onSelect((j8, k8) => {
+        if (c8.onSelect) {
+          c8.onSelect(j8, k8);
         }
       });
       Select.font({
@@ -620,8 +651,8 @@ export class SubHeader extends ViewPU {
     Column.pop();
   }
 
-  PrimaryTitleStyle(n7, o7 = null) {
-    this.observeComponentCreation2((u7, v7) => {
+  PrimaryTitleStyle(t7, u7 = null) {
+    this.observeComponentCreation2((a8, b8) => {
       Column.create();
       Column.width(this.flexWidth / DIVIDEND_NUM * DIVIDEND_NUM_TWO);
       Column.alignItems(HorizontalAlign.Start);
@@ -636,8 +667,8 @@ export class SubHeader extends ViewPU {
         bottom: { id: -1, type: 10002, params: ['sys.float.padding_level4'], bundleName: '', moduleName: '' },
       });
     }, Column);
-    this.observeComponentCreation2((r7, s7) => {
-      Text.create(n7.content);
+    this.observeComponentCreation2((x7, y7) => {
+      Text.create(t7.content);
       __Text__primaryTitleStyles({
         fontWeight: FontWeight.Medium,
         maxLines: DOUBLE_LINE_NUM,
@@ -652,8 +683,8 @@ export class SubHeader extends ViewPU {
     Column.pop();
   }
 
-  ButtonStyle(a6, b6 = null) {
-    this.observeComponentCreation2((l7, m7) => {
+  ButtonStyle(g6, h6 = null) {
+    this.observeComponentCreation2((r7, s7) => {
       Row.create();
       Row.margin({
         left: { id: -1, type: 10002, params: ['sys.float.padding_level4'], bundleName: '', moduleName: '' },
@@ -663,74 +694,107 @@ export class SubHeader extends ViewPU {
       Row.justifyContent(FlexAlign.End);
       Row.focusable(true);
     }, Row);
-    this.observeComponentCreation2((j7, k7) => {
+    this.observeComponentCreation2((p7, q7) => {
       Stack.create();
       Stack.focusable(true);
     }, Stack);
-    this.observeComponentCreation2((f6, g6) => {
+    this.observeComponentCreation2((l6, m6) => {
       If.create();
-      if (a6) {
+      if (g6) {
         this.ifElseBranchUpdateFunction(0, () => {
-          this.observeComponentCreation2((v6, w6) => {
+          this.observeComponentCreation2((b7, c7) => {
             Row.create();
             Row.backgroundColor(ObservedObject.GetRawObject(this.buttonBgColor));
             Row.focusable(true);
             Row.height(BUTTON_HEIGHT);
             Row.justifyContent(FlexAlign.End);
-            Row.borderRadius({ id: -1, type: 10002, params: ['sys.float.corner_radius_level4'], bundleName: '', moduleName: '' });
+            Row.borderRadius({
+              id: -1, type: 10002, params: ['sys.float.corner_radius_level4'],
+              bundleName: '', moduleName: ''
+            });
             ViewStackProcessor.visualState('focused');
             Row.border({
-              radius: { id: -1, type: 10002, params: ['sys.float.corner_radius_level4'], bundleName: '', moduleName: '' },
+              radius: {
+                id: -1, type: 10002, params: ['sys.float.corner_radius_level4'],
+                bundleName: '', moduleName: ''
+              },
               width: this.buttonWidth,
-              color: { id: -1, type: 10001, params: ['sys.color.interactive_focus'], bundleName: '', moduleName: '' },
+              color: {
+                id: -1, type: 10001, params: ['sys.color.interactive_focus'],
+                bundleName: '', moduleName: ''
+              },
               style: BorderStyle.Solid,
             });
-            Row.backgroundColor({ id: -1, type: 10001, params: ['sys.color.interactive_focus'], bundleName: '', moduleName: '' });
+            Row.backgroundColor({
+              id: -1, type: 10001, params: ['sys.color.interactive_focus'],
+              bundleName: '', moduleName: ''
+            });
             ViewStackProcessor.visualState('pressed');
-            Row.backgroundColor({ id: -1, type: 10001, params: ['sys.color.interactive_pressed'], bundleName: '', moduleName: '' });
+            Row.backgroundColor({
+              id: -1, type: 10001, params: ['sys.color.interactive_pressed'],
+              bundleName: '', moduleName: ''
+            });
             ViewStackProcessor.visualState('disabled');
-            Row.opacity({ id: -1, type: 10002, params: ['sys.float.interactive_disable'], bundleName: '', moduleName: '' });
+            Row.opacity({
+              id: -1, type: 10002, params: ['sys.float.interactive_disable'],
+              bundleName: '', moduleName: ''
+            });
             ViewStackProcessor.visualState();
             Row.onFocus(() => {
               this.buttonFocus = true;
-              this.buttonBgColor = { id: -1, type: 10001, params: ['sys.color.interactive_focus'], bundleName: '', moduleName: '' };
+              this.buttonBgColor = {
+                id: -1, type: 10001, params: ['sys.color.interactive_focus'],
+                bundleName: '', moduleName: ''
+              };
             });
             Row.onBlur(() => {
               this.buttonFocus = false;
             });
-            Row.onHover((i7) => {
-              if (i7) {
-                this.buttonBgColor = { id: -1, type: 10001, params: ['sys.color.interactive_hover'], bundleName: '', moduleName: '' };
+            Row.onHover((o7) => {
+              if (o7) {
+                this.buttonBgColor = {
+                  id: -1, type: 10001, params: ['sys.color.interactive_hover'],
+                  bundleName: '', moduleName: ''
+                };
               }
               else {
-                this.buttonBgColor = { id: -1, type: 10001, params: ['sys.color.ohos_id_color_sub_background_transparent'], bundleName: '', moduleName: '' };
+                this.buttonBgColor = {
+                  id: -1, type: 10001,
+                  params: ['sys.color.ohos_id_color_sub_background_transparent'], bundleName: '', moduleName: ''
+                };
               }
             });
-            Row.onTouch((h7) => {
-              if (h7.type === TouchType.Down) {
-                if (a6.action) {
-                  a6.action();
+            Row.onTouch((n7) => {
+              if (n7.type === TouchType.Down) {
+                if (g6.action) {
+                  g6.action();
                 }
-                this.buttonBgColor = { id: -1, type: 10001, params: ['sys.color.interactive_pressed'], bundleName: '', moduleName: '' };
+                this.buttonBgColor = {
+                  id: -1, type: 10001, params: ['sys.color.interactive_pressed'],
+                  bundleName: '', moduleName: ''
+                };
               }
-              if (h7.type === TouchType.Up) {
-                this.buttonBgColor = { id: -1, type: 10001, params: ['sys.color.ohos_id_color_sub_background_transparent'], bundleName: '', moduleName: '' };
+              if (n7.type === TouchType.Up) {
+                this.buttonBgColor = {
+                  id: -1, type: 10001,
+                  params: ['sys.color.ohos_id_color_sub_background_transparent'], bundleName: '', moduleName: ''
+                };
               }
             });
-            Row.onKeyEvent((g7) => {
-              if (g7.keyCode === KeyCode.KEYCODE_ENTER || g7.keyCode === KeyCode.KEYCODE_SPACE) {
-                if (a6.action) {
-                  a6.action();
+            Row.onKeyEvent((m7) => {
+              if (m7.keyCode === KeyCode.KEYCODE_ENTER || m7.keyCode === KeyCode.KEYCODE_SPACE) {
+                if (g6.action) {
+                  g6.action();
                 }
               }
             });
-            Row.onAreaChange((d7, e7) => {
-              let f7 = Number(parseInt(e7.width.toString(), DEFAULT_VALUE));
-              this.buttonWidth = f7;
+            Row.onAreaChange((j7, k7) => {
+              let l7 = Number(parseInt(k7.width.toString(), DEFAULT_VALUE));
+              this.buttonWidth = l7;
             });
           }, Row);
-          this.observeComponentCreation2((t6, u6) => {
-            Text.create(a6.value);
+          this.observeComponentCreation2((z6, a7) => {
+            Text.create(g6.value);
             __Text__secondaryTitleStyles({
               fontWeight: FontWeight.Medium,
               maxLines: SINGLE_LINE_NUM,
@@ -740,20 +804,29 @@ export class SubHeader extends ViewPU {
           }, Text);
           Text.pop();
           Row.pop();
-          this.observeComponentCreation2((m6, n6) => {
+          this.observeComponentCreation2((s6, t6) => {
             If.create();
             if (this.buttonFocus) {
               this.ifElseBranchUpdateFunction(0, () => {
-                this.observeComponentCreation2((r6, s6) => {
+                this.observeComponentCreation2((x6, y6) => {
                   Row.create();
                   Row.height(BUTTON_HEIGHT);
                   Row.width(this.buttonWidth);
                   Row.hitTestBehavior(HitTestMode.None);
                   Row.border({
-                    width: { id: -1, type: 10002, params: ['sys.float.outline_extra_larger'], bundleName: '', moduleName: '' },
-                    color: { id: -1, type: 10001, params: ['sys.color.interactive_focus'], bundleName: '', moduleName: '' },
+                    width: {
+                      id: -1, type: 10002, params: ['sys.float.outline_extra_larger'],
+                      bundleName: '', moduleName: ''
+                    },
+                    color: {
+                      id: -1, type: 10001, params: ['sys.color.interactive_focus'],
+                      bundleName: '', moduleName: ''
+                    },
                   });
-                  Row.borderRadius({ id: -1, type: 10002, params: ['sys.float.corner_radius_level4'], bundleName: '', moduleName: '' });
+                  Row.borderRadius({
+                    id: -1, type: 10002, params: ['sys.float.corner_radius_level4'],
+                    bundleName: '', moduleName: ''
+                  });
                 }, Row);
                 Row.pop();
               });
@@ -776,98 +849,111 @@ export class SubHeader extends ViewPU {
     Row.pop();
   }
 
-  IconGroupStyle(p4, q4 = null) {
-    this.observeComponentCreation2((y5, z5) => {
+  IconGroupStyle(v4, w4 = null) {
+    this.observeComponentCreation2((e6, f6) => {
       Row.create();
       Row.justifyContent(FlexAlign.End);
       Row.width(this.flexWidth / DIVIDEND_NUM);
       Row.focusable(true);
       Row.margin({
         left: { id: -1, type: 10002, params: ['sys.float.padding_level4'], bundleName: '', moduleName: '' },
-        right: { id: -1, type: 10002, params: ['sys.float.margin_right'], bundleName: '', moduleName: '' },
+        right: { id: -1, type: 10002, params: ['sys.float.padding_level6'], bundleName: '', moduleName: '' },
       });
     }, Row);
-    this.observeComponentCreation2((t4, u4) => {
+    this.observeComponentCreation2((z4, a5) => {
       ForEach.create();
-      const v4 = (x4, y4) => {
-        const z4 = x4;
-        this.observeComponentCreation2((b5, c5) => {
+      const b5 = (d5, e5) => {
+        const f5 = d5;
+        this.observeComponentCreation2((h5, i5) => {
           If.create();
-          if (Util.isResourceType(z4.value)) {
+          if (Util.isResourceType(f5.value)) {
             this.ifElseBranchUpdateFunction(0, () => {
-              this.observeComponentCreation2((g5, h5) => {
+              this.observeComponentCreation2((m5, n5) => {
                 If.create();
-                if (y4 === INDEX_ZERO) {
+                if (e5 === INDEX_ZERO) {
                   this.ifElseBranchUpdateFunction(0, () => {
                     {
-                      this.observeComponentCreation2((u5, v5) => {
-                        if (v5) {
-                          let w5 = () => {
+                      this.observeComponentCreation2((a6, b6) => {
+                        if (b6) {
+                          let c6 = () => {
                             return {
                               item: {
                                 iconOptions: {
-                                  icon: z4.value,
-                                  symbolicIconOption: this.operationSymbolOptions && this.operationSymbolOptions.length > y4 ?
-                                    this.operationSymbolOptions[y4] : null,
+                                  icon: f5.value,
+                                  symbolicIconOption: this.operationSymbolOptions &&
+                                    this.operationSymbolOptions.length > e5 ?
+                                    this.operationSymbolOptions[e5] : null,
                                 },
-                                action: z4.action,
+                                action: f5.action,
                               }
                             };
                           };
                           ViewPU.create(new SingleIconStyle(this, {
                             item: {
                               iconOptions: {
-                                icon: z4.value,
-                                symbolicIconOption: this.operationSymbolOptions && this.operationSymbolOptions.length > y4 ?
-                                  this.operationSymbolOptions[y4] : null,
+                                icon: f5.value,
+                                symbolicIconOption: this.operationSymbolOptions &&
+                                  this.operationSymbolOptions.length > e5 ?
+                                  this.operationSymbolOptions[e5] : null,
                               },
-                              action: z4.action,
+                              action: f5.action,
                             }
-                          }, undefined, u5, w5, { page: 'library/src/main/ets/components/mainpage/MainPage.ets', line: 445 }));
+                          }, undefined, a6, c6, {
+                            page: 'library/src/main/ets/components/mainpage/MainPage.ets',
+                            line: 445
+                          }));
                         }
                         else {
-                          this.updateStateVarsOfChildByElmtId(u5, {});
+                          this.updateStateVarsOfChildByElmtId(a6, {});
                         }
                       }, { name: 'SingleIconStyle' });
                     }
                   });
                 }
-                else if (y4 === INDEX_ONE || y4 === INDEX_TWO) {
+                else if (e5 === INDEX_ONE || e5 === INDEX_TWO) {
                   this.ifElseBranchUpdateFunction(1, () => {
-                    this.observeComponentCreation2((q5, r5) => {
+                    this.observeComponentCreation2((w5, x5) => {
                       __Common__.create();
                       __Common__.margin({
-                        left: { id: -1, type: 10002, params: ['sys.float.padding_level4'], bundleName: '', moduleName: '' },
+                        left: {
+                          id: -1, type: 10002, params: ['sys.float.padding_level4'],
+                          bundleName: '', moduleName: ''
+                        },
                       });
                     }, __Common__);
                     {
-                      this.observeComponentCreation2((m5, n5) => {
-                        if (n5) {
-                          let o5 = () => {
+                      this.observeComponentCreation2((s5, t5) => {
+                        if (t5) {
+                          let u5 = () => {
                             return {
                               item: {
-                                action: z4.action,
+                                action: f5.action,
                                 iconOptions: {
-                                  icon: z4.value,
-                                  symbolicIconOption: this.operationSymbolOptions && this.operationSymbolOptions.length > y4 ?
-                                    this.operationSymbolOptions[y4] : null,
+                                  icon: f5.value,
+                                  symbolicIconOption: this.operationSymbolOptions &&
+                                    this.operationSymbolOptions.length > e5 ?
+                                    this.operationSymbolOptions[e5] : null,
                                 },
                               }
                             };
                           };
                           ViewPU.create(new SingleIconStyle(this, {
                             item: {
-                              action: z4.action,
+                              action: f5.action,
                               iconOptions: {
-                                icon: z4.value,
-                                symbolicIconOption: this.operationSymbolOptions && this.operationSymbolOptions.length > y4 ?
-                                  this.operationSymbolOptions[y4] : null,
+                                icon: f5.value,
+                                symbolicIconOption: this.operationSymbolOptions &&
+                                  this.operationSymbolOptions.length > e5 ?
+                                  this.operationSymbolOptions[e5] : null,
                               },
                             }
-                          }, undefined, m5, o5, { page: 'library/src/main/ets/components/mainpage/MainPage.ets', line: 456 }));
+                          }, undefined, s5, u5, {
+                            page: 'library/src/main/ets/components/mainpage/MainPage.ets',
+                            line: 456
+                          }));
                         }
                         else {
-                          this.updateStateVarsOfChildByElmtId(m5, {});
+                          this.updateStateVarsOfChildByElmtId(s5, {});
                         }
                       }, { name: 'SingleIconStyle' });
                     }
@@ -889,18 +975,18 @@ export class SubHeader extends ViewPU {
         }, If);
         If.pop();
       };
-      this.forEachUpdateFunction(t4, this.operationItem, v4, undefined, true, false);
+      this.forEachUpdateFunction(z4, this.operationItem, b5, undefined, true, false);
     }, ForEach);
     ForEach.pop();
     Row.pop();
   }
 
-  TextArrowStyle(u2, v2 = null) {
-    this.observeComponentCreation2((k4, l4) => {
+  TextArrowStyle(a3, b3 = null) {
+    this.observeComponentCreation2((q4, r4) => {
       Row.create();
       Row.focusable(true);
-      Row.onAreaChange((n4, o4) => {
-        this.textArrowWidth = Number(parseInt(o4.width.toString(), DEFAULT_VALUE));
+      Row.onAreaChange((t4, u4) => {
+        this.textArrowWidth = Number(parseInt(u4.width.toString(), DEFAULT_VALUE));
       });
       Row.width(this.flexWidth / DIVIDEND_NUM);
       Row.justifyContent(FlexAlign.End);
@@ -909,13 +995,16 @@ export class SubHeader extends ViewPU {
         right: { id: -1, type: 10002, params: ['sys.float.margin_right'], bundleName: '', moduleName: '' },
       });
     }, Row);
-    this.observeComponentCreation2((i4, j4) => {
+    this.observeComponentCreation2((o4, p4) => {
       Stack.create();
       Stack.focusable(true);
     }, Stack);
-    this.observeComponentCreation2((v3, w3) => {
+    this.observeComponentCreation2((b4, c4) => {
       Row.create();
-      Row.borderRadius({ id: -1, type: 10002, params: ['sys.float.corner_radius_level4'], bundleName: '', moduleName: '' });
+      Row.borderRadius({
+        id: -1, type: 10002, params: ['sys.float.corner_radius_level4'],
+        bundleName: '', moduleName: ''
+      });
       Row.focusable(true);
       Row.backgroundColor(ObservedObject.GetRawObject(this.textArrowBgColor));
       Row.height(BUTTON_SIZE);
@@ -932,34 +1021,46 @@ export class SubHeader extends ViewPU {
         top: { id: -1, type: 10002, params: ['sys.float.padding_level2'], bundleName: '', moduleName: '' },
         bottom: { id: -1, type: 10002, params: ['sys.float.padding_level2'], bundleName: '', moduleName: '' },
       });
-      Row.onHover((h4) => {
-        if (h4) {
-          this.textArrowBgColor = { id: -1, type: 10001, params: ['sys.color.interactive_hover'], bundleName: '', moduleName: '' };
+      Row.onHover((n4) => {
+        if (n4) {
+          this.textArrowBgColor = {
+            id: -1, type: 10001, params: ['sys.color.interactive_hover'],
+            bundleName: '', moduleName: ''
+          };
         }
         else {
-          this.textArrowBgColor = { id: -1, type: 10001, params: ['sys.color.ohos_id_color_sub_background_transparent'], bundleName: '', moduleName: '' };
+          this.textArrowBgColor = {
+            id: -1, type: 10001, params: ['sys.color.ohos_id_color_sub_background_transparent'],
+            bundleName: '', moduleName: ''
+          };
         }
       });
-      Row.onTouch((g4) => {
-        if (g4.type === TouchType.Down) {
-          if (u2.action) {
-            u2.action();
+      Row.onTouch((m4) => {
+        if (m4.type === TouchType.Down) {
+          if (a3.action) {
+            a3.action();
           }
-          this.textArrowBgColor = { id: -1, type: 10001, params: ['sys.color.interactive_pressed'], bundleName: '', moduleName: '' };
+          this.textArrowBgColor = {
+            id: -1, type: 10001, params: ['sys.color.interactive_pressed'],
+            bundleName: '', moduleName: ''
+          };
         }
-        if (g4.type === TouchType.Up) {
-          this.textArrowBgColor = { id: -1, type: 10001, params: ['sys.color.ohos_id_color_sub_background_transparent'], bundleName: '', moduleName: '' };
+        if (m4.type === TouchType.Up) {
+          this.textArrowBgColor = {
+            id: -1, type: 10001, params: ['sys.color.ohos_id_color_sub_background_transparent'],
+            bundleName: '', moduleName: ''
+          };
         }
       });
-      Row.onKeyEvent((f4) => {
-        if (f4.keyCode === KeyCode.KEYCODE_ENTER || f4.keyCode === KeyCode.KEYCODE_SPACE) {
-          if (u2.action) {
-            u2.action();
+      Row.onKeyEvent((l4) => {
+        if (l4.keyCode === KeyCode.KEYCODE_ENTER || l4.keyCode === KeyCode.KEYCODE_SPACE) {
+          if (a3.action) {
+            a3.action();
           }
         }
       });
-      Row.onAreaChange((d4, e4) => {
-        this.arrowWidth = Number(parseInt(e4.width.toString(), DEFAULT_VALUE));
+      Row.onAreaChange((j4, k4) => {
+        this.arrowWidth = Number(parseInt(k4.width.toString(), DEFAULT_VALUE));
       });
       ViewStackProcessor.visualState('focused');
       Row.border({
@@ -968,22 +1069,28 @@ export class SubHeader extends ViewPU {
         color: { id: -1, type: 10001, params: ['sys.color.interactive_focus'], bundleName: '', moduleName: '' },
         style: BorderStyle.Solid,
       });
-      Row.backgroundColor({ id: -1, type: 10001, params: ['sys.color.interactive_focus'], bundleName: '', moduleName: '' });
+      Row.backgroundColor({
+        id: -1, type: 10001, params: ['sys.color.interactive_focus'],
+        bundleName: '', moduleName: ''
+      });
       ViewStackProcessor.visualState('pressed');
-      Row.backgroundColor({ id: -1, type: 10001, params: ['sys.color.interactive_pressed'], bundleName: '', moduleName: '' });
+      Row.backgroundColor({
+        id: -1, type: 10001, params: ['sys.color.interactive_pressed'],
+        bundleName: '', moduleName: ''
+      });
       ViewStackProcessor.visualState('disabled');
       Row.opacity({ id: -1, type: 10002, params: ['sys.float.interactive_disable'], bundleName: '', moduleName: '' });
       ViewStackProcessor.visualState();
     }, Row);
-    this.observeComponentCreation2((t3, u3) => {
+    this.observeComponentCreation2((z3, a4) => {
       Row.create();
     }, Row);
-    this.observeComponentCreation2((m3, n3) => {
+    this.observeComponentCreation2((s3, t3) => {
       If.create();
-      if (u2) {
+      if (a3) {
         this.ifElseBranchUpdateFunction(0, () => {
-          this.observeComponentCreation2((r3, s3) => {
-            Text.create(u2.value);
+          this.observeComponentCreation2((x3, y3) => {
+            Text.create(a3.value);
             __Text__secondaryTitleStyles({
               maxLines: SINGLE_LINE_NUM,
               fontWeight: FontWeight.Regular,
@@ -1003,9 +1110,15 @@ export class SubHeader extends ViewPU {
       }
     }, If);
     If.pop();
-    this.observeComponentCreation2((k3, l3) => {
-      Image.create({ id: -1, type: 20000, params: ['sys.media.ohos_ic_public_arrow_right'], bundleName: '', moduleName: '' });
-      Image.fillColor({ id: -1, type: 10001, params: ['sys.color.ohos_id_color_tertiary'], bundleName: '', moduleName: '' });
+    this.observeComponentCreation2((q3, r3) => {
+      Image.create({
+        id: -1, type: 20000, params: ['sys.media.ohos_ic_public_arrow_right'],
+        bundleName: '', moduleName: ''
+      });
+      Image.fillColor({
+        id: -1, type: 10001, params: ['sys.color.ohos_id_color_tertiary'],
+        bundleName: '', moduleName: ''
+      });
       Image.width(IMAGE_WIDTH);
       Image.height(IMAGE_HEIGHT_NUM);
       Image.focusable(true);
@@ -1013,20 +1126,26 @@ export class SubHeader extends ViewPU {
     }, Image);
     Row.pop();
     Row.pop();
-    this.observeComponentCreation2((d3, e3) => {
+    this.observeComponentCreation2((j3, k3) => {
       If.create();
       if (this.textArrowFocus) {
         this.ifElseBranchUpdateFunction(0, () => {
-          this.observeComponentCreation2((i3, j3) => {
+          this.observeComponentCreation2((o3, p3) => {
             Row.create();
             Row.height(BUTTON_SIZE);
             Row.width(this.arrowWidth);
             Row.hitTestBehavior(HitTestMode.None);
             Row.border({
-              width: { id: -1, type: 10002, params: ['sys.float.outline_extra_larger'], bundleName: '', moduleName: '' },
+              width: {
+                id: -1, type: 10002, params: ['sys.float.outline_extra_larger'],
+                bundleName: '', moduleName: ''
+              },
               color: { id: -1, type: 10001, params: ['sys.color.interactive_focus'], bundleName: '', moduleName: '' },
             });
-            Row.borderRadius({ id: -1, type: 10002, params: ['sys.float.corner_radius_level4'], bundleName: '', moduleName: '' });
+            Row.borderRadius({
+              id: -1, type: 10002, params: ['sys.float.corner_radius_level4'],
+              bundleName: '', moduleName: ''
+            });
           }, Row);
           Row.pop();
         });
@@ -1041,8 +1160,8 @@ export class SubHeader extends ViewPU {
     Row.pop();
   }
 
-  LoadingProcessStyle(m2 = null) {
-    this.observeComponentCreation2((s2, t2) => {
+  LoadingProcessStyle(s2 = null) {
+    this.observeComponentCreation2((y2, z2) => {
       Row.create();
       Row.focusable(true);
       Row.width(this.flexWidth / DIVIDEND_NUM);
@@ -1056,11 +1175,14 @@ export class SubHeader extends ViewPU {
         right: { id: -1, type: 10002, params: ['sys.float.margin_right'], bundleName: '', moduleName: '' },
       });
     }, Row);
-    this.observeComponentCreation2((p2, q2) => {
+    this.observeComponentCreation2((v2, w2) => {
       LoadingProgress.create();
       LoadingProgress.width(IMAGE_HEIGHT_NUM);
       LoadingProgress.height(IMAGE_HEIGHT_NUM);
-      LoadingProgress.color({ id: -1, type: 10001, params: ['sys.color.icon_secondary'], bundleName: '', moduleName: '' });
+      LoadingProgress.color({
+        id: -1, type: 10001, params: ['sys.color.icon_secondary'],
+        bundleName: '', moduleName: ''
+      });
       LoadingProgress.focusable(true);
       LoadingProgress.onAppear(() => {
         this.isDuplicateLine = false;
@@ -1069,8 +1191,8 @@ export class SubHeader extends ViewPU {
     Row.pop();
   }
 
-  dummyFunction(h2 = null) {
-    this.observeComponentCreation2((j2, k2) => {
+  dummyFunction(n2 = null) {
+    this.observeComponentCreation2((p2, q2) => {
       Row.create();
       Row.onAppear(() => {
         this.changeFlexAlign(FlexAlign.End);
@@ -1079,51 +1201,56 @@ export class SubHeader extends ViewPU {
     Row.pop();
   }
 
-  changeFlexAlign(g2) {
-    if (this.flexAlign === g2) {
+  changeFlexAlign(m2) {
+    if (this.flexAlign === m2) {
       return;
     }
-    this.flexAlign = g2;
+    this.flexAlign = m2;
   }
 
   rerender() {
     this.updateDirtyElements();
   }
 }
+
 class SingleIconStyle extends ViewPU {
-  constructor(a2, b2, c2, d2 = -1, e2 = undefined, f2) {
-    super(a2, c2, d2, f2);
-    if (typeof e2 === 'function') {
-      this.paramsGenerator_ = e2;
+  constructor(g2, h2, i2, j2 = -1, k2 = undefined, l2) {
+    super(g2, i2, j2, l2);
+    if (typeof k2 === 'function') {
+      this.paramsGenerator_ = k2;
     }
-    this.__bgColor = new ObservedPropertyObjectPU({ id: -1, type: 10001, params: ['sys.color.ohos_id_color_sub_background_transparent'], bundleName: '', moduleName: '' }, this, 'bgColor');
+    this.__bgColor = new ObservedPropertyObjectPU({
+      id: -1, type: 10001,
+      params: ['sys.color.ohos_id_color_sub_background_transparent'], bundleName: '', moduleName: ''
+    },
+      this, 'bgColor');
     this.__isFocus = new ObservedPropertySimplePU(false, this, 'isFocus');
     this.item = null;
     this.focusBorderWidth = BORDER_WIDTH;
-    this.setInitiallyProvidedValue(b2);
+    this.setInitiallyProvidedValue(h2);
   }
 
-  setInitiallyProvidedValue(z1) {
-    if (z1.bgColor !== undefined) {
-      this.bgColor = z1.bgColor;
+  setInitiallyProvidedValue(f2) {
+    if (f2.bgColor !== undefined) {
+      this.bgColor = f2.bgColor;
     }
-    if (z1.isFocus !== undefined) {
-      this.isFocus = z1.isFocus;
+    if (f2.isFocus !== undefined) {
+      this.isFocus = f2.isFocus;
     }
-    if (z1.item !== undefined) {
-      this.item = z1.item;
+    if (f2.item !== undefined) {
+      this.item = f2.item;
     }
-    if (z1.focusBorderWidth !== undefined) {
-      this.focusBorderWidth = z1.focusBorderWidth;
+    if (f2.focusBorderWidth !== undefined) {
+      this.focusBorderWidth = f2.focusBorderWidth;
     }
   }
 
-  updateStateVars(y1) {
+  updateStateVars(e2) {
   }
-  
-  purgeVariableDependenciesOnElmtId(x1) {
-    this.__bgColor.purgeDependencyOnElmtId(x1);
-    this.__isFocus.purgeDependencyOnElmtId(x1);
+
+  purgeVariableDependenciesOnElmtId(d2) {
+    this.__bgColor.purgeDependencyOnElmtId(d2);
+    this.__isFocus.purgeDependencyOnElmtId(d2);
   }
 
   aboutToBeDeleted() {
@@ -1137,24 +1264,24 @@ class SingleIconStyle extends ViewPU {
     return this.__bgColor.get();
   }
 
-  set bgColor(w1) {
-    this.__bgColor.set(w1);
+  set bgColor(c2) {
+    this.__bgColor.set(c2);
   }
 
   get isFocus() {
     return this.__isFocus.get();
   }
 
-  set isFocus(v1) {
-    this.__isFocus.set(v1);
+  set isFocus(b2) {
+    this.__isFocus.set(b2);
   }
 
   initialRender() {
-    this.observeComponentCreation2((e, f) => {
+    this.observeComponentCreation2((k1, l1) => {
       If.create();
       if (this.item && this.item.iconOptions) {
         this.ifElseBranchUpdateFunction(0, () => {
-          this.observeComponentCreation2((j1, k1) => {
+          this.observeComponentCreation2((p1, q1) => {
             Row.create();
             Row.focusable(true);
             Row.width(BUTTON_SIZE);
@@ -1163,87 +1290,148 @@ class SingleIconStyle extends ViewPU {
               bottom: { id: -1, type: 10002, params: ['sys.float.padding_level2'], bundleName: '', moduleName: '' },
             });
             Row.justifyContent(FlexAlign.Center);
-            Row.borderRadius({ id: -1, type: 10002, params: ['sys.float.corner_radius_level4'], bundleName: '', moduleName: '' });
+            Row.borderRadius({
+              id: -1, type: 10002, params: ['sys.float.corner_radius_level4'],
+              bundleName: '', moduleName: ''
+            });
             Row.backgroundColor(ObservedObject.GetRawObject(this.bgColor));
             ViewStackProcessor.visualState('focused');
             Row.border({
-              radius: { id: -1, type: 10002, params: ['sys.float.corner_radius_level4'], bundleName: '', moduleName: '' },
+              radius: {
+                id: -1, type: 10002, params: ['sys.float.corner_radius_level4'],
+                bundleName: '', moduleName: ''
+              },
               width: this.focusBorderWidth,
-              color: { id: -1, type: 10001, params: ['sys.color.interactive_focus'], bundleName: '', moduleName: '' },
+              color: {
+                id: -1, type: 10001, params: ['sys.color.interactive_focus'],
+                bundleName: '', moduleName: ''
+              },
               style: BorderStyle.Solid,
             });
-            Row.backgroundColor({ id: -1, type: 10001, params: ['sys.color.interactive_focus'], bundleName: '', moduleName: '' });
+            Row.backgroundColor({
+              id: -1, type: 10001, params: ['sys.color.interactive_focus'],
+              bundleName: '', moduleName: ''
+            });
             ViewStackProcessor.visualState('pressed');
-            Row.backgroundColor({ id: -1, type: 10001, params: ['sys.color.interactive_pressed'], bundleName: '', moduleName: '' });
+            Row.backgroundColor({
+              id: -1, type: 10001, params: ['sys.color.interactive_pressed'],
+              bundleName: '', moduleName: ''
+            });
             ViewStackProcessor.visualState('disabled');
-            Row.opacity({ id: -1, type: 10002, params: ['sys.float.interactive_disable'], bundleName: '', moduleName: '' });
+            Row.opacity({
+              id: -1, type: 10002, params: ['sys.float.interactive_disable'],
+              bundleName: '', moduleName: ''
+            });
             ViewStackProcessor.visualState();
-            Row.onTouch((s1) => {
-              var t1;
-              var u1;
-              if (s1.type === TouchType.Down) {
-                if ((t1 = this.item) === null || t1 === void 0 ? void 0 : t1.action) {
-                  (u1 = this.item) === null || u1 === void 0 ? void 0 : u1.action();
+            Row.onTouch((y1) => {
+              let z1;
+              let a2;
+              if (y1.type === TouchType.Down) {
+                if ((z1 = this.item) === null || z1 === void 0 ? void 0 : z1.action) {
+                  (a2 = this.item) === null || a2 === void 0 ? void 0 : a2.action();
                 }
-                this.bgColor = { id: -1, type: 10001, params: ['sys.color.interactive_pressed'], bundleName: '', moduleName: '' };
+                this.bgColor = {
+                  id: -1, type: 10001, params: ['sys.color.interactive_pressed'],
+                  bundleName: '', moduleName: ''
+                };
               }
-              if (s1.type === TouchType.Up) {
-                this.bgColor = { id: -1, type: 10001, params: ['sys.color.ohos_id_color_sub_background_transparent'], bundleName: '', moduleName: '' };
+              if (y1.type === TouchType.Up) {
+                this.bgColor = {
+                  id: -1, type: 10001, params: ['sys.color.ohos_id_color_sub_background_transparent'],
+                  bundleName: '', moduleName: ''
+                };
               }
             });
-            Row.onHover((r1) => {
-              if (r1) {
-                this.bgColor = { id: -1, type: 10001, params: ['sys.color.interactive_hover'], bundleName: '', moduleName: '' };
+            Row.onHover((x1) => {
+              if (x1) {
+                this.bgColor = {
+                  id: -1, type: 10001, params: ['sys.color.interactive_hover'],
+                  bundleName: '', moduleName: ''
+                };
               }
               else {
-                this.bgColor = { id: -1, type: 10001, params: ['sys.color.ohos_id_color_sub_background_transparent'], bundleName: '', moduleName: '' };
+                this.bgColor = {
+                  id: -1, type: 10001, params: ['sys.color.ohos_id_color_sub_background_transparent'],
+                  bundleName: '', moduleName: ''
+                };
               }
             });
-            Row.onKeyEvent((o1) => {
-              var p1;
-              var q1;
-              if (o1.keyCode === KeyCode.KEYCODE_ENTER || o1.keyCode === KeyCode.KEYCODE_SPACE) {
-                if ((p1 = this.item) === null || p1 === void 0 ? void 0 : p1.action) {
-                  (q1 = this.item) === null || q1 === void 0 ? void 0 : q1.action();
+            Row.onKeyEvent((u1) => {
+              let v1;
+              let w1;
+              if (u1.keyCode === KeyCode.KEYCODE_ENTER || u1.keyCode === KeyCode.KEYCODE_SPACE) {
+                if ((v1 = this.item) === null || v1 === void 0 ? void 0 : v1.action) {
+                  (w1 = this.item) === null || w1 === void 0 ? void 0 : w1.action();
                 }
               }
             });
           }, Row);
+          this.IconZone.bind(this)();
+          Row.pop();
+        });
+      }
+      else {
+        this.ifElseBranchUpdateFunction(1, () => {
+        });
+      }
+    }, If);
+    If.pop();
+  }
+
+  IconZone(d = null) {
+    this.observeComponentCreation2((f, g) => {
+      If.create();
+      if (this.item && this.item.iconOptions) {
+        this.ifElseBranchUpdateFunction(0, () => {
           this.observeComponentCreation2((k, l) => {
             If.create();
             if (Util.isSymbolicResource(this.item.iconOptions.icon)) {
               this.ifElseBranchUpdateFunction(0, () => {
                 this.observeComponentCreation2((u, v) => {
-                  var w;
-                  var x;
-                  var y;
-                  var z;
-                  var a1;
-                  var b1;
-                  var c1;
-                  var d1;
-                  var e1;
-                  var f1;
-                  var g1;
-                  var h1;
-                  var i1;
+                  let w;
+                  let x;
+                  let y;
+                  let z;
+                  let a1;
+                  let b1;
+                  let c1;
+                  let d1;
+                  let e1;
+                  let f1;
+                  let g1;
+                  let h1;
+                  let i1;
                   SymbolGlyph.create((w = this.item.iconOptions) === null || w === void 0 ? void 0 : w.icon);
                   SymbolGlyph.focusable(true);
-                  SymbolGlyph.fontSize((z = (y = (x = this.item.iconOptions) === null || x === void 0 ? void 0 : x.symbolicIconOption) === null || y === void 0 ? void 0 : y.fontSize) !== null && z !== void 0 ? z : IMAGE_HEIGHT_NUM);
-                  SymbolGlyph.fontColor((c1 = (b1 = (a1 = this.item.iconOptions) === null || a1 === void 0 ? void 0 : a1.symbolicIconOption) === null || b1 === void 0 ? void 0 : b1.fontColor) !== null && c1 !== void 0 ? c1 : [{ id: -1, type: 10001, params: ['sys.color.icon_primary'], bundleName: '', moduleName: '' }]);
-                  SymbolGlyph.fontWeight((e1 = (d1 = this.item.iconOptions) === null || d1 === void 0 ? void 0 : d1.symbolicIconOption) === null || e1 === void 0 ? void 0 : e1.fontWeight);
-                  SymbolGlyph.renderingStrategy((g1 = (f1 = this.item.iconOptions) === null || f1 === void 0 ? void 0 : f1.symbolicIconOption) === null || g1 === void 0 ? void 0 : g1.renderingStrategy);
-                  SymbolGlyph.effectStrategy((i1 = (h1 = this.item.iconOptions) === null || h1 === void 0 ? void 0 : h1.symbolicIconOption) === null || i1 === void 0 ? void 0 : i1.effectStrategy);
+                  SymbolGlyph.fontSize((z = (y = (x = this.item.iconOptions) === null || x === void 0 ?
+                    void 0 : x.symbolicIconOption) === null || y === void 0 ? void 0 : y.fontSize) !== null &&
+                    z !== void 0 ? z : IMAGE_HEIGHT_NUM);
+                  SymbolGlyph.fontColor((c1 = (b1 = (a1 = this.item.iconOptions) === null || a1 === void 0 ?
+                    void 0 : a1.symbolicIconOption) === null || b1 === void 0 ? void 0 : b1.fontColor) !== null &&
+                    c1 !== void 0 ? c1 : [{
+                      id: -1, type: 10001, params: ['sys.color.icon_primary'],
+                      bundleName: '', moduleName: ''
+                    }]);
+                  SymbolGlyph.fontWeight((e1 = (d1 = this.item.iconOptions) === null || d1 === void 0 ? void 0 :
+                    d1.symbolicIconOption) === null || e1 === void 0 ? void 0 : e1.fontWeight);
+                  SymbolGlyph.renderingStrategy((g1 = (f1 = this.item.iconOptions) === null || f1 === void 0 ?
+                    void 0 : f1.symbolicIconOption) === null || g1 === void 0 ? void 0 : g1.renderingStrategy);
+                  SymbolGlyph.effectStrategy((i1 = (h1 = this.item.iconOptions) === null || h1 === void 0 ?
+                    void 0 : h1.symbolicIconOption) === null || i1 === void 0 ? void 0 : i1.effectStrategy);
                 }, SymbolGlyph);
               });
             }
             else {
               this.ifElseBranchUpdateFunction(1, () => {
                 this.observeComponentCreation2((o, p) => {
-                  var q;
-                  var r;
-                  Image.create((r = (q = this.item) === null || q === void 0 ? void 0 : q.iconOptions) === null || r === void 0 ? void 0 : r.icon);
-                  Image.fillColor({ id: -1, type: 10001, params: ['sys.color.icon_primary'], bundleName: '', moduleName: '' });
+                  let q;
+                  let r;
+                  Image.create((r = (q = this.item) === null || q === void 0 ? void 0 : q.iconOptions) === null ||
+                    r === void 0 ? void 0 : r.icon);
+                  Image.fillColor({
+                    id: -1, type: 10001, params: ['sys.color.icon_primary'],
+                    bundleName: '', moduleName: ''
+                  });
                   Image.width(IMAGE_HEIGHT_NUM);
                   Image.height(IMAGE_HEIGHT_NUM);
                   Image.focusable(true);
@@ -1252,7 +1440,6 @@ class SingleIconStyle extends ViewPU {
             }
           }, If);
           If.pop();
-          Row.pop();
         });
       }
       else {
@@ -1276,7 +1463,7 @@ class Util {
     let c = b;
     return c.type === RESOURCE_TYPE_SYMBOL;
   }
-  
+
   static isResourceType(a) {
     if (!a) {
       return false;
