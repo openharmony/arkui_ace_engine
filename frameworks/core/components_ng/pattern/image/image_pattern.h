@@ -217,6 +217,7 @@ private:
     LoadFailNotifyTask CreateLoadFailCallbackForAlt();
 
     void OnColorConfigurationUpdate() override;
+    void OnDirectionConfigurationUpdate() override;
     void OnIconConfigurationUpdate() override;
     void OnConfigurationUpdate();
     void LoadImage(const ImageSourceInfo& src);
