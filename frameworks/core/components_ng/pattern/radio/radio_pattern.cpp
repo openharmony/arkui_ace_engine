@@ -154,6 +154,7 @@ void RadioPattern::OnModifyDone()
     CHECK_NULL_VOID(focusHub);
     InitOnKeyEvent(focusHub);
     SetAccessibilityAction();
+    FireBuilder();
 }
 
 void RadioPattern::ImageNodeCreate()
@@ -270,6 +271,9 @@ void RadioPattern::InitClickEvent()
 
 void RadioPattern::InitTouchEvent()
 {
+    if (UseContentModifier()) {
+        return;
+    }
     if (touchListener_) {
         return;
     }
@@ -294,6 +298,9 @@ void RadioPattern::InitTouchEvent()
 
 void RadioPattern::InitMouseEvent()
 {
+    if (UseContentModifier()) {
+        return;
+    }
     if (mouseEvent_) {
         return;
     }
@@ -316,6 +323,9 @@ void RadioPattern::InitMouseEvent()
 
 void RadioPattern::HandleMouseEvent(bool isHover)
 {
+    if (UseContentModifier()) {
+        return;
+    }
     isHover_ = isHover;
     if (isHover) {
         touchHoverType_ = TouchHoverAnimationType::HOVER;
@@ -329,6 +339,9 @@ void RadioPattern::HandleMouseEvent(bool isHover)
 
 void RadioPattern::OnClick()
 {
+    if (UseContentModifier()) {
+        return;
+    }
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto paintProperty = host->GetPaintProperty<RadioPaintProperty>();
@@ -347,6 +360,9 @@ void RadioPattern::OnClick()
 
 void RadioPattern::OnTouchDown()
 {
+    if (UseContentModifier()) {
+        return;
+    }
     if (isHover_) {
         touchHoverType_ = TouchHoverAnimationType::HOVER_TO_PRESS;
     } else {
@@ -360,6 +376,9 @@ void RadioPattern::OnTouchDown()
 
 void RadioPattern::OnTouchUp()
 {
+    if (UseContentModifier()) {
+        return;
+    }
     if (isHover_) {
         touchHoverType_ = TouchHoverAnimationType::PRESS_TO_HOVER;
     } else {
@@ -464,6 +483,7 @@ void RadioPattern::UpdateState()
     }
     preCheck_ = check;
     isGroupChanged_ = false;
+    FireBuilder();
 }
 
 void RadioPattern::UpdateUncheckStatus(const RefPtr<FrameNode>& frameNode)
@@ -798,5 +818,55 @@ void RadioPattern::HandleEnabled()
         CHECK_NULL_VOID(paintProperty);
         paintProperty->UpdatePropertyChangeFlag(PROPERTY_UPDATE_RENDER);
     }
+}
+
+void RadioPattern::SetRadioChecked(bool check)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto eventHub = host->GetEventHub<EventHub>();
+    CHECK_NULL_VOID(eventHub);
+    auto enabled = eventHub->IsEnabled();
+    if (!enabled) {
+        return;
+    }
+    auto paintProperty = host->GetPaintProperty<RadioPaintProperty>();
+    CHECK_NULL_VOID(paintProperty);
+    paintProperty->UpdateRadioCheck(check);
+    UpdateState();
+    OnModifyDone();
+}
+
+void RadioPattern::FireBuilder()
+{
+    CHECK_NULL_VOID(makeFunc_);
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    host->RemoveChildAtIndex(0);
+    customNode_ = BuildContentModifierNode();
+    CHECK_NULL_VOID(customNode_);
+    host->AddChild(customNode_, 0);
+    host->MarkNeedFrameFlushDirty(PROPERTY_UPDATE_MEASURE);
+}
+
+RefPtr<FrameNode> RadioPattern::BuildContentModifierNode()
+{
+    CHECK_NULL_RETURN(makeFunc_, nullptr);
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, nullptr);
+    auto eventHub = host->GetEventHub<RadioEventHub>();
+    CHECK_NULL_RETURN(eventHub, nullptr);
+    auto value = eventHub->GetValue();
+    auto enabled = eventHub->IsEnabled();
+    auto paintProperty = host->GetPaintProperty<RadioPaintProperty>();
+    CHECK_NULL_RETURN(paintProperty, nullptr);
+    bool isChecked = false;
+    if (paintProperty->HasRadioCheck()) {
+        isChecked = paintProperty->GetRadioCheckValue();
+    } else {
+        isChecked = false;
+    }
+    RadioConfiguration radioConfiguration(value, isChecked, enabled);
+    return (makeFunc_.value())(radioConfiguration);
 }
 } // namespace OHOS::Ace::NG

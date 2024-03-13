@@ -191,4 +191,18 @@ void RadioModelNG::SetResponseRegion(FrameNode* frameNode, const std::vector<Dim
     CHECK_NULL_VOID(pattern);
     pattern->SetIsUserSetResponseRegion(true);
 }
+
+void RadioModelNG::SetBuilderFunc(FrameNode* frameNode, NG::RadioMakeCallback&& makeFunc)
+{
+    auto pattern = frameNode->GetPattern<RadioPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetBuilderFunc(std::move(makeFunc));
+}
+
+void RadioModelNG::SetChangeValue(FrameNode* frameNode, bool value)
+{
+    auto pattern = frameNode->GetPattern<RadioPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetRadioChecked(value);
+}
 } // namespace OHOS::Ace::NG

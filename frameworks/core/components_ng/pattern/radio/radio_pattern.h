@@ -22,11 +22,11 @@
 #include "core/components_ng/pattern/radio/radio_accessibility_property.h"
 #include "core/components_ng/pattern/radio/radio_event_hub.h"
 #include "core/components_ng/pattern/radio/radio_layout_algorithm.h"
+#include "core/components_ng/pattern/radio/radio_model_ng.h"
 #include "core/components_ng/pattern/radio/radio_paint_method.h"
 #include "core/components_ng/pattern/radio/radio_paint_property.h"
 
 namespace OHOS::Ace::NG {
-
 class RadioPattern : public Pattern {
     DECLARE_ACE_TYPE(RadioPattern, Pattern);
 
@@ -51,6 +51,9 @@ public:
 
     RefPtr<NodePaintMethod> CreateNodePaintMethod() override
     {
+        if (UseContentModifier()) {
+            return nullptr;
+        }
         if (!radioModifier_) {
             radioModifier_ = AceType::MakeRefPtr<RadioModifier>();
         }
@@ -144,6 +147,17 @@ public:
     }
     std::string ProvideRestoreInfo() override;
     void OnRestoreInfo(const std::string& restoreInfo) override;
+    void SetBuilderFunc(RadioMakeCallback&& makeFunc)
+    {
+        makeFunc_ = std::move(makeFunc);
+    }
+
+    bool UseContentModifier()
+    {
+        return customNode_ != nullptr;
+    }
+
+    void SetRadioChecked(bool check);
 
 private:
     void OnAttachToFrameNode() override;
@@ -175,15 +189,18 @@ private:
     void RemoveLastHotZoneRect() const;
     void SetAccessibilityAction();
     void UpdateSelectStatus(bool isSelected);
+    void FireBuilder();
 
     void ImageNodeCreate();
     void startEnterAnimation();
     void startExitAnimation();
     ImageSourceInfo GetImageSourceInfoFromTheme(int32_t RadioIndicator);
     void UpdateInternalResource(ImageSourceInfo& sourceInfo);
+    RefPtr<FrameNode> BuildContentModifierNode();
     RefPtr<ClickEvent> clickListener_;
     RefPtr<TouchEventImpl> touchListener_;
     RefPtr<InputEvent> mouseEvent_;
+    RefPtr<FrameNode> customNode_;
 
     std::function<void()> builder_;
     bool isFirstCreated_ = true;
@@ -209,6 +226,7 @@ private:
     bool isUserSetResponseRegion_ = false;
     bool showHoverEffect_ = true;
     bool enabled_ = true;
+    std::optional<RadioMakeCallback> makeFunc_;
 
     RefPtr<RadioModifier> radioModifier_;
     ACE_DISALLOW_COPY_AND_MOVE(RadioPattern);
