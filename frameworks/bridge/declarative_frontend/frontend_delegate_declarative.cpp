@@ -40,6 +40,7 @@
 #include "core/components/dialog/dialog_component.h"
 #include "core/components/toast/toast_component.h"
 #include "core/components_ng/base/ui_node.h"
+#include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/base/view_stack_model.h"
 #include "core/components_ng/pattern/overlay/overlay_manager.h"
 #include "core/components_ng/pattern/stage/page_pattern.h"
@@ -1705,15 +1706,7 @@ void FrontendDelegateDeclarative::ShowDialog(const PromptDialogAttr& dialogAttr,
 
 void FrontendDelegateDeclarative::RemoveCustomDialog()
 {
-    auto context = NG::PipelineContext::GetCurrentContext();
-    CHECK_NULL_VOID(context);
-    auto overlayManager = context->GetOverlayManager();
-    CHECK_NULL_VOID(overlayManager);
-    auto rootNode = overlayManager->GetRootNode().Upgrade();
-    CHECK_NULL_VOID(rootNode);
-    auto overlay = AceType::DynamicCast<NG::FrameNode>(rootNode->GetLastChild());
-    CHECK_NULL_VOID(overlay);
-    overlayManager->RemoveDialog(overlay, false);
+    NG::ViewAbstract::DismissDialog();
 }
 
 void FrontendDelegateDeclarative::OpenCustomDialog(const PromptDialogAttr &dialogAttr,
