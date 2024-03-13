@@ -137,6 +137,7 @@ bool ListPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, c
         calculate.GetEstimateHeightAndOffset(GetHost());
         currentOffset_ = calculate.GetEstimateOffset();
         isJump = true;
+        relativeOffset = 0.0f;
     } else {
         // correct the currentOffset when the startIndex is 0.
         if (listLayoutAlgorithm->GetStartIndex() == 0) {
