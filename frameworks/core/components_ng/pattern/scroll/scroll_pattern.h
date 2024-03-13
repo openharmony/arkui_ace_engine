@@ -173,7 +173,7 @@ public:
     bool NeedScrollSnapToSide(float delta) override;
     void CaleSnapOffsets();
     void CaleSnapOffsetsByInterval(ScrollSnapAlign scrollSnapAlign);
-    void CaleSnapOffsetsByPaginations();
+    void CaleSnapOffsetsByPaginations(ScrollSnapAlign scrollSnapAlign);
 
     float GetSelectScrollWidth();
 

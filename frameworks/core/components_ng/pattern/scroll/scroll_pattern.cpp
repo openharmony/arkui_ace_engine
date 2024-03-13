@@ -781,7 +781,7 @@ void ScrollPattern::CaleSnapOffsets()
     if (IsSnapToInterval()) {
         CaleSnapOffsetsByInterval(scrollSnapAlign);
     } else {
-        CaleSnapOffsetsByPaginations();
+        CaleSnapOffsetsByPaginations(scrollSnapAlign);
     }
 }
 
@@ -837,22 +837,47 @@ void ScrollPattern::CaleSnapOffsetsByInterval(ScrollSnapAlign scrollSnapAlign)
     }
 }
 
-void ScrollPattern::CaleSnapOffsetsByPaginations()
+void ScrollPattern::CaleSnapOffsetsByPaginations(ScrollSnapAlign scrollSnapAlign)
 {
     auto mainSize = GetMainAxisSize(viewPort_, GetAxis());
+    auto extentMainSize = GetMainAxisSize(viewPortExtent_, GetAxis());
     auto start = 0.0f;
     auto end = -scrollableDistance_;
     auto snapOffset = 0.0f;
     snapOffsets_.emplace_back(start);
     int32_t length = 0;
-    if (static_cast<int32_t>(snapPaginations_.size()) > 0 && NearZero(snapPaginations_[length].Value())) {
-        length++;
-    }
-    for (; length < static_cast<int32_t>(snapPaginations_.size()); length++) {
-        if (snapPaginations_[length].Unit() == DimensionUnit::PERCENT) {
-            snapOffset = -(snapPaginations_[length].Value() * mainSize);
+    auto snapPaginations = snapPaginations_;
+    snapPaginations.emplace(snapPaginations.begin(), Dimension(0.f));
+    auto current = 0.0f;
+    auto next = 0.0f;
+    auto size = static_cast<int32_t>(snapPaginations.size());
+    auto element = snapPaginations[length];
+    auto nextElement = snapPaginations[length + 1];
+    for (; length < size; length++) {
+        element = snapPaginations[length];
+        nextElement = snapPaginations[length + 1];
+        current = element.Unit() == DimensionUnit::PERCENT ? element.Value() * mainSize : element.ConvertToPx();
+        if (length == size - 1) {
+            next = extentMainSize;
         } else {
-            snapOffset = -snapPaginations_[length].ConvertToPx();
+            next = nextElement.Unit() == DimensionUnit::PERCENT ? nextElement.Value() * mainSize
+                                                                : nextElement.ConvertToPx();
+        }
+        switch (scrollSnapAlign) {
+            case ScrollSnapAlign::START:
+                snapOffset = -current;
+                break;
+            case ScrollSnapAlign::CENTER:
+                snapOffset = (mainSize - (current + next)) / 2.0f;
+                break;
+            case ScrollSnapAlign::END:
+                snapOffset = mainSize - next;
+                break;
+            default:
+                break;
+        }
+        if (!Negative(snapOffset)) {
+            continue;
         }
         if (GreatNotEqual(snapOffset, -scrollableDistance_)) {
             snapOffsets_.emplace_back(snapOffset);
