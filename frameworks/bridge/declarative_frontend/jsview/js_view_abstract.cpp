@@ -6945,7 +6945,7 @@ void JSViewAbstract::JSBind(BindingTarget globalObj)
     JSClass<JSViewAbstract>::Bind(globalObj);
 }
 
-void AddInvalidateFunc(JSRef<JSObject> jsDrawModifier)
+void AddInvalidateFunc(JSRef<JSObject> jsDrawModifier, NG::FrameNode* frameNode)
 {
     auto invalidate = [](panda::JsiRuntimeCallInfo *info) -> panda::Local<panda::JSValueRef> {
         auto vm = info->GetVM();
@@ -6967,7 +6967,6 @@ void AddInvalidateFunc(JSRef<JSObject> jsDrawModifier)
         return panda::JSValueRef::Undefined(vm);
     };
     auto jsInvalidate = JSRef<JSFunc>::New<FunctionCallback>(invalidate);
-    auto frameNode = static_cast<NG::FrameNode*>(ViewAbstractModel::GetInstance()->GetFrameNode());
     if (frameNode) {
         auto contentModifier = frameNode->GetContentModifier();
         if (contentModifier) {
@@ -6987,6 +6986,11 @@ void JSViewAbstract::JsDrawModifier(const JSCallbackInfo& info)
         return;
     }
 
+    auto frameNode = static_cast<NG::FrameNode*>(ViewAbstractModel::GetInstance()->GetFrameNode());
+    bool IsSupportDrawModifier = frameNode && frameNode->IsSupportDrawModifier();
+    if (!IsSupportDrawModifier) {
+        return;
+    }
     auto jsDrawModifier = JSRef<JSObject>::Cast(info[0]);
     RefPtr<NG::DrawModifier> drawModifier = AceType::MakeRefPtr<NG::DrawModifier>();
     auto execCtx = info.GetExecutionContext();
@@ -7031,7 +7035,7 @@ void JSViewAbstract::JsDrawModifier(const JSCallbackInfo& info)
     drawModifier->jsDrawFrontFunc = getDrawModifierFunc("drawFront");
 
     ViewAbstractModel::GetInstance()->SetDrawModifier(drawModifier);
-    AddInvalidateFunc(jsDrawModifier);
+    AddInvalidateFunc(jsDrawModifier, frameNode);
 }
 
 void JSViewAbstract::JsAllowDrop(const JSCallbackInfo& info)

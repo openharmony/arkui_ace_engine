@@ -58,6 +58,11 @@ public:
         canvasSize_ = canvasSize;
     }
 
+    bool IsSupportDrawModifier() const override
+    {
+        return false;
+    }
+
     void OnPixelRoundFinish(const SizeF& pixelGridRoundSize) override;
 
     void SetAntiAlias(bool isEnabled);
