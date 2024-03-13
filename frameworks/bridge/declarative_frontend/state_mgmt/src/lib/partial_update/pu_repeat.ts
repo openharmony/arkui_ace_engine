@@ -105,11 +105,11 @@ interface __RepeatItemInfo<T> {
 
 // helper
 class __RepeatDefaultKeyGen {
-    private static weakMap_ = new WeakMap<any, number>();
+    private static weakMap_ = new WeakMap<Object|Symbol, number>();
     private static lastKey_ = 0;
 
     // Return the same IDs for the same items
-    public static func(item: any): string {
+    public static func<T>(item: T): string {
         try {
             return __RepeatDefaultKeyGen.funcImpl(item);
         } catch(e) {
@@ -118,11 +118,11 @@ class __RepeatDefaultKeyGen {
     }
 
     // Return the same IDs for the same pairs <item, index>
-    public static funcWithIndex(item: any, index:number) {
+    public static funcWithIndex<T>(item: T, index:number) {
         return `${index}__` + __RepeatDefaultKeyGen.func(item);
     }
 
-    private static funcImpl(item: any) {
+    private static funcImpl<T>(item: T) {
         // fast keygen logic can be used with objects/symbols only
         if (typeof item != 'object' && typeof item != 'symbol') {
             return JSON.stringify(item);
