@@ -25,17 +25,13 @@
 
 namespace OHOS::Ace {
 
-enum class SpanOperation {
-    ADD = 0,
-    REMOVE,
-};
-
 class ACE_EXPORT MutableSpanString : public SpanString {
     DECLARE_ACE_TYPE(MutableSpanString, SpanString);
 
 public:
     explicit MutableSpanString(const std::string& text) : SpanString(text) {}
-    MutableSpanString(const std::string& text, std::vector<RefPtr<SpanBase>>& spans) : SpanString(text, spans) {}
+    MutableSpanString(const std::string& text, std::vector<RefPtr<SpanBase>>& spans)
+        : SpanString(text, spans) {}
     void ReplaceString(int32_t start, int32_t length, const std::string& other);
     void InsertString(int32_t start, const std::string& other);
     void RemoveString(int32_t start, int32_t length);
@@ -49,13 +45,16 @@ public:
 
 private:
     void KeepSpansOrder();
-    void ApplyReplaceStringToSpans(int32_t start, int32_t length, const std::string& other);
-    void ApplyRemoveStringToSpans(int32_t start, int32_t length);
+    void ApplyReplaceStringToSpans(int32_t start, int32_t length, const std::string& other, SpanStringOperation op);
     void ApplyInsertStringToSpans(int32_t start, const std::string& other);
+    void ApplyReplaceStringToSpanBase(int32_t start, int32_t length, const std::string& other, SpanStringOperation op);
     RefPtr<SpanBase> GetDefaultSpan(SpanType type) const;
     static std::wstring GetWideStringSubstr(const std::wstring& content, int32_t start);
     static std::wstring GetWideStringSubstr(const std::wstring& content, int32_t start, int32_t length);
-    void AppendString(const std::string& other);
+    void UpdateSpansWithOffset(int32_t start, int32_t offset, SpanStringOperation op);
+    void UpdateSpanMapWithOffset(int32_t start, int32_t offset, SpanStringOperation op);
+    void UpdateSpanBaseWithOffset(RefPtr<SpanBase>& span, int32_t start, int32_t offset, SpanStringOperation op);
 };
 } // namespace OHOS::Ace
+
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_TEXT_SPAN_MUTABLE_SPAN_STRING_H
