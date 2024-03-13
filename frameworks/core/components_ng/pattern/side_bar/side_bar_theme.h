@@ -41,18 +41,14 @@ public:
                 return theme;
             }
 
-            ParsePattern(themeConstants->GetThemeStyle(), theme);
+            ParsePattern(themeConstants, theme);
             return theme;
         }
 
     private:
-        void ParsePattern(const RefPtr<ThemeStyle>& themeStyle, const RefPtr<SideBarTheme>& theme) const
+        void ParsePattern(const RefPtr<ThemeConstants>& themeConstants, const RefPtr<SideBarTheme>& theme) const
         {
-            if (!themeStyle) {
-                return;
-            }
-
-            auto sideBarPattern = themeStyle->GetAttr<RefPtr<ThemeStyle>>(THEME_PATTERN_SIDE_BAR, nullptr);
+            RefPtr<ThemeStyle> sideBarPattern = themeConstants->GetPatternByName(THEME_PATTERN_SIDE_BAR);
             if (!sideBarPattern) {
                 return;
             }

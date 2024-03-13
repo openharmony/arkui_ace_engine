@@ -44,7 +44,7 @@ public:
                 LOGE("Build AppBarTheme error, themeConstants is null!");
                 return theme;
             }
-            ParsePattern(themeConstants->GetThemeStyle(), theme);
+            ParsePattern(themeConstants, theme);
             return theme;
         }
     };
@@ -101,12 +101,9 @@ public:
 
 private:
     AppBarTheme() = default;
-    static void ParsePattern(const RefPtr<ThemeStyle>& themeStyle, const RefPtr<AppBarTheme>& theme)
+    static void ParsePattern(const RefPtr<ThemeConstants>& themeConstants, const RefPtr<AppBarTheme>& theme)
     {
-        if (!themeStyle) {
-            return;
-        }
-        auto appBarPattern = themeStyle->GetAttr<RefPtr<ThemeStyle>>(THEME_PATTERN_APP_BAR, nullptr);
+        RefPtr<ThemeStyle> appBarPattern = themeConstants->GetPatternByName(THEME_PATTERN_APP_BAR);
         if (!appBarPattern) {
             LOGE("Pattern of app bar is null, please check!");
             return;
