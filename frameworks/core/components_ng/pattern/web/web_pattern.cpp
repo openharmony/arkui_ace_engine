@@ -2916,16 +2916,37 @@ void WebPattern::OnOverScrollFlingVelocity(float xVelocity, float yVelocity, boo
         }
         isNeedUpdateScrollAxis_ = false;
     }
+    float velocity = (expectedScrollAxis_ == Axis::HORIZONTAL) ? xVelocity : yVelocity;
+    OnOverScrollFlingVelocityHandler(velocity, isFling);
+
+    if (isFling && Positive(velocity)) {
+        isFlingReachEdge_.atStart = true;
+    } else if (isFling && Negative(velocity)) {
+        isFlingReachEdge_.atEnd = true;
+    }
+}
+
+void WebPattern::OnOverScrollFlingVelocityHandler(float velocity, bool isFling)
+{
     auto it = parentsMap_.find(expectedScrollAxis_);
     CHECK_EQUAL_VOID(it, parentsMap_.end());
     auto parent = it->second;
-    float velocity = (expectedScrollAxis_ == Axis::HORIZONTAL) ? xVelocity : yVelocity;
     auto nestedScroll = GetNestedScroll();
+    ScrollResult result = { 0.f, true };
+    auto remain = 0.f;
     if (!isFling) {
         if (scrollState_) {
             if (((velocity < 0 && nestedScroll.backward == NestedScrollMode::SELF_FIRST) ||
                     (velocity > 0 && nestedScroll.forward == NestedScrollMode::SELF_FIRST))) {
-                HandleScroll(parent.Upgrade(), -velocity, SCROLL_FROM_UPDATE, NestedState::CHILD_SCROLL);
+                result = HandleScroll(parent.Upgrade(), -velocity, SCROLL_FROM_UPDATE, NestedState::CHILD_SCROLL);
+                remain = result.remain;
+            } else if (InstanceOf<RefreshPattern>(parent.Upgrade()) &&
+                       ((velocity < 0 && nestedScroll.backward == NestedScrollMode::PARENT_FIRST) ||
+                           (velocity > 0 && nestedScroll.forward == NestedScrollMode::PARENT_FIRST))) {
+                remain = -velocity;
+            }
+            if (!NearZero(remain)) {
+                HandleScroll(remain, SCROLL_FROM_UPDATE, NestedState::CHILD_OVER_SCROLL);
             }
         }
     } else {
@@ -3018,39 +3039,67 @@ bool WebPattern::FilterScrollEvent(const float x, const float y, const float xVe
     }
     float offset = expectedFilterScrollAxis_ == Axis::HORIZONTAL ? x : y;
     float velocity = expectedFilterScrollAxis_ == Axis::HORIZONTAL ? xVelocity : yVelocity;
-    return FilterScrollEventHandler(offset, velocity);
+    bool isConsumed = offset != 0 ? FilterScrollEventHandleOffset(offset) : FilterScrollEventHandlevVlocity(velocity);
+    return isConsumed;
 }
 
-bool WebPattern::FilterScrollEventHandler(const float offset, const float velocity)
+bool WebPattern::FilterScrollEventHandleOffset(const float offset)
 {
     auto it = parentsMap_.find(expectedFilterScrollAxis_);
     CHECK_EQUAL_RETURN(it, parentsMap_.end(), false);
     auto parent = it->second;
     auto nestedScroll = GetNestedScroll();
-    if (((offset > 0 || velocity > 0) && nestedScroll.backward == NestedScrollMode::PARENT_FIRST) ||
-        ((offset < 0 || velocity < 0) && nestedScroll.forward == NestedScrollMode::PARENT_FIRST)) {
-        if (offset != 0) {
-            auto result = HandleScroll(parent.Upgrade(), offset, SCROLL_FROM_UPDATE, NestedState::CHILD_SCROLL);
-            CHECK_NULL_RETURN(delegate_, false);
-            auto defaultDisplay = Rosen::DisplayManager::GetInstance().GetDefaultDisplay();
-            CHECK_NULL_RETURN(defaultDisplay, false);
-            auto ratio = defaultDisplay->GetVirtualPixelRatio();
-            CHECK_EQUAL_RETURN(ratio, 0, false);
+    if (((offset > 0) && nestedScroll.backward == NestedScrollMode::PARENT_FIRST) ||
+        ((offset < 0) && nestedScroll.forward == NestedScrollMode::PARENT_FIRST)) {
+        auto result = HandleScroll(parent.Upgrade(), offset, SCROLL_FROM_UPDATE, NestedState::CHILD_SCROLL);
+        isParentReachEdge_ = result.reachEdge;
+        CHECK_NULL_RETURN(delegate_, false);
+        auto defaultDisplay = Rosen::DisplayManager::GetInstance().GetDefaultDisplay();
+        CHECK_NULL_RETURN(defaultDisplay, false);
+        auto ratio = defaultDisplay->GetVirtualPixelRatio();
+        if (ratio > 0) {
             expectedFilterScrollAxis_ == Axis::HORIZONTAL ? delegate_->ScrollBy(-result.remain / ratio, 0)
                                                           : delegate_->ScrollBy(0, -result.remain / ratio);
-            return true;
-        } else {
-            return HandleScrollVelocity(parent.Upgrade(), velocity);
         }
-    } else if (((offset > 0 || velocity > 0) && nestedScroll.backward == NestedScrollMode::PARALLEL) ||
-               ((offset < 0 || velocity < 0) && nestedScroll.forward == NestedScrollMode::PARALLEL)) {
-        if (offset != 0) {
-            HandleScroll(parent.Upgrade(), offset, SCROLL_FROM_UPDATE, NestedState::CHILD_SCROLL);
-        } else {
-            HandleScrollVelocity(parent.Upgrade(), velocity);
-        }
+        CHECK_NULL_RETURN(!NearZero(result.remain), true);
+        UpdateFlingReachEdgeState(offset, false);
+        return true;
+    } else if (((offset > 0) && nestedScroll.backward == NestedScrollMode::PARALLEL) ||
+               ((offset < 0) && nestedScroll.forward == NestedScrollMode::PARALLEL)) {
+        HandleScroll(parent.Upgrade(), offset, SCROLL_FROM_UPDATE, NestedState::CHILD_SCROLL);
     }
+    UpdateFlingReachEdgeState(offset, false);
     return false;
+}
+
+bool WebPattern::FilterScrollEventHandlevVlocity(const float velocity)
+{
+    auto it = parentsMap_.find(expectedFilterScrollAxis_);
+    CHECK_EQUAL_RETURN(it, parentsMap_.end(), false);
+    auto parent = it->second;
+    auto nestedScroll = GetNestedScroll();
+    if (((velocity > 0) && nestedScroll.backward == NestedScrollMode::PARENT_FIRST) ||
+        ((velocity < 0) && nestedScroll.forward == NestedScrollMode::PARENT_FIRST)) {
+        if (isParentReachEdge_ &&
+            ((Negative(velocity) && !isFlingReachEdge_.atEnd) || (Positive(velocity) && !isFlingReachEdge_.atStart))) {
+            return false;
+        }
+        return HandleScrollVelocity(parent.Upgrade(), velocity);
+    } else if ((velocity > 0 && nestedScroll.backward == NestedScrollMode::PARALLEL) ||
+               (velocity < 0 && nestedScroll.forward == NestedScrollMode::PARALLEL)) {
+        HandleScrollVelocity(parent.Upgrade(), velocity);
+    }
+    UpdateFlingReachEdgeState(velocity, false);
+    return false;
+}
+
+void WebPattern::UpdateFlingReachEdgeState(const float value, bool status)
+{
+    if (isFlingReachEdge_.atStart && Negative(value)) {
+        isFlingReachEdge_.atStart = status;
+    } else if (isFlingReachEdge_.atEnd && Positive(value)) {
+        isFlingReachEdge_.atEnd = status;
+    }
 }
 
 void WebPattern::UpdateRelativeOffset()
