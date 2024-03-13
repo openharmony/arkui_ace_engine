@@ -1714,6 +1714,8 @@ void WebPattern::OnModifyDone()
             webAccessibilityNode_ = AceType::MakeRefPtr<WebAccessibilityNode>(host);
         }
         delegate_->UpdateNativeEmbedModeEnabled(GetNativeEmbedModeEnabledValue(false));
+        delegate_->UpdateNativeEmbedRuleTag(GetNativeEmbedRuleTagValue(""));
+        delegate_->UpdateNativeEmbedRuleType(GetNativeEmbedRuleTypeValue(""));
         accessibilityState_ = AceApplicationInfo::GetInstance().IsAccessibilityEnabled();
         if (accessibilityState_) {
             delegate_->SetAccessibilityState(true);
