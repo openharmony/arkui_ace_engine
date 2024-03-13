@@ -45,18 +45,14 @@ public:
             }
             auto themeStyle = themeConstants->GetThemeStyle();
             theme->fillColor_ = themeConstants->GetColor(THEME_IMAGE_FILL_COLOR);
-            ParsePattern(themeConstants->GetThemeStyle(), theme);
+            ParsePattern(themeConstants, theme);
             return theme;
         }
 
     private:
-        void ParsePattern(const RefPtr<ThemeStyle>& themeStyle, const RefPtr<ImageTheme>& theme) const
+        void ParsePattern(const RefPtr<ThemeConstants>& themeConstants, const RefPtr<ImageTheme>& theme) const
         {
-            if (!themeStyle) {
-                LOGI("image theme style is null");
-                return;
-            }
-            auto pattern = themeStyle->GetAttr<RefPtr<ThemeStyle>>(THEME_PATTERN_IMAGE, nullptr);
+            RefPtr<ThemeStyle> pattern = themeConstants->GetPatternByName(THEME_PATTERN_IMAGE);
             if (!pattern) {
                 LOGW("find pattern of image fail");
                 return;

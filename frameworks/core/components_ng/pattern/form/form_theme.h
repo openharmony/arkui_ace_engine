@@ -44,16 +44,14 @@ public:
                 return theme;
             }
 
-            ParsePattern(themeConstants->GetThemeStyle(), theme);
+            ParsePattern(themeConstants, theme);
             return theme;
         }
-    
-    private:
-        void ParsePattern(const RefPtr<ThemeStyle>& themeStyle, const RefPtr<FormTheme>& theme) const
-        {
-            CHECK_NULL_VOID(themeStyle);
 
-            auto formPattern = themeStyle->GetAttr<RefPtr<ThemeStyle>>(THEME_PATTERN_FORM, nullptr);
+    private:
+        void ParsePattern(const RefPtr<ThemeConstants>& themeConstants, const RefPtr<FormTheme>& theme) const
+        {
+            RefPtr<ThemeStyle> formPattern = themeConstants->GetPatternByName(THEME_PATTERN_FORM);
             CHECK_NULL_VOID(formPattern);
 
             theme->unTrustBackgroundColor_ = formPattern->GetAttr<Color>("form_untrust_background_color", Color::RED);

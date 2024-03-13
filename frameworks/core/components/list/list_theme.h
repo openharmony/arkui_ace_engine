@@ -41,17 +41,13 @@ public:
             if (!themeConstants) {
                 return theme;
             }
-            ParsePattern(themeConstants->GetThemeStyle(), theme);
+            ParsePattern(themeConstants, theme);
             return theme;
         }
 
-        void ParsePattern(const RefPtr<ThemeStyle>& themeStyle, const RefPtr<ListTheme>& theme) const
+        void ParsePattern(const RefPtr<ThemeConstants>& themeConstants, const RefPtr<ListTheme>& theme) const
         {
-            if (!themeStyle) {
-                LOGW("list theme style is null");
-                return;
-            }
-            auto pattern = themeStyle->GetAttr<RefPtr<ThemeStyle>>(THEME_PATTERN_LIST, nullptr);
+            RefPtr<ThemeStyle> pattern = themeConstants->GetPatternByName(THEME_PATTERN_LIST);
             if (!pattern) {
                 LOGW("find pattern of list fail");
                 return;

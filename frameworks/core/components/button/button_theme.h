@@ -43,17 +43,17 @@ public:
             if (!themeConstants) {
                 return theme;
             }
-            ParsePattern(themeConstants->GetThemeStyle(), theme);
+            ParsePattern(themeConstants, theme);
             return theme;
         }
 
     private:
-        void ParsePattern(const RefPtr<ThemeStyle>& themeStyle, const RefPtr<ButtonTheme>& theme) const
+        void ParsePattern(const RefPtr<ThemeConstants>& themeConstants, const RefPtr<ButtonTheme>& theme) const
         {
-            if (!themeStyle) {
+            if (!themeConstants) {
                 return;
             }
-            auto buttonPattern = themeStyle->GetAttr<RefPtr<ThemeStyle>>(THEME_PATTERN_BUTTON, nullptr);
+            RefPtr<ThemeStyle> buttonPattern = themeConstants->GetPatternByName(THEME_PATTERN_BUTTON);
             if (!buttonPattern) {
                 LOGW("find pattern of button fail");
                 return;

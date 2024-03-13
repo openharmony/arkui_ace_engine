@@ -39,12 +39,12 @@ public:
                 return theme;
             }
             theme->barColor_ = themeConstants->GetColor(THEME_DRAG_BAR_COLOR);
-            ParsePattern(themeConstants->GetThemeStyle(), theme);
+            ParsePattern(themeConstants, theme);
             auto themeStyle = themeConstants->GetThemeStyle();
             if (!themeStyle) {
                 return theme;
             }
-            auto pattern = themeStyle->GetAttr<RefPtr<ThemeStyle>>(THEME_PATTERN_DRAG_BAR, nullptr);
+            RefPtr<ThemeStyle> pattern = themeConstants->GetPatternByName(THEME_PATTERN_DRAG_BAR);
             if (pattern) {
                 theme->dragBarColor_ = pattern->GetAttr<Color>("drag_bar_bg_color", Color::WHITE);
                 theme->panelBgColor_ = pattern->GetAttr<Color>("panel_bg_color", Color::WHITE);
@@ -54,12 +54,9 @@ public:
             return theme;
         }
     private:
-        void ParsePattern(const RefPtr<ThemeStyle>& themeStyle, const RefPtr<DragBarTheme>& theme) const
+        void ParsePattern(const RefPtr<ThemeConstants>& themeConstants, const RefPtr<DragBarTheme>& theme) const
         {
-            if (!themeStyle) {
-                return;
-            }
-            auto pattern = themeStyle->GetAttr<RefPtr<ThemeStyle>>(THEME_PATTERN_DRAG_BAR, nullptr);
+            RefPtr<ThemeStyle> pattern = themeConstants->GetPatternByName(THEME_PATTERN_DRAG_BAR);
             if (!pattern) {
                 LOGW("find pattern of drag bar fail");
                 return;
