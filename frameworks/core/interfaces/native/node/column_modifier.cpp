@@ -100,7 +100,7 @@ const ArkUIColumnModifier* GetColumnModifier()
         SetColumnAlignItems,
         ResetColumnAlignItems,
         GetColumnJustifyContent,
-        GetColumnAlignItems
+        GetColumnAlignItems,
         SetColumnSpace,
         ResetColumnSpace,
     };
