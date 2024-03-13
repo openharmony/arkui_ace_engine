@@ -291,14 +291,14 @@ void LayoutWrapper::ApplyConstraint(LayoutConstraintF constraint)
     GetGeometryNode()->SetParentLayoutConstraint(constraint);
 
     auto layoutProperty = GetLayoutProperty();
-    const auto& magicItemProperty = layoutProperty->GetMagicItemProperty();
-    if (magicItemProperty && magicItemProperty->HasAspectRatio()) {
+    auto& magicItemProperty = layoutProperty->GetMagicItemProperty();
+    if (magicItemProperty.HasAspectRatio()) {
         std::optional<CalcSize> idealSize = std::nullopt;
         if (layoutProperty->GetCalcLayoutConstraint()) {
             idealSize = layoutProperty->GetCalcLayoutConstraint()->selfIdealSize;
         }
         auto greaterThanApiTen = Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TEN);
-        constraint.ApplyAspectRatio(magicItemProperty->GetAspectRatioValue(), idealSize, greaterThanApiTen);
+        constraint.ApplyAspectRatio(magicItemProperty.GetAspectRatioValue(), idealSize, greaterThanApiTen);
     }
 
     auto&& insets = layoutProperty->GetSafeAreaInsets();
@@ -314,10 +314,9 @@ void LayoutWrapper::CreateRootConstraint()
     LayoutConstraintF layoutConstraint;
     layoutConstraint.percentReference.SetWidth(PipelineContext::GetCurrentRootWidth());
     auto layoutProperty = GetLayoutProperty();
-    const auto& magicItemProperty = layoutProperty->GetMagicItemProperty();
-    auto hasAspectRatio = magicItemProperty && magicItemProperty->HasAspectRatio();
-    if (hasAspectRatio) {
-        auto aspectRatio = magicItemProperty->GetAspectRatioValue();
+    auto& magicItemProperty = layoutProperty->GetMagicItemProperty();
+    if (magicItemProperty.HasAspectRatio()) {
+        auto aspectRatio = magicItemProperty.GetAspectRatioValue();
         if (Positive(aspectRatio)) {
             auto height = PipelineContext::GetCurrentRootHeight() / aspectRatio;
             layoutConstraint.percentReference.SetHeight(height);

@@ -2866,7 +2866,7 @@ void FrameNode::Measure(const std::optional<LayoutConstraintF>& parentConstraint
     // check aspect radio.
     if (pattern_ && pattern_->IsNeedAdjustByAspectRatio()) {
         const auto& magicItemProperty = layoutProperty_->GetMagicItemProperty();
-        auto aspectRatio = magicItemProperty->GetAspectRatioValue();
+        auto aspectRatio = magicItemProperty.GetAspectRatioValue();
         // Adjust by aspect ratio, firstly pick height based on width. It means that when width, height and
         // aspectRatio are all set, the height is not used.
         auto width = geometryNode_->GetFrameSize().Width();
