@@ -66,6 +66,12 @@ struct ImageSpanOptions : SpanOptionBase {
     std::optional<ImageSpanAttribute> imageAttribute;
 };
 
+enum class MenuPolicy { DEFAULT = 0, NEVER, ALWAYS };
+
+struct SelectionOptions {
+    MenuPolicy menuPolicy = MenuPolicy::DEFAULT;
+};
+
 struct SpanPositionInfo {
     SpanPositionInfo(int32_t index, int32_t start, int32_t end, int32_t offset)
         : spanIndex_(index), spanStart_(start), spanEnd_(end), spanOffset_(offset)
@@ -206,7 +212,8 @@ public:
     virtual void DeleteSpans(const RangeOptions& options) = 0;
     virtual void CloseSelectionMenu() = 0;
     virtual SelectionInfo GetSelectionSpansInfo() = 0;
-    virtual void SetSelection(int32_t selectionStart, int32_t selectionEnd) = 0;
+    virtual void SetSelection(int32_t selectionStart, int32_t selectionEnd,
+        const std::optional<SelectionOptions>& options = std::nullopt) = 0;
 };
 
 class ACE_EXPORT RichEditorModel {
