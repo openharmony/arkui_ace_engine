@@ -23,6 +23,11 @@
 #include "core/components_ng/pattern/custom_paint/custom_paint_layout_algorithm.h"
 #include "core/components_ng/pattern/pattern.h"
 #include "core/pipeline_ng/pipeline_context.h"
+#include "interfaces/inner_api/ace/ai/image_analyzer.h"
+
+namespace OHOS::Ace {
+class ImageAnalyzerManager;
+}
 
 namespace OHOS::Ace::NG {
 class CanvasPaintMethod;
@@ -34,7 +39,7 @@ class ACE_EXPORT CustomPaintPattern : public Pattern {
 
 public:
     CustomPaintPattern() = default;
-    ~CustomPaintPattern() override = default;
+    ~CustomPaintPattern() override;
 
     std::optional<RenderContext::ContextParam> GetContextParam() const override
     {
@@ -152,12 +157,20 @@ public:
 
     void SaveLayer();
     void RestoreLayer();
+    void EnableAnalyzer(bool enable);
+    void StartImageAnalyzer(void* config, onAnalyzedCallback& onAnalyzed);
+    void StopImageAnalyzer();
 
     void DumpAdvanceInfo() override;
 
 private:
     void OnAttachToFrameNode() override;
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
+    void CreateAnalyzerOverlay();
+    void DestroyAnalyzerOverlay();
+    void UpdateAnalyzerOverlay();
+    void ReleaseImageAnalyzer();
+    bool IsSupportImageAnalyzerFeature();
 
     RefPtr<CanvasPaintMethod> paintMethod_;
     std::optional<SizeF> canvasSize_;
@@ -165,6 +178,8 @@ private:
     SizeF dirtyPixelGridRoundSize_ = { -1, -1 };
     SizeF lastDirtyPixelGridRoundSize_ = { -1, -1 };
     DirtySwapConfig recordConfig_;
+    std::shared_ptr<ImageAnalyzerManager> imageAnalyzerManager_;
+    bool isEnableAnalyzer_ = false;
 
     RefPtr<RenderingContext2DModifier> contentModifier_;
 

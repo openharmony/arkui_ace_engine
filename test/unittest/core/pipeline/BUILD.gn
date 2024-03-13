@@ -65,6 +65,7 @@ ace_unittest("pipeline_context_test_ng") {
     "$ace_root/test/mock/core/common/mock_font_manager.cpp",
     "$ace_root/test/mock/core/common/mock_font_manager_ng.cpp",
     "$ace_root/test/mock/core/common/mock_image_analyzer_adapter.cpp",
+    "$ace_root/test/mock/core/common/mock_image_analyzer_manager.cpp",
     "$ace_root/test/mock/core/common/mock_image_analyzer_mgr.cpp",
     "$ace_root/test/mock/core/common/mock_interaction.cpp",
     "$ace_root/test/mock/core/common/mock_layout_inspector.cpp",

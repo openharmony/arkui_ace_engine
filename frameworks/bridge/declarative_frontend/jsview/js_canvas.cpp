@@ -75,6 +75,7 @@ void JSCanvas::JSBind(BindingTarget globalObj)
     JSClass<JSCanvas>::StaticMethod("onKeyEvent", &JSInteractableView::JsOnKey);
     JSClass<JSCanvas>::StaticMethod("onDeleteEvent", &JSInteractableView::JsOnDelete);
     JSClass<JSCanvas>::StaticMethod("onClick", &JSInteractableView::JsOnClick);
+    JSClass<JSCanvas>::StaticMethod("enableAnalyzer", &JSCanvas::EnableAnalyzer);
     JSClass<JSCanvas>::InheritAndBind<JSViewAbstract>(globalObj);
 }
 
@@ -106,5 +107,14 @@ void JSCanvas::OnReady(const JSCallbackInfo& info)
         };
         CanvasModel::GetInstance()->SetOnReady(std::move(readyEvent));
     }
+}
+
+void JSCanvas::EnableAnalyzer(const JSCallbackInfo& info)
+{
+    if (info.Length() < 1 || !info[0]->IsBoolean()) {
+        return;
+    }
+    bool enable = info[0]->ToBoolean();
+    CanvasModel::GetInstance()->EnableAnalyzer(enable);
 }
 } // namespace OHOS::Ace::Framework

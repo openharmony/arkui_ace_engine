@@ -14,16 +14,31 @@
  */
 
 #include "js_rendering_context.h"
+#include <cstdint>
+#include "interfaces/inner_api/ace/ai/image_analyzer.h"
+#include "js_native_api.h"
+#include "js_native_api_types.h"
+#include "js_utils.h"
 
+#include "base/error/error_code.h"
+#include "base/memory/referenced.h"
+#include "base/utils/utils.h"
 #include "bridge/common/utils/engine_helper.h"
 #include "bridge/declarative_frontend/engine/bindings.h"
+#include "bridge/declarative_frontend/engine/js_converter.h"
+#include "bridge/declarative_frontend/engine/js_types.h"
 #include "bridge/declarative_frontend/jsview/js_offscreen_rendering_context.h"
+#include "core/common/container_scope.h"
 #include "frameworks/bridge/declarative_frontend/jsview/models/rendering_context_model_impl.h"
 #include "frameworks/core/components_ng/pattern/rendering_context/rendering_context_model_ng.h"
 
 namespace OHOS::Ace {
 std::unique_ptr<RenderingContextModel> RenderingContextModel::instance_ = nullptr;
 std::mutex RenderingContextModel::mutex_;
+struct CanvasAsyncCxt {
+    napi_env env = nullptr;
+    napi_deferred deferred = nullptr;
+};
 RenderingContextModel* RenderingContextModel::GetInstance()
 {
     if (!instance_) {
@@ -144,6 +159,8 @@ void JSRenderingContext::JSBind(BindingTarget globalObj)
     JSClass<JSRenderingContext>::CustomMethod("createConicGradient", &JSCanvasRenderer::JsCreateConicGradient);
     JSClass<JSRenderingContext>::CustomMethod("saveLayer", &JSCanvasRenderer::JsSaveLayer);
     JSClass<JSRenderingContext>::CustomMethod("restoreLayer", &JSCanvasRenderer::JsRestoreLayer);
+    JSClass<JSRenderingContext>::CustomMethod("startImageAnalyzer", &JSRenderingContext::JsStartImageAnalyzer);
+    JSClass<JSRenderingContext>::CustomMethod("stopImageAnalyzer", &JSRenderingContext::JsStopImageAnalyzer);
     JSClass<JSRenderingContext>::Bind(globalObj, JSRenderingContext::Constructor, JSRenderingContext::Destructor);
 }
 
@@ -229,5 +246,94 @@ void JSRenderingContext::JsTransferFromImageBitmap(const JSCallbackInfo& info)
         RenderingContextModel::GetInstance()->SetTransferFromImageBitmap(
             canvasPattern_, offscreenPattern);
     }
+}
+
+napi_value CreateErrorValue(napi_env env, int32_t errCode, const std::string& errMsg = "")
+{
+    napi_value code = nullptr;
+    std::string codeStr = std::to_string(errCode);
+    napi_create_string_utf8(env, codeStr.c_str(), codeStr.length(), &code);
+    napi_value msg = nullptr;
+    napi_create_string_utf8(env, errMsg.c_str(), errMsg.length(), &msg);
+    napi_value error = nullptr;
+    napi_create_error(env, code, msg, &error);
+    return error;
+}
+
+void HandleReject(const shared_ptr<CanvasAsyncCxt>& ctx, int32_t errCode, const std::string& errMsg = "")
+{
+    napi_value result = nullptr;
+    result = CreateErrorValue(ctx->env, errCode, errMsg);
+    napi_reject_deferred(ctx->env, ctx->deferred, result);
+}
+
+void ReturnPromise(const JSCallbackInfo& info, napi_value result)
+{
+    CHECK_NULL_VOID(result);
+    auto jsPromise = JsConverter::ConvertNapiValueToJsVal(result);
+    if (!jsPromise->IsObject()) {
+        return;
+    }
+    info.SetReturnValue(JSRef<JSObject>::Cast(jsPromise));
+}
+
+void JSRenderingContext::JsStartImageAnalyzer(const JSCallbackInfo& info)
+{
+    ContainerScope scope(instanceId_);
+    napi_value promise = nullptr;
+    if (info.Length() < 1 || !info[0]->IsObject()) {
+        ReturnPromise(info, promise);
+        return;
+    }
+    auto engine = EngineHelper::GetCurrentEngine();
+    CHECK_NULL_VOID(engine);
+    NativeEngine* nativeEngine = engine->GetNativeEngine();
+    auto env = reinterpret_cast<napi_env>(nativeEngine);
+    ScopeRAII scopeRaii(env);
+
+    panda::Local<JsiValue> value = info[0].Get().GetLocalHandle();
+    JSValueWrapper valueWrapper = value;
+    napi_value configNativeValue = nativeEngine->ValueToNapiValue(valueWrapper);
+
+    auto asyncCtx = std::make_shared<CanvasAsyncCxt>();
+    asyncCtx->env = env;
+    napi_create_promise(env, &asyncCtx->deferred, &promise);
+    if (isImageAnalyzing_) {
+        napi_value result = CreateErrorValue(env, ERROR_CODE_AI_ANALYSIS_IS_ONGOING);
+        napi_reject_deferred(env, asyncCtx->deferred, result);
+        ReturnPromise(info, promise);
+        return;
+    }
+
+    onAnalyzedCallback onAnalyzed_ = [asyncCtx, weakCtx = WeakClaim(this)](bool isSucceed) {
+        auto ctx = weakCtx.Upgrade();
+        CHECK_NULL_VOID(ctx);
+        auto env = asyncCtx->env;
+        napi_handle_scope scope = nullptr;
+        auto status = napi_open_handle_scope(asyncCtx->env, &scope);
+        if (status != napi_ok) {
+            return;
+        }
+
+        napi_value result = nullptr;
+        if (isSucceed) {
+            napi_get_null(env, &result);
+            napi_resolve_deferred(env, asyncCtx->deferred, result);
+        } else {
+            result = CreateErrorValue(env, ERROR_CODE_AI_ANALYSIS_UNSUPPORTED);
+            napi_reject_deferred(env, asyncCtx->deferred, result);
+        }
+        ctx->isImageAnalyzing_ = false;
+        napi_close_handle_scope(env, scope);
+    };
+    isImageAnalyzing_ = true;
+    RenderingContextModel::GetInstance()->StartImageAnalyzer(canvasPattern_, configNativeValue, onAnalyzed_);
+    ReturnPromise(info, promise);
+}
+
+void JSRenderingContext::JsStopImageAnalyzer(const JSCallbackInfo& info)
+{
+    ContainerScope scope(instanceId_);
+    RenderingContextModel::GetInstance()->StopImageAnalyzer(canvasPattern_);
 }
 } // namespace OHOS::Ace::Framework

@@ -830,4 +830,30 @@ HWTEST_F(CustomPaintPatternTestNg, CustomPaintPatternTestNg017, TestSize.Level1)
     EXPECT_FALSE(customPattern->OnDirtyLayoutWrapperSwap(dirty, config));
 }
 
+/**
+ * @tc.name: CustomPaintPatternTestNg018
+ * @tc.desc: Test functions about EnableAnalyzer.
+ * @tc.type: FUNC
+ */
+HWTEST_F(CustomPaintPatternTestNg, CustomPaintPatternTestNg018, TestSize.Level1)
+{
+    /**
+     * @tc.steps1: initialize parameters.
+     * @tc.expected: All pointer is non-null.
+     */
+    auto customPattern = CreateCustomPaintPattern();
+    ASSERT_NE(customPattern, nullptr);
+
+    /**
+     * @tc.steps2: Test functions about EnableAnalyzer.
+     * @tc.expected: The result.
+     */
+    customPattern->EnableAnalyzer(true)
+    EXPECT_TRUE(customPattern->IsSupportImageAnalyzerFeature());
+
+    customPattern->EnableAnalyzer(false)
+    EXPECT_FALSE(customPattern->IsSupportImageAnalyzerFeature());
+
+}
+
 } // namespace OHOS::Ace::NG
