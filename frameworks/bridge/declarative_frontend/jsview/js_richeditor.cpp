@@ -1453,13 +1453,34 @@ void JSRichEditorController::CloseSelectionMenu()
     controller->CloseSelectionMenu();
 }
 
-void JSRichEditorController::SetSelection(int32_t selectionStart, int32_t selectionEnd)
+void JSRichEditorController::SetSelection(const JSCallbackInfo& args)
 {
     ContainerScope scope(instanceId_ < 0 ? Container::CurrentId() : instanceId_);
-    auto controller = controllerWeak_.Upgrade();
-    if (controller) {
-        controller->SetSelection(selectionStart, selectionEnd);
+    if (args.Length() < 2) { // 2:At least two parameters
+        TAG_LOGE(AceLogTag::ACE_RICH_TEXT, "Info length error.");
+        return;
     }
+    int32_t selectionStart = 0;
+    int32_t selectionEnd = 0;
+    JSContainerBase::ParseJsInt32(args[0], selectionStart);
+    JSContainerBase::ParseJsInt32(args[1], selectionEnd);
+    auto controller = controllerWeak_.Upgrade();
+    CHECK_NULL_VOID(controller);
+    std::optional<SelectionOptions> options = std::nullopt;
+    if (3 <= args.Length()) { // 3:Protect operations
+        SelectionOptions optionTemp;
+        auto temp = args[2]; // 2:Get the third parameter
+        if (temp->IsObject()) {
+            JSRef<JSObject> placeholderOptionObject = JSRef<JSObject>::Cast(temp);
+            JSRef<JSVal> menuPolicy = placeholderOptionObject->GetProperty("menuPolicy");
+            int32_t tempPolicy = 0;
+            if (!menuPolicy->IsNull() && JSContainerBase::ParseJsInt32(menuPolicy, tempPolicy)) {
+                optionTemp.menuPolicy = static_cast<MenuPolicy>(tempPolicy);
+                options = optionTemp;
+            }
+        }
+    }
+    controller->SetSelection(selectionStart, selectionEnd, options);
 }
 
 void JSRichEditorController::GetSelection(const JSCallbackInfo& args)
@@ -1489,7 +1510,7 @@ void JSRichEditorController::JSBind(BindingTarget globalObj)
     JSClass<JSRichEditorController>::CustomMethod("getSpans", &JSRichEditorController::GetSpansInfo);
     JSClass<JSRichEditorController>::CustomMethod("getParagraphs", &JSRichEditorController::GetParagraphsInfo);
     JSClass<JSRichEditorController>::CustomMethod("deleteSpans", &JSRichEditorController::DeleteSpans);
-    JSClass<JSRichEditorController>::Method("setSelection", &JSRichEditorController::SetSelection);
+    JSClass<JSRichEditorController>::CustomMethod("setSelection", &JSRichEditorController::SetSelection);
     JSClass<JSRichEditorController>::CustomMethod("getSelection", &JSRichEditorController::GetSelection);
     JSClass<JSRichEditorController>::Method("closeSelectionMenu", &JSRichEditorController::CloseSelectionMenu);
     JSClass<JSRichEditorController>::Bind(

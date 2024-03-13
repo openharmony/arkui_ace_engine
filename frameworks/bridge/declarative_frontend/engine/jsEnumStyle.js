@@ -2631,6 +2631,13 @@ let ButtonRole;
   ButtonRole['ERROR'] = 1;
 })(ButtonRole || (ButtonRole = {}));
 
+let MenuPolicy;
+(function (MenuPolicy) {
+    MenuPolicy['DEFAULT'] = 0;
+    MenuPolicy['NEVER'] = 1;
+    MenuPolicy['ALWAYS'] = 2;
+})(MenuPolicy || (MenuPolicy = {}));
+
 let PreDragStatus;
 (function (PreDragStatus) {
   PreDragStatus['ACTION_DETECTING_STATUS'] = 0;

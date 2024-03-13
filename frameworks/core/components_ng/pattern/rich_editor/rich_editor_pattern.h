@@ -241,7 +241,8 @@ public:
     int32_t AddSymbolSpanOperation(const SymbolSpanOptions& options, bool isPaste = false, int32_t index = -1);
     void AddSpanItem(const RefPtr<SpanItem>& item, int32_t offset);
     int32_t AddPlaceholderSpan(const RefPtr<UINode>& customNode, const SpanOptionBase& options);
-    void SetSelection(int32_t start, int32_t end);
+    void HandleSelectOverlayWithOptions(const SelectionOptions& options);
+    void SetSelection(int32_t start, int32_t end, const std::optional<SelectionOptions>& options = std::nullopt);
     void OnHandleMoveDone(const RectF& handleRect, bool isFirstHandle) override;
     std::u16string GetLeftTextOfCursor(int32_t number) override;
     std::u16string GetRightTextOfCursor(int32_t number) override;
@@ -657,6 +658,7 @@ private:
     int32_t caretSpanIndex_ = -1;
     long long timestamp_ = 0;
     OffsetF selectionMenuOffsetByMouse_;
+    OffsetF selectionMenuOffsetByMouseLongPress_;
     OffsetF lastClickOffset_;
     std::string pasteStr_;
 

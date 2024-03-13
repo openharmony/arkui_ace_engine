@@ -113,7 +113,7 @@ public:
     void GetTypingStyle(const JSCallbackInfo& info);
     void SetTypingStyle(const JSCallbackInfo& info);
     void CloseSelectionMenu();
-    void SetSelection(int32_t selectionStart, int32_t selectionEnd);
+    void SetSelection(const JSCallbackInfo& args);
     void GetSelection(const JSCallbackInfo& args);
     void SetInstanceId(int32_t id)
     {

@@ -1927,6 +1927,8 @@ void RichEditorPattern::HandleLongPress(GestureEvent& info)
     }
     TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "handle long press!");
     caretUpdateType_ = CaretUpdateType::LONG_PRESSED;
+    selectionMenuOffsetByMouseLongPress_ = OffsetF(
+        static_cast<float>(info.GetGlobalLocation().GetX()), static_cast<float>(info.GetGlobalLocation().GetY()));
     HandleDoubleClickOrLongPress(info);
     caretUpdateType_ = CaretUpdateType::NONE;
 }
@@ -3958,6 +3960,8 @@ void RichEditorPattern::HandleMouseLeftButton(const MouseInfo& info)
     if (info.GetAction() == MouseAction::MOVE) {
         HandleMouseLeftButtonMove(info);
     } else if (info.GetAction() == MouseAction::PRESS) {
+        selectionMenuOffsetByMouseLongPress_ = OffsetF(
+            static_cast<float>(info.GetGlobalLocation().GetX()), static_cast<float>(info.GetGlobalLocation().GetY()));
         HandleMouseLeftButtonPress(info);
     } else if (info.GetAction() == MouseAction::RELEASE) {
         HandleMouseLeftButtonRelease(info);
@@ -4748,7 +4752,29 @@ void RichEditorPattern::InitSelection(const Offset& pos)
     }
 }
 
-void RichEditorPattern::SetSelection(int32_t start, int32_t end)
+void RichEditorPattern::HandleSelectOverlayWithOptions(const SelectionOptions& options)
+{
+    if (options.menuPolicy == MenuPolicy::ALWAYS) {
+        if (isMousePressed_ || sourceType_ == SourceType::MOUSE) {
+            selectionMenuOffsetByMouse_ = selectionMenuOffsetByMouseLongPress_;
+        }
+        CalculateHandleOffsetAndShowOverlay();
+        if (SelectOverlayIsOn()) {
+            CloseSelectOverlay();
+            auto responseType = static_cast<TextResponseType>(
+                selectOverlayProxy_->GetSelectOverlayMangerInfo().menuInfo.responseType.value_or(0));
+            ShowSelectOverlay(textSelector_.firstHandle, textSelector_.secondHandle, IsSelectAll(), responseType);
+        } else {
+            ShowSelectOverlay(textSelector_.firstHandle, textSelector_.secondHandle, IsSelectAll());
+        }
+    } else if (options.menuPolicy == MenuPolicy::NEVER) {
+        if (SelectOverlayIsOn()) {
+            CloseSelectOverlay();
+        }
+    }
+}
+
+void RichEditorPattern::SetSelection(int32_t start, int32_t end, const std::optional<SelectionOptions>& options)
 {
     CHECK_NULL_VOID(HasFocus());
     bool changeSelected = false;
@@ -4774,7 +4800,9 @@ void RichEditorPattern::SetSelection(int32_t start, int32_t end)
             FireOnSelect(textSelector_.GetTextStart(), textSelector_.GetTextEnd());
         }
     }
-    if (SelectOverlayIsOn()) {
+    if (options.has_value() && MenuPolicy::DEFAULT != options.value().menuPolicy && textSelector_.IsValid()) {
+        HandleSelectOverlayWithOptions(options.value());
+    } else if (SelectOverlayIsOn()) {
         isMousePressed_ = selectOverlayProxy_->GetSelectOverlayMangerInfo().isUsingMouse;
         auto selectedTypeChange = (oldSelectedType.has_value() && selectedType_.has_value() &&
                                       oldSelectedType.value() != selectedType_.value()) ||
