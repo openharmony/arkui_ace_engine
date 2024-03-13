@@ -188,7 +188,7 @@ void MenuPattern::OnAttachToFrameNode()
                 CHECK_NULL_VOID(menuWarpper);
                 auto warpperPattern = menuWarpper->GetPattern<MenuWrapperPattern>();
                 CHECK_NULL_VOID(warpperPattern);
-                if (!warpperPattern->IsHided()) {
+                if (!warpperPattern->IsHide()) {
                     auto pipeline = weakPipeline.Upgrade();
                     CHECK_NULL_VOID(pipeline);
                     menu->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);

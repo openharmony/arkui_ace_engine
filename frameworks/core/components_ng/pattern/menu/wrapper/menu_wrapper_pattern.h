@@ -33,6 +33,14 @@
 
 namespace OHOS::Ace::NG {
 
+enum class MenuStatus {
+    INIT,              // Neither exists in the menuMap_ nor on the tree
+    ON_SHOW_ANIMATION, // Exists in the menuMap_ also exists on the tree
+    SHOW,              // Exists in the menuMap_ also exists on the tree
+    ON_HIDE_ANIMATION, // Exists in the menuMap_ also exists on the tree
+    HIDE               // Exists in the menuMap_ but not on the tree
+};
+
 // has full screen size
 // used for detecting clicks outside Menu area
 class MenuWrapperPattern : public PopupBasePattern {
@@ -66,14 +74,9 @@ public:
 
     void HideMenu();
 
-    bool IsHided() const
+    bool IsHide() const
     {
-        return isHided_;
-    }
-
-    void SetMenuHide()
-    {
-        isHided_ = true;
+        return menuStatus_ == MenuStatus::ON_HIDE_ANIMATION || menuStatus_ == MenuStatus::HIDE;
     }
 
     bool IsContextMenu() const
@@ -201,14 +204,19 @@ public:
         return onDisappearCallback_;
     }
 
-    void SetShow(bool isShow)
+    bool IsShow() const
     {
-        isShow_ = isShow;
+        return menuStatus_ == MenuStatus::ON_SHOW_ANIMATION || menuStatus_ == MenuStatus::SHOW;
     }
 
-    bool GetShow() const
+    void SetMenuStatus(MenuStatus value)
     {
-        return isShow_;
+        menuStatus_ = value;
+    }
+
+    MenuStatus GetMenuStatus() const
+    {
+        return menuStatus_;
     }
 
 protected:
@@ -227,7 +235,6 @@ private:
     bool IsSelectOverlayCustomMenu(const RefPtr<FrameNode>& menu) const;
     void OnAttachToFrameNode() override;
     void RegisterOnTouch();
-    void OnModifyDone() override;
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
     void SetHotAreas(const RefPtr<LayoutWrapper>& layoutWrapper);
     void StartShowAnimation();
@@ -246,9 +253,8 @@ private:
     AnimationOption animationOption_;
     Placement menuPlacement_ = Placement::NONE;
     bool isFirstShow_ = true;
-    bool isHided_ = false;
-    bool isShow_ = false;
     bool isShowInSubWindow_ = true;
+    MenuStatus menuStatus_ = MenuStatus::INIT;
     ACE_DISALLOW_COPY_AND_MOVE(MenuWrapperPattern);
 };
 } // namespace OHOS::Ace::NG
