@@ -280,10 +280,11 @@ std::shared_ptr<WebJSValue> JSWebController::GetJavaScriptResult(const std::stri
 {
     std::vector<JSRef<JSVal>> argv = {};
     std::shared_ptr<WebJSValue> jsResult = std::make_shared<WebJSValue>(WebJSValue::Type::NONE);
-    if (objectorMap_.find(objectName) == objectorMap_.end()) {
+    auto iter = objectorMap_.find(objectName);
+    if (iter == objectorMap_.end()) {
         return jsResult;
     }
-    auto jsObject = objectorMap_[objectName];
+    auto jsObject = iter->second;
     if (jsObject->IsEmpty()) {
         return jsResult;
     }

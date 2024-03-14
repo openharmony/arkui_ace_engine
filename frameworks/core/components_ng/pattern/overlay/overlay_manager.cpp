@@ -1206,10 +1206,11 @@ void OverlayManager::HideAllPopups()
 void OverlayManager::ErasePopup(int32_t targetId)
 {
     TAG_LOGD(AceLogTag::ACE_OVERLAY, "erase popup enter");
-    if (popupMap_.find(targetId) != popupMap_.end()) {
+    auto it = popupMap_.find(targetId);
+    if (it != popupMap_.end()) {
         auto rootNode = rootNodeWeak_.Upgrade();
         CHECK_NULL_VOID(rootNode);
-        rootNode->RemoveChild(popupMap_[targetId].popupNode);
+        rootNode->RemoveChild(it->second.popupNode);
         rootNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
         popupMap_.erase(targetId);
     }
@@ -3679,8 +3680,9 @@ int32_t OverlayManager::CreateModalUIExtension(
 
 void OverlayManager::CloseModalUIExtension(int32_t sessionId)
 {
-    if (uiExtNodes_.find(sessionId) != uiExtNodes_.end()) {
-        auto uiExtNode = uiExtNodes_[sessionId].Upgrade();
+    auto iter = uiExtNodes_.find(sessionId);
+    if (iter != uiExtNodes_.end()) {
+        auto uiExtNode = iter->second.Upgrade();
         if (uiExtNode) {
             ModalUIExtension::SetBindModalCallback(uiExtNode, nullptr);
         }
