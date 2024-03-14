@@ -85,7 +85,7 @@ void TabContentModelNG::Create()
 
 void TabContentModelNG::Pop()
 {
-    auto tabContent = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    auto tabContent = AceType::Claim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
     AddTabBarItem(tabContent, DEFAULT_NODE_SLOT, true);
     NG::ViewStackProcessor::GetInstance()->PopContainer();
 }

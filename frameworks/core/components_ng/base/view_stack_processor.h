@@ -245,12 +245,12 @@ public:
         }
         return frameNode->GetFocusHub();
     }
+    
+    ACE_FORCE_EXPORT FrameNode* GetMainFrameNode() const;
 
-    ACE_FORCE_EXPORT RefPtr<FrameNode> GetMainFrameNode() const;
-
-    // Get main component include composed component created by js view.
-    RefPtr<UINode> GetMainElementNode() const;
-
+   // Get main component include composed component created by js view.
+    const RefPtr<UINode>& GetMainElementNode() const;
+    
     // create wrappingComponentsMap and the component to map and then Push
     // the map to the render component stack.
     ACE_FORCE_EXPORT void Push(const RefPtr<UINode>& element, bool isCustomView = false);

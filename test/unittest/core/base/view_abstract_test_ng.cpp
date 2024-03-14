@@ -2318,7 +2318,7 @@ HWTEST_F(ViewAbstractTestNg, ViewAbstractDisableBlurTest, TestSize.Level1)
     OnBlurFunc onBlurCallback = []() {};
     ViewAbstract::SetOnFocus(std::move(onBlurCallback));
 
-    auto topFrameNodeOne = ViewStackProcessor::GetInstance()->GetMainElementNode();
+    auto topFrameNodeOne = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     EXPECT_EQ(strcmp(topFrameNodeOne->GetTag().c_str(), TAG_CHILD), 0);
     auto frameNode = AceType::DynamicCast<FrameNode>(topFrameNodeOne);
     ASSERT_NE(frameNode, nullptr);

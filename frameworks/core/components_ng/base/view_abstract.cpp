@@ -975,7 +975,7 @@ void ViewAbstract::SetOnVisibleChange(std::function<void(bool, double)> &&onVisi
 {
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
-    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    auto frameNode = AceType::Claim(ViewStackProcessor::GetInstance()->GetMainFrameNode());
     CHECK_NULL_VOID(frameNode);
     frameNode->CleanVisibleAreaUserCallback();
     pipeline->AddVisibleAreaChangeNode(frameNode, ratioList, onVisibleChange);
@@ -1032,7 +1032,7 @@ void ViewAbstract::AddDragFrameNodeToManager()
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
 
-    dragDropManager->AddDragFrameNode(frameNode->GetId(), AceType::WeakClaim(AceType::RawPtr(frameNode)));
+    dragDropManager->AddDragFrameNode(frameNode->GetId(), AceType::WeakClaim(frameNode));
 }
 
 void ViewAbstract::SetDraggable(bool draggable)
@@ -1199,7 +1199,7 @@ void ViewAbstract::SetDrawModifier(const RefPtr<NG::DrawModifier>& drawModifier)
 void* ViewAbstract::GetFrameNode()
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
-    return static_cast<void*>(AceType::RawPtr(frameNode));
+    return static_cast<void*>(frameNode);
 }
 
 void ViewAbstract::SetDragPreview(const NG::DragDropInfo& info)
@@ -1665,7 +1665,7 @@ void ViewAbstract::SetRadialGradient(const NG::Gradient &gradient)
 
 void ViewAbstract::SetInspectorId(const std::string &inspectorId)
 {
-    auto uiNode = ViewStackProcessor::GetInstance()->GetMainElementNode();
+    auto& uiNode = ViewStackProcessor::GetInstance()->GetMainElementNode();
     if (uiNode) {
         uiNode->UpdateInspectorId(inspectorId);
     }
@@ -1673,7 +1673,7 @@ void ViewAbstract::SetInspectorId(const std::string &inspectorId)
 
 void ViewAbstract::SetAutoEventParam(const std::string& param)
 {
-    auto uiNode = ViewStackProcessor::GetInstance()->GetMainElementNode();
+    auto& uiNode = ViewStackProcessor::GetInstance()->GetMainElementNode();
     if (uiNode) {
         uiNode->UpdateAutoEventParam(param);
     }
@@ -1681,7 +1681,7 @@ void ViewAbstract::SetAutoEventParam(const std::string& param)
 
 void ViewAbstract::SetRestoreId(int32_t restoreId)
 {
-    auto uiNode = ViewStackProcessor::GetInstance()->GetMainElementNode();
+    auto& uiNode = ViewStackProcessor::GetInstance()->GetMainElementNode();
     if (uiNode) {
         uiNode->SetRestoreId(restoreId);
     }
@@ -1689,7 +1689,7 @@ void ViewAbstract::SetRestoreId(int32_t restoreId)
 
 void ViewAbstract::SetDebugLine(const std::string &line)
 {
-    auto uiNode = ViewStackProcessor::GetInstance()->GetMainElementNode();
+    auto& uiNode = ViewStackProcessor::GetInstance()->GetMainElementNode();
     if (uiNode) {
         uiNode->SetDebugLine(line);
     }
@@ -2108,7 +2108,7 @@ void ViewAbstract::SetKeyboardShortcut(const std::string &value, const std::vect
         return;
     }
     eventHub->SetKeyboardShortcut(value, key, std::move(onKeyboardShortcutAction));
-    eventManager->AddKeyboardShortcutNode(WeakPtr<NG::FrameNode>(frameNode));
+    eventManager->AddKeyboardShortcutNode(AceType::WeakClaim(frameNode));
 }
 
 void ViewAbstract::CreateAnimatablePropertyFloat(const std::string &propertyName, float value,

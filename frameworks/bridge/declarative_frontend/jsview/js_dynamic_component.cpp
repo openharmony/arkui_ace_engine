@@ -89,7 +89,7 @@ void JSDynamicComponent::Create(const JSCallbackInfo& info)
     CHECK_NULL_VOID(frameNode);
     auto instanceId = Container::CurrentId();
 
-    worker->RegisterCallbackForWorkerEnv([instanceId, weak = AceType::WeakClaim(AceType::RawPtr(frameNode)), hapPath,
+    worker->RegisterCallbackForWorkerEnv([instanceId, weak = AceType::WeakClaim(frameNode), hapPath,
                                              abcPath, entryPoint](napi_env env) {
         ContainerScope scope(instanceId);
         auto container = Container::Current();

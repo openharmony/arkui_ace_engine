@@ -160,7 +160,7 @@ void ScrollModelNG::SetOnScrollFrameBegin(OnScrollFrameBeginEvent&& event)
 void ScrollModelNG::SetOnScroll(NG::ScrollEvent&& event)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
-    SetOnScroll(AceType::RawPtr(frameNode), std::move(event));
+    SetOnScroll(frameNode, std::move(event));
 }
 
 void ScrollModelNG::SetOnWillScroll(NG::ScrollEventWithState&& event)

@@ -11080,8 +11080,8 @@ HWTEST_F(SwiperTestNg, ResetDisplayCount001, TestSize.Level1)
     model.SetDisplayCount(10);
     model.ResetDisplayCount();
     RefPtr<UINode> element = ViewStackProcessor::GetInstance()->Finish();
-    frameNode = AceType::DynamicCast<FrameNode>(element);
-    pattern = frameNode->GetPattern<SwiperPattern>();
+    auto uiNode = AceType::DynamicCast<FrameNode>(element);
+    pattern = uiNode->GetPattern<SwiperPattern>();
     EXPECT_NE(pattern->GetDisplayCount(), 10);
 }
 
