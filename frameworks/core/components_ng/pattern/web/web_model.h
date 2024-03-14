@@ -169,6 +169,7 @@ public:
         std::function<void(const std::shared_ptr<BaseEventInfo>& info)>&&
             intelligentTrackingPreventionResultId) {};
     virtual void SetOnOverrideUrlLoading(std::function<bool(const BaseEventInfo* info)>&& jsCallback) = 0;
+    virtual void SetTextAutosizing(bool isTextAutosizing) {};
 private:
     static std::unique_ptr<WebModel> instance_;
     static std::mutex mutex_;

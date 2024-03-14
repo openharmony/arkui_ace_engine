@@ -1176,6 +1176,10 @@ void WebPattern::OnOverScrollModeUpdate(int mode)
    // cross platform is not support now;
 }
 
+void WebPattern::OnTextAutosizingUpdate(bool isTextAutosizing)
+{
+   // cross platform is not support now;
+}
 
 void WebPattern::UpdateRelativeOffset();
 {

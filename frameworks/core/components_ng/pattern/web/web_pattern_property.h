@@ -70,6 +70,7 @@ struct WebPatternProperty {
     ACE_DEFINE_PROPERTY_GROUP_ITEM(NativeEmbedModeEnabled, bool);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(NativeEmbedRuleTag, std::string);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(NativeEmbedRuleType, std::string);
+    ACE_DEFINE_PROPERTY_GROUP_ITEM(TextAutosizing, bool);
 };
 
 } // namespace OHOS::Ace::NG

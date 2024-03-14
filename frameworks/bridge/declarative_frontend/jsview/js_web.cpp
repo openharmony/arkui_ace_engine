@@ -1691,6 +1691,7 @@ void JSWeb::JSBind(BindingTarget globalObj)
     JSClass<JSWeb>::StaticMethod("javaScriptOnDocumentStart", &JSWeb::JavaScriptOnDocumentStart);
     JSClass<JSWeb>::StaticMethod("javaScriptOnDocumentEnd", &JSWeb::JavaScriptOnDocumentEnd);
     JSClass<JSWeb>::StaticMethod("onOverrideUrlLoading", &JSWeb::OnOverrideUrlLoading);
+    JSClass<JSWeb>::StaticMethod("textAutosizing", &JSWeb::TextAutosizing);
     JSClass<JSWeb>::InheritAndBind<JSViewAbstract>(globalObj);
     JSWebDialog::JSBind(globalObj);
     JSWebGeolocation::JSBind(globalObj);
@@ -4357,5 +4358,14 @@ void JSWeb::CopyOption(int32_t copyOption)
             break;
     }
     WebModel::GetInstance()->SetCopyOptionMode(mode);
+}
+
+void JSWeb::TextAutosizing(const JSCallbackInfo& args)
+{
+    if (args.Length() < 1 || !args[0]->IsBoolean()) {
+        return;
+    }
+    bool isTextAutosizing = args[0]->ToBoolean();
+    WebModel::GetInstance()->SetTextAutosizing(isTextAutosizing);
 }
 } // namespace OHOS::Ace::Framework
