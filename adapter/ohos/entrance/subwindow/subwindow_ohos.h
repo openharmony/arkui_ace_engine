@@ -73,10 +73,7 @@ public:
     void ClearMenu() override;
     void ClearMenuNG(int32_t targetId, bool inWindow, bool showAnimation = false) override;
     void ClearPopupNG() override;
-    void ShowDialogNGPrepare() override;
     RefPtr<NG::FrameNode> ShowDialogNG(const DialogProperties& dialogProps, std::function<void()>&& buildFunc) override;
-    RefPtr<NG::FrameNode> ShowDialogNGWithNode(
-        const DialogProperties& dialogProps, const RefPtr<NG::UINode>& customNode) override;
     void CloseDialogNG(const RefPtr<NG::FrameNode>& dialogNode) override;
     void OpenCustomDialogNG(const DialogProperties& dialogProps, std::function<void(int32_t)>&& callback) override;
     void CloseCustomDialogNG(int32_t dialogId) override;

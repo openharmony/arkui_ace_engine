@@ -27,13 +27,10 @@ public:
         std::vector<WeakPtr<AceType>>& dialogs, bool& pending, bool& isShown, std::function<void()>&& cancelTask,
         std::function<void()>&& buildFunc, RefPtr<AceType>& dialogComponent, RefPtr<AceType>& customDialog,
         std::list<DialogOperation>& dialogOperation) override;
-    static RefPtr<UINode> SetOpenDialogWithNode(DialogProperties& dialogProperties,
-        const RefPtr<UINode>& customNode);
     void SetCloseDialog(DialogProperties& dialogProperties, const WeakPtr<AceType>& controller,
         std::vector<WeakPtr<AceType>>& dialogs, bool& pending, bool& isShown, std::function<void()>&& cancelTask,
         RefPtr<AceType>& dialogComponent, RefPtr<AceType>& customDialog,
         std::list<DialogOperation>& dialogOperation) override;
-    static void SetCloseDialogForNDK(FrameNode* dialogNode);
 };
 } // namespace OHOS::Ace::NG
 #endif // FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_DIALOG_JS_CUSTOM_DIALOG_CONTROLLER_H

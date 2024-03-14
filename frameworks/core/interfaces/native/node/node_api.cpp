@@ -23,7 +23,6 @@
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/ui_node.h"
 #include "core/interfaces/native/node/calendar_picker_modifier.h"
-#include "core/interfaces/native/node/custom_dialog_model.h"
 #include "core/interfaces/native/node/node_common_modifier.h"
 #include "core/interfaces/native/node/node_image_modifier.h"
 #include "core/interfaces/native/node/node_refresh_modifier.h"
@@ -513,112 +512,6 @@ const ArkUIBasicAPI* GetBasicAPI()
     return &basicImpl;
 }
 
-ArkUIDialogHandle CreateDialog()
-{
-    return CustomDialog::CreateDialog();
-}
-
-void DisposeDialog(ArkUIDialogHandle handler)
-{
-    CustomDialog::DisposeDialog(handler);
-}
-
-ArkUI_Int32 AttachDialogContent(ArkUIDialogHandle handler, ArkUINodeHandle contentNode)
-{
-    return CustomDialog::AttachDialogContent(handler, contentNode);
-}
-
-ArkUI_Int32 DetachDialogContent(ArkUIDialogHandle handler, ArkUINodeHandle contentNode)
-{
-    return CustomDialog::DetachDialogContent(handler, contentNode);
-}
-
-ArkUI_Int32 SetDialogContentAlignment(ArkUIDialogHandle handler, ArkUI_Int32 alignment,
-    ArkUI_Float32 offsetX, ArkUI_Float32 offsetY)
-{
-    return CustomDialog::SetDialogContentAlignment(handler, alignment, offsetX, offsetY);
-}
-
-ArkUI_Int32 ResetDialogContentAlignment(ArkUIDialogHandle handler)
-{
-    return CustomDialog::ResetDialogContentAlignment(handler);
-}
-
-ArkUI_Int32 SetDialogMode(ArkUIDialogHandle handler, ArkUI_Int32 useModalMode, ArkUI_Bool autoCancel)
-{
-    return CustomDialog::SetDialogMode(handler, useModalMode, autoCancel);
-}
-
-ArkUI_Int32 SetDialogMask(ArkUIDialogHandle handler, ArkUI_Uint32 maskColor, ArkUIRect * rect)
-{
-    return CustomDialog::SetDialogMask(handler, maskColor, rect);
-}
-
-ArkUI_Int32 SetDialogBackgroundColor(ArkUIDialogHandle handler, uint32_t backgroundColor)
-{
-    return CustomDialog::SetDialogBackgroundColor(handler, backgroundColor);
-}
-
-ArkUI_Int32 SetDialogCornerRadius(ArkUIDialogHandle handler, float topLeft, float topRight,
-    float bottomLeft, float bottomRight)
-{
-    return CustomDialog::SetDialogCornerRadius(handler, topLeft, topRight, bottomLeft, bottomRight);
-}
-
-ArkUI_Int32 SetDialogGridCount(ArkUIDialogHandle handler, int32_t gridCount)
-{
-    return CustomDialog::SetDialogGridCount(handler, gridCount);
-}
-
-ArkUI_Int32 SetDialogCustomStyle(ArkUIDialogHandle handler, ArkUI_Bool customStyle)
-{
-    return CustomDialog::SetDialogCustomStyle(handler, customStyle);
-}
-
-ArkUI_Int32 UseDialogCustomAnimation(ArkUIDialogHandle handler, ArkUI_Bool useCustomAnimation)
-{
-    return CustomDialog::UseDialogCustomAnimation(handler, useCustomAnimation);
-}
-
-ArkUI_Int32 ShowDialog(ArkUIDialogHandle handler, ArkUI_Bool showInSubWindow)
-{
-    return CustomDialog::ShowDialog(handler, showInSubWindow);
-}
-
-ArkUI_Int32 CloseDialog(ArkUIDialogHandle handler)
-{
-    return CustomDialog::CloseDialog(handler);
-}
-
-// 注册关闭事件
-ArkUI_Int32 RegiesterOnWillDialogDismiss(ArkUIDialogHandle handler, bool (*eventHandler)(ArkUI_Int32))
-{
-    return CustomDialog::RegiesterOnWillDialogDismiss(handler, eventHandler);
-}
-
-const ArkUIDialogAPI* GetDialogAPI()
-{
-    static const ArkUIDialogAPI dialogImpl = {
-        CreateDialog,
-        DisposeDialog,
-        AttachDialogContent,
-        DetachDialogContent,
-        SetDialogContentAlignment,
-        ResetDialogContentAlignment,
-        SetDialogMode,
-        SetDialogMask,
-        SetDialogBackgroundColor,
-        SetDialogCornerRadius,
-        SetDialogGridCount,
-        SetDialogCustomStyle,
-        UseDialogCustomAnimation,
-        ShowDialog,
-        CloseDialog,
-        RegiesterOnWillDialogDismiss,
-    };
-    return &dialogImpl;
-}
-
 void ShowCrash(ArkUI_CharPtr message)
 {
     TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "Arkoala crash: %{public}s", message);
@@ -756,7 +649,6 @@ ArkUIFullNodeAPI impl_full = {
     GetAnimationAPI,        // Animation
     GetNavigationAPI,       // Navigation
     GetGraphicsAPI,         // Graphics
-    GetDialogAPI,
 };
 /* clang-format on */
 } // namespace

@@ -48,24 +48,14 @@ extern "C" {
  * @since 12
  */
 struct ArkUI_Node;
-/**
- * @brief Defines the custom dialog box controller of ArkUI on the native side.
- *
- * @since 12
- */
-struct ArkUI_NativeDialog;
+
 /**
  * @brief Defines the pointer to the ArkUI native component object.
  *
  * @since 12
  */
 typedef struct ArkUI_Node* ArkUI_NodeHandle;
-/**
- * @brief Defines the pointer to the custom dialog box controller of ArkUI on the native side.
- *
- * @since 12
- */
-typedef struct ArkUI_NativeDialog* ArkUI_NativeDialogHandler;
+
 /**
  * @brief Provides the number types of ArkUI in the native code.
  *
@@ -1310,22 +1300,6 @@ typedef enum {
     /** Right edge of the window. */
     ARKUI_TRANSITION_EDGE_END,
 } ArkUI_TransitionEdge;
-
-/**
- * @brief Defines a mask area.
- *
- * @since 12
- */
-typedef struct {
-    /** X coordinate of the mask area. */
-    float x;
-    /** Y coordinate of the mask area. */
-    float y;
-    /** Width of the mask area. */
-    float width;
-    /** Height of the mask area. */
-    float height;
-} ArkUI_Rect;
 
 #ifdef __cplusplus
 };

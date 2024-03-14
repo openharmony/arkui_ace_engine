@@ -15,7 +15,6 @@
 
 #include "native_interface.h"
 #include "native_node.h"
-#include "node/dialog_model.h"
 #include "node/node_model.h"
 
 #include "base/log/log_wrapper.h"
@@ -24,7 +23,6 @@ namespace {
 
 constexpr int32_t NONE_API_VERSION = 0;
 constexpr int32_t CURRENT_NATIVE_NODE_API_VERSION = 1;
-constexpr int32_t CURRENT_NATIVE_DIALOG_API_VERSION = 1;
 ArkUI_NativeNodeAPI_1 nodeImpl_1 = {
     CURRENT_NATIVE_NODE_API_VERSION,
     OHOS::Ace::NodeModel::CreateNode,
@@ -44,25 +42,6 @@ ArkUI_NativeNodeAPI_1 nodeImpl_1 = {
     OHOS::Ace::NodeModel::MarkDirty,
 };
 
-ArkUI_NativeDialogAPI_1 dialogImpl_1 = {
-    CURRENT_NATIVE_DIALOG_API_VERSION,
-    OHOS::Ace::DialogModel::Create,
-    OHOS::Ace::DialogModel::Dispose,
-    OHOS::Ace::DialogModel::AttachContent,
-    OHOS::Ace::DialogModel::DetachContent,
-    OHOS::Ace::DialogModel::SetContentAlignment,
-    OHOS::Ace::DialogModel::ResetContentAlignment,
-    OHOS::Ace::DialogModel::SetMode,
-    OHOS::Ace::DialogModel::SetMask,
-    OHOS::Ace::DialogModel::SetBackgroundColor,
-    OHOS::Ace::DialogModel::SetCornerRadius,
-    OHOS::Ace::DialogModel::SetGridCount,
-    OHOS::Ace::DialogModel::SetCustomStyle,
-    OHOS::Ace::DialogModel::UseCustomAnimation,
-    OHOS::Ace::DialogModel::RegiesterOnWillDismiss,
-    OHOS::Ace::DialogModel::Show,
-    OHOS::Ace::DialogModel::Close,
-};
 } // namespace
 
 #ifdef __cplusplus
@@ -94,17 +73,6 @@ ArkUI_AnyNativeAPI* OH_ArkUI_QueryModuleInterface(ArkUI_NativeAPIVariantKind typ
                 }
             }
             break;
-        }
-        case ARKUI_NATIVE_DIALOG: {
-            switch (version) {
-                case CURRENT_NATIVE_DIALOG_API_VERSION:
-                    return reinterpret_cast<ArkUI_AnyNativeAPI*>(&dialogImpl_1);
-                default: {
-                    TAG_LOGE(OHOS::Ace::AceLogTag::ACE_NATIVE_NODE,
-                        "fail to get dialog api family, version is incorrect: %{public}d", version);
-                    return nullptr;
-                }
-            }
         }
         default: {
             TAG_LOGE(OHOS::Ace::AceLogTag::ACE_NATIVE_NODE,
