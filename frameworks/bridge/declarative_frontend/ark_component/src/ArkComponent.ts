@@ -3495,8 +3495,12 @@ const isTruthyString = (val: any) => typeof val === 'string' && val.trim() !== '
 
 
 class UICommonEvent {
-  public _nodePtr: Object | null;
-  constructor(nodePtr: Object | null) {
+  private _nodePtr: Object | null;
+  private _instanceId: number;
+  setInstanceId(instanceId: number): void {
+    this._instanceId = instanceId;
+  }
+  setNodePtr(nodePtr: Object | null): void {
     this._nodePtr = nodePtr;
   }
   setOnClick(callback: (event?: ClickEvent) => void): void {
