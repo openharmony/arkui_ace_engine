@@ -49,7 +49,7 @@ enum class FrameNodeTrigger {
 class ACE_EXPORT SelectOverlayNode : public FrameNode {
     DECLARE_ACE_TYPE(SelectOverlayNode, FrameNode)
 public:
-    explicit SelectOverlayNode(const std::shared_ptr<SelectOverlayInfo>& info);
+    explicit SelectOverlayNode(const RefPtr<Pattern>& pattern);
     ~SelectOverlayNode() override = default;
 
     static RefPtr<FrameNode> CreateSelectOverlayNode(const std::shared_ptr<SelectOverlayInfo>& info);
