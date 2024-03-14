@@ -518,82 +518,87 @@ ArkUIDialogHandle CreateDialog()
     return CustomDialog::CreateDialog();
 }
 
-void DisposeDialog(ArkUIDialogHandle handler)
+void DisposeDialog(ArkUIDialogHandle handle)
 {
-    CustomDialog::DisposeDialog(handler);
+    CustomDialog::DisposeDialog(handle);
 }
 
-ArkUI_Int32 AttachDialogContent(ArkUIDialogHandle handler, ArkUINodeHandle contentNode)
+ArkUI_Int32 SetDialogContent(ArkUIDialogHandle handle, ArkUINodeHandle contentNode)
 {
-    return CustomDialog::AttachDialogContent(handler, contentNode);
+    return CustomDialog::SetDialogContent(handle, contentNode);
 }
 
-ArkUI_Int32 DetachDialogContent(ArkUIDialogHandle handler, ArkUINodeHandle contentNode)
+ArkUI_Int32 RemoveDialogContent(ArkUIDialogHandle handle)
 {
-    return CustomDialog::DetachDialogContent(handler, contentNode);
+    return CustomDialog::RemoveDialogContent(handle);
 }
 
-ArkUI_Int32 SetDialogContentAlignment(ArkUIDialogHandle handler, ArkUI_Int32 alignment,
+ArkUI_Int32 SetDialogContentAlignment(ArkUIDialogHandle handle, ArkUI_Int32 alignment,
     ArkUI_Float32 offsetX, ArkUI_Float32 offsetY)
 {
-    return CustomDialog::SetDialogContentAlignment(handler, alignment, offsetX, offsetY);
+    return CustomDialog::SetDialogContentAlignment(handle, alignment, offsetX, offsetY);
 }
 
-ArkUI_Int32 ResetDialogContentAlignment(ArkUIDialogHandle handler)
+ArkUI_Int32 ResetDialogContentAlignment(ArkUIDialogHandle handle)
 {
-    return CustomDialog::ResetDialogContentAlignment(handler);
+    return CustomDialog::ResetDialogContentAlignment(handle);
 }
 
-ArkUI_Int32 SetDialogMode(ArkUIDialogHandle handler, ArkUI_Int32 useModalMode, ArkUI_Bool autoCancel)
+ArkUI_Int32 SetDialogModalMode(ArkUIDialogHandle handle, ArkUI_Bool isModal)
 {
-    return CustomDialog::SetDialogMode(handler, useModalMode, autoCancel);
+    return CustomDialog::SetDialogModalMode(handle, isModal);
 }
 
-ArkUI_Int32 SetDialogMask(ArkUIDialogHandle handler, ArkUI_Uint32 maskColor, ArkUIRect * rect)
+ArkUI_Int32 SetDialogAutoCancel(ArkUIDialogHandle handle, ArkUI_Bool autoCancel)
 {
-    return CustomDialog::SetDialogMask(handler, maskColor, rect);
+    return CustomDialog::SetDialogAutoCancel(handle, autoCancel);
 }
 
-ArkUI_Int32 SetDialogBackgroundColor(ArkUIDialogHandle handler, uint32_t backgroundColor)
+ArkUI_Int32 SetDialogMask(ArkUIDialogHandle handle, ArkUI_Uint32 maskColor, ArkUIRect * rect)
 {
-    return CustomDialog::SetDialogBackgroundColor(handler, backgroundColor);
+    return CustomDialog::SetDialogMask(handle, maskColor, rect);
 }
 
-ArkUI_Int32 SetDialogCornerRadius(ArkUIDialogHandle handler, float topLeft, float topRight,
+ArkUI_Int32 SetDialogBackgroundColor(ArkUIDialogHandle handle, uint32_t backgroundColor)
+{
+    return CustomDialog::SetDialogBackgroundColor(handle, backgroundColor);
+}
+
+ArkUI_Int32 SetDialogCornerRadius(ArkUIDialogHandle handle, float topLeft, float topRight,
     float bottomLeft, float bottomRight)
 {
-    return CustomDialog::SetDialogCornerRadius(handler, topLeft, topRight, bottomLeft, bottomRight);
+    return CustomDialog::SetDialogCornerRadius(handle, topLeft, topRight, bottomLeft, bottomRight);
 }
 
-ArkUI_Int32 SetDialogGridCount(ArkUIDialogHandle handler, int32_t gridCount)
+ArkUI_Int32 SetDialogGridColumnCount(ArkUIDialogHandle handle, int32_t gridCount)
 {
-    return CustomDialog::SetDialogGridCount(handler, gridCount);
+    return CustomDialog::SetDialogGridColumnCount(handle, gridCount);
 }
 
-ArkUI_Int32 SetDialogCustomStyle(ArkUIDialogHandle handler, ArkUI_Bool customStyle)
+ArkUI_Int32 EnableDialogCustomStyle(ArkUIDialogHandle handle, ArkUI_Bool enableCustomStyle)
 {
-    return CustomDialog::SetDialogCustomStyle(handler, customStyle);
+    return CustomDialog::EnableDialogCustomStyle(handle, enableCustomStyle);
 }
 
-ArkUI_Int32 UseDialogCustomAnimation(ArkUIDialogHandle handler, ArkUI_Bool useCustomAnimation)
+ArkUI_Int32 EnableDialogCustomAnimation(ArkUIDialogHandle handle, ArkUI_Bool enableCustomAnimation)
 {
-    return CustomDialog::UseDialogCustomAnimation(handler, useCustomAnimation);
+    return CustomDialog::EnableDialogCustomAnimation(handle, enableCustomAnimation);
 }
 
-ArkUI_Int32 ShowDialog(ArkUIDialogHandle handler, ArkUI_Bool showInSubWindow)
+ArkUI_Int32 ShowDialog(ArkUIDialogHandle handle, ArkUI_Bool showInSubWindow)
 {
-    return CustomDialog::ShowDialog(handler, showInSubWindow);
+    return CustomDialog::ShowDialog(handle, showInSubWindow);
 }
 
-ArkUI_Int32 CloseDialog(ArkUIDialogHandle handler)
+ArkUI_Int32 CloseDialog(ArkUIDialogHandle handle)
 {
-    return CustomDialog::CloseDialog(handler);
+    return CustomDialog::CloseDialog(handle);
 }
 
 // 注册关闭事件
-ArkUI_Int32 RegiesterOnWillDialogDismiss(ArkUIDialogHandle handler, bool (*eventHandler)(ArkUI_Int32))
+ArkUI_Int32 RegiesterOnWillDialogDismiss(ArkUIDialogHandle handle, bool (*eventHandler)(ArkUI_Int32))
 {
-    return CustomDialog::RegiesterOnWillDialogDismiss(handler, eventHandler);
+    return CustomDialog::RegiesterOnWillDialogDismiss(handle, eventHandler);
 }
 
 const ArkUIDialogAPI* GetDialogAPI()
@@ -601,17 +606,18 @@ const ArkUIDialogAPI* GetDialogAPI()
     static const ArkUIDialogAPI dialogImpl = {
         CreateDialog,
         DisposeDialog,
-        AttachDialogContent,
-        DetachDialogContent,
+        SetDialogContent,
+        RemoveDialogContent,
         SetDialogContentAlignment,
         ResetDialogContentAlignment,
-        SetDialogMode,
+        SetDialogModalMode,
+        SetDialogAutoCancel,
         SetDialogMask,
         SetDialogBackgroundColor,
         SetDialogCornerRadius,
-        SetDialogGridCount,
-        SetDialogCustomStyle,
-        UseDialogCustomAnimation,
+        SetDialogGridColumnCount,
+        EnableDialogCustomStyle,
+        EnableDialogCustomAnimation,
         ShowDialog,
         CloseDialog,
         RegiesterOnWillDialogDismiss,

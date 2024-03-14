@@ -31,31 +31,32 @@ struct _ArkUIDialog {
     ArkUI_Uint32 backgroundColor;
     ArkUICornerRadius* cornerRadiusRect;
     ArkUI_Int32 gridCount;
-    ArkUI_Int32 customStyle;
+    ArkUI_Int32 enableCustomStyle;
     ArkUI_Int32 showInSubWindow;
-    ArkUI_Bool useCustomAnimation;
+    ArkUI_Bool enableCustomAnimation;
     bool (*onWillDissmissCall)(ArkUI_Int32);
 };
 
 namespace OHOS::Ace::NG::CustomDialog {
 ArkUIDialogHandle CreateDialog();
-void  DisposeDialog(ArkUIDialogHandle handler);
-ArkUI_Int32  AttachDialogContent(ArkUIDialogHandle handler, ArkUINodeHandle contentNode);
-ArkUI_Int32  DetachDialogContent(ArkUIDialogHandle handler, ArkUINodeHandle contentNode);
-ArkUI_Int32  SetDialogContentAlignment(ArkUIDialogHandle handler,
-    ArkUI_Int32 alignment, float offsetX, float offsetY);
-ArkUI_Int32  ResetDialogContentAlignment(ArkUIDialogHandle handler);
-ArkUI_Int32  SetDialogMode(ArkUIDialogHandle handler, bool useModalMode, bool autoCancel);
-ArkUI_Int32  SetDialogMask(ArkUIDialogHandle handler, ArkUI_Uint32 maskColor, ArkUIRect* rect);
-ArkUI_Int32 SetDialogBackgroundColor(ArkUIDialogHandle handler, ArkUI_Uint32 backgroundColor);
-ArkUI_Int32 SetDialogCornerRadius(ArkUIDialogHandle handler, float topLeft, float topRight,
-    float bottomLeft, float bottomRight);
-ArkUI_Int32 SetDialogGridCount(ArkUIDialogHandle handler, ArkUI_Int32 gridCount);
-ArkUI_Int32 SetDialogCustomStyle(ArkUIDialogHandle handler, bool customStyle);
-ArkUI_Int32 UseDialogCustomAnimation(ArkUIDialogHandle handler, ArkUI_Bool useCustomAnimation);
-ArkUI_Int32  ShowDialog(ArkUIDialogHandle handler, bool showInSubWindow);
-ArkUI_Int32  CloseDialog(ArkUIDialogHandle handler);
-ArkUI_Int32  RegiesterOnWillDialogDismiss(ArkUIDialogHandle handler, bool (*eventHandler)(ArkUI_Int32));
+void DisposeDialog(ArkUIDialogHandle handle);
+ArkUI_Int32 SetDialogContent(ArkUIDialogHandle handle, ArkUINodeHandle contentNode);
+ArkUI_Int32 RemoveDialogContent(ArkUIDialogHandle handle);
+ArkUI_Int32 SetDialogContentAlignment(ArkUIDialogHandle handle,
+    ArkUI_Int32 alignment, ArkUI_Float32 offsetX, ArkUI_Float32 offsetY);
+ArkUI_Int32 ResetDialogContentAlignment(ArkUIDialogHandle handle);
+ArkUI_Int32 SetDialogModalMode(ArkUIDialogHandle handle, bool isModal);
+ArkUI_Int32 SetDialogAutoCancel(ArkUIDialogHandle handle, bool autoCancel);
+ArkUI_Int32 SetDialogMask(ArkUIDialogHandle handle, ArkUI_Uint32 maskColor, ArkUIRect* rect);
+ArkUI_Int32 SetDialogBackgroundColor(ArkUIDialogHandle handle, ArkUI_Uint32 backgroundColor);
+ArkUI_Int32 SetDialogCornerRadius(ArkUIDialogHandle handle, ArkUI_Float32 topLeft, ArkUI_Float32 topRight,
+    ArkUI_Float32 bottomLeft, ArkUI_Float32 bottomRight);
+ArkUI_Int32 SetDialogGridColumnCount(ArkUIDialogHandle handle, ArkUI_Int32 gridCount);
+ArkUI_Int32 EnableDialogCustomStyle(ArkUIDialogHandle handle, bool enableCustomStyle);
+ArkUI_Int32 EnableDialogCustomAnimation(ArkUIDialogHandle handle, bool enableCustomAnimation);
+ArkUI_Int32 ShowDialog(ArkUIDialogHandle handle, bool showInSubWindow);
+ArkUI_Int32 CloseDialog(ArkUIDialogHandle handle);
+ArkUI_Int32 RegiesterOnWillDialogDismiss(ArkUIDialogHandle handle, bool (*eventHandler)(ArkUI_Int32));
 } // namespace OHOS::Ace::NG::CustomDialog
 
 #endif
