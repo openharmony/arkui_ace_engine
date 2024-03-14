@@ -33,9 +33,20 @@
 #include "core/components_ng/property/measure_property.h"
 
 namespace OHOS::Ace {
+using onAnalyzedCallback = std::optional<std::function<void(bool)>>;
+
 enum class ImageAnalyzerType {
     SUBJECT = 0,
     TEXT,
+};
+
+enum class ImageAnalyzerHolder {
+    IMAGE = 0,
+    CANVAS,
+    XCOMPONENT,
+    VIDEO,
+    WEB,
+    OTHERS,
 };
 
 struct ImageAnalyzerConfig {
@@ -50,6 +61,7 @@ struct ImageAnalyzerInnerConfig {
     float contentHeight = 0.0f;
     ImageFit imageFit = ImageFit::COVER;
     Matrix4 transformMat = Matrix4::CreateIdentity();
+    onAnalyzedCallback onAnalyzed;
 };
 } // namespace OHOS::Ace
 #endif // FOUNDATION_ACE_INTERFACE_INNERKITS_PROPERTIES_IMAGE_ANALYZER_H
