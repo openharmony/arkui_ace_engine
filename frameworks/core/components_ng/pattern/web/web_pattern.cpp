@@ -270,6 +270,8 @@ void WebPattern::InitEvent()
         WebPattern->UpdateLocale();
     };
     context->SetConfigChangedCallback(std::move(langTask));
+
+    RegisterVisibleAreaChangeCallback();
 }
 
 void WebPattern::InitFeatureParam()
@@ -2783,7 +2785,7 @@ void WebPattern::OnActive()
     isActive_ = true;
 }
 
-void WebPattern::OnVisibleChange(bool isVisible)
+void WebPattern::OnVisibleAreaChange(bool isVisible)
 {
     if (isVisible_ == isVisible) {
         return;
@@ -3353,5 +3355,20 @@ void WebPattern::SetTouchEventInfo(const TouchEvent& touchEvent, TouchEventInfo&
     changedInfo.SetTouchType(touchEvent.type);
 
     touchEventInfo.AddChangedTouchLocationInfo(std::move(changedInfo));
+}
+
+void WebPattern::RegisterVisibleAreaChangeCallback()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto callback = [weak = WeakClaim(this)](bool visible, double ratio) {
+        auto webPattern = weak.Upgrade();
+        CHECK_NULL_VOID(webPattern);
+        webPattern->OnVisibleAreaChange(visible);
+    };
+    std::vector<double> ratioList = {0.0};
+    pipeline->AddVisibleAreaChangeNode(host, ratioList, callback, false);
 }
 } // namespace OHOS::Ace::NG

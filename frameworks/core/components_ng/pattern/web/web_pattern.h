@@ -482,7 +482,7 @@ private:
     void OnWindowSizeChanged(int32_t width, int32_t height, WindowSizeChangeReason type) override;
     void OnInActive() override;
     void OnActive() override;
-    void OnVisibleChange(bool isVisible) override;
+    void OnVisibleAreaChange(bool isVisible);
     void OnAreaChangedInner() override;
     void OnNotifyMemoryLevel(int32_t level) override;
 
@@ -640,6 +640,7 @@ private:
     bool FilterScrollEventHandleOffset(const float offset);
     bool FilterScrollEventHandlevVlocity(const float velocity);
     void UpdateFlingReachEdgeState(const float value, bool status);
+    void RegisterVisibleAreaChangeCallback();
 
     std::optional<std::string> webSrc_;
     std::optional<std::string> webData_;
