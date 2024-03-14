@@ -526,6 +526,9 @@ void ScrollPattern::ScrollToEdge(ScrollEdgeType scrollEdgeType, bool smooth)
     if (scrollEdgeType == ScrollEdgeType::SCROLL_NONE) {
         return;
     }
+    if (LessOrEqual(scrollableDistance_, 0.0)) {
+        return;
+    }
     float distance = scrollEdgeType == ScrollEdgeType::SCROLL_TOP ? -currentOffset_ :
         (-scrollableDistance_ - currentOffset_);
     ScrollBy(distance, distance, smooth);
