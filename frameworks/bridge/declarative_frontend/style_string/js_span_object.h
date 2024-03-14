@@ -38,11 +38,8 @@ public:
     static void Destructor(JSFontSpan* fontSpan);
     static void JSBind(BindingTarget globalObj);
     static RefPtr<FontSpan> ParseJsFontSpan(JSRef<JSObject> obj);
-    void GetColor(const JSCallbackInfo& info);
-    void GetSize(const JSCallbackInfo& info);
-    void GetWeight(const JSCallbackInfo& info);
-    void GetFamily(const JSCallbackInfo& info);
-    void GetStyle(const JSCallbackInfo& info);
+    void GetFontColor(const JSCallbackInfo& info);
+    void SetFontColor(const JSCallbackInfo& info);
 
     RefPtr<FontSpan>& GetFontSpan();
     void SetFontSpan(const RefPtr<FontSpan>& fontSpan);

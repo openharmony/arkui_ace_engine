@@ -39,15 +39,17 @@ public:
     static void JSBind(BindingTarget globalObj);
     void GetString(const JSCallbackInfo& info);
     void GetLength(const JSCallbackInfo& info);
+    void SetLength(const JSCallbackInfo& info);
     void IsEqualToSpanString(const JSCallbackInfo& info);
     void GetSubSpanString(const JSCallbackInfo& info);
-    static std::vector<RefPtr<SpanBase>> ParseJsSpanBaseVector(JSRef<JSObject> obj);
+    static std::vector<RefPtr<SpanBase>> ParseJsSpanBaseVector(JSRef<JSObject> obj, int32_t maxLength);
     static JSRef<JSObject> CreateJSSpanBaseObject(const RefPtr<SpanBase>& spanObject);
     static JSRef<JSObject> CreateJsFontSpan(const RefPtr<SpanBase>& spanObject);
     static RefPtr<SpanBase> ParseJsSpanBase(int32_t start, int32_t length, SpanType type, JSRef<JSObject> obj);
     static RefPtr<SpanBase> ParseJsFontSpan(int32_t start, int32_t length, JSRef<JSObject> obj);
+    static void CheckSpanType(const int32_t& type);
+    void CheckParameters(const int32_t& start, const int32_t& length);
     void GetSpans(const JSCallbackInfo& info);
-    void GetIndex(const JSCallbackInfo& info);
     RefPtr<SpanString>& GetController();
     void SetController(const RefPtr<SpanString>& spanString);
 
