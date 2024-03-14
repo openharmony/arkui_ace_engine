@@ -65,6 +65,7 @@ use_linux = "${current_os}_${current_cpu}" == "linux_x64"
 
 # Config path
 ace_root = "//foundation/arkui/ace_engine"
+hilog_root = "//base/hiviewdfx/hilog"
 ace_napi_frameworks = "//foundation/arkui/ace_engine/frameworks"
 ace_napi = "//foundation/arkui/napi"
 ace_graphic = "//foundation/graphic/graphic_2d"
