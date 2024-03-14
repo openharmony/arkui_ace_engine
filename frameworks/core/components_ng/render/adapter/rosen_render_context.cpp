@@ -2324,11 +2324,7 @@ void RosenRenderContext::PaintBorderImageGradient()
 
     auto borderImageProperty = *GetBdImage();
     auto&& borderWidthProperty = layoutProperty->GetBorderWidthProperty();
-    auto frame = rsNode_->GetStagingProperties().GetFrame();
-    auto bounds = rsNode_->GetStagingProperties().GetBounds();
-    OffsetF offset(bounds[0] - frame[0], bounds[1] - frame[1]);
-    auto paintTask = [paintSize, borderImageProperty, &borderWidthProperty, gradient, offset](RSCanvas& rsCanvas)
-        mutable {
+    auto paintTask = [paintSize, borderImageProperty, &borderWidthProperty, gradient](RSCanvas& rsCanvas) mutable {
 #ifndef USE_ROSEN_DRAWING
         auto rsImage = SkiaDecorationPainter::CreateBorderImageGradient(gradient, paintSize);
 #else
@@ -2336,7 +2332,7 @@ void RosenRenderContext::PaintBorderImageGradient()
 #endif
         BorderImagePainter borderImagePainter(borderImageProperty, borderWidthProperty, paintSize, rsImage,
             PipelineBase::GetCurrentContext()->GetDipScale());
-        borderImagePainter.PaintBorderImage(offset, rsCanvas);
+        borderImagePainter.PaintBorderImage(OffsetF(0.0, 0.0), rsCanvas);
     };
 
     if (!borderImageModifier_) {
