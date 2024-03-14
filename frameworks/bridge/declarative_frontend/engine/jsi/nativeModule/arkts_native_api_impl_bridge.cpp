@@ -64,6 +64,7 @@
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_textpicker_bridge.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_timepicker_bridge.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_rich_editor_bridge.h"
+#include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_utils_bridge.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_video_bridge.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_stepper_item_bridge.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_marquee_bridge.h"
@@ -602,6 +603,13 @@ ArkUINativeModuleValue ArkUINativeModule::GetArkUINativeModule(ArkUIRuntimeCallI
     common->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetClipWithEdge"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::ResetClipWithEdge));
     object->Set(vm, panda::StringRef::NewFromUtf8(vm, "common"), common);
+
+    auto nativeUitls = panda::ObjectRef::New(vm);
+    nativeUitls->Set(vm, panda::StringRef::NewFromUtf8(vm, "createNativeWeakRef"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), NativeUtilsBridge::CreateNativeWeakRef));
+    nativeUitls->Set(vm, panda::StringRef::NewFromUtf8(vm, "createNativeStrongRef"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), NativeUtilsBridge::CreateNativeStrongRef));
+    object->Set(vm, panda::StringRef::NewFromUtf8(vm, "nativeUitls"), nativeUitls);
 
     auto counter = panda::ObjectRef::New(vm);
     counter->Set(vm, panda::StringRef::NewFromUtf8(vm, "setEnableInc"),
