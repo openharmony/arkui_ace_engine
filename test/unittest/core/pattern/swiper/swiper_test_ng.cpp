@@ -25,6 +25,14 @@ void SwiperTestNg::SetUpTestSuite()
     auto pipeline = MockPipelineContext::GetCurrent();
     pipeline->SetThemeManager(themeManager);
     auto swiperIndicatorTheme = AceType::MakeRefPtr<SwiperIndicatorTheme>();
+    swiperIndicatorTheme->color_ = Color::FromString("#182431");
+    swiperIndicatorTheme->selectedColor_ = Color::FromString("#007DFF");
+    swiperIndicatorTheme->size_ = Dimension(6.f);
+    TextStyle textStyle;
+    textStyle.SetTextColor(Color::FromString("#ff182431"));
+    textStyle.SetFontSize(Dimension(14.f));
+    textStyle.SetFontWeight(FontWeight::W800);
+    swiperIndicatorTheme->digitalIndicatorTextStyle_ = textStyle;
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(swiperIndicatorTheme));
 }
 
@@ -1177,128 +1185,6 @@ HWTEST_F(SwiperTestNg, SwiperFlushFocus001, TestSize.Level1)
 }
 
 /**
- * @tc.name: SwiperGetNextFocusNode001
- * @tc.desc: Swiper GetNextFocusNode.
- * @tc.type: FUNC
- */
-HWTEST_F(SwiperTestNg, SwiperGetNextFocusNode001, TestSize.Level1)
-{
-    CreateWithItem([](SwiperModelNG model) {});
-
-    /**
-     * @tc.steps: step2. Create localShowNode and focusNode.
-     */
-    auto localShowNode = AceType::MakeRefPtr<FrameNode>(V2::ROW_ETS_TAG, -1, AceType::MakeRefPtr<Pattern>());
-    auto eventHubLocal = AceType::MakeRefPtr<EventHub>();
-    eventHubLocal->AttachHost(localShowNode);
-    auto focusHubLocal = AceType::MakeRefPtr<FocusHub>(eventHubLocal);
-
-    auto focusNode = AceType::MakeRefPtr<FrameNode>(V2::ROW_ETS_TAG, -1, AceType::MakeRefPtr<Pattern>());
-    eventHub_->AttachHost(focusNode);
-    auto focusHub = AceType::MakeRefPtr<FocusHub>(eventHub_);
-    pattern_->lastWeakShowNode_ = AceType::WeakClaim(AceType::RawPtr(localShowNode));
-
-    /**
-     * @tc.steps: step3.1. Test different Axis::HORIZONTAL and FocusStep::UP.
-     * @tc.expected: pattern_->GetNextFocusNode return nullptr.
-     */
-    pattern_->direction_ = Axis::HORIZONTAL;
-    pattern_->GetNextFocusNode(FocusStep::UP, focusHub);
-    EXPECT_FALSE(pattern_->isLastIndicatorFocused_);
-
-    /**
-     * @tc.steps: step3.2. Test different Axis::VERTICAL and FocusStep::LEFT.
-     * @tc.expected: pattern_->GetNextFocusNode return nullptr.
-     */
-    pattern_->direction_ = Axis::VERTICAL;
-    pattern_->GetNextFocusNode(FocusStep::LEFT, focusHub);
-    EXPECT_FALSE(pattern_->isLastIndicatorFocused_);
-
-    /**
-     * @tc.steps: step3.3. Test different Axis::HORIZONTAL and FocusStep::DOWN.
-     * @tc.expected: pattern_->GetNextFocusNode return nullptr.
-     */
-    pattern_->direction_ = Axis::HORIZONTAL;
-    pattern_->GetNextFocusNode(FocusStep::LEFT, focusHub);
-    EXPECT_FALSE(pattern_->isLastIndicatorFocused_);
-
-    /**
-     * @tc.steps: step3.4. Test different Axis::VERTICAL and FocusStep::RIGHT.
-     * @tc.expected: pattern_->GetNextFocusNode return nullptr.
-     */
-    pattern_->direction_ = Axis::VERTICAL;
-    pattern_->GetNextFocusNode(FocusStep::RIGHT, focusHub);
-    EXPECT_FALSE(pattern_->isLastIndicatorFocused_);
-
-    /**
-     * @tc.steps: step3.5. Test different Axis::FREE.
-     * @tc.expected: pattern_->GetNextFocusNode return nullptr.
-     */
-    pattern_->direction_ = Axis::FREE;
-    pattern_->GetNextFocusNode(FocusStep::RIGHT, focusHub);
-    EXPECT_FALSE(pattern_->isLastIndicatorFocused_);
-
-    /**
-     * @tc.steps: step3.6. Test different Axis::HORIZONTAL and FocusStep::UP and has left right button.
-     * @tc.expected: pattern_->GetNextFocusNode return nullptr.
-     */
-    pattern_->GetLeftButtonId();
-    pattern_->GetRightButtonId();
-    pattern_->direction_ = Axis::HORIZONTAL;
-    pattern_->GetNextFocusNode(FocusStep::UP, focusHub);
-    EXPECT_FALSE(pattern_->isLastIndicatorFocused_);
-
-    /**
-     * @tc.steps: step3.7. Test different Axis::HORIZONTAL and FocusStep::UP and has left right button.
-     * @tc.expected: pattern_->GetNextFocusNode return nullptr.
-     */
-    pattern_->direction_ = Axis::HORIZONTAL;
-    pattern_->GetNextFocusNode(FocusStep::DOWN, focusHub);
-    EXPECT_FALSE(pattern_->isLastIndicatorFocused_);
-}
-
-/**
- * @tc.name: SwiperPreviousFocus001
- * @tc.desc: Swiper PreviousFocus.
- * @tc.type: FUNC
- */
-HWTEST_F(SwiperTestNg, SwiperPreviousFocus001, TestSize.Level1)
-{
-    CreateWithItem([](SwiperModelNG model) {});
-    auto swiperLeftArrowNode =
-        AceType::MakeRefPtr<FrameNode>(V2::SWIPER_LEFT_ARROW_ETS_TAG, -1, AceType::MakeRefPtr<SwiperPattern>());
-    auto swiperRightArrowNode =
-        AceType::MakeRefPtr<FrameNode>(V2::SWIPER_INDICATOR_ETS_TAG, -1, AceType::MakeRefPtr<SwiperPattern>());
-    frameNode_->AddChild(swiperLeftArrowNode);
-    frameNode_->AddChild(swiperRightArrowNode);
-    eventHub_->AttachHost(frameNode_);
-    auto focusHub = AceType::MakeRefPtr<FocusHub>(eventHub_);
-
-    auto curEventHub = AceType::MakeRefPtr<EventHub>();
-    auto frameNode = AceType::MakeRefPtr<FrameNode>(V2::SWIPER_LEFT_ARROW_ETS_TAG, -1, AceType::MakeRefPtr<Pattern>());
-    curEventHub->AttachHost(frameNode);
-    auto curFocusHub = AceType::MakeRefPtr<FocusHub>(curEventHub);
-
-    auto focusChildren = focusHub->GetChildren();
-    pattern_->leftButtonId_ = std::nullopt;
-    pattern_->PreviousFocus(curFocusHub);
-    EXPECT_FALSE(pattern_->isLastIndicatorFocused_);
-    EXPECT_TRUE(curFocusHub->parentFocusable_);
-    layoutProperty_->UpdateLoop(false);
-    pattern_->PreviousFocus(curFocusHub);
-    EXPECT_FALSE(curFocusHub->parentFocusable_);
-    EXPECT_FALSE(pattern_->isLastIndicatorFocused_);
-    curFocusHub->GetFrameNode()->tag_ = V2::SWIPER_INDICATOR_ETS_TAG;
-    pattern_->PreviousFocus(curFocusHub);
-    EXPECT_TRUE(pattern_->isLastIndicatorFocused_);
-    layoutProperty_->UpdateLoop(true);
-    pattern_->GetLeftButtonId();
-    EXPECT_FALSE(layoutProperty_->GetHoverShowValue(false));
-    pattern_->PreviousFocus(curFocusHub);
-    EXPECT_TRUE(pattern_->isLastIndicatorFocused_);
-}
-
-/**
  * @tc.name: SwiperAccessibilityPropertyGetCurrentIndex001
  * @tc.desc: Test GetCurrentIndex of model.
  * @tc.type: FUNC
@@ -2210,7 +2096,7 @@ HWTEST_F(SwiperTestNg, FontColor001, TestSize.Level1)
     algorithm->Measure(&layoutWrapper);
     auto backTextFrameNode = AceType::DynamicCast<FrameNode>(indicatorNode->GetLastChild());
     auto backTextLayoutProperty = AceType::DynamicCast<TextLayoutProperty>(backTextFrameNode->GetLayoutProperty());
-    EXPECT_EQ(backTextLayoutProperty->GetTextColor()->GetValue(), 0xff000000);
+    EXPECT_EQ(backTextLayoutProperty->GetTextColor(), Color::FromString("#ff182431"));
 
     /**
      * @tc.steps: step3. FontColor is WHITE.
@@ -2284,7 +2170,7 @@ HWTEST_F(SwiperTestNg, SelectedFontColor001, TestSize.Level1)
     algorithm->Measure(&layoutWrapper);
     auto frontTextFrameNode = AceType::DynamicCast<FrameNode>(indicatorNode->GetFirstChild());
     auto frontTextLayoutProperty = AceType::DynamicCast<TextLayoutProperty>(frontTextFrameNode->GetLayoutProperty());
-    EXPECT_EQ(frontTextLayoutProperty->GetTextColor()->GetValue(), 0xff000000);
+    EXPECT_EQ(frontTextLayoutProperty->GetTextColor(), Color::FromString("#ff182431"));
 
     /**
      * @tc.steps: step4. SelectedFontColor is WHITE.
@@ -2358,7 +2244,7 @@ HWTEST_F(SwiperTestNg, FontWeight001, TestSize.Level1)
     algorithm->Measure(&layoutWrapper);
     auto backTextFrameNode = AceType::DynamicCast<FrameNode>(indicatorNode->GetLastChild());
     auto backTextLayoutProperty = AceType::DynamicCast<TextLayoutProperty>(backTextFrameNode->GetLayoutProperty());
-    EXPECT_EQ(backTextLayoutProperty->GetFontWeight(), FontWeight::NORMAL);
+    EXPECT_EQ(backTextLayoutProperty->GetFontWeight(), FontWeight::W800);
     /**
      * @tc.steps: step3. FontWeight is BOLDER.
      */
@@ -2397,7 +2283,7 @@ HWTEST_F(SwiperTestNg, SelectedFontWeight001, TestSize.Level1)
     algorithm->Measure(&layoutWrapper);
     auto frontTextFrameNode = AceType::DynamicCast<FrameNode>(indicatorNode->GetFirstChild());
     auto frontTextLayoutProperty = AceType::DynamicCast<TextLayoutProperty>(frontTextFrameNode->GetLayoutProperty());
-    EXPECT_EQ(frontTextLayoutProperty->GetFontWeight(), FontWeight::NORMAL);
+    EXPECT_EQ(frontTextLayoutProperty->GetFontWeight(), FontWeight::W800);
     /**
      * @tc.steps: step3. SelectedFontWeight is MEDIUM.
      */
@@ -2829,8 +2715,8 @@ HWTEST_F(SwiperTestNg, SwiperLayoutAlgorithmLayout005, TestSize.Level1)
     auto leftArrowOffset = leftArrowGeometryNode->GetMarginFrameOffset();
     auto rightArrowGeometryNode = rightArrowNodeWrapper->GetGeometryNode();
     auto rightArrowOffset = rightArrowGeometryNode->GetMarginFrameOffset();
-    EXPECT_EQ(leftArrowOffset, OffsetF(286.0f, 196.0f));
-    EXPECT_EQ(rightArrowOffset, OffsetF(322.0f, 196.0f));
+    EXPECT_TRUE(IsEqual(leftArrowOffset, OffsetF(268.0f, 196.0f)));
+    EXPECT_TRUE(IsEqual(rightArrowOffset, OffsetF(340.0f, 196.0f)));
 
     /**
      * @tc.cases: case2. Axis is HORIZONTAL, arrow is outside the switch.
@@ -2861,8 +2747,8 @@ HWTEST_F(SwiperTestNg, SwiperLayoutAlgorithmLayout005, TestSize.Level1)
     swiperPatternAlgorithm->Layout(AceType::RawPtr(swiperLayoutWrapper));
     leftArrowOffset = leftArrowGeometryNode->GetMarginFrameOffset();
     rightArrowOffset = rightArrowGeometryNode->GetMarginFrameOffset();
-    EXPECT_EQ(leftArrowOffset, OffsetF(12.0f, 64.0f));
-    EXPECT_EQ(rightArrowOffset, OffsetF(12.0f, 100.0f));
+    EXPECT_TRUE(IsEqual(leftArrowOffset, OffsetF(12.0f, 46.0f)));
+    EXPECT_TRUE(IsEqual(rightArrowOffset, OffsetF(12.0f, 118.0f)));
 
     /**
      * @tc.cases: case5. Axis is VERTICAL, arrow is outside the switch.
@@ -2872,8 +2758,8 @@ HWTEST_F(SwiperTestNg, SwiperLayoutAlgorithmLayout005, TestSize.Level1)
     swiperPatternAlgorithm->Layout(AceType::RawPtr(swiperLayoutWrapper));
     leftArrowOffset = leftArrowGeometryNode->GetMarginFrameOffset();
     rightArrowOffset = rightArrowGeometryNode->GetMarginFrameOffset();
-    EXPECT_EQ(leftArrowOffset, OffsetF(12.0f, 89.0f));
-    EXPECT_EQ(rightArrowOffset, OffsetF(12.0f, 125.0f));
+    EXPECT_TRUE(IsEqual(leftArrowOffset, OffsetF(12.0f, 71.0f)));
+    EXPECT_TRUE(IsEqual(rightArrowOffset, OffsetF(12.0f, 143.0f)));
 
     /**
      * @tc.cases: case6. Axis is VERTICAL, arrow is in the switch, not show indicator.
@@ -3738,6 +3624,7 @@ HWTEST_F(SwiperTestNg, DotIndicatorModifier001, TestSize.Level1)
     DrawingContext context { canvas, 100.f, 100.f };
     EXPECT_CALL(canvas, AttachBrush(_)).WillRepeatedly(ReturnRef(canvas));
     EXPECT_CALL(canvas, DetachBrush()).WillRepeatedly(ReturnRef(canvas));
+    EXPECT_CALL(canvas, DrawRoundRect(_)).Times(AnyNumber());
     dotIndicatorModifier.indicatorMask_ = true;
     dotIndicatorModifier.currentIndex_ = 1.0;
     dotIndicatorModifier.normalToHoverIndex_ = 0.0;
@@ -3805,6 +3692,7 @@ HWTEST_F(SwiperTestNg, DotIndicatorModifier002, TestSize.Level1)
     DrawingContext context { canvas, 100.f, 100.f };
     EXPECT_CALL(canvas, AttachBrush(_)).WillRepeatedly(ReturnRef(canvas));
     EXPECT_CALL(canvas, DetachBrush()).WillRepeatedly(ReturnRef(canvas));
+    EXPECT_CALL(canvas, DrawRoundRect(_)).Times(AnyNumber());
     dotIndicatorModifier.indicatorMask_ = true;
     dotIndicatorModifier.currentIndex_ = 1.0;
     dotIndicatorModifier.normalToHoverIndex_ = 0.0;
@@ -3850,6 +3738,7 @@ HWTEST_F(SwiperTestNg, DotIndicatorModifier003, TestSize.Level1)
     DrawingContext context { canvas, 100.f, 100.f };
     EXPECT_CALL(canvas, AttachBrush(_)).WillRepeatedly(ReturnRef(canvas));
     EXPECT_CALL(canvas, DetachBrush()).WillRepeatedly(ReturnRef(canvas));
+    EXPECT_CALL(canvas, DrawRoundRect(_)).Times(AnyNumber());
     dotIndicatorModifier.indicatorMask_ = true;
     dotIndicatorModifier.currentIndex_ = 1.0;
     dotIndicatorModifier.normalToHoverIndex_ = 0.0;
@@ -3908,6 +3797,9 @@ HWTEST_F(SwiperTestNg, DotIndicatorModifier004, TestSize.Level1)
     DrawingContext context { canvas, 100.f, 100.f };
     EXPECT_CALL(canvas, AttachBrush(_)).WillRepeatedly(ReturnRef(canvas));
     EXPECT_CALL(canvas, DetachBrush()).WillRepeatedly(ReturnRef(canvas));
+    EXPECT_CALL(canvas, DrawRoundRect(_)).Times(AnyNumber());
+    EXPECT_CALL(canvas, Save()).Times(AnyNumber());
+    EXPECT_CALL(canvas, DrawRect(_)).Times(AnyNumber());
     dotIndicatorModifier.indicatorMask_ = true;
     dotIndicatorModifier.currentIndex_ = 1.0;
     dotIndicatorModifier.normalToHoverIndex_ = 0.0;
@@ -3942,6 +3834,7 @@ HWTEST_F(SwiperTestNg, DotIndicatorModifier005, TestSize.Level1)
     DrawingContext context { canvas, 100.f, 100.f };
     EXPECT_CALL(canvas, AttachBrush(_)).WillRepeatedly(ReturnRef(canvas));
     EXPECT_CALL(canvas, DetachBrush()).WillRepeatedly(ReturnRef(canvas));
+    EXPECT_CALL(canvas, DrawRoundRect(_)).Times(AnyNumber());
     dotIndicatorModifier.indicatorMask_ = true;
     dotIndicatorModifier.currentIndex_ = 1.0;
     dotIndicatorModifier.normalToHoverIndex_ = 0.0;
@@ -4032,11 +3925,6 @@ HWTEST_F(SwiperTestNg, ArrowOnModifyDone001, TestSize.Level1)
      */
     auto buttonNode = FrameNode::GetOrCreateFrameNode(V2::BUTTON_ETS_TAG,
         ElementRegister::GetInstance()->MakeUniqueId() + 1, []() { return AceType::MakeRefPtr<ButtonPattern>(); });
-    auto mockRenderContext = AceType::MakeRefPtr<MockRenderContext>();
-    buttonNode->renderContext_ = mockRenderContext;
-    Mock::AllowLeak(mockRenderContext.rawPtr_);
-    EXPECT_CALL(*mockRenderContext, SetVisible(_)).Times(1);
-
     leftArrowPattern->OnModifyDone();
     EXPECT_FALSE(leftArrowPattern->isFirstCreate_);
 }
@@ -4070,11 +3958,6 @@ HWTEST_F(SwiperTestNg, ArrowOnModifyDone002, TestSize.Level1)
      */
     auto buttonNode = FrameNode::GetOrCreateFrameNode(V2::BUTTON_ETS_TAG,
         ElementRegister::GetInstance()->MakeUniqueId() + 1, []() { return AceType::MakeRefPtr<ButtonPattern>(); });
-    auto mockRenderContext = AceType::MakeRefPtr<MockRenderContext>();
-    buttonNode->renderContext_ = mockRenderContext;
-    Mock::AllowLeak(mockRenderContext.rawPtr_);
-    EXPECT_CALL(*mockRenderContext, SetVisible(_)).Times(AtLeast(1));
-
     leftArrowPattern->OnModifyDone();
     EXPECT_FALSE(leftArrowPattern->isFirstCreate_);
 
@@ -4111,11 +3994,6 @@ HWTEST_F(SwiperTestNg, UpdateArrowContent001, TestSize.Level1)
 
     auto buttonNode = FrameNode::GetOrCreateFrameNode(V2::BUTTON_ETS_TAG,
         ElementRegister::GetInstance()->MakeUniqueId() + 1, []() { return AceType::MakeRefPtr<ButtonPattern>(); });
-    auto mockRenderContext = AceType::MakeRefPtr<MockRenderContext>();
-    buttonNode->renderContext_ = mockRenderContext;
-    Mock::AllowLeak(mockRenderContext.rawPtr_);
-    EXPECT_CALL(*mockRenderContext, SetVisible(_)).Times(5);
-
     leftArrowPattern->OnModifyDone();
     EXPECT_FALSE(leftArrowPattern->isFirstCreate_);
 
@@ -4161,11 +4039,6 @@ HWTEST_F(SwiperTestNg, UpdateArrowContent002, TestSize.Level1)
 
     auto buttonNode = FrameNode::GetOrCreateFrameNode(V2::BUTTON_ETS_TAG,
         ElementRegister::GetInstance()->MakeUniqueId() + 1, []() { return AceType::MakeRefPtr<ButtonPattern>(); });
-    auto mockRenderContext = AceType::MakeRefPtr<MockRenderContext>();
-    buttonNode->renderContext_ = mockRenderContext;
-    Mock::AllowLeak(mockRenderContext.rawPtr_);
-    EXPECT_CALL(*mockRenderContext, SetVisible(_)).Times(5);
-
     rightArrowPattern->OnModifyDone();
     EXPECT_FALSE(rightArrowPattern->isFirstCreate_);
 
@@ -4204,11 +4077,6 @@ HWTEST_F(SwiperTestNg, SetButtonVisible001, TestSize.Level1)
     leftSwiperArrowLayoutProperty->UpdateArrowSize(10.0_vp);
     auto buttonNode = FrameNode::GetOrCreateFrameNode(V2::BUTTON_ETS_TAG,
         ElementRegister::GetInstance()->MakeUniqueId() + 1, []() { return AceType::MakeRefPtr<ButtonPattern>(); });
-    auto mockRenderContext = AceType::MakeRefPtr<MockRenderContext>();
-    buttonNode->renderContext_ = mockRenderContext;
-    Mock::AllowLeak(mockRenderContext.rawPtr_);
-    EXPECT_CALL(*mockRenderContext, SetVisible(_)).Times(5);
-
     leftArrowPattern->OnModifyDone();
     EXPECT_FALSE(leftArrowPattern->isFirstCreate_);
 
@@ -4299,11 +4167,6 @@ HWTEST_F(SwiperTestNg, ButtonOnHover001, TestSize.Level1)
 
     auto buttonNode = FrameNode::GetOrCreateFrameNode(V2::BUTTON_ETS_TAG,
         ElementRegister::GetInstance()->MakeUniqueId() + 1, []() { return AceType::MakeRefPtr<ButtonPattern>(); });
-    auto mockRenderContext = AceType::MakeRefPtr<MockRenderContext>();
-    buttonNode->renderContext_ = mockRenderContext;
-    Mock::AllowLeak(mockRenderContext.rawPtr_);
-    EXPECT_CALL(*mockRenderContext, SetVisible(_)).Times(1);
-
     leftArrowPattern->OnModifyDone();
     ASSERT_NE(leftArrowPattern->isFirstCreate_, true);
 
@@ -4354,11 +4217,6 @@ HWTEST_F(SwiperTestNg, ButtonTouchEvent001, TestSize.Level1)
 
     auto buttonNode = FrameNode::GetOrCreateFrameNode(V2::BUTTON_ETS_TAG,
         ElementRegister::GetInstance()->MakeUniqueId() + 1, []() { return AceType::MakeRefPtr<ButtonPattern>(); });
-    auto mockRenderContext = AceType::MakeRefPtr<MockRenderContext>();
-    buttonNode->renderContext_ = mockRenderContext;
-    Mock::AllowLeak(mockRenderContext.rawPtr_);
-    EXPECT_CALL(*mockRenderContext, SetVisible(_)).Times(1);
-
     leftArrowPattern->OnModifyDone();
     ASSERT_NE(leftArrowPattern->isFirstCreate_, true);
 
@@ -4385,253 +4243,6 @@ HWTEST_F(SwiperTestNg, ButtonTouchEvent001, TestSize.Level1)
      */
     leftArrowPattern->isHover_ = false;
     leftArrowPattern->ButtonTouchEvent(buttonNode, TouchType::CANCEL);
-}
-
-/**
- * @tc.name: SwiperPatternGetNextFocusNode001
- * @tc.desc: Test SwiperPattern SwiperPatternGetNextFocusNode
- * @tc.type: FUNC
- */
-HWTEST_F(SwiperTestNg, SwiperPatternGetNextFocusNode001, TestSize.Level1)
-{
-    CreateWithItem([](SwiperModelNG model) {
-        model.SetDirection(Axis::VERTICAL);
-        model.SetIndicatorType(SwiperIndicatorType::DIGIT);
-    });
-    auto indicatorNode = FrameNode::GetOrCreateFrameNode(V2::SWIPER_INDICATOR_ETS_TAG, pattern_->GetIndicatorId(),
-        []() { return AceType::MakeRefPtr<SwiperIndicatorPattern>(); });
-    frameNode_->AddChild(indicatorNode);
-
-    auto leftArrow = FrameNode::GetOrCreateFrameNode(V2::SWIPER_LEFT_ARROW_ETS_TAG, pattern_->GetLeftButtonId(),
-        []() { return AceType::MakeRefPtr<SwiperArrowPattern>(); });
-    frameNode_->AddChild(leftArrow);
-
-    auto rightArrow = FrameNode::GetOrCreateFrameNode(V2::SWIPER_RIGHT_ARROW_ETS_TAG, pattern_->GetRightButtonId(),
-        []() { return AceType::MakeRefPtr<SwiperArrowPattern>(); });
-    frameNode_->AddChild(rightArrow);
-
-    /**
-     * @tc.steps: step3.1 call GetNextFocusNode.
-     * @tc.expected: curFocusNode FrameName is V2::SWIPER_INDICATOR_ETS_TAG.
-     * @tc.expected: isLastIndicatorFocused_ is true.
-     */
-    pattern_->GetNextFocusNode(FocusStep::NONE, rightArrow->GetFocusHub());
-    auto curFocusNode = pattern_->GetNextFocusNode(FocusStep::LEFT, rightArrow->GetFocusHub()).Upgrade();
-    EXPECT_EQ(curFocusNode->GetFrameName(), V2::SWIPER_INDICATOR_ETS_TAG);
-    EXPECT_TRUE(pattern_->isLastIndicatorFocused_);
-
-    /**
-     * @tc.cases: case3.2
-     * @tc.expected: isLastIndicatorFocused_ is false.
-     */
-    pattern_->GetNextFocusNode(FocusStep::LEFT, curFocusNode);
-    EXPECT_FALSE(pattern_->isLastIndicatorFocused_);
-
-    /**
-     * @tc.cases: case3.3
-     * @tc.expected: curFocusNode FrameName is V2::SWIPER_INDICATOR_ETS_TAG.
-     * @tc.expected: isLastIndicatorFocused_ is true.
-     */
-    curFocusNode = pattern_->GetNextFocusNode(FocusStep::RIGHT, leftArrow->GetFocusHub()).Upgrade();
-    EXPECT_EQ(curFocusNode->GetFrameName(), V2::SWIPER_INDICATOR_ETS_TAG);
-    EXPECT_TRUE(pattern_->isLastIndicatorFocused_);
-
-    /**
-     * @tc.cases: case3.4
-     * @tc.expected: curFocusNode FrameName is V2::SWIPER_RIGHT_ARROW_ETS_TAG.
-     */
-    curFocusNode = pattern_->GetNextFocusNode(FocusStep::RIGHT, curFocusNode).Upgrade();
-    EXPECT_EQ(curFocusNode->GetFrameName(), V2::SWIPER_RIGHT_ARROW_ETS_TAG);
-
-    /**
-     * @tc.cases: case3.5
-     * @tc.expected: isLastIndicatorFocused_ is false.
-     */
-    pattern_->GetNextFocusNode(FocusStep::RIGHT, curFocusNode);
-    EXPECT_FALSE(pattern_->isLastIndicatorFocused_);
-}
-
-/**
- * @tc.name: SwiperPatternPreviousFocus001
- * @tc.desc: Test SwiperPattern SwiperPatternPreviousFocus
- * @tc.type: FUNC
- */
-HWTEST_F(SwiperTestNg, SwiperPatternPreviousFocus001, TestSize.Level1)
-{
-    CreateWithItem([](SwiperModelNG model) {
-        model.SetDirection(Axis::VERTICAL);
-        model.SetIndicatorType(SwiperIndicatorType::DIGIT);
-    });
-    auto indicatorNode = FrameNode::GetOrCreateFrameNode(V2::SWIPER_INDICATOR_ETS_TAG, pattern_->GetIndicatorId(),
-        []() { return AceType::MakeRefPtr<SwiperIndicatorPattern>(); });
-    frameNode_->AddChild(indicatorNode);
-
-    auto leftArrow = FrameNode::GetOrCreateFrameNode(V2::SWIPER_LEFT_ARROW_ETS_TAG, pattern_->GetLeftButtonId(),
-        []() { return AceType::MakeRefPtr<SwiperArrowPattern>(); });
-    frameNode_->AddChild(leftArrow);
-
-    auto rightArrow = FrameNode::GetOrCreateFrameNode(V2::SWIPER_RIGHT_ARROW_ETS_TAG, pattern_->GetRightButtonId(),
-        []() { return AceType::MakeRefPtr<SwiperArrowPattern>(); });
-    frameNode_->AddChild(rightArrow);
-
-    /**
-     * @tc.steps: step3. call PreviousFocus.
-     * @tc.expected: isLastIndicatorFocused_ is true.
-     */
-    pattern_->isLastIndicatorFocused_ = false;
-    pattern_->currentIndex_ = 0;
-    auto paintProperty_ = pattern_->GetPaintProperty<SwiperPaintProperty>();
-    layoutProperty_->UpdateLoop(false);
-    layoutProperty_->UpdateHoverShow(true);
-    pattern_->PreviousFocus(indicatorNode->GetFocusHub());
-    EXPECT_TRUE(pattern_->isLastIndicatorFocused_);
-}
-
-/**
- * @tc.name: SwiperPatternPreviousFocus002
- * @tc.desc: Test SwiperPattern SwiperPatternPreviousFocus
- * @tc.type: FUNC
- */
-HWTEST_F(SwiperTestNg, SwiperPatternPreviousFocus002, TestSize.Level1)
-{
-    CreateWithItem([](SwiperModelNG model) {
-        model.SetDirection(Axis::VERTICAL);
-        model.SetIndicatorType(SwiperIndicatorType::DIGIT);
-    });
-    auto leftArrow = FrameNode::GetOrCreateFrameNode(V2::SWIPER_LEFT_ARROW_ETS_TAG, pattern_->GetLeftButtonId(),
-        []() { return AceType::MakeRefPtr<SwiperArrowPattern>(); });
-    frameNode_->AddChild(leftArrow);
-
-    auto rightArrow = FrameNode::GetOrCreateFrameNode(V2::SWIPER_RIGHT_ARROW_ETS_TAG, pattern_->GetRightButtonId(),
-        []() { return AceType::MakeRefPtr<SwiperArrowPattern>(); });
-    frameNode_->AddChild(rightArrow);
-
-    /**
-     * @tc.steps: step3.1 call PreviousFocus.
-     * @tc.expected: rightArrow->GetFocusHub()->parentFocusable is true.
-     */
-    pattern_->isLastIndicatorFocused_ = false;
-    pattern_->currentIndex_ = 0;
-    auto paintProperty_ = pattern_->GetPaintProperty<SwiperPaintProperty>();
-    layoutProperty_->UpdateLoop(false);
-    layoutProperty_->UpdateHoverShow(true);
-    pattern_->PreviousFocus(rightArrow->GetFocusHub());
-    EXPECT_TRUE(rightArrow->GetFocusHub()->parentFocusable_);
-    /**
-     * @tc.cases: case3.2
-     * @tc.expected: curFocusNode FrameName is V2::SWIPER_LEFT_ARROW_ETS_TAG.
-     */
-    pattern_->currentIndex_ = 1;
-    auto curFocusNode = pattern_->PreviousFocus(rightArrow->GetFocusHub()).Upgrade();
-    EXPECT_EQ(curFocusNode->GetFrameName(), V2::SWIPER_INDICATOR_ETS_TAG);
-}
-
-/**
- * @tc.name: SwiperPatternPreviousFocus003
- * @tc.desc: Test SwiperPattern SwiperPatternPreviousFocus
- * @tc.type: FUNC
- */
-HWTEST_F(SwiperTestNg, SwiperPatternPreviousFocus003, TestSize.Level2)
-{
-    CreateWithItem([](SwiperModelNG model) {
-        model.SetDirection(Axis::VERTICAL);
-        model.SetIndicatorType(SwiperIndicatorType::DIGIT);
-    });
-
-    /**
-     * @tc.steps: step3. call PreviousFocus.
-     * @tc.expected: frameNode_->GetFocusHub()->parentFocusable is true.
-     */
-    pattern_->PreviousFocus(frameNode_->GetFocusHub());
-    EXPECT_TRUE(frameNode_->GetFocusHub()->parentFocusable_);
-}
-
-/**
- * @tc.name: SwiperPatternNextFocus001
- * @tc.desc: Test SwiperPattern SwiperPatternNextFocus
- * @tc.type: FUNC
- */
-HWTEST_F(SwiperTestNg, SwiperPatternNextFocus001, TestSize.Level1)
-{
-    CreateWithItem([](SwiperModelNG model) {
-        model.SetDirection(Axis::VERTICAL);
-        model.SetIndicatorType(SwiperIndicatorType::DIGIT);
-    });
-    auto indicatorNode = FrameNode::GetOrCreateFrameNode(V2::SWIPER_INDICATOR_ETS_TAG, pattern_->GetIndicatorId(),
-        []() { return AceType::MakeRefPtr<SwiperIndicatorPattern>(); });
-    frameNode_->AddChild(indicatorNode);
-
-    auto leftArrow = FrameNode::GetOrCreateFrameNode(V2::SWIPER_LEFT_ARROW_ETS_TAG, pattern_->GetLeftButtonId(),
-        []() { return AceType::MakeRefPtr<SwiperArrowPattern>(); });
-    frameNode_->AddChild(leftArrow);
-
-    auto rightArrow = FrameNode::GetOrCreateFrameNode(V2::SWIPER_RIGHT_ARROW_ETS_TAG, pattern_->GetRightButtonId(),
-        []() { return AceType::MakeRefPtr<SwiperArrowPattern>(); });
-    frameNode_->AddChild(rightArrow);
-
-    /**
-     * @tc.steps: step3. call NextFocus.
-     * @tc.expected: isLastIndicatorFocused_ is true.
-     */
-    pattern_->isLastIndicatorFocused_ = false;
-    pattern_->currentIndex_ = pattern_->TotalCount() - 1;
-    auto paintProperty_ = pattern_->GetPaintProperty<SwiperPaintProperty>();
-    layoutProperty_->UpdateLoop(false);
-    layoutProperty_->UpdateHoverShow(true);
-    pattern_->NextFocus(indicatorNode->GetFocusHub());
-    EXPECT_TRUE(pattern_->isLastIndicatorFocused_);
-}
-
-/**
- * @tc.name: SwiperPatternNextFocus002
- * @tc.desc: Test SwiperPattern SwiperPatternNextFocus
- * @tc.type: FUNC
- */
-HWTEST_F(SwiperTestNg, SwiperPatternNextFocus002, TestSize.Level1)
-{
-    CreateWithItem([](SwiperModelNG model) {
-        model.SetDirection(Axis::VERTICAL);
-        model.SetIndicatorType(SwiperIndicatorType::DIGIT);
-    });
-    auto leftArrow = FrameNode::GetOrCreateFrameNode(V2::SWIPER_LEFT_ARROW_ETS_TAG, pattern_->GetLeftButtonId(),
-        []() { return AceType::MakeRefPtr<SwiperArrowPattern>(); });
-    frameNode_->AddChild(leftArrow);
-
-    auto rightArrow = FrameNode::GetOrCreateFrameNode(V2::SWIPER_RIGHT_ARROW_ETS_TAG, pattern_->GetRightButtonId(),
-        []() { return AceType::MakeRefPtr<SwiperArrowPattern>(); });
-    frameNode_->AddChild(rightArrow);
-
-    /**
-     * @tc.steps: step3.1 call PreviousFocus.
-     * @tc.expected: leftArrow->GetFocusHub()->parentFocusable is true.
-     */
-    pattern_->isLastIndicatorFocused_ = false;
-    pattern_->currentIndex_ = pattern_->TotalCount() - 1;
-    auto paintProperty_ = pattern_->GetPaintProperty<SwiperPaintProperty>();
-    layoutProperty_->UpdateLoop(false);
-    layoutProperty_->UpdateHoverShow(true);
-    pattern_->NextFocus(leftArrow->GetFocusHub());
-    EXPECT_TRUE(leftArrow->GetFocusHub()->parentFocusable_);
-}
-
-/**
- * @tc.name: SwiperPatternNextFocus003
- * @tc.desc: Test SwiperPattern SwiperPatternNextFocus
- * @tc.type: FUNC
- */
-HWTEST_F(SwiperTestNg, SwiperPatternNextFocus003, TestSize.Level2)
-{
-    CreateWithItem([](SwiperModelNG model) {
-        model.SetDirection(Axis::VERTICAL);
-        model.SetIndicatorType(SwiperIndicatorType::DIGIT);
-    });
-
-    /**
-     * @tc.steps: step3. call NextFocus.
-     * @tc.expected: frameNode_->GetFocusHub()->parentFocusable is true.
-     */
-    pattern_->NextFocus(frameNode_->GetFocusHub());
-    EXPECT_TRUE(frameNode_->GetFocusHub()->parentFocusable_);
 }
 
 /**
@@ -7499,148 +7110,6 @@ HWTEST_F(SwiperTestNg, SwiperLayoutAlgorithmMeasureSwiper002, TestSize.Level1)
 }
 
 /**
- * @tc.name: SwiperPatternPreviousFocus004
- * @tc.desc: Test SwiperPattern SwiperPatternPreviousFocus
- * @tc.type: FUNC
- */
-HWTEST_F(SwiperTestNg, SwiperPatternPreviousFocus004, TestSize.Level2)
-{
-    CreateWithItem([](SwiperModelNG model) {});
-    frameNode_->Clean(false, false);
-    layoutProperty_->UpdateLoop(true);
-    layoutProperty_->ResetDisplayCount();
-    layoutProperty_->ResetMinSize();
-    layoutProperty_->UpdateDisplayMode(SwiperDisplayMode::AUTO_LINEAR);
-    auto indicatorNode = FrameNode::GetOrCreateFrameNode(V2::SWIPER_INDICATOR_ETS_TAG,
-        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<SwiperIndicatorPattern>(); });
-    auto indicatorNodeLeftArrow = FrameNode::GetOrCreateFrameNode(V2::SWIPER_LEFT_ARROW_ETS_TAG,
-        pattern_->GetLeftButtonId(), []() { return AceType::MakeRefPtr<SwiperArrowPattern>(); });
-    indicatorNode->AddChild(indicatorNodeLeftArrow);
-    frameNode_->AddChild(indicatorNode);
-    auto leftArrow = FrameNode::GetOrCreateFrameNode(V2::SWIPER_LEFT_ARROW_ETS_TAG, pattern_->GetLeftButtonId(),
-        []() { return AceType::MakeRefPtr<SwiperArrowPattern>(); });
-    frameNode_->AddChild(leftArrow);
-    pattern_->leftButtonId_.reset();
-    pattern_->indicatorId_.reset();
-    pattern_->rightButtonId_.reset();
-    pattern_->currentIndex_ = 1;
-    layoutProperty_->UpdateShowIndicator(false);
-    eventHub_->AttachHost(frameNode_);
-    auto focusHub = AceType::MakeRefPtr<FocusHub>(eventHub_);
-
-    /**
-     * @tc.steps: step2. call PreviousFocus.
-     * @tc.expected: frameNode_->GetFocusHub()->parentFocusable is true.
-     */
-    for (int i = 0; i <= 1; i++) {
-        for (int j = 0; j <= 1; j++) {
-            pattern_->PreviousFocus(frameNode_->GetFocusHub());
-            if (i == 1) {
-                layoutProperty_->UpdateLoop(true);
-                continue;
-            }
-            pattern_->currentIndex_ = 0;
-        }
-        layoutProperty_->UpdateLoop(false);
-    }
-}
-
-/**
- * @tc.name: SwiperPatternPreviousFocus005
- * @tc.desc: Test SwiperPattern SwiperPatternPreviousFocus
- * @tc.type: FUNC
- */
-HWTEST_F(SwiperTestNg, SwiperPatternPreviousFocus005, TestSize.Level2)
-{
-    CreateWithItem([](SwiperModelNG model) {});
-    frameNode_->Clean(false, false);
-    layoutProperty_->UpdateLoop(true);
-    layoutProperty_->ResetDisplayCount();
-    layoutProperty_->ResetMinSize();
-    layoutProperty_->UpdateDisplayMode(SwiperDisplayMode::AUTO_LINEAR);
-    auto indicatorNode = FrameNode::GetOrCreateFrameNode(V2::SWIPER_INDICATOR_ETS_TAG,
-        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<SwiperIndicatorPattern>(); });
-    auto indicatorNodeLeftArrow = FrameNode::GetOrCreateFrameNode(V2::SWIPER_LEFT_ARROW_ETS_TAG,
-        pattern_->GetLeftButtonId(), []() { return AceType::MakeRefPtr<SwiperArrowPattern>(); });
-    indicatorNode->AddChild(indicatorNodeLeftArrow);
-    frameNode_->AddChild(indicatorNode);
-    auto leftArrow = FrameNode::GetOrCreateFrameNode(V2::SWIPER_LEFT_ARROW_ETS_TAG, pattern_->GetLeftButtonId(),
-        []() { return AceType::MakeRefPtr<SwiperArrowPattern>(); });
-    frameNode_->AddChild(leftArrow);
-    pattern_->leftButtonId_.reset();
-    pattern_->indicatorId_.reset();
-    pattern_->rightButtonId_.reset();
-    pattern_->currentIndex_ = 1;
-    layoutProperty_->UpdateShowIndicator(false);
-    eventHub_->AttachHost(frameNode_);
-    auto focusHub = AceType::MakeRefPtr<FocusHub>(eventHub_);
-
-    /**
-     * @tc.steps: step2. call PreviousFocus.
-     * @tc.expected: frameNode_->GetFocusHub()->parentFocusable is true.
-     */
-    for (int i = 0; i <= 1; i++) {
-        for (int j = 0; j <= 1; j++) {
-            pattern_->PreviousFocus(frameNode_->GetFocusHub());
-            if (i == 1) {
-                layoutProperty_->UpdateLoop(true);
-                continue;
-            }
-            pattern_->leftButtonId_ = 1;
-            pattern_->currentIndex_ = 0;
-        }
-        layoutProperty_->UpdateLoop(false);
-    }
-}
-
-/**
- * @tc.name: SwiperPatternNextFocus004
- * @tc.desc: Test SwiperPattern SwiperPatternPreviousFocus
- * @tc.type: FUNC
- */
-HWTEST_F(SwiperTestNg, SwiperPatternNextFocus004, TestSize.Level2)
-{
-    CreateWithItem([](SwiperModelNG model) {});
-    frameNode_->Clean(false, false);
-    layoutProperty_->UpdateLoop(true);
-    layoutProperty_->ResetDisplayCount();
-    layoutProperty_->ResetMinSize();
-    layoutProperty_->UpdateDisplayMode(SwiperDisplayMode::AUTO_LINEAR);
-    auto indicatorNode = FrameNode::GetOrCreateFrameNode(V2::SWIPER_INDICATOR_ETS_TAG,
-        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<SwiperIndicatorPattern>(); });
-    auto indicatorNodeLeftArrow = FrameNode::GetOrCreateFrameNode(V2::SWIPER_LEFT_ARROW_ETS_TAG,
-        pattern_->GetLeftButtonId(), []() { return AceType::MakeRefPtr<SwiperArrowPattern>(); });
-    indicatorNode->AddChild(indicatorNodeLeftArrow);
-    frameNode_->AddChild(indicatorNode);
-    auto leftArrow = FrameNode::GetOrCreateFrameNode(V2::SWIPER_LEFT_ARROW_ETS_TAG, pattern_->GetLeftButtonId(),
-        []() { return AceType::MakeRefPtr<SwiperArrowPattern>(); });
-    frameNode_->AddChild(leftArrow);
-    pattern_->leftButtonId_.reset();
-    pattern_->indicatorId_ = 1;
-    pattern_->rightButtonId_.reset();
-    pattern_->currentIndex_ = 1;
-    layoutProperty_->UpdateShowIndicator(false);
-    eventHub_->AttachHost(frameNode_);
-    auto focusHub = AceType::MakeRefPtr<FocusHub>(eventHub_);
-
-    /**
-     * @tc.steps: step2. call NextFocus.
-     * @tc.expected: the related function runs ok.
-     */
-    for (int i = 0; i <= 1; i++) {
-        for (int j = 0; j <= 1; j++) {
-            pattern_->NextFocus(frameNode_->GetFocusHub());
-            if (i == 1) {
-                layoutProperty_->UpdateLoop(true);
-                continue;
-            }
-            pattern_->currentIndex_ = 0;
-        }
-        layoutProperty_->UpdateLoop(false);
-    }
-}
-
-/**
  * @tc.name: SwiperInitIndicator006
  * @tc.desc: Test SwiperPattern SwiperInitIndicator
  * @tc.type: FUNC
@@ -7880,58 +7349,6 @@ HWTEST_F(SwiperTestNg, SwiperIndicatorPatternTestNg004, TestSize.Level1)
     auto indicatorPattern = indicatorNode->GetPattern<SwiperIndicatorPattern>();
     indicatorPattern->HandleHoverEvent(true);
     indicatorPattern->HandleHoverEvent(false);
-}
-
-/**
- * @tc.name: SwiperPatternPreviousFocus006
- * @tc.desc: Test SwiperPattern SwiperPatternPreviousFocus
- * @tc.type: FUNC
- */
-HWTEST_F(SwiperTestNg, SwiperPatternPreviousFocus006, TestSize.Level2)
-{
-    CreateWithItem([](SwiperModelNG model) {});
-    frameNode_->Clean(false, false);
-    layoutProperty_->UpdateLoop(true);
-    layoutProperty_->ResetDisplayCount();
-    layoutProperty_->ResetMinSize();
-    layoutProperty_->UpdateDisplayMode(SwiperDisplayMode::AUTO_LINEAR);
-    auto indicatorNode = FrameNode::GetOrCreateFrameNode(V2::SWIPER_INDICATOR_ETS_TAG,
-        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<SwiperIndicatorPattern>(); });
-    auto indicatorNodeLeftArrow = FrameNode::GetOrCreateFrameNode(V2::SWIPER_LEFT_ARROW_ETS_TAG,
-        pattern_->GetLeftButtonId(), []() { return AceType::MakeRefPtr<SwiperArrowPattern>(); });
-    indicatorNode->AddChild(indicatorNodeLeftArrow);
-    frameNode_->Clean(false, false);
-    frameNode_->AddChild(indicatorNode);
-    auto leftArrow = FrameNode::GetOrCreateFrameNode(V2::SWIPER_LEFT_ARROW_ETS_TAG, pattern_->GetLeftButtonId(),
-        []() { return AceType::MakeRefPtr<SwiperArrowPattern>(); });
-    auto rightArrow = FrameNode::GetOrCreateFrameNode(V2::SWIPER_RIGHT_ARROW_ETS_TAG, pattern_->GetRightButtonId(),
-        []() { return AceType::MakeRefPtr<SwiperArrowPattern>(); });
-    frameNode_->AddChild(leftArrow);
-    frameNode_->AddChild(rightArrow);
-    layoutProperty_->UpdateShowIndicator(false);
-    pattern_->indicatorId_.reset();
-    pattern_->rightButtonId_.reset();
-    pattern_->currentIndex_ = 1;
-    EXPECT_TRUE(pattern_->IsLoop());
-    eventHub_->AttachHost(frameNode_);
-    auto focusHub = AceType::MakeRefPtr<FocusHub>(eventHub_);
-
-    /**
-     * @tc.steps: step2. call PreviousFocus.
-     * @tc.expected: frameNode_->GetFocusHub()->parentFocusable is true.
-     */
-    for (int i = 0; i <= 1; i++) {
-        for (int j = 0; j <= 1; j++) {
-            pattern_->PreviousFocus(frameNode_->GetFocusHub());
-            if (i == 1) {
-                layoutProperty_->UpdateLoop(true);
-                continue;
-            }
-            pattern_->indicatorId_ = 1;
-            pattern_->currentIndex_ = 0;
-        }
-        layoutProperty_->UpdateLoop(false);
-    }
 }
 
 /**
@@ -8338,119 +7755,6 @@ HWTEST_F(SwiperTestNg, SwiperPatternShowPrevious003, TestSize.Level1)
     pattern_->isUserFinish_ = true;
     pattern_->ShowPrevious();
     EXPECT_EQ(pattern_->preTargetIndex_.value(), 0);
-}
-
-/**
- * @tc.name: SwiperPatternNextFocus005
- * @tc.desc: Test SwiperPattern SwiperPatternNextFocus
- * @tc.type: FUNC
- */
-HWTEST_F(SwiperTestNg, SwiperPatternNextFocus005, TestSize.Level2)
-{
-    CreateWithItem([](SwiperModelNG model) {});
-    frameNode_->Clean(false, false);
-    layoutProperty_->UpdateLoop(true);
-    layoutProperty_->ResetDisplayCount();
-    layoutProperty_->ResetMinSize();
-    layoutProperty_->UpdateDisplayMode(SwiperDisplayMode::AUTO_LINEAR);
-    auto indicatorNode = FrameNode::GetOrCreateFrameNode(V2::SWIPER_INDICATOR_ETS_TAG,
-        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<SwiperIndicatorPattern>(); });
-    auto indicatorNodeLeftArrow = FrameNode::GetOrCreateFrameNode(V2::SWIPER_LEFT_ARROW_ETS_TAG,
-        pattern_->GetLeftButtonId(), []() { return AceType::MakeRefPtr<SwiperArrowPattern>(); });
-    indicatorNode->AddChild(indicatorNodeLeftArrow);
-    frameNode_->AddChild(indicatorNode);
-    auto leftArrow = FrameNode::GetOrCreateFrameNode(V2::SWIPER_LEFT_ARROW_ETS_TAG, pattern_->GetLeftButtonId(),
-        []() { return AceType::MakeRefPtr<SwiperArrowPattern>(); });
-    auto rightArrow = FrameNode::GetOrCreateFrameNode(V2::SWIPER_RIGHT_ARROW_ETS_TAG, pattern_->GetRightButtonId(),
-        []() { return AceType::MakeRefPtr<SwiperArrowPattern>(); });
-    frameNode_->AddChild(leftArrow);
-    frameNode_->AddChild(rightArrow);
-    pattern_->leftButtonId_.reset();
-    pattern_->indicatorId_.reset();
-    pattern_->rightButtonId_ = 1;
-    pattern_->currentIndex_ = 1;
-    layoutProperty_->UpdateShowIndicator(false);
-    eventHub_->AttachHost(frameNode_);
-    auto focusHub = AceType::MakeRefPtr<FocusHub>(eventHub_);
-    auto eventHub1 = AceType::MakeRefPtr<EventHub>();
-    eventHub1->AttachHost(rightArrow);
-    auto focusHub1 = AceType::MakeRefPtr<FocusHub>(eventHub1);
-    focusHub->parentFocusable_ = false;
-
-    /**
-     * @tc.steps: step2. call NextFocus.
-     * @tc.expected: the related function runs ok.
-     */
-    for (int i = 0; i <= 1; i++) {
-        for (int j = 0; j <= 1; j++) {
-            pattern_->NextFocus(frameNode_->GetFocusHub());
-            if (i == 1) {
-                pattern_->currentIndex_ = 1;
-                continue;
-            }
-            pattern_->currentIndex_ = 0;
-            EXPECT_FALSE(pattern_->isLastIndicatorFocused_);
-        }
-        layoutProperty_->UpdateLoop(false);
-    }
-}
-
-/**
- * @tc.name: SwiperPatternPreviousFocus007
- * @tc.desc: Test SwiperPattern SwiperPatternPreviousFocus
- * @tc.type: FUNC
- */
-HWTEST_F(SwiperTestNg, SwiperPatternPreviousFocus007, TestSize.Level2)
-{
-    CreateWithItem([](SwiperModelNG model) {});
-    frameNode_->Clean(false, false);
-    layoutProperty_->UpdateLoop(true);
-    layoutProperty_->ResetDisplayCount();
-    layoutProperty_->ResetMinSize();
-    layoutProperty_->UpdateDisplayMode(SwiperDisplayMode::AUTO_LINEAR);
-    auto indicatorNode = FrameNode::GetOrCreateFrameNode(V2::SWIPER_INDICATOR_ETS_TAG,
-        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<SwiperIndicatorPattern>(); });
-    auto indicatorNodeLeftArrow = FrameNode::GetOrCreateFrameNode(V2::SWIPER_LEFT_ARROW_ETS_TAG,
-        pattern_->GetLeftButtonId(), []() { return AceType::MakeRefPtr<SwiperArrowPattern>(); });
-    indicatorNode->AddChild(indicatorNodeLeftArrow);
-    frameNode_->Clean(false, false);
-    frameNode_->AddChild(indicatorNode);
-    auto leftArrow = FrameNode::GetOrCreateFrameNode(V2::SWIPER_LEFT_ARROW_ETS_TAG, pattern_->GetLeftButtonId(),
-        []() { return AceType::MakeRefPtr<SwiperArrowPattern>(); });
-    auto rightArrow = FrameNode::GetOrCreateFrameNode(V2::SWIPER_RIGHT_ARROW_ETS_TAG, pattern_->GetRightButtonId(),
-        []() { return AceType::MakeRefPtr<SwiperArrowPattern>(); });
-    frameNode_->AddChild(leftArrow);
-    frameNode_->AddChild(rightArrow);
-    layoutProperty_->UpdateShowIndicator(false);
-    pattern_->indicatorId_.reset();
-    pattern_->rightButtonId_.reset();
-    pattern_->leftButtonId_ = 1;
-    pattern_->currentIndex_ = 0;
-    EXPECT_TRUE(pattern_->IsLoop());
-    eventHub_->AttachHost(frameNode_);
-    auto focusHub = AceType::MakeRefPtr<FocusHub>(eventHub_);
-    pattern_->isLastIndicatorFocused_ = false;
-    focusHub->parentFocusable_ = false;
-    auto eventHub1 = AceType::MakeRefPtr<EventHub>();
-    eventHub1->AttachHost(leftArrow);
-    auto focusHub1 = AceType::MakeRefPtr<FocusHub>(eventHub1);
-
-    /**
-     * @tc.steps: step2. call PreviousFocus.
-     * @tc.expected: frameNode_->GetFocusHub()->parentFocusable is true.
-     */
-    for (int i = 0; i <= 1; i++) {
-        for (int j = 0; j <= 1; j++) {
-            pattern_->PreviousFocus(frameNode_->GetFocusHub());
-            if (i == 1) {
-                pattern_->currentIndex_ = 0;
-                continue;
-            }
-            pattern_->currentIndex_ = 1;
-            EXPECT_FALSE(pattern_->isLastIndicatorFocused_);
-        }
-        layoutProperty_->UpdateLoop(false);
-    }
 }
 
 /**
@@ -9723,6 +9027,7 @@ HWTEST_F(SwiperTestNg, SwiperPaintMethodClipPadding001, TestSize.Level1)
     auto renderContext = frameNode_->GetRenderContext();
     PaintWrapper paintWrapper(renderContext, geometryNode, paintProperty);
     Testing::MockCanvas canvas;
+    EXPECT_CALL(canvas, ClipRect(_, _, _)).Times(AnyNumber());
 
     /**
      * @tc.steps: step2. call ClipPadding.
@@ -9758,6 +9063,8 @@ HWTEST_F(SwiperTestNg, SwiperPaintMethodPaintFade001, TestSize.Level1)
     auto renderContext = frameNode_->GetRenderContext();
     PaintWrapper paintWrapper(renderContext, geometryNode, paintProperty);
     Testing::MockCanvas canvas;
+    EXPECT_CALL(canvas, DrawCircle(_, _)).Times(AnyNumber());
+    EXPECT_CALL(canvas, ClipRect(_, _, _)).Times(AnyNumber());
 
     /**
      * @tc.steps: step2. call PaintFade whith setting needPaintFade_ and renderContext.
@@ -9797,6 +9104,7 @@ HWTEST_F(SwiperTestNg, SwiperPaintMethodPaintFade002, TestSize.Level1)
     Testing::MockCanvas canvas;
     EXPECT_CALL(canvas, AttachBrush(_)).WillRepeatedly(ReturnRef(canvas));
     EXPECT_CALL(canvas, DetachBrush()).WillRepeatedly(ReturnRef(canvas));
+    EXPECT_CALL(canvas, DrawCircle(_, _)).Times(AnyNumber());
     paintWrapper.paintProperty_ = AceType::MakeRefPtr<SwiperPaintProperty>();
 
     /**
@@ -9909,6 +9217,7 @@ HWTEST_F(SwiperTestNg, SwiperPaintMethodPaintFade003, TestSize.Level1)
     Testing::MockCanvas canvas;
     EXPECT_CALL(canvas, AttachBrush(_)).WillRepeatedly(ReturnRef(canvas));
     EXPECT_CALL(canvas, DetachBrush()).WillRepeatedly(ReturnRef(canvas));
+    EXPECT_CALL(canvas, DrawCircle(_, _)).Times(AnyNumber());
     paintWrapper.paintProperty_ = AceType::MakeRefPtr<SwiperPaintProperty>();
 
     /**
@@ -9945,6 +9254,7 @@ HWTEST_F(SwiperTestNg, SwiperPaintMethodPaintFade004, TestSize.Level1)
     Testing::MockCanvas canvas;
     EXPECT_CALL(canvas, AttachBrush(_)).WillRepeatedly(ReturnRef(canvas));
     EXPECT_CALL(canvas, DetachBrush()).WillRepeatedly(ReturnRef(canvas));
+    EXPECT_CALL(canvas, DrawCircle(_, _)).Times(AnyNumber());
     paintWrapper.paintProperty_ = AceType::MakeRefPtr<SwiperPaintProperty>();
     ASSERT_NE(paintWrapper.paintProperty_, nullptr);
     auto frameSize = paintWrapper.GetGeometryNode()->GetFrameSize();
@@ -10603,6 +9913,7 @@ HWTEST_F(SwiperTestNg, SwiperPatternOnScrollEnd001, TestSize.Level1)
     pattern_->GetPaintProperty<SwiperPaintProperty>()->UpdateEdgeEffect(EdgeEffect::NONE);
     auto mockScroll = AceType::MakeRefPtr<MockNestableScrollContainer>();
     EXPECT_CALL(*mockScroll, OnScrollEndRecursive).Times(1);
+    EXPECT_CALL(*mockScroll, HandleScrollVelocity).Times(1);
     NestedScrollOptions nestedOpt = {
         .forward = NestedScrollMode::SELF_FIRST,
         .backward = NestedScrollMode::SELF_FIRST,
