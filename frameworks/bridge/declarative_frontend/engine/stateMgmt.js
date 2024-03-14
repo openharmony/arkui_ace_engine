@@ -5439,6 +5439,7 @@ class ViewPU extends NativeViewPartialUpdate {
         
         // in case ViewPU is currently frozen
         ViewPU.inactiveComponents_.delete(`${this.constructor.name}[${this.id__()}]`);
+        MonitorV3.clearWatchesFromTarget(this);
         this.updateFuncByElmtId.clear();
         this.watchedProps.clear();
         this.providedVars_.clear();
@@ -7510,11 +7511,15 @@ function ObservedV2(BaseClass) {
  */
 class MonitorV3 {
     constructor(target, props, func) {
+        var _a;
+        var _b;
         ConfigureStateMgmt.instance.intentUsingV3(`@monitor`, props);
-        this.target_ = target;
+        this.target_ = new WeakRef(target);
         this.func_ = func;
         this.watchId_ = ++MonitorV3.nextWatchId_;
         this.props_ = props.split(".");
+        const meta = (_a = target[_b = MonitorV3.WATCH_INSTANCE_PREFIX]) !== null && _a !== void 0 ? _a : (target[_b] = {});
+        meta[props] = this.watchId_;
     }
     getTarget() {
         return this.target_;
@@ -7526,8 +7531,11 @@ class MonitorV3 {
     fireChange() {
         let newVal = this.observeObjectAccess();
         if (this.value_ !== newVal) {
-            
-            this.func_.call(this.target_, newVal, this.value_);
+            let target;
+            if (target = this.target_.deref()) {
+                
+                this.func_.call(target, newVal, this.value_);
+            }
             this.value_ = newVal;
         }
     }
@@ -7543,9 +7551,9 @@ class MonitorV3 {
     // this needs to be done at @monitor init and repeated every time
     // one of the objects has changes
     analysisPath(isInit) {
-        let obj = this.target_;
+        let obj = this.target_.deref();
         for (const prop of this.props_) {
-            if (typeof obj == "object" && Reflect.has(obj, prop)) {
+            if (obj && typeof obj == "object" && Reflect.has(obj, prop)) {
                 obj = obj[prop];
             }
             else {
@@ -7555,12 +7563,26 @@ class MonitorV3 {
         }
         return obj;
     }
+    static clearWatchesFromTarget(target) {
+        var _a;
+        let meta;
+        if (!target || typeof target !== "object"
+            || !(meta = target[MonitorV3.WATCH_INSTANCE_PREFIX]) || typeof meta != "object") {
+            return;
+        }
+        
+        Array.from(Object.values(meta)).forEach((watchId) => ObserveV3.getObserve().clearWatch(watchId));
+    }
 }
 //0x1.0000.0000.0000,
 // start with high number to avoid same id as elmtId for components.
 MonitorV3.MIN_WATCH_ID = 0x1000000000000;
 MonitorV3.nextWatchId_ = MonitorV3.MIN_WATCH_ID;
+// added to the prototype of target, 
+// ViewPU extended class prototype, or @Observed class proto
 MonitorV3.WATCH_PREFIX = "__wa_";
+// added to target, ie. to extended ViewPU or @Observed class object instance
+MonitorV3.WATCH_INSTANCE_PREFIX = Symbol("__wa_instance_");
 /**
  * @monitor("variable.path.expression") function decorator
  */

@@ -32,20 +32,27 @@ class MonitorV3 {
   public static readonly MIN_WATCH_ID = 0x1000000000000;
   public static nextWatchId_ = MonitorV3.MIN_WATCH_ID;
 
-  private value_: any; // 上次的值
+  private value_: any; 
   private props_: string[]; 
-  private target_: Object; 
+  private target_: WeakRef<object>;
   private func_: (val: any) => void; 
   private watchId_: number; 
 
+  // added to the prototype of target, 
+  // ViewPU extended class prototype, or @Observed class proto
   public static readonly WATCH_PREFIX = "__wa_";
+
+  // added to target, ie. to extended ViewPU or @Observed class object instance
+  private static readonly WATCH_INSTANCE_PREFIX = Symbol("__wa_instance_");
 
   constructor(target: object, props: string, func: (val: any) => void) {
     ConfigureStateMgmt.instance.intentUsingV3(`@monitor`, props);
-    this.target_ = target;
+    this.target_ = new WeakRef<Object>(target);
     this.func_ = func;
     this.watchId_ = ++MonitorV3.nextWatchId_;
     this.props_ = props.split(".");
+    const meta = target[MonitorV3.WATCH_INSTANCE_PREFIX]??={};
+    meta[props]=this.watchId_;
   }
 
   public getTarget() : Object {
@@ -60,8 +67,11 @@ class MonitorV3 {
   public fireChange(): void {
     let newVal = this.observeObjectAccess();
     if (this.value_ !== newVal) {
-      stateMgmtConsole.debug(`@monitor('${this.props_.join(".")}') function exec ...`);
-      this.func_.call(this.target_, newVal, this.value_)
+      let target: Object | undefined;
+      if (target=this.target_.deref()) {
+        stateMgmtConsole.debug(`@monitor(${this.props_.toString()}) function exec ...`);
+        this.func_.call(target, newVal, this.value_)
+      }
       this.value_ = newVal
     }
   }
@@ -79,9 +89,9 @@ class MonitorV3 {
   // this needs to be done at @monitor init and repeated every time
   // one of the objects has changes
   private analysisPath(isInit: boolean): Object | undefined {
-    let obj = this.target_;
+    let obj = this.target_.deref();
     for (const prop of this.props_) {
-      if (typeof obj=="object" && Reflect.has(obj, prop)) {
+      if (obj && typeof obj=="object" && Reflect.has(obj, prop)) {
         obj = obj[prop]
       } else {
         isInit && stateMgmtConsole.warn(`@monitor("${this.props_.join(".")}"): path currently does not exist (can be ok when monitoring union type values)`)
@@ -89,6 +99,17 @@ class MonitorV3 {
       }
     }
     return obj
+  }
+
+  public static clearWatchesFromTarget(target: Object): void {
+    let meta: Object;
+    if (!target || typeof target !== "object"
+      || !(meta = target[MonitorV3.WATCH_INSTANCE_PREFIX]) || typeof meta != "object") {
+      return;
+    }
+
+    stateMgmtConsole.debug(`MonitorV3: clearWatchesFromTarget: from target ${target.constructor?.name} watchIds to clear ${JSON.stringify(Array.from(Object.values(meta)))}`);
+    Array.from(Object.values(meta)).forEach((watchId) => ObserveV3.getObserve().clearWatch(watchId));
   }
 }
 

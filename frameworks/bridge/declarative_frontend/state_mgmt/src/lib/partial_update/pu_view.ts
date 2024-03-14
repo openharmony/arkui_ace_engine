@@ -349,6 +349,8 @@ abstract class ViewPU extends NativeViewPartialUpdate
     // in case ViewPU is currently frozen
     ViewPU.inactiveComponents_.delete(`${this.constructor.name}[${this.id__()}]`);
 
+    MonitorV3.clearWatchesFromTarget(this);
+    
     this.updateFuncByElmtId.clear();
     this.watchedProps.clear();
     this.providedVars_.clear();
