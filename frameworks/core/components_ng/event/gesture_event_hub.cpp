@@ -543,9 +543,7 @@ OffsetF GestureEventHub::GetPixelMapOffset(
         result.SetX(size.Width() * PIXELMAP_WIDTH_RATE);
         result.SetY(PIXELMAP_DRAG_DEFAULT_HEIGHT);
     } else {
-        auto coordinateX = frameNodeOffset_.GetX() > SystemProperties::GetDevicePhysicalWidth()
-                               ? frameNodeOffset_.GetX() - SystemProperties::GetDevicePhysicalWidth()
-                               : frameNodeOffset_.GetX();
+        auto coordinateX = frameNodeOffset_.GetX();
         auto coordinateY = frameNodeOffset_.GetY();
         auto differentScale = (NearZero(frameNodeSize_.Width()) || NearZero(size.Width()))
                                   ? 1.0f
