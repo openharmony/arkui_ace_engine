@@ -328,5 +328,5 @@ frameworks/core/components_ng/components_plugin.gni  @sunfei2021
 frameworks/core/components_ng/components.gni  @sunfei2021
 
 [Test source]
-test/mock/  @liyujie43
-test/unittest/  @liyujie43
+test/mock/  @chenjiafeng-openharmony
+test/unittest/  @chenjiafeng-openharmony
