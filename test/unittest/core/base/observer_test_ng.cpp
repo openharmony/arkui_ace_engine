@@ -29,6 +29,7 @@
 #include "core/components_ng/pattern/navrouter/navdestination_model_ng.h"
 #include "core/components_ng/pattern/navrouter/navdestination_pattern.h"
 #include "core/components_v2/inspector/inspector_constants.h"
+#include "test/mock/core/common/mock_container.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -37,9 +38,19 @@ namespace OHOS::Ace::NG {
 
 class ObserverTestNg : public testing::Test {
 public:
-    static void SetUpTestCase() {}
-    static void TearDownTestCase() {}
+    static void SetUpTestCase();
+    static void TearDownTestCase();
 };
+
+void ObserverTestNg::SetUpTestCase()
+{
+    MockContainer::SetUp();
+}
+
+void ObserverTestNg::TearDownTestCase()
+{
+    MockContainer::TearDown();
+}
 
 /**
  * @tc.name: ObserverTestNg001
@@ -126,5 +137,21 @@ HWTEST_F(ObserverTestNg, ObserverTestNg004, TestSize.Level1)
     ASSERT_EQ(info->id, std::to_string(frameNode->GetId()));
     ASSERT_EQ(info->scrollEvent, ScrollEventType::SCROLL_START);
     ASSERT_EQ(info->offset, offset);
+}
+
+/**
+ * @tc.name: ObserverTestNg005
+ * @tc.desc: Test the operation of Observer
+ * @tc.type: FUNC
+ */
+HWTEST_F(ObserverTestNg, ObserverTestNg005, TestSize.Level1)
+{
+    double testDensity = 0.;
+    UIObserverHandler::DensityHandleFunc densityHandleFunc = [&testDensity](AbilityContextInfo& context,
+                                                                 double density) -> void { testDensity = density; };
+    UIObserverHandler::GetInstance().densityHandleFunc_ = densityHandleFunc;
+    double targetDensity = 3.5;
+    UIObserverHandler::GetInstance().NotifyDensityChange(targetDensity);
+    EXPECT_EQ(testDensity, targetDensity);
 }
 }
