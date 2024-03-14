@@ -7996,6 +7996,40 @@ class TextInputMaxLinesModifier extends ModifierWithKey {
   }
 }
 TextInputMaxLinesModifier.identity = Symbol('textInputMaxLines');
+class TextInputUnderlineColorModifier extends ModifierWithKey {
+  constructor(value) {
+      super(value);
+  }
+  applyPeer(node, reset) {
+      if (reset) {
+          getUINativeModule().textInput.resetUnderlineColor(node);
+      }
+      else {
+          const valueType = typeof this.value;
+          if (valueType === 'number' || valueType === 'string' || isResource(this.value)) {
+              getUINativeModule().textInput.setUnderlineColor(node, this.value, undefined, undefined, undefined, undefined);
+          }
+          else {
+              getUINativeModule().textInput.setUnderlineColor(node, undefined, this.value.normal, this.value.typing, this.value.error, this.value.disable);
+          }
+      }
+  }
+  checkObjectDiff() {
+      if (isResource(this.stageValue) && isResource(this.value)) {
+          return !isBaseOrResourceEqual(this.stageValue, this.value);
+      }
+      else if (!isResource(this.stageValue) && !isResource(this.value)) {
+          return !(this.stageValue.normal === this.value.normal &&
+              this.stageValue.typing === this.value.typing &&
+              this.stageValue.error === this.value.error &&
+              this.stageValue.disable === this.value.disable);
+      }
+      else {
+          return true;
+      }
+  }
+}
+TextInputUnderlineColorModifier.identity = Symbol('textInputUnderlineColor');
 class TextInputShowPasswordIconModifier extends ModifierWithKey {
   constructor(value) {
     super(value);
@@ -8551,6 +8585,10 @@ class ArkTextInputComponent extends ArkComponent {
   }
   customKeyboard(event) {
     throw new Error('Method not implemented.');
+  }
+  underlineColor(value) {
+    modifierWithKey(this._modifiersWithKeys, TextInputUnderlineColorModifier.identity, TextInputUnderlineColorModifier, value);
+    return this;
   }
 }
 // @ts-ignore

@@ -26,10 +26,10 @@
 extern "C" {
 #endif
 
-#define ARKUI_FULL_API_VERSION 75
+#define ARKUI_FULL_API_VERSION 76
 // When changing ARKUI_BASIC_API_VERSION, ARKUI_FULL_API_VERSION must be
 // increased as well.
-#define ARKUI_NODE_API_VERSION 75
+#define ARKUI_NODE_API_VERSION 76
 
 #define ARKUI_BASIC_API_VERSION 6
 #define ARKUI_EXTENDED_API_VERSION 6
@@ -2177,6 +2177,9 @@ struct ArkUITextInputModifier {
     ArkUI_Int32 (*getTextInputCancelButtonStyle)(ArkUINodeHandle node);
     void (*setTextInputBackgroundColor)(ArkUINodeHandle node, ArkUI_Uint32 color);
     void (*resetTextInputBackgroundColor)(ArkUINodeHandle node);
+    void (*setTextInputNormalUnderlineColor)(ArkUINodeHandle node, ArkUI_Uint32 typingColor);
+    void (*setTextInputUserUnderlineColor)(ArkUINodeHandle node, const ArkUI_Float32* values, ArkUI_Int32 length);
+    void (*resetTextInputUserUnderlineColor)(ArkUINodeHandle node);
 };
 
 struct ArkUIWebModifier {
