@@ -87,6 +87,8 @@
 #endif
 namespace OHOS::Ace::NG {
 namespace {
+
+const BorderRadiusProperty ZERO_BORDER_RADIUS_PROPERTY(0.0_vp);
 // need to be moved to TextFieldTheme
 constexpr Dimension BORDER_DEFAULT_WIDTH = 0.0_vp;
 constexpr Dimension TYPING_UNDERLINE_WIDTH = 2.0_px;
@@ -697,10 +699,9 @@ void TextFieldPattern::HandleFocusEvent()
         auto renderContext = host->GetRenderContext();
         auto textFieldTheme = GetTheme();
         CHECK_NULL_VOID(textFieldTheme);
-        auto radius = textFieldTheme->GetBorderRadiusSize();
         underlineColor_ = userUnderlineColor_.typing.value_or(textFieldTheme->GetUnderlineTypingColor());
         underlineWidth_ = TYPING_UNDERLINE_WIDTH;
-        renderContext->UpdateBorderRadius({ radius.GetX(), radius.GetY(), radius.GetY(), radius.GetX() });
+        renderContext->UpdateBorderRadius(ZERO_BORDER_RADIUS_PROPERTY);
     }
     host->MarkDirtyNode(layoutProperty->GetMaxLinesValue(Infinity<float>()) <= 1 ? PROPERTY_UPDATE_MEASURE_SELF
                                                                                  : PROPERTY_UPDATE_MEASURE);
@@ -974,7 +975,7 @@ void TextFieldPattern::HandleBlurEvent()
     auto visible = layoutProperty->GetShowErrorTextValue(false);
     if (!visible && layoutProperty->GetShowUnderlineValue(false) && IsUnspecifiedOrTextType()) {
         auto renderContext = host->GetRenderContext();
-        renderContext->UpdateBorderRadius(borderRadius_);
+        renderContext->UpdateBorderRadius(ZERO_BORDER_RADIUS_PROPERTY);
         underlineColor_ = userUnderlineColor_.normal.value_or(textFieldTheme->GetUnderlineColor());
         underlineWidth_ = UNDERLINE_WIDTH;
     }
@@ -1375,8 +1376,7 @@ void TextFieldPattern::HandleTouchDown(const Offset& offset)
         auto layoutProperty = GetLayoutProperty<TextFieldLayoutProperty>();
         CHECK_NULL_VOID(layoutProperty);
         if (layoutProperty->GetShowUnderlineValue(false) && IsUnspecifiedOrTextType() && !IsNormalInlineState()) {
-            auto radius = textFieldTheme->GetBorderRadiusSize();
-            renderContext->UpdateBorderRadius({ radius.GetX(), radius.GetY(), radius.GetY(), radius.GetX() });
+            renderContext->UpdateBorderRadius(ZERO_BORDER_RADIUS_PROPERTY);
         }
         tmpHost->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
     }
@@ -1403,14 +1403,7 @@ void TextFieldPattern::HandleTouchUp()
             auto layoutProperty = GetLayoutProperty<TextFieldLayoutProperty>();
             CHECK_NULL_VOID(layoutProperty);
             if (layoutProperty->GetShowUnderlineValue(false) && IsUnspecifiedOrTextType() && !IsNormalInlineState()) {
-                renderContext->UpdateBorderRadius(borderRadius_);
-            }
-            if (layoutProperty->GetShowUnderlineValue(false) && HasFocus() && IsUnspecifiedOrTextType() &&
-                !IsNormalInlineState()) {
-                auto textFieldTheme = GetTheme();
-                CHECK_NULL_VOID(textFieldTheme);
-                auto radius = textFieldTheme->GetBorderRadiusSize();
-                renderContext->UpdateBorderRadius({ radius.GetX(), radius.GetY(), radius.GetY(), radius.GetX() });
+                renderContext->UpdateBorderRadius(ZERO_BORDER_RADIUS_PROPERTY);
             }
         }
     }
@@ -2862,8 +2855,7 @@ void TextFieldPattern::OnHover(bool isHover)
         CHECK_NULL_VOID(layoutProperty);
         if (isOnHover_) {
             if (layoutProperty->GetShowUnderlineValue(false) && IsUnspecifiedOrTextType()) {
-                auto radius = textFieldTheme->GetBorderRadiusSize();
-                renderContext->UpdateBorderRadius({ radius.GetX(), radius.GetY(), radius.GetY(), radius.GetX() });
+                renderContext->UpdateBorderRadius(ZERO_BORDER_RADIUS_PROPERTY);
             }
             tmpHost->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
             return;
@@ -2871,11 +2863,7 @@ void TextFieldPattern::OnHover(bool isHover)
         isOnHover_ = false;
         if (!isMousePressed_) {
             if (layoutProperty->GetShowUnderlineValue(false) && IsUnspecifiedOrTextType()) {
-                renderContext->UpdateBorderRadius(borderRadius_);
-            }
-            if (layoutProperty->GetShowUnderlineValue(false) && HasFocus() && IsUnspecifiedOrTextType()) {
-                auto radius = textFieldTheme->GetBorderRadiusSize();
-                renderContext->UpdateBorderRadius({ radius.GetX(), radius.GetY(), radius.GetY(), radius.GetX() });
+                renderContext->UpdateBorderRadius(ZERO_BORDER_RADIUS_PROPERTY);
             }
         }
         tmpHost->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
@@ -5294,9 +5282,7 @@ void TextFieldPattern::SaveUnderlineStates()
     CHECK_NULL_VOID(tmpHost);
     auto renderContext = tmpHost->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
-    Radius radius;
-    BorderRadiusProperty borderRadius { radius.GetX(), radius.GetY(), radius.GetY(), radius.GetX() };
-    borderRadius_ = renderContext->GetBorderRadius().value_or(borderRadius);
+    borderRadius_ = renderContext->GetBorderRadius().value_or(ZERO_BORDER_RADIUS_PROPERTY);
 }
 
 void TextFieldPattern::ApplyUnderlineStates()
@@ -5329,8 +5315,7 @@ void TextFieldPattern::ApplyUnderlineStates()
     if (!layoutProperty->HasTextColor()) {
         layoutProperty->UpdateTextColor(theme->GetUnderlineTextColor());
     }
-    Radius radius;
-    renderContext->UpdateBorderRadius({ radius.GetX(), radius.GetY(), radius.GetY(), radius.GetX() });
+    renderContext->UpdateBorderRadius(ZERO_BORDER_RADIUS_PROPERTY);
 }
 
 float TextFieldPattern::GetMarginBottom() const
