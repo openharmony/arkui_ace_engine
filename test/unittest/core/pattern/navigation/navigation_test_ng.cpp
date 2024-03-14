@@ -1522,7 +1522,7 @@ HWTEST_F(NavigationTestNg, NavigationModelNG006, TestSize.Level1)
      */
     std::optional<std::pair<std::string, RefPtr<UINode>>> preTopNavPath = std::pair<std::string, RefPtr<UINode>>();
     std::optional<std::pair<std::string, RefPtr<UINode>>> newTopNavPath = std::pair<std::string, RefPtr<UINode>>();
-    navigationPattern->CheckTopNavPathChange(preTopNavPath, preTopNavPath, false);
+    navigationPattern->CheckTopNavPathChange(preTopNavPath, preTopNavPath);
 
     preTopNavPath = std::pair<std::string, RefPtr<UINode>>();
     newTopNavPath = std::nullopt;
@@ -1531,13 +1531,13 @@ HWTEST_F(NavigationTestNg, NavigationModelNG006, TestSize.Level1)
     auto pageNode =
         FrameNode::CreateFrameNode("1", 1, AceType::MakeRefPtr<PagePattern>(AceType::MakeRefPtr<PageInfo>()));
     stageManager->stageNode_->children_.emplace_back(pageNode);
-    navigationPattern->CheckTopNavPathChange(preTopNavPath, newTopNavPath, false);
+    navigationPattern->CheckTopNavPathChange(preTopNavPath, newTopNavPath);
     ASSERT_EQ(navigationPattern->navigationMode_, NavigationMode::AUTO);
 
     preTopNavPath = std::nullopt;
     newTopNavPath = std::pair<std::string, RefPtr<UINode>>();
     navigationPattern->navigationMode_ = NavigationMode::STACK;
-    navigationPattern->CheckTopNavPathChange(preTopNavPath, newTopNavPath, false);
+    navigationPattern->CheckTopNavPathChange(preTopNavPath, newTopNavPath);
     ASSERT_EQ(navigationPattern->navigationMode_, NavigationMode::STACK);
     /**
      * @tc.steps: step3. construct correct arguments of navigationPattern->CheckTopNavPathChange then call it.
@@ -1550,7 +1550,7 @@ HWTEST_F(NavigationTestNg, NavigationModelNG006, TestSize.Level1)
 
     preTopNavPath = std::pair<std::string, RefPtr<UINode>>("preTopNavDestination", preTopNavDestination);
     newTopNavPath = std::pair<std::string, RefPtr<UINode>>("newTopNavDestination", newTopNavDestination);
-    navigationPattern->CheckTopNavPathChange(preTopNavPath, newTopNavPath, false);
+    navigationPattern->CheckTopNavPathChange(preTopNavPath, newTopNavPath);
     ASSERT_EQ(navigationPattern->navigationMode_, NavigationMode::STACK);
 
     auto preNavDestinationPattern = preTopNavDestination->GetPattern<NavDestinationPattern>();
@@ -1561,7 +1561,7 @@ HWTEST_F(NavigationTestNg, NavigationModelNG006, TestSize.Level1)
     ASSERT_NE(preTopNavDestination->GetEventHub<NavDestinationEventHub>(), nullptr);
 
     navigationPattern->navigationStack_->Add("preTopNavDestination", preTopNavDestination);
-    navigationPattern->CheckTopNavPathChange(preTopNavPath, newTopNavPath, false);
+    navigationPattern->CheckTopNavPathChange(preTopNavPath, newTopNavPath);
     ASSERT_FALSE(preNavDestinationPattern->isOnShow_);
 }
 
