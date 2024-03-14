@@ -135,10 +135,7 @@ ArkUI_NodeHandle CreateNode(ArkUI_NodeType type)
         return nullptr;
     }
 
-    ArkUI_Int32 id = -1;
-    if (nodeType == ARKUI_NODE_LOADING_PROGRESS || nodeType == ARKUI_NODE_TEXT || nodeType == ARKUI_NODE_TEXT_INPUT) {
-        id = ARKUI_AUTO_GENERATE_NODE_ID;
-    }
+    ArkUI_Int32 id = ARKUI_AUTO_GENERATE_NODE_ID;
     auto* uiNode = impl->getBasicAPI()->createNode(nodes[nodeType - 1], id, 0);
     if (!uiNode) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "node type: %{public}d can not find in full impl", type);
