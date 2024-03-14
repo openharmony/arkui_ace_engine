@@ -617,7 +617,8 @@ public:
     }
 
     void ProcessInnerPadding();
-    void OnCursorMoveDone(TextAffinity textAffinity = TextAffinity::UPSTREAM);
+    void OnCursorMoveDone(
+        TextAffinity textAffinity = TextAffinity::UPSTREAM, std::optional<Offset> offset = std::nullopt);
     bool IsDisabled();
     bool AllowCopy();
 
@@ -954,6 +955,7 @@ public:
             CloseCustomKeyboard();
             customKeyboardBuilder_ = keyboardBuilder; // refresh current keyboard
             RequestKeyboard(false, true, true);
+            StartTwinkling();
             return;
         }
         if (!customKeyboardBuilder_ && keyboardBuilder) {
@@ -963,6 +965,7 @@ public:
                 CloseKeyboard(true);
                 customKeyboardBuilder_ = keyboardBuilder; // refresh current keyboard
                 RequestKeyboard(false, true, true);
+                StartTwinkling();
                 return;
             }
 #endif
