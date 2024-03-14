@@ -2034,12 +2034,13 @@ void TextPattern::CollectSpanNodes(std::stack<SpanNodeInfo> nodes, bool& isSpanH
         }
         UpdateContainerChildren(current.containerSpanNode, current.node);
         auto spanNode = DynamicCast<SpanNode>(current.node);
-        if (spanNode && current.node->GetTag() == V2::SYMBOL_SPAN_ETS_TAG) {
+        auto tag = current.node->GetTag();
+        if (spanNode && tag == V2::SYMBOL_SPAN_ETS_TAG) {
             spanNode->CleanSpanItemChildren();
             UpdateChildProperty(spanNode);
             spanNode->MountToParagraph();
             textForDisplay_.append(StringUtils::Str16ToStr8(SYMBOL_TRANS));
-        } else if (spanNode && current.node->GetTag() != V2::PLACEHOLDER_SPAN_ETS_TAG) {
+        } else if (spanNode && tag != V2::PLACEHOLDER_SPAN_ETS_TAG) {
             spanNode->CleanSpanItemChildren();
             UpdateChildProperty(spanNode);
             spanNode->MountToParagraph();
@@ -2048,17 +2049,23 @@ void TextPattern::CollectSpanNodes(std::stack<SpanNodeInfo> nodes, bool& isSpanH
             if (spanNode->GetSpanItem()->onClick) {
                 isSpanHasClick = true;
             }
-        } else if (current.node->GetTag() == V2::IMAGE_ETS_TAG ||
-                   current.node->GetTag() == V2::PLACEHOLDER_SPAN_ETS_TAG) {
+        } else if (tag == V2::IMAGE_ETS_TAG || tag == V2::PLACEHOLDER_SPAN_ETS_TAG) {
             placeholderCount_++;
             AddChildSpanItem(current.node);
             dataDetectorAdapter_->textForAI_.append("\n");
+            auto imageNode = DynamicCast<FrameNode>(current.node);
+            if (!imageNode) {
+                continue;
+            }
+            auto focus_hub = imageNode->GetOrCreateFocusHub();
+            if (focus_hub && focus_hub->GetOnClickCallback()) {
+                isSpanHasClick = true;
+            }
         }
-        if (current.node->GetTag() == V2::PLACEHOLDER_SPAN_ETS_TAG) {
+        if (tag == V2::PLACEHOLDER_SPAN_ETS_TAG) {
             continue;
         }
-        auto containerSpanNode =
-            current.node->GetTag() == V2::CONTAINER_SPAN_ETS_TAG ? current.node : current.containerSpanNode;
+        auto containerSpanNode = tag == V2::CONTAINER_SPAN_ETS_TAG ? current.node : current.containerSpanNode;
         const auto& nextChildren = current.node->GetChildren();
         for (auto iter = nextChildren.rbegin(); iter != nextChildren.rend(); ++iter) {
             nodes.push({ .node = *iter, .containerSpanNode = containerSpanNode });
@@ -2188,6 +2195,12 @@ void TextPattern::AddChildSpanItem(const RefPtr<UINode>& child)
             auto imageSpanItem = MakeRefPtr<ImageSpanItem>();
             imageSpanItem->imageNodeId = imageNode->GetId();
             imageSpanItem->UpdatePlaceholderBackgroundStyle(imageNode);
+            auto focus_hub = imageNode->GetOrCreateFocusHub();
+            CHECK_NULL_VOID(focus_hub);
+            auto clickCall = focus_hub->GetOnClickCallback();
+            if (clickCall) {
+                imageSpanItem->SetOnClickEvent(std::move(clickCall));
+            }
             spans_.emplace_back(imageSpanItem);
             auto gesture = imageNode->GetOrCreateGestureEventHub();
             CHECK_NULL_VOID(gesture);
