@@ -67,6 +67,7 @@
 #include "core/common/resource/resource_manager.h"
 #include "core/common/resource/resource_object.h"
 #include "core/components/common/layout/constants.h"
+#include "core/components/common/layout/position_param.h"
 #include "core/components/common/layout/screen_system_manager.h"
 #include "core/components/common/properties/animation_option.h"
 #include "core/components/common/properties/border_image.h"
@@ -498,6 +499,41 @@ bool ParseLocationProps(const JSCallbackInfo& info, CalcDimension& x, CalcDimens
     bool hasX = JSViewAbstract::ParseJsDimensionVp(xVal, x);
     bool hasY = JSViewAbstract::ParseJsDimensionVp(yVal, y);
     return hasX || hasY;
+}
+
+bool ParseLocationPropsEdges(const JSCallbackInfo& info, EdgesParam& edges)
+{
+    JSRef<JSVal> arg = info[0];
+    if (!arg->IsObject()) {
+        return false;
+    }
+    bool useEdges = false;
+    CalcDimension top;
+    CalcDimension left;
+    CalcDimension bottom;
+    CalcDimension right;
+    JSRef<JSObject> edgesObj = JSRef<JSObject>::Cast(arg);
+    JSRef<JSVal> topVal = edgesObj->GetProperty("top");
+    JSRef<JSVal> leftVal = edgesObj->GetProperty("left");
+    JSRef<JSVal> bottomVal = edgesObj->GetProperty("bottom");
+    JSRef<JSVal> rightVal = edgesObj->GetProperty("right");
+    if (JSViewAbstract::ParseJsDimension(topVal, top, DimensionUnit::VP)) {
+        edges.SetTop(top);
+        useEdges = true;
+    }
+    if (JSViewAbstract::ParseJsDimension(leftVal, left, DimensionUnit::VP)) {
+        edges.SetLeft(left);
+        useEdges = true;
+    }
+    if (JSViewAbstract::ParseJsDimension(bottomVal, bottom, DimensionUnit::VP)) {
+        edges.SetBottom(bottom);
+        useEdges = true;
+    }
+    if (JSViewAbstract::ParseJsDimension(rightVal, right, DimensionUnit::VP)) {
+        edges.SetRight(right);
+        useEdges = true;
+    }
+    return useEdges;
 }
 
 RefPtr<JsFunction> ParseDragStartBuilderFunc(const JSRef<JSVal>& info)
@@ -1942,8 +1978,12 @@ void JSViewAbstract::JsPosition(const JSCallbackInfo& info)
 {
     CalcDimension x;
     CalcDimension y;
+    OHOS::Ace::EdgesParam edges;
+
     if (ParseLocationProps(info, x, y)) {
         ViewAbstractModel::GetInstance()->SetPosition(x, y);
+    } else if (ParseLocationPropsEdges(info, edges)) {
+        ViewAbstractModel::GetInstance()->SetPositionEdges(edges);
     } else {
         ViewAbstractModel::GetInstance()->SetPosition(0.0_vp, 0.0_vp);
     }
@@ -1964,8 +2004,12 @@ void JSViewAbstract::JsOffset(const JSCallbackInfo& info)
 {
     CalcDimension x;
     CalcDimension y;
+    OHOS::Ace::EdgesParam edges;
+
     if (ParseLocationProps(info, x, y)) {
         ViewAbstractModel::GetInstance()->SetOffset(x, y);
+    } else if (ParseLocationPropsEdges(info, edges)) {
+        ViewAbstractModel::GetInstance()->SetOffsetEdges(edges);
     } else {
         ViewAbstractModel::GetInstance()->SetOffset(0.0_vp, 0.0_vp);
     }

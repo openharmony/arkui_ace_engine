@@ -26,6 +26,7 @@
 #include "base/geometry/dimension.h"
 #include "base/memory/ace_type.h"
 #include "base/utils/macros.h"
+#include "core/components/common/layout/position_param.h"
 #include "core/components/common/properties/alignment.h"
 #include "core/components/common/properties/blend_mode.h"
 #include "core/components/common/properties/popup_param.h"
@@ -145,6 +146,8 @@ public:
     // position
     virtual void SetPosition(const Dimension& x, const Dimension& y) = 0;
     virtual void SetOffset(const Dimension& x, const Dimension& y) = 0;
+    virtual void SetPositionEdges(const EdgesParam& value) {};
+    virtual void SetOffsetEdges(const EdgesParam& value) {};
     virtual void MarkAnchor(const Dimension& x, const Dimension& y) = 0;
 
     // transforms
