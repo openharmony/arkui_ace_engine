@@ -2155,6 +2155,12 @@ void RichEditorPattern::OnDragEnd(const RefPtr<Ace::DragEvent>& event)
     if (status_ == Status::DRAGGING) {
         status_ = Status::NONE;
     }
+    std::for_each(dragSpanItems_.begin(), dragSpanItems_.end(), [](RefPtr<SpanItem>& item) {
+        if (item) {
+            item->EndDrag();
+        }
+    });
+    dragSpanItems_.clear();
     if (recoverDragResultObjects_.empty()) {
         return;
     }
