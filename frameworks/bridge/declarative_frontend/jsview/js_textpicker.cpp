@@ -163,7 +163,7 @@ void ParseTextPickerValueObject(const JSCallbackInfo& info, const JSRef<JSVal>& 
     CHECK_NULL_VOID(changeEventVal->IsFunction());
 
     auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(changeEventVal));
-    WeakPtr<NG::FrameNode> targetNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    WeakPtr<NG::FrameNode> targetNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
     auto onValueChange = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc), node = targetNode](
                              const std::vector<std::string>& value) {
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
@@ -190,7 +190,7 @@ void ParseTextPickerSelectedObject(const JSCallbackInfo& info, const JSRef<JSVal
     CHECK_NULL_VOID(changeEventVal->IsFunction());
 
     auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(changeEventVal));
-    WeakPtr<NG::FrameNode> targetNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    WeakPtr<NG::FrameNode> targetNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
     auto onSelectedChange = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc), node = targetNode](
                                 const std::vector<double>& index) {
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
@@ -236,7 +236,7 @@ void JSTextPicker::Create(const JSCallbackInfo& info)
             param.result.clear();
             param.options.clear();
 
-            RefPtr<NG::FrameNode> targetNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+            auto targetNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
             bool firstBuild = targetNode && targetNode->IsFirstBuilding();
             if (!firstBuild) {
                 return;
@@ -1083,7 +1083,7 @@ void TextPickerDialogAppearEvent(const JSCallbackInfo& info, TextPickerDialogEve
     std::function<void()> didAppearEvent;
     std::function<void()> willAppearEvent;
     auto paramObject = JSRef<JSObject>::Cast(info[0]);
-    WeakPtr<NG::FrameNode> targetNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    WeakPtr<NG::FrameNode> targetNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
     auto onDidAppear = paramObject->GetProperty("onDidAppear");
     if (!onDidAppear->IsUndefined() && onDidAppear->IsFunction()) {
         auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(onDidAppear));
@@ -1113,7 +1113,7 @@ void TextPickerDialogDisappearEvent(const JSCallbackInfo& info, TextPickerDialog
     std::function<void()> didDisappearEvent;
     std::function<void()> willDisappearEvent;
     auto paramObject = JSRef<JSObject>::Cast(info[0]);
-    WeakPtr<NG::FrameNode> targetNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    WeakPtr<NG::FrameNode> targetNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
     auto onDidDisappear = paramObject->GetProperty("onDidDisappear");
     if (!onDidDisappear->IsUndefined() && onDidDisappear->IsFunction()) {
         auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(onDidDisappear));
@@ -1151,7 +1151,7 @@ void JSTextPickerDialog::Show(const JSCallbackInfo& info)
     std::function<void(const std::string&)> acceptEvent;
     std::function<void(const std::string&)> changeEvent;
     auto onCancel = paramObject->GetProperty("onCancel");
-    WeakPtr<NG::FrameNode> targetNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    WeakPtr<NG::FrameNode> targetNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
     if (!onCancel->IsUndefined() && onCancel->IsFunction()) {
         auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(onCancel));
         cancelEvent = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc), node = targetNode]() {
@@ -1486,7 +1486,7 @@ std::map<std::string, NG::DialogTextEvent> JSTextPickerDialog::DialogEvent(const
     }
     auto paramObject = JSRef<JSObject>::Cast(info[0]);
     auto onAccept = paramObject->GetProperty("onAccept");
-        WeakPtr<NG::FrameNode> targetNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    auto targetNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
     if (!onAccept->IsUndefined() && onAccept->IsFunction()) {
         auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(onAccept));
         auto acceptId = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc), node = targetNode](
@@ -1523,7 +1523,7 @@ std::map<std::string, NG::DialogGestureEvent> JSTextPickerDialog::DialogCancelEv
     }
     auto paramObject = JSRef<JSObject>::Cast(info[0]);
     auto onCancel = paramObject->GetProperty("onCancel");
-    WeakPtr<NG::FrameNode> targetNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    WeakPtr<NG::FrameNode> targetNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
     if (!onCancel->IsUndefined() && onCancel->IsFunction()) {
         auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(onCancel));
         auto cancelId = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc), node = targetNode](
@@ -1545,7 +1545,7 @@ void JSTextPickerDialog::AddEvent(RefPtr<PickerTextComponent>& picker, const JSC
     }
     auto paramObject = JSRef<JSObject>::Cast(info[0]);
     auto onAccept = paramObject->GetProperty("onAccept");
-    WeakPtr<NG::FrameNode> targetNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    WeakPtr<NG::FrameNode> targetNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
     if (!onAccept->IsUndefined() && onAccept->IsFunction()) {
         auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(onAccept));
         auto acceptId = EventMarker([execCtx = info.GetExecutionContext(), func = std::move(jsFunc), node = targetNode](

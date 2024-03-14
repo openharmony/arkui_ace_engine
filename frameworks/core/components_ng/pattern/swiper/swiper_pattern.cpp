@@ -958,6 +958,9 @@ void SwiperPattern::FireChangeEvent() const
 void SwiperPattern::FireAnimationStartEvent(
     int32_t currentIndex, int32_t nextIndex, const AnimationCallbackInfo& info) const
 {
+    if (!HasTabsAncestor()) {
+        PerfMonitor::GetPerfMonitor()->Start(PerfConstants::APP_SWIPER_FLING, PerfActionType::FIRST_MOVE, "");
+    }
     auto swiperEventHub = GetEventHub<SwiperEventHub>();
     CHECK_NULL_VOID(swiperEventHub);
     swiperEventHub->FireAnimationStartEvent(currentIndex, nextIndex, info);
@@ -968,7 +971,12 @@ void SwiperPattern::FireAnimationStartEvent(
 
 void SwiperPattern::FireAnimationEndEvent(int32_t currentIndex, const AnimationCallbackInfo& info) const
 {
-    PerfMonitor::GetPerfMonitor()->End(PerfConstants::APP_SWIPER_FLING, false);
+    if (HasTabsAncestor()) {
+        PerfMonitor::GetPerfMonitor()->End(PerfConstants::APP_TAB_SWITCH, false);
+    } else {
+        PerfMonitor::GetPerfMonitor()->End(PerfConstants::APP_SWIPER_FLING, false);
+    }
+
     if (currentIndex == -1) {
         return;
     }
@@ -2066,7 +2074,9 @@ void SwiperPattern::HandleTouchUp()
 
 void SwiperPattern::HandleDragStart(const GestureEvent& info)
 {
-    PerfMonitor::GetPerfMonitor()->Start(PerfConstants::APP_SWIPER_SCROLL, PerfActionType::FIRST_MOVE, "");
+    if (!HasTabsAncestor()) {
+        PerfMonitor::GetPerfMonitor()->Start(PerfConstants::APP_SWIPER_SCROLL, PerfActionType::FIRST_MOVE, "");
+    }
     UpdateDragFRCSceneInfo(info.GetMainVelocity(), SceneStatus::START);
 
     StopAnimationOnScrollStart(
@@ -2142,8 +2152,9 @@ void SwiperPattern::HandleDragUpdate(const GestureEvent& info)
 
 void SwiperPattern::HandleDragEnd(double dragVelocity)
 {
-    PerfMonitor::GetPerfMonitor()->End(PerfConstants::APP_SWIPER_SCROLL, false);
-    PerfMonitor::GetPerfMonitor()->Start(PerfConstants::APP_SWIPER_FLING, PerfActionType::FIRST_MOVE, "");
+    if (!HasTabsAncestor()) {
+        PerfMonitor::GetPerfMonitor()->End(PerfConstants::APP_SWIPER_SCROLL, false);
+    }
     isTouchDown_ = false;
     UpdateDragFRCSceneInfo(dragVelocity, SceneStatus::END);
     const auto& addEventCallback = swiperController_->GetAddTabBarEventCallback();
@@ -4810,4 +4821,13 @@ void SwiperPattern::SetOnHiddenChangeForParent()
         navDestinationEventHub->SetOnHiddenChange(std::move(onHiddenChange));
     }
 }
+
+bool SwiperPattern::HasTabsAncestor() const
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, false);
+    auto parent = host->GetAncestorNodeOfFrame();
+    return parent != nullptr && parent->GetTag() == V2::TABS_ETS_TAG;
+}
+
 } // namespace OHOS::Ace::NG

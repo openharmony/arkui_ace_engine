@@ -192,7 +192,7 @@ bool SharedTransitionExchange::CreateSizeAnimation(const RefPtr<FrameNode>& src,
         return true;
     }
     const auto& magicProperty = src->GetLayoutProperty()->GetMagicItemProperty();
-    auto initAspectRatio = magicProperty ? magicProperty->GetAspectRatio() : std::nullopt;
+    auto initAspectRatio = magicProperty.GetAspectRatio();
     auto initSize = src->GetLayoutProperty()->GetCalcLayoutConstraint()
                         ? src->GetLayoutProperty()->GetCalcLayoutConstraint()->selfIdealSize
                         : std::nullopt;

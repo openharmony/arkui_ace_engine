@@ -132,6 +132,9 @@ public:
     // customNode only used by customDialog, pass in nullptr if not customDialog
     RefPtr<FrameNode> ShowDialog(
         const DialogProperties& dialogProps, std::function<void()>&& buildFunc, bool isRightToLeft = false);
+    RefPtr<UINode> BuildFrameNode(std::function<void()>& buildFunc);
+    RefPtr<FrameNode> ShowDialogWithNode(
+        const DialogProperties& dialogProps, const RefPtr<UINode>& customNode, bool isRightToLeft = false);
     void ShowCustomDialog(const RefPtr<FrameNode>& customNode);
     void ShowDateDialog(const DialogProperties& dialogProps, const DatePickerSettingData& settingData,
         std::map<std::string, NG::DialogEvent> dialogEvent,
@@ -366,7 +369,9 @@ public:
 
     RefPtr<FrameNode> GetSheetMask(const RefPtr<FrameNode>& sheetNode);
 
-    void DeleteModal(int32_t targetId);
+    void DeleteModal(int32_t targetId, bool needOnWillDisappear = true);
+
+    void DeleteModalNode(int32_t targetId, RefPtr<FrameNode>& modalNode, bool isModal, bool needOnWillDisappear);
 
     void RemoveSheetMask(RefPtr<FrameNode>& sheetNode, RefPtr<UINode>& rootNode);
 
@@ -496,6 +501,7 @@ private:
         AnimationOption option, float showHeight);
     void PlayDefaultModalOut(const RefPtr<FrameNode>& modalNode, const RefPtr<RenderContext>& context,
         AnimationOption option, float showHeight);
+    void OpenToastAnimation(const RefPtr<FrameNode>& toastNode, int32_t duration);
 
     // Key: target Id, Value: PopupInfo
     std::unordered_map<int32_t, NG::PopupInfo> popupMap_;

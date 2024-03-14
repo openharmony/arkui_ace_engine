@@ -64,6 +64,11 @@ public:
         isDisableMouseLeft_ = isDisableMouseLeft;
     }
 
+    void RemoveLongPressEvent(const RefPtr<LongPressEvent>& longPressEvent)
+    {
+        longPressEvents_.remove(longPressEvent);
+    }
+
     RefPtr<LongPressRecognizer> GetLongPressRecognizer() const
     {
         return longPressRecognizer_;
@@ -100,6 +105,7 @@ private:
     WeakPtr<GestureEventHub> gestureEventHub_;
     RefPtr<LongPressRecognizer> longPressRecognizer_;
     RefPtr<LongPressEvent> longPressEvent_;
+    std::list<RefPtr<LongPressEvent>> longPressEvents_;
 
     ACE_DISALLOW_COPY_AND_MOVE(LongPressEventActuator);
 };

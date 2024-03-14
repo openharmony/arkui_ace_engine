@@ -26,10 +26,10 @@
 extern "C" {
 #endif
 
-#define ARKUI_FULL_API_VERSION 74
+#define ARKUI_FULL_API_VERSION 75
 // When changing ARKUI_BASIC_API_VERSION, ARKUI_FULL_API_VERSION must be
 // increased as well.
-#define ARKUI_NODE_API_VERSION 74
+#define ARKUI_NODE_API_VERSION 75
 
 #define ARKUI_BASIC_API_VERSION 6
 #define ARKUI_EXTENDED_API_VERSION 6
@@ -69,6 +69,22 @@ typedef _ArkUICanvas* ArkUICanvasHandle;
 typedef _ArkUIPaint* ArkUIPaintHandle;
 typedef _ArkUIFont* ArkUIFontHandle;
 typedef _ArkUIXComponentController* ArkUIXComponentControllerHandle;
+
+struct ArkUIRect {
+    ArkUI_Float32 x;
+    ArkUI_Float32 y;
+    ArkUI_Float32 width;
+    ArkUI_Float32 height;
+};
+
+struct ArkUICornerRadius {
+    ArkUI_Float32 topLeft;
+    ArkUI_Float32 topRight;
+    ArkUI_Float32 bottomLeft;
+    ArkUI_Float32 bottomRight;
+};
+
+typedef struct _ArkUIDialog* ArkUIDialogHandle;
 
 /**
  * ToolType
@@ -2894,6 +2910,10 @@ struct ArkUIRichEditorModifier {
     void (*resetRichEditorEnableDataDetector)(ArkUINodeHandle node);
     void (*setRichEditorCopyOptions)(ArkUINodeHandle node, ArkUI_Int32 copyOptionsValue);
     void (*resetRichEditorCopyOptions)(ArkUINodeHandle node);
+    void (*setRichEditorCaretColor)(ArkUINodeHandle node, ArkUI_Uint32 color);
+    void (*resetRichEditorCaretColor)(ArkUINodeHandle node);
+    void (*setRichEditorSelectedBackgroundColor)(ArkUINodeHandle node, ArkUI_Uint32 color);
+    void (*resetRichEditorSelectedBackgroundColor)(ArkUINodeHandle node);
 };
 
 struct ArkUIRichEditorControllerModifier {
@@ -3291,6 +3311,28 @@ struct ArkUIBasicAPI {
     void (*containerScopeBind)();
 };
 
+struct ArkUIDialogAPI {
+    ArkUIDialogHandle (*create)();
+    void (*dispose)(ArkUIDialogHandle handler);
+    ArkUI_Int32 (*attachContent)(ArkUIDialogHandle handler, ArkUINodeHandle contentNode);
+    ArkUI_Int32 (*detachContent)(ArkUIDialogHandle handler, ArkUINodeHandle contentNode);
+    ArkUI_Int32 (*setContentAlignment)(ArkUIDialogHandle handler,
+        ArkUI_Int32 alignment, ArkUI_Float32 offsetX, ArkUI_Float32 offsetY);
+    ArkUI_Int32 (*resetContentAlignment)(ArkUIDialogHandle handler);
+    ArkUI_Int32 (*setMode)(ArkUIDialogHandle handler, ArkUI_Int32 useModalMode, ArkUI_Bool autoCancel);
+    ArkUI_Int32 (*setMask)(ArkUIDialogHandle handler, ArkUI_Uint32 maskColor, ArkUIRect* rect);
+    ArkUI_Int32 (*setBackgroundColor)(ArkUIDialogHandle handler, ArkUI_Uint32 backgroundColor);
+    ArkUI_Int32 (*setCornerRadius)(ArkUIDialogHandle handler, ArkUI_Float32 topleft, ArkUI_Float32 topRight,
+        ArkUI_Float32 bottomLeft, ArkUI_Float32 bottomRight);
+    ArkUI_Int32 (*setGridCount)(ArkUIDialogHandle handler, ArkUI_Int32 gridCount);
+    ArkUI_Int32 (*setCustomStyle)(ArkUIDialogHandle handler, ArkUI_Bool customStyle);
+    ArkUI_Int32 (*useCustomAnimation)(ArkUIDialogHandle handler, ArkUI_Bool useCustomAnimation);
+    // show dialog
+    ArkUI_Int32 (*show)(ArkUIDialogHandle handler, ArkUI_Bool showInSubWindow);
+    ArkUI_Int32 (*close)(ArkUIDialogHandle handler);
+    ArkUI_Int32 (*registerOnWillDismiss)(ArkUIDialogHandle handler, bool (*eventHandler)(ArkUI_Int32));
+};
+
 struct ArkUIBasicNodeAPI {
     ArkUI_Int32 version;
     void (*setCallbackMethod)(ArkUIAPICallbackMethod* method);
@@ -3358,6 +3400,7 @@ struct ArkUIFullNodeAPI {
     const ArkUIAnimation* (*getAnimation)();
     const ArkUINavigation* (*getNavigation)();
     const ArkUIGraphicsAPI* (*getGraphicsAPI)();
+    const ArkUIDialogAPI* (*getDialogAPI)();
 };
 
 struct ArkUIAnyAPI {

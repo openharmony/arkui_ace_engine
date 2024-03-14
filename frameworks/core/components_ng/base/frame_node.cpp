@@ -340,9 +340,8 @@ private:
     bool needResetChild_ = false;
 }; // namespace OHOS::Ace::NG
 
-FrameNode::FrameNode(
-    const std::string& tag, int32_t nodeId, const RefPtr<Pattern>& pattern, int32_t instanceId, bool isRoot)
-    : UINode(tag, nodeId, instanceId, isRoot), LayoutWrapper(WeakClaim(this)), pattern_(pattern),
+FrameNode::FrameNode(const std::string& tag, int32_t nodeId, const RefPtr<Pattern>& pattern, bool isRoot)
+    : UINode(tag, nodeId, isRoot), LayoutWrapper(WeakClaim(this)), pattern_(pattern),
       frameProxy_(std::make_unique<FrameProxy>(this))
 {
     renderContext_->InitContext(IsRootNode(), pattern_->GetContextParam());
@@ -427,10 +426,16 @@ RefPtr<FrameNode> FrameNode::GetFrameNode(const std::string& tag, int32_t nodeId
 RefPtr<FrameNode> FrameNode::CreateFrameNode(
     const std::string& tag, int32_t nodeId, const RefPtr<Pattern>& pattern, bool isRoot)
 {
-    auto frameNode = MakeRefPtr<FrameNode>(tag, nodeId, pattern, -1, isRoot);
+    auto frameNode = MakeRefPtr<FrameNode>(tag, nodeId, pattern, isRoot);
     ElementRegister::GetInstance()->AddUINode(frameNode);
     frameNode->InitializePatternAndContext();
     return frameNode;
+}
+
+bool FrameNode::IsSupportDrawModifier()
+{
+    CHECK_NULL_RETURN(pattern_, false);
+    return pattern_->IsSupportDrawModifier();
 }
 
 void FrameNode::ProcessOffscreenNode(const RefPtr<FrameNode>& node)
@@ -1058,8 +1063,8 @@ void FrameNode::TriggerOnSizeChangeCallback()
         return;
     }
     if (eventHub_->HasOnSizeChanged() && lastFrameNodeRect_) {
-        auto currFrameRect = geometryNode_->GetFrameRect();
-        if (currFrameRect != *lastFrameNodeRect_) {
+        auto currFrameRect = GetRectWithRender();
+        if (currFrameRect.GetSize() != (*lastFrameNodeRect_).GetSize()) {
             onSizeChangeDumpInfo dumpInfo { GetCurrentTimestamp(), *lastFrameNodeRect_, currFrameRect };
             if (onSizeChangeDumpInfos.size() >= SIZE_CHANGE_DUMP_SIZE) {
                 onSizeChangeDumpInfos.erase(onSizeChangeDumpInfos.begin());
@@ -2866,7 +2871,7 @@ void FrameNode::Measure(const std::optional<LayoutConstraintF>& parentConstraint
     // check aspect radio.
     if (pattern_ && pattern_->IsNeedAdjustByAspectRatio()) {
         const auto& magicItemProperty = layoutProperty_->GetMagicItemProperty();
-        auto aspectRatio = magicItemProperty->GetAspectRatioValue();
+        auto aspectRatio = magicItemProperty.GetAspectRatioValue();
         // Adjust by aspect ratio, firstly pick height based on width. It means that when width, height and
         // aspectRatio are all set, the height is not used.
         auto width = geometryNode_->GetFrameSize().Width();

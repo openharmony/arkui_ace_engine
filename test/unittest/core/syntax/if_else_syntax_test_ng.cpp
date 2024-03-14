@@ -91,7 +91,6 @@ HWTEST_F(IfElseSyntaxTestNg, IfElseSyntaxTest002, TestSize.Level1)
     IfElseModelNG ifElse;
     ifElse.Create();
     ifElse.Pop();
-    auto node = ViewStackProcessor::GetInstance()->GetMainElementNode();
     // ViewStackProcessor will not pop when it's size equals 1.
     EXPECT_FALSE(ViewStackProcessor::GetInstance()->GetMainElementNode() == nullptr);
 }

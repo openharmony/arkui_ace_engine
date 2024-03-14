@@ -114,6 +114,19 @@ void UIObserverListener::OnDensityChange(double density)
     napi_call_function(env_, nullptr, callback, 1, argv, nullptr);
 }
 
+void UIObserverListener::OnDrawOrLayout()
+{
+    if (!env_ || !callback_) {
+        return;
+    }
+    napi_value callback = nullptr;
+    napi_get_reference_value(env_, callback_, &callback);
+    napi_value objValue = nullptr;
+    napi_create_object(env_, &objValue);
+    napi_value argv[] = { objValue };
+    napi_call_function(env_, nullptr, callback, 1, argv, nullptr);
+}
+
 napi_value UIObserverListener::GetNapiCallback()
 {
     napi_value callback = nullptr;

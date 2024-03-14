@@ -69,12 +69,13 @@ XComponentType XComponentModelNG::GetTypeImpl(const RefPtr<FrameNode>& frameNode
 
 XComponentType XComponentModelNG::GetType()
 {
-    return GetTypeImpl(ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    auto frameNode = AceType::Claim(ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    return GetTypeImpl(frameNode);
 }
 
 void XComponentModelNG::SetSoPath(const std::string& soPath)
 {
-    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    auto frameNode = AceType::Claim(ViewStackProcessor::GetInstance()->GetMainFrameNode());
     CHECK_NULL_VOID(frameNode);
     auto type = GetTypeImpl(frameNode);
     if (type == XComponentType::COMPONENT || type == XComponentType::NODE) {
@@ -87,7 +88,7 @@ void XComponentModelNG::SetSoPath(const std::string& soPath)
 
 void XComponentModelNG::SetOnLoad(LoadEvent&& onLoad)
 {
-    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    auto frameNode = AceType::Claim(ViewStackProcessor::GetInstance()->GetMainFrameNode());
     CHECK_NULL_VOID(frameNode);
     auto type = GetTypeImpl(frameNode);
     if (type == XComponentType::COMPONENT || type == XComponentType::NODE) {
@@ -100,7 +101,7 @@ void XComponentModelNG::SetOnLoad(LoadEvent&& onLoad)
 
 void XComponentModelNG::SetOnDestroy(DestroyEvent&& onDestroy)
 {
-    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    auto frameNode = AceType::Claim(ViewStackProcessor::GetInstance()->GetMainFrameNode());
     CHECK_NULL_VOID(frameNode);
     auto type = GetTypeImpl(frameNode);
     if (type == XComponentType::COMPONENT || type == XComponentType::NODE) {
@@ -139,14 +140,14 @@ void XComponentModelNG::RegisterOnDestroy(const RefPtr<AceType>& node, DestroyEv
 
 bool XComponentModelNG::IsTexture()
 {
-    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    auto frameNode = AceType::Claim(ViewStackProcessor::GetInstance()->GetMainFrameNode());
     CHECK_NULL_RETURN(frameNode, false);
     return GetTypeImpl(frameNode) == XComponentType::TEXTURE;
 }
 
 void XComponentModelNG::SetDetachCallback(DetachCallback&& onDetach)
 {
-    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    auto frameNode = AceType::Claim(ViewStackProcessor::GetInstance()->GetMainFrameNode());
     CHECK_NULL_VOID(frameNode);
     auto type = GetTypeImpl(frameNode);
     if (type == XComponentType::COMPONENT || type == XComponentType::NODE) {

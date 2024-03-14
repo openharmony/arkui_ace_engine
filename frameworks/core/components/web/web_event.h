@@ -1644,6 +1644,8 @@ struct EmbedInfo final {
     std::string tag = "";
     int32_t width = 0;
     int32_t height = 0;
+    int32_t x = 0;
+    int32_t y = 0;
     std::map<std::string, std::string> params;
 };
 

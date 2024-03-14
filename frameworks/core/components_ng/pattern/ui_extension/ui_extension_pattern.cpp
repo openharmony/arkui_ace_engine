@@ -441,8 +441,11 @@ void UIExtensionPattern::InitHoverEvent(const RefPtr<InputEventHub>& inputHub)
 
 bool UIExtensionPattern::HandleKeyEvent(const KeyEvent& event)
 {
-    DispatchFocusActiveEvent(true);
-    DispatchFocusState(true);
+    auto pipeline = PipelineContext::GetCurrentContext();
+    if (pipeline && pipeline->GetIsFocusActive()) {
+        DispatchFocusActiveEvent(true);
+        DispatchFocusState(true);
+    }
     return DispatchKeyEventSync(event.rawKeyEvent);
 }
 

@@ -87,6 +87,8 @@
 #endif
 namespace OHOS::Ace::NG {
 namespace {
+
+const BorderRadiusProperty ZERO_BORDER_RADIUS_PROPERTY(0.0_vp);
 // need to be moved to TextFieldTheme
 constexpr Dimension BORDER_DEFAULT_WIDTH = 0.0_vp;
 constexpr Dimension TYPING_UNDERLINE_WIDTH = 2.0_px;
@@ -129,6 +131,7 @@ constexpr char16_t OBSCURING_CHARACTER_FOR_AR = u'*';
 const std::string NEWLINE = "\n";
 const std::wstring WIDE_NEWLINE = StringUtils::ToWstring(NEWLINE);
 constexpr int32_t AUTO_FILL_FAILED = 1;
+constexpr int32_t LONG_PRESS_PAGE_INTERVAL_MS = 100;
 
 // need to be moved to formatter
 const std::string DIGIT_WHITE_LIST = "[0-9]";
@@ -697,10 +700,9 @@ void TextFieldPattern::HandleFocusEvent()
         auto renderContext = host->GetRenderContext();
         auto textFieldTheme = GetTheme();
         CHECK_NULL_VOID(textFieldTheme);
-        auto radius = textFieldTheme->GetBorderRadiusSize();
         underlineColor_ = userUnderlineColor_.typing.value_or(textFieldTheme->GetUnderlineTypingColor());
         underlineWidth_ = TYPING_UNDERLINE_WIDTH;
-        renderContext->UpdateBorderRadius({ radius.GetX(), radius.GetY(), radius.GetY(), radius.GetX() });
+        renderContext->UpdateBorderRadius(ZERO_BORDER_RADIUS_PROPERTY);
     }
     host->MarkDirtyNode(layoutProperty->GetMaxLinesValue(Infinity<float>()) <= 1 ? PROPERTY_UPDATE_MEASURE_SELF
                                                                                  : PROPERTY_UPDATE_MEASURE);
@@ -974,7 +976,7 @@ void TextFieldPattern::HandleBlurEvent()
     auto visible = layoutProperty->GetShowErrorTextValue(false);
     if (!visible && layoutProperty->GetShowUnderlineValue(false) && IsUnspecifiedOrTextType()) {
         auto renderContext = host->GetRenderContext();
-        renderContext->UpdateBorderRadius(borderRadius_);
+        renderContext->UpdateBorderRadius(ZERO_BORDER_RADIUS_PROPERTY);
         underlineColor_ = userUnderlineColor_.normal.value_or(textFieldTheme->GetUnderlineColor());
         underlineWidth_ = UNDERLINE_WIDTH;
     }
@@ -1346,14 +1348,17 @@ void TextFieldPattern::HandleTouchEvent(const TouchEventInfo& info)
     }
 
     if (touchType == TouchType::DOWN) {
+        hasMousePressed_ = true;
         HandleTouchDown(info.GetTouches().front().GetLocalLocation());
     } else if (touchType == TouchType::UP) {
+        hasMousePressed_ = false;
         HandleTouchUp();
     } else if (touchType == TouchType::MOVE) {
         if (!isUsingMouse_) {
             HandleTouchMove(info);
         }
     }
+    locationInfo_ = info.GetTouches().front().GetLocalLocation();
 }
 
 void TextFieldPattern::HandleTouchDown(const Offset& offset)
@@ -1375,8 +1380,7 @@ void TextFieldPattern::HandleTouchDown(const Offset& offset)
         auto layoutProperty = GetLayoutProperty<TextFieldLayoutProperty>();
         CHECK_NULL_VOID(layoutProperty);
         if (layoutProperty->GetShowUnderlineValue(false) && IsUnspecifiedOrTextType() && !IsNormalInlineState()) {
-            auto radius = textFieldTheme->GetBorderRadiusSize();
-            renderContext->UpdateBorderRadius({ radius.GetX(), radius.GetY(), radius.GetY(), radius.GetX() });
+            renderContext->UpdateBorderRadius(ZERO_BORDER_RADIUS_PROPERTY);
         }
         tmpHost->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
     }
@@ -1403,14 +1407,7 @@ void TextFieldPattern::HandleTouchUp()
             auto layoutProperty = GetLayoutProperty<TextFieldLayoutProperty>();
             CHECK_NULL_VOID(layoutProperty);
             if (layoutProperty->GetShowUnderlineValue(false) && IsUnspecifiedOrTextType() && !IsNormalInlineState()) {
-                renderContext->UpdateBorderRadius(borderRadius_);
-            }
-            if (layoutProperty->GetShowUnderlineValue(false) && HasFocus() && IsUnspecifiedOrTextType() &&
-                !IsNormalInlineState()) {
-                auto textFieldTheme = GetTheme();
-                CHECK_NULL_VOID(textFieldTheme);
-                auto radius = textFieldTheme->GetBorderRadiusSize();
-                renderContext->UpdateBorderRadius({ radius.GetX(), radius.GetY(), radius.GetY(), radius.GetX() });
+                renderContext->UpdateBorderRadius(ZERO_BORDER_RADIUS_PROPERTY);
             }
         }
     }
@@ -1766,7 +1763,14 @@ void TextFieldPattern::HandleClickEvent(GestureEvent& info)
             return;
         }
     }
-
+    if (IsMouseOverScrollBar(info)) {
+        Point point(info.GetLocalLocation().GetX(), info.GetLocalLocation().GetY());
+        bool reverse = false;
+        if (AnalysisUpOrDown(point, reverse)) {
+            ScrollPage(reverse);
+        }
+        return;
+    }
     isUsingMouse_ = info.GetSourceDevice() == SourceType::MOUSE;
     if (CheckClickLocation(info)) {
         HandleDoubleClickEvent(info); // 注册手势事件
@@ -2390,6 +2394,9 @@ void TextFieldPattern::HandleLongPress(GestureEvent& info)
         shouldProcessOverlayAfterLayout = true;
         host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
     }
+    if (IsLongMouseOverScrollBar(info)) {
+        return;
+    }
     if (info.GetSourceDevice() == SourceType::MOUSE) {
         return;
     }
@@ -2421,6 +2428,24 @@ void TextFieldPattern::HandleLongPress(GestureEvent& info)
         UpdateSelectMenuVisibility(true);
     }
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+}
+
+bool TextFieldPattern::IsMouseOverScrollBar(const GestureEvent& info)
+{
+    CHECK_NULL_RETURN(GetScrollBar(), false);
+    Point point(info.GetLocalLocation().GetX(), info.GetLocalLocation().GetY());
+    return GetScrollBar()->InBarRectRegion(point);
+}
+
+bool TextFieldPattern::IsLongMouseOverScrollBar(GestureEvent& info)
+{
+    CHECK_NULL_RETURN(GetScrollBar(), false);
+    Point point(info.GetLocalLocation().GetX(), info.GetLocalLocation().GetY());
+    auto isInBarRegion = GetScrollBar()->InBarRectRegion(point);
+    if (isInBarRegion) {
+        LongScrollPage();
+    }
+    return isInBarRegion;
 }
 
 void TextFieldPattern::UpdateCaretPositionWithClamp(const int32_t& pos)
@@ -2534,6 +2559,10 @@ void TextFieldPattern::StartRequestSelectOverlay(const ShowSelectOverlayParams& 
     overlayInfo.isMenuShow = params.isShowMenu;
     overlayInfo.isNewAvoid = true;
     overlayInfo.selectArea = GetSelectArea();
+    auto paintProperty = GetPaintProperty<TextFieldPaintProperty>();
+    if (paintProperty) {
+        overlayInfo.handlerColor = paintProperty->GetCursorColor();
+    }
     RequestOpenSelectOverlay(overlayInfo);
     auto start = GetTextSelectController()->GetStartIndex();
     auto end = GetTextSelectController()->GetEndIndex();
@@ -2858,8 +2887,7 @@ void TextFieldPattern::OnHover(bool isHover)
         CHECK_NULL_VOID(layoutProperty);
         if (isOnHover_) {
             if (layoutProperty->GetShowUnderlineValue(false) && IsUnspecifiedOrTextType()) {
-                auto radius = textFieldTheme->GetBorderRadiusSize();
-                renderContext->UpdateBorderRadius({ radius.GetX(), radius.GetY(), radius.GetY(), radius.GetX() });
+                renderContext->UpdateBorderRadius(ZERO_BORDER_RADIUS_PROPERTY);
             }
             tmpHost->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
             return;
@@ -2867,11 +2895,7 @@ void TextFieldPattern::OnHover(bool isHover)
         isOnHover_ = false;
         if (!isMousePressed_) {
             if (layoutProperty->GetShowUnderlineValue(false) && IsUnspecifiedOrTextType()) {
-                renderContext->UpdateBorderRadius(borderRadius_);
-            }
-            if (layoutProperty->GetShowUnderlineValue(false) && HasFocus() && IsUnspecifiedOrTextType()) {
-                auto radius = textFieldTheme->GetBorderRadiusSize();
-                renderContext->UpdateBorderRadius({ radius.GetX(), radius.GetY(), radius.GetY(), radius.GetX() });
+                renderContext->UpdateBorderRadius(ZERO_BORDER_RADIUS_PROPERTY);
             }
         }
         tmpHost->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
@@ -2909,7 +2933,9 @@ void TextFieldPattern::HandleMouseEvent(MouseInfo& info)
     CHECK_NULL_VOID(pipeline);
     info.SetStopPropagation(true);
     auto scrollBar = GetScrollBar();
-    if (scrollBar && (scrollBar->IsPressed() || scrollBar->IsHover())) {
+    Point point(info.GetLocalLocation().GetX(), info.GetLocalLocation().GetY());
+    auto inBarRect = scrollBar->InBarRectRegion(point);
+    if ((scrollBar && (scrollBar->IsPressed() || scrollBar->IsHover())) || inBarRect) {
         pipeline->SetMouseStyleHoldNode(frameId);
         pipeline->ChangeMouseStyle(frameId, MouseFormat::DEFAULT);
         return;
@@ -3223,8 +3249,9 @@ AceAutoFillType TextFieldPattern::ConvertToAceAutoFillType(TextInputType type)
                                                                                  AceAutoFillType::ACE_PASSWORD },
         { TextInputType::USER_NAME, AceAutoFillType::ACE_USER_NAME },
         { TextInputType::NEW_PASSWORD, AceAutoFillType::ACE_NEW_PASSWORD } };
-    if (convertMap.find(type) != convertMap.end()) {
-        return convertMap[type];
+    auto it = convertMap.find(type);
+    if (it != convertMap.end()) {
+        return it->second;
     }
     return AceAutoFillType::ACE_UNSPECIFIED;
 }
@@ -5289,9 +5316,7 @@ void TextFieldPattern::SaveUnderlineStates()
     CHECK_NULL_VOID(tmpHost);
     auto renderContext = tmpHost->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
-    Radius radius;
-    BorderRadiusProperty borderRadius { radius.GetX(), radius.GetY(), radius.GetY(), radius.GetX() };
-    borderRadius_ = renderContext->GetBorderRadius().value_or(borderRadius);
+    borderRadius_ = renderContext->GetBorderRadius().value_or(ZERO_BORDER_RADIUS_PROPERTY);
 }
 
 void TextFieldPattern::ApplyUnderlineStates()
@@ -5324,8 +5349,7 @@ void TextFieldPattern::ApplyUnderlineStates()
     if (!layoutProperty->HasTextColor()) {
         layoutProperty->UpdateTextColor(theme->GetUnderlineTextColor());
     }
-    Radius radius;
-    renderContext->UpdateBorderRadius({ radius.GetX(), radius.GetY(), radius.GetY(), radius.GetX() });
+    renderContext->UpdateBorderRadius(ZERO_BORDER_RADIUS_PROPERTY);
 }
 
 float TextFieldPattern::GetMarginBottom() const
@@ -6716,5 +6740,43 @@ void TextFieldPattern::UpdateOverlaySelectArea()
     auto proxy = GetSelectOverlayProxy();
     CHECK_NULL_VOID(proxy);
     proxy->UpdateSelectArea(GetSelectArea());
+}
+
+void TextFieldPattern::ScrollPage(bool reverse, bool smooth)
+{
+    float maxFrameHeight = maxFrameHeight_ - preErrorMargin_ - maxFrameOffsetY_;
+    float distance = reverse ? maxFrameHeight : -maxFrameHeight;
+    OnScrollCallback(distance, SCROLL_FROM_JUMP);
+}
+
+void TextFieldPattern::LongScrollPage()
+{
+    Point point(locationInfo_.GetX(), locationInfo_.GetY());
+    bool reverse = false;
+    if (AnalysisUpOrDown(point, reverse) && hasMousePressed_) {
+        ScrollPage(reverse);
+        StartLongPressEventTimer();
+    }
+}
+
+void TextFieldPattern::ScheduleCaretLongPress()
+{
+    auto context = OHOS::Ace::PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(context);
+    if (!context->GetTaskExecutor()) {
+        return;
+    }
+    auto taskExecutor = context->GetTaskExecutor();
+    CHECK_NULL_VOID(taskExecutor);
+    taskExecutor->PostDelayedTask(
+        [=]() { LongScrollPage(); }, TaskExecutor::TaskType::UI, LONG_PRESS_PAGE_INTERVAL_MS);
+}
+
+void TextFieldPattern::StartLongPressEventTimer()
+{
+    auto tmpHost = GetHost();
+    CHECK_NULL_VOID(tmpHost);
+    tmpHost->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+    ScheduleCaretLongPress();
 }
 } // namespace OHOS::Ace::NG

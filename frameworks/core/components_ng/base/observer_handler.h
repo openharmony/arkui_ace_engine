@@ -105,15 +105,23 @@ public:
     using ScrollEventHandleFunc = void (*)(const std::string&, ScrollEventType, float);
     using RouterPageHandleFunc = void (*)(
         AbilityContextInfo&, napi_value, int32_t, const std::string&, const std::string&, RouterPageState);
+    using DrawCommandSendHandleFunc = void (*)();
+    using LayoutDoneHandleFunc = void (*)();
     void SetHandleNavigationChangeFunc(NavigationHandleFunc func);
     void SetHandleScrollEventChangeFunc(ScrollEventHandleFunc func);
     void SetHandleRouterPageChangeFunc(RouterPageHandleFunc func);
     using DensityHandleFunc = std::function<void(AbilityContextInfo&, double)>;
     void SetHandleDensityChangeFunc(const DensityHandleFunc& func);
+    void SetLayoutDoneHandleFunc(DrawCommandSendHandleFunc func);
+    void HandleLayoutDoneCallBack();
+    void SetDrawCommandSendHandleFunc(LayoutDoneHandleFunc func);
+    void HandleDrawCommandSendCallBack();
 private:
     NavigationHandleFunc navigationHandleFunc_ = nullptr;
     ScrollEventHandleFunc scrollEventHandleFunc_ = nullptr;
     RouterPageHandleFunc routerPageHandleFunc_ = nullptr;
+    LayoutDoneHandleFunc layoutDoneHandleFunc_ = nullptr;
+    DrawCommandSendHandleFunc drawCommandSendHandleFunc_ = nullptr;
     DensityHandleFunc densityHandleFunc_;
 
     napi_value GetUIContextValue();

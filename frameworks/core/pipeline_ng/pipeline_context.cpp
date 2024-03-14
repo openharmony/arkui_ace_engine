@@ -602,6 +602,7 @@ void PipelineContext::FlushVsync(uint64_t nanoTimestamp, uint32_t frameCount)
 
     taskScheduler_->StartRecordFrameInfo(GetCurrentFrameInfo(recvTime, nanoTimestamp));
     taskScheduler_->FlushTask();
+    UIObserverHandler::GetInstance().HandleLayoutDoneCallBack();
     taskScheduler_->FinishRecordFrameInfo();
     FlushAnimationClosure();
     TryCallNextFrameLayoutCallback();
@@ -626,6 +627,7 @@ void PipelineContext::FlushVsync(uint64_t nanoTimestamp, uint32_t frameCount)
         dragWindowVisibleCallback_ = nullptr;
     }
     FlushMessages();
+    UIObserverHandler::GetInstance().HandleDrawCommandSendCallBack();
     InspectDrew();
     if (!isFormRender_ && onShow_ && onFocus_) {
         FlushFocusView();
@@ -1907,11 +1909,16 @@ void PipelineContext::CompensateTouchMoveEvent(const TouchEvent& event)
         auto lastEventIter = idToTouchPoints_.find(event.id);
         if (lastEventIter != idToTouchPoints_.end()) {
             auto iter = lastDispatchTime_.find(lastEventIter->first);
-            if (static_cast<uint64_t>(iter != lastDispatchTime_.end() &&
-                                        lastEventIter->second.time.time_since_epoch().count()) > iter->second) {
-                eventManager_->SetLastMoveBeforeUp(event.sourceType == SourceType::MOUSE);
-                eventManager_->DispatchTouchEvent(lastEventIter->second);
-                eventManager_->SetLastMoveBeforeUp(false);
+            if (iter != lastDispatchTime_.end()) {
+                ACE_SCOPED_TRACE("CompensateTouchMoveEvent last move event time: %s last dispatch time: %s",
+                    std::to_string(static_cast<uint64_t>(lastEventIter->second.time.time_since_epoch().count()))
+                        .c_str(),
+                    std::to_string(iter->second).c_str());
+                if (static_cast<uint64_t>(lastEventIter->second.time.time_since_epoch().count()) > iter->second) {
+                    eventManager_->SetLastMoveBeforeUp(event.sourceType == SourceType::MOUSE);
+                    eventManager_->DispatchTouchEvent(lastEventIter->second);
+                    eventManager_->SetLastMoveBeforeUp(false);
+                }
             }
         }
     }
@@ -2176,8 +2183,9 @@ void PipelineContext::FlushTouchEvents()
         std::list<TouchEvent> touchPoints;
         for (const auto& iter : idToTouchPoints) {
             lastDispatchTime_[iter.first] = GetVsyncTime();
-            if (newIdTouchPoints.find(iter.first) != newIdTouchPoints.end()) {
-                touchPoints.emplace_back(newIdTouchPoints[iter.first]);
+            auto it = newIdTouchPoints.find(iter.first);
+            if (it != newIdTouchPoints.end()) {
+                touchPoints.emplace_back(it->second);
             } else {
                 touchPoints.emplace_back(iter.second);
             }

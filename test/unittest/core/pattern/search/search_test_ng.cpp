@@ -166,7 +166,7 @@ HWTEST_F(SearchTestNg, Measure001, TestSize.Level1)
 {
     SearchModelNG searchModelInstance;
 
-    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    auto frameNode = AceType::Claim(ViewStackProcessor::GetInstance()->GetMainFrameNode());
 
     RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
     ASSERT_NE(geometryNode, nullptr);
@@ -567,7 +567,7 @@ HWTEST_F(SearchTestNg, SearchPatternMethodTest006, TestSize.Level1)
  */
 HWTEST_F(SearchTestNg, Pattern001, TestSize.Level1)
 {
-    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    auto frameNode = AceType::Claim(ViewStackProcessor::GetInstance()->GetMainFrameNode());
     ASSERT_NE(frameNode, nullptr);
     auto pattern = frameNode->GetPattern<SearchPattern>();
     ASSERT_NE(pattern, nullptr);
@@ -616,7 +616,7 @@ HWTEST_F(SearchTestNg, Pattern001, TestSize.Level1)
 HWTEST_F(SearchTestNg, Pattern002, TestSize.Level1)
 {
     SearchModelNG searchModelInstance;
-    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    auto frameNode = AceType::Claim(ViewStackProcessor::GetInstance()->GetMainFrameNode());
     ASSERT_NE(frameNode, nullptr);
     auto layoutProperty = frameNode->GetLayoutProperty<SearchLayoutProperty>();
     auto pattern = frameNode->GetPattern<SearchPattern>();
@@ -1148,7 +1148,7 @@ HWTEST_F(SearchTestNg, Create001, TestSize.Level1)
     SearchModelNG searchModelInstance;
 
     searchModelInstance.Create(EMPTY_VALUE, PLACEHOLDER, EMPTY_VALUE);
-    auto frameNode = AceType::DynamicCast<SearchNode>(ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    auto frameNode = AceType::DynamicCast<SearchNode>(ViewStackProcessor::GetInstance()->GetMainElementNode());
 
     ASSERT_NE(frameNode, nullptr);
     searchModelInstance.CreateTextField(frameNode, PLACEHOLDER, EMPTY_VALUE, true);
@@ -1523,7 +1523,7 @@ HWTEST_F(SearchTestNg, PaintMethodTest004, TestSize.Level1)
 HWTEST_F(SearchTestNg, SearchChangeEventHub001, TestSize.Level1)
 {
     SearchModelNG searchModelInstance;
-    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    auto frameNode = AceType::Claim(ViewStackProcessor::GetInstance()->GetMainFrameNode());
     ASSERT_NE(frameNode, nullptr);
     ChangeAndSubmitEvent changeEvent = [](const std::string str) {};
     searchModelInstance.SetOnChangeEvent(changeEvent);
@@ -2570,7 +2570,7 @@ HWTEST_F(SearchTestNg, Pattern023, TestSize.Level1)
     /**
      * @tc.step: step1. get frameNode and pattern.
      */
-    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    auto frameNode = AceType::Claim(ViewStackProcessor::GetInstance()->GetMainFrameNode());
     ASSERT_NE(frameNode, nullptr);
     auto pattern = frameNode->GetPattern<SearchPattern>();
     ASSERT_NE(pattern, nullptr);
@@ -2633,7 +2633,7 @@ HWTEST_F(SearchTestNg, Pattern024, TestSize.Level1)
     /**
      * @tc.step: step1. get frameNode and pattern.
      */
-    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    auto frameNode = AceType::Claim(ViewStackProcessor::GetInstance()->GetMainFrameNode());
     ASSERT_NE(frameNode, nullptr);
     auto pattern = frameNode->GetPattern<SearchPattern>();
     ASSERT_NE(pattern, nullptr);
@@ -2767,7 +2767,7 @@ HWTEST_F(SearchTestNg, Pattern026, TestSize.Level1)
 HWTEST_F(SearchTestNg, UpdateChangeEvent001, TestSize.Level1)
 {
     SearchModelNG searchModelInstance;
-    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    auto frameNode =AceType::Claim(ViewStackProcessor::GetInstance()->GetMainFrameNode());
     ASSERT_NE(frameNode, nullptr);
     auto eventHub = frameNode->GetEventHub<SearchEventHub>();
     ASSERT_NE(eventHub, nullptr);

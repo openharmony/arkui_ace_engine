@@ -59,6 +59,11 @@ struct MouseClickInfo {
     TimeStamp start;
 };
 
+struct ReachEdge {
+    bool atStart = false;
+    bool atEnd = false;
+};
+
 #ifdef OHOS_STANDARD_SYSTEM
 struct TouchInfo {
     double x = -1;
@@ -631,7 +636,10 @@ private:
         std::shared_ptr<NWeb::NWebDateTimeChooserCallback> callback);
     void PostTaskToUI(const std::function<void()>&& task) const;
     void OfflineMode();
-    bool FilterScrollEventHandler(const float offset, const float velocity);
+    void OnOverScrollFlingVelocityHandler(float velocity, bool isFling);
+    bool FilterScrollEventHandleOffset(const float offset);
+    bool FilterScrollEventHandlevVlocity(const float velocity);
+    void UpdateFlingReachEdgeState(const float value, bool status);
 
     std::optional<std::string> webSrc_;
     std::optional<std::string> webData_;
@@ -715,6 +723,8 @@ private:
     RefPtr<WebAccessibilityNode> webAccessibilityNode_;
     TouchEventInfo touchEventInfo_{"touchEvent"};
     std::vector<TouchEventInfo> touchEventInfoList_ {};
+    bool isParentReachEdge_ = false;
+    ReachEdge isFlingReachEdge_ = { false, false };
 };
 } // namespace OHOS::Ace::NG
 

@@ -120,8 +120,9 @@ RefPtr<FrameNode> TimePickerDialogView::Show(const DialogProperties& dialogPrope
         stackMinuteNode->MountToParent(timePickerNode);
         minuteColumnNode->GetLayoutProperty<LayoutProperty>()->UpdatePixelRound(PIXEL_ROUND);
     }
-    if (timePickerProperty.find("selected") != timePickerProperty.end()) {
-        auto selectedTime = timePickerProperty["selected"];
+    auto it = timePickerProperty.find("selected");
+    if (it != timePickerProperty.end()) {
+        auto selectedTime = it->second;
         SetSelectedTime(timePickerRowPattern, selectedTime);
         SetDialogTitleDate(timePickerRowPattern, settingData.dialogTitleDate);
     }

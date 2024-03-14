@@ -43,6 +43,8 @@
 #include "core/components_ng/property/safe_area_insets.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/pipeline_ng/pipeline_context.h"
+#include "base/perfmonitor/perf_constants.h"
+#include "base/perfmonitor/perf_monitor.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -728,6 +730,7 @@ bool TabBarPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty,
 
 void TabBarPattern::HandleClick(const GestureEvent& info)
 {
+    PerfMonitor::GetPerfMonitor()->Start(PerfConstants::APP_TAB_SWITCH, PerfActionType::FIRST_MOVE, "");
     if (info.GetSourceDevice() == SourceType::KEYBOARD) {
         return;
     }

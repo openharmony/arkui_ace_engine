@@ -50,7 +50,8 @@ void RichEditorPaintMethod::UpdateOverlayModifier(PaintWrapper* paintWrapper)
     auto caretVisible = richEditorPattern->GetCaretVisible();
     overlayMod->SetShowSelect(richEditorPattern->GetShowSelect());
     overlayMod->SetCaretVisible(caretVisible);
-    overlayMod->SetCaretColor(Color::BLUE.GetValue());
+    overlayMod->SetCaretColor(richEditorPattern->GetCaretColor().GetValue());
+    overlayMod->SetSelectedBackgroundColor(richEditorPattern->GetSelectedBackgroundColor().GetValue());
     constexpr float CARET_WIDTH = 1.5f;
     overlayMod->SetCaretWidth(static_cast<float>(Dimension(CARET_WIDTH, DimensionUnit::VP).ConvertToPx()));
     SetCaretOffsetAndHeight(paintWrapper);

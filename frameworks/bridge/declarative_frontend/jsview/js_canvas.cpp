@@ -87,7 +87,7 @@ void JSCanvas::OnReady(const JSCallbackInfo& info)
 
     RefPtr<JsFunction> jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(info[0]));
     if (Container::IsCurrentUsePartialUpdate()) {
-        WeakPtr<NG::FrameNode> targetNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+        auto targetNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
         auto readyEvent = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc), node = targetNode]() {
             JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
             ACE_SCORING_EVENT("Canvas.onReady");
@@ -96,7 +96,7 @@ void JSCanvas::OnReady(const JSCallbackInfo& info)
         };
         CanvasModel::GetInstance()->SetOnReady(std::move(readyEvent));
     } else {
-        WeakPtr<NG::FrameNode> targetNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+        auto targetNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
         auto readyEvent = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc), node = targetNode](
                               uint32_t accountableCanvasElement) {
             JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);

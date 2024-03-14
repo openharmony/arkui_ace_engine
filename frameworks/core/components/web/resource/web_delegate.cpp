@@ -5730,7 +5730,8 @@ void WebDelegate::OnNativeEmbedLifecycleChange(std::shared_ptr<OHOS::NWeb::NWebN
         if (embedInfo) {
             info = {embedInfo->GetId(), embedInfo->GetType(), embedInfo->GetSrc(),
                 embedInfo->GetUrl(), embedInfo->GetTag(), embedInfo->GetWidth(),
-                embedInfo->GetHeight(), embedInfo->GetParams()};
+                embedInfo->GetHeight(), embedInfo->GetX(), embedInfo->GetY(),
+                embedInfo->GetParams()};
         }
     }
 

@@ -467,11 +467,33 @@ public:
     
     void SetAnimateCanOverScroll(bool animateCanOverScroll)
     {
-        animateCanOverScroll_ = animateCanOverScroll;
+        CHECK_NULL_VOID(scrollableEvent_);
+        auto canScroll = scrollableEvent_->GetEnable();
+        animateCanOverScroll_ = canScroll && animateCanOverScroll;
     }
 
+    virtual void InitScrollBarClickEvent();
+    void HandleClickEvent(GestureEvent& info);
+    virtual void InitScrollBarLongPressEvent();
+    void HandleLongPress(bool smooth);
+    virtual void InitScrollBarTouchEvent();
+    void OnTouchUp();
+    void OnTouchDown();
+    void ScheduleCaretLongPress();
+    void StartLongPressEventTimer();
+    virtual void ScrollPage(bool reverse, bool smooth = false);
+    bool AnalysisUpOrDown(Point point, bool& reverse);
     void PrintOffsetLog(AceLogTag tag, int32_t id, double finalOffset);
 
+    void SetScrollToSafeAreaHelper(bool isScrollToSafeAreaHelper)
+    {
+        isScrollToSafeAreaHelper_ = isScrollToSafeAreaHelper;
+    }
+
+    bool IsScrollToSafeAreaHelper() const
+    {
+        return isScrollToSafeAreaHelper_;
+    }
 protected:
     void OnDetachFromFrameNode(FrameNode* frameNode) override;
     virtual DisplayMode GetDefaultScrollBarDisplayMode() const
@@ -663,6 +685,7 @@ private:
     bool animateOverScroll_ = false;
     bool isAnimateOverScroll_ = false;
     bool animateCanOverScroll_ = false;
+    bool isScrollToSafeAreaHelper_ = true;
 
     // select with mouse
     enum SelectDirection { SELECT_DOWN, SELECT_UP, SELECT_NONE };
@@ -706,6 +729,8 @@ private:
     void HandleLeaveHotzoneEvent();
     bool isVertical() const;
     void AddHotZoneSenceInterface(SceneStatus scene);
+    bool isMousePressed_ = false;
+    Offset locationInfo_;
 };
 } // namespace OHOS::Ace::NG
 

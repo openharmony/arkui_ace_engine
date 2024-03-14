@@ -390,7 +390,7 @@ void TextPickerModelNG::SetUnCascadeColumns(const std::vector<NG::TextCascadePic
             auto layoutProperty = stackNode->GetLayoutProperty<LayoutProperty>();
             layoutProperty->UpdateAlignment(Alignment::CENTER);
             columnNode->GetLayoutProperty<LayoutProperty>()->UpdatePixelRound(PIXEL_ROUND);
-            stackNode->MountToParent(frameNode);
+            stackNode->MountToParent(AceType::Claim(frameNode));
         }
     }
 
@@ -430,7 +430,7 @@ void TextPickerModelNG::SetCascadeColumns(const std::vector<NG::TextCascadePicke
             auto layoutProperty = stackNode->GetLayoutProperty<LayoutProperty>();
             layoutProperty->UpdateAlignment(Alignment::CENTER);
             columnNode->GetLayoutProperty<LayoutProperty>()->UpdatePixelRound(PIXEL_ROUND);
-            stackNode->MountToParent(frameNode);
+            stackNode->MountToParent(AceType::Claim<NG::FrameNode>(frameNode));
         }
     }
 

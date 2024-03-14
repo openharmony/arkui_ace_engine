@@ -85,8 +85,7 @@ public:
 
     static void ProcessOffscreenNode(const RefPtr<FrameNode>& node);
     // avoid use creator function, use CreateFrameNode
-    FrameNode(const std::string& tag, int32_t nodeId, const RefPtr<Pattern>& pattern, int32_t instanceId = -1,
-        bool isRoot = false);
+    FrameNode(const std::string& tag, int32_t nodeId, const RefPtr<Pattern>& pattern, bool isRoot = false);
 
     ~FrameNode() override;
 
@@ -492,6 +491,8 @@ public:
             contentModifier->SetDrawModifier(drawModifier);
         }
     }
+
+    bool IsSupportDrawModifier();
 
     void SetDragPreview(const NG::DragDropInfo& info)
     {

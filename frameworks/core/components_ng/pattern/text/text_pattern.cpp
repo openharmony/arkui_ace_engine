@@ -1283,14 +1283,29 @@ NG::DragDropInfo TextPattern::OnDragStart(const RefPtr<Ace::DragEvent>& event, c
 void TextPattern::AddUdmfData(const RefPtr<Ace::DragEvent>& event)
 {
     RefPtr<UnifiedData> unifiedData = UdmfClient::GetInstance()->CreateUnifiedData();
+    auto txtPreProcessor = [weak = WeakClaim(this)](const ResultObject src, ResultObject& result) {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        auto valueString = pattern->GetSelectedSpanText(StringUtils::ToWstring(src.valueString),
+            src.offsetInSpan[RichEditorSpanRange::RANGESTART],
+            src.offsetInSpan[RichEditorSpanRange::RANGEEND]);
+        result.valueString = result.valueString + valueString;
+    };
+    std::list<ResultObject> finalResult;
+    auto type = SelectSpanType::TYPESPAN;
+    for (const auto& resultObj : dragResultObjects_) {
+        if (finalResult.empty() || resultObj.type != SelectSpanType::TYPESPAN || type != SelectSpanType::TYPESPAN) {
+            type = resultObj.type;
+            finalResult.emplace_back(resultObj);
+        } else {
+            txtPreProcessor(resultObj, finalResult.back());
+        }
+    }
     auto resultProcessor = [unifiedData, weak = WeakClaim(this)](const ResultObject& result) {
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
         if (result.type == SelectSpanType::TYPESPAN) {
-            auto data = pattern->GetSelectedSpanText(StringUtils::ToWstring(result.valueString),
-                result.offsetInSpan[RichEditorSpanRange::RANGESTART],
-                result.offsetInSpan[RichEditorSpanRange::RANGEEND]);
-            UdmfClient::GetInstance()->AddPlainTextRecord(unifiedData, data);
+            UdmfClient::GetInstance()->AddPlainTextRecord(unifiedData, result.valueString);
             return;
         }
         if (result.type == SelectSpanType::TYPEIMAGE) {
@@ -1307,7 +1322,7 @@ void TextPattern::AddUdmfData(const RefPtr<Ace::DragEvent>& event)
             }
         }
     };
-    for (const auto& resultObj : dragResultObjects_) {
+    for (const auto& resultObj : finalResult) {
         resultProcessor(resultObj);
     }
     event->SetData(unifiedData);
@@ -1580,6 +1595,8 @@ TextStyleResult TextPattern::GetTextStyleObject(const RefPtr<SpanNode>& node)
     textStyle.decorationColor = node->GetTextDecorationColorValue(Color::BLACK).ColorToString();
     textStyle.textAlign = static_cast<int32_t>(node->GetTextAlignValue(TextAlign::START));
     auto lm = node->GetLeadingMarginValue({});
+    textStyle.lineHeight = node->GetLineHeightValue(Dimension()).ConvertToVp();
+    textStyle.letterSpacing = node->GetLetterSpacingValue(Dimension()).ConvertToVp();
     textStyle.leadingMarginSize[RichEditorLeadingRange::LEADING_START] = Dimension(lm.size.Width()).ConvertToVp();
     textStyle.leadingMarginSize[RichEditorLeadingRange::LEADING_END] = Dimension(lm.size.Height()).ConvertToVp();
     return textStyle;
@@ -1741,8 +1758,8 @@ ResultObject TextPattern::GetImageResultObject(RefPtr<UINode> uinode, int32_t in
         if (imageLayoutProperty->HasVerticalAlign()) {
             resultObject.imageStyle.verticalAlign = static_cast<int32_t>(imageLayoutProperty->GetVerticalAlignValue());
         }
-        if (geometryNode->GetMargin()) {
-            resultObject.imageStyle.margin = geometryNode->GetMargin()->ToJsonString();
+        if (imageLayoutProperty->GetMarginProperty()) {
+            resultObject.imageStyle.margin = imageLayoutProperty->GetMarginProperty()->ToString();
         }
         auto imageRenderCtx = imageNode->GetRenderContext();
         if (imageRenderCtx->GetBorderRadius()) {
@@ -1750,7 +1767,9 @@ ResultObject TextPattern::GetImageResultObject(RefPtr<UINode> uinode, int32_t in
             auto jsonObject = JsonUtil::Create(true);
             auto jsonBorder = JsonUtil::Create(true);
             imageRenderCtx->GetBorderRadiusValue(brp).ToJsonValue(jsonObject, jsonBorder);
-            resultObject.imageStyle.borderRadius = jsonObject->ToString();
+            resultObject.imageStyle.borderRadius = jsonObject->GetValue("borderRadius")->IsObject()
+                                                       ? jsonObject->GetValue("borderRadius")->ToString()
+                                                       : jsonObject->GetString("borderRadius");
         }
     }
     return resultObject;
@@ -2104,12 +2123,13 @@ void TextPattern::CollectSpanNodes(std::stack<SpanNodeInfo> nodes, bool& isSpanH
         }
         UpdateContainerChildren(current.containerSpanNode, current.node);
         auto spanNode = DynamicCast<SpanNode>(current.node);
-        if (spanNode && current.node->GetTag() == V2::SYMBOL_SPAN_ETS_TAG) {
+        auto tag = current.node->GetTag();
+        if (spanNode && tag == V2::SYMBOL_SPAN_ETS_TAG) {
             spanNode->CleanSpanItemChildren();
             UpdateChildProperty(spanNode);
             spanNode->MountToParagraph();
             textForDisplay_.append(StringUtils::Str16ToStr8(SYMBOL_TRANS));
-        } else if (spanNode && current.node->GetTag() != V2::PLACEHOLDER_SPAN_ETS_TAG) {
+        } else if (spanNode && tag != V2::PLACEHOLDER_SPAN_ETS_TAG) {
             spanNode->CleanSpanItemChildren();
             UpdateChildProperty(spanNode);
             spanNode->MountToParagraph();
@@ -2118,17 +2138,23 @@ void TextPattern::CollectSpanNodes(std::stack<SpanNodeInfo> nodes, bool& isSpanH
             if (spanNode->GetSpanItem()->onClick) {
                 isSpanHasClick = true;
             }
-        } else if (current.node->GetTag() == V2::IMAGE_ETS_TAG ||
-                   current.node->GetTag() == V2::PLACEHOLDER_SPAN_ETS_TAG) {
+        } else if (tag == V2::IMAGE_ETS_TAG || tag == V2::PLACEHOLDER_SPAN_ETS_TAG) {
             placeholderCount_++;
             AddChildSpanItem(current.node);
             dataDetectorAdapter_->textForAI_.append("\n");
+            auto imageNode = DynamicCast<FrameNode>(current.node);
+            if (!imageNode) {
+                continue;
+            }
+            auto focus_hub = imageNode->GetOrCreateFocusHub();
+            if (focus_hub && focus_hub->GetOnClickCallback()) {
+                isSpanHasClick = true;
+            }
         }
-        if (current.node->GetTag() == V2::PLACEHOLDER_SPAN_ETS_TAG) {
+        if (tag == V2::PLACEHOLDER_SPAN_ETS_TAG) {
             continue;
         }
-        auto containerSpanNode =
-            current.node->GetTag() == V2::CONTAINER_SPAN_ETS_TAG ? current.node : current.containerSpanNode;
+        auto containerSpanNode = tag == V2::CONTAINER_SPAN_ETS_TAG ? current.node : current.containerSpanNode;
         const auto& nextChildren = current.node->GetChildren();
         for (auto iter = nextChildren.rbegin(); iter != nextChildren.rend(); ++iter) {
             nodes.push({ .node = *iter, .containerSpanNode = containerSpanNode });
@@ -2258,6 +2284,12 @@ void TextPattern::AddChildSpanItem(const RefPtr<UINode>& child)
             auto imageSpanItem = MakeRefPtr<ImageSpanItem>();
             imageSpanItem->imageNodeId = imageNode->GetId();
             imageSpanItem->UpdatePlaceholderBackgroundStyle(imageNode);
+            auto focus_hub = imageNode->GetOrCreateFocusHub();
+            CHECK_NULL_VOID(focus_hub);
+            auto clickCall = focus_hub->GetOnClickCallback();
+            if (clickCall) {
+                imageSpanItem->SetOnClickEvent(std::move(clickCall));
+            }
             spans_.emplace_back(imageSpanItem);
             auto gesture = imageNode->GetOrCreateGestureEventHub();
             CHECK_NULL_VOID(gesture);

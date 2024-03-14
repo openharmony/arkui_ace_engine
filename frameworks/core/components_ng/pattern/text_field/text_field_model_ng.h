@@ -96,6 +96,11 @@ public:
     void SetCancelIconColor(const Color& iconColor) override;
     void SetIsShowCancelButton(bool isShowCancelButton) override;
     void SetSelectAllValue(bool isSetSelectAllValue) override;
+    void SetLetterSpacing(const Dimension& value) override;
+    void SetLineHeight(const Dimension& value) override;
+    void SetTextDecoration(Ace::TextDecoration value) override;
+    void SetTextDecorationColor(const Color& value) override;
+    void SetTextDecorationStyle(Ace::TextDecorationStyle value) override;
     static RefPtr<FrameNode> CreateFrameNode(int32_t nodeId, const std::optional<std::string>& placeholder,
         const std::optional<std::string>& value, bool isTextArea);
     static void SetInputStyle(FrameNode* frameNode, InputStyle value);

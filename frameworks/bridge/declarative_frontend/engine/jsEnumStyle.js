@@ -641,7 +641,7 @@ var FormDimension;
   FormDimension["Dimension_4_4"] = 4;
   FormDimension["Dimension_2_1"] = 5;
   FormDimension["DIMENSION_1_1"] = 6;
-  FormDimension["DIMENSION_4_6"] = 7;
+  FormDimension["DIMENSION_6_4"] = 7;
 })(FormDimension || (FormDimension = {}));
 
 let FormRenderingMode;
@@ -2630,6 +2630,13 @@ let ButtonRole;
   ButtonRole['NORMAL'] = 0;
   ButtonRole['ERROR'] = 1;
 })(ButtonRole || (ButtonRole = {}));
+
+let MenuPolicy;
+(function (MenuPolicy) {
+    MenuPolicy['DEFAULT'] = 0;
+    MenuPolicy['NEVER'] = 1;
+    MenuPolicy['ALWAYS'] = 2;
+})(MenuPolicy || (MenuPolicy = {}));
 
 let PreDragStatus;
 (function (PreDragStatus) {

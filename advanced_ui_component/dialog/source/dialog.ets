@@ -98,7 +98,9 @@ export struct TipsDialog {
       Checkbox({ name: 'checkbox', group: 'checkboxGroup' }).select(this.isChecked)
         .onChange((checked: boolean) => {
           this.isChecked = checked;
-          if (this.checkAction) this.checkAction(checked);
+          if (this.checkAction) {
+            this.checkAction(checked);
+          }
         })
         .margin({ right: $r('sys.float.padding_level4') })
       Text(content)
@@ -111,7 +113,9 @@ export struct TipsDialog {
         .textOverflow({ overflow: TextOverflow.Ellipsis })
         .onClick(() => {
           this.isChecked = !this.isChecked;
-          if (this.checkAction) this.checkAction(this.isChecked);
+          if (this.checkAction) {
+            this.checkAction(this.isChecked);
+          }
         })
     }
     .padding({ top: $r('sys.float.padding_level8') })
@@ -190,9 +194,8 @@ export struct TipsDialog {
       constraintWidth: maxWidth,
     });
     let oneLineSize: SizeOptions = measure.measureTextSize({
-      textContent: '1',
+      textContent: this.content,
       fontSize: $r('sys.float.Body_L'),
-      constraintWidth: maxWidth,
     });
     if (this.getTextHeight(contentSize) <= this.getTextHeight(oneLineSize)) {
       this.textAlignment = TextAlign.Center;
@@ -479,9 +482,8 @@ export struct AlertDialog {
       constraintWidth: maxWidth,
     });
     let oneLineSize: SizeOptions = measure.measureTextSize({
-      textContent: '1',
+      textContent: this.content,
       fontSize: $r('sys.float.Body_L'),
-      constraintWidth: maxWidth,
     });
 
     if (this.getTextHeight(contentSize) <= this.getTextHeight(oneLineSize)) {

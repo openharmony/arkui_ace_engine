@@ -30,10 +30,14 @@ public:
 
     MOCK_METHOD1(GetPointWithTransform, void(PointF&));
     MOCK_METHOD1(AnimateHoverEffectScale, void(bool));
-    MOCK_METHOD1(SetVisible, void(bool));
     MOCK_METHOD4(SetBounds, void(float, float, float, float));
     MOCK_METHOD1(DoTextureExport, bool(uint64_t));
     MOCK_METHOD0(StopTextureExport, bool());
+
+    void SetVisible(bool visible) override
+    {
+        isVisible_ = visible;
+    }
 
     void ResetBlendBgColor() override
     {
@@ -66,6 +70,7 @@ public:
         return 0;
     }
 
+    bool isVisible_ = true;
     RectF rect_;
     Color blendColor_ = Color::TRANSPARENT;
     std::vector<double> transInfo_ = { 0, 0, 0, 0, 0, 0, 0, 0, 0 };

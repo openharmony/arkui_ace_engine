@@ -161,6 +161,20 @@ std::shared_ptr<RouterPageInfoNG> UIObserverHandler::GetRouterPageState(const Re
         RouterPageState(pattern->GetPageState()));
 }
 
+void UIObserverHandler::HandleDrawCommandSendCallBack()
+{
+    CHECK_NULL_VOID(drawCommandSendHandleFunc_);
+    ACE_LAYOUT_SCOPED_TRACE("drawCommandSend");
+    drawCommandSendHandleFunc_();
+}
+
+void UIObserverHandler::HandleLayoutDoneCallBack()
+{
+    CHECK_NULL_VOID(layoutDoneHandleFunc_);
+    ACE_LAYOUT_SCOPED_TRACE("layoutDone");
+    layoutDoneHandleFunc_();
+}
+
 void UIObserverHandler::SetHandleNavigationChangeFunc(NavigationHandleFunc func)
 {
     navigationHandleFunc_ = func;
@@ -179,6 +193,16 @@ void UIObserverHandler::SetHandleRouterPageChangeFunc(RouterPageHandleFunc func)
 void UIObserverHandler::SetHandleDensityChangeFunc(const DensityHandleFunc& func)
 {
     densityHandleFunc_ = func;
+}
+
+void UIObserverHandler::SetDrawCommandSendHandleFunc(DrawCommandSendHandleFunc func)
+{
+    drawCommandSendHandleFunc_ = func;
+}
+
+void UIObserverHandler::SetLayoutDoneHandleFunc(LayoutDoneHandleFunc func)
+{
+    layoutDoneHandleFunc_ = func;
 }
 
 napi_value UIObserverHandler::GetUIContextValue()

@@ -534,16 +534,19 @@ RefPtr<FrameNode> DatePickerDialogView::CreateDateNode(int32_t dateNodeId,
     PickerDate parseSelectedDate;
     SetShowLunar(dateNode, isLunar);
     SetDateTextProperties(dateNode, properties);
-    if (datePickerProperty.find("start") != datePickerProperty.end()) {
-        parseStartDate = datePickerProperty["start"];
+    auto iterStart = datePickerProperty.find("start");
+    if (iterStart != datePickerProperty.end()) {
+        parseStartDate = iterStart->second;
         SetStartDate(dateNode, parseStartDate);
     }
-    if (datePickerProperty.find("end") != datePickerProperty.end()) {
-        parseEndDate = datePickerProperty["end"];
+    auto iterEnd = datePickerProperty.find("end");
+    if (iterEnd != datePickerProperty.end()) {
+        parseEndDate = iterEnd->second;
         SetEndDate(dateNode, parseEndDate);
     }
-    if (datePickerProperty.find("selected") != datePickerProperty.end()) {
-        parseSelectedDate = datePickerProperty["selected"];
+    auto iterSelected = datePickerProperty.find("selected");
+    if (iterSelected != datePickerProperty.end()) {
+        parseSelectedDate = iterSelected->second;
         SetSelectedDate(dateNode, parseSelectedDate);
     }
     return dateNode;
@@ -656,8 +659,9 @@ RefPtr<FrameNode> DatePickerDialogView::CreateTimeNode(
     if (!hasMinuteNode) {
         MountColumnNodeToPicker(minuteColumnNode, timePickerNode);
     }
-    if (timePickerProperty.find("selected") != timePickerProperty.end()) {
-        auto selectedTime = timePickerProperty["selected"];
+    auto it = timePickerProperty.find("selected");
+    if (it != timePickerProperty.end()) {
+        auto selectedTime = it->second;
         timePickerRowPattern->SetSelectedTime(selectedTime);
     }
     timePickerRowPattern->SetHour24(useMilitaryTime);

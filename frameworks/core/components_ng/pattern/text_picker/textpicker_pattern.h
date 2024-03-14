@@ -210,8 +210,9 @@ public:
     uint32_t GetOptionCount(const RefPtr<FrameNode>& frmeNode)
     {
         uint32_t count = 0;
-        if (optionsWithNode_.find(frmeNode) != optionsWithNode_.end()) {
-            count = optionsWithNode_[frmeNode].size();
+        auto it = optionsWithNode_.find(frmeNode);
+        if (it != optionsWithNode_.end()) {
+            count = it->second.size();
         }
         return count;
     }

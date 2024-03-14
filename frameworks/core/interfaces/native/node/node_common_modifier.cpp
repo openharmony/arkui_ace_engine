@@ -4880,19 +4880,19 @@ void SetOnTouch(ArkUINodeHandle node, void* extraParam)
         auto getTouchPoints = [](ArkUITouchPoint** points) -> ArkUI_Int32 {
             const std::list<TouchLocationInfo>& touchList = globalEventInfo.GetTouches();
             int index = 0;
+            *points = new ArkUITouchPoint[touchList.size()];
             for (const auto& touchInfo : touchList) {
                 const OHOS::Ace::Offset& globalLocation = touchInfo.GetGlobalLocation();
                 const OHOS::Ace::Offset& localLocation = touchInfo.GetLocalLocation();
                 const OHOS::Ace::Offset& screenLocation = touchInfo.GetScreenLocation();
-                ArkUITouchPoint touchPoint;
-                touchPoint.id = touchInfo.GetFingerId();
-                touchPoint.nodeX = PipelineBase::Px2VpWithCurrentDensity(localLocation.GetX());
-                touchPoint.nodeY = PipelineBase::Px2VpWithCurrentDensity(localLocation.GetY());
-                touchPoint.windowX = PipelineBase::Px2VpWithCurrentDensity(globalLocation.GetX());
-                touchPoint.windowY = PipelineBase::Px2VpWithCurrentDensity(globalLocation.GetY());
-                touchPoint.screenX = PipelineBase::Px2VpWithCurrentDensity(screenLocation.GetX());
-                touchPoint.screenY = PipelineBase::Px2VpWithCurrentDensity(screenLocation.GetY());
-                points[index++] = &touchPoint;
+                (*points)[index].id = touchInfo.GetFingerId();
+                (*points)[index].nodeX = PipelineBase::Px2VpWithCurrentDensity(localLocation.GetX());
+                (*points)[index].nodeY = PipelineBase::Px2VpWithCurrentDensity(localLocation.GetY());
+                (*points)[index].windowX = PipelineBase::Px2VpWithCurrentDensity(globalLocation.GetX());
+                (*points)[index].windowY = PipelineBase::Px2VpWithCurrentDensity(globalLocation.GetY());
+                (*points)[index].screenX = PipelineBase::Px2VpWithCurrentDensity(screenLocation.GetX());
+                (*points)[index].screenY = PipelineBase::Px2VpWithCurrentDensity(screenLocation.GetY());
+                index++;
             }
             return index;
         };

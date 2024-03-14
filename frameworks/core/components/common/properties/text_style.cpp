@@ -18,7 +18,7 @@
 #include "core/pipeline/base/constants.h"
 
 namespace OHOS::Ace {
-
+const std::vector<WordBreak> WORD_BREAK_TYPES = { WordBreak::NORMAL, WordBreak::BREAK_ALL, WordBreak::BREAK_WORD };
 TextStyle::TextStyle(const std::vector<std::string>& fontFamilies, double fontSize, FontWeight fontWeight,
     FontStyle fontStyle, const Color& textColor)
     : fontFamilies_(fontFamilies), fontSize_(fontSize), fontWeight_(fontWeight), fontStyle_(fontStyle),

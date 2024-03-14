@@ -29,7 +29,6 @@ void MenuWrapperPattern::HideMenu(const RefPtr<FrameNode>& menu)
     if (GetHost()->GetTag() == V2::SELECT_OVERLAY_ETS_TAG) {
         return;
     }
-    isHided_ = true;
 
     auto menuPattern = menu->GetPattern<MenuPattern>();
     CHECK_NULL_VOID(menuPattern);
@@ -40,13 +39,6 @@ void MenuWrapperPattern::HideMenu(const RefPtr<FrameNode>& menu)
 void MenuWrapperPattern::OnAttachToFrameNode()
 {
     RegisterOnTouch();
-}
-
-void MenuWrapperPattern::OnModifyDone()
-{
-    Pattern::OnModifyDone();
-
-    isHided_ = false;
 }
 
 // close subMenu when mouse move outside
@@ -154,7 +146,7 @@ void MenuWrapperPattern::OnTouchEvent(const TouchEventInfo& info)
     if (touch.GetTouchType() != TouchType::DOWN) {
         return;
     }
-    if (IsHided()) {
+    if (IsHide()) {
         return;
     }
     auto host = GetHost();
@@ -210,7 +202,7 @@ bool MenuWrapperPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& d
     auto layoutProperty = menuPattern->GetLayoutProperty<MenuLayoutProperty>();
     CHECK_NULL_RETURN(layoutProperty, false);
     isShowInSubWindow_ = layoutProperty->GetShowInSubWindowValue(true);
-    if ((IsContextMenu() && !IsHided()) || ((expandDisplay && isShowInSubWindow_) && !IsHided())) {
+    if ((IsContextMenu() && !IsHide()) || ((expandDisplay && isShowInSubWindow_) && !IsHide())) {
         SetHotAreas(dirty);
     }
     CheckAndShowAnimation();

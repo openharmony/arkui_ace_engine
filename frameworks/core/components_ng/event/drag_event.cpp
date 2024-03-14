@@ -729,6 +729,15 @@ RefPtr<PixelMap> DragEventActuator::GetPreviewPixelMapByInspectorId(const std::s
 
     // Retrieve the frame node using the inspector's ID.
     auto dragPreviewFrameNode = Inspector::GetFrameNodeByKey(inspectorId);
+    CHECK_NULL_RETURN(dragPreviewFrameNode, nullptr);
+
+    auto layoutProperty = dragPreviewFrameNode->GetLayoutProperty();
+    CHECK_NULL_RETURN(layoutProperty, nullptr);
+
+    auto visibility = layoutProperty->GetVisibilityValue(VisibleType::VISIBLE);
+    if (visibility == VisibleType::INVISIBLE || visibility == VisibleType::GONE) {
+        return nullptr;
+    }
 
     // Take a screenshot of the frame node and return it as a PixelMap.
     return GetScreenShotPixelMap(dragPreviewFrameNode);

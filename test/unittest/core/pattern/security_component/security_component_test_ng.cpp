@@ -2362,9 +2362,9 @@ HWTEST_F(SecurityComponentModelTestNg, SecurityComponentPatternInitOnKeyEvent001
 HWTEST_F(SecurityComponentModelTestNg, SecurityComponentPatternIsParentMenu001, TestSize.Level1)
 {
     RefPtr<SecurityComponentPattern> pattern = AceType::MakeRefPtr<SecurityComponentPattern>();
-    auto menuNode = AceType::MakeRefPtr<FrameNode>(V2::MENU_WRAPPER_ETS_TAG, 1, pattern, -1, false);
-    auto locationButton = AceType::MakeRefPtr<FrameNode>(V2::LOCATION_BUTTON_ETS_TAG, 1, pattern, -1, false);
-    auto text = AceType::MakeRefPtr<FrameNode>(V2::TEXT_ETS_TAG, 1, pattern, -1, false);
+    auto menuNode = AceType::MakeRefPtr<FrameNode>(V2::MENU_WRAPPER_ETS_TAG, 1, pattern, false);
+    auto locationButton = AceType::MakeRefPtr<FrameNode>(V2::LOCATION_BUTTON_ETS_TAG, 1, pattern, false);
+    auto text = AceType::MakeRefPtr<FrameNode>(V2::TEXT_ETS_TAG, 1, pattern, false);
 
     locationButton->SetParent(text);
     ASSERT_FALSE(pattern->IsParentMenu(locationButton));

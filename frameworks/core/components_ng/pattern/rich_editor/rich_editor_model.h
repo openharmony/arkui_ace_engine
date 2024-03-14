@@ -66,6 +66,12 @@ struct ImageSpanOptions : SpanOptionBase {
     std::optional<ImageSpanAttribute> imageAttribute;
 };
 
+enum class MenuPolicy { DEFAULT = 0, NEVER, ALWAYS };
+
+struct SelectionOptions {
+    MenuPolicy menuPolicy = MenuPolicy::DEFAULT;
+};
+
 struct SpanPositionInfo {
     SpanPositionInfo(int32_t index, int32_t start, int32_t end, int32_t offset)
         : spanIndex_(index), spanStart_(start), spanEnd_(end), spanOffset_(offset)
@@ -103,6 +109,8 @@ struct UpdateSpanStyle {
         updateTextDecorationColor.reset();
         updateTextShadows.reset();
 
+        updateLineHeight.reset();
+        updateLetterSpacing.reset();
         updateSymbolColor.reset();
         updateSymbolRenderingStrategy.reset();
         updateSymbolEffectStrategy.reset();
@@ -125,6 +133,8 @@ struct UpdateSpanStyle {
     std::optional<Color> updateTextDecorationColor = std::nullopt;
     std::optional<std::vector<Shadow>> updateTextShadows = std::nullopt;
 
+    std::optional<CalcDimension> updateLineHeight = std::nullopt;
+    std::optional<CalcDimension> updateLetterSpacing = std::nullopt;
     std::optional<std::vector<Color>> updateSymbolColor = std::nullopt;
     std::optional<uint32_t> updateSymbolRenderingStrategy = std::nullopt;
     std::optional<uint32_t> updateSymbolEffectStrategy = std::nullopt;
@@ -145,9 +155,11 @@ struct UpdateParagraphStyle {
     {
         textAlign.reset();
         leadingMargin.reset();
+        wordBreak.reset();
     }
     std::optional<TextAlign> textAlign;
     std::optional<NG::LeadingMargin> leadingMargin;
+    std::optional<WordBreak> wordBreak;
 };
 
 struct RangeOptions {
@@ -200,7 +212,8 @@ public:
     virtual void DeleteSpans(const RangeOptions& options) = 0;
     virtual void CloseSelectionMenu() = 0;
     virtual SelectionInfo GetSelectionSpansInfo() = 0;
-    virtual void SetSelection(int32_t selectionStart, int32_t selectionEnd) = 0;
+    virtual void SetSelection(int32_t selectionStart, int32_t selectionEnd,
+        const std::optional<SelectionOptions>& options = std::nullopt) = 0;
 };
 
 class ACE_EXPORT RichEditorModel {
@@ -224,6 +237,8 @@ public:
     virtual void SetPlaceholder(PlaceholderOptions& options) = 0;
     virtual void SetTextDetectEnable(bool value) = 0;
     virtual void SetTextDetectConfig(const std::string& value, std::function<void(const std::string&)>&& onResult) = 0;
+    virtual void SetSelectedBackgroundColor(const Color& selectedColor) = 0;
+    virtual void SetCaretColor(const Color& color) = 0;
 private:
     static std::unique_ptr<RichEditorModel> instance_;
     static std::mutex mutex_;

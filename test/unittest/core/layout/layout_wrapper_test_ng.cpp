@@ -880,12 +880,9 @@ HWTEST_F(LayoutWrapperTestNg, LayoutWrapperTest021, TestSize.Level1)
     /**
      * @tc.steps: step4. UpdateAspectRatio and UpdateLayoutWeight.
      */
-    MagicItemProperty magicItemProperty;
-    magicItemProperty.UpdateAspectRatio(0.5);
-    magicItemProperty.UpdateLayoutWeight(0.5);
 
-    layoutWrapper->layoutProperty_->magicItemProperty_ = std::make_unique<MagicItemProperty>(magicItemProperty);
-
+    layoutWrapper->layoutProperty_->magicItemProperty_.UpdateAspectRatio(0.5);
+    layoutWrapper->layoutProperty_->magicItemProperty_.UpdateLayoutWeight(0.5);
     /**
      * @tc.steps: step5. call Measure.
      * @tc.expected: FRAME_SIZE.Height() is twice as much RK356_WIDTH.

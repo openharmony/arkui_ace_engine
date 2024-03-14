@@ -121,6 +121,8 @@ std::optional<SelectOverlayInfo> SelectOverlayClient::GetSelectOverlayInfo(const
     overlayInfo.isSelectRegionVisible = CheckSelectionRectVisible();
     overlayInfo.selectArea = clientInfo.selectArea;
     overlayInfo.isNewAvoid = clientInfo.isNewAvoid;
+    overlayInfo.handlerColor =
+        clientInfo.handlerColor.has_value() ? clientInfo.handlerColor : overlayInfo.handlerColor;
     if (!clientInfo.isUpdateMenu) {
         return overlayInfo;
     }

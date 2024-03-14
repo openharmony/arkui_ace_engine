@@ -94,7 +94,7 @@ void JSCustomDialogController::ConstructorCallback(const JSCallbackInfo& info)
         // Process cancel function.
         JSRef<JSVal> cancelCallback = constructorArg->GetProperty("cancel");
         if (!cancelCallback->IsUndefined() && cancelCallback->IsFunction()) {
-            WeakPtr<NG::FrameNode> frameNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+            auto frameNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
             auto jsCancelFunction = AceType::MakeRefPtr<JsWeakFunction>(ownerObj, JSRef<JSFunc>::Cast(cancelCallback));
             instance->jsCancelFunction_ = jsCancelFunction;
 
@@ -233,7 +233,7 @@ void JSCustomDialogController::JsOpenDialog(const JSCallbackInfo& info)
     }
     auto containerId = this->ownerView_->GetInstanceId();
     ContainerScope containerScope(containerId);
-    WeakPtr<NG::FrameNode> frameNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    WeakPtr<NG::FrameNode> frameNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
     auto pipelineContext = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipelineContext);
 
@@ -295,7 +295,7 @@ void JSCustomDialogController::JsCloseDialog(const JSCallbackInfo& info)
         return;
     }
 
-    WeakPtr<NG::FrameNode> frameNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    WeakPtr<NG::FrameNode> frameNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
     auto cancelTask = ([cancelCallback = jsCancelFunction_, node = frameNode]() {
         if (cancelCallback) {
             ACE_SCORING_EVENT("CustomDialog.cancel");
@@ -356,7 +356,7 @@ bool JSCustomDialogController::ParseAnimation(
     JSRef<JSVal> onFinish = obj->GetProperty("onFinish");
     std::function<void()> onFinishEvent;
     if (onFinish->IsFunction()) {
-        WeakPtr<NG::FrameNode> frameNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+        auto frameNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
         auto jsFunc = AceType::MakeRefPtr<JsWeakFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(onFinish));
         onFinishEvent = [execCtx = execContext, func = std::move(jsFunc), node = frameNode]() {
             JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
