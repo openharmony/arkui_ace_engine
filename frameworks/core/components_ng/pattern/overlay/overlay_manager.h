@@ -369,7 +369,9 @@ public:
 
     RefPtr<FrameNode> GetSheetMask(const RefPtr<FrameNode>& sheetNode);
 
-    void DeleteModal(int32_t targetId);
+    void DeleteModal(int32_t targetId, bool needOnWillDisappear = true);
+
+    void DeleteModalNode(int32_t targetId, RefPtr<FrameNode>& modalNode, bool isModal, bool needOnWillDisappear);
 
     void RemoveSheetMask(RefPtr<FrameNode>& sheetNode, RefPtr<UINode>& rootNode);
 

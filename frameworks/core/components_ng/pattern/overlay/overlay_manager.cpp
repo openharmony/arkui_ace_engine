@@ -2413,9 +2413,6 @@ void OverlayManager::BindContentCover(bool isShow, std::function<void(const std:
         if (topModalNode->GetTag() != V2::SHEET_PAGE_TAG && topModalNode->GetTag() != V2::MODAL_PAGE_TAG) {
             return;
         }
-        if (onWillDisappear) {
-            onWillDisappear();
-        }
         if (topModalNode->GetTag() == V2::SHEET_PAGE_TAG ||
             topModalNode->GetPattern<ModalPresentationPattern>()->GetTargetId() != targetId) {
             DeleteModal(targetId);
@@ -2437,6 +2434,9 @@ void OverlayManager::BindContentCover(bool isShow, std::function<void(const std:
         modalTransition = modalPresentationPattern->GetType();
         // lost focus
         ModalPageLostFocus(topModalNode);
+        if (onWillDisappear) {
+            onWillDisappear();
+        }
         if (modalTransition == ModalTransition::DEFAULT) {
             PlayDefaultModalTransition(topModalNode, false);
         } else if (modalTransition == ModalTransition::ALPHA) {
@@ -3168,7 +3168,7 @@ void OverlayManager::DestroySheet(const RefPtr<FrameNode>& sheetNode, int32_t ta
         return;
     }
     if (sheetMap_.empty() || !sheetMap_.count(targetId)) {
-        DeleteModal(targetId);
+        DeleteModal(targetId, false);
         return;
     }
     auto mapSheetNode = sheetMap_[targetId].Upgrade();
@@ -3198,7 +3198,7 @@ void OverlayManager::DestroySheet(const RefPtr<FrameNode>& sheetNode, int32_t ta
     SaveLastModalNode();
 }
 
-void OverlayManager::DeleteModal(int32_t targetId)
+void OverlayManager::DeleteModal(int32_t targetId, bool needOnWillDisappear)
 {
     bool isDelete = false;
     bool isModal = true;
@@ -3220,24 +3220,7 @@ void OverlayManager::DeleteModal(int32_t targetId)
         if (currentTargetId == targetId) {
             isDelete = true;
             modalList_.erase(modal);
-            auto rootNode = FindWindowScene(modalNode);
-            CHECK_NULL_VOID(rootNode);
-            if (isModal) {
-                modalNode->GetPattern<ModalPresentationPattern>()->OnDisappear();
-                modalNode->GetPattern<ModalPresentationPattern>()->FireCallback("false");
-                // Fire hidden event of navdestination on the disappeared modal
-                FireNavigationStateChange(false, modalNode);
-                rootNode->RemoveChild(modalNode);
-            } else {
-                RemoveSheetMask(modalNode, rootNode);
-                modalNode->GetPattern<SheetPresentationPattern>()->OnDisappear();
-                modalNode->GetPattern<SheetPresentationPattern>()->FireCallback("false");
-                sheetMap_.erase(targetId);
-                auto sheetParent = DynamicCast<FrameNode>(modalNode->GetParent());
-                CHECK_NULL_VOID(sheetParent);
-                rootNode->RemoveChild(sheetParent);
-            }
-            rootNode->MarkDirtyNode(PROPERTY_UPDATE_BY_CHILD_REQUEST);
+            DeleteModalNode(targetId, modalNode, isModal, needOnWillDisappear);
             break;
         }
     }
@@ -3250,6 +3233,35 @@ void OverlayManager::DeleteModal(int32_t targetId)
         }
         SaveLastModalNode();
     }
+}
+
+void OverlayManager::DeleteModalNode(
+    int32_t targetId, RefPtr<FrameNode>& modalNode, bool isModal, bool needOnWillDisappear)
+{
+    auto rootNode = FindWindowScene(modalNode);
+    CHECK_NULL_VOID(rootNode);
+    if (isModal) {
+        if (needOnWillDisappear) {
+            modalNode->GetPattern<ModalPresentationPattern>()->OnWillDisappear();
+        }
+        modalNode->GetPattern<ModalPresentationPattern>()->OnDisappear();
+        modalNode->GetPattern<ModalPresentationPattern>()->FireCallback("false");
+        // Fire hidden event of navdestination on the disappeared modal
+        FireNavigationStateChange(false, modalNode);
+        rootNode->RemoveChild(modalNode);
+    } else {
+        if (needOnWillDisappear) {
+            modalNode->GetPattern<SheetPresentationPattern>()->OnWillDisappear();
+        }
+        RemoveSheetMask(modalNode, rootNode);
+        modalNode->GetPattern<SheetPresentationPattern>()->OnDisappear();
+        modalNode->GetPattern<SheetPresentationPattern>()->FireCallback("false");
+        sheetMap_.erase(targetId);
+        auto sheetParent = DynamicCast<FrameNode>(modalNode->GetParent());
+        CHECK_NULL_VOID(sheetParent);
+        rootNode->RemoveChild(sheetParent);
+    }
+    rootNode->MarkDirtyNode(PROPERTY_UPDATE_BY_CHILD_REQUEST);
 }
 
 void OverlayManager::RemoveSheetMask(RefPtr<FrameNode>& sheetNode, RefPtr<UINode>& rootNode)
