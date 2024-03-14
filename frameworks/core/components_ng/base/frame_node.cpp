@@ -1064,8 +1064,8 @@ void FrameNode::TriggerOnSizeChangeCallback()
         return;
     }
     if (eventHub_->HasOnSizeChanged() && lastFrameNodeRect_) {
-        auto currFrameRect = geometryNode_->GetFrameRect();
-        if (currFrameRect != *lastFrameNodeRect_) {
+        auto currFrameRect = GetRectWithRender();
+        if (currFrameRect.GetSize() != (*lastFrameNodeRect_).GetSize()) {
             onSizeChangeDumpInfo dumpInfo { GetCurrentTimestamp(), *lastFrameNodeRect_, currFrameRect };
             if (onSizeChangeDumpInfos.size() >= SIZE_CHANGE_DUMP_SIZE) {
                 onSizeChangeDumpInfos.erase(onSizeChangeDumpInfos.begin());
