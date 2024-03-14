@@ -1823,4 +1823,15 @@ void GridPattern::StopAnimate()
     isSmoothScrolling_ = false;
 }
 
+bool GridPattern::IsPredictOutOfRange(int32_t index) const
+{
+    CHECK_NULL_RETURN(gridLayoutInfo_.reachEnd_, false);
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, true);
+    auto gridLayoutProperty = host->GetLayoutProperty<GridLayoutProperty>();
+    CHECK_NULL_RETURN(gridLayoutProperty, true);
+    auto cacheCount = gridLayoutProperty->GetCachedCountValue(0) * gridLayoutInfo_.crossCount_;
+    return index < gridLayoutInfo_.startIndex_ - cacheCount || index > gridLayoutInfo_.endIndex_ + cacheCount;
+}
+
 } // namespace OHOS::Ace::NG

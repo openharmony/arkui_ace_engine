@@ -2048,6 +2048,10 @@ void GridScrollLayoutAlgorithm::PostIdleTask(RefPtr<FrameNode> frameNode, const 
         }
         bool needMarkDirty = false;
         auto param = pattern->GetPredictLayoutParam().value();
+        auto firstItem = param.items.begin();
+        if (pattern->IsPredictOutOfRange(*firstItem)) {
+            param.items.clear();
+        }
         for (auto it = param.items.begin(); it != param.items.end();) {
             if (GetSysTimestamp() > deadline) {
                 break;

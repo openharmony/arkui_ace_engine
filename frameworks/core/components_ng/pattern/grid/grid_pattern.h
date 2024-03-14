@@ -220,6 +220,9 @@ public:
     std::vector<RefPtr<FrameNode>> GetVisibleSelectedItems() override;
 
     void StopAnimate() override;
+
+    bool IsPredictOutOfRange(int32_t index) const;
+
 private:
     float GetEndOffset();
     float GetMainGap() const;
