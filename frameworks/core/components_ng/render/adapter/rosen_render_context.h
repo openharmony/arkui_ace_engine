@@ -209,8 +209,7 @@ public:
     void ClipWithRRect(const RectF& rectF, const RadiusF& radiusF) override;
 
     bool TriggerPageTransition(PageTransitionType type, const std::function<void()>& onFinish) override;
-    void MaskAnimation(const RefPtr<RenderContext>& transitionOutNodeContext,
-        const Color& initialBackgroundColor, const Color& backgroundColor);
+    void MaskAnimation(const Color& initialBackgroundColor, const Color& backgroundColor);
 
     void SetSharedTranslate(float xTranslate, float yTranslate) override;
     void ResetSharedTranslate() override;

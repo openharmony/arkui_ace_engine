@@ -131,6 +131,7 @@ constexpr double HALF = 0.5;
 constexpr double PARENT_PAGE_OFFSET = 0.2;
 constexpr int32_t MASK_DURATION = 350;
 constexpr int32_t DEFAULT_ANIMATION_DURATION = 450;
+constexpr float REMOVE_CLIP_SIZE = 10000.0f;
 const Color MASK_COLOR = Color::FromARGB(25, 0, 0, 0);
 const Color DEFAULT_MASK_COLOR = Color::FromARGB(0, 0, 0, 0);
 const RefPtr<InterpolatingSpring> springCurve = AceType::MakeRefPtr<InterpolatingSpring>(0.0f, 1.0f, 342.0f, 37.0f);
@@ -3764,13 +3765,10 @@ void RosenRenderContext::OnProgressMaskUpdate(const RefPtr<ProgressMaskProperty>
 
 RefPtr<PageTransitionEffect> RosenRenderContext::GetDefaultPageTransition(PageTransitionType type)
 {
-    auto host = GetHost();
-    CHECK_NULL_RETURN(host, nullptr);
     auto resultEffect = AceType::MakeRefPtr<PageTransitionEffect>(type, PageTransitionOption());
     resultEffect->SetScaleEffect(ScaleOptions(1.0f, 1.0f, 1.0f, 0.5_pct, 0.5_pct));
     TranslateOptions translate;
     auto rect = GetPaintRectWithoutTransform();
-    auto frameSize = host->GetGeometryNode()->GetFrameSize();
     auto initialBackgroundColor = DEFAULT_MASK_COLOR;
     auto backgroundColor = DEFAULT_MASK_COLOR;
     RectF pageTransitionRectF;
@@ -3779,19 +3777,19 @@ RefPtr<PageTransitionEffect> RosenRenderContext::GetDefaultPageTransition(PageTr
         case PageTransitionType::EXIT_POP:
             initialBackgroundColor = DEFAULT_MASK_COLOR;
             backgroundColor = DEFAULT_MASK_COLOR;
-            pageTransitionRectF = RectF(frameSize.Width() * HALF, 0.0f, frameSize.Width() * HALF, frameSize.Height());
+            pageTransitionRectF = RectF(rect.Width() * HALF, 0.0f, rect.Width() * HALF, REMOVE_CLIP_SIZE);
             translate.x = Dimension(rect.Width() * HALF);
             break;
         case PageTransitionType::ENTER_POP:
             initialBackgroundColor = MASK_COLOR;
             backgroundColor = DEFAULT_MASK_COLOR;
-            pageTransitionRectF = RectF(0.0f, 0.0f, frameSize.Width() * PARENT_PAGE_OFFSET, frameSize.Height());
+            pageTransitionRectF = RectF(0.0f, 0.0f, rect.Width() * PARENT_PAGE_OFFSET, REMOVE_CLIP_SIZE);
             translate.x = Dimension(-rect.Width() * PARENT_PAGE_OFFSET);
             break;
         case PageTransitionType::EXIT_PUSH:
             initialBackgroundColor = DEFAULT_MASK_COLOR;
             backgroundColor = MASK_COLOR;
-            pageTransitionRectF = RectF(0.0f, 0.0f, frameSize.Width() * PARENT_PAGE_OFFSET, frameSize.Height());
+            pageTransitionRectF = RectF(0.0f, 0.0f, rect.Width() * PARENT_PAGE_OFFSET, REMOVE_CLIP_SIZE);
             translate.x = Dimension(-rect.Width() * PARENT_PAGE_OFFSET);
             break;
         default:
@@ -3807,17 +3805,14 @@ RefPtr<PageTransitionEffect> RosenRenderContext::GetDefaultPageTransition(PageTr
 
 RefPtr<PageTransitionEffect> RosenRenderContext::GetPageTransitionEffect(const RefPtr<PageTransitionEffect>& transition)
 {
-    auto host = GetHost();
-    CHECK_NULL_RETURN(host, nullptr);
-    auto frameSize = host->GetGeometryNode()->GetFrameSize();
     auto resultEffect = AceType::MakeRefPtr<PageTransitionEffect>(
         transition->GetPageTransitionType(), transition->GetPageTransitionOption());
     resultEffect->SetScaleEffect(
         transition->GetScaleEffect().value_or(ScaleOptions(1.0f, 1.0f, 1.0f, 0.5_pct, 0.5_pct)));
     TranslateOptions translate;
+    auto rect = GetPaintRectWithoutTransform();
     // slide and translate, only one can be effective
     if (transition->GetSlideEffect().has_value()) {
-        auto rect = GetPaintRectWithoutTransform();
         switch (transition->GetSlideEffect().value()) {
             case SlideEffect::LEFT:
                 translate.x = Dimension(-rect.Width());
@@ -3835,7 +3830,6 @@ RefPtr<PageTransitionEffect> RosenRenderContext::GetPageTransitionEffect(const R
                 break;
         }
     } else if (transition->GetTranslateEffect().has_value()) {
-        auto rect = GetPaintRectWithoutTransform();
         const auto& translateOptions = transition->GetTranslateEffect();
         translate.x = Dimension(translateOptions->x.ConvertToPxWithSize(rect.Width()));
         translate.y = Dimension(translateOptions->y.ConvertToPxWithSize(rect.Height()));
@@ -3843,7 +3837,7 @@ RefPtr<PageTransitionEffect> RosenRenderContext::GetPageTransitionEffect(const R
     }
     resultEffect->SetTranslateEffect(translate);
     resultEffect->SetOpacityEffect(transition->GetOpacityEffect().value_or(1));
-    resultEffect->SetPageTransitionRectF(RectF(0.0f, 0.0f, frameSize.Width(), frameSize.Height()));
+    resultEffect->SetPageTransitionRectF(RectF(0.0f, 0.0f, rect.Width(), REMOVE_CLIP_SIZE));
     resultEffect->SetInitialBackgroundColor(DEFAULT_MASK_COLOR);
     resultEffect->SetBackgroundColor(DEFAULT_MASK_COLOR);
     return resultEffect;
@@ -3867,7 +3861,7 @@ bool RosenRenderContext::TriggerPageTransition(PageTransitionType type, const st
     auto transition = pattern->FindPageTransitionEffect(type);
     RefPtr<PageTransitionEffect> effect;
     AnimationOption option;
-    auto frameSize = host->GetGeometryNode()->GetFrameSize();
+    auto rect = GetPaintRectWithoutTransform();
     if (transition) {
         effect = GetPageTransitionEffect(transition);
         option.SetCurve(transition->GetCurve());
@@ -3908,17 +3902,16 @@ bool RosenRenderContext::TriggerPageTransition(PageTransitionType type, const st
         UpdateTransformScale(VectorF(1.0f, 1.0f));
         UpdateTransformTranslate({ 0.0f, 0.0f, 0.0f });
         UpdateOpacity(1.0);
-        ClipWithRRect(RectF(0.0f, 0.0f, frameSize.Width(), frameSize.Height()),
+        ClipWithRRect(RectF(0.0f, 0.0f, rect.Width(), REMOVE_CLIP_SIZE),
             RadiusF(EdgeF(0.0f, 0.0f)));
         AnimationUtils::CloseImplicitAnimation();
-        MaskAnimation(host->GetRenderContext(),
-            effect->GetInitialBackgroundColor().value(), effect->GetBackgroundColor().value());
+        MaskAnimation(effect->GetInitialBackgroundColor().value(), effect->GetBackgroundColor().value());
         return true;
     }
     UpdateTransformScale(VectorF(1.0f, 1.0f));
     UpdateTransformTranslate({ 0.0f, 0.0f, 0.0f });
     UpdateOpacity(1.0);
-    ClipWithRRect(RectF(0.0f, 0.0f, frameSize.Width(), frameSize.Height()),
+    ClipWithRRect(RectF(0.0f, 0.0f, rect.Width(), REMOVE_CLIP_SIZE),
         RadiusF(EdgeF(0.0f, 0.0f)));
     AnimationUtils::OpenImplicitAnimation(option, option.GetCurve(), onFinish);
     UpdateTransformScale(VectorF(scaleOptions->xScale, scaleOptions->yScale));
@@ -3926,20 +3919,18 @@ bool RosenRenderContext::TriggerPageTransition(PageTransitionType type, const st
     UpdateOpacity(effect->GetOpacityEffect().value());
     ClipWithRRect(effect->GetPageTransitionRectF().value(), RadiusF(EdgeF(0.0f, 0.0f)));
     AnimationUtils::CloseImplicitAnimation();
-    MaskAnimation(host->GetRenderContext(),
-        effect->GetInitialBackgroundColor().value(), effect->GetBackgroundColor().value());
+    MaskAnimation(effect->GetInitialBackgroundColor().value(), effect->GetBackgroundColor().value());
     return true;
 }
 
-void RosenRenderContext::MaskAnimation(const RefPtr<RenderContext>& transitionOutNodeContext,
-    const Color& initialBackgroundColor, const Color& backgroundColor)
+void RosenRenderContext::MaskAnimation(const Color& initialBackgroundColor, const Color& backgroundColor)
 {
     AnimationOption maskOption;
     maskOption.SetCurve(Curves::FRICTION);
     maskOption.SetDuration(MASK_DURATION);
-    transitionOutNodeContext->SetActualForegroundColor(initialBackgroundColor);
+    SetActualForegroundColor(initialBackgroundColor);
     AnimationUtils::OpenImplicitAnimation(maskOption, maskOption.GetCurve(), nullptr);
-    transitionOutNodeContext->SetActualForegroundColor(backgroundColor);
+    SetActualForegroundColor(backgroundColor);
     AnimationUtils::CloseImplicitAnimation();
 }
 
