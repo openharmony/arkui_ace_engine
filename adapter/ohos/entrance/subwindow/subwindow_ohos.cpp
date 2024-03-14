@@ -762,25 +762,24 @@ void SubwindowOhos::RectConverter(const Rect& rect, Rosen::Rect& rosenRect)
         rosenRect.posX_, rosenRect.posY_, rosenRect.width_, rosenRect.height_);
 }
 
-RefPtr<NG::FrameNode> SubwindowOhos::ShowDialogNG(
-    const DialogProperties& dialogProps, std::function<void()>&& buildFunc)
+void SubwindowOhos::ShowDialogNGPrepare()
 {
     TAG_LOGD(AceLogTag::ACE_SUB_WINDOW, "show dialog ng enter");
     auto aceContainer = Platform::AceContainer::GetContainer(childContainerId_);
-    CHECK_NULL_RETURN(aceContainer, nullptr);
+    CHECK_NULL_VOID(aceContainer);
     auto context = DynamicCast<NG::PipelineContext>(aceContainer->GetPipelineContext());
-    CHECK_NULL_RETURN(context, nullptr);
+    CHECK_NULL_VOID(context);
     auto overlay = context->GetOverlayManager();
-    CHECK_NULL_RETURN(overlay, nullptr);
+    CHECK_NULL_VOID(overlay);
     std::map<int32_t, RefPtr<NG::FrameNode>> DialogMap(overlay->GetDialogMap().begin(), overlay->GetDialogMap().end());
     int dialogMapSize = static_cast<int>(DialogMap.size());
     if (dialogMapSize == 0) {
         auto parentAceContainer = Platform::AceContainer::GetContainer(parentContainerId_);
-        CHECK_NULL_RETURN(parentAceContainer, nullptr);
+        CHECK_NULL_VOID(parentAceContainer);
         auto parentcontext = DynamicCast<NG::PipelineContext>(parentAceContainer->GetPipelineContext());
-        CHECK_NULL_RETURN(parentcontext, nullptr);
+        CHECK_NULL_VOID(parentcontext);
         auto parentOverlay = parentcontext->GetOverlayManager();
-        CHECK_NULL_RETURN(parentOverlay, nullptr);
+        CHECK_NULL_VOID(parentOverlay);
         parentOverlay->SetSubWindowId(SubwindowManager::GetInstance()->GetDialogSubwindowInstanceId(GetSubwindowId()));
     }
     SubwindowManager::GetInstance()->SetDialogSubWindowId(
@@ -790,7 +789,35 @@ RefPtr<NG::FrameNode> SubwindowOhos::ShowDialogNG(
     window_->SetTouchable(true);
     ResizeWindow();
     ContainerScope scope(childContainerId_);
+}
+
+RefPtr<NG::FrameNode> SubwindowOhos::ShowDialogNG(
+    const DialogProperties& dialogProps, std::function<void()>&& buildFunc)
+{
+    auto aceContainer = Platform::AceContainer::GetContainer(childContainerId_);
+    CHECK_NULL_RETURN(aceContainer, nullptr);
+    auto context = DynamicCast<NG::PipelineContext>(aceContainer->GetPipelineContext());
+    CHECK_NULL_RETURN(context, nullptr);
+    auto overlay = context->GetOverlayManager();
+    CHECK_NULL_RETURN(overlay, nullptr);
+    ShowDialogNGPrepare();
     auto dialog = overlay->ShowDialog(dialogProps, std::move(buildFunc));
+    CHECK_NULL_RETURN(dialog, nullptr);
+    haveDialog_ = true;
+    return dialog;
+}
+
+RefPtr<NG::FrameNode> SubwindowOhos::ShowDialogNGWithNode(
+    const DialogProperties& dialogProps, const RefPtr<NG::UINode>& customNode)
+{
+    auto aceContainer = Platform::AceContainer::GetContainer(childContainerId_);
+    CHECK_NULL_RETURN(aceContainer, nullptr);
+    auto context = DynamicCast<NG::PipelineContext>(aceContainer->GetPipelineContext());
+    CHECK_NULL_RETURN(context, nullptr);
+    auto overlay = context->GetOverlayManager();
+    CHECK_NULL_RETURN(overlay, nullptr);
+    ShowDialogNGPrepare();
+    auto dialog = overlay->ShowDialogWithNode(dialogProps, customNode);
     CHECK_NULL_RETURN(dialog, nullptr);
     haveDialog_ = true;
     return dialog;

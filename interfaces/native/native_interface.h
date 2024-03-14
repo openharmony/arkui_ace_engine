@@ -57,13 +57,15 @@ typedef struct {
 } ArkUI_AnyNativeAPI;
 
 /**
- * @brief Defines the native API set type.
+ * @brief Defines the native API types.
  *
  * @since 12
  */
 typedef enum {
-    /** API type related to UI components. */
+    /** API related to UI components. */
     ARKUI_NATIVE_NODE,
+    /** API related to dialog boxes. */
+    ARKUI_NATIVE_DIALOG,
 } ArkUI_NativeAPIVariantKind;
 
 /**

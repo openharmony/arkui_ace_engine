@@ -35,6 +35,7 @@ template("ace_core_interfaces_native_node") {
       "node/column_split_modifier.cpp",
       "node/common_shape_modifier.cpp",
       "node/counter_modifier.cpp",
+      "node/custom_dialog_model.cpp",
       "node/data_panel_modifier.cpp",
       "node/divider_modifier.cpp",
       "node/extension_companion_node.cpp",
