@@ -999,9 +999,6 @@ void SetAlign(ArkUINodeHandle node, ArkUI_Int32 align)
     CHECK_NULL_VOID(frameNode);
     Alignment alignment = ParseAlignment(align);
     ViewAbstract::SetAlign(frameNode, alignment);
-    auto* companion = ViewModel::GetCompanion(node);
-    CHECK_NULL_VOID(companion);
-    companion->alignment = align;
 }
 
 void ResetAlign(ArkUINodeHandle node)
@@ -4644,6 +4641,14 @@ void GetTranslate(ArkUINodeHandle node, ArkUI_Float32* values)
     values[NUM_1] = translate.y.Value();
     values[NUM_2] = translate.z.Value();
 }
+
+ArkUI_Float32 GetAspectRatio(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, ERROR_FLOAT_CODE);
+    return ViewAbstract::GetAspectRatio(frameNode);
+}
+
 } // namespace
 
 namespace NodeModifier {
@@ -4700,7 +4705,7 @@ const ArkUICommonModifier* GetCommonModifier()
         GetBrightness, GetSaturate, GetBackgroundImagePosition, GetFlexGrow, GetFlexShrink, GetFlexBasis,
         GetConstraintSize, GetGrayScale, GetInvert, GetSepia, GetContrast, GetForegroundColor, GetBlur,
         GetLinearGradient, GetAlign, GetWidth, GetHeight, GetBackgroundColor, GetBackgroundImage, GetPadding, GetKey,
-        GetEnabled, GetMargin, GetTranslate, SetMoveTransition, GetMoveTransition, ResetMask };
+        GetEnabled, GetMargin, GetTranslate, SetMoveTransition, GetMoveTransition, ResetMask, GetAspectRatio };
 
     return &modifier;
 }

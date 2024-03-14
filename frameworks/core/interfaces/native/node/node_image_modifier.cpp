@@ -148,6 +148,14 @@ void ResetRenderMode(ArkUINodeHandle node)
     ImageModelNG::SetImageRenderMode(frameNode, ImageRenderMode::ORIGINAL);
 }
 
+int32_t GetRenderMode(ArkUINodeHandle node)
+{
+    int32_t defaultRenderMode = static_cast<int32_t>(ImageRenderMode::ORIGINAL);
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, defaultRenderMode);
+    return static_cast<int32_t>(ImageModelNG::GetImageRenderMode(frameNode));
+}
+
 void SetSyncLoad(ArkUINodeHandle node, ArkUI_Bool syncLoadValue)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -453,6 +461,8 @@ void ResetEdgeAntialiasing(ArkUINodeHandle node)
     CHECK_NULL_VOID(frameNode);
     ImageModelNG::SetSmoothEdge(frameNode, DEFAULT_IMAGE_EDGE_ANTIALIASING);
 }
+
+
 } // namespace
 
 namespace NodeModifier {
@@ -467,7 +477,7 @@ const ArkUIImageModifier* GetImageModifier()
         SetImageDraggable, ResetImageDraggable, SetImageBorderRadius, ResetImageBorderRadius, SetImageBorder,
         ResetImageBorder, SetImageOpacity, ResetImageOpacity, SetEdgeAntialiasing, ResetEdgeAntialiasing, GetImageSrc,
         GetAutoResize, GetObjectRepeat, GetObjectFit, GetImageInterpolation, GetColorFilter, GetAlt,
-        GetImageDraggable };
+        GetImageDraggable, GetRenderMode };
     return &modifier;
 }
 

@@ -20,6 +20,7 @@ namespace OHOS::Ace::NG {
 namespace {
 constexpr ArkUI_Float64 FRICTION_DEFAULT = -1.0;
 constexpr ArkUI_Float64 DIMENSION_DEFAULT = 0.0;
+const int32_t ERROR_INT_CODE = -1;
 }
 
 void ResetColumnsTemplate(ArkUINodeHandle node)
@@ -222,6 +223,12 @@ void ResetWaterFlowFriction(ArkUINodeHandle node)
     WaterFlowModelNG::SetFriction(frameNode, FRICTION_DEFAULT);
 }
 
+ArkUI_Int32 GetLayoutDirection(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, ERROR_INT_CODE);
+    return static_cast<ArkUI_Int32>(WaterFlowModelNG::GetLayoutDirection(frameNode));
+}
 namespace NodeModifier {
 const ArkUIWaterFlowModifier* GetWaterFlowModifier()
 {
@@ -250,6 +257,7 @@ const ArkUIWaterFlowModifier* GetWaterFlowModifier()
         ResetWaterFlowNestedScroll,
         SetWaterFlowFriction,
         ResetWaterFlowFriction,
+        GetLayoutDirection
     };
     return &modifier;
 }

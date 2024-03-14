@@ -3511,4 +3511,13 @@ TranslateOptions ViewAbstract::GetTranslate(FrameNode* frameNode)
     CHECK_NULL_RETURN(target, value);
     return target->GetTransformTranslateValue(value);
 }
+
+float ViewAbstract::GetAspectRatio(FrameNode* frameNode)
+{
+    float aspectRatio = 1.0f;
+    const auto& layoutProperty = frameNode->GetLayoutProperty();
+    CHECK_NULL_RETURN(layoutProperty, aspectRatio);
+    aspectRatio = layoutProperty->GetAspectRatio();
+    return aspectRatio;
+}
 } // namespace OHOS::Ace::NG

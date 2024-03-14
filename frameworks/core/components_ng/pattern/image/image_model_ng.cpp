@@ -471,5 +471,13 @@ bool ImageModelNG::GetDraggable(FrameNode* frameNode)
     CHECK_NULL_RETURN(frameNode, false);
     return frameNode->IsDraggable();
 }
+
+ImageRenderMode ImageModelNG::GetImageRenderMode(FrameNode* frameNode)
+{
+    CHECK_NULL_RETURN(frameNode, ImageRenderMode::ORIGINAL);
+    auto paintProperty = frameNode->GetPaintProperty<ImageRenderProperty>();
+    CHECK_NULL_RETURN(paintProperty, ImageRenderMode::ORIGINAL);
+    return paintProperty->GetImagePaintStyle()->GetImageRenderMode().value_or(ImageRenderMode::ORIGINAL);
+}
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_IMAGE_IMAGE_MODEL_NG_CPP

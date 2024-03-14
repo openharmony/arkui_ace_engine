@@ -50,6 +50,7 @@
 #include "core/components_ng/pattern/refresh/refresh_model_ng.h"
 #include "core/components_ng/pattern/xcomponent/xcomponent_model_ng.h"
 #include "core/components_ng/pattern/slider/slider_model_ng.h"
+#include "core/components_ng/pattern/waterflow/water_flow_model_ng.h"
 #include "core/interfaces/native/node/node_api.h"
 #include "core/pipeline/base/element_register.h"
 
@@ -281,6 +282,13 @@ void* createCustomNode(ArkUI_Int32 nodeId)
     return AceType::RawPtr(frameNode);
 }
 
+void* createWaterFlowNode(ArkUI_Int32 nodeId)
+{
+    auto frameNode = WaterFlowModelNG::CreateFrameNode(nodeId);
+    frameNode->IncRefCount();
+    return AceType::RawPtr(frameNode);
+}
+
 using createArkUIFrameNode = void*(ArkUI_Int32 nodeId);
 void* CreateNode(ArkUINodeType tag, ArkUI_Int32 nodeId)
 {
@@ -328,6 +336,7 @@ void* CreateNode(ArkUINodeType tag, ArkUI_Int32 nodeId)
         createCalendarPickerNode,
         nullptr, // GridItem
         createCustomNode,
+        createWaterFlowNode,
     };
     if (tag >= sizeof(createArkUIFrameNodes) / sizeof(createArkUIFrameNode*)) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "fail to create %{public}d type of node", tag);
@@ -355,13 +364,6 @@ void AddChild(void* parentNode, void* childNode)
     CHECK_NULL_VOID(childNode);
     auto* parent = reinterpret_cast<UINode*>(parentNode);
     auto* child = reinterpret_cast<UINode*>(childNode);
-
-    auto* companionNodeParent = GetCompanion(parentNode);
-    auto* companionNodeChild = GetCompanion(childNode);
-    CHECK_NULL_VOID(companionNodeParent);
-    CHECK_NULL_VOID(companionNodeChild);
-    companionNodeParent->addChild(companionNodeChild);
-
     parent->AddChild(AceType::Claim(child));
     auto* frameNode = AceType::DynamicCast<FrameNode>(child);
     if (frameNode) {
@@ -375,13 +377,6 @@ void RemoveChild(void* parentNode, void* childNode)
     CHECK_NULL_VOID(childNode);
     auto* parent = reinterpret_cast<UINode*>(parentNode);
     auto* child = reinterpret_cast<UINode*>(childNode);
-
-    auto* companionNodeParent = GetCompanion(parentNode);
-    auto* companionNodeChild = GetCompanion(childNode);
-    CHECK_NULL_VOID(companionNodeParent);
-    CHECK_NULL_VOID(companionNodeChild);
-    companionNodeParent->removeChild(companionNodeChild);
-
     parent->RemoveChild(AceType::Claim(child));
 }
 
@@ -391,14 +386,6 @@ void InsertChildAfter(void* parentNode, void* childNode, void* siblingNode)
     CHECK_NULL_VOID(childNode);
     auto* parent = reinterpret_cast<UINode*>(parentNode);
     auto* child = reinterpret_cast<UINode*>(childNode);
-
-    auto* companionNodeParent = GetCompanion(parentNode);
-    auto* companionNodeChild = GetCompanion(childNode);
-    auto* companionNodeSibling = GetCompanion(siblingNode);
-    CHECK_NULL_VOID(companionNodeParent);
-    CHECK_NULL_VOID(companionNodeChild);
-    companionNodeParent->insertChildAfter(companionNodeChild, companionNodeSibling);
-
     if (AceType::InstanceOf<GroupNode>(parent)) {
         auto* groupNode = AceType::DynamicCast<GroupNode>(parent);
         groupNode->AddChildToGroup(AceType::Claim(child));

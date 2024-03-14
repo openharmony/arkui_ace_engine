@@ -553,6 +553,33 @@ ArkUI_Int32 GetTextAreaTextAlign(ArkUINodeHandle node)
     return static_cast<ArkUI_Int32>(TextFieldModelNG::GetTextAlign(frameNode));
 }
 
+void SetTextAreaShowCounterOptions(
+    ArkUINodeHandle node, ArkUI_Bool open, ArkUI_Int32 thresholdPercentage, ArkUI_Bool highlightBorder)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    TextFieldModelNG::SetShowCounter(frameNode, open);
+    TextFieldModelNG::SetCounterType(frameNode, thresholdPercentage);
+    TextFieldModelNG::SetShowCounterBorder(frameNode, highlightBorder);
+}
+
+void ResetTextAreaShowCounterOptions(ArkUINodeHandle node)
+{
+    auto *frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    TextFieldModelNG::SetShowCounter(frameNode, false);
+    TextFieldModelNG::SetCounterType(frameNode, -1);
+    TextFieldModelNG::SetShowCounterBorder(frameNode, true);        
+}
+
+void GetTextAreaShowCounterOptions(ArkUINodeHandle node, ArkUIShowCountOptions* options)
+{
+    auto *frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    options->open = TextFieldModelNG::GetShowCounter(frameNode);
+    options->thresholdPercentage = TextFieldModelNG::GetCounterType(frameNode);
+    options->highlightBorder = TextFieldModelNG::GetShowCounterBorder(frameNode);
+}
 } // namespace
 
 namespace NodeModifier {
@@ -571,7 +598,8 @@ const ArkUITextAreaModifier* GetTextAreaModifier()
         StopTextAreaTextEditing, SetTextAreaFontWeightStr, SetTextAreaPlaceholderFontEnum, GetTextAreaPlaceholder,
         GetTextAreaText, GetTextAreaCaretColor, GetTextAreaMaxLength, GetTextAreaPlaceholderColor,
         GetTextAreaPlaceholderFont, GetTextAreaEditing, SetTextAreaBackgroundColor, ResetTextAreaBackgroundColor,
-        SetTextAreaType, ResetTextAreaType, GetTextAreaType, GetTextAreaTextAlign };
+        SetTextAreaType, ResetTextAreaType, GetTextAreaType, GetTextAreaTextAlign, SetTextAreaShowCounterOptions,
+        ResetTextAreaShowCounterOptions, GetTextAreaShowCounterOptions };
     return &modifier;
 }
 

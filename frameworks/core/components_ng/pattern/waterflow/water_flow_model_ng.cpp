@@ -33,6 +33,12 @@ void WaterFlowModelNG::Create()
     stack->Push(frameNode);
 }
 
+RefPtr<FrameNode> WaterFlowModelNG::CreateFrameNode(int32_t nodeId)
+{
+    auto frameNode = FrameNode::CreateFrameNode(V2::WATERFLOW_ETS_TAG, nodeId, AceType::MakeRefPtr<WaterFlowPattern>());
+    return frameNode;
+}
+
 void WaterFlowModelNG::SetFooter(std::function<void()>&& footer)
 {
     RefPtr<NG::UINode> footerNode;
@@ -338,5 +344,12 @@ void WaterFlowModelNG::SetFriction(FrameNode* frameNode, double friction)
     auto pattern = frameNode->GetPattern<WaterFlowPattern>();
     CHECK_NULL_VOID(pattern);
     pattern->SetFriction(friction);
+}
+
+FlexDirection WaterFlowModelNG::GetLayoutDirection(FrameNode* frameNode)
+{
+    FlexDirection value = FlexDirection::COLUMN;
+    ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(WaterFlowLayoutProperty, WaterflowDirection, value, frameNode, value);
+    return value;
 }
 } // namespace OHOS::Ace::NG
