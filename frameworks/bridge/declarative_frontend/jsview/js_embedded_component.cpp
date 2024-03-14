@@ -151,7 +151,11 @@ void JSEmbeddedComponent::JsWidth(const JSCallbackInfo& info)
     if (info[0]->IsUndefined()) {
         return;
     }
-    JSViewAbstract::JsWidth(info);
+
+    CalcDimension value;
+    if (JSViewAbstract::ParseJsDimensionVpNG(info[0], value)) {
+        ViewAbstractModel::GetInstance()->SetWidth(value);
+    }
 }
 
 void JSEmbeddedComponent::JsHeight(const JSCallbackInfo& info)
@@ -159,6 +163,10 @@ void JSEmbeddedComponent::JsHeight(const JSCallbackInfo& info)
     if (info[0]->IsUndefined()) {
         return;
     }
-    JSViewAbstract::JsHeight(info);
+
+    CalcDimension value;
+    if (JSViewAbstract::ParseJsDimensionVpNG(info[0], value)) {
+        ViewAbstractModel::GetInstance()->SetHeight(value);
+    }
 }
 } // namespace OHOS::Ace::Framework
