@@ -22,7 +22,7 @@
 namespace OHOS::Ace::NG {
 
 struct NativeWeakRef {
-    NativeWeakRef(AceType* ptr) : rawPtr(ptr)
+    explicit NativeWeakRef(AceType* ptr) : rawPtr(ptr)
     {
         weakRef = AceType::WeakClaim(ptr);
     }
@@ -34,6 +34,17 @@ struct NativeWeakRef {
 
     AceType* rawPtr = nullptr;
     WeakPtr<AceType> weakRef;
+};
+
+struct NativeStrongRef {
+    explicit NativeStrongRef(const RefPtr<AceType>& ref) : strongRef(ref) {}
+
+    AceType* RawPtr() const
+    {
+        return AceType::RawPtr(strongRef);
+    }
+
+    RefPtr<AceType> strongRef;
 };
 
 ArkUINativeModuleValue NativeUtilsBridge::CreateNativeWeakRef(ArkUIRuntimeCallInfo* runtimeCallInfo)
@@ -51,41 +62,78 @@ ArkUINativeModuleValue NativeUtilsBridge::CreateNativeWeakRef(ArkUIRuntimeCallIn
     nativeWeakRef->Set(vm, panda::StringRef::NewFromUtf8(vm, "invalid"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), NativeUtilsBridge::WeakRefInvalid));
     nativeWeakRef->Set(vm, panda::StringRef::NewFromUtf8(vm, "getNativeHandle"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), NativeUtilsBridge::GetNativeHandle));
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), NativeUtilsBridge::GetNativeHandleForWeak));
+    nativeWeakRef->Set(vm, panda::StringRef::NewFromUtf8(vm, "upgrade"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), NativeUtilsBridge::Upgrade));
     return nativeWeakRef;
 }
 
-NativeWeakRef* GetWeakRef(ArkUIRuntimeCallInfo* runtimeCallInfo)
+ArkUINativeModuleValue CreateStrongRef(EcmaVM* vm, const RefPtr<AceType>& ref)
+{
+    CHECK_NULL_RETURN(vm, panda::JSValueRef::Undefined(vm));
+    CHECK_NULL_RETURN(ref, panda::JSValueRef::Undefined(vm));
+    auto* nativeRef = new NativeStrongRef(ref);
+    auto nativeStrongRef = panda::ObjectRef::New(vm);
+    nativeStrongRef->SetNativePointerFieldCount(vm, 1);
+    nativeStrongRef->SetNativePointerField(vm, 0, nativeRef, &DestructorInterceptor<NativeStrongRef>);
+    nativeStrongRef->Set(vm, panda::StringRef::NewFromUtf8(vm, "getNativeHandle"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), NativeUtilsBridge::GetNativeHandleForStrong));
+    return nativeStrongRef;
+}
+
+ArkUINativeModuleValue NativeUtilsBridge::CreateNativeStrongRef(ArkUIRuntimeCallInfo* runtimeCallInfo)
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
-    CHECK_NULL_RETURN(vm, nullptr);
-    Local<JSValueRef> thisRef = runtimeCallInfo->GetThisRef();
-    if (!thisRef->IsObject()) {
-        return nullptr;
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
+    if (firstArg.IsEmpty() || !firstArg->IsNativePointer()) {
+        return panda::JSValueRef::Undefined(vm);
     }
-    Local<panda::ObjectRef> thisObj = thisRef->ToObject(vm);
-    auto* weak = reinterpret_cast<NativeWeakRef*>(thisObj->GetNativePointerField(0));
-    return weak;
+    auto refPtr = AceType::Claim(reinterpret_cast<AceType*>(firstArg->ToNativePointer(vm)->Value()));
+    return CreateStrongRef(vm, refPtr);
 }
 
 ArkUINativeModuleValue NativeUtilsBridge::WeakRefInvalid(ArkUIRuntimeCallInfo* runtimeCallInfo)
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::BooleanRef::New(vm, true));
-    auto* weak = GetWeakRef(runtimeCallInfo);
+    auto* weak = GetPointerField<NativeWeakRef>(runtimeCallInfo);
     if (weak != nullptr) {
         return panda::BooleanRef::New(vm, weak->Invalid());
     }
     return panda::BooleanRef::New(vm, true);
 }
 
-ArkUINativeModuleValue NativeUtilsBridge::GetNativeHandle(ArkUIRuntimeCallInfo* runtimeCallInfo)
+ArkUINativeModuleValue NativeUtilsBridge::GetNativeHandleForStrong(ArkUIRuntimeCallInfo* runtimeCallInfo)
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::JSValueRef::Undefined(vm));
-    auto* weak = GetWeakRef(runtimeCallInfo);
+    auto* strong = GetPointerField<NativeStrongRef>(runtimeCallInfo);
+    if (strong != nullptr && strong->strongRef) {
+        return panda::NativePointerRef::New(vm, strong->RawPtr());
+    }
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue NativeUtilsBridge::GetNativeHandleForWeak(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::JSValueRef::Undefined(vm));
+    auto* weak = GetPointerField<NativeWeakRef>(runtimeCallInfo);
     if (weak != nullptr && !weak->Invalid()) {
         return panda::NativePointerRef::New(vm, weak->rawPtr);
+    }
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue NativeUtilsBridge::Upgrade(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::JSValueRef::Undefined(vm));
+    auto* weak = GetPointerField<NativeWeakRef>(runtimeCallInfo);
+    if (weak != nullptr) {
+        auto ref = weak->weakRef.Upgrade();
+        return CreateStrongRef(vm, ref);
     }
     return panda::JSValueRef::Undefined(vm);
 }

@@ -21,17 +21,35 @@
 namespace OHOS::Ace::NG {
 
 template<typename T>
-void DestructorInterceptor(void* nativePtr, void* data) {
+void DestructorInterceptor(void* nativePtr, void* data)
+{
     auto* typePtr = reinterpret_cast<T*>(nativePtr);
     delete typePtr;
+}
+
+template<typename T>
+T* GetPointerField(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, nullptr);
+    Local<JSValueRef> thisRef = runtimeCallInfo->GetThisRef();
+    if (!thisRef->IsObject()) {
+        return nullptr;
+    }
+    Local<panda::ObjectRef> thisObj = thisRef->ToObject(vm);
+    auto* pointer = reinterpret_cast<T*>(thisObj->GetNativePointerField(0));
+    return pointer;
 }
 
 class NativeUtilsBridge {
 public:
     static ArkUINativeModuleValue CreateNativeWeakRef(ArkUIRuntimeCallInfo* runtimeCallInfo);
+    static ArkUINativeModuleValue CreateNativeStrongRef(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue WeakRefInvalid(ArkUIRuntimeCallInfo* runtimeCallInfo);
-    static ArkUINativeModuleValue GetNativeHandle(ArkUIRuntimeCallInfo* runtimeCallInfo);
+    static ArkUINativeModuleValue GetNativeHandleForWeak(ArkUIRuntimeCallInfo* runtimeCallInfo);
+    static ArkUINativeModuleValue GetNativeHandleForStrong(ArkUIRuntimeCallInfo* runtimeCallInfo);
+    static ArkUINativeModuleValue Upgrade(ArkUIRuntimeCallInfo* runtimeCallInfo);
 };
-}
+} // namespace OHOS::Ace::NG
 
-#endif  // FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_ENGINE_JSI_NATIVEMODULE_ARKTS_NATIVE_UTILS_BRIDGE_H
+#endif // FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_ENGINE_JSI_NATIVEMODULE_ARKTS_NATIVE_UTILS_BRIDGE_H
