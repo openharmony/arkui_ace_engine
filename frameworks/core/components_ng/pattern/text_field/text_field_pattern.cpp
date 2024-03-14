@@ -2534,6 +2534,10 @@ void TextFieldPattern::StartRequestSelectOverlay(const ShowSelectOverlayParams& 
     overlayInfo.isMenuShow = params.isShowMenu;
     overlayInfo.isNewAvoid = true;
     overlayInfo.selectArea = GetSelectArea();
+    auto paintProperty = GetPaintProperty<TextFieldPaintProperty>();
+    if (paintProperty) {
+        overlayInfo.handlerColor = paintProperty->GetCursorColor();
+    }
     RequestOpenSelectOverlay(overlayInfo);
     auto start = GetTextSelectController()->GetStartIndex();
     auto end = GetTextSelectController()->GetEndIndex();

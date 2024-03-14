@@ -70,7 +70,7 @@ void SelectOverlayPaintMethod::UpdateContentModifier(PaintWrapper* paintWrapper)
 
     selectOverlayContentModifier_->SetIsUsingMouse(info_.isUsingMouse);
 
-    selectOverlayContentModifier_->SetHandleColor(textOverlayTheme->GetHandleColor());
+    selectOverlayContentModifier_->SetHandleColor(info_.handlerColor.value_or(textOverlayTheme->GetHandleColor()));
     selectOverlayContentModifier_->SetInnerHandleColor(textOverlayTheme->GetHandleColorInner());
     selectOverlayContentModifier_->SetHandleRadius(textOverlayTheme->GetHandleDiameter().ConvertToPx() / 2.0f);
     selectOverlayContentModifier_->SetInnerHandleRadius(
