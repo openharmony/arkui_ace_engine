@@ -4434,9 +4434,9 @@ void RichEditorPattern::InsertValueByPaste(const std::string& insertValue)
             return;
         }
     }
-    if (child && child->GetTag() == V2::IMAGE_ETS_TAG) {
+    if (child && (child->GetTag() == V2::IMAGE_ETS_TAG || child->GetTag() == V2::SYMBOL_SPAN_ETS_TAG)) {
         auto spanNodeBefore = DynamicCast<SpanNode>(GetChildByIndex(info.GetSpanIndex() - 1));
-        if (spanNodeBefore != nullptr && caretSpanIndex_ == -1) {
+        if (spanNodeBefore != nullptr && caretSpanIndex_ == -1 && spanNodeBefore->GetTag() == V2::SPAN_ETS_TAG) {
             if (typingStyle_.has_value() && !HasSameTypingStyle(spanNodeBefore)) {
                 options.offset = newSpanOffset;
                 caretSpanIndex_ = AddTextSpanOperation(options, true);
@@ -4445,8 +4445,7 @@ void RichEditorPattern::InsertValueByPaste(const std::string& insertValue)
                 caretSpanIndex_ = info.GetSpanIndex() - 1;
             }
         } else {
-            auto imageNode = DynamicCast<FrameNode>(child);
-            if (imageNode && caretSpanIndex_ == -1) {
+            if (caretSpanIndex_ == -1) {
                 caretSpanIndex_ = AddTextSpanOperation(options, true, info.GetSpanIndex(), false, false);
             } else {
                 caretSpanIndex_ = AddTextSpanOperation(options, true, caretSpanIndex_ + 1);
