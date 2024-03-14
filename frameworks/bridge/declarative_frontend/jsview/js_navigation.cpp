@@ -378,7 +378,6 @@ void JSNavigation::SetTitle(const JSCallbackInfo& info)
             NavigationModel::GetInstance()->SetCustomTitle(customNode);
         }
     } else {
-        TAG_LOGI(AceLogTag::ACE_NAVIGATION, "SetTitle is undefined");
         NavigationModel::GetInstance()->ParseCommonTitle(false, false, "", "");
         return;
     }

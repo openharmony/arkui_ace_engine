@@ -317,7 +317,6 @@ RefPtr<NG::UINode> JSNavigationStack::CreateNodeByRouteInfo(const RefPtr<NG::Rou
         }
         return node;
     }
-    TAG_LOGI(AceLogTag::ACE_NAVIGATION, "can't find navDestination by route info, create empty node");
     return DynamicCast<NG::UINode>(NavDestinationModel::GetInstance()->CreateEmpty());
 }
 
@@ -615,7 +614,7 @@ void JSNavigationStack::ClearPreBuildNodeList()
 int32_t JSNavigationStack::CheckNavDestinationExists(const JSRef<JSObject>& navPathInfo)
 {
     if (navDestBuilderFunc_->IsEmpty()) {
-        TAG_LOGE(AceLogTag::ACE_NAVIGATION, "navDestBuilderFunc_ is empty.");
+        TAG_LOGW(AceLogTag::ACE_NAVIGATION, "navDestBuilderFunc_ is empty.");
         return ERROR_CODE_BUILDER_FUNCTION_NOT_REGISTERED;
     }
 

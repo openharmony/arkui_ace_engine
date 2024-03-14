@@ -140,7 +140,6 @@ void JSNavDestination::SetTitle(const JSCallbackInfo& info)
             NavDestinationModel::GetInstance()->SetCustomTitle(customNode);
         }
     } else {
-        TAG_LOGI(AceLogTag::ACE_NAVIGATION, "SetTitle is undefined");
         NavDestinationModel::GetInstance()->ParseCommonTitle(false, false, "", "");
     }
 }
