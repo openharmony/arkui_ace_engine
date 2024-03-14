@@ -148,7 +148,7 @@ void NavDestinationPattern::UpdateTitlebarVisibility(RefPtr<NavDestinationGroupN
         titleBarLayoutProperty->UpdatePropertyChangeFlag(PROPERTY_UPDATE_MEASURE);
     }
     titleBarNode->MarkModifyDone();
-    titleBarNode->MarkDirtyNode();
+    titleBarNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_CHILD);
 }
 
 bool NavDestinationPattern::GetBackButtonState()
