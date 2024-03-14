@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -32,9 +32,9 @@ enum ItemHeight {
   FIFTH_HEIGHT = 96
 }
 
-export type OperateItem = {
-  icon?: OperateIcon,
-  subIcon ?: OperateIcon,
+export declare class OperateItem {
+  icon?: OperateIcon;
+  subIcon?: OperateIcon;
   button?: OperateButton;
   switch?: OperateCheck;
   checkbox?: OperateCheck;
@@ -44,7 +44,7 @@ export type OperateItem = {
   arrow?: OperateIcon;
 }
 
-export type ContentItem = {
+export declare class ContentItem {
   iconStyle?: IconType;
   icon?: ResourceStr;
   primaryText?: ResourceStr;
@@ -52,18 +52,18 @@ export type ContentItem = {
   description?: ResourceStr;
 }
 
-export declare type OperateIcon = {
-  value: ResourceStr,
-  action?: () => void
+export declare class OperateIcon {
+  value: ResourceStr;
+  action?: () => void;
 }
 
-export type OperateButton = {
-  text?: string
+export declare class OperateButton {
+  text?: string;
 }
 
-export declare type OperateCheck = {
-  isCheck?: boolean,
-  onChange?: (value: boolean) => void
+export declare class OperateCheck {
+  isCheck?: boolean;
+  onChange?: (value: boolean) => void;
 }
 
 const TEXT_MAX_LINE = 1;
@@ -114,11 +114,11 @@ const ICON_SIZE_MAP: Map<number, number> = new Map([
 
 @Component
 struct ContentItemStruct {
-  iconStyle: IconType = null
-  icon: Resource = null
-  primaryText: string = null
-  secondaryText: string = null
-  description: string = null
+  iconStyle: IconType | null = null;
+  icon: Resource | null = null;
+  primaryText: string | null = null;
+  secondaryText: string | null = null;
+  description: string | null = null;
   private itemRowSpace: number = NORMAL_ITEM_ROW_SPACE
   @State leftWidth: string = LEFT_PART_WIDTH
 
@@ -210,15 +210,15 @@ struct ContentItemStruct {
 
 @Component
 struct OperateItemStruct {
-  arrow: OperateIcon = null
-  icon: OperateIcon = null
-  subIcon: OperateIcon = null
-  button: OperateButton = null
-  switch: OperateCheck = null
-  checkBox: OperateCheck = null
-  radio: OperateCheck = null
-  image: Resource = null
-  text: string = null
+  arrow: OperateIcon | null = null;
+  icon: OperateIcon | null = null;
+  subIcon: OperateIcon | null = null;
+  button: OperateButton | null = null;
+  switch: OperateCheck | null = null;
+  checkBox: OperateCheck | null = null;
+  radio: OperateCheck | null = null;
+  image: Resource | null = null;
+  text: string | null = null;
   @State switchState: boolean = false
   @State radioState: boolean = false
   @State checkBoxState: boolean = false
@@ -233,13 +233,13 @@ struct OperateItemStruct {
 
   aboutToAppear() {
     if (this.switch != null) {
-      this.switchState = this.switch.isCheck
+      this.switchState = this.switch.isCheck as boolean;
     }
     if (this.radio != null) {
-      this.radioState = this.radio.isCheck
+      this.radioState = this.radio.isCheck as boolean;
     }
     if (this.checkBox != null) {
-      this.checkBoxState = this.checkBox.isCheck
+      this.checkBoxState = this.checkBox.isCheck as boolean;
     }
 
     if ((this.button == null && this.image == null && this.icon != null && this.text != null) ||
@@ -398,7 +398,7 @@ struct OperateItemStruct {
 
   @Builder
   createRadio(radio: OperateCheck) {
-    Radio({ value: null, group: null })
+    Radio({ value: '', group: '' })
       .margin({ right: LISTITEM_PADDING })
       .checked(this.radioState)
       .onChange(radio.onChange)
@@ -565,7 +565,7 @@ struct OperateItemStruct {
       space: this.rowSpace
     }) {
       if (this.button != null) {
-        this.createButton(this.button.text)
+        this.createButton(this.button.text as string)
       }
 
       else if (this.image != null) {
@@ -608,8 +608,8 @@ struct OperateItemStruct {
 
 @Component
 export struct ComposeListItem {
-  @Prop contentItem: ContentItem = null;
-  @Prop operateItem: OperateItem = null;
+  @Prop contentItem: ContentItem | null = null;
+  @Prop operateItem: OperateItem | null = null;
   @State frontColor: string = Color.Transparent.toString()
   @State borderSize: number = 0;
   @State canFocus: boolean = false
@@ -621,22 +621,22 @@ export struct ComposeListItem {
 
   aboutToAppear() {
     if (this.contentItem === undefined) {
-      if (this.operateItem.image !== undefined || this.operateItem.icon !== undefined || this.operateItem.subIcon !== undefined) {
+      if (this.operateItem?.image !== undefined || this.operateItem?.icon !== undefined || this.operateItem?.subIcon !== undefined) {
         this.itemHeight = OPERATEITEM_IMAGE_SIZE + SAFE_LIST_PADDING
       }
       return
     }
 
-    if (this.contentItem.secondaryText === undefined && this.contentItem.description === undefined) {
-      if (this.contentItem.icon === undefined) {
+    if (this.contentItem?.secondaryText === undefined && this.contentItem?.description === undefined) {
+      if (this.contentItem?.icon === undefined) {
         this.itemHeight = ItemHeight.FIRST_HEIGHT
       }
       else {
-        this.itemHeight = this.contentItem.iconStyle <= IconType.HEAD_SCULPTURE ? ItemHeight.SECOND_HEIGHT : ItemHeight.THIRD_HEIGHT
+        this.itemHeight = this.contentItem.iconStyle as number <= IconType.HEAD_SCULPTURE ? ItemHeight.SECOND_HEIGHT : ItemHeight.THIRD_HEIGHT;
       }
     }
     else if (this.contentItem.description === undefined) {
-      if (this.contentItem.icon === undefined || (this.contentItem.icon !== undefined && this.contentItem.iconStyle <= IconType.SYSTEM_ICON)) {
+      if (this.contentItem.icon === undefined || (this.contentItem.icon !== undefined && this.contentItem.iconStyle as number <= IconType.SYSTEM_ICON)) {
         this.itemHeight = ItemHeight.THIRD_HEIGHT
       }
       else {
@@ -647,8 +647,8 @@ export struct ComposeListItem {
       this.itemHeight = ItemHeight.FIFTH_HEIGHT
     }
 
-    if (ICON_SIZE_MAP.get(this.contentItem.iconStyle) >= this.itemHeight) {
-      this.itemHeight = ICON_SIZE_MAP.get(this.contentItem.iconStyle) + SAFE_LIST_PADDING;
+    if (ICON_SIZE_MAP.get(this.contentItem?.iconStyle as number) as number >= this.itemHeight) {
+      this.itemHeight = ICON_SIZE_MAP.get(this.contentItem?.iconStyle as number) as number + SAFE_LIST_PADDING;
     }
   }
 
