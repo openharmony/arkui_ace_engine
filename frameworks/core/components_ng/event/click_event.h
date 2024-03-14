@@ -120,6 +120,9 @@ public:
 
     const RefPtr<ClickRecognizer>& GetClickRecognizer()
     {
+        if (!clickRecognizer_) {
+            clickRecognizer_ = MakeRefPtr<ClickRecognizer>();
+        }
         return clickRecognizer_;
     }
 
