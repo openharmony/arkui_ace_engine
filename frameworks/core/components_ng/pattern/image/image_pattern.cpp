@@ -197,6 +197,7 @@ void ImagePattern::OnImageLoadSuccess()
     srcRect_ = loadingCtx_->GetSrcRect();
     dstRect_ = loadingCtx_->GetDstRect();
 
+    CHECK_NULL_VOID(image_);
     RectF paintRect = CalcImageContentPaintSize(geometryNode);
     LoadImageSuccessEvent event(loadingCtx_->GetImageSize().Width(), loadingCtx_->GetImageSize().Height(),
         geometryNode->GetFrameSize().Width(), geometryNode->GetFrameSize().Height(), 1, paintRect.Width(),
@@ -980,6 +981,11 @@ void ImagePattern::OnLanguageConfigurationUpdate()
 }
 
 void ImagePattern::OnColorConfigurationUpdate()
+{
+    OnConfigurationUpdate();
+}
+
+void ImagePattern::OnDirectionConfigurationUpdate()
 {
     OnConfigurationUpdate();
 }
