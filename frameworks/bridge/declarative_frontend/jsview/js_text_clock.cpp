@@ -84,7 +84,7 @@ void JSTextClock::Create(const JSCallbackInfo& info)
         LOGE("hourWest args is invalid");
     }
     auto controllerObj = optionsObject->GetProperty("controller");
-    if (!controllerObj->IsUndefined() && !controllerObj->IsNull()) {
+    if (!controllerObj->IsUndefined() && !controllerObj->IsNull() && controllerObj->IsObject()) {
         auto* jsController = JSRef<JSObject>::Cast(controllerObj)->Unwrap<JSTextClockController>();
         if (jsController != nullptr) {
             if (controller) {
@@ -95,7 +95,7 @@ void JSTextClock::Create(const JSCallbackInfo& info)
         }
         return;
     }
-    LOGE("controllerObj is nullptr or undefined");
+    LOGE("controllerObj is nullptr or undefined or invalid");
 }
 
 void JSTextClock::JSBind(BindingTarget globalObj)
