@@ -404,7 +404,8 @@ public:
     bool HasPositionProp() const
     {
         CHECK_NULL_RETURN(renderContext_, false);
-        return renderContext_->HasPosition() || renderContext_->HasOffset() || renderContext_->HasAnchor();
+        return renderContext_->HasPosition() || renderContext_->HasOffset() || renderContext_->HasPositionEdges() ||
+               renderContext_->HasOffsetEdges() || renderContext_->HasAnchor();
     }
 
     // The function is only used for fast preview.
@@ -639,7 +640,7 @@ public:
 
     bool IsOutOfLayout() const override
     {
-        return renderContext_->HasPosition();
+        return renderContext_->HasPosition() || renderContext_->HasPositionEdges();
     }
 
     bool SkipMeasureContent() const override;

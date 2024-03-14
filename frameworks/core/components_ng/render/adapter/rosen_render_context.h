@@ -32,6 +32,7 @@
 #include "base/geometry/ng/offset_t.h"
 #include "base/geometry/ng/rect_t.h"
 #include "base/utils/noncopyable.h"
+#include "core/components/common/layout/position_param.h"
 #include "core/components/common/properties/color.h"
 #include "core/components_ng/event/event_hub.h"
 #include "core/components_ng/image_provider/image_loading_context.h"
@@ -224,6 +225,8 @@ public:
 
     static float ConvertDimensionToScaleBySize(const Dimension& dimension, float size);
 
+    static SizeF GetPercentReference(const RefPtr<FrameNode>& frameNode);
+
     void FlushContentModifier(const RefPtr<Modifier>& modifier) override;
     void FlushOverlayModifier(const RefPtr<Modifier>& modifier) override;
 
@@ -275,6 +278,7 @@ public:
     void UpdateMouseSelectWithRect(const RectF& rect, const Color& fillColor, const Color& strokeColor) override;
 
     void OnPositionUpdate(const OffsetT<Dimension>& value) override;
+    void OnPositionEdgesUpdate(const EdgesParam& value) override;
     void OnZIndexUpdate(int32_t value) override;
     void DumpInfo() override;
     void DumpAdvanceInfo() override;
@@ -383,6 +387,7 @@ private:
     void OnTransformRotateUpdate(const Vector5F& value) override;
 
     void OnOffsetUpdate(const OffsetT<Dimension>& value) override;
+    void OnOffsetEdgesUpdate(const EdgesParam& value) override;
     void OnAnchorUpdate(const OffsetT<Dimension>& value) override;
 
     void OnClipShapeUpdate(const RefPtr<BasicShape>& basicShape) override;
@@ -488,6 +493,10 @@ private:
     void GetPaddingOfFirstFrameNodeParent(Dimension& parentPaddingLeft, Dimension& parentPaddingTop);
     void CombineMarginAndPosition(Dimension& resultX, Dimension& resultY, const Dimension& parentPaddingLeft,
         const Dimension& parentPaddingTop, float widthPercentReference, float heightPercentReference);
+    OffsetF GetRectOffsetWithOffsetEdges(
+        const EdgesParam& offsetEdges, float widthPercentReference, float heightPercentReference);
+    OffsetF GetRectOffsetWithPositionEdges(
+        const EdgesParam& positionEdges, float widthPercentReference, float heightPercentReference);
 
     void InitEventClickEffect();
     RefPtr<Curve> UpdatePlayAnimationValue(const ClickEffectLevel& level, float& scaleValue);

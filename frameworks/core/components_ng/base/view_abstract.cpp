@@ -1217,12 +1217,28 @@ void ViewAbstract::SetPosition(const OffsetT<Dimension> &value)
     ACE_UPDATE_RENDER_CONTEXT(Position, value);
 }
 
+void ViewAbstract::SetPositionEdges(const EdgesParam& value)
+{
+    if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
+        return;
+    }
+    ACE_UPDATE_RENDER_CONTEXT(PositionEdges, value);
+}
+
 void ViewAbstract::SetOffset(const OffsetT<Dimension> &value)
 {
     if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
         return;
     }
     ACE_UPDATE_RENDER_CONTEXT(Offset, value);
+}
+
+void ViewAbstract::SetOffsetEdges(const EdgesParam& value)
+{
+    if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
+        return;
+    }
+    ACE_UPDATE_RENDER_CONTEXT(OffsetEdges, value);
 }
 
 void ViewAbstract::MarkAnchor(const OffsetT<Dimension> &value)

@@ -26,6 +26,7 @@
 #include "base/memory/ace_type.h"
 #include "base/utils/noncopyable.h"
 #include "base/utils/utils.h"
+#include "core/components/common/layout/position_param.h"
 #include "core/components/common/properties/alignment.h"
 #include "core/components/common/properties/border_image.h"
 #include "core/components_ng/base/modifier.h"
@@ -461,9 +462,19 @@ public:
         ViewAbstract::SetPosition({ x, y });
     }
 
+    void SetPositionEdges(const EdgesParam& value) override
+    {
+        ViewAbstract::SetPositionEdges(value);
+    }
+
     void SetOffset(const Dimension& x, const Dimension& y) override
     {
         ViewAbstract::SetOffset({ x, y });
+    }
+
+    void SetOffsetEdges(const EdgesParam& value) override
+    {
+        ViewAbstract::SetOffsetEdges(value);
     }
 
     void MarkAnchor(const Dimension& x, const Dimension& y) override

@@ -204,6 +204,8 @@ public:
     // position
     static void SetPosition(const OffsetT<Dimension> &value);
     static void SetOffset(const OffsetT<Dimension> &value);
+    static void SetPositionEdges(const EdgesParam& value);
+    static void SetOffsetEdges(const EdgesParam& value);
     static void MarkAnchor(const OffsetT<Dimension> &value);
 
     // render position

@@ -20,6 +20,7 @@
 #include <cstdint>
 #include <memory>
 #include <string>
+#include <utility>
 
 #include "common/rs_vector2.h"
 #include "include/utils/SkParsePath.h"
@@ -40,6 +41,7 @@
 #include "base/geometry/matrix4.h"
 #include "base/geometry/ng/offset_t.h"
 #include "base/geometry/ng/rect_t.h"
+#include "base/geometry/offset.h"
 #include "base/geometry/shape.h"
 #include "base/log/dump_log.h"
 #include "base/log/log_wrapper.h"
@@ -51,6 +53,7 @@
 #include "core/animation/spring_curve.h"
 #include "core/common/container.h"
 #include "core/common/rosen/rosen_convert_helper.h"
+#include "core/components/common/layout/position_param.h"
 #include "core/components/common/properties/blend_mode.h"
 #include "core/components/common/properties/blur_parameter.h"
 #include "core/components/common/properties/decoration.h"
@@ -65,6 +68,7 @@
 #include "core/components_ng/pattern/stage/page_pattern.h"
 #include "core/components_ng/pattern/stage/stage_pattern.h"
 #include "core/components_ng/property/calc_length.h"
+#include "core/components_ng/property/measure_property.h"
 #include "core/components_ng/property/measure_utils.h"
 #include "core/components_ng/render/adapter/background_modifier.h"
 #include "core/components_ng/render/adapter/border_image_modifier.h"
@@ -2378,16 +2382,15 @@ RectF RosenRenderContext::AdjustPaintRect()
             return rect;
         }
     }
-    bool hasPosition = HasPosition() && IsUsingPosition(frameNode);
-    if (!HasAnchor() && !HasOffset() && !hasPosition) {
+    bool hasPosition = (HasPosition() || HasPositionEdges()) && IsUsingPosition(frameNode);
+    bool hasOffset = HasOffset() || HasOffsetEdges();
+    if (!HasAnchor() && !hasOffset && !hasPosition) {
         geometryNode->SetPixelGridRoundOffset(rect.GetOffset());
         return rect;
     }
-    const auto& layoutConstraint = frameNode->GetGeometryNode()->GetParentLayoutConstraint();
-    auto widthPercentReference = layoutConstraint.has_value() ? layoutConstraint->percentReference.Width()
-                                                              : PipelineContext::GetCurrentRootWidth();
-    auto heightPercentReference = layoutConstraint.has_value() ? layoutConstraint->percentReference.Height()
-                                                               : PipelineContext::GetCurrentRootHeight();
+    auto percentReference = GetPercentReference(frameNode);
+    auto widthPercentReference = percentReference.Width();
+    auto heightPercentReference = percentReference.Height();
     auto anchor = GetAnchorValue({});
     auto anchorWidthReference = rect.Width();
     auto anchorHeightReference = rect.Height();
@@ -2407,6 +2410,15 @@ RectF RosenRenderContext::AdjustPaintRect()
         geometryNode->SetPixelGridRoundOffset(rect.GetOffset());
         return rect;
     }
+    if (HasPositionEdges() && IsUsingPosition(frameNode)) {
+        auto positionEdges = GetPositionEdgesValue(EdgesParam {});
+        OffsetF rectOffset =
+            GetRectOffsetWithPositionEdges(positionEdges, widthPercentReference, heightPercentReference);
+        rect.SetLeft(rectOffset.GetX() - anchorX.value_or(0));
+        rect.SetTop(rectOffset.GetY() - anchorY.value_or(0));
+        geometryNode->SetPixelGridRoundOffset(rect.GetOffset());
+        return rect;
+    }
     if (HasOffset()) {
         auto offset = GetOffsetValue({});
         if (PipelineBase::GetCurrentContext() &&
@@ -2417,6 +2429,14 @@ RectF RosenRenderContext::AdjustPaintRect()
         auto offsetY = ConvertToPx(offset.GetY(), ScaleProperty::CreateScaleProperty(), heightPercentReference);
         rect.SetLeft(rect.GetX() + offsetX.value_or(0) - anchorX.value_or(0));
         rect.SetTop(rect.GetY() + offsetY.value_or(0) - anchorY.value_or(0));
+        geometryNode->SetPixelGridRoundOffset(rect.GetOffset());
+        return rect;
+    }
+    if (HasOffsetEdges()) {
+        auto offsetEdges = GetOffsetEdgesValue(EdgesParam {});
+        OffsetF rectOffset = GetRectOffsetWithOffsetEdges(offsetEdges, widthPercentReference, heightPercentReference);
+        rect.SetLeft(rect.GetX() + rectOffset.GetX() - anchorX.value_or(0));
+        rect.SetTop(rect.GetY() + rectOffset.GetY() - anchorY.value_or(0));
         geometryNode->SetPixelGridRoundOffset(rect.GetOffset());
         return rect;
     }
@@ -2439,6 +2459,112 @@ float RosenRenderContext::RoundValueToPixelGrid(float value)
     } else {
         return (value - fractials + 0.5f);
     }
+}
+
+OffsetF RosenRenderContext::GetRectOffsetWithOffsetEdges(
+    const EdgesParam& offsetEdges, float widthPercentReference, float heightPercentReference)
+{
+    OffsetF rectOffset;
+    if (offsetEdges.top.has_value()) {
+        rectOffset.SetY(
+            ConvertToPx(offsetEdges.top.value(), ScaleProperty::CreateScaleProperty(), heightPercentReference)
+                .value_or(0));
+    }
+    if (offsetEdges.left.has_value()) {
+        rectOffset.SetX(
+            ConvertToPx(offsetEdges.left.value(), ScaleProperty::CreateScaleProperty(), widthPercentReference)
+                .value_or(0));
+    }
+    if (!offsetEdges.top.has_value() && offsetEdges.bottom.has_value()) {
+        rectOffset.SetY(
+            -ConvertToPx(offsetEdges.bottom.value(), ScaleProperty::CreateScaleProperty(), heightPercentReference)
+                 .value_or(0));
+    }
+    if (!offsetEdges.left.has_value() && offsetEdges.right.has_value()) {
+        rectOffset.SetX(
+            -ConvertToPx(offsetEdges.right.value(), ScaleProperty::CreateScaleProperty(), widthPercentReference)
+                 .value_or(0));
+    }
+    return rectOffset;
+}
+
+OffsetF RosenRenderContext::GetRectOffsetWithPositionEdges(
+    const EdgesParam& positionEdges, float widthPercentReference, float heightPercentReference)
+{
+    float rectTop = 0.0f;
+    float rectLeft = 0.0f;
+
+    auto frameNode = GetHost();
+    CHECK_NULL_RETURN(frameNode, OffsetF {});
+    auto layoutProperty = frameNode->GetLayoutProperty();
+    CHECK_NULL_RETURN(layoutProperty, OffsetF {});
+    auto& marginOri = layoutProperty->GetMarginProperty();
+    std::unique_ptr<MarginProperty> margin(
+        marginOri ? std::make_unique<MarginProperty>(*marginOri) : std::make_unique<MarginProperty>());
+
+    auto parentNode = frameNode->GetAncestorNodeOfFrame();
+    CHECK_NULL_RETURN(parentNode, OffsetF {});
+    auto parentLayoutProperty = parentNode->GetLayoutProperty();
+    CHECK_NULL_RETURN(parentLayoutProperty, OffsetF {});
+    auto& parentPaddingOri = parentLayoutProperty->GetPaddingProperty();
+    std::unique_ptr<PaddingProperty> parentPadding(
+        parentPaddingOri ? std::make_unique<PaddingProperty>(*parentPaddingOri) : std::make_unique<PaddingProperty>());
+
+    auto parenPercentRef = GetPercentReference(parentNode);
+    float parentWidthRef = parenPercentRef.Width();
+    float parentHeightRef = parenPercentRef.Height();
+
+    SizeF selfSize = frameNode->GetGeometryNode()->GetFrameSize();
+    float selfWidth = selfSize.Width();
+    float selfHeight = selfSize.Height();
+    SizeF parentSize = parentNode->GetGeometryNode()->GetFrameSize();
+    float parentWidth = parentSize.Width();
+    float parentHeight = parentSize.Height();
+
+    if (positionEdges.top.has_value()) {
+        rectTop = ConvertToPx(parentPadding->top.value_or(CalcLength(Dimension(0))).GetDimension(),
+                      ScaleProperty::CreateScaleProperty(), parentHeightRef)
+                      .value_or(0) +
+                  ConvertToPx(margin->top.value_or(CalcLength(Dimension(0))).GetDimension(),
+                      ScaleProperty::CreateScaleProperty(), heightPercentReference)
+                      .value_or(0) +
+                  ConvertToPx(positionEdges.top.value(), ScaleProperty::CreateScaleProperty(), heightPercentReference)
+                      .value_or(0);
+    }
+    if (positionEdges.left.has_value()) {
+        rectLeft = ConvertToPx(parentPadding->left.value_or(CalcLength(Dimension(0))).GetDimension(),
+                       ScaleProperty::CreateScaleProperty(), parentWidthRef)
+                       .value_or(0) +
+                   ConvertToPx(margin->left.value_or(CalcLength(Dimension(0))).GetDimension(),
+                       ScaleProperty::CreateScaleProperty(), widthPercentReference)
+                       .value_or(0) +
+                   ConvertToPx(positionEdges.left.value(), ScaleProperty::CreateScaleProperty(), widthPercentReference)
+                       .value_or(0);
+    }
+    if (!positionEdges.top.has_value() && positionEdges.bottom.has_value()) {
+        rectTop =
+            parentHeight - selfHeight -
+            ConvertToPx(parentPadding->bottom.value_or(CalcLength(Dimension(0))).GetDimension(),
+                ScaleProperty::CreateScaleProperty(), parentHeightRef)
+                .value_or(0) -
+            ConvertToPx(margin->bottom.value_or(CalcLength(Dimension(0))).GetDimension(),
+                ScaleProperty::CreateScaleProperty(), heightPercentReference)
+                .value_or(0) -
+            ConvertToPx(positionEdges.bottom.value(), ScaleProperty::CreateScaleProperty(), heightPercentReference)
+                .value_or(0);
+    }
+    if (!positionEdges.left.has_value() && positionEdges.right.has_value()) {
+        rectLeft = parentWidth - selfWidth -
+                   ConvertToPx(parentPadding->right.value_or(CalcLength(Dimension(0))).GetDimension(),
+                       ScaleProperty::CreateScaleProperty(), parentWidthRef)
+                       .value_or(0) -
+                   ConvertToPx(margin->right.value_or(CalcLength(Dimension(0))).GetDimension(),
+                       ScaleProperty::CreateScaleProperty(), widthPercentReference)
+                       .value_or(0) -
+                   ConvertToPx(positionEdges.right.value(), ScaleProperty::CreateScaleProperty(), widthPercentReference)
+                       .value_or(0);
+    }
+    return OffsetF(rectLeft, rectTop);
 }
 
 float RosenRenderContext::RoundValueToPixelGrid(float value, bool isRound, bool forceCeil, bool forceFloor)
@@ -2620,6 +2746,19 @@ void RosenRenderContext::GetPaddingOfFirstFrameNodeParent(Dimension& parentPaddi
         parentPaddingTop = layoutProperty->GetPaddingProperty()->top.value_or(CalcLength(Dimension(0))).GetDimension();
     }
 }
+
+SizeF RosenRenderContext::GetPercentReference(const RefPtr<FrameNode>& frameNode)
+{
+    SizeF percentReference = SizeF(PipelineContext::GetCurrentRootWidth(), PipelineContext::GetCurrentRootHeight());
+    CHECK_NULL_RETURN(frameNode, percentReference);
+    const auto& layoutConstraint = frameNode->GetGeometryNode()->GetParentLayoutConstraint();
+    if (layoutConstraint.has_value()) {
+        percentReference.SetWidth(layoutConstraint->percentReference.Width());
+        percentReference.SetHeight(layoutConstraint->percentReference.Height());
+    }
+    return percentReference;
+}
+
 void RosenRenderContext::SetPositionToRSNode()
 {
     auto frameNode = GetHost();
@@ -2651,7 +2790,17 @@ void RosenRenderContext::OnPositionUpdate(const OffsetT<Dimension>& /*value*/)
     SetPositionToRSNode();
 }
 
+void RosenRenderContext::OnPositionEdgesUpdate(const EdgesParam& /*value*/)
+{
+    SetPositionToRSNode();
+}
+
 void RosenRenderContext::OnOffsetUpdate(const OffsetT<Dimension>& /*value*/)
+{
+    SetPositionToRSNode();
+}
+
+void RosenRenderContext::OnOffsetEdgesUpdate(const EdgesParam& /*value*/)
 {
     SetPositionToRSNode();
 }
