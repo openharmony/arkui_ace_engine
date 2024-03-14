@@ -211,6 +211,22 @@ bool ConvertEvent(ArkUINodeEvent* origin, ArkUI_NodeEvent* event)
                 TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "fail to convert origin event data");
                 return false;
             }
+            switch (origin->touchEvent.action) {
+                case ACTION_DOWN:
+                    event->touchEvent.action = NODE_ACTION_DOWN;
+                    break;
+                case ACTION_UP:
+                    event->touchEvent.action = NODE_ACTION_UP;
+                    break;
+                case ACTION_MOVE:
+                    event->touchEvent.action = NODE_ACTION_MOVE;
+                    break;
+                case ACTION_CANCEL:
+                    event->touchEvent.action = NODE_ACTION_CANCEL;
+                    break;
+                default:
+                    event->touchEvent.action = NODE_ACTION_CANCEL;
+            }
             return true;
         default:
             TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "failed to convert origin event data");
