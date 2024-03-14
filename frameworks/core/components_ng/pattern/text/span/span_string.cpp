@@ -21,6 +21,18 @@
 #include "core/components_ng/pattern/text/span/span_objects.h"
 
 namespace OHOS::Ace {
+
+SpanString::SpanString(const std::string& text) : text_(text)
+{
+    auto spanItem = GetDefaultSpanItem(text);
+    spans_.emplace_back(spanItem);
+}
+
+SpanString::SpanString(const std::string& text, std::vector<RefPtr<SpanBase>>& spans) : SpanString(text)
+{
+    BindWithSpans(spans);
+}
+
 void SpanString::ApplyToSpans(const RefPtr<SpanBase>& span, std::pair<int32_t, int32_t> interval)
 {
     for (auto it = spans_.begin(); it != spans_.end(); ++it) {
@@ -40,7 +52,7 @@ void SpanString::ApplyToSpans(const RefPtr<SpanBase>& span, std::pair<int32_t, i
         if (oldStart < intersection->first && intersection->second < oldEnd) {
             (*it)->interval = { oldStart, intersection->first };
             (*it)->content = StringUtils::ToString(wContent.substr(0, intersection->first - oldStart));
-            
+
             newSpan->interval = { intersection->first, intersection->second };
             newSpan->content = StringUtils::ToString(
                 wContent.substr(intersection->first - oldStart, intersection->second - intersection->first));
@@ -160,5 +172,241 @@ void SpanString::AddSpan(const RefPtr<SpanBase>& span)
     SortSpans(spans);
     MergeIntervals(spans);
     spansMap_[span->GetSpanType()] = spans;
+}
+
+bool SpanString::CheckRange(int32_t start, int32_t length, bool allowLengthZero) const
+{
+    if (length < 0 || (length == 0 && !allowLengthZero)) {
+        return false;
+    }
+
+    auto len = GetLength();
+    auto end = start + length;
+
+    if (start > len || end > len) {
+        return false;
+    }
+
+    if (start < 0) {
+        return false;
+    }
+
+    return true;
+}
+
+RefPtr<NG::SpanItem> SpanString::GetDefaultSpanItem(const std::string& text)
+{
+    auto spanItem = MakeRefPtr<NG::SpanItem>();
+    spanItem->content = text;
+    spanItem->interval = { 0, StringUtils::ToWstring(text).length() };
+    auto pipelineContext = PipelineContext::GetCurrentContext();
+    auto themeStyle = pipelineContext->GetTheme<TextTheme>();
+    if (themeStyle) {
+        auto textStyle = themeStyle->GetTextStyle();
+        spanItem->fontStyle->UpdateFontSize(textStyle.GetFontSize());
+        spanItem->fontStyle->UpdateFontWeight(textStyle.GetFontWeight());
+        spanItem->fontStyle->UpdateTextColor(textStyle.GetTextColor());
+    }
+    return spanItem;
+}
+
+void SpanString::SetString(const std::string& text)
+{
+    text_ = text;
+}
+
+const std::string& SpanString::GetString() const
+{
+    return text_;
+}
+
+std::wstring SpanString::GetWideString()
+{
+    return StringUtils::ToWstring(text_);
+}
+
+int32_t SpanString::GetLength() const
+{
+    return StringUtils::ToWstring(text_).length();
+}
+
+bool SpanString::IsEqualToSpanString(const RefPtr<SpanString>& other) const
+{
+    return *this == *other;
+}
+
+RefPtr<SpanString> SpanString::GetSubSpanString(int32_t start, int32_t length) const
+{
+    if (!CheckRange(start, length)) {
+        RefPtr<SpanString> span = AceType::MakeRefPtr<SpanString>("");
+        return span;
+    }
+    int32_t end = start + length;
+    RefPtr<SpanString> span =
+        AceType::MakeRefPtr<SpanString>(StringUtils::ToString(StringUtils::ToWstring(text_).substr(start, length)));
+    std::map<SpanType, std::list<RefPtr<SpanBase>>> subMap;
+    for (const auto& map : spansMap_) {
+        auto subList = GetSubSpanList(start, length, map.second);
+        if (!subList.empty()) {
+            subMap.insert({ map.first, subList });
+        }
+    }
+    span->spansMap_ = subMap;
+
+    std::list<RefPtr<NG::SpanItem>> subSpans_;
+    for (const auto& spanItem : spans_) {
+        int32_t spanStart = spanItem->interval.first;
+        int32_t spanEnd = spanItem->interval.second;
+        if ((start <= spanStart && spanStart < end) || (start <= spanEnd && spanEnd < end)) {
+            auto oldStart = spanStart;
+            auto oldEnd = spanEnd;
+            spanStart = spanStart <= start ? 0 : spanStart - start;
+            spanEnd = spanEnd < end ? spanEnd - start : end - start;
+            auto newSpanItem = spanItem->GetSameStyleSpanItem();
+            newSpanItem->interval = { spanStart, spanEnd };
+            newSpanItem->content = StringUtils::ToString(
+                StringUtils::ToWstring(spanItem->content)
+                    .substr(std::max(start - oldStart, 0), std::min(spanEnd, oldEnd) - std::max(start, oldStart)));
+            subSpans_.emplace_back(newSpanItem);
+        }
+    }
+    span->spans_ = subSpans_;
+    return span;
+}
+
+std::list<RefPtr<SpanBase>> SpanString::GetSubSpanList(
+    int32_t start, int32_t length, const std::list<RefPtr<SpanBase>>& spans) const
+{
+    std::list<RefPtr<SpanBase>> res;
+    int32_t end = start + length;
+    for (auto& span : spans) {
+        int32_t spanStart = span->GetStartIndex();
+        int32_t spanEnd = span->GetEndIndex();
+        if ((start <= spanStart && spanStart < end) || (start <= spanEnd && spanEnd <= end)) {
+            spanStart = spanStart <= start ? 0 : spanStart - start;
+            spanEnd = spanEnd < end ? spanEnd - start : end - start;
+            if (spanStart == spanEnd) {
+                continue;
+            }
+            res.push_back(span->GetSubSpan(spanStart, spanEnd));
+        }
+    }
+    return res;
+}
+
+const std::map<SpanType, std::list<RefPtr<SpanBase>>>& SpanString::GetSpansMap() const
+{
+    return spansMap_;
+}
+
+std::vector<RefPtr<SpanBase>> SpanString::GetSpans(int32_t start, int32_t length) const
+{
+    std::vector<RefPtr<SpanBase>> res;
+    if (!CheckRange(start, length)) {
+        return res;
+    }
+
+    for (const auto& map : spansMap_) {
+        auto spans = GetSpans(start, length, map.first);
+        res.insert(res.begin(), spans.begin(), spans.end());
+    }
+    return res;
+}
+
+std::vector<RefPtr<SpanBase>> SpanString::GetSpans(int32_t start, int32_t length, SpanType spanType) const
+{
+    std::vector<RefPtr<SpanBase>> res;
+    if (!CheckRange(start, length)) {
+        return res;
+    }
+    int32_t end = start + length;
+    RefPtr<SpanBase> span;
+    while ((span = GetSpan(start, length, spanType)) != nullptr) {
+        res.push_back(span);
+        start = span->GetEndIndex();
+        length = end - start;
+    }
+    return res;
+}
+
+RefPtr<SpanBase> SpanString::GetSpan(int32_t start, int32_t length, SpanType spanType) const
+{
+    if (!CheckRange(start, length) || spansMap_.find(spanType) == spansMap_.end()) {
+        return nullptr;
+    }
+    int32_t end = start + length;
+    auto spanBaseList = spansMap_.find(spanType)->second;
+    for (auto itr = spanBaseList.begin(); itr != spanBaseList.end(); ++itr) {
+        auto spanBase = *itr;
+
+        if ((start <= spanBase->GetStartIndex() && spanBase->GetStartIndex() < end) ||
+            (start <= spanBase->GetEndIndex() && spanBase->GetEndIndex() <= end)) {
+            int32_t newStart = start <= spanBase->GetStartIndex() ? spanBase->GetStartIndex() : start;
+            int32_t newEnd = spanBase->GetEndIndex() < end ? spanBase->GetEndIndex() : end;
+            if (newStart == newEnd) {
+                continue;
+            }
+            return spanBase->GetSubSpan(newStart, newEnd);
+        }
+    }
+    return nullptr;
+}
+
+bool SpanString::operator==(const SpanString& other) const
+{
+    if (text_ != other.text_ && spansMap_.size() != other.spansMap_.size()) {
+        return false;
+    }
+    for (const auto& map : spansMap_) {
+        auto spansOtherMap = other.spansMap_.find(map.first);
+        if (spansOtherMap == other.spansMap_.end()) {
+            return false;
+        }
+        auto spans = map.second;
+        auto spansOther = spansOtherMap->second;
+        if (spans.size() != spansOther.size()) {
+            return false;
+        }
+        for (auto spansItr = spans.begin(), spansOtherItr = spansOther.begin();
+             spansItr != spans.end() && spansOtherItr != spansOther.end(); ++spansItr, ++spansOtherItr) {
+            if (!(*spansItr)->IsAttributesEqual(*spansOtherItr) ||
+                (*spansItr)->GetEndIndex() != (*spansOtherItr)->GetEndIndex() ||
+                (*spansItr)->GetStartIndex() != (*spansOtherItr)->GetStartIndex()) {
+                return false;
+            }
+        }
+    }
+    return true;
+}
+
+void SpanString::AddSpanWatcher(const WeakPtr<SpanWatcher>& watcher)
+{
+    watchers_.emplace_back(watcher);
+}
+
+void SpanString::NotifySpanWatcher()
+{
+    if (spans_.empty()) {
+        spans_.emplace_back(GetDefaultSpanItem(""));
+    }
+    for (const auto& item : watchers_) {
+        auto watcher = item.Upgrade();
+        if (!watcher) {
+            continue;
+        }
+        watcher->UpdateSpanItems(spans_);
+    }
+}
+
+const std::list<RefPtr<NG::SpanItem>>& SpanString::GetSpanItems() const
+{
+    return spans_;
+}
+
+void SpanString::BindWithSpans(std::vector<RefPtr<SpanBase>> spans)
+{
+    for (auto& span : spans) {
+        AddSpan(span);
+    }
 }
 } // namespace OHOS::Ace

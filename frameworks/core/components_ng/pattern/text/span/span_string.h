@@ -42,10 +42,9 @@ class ACE_EXPORT SpanString : public SpanStringBase {
     DECLARE_ACE_TYPE(SpanString, SpanStringBase);
 
 public:
-    SpanString(const SpanString& other);
     explicit SpanString(const std::string& text);
     SpanString(const std::string& text, std::vector<RefPtr<SpanBase>>& spans);
-    std::string GetString() const;
+    const std::string& GetString() const;
     std::wstring GetWideString();
     int32_t GetLength() const;
     void SetString(const std::string& text);
@@ -56,7 +55,6 @@ public:
     std::vector<RefPtr<SpanBase>> GetSpans(int32_t start, int32_t length, SpanType spanType) const;
     int32_t GetIndex(const std::string& subString) const;
     bool operator==(const SpanString& other) const;
-    SpanString& operator=(const SpanString& other);
     void AddSpanWatcher(const WeakPtr<SpanWatcher>& watcher);
     void NotifySpanWatcher();
     const std::list<RefPtr<NG::SpanItem>>& GetSpanItems() const;
@@ -65,6 +63,8 @@ public:
 
 protected:
     RefPtr<SpanBase> GetSpan(int32_t start, int32_t length, SpanType spanType) const;
+    std::list<RefPtr<SpanBase>> GetSubSpanList(
+        int32_t start, int32_t length, const std::list<RefPtr<SpanBase>>& spans) const;
     void BindWithSpans(std::vector<RefPtr<SpanBase>> spans);
     bool CheckRange(int32_t start, int32_t length, bool allowLengthZero = false) const;
     void MergeIntervals(std::list<RefPtr<SpanBase>>& spans);
