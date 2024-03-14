@@ -31,6 +31,7 @@
 #include "core/components_ng/layout/layout_property.h"
 #include "core/components_ng/pattern/bubble/bubble_pattern.h"
 #include "core/components_ng/pattern/menu/menu_pattern.h"
+#include "core/components_ng/pattern/menu/wrapper/menu_wrapper_pattern.h"
 #include "core/components_ng/pattern/navigation/navigation_model_ng.h"
 #include "core/components_ng/pattern/navigator/navigator_model_ng.h"
 #include "core/components_ng/pattern/navrouter/navrouter_model_ng.h"
@@ -2446,5 +2447,111 @@ HWTEST_F(ViewAbstractTestNg, ViewAbstractMonopolizeEvent003, TestSize.Level1)
      * @tc.steps: step5. finish view stack.
      */
     ViewStackProcessor::GetInstance()->Finish();
+}
+
+/**
+ * @tc.name: ViewAbstractMenuTransition001
+ * @tc.desc: Test the BindMenu and BindContextMenu of ViewAbstractModelNG (use dafault)
+ * @tc.type: FUNC
+ */
+HWTEST_F(ViewAbstractTestNg, ViewAbstractMenuTransition001, TestSize.Level1)
+{
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    PipelineBase::GetCurrentContext()->SetThemeManager(themeManager);
+    PipelineBase::GetCurrentContext()->SetEventManager(AceType::MakeRefPtr<EventManager>());
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<SelectTheme>()));
+    int32_t nodeId = ElementRegister::GetInstance()->MakeUniqueId();
+    const RefPtr<FrameNode> mainNode =
+        FrameNode::CreateFrameNode("targetNode", nodeId, AceType::MakeRefPtr<Pattern>(), true);
+    ViewStackProcessor::GetInstance()->Push(mainNode);
+    auto container = Container::Current();
+    ASSERT_NE(container, nullptr);
+    auto pipelineContext = container->GetPipelineContext();
+    ASSERT_NE(pipelineContext, nullptr);
+    auto context = AceType::DynamicCast<NG::PipelineContext>(pipelineContext);
+    ASSERT_NE(context, nullptr);
+    auto overlayManager = context->GetOverlayManager();
+    ASSERT_NE(overlayManager, nullptr);
+
+    ASSERT_NE(SubwindowManager::GetInstance(), nullptr);
+    std::function<void()> flagFunc = []() { flag++; };
+    std::vector<NG::OptionParam> params = {};
+    std::function<void()> buildFunc;
+    MenuParam menuParam;
+    std::function<void()> previewBuildFunc = nullptr;
+
+    menuParam.type = MenuType::MENU;
+    menuParam.isShow = true;
+
+    auto targetNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(targetNode, nullptr);
+    std::function<void()> action = [] {};
+    params.emplace_back("MenuItem1", "", action);
+    params.emplace_back("MenuItem2", "", action);
+    viewAbstractModelNG.BindMenu(std::move(params), std::move(buildFunc), menuParam);
+    auto targetId = targetNode->GetId();
+
+    auto menuNode = overlayManager->GetMenuNode(targetId);
+    ASSERT_NE(menuNode, nullptr);
+    auto wrapperPattern = menuNode->GetPattern<MenuWrapperPattern>();
+    ASSERT_NE(wrapperPattern, nullptr);
+    EXPECT_EQ(wrapperPattern->HasTransitionEffect(), false);
+    EXPECT_EQ(wrapperPattern->HasPreviewTransitionEffect(), false);
+}
+
+/**
+ * @tc.name: ViewAbstractMenuTransition002
+ * @tc.desc: Test the BindMenu and BindContextMenu of ViewAbstractModelNG (use true)
+ * @tc.type: FUNC
+ */
+HWTEST_F(ViewAbstractTestNg, ViewAbstractMenuTransition002, TestSize.Level1)
+{
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    PipelineBase::GetCurrentContext()->SetThemeManager(themeManager);
+    PipelineBase::GetCurrentContext()->SetEventManager(AceType::MakeRefPtr<EventManager>());
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<SelectTheme>()));
+    int32_t nodeId = ElementRegister::GetInstance()->MakeUniqueId();
+    const RefPtr<FrameNode> mainNode =
+        FrameNode::CreateFrameNode("targetNode", nodeId, AceType::MakeRefPtr<Pattern>(), true);
+    ViewStackProcessor::GetInstance()->Push(mainNode);
+    auto container = Container::Current();
+    ASSERT_NE(container, nullptr);
+    auto pipelineContext = container->GetPipelineContext();
+    ASSERT_NE(pipelineContext, nullptr);
+    auto context = AceType::DynamicCast<NG::PipelineContext>(pipelineContext);
+    ASSERT_NE(context, nullptr);
+    auto overlayManager = context->GetOverlayManager();
+    ASSERT_NE(overlayManager, nullptr);
+
+    ASSERT_NE(SubwindowManager::GetInstance(), nullptr);
+    std::function<void()> flagFunc = []() { flag++; };
+    std::vector<NG::OptionParam> params = {};
+    std::function<void()> buildFunc;
+    MenuParam menuParam;
+    std::function<void()> previewBuildFunc = nullptr;
+
+    NG::RotateOptions rotate(0.0f, 0.0f, 0.0f, 0.0f, 0.5_pct, 0.5_pct);
+
+    menuParam.hasTransitionEffect = true;
+    menuParam.hasPreviewTransitionEffect = true;
+    menuParam.transition = AceType::MakeRefPtr<NG::ChainedRotateEffect>(rotate);
+    menuParam.previewTransition = AceType::MakeRefPtr<NG::ChainedRotateEffect>(rotate);
+    menuParam.type = MenuType::MENU;
+    menuParam.isShow = true;
+
+    auto targetNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(targetNode, nullptr);
+    std::function<void()> action = [] {};
+    params.emplace_back("MenuItem1", "", action);
+    params.emplace_back("MenuItem2", "", action);
+    viewAbstractModelNG.BindMenu(std::move(params), std::move(buildFunc), menuParam);
+    auto targetId = targetNode->GetId();
+
+    auto menuNode = overlayManager->GetMenuNode(targetId);
+    ASSERT_NE(menuNode, nullptr);
+    auto wrapperPattern = menuNode->GetPattern<MenuWrapperPattern>();
+    ASSERT_NE(wrapperPattern, nullptr);
+    EXPECT_EQ(wrapperPattern->HasTransitionEffect(), true);
+    EXPECT_EQ(wrapperPattern->HasPreviewTransitionEffect(), true);
 }
 } // namespace OHOS::Ace::NG
