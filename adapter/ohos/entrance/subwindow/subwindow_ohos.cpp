@@ -379,8 +379,9 @@ void SubwindowOhos::HideWindow()
     if (!rootNode->GetChildren().empty() &&
         !(rootNode->GetChildren().size() == 1 && rootNode->GetLastChild()->GetTag() == V2::KEYBOARD_ETS_TAG)) {
         auto lastChildId = rootNode->GetLastChild()->GetId();
-        if (hotAreasMap_.find(lastChildId) != hotAreasMap_.end()) {
-            auto hotAreaRect = hotAreasMap_[lastChildId];
+        auto iter = hotAreasMap_.find(lastChildId);
+        if (iter != hotAreasMap_.end()) {
+            auto hotAreaRect = iter->second;
             OHOS::Rosen::WMError ret = window_->SetTouchHotAreas(hotAreaRect);
             if (ret != OHOS::Rosen::WMError::WM_OK) {
                 TAG_LOGW(AceLogTag::ACE_SUB_WINDOW, "Set hot areas failed with errCode: %{public}d",
@@ -400,9 +401,9 @@ void SubwindowOhos::HideWindow()
         CHECK_NULL_VOID(rootNode);
         if (!rootNode->GetChildren().empty() &&
             !(rootNode->GetChildren().size() == 1 && rootNode->GetLastChild()->GetTag() == V2::KEYBOARD_ETS_TAG)) {
-            auto lastChildId = rootNode->GetLastChild()->GetId();
-            if (hotAreasMap_.find(lastChildId) != hotAreasMap_.end()) {
-                auto hotAreaRect = hotAreasMap_[lastChildId];
+            auto it = hotAreasMap_.find(rootNode->GetLastChild()->GetId());
+            if (it != hotAreasMap_.end()) {
+                auto hotAreaRect = it->second;
                 OHOS::Rosen::WMError ret = window_->SetTouchHotAreas(hotAreaRect);
                 if (ret != OHOS::Rosen::WMError::WM_OK) {
                     TAG_LOGW(AceLogTag::ACE_SUB_WINDOW, "Set hot areas failed with errCode: %{public}d",

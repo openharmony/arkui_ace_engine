@@ -823,8 +823,9 @@ size_t PluginFrontendDelegate::GetComponentsCount()
 
 std::string PluginFrontendDelegate::GetParams()
 {
-    if (pageParamMap_.find(pageId_) != pageParamMap_.end()) {
-        return pageParamMap_.find(pageId_)->second;
+    auto iter = pageParamMap_.find(pageId_);
+    if (iter != pageParamMap_.end()) {
+        return iter->second;
     } else {
         return "";
     }

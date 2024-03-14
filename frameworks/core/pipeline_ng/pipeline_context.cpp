@@ -2183,8 +2183,9 @@ void PipelineContext::FlushTouchEvents()
         std::list<TouchEvent> touchPoints;
         for (const auto& iter : idToTouchPoints) {
             lastDispatchTime_[iter.first] = GetVsyncTime();
-            if (newIdTouchPoints.find(iter.first) != newIdTouchPoints.end()) {
-                touchPoints.emplace_back(newIdTouchPoints[iter.first]);
+            auto it = newIdTouchPoints.find(iter.first);
+            if (it != newIdTouchPoints.end()) {
+                touchPoints.emplace_back(it->second);
             } else {
                 touchPoints.emplace_back(iter.second);
             }

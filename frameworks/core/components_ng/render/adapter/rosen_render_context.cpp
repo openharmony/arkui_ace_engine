@@ -1073,10 +1073,11 @@ Rosen::EmitterConfig RosenRenderContext::ConvertParticleEmitterOption(
 
 void RosenRenderContext::SetRsParticleImage(std::shared_ptr<Rosen::RSImage>& rsImagePtr, std::string& imageSource)
 {
-    if (particleImageMap_.find(imageSource) == particleImageMap_.end()) {
+    auto it = particleImageMap_.find(imageSource);
+    if (it == particleImageMap_.end()) {
         return;
     }
-    auto image = particleImageMap_[imageSource];
+    auto image = it->second;
     CHECK_NULL_VOID(image);
 
     if (InstanceOf<PixelMapImage>(image)) {

@@ -54,11 +54,13 @@ void UIObserver::RegisterNavigationCallback(const std::shared_ptr<UIObserverList
 void UIObserver::RegisterNavigationCallback(
     std::string navigationId, const std::shared_ptr<UIObserverListener>& listener)
 {
-    if (specifiedCNavigationListeners_.find(navigationId) == specifiedCNavigationListeners_.end()) {
-        specifiedCNavigationListeners_[navigationId] = std::list<std::shared_ptr<UIObserverListener>>({ listener });
+    auto iter = specifiedCNavigationListeners_.find(navigationId);
+    if (iter == specifiedCNavigationListeners_.end()) {
+        specifiedCNavigationListeners_.emplace(
+            navigationId, std::list<std::shared_ptr<UIObserverListener>>({ listener }));
         return;
     }
-    auto& holder = specifiedCNavigationListeners_[navigationId];
+    auto& holder = iter->second;
     if (std::find(holder.begin(), holder.end(), listener) != holder.end()) {
         return;
     }
@@ -88,10 +90,11 @@ void UIObserver::UnRegisterNavigationCallback(napi_value cb)
 // UIObserver.off(type: "navDestinationUpdate", options, callback)
 void UIObserver::UnRegisterNavigationCallback(std::string navigationId, napi_value cb)
 {
-    if (specifiedCNavigationListeners_.find(navigationId) == specifiedCNavigationListeners_.end()) {
+    auto iter = specifiedCNavigationListeners_.find(navigationId);
+    if (iter == specifiedCNavigationListeners_.end()) {
         return;
     }
-    auto& holder = specifiedCNavigationListeners_[navigationId];
+    auto& holder = iter->second;
     if (cb == nullptr) {
         holder.clear();
         return;
@@ -114,13 +117,12 @@ void UIObserver::HandleNavigationStateChange(const std::string& navigationId, co
     for (const auto& listener : unspecifiedNavigationListeners_) {
         listener->OnNavigationStateChange(navigationId, navDestinationName, state);
     }
-
-    if (specifiedCNavigationListeners_.find(navigationId) ==
-        specifiedCNavigationListeners_.end()) {
+    auto iter = specifiedCNavigationListeners_.find(navigationId);
+    if (iter == specifiedCNavigationListeners_.end()) {
         return;
     }
 
-    auto& holder = specifiedCNavigationListeners_[navigationId];
+    auto& holder = iter->second;
 
     for (const auto& listener : holder) {
         listener->OnNavigationStateChange(navigationId, navDestinationName, state);
@@ -143,11 +145,12 @@ void UIObserver::RegisterScrollEventCallback(const std::shared_ptr<UIObserverLis
 void UIObserver::RegisterScrollEventCallback(
     const std::string& id, const std::shared_ptr<UIObserverListener>& listener)
 {
-    if (specifiedScrollEventListeners_.find(id) == specifiedScrollEventListeners_.end()) {
-        specifiedScrollEventListeners_[id] = std::list<std::shared_ptr<UIObserverListener>>({ listener });
+    auto iter = specifiedScrollEventListeners_.find(id);
+    if (iter == specifiedScrollEventListeners_.end()) {
+        specifiedScrollEventListeners_.emplace(id, std::list<std::shared_ptr<UIObserverListener>>({ listener }));
         return;
     }
-    auto& holder = specifiedScrollEventListeners_[id];
+    auto& holder = iter->second;
     if (std::find(holder.begin(), holder.end(), listener) != holder.end()) {
         return;
     }
@@ -247,12 +250,13 @@ void UIObserver::RegisterRouterPageCallback(
     if (uiContextInstanceId == 0) {
         uiContextInstanceId = Container::CurrentId();
     }
-    if (specifiedRouterPageListeners_.find(uiContextInstanceId) == specifiedRouterPageListeners_.end()) {
-        specifiedRouterPageListeners_[uiContextInstanceId] =
-            std::list<std::shared_ptr<UIObserverListener>>({ listener });
+    auto iter = specifiedRouterPageListeners_.find(uiContextInstanceId);
+    if (iter == specifiedRouterPageListeners_.end()) {
+        specifiedRouterPageListeners_.emplace(
+            uiContextInstanceId, std::list<std::shared_ptr<UIObserverListener>>({ listener }));
         return;
     }
-    auto& holder = specifiedRouterPageListeners_[uiContextInstanceId];
+    auto& holder = iter->second;
     if (std::find(holder.begin(), holder.end(), listener) != holder.end()) {
         return;
     }
@@ -297,10 +301,11 @@ void UIObserver::UnRegisterRouterPageCallback(int32_t uiContextInstanceId, napi_
     if (uiContextInstanceId == 0) {
         uiContextInstanceId = Container::CurrentId();
     }
-    if (specifiedRouterPageListeners_.find(uiContextInstanceId) == specifiedRouterPageListeners_.end()) {
+    auto iter = specifiedRouterPageListeners_.find(uiContextInstanceId);
+    if (iter == specifiedRouterPageListeners_.end()) {
         return;
     }
-    auto& holder = specifiedRouterPageListeners_[uiContextInstanceId];
+    auto& holder = iter->second;
     if (callback == nullptr) {
         holder.clear();
         return;
@@ -420,10 +425,11 @@ void UIObserver::HandleRouterPageStateChange(NG::AbilityContextInfo& info, napi_
     }
 
     auto currentId = Container::CurrentId();
-    if (specifiedRouterPageListeners_.find(currentId) == specifiedRouterPageListeners_.end()) {
+    auto iter = specifiedRouterPageListeners_.find(currentId);
+    if (iter == specifiedRouterPageListeners_.end()) {
         return;
     }
-    auto& holder = specifiedRouterPageListeners_[currentId];
+    auto& holder = iter->second;
     for (const auto& listener : holder) {
         listener->OnRouterPageStateChange(context, index, name, path, state);
     }
@@ -437,12 +443,13 @@ void UIObserver::RegisterDensityCallback(
     if (uiContextInstanceId == 0) {
         uiContextInstanceId = Container::CurrentId();
     }
-    if (specifiedDensityListeners_.find(uiContextInstanceId) == specifiedDensityListeners_.end()) {
-        specifiedDensityListeners_[uiContextInstanceId] =
-            std::list<std::shared_ptr<UIObserverListener>>({ listener });
+    auto iter = specifiedDensityListeners_.find(uiContextInstanceId);
+    if (iter == specifiedDensityListeners_.end()) {
+        specifiedDensityListeners_.emplace(
+            uiContextInstanceId, std::list<std::shared_ptr<UIObserverListener>>({ listener }));
         return;
     }
-    auto& holder = specifiedDensityListeners_[uiContextInstanceId];
+    auto& holder = iter->second;
     if (std::find(holder.begin(), holder.end(), listener) != holder.end()) {
         return;
     }
@@ -455,10 +462,11 @@ void UIObserver::UnRegisterDensityCallback(int32_t uiContextInstanceId, napi_val
     if (uiContextInstanceId == 0) {
         uiContextInstanceId = Container::CurrentId();
     }
-    if (specifiedDensityListeners_.find(uiContextInstanceId) == specifiedDensityListeners_.end()) {
+    auto iter = specifiedDensityListeners_.find(uiContextInstanceId);
+    if (iter == specifiedDensityListeners_.end()) {
         return;
     }
-    auto& holder = specifiedDensityListeners_[uiContextInstanceId];
+    auto& holder = iter->second;
     if (callback == nullptr) {
         holder.clear();
         return;
@@ -476,10 +484,11 @@ void UIObserver::UnRegisterDensityCallback(int32_t uiContextInstanceId, napi_val
 void UIObserver::HandleDensityChange(NG::AbilityContextInfo& info, double density)
 {
     auto currentId = Container::CurrentId();
-    if (specifiedDensityListeners_.find(currentId) == specifiedDensityListeners_.end()) {
+    auto iter = specifiedDensityListeners_.find(currentId);
+    if (iter == specifiedDensityListeners_.end()) {
         return;
     }
-    auto& holder = specifiedDensityListeners_[currentId];
+    auto& holder = iter->second;
     for (const auto& listener : holder) {
         listener->OnDensityChange(density);
     }

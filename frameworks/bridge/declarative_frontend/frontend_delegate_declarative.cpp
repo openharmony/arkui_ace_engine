@@ -1130,8 +1130,9 @@ std::string FrontendDelegateDeclarative::GetParams()
         ContainerScope scope(currentId.value());
         return pageRouterManager_->GetParams();
     }
-    if (pageParamMap_.find(pageId_) != pageParamMap_.end()) {
-        return pageParamMap_.find(pageId_)->second;
+    auto iter = pageParamMap_.find(pageId_);
+    if (iter != pageParamMap_.end()) {
+        return iter->second;
     }
     return "";
 }

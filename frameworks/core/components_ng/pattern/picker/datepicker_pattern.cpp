@@ -1907,12 +1907,13 @@ const std::string& DatePickerPattern::GetYear(uint32_t year)
         return empty_;
     }
     auto index = year - 1900;
-    if (years_.find(index) == years_.end()) {
+    auto it = years_.find(index);
+    if (it == years_.end()) {
         DateTime date;
         date.year = year;
         years_[index] = Localization::GetInstance()->FormatDateTime(date, "y");
     }
-    return years_[index]; // index in [0, 200]
+    return it->second; // index in [0, 200]
 }
 
 const std::string& DatePickerPattern::GetSolarMonth(uint32_t month)
@@ -1922,7 +1923,8 @@ const std::string& DatePickerPattern::GetSolarMonth(uint32_t month)
         return empty_;
     }
     auto index = month - 1;
-    if (solarMonths_.find(index) == solarMonths_.end()) {
+    auto it = solarMonths_.find(index);
+    if (it == solarMonths_.end()) {
         if (index < localizedMonths_.size()) {
             solarMonths_[index] = localizedMonths_[index];
         } else {
@@ -1931,7 +1933,7 @@ const std::string& DatePickerPattern::GetSolarMonth(uint32_t month)
             solarMonths_[index] = Localization::GetInstance()->FormatDateTime(date, "M");
         }
     }
-    return solarMonths_[index]; // index in [0,11]
+    return it->second; // index in [0,11]
 }
 
 const std::string& DatePickerPattern::GetSolarDay(uint32_t day)
@@ -1941,12 +1943,13 @@ const std::string& DatePickerPattern::GetSolarDay(uint32_t day)
         return empty_;
     }
     auto index = day - 1;
-    if (solarDays_.find(index) == solarDays_.end()) {
+    auto it = solarDays_.find(index);
+    if (it == solarDays_.end()) {
         DateTime date;
         date.day = day;
         solarDays_[index] = Localization::GetInstance()->FormatDateTime(date, "d");
     }
-    return solarDays_[index]; // index in [0,30]
+    return it->second; // index in [0,30]
 }
 
 const std::string& DatePickerPattern::GetLunarMonth(uint32_t month, bool isLeap)
@@ -1956,10 +1959,11 @@ const std::string& DatePickerPattern::GetLunarMonth(uint32_t month, bool isLeap)
     if (!(1 <= index && index <= 24)) {             // lunar month need in [1,24]
         return empty_;
     }
-    if (lunarMonths_.find(index - 1) == lunarMonths_.end()) {
+    auto it = lunarMonths_.find(index - 1);
+    if (it == lunarMonths_.end()) {
         lunarMonths_[index - 1] = Localization::GetInstance()->GetLunarMonth(month, isLeap);
     }
-    return lunarMonths_[index - 1]; // index in [0,23]
+    return it->second; // index in [0,23]
 }
 
 const std::string& DatePickerPattern::GetLunarDay(uint32_t day)
@@ -1969,10 +1973,11 @@ const std::string& DatePickerPattern::GetLunarDay(uint32_t day)
         return empty_;
     }
     auto index = day - 1;
-    if (lunarDays_.find(index) == lunarDays_.end()) {
+    auto it = lunarDays_.find(index);
+    if (it == lunarDays_.end()) {
         lunarDays_[index] = Localization::GetInstance()->GetLunarDay(day);
     }
-    return lunarDays_[index]; // index in [0,29]
+    return it->second; // index in [0,29]
 }
 
 const std::string DatePickerPattern::GetFormatString(PickerDateF date)

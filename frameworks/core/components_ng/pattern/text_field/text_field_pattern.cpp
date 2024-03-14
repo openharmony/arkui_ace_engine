@@ -3227,8 +3227,9 @@ AceAutoFillType TextFieldPattern::ConvertToAceAutoFillType(TextInputType type)
                                                                                  AceAutoFillType::ACE_PASSWORD },
         { TextInputType::USER_NAME, AceAutoFillType::ACE_USER_NAME },
         { TextInputType::NEW_PASSWORD, AceAutoFillType::ACE_NEW_PASSWORD } };
-    if (convertMap.find(type) != convertMap.end()) {
-        return convertMap[type];
+    auto it = convertMap.find(type);
+    if (it != convertMap.end()) {
+        return it->second;
     }
     return AceAutoFillType::ACE_UNSPECIFIED;
 }
