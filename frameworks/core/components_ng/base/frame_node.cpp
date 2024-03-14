@@ -433,6 +433,12 @@ RefPtr<FrameNode> FrameNode::CreateFrameNode(
     return frameNode;
 }
 
+bool FrameNode::IsSupportDrawModifier()
+{
+    CHECK_NULL_RETURN(pattern_, false);
+    return pattern_->IsSupportDrawModifier();
+}
+
 void FrameNode::ProcessOffscreenNode(const RefPtr<FrameNode>& node)
 {
     CHECK_NULL_VOID(node);

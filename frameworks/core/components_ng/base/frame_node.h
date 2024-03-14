@@ -493,6 +493,8 @@ public:
         }
     }
 
+    bool IsSupportDrawModifier();
+
     void SetDragPreview(const NG::DragDropInfo& info)
     {
         dragPreviewInfo_ = info;
