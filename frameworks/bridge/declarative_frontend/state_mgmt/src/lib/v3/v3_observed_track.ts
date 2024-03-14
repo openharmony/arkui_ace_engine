@@ -94,7 +94,7 @@ class ObserveV3 {
     this.bindId_ = id;
     if (cmp != null) {
       this.clearBinding(id);
-      this.id2cmp_[id] = (cmp instanceof ViewPU) ? new WeakRef(cmp) : cmp;
+      this.id2cmp_[id] = (cmp instanceof ViewPU) ? new WeakRef<ViewPU>(cmp) : cmp;
     }
   }
 
@@ -116,6 +116,8 @@ class ObserveV3 {
 
     delete this.id2targets_[id]
     delete this.id2cmp_[id]
+
+    stateMgmtConsole.propertyAccess(`clearBinding (at the end): id2cmp_ ${JSON.stringify(Object.keys(this.id2cmp_))}`);
   }
 
   // add dependency view model object 'target' property 'attrName'
@@ -366,9 +368,11 @@ class ObserveV3 {
   private updateUINodesWithoutVSync(elmtIds: Array<number>): void {
     stateMgmtConsole.debug(`ObserveV3.updateUINodes: ${elmtIds.length} elmtIds: ${JSON.stringify(elmtIds)} ...`);
     aceTrace.begin(`ObserveV3.updateUINodes: ${elmtIds.length} elmtId`)
+    let view : Object;
+    let weak : any;
     elmtIds.forEach((elmtId) => {
-      const view = this.id2cmp_[elmtId];
-      if (view && view instanceof ViewPU) {
+      if ((weak = this.id2cmp_[elmtId]) && (typeof weak == "object") && ("deref" in weak)
+        && (view = weak.deref()) && (view instanceof ViewPU)) {
         if (view.isViewActive()) {
           // FIXME need to call syncInstanceId before update?
           view.UpdateElement(elmtId);
@@ -376,7 +380,7 @@ class ObserveV3 {
           // FIXME @Component freeze
           //....
         }
-      }
+      } // if ViewPU
     });
     aceTrace.end();
   }

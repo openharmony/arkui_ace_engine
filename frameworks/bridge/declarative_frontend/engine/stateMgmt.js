@@ -6841,12 +6841,10 @@ class ObserveV3 {
         this.bindCmp_ = null;
         // bindId: UINode elmtId or watchId, depending on what is being observed
         this.bindId_ = UINodeRegisterProxy.notRecordingDependencies;
-        // Map bindId to ViewPU/MonitorV3
-        // FIXME use Map<number, ViewPU | MonitorV3>
+        // Map bindId to WeakRef<ViewPU> | MonitorV3
         this.id2cmp_ = {};
-        // Map bindId -> Set 0f view model object
+        // Map bindId -> Set of @observed class objects
         // reverse dependency map for quickly removing all dependencies of a bindId
-        // FIXME: string typing: Map<number, Set<Object>>
         this.id2targets_ = {};
         // queued up Set of bindId
         // elmtIds of UINodes need re-render
@@ -6880,7 +6878,7 @@ class ObserveV3 {
         this.bindId_ = id;
         if (cmp != null) {
             this.clearBinding(id);
-            this.id2cmp_[id] = cmp;
+            this.id2cmp_[id] = (cmp instanceof ViewPU) ? new WeakRef(cmp) : cmp;
         }
     }
     // clear any previously created dependency view model object to elmtId
@@ -6904,6 +6902,7 @@ class ObserveV3 {
         });
         delete this.id2targets_[id];
         delete this.id2cmp_[id];
+        
     }
     // add dependency view model object 'target' property 'attrName'
     // to current this.bindId
@@ -7138,9 +7137,11 @@ class ObserveV3 {
     updateUINodesWithoutVSync(elmtIds) {
         
         aceTrace.begin(`ObserveV3.updateUINodes: ${elmtIds.length} elmtId`);
+        let view;
+        let weak;
         elmtIds.forEach((elmtId) => {
-            const view = this.id2cmp_[elmtId];
-            if (view && view instanceof ViewPU) {
+            if ((weak = this.id2cmp_[elmtId]) && (typeof weak == "object") && ("deref" in weak)
+                && (view = weak.deref()) && (view instanceof ViewPU)) {
                 if (view.isViewActive()) {
                     // FIXME need to call syncInstanceId before update?
                     view.UpdateElement(elmtId);
@@ -7149,7 +7150,7 @@ class ObserveV3 {
                     // FIXME @Component freeze
                     //....
                 }
-            }
+            } // if ViewPU
         });
         aceTrace.end();
     }
