@@ -3251,11 +3251,6 @@ void PipelineContext::DeleteNavigationNode(const std::string& id)
     }
 }
 
-void PipelineContext::SetJSViewActive(bool active, WeakPtr<CustomNode> custom)
-{
-    taskScheduler_->SetJSViewActive(active, custom);
-}
-
 std::string PipelineContext::GetCurrentExtraInfo()
 {
     auto node = activeNode_.Upgrade();

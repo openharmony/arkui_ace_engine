@@ -102,11 +102,10 @@ bool CustomNode::RenderCustomChild(int64_t deadline)
 
 void CustomNode::SetJSViewActive(bool active)
 {
-    auto context = PipelineContext::GetCurrentContext();
-    if (!context) {
-        return;
+    if (GetJsActive() != active) {
+        SetJsActive(active);
+        FireSetActiveFunc(active);
     }
-    context->SetJSViewActive(active, WeakClaim(this));
 }
 
 void CustomNode::AdjustLayoutWrapperTree(const RefPtr<LayoutWrapperNode>& parent, bool forceMeasure, bool forceLayout)
