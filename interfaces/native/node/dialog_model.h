@@ -33,23 +33,24 @@ struct ArkUI_NativeDialog {
 #endif
 
 namespace OHOS::Ace::DialogModel {
-ArkUI_NativeDialogHandler Create();
-void Dispose(ArkUI_NativeDialogHandler handler);
-int32_t AttachContent(ArkUI_NativeDialogHandler handler, ArkUI_NodeHandle content);
-int32_t DetachContent(ArkUI_NativeDialogHandler handler, ArkUI_NodeHandle content);
-int32_t SetContentAlignment(ArkUI_NativeDialogHandler handler, int32_t alignment, float offsetX, float offsetY);
-int32_t ResetContentAlignment(ArkUI_NativeDialogHandler handler);
-int32_t SetMode(ArkUI_NativeDialogHandler handler, bool useModalMode, bool autoCancel);
-int32_t SetMask(ArkUI_NativeDialogHandler handler, uint32_t maskColor, const ArkUI_Rect* rect);
-int32_t SetBackgroundColor(ArkUI_NativeDialogHandler handler, uint32_t backgroundColor);
-int32_t SetCornerRadius(ArkUI_NativeDialogHandler handler, float topLeft, float topRight,
+ArkUI_NativeDialogHandle Create();
+void Dispose(ArkUI_NativeDialogHandle handle);
+int32_t SetContent(ArkUI_NativeDialogHandle handle, ArkUI_NodeHandle content);
+int32_t RemoveContent(ArkUI_NativeDialogHandle handle);
+int32_t SetContentAlignment(ArkUI_NativeDialogHandle handle, int32_t alignment, float offsetX, float offsetY);
+int32_t ResetContentAlignment(ArkUI_NativeDialogHandle handle);
+int32_t SetModalMode(ArkUI_NativeDialogHandle handle, bool isModal);
+int32_t SetAutoCancel(ArkUI_NativeDialogHandle handle, bool autoCancel);
+int32_t SetMask(ArkUI_NativeDialogHandle handle, uint32_t maskColor, const ArkUI_Rect* rect);
+int32_t SetBackgroundColor(ArkUI_NativeDialogHandle handle, uint32_t backgroundColor);
+int32_t SetCornerRadius(ArkUI_NativeDialogHandle handle, float topLeft, float topRight,
     float bottomLeft, float bottomRight);
-int32_t SetGridCount(ArkUI_NativeDialogHandler handler, int32_t gridCount);
-int32_t SetCustomStyle(ArkUI_NativeDialogHandler handler, bool customStyle);
-int32_t UseCustomAnimation(ArkUI_NativeDialogHandler handler, bool useCustomAnimation);
-int32_t RegiesterOnWillDismiss(ArkUI_NativeDialogHandler handler, OnWillDismissEvent eventHandler);
-int32_t Show(ArkUI_NativeDialogHandler handler, bool showInSubWindow);
-int32_t Close(ArkUI_NativeDialogHandler handler);
+int32_t SetGridColumnCount(ArkUI_NativeDialogHandle handle, int32_t gridCount);
+int32_t EnableCustomStyle(ArkUI_NativeDialogHandle handle, bool enableCustomStyle);
+int32_t EnableCustomAnimation(ArkUI_NativeDialogHandle handle, bool enableCustomAnimation);
+int32_t RegiesterOnWillDismiss(ArkUI_NativeDialogHandle handle, ArkUI_OnWillDismissEvent eventHandler);
+int32_t Show(ArkUI_NativeDialogHandle handle, bool showInSubWindow);
+int32_t Close(ArkUI_NativeDialogHandle handle);
 } // namespace OHOS::Ace::NG::DialogModel
 
 #endif // ARKUI_NATIVE_NODE_DIALOG_MODEL_H

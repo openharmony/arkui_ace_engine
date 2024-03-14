@@ -3313,24 +3313,25 @@ struct ArkUIBasicAPI {
 
 struct ArkUIDialogAPI {
     ArkUIDialogHandle (*create)();
-    void (*dispose)(ArkUIDialogHandle handler);
-    ArkUI_Int32 (*attachContent)(ArkUIDialogHandle handler, ArkUINodeHandle contentNode);
-    ArkUI_Int32 (*detachContent)(ArkUIDialogHandle handler, ArkUINodeHandle contentNode);
-    ArkUI_Int32 (*setContentAlignment)(ArkUIDialogHandle handler,
+    void (*dispose)(ArkUIDialogHandle handle);
+    ArkUI_Int32 (*setContent)(ArkUIDialogHandle handle, ArkUINodeHandle contentNode);
+    ArkUI_Int32 (*removeContent)(ArkUIDialogHandle handle);
+    ArkUI_Int32 (*setContentAlignment)(ArkUIDialogHandle handle,
         ArkUI_Int32 alignment, ArkUI_Float32 offsetX, ArkUI_Float32 offsetY);
-    ArkUI_Int32 (*resetContentAlignment)(ArkUIDialogHandle handler);
-    ArkUI_Int32 (*setMode)(ArkUIDialogHandle handler, ArkUI_Int32 useModalMode, ArkUI_Bool autoCancel);
-    ArkUI_Int32 (*setMask)(ArkUIDialogHandle handler, ArkUI_Uint32 maskColor, ArkUIRect* rect);
-    ArkUI_Int32 (*setBackgroundColor)(ArkUIDialogHandle handler, ArkUI_Uint32 backgroundColor);
-    ArkUI_Int32 (*setCornerRadius)(ArkUIDialogHandle handler, ArkUI_Float32 topleft, ArkUI_Float32 topRight,
+    ArkUI_Int32 (*resetContentAlignment)(ArkUIDialogHandle handle);
+    ArkUI_Int32 (*setModalMode)(ArkUIDialogHandle handle, ArkUI_Bool isModal);
+    ArkUI_Int32 (*setAutoCancel)(ArkUIDialogHandle handle, ArkUI_Bool autoCancel);
+    ArkUI_Int32 (*setMask)(ArkUIDialogHandle handle, ArkUI_Uint32 maskColor, ArkUIRect* rect);
+    ArkUI_Int32 (*setBackgroundColor)(ArkUIDialogHandle handle, ArkUI_Uint32 backgroundColor);
+    ArkUI_Int32 (*setCornerRadius)(ArkUIDialogHandle handle, ArkUI_Float32 topleft, ArkUI_Float32 topRight,
         ArkUI_Float32 bottomLeft, ArkUI_Float32 bottomRight);
-    ArkUI_Int32 (*setGridCount)(ArkUIDialogHandle handler, ArkUI_Int32 gridCount);
-    ArkUI_Int32 (*setCustomStyle)(ArkUIDialogHandle handler, ArkUI_Bool customStyle);
-    ArkUI_Int32 (*useCustomAnimation)(ArkUIDialogHandle handler, ArkUI_Bool useCustomAnimation);
+    ArkUI_Int32 (*setGridColumnCount)(ArkUIDialogHandle handle, ArkUI_Int32 gridCount);
+    ArkUI_Int32 (*enableCustomStyle)(ArkUIDialogHandle handle, ArkUI_Bool enableCustomStyle);
+    ArkUI_Int32 (*enableCustomAnimation)(ArkUIDialogHandle handle, ArkUI_Bool enableCustomAnimation);
     // show dialog
-    ArkUI_Int32 (*show)(ArkUIDialogHandle handler, ArkUI_Bool showInSubWindow);
-    ArkUI_Int32 (*close)(ArkUIDialogHandle handler);
-    ArkUI_Int32 (*registerOnWillDismiss)(ArkUIDialogHandle handler, bool (*eventHandler)(ArkUI_Int32));
+    ArkUI_Int32 (*show)(ArkUIDialogHandle handle, ArkUI_Bool showInSubWindow);
+    ArkUI_Int32 (*close)(ArkUIDialogHandle handle);
+    ArkUI_Int32 (*registerOnWillDismiss)(ArkUIDialogHandle handle, bool (*eventHandler)(ArkUI_Int32));
 };
 
 struct ArkUIBasicNodeAPI {

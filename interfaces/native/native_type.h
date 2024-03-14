@@ -65,7 +65,7 @@ typedef struct ArkUI_Node* ArkUI_NodeHandle;
  *
  * @since 12
  */
-typedef struct ArkUI_NativeDialog* ArkUI_NativeDialogHandler;
+typedef struct ArkUI_NativeDialog* ArkUI_NativeDialogHandle;
 /**
  * @brief Provides the number types of ArkUI in the native code.
  *

@@ -38,8 +38,8 @@ ArkUIDialogHandle CreateDialog()
         .alignment = DEFAULT_DIALOG_ALIGNMENT, .offsetX = 0.0f,
         .offsetY = 0.0f, .isModal = true, .autoCancel = true, .maskColor = DEFAULT_MASK_COLOR, .maskRect = nullptr,
         .backgroundColor = DEFAULT_DIALOG_BACKGROUND_COLOR, .cornerRadiusRect = nullptr,
-        .gridCount = -1, .customStyle = false,
-        .showInSubWindow = false, .useCustomAnimation = false, .onWillDissmissCall = nullptr });
+        .gridCount = -1, .enableCustomStyle = false,
+        .showInSubWindow = false, .enableCustomAnimation = false, .onWillDissmissCall = nullptr });
 }
 
 void DisposeDialog(ArkUIDialogHandle controllerHandler)
@@ -110,7 +110,7 @@ void ParseDialogProperties(DialogProperties& dialogProperties, ArkUIDialogHandle
     dialogProperties.isShowInSubWindow = controllerHandler->showInSubWindow;
     dialogProperties.isModal = controllerHandler->isModal;
     dialogProperties.backgroundColor = Color(controllerHandler->backgroundColor);
-    dialogProperties.customStyle = controllerHandler->customStyle;
+    dialogProperties.customStyle = controllerHandler->enableCustomStyle;
     dialogProperties.gridCount = controllerHandler->gridCount;
     if (controllerHandler->cornerRadiusRect) {
         NG::BorderRadiusProperty radius;
@@ -131,17 +131,17 @@ void ParseDialogProperties(DialogProperties& dialogProperties, ArkUIDialogHandle
                 }
             };
     }
-    if (controllerHandler->useCustomAnimation && !dialogProperties.openAnimation.has_value()) {
+    if (controllerHandler->enableCustomAnimation && !dialogProperties.openAnimation.has_value()) {
         AnimationOption animation;
         dialogProperties.openAnimation = animation;
     }
-    if (controllerHandler->useCustomAnimation && !dialogProperties.closeAnimation.has_value()) {
+    if (controllerHandler->enableCustomAnimation && !dialogProperties.closeAnimation.has_value()) {
         AnimationOption animation;
         dialogProperties.closeAnimation = animation;
     }
 }
 
-ArkUI_Int32 AttachDialogContent(ArkUIDialogHandle controllerHandler, ArkUINodeHandle contentNode)
+ArkUI_Int32 SetDialogContent(ArkUIDialogHandle controllerHandler, ArkUINodeHandle contentNode)
 {
     CHECK_NULL_RETURN(controllerHandler, ERROR_CODE_PARAM_INVALID);
     CHECK_NULL_RETURN(contentNode, ERROR_CODE_PARAM_INVALID);
@@ -152,13 +152,12 @@ ArkUI_Int32 AttachDialogContent(ArkUIDialogHandle controllerHandler, ArkUINodeHa
     return ERROR_CODE_NO_ERROR;
 }
 
-ArkUI_Int32 DetachDialogContent(ArkUIDialogHandle controllerHandler, ArkUINodeHandle contentNode)
+ArkUI_Int32 RemoveDialogContent(ArkUIDialogHandle controllerHandler)
 {
     CHECK_NULL_RETURN(controllerHandler, ERROR_CODE_PARAM_INVALID);
-    CHECK_NULL_RETURN(contentNode, ERROR_CODE_PARAM_INVALID);
-    auto* frameNode = reinterpret_cast<FrameNode*>(contentNode);
-    CHECK_NULL_RETURN(frameNode, ERROR_CODE_PARAM_INVALID);
-    if (controllerHandler->contentHandle == frameNode) {
+    if (controllerHandler->contentHandle) {
+        auto* frameNode = reinterpret_cast<FrameNode*>(controllerHandler->contentHandle);
+        CHECK_NULL_RETURN(frameNode, ERROR_CODE_PARAM_INVALID);
         frameNode->DecRefCount();
         controllerHandler->contentHandle = nullptr;
     }
@@ -187,10 +186,16 @@ ArkUI_Int32 ResetDialogContentAlignment(ArkUIDialogHandle controllerHandler)
     return ERROR_CODE_NO_ERROR;
 }
 
-ArkUI_Int32 SetDialogMode(ArkUIDialogHandle controllerHandler, bool useModalMode, bool autoCancel)
+ArkUI_Int32 SetDialogModalMode(ArkUIDialogHandle controllerHandler, bool isModal)
 {
     CHECK_NULL_RETURN(controllerHandler, ERROR_CODE_PARAM_INVALID);
-    controllerHandler->isModal = useModalMode;
+    controllerHandler->isModal = isModal;
+    return ERROR_CODE_NO_ERROR;
+}
+
+ArkUI_Int32 SetDialogAutoCancel(ArkUIDialogHandle controllerHandler, bool autoCancel)
+{
+    CHECK_NULL_RETURN(controllerHandler, ERROR_CODE_PARAM_INVALID);
     controllerHandler->autoCancel = autoCancel;
     return ERROR_CODE_NO_ERROR;
 }
@@ -222,24 +227,24 @@ ArkUI_Int32 SetDialogCornerRadius(ArkUIDialogHandle controllerHandler, ArkUI_Flo
     return ERROR_CODE_NO_ERROR;
 }
 
-ArkUI_Int32 SetDialogGridCount(ArkUIDialogHandle controllerHandler, ArkUI_Int32 gridCount)
+ArkUI_Int32 SetDialogGridColumnCount(ArkUIDialogHandle controllerHandler, ArkUI_Int32 gridCount)
 {
     CHECK_NULL_RETURN(controllerHandler, ERROR_CODE_PARAM_INVALID);
     controllerHandler->gridCount = gridCount;
     return ERROR_CODE_NO_ERROR;
 }
 
-ArkUI_Int32 SetDialogCustomStyle(ArkUIDialogHandle controllerHandler, bool customStyle)
+ArkUI_Int32 EnableDialogCustomStyle(ArkUIDialogHandle controllerHandler, bool enableCustomStyle)
 {
     CHECK_NULL_RETURN(controllerHandler, ERROR_CODE_PARAM_INVALID);
-    controllerHandler->customStyle = customStyle;
+    controllerHandler->enableCustomStyle = enableCustomStyle;
     return ERROR_CODE_NO_ERROR;
 }
 
-ArkUI_Int32 UseDialogCustomAnimation(ArkUIDialogHandle controllerHandler, ArkUI_Bool useCustomAnimation)
+ArkUI_Int32 EnableDialogCustomAnimation(ArkUIDialogHandle controllerHandler, bool enableCustomAnimation)
 {
     CHECK_NULL_RETURN(controllerHandler, ERROR_CODE_PARAM_INVALID);
-    controllerHandler->useCustomAnimation = useCustomAnimation;
+    controllerHandler->enableCustomAnimation = enableCustomAnimation;
     return ERROR_CODE_NO_ERROR;
 }
 
