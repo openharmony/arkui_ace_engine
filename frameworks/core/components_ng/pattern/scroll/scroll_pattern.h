@@ -153,7 +153,7 @@ public:
     bool UpdateCurrentOffset(float offset, int32_t source) override;
     void ScrollToEdge(ScrollEdgeType scrollEdgeType, bool smooth) override;
     void ScrollBy(float pixelX, float pixelY, bool smooth, const std::function<void()>& onFinish = nullptr);
-    bool ScrollPage(bool reverse, bool smooth, const std::function<void()>& onFinish = nullptr);
+    void ScrollPage(bool reverse, bool smooth = false) override;
     void ScrollTo(float position) override;
     void JumpToPosition(float position, int32_t source = SCROLL_FROM_JUMP);
     float GetMainContentSize() const override
