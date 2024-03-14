@@ -36,8 +36,8 @@ class NavDestinationPattern : public Pattern, public FocusView {
     DECLARE_ACE_TYPE(NavDestinationPattern, Pattern, FocusView);
 
 public:
-    explicit NavDestinationPattern(const RefPtr<ShallowBuilder>& shallowBuilder) : shallowBuilder_(shallowBuilder) {}
-    NavDestinationPattern() = default;
+    explicit NavDestinationPattern(const RefPtr<ShallowBuilder>& shallowBuilder);
+    NavDestinationPattern();
     ~NavDestinationPattern() override;
 
     bool IsAtomicNode() const override
@@ -105,9 +105,19 @@ public:
         return navDestinationContext_ ? navDestinationContext_->GetNavigationStack() : nullptr;
     }
 
+    void SetIndex(int32_t index)
+    {
+        if (navDestinationContext_) {
+            navDestinationContext_->SetIndex(index);
+        }
+    }
+
     void SetNavDestinationContext(const RefPtr<NavDestinationContext>& context)
     {
         navDestinationContext_ = context;
+        if (navDestinationContext_) {
+            navDestinationContext_->SetNavDestinationId(navDestinationId_);
+        }
     }
 
     RefPtr<NavDestinationContext> GetNavDestinationContext() const
@@ -165,6 +175,11 @@ public:
 
     void DumpInfo() override;
 
+    uint64_t GetNavDestinationId() const
+    {
+        return navDestinationId_;
+    }
+
 private:
     void UpdateNameIfNeeded(RefPtr<NavDestinationGroupNode>& hostNode);
     void UpdateBackgroundColorIfNeeded(RefPtr<NavDestinationGroupNode>& hostNode);
@@ -176,6 +191,7 @@ private:
     RefPtr<UINode> customNode_;
     WeakPtr<UINode> navigationNode_;
     bool isOnShow_ = false;
+    uint64_t navDestinationId_ = 0;
     void OnAttachToFrameNode() override;
 };
 

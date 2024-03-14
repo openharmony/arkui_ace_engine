@@ -19,12 +19,18 @@
 #include "base/memory/ace_type.h"
 #include "base/utils/utils.h"
 #include "bridge/declarative_frontend/engine/functions/js_function.h"
-#include "bridge/declarative_frontend/jsview/js_navigation_stack.h"
+#include "bridge/declarative_frontend/engine/js_converter.h"
 #include "bridge/declarative_frontend/engine/js_ref_ptr.h"
 #include "bridge/declarative_frontend/engine/js_types.h"
+#include "bridge/declarative_frontend/jsview/js_navigation_stack.h"
 #include "bridge/declarative_frontend/jsview/js_utils.h"
 
 namespace OHOS::Ace::Framework {
+napi_value JSNavPathInfo::GetParamObj() const
+{
+    return JsConverter::ConvertJsValToNapiValue(param_);
+}
+
 JSRef<JSObject> JSNavDestinationContext::CreateJSNavPathInfo() const
 {
     JSRef<JSObject> obj = JSRef<JSObject>::New();

@@ -45,8 +45,8 @@ private:
     napi_value ProcessDrawCommandSendUnRegister(napi_env env, napi_callback_info info);
     napi_value ProcessLayoutDoneRegister(napi_env env, napi_callback_info info);
     napi_value ProcessLayoutDoneUnRegister(napi_env env, napi_callback_info info);
-    std::map<std::string, Func> registerProcess_;
-    std::map<std::string, Func> unregisterProcess_;
+    std::map<std::string, Func> registerProcessMap_;
+    std::map<std::string, Func> unregisterProcessMap_;
 };
 } // namespace OHOS::Ace::Napi
 
