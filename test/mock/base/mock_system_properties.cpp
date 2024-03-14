@@ -57,6 +57,7 @@ bool SystemProperties::gridCacheEnabled_ = false;
 bool SystemProperties::sideBarContainerBlurEnable_ = false;
 bool SystemProperties::stateManagerEnable_ = false;
 bool SystemProperties::acePerformanceMonitorEnable_ = false;
+bool SystemProperties::debugBoundaryEnabled_ = false;
 
 float SystemProperties::GetFontWeightScale()
 {
