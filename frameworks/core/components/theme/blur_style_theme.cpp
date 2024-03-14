@@ -25,9 +25,7 @@ RefPtr<BlurStyleTheme> BlurStyleTheme::Builder::Build(const RefPtr<ThemeConstant
 {
     RefPtr<BlurStyleTheme> theme = AceType::Claim(new BlurStyleTheme());
     CHECK_NULL_RETURN(themeConstants, theme);
-    auto themeStyle = themeConstants->GetThemeStyle();
-    CHECK_NULL_RETURN(themeStyle, theme);
-    auto blurTheme = themeStyle->GetAttr<RefPtr<ThemeStyle>>(THEME_BLUR_STYLE_COMMON, nullptr);
+    RefPtr<ThemeStyle> blurTheme = themeConstants->GetPatternByName(THEME_BLUR_STYLE_COMMON);
     if (!blurTheme) {
         TAG_LOGW(AceLogTag::ACE_THEME, "find pattern of blur style fail");
         return theme;

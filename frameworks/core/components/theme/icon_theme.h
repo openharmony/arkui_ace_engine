@@ -36,7 +36,7 @@ public:
         RefPtr<IconTheme> Build(const RefPtr<ThemeConstants>& themeConstants) const;
 
     private:
-        void ParsePattern(const RefPtr<ThemeStyle>& themeStyle, const RefPtr<IconTheme>& theme) const;
+        void ParsePattern(const RefPtr<ThemeConstants>& themeConstants, const RefPtr<IconTheme>& theme) const;
     };
 
     ~IconTheme() override = default;

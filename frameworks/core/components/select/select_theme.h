@@ -58,17 +58,17 @@ public:
             if (!themeConstants) {
                 return theme;
             }
-            ParseNewPattern(themeConstants->GetThemeStyle(), theme);
-            Parse(themeConstants->GetThemeStyle(), theme);
+            ParseNewPattern(themeConstants, theme);
+            Parse(themeConstants, theme);
             return theme;
         }
 
-        void Parse(const RefPtr<ThemeStyle>& style, const RefPtr<SelectTheme>& theme) const
+        void Parse(const RefPtr<ThemeConstants>& themeConstants, const RefPtr<SelectTheme>& theme) const
         {
-            if (!style || !theme) {
+            if (!theme) {
                 return;
             }
-            auto pattern = style->GetAttr<RefPtr<ThemeStyle>>(THEME_PATTERN_SELECT, nullptr);
+            RefPtr<ThemeStyle> pattern = themeConstants->GetPatternByName(THEME_PATTERN_SELECT);
             if (!pattern) {
                 LOGE("Pattern of select is null, please check!");
                 return;
@@ -155,12 +155,12 @@ public:
             theme->maxPaddingEnd_ = pattern->GetAttr<Dimension>("max_padding_end", theme->maxPaddingEnd_);
         }
 
-        void ParseNewPattern(const RefPtr<ThemeStyle>& style, const RefPtr<SelectTheme>& theme) const
+        void ParseNewPattern(const RefPtr<ThemeConstants>& themeConstants, const RefPtr<SelectTheme>& theme) const
         {
-            if (!style || !theme) {
+            if (!theme) {
                 return;
             }
-            auto pattern = style->GetAttr<RefPtr<ThemeStyle>>(THEME_PATTERN_SELECT, nullptr);
+            RefPtr<ThemeStyle> pattern = themeConstants->GetPatternByName(THEME_PATTERN_SELECT);
             if (!pattern) {
                 LOGE("Pattern of select is null, please check!");
                 return;
