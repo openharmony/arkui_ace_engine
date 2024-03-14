@@ -296,14 +296,12 @@ void NavigationPattern::RefreshNavDestination()
 {
     auto hostNode = AceType::DynamicCast<NavigationGroupNode>(GetHost());
     CHECK_NULL_VOID(hostNode);
-    int32_t preSize = preStackSize_;
     auto preTopNavPath = std::move(preTopNavPath_);
     auto& navPathList = navigationStack_->GetAllNavDestinationNodes();
     hostNode->UpdateNavDestinationNodeWithoutMarkDirty(
         preTopNavPath.has_value() ? preTopNavPath->second : nullptr, navigationModeChange_);
     auto newTopNavPath = navigationStack_->GetTopNavPath();
-    auto size = navigationStack_->Size();
-    CheckTopNavPathChange(preTopNavPath, newTopNavPath, preSize > size);
+    CheckTopNavPathChange(preTopNavPath, newTopNavPath);
 
     /* if first navDestination is removed, the new one will be refreshed */
     if (!navPathList.empty()) {
@@ -316,7 +314,7 @@ void NavigationPattern::RefreshNavDestination()
 
 void NavigationPattern::CheckTopNavPathChange(
     const std::optional<std::pair<std::string, RefPtr<UINode>>>& preTopNavPath,
-    const std::optional<std::pair<std::string, RefPtr<UINode>>>& newTopNavPath, bool isPopPage)
+    const std::optional<std::pair<std::string, RefPtr<UINode>>>& newTopNavPath)
 {
     auto replaceValue = navigationStack_->GetReplaceValue();
     if (preTopNavPath == newTopNavPath && replaceValue != 1) {
@@ -353,10 +351,11 @@ void NavigationPattern::CheckTopNavPathChange(
     // fire onHidden and lostFocus event
     RefPtr<NavDestinationGroupNode> preTopNavDestination;
     int32_t lastPreIndex = -1;
+    bool isPopPage = false;
     if (preTopNavPath.has_value()) {
         // pre page is not in the current stack
         lastPreIndex = navigationStack_->FindIndex(preTopNavPath->first, preTopNavPath->second, true);
-        isPopPage &= lastPreIndex == -1;
+        isPopPage |= lastPreIndex == -1;
         preTopNavDestination = AceType::DynamicCast<NavDestinationGroupNode>(
             NavigationGroupNode::GetNavDestinationNode(preTopNavPath->second));
         if (preTopNavDestination) {
