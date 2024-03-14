@@ -34,6 +34,7 @@ void AtomicServicePattern::BeforeCreateLayoutWrapper()
     auto manager = pipeline->GetSafeAreaManager();
     CHECK_NULL_VOID(manager);
     manager->SetIsAtomicService(true);
+    manager->AddGeoRestoreNode(host);
     PaddingProperty padding {
         .left = CalcLength(safeArea.left_.Length()),
         .right = CalcLength(safeArea.right_.Length()),
