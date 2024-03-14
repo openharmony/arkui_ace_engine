@@ -189,6 +189,18 @@ JSRef<JSObject> JSRichEditor::CreateJSTextStyleResult(const TextStyleResult& tex
     return textStyleObj;
 }
 
+JSRef<JSObject> JSRichEditor::CreateJSParagraphStyle(const TextStyleResult& textStyleResult)
+{
+    JSRef<JSObject> paragraphStyleObj = JSRef<JSObject>::New();
+    paragraphStyleObj->SetProperty<int32_t>("textAlign", textStyleResult.textAlign);
+    JSRef<JSArray> leadingMarginArray = JSRef<JSArray>::New();
+    leadingMarginArray->SetValueAt(0, JSRef<JSVal>::Make(ToJSValue(textStyleResult.leadingMarginSize[0])));
+    leadingMarginArray->SetValueAt(1, JSRef<JSVal>::Make(ToJSValue(textStyleResult.leadingMarginSize[1])));
+    paragraphStyleObj->SetPropertyObject("leadingMargin", leadingMarginArray);
+
+    return paragraphStyleObj;
+}
+
 JSRef<JSObject> JSRichEditor::CreateJSSymbolSpanStyleResult(const SymbolSpanStyle& symbolSpanStyle)
 {
     JSRef<JSObject> symbolSpanStyleObj = JSRef<JSObject>::New();
@@ -215,6 +227,16 @@ JSRef<JSObject> JSRichEditor::CreateJSValueResource(const RefPtr<ResourceObject>
     return valueResourceObj;
 }
 
+JSRef<JSObject> JSRichEditor::CreateJSLayoutStyle(const ImageStyleResult& imageStyleResult)
+{
+    JSRef<JSObject> layoutStyleObj = JSRef<JSObject>::New();
+
+    layoutStyleObj->SetProperty<std::string>("borderRadius", imageStyleResult.borderRadius);
+    layoutStyleObj->SetProperty<std::string>("margin", imageStyleResult.margin);
+
+    return layoutStyleObj;
+}
+
 JSRef<JSObject> JSRichEditor::CreateJSImageStyleResult(const ImageStyleResult& imageStyleResult)
 {
     JSRef<JSObject> imageSpanStyleObj = JSRef<JSObject>::New();
@@ -225,8 +247,7 @@ JSRef<JSObject> JSRichEditor::CreateJSImageStyleResult(const ImageStyleResult& i
     imageSpanStyleObj->SetPropertyObject("size", sizeArray);
     imageSpanStyleObj->SetProperty<int32_t>("verticalAlign", imageStyleResult.verticalAlign);
     imageSpanStyleObj->SetProperty<int32_t>("objectFit", imageStyleResult.objectFit);
-    imageSpanStyleObj->SetProperty<std::string>("borderRadius", imageStyleResult.borderRadius);
-    imageSpanStyleObj->SetProperty<std::string>("margin", imageStyleResult.margin);
+    imageSpanStyleObj->SetPropertyObject("layoutStyle", CreateJSLayoutStyle(imageStyleResult));
 
     return imageSpanStyleObj;
 }
@@ -268,6 +289,7 @@ JSRef<JSObject> JSRichEditor::CreateJSSpanResultObject(const ResultObject& resul
     if (resultObject.type == SelectSpanType::TYPESPAN) {
         resultObj->SetProperty<std::string>("value", resultObject.valueString);
         resultObj->SetPropertyObject("textStyle", CreateJSTextStyleResult(resultObject.textStyle));
+        resultObj->SetPropertyObject("paragraphStyle", CreateJSParagraphStyle(resultObject.textStyle));
     } else if (resultObject.type == SelectSpanType::TYPESYMBOLSPAN) {
         resultObj->SetProperty<std::string>("value", resultObject.valueString);
         resultObj->SetPropertyObject("symbolSpanStyle", CreateJSSymbolSpanStyleResult(resultObject.symbolSpanStyle));
@@ -467,6 +489,7 @@ JSRef<JSVal> JSRichEditor::CreateJsOnIMEInputComplete(const NG::RichEditorAbstra
     onIMEInputCompleteObj->SetProperty<std::string>("value", textSpanResult.GetValue());
     onIMEInputCompleteObj->SetPropertyObject("textStyle", textStyleObj);
     onIMEInputCompleteObj->SetPropertyObject("offsetInSpan", offsetInSpan);
+    onIMEInputCompleteObj->SetPropertyObject("paragraphStyle", CreateJSParagraphStyle(textSpanResult.GetTextStyle()));
     return JSRef<JSVal>::Cast(onIMEInputCompleteObj);
 }
 
@@ -499,11 +522,16 @@ JSRef<JSVal> JSRichEditor::CreateJsAboutToDelet(const NG::RichEditorDeleteValue&
                 CreateTextStyleObj(textStyleObj, it);
                 spanResultObj->SetProperty<std::string>("value", it.GetValue());
                 spanResultObj->SetPropertyObject("textStyle", textStyleObj);
+                spanResultObj->SetPropertyObject("paragraphStyle", CreateJSParagraphStyle(it.GetTextStyle()));
                 break;
             }
             case NG::SpanResultType::IMAGE: {
                 JSRef<JSObject> imageStyleObj = JSRef<JSObject>::New();
                 CreateImageStyleObj(imageStyleObj, spanResultObj, it);
+                JSRef<JSObject> layoutStyleObj = JSRef<JSObject>::New();
+                layoutStyleObj->SetProperty<std::string>("borderRadius", it.GetBorderRadius());
+                layoutStyleObj->SetProperty<std::string>("margin", it.GetMargin());
+                imageStyleObj->SetPropertyObject("layoutStyle", layoutStyleObj);
                 spanResultObj->SetPropertyObject("imageStyle", imageStyleObj);
                 break;
             }

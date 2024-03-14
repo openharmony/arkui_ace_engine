@@ -120,6 +120,22 @@ public:
     void SetImageFit(ImageFit objectFit);
     ImageFit GetObjectFit() const;
 
+    void SetBorderRadius(const std::string& borderRadius)
+    {
+        borderRadius_ = borderRadius;
+    }
+    const std::string& GetBorderRadius() const
+    {
+        return borderRadius_;
+    }
+    void SetMargin(const std::string& margin)
+    {
+        margin_ = margin;
+    }
+    const std::string& GetMargin() const
+    {
+        return margin_;
+    }
     void SetFontStyle(OHOS::Ace::FontStyle fontStyle)
     {
         fontStyle_ = fontStyle;
@@ -154,6 +170,8 @@ private:
     int32_t height_ = 0;
     VerticalAlign verticalAlign_;
     ImageFit objectFit_;
+    std::string borderRadius_;
+    std::string margin_;
 };
 
 enum class RichEditorDeleteDirection { BACKWARD = 0, FORWARD };
