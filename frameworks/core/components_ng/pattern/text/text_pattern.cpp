@@ -1399,6 +1399,7 @@ void TextPattern::UpdateSpanItemDragStatus(const std::list<ResultObject>& result
             if (isDragging) {
                 spanItem->StartDrag(resultObj.offsetInSpan[RichEditorSpanRange::RANGESTART],
                     resultObj.offsetInSpan[RichEditorSpanRange::RANGEEND]);
+                pattern->dragSpanItems_.emplace_back(spanItem);
             } else {
                 spanItem->EndDrag();
             }
@@ -1430,6 +1431,7 @@ void TextPattern::OnDragEnd(const RefPtr<Ace::DragEvent>& event)
     if (status_ == Status::DRAGGING) {
         status_ = Status::NONE;
     }
+    dragSpanItems_.clear();
     if (dragResultObjects_.empty()) {
         return;
     }

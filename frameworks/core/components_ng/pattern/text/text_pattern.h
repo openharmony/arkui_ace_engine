@@ -309,6 +309,7 @@ public:
     virtual std::function<void(Offset)> GetThumbnailCallback();
     std::list<ResultObject> dragResultObjects_;
     std::list<ResultObject> recoverDragResultObjects_;
+    std::vector<RefPtr<SpanItem>> dragSpanItems_;
     void OnDragEnd(const RefPtr<Ace::DragEvent>& event);
     void OnDragEndNoChild(const RefPtr<Ace::DragEvent>& event);
     void CloseOperate();
