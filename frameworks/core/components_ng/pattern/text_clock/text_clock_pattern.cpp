@@ -38,7 +38,7 @@ constexpr int32_t MICROSECONDS_OF_MILLISECOND = 1000;
 constexpr int32_t MILLISECONDS_OF_SECOND = 1000;
 constexpr int32_t TOTAL_SECONDS_OF_MINUTE = 60;
 constexpr bool ON_TIME_CHANGE = true;
-const std::string DEFAULT_FORMAT = "aa h:m:s";
+const std::string DEFAULT_FORMAT = "aa hh:mm:ss";
 const std::string FORM_FORMAT = "hm";
 constexpr char TEXTCLOCK_WEEK[] = "textclock.week";
 constexpr char TEXTCLOCK_YEAR[] = "textclock.year";
@@ -95,12 +95,10 @@ void TextClockPattern::OnAttachToFrameNode()
 
 void TextClockPattern::OnDetachFromFrameNode(FrameNode* frameNode)
 {
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
-    pipeline->RemoveVisibleAreaChangeNode(host->GetId());
-    pipeline->RemoveFormVisibleChangeNode(host->GetId());
+    pipeline->RemoveVisibleAreaChangeNode(frameNode->GetId());
+    pipeline->RemoveFormVisibleChangeNode(frameNode->GetId());
 }
 
 void TextClockPattern::UpdateTextLayoutProperty(
