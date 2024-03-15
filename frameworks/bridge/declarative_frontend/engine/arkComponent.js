@@ -7053,6 +7053,20 @@ class SpanLetterSpacingModifier extends ModifierWithKey {
   }
 }
 SpanLetterSpacingModifier.identity = Symbol('spanLetterSpacing');
+class SpanBaselineOffsetModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().span.resetBaselineOffset(node);
+    }
+    else {
+      getUINativeModule().span.setBaselineOffset(node, this.value);
+    }
+  }
+}
+SpanBaselineOffsetModifier.identity = Symbol('spanBaselineOffset');
 class SpanFontModifier extends ModifierWithKey {
   constructor(value) {
     super(value);
@@ -7600,6 +7614,10 @@ class ArkSpanComponent {
   }
   letterSpacing(value) {
     modifierWithKey(this._modifiersWithKeys, SpanLetterSpacingModifier.identity, SpanLetterSpacingModifier, value);
+    return this;
+  }
+  baselineOffset(value) {
+    modifierWithKey(this._modifiersWithKeys, SpanBaselineOffsetModifier.identity, SpanBaselineOffsetModifier, value);
     return this;
   }
   textCase(value) {

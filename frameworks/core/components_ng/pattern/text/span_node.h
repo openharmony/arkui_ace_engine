@@ -146,7 +146,13 @@ enum class SpanItemType {
     NORMAL = 0,
     IMAGE = 1
 };
-
+struct PlaceholderStyle {
+    double width = 0.0f;
+    double height = 0.0f;
+    double baselineOffset = 0.0f;
+    VerticalAlign verticalAlign = VerticalAlign::BOTTOM;
+    TextBaseline baseline = TextBaseline::ALPHABETIC;
+};
 struct SpanItem : public AceType {
     DECLARE_ACE_TYPE(SpanItem, AceType);
 
@@ -184,7 +190,7 @@ public:
     int32_t selectedEnd = -1;
     void UpdateSymbolSpanParagraph(const RefPtr<FrameNode>& frameNode, const RefPtr<Paragraph>& builder);
     virtual int32_t UpdateParagraph(const RefPtr<FrameNode>& frameNode, const RefPtr<Paragraph>& builder,
-        double width = 0.0f, double height = 0.0f, VerticalAlign verticalAlign = VerticalAlign::BASELINE);
+        PlaceholderStyle placeholderStyle = PlaceholderStyle());
     virtual void UpdateSymbolSpanColor(const RefPtr<FrameNode>& frameNode, TextStyle& symbolSpanStyle);
     virtual void UpdateTextStyleForAISpan(
         const std::string& content, const RefPtr<Paragraph>& builder, const std::optional<TextStyle>& textStyle);
@@ -272,6 +278,7 @@ enum class PropertyInfo {
     WORD_BREAK,
     LINE_BREAK_STRATEGY,
     FONTFEATURE,
+    BASELINE_OFFSET,
 };
 
 class ACE_EXPORT BaseSpan : public virtual AceType {
@@ -381,6 +388,7 @@ public:
     DEFINE_SPAN_FONT_STYLE_ITEM(SymbolRenderingStrategy, uint32_t);
     DEFINE_SPAN_FONT_STYLE_ITEM(SymbolEffectStrategy, uint32_t);
     DEFINE_SPAN_TEXT_LINE_STYLE_ITEM(LineHeight, Dimension);
+    DEFINE_SPAN_TEXT_LINE_STYLE_ITEM(BaselineOffset, Dimension);
     DEFINE_SPAN_TEXT_LINE_STYLE_ITEM(TextAlign, TextAlign);
     DEFINE_SPAN_TEXT_LINE_STYLE_ITEM(WordBreak, WordBreak);
     DEFINE_SPAN_TEXT_LINE_STYLE_ITEM(LeadingMargin, LeadingMargin);
@@ -451,8 +459,8 @@ public:
     PlaceholderSpanItem() = default;
     ~PlaceholderSpanItem() override = default;
     void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override {};
-    int32_t UpdateParagraph(const RefPtr<FrameNode>& frameNode, const RefPtr<Paragraph>& builder, double width,
-        double height, VerticalAlign verticalAlign) override;
+    int32_t UpdateParagraph(const RefPtr<FrameNode>& frameNode, const RefPtr<Paragraph>& builder,
+        PlaceholderStyle placeholderStyle) override;
     ACE_DISALLOW_COPY_AND_MOVE(PlaceholderSpanItem);
 };
 
@@ -518,8 +526,8 @@ public:
     }
     ~ImageSpanItem() override = default;
     PlaceholderRun run_;
-    int32_t UpdateParagraph(const RefPtr<FrameNode>& frameNode, const RefPtr<Paragraph>& builder, double width,
-        double height, VerticalAlign verticalAlign) override;
+    int32_t UpdateParagraph(const RefPtr<FrameNode>& frameNode, const RefPtr<Paragraph>& builder,
+        PlaceholderStyle placeholderStyle) override;
     void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override {};
     void UpdatePlaceholderBackgroundStyle(const RefPtr<FrameNode>& imageNode);
     void SetImageSpanOptions(const ImageSpanOptions& options);

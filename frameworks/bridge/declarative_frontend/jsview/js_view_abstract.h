@@ -261,6 +261,10 @@ public:
     // mouse response response region
     static void JsMouseResponseRegion(const JSCallbackInfo& info);
 
+    static bool ParseJsLengthNG(
+        const JSRef<JSVal>& jsValue, NG::CalcLength& result, DimensionUnit defaultUnit, bool isSupportPercent = true);
+    static bool ParseJsLengthVpNG(const JSRef<JSVal>& jsValue, NG::CalcLength& result, bool isSupportPercent = true);
+
     // for number and string with no unit, use default dimension unit.
     static bool ParseJsDimension(const JSRef<JSVal>& jsValue, CalcDimension& result, DimensionUnit defaultUnit);
     static bool ParseJsDimensionVp(const JSRef<JSVal>& jsValue, CalcDimension& result);

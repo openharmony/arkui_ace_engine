@@ -26,10 +26,10 @@
 extern "C" {
 #endif
 
-#define ARKUI_FULL_API_VERSION 91
+#define ARKUI_FULL_API_VERSION 92
 // When changing ARKUI_BASIC_API_VERSION, ARKUI_FULL_API_VERSION must be
 // increased as well.
-#define ARKUI_NODE_API_VERSION 91
+#define ARKUI_NODE_API_VERSION 92
 
 #define ARKUI_BASIC_API_VERSION 8
 #define ARKUI_EXTENDED_API_VERSION 7
@@ -2846,6 +2846,8 @@ struct ArkUISpanModifier {
     void (*resetSpanFontColor)(ArkUINodeHandle node);
     void (*setSpanLetterSpacing)(ArkUINodeHandle node, const struct ArkUIStringAndFloat* letterSpacingValue);
     void (*resetSpanLetterSpacing)(ArkUINodeHandle node);
+    void (*setSpanBaselineOffset)(ArkUINodeHandle node, const struct ArkUIStringAndFloat* letterSpacingValue);
+    void (*resetSpanBaselineOffset)(ArkUINodeHandle node);
     void (*setSpanFont)(ArkUINodeHandle node, const struct ArkUIFontStruct* fontInfo);
     void (*resetSpanFont)(ArkUINodeHandle node);
     void (*setSpanFontWeightStr)(ArkUINodeHandle node, ArkUI_CharPtr value);
@@ -2858,6 +2860,7 @@ struct ArkUISpanModifier {
     ArkUI_Float32 (*getSpanLineHeight)(ArkUINodeHandle node);
     ArkUI_Int32 (*getSpanTextCase)(ArkUINodeHandle node);
     ArkUI_Float32 (*getSpanLetterSpacing)(ArkUINodeHandle node);
+    ArkUI_Float32 (*getSpanBaselineOffset)(ArkUINodeHandle node);
     void (*setSpanTextBackgroundStyle)(ArkUINodeHandle node, ArkUI_Uint32 color, const ArkUI_Float32* values,
         const ArkUI_Int32* units, ArkUI_Int32 length);
     void (*resetSpanTextBackgroundStyle)(ArkUINodeHandle node);

@@ -48,6 +48,7 @@ public:
     virtual void SetTextCase(TextCase value) = 0;
     virtual void SetTextShadow(const std::vector<Shadow>& value) = 0;
     virtual void SetLetterSpacing(const Dimension& value) = 0;
+    virtual void SetBaselineOffset(const Dimension& value) = 0;
     virtual void SetLineHeight(const Dimension& value) = 0;
     virtual void SetOnClick(std::function<void(BaseEventInfo* info)>&& click) = 0;
     virtual void ClearOnClick() = 0;
