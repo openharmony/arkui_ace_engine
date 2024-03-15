@@ -1411,11 +1411,14 @@ void FrameNode::AdjustLayoutWrapperTree(const RefPtr<LayoutWrapperNode>& parent,
 
 RefPtr<ContentModifier> FrameNode::GetContentModifier()
 {
+    CHECK_NULL_RETURN(pattern_, nullptr);
     auto wrapper = CreatePaintWrapper();
+    CHECK_NULL_RETURN(wrapper, nullptr);
     auto paintMethod = pattern_->CreateNodePaintMethod();
     if (!paintMethod && drawModifier_) {
         paintMethod = pattern_->CreateDefaultNodePaintMethod();
     }
+    CHECK_NULL_RETURN(paintMethod, nullptr);
     auto contentModifier = DynamicCast<ContentModifier>(paintMethod->GetContentModifier(AceType::RawPtr(wrapper)));
     return contentModifier;
 }
