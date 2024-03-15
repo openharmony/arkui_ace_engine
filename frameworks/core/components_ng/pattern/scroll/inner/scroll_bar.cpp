@@ -118,7 +118,7 @@ void ScrollBar::UpdateScrollBarRegion(
 {
     // return if nothing changes to avoid changing opacity
     if (!positionModeUpdate_ && !normalWidthUpdate_ && paintOffset_ == offset && viewPortSize_ == size &&
-        lastOffset_ == lastOffset && NearEqual(estimatedHeight_, estimatedHeight, 0.000001f)) {
+        lastOffset_ == lastOffset && NearEqual(estimatedHeight_, estimatedHeight, 0.000001f) && !isReverseUpdate_) {
         return;
     }
     if (!NearZero(estimatedHeight)) {
@@ -134,6 +134,7 @@ void ScrollBar::UpdateScrollBarRegion(
         }
         positionModeUpdate_ = false;
         normalWidthUpdate_ = false;
+        isReverseUpdate_ = false;
     }
 }
 
