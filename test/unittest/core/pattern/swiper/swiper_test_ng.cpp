@@ -10342,11 +10342,12 @@ HWTEST_F(SwiperTestNg, SwiperPatternHandleScroll001, TestSize.Level1)
     pattern_->GetLayoutProperty<SwiperLayoutProperty>()->UpdateLoop(true);
     auto res = pattern_->HandleScroll(5.0f, SCROLL_FROM_UPDATE, NestedState::GESTURE);
     EXPECT_EQ(res.remain, 0.0f);
+    EXPECT_FALSE(res.reachEdge);
 
     pattern_->GetLayoutProperty<SwiperLayoutProperty>()->UpdateDisableSwipe(true);
     res = pattern_->HandleScroll(5.0f, SCROLL_FROM_UPDATE, NestedState::GESTURE);
     EXPECT_EQ(res.remain, 5.0f);
-    EXPECT_FALSE(res.reachEdge);
+    EXPECT_TRUE(res.reachEdge);
 }
 
 /**
