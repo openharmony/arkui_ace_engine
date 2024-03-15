@@ -2744,6 +2744,9 @@ void OverlayManager::OnBindSheet(bool isShow, std::function<void(const std::stri
                 CHECK_NULL_VOID(sheet);
                 auto sheetPattern = sheet->GetPattern<SheetPresentationPattern>();
                 CHECK_NULL_VOID(sheetPattern);
+                if (sheetPattern->IsDragging()) {
+                    return;
+                }
                 sheetPattern->SheetInteractiveDismiss(false);
             });
         eventConfirmHub->AddClickEvent(sheetMaskClickEvent_);

@@ -334,6 +334,16 @@ public:
         return show_;
     }
 
+    void SetIsDragging(bool isDrag)
+    {
+        isDrag_ = isDrag;
+    }
+
+    bool IsDragging() const
+    {
+        return isDrag_;
+    }
+
     // Get ScrollHeight before avoid keyboard
     float GetScrollHeight() const
     {
@@ -428,6 +438,7 @@ private:
     std::shared_ptr<AnimationUtils::Animation> animation_;
 
     bool show_ = true;
+    bool isDrag_ = false;
 
     ACE_DISALLOW_COPY_AND_MOVE(SheetPresentationPattern);
 };
