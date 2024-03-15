@@ -176,7 +176,7 @@ ArkUINativeModuleValue SwiperBridge::SetSwiperDisplayArrow(ArkUIRuntimeCallInfo*
             ? std::to_string(lengthValue.Value()) + "vp" : "-";
     std::string backgroundColorStr =
         ArkTSUtils::ParseJsColorAlpha(vm, backgroundColor, color) ? std::to_string(color.GetValue()) : "-";
-    std::string arrowSizeStr = ArkTSUtils::ParseJsDimension(vm, arrowSize, lengthValue, DimensionUnit::VP, false)
+    std::string arrowSizeStr = ArkTSUtils::ParseJsDimensionNG(vm, arrowSize, lengthValue, DimensionUnit::VP, false)
                                    ? std::to_string(lengthValue.Value()) + "vp" : "-";
     std::string arrowColorStr =
         ArkTSUtils::ParseJsColorAlpha(vm, arrowColor, color) ? std::to_string(color.GetValue()) : "-";
