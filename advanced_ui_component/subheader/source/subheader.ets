@@ -41,42 +41,42 @@ export enum OperationType {
 }
 
 export declare class OperationOption {
-  value: ResourceStr;
-  action?: () => void;
+  public value: ResourceStr;
+  public action?: () => void;
 }
 
 export declare class SelectOptions {
-  options: Array<SelectOption>;
-  selected?: number;
-  value?: string;
-  onSelect?: (index: number, value?: string) => void;
+  public options: Array<SelectOption>;
+  public selected?: number;
+  public value?: string;
+  public onSelect?: (index: number, value?: string) => void;
 }
 
 export declare class SymbolOptions {
-  fontSize?: Length;
-  fontColor?: Array<ResourceColor>;
-  fontWeight?: number | FontWeight | string;
-  effectStrategy?: SymbolEffectStrategy;
-  renderingStrategy?: SymbolRenderingStrategy;
+  public fontSize?: Length;
+  public fontColor?: Array<ResourceColor>;
+  public fontWeight?: number | FontWeight | string;
+  public effectStrategy?: SymbolEffectStrategy;
+  public renderingStrategy?: SymbolRenderingStrategy;
 }
 
 class IconOptions {
-  icon?: Resource;
-  symbolicIconOption?: SymbolOptions | null;
+  public icon?: Resource;
+  public symbolicIconOption?: SymbolOptions | null;
 }
 
 class ContentIconOption {
-  content?: ResourceStr;
-  subContent?: ResourceStr;
-  iconOptions?: IconOptions;
-  action?: () => void;
+  public content?: ResourceStr;
+  public subContent?: ResourceStr;
+  public iconOptions?: IconOptions;
+  public action?: () => void;
 }
 
 class FontStyle {
-  maxLines: number = 0;
-  fontWeight: number = 0;
-  fontColor?: ResourceColor;
-  alignment?: Alignment;
+  public maxLines: number = 0;
+  public fontWeight: number = 0;
+  public fontColor?: ResourceColor;
+  public alignment?: Alignment;
 }
 
 @Styles
@@ -477,7 +477,7 @@ export struct SubHeader {
     .focusable(true)
     .margin({
       left: $r('sys.float.padding_level4'),
-      right: $r('sys.float.margin_right'),
+      right: $r('sys.float.padding_level6'),
     })
   }
 
@@ -643,21 +643,7 @@ struct SingleIconStyle {
   build() {
     if (this.item && this.item.iconOptions) {
       Row() {
-        if (Util.isSymbolicResource(this.item.iconOptions.icon)) {
-          SymbolGlyph(this.item.iconOptions?.icon)
-            .focusable(true)
-            .fontSize(this.item.iconOptions?.symbolicIconOption?.fontSize ?? IMAGE_HEIGHT_NUM)
-            .fontColor(this.item.iconOptions?.symbolicIconOption?.fontColor ?? [$r('sys.color.icon_primary')])
-            .fontWeight(this.item.iconOptions?.symbolicIconOption?.fontWeight)
-            .renderingStrategy(this.item.iconOptions?.symbolicIconOption?.renderingStrategy)
-            .effectStrategy(this.item.iconOptions?.symbolicIconOption?.effectStrategy)
-        } else {
-          Image(this.item?.iconOptions?.icon)
-            .fillColor($r('sys.color.icon_primary'))
-            .width(IMAGE_HEIGHT_NUM)
-            .height(IMAGE_HEIGHT_NUM)
-            .focusable(true)
-        }
+        this.IconZone();
       }
       .focusable(true)
       .width(BUTTON_SIZE)
@@ -706,6 +692,27 @@ struct SingleIconStyle {
           }
         }
       })
+    }
+  }
+
+  @Builder
+  IconZone(): void {
+    if (this.item && this.item.iconOptions) {
+      if (Util.isSymbolicResource(this.item.iconOptions.icon)) {
+        SymbolGlyph(this.item.iconOptions?.icon)
+          .focusable(true)
+          .fontSize(this.item.iconOptions?.symbolicIconOption?.fontSize ?? IMAGE_HEIGHT_NUM)
+          .fontColor(this.item.iconOptions?.symbolicIconOption?.fontColor ?? [$r('sys.color.icon_primary')])
+          .fontWeight(this.item.iconOptions?.symbolicIconOption?.fontWeight)
+          .renderingStrategy(this.item.iconOptions?.symbolicIconOption?.renderingStrategy)
+          .effectStrategy(this.item.iconOptions?.symbolicIconOption?.effectStrategy)
+      } else {
+        Image(this.item?.iconOptions?.icon)
+          .fillColor($r('sys.color.icon_primary'))
+          .width(IMAGE_HEIGHT_NUM)
+          .height(IMAGE_HEIGHT_NUM)
+          .focusable(true)
+      }
     }
   }
 }
