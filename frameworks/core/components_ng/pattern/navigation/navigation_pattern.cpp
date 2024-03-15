@@ -239,6 +239,11 @@ void NavigationPattern::SyncWithJsStackIfNeeded()
     if (preTopNavPath_ != newTopNavPath || replaceValue == 1) {
         isReplace_ = replaceValue != 0;
         UpdateIsAnimation(preTopNavPath_);
+        lastPreIndex_ = 0;
+        if (preTopNavPath_.has_value()) {
+            lastPreIndex_ = navigationStack_->FindIndex(preTopNavPath_->first,
+            preTopNavPath_->second, true);
+        }
         FireInterceptionEvent(true, newTopNavPath);
         if (needSyncWithJsStack_) {
             TAG_LOGI(AceLogTag::ACE_NAVIGATION, "sync with js stack in before interception");
@@ -1619,7 +1624,6 @@ void NavigationPattern::RemoveFromDumpManager()
 void NavigationPattern::FireInterceptionEvent(bool isBefore,
     const std::optional<std::pair<std::string, RefPtr<UINode>>>& newTopPath)
 {
-    auto size = navigationStack_->Size();
     auto hostNode = AceType::DynamicCast<NavigationGroupNode>(GetHost());
     RefPtr<NavDestinationContext> to;
     if (newTopPath.has_value()) {
@@ -1634,7 +1638,7 @@ void NavigationPattern::FireInterceptionEvent(bool isBefore,
     if (isReplace_ != 0) {
         operation = NavigationOperation::REPLACE;
     } else {
-        operation = preStackSize_ > size ? NavigationOperation::POP : NavigationOperation::PUSH;
+        operation = lastPreIndex_ == -1 ? NavigationOperation::POP : NavigationOperation::PUSH;
     }
     auto layoutProperty = hostNode->GetLayoutProperty<NavigationLayoutProperty>();
     // mode is split and stack size is one,don't need to do animation.
