@@ -519,6 +519,8 @@ void SwiperPattern::InitSurfaceChangedCallback()
                     swiper->windowSizeChangeReason_ = type;
                     swiper->StopAutoPlay();
                 }
+                auto currentIndex =
+                    swiper->targetIndex_.has_value() ? swiper->targetIndex_.value() : swiper->currentIndex_;
 
                 swiper->StopPropertyTranslateAnimation(swiper->isFinishAnimation_);
                 swiper->StopTranslateAnimation();
@@ -533,7 +535,7 @@ void SwiperPattern::InitSurfaceChangedCallback()
                 swiper->currentOffset_ = 0.0f;
                 swiper->itemPosition_.clear();
                 swiper->isVoluntarilyClear_ = true;
-                swiper->jumpIndex_ = swiper->currentIndex_;
+                swiper->jumpIndex_ = currentIndex;
                 swiper->MarkDirtyNodeSelf();
                 auto swiperNode = swiper->GetHost();
                 CHECK_NULL_VOID(swiperNode);
@@ -840,8 +842,12 @@ bool SwiperPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty,
             float targetPos = 0.0f;
             targetPos = iter->second.startPos;
             auto context = PipelineContext::GetCurrentContext();
-            bool isNeedPlayTranslateAnimation = translateAnimationIsRunning_ ||
-                itemPosition_.find(targetIndexValue + GetDisplayCount() - 1) == itemPosition_.end();
+            auto swiperLayoutProperty = GetLayoutProperty<SwiperLayoutProperty>();
+            auto lastItemIndex = Positive(swiperLayoutProperty->GetNextMarginValue(0.0_px).ConvertToPx())
+                                     ? targetIndexValue + GetDisplayCount()
+                                     : targetIndexValue + GetDisplayCount() - 1;
+            bool isNeedPlayTranslateAnimation =
+                translateAnimationIsRunning_ || itemPosition_.find(lastItemIndex) == itemPosition_.end();
             if (context && !isNeedPlayTranslateAnimation) {
                 // displayCount is auto, loop is false, if the content width less than windows size
                 // need offset to keep right aligned
@@ -1227,11 +1233,11 @@ void SwiperPattern::ShowPrevious()
 
 void SwiperPattern::ChangeIndex(int32_t index, bool useAnimation)
 {
-    auto itemCount = RealTotalCount();
     auto displayCount = GetDisplayCount();
-    if (itemCount <= 0 || displayCount == 0 || index < 0 || index >= itemCount) {
+    if (RealTotalCount() <= 0 || displayCount == 0 || index < 0 || index >= RealTotalCount()) {
         return;
     }
+    auto itemCount = TotalCount();
     auto loopCount = std::abs(currentIndex_ / itemCount);
     auto targetIndex = currentIndex_ >= 0 ? loopCount * itemCount + index : -(loopCount + 1) * itemCount + index;
     targetIndex = IsSwipeByGroup() ? SwiperUtils::ComputePageIndex(targetIndex, displayCount) : targetIndex;
@@ -1352,18 +1358,18 @@ void SwiperPattern::OnTranslateAnimationFinish()
 void SwiperPattern::StopTranslateAnimation()
 {
     if (translateAnimationIsRunning_) {
+        auto host = GetHost();
+        CHECK_NULL_VOID(host);
         translateAnimationIsRunning_ = false;
-        AnimationUtils::StopAnimation(translateAnimation_);
-        currentDelta_ = 0.0f;
-        itemPosition_.clear();
-        isVoluntarilyClear_ = true;
-        jumpIndex_ = currentIndex_;
-        MarkDirtyNodeSelf();
-        auto pipeline = PipelineContext::GetCurrentContext();
-        if (pipeline) {
-            pipeline->FlushUITasks();
-        }
-        UpdateOffsetAfterPropertyAnimation(currentOffset_);
+        AnimationOption option;
+        option.SetCurve(Curves::LINEAR);
+        option.SetDuration(0);
+        translateAnimation_ = AnimationUtils::StartAnimation(
+            option, [host, weak = WeakClaim(this)]() {
+                auto swiper = weak.Upgrade();
+                CHECK_NULL_VOID(swiper);
+                host->UpdateAnimatablePropertyFloat(TRANSLATE_PROPERTY_NAME, swiper->currentOffset_);
+            });
         OnTranslateFinish(propertyAnimationIndex_, false, isFinishAnimation_, true);
     }
 }
@@ -1718,7 +1724,7 @@ void SwiperPattern::StopAutoPlay()
 
 void SwiperPattern::StartAutoPlay()
 {
-    if (NeedAutoPlay()) {
+    if (NeedAutoPlay() && !translateAnimationIsRunning_ && !usePropertyAnimation_) {
         PostTranslateTask(GetInterval());
     }
 }
