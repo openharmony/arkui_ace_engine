@@ -283,6 +283,7 @@ void SheetPresentationPattern::InitPanEvent()
 
 void SheetPresentationPattern::HandleDragStart()
 {
+    SetIsDragging(true);
     if (animation_ && isAnimationProcess_) {
         AnimationUtils::StopAnimation(animation_);
         isAnimationBreak_ = true;
@@ -327,6 +328,7 @@ void SheetPresentationPattern::HandleDragUpdate(const GestureEvent& info)
 
 void SheetPresentationPattern::HandleDragEnd(float dragVelocity)
 {
+    SetIsDragging(false);
     auto sheetDetentsSize = sheetDetentHeight_.size();
     if ((sheetDetentsSize == 0) || (GetSheetType() == SheetType::SHEET_POPUP) || IsAvoidingKeyboard()) {
         return;
