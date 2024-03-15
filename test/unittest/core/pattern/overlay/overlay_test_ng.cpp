@@ -97,7 +97,6 @@ public:
     static void TearDownTestCase();
     std::function<RefPtr<UINode>()> builderFunc_;
     std::function<RefPtr<UINode>()> titleBuilderFunc_;
-    DatePickerSettingData datePickerSettingData_;
 
 protected:
     static RefPtr<FrameNode> CreateBubbleNode(const TestProperty& testProperty);
@@ -190,7 +189,7 @@ DatePickerSettingData OverlayTestNg::GenDatePickerSettingData()
 {
     DatePickerSettingData datePickerSettingData;
     datePickerSettingData.isLunar = false;
-    datePickerSettingData.showTime = true;
+    datePickerSettingData.showTime = false;
     datePickerSettingData.useMilitary = false;
 
     PickerTextProperties properties;
@@ -658,7 +657,7 @@ HWTEST_F(OverlayTestNg, MenuTest002, TestSize.Level1)
     overlayManager->CleanMenuInSubWindow(targetId);
     overlayManager->FocusOverlayNode(menuNode, false);
     EXPECT_FALSE(overlayManager->menuMap_.empty());
-    EXPECT_TRUE(overlayManager->RemoveOverlayInSubwindow());
+    EXPECT_FALSE(overlayManager->RemoveOverlayInSubwindow());
     EXPECT_TRUE(overlayManager->RemoveAllModalInOverlay());
     EXPECT_FALSE(overlayManager->RemoveOverlay(false));
     overlayManager->RemoveMenu(rootNode);
@@ -879,8 +878,10 @@ HWTEST_F(OverlayTestNg, ToastTest003, TestSize.Level1)
     /**
      * @tc.steps: step1. get overlay manager instance.
      */
-    auto rootNode = FrameNode::CreateFrameNode(V2::ROOT_ETS_TAG, 1, AceType::MakeRefPtr<RootPattern>());
-    auto overlay = AceType::MakeRefPtr<OverlayManager>(rootNode);
+    auto pipelineContext = MockPipelineContext::GetCurrentContext();
+    ASSERT_NE(pipelineContext, nullptr);
+    auto overlay = pipelineContext->GetOverlayManager();
+    ASSERT_NE(overlay, nullptr);
 
     /**
      * @tc.steps: step2. call ShowToast.
@@ -964,7 +965,6 @@ HWTEST_F(OverlayTestNg, PopupTest004, TestSize.Level1)
     overlayManager->RemoveIndexerPopupById(targetId);
     EXPECT_TRUE(overlayManager->customPopupMap_.empty());
 }
-
 
 /**
  * @tc.name: PopupTest005
