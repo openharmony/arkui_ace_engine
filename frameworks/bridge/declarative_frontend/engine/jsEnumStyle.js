@@ -1501,6 +1501,10 @@ class BottomTabBarStyle {
     this.id = arg;
     return this;
   }
+  iconStyle(arg) {
+    this.iconStyle = arg;
+    return this;
+  }
 }
 
 class Indicator {
