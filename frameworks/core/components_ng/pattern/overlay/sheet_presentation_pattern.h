@@ -305,6 +305,11 @@ public:
         isAnimationProcess_ = isProcess;
     }
 
+    bool GetAnimationProcess()
+    {
+        return isAnimationProcess_;
+    }
+
     float GetSheetMaxHeight()
     {
         return pageHeight_;

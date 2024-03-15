@@ -344,6 +344,10 @@ public:
         std::function<RefPtr<UINode>()>&& buildNodeFunc, NG::ModalStyle& modalStyle, std::function<void()>&& onAppear,
         std::function<void()>&& onDisappear, std::function<void()>&& onWillAppear,
         std::function<void()>&& onWillDisappear, const RefPtr<FrameNode>& targetNode, int32_t sessionId = 0);
+    void OnBindContentCover(bool isShow, std::function<void(const std::string&)>&& callback,
+        std::function<RefPtr<UINode>()>&& buildNodeFunc, NG::ModalStyle& modalStyle, std::function<void()>&& onAppear,
+        std::function<void()>&& onDisappear, std::function<void()>&& onWillAppear,
+        std::function<void()>&& onWillDisappear, const RefPtr<FrameNode>& targetNode, int32_t sessionId = 0);
     void BindSheet(bool isShow, std::function<void(const std::string&)>&& callback,
         std::function<RefPtr<UINode>()>&& buildNodeFunc, std::function<RefPtr<UINode>()>&& buildTitleNodeFunc,
         NG::SheetStyle& sheetStyle, std::function<void()>&& onAppear, std::function<void()>&& onDisappear,
@@ -502,6 +506,12 @@ private:
     void PlayDefaultModalOut(const RefPtr<FrameNode>& modalNode, const RefPtr<RenderContext>& context,
         AnimationOption option, float showHeight);
     void OpenToastAnimation(const RefPtr<FrameNode>& toastNode, int32_t duration);
+
+    void HandleModalShow(std::function<void(const std::string&)>&& callback,
+        std::function<RefPtr<UINode>()>&& buildNodeFunc, NG::ModalStyle& modalStyle, std::function<void()>&& onAppear,
+        std::function<void()>&& onDisappear, std::function<void()>&& onWillDisappear, const RefPtr<UINode> rootNode,
+        int32_t targetId, std::optional<ModalTransition> modalTransition);
+    void HandleModalPop(std::function<void()>&& onWillDisappear, const RefPtr<UINode> rootNode, int32_t targetId);
 
     // Key: target Id, Value: PopupInfo
     std::unordered_map<int32_t, NG::PopupInfo> popupMap_;
