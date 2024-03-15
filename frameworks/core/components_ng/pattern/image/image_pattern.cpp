@@ -247,8 +247,7 @@ void ImagePattern::OnImageDataReady()
     imageEventHub->FireCompleteEvent(event);
 
     auto geo = host->GetGeometryNode();
-    auto&& layoutConstraint = CreateLayoutProperty()->GetCalcLayoutConstraint();
-    if (layoutConstraint && layoutConstraint->selfIdealSize && layoutConstraint->selfIdealSize->IsValid()) {
+    if (geo->GetContent() && !host->CheckNeedForceMeasureAndLayout()) {
         StartDecoding(geo->GetContentSize());
     } else {
         host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
