@@ -91,6 +91,7 @@
 #include "frameworks/bridge/declarative_frontend/jsview/js_menu.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_menu_item.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_menu_item_group.h"
+#include "frameworks/bridge/declarative_frontend/jsview/js_nav_path_stack.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_navdestination.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_navigation.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_navigator.h"
@@ -553,6 +554,7 @@ void JsBindViews(BindingTarget globalObj, void* nativeEngine)
     JSRecycleView::JSBind(globalObj);
     JSLinearGradient::JSBind(globalObj);
     JSNavigation::JSBind(globalObj);
+    JSNavPathStack::JSBind(globalObj);
     JSTextField::JSBind(globalObj);
     JSCustomDialogController::JSBind(globalObj);
     JSNavDestination::JSBind(globalObj);
