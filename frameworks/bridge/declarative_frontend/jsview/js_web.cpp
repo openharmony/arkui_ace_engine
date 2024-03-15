@@ -306,6 +306,53 @@ private:
     RefPtr<SslErrorResult> result_;
 };
 
+class JSWebAllSslError : public Referenced {
+public:
+    static void JSBind(BindingTarget globalObj)
+    {
+        JSClass<JSWebAllSslError>::Declare("WebAllSslErrorResult");
+        JSClass<JSWebAllSslError>::CustomMethod("handleConfirm", &JSWebAllSslError::HandleConfirm);
+        JSClass<JSWebAllSslError>::CustomMethod("handleCancel", &JSWebAllSslError::HandleCancel);
+        JSClass<JSWebAllSslError>::Bind(globalObj, &JSWebAllSslError::Constructor, &JSWebAllSslError::Destructor);
+    }
+
+    void SetResult(const RefPtr<AllSslErrorResult>& result)
+    {
+        result_ = result;
+    }
+
+    void HandleConfirm(const JSCallbackInfo& args)
+    {
+        if (result_) {
+            result_->HandleConfirm();
+        }
+    }
+
+    void HandleCancel(const JSCallbackInfo& args)
+    {
+        if (result_) {
+            result_->HandleCancel();
+        }
+    }
+
+private:
+    static void Constructor(const JSCallbackInfo& args)
+    {
+        auto jsWebAllSslError = Referenced::MakeRefPtr<JSWebAllSslError>();
+        jsWebAllSslError->IncRefCount();
+        args.SetReturnValue(Referenced::RawPtr(jsWebAllSslError));
+    }
+
+    static void Destructor(JSWebAllSslError* jsWebAllSslError)
+    {
+        if (jsWebAllSslError != nullptr) {
+            jsWebAllSslError->DecRefCount();
+        }
+    }
+
+    RefPtr<AllSslErrorResult> result_;
+};
+
 class JSWebSslSelectCert : public Referenced {
 public:
     static void JSBind(BindingTarget globalObj)
@@ -1629,6 +1676,7 @@ void JSWeb::JSBind(BindingTarget globalObj)
     JSClass<JSWeb>::StaticMethod("onHttpAuthRequest", &JSWeb::OnHttpAuthRequest);
     JSClass<JSWeb>::StaticMethod("onSslErrorReceive", &JSWeb::OnSslErrRequest);
     JSClass<JSWeb>::StaticMethod("onSslErrorEventReceive", &JSWeb::OnSslErrorRequest);
+    JSClass<JSWeb>::StaticMethod("onSslErrorEvent", &JSWeb::OnAllSslErrorRequest);
     JSClass<JSWeb>::StaticMethod("onClientAuthenticationRequest", &JSWeb::OnSslSelectCertRequest);
     JSClass<JSWeb>::StaticMethod("onPermissionRequest", &JSWeb::OnPermissionRequest);
     JSClass<JSWeb>::StaticMethod("onContextMenuShow", &JSWeb::OnContextMenuShow);
@@ -1703,6 +1751,7 @@ void JSWeb::JSBind(BindingTarget globalObj)
     JSFullScreenExitHandler::JSBind(globalObj);
     JSWebHttpAuth::JSBind(globalObj);
     JSWebSslError::JSBind(globalObj);
+    JSWebAllSslError::JSBind(globalObj);
     JSWebSslSelectCert::JSBind(globalObj);
     JSWebPermissionRequest::JSBind(globalObj);
     JSContextMenuParam::JSBind(globalObj);
@@ -1874,6 +1923,25 @@ JSRef<JSVal> WebSslErrorEventToJSValue(const WebSslErrorEvent& eventInfo)
     jsWebSslError->SetResult(eventInfo.GetResult());
     obj->SetPropertyObject("handler", resultObj);
     obj->SetProperty("error", eventInfo.GetError());
+    return JSRef<JSVal>::Cast(obj);
+}
+
+JSRef<JSVal> WebAllSslErrorEventToJSValue(const WebAllSslErrorEvent& eventInfo)
+{
+    JSRef<JSObject> obj = JSRef<JSObject>::New();
+    JSRef<JSObject> resultObj = JSClass<JSWebAllSslError>::NewInstance();
+    auto jsWebAllSslError = Referenced::Claim(resultObj->Unwrap<JSWebAllSslError>());
+    if (!jsWebAllSslError) {
+        return JSRef<JSVal>::Cast(obj);
+    }
+    jsWebAllSslError->SetResult(eventInfo.GetResult());
+    obj->SetPropertyObject("handler", resultObj);
+    obj->SetProperty("error", eventInfo.GetError());
+    obj->SetProperty("url", eventInfo.GetUrl());
+    obj->SetProperty("originalUrl", eventInfo.GetOriginalUrl());
+    obj->SetProperty("referrer", eventInfo.GetReferrer());
+    obj->SetProperty("isFatalError", eventInfo.GetIsFatalError());
+    obj->SetProperty("isMainFrame", eventInfo.GetIsMainFrame());
     return JSRef<JSVal>::Cast(obj);
 }
 
@@ -2403,6 +2471,29 @@ void JSWeb::OnSslErrorRequest(const JSCallbackInfo& args)
         return true;
     };
     WebModel::GetInstance()->SetOnSslErrorRequest(jsCallback);
+}
+
+void JSWeb::OnAllSslErrorRequest(const JSCallbackInfo& args)
+{
+    if (args.Length() < 1 || !args[0]->IsFunction()) {
+        return;
+    }
+    WeakPtr<NG::FrameNode> frameNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    auto jsFunc = AceType::MakeRefPtr<JsEventFunction<WebAllSslErrorEvent, 1>>(
+        JSRef<JSFunc>::Cast(args[0]), WebAllSslErrorEventToJSValue);
+    auto instanceId = Container::CurrentId();
+    auto jsCallback = [execCtx = args.GetExecutionContext(), func = std::move(jsFunc), instanceId, node = frameNode](
+                          const BaseEventInfo* info) -> bool {
+        ContainerScope scope(instanceId);
+        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx, false);
+        auto pipelineContext = PipelineContext::GetCurrentContext();
+        CHECK_NULL_RETURN(pipelineContext, false);
+        pipelineContext->UpdateCurrentActiveNode(node);
+        auto* eventInfo = TypeInfoHelper::DynamicCast<WebAllSslErrorEvent>(info);
+        func->Execute(*eventInfo);
+        return true;
+    };
+    WebModel::GetInstance()->SetOnAllSslErrorRequest(jsCallback);
 }
 
 void JSWeb::OnSslSelectCertRequest(const JSCallbackInfo& args)

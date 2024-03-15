@@ -52,6 +52,7 @@ public:
     virtual void SetOnDownloadStart(std::function<void(const BaseEventInfo* info)>&& jsCallback) = 0;
     virtual void SetOnHttpAuthRequest(std::function<bool(const BaseEventInfo* info)>&& jsCallback) = 0;
     virtual void SetOnSslErrorRequest(std::function<bool(const BaseEventInfo* info)>&& jsCallback) = 0;
+    virtual void SetOnAllSslErrorRequest(std::function<bool(const BaseEventInfo *info)> &&jsCallback) = 0;
     virtual void SetOnSslSelectCertRequest(std::function<bool(const BaseEventInfo* info)>&& jsCallback) = 0;
     virtual void SetMediaPlayGestureAccess(bool isNeedGestureAccess) = 0;
     virtual void SetOnKeyEvent(std::function<void(KeyEventInfo& keyEventInfo)>&& jsCallback) = 0;
