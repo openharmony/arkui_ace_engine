@@ -103,6 +103,12 @@ public:
     MOCK_METHOD1(SubscribeContainerModalButtonsRectChange, void(
         std::function<void(Rosen::Rect& containerModal, Rosen::Rect& buttons)>&& callback));
     MOCK_METHOD0(GetFormSerializedGesture, SerializedGesture());
+    MOCK_METHOD1(SetUIExtensionSubWindow, void(bool isUIExtensionSubWindow));
+    MOCK_METHOD1(SetUIExtensionAbilityProcess, void(bool isUIExtensionAbilityProcess));
+    MOCK_METHOD1(SetUIExtensionAbilityHost, void(bool isUIExtensionAbilityHost));
+    MOCK_METHOD0(IsUIExtensionSubWindow, bool());
+    MOCK_METHOD0(IsUIExtensionAbilityProcess, bool());
+    MOCK_METHOD0(IsUIExtensionAbilityHost, bool());
 
 #ifndef PREVIEW
     MOCK_METHOD4(

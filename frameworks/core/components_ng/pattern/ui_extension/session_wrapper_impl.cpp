@@ -234,13 +234,22 @@ void SessionWrapperImpl::CreateSession(const AAFwk::Want& want, bool isAsyncModa
     auto container = Platform::AceContainer::GetContainer(instanceId_);
     CHECK_NULL_VOID(container);
     auto wantPtr = std::make_shared<Want>(want);
-    if (sessionType_ == SessionType::UI_EXTENSION_ABILITY &&
-        wantPtr->GetStringParam(UI_EXTENSION_TYPE_KEY) == EMBEDDED_UI) {
-        UIEXT_LOGE("The UIExtensionComponent is not allowed to start the EmbeddedUIExtensionAbility.");
-        return;
+    if (sessionType_ == SessionType::UI_EXTENSION_ABILITY) {
+        if (wantPtr->GetStringParam(UI_EXTENSION_TYPE_KEY) == EMBEDDED_UI) {
+            UIEXT_LOGE("The UIExtensionComponent is not allowed to start the EmbeddedUIExtensionAbility.");
+            return;
+        }
+        if ((container->IsUIExtensionAbilityHost() && container->IsUIExtensionSubWindow())) {
+            UIEXT_LOGE("The UIExtensionComponent does not allow nested pulling of another.");
+            auto pattern = hostPattern_.Upgrade();
+            CHECK_NULL_VOID(pattern);
+            pattern->FireOnErrorCallback(ERROR_CODE_UIEXTENSION_FORBID_CASCADE, PULL_FAIL_NAME, PULL_FAIL_MESSAGE);
+            return;
+        }
     }
     if (sessionType_ == SessionType::EMBEDDED_UI_EXTENSION) {
-        if (container->IsUIExtensionWindow()) {
+        if ((container->IsUIExtensionWindow()) ||
+            (container->IsUIExtensionAbilityProcess() && container->IsUIExtensionSubWindow())) {
             UIEXT_LOGE("The EmbeddedComponent does not allow nested pulling of another.");
             auto pattern = hostPattern_.Upgrade();
             CHECK_NULL_VOID(pattern);
