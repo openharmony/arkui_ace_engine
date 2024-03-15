@@ -6769,7 +6769,12 @@ void TextFieldPattern::ScheduleCaretLongPress()
     auto taskExecutor = context->GetTaskExecutor();
     CHECK_NULL_VOID(taskExecutor);
     taskExecutor->PostDelayedTask(
-        [=]() { LongScrollPage(); }, TaskExecutor::TaskType::UI, LONG_PRESS_PAGE_INTERVAL_MS);
+        [weak = WeakClaim(this)]() {
+            auto pattern = weak.Upgrade();
+            CHECK_NULL_VOID(pattern);
+            pattern->LongScrollPage();
+        },
+        TaskExecutor::TaskType::UI, LONG_PRESS_PAGE_INTERVAL_MS);
 }
 
 void TextFieldPattern::StartLongPressEventTimer()
