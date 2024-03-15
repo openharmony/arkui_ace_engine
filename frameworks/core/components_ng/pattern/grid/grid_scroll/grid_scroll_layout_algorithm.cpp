@@ -328,7 +328,7 @@ void GridScrollLayoutAlgorithm::LayoutBackwardCachedLine(LayoutWrapper* layoutWr
             } else {
                 offset.SetY(crossOffset);
             }
-            auto wrapper = layoutWrapper->GetChildByIndex(itemIdex);
+            auto wrapper = layoutWrapper->GetChildByIndex(itemIdex, true);
             if (!wrapper || wrapper->CheckNeedForceMeasureAndLayout()) {
                 continue;
             }
@@ -392,7 +392,7 @@ void GridScrollLayoutAlgorithm::LayoutForwardCachedLine(LayoutWrapper* layoutWra
             } else {
                 offset.SetY(crossOffset);
             }
-            auto wrapper = layoutWrapper->GetChildByIndex(itemIdex);
+            auto wrapper = layoutWrapper->GetChildByIndex(itemIdex, true);
             if (!wrapper || wrapper->CheckNeedForceMeasureAndLayout()) {
                 continue;
             }
@@ -1894,7 +1894,7 @@ float GridScrollLayoutAlgorithm::FillNewCacheLineBackward(
             auto currentIndex = gridLayoutInfo_.endIndex_ + 1;
             for (uint32_t i = (line->second.empty() ? 0 : line->second.rbegin()->first); i < crossCount_ - 1; i++) {
                 // Step1. Get wrapper of [GridItem]
-                auto itemWrapper = layoutWrapper->GetChildByIndex(currentIndex);
+                auto itemWrapper = layoutWrapper->GetChildByIndex(currentIndex, true);
                 if (!itemWrapper || itemWrapper->CheckNeedForceMeasureAndLayout()) {
                     for (uint32_t y = i; y < crossCount_ - 1; y++) {
                         predictBuildList_.emplace_back(currentIndex++);
@@ -1937,7 +1937,7 @@ float GridScrollLayoutAlgorithm::FillNewCacheLineBackward(
             break;
         }
         // Step1. Get wrapper of [GridItem]
-        auto itemWrapper = layoutWrapper->GetChildByIndex(currentIndex);
+        auto itemWrapper = layoutWrapper->GetChildByIndex(currentIndex, true);
         if (!itemWrapper || itemWrapper->CheckNeedForceMeasureAndLayout()) {
             for (uint32_t x = i; x < crossCount_; x++) {
                 predictBuildList_.emplace_back(currentIndex++);
@@ -2017,7 +2017,7 @@ void GridScrollLayoutAlgorithm::CompeleteItemCrossPosition(
 {
     for (auto item : items) {
         auto currentIndex = item.second;
-        auto itemWrapper = layoutWrapper->GetChildByIndex(currentIndex);
+        auto itemWrapper = layoutWrapper->GetChildByIndex(currentIndex, true);
         if (!itemWrapper || itemWrapper->CheckNeedForceMeasureAndLayout()) {
             continue;
         }
@@ -2056,7 +2056,7 @@ void GridScrollLayoutAlgorithm::PostIdleTask(RefPtr<FrameNode> frameNode, const 
             if (GetSysTimestamp() > deadline) {
                 break;
             }
-            auto wrapper = frameNode->GetOrCreateChildByIndex(*it, false);
+            auto wrapper = frameNode->GetOrCreateChildByIndex(*it, false, true);
             needMarkDirty = PredictBuildItem(wrapper, param.layoutConstraint) || needMarkDirty;
             param.items.erase(it++);
         }

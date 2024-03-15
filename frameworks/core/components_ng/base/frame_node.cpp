@@ -158,7 +158,7 @@ public:
         return allFrameNodeChildren_;
     }
 
-    RefPtr<LayoutWrapper> FindFrameNodeByIndex(uint32_t index, bool needBuild)
+    RefPtr<LayoutWrapper> FindFrameNodeByIndex(uint32_t index, bool needBuild, bool isCache)
     {
         while (cursor_ != children_.end()) {
             if (cursor_->startIndex > index) {
@@ -168,7 +168,7 @@ public:
 
             if (cursor_->startIndex + cursor_->count > index) {
                 auto frameNode = AceType::DynamicCast<FrameNode>(
-                    cursor_->node->GetFrameChildByIndex(index - cursor_->startIndex, needBuild));
+                    cursor_->node->GetFrameChildByIndex(index - cursor_->startIndex, needBuild, isCache));
                 return frameNode;
             }
             cursor_++;
@@ -180,17 +180,16 @@ public:
         return nullptr;
     }
 
-    RefPtr<LayoutWrapper> GetFrameNodeByIndex(uint32_t index, bool needBuild)
+    RefPtr<LayoutWrapper> GetFrameNodeByIndex(uint32_t index, bool needBuild, bool isCache)
     {
         auto itor = partFrameNodeChildren_.find(index);
         if (itor == partFrameNodeChildren_.end()) {
             Build();
-            auto child = FindFrameNodeByIndex(index, needBuild);
-            if (child) {
+            auto child = FindFrameNodeByIndex(index, needBuild, isCache);
+            if (child && !isCache) {
                 partFrameNodeChildren_[index] = child;
-                return child;
             }
-            return nullptr;
+            return child;
         }
         return itor->second;
     }
@@ -259,10 +258,8 @@ public:
             int32_t index = itor->first;
             if ((start <= end && index >= start && index <= end) ||
                 (start > end && (index <= end || start <= index))) {
-                itor->second->SetActive(true);
                 itor++;
             } else {
-                itor->second->SetActive(false);
                 partFrameNodeChildren_.erase(itor++);
             }
         }
@@ -3092,9 +3089,9 @@ void FrameNode::SyncGeometryNode(bool needSkipSync)
     layoutAlgorithm_.Reset();
 }
 
-RefPtr<LayoutWrapper> FrameNode::GetOrCreateChildByIndex(uint32_t index, bool addToRenderTree)
+RefPtr<LayoutWrapper> FrameNode::GetOrCreateChildByIndex(uint32_t index, bool addToRenderTree, bool isCache)
 {
-    auto child = frameProxy_->GetFrameNodeByIndex(index, true);
+    auto child = frameProxy_->GetFrameNodeByIndex(index, true, isCache);
     if (child) {
         child->SetSkipSyncGeometryNode(SkipSyncGeometryNode());
         if (addToRenderTree) {
@@ -3104,9 +3101,9 @@ RefPtr<LayoutWrapper> FrameNode::GetOrCreateChildByIndex(uint32_t index, bool ad
     return child;
 }
 
-RefPtr<LayoutWrapper> FrameNode::GetChildByIndex(uint32_t index)
+RefPtr<LayoutWrapper> FrameNode::GetChildByIndex(uint32_t index, bool isCache)
 {
-    return frameProxy_->GetFrameNodeByIndex(index, false);
+    return frameProxy_->GetFrameNodeByIndex(index, false, isCache);
 }
 
 int32_t FrameNode::GetChildTrueIndex(const RefPtr<LayoutWrapper>& child) const
@@ -3213,7 +3210,7 @@ void FrameNode::MarkNeedSyncRenderTree(bool needRebuild)
     needSyncRenderTree_ = true;
 }
 
-RefPtr<UINode> FrameNode::GetFrameChildByIndex(uint32_t index, bool needBuild)
+RefPtr<UINode> FrameNode::GetFrameChildByIndex(uint32_t index, bool needBuild, bool isCache)
 {
     if (index != 0) {
         return nullptr;

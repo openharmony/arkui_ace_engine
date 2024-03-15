@@ -57,7 +57,7 @@ void LayoutWrapperNode::AppendChild(const RefPtr<LayoutWrapperNode>& child, bool
         overlayChild_ = child;
     }
 }
-RefPtr<LayoutWrapper> LayoutWrapperNode::GetOrCreateChildByIndex(uint32_t index, bool addToRenderTree)
+RefPtr<LayoutWrapper> LayoutWrapperNode::GetOrCreateChildByIndex(uint32_t index, bool addToRenderTree, bool isCache)
 {
     if ((index >= static_cast<uint32_t>(currentChildCount_)) || (index < 0)) {
         return nullptr;

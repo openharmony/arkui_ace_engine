@@ -969,12 +969,12 @@ RefPtr<UINode> UINode::GetDisappearingChildById(const std::string& id) const
     return nullptr;
 }
 
-RefPtr<UINode> UINode::GetFrameChildByIndex(uint32_t index, bool needBuild)
+RefPtr<UINode> UINode::GetFrameChildByIndex(uint32_t index, bool needBuild, bool isCache)
 {
     for (const auto& child : GetChildren()) {
         uint32_t count = static_cast<uint32_t>(child->FrameCount());
         if (count > index) {
-            return child->GetFrameChildByIndex(index, needBuild);
+            return child->GetFrameChildByIndex(index, needBuild, isCache);
         }
         index -= count;
     }
