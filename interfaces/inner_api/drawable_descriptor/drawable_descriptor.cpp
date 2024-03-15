@@ -139,6 +139,7 @@ bool LayeredDrawableDescriptor::GetPixelMapFromJsonBuf(bool isBackground)
         item = cJSON_GetObjectItem(roots->child, DRAWABLEDESCRIPTOR_JSON_KEY_FOREGROUND);
     }
     if (item == nullptr) {
+        cJSON_Delete(roots);
         HILOG_ERROR("GetObjectItem from json buffer failed");
         return false;
     }
@@ -147,6 +148,7 @@ bool LayeredDrawableDescriptor::GetPixelMapFromJsonBuf(bool isBackground)
         std::unique_ptr<Media::ImageSource> imageSource =
             LayeredDrawableDescriptor::CreateImageSource(item->valuestring, errorCode);
         if (errorCode != 0) {
+            cJSON_Delete(roots);
             HILOG_ERROR("CreateImageSource from json buffer failed");
             return false;
         }
@@ -154,6 +156,7 @@ bool LayeredDrawableDescriptor::GetPixelMapFromJsonBuf(bool isBackground)
         decodeOpts.desiredPixelFormat = Media::PixelFormat::BGRA_8888;
         auto pixelMapPtr = imageSource->CreatePixelMap(decodeOpts, errorCode);
         if (errorCode != 0) {
+            cJSON_Delete(roots);
             HILOG_ERROR("Get PixelMap from json buffer failed");
             return false;
         }
@@ -164,9 +167,11 @@ bool LayeredDrawableDescriptor::GetPixelMapFromJsonBuf(bool isBackground)
             foreground_ = std::shared_ptr<Media::PixelMap>(pixelMapPtr.release());
         }
     } else {
+        cJSON_Delete(roots);
         HILOG_ERROR("Get background from json buffer failed");
         return false;
     }
+    cJSON_Delete(roots);
     return true;
 #else
     return false;
