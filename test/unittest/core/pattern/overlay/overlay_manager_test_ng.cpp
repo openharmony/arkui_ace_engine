@@ -1419,7 +1419,6 @@ HWTEST_F(OverlayManagerTestNg, TestSheetAvoidaiBar, TestSize.Level1)
         PipelineContext::GetCurrentContext()->GetSafeArea().bottom_.Length());
 }
 
-
 /**
  * @tc.name: SheetPresentationPattern2
  * @tc.desc: Test SheetPresentationPattern::CheckSheetHeightChange().
@@ -1904,5 +1903,166 @@ HWTEST_F(OverlayManagerTestNg, SheetPresentationPattern8, TestSize.Level1)
     topSheetPattern->HandleDragEnd(2000);
     EXPECT_TRUE(isDismiss);
 }
+/**
+ * @tc.name: TestSheetPage001
+ * @tc.desc: Test CreateSheetPage.
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayManagerTestNg, TestSheetPage001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create sheet page.
+     */
+    auto builder = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<LinearLayoutPattern>(true));
+    auto callback = [](const std::string&) {};
+    SheetStyle style;
+    style.isTitleBuilder = true;
+    auto sheetNode = SheetView::CreateSheetPage(0, "", builder, builder, std::move(callback), style);
+    ASSERT_NE(sheetNode, nullptr);
 
+    /**
+     * @tc.steps: step2. set style.isTitleBuilder = true.
+     * @tc.expected: create titleColumn and operationColumn.GetChildren().size() equal 2.
+     */
+    auto sheetLayoutProperty = sheetNode->GetLayoutProperty<SheetPresentationProperty>();
+    ASSERT_NE(sheetLayoutProperty, nullptr);
+    EXPECT_TRUE(sheetLayoutProperty->GetSheetStyle()->isTitleBuilder);
+    auto operationColumn = sheetNode->GetFirstChild();
+    ASSERT_NE(operationColumn, nullptr);
+    EXPECT_EQ(operationColumn->GetChildren().size(), 2);
+}
+/**
+ * @tc.name: TestSheetPage002
+ * @tc.desc: Test CreateSheetPage.
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayManagerTestNg, TestSheetPage002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create sheet page.
+     */
+    auto builder = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<LinearLayoutPattern>(true));
+    auto callback = [](const std::string&) {};
+    SheetStyle style;
+    style.isTitleBuilder = true;
+    style.sheetTitle = MESSAGE;
+    style.sheetSubtitle = MESSAGE;
+    auto sheetNode = SheetView::CreateSheetPage(0, "", builder, builder, std::move(callback), style);
+    ASSERT_NE(sheetNode, nullptr);
+
+    /**
+     * @tc.steps: step2. set style.isTitleBuilder = true、 sheetTitle and sheetSubtitle.
+     * @tc.expected: create titleColumn and titleColumn.GetChildren().size() equal 3.
+     */
+    auto sheetLayoutProperty = sheetNode->GetLayoutProperty<SheetPresentationProperty>();
+    ASSERT_NE(sheetLayoutProperty, nullptr);
+    EXPECT_TRUE(sheetLayoutProperty->GetSheetStyle()->isTitleBuilder);
+    auto operationColumn = sheetNode->GetFirstChild();
+    ASSERT_NE(operationColumn, nullptr);
+    EXPECT_EQ(operationColumn->GetChildren().size(), 2);
+    auto titleColumn = operationColumn->GetLastChild();
+    ASSERT_NE(titleColumn, nullptr);
+    EXPECT_EQ(titleColumn->GetChildren().size(), 3);
+}
+
+/**
+ * @tc.name: TestSheetPage003
+ * @tc.desc: Test SheetPresentationLayoutAlgorithm::Measure.
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayManagerTestNg, TestSheetPage003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create sheet page.
+     */
+    auto builder = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<LinearLayoutPattern>(true));
+    auto callback = [](const std::string&) {};
+    SheetStyle style;
+    style.isTitleBuilder = true;
+    style.sheetTitle = MESSAGE;
+    style.sheetSubtitle = MESSAGE;
+    auto sheetNode = SheetView::CreateSheetPage(0, "", builder, builder, std::move(callback), style);
+    ASSERT_NE(sheetNode, nullptr);
+
+    /**
+     * @tc.steps: step2. call Measure function.
+     * @tc.expected: sheetHeight_ equal 320.
+     */
+    auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
+    ASSERT_NE(sheetPattern, nullptr);
+    auto sheetLayoutAlgorithm =
+        AceType::DynamicCast<SheetPresentationLayoutAlgorithm>(sheetPattern->CreateLayoutAlgorithm());
+    ASSERT_NE(sheetLayoutAlgorithm, nullptr);
+
+    sheetNode->layoutAlgorithm_ = AceType::MakeRefPtr<LayoutAlgorithmWrapper>(sheetLayoutAlgorithm);
+    sheetNode->Measure(sheetNode->GetLayoutConstraint());
+    EXPECT_EQ(sheetLayoutAlgorithm->sheetHeight_, 2000);
+
+    sheetLayoutAlgorithm->sheetType_ = SHEET_CENTER;
+    sheetLayoutAlgorithm->sheetStyle_.sheetMode = SheetMode::AUTO;
+    auto layoutProperty = AceType::DynamicCast<SheetPresentationProperty>(sheetNode->GetLayoutProperty());
+    CHECK_NULL_VOID(layoutProperty);
+    layoutProperty->UpdateSheetStyle(sheetLayoutAlgorithm->sheetStyle_);
+    auto maxSize = SizeF(10.0f, 10.0f);
+    sheetLayoutAlgorithm->Measure(AceType::RawPtr(sheetNode));
+    sheetLayoutAlgorithm->GetHeightByScreenSizeType(maxSize);
+    sheetLayoutAlgorithm->sheetType_ = SHEET_POPUP;
+    sheetLayoutAlgorithm->GetHeightByScreenSizeType(maxSize);
+    EXPECT_EQ(sheetLayoutAlgorithm->sheetHeight_, 320);
+}
+
+/**
+ * @tc.name: TestSheetPage004
+ * @tc.desc: Test SheetPresentationLayoutAlgorithm::GetHeightBySheetStyle.
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayManagerTestNg, TestSheetPage004, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create sheet page.
+     */
+    auto builder = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<LinearLayoutPattern>(true));
+    auto callback = [](const std::string&) {};
+    SheetStyle style;
+    style.isTitleBuilder = true;
+    style.sheetTitle = MESSAGE;
+    style.sheetSubtitle = MESSAGE;
+    auto sheetNode = SheetView::CreateSheetPage(0, "", builder, builder, std::move(callback), style);
+    ASSERT_NE(sheetNode, nullptr);
+
+    auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
+    ASSERT_NE(sheetPattern, nullptr);
+    auto sheetLayoutAlgorithm =
+        AceType::DynamicCast<SheetPresentationLayoutAlgorithm>(sheetPattern->CreateLayoutAlgorithm());
+    ASSERT_NE(sheetLayoutAlgorithm, nullptr);
+
+    /**
+     * @tc.steps: step2. set sheetStyle_.height and sheetStyle_.width.
+     * @tc.expected: height and width value are equal expected value.
+     */
+    sheetLayoutAlgorithm->GetHeightBySheetStyle();
+
+    sheetLayoutAlgorithm->sheetStyle_.height = 2.5_pct;
+    sheetLayoutAlgorithm->GetHeightBySheetStyle();
+    sheetLayoutAlgorithm->sheetStyle_.height = 2.5_px;
+    sheetLayoutAlgorithm->GetHeightBySheetStyle();
+    sheetLayoutAlgorithm->sheetStyle_.height = 0.0_px;
+    auto height = sheetLayoutAlgorithm->GetHeightBySheetStyle();
+    EXPECT_EQ(height, SHEET_BIG_WINDOW_MIN_HEIGHT.ConvertToPx());
+    sheetLayoutAlgorithm->sheetStyle_.height = -1.0_px;
+    height = sheetLayoutAlgorithm->GetHeightBySheetStyle();
+    EXPECT_EQ(height, SHEET_BIG_WINDOW_HEIGHT.ConvertToPx());
+
+    sheetLayoutAlgorithm->sheetType_ = SHEET_CENTER;
+    auto maxSize = SizeF(10.0f, 10.0f);
+    auto width = sheetLayoutAlgorithm->GetWidthByScreenSizeType(maxSize);
+    EXPECT_EQ(width, SHEET_LANDSCAPE_WIDTH.ConvertToPx());
+    sheetLayoutAlgorithm->sheetType_ = SHEET_POPUP;
+    width = sheetLayoutAlgorithm->GetWidthByScreenSizeType(maxSize);
+    EXPECT_EQ(width, SHEET_POPUP_WIDTH.ConvertToPx());
+}
 }
