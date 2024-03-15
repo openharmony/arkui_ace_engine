@@ -135,7 +135,7 @@ export struct EditableTitleBar {
       alignItems: ItemAlign.Stretch,
     }) {
       Row() {
-        if (this.leftIconStyle == EditableLeftIconType.Back) {
+        if (this.leftIconStyle === EditableLeftIconType.Back) {
           Navigator()
             .active(this.backActive)
 
@@ -211,7 +211,8 @@ export struct EditableTitleBar {
       left: EditableTitleBar.leftPadding,
       right: EditableTitleBar.rightPadding,
     })
-    .backgroundColor(this.options.backgroundBlurStyle ? this.options.backgroundColor : EditableTitleBar.noneColor)
+    .backgroundColor(this.options.backgroundBlurStyle ? this.options.backgroundColor
+      : EditableTitleBar.noneColor)
     .backgroundBlurStyle(this.options.backgroundBlurStyle)
     .expandSafeArea(this.options.safeAreaTypes, this.options.safeAreaEdges)
     .onAreaChange((_oldValue: Area, newValue: Area) => {
@@ -221,29 +222,39 @@ export struct EditableTitleBar {
         EditableTitleBar.countOfSaveIcon = EditableTitleBar.commonOne;
       } else {
         maxCountOfExtraItems = EditableTitleBar.maxCountOfExtraItems;
+        EditableTitleBar.countOfSaveIcon = EditableTitleBar.commonZero;
       }
       if (this.imageItem) {
         EditableTitleBar.countOfImageItem = EditableTitleBar.commonOne;
+      } else {
+        EditableTitleBar.countOfImageItem = EditableTitleBar.commonZero;
       }
       let nValue = Number(newValue.width)
-      nValue = nValue - EditableTitleBar.leftPadding - EditableTitleBar.rightPadding - EditableTitleBar.titlePadding;
+      nValue = nValue - EditableTitleBar.leftPadding -
+        EditableTitleBar.rightPadding - EditableTitleBar.titlePadding;
       nValue = nValue - ImageMenuItem.imageHotZoneWidth;
       if (this.menuItems === undefined) {
-        this.titleMaxWidth = nValue - EditableTitleBar.countOfImageItem *
-          (ImageMenuItem.imageHotZoneWidth + ImageMenuItem.iconBackgroundSpaceHorizontal);
+        this.titleMaxWidth = nValue -
+          EditableTitleBar.countOfImageItem *
+            (ImageMenuItem.imageHotZoneWidth +
+            ImageMenuItem.iconBackgroundSpaceHorizontal);
         return;
       }
       if (this.menuItems?.length >= EditableTitleBar.maxCountOfExtraItems) {
-        this.titleMaxWidth = nValue - ImageMenuItem.imageHotZoneWidth * EditableTitleBar.maxCountOfExtraItems -
+        this.titleMaxWidth = nValue -
+          ImageMenuItem.imageHotZoneWidth * EditableTitleBar.maxCountOfExtraItems -
           EditableTitleBar.countOfImageItem * ImageMenuItem.imageHotZoneWidth -
           ImageMenuItem.iconBackgroundSpaceHorizontal *
-            (maxCountOfExtraItems + EditableTitleBar.countOfSaveIcon + EditableTitleBar.countOfImageItem);
+            (maxCountOfExtraItems + EditableTitleBar.countOfSaveIcon +
+            EditableTitleBar.countOfImageItem);
       } else {
-        this.titleMaxWidth = nValue - ImageMenuItem.imageHotZoneWidth * this.menuItems?.length -
+        this.titleMaxWidth = nValue -
+          ImageMenuItem.imageHotZoneWidth * this.menuItems?.length -
           ImageMenuItem.imageHotZoneWidth * EditableTitleBar.countOfSaveIcon -
           EditableTitleBar.countOfImageItem * ImageMenuItem.imageHotZoneWidth -
           ImageMenuItem.iconBackgroundSpaceHorizontal *
-            (this.menuItems?.length + EditableTitleBar.countOfSaveIcon + EditableTitleBar.countOfImageItem);
+            (this.menuItems?.length + EditableTitleBar.countOfSaveIcon +
+            EditableTitleBar.countOfImageItem);
       }
     })
   }
@@ -260,7 +271,8 @@ struct EditableTitleBarMenuSection {
       Row() {
         if (this.menuItems !== undefined && this.menuItems.length > EditableTitleBar.commonZero) {
           ForEach(this.menuItems.slice(EditableTitleBar.commonZero,
-            this.isSaveEnabled ? EditableTitleBar.maxOtherCountOfExtraItems : EditableTitleBar.maxCountOfExtraItems),
+            this.isSaveEnabled ?
+            EditableTitleBar.maxOtherCountOfExtraItems : EditableTitleBar.maxCountOfExtraItems),
             (item: EditableTitleBarMenuItem) => {
               ImageMenuItem({
                 item: item,
@@ -321,7 +333,8 @@ struct ImageMenuItem {
       .height(ImageMenuItem.imageHotZoneWidth)
       .borderRadius($r('sys.float.titlebar_icon_background_shape'))
       .margin({
-        left: this.attribute === ItemType.LeftIcon ? EditableTitleBar.commonZero : ImageMenuItem.iconBackgroundSpaceHorizontal,
+        left: this.attribute === ItemType.LeftIcon ? EditableTitleBar.commonZero
+          : ImageMenuItem.iconBackgroundSpaceHorizontal,
       })
       .focusable(this.item.isEnabled)
       .enabled(this.item.isEnabled)
