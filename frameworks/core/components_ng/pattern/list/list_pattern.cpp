@@ -2216,12 +2216,9 @@ void ListPattern::registerSlideUpdateListener(const std::shared_ptr<ISlideUpdate
 
 void ListPattern::UpdateFrameSizeToWeb()
 {
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    auto frameSize = host->GetGeometryNode()->GetFrameSize();
     for (auto listenerItem : listenerVector_) {
         if (listenerItem) {
-            listenerItem->OnSlideUpdate(frameSize);
+            listenerItem->OnSlideUpdate();
         }
     }
 }
