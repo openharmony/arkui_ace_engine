@@ -48,7 +48,7 @@ private:
     void ApplyReplaceStringToSpans(int32_t start, int32_t length, const std::string& other, SpanStringOperation op);
     void ApplyInsertStringToSpans(int32_t start, const std::string& other);
     void ApplyReplaceStringToSpanBase(int32_t start, int32_t length, const std::string& other, SpanStringOperation op);
-    RefPtr<SpanBase> GetDefaultSpan(SpanType type) const;
+    static RefPtr<SpanBase> GetDefaultSpan(SpanType type);
     static std::wstring GetWideStringSubstr(const std::wstring& content, int32_t start);
     static std::wstring GetWideStringSubstr(const std::wstring& content, int32_t start, int32_t length);
     void UpdateSpansWithOffset(int32_t start, int32_t offset, SpanStringOperation op);

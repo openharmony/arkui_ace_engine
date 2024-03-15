@@ -323,6 +323,8 @@ template("declarative_js_engine") {
       "jsview/menu/js_context_menu.cpp",
       "jsview/scroll_bar/js_scroll_bar.cpp",
       "sharedata/js_share_data.cpp",
+      "style_string/js_span_object.cpp",
+      "style_string/js_span_string.cpp",
       "view_stack_processor.cpp",
 
       # Models implemenations for classic fw
@@ -823,6 +825,8 @@ template("declarative_js_engine_ng") {
       "jsview/js_water_flow_sections.cpp",
       "jsview/menu/js_context_menu.cpp",
       "jsview/scroll_bar/js_scroll_bar.cpp",
+      "style_string/js_span_object.cpp",
+      "style_string/js_span_string.cpp",
     ]
 
     sources += [
