@@ -161,6 +161,7 @@ constexpr double DEFAULT_AXIS_RATIO = -0.06;
 constexpr double DEFAULT_WEB_WIDTH = 100.0;
 constexpr double DEFAULT_WEB_HEIGHT = 80.0;
 constexpr uint32_t ADJUST_WEB_DRAW_LENGTH = 3000;
+constexpr int32_t FIT_CONTENT_LIMIT_LENGTH = 8000;
 const std::string PATTERN_TYPE_WEB = "WEBPATTERN";
 const std::string DEFAULT_WEB_TEXT_ENCODING_FORMAT = "UTF-8";
 constexpr int32_t SYNC_SURFACE_QUEUE_SIZE = 8;
@@ -3148,35 +3149,35 @@ void WebPattern::InitSlideUpdateListener()
             CHECK_NULL_VOID(pattern);
             TAG_LOGI(AceLogTag::ACE_WEB, "WebPattern registerSlideUpdateListener List");
             pattern->registerSlideUpdateListener(listener);
-            axis_ = pattern->GetAxis();
+            syncAxis_ = pattern->GetAxis();
         } else {
             auto pattern = frameNode->GetPattern<ScrollPattern>();
             CHECK_NULL_VOID(pattern);
             TAG_LOGI(AceLogTag::ACE_WEB, "WebPattern registerSlideUpdateListener SCROLL");
             pattern->registerSlideUpdateListener(listener);
-            axis_ = pattern->GetAxis();
+            syncAxis_ = pattern->GetAxis();
         }
         CHECK_NULL_VOID(renderSurface_);
-        renderSurface_->SetWebSlideAxis(axis_);
+        renderSurface_->SetWebSlideAxis(syncAxis_);
     }
 }
 
-void WebPattern::UpdateSlideOffset(SizeF frameSize)
+void WebPattern::UpdateSlideOffset()
 {
     UpdateRelativeOffset();
-    switch (axis_) {
+    switch (syncAxis_) {
         case Axis::HORIZONTAL:
-            CalculateHorizontalDrawRect(frameSize);
+            CalculateHorizontalDrawRect();
             break;
         case Axis::VERTICAL:
-            CalculateVerticalDrawRect(frameSize);
+            CalculateVerticalDrawRect();
             break;
         default :
             break;
     }
 }
 
-void WebPattern::CalculateHorizontalDrawRect(SizeF frameSize)
+void WebPattern::CalculateHorizontalDrawRect()
 {
     CHECK_NULL_VOID(renderSurface_);
     renderSurface_->SetWebOffset(relativeOffsetOfScroll_.GetX());
@@ -3186,7 +3187,7 @@ void WebPattern::CalculateHorizontalDrawRect(SizeF frameSize)
 
     int32_t stepGear = (-relativeOffsetOfScroll_.GetX()) / ADJUST_WEB_DRAW_LENGTH;
     int32_t width = ADJUST_WEB_DRAW_LENGTH * 2 + stepGear;
-    int32_t height = (int32_t)frameSize.Height();
+    int32_t height = std::min(static_cast<int32_t>(drawSize_.Height()), FIT_CONTENT_LIMIT_LENGTH);
     int32_t x = ADJUST_WEB_DRAW_LENGTH * stepGear;
     int32_t y = 0;
     renderSurface_->SetWebMessage({ x, 0 });
@@ -3195,7 +3196,7 @@ void WebPattern::CalculateHorizontalDrawRect(SizeF frameSize)
     SetDrawRect(x, y, width, height);
 }
 
-void WebPattern::CalculateVerticalDrawRect(SizeF frameSize)
+void WebPattern::CalculateVerticalDrawRect()
 {
     CHECK_NULL_VOID(renderSurface_);
     renderSurface_->SetWebOffset(relativeOffsetOfScroll_.GetY());
@@ -3204,7 +3205,7 @@ void WebPattern::CalculateVerticalDrawRect(SizeF frameSize)
     }
 
     int32_t stepGear = (-relativeOffsetOfScroll_.GetY()) / ADJUST_WEB_DRAW_LENGTH;
-    int32_t width = (int32_t)frameSize.Width();
+    int32_t width = std::min(static_cast<int32_t>(drawSize_.Width()), FIT_CONTENT_LIMIT_LENGTH);
     int32_t height = ADJUST_WEB_DRAW_LENGTH * 2 + stepGear;
     int32_t x = 0;
     int32_t y = ADJUST_WEB_DRAW_LENGTH * stepGear;

@@ -108,7 +108,7 @@ public:
         return true;
     }
 
-    void UpdateSlideOffset(SizeF frameSize) override;
+    void UpdateSlideOffset() override;
 
     RefPtr<EventHub> CreateEventHub() override
     {
