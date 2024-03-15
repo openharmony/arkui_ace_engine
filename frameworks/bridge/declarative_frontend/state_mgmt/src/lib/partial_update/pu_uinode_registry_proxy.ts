@@ -104,7 +104,7 @@ class UINodeRegisterProxy {
         }
         let owningView : ViewPU | undefined;
         this.removeElementsInfo_.forEach((rmElmtInfo  : RemovedElementInfo) => {
-            const owningViewPUWeak : WeakRef<ViewPU> = UINodeRegisterProxy.ElementIdToOwningViewPU_.get(rmElmtInfo.elmtId );
+            const owningViewPUWeak : WeakRef<ViewPU> | undefined = UINodeRegisterProxy.ElementIdToOwningViewPU_.get(rmElmtInfo.elmtId );
             if (owningViewPUWeak != undefined) {
                 owningView = owningViewPUWeak.deref();
                 if (owningView) {
@@ -113,8 +113,11 @@ class UINodeRegisterProxy {
                     stateMgmtConsole.debug(`elmtIds ${rmElmtInfo.elmtId} tag: ${rmElmtInfo.tag} has not been removed because of failure of updating the weakptr of viewpu. Internal error!.`);
                 }
             } else {
-                stateMgmtConsole.debug(`elmtIds ${rmElmtInfo.elmtId} tag: ${rmElmtInfo.tag} cannot find its owning viewpu, maybe this viewpu has already been abouttobedeleted. Internal error!`)
+                stateMgmtConsole.debug(`elmtIds ${rmElmtInfo.elmtId} tag: ${rmElmtInfo.tag} cannot find its owning ViewPU, maybe this ViewPu has already been aboutToBeDeleted. Internal error!`)
             }
+
+            // FIXME: only do this if app uses V3
+            ObserveV3.getObserve().clearBinding(rmElmtInfo.elmtId);
         })
 
         this.removeElementsInfo_.length = 0;

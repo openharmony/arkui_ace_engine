@@ -5144,6 +5144,8 @@ class UINodeRegisterProxy {
             else {
                 
             }
+            // FIXME: only do this if app uses V3
+            ObserveV3.getObserve().clearBinding(rmElmtInfo.elmtId);
         });
         this.removeElementsInfo_.length = 0;
     }
@@ -5375,8 +5377,8 @@ class ViewPU extends NativeViewPartialUpdate {
         // this ViewPU should be treated as already unregistered
         
         // purge the elmtIds owned by this viewPU from the updateFuncByElmtId and also the state variable dependent elmtIds
-        Array.from(this.updateFuncByElmtId.keys()).forEach((elemId) => {
-            this.purgeDeleteElmtId(elemId);
+        Array.from(this.updateFuncByElmtId.keys()).forEach((elmtId) => {
+            this.purgeDeleteElmtId(elmtId);
         });
         if (this.hasRecycleManager()) {
             this.getRecycleManager().purgeAllCachedRecycleNode();
@@ -5409,6 +5411,8 @@ class ViewPU extends NativeViewPartialUpdate {
             // it means rmElmtId has finished all the unregistration from the js side, ElementIdToOwningViewPU_  does not need to keep it
             UINodeRegisterProxy.ElementIdToOwningViewPU_.delete(rmElmtId);
         }
+        // FIXME: only do this if app uses V3
+        ObserveV3.getObserve().clearBinding(rmElmtId);
         return result;
     }
     debugInfo__() {
@@ -6729,12 +6733,10 @@ class ObserveV3 {
         this.bindCmp_ = null;
         // bindId: UINode elmtId or watchId, depending on what is being observed
         this.bindId_ = UINodeRegisterProxy.notRecordingDependencies;
-        // Map bindId to ViewPU/MonitorV3
-        // FIXME use Map<number, ViewPU | MonitorV3>
+        // Map bindId to WeakRef<ViewPU> | MonitorV3
         this.id2cmp_ = {};
-        // Map bindId -> Set 0f view model object
+        // Map bindId -> Set of @observed class objects
         // reverse dependency map for quickly removing all dependencies of a bindId
-        // FIXME: string typing: Map<number, Set<Object>>
         this.id2targets_ = {};
         // queued up Set of bindId
         // elmtIds of UINodes need re-render
@@ -6765,7 +6767,7 @@ class ObserveV3 {
         this.bindId_ = id;
         if (cmp != null) {
             this.clearBinding(id);
-            this.id2cmp_[id] = cmp;
+            this.id2cmp_[id] = (cmp instanceof ViewPU) ? new WeakRef(cmp) : cmp;
         }
     }
     // clear any previously created dependency view model object to elmtId
@@ -6781,6 +6783,7 @@ class ObserveV3 {
         });
         delete this.id2targets_[id];
         delete this.id2cmp_[id];
+        
     }
     // add dependency view model object 'target' property 'attrName'
     // to current this.bindId
@@ -6945,7 +6948,8 @@ class ObserveV3 {
         let view;
         
         this.elmtIdsChanged_.forEach((elmtId) => {
-            if ((view = this.id2cmp_[elmtId]) && (view instanceof ViewPU)) {
+            var _a;
+            if ((view = (_a = this.id2cmp_[elmtId]) === null || _a === void 0 ? void 0 : _a.deref()) && (view instanceof ViewPU)) {
                 // FIXME Review: uiNodeNeedUpdateV3 just copies elmtIds to another set
                 // waits for FlushBuild to call rerender call updateDirtyElements
                 // to actually render the UINodes. Could we call ViewPU.UpdateElement 
