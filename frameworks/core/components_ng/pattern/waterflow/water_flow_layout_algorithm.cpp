@@ -107,8 +107,12 @@ void WaterFlowLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     }
     MinusPaddingToSize(layoutProperty->CreatePaddingAndBorder(), idealSize);
 
-    if (layoutWrapper->GetHostNode()->GetChildrenUpdated() != -1) {
-        layoutInfo_.Reset(layoutWrapper->GetHostNode()->GetChildrenUpdated());
+    int32_t updateIdx = layoutWrapper->GetHostNode()->GetChildrenUpdated();
+    if (updateIdx != -1) {
+        if (layoutInfo_.footerIndex_ == 0) {
+            --updateIdx;
+        }
+        layoutInfo_.ClearCacheAfterIndex(updateIdx - 1);
         layoutWrapper->GetHostNode()->ChildrenUpdatedFrom(-1);
     }
 
