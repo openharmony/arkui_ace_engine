@@ -210,6 +210,12 @@ public:
     const RefPtr<Pattern>& GetPattern() const;
 
     template<typename T>
+    T* GetPatternPtr() const
+    {
+        return reinterpret_cast<T*>(RawPtr(pattern_));
+    }
+
+    template<typename T>
     RefPtr<T> GetPattern() const
     {
         return DynamicCast<T>(pattern_);
@@ -222,9 +228,21 @@ public:
     }
 
     template<typename T>
+    T* GetLayoutPropertyPtr() const
+    {
+        return reinterpret_cast<T*>(RawPtr(layoutProperty_));
+    }
+
+    template<typename T>
     RefPtr<T> GetLayoutProperty() const
     {
         return DynamicCast<T>(layoutProperty_);
+    }
+
+    template<typename T>
+    T* GetPaintPropertyPtr() const
+    {
+        return reinterpret_cast<T*>(RawPtr(paintProperty_));
     }
 
     template<typename T>
