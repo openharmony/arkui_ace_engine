@@ -825,7 +825,12 @@ HWTEST_F(ImageTestNg, OnDirtyLayoutWrapperSwap001, TestSize.Level1)
     EXPECT_EQ(frameNode->GetTag(), V2::IMAGE_ETS_TAG);
     auto imagePattern = frameNode->GetPattern<ImagePattern>();
     ASSERT_NE(imagePattern, nullptr);
-    auto layoutWrapper = AceType::MakeRefPtr<LayoutWrapperNode>(nullptr, nullptr, nullptr);
+    auto imageLayoutProperty = AceType::MakeRefPtr<ImageLayoutProperty>();
+    ASSERT_NE(imageLayoutProperty, nullptr);
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    ASSERT_NE(geometryNode, nullptr);
+    geometryNode->SetContentSize(SizeF(WIDTH, HEIGHT));
+    auto layoutWrapper = AceType::MakeRefPtr<LayoutWrapperNode>(nullptr, geometryNode, imageLayoutProperty);
     auto layoutAlgorithmWrapper = AceType::MakeRefPtr<LayoutAlgorithmWrapper>(nullptr);
     layoutWrapper->SetLayoutAlgorithm(layoutAlgorithmWrapper);
     layoutWrapper->skipMeasureContent_ = true;
@@ -1536,28 +1541,19 @@ HWTEST_F(ImageTestNg, ImageLayout011, TestSize.Level1)
  */
 HWTEST_F(ImageTestNg, ImageLayoutFunction001, TestSize.Level1)
 {
-    auto imageLayoutProperty = AceType::MakeRefPtr<ImageLayoutProperty>();
-    ASSERT_NE(imageLayoutProperty, nullptr);
-    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
-    ASSERT_NE(geometryNode, nullptr);
-    LayoutWrapperNode layoutWrapper(nullptr, geometryNode, imageLayoutProperty);
+    auto frameNode = ImageTestNg::CreateImageNode(IMAGE_SRC_URL, ALT_SRC_URL);
+    auto pattern = frameNode->GetPattern<ImagePattern>();
     /**
      * @tc.cases: case1. layoutWrapper->GetGeometryNode()->GetContent() == nullptr, func will return.
      */
-    auto loadingCtx =
+    pattern->loadingCtx_ =
         AceType::MakeRefPtr<ImageLoadingContext>(ImageSourceInfo(), LoadNotifier(nullptr, nullptr, nullptr));
-    auto altLoadingCtx =
-        AceType::MakeRefPtr<ImageLoadingContext>(ImageSourceInfo(), LoadNotifier(nullptr, nullptr, nullptr));
-    auto imageLayoutAlgorithm = AceType::MakeRefPtr<ImageLayoutAlgorithm>(loadingCtx, altLoadingCtx);
-    imageLayoutAlgorithm->Layout(&layoutWrapper);
     /**
      * @tc.cases: case2. layoutWrapper->GetGeometryNode()->GetContent() is true, func success.
      */
-    geometryNode->SetContentSize(SizeF(WIDTH, HEIGHT));
-    imageLayoutAlgorithm->Layout(&layoutWrapper);
-    EXPECT_EQ(loadingCtx->imageFit_, ImageFit::COVER);
-    EXPECT_EQ(loadingCtx->autoResize_, true);
-    EXPECT_EQ(loadingCtx->dstSize_, SizeF(WIDTH, HEIGHT));
+    EXPECT_EQ(pattern->loadingCtx_->imageFit_, ImageFit::COVER);
+    EXPECT_EQ(pattern->loadingCtx_->autoResize_, true);
+    EXPECT_EQ(pattern->loadingCtx_->dstSize_, SizeF(WIDTH, HEIGHT));
 }
 
 /**
