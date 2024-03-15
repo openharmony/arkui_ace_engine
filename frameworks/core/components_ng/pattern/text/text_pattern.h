@@ -616,6 +616,8 @@ private:
     void ToJsonValue(std::unique_ptr<JsonValue>& json) const override;
     // to check if drag is in progress
 
+    void AddUdmfTxtPreProcessor(const ResultObject src, ResultObject& result, bool isAppend);
+
     bool isMeasureBoundary_ = false;
     bool isMousePressed_ = false;
     bool leftMousePressed_ = false;
