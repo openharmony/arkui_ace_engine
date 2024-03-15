@@ -609,7 +609,7 @@ void JSSwiper::SetIndicator(const JSCallbackInfo& info)
         return;
     }
 
-    if (info[0]->IsUndefined()) {
+    if (info[0]->IsEmpty()) {
         SwiperModel::GetInstance()->SetShowIndicator(true);
         return;
     }
