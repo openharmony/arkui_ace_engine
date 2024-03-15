@@ -668,41 +668,41 @@ abstract class ViewPU extends NativeViewPartialUpdate
   // implements IMultiPropertiesChangeSubscriber
   viewPropertyHasChanged(varName: PropertyInfo, dependentElmtIds: Set<number>): void {
     stateMgmtProfiler.begin("ViewPU.viewPropertyHasChanged");
-    stateMgmtTrace.scopedTrace(() => {
-      if (this.isRenderInProgress) {
-        stateMgmtConsole.applicationError(`${this.debugInfo__()}: State variable '${varName}' has changed during render! It's illegal to change @Component state while build (initial render or re-render) is on-going. Application error!`);
+    aceTrace.begin("ViewPU.viewPropertyHasChanged", this.constructor.name, varName, dependentElmtIds.size);
+    if (this.isRenderInProgress) {
+      stateMgmtConsole.applicationError(`${this.debugInfo__()}: State variable '${varName}' has changed during render! It's illegal to change @Component state while build (initial render or re-render) is on-going. Application error!`);
+    }
+
+    this.syncInstanceId();
+
+    if (dependentElmtIds.size && !this.isFirstRender()) {
+      if (!this.dirtDescendantElementIds_.size && !this.runReuse_) {
+        // mark ComposedElement dirty when first elmtIds are added
+        // do not need to do this every time
+        this.markNeedUpdate();
       }
-
-      this.syncInstanceId();
-
-      if (dependentElmtIds.size && !this.isFirstRender()) {
-        if (!this.dirtDescendantElementIds_.size && !this.runReuse_) {
-          // mark ComposedElement dirty when first elmtIds are added
-          // do not need to do this every time
-          this.markNeedUpdate();
+      stateMgmtConsole.debug(`${this.debugInfo__()}: viewPropertyHasChanged property: elmtIds that need re-render due to state variable change: ${this.debugInfoElmtIds(Array.from(dependentElmtIds))} .`)
+      for (const elmtId of dependentElmtIds) {
+        if (this.hasRecycleManager()) {
+          this.dirtDescendantElementIds_.add(this.recycleManager_.proxyNodeId(elmtId));
+        } else {
+          this.dirtDescendantElementIds_.add(elmtId);
         }
-        stateMgmtConsole.debug(`${this.debugInfo__()}: viewPropertyHasChanged property: elmtIds that need re-render due to state variable change: ${this.debugInfoElmtIds(Array.from(dependentElmtIds))} .`)
-        for (const elmtId of dependentElmtIds) {
-          if (this.hasRecycleManager()) {
-            this.dirtDescendantElementIds_.add(this.recycleManager_.proxyNodeId(elmtId));
-          } else {
-            this.dirtDescendantElementIds_.add(elmtId);
-          }
-        }
-        stateMgmtConsole.debug(`   ... updated full list of elmtIds that need re-render [${this.debugInfoElmtIds(Array.from(this.dirtDescendantElementIds_))}].`)
-      } else {
-        stateMgmtConsole.debug(`${this.debugInfo__()}: viewPropertyHasChanged: state variable change adds no elmtIds for re-render`);
-        stateMgmtConsole.debug(`   ... unchanged full list of elmtIds that need re-render [${this.debugInfoElmtIds(Array.from(this.dirtDescendantElementIds_))}].`)
       }
+      stateMgmtConsole.debug(`   ... updated full list of elmtIds that need re-render [${this.debugInfoElmtIds(Array.from(this.dirtDescendantElementIds_))}].`)
+    } else {
+      stateMgmtConsole.debug(`${this.debugInfo__()}: viewPropertyHasChanged: state variable change adds no elmtIds for re-render`);
+      stateMgmtConsole.debug(`   ... unchanged full list of elmtIds that need re-render [${this.debugInfoElmtIds(Array.from(this.dirtDescendantElementIds_))}].`)
+    }
 
-      let cb = this.watchedProps.get(varName)
-      if (cb) {
-        stateMgmtConsole.debug(`   ... calling @Watch function`);
-        cb.call(this, varName);
-      }
+    let cb = this.watchedProps.get(varName)
+    if (cb) {
+      stateMgmtConsole.debug(`   ... calling @Watch function`);
+      cb.call(this, varName);
+    }
 
-      this.restoreInstanceId();
-    }, "ViewPU.viewPropertyHasChanged", this.constructor.name, varName, dependentElmtIds.size);
+    this.restoreInstanceId();
+    aceTrace.end();
     stateMgmtProfiler.end();
   }
 
@@ -741,36 +741,35 @@ abstract class ViewPU extends NativeViewPartialUpdate
       return;
     }
     stateMgmtProfiler.begin("ViewPU.performDelayedUpdate");
-    stateMgmtTrace.scopedTrace(() => {
-      stateMgmtConsole.debug(`${this.debugInfo__()}: performDelayedUpdate start ...`);
-      this.syncInstanceId();
+    aceTrace.begin("ViewPU.performDelayedUpdate", this.constructor.name);
+    stateMgmtConsole.debug(`${this.debugInfo__()}: performDelayedUpdate start ...`);
+    this.syncInstanceId();
 
-      for (const stateLinkPropVar of this.ownObservedPropertiesStore_) {
-        const changedElmtIds = stateLinkPropVar.moveElmtIdsForDelayedUpdate();
-        if (changedElmtIds) {
-          const varName = stateLinkPropVar.info();
-          if (changedElmtIds.size && !this.isFirstRender()) {
-            for (const elmtId of changedElmtIds) {
-              this.dirtDescendantElementIds_.add(elmtId);
-            }
-          }
-
-          stateMgmtConsole.debug(`${this.debugInfo__()}: performDelayedUpdate: all elmtIds that need re-render [${Array.from(this.dirtDescendantElementIds_).toString()}].`);
-
-          const cb = this.watchedProps.get(varName)
-          if (cb) {
-            stateMgmtConsole.debug(`   ... calling @Watch function`);
-            cb.call(this, varName);
+    for (const stateLinkPropVar of this.ownObservedPropertiesStore_) {
+      const changedElmtIds = stateLinkPropVar.moveElmtIdsForDelayedUpdate();
+      if (changedElmtIds) {
+        const varName = stateLinkPropVar.info();
+        if (changedElmtIds.size && !this.isFirstRender()) {
+          for (const elmtId of changedElmtIds) {
+            this.dirtDescendantElementIds_.add(elmtId);
           }
         }
-      } // for all ownStateLinkProps_
-      this.restoreInstanceId();
 
-      if (this.dirtDescendantElementIds_.size) {
-        this.markNeedUpdate();
+        stateMgmtConsole.debug(`${this.debugInfo__()}: performDelayedUpdate: all elmtIds that need re-render [${Array.from(this.dirtDescendantElementIds_).toString()}].`);
+
+        const cb = this.watchedProps.get(varName)
+        if (cb) {
+          stateMgmtConsole.debug(`   ... calling @Watch function`);
+          cb.call(this, varName);
+        }
       }
+    } // for all ownStateLinkProps_
+    this.restoreInstanceId();
 
-    }, "ViewPU.performDelayedUpdate", this.constructor.name);
+    if (this.dirtDescendantElementIds_.size) {
+      this.markNeedUpdate();
+    }
+    aceTrace.end()
     stateMgmtProfiler.end();
   }
 
