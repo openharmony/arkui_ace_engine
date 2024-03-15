@@ -557,7 +557,7 @@ HWTEST_F(TextTestNg, TextFrameNodeCreator003, TestSize.Level1)
 {
     TextModelNG textModelNG;
     textModelNG.Create(CREATE_VALUE);
-    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    auto frameNode = AceType::Claim(ViewStackProcessor::GetInstance()->GetMainFrameNode());
     ASSERT_NE(frameNode, nullptr);
     RefPtr<LayoutProperty> layoutProperty = frameNode->GetLayoutProperty();
     ASSERT_NE(layoutProperty, nullptr);
@@ -5051,10 +5051,10 @@ HWTEST_F(TextTestNg, HandleClickEventTest001, TestSize.Level1)
     auto host = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     auto pattern = host->GetPattern<TextPattern>();
     bool isSpanPhoneClicked = false;
-    auto spanNode = CreateSpanNodeWithSetDefaultProperty(SPAN_URL);
-    host->AddChild(spanNode);
-    spanNode = CreateSpanNodeWithSetDefaultProperty(SPAN_PHONE);
+    auto spanNode = CreateSpanNodeWithSetDefaultProperty(SPAN_PHONE);
     spanNode->UpdateOnClickEvent([&isSpanPhoneClicked](GestureEvent& info) { isSpanPhoneClicked = true; });
+    host->AddChild(spanNode);
+    spanNode = CreateSpanNodeWithSetDefaultProperty(SPAN_URL);
     host->AddChild(spanNode);
     auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
     frameNode->GetRenderContext()->UpdateClipEdge(false);
