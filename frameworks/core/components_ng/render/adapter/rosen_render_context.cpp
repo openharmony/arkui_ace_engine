@@ -948,6 +948,16 @@ void RosenRenderContext::OnParticleOptionArrayUpdate(const std::list<ParticleOpt
     RequestNextFrame();
 }
 
+void RosenRenderContext::OnClickEffectLevelUpdate(const ClickEffectInfo& info)
+{
+    auto frameNode = GetHost();
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(rsNode_);
+    if (HasClickEffectLevel()) {
+        InitEventClickEffect();
+    }
+}
+
 bool RosenRenderContext::NeedPreloadImage(const std::list<ParticleOption>& optionList, RectF& rect)
 {
     bool flag = false;
