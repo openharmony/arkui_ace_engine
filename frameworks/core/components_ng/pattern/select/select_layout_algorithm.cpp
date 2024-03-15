@@ -19,6 +19,7 @@
 #include "core/components/select/select_theme.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/flex/flex_layout_property.h"
+#include "core/components_ng/pattern/select/select_pattern.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
 #include "core/pipeline/pipeline_base.h"
 
@@ -26,6 +27,7 @@ namespace OHOS::Ace::NG {
 namespace {
     constexpr float MIN_SPACE = 8.0f;
     constexpr float MIN_CHAR_VAL = 2.0f;
+    constexpr float SMALL_MIN_CHAR_VAL = 1.0f;
 } // namespace
 void SelectLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
 {
@@ -54,11 +56,8 @@ void SelectLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
 
     auto fontSize = textLayoutProperty->GetFontSize().value().ConvertToPx();
     bool isTextMin = false;
-    if (textSize.Width() < fontSize * MIN_CHAR_VAL) {
-        textSize.SetWidth(fontSize * MIN_CHAR_VAL);
-        isTextMin = true;
-    }
-    
+    MeasureAndGetTextSize(fontSize, textSize, isTextMin);
+
     if (isTextMin || childConstraint.parentIdealSize.Width().has_value()) {
         textLayoutProperty->UpdateMarginSelfIdealSize(textSize);
         textLayoutConstraint.selfIdealSize = OptionalSize<float>(textSize.Width(), textSize.Height());
@@ -83,12 +82,36 @@ void SelectLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     CHECK_NULL_VOID(pipeline);
     auto theme = pipeline->GetTheme<SelectTheme>();
     CHECK_NULL_VOID(theme);
-    auto defaultHeight = static_cast<float>(theme->GetSelectDefaultHeight().ConvertToPx());
+    float defaultHeight = MeasureAndGetDefaultHeight(layoutProps, theme);
     layoutWrapper->GetGeometryNode()->SetContentSize(
         SizeF(rowWidth, rowHeight > defaultHeight ? rowHeight : defaultHeight));
 
     // Measure same as box, base on the child row.
     BoxLayoutAlgorithm::PerformMeasureSelf(layoutWrapper);
+}
+
+void SelectLayoutAlgorithm::MeasureAndGetTextSize(double fontSize, SizeF& textSize, bool& isTextMin)
+{
+    float minCharVal =
+        Container::LessThanAPITargetVersion(PlatformVersion::VERSION_TWELVE) ? MIN_CHAR_VAL : SMALL_MIN_CHAR_VAL;
+    if (textSize.Width() < fontSize * minCharVal) {
+        textSize.SetWidth(fontSize * minCharVal);
+        isTextMin = true;
+    }
+}
+
+float SelectLayoutAlgorithm::MeasureAndGetDefaultHeight(RefPtr<LayoutProperty> layoutProps, RefPtr<SelectTheme> theme)
+{
+    float defaultHeight = 0.0f;
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
+        auto host = layoutProps->GetHost();
+        auto selectPattern = host->GetPattern<SelectPattern>();
+        defaultHeight =
+            static_cast<float>(theme->GetSelectDefaultHeight(selectPattern->GetControlSize()).ConvertToPx());
+    } else {
+        defaultHeight = static_cast<float>(theme->GetSelectDefaultHeight().ConvertToPx());
+    }
+    return defaultHeight;
 }
 
 SizeF SelectLayoutAlgorithm::MeasureAndGetSize(

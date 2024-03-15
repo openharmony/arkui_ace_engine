@@ -648,6 +648,32 @@ ArkUINativeModuleValue SelectBridge::SetSize(ArkUIRuntimeCallInfo* runtimeCallIn
     return panda::JSValueRef::Undefined(vm);
 }
 
+ArkUINativeModuleValue SelectBridge::SetControlSize(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> nodeArg = runtimeCallInfo->GetCallArgRef(0);
+    Local<JSValueRef> controlSizeArg = runtimeCallInfo->GetCallArgRef(1);  // 1: index of width value
+    auto nativeNode = nodePtr(nodeArg->ToNativePointer(vm)->Value());
+    auto controlSize = controlSizeArg->Int32Value(vm);
+    if (!ArkTSUtils::ParseJsInteger(vm, controlSizeArg, controlSize)) {
+        GetArkUINodeModifiers()->getSelectModifier()->resetControlSize(nativeNode);
+    } else {
+        GetArkUINodeModifiers()->getSelectModifier()->setControlSize(nativeNode, controlSize);
+    }
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue SelectBridge::ResetControlSize(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> nodeArg = runtimeCallInfo->GetCallArgRef(0);
+    auto nativeNode = nodePtr(nodeArg->ToNativePointer(vm)->Value());
+    GetArkUINodeModifiers()->getSelectModifier()->resetControlSize(nativeNode);
+    return panda::JSValueRef::Undefined(vm);
+}
+
 ArkUINativeModuleValue SelectBridge::ResetSize(ArkUIRuntimeCallInfo* runtimeCallInfo)
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
