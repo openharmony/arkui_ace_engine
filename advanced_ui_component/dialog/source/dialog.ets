@@ -58,7 +58,7 @@ export struct TipsDialog {
   @State imageSizeHeight: number = 0;
   @State textAlignment: TextAlign = TextAlign.Start;
   marginOffset: number = 0;
-  checkBoxHeight: number = CHECKBOX_CONTAINER_HEIGHT;
+  @State checkBoxHeight: number = 0;
   buttonHeight: number = 0;
 
   build() {
@@ -119,8 +119,11 @@ export struct TipsDialog {
         })
     }
     .padding({ top: $r('sys.float.padding_level8') })
-    .height(CHECKBOX_CONTAINER_HEIGHT)
+    .constraintSize({minHeight: CHECKBOX_CONTAINER_HEIGHT})
     .width('100%')
+    .onAreaChange((oldValue: Area, newValue: Area) => {
+      this.checkBoxHeight = Number(newValue.height);
+    })
   }
 
   @Builder
@@ -129,14 +132,17 @@ export struct TipsDialog {
       Image(this.imageRes)
         .size(this.imageSize)
         .objectFit(ImageFit.Contain)
+        .borderRadius($r('sys.float.corner_radius_level6'))
         .constraintSize({
           maxWidth: '100%',
-          maxHeight: `calc(100% - ${this.checkBoxHeight}vp - ${this.buttonHeight}vp - ${TEXT_MIN_HEIGHT}vp + ${this.marginOffset}vp)`
+          maxHeight:
+          `calc(100% - ${this.checkBoxHeight}vp - ${this.buttonHeight}vp - ${TEXT_MIN_HEIGHT}vp + ${this.marginOffset}vp)`
         })
     }
     .width('100%')
     .constraintSize({
-      maxHeight: `calc(100% - ${this.checkBoxHeight}vp - ${this.buttonHeight}vp - ${TEXT_MIN_HEIGHT}vp + ${this.marginOffset}vp)`
+      maxHeight:
+      `calc(100% - ${this.checkBoxHeight}vp - ${this.buttonHeight}vp - ${TEXT_MIN_HEIGHT}vp + ${this.marginOffset}vp)`
     })
     .onAreaChange((oldValue: Area, newValue: Area) => {
       this.imageSizeHeight = Number(newValue.height);
@@ -184,7 +190,7 @@ export struct TipsDialog {
 
   aboutToAppear() {
     this.initButtons();
-    this.initMarginAndCheckHeight();
+    this.initMargin();
   }
 
   private getTextAlign(maxWidth: number): void {
@@ -232,10 +238,7 @@ export struct TipsDialog {
     return buttonsHeight;
   }
 
-  private initMarginAndCheckHeight(): void {
-    if (this.checkTips == null) {
-      this.checkBoxHeight = 0;
-    }
+  private initMargin(): void {
     this.marginOffset = 0 - getNumberByResource('padding_level8')
   }
 }
