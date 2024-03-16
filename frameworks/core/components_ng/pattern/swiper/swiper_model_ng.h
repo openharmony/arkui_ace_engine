@@ -99,6 +99,10 @@ public:
     static void SetIndicatorType(FrameNode* frameNode, SwiperIndicatorType indicatorType);
     static void SetIsIndicatorCustomSize(FrameNode* frameNode, bool isCustomSize);
     static void SetEnabled(FrameNode* frameNode, bool enabled);
+    static void SetOnChange(FrameNode* frameNode, std::function<void(const BaseEventInfo* info)>&& onChange);
+    static void SetOnAnimationStart(FrameNode* frameNode, AnimationStartEvent&& onAnimationStart);
+    static void SetOnAnimationEnd(FrameNode* frameNode, AnimationEndEvent&& onAnimationEnd);
+    static void SetOnGestureSwipe(FrameNode* frameNode, GestureSwipeEvent&& onGestureSwipe);
 
     static bool GetLoop(FrameNode* frameNode);
     static bool GetAutoPlay(FrameNode* frameNode);
@@ -112,6 +116,7 @@ public:
     static float GetItemSpace(FrameNode* frameNode);
     static bool GetShowIndicator(FrameNode* frameNode);
     static int GetShowDisplayArrow(FrameNode* frameNode);
+    static EdgeEffect GetEffectMode(FrameNode* frameNode);
 };
 
 } // namespace OHOS::Ace::NG

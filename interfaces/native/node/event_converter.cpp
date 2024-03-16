@@ -87,6 +87,14 @@ ArkUI_Int32 ConvertOriginEventType(ArkUI_NodeEventType type)
             return ON_TEXTAREA_PASTE;
         case NODE_TEXT_AREA_ON_TEXT_SELECTION_CHANGE:
             return ON_TEXTAREA_TEXT_SELECTION_CHANGE;
+        case NODE_SWIPER_EVENT_ON_CHANGE:
+            return ON_SWIPER_CHANGE;
+        case NODE_SWIPER_EVENT_ON_ANIMATION_START:
+            return ON_SWIPER_ANIMATION_START;
+        case NODE_SWIPER_EVENT_ON_ANIMATION_END:
+            return ON_SWIPER_ANIMATION_END;
+        case NODE_SWIPER_EVENT_ON_GESTURE_SWIPE:
+            return ON_SWIPER_GESTURE_SWIPE;
         default:
             return -1;
     }
@@ -155,6 +163,14 @@ ArkUI_Int32 ConvertToNodeEventType(ArkUIEventSubKind type)
             return NODE_TEXT_AREA_ON_PASTE;
         case ON_TEXTAREA_TEXT_SELECTION_CHANGE:
             return NODE_TEXT_AREA_ON_TEXT_SELECTION_CHANGE;
+        case ON_SWIPER_CHANGE:
+            return NODE_SWIPER_EVENT_ON_CHANGE;
+        case ON_SWIPER_ANIMATION_START:
+            return NODE_SWIPER_EVENT_ON_ANIMATION_START;
+        case ON_SWIPER_ANIMATION_END:
+            return NODE_SWIPER_EVENT_ON_ANIMATION_END;
+        case ON_SWIPER_GESTURE_SWIPE:
+            return NODE_SWIPER_EVENT_ON_GESTURE_SWIPE;
         default:
             return -1;
     }
