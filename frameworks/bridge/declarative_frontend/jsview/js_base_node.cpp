@@ -30,10 +30,10 @@
 #include "bridge/declarative_frontend/engine/js_types.h"
 #include "bridge/declarative_frontend/jsview/js_utils.h"
 #include "bridge/js_frontend/engine/jsi/js_value.h"
-#include "core/components/common/properties/color.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/modifier.h"
 #include "core/components_ng/base/view_stack_processor.h"
+#include "core/components_ng/pattern/custom_frame_node/custom_frame_node.h"
 #include "core/components_ng/pattern/render_node/render_node_pattern.h"
 #include "core/components_ng/pattern/stack/stack_pattern.h"
 #include "core/components_ng/render/drawing_forward.h"
@@ -167,9 +167,7 @@ void JSBaseNode::CreateRenderNode(const JSCallbackInfo& info)
 void JSBaseNode::CreateFrameNode(const JSCallbackInfo& info)
 {
     auto nodeId = ElementRegister::GetInstance()->MakeUniqueId();
-    std::string nodeTag = "FrameNode";
-    auto node = NG::FrameNode::GetOrCreateFrameNode(
-        nodeTag, nodeId, []() { return AceType::MakeRefPtr<NG::RenderNodePattern>(); });
+    auto node = NG::CustomFrameNode::GetOrCreateCustomFrameNode(nodeId);
     node->SetExclusiveEventForChild(true);
     viewNode_ = node;
     void* ptr = AceType::RawPtr(viewNode_);
