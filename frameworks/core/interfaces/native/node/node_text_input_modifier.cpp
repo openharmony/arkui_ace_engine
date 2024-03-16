@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -50,6 +50,11 @@ const std::vector<TextAlign> TEXT_ALIGNS = { TextAlign::START, TextAlign::CENTER
 const uint32_t ERROR_UINT_CODE = -1;
 const float ERROR_FLOAT_CODE = -1.0f;
 const int32_t ERROR_INT_CODE = -1;
+constexpr int CALL_ARG_0 = 0;
+constexpr int CALL_ARG_1 = 1;
+constexpr int CALL_ARG_2 = 2;
+constexpr int CALL_ARG_3 = 3;
+constexpr int32_t DEFAULT_GROUP_UNDERLINE_COLOR_VALUES_COUNT = 4;
 std::string g_strValue;
 
 void SetTextInputCaretColor(ArkUINodeHandle node, ArkUI_Uint32 color)
@@ -804,6 +809,37 @@ void ResetTextInputBackgroundColor(ArkUINodeHandle node)
     TextFieldModelNG::SetBackgroundColor(frameNode, backgroundColor);
 }
 
+void SetTextInputNormalUnderlineColor(ArkUINodeHandle node, ArkUI_Uint32 normalColor)
+{
+    auto *frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    TextFieldModelNG::SetNormalUnderlineColor(frameNode, Color(normalColor));
+}
+
+void SetTextInputUserUnderlineColor(ArkUINodeHandle node, const ArkUI_Float32* values,
+    ArkUI_Int32 length)
+{
+    auto *frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    UserUnderlineColor userColor = UserUnderlineColor();
+    if (length != DEFAULT_GROUP_UNDERLINE_COLOR_VALUES_COUNT) {
+        return;
+    }
+    userColor.typing = Color(values[CALL_ARG_0]);
+    userColor.normal = Color(values[CALL_ARG_1]);
+    userColor.error = Color(values[CALL_ARG_2]);
+    userColor.disable = Color(values[CALL_ARG_3]);
+    TextFieldModelNG::SetUserUnderlineColor(frameNode, userColor);
+}
+
+void ResetTextInputUserUnderlineColor(ArkUINodeHandle node)
+{
+    auto *frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    UserUnderlineColor userColor = UserUnderlineColor();
+    TextFieldModelNG::SetUserUnderlineColor(frameNode, userColor);
+}
+
 } // namespace
 
 namespace NodeModifier {
@@ -831,7 +867,8 @@ const ArkUITextInputModifier* GetTextInputModifier()
         GetTextInputShowCancelButton, GetTextInputCancelIconSize, GetTextInputTextCanacelIconSrc,
         GetTextInputTextCanacelIconColor, GetTextInputTextAlign, GetTextInputFontColor, GetTextInputFontStyle,
         GetTextInputFontWeight, GetTextInputFontSize, GetTextInputCancelButtonStyle, SetTextInputBackgroundColor,
-        ResetTextInputBackgroundColor };
+        ResetTextInputBackgroundColor, SetTextInputNormalUnderlineColor, SetTextInputUserUnderlineColor,
+        ResetTextInputUserUnderlineColor};
     return &modifier;
 }
 
