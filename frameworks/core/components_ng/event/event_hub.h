@@ -289,6 +289,16 @@ public:
         return onDragEnd_;
     }
 
+    bool HasOnDragEnter() const
+    {
+        return static_cast<bool>(onDragEnter_);
+    }
+
+    bool HasOnDragLeave() const
+    {
+        return static_cast<bool>(onDragLeave_);
+    }
+
     bool HasOnDragEnd() const
     {
         return static_cast<bool>(onDragEnd_);
@@ -309,6 +319,26 @@ public:
     bool HasOnDrop() const
     {
         return onDrop_ != nullptr;
+    }
+
+    bool HasCustomerOnDragEnter() const
+    {
+        return customerOnDragEnter_ != nullptr;
+    }
+
+    bool HasCustomerOnDragLeave() const
+    {
+        return customerOnDragLeave_ != nullptr;
+    }
+
+    bool HasCustomerOnDragMove() const
+    {
+        return customerOnDragMove_ != nullptr;
+    }
+
+    bool HasCustomerOnDragEnd() const
+    {
+        return customerOnDragEnd_ != nullptr;
     }
 
     bool HasCustomerOnDrop() const

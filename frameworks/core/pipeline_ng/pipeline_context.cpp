@@ -2946,6 +2946,7 @@ void PipelineContext::OnDragEvent(const PointerEvent& pointerEvent, DragEventAct
     if (action == DragEventAction::DRAG_EVENT_START) {
         manager->RequireSummary();
         manager->SetDragCursorStyleCore(DragCursorStyleCore::DEFAULT);
+        TAG_LOGI(AceLogTag::ACE_DRAG, "start drag, current windowId is %{public}d", container->GetWindowId());
     }
     extraInfo = manager->GetExtraInfo();
     if (action == DragEventAction::DRAG_EVENT_END) {
