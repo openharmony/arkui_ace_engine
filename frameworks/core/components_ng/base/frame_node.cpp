@@ -1177,6 +1177,9 @@ void FrameNode::SetActive(bool active)
         if (parent) {
             parent->MarkNeedSyncRenderTree();
         }
+        if (isActive_ && SystemProperties::GetDeveloperModeOn()) {
+            PaintDebugBoundary(SystemProperties::GetDebugBoundaryEnabled());
+        }
     }
 }
 

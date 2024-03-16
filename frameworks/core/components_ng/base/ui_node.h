@@ -529,7 +529,7 @@ public:
 
     virtual bool SetParentLayoutConstraint(const SizeF& size) const;
 
-    void PaintDebugBoundaryTreeAll(bool flag);
+    virtual void PaintDebugBoundaryTreeAll(bool flag);
 
 protected:
     std::list<RefPtr<UINode>>& ModifyChildren()
