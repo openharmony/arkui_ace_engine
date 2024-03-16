@@ -146,6 +146,7 @@ HWTEST_F(ViewAbstractTestNg, ViewAbstractTest001, TestSize.Level1)
     ViewAbstract::SetMaxWidth(NG::CalcLength(MIN_WIDTH));
     ViewAbstract::SetMaxHeight(NG::CalcLength(MIN_HEIGHT));
     ViewAbstract::ResetAspectRatio();
+    ViewAbstract::SetDrawModifier(nullptr);
 
     /**
      * @tc.expected: Successfully set various properties of the top node on the stack
@@ -2320,6 +2321,8 @@ HWTEST_F(ViewAbstractTestNg, ViewAbstractDisableBlurTest, TestSize.Level1)
 
     auto topFrameNodeOne = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     EXPECT_EQ(strcmp(topFrameNodeOne->GetTag().c_str(), TAG_CHILD), 0);
+    auto frameNodeOne = static_cast<FrameNode*>(ViewAbstract::GetFrameNode());
+    EXPECT_EQ(strcmp(frameNodeOne->GetTag().c_str(), TAG_CHILD), 0);
     auto frameNode = AceType::DynamicCast<FrameNode>(topFrameNodeOne);
     ASSERT_NE(frameNode, nullptr);
     auto node = AceType::DynamicCast<NG::FrameNode>(frameNode);

@@ -558,8 +558,16 @@ HWTEST_F(RatingTestNg, RatingPatternTest011, TestSize.Level1)
     ASSERT_NE(ratingLayoutProperty, nullptr);
     auto ratingPattern = frameNode->GetPattern<RatingPattern>();
     ASSERT_NE(ratingPattern, nullptr);
+
     /**
-     * @tc.steps: step2. 3 ImageLoadContexts carry out successfully.
+     * @tc.steps: step2. create nodePaintMethod before carry out ImageLoadContexts, should return a default method
+     * instead of nullptr.
+     */
+    auto paintMethod1 = ratingPattern->CreateNodePaintMethod();
+    ASSERT_NE(paintMethod1, nullptr);
+
+    /**
+     * @tc.steps: step3. 3 ImageLoadContexts carry out successfully.
      */
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
     MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
@@ -582,12 +590,12 @@ HWTEST_F(RatingTestNg, RatingPatternTest011, TestSize.Level1)
     ratingPattern->secondaryImageLoadingCtx_->SuccessCallback(nullptr);
     ratingPattern->backgroundImageLoadingCtx_->SuccessCallback(nullptr);
     /**
-     * @tc.steps: step3. 3 ImageLoadContexts callback successfuly, and imageSuccessStateCode_ ==
+     * @tc.steps: step4. 3 ImageLoadContexts callback successfuly, and imageSuccessStateCode_ ==
      * RATING_IMAGE_SUCCESS_CODE.
      * @tc.expected: ratingModifier will update CanvasImage the first time.
      */
-    auto paintMethod1 = ratingPattern->CreateNodePaintMethod();
-    ASSERT_NE(paintMethod1, nullptr);
+    auto paintMethod2 = ratingPattern->CreateNodePaintMethod();
+    ASSERT_NE(paintMethod2, nullptr);
     ASSERT_NE(ratingPattern->ratingModifier_, nullptr);
     ASSERT_NE(ratingPattern->ratingModifier_->foregroundImageCanvas_, nullptr);
     ASSERT_NE(ratingPattern->ratingModifier_->secondaryImageCanvas_, nullptr);
@@ -619,8 +627,8 @@ HWTEST_F(RatingTestNg, RatingPatternTest011, TestSize.Level1)
     ratingPattern->secondaryImageLoadingCtx_->SuccessCallback(nullptr);
     ratingPattern->backgroundImageLoadingCtx_->SuccessCallback(nullptr);
     EXPECT_EQ(ratingPattern->imageSuccessStateCode_, 0b111);
-    auto paintMethod2 = ratingPattern->CreateNodePaintMethod();
-    ASSERT_NE(paintMethod2, nullptr);
+    auto paintMethod3 = ratingPattern->CreateNodePaintMethod();
+    ASSERT_NE(paintMethod3, nullptr);
     EXPECT_EQ(ratingPattern->ratingModifier_->foreground_.GetSrc(), RATING_SVG_URL);
     EXPECT_EQ(ratingPattern->ratingModifier_->secondary_.GetSrc(), RATING_SECONDARY_URL);
     EXPECT_EQ(ratingPattern->ratingModifier_->background_.GetSrc(), RESOURCE_URL);
