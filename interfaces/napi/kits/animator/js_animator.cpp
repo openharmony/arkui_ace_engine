@@ -263,6 +263,7 @@ static napi_value JSReset(napi_env env, napi_callback_info info)
         NapiThrow(env, "Internal error. Animator is null in AnimatorResult.", ERROR_CODE_INTERNAL_ERROR);
         return nullptr;
     }
+    TAG_LOGI(AceLogTag::ACE_ANIMATION, "JsAnimator: JSReset, id:%{public}d ", animator->GetId());
     animator->ClearInterpolators();
     animator->ResetIsReverse();
     animatorResult->ApplyOption();
@@ -338,7 +339,8 @@ static napi_value JSPlay(napi_env env, napi_callback_info info)
             return nullptr;
         }
     }
-    TAG_LOGI(AceLogTag::ACE_ANIMATION, "JsAnimator: JSPlay, id:%{public}d", animator->GetId());
+    TAG_LOGI(AceLogTag::ACE_ANIMATION, "JsAnimator: JsPlay, id:%{public}d, %{public}s",
+        animator->GetId(), animatorResult->GetAnimatorOption()->ToString().c_str());
     if (animatorResult->GetMotion()) {
         animator->PlayMotion(animatorResult->GetMotion());
     } else {
@@ -356,6 +358,7 @@ static napi_value JSFinish(napi_env env, napi_callback_info info)
     if (!animator) {
         return nullptr;
     }
+    TAG_LOGI(AceLogTag::ACE_ANIMATION, "JsAnimator: JSFinish, id:%{public}d ", animator->GetId());
     animator->Finish();
     napi_value result = nullptr;
     napi_get_null(env, &result);
@@ -368,6 +371,7 @@ static napi_value JSPause(napi_env env, napi_callback_info info)
     if (!animator) {
         return nullptr;
     }
+    TAG_LOGI(AceLogTag::ACE_ANIMATION, "JsAnimator: JSPause, id:%{public}d ", animator->GetId());
     animator->Pause();
     napi_value result;
     napi_get_null(env, &result);
@@ -380,6 +384,7 @@ static napi_value JSCancel(napi_env env, napi_callback_info info)
     if (!animator) {
         return nullptr;
     }
+    TAG_LOGI(AceLogTag::ACE_ANIMATION, "JsAnimator: JSCancel, id:%{public}d ", animator->GetId());
     animator->Cancel();
     napi_value result;
     napi_get_null(env, &result);
@@ -410,6 +415,7 @@ static napi_value JSReverse(napi_env env, napi_callback_info info)
             return nullptr;
         }
     }
+    TAG_LOGI(AceLogTag::ACE_ANIMATION, "JsAnimator: JSReverse, id:%{public}d ", animator->GetId());
     animator->Reverse();
     napi_value result;
     napi_get_null(env, &result);
