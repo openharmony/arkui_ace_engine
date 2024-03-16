@@ -321,8 +321,8 @@ abstract class ViewPU extends NativeViewPartialUpdate
     stateMgmtConsole.debug(`${this.constructor.name}: aboutToBeDeletedInternal `);
 
     // purge the elmtIds owned by this viewPU from the updateFuncByElmtId and also the state variable dependent elmtIds
-    Array.from(this.updateFuncByElmtId.keys()).forEach((elemId: number) => {
-      this.purgeDeleteElmtId(elemId);
+    Array.from(this.updateFuncByElmtId.keys()).forEach((elmtId: number) => {
+      this.purgeDeleteElmtId(elmtId);
     })
 
     if (this.hasRecycleManager()) {
@@ -337,7 +337,7 @@ abstract class ViewPU extends NativeViewPartialUpdate
 
     // unregisters its own id once its children are unregistered above
     UINodeRegisterProxy.unregisterRemovedElmtsFromViewPUs([this.id__()]);
-
+    
     stateMgmtConsole.debug(`${this.debugInfo__()}: onUnRegElementID  - DONE`);
 
     // in case ViewPU is currently frozen
@@ -363,6 +363,9 @@ abstract class ViewPU extends NativeViewPartialUpdate
       // it means rmElmtId has finished all the unregistration from the js side, ElementIdToOwningViewPU_  does not need to keep it
       UINodeRegisterProxy.ElementIdToOwningViewPU_.delete(rmElmtId);
     }
+    
+    // FIXME: only do this if app uses V3
+    ObserveV3.getObserve().clearBinding(rmElmtId);
     return result;
   }
 
