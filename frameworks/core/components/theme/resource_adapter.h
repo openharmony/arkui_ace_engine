@@ -216,7 +216,8 @@ public:
         return -1;
     }
 
-    virtual RefPtr<ThemeStyle> GetPatternByName(const std::string& patternName) {
+    virtual RefPtr<ThemeStyle> GetPatternByName(const std::string& patternName)
+    {
         return nullptr;
     }
 
