@@ -57,8 +57,7 @@ void CalendarPickerLayoutAlgorithm::CalendarPickerContentMeasure(LayoutWrapper* 
         auto textWrapper = contentWrapper->GetOrCreateChildByIndex(i);
         CHECK_NULL_VOID(textWrapper);
         contentLayoutProperty->UpdateContentConstraint();
-        auto textLayoutConstraint = contentLayoutProperty->CreateChildConstraint();
-        textWrapper->Measure(textLayoutConstraint);
+        textWrapper->Measure(std::nullopt);
         auto textGeometryNode = textWrapper->GetGeometryNode();
         CHECK_NULL_VOID(textGeometryNode);
         widthTotal += textGeometryNode->GetFrameSize().Width();

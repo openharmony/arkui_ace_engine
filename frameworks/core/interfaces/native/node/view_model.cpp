@@ -386,6 +386,7 @@ void InsertChildAfter(void* parentNode, void* childNode, void* siblingNode)
     CHECK_NULL_VOID(childNode);
     auto* parent = reinterpret_cast<UINode*>(parentNode);
     auto* child = reinterpret_cast<UINode*>(childNode);
+    
     if (AceType::InstanceOf<GroupNode>(parent)) {
         auto* groupNode = AceType::DynamicCast<GroupNode>(parent);
         groupNode->AddChildToGroup(AceType::Claim(child));

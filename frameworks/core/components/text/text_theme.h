@@ -46,16 +46,13 @@ public:
             theme->textStyle_.SetFontStyle(FontStyle::NORMAL);
             theme->textStyle_.SetFontWeight(FontWeight::NORMAL);
             theme->textStyle_.SetTextDecoration(TextDecoration::NONE);
-            ParsePattern(themeConstants->GetThemeStyle(), theme);
+            ParsePattern(themeConstants, theme);
             return theme;
         }
     private:
-        void ParsePattern(const RefPtr<ThemeStyle>& themeStyle, const RefPtr<TextTheme>& theme) const
+        void ParsePattern(const RefPtr<ThemeConstants>& themeConstants, const RefPtr<TextTheme>& theme) const
         {
-            if (!themeStyle) {
-                return;
-            }
-            auto pattern = themeStyle->GetAttr<RefPtr<ThemeStyle>>(THEME_PATTERN_TEXT, nullptr);
+            RefPtr<ThemeStyle> pattern = themeConstants->GetPatternByName(THEME_PATTERN_TEXT);
             if (!pattern) {
                 LOGW("find pattern of text fail");
                 return;

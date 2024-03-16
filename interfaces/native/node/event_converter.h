@@ -16,6 +16,7 @@
 #pragma once
 
 #include "native_node.h"
+#include "native_type.h"
 
 #include "core/interfaces/arkoala/arkoala_api.h"
 

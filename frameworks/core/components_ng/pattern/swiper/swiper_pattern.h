@@ -528,6 +528,7 @@ public:
     std::string ProvideRestoreInfo() override;
     void OnRestoreInfo(const std::string& restoreInfo) override;
     bool IsAutoFill() const;
+    bool HasTabsAncestor() const;
     void OnTouchTestHit(SourceType hitTestType) override;
     void SwipeToWithoutAnimation(int32_t index);
     void StopAutoPlay();

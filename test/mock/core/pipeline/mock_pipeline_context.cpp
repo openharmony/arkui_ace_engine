@@ -312,8 +312,6 @@ void PipelineContext::AddDirtyFocus(const RefPtr<FrameNode>& node) {}
 
 void PipelineContext::AddDirtyPropertyNode(const RefPtr<FrameNode>& dirty) {}
 
-void PipelineContext::AddDirtyDefaultFocus(const RefPtr<FrameNode>& node) {}
-
 void PipelineContext::AddDirtyRequestFocus(const RefPtr<FrameNode>& node) {}
 
 // core/pipeline_ng/pipeline_context.h depends on the specific impl

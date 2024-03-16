@@ -551,18 +551,16 @@ void TitleBarLayoutAlgorithm::LayoutTitle(LayoutWrapper* layoutWrapper, const Re
         return;
     }
     auto titlePattern = titleBarNode->GetPattern<TitleBarPattern>();
+    if (isCustom) {
+        // customBuilder and NavigationCustomTitle offset is (0.0f, menuHeight_)
+        auto customOffsetY = NearZero(menuWidth_) ? 0.0f : menuHeight_;
+        geometryNode->SetMarginFrameOffset(OffsetF { 0.0f, customOffsetY});
+        titleWrapper->Layout();
+        return;
+    }
+    auto title = AceType::DynamicCast<FrameNode>(titleNode);
+    CHECK_NULL_VOID(title);
     if (isInitialTitle_) {
-        // free mode
-        if (isCustom) {
-            // customBuilder and NavigationCustomTitle offset is (0.0f, menuHeight_)
-            auto customOffsetY = NearZero(menuWidth_) ? 0.0f : menuHeight_;
-            geometryNode->SetMarginFrameOffset(OffsetF { 0.0f, customOffsetY});
-            titleWrapper->Layout();
-            return;
-        }
-        auto title = AceType::DynamicCast<FrameNode>(titleNode);
-        CHECK_NULL_VOID(title);
-
         auto textLayoutProperty = title->GetLayoutProperty<TextLayoutProperty>();
         if (!textLayoutProperty) {
             // current title mode is Navigation common title

@@ -92,7 +92,7 @@ void JSTabs::SetOnChange(const JSCallbackInfo& info)
 
     auto changeHandler = AceType::MakeRefPtr<JsEventFunction<TabContentChangeEvent, 1>>(
         JSRef<JSFunc>::Cast(info[0]), TabContentChangeEventToJSValue);
-    WeakPtr<NG::FrameNode> targetNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    WeakPtr<NG::FrameNode> targetNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
     auto onChange = [executionContext = info.GetExecutionContext(), func = std::move(changeHandler), node = targetNode](
                         const BaseEventInfo* info) {
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(executionContext);
@@ -116,7 +116,7 @@ void JSTabs::SetOnTabBarClick(const JSCallbackInfo& info)
 
     auto changeHandler = AceType::MakeRefPtr<JsEventFunction<TabContentChangeEvent, 1>>(
         JSRef<JSFunc>::Cast(info[0]), TabContentChangeEventToJSValue);
-    WeakPtr<NG::FrameNode> targetNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    WeakPtr<NG::FrameNode> targetNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
     auto onTabBarClick = [executionContext = info.GetExecutionContext(), func = std::move(changeHandler),
                              node = targetNode](const BaseEventInfo* info) {
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(executionContext);
@@ -186,7 +186,7 @@ void ParseTabsIndexObject(const JSCallbackInfo& info, const JSRef<JSVal>& change
     CHECK_NULL_VOID(changeEventVal->IsFunction());
 
     auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(changeEventVal));
-    WeakPtr<NG::FrameNode> targetNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    WeakPtr<NG::FrameNode> targetNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
     auto onChangeEvent = [executionContext = info.GetExecutionContext(), func = std::move(jsFunc), node = targetNode](
                              const BaseEventInfo* info) {
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(executionContext);

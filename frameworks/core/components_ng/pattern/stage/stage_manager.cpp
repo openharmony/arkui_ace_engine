@@ -58,10 +58,9 @@ void FirePageTransition(const RefPtr<FrameNode>& page, PageTransitionType transi
                 CHECK_NULL_VOID(context);
                 auto page = weak.Upgrade();
                 CHECK_NULL_VOID(page);
-                auto pageFocusHub = page->GetFocusHub();
-                CHECK_NULL_VOID(pageFocusHub);
-                pageFocusHub->SetParentFocusable(false);
-                pageFocusHub->LostFocus();
+                auto pattern = page->GetPattern<PagePattern>();
+                CHECK_NULL_VOID(pattern);
+                pattern->FocusViewHide();
                 if (transitionType == PageTransitionType::EXIT_POP && page->GetParent()) {
                     auto stageNode = page->GetParent();
                     stageNode->RemoveChild(page);
@@ -70,8 +69,6 @@ void FirePageTransition(const RefPtr<FrameNode>& page, PageTransitionType transi
                     return;
                 }
                 page->GetEventHub<EventHub>()->SetEnabled(true);
-                auto pattern = page->GetPattern<PagePattern>();
-                CHECK_NULL_VOID(pattern);
                 pattern->SetPageInTransition(false);
                 pattern->ProcessHideState();
                 context->MarkNeedFlushMouseEvent();
@@ -90,13 +87,13 @@ void FirePageTransition(const RefPtr<FrameNode>& page, PageTransitionType transi
             CHECK_NULL_VOID(pattern);
             pattern->SetPageInTransition(false);
 
-            auto pageFocusHub = page->GetFocusHub();
-            CHECK_NULL_VOID(pageFocusHub);
-            pageFocusHub->SetParentFocusable(true);
-            pageFocusHub->RequestFocusWithDefaultFocusFirstly();
+            pattern->FocusViewShow();
             auto context = PipelineContext::GetCurrentContext();
             CHECK_NULL_VOID(context);
             context->MarkNeedFlushMouseEvent();
+            constexpr float REMOVE_CLIP_SIZE = 10000.0f;
+            page->GetRenderContext()->ClipWithRRect(RectF(0.0f, 0.0f, REMOVE_CLIP_SIZE, REMOVE_CLIP_SIZE),
+                RadiusF(EdgeF(0.0f, 0.0f)));
         });
 }
 } // namespace
@@ -403,17 +400,13 @@ void StageManager::FirePageHide(const RefPtr<UINode>& node, PageTransitionType t
     CHECK_NULL_VOID(pageNode);
     auto pagePattern = pageNode->GetPattern<PagePattern>();
     CHECK_NULL_VOID(pagePattern);
+    pagePattern->FocusViewHide();
     pagePattern->OnHide();
     if (transitionType == PageTransitionType::NONE) {
         // If there is a page transition, this function should execute after page transition,
         // otherwise the page will not be visible
         pagePattern->ProcessHideState();
     }
-
-    auto pageFocusHub = pageNode->GetFocusHub();
-    CHECK_NULL_VOID(pageFocusHub);
-    pageFocusHub->SetParentFocusable(false);
-    pageFocusHub->LostFocus();
 
     auto context = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(context);
@@ -425,13 +418,10 @@ void StageManager::FirePageShow(const RefPtr<UINode>& node, PageTransitionType t
     auto pageNode = DynamicCast<FrameNode>(node);
     CHECK_NULL_VOID(pageNode);
     auto layoutProperty = pageNode->GetLayoutProperty();
-    auto pageFocusHub = pageNode->GetFocusHub();
-    CHECK_NULL_VOID(pageFocusHub);
-    pageFocusHub->SetParentFocusable(true);
-    pageFocusHub->RequestFocusWithDefaultFocusFirstly();
 
     auto pagePattern = pageNode->GetPattern<PagePattern>();
     CHECK_NULL_VOID(pagePattern);
+    pagePattern->FocusViewShow();
     pagePattern->OnShow();
     // With or without a page transition, we need to make the coming page visible first
     pagePattern->ProcessShowState();

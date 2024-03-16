@@ -26,9 +26,9 @@ public:
     static ArkUINativeModuleValue SetFontWeight(ArkUIRuntimeCallInfo *runtimeCallInfo);
     static ArkUINativeModuleValue ResetFontWeight(ArkUIRuntimeCallInfo *runtimeCallInfo);
     static ArkUINativeModuleValue SetLineHeight(ArkUIRuntimeCallInfo *runtimeCallInfo);
-    static ArkUINativeModuleValue ReSetLineHeight(ArkUIRuntimeCallInfo *runtimeCallInfo);
+    static ArkUINativeModuleValue ResetLineHeight(ArkUIRuntimeCallInfo *runtimeCallInfo);
     static ArkUINativeModuleValue SetFontStyle(ArkUIRuntimeCallInfo *runtimeCallInfo);
-    static ArkUINativeModuleValue ReSetFontStyle(ArkUIRuntimeCallInfo *runtimeCallInfo);
+    static ArkUINativeModuleValue ResetFontStyle(ArkUIRuntimeCallInfo *runtimeCallInfo);
     static ArkUINativeModuleValue SetFontSize(ArkUIRuntimeCallInfo *runtimeCallInfo);
     static ArkUINativeModuleValue ResetFontSize(ArkUIRuntimeCallInfo *runtimeCallInfo);
     static ArkUINativeModuleValue SetFontFamily(ArkUIRuntimeCallInfo *runtimeCallInfo);

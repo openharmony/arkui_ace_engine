@@ -166,11 +166,17 @@ RefPtr<FrameNode> BubbleView::CreateBubbleNode(
     }
     popupPaintProp->UpdateAutoCancel(!param->HasAction());
     popupPaintProp->UpdatePlacement(param->GetPlacement());
+    if (param->GetHasTransition()) {
+        popupNode->GetRenderContext()->UpdateChainedTransition(param->GetTransitionEffects());
+    }
 
     auto bubbleAccessibilityProperty = popupNode->GetAccessibilityProperty<AccessibilityProperty>();
     CHECK_NULL_RETURN(bubbleAccessibilityProperty, nullptr);
     bubbleAccessibilityProperty->SetText(message);
-    auto bobblePattern = popupNode->GetPattern<BubblePattern>();
+    auto bubblePattern = popupNode->GetPattern<BubblePattern>();
+    auto textColor = param->GetTextColor();
+    bubblePattern->SetMessageColor(textColor.has_value());
+    bubblePattern->SetHasTransition(param->GetHasTransition());
     // Create child
     RefPtr<FrameNode> child;
     if (primaryButton.showButton || secondaryButton.showButton) {
@@ -194,7 +200,7 @@ RefPtr<FrameNode> BubbleView::CreateBubbleNode(
         columnLayoutProperty->UpdateMainAxisAlign(FlexAlign::CENTER); // mainAxisAlign
         columnLayoutProperty->UpdateCrossAxisAlign(FlexAlign::CENTER);
         auto textNode = CreateMessage(message, useCustom);
-        bobblePattern->SetMessageNode(textNode);
+        bubblePattern->SetMessageNode(textNode);
         auto popupTheme = GetPopupTheme();
         auto padding = popupTheme->GetPadding();
         auto layoutProps = textNode->GetLayoutProperty<TextLayoutProperty>();
@@ -302,6 +308,10 @@ RefPtr<FrameNode> BubbleView::CreateCustomBubbleNode(
     if (param->IsBackgroundColorSetted()) {
         popupPaintProps->UpdateBackgroundColor(param->GetBackgroundColor());
     }
+    if (param->GetHasTransition()) {
+        popupNode->GetRenderContext()->UpdateChainedTransition(param->GetTransitionEffects());
+    }
+    popupPattern->SetHasTransition(param->GetHasTransition());
 
     auto columnNode = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
         AceType::MakeRefPtr<LinearLayoutPattern>(false));
@@ -581,6 +591,11 @@ void BubbleView::UpdateCommonParam(int32_t popupId, const RefPtr<PopupParam>& pa
             styleOption.blurStyle = param->GetBlurStyle();
             renderContext->UpdateBackBlurStyle(styleOption);
         }
+    }
+    RefPtr<BubblePattern> bubblePattern = popupNode->GetPattern<BubblePattern>();
+    bubblePattern->SetHasTransition(param->GetHasTransition());
+    if (param->GetHasTransition()) {
+        popupNode->GetRenderContext()->UpdateChainedTransition(param->GetTransitionEffects());
     }
 }
 

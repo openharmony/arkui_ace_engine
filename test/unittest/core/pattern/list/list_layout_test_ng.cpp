@@ -1527,15 +1527,20 @@ HWTEST_F(ListLayoutTestNg, PostListItemPressStyleTask001, TestSize.Level1)
     CreateWithItem([](ListModelNG model) {
         model.SetDivider(ITEM_DIVIDER);
     });
+    int cur = 0;
+    for (auto& child : pattern_->itemPosition_) {
+        child.second.id += cur;
+        cur++;
+    }
     UpdateContentModifier();
     auto dividerList_ = pattern_->listContentModifier_->dividerList_->Get();
     auto lda = AceType::DynamicCast<ListDividerArithmetic>(dividerList_);
     auto dividerMap = lda->GetDividerMap();
-    EXPECT_EQ(dividerMap.size(), 2);
+    EXPECT_EQ(dividerMap.size(), 8);
 
     auto listItemNode = GetChildFrameNode(frameNode_, 0);
     auto listItemNodeId = listItemNode->GetId();
-    auto stateStyleMgr = AceType::DynamicCast<StateStyleManager>(listItemNode);
+    auto stateStyleMgr = AceType::MakeRefPtr<StateStyleManager>(listItemNode);
     stateStyleMgr->PostListItemPressStyleTask(UI_STATE_PRESSED);
     RefPtr<NodePaintMethod> paint = pattern_->CreateNodePaintMethod();
     RefPtr<ListPaintMethod> listPaint = AceType::DynamicCast<ListPaintMethod>(paint);
@@ -1549,7 +1554,7 @@ HWTEST_F(ListLayoutTestNg, PostListItemPressStyleTask001, TestSize.Level1)
     dividerList_ = pattern_->listContentModifier_->dividerList_->Get();
     lda = AceType::DynamicCast<ListDividerArithmetic>(dividerList_);
     dividerMap = lda->GetDividerMap();
-    EXPECT_EQ(dividerMap.size(), 0);
+    EXPECT_EQ(dividerMap.size(), 7);
 }
 
 /**
@@ -1566,13 +1571,18 @@ HWTEST_F(ListLayoutTestNg, PostListItemPressStyleTask002, TestSize.Level1)
         model.SetDivider(ITEM_DIVIDER);
         CreateGroup(TOTAL_LINE_NUMBER, Axis::VERTICAL);
     });
-
     auto groupFrameNode = GetChildFrameNode(frameNode_, 0);
+    auto groupPattern = groupFrameNode->GetPattern<ListItemGroupPattern>();
+    int cur = 0;
+    for (auto& child : groupPattern->itemPosition_) {
+        child.second.id += cur;
+        cur++;
+    }
+
     auto listItemNode = GetChildFrameNode(groupFrameNode, 0);
     auto listItemNodeId = listItemNode->GetId();
-    auto stateStyleMgr = AceType::DynamicCast<StateStyleManager>(listItemNode);
+    auto stateStyleMgr = AceType::MakeRefPtr<StateStyleManager>(listItemNode);
     stateStyleMgr->PostListItemPressStyleTask(UI_STATE_PRESSED);
-    auto groupPattern = groupFrameNode->GetPattern<ListItemGroupPattern>();
     RefPtr<NodePaintMethod> paint = groupPattern->CreateNodePaintMethod();
     RefPtr<ListItemGroupPaintMethod> groupPaint = AceType::DynamicCast<ListItemGroupPaintMethod>(paint);
     for (auto child : groupPaint->itemPosition_) {

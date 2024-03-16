@@ -18,6 +18,7 @@
 
 #include "base/geometry/ng/offset_t.h"
 #include "base/geometry/ng/vector.h"
+#include "core/components/common/layout/position_param.h"
 #include "core/components/common/properties/clip_path.h"
 #include "core/components/common/properties/color.h"
 #include "core/components/common/properties/decoration.h"
@@ -195,6 +196,8 @@ struct GraphicsProperty {
 struct RenderPositionProperty {
     ACE_DEFINE_PROPERTY_GROUP_ITEM(Position, OffsetT<Dimension>);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(Offset, OffsetT<Dimension>);
+    ACE_DEFINE_PROPERTY_GROUP_ITEM(PositionEdges, EdgesParam);
+    ACE_DEFINE_PROPERTY_GROUP_ITEM(OffsetEdges, EdgesParam);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(Anchor, OffsetT<Dimension>);
     void ToJsonValue(std::unique_ptr<JsonValue>& json) const;
 };

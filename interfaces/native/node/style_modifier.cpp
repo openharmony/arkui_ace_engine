@@ -343,12 +343,12 @@ int32_t UnConvertAnimationDirection(int32_t animationPlayMode)
     return animationPlayMode;
 }
 
-bool isLeapYear(uint32_t year)
+bool IsLeapYear(uint32_t year)
 {
     return (year % NUM_4 == 0 && year % NUM_100 != 0) || (year % NUM_400 == 0);
 }
 
-bool isValidDate(uint32_t year, uint32_t month, uint32_t day)
+bool IsValidDate(uint32_t year, uint32_t month, uint32_t day)
 {
     if (year <= 0) {
         return false;
@@ -356,7 +356,7 @@ bool isValidDate(uint32_t year, uint32_t month, uint32_t day)
     if (month < NUM_1 || month > NUM_12) {
         return false;
     }
-    int daysInMonth[] = { 31, isLeapYear(year) ? 29 : 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31};
+    int daysInMonth[] = { 31, IsLeapYear(year) ? 29 : 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31};
     if (day < NUM_1 || day > daysInMonth[month - 1]) {
         return false;
     }
@@ -4084,9 +4084,12 @@ const ArkUI_AttributeItem* GetTextAreaShowCounter(ArkUI_NodeHandle node)
     ArkUIShowCountOptions options;
     auto modifier = GetFullImpl()->getNodeModifiers()->getTextAreaModifier();
     modifier->getTextAreaShowCounterOptions(node->uiNodeHandle, &options);
-    g_numberValues[0].i32 = options.open;
-    g_numberValues[1].f32 = options.thresholdPercentage;
-    g_numberValues[2].i32 = options.highlightBorder;
+    // open
+    g_numberValues[NUM_0].i32 = options.open;
+    // thresholdPercentage
+    g_numberValues[NUM_1].f32 = options.thresholdPercentage;
+    // highlightBorder
+    g_numberValues[NUM_2].i32 = options.highlightBorder;
     return &g_attributeItem;
 }
 
@@ -4305,9 +4308,8 @@ int32_t SetTextBaseLineOffset(ArkUI_NodeHandle node, const ArkUI_AttributeItem* 
     }
     // already check in entry point.
     auto* fullImpl = GetFullImpl();
-    struct ArkUIStringAndFloat offset = { item->value[0].f32 };
-
-    fullImpl->getNodeModifiers()->getTextModifier()->setTextBaselineOffset(node->uiNodeHandle, &offset);
+    fullImpl->getNodeModifiers()->getTextModifier()->setTextBaselineOffset(node->uiNodeHandle,
+        item->value[0].f32, static_cast<int32_t>(DimensionUnit::FP));
     return ERROR_CODE_NO_ERROR;
 }
 
@@ -6384,7 +6386,7 @@ int32_t SetLetterSpacing(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
             break;
         case ARKUI_NODE_TEXT:
             fullImpl->getNodeModifiers()->getTextModifier()->setTextLetterSpacing(
-                node->uiNodeHandle, &letterSpacingValue);
+                node->uiNodeHandle, item->value[0].f32, static_cast<int32_t>(DimensionUnit::FP));
         default:
             break;
     }
@@ -6457,16 +6459,16 @@ int32_t SetTextIndent(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
     if (actualSize < 0) {
         return ERROR_CODE_PARAM_INVALID;
     }
-    struct ArkUIStringAndFloat offset = { item->value[0].f32, nullptr };
-    fullImpl->getNodeModifiers()->getTextModifier()->setTextIndent(node->uiNodeHandle, &offset);
+    fullImpl->getNodeModifiers()->getTextModifier()->setTextIndent(node->uiNodeHandle,
+        item->value[0].f32, static_cast<int32_t>(DimensionUnit::FP));
     return ERROR_CODE_NO_ERROR;
 }
 
 void ResetTextIndent(ArkUI_NodeHandle node)
 {
     auto* fullImpl = GetFullImpl();
-    struct ArkUIStringAndFloat offset = { 0.0, nullptr };
-    fullImpl->getNodeModifiers()->getTextModifier()->setTextIndent(node->uiNodeHandle, &offset);
+    fullImpl->getNodeModifiers()->getTextModifier()->setTextIndent(node->uiNodeHandle,
+        0.0f, static_cast<int32_t>(DimensionUnit::FP));
 }
 
 int32_t SetTextWordBreak(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
@@ -6752,7 +6754,7 @@ int32_t SetSelectedDate(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
     if (actualSize < 0) {
         return ERROR_CODE_PARAM_INVALID;
     }
-    if (!isValidDate(item->value[SELECTED_YEAR_INDEX].u32,
+    if (!IsValidDate(item->value[SELECTED_YEAR_INDEX].u32,
         item->value[SELECTED_MONTH_INDEX].u32, item->value[SELECTED_DAY_INDEX].u32)) {
         return ERROR_CODE_PARAM_INVALID;
     }

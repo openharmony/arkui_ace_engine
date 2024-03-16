@@ -304,7 +304,7 @@ void JSCalendar::JsOnSelectedChange(const JSCallbackInfo& info)
         return;
     }
     if (info[0]->IsFunction()) {
-        WeakPtr<NG::FrameNode> frameNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+        auto frameNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
         auto selectedChangeFuc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(info[0]));
         auto selectedChange = [execCtx = info.GetExecutionContext(), func = std::move(selectedChangeFuc),
                                   node = frameNode](const std::string& info) {
@@ -323,7 +323,7 @@ void JSCalendar::JsOnRequestData(const JSCallbackInfo& info)
     if (!info[0]->IsFunction()) {
         return;
     }
-    WeakPtr<NG::FrameNode> frameNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    WeakPtr<NG::FrameNode> frameNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
     auto requestDataFuc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(info[0]));
     auto requestData = [execCtx = info.GetExecutionContext(), func = std::move(requestDataFuc), node = frameNode](
                            const std::string& info) {

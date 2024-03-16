@@ -16,6 +16,17 @@
 #include "core/components/common/properties/alignment.h"
 
 namespace OHOS::Ace {
+namespace {
+constexpr int NUM_0 = 0;
+constexpr int NUM_1 = 1;
+constexpr int NUM_2 = 2;
+constexpr int NUM_3 = 3;
+constexpr int NUM_4 = 4;
+constexpr int NUM_5 = 5;
+constexpr int NUM_6 = 6;
+constexpr int NUM_7 = 7;
+constexpr int NUM_8 = 8;
+}
 
 const Alignment Alignment::TOP_LEFT = Alignment(-1.0, -1.0);
 const Alignment Alignment::TOP_CENTER = Alignment(0.0, -1.0);
@@ -111,5 +122,32 @@ Alignment Alignment::GetAlignment(TextDirection direction, const std::string& st
     };
 
     return uMap.count(str) ? uMap.at(str)(direction) : CENTER;
+}
+
+std::optional<Alignment> Alignment::ParseAlignment(int32_t alignment)
+{
+    switch (alignment) {
+        case NUM_0:
+            return Alignment::TOP_LEFT;
+        case NUM_1:
+            return Alignment::TOP_CENTER;
+        case NUM_2:
+            return Alignment::TOP_RIGHT;
+        case NUM_3:
+            return Alignment::CENTER_LEFT;
+        case NUM_4:
+            return Alignment::CENTER;
+        case NUM_5:
+            return Alignment::CENTER_RIGHT;
+        case NUM_6:
+            return Alignment::BOTTOM_LEFT;
+        case NUM_7:
+            return Alignment::BOTTOM_CENTER;
+        case NUM_8:
+            return Alignment::BOTTOM_RIGHT;
+        default:
+            break;
+    }
+    return std::nullopt;
 }
 } // namespace OHOS::Ace

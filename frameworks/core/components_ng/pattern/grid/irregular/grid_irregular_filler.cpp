@@ -28,16 +28,9 @@ GridIrregularFiller::GridIrregularFiller(GridLayoutInfo* info, LayoutWrapper* wr
 
 int32_t GridIrregularFiller::InitPos(int32_t lineIdx)
 {
-    // to land on the first item after advancing once
     posX_ = -1;
     posY_ = lineIdx;
-
-    const auto& row = info_->gridMatrix_.find(lineIdx);
-    if (row == info_->gridMatrix_.end()) {
-        // implies empty matrix
-        return -1;
-    }
-    return row->second.at(0) - 1;
+    return info_->FindEndIdx(lineIdx - 1).itemIdx;
 }
 
 using Result = GridIrregularFiller::FillResult;

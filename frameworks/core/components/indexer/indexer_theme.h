@@ -47,7 +47,7 @@ public:
                 LOGE("Build AppTheme error, themeConstants is null!");
                 return theme;
             }
-            ParsePattern(themeConstants->GetThemeStyle(), theme);
+            ParsePattern(themeConstants, theme);
             return theme;
         }
     };
@@ -192,12 +192,9 @@ protected:
     Color popupUnclickedBgAreaColor_;
 
 private:
-    static void ParsePattern(const RefPtr<ThemeStyle>& themeStyle, const RefPtr<IndexerTheme>& theme)
+    static void ParsePattern(const RefPtr<ThemeConstants>& themeConstants, const RefPtr<IndexerTheme>& theme)
     {
-        if (!themeStyle) {
-            return;
-        }
-        auto indexerPattern = themeStyle->GetAttr<RefPtr<ThemeStyle>>(THEME_PATTERN_INDEXER, nullptr);
+        RefPtr<ThemeStyle> indexerPattern = themeConstants->GetPatternByName(THEME_PATTERN_INDEXER);
         if (!indexerPattern) {
             LOGE("Pattern of indexer is null, please check!");
             return;

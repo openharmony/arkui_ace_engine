@@ -301,4 +301,25 @@ HWTEST_F(RefreshVersionTwelveTestNg, AttrPullToRefresh04, TestSize.Level1)
                                / pattern_->CalculateFriction());
     EXPECT_EQ(refreshStatus, RefreshStatus::OVER_DRAG);
 }
+
+/**
+ * @tc.name: RefreshWithText001
+ * @tc.desc: Test drag with a text
+ * @tc.type: FUNC
+ */
+HWTEST_F(RefreshVersionTwelveTestNg, RefreshWithText001, TestSize.Level1)
+{
+    /**
+     * @tc.cases: HandleDrag delta less than TRIGGER_REFRESH_DISTANCE
+     * @tc.expected: Would not trigger refresh
+     */
+    MockPipelineContext::pipeline_->SetMinPlatformVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWELVE));
+    Create([](RefreshModelNG model) {model.SetLoadingText("promptText"); });
+    pattern_->HandleDragStart();
+    EXPECT_EQ(pattern_->refreshStatus_, RefreshStatus::INACTIVE);
+    pattern_->HandleDragUpdate(TRIGGER_REFRESH_DISTANCE.ConvertToPx() - 1.f);
+    EXPECT_EQ(pattern_->refreshStatus_, RefreshStatus::DRAG);
+    pattern_->HandleDragEnd(0.f);
+    EXPECT_EQ(pattern_->refreshStatus_, RefreshStatus::INACTIVE);
+}
 } // namespace OHOS::Ace::NG

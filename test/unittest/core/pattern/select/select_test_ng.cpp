@@ -1453,6 +1453,38 @@ HWTEST_F(SelectTestNg, SetSelectedOptionFontFamily002, TestSize.Level1)
 }
 
 /**
+ * @tc.name: InspectorGetSelectedFont001
+ * @tc.desc: Test SelectPattern InspectorGetSelectedFont001
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectTestNg, InspectorGetSelectedFont001, TestSize.Level1)
+{
+    SelectModelNG model;
+    std::vector<SelectParam> params = { { OPTION_TEXT, FILE_SOURCE } };
+    model.Create(params);
+    ViewAbstract::SetWidth(CalcLength(100.f));
+    ViewAbstract::SetHeight(CalcLength(40.f));
+
+    RefPtr<UINode> element = ViewStackProcessor::GetInstance()->Finish();
+    auto frameNode = AceType::DynamicCast<FrameNode>(element);
+    auto pattern = frameNode->GetPattern<SelectPattern>();
+    frameNode->SetActive();
+    frameNode->isLayoutDirtyMarked_ = true;
+    frameNode->CreateLayoutTask();
+    frameNode->SetActive(false);
+    pattern->SetSelectedOptionItalicFontStyle(Ace::FontStyle::NORMAL);
+    std::vector<std::string> selectParams = { "select", "font", "family" };
+    pattern->SetSelectedOptionFontFamily(selectParams);
+    pattern->SetSelectedOptionFontSize(Dimension(20.00, DimensionUnit::VP));
+    pattern->SetSelectedOptionFontWeight(FontWeight::NORMAL);
+    pattern->InspectorGetSelectedFont();
+    EXPECT_TRUE(pattern->selectedFont_.FontStyle.has_value());
+    EXPECT_TRUE(pattern->selectedFont_.FontSize.has_value());
+    EXPECT_TRUE(pattern->selectedFont_.FontFamily.has_value());
+    EXPECT_TRUE(pattern->selectedFont_.FontWeight.has_value());
+}
+
+/**
  * @tc.name: SetSelectedOptionFontFamily003
  * @tc.desc: Test SelectPattern SetSelectedOptionFontFamily
  * @tc.type: FUNC

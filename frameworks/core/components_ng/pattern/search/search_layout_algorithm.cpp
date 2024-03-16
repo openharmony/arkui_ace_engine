@@ -166,9 +166,24 @@ void SearchLayoutAlgorithm::TextFieldMeasure(LayoutWrapper* layoutWrapper)
     auto textFieldHeight = std::min(themeHeight, searchHeight - 0.0f);
     auto childLayoutConstraint = layoutProperty->CreateChildConstraint();
     childLayoutConstraint.selfIdealSize.SetWidth(textFieldWidth);
-    childLayoutConstraint.selfIdealSize.SetHeight(textFieldHeight);
+    SetTextFieldLayoutConstraintHeight(childLayoutConstraint, textFieldHeight, layoutWrapper);
     textFieldWrapper->Measure(childLayoutConstraint);
     textFieldSizeMeasure_ = textFieldGeometryNode->GetFrameSize();
+}
+
+void SearchLayoutAlgorithm::SetTextFieldLayoutConstraintHeight(LayoutConstraintF& contentConstraint,
+    double textFieldHeight, LayoutWrapper* layoutWrapper)
+{
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
+        auto textFieldWrapper = layoutWrapper->GetOrCreateChildByIndex(TEXTFIELD_INDEX);
+        auto textFieldLayoutProperty =
+            AceType::DynamicCast<TextFieldLayoutProperty>(textFieldWrapper->GetLayoutProperty());
+        if ((textFieldLayoutProperty == nullptr) || (!textFieldLayoutProperty->HasLineHeight())) {
+            contentConstraint.selfIdealSize.SetHeight(textFieldHeight);
+        }
+        return;
+    }
+    contentConstraint.selfIdealSize.SetHeight(textFieldHeight);
 }
 
 void SearchLayoutAlgorithm::ImageMeasure(LayoutWrapper* layoutWrapper)

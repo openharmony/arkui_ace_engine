@@ -143,9 +143,10 @@ bool FormModulePreloader::ParseComponentCollectionJson(
                 continue;
             }
             std::lock_guard<std::mutex> lock(gMapLock_);
-            if (gFormModuleMap_[bundleName].find(componentName) == gFormModuleMap_[bundleName].end()) {
+            auto& iter = gFormModuleMap_[bundleName];
+            if (iter.find(componentName) == iter.end()) {
                 formModuleList.emplace(componentName);
-                gFormModuleMap_[bundleName].emplace(bundleName);
+                iter.emplace(bundleName);
             }
         }
     }

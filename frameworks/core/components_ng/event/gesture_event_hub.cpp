@@ -716,6 +716,14 @@ void GestureEventHub::HandleOnDragStart(const GestureEvent& info)
     CHECK_NULL_VOID(dragDropManager);
     dragDropManager->SetDraggingPointer(info.GetPointerId());
     dragDropManager->SetDraggingPressedState(true);
+    if (dragPreviewInfo.inspectorId != "") {
+        auto dragPreviewPixelMap = DragEventActuator::GetPreviewPixelMap(dragPreviewInfo.inspectorId, frameNode);
+        CHECK_NULL_VOID(dragPreviewPixelMap);
+        dragDropInfo.pixelMap = dragPreviewPixelMap;
+        OnDragStart(info, pipeline, frameNode, dragDropInfo, event);
+        return;
+    }
+
     if (info.GetSourceDevice() != SourceType::MOUSE) {
         if (dragPreviewInfo.pixelMap != nullptr || dragPreviewInfo.customNode != nullptr) {
             if (dragPreviewPixelMap_ != nullptr) {
@@ -807,8 +815,6 @@ void GestureEventHub::OnDragStart(const GestureEvent& info, const RefPtr<Pipelin
         dragDropManager->SetIsMouseDrag(true);
         pixelMap = CreatePixelMapFromString(DEFAULT_MOUSE_DRAG_IMAGE);
         CHECK_NULL_VOID(pixelMap);
-        auto taskScheduler = pipeline->GetTaskExecutor();
-        CHECK_NULL_VOID(taskScheduler);
         GenerateMousePixelMap(info);
         if (pixelMap_) {
             pixelMap = pixelMap_;
@@ -1021,6 +1027,18 @@ void GestureEventHub::SetUserOnClick(GestureEventFunc&& clickEvent)
         SetFocusClickEvent(userParallelClickEventActuator_->GetClickEvent());
     } else {
         clickEventActuator_->SetUserCallback(std::move(clickEvent));
+        SetFocusClickEvent(clickEventActuator_->GetClickEvent());
+    }
+}
+
+void GestureEventHub::SetJSFrameNodeOnClick(GestureEventFunc&& clickEvent)
+{
+    CheckClickActuator();
+    if (parallelCombineClick) {
+        userParallelClickEventActuator_->SetJSFrameNodeCallback(std::move(clickEvent));
+        SetFocusClickEvent(userParallelClickEventActuator_->GetClickEvent());
+    } else {
+        clickEventActuator_->SetJSFrameNodeCallback(std::move(clickEvent));
         SetFocusClickEvent(clickEventActuator_->GetClickEvent());
     }
 }
@@ -1295,6 +1313,20 @@ void GestureEventHub::ClearUserOnTouch()
     }
 }
 
+void GestureEventHub::ClearJSFrameNodeOnClick()
+{
+    if (clickEventActuator_) {
+        clickEventActuator_->ClearJSFrameNodeCallback();
+    }
+}
+
+void GestureEventHub::ClearJSFrameNodeOnTouch()
+{
+    if (touchEventActuator_) {
+        touchEventActuator_->ClearJSFrameNodeCallback();
+    }
+}
+
 void GestureEventHub::CopyGestures(const RefPtr<GestureEventHub>& gestureEventHub)
 {
     CHECK_NULL_VOID(gestureEventHub);
@@ -1406,18 +1438,44 @@ void GestureEventHub::SetResponseRegion(const std::vector<DimensionRect>& respon
 }
 
 void GestureEventHub::RemoveLastResponseRect()
-    {
-        if (responseRegion_.empty()) {
-            isResponseRegion_ = false;
-            return;
-        }
-        responseRegion_.pop_back();
-        if (responseRegion_.empty()) {
-            isResponseRegion_ = false;
-        }
-
-        if (responseRegionFunc_) {
-            responseRegionFunc_(responseRegion_);
-        }
+{
+    if (responseRegion_.empty()) {
+        isResponseRegion_ = false;
+        return;
     }
+    responseRegion_.pop_back();
+    if (responseRegion_.empty()) {
+        isResponseRegion_ = false;
+    }
+
+    if (responseRegionFunc_) {
+        responseRegionFunc_(responseRegion_);
+    }
+}
+
+void GestureEventHub::SetOnTouchEvent(TouchEventFunc&& touchEventFunc)
+{
+    if (!touchEventActuator_) {
+        touchEventActuator_ = MakeRefPtr<TouchEventActuator>();
+    }
+    touchEventActuator_->SetOnTouchEvent(std::move(touchEventFunc));
+}
+
+void GestureEventHub::SetJSFrameNodeOnTouchEvent(TouchEventFunc&& touchEventFunc)
+{
+    if (!touchEventActuator_) {
+        touchEventActuator_ = MakeRefPtr<TouchEventActuator>();
+    }
+    touchEventActuator_->SetJSFrameNodeOnTouchEvent(std::move(touchEventFunc));
+}
+
+void GestureEventHub::SetDragForbiddenForcely(bool isDragForbidden)
+{
+    isDragForbidden_ = isDragForbidden;
+}
+
+bool GestureEventHub::IsDragForbidden()
+{
+    return isDragForbidden_;
+}
 } // namespace OHOS::Ace::NG

@@ -22,6 +22,7 @@
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/base/view_stack_processor.h"
+#include "core/components_ng/pattern/text/span/span_string.h"
 #include "core/components_ng/pattern/text/text_event_hub.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/components_ng/pattern/text_field/text_field_event_hub.h"
@@ -53,6 +54,22 @@ void TextModelNG::Create(const std::string& content)
     textPattern->SetTextController(AceType::MakeRefPtr<TextController>());
     textPattern->GetTextController()->SetPattern(WeakPtr(textPattern));
     textPattern->ClearSelectionMenu();
+}
+
+void TextModelNG::Create(const RefPtr<SpanStringBase>& spanBase)
+{
+    TextModelNG::Create("");
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto textPattern = frameNode->GetPattern<TextPattern>();
+    CHECK_NULL_VOID(textPattern);
+    auto spanString = AceType::DynamicCast<SpanString>(spanBase);
+    if (spanString) {
+        spanString->AddSpanWatcher(WeakPtr(textPattern));
+        auto spans = spanString->GetSpanItems();
+        textPattern->SetSpanItemChildren(spans);
+        textPattern->SetSpanStringMode(true);
+    }
 }
 
 RefPtr<FrameNode> TextModelNG::CreateFrameNode(int32_t nodeId, const std::string& content)

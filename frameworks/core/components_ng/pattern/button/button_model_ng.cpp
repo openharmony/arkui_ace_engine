@@ -214,7 +214,7 @@ void ButtonModelNG::SetLabel(FrameNode* frameNode, const char* label)
     if (layoutProperty->GetPaddingProperty()) {
         return;
     }
-    auto buttonTheme = PipelineBase::GetCurrentContext()->GetTheme<ButtonTheme>();
+    auto buttonTheme = PipelineBase::GetCurrentContextSafely()->GetTheme<ButtonTheme>();
     CHECK_NULL_VOID(buttonTheme);
     auto padding = buttonTheme->GetPadding();
     PaddingProperty defaultPadding = { CalcLength(padding.Left()), CalcLength(padding.Right()),
@@ -255,7 +255,7 @@ RefPtr<FrameNode> ButtonModelNG::CreateFrameNode(int32_t nodeId)
     if (layoutProperty->GetPaddingProperty()) {
         return frameNode;
     }
-    auto buttonTheme = PipelineBase::GetCurrentContext()->GetTheme<ButtonTheme>();
+    auto buttonTheme = PipelineBase::GetCurrentContextSafely()->GetTheme<ButtonTheme>();
     CHECK_NULL_RETURN(buttonTheme, nullptr);
     auto padding = buttonTheme->GetPadding();
     PaddingProperty defaultPadding = { CalcLength(padding.Left()), CalcLength(padding.Right()),
@@ -364,7 +364,7 @@ void ButtonModelNG::SetTextDefaultStyle(const RefPtr<FrameNode>& textNode, const
     CHECK_NULL_VOID(textNode);
     auto textLayoutProperty = textNode->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_VOID(textLayoutProperty);
-    auto buttonTheme = PipelineBase::GetCurrentContext()->GetTheme<ButtonTheme>();
+    auto buttonTheme = PipelineBase::GetCurrentContextSafely()->GetTheme<ButtonTheme>();
     auto textStyle = buttonTheme->GetTextStyle();
     textLayoutProperty->UpdateContent(label);
     textLayoutProperty->UpdateTextOverflow(TextOverflow::ELLIPSIS);
@@ -486,5 +486,10 @@ Color ButtonModelNG::GetFontColor(FrameNode* frameNode)
     Color value;
     ACE_GET_NODE_LAYOUT_PROPERTY(ButtonLayoutProperty, FontColor, value, frameNode);
     return value;
+}
+
+void ButtonModelNG::ResetBorderRadius()
+{
+    ACE_RESET_LAYOUT_PROPERTY(ButtonLayoutProperty, BorderRadius);
 }
 } // namespace OHOS::Ace::NG

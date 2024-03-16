@@ -31,8 +31,7 @@ ArkUINativeModuleValue RatingBridge::SetStars(ArkUIRuntimeCallInfo* runtimeCallI
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
     Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(NUM_1);
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
-    auto input = secondArg->ToNumber(vm)->Value();
-    int32_t stars = static_cast<int32_t>(input);
+    int32_t stars = secondArg->Int32Value(vm);
     if (stars <= 0) {
         stars = STARS_DEFAULT;
     }

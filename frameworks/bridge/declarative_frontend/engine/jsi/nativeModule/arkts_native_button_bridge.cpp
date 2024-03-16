@@ -387,6 +387,7 @@ ArkUINativeModuleValue ButtonBridge::SetLabelStyle(ArkUIRuntimeCallInfo* runtime
     std::vector<ArkUI_Uint32> dataCountVector;
     dataCountVector.push_back(stringParameters.size());
     dataCountVector.push_back(valuesVector.size());
+    dataCountVector.push_back(fontSizesVector.size());
     GetArkUINodeModifiers()->getButtonModifier()->setButtonLabelStyle(
         nativeNode, stringParameters.data(), valuesVector.data(), fontSizesVector.data(), dataCountVector.data());
     return panda::JSValueRef::Undefined(vm);

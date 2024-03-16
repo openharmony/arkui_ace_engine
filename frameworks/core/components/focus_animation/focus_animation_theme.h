@@ -42,11 +42,7 @@ public:
             if (!themeConstants) {
                 return theme;
             }
-            auto themeStyle = themeConstants->GetThemeStyle();
-            if (!themeStyle) {
-                return theme;
-            }
-            auto pattern = themeStyle->GetAttr<RefPtr<ThemeStyle>>(THEME_PATTERN_FOCUS_ANIMATION, nullptr);
+            RefPtr<ThemeStyle> pattern = themeConstants->GetPatternByName(THEME_PATTERN_FOCUS_ANIMATION);
             if (!pattern) {
                 LOGW("find pattern of focus_animation fail");
                 return theme;

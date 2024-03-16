@@ -137,16 +137,17 @@ void DialogPattern::HandleClick(const GestureEvent& info)
         auto&& clickPosition = info.GetGlobalLocation();
         if (!contentRect.IsInRegion(
                 PointF(clickPosition.GetX() - globalOffset.GetX(), clickPosition.GetY() - globalOffset.GetY()))) {
+            auto pipeline = PipelineContext::GetCurrentContext();
+            CHECK_NULL_VOID(pipeline);
+            auto overlayManager = pipeline->GetOverlayManager();
+            CHECK_NULL_VOID(overlayManager);
             if (this->ShouldDismiss()) {
+                overlayManager->SetDismissDialogId(host->GetId());
                 this->CallOnWillDismiss(static_cast<int32_t>(DialogDismissReason::DIALOG_TOUCH_OUTSIDE));
                 TAG_LOGI(AceLogTag::ACE_DIALOG, "Dialog Should Dismiss");
                 return;
             }
             PopDialog(-1);
-            auto pipeline = PipelineContext::GetCurrentContext();
-            CHECK_NULL_VOID(pipeline);
-            auto overlayManager = pipeline->GetOverlayManager();
-            CHECK_NULL_VOID(overlayManager);
             if (overlayManager->isMaskNode(GetHost()->GetId())) {
                 overlayManager->PopModalDialog(GetHost()->GetId());
             }
@@ -221,15 +222,50 @@ void DialogPattern::UpdateContentRenderContext(const RefPtr<FrameNode>& contentN
     } else {
         contentRenderContext->UpdateBackgroundColor(props.backgroundColor.value_or(dialogTheme_->GetBackgroundColor()));
     }
-
     if (props.borderRadius.has_value()) {
-        contentRenderContext->UpdateBorderRadius(props.borderRadius.value());
+        if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TWELVE)) {
+            auto radiusValue = props.borderRadius.value();
+            ParseBorderRadius(radiusValue);
+            contentRenderContext->UpdateBorderRadius(radiusValue);
+        } else {
+            contentRenderContext->UpdateBorderRadius(props.borderRadius.value());
+        }
     } else {
         BorderRadiusProperty radius;
         radius.SetRadius(dialogTheme_->GetRadius().GetX());
         contentRenderContext->UpdateBorderRadius(radius);
     }
+    if (props.borderWidth.has_value()) {
+        auto layoutProps = contentNode->GetLayoutProperty<LinearLayoutProperty>();
+        layoutProps->UpdateBorderWidth(props.borderWidth.value());
+        contentRenderContext->UpdateBorderWidth(props.borderWidth.value());
+    }
+    if (props.borderStyle.has_value()) {
+        contentRenderContext->UpdateBorderStyle(props.borderStyle.value());
+    }
+    if (props.borderColor.has_value()) {
+        contentRenderContext->UpdateBorderColor(props.borderColor.value());
+    }
+    if (props.shadow.has_value()) {
+        contentRenderContext->UpdateBackShadow(props.shadow.value());
+    }
     contentRenderContext->SetClipToBounds(true);
+}
+
+void DialogPattern::ParseBorderRadius(BorderRadiusProperty& raidus)
+{
+    if (!raidus.radiusTopLeft.has_value() || raidus.radiusTopLeft.value().Value() < 0) {
+        raidus.radiusTopLeft = dialogTheme_->GetRadius().GetX();
+    }
+    if (!raidus.radiusTopRight.has_value() || raidus.radiusTopRight.value().Value() < 0) {
+        raidus.radiusTopRight = dialogTheme_->GetRadius().GetX();
+    }
+    if (!raidus.radiusBottomLeft.has_value() || raidus.radiusBottomLeft.value().Value() < 0) {
+        raidus.radiusBottomLeft = dialogTheme_->GetRadius().GetX();
+    }
+    if (!raidus.radiusBottomRight.has_value() || raidus.radiusBottomRight.value().Value() < 0) {
+        raidus.radiusBottomRight = dialogTheme_->GetRadius().GetX();
+    }
 }
 
 RefPtr<FrameNode> DialogPattern::CreateDialogScroll(const DialogProperties& dialogProps)
@@ -292,6 +328,11 @@ void DialogPattern::BuildChild(const DialogProperties& props)
 
     if (!props.customStyle) {
         UpdateContentRenderContext(contentColumn, props);
+        if (props.height.has_value()) {
+            auto layoutProps = contentColumn->GetLayoutProperty<LinearLayoutProperty>();
+            layoutProps->UpdateMainAxisAlign(FlexAlign::SPACE_BETWEEN);
+            layoutProps->UpdateMeasureType(MeasureType::MATCH_PARENT_MAIN_AXIS);
+        }
     }
 
     auto columnProp = AceType::DynamicCast<LinearLayoutProperty>(contentColumn->GetLayoutProperty());

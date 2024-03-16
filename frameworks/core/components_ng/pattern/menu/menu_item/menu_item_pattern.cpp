@@ -262,11 +262,11 @@ void MenuItemPattern::ShowSubMenu()
     auto parentMenu = GetMenu();
     CHECK_NULL_VOID(parentMenu);
     // parentMenu no need focus
-    auto focusMenu = GetMenu(true);
-    CHECK_NULL_VOID(focusMenu);
-    auto focusHub = focusMenu->GetFocusHub();
-    CHECK_NULL_VOID(focusHub);
-    focusHub->SetParentFocusable(false);
+    auto menuNode = GetMenu(true);
+    CHECK_NULL_VOID(menuNode);
+    auto menuPattern = menuNode->GetPattern<MenuPattern>();
+    CHECK_NULL_VOID(menuPattern);
+    menuPattern->FocusViewHide();
     auto parentMenuPattern = parentMenu->GetPattern<MenuPattern>();
     CHECK_NULL_VOID(parentMenuPattern);
     auto showedSubMenu = parentMenuPattern->GetShowedSubMenu();
@@ -285,10 +285,10 @@ void MenuItemPattern::ShowSubMenu()
     auto customNode = NG::ViewStackProcessor::GetInstance()->Finish();
     bool isSelectOverlayMenu = IsSelectOverlayMenu();
     MenuParam param;
-    auto layoutProps = focusMenu->GetLayoutProperty<MenuLayoutProperty>();
+    auto layoutProps = menuNode->GetLayoutProperty<MenuLayoutProperty>();
     CHECK_NULL_VOID(layoutProps);
     param.isShowInSubWindow = layoutProps->GetShowInSubWindowValue(false);
-    auto focusMenuRenderContext = focusMenu->GetRenderContext();
+    auto focusMenuRenderContext = menuNode->GetRenderContext();
     CHECK_NULL_VOID(focusMenuRenderContext);
     if (focusMenuRenderContext->GetBackBlurStyle().has_value()) {
         auto focusMenuBlurStyle = focusMenuRenderContext->GetBackBlurStyle();
@@ -322,9 +322,7 @@ void MenuItemPattern::ShowSubMenuHelper(const RefPtr<FrameNode>& subMenu)
     RegisterWrapperMouseEvent();
     // select overlay menu no need focus
     if (!isSelectOverlayMenu) {
-        auto focusHub = subMenu->GetOrCreateFocusHub();
-        CHECK_NULL_VOID(focusHub);
-        focusHub->RequestFocusWithDefaultFocusFirstly();
+        menuPattern->FocusViewShow();
     }
 }
 

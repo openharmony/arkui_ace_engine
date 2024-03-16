@@ -47,17 +47,14 @@ public:
             if (!themeConstants) {
                 return theme;
             }
-            ParsePattern(themeConstants->GetThemeStyle(), theme);
+            ParsePattern(themeConstants, theme);
             return theme;
         }
 
     private:
-        void ParsePattern(const RefPtr<ThemeStyle>& themeStyle, const RefPtr<ToolBarTheme>& theme) const
+        void ParsePattern(const RefPtr<ThemeConstants>& themeConstants, const RefPtr<ToolBarTheme>& theme) const
         {
-            if (!themeStyle) {
-                return;
-            }
-            auto toolbarPattern = themeStyle->GetAttr<RefPtr<ThemeStyle>>(THEME_PATTERN_TOOLBAR, nullptr);
+            RefPtr<ThemeStyle> toolbarPattern = themeConstants->GetPatternByName(THEME_PATTERN_TOOLBAR);
             if (!toolbarPattern) {
                 LOGI("ToolbarPattern is null");
                 return;

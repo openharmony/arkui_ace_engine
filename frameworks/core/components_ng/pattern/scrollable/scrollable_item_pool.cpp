@@ -32,14 +32,15 @@ RefPtr<ScrollableItem> ScrollableItemPool::Allocate(
     const std::string& tag, int32_t nodeId, const PatternCreator& patternCreator)
 {
     ACE_SCOPED_TRACE("ScrollableItemPool::Allocate");
-    if (pool_.find(tag) == pool_.end() || (pool_.find(tag) != pool_.end() && pool_[tag].empty())) {
+    auto it = pool_.find(tag);
+    if (it == pool_.end() || it->second.empty()) {
         auto node = ScrollableItem::GetOrCreateScrollableItem(tag, nodeId, patternCreator);
         node->SetCustomDeleter(ObjectPoolDeleter<ScrollableItem> { this });
         node->SetMaybeRelease(false);
         return node;
     }
-    auto node = pool_[tag].back();
-    pool_[tag].pop_back();
+    auto node = it->second.back();
+    it->second.pop_back();
     ElementRegister::GetInstance()->UpdateRecycleElmtId(node->GetId(), nodeId);
     node->UpdateRecycleElmtId(nodeId);
     return Referenced::Claim(node);
@@ -50,13 +51,14 @@ void ScrollableItemPool::Deallocate(ScrollableItem* obj)
     ACE_SCOPED_TRACE("ScrollableItemPool::Deallocate");
     CHECK_NULL_VOID(obj);
     auto tag = obj->GetTag();
-    if (pool_.find(tag) == pool_.end()) {
+    auto it = pool_.find(tag);
+    if (it == pool_.end()) {
         pool_[tag] = { obj };
         obj->Clean(true);
         return;
     }
-    if (pool_[tag].size() < static_cast<uint32_t>(size_)) {
-        pool_[tag].emplace_back(obj);
+    if (it->second.size() < static_cast<uint32_t>(size_)) {
+        it->second.emplace_back(obj);
         obj->Clean(true);
         return;
     }

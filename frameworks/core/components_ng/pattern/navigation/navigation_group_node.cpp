@@ -138,22 +138,49 @@ void NavigationGroupNode::UpdateNavDestinationNodeWithoutMarkDirty(const RefPtr<
     int32_t slot = 0;
     UpdateLastStandardIndex();
     TAG_LOGI(AceLogTag::ACE_NAVIGATION, "last standard page index is %{public}d", lastStandardIndex_);
+    if (!ReorderNavDestination(navDestinationNodes, navigationContentNode, slot, hasChanged)) {
+        return;
+    }
+
+    for (int32_t i = static_cast<int32_t>(navDestinationNodes.size()) - 1; i >= 0; --i) {
+        const auto& childNode = navDestinationNodes[i];
+        const auto& uiNode = childNode.second;
+        auto navDestination = AceType::DynamicCast<NavDestinationGroupNode>(GetNavDestinationNode(uiNode));
+        hasChanged = (UpdateNavDestinationVisibility(navDestination, remainChild, i, navDestinationNodes.size())
+         || hasChanged);
+    }
+
+    RemoveRedundantNavDestination(navigationContentNode, remainChild, slot, hasChanged);
+    if (modeChange) {
+        navigationContentNode->GetLayoutProperty()->UpdatePropertyChangeFlag(PROPERTY_UPDATE_MEASURE_SELF_AND_CHILD);
+    } else if (hasChanged) {
+        navigationContentNode->GetLayoutProperty()->UpdatePropertyChangeFlag(PROPERTY_UPDATE_MEASURE);
+    }
+}
+
+bool NavigationGroupNode::ReorderNavDestination(
+    const std::vector<std::pair<std::string, RefPtr<UINode>>>& navDestinationNodes,
+    RefPtr<FrameNode>& navigationContentNode, int32_t& slot, bool& hasChanged)
+{
+    auto pattern = AceType::DynamicCast<NavigationPattern>(GetPattern());
+    CHECK_NULL_RETURN(pattern, false);
     for (uint32_t i = 0; i != navDestinationNodes.size(); ++i) {
         const auto& childNode = navDestinationNodes[i];
         const auto& uiNode = childNode.second;
         auto navDestination = AceType::DynamicCast<NavDestinationGroupNode>(GetNavDestinationNode(uiNode));
         if (navDestination == nullptr) {
             TAG_LOGI(AceLogTag::ACE_NAVIGATION, "get destination node failed");
-            return;
+            return false;
         }
         auto navDestinationPattern = navDestination->GetPattern<NavDestinationPattern>();
-        CHECK_NULL_VOID(navDestinationPattern);
+        CHECK_NULL_RETURN(navDestinationPattern, false);
         navDestinationPattern->SetName(childNode.first);
         navDestinationPattern->SetCustomNode(uiNode);
+        navDestinationPattern->SetIndex(static_cast<int32_t>(i));
         SetBackButtonEvent(navDestination);
         navDestination->SetIndex(i);
         auto eventHub = navDestination->GetEventHub<NavDestinationEventHub>();
-        CHECK_NULL_VOID(eventHub);
+        CHECK_NULL_RETURN(eventHub, false);
         if (!eventHub->GetOnStateChange()) {
             auto onStateChangeMap = pattern->GetOnStateChangeMap();
             auto iter = onStateChangeMap.find(uiNode->GetId());
@@ -172,16 +199,13 @@ void NavigationGroupNode::UpdateNavDestinationNodeWithoutMarkDirty(const RefPtr<
         }
         slot++;
     }
+    return true;
+}
 
-    for (int32_t i = static_cast<int32_t>(navDestinationNodes.size()) - 1; i >= 0; --i) {
-        const auto& childNode = navDestinationNodes[i];
-        const auto& uiNode = childNode.second;
-        auto navDestination = AceType::DynamicCast<NavDestinationGroupNode>(GetNavDestinationNode(uiNode));
-        hasChanged = (UpdateNavDestinationVisibility(navDestination, remainChild, i, navDestinationNodes.size())
-         || hasChanged);
-    }
-
-    while (static_cast<size_t>(slot) < navigationContentNode->GetChildren().size()) {
+void NavigationGroupNode::RemoveRedundantNavDestination(
+    RefPtr<FrameNode>& navigationContentNode, const RefPtr<UINode>& remainChild, size_t slot, bool& hasChanged)
+{
+    while (slot < navigationContentNode->GetChildren().size()) {
         // delete useless nodes that are not at the top
         auto navDestination = AceType::DynamicCast<NavDestinationGroupNode>(navigationContentNode->GetLastChild());
         if (!navDestination) {
@@ -223,11 +247,6 @@ void NavigationGroupNode::UpdateNavDestinationNodeWithoutMarkDirty(const RefPtr<
             navDestination->MovePosition(slot);
             ++slot;
         }
-    }
-    if (modeChange) {
-        navigationContentNode->GetLayoutProperty()->UpdatePropertyChangeFlag(PROPERTY_UPDATE_MEASURE_SELF_AND_CHILD);
-    } else if (hasChanged) {
-        navigationContentNode->GetLayoutProperty()->UpdatePropertyChangeFlag(PROPERTY_UPDATE_MEASURE);
     }
 }
 

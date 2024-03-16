@@ -863,6 +863,21 @@ public:
         underlineColor_ = underlineColor;
     }
 
+    void SetNormalUnderlineColor(const Color& normalColor)
+    {
+        userUnderlineColor_.normal = normalColor;
+    }
+
+    void SetUserUnderlineColor(UserUnderlineColor userUnderlineColor)
+    {
+        userUnderlineColor_ = userUnderlineColor;
+    }
+
+    UserUnderlineColor GetUserUnderlineColor()
+    {
+        return userUnderlineColor_;
+    }
+
     void SetUnderlineWidth(Dimension underlineWidth)
     {
         underlineWidth_ = underlineWidth;
@@ -1096,6 +1111,13 @@ public:
     void CleanNodeResponseKeyEvent();
 
     void OnVirtualKeyboardAreaChanged() override;
+    void ScrollPage(bool reverse, bool smooth = false) override;
+    void LongScrollPage();
+    void ScheduleCaretLongPress();
+    void StartLongPressEventTimer();
+    void InitScrollBarClickEvent() override {}
+    void InitScrollBarLongPressEvent() override {}
+    void InitScrollBarTouchEvent() override {}
 
 protected:
     virtual void InitDragEvent();
@@ -1238,6 +1260,9 @@ private:
     void PasswordResponseKeyEvent();
     void UnitResponseKeyEvent();
     void ProcNormalInlineStateInBlurEvent();
+    bool IsMouseOverScrollBar(const GestureEvent& info);
+    bool IsLongMouseOverScrollBar(GestureEvent& info);
+    
 #if defined(ENABLE_STANDARD_INPUT)
     std::optional<MiscServices::TextConfig> GetMiscTextConfig() const;
 #endif
@@ -1337,6 +1362,7 @@ private:
     float countHeight_ = 0.0f;
     Dimension underlineWidth_ = 1.0_px;
     Color underlineColor_;
+    UserUnderlineColor userUnderlineColor_ = UserUnderlineColor();
     bool scrollBarVisible_ = false;
     bool isCounterIdealheight_ = false;
     float maxFrameOffsetY_ = 0.0f;
@@ -1357,6 +1383,7 @@ private:
 
     int32_t dragTextStart_ = 0;
     int32_t dragTextEnd_ = 0;
+    std::string dragValue_;
     RefPtr<FrameNode> dragNode_;
     DragStatus dragStatus_ = DragStatus::NONE; // The status of the dragged initiator
     DragStatus dragRecipientStatus_ = DragStatus::NONE; // Drag the recipient's state
@@ -1424,6 +1451,9 @@ private:
     Offset clickLocation_;
     bool isKeyboardClosedByUser_ = false;
     bool lockRecord_ = false;
+    bool hasMousePressed_ = false;
+    bool isLongPressPage_ = false;
+    Offset locationInfo_;
 };
 } // namespace OHOS::Ace::NG
 

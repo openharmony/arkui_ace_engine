@@ -437,7 +437,7 @@ void ToggleModelNG::SetSelectedColor(FrameNode* frameNode, const std::optional<C
 {
     CHECK_NULL_VOID(frameNode);
 
-    auto pipeline = PipelineBase::GetCurrentContext();
+    auto pipeline = PipelineBase::GetCurrentContextSafely();
     CHECK_NULL_VOID(pipeline);
     Color color;
     if (selectedColor.has_value()) {

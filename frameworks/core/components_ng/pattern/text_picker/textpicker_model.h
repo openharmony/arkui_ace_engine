@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -22,7 +22,7 @@
 #include "base/geometry/dimension.h"
 #include "core/components/picker/picker_theme.h"
 #include "core/components_ng/pattern/picker/picker_type_define.h"
-
+#include "core/components_ng/pattern/text_picker/textpicker_properties.h"
 namespace OHOS::Ace {
 struct TextPickerDialog {
     CalcDimension height;
@@ -78,6 +78,7 @@ public:
     virtual void SetOnSelectedChangeEvent(TextCascadeSelectedChangeEvent&& onChange) = 0;
     virtual void SetSingleRange(bool isSingleRange) = 0;
     virtual bool GetSingleRange() = 0;
+    virtual void SetDivider(const NG::ItemDivider& divider) {};
 
 private:
     static std::unique_ptr<TextPickerModel> textPickerInstance_;

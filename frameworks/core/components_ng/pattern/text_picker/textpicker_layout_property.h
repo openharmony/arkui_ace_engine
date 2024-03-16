@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -21,8 +21,9 @@
 #include "core/components_ng/layout/layout_property.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_property.h"
 #include "core/components_ng/pattern/text/text_styles.h"
+#include "core/components_ng/pattern/text_picker/textpicker_layout_property.h"
+#include "core/components_ng/pattern/text_picker/textpicker_properties.h"
 #include "core/components_ng/property/property.h"
-
 namespace OHOS::Ace::NG {
 class ACE_EXPORT TextPickerLayoutProperty : public LinearLayoutProperty {
     DECLARE_ACE_TYPE(TextPickerLayoutProperty, LinearLayoutProperty);
@@ -45,6 +46,7 @@ public:
         value->propTextStyle_ = CloneTextStyle();
         value->propSelectedTextStyle_ = CloneSelectedTextStyle();
         value->propCanLoop_ = CloneCanLoop();
+        value->propDivider_ = CloneDivider();
         return value;
     }
 
@@ -61,6 +63,7 @@ public:
         ResetTextStyle();
         ResetSelectedTextStyle();
         ResetCanLoop();
+        ResetDivider();
     }
 
     void ToJsonValue(std::unique_ptr<JsonValue>& json) const override
@@ -70,6 +73,17 @@ public:
         json->Put("defaultPickerItemHeight", GetDefaultPickerItemHeightValue(Dimension(0)).ToString().c_str());
         json->Put("selected", std::to_string(GetSelectedValue(0)).c_str());
         json->Put("value", GetValueValue("").c_str());
+        if (propDivider_.has_value()) {
+            auto divider = JsonUtil::Create(true);
+            divider->Put("strokeWidth", propDivider_.value().strokeWidth.ToString().c_str());
+            divider->Put("startMargin", propDivider_.value().startMargin.ToString().c_str());
+            divider->Put("endMargin", propDivider_.value().endMargin.ToString().c_str());
+            divider->Put("color", propDivider_.value().color.ColorToString().c_str());
+            json->Put("divider", divider);
+        } else {
+            auto divider = JsonUtil::Create(true);
+            json->Put("divider", divider);
+        }
 
         auto jsonArraySelected = JsonUtil::CreateArray(true);
         auto arraySelected = CloneSelecteds().value_or(std::vector<uint32_t>());
@@ -131,6 +145,8 @@ public:
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(Selecteds, std::vector<uint32_t>, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(Values, std::vector<std::string>, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(SelectedIndex, std::vector<uint32_t>, PROPERTY_UPDATE_MEASURE);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(Divider, ItemDivider, PROPERTY_UPDATE_MEASURE);
+
     ACE_DEFINE_PROPERTY_GROUP(DisappearTextStyle, FontStyle);
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP_ITEM(
         DisappearTextStyle, FontSize, DisappearFontSize, Dimension, PROPERTY_UPDATE_MEASURE);

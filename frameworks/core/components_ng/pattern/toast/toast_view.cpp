@@ -29,8 +29,8 @@
 #include "core/pipeline/pipeline_base.h"
 
 namespace OHOS::Ace::NG {
-RefPtr<FrameNode> ToastView::CreateToastNode(
-    const std::string& message, const std::string& bottom, bool isRightToLeft, const ToastShowMode& showMode)
+RefPtr<FrameNode> ToastView::CreateToastNode(const std::string& message, const std::string& bottom, bool isRightToLeft,
+    const ToastShowMode& showMode, std::optional<Alignment> alignment, std::optional<DimensionOffset> offset)
 {
     auto context = PipelineBase::GetCurrentContext();
     CHECK_NULL_RETURN(context, nullptr);
@@ -61,7 +61,16 @@ RefPtr<FrameNode> ToastView::CreateToastNode(
     UpdateTextLayoutProperty(textNode, message, isRightToLeft);
     UpdateTextContext(textNode);
     textNode->MountToParent(toastNode);
-
+    if (alignment.has_value()) {
+        toastProperty->UpdateToastAlignment(alignment.value());
+    } else {
+        toastProperty->ResetToastAlignment();
+    }
+    if (offset.has_value()) {
+        toastProperty->UpdateToastOffset(offset.value());
+    } else {
+        toastProperty->ResetToastOffset();
+    }
     toastProperty->UpdateBottom(StringUtils::StringToDimensionWithThemeValue(bottom, true, toastTheme->GetBottom()));
     toastProperty->UpdateShowMode(showMode);
     toastNode->GetEventHub<EventHub>()->GetOrCreateGestureEventHub()->SetHitTestMode(HitTestMode::HTMTRANSPARENT);

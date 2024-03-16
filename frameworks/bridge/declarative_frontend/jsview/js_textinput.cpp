@@ -95,6 +95,7 @@ void JSTextInput::JSBind(BindingTarget globalObj)
     JSClass<JSTextInput>::StaticMethod("onDisAppear", &JSInteractableView::JsOnDisAppear);
     JSClass<JSTextInput>::StaticMethod("passwordIcon", &JSTextField::SetPasswordIcon);
     JSClass<JSTextInput>::StaticMethod("showUnderline", &JSTextField::SetShowUnderline);
+    JSClass<JSTextInput>::StaticMethod("underlineColor", &JSTextField::SetUnderlineColor);
     JSClass<JSTextInput>::StaticMethod("enableKeyboardOnFocus", &JSTextField::SetEnableKeyboardOnFocus);
     JSClass<JSTextInput>::StaticMethod("selectionMenuHidden", &JSTextField::SetSelectionMenuHidden);
     JSClass<JSTextInput>::StaticMethod("customKeyboard", &JSTextField::SetCustomKeyboard);
@@ -103,6 +104,9 @@ void JSTextInput::JSBind(BindingTarget globalObj)
     JSClass<JSTextInput>::StaticMethod("cancelButton", &JSTextField::SetCancelButton);
     JSClass<JSTextInput>::StaticMethod("selectAll", &JSTextField::SetSelectAllValue);
     JSClass<JSTextInput>::StaticMethod("showCounter", &JSTextField::SetShowCounter);
+    JSClass<JSTextInput>::StaticMethod("decoration", &JSTextField::SetDecoration);
+    JSClass<JSTextInput>::StaticMethod("letterSpacing", &JSTextField::SetLetterSpacing);
+    JSClass<JSTextInput>::StaticMethod("lineHeight", &JSTextField::SetLineHeight);
 
     JSClass<JSTextInput>::InheritAndBind<JSViewAbstract>(globalObj);
 }

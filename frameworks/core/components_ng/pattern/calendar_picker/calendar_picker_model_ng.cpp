@@ -313,7 +313,7 @@ void CalendarPickerModelNG::SetPadding(const PaddingProperty& padding)
 
 void CalendarPickerModelNG::SetTextStyle(FrameNode* frameNode, const PickerTextStyle& textStyle)
 {
-    auto pipeline = PipelineBase::GetCurrentContext();
+    auto pipeline = PipelineBase::GetCurrentContextSafely();
     CHECK_NULL_VOID(pipeline);
     RefPtr<CalendarTheme> calendarTheme = pipeline->GetTheme<CalendarTheme>();
     CHECK_NULL_VOID(calendarTheme);
@@ -331,7 +331,7 @@ void CalendarPickerModelNG::SetTextStyle(FrameNode* frameNode, const PickerTextS
 
 RefPtr<CalendarTheme> GetDefaultTextTheme()
 {
-    auto pipeline = PipelineBase::GetCurrentContext();
+    auto pipeline = PipelineBase::GetCurrentContextSafely();
     CHECK_NULL_RETURN(pipeline, nullptr);
     return pipeline->GetTheme<CalendarTheme>();
 }

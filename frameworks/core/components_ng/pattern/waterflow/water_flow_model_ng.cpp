@@ -349,7 +349,8 @@ void WaterFlowModelNG::SetFriction(FrameNode* frameNode, double friction)
 FlexDirection WaterFlowModelNG::GetLayoutDirection(FrameNode* frameNode)
 {
     FlexDirection value = FlexDirection::COLUMN;
-    ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(WaterFlowLayoutProperty, WaterflowDirection, value, frameNode, value);
+    ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(
+        WaterFlowLayoutProperty, WaterflowDirection, value, frameNode, value);
     return value;
 }
 } // namespace OHOS::Ace::NG

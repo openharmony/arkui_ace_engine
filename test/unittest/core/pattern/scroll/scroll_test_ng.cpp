@@ -59,6 +59,7 @@ constexpr float SCROLL_WIDTH = 480.f;
 constexpr float SCROLL_HEIGHT = 800.f;
 constexpr int32_t TOTAL_LINE_NUMBER = 10;
 constexpr int32_t VIEW_LINE_NUMBER = 8;
+constexpr int32_t SNAP_ITEM_NUMBER = 30;
 constexpr float DEFAULT_ACTIVE_WIDTH = 8.0f;
 constexpr float DEFAULT_INACTIVE_WIDTH = 4.0f;
 constexpr float DEFAULT_NORMAL_WIDTH = 4.0f;
@@ -66,6 +67,7 @@ constexpr float DEFAULT_TOUCH_WIDTH = 32.0f;
 constexpr float ITEM_WIDTH = SCROLL_WIDTH / VIEW_LINE_NUMBER;
 constexpr float ITEM_HEIGHT = SCROLL_HEIGHT / VIEW_LINE_NUMBER;
 constexpr float VERTICAL_SCROLLABLE_DISTANCE = (TOTAL_LINE_NUMBER - VIEW_LINE_NUMBER) * ITEM_HEIGHT;
+constexpr float SNAP_SCROLLABLE_DISTANCE = (SNAP_ITEM_NUMBER - VIEW_LINE_NUMBER) * ITEM_HEIGHT;
 constexpr float NORMAL_WIDTH = 4.f;
 constexpr float SCROLL_PAGING_SPEED_THRESHOLD = 1200.0f;
 } // namespace
@@ -80,7 +82,8 @@ public:
     void UpdateCurrentOffset(float offset);
 
     void Create(const std::function<void(ScrollModelNG)>& callback = nullptr);
-    void CreateWithContent(const std::function<void(ScrollModelNG)>& callback = nullptr);
+    void CreateWithContent(
+        const std::function<void(ScrollModelNG)>& callback = nullptr, int32_t childNumber = TOTAL_LINE_NUMBER);
     void CreateSnapScroll(ScrollSnapAlign scrollSnapAlign, const Dimension& intervalSize,
         const std::vector<Dimension>& snapPaginations, const std::pair<bool, bool>& enableSnapToSide);
 
@@ -161,22 +164,23 @@ void ScrollTestNg::Create(const std::function<void(ScrollModelNG)>& callback)
     FlushLayoutTask(frameNode_);
 }
 
-void ScrollTestNg::CreateWithContent(const std::function<void(ScrollModelNG)>& callback)
+void ScrollTestNg::CreateWithContent(const std::function<void(ScrollModelNG)>& callback, int32_t childNumber)
 {
-    Create([callback](ScrollModelNG model) {
+    Create([callback, childNumber](ScrollModelNG model) {
         if (callback) {
             callback(model);
         }
-        CreateContent();
+        CreateContent(childNumber);
     });
 }
 
 void ScrollTestNg::CreateSnapScroll(ScrollSnapAlign scrollSnapAlign, const Dimension& intervalSize,
     const std::vector<Dimension>& snapPaginations, const std::pair<bool, bool>& enableSnapToSide)
 {
-    CreateWithContent([scrollSnapAlign, intervalSize, snapPaginations, enableSnapToSide](ScrollModelNG model) {
-        model.SetScrollSnap(scrollSnapAlign, intervalSize, snapPaginations, enableSnapToSide);
-    });
+    CreateWithContent(
+        [scrollSnapAlign, intervalSize, snapPaginations, enableSnapToSide](ScrollModelNG model) {
+            model.SetScrollSnap(scrollSnapAlign, intervalSize, snapPaginations, enableSnapToSide);
+        }, SNAP_ITEM_NUMBER);
 }
 
 void ScrollTestNg::CreateContent(int32_t childNumber)
@@ -518,6 +522,13 @@ HWTEST_F(ScrollTestNg, Event002, TestSize.Level1)
     isTrigger = false;
     pattern_->ScrollToEdge(ScrollEdgeType::SCROLL_TOP, false);
     EXPECT_TRUE(isTrigger);
+
+    /**
+     * @tc.steps: step6. Trigger event by ScrollToEdge,check offset
+     * @tc.expected: offset is equal to GetTotalOffset
+     */
+    auto scrollOffSet = accessibilityProperty_->GetScrollOffSet();
+    EXPECT_EQ(scrollOffSet, pattern_->GetTotalOffset());
 }
 
 /**
@@ -999,6 +1010,8 @@ HWTEST_F(ScrollTestNg, ScrollBarAnimation001, TestSize.Level1)
     modifier = scrollPaint->GetOverlayModifier(&paintWrapper);
     scrollBarOverlayModifier = AceType::DynamicCast<ScrollBarOverlayModifier>(modifier);
     ASSERT_NE(scrollBarOverlayModifier, nullptr);
+    EXPECT_CALL(canvas, AttachBrush).WillOnce(ReturnRef(canvas));
+    EXPECT_CALL(canvas, DetachBrush).WillOnce(ReturnRef(canvas));
     DrawingContext drawingContext = { canvas, SCROLL_WIDTH, SCROLL_HEIGHT };
     scrollBarOverlayModifier->onDraw(drawingContext);
     Touch(TouchType::DOWN, downInBar, SourceType::TOUCH);
@@ -1048,7 +1061,7 @@ HWTEST_F(ScrollTestNg, ScrollBarAnimation002, TestSize.Level1)
     EXPECT_TRUE(scrollBar->NeedPaint());
     ASSERT_NE(scrollBarOverlayModifier, nullptr);
     EXPECT_EQ(scrollBarOverlayModifier->GetOpacity(), UINT8_MAX);
-    EXPECT_EQ(scrollBarOverlayModifier->opacityAnimation_, nullptr);
+    EXPECT_NE(scrollBarOverlayModifier->opacityAnimation_, nullptr);
     EXPECT_EQ(scrollBarOverlayModifier->opacityAnimatingType_, OpacityAnimationType::NONE);
 
     /**
@@ -3080,7 +3093,7 @@ HWTEST_F(ScrollTestNg, Snap001, TestSize.Level1)
         Dimension(30.f),
     };
 
-    // snapOffsets_: {0, -10, -20, -30, -160}
+    // snapOffsets_: { 0.f, -10.f, -20.f, -30.f, -2200.f }
     std::pair<bool, bool> enableSnapToSide = { false, false };
     CreateSnapScroll(ScrollSnapAlign::START, intervalSize, snapPaginations, enableSnapToSide);
     EXPECT_FALSE(pattern_->CalePredictSnapOffset(0.f).has_value());
@@ -3107,11 +3120,11 @@ HWTEST_F(ScrollTestNg, Snap001, TestSize.Level1)
     pattern_->currentOffset_ = -20.f;
     EXPECT_FALSE(pattern_->NeedScrollSnapToSide(0.f));
 
-    // snapOffsets_: {-5, -15, -145, -155}
+    // snapOffsets_: { 0.f, -10.f, -20.f, -30.f, -40.f, ... , -180.f, -190.f, -200.f }
     snapPaginations = {};
     CreateSnapScroll(ScrollSnapAlign::START, intervalSize, snapPaginations, enableSnapToSide);
     EXPECT_FALSE(pattern_->CalePredictSnapOffset(10.f).has_value());
-    EXPECT_FALSE(pattern_->CalePredictSnapOffset(-(VERTICAL_SCROLLABLE_DISTANCE + 10.f)).has_value());
+    EXPECT_FALSE(pattern_->CalePredictSnapOffset(-(SNAP_SCROLLABLE_DISTANCE + 10.f)).has_value());
     EXPECT_TRUE(pattern_->CalePredictSnapOffset(-2.f).has_value());
     EXPECT_TRUE(pattern_->CalePredictSnapOffset(-158.f).has_value());
     EXPECT_TRUE(pattern_->CalePredictSnapOffset(-10.f).has_value());
@@ -3133,26 +3146,27 @@ HWTEST_F(ScrollTestNg, Snap002, TestSize.Level1)
         Dimension((VERTICAL_SCROLLABLE_DISTANCE + 10.f) / SCROLL_HEIGHT, DimensionUnit::PERCENT),
     };
 
-    // snapOffsets_: {0, -10, -20, -30, -160}
+    // snapOffsets_: { 0.f, -1205.f, -2200.f }
     std::pair<bool, bool> enableSnapToSide = { false, false };
     CreateSnapScroll(ScrollSnapAlign::CENTER, intervalSize, snapPaginations, enableSnapToSide);
     EXPECT_FALSE(pattern_->CalePredictSnapOffset(0.f).has_value());
     EXPECT_FALSE(pattern_->CalePredictSnapOffset(-20.f).has_value());
     pattern_->currentOffset_ = -20.f;
-    EXPECT_TRUE(pattern_->CalePredictSnapOffset(0.f).has_value());
+    EXPECT_FALSE(pattern_->CalePredictSnapOffset(0.f).has_value());
 
     enableSnapToSide = { true, false };
     CreateSnapScroll(ScrollSnapAlign::CENTER, intervalSize, snapPaginations, enableSnapToSide);
-    EXPECT_FALSE(pattern_->CalePredictSnapOffset(-40.f).has_value());
-    pattern_->currentOffset_ = 20.f;
     EXPECT_TRUE(pattern_->CalePredictSnapOffset(-40.f).has_value());
-    EXPECT_FALSE(pattern_->CalePredictSnapOffset(0.f).has_value());
+    pattern_->currentOffset_ = -1200.f;
+    EXPECT_FALSE(pattern_->CalePredictSnapOffset(-40.f).has_value());
+    EXPECT_TRUE(pattern_->CalePredictSnapOffset(0.f).has_value());
+    EXPECT_DOUBLE_EQ(pattern_->CalePredictSnapOffset(0.f).value(), -5.f);
 
-    // snapOffsets_: {-5, -15, -145, -155}
+    // snapOffsets_: { 0.f, -5.f, -15.f, -25.f, -35.f, ... , -2185.f, -2195.f }
     snapPaginations = {};
     CreateSnapScroll(ScrollSnapAlign::CENTER, intervalSize, snapPaginations, enableSnapToSide);
     EXPECT_FALSE(pattern_->CalePredictSnapOffset(10.f).has_value());
-    EXPECT_FALSE(pattern_->CalePredictSnapOffset(-(VERTICAL_SCROLLABLE_DISTANCE + 10.f)).has_value());
+    EXPECT_FALSE(pattern_->CalePredictSnapOffset(-(SNAP_SCROLLABLE_DISTANCE + 10.f)).has_value());
     EXPECT_TRUE(pattern_->CalePredictSnapOffset(-2.f).has_value());
     EXPECT_TRUE(pattern_->CalePredictSnapOffset(-158.f).has_value());
     EXPECT_TRUE(pattern_->CalePredictSnapOffset(-10.f).has_value());
@@ -3172,29 +3186,244 @@ HWTEST_F(ScrollTestNg, Snap003, TestSize.Level1)
         Dimension(30.f),
     };
 
-    // snapOffsets_: {0, -10, -20, -30, -160}
+    // snapOffsets_: { 0.f, -2200.f }
     std::pair<bool, bool> enableSnapToSide = { false, false };
     CreateSnapScroll(ScrollSnapAlign::END, intervalSize, snapPaginations, enableSnapToSide);
     EXPECT_FALSE(pattern_->CalePredictSnapOffset(0.f).has_value());
     EXPECT_FALSE(pattern_->CalePredictSnapOffset(-20.f).has_value());
     pattern_->currentOffset_ = -20.f;
-    EXPECT_TRUE(pattern_->CalePredictSnapOffset(0.f).has_value());
+    EXPECT_FALSE(pattern_->CalePredictSnapOffset(0.f).has_value());
 
     enableSnapToSide = { true, false };
     CreateSnapScroll(ScrollSnapAlign::END, intervalSize, snapPaginations, enableSnapToSide);
     EXPECT_FALSE(pattern_->CalePredictSnapOffset(-40.f).has_value());
     pattern_->currentOffset_ = 20.f;
-    EXPECT_TRUE(pattern_->CalePredictSnapOffset(-40.f).has_value());
+    EXPECT_FALSE(pattern_->CalePredictSnapOffset(-40.f).has_value());
     EXPECT_FALSE(pattern_->CalePredictSnapOffset(0.f).has_value());
 
-    // snapOffsets_: {-5, -15, -145, -155}
+    // snapOffsets_: { 0.f, -10.f, -20.f, -30.f, -40.f, ... , -180.f, -190.f, -200.f }
     snapPaginations = {};
     CreateSnapScroll(ScrollSnapAlign::END, intervalSize, snapPaginations, enableSnapToSide);
     EXPECT_FALSE(pattern_->CalePredictSnapOffset(10.f).has_value());
-    EXPECT_FALSE(pattern_->CalePredictSnapOffset(-(VERTICAL_SCROLLABLE_DISTANCE + 10.f)).has_value());
+    EXPECT_FALSE(pattern_->CalePredictSnapOffset(-(SNAP_SCROLLABLE_DISTANCE + 10.f)).has_value());
     EXPECT_TRUE(pattern_->CalePredictSnapOffset(-2.f).has_value());
     EXPECT_TRUE(pattern_->CalePredictSnapOffset(-158.f).has_value());
     EXPECT_TRUE(pattern_->CalePredictSnapOffset(-10.f).has_value());
+}
+
+/**
+ * @tc.name: CaleSnapOffsetsByPaginations001
+ * @tc.desc: Test CaleSnapOffsetsByPaginations where the page size is lesser than the scroll size.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollTestNg, CaleSnapOffsetsByPaginations001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Init snapPaginations.
+     */
+    Dimension intervalSize = Dimension(0.f);
+    std::vector<Dimension> snapPaginations = {
+        Dimension(400.f),
+        Dimension(800.f),
+        Dimension(1400.f),
+        Dimension(1600.f),
+        Dimension(2200.f),
+    };
+
+    /**
+     * @tc.steps: step2. EnableSnapToSide is { true, true } and SnapAlign is ScrollSnapAlign::START.
+     * @tc.expected: SnapOffsets is correct.
+     */
+    // snapPaginations: { 400.f, 800.f, 1400.f, 1600.f, 2200.f }
+    std::pair<bool, bool> enableSnapToSide = { true, true };
+    CreateSnapScroll(ScrollSnapAlign::START, intervalSize, snapPaginations, enableSnapToSide);
+    pattern_->CaleSnapOffsets();
+    auto snapOffsets = pattern_->GetSnapOffsets();
+    std::vector<float> testSnapOffsets = { 0.f, -400.f, -800.f, -1400.f, -1600.f, -2200.f };
+    EXPECT_TRUE(snapOffsets == testSnapOffsets);
+    EXPECT_TRUE(pattern_->CalePredictSnapOffset(-200.f).has_value());
+    EXPECT_DOUBLE_EQ(pattern_->CalePredictSnapOffset(-200.f).value(), -400.f);
+    EXPECT_TRUE(pattern_->CalePredictSnapOffset(-2000.f).has_value());
+    EXPECT_DOUBLE_EQ(pattern_->CalePredictSnapOffset(-2000.f).value(), -2200.f);
+
+    /**
+     * @tc.steps: step3. EnableSnapToSide is { false, false }.
+     * @tc.expected: SnapOffsets is correct.
+     */
+    pattern_->SetEnableSnapToSide({ false, false });
+    EXPECT_FALSE(pattern_->CalePredictSnapOffset(-200.f).has_value());
+    EXPECT_FALSE(pattern_->CalePredictSnapOffset(-2000.f).has_value());
+
+    /**
+     * @tc.steps: step4. EnableSnapToSide is { true, true } and SnapAlign is ScrollSnapAlign::CENTER.
+     * @tc.expected: SnapOffsets is correct.
+     */
+    auto host = pattern_->GetHost();
+    ASSERT_NE(host, nullptr);
+    pattern_->SetEnableSnapToSide({ true, true });
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(ScrollLayoutProperty, ScrollSnapAlign, ScrollSnapAlign::CENTER, host);
+    pattern_->CaleSnapOffsets();
+    snapOffsets = pattern_->GetSnapOffsets();
+    testSnapOffsets = { 0.f, -200.f, -700.f, -1100.f, -1500.f, -2200.f };
+    EXPECT_TRUE(snapOffsets == testSnapOffsets);
+    EXPECT_TRUE(pattern_->CalePredictSnapOffset(-99.f).has_value());
+    EXPECT_DOUBLE_EQ(pattern_->CalePredictSnapOffset(-99.f).value(), 0.f);
+    EXPECT_TRUE(pattern_->CalePredictSnapOffset(-1700.f).has_value());
+    EXPECT_DOUBLE_EQ(pattern_->CalePredictSnapOffset(-1700.f).value(), -1500.f);
+
+    /**
+     * @tc.steps: step5. EnableSnapToSide is { false, false }.
+     * @tc.expected: SnapOffsets is correct.
+     */
+    pattern_->SetEnableSnapToSide({ false, false });
+    EXPECT_FALSE(pattern_->CalePredictSnapOffset(-99.f).has_value());
+    EXPECT_FALSE(pattern_->CalePredictSnapOffset(-1700.f).has_value());
+
+    /**
+     * @tc.steps: step6. EnableSnapToSide is { true, true } and SnapAlign is ScrollSnapAlign::END.
+     * @tc.expected: SnapOffsets is correct.
+     */
+    pattern_->SetEnableSnapToSide({ true, true });
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(ScrollLayoutProperty, ScrollSnapAlign, ScrollSnapAlign::END, host);
+    pattern_->CaleSnapOffsets();
+    snapOffsets = pattern_->GetSnapOffsets();
+    testSnapOffsets = { 0.f, -600.f, -800.f, -1400.f, -2200.f };
+    EXPECT_TRUE(snapOffsets == testSnapOffsets);
+    EXPECT_TRUE(pattern_->CalePredictSnapOffset(-300.f).has_value());
+    EXPECT_DOUBLE_EQ(pattern_->CalePredictSnapOffset(-300.f).value(), -600.f);
+    EXPECT_TRUE(pattern_->CalePredictSnapOffset(-1799.f).has_value());
+    EXPECT_DOUBLE_EQ(pattern_->CalePredictSnapOffset(-1799.f).value(), -1400.f);
+
+    /**
+     * @tc.steps: step7. EnableSnapToSide is { false, false }.
+     * @tc.expected: SnapOffsets is correct.
+     */
+    pattern_->SetEnableSnapToSide({ false, false });
+    EXPECT_FALSE(pattern_->CalePredictSnapOffset(-300.f).has_value());
+    EXPECT_FALSE(pattern_->CalePredictSnapOffset(-1799.f).has_value());
+}
+
+/**
+ * @tc.name: CaleSnapOffsetsByPaginations002
+ * @tc.desc: Test CaleSnapOffsetsByPaginations where the page size is greater than the scroll size.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollTestNg, CaleSnapOffsetsByPaginations002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Init snapPaginations.
+     */
+    Dimension intervalSize = Dimension(0.f);
+    std::vector<Dimension> snapPaginations = {
+        Dimension(1000.f),
+        Dimension(1200.f),
+        Dimension(2000.f),
+    };
+
+    /**
+     * @tc.steps: step2. EnableSnapToSide is { true, true } and SnapAlign is ScrollSnapAlign::START.
+     * @tc.expected: SnapOffsets is correct.
+     */
+    // snapPaginations: { 1000.f, 1200.f, 2000.f }
+    std::pair<bool, bool> enableSnapToSide = { true, true };
+    CreateSnapScroll(ScrollSnapAlign::START, intervalSize, snapPaginations, enableSnapToSide);
+    pattern_->CaleSnapOffsets();
+    auto snapOffsets = pattern_->GetSnapOffsets();
+    std::vector<float> testSnapOffsets = { 0.f, -1000.f, -1200.f, -2000.f, -2200.f };
+    EXPECT_TRUE(snapOffsets == testSnapOffsets);
+    EXPECT_TRUE(pattern_->CalePredictSnapOffset(-500.f).has_value());
+    EXPECT_DOUBLE_EQ(pattern_->CalePredictSnapOffset(-500.f).value(), -1000.f);
+    pattern_->currentOffset_ = -2000.f;
+    EXPECT_TRUE(pattern_->CalePredictSnapOffset(-100.f).has_value());
+    EXPECT_DOUBLE_EQ(pattern_->CalePredictSnapOffset(-100.f).value(), -200.f);
+    // The midpoint of -1200.f and -2000.f is -1600.f
+    EXPECT_TRUE(pattern_->CalePredictSnapOffset(400.f).has_value());
+    EXPECT_DOUBLE_EQ(pattern_->CalePredictSnapOffset(400.f).value(), 0.f);
+    EXPECT_TRUE(pattern_->CalePredictSnapOffset(401.f).has_value());
+    EXPECT_DOUBLE_EQ(pattern_->CalePredictSnapOffset(401.f).value(), 800.f);
+
+    /**
+     * @tc.steps: step3. EnableSnapToSide is { false, false }.
+     * @tc.expected: SnapOffsets is correct.
+     */
+    pattern_->SetEnableSnapToSide({ false, false });
+    pattern_->currentOffset_ = -1900.f;
+    EXPECT_TRUE(pattern_->CalePredictSnapOffset(-100.f).has_value());
+    EXPECT_DOUBLE_EQ(pattern_->CalePredictSnapOffset(-100.f).value(), -100.f);
+    EXPECT_FALSE(pattern_->CalePredictSnapOffset(-101.f).has_value());
+    EXPECT_TRUE(pattern_->CalePredictSnapOffset(900.f).has_value());
+    EXPECT_DOUBLE_EQ(pattern_->CalePredictSnapOffset(900.f).value(), 900.f);
+    EXPECT_FALSE(pattern_->CalePredictSnapOffset(901.f).has_value());
+
+    /**
+     * @tc.steps: step4. EnableSnapToSide is { true, true } and SnapAlign is ScrollSnapAlign::CENTER.
+     * @tc.expected: SnapOffsets is correct.
+     */
+    auto host = pattern_->GetHost();
+    ASSERT_NE(host, nullptr);
+    pattern_->currentOffset_ = 0.f;
+    pattern_->SetEnableSnapToSide({ true, true });
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(ScrollLayoutProperty, ScrollSnapAlign, ScrollSnapAlign::CENTER, host);
+    pattern_->CaleSnapOffsets();
+    snapOffsets = pattern_->GetSnapOffsets();
+    testSnapOffsets = { 0.f, -100.f, -700.f, -1200.f, -2100.f, -2200.f };
+    EXPECT_TRUE(snapOffsets == testSnapOffsets);
+    EXPECT_TRUE(pattern_->CalePredictSnapOffset(-49.f).has_value());
+    EXPECT_DOUBLE_EQ(pattern_->CalePredictSnapOffset(-49.f).value(), 0.f);
+    pattern_->currentOffset_ = -2000.f;
+    EXPECT_TRUE(pattern_->CalePredictSnapOffset(-100.f).has_value());
+    EXPECT_DOUBLE_EQ(pattern_->CalePredictSnapOffset(-100.f).value(), -100.f);
+    // The midpoint of -1200.f and -2100.f is -1650.f
+    EXPECT_TRUE(pattern_->CalePredictSnapOffset(350.f).has_value());
+    EXPECT_DOUBLE_EQ(pattern_->CalePredictSnapOffset(350.f).value(), -100.f);
+    EXPECT_TRUE(pattern_->CalePredictSnapOffset(351.f).has_value());
+    EXPECT_DOUBLE_EQ(pattern_->CalePredictSnapOffset(351.f).value(), 800.f);
+
+    /**
+     * @tc.steps: step5. EnableSnapToSide is { false, false }.
+     * @tc.expected: SnapOffsets is correct.
+     */
+    pattern_->SetEnableSnapToSide({ false, false });
+    EXPECT_TRUE(pattern_->CalePredictSnapOffset(-100.f).has_value());
+    EXPECT_DOUBLE_EQ(pattern_->CalePredictSnapOffset(-100.f).value(), -100.f);
+    EXPECT_FALSE(pattern_->CalePredictSnapOffset(-101.f).has_value());
+    EXPECT_TRUE(pattern_->CalePredictSnapOffset(1900.f).has_value());
+    EXPECT_DOUBLE_EQ(pattern_->CalePredictSnapOffset(1900.f).value(), 1900.f);
+    EXPECT_FALSE(pattern_->CalePredictSnapOffset(1901.f).has_value());
+
+    /**
+     * @tc.steps: step6. EnableSnapToSide is { true, true } and SnapAlign is ScrollSnapAlign::END.
+     * @tc.expected: SnapOffsets is correct.
+     */
+    pattern_->currentOffset_ = 0.f;
+    pattern_->SetEnableSnapToSide({ true, true });
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(ScrollLayoutProperty, ScrollSnapAlign, ScrollSnapAlign::END, host);
+    pattern_->CaleSnapOffsets();
+    snapOffsets = pattern_->GetSnapOffsets();
+    testSnapOffsets = { 0.f, -200.f, -400.f, -1200.f, -2200.f };
+    EXPECT_TRUE(snapOffsets == testSnapOffsets);
+    EXPECT_TRUE(pattern_->CalePredictSnapOffset(-100.f).has_value());
+    EXPECT_DOUBLE_EQ(pattern_->CalePredictSnapOffset(-100.f).value(), -200.f);
+    EXPECT_TRUE(pattern_->CalePredictSnapOffset(-1200.f).has_value());
+    EXPECT_DOUBLE_EQ(pattern_->CalePredictSnapOffset(-1200.f).value(), -1200.f);
+    pattern_->currentOffset_ = -300.f;
+    // The midpoint of 0.f and -200.f is -100.f
+    EXPECT_TRUE(pattern_->CalePredictSnapOffset(200.f).has_value());
+    EXPECT_DOUBLE_EQ(pattern_->CalePredictSnapOffset(200.f).value(), 100.f);
+    EXPECT_TRUE(pattern_->CalePredictSnapOffset(201.f).has_value());
+    EXPECT_DOUBLE_EQ(pattern_->CalePredictSnapOffset(201.f).value(), 300.f);
+
+    /**
+     * @tc.steps: step7. EnableSnapToSide is { false, false }.
+     * @tc.expected: SnapOffsets is correct.
+     */
+    pattern_->SetEnableSnapToSide({ false, false });
+    EXPECT_TRUE(pattern_->CalePredictSnapOffset(100.f).has_value());
+    EXPECT_DOUBLE_EQ(pattern_->CalePredictSnapOffset(100.f).value(), 100.f);
+    EXPECT_FALSE(pattern_->CalePredictSnapOffset(101.f).has_value());
+    EXPECT_TRUE(pattern_->CalePredictSnapOffset(-900.f).has_value());
+    EXPECT_DOUBLE_EQ(pattern_->CalePredictSnapOffset(-900.f).value(), -900.f);
+    EXPECT_FALSE(pattern_->CalePredictSnapOffset(-901.f).has_value());
 }
 
 /**

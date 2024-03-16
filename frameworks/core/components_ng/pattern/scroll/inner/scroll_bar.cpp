@@ -43,7 +43,7 @@ ScrollBar::ScrollBar(DisplayMode displayMode, ShapeMode shapeMode, PositionMode 
 
 void ScrollBar::InitTheme()
 {
-    auto pipelineContext = PipelineContext::GetCurrentContext();
+    auto pipelineContext = PipelineContext::GetCurrentContextSafely();
     CHECK_NULL_VOID(pipelineContext);
     auto theme = pipelineContext->GetTheme<ScrollBarTheme>();
     CHECK_NULL_VOID(theme);
@@ -81,6 +81,24 @@ bool ScrollBar::InBarRectRegion(const Point& point) const
         return barRect_.IsInRegion(point);
     }
     return false;
+}
+
+BarDirection ScrollBar::CheckBarDirection(const Point& point, const Axis& axis)
+{
+    if (!InBarRectRegion(point)) {
+        return BarDirection::BAR_NONE;
+    }
+    auto touchRegion = GetTouchRegion();
+    auto pointOffset = OffsetF(point.GetX(), point.GetY());
+    auto scrollBarTopOffset = OffsetF(touchRegion.Left(), touchRegion.Top());
+    auto scrollBarBottomOffset = OffsetF(touchRegion.Right(), touchRegion.Bottom());
+    if (pointOffset.GetMainOffset(axis) < scrollBarTopOffset.GetMainOffset(axis)) {
+        return BarDirection::PAGE_UP;
+    } else if (pointOffset.GetMainOffset(axis) > scrollBarBottomOffset.GetMainOffset(axis)) {
+        return BarDirection::PAGE_DOWN;
+    } else {
+        return BarDirection::BAR_NONE;
+    }
 }
 
 void ScrollBar::FlushBarWidth()

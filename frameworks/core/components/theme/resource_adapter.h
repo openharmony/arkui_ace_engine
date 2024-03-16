@@ -216,6 +216,10 @@ public:
         return -1;
     }
 
+    virtual RefPtr<ThemeStyle> GetPatternByName(const std::string& patternName) {
+        return nullptr;
+    }
+
     static RefPtr<ResourceAdapter> CreateNewResourceAdapter(
         const std::string& bundleName, const std::string& moduleName);
 };

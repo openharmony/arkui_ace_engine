@@ -90,6 +90,8 @@ const std::vector<std::string> FONT_FAMILY_VALUE = { "cursive" };
 
 class OverlayManagerTestNg : public testing::Test {
 public:
+    void SetUp() override;
+    void TearDown() override;
     static void SetUpTestCase();
     static void TearDownTestCase();
     std::function<RefPtr<UINode>()> builderFunc_;
@@ -100,8 +102,18 @@ protected:
     static RefPtr<FrameNode> CreateTargetNode();
     static void CreateSheetStyle(SheetStyle& sheetStyle);
     void CreateSheetBuilder();
+    int32_t minPlatformVersion_ = 0;
 };
 
+void OverlayManagerTestNg::SetUp()
+{
+    minPlatformVersion_ = PipelineBase::GetCurrentContext()->GetMinPlatformVersion();
+}
+
+void OverlayManagerTestNg::TearDown()
+{
+    PipelineBase::GetCurrentContext()->SetMinPlatformVersion(minPlatformVersion_);
+}
 
 void OverlayManagerTestNg::SetUpTestCase()
 {
@@ -1295,12 +1307,96 @@ HWTEST_F(OverlayManagerTestNg, TestSheetAvoidSafeArea2, TestSize.Level1)
 }
 
 /**
+ * @tc.type: FUNC
+ * @tc.name: Test BindSheet
+ * @tc.desc: Test SheetPresentationPattern::AvoidSafeArea() when sheetType is Center.
+ */
+HWTEST_F(OverlayManagerTestNg, TestSheetAvoidSafeArea3, TestSize.Level1)
+{
+    MockPipelineContext::GetCurrent()->SetMinPlatformVersion(static_cast<int32_t>(PlatformVersion::VERSION_ELEVEN));
+    /**
+     * @tc.steps: step1. create sheet node and initialize sheet pattern.
+     */
+    auto sheetNode = FrameNode::CreateFrameNode(
+        V2::SHEET_PAGE_TAG, 1, AceType::MakeRefPtr<SheetPresentationPattern>(-1, V2::BUTTON_ETS_TAG, nullptr));
+    auto dragBarNode = FrameNode::CreateFrameNode(
+        "SheetDragBar", ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<SheetDragBarPattern>());
+    auto scroll = FrameNode::CreateFrameNode(
+        V2::SCROLL_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<ScrollPattern>());
+    auto builderContent =
+        FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG, 0, AceType::MakeRefPtr<LinearLayoutPattern>(false));
+    builderContent->MountToParent(scroll);
+    dragBarNode->MountToParent(sheetNode);
+    scroll->MountToParent(sheetNode);
+    sheetNode->GetFocusHub()->currentFocus_ = true;
+    auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
+    sheetPattern->sheetType_ = SheetType::SHEET_CENTER;
+    auto renderContext = sheetNode->GetRenderContext();
+    auto safeAreaManager = AceType::MakeRefPtr<SafeAreaManager>();
+    auto geometryNode = sheetNode->GetGeometryNode();
+    ASSERT_NE(geometryNode, nullptr);
+    geometryNode->SetFrameSize(SizeF(800, 1800));
+    MockPipelineContext::GetCurrent()->safeAreaManager_ = safeAreaManager;
+    MockPipelineContext::GetCurrent()->SetRootSize(800, 2000);
+    auto textFieldManager = AceType::MakeRefPtr<TextFieldManagerNG>();
+    textFieldManager->SetHeight(20);
+    MockPipelineContext::GetCurrent()->SetTextFieldManager(textFieldManager);
+    SafeAreaInsets::Inset upKeyboard { 0, 200 };
+    sheetPattern->pageHeight_ = 2000;
+    sheetPattern->sheetHeight_ = 1800;
+    /**
+     * @tc.steps: step2. keyboard up, and sheet will goes to correct position.
+     * @tc.cases: case1. keyboard up, but sheet needs not up beacure hsafe is enough.
+     */
+    safeAreaManager->keyboardInset_ = upKeyboard;
+    textFieldManager->SetClickPosition(Offset(0, 1000));
+    sheetPattern->height_ = 1800;
+    sheetPattern->AvoidSafeArea();
+    EXPECT_EQ(sheetPattern->keyboardHeight_, 200);
+    /**
+     * @tc.cases: case2. keyboard up, sheet needs not to go up.
+     */
+    sheetPattern->keyboardHeight_ = 0;
+    textFieldManager->SetClickPosition(Offset(0, 300));
+    sheetPattern->AvoidSafeArea();
+    EXPECT_EQ(static_cast<int>(renderContext->GetTransformTranslate()->y.ConvertToPx()), 2000 - sheetPattern->height_);
+    /**
+     * @tc.cases: case3. sheet offset = 1800, sheet goes up with h and not goes up to LARGE.
+     */
+    sheetPattern->keyboardHeight_ = 0;
+    textFieldManager->SetClickPosition(Offset(0, 1900));
+    sheetPattern->AvoidSafeArea();
+    EXPECT_EQ(static_cast<int>(renderContext->GetTransformTranslate()->y.ConvertToPx()), 56);
+    EXPECT_FALSE(sheetPattern->isScrolling_);
+    /**
+     * @tc.cases: case4. sheet offset = 1800, sheet goes up to LARGE and scrolling.
+     */
+    sheetPattern->keyboardHeight_ = 0;
+    sheetPattern->height_ = 1950;
+    textFieldManager->SetClickPosition(Offset(0, 1900));
+    sheetPattern->AvoidSafeArea();
+    EXPECT_EQ(static_cast<int>(renderContext->GetTransformTranslate()->y.ConvertToPx()), 8);
+    EXPECT_EQ(sheetPattern->scrollHeight_, 102.0f);
+    EXPECT_TRUE(sheetPattern->isScrolling_);
+    /**
+     * @tc.cases: case5. softkeyboard is down.
+     */
+    SafeAreaInsets::Inset downKeyboard { 0, 0 };
+    safeAreaManager->keyboardInset_ = downKeyboard;
+    sheetPattern->AvoidSafeArea();
+    EXPECT_EQ(static_cast<int>(renderContext->GetTransformTranslate()->y.ConvertToPx()), 50);
+    EXPECT_EQ(sheetPattern->keyboardHeight_, 0);
+    EXPECT_FALSE(sheetPattern->isScrolling_);
+}
+
+/**
  * @tc.name: TestOnBindSheet
  * @tc.desc: Test Sheet avoids aiBar.
  * @tc.type: FUNC
  */
 HWTEST_F(OverlayManagerTestNg, TestSheetAvoidaiBar, TestSize.Level1)
 {
+    MockPipelineContext::GetCurrent()->SetMinPlatformVersion(static_cast<int32_t>(PlatformVersion::VERSION_ELEVEN));
     auto operationColumn = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG,
         ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<LinearLayoutPattern>(true));
     auto callback = [](const std::string&) {};
@@ -1322,7 +1418,6 @@ HWTEST_F(OverlayManagerTestNg, TestSheetAvoidaiBar, TestSize.Level1)
     EXPECT_EQ(scrollLayoutProperty->GetScrollContentEndOffsetValue(.0f),
         PipelineContext::GetCurrentContext()->GetSafeArea().bottom_.Length());
 }
-
 
 /**
  * @tc.name: SheetPresentationPattern2
@@ -1808,5 +1903,166 @@ HWTEST_F(OverlayManagerTestNg, SheetPresentationPattern8, TestSize.Level1)
     topSheetPattern->HandleDragEnd(2000);
     EXPECT_TRUE(isDismiss);
 }
+/**
+ * @tc.name: TestSheetPage001
+ * @tc.desc: Test CreateSheetPage.
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayManagerTestNg, TestSheetPage001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create sheet page.
+     */
+    auto builder = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<LinearLayoutPattern>(true));
+    auto callback = [](const std::string&) {};
+    SheetStyle style;
+    style.isTitleBuilder = true;
+    auto sheetNode = SheetView::CreateSheetPage(0, "", builder, builder, std::move(callback), style);
+    ASSERT_NE(sheetNode, nullptr);
 
+    /**
+     * @tc.steps: step2. set style.isTitleBuilder = true.
+     * @tc.expected: create titleColumn and operationColumn.GetChildren().size() equal 2.
+     */
+    auto sheetLayoutProperty = sheetNode->GetLayoutProperty<SheetPresentationProperty>();
+    ASSERT_NE(sheetLayoutProperty, nullptr);
+    EXPECT_TRUE(sheetLayoutProperty->GetSheetStyle()->isTitleBuilder);
+    auto operationColumn = sheetNode->GetFirstChild();
+    ASSERT_NE(operationColumn, nullptr);
+    EXPECT_EQ(operationColumn->GetChildren().size(), 2);
+}
+/**
+ * @tc.name: TestSheetPage002
+ * @tc.desc: Test CreateSheetPage.
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayManagerTestNg, TestSheetPage002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create sheet page.
+     */
+    auto builder = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<LinearLayoutPattern>(true));
+    auto callback = [](const std::string&) {};
+    SheetStyle style;
+    style.isTitleBuilder = true;
+    style.sheetTitle = MESSAGE;
+    style.sheetSubtitle = MESSAGE;
+    auto sheetNode = SheetView::CreateSheetPage(0, "", builder, builder, std::move(callback), style);
+    ASSERT_NE(sheetNode, nullptr);
+
+    /**
+     * @tc.steps: step2. set style.isTitleBuilder = true、 sheetTitle and sheetSubtitle.
+     * @tc.expected: create titleColumn and titleColumn.GetChildren().size() equal 3.
+     */
+    auto sheetLayoutProperty = sheetNode->GetLayoutProperty<SheetPresentationProperty>();
+    ASSERT_NE(sheetLayoutProperty, nullptr);
+    EXPECT_TRUE(sheetLayoutProperty->GetSheetStyle()->isTitleBuilder);
+    auto operationColumn = sheetNode->GetFirstChild();
+    ASSERT_NE(operationColumn, nullptr);
+    EXPECT_EQ(operationColumn->GetChildren().size(), 2);
+    auto titleColumn = operationColumn->GetLastChild();
+    ASSERT_NE(titleColumn, nullptr);
+    EXPECT_EQ(titleColumn->GetChildren().size(), 3);
+}
+
+/**
+ * @tc.name: TestSheetPage003
+ * @tc.desc: Test SheetPresentationLayoutAlgorithm::Measure.
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayManagerTestNg, TestSheetPage003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create sheet page.
+     */
+    auto builder = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<LinearLayoutPattern>(true));
+    auto callback = [](const std::string&) {};
+    SheetStyle style;
+    style.isTitleBuilder = true;
+    style.sheetTitle = MESSAGE;
+    style.sheetSubtitle = MESSAGE;
+    auto sheetNode = SheetView::CreateSheetPage(0, "", builder, builder, std::move(callback), style);
+    ASSERT_NE(sheetNode, nullptr);
+
+    /**
+     * @tc.steps: step2. call Measure function.
+     * @tc.expected: sheetHeight_ equal 320.
+     */
+    auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
+    ASSERT_NE(sheetPattern, nullptr);
+    auto sheetLayoutAlgorithm =
+        AceType::DynamicCast<SheetPresentationLayoutAlgorithm>(sheetPattern->CreateLayoutAlgorithm());
+    ASSERT_NE(sheetLayoutAlgorithm, nullptr);
+
+    sheetNode->layoutAlgorithm_ = AceType::MakeRefPtr<LayoutAlgorithmWrapper>(sheetLayoutAlgorithm);
+    sheetNode->Measure(sheetNode->GetLayoutConstraint());
+    EXPECT_EQ(sheetLayoutAlgorithm->sheetHeight_, 2000);
+
+    sheetLayoutAlgorithm->sheetType_ = SHEET_CENTER;
+    sheetLayoutAlgorithm->sheetStyle_.sheetMode = SheetMode::AUTO;
+    auto layoutProperty = AceType::DynamicCast<SheetPresentationProperty>(sheetNode->GetLayoutProperty());
+    CHECK_NULL_VOID(layoutProperty);
+    layoutProperty->UpdateSheetStyle(sheetLayoutAlgorithm->sheetStyle_);
+    auto maxSize = SizeF(10.0f, 10.0f);
+    sheetLayoutAlgorithm->Measure(AceType::RawPtr(sheetNode));
+    sheetLayoutAlgorithm->GetHeightByScreenSizeType(maxSize);
+    sheetLayoutAlgorithm->sheetType_ = SHEET_POPUP;
+    sheetLayoutAlgorithm->GetHeightByScreenSizeType(maxSize);
+    EXPECT_EQ(sheetLayoutAlgorithm->sheetHeight_, 320);
+}
+
+/**
+ * @tc.name: TestSheetPage004
+ * @tc.desc: Test SheetPresentationLayoutAlgorithm::GetHeightBySheetStyle.
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayManagerTestNg, TestSheetPage004, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create sheet page.
+     */
+    auto builder = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<LinearLayoutPattern>(true));
+    auto callback = [](const std::string&) {};
+    SheetStyle style;
+    style.isTitleBuilder = true;
+    style.sheetTitle = MESSAGE;
+    style.sheetSubtitle = MESSAGE;
+    auto sheetNode = SheetView::CreateSheetPage(0, "", builder, builder, std::move(callback), style);
+    ASSERT_NE(sheetNode, nullptr);
+
+    auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
+    ASSERT_NE(sheetPattern, nullptr);
+    auto sheetLayoutAlgorithm =
+        AceType::DynamicCast<SheetPresentationLayoutAlgorithm>(sheetPattern->CreateLayoutAlgorithm());
+    ASSERT_NE(sheetLayoutAlgorithm, nullptr);
+
+    /**
+     * @tc.steps: step2. set sheetStyle_.height and sheetStyle_.width.
+     * @tc.expected: height and width value are equal expected value.
+     */
+    sheetLayoutAlgorithm->GetHeightBySheetStyle();
+
+    sheetLayoutAlgorithm->sheetStyle_.height = 2.5_pct;
+    sheetLayoutAlgorithm->GetHeightBySheetStyle();
+    sheetLayoutAlgorithm->sheetStyle_.height = 2.5_px;
+    sheetLayoutAlgorithm->GetHeightBySheetStyle();
+    sheetLayoutAlgorithm->sheetStyle_.height = 0.0_px;
+    auto height = sheetLayoutAlgorithm->GetHeightBySheetStyle();
+    EXPECT_EQ(height, SHEET_BIG_WINDOW_MIN_HEIGHT.ConvertToPx());
+    sheetLayoutAlgorithm->sheetStyle_.height = -1.0_px;
+    height = sheetLayoutAlgorithm->GetHeightBySheetStyle();
+    EXPECT_EQ(height, SHEET_BIG_WINDOW_HEIGHT.ConvertToPx());
+
+    sheetLayoutAlgorithm->sheetType_ = SHEET_CENTER;
+    auto maxSize = SizeF(10.0f, 10.0f);
+    auto width = sheetLayoutAlgorithm->GetWidthByScreenSizeType(maxSize);
+    EXPECT_EQ(width, SHEET_LANDSCAPE_WIDTH.ConvertToPx());
+    sheetLayoutAlgorithm->sheetType_ = SHEET_POPUP;
+    width = sheetLayoutAlgorithm->GetWidthByScreenSizeType(maxSize);
+    EXPECT_EQ(width, SHEET_POPUP_WIDTH.ConvertToPx());
+}
 }

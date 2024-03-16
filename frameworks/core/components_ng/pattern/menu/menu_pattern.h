@@ -52,8 +52,8 @@ enum class MenuType {
     SELECT_OVERLAY_RIGHT_CLICK_MENU, // menu type used for select overlay menu triggered by right-click
 };
 
-class MenuPattern : public Pattern {
-    DECLARE_ACE_TYPE(MenuPattern, Pattern);
+class MenuPattern : public Pattern, public FocusView {
+    DECLARE_ACE_TYPE(MenuPattern, Pattern, FocusView);
 
 public:
     MenuPattern(int32_t targetId, std::string tag, MenuType type)
@@ -69,6 +69,16 @@ public:
     FocusPattern GetFocusPattern() const override
     {
         return { FocusType::SCOPE, true };
+    }
+
+    std::list<int32_t> GetRouteOfFirstScope() override
+    {
+        return { 0, 0 };
+    }
+
+    bool IsFocusViewLegal() override
+    {
+        return type_ == MenuType::MENU || type_ == MenuType::CONTEXT_MENU || type_ == MenuType::SUB_MENU;
     }
 
     RefPtr<LayoutProperty> CreateLayoutProperty() override

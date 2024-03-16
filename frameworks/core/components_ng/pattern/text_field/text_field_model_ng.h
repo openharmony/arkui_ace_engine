@@ -75,6 +75,8 @@ public:
     void SetMaxViewLines(uint32_t value) override;
 
     void SetShowUnderline(bool showUnderLine) override;
+    void SetNormalUnderlineColor(const Color& normalColor) override;
+    void SetUserUnderlineColor(UserUnderlineColor userColor) override;
     void SetShowCounter(bool value) override;
     void SetCounterType(int32_t value) override;
     void SetShowCounterBorder(bool value) override;
@@ -94,6 +96,11 @@ public:
     void SetCancelIconColor(const Color& iconColor) override;
     void SetIsShowCancelButton(bool isShowCancelButton) override;
     void SetSelectAllValue(bool isSetSelectAllValue) override;
+    void SetLetterSpacing(const Dimension& value) override;
+    void SetLineHeight(const Dimension& value) override;
+    void SetTextDecoration(Ace::TextDecoration value) override;
+    void SetTextDecorationColor(const Color& value) override;
+    void SetTextDecorationStyle(Ace::TextDecorationStyle value) override;
     static RefPtr<FrameNode> CreateFrameNode(int32_t nodeId, const std::optional<std::string>& placeholder,
         const std::optional<std::string>& value, bool isTextArea);
     static void SetInputStyle(FrameNode* frameNode, InputStyle value);
@@ -117,6 +124,8 @@ public:
     static void SetFontWeight(FrameNode* frameNode, FontWeight value);
     static void SetEnterKeyType(FrameNode* frameNode, TextInputAction value);
     static void SetShowUnderline(FrameNode* frameNode, bool showUnderLine);
+    static void SetNormalUnderlineColor(FrameNode* frameNode, const Color& normalColor);
+    static void SetUserUnderlineColor(FrameNode* frameNode, UserUnderlineColor userColor);
     static void SetFontFamily(FrameNode* frameNode, const std::vector<std::string>& value);
     static void SetMaxLines(FrameNode* frameNode, uint32_t value);
     static void SetPlaceholderFont(FrameNode* frameNode, const Font& value);

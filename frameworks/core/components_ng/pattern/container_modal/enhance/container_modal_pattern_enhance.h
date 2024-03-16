@@ -51,8 +51,6 @@ protected:
     void ChangeTitleButtonIcon(
         const RefPtr<FrameNode>& buttonNode, InternalResource::ResourceId icon, bool isFocus) override;
 
-    bool CanHideFloatingTitle() override;
-
 private:
     VisibleType controlButtonVisibleBeforeAnim_;
 };

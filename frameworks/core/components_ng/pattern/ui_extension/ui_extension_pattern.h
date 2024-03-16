@@ -20,6 +20,7 @@
 #include <functional>
 #include <list>
 #include <memory>
+#include <optional>
 #include <refbase.h>
 #include <vector>
 
@@ -32,6 +33,22 @@
 #include "core/components_ng/pattern/ui_extension/session_wrapper.h"
 #include "core/event/mouse_event.h"
 #include "core/event/touch_event.h"
+
+#define UIEXT_LOGD(fmt, ...)                                                                                      \
+    TAG_LOGD(AceLogTag::ACE_UIEXTENSIONCOMPONENT, "[@%{public}d][ID: %{public}d] " fmt, __LINE__, uiExtensionId_, \
+        ##__VA_ARGS__)
+#define UIEXT_LOGI(fmt, ...)                                                                                      \
+    TAG_LOGI(AceLogTag::ACE_UIEXTENSIONCOMPONENT, "[@%{public}d][ID: %{public}d] " fmt, __LINE__, uiExtensionId_, \
+        ##__VA_ARGS__)
+#define UIEXT_LOGW(fmt, ...)                                                                                      \
+    TAG_LOGW(AceLogTag::ACE_UIEXTENSIONCOMPONENT, "[@%{public}d][ID: %{public}d] " fmt, __LINE__, uiExtensionId_, \
+        ##__VA_ARGS__)
+#define UIEXT_LOGE(fmt, ...)                                                                                      \
+    TAG_LOGE(AceLogTag::ACE_UIEXTENSIONCOMPONENT, "[@%{public}d][ID: %{public}d] " fmt, __LINE__, uiExtensionId_, \
+        ##__VA_ARGS__)
+#define UIEXT_LOGF(fmt, ...)                                                                                      \
+    TAG_LOGF(AceLogTag::ACE_UIEXTENSIONCOMPONENT, "[@%{public}d][ID: %{public}d] " fmt, __LINE__, uiExtensionId_, \
+        ##__VA_ARGS__)
 
 namespace OHOS::Accessibility {
 class AccessibilityElementInfo;
@@ -53,17 +70,13 @@ class RSTransaction;
 } // namespace OHOS::Rosen
 
 namespace OHOS::Ace::NG {
-enum EmbeddedType : int32_t {
-    DEFAULT_TYPE = -1,
-    UI_EXTENSION = 0
-};
 class UIExtensionProxy;
 class UIExtensionPattern : public Pattern {
     DECLARE_ACE_TYPE(UIExtensionPattern, Pattern);
 
 public:
     explicit UIExtensionPattern(bool isTransferringCaller = false, bool isModal = false,
-        bool isAsyncModalBinding = false, int32_t embeddedType = EmbeddedType::DEFAULT_TYPE);
+        bool isAsyncModalBinding = false, SessionType sessionType = SessionType::UI_EXTENSION_ABILITY);
     ~UIExtensionPattern() override;
 
     RefPtr<LayoutAlgorithm> CreateLayoutAlgorithm() override;
@@ -97,8 +110,7 @@ public:
     }
 
     void OnConnect();
-    void OnDisconnect();
-    void OnExtensionDied();
+    void OnDisconnect(bool isAbnormal);
     void HandleDragEvent(const PointerEvent& info) override;
 
     void SetModalOnDestroy(const std::function<void()>&& callback);
@@ -111,6 +123,8 @@ public:
     void FireOnReleaseCallback(int32_t releaseCode);
     void SetOnResultCallback(const std::function<void(int32_t, const AAFwk::Want&)>&& callback);
     void FireOnResultCallback(int32_t code, const AAFwk::Want& want);
+    void SetOnTerminatedCallback(const std::function<void(std::optional<int32_t>, const RefPtr<WantWrap>&)>&& callback);
+    void FireOnTerminatedCallback(std::optional<int32_t> code, const RefPtr<WantWrap>& wantWrap);
     void SetOnReceiveCallback(const std::function<void(const AAFwk::WantParams&)>&& callback);
     void FireOnReceiveCallback(const AAFwk::WantParams& params);
     void SetOnErrorCallback(
@@ -123,8 +137,8 @@ public:
     void SetBindModalCallback(const std::function<void()>&& callback);
     void FireBindModalCallback();
 
-    void OnSizeChanged(WindowSizeChangeReason type,
-        const std::shared_ptr<Rosen::RSTransaction>& rsTransaction);
+    void NotifySizeChangeReason(
+        WindowSizeChangeReason type, const std::shared_ptr<Rosen::RSTransaction>& rsTransaction);
     void NotifyForeground();
     void NotifyBackground();
     void NotifyDestroy();
@@ -150,11 +164,6 @@ public:
     void OnAccessibilityEvent(const Accessibility::AccessibilityEventInfo& info, int64_t uiExtensionOffset);
 
 private:
-    enum class ReleaseCode {
-        DESTROY_NORMAL = 0,
-        CONNECT_BROKEN,
-    };
-
     enum class AbilityState {
         NONE = 0,
         FOREGROUND,
@@ -170,6 +179,7 @@ private:
 
     enum class ComponentType { DYNAMIC, UI_EXTENSION };
 
+    const char* ToString(AbilityState state);
     void OnAttachToFrameNode() override;
     void OnDetachFromFrameNode(FrameNode* frameNode) override;
     void OnLanguageConfigurationUpdate() override;
@@ -205,6 +215,7 @@ private:
     std::function<void(const RefPtr<UIExtensionProxy>&)> onRemoteReadyCallback_;
     std::function<void(int32_t)> onReleaseCallback_;
     std::function<void(int32_t, const AAFwk::Want&)> onResultCallback_;
+    std::function<void(std::optional<int32_t>, const RefPtr<WantWrap>&)> onTerminatedCallback_;
     std::function<void(const AAFwk::WantParams&)> onReceiveCallback_;
     std::function<void(int32_t code, const std::string& name, const std::string& message)> onErrorCallback_;
     std::list<std::function<void(const RefPtr<UIExtensionProxy>&)>> onSyncOnCallbackList_;
@@ -224,7 +235,6 @@ private:
     int32_t uiExtensionId_ = 0;
     int32_t callbackId_ = 0;
     RectF displayArea_;
-    int32_t embeddedType_ = EmbeddedType::DEFAULT_TYPE;
 
     // for DynamicComponent
     ComponentType componentType_ = ComponentType::UI_EXTENSION;

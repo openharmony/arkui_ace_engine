@@ -77,7 +77,7 @@ public:
     }
 
     void MarkNeedSyncRenderTree(bool needRebuild = false) override;
-    RefPtr<UINode> GetFrameChildByIndex(uint32_t index, bool needBuild) override;
+    RefPtr<UINode> GetFrameChildByIndex(uint32_t index, bool needBuild, bool isCache = false) override;
     bool RenderCustomChild(int64_t deadline) override;
     void SetJSViewActive(bool active) override;
 

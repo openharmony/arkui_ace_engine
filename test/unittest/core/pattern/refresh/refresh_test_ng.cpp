@@ -16,6 +16,7 @@
 #include "refresh_test_ng.h"
 
 #include "core/components_ng/pattern/linear_layout/column_model_ng.h"
+#include "test/mock/core/pattern/mock_nestable_scroll_container.h"
 
 namespace OHOS::Ace::NG {
 
@@ -153,6 +154,8 @@ HWTEST_F(RefreshTestNg, RefreshNestedSwiper001, TestSize.Level1)
     MockPipelineContext::pipeline_->SetMinPlatformVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWELVE));
     AceApplicationInfo::GetInstance().SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWELVE));
     Create([this](RefreshModelNG model) { CreateNestedSwiper(); });
+    ASSERT_NE(swiperPattern_, nullptr);
+    ASSERT_NE(pattern_, nullptr);
 
     /**
      * @tc.steps: step2. Test OnScrollStartRecursive.
@@ -217,6 +220,9 @@ HWTEST_F(RefreshTestNg, RefreshNestedSwiper002, TestSize.Level1)
     MockPipelineContext::pipeline_->SetMinPlatformVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWELVE));
     AceApplicationInfo::GetInstance().SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWELVE));
     CreateScroll();
+    ASSERT_NE(swiperPattern_, nullptr);
+    ASSERT_NE(pattern_, nullptr);
+    ASSERT_NE(scrollPattern_, nullptr);
     swiperPattern_->SetNestedScroll(NestedScrollOptions({
         .forward = NestedScrollMode::SELF_FIRST,
         .backward = NestedScrollMode::SELF_FIRST,
@@ -261,6 +267,120 @@ HWTEST_F(RefreshTestNg, RefreshNestedSwiper002, TestSize.Level1)
     auto friction = pattern_->CalculateFriction();
     swiperPattern_->HandleScroll(static_cast<float>(40.f), SCROLL_FROM_UPDATE, NestedState::GESTURE, 0.f);
     EXPECT_EQ(pattern_->scrollOffset_, lastScrollOffset + 20.f * friction);
+}
+
+/**
+ * @tc.name: RefreshPatternHandleScroll001
+ * @tc.desc: test HandleScroll  when NestedScrollMode is SELF_ONLY.
+ * @tc.type: FUNC
+ */
+HWTEST_F(RefreshTestNg, RefreshPatternHandleScroll001, TestSize.Level1)
+{
+    MockPipelineContext::pipeline_->SetMinPlatformVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWELVE));
+    AceApplicationInfo::GetInstance().SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWELVE));
+    CreateRefresh([this](RefreshModelNG model) {});
+    ASSERT_NE(pattern_, nullptr);
+    auto mockScroll = AceType::MakeRefPtr<MockNestableScrollContainer>();
+    pattern_->scrollOffset_ = 5.f;
+    pattern_->parent_ = mockScroll;
+    EXPECT_CALL(*mockScroll, HandleScroll(-5.f, SCROLL_FROM_UPDATE, NestedState::CHILD_SCROLL, 0.f))
+        .Times(0)
+        .WillOnce(Return(ScrollResult { .remain = 5.f, .reachEdge = true }));
+    auto res = pattern_->HandleScroll(-5.0f, SCROLL_FROM_UPDATE, NestedState::CHILD_SCROLL, 0.f);
+    EXPECT_EQ(res.remain, 0.f);
+
+    auto lastScrollOffset = pattern_->scrollOffset_;
+    auto friction = pattern_->CalculateFriction();
+    res = pattern_->HandleScroll(5.0f, SCROLL_FROM_UPDATE, NestedState::CHILD_OVER_SCROLL, 0.f);
+    EXPECT_EQ(res.remain, 0.f);
+    EXPECT_EQ(pattern_->scrollOffset_, lastScrollOffset + 5.f * friction);
+
+    pattern_->scrollOffset_ = 0.f;
+    res = pattern_->HandleScroll(5.0f, SCROLL_FROM_UPDATE, NestedState::CHILD_SCROLL, 0.f);
+    EXPECT_EQ(res.remain, 5.f);
+}
+
+/**
+ * @tc.name: RefreshPatternHandleScroll002
+ * @tc.desc: test HandleScroll  when NestedScrollMode is PARENT_FIRST.
+ * @tc.type: FUNC
+ */
+HWTEST_F(RefreshTestNg, RefreshPatternHandleScroll002, TestSize.Level1)
+{
+    MockPipelineContext::pipeline_->SetMinPlatformVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWELVE));
+    AceApplicationInfo::GetInstance().SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWELVE));
+    CreateRefresh([this](RefreshModelNG model) {});
+    ASSERT_NE(pattern_, nullptr);
+    auto mockScroll = AceType::MakeRefPtr<MockNestableScrollContainer>();
+    pattern_->scrollOffset_ = 5.f;
+    pattern_->parent_ = mockScroll;
+    NestedScrollOptions nestedOpt = {
+        .forward = NestedScrollMode::PARENT_FIRST,
+        .backward = NestedScrollMode::PARENT_FIRST,
+    };
+    pattern_->SetNestedScroll(nestedOpt);
+    EXPECT_CALL(*mockScroll, HandleScroll(-5.f, SCROLL_FROM_UPDATE, NestedState::CHILD_SCROLL, 0.f))
+        .Times(1)
+        .WillOnce(Return(ScrollResult { .remain = -5.f, .reachEdge = true }));
+    auto res = pattern_->HandleScroll(-5.0f, SCROLL_FROM_UPDATE, NestedState::CHILD_SCROLL, 0.f);
+    EXPECT_EQ(res.remain, 0.f);
+
+    auto lastScrollOffset = pattern_->scrollOffset_;
+    auto friction = pattern_->CalculateFriction();
+    res = pattern_->HandleScroll(5.0f, SCROLL_FROM_UPDATE, NestedState::CHILD_OVER_SCROLL, 0.f);
+    EXPECT_EQ(res.remain, 0.f);
+    EXPECT_EQ(pattern_->scrollOffset_, lastScrollOffset + 5.f * friction);
+
+    pattern_->scrollOffset_ = 0.f;
+    EXPECT_CALL(*mockScroll, HandleScroll(-5.f, SCROLL_FROM_UPDATE, NestedState::CHILD_SCROLL, 0.f))
+        .Times(1)
+        .WillOnce(Return(ScrollResult { .remain = 0.f, .reachEdge = true }));
+    res = pattern_->HandleScroll(-5.0f, SCROLL_FROM_UPDATE, NestedState::CHILD_SCROLL, 0.f);
+    EXPECT_EQ(res.remain, 0.f);
+}
+
+/**
+ * @tc.name: RefreshPatternHandleScroll003
+ * @tc.desc: test HandleScroll  when NestedScrollMode is SELF_FIRST.
+ * @tc.type: FUNC
+ */
+HWTEST_F(RefreshTestNg, RefreshPatternHandleScroll003, TestSize.Level1)
+{
+    MockPipelineContext::pipeline_->SetMinPlatformVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWELVE));
+    AceApplicationInfo::GetInstance().SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWELVE));
+    CreateRefresh([this](RefreshModelNG model) {});
+    ASSERT_NE(pattern_, nullptr);
+    auto mockScroll = AceType::MakeRefPtr<MockNestableScrollContainer>();
+    pattern_->scrollOffset_ = 5.f;
+    pattern_->parent_ = mockScroll;
+    NestedScrollOptions nestedOpt = {
+        .forward = NestedScrollMode::SELF_FIRST,
+        .backward = NestedScrollMode::SELF_FIRST,
+    };
+    pattern_->SetNestedScroll(nestedOpt);
+    EXPECT_CALL(*mockScroll, HandleScroll(0.f, SCROLL_FROM_UPDATE, NestedState::CHILD_SCROLL, 0.f))
+        .Times(1)
+        .WillOnce(Return(ScrollResult { .remain = 0.f, .reachEdge = true }));
+    auto res = pattern_->HandleScroll(-5.0f, SCROLL_FROM_UPDATE, NestedState::CHILD_SCROLL, 0.f);
+    EXPECT_EQ(res.remain, 0.f);
+
+    auto lastScrollOffset = pattern_->scrollOffset_;
+    auto friction = pattern_->CalculateFriction();
+    EXPECT_CALL(*mockScroll, HandleScroll(5.f, SCROLL_FROM_UPDATE, NestedState::CHILD_OVER_SCROLL, 0.f))
+        .Times(1)
+        .WillOnce(Return(ScrollResult { .remain = 0.f, .reachEdge = true }));
+    res = pattern_->HandleScroll(5.0f, SCROLL_FROM_UPDATE, NestedState::CHILD_OVER_SCROLL, 0.f);
+    EXPECT_EQ(res.remain, 0.f);
+    EXPECT_EQ(pattern_->scrollOffset_, 0.f);
+
+    lastScrollOffset = pattern_->scrollOffset_;
+    friction = pattern_->CalculateFriction();
+    EXPECT_CALL(*mockScroll, HandleScroll(5.f, SCROLL_FROM_UPDATE, NestedState::CHILD_OVER_SCROLL, 0.f))
+        .Times(1)
+        .WillOnce(Return(ScrollResult { .remain = 5.f, .reachEdge = true }));
+    res = pattern_->HandleScroll(5.0f, SCROLL_FROM_UPDATE, NestedState::CHILD_OVER_SCROLL, 0.f);
+    EXPECT_EQ(res.remain, 0.f);
+    EXPECT_EQ(pattern_->scrollOffset_, lastScrollOffset + 5.f * friction);
 }
 
 /**

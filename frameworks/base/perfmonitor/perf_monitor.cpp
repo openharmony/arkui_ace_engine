@@ -227,7 +227,8 @@ bool SceneRecord::IsFirstFrame()
 
 bool SceneRecord::IsDisplayAnimator(const std::string& sceneId)
 {
-    if (sceneId == PerfConstants::APP_LIST_FLING || sceneId == PerfConstants::APP_SWIPER_SCROLL) {
+    if (sceneId == PerfConstants::APP_LIST_FLING || sceneId == PerfConstants::APP_SWIPER_SCROLL
+        || sceneId == PerfConstants::SNAP_RECENT_ANI) {
         return true;
     }
     return false;
@@ -374,8 +375,9 @@ void PerfMonitor::RecordBaseInfo(SceneRecord* record)
 
 SceneRecord* PerfMonitor::GetRecord(const std::string& sceneId)
 {
-    if (mRecords.find(sceneId) != mRecords.end()) {
-        return mRecords[sceneId];
+    auto iter = mRecords.find(sceneId);
+    if (iter != mRecords.end()) {
+        return iter->second;
     }
     return nullptr;
 }

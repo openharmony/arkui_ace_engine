@@ -709,6 +709,31 @@ HWTEST_F(WaterFlowTestNg, WaterFlowTest011, TestSize.Level1)
 }
 
 /**
+ * @tc.name: WaterFlowTest012
+ * @tc.desc: Test GetOverScrollOffset
+ * @tc.type: FUNC
+ */
+HWTEST_F(WaterFlowTestNg, WaterFlowTest012, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create waterFlow that is less than one screen
+     * @tc.expected: itemStart_ = true  itemEnd_ = true.
+     */
+    Create([](WaterFlowModelNG model) {
+        model.SetColumnsTemplate("1fr 1fr 1fr 1fr");
+        CreateItem(TOTAL_LINE_NUMBER);
+    });
+    EXPECT_TRUE(pattern_->layoutInfo_.itemStart_);
+    EXPECT_TRUE(pattern_->layoutInfo_.itemEnd_);
+    EXPECT_TRUE(pattern_->layoutInfo_.offsetEnd_);
+    EXPECT_EQ(pattern_->layoutInfo_.maxHeight_, 500);
+    EXPECT_EQ(pattern_->layoutInfo_.lastMainSize_, 800);
+
+    EXPECT_TRUE(IsEqual(pattern_->GetOverScrollOffset(ITEM_HEIGHT), { 100, 100 }));
+    EXPECT_TRUE(IsEqual(pattern_->GetOverScrollOffset(3 * ITEM_HEIGHT), { 300, 300 }));
+}
+
+/**
  * @tc.name: UpdateCurrentOffset001
  * @tc.desc: Test UpdateCurrentOffset
  * @tc.type: FUNC
@@ -755,6 +780,62 @@ HWTEST_F(WaterFlowTestNg, UpdateCurrentOffset001, TestSize.Level1)
      */
     UpdateCurrentOffset(ITEM_HEIGHT);
     EXPECT_TRUE(IsEqualTotalOffset(WATERFLOW_HEIGHT - ITEM_HEIGHT));
+}
+
+/**
+ * @tc.name: UpdateCurrentOffset002
+ * @tc.desc: Test UpdateCurrentOffset
+ * @tc.type: FUNC
+ */
+HWTEST_F(WaterFlowTestNg, UpdateCurrentOffset002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create waterFlow
+     * @tc.expected: startIndex_ = 0 endIndex_ = 10.
+     */
+    Create([](WaterFlowModelNG model) {
+        model.SetColumnsTemplate("1fr 1fr");
+        model.SetEdgeEffect(EdgeEffect::SPRING, false);
+        CreateItem(TOTAL_LINE_NUMBER * 2);
+    });
+    EXPECT_EQ(pattern_->layoutInfo_.startIndex_, 0);
+    EXPECT_EQ(pattern_->layoutInfo_.endIndex_, 10);
+    EXPECT_TRUE(pattern_->layoutInfo_.itemStart_);
+    EXPECT_FALSE(pattern_->layoutInfo_.itemEnd_);
+    EXPECT_FALSE(pattern_->layoutInfo_.offsetEnd_);
+
+    /**
+     * @tc.steps: step2. Scroll down
+     * @tc.expected: startIndex_ = 1 endIndex_ = 13.
+     */
+    UpdateCurrentOffset(-2 * ITEM_HEIGHT);
+    EXPECT_EQ(pattern_->layoutInfo_.startIndex_, 1);
+    EXPECT_EQ(pattern_->layoutInfo_.endIndex_, 13);
+    EXPECT_FALSE(pattern_->layoutInfo_.itemStart_);
+    EXPECT_FALSE(pattern_->layoutInfo_.itemEnd_);
+    EXPECT_FALSE(pattern_->layoutInfo_.offsetEnd_);
+
+    /**
+     * @tc.steps: step3. scroll down
+     * @tc.expected: startIndex_ = 11 endIndex_ = 19.
+     */
+    UpdateCurrentOffset(-10000.f);
+    EXPECT_EQ(pattern_->layoutInfo_.startIndex_, 11);
+    EXPECT_EQ(pattern_->layoutInfo_.endIndex_, 19);
+    EXPECT_FALSE(pattern_->layoutInfo_.itemStart_);
+    EXPECT_TRUE(pattern_->layoutInfo_.itemEnd_);
+    EXPECT_TRUE(pattern_->layoutInfo_.offsetEnd_);
+
+    /**
+     * @tc.steps: step4. scroll up
+     * @tc.expected: startIndex_ = 7 endIndex_ = 19.
+     */
+    UpdateCurrentOffset(2 * ITEM_HEIGHT);
+    EXPECT_EQ(pattern_->layoutInfo_.startIndex_, 7);
+    EXPECT_EQ(pattern_->layoutInfo_.endIndex_, 19);
+    EXPECT_FALSE(pattern_->layoutInfo_.itemStart_);
+    EXPECT_TRUE(pattern_->layoutInfo_.itemEnd_);
+    EXPECT_FALSE(pattern_->layoutInfo_.offsetEnd_);
 }
 
 /**
@@ -1082,6 +1163,45 @@ HWTEST_F(WaterFlowTestNg, Callback001, TestSize.Level1)
 }
 
 /**
+ * @tc.name: Callback002
+ * @tc.desc: Test EdgeEffectCallback
+ * @tc.type: FUNC
+ */
+HWTEST_F(WaterFlowTestNg, Callback002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create waterFlow
+     */
+    Create([](WaterFlowModelNG model) {
+        model.SetColumnsTemplate("1fr 1fr");
+        model.SetEdgeEffect(EdgeEffect::SPRING, false);
+        CreateItem(TOTAL_LINE_NUMBER * 2);
+    });
+
+    auto gestureHub = pattern_->GetGestureHub();
+    auto axis = pattern_->GetAxis();
+    ASSERT_NE(gestureHub->scrollableActuator_, nullptr);
+    EXPECT_EQ(axis, Axis::VERTICAL);
+    auto effect = gestureHub->scrollableActuator_->scrollEffects_[axis];
+
+    EXPECT_EQ(effect->leadingCallback_(), 0);
+    EXPECT_EQ(effect->initLeadingCallback_(), 0);
+    EXPECT_EQ(effect->currentPositionCallback_(), 0);
+
+    pattern_->SetAlwaysEnabled(true);
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(effect->leadingCallback_(), 0);
+    EXPECT_EQ(effect->initLeadingCallback_(), 0);
+    EXPECT_EQ(effect->currentPositionCallback_(), 0);
+
+    pattern_->layoutInfo_.Reset();
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(effect->leadingCallback_(), 0);
+    EXPECT_EQ(effect->initLeadingCallback_(), 0);
+    EXPECT_EQ(effect->currentPositionCallback_(), 0);
+}
+
+/**
  * @tc.name: onScroll001
  * @tc.desc: Test onScroll event
  * @tc.type: FUNC
@@ -1373,6 +1493,7 @@ HWTEST_F(WaterFlowTestNg, WaterFlowPositionController_ScrollPage001, TestSize.Le
     controller->ScrollPage(false, true);
     EXPECT_TRUE(IsEqualTotalOffset(WATERFLOW_HEIGHT));
     EXPECT_EQ(controller->GetCurrentOffset().GetY(), WATERFLOW_HEIGHT);
+    EXPECT_EQ(accessibilityProperty_->GetScrollOffSet(), pattern_->GetTotalOffset());
     EXPECT_TRUE(controller->IsAtEnd());
 
     pattern_->SetAxis(Axis::NONE);

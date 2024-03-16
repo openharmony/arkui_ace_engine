@@ -831,7 +831,7 @@ void DragDropManager::OnItemDragMove(float globalX, float globalY, int32_t dragg
         return (dragType == DragType::GRID) ? (eventGrid == draggedGrid ? draggedIndex : -1) : draggedIndex;
     };
 
-    auto dragFrameNode = FindDragFrameNodeByPosition(windowX, windowY, dragType, false);
+    auto dragFrameNode = FindDragFrameNodeByPosition(globalX, globalY, dragType, false);
     if (!dragFrameNode) {
         if (preGridTargetFrameNode_) {
             FireOnItemDragEvent(preGridTargetFrameNode_, dragType, itemDragInfo, DragEventType::LEAVE,
@@ -842,7 +842,7 @@ void DragDropManager::OnItemDragMove(float globalX, float globalY, int32_t dragg
     }
 
     if (dragFrameNode == preGridTargetFrameNode_) {
-        int32_t insertIndex = GetItemIndex(dragFrameNode, dragType, windowX, windowY);
+        int32_t insertIndex = GetItemIndex(dragFrameNode, dragType, globalX, globalY);
         FireOnItemDragEvent(
             dragFrameNode, dragType, itemDragInfo, DragEventType::MOVE, getDraggedIndex(dragFrameNode), insertIndex);
         return;
@@ -879,7 +879,7 @@ void DragDropManager::OnItemDragEnd(float globalX, float globalY, int32_t dragge
     itemDragInfo.SetX(pipeline->ConvertPxToVp(Dimension(windowX, DimensionUnit::PX)));
     itemDragInfo.SetY(pipeline->ConvertPxToVp(Dimension(windowY, DimensionUnit::PX)));
 
-    auto dragFrameNode = FindDragFrameNodeByPosition(windowX, windowY, dragType, true);
+    auto dragFrameNode = FindDragFrameNodeByPosition(globalX, globalY, dragType, true);
     if (!dragFrameNode) {
         // drag on one grid and drop on other area
         if (draggedGridFrameNode_) {
@@ -894,7 +894,7 @@ void DragDropManager::OnItemDragEnd(float globalX, float globalY, int32_t dragge
             }
         }
     } else {
-        int32_t insertIndex = GetItemIndex(dragFrameNode, dragType, windowX, windowY);
+        int32_t insertIndex = GetItemIndex(dragFrameNode, dragType, globalX, globalY);
         // drag and drop on the same grid
         if (dragFrameNode == draggedGridFrameNode_) {
             FireOnItemDropEvent(dragFrameNode, dragType, itemDragInfo, draggedIndex, insertIndex, true);

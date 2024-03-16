@@ -253,6 +253,36 @@ public:
 
     SerializedGesture GetFormSerializedGesture() override;
 
+    void SetUIExtensionSubWindow(bool isUIExtensionSubWindow) override
+    {
+        isUIExtensionSubWindow_ = isUIExtensionSubWindow;
+    }
+
+    bool IsUIExtensionSubWindow() override
+    {
+        return isUIExtensionSubWindow_;
+    }
+
+    void SetUIExtensionAbilityProcess(bool isUIExtensionAbilityProcess) override
+    {
+        isUIExtensionAbilityProcess_ = isUIExtensionAbilityProcess;
+    }
+
+    bool IsUIExtensionAbilityProcess() override
+    {
+        return isUIExtensionAbilityProcess_;
+    }
+
+    void SetUIExtensionAbilityHost(bool isUIExtensionAbilityHost) override
+    {
+        isUIExtensionAbilityHost_ = isUIExtensionAbilityHost;
+    }
+
+    bool IsUIExtensionAbilityHost() override
+    {
+        return isUIExtensionAbilityHost_;
+    }
+
 private:
     UIContentErrorCode InitializeInner(
         OHOS::Rosen::Window* window, const std::string& contentInfo, napi_value storage, bool isNamedRouter);
@@ -273,6 +303,7 @@ private:
     static void RemoveOldPopInfoIfExsited(bool isShowInSubWindow, int32_t nodeId);
     void RenderLayoutBoundary(bool isDebugBoundary);
     static void EnableSystemParameterTraceLayoutCallback(const char* key, const char* value, void* context);
+    static void EnableSystemParameterTraceInputEventCallback(const char* key, const char* value, void* context);
     static void EnableSystemParameterSecurityDevelopermodeCallback(const char* key, const char* value, void* context);
     static void EnableSystemParameterDebugStatemgrCallback(const char* key, const char* value, void* context);
     static void EnableSystemParameterDebugBoundaryCallback(const char* key, const char* value, void* context);
@@ -311,6 +342,9 @@ private:
     std::shared_ptr<TaskWrapper> taskWrapper_;
 
     sptr<IRemoteObject> parentToken_ = nullptr;
+    bool isUIExtensionSubWindow_ = false;
+    bool isUIExtensionAbilityProcess_ = false;
+    bool isUIExtensionAbilityHost_ = false;
 };
 
 } // namespace OHOS::Ace

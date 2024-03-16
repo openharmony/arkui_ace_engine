@@ -78,7 +78,7 @@ void JSRichText::OnStart(const JSCallbackInfo& info)
 {
     if (info.Length() > 0 && info[0]->IsFunction()) {
         RefPtr<JsFunction> jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(info[0]));
-        WeakPtr<NG::FrameNode> targetNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+        auto targetNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
         auto onStartEvent = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc), node = targetNode](
                                 const BaseEventInfo* info) {
             JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
@@ -94,7 +94,7 @@ void JSRichText::OnComplete(const JSCallbackInfo& info)
 {
     if (info.Length() > 0 && info[0]->IsFunction()) {
         RefPtr<JsFunction> jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(info[0]));
-        WeakPtr<NG::FrameNode> targetNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+        auto targetNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
         auto onCompleteEvent = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc), node = targetNode](
                                    const BaseEventInfo* info) {
             JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);

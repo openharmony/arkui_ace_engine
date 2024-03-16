@@ -55,6 +55,8 @@ RefPtr<WantWrap> WantWrap::CreateWantWrap(const std::string& bundleName, const s
     return AceType::MakeRefPtr<WantWrapOhos>(bundleName, abilityName);
 }
 
+WantWrapOhos::WantWrapOhos(const AAFwk::Want& want) : want_(want) {}
+
 WantWrapOhos::WantWrapOhos(napi_env env, napi_value value)
 {
     OHOS::AppExecFwk::UnwrapWant(env, value, want_);

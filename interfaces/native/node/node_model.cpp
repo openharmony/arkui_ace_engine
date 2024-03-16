@@ -135,10 +135,7 @@ ArkUI_NodeHandle CreateNode(ArkUI_NodeType type)
         return nullptr;
     }
 
-    ArkUI_Int32 id = -1;
-    if (nodeType == ARKUI_NODE_LOADING_PROGRESS || nodeType == ARKUI_NODE_TEXT || nodeType == ARKUI_NODE_TEXT_INPUT) {
-        id = ARKUI_AUTO_GENERATE_NODE_ID;
-    }
+    ArkUI_Int32 id = ARKUI_AUTO_GENERATE_NODE_ID;
     auto* uiNode = impl->getBasicAPI()->createNode(nodes[nodeType - 1], id, 0);
     if (!uiNode) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "node type: %{public}d can not find in full impl", type);
@@ -198,16 +195,22 @@ void SetAttribute(ArkUI_NodeHandle node, ArkUI_NodeAttributeType attribute, cons
 
 int32_t SetAttribute(ArkUI_NodeHandle node, ArkUI_NodeAttributeType attribute, const ArkUI_AttributeItem* value)
 {
+    auto* impl = GetFullImpl();
+    impl->getBasicAPI()->containerScopeBind();
     return SetNodeAttribute(node, attribute, value);
 }
 
 int32_t ResetAttribute(ArkUI_NodeHandle node, ArkUI_NodeAttributeType attribute)
 {
+    auto* impl = GetFullImpl();
+    impl->getBasicAPI()->containerScopeBind();
     return ResetNodeAttribute(node, attribute);
 }
 
 const ArkUI_AttributeItem* GetAttribute(ArkUI_NodeHandle node, ArkUI_NodeAttributeType attribute)
 {
+    auto* impl = GetFullImpl();
+    impl->getBasicAPI()->containerScopeBind();
     return GetNodeAttribute(node, attribute);
 }
 
@@ -220,6 +223,7 @@ int32_t RegisterNodeEvent(ArkUI_NodeHandle nodePtr, ArkUI_NodeEventType eventTyp
     }
     // already check in entry point.
     auto* impl = GetFullImpl();
+    impl->getBasicAPI()->containerScopeBind();
     auto* extraParam = new InnerEventExtraParam({eventId});
     if (nodePtr->extraData) {
         auto* extraData = reinterpret_cast<ExtraData*>(nodePtr->extraData);

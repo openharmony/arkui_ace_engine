@@ -23,6 +23,7 @@ namespace OHOS::Ace::Framework {
 class JsConverter {
 public:
     static JSRef<JSVal> ConvertNapiValueToJsVal(napi_value nativeValue);
+    static napi_value ConvertJsValToNapiValue(JSRef<JSVal> jsVal);
 };
 
 } // namespace OHOS::Ace::Framework
