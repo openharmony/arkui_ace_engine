@@ -64,6 +64,10 @@ public:
     static Dimension GetFontSize(FrameNode* frameNode);
     static Ace::FontWeight GetFontWeight(FrameNode* frameNode);
     static Color GetFontColor(FrameNode* frameNode);
+    static void SetRole(FrameNode* frameNode, const std::optional<ButtonRole>& buttonRole);
+    static void SetButtonStyle(FrameNode* frameNode, const std::optional<ButtonStyleMode>& buttonStyle);
+    static void SetControlSize(FrameNode* frameNode, const std::optional<ControlSize>& controlSize);
+    
 
 private:
     static void CreateWithLabel(const std::string& label);

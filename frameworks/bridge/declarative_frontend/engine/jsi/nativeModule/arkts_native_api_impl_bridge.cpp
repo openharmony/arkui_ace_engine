@@ -1738,6 +1738,18 @@ void ArkUINativeModule::RegisterButtonAttributes(Local<panda::ObjectRef> object,
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ButtonBridge::SetButtonSize));
     button->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetButtonSize"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ButtonBridge::ResetButtonSize));
+    button->Set(vm, panda::StringRef::NewFromUtf8(vm, "setButtonRole"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ButtonBridge::SetButtonRole));
+    button->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetButtonRole"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ButtonBridge::ResetButtonRole));
+    button->Set(vm, panda::StringRef::NewFromUtf8(vm, "setButtonStyle"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ButtonBridge::SetButtonStyle));
+    button->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetButtonStyle"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ButtonBridge::ResetButtonStyle));
+    button->Set(vm, panda::StringRef::NewFromUtf8(vm, "setButtonControlSize"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ButtonBridge::SetButtonControlSize));
+    button->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetButtonControlSize"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ButtonBridge::ResetButtonControlSize));
     object->Set(vm, panda::StringRef::NewFromUtf8(vm, "button"), button);
 }
 

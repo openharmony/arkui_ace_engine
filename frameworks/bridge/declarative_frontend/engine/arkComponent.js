@@ -9680,6 +9680,18 @@ class ArkButtonComponent extends ArkComponent {
     modifierWithKey(this._modifiersWithKeys, ButtonSizeModifier.identity, ButtonSizeModifier, value);
     return this;
   }
+  role(value) {
+    modifierWithKey(this._modifiersWithKeys, ButtonRoleModifier.identity, ButtonRoleModifier, value);
+    return this;
+  }
+  buttonStyle(value) {
+    modifierWithKey(this._modifiersWithKeys, ButtonStyleModifier.identity, ButtonStyleModifier, value);
+    return this;
+  }
+  controlSize(value) {
+    modifierWithKey(this._modifiersWithKeys, ButtonControlSizeModifier.identity, ButtonControlSizeModifier, value);
+    return this;
+  }
 }
 class ButtonBackgroundColorModifier extends ModifierWithKey {
   constructor(value) {
@@ -9698,6 +9710,54 @@ class ButtonBackgroundColorModifier extends ModifierWithKey {
   }
 }
 ButtonBackgroundColorModifier.identity = Symbol('buttonBackgroundColor');
+class ButtonRoleModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().button.resetButtonRole(node);
+    } else {
+      getUINativeModule().button.setButtonRole(node, this.value);
+    }
+  }
+  checkObjectDiff() {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+ButtonRoleModifier.identity = Symbol('buttonRole');
+class ButtonStyleModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().button.resetButtonStyle(node);
+    } else {
+      getUINativeModule().button.setButtonStyle(node, this.value);
+    }
+  }
+  checkObjectDiff() {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+ButtonStyleModifier.identity = Symbol('buttonStyle');
+class ButtonControlSizeModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().button.resetButtonControlSize(node);
+    } else {
+      getUINativeModule().button.setButtonControlSize(node, this.value);
+    }
+  }
+  checkObjectDiff() {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+ButtonControlSizeModifier.identity = Symbol('buttonControlSize');
 class ButtonStateEffectModifier extends ModifierWithKey {
   constructor(value) {
     super(value);
