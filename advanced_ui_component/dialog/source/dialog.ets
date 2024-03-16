@@ -135,12 +135,14 @@ export struct TipsDialog {
         .borderRadius($r('sys.float.corner_radius_level6'))
         .constraintSize({
           maxWidth: '100%',
-          maxHeight: `calc(100% - ${this.checkBoxHeight}vp - ${this.buttonHeight}vp - ${TEXT_MIN_HEIGHT}vp + ${this.marginOffset}vp)`
+          maxHeight:
+          `calc(100% - ${this.checkBoxHeight}vp - ${this.buttonHeight}vp - ${TEXT_MIN_HEIGHT}vp + ${this.marginOffset}vp)`
         })
     }
     .width('100%')
     .constraintSize({
-      maxHeight: `calc(100% - ${this.checkBoxHeight}vp - ${this.buttonHeight}vp - ${TEXT_MIN_HEIGHT}vp + ${this.marginOffset}vp)`
+      maxHeight:
+      `calc(100% - ${this.checkBoxHeight}vp - ${this.buttonHeight}vp - ${TEXT_MIN_HEIGHT}vp + ${this.marginOffset}vp)`
     })
     .onAreaChange((oldValue: Area, newValue: Area) => {
       this.imageSizeHeight = Number(newValue.height);
