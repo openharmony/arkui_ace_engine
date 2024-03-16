@@ -29,8 +29,8 @@ void RenderSvgFeGaussianBlur::Update(const RefPtr<Component> &component)
 
     auto& declaration = feComponent->GetDeclaration();
     if (declaration) {
-        deviationX_ = declaration->GetStdDeviation();
-        deviationY_ = declaration->GetStdDeviation();
+        deviationX_ = declaration->GetStdDeviationX();
+        deviationY_ = declaration->GetStdDeviationY();
         edgeMode_ = declaration->GetEdgeMode();
         SetFeCommonAttrs(declaration);
     }

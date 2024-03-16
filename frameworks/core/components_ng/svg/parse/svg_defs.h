@@ -24,9 +24,12 @@ class SvgDefs : public SvgNode {
     DECLARE_ACE_TYPE(SvgDefs, SvgNode);
 
 public:
-    SvgDefs()
+    SvgDefs() : SvgNode()
     {
-        InitNoneFlag();
+        declaration_ = AceType::MakeRefPtr<SvgBaseDeclaration>();
+        declaration_->Init();
+        declaration_->InitializeStyle();
+        InitDefsFlag();
     }
 
     ~SvgDefs() override = default;
@@ -36,17 +39,14 @@ public:
         return AceType::MakeRefPtr<SvgDefs>();
     }
 
-#ifndef USE_ROSEN_DRAWING
-    SkPath AsPath(const Size& viewPort) const override
+    void InitDefsFlag()
     {
-        SkPath path;
-        for (auto child : children_) {
-            const SkPath childPath = child->AsPath(viewPort);
-            Op(path, childPath, kUnion_SkPathOp, &path);
-        }
-        return path;
+        hrefFill_ = false;
+        hrefRender_ = false;
+        inheritStyle_ = false;
+        drawTraversed_ = false;
     }
-#else
+
     RSRecordingPath AsPath(const Size& viewPort) const override
     {
         RSRecordingPath path;
@@ -56,7 +56,6 @@ public:
         }
         return path;
     }
-#endif
 };
 
 } // namespace OHOS::Ace::NG
