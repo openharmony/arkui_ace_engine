@@ -26,10 +26,10 @@
 extern "C" {
 #endif
 
-#define ARKUI_FULL_API_VERSION 76
+#define ARKUI_FULL_API_VERSION 77
 // When changing ARKUI_BASIC_API_VERSION, ARKUI_FULL_API_VERSION must be
 // increased as well.
-#define ARKUI_NODE_API_VERSION 76
+#define ARKUI_NODE_API_VERSION 77
 
 #define ARKUI_BASIC_API_VERSION 6
 #define ARKUI_EXTENDED_API_VERSION 6
@@ -1464,6 +1464,12 @@ struct ArkUIButtonModifier {
     ArkUI_Float32 (*getButtonFontSize)(ArkUINodeHandle node);
     ArkUI_Int32 (*getButtonFontWeight)(ArkUINodeHandle node);
     ArkUI_Uint32 (*getButtonFontColor)(ArkUINodeHandle node);
+    void (*setButtonRole)(ArkUINodeHandle node, ArkUI_Uint32 buttonRole);
+    void (*resetButtonRole)(ArkUINodeHandle node);
+    void (*setButtonStyle)(ArkUINodeHandle node, ArkUI_Uint32 buttonStyle);
+    void (*resetButtonStyle)(ArkUINodeHandle node);
+    void (*setButtonControlSize)(ArkUINodeHandle node, ArkUI_Uint32 controlSize);
+    void (*resetButtonControlSize)(ArkUINodeHandle node);
 };
 
 struct ArkUIImageModifier {
