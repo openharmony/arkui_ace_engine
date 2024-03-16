@@ -5618,6 +5618,22 @@ void WebDelegate::UpdateTextAutosizing(bool isTextAutosizing)
         TaskExecutor::TaskType::PLATFORM);
 }
 
+void WebDelegate::UpdateNativeVideoPlayerConfig(bool enable, bool shouldOverlay)
+{
+    auto context = context_.Upgrade();
+    CHECK_NULL_VOID(context);
+    context->GetTaskExecutor()->PostTask(
+        [weak = WeakClaim(this), enable, shouldOverlay]() {
+            auto delegate = weak.Upgrade();
+            CHECK_NULL_VOID(delegate);
+            CHECK_NULL_VOID(delegate->nweb_);
+            std::shared_ptr<OHOS::NWeb::NWebPreference> setting = delegate->nweb_->GetPreference();
+            CHECK_NULL_VOID(setting);
+            setting->SetNativeVideoPlayerConfig(enable, shouldOverlay);
+        },
+        TaskExecutor::TaskType::PLATFORM);
+}
+
 void WebDelegate::RegisterSurfacePositionChangedCallback()
 {
 #ifdef NG_BUILD
