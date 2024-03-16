@@ -871,6 +871,53 @@ void OverlayManager::ClearToast()
     }
 }
 
+void OverlayManager::ShowPopupAnimation(const RefPtr<FrameNode>& popupNode)
+{
+    auto popupPattern = popupNode->GetPattern<BubblePattern>();
+    CHECK_NULL_VOID(popupPattern);
+    BlurLowerNode(popupNode);
+    auto onFinish = [popupNodeWk = WeakPtr<FrameNode>(popupNode), weak = WeakClaim(this)]() {
+        auto overlayManager = weak.Upgrade();
+        auto popupNode = popupNodeWk.Upgrade();
+        CHECK_NULL_VOID(overlayManager && popupNode);
+        overlayManager->FocusOverlayNode(popupNode);
+    };
+    if (popupPattern->GetHasTransition()) {
+        popupPattern->StartEnteringTransitionEffects(popupNode, onFinish);
+    } else {
+        popupPattern->StartEnteringAnimation(onFinish);
+    }
+}
+
+void OverlayManager::ShowPopupAnimationNG(const RefPtr<FrameNode>& popupNode)
+{
+    auto popupPattern = popupNode->GetPattern<BubblePattern>();
+    CHECK_NULL_VOID(popupPattern);
+    if (popupPattern->GetHasTransition()) {
+        popupPattern->StartEnteringTransitionEffects(popupNode, nullptr);
+    } else {
+        popupPattern->StartEnteringAnimation(nullptr);
+    }
+}
+
+void OverlayManager::HidePopupAnimation(const RefPtr<FrameNode>& popupNode, const std::function<void()>& finish)
+{
+    auto rootNode = rootNodeWeak_.Upgrade();
+    auto popupPattern = popupNode->GetPattern<BubblePattern>();
+    if (popupPattern->GetHasTransition()) {
+        if (!popupNode->GetRenderContext()->HasDisappearTransition()) {
+            popupPattern->SetTransitionStatus(TransitionStatus::INVISIABLE);
+            popupNode->GetEventHub<BubbleEventHub>()->FireChangeEvent(false);
+            rootNode->RemoveChild(popupNode);
+            rootNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+        } else {
+            popupPattern->StartExitingTransitionEffects(popupNode, finish);
+        }
+    } else {
+        popupPattern->StartExitingAnimation(finish);
+    }
+}
+
 void OverlayManager::ShowPopup(int32_t targetId, const PopupInfo& popupInfo,
     const std::function<void(int32_t)>&& onWillDismiss, bool interactiveDismiss)
 {
@@ -949,16 +996,9 @@ void OverlayManager::MountPopup(int32_t targetId, const PopupInfo& popupInfo,
     popupPattern->UpdateOnWillDismiss(move(onWillDismiss));
     if ((isTypeWithOption && !isShowInSubWindow) ||
         (!Container::LessThanAPIVersion(PlatformVersion::VERSION_ELEVEN) && isUseCustom && popupInfo.focusable)) {
-        BlurLowerNode(popupNode);
-        auto onFinish = [popupNodeWk = WeakPtr<FrameNode>(popupNode), weak = WeakClaim(this)]() {
-            auto overlayManager = weak.Upgrade();
-            auto popupNode = popupNodeWk.Upgrade();
-            CHECK_NULL_VOID(overlayManager && popupNode);
-            overlayManager->FocusOverlayNode(popupNode);
-        };
-        popupPattern->StartEnteringAnimation(onFinish);
+        ShowPopupAnimation(popupNode);
     } else {
-        popupPattern->StartEnteringAnimation(nullptr);
+        ShowPopupAnimationNG(popupNode);
     }
     SetPopupHotAreas(popupNode);
 }
@@ -1037,34 +1077,34 @@ void OverlayManager::HidePopup(int32_t targetId, const PopupInfo& popupInfo)
     CheckReturnFocus(popupNode);
     // detach popupNode after exiting animation
     popupMap_[targetId].isCurrentOnShow = false;
-    popupPattern->StartExitingAnimation(
-        [isShowInSubWindow, isTypeWithOption, isUseCustom, focusable,
-            targetId, popupNodeWk = WeakPtr<FrameNode>(popupNode),
-            rootNodeWk = WeakPtr<UINode>(rootNode), weak = WeakClaim(this)]() {
-            auto rootNode = rootNodeWk.Upgrade();
-            auto popupNode = popupNodeWk.Upgrade();
-            auto overlayManager = weak.Upgrade();
-            CHECK_NULL_VOID(rootNode && popupNode && overlayManager);
-            if (overlayManager->popupMap_[targetId].isCurrentOnShow) {
-                return;
-            }
-            auto popupPattern = popupNode->GetPattern<BubblePattern>();
-            CHECK_NULL_VOID(popupPattern);
-            popupPattern->SetTransitionStatus(TransitionStatus::INVISIABLE);
-            popupNode->GetEventHub<BubbleEventHub>()->FireChangeEvent(false);
-            rootNode->RemoveChild(popupNode);
-            rootNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
-            if ((isTypeWithOption && !isShowInSubWindow) ||
-                (!Container::LessThanAPIVersion(PlatformVersion::VERSION_ELEVEN) && isUseCustom && focusable)) {
-                overlayManager->BlurOverlayNode(popupNode);
-            }
-            if (isShowInSubWindow) {
-                auto subwindow = SubwindowManager::GetInstance();
-                CHECK_NULL_VOID(subwindow);
-                subwindow->DeletePopupHotAreas(popupNode->GetId(), popupPattern->GetContainerId());
-                subwindow->HideSubWindowNG();
-            }
-        });
+    auto onFinish = [isShowInSubWindow, isTypeWithOption, isUseCustom, focusable,
+        targetId, popupNodeWk = WeakPtr<FrameNode>(popupNode),
+        rootNodeWk = WeakPtr<UINode>(rootNode), weak = WeakClaim(this)]() {
+        auto rootNode = rootNodeWk.Upgrade();
+        auto popupNode = popupNodeWk.Upgrade();
+        auto overlayManager = weak.Upgrade();
+        CHECK_NULL_VOID(rootNode && popupNode && overlayManager);
+        if (overlayManager->popupMap_[targetId].isCurrentOnShow) {
+            return;
+        }
+        auto popupPattern = popupNode->GetPattern<BubblePattern>();
+        CHECK_NULL_VOID(popupPattern);
+        popupPattern->SetTransitionStatus(TransitionStatus::INVISIABLE);
+        popupNode->GetEventHub<BubbleEventHub>()->FireChangeEvent(false);
+        rootNode->RemoveChild(popupNode);
+        rootNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+        if ((isTypeWithOption && !isShowInSubWindow) ||
+            (!Container::LessThanAPIVersion(PlatformVersion::VERSION_ELEVEN) && isUseCustom && focusable)) {
+            overlayManager->BlurOverlayNode(popupNode);
+        }
+        if (isShowInSubWindow) {
+            auto subwindow = SubwindowManager::GetInstance();
+            CHECK_NULL_VOID(subwindow);
+            subwindow->DeletePopupHotAreas(popupNode->GetId(), popupPattern->GetContainerId());
+            subwindow->HideSubWindowNG();
+        }
+    };
+    HidePopupAnimation(popupNode, onFinish);
     popupNode->OnAccessibilityEvent(
         AccessibilityEventType::CHANGE, WindowsContentChangeTypes::CONTENT_CHANGE_TYPE_SUBTREE);
     RemoveEventColumn();
