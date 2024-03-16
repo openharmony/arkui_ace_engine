@@ -248,6 +248,7 @@ export struct SelectDialog{
   confirm?: ButtonOptions | null = null;
   radioContent: Array<SheetInfo> = [];
   buttons?: ButtonOptions[] = [];
+  contentPadding ?: Padding;
   @BuilderParam contentBuilder: () => void = this.buildContent;
   controller: CustomDialogController = new CustomDialogController({
     builder: CustomContentDialog({
@@ -270,42 +271,64 @@ export struct SelectDialog{
               .fontWeight(FontWeight.Regular)
               .fontColor($r('sys.color.font_primary'))
               .textOverflow({overflow: TextOverflow.Ellipsis})
-          }.padding({bottom: $r('sys.float.padding_level4')})
-          .width('100%')
+          }.padding({
+            left: $r('sys.float.padding_level12'),
+            right: $r('sys.float.padding_level12'),
+            bottom: $r('sys.float.padding_level4')
+          }).width('100%')
         }
         List({space: 1}) {
           ForEach(this.radioContent, (item: SheetInfo, index?: number) => {
             ListItem() {
               Column() {
-                Row() {
-                  Text(item.title)
-                    .fontSize($r('sys.float.Body_L'))
-                    .fontWeight(FontWeight.Medium)
-                    .fontColor($r('sys.color.font_primary'))
-                    .layoutWeight(1)
-                  Radio({value: 'item.title', group: 'radioGroup'})
-                    .size({width : CHECKBOX_CONTAINER_LENGTH, height : CHECKBOX_CONTAINER_LENGTH})
-                    .checked(this.selectedIndex == index)
-                    .onClick(() => {
-                      item.action && item.action()
-                      this.controller.close()
-                    })
-                }.constraintSize({minHeight: LIST_MIN_HEIGHT}).clip(false)
-                .padding({ top: $r('sys.float.padding_level4'), bottom: $r('sys.float.padding_level4') })
+                Button() {
+                  Row() {
+                    Text(item.title)
+                      .fontSize($r('sys.float.Body_L'))
+                      .fontWeight(FontWeight.Medium)
+                      .fontColor($r('sys.color.font_primary'))
+                      .layoutWeight(1)
+                    Radio({ value: 'item.title', group: 'radioGroup' })
+                      .size({ width: CHECKBOX_CONTAINER_LENGTH, height: CHECKBOX_CONTAINER_LENGTH })
+                      .checked(this.selectedIndex === index)
+                      .hitTestBehavior(HitTestMode.None)
+                  }.constraintSize({ minHeight: LIST_MIN_HEIGHT }).clip(false)
+                  .padding({
+                    top: $r('sys.float.padding_level4'),
+                    bottom: $r('sys.float.padding_level4')
+                  }).onClick(() => {
+                    item.action && item.action()
+                    this.controller.close()
+                  })
+                }
+                .type(ButtonType.Normal)
+                .borderRadius($r('sys.float.corner_radius_level8'))
+                .buttonStyle(ButtonStyleMode.TEXTUAL)
+                .padding({
+                  left: $r('sys.float.padding_level6'),
+                  right: $r('sys.float.padding_level6')
+                })
                 .onClick(() => {
                   item.action && item.action()
                   this.controller.close()
                 })
                 if (index < this.radioContent.length - 1) {
-                  Divider().color($r('sys.color.comp_divider'))
+                  Divider()
+                    .color($r('sys.color.comp_divider'))
+                    .padding({
+                      left: $r('sys.float.padding_level6'),
+                      right: $r('sys.float.padding_level6')
+                    })
                 }
-              }
+              }.padding({
+                left: $r('sys.float.padding_level6'),
+                right: $r('sys.float.padding_level6')
+              })
             }
           })
         }.width('100%').clip(false)
-      }.padding({right: $r('sys.float.padding_level8')})
-    }.margin({right: -getNumberByResource('padding_level8')})
-    .scrollBar(BarState.Auto)
+      }
+    }.scrollBar(BarState.Auto)
   }
 
   build() {
@@ -316,11 +339,38 @@ export struct SelectDialog{
         this.contentBuilder();
       },
       buttons: this.buttons,
+      contentAreaPadding: this.contentPadding
     })
   }
 
   aboutToAppear(): void {
+    this.initContentPadding();
     this.initButtons();
+  }
+
+  private initContentPadding(): void {
+    this.contentPadding = {
+      left: $r('sys.float.padding_level0'),
+      right: $r('sys.float.padding_level0')
+    }
+
+    if (!this.title && !this.confirm) {
+      this.contentPadding = {
+        top: $r('sys.float.padding_level12'),
+        bottom: $r('sys.float.padding_level12')
+      }
+      return;
+    }
+
+    if (!this.title) {
+      this.contentPadding = {
+        top: $r('sys.float.padding_level12')
+      }
+    } else if (!this.confirm) {
+      this.contentPadding = {
+        bottom: $r('sys.float.padding_level12')
+      }
+    }
   }
 
   private initButtons(): void {
@@ -544,6 +594,7 @@ struct CustomDialogContentComponent {
   secondaryTitle?: ResourceStr;
   @BuilderParam contentBuilder: () => void = this.defaultContentBuilder;
   buttons?: ButtonOptions[];
+  contentAreaPadding?: Padding;
 
   @Builder
   defaultContentBuilder(): void {
@@ -726,6 +777,10 @@ struct CustomDialogContentComponent {
    * @returns content padding
    */
   private getContentPadding(): Padding {
+    if (this.contentAreaPadding) {
+      return this.contentAreaPadding;
+    }
+
     if ((this.primaryTitle || this.secondaryTitle) && this.buttons && this.buttons.length > 0) {
       return {
         top: 0,
@@ -858,6 +913,7 @@ export struct CustomDialogComponent {
   secondaryTitle?: ResourceStr;
   @BuilderParam contentBuilder: () => void;
   buttons?: ButtonOptions[];
+  contentAreaPadding?: Padding;
   screenWidth: number = 0;
   @State columnModifier: ColumnModifier = new ColumnModifier();
   isFirstInit: boolean = true;
@@ -873,6 +929,7 @@ export struct CustomDialogComponent {
             this.contentBuilder();
           },
           buttons: this.buttons,
+          contentAreaPadding: this.contentAreaPadding,
         });
       }
       .attributeModifier(this.columnModifier)
