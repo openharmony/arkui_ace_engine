@@ -37,6 +37,7 @@
 #include "core/components_ng/layout/layout_property.h"
 #include "core/components_ng/pattern/bubble/bubble_pattern.h"
 #include "core/components_ng/pattern/bubble/bubble_view.h"
+#include "core/components_ng/pattern/dialog/dialog_pattern.h"
 #include "core/components_ng/pattern/menu/menu_pattern.h"
 #include "core/components_ng/pattern/menu/menu_view.h"
 #include "core/components_ng/pattern/menu/preview/menu_preview_pattern.h"
@@ -1458,13 +1459,21 @@ void ViewAbstract::DismissDialog()
     CHECK_NULL_VOID(overlayManager);
     auto rootNode = overlayManager->GetRootNode().Upgrade();
     CHECK_NULL_VOID(rootNode);
-    auto overlay = AceType::DynamicCast<FrameNode>(rootNode->GetLastChild());
+    RefPtr<FrameNode> overlay;
+    if (overlayManager->GetDismissDialogId()) {
+        overlay = overlayManager->GetDialog(overlayManager->GetDismissDialogId());
+    } else {
+        overlay = AceType::DynamicCast<FrameNode>(rootNode->GetLastChild());
+    }
     CHECK_NULL_VOID(overlay);
-    overlayManager->RemoveDialog(overlay, false);
     auto pattern = overlay->GetPattern();
     CHECK_NULL_VOID(pattern);
-    if (overlayManager->isMaskNode(pattern->GetHost()->GetId())) {
-        overlayManager->PopModalDialog(pattern->GetHost()->GetId());
+    auto dialogPattern = AceType::DynamicCast<DialogPattern>(pattern);
+    if (dialogPattern) {
+        overlayManager->RemoveDialog(overlay, false);
+        if (overlayManager->isMaskNode(dialogPattern->GetHost()->GetId())) {
+            overlayManager->PopModalDialog(dialogPattern->GetHost()->GetId());
+        }
     }
 }
 

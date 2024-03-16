@@ -105,6 +105,16 @@ public:
         }
     }
 
+    void SetDismissDialogId(int32_t id)
+    {
+        dismissDialogId_ = id;
+    }
+
+    int32_t GetDismissDialogId() const
+    {
+        return dismissDialogId_;
+    }
+
     void ShowMenu(int32_t targetId, const NG::OffsetF& offset, RefPtr<FrameNode> menu = nullptr);
     void HideMenu(const RefPtr<FrameNode>& menu, int32_t targetId, bool isMenuOnTouch = false);
     void DeleteMenu(int32_t targetId);
@@ -528,6 +538,7 @@ private:
     WeakPtr<UINode> rootNodeWeak_;
     int32_t dialogCount_ = 0;
     int32_t dismissTargetId_ = 0;
+    int32_t dismissDialogId_ = 0;
     std::unordered_map<int32_t, int32_t> maskNodeIdMap_;
     int32_t subWindowId_;
     bool hasPixelMap_ { false };

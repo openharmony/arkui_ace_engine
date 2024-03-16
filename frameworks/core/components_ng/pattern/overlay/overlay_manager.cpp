@@ -1989,6 +1989,7 @@ bool OverlayManager::RemoveOverlay(bool isBackPressed, bool isPageRouter)
             auto dialogPattern = DynamicCast<DialogPattern>(pattern);
             CHECK_NULL_RETURN(dialogPattern, false);
             if (dialogPattern->ShouldDismiss()) {
+                SetDismissDialogId(0);
                 dialogPattern->CallOnWillDismiss(static_cast<int32_t>(DialogDismissReason::DIALOG_PRESS_BACK));
                 TAG_LOGI(AceLogTag::ACE_OVERLAY, "Dialog Should Dismiss");
                 return true;
@@ -2242,6 +2243,7 @@ bool OverlayManager::RemoveOverlayInSubwindow()
         auto dialogPattern = DynamicCast<DialogPattern>(pattern);
         CHECK_NULL_RETURN(dialogPattern, false);
         if (dialogPattern->ShouldDismiss()) {
+            SetDismissDialogId(0);
             dialogPattern->CallOnWillDismiss(static_cast<int32_t>(DialogDismissReason::DIALOG_PRESS_BACK));
             TAG_LOGI(AceLogTag::ACE_OVERLAY, "Dialog Should Dismiss");
             return true;

@@ -137,16 +137,17 @@ void DialogPattern::HandleClick(const GestureEvent& info)
         auto&& clickPosition = info.GetGlobalLocation();
         if (!contentRect.IsInRegion(
                 PointF(clickPosition.GetX() - globalOffset.GetX(), clickPosition.GetY() - globalOffset.GetY()))) {
+            auto pipeline = PipelineContext::GetCurrentContext();
+            CHECK_NULL_VOID(pipeline);
+            auto overlayManager = pipeline->GetOverlayManager();
+            CHECK_NULL_VOID(overlayManager);
             if (this->ShouldDismiss()) {
+                overlayManager->SetDismissDialogId(host->GetId());
                 this->CallOnWillDismiss(static_cast<int32_t>(DialogDismissReason::DIALOG_TOUCH_OUTSIDE));
                 TAG_LOGI(AceLogTag::ACE_DIALOG, "Dialog Should Dismiss");
                 return;
             }
             PopDialog(-1);
-            auto pipeline = PipelineContext::GetCurrentContext();
-            CHECK_NULL_VOID(pipeline);
-            auto overlayManager = pipeline->GetOverlayManager();
-            CHECK_NULL_VOID(overlayManager);
             if (overlayManager->isMaskNode(GetHost()->GetId())) {
                 overlayManager->PopModalDialog(GetHost()->GetId());
             }
