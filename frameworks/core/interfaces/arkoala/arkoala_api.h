@@ -1673,6 +1673,7 @@ struct ArkUISwiperModifier {
     ArkUI_Float32 (*getSwiperItemSpace)(ArkUINodeHandle node);
     ArkUI_Int32 (*getSwiperShowIndicator)(ArkUINodeHandle node);
     ArkUI_Int32 (*getSwiperShowDisplayArrow)(ArkUINodeHandle node);
+    ArkUI_Int32 (*getSwiperEffectMode)(ArkUINodeHandle node);
 };
 
 struct ArkUISwiperControllerModifier {

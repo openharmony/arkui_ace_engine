@@ -35,6 +35,7 @@
 #include "core/interfaces/native/node/node_toggle_modifier.h"
 #include "core/interfaces/native/node/node_checkbox_modifier.h"
 #include "core/interfaces/native/node/node_slider_modifier.h"
+#include "core/interfaces/native/node/node_swiper_modifier.h"
 #include "core/interfaces/native/node/view_model.h"
 #include "core/pipeline_ng/pipeline_context.h"
 #include "frameworks/core/common/container.h"
@@ -204,6 +205,13 @@ const ComponentAsyncEventHandler SLIDER_NODE_ASYNC_EVENT_HANDLERS[] = {
     NodeModifier::SetSliderChange,
 };
 
+const ComponentAsyncEventHandler SWIPER_NODE_ASYNC_EVENT_HANDLERS[] = {
+    NodeModifier::SetSwiperChange,
+    NodeModifier::SetSwiperAnimationStart,
+    NodeModifier::SetSwiperAnimationEnd,
+    NodeModifier::SetSwiperGestureSwipe,
+};
+
 /* clang-format on */
 void NotifyComponentAsyncEvent(ArkUINodeHandle node, ArkUIEventSubKind kind, ArkUI_Int64 extraParam)
 {
@@ -316,6 +324,15 @@ void NotifyComponentAsyncEvent(ArkUINodeHandle node, ArkUIEventSubKind kind, Ark
                 return;
             }
             eventHandle = SLIDER_NODE_ASYNC_EVENT_HANDLERS[subKind];
+            break;
+        }
+        case ARKUI_SWIPER: {
+            // swiper event type.
+            if (subKind >= sizeof(SWIPER_NODE_ASYNC_EVENT_HANDLERS) / sizeof(ComponentAsyncEventHandler)) {
+                TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "NotifyComponentAsyncEvent kind:%{public}d NOT IMPLEMENT", kind);
+                return;
+            }
+            eventHandle = SWIPER_NODE_ASYNC_EVENT_HANDLERS[subKind];
             break;
         }
         default: {
