@@ -2894,7 +2894,19 @@ bool RichEditorPattern::EraseEmoji()
 
 void RichEditorPattern::HandleOnDelete(bool backward)
 {
-    backward ? DeleteBackward(1) : DeleteForward(1);
+    if (backward) {
+#if defined(PREVIEW)
+        DeleteForward(1);
+#else
+        DeleteBackward(1);
+#endif
+    } else {
+#if defined(PREVIEW)
+        DeleteBackward(1);
+#else
+        DeleteForward(1);
+#endif
+    }
 }
 
 void RichEditorPattern::DeleteBackward(int32_t length)
