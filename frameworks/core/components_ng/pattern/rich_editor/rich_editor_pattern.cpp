@@ -2941,16 +2941,16 @@ std::wstring RichEditorPattern::DeleteBackwardOperation(int32_t length)
         FireOnDeleteComplete(info);
         return deleteText;
     }
-    if (length == spans_.back()->position) {
-        ResetFirstNodeStyle();
-        textForDisplay_.clear();
-    }
     info.SetOffset(caretPosition_ - 1);
     info.SetLength(length);
     int32_t currentPosition = std::clamp((caretPosition_ - length), 0, static_cast<int32_t>(GetTextContentLength()));
     if (!spans_.empty()) {
         CalcDeleteValueObj(currentPosition, length, info);
         FireOnDeleteComplete(info);
+    }
+    auto host = GetHost();
+    if (host && host->GetChildren().empty()) {
+        textForDisplay_.clear();
     }
     if (!caretVisible_) {
         StartTwinkling();
