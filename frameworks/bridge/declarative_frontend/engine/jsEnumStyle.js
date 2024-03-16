@@ -348,7 +348,7 @@ var TextDecorationStyle;
   TextDecorationStyle[TextDecorationStyle["DOTTED"] = 2] = "DOTTED";
   TextDecorationStyle[TextDecorationStyle["DASHED"] = 3] = "DASHED";
   TextDecorationStyle[TextDecorationStyle["WAVY"] = 4] = "WAVY";
-})(TextDecorationStyle || (TextDecorationStyle= {}));
+})(TextDecorationStyle || (TextDecorationStyle = {}));
 
 var TextDecorationType;
 (function (TextDecorationType) {
@@ -933,13 +933,13 @@ var TitleHeight;
 })(TitleHeight || (TitleHeight = {}));
 
 var NavDestinationMode;
-(function(NavDestinationMode) {
+(function (NavDestinationMode) {
   NavDestinationMode[NavDestinationMode["STANDARD"] = 0] = "STANDARD";
   NavDestinationMode[NavDestinationMode["DIALOG"] = 1] = "DIALOG";
 }(NavDestinationMode || (NavDestinationMode = {})));
 
 let NavigationOperation;
-(function(NavigationOperation) {
+(function (NavigationOperation) {
   NavigationOperation[NavigationOperation.PUSH = 1] = "PUSH";
   NavigationOperation[NavigationOperation.POP = 2] = "POP";
   NavigationOperation[NavigationOperation.REPLACE = 3] = "REPLACE";
@@ -1393,17 +1393,17 @@ var GestureJudgeResult;
 
 var GestureControl;
 (function (GestureControl) {
-    let GestureType;
-    (function (GestureType) {
-        GestureType[GestureType["TAP_GESTURE"] = 0] = "TAP_GESTURE";
-        GestureType[GestureType["LONG_PRESS_GESTURE"] = 1] = "LONG_PRESS_GESTURE";
-        GestureType[GestureType["PAN_GESTURE"] = 2] = "PAN_GESTURE";
-        GestureType[GestureType["PINCH_GESTURE"] = 3] = "PINCH_GESTURE";
-        GestureType[GestureType["SWIPE_GESTURE"] = 4] = "SWIPE_GESTURE";
-        GestureType[GestureType["ROTATION_GESTURE"] = 5] = "ROTATION_GESTURE";
-        GestureType[GestureType["DRAG"] = 6] = "DRAG";
-        GestureType[GestureType["CLICK"] = 7] = "CLICK";
-    })(GestureType = GestureControl.GestureType || (GestureControl.GestureType = {}));
+  let GestureType;
+  (function (GestureType) {
+    GestureType[GestureType["TAP_GESTURE"] = 0] = "TAP_GESTURE";
+    GestureType[GestureType["LONG_PRESS_GESTURE"] = 1] = "LONG_PRESS_GESTURE";
+    GestureType[GestureType["PAN_GESTURE"] = 2] = "PAN_GESTURE";
+    GestureType[GestureType["PINCH_GESTURE"] = 3] = "PINCH_GESTURE";
+    GestureType[GestureType["SWIPE_GESTURE"] = 4] = "SWIPE_GESTURE";
+    GestureType[GestureType["ROTATION_GESTURE"] = 5] = "ROTATION_GESTURE";
+    GestureType[GestureType["DRAG"] = 6] = "DRAG";
+    GestureType[GestureType["CLICK"] = 7] = "CLICK";
+  })(GestureType = GestureControl.GestureType || (GestureControl.GestureType = {}));
 })(GestureControl || (GestureControl = {}));
 
 class SubTabBarStyle {
@@ -1441,7 +1441,7 @@ class SubTabBarStyle {
 }
 
 class DrawModifier {
-  invalidate() {}
+  invalidate() { }
 }
 
 class ProgressMask {
@@ -1806,7 +1806,7 @@ class NavPathStack {
     let promise = this.nativeStack?.onPushDestination(info);
     if (!promise) {
       this.pathArray.pop();
-      return new Promise((resolve, reject)=>{
+      return new Promise((resolve, reject) => {
         reject({ message: 'Internal error.', code: 100001 });
       })
     }
@@ -1837,7 +1837,7 @@ class NavPathStack {
     let promise = this.nativeStack?.onPushDestination(info);
     if (!promise) {
       this.pathArray.pop();
-      promise = new Promise((resolve, reject)=>{
+      promise = new Promise((resolve, reject) => {
         reject({ message: 'Internal error.', code: 100001 });
       })
     }
@@ -2010,7 +2010,7 @@ class NavPathStack {
     let tempArray = this.pathArray.slice(0);
     this.removeArray = [];
     this.pathArray = [];
-    for (let index = 0 ; index < tempArray.length ; index++) {
+    for (let index = 0; index < tempArray.length; index++) {
       if (tempArray[index] && !indexes.includes(index)) {
         this.pathArray.push(tempArray[index]);
       } else {
@@ -2594,12 +2594,12 @@ var ImageAnalyzerType;
 })(ImageAnalyzerType || (ImageAnalyzerType = {}));
 
 function wrapBuilder(builder) {
-    return new WrappedBuilder(builder);
+  return new WrappedBuilder(builder);
 }
 class WrappedBuilder {
-    constructor(builder) {
-        this.builder = builder;
-    }
+  constructor(builder) {
+    this.builder = builder;
+  }
 }
 
 let TextSpanType;
@@ -2630,16 +2630,16 @@ let RenderMode;
 })(RenderMode || (RenderMode = {}));
 
 let ButtonRole;
-(function (ButtonRole){
+(function (ButtonRole) {
   ButtonRole['NORMAL'] = 0;
   ButtonRole['ERROR'] = 1;
 })(ButtonRole || (ButtonRole = {}));
 
 let MenuPolicy;
 (function (MenuPolicy) {
-    MenuPolicy['DEFAULT'] = 0;
-    MenuPolicy['NEVER'] = 1;
-    MenuPolicy['ALWAYS'] = 2;
+  MenuPolicy['DEFAULT'] = 0;
+  MenuPolicy['NEVER'] = 1;
+  MenuPolicy['ALWAYS'] = 2;
 })(MenuPolicy || (MenuPolicy = {}));
 
 let PreDragStatus;
@@ -2652,3 +2652,15 @@ let PreDragStatus;
   PreDragStatus['PREVIEW_LANDING_FINISHED'] = 5;
   PreDragStatus['ACTION_CANCELED_BEFORE_DRAG'] = 6;
 })(PreDragStatus || (PreDragStatus = {}));
+
+var StyledStringKey;
+(function (StyledStringKey) {
+  StyledStringKey[StyledStringKey["FONT"] = 0] = "FONT";
+  StyledStringKey[StyledStringKey["DECORATION"] = 1] = "DECORATION";
+  StyledStringKey[StyledStringKey["BASELINE_OFFSET"] = 2] = "BASELINE_OFFSET";
+  StyledStringKey[StyledStringKey["LETTER_SPACING"] = 3] = "LETTER_SPACING";
+  StyledStringKey[StyledStringKey["TEXT_SHADOW"] = 4] = "TEXT_SHADOW";
+  StyledStringKey[StyledStringKey["PARAGRAPH_STYLE"] = 5] = "PARAGRAPH_STYLE";
+  StyledStringKey[StyledStringKey["BACKGROUND_COLOR"] = 6] = "BACKGROUND_COLOR";
+  StyledStringKey[StyledStringKey["GESTURE"] = 7] = "GESTURE";
+})(StyledStringKey || (StyledStringKey = {}));

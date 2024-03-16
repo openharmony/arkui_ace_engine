@@ -47,10 +47,10 @@ public:
     static JSRef<JSObject> CreateJsFontSpan(const RefPtr<SpanBase>& spanObject);
     static RefPtr<SpanBase> ParseJsSpanBase(int32_t start, int32_t length, SpanType type, JSRef<JSObject> obj);
     static RefPtr<SpanBase> ParseJsFontSpan(int32_t start, int32_t length, JSRef<JSObject> obj);
-    static void CheckSpanType(const int32_t& type);
-    void CheckParameters(const int32_t& start, const int32_t& length);
+    static bool CheckSpanType(const int32_t& type);
+    bool CheckParameters(const int32_t& start, const int32_t& length);
     void GetSpans(const JSCallbackInfo& info);
-    RefPtr<SpanString>& GetController();
+    const RefPtr<SpanString>& GetController();
     void SetController(const RefPtr<SpanString>& spanString);
 
 private:
