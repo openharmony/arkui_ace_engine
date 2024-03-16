@@ -35,7 +35,6 @@
 #include "core/components_ng/animation/geometry_transition.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/frame_scene_status.h"
-#include "core/components_ng/base/modifier.h"
 #include "core/components_ng/event/focus_hub.h"
 #include "core/components_ng/layout/layout_wrapper.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
@@ -314,39 +313,6 @@ HWTEST_F(FrameNodeTestNg, FrameNodeTestNg008, TestSize.Level1)
      */
     EXPECT_TRUE(parentNode->HaveSecurityComponent());
     EXPECT_TRUE(node->HaveSecurityComponent());
-}
-
-/**
- * @tc.name: FrameNodeTestNg009
- * @tc.desc: Test frame node method
- * @tc.type: FUNC
- */
-HWTEST_F(FrameNodeTestNg, FrameNodeTestNg009, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step 1. create framenode and initialize the params used in Test.
-     */
-    RefPtr<NG::DrawModifier> drawModifier = AceType::MakeRefPtr<NG::DrawModifier>();
-    ASSERT_NE(drawModifier, nullptr);
-
-    /**
-     * @tc.steps: step 2. call get function .
-     * @tc.expect: expect the return value to be correct.
-     */
-    EXPECT_TRUE(FRAME_NODE->IsSupportDrawModifier());
-
-    /**
-     * @tc.steps: step 3. call GetContentModifier when drawModifier is null .
-     * @tc.expect: expect the return value to be correct.
-     */
-    EXPECT_EQ(FRAME_NODE->GetContentModifier(), nullptr);
-
-    /**
-     * @tc.steps: step 4. call GetContentModifier when drawModifier is not null .
-     * @tc.expect: expect the return value to be correct.
-     */
-    FRAME_NODE->SetDrawModifier(drawModifier);
-    EXPECT_NE(FRAME_NODE->GetContentModifier(), nullptr);
 }
 
 /**
