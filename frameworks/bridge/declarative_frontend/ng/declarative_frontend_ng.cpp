@@ -403,6 +403,13 @@ UIContentErrorCode DeclarativeFrontendNG::RunPage(
     return UIContentErrorCode::NULL_POINTER;
 }
 
+void DeclarativeFrontendNG::RunPageByNamedRouter(const std::string& name)
+{
+    if (delegate_) {
+        delegate_->RunPage(name, "", pageProfile_, true);
+    }
+}
+
 void DeclarativeFrontendNG::ReplacePage(const std::string& url, const std::string& params)
 {
     if (delegate_) {
