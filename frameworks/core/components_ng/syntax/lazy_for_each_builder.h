@@ -52,7 +52,7 @@ public:
         return OnGetTotalCount();
     }
 
-    std::pair<std::string, RefPtr<UINode>> GetChildByIndex(int32_t index, bool needBuild);
+    std::pair<std::string, RefPtr<UINode>> GetChildByIndex(int32_t index, bool needBuild, bool isCache = false);
 
     void ExpandChildrenOnInitial()
     {
@@ -165,12 +165,17 @@ public:
         }
     }
 
-    void SetActiveChildRange(int32_t start, int32_t end)
+    bool SetActiveChildRange(int32_t start, int32_t end)
     {
+        bool needBuild = false;
         for (auto& [index, node] : cachedItems_) {
             if ((start <= end && start <= index && end >= index) ||
                 (start > end && (index <= end || index >= start))) {
                 if (node.second) {
+                    auto frameNode = AceType::DynamicCast<FrameNode>(node.second->GetFrameChildByIndex(0, true));
+                    if (frameNode) {
+                        frameNode->SetActive(true);
+                    }
                     continue;
                 }
                 auto keyIter = expiringItem_.find(node.first);
@@ -182,6 +187,7 @@ public:
                         frameNode->SetActive(true);
                     }
                 }
+                needBuild = true;
                 continue;
             }
             if (!node.second) {
@@ -192,7 +198,9 @@ public:
                 frameNode->SetActive(false);
             }
             expiringItem_.try_emplace(node.first, LazyForEachCacheChild(index, std::move(node.second)));
+            needBuild = true;
         }
+        return needBuild;
     }
 
     void SetFlagForGeneratedItem(PropertyChangeFlag propertyChangeFlag)

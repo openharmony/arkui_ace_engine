@@ -373,7 +373,7 @@ void WaterFlowPattern::SetAccessibilityAction()
     });
 }
 
-void WaterFlowPattern::ScrollPage(bool reverse)
+void WaterFlowPattern::ScrollPage(bool reverse, bool smooth)
 {
     CHECK_NULL_VOID(IsScrollable());
 
@@ -386,9 +386,13 @@ void WaterFlowPattern::ScrollPage(bool reverse)
     auto geometryNode = host->GetGeometryNode();
     CHECK_NULL_VOID(geometryNode);
     auto mainContentSize = geometryNode->GetPaddingSize().MainSize(axis);
-
-    UpdateCurrentOffset(reverse ? mainContentSize : -mainContentSize, SCROLL_FROM_JUMP);
-
+    if (smooth) {
+        float distance = reverse ? mainContentSize : -mainContentSize;
+        float position = layoutInfo_.currentOffset_ + distance;
+        AnimateTo(-position, -1, nullptr, true);
+    } else {
+        UpdateCurrentOffset(reverse ? mainContentSize : -mainContentSize, SCROLL_FROM_JUMP);
+    }
     // AccessibilityEventType::SCROLL_END
 }
 

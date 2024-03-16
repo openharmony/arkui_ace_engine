@@ -27,6 +27,7 @@ namespace OHOS::Ace::NG {
 class FrameNode;
 class FocusHub;
 class EventHub;
+class FocusView;
 
 using TabIndexNodeList = std::list<std::pair<int32_t, WeakPtr<FocusHub>>>;
 constexpr int32_t DEFAULT_TAB_FOCUSED_INDEX = -2;
@@ -291,9 +292,26 @@ public:
         onFocusCallback_ = std::move(onFocusCallback);
     }
 
+    void SetJSFrameNodeOnFocusCallback(OnFocusFunc&& onFocusCallback)
+    {
+        onJSFrameNodeFocusCallback_ = std::move(onFocusCallback);
+    }
+
+    void ClearJSFrameNodeOnFocusCallback()
+    {
+        if (onJSFrameNodeFocusCallback_) {
+            onJSFrameNodeFocusCallback_ = nullptr;
+        }
+    }
+
     const OnFocusFunc& GetOnFocusCallback()
     {
         return onFocusCallback_;
+    }
+
+    const OnFocusFunc& GetOnJSFrameNodeFocusCallback()
+    {
+        return onJSFrameNodeFocusCallback_;
     }
 
     void ClearOnBlurCallback()
@@ -303,14 +321,37 @@ public:
         }
     }
 
+    void ClearJSFrameNodeOnBlurCallback()
+    {
+        if (onJSFrameNodeBlurCallback_) {
+            onJSFrameNodeBlurCallback_ = nullptr;
+        }
+    }
+
     void SetOnBlurCallback(OnBlurFunc&& onBlurCallback)
     {
         onBlurCallback_ = std::move(onBlurCallback);
     }
 
+    void SetJSFrameNodeOnBlurCallback(OnBlurFunc&& onBlurCallback)
+    {
+        onJSFrameNodeBlurCallback_ = std::move(onBlurCallback);
+    }
+
+
     const OnBlurFunc& GetOnBlurCallback()
     {
         return onBlurCallback_;
+    }
+
+    const OnBlurFunc& GetOnJSFrameNodeBlurCallback()
+    {
+        return onJSFrameNodeBlurCallback_;
+    }
+
+    void SetJSFrameNodeOnKeyCallback(OnKeyCallbackFunc&& onKeyEventCallback)
+    {
+        onJSFrameNodeKeyEventCallback_ = std::move(onKeyEventCallback);
     }
 
     void SetOnKeyEventCallback(OnKeyCallbackFunc&& onKeyEventCallback)
@@ -328,6 +369,18 @@ public:
     const OnKeyCallbackFunc& GetOnKeyEventCallback()
     {
         return onKeyEventCallback_;
+    }
+
+    const OnKeyCallbackFunc& GetOnJSFrameNodeKeyCallback()
+    {
+        return onJSFrameNodeKeyEventCallback_;
+    }
+
+    void ClearJSFrameNodeOnKeyCallback()
+    {
+        if (onJSFrameNodeKeyEventCallback_) {
+            onJSFrameNodeKeyEventCallback_ = nullptr;
+        }
     }
 
     void SetOnClickCallback(GestureEventFunc&& onClickEventCallback)
@@ -412,8 +465,11 @@ public:
 
 private:
     OnFocusFunc onFocusCallback_;
+    OnFocusFunc onJSFrameNodeFocusCallback_;
     OnBlurFunc onBlurCallback_;
+    OnBlurFunc onJSFrameNodeBlurCallback_;
     OnKeyCallbackFunc onKeyEventCallback_;
+    OnKeyCallbackFunc onJSFrameNodeKeyEventCallback_;
     GestureEventFunc onClickEventCallback_;
 
     WeakPtr<FocusHub> defaultFocusNode_;
@@ -587,23 +643,21 @@ public:
     bool HandleKeyEvent(const KeyEvent& keyEvent);
     bool RequestFocusImmediately(bool isJudgeRootTree = false);
     void RequestFocus() const;
-    void RequestFocusWithDefaultFocusFirstly();
     void UpdateAccessibilityFocusInfo();
     void SwitchFocus(const RefPtr<FocusHub>& focusNode);
 
-    RefPtr<FocusHub> GetChildMainView();
-    RefPtr<FocusHub> GetMainViewRootScope();
-
-    static RefPtr<FocusHub> GetCurrentMainView();
     static void LostFocusToViewRoot();
 
-    bool HandleFocusOnMainView();
     void LostFocus(BlurReason reason = BlurReason::FOCUS_SWITCH);
     void LostSelfFocus();
     void RemoveSelf(BlurReason reason = BlurReason::FRAME_DESTROY);
     void RemoveChild(const RefPtr<FocusHub>& focusNode, BlurReason reason = BlurReason::FRAME_DESTROY);
     bool GoToNextFocusLinear(FocusStep step, const RectF& rect = RectF());
     bool TryRequestFocus(const RefPtr<FocusHub>& focusNode, const RectF& rect, FocusStep step = FocusStep::NONE);
+    void InheritFocus()
+    {
+        OnFocusScope(true);
+    }
 
     void CollectTabIndexNodes(TabIndexNodeList& tabIndexNodes);
     bool GoToFocusByTabNodeIdx(TabIndexNodeList& tabIndexNodes, int32_t tabNodeIdx);
@@ -613,6 +667,7 @@ public:
     void HandleParentScroll() const;
     int32_t GetFocusingTabNodeIdx(TabIndexNodeList& tabIndexNodes) const;
     bool RequestFocusImmediatelyById(const std::string& id);
+    RefPtr<FocusView> GetFirstChildFocusView();
 
     bool IsFocusableByTab();
     bool IsFocusableNodeByTab();
@@ -666,6 +721,24 @@ public:
         return focusCallbackEvents_ ? focusCallbackEvents_->GetOnFocusCallback() : nullptr;
     }
 
+    void ClearJSFrameNodeOnFocusCallback()
+    {
+        if (focusCallbackEvents_) {
+            focusCallbackEvents_->ClearJSFrameNodeOnFocusCallback();
+        }
+    }
+    void SetJSFrameNodeOnFocusCallback(OnFocusFunc&& onFocusCallback)
+    {
+        if (!focusCallbackEvents_) {
+            focusCallbackEvents_ = MakeRefPtr<FocusCallbackEvents>();
+        }
+        focusCallbackEvents_->SetJSFrameNodeOnFocusCallback(std::move(onFocusCallback));
+    }
+    OnFocusFunc GetOnJSFrameNodeFocusCallback()
+    {
+        return focusCallbackEvents_ ? focusCallbackEvents_->GetOnJSFrameNodeFocusCallback() : nullptr;
+    }
+
     void ClearUserOnBlur()
     {
         if (focusCallbackEvents_) {
@@ -686,6 +759,24 @@ public:
         return focusCallbackEvents_ ? focusCallbackEvents_->GetOnBlurCallback() : nullptr;
     }
 
+    void ClearJSFrameNodeOnBlurCallback()
+    {
+        if (focusCallbackEvents_) {
+            focusCallbackEvents_->ClearJSFrameNodeOnBlurCallback();
+        }
+    }
+    void SetJSFrameNodeOnBlurCallback(OnBlurFunc&& onBlurCallback)
+    {
+        if (!focusCallbackEvents_) {
+            focusCallbackEvents_ = MakeRefPtr<FocusCallbackEvents>();
+        }
+        focusCallbackEvents_->SetJSFrameNodeOnBlurCallback(std::move(onBlurCallback));
+    }
+    OnBlurFunc GetOnJSFrameNodeBlurCallback()
+    {
+        return focusCallbackEvents_ ? focusCallbackEvents_->GetOnJSFrameNodeBlurCallback() : nullptr;
+    }
+
     void SetOnKeyCallback(OnKeyCallbackFunc&& onKeyCallback)
     {
         if (!focusCallbackEvents_) {
@@ -704,6 +795,26 @@ public:
     OnKeyCallbackFunc GetOnKeyCallback()
     {
         return focusCallbackEvents_ ? focusCallbackEvents_->GetOnKeyEventCallback() : nullptr;
+    }
+
+    void ClearJSFrameNodeOnKeyCallback()
+    {
+        if (focusCallbackEvents_) {
+            focusCallbackEvents_->ClearJSFrameNodeOnKeyCallback();
+        }
+    }
+
+    void SetJSFrameNodeOnKeyCallback(OnKeyCallbackFunc&& onKeyCallback)
+    {
+        if (!focusCallbackEvents_) {
+            focusCallbackEvents_ = MakeRefPtr<FocusCallbackEvents>();
+        }
+        focusCallbackEvents_->SetJSFrameNodeOnKeyCallback(std::move(onKeyCallback));
+    }
+    
+    OnKeyCallbackFunc GetOnJSFrameNodeKeyCallback()
+    {
+        return focusCallbackEvents_ ? focusCallbackEvents_->GetOnJSFrameNodeKeyCallback() : nullptr;
     }
 
     void SetOnClickCallback(GestureEventFunc&& onClickCallback)
@@ -875,18 +986,6 @@ public:
         return focusCallbackEvents_ ? focusCallbackEvents_->IsDefaultGroupHasFocused() : false;
     }
 
-    void SetIsViewRootScopeFocused(const RefPtr<FocusHub>& viewRootScope, bool isViewRootScopeFocused)
-    {
-        isViewRootScopeFocused_ = isViewRootScopeFocused;
-        if (viewRootScope) {
-            viewRootScope->SetFocusDependence(isViewRootScopeFocused ? FocusDependence::SELF : FocusDependence::AUTO);
-        }
-    }
-    bool GetIsViewRootScopeFocused() const
-    {
-        return isViewRootScopeFocused_;
-    }
-
     bool IsImplicitFocusableScope() const
     {
         return (focusType_ == FocusType::SCOPE) && focusable_ && implicitFocusable_;
@@ -926,15 +1025,6 @@ public:
     void SetFocusDependence(FocusDependence focusDepend)
     {
         focusDepend_ = focusDepend;
-    }
-
-    void SetIsViewHasFocused(bool isViewHasFocused)
-    {
-        isViewHasFocused_ = isViewHasFocused;
-    }
-    bool GetIsViewHasFocused() const
-    {
-        return isViewHasFocused_;
     }
 
     size_t GetFocusableCount()
@@ -1020,6 +1110,8 @@ private:
 
     RefPtr<FocusHub> GetNearestNodeByProjectArea(const std::list<RefPtr<FocusHub>>& allNodes, FocusStep step);
 
+    bool UpdateFocusView();
+
     OnFocusFunc onFocusInternal_;
     OnBlurFunc onBlurInternal_;
     OnBlurReasonFunc onBlurReasonInternal_;
@@ -1044,8 +1136,6 @@ private:
     bool parentFocusable_ { true };
     bool currentFocus_ { false };
     bool isFocusUnit_ { false };
-    bool isViewRootScopeFocused_ { true };
-    bool isViewHasFocused_ { false };
     bool hasForwardMovement_ { false };
     bool hasBackwardMovement_ { false };
     bool isFocusActiveWhenFocused_ { false };

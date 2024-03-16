@@ -351,6 +351,11 @@ void ProgressModelNG::SetValue(FrameNode* frameNode, double value)
         value = maxValue.value_or(0);
     }
     ACE_UPDATE_NODE_PAINT_PROPERTY(ProgressPaintProperty, Value, value, frameNode);
+    auto pattern = frameNode->GetPattern<ProgressPattern>();
+    CHECK_NULL_VOID(pattern);
+    if (!pattern->IsTextFromUser()) {
+        SetText(frameNode, std::nullopt);
+    }
 }
 
 void ProgressModelNG::SetTotal(FrameNode* frameNode, double max)
@@ -548,7 +553,7 @@ double ProgressModelNG::GetValue(FrameNode* frameNode)
 Color ProgressModelNG::GetColor(FrameNode* frameNode)
 {
     Color value;
-    ACE_GET_NODE_PAINT_PROPERTY(ProgressPaintProperty, Color, value, frameNode);
+    ACE_GET_NODE_PAINT_PROPERTY_WITH_DEFAULT_VALUE(ProgressPaintProperty, Color, value, frameNode, value);
     return value;
 }
 

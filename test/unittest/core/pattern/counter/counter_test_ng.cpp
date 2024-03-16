@@ -21,13 +21,15 @@
 
 #define protected public
 #define private public
+#include "test/mock/core/common/mock_theme_manager.h"
+#include "test/mock/core/pipeline/mock_pipeline_context.h"
+#include "test/unittest/core/pattern/test_ng.h"
+
 #include "base/geometry/dimension.h"
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/counter/counter_model_ng.h"
-#include "test/mock/core/common/mock_theme_manager.h"
-#include "test/mock/core/pipeline/mock_pipeline_context.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -41,45 +43,61 @@ const Color COLOR = Color::BLUE;
 constexpr double DEFAULT_BUTTON_OPACITY = 1.0;
 } // namespace
 
-class CounterTestNg : public testing::Test {
+class CounterTestNg : public TestNG {
 public:
-    static void SetUpTestCase();
-    static void TearDownTestCase();
+    static void SetUpTestSuite();
+    static void TearDownTestSuite();
     void SetUp() override;
     void TearDown() override;
+    void GetInstance();
+
+    void Create(const std::function<void(CounterModelNG)>& callback = nullptr);
+
+    RefPtr<CounterNode> frameNode_;
+    RefPtr<CounterPattern> pattern_;
+    RefPtr<LayoutProperty> layoutProperty_;
 };
 
-void CounterTestNg::SetUpTestCase()
+void CounterTestNg::SetUpTestSuite()
 {
     MockPipelineContext::SetUp();
-}
-void CounterTestNg::TearDownTestCase()
-{
-    MockPipelineContext::TearDown();
-}
-void CounterTestNg::SetUp() {}
-void CounterTestNg::TearDown() {}
-
-/**
- * @tc.name: CounterPatternTest001
- * @tc.desc: Test counter Create function.
- * @tc.type: FUNC
- */
-HWTEST_F(CounterTestNg, CounterPatternTest001, TestSize.Level1)
-{
-    // create mock theme manager
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
     MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
     auto counterTheme = AceType::MakeRefPtr<CounterTheme>();
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(counterTheme));
+}
 
-    CounterModelNG counterModelNG;
-    counterModelNG.Create();
-    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->GetMainElementNode());
-    EXPECT_NE(frameNode, nullptr);
-    counterModelNG.Create();
-    auto frameNode1 = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
-    EXPECT_NE(frameNode1, nullptr);
+void CounterTestNg::TearDownTestSuite()
+{
+    MockPipelineContext::TearDown();
+}
+
+void CounterTestNg::SetUp() {}
+
+void CounterTestNg::TearDown()
+{
+    frameNode_ = nullptr;
+    pattern_ = nullptr;
+    layoutProperty_ = nullptr;
+}
+
+void CounterTestNg::GetInstance()
+{
+    RefPtr<UINode> element = ViewStackProcessor::GetInstance()->Finish();
+    frameNode_ = AceType::DynamicCast<CounterNode>(element);
+    pattern_ = frameNode_->GetPattern<CounterPattern>();
+    layoutProperty_ = frameNode_->GetLayoutProperty();
+}
+
+void CounterTestNg::Create(const std::function<void(CounterModelNG)>& callback)
+{
+    CounterModelNG model;
+    model.Create();
+    if (callback) {
+        callback(model);
+    }
+    GetInstance();
+    FlushLayoutTask(frameNode_);
 }
 
 /**
@@ -89,20 +107,24 @@ HWTEST_F(CounterTestNg, CounterPatternTest001, TestSize.Level1)
  */
 HWTEST_F(CounterTestNg, CounterPatternTest002, TestSize.Level1)
 {
-    // create mock theme manager
-    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
-    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
-    auto counterTheme = AceType::MakeRefPtr<CounterTheme>();
-    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(counterTheme));
+    Create([](CounterModelNG model) {
+        auto counterEventFunc1 = []() {};
+        model.SetOnInc(std::move(counterEventFunc1));
+        auto counterEventFunc2 = []() {};
+        model.SetOnDec(std::move(counterEventFunc2));
+    });
 
-    CounterModelNG counterModelNG;
-    counterModelNG.Create();
-    auto counterEventFunc1 = []() {};
-    counterModelNG.SetOnInc(std::move(counterEventFunc1));
-    auto counterEventFunc2 = []() {};
-    counterModelNG.SetOnDec(std::move(counterEventFunc2));
-    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
-    EXPECT_NE(frameNode, nullptr);
+    auto subId = pattern_->GetSubId();
+    auto subNode = AceType::DynamicCast<FrameNode>(frameNode_->GetChildAtIndex(frameNode_->GetChildIndexById(subId)));
+    auto subGestureHub = subNode->GetOrCreateGestureEventHub();
+    EXPECT_EQ(subGestureHub->parallelCombineClick, false);
+    EXPECT_NE(subGestureHub->clickEventActuator_->userCallback_, nullptr);
+
+    auto addId = pattern_->GetAddId();
+    auto addNode = AceType::DynamicCast<FrameNode>(frameNode_->GetChildAtIndex(frameNode_->GetChildIndexById(addId)));
+    auto addGestureHub = addNode->GetOrCreateGestureEventHub();
+    EXPECT_EQ(addGestureHub->parallelCombineClick, false);
+    EXPECT_NE(addGestureHub->clickEventActuator_->userCallback_, nullptr);
 }
 
 /**
@@ -112,21 +134,12 @@ HWTEST_F(CounterTestNg, CounterPatternTest002, TestSize.Level1)
  */
 HWTEST_F(CounterTestNg, CounterPatternTest003, TestSize.Level1)
 {
-    // create mock theme manager
-    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
-    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
-    auto counterTheme = AceType::MakeRefPtr<CounterTheme>();
-    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(counterTheme));
+    Create([](CounterModelNG model) {
+        model.SetWidth(WIDTH);
+        model.SetHeight(HEIGHT);
+    });
 
-    CounterModelNG counterModelNG;
-    counterModelNG.Create();
-    counterModelNG.SetWidth(WIDTH);
-    counterModelNG.SetHeight(HEIGHT);
-    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
-    EXPECT_NE(frameNode, nullptr);
-    auto layoutProperty = frameNode->GetLayoutProperty();
-    EXPECT_NE(layoutProperty, nullptr);
-    auto selfIdealSize = layoutProperty->GetCalcLayoutConstraint()->selfIdealSize;
+    auto selfIdealSize = layoutProperty_->GetCalcLayoutConstraint()->selfIdealSize;
     EXPECT_EQ(selfIdealSize->Width()->dimension_, WIDTH);
     EXPECT_EQ(selfIdealSize->Height()->dimension_, HEIGHT);
 }
@@ -138,20 +151,13 @@ HWTEST_F(CounterTestNg, CounterPatternTest003, TestSize.Level1)
  */
 HWTEST_F(CounterTestNg, CounterPatternTest004, TestSize.Level1)
 {
-    // create mock theme manager
-    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
-    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
-    auto counterTheme = AceType::MakeRefPtr<CounterTheme>();
-    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(counterTheme));
+    Create([](CounterModelNG model) {
+        model.SetControlWidth(WIDTH);
+        model.SetStateChange(true);
+        model.SetBackgroundColor(COLOR);
+    });
 
-    CounterModelNG counterModelNG;
-    counterModelNG.Create();
-    counterModelNG.SetControlWidth(WIDTH);
-    counterModelNG.SetStateChange(true);
-    counterModelNG.SetBackgroundColor(COLOR);
-    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
-    EXPECT_NE(frameNode, nullptr);
-    auto renderContext = frameNode->GetRenderContext();
+    auto renderContext = frameNode_->GetRenderContext();
     EXPECT_EQ(renderContext->GetBackgroundColor(), COLOR);
 }
 
@@ -162,38 +168,16 @@ HWTEST_F(CounterTestNg, CounterPatternTest004, TestSize.Level1)
  */
 HWTEST_F(CounterTestNg, CounterPatternTest005, TestSize.Level1)
 {
-    CounterModelNG counterModelNG;
-    counterModelNG.Create();
-    auto counterNode = AceType::DynamicCast<CounterNode>(ViewStackProcessor::GetInstance()->Finish());
-    ASSERT_NE(counterNode, nullptr);
+    Create();
 
     auto nodeId = ElementRegister::GetInstance()->MakeUniqueId();
-    auto frameNode = AceType::MakeRefPtr<FrameNode>(FRAME_ITEM_ETS_TAG, nodeId, AceType::MakeRefPtr<Pattern>());
-    int32_t contentId = counterNode->GetPattern<CounterPattern>()->GetContentId();
-    auto contentChildNode = counterNode->GetChildAtIndex(counterNode->GetChildIndexById(contentId));
-    counterNode->AddChildToGroup(frameNode);
+    auto childNode = AceType::MakeRefPtr<FrameNode>(FRAME_ITEM_ETS_TAG, nodeId, AceType::MakeRefPtr<Pattern>());
+    int32_t contentId = pattern_->GetContentId();
+    auto contentChildNode = frameNode_->GetChildAtIndex(frameNode_->GetChildIndexById(contentId));
+    frameNode_->AddChildToGroup(childNode);
     EXPECT_EQ(contentChildNode->children_.size(), 1);
-}
 
-/**
- * @tc.name: CounterPatternTest006
- * @tc.desc: Test CounterNode DeleteChildFromGroup function.
- * @tc.type: FUNC
- */
-HWTEST_F(CounterTestNg, CounterPatternTest006, TestSize.Level1)
-{
-    CounterModelNG counterModelNG;
-    counterModelNG.Create();
-    auto counterNode = AceType::DynamicCast<CounterNode>(ViewStackProcessor::GetInstance()->Finish());
-    ASSERT_NE(counterNode, nullptr);
-
-    auto nodeId = ElementRegister::GetInstance()->MakeUniqueId();
-    auto frameNode = AceType::MakeRefPtr<FrameNode>(FRAME_ITEM_ETS_TAG, nodeId, AceType::MakeRefPtr<Pattern>());
-    int32_t contentId = counterNode->GetPattern<CounterPattern>()->GetContentId();
-    auto contentChildNode = counterNode->GetChildAtIndex(counterNode->GetChildIndexById(contentId));
-    counterNode->AddChildToGroup(frameNode);
-    EXPECT_EQ(contentChildNode->children_.size(), 1);
-    counterNode->DeleteChildFromGroup();
+    frameNode_->DeleteChildFromGroup();
     EXPECT_EQ(contentChildNode->children_.size(), 0);
 }
 
@@ -204,30 +188,23 @@ HWTEST_F(CounterTestNg, CounterPatternTest006, TestSize.Level1)
  */
 HWTEST_F(CounterTestNg, CounterPatternTest007, TestSize.Level1)
 {
-    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
-    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
-    auto counterTheme = AceType::MakeRefPtr<CounterTheme>();
-    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(counterTheme));
+    Create([](CounterModelNG model) {
+        model.SetEnableInc(true);
+        model.SetEnableDec(true);
+    });
 
-    CounterModelNG counterModelNG;
-    counterModelNG.Create();
-    auto* stack = ViewStackProcessor::GetInstance();
-    auto frameNode = stack->GetMainFrameNode();
-    ASSERT_NE(frameNode, nullptr);
-    auto addId = frameNode->GetPattern<CounterPattern>()->GetAddId();
-    auto addNode = AceType::DynamicCast<FrameNode>(frameNode->GetChildAtIndex(frameNode->GetChildIndexById(addId)));
-    auto addNodeRenderContext = addNode->GetRenderContext();
-    ASSERT_NE(addNodeRenderContext, nullptr);
-    auto eventHub = addNode->GetEventHub<EventHub>();
-    counterModelNG.SetEnableInc(true);
-    EXPECT_EQ(eventHub->IsEnabled(), true);
-    auto opacity = addNodeRenderContext->GetOpacityValue(-1);
-    EXPECT_EQ(opacity, DEFAULT_BUTTON_OPACITY);
-
-    counterModelNG.SetEnableInc(false);
-    EXPECT_EQ(eventHub->IsEnabled(), false);
-    opacity = addNodeRenderContext->GetOpacityValue(-1);
-    EXPECT_EQ(opacity, BUTTON_ALPHA_DISABLED);
+    auto addId = pattern_->GetAddId();
+    auto addNode = AceType::DynamicCast<FrameNode>(frameNode_->GetChildAtIndex(frameNode_->GetChildIndexById(addId)));
+    auto addRenderContext = addNode->GetRenderContext();
+    auto addEventHub = addNode->GetEventHub<EventHub>();
+    auto subId = pattern_->GetSubId();
+    auto subNode = AceType::DynamicCast<FrameNode>(frameNode_->GetChildAtIndex(frameNode_->GetChildIndexById(subId)));
+    auto subRenderContext = subNode->GetRenderContext();
+    auto subEventHub = subNode->GetEventHub<EventHub>();
+    EXPECT_EQ(addEventHub->IsEnabled(), true);
+    EXPECT_EQ(addRenderContext->GetOpacityValue(-1), DEFAULT_BUTTON_OPACITY);
+    EXPECT_EQ(subEventHub->IsEnabled(), true);
+    EXPECT_EQ(subRenderContext->GetOpacityValue(-1), DEFAULT_BUTTON_OPACITY);
 }
 
 /**
@@ -237,30 +214,23 @@ HWTEST_F(CounterTestNg, CounterPatternTest007, TestSize.Level1)
  */
 HWTEST_F(CounterTestNg, CounterPatternTest008, TestSize.Level1)
 {
-    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
-    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
-    auto counterTheme = AceType::MakeRefPtr<CounterTheme>();
-    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(counterTheme));
+    Create([](CounterModelNG model) {
+        model.SetEnableInc(false);
+        model.SetEnableDec(false);
+    });
 
-    CounterModelNG counterModelNG;
-    counterModelNG.Create();
-    auto* stack = ViewStackProcessor::GetInstance();
-    auto frameNode = stack->GetMainFrameNode();
-    ASSERT_NE(frameNode, nullptr);
-    auto subId = frameNode->GetPattern<CounterPattern>()->GetSubId();
-    auto subNode = AceType::DynamicCast<FrameNode>(frameNode->GetChildAtIndex(frameNode->GetChildIndexById(subId)));
-    auto subNodeRenderContext = subNode->GetRenderContext();
-    ASSERT_NE(subNodeRenderContext, nullptr);
-    auto eventHub = subNode->GetEventHub<EventHub>();
-    counterModelNG.SetEnableDec(true);
-    EXPECT_EQ(eventHub->IsEnabled(), true);
-    auto opacity = subNodeRenderContext->GetOpacityValue(-1);
-    EXPECT_EQ(opacity, DEFAULT_BUTTON_OPACITY);
-
-    counterModelNG.SetEnableDec(false);
-    EXPECT_EQ(eventHub->IsEnabled(), false);
-    opacity = subNodeRenderContext->GetOpacityValue(-1);
-    EXPECT_EQ(opacity, BUTTON_ALPHA_DISABLED);
+    auto addId = pattern_->GetAddId();
+    auto addNode = AceType::DynamicCast<FrameNode>(frameNode_->GetChildAtIndex(frameNode_->GetChildIndexById(addId)));
+    auto addRenderContext = addNode->GetRenderContext();
+    auto addEventHub = addNode->GetEventHub<EventHub>();
+    auto subId = pattern_->GetSubId();
+    auto subNode = AceType::DynamicCast<FrameNode>(frameNode_->GetChildAtIndex(frameNode_->GetChildIndexById(subId)));
+    auto subRenderContext = subNode->GetRenderContext();
+    auto subEventHub = subNode->GetEventHub<EventHub>();
+    EXPECT_EQ(addEventHub->IsEnabled(), false);
+    EXPECT_EQ(addRenderContext->GetOpacityValue(-1), BUTTON_ALPHA_DISABLED);
+    EXPECT_EQ(subEventHub->IsEnabled(), false);
+    EXPECT_EQ(subRenderContext->GetOpacityValue(-1), BUTTON_ALPHA_DISABLED);
 }
 
 /**
@@ -271,15 +241,18 @@ HWTEST_F(CounterTestNg, CounterPatternTest008, TestSize.Level1)
 HWTEST_F(CounterTestNg, CounterPatternTest009, TestSize.Level1)
 {
     ViewStackProcessor::GetInstance()->StartGetAccessRecordingFor(100);
-    CounterModelNG counterModelNG;
-    counterModelNG.Create();
-    auto counterNode = AceType::DynamicCast<CounterNode>(ViewStackProcessor::GetInstance()->Finish());
-    ASSERT_NE(counterNode, nullptr);
+    CounterModelNG model;
+    model.Create();
+    GetInstance();
+    EXPECT_TRUE(pattern_->HasSubNode());
+    EXPECT_TRUE(pattern_->HasContentNode());
+    EXPECT_TRUE(pattern_->HasAddNode());
+
     /**
      * Create again,cover all branches in function Create
      */
     ViewStackProcessor::GetInstance()->StartGetAccessRecordingFor(100);
-    counterModelNG.Create();
+    model.Create();
 }
 
 /**
@@ -297,5 +270,39 @@ HWTEST_F(CounterTestNg, CounterPatternTest010, TestSize.Level1)
     ASSERT_NE(subNode, nullptr);
     subNode->MountToParent(columnNode);
     CounterNode::GetOrCreateCounterNode("Counter", 101, []() { return AceType::MakeRefPtr<CounterPattern>(); });
+}
+
+/**
+ * @tc.name: CounterPatternTest011
+ * @tc.desc: Test counter SetEnableInc function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(CounterTestNg, CounterPatternTest011, TestSize.Level1)
+{
+    CounterModelNG model;
+    model.Create();
+    GetInstance();
+
+    auto addId = pattern_->GetAddId();
+    auto addNode = AceType::DynamicCast<FrameNode>(frameNode_->GetChildAtIndex(frameNode_->GetChildIndexById(addId)));
+    auto addRenderContext = addNode->GetRenderContext();
+    auto addEventHub = addNode->GetEventHub<EventHub>();
+    auto subId = pattern_->GetSubId();
+    auto subNode = AceType::DynamicCast<FrameNode>(frameNode_->GetChildAtIndex(frameNode_->GetChildIndexById(subId)));
+    auto subRenderContext = subNode->GetRenderContext();
+    auto subEventHub = subNode->GetEventHub<EventHub>();
+    model.SetEnableInc(AceType::RawPtr(frameNode_), true);
+    model.SetEnableDec(AceType::RawPtr(frameNode_), true);
+    EXPECT_EQ(addEventHub->IsEnabled(), true);
+    EXPECT_EQ(subEventHub->IsEnabled(), true);
+    EXPECT_EQ(addRenderContext->GetOpacityValue(-1), DEFAULT_BUTTON_OPACITY);
+    EXPECT_EQ(subRenderContext->GetOpacityValue(-1), DEFAULT_BUTTON_OPACITY);
+
+    model.SetEnableInc(AceType::RawPtr(frameNode_), false);
+    model.SetEnableDec(AceType::RawPtr(frameNode_), false);
+    EXPECT_EQ(addEventHub->IsEnabled(), false);
+    EXPECT_EQ(subEventHub->IsEnabled(), false);
+    EXPECT_EQ(addRenderContext->GetOpacityValue(-1), BUTTON_ALPHA_DISABLED);
+    EXPECT_EQ(subRenderContext->GetOpacityValue(-1), BUTTON_ALPHA_DISABLED);
 }
 } // namespace OHOS::Ace::NG

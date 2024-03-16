@@ -3492,3 +3492,42 @@ const isFloat = (val: any) => Number.isFinite(val) && !Number.isInteger(val);
 const isInteger = (val: any) => Number.isInteger(val);
 const isNonEmptyMap = (val: any) => val instanceof Map && val.size > 0;
 const isTruthyString = (val: any) => typeof val === 'string' && val.trim() !== '';
+
+
+class UICommonEvent {
+  private _nodePtr: Object | null;
+  private _instanceId: number;
+  setInstanceId(instanceId: number): void {
+    this._instanceId = instanceId;
+  }
+  setNodePtr(nodePtr: Object | null): void {
+    this._nodePtr = nodePtr;
+  }
+  setOnClick(callback: (event?: ClickEvent) => void): void {
+    getUINativeModule().frameNode.setOnClick(this._nodePtr, callback);
+  }
+  setOnTouch(callback: (event?: TouchEvent) => void): void {
+    getUINativeModule().frameNode.setOnTouch(this._nodePtr, callback);
+  }
+  setOnAppear(callback: () => void): void {
+    getUINativeModule().frameNode.setOnAppear(this._nodePtr, callback);
+  }
+  setOnDisappear(callback: () => void): void {
+    getUINativeModule().frameNode.setOnDisappear(this._nodePtr, callback);
+  }
+  setOnKeyEvent(callback: (event?: KeyEvent) => void): void {
+    getUINativeModule().frameNode.setOnKeyEvent(this._nodePtr, callback);
+  }
+  setOnFocus(callback: () => void): void {
+    getUINativeModule().frameNode.setOnFocus(this._nodePtr, callback);
+  }
+  setOnBlur(callback: () => void): void {
+    getUINativeModule().frameNode.setOnBlur(this._nodePtr, callback);
+  }
+  setOnHover(callback: (isHover?: boolean, event?: HoverEvent) => void): void {
+    getUINativeModule().frameNode.setOnHover(this._nodePtr, callback);
+  }
+  setOnMouse(callback: (event?: MouseEvent) => void): void {
+    getUINativeModule().frameNode.setOnMouse(this._nodePtr, callback);
+  }
+}

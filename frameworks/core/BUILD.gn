@@ -35,6 +35,7 @@ template("ace_core_source_set") {
     # add common source file needed by all product platform here
     sources = [
       # accessibility
+      "accessibility/accessibility_manager_ng.cpp",
       "accessibility/accessibility_node.cpp",
       "accessibility/accessibility_utils.cpp",
 
@@ -596,6 +597,7 @@ template("ace_core_ng_source_set") {
     # add common source file needed by all product platform here
     sources = [
       # accessibility
+      "accessibility/accessibility_manager_ng.cpp",
       "accessibility/accessibility_node.cpp",
       "accessibility/accessibility_utils.cpp",
 

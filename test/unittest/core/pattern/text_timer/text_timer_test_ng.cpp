@@ -123,7 +123,7 @@ RefPtr<FrameNode> TextTimerTestNg::CreateTextTimerParagraph(const TestProperty& 
     if (testProperty.fontFamily.has_value()) {
         textTimerModel.SetFontFamily(testProperty.fontFamily.value());
     }
-    return ViewStackProcessor::GetInstance()->GetMainFrameNode(); // TextTimerView pop
+    return AceType::Claim<FrameNode>(ViewStackProcessor::GetInstance()->GetMainFrameNode()); // TextTimerView pop
 }
 
 /**
@@ -297,7 +297,7 @@ HWTEST_F(TextTimerTestNg, TextTimerTest003, TestSize.Level1)
      * @tc.steps: step2. get texttimer frameNode and event.
      * @tc.expected: step2. function is called.
      */
-    RefPtr<FrameNode> frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     EXPECT_NE(frameNode, nullptr);
     RefPtr<TextTimerEventHub> eventHub = frameNode->GetEventHub<NG::TextTimerEventHub>();
     EXPECT_NE(eventHub, nullptr);

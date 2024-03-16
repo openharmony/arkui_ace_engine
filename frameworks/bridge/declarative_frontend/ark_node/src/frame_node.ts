@@ -12,6 +12,78 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+class FrameNodeAttributeMap {
+  private map_: Map<Symbol, ModifierWithKey<number | string | boolean | object>>;
+  private changeCallback: ((key: Symbol, value: ModifierWithKey<number | string | boolean | object>) => void) | undefined;
+
+  constructor() {
+    this.map_ = new Map();
+  }
+
+  public clear(): void {
+    this.map_.clear();
+  }
+
+  public delete(key: Symbol): boolean {
+    return this.map_.delete(key);
+  }
+
+  public forEach(callbackfn: (value: ModifierWithKey<number | string | boolean | object>, key: Symbol,
+    map: Map<Symbol, ModifierWithKey<number | string | boolean | object>>) => void, thisArg?: any): void {
+    this.map_.forEach(callbackfn, thisArg);
+  }
+  public get(key: Symbol): ModifierWithKey<number | string | boolean | object> | undefined {
+    return this.map_.get(key);
+  }
+  public has(key: Symbol): boolean {
+    return this.map_.has(key);
+  }
+  public set(key: Symbol, value: ModifierWithKey<number | string | boolean | object>): this {
+    const _a = this.changeCallback;
+    this.map_.set(key, value);
+    _a === null || _a === void 0 ? void 0 : _a(key, value);
+    return this;
+  }
+  public get size(): number {
+    return this.map_.size;
+  }
+  public entries(): IterableIterator<[Symbol, ModifierWithKey<number | string | boolean | object>]> {
+    return this.map_.entries();
+  }
+  public keys(): IterableIterator<Symbol> {
+    return this.map_.keys();
+  }
+  public values(): IterableIterator<ModifierWithKey<number | string | boolean | object>> {
+    return this.map_.values();
+  }
+  public [Symbol.iterator](): IterableIterator<[Symbol, ModifierWithKey<number | string | boolean | object>]> {
+    return this.map_.entries();
+  }
+  public get [Symbol.toStringTag](): string {
+    return 'FrameNodeAttributeMapTag';
+  }
+  public setOnChange(callback: (key: Symbol, value: ModifierWithKey<number | string | boolean | object>) => void): void {
+    if (this.changeCallback === undefined) {
+      this.changeCallback = callback;
+    }
+  }
+}
+
+class FrameNodeModifier extends ArkComponent {
+  constructor(nodePtr: NodePtr) {
+    super(nodePtr);
+    this._modifiersWithKeys = new FrameNodeAttributeMap();
+    this._modifiersWithKeys.setOnChange((key, value) => {
+      if (this.nativePtr === undefined) {
+        return;
+      }
+      value.applyStage(this.nativePtr);
+    })
+  }
+  setNodePtr(nodePtr: NodePtr): void {
+    this.nativePtr = nodePtr;
+  }
+}
 
 class FrameNode {
   private renderNode_: RenderNode;
@@ -20,6 +92,8 @@ class FrameNode {
   protected uiContext_: UIContext | undefined | null;
   private nodeId_: number;
   private type_: string;
+  private _commonAttribute: FrameNodeModifier;
+  private _commonEvent: UICommonEvent;
   constructor(uiContext: UIContext, type: string) {
     this.uiContext_ = uiContext;
     this.nodeId_ = -1;
@@ -208,17 +282,34 @@ class FrameNode {
     return this.convertToFrameNode(nodePtr);
   }
   getChildrenCount(): number {
-    const number = getUINativeModule().frameNode.getChildNumber(this.nodePtr_);
+    const number = getUINativeModule().frameNode.getChildrenCount(this.nodePtr_);
     return number;
   }
   getPositionToParent(): Position {
     const position = getUINativeModule().frameNode.getPositionToParent(this.nodePtr_);
-    return {x: position[0], y: position[1]};
+    return { x: position[0], y: position[1] };
   }
 
   getPositionToWindow(): Position {
     const position = getUINativeModule().frameNode.getPositionToWindow(this.nodePtr_);
-    return {x: position[0], y: position[1]};
+    return { x: position[0], y: position[1] };
+  }
+
+  get commonAttribute(): ArkComponent {
+    if (this._commonAttribute === undefined) {
+      this._commonAttribute = new FrameNodeModifier(this.nodePtr_);
+    }
+    this._commonAttribute.setNodePtr((this.type_ === 'BuilderNode' || this.type_ === 'ArkTsNode') ? undefined : this.nodePtr_);
+    return this._commonAttribute;
+  }
+
+  get commonEvent(): UICommonEvent {
+    if (this._commonEvent === undefined) {
+      this._commonEvent = new UICommonEvent(this.nodePtr_);
+    }
+    this._commonEvent.setNodePtr(this.nodePtr_);
+    this._commonEvent.setInstanceId((this.uiContext_ === undefined || this.uiContext_ === null) ? -1 : this.uiContext_.instanceId_);
+    return this._commonEvent;
   }
 }
 

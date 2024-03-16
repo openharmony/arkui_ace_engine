@@ -14,6 +14,7 @@
  */
 
 #include "frameworks/core/components_ng/pattern/rendering_context/rendering_context_model_ng.h"
+#include "interfaces/inner_api/ace/ai/image_analyzer.h"
 
 namespace OHOS::Ace::NG {
 void RenderingContextModelNG::GetWidth(RefPtr<AceType>& canvasPattern, double& width)
@@ -44,6 +45,25 @@ void RenderingContextModelNG::SetTransferFromImageBitmap(RefPtr<AceType>& canvas
             return;
         }
         customPaintPattern->TransferFromImageBitmap(offscreenCanvasPattern);
+    }
+}
+
+void RenderingContextModelNG::StartImageAnalyzer(RefPtr<AceType>& canvasPattern, void* config,
+    onAnalyzedCallback& onAnalyzed)
+{
+    CHECK_NULL_VOID(canvasPattern);
+    auto customPaintPattern = AceType::DynamicCast<NG::CustomPaintPattern>(canvasPattern);
+    if (customPaintPattern) {
+        customPaintPattern->StartImageAnalyzer(config, onAnalyzed);
+    }
+}
+
+void RenderingContextModelNG::StopImageAnalyzer(RefPtr<AceType>& canvasPattern)
+{
+    CHECK_NULL_VOID(canvasPattern);
+    auto customPaintPattern = AceType::DynamicCast<NG::CustomPaintPattern>(canvasPattern);
+    if (customPaintPattern) {
+        customPaintPattern->StopImageAnalyzer();
     }
 }
 } // namespace OHOS::Ace::NG

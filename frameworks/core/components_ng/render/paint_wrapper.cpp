@@ -65,6 +65,9 @@ void PaintWrapper::FlushRender(const RefPtr<NG::DrawModifier>& drawModifier)
     auto contentModifier = DynamicCast<ContentModifier>(nodePaintImpl_->GetContentModifier(this));
     if (contentModifier) {
         nodePaintImpl_->UpdateContentModifier(this);
+        if (drawModifier) {
+            contentModifier->SetContentChange();
+        }
     }
 
     auto overlayModifier = nodePaintImpl_->GetOverlayModifier(this);

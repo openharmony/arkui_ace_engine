@@ -389,6 +389,70 @@ class NodeController {
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+class FrameNodeAttributeMap {
+    constructor() {
+        this.map_ = new Map();
+    }
+    clear() {
+        this.map_.clear();
+    }
+    delete(key) {
+        return this.map_.delete(key);
+    }
+    forEach(callbackfn, thisArg) {
+        this.map_.forEach(callbackfn, thisArg);
+    }
+    get(key) {
+        return this.map_.get(key);
+    }
+    has(key) {
+        return this.map_.has(key);
+    }
+    set(key, value) {
+        const _a = this.changeCallback;
+        this.map_.set(key, value);
+        _a === null || _a === void 0 ? void 0 : _a(key, value);
+        return this;
+    }
+    get size() {
+        return this.map_.size;
+    }
+    entries() {
+        return this.map_.entries();
+    }
+    keys() {
+        return this.map_.keys();
+    }
+    values() {
+        return this.map_.values();
+    }
+    [Symbol.iterator]() {
+        return this.map_.entries();
+    }
+    get [Symbol.toStringTag]() {
+        return 'FrameNodeAttributeMapTag';
+    }
+    setOnChange(callback) {
+        if (this.changeCallback === undefined) {
+            this.changeCallback = callback;
+        }
+    }
+}
+class FrameNodeModifier extends ArkComponent {
+    constructor(nodePtr) {
+        super(nodePtr);
+        this._modifiersWithKeys = new FrameNodeAttributeMap();
+        this._modifiersWithKeys.setOnChange((key, value) => {
+            if (this.nativePtr === undefined) {
+                return;
+            }
+            value.applyStage(this.nativePtr);
+        });
+    }
+    setNodePtr(nodePtr) {
+        this.nativePtr = nodePtr;
+    }
+}
 class FrameNode {
     constructor(uiContext, type) {
         this.uiContext_ = uiContext;
@@ -575,22 +639,31 @@ class FrameNode {
         return this.convertToFrameNode(nodePtr);
     }
     getChildrenCount() {
-        const number = getUINativeModule().frameNode.getChildNumber(this.nodePtr_);
+        const number = getUINativeModule().frameNode.getChildrenCount(this.nodePtr_);
         return number;
     }
     getPositionToParent() {
         const position = getUINativeModule().frameNode.getPositionToParent(this.nodePtr_);
-        if (position) {
-            return {x: position[0], y: position[1]};
-        }
-        return null;
+        return { x: position[0], y: position[1] };
     }
     getPositionToWindow() {
         const position = getUINativeModule().frameNode.getPositionToWindow(this.nodePtr_);
-        if (position) {
-            return {x: position[0], y: position[1]};
+        return { x: position[0], y: position[1] };
+    }
+    get commonAttribute() {
+        if (this._commonAttribute === undefined) {
+            this._commonAttribute = new FrameNodeModifier(this.nodePtr_);
         }
-        return null;
+        this._commonAttribute.setNodePtr((this.type_ === 'BuilderNode' || this.type_ === 'ArkTsNode') ? undefined : this.nodePtr_);
+        return this._commonAttribute;
+    }
+    get commonEvent() {
+        if (this._commonEvent === undefined) {
+            this._commonEvent = new UICommonEvent(this.nodePtr_);
+        }
+        this._commonEvent.setNodePtr(this.nodePtr_);
+        this._commonEvent.setInstanceId((this.uiContext_ === undefined || this.uiContext_ === null) ? -1 : this.uiContext_.instanceId_);
+        return this._commonEvent;
     }
 }
 class FrameNodeUtils {
@@ -600,12 +673,11 @@ class FrameNodeUtils {
             return null;
         }
         if (FrameNodeFinalizationRegisterProxy.ElementIdToOwningFrameNode_.has(nodeId)) {
-        let frameNode = FrameNodeFinalizationRegisterProxy.ElementIdToOwningFrameNode_.get(nodeId).deref();
+            let frameNode = FrameNodeFinalizationRegisterProxy.ElementIdToOwningFrameNode_.get(nodeId).deref();
             return frameNode === undefined ? null : frameNode;
         }
         return null;
     }
-
     static createFrameNode(uiContext, nodePtr) {
         if (!getUINativeModule().frameNode.isModifiable(nodePtr)) {
             let frameNode = new FrameNode(uiContext, 'ArkTsNode');

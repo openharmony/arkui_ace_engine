@@ -83,18 +83,14 @@ public:
                 return theme;
             }
             theme->trackThickness_ = themeConstants->GetDimension(THEME_PROGRERSS_THICKNESS);
-            ParsePattern(themeConstants->GetThemeStyle(), theme);
+            ParsePattern(themeConstants, theme);
             return theme;
         }
 
     private:
-        void ParsePattern(const RefPtr<ThemeStyle>& themeStyle, const RefPtr<GaugeTheme>& theme) const
+        void ParsePattern(const RefPtr<ThemeConstants>& themeConstants, const RefPtr<GaugeTheme>& theme) const
         {
-            if (!themeStyle) {
-                return;
-            }
-
-            auto gaugePattern = themeStyle->GetAttr<RefPtr<ThemeStyle>>(THEME_PATTERN_GAUGE, nullptr);
+            RefPtr<ThemeStyle> gaugePattern = themeConstants->GetPatternByName(THEME_PATTERN_GAUGE);
             if (!gaugePattern) {
                 return;
             }

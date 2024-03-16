@@ -28,6 +28,7 @@
 #include "bridge/common/utils/utils.h"
 #include "core/animation/animation_pub.h"
 #include "core/animation/curves.h"
+#include "core/common/ime/text_input_type.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components/common/properties/animation_option.h"
 #include "core/components/common/properties/color.h"
@@ -998,9 +999,6 @@ void SetAlign(ArkUINodeHandle node, ArkUI_Int32 align)
     CHECK_NULL_VOID(frameNode);
     Alignment alignment = ParseAlignment(align);
     ViewAbstract::SetAlign(frameNode, alignment);
-    auto* companion = ViewModel::GetCompanion(node);
-    CHECK_NULL_VOID(companion);
-    companion->alignment = align;
 }
 
 void ResetAlign(ArkUINodeHandle node)
@@ -3764,6 +3762,70 @@ ArkUITranslateTransitionType GetTranslateTransition(ArkUINodeHandle node)
     return translateAnimationStruct;
 }
 
+void SetMoveTransition(ArkUINodeHandle node, ArkUI_Int32 value, const ArkUIAnimationOptionType* animationOption)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto edgeType = static_cast<TransitionEdge>(value);
+    RefPtr<OneCenterTransitionOptionType> oneCenterTransition;
+    auto renderContext = frameNode->GetRenderContext();
+    if (renderContext) {
+        oneCenterTransition = renderContext->GetOneCenterTransitionOption();
+    }
+    if (!oneCenterTransition) {
+        oneCenterTransition = AceType::MakeRefPtr<OneCenterTransitionOptionType>();
+        ResetTransformCenter(oneCenterTransition);
+    }
+    RefPtr<NG::ChainedTransitionEffect> chainEffect = oneCenterTransition->GetTransitionEffect();
+    RefPtr<NG::ChainedMoveEffect> moveEffect;
+    while (chainEffect) {
+        if (chainEffect->GetType() == ChainedTransitionEffectType::MOVE) {
+            moveEffect = AceType::DynamicCast<NG::ChainedMoveEffect>(chainEffect);
+            break;
+        }
+        chainEffect = chainEffect->GetNext();
+    }
+    auto option = std::make_shared<AnimationOption>();
+    SetAnimationOption(option, animationOption);
+    if (!moveEffect) {
+        moveEffect = AceType::MakeRefPtr<NG::ChainedMoveEffect>(edgeType);
+        moveEffect->SetAnimationOption(option);
+        moveEffect->SetNext(oneCenterTransition->GetTransitionEffect());
+        oneCenterTransition->SetTransitionEffect(moveEffect);
+    } else {
+        moveEffect->SetAnimationOption(option);
+    }
+    ACE_UPDATE_NODE_RENDER_CONTEXT(OneCenterTransitionOption, oneCenterTransition, frameNode);
+    ViewAbstract::SetChainedTransition(frameNode, oneCenterTransition->GetTransitionEffect());
+}
+
+ArkUIMoveTransitionType GetMoveTransition(ArkUINodeHandle node)
+{
+    ArkUIAnimationOptionType animationType = { DEFAULT_DURATION, 0, 0, 1, 0, 1.0f };
+    ArkUIMoveTransitionType moveAnimationStruct = { 0, animationType };
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, moveAnimationStruct);
+    RefPtr<OneCenterTransitionOptionType> oneCenterTransition;
+    auto renderContext = frameNode->GetRenderContext();
+    if (renderContext) {
+        oneCenterTransition = renderContext->GetOneCenterTransitionOption();
+    }
+    CHECK_NULL_RETURN(oneCenterTransition, moveAnimationStruct);
+    RefPtr<NG::ChainedTransitionEffect> chainEffect = oneCenterTransition->GetTransitionEffect();
+    RefPtr<NG::ChainedMoveEffect> moveEffect;
+    while (chainEffect) {
+        if (chainEffect->GetType() == ChainedTransitionEffectType::MOVE) {
+            moveEffect = AceType::DynamicCast<NG::ChainedMoveEffect>(chainEffect);
+            break;
+        }
+        chainEffect = chainEffect->GetNext();
+    }
+    CHECK_NULL_RETURN(moveEffect, moveAnimationStruct);
+    moveAnimationStruct.edgeType = static_cast<ArkUI_Int32>(moveEffect->GetEffect());
+    ParseAnimationOptionToStruct(moveEffect->GetAnimationOption(), moveAnimationStruct.animation);
+    return moveAnimationStruct;
+}
+
 void SetMaskShape(ArkUINodeHandle node, ArkUI_CharPtr type, ArkUI_Uint32 fill, ArkUI_Uint32 stroke,
     ArkUI_Float32 strokeWidth, const ArkUI_Float32* attribute, ArkUI_Int32 length)
 {
@@ -3839,6 +3901,13 @@ void SetProgressMask(ArkUINodeHandle node, const ArkUI_Float32* attribute, ArkUI
     progressMask->SetMaxValue(total);
     progressMask->SetColor(Color(color));
     ViewAbstract::SetProgressMask(frameNode, progressMask);
+}
+
+void ResetMask(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ViewAbstract::SetMask(frameNode, nullptr);
 }
 
 void SetOutlineColor(ArkUINodeHandle node, const uint32_t* values, int32_t valuesSize)
@@ -4628,7 +4697,7 @@ const ArkUICommonModifier* GetCommonModifier()
         GetBrightness, GetSaturate, GetBackgroundImagePosition, GetFlexGrow, GetFlexShrink, GetFlexBasis,
         GetConstraintSize, GetGrayScale, GetInvert, GetSepia, GetContrast, GetForegroundColor, GetBlur,
         GetLinearGradient, GetAlign, GetWidth, GetHeight, GetBackgroundColor, GetBackgroundImage, GetPadding, GetKey,
-        GetEnabled, GetMargin, GetTranslate };
+        GetEnabled, GetMargin, GetTranslate, SetMoveTransition, GetMoveTransition, ResetMask };
 
     return &modifier;
 }
@@ -4648,6 +4717,23 @@ void SetOnAppear(ArkUINodeHandle node, void* extraParam)
         SendArkUIAsyncEvent(&event);
     };
     ViewAbstract::SetOnAppear(frameNode, std::move(onAppear));
+}
+
+void SetOnDisappear(ArkUINodeHandle node, void* extraParam)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    int32_t nodeId = frameNode->GetId();
+    auto onDisappear = [frameNode, nodeId, extraParam]() {
+        ArkUINodeEvent event;
+        event.kind = COMPONENT_ASYNC_EVENT;
+        event.extraParam = reinterpret_cast<intptr_t>(extraParam);
+        event.nodeId = nodeId;
+        event.componentAsyncEvent.subKind = ON_DISAPPEAR;
+        PipelineContext::SetCallBackNode(AceType::WeakClaim(frameNode));
+        SendArkUIAsyncEvent(&event);
+    };
+    ViewAbstract::SetOnDisappear(frameNode, std::move(onDisappear));
 }
 
 void SetOnFocus(ArkUINodeHandle node, void* extraParam)
@@ -4794,19 +4880,19 @@ void SetOnTouch(ArkUINodeHandle node, void* extraParam)
         auto getTouchPoints = [](ArkUITouchPoint** points) -> ArkUI_Int32 {
             const std::list<TouchLocationInfo>& touchList = globalEventInfo.GetTouches();
             int index = 0;
+            *points = new ArkUITouchPoint[touchList.size()];
             for (const auto& touchInfo : touchList) {
                 const OHOS::Ace::Offset& globalLocation = touchInfo.GetGlobalLocation();
                 const OHOS::Ace::Offset& localLocation = touchInfo.GetLocalLocation();
                 const OHOS::Ace::Offset& screenLocation = touchInfo.GetScreenLocation();
-                ArkUITouchPoint touchPoint;
-                touchPoint.id = touchInfo.GetFingerId();
-                touchPoint.nodeX = PipelineBase::Px2VpWithCurrentDensity(localLocation.GetX());
-                touchPoint.nodeY = PipelineBase::Px2VpWithCurrentDensity(localLocation.GetY());
-                touchPoint.windowX = PipelineBase::Px2VpWithCurrentDensity(globalLocation.GetX());
-                touchPoint.windowY = PipelineBase::Px2VpWithCurrentDensity(globalLocation.GetY());
-                touchPoint.screenX = PipelineBase::Px2VpWithCurrentDensity(screenLocation.GetX());
-                touchPoint.screenY = PipelineBase::Px2VpWithCurrentDensity(screenLocation.GetY());
-                points[index++] = &touchPoint;
+                (*points)[index].id = touchInfo.GetFingerId();
+                (*points)[index].nodeX = PipelineBase::Px2VpWithCurrentDensity(localLocation.GetX());
+                (*points)[index].nodeY = PipelineBase::Px2VpWithCurrentDensity(localLocation.GetY());
+                (*points)[index].windowX = PipelineBase::Px2VpWithCurrentDensity(globalLocation.GetX());
+                (*points)[index].windowY = PipelineBase::Px2VpWithCurrentDensity(globalLocation.GetY());
+                (*points)[index].screenX = PipelineBase::Px2VpWithCurrentDensity(screenLocation.GetX());
+                (*points)[index].screenY = PipelineBase::Px2VpWithCurrentDensity(screenLocation.GetY());
+                index++;
             }
             return index;
         };

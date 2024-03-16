@@ -80,7 +80,6 @@ const std::vector<TextAlign> TEXT_ALIGNS = { TextAlign::START, TextAlign::CENTER
     TextAlign::LEFT, TextAlign::RIGHT };
 const std::vector<TextHeightAdaptivePolicy> HEIGHT_ADAPTIVE_POLICY = { TextHeightAdaptivePolicy::MAX_LINES_FIRST,
     TextHeightAdaptivePolicy::MIN_FONT_SIZE_FIRST, TextHeightAdaptivePolicy::LAYOUT_CONSTRAINT_FIRST };
-const std::vector<WordBreak> WORD_BREAK_TYPES = { WordBreak::NORMAL, WordBreak::BREAK_ALL, WordBreak::BREAK_WORD };
 const std::vector<EllipsisMode> ELLIPSIS_MODALS = { EllipsisMode::HEAD, EllipsisMode::MIDDLE, EllipsisMode::TAIL };
 }; // namespace
 
@@ -149,18 +148,15 @@ void JSText::SetFontSize(const JSCallbackInfo& info)
     if (info.Length() < 1) {
         return;
     }
-    auto pipelineContext = PipelineBase::GetCurrentContext();
-    CHECK_NULL_VOID(pipelineContext);
-    auto theme = pipelineContext->GetTheme<TextTheme>();
-    CHECK_NULL_VOID(theme);
-    CalcDimension fontSize = theme->GetTextStyle().GetFontSize();
-    if (!ParseJsDimensionFpNG(info[0], fontSize, false)) {
+    CalcDimension fontSize;
+    if (!ParseJsDimensionFpNG(info[0], fontSize, false) || fontSize.IsNegative()) {
+        auto pipelineContext = PipelineBase::GetCurrentContext();
+        CHECK_NULL_VOID(pipelineContext);
+        auto theme = pipelineContext->GetTheme<TextTheme>();
+        CHECK_NULL_VOID(theme);
         fontSize = theme->GetTextStyle().GetFontSize();
         TextModel::GetInstance()->SetFontSize(fontSize);
         return;
-    }
-    if (fontSize.IsNegative()) {
-        fontSize = theme->GetTextStyle().GetFontSize();
     }
     TextModel::GetInstance()->SetFontSize(fontSize);
 }
@@ -412,37 +408,40 @@ void JSText::SetBaselineOffset(const JSCallbackInfo& info)
 
 void JSText::SetDecoration(const JSCallbackInfo& info)
 {
-    do {
-        auto tmpInfo = info[0];
-        if (!tmpInfo->IsObject()) {
-            break;
-        }
-        JSRef<JSObject> obj = JSRef<JSObject>::Cast(tmpInfo);
-        JSRef<JSVal> typeValue = obj->GetProperty("type");
-        JSRef<JSVal> colorValue = obj->GetProperty("color");
-        JSRef<JSVal> styleValue = obj->GetProperty("style");
+    auto tmpInfo = info[0];
+    if (!tmpInfo->IsObject()) {
+        info.ReturnSelf();
+        return;
+    }
+    JSRef<JSObject> obj = JSRef<JSObject>::Cast(tmpInfo);
+    JSRef<JSVal> typeValue = obj->GetProperty("type");
+    JSRef<JSVal> colorValue = obj->GetProperty("color");
+    JSRef<JSVal> styleValue = obj->GetProperty("style");
 
-        auto pipelineContext = PipelineBase::GetCurrentContext();
-        CHECK_NULL_VOID(pipelineContext);
-        auto theme = pipelineContext->GetTheme<TextTheme>();
+    TextDecoration textDecoration;
+    if (typeValue->IsNumber()) {
+        textDecoration = static_cast<TextDecoration>(typeValue->ToNumber<int32_t>());
+    } else {
+        auto theme = GetTheme<TextTheme>();
         CHECK_NULL_VOID(theme);
-        TextDecoration textDecoration = theme->GetTextStyle().GetTextDecoration();
-        if (typeValue->IsNumber()) {
-            textDecoration = static_cast<TextDecoration>(typeValue->ToNumber<int32_t>());
-        }
-        Color result = theme->GetTextStyle().GetTextDecorationColor();
-        ParseJsColor(colorValue, result);
-        std::optional<TextDecorationStyle> textDecorationStyle;
-        if (styleValue->IsNumber()) {
-            textDecorationStyle = static_cast<TextDecorationStyle>(styleValue->ToNumber<int32_t>());
-        }
-        TextModel::GetInstance()->SetTextDecoration(textDecoration);
-        TextModel::GetInstance()->SetTextDecorationColor(result);
-        if (textDecorationStyle) {
-            TextModel::GetInstance()->SetTextDecorationStyle(textDecorationStyle.value());
-        }
-    } while (false);
-    info.SetReturnValue(info.This());
+        textDecoration = theme->GetTextStyle().GetTextDecoration();
+    }
+    Color result;
+    if (!ParseJsColor(colorValue, result)) {
+        auto theme = GetTheme<TextTheme>();
+        CHECK_NULL_VOID(theme);
+        result = theme->GetTextStyle().GetTextDecorationColor();
+    }
+    std::optional<TextDecorationStyle> textDecorationStyle;
+    if (styleValue->IsNumber()) {
+        textDecorationStyle = static_cast<TextDecorationStyle>(styleValue->ToNumber<int32_t>());
+    }
+    TextModel::GetInstance()->SetTextDecoration(textDecoration);
+    TextModel::GetInstance()->SetTextDecorationColor(result);
+    if (textDecorationStyle) {
+        TextModel::GetInstance()->SetTextDecorationStyle(textDecorationStyle.value());
+    }
+    info.ReturnSelf();
 }
 
 void JSText::SetHeightAdaptivePolicy(int32_t value)
@@ -463,7 +462,7 @@ void JSText::JsOnClick(const JSCallbackInfo& info)
         if (!info[0]->IsFunction()) {
             return;
         }
-        WeakPtr<NG::FrameNode> frameNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+        auto frameNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
         auto jsOnClickFunc = AceType::MakeRefPtr<JsClickFunction>(JSRef<JSFunc>::Cast(info[0]));
         auto onClick = [execCtx = info.GetExecutionContext(), func = jsOnClickFunc, node = frameNode]
             (const BaseEventInfo* info) {
@@ -483,7 +482,7 @@ void JSText::JsOnClick(const JSCallbackInfo& info)
         if (info[0]->IsFunction()) {
             auto inspector = ViewStackProcessor::GetInstance()->GetInspectorComposedComponent();
             auto impl = inspector ? inspector->GetInspectorFunctionImpl() : nullptr;
-            WeakPtr<NG::FrameNode> frameNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+            auto frameNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
             RefPtr<JsClickFunction> jsOnClickFunc = AceType::MakeRefPtr<JsClickFunction>(JSRef<JSFunc>::Cast(info[0]));
             auto onClickId = [execCtx = info.GetExecutionContext(), func = std::move(jsOnClickFunc), impl,
                                  node = frameNode](const BaseEventInfo* info) {
@@ -560,7 +559,7 @@ void JSText::JsOnDragStart(const JSCallbackInfo& info)
 {
     CHECK_NULL_VOID(info[0]->IsFunction());
     RefPtr<JsDragFunction> jsOnDragStartFunc = AceType::MakeRefPtr<JsDragFunction>(JSRef<JSFunc>::Cast(info[0]));
-    WeakPtr<NG::FrameNode> frameNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    WeakPtr<NG::FrameNode> frameNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
     auto onDragStart = [execCtx = info.GetExecutionContext(), func = std::move(jsOnDragStartFunc),
                            targetNode = frameNode](
                            const RefPtr<DragEvent>& info, const std::string& extraParams) -> NG::DragDropBaseInfo {
@@ -594,7 +593,7 @@ void JSText::JsOnDragStart(const JSCallbackInfo& info)
 void JSText::JsOnDragEnter(const JSCallbackInfo& info)
 {
     CHECK_NULL_VOID(info[0]->IsFunction());
-    WeakPtr<NG::FrameNode> frameNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    WeakPtr<NG::FrameNode> frameNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
     RefPtr<JsDragFunction> jsOnDragEnterFunc = AceType::MakeRefPtr<JsDragFunction>(JSRef<JSFunc>::Cast(info[0]));
     auto onDragEnterId = [execCtx = info.GetExecutionContext(), func = std::move(jsOnDragEnterFunc), node = frameNode](
                              const RefPtr<DragEvent>& info, const std::string& extraParams) {
@@ -609,7 +608,7 @@ void JSText::JsOnDragEnter(const JSCallbackInfo& info)
 void JSText::JsOnDragMove(const JSCallbackInfo& info)
 {
     CHECK_NULL_VOID(info[0]->IsFunction());
-    WeakPtr<NG::FrameNode> frameNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    WeakPtr<NG::FrameNode> frameNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
     RefPtr<JsDragFunction> jsOnDragMoveFunc = AceType::MakeRefPtr<JsDragFunction>(JSRef<JSFunc>::Cast(info[0]));
     auto onDragMoveId = [execCtx = info.GetExecutionContext(), func = std::move(jsOnDragMoveFunc), node = frameNode](
                             const RefPtr<DragEvent>& info, const std::string& extraParams) {
@@ -624,7 +623,7 @@ void JSText::JsOnDragMove(const JSCallbackInfo& info)
 void JSText::JsOnDragLeave(const JSCallbackInfo& info)
 {
     CHECK_NULL_VOID(info[0]->IsFunction());
-    WeakPtr<NG::FrameNode> frameNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    WeakPtr<NG::FrameNode> frameNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
     RefPtr<JsDragFunction> jsOnDragLeaveFunc = AceType::MakeRefPtr<JsDragFunction>(JSRef<JSFunc>::Cast(info[0]));
     auto onDragLeaveId = [execCtx = info.GetExecutionContext(), func = std::move(jsOnDragLeaveFunc), node = frameNode](
                              const RefPtr<DragEvent>& info, const std::string& extraParams) {
@@ -740,7 +739,7 @@ void JSText::BindSelectionMenu(const JSCallbackInfo& info)
         responseType = static_cast<NG::TextResponseType>(response);
     }
 
-    WeakPtr<NG::FrameNode> frameNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    WeakPtr<NG::FrameNode> frameNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
     std::function<void()> buildFunc = [execCtx = info.GetExecutionContext(), func = std::move(builderFunc),
                                           node = frameNode]() {
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
@@ -846,7 +845,7 @@ void JSTextController::JSBind(BindingTarget globalObj)
 void JSText::ParseMenuParam(
     const JSCallbackInfo& info, const JSRef<JSObject>& menuOptions, NG::SelectMenuParam& menuParam)
 {
-    WeakPtr<NG::FrameNode> frameNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    WeakPtr<NG::FrameNode> frameNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
     auto onAppearValue = menuOptions->GetProperty("onAppear");
     if (onAppearValue->IsFunction()) {
         RefPtr<JsFunction> jsOnAppearFunc =

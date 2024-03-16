@@ -76,7 +76,7 @@ HWTEST_F(NavdestinationTestNg, NavdestinationTest001, TestSize.Level1)
     NavDestinationModelNG.SetHideTitleBar(true);
     NavDestinationModelNG.SetTitle(NAVIGATION_TITLE, true);
     NavDestinationModelNG.SetSubtitle(NAVIGATION_SUBTITLE);
-    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    auto frameNode = AceType::Claim(ViewStackProcessor::GetInstance()->GetMainFrameNode());
     ASSERT_NE(frameNode, nullptr);
     auto navigationGroupNode = AceType::DynamicCast<NavDestinationGroupNode>(frameNode);
     ASSERT_NE(navigationGroupNode, nullptr);
@@ -100,7 +100,7 @@ HWTEST_F(NavdestinationTestNg, NavdestinationTest003, TestSize.Level1)
     NavDestinationModelNG.SetHideTitleBar(false);
     NavDestinationModelNG.SetTitle(NAVIGATION_TITLE, false);
     NavDestinationModelNG.SetSubtitle(NAVIGATION_SUBTITLE);
-    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    auto frameNode = AceType::Claim(ViewStackProcessor::GetInstance()->GetMainFrameNode());
     ASSERT_NE(frameNode, nullptr);
     auto navigationGroupNode = AceType::DynamicCast<NavDestinationGroupNode>(frameNode);
     ASSERT_NE(navigationGroupNode, nullptr);
@@ -127,7 +127,7 @@ HWTEST_F(NavdestinationTestNg, NavdestinationTest004, TestSize.Level1)
 
     RefPtr<NG::UINode> customNode;
     NavDestinationModelNG.SetCustomTitle(customNode);
-    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    auto frameNode = AceType::Claim(ViewStackProcessor::GetInstance()->GetMainFrameNode());
     ASSERT_NE(frameNode, nullptr);
     auto navigationGroupNode = AceType::DynamicCast<NavDestinationGroupNode>(frameNode);
     ASSERT_NE(navigationGroupNode, nullptr);

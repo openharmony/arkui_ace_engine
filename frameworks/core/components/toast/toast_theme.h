@@ -44,16 +44,13 @@ public:
             if (!themeConstants) {
                 return theme;
             }
-            ParsePattern(themeConstants->GetThemeStyle(), theme);
+            ParsePattern(themeConstants, theme);
             return theme;
         }
     private:
-        void ParsePattern(const RefPtr<ThemeStyle>& themeStyle, const RefPtr<ToastTheme>& theme) const
+        void ParsePattern(const RefPtr<ThemeConstants>& themeConstants, const RefPtr<ToastTheme>& theme) const
         {
-            if (!themeStyle) {
-                return;
-            }
-            auto toastPattern = themeStyle->GetAttr<RefPtr<ThemeStyle>>(THEME_PATTERN_TOAST, nullptr);
+            RefPtr<ThemeStyle> toastPattern = themeConstants->GetPatternByName(THEME_PATTERN_TOAST);
             if (!toastPattern) {
                 return;
             }

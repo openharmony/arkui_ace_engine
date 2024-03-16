@@ -24,6 +24,7 @@
 #include "core/components/popup/popup_theme.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/event/focus_hub.h"
+#include "core/components_ng/manager/focus/focus_view.h"
 #include "core/components_ng/pattern/bubble//bubble_event_hub.h"
 #include "core/components_ng/pattern/bubble/bubble_layout_algorithm.h"
 #include "core/components_ng/pattern/bubble/bubble_layout_property.h"
@@ -45,8 +46,9 @@ enum class DismissReason {
     TOUCH_OUTSIDE,
     CLOSE_BUTTON,
 };
-class BubblePattern : public PopupBasePattern {
-    DECLARE_ACE_TYPE(BubblePattern, PopupBasePattern);
+
+class BubblePattern : public PopupBasePattern, public FocusView {
+    DECLARE_ACE_TYPE(BubblePattern, PopupBasePattern, FocusView);
 
 public:
     BubblePattern() = default;
@@ -110,6 +112,11 @@ public:
         return { FocusType::SCOPE, true };
     }
 
+    std::list<int32_t> GetRouteOfFirstScope() override
+    {
+        return { 0, 0, 0 };
+    }
+
     void OnWindowHide() override;
     void OnWindowSizeChanged(int32_t width, int32_t height, WindowSizeChangeReason type) override;
     void StartEnteringAnimation(std::function<void()> finish);
@@ -117,6 +124,13 @@ public:
     bool IsOnShow();
     bool IsExiting();
     void OnColorConfigurationUpdate() override;
+    void UpdateBubbleText();
+    void UpdateText(const RefPtr<UINode>& node, const RefPtr<PopupTheme>& popupTheme);
+
+    void SetMessageColor(bool isSetMessageColor)
+    {
+        isSetMessageColor_ = isSetMessageColor;
+    }
 
     void SetMessageNode(RefPtr<FrameNode> messageNode)
     {
@@ -224,6 +238,8 @@ private:
     float arrowHeight_ = Dimension(8.0_vp).ConvertToPx();
 
     bool showArrow_ = false;
+    ColorMode colorMode_ = ColorMode::COLOR_MODE_UNDEFINED;
+    bool isSetMessageColor_ = false;
 
     TransitionStatus transitionStatus_ = TransitionStatus::INVISIABLE;
 

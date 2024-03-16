@@ -35,6 +35,7 @@ template("ace_core_interfaces_native_node") {
       "node/column_split_modifier.cpp",
       "node/common_shape_modifier.cpp",
       "node/counter_modifier.cpp",
+      "node/custom_dialog_model.cpp",
       "node/data_panel_modifier.cpp",
       "node/divider_modifier.cpp",
       "node/extension_companion_node.cpp",
@@ -105,6 +106,8 @@ template("ace_core_interfaces_native_node") {
       "node/view_model.cpp",
       "node/water_flow_modifier.cpp",
     ]
+
+    deps = [ "$ace_root/frameworks/core/components/theme:build_theme_code" ]
 
     include_dirs = [ "${ace_root}/interfaces/inner_api/ace" ]
 

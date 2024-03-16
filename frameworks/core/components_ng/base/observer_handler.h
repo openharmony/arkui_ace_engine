@@ -17,6 +17,7 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_BASE_OBSERVER_HANDLER_H
 
 #include <functional>
+#include <optional>
 #include <string>
 #include <utility>
 
@@ -24,6 +25,7 @@
 #include "base/memory/referenced.h"
 #include "core/common/frontend.h"
 #include "core/common/container.h"
+#include "core/components_ng/pattern/navigation/navigation_declaration.h"
 #include "core/components_ng/pattern/stage/page_pattern.h"
 
 namespace OHOS::Ace::NG {
@@ -57,6 +59,20 @@ struct ScrollEventInfo {
     {}
 };
 
+struct NavDestinationSwitchInfo {
+    // UIContext
+    napi_value context;
+    std::optional<NavDestinationInfo> from;
+    std::optional<NavDestinationInfo> to;
+    NavigationOperation operation;
+
+    NavDestinationSwitchInfo(napi_value ctx, std::optional<NavDestinationInfo>&& fromInfo,
+        std::optional<NavDestinationInfo>&& toInfo, NavigationOperation op)
+        : context(ctx), from(std::forward<std::optional<NavDestinationInfo>>(fromInfo)),
+          to(std::forward<std::optional<NavDestinationInfo>>(toInfo)), operation(op)
+    {}
+};
+
 struct RouterPageInfoNG {
     napi_value context;
     int32_t index;
@@ -74,18 +90,9 @@ struct AbilityContextInfo {
     std::string bundleName = "";
     std::string moduleName = "";
 
-    bool IsEqual(AbilityContextInfo& info)
+    bool IsEqual(const AbilityContextInfo& info) const
     {
-        if (info.name != name) {
-            return false;
-        }
-        if (info.bundleName != bundleName) {
-            return false;
-        }
-        if (info.moduleName != moduleName) {
-            return false;
-        }
-        return true;
+        return name == info.name && bundleName == info.bundleName && moduleName == info.moduleName;
     }
 };
 
@@ -105,15 +112,23 @@ public:
     using ScrollEventHandleFunc = void (*)(const std::string&, ScrollEventType, float);
     using RouterPageHandleFunc = void (*)(
         AbilityContextInfo&, napi_value, int32_t, const std::string&, const std::string&, RouterPageState);
+    using DrawCommandSendHandleFunc = void (*)();
+    using LayoutDoneHandleFunc = void (*)();
     void SetHandleNavigationChangeFunc(NavigationHandleFunc func);
     void SetHandleScrollEventChangeFunc(ScrollEventHandleFunc func);
     void SetHandleRouterPageChangeFunc(RouterPageHandleFunc func);
     using DensityHandleFunc = std::function<void(AbilityContextInfo&, double)>;
     void SetHandleDensityChangeFunc(const DensityHandleFunc& func);
+    void SetLayoutDoneHandleFunc(DrawCommandSendHandleFunc func);
+    void HandleLayoutDoneCallBack();
+    void SetDrawCommandSendHandleFunc(LayoutDoneHandleFunc func);
+    void HandleDrawCommandSendCallBack();
 private:
     NavigationHandleFunc navigationHandleFunc_ = nullptr;
     ScrollEventHandleFunc scrollEventHandleFunc_ = nullptr;
     RouterPageHandleFunc routerPageHandleFunc_ = nullptr;
+    LayoutDoneHandleFunc layoutDoneHandleFunc_ = nullptr;
+    DrawCommandSendHandleFunc drawCommandSendHandleFunc_ = nullptr;
     DensityHandleFunc densityHandleFunc_;
 
     napi_value GetUIContextValue();

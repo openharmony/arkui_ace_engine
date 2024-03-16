@@ -91,6 +91,8 @@ private:
     void BeforeCreateLayoutWrapper() override;
     void UpdateToastSize(const RefPtr<FrameNode>& toast);
     void UpdateTextSizeConstraint(const RefPtr<FrameNode>& text);
+    Dimension GetOffsetX(const RefPtr<LayoutWrapper>& layoutWrapper);
+    Dimension GetOffsetY(const RefPtr<LayoutWrapper>& layoutWrapper);
 
     double GetBottomValue(const RefPtr<LayoutWrapper>& layoutWrapper);
 

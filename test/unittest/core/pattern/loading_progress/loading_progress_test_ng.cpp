@@ -194,8 +194,7 @@ HWTEST_F(LoadingProgressTestNg, LoadingProgressPatternTest003, TestSize.Level1)
     LoadingProgressModelNG modelNg;
     modelNg.Create();
     modelNg.SetEnableLoading(true);
-    RefPtr<FrameNode> frameNode =
-        AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     ASSERT_NE(frameNode, nullptr);
     auto loadingProgressPattern = frameNode->GetPattern<LoadingProgressPattern>();
     ASSERT_NE(loadingProgressPattern, nullptr);

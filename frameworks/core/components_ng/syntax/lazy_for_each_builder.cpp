@@ -16,7 +16,8 @@
 #include "core/components_ng/syntax/lazy_for_each_builder.h"
 
 namespace OHOS::Ace::NG {
-    std::pair<std::string, RefPtr<UINode>> LazyForEachBuilder::GetChildByIndex(int32_t index, bool needBuild)
+    std::pair<std::string, RefPtr<UINode>> LazyForEachBuilder::GetChildByIndex(
+        int32_t index, bool needBuild, bool isCache)
     {
         auto iter = cachedItems_.find(index);
         if (iter != cachedItems_.end()) {
@@ -25,9 +26,13 @@ namespace OHOS::Ace::NG {
             }
             auto keyIter = expiringItem_.find(iter->second.first);
             if (keyIter != expiringItem_.end() && keyIter->second.second) {
-                iter->second.second = keyIter->second.second;
-                expiringItem_.erase(keyIter);
-                return iter->second;
+                if (!isCache) {
+                    iter->second.second = keyIter->second.second;
+                    expiringItem_.erase(keyIter);
+                    return iter->second;
+                } else {
+                    return { keyIter->first, keyIter->second.second };
+                }
             }
         }
 
@@ -35,7 +40,10 @@ namespace OHOS::Ace::NG {
             ACE_SCOPED_TRACE("Builder:BuildLazyItem [%d]", index);
             auto itemInfo = OnGetChildByIndex(index, expiringItem_);
             CHECK_NULL_RETURN(itemInfo.second, itemInfo);
-            {
+            if (isCache) {
+                expiringItem_.emplace(itemInfo.first, LazyForEachCacheChild(index, itemInfo.second));
+                cachedItems_[index] = LazyForEachChild(itemInfo.first, nullptr);
+            } else {
                 cachedItems_[index] = itemInfo;
             }
             return itemInfo;

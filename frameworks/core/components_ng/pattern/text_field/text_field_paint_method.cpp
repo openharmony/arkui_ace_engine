@@ -39,6 +39,11 @@
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
+namespace {
+constexpr float MAX_ALPHA = 255.0;
+constexpr float DEFAULT_SELECTED_BACKGROUND_COLOR_OPACITY = 0.2;
+} // namespace
+
 TextFieldPaintMethod::TextFieldPaintMethod(const WeakPtr<Pattern>& pattern,
     const RefPtr<TextFieldOverlayModifier>& textFieldOverlayModifier,
     const RefPtr<TextFieldContentModifier>& textFieldContentModifier)
@@ -165,8 +170,7 @@ void TextFieldPaintMethod::UpdateOverlayModifier(PaintWrapper* paintWrapper)
     InputStyle inputStyle = paintProperty->GetInputStyleValue(InputStyle::DEFAULT);
     textFieldOverlayModifier_->SetInputStyle(inputStyle);
 
-    auto selectedColor = paintProperty->GetSelectedBackgroundColorValue(theme->GetSelectedColor());
-    textFieldOverlayModifier_->SetSelectedBackGroundColor(selectedColor);
+    UpdateSelectedBackGroundColor(paintProperty, theme);
 
     textFieldOverlayModifier_->SetUnderlineWidth(textFieldPattern->GetUnderlineWidth());
     textFieldOverlayModifier_->SetUnderlineColor(textFieldPattern->GetUnderlineColor());
@@ -196,5 +200,24 @@ void TextFieldPaintMethod::UpdateScrollBar()
     scrollBar->SetHoverAnimationType(HoverAnimationType::NONE);
     textFieldOverlayModifier_->SetBarColor(scrollBar->GetForegroundColor());
     scrollBar->SetOpacityAnimationType(OpacityAnimationType::NONE);
+}
+
+void TextFieldPaintMethod::UpdateSelectedBackGroundColor(
+    const RefPtr<TextFieldPaintProperty>& paintProperty, const RefPtr<TextFieldTheme>& theme)
+{
+    CHECK_NULL_VOID(paintProperty);
+    CHECK_NULL_VOID(theme);
+    if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
+        auto selectedColor = paintProperty->GetSelectedBackgroundColorValue(theme->GetSelectedColor());
+        textFieldOverlayModifier_->SetSelectedBackGroundColor(selectedColor);
+    } else {
+        auto selectedColor = paintProperty->GetSelectedBackgroundColor();
+        if (!selectedColor.has_value()) {
+            auto cursorColor = paintProperty->GetCursorColorValue(theme->GetCursorColor());
+            selectedColor = cursorColor.ChangeOpacity(
+                static_cast<double>(cursorColor.GetAlpha()) / MAX_ALPHA * DEFAULT_SELECTED_BACKGROUND_COLOR_OPACITY);
+        }
+        textFieldOverlayModifier_->SetSelectedBackGroundColor(selectedColor.value());
+    }
 }
 } // namespace OHOS::Ace::NG

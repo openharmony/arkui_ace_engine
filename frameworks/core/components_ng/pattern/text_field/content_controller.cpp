@@ -48,7 +48,8 @@ std::string ContentController::PreprocessString(int32_t startIndex, int32_t endI
         (property->GetTextInputType().value() == TextInputType::NUMBER_DECIMAL ||
             property->GetTextInputType().value() == TextInputType::EMAIL_ADDRESS)) {
         char specialChar = property->GetTextInputType().value() == TextInputType::NUMBER_DECIMAL ? '.' : '@';
-        if (content_.find(specialChar) != std::string::npos && value.find(specialChar) != std::string::npos &&
+        tmp = EraseRedundantSpecialChar(value, specialChar);
+        if (content_.find(specialChar) != std::string::npos && tmp.find(specialChar) != std::string::npos &&
             GetSelectedValue(startIndex, endIndex).find(specialChar) == std::string::npos) {
             tmp.erase(
                 std::remove_if(tmp.begin(), tmp.end(), [&specialChar](char c) { return c == specialChar; }), tmp.end());
@@ -64,6 +65,24 @@ std::string ContentController::PreprocessString(int32_t startIndex, int32_t endI
     addLength = std::min(addLength, maxLength - curLength + delLength);
     tmp = StringUtils::ToString(wideTmp.substr(0, addLength));
     return tmp;
+}
+
+std::string ContentController::EraseRedundantSpecialChar(const std::string& value, const char& specialChar)
+{
+    std::stringstream res;
+    bool isAdd = true;
+    int32_t length = static_cast<int32_t>(value.length());
+    for (int32_t i = 0; i < length; i++) {
+        if (value[i] != specialChar) {
+            res << value[i];
+            continue;
+        }
+        if (isAdd) {
+            isAdd = false;
+            res << value[i];
+        }
+    }
+    return res.str();
 }
 
 bool ContentController::InsertValue(int32_t index, const std::string& value)

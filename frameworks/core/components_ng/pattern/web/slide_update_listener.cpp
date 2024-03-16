@@ -16,10 +16,10 @@
 #include "core/components_ng/pattern/web/slide_update_listener.h"
 
 namespace OHOS::Ace::NG {
-void SlideUpdateListener::OnSlideUpdate(const SizeF& frameSize)
+void SlideUpdateListener::OnSlideUpdate()
 {
     auto pattern = pattern_.Upgrade();
     CHECK_NULL_VOID(pattern);
-    pattern->UpdateSlideOffset(frameSize);
+    pattern->UpdateSlideOffset();
 }
 } // namespace OHOS::Ace::NG

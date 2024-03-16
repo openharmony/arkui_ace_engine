@@ -36,8 +36,8 @@ namespace OHOS::Ace::NG {
 
 thread_local int64_t UINode::currentAccessibilityId_ = 0;
 
-UINode::UINode(const std::string& tag, int32_t nodeId, int32_t instanceId, bool isRoot)
-    : tag_(tag), nodeId_(nodeId), accessibilityId_(currentAccessibilityId_++), isRoot_(isRoot), instanceId_(instanceId)
+UINode::UINode(const std::string& tag, int32_t nodeId, bool isRoot)
+    : tag_(tag), nodeId_(nodeId), accessibilityId_(currentAccessibilityId_++), isRoot_(isRoot)
 {
     if (AceChecker::IsPerformanceCheckEnabled()) {
         auto pos = EngineHelper::GetPositionOnJsCode();
@@ -54,9 +54,7 @@ UINode::UINode(const std::string& tag, int32_t nodeId, int32_t instanceId, bool 
         distributedUI->AddNewNode(nodeId_);
     } while (false);
 #endif
-    if (instanceId_ == -1) {
-        instanceId_ = Container::CurrentId();
-    }
+    instanceId_ = Container::CurrentId();
     nodeStatus_ = ViewStackProcessor::GetInstance()->IsBuilderNode() ? NodeStatus::BUILDER_NODE_OFF_MAINTREE
                                                                      : NodeStatus::NORMAL_NODE;
 }
@@ -440,10 +438,10 @@ void UINode::AdjustParentLayoutFlag(PropertyChangeFlag& flag)
     }
 }
 
-void UINode::MarkDirtyNode(PropertyChangeFlag extraFlag)
+void UINode::MarkDirtyNode(PropertyChangeFlag extraFlag, bool childExpansiveAndMark)
 {
     for (const auto& child : GetChildren()) {
-        child->MarkDirtyNode(extraFlag);
+        child->MarkDirtyNode(extraFlag, childExpansiveAndMark);
     }
 }
 
@@ -971,12 +969,12 @@ RefPtr<UINode> UINode::GetDisappearingChildById(const std::string& id) const
     return nullptr;
 }
 
-RefPtr<UINode> UINode::GetFrameChildByIndex(uint32_t index, bool needBuild)
+RefPtr<UINode> UINode::GetFrameChildByIndex(uint32_t index, bool needBuild, bool isCache)
 {
     for (const auto& child : GetChildren()) {
         uint32_t count = static_cast<uint32_t>(child->FrameCount());
         if (count > index) {
-            return child->GetFrameChildByIndex(index, needBuild);
+            return child->GetFrameChildByIndex(index, needBuild, isCache);
         }
         index -= count;
     }

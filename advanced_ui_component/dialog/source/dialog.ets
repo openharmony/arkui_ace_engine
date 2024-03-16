@@ -15,10 +15,10 @@
  
 import { ButtonOptions } from '@ohos.arkui.advanced.Dialog'; 
 import { BusinessError } from '@ohos.base';
+import display from '@ohos.display';
 import hilog from '@ohos.hilog';
 import measure from '@ohos.measure';
 import resourceManager from '@ohos.resourceManager';
-import window from '@ohos.window';
 
 const TITLE_MAX_LINES: number = 2;
 const HORIZON_BUTTON_MAX_COUNT: number = 2;
@@ -98,7 +98,9 @@ export struct TipsDialog {
       Checkbox({ name: 'checkbox', group: 'checkboxGroup' }).select(this.isChecked)
         .onChange((checked: boolean) => {
           this.isChecked = checked;
-          if (this.checkAction) this.checkAction(checked);
+          if (this.checkAction) {
+            this.checkAction(checked);
+          }
         })
         .margin({ right: $r('sys.float.padding_level4') })
       Text(content)
@@ -111,7 +113,9 @@ export struct TipsDialog {
         .textOverflow({ overflow: TextOverflow.Ellipsis })
         .onClick(() => {
           this.isChecked = !this.isChecked;
-          if (this.checkAction) this.checkAction(this.isChecked);
+          if (this.checkAction) {
+            this.checkAction(this.isChecked);
+          }
         })
     }
     .padding({ top: $r('sys.float.padding_level8') })
@@ -194,9 +198,8 @@ export struct TipsDialog {
       constraintWidth: maxWidth,
     });
     let oneLineSize: SizeOptions = measure.measureTextSize({
-      textContent: '1',
+      textContent: this.content,
       fontSize: $r('sys.float.Body_L'),
-      constraintWidth: maxWidth,
     });
     if (this.getTextHeight(contentSize) <= this.getTextHeight(oneLineSize)) {
       this.textAlignment = TextAlign.Center;
@@ -480,9 +483,8 @@ export struct AlertDialog {
       constraintWidth: maxWidth,
     });
     let oneLineSize: SizeOptions = measure.measureTextSize({
-      textContent: '1',
+      textContent: this.content,
       fontSize: $r('sys.float.Body_L'),
-      constraintWidth: maxWidth,
     });
 
     if (this.getTextHeight(contentSize) <= this.getTextHeight(oneLineSize)) {
@@ -554,9 +556,7 @@ struct CustomDialogContentComponent {
   build() {
     Column() {
       // title area
-      if (this.primaryTitle || this.secondaryTitle) {
-        this.buildTitles();
-      }
+      this.buildTitles();
 
       // content area
       Column() {
@@ -566,9 +566,7 @@ struct CustomDialogContentComponent {
       .constraintSize({ maxHeight: this.contentMaxHeight, })
 
       // operation area
-      if (this.buttons && this.buttons.length > 0) {
-        this.buildButtons();
-      }
+      this.buildButtons();
     }
     .width('100%')
   }
@@ -632,18 +630,16 @@ struct CustomDialogContentComponent {
 
   @Builder
   buildSingleButton(buttonOptions: ButtonOptions): void {
-    Button(buttonOptions.value)
-      .onClick(() => {
-        if (buttonOptions.action) {
-          buttonOptions.action();
-        }
-        this.controller?.close();
-      })
-      .fontColor(buttonOptions.fontColor ?? $r('sys.color.ohos_id_color_text_primary_activated'))
-      .backgroundColor(buttonOptions.background ?? $r('sys.color.ohos_id_color_background_transparent'))
-      .buttonStyle(buttonOptions.buttonStyle ?? getNumberByResource('alert_button_style'))
-      .role(buttonOptions.role ?? ButtonRole.NORMAL)
-      .layoutWeight(BUTTON_LAYOUT_WEIGHT)
+    if (this.isNewPropertiesHighPriority(buttonOptions)) {
+      Button(buttonOptions.value)
+        .setButtonProperties(buttonOptions, this.controller)
+        .role(buttonOptions.role ?? ButtonRole.NORMAL)
+    } else {
+      Button(buttonOptions.value)
+        .setButtonProperties(buttonOptions, this.controller)
+        .backgroundColor(buttonOptions.background ?? $r('sys.color.ohos_id_color_background_transparent'))
+        .fontColor(buttonOptions.fontColor ?? $r('sys.color.ohos_id_color_text_primary_activated'))
+    }
   }
 
   @Builder
@@ -834,6 +830,26 @@ struct CustomDialogContentComponent {
       bottom: $r('sys.float.alert_button_bottom_padding_horizontal'),
     };
   }
+
+  /**
+   * is button buttonStyle and role properties high priority
+   *
+   * @param buttonOptions button properties
+   * @returns check result
+   */
+  private isNewPropertiesHighPriority(buttonOptions: ButtonOptions): boolean {
+    if (buttonOptions.role === ButtonRole.ERROR) {
+      return true;
+    }
+    if (buttonOptions.buttonStyle !== undefined &&
+      buttonOptions.buttonStyle !== getNumberByResource('alert_button_style')) {
+      return true;
+    }
+    if (buttonOptions.background === undefined && buttonOptions.fontColor === undefined) {
+      return true;
+    }
+    return false;
+  }
 }
 
 @Component
@@ -843,41 +859,75 @@ export struct CustomDialogComponent {
   secondaryTitle?: ResourceStr;
   @BuilderParam contentBuilder: () => void;
   buttons?: ButtonOptions[];
-  @State dialogWidth: number | string = '100%';
+  screenWidth: number = 0;
+  @State columnModifier: ColumnModifier = new ColumnModifier();
+  isFirstInit: boolean = true;
 
   build() {
     Column() {
-      CustomDialogContentComponent({
-        controller: this.controller,
-        primaryTitle: this.primaryTitle,
-        secondaryTitle: this.secondaryTitle,
-        contentBuilder: () => {
-          this.contentBuilder();
-        },
-        buttons: this.buttons,
-      });
+      Column() {
+        CustomDialogContentComponent({
+          controller: this.controller,
+          primaryTitle: this.primaryTitle,
+          secondaryTitle: this.secondaryTitle,
+          contentBuilder: () => {
+            this.contentBuilder();
+          },
+          buttons: this.buttons,
+        });
+      }
+      .attributeModifier(this.columnModifier)
     }
-    .backgroundBlurStyle(BlurStyle.COMPONENT_ULTRA_THICK)
-    .borderRadius($r('sys.float.alert_container_shape'))
-    .backgroundColor($r('sys.color.comp_background_primary'))
-    .width(this.dialogWidth)
+    .onAreaChange((oldValue: Area, newValue: Area) => {
+      if (!this.isFirstInit) {
+        return;
+      }
+      if (this.screenWidth > getNumberByResource('alert_container_max_width')) {
+        this.columnModifier.customStyle = newValue.width > getNumberByResource('alert_container_max_width');
+      } else {
+        this.columnModifier.customStyle = newValue.width >= this.screenWidth;
+      }
+      this.isFirstInit = false;
+    });
   }
 
   aboutToAppear(): void {
-    window.getLastWindow(getContext(this)).then((windowInfo: window.Window) => {
-      let windowWidth: number = px2vp(windowInfo.getWindowProperties().windowRect.width);
-      this.dialogWidth = Math.min(windowWidth - getNumberByResource('ohos_id_dialog_margin_start') -
-      getNumberByResource('ohos_id_dialog_margin_end'), getNumberByResource('alert_container_max_width'));
-
-      // register the callback of window size change
-      windowInfo.on('windowSizeChange', (windowSize: window.Size) => {
-        this.dialogWidth = Math.min(px2vp(windowSize.width) - getNumberByResource('ohos_id_dialog_margin_start') -
-        getNumberByResource('ohos_id_dialog_margin_end'), getNumberByResource('alert_container_max_width'));
-      });
-    }).catch((error: BusinessError) => {
-      hilog.error(0x3900, 'Ace', `Failed to obtain the top window, code: ${error.code}, message:${error.message}`);
-    });
+    try {
+      this.screenWidth = px2vp(display.getDefaultDisplaySync().width);
+    } catch (error) {
+      hilog.error(0x3900, 'Ace', `CustomDialogComponent getDefaultDisplaySync error: ${JSON.stringify(error)}`);
+    }
   }
+}
+
+class ColumnModifier implements AttributeModifier<ColumnAttribute> {
+  public customStyle: boolean = false;
+
+  applyNormalAttribute(instance: ColumnAttribute): void {
+    if (!this.customStyle) {
+      return;
+    }
+    instance.backgroundBlurStyle(BlurStyle.Thick);
+    instance.borderRadius($r('sys.float.ohos_id_corner_radius_dialog'));
+    instance.margin({
+      left: $r('sys.float.ohos_id_dialog_margin_start'),
+      right: $r('sys.float.ohos_id_dialog_margin_end'),
+      bottom: $r('sys.float.ohos_id_dialog_margin_bottom'),
+    });
+    instance.backgroundColor($r('sys.color.ohos_id_color_dialog_bg'));
+  }
+}
+
+@Extend(Button)
+function setButtonProperties(buttonOptions: ButtonOptions, controller?: CustomDialogController) {
+  .onClick(() => {
+    if (buttonOptions.action) {
+      buttonOptions.action();
+    }
+    controller?.close();
+  })
+  .buttonStyle(buttonOptions.buttonStyle ?? getNumberByResource('alert_button_style'))
+  .layoutWeight(BUTTON_LAYOUT_WEIGHT)
 }
 
 /**

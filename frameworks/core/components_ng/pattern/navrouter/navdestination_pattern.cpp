@@ -14,6 +14,9 @@
  */
 
 #include "core/components_ng/pattern/navrouter/navdestination_pattern.h"
+
+#include <atomic>
+
 #include "core/common/container.h"
 #include "base/log/dump_log.h"
 #include "core/components/theme/app_theme.h"
@@ -23,6 +26,20 @@
 #include "core/components_ng/pattern/text/text_layout_property.h"
 
 namespace OHOS::Ace::NG {
+namespace {
+    std::atomic<uint64_t> navDestinationPatternNextAutoGenId = 0;
+}
+
+NavDestinationPattern::NavDestinationPattern(const RefPtr<ShallowBuilder>& shallowBuilder)
+    : shallowBuilder_(shallowBuilder)
+{
+    navDestinationId_ = navDestinationPatternNextAutoGenId.fetch_add(1);
+}
+
+NavDestinationPattern::NavDestinationPattern()
+{
+    navDestinationId_ = navDestinationPatternNextAutoGenId.fetch_add(1);
+}
 
 NavDestinationPattern::~NavDestinationPattern()
 {
@@ -148,7 +165,7 @@ void NavDestinationPattern::UpdateTitlebarVisibility(RefPtr<NavDestinationGroupN
         titleBarLayoutProperty->UpdatePropertyChangeFlag(PROPERTY_UPDATE_MEASURE);
     }
     titleBarNode->MarkModifyDone();
-    titleBarNode->MarkDirtyNode();
+    titleBarNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_CHILD);
 }
 
 bool NavDestinationPattern::GetBackButtonState()

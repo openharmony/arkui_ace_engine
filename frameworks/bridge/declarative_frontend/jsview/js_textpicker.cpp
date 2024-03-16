@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -31,6 +31,7 @@
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/text_picker/textpicker_model.h"
 #include "core/components_ng/pattern/text_picker/textpicker_model_ng.h"
+#include "core/components_ng/pattern/text_picker/textpicker_properties.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace {
@@ -40,6 +41,7 @@ const std::vector<DialogAlignment> DIALOG_ALIGNMENT = { DialogAlignment::TOP, Di
     DialogAlignment::BOTTOM, DialogAlignment::DEFAULT, DialogAlignment::TOP_START, DialogAlignment::TOP_END,
     DialogAlignment::CENTER_START, DialogAlignment::CENTER_END, DialogAlignment::BOTTOM_START,
     DialogAlignment::BOTTOM_END };
+const std::regex DIMENSION_REGEX(R"(^[-+]?\d+(?:\.\d+)?(?:px|vp|fp|lpx)?$)", std::regex::icase);
 }
 
 std::unique_ptr<TextPickerModel> TextPickerModel::textPickerInstance_ = nullptr;
@@ -98,6 +100,8 @@ void JSTextPicker::JSBind(BindingTarget globalObj)
     JSClass<JSTextPicker>::StaticMethod("textStyle", &JSTextPicker::SetTextStyle);
     JSClass<JSTextPicker>::StaticMethod("selectedTextStyle", &JSTextPicker::SetSelectedTextStyle);
     JSClass<JSTextPicker>::StaticMethod("selectedIndex", &JSTextPicker::SetSelectedIndex);
+    JSClass<JSTextPicker>::StaticMethod("divider", &JSTextPicker::SetDivider);
+
     JSClass<JSTextPicker>::StaticMethod("onAccept", &JSTextPicker::OnAccept);
     JSClass<JSTextPicker>::StaticMethod("onCancel", &JSTextPicker::OnCancel);
     JSClass<JSTextPicker>::StaticMethod("onChange", &JSTextPicker::OnChange);
@@ -159,7 +163,7 @@ void ParseTextPickerValueObject(const JSCallbackInfo& info, const JSRef<JSVal>& 
     CHECK_NULL_VOID(changeEventVal->IsFunction());
 
     auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(changeEventVal));
-    WeakPtr<NG::FrameNode> targetNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    WeakPtr<NG::FrameNode> targetNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
     auto onValueChange = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc), node = targetNode](
                              const std::vector<std::string>& value) {
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
@@ -186,7 +190,7 @@ void ParseTextPickerSelectedObject(const JSCallbackInfo& info, const JSRef<JSVal
     CHECK_NULL_VOID(changeEventVal->IsFunction());
 
     auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(changeEventVal));
-    WeakPtr<NG::FrameNode> targetNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    WeakPtr<NG::FrameNode> targetNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
     auto onSelectedChange = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc), node = targetNode](
                                 const std::vector<double>& index) {
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
@@ -232,7 +236,7 @@ void JSTextPicker::Create(const JSCallbackInfo& info)
             param.result.clear();
             param.options.clear();
 
-            RefPtr<NG::FrameNode> targetNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+            auto targetNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
             bool firstBuild = targetNode && targetNode->IsFirstBuilding();
             if (!firstBuild) {
                 return;
@@ -993,6 +997,41 @@ void JSTextPicker::SetSelectedIndex(const JSCallbackInfo& info)
     }
 }
 
+void JSTextPicker::SetDivider(const JSCallbackInfo& info)
+{
+    NG::ItemDivider divider;
+    if (info.Length() >= 1 && info[0]->IsObject()) {
+        auto pickerTheme = GetTheme<PickerTheme>();
+        JSRef<JSObject> obj = JSRef<JSObject>::Cast(info[0]);
+        bool needReset = obj->GetProperty("strokeWidth")->IsString() &&
+            !std::regex_match(obj->GetProperty("strokeWidth")->ToString(), DIMENSION_REGEX);
+        if (needReset || !ConvertFromJSValue(obj->GetProperty("strokeWidth"), divider.strokeWidth)) {
+            divider.strokeWidth = 0.0_vp;
+        }
+        if (!ConvertFromJSValue(obj->GetProperty("color"), divider.color)) {
+            // Failed to get color from param, using default color defined in theme
+            if (pickerTheme) {
+                divider.color = pickerTheme->GetDividerColor();
+            } else {
+                divider.color = Color::TRANSPARENT;
+            }
+        }
+        
+        needReset = obj->GetProperty("startMargin")->IsString() &&
+            !std::regex_match(obj->GetProperty("startMargin")->ToString(), DIMENSION_REGEX);
+        if (needReset || !ConvertFromJSValue(obj->GetProperty("startMargin"), divider.startMargin)) {
+            divider.startMargin = 0.0_vp;
+        }
+        needReset = obj->GetProperty("endMargin")->IsString() &&
+            !std::regex_match(obj->GetProperty("endMargin")->ToString(), DIMENSION_REGEX);
+        if (needReset || !ConvertFromJSValue(obj->GetProperty("endMargin"), divider.endMargin)) {
+            divider.endMargin = 0.0_vp;
+        }
+    }
+    TextPickerModel::GetInstance()->SetDivider(divider);
+    info.ReturnSelf();
+}
+
 void JSTextPicker::OnAccept(const JSCallbackInfo& info) {}
 
 void JSTextPicker::OnCancel(const JSCallbackInfo& info) {}
@@ -1044,7 +1083,7 @@ void TextPickerDialogAppearEvent(const JSCallbackInfo& info, TextPickerDialogEve
     std::function<void()> didAppearEvent;
     std::function<void()> willAppearEvent;
     auto paramObject = JSRef<JSObject>::Cast(info[0]);
-    WeakPtr<NG::FrameNode> targetNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    WeakPtr<NG::FrameNode> targetNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
     auto onDidAppear = paramObject->GetProperty("onDidAppear");
     if (!onDidAppear->IsUndefined() && onDidAppear->IsFunction()) {
         auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(onDidAppear));
@@ -1074,7 +1113,7 @@ void TextPickerDialogDisappearEvent(const JSCallbackInfo& info, TextPickerDialog
     std::function<void()> didDisappearEvent;
     std::function<void()> willDisappearEvent;
     auto paramObject = JSRef<JSObject>::Cast(info[0]);
-    WeakPtr<NG::FrameNode> targetNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    WeakPtr<NG::FrameNode> targetNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
     auto onDidDisappear = paramObject->GetProperty("onDidDisappear");
     if (!onDidDisappear->IsUndefined() && onDidDisappear->IsFunction()) {
         auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(onDidDisappear));
@@ -1112,7 +1151,7 @@ void JSTextPickerDialog::Show(const JSCallbackInfo& info)
     std::function<void(const std::string&)> acceptEvent;
     std::function<void(const std::string&)> changeEvent;
     auto onCancel = paramObject->GetProperty("onCancel");
-    WeakPtr<NG::FrameNode> targetNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    WeakPtr<NG::FrameNode> targetNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
     if (!onCancel->IsUndefined() && onCancel->IsFunction()) {
         auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(onCancel));
         cancelEvent = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc), node = targetNode]() {
@@ -1447,7 +1486,7 @@ std::map<std::string, NG::DialogTextEvent> JSTextPickerDialog::DialogEvent(const
     }
     auto paramObject = JSRef<JSObject>::Cast(info[0]);
     auto onAccept = paramObject->GetProperty("onAccept");
-        WeakPtr<NG::FrameNode> targetNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    auto targetNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
     if (!onAccept->IsUndefined() && onAccept->IsFunction()) {
         auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(onAccept));
         auto acceptId = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc), node = targetNode](
@@ -1484,7 +1523,7 @@ std::map<std::string, NG::DialogGestureEvent> JSTextPickerDialog::DialogCancelEv
     }
     auto paramObject = JSRef<JSObject>::Cast(info[0]);
     auto onCancel = paramObject->GetProperty("onCancel");
-    WeakPtr<NG::FrameNode> targetNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    WeakPtr<NG::FrameNode> targetNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
     if (!onCancel->IsUndefined() && onCancel->IsFunction()) {
         auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(onCancel));
         auto cancelId = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc), node = targetNode](
@@ -1506,7 +1545,7 @@ void JSTextPickerDialog::AddEvent(RefPtr<PickerTextComponent>& picker, const JSC
     }
     auto paramObject = JSRef<JSObject>::Cast(info[0]);
     auto onAccept = paramObject->GetProperty("onAccept");
-    WeakPtr<NG::FrameNode> targetNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    WeakPtr<NG::FrameNode> targetNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
     if (!onAccept->IsUndefined() && onAccept->IsFunction()) {
         auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(onAccept));
         auto acceptId = EventMarker([execCtx = info.GetExecutionContext(), func = std::move(jsFunc), node = targetNode](

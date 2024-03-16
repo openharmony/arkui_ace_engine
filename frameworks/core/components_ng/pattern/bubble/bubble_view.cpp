@@ -170,7 +170,9 @@ RefPtr<FrameNode> BubbleView::CreateBubbleNode(
     auto bubbleAccessibilityProperty = popupNode->GetAccessibilityProperty<AccessibilityProperty>();
     CHECK_NULL_RETURN(bubbleAccessibilityProperty, nullptr);
     bubbleAccessibilityProperty->SetText(message);
-    auto bobblePattern = popupNode->GetPattern<BubblePattern>();
+    auto bubblePattern = popupNode->GetPattern<BubblePattern>();
+    auto textColor = param->GetTextColor();
+    bubblePattern->SetMessageColor(textColor.has_value());
     // Create child
     RefPtr<FrameNode> child;
     if (primaryButton.showButton || secondaryButton.showButton) {
@@ -194,7 +196,7 @@ RefPtr<FrameNode> BubbleView::CreateBubbleNode(
         columnLayoutProperty->UpdateMainAxisAlign(FlexAlign::CENTER); // mainAxisAlign
         columnLayoutProperty->UpdateCrossAxisAlign(FlexAlign::CENTER);
         auto textNode = CreateMessage(message, useCustom);
-        bobblePattern->SetMessageNode(textNode);
+        bubblePattern->SetMessageNode(textNode);
         auto popupTheme = GetPopupTheme();
         auto padding = popupTheme->GetPadding();
         auto layoutProps = textNode->GetLayoutProperty<TextLayoutProperty>();

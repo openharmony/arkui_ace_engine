@@ -80,6 +80,19 @@ if (is_ohos_standard_system) {
     }
   }
 
+  ohos_copy("copy_abc_library") {
+    deps = [ "$ace_root/frameworks/bridge/declarative_frontend:ark_modifier" ]
+    out_path = get_label_info(
+            "$ace_root/frameworks/bridge/declarative_frontend:ark_modifier",
+            "root_out_dir")
+    sources = [ "${out_path}/arkui/ace_engine/modifier.abc" ]
+
+    outputs = [ target_out_dir +
+                "/previewer/common/bin/module/arkui/{{source_file_part}}" ]
+    module_source_dir = target_out_dir + "/previewer/common/bin/module/arkui"
+    module_install_name = ""
+  }
+
   # All dynamic libraries to be copied to the path "/previewer/common/bin/",
   # which are related to the previewer, can be added to this script.
   ohos_copy("copy_preview_shared_library") {

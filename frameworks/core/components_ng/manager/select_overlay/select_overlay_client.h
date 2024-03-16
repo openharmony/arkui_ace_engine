@@ -49,6 +49,7 @@ struct OverlayExtraInfo {
 struct ClientOverlayInfo {
     std::optional<SelectHandleInfo> firstHandleInfo;
     std::optional<SelectHandleInfo> secondHandleInfo;
+    std::optional<Color> handlerColor;
     RectF selectArea;
     bool isNewAvoid = false;
     bool animation = true;

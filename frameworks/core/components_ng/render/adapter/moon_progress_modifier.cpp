@@ -44,7 +44,7 @@ const float EPSLION = 1e-5;
 const float DEFAULT_MAXVALUE = 100.0f;
 const bool DEFAULT_ENABLE_BREATHE = true;
 constexpr float INITIAL_OPACITY = 0.0f;
-constexpr int32_t PICTURE_DURATION = 750;
+constexpr int32_t PICTURE_DURATION = 1500;
 } // namespace
 
 MoonProgressModifier::MoonProgressModifier()
@@ -170,7 +170,6 @@ void MoonProgressModifier::StartPictureAnimate() const
     option.SetDelay(0);
     option.SetCurve(Curves::SHARP);
     option.SetIteration(-1);
-    option.SetAnimationDirection(AnimationDirection::ALTERNATE);
     AnimationUtils::Animate(option, [weak = AceType::WeakClaim(AceType::RawPtr(opacity_))]() {
         auto opacity = weak.Upgrade();
         CHECK_NULL_VOID(opacity);
@@ -253,7 +252,7 @@ void MoonProgressModifier::PaintSquareMoonShadow(RSCanvas& canvas, RSBrush& brus
     } else {
         opacity = opacity_->Get();
     }
-    brush.SetAlphaF(opacity_->Get());
+    brush.SetAlphaF(opacity);
     canvas.AttachBrush(brush);
 
     auto config = canvasImage_->GetPaintConfig();

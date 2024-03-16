@@ -547,6 +547,36 @@ public:
         int64_t elementId, const std::map<std::string, std::string>& actionArguments,
         int32_t action, int64_t offset);
 
+    void SetUIExtensionSubWindow(bool isUIExtensionSubWindow)
+    {
+        isUIExtensionSubWindow_ = isUIExtensionSubWindow;
+    }
+
+    bool IsUIExtensionSubWindow()
+    {
+        return isUIExtensionSubWindow_;
+    }
+
+    void SetUIExtensionAbilityProcess(bool isUIExtensionAbilityProcess)
+    {
+        isUIExtensionAbilityProcess_ = isUIExtensionAbilityProcess;
+    }
+
+    bool IsUIExtensionAbilityProcess()
+    {
+        return isUIExtensionAbilityProcess_;
+    }
+
+    void SetUIExtensionAbilityHost(bool isUIExtensionAbilityHost)
+    {
+        isUIExtensionAbilityHost_ = isUIExtensionAbilityHost;
+    }
+
+    bool IsUIExtensionAbilityHost()
+    {
+        return isUIExtensionAbilityHost_;
+    }
+
 private:
     virtual bool MaybeRelease() override;
     void InitializeFrontend();
@@ -599,6 +629,9 @@ private:
     bool isFormRender_ = false;
     int32_t parentId_ = 0;
     bool useStageModel_ = false;
+    bool isUIExtensionSubWindow_ = false;
+    bool isUIExtensionAbilityProcess_ = false;
+    bool isUIExtensionAbilityHost_ = false;
 
     DeviceOrientation orientation_ = DeviceOrientation::ORIENTATION_UNDEFINED;
 

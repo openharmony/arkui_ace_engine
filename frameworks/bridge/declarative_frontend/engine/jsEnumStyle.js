@@ -641,7 +641,7 @@ var FormDimension;
   FormDimension["Dimension_4_4"] = 4;
   FormDimension["Dimension_2_1"] = 5;
   FormDimension["DIMENSION_1_1"] = 6;
-  FormDimension["DIMENSION_4_6"] = 7;
+  FormDimension["DIMENSION_6_4"] = 7;
 })(FormDimension || (FormDimension = {}));
 
 let FormRenderingMode;
@@ -1499,6 +1499,10 @@ class BottomTabBarStyle {
   }
   id(arg) {
     this.id = arg;
+    return this;
+  }
+  iconStyle(arg) {
+    this.iconStyle = arg;
     return this;
   }
 }
@@ -2630,3 +2634,21 @@ let ButtonRole;
   ButtonRole['NORMAL'] = 0;
   ButtonRole['ERROR'] = 1;
 })(ButtonRole || (ButtonRole = {}));
+
+let MenuPolicy;
+(function (MenuPolicy) {
+    MenuPolicy['DEFAULT'] = 0;
+    MenuPolicy['NEVER'] = 1;
+    MenuPolicy['ALWAYS'] = 2;
+})(MenuPolicy || (MenuPolicy = {}));
+
+let PreDragStatus;
+(function (PreDragStatus) {
+  PreDragStatus['ACTION_DETECTING_STATUS'] = 0;
+  PreDragStatus['READY_TO_TRIGGER_DRAG_ACTION'] = 1;
+  PreDragStatus['PREVIEW_LIFT_STARTED'] = 2;
+  PreDragStatus['PREVIEW_LIFT_FINISHED'] = 3;
+  PreDragStatus['PREVIEW_LANDING_STARTED'] = 4;
+  PreDragStatus['PREVIEW_LANDING_FINISHED'] = 5;
+  PreDragStatus['ACTION_CANCELED_BEFORE_DRAG'] = 6;
+})(PreDragStatus || (PreDragStatus = {}));

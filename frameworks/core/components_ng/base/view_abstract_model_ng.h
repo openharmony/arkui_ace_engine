@@ -26,6 +26,7 @@
 #include "base/memory/ace_type.h"
 #include "base/utils/noncopyable.h"
 #include "base/utils/utils.h"
+#include "core/components/common/layout/position_param.h"
 #include "core/components/common/properties/alignment.h"
 #include "core/components/common/properties/border_image.h"
 #include "core/components_ng/base/modifier.h"
@@ -461,9 +462,19 @@ public:
         ViewAbstract::SetPosition({ x, y });
     }
 
+    void SetPositionEdges(const EdgesParam& value) override
+    {
+        ViewAbstract::SetPositionEdges(value);
+    }
+
     void SetOffset(const Dimension& x, const Dimension& y) override
     {
         ViewAbstract::SetOffset({ x, y });
+    }
+
+    void SetOffsetEdges(const EdgesParam& value) override
+    {
+        ViewAbstract::SetOffsetEdges(value);
     }
 
     void MarkAnchor(const Dimension& x, const Dimension& y) override
@@ -525,7 +536,7 @@ public:
                 overlayNode = AceType::DynamicCast<FrameNode>(buildNodeFunc());
                 CHECK_NULL_VOID(overlayNode);
                 frameNode->SetOverlayNode(overlayNode);
-                overlayNode->SetParent(AceType::WeakClaim(AceType::RawPtr(frameNode)));
+                overlayNode->SetParent(AceType::WeakClaim(frameNode));
                 overlayNode->SetActive(true);
             } else {
                 overlayNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
@@ -842,6 +853,11 @@ public:
         ViewAbstract::SetOnDragStart(std::move(dragStart));
     }
 
+    void SetOnPreDrag(NG::OnPreDragFunc&& onPreDrag) override
+    {
+        ViewAbstract::SetOnPreDrag(std::move(onPreDrag));
+    }
+
     void SetOnDragEnter(NG::OnDragDropFunc&& onDragEnter) override
     {
         ViewAbstract::SetOnDragEnter(std::move(onDragEnter));
@@ -1012,7 +1028,7 @@ public:
     void BindPopup(const RefPtr<PopupParam>& param, const RefPtr<AceType>& customNode) override
     {
         auto targetNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
-        ViewAbstract::BindPopup(param, targetNode, AceType::DynamicCast<UINode>(customNode));
+        ViewAbstract::BindPopup(param, AceType::Claim(targetNode), AceType::DynamicCast<UINode>(customNode));
     }
 
     void DismissDialog() override

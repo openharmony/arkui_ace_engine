@@ -241,7 +241,8 @@ public:
     int32_t AddSymbolSpanOperation(const SymbolSpanOptions& options, bool isPaste = false, int32_t index = -1);
     void AddSpanItem(const RefPtr<SpanItem>& item, int32_t offset);
     int32_t AddPlaceholderSpan(const RefPtr<UINode>& customNode, const SpanOptionBase& options);
-    void SetSelection(int32_t start, int32_t end);
+    void HandleSelectOverlayWithOptions(const SelectionOptions& options);
+    void SetSelection(int32_t start, int32_t end, const std::optional<SelectionOptions>& options = std::nullopt);
     void OnHandleMoveDone(const RectF& handleRect, bool isFirstHandle) override;
     std::u16string GetLeftTextOfCursor(int32_t number) override;
     std::u16string GetRightTextOfCursor(int32_t number) override;
@@ -257,6 +258,7 @@ public:
     void HandleOnSelectAll() override;
     void HandleOnCopy(bool isUsingExternalKeyboard = false) override;
     bool JudgeDraggable(GestureEvent& info);
+    void CalculateCaretOffsetAndHeight(OffsetF& caretOffset, float& caretHeight);
 
     bool IsUsingMouse() const
     {
@@ -271,11 +273,6 @@ public:
     OffsetF GetSelectionMenuOffset() const
     {
         return selectionMenuOffsetByMouse_;
-    }
-
-    OffsetF GetLastClickOffset() const
-    {
-        return lastClickOffset_;
     }
 
     void SetLastClickOffset(const OffsetF& lastClickOffset)
@@ -358,6 +355,7 @@ public:
     void OnColorConfigurationUpdate() override;
     bool IsDisabled() const;
     float GetLineHeight() const override;
+    float GetLetterSpacing() const;
     std::vector<RectF> GetTextBoxes() override;
     bool OnBackPressed() override;
 
@@ -454,6 +452,20 @@ public:
     }
 
     void OnVirtualKeyboardAreaChanged() override;
+
+    void SetCaretColor(const Color& caretColor)
+    {
+        caretColor_ = caretColor;
+    }
+
+    Color GetCaretColor();
+
+    void SetSelectedBackgroundColor(const Color& selectedBackgroundColor)
+    {
+        selectedBackgroundColor_ = selectedBackgroundColor;
+    }
+
+    Color GetSelectedBackgroundColor();
 
 protected:
     bool CanStartAITask() override;
@@ -645,8 +657,8 @@ private:
     int32_t caretPosition_ = 0;
     int32_t caretSpanIndex_ = -1;
     long long timestamp_ = 0;
-    OffsetF parentGlobalOffset_;
     OffsetF selectionMenuOffsetByMouse_;
+    OffsetF selectionMenuOffsetByMouseLongPress_;
     OffsetF lastClickOffset_;
     std::string pasteStr_;
 
@@ -665,7 +677,8 @@ private:
     std::optional<struct UpdateSpanStyle> typingStyle_;
     std::optional<TextStyle> typingTextStyle_;
     std::list<ResultObject> dragResultObjects_;
-
+    std::optional<Color> caretColor_;
+    std::optional<Color> selectedBackgroundColor_;
     std::function<void()> customKeyboardBuilder_;
     RefPtr<OverlayManager> keyboardOverlay_;
     Offset selectionMenuOffset_;

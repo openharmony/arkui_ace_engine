@@ -36,8 +36,8 @@ namespace OHOS::Ace::NG {
 using namespace Framework;
 using OnNavigationAnimation = std::function<NavigationTransition(NavContentInfo, NavContentInfo,
         NavigationOperation)>;
-class NavigationPattern : public Pattern {
-    DECLARE_ACE_TYPE(NavigationPattern, Pattern);
+class NavigationPattern : public Pattern, public FocusView {
+    DECLARE_ACE_TYPE(NavigationPattern, Pattern, FocusView);
 
 public:
     NavigationPattern();
@@ -80,6 +80,11 @@ public:
     ScopeFocusAlgorithm GetScopeFocusAlgorithm() override
     {
         return { false, true, ScopeType::FLEX };
+    }
+
+    std::list<int32_t> GetRouteOfFirstScope() override
+    {
+        return {};
     }
 
     void SetNavDestination(std::function<void(std::string)>&& builder)
@@ -338,7 +343,7 @@ public:
 
 private:
     void CheckTopNavPathChange(const std::optional<std::pair<std::string, RefPtr<UINode>>>& preTopNavPath,
-        const std::optional<std::pair<std::string, RefPtr<UINode>>>& newTopNavPath, bool isPopPage);
+        const std::optional<std::pair<std::string, RefPtr<UINode>>>& newTopNavPath);
     void TransitionWithAnimation(const RefPtr<NavDestinationGroupNode>& preTopNavDestination,
         const RefPtr<NavDestinationGroupNode>& newTopNavDestination, bool isPopPage);
     bool TriggerCustomAnimation(const RefPtr<NavDestinationGroupNode>& preTopNavDestination,
@@ -374,6 +379,8 @@ private:
     RefPtr<NavigationPattern> GetParentNavigationPattern();
     void DealTransitionVisibility(const RefPtr<FrameNode>& node, bool isVisible, bool isNavBar);
 
+    void UpdateIsAnimation(const std::optional<std::pair<std::string, RefPtr<UINode>>>& preTopNavPath);
+
     NavigationMode navigationMode_ = NavigationMode::AUTO;
     std::function<void(std::string)> builder_;
     RefPtr<NavigationStack> navigationStack_;
@@ -400,6 +407,9 @@ private:
     bool isCustomAnimation_ = false; // custom animation
     bool isInDividerDrag_ = false;
     bool isDividerDraggable_ = true;
+    bool isAnimated_ = false;
+    bool isReplace_ = false;
+    int32_t lastPreIndex_ = false;
     std::shared_ptr<NavigationController> navigationController_;
     std::map<int32_t, std::function<void(bool)>> onStateChangeMap_;
     OnNavigationAnimation onTransition_;

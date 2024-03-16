@@ -169,9 +169,9 @@ void TitleBarPattern::InitTitleParam()
     auto titleBarNode = AceType::DynamicCast<TitleBarNode>(GetHost());
     CHECK_NULL_VOID(titleBarNode);
     if (titleBarNode->GetSubtitle()) {
-        tempTitleBarHeight_ = static_cast<float>(FULL_DOUBLE_LINE_TITLEBAR_HEIGHT.ConvertToPx());
+        tempTitleBarHeight_.SetValue(FULL_DOUBLE_LINE_TITLEBAR_HEIGHT.Value());
     } else {
-        tempTitleBarHeight_ = static_cast<float>(FULL_SINGLE_LINE_TITLEBAR_HEIGHT.ConvertToPx());
+        tempTitleBarHeight_.SetValue(FULL_SINGLE_LINE_TITLEBAR_HEIGHT.Value());
     }
     overDragOffset_ = 0.0f;
     tempTitleOffsetY_ = 0.0f;
@@ -227,8 +227,8 @@ void TitleBarPattern::MountTitle(const RefPtr<TitleBarNode>& hostNode)
         UpdateSubTitleOpacity(1.0);
     } else {
         if (fontSize_.has_value()) {
-            titleLayoutProperty->UpdateFontSize(Dimension(fontSize_.value(), DimensionUnit::PX));
-            titleLayoutProperty->UpdateAdaptMaxFontSize(Dimension(fontSize_.value(), DimensionUnit::PX));
+            titleLayoutProperty->UpdateFontSize(fontSize_.value());
+            titleLayoutProperty->UpdateAdaptMaxFontSize(fontSize_.value());
         } else {
             titleLayoutProperty->UpdateFontSize(theme->GetTitleFontSizeBig());
             titleLayoutProperty->UpdateAdaptMaxFontSize(theme->GetTitleFontSizeBig());
@@ -269,11 +269,10 @@ void TitleBarPattern::OnModifyDone()
         return;
     }
     isTitleChanged_ = false;
-    if (NearEqual(tempTitleBarHeight_, static_cast<float>(FULL_DOUBLE_LINE_TITLEBAR_HEIGHT.ConvertToPx())) ||
-        NearEqual(tempTitleBarHeight_, static_cast<float>(FULL_SINGLE_LINE_TITLEBAR_HEIGHT.ConvertToPx()))) {
-        tempTitleBarHeight_ =
-            hostNode->GetSubtitle() ? static_cast<float>(FULL_DOUBLE_LINE_TITLEBAR_HEIGHT.ConvertToPx())
-                                    : static_cast<float>(FULL_SINGLE_LINE_TITLEBAR_HEIGHT.ConvertToPx());
+    if (NearEqual(GetTempTitleBarHeight(), static_cast<float>(FULL_DOUBLE_LINE_TITLEBAR_HEIGHT.ConvertToPx())) ||
+        NearEqual(GetTempTitleBarHeight(), static_cast<float>(FULL_SINGLE_LINE_TITLEBAR_HEIGHT.ConvertToPx()))) {
+        tempTitleBarHeight_.SetValue(hostNode->GetSubtitle() ? FULL_DOUBLE_LINE_TITLEBAR_HEIGHT.Value()
+                                                             : FULL_SINGLE_LINE_TITLEBAR_HEIGHT.Value());
     }
 }
 
@@ -306,7 +305,7 @@ void TitleBarPattern::ProcessTitleDragStart(float offset)
     maxTitleOffsetY_ = initialTitleOffsetY_;
     moveRatio_ = (maxTitleOffsetY_ - minTitleOffsetY_) /
                  (maxTitleBarHeight_ - static_cast<float>(SINGLE_LINE_TITLEBAR_HEIGHT.ConvertToPx()));
-    titleMoveDistance_ = (tempTitleBarHeight_ - defaultTitleBarHeight_) * moveRatio_;
+    titleMoveDistance_ = (GetTempTitleBarHeight() - defaultTitleBarHeight_) * moveRatio_;
     defaultTitleOffsetY_ = currentTitleOffsetY_;
     SetTempTitleOffsetY();
     defaultSubtitleOffsetY_ = GetSubTitleOffsetY();
@@ -317,7 +316,7 @@ void TitleBarPattern::ProcessTitleDragStart(float offset)
     SetDefaultTitleFontSize();
     auto mappedOffset = GetMappedOffset(offset);
     auto tempFontSize = GetFontSize(mappedOffset);
-    UpdateTitleFontSize(Dimension(tempFontSize, DimensionUnit::PX));
+    UpdateTitleFontSize(tempFontSize);
 
     // subTitle Opacity
     SetDefaultSubtitleOpacity();
@@ -338,7 +337,7 @@ void TitleBarPattern::ProcessTitleDragUpdate(float offset)
         return;
     }
     SetTempTitleBarHeight(offset);
-    titleMoveDistance_ = (tempTitleBarHeight_ - defaultTitleBarHeight_) * moveRatio_;
+    titleMoveDistance_ = (GetTempTitleBarHeight() - defaultTitleBarHeight_) * moveRatio_;
     SetTempTitleOffsetY();
     SetTempSubTitleOffsetY();
     titleBarNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_PARENT);
@@ -346,7 +345,7 @@ void TitleBarPattern::ProcessTitleDragUpdate(float offset)
     // title font size
     auto mappedOffset = GetMappedOffset(offset);
     fontSize_ = GetFontSize(mappedOffset);
-    UpdateTitleFontSize(Dimension(fontSize_.value(), DimensionUnit::PX));
+    UpdateTitleFontSize(fontSize_.value());
 
     // subTitle Opacity
     opacity_ = GetSubtitleOpacity();
@@ -373,10 +372,11 @@ void TitleBarPattern::ProcessTitleDragEnd()
     if (CanOverDrag_ || isTitleScaleChange_) {
         auto titleMiddleValue =
             (static_cast<float>(SINGLE_LINE_TITLEBAR_HEIGHT.ConvertToPx()) + maxTitleBarHeight_) / TITLE_RATIO;
-        if (LessNotEqual(tempTitleBarHeight_, titleMiddleValue) || NearEqual(tempTitleBarHeight_, titleMiddleValue)) {
+        if (LessNotEqual(GetTempTitleBarHeight(), titleMiddleValue) ||
+            NearEqual(GetTempTitleBarHeight(), titleMiddleValue)) {
             AnimateTo(static_cast<float>(SINGLE_LINE_TITLEBAR_HEIGHT.ConvertToPx()) - defaultTitleBarHeight_);
             return;
-        } else if (GreatNotEqual(tempTitleBarHeight_, titleMiddleValue)) {
+        } else if (GreatNotEqual(GetTempTitleBarHeight(), titleMiddleValue)) {
             AnimateTo(maxTitleBarHeight_ - defaultTitleBarHeight_);
             return;
         }
@@ -387,29 +387,30 @@ float TitleBarPattern::GetSubtitleOpacity()
 {
     auto titleBarHeightDiff = maxTitleBarHeight_ - static_cast<float>(SINGLE_LINE_TITLEBAR_HEIGHT.ConvertToPx());
     opacityRatio_ = 1.0f / titleBarHeightDiff;
-    auto tempOpacity = static_cast<float>(
-        (tempTitleBarHeight_ - static_cast<float>(SINGLE_LINE_TITLEBAR_HEIGHT.ConvertToPx())) * opacityRatio_ + 0.0f);
+    auto tempOpacity = static_cast<float>((GetTempTitleBarHeight() -
+        static_cast<float>(SINGLE_LINE_TITLEBAR_HEIGHT.ConvertToPx())) * opacityRatio_ + 0.0f);
     return tempOpacity;
 }
 
-float TitleBarPattern::GetFontSize(float offset)
+Dimension TitleBarPattern::GetFontSize(float offset)
 {
     auto titleBarHeight = defaultTitleBarHeight_ + offset;
     auto theme = NavigationGetTheme();
-    CHECK_NULL_RETURN(theme, 0.0f);
+    CHECK_NULL_RETURN(theme, Dimension(0.0f, DimensionUnit::FP));
     auto titleFontSizeDiff = theme->GetTitleFontSizeBig() - theme->GetTitleFontSize();
     auto titleBarHeightDiff = maxTitleBarHeight_ - static_cast<float>(SINGLE_LINE_TITLEBAR_HEIGHT.ConvertToPx());
-    fontSizeRatio_ = titleFontSizeDiff.ConvertToPx() / titleBarHeightDiff;
-    auto tempFontSize = static_cast<float>(
-        (titleBarHeight - static_cast<float>(SINGLE_LINE_TITLEBAR_HEIGHT.ConvertToPx())) * fontSizeRatio_ +
-        theme->GetTitleFontSize().ConvertToPx());
-    if (GreatNotEqual(tempFontSize, theme->GetTitleFontSizeBig().ConvertToPx())) {
-        tempFontSize = theme->GetTitleFontSizeBig().ConvertToPx();
+    if (!NearZero(titleBarHeightDiff)) {
+        fontSizeRatio_ = titleFontSizeDiff.Value() / titleBarHeightDiff;
     }
-    if (LessNotEqual(tempFontSize, theme->GetTitleFontSize().ConvertToPx())) {
-        tempFontSize = theme->GetTitleFontSize().ConvertToPx();
+    auto tempFontSize = theme->GetTitleFontSize().Value() +
+        (titleBarHeight - static_cast<float>(SINGLE_LINE_TITLEBAR_HEIGHT.ConvertToPx())) * fontSizeRatio_;
+    if (GreatNotEqual(tempFontSize, theme->GetTitleFontSizeBig().Value())) {
+        tempFontSize = theme->GetTitleFontSizeBig().Value();
     }
-    return tempFontSize;
+    if (LessNotEqual(tempFontSize, theme->GetTitleFontSize().Value())) {
+        tempFontSize = theme->GetTitleFontSize().Value();
+    }
+    return Dimension(tempFontSize, DimensionUnit::FP);
 }
 
 float TitleBarPattern::GetMappedOffset(float offset)
@@ -440,7 +441,7 @@ void TitleBarPattern::SpringAnimation(float startPos, float endPos)
         auto titlebar = weak.Upgrade();
         CHECK_NULL_VOID(titlebar);
         titlebar->SetOverDragOffset(value);
-        titlebar->tempTitleBarHeight_ = titlebar->maxTitleBarHeight_ + value / 6.0f;
+        titlebar->SetTempTitleBarHeightVp(titlebar->maxTitleBarHeight_ + value / 6.0f);
         titlebar->UpdateScaleByDragOverDragOffset(value);
         auto host = titlebar->GetHost();
         CHECK_NULL_VOID(host);
@@ -547,13 +548,14 @@ void TitleBarPattern::SetMaxTitleBarHeight()
 
 void TitleBarPattern::SetTempTitleBarHeight(float offsetY)
 {
-    tempTitleBarHeight_ = defaultTitleBarHeight_ + offsetY;
-    if (tempTitleBarHeight_ < static_cast<float>(SINGLE_LINE_TITLEBAR_HEIGHT.ConvertToPx())) {
-        tempTitleBarHeight_ = static_cast<float>(SINGLE_LINE_TITLEBAR_HEIGHT.ConvertToPx());
+    auto tmepTitleBarHeight = defaultTitleBarHeight_ + offsetY;
+    if (tmepTitleBarHeight < static_cast<float>(SINGLE_LINE_TITLEBAR_HEIGHT.ConvertToPx())) {
+        tmepTitleBarHeight = static_cast<float>(SINGLE_LINE_TITLEBAR_HEIGHT.ConvertToPx());
     }
-    if (tempTitleBarHeight_ > maxTitleBarHeight_) {
-        tempTitleBarHeight_ = maxTitleBarHeight_;
+    if (tmepTitleBarHeight > maxTitleBarHeight_) {
+        tmepTitleBarHeight = maxTitleBarHeight_;
     }
+    SetTempTitleBarHeightVp(tmepTitleBarHeight);
 }
 
 void TitleBarPattern::SetTempTitleOffsetY()
@@ -735,7 +737,7 @@ void TitleBarPattern::OnCoordScrollStart()
     maxTitleOffsetY_ = initialTitleOffsetY_;
     moveRatio_ = (maxTitleOffsetY_ - minTitleOffsetY_) /
                  (maxTitleBarHeight_ - static_cast<float>(SINGLE_LINE_TITLEBAR_HEIGHT.ConvertToPx()));
-    titleMoveDistance_ = (tempTitleBarHeight_ - defaultTitleBarHeight_) * moveRatio_;
+    titleMoveDistance_ = (GetTempTitleBarHeight() - defaultTitleBarHeight_) * moveRatio_;
 }
 
 float TitleBarPattern::OnCoordScrollUpdate(float offset)
@@ -811,11 +813,11 @@ void TitleBarPattern::SetTitleStyleByCoordScrollOffset(float offset)
         return;
     }
     if (Positive(overDragOffset_)) {
-        tempTitleBarHeight_ = maxTitleBarHeight_ + overDragOffset_ / 6.0f;
+        SetTempTitleBarHeightVp(maxTitleBarHeight_ + overDragOffset_ / 6.0f);
         titleMoveDistance_ = (maxTitleBarHeight_ - defaultTitleBarHeight_) * moveRatio_ + overDragOffset_ / 6.0f;
     } else {
         SetTempTitleBarHeight(offset);
-        titleMoveDistance_ = (tempTitleBarHeight_ - defaultTitleBarHeight_) * moveRatio_;
+        titleMoveDistance_ = (GetTempTitleBarHeight() - defaultTitleBarHeight_) * moveRatio_;
     }
 
     SetTempTitleOffsetY();
@@ -825,7 +827,7 @@ void TitleBarPattern::SetTitleStyleByCoordScrollOffset(float offset)
     // title font size
     auto mappedOffset = GetMappedOffset(offset);
     fontSize_ = GetFontSize(mappedOffset);
-    UpdateTitleFontSize(Dimension(fontSize_.value(), DimensionUnit::PX));
+    UpdateTitleFontSize(fontSize_.value());
 
     // subTitle Opacity
     opacity_ = GetSubtitleOpacity();

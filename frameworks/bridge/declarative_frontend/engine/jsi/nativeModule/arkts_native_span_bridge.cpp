@@ -25,8 +25,6 @@
 
 namespace OHOS::Ace::NG {
 constexpr int SIZE_OF_TEXT_CASES = 2;
-constexpr double DEFAULT_SPAN_FONT_SIZE = 16;
-constexpr DimensionUnit DEFAULT_SPAN_FONT_UNIT = DimensionUnit::FP;
 constexpr TextDecorationStyle DEFAULT_DECORATION_STYLE = TextDecorationStyle::SOLID;
 constexpr Ace::FontStyle DEFAULT_FONT_STYLE = Ace::FontStyle::NORMAL;
 constexpr Color DEFAULT_DECORATION_COLOR = Color(0xff000000);
@@ -112,7 +110,7 @@ ArkUINativeModuleValue SpanBridge::SetLineHeight(ArkUIRuntimeCallInfo *runtimeCa
     return panda::JSValueRef::Undefined(vm);
 }
 
-ArkUINativeModuleValue SpanBridge::ReSetLineHeight(ArkUIRuntimeCallInfo *runtimeCallInfo)
+ArkUINativeModuleValue SpanBridge::ResetLineHeight(ArkUIRuntimeCallInfo *runtimeCallInfo)
 {
     EcmaVM *vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
@@ -143,7 +141,7 @@ ArkUINativeModuleValue SpanBridge::SetFontStyle(ArkUIRuntimeCallInfo *runtimeCal
     return panda::JSValueRef::Undefined(vm);
 }
 
-ArkUINativeModuleValue SpanBridge::ReSetFontStyle(ArkUIRuntimeCallInfo *runtimeCallInfo)
+ArkUINativeModuleValue SpanBridge::ResetFontStyle(ArkUIRuntimeCallInfo *runtimeCallInfo)
 {
     EcmaVM *vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
@@ -160,14 +158,11 @@ ArkUINativeModuleValue SpanBridge::SetFontSize(ArkUIRuntimeCallInfo *runtimeCall
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
     Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(NUM_1);
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
-    auto theme = ArkTSUtils::GetTheme<TextTheme>();
+    auto theme = GetTheme<TextTheme>();
+    CHECK_NULL_RETURN(theme, panda::JSValueRef::Undefined(vm));
 
-    CalcDimension fontSize(DEFAULT_SPAN_FONT_SIZE, DEFAULT_SPAN_FONT_UNIT);
-    if (!ArkTSUtils::ParseJsDimensionFp(vm, secondArg, fontSize)) {
-        fontSize.SetUnit(DEFAULT_SPAN_FONT_UNIT);
-        fontSize.SetValue(DEFAULT_SPAN_FONT_SIZE);
-    }
-    if (fontSize.IsNegative() && theme) {
+    CalcDimension fontSize = theme->GetTextStyle().GetFontSize();
+    if (!ArkTSUtils::ParseJsDimensionFp(vm, secondArg, fontSize, false) || fontSize.IsNegative()) {
         fontSize = theme->GetTextStyle().GetFontSize();
     }
     GetArkUINodeModifiers()->getSpanModifier()->setSpanFontSize(nativeNode, fontSize.Value(),
@@ -257,10 +252,7 @@ ArkUINativeModuleValue SpanBridge::SetFontColor(ArkUIRuntimeCallInfo *runtimeCal
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
     Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(NUM_1);
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
-
-    auto pipelineContext = PipelineBase::GetCurrentContext();
-    CHECK_NULL_RETURN(pipelineContext, panda::JSValueRef::Undefined(vm));
-    auto theme = pipelineContext->GetTheme<TextTheme>();
+    auto theme = GetTheme<TextTheme>();
     CHECK_NULL_RETURN(theme, panda::JSValueRef::Undefined(vm));
 
     Color textColor = theme->GetTextStyle().GetTextColor();
@@ -324,23 +316,17 @@ ArkUINativeModuleValue SpanBridge::SetFont(ArkUIRuntimeCallInfo *runtimeCallInfo
     Local<JSValueRef> styleArg = runtimeCallInfo->GetCallArgRef(NUM_4);
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     ArkUIFontStruct fontInfo;
-    CalcDimension fontSize;
-    if (!ArkTSUtils::ParseJsDimensionFp(vm, sizeArg,  fontSize) || sizeArg->IsNull()) {
-        fontSize.SetValue(DEFAULT_SPAN_FONT_SIZE);
-        fontSize.SetUnit(DEFAULT_SPAN_FONT_UNIT);
-    }
-    if (sizeArg->IsUndefined() || fontSize.IsNegative() || fontSize.Unit() == DimensionUnit::PERCENT) {
-        auto pipelineContext = PipelineContext::GetCurrentContext();
-        CHECK_NULL_RETURN(pipelineContext, panda::JSValueRef::Undefined(vm));
-        auto theme = pipelineContext->GetTheme<TextTheme>();
-        CHECK_NULL_RETURN(theme, panda::JSValueRef::Undefined(vm));
-        auto size = theme->GetTextStyle().GetFontSize();
-        fontInfo.fontSizeNumber = size.Value();
-        fontInfo.fontSizeUnit = static_cast<int8_t>(size.Unit());
+    auto theme = GetTheme<TextTheme>();
+    CHECK_NULL_RETURN(theme, panda::JSValueRef::Undefined(vm));
+
+    CalcDimension fontSize = theme->GetTextStyle().GetFontSize();
+    if (sizeArg->IsNull() || !ArkTSUtils::ParseJsDimensionFp(vm, sizeArg, fontSize, false) || fontSize.IsNegative()) {
+        fontSize = theme->GetTextStyle().GetFontSize();
     } else {
         fontInfo.fontSizeNumber = fontSize.Value();
         fontInfo.fontSizeUnit = static_cast<int8_t>(fontSize.Unit());
     }
+
     std::string weight = DEFAULT_FONT_WEIGHT;
     if (!weightArg->IsNull()) {
         if (weightArg->IsNumber()) {

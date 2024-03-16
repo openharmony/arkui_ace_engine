@@ -59,6 +59,7 @@ bool SystemProperties::gridCacheEnabled_ = true;
 bool SystemProperties::sideBarContainerBlurEnable_ = false;
 bool SystemProperties::stateManagerEnable_ = false;
 bool SystemProperties::acePerformanceMonitorEnable_ = false;
+bool SystemProperties::debugBoundaryEnabled_ = false;
 
 bool g_irregularGrid = true;
 bool g_segmentedWaterflow = true;

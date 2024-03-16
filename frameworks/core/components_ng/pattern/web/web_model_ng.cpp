@@ -74,6 +74,10 @@ void WebModelNG::Create(const std::string& src, std::function<void(int32_t)>&& s
     stack->Push(frameNode);
     auto webPattern = frameNode->GetPattern<WebPattern>();
     CHECK_NULL_VOID(webPattern);
+    webPattern->SetNestedScroll(NestedScrollOptions({
+            .forward = NestedScrollMode::SELF_FIRST,
+            .backward = NestedScrollMode::SELF_FIRST,
+        }));
     webPattern->SetWebSrc(src);
     webPattern->SetPopup(popup);
     webPattern->SetSetWebIdCallback(std::move(setWebIdCallback));
@@ -920,7 +924,7 @@ void WebModelNG::AddDragFrameNodeToManager()
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
 
-    dragDropManager->AddDragFrameNode(frameNode->GetId(), frameNode);
+    dragDropManager->AddDragFrameNode(frameNode->GetId(), AceType::WeakClaim(frameNode));
 }
 
 void WebModelNG::SetAudioResumeInterval(int32_t resumeInterval)

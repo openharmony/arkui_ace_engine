@@ -44,10 +44,8 @@ void TextFieldModelNG::CreateNode(
     auto pattern = frameNode->GetPattern<TextFieldPattern>();
     pattern->SetModifyDoneStatus(false);
     auto textValue = pattern->GetTextValue();
-    if (SystemProperties::GetDebugEnabled()) {
-        LOGI("TextFieldModelNG::GetOrCreateNode with text %{public}s, current text %{public}s",
-            value.value_or("NA").c_str(), textValue.c_str());
-    }
+    TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "new text:%{public}s, old text:%{public}s", value.value_or("NA").c_str(),
+        textValue.c_str());
     if (value.has_value() && value.value() != textValue) {
         pattern->InitValueText(value.value());
     }
@@ -97,10 +95,8 @@ RefPtr<FrameNode> TextFieldModelNG::CreateFrameNode(int32_t nodeId, const std::o
     auto pattern = frameNode->GetPattern<TextFieldPattern>();
     pattern->SetModifyDoneStatus(false);
     auto textValue = pattern->GetTextValue();
-    if (SystemProperties::GetDebugEnabled()) {
-        LOGI("TextFieldModelNG::GetOrCreateNode with text %{public}s, current text %{public}s",
-            value.value_or("NA").c_str(), textValue.c_str());
-    }
+    TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "new text:%{public}s, old text:%{public}s", value.value_or("NA").c_str(),
+        textValue.c_str());
     if (value.has_value() && value.value() != textValue) {
         pattern->InitEditingValueText(value.value());
     }
@@ -130,6 +126,20 @@ void TextFieldModelNG::SetDraggable(bool draggable)
 void TextFieldModelNG::SetShowUnderline(bool showUnderLine)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(TextFieldLayoutProperty, ShowUnderline, showUnderLine);
+}
+
+void TextFieldModelNG::SetUserUnderlineColor(UserUnderlineColor userColor)
+{
+    auto pattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<TextFieldPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetUserUnderlineColor(userColor);
+}
+
+void TextFieldModelNG::SetNormalUnderlineColor(const Color& normalColor)
+{
+    auto pattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<TextFieldPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetNormalUnderlineColor(normalColor);
 }
 
 void TextFieldModelNG::ProcessDefaultStyleAndBehaviors(const RefPtr<FrameNode>& frameNode)
@@ -409,6 +419,14 @@ void TextFieldModelNG::SetOnTextSelectionChange(std::function<void(int32_t, int3
     eventHub->SetOnSelectionChange(std::move(func));
 }
 
+void TextFieldModelNG::SetOnTextSelectionChange(FrameNode* frameNode, std::function<void(int32_t, int32_t)>&& func)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetEventHub<TextFieldEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnSelectionChange(std::move(func));
+}
+
 void TextFieldModelNG::SetOnContentScroll(std::function<void(float, float)>&& func)
 {
     auto eventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<TextFieldEventHub>();
@@ -465,7 +483,7 @@ void TextFieldModelNG::AddDragFrameNodeToManager() const
     CHECK_NULL_VOID(dragDropManager);
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
-    dragDropManager->AddTextFieldDragFrameNode(frameNode->GetId(), AceType::WeakClaim(AceType::RawPtr(frameNode)));
+    dragDropManager->AddTextFieldDragFrameNode(frameNode->GetId(), AceType::WeakClaim(frameNode));
 }
 
 void TextFieldModelNG::SetForegroundColor(const Color& value)
@@ -580,6 +598,12 @@ void TextFieldModelNG::SetBackgroundColor(const Color& color, bool tmp)
 
     NG::ViewAbstract::SetBackgroundColor(color);
     ACE_UPDATE_PAINT_PROPERTY(TextFieldPaintProperty, BackgroundColor, color);
+}
+
+void TextFieldModelNG::SetBackgroundColor(FrameNode* frameNode, const Color& color)
+{
+    NG::ViewAbstract::SetBackgroundColor(color);
+    ACE_UPDATE_NODE_PAINT_PROPERTY(TextFieldPaintProperty, BackgroundColor, color, frameNode);
 }
 
 void TextFieldModelNG::SetHeight(const Dimension& value) {}
@@ -702,6 +726,31 @@ void TextFieldModelNG::SetSelectAllValue(bool isSelectAllValue)
     ACE_UPDATE_LAYOUT_PROPERTY(TextFieldLayoutProperty, SelectAllValue, isSelectAllValue);
 }
 
+void TextFieldModelNG::SetLetterSpacing(const Dimension& value)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(TextFieldLayoutProperty, LetterSpacing, value);
+}
+
+void TextFieldModelNG::SetLineHeight(const Dimension& value)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(TextFieldLayoutProperty, LineHeight, value);
+}
+
+void TextFieldModelNG::SetTextDecoration(Ace::TextDecoration value)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(TextFieldLayoutProperty, TextDecoration, value);
+}
+
+void TextFieldModelNG::SetTextDecorationColor(const Color& value)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(TextFieldLayoutProperty, TextDecorationColor, value);
+}
+
+void TextFieldModelNG::SetTextDecorationStyle(Ace::TextDecorationStyle value)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(TextFieldLayoutProperty, TextDecorationStyle, value);
+}
+
 void TextFieldModelNG::SetInputStyle(FrameNode* frameNode, InputStyle value)
 {
     ACE_UPDATE_NODE_PAINT_PROPERTY(TextFieldPaintProperty, InputStyle, value, frameNode);
@@ -728,11 +777,21 @@ void TextFieldModelNG::SetPasswordIcon(FrameNode* frameNode, const PasswordIcon&
         ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, ShowPasswordSourceInfo,
             ImageSourceInfo(passwordIcon.showResult,
                 passwordIcon.showBundleName, passwordIcon.showModuleName), frameNode);
+    } else {
+        ImageSourceInfo showSystemSourceInfo;
+        showSystemSourceInfo.SetResourceId(InternalResource::ResourceId::SHOW_PASSWORD_SVG);
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, ShowPasswordSourceInfo,
+            showSystemSourceInfo, frameNode);
     }
     if (passwordIcon.hideResult != "") {
         ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, HidePasswordSourceInfo,
             ImageSourceInfo(passwordIcon.hideResult,
                 passwordIcon.hideBundleName, passwordIcon.hideModuleName), frameNode);
+    } else {
+        ImageSourceInfo hideSystemSourceInfo;
+        hideSystemSourceInfo.SetResourceId(InternalResource::ResourceId::HIDE_PASSWORD_SVG);
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, HidePasswordSourceInfo,
+            hideSystemSourceInfo, frameNode);
     }
 }
 
@@ -845,6 +904,20 @@ void TextFieldModelNG::SetShowUnderline(FrameNode* frameNode, bool showUnderLine
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, ShowUnderline, showUnderLine, frameNode);
 }
 
+void TextFieldModelNG::SetUserUnderlineColor(FrameNode* frameNode, UserUnderlineColor userColor)
+{
+    auto pattern = AceType::DynamicCast<TextFieldPattern>(frameNode->GetPattern());
+    CHECK_NULL_VOID(pattern);
+    pattern->SetUserUnderlineColor(userColor);
+}
+
+void TextFieldModelNG::SetNormalUnderlineColor(FrameNode* frameNode, const Color& normalColor)
+{
+    auto pattern = AceType::DynamicCast<TextFieldPattern>(frameNode->GetPattern());
+    CHECK_NULL_VOID(pattern);
+    pattern->SetNormalUnderlineColor(normalColor);
+}
+
 void TextFieldModelNG::SetEnterKeyType(FrameNode* frameNode, TextInputAction value)
 {
     auto pattern = AceType::DynamicCast<TextFieldPattern>(frameNode->GetPattern());
@@ -866,23 +939,22 @@ void TextFieldModelNG::SetMaxLines(FrameNode* frameNode, uint32_t value)
 void TextFieldModelNG::SetPlaceholderFont(FrameNode* frameNode, const Font& value)
 {
     if (value.fontSize.has_value()) {
-        ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty,
-            PlaceholderFontSize, value.fontSize.value(), frameNode);
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(
+            TextFieldLayoutProperty, PlaceholderFontSize, value.fontSize.value(), frameNode);
     }
     if (value.fontStyle) {
-        ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty,
-            PlaceholderItalicFontStyle, value.fontStyle.value(), frameNode);
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(
+            TextFieldLayoutProperty, PlaceholderItalicFontStyle, value.fontStyle.value(), frameNode);
     }
     if (value.fontWeight) {
-        ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty,
-            PlaceholderFontWeight, value.fontWeight.value(), frameNode);
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(
+            TextFieldLayoutProperty, PlaceholderFontWeight, value.fontWeight.value(), frameNode);
     }
     if (!value.fontFamilies.empty()) {
-        ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty,
-            PlaceholderFontFamily, value.fontFamilies, frameNode);
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, PlaceholderFontFamily, value.fontFamilies, frameNode);
     }
-    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty,
-        PreferredPlaceholderLineHeightNeedToUpdate, true, frameNode);
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(
+        TextFieldLayoutProperty, PreferredPlaceholderLineHeightNeedToUpdate, true, frameNode);
 }
 
 void TextFieldModelNG::SetFontSize(FrameNode* frameNode, const Dimension& value)
@@ -977,8 +1049,8 @@ void TextFieldModelNG::SetOnCut(FrameNode* frameNode, std::function<void(const s
     eventHub->SetOnCut(std::move(func));
 }
 
-void TextFieldModelNG::SetOnPasteWithEvent(FrameNode* frameNode,
-    std::function<void(const std::string&, NG::TextCommonEvent&)>&& func)
+void TextFieldModelNG::SetOnPasteWithEvent(
+    FrameNode* frameNode, std::function<void(const std::string&, NG::TextCommonEvent&)>&& func)
 {
     CHECK_NULL_VOID(frameNode);
     auto eventHub = frameNode->GetEventHub<TextFieldEventHub>();
@@ -1085,7 +1157,7 @@ Font TextFieldModelNG::GetPlaceholderFont(FrameNode* frameNode)
         TextFieldLayoutProperty, PlaceholderFontWeight, fontWeight, frameNode, fontWeight);
     ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(
         TextFieldLayoutProperty, PlaceholderFontFamily, fontFamilies, frameNode, fontFamilies);
-    Font value { fontWeight, fontSize, fontStyle, fontFamilies};
+    Font value { fontWeight, fontSize, fontStyle, fontFamilies };
     return value;
 }
 

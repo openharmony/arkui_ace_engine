@@ -50,6 +50,9 @@ enum class TouchType : size_t {
     PULL_MOVE,
     PULL_IN_WINDOW,
     PULL_OUT_WINDOW,
+    HOVER_ENTER,
+    HOVER_MOVE,
+    HOVER_EXIT,
     UNKNOWN,
 };
 

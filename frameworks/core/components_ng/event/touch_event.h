@@ -84,6 +84,14 @@ public:
             userCallback_.Reset();
         }
     }
+    
+    void ClearJSFrameNodeCallback()
+    {
+        // When the event param is undefined, it will clear the callback.
+        if (commonTouchEventCallback_) {
+            commonTouchEventCallback_.Reset();
+        }
+    }
 
     void OnFlushTouchEventsBegin() override;
     void OnFlushTouchEventsEnd() override;
@@ -115,11 +123,20 @@ public:
     bool DispatchEvent(const TouchEvent& point) override;
     bool HandleEvent(const TouchEvent& point) override;
 
+    void SetJSFrameNodeOnTouchEvent(TouchEventFunc&& callback)
+    {
+        if (commonTouchEventCallback_) {
+            commonTouchEventCallback_.Reset();
+        }
+        commonTouchEventCallback_ = MakeRefPtr<TouchEventImpl>(std::move(callback));
+    }
+
     void CopyTouchEvent(const RefPtr<TouchEventActuator>& touchEventActuator)
     {
         touchEvents_ = touchEventActuator->touchEvents_;
         userCallback_ = touchEventActuator->userCallback_;
         onTouchEventCallback_ = touchEventActuator->onTouchEventCallback_;
+        commonTouchEventCallback_ = touchEventActuator->commonTouchEventCallback_;
     }
 
 private:
@@ -129,6 +146,7 @@ private:
     std::list<RefPtr<TouchEventImpl>> touchEvents_;
     RefPtr<TouchEventImpl> userCallback_;
     RefPtr<TouchEventImpl> onTouchEventCallback_;
+    RefPtr<TouchEventImpl> commonTouchEventCallback_;
     // isFlushTouchEventsEnd_ means the last one touch event info during one vsync period, used only for web_pattern
     // if isFlushTouchEventsEnd_ is true, web_pattern start to send touch event list to chromium
     bool isFlushTouchEventsEnd_ = false;

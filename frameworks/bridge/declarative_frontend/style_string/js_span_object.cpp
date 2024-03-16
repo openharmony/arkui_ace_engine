@@ -15,4 +15,70 @@
 
 #include "frameworks/bridge/declarative_frontend/jsview/js_span_object.h"
 
-namespace OHOS::Ace::Framework {} // namespace OHOS::Ace::Framework
+#include "frameworks/bridge/common/utils/utils.h"
+#include "frameworks/bridge/declarative_frontend/engine/functions/js_function.h"
+#include "frameworks/bridge/declarative_frontend/jsview/js_view_abstract.h"
+namespace OHOS::Ace::Framework {
+
+void JSFontSpan::JSBind(BindingTarget globalObj)
+{
+    JSClass<JSFontSpan>::Declare("TextStyle");
+    JSClass<JSFontSpan>::CustomProperty("fontColor", &JSFontSpan::GetFontColor, &JSFontSpan::SetFontColor);
+    JSClass<JSFontSpan>::Bind(globalObj, JSFontSpan::Constructor, JSFontSpan::Destructor);
+}
+
+void JSFontSpan::Constructor(const JSCallbackInfo& args)
+{
+    auto fontSpan = Referenced::MakeRefPtr<JSFontSpan>();
+    fontSpan->IncRefCount();
+
+    RefPtr<FontSpan> span;
+    if (args.Length() <= 0) {
+        Font font;
+        span = AceType::MakeRefPtr<FontSpan>(font);
+    } else {
+        span = JSFontSpan::ParseJsFontSpan(JSRef<JSObject>::Cast(args[0]));
+    }
+    fontSpan->fontSpan_ = span;
+    args.SetReturnValue(Referenced::RawPtr(fontSpan));
+}
+
+void JSFontSpan::Destructor(JSFontSpan* fontSpan)
+{
+    if (fontSpan != nullptr) {
+        fontSpan->DecRefCount();
+    }
+}
+
+RefPtr<FontSpan> JSFontSpan::ParseJsFontSpan(JSRef<JSObject> obj)
+{
+    Font font;
+    Color color;
+    JSRef<JSVal> colorObj = JSRef<JSVal>::Cast(obj->GetProperty("fontColor"));
+    if (!colorObj->IsNull() && JSViewAbstract::ParseJsColor(colorObj, color)) {
+        font.fontColor = color;
+    }
+    return AceType::MakeRefPtr<FontSpan>(font);
+}
+void JSFontSpan::GetFontColor(const JSCallbackInfo& info)
+{
+    CHECK_NULL_VOID(fontSpan_);
+    if (!fontSpan_->GetFont().fontColor.has_value()) {
+        return;
+    }
+    auto ret = JSRef<JSVal>::Make(JSVal(ToJSValue(fontSpan_->GetFont().GetFontColor())));
+    info.SetReturnValue(ret);
+}
+
+void JSFontSpan::SetFontColor(const JSCallbackInfo& info) {}
+
+RefPtr<FontSpan>& JSFontSpan::GetFontSpan()
+{
+    return fontSpan_;
+}
+void JSFontSpan::SetFontSpan(const RefPtr<FontSpan>& fontSpan)
+{
+    fontSpan_ = fontSpan;
+}
+
+} // namespace OHOS::Ace::Framework

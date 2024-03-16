@@ -19,7 +19,7 @@ class TextEnableDataDetectorModifier extends ModifierWithKey<boolean> {
     super(value);
   }
   static identity: Symbol = Symbol('textEnableDataDetector');
-  applyPeer(node: KNode, reset: boolean) {
+  applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
       getUINativeModule().text.resetEnableDataDetector(node);
     } else {

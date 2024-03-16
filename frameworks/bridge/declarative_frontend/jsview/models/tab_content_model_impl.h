@@ -33,6 +33,7 @@ public:
     void SetBoard(const BoardStyle& board) override {}
     void SetSelectedMode(SelectedMode selectedMode) override {}
     void SetLabelStyle(const LabelStyle& labelStyle) override {}
+    void SetIconStyle(const IconStyle& iconStyle) override {}
     void SetPadding(const NG::PaddingProperty& padding) override {}
     void SetLayoutMode(LayoutMode layoutMode) override {}
     void SetVerticalAlign(FlexAlign verticalAlign) override {}

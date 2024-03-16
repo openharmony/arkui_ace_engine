@@ -291,6 +291,27 @@ public:
     virtual void SubscribeContainerModalButtonsRectChange(
         std::function<void(Rosen::Rect& containerModal, Rosen::Rect& buttons)>&& callback) {}
 
+    virtual void SetUIExtensionSubWindow(bool isUIExtensionSubWindow) {}
+
+    virtual bool IsUIExtensionSubWindow()
+    {
+        return false;
+    }
+
+    virtual void SetUIExtensionAbilityProcess(bool isUIExtensionAbilityProcess) {}
+
+    virtual bool IsUIExtensionAbilityProcess()
+    {
+        return false;
+    }
+
+    virtual void SetUIExtensionAbilityHost(bool isUIExtensionAbilityHost) {}
+
+    virtual bool IsUIExtensionAbilityHost()
+    {
+        return false;
+    }
+
 #ifndef PREVIEW
     virtual void SearchElementInfoByAccessibilityId(
         int64_t elementId, int32_t mode,

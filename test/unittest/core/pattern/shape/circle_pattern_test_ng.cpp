@@ -37,7 +37,7 @@ class CirclePatternTestNg : public BaseShapePatternTestNg {
     RefPtr<FrameNode> CreadFrameNode() override
     {
         CircleModelNG().Create();
-        return AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->GetMainElementNode());
+        return AceType::Claim(ViewStackProcessor::GetInstance()->GetMainFrameNode());
     }
 
     void Draw(RefPtr<FrameNode> frameNode) override

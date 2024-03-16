@@ -95,7 +95,7 @@ Render3D::PointerEvent ModelTouchHandler::CreateSceneTouchEvent(const TouchEvent
         deltaChange.SetX(point.screenX - oldPoint.screenX);
         deltaChange.SetY(point.screenY - oldPoint.screenY);
     }
-    
+
     pointerEvent.deltaX_ = deltaChange.GetX() / viewWidth;
     pointerEvent.deltaY_ = deltaChange.GetY() / viewHeight;
     switch (point.type) {
@@ -116,10 +116,13 @@ Render3D::PointerEvent ModelTouchHandler::CreateSceneTouchEvent(const TouchEvent
         case TouchType::PULL_MOVE:
         case TouchType::PULL_IN_WINDOW:
         case TouchType::PULL_OUT_WINDOW:
+        case TouchType::HOVER_ENTER:
+        case TouchType::HOVER_MOVE:
+        case TouchType::HOVER_EXIT:
         case TouchType::UNKNOWN:
             break;
     }
-    
+
     return pointerEvent;
 }
-} // namespace OHOS::Ace
+} // namespace OHOS::Ace::NG

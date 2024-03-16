@@ -500,7 +500,7 @@ void JSButton::JsOnClick(const JSCallbackInfo& info)
     }
 
     auto jsOnClickFunc = AceType::MakeRefPtr<JsClickFunction>(JSRef<JSFunc>::Cast(info[0]));
-    WeakPtr<NG::FrameNode> targetNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    WeakPtr<NG::FrameNode> targetNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
     auto onTap = [execCtx = info.GetExecutionContext(), func = jsOnClickFunc, node = targetNode](GestureEvent& info) {
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
         ACE_SCORING_EVENT("onClick");
@@ -581,8 +581,11 @@ void JSButton::JsSize(const JSCallbackInfo& info)
 void JSButton::JsRadius(const JSCallbackInfo& info)
 {
     CalcDimension radius;
-    ParseJsDimensionVp(info[0], radius);
-    ButtonModel::GetInstance()->SetBorderRadius(radius);
+    if (!ParseJsDimensionVpNG(info[0], radius)) {
+        ButtonModel::GetInstance()->ResetBorderRadius();
+    } else {
+        ButtonModel::GetInstance()->SetBorderRadius(radius);
+    }
     HandleDifferentRadius(info[0]);
 }
 

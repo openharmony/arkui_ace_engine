@@ -1187,17 +1187,17 @@ void WebPattern::InitSlideUpdateListener()
     // cross platform is not support now;
 }
 
-void WebPattern::UpdateSlideOffset(SizeF frameSize)
+void WebPattern::UpdateSlideOffset()
 {
    // cross platform is not support now;
 }
 
-void WebPattern::CalculateHorizontalDrawRect(SizeF frameSize)
+void WebPattern::CalculateHorizontalDrawRect()
 {
    // cross platform is not support now;
 }
 
-void WebPattern::CalculateVerticalDrawRect(SizeF frameSize)
+void WebPattern::CalculateVerticalDrawRect()
 {
     // cross platform is not support now;
 }

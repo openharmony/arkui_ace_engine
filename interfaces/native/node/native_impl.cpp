@@ -15,13 +15,16 @@
 
 #include "native_interface.h"
 #include "native_node.h"
+#include "node/dialog_model.h"
 #include "node/node_model.h"
 
 #include "base/log/log_wrapper.h"
 
 namespace {
 
+constexpr int32_t NONE_API_VERSION = 0;
 constexpr int32_t CURRENT_NATIVE_NODE_API_VERSION = 1;
+constexpr int32_t CURRENT_NATIVE_DIALOG_API_VERSION = 1;
 ArkUI_NativeNodeAPI_1 nodeImpl_1 = {
     CURRENT_NATIVE_NODE_API_VERSION,
     OHOS::Ace::NodeModel::CreateNode,
@@ -41,6 +44,25 @@ ArkUI_NativeNodeAPI_1 nodeImpl_1 = {
     OHOS::Ace::NodeModel::MarkDirty,
 };
 
+ArkUI_NativeDialogAPI_1 dialogImpl_1 = {
+    OHOS::Ace::DialogModel::Create,
+    OHOS::Ace::DialogModel::Dispose,
+    OHOS::Ace::DialogModel::SetContent,
+    OHOS::Ace::DialogModel::RemoveContent,
+    OHOS::Ace::DialogModel::SetContentAlignment,
+    OHOS::Ace::DialogModel::ResetContentAlignment,
+    OHOS::Ace::DialogModel::SetModalMode,
+    OHOS::Ace::DialogModel::SetAutoCancel,
+    OHOS::Ace::DialogModel::SetMask,
+    OHOS::Ace::DialogModel::SetBackgroundColor,
+    OHOS::Ace::DialogModel::SetCornerRadius,
+    OHOS::Ace::DialogModel::SetGridColumnCount,
+    OHOS::Ace::DialogModel::EnableCustomStyle,
+    OHOS::Ace::DialogModel::EnableCustomAnimation,
+    OHOS::Ace::DialogModel::RegiesterOnWillDismiss,
+    OHOS::Ace::DialogModel::Show,
+    OHOS::Ace::DialogModel::Close,
+};
 } // namespace
 
 #ifdef __cplusplus
@@ -48,6 +70,11 @@ extern "C" {
 #endif
 
 ArkUI_AnyNativeAPI* OH_ArkUI_GetNativeAPI(ArkUI_NativeAPIVariantKind type, int32_t version)
+{
+    return OH_ArkUI_QueryModuleInterface(type, version);
+}
+
+ArkUI_AnyNativeAPI* OH_ArkUI_QueryModuleInterface(ArkUI_NativeAPIVariantKind type, int32_t version)
 {
     if (!OHOS::Ace::NodeModel::GetFullImpl()) {
         TAG_LOGE(OHOS::Ace::AceLogTag::ACE_NATIVE_NODE,
@@ -57,6 +84,7 @@ ArkUI_AnyNativeAPI* OH_ArkUI_GetNativeAPI(ArkUI_NativeAPIVariantKind type, int32
     switch (type) {
         case ARKUI_NATIVE_NODE: {
             switch (version) {
+                case NONE_API_VERSION:
                 case CURRENT_NATIVE_NODE_API_VERSION:
                     return reinterpret_cast<ArkUI_AnyNativeAPI*>(&nodeImpl_1);
                 default: {
@@ -66,6 +94,17 @@ ArkUI_AnyNativeAPI* OH_ArkUI_GetNativeAPI(ArkUI_NativeAPIVariantKind type, int32
                 }
             }
             break;
+        }
+        case ARKUI_NATIVE_DIALOG: {
+            switch (version) {
+                case CURRENT_NATIVE_DIALOG_API_VERSION:
+                    return reinterpret_cast<ArkUI_AnyNativeAPI*>(&dialogImpl_1);
+                default: {
+                    TAG_LOGE(OHOS::Ace::AceLogTag::ACE_NATIVE_NODE,
+                        "fail to get dialog api family, version is incorrect: %{public}d", version);
+                    return nullptr;
+                }
+            }
         }
         default: {
             TAG_LOGE(OHOS::Ace::AceLogTag::ACE_NATIVE_NODE,

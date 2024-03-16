@@ -210,13 +210,9 @@ public:
     }
 
     // Set by node container.
-    void SetOnTouchEvent(TouchEventFunc&& touchEventFunc)
-    {
-        if (!touchEventActuator_) {
-            touchEventActuator_ = MakeRefPtr<TouchEventActuator>();
-        }
-        touchEventActuator_->SetOnTouchEvent(std::move(touchEventFunc));
-    }
+    void SetOnTouchEvent(TouchEventFunc&& touchEventFunc);
+    // Set by JS FrameNode.
+    void SetJSFrameNodeOnTouchEvent(TouchEventFunc&& touchEventFunc);
 
     void AddTouchEvent(const RefPtr<TouchEventImpl>& touchEvent)
     {
@@ -250,6 +246,9 @@ public:
     // Set by user define, which will replace old one.
     void SetUserOnClick(GestureEventFunc&& clickEvent);
 
+     // Set by JS FrameNode.
+    void SetJSFrameNodeOnClick(GestureEventFunc&& clickEvent);
+    
     void SetOnGestureJudgeBegin(GestureJudgeFunc&& gestureJudgeFunc);
 
     void SetOnTouchIntercept(TouchInterceptFunc&& touchInterceptFunc);
@@ -272,6 +271,10 @@ public:
     void ClearUserOnClick();
     void ClearUserOnTouch();
 
+
+    void ClearJSFrameNodeOnClick();
+    void ClearJSFrameNodeOnTouch();
+
     void AddClickEvent(const RefPtr<ClickEvent>& clickEvent);
 
     void RemoveClickEvent(const RefPtr<ClickEvent>& clickEvent)
@@ -280,6 +283,14 @@ public:
             return;
         }
         clickEventActuator_->RemoveClickEvent(clickEvent);
+    }
+
+    void RemoveLongPressEvent(const RefPtr<LongPressEvent>& longPressEvent)
+    {
+        if (!longPressEventActuator_) {
+            return;
+        }
+        longPressEventActuator_->RemoveLongPressEvent(longPressEvent);
     }
 
     bool IsClickEventsEmpty() const
@@ -458,6 +469,10 @@ public:
             dragEventActuator_->SetThumbnailCallback(std::move(callback));
         }
     }
+
+    bool IsDragForbidden();
+
+    void SetDragForbiddenForcely(bool isDragForbidden);
 
     bool GetTextDraggable() const
     {
@@ -641,6 +656,7 @@ private:
     TouchInterceptFunc touchInterceptFunc_;
 
     MenuPreviewMode previewMode_ = MenuPreviewMode::NONE;
+    bool isDragForbidden_ = false;
     bool textDraggable_ = false;
     bool isTextDraggable_ = false;
     bool monopolizeEvents_ = false;

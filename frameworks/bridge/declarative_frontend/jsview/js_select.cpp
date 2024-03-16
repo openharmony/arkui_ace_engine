@@ -119,6 +119,7 @@ void JSSelect::JSBind(BindingTarget globalObj)
     JSClass<JSSelect>::StaticMethod("optionWidthFitTrigger", &JSSelect::SetOptionWidthFitTrigger, opt);
     JSClass<JSSelect>::StaticMethod("menuBackgroundColor", &JSSelect::SetMenuBackgroundColor, opt);
     JSClass<JSSelect>::StaticMethod("menuBackgroundBlurStyle", &JSSelect::SetMenuBackgroundBlurStyle, opt);
+    JSClass<JSSelect>::StaticMethod("controlSize", &JSSelect::SetControlSize);
 
     JSClass<JSSelect>::StaticMethod("onClick", &JSInteractableView::JsOnClick);
     JSClass<JSSelect>::StaticMethod("onTouch", &JSInteractableView::JsOnTouch);
@@ -134,7 +135,7 @@ void ParseSelectedObject(const JSCallbackInfo& info, const JSRef<JSVal>& changeE
     CHECK_NULL_VOID(changeEventVal->IsFunction());
 
     auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(changeEventVal));
-    WeakPtr<NG::FrameNode> targetNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    WeakPtr<NG::FrameNode> targetNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
     auto onSelect = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc), node = targetNode](int32_t index) {
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
         ACE_SCORING_EVENT("Select.SelectChangeEvent");
@@ -170,7 +171,7 @@ void ParseValueObject(const JSCallbackInfo& info, const JSRef<JSVal>& changeEven
     CHECK_NULL_VOID(changeEventVal->IsFunction());
 
     auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(changeEventVal));
-    WeakPtr<NG::FrameNode> targetNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    WeakPtr<NG::FrameNode> targetNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
     auto onSelect = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc), node = targetNode](
                         const std::string& value) {
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
@@ -199,20 +200,30 @@ void JSSelect::Value(const JSCallbackInfo& info)
     SelectModel::GetInstance()->SetValue(value);
 }
 
+void ResetFont(void)
+{
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto selectTheme = pipeline->GetTheme<SelectTheme>();
+    CHECK_NULL_VOID(selectTheme);
+    auto textTheme = pipeline->GetTheme<TextTheme>();
+    CHECK_NULL_VOID(textTheme);
+    if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
+        SelectModel::GetInstance()->SetFontSize(selectTheme->GetFontSize());
+    } else {
+        auto controlSize = SelectModel::GetInstance()->GetControlSize();
+        SelectModel::GetInstance()->SetFontSize(selectTheme->GetFontSize(controlSize));
+    }
+    SelectModel::GetInstance()->SetFontWeight(FontWeight::MEDIUM);
+    SelectModel::GetInstance()->SetFontFamily(textTheme->GetTextStyle().GetFontFamilies());
+    SelectModel::GetInstance()->SetItalicFontStyle(textTheme->GetTextStyle().GetFontStyle());
+    return;
+}
+
 void JSSelect::Font(const JSCallbackInfo& info)
 {
     if (info[0]->IsUndefined() || info[0]->IsNull()) {
-        auto pipeline = PipelineBase::GetCurrentContext();
-        CHECK_NULL_VOID(pipeline);
-        auto selectTheme = pipeline->GetTheme<SelectTheme>();
-        CHECK_NULL_VOID(selectTheme);
-        auto textTheme = pipeline->GetTheme<TextTheme>();
-        CHECK_NULL_VOID(textTheme);
-        SelectModel::GetInstance()->SetFontSize(selectTheme->GetFontSize());
-        SelectModel::GetInstance()->SetFontWeight(FontWeight::MEDIUM);
-        SelectModel::GetInstance()->SetFontFamily(textTheme->GetTextStyle().GetFontFamilies());
-        SelectModel::GetInstance()->SetItalicFontStyle(textTheme->GetTextStyle().GetFontStyle());
-        return;
+        ResetFont();
     }
 
     if (!info[0]->IsObject()) {
@@ -473,7 +484,7 @@ void JSSelect::OnSelected(const JSCallbackInfo& info)
         return;
     }
     auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(info[0]));
-    WeakPtr<NG::FrameNode> targetNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    WeakPtr<NG::FrameNode> targetNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
     auto onSelect = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc), node = targetNode](
                         int32_t index, const std::string& value) {
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
@@ -834,6 +845,22 @@ void JSSelect::SetMenuBackgroundBlurStyle(const JSCallbackInfo& info)
             styleOption.blurStyle = static_cast<BlurStyle>(blurStyle);
             SelectModel::GetInstance()->SetMenuBackgroundBlurStyle(styleOption);
         }
+    }
+}
+
+void JSSelect::SetControlSize(const JSCallbackInfo& info)
+{
+    if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
+        return;
+    }
+    if (info.Length() < 1) {
+        return;
+    }
+    if (info[0]->IsNumber()) {
+        auto controlSize = static_cast<ControlSize>(info[0]->ToNumber<int32_t>());
+        SelectModel::GetInstance()->SetControlSize(controlSize);
+    } else {
+        LOGE("JSSelect::SetControlSize Is not Number.");
     }
 }
 } // namespace OHOS::Ace::Framework

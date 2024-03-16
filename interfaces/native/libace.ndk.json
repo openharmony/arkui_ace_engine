@@ -170,5 +170,9 @@
     {
         "first_introduced": "12",
         "name": "OH_NativeXComponent_RegisterOnTouchInterceptCallback"
+    },
+    {
+        "first_introduced": "12",
+        "name": "OH_ArkUI_QueryModuleInterface"
     }
 ]

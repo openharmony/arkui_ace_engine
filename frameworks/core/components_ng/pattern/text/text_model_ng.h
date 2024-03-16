@@ -124,6 +124,8 @@ public:
     static Color GetFontColor(FrameNode* frameNode);
     static Dimension GetTextBaselineOffset(FrameNode* frameNode);
     static std::vector<Shadow> GetTextShadow(FrameNode* frameNode);
+    static Ace::WordBreak GetWordBreak(FrameNode* frameNode);
+    static EllipsisMode GetEllipsisMode(FrameNode* frameNode);
 };
 } // namespace OHOS::Ace::NG
 

@@ -58,7 +58,7 @@ class ACE_EXPORT UINode : public virtual AceType {
     DECLARE_ACE_TYPE(UINode, AceType);
 
 public:
-    UINode(const std::string& tag, int32_t nodeId, int32_t instanceId = -1, bool isRoot = false);
+    UINode(const std::string& tag, int32_t nodeId, bool isRoot = false);
     ~UINode() override;
 
     // atomic node is like button, image, custom node and so on.
@@ -277,7 +277,8 @@ public:
 
     virtual void AdjustParentLayoutFlag(PropertyChangeFlag& flag);
 
-    virtual void MarkDirtyNode(PropertyChangeFlag extraFlag = PROPERTY_UPDATE_NORMAL);
+    virtual void MarkDirtyNode(
+        PropertyChangeFlag extraFlag = PROPERTY_UPDATE_NORMAL, bool childExpansiveAndMark = false);
 
     virtual void MarkNeedFrameFlushDirty(PropertyChangeFlag extraFlag = PROPERTY_UPDATE_NORMAL);
 
@@ -385,7 +386,7 @@ public:
         newChild->MountToParent(AceType::Claim(this), slot, false);
     }
     virtual void FastPreviewUpdateChildDone() {}
-    virtual RefPtr<UINode> GetFrameChildByIndex(uint32_t index, bool needBuild);
+    virtual RefPtr<UINode> GetFrameChildByIndex(uint32_t index, bool needBuild, bool isCache = false);
 
     void SetDebugLine(const std::string& line)
     {

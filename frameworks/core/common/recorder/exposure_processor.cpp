@@ -28,7 +28,7 @@ ExposureProcessor::ExposureProcessor(const std::string& pageUrl, const std::stri
 
 bool ExposureProcessor::IsNeedRecord() const
 {
-    return EventRecorder::Get().IsExposureRecordEnable() && !cfg_.id.empty();
+    return !cfg_.id.empty();
 }
 
 double ExposureProcessor::GetRatio() const

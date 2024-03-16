@@ -21,4 +21,58 @@
 #include "core/components/common/properties/color.h"
 #include "core/components_ng/pattern/text_field/text_field_model.h"
 
-namespace OHOS::Ace {} // namespace OHOS::Ace
+namespace OHOS::Ace {
+// SpanBase
+int32_t SpanBase::GetStartIndex() const
+{
+    return start_;
+}
+
+int32_t SpanBase::GetEndIndex() const
+{
+    return end_;
+}
+void SpanBase::UpdateStartIndex(int32_t startIndex)
+{
+    start_ = startIndex;
+}
+
+void SpanBase::UpdateEndIndex(int32_t endIndex)
+{
+    end_ = endIndex;
+}
+
+// FontSpan
+void FontSpan::ApplyToSpanItem(const RefPtr<NG::SpanItem>& spanItem) const
+{
+    if (font_.fontColor.has_value()) {
+        spanItem->fontStyle->UpdateTextColor(font_.fontColor.value());
+    }
+
+    if (font_.fontFamiliesNG.has_value()) {
+        spanItem->fontStyle->UpdateFontFamily(font_.fontFamiliesNG.value());
+    }
+
+    if (font_.fontSize.has_value()) {
+        spanItem->fontStyle->UpdateFontSize(font_.fontSize.value());
+    }
+
+    if (font_.fontStyle.has_value()) {
+        spanItem->fontStyle->UpdateItalicFontStyle(font_.fontStyle.value());
+    }
+
+    if (font_.fontWeight.has_value()) {
+        spanItem->fontStyle->UpdateFontWeight(font_.fontWeight.value());
+    }
+}
+
+bool FontSpan::IsAttributesEqual(const RefPtr<SpanBase>& other) const
+{
+    auto fontSpan = DynamicCast<FontSpan>(other);
+    if (!fontSpan) {
+        return false;
+    }
+    auto font = fontSpan->GetFont();
+    return font_.IsEqual(font);
+}
+} // namespace OHOS::Ace
