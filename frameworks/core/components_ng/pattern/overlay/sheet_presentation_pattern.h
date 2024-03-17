@@ -305,6 +305,11 @@ public:
         isAnimationProcess_ = isProcess;
     }
 
+    bool GetAnimationProcess()
+    {
+        return isAnimationProcess_;
+    }
+
     float GetSheetMaxHeight()
     {
         return pageHeight_;
@@ -332,6 +337,16 @@ public:
     bool GetShowState() const
     {
         return show_;
+    }
+
+    void SetIsDragging(bool isDrag)
+    {
+        isDrag_ = isDrag;
+    }
+
+    bool IsDragging() const
+    {
+        return isDrag_;
     }
 
     // Get ScrollHeight before avoid keyboard
@@ -428,6 +443,7 @@ private:
     std::shared_ptr<AnimationUtils::Animation> animation_;
 
     bool show_ = true;
+    bool isDrag_ = false;
 
     ACE_DISALLOW_COPY_AND_MOVE(SheetPresentationPattern);
 };

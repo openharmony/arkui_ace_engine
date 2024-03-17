@@ -13,11 +13,12 @@
  * limitations under the License.
  */
 
-#include "frameworks/bridge/declarative_frontend/jsview/js_span_object.h"
+#include "frameworks/bridge/declarative_frontend/style_string/js_span_object.h"
 
 #include "frameworks/bridge/common/utils/utils.h"
 #include "frameworks/bridge/declarative_frontend/engine/functions/js_function.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_view_abstract.h"
+
 namespace OHOS::Ace::Framework {
 
 void JSFontSpan::JSBind(BindingTarget globalObj)
@@ -50,7 +51,7 @@ void JSFontSpan::Destructor(JSFontSpan* fontSpan)
     }
 }
 
-RefPtr<FontSpan> JSFontSpan::ParseJsFontSpan(JSRef<JSObject> obj)
+RefPtr<FontSpan> JSFontSpan::ParseJsFontSpan(const JSRef<JSObject>& obj)
 {
     Font font;
     Color color;
@@ -60,13 +61,14 @@ RefPtr<FontSpan> JSFontSpan::ParseJsFontSpan(JSRef<JSObject> obj)
     }
     return AceType::MakeRefPtr<FontSpan>(font);
 }
+
 void JSFontSpan::GetFontColor(const JSCallbackInfo& info)
 {
     CHECK_NULL_VOID(fontSpan_);
     if (!fontSpan_->GetFont().fontColor.has_value()) {
         return;
     }
-    auto ret = JSRef<JSVal>::Make(JSVal(ToJSValue(fontSpan_->GetFont().GetFontColor())));
+    auto ret = JSRef<JSVal>::Make(JSVal(ToJSValue(fontSpan_->GetFont().fontColor.value().ColorToString())));
     info.SetReturnValue(ret);
 }
 
@@ -76,6 +78,7 @@ RefPtr<FontSpan>& JSFontSpan::GetFontSpan()
 {
     return fontSpan_;
 }
+
 void JSFontSpan::SetFontSpan(const RefPtr<FontSpan>& fontSpan)
 {
     fontSpan_ = fontSpan;

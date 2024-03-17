@@ -33,6 +33,7 @@
 #include "bridge/declarative_frontend/jsview/js_view_abstract.h"
 #include "bridge/declarative_frontend/jsview/js_view_common_def.h"
 #include "bridge/declarative_frontend/jsview/models/text_model_impl.h"
+#include "bridge/declarative_frontend/style_string/js_span_string.h"
 #include "bridge/declarative_frontend/view_stack_processor.h"
 #include "core/common/container.h"
 #include "core/components/text/text_theme.h"
@@ -512,11 +513,24 @@ void JSText::JsRemoteMessage(const JSCallbackInfo& info)
 void JSText::Create(const JSCallbackInfo& info)
 {
     std::string data;
-    if (info.Length() > 0) {
-        ParseJsString(info[0], data);
+    if (info.Length() <= 0) {
+        TextModel::GetInstance()->Create(data);
+        return;
     }
 
-    TextModel::GetInstance()->Create(data);
+    if (info[0]->IsObject() && JSRef<JSObject>::Cast(info[0])->Unwrap<JSSpanString>()) {
+        auto *spanString = JSRef<JSObject>::Cast(info[0])->Unwrap<JSSpanString>();
+        auto spanStringController = spanString->GetController();
+        if (spanStringController) {
+            TextModel::GetInstance()->Create(spanStringController);
+        } else {
+            TextModel::GetInstance()->Create(data);
+        }
+    } else {
+        ParseJsString(info[0], data);
+        TextModel::GetInstance()->Create(data);
+    }
+
     if (info.Length() <= 1 || !info[1]->IsObject()) {
         return;
     }

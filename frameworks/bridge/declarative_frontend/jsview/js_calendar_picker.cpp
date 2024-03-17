@@ -345,7 +345,7 @@ void JSCalendarPicker::ParseTextStyle(const JSRef<JSObject>& paramObj, NG::Picke
         textStyle.fontSize = Dimension(-1);
     } else {
         CalcDimension size;
-        if (!ParseJsDimensionFp(fontSize, size) || size.Unit() == DimensionUnit::PERCENT) {
+        if (!ParseJsDimensionFpNG(fontSize, size) || size.Unit() == DimensionUnit::PERCENT) {
             textStyle.fontSize = Dimension(-1);
         } else {
             textStyle.fontSize = size;

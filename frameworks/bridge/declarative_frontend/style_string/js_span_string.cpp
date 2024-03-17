@@ -13,12 +13,12 @@
  * limitations under the License.
  */
 
-#include "frameworks/bridge/declarative_frontend/jsview/js_span_string.h"
+#include "frameworks/bridge/declarative_frontend/style_string/js_span_string.h"
 
 #include "frameworks/bridge/common/utils/utils.h"
 #include "frameworks/bridge/declarative_frontend/engine/functions/js_function.h"
-#include "frameworks/bridge/declarative_frontend/jsview/js_span_object.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_view_abstract.h"
+#include "frameworks/bridge/declarative_frontend/style_string/js_span_object.h"
 namespace OHOS::Ace::Framework {
 
 const std::vector<SpanType> types = { SpanType::Font };
@@ -101,7 +101,9 @@ void JSSpanString::GetSubSpanString(const JSCallbackInfo& info)
     if (info.Length() == 2 && info[1]->IsNumber()) {
         length = info[1]->ToNumber<int32_t>();
     }
-    CheckParameters(start, length);
+    if (!CheckParameters(start, length)) {
+        return;
+    }
     auto spanString = spanString_->GetSubSpanString(start, length);
     CHECK_NULL_VOID(spanString);
     JSRef<JSObject> obj = JSClass<JSSpanString>::NewInstance();
@@ -117,12 +119,22 @@ void JSSpanString::GetSpans(const JSCallbackInfo& info)
     }
     auto start = info[0]->ToNumber<int32_t>();
     auto length = info[1]->ToNumber<int32_t>();
-    CheckParameters(start, length);
+    if (!CheckParameters(start, length)) {
+        return;
+    }
     std::vector<RefPtr<SpanBase>> spans;
-    if (info.Length() >= 3 && info[2]->IsNumber()) {
-        CheckSpanType(info[2]->ToNumber<int32_t>());
-        SpanType type = static_cast<SpanType>(info[2]->ToNumber<int32_t>());
-        spans = spanString_->GetSpans(start, length, type);
+    if (info.Length() >= 3) {
+        auto spanTypeObj = info[2];
+        if (spanTypeObj->IsNumber()) {
+            auto spanType = spanTypeObj->ToNumber<int32_t>();
+            if (!CheckSpanType(spanType)) {
+                return;
+            }
+            SpanType type = static_cast<SpanType>(spanType);
+            spans = spanString_->GetSpans(start, length, type);
+        } else {
+            JSException::Throw(ERROR_CODE_PARAM_INVALID, "%s", "Input span type check failed.");
+        }
     } else {
         spans = spanString_->GetSpans(start, length);
     }
@@ -140,11 +152,11 @@ JSRef<JSObject> JSSpanString::CreateJSSpanBaseObject(const RefPtr<SpanBase>& spa
     JSRef<JSObject> resultObj = JSRef<JSObject>::New();
     resultObj->SetProperty<int32_t>("start", spanObject->GetStartIndex());
     resultObj->SetProperty<int32_t>("length", spanObject->GetLength());
-    resultObj->SetProperty<int32_t>("styleKey", static_cast<int32_t>(spanObject->GetSpanType()));
+    resultObj->SetProperty<int32_t>("styledKey", static_cast<int32_t>(spanObject->GetSpanType()));
     switch (spanObject->GetSpanType()) {
         case SpanType::Font: {
             JSRef<JSObject> obj = CreateJsFontSpan(spanObject);
-            resultObj->SetPropertyObject("styleValue", obj);
+            resultObj->SetPropertyObject("styledValue", obj);
             return resultObj;
         }
         default:
@@ -184,19 +196,23 @@ RefPtr<SpanBase> JSSpanString::ParseJsFontSpan(int32_t start, int32_t length, JS
     return nullptr;
 }
 
-void JSSpanString::CheckSpanType(const int32_t& type)
+bool JSSpanString::CheckSpanType(const int32_t& type)
 {
     if (type < 0 || type >= static_cast<int32_t>(types.size())) {
         JSException::Throw(ERROR_CODE_PARAM_INVALID, "%s", "Input span type check failed.");
+        return false;
     }
+    return true;
 }
 
-void JSSpanString::CheckParameters(const int32_t& start, const int32_t& length)
+bool JSSpanString::CheckParameters(const int32_t& start, const int32_t& length)
 {
     // The input parameter must not cross the boundary.
     if (!spanString_->CheckRange(start, length)) {
         JSException::Throw(ERROR_CODE_PARAM_INVALID, "%s", "Input parameter check failed.");
+        return false;
     }
+    return true;
 }
 
 std::vector<RefPtr<SpanBase>> JSSpanString::ParseJsSpanBaseVector(JSRef<JSObject> obj, int32_t maxLength)
@@ -221,24 +237,24 @@ std::vector<RefPtr<SpanBase>> JSSpanString::ParseJsSpanBaseVector(JSRef<JSObject
             length = lengthProperty->ToNumber<int32_t>();
             length = length > maxLength - start ? maxLength - start : length;
         }
-        auto styleKey = valueObj->GetProperty("styleKey");
+        auto styleKey = valueObj->GetProperty("styledKey");
         if (styleKey->IsNull() || !styleKey->IsNumber()) {
             continue;
         }
-        auto styleStringValue = valueObj->GetProperty("styleValue");
+        auto styleStringValue = valueObj->GetProperty("styledValue");
         if (!styleStringValue->IsObject()) {
             continue;
         }
         SpanType type = static_cast<SpanType>(styleKey->ToNumber<int32_t>());
         auto spanBase = ParseJsSpanBase(start, length, type, JSRef<JSObject>::Cast(styleStringValue));
         if (spanBase) {
-            spanBaseVector.push_back(spanBase);
+            spanBaseVector.emplace_back(spanBase);
         }
     }
     return spanBaseVector;
 }
 
-RefPtr<SpanString>& JSSpanString::GetController()
+const RefPtr<SpanString>& JSSpanString::GetController()
 {
     return spanString_;
 }
@@ -265,6 +281,7 @@ void JSMutableSpanString::Constructor(const JSCallbackInfo& args)
         auto spanBases = JSSpanString::ParseJsSpanBaseVector(args[1], StringUtils::ToWstring(data).length());
         spanString = AceType::MakeRefPtr<MutableSpanString>(data, spanBases);
     }
+    LOGE("jyj string value %s", data.c_str());
     jsSpanString->SetController(spanString);
     jsSpanString->SetMutableController(spanString);
     args.SetReturnValue(Referenced::RawPtr(jsSpanString));
@@ -297,7 +314,6 @@ void JSMutableSpanString::JSBind(BindingTarget globalObj)
     JSClass<JSMutableSpanString>::CustomMethod("replaceStyledString", &JSMutableSpanString::ReplaceSpanString);
     JSClass<JSMutableSpanString>::CustomMethod("insertStyledString", &JSMutableSpanString::InsertSpanString);
     JSClass<JSMutableSpanString>::CustomMethod("appendStyledString", &JSMutableSpanString::AppendSpanString);
-
     JSClass<JSMutableSpanString>::Bind(globalObj, JSMutableSpanString::Constructor, JSMutableSpanString::Destructor);
 }
 
@@ -310,7 +326,9 @@ void JSMutableSpanString::ReplaceString(const JSCallbackInfo& info)
     int32_t length = info[1]->ToNumber<int32_t>();
     auto controller = GetMutableController().Upgrade();
     CHECK_NULL_VOID(controller);
-    CheckParameters(start, length);
+    if (!CheckParameters(start, length)) {
+        return;
+    }
     std::string data = info[2]->ToString();
     controller->ReplaceString(start, length, data);
 }
@@ -342,7 +360,9 @@ void JSMutableSpanString::RemoveString(const JSCallbackInfo& info)
     auto length = info[1]->ToNumber<int32_t>();
     auto controller = GetMutableController().Upgrade();
     CHECK_NULL_VOID(controller);
-    CheckParameters(start, length);
+    if (!CheckParameters(start, length)) {
+        return;
+    }
     controller->RemoveString(start, length);
 }
 
@@ -354,20 +374,23 @@ void JSMutableSpanString::ReplaceSpan(const JSCallbackInfo& info)
     auto paramObject = JSRef<JSObject>::Cast(info[0]);
     auto startObj = paramObject->GetProperty("start");
     auto lengthObj = paramObject->GetProperty("length");
-    auto styleKeyObj = paramObject->GetProperty("styleKey");
-    auto styleValueObj = paramObject->GetProperty("styleValue");
+    auto styleKeyObj = paramObject->GetProperty("styledKey");
+    auto styleValueObj = paramObject->GetProperty("styledValue");
     if (!startObj->IsNumber() || !lengthObj->IsNumber() || !styleKeyObj->IsNumber() || !styleValueObj->IsObject()) {
         return;
     }
-    CheckSpanType(styleKeyObj->ToNumber<int32_t>());
+    auto spanType = styleKeyObj->ToNumber<int32_t>();
+    CheckSpanType(spanType);
     auto start = startObj->ToNumber<int32_t>();
     auto length = lengthObj->ToNumber<int32_t>();
-    SpanType type = static_cast<SpanType>(styleKeyObj->ToNumber<int32_t>());
+    SpanType type = static_cast<SpanType>(spanType);
     auto spanBase = ParseJsSpanBase(start, length, type, JSRef<JSObject>::Cast(styleValueObj));
     CHECK_NULL_VOID(spanBase);
     auto controller = GetMutableController().Upgrade();
     CHECK_NULL_VOID(controller);
-    CheckParameters(start, length);
+    if (!CheckParameters(start, length)) {
+        return;
+    }
     controller->ReplaceSpan(start, length, spanBase);
 }
 
@@ -379,20 +402,25 @@ void JSMutableSpanString::AddSpan(const JSCallbackInfo& info)
     auto paramObject = JSRef<JSObject>::Cast(info[0]);
     auto startObj = paramObject->GetProperty("start");
     auto lengthObj = paramObject->GetProperty("length");
-    auto styleKeyObj = paramObject->GetProperty("styleKey");
-    auto styleValueObj = paramObject->GetProperty("styleValue");
+    auto styleKeyObj = paramObject->GetProperty("styledKey");
+    auto styleValueObj = paramObject->GetProperty("styledValue");
     if (!startObj->IsNumber() || !lengthObj->IsNumber() || !styleKeyObj->IsNumber() || !styleValueObj->IsObject()) {
         return;
     }
-    CheckSpanType(styleKeyObj->ToNumber<int32_t>());
+    auto spanType = styleKeyObj->ToNumber<int32_t>();
+    if (!CheckSpanType(spanType)) {
+        return;
+    }
     auto start = startObj->ToNumber<int32_t>();
     auto length = lengthObj->ToNumber<int32_t>();
-    SpanType type = static_cast<SpanType>(styleKeyObj->ToNumber<int32_t>());
+    SpanType type = static_cast<SpanType>(spanType);
     auto spanBase = ParseJsSpanBase(start, length, type, JSRef<JSObject>::Cast(styleValueObj));
     CHECK_NULL_VOID(spanBase);
     auto controller = GetMutableController().Upgrade();
     CHECK_NULL_VOID(controller);
-    CheckParameters(start, length);
+    if (!CheckParameters(start, length)) {
+        return;
+    }
     controller->AddSpan(spanBase);
 }
 
@@ -403,11 +431,16 @@ void JSMutableSpanString::RemoveSpan(const JSCallbackInfo& info)
     }
     auto start = info[0]->ToNumber<int32_t>();
     auto length = info[1]->ToNumber<int32_t>();
-    CheckSpanType(info[2]->ToNumber<int32_t>());
-    SpanType type = static_cast<SpanType>(info[2]->ToNumber<int32_t>());
+    auto spanType = info[2]->ToNumber<int32_t>();
+    if (!CheckSpanType(spanType)) {
+        return;
+    }
+    SpanType type = static_cast<SpanType>(spanType);
     auto controller = GetMutableController().Upgrade();
     CHECK_NULL_VOID(controller);
-    CheckParameters(start, length);
+    if (!CheckParameters(start, length)) {
+        return;
+    }
     controller->RemoveSpan(start, length, type);
 }
 
@@ -420,7 +453,9 @@ void JSMutableSpanString::RemoveSpans(const JSCallbackInfo& info)
     CHECK_NULL_VOID(controller);
     auto start = info[0]->ToNumber<int32_t>();
     auto length = info[1]->ToNumber<int32_t>();
-    CheckParameters(start, length);
+    if (!CheckParameters(start, length)) {
+        return;
+    }
     controller->RemoveSpans(start, length);
 }
 
@@ -444,7 +479,9 @@ void JSMutableSpanString::ReplaceSpanString(const JSCallbackInfo& info)
     CHECK_NULL_VOID(spanStringController);
     auto controller = GetMutableController().Upgrade();
     CHECK_NULL_VOID(controller);
-    CheckParameters(start, length);
+    if (!CheckParameters(start, length)) {
+        return;
+    }
     controller->ReplaceSpanString(start, length, spanStringController);
 }
 

@@ -13,10 +13,10 @@
  * limitations under the License.
  */
 
+const display = requireNapi('display');
 const hilog = requireNapi('hilog');
-const resourceManager = requireNapi('resourceManager');
 const measure = requireNapi('measure');
-const window = requireNapi('window');
+const resourceManager = requireNapi('resourceManager');
 
 const TITLE_MAX_LINES = 2;
 const HORIZON_BUTTON_MAX_COUNT = 2;
@@ -41,10 +41,10 @@ const TEXT_MIN_HEIGHT = 48;
 const DEFAULT_IMAGE_SIZE = 64;
 
 export class TipsDialog extends ViewPU {
-  constructor(o12, p12, q12, r12 = -1, s12 = undefined, t12) {
-    super(o12, q12, r12, t12);
-    if (typeof s12 === 'function') {
-      this.paramsGenerator_ = s12;
+  constructor(k19, l19, m19, n19 = -1, o19 = undefined, p19) {
+    super(k19, m19, n19, p19);
+    if (typeof o19 === 'function') {
+      this.paramsGenerator_ = o19;
     }
     this.controller = undefined;
     this.imageRes = null;
@@ -60,108 +60,126 @@ export class TipsDialog extends ViewPU {
     this.__imageSizeHeight = new ObservedPropertySimplePU(0, this, 'imageSizeHeight');
     this.__textAlignment = new ObservedPropertySimplePU(TextAlign.Start, this, 'textAlignment');
     this.marginOffset = 0;
-    this.checkBoxHeight = CHECKBOX_CONTAINER_HEIGHT;
+    this.__checkBoxHeight = new ObservedPropertySimplePU(0, this, 'checkBoxHeight');
     this.buttonHeight = 0;
-    this.setInitiallyProvidedValue(p12);
+    this.setInitiallyProvidedValue(l19);
+    this.finalizeConstruction();
   }
-  setInitiallyProvidedValue(n12) {
-    if (n12.controller !== undefined) {
-      this.controller = n12.controller;
+  setInitiallyProvidedValue(j19) {
+    if (j19.controller !== undefined) {
+      this.controller = j19.controller;
     }
-    if (n12.imageRes !== undefined) {
-      this.imageRes = n12.imageRes;
+    if (j19.imageRes !== undefined) {
+      this.imageRes = j19.imageRes;
     }
-    if (n12.imageSize !== undefined) {
-      this.imageSize = n12.imageSize;
+    if (j19.imageSize !== undefined) {
+      this.imageSize = j19.imageSize;
     }
-    if (n12.title !== undefined) {
-      this.title = n12.title;
+    if (j19.title !== undefined) {
+      this.title = j19.title;
     }
-    if (n12.content !== undefined) {
-      this.content = n12.content;
+    if (j19.content !== undefined) {
+      this.content = j19.content;
     }
-    if (n12.checkAction !== undefined) {
-      this.checkAction = n12.checkAction;
+    if (j19.checkAction !== undefined) {
+      this.checkAction = j19.checkAction;
     }
-    if (n12.checkTips !== undefined) {
-      this.checkTips = n12.checkTips;
+    if (j19.checkTips !== undefined) {
+      this.checkTips = j19.checkTips;
     }
-    if (n12.isChecked !== undefined) {
-      this.isChecked = n12.isChecked;
+    if (j19.isChecked !== undefined) {
+      this.isChecked = j19.isChecked;
     }
-    if (n12.primaryButton !== undefined) {
-      this.primaryButton = n12.primaryButton;
+    if (j19.primaryButton !== undefined) {
+      this.primaryButton = j19.primaryButton;
     }
-    if (n12.secondaryButton !== undefined) {
-      this.secondaryButton = n12.secondaryButton;
+    if (j19.secondaryButton !== undefined) {
+      this.secondaryButton = j19.secondaryButton;
     }
-    if (n12.buttons !== undefined) {
-      this.buttons = n12.buttons;
+    if (j19.buttons !== undefined) {
+      this.buttons = j19.buttons;
     }
-    if (n12.imageSizeHeight !== undefined) {
-      this.imageSizeHeight = n12.imageSizeHeight;
+    if (j19.imageSizeHeight !== undefined) {
+      this.imageSizeHeight = j19.imageSizeHeight;
     }
-    if (n12.textAlignment !== undefined) {
-      this.textAlignment = n12.textAlignment;
+    if (j19.textAlignment !== undefined) {
+      this.textAlignment = j19.textAlignment;
     }
-    if (n12.marginOffset !== undefined) {
-      this.marginOffset = n12.marginOffset;
+    if (j19.marginOffset !== undefined) {
+      this.marginOffset = j19.marginOffset;
     }
-    if (n12.checkBoxHeight !== undefined) {
-      this.checkBoxHeight = n12.checkBoxHeight;
+    if (j19.checkBoxHeight !== undefined) {
+      this.checkBoxHeight = j19.checkBoxHeight;
     }
-    if (n12.buttonHeight !== undefined) {
-      this.buttonHeight = n12.buttonHeight;
+    if (j19.buttonHeight !== undefined) {
+      this.buttonHeight = j19.buttonHeight;
     }
   }
-  updateStateVars(m12) {
+  updateStateVars(i19) {
   }
-  purgeVariableDependenciesOnElmtId(l12) {
-    this.__imageSize.purgeDependencyOnElmtId(l12);
-    this.__isChecked.purgeDependencyOnElmtId(l12);
-    this.__imageSizeHeight.purgeDependencyOnElmtId(l12);
-    this.__textAlignment.purgeDependencyOnElmtId(l12);
+  purgeVariableDependenciesOnElmtId(h19) {
+    this.__imageSize.purgeDependencyOnElmtId(h19);
+    this.__isChecked.purgeDependencyOnElmtId(h19);
+    this.__imageSizeHeight.purgeDependencyOnElmtId(h19);
+    this.__textAlignment.purgeDependencyOnElmtId(h19);
+    this.__checkBoxHeight.purgeDependencyOnElmtId(h19);
   }
   aboutToBeDeleted() {
     this.__imageSize.aboutToBeDeleted();
     this.__isChecked.aboutToBeDeleted();
     this.__imageSizeHeight.aboutToBeDeleted();
     this.__textAlignment.aboutToBeDeleted();
+    this.__checkBoxHeight.aboutToBeDeleted();
     SubscriberManager.Get().delete(this.id__());
     this.aboutToBeDeletedInternal();
   }
-  setController(k12) {
-    this.controller = k12;
+  setController(g19) {
+    this.controller = g19;
   }
   get imageSize() {
     return this.__imageSize.get();
   }
-  set imageSize(j12) {
-    this.__imageSize.set(j12);
+  set imageSize(f19) {
+    this.__imageSize.set(f19);
   }
   get isChecked() {
     return this.__isChecked.get();
   }
-  set isChecked(i12) {
-    this.__isChecked.set(i12);
+  set isChecked(e19) {
+    this.__isChecked.set(e19);
   }
   get imageSizeHeight() {
     return this.__imageSizeHeight.get();
   }
-  set imageSizeHeight(h12) {
-    this.__imageSizeHeight.set(h12);
+  set imageSizeHeight(d19) {
+    this.__imageSizeHeight.set(d19);
   }
   get textAlignment() {
     return this.__textAlignment.get();
   }
-  set textAlignment(g12) {
-    this.__textAlignment.set(g12);
+  set textAlignment(c19) {
+    this.__textAlignment.set(c19);
+  }
+  get checkBoxHeight() {
+    return this.__checkBoxHeight.get();
+  }
+  set checkBoxHeight(b19) {
+    this.__checkBoxHeight.set(b19);
   }
   initialRender() {
     {
-      this.observeComponentCreation2((c12, d12) => {
-        if (d12) {
-          let e12 = () => {
+      this.observeComponentCreation((v18, w18) => {
+        ViewStackProcessor.StartGetAccessRecordingFor(v18);
+        if (w18) {
+          let x18 = new CustomDialogComponent(this, {
+            controller: this.controller,
+            contentBuilder: () => {
+              this.contentBuilder();
+            },
+            buttons: this.buttons,
+          }, undefined, v18, () => { }, { page: 'library/src/main/ets/components/mainpage/MainPage.ets', line: 65 });
+          ViewPU.create(x18);
+          let y18 = () => {
             return {
               controller: this.controller,
               contentBuilder: () => {
@@ -170,36 +188,42 @@ export class TipsDialog extends ViewPU {
               buttons: this.buttons
             };
           };
-          ViewPU.create(new CustomDialogComponent(this, {
-            controller: this.controller,
-            contentBuilder: () => {
-              this.contentBuilder();
-            },
-            buttons: this.buttons,
-          }, undefined, c12, e12, { page: 'library/src/main/ets/components/mainpage/MainPage.ets', line: 65 }));
+          x18.paramsGenerator_ = y18;
         }
         else {
-          this.updateStateVarsOfChildByElmtId(c12, {});
+          this.updateStateVarsOfChildByElmtId(v18, {});
         }
-      }, { name: 'CustomDialogComponent' });
+        ViewStackProcessor.StopGetAccessRecording();
+      });
     }
   }
-  contentBuilder(k11 = null) {
-    this.observeComponentCreation2((z11, a12) => {
+  contentBuilder(d18 = null) {
+    this.observeComponentCreation((s18, t18) => {
+      ViewStackProcessor.StartGetAccessRecordingFor(s18);
       Column.create();
-    }, Column);
+      if (!t18) {
+        Column.pop();
+      }
+      ViewStackProcessor.StopGetAccessRecording();
+    });
     this.imagePart.bind(this)();
-    this.observeComponentCreation2((s11, t11) => {
+    this.observeComponentCreation((l18, m18) => {
+      ViewStackProcessor.StartGetAccessRecordingFor(l18);
       If.create();
       if (this.title != null || this.content != null) {
         this.ifElseBranchUpdateFunction(0, () => {
-          this.observeComponentCreation2((x11, y11) => {
+          this.observeComponentCreation((q18, r18) => {
+            ViewStackProcessor.StartGetAccessRecordingFor(q18);
             Column.create();
-            Column.padding({ top: { id: -1, type: 10002, params: ['sys.float.padding_level8'], bundleName: '', moduleName: '' } });
+            Column.padding({ top: { 'id': -1, 'type': 10002, params: ['sys.float.padding_level8'], 'bundleName': '', 'moduleName': '' } });
             Column.constraintSize({
               maxHeight: `calc(100% - ${this.checkBoxHeight}vp - ${this.imageSizeHeight}vp - ${this.buttonHeight}vp)`
             });
-          }, Column);
+            if (!r18) {
+              Column.pop();
+            }
+            ViewStackProcessor.StopGetAccessRecording();
+          });
           this.textPart.bind(this)();
           Column.pop();
         });
@@ -208,9 +232,14 @@ export class TipsDialog extends ViewPU {
         this.ifElseBranchUpdateFunction(1, () => {
         });
       }
-    }, If);
+      if (!m18) {
+        If.pop();
+      }
+      ViewStackProcessor.StopGetAccessRecording();
+    });
     If.pop();
-    this.observeComponentCreation2((o11, p11) => {
+    this.observeComponentCreation((h18, i18) => {
+      ViewStackProcessor.StartGetAccessRecordingFor(h18);
       If.create();
       if (this.checkTips != null) {
         this.ifElseBranchUpdateFunction(0, () => {
@@ -221,36 +250,52 @@ export class TipsDialog extends ViewPU {
         this.ifElseBranchUpdateFunction(1, () => {
         });
       }
-    }, If);
+      if (!i18) {
+        If.pop();
+      }
+      ViewStackProcessor.StopGetAccessRecording();
+    });
     If.pop();
     Column.pop();
   }
-  checkBoxPart(w10, x10 = null) {
-    this.observeComponentCreation2((i11, j11) => {
+  checkBoxPart(m17, n17 = null) {
+    this.observeComponentCreation((y17, z17) => {
+      ViewStackProcessor.StartGetAccessRecordingFor(y17);
       Row.create();
-      Row.padding({ top: { id: -1, type: 10002, params: ['sys.float.padding_level8'], 
-      bundleName: '', moduleName: '' } });
-      Row.height(CHECKBOX_CONTAINER_HEIGHT);
+      Row.padding({ top: { 'id': -1, 'type': 10002, params: ['sys.float.padding_level8'], 'bundleName': '', 'moduleName': '' } });
+      Row.constraintSize({ minHeight: CHECKBOX_CONTAINER_HEIGHT });
       Row.width('100%');
-    }, Row);
-    this.observeComponentCreation2((e11, f11) => {
+      Row.onAreaChange((b18, c18) => {
+        this.checkBoxHeight = Number(c18.height);
+      });
+      if (!z17) {
+        Row.pop();
+      }
+      ViewStackProcessor.StopGetAccessRecording();
+    });
+    this.observeComponentCreation((u17, v17) => {
+      ViewStackProcessor.StartGetAccessRecordingFor(u17);
       Checkbox.create({ name: 'checkbox', group: 'checkboxGroup' });
       Checkbox.select(this.isChecked);
-      Checkbox.onChange((h11) => {
-        this.isChecked = h11;
+      Checkbox.onChange((x17) => {
+        this.isChecked = x17;
         if (this.checkAction) {
-          this.checkAction(h11);
+          this.checkAction(x17);
         }
       });
-      Checkbox.margin({ right: { id: -1, type: 10002, params: ['sys.float.padding_level4'], 
-      bundleName: '', moduleName: '' } });
-    }, Checkbox);
+      Checkbox.margin({ right: { 'id': -1, 'type': 10002, params: ['sys.float.padding_level4'], 'bundleName': '', 'moduleName': '' } });
+      if (!v17) {
+        Checkbox.pop();
+      }
+      ViewStackProcessor.StopGetAccessRecording();
+    });
     Checkbox.pop();
-    this.observeComponentCreation2((b11, c11) => {
-      Text.create(w10);
-      Text.fontSize({ id: -1, type: 10002, params: ['sys.float.Body_M'], bundleName: '', moduleName: '' });
+    this.observeComponentCreation((r17, s17) => {
+      ViewStackProcessor.StartGetAccessRecordingFor(r17);
+      Text.create(m17);
+      Text.fontSize({ 'id': -1, 'type': 10002, params: ['sys.float.Body_M'], 'bundleName': '', 'moduleName': '' });
       Text.fontWeight(FontWeight.Regular);
-      Text.fontColor({ id: -1, type: 10001, params: ['sys.color.font_primary'], bundleName: '', moduleName: '' });
+      Text.fontColor({ 'id': -1, 'type': 10001, params: ['sys.color.font_primary'], 'bundleName': '', 'moduleName': '' });
       Text.maxLines(CONTENT_MAX_LINES);
       Text.layoutWeight(1);
       Text.focusOnTouch(true);
@@ -261,65 +306,97 @@ export class TipsDialog extends ViewPU {
           this.checkAction(this.isChecked);
         }
       });
-    }, Text);
+      if (!s17) {
+        Text.pop();
+      }
+      ViewStackProcessor.StopGetAccessRecording();
+    });
     Text.pop();
     Row.pop();
   }
-  imagePart(m10 = null) {
-    this.observeComponentCreation2((r10, s10) => {
+  imagePart(c17 = null) {
+    this.observeComponentCreation((h17, i17) => {
+      ViewStackProcessor.StartGetAccessRecordingFor(h17);
       Column.create();
       Column.width('100%');
       Column.constraintSize({
-        maxHeight: 
-        `calc(100% - ${this.checkBoxHeight}vp - ${this.buttonHeight}vp - ${TEXT_MIN_HEIGHT}vp + ${this.marginOffset}vp)`
+        maxHeight: `calc(100% - ${this.checkBoxHeight}vp - ${this.buttonHeight}vp - ${TEXT_MIN_HEIGHT}vp + ${this.marginOffset}vp)`
       });
-      Column.onAreaChange((u10, v10) => {
-        this.imageSizeHeight = Number(v10.height);
+      Column.onAreaChange((k17, l17) => {
+        this.imageSizeHeight = Number(l17.height);
       });
-    }, Column);
-    this.observeComponentCreation2((p10, q10) => {
+      if (!i17) {
+        Column.pop();
+      }
+      ViewStackProcessor.StopGetAccessRecording();
+    });
+    this.observeComponentCreation((f17, g17) => {
+      ViewStackProcessor.StartGetAccessRecordingFor(f17);
       Image.create(this.imageRes);
-      Image.size(ObservedObject.GetRawObject(this.imageSize));
+      Image.size(this.imageSize);
       Image.objectFit(ImageFit.Contain);
+      Image.borderRadius({ 'id': -1, 'type': 10002, params: ['sys.float.corner_radius_level6'], 'bundleName': '', 'moduleName': '' });
       Image.constraintSize({
         maxWidth: '100%',
-        maxHeight: 
-        `calc(100% - ${this.checkBoxHeight}vp - ${this.buttonHeight}vp - ${TEXT_MIN_HEIGHT}vp + ${this.marginOffset}vp)`
+        maxHeight: `calc(100% - ${this.checkBoxHeight}vp - ${this.buttonHeight}vp - ${TEXT_MIN_HEIGHT}vp + ${this.marginOffset}vp)`
       });
-    }, Image);
+      if (!g17) {
+        Image.pop();
+      }
+      ViewStackProcessor.StopGetAccessRecording();
+    });
     Column.pop();
   }
-  textPart(g9 = null) {
-    this.observeComponentCreation2((k10, l10) => {
+  textPart(w15 = null) {
+    this.observeComponentCreation((a17, b17) => {
+      ViewStackProcessor.StartGetAccessRecordingFor(a17);
       Scroll.create();
       Scroll.margin({ right: `${this.marginOffset}vp` });
-    }, Scroll);
-    this.observeComponentCreation2((i10, j10) => {
+      if (!b17) {
+        Scroll.pop();
+      }
+      ViewStackProcessor.StopGetAccessRecording();
+    });
+    this.observeComponentCreation((y16, z16) => {
+      ViewStackProcessor.StartGetAccessRecordingFor(y16);
       Column.create();
-      Column.margin({ right: { id: -1, type: 10002, params: ['sys.float.padding_level8'], 
-      bundleName: '', moduleName: '' } });
-    }, Column);
-    this.observeComponentCreation2((y9, z9) => {
+      Column.margin({ right: { 'id': -1, 'type': 10002, params: ['sys.float.padding_level8'], 'bundleName': '', 'moduleName': '' } });
+      if (!z16) {
+        Column.pop();
+      }
+      ViewStackProcessor.StopGetAccessRecording();
+    });
+    this.observeComponentCreation((o16, p16) => {
+      ViewStackProcessor.StartGetAccessRecordingFor(o16);
       If.create();
       if (this.title != null) {
         this.ifElseBranchUpdateFunction(0, () => {
-          this.observeComponentCreation2((g10, h10) => {
+          this.observeComponentCreation((w16, x16) => {
+            ViewStackProcessor.StartGetAccessRecordingFor(w16);
             Row.create();
-            Row.padding({ bottom: { id: -1, type: 10002, params: ['sys.float.padding_level8'], 
-            bundleName: '', moduleName: '' } });
-          }, Row);
-          this.observeComponentCreation2((e10, f10) => {
+            Row.padding({ bottom: { 'id': -1, 'type': 10002, params: ['sys.float.padding_level8'], 'bundleName': '', 'moduleName': '' } });
+            if (!x16) {
+              Row.pop();
+            }
+            ViewStackProcessor.StopGetAccessRecording();
+          });
+          this.observeComponentCreation((u16, v16) => {
+            ViewStackProcessor.StartGetAccessRecordingFor(u16);
             Text.create(this.title);
-            Text.fontSize({ id: -1, type: 10002, params: ['sys.float.Title_S'], bundleName: '', moduleName: '' });
+            Text.fontSize({ 'id': -1, 'type': 10002, params: ['sys.float.Title_S'], 'bundleName': '', 'moduleName': '' });
             Text.fontWeight(FontWeight.Medium);
-            Text.fontColor({ id: -1, type: 10001, params: ['sys.color.font_primary'], bundleName: '', moduleName: '' });
+            Text.fontColor({ 'id': -1, 'type': 10001, params: ['sys.color.font_primary'], 'bundleName': '', 'moduleName': '' });
             Text.textAlign(TextAlign.Center);
             Text.maxLines(CONTENT_MAX_LINES);
             Text.textOverflow({ overflow: TextOverflow.Ellipsis });
-            Text.minFontSize({ id: -1, type: 10002, params: ['sys.float.Body_L'], bundleName: '', moduleName: '' });
-            Text.maxFontSize({ id: -1, type: 10002, params: ['sys.float.Title_S'], bundleName: '', moduleName: '' });
+            Text.minFontSize({ 'id': -1, 'type': 10002, params: ['sys.float.Body_L'], 'bundleName': '', 'moduleName': '' });
+            Text.maxFontSize({ 'id': -1, 'type': 10002, params: ['sys.float.Title_S'], 'bundleName': '', 'moduleName': '' });
             Text.width('100%');
-          }, Text);
+            if (!v16) {
+              Text.pop();
+            }
+            ViewStackProcessor.StopGetAccessRecording();
+          });
           Text.pop();
           Row.pop();
         });
@@ -328,27 +405,42 @@ export class TipsDialog extends ViewPU {
         this.ifElseBranchUpdateFunction(1, () => {
         });
       }
-    }, If);
+      if (!p16) {
+        If.pop();
+      }
+      ViewStackProcessor.StopGetAccessRecording();
+    });
     If.pop();
-    this.observeComponentCreation2((l9, m9) => {
+    this.observeComponentCreation((b16, c16) => {
+      ViewStackProcessor.StartGetAccessRecordingFor(b16);
       If.create();
       if (this.content != null) {
         this.ifElseBranchUpdateFunction(0, () => {
-          this.observeComponentCreation2((w9, x9) => {
+          this.observeComponentCreation((m16, n16) => {
+            ViewStackProcessor.StartGetAccessRecordingFor(m16);
             Row.create();
-          }, Row);
-          this.observeComponentCreation2((r9, s9) => {
+            if (!n16) {
+              Row.pop();
+            }
+            ViewStackProcessor.StopGetAccessRecording();
+          });
+          this.observeComponentCreation((h16, i16) => {
+            ViewStackProcessor.StartGetAccessRecordingFor(h16);
             Text.create(this.content);
-            Text.fontSize({ id: -1, type: 10002, params: ['sys.float.Body_L'], bundleName: '', moduleName: '' });
+            Text.fontSize({ 'id': -1, 'type': 10002, params: ['sys.float.Body_L'], 'bundleName': '', 'moduleName': '' });
             Text.fontWeight(FontWeight.Medium);
-            Text.fontColor({ id: -1, type: 10001, params: ['sys.color.font_primary'], bundleName: '', moduleName: '' });
+            Text.fontColor({ 'id': -1, 'type': 10001, params: ['sys.color.font_primary'], 'bundleName': '', 'moduleName': '' });
             Text.textAlign(this.textAlignment);
             Text.textOverflow({ overflow: TextOverflow.Ellipsis });
             Text.width('100%');
-            Text.onAreaChange((u9, v9) => {
-              this.getTextAlign(Number(v9.width));
+            Text.onAreaChange((k16, l16) => {
+              this.getTextAlign(Number(l16.width));
             });
-          }, Text);
+            if (!i16) {
+              Text.pop();
+            }
+            ViewStackProcessor.StopGetAccessRecording();
+          });
           Text.pop();
           Row.pop();
         });
@@ -357,32 +449,36 @@ export class TipsDialog extends ViewPU {
         this.ifElseBranchUpdateFunction(1, () => {
         });
       }
-    }, If);
+      if (!c16) {
+        If.pop();
+      }
+      ViewStackProcessor.StopGetAccessRecording();
+    });
     If.pop();
     Column.pop();
     Scroll.pop();
   }
   aboutToAppear() {
     this.initButtons();
-    this.initMarginAndCheckHeight();
+    this.initMargin();
   }
-  getTextAlign(d9) {
-    let e9 = measure.measureTextSize({
+  getTextAlign(t15) {
+    let u15 = measure.measureTextSize({
       textContent: this.content,
-      fontSize: { id: -1, type: 10002, params: ['sys.float.Body_L'], bundleName: '', moduleName: '' },
-      constraintWidth: d9,
+      fontSize: { 'id': -1, 'type': 10002, params: ['sys.float.Body_L'], 'bundleName': '', 'moduleName': '' },
+      constraintWidth: t15,
     });
-    let f9 = measure.measureTextSize({
+    let v15 = measure.measureTextSize({
       textContent: this.content,
-      fontSize: { id: -1, type: 10002, params: ['sys.float.Body_L'], bundleName: '', moduleName: '' },
+      fontSize: { 'id': -1, 'type': 10002, params: ['sys.float.Body_L'], 'bundleName': '', 'moduleName': '' },
     });
-    if (this.getTextHeight(e9) <= this.getTextHeight(f9)) {
+    if (this.getTextHeight(u15) <= this.getTextHeight(v15)) {
       this.textAlignment = TextAlign.Center;
     }
   }
-  getTextHeight(c9) {
-    if (c9 && c9.height !== null && c9.height !== undefined) {
-      return Number(c9.height);
+  getTextHeight(s15) {
+    if (s15 && s15.height !== null && s15.height !== undefined) {
+      return Number(s15.height);
     }
     return 0;
   }
@@ -403,14 +499,11 @@ export class TipsDialog extends ViewPU {
     if (!this.buttons || this.buttons.length === 0) {
       return 0;
     }
-    let b9 = getNumberByResource('alert_button_top_padding');
-    b9 += BUTTON_DEFAULT_HEIGHT + getNumberByResource('alert_button_bottom_padding_horizontal');
-    return b9;
+    let r15 = getNumberByResource('alert_button_top_padding');
+    r15 += BUTTON_DEFAULT_HEIGHT + getNumberByResource('alert_button_bottom_padding_horizontal');
+    return r15;
   }
-  initMarginAndCheckHeight() {
-    if (this.checkTips == null) {
-      this.checkBoxHeight = 0;
-    }
+  initMargin() {
     this.marginOffset = 0 - getNumberByResource('padding_level8');
   }
   rerender() {
@@ -419,10 +512,10 @@ export class TipsDialog extends ViewPU {
 }
 
 export class SelectDialog extends ViewPU {
-  constructor(e15, f15, g15, h15 = -1, i15 = undefined, j15) {
-    super(e15, g15, h15, j15);
-    if (typeof i15 === 'function') {
-      this.paramsGenerator_ = i15;
+  constructor(j15, k15, l15, m15 = -1, n15 = undefined, o15) {
+    super(j15, l15, m15, o15);
+    if (typeof n15 === "function") {
+      this.paramsGenerator_ = n15;
     }
     this.title = '';
     this.content = '';
@@ -430,21 +523,20 @@ export class SelectDialog extends ViewPU {
     this.confirm = null;
     this.radioContent = [];
     this.buttons = [];
+    this.contentPadding = undefined;
     this.contentBuilder = this.buildContent;
     this.controller = new CustomDialogController({
       builder: () => {
-        let k15;
-        let l15 = new CustomContentDialog(this, {
+        let p15 = new CustomContentDialog(this, {
           primaryTitle: this.title,
           contentBuilder: () => {
             this.contentBuilder();
           },
           buttons: this.buttons,
-        }, undefined, -1, () => { }, { page: 'library/src/main/ets/components/mainpage/MainPage.ets', line: 166 });
-        l15.setController(this.controller);
-        ViewPU.create(l15);
-        let m15 = () => {
-          let p15;
+        }, undefined, -1, () => { }, { page: "library/src/main/ets/components/mainpage/MainPage.ets", line: 254 });
+        p15.setController(this.controller);
+        ViewPU.create(p15);
+        let q15 = () => {
           return {
             primaryTitle: this.title,
             contentBuilder: () => {
@@ -453,92 +545,97 @@ export class SelectDialog extends ViewPU {
             buttons: this.buttons
           };
         };
-        l15.paramsGenerator_ = m15;
+        p15.paramsGenerator_ = q15;
       }
     }, this);
-    this.setInitiallyProvidedValue(f15);
+    this.setInitiallyProvidedValue(k15);
     this.finalizeConstruction();
   }
-  setInitiallyProvidedValue(d15) {
-    if (d15.title !== undefined) {
-      this.title = d15.title;
+  setInitiallyProvidedValue(i15) {
+    if (i15.title !== undefined) {
+      this.title = i15.title;
     }
-    if (d15.content !== undefined) {
-      this.content = d15.content;
+    if (i15.content !== undefined) {
+      this.content = i15.content;
     }
-    if (d15.selectedIndex !== undefined) {
-      this.selectedIndex = d15.selectedIndex;
+    if (i15.selectedIndex !== undefined) {
+      this.selectedIndex = i15.selectedIndex;
     }
-    if (d15.confirm !== undefined) {
-      this.confirm = d15.confirm;
+    if (i15.confirm !== undefined) {
+      this.confirm = i15.confirm;
     }
-    if (d15.radioContent !== undefined) {
-      this.radioContent = d15.radioContent;
+    if (i15.radioContent !== undefined) {
+      this.radioContent = i15.radioContent;
     }
-    if (d15.buttons !== undefined) {
-      this.buttons = d15.buttons;
+    if (i15.buttons !== undefined) {
+      this.buttons = i15.buttons;
     }
-    if (d15.contentBuilder !== undefined) {
-      this.contentBuilder = d15.contentBuilder;
+    if (i15.contentPadding !== undefined) {
+      this.contentPadding = i15.contentPadding;
     }
-    if (d15.controller !== undefined) {
-      this.controller = d15.controller;
+    if (i15.contentBuilder !== undefined) {
+      this.contentBuilder = i15.contentBuilder;
+    }
+    if (i15.controller !== undefined) {
+      this.controller = i15.controller;
     }
   }
-  updateStateVars(c15) {
+  updateStateVars(h15) {
   }
-  purgeVariableDependenciesOnElmtId(b15) {
+  purgeVariableDependenciesOnElmtId(g15) {
   }
   aboutToBeDeleted() {
     SubscriberManager.Get().delete(this.id__());
     this.aboutToBeDeletedInternal();
   }
-  setController(a15) {
-    this.controller = a15;
+  setController(f15) {
+    this.controller = f15;
   }
-  buildContent(p12 = null) {
-    this.observeComponentCreation((y14, z14) => {
-      ViewStackProcessor.StartGetAccessRecordingFor(y14);
+  buildContent(s12 = null) {
+    this.observeComponentCreation((d15, e15) => {
+      ViewStackProcessor.StartGetAccessRecordingFor(d15);
       Scroll.create();
-      Scroll.margin({ right: -getNumberByResource('padding_level8') });
       Scroll.scrollBar(BarState.Auto);
-      if (!z14) {
+      if (!e15) {
         Scroll.pop();
       }
       ViewStackProcessor.StopGetAccessRecording();
     });
-    this.observeComponentCreation((w14, x14) => {
-      ViewStackProcessor.StartGetAccessRecordingFor(w14);
+    this.observeComponentCreation((b15, c15) => {
+      ViewStackProcessor.StartGetAccessRecordingFor(b15);
       Column.create();
-      Column.padding({ right: { id: -1, type: 10002, params: ['sys.float.padding_level8'], bundleName: '__harDefaultBundleName__', moduleName: '__harDefaultModuleName__' } });
-      if (!x14) {
+      if (!c15) {
         Column.pop();
       }
       ViewStackProcessor.StopGetAccessRecording();
     });
-    this.observeComponentCreation((m14, n14) => {
-      ViewStackProcessor.StartGetAccessRecordingFor(m14);
+    this.observeComponentCreation((r14, s14) => {
+      ViewStackProcessor.StartGetAccessRecordingFor(r14);
       If.create();
       if (this.content) {
         this.ifElseBranchUpdateFunction(0, () => {
-          this.observeComponentCreation((u14, v14) => {
-            ViewStackProcessor.StartGetAccessRecordingFor(u14);
+          this.observeComponentCreation((z14, a15) => {
+            ViewStackProcessor.StartGetAccessRecordingFor(z14);
             Row.create();
-            Row.padding({ bottom: { id: -1, type: 10002, params: ['sys.float.padding_level4'], bundleName: '__harDefaultBundleName__', moduleName: '__harDefaultModuleName__' } });
+            Row.padding({
+              left: { "id": -1, "type": 10002, params: ['sys.float.padding_level12'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" },
+              right: { "id": -1, "type": 10002, params: ['sys.float.padding_level12'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" },
+              bottom: { "id": -1, "type": 10002, params: ['sys.float.padding_level4'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" }
+            });
             Row.width('100%');
-            if (!v14) {
+            if (!a15) {
               Row.pop();
             }
             ViewStackProcessor.StopGetAccessRecording();
           });
-          this.observeComponentCreation((s14, t14) => {
-            ViewStackProcessor.StartGetAccessRecordingFor(s14);
+          this.observeComponentCreation((x14, y14) => {
+            ViewStackProcessor.StartGetAccessRecordingFor(x14);
             Text.create(this.content);
-            Text.fontSize({ id: -1, type: 10002, params: ['sys.float.Body_M'], bundleName: '__harDefaultBundleName__', moduleName: '__harDefaultModuleName__' });
+            Text.fontSize({ "id": -1, "type": 10002, params: ['sys.float.Body_M'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" });
             Text.fontWeight(FontWeight.Regular);
-            Text.fontColor({ id: -1, type: 10001, params: ['sys.color.font_primary'], bundleName: '__harDefaultBundleName__', moduleName: '__harDefaultModuleName__' });
+            Text.fontColor({ "id": -1, "type": 10001, params: ['sys.color.font_primary'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" });
             Text.textOverflow({ overflow: TextOverflow.Ellipsis });
-            if (!t14) {
+            if (!y14) {
               Text.pop();
             }
             ViewStackProcessor.StopGetAccessRecording();
@@ -551,103 +648,127 @@ export class SelectDialog extends ViewPU {
         this.ifElseBranchUpdateFunction(1, () => {
         });
       }
-      if (!n14) {
+      if (!s14) {
         If.pop();
       }
       ViewStackProcessor.StopGetAccessRecording();
     });
     If.pop();
-    this.observeComponentCreation((k14, l14) => {
-      ViewStackProcessor.StartGetAccessRecordingFor(k14);
+    this.observeComponentCreation((p14, q14) => {
+      ViewStackProcessor.StartGetAccessRecordingFor(p14);
       List.create({ space: 1 });
       List.width('100%');
       List.clip(false);
-      if (!l14) {
+      if (!q14) {
         List.pop();
       }
       ViewStackProcessor.StopGetAccessRecording();
     });
-    this.observeComponentCreation((v12, w12) => {
-      ViewStackProcessor.StartGetAccessRecordingFor(v12);
+    this.observeComponentCreation((y12, z12) => {
+      ViewStackProcessor.StartGetAccessRecordingFor(y12);
       ForEach.create();
-      const x12 = (z12, a13) => {
-        const b13 = z12;
+      const a13 = (c13, d13) => {
+        const e13 = c13;
         {
-          const c13 = (i14, j14) => {
-            ViewStackProcessor.StartGetAccessRecordingFor(i14);
-            d13(i14, j14);
-            if (!j14) {
+          const f13 = (n14, o14) => {
+            ViewStackProcessor.StartGetAccessRecordingFor(n14);
+            g13(n14, o14);
+            if (!o14) {
               ListItem.pop();
             }
             ViewStackProcessor.StopGetAccessRecording();
           };
-          const d13 = (g14, h14) => {
-            ListItem.create(e13, true);
+          const g13 = (l14, m14) => {
+            ListItem.create(h13, true);
           };
-          const e13 = (i13, j13) => {
-            c13(i13, j13);
-            this.updateFuncByElmtId.set(i13, c13);
-            this.observeComponentCreation((e14, f14) => {
-              ViewStackProcessor.StartGetAccessRecordingFor(e14);
+          const h13 = (l13, m13) => {
+            f13(l13, m13);
+            this.updateFuncByElmtId.set(l13, f13);
+            this.observeComponentCreation((j14, k14) => {
+              ViewStackProcessor.StartGetAccessRecordingFor(j14);
               Column.create();
-              if (!f14) {
+              Column.padding({
+                left: { "id": -1, "type": 10002, params: ['sys.float.padding_level6'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" },
+                right: { "id": -1, "type": 10002, params: ['sys.float.padding_level6'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" }
+              });
+              if (!k14) {
                 Column.pop();
               }
               ViewStackProcessor.StopGetAccessRecording();
             });
-            this.observeComponentCreation((b14, c14) => {
-              ViewStackProcessor.StartGetAccessRecordingFor(b14);
+            this.observeComponentCreation((g14, h14) => {
+              ViewStackProcessor.StartGetAccessRecordingFor(g14);
+              Button.createWithChild();
+              Button.type(ButtonType.Normal);
+              Button.borderRadius({ "id": -1, "type": 10002, params: ['sys.float.corner_radius_level8'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" });
+              Button.buttonStyle(ButtonStyleMode.TEXTUAL);
+              Button.padding({
+                left: { "id": -1, "type": 10002, params: ['sys.float.padding_level6'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" },
+                right: { "id": -1, "type": 10002, params: ['sys.float.padding_level6'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" }
+              });
+              Button.onClick(() => {
+                e13.action && e13.action();
+                this.controller.close();
+              });
+              if (!h14) {
+                Button.pop();
+              }
+              ViewStackProcessor.StopGetAccessRecording();
+            });
+            this.observeComponentCreation((e14, f14) => {
+              ViewStackProcessor.StartGetAccessRecordingFor(e14);
               Row.create();
               Row.constraintSize({ minHeight: LIST_MIN_HEIGHT });
               Row.clip(false);
-              Row.padding({ top: { id: -1, type: 10002, params: ['sys.float.padding_level4'], bundleName: '__harDefaultBundleName__', moduleName: '__harDefaultModuleName__' }, bottom: { id: -1, type: 10002, params: ['sys.float.padding_level4'], bundleName: '__harDefaultBundleName__', moduleName: '__harDefaultModuleName__' } });
-              Row.onClick(() => {
-                b13.action && b13.action();
-                this.controller.close();
+              Row.padding({
+                top: { "id": -1, "type": 10002, params: ['sys.float.padding_level4'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" },
+                bottom: { "id": -1, "type": 10002, params: ['sys.float.padding_level4'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" }
               });
-              if (!c14) {
+              if (!f14) {
                 Row.pop();
               }
               ViewStackProcessor.StopGetAccessRecording();
             });
-            this.observeComponentCreation((z13, a14) => {
-              ViewStackProcessor.StartGetAccessRecordingFor(z13);
-              Text.create(b13.title);
-              Text.fontSize({ id: -1, type: 10002, params: ['sys.float.Body_L'], bundleName: '__harDefaultBundleName__', moduleName: '__harDefaultModuleName__' });
+            this.observeComponentCreation((c14, d14) => {
+              ViewStackProcessor.StartGetAccessRecordingFor(c14);
+              Text.create(e13.title);
+              Text.fontSize({ "id": -1, "type": 10002, params: ['sys.float.Body_L'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" });
               Text.fontWeight(FontWeight.Medium);
-              Text.fontColor({ id: -1, type: 10001, params: ['sys.color.font_primary'], bundleName: '__harDefaultBundleName__', moduleName: '__harDefaultModuleName__' });
+              Text.fontColor({ "id": -1, "type": 10001, params: ['sys.color.font_primary'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" });
               Text.layoutWeight(1);
-              if (!a14) {
+              if (!d14) {
                 Text.pop();
               }
               ViewStackProcessor.StopGetAccessRecording();
             });
             Text.pop();
-            this.observeComponentCreation((w13, x13) => {
-              ViewStackProcessor.StartGetAccessRecordingFor(w13);
+            this.observeComponentCreation((a14, b14) => {
+              ViewStackProcessor.StartGetAccessRecordingFor(a14);
               Radio.create({ value: 'item.title', group: 'radioGroup' });
               Radio.size({ width: CHECKBOX_CONTAINER_LENGTH, height: CHECKBOX_CONTAINER_LENGTH });
-              Radio.checked(this.selectedIndex === a13);
-              Radio.onClick(() => {
-                b13.action && b13.action();
-                this.controller.close();
-              });
-              if (!x13) {
+              Radio.checked(this.selectedIndex === d13);
+              Radio.hitTestBehavior(HitTestMode.None);
+              if (!b14) {
                 Radio.pop();
               }
               ViewStackProcessor.StopGetAccessRecording();
             });
             Row.pop();
-            this.observeComponentCreation((p13, q13) => {
-              ViewStackProcessor.StartGetAccessRecordingFor(p13);
+            Button.pop();
+            this.observeComponentCreation((t13, u13) => {
+              ViewStackProcessor.StartGetAccessRecordingFor(t13);
               If.create();
-              if (a13 < this.radioContent.length - 1) {
+              if (d13 < this.radioContent.length - 1) {
                 this.ifElseBranchUpdateFunction(0, () => {
-                  this.observeComponentCreation((u13, v13) => {
-                    ViewStackProcessor.StartGetAccessRecordingFor(u13);
+                  this.observeComponentCreation((y13, z13) => {
+                    ViewStackProcessor.StartGetAccessRecordingFor(y13);
                     Divider.create();
-                    Divider.color({ id: -1, type: 10001, params: ['sys.color.comp_divider'], bundleName: '__harDefaultBundleName__', moduleName: '__harDefaultModuleName__' });
-                    if (!v13) {
+                    Divider.color({ "id": -1, "type": 10001, params: ['sys.color.comp_divider'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" });
+                    Divider.padding({
+                      left: { "id": -1, "type": 10002, params: ['sys.float.padding_level6'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" },
+                      right: { "id": -1, "type": 10002, params: ['sys.float.padding_level6'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" }
+                    });
+                    if (!z13) {
                       Divider.pop();
                     }
                     ViewStackProcessor.StopGetAccessRecording();
@@ -658,7 +779,7 @@ export class SelectDialog extends ViewPU {
                 this.ifElseBranchUpdateFunction(1, () => {
                 });
               }
-              if (!q13) {
+              if (!u13) {
                 If.pop();
               }
               ViewStackProcessor.StopGetAccessRecording();
@@ -667,12 +788,12 @@ export class SelectDialog extends ViewPU {
             Column.pop();
             ListItem.pop();
           };
-          this.observeComponentCreation(c13);
+          this.observeComponentCreation(f13);
           ListItem.pop();
         }
       };
-      this.forEachUpdateFunction(v12, this.radioContent, x12, undefined, true, false);
-      if (!w12) {
+      this.forEachUpdateFunction(y12, this.radioContent, a13, undefined, true, false);
+      if (!z12) {
         ForEach.pop();
       }
       ViewStackProcessor.StopGetAccessRecording();
@@ -684,39 +805,65 @@ export class SelectDialog extends ViewPU {
   }
   initialRender() {
     {
-      this.observeComponentCreation((j12, k12) => {
-        ViewStackProcessor.StartGetAccessRecordingFor(j12);
-        if (k12) {
-          let l12 = new CustomDialogComponent(this, {
+      this.observeComponentCreation((m12, n12) => {
+        ViewStackProcessor.StartGetAccessRecordingFor(m12);
+        if (n12) {
+          let o12 = new CustomDialogComponent(this, {
             controller: this.controller,
             primaryTitle: this.title,
             contentBuilder: () => {
               this.contentBuilder();
             },
             buttons: this.buttons,
-          }, undefined, j12, () => { }, { page: 'library/src/main/ets/components/mainpage/MainPage.ets', line: 225 });
-          ViewPU.create(l12);
-          let m12 = () => {
+            contentAreaPadding: this.contentPadding
+          }, undefined, m12, () => { }, { page: "library/src/main/ets/components/mainpage/MainPage.ets", line: 332 });
+          ViewPU.create(o12);
+          let p12 = () => {
             return {
               controller: this.controller,
               primaryTitle: this.title,
               contentBuilder: () => {
                 this.contentBuilder();
               },
-              buttons: this.buttons
+              buttons: this.buttons,
+              contentAreaPadding: this.contentPadding
             };
           };
-          l12.paramsGenerator_ = m12;
+          o12.paramsGenerator_ = p12;
         }
         else {
-          this.updateStateVarsOfChildByElmtId(j12, {});
+          this.updateStateVarsOfChildByElmtId(m12, {});
         }
         ViewStackProcessor.StopGetAccessRecording();
       });
     }
   }
   aboutToAppear() {
+    this.initContentPadding();
     this.initButtons();
+  }
+  initContentPadding() {
+    this.contentPadding = {
+      left: { "id": -1, "type": 10002, params: ['sys.float.padding_level0'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" },
+      right: { "id": -1, "type": 10002, params: ['sys.float.padding_level0'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" }
+    };
+    if (!this.title && !this.confirm) {
+      this.contentPadding = {
+        top: { "id": -1, "type": 10002, params: ['sys.float.padding_level12'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" },
+        bottom: { "id": -1, "type": 10002, params: ['sys.float.padding_level12'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" }
+      };
+      return;
+    }
+    if (!this.title) {
+      this.contentPadding = {
+        top: { "id": -1, "type": 10002, params: ['sys.float.padding_level12'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" }
+      };
+    }
+    else if (!this.confirm) {
+      this.contentPadding = {
+        bottom: { "id": -1, "type": 10002, params: ['sys.float.padding_level12'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" }
+      };
+    }
   }
   initButtons() {
     this.buttons = [];
@@ -1198,8 +1345,12 @@ export class AlertDialog extends ViewPU {
       Text.fontSize({ id: -1, type: 10002, params: ['sys.float.Body_L'], bundleName: '', moduleName: '' });
       Text.fontWeight(FontWeight.Medium);
       Text.fontColor({ id: -1, type: 10001, params: ['sys.color.font_primary'], bundleName: '', moduleName: '' });
-      Text.margin({ right: { id: -1, type: 10002, params: ['sys.float.padding_level8'], 
-      bundleName: '', moduleName: '' }, });
+      Text.margin({
+        right: {
+          id: -1, type: 10002, params: ['sys.float.padding_level8'],
+          bundleName: '', moduleName: ''
+        },
+      });
       Text.width(`calc(100% - ${getNumberByResource('padding_level8')}vp)`);
       Text.textAlign(this.textAlign);
       Text.onAreaChange((f8, g8) => {
@@ -1257,53 +1408,53 @@ if (!('finalizeConstruction' in ViewPU.prototype)) {
   Reflect.set(ViewPU.prototype, 'finalizeConstruction', () => { });
 }
 export class CustomContentDialog extends ViewPU {
-  constructor(l6, m6, n6, o6 = -1, p6 = undefined, q6) {
-    super(l6, n6, o6, q6);
-    if (typeof p6 === 'function') {
-      this.paramsGenerator_ = p6;
+  constructor(o6, p6, q6, r6 = -1, s6 = undefined, t6) {
+    super(o6, q6, r6, t6);
+    if (typeof s6 === 'function') {
+      this.paramsGenerator_ = s6;
     }
     this.controller = undefined;
     this.primaryTitle = undefined;
     this.secondaryTitle = undefined;
     this.contentBuilder = undefined;
     this.buttons = undefined;
-    this.setInitiallyProvidedValue(m6);
+    this.setInitiallyProvidedValue(p6);
     this.finalizeConstruction();
   }
-  setInitiallyProvidedValue(k6) {
-    if (k6.controller !== undefined) {
-      this.controller = k6.controller;
+  setInitiallyProvidedValue(n6) {
+    if (n6.controller !== undefined) {
+      this.controller = n6.controller;
     }
-    if (k6.primaryTitle !== undefined) {
-      this.primaryTitle = k6.primaryTitle;
+    if (n6.primaryTitle !== undefined) {
+      this.primaryTitle = n6.primaryTitle;
     }
-    if (k6.secondaryTitle !== undefined) {
-      this.secondaryTitle = k6.secondaryTitle;
+    if (n6.secondaryTitle !== undefined) {
+      this.secondaryTitle = n6.secondaryTitle;
     }
-    if (k6.contentBuilder !== undefined) {
-      this.contentBuilder = k6.contentBuilder;
+    if (n6.contentBuilder !== undefined) {
+      this.contentBuilder = n6.contentBuilder;
     }
-    if (k6.buttons !== undefined) {
-      this.buttons = k6.buttons;
+    if (n6.buttons !== undefined) {
+      this.buttons = n6.buttons;
     }
   }
-  updateStateVars(j6) {
+  updateStateVars(m6) {
   }
-  purgeVariableDependenciesOnElmtId(i6) {
+  purgeVariableDependenciesOnElmtId(l6) {
   }
   aboutToBeDeleted() {
     SubscriberManager.Get().delete(this.id__());
     this.aboutToBeDeletedInternal();
   }
-  setController(h6) {
-    this.controller = h6;
+  setController(k6) {
+    this.controller = k6;
   }
   initialRender() {
     {
-      this.observeComponentCreation((b6, c6) => {
-        ViewStackProcessor.StartGetAccessRecordingFor(b6);
-        if (c6) {
-          let d6 = new CustomDialogContentComponent(this, {
+      this.observeComponentCreation((e6, f6) => {
+        ViewStackProcessor.StartGetAccessRecordingFor(e6);
+        if (f6) {
+          let g6 = new CustomDialogContentComponent(this, {
             controller: this.controller,
             primaryTitle: this.primaryTitle,
             secondaryTitle: this.secondaryTitle,
@@ -1311,9 +1462,9 @@ export class CustomContentDialog extends ViewPU {
               this.contentBuilder();
             },
             buttons: this.buttons,
-          }, undefined, b6, () => { }, { page: 'library/src/main/ets/components/mainpage/MainPage.ets', line: 22 });
-          ViewPU.create(d6);
-          let e6 = () => {
+          }, undefined, e6, () => { }, { page: 'library/src/main/ets/components/mainpage/MainPage.ets', line: 22 });
+          ViewPU.create(g6);
+          let h6 = () => {
             return {
               controller: this.controller,
               primaryTitle: this.primaryTitle,
@@ -1324,10 +1475,10 @@ export class CustomContentDialog extends ViewPU {
               buttons: this.buttons
             };
           };
-          d6.paramsGenerator_ = e6;
+          g6.paramsGenerator_ = h6;
         }
         else {
-          this.updateStateVarsOfChildByElmtId(b6, {});
+          this.updateStateVarsOfChildByElmtId(e6, {});
         }
         ViewStackProcessor.StopGetAccessRecording();
       });
@@ -1338,125 +1489,95 @@ export class CustomContentDialog extends ViewPU {
   }
 }
 class CustomDialogContentComponent extends ViewPU {
-  constructor(u5, v5, w5, x5 = -1, y5 = undefined, z5) {
-    super(u5, w5, x5, z5);
-    if (typeof y5 === 'function') {
-      this.paramsGenerator_ = y5;
+  constructor(x5, y5, z5, a6 = -1, b6 = undefined, c6) {
+    super(x5, z5, a6, c6);
+    if (typeof b6 === 'function') {
+      this.paramsGenerator_ = b6;
     }
     this.controller = undefined;
     this.primaryTitle = undefined;
     this.secondaryTitle = undefined;
     this.contentBuilder = this.defaultContentBuilder;
     this.buttons = undefined;
+    this.contentAreaPadding = undefined;
     this.titleHeight = 0;
     this.__contentMaxHeight = new ObservedPropertySimplePU('', this, 'contentMaxHeight');
-    this.setInitiallyProvidedValue(v5);
+    this.setInitiallyProvidedValue(y5);
     this.finalizeConstruction();
   }
-  setInitiallyProvidedValue(t5) {
-    if (t5.controller !== undefined) {
-      this.controller = t5.controller;
+  setInitiallyProvidedValue(w5) {
+    if (w5.controller !== undefined) {
+      this.controller = w5.controller;
     }
-    if (t5.primaryTitle !== undefined) {
-      this.primaryTitle = t5.primaryTitle;
+    if (w5.primaryTitle !== undefined) {
+      this.primaryTitle = w5.primaryTitle;
     }
-    if (t5.secondaryTitle !== undefined) {
-      this.secondaryTitle = t5.secondaryTitle;
+    if (w5.secondaryTitle !== undefined) {
+      this.secondaryTitle = w5.secondaryTitle;
     }
-    if (t5.contentBuilder !== undefined) {
-      this.contentBuilder = t5.contentBuilder;
+    if (w5.contentBuilder !== undefined) {
+      this.contentBuilder = w5.contentBuilder;
     }
-    if (t5.buttons !== undefined) {
-      this.buttons = t5.buttons;
+    if (w5.buttons !== undefined) {
+      this.buttons = w5.buttons;
     }
-    if (t5.titleHeight !== undefined) {
-      this.titleHeight = t5.titleHeight;
+    if (w5.contentAreaPadding !== undefined) {
+      this.contentAreaPadding = w5.contentAreaPadding;
     }
-    if (t5.contentMaxHeight !== undefined) {
-      this.contentMaxHeight = t5.contentMaxHeight;
+    if (w5.titleHeight !== undefined) {
+      this.titleHeight = w5.titleHeight;
+    }
+    if (w5.contentMaxHeight !== undefined) {
+      this.contentMaxHeight = w5.contentMaxHeight;
     }
   }
-  updateStateVars(s5) {
+  updateStateVars(v5) {
   }
-  purgeVariableDependenciesOnElmtId(r5) {
-    this.__contentMaxHeight.purgeDependencyOnElmtId(r5);
+  purgeVariableDependenciesOnElmtId(u5) {
+    this.__contentMaxHeight.purgeDependencyOnElmtId(u5);
   }
   aboutToBeDeleted() {
     this.__contentMaxHeight.aboutToBeDeleted();
     SubscriberManager.Get().delete(this.id__());
     this.aboutToBeDeletedInternal();
   }
-  defaultContentBuilder(q5 = null) {
+  defaultContentBuilder(t5 = null) {
   }
   get contentMaxHeight() {
     return this.__contentMaxHeight.get();
   }
-  set contentMaxHeight(p5) {
-    this.__contentMaxHeight.set(p5);
+  set contentMaxHeight(s5) {
+    this.__contentMaxHeight.set(s5);
   }
   initialRender() {
-    this.observeComponentCreation((n5, o5) => {
-      ViewStackProcessor.StartGetAccessRecordingFor(n5);
+    this.observeComponentCreation((q5, r5) => {
+      ViewStackProcessor.StartGetAccessRecordingFor(q5);
       Column.create();
       Column.width('100%');
-      if (!o5) {
+      if (!r5) {
         Column.pop();
       }
       ViewStackProcessor.StopGetAccessRecording();
     });
-    this.observeComponentCreation((j5, k5) => {
-      ViewStackProcessor.StartGetAccessRecordingFor(j5);
-      If.create();
-      if (this.primaryTitle || this.secondaryTitle) {
-        this.ifElseBranchUpdateFunction(0, () => {
-          this.buildTitles.bind(this)();
-        });
-      }
-      else {
-        this.ifElseBranchUpdateFunction(1, () => {
-        });
-      }
-      if (!k5) {
-        If.pop();
-      }
-      ViewStackProcessor.StopGetAccessRecording();
-    });
-    If.pop();
-    this.observeComponentCreation((h5, i5) => {
-      ViewStackProcessor.StartGetAccessRecordingFor(h5);
+    this.buildTitles.bind(this)();
+    this.observeComponentCreation((o5, p5) => {
+      ViewStackProcessor.StartGetAccessRecordingFor(o5);
       Column.create();
       Column.padding(this.getContentPadding());
       Column.constraintSize({ maxHeight: this.contentMaxHeight, });
-      if (!i5) {
+      if (!p5) {
         Column.pop();
       }
       ViewStackProcessor.StopGetAccessRecording();
     });
     this.contentBuilder.bind(this)();
     Column.pop();
-    this.observeComponentCreation((d5, e5) => {
-      ViewStackProcessor.StartGetAccessRecordingFor(d5);
-      If.create();
-      if (this.buttons && this.buttons.length > 0) {
-        this.ifElseBranchUpdateFunction(0, () => {
-          this.buildButtons.bind(this)();
-        });
-      }
-      else {
-        this.ifElseBranchUpdateFunction(1, () => {
-        });
-      }
-      if (!e5) {
-        If.pop();
-      }
-      ViewStackProcessor.StopGetAccessRecording();
-    });
-    If.pop();
+    this.buildButtons.bind(this)();
     Column.pop();
   }
-  buildTitles(v3 = null) {
-    this.observeComponentCreation((u4, v4) => {
-      ViewStackProcessor.StartGetAccessRecordingFor(u4);
+  buildTitles(i4 = null) {
+    this.observeComponentCreation((h5, i5) => {
+      ViewStackProcessor.StartGetAccessRecordingFor(h5);
       Column.create();
       Column.constraintSize({
         minHeight: this.getTitleAreaMinHeight(),
@@ -1464,26 +1585,26 @@ class CustomDialogContentComponent extends ViewPU {
       Column.justifyContent(FlexAlign.Center);
       Column.width('100%');
       Column.padding(this.getTitleAreaPadding());
-      Column.onAreaChange((x4, y4) => {
-        this.titleHeight = Number(y4.height);
+      Column.onAreaChange((k5, l5) => {
+        this.titleHeight = Number(l5.height);
         this.contentMaxHeight = `calc(100% - ${this.titleHeight}vp - ${this.getButtonsHeight()}vp)`;
       });
-      if (!v4) {
+      if (!i5) {
         Column.pop();
       }
       ViewStackProcessor.StopGetAccessRecording();
     });
-    this.observeComponentCreation((s4, t4) => {
-      ViewStackProcessor.StartGetAccessRecordingFor(s4);
+    this.observeComponentCreation((f5, g5) => {
+      ViewStackProcessor.StartGetAccessRecordingFor(f5);
       Row.create();
       Row.width('100%');
-      if (!t4) {
+      if (!g5) {
         Row.pop();
       }
       ViewStackProcessor.StopGetAccessRecording();
     });
-    this.observeComponentCreation((q4, r4) => {
-      ViewStackProcessor.StartGetAccessRecordingFor(q4);
+    this.observeComponentCreation((d5, e5) => {
+      ViewStackProcessor.StartGetAccessRecordingFor(d5);
       Text.create(this.primaryTitle);
       Text.fontWeight(FontWeight.Bold);
       Text.fontColor({ id: -1, type: 10001, params: ['sys.color.font_primary'], bundleName: '', moduleName: '' });
@@ -1493,32 +1614,32 @@ class CustomDialogContentComponent extends ViewPU {
       Text.maxLines(TITLE_MAX_LINES);
       Text.heightAdaptivePolicy(TextHeightAdaptivePolicy.MIN_FONT_SIZE_FIRST);
       Text.textOverflow({ overflow: TextOverflow.Ellipsis });
-      if (!r4) {
+      if (!e5) {
         Text.pop();
       }
       ViewStackProcessor.StopGetAccessRecording();
     });
     Text.pop();
     Row.pop();
-    this.observeComponentCreation((g4, h4) => {
-      ViewStackProcessor.StartGetAccessRecordingFor(g4);
+    this.observeComponentCreation((t4, u4) => {
+      ViewStackProcessor.StartGetAccessRecordingFor(t4);
       If.create();
       if (this.primaryTitle && this.secondaryTitle) {
         this.ifElseBranchUpdateFunction(0, () => {
-          this.observeComponentCreation((o4, p4) => {
-            ViewStackProcessor.StartGetAccessRecordingFor(o4);
+          this.observeComponentCreation((b5, c5) => {
+            ViewStackProcessor.StartGetAccessRecordingFor(b5);
             Row.create();
-            if (!p4) {
+            if (!c5) {
               Row.pop();
             }
             ViewStackProcessor.StopGetAccessRecording();
           });
-          this.observeComponentCreation((m4, n4) => {
-            ViewStackProcessor.StartGetAccessRecordingFor(m4);
+          this.observeComponentCreation((z4, a5) => {
+            ViewStackProcessor.StartGetAccessRecordingFor(z4);
             Divider.create();
             Divider.margin({ id: -1, type: 10002, params: ['sys.float.padding_level1'], bundleName: '', moduleName: '' });
             Divider.color(Color.Transparent);
-            if (!n4) {
+            if (!a5) {
               Divider.pop();
             }
             ViewStackProcessor.StopGetAccessRecording();
@@ -1530,23 +1651,23 @@ class CustomDialogContentComponent extends ViewPU {
         this.ifElseBranchUpdateFunction(1, () => {
         });
       }
-      if (!h4) {
+      if (!u4) {
         If.pop();
       }
       ViewStackProcessor.StopGetAccessRecording();
     });
     If.pop();
-    this.observeComponentCreation((e4, f4) => {
-      ViewStackProcessor.StartGetAccessRecordingFor(e4);
+    this.observeComponentCreation((r4, s4) => {
+      ViewStackProcessor.StartGetAccessRecordingFor(r4);
       Row.create();
       Row.width('100%');
-      if (!f4) {
+      if (!s4) {
         Row.pop();
       }
       ViewStackProcessor.StopGetAccessRecording();
     });
-    this.observeComponentCreation((c4, d4) => {
-      ViewStackProcessor.StartGetAccessRecordingFor(c4);
+    this.observeComponentCreation((p4, q4) => {
+      ViewStackProcessor.StartGetAccessRecordingFor(p4);
       Text.create(this.secondaryTitle);
       Text.fontWeight(FontWeight.Regular);
       Text.fontColor({ id: -1, type: 10001, params: ['sys.color.font_secondary'], bundleName: '', moduleName: '' });
@@ -1556,7 +1677,7 @@ class CustomDialogContentComponent extends ViewPU {
       Text.maxLines(TITLE_MAX_LINES);
       Text.heightAdaptivePolicy(TextHeightAdaptivePolicy.MIN_FONT_SIZE_FIRST);
       Text.textOverflow({ overflow: TextOverflow.Ellipsis });
-      if (!d4) {
+      if (!q4) {
         Text.pop();
       }
       ViewStackProcessor.StopGetAccessRecording();
@@ -1565,13 +1686,13 @@ class CustomDialogContentComponent extends ViewPU {
     Row.pop();
     Column.pop();
   }
-  buildButtons(r3 = null) {
-    this.observeComponentCreation((t3, u3) => {
-      ViewStackProcessor.StartGetAccessRecordingFor(t3);
+  buildButtons(e4 = null) {
+    this.observeComponentCreation((g4, h4) => {
+      ViewStackProcessor.StartGetAccessRecordingFor(g4);
       Column.create();
       Column.width('100%');
       Column.padding(this.getOperationAreaPadding());
-      if (!u3) {
+      if (!h4) {
         Column.pop();
       }
       ViewStackProcessor.StopGetAccessRecording();
@@ -1580,55 +1701,73 @@ class CustomDialogContentComponent extends ViewPU {
     this.buildVerticalAlignButtons.bind(this)();
     Column.pop();
   }
-  buildSingleButton(i3, j3 = null) {
-    this.observeComponentCreation((l3, m3) => {
-      let n3;
-      let o3;
-      let p3;
-      let q3;
-      ViewStackProcessor.StartGetAccessRecordingFor(l3);
-      Button.createWithLabel(i3.value);
-      Button.onClick(() => {
-        let s3;
-        if (i3.action) {
-          i3.action();
-        }
-        (s3 = this.controller) === null || s3 === void 0 ? void 0 : s3.close();
-      });
-      Button.fontColor((n3 = i3.fontColor) !== null && n3 !== void 0 ? n3 : { id: -1, type: 10001, params: ['sys.color.ohos_id_color_text_primary_activated'], bundleName: '', moduleName: '' });
-      Button.backgroundColor((o3 = i3.background) !== null && o3 !== void 0 ? o3 : { id: -1, type: 10001, params: ['sys.color.ohos_id_color_background_transparent'], bundleName: '', moduleName: '' });
-      Button.buttonStyle((p3 = i3.buttonStyle) !== null && p3 !== void 0 ? p3 : getNumberByResource('alert_button_style'));
-      Button.role((q3 = i3.role) !== null && q3 !== void 0 ? q3 : ButtonRole.NORMAL);
-      Button.layoutWeight(BUTTON_LAYOUT_WEIGHT);
-      if (!m3) {
-        Button.pop();
+  buildSingleButton(o3, p3 = null) {
+    this.observeComponentCreation((r3, s3) => {
+      ViewStackProcessor.StartGetAccessRecordingFor(r3);
+      If.create();
+      if (this.isNewPropertiesHighPriority(o3)) {
+        this.ifElseBranchUpdateFunction(0, () => {
+          this.observeComponentCreation((b4, c4) => {
+            let d4;
+            ViewStackProcessor.StartGetAccessRecordingFor(b4);
+            Button.createWithLabel(o3.value);
+            __Button__setButtonProperties(o3, this.controller);
+            Button.role((d4 = o3.role) !== null && d4 !== void 0 ? d4 : ButtonRole.NORMAL);
+            if (!c4) {
+              Button.pop();
+            }
+            ViewStackProcessor.StopGetAccessRecording();
+          });
+          Button.pop();
+        });
+      }
+      else {
+        this.ifElseBranchUpdateFunction(1, () => {
+          this.observeComponentCreation((v3, w3) => {
+            let x3;
+            let y3;
+            ViewStackProcessor.StartGetAccessRecordingFor(v3);
+            Button.createWithLabel(o3.value);
+            __Button__setButtonProperties(o3, this.controller);
+            Button.backgroundColor((x3 = o3.background) !== null && x3 !== void 0 ? x3 : { id: -1, type: 10001, params: ['sys.color.ohos_id_color_background_transparent'], bundleName: '', moduleName: '' });
+            Button.fontColor((y3 = o3.fontColor) !== null && y3 !== void 0 ? y3 : { id: -1, type: 10001, params: ['sys.color.ohos_id_color_text_primary_activated'], bundleName: '', moduleName: '' });
+            if (!w3) {
+              Button.pop();
+            }
+            ViewStackProcessor.StopGetAccessRecording();
+          });
+          Button.pop();
+        });
+      }
+      if (!s3) {
+        If.pop();
       }
       ViewStackProcessor.StopGetAccessRecording();
     });
-    Button.pop();
+    If.pop();
   }
-  buildHorizontalAlignButtons(r2 = null) {
-    this.observeComponentCreation((t2, u2) => {
-      ViewStackProcessor.StartGetAccessRecordingFor(t2);
+  buildHorizontalAlignButtons(x2 = null) {
+    this.observeComponentCreation((z2, a3) => {
+      ViewStackProcessor.StartGetAccessRecordingFor(z2);
       If.create();
       if (this.buttons && this.buttons.length > 0 && this.buttons.length <= HORIZON_BUTTON_MAX_COUNT) {
         this.ifElseBranchUpdateFunction(0, () => {
-          this.observeComponentCreation((g3, h3) => {
-            ViewStackProcessor.StartGetAccessRecordingFor(g3);
+          this.observeComponentCreation((m3, n3) => {
+            ViewStackProcessor.StartGetAccessRecordingFor(m3);
             Row.create();
-            if (!h3) {
+            if (!n3) {
               Row.pop();
             }
             ViewStackProcessor.StopGetAccessRecording();
           });
           this.buildSingleButton.bind(this)(this.buttons[0]);
-          this.observeComponentCreation((z2, a3) => {
-            ViewStackProcessor.StartGetAccessRecordingFor(z2);
+          this.observeComponentCreation((f3, g3) => {
+            ViewStackProcessor.StartGetAccessRecordingFor(f3);
             If.create();
             if (this.buttons.length === HORIZON_BUTTON_MAX_COUNT) {
               this.ifElseBranchUpdateFunction(0, () => {
-                this.observeComponentCreation((e3, f3) => {
-                  ViewStackProcessor.StartGetAccessRecordingFor(e3);
+                this.observeComponentCreation((k3, l3) => {
+                  ViewStackProcessor.StartGetAccessRecordingFor(k3);
                   Divider.create();
                   Divider.width({ id: -1, type: 10002, params: ['sys.float.alert_divider_width'], bundleName: '', moduleName: '' });
                   Divider.height({ id: -1, type: 10002, params: ['sys.float.alert_divider_height'], bundleName: '', moduleName: '' });
@@ -1638,7 +1777,7 @@ class CustomDialogContentComponent extends ViewPU {
                     left: { id: -1, type: 10002, params: ['sys.float.alert_button_horizontal_space'], bundleName: '', moduleName: '' },
                     right: { id: -1, type: 10002, params: ['sys.float.alert_button_horizontal_space'], bundleName: '', moduleName: '' },
                   });
-                  if (!f3) {
+                  if (!l3) {
                     Divider.pop();
                   }
                   ViewStackProcessor.StopGetAccessRecording();
@@ -1650,7 +1789,7 @@ class CustomDialogContentComponent extends ViewPU {
               this.ifElseBranchUpdateFunction(1, () => {
               });
             }
-            if (!a3) {
+            if (!g3) {
               If.pop();
             }
             ViewStackProcessor.StopGetAccessRecording();
@@ -1663,36 +1802,36 @@ class CustomDialogContentComponent extends ViewPU {
         this.ifElseBranchUpdateFunction(1, () => {
         });
       }
-      if (!u2) {
+      if (!a3) {
         If.pop();
       }
       ViewStackProcessor.StopGetAccessRecording();
     });
     If.pop();
   }
-  buildVerticalAlignButtons(y1 = null) {
-    this.observeComponentCreation((a2, b2) => {
-      ViewStackProcessor.StartGetAccessRecordingFor(a2);
+  buildVerticalAlignButtons(e2 = null) {
+    this.observeComponentCreation((g2, h2) => {
+      ViewStackProcessor.StartGetAccessRecordingFor(g2);
       If.create();
       if (this.buttons && this.isVerticalAlignButton()) {
         this.ifElseBranchUpdateFunction(0, () => {
-          this.observeComponentCreation((p2, q2) => {
-            ViewStackProcessor.StartGetAccessRecordingFor(p2);
+          this.observeComponentCreation((v2, w2) => {
+            ViewStackProcessor.StartGetAccessRecordingFor(v2);
             Column.create();
-            if (!q2) {
+            if (!w2) {
               Column.pop();
             }
             ViewStackProcessor.StopGetAccessRecording();
           });
-          this.observeComponentCreation((g2, h2) => {
-            ViewStackProcessor.StartGetAccessRecordingFor(g2);
+          this.observeComponentCreation((m2, n2) => {
+            ViewStackProcessor.StartGetAccessRecordingFor(m2);
             ForEach.create();
-            const i2 = (m2, n2) => {
-              const o2 = m2;
-              this.buildButtonWithDivider.bind(this)(n2);
+            const o2 = (s2, t2) => {
+              const u2 = s2;
+              this.buildButtonWithDivider.bind(this)(t2);
             };
-            this.forEachUpdateFunction(g2, this.buttons.slice(0, VERTICAL_BUTTON_MAX_COUNT), i2, (l2) => l2.value.toString(), true, false);
-            if (!h2) {
+            this.forEachUpdateFunction(m2, this.buttons.slice(0, VERTICAL_BUTTON_MAX_COUNT), o2, (r2) => r2.value.toString(), true, false);
+            if (!n2) {
               ForEach.pop();
             }
             ViewStackProcessor.StopGetAccessRecording();
@@ -1705,39 +1844,39 @@ class CustomDialogContentComponent extends ViewPU {
         this.ifElseBranchUpdateFunction(1, () => {
         });
       }
-      if (!b2) {
+      if (!h2) {
         If.pop();
       }
       ViewStackProcessor.StopGetAccessRecording();
     });
     If.pop();
   }
-  buildButtonWithDivider(g1, h1 = null) {
-    this.observeComponentCreation((j1, k1) => {
-      ViewStackProcessor.StartGetAccessRecordingFor(j1);
+  buildButtonWithDivider(m1, n1 = null) {
+    this.observeComponentCreation((p1, q1) => {
+      ViewStackProcessor.StartGetAccessRecordingFor(p1);
       If.create();
-      if (this.buttons && this.buttons[g1]) {
+      if (this.buttons && this.buttons[m1]) {
         this.ifElseBranchUpdateFunction(0, () => {
-          this.observeComponentCreation((w1, x1) => {
-            ViewStackProcessor.StartGetAccessRecordingFor(w1);
+          this.observeComponentCreation((c2, d2) => {
+            ViewStackProcessor.StartGetAccessRecordingFor(c2);
             Row.create();
-            if (!x1) {
+            if (!d2) {
               Row.pop();
             }
             ViewStackProcessor.StopGetAccessRecording();
           });
-          this.buildSingleButton.bind(this)(this.buttons[g1]);
+          this.buildSingleButton.bind(this)(this.buttons[m1]);
           Row.pop();
-          this.observeComponentCreation((p1, q1) => {
-            ViewStackProcessor.StartGetAccessRecordingFor(p1);
+          this.observeComponentCreation((v1, w1) => {
+            ViewStackProcessor.StartGetAccessRecordingFor(v1);
             If.create();
-			if (g1 < Math.min(this.buttons.length, VERTICAL_BUTTON_MAX_COUNT) - 1) {
+            if (m1 < Math.min(this.buttons.length, VERTICAL_BUTTON_MAX_COUNT) - 1) {
               this.ifElseBranchUpdateFunction(0, () => {
-                this.observeComponentCreation((u1, v1) => {
-                  ViewStackProcessor.StartGetAccessRecordingFor(u1);
+                this.observeComponentCreation((a2, b2) => {
+                  ViewStackProcessor.StartGetAccessRecordingFor(a2);
                   Row.create();
                   Row.height({ id: -1, type: 10002, params: ['sys.float.alert_button_vertical_space'], bundleName: '', moduleName: '' });
-                  if (!v1) {
+                  if (!b2) {
                     Row.pop();
                   }
                   ViewStackProcessor.StopGetAccessRecording();
@@ -1749,7 +1888,7 @@ class CustomDialogContentComponent extends ViewPU {
               this.ifElseBranchUpdateFunction(1, () => {
               });
             }
-            if (!q1) {
+            if (!w1) {
               If.pop();
             }
             ViewStackProcessor.StopGetAccessRecording();
@@ -1761,7 +1900,7 @@ class CustomDialogContentComponent extends ViewPU {
         this.ifElseBranchUpdateFunction(1, () => {
         });
       }
-      if (!k1) {
+      if (!q1) {
         If.pop();
       }
       ViewStackProcessor.StopGetAccessRecording();
@@ -1781,19 +1920,22 @@ class CustomDialogContentComponent extends ViewPU {
     if (!this.buttons || this.buttons.length === 0) {
       return 0;
     }
-    let f1 = getNumberByResource('alert_button_top_padding');
+    let l1 = getNumberByResource('alert_button_top_padding');
     if (this.buttons.length <= HORIZON_BUTTON_MAX_COUNT) {
-      f1 += BUTTON_DEFAULT_HEIGHT +
+      l1 += BUTTON_DEFAULT_HEIGHT +
         getNumberByResource('alert_button_bottom_padding_horizontal');
     }
     else {
-      f1 += BUTTON_DEFAULT_HEIGHT * this.buttons.length +
+      l1 += BUTTON_DEFAULT_HEIGHT * this.buttons.length +
         (this.buttons.length - 1) * getNumberByResource('alert_button_vertical_space') +
         getNumberByResource('alert_button_bottom_padding_vertical');
     }
-    return f1;
+    return l1;
   }
   getContentPadding() {
+    if (this.contentAreaPadding) {
+      return this.contentAreaPadding;
+    }
     if ((this.primaryTitle || this.secondaryTitle) && this.buttons && this.buttons.length > 0) {
       return {
         top: 0,
@@ -1876,69 +2018,111 @@ class CustomDialogContentComponent extends ViewPU {
       bottom: { id: -1, type: 10002, params: ['sys.float.alert_button_bottom_padding_horizontal'], bundleName: '', moduleName: '' },
     };
   }
+  isNewPropertiesHighPriority(k1) {
+    if (k1.role === ButtonRole.ERROR) {
+      return true;
+    }
+    if (k1.buttonStyle !== undefined &&
+      k1.buttonStyle !== getNumberByResource('alert_button_style')) {
+      return true;
+    }
+    if (k1.background === undefined && k1.fontColor === undefined) {
+      return true;
+    }
+    return false;
+  }
   rerender() {
     this.updateDirtyElements();
   }
 }
 export class CustomDialogComponent extends ViewPU {
-  constructor(z, a1, b1, c1 = -1, d1 = undefined, e1) {
-    super(z, b1, c1, e1);
-    if (typeof d1 === 'function') {
-      this.paramsGenerator_ = d1;
+  constructor(e1, f1, g1, h1 = -1, i1 = undefined, j1) {
+    super(e1, g1, h1, j1);
+    if (typeof i1 === 'function') {
+      this.paramsGenerator_ = i1;
     }
     this.controller = undefined;
     this.primaryTitle = undefined;
     this.secondaryTitle = undefined;
     this.contentBuilder = undefined;
     this.buttons = undefined;
-    this.__dialogWidth = new ObservedPropertySimplePU('100%', this, 'dialogWidth');
-    this.setInitiallyProvidedValue(a1);
+    this.contentAreaPadding = undefined;
+    this.screenWidth = 0;
+    this.__columnModifier = new ObservedPropertyObjectPU(new ColumnModifier(), this, 'columnModifier');
+    this.isFirstInit = true;
+    this.setInitiallyProvidedValue(f1);
     this.finalizeConstruction();
   }
-  setInitiallyProvidedValue(y) {
-    if (y.controller !== undefined) {
-      this.controller = y.controller;
+  setInitiallyProvidedValue(d1) {
+    if (d1.controller !== undefined) {
+      this.controller = d1.controller;
     }
-    if (y.primaryTitle !== undefined) {
-      this.primaryTitle = y.primaryTitle;
+    if (d1.primaryTitle !== undefined) {
+      this.primaryTitle = d1.primaryTitle;
     }
-    if (y.secondaryTitle !== undefined) {
-      this.secondaryTitle = y.secondaryTitle;
+    if (d1.secondaryTitle !== undefined) {
+      this.secondaryTitle = d1.secondaryTitle;
     }
-    if (y.contentBuilder !== undefined) {
-      this.contentBuilder = y.contentBuilder;
+    if (d1.contentBuilder !== undefined) {
+      this.contentBuilder = d1.contentBuilder;
     }
-    if (y.buttons !== undefined) {
-      this.buttons = y.buttons;
+    if (d1.buttons !== undefined) {
+      this.buttons = d1.buttons;
     }
-    if (y.dialogWidth !== undefined) {
-      this.dialogWidth = y.dialogWidth;
+    if (d1.contentAreaPadding !== undefined) {
+      this.contentAreaPadding = d1.contentAreaPadding;
+    }
+    if (d1.screenWidth !== undefined) {
+      this.screenWidth = d1.screenWidth;
+    }
+    if (d1.columnModifier !== undefined) {
+      this.columnModifier = d1.columnModifier;
+    }
+    if (d1.isFirstInit !== undefined) {
+      this.isFirstInit = d1.isFirstInit;
     }
   }
-  updateStateVars(x) {
+  updateStateVars(c1) {
   }
-  purgeVariableDependenciesOnElmtId(w) {
-    this.__dialogWidth.purgeDependencyOnElmtId(w);
+  purgeVariableDependenciesOnElmtId(b1) {
+    this.__columnModifier.purgeDependencyOnElmtId(b1);
   }
   aboutToBeDeleted() {
-    this.__dialogWidth.aboutToBeDeleted();
+    this.__columnModifier.aboutToBeDeleted();
     SubscriberManager.Get().delete(this.id__());
     this.aboutToBeDeletedInternal();
   }
-  get dialogWidth() {
-    return this.__dialogWidth.get();
+  get columnModifier() {
+    return this.__columnModifier.get();
   }
-  set dialogWidth(v) {
-    this.__dialogWidth.set(v);
+  set columnModifier(a1) {
+    this.__columnModifier.set(a1);
   }
   initialRender() {
+    this.observeComponentCreation((v, w) => {
+      ViewStackProcessor.StartGetAccessRecordingFor(v);
+      Column.create();
+      Column.onAreaChange((y, z) => {
+        if (!this.isFirstInit) {
+          return;
+        }
+        if (this.screenWidth > getNumberByResource('alert_container_max_width')) {
+          this.columnModifier.customStyle = z.width > getNumberByResource('alert_container_max_width');
+        }
+        else {
+          this.columnModifier.customStyle = z.width >= this.screenWidth;
+        }
+        this.isFirstInit = false;
+      });
+      if (!w) {
+        Column.pop();
+      }
+      ViewStackProcessor.StopGetAccessRecording();
+    });
     this.observeComponentCreation((t, u) => {
       ViewStackProcessor.StartGetAccessRecordingFor(t);
       Column.create();
-      Column.backgroundBlurStyle(BlurStyle.COMPONENT_ULTRA_THICK);
-      Column.borderRadius({ id: -1, type: 10002, params: ['sys.float.alert_container_shape'], bundleName: '', moduleName: '' });
-      Column.backgroundColor({ id: -1, type: 10001, params: ['sys.color.comp_background_primary'], bundleName: '', moduleName: '' });
-      Column.width(this.dialogWidth);
+      Column.attributeModifier.bind(this)(this.columnModifier);
       if (!u) {
         Column.pop();
       }
@@ -1956,7 +2140,8 @@ export class CustomDialogComponent extends ViewPU {
               this.contentBuilder();
             },
             buttons: this.buttons,
-          }, undefined, n, () => { }, { page: 'library/src/main/ets/components/mainpage/MainPage.ets', line: 343 });
+            contentAreaPadding: this.contentAreaPadding,
+          }, undefined, n, () => { }, { page: 'library/src/main/ets/components/mainpage/MainPage.ets', line: 362 });
           ViewPU.create(p);
           let q = () => {
             return {
@@ -1966,7 +2151,8 @@ export class CustomDialogComponent extends ViewPU {
               contentBuilder: () => {
                 this.contentBuilder();
               },
-              buttons: this.buttons
+              buttons: this.buttons,
+              contentAreaPadding: this.contentAreaPadding
             };
           };
           p.paramsGenerator_ = q;
@@ -1978,23 +2164,48 @@ export class CustomDialogComponent extends ViewPU {
       });
     }
     Column.pop();
+    Column.pop();
   }
   aboutToAppear() {
-    window.getLastWindow(getContext(this)).then((h) => {
-      let i = px2vp(h.getWindowProperties().windowRect.width);
-      this.dialogWidth = Math.min(i - getNumberByResource('ohos_id_dialog_margin_start') -
-        getNumberByResource('ohos_id_dialog_margin_end'), getNumberByResource('alert_container_max_width'));
-      h.on('windowSizeChange', (k) => {
-        this.dialogWidth = Math.min(px2vp(k.width) - getNumberByResource('ohos_id_dialog_margin_start') -
-          getNumberByResource('ohos_id_dialog_margin_end'), getNumberByResource('alert_container_max_width'));
-      });
-    }).catch((g) => {
-      hilog.error(0x3900, 'Ace', `Failed to obtain the top window, code: ${g.code}, message:${g.message}`);
-    });
+    try {
+      this.screenWidth = px2vp(display.getDefaultDisplaySync().width);
+    }
+    catch (j) {
+      hilog.error(0x3900, 'Ace', `CustomDialogComponent getDefaultDisplaySync error: ${JSON.stringify(j)}`);
+    }
   }
   rerender() {
     this.updateDirtyElements();
   }
+}
+class ColumnModifier {
+  constructor() {
+    this.customStyle = false;
+  }
+  applyNormalAttribute(i) {
+    if (!this.customStyle) {
+      return;
+    }
+    i.backgroundBlurStyle(BlurStyle.Thick);
+    i.borderRadius({ id: -1, type: 10002, params: ['sys.float.ohos_id_corner_radius_dialog'], bundleName: '', moduleName: '' });
+    i.margin({
+      left: { id: -1, type: 10002, params: ['sys.float.ohos_id_dialog_margin_start'], bundleName: '', moduleName: '' },
+      right: { id: -1, type: 10002, params: ['sys.float.ohos_id_dialog_margin_end'], bundleName: '', moduleName: '' },
+      bottom: { id: -1, type: 10002, params: ['sys.float.ohos_id_dialog_margin_bottom'], bundleName: '', moduleName: '' },
+    });
+    i.backgroundColor({ id: -1, type: 10001, params: ['sys.color.ohos_id_color_dialog_bg'], bundleName: '', moduleName: '' });
+  }
+}
+function __Button__setButtonProperties(e, f) {
+  let g;
+  Button.onClick(() => {
+    if (e.action) {
+      e.action();
+    }
+    f === null || f === void 0 ? void 0 : f.close();
+  });
+  Button.buttonStyle((g = e.buttonStyle) !== null && g !== void 0 ? g : getNumberByResource('alert_button_style'));
+  Button.layoutWeight(BUTTON_LAYOUT_WEIGHT);
 }
 function getNumberByResource(a) {
   try {

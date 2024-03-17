@@ -157,7 +157,10 @@ void Invalidate(ArkUINodeHandle node)
     CHECK_NULL_VOID(frameNode);
     auto pattern = frameNode->GetPattern<RenderNodePattern>();
     CHECK_NULL_VOID(pattern);
+    auto renderContext = frameNode->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
     pattern->Invalidate();
+    renderContext->RequestNextFrame();
 }
 
 void SetScale(ArkUINodeHandle node, ArkUI_Float32 scaleX, ArkUI_Float32 scaleY)

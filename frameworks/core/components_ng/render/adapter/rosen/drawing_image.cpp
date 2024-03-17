@@ -273,9 +273,10 @@ bool DrawingImage::DrawImageNine(
     UpdateRSFilter(config, filter);
     brush.SetFilter(filter);
     auto& recordingCanvas = static_cast<Rosen::ExtendRecordingCanvas&>(canvas);
+    auto radii = ImagePainterUtils::ToRSRadius(radiusXY);
     std::vector<RSPoint> radius;
     for (int ii = 0; ii < 4; ii++) {
-        RSPoint point(radiusXY[ii].GetX(), radiusXY[ii].GetY());
+        RSPoint point(radii[ii].GetX(), radii[ii].GetY());
         radius.emplace_back(point);
     }
     recordingCanvas.ClipAdaptiveRoundRect(radius);
@@ -306,7 +307,7 @@ bool DrawingImage::DrawWithRecordingCanvas(RSCanvas& canvas, const BorderRadiusA
     auto& recordingCanvas = static_cast<Rosen::ExtendRecordingCanvas&>(canvas);
     std::vector<RSPoint> radius;
     for (int ii = 0; ii < 4; ii++) {
-        RSPoint point(radiusXY[ii].GetX(), radiusXY[ii].GetY());
+        RSPoint point(radii[ii].GetX(), radii[ii].GetY());
         radius.emplace_back(point);
     }
     recordingCanvas.ClipAdaptiveRoundRect(radius);

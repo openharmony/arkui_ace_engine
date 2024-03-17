@@ -1763,11 +1763,11 @@ typedef enum {
      * This attribute can be set, reset, and obtained as required through APIs.
      *
      * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
-     * .value[0].i32 to .value[19].i32: filter matrix array. \n
+     * .value[0].f32 to .value[19].f32: filter matrix array. \n
      * .size: 5 x 4 filter array size. \n
      * \n
      * Format of the return value {@link ArkUI_AttributeItem}:\n
-     * .value[0].i32 to .value[19].i32: filter matrix array. \n
+     * .value[0].f32 to .value[19].f32: filter matrix array. \n
      * .size: 5 x 4 filter array size. \n
      *
      */
@@ -1811,10 +1811,10 @@ typedef enum {
      * @brief Defines the image rendering mode. This attribute can be set, reset, and obtained as required through APIs.
      *
      * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
-     * .value[0].i32: The parameter type is {@link ArkUI_RenderMode}. \n
+     * .value[0].i32: The parameter type is {@link ArkUI_ImageRenderMode}. \n
      * \n
      * Format of the return value {@link ArkUI_AttributeItem}:\n
-     * .value[0].i32: The parameter type is {@link ArkUI_RenderMode}. \n
+     * .value[0].i32: The parameter type is {@link ArkUI_ImageRenderMode}. \n
      *
      */
     NODE_IMAGE_RENDER_MODE,
@@ -3459,17 +3459,20 @@ typedef enum {
     NODE_SWIPER_SHOW_DISPLAY_ARROW,
 
     /**
-     * @brief 设置Swiper的边缘滑动效果，支持属性设置，属性重置和属性获取接口。
+     * @brief Defines the effect used at the edges of the swiper when the boundary of the scrollable content is reached.
+     * This attribute can be set, reset, and obtained as required through APIs.
      *
-     * 属性设置方法参数{@link ArkUI_AttributeItem}格式： \n
-     * .value[0].i32: 边缘滑动效果，参数类型{@link ArkUI_EdgeEffect}， \n
-     * 默认值为ARKUI_EDGE_EFFECT_SPRING。 \n
+     * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
+     * .value[0].i32: effect used at the edges of the swiper when the boundary of the scrollable content is reached.
+     * The parameter type is {@link ArkUI_EdgeEffect}.\n
+     * The default value is <b>ARKUI_EDGE_EFFECT_SPRING</b>. \n
      * \n
-     * 属性获取方法返回值{@link ArkUI_AttributeItem}格式： \n
-     * .value[0].i32: 边缘滑动效果，参数类型{@link ArkUI_EdgeEffect}， \n
+     * Format of the return value {@link ArkUI_AttributeItem}:\n
+     * .value[0].i32: effect used at the edges of the swiper when the boundary of the scrollable content is reached.
+     * The parameter type is {@link ArkUI_EdgeEffect}. \n
      *
      */
-    NODE_SWIPER_EFFECT_MODE,
+    NODE_SWIPER_EDGE_EFFECT_MODE,
 
     /**
      * @brief Defines the header of the list item group.
@@ -3972,46 +3975,56 @@ typedef enum {
     NODE_SLIDER_EVENT_ON_CHANGE = MAX_NODE_SCOPE_NUM * ARKUI_NODE_SLIDER,
 
     /**
-     * @brief 定义ARKUI_NODE_SWIPER当前元素索引变化时触发事件回调。
+     * @brief Defines the event triggered when the index of the currently displayed element of this
+     * <b>ARKUI_NODE_SWIPER</b> instance changes.
      *
-     * 事件回调发生时，事件参数{@link ArkUI_NodeEvent}对象中的联合体类型为{@link ArkUI_NodeComponentEvetn}。\n
-     * {@link ArkUI_NodeComponentEvent}中包含1个参数：\n
-     * <b>ArkUI_NodeComponentEvent.data[0].i32</b>：表示当前显示元素的索引。\n
+     * When the event callback occurs, the union type in the {@link ArkUI_NodeEvent} object is
+     * {@link ArkUI_NodeComponentEvent}. \n
+     * {@link ArkUI_NodeComponentEvent} contains one parameter:\n
+     * <b>ArkUI_NodeComponentEvent.data[0].i32</b>: index of the currently displayed element. \n
      */
     NODE_SWIPER_EVENT_ON_CHANGE = MAX_NODE_SCOPE_NUM * ARKUI_NODE_SWIPER,
 
     /**
-     * @brief 定义ARKUI_NODE_SWIPER切换动画开始时触发回调。
+     * @brief Defines the event triggered when the switching animation of this <b>ARKUI_NODE_SWIPER</b> instance starts.
      *
-     * 事件回调发生时，事件参数{@link ArkUI_NodeEvent}对象中的联合体类型为{@link ArkUI_NodeComponentEvent}。\n
-     * {@link ArkUI_NodeComponentEvent}中包含5个参数：\n
-     * <b>ArkUI_NodeComponentEvent.data[0].i32</b>：表示当前显示元素的索引。\n
-     * <b>ArkUI_NodeComponentEvent.data[1].i32</b>：表示切换动画目标元素的索引。\n
-     * <b>ArkUI_NodeComponentEvent.data[2].f32</b>：表示主轴方向上当前显示元素相对Swiper起始位置的位移。\n
-     * <b>ArkUI_NodeComponentEvent.data[3].f32</b>：表示主轴方向上目标元素相对Swiper起始位置的位移。\n
-     * <b>ArkUI_NodeComponentEvent.data[4].f32</b>：表示离手速度。\n
+     * When the event callback occurs, the union type in the {@link ArkUI_NodeEvent} object is
+     * {@link ArkUI_NodeComponentEvent}. \n
+     * {@link ArkUI_NodeComponentEvent} contains five parameters: \n
+     * <b>ArkUI_NodeComponentEvent.data[0].i32</b>: index of the currently displayed element. \n
+     * <b>ArkUI_NodeComponentEvent.data[1].i32</b>: index of the target element to switch to. \n
+     * <b>ArkUI_NodeComponentEvent.data[2].f32</b>: offset of the currently displayed element relative to the
+     * start position of the swiper along the main axis. \n
+     * <b>ArkUI_NodeComponentEvent.data[3].f32</b>: offset of the target element relative to the start position
+     * of the swiper along the main axis. \n
+     * <b>ArkUI_NodeComponentEvent.data[4].f32</b>: hands-off velocity. \n
      */
     NODE_SWIPER_EVENT_ON_ANIMATION_START,
 
     /**
-     * @brief 定义ARKUI_NODE_SWIPER切换动画结束是触发回调。
+     * @brief Defines the event triggered when the switching animation of this <b>ARKUI_NODE_SWIPER</b> instance ends.
      *
-     * 事件回调发生时，事件参数{@link ArkUI_NodeEvent}对象中的联合体类型为{@link ArkUI_NodeComponentEvent}。\n
-     * {@link ArkUI_NodeComponentEvent}中包含2个参数：\n
-     * <b>ArkUI_NodeComponentEvent.data[0].i32</b>：表示当前显示元素的索引。\n
-     * <b>ArkUI_NodeComponentEvent.data[1].f32</b>：表示主轴方向上当前显示元素相对Swiper起始位置的位移。\n
+     * When the event callback occurs, the union type in the {@link ArkUI_NodeEvent} object is
+     * {@link ArkUI_NodeComponentEvent}. \n
+     * {@link ArkUI_NodeComponentEvent} contains two parameters:\n
+     * <b>ArkUI_NodeComponentEvent.data[0].i32</b>: index of the currently displayed element. \n
+     * <b>ArkUI_NodeComponentEvent.data[1].f32</b>: offset of the currently displayed element relative to the
+     * start position of the swiper along the main axis. \n
      */
     NODE_SWIPER_EVENT_ON_ANIMATION_END,
 
     /**
-     * @brief 定义ARKUI_NODE_SWIPER在页面跟手滑动过程中，逐帧触发该回调。
+     * @brief Defines the event triggered on a frame-by-frame basis when the page is turned by a swipe in this
+     * <b>ARKUI_NODE_SWIPER</b> instance.
      *
-     * 事件回调发生时，事件参数{@link ArkUI_NodeEvent}对象中的联合体类型为{@link ArkUI_NodeComponentEvent}。\n
-     * {@link ArkUI_NodeComponentEvent}中包含2个参数：\n
-     * <b>ArkUI_NodeComponentEvent.data[0].i32</b>：表示当前显示元素的索引。\n
-     * <b>ArkUI_NodeComponentEvent.data[1].f32</b>：表示主轴方向上当前显示元素相对Swiper起始位置的位移。\n
+     * When the event callback occurs, the union type in the {@link ArkUI_NodeEvent} object is
+     * {@link ArkUI_NodeComponentEvent}. \n
+     * {@link ArkUI_NodeComponentEvent} contains two parameters:\n
+     * <b>ArkUI_NodeComponentEvent.data[0].i32</b>: index of the currently displayed element. \n
+     * <b>ArkUI_NodeComponentEvent.data[1].f32</b>: offset of the currently displayed element relative to the
+     * start position of the swiper along the main axis. \n
      */
-    NODE_SWIPER_EVENT_GESTURE_SWIPE,
+    NODE_SWIPER_EVENT_ON_GESTURE_SWIPE,
 
     /**
      * @brief Defines the event triggered when the <b>ARKUI_NODE_SCROLL</b> component scrolls.

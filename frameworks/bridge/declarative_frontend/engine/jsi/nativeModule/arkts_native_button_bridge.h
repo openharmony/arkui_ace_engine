@@ -45,7 +45,13 @@ public:
     static ArkUINativeModuleValue ResetButtonBorder(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue SetButtonSize(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue ResetButtonSize(ArkUIRuntimeCallInfo* runtimeCallInfo);
-
+    static ArkUINativeModuleValue SetButtonRole(ArkUIRuntimeCallInfo* runtimeCallInfo);
+    static ArkUINativeModuleValue ResetButtonRole(ArkUIRuntimeCallInfo* runtimeCallInfo);
+    static ArkUINativeModuleValue SetButtonStyle(ArkUIRuntimeCallInfo* runtimeCallInfo);
+    static ArkUINativeModuleValue ResetButtonStyle(ArkUIRuntimeCallInfo* runtimeCallInfo);
+    static ArkUINativeModuleValue SetButtonControlSize(ArkUIRuntimeCallInfo* runtimeCallInfo);
+    static ArkUINativeModuleValue ResetButtonControlSize(ArkUIRuntimeCallInfo* runtimeCallInfo);
+    
 private:
     static void PushValuesVector(const std::optional<int32_t>& value, std::vector<int32_t>& valuesVector);
     static void PushDimensionVector(const std::optional<Dimension>& valueDimen, std::vector<ArkUI_Float32>& dimensions);

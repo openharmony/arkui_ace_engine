@@ -585,6 +585,9 @@ UIContentErrorCode UIContentImpl::InitializeInner(
     auto distributedUI = std::make_shared<NG::DistributedUI>();
     uiManager_ = std::make_unique<DistributedUIManager>(instanceId_, distributedUI);
     Platform::AceContainer::GetContainer(instanceId_)->SetDistributedUI(distributedUI);
+    Platform::AceContainer::GetContainer(instanceId_)->SetUIExtensionSubWindow(isUIExtensionSubWindow_);
+    Platform::AceContainer::GetContainer(instanceId_)->SetUIExtensionAbilityProcess(isUIExtensionAbilityProcess_);
+    Platform::AceContainer::GetContainer(instanceId_)->SetUIExtensionAbilityHost(isUIExtensionAbilityHost_);
     return errorCode;
 }
 
@@ -634,6 +637,9 @@ UIContentErrorCode UIContentImpl::Initialize(
     auto distributedUI = std::make_shared<NG::DistributedUI>();
     uiManager_ = std::make_unique<DistributedUIManager>(instanceId_, distributedUI);
     Platform::AceContainer::GetContainer(instanceId_)->SetDistributedUI(distributedUI);
+    Platform::AceContainer::GetContainer(instanceId_)->SetUIExtensionSubWindow(isUIExtensionSubWindow_);
+    Platform::AceContainer::GetContainer(instanceId_)->SetUIExtensionAbilityProcess(isUIExtensionAbilityProcess_);
+    Platform::AceContainer::GetContainer(instanceId_)->SetUIExtensionAbilityHost(isUIExtensionAbilityHost_);
     return errorCode;
 }
 

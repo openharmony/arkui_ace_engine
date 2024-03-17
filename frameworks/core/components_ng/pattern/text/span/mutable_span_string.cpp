@@ -19,9 +19,8 @@
 
 #include "base/memory/referenced.h"
 #include "base/utils/string_utils.h"
-#include "core/components_ng/pattern/text/span/span_objects.h"
+#include "core/components_ng/pattern/text/span/span_object.h"
 #include "core/components_ng/pattern/text/span/span_string.h"
-
 
 namespace OHOS::Ace {
 std::wstring MutableSpanString::GetWideStringSubstr(const std::wstring& content, int32_t start, int32_t length)
@@ -55,11 +54,15 @@ void MutableSpanString::RemoveSpan(int32_t start, int32_t length, SpanType key)
     auto defaultSpan = MutableSpanString::GetDefaultSpan(key);
     defaultSpan->UpdateStartIndex(start);
     defaultSpan->UpdateEndIndex(end);
-    AddSpan(defaultSpan);
+    ApplyToSpans(defaultSpan, { start, end }, SpanOperation::REMOVE);
     SplitInterval(spans, { start, end });
     SortSpans(spans);
     MergeIntervals(spans);
-    spansMap_[key] = spans;
+    if (spans.empty()) {
+        spansMap_.erase(key);
+    } else {
+        spansMap_[key] = spans;
+    }
 }
 
 void MutableSpanString::RemoveSpans(int32_t start, int32_t length)
@@ -339,7 +342,7 @@ void MutableSpanString::ReplaceSpanString(int32_t start, int32_t length, const R
             auto span = spanStringSpan->GetSubSpan(spanStringSpan->GetStartIndex() + start,
                 spanStringSpan->GetEndIndex() + start);
             ApplyToSpans(span, {spanStringSpan->GetStartIndex() + start,
-                spanStringSpan->GetEndIndex() + start});
+                spanStringSpan->GetEndIndex() + start}, SpanOperation::ADD);
             spans.emplace_back(span);
         }
         spansMap_[it->first] = spans;
@@ -357,11 +360,11 @@ void MutableSpanString::AppendSpanString(const RefPtr<SpanString>& spanString)
     ReplaceSpanString(GetLength(), 0, spanString);
 }
 
-RefPtr<SpanBase> MutableSpanString::GetDefaultSpan(SpanType type) const
+RefPtr<SpanBase> MutableSpanString::GetDefaultSpan(SpanType type)
 {
     switch (type) {
         case SpanType::Font:
-            return FontSpan::CreateDefaultSpan();
+            return MakeRefPtr<FontSpan>();
         case SpanType::Background:
         case SpanType::Decoration:
         case SpanType::Gesture:

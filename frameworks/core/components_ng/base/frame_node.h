@@ -210,6 +210,12 @@ public:
     const RefPtr<Pattern>& GetPattern() const;
 
     template<typename T>
+    T* GetPatternPtr() const
+    {
+        return reinterpret_cast<T*>(RawPtr(pattern_));
+    }
+
+    template<typename T>
     RefPtr<T> GetPattern() const
     {
         return DynamicCast<T>(pattern_);
@@ -222,9 +228,21 @@ public:
     }
 
     template<typename T>
+    T* GetLayoutPropertyPtr() const
+    {
+        return reinterpret_cast<T*>(RawPtr(layoutProperty_));
+    }
+
+    template<typename T>
     RefPtr<T> GetLayoutProperty() const
     {
         return DynamicCast<T>(layoutProperty_);
+    }
+
+    template<typename T>
+    T* GetPaintPropertyPtr() const
+    {
+        return reinterpret_cast<T*>(RawPtr(paintProperty_));
     }
 
     template<typename T>
@@ -592,8 +610,9 @@ public:
         return layoutProperty_;
     }
 
-    RefPtr<LayoutWrapper> GetOrCreateChildByIndex(uint32_t index, bool addToRenderTree = true) override;
-    RefPtr<LayoutWrapper> GetChildByIndex(uint32_t index) override;
+    RefPtr<LayoutWrapper> GetOrCreateChildByIndex(
+        uint32_t index, bool addToRenderTree = true, bool isCache = false) override;
+    RefPtr<LayoutWrapper> GetChildByIndex(uint32_t index, bool isCache = false) override;
     /**
      * @brief Get the index of Child among all FrameNode children of [this].
      * Handles intermediate SyntaxNodes like LazyForEach.
@@ -649,7 +668,7 @@ public:
         int32_t cacheCount = 0, const std::optional<LayoutConstraintF>& itemConstraint = std::nullopt) override;
 
     void SyncGeometryNode(bool needSkipSync = false);
-    RefPtr<UINode> GetFrameChildByIndex(uint32_t index, bool needBuild) override;
+    RefPtr<UINode> GetFrameChildByIndex(uint32_t index, bool needBuild, bool isCache = false) override;
     bool CheckNeedForceMeasureAndLayout() override;
 
     bool SetParentLayoutConstraint(const SizeF& size) const override;

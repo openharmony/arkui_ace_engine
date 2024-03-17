@@ -60,6 +60,7 @@ void ListPattern::OnModifyDone()
     CHECK_NULL_VOID(listLayoutProperty);
     auto axis = listLayoutProperty->GetListDirection().value_or(Axis::VERTICAL);
     if (axis != GetAxis()) {
+        needReEstimateOffset_ = true;
         SetAxis(axis);
         ChangeAxis(GetHost());
     }
@@ -131,13 +132,14 @@ bool ListPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, c
     float relativeOffset = listLayoutAlgorithm->GetCurrentOffset();
     auto predictSnapOffset = listLayoutAlgorithm->GetPredictSnapOffset();
     auto predictSnapEndPos = listLayoutAlgorithm->GetPredictSnapEndPosition();
-    if (listLayoutAlgorithm->NeedEstimateOffset()) {
+    if (listLayoutAlgorithm->NeedEstimateOffset() || needReEstimateOffset_) {
         lanes_ = listLayoutAlgorithm->GetLanes();
         auto calculate = ListHeightOffsetCalculator(itemPosition_, spaceWidth_, lanes_, GetAxis());
         calculate.GetEstimateHeightAndOffset(GetHost());
         currentOffset_ = calculate.GetEstimateOffset();
         isJump = true;
         relativeOffset = 0.0f;
+        needReEstimateOffset_ = false;
     } else {
         // correct the currentOffset when the startIndex is 0.
         if (listLayoutAlgorithm->GetStartIndex() == 0) {
@@ -2214,12 +2216,9 @@ void ListPattern::registerSlideUpdateListener(const std::shared_ptr<ISlideUpdate
 
 void ListPattern::UpdateFrameSizeToWeb()
 {
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    auto frameSize = host->GetGeometryNode()->GetFrameSize();
     for (auto listenerItem : listenerVector_) {
         if (listenerItem) {
-            listenerItem->OnSlideUpdate(frameSize);
+            listenerItem->OnSlideUpdate();
         }
     }
 }

@@ -120,9 +120,11 @@ bool MenuPreviewPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& d
             }
         },
         option.GetOnFinishEvent());
-    auto menuWrapper = GetMenuWrapper();
-    auto menuPattern = GetMenuPattern(menuWrapper);
-    ShowScaleAnimation(context, menuTheme, menuPattern);
+    if (!hasPreviewTransitionEffect_) {
+        auto menuWrapper = GetMenuWrapper();
+        auto menuPattern = GetMenuPattern(menuWrapper);
+        ShowScaleAnimation(context, menuTheme, menuPattern);
+    }
     isFirstShow_ = false;
     return false;
 }

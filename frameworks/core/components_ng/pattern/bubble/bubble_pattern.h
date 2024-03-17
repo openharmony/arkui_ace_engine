@@ -119,6 +119,8 @@ public:
 
     void OnWindowHide() override;
     void OnWindowSizeChanged(int32_t width, int32_t height, WindowSizeChangeReason type) override;
+    void StartEnteringTransitionEffects(const RefPtr<FrameNode>& popupNode, const std::function<void()>& finish);
+    void StartExitingTransitionEffects(const RefPtr<FrameNode>& popupNode, const std::function<void()>& finish);
     void StartEnteringAnimation(std::function<void()> finish);
     void StartExitingAnimation(std::function<void()> finish);
     bool IsOnShow();
@@ -184,6 +186,16 @@ public:
             onWillDismiss_(reason);
         }
     }
+    void SetHasTransition(bool hasTransition)
+    {
+        hasTransition_ = hasTransition;
+    }
+
+    bool GetHasTransition() const
+    {
+        return hasTransition_;
+    }
+
 protected:
     void OnDetachFromFrameNode(FrameNode* frameNode) override;
 
@@ -255,6 +267,8 @@ private:
     std::string clipPath_;
     RefPtr<FrameNode> clipFrameNode_;
     ACE_DISALLOW_COPY_AND_MOVE(BubblePattern);
+
+    bool hasTransition_ = false;
 };
 } // namespace OHOS::Ace::NG
 

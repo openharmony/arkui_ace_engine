@@ -479,14 +479,13 @@ void ScrollPattern::HandleCrashBottom() const
 
 bool ScrollPattern::UpdateCurrentOffset(float delta, int32_t source)
 {
-    auto host = GetHost();
-    CHECK_NULL_RETURN(host, false);
-    auto frameSize = host->GetGeometryNode()->GetFrameSize();
     for (auto listenerItem : listenerVector_) {
         if (listenerItem) {
-            listenerItem->OnSlideUpdate(frameSize);
+            listenerItem->OnSlideUpdate();
         }
     }
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, false);
     if (source != SCROLL_FROM_JUMP && !HandleEdgeEffect(delta, source, viewSize_)) {
         if (IsOutOfBoundary()) {
             host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);

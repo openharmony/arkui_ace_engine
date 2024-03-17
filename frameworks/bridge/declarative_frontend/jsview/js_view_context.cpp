@@ -438,7 +438,11 @@ void JSViewContext::JSAnimateToImmediately(const JSCallbackInfo& info)
 
 void JSViewContext::AnimateToInner(const JSCallbackInfo& info, bool immediately)
 {
+#ifdef USE_ORIGIN_SCOPE
+    auto scopedDelegate = EngineHelper::GetCurrentDelegate();
+#else
     auto scopedDelegate = EngineHelper::GetCurrentDelegateSafely();
+#endif
     if (!scopedDelegate) {
         // this case usually means there is no foreground container, need to figure out the reason.
         return;

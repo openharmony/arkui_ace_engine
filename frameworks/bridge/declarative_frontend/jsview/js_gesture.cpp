@@ -244,13 +244,19 @@ constexpr char ROTATION_ANGLE[] = "angle";
 void JSGesture::Create(const JSCallbackInfo& info)
 {
     int32_t priorityNum = 0;
-    if (info.Length() > 0 && info[0]->IsNumber()) {
-        priorityNum = info[0]->ToNumber<int32_t>();
+    if (info.Length() > 0) {
+        auto jsPriorityNum = info[0];
+        if (jsPriorityNum->IsNumber()) {
+            priorityNum = jsPriorityNum->ToNumber<int32_t>();
+        }
     }
 
     int32_t gestureMaskNum = 0;
-    if (info.Length() > 1 && info[1]->IsNumber()) {
-        gestureMaskNum = info[1]->ToNumber<int32_t>();
+    if (info.Length() > 1) {
+        auto jsGestureMaskNum = info[1];
+        if (jsGestureMaskNum->IsNumber()) {
+            gestureMaskNum = jsGestureMaskNum->ToNumber<int32_t>();
+        }
     }
 
     GestureModel::GetInstance()->Create(priorityNum, gestureMaskNum);
@@ -442,8 +448,11 @@ void JSRotationGesture::Create(const JSCallbackInfo& args)
 void JSGestureGroup::Create(const JSCallbackInfo& args)
 {
     int32_t gestureMode = 0;
-    if (args.Length() > 0 && args[0]->IsNumber()) {
-        gestureMode = args[0]->ToNumber<int32_t>();
+    if (args.Length() > 0) {
+        auto jsGestureMode = args[0];
+        if (jsGestureMode->IsNumber()) {
+            gestureMode = jsGestureMode->ToNumber<int32_t>();
+        }
     }
 
     GestureGroupModel::GetInstance()->Create(gestureMode);
@@ -480,8 +489,11 @@ void JSGesture::JsHandlerOnGestureEvent(Ace::GestureEventAction action, const JS
 void JSGesture::SetTag(const JSCallbackInfo& args)
 {
     std::string tag;
-    if (args.Length() > 0 && args[0]->IsString()) {
-        tag = args[0]->ToString();
+    if (args.Length() > 0) {
+        auto jsTag = args[0];
+        if (jsTag->IsString()) {
+            tag = jsTag->ToString();
+        }
     }
     GestureModel::GetInstance()->SetTag(tag);
 }
@@ -685,13 +697,14 @@ void JSGesture::JSBind(BindingTarget globalObj)
 
 void JSTimeoutGesture::Create(const JSCallbackInfo& args)
 {
-    if (!args[0]->IsNumber()) {
+    auto jsGesture = args[0];
+    if (!jsGesture->IsNumber()) {
         return;
     }
 
     RefPtr<GestureProcessor> gestureProcessor;
     gestureProcessor = TimeoutGestureModel::GetInstance()->GetGestureProcessor();
-    auto gesture = AceType::MakeRefPtr<TimeoutGesture>(std::chrono::duration<float>(args[0]->ToNumber<float>()));
+    auto gesture = AceType::MakeRefPtr<TimeoutGesture>(std::chrono::duration<float>(jsGesture->ToNumber<float>()));
     gestureProcessor->PushGesture(gesture);
 }
 

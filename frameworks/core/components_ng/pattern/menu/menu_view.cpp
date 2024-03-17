@@ -54,7 +54,8 @@ constexpr float PAN_MAX_VELOCITY = 2000.0f;
 
 // create menuWrapper and menu node, update menu props
 std::pair<RefPtr<FrameNode>, RefPtr<FrameNode>> CreateMenu(int32_t targetId, const std::string& targetTag = "",
-    MenuType type = MenuType::MENU, const RefPtr<UINode>& previewCustomNode = nullptr)
+    MenuType type = MenuType::MENU, const bool hasPreviewTransitionEffect = false,
+    const RefPtr<UINode>& previewCustomNode = nullptr)
 {
     // use wrapper to detect click events outside menu
     auto wrapperNode = FrameNode::CreateFrameNode(V2::MENU_WRAPPER_ETS_TAG,
@@ -78,6 +79,10 @@ std::pair<RefPtr<FrameNode>, RefPtr<FrameNode>> CreateMenu(int32_t targetId, con
         auto previewNode = FrameNode::CreateFrameNode(V2::MENU_PREVIEW_ETS_TAG,
             ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<MenuPreviewPattern>());
         CHECK_NULL_RETURN(previewNode, std::make_pair(wrapperNode, menuNode));
+        auto previewPattern = previewNode->GetPattern<MenuPreviewPattern>();
+        previewPattern->SetHasPreviewTransitionEffect(hasPreviewTransitionEffect);
+        auto layoutProperty = previewNode->GetLayoutProperty();
+        layoutProperty->UpdateVisibility(VisibleType::VISIBLE, true);
         previewNode->AddChild(previewCustomNode);
         previewNode->MountToParent(wrapperNode);
         previewNode->MarkModifyDone();
@@ -331,7 +336,14 @@ void SetPixelMap(const RefPtr<FrameNode>& target, const RefPtr<FrameNode>& menuN
     imageContext->UpdatePosition(OffsetT<Dimension>(Dimension(imageOffset.GetX()), Dimension(imageOffset.GetY())));
     imageNode->MarkModifyDone();
     imageNode->MountToParent(menuNode);
-    ShowPixelMapAnimation(imageNode, menuNode);
+    auto menuWrapperPattern = menuNode->GetPattern<MenuWrapperPattern>();
+    CHECK_NULL_VOID(menuWrapperPattern);
+    if (menuWrapperPattern->HasPreviewTransitionEffect()) {
+        auto layoutProperty = imageNode->GetLayoutProperty();
+        layoutProperty->UpdateVisibility(VisibleType::VISIBLE, true);
+    } else {
+        ShowPixelMapAnimation(imageNode, menuNode);
+    }
 }
 
 void ShowFilterAnimation(const RefPtr<FrameNode>& columnNode)
@@ -471,13 +483,24 @@ RefPtr<FrameNode> MenuView::Create(std::vector<OptionParam>&& params, int32_t ta
     return wrapperNode;
 }
 
+void SetPreviewTransitionEffect(const RefPtr<FrameNode> &menuWrapperNode, const MenuParam &menuParam)
+{
+    TAG_LOGD(AceLogTag::ACE_DIALOG, "set menu transition effect");
+    CHECK_NULL_VOID(menuWrapperNode);
+    auto pattern = menuWrapperNode->GetPattern<MenuWrapperPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetHasPreviewTransitionEffect(menuParam.hasPreviewTransitionEffect);
+}
+
 // create menu with custom node from a builder
 RefPtr<FrameNode> MenuView::Create(const RefPtr<UINode>& customNode, int32_t targetId, const std::string& targetTag,
     const MenuParam& menuParam, bool withWrapper, const RefPtr<UINode>& previewCustomNode)
 {
     auto type = menuParam.type;
-    auto [wrapperNode, menuNode] = CreateMenu(targetId, targetTag, type, previewCustomNode);
+    auto [wrapperNode, menuNode] = CreateMenu(targetId, targetTag, type, menuParam.hasPreviewTransitionEffect,
+        previewCustomNode);
     UpdateMenuBackgroundStyle(menuNode, menuParam);
+    SetPreviewTransitionEffect(wrapperNode, menuParam);
     auto pattern = menuNode->GetPattern<MenuPattern>();
     if (pattern) {
         pattern->SetPreviewMode(menuParam.previewMode);

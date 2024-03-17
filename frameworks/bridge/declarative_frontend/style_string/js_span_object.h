@@ -16,15 +16,12 @@
 #ifndef FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_STYLE_STRING_JS_SPAN_OBJECT_H
 #define FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_STYLE_STRING_JS_SPAN_OBJECT_H
 
-#include "base/geometry/dimension.h"
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
 #include "bridge/declarative_frontend/engine/bindings_defines.h"
+#include "bridge/declarative_frontend/engine/js_ref_ptr.h"
 #include "bridge/declarative_frontend/engine/js_types.h"
-#include "bridge/declarative_frontend/jsview/js_container_base.h"
-#include "core/components_ng/pattern/text/span/span_objects.h"
-#include "core/components_ng/pattern/text_field/text_field_model.h"
-#include "core/pipeline/pipeline_base.h"
+#include "core/components_ng/pattern/text/span/span_object.h"
 
 namespace OHOS::Ace::Framework {
 
@@ -37,7 +34,7 @@ public:
     static void Constructor(const JSCallbackInfo& args);
     static void Destructor(JSFontSpan* fontSpan);
     static void JSBind(BindingTarget globalObj);
-    static RefPtr<FontSpan> ParseJsFontSpan(JSRef<JSObject> obj);
+    static RefPtr<FontSpan> ParseJsFontSpan(const JSRef<JSObject>& obj);
     void GetFontColor(const JSCallbackInfo& info);
     void SetFontColor(const JSCallbackInfo& info);
 

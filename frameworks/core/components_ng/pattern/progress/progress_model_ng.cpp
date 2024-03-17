@@ -553,7 +553,7 @@ double ProgressModelNG::GetValue(FrameNode* frameNode)
 Color ProgressModelNG::GetColor(FrameNode* frameNode)
 {
     Color value;
-    ACE_GET_NODE_PAINT_PROPERTY(ProgressPaintProperty, Color, value, frameNode);
+    ACE_GET_NODE_PAINT_PROPERTY_WITH_DEFAULT_VALUE(ProgressPaintProperty, Color, value, frameNode, value);
     return value;
 }
 

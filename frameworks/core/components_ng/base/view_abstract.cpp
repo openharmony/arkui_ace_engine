@@ -37,6 +37,7 @@
 #include "core/components_ng/layout/layout_property.h"
 #include "core/components_ng/pattern/bubble/bubble_pattern.h"
 #include "core/components_ng/pattern/bubble/bubble_view.h"
+#include "core/components_ng/pattern/dialog/dialog_pattern.h"
 #include "core/components_ng/pattern/menu/menu_pattern.h"
 #include "core/components_ng/pattern/menu/menu_view.h"
 #include "core/components_ng/pattern/menu/preview/menu_preview_pattern.h"
@@ -80,6 +81,30 @@ void RegisterMenuCallback(const RefPtr<FrameNode> &menuWrapperNode, const MenuPa
     pattern->RegisterMenuAboutToAppearCallback(menuParam.aboutToAppear);
     pattern->RegisterMenuAboutToDisappearCallback(menuParam.aboutToDisappear);
     pattern->RegisterMenuStateChangeCallback(menuParam.onStateChange);
+}
+
+void SetMenuTransitionEffect(const RefPtr<FrameNode> &menuWrapperNode, const MenuParam &menuParam)
+{
+    TAG_LOGD(AceLogTag::ACE_DIALOG, "set menu transition effect");
+    CHECK_NULL_VOID(menuWrapperNode);
+    auto pattern = menuWrapperNode->GetPattern<MenuWrapperPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetHasTransitionEffect(menuParam.hasTransitionEffect);
+    if (menuParam.hasTransitionEffect) {
+        auto renderContext = menuWrapperNode->GetRenderContext();
+        CHECK_NULL_VOID(renderContext);
+        CHECK_NULL_VOID(menuParam.transition);
+        renderContext->UpdateChainedTransition(menuParam.transition);
+    }
+    pattern->SetHasPreviewTransitionEffect(menuParam.hasPreviewTransitionEffect);
+    if (menuParam.hasPreviewTransitionEffect) {
+        auto previewChild = pattern->GetPreview();
+        CHECK_NULL_VOID(previewChild);
+        auto renderContext = previewChild->GetRenderContext();
+        CHECK_NULL_VOID(renderContext);
+        CHECK_NULL_VOID(menuParam.previewTransition);
+        renderContext->UpdateChainedTransition(menuParam.previewTransition);
+    }
 }
 } // namespace
 
@@ -1458,13 +1483,21 @@ void ViewAbstract::DismissDialog()
     CHECK_NULL_VOID(overlayManager);
     auto rootNode = overlayManager->GetRootNode().Upgrade();
     CHECK_NULL_VOID(rootNode);
-    auto overlay = AceType::DynamicCast<FrameNode>(rootNode->GetLastChild());
+    RefPtr<FrameNode> overlay;
+    if (overlayManager->GetDismissDialogId()) {
+        overlay = overlayManager->GetDialog(overlayManager->GetDismissDialogId());
+    } else {
+        overlay = AceType::DynamicCast<FrameNode>(rootNode->GetLastChild());
+    }
     CHECK_NULL_VOID(overlay);
-    overlayManager->RemoveDialog(overlay, false);
     auto pattern = overlay->GetPattern();
     CHECK_NULL_VOID(pattern);
-    if (overlayManager->isMaskNode(pattern->GetHost()->GetId())) {
-        overlayManager->PopModalDialog(pattern->GetHost()->GetId());
+    auto dialogPattern = AceType::DynamicCast<DialogPattern>(pattern);
+    if (dialogPattern) {
+        overlayManager->RemoveDialog(overlay, false);
+        if (overlayManager->isMaskNode(dialogPattern->GetHost()->GetId())) {
+            overlayManager->PopModalDialog(dialogPattern->GetHost()->GetId());
+        }
     }
 }
 
@@ -1480,6 +1513,7 @@ void ViewAbstract::BindMenuWithItems(std::vector<OptionParam> &&params, const Re
     auto menuNode =
         MenuView::Create(std::move(params), targetNode->GetId(), targetNode->GetTag(), MenuType::MENU, menuParam);
     RegisterMenuCallback(menuNode, menuParam);
+    SetMenuTransitionEffect(menuNode, menuParam);
     auto pipeline = PipelineBase::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
     auto theme = pipeline->GetTheme<SelectTheme>();
@@ -1506,6 +1540,7 @@ void ViewAbstract::BindMenuWithCustomNode(const RefPtr<UINode>& customNode, cons
     auto menuNode =
         MenuView::Create(customNode, targetNode->GetId(), targetNode->GetTag(), menuParam, true, previewCustomNode);
     RegisterMenuCallback(menuNode, menuParam);
+    SetMenuTransitionEffect(menuNode, menuParam);
     if (menuParam.type == MenuType::CONTEXT_MENU) {
         SubwindowManager::GetInstance()->ShowMenuNG(menuNode, targetNode->GetId(), offset, menuParam.isAboveApps);
         return;

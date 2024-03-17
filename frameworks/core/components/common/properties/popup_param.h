@@ -25,6 +25,7 @@
 #include "core/components/common/properties/decoration.h"
 #include "core/components/common/properties/edge.h"
 #include "core/components/common/properties/placement.h"
+#include "core/components_ng/property/transition_property.h"
 #include "core/event/ace_event_handler.h"
 #include "core/event/touch_event.h"
 
@@ -449,6 +450,26 @@ public:
     {
         return onWillDismiss_;
     }
+    void SetHasTransition(bool hasTransition)
+    {
+        hasTransition_ = hasTransition;
+    }
+
+    bool GetHasTransition() const
+    {
+        return hasTransition_;
+    }
+
+    void SetTransitionEffects(const RefPtr<NG::ChainedTransitionEffect>& transitionEffects)
+    {
+        transitionEffects_ = transitionEffects;
+    }
+
+    const RefPtr<NG::ChainedTransitionEffect> GetTransitionEffects() const
+    {
+        return transitionEffects_;
+    }
+
 private:
     bool isShow_ = true;
     bool hasAction_ = false;
@@ -493,6 +514,8 @@ private:
     ButtonProperties primaryButtonProperties_;   // first button.
     ButtonProperties secondaryButtonProperties_; // second button.
     OnWillDismiss onWillDismiss_;
+    bool hasTransition_ = false;
+    RefPtr<NG::ChainedTransitionEffect> transitionEffects_ = nullptr;
 };
 
 } // namespace OHOS::Ace

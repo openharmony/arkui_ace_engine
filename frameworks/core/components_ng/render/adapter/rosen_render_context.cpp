@@ -948,6 +948,16 @@ void RosenRenderContext::OnParticleOptionArrayUpdate(const std::list<ParticleOpt
     RequestNextFrame();
 }
 
+void RosenRenderContext::OnClickEffectLevelUpdate(const ClickEffectInfo& info)
+{
+    auto frameNode = GetHost();
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(rsNode_);
+    if (HasClickEffectLevel()) {
+        InitEventClickEffect();
+    }
+}
+
 bool RosenRenderContext::NeedPreloadImage(const std::list<ParticleOption>& optionList, RectF& rect)
 {
     bool flag = false;
@@ -1527,10 +1537,7 @@ void RosenRenderContext::OnTransformMatrixUpdate(const Matrix4& matrix)
             static_cast<float>(transform.quaternion.GetW()) };
         Rosen::Vector2f scaleValue { transform.scale[0], transform.scale[1] };
         Rosen::Vector2f skewValue { transform.skew[0], transform.skew[1] };
-        Rosen::Vector2f pivotValue { 0.0, 0.0 };
 
-        AddOrChangePivotModifier(
-            rsNode_, transformMatrixModifier_->pivotXY, transformMatrixModifier_->pivotXYValue, pivotValue);
         AddOrChangeTranslateModifier(rsNode_, transformMatrixModifier_->translateXY,
             transformMatrixModifier_->translateXYValue, xyTranslateValue);
         AddOrChangeScaleModifier(

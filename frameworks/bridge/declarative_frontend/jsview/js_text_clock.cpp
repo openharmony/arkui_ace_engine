@@ -59,7 +59,8 @@ namespace OHOS::Ace::Framework {
 
 namespace {
 const std::vector<FontStyle> FONT_STYLES = { FontStyle::NORMAL, FontStyle::ITALIC };
-const std::string DEFAULT_FORMAT = "aa h:m:s";
+const std::string DEFAULT_FORMAT_API_ELEVEN = "aa hh:mm:ss";
+const std::string DEFAULT_FORMAT_API_TEN = "hms";
 constexpr int32_t HOURS_WEST_LOWER_LIMIT = -14;
 constexpr int32_t HOURS_WEST_UPPER_LIMIT = 12;
 constexpr float HOURS_WEST[] = { 9.5f, 3.5f, -3.5f, -4.5f, -5.5f, -5.75f, -6.5f, -9.5f, -10.5f, -12.75f };
@@ -71,7 +72,7 @@ bool HoursWestIsValid(int32_t hoursWest)
 
 float GetHoursWest(float hoursWest)
 {
-    if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
+    if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
         for (float i : HOURS_WEST) {
             if (NearEqual(hoursWest, i)) {
                 return hoursWest;
@@ -234,32 +235,30 @@ void JSTextClock::SetFormat(const JSCallbackInfo& info)
         return;
     }
     if (!info[0]->IsString()) {
-        TextClockModel::GetInstance()->SetFormat(DEFAULT_FORMAT);
+        if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
+            TextClockModel::GetInstance()->SetFormat(DEFAULT_FORMAT_API_ELEVEN);
+        } else {
+            TextClockModel::GetInstance()->SetFormat(DEFAULT_FORMAT_API_TEN);
+        }
         return;
     }
 
-    std::string value;
     auto format = info[0]->ToString();
-    if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN)
-            ? (format.length() == 0) : (format.length() == 0 || !StringUtils::IsAscii(format))) {
-        format = DEFAULT_FORMAT;
-        TextClockModel::GetInstance()->SetFormat(format);
-        return;
-    }
-
-    if (!ParseJsString(info[0], value)) {
-        return;
-    }
-    if (Container::LessThanAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
+    if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
+        if (format.length() == 0) {
+            TextClockModel::GetInstance()->SetFormat(DEFAULT_FORMAT_API_ELEVEN);
+            return;
+        }
+    } else {
         std::regex pattern(
             R"(^([Yy]*[_|\W\s]*[M]*[_|\W\s]*[d]*[_|\W\s]*[D]*[_|\W\s]*[Hh]*[_|\W\s]*[m]*[_|\W\s]*[s]*[_|\W\s]*[S]*)$)");
-        if (!std::regex_match(value, pattern)) {
-            TextClockModel::GetInstance()->SetFormat("aa h:m:s");
+        if (format.length() == 0 || !StringUtils::IsAscii(format) || !std::regex_match(format, pattern)) {
+            TextClockModel::GetInstance()->SetFormat(DEFAULT_FORMAT_API_TEN);
             return;
         }
     }
 
-    TextClockModel::GetInstance()->SetFormat(value);
+    TextClockModel::GetInstance()->SetFormat(format);
 }
 
 void JSTextClock::SetTextShadow(const JSCallbackInfo& info)

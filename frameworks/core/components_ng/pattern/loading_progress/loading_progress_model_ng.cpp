@@ -53,7 +53,7 @@ void LoadingProgressModelNG::SetEnableLoading(bool enable)
 uint32_t LoadingProgressModelNG::GetColor(FrameNode* frameNode)
 {
     Color value;
-    ACE_GET_NODE_PAINT_PROPERTY(LoadingProgressPaintProperty, Color, value, frameNode);
+    ACE_GET_NODE_PAINT_PROPERTY_WITH_DEFAULT_VALUE(LoadingProgressPaintProperty, Color, value, frameNode, value);
     return value.GetValue();
 }
 

@@ -26,10 +26,10 @@
 extern "C" {
 #endif
 
-#define ARKUI_FULL_API_VERSION 75
+#define ARKUI_FULL_API_VERSION 77
 // When changing ARKUI_BASIC_API_VERSION, ARKUI_FULL_API_VERSION must be
 // increased as well.
-#define ARKUI_NODE_API_VERSION 75
+#define ARKUI_NODE_API_VERSION 77
 
 #define ARKUI_BASIC_API_VERSION 6
 #define ARKUI_EXTENDED_API_VERSION 6
@@ -254,6 +254,26 @@ enum ArkUITouchEventAction {
     ACTION_CANCEL,
 };
 
+/**
+ * @brief 定义手势事件类型。
+ *
+ * @since 12
+ */
+typedef enum {
+    /** 手势事件触发。 */
+    ARKUI_GESTURE_EVENT_ACTION_ACCEPT = 0x01,
+
+    /** 手势事件更新。 */
+    ARKUI_GESTURE_EVENT_ACTION_UPDATE = 0x02,
+
+    /** 手势事件结束。 */
+    ARKUI_GESTURE_EVENT_ACTION_END = 0x04,
+
+    /** 手势事件取消。 */
+    ARKUI_GESTURE_EVENT_ACTION_CANCEL = 0x08,
+} ArkUIGestureEventActionType;
+
+
 struct ArkUIHistoricalTouchPoint {
     /**
      * Touch action
@@ -272,7 +292,7 @@ struct ArkUITouchEvent {
      *
      */
     ArkUITouchEventAction action;
-    
+
     /** Time stamp of the current event. */
     ArkUI_Int64 timeStamp;
 
@@ -610,7 +630,7 @@ struct ArkUITextDecorationType {
 };
 
 struct ArkUIFilterColorType {
-    ArkUI_Int32* filterArray;
+    ArkUI_Float32* filterArray;
     ArkUI_Int32 filterSize;
 };
 
@@ -805,6 +825,17 @@ enum ArkUIAPINodeFlags {
     CUSTOM_DRAW = 1 << 2,
 };
 
+enum ArkUIGestureDirection {
+    ArkUI_GESTURE_DIRECTION_NONE = 0,
+    ArkUI_GESTURE_DIRECTION_LEFT = 1,
+    ArkUI_GESTURE_DIRECTION_RIGHT = 2,
+    ArkUI_GESTURE_DIRECTION_HORIZONTAL = 3,
+    ArkUI_GESTURE_DIRECTION_UP = 4,
+    ArkUI_GESTURE_DIRECTION_DOWN = 5,
+    ArkUI_GESTURE_DIRECTION_VERTICAL = 12,
+    ArkUI_GESTURE_DIRECTION_ALL = 15,
+};
+
 enum ArkUIAPICustomOp { MEASURE = 1, LAYOUT = 2, DRAW = 3 };
 
 enum ArkUIVMKind {
@@ -859,8 +890,8 @@ struct ArkUINodeAsyncEvent {
 struct ArkUIAPIEventGestureAsyncEvent {
     ArkUI_Int32 subKind;
     ArkUI_Int32 repeat;
-    ArkUI_Int32 x;
-    ArkUI_Int32 y;
+    ArkUI_Float32 x;
+    ArkUI_Float32 y;
     ArkUI_Int32 angle;
     ArkUI_Int32 scale;
     ArkUI_Int32 pinchCenterX;
@@ -872,9 +903,9 @@ struct ArkUIAPIEventGestureAsyncEvent {
     ArkUI_Int32 tiltX;
     ArkUI_Int32 tiltY;
     ArkUI_Int32 sourceTool;
-    ArkUI_Int32 velocityX;
-    ArkUI_Int32 velocityY;
-    ArkUI_Int32 velocity;
+    ArkUI_Float32 velocityX;
+    ArkUI_Float32 velocityY;
+    ArkUI_Float32 velocity;
 };
 
 struct ArkUINodeEvent {
@@ -1464,6 +1495,12 @@ struct ArkUIButtonModifier {
     ArkUI_Float32 (*getButtonFontSize)(ArkUINodeHandle node);
     ArkUI_Int32 (*getButtonFontWeight)(ArkUINodeHandle node);
     ArkUI_Uint32 (*getButtonFontColor)(ArkUINodeHandle node);
+    void (*setButtonRole)(ArkUINodeHandle node, ArkUI_Uint32 buttonRole);
+    void (*resetButtonRole)(ArkUINodeHandle node);
+    void (*setButtonStyle)(ArkUINodeHandle node, ArkUI_Uint32 buttonStyle);
+    void (*resetButtonStyle)(ArkUINodeHandle node);
+    void (*setButtonControlSize)(ArkUINodeHandle node, ArkUI_Uint32 controlSize);
+    void (*resetButtonControlSize)(ArkUINodeHandle node);
 };
 
 struct ArkUIImageModifier {
@@ -1673,6 +1710,7 @@ struct ArkUISwiperModifier {
     ArkUI_Float32 (*getSwiperItemSpace)(ArkUINodeHandle node);
     ArkUI_Int32 (*getSwiperShowIndicator)(ArkUINodeHandle node);
     ArkUI_Int32 (*getSwiperShowDisplayArrow)(ArkUINodeHandle node);
+    ArkUI_Int32 (*getSwiperEffectMode)(ArkUINodeHandle node);
 };
 
 struct ArkUISwiperControllerModifier {
@@ -1920,17 +1958,15 @@ struct ArkUITabsControllerModifier {
     ArkUINodeHandle (*getTabsController)(ArkUINodeHandle node);
 };
 
+struct ArkUIGesture;
+
 struct ArkUIGestureModifier {
-    void (*tapGestureAsyncEvent)(
-        ArkUINodeHandle nodePtr, ArkUI_Int32 mask, ArkUI_Int32 priority, ArkUI_Int32 count, ArkUI_Int32 fingers);
-    void (*longPressGestureAsyncEvent)(ArkUINodeHandle nodePtr, ArkUI_Int32 mask, ArkUI_Int32 priority,
-        ArkUI_Int32 fingers, ArkUI_Int32 repeat, ArkUI_Int32 duration, ArkUI_Int32* event);
-    void (*panGestureAsyncEvent)(ArkUINodeHandle nodePtr, ArkUI_Int32 mask, ArkUI_Int32 priority, ArkUI_Int32 fingers,
-        ArkUI_Int32 direction, ArkUI_Int32 distance, ArkUI_Int32* event);
-    void (*pinchGestureAsyncEvent)(ArkUINodeHandle nodePtr, ArkUI_Int32 mask, ArkUI_Int32 priority, ArkUI_Int32 fingers,
-        ArkUI_Int32 distance, ArkUI_Int32* event);
-    void (*groupGestureAsyncEvent)(ArkUINodeHandle nodePtr, ArkUI_Int32 mode, ArkUI_Int32* event);
-    void (*notifyResetGestureAsyncEvent)(ArkUINodeHandle nodePtr, ArkUI_Int32 subKind);
+    ArkUIGesture* (*createPanGesture)(ArkUI_Int32 fingers, ArkUI_Int32 direction, ArkUI_Float64 distance);
+    void (*dispose)(ArkUIGesture* recognizer);
+    // gesture event will received in common async event queue.
+    void (*registerGestureEvent)(ArkUIGesture* gesture, ArkUI_Uint32 actionTypeMask, void* extraParam);
+    void (*addGestureToNode)(ArkUINodeHandle node, ArkUIGesture* gesture, ArkUI_Int32 priorityNum, ArkUI_Uint32 mask);
+    void (*removeGestureFromNode)(ArkUINodeHandle node, ArkUIGesture* recognizer);
 };
 
 struct ArkUISliderModifier {
@@ -2177,6 +2213,9 @@ struct ArkUITextInputModifier {
     ArkUI_Int32 (*getTextInputCancelButtonStyle)(ArkUINodeHandle node);
     void (*setTextInputBackgroundColor)(ArkUINodeHandle node, ArkUI_Uint32 color);
     void (*resetTextInputBackgroundColor)(ArkUINodeHandle node);
+    void (*setTextInputNormalUnderlineColor)(ArkUINodeHandle node, ArkUI_Uint32 typingColor);
+    void (*setTextInputUserUnderlineColor)(ArkUINodeHandle node, const ArkUI_Float32* values, ArkUI_Int32 length);
+    void (*resetTextInputUserUnderlineColor)(ArkUINodeHandle node);
 };
 
 struct ArkUIWebModifier {
@@ -2804,6 +2843,8 @@ struct ArkUISelectModifier {
     void (*resetSelectOptionWidth)(ArkUINodeHandle node);
     void (*setSelectOptionHeight)(ArkUINodeHandle node, ArkUI_Float32 value, ArkUI_Int32 unit);
     void (*resetSelectOptionHeight)(ArkUINodeHandle node);
+    void (*setControlSize)(ArkUINodeHandle node, ArkUI_Int32 controlSize);
+    void (*resetControlSize)(ArkUINodeHandle node);
 };
 
 /** Common for all API variants.*/
@@ -3313,24 +3354,25 @@ struct ArkUIBasicAPI {
 
 struct ArkUIDialogAPI {
     ArkUIDialogHandle (*create)();
-    void (*dispose)(ArkUIDialogHandle handler);
-    ArkUI_Int32 (*attachContent)(ArkUIDialogHandle handler, ArkUINodeHandle contentNode);
-    ArkUI_Int32 (*detachContent)(ArkUIDialogHandle handler, ArkUINodeHandle contentNode);
-    ArkUI_Int32 (*setContentAlignment)(ArkUIDialogHandle handler,
+    void (*dispose)(ArkUIDialogHandle handle);
+    ArkUI_Int32 (*setContent)(ArkUIDialogHandle handle, ArkUINodeHandle contentNode);
+    ArkUI_Int32 (*removeContent)(ArkUIDialogHandle handle);
+    ArkUI_Int32 (*setContentAlignment)(ArkUIDialogHandle handle,
         ArkUI_Int32 alignment, ArkUI_Float32 offsetX, ArkUI_Float32 offsetY);
-    ArkUI_Int32 (*resetContentAlignment)(ArkUIDialogHandle handler);
-    ArkUI_Int32 (*setMode)(ArkUIDialogHandle handler, ArkUI_Int32 useModalMode, ArkUI_Bool autoCancel);
-    ArkUI_Int32 (*setMask)(ArkUIDialogHandle handler, ArkUI_Uint32 maskColor, ArkUIRect* rect);
-    ArkUI_Int32 (*setBackgroundColor)(ArkUIDialogHandle handler, ArkUI_Uint32 backgroundColor);
-    ArkUI_Int32 (*setCornerRadius)(ArkUIDialogHandle handler, ArkUI_Float32 topleft, ArkUI_Float32 topRight,
+    ArkUI_Int32 (*resetContentAlignment)(ArkUIDialogHandle handle);
+    ArkUI_Int32 (*setModalMode)(ArkUIDialogHandle handle, ArkUI_Bool isModal);
+    ArkUI_Int32 (*setAutoCancel)(ArkUIDialogHandle handle, ArkUI_Bool autoCancel);
+    ArkUI_Int32 (*setMask)(ArkUIDialogHandle handle, ArkUI_Uint32 maskColor, ArkUIRect* rect);
+    ArkUI_Int32 (*setBackgroundColor)(ArkUIDialogHandle handle, ArkUI_Uint32 backgroundColor);
+    ArkUI_Int32 (*setCornerRadius)(ArkUIDialogHandle handle, ArkUI_Float32 topleft, ArkUI_Float32 topRight,
         ArkUI_Float32 bottomLeft, ArkUI_Float32 bottomRight);
-    ArkUI_Int32 (*setGridCount)(ArkUIDialogHandle handler, ArkUI_Int32 gridCount);
-    ArkUI_Int32 (*setCustomStyle)(ArkUIDialogHandle handler, ArkUI_Bool customStyle);
-    ArkUI_Int32 (*useCustomAnimation)(ArkUIDialogHandle handler, ArkUI_Bool useCustomAnimation);
+    ArkUI_Int32 (*setGridColumnCount)(ArkUIDialogHandle handle, ArkUI_Int32 gridCount);
+    ArkUI_Int32 (*enableCustomStyle)(ArkUIDialogHandle handle, ArkUI_Bool enableCustomStyle);
+    ArkUI_Int32 (*enableCustomAnimation)(ArkUIDialogHandle handle, ArkUI_Bool enableCustomAnimation);
     // show dialog
-    ArkUI_Int32 (*show)(ArkUIDialogHandle handler, ArkUI_Bool showInSubWindow);
-    ArkUI_Int32 (*close)(ArkUIDialogHandle handler);
-    ArkUI_Int32 (*registerOnWillDismiss)(ArkUIDialogHandle handler, bool (*eventHandler)(ArkUI_Int32));
+    ArkUI_Int32 (*show)(ArkUIDialogHandle handle, ArkUI_Bool showInSubWindow);
+    ArkUI_Int32 (*close)(ArkUIDialogHandle handle);
+    ArkUI_Int32 (*registerOnWillDismiss)(ArkUIDialogHandle handle, bool (*eventHandler)(ArkUI_Int32));
 };
 
 struct ArkUIBasicNodeAPI {

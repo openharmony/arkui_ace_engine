@@ -19,7 +19,7 @@
 #include "base/error/error_code.h"
 
 namespace OHOS::Ace::DialogModel {
-ArkUI_NativeDialogHandler Create()
+ArkUI_NativeDialogHandle Create()
 {
     auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
     if (!impl) {
@@ -29,148 +29,157 @@ ArkUI_NativeDialogHandler Create()
     return new ArkUI_NativeDialog({ dialog });
 }
 
-void Dispose(ArkUI_NativeDialogHandler handler)
+void Dispose(ArkUI_NativeDialogHandle handle)
 {
     auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
-    if (!impl || !handler) {
+    if (!impl || !handle) {
         return;
     }
-    impl->getDialogAPI()->dispose(handler->controller);
-    delete handler;
+    impl->getDialogAPI()->dispose(handle->controller);
+    delete handle;
 }
 
-int32_t AttachContent(ArkUI_NativeDialogHandler handler, ArkUI_NodeHandle content)
+int32_t SetContent(ArkUI_NativeDialogHandle handle, ArkUI_NodeHandle content)
 {
     auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
-    if (!impl || !handler || !content) {
+    if (!impl || !handle || !content) {
         return ERROR_CODE_PARAM_INVALID;
     }
-    return impl->getDialogAPI()->attachContent(handler->controller, content->uiNodeHandle);
+    return impl->getDialogAPI()->setContent(handle->controller, content->uiNodeHandle);
 }
 
-int32_t DetachContent(ArkUI_NativeDialogHandler handler, ArkUI_NodeHandle content)
+int32_t RemoveContent(ArkUI_NativeDialogHandle handle)
 {
     auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
-    if (!impl || !handler || !content) {
+    if (!impl || !handle) {
         return ERROR_CODE_PARAM_INVALID;
     }
-    return impl->getDialogAPI()->detachContent(handler->controller, content->uiNodeHandle);
+    return impl->getDialogAPI()->removeContent(handle->controller);
 }
 
-int32_t SetContentAlignment(ArkUI_NativeDialogHandler handler, int32_t alignment, float offsetX, float offsetY)
+int32_t SetContentAlignment(ArkUI_NativeDialogHandle handle, int32_t alignment, float offsetX, float offsetY)
 {
     auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
-    if (!impl || !handler) {
+    if (!impl || !handle) {
         return ERROR_CODE_PARAM_INVALID;
     }
-    return impl->getDialogAPI()->setContentAlignment(handler->controller,
+    return impl->getDialogAPI()->setContentAlignment(handle->controller,
         alignment, offsetX, offsetY);
 }
 
-int32_t ResetContentAlignment(ArkUI_NativeDialogHandler handler)
+int32_t ResetContentAlignment(ArkUI_NativeDialogHandle handle)
 {
     auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
-    if (!impl || !handler) {
+    if (!impl || !handle) {
         return ERROR_CODE_PARAM_INVALID;
     }
-    return impl->getDialogAPI()->resetContentAlignment(handler->controller);
+    return impl->getDialogAPI()->resetContentAlignment(handle->controller);
 }
 
-int32_t SetMode(ArkUI_NativeDialogHandler handler, bool useModalMode, bool autoCancel)
+int32_t SetModalMode(ArkUI_NativeDialogHandle handle, bool isModal)
 {
     auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
-    if (!impl || !handler) {
+    if (!impl || !handle) {
         return ERROR_CODE_PARAM_INVALID;
     }
-    return impl->getDialogAPI()->setMode(handler->controller, useModalMode, autoCancel);
+    return impl->getDialogAPI()->setModalMode(handle->controller, isModal);
 }
 
-int32_t SetMask(ArkUI_NativeDialogHandler handler, uint32_t maskColor, const ArkUI_Rect* maskRect)
+int32_t SetAutoCancel(ArkUI_NativeDialogHandle handle, bool autoCancel)
 {
     auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
-    if (!impl || !handler) {
+    if (!impl || !handle) {
+        return ERROR_CODE_PARAM_INVALID;
+    }
+    return impl->getDialogAPI()->setAutoCancel(handle->controller, autoCancel);
+}
+
+int32_t SetMask(ArkUI_NativeDialogHandle handle, uint32_t maskColor, const ArkUI_Rect* maskRect)
+{
+    auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
+    if (!impl || !handle) {
         return ERROR_CODE_PARAM_INVALID;
     }
     if (maskRect) {
         ArkUIRect rect = { maskRect->x, maskRect->y, maskRect->width, maskRect->height };
-        return impl->getDialogAPI()->setMask(handler->controller, maskColor, &rect);
+        return impl->getDialogAPI()->setMask(handle->controller, maskColor, &rect);
     } else {
-        return impl->getDialogAPI()->setMask(handler->controller, maskColor, nullptr);
+        return impl->getDialogAPI()->setMask(handle->controller, maskColor, nullptr);
     }
 }
 
-int32_t SetBackgroundColor(ArkUI_NativeDialogHandler handler, uint32_t backgroundColor)
+int32_t SetBackgroundColor(ArkUI_NativeDialogHandle handle, uint32_t backgroundColor)
 {
     auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
-    if (!impl || !handler) {
+    if (!impl || !handle) {
         return ERROR_CODE_PARAM_INVALID;
     }
-    return impl->getDialogAPI()->setBackgroundColor(handler->controller, backgroundColor);
+    return impl->getDialogAPI()->setBackgroundColor(handle->controller, backgroundColor);
 }
 
-int32_t SetCornerRadius(ArkUI_NativeDialogHandler handler, float topLeft, float topRight,
+int32_t SetCornerRadius(ArkUI_NativeDialogHandle handle, float topLeft, float topRight,
     float bottomLeft, float bottomRight)
 {
     auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
-    if (!impl || !handler) {
+    if (!impl || !handle) {
         return ERROR_CODE_PARAM_INVALID;
     }
-    return impl->getDialogAPI()->setCornerRadius(handler->controller,
+    return impl->getDialogAPI()->setCornerRadius(handle->controller,
         topLeft, topRight, bottomLeft, bottomRight);
 }
 
-int32_t SetGridCount(ArkUI_NativeDialogHandler handler, int32_t gridCount)
+int32_t SetGridColumnCount(ArkUI_NativeDialogHandle handle, int32_t gridCount)
 {
     auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
-    if (!impl || !handler) {
+    if (!impl || !handle) {
         return ERROR_CODE_PARAM_INVALID;
     }
-    return impl->getDialogAPI()->setGridCount(handler->controller, gridCount);
+    return impl->getDialogAPI()->setGridColumnCount(handle->controller, gridCount);
 }
 
-int32_t SetCustomStyle(ArkUI_NativeDialogHandler handler, bool customStyle)
+int32_t EnableCustomStyle(ArkUI_NativeDialogHandle handle, bool enableCustomStyle)
 {
     auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
-    if (!impl || !handler) {
+    if (!impl || !handle) {
         return ERROR_CODE_PARAM_INVALID;
     }
-    return impl->getDialogAPI()->setCustomStyle(handler->controller, customStyle);
+    return impl->getDialogAPI()->enableCustomStyle(handle->controller, enableCustomStyle);
 }
 
-int32_t UseCustomAnimation(ArkUI_NativeDialogHandler handler, bool useCustomAnimation)
+int32_t EnableCustomAnimation(ArkUI_NativeDialogHandle handle, bool enableCustomAnimation)
 {
     auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
-    if (!impl || !handler) {
+    if (!impl || !handle) {
         return ERROR_CODE_PARAM_INVALID;
     }
-    return impl->getDialogAPI()->useCustomAnimation(handler->controller, useCustomAnimation);
+    return impl->getDialogAPI()->enableCustomAnimation(handle->controller, enableCustomAnimation);
 }
 
-int32_t Show(ArkUI_NativeDialogHandler handler, bool showInSubWindow)
+int32_t Show(ArkUI_NativeDialogHandle handle, bool showInSubWindow)
 {
     auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
-    if (!impl || !handler) {
+    if (!impl || !handle) {
         return ERROR_CODE_PARAM_INVALID;
     }
-    return impl->getDialogAPI()->show(handler->controller, showInSubWindow);
+    return impl->getDialogAPI()->show(handle->controller, showInSubWindow);
 }
 
-int32_t Close(ArkUI_NativeDialogHandler handler)
+int32_t Close(ArkUI_NativeDialogHandle handle)
 {
     auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
-    if (!impl || !handler) {
+    if (!impl || !handle) {
         return ERROR_CODE_PARAM_INVALID;
     }
-    return impl->getDialogAPI()->close(handler->controller);
+    return impl->getDialogAPI()->close(handle->controller);
 }
 
-int32_t RegiesterOnWillDismiss(ArkUI_NativeDialogHandler handler, OnWillDismissEvent eventHandler)
+int32_t RegiesterOnWillDismiss(ArkUI_NativeDialogHandle handle, ArkUI_OnWillDismissEvent eventHandler)
 {
     auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
-    if (!impl || !handler) {
+    if (!impl || !handle) {
         return ERROR_CODE_PARAM_INVALID;
     }
-    return impl->getDialogAPI()->registerOnWillDismiss(handler->controller, eventHandler);
+    return impl->getDialogAPI()->registerOnWillDismiss(handle->controller, eventHandler);
 }
 
 } // namespace OHOS::Ace::NG::DialogModel

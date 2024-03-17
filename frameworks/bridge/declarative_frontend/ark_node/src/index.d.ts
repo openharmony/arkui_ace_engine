@@ -110,8 +110,11 @@ declare class ArkComponent {
 }
 
 declare class UICommonEvent {
-  public _nodePtr: NodePtr;
+  private _nodePtr: NodePtr;
+  private _instanceId: number;
   constructor(nodePtr: NodePtr);
+  setInstanceId(instanceId: number): void;
+  setNodePtr(nodePtr: NodePtr): void;
 }
 
 declare class ModifierWithKey<T extends number | string | boolean | object> {

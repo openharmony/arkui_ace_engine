@@ -1905,14 +1905,14 @@ void WebDelegate::RunSetWebIdAndHapPathCallback()
     auto setWebIdCallback = pattern->GetSetWebIdCallback();
     CHECK_NULL_VOID(setWebIdCallback);
     setWebIdCallback(webId);
-    auto onControllerAttachedCallback = pattern->GetOnControllerAttachedCallback();
-    if (onControllerAttachedCallback) {
-        onControllerAttachedCallback();
-    }
     if (!hapPath_.empty()) {
         auto setHapPathCallback = pattern->GetSetHapPathCallback();
         CHECK_NULL_VOID(setHapPathCallback);
         setHapPathCallback(hapPath_);
+    }
+    auto onControllerAttachedCallback = pattern->GetOnControllerAttachedCallback();
+    if (onControllerAttachedCallback) {
+        onControllerAttachedCallback();
     }
     NotifyPopupWindowResult(true);
     return;
@@ -1923,14 +1923,14 @@ void WebDelegate::RunSetWebIdAndHapPathCallback()
         auto setWebIdCallback = pattern->GetSetWebIdCallback();
         CHECK_NULL_VOID(setWebIdCallback);
         setWebIdCallback(webId);
-        auto onControllerAttachedCallback = pattern->GetOnControllerAttachedCallback();
-        if (onControllerAttachedCallback) {
-            onControllerAttachedCallback();
-        }
         if (!hapPath_.empty()) {
             auto setHapPathCallback = pattern->GetSetHapPathCallback();
             CHECK_NULL_VOID(setHapPathCallback);
             setHapPathCallback(hapPath_);
+        }
+        auto onControllerAttachedCallback = pattern->GetOnControllerAttachedCallback();
+        if (onControllerAttachedCallback) {
+            onControllerAttachedCallback();
         }
         NotifyPopupWindowResult(true);
         return;
@@ -5717,7 +5717,7 @@ void WebDelegate::OnNativeEmbedLifecycleChange(std::shared_ptr<OHOS::NWeb::NWebN
         return;
     }
 
-    EmbedInfo info = {0, };
+    EmbedInfo info;
     std::string embedId;
     std::string surfaceId;
     OHOS::Ace::NativeEmbedStatus status = OHOS::Ace::NativeEmbedStatus::CREATE;

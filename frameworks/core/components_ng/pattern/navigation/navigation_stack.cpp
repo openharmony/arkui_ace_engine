@@ -269,17 +269,12 @@ void NavigationStack::UpdateRemovedNavPathList()
     if (navPathList_.empty() || removeArray.empty()) {
         return;
     }
-    int32_t index = 0;
-    int32_t removeIndex = 0;
-    for (auto it = navPathList_.begin(); it != navPathList_.end(); ++index) {
-        if (index == removeArray[removeIndex]) {
-            it = navPathList_.erase(it);
-            removeIndex++;
-            if (removeIndex >= static_cast<int32_t>(removeArray.size())) {
-                break;
-            }
-        } else {
-            ++it;
+    int32_t navPathListSize = static_cast<int32_t>(navPathList_.size());
+    auto iter = navPathList_.begin();
+    for (int32_t i = static_cast<int32_t>(removeArray.size()) - 1; i >= 0; --i) {
+        auto index = removeArray[i];
+        if (index >= 0 && index < navPathListSize) {
+            navPathList_.erase(iter + index);
         }
     }
     ClearRemoveArray();

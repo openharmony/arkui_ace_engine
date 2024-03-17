@@ -1399,6 +1399,7 @@ void TextPattern::UpdateSpanItemDragStatus(const std::list<ResultObject>& result
             if (isDragging) {
                 spanItem->StartDrag(resultObj.offsetInSpan[RichEditorSpanRange::RANGESTART],
                     resultObj.offsetInSpan[RichEditorSpanRange::RANGEEND]);
+                pattern->dragSpanItems_.emplace_back(spanItem);
             } else {
                 spanItem->EndDrag();
             }
@@ -1430,6 +1431,7 @@ void TextPattern::OnDragEnd(const RefPtr<Ace::DragEvent>& event)
     if (status_ == Status::DRAGGING) {
         status_ = Status::NONE;
     }
+    dragSpanItems_.clear();
     if (dragResultObjects_.empty()) {
         return;
     }
@@ -1912,6 +1914,11 @@ void TextPattern::OnModifyDone()
         enabled_ = enabledCache;
         host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     }
+    if (isSpanStringMode_) {
+        for (const auto& span : spans_) {
+            InheritParentProperties(span);
+        }
+    }
 }
 
 void TextPattern::ToJsonValue(std::unique_ptr<JsonValue>& json) const
@@ -2109,7 +2116,14 @@ void TextPattern::InitSpanItem(std::stack<SpanNodeInfo> nodes)
 
 void TextPattern::BeforeCreateLayoutWrapper()
 {
-    PreCreateLayoutWrapper();
+    if (!isSpanStringMode_) {
+        PreCreateLayoutWrapper();
+    } else {
+        // mark content dirty
+        if (contentMod_) {
+            contentMod_->ContentChange();
+        }
+    }
 }
 
 void TextPattern::CollectSpanNodes(std::stack<SpanNodeInfo> nodes, bool& isSpanHasClick)
@@ -2849,5 +2863,44 @@ ResultObject TextPattern::GetBuilderResultObject(RefPtr<UINode> uiNode, int32_t 
         resultObject.valueString = " ";
     }
     return resultObject;
+}
+
+void TextPattern::UpdateSpanItems(const std::list<RefPtr<SpanItem>>& spanItems)
+{
+    spans_ = spanItems;
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    for (const auto& span : spans_) {
+        InheritParentProperties(span);
+    }
+    host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+}
+
+#define INHERIT_TEXT_STYLE(group, name, func)                                     \
+    do {                                                                          \
+        if ((textLayoutProp)->Has##name() && spanItem->group->Has##name()) {      \
+            spanItem->group->func(textLayoutProp->Get##name().value());           \
+        }                                                                         \
+    } while (false)
+
+void TextPattern::InheritParentProperties(const RefPtr<SpanItem>& spanItem)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto textLayoutProp = host->GetLayoutProperty<TextLayoutProperty>();
+    CHECK_NULL_VOID(textLayoutProp);
+    INHERIT_TEXT_STYLE(fontStyle, FontSize, UpdateFontSize);
+    INHERIT_TEXT_STYLE(fontStyle, TextColor, UpdateTextColor);
+    INHERIT_TEXT_STYLE(fontStyle, ItalicFontStyle, UpdateItalicFontStyle);
+    INHERIT_TEXT_STYLE(fontStyle, FontWeight, UpdateFontWeight);
+    INHERIT_TEXT_STYLE(fontStyle, FontFamily, UpdateFontFamily);
+    INHERIT_TEXT_STYLE(fontStyle, TextShadow, UpdateTextShadow);
+    INHERIT_TEXT_STYLE(fontStyle, TextCase, UpdateTextCase);
+    INHERIT_TEXT_STYLE(fontStyle, TextDecoration, UpdateTextDecoration);
+    INHERIT_TEXT_STYLE(fontStyle, TextDecorationColor, UpdateTextDecorationColor);
+    INHERIT_TEXT_STYLE(fontStyle, TextDecorationStyle, UpdateTextDecorationStyle);
+    INHERIT_TEXT_STYLE(fontStyle, LetterSpacing, UpdateLetterSpacing);
+
+    INHERIT_TEXT_STYLE(textLineStyle, LineHeight, UpdateLineHeight);
 }
 } // namespace OHOS::Ace::NG

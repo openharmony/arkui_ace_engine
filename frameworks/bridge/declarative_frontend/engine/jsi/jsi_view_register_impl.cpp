@@ -169,6 +169,8 @@
 #include "bridge/declarative_frontend/jsview/menu/js_context_menu.h"
 #include "bridge/declarative_frontend/jsview/scroll_bar/js_scroll_bar.h"
 #include "bridge/declarative_frontend/sharedata/js_share_data.h"
+#include "bridge/declarative_frontend/style_string/js_span_string.h"
+#include "bridge/declarative_frontend/style_string/js_span_object.h"
 #include "core/components_ng/base/ui_node.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/custom/custom_title_node.h"
@@ -499,6 +501,9 @@ static const std::unordered_map<std::string, std::function<void(BindingTarget)>>
     { "ScrollMotion", JSAnimator::JSBind },
     { "Animator", JSAnimator::JSBind },
     { "Span", JSSpan::JSBind },
+    { "SpanString", JSSpanString::JSBind },
+    { "MutableSpanString", JSMutableSpanString::JSBind },
+    { "FontSpan", JSFontSpan::JSBind },
     { "Button", JSButton::JSBind },
     { "Canvas", JSCanvas::JSBind },
     { "Matrix2D", JSMatrix2d::JSBind },
@@ -572,6 +577,9 @@ static const std::unordered_map<std::string, std::function<void(BindingTarget)>>
     { "ScrollMotion", JSAnimator::JSBind },
     { "Animator", JSAnimator::JSBind },
     { "Span", JSSpan::JSBind },
+    { "SpanString", JSSpanString::JSBind },
+    { "MutableSpanString", JSMutableSpanString::JSBind },
+    { "FontSpan", JSFontSpan::JSBind },
     { "Button", JSButton::JSBind },
     { "Canvas", JSCanvas::JSBind },
     { "LazyForEach", JSLazyForEach::JSBind },

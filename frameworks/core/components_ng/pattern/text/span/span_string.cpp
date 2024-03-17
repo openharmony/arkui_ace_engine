@@ -16,24 +16,31 @@
 #include "core/components_ng/pattern/text/span/span_string.h"
 
 #include "base/utils/string_utils.h"
-#include "bridge/declarative_frontend/engine/js_types.h"
 #include "core/components/common/properties/color.h"
-#include "core/components_ng/pattern/text/span/span_objects.h"
 
 namespace OHOS::Ace {
-
-SpanString::SpanString(const std::string& text) : text_(text)
-{
-    auto spanItem = GetDefaultSpanItem(text);
-    spans_.emplace_back(spanItem);
-}
-
 SpanString::SpanString(const std::string& text, std::vector<RefPtr<SpanBase>>& spans) : SpanString(text)
 {
     BindWithSpans(spans);
 }
 
-void SpanString::ApplyToSpans(const RefPtr<SpanBase>& span, std::pair<int32_t, int32_t> interval)
+SpanString::SpanString(const std::string& text) : text_(text)
+{
+    auto spanItem = MakeRefPtr<NG::SpanItem>();
+    spanItem->content = text;
+    spanItem->interval = { 0, StringUtils::ToWstring(text).length() };
+    spans_.emplace_back(spanItem);
+}
+
+SpanString::~SpanString()
+{
+    spansMap_.clear();
+    watchers_.clear();
+    spans_.clear();
+}
+
+void SpanString::ApplyToSpans(
+    const RefPtr<SpanBase>& span, std::pair<int32_t, int32_t> interval, SpanOperation operation)
 {
     for (auto it = spans_.begin(); it != spans_.end(); ++it) {
         auto intersection = (*it)->GetIntersectionInterval(interval);
@@ -43,7 +50,7 @@ void SpanString::ApplyToSpans(const RefPtr<SpanBase>& span, std::pair<int32_t, i
         auto oldStart = (*it)->interval.first;
         auto oldEnd = (*it)->interval.second;
         if (oldStart == intersection->first && intersection->second == oldEnd) {
-            span->ApplyToSpanItem(*it);
+            span->ApplyToSpanItem(*it, operation);
             continue;
         }
 
@@ -56,7 +63,7 @@ void SpanString::ApplyToSpans(const RefPtr<SpanBase>& span, std::pair<int32_t, i
             newSpan->interval = { intersection->first, intersection->second };
             newSpan->content = StringUtils::ToString(
                 wContent.substr(intersection->first - oldStart, intersection->second - intersection->first));
-            span->ApplyToSpanItem(newSpan);
+            span->ApplyToSpanItem(newSpan, operation);
 
             auto newSpan2 = (*it)->GetSameStyleSpanItem();
             newSpan2->interval = { intersection->second, oldEnd };
@@ -69,7 +76,7 @@ void SpanString::ApplyToSpans(const RefPtr<SpanBase>& span, std::pair<int32_t, i
         if (oldEnd > intersection->second) {
             (*it)->content = StringUtils::ToString(wContent.substr(0, intersection->second - oldStart));
             (*it)->interval = { oldStart, intersection->second };
-            span->ApplyToSpanItem(*it);
+            span->ApplyToSpanItem(*it, operation);
             newSpan->interval = { intersection->second, oldEnd };
             newSpan->content = StringUtils::ToString(wContent.substr(intersection->second - oldStart));
             it = spans_.insert(std::next(it), newSpan);
@@ -81,7 +88,7 @@ void SpanString::ApplyToSpans(const RefPtr<SpanBase>& span, std::pair<int32_t, i
             (*it)->interval = { oldStart, intersection->first };
             newSpan->interval = { intersection->first, oldEnd };
             newSpan->content = StringUtils::ToString(wContent.substr(intersection->first - oldStart));
-            span->ApplyToSpanItem(newSpan);
+            span->ApplyToSpanItem(newSpan, operation);
             it = spans_.insert(std::next(it), newSpan);
         }
     }
@@ -163,10 +170,10 @@ void SpanString::AddSpan(const RefPtr<SpanBase>& span)
     auto end = span->GetEndIndex();
     if (spansMap_.find(span->GetSpanType()) == spansMap_.end()) {
         spansMap_[span->GetSpanType()].emplace_back(span);
-        ApplyToSpans(span, { start, end });
+        ApplyToSpans(span, { start, end }, SpanOperation::ADD);
         return;
     }
-    ApplyToSpans(span, { start, end });
+    ApplyToSpans(span, { start, end }, SpanOperation::ADD);
     SplitInterval(spans, { start, end });
     spans.emplace_back(span);
     SortSpans(spans);
@@ -199,14 +206,6 @@ RefPtr<NG::SpanItem> SpanString::GetDefaultSpanItem(const std::string& text)
     auto spanItem = MakeRefPtr<NG::SpanItem>();
     spanItem->content = text;
     spanItem->interval = { 0, StringUtils::ToWstring(text).length() };
-    auto pipelineContext = PipelineContext::GetCurrentContext();
-    auto themeStyle = pipelineContext->GetTheme<TextTheme>();
-    if (themeStyle) {
-        auto textStyle = themeStyle->GetTextStyle();
-        spanItem->fontStyle->UpdateFontSize(textStyle.GetFontSize());
-        spanItem->fontStyle->UpdateFontWeight(textStyle.GetFontWeight());
-        spanItem->fontStyle->UpdateTextColor(textStyle.GetTextColor());
-    }
     return spanItem;
 }
 
@@ -244,7 +243,7 @@ RefPtr<SpanString> SpanString::GetSubSpanString(int32_t start, int32_t length) c
     int32_t end = start + length;
     RefPtr<SpanString> span =
         AceType::MakeRefPtr<SpanString>(StringUtils::ToString(StringUtils::ToWstring(text_).substr(start, length)));
-    std::map<SpanType, std::list<RefPtr<SpanBase>>> subMap;
+    std::unordered_map<SpanType, std::list<RefPtr<SpanBase>>> subMap;
     for (const auto& map : spansMap_) {
         auto subList = GetSubSpanList(start, length, map.second);
         if (!subList.empty()) {
@@ -288,13 +287,13 @@ std::list<RefPtr<SpanBase>> SpanString::GetSubSpanList(
             if (spanStart == spanEnd) {
                 continue;
             }
-            res.push_back(span->GetSubSpan(spanStart, spanEnd));
+            res.emplace_back(span->GetSubSpan(spanStart, spanEnd));
         }
     }
     return res;
 }
 
-const std::map<SpanType, std::list<RefPtr<SpanBase>>>& SpanString::GetSpansMap() const
+const std::unordered_map<SpanType, std::list<RefPtr<SpanBase>>>& SpanString::GetSpansMap() const
 {
     return spansMap_;
 }
@@ -322,7 +321,7 @@ std::vector<RefPtr<SpanBase>> SpanString::GetSpans(int32_t start, int32_t length
     int32_t end = start + length;
     RefPtr<SpanBase> span;
     while ((span = GetSpan(start, length, spanType)) != nullptr) {
-        res.push_back(span);
+        res.emplace_back(span);
         start = span->GetEndIndex();
         length = end - start;
     }

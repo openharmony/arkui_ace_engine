@@ -62,6 +62,7 @@ void CustomDialogControllerModelNG::SetOpenDialog(DialogProperties& dialogProper
                 DialogProperties Maskarg;
                 Maskarg.isMask = true;
                 Maskarg.autoCancel = dialogProperties.autoCancel;
+                Maskarg.onWillDismiss = dialogProperties.onWillDismiss;
                 Maskarg.maskColor = dialogProperties.maskColor;
                 auto mask = overlayManager->ShowDialog(Maskarg, nullptr, false);
                 CHECK_NULL_VOID(mask);

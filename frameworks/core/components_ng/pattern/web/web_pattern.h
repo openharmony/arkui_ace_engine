@@ -123,7 +123,7 @@ public:
 
     bool NeedSoftKeyboard() const override;
 
-    void UpdateSlideOffset(SizeF frameSize) override;
+    void UpdateSlideOffset() override;
 
     RefPtr<EventHub> CreateEventHub() override
     {
@@ -482,7 +482,7 @@ private:
     void OnWindowSizeChanged(int32_t width, int32_t height, WindowSizeChangeReason type) override;
     void OnInActive() override;
     void OnActive() override;
-    void OnVisibleChange(bool isVisible) override;
+    void OnVisibleAreaChange(bool isVisible);
     void OnAreaChangedInner() override;
     void OnNotifyMemoryLevel(int32_t level) override;
 
@@ -564,8 +564,8 @@ private:
     void ResetDragAction();
     void UpdateRelativeOffset();
     void InitSlideUpdateListener();
-    void CalculateHorizontalDrawRect(const SizeF frameSize);
-    void CalculateVerticalDrawRect(const SizeF frameSize);
+    void CalculateHorizontalDrawRect();
+    void CalculateVerticalDrawRect();
 
     NG::DragDropInfo HandleOnDragStart(const RefPtr<OHOS::Ace::DragEvent>& info);
     void HandleOnDragEnter(const RefPtr<OHOS::Ace::DragEvent>& info);
@@ -640,6 +640,7 @@ private:
     bool FilterScrollEventHandleOffset(const float offset);
     bool FilterScrollEventHandlevVlocity(const float velocity);
     void UpdateFlingReachEdgeState(const float value, bool status);
+    void RegisterVisibleAreaChangeCallback();
 
     std::optional<std::string> webSrc_;
     std::optional<std::string> webData_;
@@ -704,7 +705,8 @@ private:
     bool isNeedUpdateFilterScrolAxis_ = true;
     WebLayoutMode layoutMode_ = WebLayoutMode::NONE;
     bool scrollState_ = false;
-    Axis axis_ = Axis::NONE;
+    Axis axis_ = Axis::FREE;
+    Axis syncAxis_ = Axis::NONE;
     Axis expectedScrollAxis_ = Axis::FREE;
     Axis expectedFilterScrollAxis_ = Axis::FREE;
     int32_t rootLayerWidth_ = 0;

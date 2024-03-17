@@ -18,9 +18,12 @@
 
 #include "native_event.h"
 #include "native_node.h"
+#include "node/gesture_impl.h"
+#include "node/node_model.h"
 #include "securec.h"
 
 #include "base/log/log_wrapper.h"
+#include "core/interfaces/arkoala/arkoala_api.h"
 
 namespace OHOS::Ace::NodeModel {
 
@@ -87,6 +90,14 @@ ArkUI_Int32 ConvertOriginEventType(ArkUI_NodeEventType type)
             return ON_TEXTAREA_PASTE;
         case NODE_TEXT_AREA_ON_TEXT_SELECTION_CHANGE:
             return ON_TEXTAREA_TEXT_SELECTION_CHANGE;
+        case NODE_SWIPER_EVENT_ON_CHANGE:
+            return ON_SWIPER_CHANGE;
+        case NODE_SWIPER_EVENT_ON_ANIMATION_START:
+            return ON_SWIPER_ANIMATION_START;
+        case NODE_SWIPER_EVENT_ON_ANIMATION_END:
+            return ON_SWIPER_ANIMATION_END;
+        case NODE_SWIPER_EVENT_ON_GESTURE_SWIPE:
+            return ON_SWIPER_GESTURE_SWIPE;
         default:
             return -1;
     }
@@ -155,6 +166,14 @@ ArkUI_Int32 ConvertToNodeEventType(ArkUIEventSubKind type)
             return NODE_TEXT_AREA_ON_PASTE;
         case ON_TEXTAREA_TEXT_SELECTION_CHANGE:
             return NODE_TEXT_AREA_ON_TEXT_SELECTION_CHANGE;
+        case ON_SWIPER_CHANGE:
+            return NODE_SWIPER_EVENT_ON_CHANGE;
+        case ON_SWIPER_ANIMATION_START:
+            return NODE_SWIPER_EVENT_ON_ANIMATION_START;
+        case ON_SWIPER_ANIMATION_END:
+            return NODE_SWIPER_EVENT_ON_ANIMATION_END;
+        case ON_SWIPER_GESTURE_SWIPE:
+            return NODE_SWIPER_EVENT_ON_GESTURE_SWIPE;
         default:
             return -1;
     }
@@ -211,6 +230,22 @@ bool ConvertEvent(ArkUINodeEvent* origin, ArkUI_NodeEvent* event)
                 TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "fail to convert origin event data");
                 return false;
             }
+            switch (origin->touchEvent.action) {
+                case ACTION_DOWN:
+                    event->touchEvent.action = NODE_ACTION_DOWN;
+                    break;
+                case ACTION_UP:
+                    event->touchEvent.action = NODE_ACTION_UP;
+                    break;
+                case ACTION_MOVE:
+                    event->touchEvent.action = NODE_ACTION_MOVE;
+                    break;
+                case ACTION_CANCEL:
+                    event->touchEvent.action = NODE_ACTION_CANCEL;
+                    break;
+                default:
+                    event->touchEvent.action = NODE_ACTION_CANCEL;
+            }
             return true;
         default:
             TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "failed to convert origin event data");
@@ -235,6 +270,20 @@ bool ConvertEventResult(ArkUI_NodeEvent* event, ArkUINodeEvent* origin)
         }
     }
     return true;
+}
+
+void HandleInnerEvent(ArkUINodeEvent* innerEvent)
+{
+    switch (innerEvent->kind) {
+        case ArkUIEventCategory::GESTURE_ASYNC_EVENT: {
+            // handle gesture event.
+            OHOS::Ace::GestureModel::HandleGestureEvent(innerEvent);
+            break;
+        }
+        default: {
+            OHOS::Ace::NodeModel::HandleInnerNodeEvent(innerEvent);
+        }
+    }
 }
 
 }; // namespace OHOS::Ace::NodeModel

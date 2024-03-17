@@ -717,6 +717,46 @@ HWTEST_F(RichEditorTestNg, RichEditorModel013, TestSize.Level1)
 }
 
 /**
+ * @tc.name: RichEditorModel014
+ * @tc.desc: test paragraph style wordBreak attribute
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorTestNg, RichEditorModel014, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    auto richEditorController = richEditorPattern->GetRichEditorController();
+    ASSERT_NE(richEditorController, nullptr);
+    TextSpanOptions options;
+    options.value = INIT_VALUE_1;
+
+    // test paragraph  style wordBreak default value
+    richEditorController->AddTextSpan(options);
+    auto info = richEditorController->GetParagraphsInfo(1, sizeof(INIT_VALUE_1));
+    EXPECT_EQ(static_cast<WordBreak>(info[0].wordBreak), WordBreak::BREAK_WORD);
+
+    // test paragraph style wordBreak value of WordBreak.NORMAL
+    struct UpdateParagraphStyle style;
+    style.wordBreak = WordBreak::NORMAL;
+    richEditorController->UpdateParagraphStyle(1, sizeof(INIT_VALUE_1), style);
+    info = richEditorController->GetParagraphsInfo(1, sizeof(INIT_VALUE_1));
+    EXPECT_EQ(static_cast<WordBreak>(info[0].wordBreak), WordBreak::NORMAL);
+
+    // test paragraph style wordBreak value of WordBreak.BREAK_ALL
+    style.wordBreak = WordBreak::BREAK_ALL;
+    richEditorController->UpdateParagraphStyle(1, sizeof(INIT_VALUE_1), style);
+    info = richEditorController->GetParagraphsInfo(1, sizeof(INIT_VALUE_1));
+    EXPECT_EQ(static_cast<WordBreak>(info[0].wordBreak), WordBreak::BREAK_ALL);
+    
+    // test paragraph style wordBreak value of WordBreak.BREAK_WORD
+    style.wordBreak = WordBreak::BREAK_WORD;
+    richEditorController->UpdateParagraphStyle(1, sizeof(INIT_VALUE_1), style);
+    info = richEditorController->GetParagraphsInfo(1, sizeof(INIT_VALUE_1));
+    EXPECT_EQ(static_cast<WordBreak>(info[0].wordBreak), WordBreak::BREAK_WORD);
+}
+
+/**
  * @tc.name: RichEditorInsertValue001
  * @tc.desc: test calc insert value object
  * @tc.type: FUNC
@@ -3651,5 +3691,226 @@ HWTEST_F(RichEditorTestNg, RichEditorDragTest002, TestSize.Level1)
     while (!ViewStackProcessor::GetInstance()->elementsStack_.empty()) {
         ViewStackProcessor::GetInstance()->elementsStack_.pop();
     }
+}
+/**
+ * @tc.name: GetTextSpansInfo
+ * @tc.desc: test get paragraphStyle
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorTestNg, GetTextSpansInfo, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. get richEditor controller
+     */
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    auto richEditorController = richEditorPattern->GetRichEditorController();
+    ASSERT_NE(richEditorController, nullptr);
+
+    /**
+     * @tc.steps: step2. initalize span properties
+     */
+    TextSpanOptions options;
+    options.value = INIT_VALUE_1;
+
+    /**
+     * @tc.steps: step3. test add span
+     */
+    richEditorController->AddTextSpan(options);
+
+    struct UpdateParagraphStyle style1;
+    style1.textAlign = TextAlign::END;
+    style1.leadingMargin = std::make_optional<NG::LeadingMargin>();
+    style1.leadingMargin->size = NG::SizeF(5.0, 10.0);
+    richEditorPattern->UpdateParagraphStyle(0, 6, style1);
+
+    auto info = richEditorController->GetSpansInfo(0, 6);
+    EXPECT_EQ(info.selection_.resultObjects.size(), 1);
+    auto valueString = info.selection_.resultObjects.begin()->valueString;
+    auto textStyle = info.selection_.resultObjects.begin()->textStyle;
+
+    EXPECT_EQ(textStyle.textAlign, int(TextAlign::END));
+    EXPECT_EQ(textStyle.leadingMarginSize[0], 5.0);
+    EXPECT_EQ(textStyle.leadingMarginSize[1], 10.0);
+
+    ClearSpan();
+}
+
+/**
+ * @tc.name: GetImageSpansInfo
+ * @tc.desc: test image span layoutStyle
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorTestNg, GetImageSpansInfo, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. get richEditor controller
+     */
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    auto richEditorController = richEditorPattern->GetRichEditorController();
+    ASSERT_NE(richEditorController, nullptr);
+
+    /**
+     * @tc.steps: step2. initalize span properties
+     */
+    ImageSpanOptions options;
+    options.image = IMAGE_VALUE;
+    std::optional<Ace::NG::MarginProperty> marginProp = std::nullopt;
+    std::optional<Ace::NG::BorderRadiusProperty> borderRadius = std::nullopt;
+    marginProp = { CALC_LENGTH_CALC, CALC_LENGTH_CALC, CALC_LENGTH_CALC, CALC_LENGTH_CALC };
+    borderRadius = { CALC_TEST, CALC_TEST, CALC_TEST, CALC_TEST };
+    ImageSpanAttribute imageStyle;
+    imageStyle.marginProp = marginProp;
+    imageStyle.borderRadius = borderRadius;
+    options.imageAttribute = imageStyle;
+
+    /**
+     * @tc.steps: step3. test add span
+     */
+    richEditorController->AddImageSpan(options);
+    auto info = richEditorController->GetSpansInfo(0, 1);
+    EXPECT_EQ(info.selection_.resultObjects.size(), 1);
+    auto imageStyleout = info.selection_.resultObjects.begin()->imageStyle;
+    EXPECT_EQ(imageStyleout.borderRadius,
+        "{\"topLeft\":\"10.00\",\"topRight\":\"10.00\",\"bottomLeft\":\"10.00\",\"bottomRight\":\"10.00\"}");
+    EXPECT_EQ(imageStyleout.margin, "left: [10.00]right: [10.00]top: [10.00]bottom: [10.00]");
+    ClearSpan();
+}
+
+/**
+ * @tc.name: DeleteValueSetTextSpan
+ * @tc.desc: test add delete text span
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorTestNg, DeleteValueSetTextSpan, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. get richEditor controller
+     */
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    auto richEditorController = richEditorPattern->GetRichEditorController();
+    ASSERT_NE(richEditorController, nullptr);
+
+    /**
+     * @tc.steps: step2. test add span
+     */
+    AddSpan(INIT_VALUE_1);
+    struct UpdateParagraphStyle style1;
+    style1.textAlign = TextAlign::END;
+    style1.leadingMargin = std::make_optional<NG::LeadingMargin>();
+    style1.leadingMargin->size = NG::SizeF(5.0, 10.0);
+    richEditorPattern->UpdateParagraphStyle(0, 6, style1);
+    auto info = richEditorController->GetSpansInfo(0, 6);
+    EXPECT_EQ(info.selection_.resultObjects.size(), 1);
+
+    auto it = AceType::DynamicCast<SpanNode>(richEditorNode_->GetLastChild());
+    auto spanItem = it->GetSpanItem();
+    spanItem->position = 0;
+    spanItem->textStyle_ = TextStyle();
+    spanItem->textStyle_.value().fontFamilies_.push_back("test1");
+    RichEditorAbstractSpanResult spanResult;
+    spanResult.SetSpanIndex(0);
+    richEditorPattern->DeleteValueSetTextSpan(spanItem, 0, 1, spanResult);
+
+    EXPECT_EQ(spanResult.GetTextStyle().textAlign, int(TextAlign::END));
+    EXPECT_EQ(spanResult.GetTextStyle().leadingMarginSize[0], 5.0);
+    EXPECT_EQ(spanResult.GetTextStyle().leadingMarginSize[1], 10.0);
+
+    ClearSpan();
+}
+
+/**
+ * @tc.name: onIMEInputComplete
+ * @tc.desc: test onIMEInputComplete
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorTestNg, onIMEInputComplete, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. get richEditor controller
+     */
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    auto richEditorController = richEditorPattern->GetRichEditorController();
+    ASSERT_NE(richEditorController, nullptr);
+
+    /**
+     * @tc.steps: step2. add text span
+     */
+    AddSpan(INIT_VALUE_1);
+    struct UpdateParagraphStyle style1;
+    style1.textAlign = TextAlign::END;
+    style1.leadingMargin = std::make_optional<NG::LeadingMargin>();
+    style1.leadingMargin->size = NG::SizeF(5.0, 10.0);
+    richEditorPattern->UpdateParagraphStyle(0, 6, style1);
+    auto info = richEditorController->GetSpansInfo(0, 6);
+    EXPECT_EQ(info.selection_.resultObjects.size(), 1);
+
+    auto eventHub = richEditorPattern->GetEventHub<RichEditorEventHub>();
+    ASSERT_NE(eventHub, nullptr);
+    TextStyleResult textStyle;
+    auto func = [&textStyle](const RichEditorAbstractSpanResult& info) { textStyle = info.GetTextStyle(); };
+    eventHub->SetOnIMEInputComplete(std::move(func));
+    auto it1 = AceType::DynamicCast<SpanNode>(richEditorNode_->GetLastChild());
+    richEditorPattern->AfterIMEInsertValue(it1, 1, false);
+    EXPECT_EQ(textStyle.textAlign, int(TextAlign::END));
+    EXPECT_EQ(textStyle.leadingMarginSize[0], 5.0);
+    EXPECT_EQ(textStyle.leadingMarginSize[1], 10.0);
+    while (!ViewStackProcessor::GetInstance()->elementsStack_.empty()) {
+        ViewStackProcessor::GetInstance()->elementsStack_.pop();
+    }
+
+    ClearSpan();
+}
+
+/**
+ * @tc.name: DeleteValueSetImageSpan
+ * @tc.desc: test delete imagespan
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorTestNg, DeleteValueSetImageSpan, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. get richEditor controller
+     */
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    auto richEditorController = richEditorPattern->GetRichEditorController();
+    ASSERT_NE(richEditorController, nullptr);
+
+    /**
+     * @tc.steps: step2. initalize span properties
+     */
+    ImageSpanOptions options;
+    options.image = IMAGE_VALUE;
+    std::optional<Ace::NG::MarginProperty> marginProp = std::nullopt;
+    std::optional<Ace::NG::BorderRadiusProperty> borderRadius = std::nullopt;
+    marginProp = { CALC_LENGTH_CALC, CALC_LENGTH_CALC, CALC_LENGTH_CALC, CALC_LENGTH_CALC };
+    borderRadius = { CALC_TEST, CALC_TEST, CALC_TEST, CALC_TEST };
+    ImageSpanAttribute imageStyle;
+    imageStyle.marginProp = marginProp;
+    imageStyle.borderRadius = borderRadius;
+    options.imageAttribute = imageStyle;
+
+    /**
+     * @tc.steps: step3. test delete image span
+     */
+    richEditorController->AddImageSpan(options);
+    RichEditorAbstractSpanResult spanResult;
+    spanResult.SetSpanIndex(0);
+    auto spanItem = richEditorPattern->spans_.front();
+    richEditorPattern->DeleteValueSetImageSpan(spanItem, spanResult);
+    EXPECT_EQ(spanResult.GetMargin(), "left: [10.00]right: [10.00]top: [10.00]bottom: [10.00]");
+    EXPECT_EQ(spanResult.GetBorderRadius(),
+        "{\"topLeft\":\"10.00\",\"topRight\":\"10.00\",\"bottomLeft\":\"10.00\",\"bottomRight\":\"10.00\"}");
+
+    ClearSpan();
 }
 } // namespace OHOS::Ace::NG

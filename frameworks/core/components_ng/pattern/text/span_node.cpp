@@ -479,7 +479,7 @@ uint32_t SpanItem::GetSymbolUnicode()
 void SpanItem::StartDrag(int32_t start, int32_t end)
 {
     selectedStart = std::max(0, start);
-    int contentLen = content.size();
+    int32_t contentLen = content.size();
     selectedEnd = std::min(contentLen, end);
 }
 
@@ -551,8 +551,8 @@ std::optional<std::pair<int32_t, int32_t>> SpanItem::GetIntersectionInterval(std
     }
 
     // Calculate the intersection interval
-    int start = std::max(this->interval.first, interval.first);
-    int end = std::min(this->interval.second, interval.second);
+    int32_t start = std::max(this->interval.first, interval.first);
+    int32_t end = std::min(this->interval.second, interval.second);
     return std::make_optional<std::pair<int32_t, int32_t>>(std::make_pair(start, end));
 }
 
