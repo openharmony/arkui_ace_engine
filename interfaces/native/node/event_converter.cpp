@@ -18,9 +18,12 @@
 
 #include "native_event.h"
 #include "native_node.h"
+#include "node/gesture_impl.h"
+#include "node/node_model.h"
 #include "securec.h"
 
 #include "base/log/log_wrapper.h"
+#include "core/interfaces/arkoala/arkoala_api.h"
 
 namespace OHOS::Ace::NodeModel {
 
@@ -267,6 +270,20 @@ bool ConvertEventResult(ArkUI_NodeEvent* event, ArkUINodeEvent* origin)
         }
     }
     return true;
+}
+
+void HandleInnerEvent(ArkUINodeEvent* innerEvent)
+{
+    switch (innerEvent->kind) {
+        case ArkUIEventCategory::GESTURE_ASYNC_EVENT: {
+            // handle gesture event.
+            OHOS::Ace::GestureModel::HandleGestureEvent(innerEvent);
+            break;
+        }
+        default: {
+            OHOS::Ace::NodeModel::HandleInnerNodeEvent(innerEvent);
+        }
+    }
 }
 
 }; // namespace OHOS::Ace::NodeModel

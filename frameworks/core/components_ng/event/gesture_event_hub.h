@@ -160,6 +160,23 @@ public:
         recreateGesture_ = true;
     }
 
+    // call by CAPI do distinguish with AddGesture called by ARKUI;
+    void AttachGesture(const RefPtr<NG::Gesture>& gesture)
+    {
+        gestures_.emplace_back(gesture);
+        backupGestures_.emplace_back(gesture);
+        recreateGesture_ = true;
+        OnModifyDone();
+    }
+
+    void RemoveGesture(const RefPtr<NG::Gesture>& gesture)
+    {
+        gestures_.remove(gesture);
+        backupGestures_.remove(gesture);
+        recreateGesture_ = true;
+        OnModifyDone();
+    }
+
     void AddScrollableEvent(const RefPtr<ScrollableEvent>& scrollableEvent)
     {
         if (!scrollableActuator_) {
@@ -248,7 +265,7 @@ public:
 
      // Set by JS FrameNode.
     void SetJSFrameNodeOnClick(GestureEventFunc&& clickEvent);
-    
+
     void SetOnGestureJudgeBegin(GestureJudgeFunc&& gestureJudgeFunc);
 
     void SetOnTouchIntercept(TouchInterceptFunc&& touchInterceptFunc);

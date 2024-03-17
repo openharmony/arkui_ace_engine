@@ -51,6 +51,7 @@ ohos_shared_library("ace_ndk") {
     "native_interface_xcomponent.cpp",
     "node/dialog_model.cpp",
     "node/event_converter.cpp",
+    "node/gesture_impl.cpp",
     "node/native_impl.cpp",
     "node/native_node_napi.cpp",
     "node/node_model.cpp",
