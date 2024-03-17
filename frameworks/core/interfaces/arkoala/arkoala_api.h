@@ -630,7 +630,7 @@ struct ArkUITextDecorationType {
 };
 
 struct ArkUIFilterColorType {
-    ArkUI_Int32* filterArray;
+    ArkUI_Float32* filterArray;
     ArkUI_Int32 filterSize;
 };
 

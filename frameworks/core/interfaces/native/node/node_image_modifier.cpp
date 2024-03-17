@@ -317,12 +317,8 @@ ArkUIFilterColorType GetColorFilter(ArkUINodeHandle node)
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_RETURN(frameNode, colorFilter);
     auto filterFloatArray = ImageModelNG::GetColorFilter(frameNode);
-    std::vector<int32_t> filterArray;
-    for (size_t i = 0; i < filterFloatArray.size(); i++) {
-        filterArray.emplace_back(static_cast<int32_t>(filterFloatArray[i]));
-    }
-    colorFilter.filterArray = filterArray.size() > 0 ? &filterArray[0] : nullptr;
-    colorFilter.filterSize = filterArray.size();
+    colorFilter.filterArray = filterFloatArray.size() > 0 ? &filterFloatArray[0] : nullptr;
+    colorFilter.filterSize = filterFloatArray.size();
     return colorFilter;
 }
 

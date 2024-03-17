@@ -1763,11 +1763,11 @@ typedef enum {
      * This attribute can be set, reset, and obtained as required through APIs.
      *
      * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
-     * .value[0].i32 to .value[19].i32: filter matrix array. \n
+     * .value[0].f32 to .value[19].f32: filter matrix array. \n
      * .size: 5 x 4 filter array size. \n
      * \n
      * Format of the return value {@link ArkUI_AttributeItem}:\n
-     * .value[0].i32 to .value[19].i32: filter matrix array. \n
+     * .value[0].f32 to .value[19].f32: filter matrix array. \n
      * .size: 5 x 4 filter array size. \n
      *
      */

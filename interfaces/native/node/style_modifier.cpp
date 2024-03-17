@@ -6589,7 +6589,7 @@ int32_t SetColorFilter(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
     }
     std::vector<float> colorFloatArray;
     for (size_t i = 0; i < actualSize && i < REQUIRED_TWENTY_PARAM; i++) {
-        colorFloatArray.emplace_back(static_cast<float>(item->value[i].i32));
+        colorFloatArray.emplace_back(item->value[i].f32);
     }
     fullImpl->getNodeModifiers()->getImageModifier()->setColorFilter(
         node->uiNodeHandle, &colorFloatArray[0], colorFloatArray.size());
@@ -7602,7 +7602,7 @@ const ArkUI_AttributeItem* GetColorFilter(ArkUI_NodeHandle node)
     auto fullImpl = GetFullImpl();
     auto colorFilter = fullImpl->getNodeModifiers()->getImageModifier()->getColorFilter(node->uiNodeHandle);
     for (size_t i = 0; i < colorFilter.filterSize; i++) {
-        g_numberValues[i].i32 = colorFilter.filterArray[i];
+        g_numberValues[i].f32 = colorFilter.filterArray[i];
     }
     g_attributeItem.size = colorFilter.filterSize;
     return &g_attributeItem;
