@@ -29,7 +29,7 @@ extern "C" {
 #endif
 
 struct ArkUI_GestureRecognizer {
-    int32_t type;
+    int32_t type = -1;
     ArkUIGesture* gesture = nullptr;
     void* extraData = nullptr;
 };
@@ -62,7 +62,7 @@ ArkUI_GestureEventActionType OH_ArkUI_GestureEvent_GetActionType(const ArkUI_Ges
             ret = GESTURE_EVENT_ACTION_CANCEL;
             break;
         default:
-            ret = GESTURE_EVENT_ACTION_INVALID;
+            ret = GESTURE_EVENT_ACTION_ACCEPT;
             break;
     }
     return ret;
@@ -128,17 +128,19 @@ int32_t SetGestureEventTarget(ArkUI_GestureRecognizer* recognizer, ArkUI_Gesture
     return 0;
 }
 
-void AddGestureToNode(ArkUI_NodeHandle node, ArkUI_GestureRecognizer* recognizer, ArkUI_GesturePriority priorityNum,
+int32_t AddGestureToNode(ArkUI_NodeHandle node, ArkUI_GestureRecognizer* recognizer, ArkUI_GesturePriority priorityNum,
     ArkUI_GestureMask mask)
 {
     OHOS::Ace::NodeModel::GetFullImpl()->getNodeModifiers()->getGestureModifier()->addGestureToNode(
         node->uiNodeHandle, recognizer->gesture, priorityNum, mask);
+    return 0;
 }
 
 void HandleGestureEvent(ArkUINodeEvent* event)
 {
     auto* extraData = reinterpret_cast<GestureInnerData*>(event->extraParam);
     extraData->targetReceiver(reinterpret_cast<ArkUI_GestureEvent *>(&event->gestureAsyncEvent), extraData->extraParam);
+    delete event;
 }
 
 }; // namespace OHOS::Ace::GestureModel

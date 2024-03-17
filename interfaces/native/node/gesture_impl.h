@@ -30,7 +30,7 @@ void DisposeGesture(ArkUI_GestureRecognizer* recognizer);
 int32_t SetGestureEventTarget(ArkUI_GestureRecognizer* recognizer, ArkUI_GestureEventActionTypeMask mask,
     void* extraParam, void (*targetReceiver)(ArkUI_GestureEvent* event, void* extraParam));
 
-void AddGestureToNode(ArkUI_NodeHandle node, ArkUI_GestureRecognizer* recognizer, ArkUI_GesturePriority priorityNum,
+int32_t AddGestureToNode(ArkUI_NodeHandle node, ArkUI_GestureRecognizer* recognizer, ArkUI_GesturePriority priorityNum,
     ArkUI_GestureMask mask);
 
 void HandleGestureEvent(ArkUINodeEvent* event);
