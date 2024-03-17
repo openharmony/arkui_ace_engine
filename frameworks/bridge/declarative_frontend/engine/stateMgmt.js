@@ -12,10 +12,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+/**
+ * ConfigureStateMgmt keeps track if V2 @Observed and @Track are used.
+ * If yes, it enables object deep observation mechanisms need with ObservedV3.
+ */
 class ConfigureStateMgmt {
     constructor() {
-        this.v2InUse_ = false;
-        this.v3InUse_ = false;
+        this.v2ObservedTrackInUse_ = false;
+        this.puObservedTrackInUse_ = false;
     }
     static get instance() {
         return ConfigureStateMgmt.instance__
@@ -23,51 +27,37 @@ class ConfigureStateMgmt {
             : (ConfigureStateMgmt.instance__ = new ConfigureStateMgmt());
     }
     /**
-     * framework code call this function when it sees use of a stateMgmt V3 feature
+     * framework code call this function when it sees use of a stateMgmt V2 @Observed @Track
      *
      * @param feature specify feature separately from context of use, so that in future decision can be made
      *                for individual features, not use permit either use of V2 or V3.
      * @param contextOfUse purely for error messages. Give enough info that use is able to local the feature use in source code.
      * @returns true if no mix of features detected, false if mix is detected
      */
-    intentUsingV3(feature, contextOfUse = "") {
-        this.v3InUse_ = true;
-        const ret = !this.v2InUse_ && this.v3InUse_;
-        if (ret) {
-            
-        }
-        else {
-            stateMgmtConsole.featureCombinationError(`Found ${feature} ${contextOfUse} - ${ConfigureStateMgmt.HOW_TO_SAY}`);
-        }
-        return ret;
+    usingV2ObservedTrack(feature, contextOfUse = "") {
+        this.v2ObservedTrackInUse_ = true;
+        
     }
     /**
-     * framework code call this function when it sees use of a stateMgmt V2 feature
-     *
-     * @param feature specify feature separately from context of use, so that in future decision can be made
-     *                for individual features, not use permit either use of V2 or V3.
-     * @param contextOfUse purely for error messages. Give enough info that use is able to local the feature use in source code.
-     * @returns true if no mix of features detected, false if mix is detected
-     */
-    intentUsingV2(feature, contextOfUse = "") {
-        this.v2InUse_ = true;
-        const ret = this.v2InUse_ && !this.v3InUse_;
-        if (ret) {
-            
-        }
-        else {
-            stateMgmtConsole.featureCombinationError(`Found ${feature} ${contextOfUse} - ${ConfigureStateMgmt.HOW_TO_SAY}`);
-        }
-        return ret;
+ * framework code call this function when it sees use of a stateMgmt PU Observed / @Track
+ *
+ * @param feature specify feature separately from context of use, so that in future decision can be made
+ *                for individual features, not use permit either use of V2 or V3.
+ * @param contextOfUse purely for error messages. Give enough info that use is able to local the feature use in source code.
+ * @returns true if no mix of features detected, false if mix is detected
+ */
+    usingPUObservedTrack(feature, contextOfUse = "") {
+        this.puObservedTrackInUse_ = true;
+        
     }
     /**
-     * Return true if object deep observation mechanisms need to be enabled
-     * that is when seen V3 @observe, @track, or @monitor decorator used in at least one class
-     * (we could but we do not check for class object instance creation for performance reasons)
-     * @returns
-     */
-    needsV3Observe() {
-        return this.v3InUse_;
+      * Return true if object deep observation mechanisms need to be enabled
+      * that is when seen V3 @observe, @track, or @monitor decorator used in at least one class
+      * (we could but we do not check for class object instance creation for performance reasons)
+      * @returns
+      */
+    needsV2Observe() {
+        return this.v2ObservedTrackInUse_;
     }
 } // ConfigureStateMgmt
 ConfigureStateMgmt.HOW_TO_SAY = `Your application uses both state management V2 and V3 features! - It is strongly recommended not to mix V2 and V3. Consult the rules how state management V2 and V3 can be mixed in the same app.`;
@@ -2138,7 +2128,7 @@ function Observed(BaseClass) {
         constructor(...args) {
             super(...args);
             
-            ConfigureStateMgmt.instance.intentUsingV2(`@Observed`, BaseClass.name);
+            ConfigureStateMgmt.instance.usingPUObservedTrack(`@Observed`, BaseClass.name);
             let isProxied = Reflect.has(this, __IS_OBSERVED_PROXIED);
             Object.defineProperty(this, __IS_OBSERVED_PROXIED, {
                 value: true,
@@ -3658,7 +3648,7 @@ class View extends NativeViewFullUpdate {
 // indicates to framework to track individual object property value changes
 function Track(target, property) {
     var _a;
-    ConfigureStateMgmt.instance.intentUsingV2(`@Track`, property);
+    ConfigureStateMgmt.instance.usingPUObservedTrack(`@Track`, property);
     Reflect.set(target, `${TrackedObject.___TRACKED_PREFIX}${property}`, true);
     Reflect.set(target, TrackedObject.___IS_TRACKED_OPTIMISED, true);
     
@@ -3765,7 +3755,6 @@ class ObservedPropertyAbstractPU extends ObservedPropertyAbstract {
                 this.subscriberRefs_.add(subscriber);
             }
         }
-        ConfigureStateMgmt.instance.intentUsingV2(`V2 Decorated variable`, this.debugInfo());
     }
     aboutToBeDeleted() {
         super.aboutToBeDeleted();
@@ -6036,13 +6025,18 @@ class ViewPU extends NativeViewPartialUpdate {
             this.syncInstanceId();
             
             ViewStackProcessor.StartGetAccessRecordingFor(elmtId);
-            // FIXME: Because ReactNative dynamic viewer app library uses V3 @observe within V2 @Component, 
-            // the framework needs to enable both V2 recording and 
-            // V3 recording with startBind as well.
-            this.currentlyRenderedElmtIdStack_.push(elmtId);
-            // FIXME: like in V2 setting bindId_ in ObserveV3 does not work with 'stacked' 
-            // update + initial render calls, ike in if and ForEach case, convert to stack as well
-            ObserveV3.getObserve().startBind(this, elmtId);
+            if (!this.isViewV3) {
+                // Enable PU state tracking only in PU @Components
+                this.currentlyRenderedElmtIdStack_.push(elmtId);
+            }
+            // if V2 @Observed/@Track used anywhere in the app (there is no more fine grained criteria), 
+            // enable V2 object deep observation
+            // FIXME: A @Component should only use PU or V2 state, but RN dynamic viewer uses both.
+            if (ConfigureStateMgmt.instance.needsV2Observe()) {
+                // FIXME: like in V2 setting bindId_ in ObserveV3 does not work with 'stacked' 
+                // update + initial render calls, like in if and ForEach case, convert to stack as well
+                ObserveV3.getObserve().startBind(this, elmtId);
+            }
             compilerAssignedUpdateFunc(elmtId, isFirstRender);
             if (!isFirstRender) {
                 _popFunc();
@@ -6051,8 +6045,12 @@ class ViewPU extends NativeViewPartialUpdate {
             if (node !== undefined) {
                 node.cleanStageValue();
             }
-            ObserveV3.getObserve().startBind(null, UINodeRegisterProxy.notRecordingDependencies);
-            this.currentlyRenderedElmtIdStack_.pop();
+            if (ConfigureStateMgmt.instance.needsV2Observe()) {
+                ObserveV3.getObserve().startBind(null, UINodeRegisterProxy.notRecordingDependencies);
+            }
+            if (!this.isViewV3) {
+                this.currentlyRenderedElmtIdStack_.pop();
+            }
             ViewStackProcessor.StopGetAccessRecording();
             
             this.restoreInstanceId();
@@ -7427,9 +7425,10 @@ ObserveV3.arraySetMapProxy = {
  * @from 12
  */
 const Trace = (target, propertyKey) => {
-    ConfigureStateMgmt.instance.intentUsingV3(`@track`, propertyKey);
+    ConfigureStateMgmt.instance.usingV2ObservedTrack(`@track`, propertyKey);
     return trackInternal(target, propertyKey);
 };
+const track = Trace;
 const trackInternal = (target, propertyKey) => {
     var _a;
     var _b;
@@ -7460,12 +7459,17 @@ const trackInternal = (target, propertyKey) => {
     (_a = target[_b = ObserveV3.V3_DECO_META]) !== null && _a !== void 0 ? _a : (target[_b] = {});
 }; // track
 function ObservedV2(BaseClass) {
-    ConfigureStateMgmt.instance.intentUsingV3(`@observed`, BaseClass === null || BaseClass === void 0 ? void 0 : BaseClass.name);
+    ConfigureStateMgmt.instance.usingV2ObservedTrack(`@observed`, BaseClass === null || BaseClass === void 0 ? void 0 : BaseClass.name);
     // prevent @Track inside @observed class
     if (BaseClass.prototype && Reflect.has(BaseClass.prototype, TrackedObject.___IS_TRACKED_OPTIMISED)) {
         const error = `'@observed class ${BaseClass === null || BaseClass === void 0 ? void 0 : BaseClass.name}': invalid use of V2 @Track decorator inside V3 @observed class. Need to fix class definition to use @track.`;
         stateMgmtConsole.applicationError(error);
         throw new Error(error);
+    }
+    const observed = ObservedV2;
+    if (BaseClass.prototype && !Reflect.has(BaseClass.prototype, ObserveV3.V3_DECO_META)) {
+        // not an error, suspicious of developer oversight
+        stateMgmtConsole.warn(`'@observed class ${BaseClass === null || BaseClass === void 0 ? void 0 : BaseClass.name}': no @track property inside. Is thi intended? Check our application.`);
     }
     // Use ID_REFS only if number of observed attrs is significant
     const attrList = Object.getOwnPropertyNames(BaseClass.prototype);
@@ -7513,7 +7517,6 @@ class MonitorV3 {
     constructor(target, props, func) {
         var _a;
         var _b;
-        ConfigureStateMgmt.instance.intentUsingV3(`@monitor`, props);
         this.target_ = new WeakRef(target);
         this.func_ = func;
         this.watchId_ = ++MonitorV3.nextWatchId_;
@@ -7634,7 +7637,6 @@ AsyncAddMonitorV3.watches = [];
  */
 class ComputedV3 {
     constructor(target, prop, func) {
-        ConfigureStateMgmt.instance.intentUsingV3(`@computed`, prop);
         this.target_ = target;
         this.propertyComputeFunc_ = func;
         this.computedId_ = ++ComputedV3.nextCompId_;
@@ -7789,7 +7791,6 @@ const param = (target, propertyKey) => {
  * @param propertyKey
  */
 const event = (target, propertyKey) => {
-    ConfigureStateMgmt.instance.intentUsingV3(`@event`, propertyKey);
     ObserveV3.addVariableDecoMeta(target, propertyKey, "@event");
     target[propertyKey] = () => { };
 };

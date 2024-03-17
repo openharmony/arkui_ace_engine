@@ -42,7 +42,6 @@ class ComputedV3 {
   public static readonly COMPUTED_CACHED_PREFIX = "__cached_";
 
   constructor(target: object, prop: string, func: (...args: any[]) => any) {
-    ConfigureStateMgmt.instance.intentUsingV3(`@computed`, prop);
     this.target_ = target;
     this.propertyComputeFunc_ = func;
     this.computedId_ = ++ComputedV3.nextCompId_;

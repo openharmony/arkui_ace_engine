@@ -46,7 +46,6 @@ class MonitorV3 {
   private static readonly WATCH_INSTANCE_PREFIX = Symbol("__wa_instance_");
 
   constructor(target: object, props: string, func: (val: any) => void) {
-    ConfigureStateMgmt.instance.intentUsingV3(`@monitor`, props);
     this.target_ = new WeakRef<Object>(target);
     this.func_ = func;
     this.watchId_ = ++MonitorV3.nextWatchId_;

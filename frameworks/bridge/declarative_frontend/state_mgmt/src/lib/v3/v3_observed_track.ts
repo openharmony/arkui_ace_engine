@@ -132,7 +132,7 @@ class ObserveV3 {
       throw new TypeError(error);
     }
 
-    stateMgmtConsole.propertyAccess(`ObserveV3.addRef ${attrName} for id ${this.bindId_}...`);
+    stateMgmtConsole.propertyAccess(`ObserveV3.addRef '${attrName}' for id ${this.bindId_}...`);
     const id = this.bindId_
 
     // Map: attribute/symbol -> dependent id
@@ -663,9 +663,10 @@ class ObserveV3 {
  * @from 12
  */
 const Trace = (target: Object, propertyKey: string) => {
-  ConfigureStateMgmt.instance.intentUsingV3(`@track`, propertyKey);
+  ConfigureStateMgmt.instance.usingV2ObservedTrack(`@track`, propertyKey);
   return trackInternal(target, propertyKey);
 }
+const track = Trace;
 
 const trackInternal = (target: any, propertyKey: string) => {
   if (typeof target === "function" && !Reflect.has(target, propertyKey)) {
@@ -709,13 +710,20 @@ const trackInternal = (target: any, propertyKey: string) => {
 type ConstructorV3 = { new(...args: any[]): any };
 
 function ObservedV2<T extends ConstructorV3>(BaseClass: T) : ConstructorV3 {
-  ConfigureStateMgmt.instance.intentUsingV3(`@observed`, BaseClass?.name);
+  ConfigureStateMgmt.instance.usingV2ObservedTrack(`@observed`, BaseClass?.name);
 
   // prevent @Track inside @observed class
   if (BaseClass.prototype && Reflect.has(BaseClass.prototype,  TrackedObject.___IS_TRACKED_OPTIMISED)) {
     const error=`'@observed class ${BaseClass?.name}': invalid use of V2 @Track decorator inside V3 @observed class. Need to fix class definition to use @track.`
     stateMgmtConsole.applicationError(error);
     throw new Error(error);
+  }
+  const observed = ObservedV2;
+
+
+  if (BaseClass.prototype && !Reflect.has(BaseClass.prototype, ObserveV3.V3_DECO_META)) {
+    // not an error, suspicious of developer oversight
+    stateMgmtConsole.warn(`'@observed class ${BaseClass?.name}': no @track property inside. Is thi intended? Check our application.`);
   }
 
   // Use ID_REFS only if number of observed attrs is significant

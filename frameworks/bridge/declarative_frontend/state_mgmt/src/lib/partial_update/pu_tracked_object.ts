@@ -16,7 +16,7 @@
 // @Track class property decorator
 // indicates to framework to track individual object property value changes
 function Track(target: Object, property: string) {
-  ConfigureStateMgmt.instance.intentUsingV2(`@Track`, property);
+  ConfigureStateMgmt.instance.usingPUObservedTrack(`@Track`, property);
   Reflect.set(target, `${TrackedObject.___TRACKED_PREFIX}${property}`, true);
   Reflect.set(target, TrackedObject.___IS_TRACKED_OPTIMISED, true);
   stateMgmtConsole.debug(`class ${target.constructor?.name}: property @Track ${property}`);

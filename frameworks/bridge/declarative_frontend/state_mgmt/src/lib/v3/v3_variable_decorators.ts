@@ -78,10 +78,7 @@ const state = (target: Object, propertyKey: string) => {
    */
   
   const event = (target, propertyKey) => {
-    ConfigureStateMgmt.instance.intentUsingV3(`@event`, propertyKey);
-  
     ObserveV3.addVariableDecoMeta(target, propertyKey, "@event");
-  
     target[propertyKey] = () => {};
   }
   

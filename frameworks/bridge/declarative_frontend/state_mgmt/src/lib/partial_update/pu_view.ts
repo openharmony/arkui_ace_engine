@@ -1013,16 +1013,23 @@ abstract class ViewPU extends NativeViewPartialUpdate
     const _popFunc: () => void = (classObject && "pop" in classObject) ? classObject.pop! : () => { };
     const updateFunc = (elmtId: number, isFirstRender: boolean) => {
       this.syncInstanceId();
-      stateMgmtConsole.debug(`${this.debugInfo__()}: ${isFirstRender ? `First render` : `Re-render/update`} ${_componentName}[${elmtId}] start ....`);
+      stateMgmtConsole.debug(`${this.debugInfo__()}: ${isFirstRender ? `First render` : `Re-render/update`} ${_componentName}[${elmtId}] ${!this.isViewV3 ? '(enable PU state observe) ' : ''} ${ConfigureStateMgmt.instance.needsV2Observe() ? '(enabled V2 state observe) ' : ''} - start ....`);
 
       ViewStackProcessor.StartGetAccessRecordingFor(elmtId);
-      // FIXME: Because ReactNative dynamic viewer app library uses V3 @observe within V2 @Component, 
-      // the framework needs to enable both V2 recording and 
-      // V3 recording with startBind as well.
-      this.currentlyRenderedElmtIdStack_.push(elmtId);
-      // FIXME: like in V2 setting bindId_ in ObserveV3 does not work with 'stacked' 
-      // update + initial render calls, ike in if and ForEach case, convert to stack as well
-      ObserveV3.getObserve().startBind(this, elmtId);
+
+      if (!this.isViewV3) {
+        // Enable PU state tracking only in PU @Components
+        this.currentlyRenderedElmtIdStack_.push(elmtId);
+      }
+
+      // if V2 @Observed/@Track used anywhere in the app (there is no more fine grained criteria), 
+      // enable V2 object deep observation
+      // FIXME: A @Component should only use PU or V2 state, but RN dynamic viewer uses both.
+      if (ConfigureStateMgmt.instance.needsV2Observe()) {
+        // FIXME: like in V2 setting bindId_ in ObserveV3 does not work with 'stacked' 
+        // update + initial render calls, like in if and ForEach case, convert to stack as well
+        ObserveV3.getObserve().startBind(this, elmtId);
+      }
 
       compilerAssignedUpdateFunc(elmtId, isFirstRender);
       if (!isFirstRender) {
@@ -1034,8 +1041,12 @@ abstract class ViewPU extends NativeViewPartialUpdate
         (node as ArkComponent).cleanStageValue();
       }
 
-      ObserveV3.getObserve().startBind(null, UINodeRegisterProxy.notRecordingDependencies);
-      this.currentlyRenderedElmtIdStack_.pop();
+      if (ConfigureStateMgmt.instance.needsV2Observe()) {
+        ObserveV3.getObserve().startBind(null, UINodeRegisterProxy.notRecordingDependencies);
+      }
+      if (!this.isViewV3) {
+        this.currentlyRenderedElmtIdStack_.pop();
+      }
       ViewStackProcessor.StopGetAccessRecording();
 
       stateMgmtConsole.debug(`${this.debugInfo__()}: ${isFirstRender ? `First render` : `Re-render/update`}  ${_componentName}[${elmtId}] - DONE ....`);
