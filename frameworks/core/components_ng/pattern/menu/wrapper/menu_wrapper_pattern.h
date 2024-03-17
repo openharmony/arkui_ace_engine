@@ -219,6 +219,26 @@ public:
         return menuStatus_;
     }
 
+    bool HasTransitionEffect() const
+    {
+        return hasTransitionEffect_;
+    }
+
+    void SetHasTransitionEffect(bool hasTransitionEffect)
+    {
+        hasTransitionEffect_ = hasTransitionEffect;
+    }
+
+    bool HasPreviewTransitionEffect() const
+    {
+        return hasPreviewTransitionEffect_;
+    }
+
+    void SetHasPreviewTransitionEffect(bool hasPreviewTransitionEffect)
+    {
+        hasPreviewTransitionEffect_ = hasPreviewTransitionEffect;
+    }
+
 protected:
     void OnTouchEvent(const TouchEventInfo& info);
     void CheckAndShowAnimation();
@@ -255,6 +275,8 @@ private:
     bool isFirstShow_ = true;
     bool isShowInSubWindow_ = true;
     MenuStatus menuStatus_ = MenuStatus::INIT;
+    bool hasTransitionEffect_ = false;
+    bool hasPreviewTransitionEffect_ = false;
     ACE_DISALLOW_COPY_AND_MOVE(MenuWrapperPattern);
 };
 } // namespace OHOS::Ace::NG

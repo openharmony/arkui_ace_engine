@@ -2892,6 +2892,14 @@ void ParseMenuParam(const JSCallbackInfo& info, const JSRef<JSObject>& menuOptio
         menuParam.aboutToDisappear = std::move(aboutToDisappear);
     }
 
+    auto menuTransition = menuOptions->GetProperty("transition");
+    menuParam.hasTransitionEffect = false;
+    if (menuTransition->IsObject()) {
+        auto obj = JSRef<JSObject>::Cast(menuTransition);
+        menuParam.hasTransitionEffect = true;
+        menuParam.transition = ParseChainedTransition(obj, info.GetExecutionContext());
+    }
+
     JSRef<JSVal> showInSubWindowValue = menuOptions->GetProperty("showInSubWindow");
     GetMenuShowInSubwindow(menuParam);
     if (menuParam.isShowInSubWindow) {
@@ -2926,7 +2934,8 @@ void ParseAnimationScaleArray(const JSRef<JSArray>& scaleArray, NG::MenuParam& m
     }
 }
 
-void ParseContentPreviewAnimationOptionsParam(const JSRef<JSObject>& menuContentOptions, NG::MenuParam& menuParam)
+void ParseContentPreviewAnimationOptionsParam(const JSCallbackInfo& info, const JSRef<JSObject>& menuContentOptions,
+    NG::MenuParam& menuParam)
 {
     menuParam.previewAnimationOptions.scaleFrom = -1.0f;
     menuParam.previewAnimationOptions.scaleTo = -1.0f;
@@ -2938,6 +2947,13 @@ void ParseContentPreviewAnimationOptionsParam(const JSRef<JSObject>& menuContent
         if (!scaleProperty->IsEmpty() && scaleProperty->IsArray()) {
             JSRef<JSArray> scaleArray = JSRef<JSArray>::Cast(scaleProperty);
             ParseAnimationScaleArray(scaleArray, menuParam);
+        }
+        auto previewTransition = animationOptionsObj->GetProperty("transition");
+        menuParam.hasPreviewTransitionEffect = false;
+        if (previewTransition->IsObject()) {
+            auto obj = JSRef<JSObject>::Cast(previewTransition);
+            menuParam.hasPreviewTransitionEffect = true;
+            menuParam.previewTransition = ParseChainedTransition(obj, info.GetExecutionContext());
         }
     }
 }
@@ -2956,7 +2972,7 @@ void ParseBindContentOptionParam(const JSCallbackInfo& info, const JSRef<JSVal>&
     if (preview->IsNumber()) {
         if (preview->ToNumber<int32_t>() == 1) {
             menuParam.previewMode = MenuPreviewMode::IMAGE;
-            ParseContentPreviewAnimationOptionsParam(menuContentOptions, menuParam);
+            ParseContentPreviewAnimationOptionsParam(info, menuContentOptions, menuParam);
         }
     } else {
         previewBuilderFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSFunc>::Cast(preview));
@@ -2970,7 +2986,7 @@ void ParseBindContentOptionParam(const JSCallbackInfo& info, const JSRef<JSVal>&
             func->Execute();
         };
         menuParam.previewMode = MenuPreviewMode::CUSTOM;
-        ParseContentPreviewAnimationOptionsParam(menuContentOptions, menuParam);
+        ParseContentPreviewAnimationOptionsParam(info, menuContentOptions, menuParam);
     }
 }
 

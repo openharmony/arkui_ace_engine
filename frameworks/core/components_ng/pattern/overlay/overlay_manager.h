@@ -519,6 +519,11 @@ private:
     void PlayDefaultModalOut(const RefPtr<FrameNode>& modalNode, const RefPtr<RenderContext>& context,
         AnimationOption option, float showHeight);
     void OpenToastAnimation(const RefPtr<FrameNode>& toastNode, int32_t duration);
+    void OnShowMenuAnimationFinished(const WeakPtr<FrameNode> menuWK, const WeakPtr<OverlayManager> weak,
+        int32_t instanceId);
+    void OnPopMenuAnimationFinished(const WeakPtr<FrameNode> menuWK, const WeakPtr<UINode> rootWeak,
+        const WeakPtr<OverlayManager> weak, int32_t instanceId);
+    void UpdateMenuVisibility(const RefPtr<FrameNode>& menu);
 
     void HandleModalShow(std::function<void(const std::string&)>&& callback,
         std::function<RefPtr<UINode>()>&& buildNodeFunc, NG::ModalStyle& modalStyle, std::function<void()>&& onAppear,

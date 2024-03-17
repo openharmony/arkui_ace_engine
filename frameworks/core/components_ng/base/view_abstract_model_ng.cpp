@@ -110,6 +110,12 @@ void ViewAbstractModelNG::BindMenu(
     auto menuNode = overlayManager->GetMenuNode(targetId);
     if (menuNode) {
         auto wrapperPattern = menuNode->GetPattern<MenuWrapperPattern>();
+        wrapperPattern->SetHasTransitionEffect(menuParam.hasTransitionEffect);
+        if (menuParam.hasTransitionEffect) {
+            auto renderContext = menuNode->GetRenderContext();
+            CHECK_NULL_VOID(renderContext);
+            renderContext->UpdateChainedTransition(menuParam.transition);
+        }
         if (!wrapperPattern->IsShow() && menuParam.isShow) {
             overlayManager->ShowMenu(targetId, menuParam.positionOffset, menuNode);
         } else if (wrapperPattern->IsShow() && menuParam.setShow && !menuParam.isShow) {

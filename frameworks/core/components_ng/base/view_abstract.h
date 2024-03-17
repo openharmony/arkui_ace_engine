@@ -90,6 +90,10 @@ struct MenuParam {
     std::optional<Dimension> arrowOffset;
     bool isAboveApps = false;
     bool isShowInSubWindow = false;
+    bool hasTransitionEffect = false;
+    RefPtr<NG::ChainedTransitionEffect> transition;
+    bool hasPreviewTransitionEffect = false;
+    RefPtr<NG::ChainedTransitionEffect> previewTransition;
     MenuType type = MenuType::MENU;
     MenuPreviewMode previewMode = MenuPreviewMode::NONE;
     MenuPreviewAnimationOptions previewAnimationOptions;
