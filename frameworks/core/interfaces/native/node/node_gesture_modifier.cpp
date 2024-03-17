@@ -152,7 +152,6 @@ void addGestureToNode(ArkUINodeHandle node, ArkUIGesture* gesture, ArkUI_Int32 p
         gestureMask = static_cast<GestureMask>(mask);
     }
     gesturePtr->SetGestureMask(gestureMask);
-    //reference to type 'const RefPtr<NG::Gesture>' could not bind to an lvalue of type 'OHOS::Ace::NG::Gesture *'
     gestureHub->AttachGesture(gesturePtr);
 }
 
