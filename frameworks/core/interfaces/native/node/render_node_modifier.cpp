@@ -122,9 +122,7 @@ void SetShadowOffset(ArkUINodeHandle node, ArkUI_Float32 offsetX, ArkUI_Float32 
     auto* currentNode = reinterpret_cast<UINode*>(node);
     auto renderContext = GetRenderContext(currentNode);
     CHECK_NULL_VOID(renderContext);
-    Dimension first = Dimension(offsetX, DimensionUnit::VP);
-    Dimension second = Dimension(offsetY, DimensionUnit::VP);
-    renderContext->SetShadowOffset(first.ConvertToPx(), second.ConvertToPx());
+    renderContext->SetShadowOffset(offsetX, offsetY);
 }
 
 void SetShadowAlpha(ArkUINodeHandle node, ArkUI_Float32 alpha)
