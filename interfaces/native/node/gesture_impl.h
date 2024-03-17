@@ -33,6 +33,10 @@ int32_t SetGestureEventTarget(ArkUI_GestureRecognizer* recognizer, ArkUI_Gesture
 int32_t AddGestureToNode(ArkUI_NodeHandle node, ArkUI_GestureRecognizer* recognizer, ArkUI_GesturePriority priorityNum,
     ArkUI_GestureMask mask);
 
+int32_t RemoveGestureFromNode(ArkUI_NodeHandle node, ArkUI_GestureRecognizer* recognizer);
+
+ArkUI_GestureRecognizerType GetGestureType(ArkUI_GestureRecognizer* recognizer);
+
 void HandleGestureEvent(ArkUINodeEvent* event);
 
 }; // namespace OHOS::Ace::GestureModel

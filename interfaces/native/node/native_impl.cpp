@@ -80,9 +80,9 @@ ArkUI_NativeGestureAPI_1 gestureImpl_1 = {
     nullptr,
     OHOS::Ace::GestureModel::SetGestureEventTarget,
     OHOS::Ace::GestureModel::AddGestureToNode,
+    OHOS::Ace::GestureModel::RemoveGestureFromNode,
     nullptr,
-    nullptr,
-    nullptr,
+    OHOS::Ace::GestureModel::GetGestureType,
 };
 
 } // namespace
