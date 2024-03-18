@@ -506,6 +506,10 @@ abstract class ViewPU extends NativeViewPartialUpdate
     this.parent_ = parent;
   }
 
+  public getParent() : ViewPU | undefined {
+    return this.parent_;
+  }
+  
   /**
    * Indicate if this @Component is allowed to freeze by calling with freezeState=true
    * Called with value of the @Component decorator 'freezeWhenInactive' parameter
@@ -1030,7 +1034,7 @@ abstract class ViewPU extends NativeViewPartialUpdate
       // if V2 @Observed/@Track used anywhere in the app (there is no more fine grained criteria), 
       // enable V2 object deep observation
       // FIXME: A @Component should only use PU or V2 state, but ReactNative dynamic viewer uses both.
-      if (ConfigureStateMgmt.instance.needsV2Observe()) {
+      if (this.isViewV3 || ConfigureStateMgmt.instance.needsV2Observe()) {
         // FIXME: like in V2 setting bindId_ in ObserveV3 does not work with 'stacked' 
         // update + initial render calls, like in if and ForEach case, convert to stack as well
         ObserveV3.getObserve().startBind(this, elmtId);
@@ -1046,7 +1050,7 @@ abstract class ViewPU extends NativeViewPartialUpdate
         (node as ArkComponent).cleanStageValue();
       }
 
-      if (ConfigureStateMgmt.instance.needsV2Observe()) {
+      if (this.isViewV3 || ConfigureStateMgmt.instance.needsV2Observe()) {
         ObserveV3.getObserve().startBind(null, UINodeRegisterProxy.notRecordingDependencies);
       }
       if (!this.isViewV3) {
@@ -1637,24 +1641,14 @@ abstract class ViewPU extends NativeViewPartialUpdate
     ObserveV3.getObserve().constructMonitor(this, this.constructor.name);
     ObserveV3.getObserve().constructComputed(this, this.constructor.name);
 
-    // FIME ProvideConsumeUtilV3.setupConsumeVarsV3(this);
+    ProvideConsumeUtilV3.setupConsumeVarsV3(this);
 
     // Always use ID_REFS in ViewPU
     this[ObserveV3.ID_REFS] = {};
-  }
-
-  /**
-   * v3: find a @provide'ed variable in the nearest ancestor ViewPU.
-   * @param provideName 
-   * @returns 
-   */
-  public findProvideV3(provideName: string): [ViewPU | undefined, string, boolean] {
-    // FIXME unimplemented
-    return [ undefined, provideName, true]
-  }
+  } 
 
   // WatchIds that needs to be fired later gets added to monitorIdsDelayedUpdate
-  // monitor firechange will be triggered for all these watchIds once this view gets active
+  // monitor fireChange will be triggered for all these watchIds once this view gets active
   public addDelayedMonitorIds(watchId: number) {
     /* FIXME @Component freeze 
     stateMgmtConsole.debug(`${this.debugInfo__()} addDelayedMonitorIds called for watchId: ${watchId}`);

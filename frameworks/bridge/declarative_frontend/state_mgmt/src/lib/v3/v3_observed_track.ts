@@ -20,7 +20,9 @@
  */
 
 class ObserveV3 {
+  // meta data about decorated variable inside prototype
   public static readonly V3_DECO_META = Symbol('__v3_deco_meta__'); 
+
   public static readonly SYMBOL_REFS = Symbol('__use_refs__');
   public static readonly ID_REFS = Symbol('__id_refs__');
   public static readonly MONITOR_REFS = Symbol("___monitor_refs_");
@@ -756,7 +758,7 @@ class ObserveV3 {
     );
   }
 
- 
+
   public static usesV3Variables(proto : Object) : boolean {
   return (proto && typeof proto =="object" && proto[ObserveV3.V3_DECO_META]);
   }
@@ -784,7 +786,7 @@ const trackInternal = (target: any, propertyKey: string) => {
     // dynamic track，and it not a static attribute
     target = target.prototype
   }
-  let storeProp = ObserveV3.OB_PREFIX + propertyKey
+  const storeProp = ObserveV3.OB_PREFIX + propertyKey
   target[storeProp] = target[propertyKey]
   Reflect.defineProperty(target, propertyKey, {
     get() {

@@ -5630,6 +5630,9 @@ class ViewPU extends NativeViewPartialUpdate {
         }
         this.parent_ = parent;
     }
+    getParent() {
+        return this.parent_;
+    }
     /**
      * Indicate if this @Component is allowed to freeze by calling with freezeState=true
      * Called with value of the @Component decorator 'freezeWhenInactive' parameter
@@ -6100,7 +6103,7 @@ class ViewPU extends NativeViewPartialUpdate {
             // if V2 @Observed/@Track used anywhere in the app (there is no more fine grained criteria), 
             // enable V2 object deep observation
             // FIXME: A @Component should only use PU or V2 state, but ReactNative dynamic viewer uses both.
-            if (ConfigureStateMgmt.instance.needsV2Observe()) {
+            if (this.isViewV3 || ConfigureStateMgmt.instance.needsV2Observe()) {
                 // FIXME: like in V2 setting bindId_ in ObserveV3 does not work with 'stacked' 
                 // update + initial render calls, like in if and ForEach case, convert to stack as well
                 ObserveV3.getObserve().startBind(this, elmtId);
@@ -6113,7 +6116,7 @@ class ViewPU extends NativeViewPartialUpdate {
             if (node !== undefined) {
                 node.cleanStageValue();
             }
-            if (ConfigureStateMgmt.instance.needsV2Observe()) {
+            if (this.isViewV3 || ConfigureStateMgmt.instance.needsV2Observe()) {
                 ObserveV3.getObserve().startBind(null, UINodeRegisterProxy.notRecordingDependencies);
             }
             if (!this.isViewV3) {
@@ -6639,21 +6642,12 @@ class ViewPU extends NativeViewPartialUpdate {
         // FIXME, can we skip for apps that do not use V3 at all?
         ObserveV3.getObserve().constructMonitor(this, this.constructor.name);
         ObserveV3.getObserve().constructComputed(this, this.constructor.name);
-        // FIME ProvideConsumeUtilV3.setupConsumeVarsV3(this);
+        ProvideConsumeUtilV3.setupConsumeVarsV3(this);
         // Always use ID_REFS in ViewPU
         this[ObserveV3.ID_REFS] = {};
     }
-    /**
-     * v3: find a @provide'ed variable in the nearest ancestor ViewPU.
-     * @param provideName
-     * @returns
-     */
-    findProvideV3(provideName) {
-        // FIXME unimplemented
-        return [undefined, provideName, true];
-    }
     // WatchIds that needs to be fired later gets added to monitorIdsDelayedUpdate
-    // monitor firechange will be triggered for all these watchIds once this view gets active
+    // monitor fireChange will be triggered for all these watchIds once this view gets active
     addDelayedMonitorIds(watchId) {
         /* FIXME @Component freeze
         
@@ -7431,6 +7425,7 @@ class ObserveV3 {
         return (proto && typeof proto == "object" && proto[ObserveV3.V3_DECO_META]);
     }
 } // class ObserveV3
+// meta data about decorated variable inside prototype
 ObserveV3.V3_DECO_META = Symbol('__v3_deco_meta__');
 ObserveV3.SYMBOL_REFS = Symbol('__use_refs__');
 ObserveV3.ID_REFS = Symbol('__id_refs__');
@@ -7629,7 +7624,7 @@ const trackInternal = (target, propertyKey) => {
         // dynamic track，and it not a static attribute
         target = target.prototype;
     }
-    let storeProp = ObserveV3.OB_PREFIX + propertyKey;
+    const storeProp = ObserveV3.OB_PREFIX + propertyKey;
     target[storeProp] = target[propertyKey];
     Reflect.defineProperty(target, propertyKey, {
         get() {
@@ -7963,7 +7958,7 @@ target[watchProp] ? target[watchProp][propertyKey] = computeFunction
                   : target[watchProp] = { [propertyKey]: computeFunction };
 }
 
-*/ 
+*/
 /*
  * Copyright (c) 2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -8045,6 +8040,158 @@ const event = (target, propertyKey) => {
   target[propertyKey] = () => {};
 }
 */
+class ProvideConsumeUtilV3 {
+    /**
+     * Helper function to add meta data about @provide and @comnsume decorators to ViewPU
+     * similar to @see addVariableDecoMeta, but adds the alias to allow search from @consume for @provide counterpart
+     * @param proto prototype object of application class derived from ViewPU
+     * @param varName decorated variable
+     * @param deco "@state", "@event", etc (note "@model" gets transpiled in "@param" and "@event")
+     */
+    static addProvideConsumeVariableDecoMeta(proto, varName, aliasName, deco) {
+        var _a;
+        var _b;
+        // add decorator meta data to prototype
+        const meta = (_a = proto[_b = ObserveV3.V3_DECO_META]) !== null && _a !== void 0 ? _a : (proto[_b] = {});
+        // note: aliasName is the actual alias not the prefixed version
+        meta[varName] = { "deco": deco, "aliasName": aliasName };
+        // prefix to avoid name collisions with variable of same name as the alias!
+        const aliasProp = ProvideConsumeUtilV3.ALIAS_PREFIX + aliasName;
+        meta[aliasProp] = { "varName": varName, "deco": deco };
+        // FIXME 
+        // when splitting ViewPU and ViewV3
+        // use instanceOf. Until then, this is a workaround.
+        // any @state, @track, etc V3 event handles this function to return false
+        Reflect.defineProperty(proto, "isViewV3", {
+            get() { return true; },
+            enumerable: false
+        });
+    }
+    static setupConsumeVarsV3(view) {
+        const meta = view && view[ObserveV3.V3_DECO_META];
+        if (!meta) {
+            return;
+        }
+        for (const [key, value] of Object.entries(meta)) {
+            if (value["deco"] == "@consume" && value["varName"]) {
+                const prefixedAliasName = key;
+                let result = ProvideConsumeUtilV3.findProvide(view, prefixedAliasName);
+                if (result && result[0] && result[1]) {
+                    ProvideConsumeUtilV3.connectConsume2Provide(view, value["varName"], result[0], result[1]);
+                }
+                else {
+                    ProvideConsumeUtilV3.defineConsumeWithoutProvide(view, value["varName"]);
+                }
+            }
+        }
+    }
+    /**
+    * v3: find a @provide'ed variable from its nearest ancestor ViewPU.
+    * @param searchingAliasName The key name to search for.
+    * @returns A tuple containing the ViewPU instance where the provider is found
+    * and the provider name
+    * If root @Component reached without finding, returns undefined.
+    */
+    static findProvide(view, searchingPrefixedAliasName) {
+        var _a;
+        let checkView = view === null || view === void 0 ? void 0 : view.getParent();
+        while (checkView) {
+            const meta = (_a = checkView.constructor) === null || _a === void 0 ? void 0 : _a.prototype[ObserveV3.V3_DECO_META];
+            if (meta && meta[searchingPrefixedAliasName]) {
+                const aliasMeta = meta[searchingPrefixedAliasName];
+                const providedVarName = aliasMeta && (aliasMeta["deco"] == "@provide" ? aliasMeta["varName"] : undefined);
+                if (providedVarName) {
+                    
+                    return [checkView, providedVarName];
+                }
+            }
+            checkView = checkView.getParent();
+        }
+        ; // while
+        
+        return undefined;
+    }
+    static connectConsume2Provide(consumeView, consumeVarName, provideView, provideVarName) {
+        var _a;
+        
+        // weakref provideView ?
+        //const storeProvide = ObserveV3.OB_PREFIX + provideVarName;
+        const weakView = new WeakRef(provideView);
+        const provideViewName = (_a = provideView.constructor) === null || _a === void 0 ? void 0 : _a.name;
+        Reflect.defineProperty(consumeView, consumeVarName, {
+            get() {
+                
+                ObserveV3.getObserve().addRef(this, consumeVarName);
+                const view = weakView.deref();
+                if (!view) {
+                    const error = `${this.debugInfo__()}: get() on @consume ${consumeVarName}: providing @ComponentV2 ${provideViewName} no longer exists. Application error.`;
+                    stateMgmtConsole.error(error);
+                    throw new Error(error);
+                }
+                return view[provideVarName];
+            },
+            set(val) {
+                // If the object has not been observed, you can directly assign a value to it. This improves performance.
+                
+                const view = weakView.deref();
+                if (!view) {
+                    const error = `${this.debugInfo__()}: set() on @consume ${consumeVarName}: providing @ComponentV2 ${provideViewName} no longer exists. Application error.`;
+                    stateMgmtConsole.error(error);
+                    throw new Error(error);
+                }
+                if (val !== view[provideVarName]) {
+                    
+                    view[provideVarName] = val;
+                    if (this[ObserveV3.SYMBOL_REFS]) { // This condition can improve performance.
+                        ObserveV3.getObserve().fireChange(this, consumeVarName);
+                    }
+                }
+            },
+            enumerable: true
+        });
+    }
+    static defineConsumeWithoutProvide(consumeView, consumeVarName) {
+        
+        const storeProp = ObserveV3.OB_PREFIX + consumeVarName;
+        consumeView[storeProp] = consumeView[consumeVarName]; // use local init value, also as backing store
+        Reflect.defineProperty(consumeView, consumeVarName, {
+            get() {
+                ObserveV3.getObserve().addRef(this, consumeVarName);
+                return ObserveV3.autoProxyObject(this, ObserveV3.OB_PREFIX + consumeVarName);
+            },
+            set(val) {
+                if (val !== this[storeProp]) {
+                    this[storeProp] = val;
+                    if (this[ObserveV3.SYMBOL_REFS]) { // This condition can improve performance.
+                        ObserveV3.getObserve().fireChange(this, consumeVarName);
+                    }
+                }
+            },
+            enumerable: true
+        });
+    }
+}
+ProvideConsumeUtilV3.ALIAS_PREFIX = '___pc_alias_';
+/**
+ * ViewPU variable decorator @provide(alias> : string) varName
+ * @param alias defaults to varName
+ * @returns
+ */
+const provide = (aliasName) => {
+    return (target, varName) => {
+        const providedUnderName = aliasName || varName;
+        ProvideConsumeUtilV3.addProvideConsumeVariableDecoMeta(target, varName, providedUnderName, "@provide");
+        trackInternal(target, varName);
+    };
+}; // @provide
+const consume = (aliasName) => {
+    return (target, varName) => {
+        const searchForProvideWithName = aliasName || varName;
+        // redefining the property happens when ViewPU gets constructed
+        // and @Consume gets connected to @provide counterpart
+        ProvideConsumeUtilV3.addProvideConsumeVariableDecoMeta(target, varName, searchForProvideWithName, "@consume");
+    };
+};
 // The prop parameter is not carried when the component is updated.
 // FIXME what is the purpose of this ?
 /*
