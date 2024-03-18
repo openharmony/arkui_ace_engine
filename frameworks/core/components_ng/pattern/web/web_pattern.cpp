@@ -1893,7 +1893,6 @@ void WebPattern::HandleTouchDown(const TouchEventInfo& info, bool fromOverlay)
 
 void WebPattern::HandleTouchUp(const TouchEventInfo& info, bool fromOverlay)
 {
-    ResetDragAction();
     CHECK_NULL_VOID(delegate_);
     std::list<TouchInfo> touchInfos;
     if (!ParseTouchInfo(info, touchInfos)) {
