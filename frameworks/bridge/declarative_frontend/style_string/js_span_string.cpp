@@ -281,7 +281,6 @@ void JSMutableSpanString::Constructor(const JSCallbackInfo& args)
         auto spanBases = JSSpanString::ParseJsSpanBaseVector(args[1], StringUtils::ToWstring(data).length());
         spanString = AceType::MakeRefPtr<MutableSpanString>(data, spanBases);
     }
-    LOGE("jyj string value %s", data.c_str());
     jsSpanString->SetController(spanString);
     jsSpanString->SetMutableController(spanString);
     args.SetReturnValue(Referenced::RawPtr(jsSpanString));
