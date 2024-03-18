@@ -16204,6 +16204,9 @@ class ArkWebComponent extends ArkComponent {
   onSslErrorEventReceive(callback) {
     throw new Error('Method not implemented.');
   }
+  onSslErrorEvent(callback) {
+    throw new Error('Method not implemented.');
+  }
   onClientAuthenticationRequest(callback) {
     throw new Error('Method not implemented.');
   }

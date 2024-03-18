@@ -266,6 +266,20 @@ void SslErrorResultOhos::HandleCancel()
     }
 }
 
+void AllSslErrorResultOhos::HandleConfirm()
+{
+    if (result_) {
+        result_->HandleConfirm();
+    }
+}
+
+void AllSslErrorResultOhos::HandleCancel()
+{
+    if (result_) {
+        result_->HandleCancel();
+    }
+}
+
 void SslSelectCertResultOhos::HandleConfirm(const std::string& privateKeyFile, const std::string& certChainFile)
 {
     if (result_) {
@@ -4407,6 +4421,27 @@ bool WebDelegate::OnSslErrorRequest(const std::shared_ptr<BaseEventInfo>& info)
         CHECK_NULL_VOID(webCom);
         result = webCom->OnSslErrorRequest(info.get());
 #endif
+    });
+    return result;
+}
+
+bool WebDelegate::OnAllSslErrorRequest(const std::shared_ptr<BaseEventInfo>& info)
+{
+    auto context = context_.Upgrade();
+    CHECK_NULL_RETURN(context, false);
+    bool result = false;
+    auto jsTaskExecutor = SingleTaskExecutor::Make(context->GetTaskExecutor(), TaskExecutor::TaskType::JS);
+    jsTaskExecutor.PostSyncTask([weak = WeakClaim(this), info, &result]() {
+        auto delegate = weak.Upgrade();
+        CHECK_NULL_VOID(delegate);
+        auto webPattern = delegate->webPattern_.Upgrade();
+        CHECK_NULL_VOID(webPattern);
+        auto webEventHub = webPattern->GetWebEventHub();
+        CHECK_NULL_VOID(webEventHub);
+        auto propOnAllSslErrorEvent = webEventHub->GetOnAllSslErrorRequestEvent();
+        CHECK_NULL_VOID(propOnAllSslErrorEvent);
+        result = propOnAllSslErrorEvent(info);
+        return;
     });
     return result;
 }

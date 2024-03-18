@@ -149,6 +149,19 @@ private:
     std::shared_ptr<OHOS::NWeb::NWebJSSslErrorResult> result_;
 };
 
+class AllSslErrorResultOhos : public AllSslErrorResult {
+    DECLARE_ACE_TYPE(AllSslErrorResultOhos, AllSslErrorResult)
+
+public:
+    AllSslErrorResultOhos(std::shared_ptr<OHOS::NWeb::NWebJSAllSslErrorResult> result) : result_(result) {}
+
+    void HandleConfirm() override;
+    void HandleCancel() override;
+
+private:
+    std::shared_ptr<OHOS::NWeb::NWebJSAllSslErrorResult> result_;
+};
+
 class SslSelectCertResultOhos : public SslSelectCertResult {
     DECLARE_ACE_TYPE(SslSelectCertResultOhos, SslSelectCertResult)
 
@@ -616,6 +629,7 @@ public:
     bool OnCommonDialog(const std::shared_ptr<BaseEventInfo>& info, DialogEventType dialogEventType);
     bool OnHttpAuthRequest(const std::shared_ptr<BaseEventInfo>& info);
     bool OnSslErrorRequest(const std::shared_ptr<BaseEventInfo>& info);
+    bool OnAllSslErrorRequest(const std::shared_ptr<BaseEventInfo>& info);
     bool OnSslSelectCertRequest(const std::shared_ptr<BaseEventInfo>& info);
     void OnDownloadStart(const std::string& url, const std::string& userAgent, const std::string& contentDisposition,
         const std::string& mimetype, long contentLength);

@@ -723,6 +723,23 @@ public:
         onSslErrorRequestImpl_ = std::move(onSslErrorRequestImpl);
     }
 
+    using OnAllSslErrorRequestImpl = std::function<bool(const BaseEventInfo* info)>;
+    bool OnAllSslErrorRequest(const BaseEventInfo* info) const
+    {
+        if (onAllSslErrorRequestImpl_) {
+            return onAllSslErrorRequestImpl_(info);
+        }
+        return false;
+    }
+
+    void SetOnAllSslErrorRequestImpl(OnAllSslErrorRequestImpl && onAllSslErrorRequestImpl)
+    {
+        if (onAllSslErrorRequestImpl == nullptr) {
+            return;
+        }
+        onAllSslErrorRequestImpl_ = std::move(onAllSslErrorRequestImpl);
+    }
+
     using OnSslSelectCertRequestImpl = std::function<bool(const BaseEventInfo* info)>;
     bool OnSslSelectCertRequest(const BaseEventInfo* info) const
     {
@@ -1050,6 +1067,7 @@ private:
     OnOverrideUrlLoadingImpl onOverrideUrlLoadingImpl_;
     OnHttpAuthRequestImpl onHttpAuthRequestImpl_;
     OnSslErrorRequestImpl onSslErrorRequestImpl_;
+    OnAllSslErrorRequestImpl onAllSslErrorRequestImpl_;
     OnSslSelectCertRequestImpl onSslSelectCertRequestImpl_;
     OnContextMenuImpl onContextMenuImpl_;
     OnContextMenuHideImpl onContextMenuHideImpl_;
