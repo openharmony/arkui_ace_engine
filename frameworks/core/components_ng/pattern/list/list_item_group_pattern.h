@@ -172,11 +172,10 @@ public:
 
     void SetItemPressed(bool isPressed, int32_t id)
     {
-        for (auto& child : itemPosition_) {
-            if (child.second.id == id) {
-                child.second.isPressed = isPressed;
-                break;
-            }
+        if (isPressed) {
+            pressedItem_.emplace(id);
+        } else {
+            pressedItem_.erase(id);
         }
     }
 
@@ -205,6 +204,7 @@ private:
     float_t footerMainSize_ = 0.0f;
 
     std::optional<LayoutedItemInfo> layoutedItemInfo_;
+    std::set<int32_t> pressedItem_;
     bool layouted_ = false;
 
     ListItemGroupLayoutAlgorithm::PositionMap itemPosition_;
