@@ -52,7 +52,7 @@ template("pa_backend") {
 
     sources = [
       "engine/common/js_backend_engine_loader.cpp",
-      "pa_backend.cpp"
+      "pa_backend.cpp",
     ]
   }
 }

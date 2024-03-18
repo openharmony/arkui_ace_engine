@@ -81,15 +81,14 @@ ohos_shared_library("ace_uicontent") {
     "${ace_root}/interfaces/inner_api/ace/ui_event.cpp",
     "${ace_root}/interfaces/inner_api/ace/ui_event_func.cpp",
   ]
-
+  external_deps = [ "hilog:libhilog" ]
   if (!use_mingw_win && !use_mac && !use_linux &&
       defined(uicast_configs.uicast_enable)) {
     sources +=
         [ "${ace_root}/interfaces/inner_api/ace/uicast/uicast_subscriber.cpp" ]
-    external_deps = [
+    external_deps += [
       "ability_base:want",
       "common_event_service:cesfwk_innerkits",
-      "hilog:libhilog",
     ]
   }
   deps = [ ":ace_forward_compatibility" ]
