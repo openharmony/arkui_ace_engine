@@ -107,7 +107,7 @@ typedef enum {
     ARKUI_NODE_FLEX,
     /** Refresh component. */
     ARKUI_NODE_REFRESH,
-    /** 瀑布流容器。 */
+    /** WaterFlow component. */
     ARKUI_NODE_WATER_FLOW,
 } ArkUI_NodeType;
 

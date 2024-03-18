@@ -840,6 +840,19 @@ void ResetTextInputUserUnderlineColor(ArkUINodeHandle node)
     TextFieldModelNG::SetUserUnderlineColor(frameNode, userColor);
 }
 
+void SetTextInputTextSelection(ArkUINodeHandle node, ArkUI_Int32 start, ArkUI_Int32 end)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    TextFieldModelNG::SetTextSelection(frameNode, start, end);
+}
+
+ArkUI_Int32 GetTextInputTextSelectionIndex(ArkUINodeHandle node, ArkUI_Bool isEnd)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, ERROR_INT_CODE);
+    return TextFieldModelNG::GetTextSelectionIndex(frameNode, isEnd);
+}
 } // namespace
 
 namespace NodeModifier {
@@ -868,7 +881,7 @@ const ArkUITextInputModifier* GetTextInputModifier()
         GetTextInputTextCanacelIconColor, GetTextInputTextAlign, GetTextInputFontColor, GetTextInputFontStyle,
         GetTextInputFontWeight, GetTextInputFontSize, GetTextInputCancelButtonStyle, SetTextInputBackgroundColor,
         ResetTextInputBackgroundColor, SetTextInputNormalUnderlineColor, SetTextInputUserUnderlineColor,
-        ResetTextInputUserUnderlineColor};
+        ResetTextInputUserUnderlineColor, SetTextInputTextSelection, GetTextInputTextSelectionIndex};
     return &modifier;
 }
 

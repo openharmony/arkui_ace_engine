@@ -3570,6 +3570,15 @@ TranslateOptions ViewAbstract::GetTranslate(FrameNode* frameNode)
     return target->GetTransformTranslateValue(value);
 }
 
+float ViewAbstract::GetAspectRatio(FrameNode* frameNode)
+{
+    float aspectRatio = 1.0f;
+    const auto& layoutProperty = frameNode->GetLayoutProperty();
+    CHECK_NULL_RETURN(layoutProperty, aspectRatio);
+    aspectRatio = layoutProperty->GetAspectRatio();
+    return aspectRatio;
+}
+
 void ViewAbstract::SetJSFrameNodeOnClick(FrameNode* frameNode, GestureEventFunc&& clickEventFunc)
 {
     CHECK_NULL_VOID(frameNode);

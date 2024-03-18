@@ -699,6 +699,7 @@ enum ArkUINodeType {
     ARKUI_CALENDAR_PICKER,
     ARKUI_GRID_ITEM,
     ARKUI_CUSTOM,
+    ARKUI_WATER_FLOW,
 };
 
 enum ArkUIEventCategory {
@@ -968,6 +969,12 @@ union ArkUIInt32orFloat32 {
 struct ArkUIBackgroundImage {
     ArkUI_CharPtr src;
     ArkUI_Int32 repeat;
+};
+
+struct ArkUIShowCountOptions {
+    ArkUI_Bool open;
+    ArkUI_Int32 thresholdPercentage;
+    ArkUI_Bool highlightBorder;
 };
 
 struct ArkUICommonModifier {
@@ -1307,6 +1314,7 @@ struct ArkUICommonModifier {
     void (*setMoveTransition)(ArkUINodeHandle node, ArkUI_Int32 value, const ArkUIAnimationOptionType* opacityOption);
     ArkUIMoveTransitionType (*getMoveTransition)(ArkUINodeHandle node);
     void (*resetMask)(ArkUINodeHandle node);
+    ArkUI_Float32 (*getAspectRatio)(ArkUINodeHandle node);
 };
 
 struct ArkUICommonShapeModifier {
@@ -1557,6 +1565,7 @@ struct ArkUIImageModifier {
     ArkUIFilterColorType (*getColorFilter)(ArkUINodeHandle node);
     ArkUI_CharPtr (*getAlt)(ArkUINodeHandle node);
     ArkUI_Int32 (*getImageDraggable)(ArkUINodeHandle node);
+    ArkUI_Int32 (*getRenderMode)(ArkUINodeHandle node);
 };
 
 struct ArkUIColumnModifier {
@@ -2127,6 +2136,10 @@ struct ArkUITextAreaModifier {
     void (*resetTextAreaType)(ArkUINodeHandle node);
     ArkUI_Int32 (*getTextAreaType)(ArkUINodeHandle node);
     ArkUI_Int32 (*getTextAreaTextAlign)(ArkUINodeHandle node);
+    void (*setTextAreaShowCounterOptions)(
+        ArkUINodeHandle node, ArkUI_Int32 open, ArkUI_Int32 thresholdPercentage, ArkUI_Int32 highlightBorder);
+    void (*resetTextAreaShowCounterOptions)(ArkUINodeHandle node);
+    void (*getTextAreaShowCounterOptions)(ArkUINodeHandle node, ArkUIShowCountOptions* options);
 };
 
 struct ArkUITextInputModifier {
@@ -2216,6 +2229,8 @@ struct ArkUITextInputModifier {
     void (*setTextInputNormalUnderlineColor)(ArkUINodeHandle node, ArkUI_Uint32 typingColor);
     void (*setTextInputUserUnderlineColor)(ArkUINodeHandle node, const ArkUI_Float32* values, ArkUI_Int32 length);
     void (*resetTextInputUserUnderlineColor)(ArkUINodeHandle node);
+    void (*setTextInputTextSelection)(ArkUINodeHandle node, ArkUI_Int32 start, ArkUI_Int32 end);
+    ArkUI_Int32 (*getTextInputTextSelectionIndex)(ArkUINodeHandle node, ArkUI_Bool isEnd);
 };
 
 struct ArkUIWebModifier {
@@ -2341,6 +2356,7 @@ struct ArkUIWaterFlowModifier {
     void (*resetWaterFlowNestedScroll)(ArkUINodeHandle node);
     void (*setWaterFlowFriction)(ArkUINodeHandle node, ArkUI_Float32 friction);
     void (*resetWaterFlowFriction)(ArkUINodeHandle node);
+    ArkUI_Int32 (*getLayoutDirection)(ArkUINodeHandle node);
 };
 
 struct ArkUIMenuItemModifier {

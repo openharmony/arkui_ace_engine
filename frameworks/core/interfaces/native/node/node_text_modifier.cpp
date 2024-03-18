@@ -706,6 +706,20 @@ ArkUI_Int32 GetItalicFontStyle(ArkUINodeHandle node)
     CHECK_NULL_RETURN(frameNode, ERROR_INT_CODE);
     return static_cast<ArkUI_Int32>(TextModelNG::GetItalicFontStyle(frameNode));
 }
+
+ArkUI_Int32 GetTextWordBreak(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, ERROR_INT_CODE);
+    return static_cast<ArkUI_Int32>(TextModelNG::GetWordBreak(frameNode));
+}
+
+ArkUI_Int32 GetTextEllipsisMode(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, ERROR_INT_CODE);
+    return static_cast<ArkUI_Int32>(TextModelNG::GetEllipsisMode(frameNode));
+}
 } // namespace
 
 namespace NodeModifier {
@@ -784,6 +798,8 @@ const ArkUITextModifier* GetTextModifier()
         GetTextBaselineOffset,
         GetTextShadowCount,
         GetTextShadow,
+        GetTextWordBreak,
+        GetTextEllipsisMode
     };
 
     return &modifier;

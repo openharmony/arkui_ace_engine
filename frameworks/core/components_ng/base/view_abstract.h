@@ -588,7 +588,7 @@ public:
     static bool GetEnabled(FrameNode* frameNode);
     static MarginProperty GetMargin(FrameNode* frameNode);
     static TranslateOptions GetTranslate(FrameNode* frameNode);
-
+    static float GetAspectRatio(FrameNode* frameNode);
 private:
     static void AddDragFrameNodeToManager();
 };

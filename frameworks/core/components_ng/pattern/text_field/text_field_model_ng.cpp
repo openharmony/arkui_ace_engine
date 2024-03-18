@@ -17,6 +17,7 @@
 
 #include <cstddef>
 
+#include "base/log/log_wrapper.h"
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
 #include "base/utils/utils.h"
@@ -572,6 +573,15 @@ void TextFieldModelNG::SetShowCounterBorder(bool value)
     ACE_UPDATE_LAYOUT_PROPERTY(TextFieldLayoutProperty, ShowHighlightBorder, value);
 }
 
+void TextFieldModelNG::SetShowCounterBorder(FrameNode* frameNode, bool value)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<TextFieldPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetCounterState(false);
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, ShowHighlightBorder, value, frameNode);
+}
+
 void TextFieldModelNG::SetBarState(OHOS::Ace::DisplayMode value)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(TextFieldLayoutProperty, DisplayMode, value);
@@ -602,7 +612,7 @@ void TextFieldModelNG::SetBackgroundColor(const Color& color, bool tmp)
 
 void TextFieldModelNG::SetBackgroundColor(FrameNode* frameNode, const Color& color)
 {
-    NG::ViewAbstract::SetBackgroundColor(color);
+    NG::ViewAbstract::SetBackgroundColor(frameNode, color);
     ACE_UPDATE_NODE_PAINT_PROPERTY(TextFieldPaintProperty, BackgroundColor, color, frameNode);
 }
 
@@ -1086,7 +1096,7 @@ void TextFieldModelNG::SetCancelIconColor(FrameNode* frameNode, const Color& ico
 std::string TextFieldModelNG::GetPlaceholderText(FrameNode* frameNode)
 {
     std::string value;
-    ACE_GET_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, Placeholder, value, frameNode);
+    ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(TextFieldLayoutProperty, Placeholder, value, frameNode, value);
     return value;
 }
 
@@ -1101,21 +1111,21 @@ std::string TextFieldModelNG::GetTextFieldText(FrameNode* frameNode)
 Color TextFieldModelNG::GetCaretColor(FrameNode* frameNode)
 {
     Color value;
-    ACE_GET_NODE_PAINT_PROPERTY(TextFieldPaintProperty, CursorColor, value, frameNode);
+    ACE_GET_NODE_PAINT_PROPERTY_WITH_DEFAULT_VALUE(TextFieldPaintProperty, CursorColor, value, frameNode, value);
     return value;
 }
 
 Dimension TextFieldModelNG::GetCaretStyle(FrameNode* frameNode)
 {
     Dimension value;
-    ACE_GET_NODE_PAINT_PROPERTY(TextFieldPaintProperty, CursorWidth, value, frameNode);
+    ACE_GET_NODE_PAINT_PROPERTY_WITH_DEFAULT_VALUE(TextFieldPaintProperty, CursorWidth, value, frameNode, value);
     return value;
 }
 
 bool TextFieldModelNG::GetShowUnderline(FrameNode* frameNode)
 {
     bool value = false;
-    ACE_GET_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, ShowUnderline, value, frameNode);
+    ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(TextFieldLayoutProperty, ShowUnderline, value, frameNode, value);
     return value;
 }
 
@@ -1172,21 +1182,22 @@ bool TextFieldModelNG::GetRequestKeyboardOnFocus(FrameNode* frameNode)
 TextInputType TextFieldModelNG::GetType(FrameNode* frameNode)
 {
     TextInputType value = TextInputType::UNSPECIFIED;
-    ACE_GET_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, TextInputType, value, frameNode);
+    ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(TextFieldLayoutProperty, TextInputType, value, frameNode, value);
     return value;
 }
 
 Color TextFieldModelNG::GetSelectedBackgroundColor(FrameNode* frameNode)
 {
     Color value;
-    ACE_GET_NODE_PAINT_PROPERTY(TextFieldPaintProperty, SelectedBackgroundColor, value, frameNode);
+    ACE_GET_NODE_PAINT_PROPERTY_WITH_DEFAULT_VALUE(
+        TextFieldPaintProperty, SelectedBackgroundColor, value, frameNode, value);
     return value;
 }
 
 bool TextFieldModelNG::GetShowPasswordIcon(FrameNode* frameNode)
 {
     bool value = false;
-    ACE_GET_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, ShowPasswordIcon, value, frameNode);
+    ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(TextFieldLayoutProperty, ShowPasswordIcon, value, frameNode, value);
     return value;
 }
 
@@ -1201,28 +1212,29 @@ bool TextFieldModelNG::GetTextFieldEditing(FrameNode* frameNode)
 bool TextFieldModelNG::GetShowCancelButton(FrameNode* frameNode)
 {
     bool value = false;
-    ACE_GET_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, IsShowCancelButton, value, frameNode);
+    ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(
+        TextFieldLayoutProperty, IsShowCancelButton, value, frameNode, value);
     return value;
 }
 
 CalcDimension TextFieldModelNG::GetCancelIconSize(FrameNode* frameNode)
 {
     CalcDimension value;
-    ACE_GET_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, IconSize, value, frameNode);
+    ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(TextFieldLayoutProperty, IconSize, value, frameNode, value);
     return value;
 }
 
 std::string TextFieldModelNG::GetCanacelIconSrc(FrameNode* frameNode)
 {
     std::string value;
-    ACE_GET_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, IconSrc, value, frameNode);
+    ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(TextFieldLayoutProperty, IconSrc, value, frameNode, value);
     return value;
 }
 
 Color TextFieldModelNG::GetCancelIconColor(FrameNode* frameNode)
 {
     Color value;
-    ACE_GET_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, IconColor, value, frameNode);
+    ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(TextFieldLayoutProperty, IconColor, value, frameNode, value);
     return value;
 }
 
@@ -1256,11 +1268,53 @@ Dimension TextFieldModelNG::GetFontSize(FrameNode* frameNode)
     ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(TextFieldLayoutProperty, FontSize, value, frameNode, Dimension());
     return value;
 }
-
 CleanNodeStyle TextFieldModelNG::GetCleanNodeStyle(FrameNode* frameNode)
 {
     CleanNodeStyle value = CleanNodeStyle::INPUT;
-    ACE_GET_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, CleanNodeStyle, value, frameNode);
+    ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(TextFieldLayoutProperty, CleanNodeStyle, value, frameNode, value);
     return value;
+}
+bool TextFieldModelNG::GetShowCounter(FrameNode* frameNode)
+{
+    bool value = false;
+    ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(TextFieldLayoutProperty, ShowCounter, value, frameNode, value);
+    return static_cast<int>(value);
+}
+int TextFieldModelNG::GetCounterType(FrameNode* frameNode)
+{
+    int value = -1;
+    ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(TextFieldLayoutProperty, SetCounter, value, frameNode, value);
+    return value;
+}
+bool TextFieldModelNG::GetShowCounterBorder(FrameNode* frameNode)
+{
+    bool value = true;
+    ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(
+        TextFieldLayoutProperty, ShowHighlightBorder, value, frameNode, value);
+    return value;
+}
+
+void TextFieldModelNG::SetTextSelection(FrameNode* frameNode, int32_t start, int32_t end)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<TextFieldPattern>();
+    CHECK_NULL_VOID(pattern);
+    auto wideText = pattern->GetWideText();
+    int32_t length = static_cast<int32_t>(wideText.length());
+    start = std::clamp(start, 0, length);
+    end = std::clamp(end, 0, length);
+    pattern->SetSelectionFlag(start, end);
+}
+
+int32_t TextFieldModelNG::GetTextSelectionIndex(FrameNode* frameNode, bool isEnd)
+{
+    int32_t defaultValue = 0;
+    auto pattern = frameNode->GetPattern<TextFieldPattern>();
+    CHECK_NULL_RETURN(pattern, defaultValue);
+    auto selectController = pattern->GetTextSelectController();
+    if (isEnd) {
+        return selectController->GetEndIndex();
+    }
+    return selectController->GetStartIndex();
 }
 } // namespace OHOS::Ace::NG

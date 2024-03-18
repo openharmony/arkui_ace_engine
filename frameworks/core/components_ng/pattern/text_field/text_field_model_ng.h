@@ -173,6 +173,13 @@ public:
     static FontWeight GetFontWeight(FrameNode* frameNode);
     static Dimension GetFontSize(FrameNode* frameNode);
     static CleanNodeStyle GetCleanNodeStyle(FrameNode* frameNode);
+    static void SetShowCounterBorder(FrameNode* frameNode, bool value);
+    static bool GetShowCounter(FrameNode* frameNode);
+    static int GetCounterType(FrameNode* frameNode);
+    static bool GetShowCounterBorder(FrameNode* frameNode);
+    static void SetTextSelection(FrameNode* frameNode, int32_t start, int32_t end);
+    static int32_t GetTextSelectionIndex(FrameNode* frameNode, bool isEnd);
+
 private:
     void AddDragFrameNodeToManager() const;
     void SetDraggable(bool draggable);
