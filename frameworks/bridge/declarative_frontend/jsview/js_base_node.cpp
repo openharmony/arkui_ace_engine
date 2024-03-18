@@ -18,6 +18,7 @@
 #include <string>
 
 #include "canvas_napi/js_canvas.h"
+#include "jsnapi_expo.h"
 
 #include "base/geometry/dimension.h"
 #include "base/memory/ace_type.h"
@@ -166,14 +167,33 @@ void JSBaseNode::CreateRenderNode(const JSCallbackInfo& info)
 
 void JSBaseNode::CreateFrameNode(const JSCallbackInfo& info)
 {
+    EcmaVM* vm = info.GetVm();
+    CHECK_NULL_VOID(vm);
     auto nodeId = ElementRegister::GetInstance()->MakeUniqueId();
     auto node = NG::CustomFrameNode::GetOrCreateCustomFrameNode(nodeId);
     node->SetExclusiveEventForChild(true);
+    auto pattern = node->GetPattern<NG::CustomFrameNodePattern>();
+    auto global = JSNApi::GetGlobalObject(vm);
+    auto funcName = panda::StringRef::NewFromUtf8(vm, "__AttachToMainTree__");
+    auto obj = global->Get(vm, funcName);
+    panda::Local<panda::FunctionRef> attachFunc = obj;
+    if (obj->IsFunction()) {
+        pattern->SetOnAttachFunc([vm, func = panda::CopyableGlobal(vm, attachFunc)](int32_t nodeId) {
+            panda::Local<panda::JSValueRef> params[] = { panda::NumberRef::New(vm, nodeId) };
+            func->Call(vm, func.ToLocal(), params, ArraySize(params));
+        });
+    }
+    funcName = panda::StringRef::NewFromUtf8(vm, "__DetachToMainTree__");
+    obj = global->Get(vm, funcName);
+    panda::Local<panda::FunctionRef> detachFunc = obj;
+    if (detachFunc->IsFunction()) {
+        pattern->SetOnDetachFunc([vm, func = panda::CopyableGlobal(vm, detachFunc)](int32_t nodeId) {
+            panda::Local<panda::JSValueRef> params[] = { panda::NumberRef::New(vm, nodeId) };
+            func->Call(vm, func.ToLocal(), params, ArraySize(params));
+        });
+    }
     viewNode_ = node;
     void* ptr = AceType::RawPtr(viewNode_);
-
-    EcmaVM* vm = info.GetVm();
-    CHECK_NULL_VOID(vm);
     info.SetReturnValue(JSRef<JSVal>::Make(panda::NativePointerRef::New(vm, ptr)));
 }
 
