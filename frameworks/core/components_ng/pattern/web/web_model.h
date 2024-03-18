@@ -158,6 +158,7 @@ public:
 
     virtual void SetScreenCaptureRequestEventId(std::function<void(const BaseEventInfo* info)>&& jsCallback) {};
     virtual void SetNestedScroll(const NestedScrollOptions& nestedOpt) {}
+    virtual void SetMetaViewport(bool enabled) {}
     virtual void SetLayoutMode(WebLayoutMode mode) {}
     virtual void SetOverScrollMode(OverScrollMode mode) {}
     virtual void JavaScriptOnDocumentStart(const ScriptItems& scriptItems) {};

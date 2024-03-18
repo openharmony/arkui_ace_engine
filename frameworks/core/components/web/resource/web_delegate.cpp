@@ -6035,4 +6035,21 @@ bool WebDelegate::OnHandleOverrideLoading(std::shared_ptr<OHOS::NWeb::NWebUrlRes
     });
     return result;
 }
+
+void WebDelegate::UpdateMetaViewport(bool isMetaViewportEnabled)
+{
+    auto context = context_.Upgrade();
+    CHECK_NULL_VOID(context);
+    context->GetTaskExecutor()->PostTask(
+        [weak = WeakClaim(this), isMetaViewportEnabled]() {
+            auto delegate = weak.Upgrade();
+            if (delegate && delegate->nweb_) {
+                std::shared_ptr<OHOS::NWeb::NWebPreference> setting = delegate->nweb_->GetPreference();
+                if (setting) {
+                    setting->SetViewportEnable(isMetaViewportEnabled);
+                }
+            }
+        },
+        TaskExecutor::TaskType::PLATFORM);
+}
 } // namespace OHOS::Ace
