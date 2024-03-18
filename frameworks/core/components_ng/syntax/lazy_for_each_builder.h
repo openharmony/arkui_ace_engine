@@ -197,7 +197,10 @@ public:
             if (frameNode) {
                 frameNode->SetActive(false);
             }
-            expiringItem_.try_emplace(node.first, LazyForEachCacheChild(index, std::move(node.second)));
+            auto pair = expiringItem_.try_emplace(node.first, LazyForEachCacheChild(index, std::move(node.second)));
+            if (!pair.second) {
+                TAG_LOGW(AceLogTag::ACE_LAZY_FOREACH, "Use repeat key for index: %{public}d", index);
+            }
             needBuild = true;
         }
         return needBuild;
