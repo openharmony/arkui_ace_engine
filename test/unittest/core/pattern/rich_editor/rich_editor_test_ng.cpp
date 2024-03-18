@@ -2686,6 +2686,249 @@ HWTEST_F(RichEditorTestNg, Selection002, TestSize.Level1)
 }
 
 /**
+ * @tc.name: Selection003
+ * @tc.desc: test SetSelection
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorTestNg, Selection003, TestSize.Level1)
+{
+    /**
+     * @tc.step: step1. Add text span and get richeditor pattern.
+     */
+    AddSpan(INIT_VALUE_1);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+
+    /**
+     * @tc.step: step2. Request focus.
+     */
+    auto focusHub = richEditorNode_->GetOrCreateFocusHub();
+    focusHub->RequestFocusImmediately();
+
+    /**
+     * @tc.step: step3. Call SetSelection with no menu
+     * @tc.expected: Text is selected and the menu doesn't pop up
+     */
+    int32_t start = 0;
+    int32_t end = 1;
+    SelectionOptions options;
+    options.menuPolicy = MenuPolicy::DEFAULT;
+    richEditorPattern->OnModifyDone();
+    richEditorPattern->SetSelection(start, end, options);
+    ClearSpan();
+    EXPECT_FALSE(richEditorPattern->SelectOverlayIsOn());
+    EXPECT_EQ(richEditorPattern->textSelector_.baseOffset, start);
+    EXPECT_EQ(richEditorPattern->textSelector_.destinationOffset, end);
+}
+
+/**
+ * @tc.name: Selection004
+ * @tc.desc: test SetSelection
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorTestNg, Selection004, TestSize.Level1)
+{
+    /**
+     * @tc.step: step1. Add text span and get richeditor pattern.
+     */
+    AddSpan(INIT_VALUE_1);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+
+    /**
+     * @tc.step: step2. Request focus.
+     */
+    auto focusHub = richEditorNode_->GetOrCreateFocusHub();
+    focusHub->RequestFocusImmediately();
+
+    /**
+     * @tc.step: step3. Create a scene where the text menu has popped up.
+     */
+    richEditorPattern->OnModifyDone();
+    richEditorPattern->textSelector_.Update(0, 1);
+    richEditorPattern->CalculateHandleOffsetAndShowOverlay();
+    richEditorPattern->ShowSelectOverlay(
+        richEditorPattern->textSelector_.firstHandle, richEditorPattern->textSelector_.secondHandle, false);
+    EXPECT_TRUE(richEditorPattern->SelectOverlayIsOn());
+
+    /**
+     * @tc.step: step4. Call SetSelection with menu pop up
+     * @tc.expected: Text is selected and the menu still pop up
+     */
+    int32_t start = -1;
+    int32_t end = -1;
+    SelectionOptions options;
+    options.menuPolicy = MenuPolicy::DEFAULT;
+    richEditorPattern->SetSelection(start, end, options);
+    ClearSpan();
+    EXPECT_TRUE(richEditorPattern->SelectOverlayIsOn());
+    EXPECT_EQ(richEditorPattern->textSelector_.baseOffset, 0);
+    EXPECT_EQ(richEditorPattern->textSelector_.destinationOffset, INIT_VALUE_1.length());
+}
+
+/**
+ * @tc.name: Selection005
+ * @tc.desc: test SetSelection
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorTestNg, Selection005, TestSize.Level1)
+{
+    /**
+     * @tc.step: step1. Add text span and get richeditor pattern.
+     */
+    AddSpan(INIT_VALUE_1);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+
+    /**
+     * @tc.step: step2. Request focus.
+     */
+    auto focusHub = richEditorNode_->GetOrCreateFocusHub();
+    focusHub->RequestFocusImmediately();
+
+    /**
+     * @tc.step: step3. Call SetSelection with no menu
+     * @tc.expected: Text is selected and the menu doesn't pop up
+     */
+    int32_t start = 0;
+    int32_t end = 1;
+    SelectionOptions options;
+    options.menuPolicy = MenuPolicy::NEVER;
+    richEditorPattern->OnModifyDone();
+    richEditorPattern->SetSelection(start, end, options);
+    ClearSpan();
+    EXPECT_FALSE(richEditorPattern->SelectOverlayIsOn());
+    EXPECT_EQ(richEditorPattern->textSelector_.baseOffset, start);
+    EXPECT_EQ(richEditorPattern->textSelector_.destinationOffset, end);
+}
+
+/**
+ * @tc.name: Selection006
+ * @tc.desc: test SetSelection
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorTestNg, Selection006, TestSize.Level1)
+{
+    /**
+     * @tc.step: step1. Add text span and get richeditor pattern.
+     */
+    AddSpan(INIT_VALUE_1);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+
+    /**
+     * @tc.step: step2. Request focus.
+     */
+    auto focusHub = richEditorNode_->GetOrCreateFocusHub();
+    focusHub->RequestFocusImmediately();
+
+    /**
+     * @tc.step: step3. Create a scene where the text menu has popped up.
+     */
+    richEditorPattern->OnModifyDone();
+    richEditorPattern->textSelector_.Update(0, 1);
+    richEditorPattern->CalculateHandleOffsetAndShowOverlay();
+    richEditorPattern->ShowSelectOverlay(
+        richEditorPattern->textSelector_.firstHandle, richEditorPattern->textSelector_.secondHandle, false);
+    EXPECT_TRUE(richEditorPattern->SelectOverlayIsOn());
+
+    /**
+     * @tc.step: step4. Call SetSelection with menu pop up.
+     * @tc.expected: Text is selected and menu doesn't pop up.
+     */
+    int32_t start = -1;
+    int32_t end = -1;
+    SelectionOptions options;
+    options.menuPolicy = MenuPolicy::NEVER;
+    richEditorPattern->SetSelection(start, end, options);
+    ClearSpan();
+    EXPECT_FALSE(richEditorPattern->SelectOverlayIsOn());
+    EXPECT_EQ(richEditorPattern->textSelector_.baseOffset, 0);
+    EXPECT_EQ(richEditorPattern->textSelector_.destinationOffset, INIT_VALUE_1.length());
+}
+
+/**
+ * @tc.name: Selection007
+ * @tc.desc: test SetSelection
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorTestNg, Selection007, TestSize.Level1)
+{
+    /**
+     * @tc.step: step1. Add text span and get richeditor pattern.
+     */
+    AddSpan(INIT_VALUE_1);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+
+    /**
+     * @tc.step: step2. Request focus.
+     */
+    auto focusHub = richEditorNode_->GetOrCreateFocusHub();
+    focusHub->RequestFocusImmediately();
+
+    /**
+     * @tc.step: step3. Call SetSelection with no menu
+     * @tc.expected: Text is selected and the menu pop up
+     */
+    int32_t start = 0;
+    int32_t end = 1;
+    SelectionOptions options;
+    options.menuPolicy = MenuPolicy::ALWAYS;
+    richEditorPattern->OnModifyDone();
+    richEditorPattern->SetSelection(start, end, options);
+    ClearSpan();
+    EXPECT_TRUE(richEditorPattern->SelectOverlayIsOn());
+    EXPECT_EQ(richEditorPattern->textSelector_.baseOffset, start);
+    EXPECT_EQ(richEditorPattern->textSelector_.destinationOffset, end);
+}
+
+/**
+ * @tc.name: Selection008
+ * @tc.desc: test SetSelection
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorTestNg, Selection008, TestSize.Level1)
+{
+    /**
+     * @tc.step: step1. Add text span and get richeditor pattern.
+     */
+    AddSpan(INIT_VALUE_1);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+
+    /**
+     * @tc.step: step2. Request focus.
+     */
+    auto focusHub = richEditorNode_->GetOrCreateFocusHub();
+    focusHub->RequestFocusImmediately();
+
+    /**
+     * @tc.step: step3. Create a scene where the text menu has popped up.
+     */
+    richEditorPattern->OnModifyDone();
+    richEditorPattern->textSelector_.Update(0, 1);
+    richEditorPattern->CalculateHandleOffsetAndShowOverlay();
+    richEditorPattern->ShowSelectOverlay(
+        richEditorPattern->textSelector_.firstHandle, richEditorPattern->textSelector_.secondHandle, false);
+    EXPECT_TRUE(richEditorPattern->SelectOverlayIsOn());
+
+    /**
+     * @tc.step: step4. Call SetSelection with menu pop up.
+     * @tc.expected: Text is selected and menu pop up.
+     */
+    int32_t start = -1;
+    int32_t end = -1;
+    SelectionOptions options;
+    options.menuPolicy = MenuPolicy::ALWAYS;
+    richEditorPattern->SetSelection(start, end, options);
+    ClearSpan();
+    EXPECT_TRUE(richEditorPattern->SelectOverlayIsOn());
+    EXPECT_EQ(richEditorPattern->textSelector_.baseOffset, 0);
+    EXPECT_EQ(richEditorPattern->textSelector_.destinationOffset, INIT_VALUE_1.length());
+}
+
+/**
  * @tc.name: OnScrollCallback
  * @tc.desc: Verify that the OnScrollCallback interface calls normally and exits without exception.
  * @tc.type: FUNC
