@@ -45,6 +45,8 @@ private:
     napi_value ProcessDrawCommandSendUnRegister(napi_env env, napi_callback_info info);
     napi_value ProcessLayoutDoneRegister(napi_env env, napi_callback_info info);
     napi_value ProcessLayoutDoneUnRegister(napi_env env, napi_callback_info info);
+    napi_value ProcessNavDestinationSwitchRegister(napi_env env, napi_callback_info info);
+    napi_value ProcessNavDestinationSwitchUnRegister(napi_env env, napi_callback_info info);
     std::map<std::string, Func> registerProcessMap_;
     std::map<std::string, Func> unregisterProcessMap_;
 };

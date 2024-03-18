@@ -35,8 +35,7 @@ public:
             napi_delete_reference(env_, callback_);
         }
     }
-    void OnNavigationStateChange(
-        const std::string& navigationId, const std::string& navDestinationName, NG::NavDestinationState state);
+    void OnNavigationStateChange(const NG::NavDestinationInfo& info);
     void OnScrollEventStateChange(
         const std::string& id, NG::ScrollEventType eventType, float offset);
     void OnRouterPageStateChange(napi_value context, int32_t index,
@@ -46,6 +45,7 @@ public:
     void OnDrawOrLayout();
 
 private:
+    napi_value CreateNavDestinationInfoObj(const NG::NavDestinationInfo& info);
     napi_value GetNapiCallback();
     napi_env env_ = nullptr;
     napi_ref callback_ = nullptr;

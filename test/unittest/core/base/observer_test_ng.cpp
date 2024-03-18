@@ -86,7 +86,14 @@ HWTEST_F(ObserverTestNg, ObserverTestNg002, TestSize.Level1)
     navigation->GetPattern<NavigationPattern>()->navigationStack_ = AceType::MakeRefPtr<NavigationStack>();
     auto contentNode = NavDestinationGroupNode::GetOrCreateGroupNode(
         V2::NAVDESTINATION_VIEW_ETS_TAG, 22, []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
+    auto pathInfo = AceType::MakeRefPtr<NavPathInfo>();
+    ASSERT_NE(pathInfo, nullptr);
+    auto context = AceType::MakeRefPtr<NavDestinationContext>();
+    ASSERT_NE(context, nullptr);
+    context->SetNavPathInfo(pathInfo);
+
     auto pattern = contentNode->GetPattern<NavDestinationPattern>();
+    pattern->SetNavDestinationContext(context);
     pattern->name_ = "test_name";
     pattern->isOnShow_ = true;
     pattern->navigationNode_ = AceType::WeakClaim(Referenced::RawPtr(navigation));
@@ -100,6 +107,7 @@ HWTEST_F(ObserverTestNg, ObserverTestNg002, TestSize.Level1)
     ASSERT_EQ(pattern->GetNavigationNode(), navigation);
 
     info = UIObserverHandler::GetInstance().GetNavigationState(contentNode);
+    ASSERT_NE(info, nullptr);
     ASSERT_EQ(info->name, "test_name");
     ASSERT_EQ(info->navigationId, "");
     ASSERT_EQ(info->state, NavDestinationState::ON_SHOWN);
