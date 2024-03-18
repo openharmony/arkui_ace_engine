@@ -2084,6 +2084,20 @@ typedef enum {
      *
      */
     NODE_TEXT_INPUT_CANCEL_BUTTON,
+    /**
+     * @brief Sets the text selection area, which will be highlighted.
+     * This attribute can be set, reset, and obtained as required through APIs.
+     *
+     * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
+     * .value[0].i32: start position of the text selection. \n
+     * .value[1].i32: end position of the text selection. \n
+     * \n
+     * Format of the return value {@link ArkUI_AttributeItem}:\n
+     * .value[0].i32: start position of the text selection. \n
+     * .value[1].i32: end position of the text selection. \n
+     *
+     */
+    NODE_TEXT_INPUT_TEXT_SELECTION,
 
     /**
      * @brief Defines the default placeholder text for the multi-line text box.
