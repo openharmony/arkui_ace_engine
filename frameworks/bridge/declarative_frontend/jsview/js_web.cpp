@@ -4062,7 +4062,7 @@ JSRef<JSVal> EmbedLifecycleChangeToJSValue(const NativeEmbedDataInfo& eventInfo)
     JSRef<JSObject> positionObj = objectTemplate->NewInstance();
     positionObj->SetProperty("x", eventInfo.GetEmebdInfo().x);
     positionObj->SetProperty("y", eventInfo.GetEmebdInfo().y);
-    requestObj->SetProperty("position", positionObj);
+    requestObj->SetPropertyObject("position", positionObj);
 
     auto params = eventInfo.GetEmebdInfo().params;
     JSRef<JSObject> paramsObj = objectTemplate->NewInstance();
