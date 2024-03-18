@@ -915,7 +915,7 @@ bool JSPromptParseParam(napi_env env, size_t argc, napi_value* argv, std::shared
     return true;
 }
 
-void JSPromptThrowInterError(napi_env env, std::shared_ptr<PromptAsyncContext>& asyncContext, std::string strMsg)
+void JSPromptThrowInterError(napi_env env, std::shared_ptr<PromptAsyncContext>& asyncContext, std::string& strMsg)
 {
     napi_value code = nullptr;
     std::string strCode = std::to_string(ERROR_CODE_INTERNAL_ERROR);

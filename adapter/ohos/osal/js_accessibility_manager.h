@@ -207,7 +207,7 @@ private:
     };
 
     bool AccessibilityActionEvent(const Accessibility::ActionType& action,
-        const std::map<std::string, std::string> actionArguments, const RefPtr<AccessibilityNode>& node,
+        const std::map<std::string, std::string>& actionArguments, const RefPtr<AccessibilityNode>& node,
         const RefPtr<PipelineContext>& context);
     bool RequestAccessibilityFocus(const RefPtr<AccessibilityNode>& node);
 

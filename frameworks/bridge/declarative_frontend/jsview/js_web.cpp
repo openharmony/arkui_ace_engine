@@ -888,10 +888,7 @@ public:
             globalObj, &JSWebResourceResponse::Constructor, &JSWebResourceResponse::Destructor);
     }
 
-    JSWebResourceResponse()
-    {
-        response_ = AceType::MakeRefPtr<WebResponse>();
-    }
+    JSWebResourceResponse() : response_(AceType::MakeRefPtr<WebResponse>()) {}
 
     void SetEvent(const ReceivedHttpErrorEvent& eventInfo)
     {

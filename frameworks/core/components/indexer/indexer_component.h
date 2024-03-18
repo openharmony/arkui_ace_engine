@@ -231,7 +231,7 @@ public:
     {
         std::vector<std::u16string> alphabet;
         for (const auto& item : str) {
-            alphabet.push_back(StringUtils::Str8ToStr16(item));
+            alphabet.emplace_back(StringUtils::Str8ToStr16(item));
         }
         return alphabet;
     }

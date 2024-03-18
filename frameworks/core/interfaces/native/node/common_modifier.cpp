@@ -396,7 +396,7 @@ void SetBorderImageRepeat(RefPtr<BorderImage>& borderImage,
 }
 
 void SetBorderImageWidth(RefPtr<BorderImage>& borderImage,
-    const std::vector<BorderImageDirection> directions,
+    const std::vector<BorderImageDirection>& directions,
     const ArkUIStringAndFloat* options, int32_t optionsLength, int32_t& offset)
 {
     for (int32_t index = 0; index < NUM_12; index += NUM_3) {
@@ -411,7 +411,7 @@ void SetBorderImageWidth(RefPtr<BorderImage>& borderImage,
 }
 
 void SetBorderImageOutset(RefPtr<BorderImage>& borderImage,
-    const std::vector<BorderImageDirection> directions,
+    const std::vector<BorderImageDirection>& directions,
     const ArkUIStringAndFloat* options, int32_t optionsLength, int32_t& offset)
 {
     for (unsigned int index = 0; index < NUM_12; index += NUM_3) {
