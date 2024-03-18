@@ -2459,7 +2459,7 @@ void OverlayManager::BindContentCover(bool isShow, std::function<void(const std:
         CHECK_NULL_VOID(overlay);
         overlay->OnBindContentCover(isShow, std::move(callback), std::move(buildNodeFunc), modalStyle,
             std::move(onAppear), std::move(onDisappear), std::move(onWillAppear), std::move(onWillDisappear),
-            targetNode);
+            targetNode, sessionId);
         auto pipeline = PipelineContext::GetCurrentContext();
         CHECK_NULL_VOID(pipeline);
         pipeline->FlushUITasks();
