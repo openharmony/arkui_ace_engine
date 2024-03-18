@@ -68,6 +68,10 @@ void SheetPresentationLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
         for (auto&& child : layoutWrapper->GetAllChildrenWithBuild()) {
             child->Measure(childConstraint);
         }
+        auto scrollNode = layoutWrapper->GetChildByIndex(1);
+        CHECK_NULL_VOID(scrollNode);
+        childConstraint.selfIdealSize = OptionalSizeF(childConstraint.maxSize);
+        scrollNode->Measure(childConstraint);
         if ((sheetType_ == SheetType::SHEET_CENTER || sheetType_ == SheetType::SHEET_POPUP)
             && (sheetStyle_.sheetMode.value_or(SheetMode::LARGE) == SheetMode::AUTO)) {
             auto&& children = layoutWrapper->GetAllChildrenWithBuild();
