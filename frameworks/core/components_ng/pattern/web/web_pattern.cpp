@@ -1549,6 +1549,13 @@ void WebPattern::OnNativeEmbedRuleTypeUpdate(const std::string& type)
     }
 }
 
+void WebPattern::OnTextAutosizingUpdate(bool isTextAutosizing)
+{
+    if (delegate_) {
+        delegate_->UpdateTextAutosizing(isTextAutosizing);
+    }
+}
+
 bool WebPattern::IsRootNeedExportTexture()
 {
     auto host = GetHost();
@@ -1702,6 +1709,7 @@ void WebPattern::OnModifyDone()
         delegate_->UpdateScrollBarColor(GetScrollBarColorValue(DEFAULT_SCROLLBAR_COLOR));
         delegate_->UpdateOverScrollMode(GetOverScrollModeValue(OverScrollMode::NEVER));
         delegate_->UpdateCopyOptionMode(GetCopyOptionModeValue(static_cast<int32_t>(CopyOptions::Distributed)));
+        delegate_->UpdateTextAutosizing(GetTextAutosizingValue(true));
         if (GetBlockNetwork()) {
             delegate_->UpdateBlockNetwork(GetBlockNetwork().value());
         }

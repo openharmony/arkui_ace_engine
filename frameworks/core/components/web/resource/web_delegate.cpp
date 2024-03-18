@@ -5565,6 +5565,24 @@ void WebDelegate::UpdateCopyOptionMode(const int copyOptionModeValue)
         TaskExecutor::TaskType::PLATFORM);
 }
 
+void WebDelegate::UpdateTextAutosizing(bool isTextAutosizing)
+{
+    auto context = context_.Upgrade();
+    if (!context) {
+        return;
+    }
+    context->GetTaskExecutor()->PostTask(
+        [weak = WeakClaim(this), isTextAutosizing]() {
+            auto delegate = weak.Upgrade();
+            if (delegate && delegate->nweb_) {
+                std::shared_ptr<OHOS::NWeb::NWebPreference> setting = delegate->nweb_->GetPreference();
+                CHECK_NULL_VOID(setting);
+                setting->PutTextAutosizingEnabled(isTextAutosizing);
+            }
+        },
+        TaskExecutor::TaskType::PLATFORM);
+}
+
 void WebDelegate::RegisterSurfacePositionChangedCallback()
 {
 #ifdef NG_BUILD

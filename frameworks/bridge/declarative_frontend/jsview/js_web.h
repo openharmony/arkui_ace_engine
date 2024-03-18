@@ -149,6 +149,7 @@ public:
     static JSwebEventCallback OnControllerAttachedCallback_;
     static void CopyOption(int32_t copyOption);
     static void OnOverrideUrlLoading(const JSCallbackInfo& args);
+    static void TextAutosizing(const JSCallbackInfo& args);
 
 protected:
     static void OnCommonDialog(const JSCallbackInfo& args, int dialogEventType);

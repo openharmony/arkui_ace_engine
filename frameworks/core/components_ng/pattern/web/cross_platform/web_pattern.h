@@ -328,6 +328,7 @@ public:
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, VerticalScrollBarAccessEnabled, bool);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, ScrollBarColor, std::string);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, OverScrollMode, int32_t);
+    ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, TextAutosizing, bool);
     
     void RequestFullScreen();
     void ExitFullScreen();
@@ -431,6 +432,7 @@ private:
     void OnVerticalScrollBarAccessEnabledUpdate(bool value);
     void OnScrollBarColorUpdate(const std::string& value);
     void OnOverScrollModeUpdate(const int32_t value);
+    void OnTextAutosizingUpdate(bool isTextAutosizing);
 
     void InitEvent();
     void InitTouchEvent(const RefPtr<GestureEventHub>& gestureHub);

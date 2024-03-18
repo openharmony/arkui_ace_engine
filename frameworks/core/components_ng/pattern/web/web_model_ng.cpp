@@ -1002,4 +1002,11 @@ void WebModelNG::SetPermissionClipboard(std::function<void(const std::shared_ptr
     
     webPattern->SetPermissionClipboardCallback(std::move(jsCallback));
 }
+
+void WebModelNG::SetTextAutosizing(bool isTextAutosizing)
+{
+    auto webPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPattern>();
+    CHECK_NULL_VOID(webPattern);
+    webPattern->UpdateTextAutosizing(isTextAutosizing);
+}
 } // namespace OHOS::Ace::NG
