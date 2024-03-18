@@ -3642,13 +3642,17 @@ float TextFieldPattern::PreferredLineHeight(bool isAlgorithmMeasure)
     return PreferredTextHeight(contentController_->IsEmpty(), isAlgorithmMeasure);
 }
 
-void TextFieldPattern::OnCursorMoveDone(TextAffinity textAffinity)
+void TextFieldPattern::OnCursorMoveDone(TextAffinity textAffinity, std::optional<Offset> offset)
 {
     auto tmpHost = GetHost();
     CHECK_NULL_VOID(tmpHost);
     StartTwinkling();
     CloseSelectOverlay();
-    selectController_->MoveCaretToContentRect(GetCaretIndex(), textAffinity);
+    if (offset.has_value()) {
+        selectController_->UpdateCaretInfoByOffset(offset.value());
+    } else {
+        selectController_->MoveCaretToContentRect(GetCaretIndex(), textAffinity);
+    }
     if (ResetObscureTickCountDown()) {
         tmpHost->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
     } else {
@@ -3981,17 +3985,15 @@ bool TextFieldPattern::CursorMoveUpOperation()
 {
     CHECK_NULL_RETURN(IsTextArea(), false);
     auto originCaretPosition = selectController_->GetCaretIndex();
-    if (IsSelected()) {
-        selectController_->UpdateCaretIndex(selectController_->GetStartIndex());
-    } else {
-        auto offsetX = selectController_->GetCaretRect().GetX() - contentRect_.GetX();
-        auto offsetY = selectController_->GetCaretRect().GetY() - textRect_.GetY();
-        // multiply by 0.5f to convert to the grapheme center point of the previous line.
-        float verticalOffset = offsetY - PreferredLineHeight() * 0.5f;
-        selectController_->UpdateCaretIndex(
-            static_cast<int32_t>(paragraph_->GetGlyphIndexByCoordinate(Offset(offsetX, verticalOffset))));
-    }
-    OnCursorMoveDone(TextAffinity::DOWNSTREAM);
+    auto offsetX = selectController_->GetCaretRect().GetX() - contentRect_.GetX();
+    auto offsetY = selectController_->GetCaretRect().GetY() - textRect_.GetY();
+    // multiply by 0.5f to convert to the grapheme center point of the previous line.
+    float verticalOffset = offsetY - PreferredLineHeight() * 0.5f;
+    selectController_->UpdateCaretIndex(
+        static_cast<int32_t>(paragraph_->GetGlyphIndexByCoordinate(Offset(offsetX, verticalOffset))));
+    std::optional<Offset> offset;
+    offset.emplace(Offset(offsetX, verticalOffset));
+    OnCursorMoveDone(TextAffinity::DOWNSTREAM, offset);
     return originCaretPosition != selectController_->GetCaretIndex();
 }
 
@@ -4009,17 +4011,15 @@ bool TextFieldPattern::CursorMoveDownOperation()
 {
     CHECK_NULL_RETURN(IsTextArea(), false);
     auto originCaretPosition = selectController_->GetCaretIndex();
-    if (IsSelected()) {
-        selectController_->UpdateCaretIndex(selectController_->GetEndIndex());
-    } else {
-        auto offsetX = selectController_->GetCaretRect().GetX() - contentRect_.GetX();
-        auto offsetY = selectController_->GetCaretRect().GetY() - textRect_.GetY();
-        // multiply by 1.5f to convert to the grapheme center point of the next line.
-        float verticalOffset = offsetY + PreferredLineHeight() * 1.5f;
-        selectController_->UpdateCaretIndex(
-            static_cast<int32_t>(paragraph_->GetGlyphIndexByCoordinate(Offset(offsetX, verticalOffset))));
-    }
-    OnCursorMoveDone(TextAffinity::DOWNSTREAM);
+    auto offsetX = selectController_->GetCaretRect().GetX() - contentRect_.GetX();
+    auto offsetY = selectController_->GetCaretRect().GetY() - textRect_.GetY();
+    // multiply by 1.5f to convert to the grapheme center point of the next line.
+    float verticalOffset = offsetY + PreferredLineHeight() * 1.5f;
+    selectController_->UpdateCaretIndex(
+        static_cast<int32_t>(paragraph_->GetGlyphIndexByCoordinate(Offset(offsetX, verticalOffset))));
+    std::optional<Offset> offset;
+    offset.emplace(Offset(offsetX, verticalOffset));
+    OnCursorMoveDone(TextAffinity::DOWNSTREAM, offset);
     return originCaretPosition != selectController_->GetCaretIndex();
 }
 
