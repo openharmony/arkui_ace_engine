@@ -25,7 +25,7 @@ ArkUI_Bool IsModifiable(ArkUINodeHandle node)
     CHECK_NULL_RETURN(currentNode, false);
     auto* frameNode = AceType::DynamicCast<UINode>(currentNode);
     CHECK_NULL_RETURN(frameNode, false);
-    return frameNode->GetTag() == "FrameNode";
+    return frameNode->GetTag() == "CustomFrameNode";
 }
 
 RefPtr<FrameNode> GetParentNode(UINode* node)
