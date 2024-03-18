@@ -581,7 +581,9 @@ void RosenRenderContext::SyncGeometryProperties(const RectF& paintRect)
         PaintOverlayText();
     }
 
-    PaintDebugBoundary(SystemProperties::GetDebugBoundaryEnabled());
+    if (SystemProperties::GetDebugBoundaryEnabled()) {
+        PaintDebugBoundary(true);
+    }
 
     if (propParticleOptionArray_.has_value()) {
         if (!measureTriggered_ || particleAnimationPlaying_) {
