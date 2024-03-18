@@ -1345,6 +1345,13 @@ void WebPattern::OnCopyOptionModeUpdate(int32_t mode)
     }
 }
 
+void WebPattern::OnMetaViewportUpdate(bool value)
+{
+    if (delegate_) {
+        delegate_->UpdateMetaViewport(value);
+    }
+}
+
 void WebPattern::OnForceDarkAccessUpdate(bool access)
 {
     if (delegate_) {
@@ -1710,6 +1717,9 @@ void WebPattern::OnModifyDone()
         delegate_->UpdateOverScrollMode(GetOverScrollModeValue(OverScrollMode::NEVER));
         delegate_->UpdateCopyOptionMode(GetCopyOptionModeValue(static_cast<int32_t>(CopyOptions::Distributed)));
         delegate_->UpdateTextAutosizing(GetTextAutosizingValue(true));
+        if (GetMetaViewport()) {
+            delegate_->UpdateMetaViewport(GetMetaViewport().value());
+        }
         if (GetBlockNetwork()) {
             delegate_->UpdateBlockNetwork(GetBlockNetwork().value());
         }

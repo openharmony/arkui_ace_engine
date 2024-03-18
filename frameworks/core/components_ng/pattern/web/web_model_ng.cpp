@@ -981,6 +981,13 @@ void WebModelNG::SetNestedScroll(const NestedScrollOptions& nestedOpt)
     webPattern->SetNestedScroll(nestedOpt);
 }
 
+void WebModelNG::SetMetaViewport(bool enabled)
+{
+    auto webPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPattern>();
+    CHECK_NULL_VOID(webPattern);
+    webPattern->UpdateMetaViewport(enabled);
+}
+
 void WebModelNG::JavaScriptOnDocumentStart(const ScriptItems& scriptItems)
 {
     auto webPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPattern>();

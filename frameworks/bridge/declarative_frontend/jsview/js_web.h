@@ -137,6 +137,7 @@ public:
     static void OnOverScroll(const JSCallbackInfo& args);
     static void SetLayoutMode(int32_t layoutMode);
     static void SetNestedScroll(const JSCallbackInfo& info);
+    static void SetMetaViewport(const JSCallbackInfo& args);
     static void OverScrollMode(int overScrollMode);
     static void EnableNativeEmbedMode(bool isEmbedModeEnabled);
     static void RegisterNativeEmbedRule(const std::string& tag, const std::string& type);

@@ -1685,6 +1685,7 @@ void JSWeb::JSBind(BindingTarget globalObj)
     JSClass<JSWeb>::StaticMethod("onScreenCaptureRequest", &JSWeb::OnScreenCaptureRequest);
     JSClass<JSWeb>::StaticMethod("layoutMode", &JSWeb::SetLayoutMode);
     JSClass<JSWeb>::StaticMethod("nestedScroll", &JSWeb::SetNestedScroll);
+    JSClass<JSWeb>::StaticMethod("metaViewport", &JSWeb::SetMetaViewport);
     JSClass<JSWeb>::StaticMethod("javaScriptOnDocumentStart", &JSWeb::JavaScriptOnDocumentStart);
     JSClass<JSWeb>::StaticMethod("javaScriptOnDocumentEnd", &JSWeb::JavaScriptOnDocumentEnd);
     JSClass<JSWeb>::StaticMethod("onOverrideUrlLoading", &JSWeb::OnOverrideUrlLoading);
@@ -4255,6 +4256,15 @@ void JSWeb::SetNestedScroll(const JSCallbackInfo& args)
     nestedOpt.backward = static_cast<NestedScrollMode>(backward);
     WebModel::GetInstance()->SetNestedScroll(nestedOpt);
     args.ReturnSelf();
+}
+
+void JSWeb::SetMetaViewport(const JSCallbackInfo& args)
+{
+    if (args.Length() < 1 || !args[0]->IsBoolean()) {
+        return;
+    }
+    bool enabled = args[0]->ToBoolean();
+    WebModel::GetInstance()->SetMetaViewport(enabled);
 }
 
 void JSWeb::ParseScriptItems(const JSCallbackInfo& args, ScriptItems& scriptItems)
