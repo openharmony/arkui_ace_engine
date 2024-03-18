@@ -32,6 +32,8 @@ public:
     void SetTabBarMode(TabBarMode tabBarMode) override;
     void SetTabBarWidth(const Dimension& tabBarWidth) override;
     void SetTabBarHeight(const Dimension& tabBarHeight) override;
+    void SetWidthAuto(bool isAuto) override {};
+    void SetHeightAuto(bool isAuto) override {};
     void SetBarAdaptiveHeight(bool barAdaptiveHeight) override {};
     void SetIsVertical(bool isVertical) override;
     void SetScrollable(bool scrollable) override;
