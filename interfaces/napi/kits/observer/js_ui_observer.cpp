@@ -40,10 +40,12 @@ namespace {
 static constexpr uint32_t PARAM_SIZE_ONE = 1;
 static constexpr uint32_t PARAM_SIZE_TWO = 2;
 static constexpr uint32_t PARAM_SIZE_THREE = 3;
+static constexpr uint32_t PARAM_SIZE_FOUR = 4;
 
 static constexpr size_t PARAM_INDEX_ZERO = 0;
 static constexpr size_t PARAM_INDEX_ONE = 1;
 static constexpr size_t PARAM_INDEX_TWO = 2;
+static constexpr size_t PARAM_INDEX_THREE = 3;
 
 static constexpr uint32_t ON_SHOWN = 0;
 static constexpr uint32_t ON_HIDDEN = 1;
@@ -63,6 +65,7 @@ constexpr char SCROLL_EVENT[] = "scrollEvent";
 constexpr char DENSITY_UPDATE[] = "densityUpdate";
 constexpr char LAYOUT_DONE[] = "didLayout";
 constexpr char DRAW_COMMAND_SEND[] = "willDraw";
+constexpr char NAVDESTINATION_SWITCH[] = "navDestinationSwitch";
 
 bool IsUIAbilityContext(napi_env env, napi_value context)
 {
@@ -120,6 +123,180 @@ bool ParseScrollId(napi_env env, napi_value obj, std::string& result)
     }
     return ParseStringFromNapi(env, resultId, result);
 }
+
+bool IsNavDestSwitchOptions(napi_env env, napi_value obj, std::string& navigationId)
+{
+    if (!MatchValueType(env, obj, napi_object)) {
+        return false;
+    }
+    napi_value navId = nullptr;
+    napi_get_named_property(env, obj, "navigationId", &navId);
+    return ParseStringFromNapi(env, navId, navigationId);
+}
+
+struct NavDestinationSwitchParams {
+    bool isUIContext = true;
+    std::optional<std::string> navigationId;
+    napi_value callback = nullptr;
+    napi_value abilityUIContext = nullptr;
+    int32_t uiContextInstanceId = 0;
+};
+
+bool ParseNavDestSwitchRegisterParams(napi_env env, napi_callback_info info, NavDestinationSwitchParams& params)
+{
+    GET_PARAMS(env, info, PARAM_SIZE_FOUR);
+
+    auto& secondArg = argv[PARAM_INDEX_ONE];
+    auto& thirdArg = argv[PARAM_INDEX_TWO];
+    auto& fourthArg = argv[PARAM_INDEX_THREE];
+    std::string navigationId;
+    if (argc == PARAM_SIZE_TWO && MatchValueType(env, secondArg, napi_function)) {
+        // js code: UIObserver.on('navDestinationSwitch', callback)
+        params.callback = secondArg;
+    } else if (argc == PARAM_SIZE_THREE && MatchValueType(env, secondArg, napi_object) &&
+        MatchValueType(env, thirdArg, napi_function)) {
+        if (IsNavDestSwitchOptions(env, secondArg, navigationId)) {
+            // js code: UIObserver.on('navDestinationSwitch', { navigationId: navId }, callback)
+            params.navigationId = navigationId;
+        } else if (IsUIAbilityContext(env, secondArg)) {
+            // js code: observer.on('navDestinationSwitch', AbilityUIContext, callback)
+            params.isUIContext = false;
+            params.abilityUIContext = secondArg;
+        } else {
+            // js code: observer.on('navDestinationSwitch', UIContext, callback)
+            params.uiContextInstanceId = GetUIContextInstanceId(env, secondArg);
+        }
+        params.callback = thirdArg;
+    } else if (argc == PARAM_SIZE_FOUR && MatchValueType(env, secondArg, napi_object) &&
+        IsNavDestSwitchOptions(env, thirdArg, navigationId) &&
+        MatchValueType(env, fourthArg, napi_function)) {
+        if (IsUIAbilityContext(env, secondArg)) {
+            // js code: observer.on('navDestinationSwitch', AbilityUIContext, { navigationId: navId }, callback)
+            params.isUIContext = false;
+            params.abilityUIContext = secondArg;
+        } else {
+            // js code: observer.on('navDestinationSwitch', UIContext, { navigationId: navId }, callback)
+            params.uiContextInstanceId = GetUIContextInstanceId(env, secondArg);
+        }
+        params.navigationId = navigationId;
+        params.callback = fourthArg;
+    } else {
+        return false;
+    }
+
+    return true;
+}
+
+bool ParseNavDestSwitchUnRegisterParams(
+    napi_env env, napi_value secondArg, NavDestinationSwitchParams& params)
+{
+    std::string navigationId;
+    if (MatchValueType(env, secondArg, napi_function)) {
+        // js code: UIObserver.off('navDestinationSwitch', callback)
+        params.callback = secondArg;
+    } else if (IsNavDestSwitchOptions(env, secondArg, navigationId)) {
+        // js code: UIObserver.off('navDestinationSwitch', { navigationId: navId })
+        params.navigationId = navigationId;
+    } else if (MatchValueType(env, secondArg, napi_object)) {
+        if (IsUIAbilityContext(env, secondArg)) {
+            // js code: observer.off('navDestinationSwitch', AbilityUIContext)
+            params.isUIContext = false;
+            params.abilityUIContext = secondArg;
+        } else {
+            // js code: observer.off('navDestinationSwitch', UIContext)
+            params.uiContextInstanceId = GetUIContextInstanceId(env, secondArg);
+        }
+    } else {
+        return false;
+    }
+
+    return true;
+}
+
+bool ParseNavDestSwitchUnRegisterParams(
+    napi_env env, napi_value secondArg, napi_value thirdArg, NavDestinationSwitchParams& params)
+{
+    std::string navigationId;
+    if (MatchValueType(env, thirdArg, napi_function)) {
+        params.callback = thirdArg;
+        if (IsNavDestSwitchOptions(env, secondArg, navigationId)) {
+            // js code: UIObserver.off('navDestinationSwitch', { navigationId: navId }, callback)
+            params.navigationId = navigationId;
+        } else if (MatchValueType(env, secondArg, napi_object)) {
+            if (IsUIAbilityContext(env, secondArg)) {
+                // js code: observer.off('navDestinationSwitch', AbilityUIContext, callback)
+                params.isUIContext = false;
+                params.abilityUIContext = secondArg;
+            } else {
+                // js code: observer.off('navDestinationSwitch', UIContext, callback)
+                params.uiContextInstanceId = GetUIContextInstanceId(env, secondArg);
+            }
+        } else {
+            return false;
+        }
+    } else if (MatchValueType(env, secondArg, napi_object) &&
+        IsNavDestSwitchOptions(env, thirdArg, navigationId)) {
+        if (IsUIAbilityContext(env, secondArg)) {
+            // js code: observer.off('navDestinationSwitch', AbilityUIContext, { navigationId: navId })
+            params.isUIContext = false;
+            params.abilityUIContext = secondArg;
+        } else {
+            // js code: observer.off('navDestinationSwitch', UIContext, { navigationId: navId })
+            params.uiContextInstanceId = GetUIContextInstanceId(env, secondArg);
+        }
+        params.navigationId = navigationId;
+    } else {
+        return false;
+    }
+
+    return true;
+}
+
+bool ParseNavDestSwitchUnRegisterParams(
+    napi_env env, napi_value secondArg, napi_value thirdArg,
+    napi_value fourthArg, NavDestinationSwitchParams& params)
+{
+    std::string navigationId;
+    auto& context = secondArg;
+    auto& options = thirdArg;
+    auto& callback = fourthArg;
+    if (MatchValueType(env, context, napi_object) &&
+        IsNavDestSwitchOptions(env, options, navigationId) &&
+        MatchValueType(env, callback, napi_function)) {
+        if (IsUIAbilityContext(env, context)) {
+            // js code: observer.off('navDestinationSwitch', AbilityUIContext, { navigationId: navId }, callback)
+            params.isUIContext = false;
+            params.abilityUIContext = context;
+        } else {
+            // js code: observer.off('navDestinationSwitch', UIContext, { navigationId: navId }, callback)
+            params.uiContextInstanceId = GetUIContextInstanceId(env, context);
+        }
+        params.navigationId = navigationId;
+        params.callback = callback;
+        return true;
+    }
+
+    return false;
+}
+
+bool ParseNavDestSwitchUnRegisterParams(
+    napi_env env, napi_callback_info info, NavDestinationSwitchParams& params)
+{
+    GET_PARAMS(env, info, PARAM_SIZE_FOUR);
+
+    if (argc == PARAM_SIZE_TWO) {
+        return ParseNavDestSwitchUnRegisterParams(env, argv[PARAM_INDEX_ONE], params);
+    } else if (argc == PARAM_SIZE_THREE) {
+        return ParseNavDestSwitchUnRegisterParams(env, argv[PARAM_INDEX_ONE], argv[PARAM_INDEX_TWO], params);
+    } else if (argc == PARAM_SIZE_FOUR) {
+        return ParseNavDestSwitchUnRegisterParams(
+            env, argv[PARAM_INDEX_ONE], argv[PARAM_INDEX_TWO], argv[PARAM_INDEX_THREE], params);
+    } else if (argc != PARAM_SIZE_ONE) {
+        return false;
+    }
+
+    return true;
+}
 } // namespace
 
 ObserverProcess::ObserverProcess()
@@ -131,6 +308,7 @@ ObserverProcess::ObserverProcess()
         { DENSITY_UPDATE, &ObserverProcess::ProcessDensityRegister },
         { LAYOUT_DONE, &ObserverProcess::ProcessLayoutDoneRegister },
         { DRAW_COMMAND_SEND, &ObserverProcess::ProcessDrawCommandSendRegister },
+        { NAVDESTINATION_SWITCH, &ObserverProcess::ProcessNavDestinationSwitchRegister },
     };
     unregisterProcessMap_ = {
         { NAVDESTINATION_UPDATE, &ObserverProcess::ProcessNavigationUnRegister },
@@ -139,6 +317,7 @@ ObserverProcess::ObserverProcess()
         { DENSITY_UPDATE, &ObserverProcess::ProcessDensityUnRegister },
         { LAYOUT_DONE, &ObserverProcess::ProcessLayoutDoneUnRegister },
         { DRAW_COMMAND_SEND, &ObserverProcess::ProcessDrawCommandSendUnRegister},
+        { NAVDESTINATION_SWITCH, &ObserverProcess::ProcessNavDestinationSwitchUnRegister },
     };
 }
 
@@ -519,6 +698,41 @@ napi_value ObserverProcess::ProcessLayoutDoneUnRegister(napi_env env, napi_callb
 
     napi_value result = nullptr;
     return result;
+}
+
+napi_value ObserverProcess::ProcessNavDestinationSwitchRegister(napi_env env, napi_callback_info info)
+{
+    NavDestinationSwitchParams params;
+    if (!ParseNavDestSwitchRegisterParams(env, info, params)) {
+        return nullptr;
+    }
+
+    auto listener = std::make_shared<UIObserverListener>(env, params.callback);
+    if (params.isUIContext) {
+        UIObserver::RegisterNavDestinationSwitchCallback(params.uiContextInstanceId, params.navigationId, listener);
+    } else {
+        UIObserver::RegisterNavDestinationSwitchCallback(env, params.abilityUIContext, params.navigationId, listener);
+    }
+
+    return nullptr;
+}
+
+napi_value ObserverProcess::ProcessNavDestinationSwitchUnRegister(napi_env env, napi_callback_info info)
+{
+    NavDestinationSwitchParams params;
+    if (!ParseNavDestSwitchUnRegisterParams(env, info, params)) {
+        return nullptr;
+    }
+
+    if (params.isUIContext) {
+        UIObserver::UnRegisterNavDestinationSwitchCallback(
+            params.uiContextInstanceId, params.navigationId, params.callback);
+    } else {
+        UIObserver::UnRegisterNavDestinationSwitchCallback(
+            env, params.abilityUIContext, params.navigationId, params.callback);
+    }
+
+    return nullptr;
 }
 
 napi_value ObserverOn(napi_env env, napi_callback_info info)

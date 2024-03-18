@@ -45,10 +45,14 @@ void UIObserverHandler::NotifyNavigationStateChange(const WeakPtr<AceType>& weak
     CHECK_NULL_VOID(ref);
     auto pattern = AceType::DynamicCast<NavDestinationPattern>(ref);
     CHECK_NULL_VOID(pattern);
-    std::string navigationId = GetNavigationId(pattern);
-    std::string navDestinationName = pattern->GetName();
+    auto host = AceType::DynamicCast<NavDestinationGroupNode>(pattern->GetHost());
+    CHECK_NULL_VOID(host);
+    auto pathInfo = pattern->GetNavPathInfo();
+    CHECK_NULL_VOID(pathInfo);
+    NavDestinationInfo info(GetNavigationId(pattern), pattern->GetName(), state, host->GetIndex(),
+        pathInfo->GetParamObj(), std::to_string(pattern->GetNavDestinationId()));
     CHECK_NULL_VOID(navigationHandleFunc_);
-    navigationHandleFunc_(navigationId, navDestinationName, state);
+    navigationHandleFunc_(info);
 }
 
 void UIObserverHandler::NotifyScrollEventStateChange(const WeakPtr<AceType>& weakPattern, ScrollEventType eventType)
@@ -106,10 +110,15 @@ std::shared_ptr<NavDestinationInfo> UIObserverHandler::GetNavigationState(const 
     CHECK_NULL_RETURN(nav, nullptr);
     auto pattern = nav->GetPattern<NavDestinationPattern>();
     CHECK_NULL_RETURN(pattern, nullptr);
+    auto host = AceType::DynamicCast<NavDestinationGroupNode>(pattern->GetHost());
+    CHECK_NULL_RETURN(host, nullptr);
+    auto pathInfo = pattern->GetNavPathInfo();
+    CHECK_NULL_RETURN(pathInfo, nullptr);
+
     return std::make_shared<NavDestinationInfo>(
-        GetNavigationId(pattern),
-        pattern->GetName(),
-        pattern->GetIsOnShow() ? NavDestinationState::ON_SHOWN : NavDestinationState::ON_HIDDEN);
+        GetNavigationId(pattern), pattern->GetName(),
+        pattern->GetIsOnShow() ? NavDestinationState::ON_SHOWN : NavDestinationState::ON_HIDDEN,
+        host->GetIndex(), pathInfo->GetParamObj(), std::to_string(pattern->GetNavDestinationId()));
 }
 
 std::shared_ptr<ScrollEventInfo> UIObserverHandler::GetScrollEventState(const RefPtr<AceType>& node)
@@ -175,6 +184,20 @@ void UIObserverHandler::HandleLayoutDoneCallBack()
     layoutDoneHandleFunc_();
 }
 
+void UIObserverHandler::NotifyNavDestinationSwitch(std::optional<NavDestinationInfo>&& from,
+    std::optional<NavDestinationInfo>&& to, NavigationOperation operation)
+{
+    CHECK_NULL_VOID(navDestinationSwitchHandleFunc_);
+    AbilityContextInfo info = {
+        AceApplicationInfo::GetInstance().GetAbilityName(),
+        AceApplicationInfo::GetInstance().GetProcessName(),
+        Container::Current()->GetModuleName()
+    };
+    NavDestinationSwitchInfo switchInfo(GetUIContextValue(), std::forward<std::optional<NavDestinationInfo>>(from),
+        std::forward<std::optional<NavDestinationInfo>>(to), operation);
+    navDestinationSwitchHandleFunc_(info, switchInfo);
+}
+
 void UIObserverHandler::SetHandleNavigationChangeFunc(NavigationHandleFunc func)
 {
     navigationHandleFunc_ = func;
@@ -203,6 +226,11 @@ void UIObserverHandler::SetDrawCommandSendHandleFunc(DrawCommandSendHandleFunc f
 void UIObserverHandler::SetLayoutDoneHandleFunc(LayoutDoneHandleFunc func)
 {
     layoutDoneHandleFunc_ = func;
+}
+
+void UIObserverHandler::SetHandleNavDestinationSwitchFunc(NavDestinationSwitchHandleFunc func)
+{
+    navDestinationSwitchHandleFunc_ = func;
 }
 
 napi_value UIObserverHandler::GetUIContextValue()

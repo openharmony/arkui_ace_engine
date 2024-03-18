@@ -38,9 +38,16 @@ struct NavDestinationInfo {
     std::string navigationId;
     std::string name;
     NavDestinationState state;
+    int32_t index;
+    napi_value param;
+    std::string navDestinationId;
 
-    NavDestinationInfo(std::string id, std::string name, NavDestinationState state)
-        : navigationId(std::move(id)), name(std::move(name)), state(state)
+    NavDestinationInfo() = default;
+
+    NavDestinationInfo(std::string id, std::string name, NavDestinationState state,
+        int32_t index, napi_value param, std::string navDesId)
+        : navigationId(std::move(id)), name(std::move(name)), state(state),
+          index(index), param(param), navDestinationId(std::move(navDesId))
     {}
 };
 
@@ -108,12 +115,16 @@ public:
     std::shared_ptr<NavDestinationInfo> GetNavigationState(const RefPtr<AceType>& node);
     std::shared_ptr<ScrollEventInfo> GetScrollEventState(const RefPtr<AceType>& node);
     std::shared_ptr<RouterPageInfoNG> GetRouterPageState(const RefPtr<AceType>& node);
-    using NavigationHandleFunc = void (*)(const std::string&, const std::string&, NavDestinationState);
+    void NotifyNavDestinationSwitch(std::optional<NavDestinationInfo>&& from,
+        std::optional<NavDestinationInfo>&& to, NavigationOperation operation);
+    using NavigationHandleFunc = void (*)(const NavDestinationInfo& info);
     using ScrollEventHandleFunc = void (*)(const std::string&, ScrollEventType, float);
     using RouterPageHandleFunc = void (*)(
         AbilityContextInfo&, napi_value, int32_t, const std::string&, const std::string&, RouterPageState);
     using DrawCommandSendHandleFunc = void (*)();
     using LayoutDoneHandleFunc = void (*)();
+    using NavDestinationSwitchHandleFunc = void (*)(
+        const AbilityContextInfo&, NavDestinationSwitchInfo&);
     void SetHandleNavigationChangeFunc(NavigationHandleFunc func);
     void SetHandleScrollEventChangeFunc(ScrollEventHandleFunc func);
     void SetHandleRouterPageChangeFunc(RouterPageHandleFunc func);
@@ -123,6 +134,7 @@ public:
     void HandleLayoutDoneCallBack();
     void SetDrawCommandSendHandleFunc(LayoutDoneHandleFunc func);
     void HandleDrawCommandSendCallBack();
+    void SetHandleNavDestinationSwitchFunc(NavDestinationSwitchHandleFunc func);
 private:
     NavigationHandleFunc navigationHandleFunc_ = nullptr;
     ScrollEventHandleFunc scrollEventHandleFunc_ = nullptr;
@@ -130,6 +142,7 @@ private:
     LayoutDoneHandleFunc layoutDoneHandleFunc_ = nullptr;
     DrawCommandSendHandleFunc drawCommandSendHandleFunc_ = nullptr;
     DensityHandleFunc densityHandleFunc_;
+    NavDestinationSwitchHandleFunc navDestinationSwitchHandleFunc_ = nullptr;
 
     napi_value GetUIContextValue();
 };

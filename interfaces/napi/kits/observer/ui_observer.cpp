@@ -32,12 +32,17 @@ std::unordered_map<napi_ref, std::list<std::shared_ptr<UIObserverListener>>>
     UIObserver::abilityContextRouterPageListeners_;
 std::unordered_map<int32_t, std::list<std::shared_ptr<UIObserverListener>>>
     UIObserver::specifiedRouterPageListeners_;
-std::unordered_map<napi_ref, NG::AbilityContextInfo> UIObserver::infos_;
+std::unordered_map<napi_ref, NG::AbilityContextInfo> UIObserver::infosForRouterPage_;
 
 std::unordered_map<int32_t, std::list<std::shared_ptr<UIObserverListener>>>
     UIObserver::specifiedDensityListeners_;
 std::unordered_map<int32_t, std::list<std::shared_ptr<UIObserverListener>>> UIObserver::specifiedDrawListeners_;
 std::unordered_map<int32_t, std::list<std::shared_ptr<UIObserverListener>>> UIObserver::specifiedLayoutListeners_;
+
+std::unordered_map<napi_ref, UIObserver::NavIdAndListenersMap> UIObserver::abilityUIContextNavDesSwitchListeners_;
+std::unordered_map<int32_t, UIObserver::NavIdAndListenersMap> UIObserver::uiContextNavDesSwitchListeners_;
+std::unordered_map<napi_ref, NG::AbilityContextInfo> UIObserver::infosForNavDesSwitch_;
+
 // UIObserver.on(type: "navDestinationUpdate", callback)
 // register a global listener without options
 void UIObserver::RegisterNavigationCallback(const std::shared_ptr<UIObserverListener>& listener)
@@ -111,13 +116,12 @@ void UIObserver::UnRegisterNavigationCallback(std::string navigationId, napi_val
     );
 }
 
-void UIObserver::HandleNavigationStateChange(const std::string& navigationId, const std::string& navDestinationName,
-                                             NG::NavDestinationState state)
+void UIObserver::HandleNavigationStateChange(const NG::NavDestinationInfo& info)
 {
     for (const auto& listener : unspecifiedNavigationListeners_) {
-        listener->OnNavigationStateChange(navigationId, navDestinationName, state);
+        listener->OnNavigationStateChange(info);
     }
-    auto iter = specifiedCNavigationListeners_.find(navigationId);
+    auto iter = specifiedCNavigationListeners_.find(info.navigationId);
     if (iter == specifiedCNavigationListeners_.end()) {
         return;
     }
@@ -125,7 +129,7 @@ void UIObserver::HandleNavigationStateChange(const std::string& navigationId, co
     auto& holder = iter->second;
 
     for (const auto& listener : holder) {
-        listener->OnNavigationStateChange(navigationId, navDestinationName, state);
+        listener->OnNavigationStateChange(info);
     }
 }
 
@@ -226,7 +230,7 @@ void UIObserver::RegisterRouterPageCallback(
     GetAbilityInfos(env, uiAbilityContext, info);
     for (auto listenerPair : abilityContextRouterPageListeners_) {
         auto ref = listenerPair.first;
-        auto localInfo = infos_[ref];
+        auto localInfo = infosForRouterPage_[ref];
         if (info.IsEqual(localInfo)) {
             auto& holder = abilityContextRouterPageListeners_[ref];
             if (std::find(holder.begin(), holder.end(), listener) != holder.end()) {
@@ -239,7 +243,7 @@ void UIObserver::RegisterRouterPageCallback(
     napi_ref newRef = nullptr;
     napi_create_reference(env, uiAbilityContext, 1, &newRef);
     abilityContextRouterPageListeners_[newRef] = std::list<std::shared_ptr<UIObserverListener>>({ listener });
-    infos_[newRef] = info;
+    infosForRouterPage_[newRef] = info;
 }
 
 // UIObserver.on(type: "routerPageUpdate", uiContext | null, callback)
@@ -270,7 +274,7 @@ void UIObserver::UnRegisterRouterPageCallback(napi_env env, napi_value uiAbility
     GetAbilityInfos(env, uiAbilityContext, info);
     for (auto listenerPair : abilityContextRouterPageListeners_) {
         auto ref = listenerPair.first;
-        auto localInfo = infos_[ref];
+        auto localInfo = infosForRouterPage_[ref];
         if (info.IsEqual(localInfo)) {
             auto& holder = abilityContextRouterPageListeners_[listenerPair.first];
             if (callback == nullptr) {
@@ -286,7 +290,7 @@ void UIObserver::UnRegisterRouterPageCallback(napi_env env, napi_value uiAbility
                     holder.end());
             }
             if (holder.empty()) {
-                infos_.erase(ref);
+                infosForRouterPage_.erase(ref);
                 abilityContextRouterPageListeners_.erase(ref);
                 napi_delete_reference(env, ref);
             }
@@ -410,7 +414,7 @@ void UIObserver::HandleRouterPageStateChange(NG::AbilityContextInfo& info, napi_
 {
     for (auto listenerPair : abilityContextRouterPageListeners_) {
         auto ref = listenerPair.first;
-        auto localInfo = infos_[ref];
+        auto localInfo = infosForRouterPage_[ref];
         if (info.IsEqual(localInfo)) {
             auto env = GetCurrentNapiEnv();
             napi_value abilityContext = nullptr;
@@ -515,6 +519,158 @@ void UIObserver::HandLayoutDoneChange()
     auto& holder = specifiedLayoutListeners_[currentId];
     for (const auto& listener : holder) {
         listener->OnDrawOrLayout();
+    }
+}
+
+/**
+ * observer.on('navDestinationSwitch', context: UIAbilityContext, callback)
+ * observer.on('navDestinationSwitch', context: UIAbilityContext, { navigationId: navId }, callback)
+ */
+void UIObserver::RegisterNavDestinationSwitchCallback(napi_env env, napi_value uiAbilityContext,
+    const std::optional<std::string>& navigationId, const std::shared_ptr<UIObserverListener>& listener)
+{
+    NG::AbilityContextInfo info;
+    GetAbilityInfos(env, uiAbilityContext, info);
+    for (auto& listenerPair : abilityUIContextNavDesSwitchListeners_) {
+        auto ref = listenerPair.first;
+        auto localInfo = infosForNavDesSwitch_[ref];
+        if (!info.IsEqual(localInfo)) {
+            continue;
+        }
+
+        auto& listenersMap = listenerPair.second;
+        auto it = listenersMap.find(navigationId);
+        if (it == listenersMap.end()) {
+            listenersMap[navigationId] = std::list<std::shared_ptr<UIObserverListener>>({listener});
+            return;
+        }
+        if (std::find(it->second.begin(), it->second.end(), listener) == it->second.end()) {
+            it->second.emplace_back(listener);
+        }
+        return;
+    }
+    napi_ref newRef = nullptr;
+    napi_create_reference(env, uiAbilityContext, 1, &newRef);
+    NavIdAndListenersMap listenersMap;
+    listenersMap.emplace(navigationId, std::list<std::shared_ptr<UIObserverListener>>({ listener }));
+    abilityUIContextNavDesSwitchListeners_[newRef] = listenersMap;
+    infosForNavDesSwitch_[newRef] = info;
+}
+
+/**
+ * UIObserver.on('navDestinationSwitch', { navigationId: navId }, callback)
+ * UIObserver.on('navDestinationSwitch', callback)
+ * observer.on('navDestinationSwitch', context: UIContext, { navigationId?: navId }, callback)
+ */
+void UIObserver::RegisterNavDestinationSwitchCallback(int32_t uiContextInstanceId,
+    const std::optional<std::string>& navigationId, const std::shared_ptr<UIObserverListener>& listener)
+{
+    if (uiContextInstanceId == 0) {
+        uiContextInstanceId = Container::CurrentId();
+    }
+    auto listenersMapIter = uiContextNavDesSwitchListeners_.find(uiContextInstanceId);
+    if (listenersMapIter == uiContextNavDesSwitchListeners_.end()) {
+        NavIdAndListenersMap listenersMap;
+        listenersMap.emplace(navigationId, std::list<std::shared_ptr<UIObserverListener>>({ listener }));
+        uiContextNavDesSwitchListeners_[uiContextInstanceId] = listenersMap;
+        return;
+    }
+
+    auto& listenersMap = listenersMapIter->second;
+    auto it = listenersMap.find(navigationId);
+    if (it == listenersMap.end()) {
+        listenersMap[navigationId] = std::list<std::shared_ptr<UIObserverListener>>({listener});
+        return;
+    }
+
+    if (std::find(it->second.begin(), it->second.end(), listener) == it->second.end()) {
+        it->second.emplace_back(listener);
+    }
+}
+
+/**
+ * observer.off('navDestinationSwitch', context: AbilityUIContext})
+ * observer.off('navDestinationSwitch', context: AbilityUIContext, callback })
+ * observer.off('navDestinationSwitch', context: AbilityUIContext, { navigationId: navId } })
+ * observer.off('navDestinationSwitch', context: AbilityUIContext, { navigationId: navId }, callback })
+ */
+void UIObserver::UnRegisterNavDestinationSwitchCallback(napi_env env, napi_value uiAbilityContext,
+    const std::optional<std::string>& navigationId, napi_value callback)
+{
+    NG::AbilityContextInfo info;
+    GetAbilityInfos(env, uiAbilityContext, info);
+    for (auto listenerPair : abilityUIContextNavDesSwitchListeners_) {
+        auto ref = listenerPair.first;
+        auto localInfo = infosForNavDesSwitch_[ref];
+        if (!info.IsEqual(localInfo)) {
+            continue;
+        }
+
+        auto& listenersMap = listenerPair.second;
+        auto it = listenersMap.find(navigationId);
+        if (it == listenersMap.end()) {
+            return;
+        }
+        auto& listeners = it->second;
+        if (callback == nullptr) {
+            listeners.clear();
+        } else {
+            listeners.erase(std::remove_if(listeners.begin(), listeners.end(),
+                [callback](const std::shared_ptr<UIObserverListener>& registeredListener) {
+                    return registeredListener->NapiEqual(callback);
+                }), listeners.end());
+        }
+        if (listeners.empty()) {
+            listenersMap.erase(it);
+        }
+        if (listenersMap.empty()) {
+            infosForNavDesSwitch_.erase(ref);
+            abilityUIContextNavDesSwitchListeners_.erase(ref);
+            napi_delete_reference(env, ref);
+        }
+        return;
+    }
+}
+
+/**
+ * observer.off('navDestinationSwitch', context: UIContext})
+ * observer.off('navDestinationSwitch', context: UIContext, callback })
+ * observer.off('navDestinationSwitch', context: UIContext, { navigationId: navId })
+ * observer.off('navDestinationSwitch', context: UIContext, { navigationId: navId }, callback )
+ * UIObserver.off('navDestinationSwitch')
+ * UIObserver.off('navDestinationSwitch', callback)
+ * UIObserver.off('navDestinationSwitch', { navigationId: navId })
+ * UIObserver.off('navDestinationSwitch', { navigationId: navId }, callback )
+ */
+void UIObserver::UnRegisterNavDestinationSwitchCallback(int32_t uiContextInstanceId,
+    const std::optional<std::string>& navigationId, napi_value callback)
+{
+    if (uiContextInstanceId == 0) {
+        uiContextInstanceId = Container::CurrentId();
+    }
+    auto listenersMapIter = uiContextNavDesSwitchListeners_.find(uiContextInstanceId);
+    if (listenersMapIter == uiContextNavDesSwitchListeners_.end()) {
+        return;
+    }
+    auto& listenersMap = listenersMapIter->second;
+    auto it = listenersMap.find(navigationId);
+    if (it == listenersMap.end()) {
+        return;
+    }
+    auto& listeners = it->second;
+    if (callback == nullptr) {
+        listeners.clear();
+    } else {
+        listeners.erase(std::remove_if(listeners.begin(), listeners.end(),
+            [callback](const std::shared_ptr<UIObserverListener>& registeredListener) {
+                return registeredListener->NapiEqual(callback);
+            }), listeners.end());
+    }
+    if (listeners.empty()) {
+        listenersMap.erase(it);
+    }
+    if (listenersMap.empty()) {
+        uiContextNavDesSwitchListeners_.erase(listenersMapIter);
     }
 }
 
