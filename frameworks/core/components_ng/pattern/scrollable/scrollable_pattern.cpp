@@ -2388,7 +2388,12 @@ void ScrollablePattern::ScheduleCaretLongPress()
     auto taskExecutor = context->GetTaskExecutor();
     CHECK_NULL_VOID(taskExecutor);
     taskExecutor->PostDelayedTask(
-        [=]() { HandleLongPress(true); }, TaskExecutor::TaskType::UI, LONG_PRESS_PAGE_INTERVAL_MS);
+        [weak = WeakClaim(this)]() {
+            auto pattern = weak.Upgrade();
+            CHECK_NULL_VOID(pattern);
+            pattern->HandleLongPress(true);
+        },
+        TaskExecutor::TaskType::UI, LONG_PRESS_PAGE_INTERVAL_MS);
 }
 
 void ScrollablePattern::StartLongPressEventTimer()
