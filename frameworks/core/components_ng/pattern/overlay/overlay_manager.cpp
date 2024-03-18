@@ -2146,10 +2146,12 @@ bool OverlayManager::RemoveModalInOverlay()
             return true;
         }
     }
-
     auto rootNode = FindWindowScene(topModalNode);
     CHECK_NULL_RETURN(rootNode, true);
-
+    auto overlay = DynamicCast<FrameNode>(rootNode->GetLastChild());
+    if (overlay && overlay->GetFirstChild() != topModalNode) {
+        return true;
+    }
     ModalPageLostFocus(topModalNode);
     auto pattern = topModalNode->GetPattern<PopupBasePattern>();
     if (isProhibitBack_ && pattern->GetTargetId() < 0) {
@@ -2179,7 +2181,6 @@ bool OverlayManager::RemoveModalInOverlay()
             FireNavigationStateChange(true);
         }
     }
-
     FireModalPageHide();
     SaveLastModalNode();
     return true;
