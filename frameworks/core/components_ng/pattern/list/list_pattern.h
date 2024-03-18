@@ -159,6 +159,9 @@ public:
         return contentMainSize_;
     };
 
+    void UpdatePosMapStart(float delta);
+    void UpdatePosMapEnd();
+    void CalculateCurrentOffset(float delta);
     void UpdateScrollBarOffset() override;
     // chain animation
     void SetChainAnimation();
@@ -243,6 +246,11 @@ public:
     }
 
 private:
+    struct PositionInfo {
+        float mainPos;
+        float mainSize;
+    };
+
     bool IsNeedInitClickEventRecorder() const override
     {
         return true;
@@ -338,6 +346,7 @@ private:
     bool isNeedCheckOffset_ = false;
 
     ListLayoutAlgorithm::PositionMap itemPosition_;
+    std::map<int32_t, PositionInfo> posMap_;
 
     std::map<int32_t, int32_t> lanesItemRange_;
     int32_t lanes_ = 1;
