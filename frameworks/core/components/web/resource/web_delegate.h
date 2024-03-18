@@ -428,6 +428,22 @@ private:
     WeakPtr<PipelineBase> context_;
 };
 
+class GestureEventResultOhos : public GestureEventResult {
+    DECLARE_ACE_TYPE(GestureEventResultOhos, GestureEventResult);
+
+public:
+    GestureEventResultOhos(std::shared_ptr<OHOS::NWeb::NWebGestureEventResult> result)
+        : result_(result) {}
+
+    void SetGestureEventResult(bool result) override;
+    bool HasSendTask() { return sendTask_; }
+    void SetSendTask() { sendTask_ = true; }
+
+private:
+    std::shared_ptr<OHOS::NWeb::NWebGestureEventResult> result_;
+    bool sendTask_ = false;
+};
+
 enum class ScriptItemType {
     DOCUMENT_START = 0,
     DOCUMENT_END
