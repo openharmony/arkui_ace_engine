@@ -292,6 +292,69 @@ class SearchIdModifier extends ModifierWithKey<string> {
   }
 }
 
+class SearchDecorationModifier extends ModifierWithKey<{ type: TextDecorationType; color?: ResourceColor }> {
+  constructor(value: { type: TextDecorationType; color?: ResourceColor }) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('searchDecoration');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().search.resetDecoration(node);
+    } else {
+      getUINativeModule().search.setDecoration(node, this.value!.type, this.value!.color);
+    }
+  }
+
+  checkObjectDiff(): boolean {
+    if (this.stageValue.type !== this.value.type) {
+      return true;
+    }
+    if (isResource(this.stageValue.color) && isResource(this.value.color)) {
+      return !isResourceEqual(this.stageValue.color, this.value.color);
+    } else if (!isResource(this.stageValue.color) && !isResource(this.value.color)) {
+      return !(this.stageValue.color === this.value.color);
+    } else {
+      return true;
+    }
+  }
+}
+
+class SearchLetterSpacingModifier extends ModifierWithKey<number | string> {
+  constructor(value: number | string) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('searchLetterSpacing');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().search.resetLetterSpacing(node);
+    } else {
+      getUINativeModule().search.setLetterSpacing(node, this.value);
+    }
+  }
+
+  checkObjectDiff(): boolean {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+
+class SearchLineHeightModifier extends ModifierWithKey<number | string | Resource> {
+  constructor(value: number | string | Resource) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('searchLineHeight');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().search.resetLineHeight(node);
+    } else {
+      getUINativeModule().search.setLineHeight(node, this.value);
+    }
+  }
+
+  checkObjectDiff(): boolean {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+
 class ArkSearchComponent extends ArkComponent implements CommonMethod<SearchAttribute> {
   constructor(nativePtr: KNode) {
     super(nativePtr);
@@ -405,6 +468,18 @@ class ArkSearchComponent extends ArkComponent implements CommonMethod<SearchAttr
   }
   key(value: string): this {
     modifierWithKey(this._modifiersWithKeys, SearchIdModifier.identity, SearchIdModifier, value);
+    return this;
+  }
+  decoration(value: { type: TextDecorationType; color?: ResourceColor }): this {
+    modifierWithKey(this._modifiersWithKeys, SearchDecorationModifier.identity, SearchDecorationModifier, value);
+    return this;
+  }
+  letterSpacing(value: number | string): this {
+    modifierWithKey(this._modifiersWithKeys, SearchLetterSpacingModifier.identity, SearchLetterSpacingModifier, value);
+    return this;
+  }
+  lineHeight(value: number | string | Resource): this {
+    modifierWithKey(this._modifiersWithKeys, SearchLineHeightModifier.identity, SearchLineHeightModifier, value);
     return this;
   }
 }
