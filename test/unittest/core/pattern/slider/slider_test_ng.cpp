@@ -616,10 +616,10 @@ HWTEST_F(SliderTestNg, SliderTestNg008, TestSize.Level1)
      */
     paintProperty->UpdateMin(MIN_LABEL);
     paintProperty->UpdateMax(MAX_LABEL);
-    sliderPattern->OnModifyDone();
+    sliderPattern->CalcSliderValue();
     EXPECT_EQ(paintProperty->GetValue().value(), MAX_LABEL);
     paintProperty->UpdateValue(0);
-    sliderPattern->OnModifyDone();
+    sliderPattern->CalcSliderValue();
     EXPECT_EQ(paintProperty->GetValue().value(), MIN_LABEL);
     /**
      * @tc.cases: case3. when slider stepSize value is less than or equal to 0, take 1 by defualt;
@@ -628,10 +628,11 @@ HWTEST_F(SliderTestNg, SliderTestNg008, TestSize.Level1)
     paintProperty->UpdateStep(0);
     paintProperty->UpdateMin(MIN);
     paintProperty->UpdateMax(MAX);
-    sliderPattern->OnModifyDone();
+    sliderPattern->CalcSliderValue();
     EXPECT_EQ(paintProperty->GetStep().value(), STEP);
     paintProperty->UpdateStep(-1);
-    sliderPattern->OnModifyDone();
+    sliderPattern->UpdateValue(-1);
+    sliderPattern->CalcSliderValue();
     EXPECT_EQ(paintProperty->GetStep().value(), STEP);
 }
 
@@ -3195,7 +3196,6 @@ HWTEST_F(SliderTestNg, SliderPatternChangeEventTestNg001, TestSize.Level1)
     ASSERT_NE(frameNode, nullptr);
     auto sliderEventHub = frameNode->GetEventHub<NG::SliderEventHub>();
     ASSERT_NE(sliderEventHub, nullptr);
-    sliderEventHub->SetOnChangeEvent(std::move(eventOnChange));
     ASSERT_NE(sliderEventHub->onChangeEvent_, nullptr);
     sliderEventHub->FireChangeEvent(1.0, 1);
     sliderEventHub->SetOnChangeEvent(nullptr);
