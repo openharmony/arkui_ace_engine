@@ -73,7 +73,10 @@ private:
     static void SetTitleMouseHoverEvent(const RefPtr<FrameNode>& titleRow);
     static void HandleMouseEvent(const RefPtr<FrameNode>& titleButton, bool isHover);
     static void PlayHoverAnimation(const RefPtr<FrameNode>& titleButton, const Color& color);
-    static void MountColumnNodeToPicker(const RefPtr<FrameNode>& columnNode, const RefPtr<FrameNode>& pickerNode);
+    static void MountColumnNodeToPicker(
+        const RefPtr<FrameNode>& columnNode, const RefPtr<FrameNode>& pickerNode, uint32_t columnWeight = 1);
+    static void UpdateTitleRowLayoutProps(const RefPtr<FrameNode>& titleRow);
+    static void SetTimeNodeColumnWeight(const RefPtr<FrameNode>& timeNode, const DatePickerSettingData& settingData);
 };
 } // namespace OHOS::Ace::NG
 

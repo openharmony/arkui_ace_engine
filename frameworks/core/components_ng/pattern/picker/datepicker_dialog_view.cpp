@@ -43,12 +43,17 @@ constexpr double TIME_WIDTH_PERCENT_ONE = 0.5714;
 constexpr double MONTHDAYS_WIDTH_PERCENT_TWO = 0.3636;
 constexpr double TIME_WIDTH_PERCENT_TWO = 0.6363;
 constexpr Dimension BUTTON_BOTTOM_TOP_MARGIN = 10.0_vp;
-constexpr Dimension LUNARSWITCH_HEIGHT = 48.0_vp;
+constexpr Dimension LUNARSWITCH_HEIGHT = 40.0_vp;
 constexpr Dimension CHECKBOX_SIZE = 24.0_vp;
 constexpr Dimension PICKER_DIALOG_MARGIN_FORM_EDGE = 24.0_vp;
 constexpr Dimension LUNARSWITCH_MARGIN_TO_BUTTON = 8.0_vp;
 constexpr int32_t HOVER_ANIMATION_DURATION = 250;
 constexpr int32_t BUFFER_NODE_NUMBER = 2;
+constexpr Dimension TITLE_HEIGHT = 56.0_vp;
+constexpr int32_t RATIO_SEVEN = 7;
+constexpr int32_t RATIO_FOUR = 4;
+constexpr int32_t RATIO_THREE = 3;
+constexpr int32_t RATIO_TWO = 2;
 constexpr uint8_t PIXEL_ROUND = 18;
 } // namespace
 bool DatePickerDialogView::switchFlag_ = false;
@@ -116,11 +121,15 @@ RefPtr<FrameNode> DatePickerDialogView::Show(const DialogProperties& dialogPrope
         pickerPattern->SetShowTimeFlag(true);
         auto monthDaysLayoutProperty = monthDaysNode->GetLayoutProperty();
         CHECK_NULL_RETURN(monthDaysLayoutProperty, nullptr);
-        monthDaysLayoutProperty->UpdateUserDefinedIdealSize(
-            CalcSize(NG::CalcLength(
-                         Dimension(settingData.useMilitary ? MONTHDAYS_WIDTH_PERCENT_ONE : MONTHDAYS_WIDTH_PERCENT_TWO,
-                             DimensionUnit::PERCENT)),
+        if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
+            monthDaysLayoutProperty->UpdateLayoutWeight(settingData.useMilitary ? RATIO_THREE : RATIO_FOUR);
+        } else {
+            monthDaysLayoutProperty->UpdateUserDefinedIdealSize(
+                CalcSize(NG::CalcLength(Dimension(
+                    settingData.useMilitary ? MONTHDAYS_WIDTH_PERCENT_ONE : MONTHDAYS_WIDTH_PERCENT_TWO,
+                    DimensionUnit::PERCENT)),
                 std::nullopt));
+        }
         monthDaysNode->MarkModifyDone();
         monthDaysNode->MountToParent(pickerRow);
         auto timeNode = CreateTimeNode(settingData.timePickerProperty, settingData.properties, settingData.useMilitary);
@@ -137,13 +146,8 @@ RefPtr<FrameNode> DatePickerDialogView::Show(const DialogProperties& dialogPrope
             datePickerEventHub->FireDialogChangeEvent(str);
         };
         timePickerEventHub->SetOnChangeForDatePicker(std::move(onChangeCallback));
-        auto timeLayoutProperty = timeNode->GetLayoutProperty();
-        CHECK_NULL_RETURN(timeLayoutProperty, nullptr);
-        timeLayoutProperty->UpdateUserDefinedIdealSize(
-            CalcSize(NG::CalcLength(Dimension(settingData.useMilitary ? TIME_WIDTH_PERCENT_ONE : TIME_WIDTH_PERCENT_TWO,
-                         DimensionUnit::PERCENT)),
-                std::nullopt));
         timeNode->MarkModifyDone();
+        SetTimeNodeColumnWeight(timeNode, settingData);
         timeNode->MountToParent(pickerRow);
         pickerRow->MountToParent(pickerStack);
 
@@ -266,8 +270,40 @@ RefPtr<FrameNode> DatePickerDialogView::Show(const DialogProperties& dialogPrope
     }
     contentRow->AddChild(CreateDividerNode(dateNode), 1);
     contentRow->MountToParent(contentColumn);
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
+        PaddingProperty contentPadding;
+        contentPadding.left = CalcLength(PICKER_DIALOG_MARGIN_FORM_EDGE);
+        contentPadding.right = CalcLength(PICKER_DIALOG_MARGIN_FORM_EDGE);
+        contentColumn->GetLayoutProperty()->UpdatePadding(contentPadding);
+    }
     dialogNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
     return dialogNode;
+}
+
+void DatePickerDialogView::SetTimeNodeColumnWeight(
+    const RefPtr<FrameNode>& timeNode, const DatePickerSettingData& settingData)
+{
+    auto timeLayoutProperty = timeNode->GetLayoutProperty();
+    CHECK_NULL_VOID(timeLayoutProperty);
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
+        timeLayoutProperty->UpdateLayoutWeight(settingData.useMilitary ? RATIO_FOUR : RATIO_SEVEN);
+        for (const auto& child : timeNode->GetChildren()) {
+            auto frameNodeChild = AceType::DynamicCast<NG::FrameNode>(child);
+            auto timeColumnLayoutProperty = frameNodeChild->GetLayoutProperty();
+            timeColumnLayoutProperty->UpdateLayoutWeight(RATIO_TWO);
+        }
+        if (!settingData.useMilitary) {
+            auto child = timeNode->GetFirstChild();
+            auto frameNodeChild = AceType::DynamicCast<NG::FrameNode>(child);
+            auto timeColumnLayoutProperty = frameNodeChild->GetLayoutProperty();
+            timeColumnLayoutProperty->UpdateLayoutWeight(RATIO_THREE);
+        }
+    } else {
+        timeLayoutProperty->UpdateUserDefinedIdealSize(
+            CalcSize(NG::CalcLength(Dimension(settingData.useMilitary ? TIME_WIDTH_PERCENT_ONE : TIME_WIDTH_PERCENT_TWO,
+                DimensionUnit::PERCENT)),
+            std::nullopt));
+    }
 }
 
 RefPtr<FrameNode> DatePickerDialogView::CreateStackNode()
@@ -302,11 +338,7 @@ RefPtr<FrameNode> DatePickerDialogView::CreateTitleButtonNode(const RefPtr<Frame
     auto titleRow = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
         AceType::MakeRefPtr<LinearLayoutPattern>(false));
     CHECK_NULL_RETURN(titleRow, nullptr);
-    auto layoutProps = titleRow->GetLayoutProperty<LinearLayoutProperty>();
-    CHECK_NULL_RETURN(layoutProps, nullptr);
-    layoutProps->UpdateMainAxisAlign(FlexAlign::CENTER);
-    layoutProps->UpdateCrossAxisAlign(FlexAlign::CENTER);
-    layoutProps->UpdateMeasureType(MeasureType::MATCH_PARENT_MAIN_AXIS);
+    UpdateTitleRowLayoutProps(titleRow);
 
     auto buttonTitleNode = FrameNode::GetOrCreateFrameNode(
         V2::BUTTON_ETS_TAG, pickerPattern->GetButtonTitleId(), []() { return AceType::MakeRefPtr<ButtonPattern>(); });
@@ -341,6 +373,19 @@ RefPtr<FrameNode> DatePickerDialogView::CreateTitleButtonNode(const RefPtr<Frame
     buttonTitleNode->MountToParent(titleRow);
     titleRow->SetNeedCallChildrenUpdate(false);
     return titleRow;
+}
+
+void DatePickerDialogView::UpdateTitleRowLayoutProps(const RefPtr<FrameNode>& titleRow)
+{
+    auto layoutProps = titleRow->GetLayoutProperty<LinearLayoutProperty>();
+    CHECK_NULL_VOID(layoutProps);
+    layoutProps->UpdateMainAxisAlign(FlexAlign::CENTER);
+    layoutProps->UpdateCrossAxisAlign(FlexAlign::CENTER);
+    layoutProps->UpdateMeasureType(MeasureType::MATCH_PARENT_MAIN_AXIS);
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
+        layoutProps->UpdateUserDefinedIdealSize(
+            CalcSize(CalcLength(Dimension(1.0, DimensionUnit::PERCENT)), CalcLength(TITLE_HEIGHT)));
+    }
 }
 
 RefPtr<FrameNode> DatePickerDialogView::CreateTitleButtonRowNode()
@@ -587,9 +632,9 @@ void DatePickerDialogView::CreateNormalDateNode(const RefPtr<FrameNode>& dateNod
     datePickerPattern->SetColumn(monthColumnNode);
     datePickerPattern->SetColumn(dayColumnNode);
 
-    MountColumnNodeToPicker(yearColumnNode, dateNode);
-    MountColumnNodeToPicker(monthColumnNode, dateNode);
-    MountColumnNodeToPicker(dayColumnNode, dateNode);
+    MountColumnNodeToPicker(yearColumnNode, dateNode, RATIO_THREE);
+    MountColumnNodeToPicker(monthColumnNode, dateNode, RATIO_TWO);
+    MountColumnNodeToPicker(dayColumnNode, dateNode, RATIO_TWO);
 }
 
 void DatePickerDialogView::CreateSingleDateNode(const RefPtr<FrameNode>& dateNode, uint32_t showCount)
@@ -605,7 +650,7 @@ void DatePickerDialogView::CreateSingleDateNode(const RefPtr<FrameNode>& dateNod
     datePickerPattern->SetColumn(monthDaysColumnNode);
     datePickerPattern->SetColumn(yearColumnNode);
 
-    MountColumnNodeToPicker(monthDaysColumnNode, dateNode);
+    MountColumnNodeToPicker(monthDaysColumnNode, dateNode, RATIO_FOUR);
 
     {
         auto stackYearNode = CreateStackNode();
@@ -667,7 +712,7 @@ RefPtr<FrameNode> DatePickerDialogView::CreateTimeNode(
 }
 
 void DatePickerDialogView::MountColumnNodeToPicker(
-    const RefPtr<FrameNode>& columnNode, const RefPtr<FrameNode>& pickerNode)
+    const RefPtr<FrameNode>& columnNode, const RefPtr<FrameNode>& pickerNode, uint32_t columnWeight)
 {
     auto stackNode = CreateStackNode();
     auto blendNode = CreateColumnNode();
@@ -677,7 +722,7 @@ void DatePickerDialogView::MountColumnNodeToPicker(
     blendNode->MountToParent(stackNode);
     auto layoutProperty = stackNode->GetLayoutProperty<LayoutProperty>();
     layoutProperty->UpdateAlignment(Alignment::CENTER);
-    layoutProperty->UpdateLayoutWeight(1);
+    layoutProperty->UpdateLayoutWeight(columnWeight);
     stackNode->MountToParent(pickerNode);
     columnNode->GetLayoutProperty<LayoutProperty>()->UpdatePixelRound(PIXEL_ROUND);
 }
@@ -762,7 +807,9 @@ void DatePickerDialogView::CreateLunarswitchNode(
     auto checkboxLayoutProps = checkbox->GetLayoutProperty<LayoutProperty>();
     CHECK_NULL_VOID(checkboxLayoutProps);
     MarginProperty marginCheckbox;
-    marginCheckbox.left = CalcLength(PICKER_DIALOG_MARGIN_FORM_EDGE);
+    if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
+        marginCheckbox.left = CalcLength(PICKER_DIALOG_MARGIN_FORM_EDGE);
+    }
     marginCheckbox.right = CalcLength(LUNARSWITCH_MARGIN_TO_BUTTON);
     checkboxLayoutProps->UpdateMargin(marginCheckbox);
     checkboxLayoutProps->UpdateUserDefinedIdealSize(CalcSize(CalcLength(CHECKBOX_SIZE), CalcLength(CHECKBOX_SIZE)));
