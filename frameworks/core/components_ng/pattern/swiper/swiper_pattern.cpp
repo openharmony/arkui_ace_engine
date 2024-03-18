@@ -1760,7 +1760,7 @@ void SwiperPattern::UpdateCurrentOffset(float offset)
     }
     currentDelta_ = currentDelta_ - offset;
     currentIndexOffset_ += offset;
-    if (isDragging_) {
+    if (isDragging_ || childScrolling_) {
         AnimationCallbackInfo callbackInfo;
         callbackInfo.currentOffset =
             GetCustomPropertyOffset() + Dimension(currentIndexOffset_, DimensionUnit::PX).ConvertToVp();

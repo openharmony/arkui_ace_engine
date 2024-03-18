@@ -9798,6 +9798,26 @@ HWTEST_F(SwiperTestNg, SwiperPatternHandleScroll007, TestSize.Level1)
 }
 
 /**
+ * @tc.name: SwiperPatternHandleScroll008
+ * @tc.desc: test HandleScroll triggering event
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperTestNg, SwiperPatternHandleScroll008, TestSize.Level1)
+{
+    CreateWithItem([](SwiperModelNG model) {});
+    pattern_->itemPosition_.insert({ 0, SwiperItemInfo { .startPos = 0.0f } });
+    int32_t callCount = 0;
+    eventHub_->SetGestureSwipeEvent([&](int32_t index, const AnimationCallbackInfo& info) {
+        ++callCount;
+    });
+    pattern_->OnScrollStartRecursive(0.0f);
+    pattern_->HandleScroll(5.0f, SCROLL_FROM_UPDATE, NestedState::CHILD_SCROLL);
+    pattern_->HandleScroll(-5.0f, SCROLL_FROM_UPDATE, NestedState::CHILD_SCROLL);
+    pattern_->HandleScroll(-2.0f, SCROLL_FROM_UPDATE, NestedState::CHILD_SCROLL);
+    EXPECT_EQ(callCount, 3);
+}
+
+/**
  * @tc.name: SwiperPatternHandleScrollVelocity001
  * @tc.desc: test HandleScrollVelocity self handle
  * @tc.type: FUNC
