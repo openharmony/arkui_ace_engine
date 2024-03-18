@@ -81,7 +81,6 @@ public:
 
 private:
     bool EraseEmoji();
-    std::string EraseRedundantSpecialChar(const std::string& value, const char& specialChar);
     void FormatIndex(int32_t& startIndex, int32_t& endIndex);
     void FilterTextInputStyle(bool& textChanged, std::string& result);
     bool FilterWithEvent(const std::string& filter, std::string& result);
