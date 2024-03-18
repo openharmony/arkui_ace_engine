@@ -115,21 +115,30 @@ void JSSideBar::Create(const JSCallbackInfo& info)
     SideBarContainerModel::GetInstance()->SetSideBarContainerType(style);
 }
 
-void JSSideBar::SetShowControlButton(bool isShow)
+void JSSideBar::SetShowControlButton(const JSCallbackInfo& info)
 {
+    if (info.Length() != 1) {
+        return;
+    }
+
+    bool isShow = true;
+    if (info[0]->IsBoolean()) {
+        isShow = info[0]->ToBoolean();
+    }
     SideBarContainerModel::GetInstance()->SetShowControlButton(isShow);
 }
 
 void JSSideBar::JsSideBarPosition(const JSCallbackInfo& info)
 {
-    if (info.Length() < 1) {
+    if (info.Length() != 1) {
         return;
     }
     SideBarPosition sideBarPosition = SideBarPosition::START;
     if (info[0]->IsNumber()) {
-        sideBarPosition = static_cast<SideBarPosition>(info[0]->ToNumber<int>());
-    } else {
-        return;
+        auto position = info[0]->ToNumber<int>();
+        if (position >= 0 && position <= 1) {
+            sideBarPosition = static_cast<SideBarPosition>(position);
+        }
     }
     SideBarContainerModel::GetInstance()->SetSideBarPosition(sideBarPosition);
 }
@@ -269,7 +278,15 @@ void JSSideBar::JsControlButton(const JSCallbackInfo& info)
         return;
     }
 
-    if (!info[0]->IsNull() && info[0]->IsObject()) {
+    if (info[0]->IsUndefined() || info[0]->IsNull()) {
+        SideBarContainerModel::GetInstance()->SetControlButtonWidth(DEFAULT_CONTROL_BUTTON_WIDTH);
+        SideBarContainerModel::GetInstance()->SetControlButtonHeight(DEFAULT_CONTROL_BUTTON_HEIGHT);
+        SideBarContainerModel::GetInstance()->ResetControlButtonLeft();
+        SideBarContainerModel::GetInstance()->SetControlButtonTop(DEFAULT_CONTROL_BUTTON_TOP);
+        SideBarContainerModel::GetInstance()->ResetControlButtonIconInfo();
+        return;
+    }
+    if (info[0]->IsObject()) {
         JSRef<JSObject> value = JSRef<JSObject>::Cast(info[0]);
         if (Container::LessThanAPIVersion(PlatformVersion::VERSION_TEN)) {
             ParseControlButtonOG(value);
@@ -278,7 +295,11 @@ void JSSideBar::JsControlButton(const JSCallbackInfo& info)
         }
 
         JSRef<JSVal> icons = value->GetProperty("icons");
-        if (!icons->IsNull() && icons->IsObject()) {
+        if (icons->IsUndefined() || icons->IsNull()) {
+            SideBarContainerModel::GetInstance()->ResetControlButtonIconInfo();
+            return;
+        }
+        if (icons->IsObject()) {
             JSRef<JSObject> iconsVal = JSRef<JSObject>::Cast(icons);
             JSRef<JSVal> showIcon = iconsVal->GetProperty("shown");
             JSRef<JSVal> switchingIcon = iconsVal->GetProperty("switching");
@@ -418,5 +439,4 @@ void JSSideBar::ParseControlButtonNG(JSRef<JSObject> value)
     }
     SideBarContainerModel::GetInstance()->SetControlButtonTop(controlButtonTop);
 }
-
 } // namespace OHOS::Ace::Framework
