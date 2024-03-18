@@ -444,7 +444,6 @@ bool UIExtensionPattern::HandleKeyEvent(const KeyEvent& event)
     auto pipeline = PipelineContext::GetCurrentContext();
     if (pipeline && pipeline->GetIsFocusActive()) {
         DispatchFocusActiveEvent(true);
-        DispatchFocusState(true);
     }
     return DispatchKeyEventSync(event.rawKeyEvent);
 }

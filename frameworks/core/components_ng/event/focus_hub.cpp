@@ -620,7 +620,7 @@ bool FocusHub::OnKeyEventScope(const KeyEvent& keyEvent)
     }
     if (keyEvent.IsKey({ KeyCode::KEY_TAB }) && pipeline->IsTabJustTriggerOnKeyEvent()) {
         ScrollToLastFocusIndex();
-        return false;
+        return true;
     }
 
     ScrollToLastFocusIndex();
