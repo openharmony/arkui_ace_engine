@@ -369,6 +369,7 @@ public:
     }
 
     void GetBuilderInitHeight();
+    void ChangeSheetPage(float height);
     void DumpAdvanceInfo() override;
 protected:
     void OnDetachFromFrameNode(FrameNode* frameNode) override;
@@ -414,7 +415,8 @@ private:
     RefPtr<PanEvent> panEvent_;
     float currentOffset_ = 0.0f;
 
-    float height_ = 0.0f; // sheet height, start from the bottom
+    float sheetHeightUp_ = 0.0f; // sheet offset to move up when avoiding keyboard
+    float height_ = 0.0f; // sheet height, start from the bottom, before avoiding keyboard
     float sheetHeight_ = 0.0f; // sheet frameSize Height
     float pageHeight_ = 0.0f; // root Height, = maxSize.Height()
     float scrollHeight_ = 0.0f;
