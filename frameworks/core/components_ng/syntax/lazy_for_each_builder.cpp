@@ -14,6 +14,7 @@
  */
 
 #include "core/components_ng/syntax/lazy_for_each_builder.h"
+#include "core/components_ng/pattern/recycle_view/recycle_dummy_node.h"
 
 namespace OHOS::Ace::NG {
     std::pair<std::string, RefPtr<UINode>> LazyForEachBuilder::GetChildByIndex(
@@ -211,6 +212,10 @@ namespace OHOS::Ace::NG {
         auto iter = cachedItems_.find(index);
         if (iter != cachedItems_.end()) {
             if (!iter->second.second) {
+                return;
+            }
+            auto dummyNode = AceType::DynamicCast<RecycleDummyNode>(iter->second.second);
+            if (!dummyNode) {
                 return;
             }
             auto keyIter = expiringItem_.find(iter->second.first);
