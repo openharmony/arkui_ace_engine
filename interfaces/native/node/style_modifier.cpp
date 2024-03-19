@@ -17,6 +17,7 @@
 #include <cstddef>
 #include <cstdint>
 #include <map>
+#include <unordered_map>
 #include <regex>
 #include <string>
 
@@ -126,12 +127,20 @@ const std::vector<std::string> CURVE_ARRAY = { "linear", "ease", "ease-in", "eas
     "fast-out-slow-in", "linear-out-slow-in", "fast-out-linear-in", "extreme-deceleration", "sharp", "rhythm", "smooth",
     "friction" };
 const std::vector<std::string> FONT_STYLES = { "normal", "italic" };
-const std::vector<int32_t> SPAN_ATTRIBUTES = { static_cast<int32_t>(NODE_SPAN_CONTENT),
-    static_cast<int32_t>(NODE_TEXT_DECORATION), static_cast<int32_t>(NODE_FONT_COLOR),
-    static_cast<int32_t>(NODE_FONT_SIZE), static_cast<int32_t>(NODE_FONT_STYLE), static_cast<int32_t>(NODE_FONT_WEIGHT),
-    static_cast<int32_t>(NODE_TEXT_LINE_HEIGHT), static_cast<int32_t>(NODE_TEXT_CASE),
-    static_cast<int32_t>(NODE_TEXT_LETTER_SPACING), static_cast<int32_t>(NODE_FONT_FAMILY),
-    static_cast<int32_t>(NODE_TEXT_TEXT_SHADOW), static_cast<int32_t>(NODE_SPAN_TEXT_BACKGROUND_STYLE) };
+std::unordered_map<int32_t, bool> SPAN_ATTRIBUTES_MAP = {
+    { static_cast<int32_t>(NODE_SPAN_CONTENT), true },
+    { static_cast<int32_t>(NODE_TEXT_DECORATION), true },
+    { static_cast<int32_t>(NODE_FONT_COLOR), true },
+    { static_cast<int32_t>(NODE_FONT_SIZE), true },
+    { static_cast<int32_t>(NODE_FONT_STYLE), true },
+    { static_cast<int32_t>(NODE_FONT_WEIGHT), true },
+    { static_cast<int32_t>(NODE_TEXT_LINE_HEIGHT), true },
+    { static_cast<int32_t>(NODE_TEXT_CASE), true },
+    { static_cast<int32_t>(NODE_TEXT_LETTER_SPACING), true },
+    { static_cast<int32_t>(NODE_FONT_FAMILY), true },
+    { static_cast<int32_t>(NODE_TEXT_TEXT_SHADOW), true },
+    { static_cast<int32_t>(NODE_SPAN_TEXT_BACKGROUND_STYLE), true },
+};
 constexpr int32_t ANIMATION_DURATION_INDEX = 0;
 constexpr int32_t ANIMATION_CURVE_INDEX = 1;
 constexpr int32_t ANIMATION_DELAY_INDEX = 2;
@@ -1682,7 +1691,7 @@ void ResetFocusable(ArkUI_NodeHandle node)
 
 int32_t SetAccessibilityGroup(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
 {
-    if (node->type == ARKUI_NODE_SPAN || item->size == 0 || !CheckAttributeIsBool(item->value[0].i32)) {
+    if (item->size == 0 || !CheckAttributeIsBool(item->value[0].i32)) {
         return ERROR_CODE_PARAM_INVALID;
     }
     auto* fullImpl = GetFullImpl();
@@ -1692,10 +1701,6 @@ int32_t SetAccessibilityGroup(ArkUI_NodeHandle node, const ArkUI_AttributeItem* 
 
 const ArkUI_AttributeItem* GetAccessibilityGroup(ArkUI_NodeHandle node)
 {
-    if (node->type == ARKUI_NODE_SPAN) {
-        g_attributeItem.size = NUM_0;
-        return nullptr;
-    }
     auto resultValue =
         GetFullImpl()->getNodeModifiers()->getCommonModifier()->getAccessibilityGroup(node->uiNodeHandle);
     g_numberValues[0].i32 = resultValue;
@@ -1704,16 +1709,13 @@ const ArkUI_AttributeItem* GetAccessibilityGroup(ArkUI_NodeHandle node)
 
 void ResetAccessibilityGroup(ArkUI_NodeHandle node)
 {
-    if (node->type == ARKUI_NODE_SPAN) {
-        return;
-    }
     auto* fullImpl = GetFullImpl();
     fullImpl->getNodeModifiers()->getCommonModifier()->resetAccessibilityGroup(node->uiNodeHandle);
 }
 
 int32_t SetAccessibilityText(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
 {
-    if (node->type == ARKUI_NODE_SPAN || item->string == nullptr) {
+    if (item->string == nullptr) {
         return ERROR_CODE_PARAM_INVALID;
     }
     auto* fullImpl = GetFullImpl();
@@ -1723,10 +1725,6 @@ int32_t SetAccessibilityText(ArkUI_NodeHandle node, const ArkUI_AttributeItem* i
 
 const ArkUI_AttributeItem* GetAccessibilityText(ArkUI_NodeHandle node)
 {
-    if (node->type == ARKUI_NODE_SPAN) {
-        g_attributeItem.size = NUM_0;
-        return nullptr;
-    }
     auto resultValue = GetFullImpl()->getNodeModifiers()->getCommonModifier()->getAccessibilityText(node->uiNodeHandle);
     g_attributeItem.string = resultValue;
     g_attributeItem.size = 0;
@@ -1735,16 +1733,13 @@ const ArkUI_AttributeItem* GetAccessibilityText(ArkUI_NodeHandle node)
 
 void ResetAccessibilityText(ArkUI_NodeHandle node)
 {
-    if (node->type == ARKUI_NODE_SPAN) {
-        return;
-    }
     auto* fullImpl = GetFullImpl();
     fullImpl->getNodeModifiers()->getCommonModifier()->resetAccessibilityText(node->uiNodeHandle);
 }
 
 int32_t SetAccessibilityLevel(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
 {
-    if (node->type == ARKUI_NODE_SPAN || item->size == 0 || !CheckAttributeIsAccessibilityLevel(item->value[0].i32)) {
+    if (item->size == 0 || !CheckAttributeIsAccessibilityLevel(item->value[0].i32)) {
         return ERROR_CODE_PARAM_INVALID;
     }
     auto* fullImpl = GetFullImpl();
@@ -1755,10 +1750,6 @@ int32_t SetAccessibilityLevel(ArkUI_NodeHandle node, const ArkUI_AttributeItem* 
 
 const ArkUI_AttributeItem* GetAccessibilityLevel(ArkUI_NodeHandle node)
 {
-    if (node->type == ARKUI_NODE_SPAN) {
-        g_attributeItem.size = NUM_0;
-        return nullptr;
-    }
     auto resultValue = GetFullImpl()->getNodeModifiers()->getCommonModifier()->getAccessibilityLevel(
         node->uiNodeHandle);
     std::string levelString(resultValue);
@@ -1768,16 +1759,13 @@ const ArkUI_AttributeItem* GetAccessibilityLevel(ArkUI_NodeHandle node)
 
 void ResetAccessibilityLevel(ArkUI_NodeHandle node)
 {
-    if (node->type == ARKUI_NODE_SPAN) {
-        return;
-    }
     auto* fullImpl = GetFullImpl();
     fullImpl->getNodeModifiers()->getCommonModifier()->resetAccessibilityLevel(node->uiNodeHandle);
 }
 
 int32_t SetAccessibilityDescription(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
 {
-    if (node->type == ARKUI_NODE_SPAN || item->string == nullptr) {
+    if (item->string == nullptr) {
         return ERROR_CODE_PARAM_INVALID;
     }
     auto* fullImpl = GetFullImpl();
@@ -1787,10 +1775,6 @@ int32_t SetAccessibilityDescription(ArkUI_NodeHandle node, const ArkUI_Attribute
 
 const ArkUI_AttributeItem* GetAccessibilityDescription(ArkUI_NodeHandle node)
 {
-    if (node->type == ARKUI_NODE_SPAN) {
-        g_attributeItem.size = NUM_0;
-        return nullptr;
-    }
     auto resultValue =
         GetFullImpl()->getNodeModifiers()->getCommonModifier()->getAccessibilityDescription(node->uiNodeHandle);
     g_attributeItem.string = resultValue;
@@ -1800,9 +1784,6 @@ const ArkUI_AttributeItem* GetAccessibilityDescription(ArkUI_NodeHandle node)
 
 void ResetAccessibilityDescription(ArkUI_NodeHandle node)
 {
-    if (node->type == ARKUI_NODE_SPAN) {
-        return;
-    }
     auto* fullImpl = GetFullImpl();
     fullImpl->getNodeModifiers()->getCommonModifier()->resetAccessibilityDescription(node->uiNodeHandle);
 }
@@ -8286,11 +8267,8 @@ const ArkUI_AttributeItem* GetLayoutDirection(ArkUI_NodeHandle node)
 bool CheckIfAttributeLegal(ArkUI_NodeHandle node, int32_t type)
 {
     if (node->type == ARKUI_NODE_SPAN) {
-        auto it = std::find(SPAN_ATTRIBUTES.begin(), SPAN_ATTRIBUTES.end(), type);
-        if (it != SPAN_ATTRIBUTES.end()) {
-            return true;
-        }
-        return false;
+        auto it = SPAN_ATTRIBUTES_MAP.find(type);
+        return it != SPAN_ATTRIBUTES_MAP.end();
     }
     return true;
 }
