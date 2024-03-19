@@ -3884,7 +3884,7 @@ bool RosenRenderContext::TriggerPageTransition(PageTransitionType type, const st
                 static_cast<int32_t>(pipeline->GetTimeFromExternalTimer() - pipeline->GetLastTouchTime()) /
                 nanoToMilliSeconds;
             startDelayTime = std::max(0, startDelayTime);
-            int32_t delayedDuration = pageTransitionDuration  > startDelayTime ? pageTransitionDuration - startDelayTime
+            int32_t delayedDuration = pageTransitionDuration > startDelayTime ? pageTransitionDuration - startDelayTime
                                                                               : pageTransitionDuration;
             delayedDuration = std::max(minTransitionDuration, delayedDuration - frameDelayTime);
             LOGI("Use quick push delayedDuration:%{public}d", delayedDuration);
