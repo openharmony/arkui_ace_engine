@@ -972,7 +972,12 @@ void CustomPaintPattern::OnPixelRoundFinish(const SizeF& pixelGridRoundSize)
 void CustomPaintPattern::EnableAnalyzer(bool enable)
 {
     isEnableAnalyzer_ = enable;
-    if (isEnableAnalyzer_) {
+    if (!isEnableAnalyzer_) {
+        DestroyAnalyzerOverlay();
+        return;
+    }
+
+    if (!imageAnalyzerManager_) {
         imageAnalyzerManager_ = std::make_shared<ImageAnalyzerManager>(GetHost(), ImageAnalyzerHolder::CANVAS);
     }
 }

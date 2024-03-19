@@ -1012,7 +1012,12 @@ void ImagePattern::OnConfigurationUpdate()
 void ImagePattern::EnableAnalyzer(bool value)
 {
     isEnableAnalyzer_ = value;
-    if (isEnableAnalyzer_) {
+    if (!isEnableAnalyzer_) {
+        DestroyAnalyzerOverlay();
+        return;
+    }
+
+    if (!imageAnalyzerManager_) {
         imageAnalyzerManager_ = std::make_shared<ImageAnalyzerManager>(GetHost(), ImageAnalyzerHolder::IMAGE);
     }
 }

@@ -109,12 +109,8 @@ void JSCanvas::OnReady(const JSCallbackInfo& info)
     }
 }
 
-void JSCanvas::EnableAnalyzer(const JSCallbackInfo& info)
+void JSCanvas::EnableAnalyzer(bool enable)
 {
-    if (info.Length() < 1 || !info[0]->IsBoolean()) {
-        return;
-    }
-    bool enable = info[0]->ToBoolean();
     CanvasModel::GetInstance()->EnableAnalyzer(enable);
 }
 } // namespace OHOS::Ace::Framework
