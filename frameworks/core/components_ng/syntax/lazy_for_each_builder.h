@@ -461,6 +461,19 @@ public:
         }
     }
 
+    void PaintDebugBoundaryTreeAll(bool flag)
+    {
+        for (const auto& node : cachedItems_) {
+            if (node.second.second == nullptr) {
+                continue;
+            }
+            node.second.second->PaintDebugBoundaryTreeAll(flag);
+        }
+        for (const auto& node : expiringItem_) {
+            node.second.second->PaintDebugBoundaryTreeAll(flag);
+        }
+    }
+
 protected:
     virtual int32_t OnGetTotalCount() = 0;
 

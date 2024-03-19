@@ -532,7 +532,7 @@ public:
 
     virtual void SetNodeIndexOffset(int32_t start, int32_t count) {}
 
-    void PaintDebugBoundaryTreeAll(bool flag);
+    virtual void PaintDebugBoundaryTreeAll(bool flag);
 
 protected:
     std::list<RefPtr<UINode>>& ModifyChildren()

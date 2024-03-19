@@ -2862,19 +2862,10 @@ void UIContentImpl::UpdateTransform(const OHOS::Rosen::Transform& transform)
 
 void UIContentImpl::RenderLayoutBoundary(bool isDebugBoundary)
 {
-    ContainerScope scope(instanceId_);
-    auto taskExecutor = Container::CurrentTaskExecutor();
-    CHECK_NULL_VOID(taskExecutor);
-    taskExecutor->PostTask(
-        [isDebugBoundary]() {
-            auto pipeline = NG::PipelineContext::GetCurrentContext();
-            CHECK_NULL_VOID(pipeline);
-            auto rootNode = pipeline->GetRootElement();
-            CHECK_NULL_VOID(rootNode);
-            rootNode->PaintDebugBoundaryTreeAll(isDebugBoundary);
-            pipeline->RequestFrame();
-        },
-        TaskExecutor::TaskType::UI);
+    auto container = AceEngine::Get().GetContainer(instanceId_);
+    CHECK_NULL_VOID(container);
+    CHECK_NULL_VOID(renderBoundaryManager_);
+    renderBoundaryManager_->PostTaskRenderBoundary(isDebugBoundary, container);
 }
 
 void UIContentImpl::EnableSystemParameterTraceLayoutCallback(const char* key, const char* value, void* context)
