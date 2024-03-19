@@ -123,6 +123,7 @@ template("ace_core_source_set") {
       "components/declaration/svg/svg_circle_declaration.cpp",
       "components/declaration/svg/svg_declaration.cpp",
       "components/declaration/svg/svg_ellipse_declaration.cpp",
+      "components/declaration/svg/svg_fe_blend_declaration.cpp",
       "components/declaration/svg/svg_fe_colormatrix_declaration.cpp",
       "components/declaration/svg/svg_fe_component_transfer_declaration.cpp",
       "components/declaration/svg/svg_fe_composite_declaration.cpp",

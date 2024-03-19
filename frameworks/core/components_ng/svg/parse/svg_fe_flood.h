@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,28 +13,26 @@
  * limitations under the License.
  */
 
-#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_SVG_PARSE_SVG_FE_COMPOSITE_H
-#define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_SVG_PARSE_SVG_FE_COMPOSITE_H
+#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_SVG_PARSE_SVG_FE_FLOOD_H
+#define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_SVG_PARSE_SVG_FE_FLOOD_H
 
-#include "core/components/declaration/svg/svg_fe_composite_declaration.h"
-#include "core/components_ng/render/drawing.h"
+#include "core/components/declaration/svg/svg_fe_flood_declaration.h"
 #include "core/components_ng/svg/parse/svg_fe.h"
 
 namespace OHOS::Ace::NG {
 
-class SvgFeComposite : public SvgFe {
-    DECLARE_ACE_TYPE(SvgFeComposite, SvgFe);
+class SvgFeFlood : public SvgFe {
+    DECLARE_ACE_TYPE(SvgFeFlood, SvgFe);
 
 public:
-    SvgFeComposite();
-    ~SvgFeComposite() override = default;
+    SvgFeFlood();
+    ~SvgFeFlood() override = default;
     static RefPtr<SvgNode> Create();
 
     void OnAsImageFilter(std::shared_ptr<RSImageFilter>& imageFilter, const ColorInterpolationType& srcColor,
         ColorInterpolationType& currentColor) const override;
-    RSBlendMode BlendModeForOperator(FeOperatorType op) const;
 };
 
 } // namespace OHOS::Ace::NG
 
-#endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_SVG_PARSE_SVG_FE_COMPOSITE_H
+#endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_SVG_PARSE_SVG_FE_FLOOD_H

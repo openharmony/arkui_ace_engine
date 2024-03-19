@@ -18,7 +18,7 @@
 #include "include/effects/SkImageFilters.h"
 
 #include "base/utils/utils.h"
-#include "frameworks/core/components/declaration/svg/svg_fe_composite_declaration.h"
+#include "core/components/common/properties/blend_mode.h"
 
 namespace OHOS::Ace::NG {
 
@@ -34,36 +34,48 @@ SvgFeComposite::SvgFeComposite() : SvgFe()
     declaration_->InitializeStyle();
 }
 
-#ifndef USE_ROSEN_DRAWING
-void SvgFeComposite::OnAsImageFilter(sk_sp<SkImageFilter>& imageFilter, const ColorInterpolationType& srcColor,
-    ColorInterpolationType& currentColor) const
-#else
+RSBlendMode SvgFeComposite::BlendModeForOperator(FeOperatorType op) const
+{
+    switch (op) {
+        case FeOperatorType::FE_ATOP:
+            return RSBlendMode::SRC_ATOP;
+        case FeOperatorType::FE_IN:
+            return RSBlendMode::SRC_IN;
+        case FeOperatorType::FE_LIGHTER:
+            return RSBlendMode::LIGHTEN;
+        case FeOperatorType::FE_OUT:
+            return RSBlendMode::SRC_OUT;
+        case FeOperatorType::FE_OVER:
+            return RSBlendMode::SRC_OVER;
+        case FeOperatorType::FE_XOR:
+            return RSBlendMode::XOR;
+        case FeOperatorType::FE_ARITHMETIC:
+            return RSBlendMode::SRC_OVER;
+        default:
+            return RSBlendMode::SRC_IN;
+    };
+}
+
 void SvgFeComposite::OnAsImageFilter(std::shared_ptr<RSImageFilter>& imageFilter,
     const ColorInterpolationType& srcColor, ColorInterpolationType& currentColor) const
-#endif
 {
     auto declaration = AceType::DynamicCast<SvgFeCompositeDeclaration>(declaration_);
     CHECK_NULL_VOID(declaration);
-    if (declaration->GetOperatorType() != FeOperatorType::FE_ARITHMETIC) {
-        // this version skia not support SkBlendImageFilters
-        return;
-    }
-
+    auto mode = declaration->GetOperatorType();
     auto foreImageFilter = MakeImageFilter(declaration->GetIn(), imageFilter);
     auto backImageFilter = MakeImageFilter(declaration->GetIn2(), imageFilter);
     ConverImageFilterColor(foreImageFilter, srcColor, currentColor);
     ConverImageFilterColor(backImageFilter, srcColor, currentColor);
-#ifndef USE_ROSEN_DRAWING
-
-    imageFilter = SkImageFilters::Arithmetic(declaration->GetK1(), declaration->GetK2(), declaration->GetK3(),
-        declaration->GetK4(), true, backImageFilter, foreImageFilter, nullptr);
-#else
+    if (mode != FeOperatorType::FE_ARITHMETIC) {
+        imageFilter = RSRecordingImageFilter::CreateBlendImageFilter(
+            BlendModeForOperator(mode), backImageFilter, foreImageFilter);
+        ConverImageFilterColor(imageFilter, srcColor, currentColor);
+        return;
+    }
     std::vector<RSScalar> coefficients = { declaration->GetK1(), declaration->GetK2(), declaration->GetK3(),
         declaration->GetK4() };
     imageFilter =
         RSRecordingImageFilter::CreateArithmeticImageFilter(coefficients, true, backImageFilter, foreImageFilter);
-#endif
-
     ConverImageFilterColor(imageFilter, srcColor, currentColor);
 }
 
