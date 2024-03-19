@@ -4186,11 +4186,11 @@ bool SwiperPattern::HandleScrollVelocity(float velocity)
 ScrollResult SwiperPattern::HandleScroll(float offset, int32_t source, NestedState state, float velocity)
 {
     if (IsDisableSwipe()) {
-        return { offset, false };
+        return { offset, true };
     }
     if (source == SCROLL_FROM_ANIMATION && AnimationRunning()) {
         // deny conflicting animation from child
-        return { offset, false };
+        return { offset, true };
     }
     // mouse scroll triggers showNext / showPrev instead of updating offset
     if (source == SCROLL_FROM_AXIS) {
