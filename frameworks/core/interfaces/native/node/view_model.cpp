@@ -29,6 +29,7 @@
 #include "core/components_ng/pattern/list/list_item_group_model_ng.h"
 #include "core/components_ng/pattern/picker/datepicker_model_ng.h"
 #include "core/components_ng/pattern/scroll/scroll_model_ng.h"
+#include "core/components_ng/pattern/shape/circle_model_ng.h"
 #include "core/components_ng/pattern/stack/stack_model_ng.h"
 #include "core/components_ng/pattern/text_field/text_field_model_ng.h"
 #include "core/components_ng/pattern/text/image_span_view.h"
@@ -289,6 +290,13 @@ void* createWaterFlowNode(ArkUI_Int32 nodeId)
     return AceType::RawPtr(frameNode);
 }
 
+void* createCircleNode(ArkUI_Int32 nodeId)
+{
+    auto frameNode = CircleModelNG::CreateFrameNode(nodeId);
+    frameNode->IncRefCount();
+    return AceType::RawPtr(frameNode);
+}
+
 using createArkUIFrameNode = void*(ArkUI_Int32 nodeId);
 void* CreateNode(ArkUINodeType tag, ArkUI_Int32 nodeId)
 {
@@ -337,6 +345,7 @@ void* CreateNode(ArkUINodeType tag, ArkUI_Int32 nodeId)
         nullptr, // GridItem
         createCustomNode,
         createWaterFlowNode,
+        createCircleNode,
     };
     if (tag >= sizeof(createArkUIFrameNodes) / sizeof(createArkUIFrameNode*)) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "fail to create %{public}d type of node", tag);
