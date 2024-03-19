@@ -25,6 +25,7 @@
 #include "test/mock/core/common/mock_theme_manager.h"
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
 
+#include "core/common/ace_application_info.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components/select/select_theme.h"
 #include "core/components/text/text_theme.h"
@@ -82,7 +83,6 @@ const Color BG_COLOR_VALUE = Color::FromRGB(100, 255, 100);
 const std::vector<SelectParam> CREATE_VALUE = { { OPTION_TEXT, FILE_SOURCE }, { OPTION_TEXT_2, INTERNAL_SOURCE },
     { OPTION_TEXT_3, INTERNAL_SOURCE } };
 constexpr int32_t PLATFORM_VERSION_ELEVEN = 11;
-constexpr int32_t PLATFORM_VERSION_TWELVE = 12;
 } // namespace
 struct TestProperty {
     std::optional<Dimension> FontSize = std::nullopt;
@@ -1869,7 +1869,9 @@ HWTEST_F(SelectTestNg, SelectControlSizeTest001, TestSize.Level1)
      * @tc.expected: Objects are created successfully.
      */
     SelectModelNG selectModelInstance;
-    PipelineBase::GetCurrentContext()->SetMinPlatformVersion(PLATFORM_VERSION_TWELVE);
+    if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
+        return;
+    }
     auto selectFrameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     ASSERT_NE(selectFrameNode, nullptr);
     auto selectPattern = selectFrameNode->GetPattern<SelectPattern>();
