@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -227,23 +227,15 @@ void IndexerPattern::CollapseArrayValue()
         maxItemsCount = static_cast<int32_t>(height / itemSize);
     }
     int32_t fullArraySize = static_cast<int32_t>(fullArrayValue_.size());
-    if (fullArraySize - sharpItemCount_ <= INDEXER_NINE_CHARACTERS_CHECK) {
+    if (maxItemsCount >= fullArraySize || fullArraySize - sharpItemCount_ <= INDEXER_NINE_CHARACTERS_CHECK) {
         if (lastCollapsingMode_ != IndexerCollapsingMode::NONE) {
             lastCollapsingMode_ = IndexerCollapsingMode::NONE;
             BuildFullArrayValue();
         }
     } else if (fullArraySize - sharpItemCount_ <= INDEXER_THIRTEEN_CHARACTERS_CHECK) {
-        // check if maximum items count greater or equal full array size
-        if (maxItemsCount >= fullArraySize) {
-            if (lastCollapsingMode_ != IndexerCollapsingMode::NONE) {
-                lastCollapsingMode_ = IndexerCollapsingMode::NONE;
-                BuildFullArrayValue();
-            }
-        } else {
-            if (lastCollapsingMode_ != IndexerCollapsingMode::FIVE) {
-                lastCollapsingMode_ = IndexerCollapsingMode::FIVE;
-                ApplyFivePlusOneMode(fullArraySize);
-            }
+        if (lastCollapsingMode_ != IndexerCollapsingMode::FIVE) {
+            lastCollapsingMode_ = IndexerCollapsingMode::FIVE;
+            ApplyFivePlusOneMode(fullArraySize);
         }
     } else {
         // 13 here is count of visible items in 7 + 1 mode (i.e. 7 characters 6 dots and # item if exists)
