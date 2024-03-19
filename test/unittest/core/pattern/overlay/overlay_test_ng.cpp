@@ -256,11 +256,11 @@ HWTEST_F(OverlayTestNg, PopupTest001, TestSize.Level1)
 }
 
 /**
- * @tc.name: BindContentCover001
- * @tc.desc: Test OverlayManager::BindContentCover create modal node.
+ * @tc.name: OnBindContentCover001
+ * @tc.desc: Test OverlayManager::OnBindContentCover create modal node.
  * @tc.type: FUNC
  */
-HWTEST_F(OverlayTestNg, BindContentCover001, TestSize.Level1)
+HWTEST_F(OverlayTestNg, OnBindContentCover001, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. create target node.
@@ -294,7 +294,7 @@ HWTEST_F(OverlayTestNg, BindContentCover001, TestSize.Level1)
     modalStyle.modalTransition = ModalTransition::NONE;
     bool isShow = true;
     auto overlayManager = AceType::MakeRefPtr<OverlayManager>(rootNode);
-    overlayManager->BindContentCover(
+    overlayManager->OnBindContentCover(
         isShow, nullptr, std::move(builderFunc), modalStyle, nullptr, nullptr, nullptr, nullptr, targetNode);
     EXPECT_FALSE(overlayManager->modalStack_.empty());
     overlayManager->PlayDefaultModalTransition(rootNode, false);
@@ -309,11 +309,11 @@ HWTEST_F(OverlayTestNg, BindContentCover001, TestSize.Level1)
 }
 
 /**
- * @tc.name: BindContentCover002
- * @tc.desc: Test OverlayManager::BindContentCover change ModalTransition dynamically.
+ * @tc.name: OnBindContentCover002
+ * @tc.desc: Test OverlayManager::OnBindContentCover change ModalTransition dynamically.
  * @tc.type: FUNC
  */
-HWTEST_F(OverlayTestNg, BindContentCover002, TestSize.Level1)
+HWTEST_F(OverlayTestNg, OnBindContentCover002, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. create target node.
@@ -344,7 +344,7 @@ HWTEST_F(OverlayTestNg, BindContentCover002, TestSize.Level1)
     auto onWillAppear = []() {};
     auto onAppear = []() {};
     auto overlayManager = AceType::MakeRefPtr<OverlayManager>(rootNode);
-    overlayManager->BindContentCover(
+    overlayManager->OnBindContentCover(
         isShow, nullptr, std::move(builderFunc_), modalStyle, onAppear, nullptr, onWillAppear, nullptr, targetNode);
     EXPECT_FALSE(overlayManager->modalStack_.empty());
     auto topModalNode = overlayManager->modalStack_.top().Upgrade();
@@ -359,7 +359,7 @@ HWTEST_F(OverlayTestNg, BindContentCover002, TestSize.Level1)
      * @tc.expected: the ModalTransition is updated successfully
      */
     modalStyle.modalTransition = ModalTransition::NONE;
-    overlayManager->BindContentCover(
+    overlayManager->OnBindContentCover(
         isShow, nullptr, std::move(builderFunc_), modalStyle, nullptr, nullptr, nullptr, nullptr, targetNode);
     topModalNode = overlayManager->modalStack_.top().Upgrade();
     EXPECT_NE(topModalNode, nullptr);
@@ -373,21 +373,21 @@ HWTEST_F(OverlayTestNg, BindContentCover002, TestSize.Level1)
      * @tc.expected: the backgroundColor is updated successfully
      */
     modalStyle.backgroundColor = Color::GREEN;
-    overlayManager->BindContentCover(
+    overlayManager->OnBindContentCover(
         isShow, nullptr, std::move(builderFunc_), modalStyle, nullptr, nullptr, nullptr, nullptr, targetNode);
     topModalNode = overlayManager->modalStack_.top().Upgrade();
     EXPECT_NE(topModalNode, nullptr);
     EXPECT_EQ(topModalNode->GetRenderContext()->GetBackgroundColorValue(), Color::GREEN);
-    overlayManager->BindContentCover(
+    overlayManager->OnBindContentCover(
         !isShow, nullptr, nullptr, modalStyle, nullptr, nullptr, nullptr, nullptr, targetNode);
 }
 
 /**
- * @tc.name: BindContentCover003
- * @tc.desc: Test OverlayManager::BindContentCover destroy modal node.
+ * @tc.name: OnBindContentCover003
+ * @tc.desc: Test OverlayManager::OnBindContentCover destroy modal node.
  * @tc.type: FUNC
  */
-HWTEST_F(OverlayTestNg, BindContentCover003, TestSize.Level1)
+HWTEST_F(OverlayTestNg, OnBindContentCover003, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. create target node.
@@ -420,7 +420,7 @@ HWTEST_F(OverlayTestNg, BindContentCover003, TestSize.Level1)
     modalStyle.modalTransition = ModalTransition::NONE;
     bool isShow = true;
     auto overlayManager = AceType::MakeRefPtr<OverlayManager>(rootNode);
-    overlayManager->BindContentCover(
+    overlayManager->OnBindContentCover(
         isShow, nullptr, std::move(builderFunc), modalStyle, nullptr, nullptr, nullptr, nullptr, targetNode);
     EXPECT_FALSE(overlayManager->modalStack_.empty());
 
@@ -430,7 +430,7 @@ HWTEST_F(OverlayTestNg, BindContentCover003, TestSize.Level1)
      */
     auto onWillDisappear = []() {};
     auto onDisappear = []() {};
-    overlayManager->BindContentCover(
+    overlayManager->OnBindContentCover(
         !isShow, nullptr, nullptr, modalStyle, nullptr, onDisappear, nullptr, onWillDisappear, targetNode);
     EXPECT_TRUE(overlayManager->modalStack_.empty());
 }
@@ -1079,7 +1079,7 @@ HWTEST_F(OverlayTestNg, RemoveOverlayTest002, TestSize.Level1)
     modalStyle.modalTransition = ModalTransition::NONE;
     bool isShow = true;
     auto overlayManager = AceType::MakeRefPtr<OverlayManager>(rootNode);
-    overlayManager->BindContentCover(
+    overlayManager->OnBindContentCover(
         isShow, nullptr, std::move(builderFunc), modalStyle, nullptr, nullptr, nullptr, nullptr, targetNode);
     EXPECT_FALSE(overlayManager->modalStack_.empty());
     EXPECT_TRUE(overlayManager->RemoveOverlay(false));
@@ -1089,7 +1089,7 @@ HWTEST_F(OverlayTestNg, RemoveOverlayTest002, TestSize.Level1)
      * @tc.expected: remove successfully.
      */
     modalStyle.modalTransition = ModalTransition::ALPHA;
-    overlayManager->BindContentCover(
+    overlayManager->OnBindContentCover(
         isShow, nullptr, std::move(builderFunc), modalStyle, nullptr, nullptr, nullptr, nullptr, targetNode);
     EXPECT_TRUE(overlayManager->RemoveModalInOverlay());
 }
