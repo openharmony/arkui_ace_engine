@@ -395,7 +395,7 @@ public:
 
     void SetLayoutPriority(int32_t priority) override {}
 
-    void SetLayoutWeight(int32_t value) override
+    void SetLayoutWeight(float value) override
     {
         ViewAbstract::SetLayoutWeight(value);
     }
