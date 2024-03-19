@@ -102,6 +102,7 @@ void JSSearch::JSBind(BindingTarget globalObj)
     JSClass<JSSearch>::StaticMethod("textMenuOptions", &JSSearch::JsMenuOptionsExtension);
     JSClass<JSSearch>::StaticMethod("selectionMenuHidden", &JSSearch::SetSelectionMenuHidden);
     JSClass<JSSearch>::StaticMethod("customKeyboard", &JSSearch::SetCustomKeyboard);
+    JSClass<JSSearch>::StaticMethod("enterKeyType", &JSSearch::SetEnterKeyType);
     JSClass<JSSearch>::StaticMethod("maxLength", &JSSearch::SetMaxLength);
     JSClass<JSSearch>::StaticMethod("type", &JSSearch::SetType);
     JSClass<JSSearch>::StaticMethod("decoration", &JSSearch::SetDecoration);
@@ -705,6 +706,22 @@ void JSSearchController::JSBind(BindingTarget globalObj)
 {
     JSClass<JSTextEditableController>::Declare("SearchController");
     JSTextEditableController::JSBind(globalObj);
+}
+
+void JSSearch::SetEnterKeyType(const JSCallbackInfo& info)
+{
+    if (info.Length() < 1) {
+        return;
+    }
+    if (info[0]->IsUndefined()) {
+        SearchModel::GetInstance()->SetSearchEnterKeyType(TextInputAction::SEARCH);
+        return;
+    }
+    if (!info[0]->IsNumber()) {
+        return;
+    }
+    TextInputAction textInputAction = CastToTextInputAction(info[0]->ToNumber<int32_t>());
+    SearchModel::GetInstance()->SetSearchEnterKeyType(textInputAction);
 }
 
 void JSSearch::SetMaxLength(const JSCallbackInfo& info)

@@ -851,6 +851,10 @@ ArkUINativeModuleValue ArkUINativeModule::GetArkUINativeModule(ArkUIRuntimeCallI
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), SearchBridge::SetCopyOption));
     search->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetCopyOption"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), SearchBridge::ResetCopyOption));
+    search->Set(vm, panda::StringRef::NewFromUtf8(vm, "setSearchEnterKeyType"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), SearchBridge::SetSearchEnterKeyType));
+    search->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetSearchEnterKeyType"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), SearchBridge::ResetSearchEnterKeyType));
     search->Set(vm, panda::StringRef::NewFromUtf8(vm, "setSearchHeight"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), SearchBridge::SetSearchHeight));
     search->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetSearchHeight"),
