@@ -1590,7 +1590,15 @@ void ScrollablePattern::ProcessSpringEffect(float velocity)
     if (!OutBoundaryCallback() && !GetCanOverScroll()) {
         return;
     }
-    scrollEffect_->ProcessScrollOver(velocity);
+    CHECK_NULL_VOID(scrollableEvent_);
+    auto scrollable = scrollableEvent_->GetScrollable();
+    // HandleTouchUp may be triggered before HandleDragEnd when scrollable nested scrollable,
+    // so need to update spring motion.
+    if (scrollable && scrollable->IsSpringMotionRunning()) {
+        scrollEffect_->ProcessSpringUpdate();
+    } else {
+        scrollEffect_->ProcessScrollOver(velocity);
+    }
 }
 
 void ScrollablePattern::SetCanOverScroll(bool val)
