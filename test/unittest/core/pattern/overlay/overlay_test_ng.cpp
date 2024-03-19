@@ -1068,6 +1068,47 @@ HWTEST_F(OverlayTestNg, PopupTest005, TestSize.Level1)
 }
 
 /**
+ * @tc.name: PopupTest006
+ * @tc.desc: Test OverlayManager::ShowPopup and HidePopup when hastransition is true.
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayTestNg, PopupTest006, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create target node and popupInfo.
+     */
+    auto targetNode = CreateTargetNode();
+    auto targetId = targetNode->GetId();
+    auto targetTag = targetNode->GetTag();
+    auto popupId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto popupNode =
+        FrameNode::CreateFrameNode(V2::POPUP_ETS_TAG, popupId, AceType::MakeRefPtr<BubblePattern>(targetId, targetTag));
+    PopupInfo popupInfo;
+    popupInfo.popupId = popupId;
+    popupInfo.popupNode = popupNode;
+    popupInfo.target = targetNode;
+    popupInfo.markNeedUpdate = true;
+    popupInfo.isBlockEvent = false;
+    auto layoutProp = popupNode->GetLayoutProperty<BubbleLayoutProperty>();
+    ASSERT_NE(layoutProp, nullptr);
+    layoutProp->UpdateUseCustom(true);
+
+    /**
+     * @tc.steps: step2. create overlayManager and call ShowPopup.
+     * @tc.expected: visibility of layoutProperty is updated successfully
+     */
+    auto rootNode = FrameNode::CreateFrameNode(V2::ROOT_ETS_TAG, 1, AceType::MakeRefPtr<RootPattern>());
+    auto overlayManager = AceType::MakeRefPtr<OverlayManager>(rootNode);
+    rootNode->isLayoutComplete_ = true;
+    auto popupPattern = popupInfo.popupNode->GetPattern<BubblePattern>();
+    popupPattern->SetHasTransition(true);
+    overlayManager->ShowPopup(targetId, popupInfo);
+    EXPECT_TRUE(popupPattern->GetHasTransition());
+    auto layoutProp1 = popupInfo.popupNode->GetLayoutProperty();
+    EXPECT_EQ(layoutProp1->GetVisibility(), VisibleType::VISIBLE);
+}
+
+/**
  * @tc.name: RemoveOverlayTest001
  * @tc.desc: Test OverlayManager::RemoveOverlay.
  * @tc.type: FUNC
