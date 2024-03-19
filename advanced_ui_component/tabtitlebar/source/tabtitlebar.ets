@@ -17,14 +17,14 @@ import { KeyCode } from '@ohos.multimodalInput.keyCode'
 import MeasureText from '@ohos.measure'
 
 export declare class TabTitleBarMenuItem {
-  value: ResourceStr;
-  isEnabled?: boolean;
-  action?: () => void;
+  public value: ResourceStr;
+  public isEnabled?: boolean;
+  public action?: () => void;
 }
 
 export declare class TabTitleBarTabItem {
-  title: ResourceStr;
-  icon?: ResourceStr;
+  public title: ResourceStr;
+  public icon?: ResourceStr;
 }
 
 const PUBLIC_MORE = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAMAAAADACAYAAABS3GwHAAAAIGNIUk0AAHomAACAhAAA+' +
