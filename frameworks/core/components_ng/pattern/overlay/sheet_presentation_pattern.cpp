@@ -157,8 +157,6 @@ void SheetPresentationPattern::CheckBuilderChange()
         CHECK_NULL_VOID(layoutProperty);
         auto sheetStyle = layoutProperty->GetSheetStyleValue();
         if (sheetStyle.sheetMode == SheetMode::AUTO) {
-            auto height = sheetPattern->GetFitContentHeight();
-            sheetPattern->HandleFitContontChange(height);
             sheetNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
         }
     };
