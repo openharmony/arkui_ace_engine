@@ -16,17 +16,18 @@
 #ifndef FOUNDATION_ACE_ADAPTER_OHOS_OSAL_WANT_WRAP_OHOS_H
 #define FOUNDATION_ACE_ADAPTER_OHOS_OSAL_WANT_WRAP_OHOS_H
 
-#include "base/want/want_wrap.h"
-
 #include <string>
 
 #include "napi/native_api.h"
 #include "native_engine/native_engine.h"
 #include "want.h"
 
+#include "base/want/want_wrap.h"
+
 namespace OHOS::Ace {
 class WantParamsWrapOhos : public WantParamsWrap {
     DECLARE_ACE_TYPE(WantParamsWrapOhos, WantParamsWrap);
+
 public:
     WantParamsWrapOhos(napi_env env, napi_value value);
     ~WantParamsWrapOhos() = default;
@@ -34,6 +35,7 @@ public:
     {
         return params_;
     }
+
 private:
     AAFwk::WantParams params_;
 };
@@ -42,6 +44,7 @@ class WantWrapOhos : public WantWrap {
     DECLARE_ACE_TYPE(WantWrapOhos, WantWrap)
 
 public:
+    explicit WantWrapOhos(const AAFwk::Want& want);
     WantWrapOhos(napi_env env, napi_value value);
     WantWrapOhos(const std::string& bundleName, const std::string& abilityName);
     ~WantWrapOhos() = default;
@@ -49,7 +52,7 @@ public:
     std::string ToString() const override;
     void SetWantParam(const std::map<std::string, std::string>& params) override;
 
-    const AAFwk::Want& GetWant() const
+    const AAFwk::Want& GetWant() const override
     {
         return want_;
     }

@@ -113,7 +113,7 @@ bool Animator::HasScheduler() const
     return scheduler_ != nullptr;
 }
 
-bool Animator::SetExpectedFrameRateRange(FrameRateRange& frameRateRange)
+bool Animator::SetExpectedFrameRateRange(const FrameRateRange& frameRateRange)
 {
     if (HasScheduler() && frameRateRange.IsValid()) {
         scheduler_->SetExpectedFrameRateRange(frameRateRange);

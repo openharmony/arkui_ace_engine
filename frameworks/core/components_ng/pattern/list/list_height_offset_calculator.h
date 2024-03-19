@@ -150,10 +150,12 @@ public:
         while (itor != itemPosition_.end() && itor->second.isGroup) {
             auto child = node->GetFrameChildByIndex(itor->first - currentIndex_, false);
             auto frameNode = AceType::DynamicCast<FrameNode>(child);
-            auto group = frameNode->GetPattern<ListItemGroupPattern>();
-            if (group->HasLayoutedItem()) {
-                std::pair<float, float> pos = { itor->second.startPos, itor->second.endPos };
-                return group->GetEstimateOffset(estimateOffset_ + skipHeight, pos);
+            if (frameNode) {
+                auto group = frameNode->GetPattern<ListItemGroupPattern>();
+                if (group && group->HasLayoutedItem()) {
+                    std::pair<float, float> pos = { itor->second.startPos, itor->second.endPos };
+                    return group->GetEstimateOffset(estimateOffset_ + skipHeight, pos);
+                }
             }
             skipHeight += averageHeight;
             itor++;

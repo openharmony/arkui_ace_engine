@@ -141,6 +141,7 @@ public:
     std::string GetPagePath();
 
 protected:
+    void OnDumpInfoNG(const std::vector<std::string>& params, uint32_t windowId) override;
     void DumpHandleEvent(const std::vector<std::string>& params) override;
     void DumpProperty(const std::vector<std::string>& params) override;
     void DumpTree(int32_t depth, int64_t nodeID) override;
@@ -206,7 +207,7 @@ private:
     };
 
     bool AccessibilityActionEvent(const Accessibility::ActionType& action,
-        const std::map<std::string, std::string> actionArguments, const RefPtr<AccessibilityNode>& node,
+        const std::map<std::string, std::string>& actionArguments, const RefPtr<AccessibilityNode>& node,
         const RefPtr<PipelineContext>& context);
     bool RequestAccessibilityFocus(const RefPtr<AccessibilityNode>& node);
 
@@ -262,14 +263,17 @@ private:
     RefPtr<NG::FrameNode> FindNodeFromRootByExtensionId(const RefPtr<NG::FrameNode>& root, const int64_t uiExtensionId);
 
     void DumpProperty(const RefPtr<AccessibilityNode>& node);
-    void DumpPropertyNG(const std::vector<std::string>& params);
+    void DumpPropertyNG(int64_t nodeID);
+    void DumpHoverTestNG(uint32_t windowId, int64_t nodeID, int32_t x, int32_t y, bool verbose);
     RefPtr<NG::PipelineContext> FindPipelineByElementId(const int64_t elementId, RefPtr<NG::FrameNode>& node);
     RefPtr<NG::FrameNode> FindNodeFromPipeline(const WeakPtr<PipelineBase>& context, const int64_t elementId);
     RefPtr<PipelineBase> GetPipelineByWindowId(const int32_t windowId);
     void ProcessParameters(Accessibility::ActionType op, const std::vector<std::string>& params,
         std::map<std::string, std::string>& paramsMap);
 
-    void DumpTreeNodeNG(const RefPtr<NG::FrameNode>& parent, int32_t depth,
+    RefPtr<NG::PipelineContext> GetPipelineByWindowId(uint32_t windowId);
+    void DumpTreeNG(bool useWindowId, uint32_t windowId, int64_t rootId);
+    void DumpTreeNG(const RefPtr<NG::FrameNode>& parent, int32_t depth,
         int64_t nodeID, const CommonProperty& commonProperty);
 
     void GenerateCommonProperty(const RefPtr<PipelineBase>& context, CommonProperty& output,

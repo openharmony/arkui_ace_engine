@@ -21,7 +21,7 @@ ScopedMonitor::ScopedMonitor(MonitorTag tag) : tag_(tag)
 {
     begin_ = steady_clock::now();
     if (tag_ == MonitorTag::STATIC_API) {
-        ArkUIPerfMonitor::GetInstance().RecordPropertyUpdate();
+        ArkUIPerfMonitor::GetInstance().SetRecordingStatus(tag, MonitorStatus::RUNNING);
     }
 }
 
@@ -43,7 +43,7 @@ void ArkUIPerfMonitor::RecordTimeSlice(MonitorTag tag, int64_t duration) {}
 
 void ArkUIPerfMonitor::RecordNodeNum(uint64_t num) {}
 
-void ArkUIPerfMonitor::RecordPropertyUpdate() {}
+void ArkUIPerfMonitor::SetRecordingStatus(MonitorTag tag, MonitorStatus status) {}
 
 void ArkUIPerfMonitor::InitPerfMonitor() {}
 
@@ -54,8 +54,9 @@ void ArkUIPerfMonitor::ClearPerfMonitor()
     timeSlice_[MonitorTag::COMPONENT_UPDATE] = 0;
     timeSlice_[MonitorTag::JS_CALLBACK] = 0;
     timeSlice_[MonitorTag::STATIC_API] = 0;
-    property_ = 0;
-    node_num_ = 0;
+    propertyNum_ = 0;
+    nodeNum_ = 0;
+    monitorStatus_ = 0;
 }
 
 void ArkUIPerfMonitor::FlushPerfMonitor() {}

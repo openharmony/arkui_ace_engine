@@ -16,6 +16,7 @@
 #pragma once
 
 #include "native_node.h"
+#include "native_type.h"
 
 #include "core/interfaces/arkoala/arkoala_api.h"
 
@@ -29,5 +30,7 @@ bool IsTouchEvent(ArkUI_Int32 type);
 
 bool ConvertEvent(ArkUINodeEvent* origin, ArkUI_NodeEvent* event);
 bool ConvertEventResult(ArkUI_NodeEvent* event, ArkUINodeEvent* origin);
+
+void HandleInnerEvent(ArkUINodeEvent* innerEvent);
 
 }; // namespace OHOS::Ace::NodeModel

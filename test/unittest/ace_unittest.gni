@@ -139,6 +139,10 @@ template("ace_unittest") {
       configs = []
       configs = ace_unittest_config
 
+      if (defined(invoker.defines)) {
+        defines += invoker.defines
+      }
+
       external_deps = []
       external_deps += ace_external_deps
       external_deps += flutter_external_deps

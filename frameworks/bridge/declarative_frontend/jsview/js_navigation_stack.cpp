@@ -688,13 +688,13 @@ void JSNavigationStack::FireNavigationInterception(bool isBefore, const RefPtr<N
     if (preDestination) {
         params[0] = preDestination->CreateJSObject();
     } else {
-        params[0] = JSRef<JSVal>::Make(ToJSValue("NavBar"));
+        params[0] = JSRef<JSVal>::Make(ToJSValue("navBar"));
     }
     auto topDestination = AceType::DynamicCast<JSNavDestinationContext>(to);
     if (topDestination) {
         params[1] = topDestination->CreateJSObject();
     } else {
-        params[1] = JSRef<JSVal>::Make(ToJSValue("NavBar"));
+        params[1] = JSRef<JSVal>::Make(ToJSValue("navBar"));
     }
     const uint8_t operationIndex = 2;
     params[operationIndex] = JSRef<JSVal>::Make(ToJSValue(static_cast<int32_t>(operation)));

@@ -16,18 +16,28 @@
 #include "core/components_ng/image_provider/pixel_map_image_object.h"
 
 #include "core/components_ng/image_provider/image_loading_context.h"
+#include "core/components_ng/image_provider/image_utils.h"
 #include "core/components_ng/render/canvas_image.h"
 
 namespace OHOS::Ace::NG {
 
 void PixelMapImageObject::MakeCanvasImage(
-    const RefPtr<ImageLoadingContext>& ctx, const SizeF& /*resizeTarget*/, bool /*forceResize*/, bool /*syncLoad*/)
+    const RefPtr<ImageLoadingContext>& ctx, const SizeF& /*resizeTarget*/, bool /*forceResize*/, bool syncLoad)
 {
     if (!pixmap_) {
         ctx->FailCallback("pixmap is null when PixelMapImageObject try MakeCanvasImage");
         return;
     }
-    ctx->SuccessCallback(CanvasImage::Create(pixmap_));
+    if (syncLoad) {
+        ctx->SuccessCallback(CanvasImage::Create(pixmap_));
+    } else {
+        auto task = [ctx, weak = AceType::WeakClaim(this)]() {
+            auto pixelmapObject = weak.Upgrade();
+            CHECK_NULL_VOID(pixelmapObject);
+            ctx->SuccessCallback(CanvasImage::Create(pixelmapObject->pixmap_));
+        };
+        NG::ImageUtils::PostToUI(task);
+    }
 }
 
 RefPtr<PixelMapImageObject> PixelMapImageObject::Create(const ImageSourceInfo& src, const RefPtr<ImageData>& data)

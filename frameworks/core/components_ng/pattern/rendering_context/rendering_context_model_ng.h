@@ -25,6 +25,8 @@ public:
     void GetHeight(RefPtr<AceType>& canvasPattern, double& height) override;
     void SetTransferFromImageBitmap(RefPtr<AceType>& canvasPattern,
         RefPtr<AceType> offscreenCPattern) override;
+    void StartImageAnalyzer(RefPtr<AceType>& canvasPattern, void* config, onAnalyzedCallback& onAnalyzed) override;
+    void StopImageAnalyzer(RefPtr<AceType>& canvasPattern) override;
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_RENDERING_CONTEXT_MODEL_NG_H

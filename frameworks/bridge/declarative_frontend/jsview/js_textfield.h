@@ -87,6 +87,7 @@ public:
     static void SetMaxLines(const JSCallbackInfo& info);
 
     static void SetShowUnderline(const JSCallbackInfo& info);
+    static void SetUnderlineColor(const JSCallbackInfo& info);
     static void SetEnableKeyboardOnFocus(const JSCallbackInfo& info);
     static void SetSelectionMenuHidden(const JSCallbackInfo& info);
     static bool ParseJsCustomKeyboardBuilder(
@@ -99,6 +100,9 @@ public:
     static JSRef<JSVal> CreateJSTextCommonEvent(NG::TextCommonEvent& event);
     static void CreateJsTextFieldCommonEvent(const JSCallbackInfo& info);
     static Local<JSValueRef> JsKeepEditableState(panda::JsiRuntimeCallInfo *info);
+    static void SetDecoration(const JSCallbackInfo& info);
+    static void SetLetterSpacing(const JSCallbackInfo& info);
+    static void SetLineHeight(const JSCallbackInfo& info);
 };
 
 } // namespace OHOS::Ace::Framework

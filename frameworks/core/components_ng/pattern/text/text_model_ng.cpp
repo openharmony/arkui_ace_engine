@@ -22,6 +22,7 @@
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/base/view_stack_processor.h"
+#include "core/components_ng/pattern/text/span/span_string.h"
 #include "core/components_ng/pattern/text/text_event_hub.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/components_ng/pattern/text_field/text_field_event_hub.h"
@@ -53,6 +54,22 @@ void TextModelNG::Create(const std::string& content)
     textPattern->SetTextController(AceType::MakeRefPtr<TextController>());
     textPattern->GetTextController()->SetPattern(WeakPtr(textPattern));
     textPattern->ClearSelectionMenu();
+}
+
+void TextModelNG::Create(const RefPtr<SpanStringBase>& spanBase)
+{
+    TextModelNG::Create("");
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto textPattern = frameNode->GetPattern<TextPattern>();
+    CHECK_NULL_VOID(textPattern);
+    auto spanString = AceType::DynamicCast<SpanString>(spanBase);
+    if (spanString) {
+        spanString->AddSpanWatcher(WeakPtr(textPattern));
+        auto spans = spanString->GetSpanItems();
+        textPattern->SetSpanItemChildren(spans);
+        textPattern->SetSpanStringMode(true);
+    }
 }
 
 RefPtr<FrameNode> TextModelNG::CreateFrameNode(int32_t nodeId, const std::string& content)
@@ -477,6 +494,13 @@ void TextModelNG::SetEllipsisMode(FrameNode* frameNode, Ace::EllipsisMode value)
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextLayoutProperty, EllipsisMode, value, frameNode);
 }
 
+void TextModelNG::SetTextDetectEnable(FrameNode* frameNode, bool value)
+{
+    auto textPattern = frameNode->GetPattern<TextPattern>();
+    CHECK_NULL_VOID(textPattern);
+    textPattern->SetTextDetectEnable(value);
+}
+
 void TextModelNG::BindSelectionMenu(TextSpanType& spanType, TextResponseType& responseType,
     std::function<void()>& buildFunc, SelectMenuParam& menuParam)
 {
@@ -696,5 +720,19 @@ std::vector<Shadow> TextModelNG::GetTextShadow(FrameNode* frameNode)
     auto layoutProperty = frameNode->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_RETURN(layoutProperty, defaultShadow);
     return layoutProperty->GetTextShadow().value_or(defaultShadow);
+}
+
+Ace::WordBreak TextModelNG::GetWordBreak(FrameNode* frameNode)
+{
+    Ace::WordBreak value = Ace::WordBreak::BREAK_WORD;
+    ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(TextLayoutProperty, WordBreak, value, frameNode, value);
+    return value;
+}
+
+EllipsisMode TextModelNG::GetEllipsisMode(FrameNode* frameNode)
+{
+    EllipsisMode value = EllipsisMode::TAIL;
+    ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(TextLayoutProperty, EllipsisMode, value, frameNode, value);
+    return value;
 }
 } // namespace OHOS::Ace::NG

@@ -101,6 +101,7 @@ public:
     static void JsTransition(const JSCallbackInfo& info);
     static NG::TransitionOptions ParseTransition(std::unique_ptr<JsonValue>& transitionArgs);
     static NG::TransitionOptions ParseJsTransition(const JSRef<JSVal>& transitionArgs);
+    static RefPtr<NG::ChainedTransitionEffect> ParseJsTransitionEffect(const JSCallbackInfo& info);
     static void JsWidth(const JSCallbackInfo& info);
     static void JsHeight(const JSCallbackInfo& info);
     static void JsBackgroundColor(const JSCallbackInfo& info);
@@ -184,6 +185,7 @@ public:
     static void JsOnHover(const JSCallbackInfo& info);
     static void JsOnClick(const JSCallbackInfo& info);
     static void JsOnGestureJudgeBegin(const JSCallbackInfo& args);
+    static void JsOnTouchIntercept(const JSCallbackInfo& info);
     static void JsClickEffect(const JSCallbackInfo& info);
     static void JsRestoreId(int32_t restoreId);
     static void JsOnVisibleAreaChange(const JSCallbackInfo& info);
@@ -221,6 +223,7 @@ public:
     static bool ParseJsInt32(const JSRef<JSVal>& jsValue, int32_t& result);
     static bool ParseJsColorFromResource(const JSRef<JSVal>& jsValue, Color& result);
     static bool ParseJsColor(const JSRef<JSVal>& jsValue, Color& result);
+    static bool ParseJsColor(const JSRef<JSVal>& jsValue, Color& result, const Color& defaultColor);
     static bool ParseJsColorStrategy(const JSRef<JSVal>& jsValue, ForegroundColorStrategy& strategy);
     static bool ParseJsShadowColorStrategy(const JSRef<JSVal>& jsValue, ShadowColorStrategy& strategy);
     static bool ParseJsFontFamilies(const JSRef<JSVal>& jsValue, std::vector<std::string>& result);
@@ -286,6 +289,7 @@ public:
     static void JsOnDragEnd(const JSCallbackInfo& info);
     static void JsOnDragMove(const JSCallbackInfo& info);
     static void JsOnDragLeave(const JSCallbackInfo& info);
+    static void JsOnPreDrag(const JSCallbackInfo& info);
     static void JsOnDrop(const JSCallbackInfo& info);
     static void JsOnAreaChange(const JSCallbackInfo& info);
     static void JsOnSizeChange(const JSCallbackInfo& info);
@@ -309,7 +313,10 @@ public:
     static void JsHueRotate(const JSCallbackInfo& info);
 
     static void JsClip(const JSCallbackInfo& info);
+    static void JsClipShape(const JSCallbackInfo& info);
+
     static void JsMask(const JSCallbackInfo& info);
+    static void JsMaskShape(const JSCallbackInfo& info);
 
     static void JsKey(const std::string& key);
     static void JsId(const JSCallbackInfo& info);
@@ -516,6 +523,11 @@ public:
     static bool ParseJsSymbolId(
         const JSRef<JSVal>& jsValue, uint32_t& symbolId, RefPtr<ResourceObject>& symbolResourceObject);
     static bool ParseJsSymbolColor(const JSRef<JSVal>& jsValue, std::vector<Color>& result);
+    static bool ParseBorderWidthProps(const JSRef<JSVal>& args, NG::BorderWidthProperty& borderWidthProperty);
+    static bool ParseBorderColorProps(const JSRef<JSVal>& args, NG::BorderColorProperty& colorProperty);
+    static bool ParseBorderStyleProps(const JSRef<JSVal>& args, NG::BorderStyleProperty& borderStyleProperty);
+    static bool ParseBorderRadius(const JSRef<JSVal>& args, NG::BorderRadiusProperty& radius);
+    static void SetDialogProperties(const JSRef<JSObject>& obj, DialogProperties& properties);
 };
 } // namespace OHOS::Ace::Framework
 #endif // JS_VIEW_ABSTRACT_H

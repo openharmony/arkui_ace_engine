@@ -91,7 +91,7 @@ HWTEST_F(SwiperAttrTestNg, AttrIndex004, TestSize.Level1)
 HWTEST_F(SwiperAttrTestNg, AttrAutoPlay001, TestSize.Level1)
 {
     /**
-     * @tc.cases: Do not set value
+     * @tc.steps: step1. Do not set value
      * @tc.expected: AutoPlay is false, interval is default, isLoop is true
      */
     CreateWithItem([](SwiperModelNG model) {});
@@ -159,12 +159,28 @@ HWTEST_F(SwiperAttrTestNg, AttrAutoPlay004, TestSize.Level1)
 HWTEST_F(SwiperAttrTestNg, AttrIndicator001, TestSize.Level1)
 {
     /**
-     * @tc.cases: Do not set value
+     * @tc.steps: step1. Do not set value
      * @tc.expected: Show indicator, indicator type is DOT
      */
     CreateWithItem([](SwiperModelNG model) {});
     EXPECT_TRUE(pattern_->IsShowIndicator());
     EXPECT_EQ(pattern_->GetIndicatorType(), SwiperIndicatorType::DOT);
+    EXPECT_EQ(frameNode_->GetTotalChildCount(), 5); // 4 items and indicator
+    auto indicatorNode = GetChildFrameNode(frameNode_, 4);
+    EXPECT_EQ(indicatorNode->GetTag(), V2::SWIPER_INDICATOR_ETS_TAG);
+    EXPECT_TRUE(IsEqual(GetChildRect(frameNode_, 4), RectF(196.05f, 768.02f, 87.9f, 31.98f)));
+
+    auto wrapper = FlushLayoutTask(indicatorNode);
+    auto paintMethod = AceType::DynamicCast<DotIndicatorPaintMethod>(wrapper->nodePaintImpl_);
+    EXPECT_FALSE(paintMethod->dotIndicatorModifier_->indicatorMask_);
+    EXPECT_EQ(paintMethod->dotIndicatorModifier_->unselectedColor_->Get(), Color::FromString("#182431"));
+    EXPECT_EQ(paintMethod->dotIndicatorModifier_->selectedColor_->Get().ToColor(), Color::FromString("#007DFF"));
+    LinearVector<float> itemHalfSizes;
+    itemHalfSizes.emplace_back(3.f);
+    itemHalfSizes.emplace_back(3.f);
+    itemHalfSizes.emplace_back(3.f);
+    itemHalfSizes.emplace_back(3.f);
+    EXPECT_EQ(paintMethod->dotIndicatorModifier_->itemHalfSizes_->Get(), itemHalfSizes);
 }
 
 /**
@@ -175,11 +191,104 @@ HWTEST_F(SwiperAttrTestNg, AttrIndicator001, TestSize.Level1)
 HWTEST_F(SwiperAttrTestNg, AttrIndicator002, TestSize.Level1)
 {
     /**
+     * @tc.steps: step1. Set value
+     * @tc.expected: Show indicator, indicator type is DOT
+     */
+    SwiperParameters swiperParameters;
+    swiperParameters.dimLeft = std::make_optional<Dimension>(10.f);
+    swiperParameters.dimTop = std::make_optional<Dimension>(10.f);
+    swiperParameters.dimRight = std::make_optional<Dimension>(10.f);
+    swiperParameters.dimBottom = std::make_optional<Dimension>(10.f);
+    swiperParameters.itemWidth = std::make_optional<Dimension>(10.f);
+    swiperParameters.itemHeight = std::make_optional<Dimension>(10.f);
+    swiperParameters.selectedItemWidth = std::make_optional<Dimension>(10.f);
+    swiperParameters.selectedItemHeight = std::make_optional<Dimension>(10.f);
+    swiperParameters.maskValue = std::make_optional<bool>(true);
+    swiperParameters.colorVal = std::make_optional<Color>(Color::RED);
+    swiperParameters.selectedColorVal = std::make_optional<Color>(Color::GREEN);
+    CreateWithItem([=](SwiperModelNG model) {
+        model.SetDotIndicatorStyle(swiperParameters);
+    });
+    EXPECT_TRUE(pattern_->IsShowIndicator());
+    EXPECT_EQ(pattern_->GetIndicatorType(), SwiperIndicatorType::DOT);
+    EXPECT_EQ(frameNode_->GetTotalChildCount(), 5); // 4 items and indicator
+    auto indicatorNode = GetChildFrameNode(frameNode_, 4);
+    EXPECT_EQ(indicatorNode->GetTag(), V2::SWIPER_INDICATOR_ETS_TAG);
+    EXPECT_TRUE(IsEqual(GetChildRect(frameNode_, 4), RectF(10.f, 10.f, 114.5f, 37.3f)));
+
+    auto wrapper = FlushLayoutTask(indicatorNode);
+    auto paintMethod = AceType::DynamicCast<DotIndicatorPaintMethod>(wrapper->nodePaintImpl_);
+    EXPECT_TRUE(paintMethod->dotIndicatorModifier_->indicatorMask_);
+    EXPECT_EQ(paintMethod->dotIndicatorModifier_->unselectedColor_->Get(), Color::RED);
+    EXPECT_EQ(paintMethod->dotIndicatorModifier_->selectedColor_->Get().ToColor(), Color::GREEN);
+    LinearVector<float> itemHalfSizes;
+    itemHalfSizes.emplace_back(5.f);
+    itemHalfSizes.emplace_back(5.f);
+    itemHalfSizes.emplace_back(5.f);
+    itemHalfSizes.emplace_back(5.f);
+    EXPECT_EQ(paintMethod->dotIndicatorModifier_->itemHalfSizes_->Get(), itemHalfSizes);
+}
+
+/**
+ * @tc.name: AttrIndicator003
+ * @tc.desc: Test property about indicator
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperAttrTestNg, AttrIndicator003, TestSize.Level1)
+{
+    /**
      * @tc.cases: Set indicator type to DIGIT
      * @tc.expected: Show indicator, indicator type is DIGIT
      */
     CreateWithItem([](SwiperModelNG model) { model.SetIndicatorType(SwiperIndicatorType::DIGIT); });
     EXPECT_EQ(pattern_->GetIndicatorType(), SwiperIndicatorType::DIGIT);
+    auto indicatorNode = GetChildFrameNode(frameNode_, 4);
+    auto firstTextNode = GetChildFrameNode(indicatorNode, 0);
+    auto lastTextNode = GetChildFrameNode(indicatorNode, 1);
+    auto firstTextLayoutProperty = firstTextNode->GetLayoutProperty<TextLayoutProperty>();
+    auto lastTextLayoutProperty = lastTextNode->GetLayoutProperty<TextLayoutProperty>();
+    EXPECT_EQ(firstTextLayoutProperty->GetTextColor(), Color::FromString("#ff182431"));
+    EXPECT_EQ(firstTextLayoutProperty->GetFontSize(), Dimension(14.f));
+    EXPECT_EQ(firstTextLayoutProperty->GetFontWeight(), FontWeight::W800);
+    EXPECT_EQ(lastTextLayoutProperty->GetTextColor(), Color::FromString("#ff182431"));
+    EXPECT_EQ(lastTextLayoutProperty->GetFontSize(), Dimension(14.f));
+    EXPECT_EQ(lastTextLayoutProperty->GetFontWeight(), FontWeight::W800);
+}
+
+/**
+ * @tc.name: AttrIndicator004
+ * @tc.desc: Test property about indicator
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperAttrTestNg, AttrIndicator004, TestSize.Level1)
+{
+    /**
+     * @tc.cases: Set indicator type to DIGIT
+     * @tc.expected: Show indicator, indicator type is DIGIT
+     */
+    SwiperDigitalParameters swiperDigitalParameters;
+    swiperDigitalParameters.fontColor = Color::RED;
+    swiperDigitalParameters.selectedFontColor = Color::GREEN;
+    swiperDigitalParameters.fontSize = Dimension(12.f);
+    swiperDigitalParameters.selectedFontSize = Dimension(16.f);
+    swiperDigitalParameters.fontWeight = FontWeight::W500;
+    swiperDigitalParameters.selectedFontWeight = FontWeight::W900;
+    CreateWithItem([=](SwiperModelNG model) {
+        model.SetIndicatorType(SwiperIndicatorType::DIGIT);
+        model.SetDigitIndicatorStyle(swiperDigitalParameters);
+    });
+    EXPECT_EQ(pattern_->GetIndicatorType(), SwiperIndicatorType::DIGIT);
+    auto indicatorNode = GetChildFrameNode(frameNode_, 4);
+    auto firstTextNode = GetChildFrameNode(indicatorNode, 0);
+    auto lastTextNode = GetChildFrameNode(indicatorNode, 1);
+    auto firstTextLayoutProperty = firstTextNode->GetLayoutProperty<TextLayoutProperty>();
+    auto lastTextLayoutProperty = lastTextNode->GetLayoutProperty<TextLayoutProperty>();
+    EXPECT_EQ(firstTextLayoutProperty->GetTextColor(), Color::GREEN);
+    EXPECT_EQ(firstTextLayoutProperty->GetFontSize(), Dimension(16.f));
+    EXPECT_EQ(firstTextLayoutProperty->GetFontWeight(), FontWeight::W900);
+    EXPECT_EQ(lastTextLayoutProperty->GetTextColor(), Color::RED);
+    EXPECT_EQ(lastTextLayoutProperty->GetFontSize(), Dimension(12.f));
+    EXPECT_EQ(lastTextLayoutProperty->GetFontWeight(), FontWeight::W500);
 }
 
 /**
@@ -609,7 +718,9 @@ HWTEST_F(SwiperAttrTestNg, AttrNestedScroll001, TestSize.Level1)
      */
     CreateWithItem([](SwiperModelNG model) { model.SetLoop(false); });
     EXPECT_FALSE(pattern_->IsLoop());
-    EXPECT_FALSE(pattern_->enableNestedScroll_);
+    auto nestedScroll = pattern_->GetNestedScroll();
+    EXPECT_EQ(nestedScroll.forward, NestedScrollMode::SELF_ONLY);
+    EXPECT_EQ(nestedScroll.backward, NestedScrollMode::SELF_ONLY);
 }
 
 /**
@@ -632,7 +743,9 @@ HWTEST_F(SwiperAttrTestNg, AttrNestedScroll002, TestSize.Level1)
         model.SetNestedScroll(nestedOpt);
     });
     EXPECT_FALSE(pattern_->IsLoop());
-    EXPECT_TRUE(pattern_->enableNestedScroll_);
+    auto nestedScroll = pattern_->GetNestedScroll();
+    EXPECT_EQ(nestedScroll.forward, NestedScrollMode::SELF_FIRST);
+    EXPECT_EQ(nestedScroll.backward, NestedScrollMode::SELF_FIRST);
 }
 
 /**
@@ -684,5 +797,4 @@ HWTEST_F(SwiperAttrTestNg, AttrDisplayArrow001, TestSize.Level1)
     EXPECT_EQ(layoutProperty_->GetArrowSize(), Dimension(24.0));
     EXPECT_EQ(layoutProperty_->GetArrowColor(), Color::BLUE);
 }
-
 } // namespace OHOS::Ace::NG

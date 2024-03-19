@@ -48,6 +48,8 @@ public:
 
     void SetAccuracy(double accuracy);
 
+    void SetVelocityAccuracy(double velocityAccuracy);
+
     void Reset(double start, double end, double velocity, const RefPtr<SpringProperty>& spring);
 
     std::string GetMotionType() const override;
@@ -57,6 +59,7 @@ protected:
     double currentPosition_ = 0.0;
     double currentVelocity_ = 0.0;
     double accuracy_ = NEAR_ZERO;
+    double velocityAccuracy_ = NEAR_ZERO;
     RefPtr<SpringModel> model_;
 
 private:

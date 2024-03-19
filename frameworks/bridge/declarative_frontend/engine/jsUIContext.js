@@ -273,7 +273,51 @@ class UIContext {
         Context.keyframeAnimateTo(param, keyframes);
         __JSScopeUtil__.restoreInstanceId();
     }
+
+    getFrameNodeById(id) {
+        __JSScopeUtil__.syncInstanceId(this.instanceId_);
+        let nodePtr = getUINativeModule().getFrameNodeByKey(id);
+        let xNode = globalThis.requireNapi('arkui.node');
+        let node = xNode.FrameNodeUtils.searchNodeInRegisterProxy(nodePtr);
+        if (!node) {
+            node = xNode.FrameNodeUtils.createFrameNode(this, nodePtr);
+        }
+        __JSScopeUtil__.restoreInstanceId();
+        return node;
+    }
+    getFocusController() {
+        if (this.focusController_ == null) {
+            this.focusController_ = new FocusController(this.instanceId_);
+        }
+        return this.focusController_;
+    }
 }
+
+class FocusController {
+    /**
+     * Construct new instance of FocusController.
+     * initialzie with instanceId.
+     * @param instanceId obtained on the c++ side.
+     * @since 12
+     */
+    constructor(instanceId) {
+        this.instanceId_ = instanceId;
+        this.ohos_focusController = globalThis.requireNapi('arkui.focusController');
+    }
+    clearFocus() {
+        __JSScopeUtil__.syncInstanceId(this.instanceId_);
+        this.ohos_focusController.clearFocus();
+        __JSScopeUtil__.restoreInstanceId();
+    }
+
+    requestFocus(value) {
+        __JSScopeUtil__.syncInstanceId(this.instanceId_);
+        let result = this.ohos_focusController.requestFocus(value);
+        __JSScopeUtil__.restoreInstanceId();
+        return result;
+    }
+}
+
 class ComponentUtils {
     /**
      * Construct new instance of ComponentUtils.

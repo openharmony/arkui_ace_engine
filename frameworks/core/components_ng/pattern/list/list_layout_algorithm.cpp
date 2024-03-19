@@ -77,6 +77,8 @@ void ListLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     contentEndOffset_ += expandHeight;
     // expand contentSize
     contentConstraint.MinusPadding(std::nullopt, std::nullopt, std::nullopt, -expandHeight);
+    auto&& safeAreaOpts = listLayoutProperty->GetSafeAreaExpandOpts();
+    expandSafeArea_ = safeAreaOpts && safeAreaOpts->Expansive();
 
     auto contentIdealSize = CreateIdealSize(
         contentConstraint, axis_, listLayoutProperty->GetMeasureType(MeasureType::MATCH_PARENT_CROSS_AXIS));
@@ -134,7 +136,6 @@ void ListLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
         listItemAlign_ = listLayoutProperty->GetListItemAlign().value_or(V2::ListItemAlign::START);
         // calculate child layout constraint.
         UpdateListItemConstraint(axis_, contentIdealSize, childLayoutConstraint_);
-        constraintChanged_ = IsConstraintChanged(layoutWrapper);
         MeasureList(layoutWrapper);
     } else {
         itemPosition_.clear();
@@ -169,13 +170,16 @@ void ListLayoutAlgorithm::SetCacheCount(LayoutWrapper* layoutWrapper, int32_t ca
     layoutWrapper->SetCacheCount(cacheCount);
 }
 
-bool ListLayoutAlgorithm::IsConstraintChanged(LayoutWrapper* layoutWrapper) const
+bool ListLayoutAlgorithm::CheckNeedMeasure(const RefPtr<LayoutWrapper>& layoutWrapper) const
 {
-    auto host = layoutWrapper->GetHostNode();
-    CHECK_NULL_RETURN(host, false);
-    auto pattern = host->GetPattern<ListPattern>();
-    CHECK_NULL_RETURN(pattern, false);
-    return pattern->GetLayoutConstraint() != childLayoutConstraint_;
+    if (expandSafeArea_ || layoutWrapper->CheckNeedForceMeasureAndLayout()) {
+        return true;
+    }
+    auto geometryNode = layoutWrapper->GetGeometryNode();
+    CHECK_NULL_RETURN(geometryNode, true);
+    auto constraint = geometryNode->GetParentLayoutConstraint();
+    CHECK_NULL_RETURN(constraint, true);
+    return constraint.value() != childLayoutConstraint_;
 }
 
 float ListLayoutAlgorithm::GetChildMaxCrossSize(LayoutWrapper* layoutWrapper, Axis axis) const
@@ -464,8 +468,8 @@ bool ListLayoutAlgorithm::CheckNoNeedJumpListItemGroup(LayoutWrapper* layoutWrap
     if (jumpIndex >= startIndex && jumpIndex <= endIndex) {
         auto it = groupItemPosition.find(jumpIndexInGroup);
         if (it != groupItemPosition.end()) {
-            auto topPos = jumpIndexStartPos + it->second.first - contentStartOffset_;
-            auto bottomPos = jumpIndexStartPos + it->second.second + contentEndOffset_;
+            auto topPos = jumpIndexStartPos + it->second.startPos - contentStartOffset_;
+            auto bottomPos = jumpIndexStartPos + it->second.endPos + contentEndOffset_;
             if (JudgeInOfScreenScrollAutoType(wrapper, listLayoutProperty, topPos, bottomPos)) {
                 return true;
             }
@@ -804,7 +808,7 @@ int32_t ListLayoutAlgorithm::LayoutALineForward(LayoutWrapper* layoutWrapper,
         ACE_SCOPED_TRACE("ListLayoutAlgorithm::MeasureListItemGroup:%d", currentIndex);
         SetListItemGroupParam(wrapper, currentIndex, startPos, true, listLayoutProperty, false);
         wrapper->Measure(childLayoutConstraint_);
-    } else if (constraintChanged_ || wrapper->CheckNeedForceMeasureAndLayout()) {
+    } else if (CheckNeedMeasure(wrapper)) {
         ACE_SCOPED_TRACE("ListLayoutAlgorithm::MeasureListItem:%d", currentIndex);
         wrapper->Measure(childLayoutConstraint_);
     }
@@ -831,7 +835,7 @@ int32_t ListLayoutAlgorithm::LayoutALineBackward(LayoutWrapper* layoutWrapper,
         SetListItemGroupParam(wrapper, currentIndex, endPos, false, listLayoutProperty, false);
         ACE_SCOPED_TRACE("ListLayoutAlgorithm::MeasureListItemGroup:%d", currentIndex);
         wrapper->Measure(childLayoutConstraint_);
-    } else if (constraintChanged_ || wrapper->CheckNeedForceMeasureAndLayout()) {
+    } else if (CheckNeedMeasure(wrapper)) {
         ACE_SCOPED_TRACE("ListLayoutAlgorithm::MeasureListItem:%d", currentIndex);
         wrapper->Measure(childLayoutConstraint_);
     }
@@ -1216,7 +1220,7 @@ void ListLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
         pos.second.startPos -= currentOffset_;
         pos.second.endPos -= currentOffset_;
         LayoutItem(wrapper, pos.first, pos.second, startIndex, crossSize);
-        if (wrapper->CheckNeedForceMeasureAndLayout()) {
+        if (expandSafeArea_ || wrapper->CheckNeedForceMeasureAndLayout()) {
             wrapper->Layout();
         } else {
             SyncGeometry(wrapper);
@@ -1465,8 +1469,8 @@ std::list<int32_t> ListLayoutAlgorithm::LayoutCachedItem(LayoutWrapper* layoutWr
     auto currPos = itemPosition_.rbegin()->second.endPos + spaceWidth_;
     for (int32_t i = 0; i < cacheCount && currIndex + i < totalItemCount_; i++) {
         int32_t index = currIndex + i;
-        auto wrapper = layoutWrapper->GetChildByIndex(index);
-        if (!wrapper || wrapper->CheckNeedForceMeasureAndLayout()) {
+        auto wrapper = layoutWrapper->GetChildByIndex(index, true);
+        if (!wrapper || CheckNeedMeasure(wrapper)) {
             predictBuildList.emplace_back(index);
             continue;
         }
@@ -1486,8 +1490,8 @@ std::list<int32_t> ListLayoutAlgorithm::LayoutCachedItem(LayoutWrapper* layoutWr
     currPos = itemPosition_.begin()->second.startPos - spaceWidth_;
     for (int32_t i = 0; i < cacheCount && currIndex - i >= 0; i++) {
         int32_t index = currIndex - i;
-        auto wrapper = layoutWrapper->GetChildByIndex(index);
-        if (!wrapper || wrapper->CheckNeedForceMeasureAndLayout()) {
+        auto wrapper = layoutWrapper->GetChildByIndex(index, true);
+        if (!wrapper || CheckNeedMeasure(wrapper)) {
             predictBuildList.emplace_back(index);
             continue;
         }
@@ -1547,7 +1551,7 @@ void ListLayoutAlgorithm::PostIdleTask(RefPtr<FrameNode> frameNode, const ListPr
             if (GetSysTimestamp() > deadline) {
                 break;
             }
-            auto wrapper = frameNode->GetOrCreateChildByIndex(*it, false);
+            auto wrapper = frameNode->GetOrCreateChildByIndex(*it, false, true);
             if (wrapper && wrapper->GetHostNode() && !wrapper->GetHostNode()->RenderCustomChild(deadline)) {
                 break;
             }

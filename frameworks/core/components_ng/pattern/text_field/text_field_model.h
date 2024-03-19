@@ -43,6 +43,30 @@ struct Font {
     std::optional<Dimension> fontSize;
     std::optional<FontStyle> fontStyle;
     std::vector<std::string> fontFamilies;
+    std::optional<Color> fontColor;
+    std::optional<std::vector<std::string>> fontFamiliesNG;
+
+    bool IsEqual(const Font& other) const
+    {
+        bool flag = fontWeight == other.fontWeight && fontSize == other.fontSize && fontStyle == other.fontStyle &&
+            fontColor == other.fontColor;
+        if (!flag) {
+            return false;
+        }
+        if (fontFamiliesNG.has_value() && other.fontFamiliesNG) {
+            auto curFontFamilies = fontFamiliesNG.value();
+            auto otherFontFamilies = other.fontFamiliesNG.value();
+            if (curFontFamilies.size() !=otherFontFamilies.size()) {
+                return false;
+            }
+            for (size_t i = 0; i < curFontFamilies.size(); ++i) {
+                if (curFontFamilies[i] != otherFontFamilies[i]) {
+                    return false;
+                }
+            }
+        }
+        return flag;
+    }
 };
 
 struct CaretStyle {
@@ -56,6 +80,13 @@ struct PasswordIcon {
     std::string hideBundleName;
     std::string showModuleName;
     std::string hideModuleName;
+};
+
+struct UserUnderlineColor {
+    std::optional<Color> typing = std::nullopt;
+    std::optional<Color> normal = std::nullopt;
+    std::optional<Color> error = std::nullopt;
+    std::optional<Color> disable = std::nullopt;
 };
 
 enum class InputStyle {
@@ -226,6 +257,8 @@ public:
     virtual void SetMaxViewLines(uint32_t value) {};
 
     virtual void SetShowUnderline(bool showUnderLine) {};
+    virtual void SetNormalUnderlineColor(const Color& normalColor) {};
+    virtual void SetUserUnderlineColor(UserUnderlineColor userColor) {};
     virtual void SetShowCounter(bool value) {};
     virtual void SetOnChangeEvent(std::function<void(const std::string&)>&& func) = 0;
     virtual void SetFocusableAndFocusNode() {};
@@ -235,13 +268,20 @@ public:
     virtual void SetShowCounterBorder(bool value) {};
     virtual void SetCleanNodeStyle(CleanNodeStyle cleanNodeStyle) = 0;
     virtual void SetCancelIconSize(const CalcDimension& iconSize) = 0;
-    virtual void SetCanacelIconSrc(const std::string& iconSrc) = 0;
+    virtual void SetCanacelIconSrc(
+        const std::string& iconSrc, const std::string& bundleName, const std::string& moduleName) = 0;
     virtual void SetCancelIconColor(const Color& iconColor) = 0;
     virtual void SetIsShowCancelButton(bool isShowCancelButton) = 0;
     virtual void SetPasswordRules(const std::string& passwordRules) = 0;
     virtual void SetEnableAutoFill(bool enableAutoFill) = 0;
 
     virtual void SetSelectAllValue(bool isSetSelectAllValue) = 0;
+
+    virtual void SetLetterSpacing(const Dimension& value) {};
+    virtual void SetLineHeight(const Dimension& value) {};
+    virtual void SetTextDecoration(Ace::TextDecoration value) {};
+    virtual void SetTextDecorationColor(const Color& value) {};
+    virtual void SetTextDecorationStyle(Ace::TextDecorationStyle value) {};
 
 private:
     static std::unique_ptr<TextFieldModel> instance_;

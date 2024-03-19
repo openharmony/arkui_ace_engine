@@ -104,6 +104,9 @@ bool ListItemPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirt
     CHECK_NULL_RETURN(layoutAlgorithm, false);
     startNodeSize_ = layoutAlgorithm->GetStartNodeSize();
     endNodeSize_ = layoutAlgorithm->GetEndNodeSize();
+    if (axis_ != GetAxis()) {
+        ChangeAxis(GetAxis());
+    }
     return false;
 }
 
@@ -523,6 +526,8 @@ void ListItemPattern::StartSpringMotion(float start, float end, float velocity, 
         springMotion_->Reset(start, end, velocity, DEFAULT_OVER_SPRING_PROPERTY);
         springMotion_->ClearListeners();
     }
+    // 10000.0f: use a large value to mask the determination of speed threshold
+    springMotion_->SetVelocityAccuracy(10000.0f);
     springMotion_->AddListener([weakScroll = AceType::WeakClaim(this), start, end](double position) {
         auto listItem = weakScroll.Upgrade();
         CHECK_NULL_VOID(listItem);

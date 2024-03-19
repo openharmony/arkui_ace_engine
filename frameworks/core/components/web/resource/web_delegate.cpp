@@ -266,6 +266,20 @@ void SslErrorResultOhos::HandleCancel()
     }
 }
 
+void AllSslErrorResultOhos::HandleConfirm()
+{
+    if (result_) {
+        result_->HandleConfirm();
+    }
+}
+
+void AllSslErrorResultOhos::HandleCancel()
+{
+    if (result_) {
+        result_->HandleCancel();
+    }
+}
+
 void SslSelectCertResultOhos::HandleConfirm(const std::string& privateKeyFile, const std::string& certChainFile)
 {
     if (result_) {
@@ -1712,6 +1726,8 @@ bool WebDelegate::PrepareInitOHOSWeb(const WeakPtr<PipelineBase>& context)
         onTouchIconUrlV2_ = useNewPipe ? eventHub->GetOnTouchIconUrlEvent() : nullptr;
         onAudioStateChangedV2_ = GetAudioStateChangedCallback(useNewPipe, eventHub);
         onFirstContentfulPaintV2_ = useNewPipe ? eventHub->GetOnFirstContentfulPaintEvent() : nullptr;
+        OnFirstMeaningfulPaintV2_ = useNewPipe ? eventHub->GetOnFirstMeaningfulPaintEvent() : nullptr;
+        OnLargestContentfulPaintV2_ = useNewPipe ? eventHub->GetOnLargestContentfulPaintEvent() : nullptr;
         onSafeBrowsingCheckResultV2_ = useNewPipe ? eventHub->GetOnSafeBrowsingCheckResultEvent() : nullptr;
         onOverScrollV2_ = useNewPipe ? eventHub->GetOnOverScrollEvent()
                                      : AceAsyncEvent<void(const std::shared_ptr<BaseEventInfo>&)>::Create(
@@ -1903,14 +1919,14 @@ void WebDelegate::RunSetWebIdAndHapPathCallback()
     auto setWebIdCallback = pattern->GetSetWebIdCallback();
     CHECK_NULL_VOID(setWebIdCallback);
     setWebIdCallback(webId);
-    auto onControllerAttachedCallback = pattern->GetOnControllerAttachedCallback();
-    if (onControllerAttachedCallback) {
-        onControllerAttachedCallback();
-    }
     if (!hapPath_.empty()) {
         auto setHapPathCallback = pattern->GetSetHapPathCallback();
         CHECK_NULL_VOID(setHapPathCallback);
         setHapPathCallback(hapPath_);
+    }
+    auto onControllerAttachedCallback = pattern->GetOnControllerAttachedCallback();
+    if (onControllerAttachedCallback) {
+        onControllerAttachedCallback();
     }
     NotifyPopupWindowResult(true);
     return;
@@ -1921,14 +1937,14 @@ void WebDelegate::RunSetWebIdAndHapPathCallback()
         auto setWebIdCallback = pattern->GetSetWebIdCallback();
         CHECK_NULL_VOID(setWebIdCallback);
         setWebIdCallback(webId);
-        auto onControllerAttachedCallback = pattern->GetOnControllerAttachedCallback();
-        if (onControllerAttachedCallback) {
-            onControllerAttachedCallback();
-        }
         if (!hapPath_.empty()) {
             auto setHapPathCallback = pattern->GetSetHapPathCallback();
             CHECK_NULL_VOID(setHapPathCallback);
             setHapPathCallback(hapPath_);
+        }
+        auto onControllerAttachedCallback = pattern->GetOnControllerAttachedCallback();
+        if (onControllerAttachedCallback) {
+            onControllerAttachedCallback();
         }
         NotifyPopupWindowResult(true);
         return;
@@ -4409,6 +4425,27 @@ bool WebDelegate::OnSslErrorRequest(const std::shared_ptr<BaseEventInfo>& info)
     return result;
 }
 
+bool WebDelegate::OnAllSslErrorRequest(const std::shared_ptr<BaseEventInfo>& info)
+{
+    auto context = context_.Upgrade();
+    CHECK_NULL_RETURN(context, false);
+    bool result = false;
+    auto jsTaskExecutor = SingleTaskExecutor::Make(context->GetTaskExecutor(), TaskExecutor::TaskType::JS);
+    jsTaskExecutor.PostSyncTask([weak = WeakClaim(this), info, &result]() {
+        auto delegate = weak.Upgrade();
+        CHECK_NULL_VOID(delegate);
+        auto webPattern = delegate->webPattern_.Upgrade();
+        CHECK_NULL_VOID(webPattern);
+        auto webEventHub = webPattern->GetWebEventHub();
+        CHECK_NULL_VOID(webEventHub);
+        auto propOnAllSslErrorEvent = webEventHub->GetOnAllSslErrorRequestEvent();
+        CHECK_NULL_VOID(propOnAllSslErrorEvent);
+        result = propOnAllSslErrorEvent(info);
+        return;
+    });
+    return result;
+}
+
 bool WebDelegate::OnSslSelectCertRequest(const std::shared_ptr<BaseEventInfo>& info)
 {
     auto context = context_.Upgrade();
@@ -5000,6 +5037,23 @@ void WebDelegate::OnFirstContentfulPaint(int64_t navigationStartTick, int64_t fi
     }
 }
 
+void WebDelegate::OnFirstMeaningfulPaint(std::shared_ptr<OHOS::NWeb::NWebFirstMeaningfulPaintDetails> details)
+{
+    if (OnFirstMeaningfulPaintV2_) {
+        OnFirstMeaningfulPaintV2_(std::make_shared<FirstMeaningfulPaintEvent>(
+            details->GetNavigationStartTime(), details->GetFirstMeaningfulPaintTime()));
+    }
+}
+
+void WebDelegate::OnLargestContentfulPaint(std::shared_ptr<OHOS::NWeb::NWebLargestContentfulPaintDetails> details)
+{
+    if (OnLargestContentfulPaintV2_) {
+        OnLargestContentfulPaintV2_(std::make_shared<LargestContentfulPaintEvent>(details->GetNavigationStartTime(),
+            details->GetLargestImagePaintTime(), details->GetLargestTextPaintTime(),
+            details->GetLargestImageLoadStartTime(), details->GetLargestImageLoadEndTime(), details->GetImageBPP()));
+    }
+}
+
 void WebDelegate::OnSafeBrowsingCheckResult(int threat_type)
 {
     if (onSafeBrowsingCheckResultV2_) {
@@ -5546,6 +5600,24 @@ void WebDelegate::UpdateCopyOptionMode(const int copyOptionModeValue)
         TaskExecutor::TaskType::PLATFORM);
 }
 
+void WebDelegate::UpdateTextAutosizing(bool isTextAutosizing)
+{
+    auto context = context_.Upgrade();
+    if (!context) {
+        return;
+    }
+    context->GetTaskExecutor()->PostTask(
+        [weak = WeakClaim(this), isTextAutosizing]() {
+            auto delegate = weak.Upgrade();
+            if (delegate && delegate->nweb_) {
+                std::shared_ptr<OHOS::NWeb::NWebPreference> setting = delegate->nweb_->GetPreference();
+                CHECK_NULL_VOID(setting);
+                setting->PutTextAutosizingEnabled(isTextAutosizing);
+            }
+        },
+        TaskExecutor::TaskType::PLATFORM);
+}
+
 void WebDelegate::RegisterSurfacePositionChangedCallback()
 {
 #ifdef NG_BUILD
@@ -5677,11 +5749,17 @@ void WebDelegate::SetTouchEventInfo(std::shared_ptr<OHOS::NWeb::NWebNativeEmbedT
     auto webPattern = webPattern_.Upgrade();
     CHECK_NULL_VOID(webPattern);
     if (touchEvent) {
-        TouchEvent event{touchEvent->GetId(), touchEvent->GetX(), touchEvent->GetY(), touchEvent->GetScreenX(),
-            touchEvent->GetScreenY(), static_cast<OHOS::Ace::TouchType>(touchEvent->GetType())};
+        TouchEvent event;
+        event.SetId(touchEvent->GetId())
+            .SetX(touchEvent->GetX())
+            .SetY(touchEvent->GetY())
+            .SetScreenX(touchEvent->GetScreenX())
+            .SetScreenY(touchEvent->GetScreenY())
+            .SetType(static_cast<OHOS::Ace::TouchType>(touchEvent->GetType()));
         webPattern->SetTouchEventInfo(event, touchEventInfo);
     } else {
-        TouchEvent event = {0, };
+        TouchEvent event;
+        event.SetId(0);
         webPattern->SetTouchEventInfo(event, touchEventInfo);
     }
 }
@@ -5692,7 +5770,7 @@ void WebDelegate::OnNativeEmbedLifecycleChange(std::shared_ptr<OHOS::NWeb::NWebN
         return;
     }
 
-    EmbedInfo info = {0, };
+    EmbedInfo info;
     std::string embedId;
     std::string surfaceId;
     OHOS::Ace::NativeEmbedStatus status = OHOS::Ace::NativeEmbedStatus::CREATE;
@@ -5705,7 +5783,8 @@ void WebDelegate::OnNativeEmbedLifecycleChange(std::shared_ptr<OHOS::NWeb::NWebN
         if (embedInfo) {
             info = {embedInfo->GetId(), embedInfo->GetType(), embedInfo->GetSrc(),
                 embedInfo->GetUrl(), embedInfo->GetTag(), embedInfo->GetWidth(),
-                embedInfo->GetHeight(), embedInfo->GetParams()};
+                embedInfo->GetHeight(), embedInfo->GetX(), embedInfo->GetY(),
+                embedInfo->GetParams()};
         }
     }
 
@@ -5990,5 +6069,22 @@ bool WebDelegate::OnHandleOverrideLoading(std::shared_ptr<OHOS::NWeb::NWebUrlRes
         result = webCom->OnOverrideUrlLoading(param.get());
     });
     return result;
+}
+
+void WebDelegate::UpdateMetaViewport(bool isMetaViewportEnabled)
+{
+    auto context = context_.Upgrade();
+    CHECK_NULL_VOID(context);
+    context->GetTaskExecutor()->PostTask(
+        [weak = WeakClaim(this), isMetaViewportEnabled]() {
+            auto delegate = weak.Upgrade();
+            if (delegate && delegate->nweb_) {
+                std::shared_ptr<OHOS::NWeb::NWebPreference> setting = delegate->nweb_->GetPreference();
+                if (setting) {
+                    setting->SetViewportEnable(isMetaViewportEnabled);
+                }
+            }
+        },
+        TaskExecutor::TaskType::PLATFORM);
 }
 } // namespace OHOS::Ace

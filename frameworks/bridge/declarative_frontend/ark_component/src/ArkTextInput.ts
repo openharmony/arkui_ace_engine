@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -62,6 +62,39 @@ class TextInputMaxLinesModifier extends ModifierWithKey<number> {
     return !isBaseOrResourceEqual(this.stageValue, this.value);
   }
 }
+class TextInputUnderlineColorModifier extends ModifierWithKey<ResourceColor | UnderlineColor | undefined> {
+  constructor(value: ResourceColor | UnderlineColor | undefined) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('textInputUnderlineColor');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().textInput.resetUnderlineColor(node);
+    } else {
+      const valueType: string = typeof this.value;
+      if (valueType === 'number' || valueType === 'string' || isResource(this.value)) {
+        getUINativeModule().textInput.setUnderlineColor(node, this.value, undefined, undefined, undefined, undefined);
+      } else {
+        getUINativeModule().textInput.setUnderlineColor(node, undefined, (this.value as UnderlineColor).normal,
+          (this.value as UnderlineColor).typing, (this.value as UnderlineColor).error, (this.value as UnderlineColor).disable);
+      }
+    }
+  }
+
+  checkObjectDiff(): boolean {
+    if (isResource(this.stageValue) && isResource(this.value)) {
+      return !isBaseOrResourceEqual(this.stageValue, this.value);
+    } else if (!isResource(this.stageValue) && !isResource(this.value)) {
+      return !((this.stageValue as UnderlineColor).normal === (this.value as UnderlineColor).normal &&
+        (this.stageValue as UnderlineColor).typing === (this.value as UnderlineColor).typing &&
+        (this.stageValue as UnderlineColor).error === (this.value as UnderlineColor).error &&
+        (this.stageValue as UnderlineColor).disable === (this.value as UnderlineColor).disable);
+    } else {
+      return true;
+    }
+  }
+}
+
 class TextInputShowPasswordIconModifier extends ModifierWithKey<boolean> {
   constructor(value: boolean) {
     super(value);
@@ -646,6 +679,10 @@ class ArkTextInputComponent extends ArkComponent implements CommonMethod<TextInp
   }
   customKeyboard(event: () => void): TextInputAttribute {
     throw new Error('Method not implemented.');
+  }
+  underlineColor(value: ResourceColor | UnderlineColor | undefined): TextInputAttribute {
+    modifierWithKey(this._modifiersWithKeys, TextInputUnderlineColorModifier.identity, TextInputUnderlineColorModifier, value);
+    return this;
   }
 }
 // @ts-ignore

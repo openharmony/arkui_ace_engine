@@ -32,8 +32,9 @@ int32_t DatePickerColumnAccessibilityProperty::GetCollectionItemCounts() const
     auto pattern = frameNode->GetPattern<DatePickerColumnPattern>();
     CHECK_NULL_RETURN(pattern, 0);
     auto options = pattern->GetOptions();
-    if (options.find(frameNode) != options.end()) {
-        return options[frameNode].size();
+    auto it = options.find(frameNode);
+    if (it != options.end()) {
+        return it->second.size();
     }
     return 0;
 }
@@ -89,11 +90,12 @@ std::string DatePickerColumnAccessibilityProperty::GetText() const
     CHECK_NULL_RETURN(pattern, "");
     auto index = pattern->GetCurrentIndex();
     auto options = pattern->GetOptions();
-    if (options.find(frameNode) != options.end()) {
-        if (options[frameNode].size() < index) {
+    auto it = options.find(frameNode);
+    if (it != options.end()) {
+        if (it->second.size() < index) {
             return "";
         }
-        auto date = options[frameNode].at(index);
+        auto date = it->second.at(index);
         return DatePickerPattern::GetFormatString(date);
     }
     return "";

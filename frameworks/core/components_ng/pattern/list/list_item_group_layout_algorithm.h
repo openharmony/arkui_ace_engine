@@ -31,11 +31,18 @@ struct LayoutedItemInfo {
     float endPos = 0.0f;
 };
 
+struct ListItemGroupInfo {
+    int32_t id = -1;
+    float startPos = 0.0f;
+    float endPos = 0.0f;
+    bool isPressed = false;
+};
+
 // TextLayoutAlgorithm acts as the underlying text layout.
 class ACE_EXPORT ListItemGroupLayoutAlgorithm : public LayoutAlgorithm {
     DECLARE_ACE_TYPE(ListItemGroupLayoutAlgorithm, LayoutAlgorithm);
 public:
-    using PositionMap = std::map<int32_t, std::pair<float, float>>;
+    using PositionMap = std::map<int32_t, ListItemGroupInfo>;
 
     static const int32_t LAST_ITEM = -1;
 
@@ -138,9 +145,9 @@ public:
             return 0.0f;
         }
         if (GetStartIndex() == 0) {
-            return itemPosition_.begin()->second.first;
+            return itemPosition_.begin()->second.startPos;
         }
-        return itemPosition_.begin()->second.first - spaceWidth_;
+        return itemPosition_.begin()->second.startPos - spaceWidth_;
     }
 
     float GetEndPosition() const
@@ -149,9 +156,9 @@ public:
             return 0.0f;
         }
         if (GetEndIndex() == totalItemCount_ - 1) {
-            return itemPosition_.rbegin()->second.second;
+            return itemPosition_.rbegin()->second.endPos;
         }
-        return itemPosition_.rbegin()->second.second + spaceWidth_;
+        return itemPosition_.rbegin()->second.endPos + spaceWidth_;
     }
 
     int32_t GetTotalItemCount() const
@@ -203,11 +210,6 @@ public:
         return layoutedItemInfo_;
     }
 
-    const LayoutConstraintF& GetLayoutConstraint() const
-    {
-        return childLayoutConstraint_;
-    }
-
     static void SyncGeometry(RefPtr<LayoutWrapper>& wrapper);
 
 private:
@@ -256,7 +258,7 @@ private:
     bool IsCardStyleForListItemGroup(const LayoutWrapper* groupLayoutWrapper);
     float GetListItemGroupMaxWidth(const OptionalSizeF& parentIdealSize, RefPtr<LayoutProperty> layoutProperty);
     void AdjustItemPosition();
-    bool IsConstraintChanged(LayoutWrapper* layoutWrapper) const;
+    bool CheckNeedMeasure(const RefPtr<LayoutWrapper>& layoutWrapper) const;
 
     bool isCardStyle_ = false;
     int32_t headerIndex_;
@@ -294,7 +296,6 @@ private:
 
     std::optional<LayoutedItemInfo> layoutedItemInfo_;
     LayoutConstraintF childLayoutConstraint_;
-    bool constraintChanged_ = true;
 };
 } // namespace OHOS::Ace::NG
 

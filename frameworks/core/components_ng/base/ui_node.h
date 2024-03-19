@@ -58,7 +58,7 @@ class ACE_EXPORT UINode : public virtual AceType {
     DECLARE_ACE_TYPE(UINode, AceType);
 
 public:
-    UINode(const std::string& tag, int32_t nodeId, int32_t instanceId = -1, bool isRoot = false);
+    UINode(const std::string& tag, int32_t nodeId, bool isRoot = false);
     ~UINode() override;
 
     // atomic node is like button, image, custom node and so on.
@@ -256,7 +256,7 @@ public:
     void SetChildrenInDestroying();
 
     virtual HitTestResult TouchTest(const PointF& globalPoint, const PointF& parentLocalPoint,
-        const PointF& parentRevertPoint, const TouchRestrict& touchRestrict, TouchTestResult& result, int32_t touchId,
+        const PointF& parentRevertPoint, TouchRestrict& touchRestrict, TouchTestResult& result, int32_t touchId,
         bool isDispatch = false);
     virtual HitTestMode GetHitTestMode() const
     {
@@ -277,7 +277,8 @@ public:
 
     virtual void AdjustParentLayoutFlag(PropertyChangeFlag& flag);
 
-    virtual void MarkDirtyNode(PropertyChangeFlag extraFlag = PROPERTY_UPDATE_NORMAL);
+    virtual void MarkDirtyNode(
+        PropertyChangeFlag extraFlag = PROPERTY_UPDATE_NORMAL, bool childExpansiveAndMark = false);
 
     virtual void MarkNeedFrameFlushDirty(PropertyChangeFlag extraFlag = PROPERTY_UPDATE_NORMAL);
 
@@ -385,7 +386,7 @@ public:
         newChild->MountToParent(AceType::Claim(this), slot, false);
     }
     virtual void FastPreviewUpdateChildDone() {}
-    virtual RefPtr<UINode> GetFrameChildByIndex(uint32_t index, bool needBuild);
+    virtual RefPtr<UINode> GetFrameChildByIndex(uint32_t index, bool needBuild, bool isCache = false);
 
     void SetDebugLine(const std::string& line)
     {
@@ -529,6 +530,8 @@ public:
 
     virtual bool SetParentLayoutConstraint(const SizeF& size) const;
 
+    virtual void SetNodeIndexOffset(int32_t start, int32_t count) {}
+
     virtual void PaintDebugBoundaryTreeAll(bool flag);
 
 protected:
@@ -577,7 +580,8 @@ protected:
     // update visible change signal to children
     void UpdateChildrenVisible(bool isVisible) const;
 
-    void CollectRemovedChildren(const std::list<RefPtr<UINode>>& children, std::list<int32_t>& removedElmtId);
+    void CollectRemovedChildren(const std::list<RefPtr<UINode>>& children,
+        std::list<int32_t>& removedElmtId, bool isEntry);
     void CollectRemovedChild(const RefPtr<UINode>& child, std::list<int32_t>& removedElmtId);
 
     bool needCallChildrenUpdate_ = true;

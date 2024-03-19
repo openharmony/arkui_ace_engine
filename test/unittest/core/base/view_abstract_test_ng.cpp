@@ -31,6 +31,7 @@
 #include "core/components_ng/layout/layout_property.h"
 #include "core/components_ng/pattern/bubble/bubble_pattern.h"
 #include "core/components_ng/pattern/menu/menu_pattern.h"
+#include "core/components_ng/pattern/menu/wrapper/menu_wrapper_pattern.h"
 #include "core/components_ng/pattern/navigation/navigation_model_ng.h"
 #include "core/components_ng/pattern/navigator/navigator_model_ng.h"
 #include "core/components_ng/pattern/navrouter/navrouter_model_ng.h"
@@ -62,6 +63,7 @@ const Dimension RIGHT { 10.0, DimensionUnit::PX };
 const Dimension BOTTOM { 20.0, DimensionUnit::PX };
 const Dimension VALUE { -50.0, DimensionUnit::PX };
 const Dimension ZERO { 0.0, DimensionUnit::PX };
+const BiasPair biasPair(0.5f, 0.5f);
 const InvertVariant invert = 0.0f;
 const OffsetF OFFSETF { 1.0, 1.0 };
 const Offset OFFSET { 2.0, 2.0 };
@@ -112,18 +114,32 @@ public:
         MockContainer::Current()->pipelineContext_ = nullptr;
         MockPipelineContext::TearDown();
     }
+
+    void SetUp() override
+    {
+        auto* stack = ViewStackProcessor::GetInstance();
+        auto nodeId = stack->ClaimNodeId();
+        auto frameNode =
+            FrameNode::GetOrCreateFrameNode("components", nodeId, []() { return AceType::MakeRefPtr<Pattern>(); });
+        stack->Push(frameNode);
+    }
+    void TearDown() override {}
 };
 
 /**
  * @tc.name: ViewAbstractTest001
- * @tc.desc: Test the operation of View_Abstract
+ * @tc.desc: SetWidth、SetHeight、SetMinWidth、SetMinHeight、SetMaxWidth、SetMaxHeight
  * @tc.type: FUNC
  */
 HWTEST_F(ViewAbstractTestNg, ViewAbstractTest001, TestSize.Level1)
 {
     /**
-     * @tc.steps: step1.The FrameNode is null, related function is called.
+     * @tc.steps: step1.Using static methods to set component properties
      */
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto layoutProperty = frameNode->GetLayoutProperty();
+    ASSERT_NE(layoutProperty, nullptr);
     ViewAbstract::SetWidth(NG::CalcLength(WIDTH));
     ViewAbstract::SetHeight(NG::CalcLength(HEIGHT));
     ViewAbstract::SetMinWidth(NG::CalcLength(MIN_WIDTH));
@@ -131,12 +147,43 @@ HWTEST_F(ViewAbstractTestNg, ViewAbstractTest001, TestSize.Level1)
     ViewAbstract::SetMaxWidth(NG::CalcLength(MIN_WIDTH));
     ViewAbstract::SetMaxHeight(NG::CalcLength(MIN_HEIGHT));
     ViewAbstract::ResetAspectRatio();
-    ViewAbstract::ClearWidthOrHeight(true);
+    ViewAbstract::SetDrawModifier(nullptr);
 
     /**
-     * @tc.expected: Return expected results..
+     * @tc.expected: Successfully set various properties of the top node on the stack
      */
-    EXPECT_EQ(ViewStackProcessor::GetInstance()->GetMainElementNode(), nullptr);
+    EXPECT_EQ(layoutProperty->calcLayoutConstraint_->selfIdealSize->Width(), NG::CalcLength(WIDTH));
+    EXPECT_EQ(layoutProperty->calcLayoutConstraint_->selfIdealSize->Height(), NG::CalcLength(HEIGHT));
+    EXPECT_EQ(layoutProperty->calcLayoutConstraint_->minSize->Width(), NG::CalcLength(MIN_WIDTH));
+    EXPECT_EQ(layoutProperty->calcLayoutConstraint_->minSize->Height(), NG::CalcLength(MIN_HEIGHT));
+    EXPECT_EQ(layoutProperty->calcLayoutConstraint_->maxSize->Width(), NG::CalcLength(MIN_WIDTH));
+    EXPECT_EQ(layoutProperty->calcLayoutConstraint_->maxSize->Height(), NG::CalcLength(MIN_HEIGHT));
+
+    /**
+     * @tc.steps: step2.Static methods set properties for other nodes
+     */
+    auto newNode =
+            FrameNode::GetOrCreateFrameNode("newframenode", 10, []() { return AceType::MakeRefPtr<Pattern>(); });
+    ViewAbstract::SetWidth(AceType::RawPtr(newNode), NG::CalcLength(WIDTH));
+    ViewAbstract::SetHeight(AceType::RawPtr(newNode), NG::CalcLength(HEIGHT));
+    ViewAbstract::SetMinWidth(AceType::RawPtr(newNode), NG::CalcLength(MIN_WIDTH));
+    ViewAbstract::SetMinHeight(AceType::RawPtr(newNode), NG::CalcLength(MIN_HEIGHT));
+    ViewAbstract::SetMaxWidth(AceType::RawPtr(newNode), NG::CalcLength(MIN_WIDTH));
+    ViewAbstract::SetMaxHeight(AceType::RawPtr(newNode), NG::CalcLength(MIN_HEIGHT));
+    auto newProperty = frameNode->GetLayoutProperty();
+    
+    /**
+     * @tc.expected: Successfully set various attributes of the new node
+     */
+    EXPECT_EQ(newProperty->calcLayoutConstraint_->selfIdealSize->Width(), NG::CalcLength(WIDTH));
+    EXPECT_EQ(newProperty->calcLayoutConstraint_->selfIdealSize->Height(), NG::CalcLength(HEIGHT));
+    EXPECT_EQ(newProperty->calcLayoutConstraint_->minSize->Width(), NG::CalcLength(MIN_WIDTH));
+    EXPECT_EQ(newProperty->calcLayoutConstraint_->minSize->Height(), NG::CalcLength(MIN_HEIGHT));
+    EXPECT_EQ(newProperty->calcLayoutConstraint_->maxSize->Width(), NG::CalcLength(MIN_WIDTH));
+    EXPECT_EQ(newProperty->calcLayoutConstraint_->maxSize->Height(), NG::CalcLength(MIN_HEIGHT));
+
+    ViewAbstract::ClearWidthOrHeight(true);
+    EXPECT_EQ(layoutProperty->calcLayoutConstraint_->selfIdealSize->Width(), std::nullopt);
 }
 
 /**
@@ -187,10 +234,46 @@ HWTEST_F(ViewAbstractTestNg, ViewAbstractTest003, TestSize.Level1)
      */
     ViewAbstract::SetAspectRatio(RATIO);
     ViewAbstract::SetBackgroundColor(BLUE);
+    ViewAbstract::SetBackgroundColor(nullptr, BLUE);
     ViewAbstract::SetBackgroundImage(imageSourceInfo);
+    ViewAbstract::SetBackgroundImage(nullptr, imageSourceInfo);
     ViewAbstract::SetBackgroundImageSize(BACKGROUNDSIZE);
+    ViewAbstract::SetBackgroundImageSize(nullptr, BACKGROUNDSIZE);
     ViewAbstract::SetBackgroundImagePosition(BACKGROUNDPOSITION);
+    ViewAbstract::SetBackgroundImagePosition(nullptr, BACKGROUNDPOSITION);
+    ViewAbstract::SetPixelRound(0);
+    ChainInfo chainInfo;
+    chainInfo.direction = LineDirection::HORIZONTAL;
+    chainInfo.style = ChainStyle::SPREAD;
+    ViewAbstract::SetChainStyle(chainInfo);
+    ViewAbstract::SetChainStyle(nullptr, chainInfo);
     ViewAbstract::SetLayoutWeight(TEN);
+    ViewAbstract::SetBias(biasPair);
+    ViewAbstract::SetOuterBorderRadius(ZERO);
+    ViewAbstract::SetOuterBorderRadius(nullptr, ZERO);
+    NG::BorderRadiusProperty borderRadius;
+    ViewAbstract::SetOuterBorderRadius(borderRadius);
+    ViewAbstract::SetOuterBorderRadius(nullptr, borderRadius);
+    ViewAbstract::SetOuterBorderColor(BLUE);
+    ViewAbstract::SetOuterBorderColor(nullptr, BLUE);
+    NG::BorderColorProperty borderColor;
+    ViewAbstract::SetOuterBorderColor(borderColor);
+    ViewAbstract::SetOuterBorderColor(nullptr, borderColor);
+    ViewAbstract::SetOuterBorderWidth(ZERO);
+    ViewAbstract::SetOuterBorderWidth(nullptr, ZERO);
+    NG::BorderWidthProperty borderWidth;
+    ViewAbstract::SetOuterBorderWidth(borderWidth);
+    ViewAbstract::SetOuterBorderWidth(nullptr, borderWidth);
+    auto borderStyle = static_cast<BorderStyle>(INDEX);
+    ViewAbstract::SetOuterBorderStyle(borderStyle);
+    ViewAbstract::SetOuterBorderStyle(nullptr, borderStyle);
+    NG::BorderStyleProperty borderStyleProperty;
+    ViewAbstract::SetOuterBorderStyle(borderStyleProperty);
+    ViewAbstract::SetOuterBorderStyle(nullptr, borderStyleProperty);
+    BlendMode blendMode = BlendMode::NONE;
+    ViewAbstract::SetBlendMode(blendMode);
+    BlendApplyType blendApplyType = BlendApplyType::FAST;
+    ViewAbstract::SetBlendApplyType(blendApplyType);
 
     BlurStyleOption blurStyleOption;
     blurStyleOption.blurStyle = BlurStyle::NO_MATERIAL;
@@ -202,13 +285,14 @@ HWTEST_F(ViewAbstractTestNg, ViewAbstractTest003, TestSize.Level1)
     ViewAbstract::SetAlignRules(alignRules);
     auto repeat = static_cast<ImageRepeat>(INDEX);
     ViewAbstract::SetBackgroundImageRepeat(repeat);
+    ViewAbstract::SetBackgroundImageRepeat(nullptr, repeat);
     auto direction = static_cast<TextDirection>(INDEX);
     ViewAbstract::SetLayoutDirection(direction);
 
     /**
      * @tc.expected: Return expected results..
      */
-    EXPECT_EQ(ViewStackProcessor::GetInstance()->GetMainElementNode(), nullptr);
+    EXPECT_NE(ViewStackProcessor::GetInstance()->GetMainElementNode(), nullptr);
 }
 
 /**
@@ -226,10 +310,47 @@ HWTEST_F(ViewAbstractTestNg, ViewAbstractTest004, TestSize.Level1)
 
     ViewAbstract::SetAspectRatio(RATIO);
     ViewAbstract::SetBackgroundColor(BLUE);
+    ViewAbstract::SetBackgroundColor(nullptr, BLUE);
     ViewAbstract::SetBackgroundImage(imageSourceInfo);
+    ViewAbstract::SetBackgroundImage(nullptr, imageSourceInfo);
     ViewAbstract::SetBackgroundImageSize(BACKGROUNDSIZE);
+    ViewAbstract::SetBackgroundImageSize(nullptr, BACKGROUNDSIZE);
     ViewAbstract::SetBackgroundImagePosition(BACKGROUNDPOSITION);
+    ViewAbstract::SetBackgroundImagePosition(nullptr, BACKGROUNDPOSITION);
+    ViewAbstract::SetPixelRound(0);
+
+    ChainInfo chainInfo;
+    chainInfo.direction = LineDirection::HORIZONTAL;
+    chainInfo.style = ChainStyle::SPREAD;
+    ViewAbstract::SetChainStyle(chainInfo);
+    ViewAbstract::SetChainStyle(nullptr, chainInfo);
+    ViewAbstract::SetBias(biasPair);
+    ViewAbstract::SetOuterBorderRadius(ZERO);
+    ViewAbstract::SetOuterBorderRadius(nullptr, ZERO);
+    NG::BorderRadiusProperty borderRadius;
+    ViewAbstract::SetOuterBorderRadius(borderRadius);
+    ViewAbstract::SetOuterBorderRadius(nullptr, borderRadius);
+    ViewAbstract::SetOuterBorderColor(BLUE);
+    ViewAbstract::SetOuterBorderColor(nullptr, BLUE);
+    NG::BorderColorProperty borderColor;
+    ViewAbstract::SetOuterBorderColor(borderColor);
+    ViewAbstract::SetOuterBorderColor(nullptr, borderColor);
+    ViewAbstract::SetOuterBorderWidth(ZERO);
+    ViewAbstract::SetOuterBorderWidth(nullptr, ZERO);
+    NG::BorderWidthProperty borderWidth;
+    ViewAbstract::SetOuterBorderWidth(borderWidth);
+    ViewAbstract::SetOuterBorderWidth(nullptr, borderWidth);
+    auto borderStyle = static_cast<BorderStyle>(INDEX);
+    ViewAbstract::SetOuterBorderStyle(borderStyle);
+    ViewAbstract::SetOuterBorderStyle(nullptr, borderStyle);
+    NG::BorderStyleProperty borderStyleProperty;
+    ViewAbstract::SetOuterBorderStyle(borderStyleProperty);
+    ViewAbstract::SetOuterBorderStyle(nullptr, borderStyleProperty);
     ViewAbstract::SetLayoutWeight(TEN);
+    BlendMode blendMode = BlendMode::NONE;
+    ViewAbstract::SetBlendMode(blendMode);
+    BlendApplyType blendApplyType = BlendApplyType::FAST;
+    ViewAbstract::SetBlendApplyType(blendApplyType);
 
     BlurStyleOption blurStyleOption;
     blurStyleOption.blurStyle = BlurStyle::NO_MATERIAL;
@@ -241,6 +362,7 @@ HWTEST_F(ViewAbstractTestNg, ViewAbstractTest004, TestSize.Level1)
     ViewAbstract::SetAlignRules(alignRules);
     auto repeat = static_cast<ImageRepeat>(INDEX);
     ViewAbstract::SetBackgroundImageRepeat(repeat);
+    ViewAbstract::SetBackgroundImageRepeat(nullptr, repeat);
     auto direction = static_cast<TextDirection>(INDEX);
     ViewAbstract::SetLayoutDirection(direction);
 
@@ -282,11 +404,13 @@ HWTEST_F(ViewAbstractTestNg, ViewAbstractTest005, TestSize.Level1)
     ViewAbstract::SetBorderWidth(WIDTH);
     auto borderStyle = static_cast<BorderStyle>(INDEX);
     ViewAbstract::SetBorderStyle(borderStyle);
+    ViewAbstract::SetBorderStyle(nullptr, borderStyle);
+    ViewAbstract::SetAutoEventParam(VALUE_X);
 
     /**
      * @tc.expected: Return expected results..
      */
-    EXPECT_EQ(ViewStackProcessor::GetInstance()->GetMainElementNode(), nullptr);
+    EXPECT_NE(ViewStackProcessor::GetInstance()->GetMainElementNode(), nullptr);
 }
 
 /**
@@ -316,6 +440,7 @@ HWTEST_F(ViewAbstractTestNg, ViewAbstractTest006, TestSize.Level1)
     ViewAbstract::SetBorderWidth(WIDTH);
     auto borderStyle = static_cast<BorderStyle>(INDEX);
     ViewAbstract::SetBorderStyle(borderStyle);
+    ViewAbstract::SetBorderStyle(nullptr, borderStyle);
 
     /**
      * @tc.expected: Return expected results.
@@ -349,20 +474,23 @@ HWTEST_F(ViewAbstractTestNg, ViewAbstractTest007, TestSize.Level1)
 
     NG::BorderRadiusProperty borderRadius;
     ViewAbstract::SetBorderRadius(borderRadius);
+    ViewAbstract::SetBorderRadius(nullptr, borderRadius);
 
     NG::BorderColorProperty borderColors;
     ViewAbstract::SetBorderColor(borderColors);
 
     NG::BorderWidthProperty borderWidth;
     ViewAbstract::SetBorderWidth(borderWidth);
+    ViewAbstract::SetBorderWidth(nullptr, borderWidth);
 
     NG::BorderStyleProperty borderStyles;
     ViewAbstract::SetBorderStyle(borderStyles);
+    ViewAbstract::SetBorderStyle(nullptr, borderStyles);
 
     /**
      * @tc.expected: Return expected results..
      */
-    EXPECT_EQ(ViewStackProcessor::GetInstance()->GetMainElementNode(), nullptr);
+    EXPECT_NE(ViewStackProcessor::GetInstance()->GetMainElementNode(), nullptr);
 }
 
 /**
@@ -389,12 +517,14 @@ HWTEST_F(ViewAbstractTestNg, ViewAbstractTest008, TestSize.Level1)
 
     NG::BorderColorProperty borderColors;
     ViewAbstract::SetBorderColor(borderColors);
+    ViewAbstract::SetBorderColor(nullptr, borderColors);
 
     NG::BorderWidthProperty borderWidth;
     ViewAbstract::SetBorderWidth(borderWidth);
 
     NG::BorderStyleProperty borderStyles;
     ViewAbstract::SetBorderStyle(borderStyles);
+    ViewAbstract::SetBorderStyle(nullptr, borderStyles);
 
     /**
      * @tc.expected: Return expected results.
@@ -430,6 +560,10 @@ HWTEST_F(ViewAbstractTestNg, ViewAbstractTest009, TestSize.Level1)
     ViewAbstract::SetOnHover(std::move(onHoverEventFunc));
     OnKeyCallbackFunc onKeyCallback;
     ViewAbstract::SetOnKeyEvent(std::move(onKeyCallback));
+    DragPreviewOption dragPreviewOption;
+    ViewAbstract::SetDragPreviewOptions(dragPreviewOption);
+    NG::DragDropInfo info;
+    ViewAbstract::SetDragPreview(info);
 
     auto hoverEffect = static_cast<HoverEffectType>(INDEX);
     ViewAbstract::SetHoverEffect(hoverEffect);
@@ -442,7 +576,7 @@ HWTEST_F(ViewAbstractTestNg, ViewAbstractTest009, TestSize.Level1)
     /**
      * @tc.expected: Return expected results.
      */
-    EXPECT_EQ(ViewStackProcessor::GetInstance()->GetMainElementNode(), nullptr);
+    EXPECT_NE(ViewStackProcessor::GetInstance()->GetMainElementNode(), nullptr);
 }
 
 /**
@@ -534,11 +668,12 @@ HWTEST_F(ViewAbstractTestNg, ViewAbstractTest011, TestSize.Level1)
     ViewAbstract::SetOnDrop(std::move(onDrop));
     Alignment alignment;
     ViewAbstract::SetAlign(std::move(alignment));
+    ViewAbstract::SetAlign(nullptr, std::move(alignment));
 
     /**
      * @tc.expected: Return expected results.
      */
-    EXPECT_EQ(ViewStackProcessor::GetInstance()->GetMainElementNode(), nullptr);
+    EXPECT_NE(ViewStackProcessor::GetInstance()->GetMainElementNode(), nullptr);
 }
 
 /**
@@ -606,6 +741,7 @@ HWTEST_F(ViewAbstractTestNg, ViewAbstractTest013, TestSize.Level1)
     auto visible = static_cast<VisibleType>(INDEX);
     ViewAbstract::SetVisibility(std::move(visible));
     ViewAbstract::SetGeometryTransition(srcimages);
+    ViewAbstract::SetGeometryTransition(nullptr, srcimages, false);
     ViewAbstract::SetOpacity(OPACITYS);
     ViewAbstract::SetZIndex(FOUF);
 
@@ -615,11 +751,14 @@ HWTEST_F(ViewAbstractTestNg, ViewAbstractTest013, TestSize.Level1)
     ViewAbstract::MarkAnchor(value);
     VectorF scale(1.0f, 1.0f);
     ViewAbstract::SetScale(scale);
+    ViewAbstract::SetScale(nullptr, scale);
+    DimensionOffset valueOffset = { WIDTH, HEIGHT };
+    ViewAbstract::SetPivot(nullptr, valueOffset);
 
     /**
      * @tc.expected: Return expected results.
      */
-    EXPECT_EQ(ViewStackProcessor::GetInstance()->GetMainElementNode(), nullptr);
+    EXPECT_NE(ViewStackProcessor::GetInstance()->GetMainElementNode(), nullptr);
 }
 
 /**
@@ -675,27 +814,36 @@ HWTEST_F(ViewAbstractTestNg, ViewAbstractTest015, TestSize.Level1)
     NG::TranslateOptions pttions;
     BlurOption blurOption;
     ViewAbstract::SetTranslate(std::move(pttions));
+    ViewAbstract::SetTranslate(nullptr, std::move(pttions));
     Matrix4 matrix;
     ViewAbstract::SetTransformMatrix(std::move(matrix));
     ViewAbstract::SetBackdropBlur(RADIUS, blurOption);
+    ViewAbstract::SetBackdropBlur(nullptr, RADIUS);
     ViewAbstract::SetFrontBlur(RADIUS, blurOption);
+    ViewAbstract::SetFrontBlur(nullptr, RADIUS);
     ViewAbstract::SetInspectorId(srcimages);
 
     Vector5F scale(1.0f, 1.0f, 2.0f, 2.0f, 0.0f);
     ViewAbstract::SetRotate(scale);
+    ViewAbstract::SetRotate(nullptr, scale);
     ShadowStyle style { 1 };
     Shadow shadow { RATIO, OFFSET, BLUE, style };
     ViewAbstract::SetBackShadow(shadow);
+    ViewAbstract::SetBackShadow(nullptr, shadow);
 
     NG::Gradient gradient;
     ViewAbstract::SetLinearGradient(std::move(gradient));
     ViewAbstract::SetSweepGradient(std::move(gradient));
     ViewAbstract::SetRadialGradient(std::move(gradient));
+    ViewAbstract::DismissDialog();
+    ViewAbstract::SetSystemBarEffect(false);
+    ViewAbstract::SetFreeze(false);
+    ViewAbstract::SetUseShadowBatching(false);
 
     /**
      * @tc.expected: Return expected results.
      */
-    EXPECT_EQ(ViewStackProcessor::GetInstance()->GetMainElementNode(), nullptr);
+    EXPECT_NE(ViewStackProcessor::GetInstance()->GetMainElementNode(), nullptr);
 }
 
 /**
@@ -731,7 +879,9 @@ HWTEST_F(ViewAbstractTestNg, ViewAbstractTest016, TestSize.Level1)
     ViewAbstract::SetLinearGradient(std::move(gradient));
     ViewAbstract::SetSweepGradient(std::move(gradient));
     ViewAbstract::SetRadialGradient(std::move(gradient));
-
+    ViewAbstract::SetSystemBarEffect(false);
+    ViewAbstract::SetFreeze(false);
+    ViewAbstract::SetUseShadowBatching(false);
     /**
      * @tc.expected: Return expected results.
      */
@@ -762,14 +912,19 @@ HWTEST_F(ViewAbstractTestNg, ViewAbstractTest017, TestSize.Level1)
     ViewAbstract::SetTransition(std::move(options));
     RefPtr<BasicShape> basicShape;
     ViewAbstract::SetClipShape(std::move(basicShape));
+    ViewAbstract::SetClipShape(nullptr, std::move(basicShape));
     ViewAbstract::SetMask(std::move(basicShape));
     ViewAbstract::SetClipEdge(false);
     ViewAbstract::SetGrayScale(RADIUS);
     ViewAbstract::SetContrast(RADIUS);
     ViewAbstract::SetSaturate(RADIUS);
+    ViewAbstract::SetSaturate(nullptr, RADIUS);
     ViewAbstract::SetSepia(RADIUS);
+    ViewAbstract::SetSepia(nullptr, RADIUS);
     ViewAbstract::SetInvert(invert);
+    ViewAbstract::SetInvert(nullptr, invert);
     ViewAbstract::SetHueRotate(RATIO);
+    ViewAbstract::SetHueRotate(nullptr, RATIO);
     ViewAbstract::SetBrightness(RADIUS);
     ViewAbstract::SetColorBlend(BLUE);
     ViewAbstract::SetBorderImageSource(srcimages);
@@ -777,7 +932,7 @@ HWTEST_F(ViewAbstractTestNg, ViewAbstractTest017, TestSize.Level1)
     /**
      * @tc.expected: Return expected results.
      */
-    EXPECT_EQ(ViewStackProcessor::GetInstance()->GetMainElementNode(), nullptr);
+    EXPECT_NE(ViewStackProcessor::GetInstance()->GetMainElementNode(), nullptr);
 }
 
 /**
@@ -801,6 +956,7 @@ HWTEST_F(ViewAbstractTestNg, ViewAbstractTest018, TestSize.Level1)
     ViewAbstract::SetClipShape(std::move(basicShape));
     ViewAbstract::SetMask(std::move(basicShape));
     ViewAbstract::SetClipEdge(false);
+    ViewAbstract::SetClipEdge(nullptr, false);
     ViewAbstract::SetGrayScale(RADIUS);
     ViewAbstract::SetContrast(RADIUS);
     ViewAbstract::SetSaturate(RADIUS);
@@ -808,7 +964,9 @@ HWTEST_F(ViewAbstractTestNg, ViewAbstractTest018, TestSize.Level1)
     ViewAbstract::SetInvert(invert);
     ViewAbstract::SetHueRotate(RATIO);
     ViewAbstract::SetBrightness(RADIUS);
+    ViewAbstract::SetBrightness(nullptr, RADIUS);
     ViewAbstract::SetColorBlend(BLUE);
+    ViewAbstract::SetColorBlend(nullptr, BLUE);
     ViewAbstract::SetBorderImageSource(srcimages);
 
     /**
@@ -859,7 +1017,7 @@ HWTEST_F(ViewAbstractTestNg, ViewAbstractTest019, TestSize.Level1)
     /**
      * @tc.expected: Return expected results.
      */
-    EXPECT_EQ(ViewStackProcessor::GetInstance()->GetMainElementNode(), nullptr);
+    EXPECT_NE(ViewStackProcessor::GetInstance()->GetMainElementNode(), nullptr);
 }
 
 /**
@@ -943,7 +1101,7 @@ HWTEST_F(ViewAbstractTestNg, ViewAbstractTest021, TestSize.Level1)
     /**
      * @tc.expected: Return expected results.
      */
-    EXPECT_EQ(ViewStackProcessor::GetInstance()->GetMainElementNode(), nullptr);
+    EXPECT_NE(ViewStackProcessor::GetInstance()->GetMainElementNode(), nullptr);
 }
 
 /**
@@ -1006,6 +1164,9 @@ HWTEST_F(ViewAbstractTestNg, ViewAbstractTest023, TestSize.Level1)
     std::function<void(const RectF& oldRect, const OffsetF& oldOrigin, const RectF& rect, const OffsetF& origin)>
         onAreaChanged;
     ViewAbstract::SetOnAreaChanged(std::move(onAreaChanged));
+
+    std::function<void(const RectF& oldRect, const RectF& rect)> onSizeChanged;
+    ViewAbstract::SetOnSizeChanged(std::move(onSizeChanged));
     std::function<void(bool, double)> onVisibleChange;
     const std::vector<double> ratios;
     ViewAbstract::SetOnVisibleChange(std::move(onVisibleChange), ratios);
@@ -1021,7 +1182,7 @@ HWTEST_F(ViewAbstractTestNg, ViewAbstractTest023, TestSize.Level1)
     /**
      * @tc.expected: Return expected results.
      */
-    EXPECT_EQ(ViewStackProcessor::GetInstance()->GetMainElementNode(), nullptr);
+    EXPECT_NE(ViewStackProcessor::GetInstance()->GetMainElementNode(), nullptr);
 }
 
 /**
@@ -1260,9 +1421,41 @@ HWTEST_F(ViewAbstractTestNg, ViewAbstractTest029, TestSize.Level1)
     ViewAbstract::SetMaxHeight(NG::CalcLength(MIN_HEIGHT));
     ViewAbstract::SetAspectRatio(RATIO);
     ViewAbstract::SetBackgroundColor(BLUE);
+    ViewAbstract::SetBackgroundColor(nullptr, BLUE);
     ViewAbstract::SetBackgroundImage(imageSourceInfo);
+    ViewAbstract::SetBackgroundImage(nullptr, imageSourceInfo);
     ViewAbstract::SetBackgroundImageSize(BACKGROUNDSIZE);
+    ViewAbstract::SetBackgroundImageSize(nullptr, BACKGROUNDSIZE);
     ViewAbstract::SetBackgroundImagePosition(BACKGROUNDPOSITION);
+    ViewAbstract::SetBackgroundImagePosition(nullptr, BACKGROUNDPOSITION);
+    ViewAbstract::SetPixelRound(0);
+    ChainInfo chainInfo;
+    chainInfo.direction = LineDirection::HORIZONTAL;
+    chainInfo.style = ChainStyle::SPREAD;
+    ViewAbstract::SetChainStyle(chainInfo);
+    ViewAbstract::SetChainStyle(nullptr, chainInfo);
+    ViewAbstract::SetBias(biasPair);
+    ViewAbstract::SetOuterBorderRadius(ZERO);
+    ViewAbstract::SetOuterBorderRadius(nullptr, ZERO);
+    NG::BorderRadiusProperty borderRadius;
+    ViewAbstract::SetOuterBorderRadius(borderRadius);
+    ViewAbstract::SetOuterBorderRadius(nullptr, borderRadius);
+    ViewAbstract::SetOuterBorderColor(BLUE);
+    ViewAbstract::SetOuterBorderColor(nullptr, BLUE);
+    NG::BorderColorProperty borderColor;
+    ViewAbstract::SetOuterBorderColor(borderColor);
+    ViewAbstract::SetOuterBorderColor(nullptr, borderColor);
+    ViewAbstract::SetOuterBorderWidth(ZERO);
+    ViewAbstract::SetOuterBorderWidth(nullptr, ZERO);
+    NG::BorderWidthProperty borderWidth;
+    ViewAbstract::SetOuterBorderWidth(borderWidth);
+    ViewAbstract::SetOuterBorderWidth(nullptr, borderWidth);
+    auto borderStyle = static_cast<BorderStyle>(INDEX);
+    ViewAbstract::SetOuterBorderStyle(borderStyle);
+    ViewAbstract::SetOuterBorderStyle(nullptr, borderStyle);
+    NG::BorderStyleProperty borderStyleProperty;
+    ViewAbstract::SetOuterBorderStyle(borderStyleProperty);
+    ViewAbstract::SetOuterBorderStyle(nullptr, borderStyleProperty);
     ViewAbstract::ResetAspectRatio();
 
     /**
@@ -1293,6 +1486,9 @@ HWTEST_F(ViewAbstractTestNg, ViewAbstractTest030, TestSize.Level1)
     ViewAbstract::SetMotionPath(std::move(motionPath));
     auto repeat = static_cast<ImageRepeat>(INDEX);
     ViewAbstract::SetBackgroundImageRepeat(repeat);
+    ViewAbstract::SetBackgroundImageRepeat(nullptr, repeat);
+    GestureJudgeFunc tapEventFunc;
+    ViewAbstract::SetOnGestureJudgeBegin(std::move(tapEventFunc));
 
     BlurStyleOption blurStyleOption;
     blurStyleOption.blurStyle = BlurStyle::NO_MATERIAL;
@@ -1375,11 +1571,15 @@ HWTEST_F(ViewAbstractTestNg, ViewAbstractTest032, TestSize.Level1)
     ViewAbstract::SetPadding(NG::CalcLength(WIDTH));
     ViewAbstract::SetMargin(NG::CalcLength(WIDTH));
     ViewAbstract::SetBorderRadius(WIDTH);
+    ViewAbstract::SetBorderRadius(nullptr, WIDTH);
     ViewAbstract::SetBorderColor(BLUE);
+    ViewAbstract::SetBorderColor(nullptr, BLUE);
     ViewAbstract::SetBorderWidth(WIDTH);
+    ViewAbstract::SetBorderWidth(nullptr, WIDTH);
 
     auto borderStyle = static_cast<BorderStyle>(INDEX);
     ViewAbstract::SetBorderStyle(borderStyle);
+    ViewAbstract::SetBorderStyle(nullptr, borderStyle);
 
     /**
      * @tc.expected: Return expected results.
@@ -1427,6 +1627,7 @@ HWTEST_F(ViewAbstractTestNg, ViewAbstractTest033, TestSize.Level1)
 
     NG::BorderStyleProperty borderStyles;
     ViewAbstract::SetBorderStyle(borderStyles);
+    ViewAbstract::SetBorderStyle(nullptr, borderStyles);
 
     /**
      * @tc.expected: Return expected results.
@@ -1456,6 +1657,7 @@ HWTEST_F(ViewAbstractTestNg, ViewAbstractTest034, TestSize.Level1)
     ViewAbstract::SetBrightness(RADIUS);
     ViewAbstract::SetGrayScale(RADIUS);
     ViewAbstract::SetContrast(RADIUS);
+    ViewAbstract::SetContrast(nullptr, RADIUS);
     ViewAbstract::SetSaturate(RADIUS);
     ViewAbstract::SetSepia(RADIUS);
     ViewAbstract::SetInvert(invert);
@@ -1511,6 +1713,7 @@ HWTEST_F(ViewAbstractTestNg, ViewAbstractTest035, TestSize.Level1)
     RefPtr<BasicShape> basicShape;
     ViewAbstract::SetClipShape(std::move(basicShape));
     ViewAbstract::SetMask(std::move(basicShape));
+    ViewAbstract::SetMask(nullptr, std::move(basicShape));
 
     /**
      * @tc.expected: Return expected results.
@@ -1590,6 +1793,7 @@ HWTEST_F(ViewAbstractTestNg, ViewAbstractTest037, TestSize.Level1)
     ViewAbstract::SetChainedTransition(std::move(effect));
     RefPtr<ProgressMaskProperty> progress;
     ViewAbstract::SetProgressMask(std::move(progress));
+    ViewAbstract::SetProgressMask(nullptr, std::move(progress));
     auto strategy = static_cast<ForegroundColorStrategy>(INDEX);
     ViewAbstract::SetForegroundColorStrategy(std::move(strategy));
     OverlayOptions overlay;
@@ -2116,8 +2320,10 @@ HWTEST_F(ViewAbstractTestNg, ViewAbstractDisableBlurTest, TestSize.Level1)
     OnBlurFunc onBlurCallback = []() {};
     ViewAbstract::SetOnFocus(std::move(onBlurCallback));
 
-    auto topFrameNodeOne = ViewStackProcessor::GetInstance()->GetMainElementNode();
+    auto topFrameNodeOne = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     EXPECT_EQ(strcmp(topFrameNodeOne->GetTag().c_str(), TAG_CHILD), 0);
+    auto frameNodeOne = static_cast<FrameNode*>(ViewAbstract::GetFrameNode());
+    EXPECT_EQ(strcmp(frameNodeOne->GetTag().c_str(), TAG_CHILD), 0);
     auto frameNode = AceType::DynamicCast<FrameNode>(topFrameNodeOne);
     ASSERT_NE(frameNode, nullptr);
     auto node = AceType::DynamicCast<NG::FrameNode>(frameNode);
@@ -2244,5 +2450,111 @@ HWTEST_F(ViewAbstractTestNg, ViewAbstractMonopolizeEvent003, TestSize.Level1)
      * @tc.steps: step5. finish view stack.
      */
     ViewStackProcessor::GetInstance()->Finish();
+}
+
+/**
+ * @tc.name: ViewAbstractMenuTransition001
+ * @tc.desc: Test the BindMenu and BindContextMenu of ViewAbstractModelNG (use dafault)
+ * @tc.type: FUNC
+ */
+HWTEST_F(ViewAbstractTestNg, ViewAbstractMenuTransition001, TestSize.Level1)
+{
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    PipelineBase::GetCurrentContext()->SetThemeManager(themeManager);
+    PipelineBase::GetCurrentContext()->SetEventManager(AceType::MakeRefPtr<EventManager>());
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<SelectTheme>()));
+    int32_t nodeId = ElementRegister::GetInstance()->MakeUniqueId();
+    const RefPtr<FrameNode> mainNode =
+        FrameNode::CreateFrameNode("targetNode", nodeId, AceType::MakeRefPtr<Pattern>(), true);
+    ViewStackProcessor::GetInstance()->Push(mainNode);
+    auto container = Container::Current();
+    ASSERT_NE(container, nullptr);
+    auto pipelineContext = container->GetPipelineContext();
+    ASSERT_NE(pipelineContext, nullptr);
+    auto context = AceType::DynamicCast<NG::PipelineContext>(pipelineContext);
+    ASSERT_NE(context, nullptr);
+    auto overlayManager = context->GetOverlayManager();
+    ASSERT_NE(overlayManager, nullptr);
+
+    ASSERT_NE(SubwindowManager::GetInstance(), nullptr);
+    std::function<void()> flagFunc = []() { flag++; };
+    std::vector<NG::OptionParam> params = {};
+    std::function<void()> buildFunc;
+    MenuParam menuParam;
+    std::function<void()> previewBuildFunc = nullptr;
+
+    menuParam.type = MenuType::MENU;
+    menuParam.isShow = true;
+
+    auto targetNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(targetNode, nullptr);
+    std::function<void()> action = [] {};
+    params.emplace_back("MenuItem1", "", action);
+    params.emplace_back("MenuItem2", "", action);
+    viewAbstractModelNG.BindMenu(std::move(params), std::move(buildFunc), menuParam);
+    auto targetId = targetNode->GetId();
+
+    auto menuNode = overlayManager->GetMenuNode(targetId);
+    ASSERT_NE(menuNode, nullptr);
+    auto wrapperPattern = menuNode->GetPattern<MenuWrapperPattern>();
+    ASSERT_NE(wrapperPattern, nullptr);
+    EXPECT_EQ(wrapperPattern->HasTransitionEffect(), false);
+    EXPECT_EQ(wrapperPattern->HasPreviewTransitionEffect(), false);
+}
+
+/**
+ * @tc.name: ViewAbstractMenuTransition002
+ * @tc.desc: Test the BindMenu and BindContextMenu of ViewAbstractModelNG (use true)
+ * @tc.type: FUNC
+ */
+HWTEST_F(ViewAbstractTestNg, ViewAbstractMenuTransition002, TestSize.Level1)
+{
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    PipelineBase::GetCurrentContext()->SetThemeManager(themeManager);
+    PipelineBase::GetCurrentContext()->SetEventManager(AceType::MakeRefPtr<EventManager>());
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<SelectTheme>()));
+    int32_t nodeId = ElementRegister::GetInstance()->MakeUniqueId();
+    const RefPtr<FrameNode> mainNode =
+        FrameNode::CreateFrameNode("targetNode", nodeId, AceType::MakeRefPtr<Pattern>(), true);
+    ViewStackProcessor::GetInstance()->Push(mainNode);
+    auto container = Container::Current();
+    ASSERT_NE(container, nullptr);
+    auto pipelineContext = container->GetPipelineContext();
+    ASSERT_NE(pipelineContext, nullptr);
+    auto context = AceType::DynamicCast<NG::PipelineContext>(pipelineContext);
+    ASSERT_NE(context, nullptr);
+    auto overlayManager = context->GetOverlayManager();
+    ASSERT_NE(overlayManager, nullptr);
+
+    ASSERT_NE(SubwindowManager::GetInstance(), nullptr);
+    std::function<void()> flagFunc = []() { flag++; };
+    std::vector<NG::OptionParam> params = {};
+    std::function<void()> buildFunc;
+    MenuParam menuParam;
+    std::function<void()> previewBuildFunc = nullptr;
+
+    NG::RotateOptions rotate(0.0f, 0.0f, 0.0f, 0.0f, 0.5_pct, 0.5_pct);
+
+    menuParam.hasTransitionEffect = true;
+    menuParam.hasPreviewTransitionEffect = true;
+    menuParam.transition = AceType::MakeRefPtr<NG::ChainedRotateEffect>(rotate);
+    menuParam.previewTransition = AceType::MakeRefPtr<NG::ChainedRotateEffect>(rotate);
+    menuParam.type = MenuType::MENU;
+    menuParam.isShow = true;
+
+    auto targetNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(targetNode, nullptr);
+    std::function<void()> action = [] {};
+    params.emplace_back("MenuItem1", "", action);
+    params.emplace_back("MenuItem2", "", action);
+    viewAbstractModelNG.BindMenu(std::move(params), std::move(buildFunc), menuParam);
+    auto targetId = targetNode->GetId();
+
+    auto menuNode = overlayManager->GetMenuNode(targetId);
+    ASSERT_NE(menuNode, nullptr);
+    auto wrapperPattern = menuNode->GetPattern<MenuWrapperPattern>();
+    ASSERT_NE(wrapperPattern, nullptr);
+    EXPECT_EQ(wrapperPattern->HasTransitionEffect(), true);
+    EXPECT_EQ(wrapperPattern->HasPreviewTransitionEffect(), true);
 }
 } // namespace OHOS::Ace::NG

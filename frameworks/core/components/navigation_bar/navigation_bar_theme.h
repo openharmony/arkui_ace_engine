@@ -43,11 +43,7 @@ public:
             theme->backResourceId_ = themeConstants->GetResourceId(THEME_NAVIGATION_BAR_RESOURCE_ID_BACK);
             theme->moreResourceId_ = themeConstants->GetResourceId(THEME_NAVIGATION_BAR_RESOURCE_ID_MORE);
 
-            auto themeStyle = themeConstants->GetThemeStyle();
-            if (!themeStyle) {
-                return theme;
-            }
-            auto pattern = themeStyle->GetAttr<RefPtr<ThemeStyle>>(THEME_PATTERN_NAVIGATION_BAR, nullptr);
+            RefPtr<ThemeStyle> pattern = themeConstants->GetPatternByName(THEME_PATTERN_NAVIGATION_BAR);
             if (pattern) {
                 theme->height_ = pattern->GetAttr<Dimension>("navigation_bar_height", 0.0_vp);
                 theme->heightEmphasize_ = pattern->GetAttr<Dimension>("navigation_bar_height_emphasize", 0.0_vp);
@@ -85,17 +81,14 @@ public:
                 theme->navBarUnfocusEffectEnable_ = StringUtils::StringToInt(navBarUnfocusEffectEnable);
                 theme->navBarUnfocusColor_ = pattern->GetAttr<Color>("section_unfocus_color", Color::TRANSPARENT);
             }
-            ParsePattern(themeConstants->GetThemeStyle(), theme);
+            ParsePattern(themeConstants, theme);
             return theme;
         }
 
     private:
-        void ParsePattern(const RefPtr<ThemeStyle>& themeStyle, const RefPtr<NavigationBarTheme>& theme) const
+        void ParsePattern(const RefPtr<ThemeConstants>& themeConstants, const RefPtr<NavigationBarTheme>& theme) const
         {
-            if (!themeStyle) {
-                return;
-            }
-            auto pattern = themeStyle->GetAttr<RefPtr<ThemeStyle>>(THEME_PATTERN_NAVIGATION_BAR, nullptr);
+            RefPtr<ThemeStyle> pattern = themeConstants->GetPatternByName(THEME_PATTERN_NAVIGATION_BAR);
             if (!pattern) {
                 return;
             }

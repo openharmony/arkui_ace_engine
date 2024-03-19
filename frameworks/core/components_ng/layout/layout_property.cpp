@@ -93,7 +93,7 @@ void LayoutProperty::Reset()
     margin_.reset();
     borderWidth_.reset();
     outerBorderWidth_.reset();
-    magicItemProperty_.reset();
+    magicItemProperty_.Reset();
     positionProperty_.reset();
     measureType_.reset();
     layoutDirection_.reset();
@@ -106,7 +106,7 @@ void LayoutProperty::ToJsonValue(std::unique_ptr<JsonValue>& json) const
 {
     ACE_PROPERTY_TO_JSON_VALUE(calcLayoutConstraint_, MeasureProperty);
     ACE_PROPERTY_TO_JSON_VALUE(positionProperty_, PositionProperty);
-    ACE_PROPERTY_TO_JSON_VALUE(magicItemProperty_, MagicItemProperty);
+    magicItemProperty_.ToJsonValue(json);
     ACE_PROPERTY_TO_JSON_VALUE(flexItemProperty_, FlexItemProperty);
     ACE_PROPERTY_TO_JSON_VALUE(gridProperty_, GridProperty);
 
@@ -208,9 +208,7 @@ void LayoutProperty::UpdateLayoutProperty(const LayoutProperty* layoutProperty)
     if (layoutProperty->borderWidth_) {
         borderWidth_ = std::make_unique<BorderWidthProperty>(*layoutProperty->borderWidth_);
     }
-    if (layoutProperty->magicItemProperty_) {
-        magicItemProperty_ = std::make_unique<MagicItemProperty>(*layoutProperty->magicItemProperty_);
-    }
+    magicItemProperty_ = layoutProperty->magicItemProperty_;
     if (layoutProperty->positionProperty_) {
         positionProperty_ = std::make_unique<PositionProperty>(*layoutProperty->positionProperty_);
     }
@@ -257,7 +255,7 @@ void LayoutProperty::UpdateLayoutConstraint(const LayoutConstraintF& parentConst
         // TODO: add margin is negative case.
         marginResult_.reset();
         auto margin = CreateMargin();
-        if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
+        if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
             MinusPaddingToNonNegativeSize(margin, layoutConstraint_->maxSize);
             MinusPaddingToNonNegativeSize(margin, layoutConstraint_->minSize);
             MinusPaddingToNonNegativeSize(margin, layoutConstraint_->percentReference);
@@ -269,14 +267,6 @@ void LayoutProperty::UpdateLayoutConstraint(const LayoutConstraintF& parentConst
         // already has non negative protection
         MinusPaddingToSize(margin, layoutConstraint_->selfIdealSize);
         MinusPaddingToSize(margin, layoutConstraint_->parentIdealSize);
-    }
-    if (padding_) {
-        auto padding = CreatePaddingAndBorder();
-        if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
-            AddPaddingToSize(padding, layoutConstraint_->maxSize);
-            AddPaddingToSize(padding, layoutConstraint_->minSize);
-            AddPaddingToSize(padding, layoutConstraint_->percentReference);
-        }
     }
     auto originMax = layoutConstraint_->maxSize;
     if (calcLayoutConstraint_) {
@@ -325,11 +315,10 @@ void LayoutProperty::CheckBorderAndPadding()
 
 void LayoutProperty::CheckAspectRatio()
 {
-    auto hasAspectRatio = magicItemProperty_ ? magicItemProperty_->HasAspectRatio() : false;
-    if (!hasAspectRatio) {
+    if (!magicItemProperty_.HasAspectRatio()) {
         return;
     }
-    auto aspectRatio = magicItemProperty_->GetAspectRatioValue();
+    auto aspectRatio = magicItemProperty_.GetAspectRatioValue();
     // Adjust by aspect ratio, firstly pick height based on width. It means that when width, height and aspectRatio are
     // all set, the height is not used.
     auto maxWidth = layoutConstraint_->maxSize.Width();
@@ -659,39 +648,30 @@ bool LayoutProperty::HasFixedHeight() const
 
 bool LayoutProperty::HasAspectRatio() const
 {
-    if (!magicItemProperty_) {
-        return false;
-    }
-    return magicItemProperty_->HasAspectRatio();
+    return magicItemProperty_.HasAspectRatio();
 }
 
 float LayoutProperty::GetAspectRatio() const
 {
-    if (magicItemProperty_ && magicItemProperty_->HasAspectRatio()) {
-        return magicItemProperty_->GetAspectRatioValue();
+    if (magicItemProperty_.HasAspectRatio()) {
+        return magicItemProperty_.GetAspectRatioValue();
     }
     return 0.0f;
 }
 
 void LayoutProperty::UpdateAspectRatio(float ratio)
 {
-    if (!magicItemProperty_) {
-        magicItemProperty_ = std::make_unique<MagicItemProperty>();
-    }
-    if (magicItemProperty_->UpdateAspectRatio(ratio)) {
+    if (magicItemProperty_.UpdateAspectRatio(ratio)) {
         propertyChangeFlag_ = propertyChangeFlag_ | PROPERTY_UPDATE_MEASURE;
     }
 }
 
 void LayoutProperty::ResetAspectRatio()
 {
-    if (!magicItemProperty_) {
-        return;
-    }
-    if (magicItemProperty_->HasAspectRatio()) {
+    if (magicItemProperty_.HasAspectRatio()) {
         propertyChangeFlag_ = propertyChangeFlag_ | PROPERTY_UPDATE_MEASURE;
+        magicItemProperty_.ResetAspectRatio();
     }
-    magicItemProperty_->ResetAspectRatio();
 }
 
 void LayoutProperty::UpdateGeometryTransition(const std::string& id, bool followWithoutTransition)
@@ -743,10 +723,7 @@ void LayoutProperty::UpdateLayoutDirection(TextDirection value)
 
 void LayoutProperty::UpdateLayoutWeight(float value)
 {
-    if (!magicItemProperty_) {
-        magicItemProperty_ = std::make_unique<MagicItemProperty>();
-    }
-    if (magicItemProperty_->UpdateLayoutWeight(value)) {
+    if (magicItemProperty_.UpdateLayoutWeight(value)) {
         propertyChangeFlag_ = propertyChangeFlag_ | PROPERTY_UPDATE_MEASURE;
     }
 }

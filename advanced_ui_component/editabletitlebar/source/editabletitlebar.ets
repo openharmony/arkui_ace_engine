@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,17 +13,35 @@
  * limitations under the License.
  */
 
-import { KeyCode } from '@ohos.multimodalInput.keyCode'
+import { BusinessError } from '@ohos.base';
+import hilog from '@ohos.hilog';
+import { KeyCode } from '@ohos.multimodalInput.keyCode';
+import resourceManager from '@ohos.resourceManager';
 
 export enum EditableLeftIconType {
   Back,
-  Cancel
+  Cancel,
 }
 
-export declare type EditableTitleBarMenuItem = {
-  value: ResourceStr
-  isEnabled: boolean
-  action?: () => void
+export declare interface EditableTitleBarMenuItem {
+  value: ResourceStr;
+  isEnabled: boolean;
+  action?: () => void;
+}
+
+export type EditableTitleBarItem = EditableTitleBarMenuItem;
+
+export declare interface EditableTitleBarOptions {
+  backgroundColor?: ResourceColor;
+  backgroundBlurStyle?: BlurStyle;
+  safeAreaTypes?: Array<SafeAreaType>;
+  safeAreaEdges?: Array<SafeAreaEdge>;
+}
+
+enum ItemType {
+  Image,
+  Icon,
+  LeftIcon,
 }
 
 const PUBLIC_CANCEL = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAMAAAADACAYAAABS3Gw' +
@@ -46,7 +64,7 @@ const PUBLIC_CANCEL = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAMAAAADACAY
   'ty5or5I+L4FzNHzV/LfKB9OGb4rfJP0iO49xvL/pB9CGAMfljIxgLoLUR+WMjGAmgtT3yx0awJ4DWdsgfG8HOog+6D1eB' +
   'ntR8WLNB/sFzlKtDnfw3BNDa65rfp2+I3hfBo5rL5B9UBFttcoNzP35qk8vfLxZ9sCs9OnHdG6Kvps8e3TXiVzWPp88Ut' +
   '3k1OLr1vFpz6Z31/LbmntMDAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAEAO/wLvsR65mx80NAAAAABJRU' +
-  '5ErkJggg=='
+  '5ErkJggg==';
 
 const PUBLIC_OK = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAMAAAADACAYAAABS3' +
   'GwHAAAAIGNIUk0AAHomAACAhAAA+gAAAIDoAAB1MAAA6mAAADqYAAAXcJy6UTwAAAAEZ0FNQQAAsY58+1GTAAAAAXNSR0IArs4c6QAAAAZ' +
@@ -63,7 +81,7 @@ const PUBLIC_OK = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAMAAAADACAYAAAB
   '9423aJ2PeMH4BjDWCHd24n9f9+cXvHa+7U7fb+Fe/qeC/ezvU+e5bleX40A11pm6u+xapMX5fARK+Eix+u7O1brbp/1Bw4xfAoCP4Pxi/A' +
   'GIjMH4BxEZg/AKIjcD4BRAbgfELIDYC4xdAbATGL4DYCIxfAIOL4EXdkbrpZX6sd3WH6p56WQUwJG/qbtX92Cz8EFwfD+sO1L31cq4uU16' +
   'CibU/M3Sy7nzdlgnf51ndxbrbXj4BjCmEPXX76/Y2Cz8DNNP9+l91f3Sf8e92AQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA' +
-  'AAAAAzKZwK1uX4kZ6mnAAAAAElFTkSuQmCC'
+  'AAAAAzKZwK1uX4kZ6mnAAAAAElFTkSuQmCC';
 
 const PUBLIC_BACK = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAMAAAADACAY' +
   'AAABS3GwHAAAAIGNIUk0AAHomAACAhAAA+gAAAIDoAAB1MAAA6mAAADqYAAAXcJy6UTwAAAAEZ0FNQQAAsY58+1GTAAAAA' +
@@ -81,83 +99,162 @@ const PUBLIC_BACK = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAMAAAADACAY' 
   'IAIEIAIEIAIEIAIEIAIEIAIEIAIEIAIEIAIEIAIEIAIEIAIEIAIEIAIEIAIEIAIEIAIEIAIEIAIEIAIEIAIEIAIEIAIEIAI' +
   'EIAIEIAIEIAIEIAIEIAIEIAIEIAIEIAIEIAIEIAIEIAIEIAIEIAIE8M8jmBlGgABSRnAqZiXms+MUQNYIDnkUKMu4I/gj6z' +
   'ELMRv7/PsnHKEAMkcw6fgEkDmCNUcngMwRvHFsngRnfWJcL/9tRyaAgxrB+ZijO9ymH7MUs+m4yjLmCBozEXMr5nr1+9We1' +
-  'ZgXMXccDwAAAAAAAAAAAAAAAAAAAAAAwO5+AfVgtqHKRnawAAAAAElFTkSuQmCC'
+  'ZgXMXccDwAAAAAAAAAAAAAAAAAAAAAAwO5+AfVgtqHKRnawAAAAAElFTkSuQmCC';
 
 @Component
 export struct EditableTitleBar {
-  leftIconStyle: EditableLeftIconType
-  title: ResourceStr
-  menuItems: Array<EditableTitleBarMenuItem>
-  onSave?: () => void
-  onCancel?: () => void
-
-  @State titleMaxWidth: number = 0
-  @State backActive: boolean = false
-
-  static readonly maxCountOfExtraItems = 2
-  private static readonly totalHeight = 56
-  private static readonly leftPadding = 12
-  private static readonly rightPadding = 12
-  private static readonly titlePadding = 16
+  leftIconStyle: EditableLeftIconType = EditableLeftIconType.Back;
+  title: ResourceStr = '';
+  subtitle?: ResourceStr = '';
+  isSaveIconRequired: boolean = true;
+  imageItem?: EditableTitleBarItem;
+  menuItems: Array<EditableTitleBarMenuItem> | undefined = undefined;
+  options: EditableTitleBarOptions = {
+    safeAreaTypes: [SafeAreaType.SYSTEM],
+    safeAreaEdges: [SafeAreaEdge.TOP],
+  };
+  onSave?: () => void;
+  onCancel?: () => void;
+  @State titleMaxWidth: number = 0;
+  @State backActive: boolean = false;
+  static maxCountOfExtraItems = 3;
+  static maxOtherCountOfExtraItems = 2;
+  static countOfImageItem = 0;
+  static countOfSaveIcon = 0;
+  static readonly commonOne = 1;
+  static readonly commonZero = 0;
+  static readonly noneColor = '#00000000';
+  private static readonly totalHeight = getNumberByResource('titlebar_default_height');
+  private static readonly leftPadding = getNumberByResource('titlebar_title_margin_left');
+  private static readonly rightPadding = getNumberByResource('titlebar_title_margin_right');
+  private static readonly titlePadding = getNumberByResource('titlebar_icon_background_space_horizontal');
 
   build() {
     Flex({
       justifyContent: FlexAlign.SpaceBetween,
-      alignItems: ItemAlign.Stretch
+      alignItems: ItemAlign.Stretch,
     }) {
       Row() {
-        if (this.leftIconStyle == EditableLeftIconType.Back) {
+        if (this.leftIconStyle === EditableLeftIconType.Back) {
           Navigator()
             .active(this.backActive)
 
           ImageMenuItem({ item: {
             value: PUBLIC_BACK,
             isEnabled: true,
-            action: () => this.backActive = true
-          } })
+            action: () => this.onCancel ? this.onCancel() : this.backActive = true,
+          },
+            attribute: ItemType.LeftIcon,
+          })
         } else {
           ImageMenuItem({ item: {
             value: PUBLIC_CANCEL,
             isEnabled: true,
-            action: () => this.onCancel && this.onCancel()
-          } })
+            action: () => this.onCancel && this.onCancel(),
+          },
+            attribute: ItemType.LeftIcon,
+          })
+        }
+        if (this.imageItem !== undefined) {
+          ImageMenuItem({
+            item: this.imageItem,
+            attribute: ItemType.Image,
+          })
         }
 
         Column() {
-          Text(this.title)
-            .fontWeight(FontWeight.Medium)
-            .fontSize($r('sys.float.ohos_id_text_size_headline8'))
-            .fontColor($r('sys.color.ohos_id_color_titlebar_text'))
-            .maxLines(1)
-            .textOverflow({ overflow: TextOverflow.Ellipsis })
-            .constraintSize({ maxWidth: this.titleMaxWidth })
+          Row() {
+            Text(this.title)
+              .fontSize($r('sys.float.titlebar_title_tertiary_size'))
+              .fontColor($r('sys.color.titlebar_title_tertiary_color'))
+              .maxLines(1)
+              .fontWeight(FontWeight.Bold)
+              .textAlign(TextAlign.Start)
+              .textOverflow({ overflow: TextOverflow.Ellipsis })
+              .constraintSize({ maxWidth: this.titleMaxWidth })
+          }
+          .justifyContent(FlexAlign.Start)
+
+          Row() {
+            Text(this.subtitle)
+              .visibility(this.subtitle ? Visibility.Visible : Visibility.None)
+              .fontSize($r('sys.float.titlebar_subheader_size'))
+              .fontColor($r('sys.color.titlebar_subheader_color'))
+              .maxLines(1)
+              .fontWeight(FontWeight.Regular)
+              .textAlign(TextAlign.Start)
+              .textOverflow({ overflow: TextOverflow.Ellipsis })
+              .constraintSize({ maxWidth: this.titleMaxWidth })
+          }
+          .margin({
+            top: this.subtitle ? $r('sys.float.padding_level1') : $r('sys.float.padding_level0')
+          })
+          .justifyContent(FlexAlign.Start)
         }
         .justifyContent(FlexAlign.Start)
+        .margin({
+          left: $r('sys.float.titlebar_icon_background_space_horizontal'),
+        })
         .alignItems(HorizontalAlign.Start)
         .constraintSize({ maxWidth: this.titleMaxWidth })
       }
-      .margin({ left: $r('sys.float.ohos_id_default_padding_start') })
+      .height(EditableTitleBar.totalHeight)
 
       EditableTitleBarMenuSection({
         menuItems: this.menuItems,
-        onSave: this.onSave
+        onSave: this.onSave,
+        isSaveEnabled: this.isSaveIconRequired,
       })
     }
     .width('100%')
-    .height(EditableTitleBar.totalHeight)
-    .backgroundColor($r('sys.color.ohos_id_color_background'))
+    .padding({
+      left: EditableTitleBar.leftPadding,
+      right: EditableTitleBar.rightPadding,
+    })
+    .backgroundColor(this.options.backgroundBlurStyle ? this.options.backgroundColor
+      : EditableTitleBar.noneColor)
+    .backgroundBlurStyle(this.options.backgroundBlurStyle)
+    .expandSafeArea(this.options.safeAreaTypes, this.options.safeAreaEdges)
     .onAreaChange((_oldValue: Area, newValue: Area) => {
-      let nValue = Number(newValue.width)
-      nValue = nValue - EditableTitleBar.leftPadding - EditableTitleBar.rightPadding - EditableTitleBar.titlePadding
-      nValue = nValue - ImageMenuItem.imageHotZoneWidth - ImageMenuItem.imageHotZoneWidth
-      if (this.menuItems === undefined) {
-        this.titleMaxWidth = nValue
-        return
-      }
-      if (this.menuItems.length > EditableTitleBar.maxCountOfExtraItems) {
-        this.titleMaxWidth = nValue - ImageMenuItem.imageHotZoneWidth * EditableTitleBar.maxCountOfExtraItems
+      let maxCountOfExtraItems = EditableTitleBar.commonZero;
+      if (this.isSaveIconRequired) {
+        maxCountOfExtraItems = EditableTitleBar.maxOtherCountOfExtraItems;
+        EditableTitleBar.countOfSaveIcon = EditableTitleBar.commonOne;
       } else {
-        this.titleMaxWidth = nValue - ImageMenuItem.imageHotZoneWidth * this.menuItems.length
+        maxCountOfExtraItems = EditableTitleBar.maxCountOfExtraItems;
+        EditableTitleBar.countOfSaveIcon = EditableTitleBar.commonZero;
+      }
+      if (this.imageItem) {
+        EditableTitleBar.countOfImageItem = EditableTitleBar.commonOne;
+      } else {
+        EditableTitleBar.countOfImageItem = EditableTitleBar.commonZero;
+      }
+      let nValue = Number(newValue.width)
+      nValue = nValue - EditableTitleBar.leftPadding -
+        EditableTitleBar.rightPadding - EditableTitleBar.titlePadding;
+      nValue = nValue - ImageMenuItem.imageHotZoneWidth;
+      if (this.menuItems === undefined) {
+        this.titleMaxWidth = nValue -
+          EditableTitleBar.countOfImageItem *
+            (ImageMenuItem.imageHotZoneWidth +
+            ImageMenuItem.iconBackgroundSpaceHorizontal);
+        return;
+      }
+      if (this.menuItems?.length >= EditableTitleBar.maxCountOfExtraItems) {
+        this.titleMaxWidth = nValue -
+          ImageMenuItem.imageHotZoneWidth * EditableTitleBar.maxCountOfExtraItems -
+          EditableTitleBar.countOfImageItem * ImageMenuItem.imageHotZoneWidth -
+          ImageMenuItem.iconBackgroundSpaceHorizontal *
+            (maxCountOfExtraItems + EditableTitleBar.countOfSaveIcon +
+            EditableTitleBar.countOfImageItem);
+      } else {
+        this.titleMaxWidth = nValue -
+          ImageMenuItem.imageHotZoneWidth * this.menuItems?.length -
+          ImageMenuItem.imageHotZoneWidth * EditableTitleBar.countOfSaveIcon -
+          EditableTitleBar.countOfImageItem * ImageMenuItem.imageHotZoneWidth -
+          ImageMenuItem.iconBackgroundSpaceHorizontal *
+            (this.menuItems?.length + EditableTitleBar.countOfSaveIcon +
+            EditableTitleBar.countOfImageItem);
       }
     })
   }
@@ -165,132 +262,205 @@ export struct EditableTitleBar {
 
 @Component
 struct EditableTitleBarMenuSection {
-  menuItems: Array<EditableTitleBarMenuItem>
-  onSave?: () => void
+  menuItems: Array<EditableTitleBarMenuItem> | undefined = undefined;
+  onSave?: () => void;
+  isSaveEnabled: boolean = true;
 
   build() {
     Column() {
       Row() {
-        if (this.menuItems !== undefined && this.menuItems.length > 0) {
-          ForEach(this.menuItems.slice(0, EditableTitleBar.maxCountOfExtraItems), (item: EditableTitleBarMenuItem) => {
-            ImageMenuItem({ item: item })
+        if (this.menuItems !== undefined && this.menuItems.length > EditableTitleBar.commonZero) {
+          ForEach(this.menuItems.slice(EditableTitleBar.commonZero,
+            this.isSaveEnabled ?
+            EditableTitleBar.maxOtherCountOfExtraItems : EditableTitleBar.maxCountOfExtraItems),
+            (item: EditableTitleBarMenuItem) => {
+              ImageMenuItem({
+                item: item,
+                attribute: ItemType.Icon,
+              })
+            })
+        }
+        if (this.isSaveEnabled) {
+          ImageMenuItem({
+            item: {
+              value: PUBLIC_OK,
+              isEnabled: true,
+              action: () => this.onSave && this.onSave(),
+            },
+            attribute: ItemType.Icon,
           })
         }
-        ImageMenuItem({ item: {
-          value: PUBLIC_OK,
-          isEnabled: true,
-          action: () => this.onSave && this.onSave()
-        } })
       }
     }
-    .margin({
-      left: $r('sys.float.ohos_id_elements_margin_vertical_l'),
-      right: $r('sys.float.ohos_id_default_padding_end')
-    })
     .justifyContent(FlexAlign.Center)
   }
 }
 
 @Component
 struct ImageMenuItem {
-  item: EditableTitleBarMenuItem
-
-  static readonly imageSize = 24
-  static readonly imageHotZoneWidth = 48
-  static readonly buttonBorderRadius = 8
-  static readonly focusBorderWidth = 2
-  static readonly disabledImageOpacity = 0.4
-
-  @State isOnFocus: boolean = false
-  @State isOnHover: boolean = false
-  @State isOnClick: boolean = false
+  item: EditableTitleBarMenuItem = {
+    value: '',
+    isEnabled: true,
+  };
+  attribute: ItemType = ItemType.Image;
+  static readonly imageHotZoneWidth = getNumberByResource('titlebar_icon_background_width');
+  static readonly imageHotZoneHeight = getNumberByResource('titlebar_icon_background_height');
+  static readonly iconBackgroundSpaceHorizontal = getNumberByResource('titlebar_icon_background_space_horizontal');
+  @State isOnFocus: boolean = false;
+  @State isOnHover: boolean = false;
+  @State isOnClick: boolean = false;
 
   getFgColor() {
-    return this.isOnClick
-      ? $r('sys.color.ohos_id_color_titlebar_icon_pressed')
-      : $r('sys.color.ohos_id_color_titlebar_icon')
-  }
-
-  getBgColor() {
     if (this.isOnClick) {
-      return $r('sys.color.ohos_id_color_click_effect')
+      return $r('sys.color.titlebar_icon_background_pressed_color');
     } else if (this.isOnHover) {
-      return $r('sys.color.ohos_id_color_hover')
+      return $r('sys.color.titlebar_icon_background_hover_color');
     } else {
-      return Color.Transparent
+      return EditableTitleBar.noneColor;
     }
   }
 
   build() {
-    Row() {
-      Image(this.item.value)
-        .width(ImageMenuItem.imageSize)
-        .height(ImageMenuItem.imageSize)
-        .focusable(this.item.isEnabled)
+    if (this.attribute === ItemType.Icon || this.attribute === ItemType.LeftIcon) {
+      Button({ type: ButtonType.Normal, stateEffect: this.item.isEnabled }) {
+        Image(this.item.value)
+          .width($r('sys.float.titlebar_icon_width'))
+          .height($r('sys.float.titlebar_icon_height'))
+          .focusable(this.item.isEnabled)
+          .enabled(this.item.isEnabled)
+      }
+      .width(ImageMenuItem.imageHotZoneWidth)
+      .height(ImageMenuItem.imageHotZoneWidth)
+      .borderRadius($r('sys.float.titlebar_icon_background_shape'))
+      .margin({
+        left: this.attribute === ItemType.LeftIcon ? EditableTitleBar.commonZero
+          : ImageMenuItem.iconBackgroundSpaceHorizontal,
+      })
+      .focusable(this.item.isEnabled)
+      .enabled(this.item.isEnabled)
+      .foregroundColor(this.getFgColor())
+      .backgroundColor($r('sys.color.titlebar_icon_background_color'))
+      .stateStyles({
+        focused: {
+          .border({
+            radius: $r('sys.float.titlebar_icon_background_shape'),
+            width: $r('sys.float.titlebar_icon_background_focus_outline_weight'),
+            color: $r('sys.color.titlebar_icon_background_focus_outline_color'),
+            style: BorderStyle.Solid,
+          })
+        },
+        normal: {
+          .border({
+            radius: $r('sys.float.titlebar_icon_background_shape'),
+            width: EditableTitleBar.commonZero,
+          })
+        },
+        pressed: {
+          .border({
+            radius: $r('sys.float.titlebar_icon_background_shape'),
+            width: EditableTitleBar.commonZero,
+          })
+        }
+      })
+      .onFocus(() => {
+        if (!this.item.isEnabled) {
+          return;
+        }
+        this.isOnFocus = true;
+      })
+      .onBlur(() => this.isOnFocus = false)
+      .onHover((isOn) => {
+        if (!this.item.isEnabled) {
+          return;
+        }
+        this.isOnHover = isOn;
+      })
+      .onKeyEvent((event) => {
+        if (!this.item.isEnabled) {
+          return;
+        }
+        if (event.keyCode !== KeyCode.KEYCODE_ENTER && event.keyCode !== KeyCode.KEYCODE_SPACE) {
+          return;
+        }
+        if (event.type === KeyType.Down) {
+          this.isOnClick = true;
+        }
+        if (event.type === KeyType.Up) {
+          this.isOnClick = false;
+        }
+      })
+      .onTouch((event) => {
+        if (!this.item.isEnabled) {
+          return;
+        }
+        if (event.type === TouchType.Down) {
+          this.isOnClick = true;
+        }
+        if (event.type === TouchType.Up) {
+          this.isOnClick = false;
+        }
+      })
+      .onClick(() => this.item.isEnabled && this.item.action && this.item.action())
+    } else {
+      Stack({ alignContent: Alignment.Center }) {
+        Image(this.item.value)
+          .width(ImageMenuItem.imageHotZoneWidth)
+          .height(ImageMenuItem.imageHotZoneHeight)
+          .borderRadius($r('sys.float.titlebar_icon_background_shape'))
+          .focusable(false)
+          .enabled(this.item.isEnabled)
+          .objectFit(ImageFit.Cover)
+          .onClick(() => this.item.isEnabled && this.item.action && this.item.action())
+
+        Button()
+          .width(ImageMenuItem.imageHotZoneWidth)
+          .height(ImageMenuItem.imageHotZoneHeight)
+          .backgroundColor(EditableTitleBar.noneColor)
+          .borderRadius($r('sys.float.titlebar_icon_background_shape'))
+          .focusable(this.item.isEnabled)
+          .enabled(this.item.isEnabled)
+          .stateStyles({
+            focused: {
+              .border({
+                radius: $r('sys.float.titlebar_icon_background_shape'),
+                width: $r('sys.float.titlebar_icon_background_focus_outline_weight'),
+                color: $r('sys.color.titlebar_icon_background_focus_outline_color'),
+                style: BorderStyle.Solid,
+              })
+            },
+            normal: {
+              .border({
+                radius: $r('sys.float.titlebar_icon_background_shape'),
+                width: EditableTitleBar.commonZero,
+              })
+            },
+            pressed: {
+              .border({
+                radius: $r('sys.float.titlebar_icon_background_shape'),
+                width: EditableTitleBar.commonZero,
+              })
+            }
+          })
+      }.margin({
+        left: ImageMenuItem.iconBackgroundSpaceHorizontal,
+      })
     }
-    .width(ImageMenuItem.imageHotZoneWidth)
-    .height(ImageMenuItem.imageHotZoneWidth)
-    .borderRadius(ImageMenuItem.buttonBorderRadius)
-    .foregroundColor(this.getFgColor())
-    .backgroundColor(this.getBgColor())
-    .justifyContent(FlexAlign.Center)
-    .opacity(this.item.isEnabled ? 1 : ImageMenuItem.disabledImageOpacity)
-    .stateStyles({
-      focused: {
-        .border({
-          radius: $r('sys.float.ohos_id_corner_radius_clicked'),
-          width: ImageMenuItem.focusBorderWidth,
-          color: $r('sys.color.ohos_id_color_focused_outline'),
-          style: BorderStyle.Solid
-        })
-      },
-      normal: {
-        .border({
-          radius: $r('sys.float.ohos_id_corner_radius_clicked'),
-          width: 0
-        })
-      }
-    })
-    .onFocus(() => {
-      if (!this.item.isEnabled) {
-        return
-      }
-      this.isOnFocus = true
-    })
-    .onBlur(() => this.isOnFocus = false)
-    .onHover((isOn) => {
-      if (!this.item.isEnabled) {
-        return
-      }
-      this.isOnHover = isOn
-    })
-    .onKeyEvent((event) => {
-      if (!this.item.isEnabled) {
-        return
-      }
-      if (event.keyCode !== KeyCode.KEYCODE_ENTER && event.keyCode !== KeyCode.KEYCODE_SPACE) {
-        return
-      }
-      if (event.type === KeyType.Down) {
-        this.isOnClick = true
-      }
-      if (event.type === KeyType.Up) {
-        this.isOnClick = false
-      }
-    })
-    .onTouch((event) => {
-      if (!this.item.isEnabled) {
-        return
-      }
-      if (event.type === TouchType.Down) {
-        this.isOnClick = true
-      }
-      if (event.type === TouchType.Up) {
-        this.isOnClick = false
-      }
-    })
-    .onClick(() => this.item.isEnabled && this.item.action && this.item.action())
   }
 }
 
-export default { EditableLeftIconType, EditableTitleBar }
+/**
+ * get resource size
+ *
+ * @param resourceName resource name
+ * @return resource size
+ */
+function getNumberByResource(resourceName: string): number {
+  try {
+    return resourceManager.getSystemResourceManager().getNumberByName(resourceName);
+  } catch (error) {
+    let code: number = (error as BusinessError).code;
+    let message: string = (error as BusinessError).message;
+    hilog.error(0x3900, 'Ace', `EditableTitleBar getNumberByResource error, code: ${code},message:${message}`);
+    return EditableTitleBar.commonZero;
+  }
+}

@@ -41,12 +41,17 @@ public:
     virtual void CloseSelectionMenu() = 0;
 };
 
+class ACE_EXPORT SpanStringBase : public AceType {
+    DECLARE_ACE_TYPE(SpanStringBase, AceType);
+};
+
 class ACE_EXPORT TextModel {
 public:
     static TextModel* GetInstance();
     virtual ~TextModel() = default;
 
     virtual void Create(const std::string& content) = 0;
+    virtual void Create(const RefPtr<SpanStringBase>& spanString) = 0;
     virtual void SetFont(const Font& value) = 0;
     virtual void SetFontSize(const Dimension& value) = 0;
     virtual void SetTextColor(const Color& value) = 0;

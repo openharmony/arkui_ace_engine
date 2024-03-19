@@ -41,6 +41,8 @@ private:
     TabsItemDivider GetDivider(LayoutWrapper* layoutWrapper) const;
     float MeasureDivider(const RefPtr<TabsLayoutProperty>& layoutProperty,
         const RefPtr<LayoutWrapper>& dividerWrapper, const SizeF& idealSize);
+    SizeF MeasureSwiper(const RefPtr<TabsLayoutProperty>& layoutProperty, RefPtr<LayoutWrapper>& swiperWrapper,
+        const SizeF& idealSize, const SizeF& tabBarSize, const float dividerWidth);
     std::vector<OffsetF> LayoutOffsetList(
         LayoutWrapper* layoutWrapper, const RefPtr<LayoutWrapper>& tabBarWrapper, const SizeF& frameSize) const;
 };

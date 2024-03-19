@@ -117,6 +117,8 @@ public:
         BarPosition barPosition = BarPosition::START, int32_t index = 0);
     void CreateWithItem(const std::function<void(TabsModelNG)>& callback,
         BarPosition barPosition = BarPosition::START, int32_t index = 0);
+    void CreateWithItemWithoutBuilder(const std::function<void(TabsModelNG)>& callback,
+        BarPosition barPosition = BarPosition::START, int32_t index = 0);
 
     static void CreateItem(
         int32_t itemNumber, const std::function<void(TabContentModelNG, int32_t)>& callback = nullptr);
@@ -124,7 +126,10 @@ public:
     static void CreateSingleItemWithoutBuilder(
         const std::function<void(TabContentModelNG)>& callback, int32_t nodeId);
     static TabBarBuilderFunc TabBarItemBuilder();
-    void SwipeTo(int32_t index);
+    void SwipeToWithoutAnimation(int32_t index);
+    void ClickTo(Offset offset);
+    void MouseTo(MouseAction action, Offset location, bool isHover);
+    void TouchTo(TouchType type, Offset location);
 
     RefPtr<TabsNode> frameNode_;
     RefPtr<TabsPattern> pattern_;

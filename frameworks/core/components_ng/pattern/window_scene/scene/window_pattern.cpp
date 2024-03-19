@@ -139,13 +139,11 @@ void WindowPattern::OnAttachToFrameNode()
     }
 
     host->AddChild(contentNode_);
-    if (!session_->GetBufferAvailable()) {
+    auto surfaceNode = session_->GetSurfaceNode();
+    if (surfaceNode && !surfaceNode->IsBufferAvailable()) {
         CreateStartingNode();
         host->AddChild(startingNode_);
-        auto surfaceNode = session_->GetSurfaceNode();
-        if (surfaceNode) {
-            surfaceNode->SetBufferAvailableCallback(callback_);
-        }
+        surfaceNode->SetBufferAvailableCallback(callback_);
     }
 }
 

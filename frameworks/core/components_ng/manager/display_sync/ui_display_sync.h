@@ -166,7 +166,7 @@ public:
     void JudgeWhetherSkip();
     void OnFrame();
 
-    void SetExpectedFrameRateRange(FrameRateRange&& frameRateRange);
+    void SetExpectedFrameRateRange(const FrameRateRange& frameRateRange);
     bool SetVsyncRate(int32_t vsyncRate);
     bool IsCommonDivisor(int32_t expectedRate, int32_t vsyncRate);
 

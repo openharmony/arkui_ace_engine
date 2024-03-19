@@ -39,9 +39,13 @@ public:
     void JsSetHeight(const JSCallbackInfo& info);
     void JsSetWidth(const JSCallbackInfo& info);
     void JsTransferFromImageBitmap(const JSCallbackInfo& info);
+    void JsStartImageAnalyzer(const JSCallbackInfo& info);
+    void JsStopImageAnalyzer(const JSCallbackInfo& info);
 
     ACE_DISALLOW_COPY_AND_MOVE(JSRenderingContext);
 
+private:
+    bool isImageAnalyzing_ = false;
 };
 
 } // namespace OHOS::Ace::Framework

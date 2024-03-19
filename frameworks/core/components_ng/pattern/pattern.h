@@ -81,6 +81,16 @@ public:
         return true;
     }
 
+    virtual bool StopExpandMark()
+    {
+        return false;
+    }
+    
+    virtual bool IsSupportDrawModifier() const
+    {
+        return true;
+    }
+
     // The pattern needs softkeyboard is like search, rich editor, text area, text field pattern.
     virtual bool NeedSoftKeyboard() const
     {
@@ -135,6 +145,11 @@ public:
     virtual RefPtr<NodePaintMethod> CreateNodePaintMethod()
     {
         return nullptr;
+    }
+
+    virtual RefPtr<NodePaintMethod> CreateDefaultNodePaintMethod()
+    {
+        return MakeRefPtr<NodePaintMethod>();
     }
 
     virtual std::optional<RectF> GetOverridePaintRect() const
@@ -248,7 +263,7 @@ public:
         return true;
     }
 
-    virtual void UpdateSlideOffset(SizeF /* frameSize */) {}
+    virtual void UpdateSlideOffset() {}
 
     // TODO: for temp use, need to delete this.
     virtual bool OnDirtyLayoutWrapperSwap(

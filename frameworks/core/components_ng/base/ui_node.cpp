@@ -36,8 +36,8 @@ namespace OHOS::Ace::NG {
 
 thread_local int64_t UINode::currentAccessibilityId_ = 0;
 
-UINode::UINode(const std::string& tag, int32_t nodeId, int32_t instanceId, bool isRoot)
-    : tag_(tag), nodeId_(nodeId), accessibilityId_(currentAccessibilityId_++), isRoot_(isRoot), instanceId_(instanceId)
+UINode::UINode(const std::string& tag, int32_t nodeId, bool isRoot)
+    : tag_(tag), nodeId_(nodeId), accessibilityId_(currentAccessibilityId_++), isRoot_(isRoot)
 {
     if (AceChecker::IsPerformanceCheckEnabled()) {
         auto pos = EngineHelper::GetPositionOnJsCode();
@@ -54,9 +54,7 @@ UINode::UINode(const std::string& tag, int32_t nodeId, int32_t instanceId, bool 
         distributedUI->AddNewNode(nodeId_);
     } while (false);
 #endif
-    if (instanceId_ == -1) {
-        instanceId_ = Container::CurrentId();
-    }
+    instanceId_ = Container::CurrentId();
     nodeStatus_ = ViewStackProcessor::GetInstance()->IsBuilderNode() ? NodeStatus::BUILDER_NODE_OFF_MAINTREE
                                                                      : NodeStatus::NORMAL_NODE;
 }
@@ -229,7 +227,9 @@ void UINode::Clean(bool cleanDirectly, bool allowTransition)
         }
         ++index;
     }
-    children_.clear();
+    if (tag_ != V2::JS_IF_ELSE_ETS_TAG) {
+        children_.clear();
+    }
     MarkNeedSyncRenderTree(true);
 }
 
@@ -440,10 +440,10 @@ void UINode::AdjustParentLayoutFlag(PropertyChangeFlag& flag)
     }
 }
 
-void UINode::MarkDirtyNode(PropertyChangeFlag extraFlag)
+void UINode::MarkDirtyNode(PropertyChangeFlag extraFlag, bool childExpansiveAndMark)
 {
     for (const auto& child : GetChildren()) {
-        child->MarkDirtyNode(extraFlag);
+        child->MarkDirtyNode(extraFlag, childExpansiveAndMark);
     }
 }
 
@@ -608,7 +608,7 @@ RefPtr<PipelineContext> UINode::GetContext()
 }
 
 HitTestResult UINode::TouchTest(const PointF& globalPoint, const PointF& parentLocalPoint,
-    const PointF& parentRevertPoint, const TouchRestrict& touchRestrict, TouchTestResult& result, int32_t touchId,
+    const PointF& parentRevertPoint, TouchRestrict& touchRestrict, TouchTestResult& result, int32_t touchId,
     bool isDispatch)
 {
     auto children = GetChildren();
@@ -723,6 +723,8 @@ bool UINode::RenderCustomChild(int64_t deadline)
 
 void UINode::Build(std::shared_ptr<std::list<ExtraInfo>> extraInfos)
 {
+    ACE_LAYOUT_SCOPED_TRACE("Build[%s][self:%d][parent:%d][key:%s]", GetTag().c_str(), GetId(),
+        GetParent() ? GetParent()->GetId() : 0, GetInspectorIdValue("").c_str());
     for (const auto& child : GetChildren()) {
         if (InstanceOf<CustomNode>(child)) {
             auto custom = DynamicCast<CustomNode>(child);
@@ -971,12 +973,12 @@ RefPtr<UINode> UINode::GetDisappearingChildById(const std::string& id) const
     return nullptr;
 }
 
-RefPtr<UINode> UINode::GetFrameChildByIndex(uint32_t index, bool needBuild)
+RefPtr<UINode> UINode::GetFrameChildByIndex(uint32_t index, bool needBuild, bool isCache)
 {
     for (const auto& child : GetChildren()) {
         uint32_t count = static_cast<uint32_t>(child->FrameCount());
         if (count > index) {
-            return child->GetFrameChildByIndex(index, needBuild);
+            return child->GetFrameChildByIndex(index, needBuild, isCache);
         }
         index -= count;
     }
@@ -1069,10 +1071,16 @@ void UINode::UpdateNodeStatus(NodeStatus nodeStatus)
 
 // Collects  all the child elements of "children" in a recursive manner
 // Fills the "removedElmtId" list with the collected child elements
-void UINode::CollectRemovedChildren(const std::list<RefPtr<UINode>>& children, std::list<int32_t>& removedElmtId)
+void UINode::CollectRemovedChildren(const std::list<RefPtr<UINode>>& children,
+    std::list<int32_t>& removedElmtId, bool isEntry)
 {
     for (auto const& child : children) {
-        CollectRemovedChild(child, removedElmtId);
+        if (!child->IsDisappearing()) {
+            CollectRemovedChild(child, removedElmtId);
+        }
+    }
+    if (isEntry) {
+        children_.clear();
     }
 }
 
@@ -1082,7 +1090,7 @@ void UINode::CollectRemovedChild(const RefPtr<UINode>& child, std::list<int32_t>
     // Fetch all the child elementIDs recursively
     if (child->GetTag() != V2::JS_VIEW_ETS_TAG) {
         // add CustomNode but do not recurse into its children
-        CollectRemovedChildren(child->GetChildren(), removedElmtId);
+        CollectRemovedChildren(child->GetChildren(), removedElmtId, false);
     }
 }
 

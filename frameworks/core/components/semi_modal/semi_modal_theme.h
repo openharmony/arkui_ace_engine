@@ -39,16 +39,13 @@ public:
                 return theme;
             }
             theme->bgColor_ = themeConstants->GetColor(THEME_SEMI_MODAL_BACKGROUND_COLOR);
-            ParsePattern(themeConstants->GetThemeStyle(), theme);
+            ParsePattern(themeConstants, theme);
             return theme;
         }
     private:
-        void ParsePattern(const RefPtr<ThemeStyle>& themeStyle, const RefPtr<SemiModalTheme>& theme) const
+        void ParsePattern(const RefPtr<ThemeConstants>& themeConstants, const RefPtr<SemiModalTheme>& theme) const
         {
-            if (!themeStyle) {
-                return;
-            }
-            auto semiModalPattern = themeStyle->GetAttr<RefPtr<ThemeStyle>>(THEME_PATTERN_SEMI_MODAL, nullptr);
+            RefPtr<ThemeStyle> semiModalPattern = themeConstants->GetPatternByName(THEME_PATTERN_SEMI_MODAL);
             if (!semiModalPattern) {
                 return;
             }

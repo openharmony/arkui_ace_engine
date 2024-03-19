@@ -156,7 +156,6 @@ void WindowScene::RegisterFocusCallback()
             auto focusHub = host->GetFocusHub();
             CHECK_NULL_VOID(focusHub);
             focusHub->SetParentFocusable(true);
-            focusHub->RequestFocusWithDefaultFocusFirstly();
         },
             TaskExecutor::TaskType::UI);
     };
@@ -259,6 +258,7 @@ void WindowScene::BufferAvailableCallback()
 void WindowScene::OnActivation()
 {
     auto uiTask = [weakThis = WeakClaim(this)]() {
+        ACE_SCOPED_TRACE("WindowScene::OnActivation");
         auto self = weakThis.Upgrade();
         CHECK_NULL_VOID(self && self->session_);
 
@@ -306,6 +306,7 @@ void WindowScene::OnActivation()
 void WindowScene::OnConnect()
 {
     auto uiTask = [weakThis = WeakClaim(this)]() {
+        ACE_SCOPED_TRACE("WindowScene::OnConnect");
         auto self = weakThis.Upgrade();
         CHECK_NULL_VOID(self);
 
@@ -337,6 +338,7 @@ void WindowScene::OnConnect()
 void WindowScene::OnForeground()
 {
     auto uiTask = [weakThis = WeakClaim(this)]() {
+        ACE_SCOPED_TRACE("WindowScene::OnForeground");
         auto self = weakThis.Upgrade();
         CHECK_NULL_VOID(self);
 
@@ -362,17 +364,16 @@ void WindowScene::OnDisconnect()
     auto snapshot = session_->GetSnapshot();
 
     auto uiTask = [weakThis = WeakClaim(this), snapshot]() {
+        ACE_SCOPED_TRACE("WindowScene::OnDisconnect");
         auto self = weakThis.Upgrade();
         CHECK_NULL_VOID(self);
         self->destroyed_ = true;
 
         auto host = self->GetHost();
         CHECK_NULL_VOID(host);
-        host->RemoveChild(self->contentNode_);
-        self->contentNode_.Reset();
-        if (!self->snapshotNode_) {
+        if (!self->snapshotNode_ && !self->startingNode_) {
             self->CreateSnapshotNode(snapshot);
-            host->AddChild(self->snapshotNode_, 0);
+            host->AddChild(self->snapshotNode_);
         }
         host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     };

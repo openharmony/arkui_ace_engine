@@ -27,8 +27,6 @@
 namespace OHOS::Ace::Framework {
 namespace {
 
-constexpr Axis DIRECTION_TABLE[] = { Axis::VERTICAL, Axis::HORIZONTAL };
-
 constexpr AlignDeclaration::Edge EDGE_TABLE[] = {
     AlignDeclaration::Edge::TOP,
     AlignDeclaration::Edge::CENTER,
@@ -69,6 +67,7 @@ void JSScroller::JSBind(BindingTarget globalObj)
     JSClass<JSScroller>::Declare("Scroller");
     JSClass<JSScroller>::CustomMethod("scrollTo", &JSScroller::ScrollTo);
     JSClass<JSScroller>::CustomMethod("scrollEdge", &JSScroller::ScrollEdge);
+    JSClass<JSScroller>::CustomMethod("fling", &JSScroller::Fling);
     JSClass<JSScroller>::CustomMethod("scrollPage", &JSScroller::ScrollPage);
     JSClass<JSScroller>::CustomMethod("currentOffset", &JSScroller::CurrentOffset);
     JSClass<JSScroller>::CustomMethod("scrollToIndex", &JSScroller::ScrollToIndex);
@@ -177,6 +176,28 @@ void JSScroller::ScrollEdge(const JSCallbackInfo& args)
     scrollController->ScrollToEdge(edgeType, true);
 }
 
+void JSScroller::Fling(const JSCallbackInfo& args)
+{
+    auto scrollController = controllerWeak_.Upgrade();
+    if (!scrollController) {
+        JSException::Throw(ERROR_CODE_NAMED_ROUTE_ERROR, "%s", "Controller not bound to component.");
+        return;
+    }
+    double flingVelocity = 0.0;
+    if (args[0]->IsNumber()) {
+        flingVelocity = args[0]->ToNumber<double>();
+        if (NearZero(flingVelocity)) {
+            return;
+        }
+        flingVelocity = Dimension(flingVelocity, DimensionUnit::VP).ConvertToPx();
+    } else {
+        JSException::Throw(ERROR_CODE_PARAM_INVALID, "%s", "The parameter check failed.");
+        return;
+    }
+    ContainerScope scope(instanceId_);
+    scrollController->Fling(flingVelocity);
+}
+
 void JSScroller::ScrollToIndex(const JSCallbackInfo& args)
 {
     int32_t index = 0;
@@ -212,15 +233,17 @@ void JSScroller::ScrollPage(const JSCallbackInfo& args)
     if (!ConvertFromJSValue(obj->GetProperty("next"), next)) {
         return;
     }
-
-    Axis direction = Axis::NONE;
-    ConvertFromJSValue(obj->GetProperty("direction"), DIRECTION_TABLE, direction);
+    bool smooth = false;
+    auto smoothValue = obj->GetProperty("animation");
+    if (smoothValue->IsBoolean()) {
+        smooth = smoothValue->ToBoolean();
+    }
     auto scrollController = controllerWeak_.Upgrade();
     if (!scrollController) {
         return;
     }
     ContainerScope scope(instanceId_);
-    scrollController->ScrollPage(!next, true);
+    scrollController->ScrollPage(!next, smooth);
 }
 
 void JSScroller::CurrentOffset(const JSCallbackInfo& args)

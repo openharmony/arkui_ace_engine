@@ -716,6 +716,14 @@ void GestureEventHub::HandleOnDragStart(const GestureEvent& info)
     CHECK_NULL_VOID(dragDropManager);
     dragDropManager->SetDraggingPointer(info.GetPointerId());
     dragDropManager->SetDraggingPressedState(true);
+    if (dragPreviewInfo.inspectorId != "") {
+        auto dragPreviewPixelMap = DragEventActuator::GetPreviewPixelMap(dragPreviewInfo.inspectorId, frameNode);
+        CHECK_NULL_VOID(dragPreviewPixelMap);
+        dragDropInfo.pixelMap = dragPreviewPixelMap;
+        OnDragStart(info, pipeline, frameNode, dragDropInfo, event);
+        return;
+    }
+
     if (info.GetSourceDevice() != SourceType::MOUSE) {
         if (dragPreviewInfo.pixelMap != nullptr || dragPreviewInfo.customNode != nullptr) {
             if (dragPreviewPixelMap_ != nullptr) {
@@ -807,8 +815,6 @@ void GestureEventHub::OnDragStart(const GestureEvent& info, const RefPtr<Pipelin
         dragDropManager->SetIsMouseDrag(true);
         pixelMap = CreatePixelMapFromString(DEFAULT_MOUSE_DRAG_IMAGE);
         CHECK_NULL_VOID(pixelMap);
-        auto taskScheduler = pipeline->GetTaskExecutor();
-        CHECK_NULL_VOID(taskScheduler);
         GenerateMousePixelMap(info);
         if (pixelMap_) {
             pixelMap = pixelMap_;
@@ -826,14 +832,25 @@ void GestureEventHub::OnDragStart(const GestureEvent& info, const RefPtr<Pipelin
     if (IsPixelMapNeedScale()) {
         RefPtr<FrameNode> imageNode = overlayManager->GetPixelMapContentNode();
         DragEventActuator::CreatePreviewNode(frameNode, imageNode);
+        auto frameTag = frameNode->GetTag();
+        if (GetTextDraggable() && IsTextCategoryComponent(frameTag)) {
+            auto textDragPattern = frameNode->GetPattern<TextDragBase>();
+            CHECK_NULL_VOID(textDragPattern);
+            auto dragNode = textDragPattern->MoveDragNode();
+            if (dragNode) {
+                auto dragNodeOffset = dragNode->GetOffsetInScreen();
+                DragEventActuator::UpdatePreviewPositionAndScale(imageNode, dragNodeOffset);
+            }
+        }
         CHECK_NULL_VOID(imageNode);
         scale = static_cast<float>(imageNode->GetPreviewScaleVal());
         auto window = SubwindowManager::GetInstance()->ShowPreviewNG();
         if (window) {
-            overlayManager = window->GetOverlayManager();
-            CHECK_NULL_VOID(overlayManager);
-            DragEventActuator::MountPixelMap(overlayManager, eventHub->GetGestureEventHub(), imageNode);
-            dragDropManager->DoDragStartAnimation(overlayManager, info);
+            auto subWindowOverlayManager = window->GetOverlayManager();
+            CHECK_NULL_VOID(subWindowOverlayManager);
+            DragEventActuator::MountPixelMap(subWindowOverlayManager, eventHub->GetGestureEventHub(), imageNode);
+            dragDropManager->DoDragStartAnimation(subWindowOverlayManager, info);
+            overlayManager->RemovePixelMap();
             if (pixelMap_ != nullptr) {
                 pixelMap = pixelMap_;
             }
@@ -1014,9 +1031,31 @@ void GestureEventHub::SetUserOnClick(GestureEventFunc&& clickEvent)
     }
 }
 
+void GestureEventHub::SetJSFrameNodeOnClick(GestureEventFunc&& clickEvent)
+{
+    CheckClickActuator();
+    if (parallelCombineClick) {
+        userParallelClickEventActuator_->SetJSFrameNodeCallback(std::move(clickEvent));
+        SetFocusClickEvent(userParallelClickEventActuator_->GetClickEvent());
+    } else {
+        clickEventActuator_->SetJSFrameNodeCallback(std::move(clickEvent));
+        SetFocusClickEvent(clickEventActuator_->GetClickEvent());
+    }
+}
+
 void GestureEventHub::SetOnGestureJudgeBegin(GestureJudgeFunc&& gestureJudgeFunc)
 {
     gestureJudgeFunc_ = std::move(gestureJudgeFunc);
+}
+
+void GestureEventHub::SetOnTouchIntercept(TouchInterceptFunc&& touchInterceptFunc)
+{
+    touchInterceptFunc_ = std::move(touchInterceptFunc);
+}
+
+TouchInterceptFunc GestureEventHub::GetOnTouchIntercept() const
+{
+    return touchInterceptFunc_;
 }
 
 void GestureEventHub::SetOnGestureJudgeNativeBegin(GestureJudgeFunc&& gestureJudgeFunc)
@@ -1274,6 +1313,20 @@ void GestureEventHub::ClearUserOnTouch()
     }
 }
 
+void GestureEventHub::ClearJSFrameNodeOnClick()
+{
+    if (clickEventActuator_) {
+        clickEventActuator_->ClearJSFrameNodeCallback();
+    }
+}
+
+void GestureEventHub::ClearJSFrameNodeOnTouch()
+{
+    if (touchEventActuator_) {
+        touchEventActuator_->ClearJSFrameNodeCallback();
+    }
+}
+
 void GestureEventHub::CopyGestures(const RefPtr<GestureEventHub>& gestureEventHub)
 {
     CHECK_NULL_VOID(gestureEventHub);
@@ -1371,5 +1424,58 @@ RefPtr<UnifiedData> GestureEventHub::GetUnifiedData(const std::string& frameTag,
         defaultOnDragStart(dragEvent, "");
     }
     return unifiedData;
+}
+
+void GestureEventHub::SetResponseRegion(const std::vector<DimensionRect>& responseRegion)
+{
+    responseRegion_ = responseRegion;
+    if (!responseRegion_.empty()) {
+        isResponseRegion_ = true;
+    }
+    if (responseRegionFunc_) {
+        responseRegionFunc_(responseRegion_);
+    }
+}
+
+void GestureEventHub::RemoveLastResponseRect()
+{
+    if (responseRegion_.empty()) {
+        isResponseRegion_ = false;
+        return;
+    }
+    responseRegion_.pop_back();
+    if (responseRegion_.empty()) {
+        isResponseRegion_ = false;
+    }
+
+    if (responseRegionFunc_) {
+        responseRegionFunc_(responseRegion_);
+    }
+}
+
+void GestureEventHub::SetOnTouchEvent(TouchEventFunc&& touchEventFunc)
+{
+    if (!touchEventActuator_) {
+        touchEventActuator_ = MakeRefPtr<TouchEventActuator>();
+    }
+    touchEventActuator_->SetOnTouchEvent(std::move(touchEventFunc));
+}
+
+void GestureEventHub::SetJSFrameNodeOnTouchEvent(TouchEventFunc&& touchEventFunc)
+{
+    if (!touchEventActuator_) {
+        touchEventActuator_ = MakeRefPtr<TouchEventActuator>();
+    }
+    touchEventActuator_->SetJSFrameNodeOnTouchEvent(std::move(touchEventFunc));
+}
+
+void GestureEventHub::SetDragForbiddenForcely(bool isDragForbidden)
+{
+    isDragForbidden_ = isDragForbidden;
+}
+
+bool GestureEventHub::IsDragForbidden()
+{
+    return isDragForbidden_;
 }
 } // namespace OHOS::Ace::NG

@@ -667,6 +667,38 @@ HWTEST_F(GridAttrTestNg, BigItem003, TestSize.Level1)
 }
 
 /**
+ * @tc.name: BigItem004
+ * @tc.desc: Test property colStart/colEnd with colTemplate
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridAttrTestNg, BigItem004, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Only set ColumnsTemplate, create big items
+     * @tc.expected: Big item have bigger size
+     */
+    Create([](GridModelNG model) {
+        model.SetColumnsTemplate("1fr 1fr 1fr 1fr");
+        CreateBigColItem(2, 3);
+        CreateFixedItem(7);
+    });
+    EXPECT_TRUE(VerifyBigItemRect(0, RectF(ITEM_WIDTH * 2, 0.f, ITEM_WIDTH * 2, ITEM_HEIGHT))); // big item
+    EXPECT_TRUE(VerifyBigItemRect(1, RectF(0.f, ITEM_HEIGHT, ITEM_WIDTH, ITEM_HEIGHT))); // normal item
+
+    /**
+     * @tc.steps: step2. Change colStart and colEnd
+     * @tc.expected: Big item size is changed
+     */
+    auto itemLayoutProperty = GetChildLayoutProperty<GridItemLayoutProperty>(frameNode_, 0);
+    itemLayoutProperty->UpdateColumnStart(0);
+    itemLayoutProperty->UpdateColumnEnd(1);
+    frameNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE); // update items
+    FlushLayoutTask(frameNode_);
+    EXPECT_TRUE(VerifyBigItemRect(0, RectF(0.f, 0.f, ITEM_WIDTH * 2, ITEM_HEIGHT))); // big item
+    EXPECT_TRUE(VerifyBigItemRect(1, RectF(ITEM_WIDTH * 2, 0.f, ITEM_WIDTH, ITEM_HEIGHT))); // normal item
+}
+
+/**
  * @tc.name: EnableScrollInteraction001
  * @tc.desc: Test property about enableScrollInteraction.
  * @tc.type: FUNC
@@ -992,7 +1024,7 @@ HWTEST_F(GridAttrTestNg, LayoutOptions001, TestSize.Level1)
     Create([option](GridModelNG model) {
         model.SetColumnsTemplate("1fr 1fr 1fr 1fr");
         model.SetLayoutOptions(option);
-        CreateColItem(10);
+        CreateFixedItem(10);
     });
     EXPECT_TRUE(VerifyBigItemRect(0, RectF(0.f, ITEM_HEIGHT * 0, ITEM_WIDTH, ITEM_HEIGHT)));
     EXPECT_TRUE(VerifyBigItemRect(1, RectF(0.f, ITEM_HEIGHT * 1, GRID_WIDTH, ITEM_HEIGHT)));
@@ -1025,7 +1057,7 @@ HWTEST_F(GridAttrTestNg, LayoutOptions002, TestSize.Level1)
     Create([option](GridModelNG model) {
         model.SetColumnsTemplate("1fr 1fr 1fr 1fr");
         model.SetLayoutOptions(option);
-        CreateColItem(10);
+        CreateFixedItem(10);
     });
     EXPECT_TRUE(VerifyBigItemRect(0, RectF(0.f, ITEM_HEIGHT * 0, GRID_WIDTH, ITEM_HEIGHT)));
     EXPECT_TRUE(VerifyBigItemRect(1, RectF(0.f, ITEM_HEIGHT * 1, GRID_WIDTH, ITEM_HEIGHT)));
@@ -1047,7 +1079,7 @@ HWTEST_F(GridAttrTestNg, GridItemDumpAdvanceInfoTest001, TestSize.Level1)
         model.SetRowsTemplate("1fr 1fr 1fr");
         model.SetColumnsGap(Dimension(COL_GAP));
         model.SetRowsGap(Dimension(ROW_GAP));
-        CreateColItem(10);
+        CreateFixedItem(10);
     });
 
     /**
@@ -1072,7 +1104,7 @@ HWTEST_F(GridAttrTestNg, GridItemSetSelectableTest001, TestSize.Level1)
 {
     Create([](GridModelNG model) {
         model.SetColumnsTemplate("1fr 1fr 1fr 1fr");
-        CreateColItem(20);
+        CreateFixedItem(20);
     });
 
     /**

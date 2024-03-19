@@ -219,7 +219,7 @@ int32_t SpanItem::UpdateParagraph(const RefPtr<FrameNode>& frameNode,
     if (pattern->NeedShowAIDetect() && !aiSpanMap.empty()) {
         UpdateTextStyleForAISpan(spanContent, builder, textStyle);
     } else {
-        UpdateTextStyle(spanContent, builder, textStyle);
+        UpdateTextStyle(spanContent, builder, textStyle, selectedStart, selectedEnd);
     }
     textStyle_ = textStyle;
 
@@ -313,14 +313,18 @@ void SpanItem::UpdateTextStyleForAISpan(
             aiSpanMap.erase(aiSpanMap.begin());
             continue;
         }
+        int32_t contentStart = preEnd - spanStart;
         if (preEnd < aiSpanStartInSpan) {
             auto beforeContent =
                 StringUtils::ToString(wSpanContent.substr(preEnd - spanStart, aiSpanStartInSpan - preEnd));
-            UpdateTextStyle(beforeContent, builder, textStyle);
+            UpdateTextStyle(beforeContent, builder, textStyle, selectedStart - contentStart,
+                selectedEnd - contentStart);
+            contentStart = contentStart + aiSpanStartInSpan - preEnd;
         }
         auto displayContent = StringUtils::ToWstring(
             aiSpan.content).substr(aiSpanStartInSpan - aiSpan.start, aiSpanEndInSpan - aiSpanStartInSpan);
-        UpdateTextStyle(StringUtils::ToString(displayContent), builder, aiSpanTextStyle);
+        UpdateTextStyle(StringUtils::ToString(displayContent), builder, aiSpanTextStyle, selectedStart - contentStart,
+            selectedEnd - contentStart);
         preEnd = aiSpanEndInSpan;
         if (aiSpan.end > position) {
             return;
@@ -329,8 +333,9 @@ void SpanItem::UpdateTextStyleForAISpan(
         }
     }
     if (preEnd < position) {
+        int32_t contentStart = preEnd - spanStart;
         auto afterContent = StringUtils::ToString(wSpanContent.substr(preEnd - spanStart, position - preEnd));
-        UpdateTextStyle(afterContent, builder, textStyle);
+        UpdateTextStyle(afterContent, builder, textStyle, selectedStart - contentStart, selectedEnd - contentStart);
     }
 }
 
@@ -387,35 +392,33 @@ void SpanItem::FontRegisterCallback(const RefPtr<FrameNode>& frameNode, const Te
 }
 
 void SpanItem::UpdateTextStyle(
-    const std::string& content, const RefPtr<Paragraph>& builder, const std::optional<TextStyle>& textStyle)
+    const std::string& content, const RefPtr<Paragraph>& builder, const std::optional<TextStyle>& textStyle,
+    const int32_t selStart, const int32_t selEnd)
 {
-    auto textCase = fontStyle ? fontStyle->GetTextCase().value_or(TextCase::NORMAL) : TextCase::NORMAL;
-    auto updateTextAction = [builder, textCase](const std::string& content, const std::optional<TextStyle>& textStyle) {
-        if (content.empty()) {
-            return;
-        }
-        auto displayText = content;
-        StringUtils::TransformStrCase(displayText, static_cast<int32_t>(textCase));
-        if (textStyle.has_value()) {
-            builder->PushStyle(textStyle.value());
-        }
-        builder->AddText(StringUtils::Str8ToStr16(displayText));
-        if (textStyle.has_value()) {
-            builder->PopStyle();
-        }
-    };
     if (!IsDragging()) {
-        updateTextAction(content, textStyle);
+        UpdateContentTextStyle(content, builder, textStyle);
     } else {
         if (content.empty()) {
             return;
         }
         auto displayContent = StringUtils::Str8ToStr16(content);
         auto contentLength = static_cast<int32_t>(displayContent.length());
-        auto beforeSelectedText = displayContent.substr(0, selectedStart);
-        updateTextAction(StringUtils::Str16ToStr8(beforeSelectedText), textStyle);
-
-        if (selectedStart < contentLength) {
+        if (selStart > 0) {
+            auto beforeSelectedText = displayContent.substr(0, selectedStart);
+            UpdateContentTextStyle(StringUtils::Str16ToStr8(beforeSelectedText), builder, textStyle);
+        }
+        auto finalSelStart = selStart;
+        if (finalSelStart < 0) {
+            finalSelStart = 0;
+        }
+        auto finalSelEnd = selEnd;
+        if (finalSelEnd < 0) {
+            finalSelEnd = 0;
+        }
+        if (finalSelEnd > 0 && finalSelEnd > contentLength) {
+            finalSelEnd = contentLength;
+        }
+        if (finalSelStart < contentLength) {
             auto pipelineContext = PipelineContext::GetCurrentContext();
             TextStyle normalStyle =
                 !pipelineContext ? TextStyle()
@@ -423,14 +426,32 @@ void SpanItem::UpdateTextStyle(
             TextStyle selectedTextStyle = textStyle.value_or(normalStyle);
             Color color = selectedTextStyle.GetTextColor().ChangeAlpha(DRAGGED_TEXT_OPACITY);
             selectedTextStyle.SetTextColor(color);
-            auto selectedText = displayContent.substr(selectedStart, selectedEnd - selectedStart);
-            updateTextAction(StringUtils::Str16ToStr8(selectedText), selectedTextStyle);
+            auto selectedText = displayContent.substr(finalSelStart, finalSelEnd - finalSelStart);
+            UpdateContentTextStyle(StringUtils::Str16ToStr8(selectedText), builder, selectedTextStyle);
         }
 
-        if (selectedEnd < contentLength) {
-            auto afterSelectedText = displayContent.substr(selectedEnd);
-            updateTextAction(StringUtils::Str16ToStr8(afterSelectedText), textStyle);
+        if (finalSelEnd < contentLength) {
+            auto afterSelectedText = displayContent.substr(finalSelEnd);
+            UpdateContentTextStyle(StringUtils::Str16ToStr8(afterSelectedText), builder, textStyle);
         }
+    }
+}
+
+void SpanItem::UpdateContentTextStyle(
+    const std::string& content, const RefPtr<Paragraph>& builder, const std::optional<TextStyle>& textStyle)
+{
+    if (content.empty()) {
+        return;
+    }
+    auto displayText = content;
+    auto textCase = fontStyle ? fontStyle->GetTextCase().value_or(TextCase::NORMAL) : TextCase::NORMAL;
+    StringUtils::TransformStrCase(displayText, static_cast<int32_t>(textCase));
+    if (textStyle.has_value()) {
+        builder->PushStyle(textStyle.value());
+    }
+    builder->AddText(StringUtils::Str8ToStr16(displayText));
+    if (textStyle.has_value()) {
+        builder->PopStyle();
     }
 }
 
@@ -458,7 +479,7 @@ uint32_t SpanItem::GetSymbolUnicode()
 void SpanItem::StartDrag(int32_t start, int32_t end)
 {
     selectedStart = std::max(0, start);
-    int contentLen = content.size();
+    int32_t contentLen = content.size();
     selectedEnd = std::min(contentLen, end);
 }
 
@@ -471,6 +492,68 @@ void SpanItem::EndDrag()
 bool SpanItem::IsDragging()
 {
     return selectedStart >= 0 && selectedEnd >= 0;
+}
+
+#define COPY_TEXT_STYLE(group, name, func)                          \
+    do {                                                            \
+        if ((group)->Has##name()) {                                 \
+            sameSpan->group->func((group)->prop##name.value());     \
+        }                                                           \
+    } while (false)
+
+RefPtr<SpanItem> SpanItem::GetSameStyleSpanItem() const
+{
+    auto sameSpan = MakeRefPtr<SpanItem>();
+    COPY_TEXT_STYLE(fontStyle, FontSize, UpdateFontSize);
+    COPY_TEXT_STYLE(fontStyle, TextColor, UpdateTextColor);
+    COPY_TEXT_STYLE(fontStyle, TextShadow, UpdateTextShadow);
+    COPY_TEXT_STYLE(fontStyle, ItalicFontStyle, UpdateItalicFontStyle);
+    COPY_TEXT_STYLE(fontStyle, FontWeight, UpdateFontWeight);
+    COPY_TEXT_STYLE(fontStyle, FontFamily, UpdateFontFamily);
+    COPY_TEXT_STYLE(fontStyle, FontFeature, UpdateFontFeature);
+    COPY_TEXT_STYLE(fontStyle, TextDecoration, UpdateTextDecoration);
+    COPY_TEXT_STYLE(fontStyle, TextDecorationColor, UpdateTextDecorationColor);
+    COPY_TEXT_STYLE(fontStyle, TextDecorationStyle, UpdateTextDecorationStyle);
+    COPY_TEXT_STYLE(fontStyle, TextCase, UpdateTextCase);
+    COPY_TEXT_STYLE(fontStyle, AdaptMinFontSize, UpdateAdaptMinFontSize);
+    COPY_TEXT_STYLE(fontStyle, AdaptMaxFontSize, UpdateAdaptMaxFontSize);
+    COPY_TEXT_STYLE(fontStyle, LetterSpacing, UpdateLetterSpacing);
+
+    COPY_TEXT_STYLE(textLineStyle, LineHeight, UpdateLineHeight);
+    COPY_TEXT_STYLE(textLineStyle, TextBaseline, UpdateTextBaseline);
+    COPY_TEXT_STYLE(textLineStyle, BaselineOffset, UpdateBaselineOffset);
+    COPY_TEXT_STYLE(textLineStyle, TextOverflow, UpdateTextOverflow);
+    COPY_TEXT_STYLE(textLineStyle, TextAlign, UpdateTextAlign);
+    COPY_TEXT_STYLE(textLineStyle, MaxLength, UpdateMaxLength);
+    COPY_TEXT_STYLE(textLineStyle, MaxLines, UpdateMaxLines);
+    COPY_TEXT_STYLE(textLineStyle, HeightAdaptivePolicy, UpdateHeightAdaptivePolicy);
+    COPY_TEXT_STYLE(textLineStyle, TextIndent, UpdateTextIndent);
+    COPY_TEXT_STYLE(textLineStyle, LeadingMargin, UpdateLeadingMargin);
+    COPY_TEXT_STYLE(textLineStyle, WordBreak, UpdateWordBreak);
+    COPY_TEXT_STYLE(textLineStyle, EllipsisMode, UpdateEllipsisMode);
+
+    if (backgroundStyle.has_value()) {
+        sameSpan->backgroundStyle->backgroundColor = backgroundStyle->backgroundColor;
+        sameSpan->backgroundStyle->backgroundRadius = backgroundStyle->backgroundRadius;
+        sameSpan->backgroundStyle->groupId = backgroundStyle->groupId;
+    }
+
+    sameSpan->onClick = onClick;
+    sameSpan->onLongPress = onLongPress;
+    return sameSpan;
+}
+
+std::optional<std::pair<int32_t, int32_t>> SpanItem::GetIntersectionInterval(std::pair<int32_t, int32_t> interval) const
+{
+    // Check the intersection
+    if (this->interval.second <= interval.first || interval.second <= this->interval.first) {
+        return std::nullopt;
+    }
+
+    // Calculate the intersection interval
+    int32_t start = std::max(this->interval.first, interval.first);
+    int32_t end = std::min(this->interval.second, interval.second);
+    return std::make_optional<std::pair<int32_t, int32_t>>(std::make_pair(start, end));
 }
 
 int32_t ImageSpanItem::UpdateParagraph(const RefPtr<FrameNode>& /* frameNode */, const RefPtr<Paragraph>& builder,

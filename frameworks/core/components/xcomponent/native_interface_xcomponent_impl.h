@@ -21,11 +21,15 @@
 #include <unistd.h>
 #include <vector>
 
+#include "interfaces/native/native_event.h"
 #include "interfaces/native/native_interface_xcomponent.h"
 #include "interfaces/native/ui_input_event.h"
 
 #include "base/memory/ace_type.h"
 #include "base/utils/utils.h"
+#include "core/components_ng/event/gesture_event_hub.h"
+
+using NativeXComponent_Surface_Callback = void (*)(OH_NativeXComponent*, void*);
 
 struct XComponentTouchPoint {
     float tiltX = 0.0f;
@@ -42,6 +46,8 @@ struct OH_NativeXComponent_KeyEvent {
     int64_t deviceId {};
     int64_t timestamp {};
 };
+
+using OnTouchIntercept_Callback = HitTestMode (*)(OH_NativeXComponent*, ArkUI_UIInputEvent*);
 
 namespace OHOS::Ace {
 class NativeXComponentImpl : public virtual AceType {
@@ -138,6 +144,26 @@ public:
     const OH_NativeXComponent_MouseEvent_Callback* GetMouseEventCallback()
     {
         return mouseEventCallback_;
+    }
+
+    NativeXComponent_Surface_Callback GetSurfaceShowCallback() const
+    {
+        return surfaceShowCallback_;
+    }
+
+    void SetSurfaceShowCallback(NativeXComponent_Surface_Callback callback)
+    {
+        surfaceShowCallback_ = callback;
+    }
+
+    NativeXComponent_Surface_Callback GetSurfaceHideCallback() const
+    {
+        return surfaceHideCallback_;
+    }
+
+    void SetSurfaceHideCallback(NativeXComponent_Surface_Callback callback)
+    {
+        surfaceHideCallback_ = callback;
     }
 
     void SetTouchEvent(const OH_NativeXComponent_TouchEvent touchEvent)
@@ -237,6 +263,16 @@ public:
     NativeXComponent_Callback GetBlurEventCallback() const
     {
         return blurEventCallback_;
+    }
+
+    void SetOnTouchInterceptCallback(OnTouchIntercept_Callback callback)
+    {
+        onTouchInterceptCallback_ = callback;
+    }
+
+    OnTouchIntercept_Callback GetOnTouchInterceptCallback()
+    {
+        return onTouchInterceptCallback_;
     }
 
     void SetFocusEventCallback(NativeXComponent_Callback callback)
@@ -350,6 +386,8 @@ private:
     OH_NativeXComponent_KeyEvent keyEvent_;
     OH_NativeXComponent_Callback* callback_ = nullptr;
     OH_NativeXComponent_MouseEvent_Callback* mouseEventCallback_ = nullptr;
+    NativeXComponent_Surface_Callback surfaceShowCallback_ = nullptr;
+    NativeXComponent_Surface_Callback surfaceHideCallback_ = nullptr;
     NativeXComponent_Callback focusEventCallback_ = nullptr;
     NativeXComponent_Callback keyEventCallback_ = nullptr;
     NativeXComponent_Callback blurEventCallback_ = nullptr;
@@ -360,6 +398,7 @@ private:
     OH_NativeXComponent_ExpectedRateRange* rateRange_ = nullptr;
     NativeNode_Callback attachNativeNodeCallback_ = nullptr;
     NativeNode_Callback detachNativeNodeCallback_ = nullptr;
+    OnTouchIntercept_Callback onTouchInterceptCallback_ = nullptr;
     void* container_;
     bool needSoftKeyboard_ = false;
 };
@@ -377,6 +416,8 @@ struct OH_NativeXComponent {
     int32_t GetHistoryPoints(const void* window, int32_t* size, OH_NativeXComponent_HistoricalPoint** historicalPoints);
     int32_t RegisterCallback(OH_NativeXComponent_Callback* callback);
     int32_t RegisterMouseEventCallback(OH_NativeXComponent_MouseEvent_Callback* callback);
+    int32_t RegisterSurfaceShowCallback(NativeXComponent_Surface_Callback callback);
+    int32_t RegisterSurfaceHideCallback(NativeXComponent_Surface_Callback callback);
     int32_t GetToolType(size_t pointIndex, OH_NativeXComponent_TouchPointToolType* toolType);
     int32_t GetTiltX(size_t pointIndex, float* tiltX);
     int32_t GetTiltY(size_t pointIndex, float* tiltY);
@@ -393,6 +434,8 @@ struct OH_NativeXComponent {
     int32_t RegisterUIAxisEventCallback(
         void (*callback)(OH_NativeXComponent* component, ArkUI_UIInputEvent* event, ArkUI_UIInputEvent_Type type));
     int32_t SetNeedSoftKeyboard(bool needSoftKeyboard);
+    int32_t RegisterOnTouchInterceptCallback(
+        HitTestMode (*callback)(OH_NativeXComponent* component, ArkUI_UIInputEvent* event));
 
 private:
     OHOS::Ace::NativeXComponentImpl* xcomponentImpl_ = nullptr;

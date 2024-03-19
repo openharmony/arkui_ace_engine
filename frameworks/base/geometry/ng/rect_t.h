@@ -362,7 +362,7 @@ public:
                 val += it;
             } else {
                 if (!val.empty()) {
-                    vals.push_back(StringUtils::StringToFloat(val));
+                    vals.emplace_back(StringUtils::StringToFloat(val));
                     val.clear();
                 }
             }

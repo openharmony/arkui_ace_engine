@@ -82,6 +82,7 @@ const Color BG_COLOR_VALUE = Color::FromRGB(100, 255, 100);
 const std::vector<SelectParam> CREATE_VALUE = { { OPTION_TEXT, FILE_SOURCE }, { OPTION_TEXT_2, INTERNAL_SOURCE },
     { OPTION_TEXT_3, INTERNAL_SOURCE } };
 constexpr int32_t PLATFORM_VERSION_ELEVEN = 11;
+constexpr int32_t PLATFORM_VERSION_TWELVE = 12;
 } // namespace
 struct TestProperty {
     std::optional<Dimension> FontSize = std::nullopt;
@@ -1453,6 +1454,38 @@ HWTEST_F(SelectTestNg, SetSelectedOptionFontFamily002, TestSize.Level1)
 }
 
 /**
+ * @tc.name: InspectorGetSelectedFont001
+ * @tc.desc: Test SelectPattern InspectorGetSelectedFont001
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectTestNg, InspectorGetSelectedFont001, TestSize.Level1)
+{
+    SelectModelNG model;
+    std::vector<SelectParam> params = { { OPTION_TEXT, FILE_SOURCE } };
+    model.Create(params);
+    ViewAbstract::SetWidth(CalcLength(100.f));
+    ViewAbstract::SetHeight(CalcLength(40.f));
+
+    RefPtr<UINode> element = ViewStackProcessor::GetInstance()->Finish();
+    auto frameNode = AceType::DynamicCast<FrameNode>(element);
+    auto pattern = frameNode->GetPattern<SelectPattern>();
+    frameNode->SetActive();
+    frameNode->isLayoutDirtyMarked_ = true;
+    frameNode->CreateLayoutTask();
+    frameNode->SetActive(false);
+    pattern->SetSelectedOptionItalicFontStyle(Ace::FontStyle::NORMAL);
+    std::vector<std::string> selectParams = { "select", "font", "family" };
+    pattern->SetSelectedOptionFontFamily(selectParams);
+    pattern->SetSelectedOptionFontSize(Dimension(20.00, DimensionUnit::VP));
+    pattern->SetSelectedOptionFontWeight(FontWeight::NORMAL);
+    pattern->InspectorGetSelectedFont();
+    EXPECT_TRUE(pattern->selectedFont_.FontStyle.has_value());
+    EXPECT_TRUE(pattern->selectedFont_.FontSize.has_value());
+    EXPECT_TRUE(pattern->selectedFont_.FontFamily.has_value());
+    EXPECT_TRUE(pattern->selectedFont_.FontWeight.has_value());
+}
+
+/**
  * @tc.name: SetSelectedOptionFontFamily003
  * @tc.desc: Test SelectPattern SetSelectedOptionFontFamily
  * @tc.type: FUNC
@@ -1822,5 +1855,37 @@ HWTEST_F(SelectTestNg, SelectLayoutPropertyTest006, TestSize.Level1)
     layoutWrapper->layoutWrapperBuilder_ = wrapperBuilder;
     layoutAlgorithm->Measure(layoutWrapper);
     EXPECT_NE(layoutWrapper->GetOrCreateChildByIndex(0), nullptr);
+}
+
+/**
+ * @tc.name: SelectControlSizeTest001
+ * @tc.desc: Test SelectPattern ControlSize.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectTestNg, SelectControlSizeTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create select model, select frame node and select pattern.
+     * @tc.expected: Objects are created successfully.
+     */
+    SelectModelNG selectModelInstance;
+    PipelineBase::GetCurrentContext()->SetMinPlatformVersion(PLATFORM_VERSION_TWELVE);
+    auto selectFrameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(selectFrameNode, nullptr);
+    auto selectPattern = selectFrameNode->GetPattern<SelectPattern>();
+    ASSERT_NE(selectPattern, nullptr);
+
+    /**
+     * @tc.steps: step2. Get ControlSize, compare the set value with the ControlSize.
+     * @tc.expected: SelectPattern's default ControlSize and ControlSize::NORMAL are equal.
+     */
+    EXPECT_EQ(selectPattern->GetControlSize(), ControlSize::NORMAL);
+
+    /**
+     * @tc.steps: step3. Call SetControlSize and get ControlSize, compare the set value with the ControlSize.
+     * @tc.expected: SelectPattern's ControlSize and the set value are equal.
+     */
+    selectModelInstance.SetControlSize(ControlSize::SMALL);
+    EXPECT_EQ(selectPattern->GetControlSize(), ControlSize::SMALL);
 }
 } // namespace OHOS::Ace::NG

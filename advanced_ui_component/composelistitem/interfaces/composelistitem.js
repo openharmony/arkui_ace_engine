@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,25 +13,28 @@
  * limitations under the License.
  */
 
+if (!("finalizeConstruction" in ViewPU.prototype)) {
+  Reflect.set(ViewPU.prototype, "finalizeConstruction", () => { });
+}
 export var IconType;
-!function(e){
-  e[e.BADGE=1] = "BADGE";
-  e[e.NORMAL_ICON=2] = "NORMAL_ICON";
-  e[e.SYSTEM_ICON=3] = "SYSTEM_ICON";
-  e[e.HEAD_SCULPTURE=4] = "HEAD_SCULPTURE";
-  e[e.APP_ICON=5] = "APP_ICON";
-  e[e.PREVIEW=6] = "PREVIEW";
-  e[e.LONGITUDINAL=7] = "LONGITUDINAL";
-  e[e.VERTICAL=8] = "VERTICAL"
-}(IconType || (IconType = {}));
+(function (v10) {
+  v10[v10["BADGE"] = 1] = "BADGE";
+  v10[v10["NORMAL_ICON"] = 2] = "NORMAL_ICON";
+  v10[v10["SYSTEM_ICON"] = 3] = "SYSTEM_ICON";
+  v10[v10["HEAD_SCULPTURE"] = 4] = "HEAD_SCULPTURE";
+  v10[v10["APP_ICON"] = 5] = "APP_ICON";
+  v10[v10["PREVIEW"] = 6] = "PREVIEW";
+  v10[v10["LONGITUDINAL"] = 7] = "LONGITUDINAL";
+  v10[v10["VERTICAL"] = 8] = "VERTICAL";
+})(IconType || (IconType = {}));
 var ItemHeight;
-!function(e){
-  e[e.FIRST_HEIGHT=48] = "FIRST_HEIGHT";
-  e[e.SECOND_HEIGHT=56] = "SECOND_HEIGHT";
-  e[e.THIRD_HEIGHT=64] = "THIRD_HEIGHT";
-  e[e.FOURTH_HEIGHT=72] = "FOURTH_HEIGHT";
-  e[e.FIFTH_HEIGHT=96] = "FIFTH_HEIGHT"
-}(ItemHeight || (ItemHeight = {}));
+(function (u10) {
+  u10[u10["FIRST_HEIGHT"] = 48] = "FIRST_HEIGHT";
+  u10[u10["SECOND_HEIGHT"] = 56] = "SECOND_HEIGHT";
+  u10[u10["THIRD_HEIGHT"] = 64] = "THIRD_HEIGHT";
+  u10[u10["FOURTH_HEIGHT"] = 72] = "FOURTH_HEIGHT";
+  u10[u10["FIFTH_HEIGHT"] = 96] = "FIFTH_HEIGHT";
+})(ItemHeight || (ItemHeight = {}));
 const TEXT_MAX_LINE = 1;
 const ITEM_BORDER_SHOWN = 2;
 const TEXT_COLUMN_SPACE = 4;
@@ -58,254 +61,279 @@ const OPERATEITEM_ICONLIKE_SIZE = 24;
 const OPERATEITEM_ARROW_WIDTH = 12;
 const OPERATEITEM_ICON_CLICKABLE_SIZE = 40;
 const OPERATEITEM_IMAGE_SIZE = 48;
-const HOVERING_COLOR = "#0d000000";
-const TOUCH_DOWN_COLOR = "#1a000000";
-const ACTIVED_COLOR = "#1a0a59f7";
-const ICON_SIZE_MAP = new Map([[IconType.BADGE, 8], [IconType.NORMAL_ICON, 16], [IconType.SYSTEM_ICON, 24], [IconType.HEAD_SCULPTURE, 40], [IconType.APP_ICON, 64], [IconType.PREVIEW, 96], [IconType.LONGITUDINAL, 96], [IconType.VERTICAL, 96]]);
-
+const HOVERING_COLOR = '#0d000000';
+const TOUCH_DOWN_COLOR = '#1a000000';
+const ACTIVED_COLOR = '#1a0a59f7';
+const RIGHT_CONTENT_NULL_LEFTWIDTH = '100%';
+const RIGHT_CONTENT_NULL_RIGHTWIDTH = '0vp';
+const LEFT_PART_WIDTH = 'calc(66% - 16vp)';
+const RIGHT_PART_WIDTH = '34%';
+const LEFT_ONLY_ARROW_WIDTH = 'calc(100% - 40vp)';
+const RIGHT_ONLY_ARROW_WIDTH = '24vp';
+const ICON_SIZE_MAP = new Map([
+  [IconType.BADGE, BADGE_SIZE],
+  [IconType.NORMAL_ICON, SMALL_ICON_SIZE],
+  [IconType.SYSTEM_ICON, SYSTEM_ICON_SIZE],
+  [IconType.HEAD_SCULPTURE, HEADSCULPTURE_SIZE],
+  [IconType.APP_ICON, APP_ICON_SIZE],
+  [IconType.PREVIEW, PREVIEW_SIZE],
+  [IconType.LONGITUDINAL, LONGITUDINAL_SIZE],
+  [IconType.VERTICAL, VERTICAL_SIZE]
+]);
 class ContentItemStruct extends ViewPU {
-  constructor(e, t, o, r = -1) {
-    super(e, o, r);
+  constructor(o10, p10, q10, r10 = -1, s10 = undefined, t10) {
+    super(o10, q10, r10, t10);
+    if (typeof s10 === "function") {
+      this.paramsGenerator_ = s10;
+    }
     this.iconStyle = null;
     this.icon = null;
     this.primaryText = null;
     this.secondaryText = null;
     this.description = null;
-    this.itemRowSpace = 16;
-    this.setInitiallyProvidedValue(t)
+    this.itemRowSpace = NORMAL_ITEM_ROW_SPACE;
+    this.__leftWidth = new ObservedPropertySimplePU(LEFT_PART_WIDTH, this, "leftWidth");
+    this.setInitiallyProvidedValue(p10);
+    this.finalizeConstruction();
   }
-
-  setInitiallyProvidedValue(e) {
-    void 0 !== e.iconStyle && (this.iconStyle = e.iconStyle);
-    void 0 !== e.icon && (this.icon = e.icon);
-    void 0 !== e.primaryText && (this.primaryText = e.primaryText);
-    void 0 !== e.secondaryText && (this.secondaryText = e.secondaryText);
-    void 0 !== e.description && (this.description = e.description);
-    void 0 !== e.itemRowSpace && (this.itemRowSpace = e.itemRowSpace)
+  setInitiallyProvidedValue(n10) {
+    if (n10.iconStyle !== undefined) {
+      this.iconStyle = n10.iconStyle;
+    }
+    if (n10.icon !== undefined) {
+      this.icon = n10.icon;
+    }
+    if (n10.primaryText !== undefined) {
+      this.primaryText = n10.primaryText;
+    }
+    if (n10.secondaryText !== undefined) {
+      this.secondaryText = n10.secondaryText;
+    }
+    if (n10.description !== undefined) {
+      this.description = n10.description;
+    }
+    if (n10.itemRowSpace !== undefined) {
+      this.itemRowSpace = n10.itemRowSpace;
+    }
+    if (n10.leftWidth !== undefined) {
+      this.leftWidth = n10.leftWidth;
+    }
   }
-
-  updateStateVars(e) {
+  updateStateVars(m10) {
   }
-
-  purgeVariableDependenciesOnElmtId(e) {
+  purgeVariableDependenciesOnElmtId(l10) {
+    this.__leftWidth.purgeDependencyOnElmtId(l10);
   }
-
   aboutToBeDeleted() {
+    this.__leftWidth.aboutToBeDeleted();
     SubscriberManager.Get().delete(this.id__());
-    this.aboutToBeDeletedInternal()
+    this.aboutToBeDeletedInternal();
   }
-
+  get leftWidth() {
+    return this.__leftWidth.get();
+  }
+  set leftWidth(k10) {
+    this.__leftWidth.set(k10);
+  }
   aboutToAppear() {
-    null == this.icon && null == this.iconStyle && (this.itemRowSpace = 0)
+    if (this.icon == null && this.iconStyle == null) {
+      this.itemRowSpace = SPECIAL_ITEM_ROW_SPACE;
+    }
   }
-
-  createIcon(e = null) {
-    this.observeComponentCreation(((e, t) => {
-      ViewStackProcessor.StartGetAccessRecordingFor(e);
+  createIcon(t9 = null) {
+    this.observeComponentCreation((v9, w9) => {
+      ViewStackProcessor.StartGetAccessRecordingFor(v9);
       If.create();
-      null != this.icon && null != this.iconStyle ? this.ifElseBranchUpdateFunction(0, (() => {
-        this.observeComponentCreation(((e, t) => {
-          ViewStackProcessor.StartGetAccessRecordingFor(e);
-          If.create();
-          this.iconStyle <= IconType.PREVIEW ? this.ifElseBranchUpdateFunction(0, (() => {
-            this.observeComponentCreation(((e, t) => {
-              ViewStackProcessor.StartGetAccessRecordingFor(e);
-              Image.create(this.icon);
-              Image.objectFit(ImageFit.Contain);
-              Image.width(ICON_SIZE_MAP.get(this.iconStyle));
-              Image.height(ICON_SIZE_MAP.get(this.iconStyle));
-              Image.borderRadius({
-                id: -1,
-                type: 10002,
-                params: ["sys.float.ohos_id_corner_radius_default_m"],
-                bundleName: "",
-                moduleName: ""
+      if (this.icon != null && this.iconStyle != null) {
+        this.ifElseBranchUpdateFunction(0, () => {
+          this.observeComponentCreation((a10, b10) => {
+            ViewStackProcessor.StartGetAccessRecordingFor(a10);
+            If.create();
+            if (this.iconStyle <= IconType.PREVIEW) {
+              this.ifElseBranchUpdateFunction(0, () => {
+                this.observeComponentCreation((i10, j10) => {
+                  ViewStackProcessor.StartGetAccessRecordingFor(i10);
+                  Image.create(this.icon);
+                  Image.objectFit(ImageFit.Contain);
+                  Image.width(ICON_SIZE_MAP.get(this.iconStyle));
+                  Image.height(ICON_SIZE_MAP.get(this.iconStyle));
+                  Image.borderRadius({ "id": -1, "type": 10002, params: ['sys.float.ohos_id_corner_radius_default_m'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" });
+                  Image.focusable(true);
+                  Image.draggable(false);
+                  Image.fillColor({ "id": -1, "type": 10001, params: ['sys.color.ohos_id_color_secondary'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" });
+                  if (!j10) {
+                    Image.pop();
+                  }
+                  ViewStackProcessor.StopGetAccessRecording();
+                });
               });
-              Image.focusable(!0);
-              Image.draggable(!1);
-              Image.fillColor({
-                id: -1,
-                type: 10001,
-                params: ['sys.color.ohos_id_color_secondary'],
-                bundleName: "",
-                moduleName: ""
+            }
+            else {
+              this.ifElseBranchUpdateFunction(1, () => {
+                this.observeComponentCreation((e10, f10) => {
+                  ViewStackProcessor.StartGetAccessRecordingFor(e10);
+                  Image.create(this.icon);
+                  Image.objectFit(ImageFit.Contain);
+                  Image.constraintSize({
+                    minWidth: SPECIAL_ICON_SIZE,
+                    maxWidth: ICON_SIZE_MAP.get(this.iconStyle),
+                    minHeight: SPECIAL_ICON_SIZE,
+                    maxHeight: ICON_SIZE_MAP.get(this.iconStyle)
+                  });
+                  Image.borderRadius({ "id": -1, "type": 10002, params: ['sys.float.ohos_id_corner_radius_default_m'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" });
+                  Image.focusable(true);
+                  Image.draggable(false);
+                  Image.fillColor({ "id": -1, "type": 10001, params: ['sys.color.ohos_id_color_secondary'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" });
+                  if (!f10) {
+                    Image.pop();
+                  }
+                  ViewStackProcessor.StopGetAccessRecording();
+                });
               });
-              t || Image.pop();
-              ViewStackProcessor.StopGetAccessRecording()
-            }))
-          })) : this.ifElseBranchUpdateFunction(1, (() => {
-            this.observeComponentCreation(((e, t) => {
-              ViewStackProcessor.StartGetAccessRecordingFor(e);
-              Image.create(this.icon);
-              Image.objectFit(ImageFit.Contain);
-              Image.constraintSize({
-                minWidth: 0,
-                maxWidth: ICON_SIZE_MAP.get(this.iconStyle),
-                minHeight: 0,
-                maxHeight: ICON_SIZE_MAP.get(this.iconStyle)
-              });
-              Image.borderRadius({
-                id: -1,
-                type: 10002,
-                params: ["sys.float.ohos_id_corner_radius_default_m"],
-                bundleName: "",
-                moduleName: ""
-              });
-              Image.focusable(!0);
-              Image.draggable(!1);
-              Image.fillColor({
-                id: -1,
-                type: 10001,
-                params: ['sys.color.ohos_id_color_secondary'],
-                bundleName: "",
-                moduleName: ""
-              });
-              t || Image.pop();
-              ViewStackProcessor.StopGetAccessRecording()
-            }))
-          }));
-          t || If.pop();
-          ViewStackProcessor.StopGetAccessRecording()
-        }));
-        If.pop()
-      })) : If.branchId(1);
-      t || If.pop();
-      ViewStackProcessor.StopGetAccessRecording()
-    }));
-    If.pop()
+            }
+            if (!b10) {
+              If.pop();
+            }
+            ViewStackProcessor.StopGetAccessRecording();
+          });
+          If.pop();
+        });
+      }
+      else {
+        this.ifElseBranchUpdateFunction(1, () => {
+        });
+      }
+      if (!w9) {
+        If.pop();
+      }
+      ViewStackProcessor.StopGetAccessRecording();
+    });
+    If.pop();
   }
-
-  createText(e = null) {
-    this.observeComponentCreation(((e, t) => {
-      ViewStackProcessor.StartGetAccessRecordingFor(e);
-      Column.create({ space: 4 });
+  createText(w8 = null) {
+    this.observeComponentCreation((r9, s9) => {
+      ViewStackProcessor.StartGetAccessRecordingFor(r9);
+      Column.create({ space: TEXT_COLUMN_SPACE });
       Column.flexShrink(1);
-      Column.margin({ top: 8, bottom: 8 });
+      Column.margin({
+        top: TEXT_SAFE_MARGIN,
+        bottom: TEXT_SAFE_MARGIN
+      });
       Column.alignItems(HorizontalAlign.Start);
-      t || Column.pop();
-      ViewStackProcessor.StopGetAccessRecording()
-    }));
-    this.observeComponentCreation(((e, t) => {
-      ViewStackProcessor.StartGetAccessRecordingFor(e);
+      if (!s9) {
+        Column.pop();
+      }
+      ViewStackProcessor.StopGetAccessRecording();
+    });
+    this.observeComponentCreation((p9, q9) => {
+      ViewStackProcessor.StartGetAccessRecordingFor(p9);
       Text.create(this.primaryText);
-      Text.fontSize({
-        id: -1,
-        type: 10002,
-        params: ["sys.float.ohos_id_text_size_body1"],
-        bundleName: "",
-        moduleName: ""
-      });
-      Text.fontColor({
-        id: -1,
-        type: 10001,
-        params: ["sys.color.ohos_id_color_text_primary"],
-        bundleName: "",
-        moduleName: ""
-      });
-      Text.maxLines(1);
+      Text.fontSize({ "id": -1, "type": 10002, params: ['sys.float.ohos_id_text_size_body1'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" });
+      Text.fontColor({ "id": -1, "type": 10001, params: ['sys.color.ohos_id_color_text_primary'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" });
+      Text.maxLines(TEXT_MAX_LINE);
       Text.textOverflow({ overflow: TextOverflow.Ellipsis });
       Text.fontWeight(FontWeight.Medium);
-      Text.focusable(!0);
-      Text.draggable(!1);
-      t || Text.pop();
-      ViewStackProcessor.StopGetAccessRecording()
-    }));
+      Text.focusable(true);
+      Text.draggable(false);
+      if (!q9) {
+        Text.pop();
+      }
+      ViewStackProcessor.StopGetAccessRecording();
+    });
     Text.pop();
-    this.observeComponentCreation(((e, t) => {
-      ViewStackProcessor.StartGetAccessRecordingFor(e);
+    this.observeComponentCreation((i9, j9) => {
+      ViewStackProcessor.StartGetAccessRecordingFor(i9);
       If.create();
-      null != this.secondaryText ? this.ifElseBranchUpdateFunction(0, (() => {
-        this.observeComponentCreation(((e, t) => {
-          ViewStackProcessor.StartGetAccessRecordingFor(e);
-          Text.create(this.secondaryText);
-          Text.fontSize({
-            id: -1,
-            type: 10002,
-            params: ["sys.float.ohos_id_text_size_body2"],
-            bundleName: "",
-            moduleName: ""
+      if (this.secondaryText != null) {
+        this.ifElseBranchUpdateFunction(0, () => {
+          this.observeComponentCreation((n9, o9) => {
+            ViewStackProcessor.StartGetAccessRecordingFor(n9);
+            Text.create(this.secondaryText);
+            Text.fontSize({ "id": -1, "type": 10002, params: ['sys.float.ohos_id_text_size_body2'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" });
+            Text.fontColor({ "id": -1, "type": 10001, params: ['sys.color.ohos_id_color_text_secondary'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" });
+            Text.maxLines(TEXT_MAX_LINE);
+            Text.textOverflow({ overflow: TextOverflow.Ellipsis });
+            Text.focusable(true);
+            Text.draggable(false);
+            if (!o9) {
+              Text.pop();
+            }
+            ViewStackProcessor.StopGetAccessRecording();
           });
-          Text.fontColor({
-            id: -1,
-            type: 10001,
-            params: ["sys.color.ohos_id_color_text_secondary"],
-            bundleName: "",
-            moduleName: ""
-          });
-          Text.maxLines(1);
-          Text.textOverflow({ overflow: TextOverflow.Ellipsis });
-          Text.focusable(!0);
-          Text.draggable(!1);
-          t || Text.pop();
-          ViewStackProcessor.StopGetAccessRecording()
-        }));
-        Text.pop()
-      })) : If.branchId(1);
-      t || If.pop();
-      ViewStackProcessor.StopGetAccessRecording()
-    }));
+          Text.pop();
+        });
+      }
+      else {
+        this.ifElseBranchUpdateFunction(1, () => {
+        });
+      }
+      if (!j9) {
+        If.pop();
+      }
+      ViewStackProcessor.StopGetAccessRecording();
+    });
     If.pop();
-    this.observeComponentCreation(((e, t) => {
-      ViewStackProcessor.StartGetAccessRecordingFor(e);
+    this.observeComponentCreation((b9, c9) => {
+      ViewStackProcessor.StartGetAccessRecordingFor(b9);
       If.create();
-      null != this.description ? this.ifElseBranchUpdateFunction(0, (() => {
-        this.observeComponentCreation(((e, t) => {
-          ViewStackProcessor.StartGetAccessRecordingFor(e);
-          Text.create(this.description);
-          Text.fontSize({
-            id: -1,
-            type: 10002,
-            params: ["sys.float.ohos_id_text_size_body2"],
-            bundleName: "",
-            moduleName: ""
+      if (this.description != null) {
+        this.ifElseBranchUpdateFunction(0, () => {
+          this.observeComponentCreation((g9, h9) => {
+            ViewStackProcessor.StartGetAccessRecordingFor(g9);
+            Text.create(this.description);
+            Text.fontSize({ "id": -1, "type": 10002, params: ['sys.float.ohos_id_text_size_body2'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" });
+            Text.fontColor({ "id": -1, "type": 10001, params: ['sys.color.ohos_id_color_text_secondary'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" });
+            Text.maxLines(TEXT_MAX_LINE);
+            Text.textOverflow({ overflow: TextOverflow.Ellipsis });
+            Text.focusable(true);
+            Text.draggable(false);
+            if (!h9) {
+              Text.pop();
+            }
+            ViewStackProcessor.StopGetAccessRecording();
           });
-          Text.fontColor({
-            id: -1,
-            type: 10001,
-            params: ["sys.color.ohos_id_color_text_secondary"],
-            bundleName: "",
-            moduleName: ""
-          });
-          Text.maxLines(1);
-          Text.textOverflow({ overflow: TextOverflow.Ellipsis });
-          Text.focusable(!0);
-          Text.draggable(!1);
-          t || Text.pop();
-          ViewStackProcessor.StopGetAccessRecording()
-        }));
-        Text.pop()
-      })) : If.branchId(1);
-      t || If.pop();
-      ViewStackProcessor.StopGetAccessRecording()
-    }));
+          Text.pop();
+        });
+      }
+      else {
+        this.ifElseBranchUpdateFunction(1, () => {
+        });
+      }
+      if (!c9) {
+        If.pop();
+      }
+      ViewStackProcessor.StopGetAccessRecording();
+    });
     If.pop();
-    Column.pop()
+    Column.pop();
   }
-
   initialRender() {
-    this.observeComponentCreation(((e, t) => {
-      ViewStackProcessor.StartGetAccessRecordingFor(e);
+    this.observeComponentCreation((u8, v8) => {
+      ViewStackProcessor.StartGetAccessRecordingFor(u8);
       Row.create({ space: this.itemRowSpace });
       Row.margin({ right: 16 });
-      Row.padding({ left: 8 });
-      Row.width("calc(66% - 16vp)");
+      Row.padding({ left: LISTITEM_PADDING });
+      Row.width(this.leftWidth);
       Row.flexShrink(1);
-      t || Row.pop();
-      ViewStackProcessor.StopGetAccessRecording()
-    }));
+      if (!v8) {
+        Row.pop();
+      }
+      ViewStackProcessor.StopGetAccessRecording();
+    });
     this.createIcon.bind(this)();
     this.createText.bind(this)();
-    Row.pop()
+    Row.pop();
   }
-
   rerender() {
-    this.updateDirtyElements()
+    this.updateDirtyElements();
   }
 }
-
 class OperateItemStruct extends ViewPU {
-  constructor(e, t, o, r = -1) {
-    super(e, o, r);
+  constructor(n8, o8, p8, q8 = -1, r8 = undefined, s8) {
+    super(n8, p8, q8, s8);
+    if (typeof r8 === "function") {
+      this.paramsGenerator_ = r8;
+    }
     this.arrow = null;
     this.icon = null;
     this.subIcon = null;
@@ -315,54 +343,83 @@ class OperateItemStruct extends ViewPU {
     this.radio = null;
     this.image = null;
     this.text = null;
-    this.__switchState = new ObservedPropertySimplePU(!1, this, "switchState");
-    this.__radioState = new ObservedPropertySimplePU(!1, this, "radioState");
-    this.__checkBoxState = new ObservedPropertySimplePU(!1, this, "checkBoxState");
-    this.__parentCanFocus = new SynchedPropertySimpleTwoWayPU(t.parentCanFocus, this, "parentCanFocus");
-    this.__parentCanTouch = new SynchedPropertySimpleTwoWayPU(t.parentCanTouch, this, "parentCanTouch");
-    this.__parentIsHover = new SynchedPropertySimpleTwoWayPU(t.parentIsHover, this, "parentIsHover");
-    this.__parentCanHover = new SynchedPropertySimpleTwoWayPU(t.parentCanHover, this, "parentCanHover");
-    this.__parentIsActive = new SynchedPropertySimpleTwoWayPU(t.parentIsActive, this, "parentIsActive");
-    this.__parentFrontColor = new SynchedPropertySimpleTwoWayPU(t.parentFrontColor, this, "parentFrontColor");
-    this.rowSpace = 0;
-    this.setInitiallyProvidedValue(t)
+    this.__switchState = new ObservedPropertySimplePU(false, this, "switchState");
+    this.__radioState = new ObservedPropertySimplePU(false, this, "radioState");
+    this.__checkBoxState = new ObservedPropertySimplePU(false, this, "checkBoxState");
+    this.__rightWidth = new ObservedPropertySimplePU(RIGHT_PART_WIDTH, this, "rightWidth");
+    this.__parentCanFocus = new SynchedPropertySimpleTwoWayPU(o8.parentCanFocus, this, "parentCanFocus");
+    this.__parentCanTouch = new SynchedPropertySimpleTwoWayPU(o8.parentCanTouch, this, "parentCanTouch");
+    this.__parentIsHover = new SynchedPropertySimpleTwoWayPU(o8.parentIsHover, this, "parentIsHover");
+    this.__parentCanHover = new SynchedPropertySimpleTwoWayPU(o8.parentCanHover, this, "parentCanHover");
+    this.__parentIsActive = new SynchedPropertySimpleTwoWayPU(o8.parentIsActive, this, "parentIsActive");
+    this.__parentFrontColor = new SynchedPropertySimpleTwoWayPU(o8.parentFrontColor, this, "parentFrontColor");
+    this.rowSpace = DEFAULT_ROW_SPACE;
+    this.setInitiallyProvidedValue(o8);
+    this.finalizeConstruction();
   }
-
-  setInitiallyProvidedValue(e) {
-    void 0 !== e.arrow && (this.arrow = e.arrow);
-    void 0 !== e.icon && (this.icon = e.icon);
-    void 0 !== e.subIcon && (this.subIcon = e.subIcon);
-    void 0 !== e.button && (this.button = e.button);
-    void 0 !== e.switch && (this.switch = e.switch);
-    void 0 !== e.checkBox && (this.checkBox = e.checkBox);
-    void 0 !== e.radio && (this.radio = e.radio);
-    void 0 !== e.image && (this.image = e.image);
-    void 0 !== e.text && (this.text = e.text);
-    void 0 !== e.switchState && (this.switchState = e.switchState);
-    void 0 !== e.radioState && (this.radioState = e.radioState);
-    void 0 !== e.checkBoxState && (this.checkBoxState = e.checkBoxState);
-    void 0 !== e.rowSpace && (this.rowSpace = e.rowSpace)
+  setInitiallyProvidedValue(m8) {
+    if (m8.arrow !== undefined) {
+      this.arrow = m8.arrow;
+    }
+    if (m8.icon !== undefined) {
+      this.icon = m8.icon;
+    }
+    if (m8.subIcon !== undefined) {
+      this.subIcon = m8.subIcon;
+    }
+    if (m8.button !== undefined) {
+      this.button = m8.button;
+    }
+    if (m8.switch !== undefined) {
+      this.switch = m8.switch;
+    }
+    if (m8.checkBox !== undefined) {
+      this.checkBox = m8.checkBox;
+    }
+    if (m8.radio !== undefined) {
+      this.radio = m8.radio;
+    }
+    if (m8.image !== undefined) {
+      this.image = m8.image;
+    }
+    if (m8.text !== undefined) {
+      this.text = m8.text;
+    }
+    if (m8.switchState !== undefined) {
+      this.switchState = m8.switchState;
+    }
+    if (m8.radioState !== undefined) {
+      this.radioState = m8.radioState;
+    }
+    if (m8.checkBoxState !== undefined) {
+      this.checkBoxState = m8.checkBoxState;
+    }
+    if (m8.rightWidth !== undefined) {
+      this.rightWidth = m8.rightWidth;
+    }
+    if (m8.rowSpace !== undefined) {
+      this.rowSpace = m8.rowSpace;
+    }
   }
-
-  updateStateVars(e) {
+  updateStateVars(l8) {
   }
-
-  purgeVariableDependenciesOnElmtId(e) {
-    this.__switchState.purgeDependencyOnElmtId(e);
-    this.__radioState.purgeDependencyOnElmtId(e);
-    this.__checkBoxState.purgeDependencyOnElmtId(e);
-    this.__parentCanFocus.purgeDependencyOnElmtId(e);
-    this.__parentCanTouch.purgeDependencyOnElmtId(e);
-    this.__parentIsHover.purgeDependencyOnElmtId(e);
-    this.__parentCanHover.purgeDependencyOnElmtId(e);
-    this.__parentIsActive.purgeDependencyOnElmtId(e);
-    this.__parentFrontColor.purgeDependencyOnElmtId(e)
+  purgeVariableDependenciesOnElmtId(k8) {
+    this.__switchState.purgeDependencyOnElmtId(k8);
+    this.__radioState.purgeDependencyOnElmtId(k8);
+    this.__checkBoxState.purgeDependencyOnElmtId(k8);
+    this.__rightWidth.purgeDependencyOnElmtId(k8);
+    this.__parentCanFocus.purgeDependencyOnElmtId(k8);
+    this.__parentCanTouch.purgeDependencyOnElmtId(k8);
+    this.__parentIsHover.purgeDependencyOnElmtId(k8);
+    this.__parentCanHover.purgeDependencyOnElmtId(k8);
+    this.__parentIsActive.purgeDependencyOnElmtId(k8);
+    this.__parentFrontColor.purgeDependencyOnElmtId(k8);
   }
-
   aboutToBeDeleted() {
     this.__switchState.aboutToBeDeleted();
     this.__radioState.aboutToBeDeleted();
     this.__checkBoxState.aboutToBeDeleted();
+    this.__rightWidth.aboutToBeDeleted();
     this.__parentCanFocus.aboutToBeDeleted();
     this.__parentCanTouch.aboutToBeDeleted();
     this.__parentIsHover.aboutToBeDeleted();
@@ -370,589 +427,670 @@ class OperateItemStruct extends ViewPU {
     this.__parentIsActive.aboutToBeDeleted();
     this.__parentFrontColor.aboutToBeDeleted();
     SubscriberManager.Get().delete(this.id__());
-    this.aboutToBeDeletedInternal()
+    this.aboutToBeDeletedInternal();
   }
-
   get switchState() {
-    return this.__switchState.get()
+    return this.__switchState.get();
   }
-
-  set switchState(e) {
-    this.__switchState.set(e)
+  set switchState(j8) {
+    this.__switchState.set(j8);
   }
-
   get radioState() {
-    return this.__radioState.get()
+    return this.__radioState.get();
   }
-
-  set radioState(e) {
-    this.__radioState.set(e)
+  set radioState(i8) {
+    this.__radioState.set(i8);
   }
-
   get checkBoxState() {
-    return this.__checkBoxState.get()
+    return this.__checkBoxState.get();
   }
-
-  set checkBoxState(e) {
-    this.__checkBoxState.set(e)
+  set checkBoxState(h8) {
+    this.__checkBoxState.set(h8);
   }
-
+  get rightWidth() {
+    return this.__rightWidth.get();
+  }
+  set rightWidth(g8) {
+    this.__rightWidth.set(g8);
+  }
   get parentCanFocus() {
-    return this.__parentCanFocus.get()
+    return this.__parentCanFocus.get();
   }
-
-  set parentCanFocus(e) {
-    this.__parentCanFocus.set(e)
+  set parentCanFocus(f8) {
+    this.__parentCanFocus.set(f8);
   }
-
   get parentCanTouch() {
-    return this.__parentCanTouch.get()
+    return this.__parentCanTouch.get();
   }
-
-  set parentCanTouch(e) {
-    this.__parentCanTouch.set(e)
+  set parentCanTouch(e8) {
+    this.__parentCanTouch.set(e8);
   }
-
   get parentIsHover() {
-    return this.__parentIsHover.get()
+    return this.__parentIsHover.get();
   }
-
-  set parentIsHover(e) {
-    this.__parentIsHover.set(e)
+  set parentIsHover(d8) {
+    this.__parentIsHover.set(d8);
   }
-
   get parentCanHover() {
-    return this.__parentCanHover.get()
+    return this.__parentCanHover.get();
   }
-
-  set parentCanHover(e) {
-    this.__parentCanHover.set(e)
+  set parentCanHover(c8) {
+    this.__parentCanHover.set(c8);
   }
-
   get parentIsActive() {
-    return this.__parentIsActive.get()
+    return this.__parentIsActive.get();
   }
-
-  set parentIsActive(e) {
-    this.__parentIsActive.set(e)
+  set parentIsActive(b8) {
+    this.__parentIsActive.set(b8);
   }
-
   get parentFrontColor() {
-    return this.__parentFrontColor.get()
+    return this.__parentFrontColor.get();
   }
-
-  set parentFrontColor(e) {
-    this.__parentFrontColor.set(e)
+  set parentFrontColor(a8) {
+    this.__parentFrontColor.set(a8);
   }
-
   aboutToAppear() {
-    null != this.switch && (this.switchState = this.switch.isCheck);
-    null != this.radio && (this.radioState = this.radio.isCheck);
-    null != this.checkBox && (this.checkBoxState = this.checkBox.isCheck);
-    (null == this.button && null == this.image && null != this.icon && null != this.text || null == this.button && null == this.image && null == this.icon && null != this.arrow && null != this.text) && (this.rowSpace = 4)
+    if (this.switch != null) {
+      this.switchState = this.switch.isCheck;
+    }
+    if (this.radio != null) {
+      this.radioState = this.radio.isCheck;
+    }
+    if (this.checkBox != null) {
+      this.checkBoxState = this.checkBox.isCheck;
+    }
+    if ((this.button == null && this.image == null && this.icon != null && this.text != null) ||
+      (this.button == null && this.image == null && this.icon == null && this.arrow != null && this.text != null)) {
+      this.rowSpace = SPECICAL_ROW_SPACE;
+    }
   }
-
-  createButton(e, t = null) {
-    this.observeComponentCreation(((e, t) => {
-      ViewStackProcessor.StartGetAccessRecordingFor(e);
+  createButton(k7, l7 = null) {
+    this.observeComponentCreation((t7, u7) => {
+      ViewStackProcessor.StartGetAccessRecordingFor(t7);
       Button.createWithChild();
-      Button.margin({ right: 8 });
+      Button.margin({ right: LISTITEM_PADDING });
       Button.hitTestBehavior(HitTestMode.Block);
-      Button.fontSize({
-        id: -1,
-        type: 10002,
-        params: ["sys.float.ohos_id_text_size_button3"],
-        bundleName: "",
-        moduleName: ""
+      Button.fontSize({ "id": -1, "type": 10002, params: ['sys.float.ohos_id_text_size_button3'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" });
+      Button.fontColor({ "id": -1, "type": 10001, params: ['sys.color.ohos_id_color_text_primary_activated_transparent'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" });
+      Button.height(BUTTON_SIZE);
+      Button.backgroundColor({ "id": -1, "type": 10001, params: ['sys.color.ohos_id_color_button_normal'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" });
+      Button.labelStyle({
+        maxLines: TEXT_MAX_LINE
       });
-      Button.fontColor({
-        id: -1,
-        type: 10001,
-        params: ["sys.color.ohos_id_color_text_primary_activated_transparent"],
-        bundleName: "",
-        moduleName: ""
+      Button.onFocus(() => {
+        this.parentCanFocus = false;
       });
-      Button.height(28);
-      Button.backgroundColor({
-        id: -1,
-        type: 10001,
-        params: ["sys.color.ohos_id_color_button_normal"],
-        bundleName: "",
-        moduleName: ""
-      });
-      Button.labelStyle({ maxLines: 1 });
-      Button.onFocus((() => {
-        this.parentCanFocus = !1
-      }));
-      Button.onTouch((e => {
-        e.type == TouchType.Down && (this.parentCanTouch = !1);
-        e.type == TouchType.Up && (this.parentCanTouch = !0)
-      }));
-      Button.onHover((e => {
-        this.parentCanHover = !1;
-        e && "#0d000000" == this.parentFrontColor && (this.parentFrontColor = this.parentIsActive ? "#1a0a59f7" : Color.Transparent.toString());
-        if (!e) {
-          this.parentCanHover = !0;
-          this.parentIsHover && (this.parentFrontColor = this.parentIsHover ? "#0d000000" : this.parentIsActive ? "#1a0a59f7" : Color.Transparent.toString())
+      Button.onTouch((z7) => {
+        if (z7.type == TouchType.Down) {
+          this.parentCanTouch = false;
         }
-      }));
-      t || Button.pop();
-      ViewStackProcessor.StopGetAccessRecording()
-    }));
-    this.observeComponentCreation(((e, t) => {
-      ViewStackProcessor.StartGetAccessRecordingFor(e);
+        if (z7.type == TouchType.Up) {
+          this.parentCanTouch = true;
+        }
+      });
+      Button.onHover((y7) => {
+        this.parentCanHover = false;
+        if (y7 && this.parentFrontColor == HOVERING_COLOR) {
+          this.parentFrontColor = this.parentIsActive ? ACTIVED_COLOR : Color.Transparent.toString();
+        }
+        if (!y7) {
+          this.parentCanHover = true;
+          if (this.parentIsHover) {
+            this.parentFrontColor = this.parentIsHover ? HOVERING_COLOR : (this.parentIsActive ? ACTIVED_COLOR : Color.Transparent.toString());
+          }
+        }
+      });
+      if (!u7) {
+        Button.pop();
+      }
+      ViewStackProcessor.StopGetAccessRecording();
+    });
+    this.observeComponentCreation((r7, s7) => {
+      ViewStackProcessor.StartGetAccessRecordingFor(r7);
       Row.create();
-      Row.padding({ left: 8, right: 8 });
-      t || Row.pop();
-      ViewStackProcessor.StopGetAccessRecording()
-    }));
-    this.observeComponentCreation(((t, o) => {
-      ViewStackProcessor.StartGetAccessRecordingFor(t);
-      Text.create(e);
-      Text.focusable(!0);
-      o || Text.pop();
-      ViewStackProcessor.StopGetAccessRecording()
-    }));
+      Row.padding({
+        left: TEXT_SAFE_MARGIN,
+        right: TEXT_SAFE_MARGIN
+      });
+      if (!s7) {
+        Row.pop();
+      }
+      ViewStackProcessor.StopGetAccessRecording();
+    });
+    this.observeComponentCreation((p7, q7) => {
+      ViewStackProcessor.StartGetAccessRecordingFor(p7);
+      Text.create(k7);
+      Text.focusable(true);
+      if (!q7) {
+        Text.pop();
+      }
+      ViewStackProcessor.StopGetAccessRecording();
+    });
     Text.pop();
     Row.pop();
-    Button.pop()
+    Button.pop();
   }
-
-  createIcon(e, t = null) {
-    this.observeComponentCreation(((t, o) => {
-      ViewStackProcessor.StartGetAccessRecordingFor(t);
+  createIcon(x6, y6 = null) {
+    this.observeComponentCreation((d7, e7) => {
+      ViewStackProcessor.StartGetAccessRecordingFor(d7);
       Button.createWithChild({ type: ButtonType.Normal });
       Button.hitTestBehavior(HitTestMode.Block);
       Button.backgroundColor(Color.Transparent);
-      Button.height(40);
-      Button.width(40);
-      Button.borderRadius({
-        id: -1,
-        type: 10002,
-        params: ["sys.float.ohos_id_corner_radius_clicked"],
-        bundleName: "",
-        moduleName: ""
+      Button.height(OPERATEITEM_ICON_CLICKABLE_SIZE);
+      Button.width(OPERATEITEM_ICON_CLICKABLE_SIZE);
+      Button.borderRadius({ "id": -1, "type": 10002, params: ['sys.float.ohos_id_corner_radius_clicked'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" });
+      Button.onFocus(() => {
+        this.parentCanFocus = false;
       });
-      Button.onFocus((() => {
-        this.parentCanFocus = !1
-      }));
-      Button.onTouch((e => {
-        e.type == TouchType.Down && (this.parentCanTouch = !1);
-        e.type == TouchType.Up && (this.parentCanTouch = !0)
-      }));
-      Button.onHover((e => {
-        this.parentCanHover = !1;
-        e && "#0d000000" == this.parentFrontColor && (this.parentFrontColor = this.parentIsActive ? "#1a0a59f7" : Color.Transparent.toString());
-        if (!e) {
-          this.parentCanHover = !0;
-          this.parentIsHover && (this.parentFrontColor = this.parentIsHover ? "#0d000000" : this.parentIsActive ? "#1a0a59f7" : Color.Transparent.toString())
+      Button.onTouch((j7) => {
+        if (j7.type == TouchType.Down) {
+          this.parentCanTouch = false;
         }
-      }));
-      Button.onClick(e.action);
-      o || Button.pop();
-      ViewStackProcessor.StopGetAccessRecording()
-    }));
-    this.observeComponentCreation(((t, o) => {
-      ViewStackProcessor.StartGetAccessRecordingFor(t);
-      Image.create(e.value);
-      Image.height(24);
-      Image.width(24);
-      Image.focusable(!0);
-      Image.fillColor({
-        id: -1,
-        type: 10001,
-        params: ["sys.color.ohos_id_color_primary"],
-        bundleName: "",
-        moduleName: ""
+        if (j7.type == TouchType.Up) {
+          this.parentCanTouch = true;
+        }
       });
-      Image.draggable(!1);
-      o || Image.pop();
-      ViewStackProcessor.StopGetAccessRecording()
-    }));
-    Button.pop()
+      Button.onHover((i7) => {
+        this.parentCanHover = false;
+        if (i7 && this.parentFrontColor == HOVERING_COLOR) {
+          this.parentFrontColor = this.parentIsActive ? ACTIVED_COLOR : Color.Transparent.toString();
+        }
+        if (!i7) {
+          this.parentCanHover = true;
+          if (this.parentIsHover) {
+            this.parentFrontColor = this.parentIsHover ? HOVERING_COLOR : (this.parentIsActive ? ACTIVED_COLOR : Color.Transparent.toString());
+          }
+        }
+      });
+      Button.onClick((x6.action));
+      if (!e7) {
+        Button.pop();
+      }
+      ViewStackProcessor.StopGetAccessRecording();
+    });
+    this.observeComponentCreation((b7, c7) => {
+      ViewStackProcessor.StartGetAccessRecordingFor(b7);
+      Image.create(x6.value);
+      Image.height(OPERATEITEM_ICONLIKE_SIZE);
+      Image.width(OPERATEITEM_ICONLIKE_SIZE);
+      Image.focusable(true);
+      Image.fillColor({ "id": -1, "type": 10001, params: ['sys.color.ohos_id_color_primary'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" });
+      Image.draggable(false);
+      if (!c7) {
+        Image.pop();
+      }
+      ViewStackProcessor.StopGetAccessRecording();
+    });
+    Button.pop();
   }
-
-  createImage(e, t = null) {
-    this.observeComponentCreation(((t, o) => {
-      ViewStackProcessor.StartGetAccessRecordingFor(t);
-      Image.create(e);
-      Image.height(48);
-      Image.width(48);
-      Image.draggable(!1);
-      Image.margin({ right: 8 });
-      o || Image.pop();
-      ViewStackProcessor.StopGetAccessRecording()
-    }))
+  createImage(s6, t6 = null) {
+    this.observeComponentCreation((v6, w6) => {
+      ViewStackProcessor.StartGetAccessRecordingFor(v6);
+      Image.create(s6);
+      Image.height(OPERATEITEM_IMAGE_SIZE);
+      Image.width(OPERATEITEM_IMAGE_SIZE);
+      Image.draggable(false);
+      Image.margin({ right: LISTITEM_PADDING });
+      if (!w6) {
+        Image.pop();
+      }
+      ViewStackProcessor.StopGetAccessRecording();
+    });
   }
-
-  createText(e, t = null) {
-    this.observeComponentCreation(((t, o) => {
-      ViewStackProcessor.StartGetAccessRecordingFor(t);
-      Text.create(e);
-      Text.margin({ right: 8 });
-      Text.fontSize({
-        id: -1,
-        type: 10002,
-        params: ["sys.float.ohos_id_text_size_body2"],
-        bundleName: "",
-        moduleName: ""
-      });
-      Text.fontColor({
-        id: -1,
-        type: 10001,
-        params: ["sys.color.ohos_id_color_text_secondary"],
-        bundleName: "",
-        moduleName: ""
-      });
-      Text.focusable(!0);
-      Text.draggable(!1);
+  createText(n6, o6 = null) {
+    this.observeComponentCreation((q6, r6) => {
+      ViewStackProcessor.StartGetAccessRecordingFor(q6);
+      Text.create(n6);
+      Text.margin({ right: LISTITEM_PADDING });
+      Text.fontSize({ "id": -1, "type": 10002, params: ['sys.float.ohos_id_text_size_body2'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" });
+      Text.fontColor({ "id": -1, "type": 10001, params: ['sys.color.ohos_id_color_text_secondary'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" });
+      Text.focusable(true);
+      Text.draggable(false);
       Text.flexShrink(1);
-      o || Text.pop();
-      ViewStackProcessor.StopGetAccessRecording()
-    }));
-    Text.pop()
-  }
-
-  createArrow(e, t = null) {
-    this.observeComponentCreation(((t, o) => {
-      ViewStackProcessor.StartGetAccessRecordingFor(t);
-      Button.createWithChild({ type: ButtonType.Normal });
-      Button.margin({ right: 8 });
-      Button.hitTestBehavior(HitTestMode.Block);
-      Button.backgroundColor(Color.Transparent);
-      Button.height(24);
-      Button.width(12);
-      Button.onFocus((() => {
-        this.parentCanFocus = !1
-      }));
-      Button.onTouch((e => {
-        e.type == TouchType.Down && (this.parentCanTouch = !1);
-        e.type == TouchType.Up && (this.parentCanTouch = !0)
-      }));
-      Button.onHover((e => {
-        this.parentCanHover = !1;
-        e && "#0d000000" == this.parentFrontColor && (this.parentFrontColor = this.parentIsActive ? "#1a0a59f7" : Color.Transparent.toString());
-        if (!e) {
-          this.parentCanHover = !0;
-          this.parentIsHover && (this.parentFrontColor = this.parentIsHover ? "#0d000000" : this.parentIsActive ? "#1a0a59f7" : Color.Transparent.toString())
-        }
-      }));
-      Button.onClick(e.action);
-      o || Button.pop();
-      ViewStackProcessor.StopGetAccessRecording()
-    }));
-    this.observeComponentCreation(((t, o) => {
-      ViewStackProcessor.StartGetAccessRecordingFor(t);
-      Image.create(e.value);
-      Image.height(24);
-      Image.width(12);
-      Image.focusable(!0);
-      Image.fillColor({
-        id: -1,
-        type: 10001,
-        params: ["sys.color.ohos_id_color_fourth"],
-        bundleName: "",
-        moduleName: ""
-      });
-      Image.draggable(!1);
-      o || Image.pop();
-      ViewStackProcessor.StopGetAccessRecording()
-    }));
-    Button.pop()
-  }
-
-  createRadio(e, t = null) {
-    this.observeComponentCreation(((t, o) => {
-      ViewStackProcessor.StartGetAccessRecordingFor(t);
-      Radio.create({ value: null, group: null });
-      Radio.margin({ right: 8 });
-      Radio.checked(this.radioState);
-      Radio.onChange(e.onChange);
-      Radio.height(24);
-      Radio.width(24);
-      Radio.onFocus((() => {
-        this.parentCanFocus = !1
-      }));
-      Radio.hitTestBehavior(HitTestMode.Block);
-      Radio.onTouch((e => {
-        e.type == TouchType.Down && (this.parentCanTouch = !1);
-        e.type == TouchType.Up && (this.parentCanTouch = !0)
-      }));
-      Radio.onHover((e => {
-        this.parentCanHover = !1;
-        e && "#0d000000" == this.parentFrontColor && (this.parentFrontColor = this.parentIsActive ? "#1a0a59f7" : Color.Transparent.toString());
-        if (!e) {
-          this.parentCanHover = !0;
-          this.parentIsHover && (this.parentFrontColor = this.parentIsHover ? "#0d000000" : this.parentIsActive ? "#1a0a59f7" : Color.Transparent.toString())
-        }
-      }));
-      o || Radio.pop();
-      ViewStackProcessor.StopGetAccessRecording()
-    }))
-  }
-
-  createCheckBox(e, t = null) {
-    this.observeComponentCreation(((t, o) => {
-      ViewStackProcessor.StartGetAccessRecordingFor(t);
-      Checkbox.create();
-      Checkbox.margin({ right: 8 });
-      Checkbox.select(this.checkBoxState);
-      Checkbox.onChange(e.onChange);
-      Checkbox.height(24);
-      Checkbox.height(24);
-      Checkbox.onFocus((() => {
-        this.parentCanFocus = !1
-      }));
-      Checkbox.hitTestBehavior(HitTestMode.Block);
-      Checkbox.onTouch((e => {
-        e.type == TouchType.Down && (this.parentCanTouch = !1);
-        e.type == TouchType.Up && (this.parentCanTouch = !0)
-      }));
-      Checkbox.onHover((e => {
-        this.parentCanHover = !1;
-        e && "#0d000000" == this.parentFrontColor && (this.parentFrontColor = this.parentIsActive ? "#1a0a59f7" : Color.Transparent.toString());
-        if (!e) {
-          this.parentCanHover = !0;
-          this.parentIsHover && (this.parentFrontColor = this.parentIsHover ? "#0d000000" : this.parentIsActive ? "#1a0a59f7" : Color.Transparent.toString())
-        }
-      }));
-      o || Checkbox.pop();
-      ViewStackProcessor.StopGetAccessRecording()
-    }));
-    Checkbox.pop()
-  }
-
-  createSwitch(e, t = null) {
-    this.observeComponentCreation(((e, t) => {
-      ViewStackProcessor.StartGetAccessRecordingFor(e);
-      Row.create();
-      Row.margin({ right: 6 });
-      Row.height(40);
-      Row.width(40);
-      Row.justifyContent(FlexAlign.Center);
-      Row.onFocus((() => {
-        this.parentCanFocus = !1
-      }));
-      Row.onTouch((e => {
-        e.type == TouchType.Down && (this.parentCanTouch = !1);
-        e.type == TouchType.Up && (this.parentCanTouch = !0)
-      }));
-      Row.onHover((e => {
-        this.parentCanHover = !1;
-        e && "#0d000000" == this.parentFrontColor && (this.parentFrontColor = this.parentIsActive ? "#1a0a59f7" : Color.Transparent.toString());
-        if (!e) {
-          this.parentCanHover = !0;
-          this.parentIsHover && (this.parentFrontColor = this.parentIsHover ? "#0d000000" : this.parentIsActive ? "#1a0a59f7" : Color.Transparent.toString())
-        }
-      }));
-      t || Row.pop();
-      ViewStackProcessor.StopGetAccessRecording()
-    }));
-    this.observeComponentCreation(((t, o) => {
-      ViewStackProcessor.StartGetAccessRecordingFor(t);
-      Toggle.create({ type: ToggleType.Switch, isOn: this.switchState });
-      Toggle.onChange(e.onChange);
-      Toggle.onClick((() => {
-        this.switchState = !this.switchState
-      }));
-      Toggle.hitTestBehavior(HitTestMode.Block);
-      o || Toggle.pop();
-      ViewStackProcessor.StopGetAccessRecording()
-    }));
-    Toggle.pop();
-    Row.pop()
-  }
-
-  createTextArrow(e, t, o = null) {
-    this.observeComponentCreation(((e, o) => {
-      ViewStackProcessor.StartGetAccessRecordingFor(e);
-      Button.createWithChild({ type: ButtonType.Normal });
-      Button.hitTestBehavior(HitTestMode.Block);
-      Button.labelStyle({ maxLines: 1 });
-      Button.backgroundColor(Color.Transparent);
-      Button.height(32);
-      Button.borderRadius({
-        id: -1,
-        type: 10002,
-        params: ["sys.float.ohos_id_corner_radius_clicked"],
-        bundleName: "",
-        moduleName: ""
-      });
-      Button.onFocus((() => {
-        this.parentCanFocus = !1
-      }));
-      Button.onTouch((e => {
-        e.type == TouchType.Down && (this.parentCanTouch = !1);
-        e.type == TouchType.Up && (this.parentCanTouch = !0)
-      }));
-      Button.onHover((e => {
-        this.parentCanHover = !1;
-        e && "#0d000000" == this.parentFrontColor && (this.parentFrontColor = this.parentIsActive ? "#1a0a59f7" : Color.Transparent.toString());
-        if (!e) {
-          this.parentCanHover = !0;
-          this.parentIsHover && (this.parentFrontColor = this.parentIsHover ? "#0d000000" : this.parentIsActive ? "#1a0a59f7" : Color.Transparent.toString())
-        }
-      }));
-      Button.onClick(t.action);
-      o || Button.pop();
-      ViewStackProcessor.StopGetAccessRecording()
-    }));
-    this.observeComponentCreation(((e, t) => {
-      ViewStackProcessor.StartGetAccessRecordingFor(e);
-      Row.create({ space: 4 });
-      Row.padding({ left: 8, right: 8 });
-      t || Row.pop();
-      ViewStackProcessor.StopGetAccessRecording()
-    }));
-    this.observeComponentCreation(((t, o) => {
-      ViewStackProcessor.StartGetAccessRecordingFor(t);
-      Text.create(e);
-      Text.fontSize({
-        id: -1,
-        type: 10002,
-        params: ["sys.float.ohos_id_text_size_body2"],
-        bundleName: "",
-        moduleName: ""
-      });
-      Text.fontColor({
-        id: -1,
-        type: 10001,
-        params: ["sys.color.ohos_id_color_text_secondary"],
-        bundleName: "",
-        moduleName: ""
-      });
-      Text.focusable(!0);
-      Text.draggable(!1);
-      Text.constraintSize({ maxWidth: 'calc(100% - 12vp)' });
-      o || Text.pop();
-      ViewStackProcessor.StopGetAccessRecording()
-    }));
+      if (!r6) {
+        Text.pop();
+      }
+      ViewStackProcessor.StopGetAccessRecording();
+    });
     Text.pop();
-    this.observeComponentCreation(((e, o) => {
-      ViewStackProcessor.StartGetAccessRecordingFor(e);
-      Image.create(t.value);
-      Image.height(24);
-      Image.width(12);
-      Image.fillColor({
-        id: -1,
-        type: 10001,
-        params: ["sys.color.ohos_id_color_fourth"],
-        bundleName: "",
-        moduleName: ""
-      });
-      Image.focusable(!0);
-      Image.draggable(!1);
-      o || Image.pop();
-      ViewStackProcessor.StopGetAccessRecording()
-    }));
-    Row.pop();
-    Button.pop()
   }
-
+  createArrow(a6, b6 = null) {
+    this.observeComponentCreation((g6, h6) => {
+      ViewStackProcessor.StartGetAccessRecordingFor(g6);
+      Button.createWithChild({ type: ButtonType.Normal });
+      Button.margin({ right: LISTITEM_PADDING });
+      Button.hitTestBehavior(HitTestMode.Block);
+      Button.backgroundColor(Color.Transparent);
+      Button.height(OPERATEITEM_ICONLIKE_SIZE);
+      Button.width(OPERATEITEM_ARROW_WIDTH);
+      Button.onFocus(() => {
+        this.parentCanFocus = false;
+      });
+      Button.onTouch((m6) => {
+        if (m6.type == TouchType.Down) {
+          this.parentCanTouch = false;
+        }
+        if (m6.type == TouchType.Up) {
+          this.parentCanTouch = true;
+        }
+      });
+      Button.onHover((l6) => {
+        this.parentCanHover = false;
+        if (l6 && this.parentFrontColor == HOVERING_COLOR) {
+          this.parentFrontColor = this.parentIsActive ? ACTIVED_COLOR : Color.Transparent.toString();
+        }
+        if (!l6) {
+          this.parentCanHover = true;
+          if (this.parentIsHover) {
+            this.parentFrontColor = this.parentIsHover ? HOVERING_COLOR : (this.parentIsActive ? ACTIVED_COLOR : Color.Transparent.toString());
+          }
+        }
+      });
+      Button.onClick(a6.action);
+      if (!h6) {
+        Button.pop();
+      }
+      ViewStackProcessor.StopGetAccessRecording();
+    });
+    this.observeComponentCreation((e6, f6) => {
+      ViewStackProcessor.StartGetAccessRecordingFor(e6);
+      Image.create(a6.value);
+      Image.height(OPERATEITEM_ICONLIKE_SIZE);
+      Image.width(OPERATEITEM_ARROW_WIDTH);
+      Image.focusable(true);
+      Image.fillColor({ "id": -1, "type": 10001, params: ['sys.color.ohos_id_color_fourth'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" });
+      Image.draggable(false);
+      if (!f6) {
+        Image.pop();
+      }
+      ViewStackProcessor.StopGetAccessRecording();
+    });
+    Button.pop();
+  }
+  createRadio(q5, r5 = null) {
+    this.observeComponentCreation((t5, u5) => {
+      ViewStackProcessor.StartGetAccessRecordingFor(t5);
+      Radio.create({ value: '', group: '' });
+      Radio.margin({ right: LISTITEM_PADDING });
+      Radio.checked(this.radioState);
+      Radio.onChange(q5.onChange);
+      Radio.height(OPERATEITEM_ICONLIKE_SIZE);
+      Radio.width(OPERATEITEM_ICONLIKE_SIZE);
+      Radio.onFocus(() => {
+        this.parentCanFocus = false;
+      });
+      Radio.hitTestBehavior(HitTestMode.Block);
+      Radio.onTouch((z5) => {
+        if (z5.type == TouchType.Down) {
+          this.parentCanTouch = false;
+        }
+        if (z5.type == TouchType.Up) {
+          this.parentCanTouch = true;
+        }
+      });
+      Radio.onHover((y5) => {
+        this.parentCanHover = false;
+        if (y5 && this.parentFrontColor == HOVERING_COLOR) {
+          this.parentFrontColor = this.parentIsActive ? ACTIVED_COLOR : Color.Transparent.toString();
+        }
+        if (!y5) {
+          this.parentCanHover = true;
+          if (this.parentIsHover) {
+            this.parentFrontColor = this.parentIsHover ? HOVERING_COLOR : (this.parentIsActive ? ACTIVED_COLOR : Color.Transparent.toString());
+          }
+        }
+      });
+      if (!u5) {
+        Radio.pop();
+      }
+      ViewStackProcessor.StopGetAccessRecording();
+    });
+  }
+  createCheckBox(g5, h5 = null) {
+    this.observeComponentCreation((j5, k5) => {
+      ViewStackProcessor.StartGetAccessRecordingFor(j5);
+      Checkbox.create();
+      Checkbox.margin({ right: LISTITEM_PADDING });
+      Checkbox.select(this.checkBoxState);
+      Checkbox.onChange(g5.onChange);
+      Checkbox.height(OPERATEITEM_ICONLIKE_SIZE);
+      Checkbox.height(OPERATEITEM_ICONLIKE_SIZE);
+      Checkbox.onFocus(() => {
+        this.parentCanFocus = false;
+      });
+      Checkbox.hitTestBehavior(HitTestMode.Block);
+      Checkbox.onTouch((p5) => {
+        if (p5.type == TouchType.Down) {
+          this.parentCanTouch = false;
+        }
+        if (p5.type == TouchType.Up) {
+          this.parentCanTouch = true;
+        }
+      });
+      Checkbox.onHover((o5) => {
+        this.parentCanHover = false;
+        if (o5 && this.parentFrontColor == HOVERING_COLOR) {
+          this.parentFrontColor = this.parentIsActive ? ACTIVED_COLOR : Color.Transparent.toString();
+        }
+        if (!o5) {
+          this.parentCanHover = true;
+          if (this.parentIsHover) {
+            this.parentFrontColor = this.parentIsHover ? HOVERING_COLOR : (this.parentIsActive ? ACTIVED_COLOR : Color.Transparent.toString());
+          }
+        }
+      });
+      if (!k5) {
+        Checkbox.pop();
+      }
+      ViewStackProcessor.StopGetAccessRecording();
+    });
+    Checkbox.pop();
+  }
+  createSwitch(s4, t4 = null) {
+    this.observeComponentCreation((z4, a5) => {
+      ViewStackProcessor.StartGetAccessRecordingFor(z4);
+      Row.create();
+      Row.margin({ right: SWITCH_PADDING });
+      Row.height(OPERATEITEM_ICON_CLICKABLE_SIZE);
+      Row.width(OPERATEITEM_ICON_CLICKABLE_SIZE);
+      Row.justifyContent(FlexAlign.Center);
+      Row.onFocus(() => {
+        this.parentCanFocus = false;
+      });
+      Row.onTouch((f5) => {
+        if (f5.type == TouchType.Down) {
+          this.parentCanTouch = false;
+        }
+        if (f5.type == TouchType.Up) {
+          this.parentCanTouch = true;
+        }
+      });
+      Row.onHover((e5) => {
+        this.parentCanHover = false;
+        if (e5 && this.parentFrontColor == HOVERING_COLOR) {
+          this.parentFrontColor = this.parentIsActive ? ACTIVED_COLOR : Color.Transparent.toString();
+        }
+        if (!e5) {
+          this.parentCanHover = true;
+          if (this.parentIsHover) {
+            this.parentFrontColor = this.parentIsHover ? HOVERING_COLOR : (this.parentIsActive ? ACTIVED_COLOR : Color.Transparent.toString());
+          }
+        }
+      });
+      if (!a5) {
+        Row.pop();
+      }
+      ViewStackProcessor.StopGetAccessRecording();
+    });
+    this.observeComponentCreation((w4, x4) => {
+      ViewStackProcessor.StartGetAccessRecordingFor(w4);
+      Toggle.create({ type: ToggleType.Switch, isOn: this.switchState });
+      Toggle.onChange(s4.onChange);
+      Toggle.onClick(() => {
+        this.switchState = !this.switchState;
+      });
+      Toggle.hitTestBehavior(HitTestMode.Block);
+      if (!x4) {
+        Toggle.pop();
+      }
+      ViewStackProcessor.StopGetAccessRecording();
+    });
+    Toggle.pop();
+    Row.pop();
+  }
+  createTextArrow(y3, z3, a4 = null) {
+    this.observeComponentCreation((l4, m4) => {
+      ViewStackProcessor.StartGetAccessRecordingFor(l4);
+      Button.createWithChild({ type: ButtonType.Normal });
+      Button.hitTestBehavior(HitTestMode.Block);
+      Button.labelStyle({
+        maxLines: TEXT_MAX_LINE
+      });
+      Button.backgroundColor(Color.Transparent);
+      Button.height(TEXT_ARROW_HEIGHT);
+      Button.borderRadius({ "id": -1, "type": 10002, params: ['sys.float.ohos_id_corner_radius_clicked'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" });
+      Button.onFocus(() => {
+        this.parentCanFocus = false;
+      });
+      Button.onTouch((r4) => {
+        if (r4.type == TouchType.Down) {
+          this.parentCanTouch = false;
+        }
+        if (r4.type == TouchType.Up) {
+          this.parentCanTouch = true;
+        }
+      });
+      Button.onHover((q4) => {
+        this.parentCanHover = false;
+        if (q4 && this.parentFrontColor == HOVERING_COLOR) {
+          this.parentFrontColor = this.parentIsActive ? ACTIVED_COLOR : Color.Transparent.toString();
+        }
+        if (!q4) {
+          this.parentCanHover = true;
+          if (this.parentIsHover) {
+            this.parentFrontColor = this.parentIsHover ? HOVERING_COLOR : (this.parentIsActive ? ACTIVED_COLOR : Color.Transparent.toString());
+          }
+        }
+      });
+      Button.onClick(z3.action);
+      if (!m4) {
+        Button.pop();
+      }
+      ViewStackProcessor.StopGetAccessRecording();
+    });
+    this.observeComponentCreation((j4, k4) => {
+      ViewStackProcessor.StartGetAccessRecordingFor(j4);
+      Row.create({ space: SPECICAL_ROW_SPACE });
+      Row.padding({
+        left: TEXT_SAFE_MARGIN,
+        right: TEXT_SAFE_MARGIN
+      });
+      if (!k4) {
+        Row.pop();
+      }
+      ViewStackProcessor.StopGetAccessRecording();
+    });
+    this.observeComponentCreation((h4, i4) => {
+      ViewStackProcessor.StartGetAccessRecordingFor(h4);
+      Text.create(y3);
+      Text.fontSize({ "id": -1, "type": 10002, params: ['sys.float.ohos_id_text_size_body2'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" });
+      Text.fontColor({ "id": -1, "type": 10001, params: ['sys.color.ohos_id_color_text_secondary'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" });
+      Text.focusable(true);
+      Text.draggable(false);
+      Text.constraintSize({
+        maxWidth: `calc(100% - ${OPERATEITEM_ARROW_WIDTH}vp)`
+      });
+      if (!i4) {
+        Text.pop();
+      }
+      ViewStackProcessor.StopGetAccessRecording();
+    });
+    Text.pop();
+    this.observeComponentCreation((f4, g4) => {
+      ViewStackProcessor.StartGetAccessRecordingFor(f4);
+      Image.create(z3.value);
+      Image.height(OPERATEITEM_ICONLIKE_SIZE);
+      Image.width(OPERATEITEM_ARROW_WIDTH);
+      Image.fillColor({ "id": -1, "type": 10001, params: ['sys.color.ohos_id_color_fourth'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" });
+      Image.focusable(true);
+      Image.draggable(false);
+      if (!g4) {
+        Image.pop();
+      }
+      ViewStackProcessor.StopGetAccessRecording();
+    });
+    Row.pop();
+    Button.pop();
+  }
   initialRender() {
-    this.observeComponentCreation(((e, t) => {
-      ViewStackProcessor.StartGetAccessRecordingFor(e);
-      Row.create({ space: this.rowSpace });
-      Row.width("34%");
+    this.observeComponentCreation((w3, x3) => {
+      ViewStackProcessor.StartGetAccessRecordingFor(w3);
+      Row.create({
+        space: this.rowSpace
+      });
+      Row.width(this.rightWidth);
       Row.flexShrink(1);
       Row.justifyContent(FlexAlign.End);
-      t || Row.pop();
-      ViewStackProcessor.StopGetAccessRecording()
-    }));
-    this.observeComponentCreation(((e, t) => {
-      ViewStackProcessor.StartGetAccessRecordingFor(e);
+      if (!x3) {
+        Row.pop();
+      }
+      ViewStackProcessor.StopGetAccessRecording();
+    });
+    this.observeComponentCreation((e3, f3) => {
+      ViewStackProcessor.StartGetAccessRecordingFor(e3);
       If.create();
-      null != this.button ? this.ifElseBranchUpdateFunction(0, (() => {
-        this.createButton.bind(this)(this.button.text)
-      })) : null != this.image ? this.ifElseBranchUpdateFunction(1, (() => {
-        this.createImage.bind(this)(this.image)
-      })) : null != this.icon && null != this.text ? this.ifElseBranchUpdateFunction(2, (() => {
-        this.createText.bind(this)(this.text);
-        this.createIcon.bind(this)(this.icon)
-      })) : null != this.arrow && null == this.text ? this.ifElseBranchUpdateFunction(3, (() => {
-        this.createArrow.bind(this)(this.arrow)
-      })) : null != this.arrow && null != this.text ? this.ifElseBranchUpdateFunction(4, (() => {
-        this.createTextArrow.bind(this)(this.text, this.arrow)
-      })) : null != this.text ? this.ifElseBranchUpdateFunction(5, (() => {
-        this.createText.bind(this)(this.text)
-      })) : null != this.radio ? this.ifElseBranchUpdateFunction(6, (() => {
-        this.createRadio.bind(this)(this.radio)
-      })) : null != this.checkBox ? this.ifElseBranchUpdateFunction(7, (() => {
-        this.createCheckBox.bind(this)(this.checkBox)
-      })) : null != this.switch ? this.ifElseBranchUpdateFunction(8, (() => {
-        this.createSwitch.bind(this)(this.switch)
-      })) : null != this.icon && this.ifElseBranchUpdateFunction(9, (() => {
-        this.createIcon.bind(this)(this.icon);
-        this.observeComponentCreation(((e, t) => {
-          ViewStackProcessor.StartGetAccessRecordingFor(e);
-          If.create();
-          null != this.subIcon ? this.ifElseBranchUpdateFunction(0, (() => {
-            this.createIcon.bind(this)(this.subIcon)
-          })) : If.branchId(1);
-          t || If.pop();
-          ViewStackProcessor.StopGetAccessRecording()
-        }));
-        If.pop()
-      }));
-      t || If.pop();
-      ViewStackProcessor.StopGetAccessRecording()
-    }));
+      if (this.button != null) {
+        this.ifElseBranchUpdateFunction(0, () => {
+          this.createButton.bind(this)(this.button.text);
+        });
+      }
+      else if (this.image != null) {
+        this.ifElseBranchUpdateFunction(1, () => {
+          this.createImage.bind(this)(this.image);
+        });
+      }
+      else if (this.icon != null && this.text != null) {
+        this.ifElseBranchUpdateFunction(2, () => {
+          this.createText.bind(this)(this.text);
+          this.createIcon.bind(this)(this.icon);
+        });
+      }
+      else if (this.arrow != null && this.text == null) {
+        this.ifElseBranchUpdateFunction(3, () => {
+          this.createArrow.bind(this)(this.arrow);
+        });
+      }
+      else if (this.arrow != null && this.text != null) {
+        this.ifElseBranchUpdateFunction(4, () => {
+          this.createTextArrow.bind(this)(this.text, this.arrow);
+        });
+      }
+      else if (this.text != null) {
+        this.ifElseBranchUpdateFunction(5, () => {
+          this.createText.bind(this)(this.text);
+        });
+      }
+      else if (this.radio != null) {
+        this.ifElseBranchUpdateFunction(6, () => {
+          this.createRadio.bind(this)(this.radio);
+        });
+      }
+      else if (this.checkBox != null) {
+        this.ifElseBranchUpdateFunction(7, () => {
+          this.createCheckBox.bind(this)(this.checkBox);
+        });
+      }
+      else if (this.switch != null) {
+        this.ifElseBranchUpdateFunction(8, () => {
+          this.createSwitch.bind(this)(this.switch);
+        });
+      }
+      else if (this.icon != null) {
+        this.ifElseBranchUpdateFunction(9, () => {
+          this.createIcon.bind(this)(this.icon);
+          this.observeComponentCreation((j3, k3) => {
+            ViewStackProcessor.StartGetAccessRecordingFor(j3);
+            If.create();
+            if (this.subIcon != null) {
+              this.ifElseBranchUpdateFunction(0, () => {
+                this.createIcon.bind(this)(this.subIcon);
+              });
+            }
+            else {
+              this.ifElseBranchUpdateFunction(1, () => {
+              });
+            }
+            if (!k3) {
+              If.pop();
+            }
+            ViewStackProcessor.StopGetAccessRecording();
+          });
+          If.pop();
+        });
+      }
+      else {
+        this.ifElseBranchUpdateFunction(10, () => {
+        });
+      }
+      if (!f3) {
+        If.pop();
+      }
+      ViewStackProcessor.StopGetAccessRecording();
+    });
     If.pop();
-    Row.pop()
+    Row.pop();
   }
-
   rerender() {
-    this.updateDirtyElements()
+    this.updateDirtyElements();
   }
 }
-
 export class ComposeListItem extends ViewPU {
-  constructor(e, t, o, r = -1) {
-    super(e, o, r);
-    this.__contentItem = new SynchedPropertyObjectOneWayPU(t.contentItem, this, "contentItem");
-    this.__operateItem = new SynchedPropertyObjectOneWayPU(t.operateItem, this, "operateItem");
+  constructor(w2, x2, y2, z2 = -1, a3 = undefined, b3) {
+    super(w2, y2, z2, b3);
+    if (typeof a3 === "function") {
+      this.paramsGenerator_ = a3;
+    }
+    this.__contentItem = new SynchedPropertyObjectOneWayPU(x2.contentItem, this, "contentItem");
+    this.__operateItem = new SynchedPropertyObjectOneWayPU(x2.operateItem, this, "operateItem");
     this.__frontColor = new ObservedPropertySimplePU(Color.Transparent.toString(), this, "frontColor");
     this.__borderSize = new ObservedPropertySimplePU(0, this, "borderSize");
-    this.__canFocus = new ObservedPropertySimplePU(!1, this, "canFocus");
-    this.__canTouch = new ObservedPropertySimplePU(!0, this, "canTouch");
-    this.__canHover = new ObservedPropertySimplePU(!0, this, "canHover");
-    this.__isHover = new ObservedPropertySimplePU(!0, this, "isHover");
+    this.__canFocus = new ObservedPropertySimplePU(false, this, "canFocus");
+    this.__canTouch = new ObservedPropertySimplePU(true, this, "canTouch");
+    this.__canHover = new ObservedPropertySimplePU(true, this, "canHover");
+    this.__isHover = new ObservedPropertySimplePU(true, this, "isHover");
     this.__itemHeight = new ObservedPropertySimplePU(ItemHeight.FIRST_HEIGHT, this, "itemHeight");
-    this.__isActive = new ObservedPropertySimplePU(!1, this, "isActive");
-    this.setInitiallyProvidedValue(t)
+    this.__isActive = new ObservedPropertySimplePU(false, this, "isActive");
+    this.setInitiallyProvidedValue(x2);
+    this.finalizeConstruction();
   }
-
-  setInitiallyProvidedValue(e) {
-    void 0 !== e.contentItem ? this.__contentItem.set(e.contentItem) : this.__contentItem.set(null);
-    void 0 !== e.operateItem ? this.__operateItem.set(e.operateItem) : this.__operateItem.set(null);
-    void 0 !== e.frontColor && (this.frontColor = e.frontColor);
-    void 0 !== e.borderSize && (this.borderSize = e.borderSize);
-    void 0 !== e.canFocus && (this.canFocus = e.canFocus);
-    void 0 !== e.canTouch && (this.canTouch = e.canTouch);
-    void 0 !== e.canHover && (this.canHover = e.canHover);
-    void 0 !== e.isHover && (this.isHover = e.isHover);
-    void 0 !== e.itemHeight && (this.itemHeight = e.itemHeight);
-    void 0 !== e.isActive && (this.isActive = e.isActive)
+  setInitiallyProvidedValue(v2) {
+    if (v2.contentItem === undefined) {
+      this.__contentItem.set(null);
+    }
+    if (v2.operateItem === undefined) {
+      this.__operateItem.set(null);
+    }
+    if (v2.frontColor !== undefined) {
+      this.frontColor = v2.frontColor;
+    }
+    if (v2.borderSize !== undefined) {
+      this.borderSize = v2.borderSize;
+    }
+    if (v2.canFocus !== undefined) {
+      this.canFocus = v2.canFocus;
+    }
+    if (v2.canTouch !== undefined) {
+      this.canTouch = v2.canTouch;
+    }
+    if (v2.canHover !== undefined) {
+      this.canHover = v2.canHover;
+    }
+    if (v2.isHover !== undefined) {
+      this.isHover = v2.isHover;
+    }
+    if (v2.itemHeight !== undefined) {
+      this.itemHeight = v2.itemHeight;
+    }
+    if (v2.isActive !== undefined) {
+      this.isActive = v2.isActive;
+    }
   }
-
-  updateStateVars(e) {
-    this.__contentItem.reset(e.contentItem);
-    this.__operateItem.reset(e.operateItem)
+  updateStateVars(u2) {
+    this.__contentItem.reset(u2.contentItem);
+    this.__operateItem.reset(u2.operateItem);
   }
-
-  purgeVariableDependenciesOnElmtId(e) {
-    this.__contentItem.purgeDependencyOnElmtId(e);
-    this.__operateItem.purgeDependencyOnElmtId(e);
-    this.__frontColor.purgeDependencyOnElmtId(e);
-    this.__borderSize.purgeDependencyOnElmtId(e);
-    this.__canFocus.purgeDependencyOnElmtId(e);
-    this.__canTouch.purgeDependencyOnElmtId(e);
-    this.__canHover.purgeDependencyOnElmtId(e);
-    this.__isHover.purgeDependencyOnElmtId(e);
-    this.__itemHeight.purgeDependencyOnElmtId(e);
-    this.__isActive.purgeDependencyOnElmtId(e)
+  purgeVariableDependenciesOnElmtId(t2) {
+    this.__contentItem.purgeDependencyOnElmtId(t2);
+    this.__operateItem.purgeDependencyOnElmtId(t2);
+    this.__frontColor.purgeDependencyOnElmtId(t2);
+    this.__borderSize.purgeDependencyOnElmtId(t2);
+    this.__canFocus.purgeDependencyOnElmtId(t2);
+    this.__canTouch.purgeDependencyOnElmtId(t2);
+    this.__canHover.purgeDependencyOnElmtId(t2);
+    this.__isHover.purgeDependencyOnElmtId(t2);
+    this.__itemHeight.purgeDependencyOnElmtId(t2);
+    this.__isActive.purgeDependencyOnElmtId(t2);
   }
-
   aboutToBeDeleted() {
     this.__contentItem.aboutToBeDeleted();
     this.__operateItem.aboutToBeDeleted();
@@ -965,264 +1103,350 @@ export class ComposeListItem extends ViewPU {
     this.__itemHeight.aboutToBeDeleted();
     this.__isActive.aboutToBeDeleted();
     SubscriberManager.Get().delete(this.id__());
-    this.aboutToBeDeletedInternal()
+    this.aboutToBeDeletedInternal();
   }
-
   get contentItem() {
-    return this.__contentItem.get()
+    return this.__contentItem.get();
   }
-
-  set contentItem(e) {
-    this.__contentItem.set(e)
+  set contentItem(s2) {
+    this.__contentItem.set(s2);
   }
-
   get operateItem() {
-    return this.__operateItem.get()
+    return this.__operateItem.get();
   }
-
-  set operateItem(e) {
-    this.__operateItem.set(e)
+  set operateItem(r2) {
+    this.__operateItem.set(r2);
   }
-
   get frontColor() {
-    return this.__frontColor.get()
+    return this.__frontColor.get();
   }
-
-  set frontColor(e) {
-    this.__frontColor.set(e)
+  set frontColor(q2) {
+    this.__frontColor.set(q2);
   }
-
   get borderSize() {
-    return this.__borderSize.get()
+    return this.__borderSize.get();
   }
-
-  set borderSize(e) {
-    this.__borderSize.set(e)
+  set borderSize(p2) {
+    this.__borderSize.set(p2);
   }
-
   get canFocus() {
-    return this.__canFocus.get()
+    return this.__canFocus.get();
   }
-
-  set canFocus(e) {
-    this.__canFocus.set(e)
+  set canFocus(o2) {
+    this.__canFocus.set(o2);
   }
-
   get canTouch() {
-    return this.__canTouch.get()
+    return this.__canTouch.get();
   }
-
-  set canTouch(e) {
-    this.__canTouch.set(e)
+  set canTouch(n2) {
+    this.__canTouch.set(n2);
   }
-
   get canHover() {
-    return this.__canHover.get()
+    return this.__canHover.get();
   }
-
-  set canHover(e) {
-    this.__canHover.set(e)
+  set canHover(m2) {
+    this.__canHover.set(m2);
   }
-
   get isHover() {
-    return this.__isHover.get()
+    return this.__isHover.get();
   }
-
-  set isHover(e) {
-    this.__isHover.set(e)
+  set isHover(l2) {
+    this.__isHover.set(l2);
   }
-
   get itemHeight() {
-    return this.__itemHeight.get()
+    return this.__itemHeight.get();
   }
-
-  set itemHeight(e) {
-    this.__itemHeight.set(e)
+  set itemHeight(k2) {
+    this.__itemHeight.set(k2);
   }
-
   get isActive() {
-    return this.__isActive.get()
+    return this.__isActive.get();
   }
-
-  set isActive(e) {
-    this.__isActive.set(e)
+  set isActive(j2) {
+    this.__isActive.set(j2);
   }
-
   aboutToAppear() {
-    if (undefined !== this.contentItem) {
-        undefined === this.contentItem.secondaryText && undefined === this.contentItem.description ? undefined === this.contentItem.icon ? this.itemHeight = ItemHeight.FIRST_HEIGHT : this.itemHeight = this.contentItem.iconStyle <= IconType.HEAD_SCULPTURE ? ItemHeight.SECOND_HEIGHT : ItemHeight.THIRD_HEIGHT : undefined === this.contentItem.description ? undefined === this.contentItem.icon || undefined !== this.contentItem.icon && this.contentItem.iconStyle <= IconType.SYSTEM_ICON ? this.itemHeight = ItemHeight.THIRD_HEIGHT : this.itemHeight = ItemHeight.FOURTH_HEIGHT : this.itemHeight = ItemHeight.FIFTH_HEIGHT;
-      ICON_SIZE_MAP.get(this.contentItem.iconStyle) >= this.itemHeight && (this.itemHeight = ICON_SIZE_MAP.get(this.contentItem.iconStyle) + 32)
-    } else undefined === this.operateItem.image && undefined === this.operateItem.icon && undefined === this.operateItem.subIcon || (this.itemHeight = 80)
+    var b2, c2, d2, e2, f2, g2, h2, i2;
+    if (this.contentItem === undefined) {
+      if (((b2 = this.operateItem) === null || b2 === void 0 ? void 0 : b2.image) !== undefined || ((c2 = this.operateItem) === null || c2 === void 0 ? void 0 : c2.icon) !== undefined || ((d2 = this.operateItem) === null || d2 === void 0 ? void 0 : d2.subIcon) !== undefined) {
+        this.itemHeight = OPERATEITEM_IMAGE_SIZE + SAFE_LIST_PADDING;
+      }
+      return;
+    }
+    if (((e2 = this.contentItem) === null || e2 === void 0 ? void 0 : e2.secondaryText) === undefined && ((f2 = this.contentItem) === null || f2 === void 0 ? void 0 : f2.description) === undefined) {
+      if (((g2 = this.contentItem) === null || g2 === void 0 ? void 0 : g2.icon) === undefined) {
+        this.itemHeight = ItemHeight.FIRST_HEIGHT;
+      }
+      else {
+        this.itemHeight = this.contentItem.iconStyle <= IconType.HEAD_SCULPTURE ? ItemHeight.SECOND_HEIGHT : ItemHeight.THIRD_HEIGHT;
+      }
+    }
+    else if (this.contentItem.description === undefined) {
+      if (this.contentItem.icon === undefined || (this.contentItem.icon !== undefined && this.contentItem.iconStyle <= IconType.SYSTEM_ICON)) {
+        this.itemHeight = ItemHeight.THIRD_HEIGHT;
+      }
+      else {
+        this.itemHeight = ItemHeight.FOURTH_HEIGHT;
+      }
+    }
+    else {
+      this.itemHeight = ItemHeight.FIFTH_HEIGHT;
+    }
+    if (ICON_SIZE_MAP.get((h2 = this.contentItem) === null || h2 === void 0 ? void 0 : h2.iconStyle) >= this.itemHeight) {
+      this.itemHeight = ICON_SIZE_MAP.get((i2 = this.contentItem) === null || i2 === void 0 ? void 0 : i2.iconStyle) + SAFE_LIST_PADDING;
+    }
   }
-
+  calculatedLeftWidth() {
+    if (this.operateItem === null || JSON.stringify(this.operateItem) === '{}') {
+      return RIGHT_CONTENT_NULL_LEFTWIDTH;
+    }
+    else if (this.operateItem.arrow != null && this.operateItem.text == null) {
+      return LEFT_ONLY_ARROW_WIDTH;
+    }
+    else {
+      return LEFT_PART_WIDTH;
+    }
+  }
+  calculatedRightWidth() {
+    if (this.operateItem === null || JSON.stringify(this.operateItem) === '{}') {
+      return RIGHT_CONTENT_NULL_RIGHTWIDTH;
+    }
+    else if (this.operateItem.arrow != null && this.operateItem.text == null) {
+      return RIGHT_ONLY_ARROW_WIDTH;
+    }
+    else {
+      return RIGHT_PART_WIDTH;
+    }
+  }
   initialRender() {
-    this.observeComponentCreation(((e, t) => {
-      ViewStackProcessor.StartGetAccessRecordingFor(e);
+    this.observeComponentCreation((z1, a2) => {
+      ViewStackProcessor.StartGetAccessRecordingFor(z1);
       Stack.create();
       Stack.padding({
-        left: {
-          id: -1,
-          type: 10002,
-          params: ["sys.float.ohos_id_default_padding_start"],
-          bundleName: "",
-          moduleName: ""
-        },
-        right: {
-          id: -1,
-          type: 10002,
-          params: ["sys.float.ohos_id_default_padding_end"],
-          bundleName: "",
-          moduleName: ""
-        }
+        left: { "id": -1, "type": 10002, params: ['sys.float.ohos_id_default_padding_start'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" },
+        right: { "id": -1, "type": 10002, params: ['sys.float.ohos_id_default_padding_end'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" }
       });
-      t || Stack.pop();
-      ViewStackProcessor.StopGetAccessRecording()
-    }));
-    this.observeComponentCreation(((e, t) => {
-      ViewStackProcessor.StartGetAccessRecordingFor(e);
+      if (!a2) {
+        Stack.pop();
+      }
+      ViewStackProcessor.StopGetAccessRecording();
+    });
+    this.observeComponentCreation((r1, s1) => {
+      ViewStackProcessor.StartGetAccessRecordingFor(r1);
       Flex.create({ justifyContent: FlexAlign.SpaceBetween, alignItems: ItemAlign.Center });
       Flex.height(this.itemHeight);
-      Flex.focusable(!0);
-      Flex.borderRadius({
-        id: -1,
-        type: 10002,
-        params: ["sys.float.ohos_id_corner_radius_default_m"],
-        bundleName: "",
-        moduleName: ""
-      });
+      Flex.focusable(true);
+      Flex.borderRadius({ "id": -1, "type": 10002, params: ['sys.float.ohos_id_corner_radius_default_m'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" });
       Flex.backgroundColor(this.frontColor);
-      Flex.onFocus((() => {
-        this.canFocus = !0
-      }));
-      Flex.onBlur((() => {
-        this.canFocus = !1
-      }));
-      Flex.onHover((e => {
-        this.isHover = e;
-        this.canHover && (this.frontColor = e ? "#0d000000" : this.isActive ? "#1a0a59f7" : Color.Transparent.toString())
-      }));
-      Flex.onTouch((e => {
-        e.type == TouchType.Down && this.canTouch && (this.frontColor = "#1a000000");
-        e.type == TouchType.Up && (this.frontColor = this.isActive ? "#1a0a59f7" : Color.Transparent.toString())
-      }));
+      Flex.onFocus(() => {
+        this.canFocus = true;
+      });
+      Flex.onBlur(() => {
+        this.canFocus = false;
+      });
+      Flex.onHover((y1) => {
+        this.isHover = y1;
+        if (this.canHover) {
+          this.frontColor = y1 ? HOVERING_COLOR : (this.isActive ? ACTIVED_COLOR : Color.Transparent.toString());
+        }
+      });
+      Flex.onTouch((x1) => {
+        if (x1.type == TouchType.Down && this.canTouch) {
+          this.frontColor = TOUCH_DOWN_COLOR;
+        }
+        if (x1.type == TouchType.Up) {
+          this.frontColor = this.isActive ? ACTIVED_COLOR : Color.Transparent.toString();
+        }
+      });
       ViewStackProcessor.visualState("focused");
       Flex.border({
-        radius: {
-          id: -1,
-          type: 10002,
-          params: ["sys.float.ohos_id_corner_radius_default_m"],
-          bundleName: "",
-          moduleName: ""
-        },
-        width: 2,
-        color: {
-          id: -1,
-          type: 10001,
-          params: ["sys.color.ohos_id_color_focused_outline"],
-          bundleName: "",
-          moduleName: ""
-        },
+        radius: { "id": -1, "type": 10002, params: ['sys.float.ohos_id_corner_radius_default_m'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" },
+        width: ITEM_BORDER_SHOWN,
+        color: { "id": -1, "type": 10001, params: ['sys.color.ohos_id_color_focused_outline'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" },
         style: BorderStyle.Solid
       });
       ViewStackProcessor.visualState("normal");
       Flex.border({
-        radius: {
-          id: -1,
-          type: 10002,
-          params: ["sys.float.ohos_id_corner_radius_default_m"],
-          bundleName: "",
-          moduleName: ""
-        },
-        width: 2,
+        radius: { "id": -1, "type": 10002, params: ['sys.float.ohos_id_corner_radius_default_m'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" },
+        width: ITEM_BORDER_SHOWN,
         color: Color.Transparent
       });
       ViewStackProcessor.visualState();
-      t || Flex.pop();
-      ViewStackProcessor.StopGetAccessRecording()
-    }));
-    this.observeComponentCreation(((e, t) => {
-      ViewStackProcessor.StartGetAccessRecordingFor(e);
+      if (!s1) {
+        Flex.pop();
+      }
+      ViewStackProcessor.StopGetAccessRecording();
+    });
+    this.observeComponentCreation((g1, h1) => {
+      ViewStackProcessor.StartGetAccessRecordingFor(g1);
       If.create();
-      null === this.contentItem ? this.ifElseBranchUpdateFunction(0, (() => {
-        this.observeComponentCreation(((e, t) => {
-          ViewStackProcessor.StartGetAccessRecordingFor(e);
-          t ? ViewPU.create(new ContentItemStruct(this, {}, void 0, e)) : this.updateStateVarsOfChildByElmtId(e, {});
-          ViewStackProcessor.StopGetAccessRecording()
-        }))
-      })) : If.branchId(1);
-      t || If.pop();
-      ViewStackProcessor.StopGetAccessRecording()
-    }));
+      if (this.contentItem === null) {
+        this.ifElseBranchUpdateFunction(0, () => {
+          {
+            this.observeComponentCreation((l1, m1) => {
+              ViewStackProcessor.StartGetAccessRecordingFor(l1);
+              if (m1) {
+                let n1 = new ContentItemStruct(this, {}, undefined, l1, () => { }, { page: "library/src/main/ets/components/mainpage/composelistitem.ets", line: 679 });
+                ViewPU.create(n1);
+                let o1 = () => {
+                  return {};
+                };
+                n1.paramsGenerator_ = o1;
+              }
+              else {
+                this.updateStateVarsOfChildByElmtId(l1, {});
+              }
+              ViewStackProcessor.StopGetAccessRecording();
+            });
+          }
+        });
+      }
+      else {
+        this.ifElseBranchUpdateFunction(1, () => {
+        });
+      }
+      if (!h1) {
+        If.pop();
+      }
+      ViewStackProcessor.StopGetAccessRecording();
+    });
     If.pop();
-    this.observeComponentCreation(((e, t) => {
-      ViewStackProcessor.StartGetAccessRecordingFor(e);
+    this.observeComponentCreation((v, w) => {
+      ViewStackProcessor.StartGetAccessRecordingFor(v);
       If.create();
-      null !== this.contentItem ? this.ifElseBranchUpdateFunction(0, (() => {
-        this.observeComponentCreation(((e, t) => {
-          ViewStackProcessor.StartGetAccessRecordingFor(e);
-          t ? ViewPU.create(new ContentItemStruct(this, {
-            icon: "string" == typeof this.contentItem.icon ? null : this.contentItem.icon,
-            iconStyle: this.contentItem.iconStyle,
-            primaryText: "string" == typeof this.contentItem.primaryText ? this.contentItem.primaryText : null,
-            secondaryText: "string" == typeof this.contentItem.secondaryText ? this.contentItem.secondaryText : null,
-            description: "string" == typeof this.contentItem.description ? this.contentItem.description : null
-          }, void 0, e)) : this.updateStateVarsOfChildByElmtId(e, {});
-          ViewStackProcessor.StopGetAccessRecording()
-        }))
-      })) : If.branchId(1);
-      t || If.pop();
-      ViewStackProcessor.StopGetAccessRecording()
-    }));
+      if (this.contentItem !== null) {
+        this.ifElseBranchUpdateFunction(0, () => {
+          {
+            this.observeComponentCreation((a1, b1) => {
+              ViewStackProcessor.StartGetAccessRecordingFor(a1);
+              if (b1) {
+                let c1 = new ContentItemStruct(this, {
+                  icon: typeof this.contentItem.icon === 'string' ? null : this.contentItem.icon,
+                  iconStyle: this.contentItem.iconStyle,
+                  primaryText: typeof this.contentItem.primaryText === 'string' ? this.contentItem.primaryText : null,
+                  secondaryText: typeof this.contentItem.secondaryText === 'string' ? this.contentItem.secondaryText : null,
+                  description: typeof this.contentItem.description === 'string' ? this.contentItem.description : null,
+                  leftWidth: this.calculatedLeftWidth()
+                }, undefined, a1, () => { }, { page: "library/src/main/ets/components/mainpage/composelistitem.ets", line: 682 });
+                ViewPU.create(c1);
+                let d1 = () => {
+                  return {
+                    icon: typeof this.contentItem.icon === 'string' ? null : this.contentItem.icon,
+                    iconStyle: this.contentItem.iconStyle,
+                    primaryText: typeof this.contentItem.primaryText === 'string' ? this.contentItem.primaryText : null,
+                    secondaryText: typeof this.contentItem.secondaryText === 'string' ? this.contentItem.secondaryText : null,
+                    description: typeof this.contentItem.description === 'string' ? this.contentItem.description : null,
+                    leftWidth: this.calculatedLeftWidth()
+                  };
+                };
+                c1.paramsGenerator_ = d1;
+              }
+              else {
+                this.updateStateVarsOfChildByElmtId(a1, {});
+              }
+              ViewStackProcessor.StopGetAccessRecording();
+            });
+          }
+        });
+      }
+      else {
+        this.ifElseBranchUpdateFunction(1, () => {
+        });
+      }
+      if (!w) {
+        If.pop();
+      }
+      ViewStackProcessor.StopGetAccessRecording();
+    });
     If.pop();
-    this.observeComponentCreation(((e, t) => {
-      ViewStackProcessor.StartGetAccessRecordingFor(e);
+    this.observeComponentCreation((f, g) => {
+      ViewStackProcessor.StartGetAccessRecordingFor(f);
       If.create();
-      null !== this.operateItem ? this.ifElseBranchUpdateFunction(0, (() => {
-        this.observeComponentCreation(((e, t) => {
-          ViewStackProcessor.StartGetAccessRecordingFor(e);
-          __Common__.create();
-          __Common__.onFocus((() => {
-            this.canFocus = !1
-          }));
-          __Common__.onBlur((() => {
-            this.canFocus = !0
-          }));
-          t || __Common__.pop();
-          ViewStackProcessor.StopGetAccessRecording()
-        }));
-        this.observeComponentCreation(((e, t) => {
-          ViewStackProcessor.StartGetAccessRecordingFor(e);
-          t ? ViewPU.create(new OperateItemStruct(this, {
-            icon: this.operateItem.icon,
-            subIcon: this.operateItem.subIcon,
-            button: this.operateItem.button,
-            switch: this.operateItem.switch,
-            checkBox: this.operateItem.checkbox,
-            radio: this.operateItem.radio,
-            image: "string" == typeof this.operateItem.image ? null : this.operateItem.image,
-            text: "string" == typeof this.operateItem.text ? this.operateItem.text : null,
-            arrow: "string" == typeof this.operateItem.arrow ? null : this.operateItem.arrow,
-            parentCanFocus: this.__canFocus,
-            parentCanTouch: this.__canTouch,
-            parentIsHover: this.__isHover,
-            parentFrontColor: this.__frontColor,
-            parentIsActive: this.__isActive,
-            parentCanHover: this.__canHover
-          }, void 0, e)) : this.updateStateVarsOfChildByElmtId(e, {});
-          ViewStackProcessor.StopGetAccessRecording()
-        }));
-        __Common__.pop()
-      })) : If.branchId(1);
-      t || If.pop();
-      ViewStackProcessor.StopGetAccessRecording()
-    }));
+      if (this.operateItem !== null) {
+        this.ifElseBranchUpdateFunction(0, () => {
+          this.observeComponentCreation((r, s) => {
+            ViewStackProcessor.StartGetAccessRecordingFor(r);
+            __Common__.create();
+            __Common__.onFocus(() => {
+              this.canFocus = false;
+            });
+            __Common__.onBlur(() => {
+              this.canFocus = true;
+            });
+            if (!s) {
+              __Common__.pop();
+            }
+            ViewStackProcessor.StopGetAccessRecording();
+          });
+          {
+            this.observeComponentCreation((l, m) => {
+              ViewStackProcessor.StartGetAccessRecordingFor(l);
+              if (m) {
+                let n = new OperateItemStruct(this, {
+                  icon: this.operateItem.icon,
+                  subIcon: this.operateItem.subIcon,
+                  button: this.operateItem.button,
+                  switch: this.operateItem.switch,
+                  checkBox: this.operateItem.checkbox,
+                  radio: this.operateItem.radio,
+                  image: typeof this.operateItem.image === 'string' ? null : this.operateItem.image,
+                  text: typeof this.operateItem.text === 'string' ? this.operateItem.text : null,
+                  arrow: typeof this.operateItem.arrow === 'string' ? null : this.operateItem.arrow,
+                  parentCanFocus: this.__canFocus,
+                  parentCanTouch: this.__canTouch,
+                  parentIsHover: this.__isHover,
+                  parentFrontColor: this.__frontColor,
+                  parentIsActive: this.__isActive,
+                  parentCanHover: this.__canHover,
+                  rightWidth: this.calculatedRightWidth()
+                }, undefined, l, () => { }, { page: "library/src/main/ets/components/mainpage/composelistitem.ets", line: 692 });
+                ViewPU.create(n);
+                let o = () => {
+                  return {
+                    icon: this.operateItem.icon,
+                    subIcon: this.operateItem.subIcon,
+                    button: this.operateItem.button,
+                    switch: this.operateItem.switch,
+                    checkBox: this.operateItem.checkbox,
+                    radio: this.operateItem.radio,
+                    image: typeof this.operateItem.image === 'string' ? null : this.operateItem.image,
+                    text: typeof this.operateItem.text === 'string' ? this.operateItem.text : null,
+                    arrow: typeof this.operateItem.arrow === 'string' ? null : this.operateItem.arrow,
+                    parentCanFocus: this.canFocus,
+                    parentCanTouch: this.canTouch,
+                    parentIsHover: this.isHover,
+                    parentFrontColor: this.frontColor,
+                    parentIsActive: this.isActive,
+                    parentCanHover: this.canHover,
+                    rightWidth: this.calculatedRightWidth()
+                  };
+                };
+                n.paramsGenerator_ = o;
+              }
+              else {
+                this.updateStateVarsOfChildByElmtId(l, {});
+              }
+              ViewStackProcessor.StopGetAccessRecording();
+            });
+          }
+          __Common__.pop();
+        });
+      }
+      else {
+        this.ifElseBranchUpdateFunction(1, () => {
+        });
+      }
+      if (!g) {
+        If.pop();
+      }
+      ViewStackProcessor.StopGetAccessRecording();
+    });
     If.pop();
     Flex.pop();
-    Stack.pop()
+    Stack.pop();
   }
-
   rerender() {
-    this.updateDirtyElements()
+    this.updateDirtyElements();
   }
 }
 

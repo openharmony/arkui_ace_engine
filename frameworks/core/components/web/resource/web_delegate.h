@@ -149,6 +149,19 @@ private:
     std::shared_ptr<OHOS::NWeb::NWebJSSslErrorResult> result_;
 };
 
+class AllSslErrorResultOhos : public AllSslErrorResult {
+    DECLARE_ACE_TYPE(AllSslErrorResultOhos, AllSslErrorResult)
+
+public:
+    AllSslErrorResultOhos(std::shared_ptr<OHOS::NWeb::NWebJSAllSslErrorResult> result) : result_(result) {}
+
+    void HandleConfirm() override;
+    void HandleCancel() override;
+
+private:
+    std::shared_ptr<OHOS::NWeb::NWebJSAllSslErrorResult> result_;
+};
+
 class SslSelectCertResultOhos : public SslSelectCertResult {
     DECLARE_ACE_TYPE(SslSelectCertResultOhos, SslSelectCertResult)
 
@@ -411,7 +424,7 @@ public:
     void Handle(bool key) override;
 
 private:
-    WeakPtr<PipelineBase> context_;
+    WeakPtr<PipelineBase> context_ = nullptr;
 };
 
 class WebDelegateObserver : public virtual AceType {
@@ -536,6 +549,8 @@ public:
     void UpdateNativeEmbedRuleTag(const std::string& tag);
     void UpdateNativeEmbedRuleType(const std::string& type);
     void UpdateCopyOptionMode(const int32_t copyOptionModeValue);
+    void UpdateTextAutosizing(bool isTextAutosizing);
+    void UpdateMetaViewport(bool isMetaViewportEnabled);
     void LoadUrl();
     void CreateWebMessagePorts(std::vector<RefPtr<WebMessagePort>>& ports);
     void PostWebMessage(std::string& message, std::vector<RefPtr<WebMessagePort>>& ports, std::string& uri);
@@ -614,6 +629,7 @@ public:
     bool OnCommonDialog(const std::shared_ptr<BaseEventInfo>& info, DialogEventType dialogEventType);
     bool OnHttpAuthRequest(const std::shared_ptr<BaseEventInfo>& info);
     bool OnSslErrorRequest(const std::shared_ptr<BaseEventInfo>& info);
+    bool OnAllSslErrorRequest(const std::shared_ptr<BaseEventInfo>& info);
     bool OnSslSelectCertRequest(const std::shared_ptr<BaseEventInfo>& info);
     void OnDownloadStart(const std::string& url, const std::string& userAgent, const std::string& contentDisposition,
         const std::string& mimetype, long contentLength);
@@ -662,6 +678,8 @@ public:
     void OnTouchIconUrl(const std::string& iconUrl, bool precomposed);
     void OnAudioStateChanged(bool audible);
     void OnFirstContentfulPaint(int64_t navigationStartTick, int64_t firstContentfulPaintMs);
+    void OnFirstMeaningfulPaint(std::shared_ptr<OHOS::NWeb::NWebFirstMeaningfulPaintDetails> details);
+    void OnLargestContentfulPaint(std::shared_ptr<OHOS::NWeb::NWebLargestContentfulPaintDetails> details);
     void OnSafeBrowsingCheckResult(int threat_type);
     void OnGetTouchHandleHotZone(OHOS::NWeb::TouchHandleHotZone& hotZone);
     void OnOverScroll(float xOffset, float yOffset);
@@ -827,7 +845,7 @@ private:
     State state_ { State::WAITINGFORSIZE };
 #ifdef OHOS_STANDARD_SYSTEM
     std::shared_ptr<OHOS::NWeb::NWeb> nweb_;
-    std::shared_ptr<OHOS::NWeb::NWebCookieManager> cookieManager_;
+    std::shared_ptr<OHOS::NWeb::NWebCookieManager> cookieManager_ = nullptr;
     sptr<Rosen::Window> window_;
     bool isCreateWebView_ = false;
     int32_t callbackId_ = 0;
@@ -855,6 +873,8 @@ private:
     EventCallbackV2 onTouchIconUrlV2_;
     EventCallbackV2 onAudioStateChangedV2_;
     EventCallbackV2 onFirstContentfulPaintV2_;
+    EventCallbackV2 OnFirstMeaningfulPaintV2_;
+    EventCallbackV2 OnLargestContentfulPaintV2_;
     EventCallbackV2 onOverScrollV2_;
     EventCallbackV2 onScreenCaptureRequestV2_;
     EventCallbackV2 onNavigationEntryCommittedV2_;

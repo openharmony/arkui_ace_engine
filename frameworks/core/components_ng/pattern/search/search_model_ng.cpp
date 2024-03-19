@@ -885,6 +885,20 @@ RefPtr<FrameNode> SearchModelNG::GetSearchTextFieldFrameNode() const
     return textFieldChild;
 }
 
+void SearchModelNG::SetSearchEnterKeyType(TextInputAction value)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto textFieldChild = AceType::DynamicCast<FrameNode>(frameNode->GetChildren().front());
+    CHECK_NULL_VOID(textFieldChild);
+    auto pattern = textFieldChild->GetPattern<TextFieldPattern>();
+    CHECK_NULL_VOID(pattern);
+    if (value == TextInputAction::UNSPECIFIED) {
+        value = TextInputAction::SEARCH;
+    }
+    pattern->UpdateTextInputAction(value);
+}
+
 void SearchModelNG::SetMaxLength(uint32_t value)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
@@ -1279,8 +1293,81 @@ void SearchModelNG::SetRightIconSrcPath(FrameNode* frameNode, const std::string&
     imageFrameNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
 }
 
+void SearchModelNG::SetSearchEnterKeyType(FrameNode* frameNode, TextInputAction value)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto textFieldChild = AceType::DynamicCast<FrameNode>(frameNode->GetChildren().front());
+    CHECK_NULL_VOID(textFieldChild);
+    auto pattern = textFieldChild->GetPattern<TextFieldPattern>();
+    CHECK_NULL_VOID(pattern);
+    if (value == TextInputAction::UNSPECIFIED) {
+        value = TextInputAction::SEARCH;
+    }
+    pattern->UpdateTextInputAction(value);
+}
+
 void SearchModelNG::SetHeight(FrameNode* frameNode, const Dimension& height)
 {
     NG::ViewAbstract::SetHeight(frameNode, NG::CalcLength(height));
+}
+
+void SearchModelNG::SetLetterSpacing(const Dimension& value)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto textFieldChild = AceType::DynamicCast<FrameNode>(frameNode->GetChildren().front());
+    CHECK_NULL_VOID(textFieldChild);
+    auto textFieldLayoutProperty = textFieldChild->GetLayoutProperty<TextFieldLayoutProperty>();
+    CHECK_NULL_VOID(textFieldLayoutProperty);
+    textFieldLayoutProperty->UpdateLetterSpacing(value);
+    textFieldChild->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+}
+
+void SearchModelNG::SetLineHeight(const Dimension& value)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto textFieldChild = AceType::DynamicCast<FrameNode>(frameNode->GetChildren().front());
+    CHECK_NULL_VOID(textFieldChild);
+    auto textFieldLayoutProperty = textFieldChild->GetLayoutProperty<TextFieldLayoutProperty>();
+    CHECK_NULL_VOID(textFieldLayoutProperty);
+    textFieldLayoutProperty->UpdateLineHeight(value);
+    textFieldChild->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+}
+
+void SearchModelNG::SetTextDecoration(Ace::TextDecoration value)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto textFieldChild = AceType::DynamicCast<FrameNode>(frameNode->GetChildren().front());
+    CHECK_NULL_VOID(textFieldChild);
+    auto textFieldLayoutProperty = textFieldChild->GetLayoutProperty<TextFieldLayoutProperty>();
+    CHECK_NULL_VOID(textFieldLayoutProperty);
+    textFieldLayoutProperty->UpdateTextDecoration(value);
+    textFieldChild->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+}
+
+void SearchModelNG::SetTextDecorationColor(const Color& value)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto textFieldChild = AceType::DynamicCast<FrameNode>(frameNode->GetChildren().front());
+    CHECK_NULL_VOID(textFieldChild);
+    auto textFieldLayoutProperty = textFieldChild->GetLayoutProperty<TextFieldLayoutProperty>();
+    CHECK_NULL_VOID(textFieldLayoutProperty);
+    textFieldLayoutProperty->UpdateTextDecorationColor(value);
+    textFieldChild->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+}
+
+void SearchModelNG::SetTextDecorationStyle(Ace::TextDecorationStyle value)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto textFieldChild = AceType::DynamicCast<FrameNode>(frameNode->GetChildren().front());
+    CHECK_NULL_VOID(textFieldChild);
+    auto textFieldLayoutProperty = textFieldChild->GetLayoutProperty<TextFieldLayoutProperty>();
+    CHECK_NULL_VOID(textFieldLayoutProperty);
+    textFieldLayoutProperty->UpdateTextDecorationStyle(value);
+    textFieldChild->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
 }
 } // namespace OHOS::Ace::NG

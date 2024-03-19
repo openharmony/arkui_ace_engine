@@ -178,6 +178,7 @@ public:
 
     void SetHour24(bool value)
     {
+        isForceUpdate_ = value != hour24_;
         hour24_ = value;
     }
 
@@ -420,6 +421,7 @@ private:
     WeakPtr<FrameNode> contentRowNode_;
     bool isPicker_ = false;
     bool isFiredTimeChange_ = false;
+    bool isForceUpdate_ = false;
     std::optional<std::string> firedTimeStr_;
 };
 } // namespace OHOS::Ace::NG

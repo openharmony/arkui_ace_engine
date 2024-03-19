@@ -663,7 +663,7 @@ HWTEST_F(CheckBoxGroupTestNG, CheckBoxPatternTest014, TestSize.Level1)
 {
     CheckBoxGroupModelNG checkBoxModelNG;
     checkBoxModelNG.Create(GROUP_NAME);
-    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     EXPECT_NE(frameNode, nullptr);
     auto pattern = frameNode->GetPattern<CheckBoxGroupPattern>();
     EXPECT_NE(pattern, nullptr);

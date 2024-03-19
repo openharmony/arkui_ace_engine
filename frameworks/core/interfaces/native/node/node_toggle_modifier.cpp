@@ -251,8 +251,28 @@ void ResetToggleHoverEffect(ArkUINodeHandle node)
     CHECK_NULL_VOID(frameNode);
     ToggleModelNG::SetHoverEffect(frameNode, OHOS::Ace::HoverEffectType::AUTO);
 }
-} // namespace
 
+void SetToggleIsOn(ArkUINodeHandle node, ArkUI_Bool switchPointColor)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ToggleModelNG::SetSwitchIsOn(frameNode, static_cast<bool>(switchPointColor));
+}
+
+void ResetToggleIsOn(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ToggleModelNG::SetSwitchIsOn(frameNode, false);
+}
+
+ArkUI_Bool GetToggleIsOn(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, ERROR_UINT_CODE);
+    return static_cast<ArkUI_Bool>(ToggleModelNG::GetSwitchIsOn(frameNode));
+}
+} // namespace
 namespace NodeModifier {
 const ArkUIToggleModifier* GetToggleModifier()
 {
@@ -273,6 +293,9 @@ const ArkUIToggleModifier* GetToggleModifier()
         ResetToggleHoverEffect,
         GetToggleSelectedColor,
         GetToggleSwitchPointColor,
+        SetToggleIsOn,
+        ResetToggleIsOn,
+        GetToggleIsOn
     };
 
     return &modifier;

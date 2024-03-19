@@ -72,8 +72,9 @@ std::shared_ptr<JsPageCheckboxGroups> ViewStackProcessor::GetCheckboxGroupCompon
 RefPtr<ComposedComponent> ViewStackProcessor::GetRootComponent(const std::string& id, const std::string& name)
 {
     auto& wrappingComponentsMap = componentsStack_.top();
-    if (wrappingComponentsMap.find("root") != wrappingComponentsMap.end()) {
-        return AceType::DynamicCast<ComposedComponent>(wrappingComponentsMap["root"]);
+    auto iter = wrappingComponentsMap.find("root");
+    if (iter != wrappingComponentsMap.end()) {
+        return AceType::DynamicCast<ComposedComponent>(iter->second);
     }
 
     RefPtr<ComposedComponent> rootComponent = AceType::MakeRefPtr<OHOS::Ace::ComposedComponent>(id, name);

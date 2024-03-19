@@ -46,10 +46,11 @@ constexpr int TOP_VALUE = 9;
 constexpr int WIDTH_VALUE = 10;
 constexpr int HEIGHT_VALUE = 11;
 
-RefPtr<RenderContext> GetRenderContext(UINode* UiNode)
+RefPtr<RenderContext> GetRenderContext(UINode* node)
 {
-    auto* frameNode = AceType::DynamicCast<FrameNode>(UiNode);
+    auto* frameNode = AceType::DynamicCast<FrameNode>(node);
     CHECK_NULL_RETURN(frameNode, nullptr);
+    CHECK_NULL_RETURN(node->GetTag() != "BuilderProxyNode", nullptr);
     auto context = frameNode->GetRenderContext();
     return context;
 }
@@ -121,9 +122,7 @@ void SetShadowOffset(ArkUINodeHandle node, ArkUI_Float32 offsetX, ArkUI_Float32 
     auto* currentNode = reinterpret_cast<UINode*>(node);
     auto renderContext = GetRenderContext(currentNode);
     CHECK_NULL_VOID(renderContext);
-    Dimension first = Dimension(offsetX, DimensionUnit::VP);
-    Dimension second = Dimension(offsetY, DimensionUnit::VP);
-    renderContext->SetShadowOffset(first.ConvertToPx(), second.ConvertToPx());
+    renderContext->SetShadowOffset(offsetX, offsetY);
 }
 
 void SetShadowAlpha(ArkUINodeHandle node, ArkUI_Float32 alpha)
@@ -156,7 +155,10 @@ void Invalidate(ArkUINodeHandle node)
     CHECK_NULL_VOID(frameNode);
     auto pattern = frameNode->GetPattern<RenderNodePattern>();
     CHECK_NULL_VOID(pattern);
+    auto renderContext = frameNode->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
     pattern->Invalidate();
+    renderContext->RequestNextFrame();
 }
 
 void SetScale(ArkUINodeHandle node, ArkUI_Float32 scaleX, ArkUI_Float32 scaleY)
@@ -197,6 +199,7 @@ void SetSize(ArkUINodeHandle node, ArkUI_Float32 width, ArkUI_Float32 height)
     auto* currentNode = reinterpret_cast<UINode*>(node);
     auto* frameNode = AceType::DynamicCast<FrameNode>(currentNode);
     CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(frameNode->GetTag() != "BuilderProxyNode");
     auto layoutProperty = frameNode->GetLayoutProperty();
     CHECK_NULL_VOID(layoutProperty);
     layoutProperty->UpdateUserDefinedIdealSize(

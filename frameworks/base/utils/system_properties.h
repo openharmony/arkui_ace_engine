@@ -459,6 +459,8 @@ public:
 
     static void SetLayoutTraceEnabled(bool layoutTraceEnable);
 
+    static void SetInputEventTraceEnabled(bool inputEventTraceEnable);
+
     static void SetSecurityDevelopermodeLayoutTraceEnabled(bool layoutTraceEnable);
 
     static void SetDebugBoundaryEnabled(bool debugBoundaryEnabled);

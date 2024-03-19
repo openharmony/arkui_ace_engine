@@ -176,7 +176,7 @@ public:
 
     void SetShowLunar(bool value)
     {
-        isForceUpdate_ = true;
+        isForceUpdate_ = value != lunar_;
         lunar_ = value;
     }
 

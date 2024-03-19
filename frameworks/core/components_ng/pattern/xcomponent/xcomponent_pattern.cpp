@@ -15,14 +15,17 @@
 
 #include "core/components_ng/pattern/xcomponent/xcomponent_pattern.h"
 
+#include "interfaces/native/native_event.h"
 #include "interfaces/native/ui_input_event.h"
 
 #include "base/geometry/ng/size_t.h"
 #include "base/log/log_wrapper.h"
+#include "base/memory/ace_type.h"
 #include "base/ressched/ressched_report.h"
 #include "base/utils/system_properties.h"
 #include "base/utils/utils.h"
 #include "core/components/common/layout/constants.h"
+#include "core/components_ng/event/gesture_event_hub.h"
 #include "core/components_ng/pattern/xcomponent/xcomponent_controller_ng.h"
 #include "core/event/axis_event.h"
 #ifdef NG_BUILD
@@ -32,6 +35,8 @@
 #endif
 #ifdef ENABLE_ROSEN_BACKEND
 #include "transaction/rs_transaction_proxy.h"
+#include "ui/rs_ext_node_operation.h"
+#include "core/components_ng/render/adapter/rosen_render_context.h"
 #endif
 
 #include "core/components_ng/event/input_event.h"
@@ -240,6 +245,12 @@ void XComponentPattern::OnAttachToFrameNode()
 {
     instanceId_ = Container::CurrentIdSafely();
     Initialize(instanceId_);
+
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    pipeline->AddWindowStateChangedCallback(host->GetId());
 }
 
 void XComponentPattern::OnModifyDone()
@@ -272,6 +283,35 @@ void XComponentPattern::OnAreaChangedInner()
 #endif
 }
 
+void XComponentPattern::SetSurfaceNodeToGraphic()
+{
+#ifdef ENABLE_ROSEN_BACKEND
+    if (type_ != XComponentType::SURFACE || !Rosen::RSExtNodeOperation::GetInstance().CheckNeedToProcess(GetId())) {
+        return;
+    }
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto renderContext = host->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    auto rosenRenderContext = AceType::DynamicCast<NG::RosenRenderContext>(renderContext);
+    CHECK_NULL_VOID(rosenRenderContext);
+    std::shared_ptr<Rosen::RSNode> parentNode = rosenRenderContext->GetRSNode();
+    CHECK_NULL_VOID(parentNode);
+    RectF canvasRect = rosenRenderContext->GetPropertyOfPosition();
+
+    CHECK_NULL_VOID(renderContextForSurface_);
+    auto context = AceType::DynamicCast<NG::RosenRenderContext>(renderContextForSurface_);
+    CHECK_NULL_VOID(context);
+    std::shared_ptr<Rosen::RSNode> rsNode = context->GetRSNode();
+    CHECK_NULL_VOID(rsNode);
+    std::shared_ptr<Rosen::RSSurfaceNode> rsSurfaceNode = std::static_pointer_cast<Rosen::RSSurfaceNode>(rsNode);
+    CHECK_NULL_VOID(rsSurfaceNode);
+
+    Rosen::RSExtNodeOperation::GetInstance().ProcessRSExtNode(GetId(), parentNode->GetId(),
+        canvasRect.GetX(), canvasRect.GetY(), rsSurfaceNode);
+#endif
+}
+
 void XComponentPattern::OnRebuildFrame()
 {
     if (type_ != XComponentType::SURFACE) {
@@ -286,6 +326,7 @@ void XComponentPattern::OnRebuildFrame()
     CHECK_NULL_VOID(renderContext);
     CHECK_NULL_VOID(handlingSurfaceRenderContext_);
     renderContext->AddChild(handlingSurfaceRenderContext_, 0);
+    SetSurfaceNodeToGraphic();
 }
 
 void XComponentPattern::OnDetachFromFrameNode(FrameNode* frameNode)
@@ -306,6 +347,11 @@ void XComponentPattern::OnDetachFromFrameNode(FrameNode* frameNode)
         }
 #endif
     }
+
+    auto id = frameNode->GetId();
+    auto pipeline = AceType::DynamicCast<PipelineContext>(PipelineBase::GetCurrentContext());
+    CHECK_NULL_VOID(pipeline);
+    pipeline->RemoveWindowStateChangedCallback(id);
 }
 
 void XComponentPattern::SetMethodCall()
@@ -541,6 +587,7 @@ void XComponentPattern::InitEvent()
     auto gestureHub = eventHub->GetOrCreateGestureEventHub();
     CHECK_NULL_VOID(gestureHub);
     InitTouchEvent(gestureHub);
+    InitOnTouchIntercept(gestureHub);
     auto inputHub = eventHub->GetOrCreateInputEventHub();
     InitMouseEvent(inputHub);
     InitAxisEvent(inputHub);
@@ -638,6 +685,20 @@ void XComponentPattern::InitAxisEvent(const RefPtr<InputEventHub>& inputHub)
 
     axisEvent_ = MakeRefPtr<InputEvent>(std::move(axisTask));
     inputHub->AddOnAxisEvent(axisEvent_);
+}
+
+void XComponentPattern::InitOnTouchIntercept(const RefPtr<GestureEventHub>& gestureHub)
+{
+    gestureHub->SetOnTouchIntercept(
+        [pattern = Claim(this)](
+            const TouchEventInfo& touchEvent) -> HitTestMode {
+            auto event = touchEvent.ConvertToTouchEvent();
+            auto* uiEvent = static_cast<ArkUI_UIInputEvent*>(&event);
+            CHECK_NULL_RETURN(uiEvent, NG::HitTestMode::HTMDEFAULT);
+            const auto onTouchInterceptCallback = pattern->nativeXComponentImpl_->GetOnTouchInterceptCallback();
+            CHECK_NULL_RETURN(onTouchInterceptCallback, NG::HitTestMode::HTMDEFAULT);
+            return static_cast<NG::HitTestMode>(onTouchInterceptCallback(pattern->nativeXComponent_.get(), uiEvent));
+        });
 }
 
 void XComponentPattern::InitMouseEvent(const RefPtr<InputEventHub>& inputHub)
@@ -961,10 +1022,8 @@ void XComponentPattern::HandleSetExpectedRateRangeEvent()
     OH_NativeXComponent_ExpectedRateRange* range = nativeXComponentImpl_->GetRateRange();
     CHECK_NULL_VOID(range);
     FrameRateRange frameRateRange;
-    frameRateRange.preferred_ = range->expected;
-    frameRateRange.max_ = range->max;
-    frameRateRange.min_ = range->min;
-    displaySync_->SetExpectedFrameRateRange(std::move(frameRateRange));
+    frameRateRange.Set(range->min, range->max, range->expected);
+    displaySync_->SetExpectedFrameRateRange(frameRateRange);
 }
 
 void XComponentPattern::HandleOnFrameEvent()
@@ -1147,5 +1206,53 @@ void XComponentPattern::UpdateSurfaceBounds(bool needForceRender)
         CHECK_NULL_VOID(host);
         host->MarkNeedRenderOnly();
     }
+}
+
+void XComponentPattern::NativeSurfaceHide()
+{
+    CHECK_RUN_ON(UI);
+    CHECK_NULL_VOID(nativeXComponent_);
+    CHECK_NULL_VOID(nativeXComponentImpl_);
+    auto* surface = const_cast<void*>(nativeXComponentImpl_->GetSurface());
+    const auto surfaceHideCallback = nativeXComponentImpl_->GetSurfaceHideCallback();
+    CHECK_NULL_VOID(surfaceHideCallback);
+    surfaceHideCallback(nativeXComponent_.get(), surface);
+}
+
+void XComponentPattern::NativeSurfaceShow()
+{
+    CHECK_RUN_ON(UI);
+    CHECK_NULL_VOID(nativeXComponentImpl_);
+    CHECK_NULL_VOID(nativeXComponent_);
+    auto width = initSize_.Width();
+    auto height = initSize_.Height();
+    nativeXComponentImpl_->SetXComponentWidth(static_cast<uint32_t>(width));
+    nativeXComponentImpl_->SetXComponentHeight(static_cast<uint32_t>(height));
+    auto* surface = const_cast<void*>(nativeXComponentImpl_->GetSurface());
+    const auto surfaceShowCallback = nativeXComponentImpl_->GetSurfaceShowCallback();
+    CHECK_NULL_VOID(surfaceShowCallback);
+    surfaceShowCallback(nativeXComponent_.get(), surface);
+}
+
+void XComponentPattern::OnWindowHide()
+{
+    if (!hasXComponentInit_ || hasReleasedSurface_
+        || (type_ != XComponentType::SURFACE && type_ != XComponentType::TEXTURE)) {
+        return;
+    }
+    CHECK_NULL_VOID(renderSurface_);
+    NativeSurfaceHide();
+    renderSurface_->releaseSurfaceBuffers();
+    hasReleasedSurface_ = true;
+}
+
+void XComponentPattern::OnWindowShow()
+{
+    if (!hasXComponentInit_ || !hasReleasedSurface_
+        || (type_ != XComponentType::SURFACE && type_ != XComponentType::TEXTURE)) {
+        return;
+    }
+    NativeSurfaceShow();
+    hasReleasedSurface_ = false;
 }
 } // namespace OHOS::Ace::NG

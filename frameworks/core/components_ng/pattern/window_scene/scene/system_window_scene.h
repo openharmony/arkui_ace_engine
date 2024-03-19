@@ -20,11 +20,12 @@
 #include "session/host/include/session.h"
 
 #include "core/common/container.h"
+#include "core/components_ng/manager/focus/focus_view.h"
 #include "core/components_ng/pattern/stack/stack_pattern.h"
 
 namespace OHOS::Ace::NG {
-class SystemWindowScene : public StackPattern {
-    DECLARE_ACE_TYPE(SystemWindowScene, StackPattern);
+class SystemWindowScene : public StackPattern, public FocusView {
+    DECLARE_ACE_TYPE(SystemWindowScene, StackPattern, FocusView);
 
 public:
     explicit SystemWindowScene(const sptr<Rosen::Session>& session);
@@ -42,6 +43,13 @@ public:
         TAG_LOGI(AceLogTag::ACE_WINDOW_SCENE, "system window scene will change visible to %{public}s",
             visible ? "true" : "false");
     }
+
+    std::list<int32_t> GetRouteOfFirstScope() override
+    {
+        return { 0 };
+    }
+
+    void LostViewFocus() override;
 
 private:
     void OnAttachToFrameNode() override;

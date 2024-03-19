@@ -60,9 +60,9 @@ void Scheduler::Stop()
     scheduleId_ = 0;
 }
 
-void Scheduler::SetExpectedFrameRateRange(FrameRateRange& frameRateRange)
+void Scheduler::SetExpectedFrameRateRange(const FrameRateRange& frameRateRange)
 {
-    displaySync_->SetExpectedFrameRateRange(std::move(frameRateRange));
+    displaySync_->SetExpectedFrameRateRange(frameRateRange);
 }
 
 void Scheduler::OnFrame(uint64_t nanoTimestamp)

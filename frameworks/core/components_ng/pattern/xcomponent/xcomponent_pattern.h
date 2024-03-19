@@ -275,11 +275,16 @@ private:
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
     void OnRebuildFrame() override;
     void OnAreaChangedInner() override;
+    void OnWindowHide() override;
+    void OnWindowShow() override;
+    void NativeSurfaceHide();
+    void NativeSurfaceShow();
     void OnModifyDone() override;
 
     void InitNativeNodeCallbacks();
     void InitEvent();
     void InitTouchEvent(const RefPtr<GestureEventHub>& gestureHub);
+    void InitOnTouchIntercept(const RefPtr<GestureEventHub>& gestureHub);
     void InitAxisEvent(const RefPtr<InputEventHub>& inputHub);
     void HandleTouchEvent(const TouchEventInfo& info);
     void InitMouseEvent(const RefPtr<InputEventHub>& inputHub);
@@ -304,6 +309,7 @@ private:
     bool DoTextureExport();
     bool StopTextureExport();
     void InitializeRenderContext();
+    void SetSurfaceNodeToGraphic();
 
 #if defined(VIDEO_TEXTURE_SUPPORTED) && defined(XCOMPONENT_SUPPORTED)
     void RegisterRenderContextCallBack();
@@ -351,6 +357,7 @@ private:
     // for export texture
     NodeRenderType renderType_ = NodeRenderType::RENDER_TYPE_DISPLAY;
     uint64_t exportTextureSurfaceId_ = 0U;
+    bool hasReleasedSurface_ = false;
 #ifdef OHOS_PLATFORM
     int64_t startIncreaseTime_ = 0;
 #endif

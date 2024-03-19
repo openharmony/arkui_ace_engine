@@ -52,6 +52,8 @@ void CalendarPickerModelNG::LayoutPicker(const RefPtr<CalendarPickerPattern>& pi
             CalendarPickerModelNG::CreateCalendarNodeChild(pickerPattern->GetContentId(), settingData, theme);
         CHECK_NULL_VOID(contentNode);
         contentNode->MountToParent(pickerNode);
+    } else {
+        pickerPattern->SetDate(settingData.selectedDate.ToString(true));
     }
     auto flexNode = CalendarPickerModelNG::CreateButtonFlexChild(pickerPattern->GetButtonFlexId(), theme);
     CHECK_NULL_VOID(flexNode);
@@ -311,7 +313,7 @@ void CalendarPickerModelNG::SetPadding(const PaddingProperty& padding)
 
 void CalendarPickerModelNG::SetTextStyle(FrameNode* frameNode, const PickerTextStyle& textStyle)
 {
-    auto pipeline = PipelineBase::GetCurrentContext();
+    auto pipeline = PipelineBase::GetCurrentContextSafely();
     CHECK_NULL_VOID(pipeline);
     RefPtr<CalendarTheme> calendarTheme = pipeline->GetTheme<CalendarTheme>();
     CHECK_NULL_VOID(calendarTheme);
@@ -329,7 +331,7 @@ void CalendarPickerModelNG::SetTextStyle(FrameNode* frameNode, const PickerTextS
 
 RefPtr<CalendarTheme> GetDefaultTextTheme()
 {
-    auto pipeline = PipelineBase::GetCurrentContext();
+    auto pipeline = PipelineBase::GetCurrentContextSafely();
     CHECK_NULL_RETURN(pipeline, nullptr);
     return pipeline->GetTheme<CalendarTheme>();
 }

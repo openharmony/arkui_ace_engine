@@ -29,9 +29,7 @@ ScopedMonitor::ScopedMonitor(MonitorTag tag) : tag_(tag)
         return;
     }
     begin_ = steady_clock::now();
-    if (tag == MonitorTag::STATIC_API) {
-        ArkUIPerfMonitor::GetInstance().RecordPropertyUpdate();
-    }
+    ArkUIPerfMonitor::GetInstance().SetRecordingStatus(tag_, MonitorStatus::RUNNING);
 }
 
 ScopedMonitor::~ScopedMonitor()
@@ -77,21 +75,39 @@ void ArkUIPerfMonitor::FinishPerf()
 
 void ArkUIPerfMonitor::RecordTimeSlice(MonitorTag tag, int64_t duration)
 {
+    SetRecordingStatus(tag, MonitorStatus::IDLE);
+    if (tag == MonitorTag::STATIC_API) {
+        if (!monitorStatus_) {
+            return;
+        }
+        propertyNum_++;
+    }
     timeSlice_[tag] += duration;
 }
 
 void ArkUIPerfMonitor::RecordNodeNum(uint64_t num)
 {
-    node_num_ += num;
+    nodeNum_ += num;
 }
 
-void ArkUIPerfMonitor::RecordPropertyUpdate()
+void ArkUIPerfMonitor::SetRecordingStatus(MonitorTag tag, MonitorStatus status)
 {
-    property_++;
+    if (tag == MonitorTag::STATIC_API) {
+        return;
+    }
+    switch (status) {
+        case MonitorStatus::RUNNING:
+            ++monitorStatus_;
+            break;
+        case MonitorStatus::IDLE:
+            --monitorStatus_;
+            break;
+    }
 }
 
 void ArkUIPerfMonitor::InitPerfMonitor()
 {
+    monitorStatus_ = 0;
     ClearPerfMonitor();
 }
 
@@ -102,8 +118,8 @@ void ArkUIPerfMonitor::ClearPerfMonitor()
     timeSlice_[MonitorTag::COMPONENT_UPDATE] = 0;
     timeSlice_[MonitorTag::JS_CALLBACK] = 0;
     timeSlice_[MonitorTag::STATIC_API] = 0;
-    property_ = 0;
-    node_num_ = 0;
+    propertyNum_ = 0;
+    nodeNum_ = 0;
 }
 
 void ArkUIPerfMonitor::FlushPerfMonitor()
@@ -112,8 +128,8 @@ void ArkUIPerfMonitor::FlushPerfMonitor()
     auto frameWork = total - timeSlice_[MonitorTag::COMPONENT_CREATION] - timeSlice_[MonitorTag::COMPONENT_LIFECYCLE] -
                      timeSlice_[MonitorTag::COMPONENT_UPDATE] - timeSlice_[MonitorTag::JS_CALLBACK] +
                      timeSlice_[MonitorTag::STATIC_API];
-    ACE_SCOPED_TRACE(
-        "ArkUIPerfMonitor[%" PRIu64 ", %" PRIu64 " ,%" PRId64 ", %" PRId64 "]", node_num_, property_, total, frameWork);
+    ACE_SCOPED_TRACE("ArkUIPerfMonitor[%" PRIu64 ", %" PRIu64 " ,%" PRId64 ", %" PRId64 "]", nodeNum_, propertyNum_,
+        total, frameWork);
 }
 
 } // namespace OHOS::Ace

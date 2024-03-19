@@ -13,8 +13,14 @@
 
 import("//foundation/arkui/ace_engine/test/unittest/ace_unittest.gni")
 
+ace_unittest("water_flow_test_old") {
+  type = "new"
+  sources = [ "water_flow_test_ng.cpp" ]
+}
+
 ace_unittest("water_flow_test_ng") {
   type = "new"
+  defines = [ "TEST_SEGMENTED_WATER_FLOW" ]
   sources = [
     "water_flow_layout_info_test.cpp",
     "water_flow_segment_layout_test.cpp",

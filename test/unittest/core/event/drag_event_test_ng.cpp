@@ -14,6 +14,7 @@
  */
 
 #include "gtest/gtest.h"
+#include <string>
 
 #define private public
 #define protected public
@@ -51,6 +52,8 @@ constexpr int32_t FINGERS_NUMBER_GREATER_THAN_DEFAULT = 2;
 constexpr float DISTANCE_GREATER_THAN_DEFAULT = 6.0f;
 constexpr float DISTANCE_EQUAL_DEFAULT = 5.0f;
 constexpr float IMAGE_INVALID_RECT_WIDTH = 100.0f;
+const std::string COMPONENT_ID = "id of component which you want to get screenshot from";
+const std::string NO_COMPONENT_ID = "";
 } // namespace
 
 class DragEventTestNg : public testing::Test {
@@ -588,7 +591,7 @@ HWTEST_F(DragEventTestNg, DragEventTestNg005, TestSize.Level1)
     EXPECT_EQ(gestureEventHub->GetTextDraggable(), false);
     EXPECT_EQ(dragEventActuator->IsAllowedDrag(), true);
     (*(dragEventActuator->previewLongPressRecognizer_->onAction_))(info);
-    EXPECT_EQ(dragEventActuator->GetIsNotInPreviewState(), false);
+    EXPECT_EQ(dragEventActuator->GetIsNotInPreviewState(), true);
     /**
      * @tc.steps: step6. Invoke longPressUpdate callback.
      * @tc.expected: cover longPressUpdate when GetTextDraggable() == false, isAllowedDrag == false.
@@ -597,7 +600,7 @@ HWTEST_F(DragEventTestNg, DragEventTestNg005, TestSize.Level1)
     frameNode->SetDraggable(false);
     EXPECT_EQ(dragEventActuator->IsAllowedDrag(), false);
     (*(dragEventActuator->previewLongPressRecognizer_->onAction_))(info);
-    EXPECT_EQ(dragEventActuator->isReceivedLongPress_, true);
+    EXPECT_EQ(dragEventActuator->isReceivedLongPress_, false);
     /**
      * @tc.steps: step7. Invoke longPressUpdate callback.
      * @tc.expected: cover longPressUpdate when GetTextDraggable() == true, GetIsTextDraggable() == false.
@@ -606,7 +609,7 @@ HWTEST_F(DragEventTestNg, DragEventTestNg005, TestSize.Level1)
     gestureEventHub->SetIsTextDraggable(false);
     dragEventActuator->SetIsNotInPreviewState(true);
     (*(dragEventActuator->previewLongPressRecognizer_->onAction_))(info);
-    EXPECT_EQ(dragEventActuator->GetIsNotInPreviewState(), false);
+    EXPECT_EQ(dragEventActuator->GetIsNotInPreviewState(), true);
     /**
      * @tc.steps: step8. Invoke longPressUpdate callback.
      * @tc.expected: cover longPressUpdate when GetTextDraggable() == true, GetIsTextDraggable() == true.
@@ -614,7 +617,7 @@ HWTEST_F(DragEventTestNg, DragEventTestNg005, TestSize.Level1)
     gestureEventHub->SetIsTextDraggable(true);
     dragEventActuator->SetIsNotInPreviewState(true);
     (*(dragEventActuator->previewLongPressRecognizer_->onAction_))(info);
-    EXPECT_EQ(dragEventActuator->GetIsNotInPreviewState(), false);
+    EXPECT_EQ(dragEventActuator->GetIsNotInPreviewState(), true);
 }
 
 /**
@@ -765,7 +768,7 @@ HWTEST_F(DragEventTestNg, DragEventTestNg007, TestSize.Level1)
     EXPECT_EQ(dragEventActuator->GetIsBindOverlayValue(dragEventActuator), true);
     unknownPropertyValue = GESTURE_EVENT_PROPERTY_DEFAULT_VALUE;
     (*(dragEventActuator->panRecognizer_->onActionCancel_))();
-    EXPECT_EQ(unknownPropertyValue, GESTURE_EVENT_PROPERTY_VALUE);
+    EXPECT_EQ(unknownPropertyValue, GESTURE_EVENT_PROPERTY_DEFAULT_VALUE);
     /**
      * @tc.steps: step7. Invoke onActionCancel callback, GetIsBindOverlayValue is true.
      * @tc.expected: cover getDeviceType() == SourceType::MOUSE.
@@ -773,12 +776,12 @@ HWTEST_F(DragEventTestNg, DragEventTestNg007, TestSize.Level1)
     dragEventActuator->panRecognizer_->deviceType_ = SourceType::MOUSE;
     unknownPropertyValue = GESTURE_EVENT_PROPERTY_DEFAULT_VALUE;
     (*(dragEventActuator->panRecognizer_->onActionCancel_))();
-    EXPECT_EQ(unknownPropertyValue, GESTURE_EVENT_PROPERTY_VALUE);
+    EXPECT_EQ(unknownPropertyValue, GESTURE_EVENT_PROPERTY_DEFAULT_VALUE);
 
     gestureEventHub->SetTextDraggable(false);
     unknownPropertyValue = GESTURE_EVENT_PROPERTY_DEFAULT_VALUE;
     (*(dragEventActuator->panRecognizer_->onActionCancel_))();
-    EXPECT_EQ(unknownPropertyValue, GESTURE_EVENT_PROPERTY_VALUE);
+    EXPECT_EQ(unknownPropertyValue, GESTURE_EVENT_PROPERTY_DEFAULT_VALUE);
 }
 
 /**
@@ -884,5 +887,22 @@ HWTEST_F(DragEventTestNg, DragEventTestNg009, TestSize.Level1)
     TranslateOptions result = imageContext->GetTransformTranslate().value();
     TranslateOptions expectValue { 0.0f, 0.0f, 0.0f };
     EXPECT_EQ(result.x.calcvalue_, expectValue.x.calcvalue_);
+}
+
+/**
+ * @tc.name: DragEventTestNg010
+ * @tc.desc: Invoke GetPreviewPixelMap.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DragEventTestNg, DragEventTestNg010, TestSize.Level1)
+{
+    EXPECT_EQ(DragEventActuator::GetPreviewPixelMap(NO_COMPONENT_ID, nullptr), nullptr);
+    EXPECT_EQ(DragEventActuator::GetPreviewPixelMap(COMPONENT_ID, nullptr), nullptr);
+
+    auto frameNode = FrameNode::CreateFrameNode(
+        V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
+    
+    EXPECT_EQ(DragEventActuator::GetPreviewPixelMap(NO_COMPONENT_ID, frameNode), nullptr);
+    EXPECT_EQ(DragEventActuator::GetPreviewPixelMap(COMPONENT_ID, frameNode), nullptr);
 }
 } // namespace OHOS::Ace::NG

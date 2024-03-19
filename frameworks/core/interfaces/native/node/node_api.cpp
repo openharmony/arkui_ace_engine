@@ -23,6 +23,7 @@
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/ui_node.h"
 #include "core/interfaces/native/node/calendar_picker_modifier.h"
+#include "core/interfaces/native/node/custom_dialog_model.h"
 #include "core/interfaces/native/node/node_common_modifier.h"
 #include "core/interfaces/native/node/node_image_modifier.h"
 #include "core/interfaces/native/node/node_refresh_modifier.h"
@@ -34,17 +35,12 @@
 #include "core/interfaces/native/node/node_toggle_modifier.h"
 #include "core/interfaces/native/node/node_checkbox_modifier.h"
 #include "core/interfaces/native/node/node_slider_modifier.h"
+#include "core/interfaces/native/node/node_swiper_modifier.h"
 #include "core/interfaces/native/node/view_model.h"
 #include "core/pipeline_ng/pipeline_context.h"
 #include "frameworks/core/common/container.h"
 
 namespace OHOS::Ace::NG {
-
-ArkUINodeHandle GetFrameNodeById(ArkUI_Int32 nodeId)
-{
-    auto node = OHOS::Ace::ElementRegister::GetInstance()->GetNodeById(nodeId);
-    return reinterpret_cast<ArkUINodeHandle>(OHOS::Ace::AceType::RawPtr(node));
-}
 
 ArkUI_Int64 GetUIState(ArkUINodeHandle node)
 {
@@ -67,7 +63,7 @@ void SetSupportedUIState(ArkUINodeHandle node, ArkUI_Int64 state)
 namespace NodeModifier {
 const ArkUIStateModifier* GetUIStateModifier()
 {
-    static const ArkUIStateModifier modifier = { GetFrameNodeById, GetUIState, SetSupportedUIState };
+    static const ArkUIStateModifier modifier = { GetUIState, SetSupportedUIState };
     return &modifier;
 }
 }
@@ -105,7 +101,6 @@ void SetCustomCallback(ArkUINodeHandle node, ArkUI_Int32 callback)
 ArkUINodeHandle CreateNode(ArkUINodeType type, int peerId, ArkUI_Int32 flags)
 {
     auto* node = reinterpret_cast<ArkUINodeHandle>(ViewModel::CreateNode(type, peerId));
-    ViewModel::RegisterCompanion(node, peerId, flags);
     return node;
 }
 
@@ -138,7 +133,7 @@ typedef void (*ComponentAsyncEventHandler)(ArkUINodeHandle node, void* extraPara
 /* clang-format off */
 const ComponentAsyncEventHandler commonNodeAsyncEventHandlers[] = {
     NodeModifier::SetOnAppear,
-    nullptr,
+    NodeModifier::SetOnDisappear,
     NodeModifier::SetOnTouch,
     NodeModifier::SetOnClick,
     nullptr,
@@ -165,12 +160,15 @@ const ComponentAsyncEventHandler textInputNodeAsyncEventHandlers[] = {
     NodeModifier::SetOnTextInputChange,
     NodeModifier::SetOnTextInputCut,
     NodeModifier::SetOnTextInputPaste,
+    NodeModifier::SetOnTextInputSelectionChange,
 };
 
 const ComponentAsyncEventHandler textAreaNodeAsyncEventHandlers[] = {
     nullptr,
     nullptr,
     NodeModifier::SetOnTextAreaChange,
+    NodeModifier::SetOnTextAreaPaste,
+    NodeModifier::SetOnTextAreaSelectionChange,
 };
 
 const ComponentAsyncEventHandler refreshNodeAsyncEventHandlers[] = {
@@ -205,6 +203,13 @@ const ComponentAsyncEventHandler CHECKBOX_NODE_ASYNC_EVENT_HANDLERS[] = {
 
 const ComponentAsyncEventHandler SLIDER_NODE_ASYNC_EVENT_HANDLERS[] = {
     NodeModifier::SetSliderChange,
+};
+
+const ComponentAsyncEventHandler SWIPER_NODE_ASYNC_EVENT_HANDLERS[] = {
+    NodeModifier::SetSwiperChange,
+    NodeModifier::SetSwiperAnimationStart,
+    NodeModifier::SetSwiperAnimationEnd,
+    NodeModifier::SetSwiperGestureSwipe,
 };
 
 /* clang-format on */
@@ -321,6 +326,15 @@ void NotifyComponentAsyncEvent(ArkUINodeHandle node, ArkUIEventSubKind kind, Ark
             eventHandle = SLIDER_NODE_ASYNC_EVENT_HANDLERS[subKind];
             break;
         }
+        case ARKUI_SWIPER: {
+            // swiper event type.
+            if (subKind >= sizeof(SWIPER_NODE_ASYNC_EVENT_HANDLERS) / sizeof(ComponentAsyncEventHandler)) {
+                TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "NotifyComponentAsyncEvent kind:%{public}d NOT IMPLEMENT", kind);
+                return;
+            }
+            eventHandle = SWIPER_NODE_ASYNC_EVENT_HANDLERS[subKind];
+            break;
+        }
         default: {
             TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "NotifyComponentAsyncEvent kind:%{public}d NOT IMPLEMENT", kind);
         }
@@ -358,6 +372,11 @@ void MarkDirty(ArkUINodeHandle nodePtr, ArkUI_Uint32 flag)
     if (uiNode) {
         uiNode->MarkDirtyNode(flag);
     }
+}
+
+void ContainerScopeBind()
+{
+    ContainerScope scope(Container::CurrentIdSafely());
 }
 
 static void SetCallbackMethod(ArkUIAPICallbackMethod* method)
@@ -504,10 +523,123 @@ const ArkUIBasicAPI* GetBasicAPI()
 
         ApplyModifierFinish,
         MarkDirty,
+        ContainerScopeBind,
     };
     /* clang-format on */
 
     return &basicImpl;
+}
+
+ArkUIDialogHandle CreateDialog()
+{
+    return CustomDialog::CreateDialog();
+}
+
+void DisposeDialog(ArkUIDialogHandle handle)
+{
+    CustomDialog::DisposeDialog(handle);
+}
+
+ArkUI_Int32 SetDialogContent(ArkUIDialogHandle handle, ArkUINodeHandle contentNode)
+{
+    return CustomDialog::SetDialogContent(handle, contentNode);
+}
+
+ArkUI_Int32 RemoveDialogContent(ArkUIDialogHandle handle)
+{
+    return CustomDialog::RemoveDialogContent(handle);
+}
+
+ArkUI_Int32 SetDialogContentAlignment(ArkUIDialogHandle handle, ArkUI_Int32 alignment,
+    ArkUI_Float32 offsetX, ArkUI_Float32 offsetY)
+{
+    return CustomDialog::SetDialogContentAlignment(handle, alignment, offsetX, offsetY);
+}
+
+ArkUI_Int32 ResetDialogContentAlignment(ArkUIDialogHandle handle)
+{
+    return CustomDialog::ResetDialogContentAlignment(handle);
+}
+
+ArkUI_Int32 SetDialogModalMode(ArkUIDialogHandle handle, ArkUI_Bool isModal)
+{
+    return CustomDialog::SetDialogModalMode(handle, isModal);
+}
+
+ArkUI_Int32 SetDialogAutoCancel(ArkUIDialogHandle handle, ArkUI_Bool autoCancel)
+{
+    return CustomDialog::SetDialogAutoCancel(handle, autoCancel);
+}
+
+ArkUI_Int32 SetDialogMask(ArkUIDialogHandle handle, ArkUI_Uint32 maskColor, ArkUIRect * rect)
+{
+    return CustomDialog::SetDialogMask(handle, maskColor, rect);
+}
+
+ArkUI_Int32 SetDialogBackgroundColor(ArkUIDialogHandle handle, uint32_t backgroundColor)
+{
+    return CustomDialog::SetDialogBackgroundColor(handle, backgroundColor);
+}
+
+ArkUI_Int32 SetDialogCornerRadius(ArkUIDialogHandle handle, float topLeft, float topRight,
+    float bottomLeft, float bottomRight)
+{
+    return CustomDialog::SetDialogCornerRadius(handle, topLeft, topRight, bottomLeft, bottomRight);
+}
+
+ArkUI_Int32 SetDialogGridColumnCount(ArkUIDialogHandle handle, int32_t gridCount)
+{
+    return CustomDialog::SetDialogGridColumnCount(handle, gridCount);
+}
+
+ArkUI_Int32 EnableDialogCustomStyle(ArkUIDialogHandle handle, ArkUI_Bool enableCustomStyle)
+{
+    return CustomDialog::EnableDialogCustomStyle(handle, enableCustomStyle);
+}
+
+ArkUI_Int32 EnableDialogCustomAnimation(ArkUIDialogHandle handle, ArkUI_Bool enableCustomAnimation)
+{
+    return CustomDialog::EnableDialogCustomAnimation(handle, enableCustomAnimation);
+}
+
+ArkUI_Int32 ShowDialog(ArkUIDialogHandle handle, ArkUI_Bool showInSubWindow)
+{
+    return CustomDialog::ShowDialog(handle, showInSubWindow);
+}
+
+ArkUI_Int32 CloseDialog(ArkUIDialogHandle handle)
+{
+    return CustomDialog::CloseDialog(handle);
+}
+
+// 注册关闭事件
+ArkUI_Int32 RegiesterOnWillDialogDismiss(ArkUIDialogHandle handle, bool (*eventHandler)(ArkUI_Int32))
+{
+    return CustomDialog::RegiesterOnWillDialogDismiss(handle, eventHandler);
+}
+
+const ArkUIDialogAPI* GetDialogAPI()
+{
+    static const ArkUIDialogAPI dialogImpl = {
+        CreateDialog,
+        DisposeDialog,
+        SetDialogContent,
+        RemoveDialogContent,
+        SetDialogContentAlignment,
+        ResetDialogContentAlignment,
+        SetDialogModalMode,
+        SetDialogAutoCancel,
+        SetDialogMask,
+        SetDialogBackgroundColor,
+        SetDialogCornerRadius,
+        SetDialogGridColumnCount,
+        EnableDialogCustomStyle,
+        EnableDialogCustomAnimation,
+        ShowDialog,
+        CloseDialog,
+        RegiesterOnWillDialogDismiss,
+    };
+    return &dialogImpl;
 }
 
 void ShowCrash(ArkUI_CharPtr message)
@@ -647,6 +779,7 @@ ArkUIFullNodeAPI impl_full = {
     GetAnimationAPI,        // Animation
     GetNavigationAPI,       // Navigation
     GetGraphicsAPI,         // Graphics
+    GetDialogAPI,
 };
 /* clang-format on */
 } // namespace

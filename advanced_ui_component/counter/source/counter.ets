@@ -267,8 +267,8 @@ export struct CounterComponent {
     if (this.numberStyleOptions.label === undefined) {
       this.numberStyleOptions.label = '';
     }
-    if (this.numberStyleOptions.value !== undefined && this.value === undefined) {
-      this.value = this.numberStyleOptions.value;
+    if (this.value === undefined) {
+      this.value = this.numberStyleOptions.value !== undefined ? this.numberStyleOptions.value : 0;
       this.onChange?.(this.value);
       this.inputValue = this.value.toString();
     }
@@ -337,8 +337,8 @@ export struct CounterComponent {
   }
 
   private updateInlineStyleOptions() {
-    if (this.inlineStyleOptions.value !== undefined && this.value === undefined) {
-      this.value = this.inlineStyleOptions.value;
+    if (this.value === undefined) {
+      this.value = this.inlineStyleOptions.value !== undefined ? this.inlineStyleOptions.value : 0;
       this.onChange?.(this.value);
       this.inputValue = this.value.toString();
     }
@@ -1311,7 +1311,7 @@ export struct CounterComponent {
                 center: {anchor: '__container__', align: VerticalAlign.Center},
                 middle: {anchor: '__container__', align: HorizontalAlign.Center}
               })
-              .width(this.getValueLength() * 9.6)
+              .width(Math.min(this.getValueLength() * 9.6,this.textWidth))
               .height('20vp')
               .padding(0)
               .borderRadius(0)

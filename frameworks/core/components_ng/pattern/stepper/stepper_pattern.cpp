@@ -227,19 +227,23 @@ void StepperPattern::CreateRightButtonNode(int32_t index)
     if (labelStatus == "normal") {
         isRightLabelDisable_ = false;
         if (index == maxIndex_) {
-            CreateArrowlessRightButtonNode(index, Localization::GetInstance()->GetEntryLetters("stepper.start"));
+            CreateArrowlessRightButtonNode(index, false, Localization::GetInstance()->GetEntryLetters("stepper.start"));
         } else {
             CreateArrowRightButtonNode(index, false);
         }
     } else if (labelStatus == "disabled") {
         isRightLabelDisable_ = true;
-        CreateArrowRightButtonNode(index, true);
+        if (index == maxIndex_) {
+            CreateArrowlessRightButtonNode(index, true, Localization::GetInstance()->GetEntryLetters("stepper.start"));
+        } else {
+            CreateArrowRightButtonNode(index, true);
+        }
     } else if (labelStatus == "waiting") {
         isRightLabelDisable_ = false;
         CreateWaitingRightButtonNode();
     } else if (labelStatus == "skip") {
         isRightLabelDisable_ = false;
-        CreateArrowlessRightButtonNode(index, Localization::GetInstance()->GetEntryLetters("stepper.skip"));
+        CreateArrowlessRightButtonNode(index, false, Localization::GetInstance()->GetEntryLetters("stepper.skip"));
     }
 }
 
@@ -342,7 +346,7 @@ void StepperPattern::CreateArrowRightButtonNode(int32_t index, bool isDisabled)
     imageNode->MarkModifyDone();
 }
 
-void StepperPattern::CreateArrowlessRightButtonNode(int32_t index, const std::string& defaultContent)
+void StepperPattern::CreateArrowlessRightButtonNode(int32_t index, bool isDisabled, const std::string& defaultContent)
 {
     auto stepperTheme = GetTheme();
     CHECK_NULL_VOID(stepperTheme);
@@ -377,6 +381,8 @@ void StepperPattern::CreateArrowlessRightButtonNode(int32_t index, const std::st
         buttonLayoutProperty->UpdateBorderRadius(BorderRadiusProperty(stepperTheme->GetRadius()));
         buttonNode->MountToParent(hostNode);
     }
+    isRightLabelDisable_ ? buttonNode->GetEventHub<ButtonEventHub>()->SetEnabled(false)
+                         : buttonNode->GetEventHub<ButtonEventHub>()->SetEnabled(true);
     buttonNode->MarkModifyDone();
 
     // Create textNode
@@ -390,7 +396,11 @@ void StepperPattern::CreateArrowlessRightButtonNode(int32_t index, const std::st
     textLayoutProperty->UpdateAdaptMaxFontSize(stepperTheme->GetTextStyle().GetFontSize());
     textLayoutProperty->UpdateMaxLines(stepperTheme->GetTextMaxLines());
     textLayoutProperty->UpdateFontWeight(stepperTheme->GetTextStyle().GetFontWeight());
-    textLayoutProperty->UpdateTextColor(stepperTheme->GetTextStyle().GetTextColor());
+    auto textColor = stepperTheme->GetTextStyle().GetTextColor();
+    if (isDisabled) {
+        textColor = textColor.BlendOpacity(stepperTheme->GetDisabledAlpha());
+    }
+    textLayoutProperty->UpdateTextColor(textColor);
     textLayoutProperty->UpdateTextOverflow(TextOverflow::ELLIPSIS);
     textLayoutProperty->UpdateAlignment(Alignment::CENTER);
     textLayoutProperty->UpdateMargin(

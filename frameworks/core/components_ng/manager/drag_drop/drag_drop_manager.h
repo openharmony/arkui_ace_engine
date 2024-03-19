@@ -273,6 +273,26 @@ public:
         info_ = DragPreviewInfo();
     }
 
+    void SetPrepareDragFrameNode(const WeakPtr<FrameNode>& prepareDragFrameNode)
+    {
+        prepareDragFrameNode_ = prepareDragFrameNode;
+    }
+
+    const WeakPtr<FrameNode> GetPrepareDragFrameNode() const
+    {
+        return prepareDragFrameNode_;
+    }
+
+    void SetPreDragStatus(PreDragStatus preDragStatus)
+    {
+        preDragStatus_ = preDragStatus;
+    }
+
+    PreDragStatus GetPreDragStatus() const
+    {
+        return preDragStatus_;
+    }
+
 private:
     double CalcDragPreviewDistanceWithPoint(
         const OHOS::Ace::Dimension& preserverHeight, int32_t x, int32_t y, const DragPreviewInfo& info);
@@ -310,6 +330,7 @@ private:
     RefPtr<FrameNode> preGridTargetFrameNode_;
     RefPtr<FrameNode> dragWindowRootNode_;
     RefPtr<Clipboard> clipboard_;
+    WeakPtr<FrameNode> prepareDragFrameNode_;
     std::function<void(const std::string&)> addDataCallback_ = nullptr;
     std::function<void(const std::string&)> getDataCallback_ = nullptr;
     std::function<void(const std::string&)> deleteDataCallback_ = nullptr;
@@ -333,6 +354,7 @@ private:
     bool hasNotifiedTransformation_ = false;
     VelocityTracker velocityTracker_;
     DragDropMgrState dragDropState_ = DragDropMgrState::IDLE;
+    PreDragStatus preDragStatus_ = PreDragStatus::ACTION_DETECTING_STATUS;
     Rect previewRect_ { -1, -1, -1, -1 };
     DragPreviewInfo info_;
     bool isDragFwkShow_ { false };

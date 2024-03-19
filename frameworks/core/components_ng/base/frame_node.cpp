@@ -29,6 +29,7 @@
 #include "base/utils/utils.h"
 #include "core/common/ace_application_info.h"
 #include "core/common/container.h"
+#include "core/common/recorder/event_recorder.h"
 #include "core/common/recorder/node_data_cache.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components/common/layout/grid_system_manager.h"
@@ -58,6 +59,7 @@ constexpr double VISIBLE_RATIO_MAX = 1.0;
 constexpr int32_t SUBSTR_LENGTH = 3;
 const char DIMENSION_UNIT_VP[] = "vp";
 const char FORM_COMPONENT_TAG[] = "FormComponent";
+constexpr int32_t SIZE_CHANGE_DUMP_SIZE = 5;
 } // namespace
 namespace OHOS::Ace::NG {
 
@@ -103,13 +105,12 @@ public:
         int32_t count = 0;
         for (const auto& child : children) {
             count = child->FrameCount();
+            child->SetNodeIndexOffset(startIndex, count);
             children_.push_back({ child, startIndex, count });
             startIndex += count;
             totalCount_ += count;
         }
         cursor_ = children_.begin();
-        startIndex_ = -1;
-        endIndex_ = -1;
     }
 
     static void AddFrameNode(const RefPtr<UINode>& UiNode, std::list<RefPtr<LayoutWrapper>>& allFrameNodeChildren,
@@ -157,7 +158,7 @@ public:
         return allFrameNodeChildren_;
     }
 
-    RefPtr<LayoutWrapper> FindFrameNodeByIndex(uint32_t index, bool needBuild)
+    RefPtr<LayoutWrapper> FindFrameNodeByIndex(uint32_t index, bool needBuild, bool isCache)
     {
         while (cursor_ != children_.end()) {
             if (cursor_->startIndex > index) {
@@ -167,7 +168,7 @@ public:
 
             if (cursor_->startIndex + cursor_->count > index) {
                 auto frameNode = AceType::DynamicCast<FrameNode>(
-                    cursor_->node->GetFrameChildByIndex(index - cursor_->startIndex, needBuild));
+                    cursor_->node->GetFrameChildByIndex(index - cursor_->startIndex, needBuild, isCache));
                 return frameNode;
             }
             cursor_++;
@@ -179,17 +180,16 @@ public:
         return nullptr;
     }
 
-    RefPtr<LayoutWrapper> GetFrameNodeByIndex(uint32_t index, bool needBuild)
+    RefPtr<LayoutWrapper> GetFrameNodeByIndex(uint32_t index, bool needBuild, bool isCache)
     {
         auto itor = partFrameNodeChildren_.find(index);
         if (itor == partFrameNodeChildren_.end()) {
             Build();
-            auto child = FindFrameNodeByIndex(index, needBuild);
-            if (child) {
+            auto child = FindFrameNodeByIndex(index, needBuild, isCache);
+            if (child && !isCache) {
                 partFrameNodeChildren_[index] = child;
-                return child;
             }
-            return nullptr;
+            return child;
         }
         return itor->second;
     }
@@ -254,19 +254,12 @@ public:
 
     void SetActiveChildRange(int32_t start, int32_t end)
     {
-        if (startIndex_ == start && endIndex_ == end) {
-            return;
-        }
-        startIndex_ = start;
-        endIndex_ = end;
         for (auto itor = partFrameNodeChildren_.begin(); itor != partFrameNodeChildren_.end();) {
             int32_t index = itor->first;
             if ((start <= end && index >= start && index <= end) ||
                 (start > end && (index <= end || start <= index))) {
-                itor->second->SetActive(true);
                 itor++;
             } else {
-                itor->second->SetActive(false);
                 partFrameNodeChildren_.erase(itor++);
             }
         }
@@ -343,13 +336,10 @@ private:
     bool inUse_ = false;
     bool delayReset_ = false;
     bool needResetChild_ = false;
-    int32_t startIndex_ = -1;
-    int32_t endIndex_ = -1;
 }; // namespace OHOS::Ace::NG
 
-FrameNode::FrameNode(
-    const std::string& tag, int32_t nodeId, const RefPtr<Pattern>& pattern, int32_t instanceId, bool isRoot)
-    : UINode(tag, nodeId, instanceId, isRoot), LayoutWrapper(WeakClaim(this)), pattern_(pattern),
+FrameNode::FrameNode(const std::string& tag, int32_t nodeId, const RefPtr<Pattern>& pattern, bool isRoot)
+    : UINode(tag, nodeId, isRoot), LayoutWrapper(WeakClaim(this)), pattern_(pattern),
       frameProxy_(std::make_unique<FrameProxy>(this))
 {
     renderContext_->InitContext(IsRootNode(), pattern_->GetContextParam());
@@ -434,10 +424,16 @@ RefPtr<FrameNode> FrameNode::GetFrameNode(const std::string& tag, int32_t nodeId
 RefPtr<FrameNode> FrameNode::CreateFrameNode(
     const std::string& tag, int32_t nodeId, const RefPtr<Pattern>& pattern, bool isRoot)
 {
-    auto frameNode = MakeRefPtr<FrameNode>(tag, nodeId, pattern, -1, isRoot);
+    auto frameNode = MakeRefPtr<FrameNode>(tag, nodeId, pattern, isRoot);
     ElementRegister::GetInstance()->AddUINode(frameNode);
     frameNode->InitializePatternAndContext();
     return frameNode;
+}
+
+bool FrameNode::IsSupportDrawModifier()
+{
+    CHECK_NULL_RETURN(pattern_, false);
+    return pattern_->IsSupportDrawModifier();
 }
 
 void FrameNode::ProcessOffscreenNode(const RefPtr<FrameNode>& node)
@@ -570,6 +566,18 @@ void FrameNode::DumpCommonInfo()
     }
 }
 
+void FrameNode::DumpOnSizeChangeInfo()
+{
+    for (auto it = onSizeChangeDumpInfos.rbegin(); it != onSizeChangeDumpInfos.rend(); ++it) {
+        DumpLog::GetInstance().AddDesc(std::string("onSizeChange Time: ")
+            .append(ConvertTimestampToStr(it->onSizeChangeTimeStamp))
+            .append(" lastFrameRect: ")
+            .append(it->lastFrameRect.ToString())
+            .append(" currFrameRect: ")
+            .append(it->currFrameRect.ToString()));
+    }
+}
+
 void FrameNode::DumpOverlayInfo()
 {
     if (!layoutProperty_->IsOverlayNode()) {
@@ -585,6 +593,7 @@ void FrameNode::DumpOverlayInfo()
 void FrameNode::DumpInfo()
 {
     DumpCommonInfo();
+    DumpOnSizeChangeInfo();
     if (pattern_) {
         pattern_->DumpInfo();
     }
@@ -596,6 +605,7 @@ void FrameNode::DumpInfo()
 void FrameNode::DumpAdvanceInfo()
 {
     DumpCommonInfo();
+    DumpOnSizeChangeInfo();
     if (pattern_) {
         pattern_->DumpInfo();
         pattern_->DumpAdvanceInfo();
@@ -840,8 +850,14 @@ void FrameNode::OnVisibleChange(bool isVisible)
 
 void FrameNode::OnDetachFromMainTree(bool recursive)
 {
-    if (auto focusHub = GetFocusHub()) {
-        focusHub->RemoveSelf();
+    auto focusHub = GetFocusHub();
+    if (focusHub) {
+        auto focusView = focusHub->GetFirstChildFocusView();
+        if (focusView) {
+            focusView->FocusViewClose();
+        } else {
+            focusHub->RemoveSelf();
+        }
     }
     pattern_->OnDetachFromMainTree();
     eventHub_->FireOnDisappear();
@@ -1025,14 +1041,33 @@ void FrameNode::SetOnSizeChangeCallback(OnSizeChangedFunc&& callback)
     eventHub_->SetOnSizeChanged(std::move(callback));
 }
 
+RectF FrameNode::GetRectWithRender()
+{
+    auto currFrameRect = geometryNode_->GetFrameRect();
+    if (renderContext_ && renderContext_->GetPositionProperty()) {
+        if (renderContext_->GetPositionProperty()->HasPosition()) {
+            auto renderPosition = ContextPositionConvertToPX(
+                renderContext_, layoutProperty_->GetLayoutConstraint()->percentReference);
+            currFrameRect.SetOffset(
+                { static_cast<float>(renderPosition.first), static_cast<float>(renderPosition.second) });
+        }
+    }
+    return currFrameRect;
+}
+
 void FrameNode::TriggerOnSizeChangeCallback()
 {
     if (!IsActive()) {
         return;
     }
     if (eventHub_->HasOnSizeChanged() && lastFrameNodeRect_) {
-        auto currFrameRect = geometryNode_->GetFrameRect();
-        if (currFrameRect != *lastFrameNodeRect_) {
+        auto currFrameRect = GetRectWithRender();
+        if (currFrameRect.GetSize() != (*lastFrameNodeRect_).GetSize()) {
+            onSizeChangeDumpInfo dumpInfo { GetCurrentTimestamp(), *lastFrameNodeRect_, currFrameRect };
+            if (onSizeChangeDumpInfos.size() >= SIZE_CHANGE_DUMP_SIZE) {
+                onSizeChangeDumpInfos.erase(onSizeChangeDumpInfos.begin());
+            }
+            onSizeChangeDumpInfos.emplace_back(dumpInfo);
             eventHub_->FireOnSizeChanged(*lastFrameNodeRect_, currFrameRect);
             *lastFrameNodeRect_ = currFrameRect;
         }
@@ -1376,8 +1411,14 @@ void FrameNode::AdjustLayoutWrapperTree(const RefPtr<LayoutWrapperNode>& parent,
 
 RefPtr<ContentModifier> FrameNode::GetContentModifier()
 {
+    CHECK_NULL_RETURN(pattern_, nullptr);
     auto wrapper = CreatePaintWrapper();
+    CHECK_NULL_RETURN(wrapper, nullptr);
     auto paintMethod = pattern_->CreateNodePaintMethod();
+    if (!paintMethod && drawModifier_) {
+        paintMethod = pattern_->CreateDefaultNodePaintMethod();
+    }
+    CHECK_NULL_RETURN(paintMethod, nullptr);
     auto contentModifier = DynamicCast<ContentModifier>(paintMethod->GetContentModifier(AceType::RawPtr(wrapper)));
     return contentModifier;
 }
@@ -1387,6 +1428,9 @@ RefPtr<PaintWrapper> FrameNode::CreatePaintWrapper()
     pattern_->BeforeCreatePaintWrapper();
     isRenderDirtyMarked_ = false;
     auto paintMethod = pattern_->CreateNodePaintMethod();
+    if (!paintMethod && drawModifier_) {
+        paintMethod = pattern_->CreateDefaultNodePaintMethod();
+    }
     // It is necessary to copy the layoutProperty property to prevent the paintProperty_ property from being
     // modified during the paint process, resulting in the problem of judging whether the front-end setting value
     // changes the next time js is executed.
@@ -1425,7 +1469,10 @@ void FrameNode::RebuildRenderContextTree()
     // generate full children list, including disappear children.
     GenerateOneDepthVisibleFrameWithTransition(children);
     if (overlayNode_) {
-        children.push_back(overlayNode_);
+        auto property = overlayNode_->GetLayoutProperty();
+        if (property && property->GetVisibilityValue(VisibleType::VISIBLE) == VisibleType::VISIBLE) {
+            children.push_back(overlayNode_);
+        }
     }
     for (const auto& child : children) {
         frameChildren_.emplace(child);
@@ -1466,7 +1513,7 @@ void FrameNode::FlushUpdateAndMarkDirty()
     MarkDirtyNode();
 }
 
-void FrameNode::MarkDirtyNode(PropertyChangeFlag extraFlag)
+void FrameNode::MarkDirtyNode(PropertyChangeFlag extraFlag, bool childExpansiveAndMark)
 {
     if (CheckNeedMakePropertyDiff(extraFlag)) {
         if (isPropertyDiffMarked_) {
@@ -1478,7 +1525,7 @@ void FrameNode::MarkDirtyNode(PropertyChangeFlag extraFlag)
         isPropertyDiffMarked_ = true;
         return;
     }
-    MarkDirtyNode(IsMeasureBoundary(), IsRenderBoundary(), extraFlag);
+    MarkDirtyNode(IsMeasureBoundary(), IsRenderBoundary(), extraFlag, childExpansiveAndMark);
 }
 
 RefPtr<FrameNode> FrameNode::GetAncestorNodeOfFrame(bool checkBoundary) const
@@ -1547,15 +1594,16 @@ void FrameNode::MarkNeedRender(bool isRenderBoundary)
     }
 }
 
-bool FrameNode::RequestParentDirty()
+bool FrameNode::RequestParentDirty(bool childExpansiveAndMark)
 {
     auto parent = GetAncestorNodeOfFrame();
     CHECK_NULL_RETURN(parent, false);
-    parent->MarkDirtyNode(PROPERTY_UPDATE_BY_CHILD_REQUEST);
+    parent->MarkDirtyNode(PROPERTY_UPDATE_BY_CHILD_REQUEST, childExpansiveAndMark);
     return true;
 }
 
-void FrameNode::MarkDirtyNode(bool isMeasureBoundary, bool isRenderBoundary, PropertyChangeFlag extraFlag)
+void FrameNode::MarkDirtyNode(
+    bool isMeasureBoundary, bool isRenderBoundary, PropertyChangeFlag extraFlag, bool childExpansiveAndMark)
 {
     if (CheckNeedRender(extraFlag)) {
         paintProperty_->UpdatePropertyChangeFlag(extraFlag);
@@ -1572,8 +1620,20 @@ void FrameNode::MarkDirtyNode(bool isMeasureBoundary, bool isRenderBoundary, Pro
 
     if (CheckNeedRequestMeasureAndLayout(layoutFlag)) {
         auto&& opts = GetLayoutProperty()->GetSafeAreaExpandOpts();
-        if ((!isMeasureBoundary && IsNeedRequestParentMeasure()) || (opts && opts->ExpansiveToMark())) {
-            if (RequestParentDirty()) {
+        auto selfExpansiveToMark = opts && opts->ExpansiveToMark();
+        if ((!isMeasureBoundary && IsNeedRequestParentMeasure()) || selfExpansiveToMark) {
+            bool parentStopMark = false;
+            auto parent = GetAncestorNodeOfFrame();
+            if (parent) {
+                auto parentPattern = parent->GetPattern();
+                parentStopMark = parentPattern && parentPattern->StopExpandMark();
+            }
+            // case 1: child not expand and mark, but self expand, need to check if parent stop expand mark
+            // case 2: child and self not expand, regular mark parent
+            // case 3: child expand and mark, need to check parent stop expand
+            bool needMarkParent =
+                !childExpansiveAndMark || ((childExpansiveAndMark || selfExpansiveToMark) && !parentStopMark);
+            if (needMarkParent && RequestParentDirty(selfExpansiveToMark)) {
                 return;
             }
         }
@@ -1728,7 +1788,7 @@ void FrameNode::AddJudgeToTargetComponent(RefPtr<TargetComponent>& targetCompone
 }
 
 HitTestResult FrameNode::TouchTest(const PointF& globalPoint, const PointF& parentLocalPoint,
-    const PointF& parentRevertPoint, const TouchRestrict& touchRestrict, TouchTestResult& result, int32_t touchId,
+    const PointF& parentRevertPoint, TouchRestrict& touchRestrict, TouchTestResult& result, int32_t touchId,
     bool isDispatch)
 {
     if (!isActive_ || !eventHub_->IsEnabled() || bypass_) {
@@ -1810,28 +1870,36 @@ HitTestResult FrameNode::TouchTest(const PointF& globalPoint, const PointF& pare
     auto subRevertPoint = revertPoint - origRect.GetOffset();
     bool consumed = false;
 
-    std::vector<TouchTestInfo> touchInfos;
-    CollectTouchInfos(globalPoint, subRevertPoint, touchInfos);
-    TouchResult touchRes = GetOnChildTouchTestRet(touchInfos);
-    if ((touchRes.strategy != TouchTestStrategy::DEFAULT) && touchRes.id.empty()) {
-        TAG_LOGW(AceLogTag::ACE_UIEVENT, "onChildTouchTest result is: id = %{public}s, strategy = %{public}d.",
-            touchRes.id.c_str(), static_cast<int32_t>(touchRes.strategy));
-        touchRes.strategy = TouchTestStrategy::DEFAULT;
-    }
-
-    auto childNode = GetDispatchFrameNode(touchRes);
-    if (childNode != nullptr) {
-        TAG_LOGD(AceLogTag::ACE_UIEVENT, "%{public}s do TouchTest, parameter isDispatch is true.",
-            childNode->GetInspectorId()->c_str());
-        auto hitResult = childNode->TouchTest(
-            globalPoint, localPoint, subRevertPoint, touchRestrict, newComingTargets, touchId, true);
-        if (hitResult == HitTestResult::STOP_BUBBLING) {
-            preventBubbling = true;
-            consumed = true;
+    auto onTouchInterceptresult = TriggerOnTouchIntercept(touchRestrict.touchEvent);
+    TouchResult touchRes;
+    if (onTouchInterceptresult != HitTestMode::HTMBLOCK) {
+        std::vector<TouchTestInfo> touchInfos;
+        CollectTouchInfos(globalPoint, subRevertPoint, touchInfos);
+        touchRes = GetOnChildTouchTestRet(touchInfos);
+        if ((touchRes.strategy != TouchTestStrategy::DEFAULT) && touchRes.id.empty()) {
+            TAG_LOGW(AceLogTag::ACE_UIEVENT, "onChildTouchTest result is: id = %{public}s, strategy = %{public}d.",
+                touchRes.id.c_str(), static_cast<int32_t>(touchRes.strategy));
+            touchRes.strategy = TouchTestStrategy::DEFAULT;
         }
 
-        if (hitResult == HitTestResult::BUBBLING) {
-            consumed = true;
+        auto childNode = GetDispatchFrameNode(touchRes);
+        if (childNode != nullptr) {
+            TAG_LOGD(AceLogTag::ACE_UIEVENT, "%{public}s do TouchTest, parameter isDispatch is true.",
+                childNode->GetInspectorId()->c_str());
+            auto hitResult = childNode->TouchTest(
+                globalPoint, localPoint, subRevertPoint, touchRestrict, newComingTargets, touchId, true);
+            if (touchRes.strategy == TouchTestStrategy::FORWARD ||
+                touchRes.strategy == TouchTestStrategy::FORWARD_COMPETITION) {
+                touchRestrict.childTouchTestList.emplace_back(touchRes.id);
+            }
+            if (hitResult == HitTestResult::STOP_BUBBLING) {
+                preventBubbling = true;
+                consumed = true;
+            }
+
+            if (hitResult == HitTestResult::BUBBLING) {
+                consumed = true;
+            }
         }
     }
 
@@ -1839,21 +1907,24 @@ HitTestResult FrameNode::TouchTest(const PointF& globalPoint, const PointF& pare
         if (GetHitTestMode() == HitTestMode::HTMBLOCK) {
             break;
         }
-        if (touchRes.strategy == TouchTestStrategy::FORWARD) {
-            break;
+        if (onTouchInterceptresult != HitTestMode::HTMBLOCK) {
+            if (touchRes.strategy == TouchTestStrategy::FORWARD) {
+                break;
+            }
         }
 
         const auto& child = iter->Upgrade();
         if (!child) {
             continue;
         }
-
-        std::string id;
-        if (child->GetInspectorId().has_value()) {
-            id = child->GetInspectorId().value();
-        }
-        if (touchRes.strategy == TouchTestStrategy::FORWARD_COMPETITION && touchRes.id == id) {
-            continue;
+        if (onTouchInterceptresult != HitTestMode::HTMBLOCK) {
+            std::string id;
+            if (child->GetInspectorId().has_value()) {
+                id = child->GetInspectorId().value();
+            }
+            if (touchRes.strategy == TouchTestStrategy::FORWARD_COMPETITION && touchRes.id == id) {
+                continue;
+            }
         }
 
         auto childHitResult =
@@ -2804,7 +2875,7 @@ void FrameNode::Measure(const std::optional<LayoutConstraintF>& parentConstraint
     // check aspect radio.
     if (pattern_ && pattern_->IsNeedAdjustByAspectRatio()) {
         const auto& magicItemProperty = layoutProperty_->GetMagicItemProperty();
-        auto aspectRatio = magicItemProperty->GetAspectRatioValue();
+        auto aspectRatio = magicItemProperty.GetAspectRatioValue();
         // Adjust by aspect ratio, firstly pick height based on width. It means that when width, height and
         // aspectRatio are all set, the height is not used.
         auto width = geometryNode_->GetFrameSize().Width();
@@ -2990,7 +3061,7 @@ void FrameNode::SyncGeometryNode(bool needSkipSync)
     // TODO: temp use and need to delete.
     needRerender =
         needRerender || pattern_->OnDirtyLayoutWrapperSwap(Claim(this), config.skipMeasure, config.skipLayout);
-    if (needRerender || CheckNeedRender(paintProperty_->GetPropertyChangeFlag())) {
+    if (needRerender || drawModifier_ || CheckNeedRender(paintProperty_->GetPropertyChangeFlag())) {
         MarkDirtyNode(true, true, PROPERTY_UPDATE_RENDER);
     }
 
@@ -3024,9 +3095,9 @@ void FrameNode::SyncGeometryNode(bool needSkipSync)
     layoutAlgorithm_.Reset();
 }
 
-RefPtr<LayoutWrapper> FrameNode::GetOrCreateChildByIndex(uint32_t index, bool addToRenderTree)
+RefPtr<LayoutWrapper> FrameNode::GetOrCreateChildByIndex(uint32_t index, bool addToRenderTree, bool isCache)
 {
-    auto child = frameProxy_->GetFrameNodeByIndex(index, true);
+    auto child = frameProxy_->GetFrameNodeByIndex(index, true, isCache);
     if (child) {
         child->SetSkipSyncGeometryNode(SkipSyncGeometryNode());
         if (addToRenderTree) {
@@ -3036,14 +3107,19 @@ RefPtr<LayoutWrapper> FrameNode::GetOrCreateChildByIndex(uint32_t index, bool ad
     return child;
 }
 
-RefPtr<LayoutWrapper> FrameNode::GetChildByIndex(uint32_t index)
+RefPtr<LayoutWrapper> FrameNode::GetChildByIndex(uint32_t index, bool isCache)
 {
-    return frameProxy_->GetFrameNodeByIndex(index, false);
+    return frameProxy_->GetFrameNodeByIndex(index, false, isCache);
 }
 
 int32_t FrameNode::GetChildTrueIndex(const RefPtr<LayoutWrapper>& child) const
 {
     return frameProxy_->GetChildIndex(child);
+}
+
+uint32_t FrameNode::GetChildTrueTotalCount() const
+{
+    return frameProxy_->GetTotalCount();
 }
 
 const std::list<RefPtr<LayoutWrapper>>& FrameNode::GetAllChildrenWithBuild(bool addToRenderTree)
@@ -3140,7 +3216,7 @@ void FrameNode::MarkNeedSyncRenderTree(bool needRebuild)
     needSyncRenderTree_ = true;
 }
 
-RefPtr<UINode> FrameNode::GetFrameChildByIndex(uint32_t index, bool needBuild)
+RefPtr<UINode> FrameNode::GetFrameChildByIndex(uint32_t index, bool needBuild, bool isCache)
 {
     if (index != 0) {
         return nullptr;
@@ -3210,7 +3286,13 @@ void FrameNode::DoSetActiveChildRange(int32_t start, int32_t end)
 void FrameNode::OnInspectorIdUpdate(const std::string& id)
 {
     renderContext_->UpdateNodeName(id);
-    RecordExposureIfNeed(id);
+    PostTask(
+        [weak = WeakClaim(this), inspectorId = id]() {
+            auto host = weak.Upgrade();
+            CHECK_NULL_VOID(host);
+            host->RecordExposureIfNeed(inspectorId);
+        },
+        TaskExecutor::TaskType::UI);
     auto parent = GetAncestorNodeOfFrame();
     CHECK_NULL_VOID(parent);
     if (parent->GetTag() == V2::RELATIVE_CONTAINER_ETS_TAG) {
@@ -3221,6 +3303,9 @@ void FrameNode::OnInspectorIdUpdate(const std::string& id)
 void FrameNode::RecordExposureIfNeed(const std::string& inspectorId)
 {
     if (exposureProcessor_) {
+        return;
+    }
+    if (!Recorder::EventRecorder::Get().IsExposureRecordEnable()) {
         return;
     }
     auto pageUrl = Recorder::GetPageUrlByNode(Claim(this));
@@ -3513,4 +3598,77 @@ void FrameNode::PaintDebugBoundary(bool flag)
         renderContext_->PaintDebugBoundary(flag);
     }
 }
+
+HitTestMode FrameNode::TriggerOnTouchIntercept(const TouchEvent& touchEvent)
+{
+    auto gestureHub = eventHub_->GetGestureEventHub();
+    CHECK_NULL_RETURN(gestureHub, HitTestMode::HTMDEFAULT);
+    auto onTouchIntercept = gestureHub->GetOnTouchIntercept();
+    CHECK_NULL_RETURN(onTouchIntercept, HitTestMode::HTMDEFAULT);
+    TouchEventInfo event("touchEvent");
+    event.SetTimeStamp(touchEvent.time);
+    event.SetPointerEvent(touchEvent.pointerEvent);
+    TouchLocationInfo changedInfo("onTouch", touchEvent.id);
+    PointF lastLocalPoint(touchEvent.x, touchEvent.y);
+    NGGestureRecognizer::Transform(lastLocalPoint, Claim(this), false, false);
+    auto localX = static_cast<float>(lastLocalPoint.GetX());
+    auto localY = static_cast<float>(lastLocalPoint.GetY());
+    changedInfo.SetLocalLocation(Offset(localX, localY));
+    changedInfo.SetGlobalLocation(Offset(touchEvent.x, touchEvent.y));
+    changedInfo.SetScreenLocation(Offset(touchEvent.screenX, touchEvent.screenY));
+    changedInfo.SetTouchType(touchEvent.type);
+    changedInfo.SetForce(touchEvent.force);
+    if (touchEvent.tiltX.has_value()) {
+        changedInfo.SetTiltX(touchEvent.tiltX.value());
+    }
+    if (touchEvent.tiltY.has_value()) {
+        changedInfo.SetTiltY(touchEvent.tiltY.value());
+    }
+    changedInfo.SetSourceTool(touchEvent.sourceTool);
+    event.AddChangedTouchLocationInfo(std::move(changedInfo));
+
+    AddTouchEventAllFingersInfo(event, touchEvent);
+    event.SetSourceDevice(touchEvent.sourceType);
+    event.SetForce(touchEvent.force);
+    if (touchEvent.tiltX.has_value()) {
+        event.SetTiltX(touchEvent.tiltX.value());
+    }
+    if (touchEvent.tiltY.has_value()) {
+        event.SetTiltY(touchEvent.tiltY.value());
+    }
+    event.SetSourceTool(touchEvent.sourceTool);
+    auto result = onTouchIntercept(event);
+    SetHitTestMode(result);
+    return result;
+}
+
+void FrameNode::AddTouchEventAllFingersInfo(TouchEventInfo& event, const TouchEvent& touchEvent)
+{
+    // all fingers collection
+    for (const auto& item : touchEvent.pointers) {
+        float globalX = item.x;
+        float globalY = item.y;
+        float screenX = item.screenX;
+        float screenY = item.screenY;
+        PointF localPoint(globalX, globalY);
+        NGGestureRecognizer::Transform(localPoint, Claim(this), false, false);
+        auto localX = static_cast<float>(localPoint.GetX());
+        auto localY = static_cast<float>(localPoint.GetY());
+        TouchLocationInfo info("onTouch", item.id);
+        info.SetGlobalLocation(Offset(globalX, globalY));
+        info.SetLocalLocation(Offset(localX, localY));
+        info.SetScreenLocation(Offset(screenX, screenY));
+        info.SetTouchType(touchEvent.type);
+        info.SetForce(item.force);
+        if (item.tiltX.has_value()) {
+            info.SetTiltX(item.tiltX.value());
+        }
+        if (item.tiltY.has_value()) {
+            info.SetTiltY(item.tiltY.value());
+        }
+        info.SetSourceTool(item.sourceTool);
+        event.AddTouchLocationInfo(std::move(info));
+    }
+}
+
 } // namespace OHOS::Ace::NG

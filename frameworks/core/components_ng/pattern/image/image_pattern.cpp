@@ -26,37 +26,31 @@
 #include "base/geometry/ng/vector.h"
 #include "base/log/dump_log.h"
 #include "base/utils/utils.h"
-#include "core/common/ai/image_analyzer_mgr.h"
+#include "core/common/ace_engine_ext.h"
+#include "core/common/ai/image_analyzer_manager.h"
+#include "core/common/container.h"
 #include "core/common/frontend.h"
+#include "core/common/udmf/udmf_client.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components/image/image_theme.h"
 #include "core/components/theme/icon_theme.h"
 #include "core/components_ng/base/view_stack_processor.h"
-#include "core/components_ng/event/event_hub.h"
 #include "core/components_ng/pattern/image/image_layout_property.h"
 #include "core/components_ng/pattern/image/image_paint_method.h"
 #include "core/components_ng/pattern/image/image_pattern.h"
 #include "core/components_ng/property/measure_property.h"
 #include "core/pipeline_ng/pipeline_context.h"
-#include "core/common/ace_engine_ext.h"
-#include "core/common/ai/image_analyzer_adapter.h"
-#include "core/common/container.h"
-#include "core/common/udmf/udmf_client.h"
 
 namespace OHOS::Ace::NG {
 ImagePattern::ImagePattern()
 {
     InitDefaultValue();
-    imageAnalyzerAdapter_ = std::shared_ptr<ImageAnalyzerAdapter>(CreateImageAnalyzerAdapter());
 }
 
 ImagePattern::~ImagePattern()
 {
-    if (!isEnableAnalyzer_) {
-        return;
-    }
-    if (IsSupportImageAnalyzerFeature() && isAnalyzerOverlayBuild_) {
-        ImageAnalyzerMgr::GetInstance().Release(&overlayData_);
+    if (IsSupportImageAnalyzerFeature()) {
+        ReleaseImageAnalyzer();
     }
 }
 
@@ -197,6 +191,7 @@ void ImagePattern::OnImageLoadSuccess()
     srcRect_ = loadingCtx_->GetSrcRect();
     dstRect_ = loadingCtx_->GetDstRect();
 
+    CHECK_NULL_VOID(image_);
     RectF paintRect = CalcImageContentPaintSize(geometryNode);
     LoadImageSuccessEvent event(loadingCtx_->GetImageSize().Width(), loadingCtx_->GetImageSize().Height(),
         geometryNode->GetFrameSize().Width(), geometryNode->GetFrameSize().Height(), 1, paintRect.Width(),
@@ -216,9 +211,8 @@ void ImagePattern::OnImageLoadSuccess()
     altImage_ = nullptr;
     altDstRect_.reset();
     altSrcRect_.reset();
-
-    if (!IsSupportImageAnalyzerFeature() && isAnalyzerOverlayBuild_) {
-        DeleteAnalyzerOverlay();
+    if (!IsSupportImageAnalyzerFeature()) {
+        DestroyAnalyzerOverlay();
     }
     UpdateAnalyzerOverlay();
 
@@ -252,7 +246,12 @@ void ImagePattern::OnImageDataReady()
         geometryNode->GetContentOffset().GetX(), geometryNode->GetContentOffset().GetY());
     imageEventHub->FireCompleteEvent(event);
 
-    host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    auto geo = host->GetGeometryNode();
+    if (geo->GetContent() && !host->CheckNeedForceMeasureAndLayout()) {
+        StartDecoding(geo->GetContentSize());
+    } else {
+        host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    }
 }
 
 void ImagePattern::OnImageLoadFail(const std::string& errorMsg)
@@ -264,6 +263,32 @@ void ImagePattern::OnImageLoadFail(const std::string& errorMsg)
     CHECK_NULL_VOID(imageEventHub);
     LoadImageFailEvent event(geometryNode->GetFrameSize().Width(), geometryNode->GetFrameSize().Height(), errorMsg);
     imageEventHub->FireErrorEvent(event);
+}
+
+void ImagePattern::StartDecoding(const SizeF& dstSize)
+{
+    // if layout size has not decided yet, resize target can not be calculated
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    if (!host->GetGeometryNode()->GetContent()) {
+        return;
+    }
+
+    const auto& props = DynamicCast<ImageLayoutProperty>(host->GetLayoutProperty());
+    CHECK_NULL_VOID(props);
+    bool autoResize = props->GetAutoResize().value_or(autoResizeDefault_);
+
+    ImageFit imageFit = props->GetImageFit().value_or(ImageFit::COVER);
+    const std::optional<SizeF>& sourceSize = props->GetSourceSize();
+    auto renderProp = host->GetPaintProperty<ImageRenderProperty>();
+    bool hasValidSlice = renderProp && renderProp->HasImageResizableSlice();
+
+    if (loadingCtx_) {
+        loadingCtx_->MakeCanvasImageIfNeed(dstSize, autoResize, imageFit, sourceSize, hasValidSlice);
+    }
+    if (altLoadingCtx_) {
+        altLoadingCtx_->MakeCanvasImageIfNeed(dstSize, autoResize, imageFit, sourceSize, hasValidSlice);
+    }
 }
 
 void ImagePattern::SetImagePaintConfig(const RefPtr<CanvasImage>& canvasImage, const RectF& srcRect,
@@ -318,6 +343,9 @@ bool ImagePattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, 
     if (config.skipMeasure || dirty->SkipMeasureContent()) {
         return false;
     }
+
+    const auto& dstSize = dirty->GetGeometryNode()->GetContentSize();
+    StartDecoding(dstSize);
 
     if (loadingCtx_) {
         auto renderProp = GetPaintProperty<ImageRenderProperty>();
@@ -405,8 +433,8 @@ void ImagePattern::LoadImageDataIfNeed()
             ContainerScope scope(instanceID);
             auto pattern = weak.Upgrade();
             CHECK_NULL_VOID(pattern);
-            pattern->CreateAnalyzerOverlay();
             if (pattern->IsSupportImageAnalyzerFeature()) {
+                pattern->CreateAnalyzerOverlay();
                 auto host = pattern->GetHost();
                 pattern->UpdateAnalyzerUIConfig(host->GetGeometryNode());
             }
@@ -473,9 +501,9 @@ void ImagePattern::OnModifyDone()
 
     UpdateGestureAndDragWhenModify();
 
-    if (isAnalyzerOverlayBuild_) {
+    if (imageAnalyzerManager_ && imageAnalyzerManager_->isOverlayCreated()) {
         if (!IsSupportImageAnalyzerFeature()) {
-            DeleteAnalyzerOverlay();
+            DestroyAnalyzerOverlay();
         } else {
             UpdateAnalyzerOverlayLayout();
         }
@@ -950,6 +978,11 @@ void ImagePattern::OnColorConfigurationUpdate()
     OnConfigurationUpdate();
 }
 
+void ImagePattern::OnDirectionConfigurationUpdate()
+{
+    OnConfigurationUpdate();
+}
+
 void ImagePattern::OnIconConfigurationUpdate()
 {
     OnConfigurationUpdate();
@@ -976,6 +1009,19 @@ void ImagePattern::OnConfigurationUpdate()
     }
 }
 
+void ImagePattern::EnableAnalyzer(bool value)
+{
+    isEnableAnalyzer_ = value;
+    if (!isEnableAnalyzer_) {
+        DestroyAnalyzerOverlay();
+        return;
+    }
+
+    if (!imageAnalyzerManager_) {
+        imageAnalyzerManager_ = std::make_shared<ImageAnalyzerManager>(GetHost(), ImageAnalyzerHolder::IMAGE);
+    }
+}
+
 // As an example
 void ImagePattern::SetImageAnalyzerConfig(const ImageAnalyzerConfig &config)
 {
@@ -986,184 +1032,61 @@ void ImagePattern::SetImageAnalyzerConfig(const ImageAnalyzerConfig &config)
 
 void ImagePattern::SetImageAnalyzerConfig(void* config)
 {
-    if (!isEnableAnalyzer_) {
-        return;
+    if (isEnableAnalyzer_) {
+        CHECK_NULL_VOID(imageAnalyzerManager_);
+        imageAnalyzerManager_->SetImageAnalyzerConfig(config);
     }
-    imageAnalyzerAdapter_->SetImageAnalyzerConfig(config);
-    auto analyzerConfig = imageAnalyzerAdapter_->GetImageAnalyzerConfig();
-    if (IsSupportImageAnalyzerFeature() && isAnalyzerOverlayBuild_) {
-        ImageAnalyzerMgr::GetInstance().UpdateConfig(&overlayData_, analyzerConfig);
-    }
-}
-
-void ImagePattern::CreateAnalyzerOverlay()
-{
-    if (!IsSupportImageAnalyzerFeature() || isAnalyzerOverlayBuild_) {
-        return;
-    }
-
-    auto pixelMap = image_->GetPixelMap();
-    CHECK_NULL_VOID(pixelMap);
-    auto pixelmapNapiVal = imageAnalyzerAdapter_->ConvertPixmapNapi(pixelMap);
-    auto frameNode = GetHost();
-    auto overlayNode = frameNode->GetOverlayNode();
-
-    auto layoutProps = GetLayoutProperty<ImageLayoutProperty>();
-    CHECK_NULL_VOID(layoutProps);
-    analyzerUIConfig_.imageFit = layoutProps->GetImageFit().value_or(ImageFit::COVER);
-    auto buildNodeFunction = [this, &pixelmapNapiVal]() -> RefPtr<UINode> {
-        ScopedViewStackProcessor builderViewStackProcessor;
-        auto analyzerConfig = imageAnalyzerAdapter_->GetImageAnalyzerConfig();
-        ImageAnalyzerMgr::GetInstance().BuildNodeFunc(
-            pixelmapNapiVal, analyzerConfig, &analyzerUIConfig_, &overlayData_);
-        auto customNode = ViewStackProcessor::GetInstance()->Finish();
-        return customNode;
-    };
-    overlayNode = AceType::DynamicCast<FrameNode>(buildNodeFunction());
-    CHECK_NULL_VOID(overlayNode);
-    frameNode->SetOverlayNode(overlayNode);
-    overlayNode->SetParent(AceType::WeakClaim(AceType::RawPtr(frameNode)));
-    overlayNode->SetActive(true);
-    isAnalyzerOverlayBuild_ = true;
-
-    UpdateAnalyzerOverlayLayout();
-    auto renderContext = overlayNode->GetRenderContext();
-    CHECK_NULL_VOID(renderContext);
-    renderContext->UpdateZIndex(INT32_MAX);
-    auto focusHub = overlayNode->GetOrCreateFocusHub();
-    CHECK_NULL_VOID(focusHub);
-    focusHub->SetFocusable(false);
-    overlayNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
-}
-
-void ImagePattern::UpdateAnalyzerOverlay()
-{
-    if (!IsSupportImageAnalyzerFeature() || !isAnalyzerOverlayBuild_) {
-        return;
-    }
-
-    auto imageLayoutProperty = GetLayoutProperty<ImageLayoutProperty>();
-    CHECK_NULL_VOID(imageLayoutProperty);
-    auto src = imageLayoutProperty->GetImageSourceInfo().value_or(ImageSourceInfo(""));
-    UpdateInternalResource(src);
-    if (loadingCtx_ && loadingCtx_->GetSourceInfo() == src && srcRect_ == dstRect_) {
-        return;
-    }
-
-    auto pixelMap = image_->GetPixelMap();
-    CHECK_NULL_VOID(pixelMap);
-    auto pixelmapNapiVal = imageAnalyzerAdapter_->ConvertPixmapNapi(pixelMap);
-    auto frameNode = GetHost();
-    auto overlayNode = frameNode->GetOverlayNode();
-    auto analyzerConfig = imageAnalyzerAdapter_->GetImageAnalyzerConfig();
-    ImageAnalyzerMgr::GetInstance().UpdateImage(&overlayData_, pixelmapNapiVal, analyzerConfig, &analyzerUIConfig_);
-    overlayNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
-}
-
-void ImagePattern::DeleteAnalyzerOverlay()
-{
-    auto frameNode = GetHost();
-    CHECK_NULL_VOID(frameNode);
-    auto overlayNode = frameNode->GetOverlayNode();
-    isAnalyzerOverlayBuild_ = false;
-    if (!overlayNode) {
-        return;
-    }
-    RefPtr<FrameNode> node;
-    frameNode->SetOverlayNode(node);
 }
 
 bool ImagePattern::IsSupportImageAnalyzerFeature()
 {
-    auto eventHub = GetEventHub<EventHub>();
-    bool isEnabled = true;
-    if (eventHub) {
-        isEnabled = eventHub->IsEnabled();
-    }
-
-    bool hasObscured = false;
-    auto host = GetHost();
-    CHECK_NULL_RETURN(host, false);
-    if (host->GetRenderContext()->GetObscured().has_value()) {
-        auto obscuredReasons = host->GetRenderContext()->GetObscured().value();
-        hasObscured = std::any_of(obscuredReasons.begin(), obscuredReasons.end(),
-            [](const auto& reason) { return reason == ObscuredReasons::PLACEHOLDER; });
-    }
-
-    auto imageRenderProperty = GetPaintProperty<ImageRenderProperty>();
-    CHECK_NULL_RETURN(imageRenderProperty, false);
-    ImageRepeat repeat = imageRenderProperty->GetImageRepeat().value_or(ImageRepeat::NO_REPEAT);
-
-    return isEnabled && !hasObscured && isEnableAnalyzer_ &&
-           ImageAnalyzerMgr::GetInstance().IsImageAnalyzerSupported() && image_ &&
-           !loadingCtx_->GetSourceInfo().IsSvg() && repeat == ImageRepeat::NO_REPEAT &&
-           loadingCtx_->GetFrameCount() == 1;
+    CHECK_NULL_RETURN(imageAnalyzerManager_, false);
+    return isEnableAnalyzer_ && image_ && !loadingCtx_->GetSourceInfo().IsSvg() && loadingCtx_->GetFrameCount() == 1 &&
+        imageAnalyzerManager_->IsSupportImageAnalyzerFeature();
 }
 
-void ImagePattern::UpdateAnalyzerUIConfig(const RefPtr<GeometryNode>& geometryNode)
+void ImagePattern::CreateAnalyzerOverlay()
 {
-    bool isUIConfigUpdate = false;
-    CHECK_NULL_VOID(geometryNode);
-    if (analyzerUIConfig_.contentWidth != geometryNode->GetContentSize().Width() ||
-        analyzerUIConfig_.contentHeight != geometryNode->GetContentSize().Height()) {
-        analyzerUIConfig_.contentWidth = geometryNode->GetContentSize().Width();
-        analyzerUIConfig_.contentHeight = geometryNode->GetContentSize().Height();
-        isUIConfigUpdate = true;
+    auto pixelMap = image_->GetPixelMap();
+    CHECK_NULL_VOID(pixelMap);
+    if (IsSupportImageAnalyzerFeature()) {
+        CHECK_NULL_VOID(imageAnalyzerManager_);
+        imageAnalyzerManager_->CreateAnalyzerOverlay(pixelMap);
     }
+}
 
-    auto layoutProps = GetLayoutProperty<ImageLayoutProperty>();
-    CHECK_NULL_VOID(layoutProps);
-    if (analyzerUIConfig_.imageFit != layoutProps->GetImageFit().value_or(ImageFit::COVER)) {
-        analyzerUIConfig_.imageFit = layoutProps->GetImageFit().value_or(ImageFit::COVER);
-        isUIConfigUpdate = true;
-    }
-
-    auto frameNode = GetHost();
-    CHECK_NULL_VOID(frameNode);
-    auto renderContext = frameNode->GetRenderContext();
-    CHECK_NULL_VOID(renderContext);
-
-    auto localCenter = renderContext->GetTransformCenterValue(DimensionOffset(0.5_pct, 0.5_pct));
-    auto localScale = renderContext->GetTransformScaleValue(VectorF(1.0f, 1.0f));
-    Matrix4 localScaleMat = Matrix4::CreateTranslate(localCenter.GetX().Value(), localCenter.GetY().Value(), 0) *
-                            Matrix4::CreateScale(localScale.x, localScale.y, 1.0f) *
-                            Matrix4::CreateTranslate(-localCenter.GetX().Value(), -localCenter.GetY().Value(), 0);
-
-    auto transformMat = renderContext->GetTransformMatrixValue(Matrix4::CreateIdentity());
-    VectorF transCenter(transformMat.Get(0, 3), transformMat.Get(1, 3));
-    Matrix4 transScaleMat = Matrix4::CreateTranslate(transCenter.x, transCenter.y, 0) *
-                            Matrix4::CreateScale(transformMat.GetScaleX(), transformMat.GetScaleY(), 1.0f) *
-                            Matrix4::CreateTranslate(-transCenter.x, -transCenter.y, 0);
-    Matrix4 scaleMat = localScaleMat * transScaleMat;
-    if (!(analyzerUIConfig_.transformMat == scaleMat)) {
-        analyzerUIConfig_.transformMat = scaleMat;
-        isUIConfigUpdate = true;
-    }
-
-    if (isUIConfigUpdate) {
-        ImageAnalyzerMgr::GetInstance().UpdateInnerConfig(&overlayData_, &analyzerUIConfig_);
+void ImagePattern::UpdateAnalyzerOverlay()
+{
+    auto pixelMap = image_->GetPixelMap();
+    CHECK_NULL_VOID(pixelMap);
+    if (IsSupportImageAnalyzerFeature()) {
+        imageAnalyzerManager_->UpdateAnalyzerOverlay(pixelMap);
     }
 }
 
 void ImagePattern::UpdateAnalyzerOverlayLayout()
 {
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    auto layoutProperty = host->GetLayoutProperty();
-    CHECK_NULL_VOID(layoutProperty);
-    auto padding = layoutProperty->CreatePaddingAndBorder();
-    auto overlayNode = host->GetOverlayNode();
-    CHECK_NULL_VOID(overlayNode);
-    auto overlayLayoutProperty = overlayNode->GetLayoutProperty();
-    CHECK_NULL_VOID(overlayLayoutProperty);
-    overlayLayoutProperty->UpdateMeasureType(MeasureType::MATCH_PARENT);
-    overlayLayoutProperty->UpdateAlignment(Alignment::TOP_LEFT);
-    overlayLayoutProperty->SetOverlayOffset(Dimension(padding.Offset().GetX()), Dimension(padding.Offset().GetY()));
-    overlayNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    CHECK_NULL_VOID(imageAnalyzerManager_);
+    imageAnalyzerManager_->UpdateAnalyzerOverlayLayout();
+}
 
-    auto renderContext = overlayNode->GetRenderContext();
-    if (renderContext) {
-        renderContext->SetRenderFrameOffset({-padding.Offset().GetX(), -padding.Offset().GetY()});
+void ImagePattern::DestroyAnalyzerOverlay()
+{
+    CHECK_NULL_VOID(imageAnalyzerManager_);
+    imageAnalyzerManager_->DestroyAnalyzerOverlay();
+}
+
+void ImagePattern::ReleaseImageAnalyzer()
+{
+    CHECK_NULL_VOID(imageAnalyzerManager_);
+    imageAnalyzerManager_->ReleaseImageAnalyzer();
+}
+
+void ImagePattern::UpdateAnalyzerUIConfig(const RefPtr<NG::GeometryNode>& geometryNode)
+{
+    if (IsSupportImageAnalyzerFeature()) {
+        CHECK_NULL_VOID(imageAnalyzerManager_);
+        imageAnalyzerManager_->UpdateAnalyzerUIConfig(geometryNode);
     }
 }
 
@@ -1181,5 +1104,17 @@ void ImagePattern::InitDefaultValue()
         autoResizeDefault_ = true;
         interpolationDefault_ = ImageInterpolation::NONE;
     }
+}
+
+bool ImagePattern::hasSceneChanged()
+{
+    auto imageLayoutProperty = GetLayoutProperty<ImageLayoutProperty>();
+    CHECK_NULL_RETURN(imageLayoutProperty, false);
+    auto src = imageLayoutProperty->GetImageSourceInfo().value_or(ImageSourceInfo(""));
+    UpdateInternalResource(src);
+    if (loadingCtx_ && loadingCtx_->GetSourceInfo() == src && srcRect_ == dstRect_) {
+        return false;
+    }
+    return true;
 }
 } // namespace OHOS::Ace::NG

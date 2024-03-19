@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -390,7 +390,7 @@ void TextPickerModelNG::SetUnCascadeColumns(const std::vector<NG::TextCascadePic
             auto layoutProperty = stackNode->GetLayoutProperty<LayoutProperty>();
             layoutProperty->UpdateAlignment(Alignment::CENTER);
             columnNode->GetLayoutProperty<LayoutProperty>()->UpdatePixelRound(PIXEL_ROUND);
-            stackNode->MountToParent(frameNode);
+            stackNode->MountToParent(AceType::Claim(frameNode));
         }
     }
 
@@ -430,7 +430,7 @@ void TextPickerModelNG::SetCascadeColumns(const std::vector<NG::TextCascadePicke
             auto layoutProperty = stackNode->GetLayoutProperty<LayoutProperty>();
             layoutProperty->UpdateAlignment(Alignment::CENTER);
             columnNode->GetLayoutProperty<LayoutProperty>()->UpdatePixelRound(PIXEL_ROUND);
-            stackNode->MountToParent(frameNode);
+            stackNode->MountToParent(AceType::Claim<NG::FrameNode>(frameNode));
         }
     }
 
@@ -1021,5 +1021,21 @@ std::string TextPickerModelNG::getTextPickerRange(FrameNode* frameNode)
         }
     }
     return result;
+}
+
+void TextPickerModelNG::SetDivider(const ItemDivider& divider)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto textPickerPattern = frameNode->GetPattern<TextPickerPattern>();
+    CHECK_NULL_VOID(textPickerPattern);
+    textPickerPattern->SetDivider(divider);
+    ACE_UPDATE_LAYOUT_PROPERTY(TextPickerLayoutProperty, Divider, divider);
+}
+
+void TextPickerModelNG::SetDivider(FrameNode* frameNode, const ItemDivider& divider)
+{
+    CHECK_NULL_VOID(frameNode);
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextPickerLayoutProperty, Divider, divider, frameNode);
 }
 } // namespace OHOS::Ace::NG

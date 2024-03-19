@@ -20,6 +20,7 @@
 
 #include "core/components/common/layout/constants.h"
 #include "core/components_ng/base/view_stack_processor.h"
+#include "core/components_ng/pattern/ui_extension/session_wrapper.h"
 #include "core/components_ng/pattern/ui_extension/ui_extension_pattern.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/pipeline_ng/pipeline_context.h"
@@ -43,8 +44,8 @@ RefPtr<FrameNode> UIExtensionModelNG::Create(const std::string& bundleName, cons
     return frameNode;
 }
 
-RefPtr<FrameNode> UIExtensionModelNG::Create(const AAFwk::Want& want, const ModalUIExtensionCallbacks& callbacks,
-    bool isAsyncModalBinding)
+RefPtr<FrameNode> UIExtensionModelNG::Create(
+    const AAFwk::Want& want, const ModalUIExtensionCallbacks& callbacks, bool isAsyncModalBinding)
 {
     auto nodeId = ElementRegister::GetInstance()->MakeUniqueId();
     auto frameNode = FrameNode::GetOrCreateFrameNode(V2::UI_EXTENSION_COMPONENT_ETS_TAG, nodeId,
@@ -61,6 +62,9 @@ RefPtr<FrameNode> UIExtensionModelNG::Create(const AAFwk::Want& want, const Moda
     pattern->SetOnReceiveCallback(std::move(callbacks.onReceive));
     pattern->SetModalOnRemoteReadyCallback(std::move(callbacks.onRemoteReady));
     pattern->SetModalOnDestroy(std::move(callbacks.onDestroy));
+    auto dragDropManager = pipeline->GetDragDropManager();
+    CHECK_NULL_RETURN(dragDropManager, frameNode);
+    dragDropManager->AddDragFrameNode(nodeId, AceType::WeakClaim(AceType::RawPtr(frameNode)));
     return frameNode;
 }
 
@@ -83,12 +87,12 @@ void UIExtensionModelNG::Create(const RefPtr<OHOS::Ace::WantWrap>& wantWrap, boo
 }
 
 // for EmbeddedComponent
-void UIExtensionModelNG::Create(const RefPtr<OHOS::Ace::WantWrap>& wantWrap, int32_t embeddedType)
+void UIExtensionModelNG::Create(const RefPtr<OHOS::Ace::WantWrap>& wantWrap, SessionType sessionType)
 {
     auto* stack = ViewStackProcessor::GetInstance();
     auto nodeId = stack->ClaimNodeId();
     auto frameNode = FrameNode::GetOrCreateFrameNode(V2::UI_EXTENSION_COMPONENT_ETS_TAG, nodeId,
-        [embeddedType]() { return AceType::MakeRefPtr<UIExtensionPattern>(false, false, false, embeddedType); });
+        [sessionType]() { return AceType::MakeRefPtr<UIExtensionPattern>(false, false, false, sessionType); });
     auto pattern = frameNode->GetPattern<UIExtensionPattern>();
     CHECK_NULL_VOID(pattern);
     pattern->SetWantWrap(wantWrap);
@@ -99,6 +103,9 @@ void UIExtensionModelNG::Create(const RefPtr<OHOS::Ace::WantWrap>& wantWrap, int
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
     pipeline->AddWindowStateChangedCallback(nodeId);
+    auto dragDropManager = pipeline->GetDragDropManager();
+    CHECK_NULL_VOID(dragDropManager);
+    dragDropManager->AddDragFrameNode(nodeId, AceType::WeakClaim(AceType::RawPtr(frameNode)));
 }
 
 // for DynamicComponent
@@ -106,8 +113,8 @@ void UIExtensionModelNG::Create()
 {
     auto* stack = ViewStackProcessor::GetInstance();
     auto nodeId = stack->ClaimNodeId();
-    auto frameNode = FrameNode::GetOrCreateFrameNode(V2::DYNAMIC_COMPONENT_ETS_TAG, nodeId,
-        []() { return AceType::MakeRefPtr<UIExtensionPattern>(); });
+    auto frameNode = FrameNode::GetOrCreateFrameNode(
+        V2::DYNAMIC_COMPONENT_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<UIExtensionPattern>(); });
     auto pattern = frameNode->GetPattern<UIExtensionPattern>();
     CHECK_NULL_VOID(pattern);
     stack->Push(frameNode);
@@ -156,6 +163,15 @@ void UIExtensionModelNG::SetOnResult(std::function<void(int32_t, const AAFwk::Wa
     CHECK_NULL_VOID(frameNode);
     auto pattern = frameNode->GetPattern<UIExtensionPattern>();
     pattern->SetOnResultCallback(std::move(onResult));
+}
+
+void UIExtensionModelNG::SetOnTerminated(
+    std::function<void(std::optional<int32_t>, const RefPtr<WantWrap>&)>&& onTerminated)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<UIExtensionPattern>();
+    pattern->SetOnTerminatedCallback(std::move(onTerminated));
 }
 
 void UIExtensionModelNG::SetOnReceive(std::function<void(const AAFwk::WantParams&)>&& onReceive)

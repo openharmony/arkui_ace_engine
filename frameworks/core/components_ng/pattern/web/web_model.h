@@ -52,6 +52,7 @@ public:
     virtual void SetOnDownloadStart(std::function<void(const BaseEventInfo* info)>&& jsCallback) = 0;
     virtual void SetOnHttpAuthRequest(std::function<bool(const BaseEventInfo* info)>&& jsCallback) = 0;
     virtual void SetOnSslErrorRequest(std::function<bool(const BaseEventInfo* info)>&& jsCallback) = 0;
+    virtual void SetOnAllSslErrorRequest(std::function<bool(const BaseEventInfo *info)> &&jsCallback) = 0;
     virtual void SetOnSslSelectCertRequest(std::function<bool(const BaseEventInfo* info)>&& jsCallback) = 0;
     virtual void SetMediaPlayGestureAccess(bool isNeedGestureAccess) = 0;
     virtual void SetOnKeyEvent(std::function<void(KeyEventInfo& keyEventInfo)>&& jsCallback) = 0;
@@ -124,6 +125,10 @@ public:
         std::function<void(const std::shared_ptr<BaseEventInfo>& info)>&& audioStateChanged) {};
     virtual void SetFirstContentfulPaintId(
         std::function<void(const std::shared_ptr<BaseEventInfo>& info)>&& firstContentfulPaintId) {};
+    virtual void SetFirstMeaningfulPaintId(
+        std::function<void(const std::shared_ptr<BaseEventInfo>& info)>&& firstMeaningfulPaintId) {};
+    virtual void SetLargestContentfulPaintId(
+        std::function<void(const std::shared_ptr<BaseEventInfo>& info)>&& largestContentfulPaintId) {};
     virtual void SetSafeBrowsingCheckResultId(
         std::function<void(const std::shared_ptr<BaseEventInfo>& info)>&& safeBrowsingCheckResultId) {};
     virtual void SetNavigationEntryCommittedId(
@@ -154,6 +159,7 @@ public:
 
     virtual void SetScreenCaptureRequestEventId(std::function<void(const BaseEventInfo* info)>&& jsCallback) {};
     virtual void SetNestedScroll(const NestedScrollOptions& nestedOpt) {}
+    virtual void SetMetaViewport(bool enabled) {}
     virtual void SetLayoutMode(WebLayoutMode mode) {}
     virtual void SetOverScrollMode(OverScrollMode mode) {}
     virtual void JavaScriptOnDocumentStart(const ScriptItems& scriptItems) {};
@@ -165,6 +171,7 @@ public:
         std::function<void(const std::shared_ptr<BaseEventInfo>& info)>&&
             intelligentTrackingPreventionResultId) {};
     virtual void SetOnOverrideUrlLoading(std::function<bool(const BaseEventInfo* info)>&& jsCallback) = 0;
+    virtual void SetTextAutosizing(bool isTextAutosizing) {};
 private:
     static std::unique_ptr<WebModel> instance_;
     static std::mutex mutex_;

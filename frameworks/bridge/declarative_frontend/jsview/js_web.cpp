@@ -306,6 +306,53 @@ private:
     RefPtr<SslErrorResult> result_;
 };
 
+class JSWebAllSslError : public Referenced {
+public:
+    static void JSBind(BindingTarget globalObj)
+    {
+        JSClass<JSWebAllSslError>::Declare("WebAllSslErrorResult");
+        JSClass<JSWebAllSslError>::CustomMethod("handleConfirm", &JSWebAllSslError::HandleConfirm);
+        JSClass<JSWebAllSslError>::CustomMethod("handleCancel", &JSWebAllSslError::HandleCancel);
+        JSClass<JSWebAllSslError>::Bind(globalObj, &JSWebAllSslError::Constructor, &JSWebAllSslError::Destructor);
+    }
+
+    void SetResult(const RefPtr<AllSslErrorResult>& result)
+    {
+        result_ = result;
+    }
+
+    void HandleConfirm(const JSCallbackInfo& args)
+    {
+        if (result_) {
+            result_->HandleConfirm();
+        }
+    }
+
+    void HandleCancel(const JSCallbackInfo& args)
+    {
+        if (result_) {
+            result_->HandleCancel();
+        }
+    }
+
+private:
+    static void Constructor(const JSCallbackInfo& args)
+    {
+        auto jsWebAllSslError = Referenced::MakeRefPtr<JSWebAllSslError>();
+        jsWebAllSslError->IncRefCount();
+        args.SetReturnValue(Referenced::RawPtr(jsWebAllSslError));
+    }
+
+    static void Destructor(JSWebAllSslError* jsWebAllSslError)
+    {
+        if (jsWebAllSslError != nullptr) {
+            jsWebAllSslError->DecRefCount();
+        }
+    }
+
+    RefPtr<AllSslErrorResult> result_;
+};
+
 class JSWebSslSelectCert : public Referenced {
 public:
     static void JSBind(BindingTarget globalObj)
@@ -888,10 +935,7 @@ public:
             globalObj, &JSWebResourceResponse::Constructor, &JSWebResourceResponse::Destructor);
     }
 
-    JSWebResourceResponse()
-    {
-        response_ = AceType::MakeRefPtr<WebResponse>();
-    }
+    JSWebResourceResponse() : response_(AceType::MakeRefPtr<WebResponse>()) {}
 
     void SetEvent(const ReceivedHttpErrorEvent& eventInfo)
     {
@@ -1629,6 +1673,7 @@ void JSWeb::JSBind(BindingTarget globalObj)
     JSClass<JSWeb>::StaticMethod("onHttpAuthRequest", &JSWeb::OnHttpAuthRequest);
     JSClass<JSWeb>::StaticMethod("onSslErrorReceive", &JSWeb::OnSslErrRequest);
     JSClass<JSWeb>::StaticMethod("onSslErrorEventReceive", &JSWeb::OnSslErrorRequest);
+    JSClass<JSWeb>::StaticMethod("onSslErrorEvent", &JSWeb::OnAllSslErrorRequest);
     JSClass<JSWeb>::StaticMethod("onClientAuthenticationRequest", &JSWeb::OnSslSelectCertRequest);
     JSClass<JSWeb>::StaticMethod("onPermissionRequest", &JSWeb::OnPermissionRequest);
     JSClass<JSWeb>::StaticMethod("onContextMenuShow", &JSWeb::OnContextMenuShow);
@@ -1674,6 +1719,8 @@ void JSWeb::JSBind(BindingTarget globalObj)
     JSClass<JSWeb>::StaticMethod("onAudioStateChanged", &JSWeb::OnAudioStateChanged);
     JSClass<JSWeb>::StaticMethod("mediaOptions", &JSWeb::MediaOptions);
     JSClass<JSWeb>::StaticMethod("onFirstContentfulPaint", &JSWeb::OnFirstContentfulPaint);
+    JSClass<JSWeb>::StaticMethod("onFirstMeaningfulPaint", &JSWeb::OnFirstMeaningfulPaint);
+    JSClass<JSWeb>::StaticMethod("onLargestContentfulPaint", &JSWeb::OnLargestContentfulPaint);
     JSClass<JSWeb>::StaticMethod("onSafeBrowsingCheckResult", &JSWeb::OnSafeBrowsingCheckResult);
     JSClass<JSWeb>::StaticMethod("onNavigationEntryCommitted", &JSWeb::OnNavigationEntryCommitted);
     JSClass<JSWeb>::StaticMethod("onIntelligentTrackingPreventionResult",
@@ -1686,9 +1733,11 @@ void JSWeb::JSBind(BindingTarget globalObj)
     JSClass<JSWeb>::StaticMethod("onScreenCaptureRequest", &JSWeb::OnScreenCaptureRequest);
     JSClass<JSWeb>::StaticMethod("layoutMode", &JSWeb::SetLayoutMode);
     JSClass<JSWeb>::StaticMethod("nestedScroll", &JSWeb::SetNestedScroll);
+    JSClass<JSWeb>::StaticMethod("metaViewport", &JSWeb::SetMetaViewport);
     JSClass<JSWeb>::StaticMethod("javaScriptOnDocumentStart", &JSWeb::JavaScriptOnDocumentStart);
     JSClass<JSWeb>::StaticMethod("javaScriptOnDocumentEnd", &JSWeb::JavaScriptOnDocumentEnd);
     JSClass<JSWeb>::StaticMethod("onOverrideUrlLoading", &JSWeb::OnOverrideUrlLoading);
+    JSClass<JSWeb>::StaticMethod("textAutosizing", &JSWeb::TextAutosizing);
     JSClass<JSWeb>::InheritAndBind<JSViewAbstract>(globalObj);
     JSWebDialog::JSBind(globalObj);
     JSWebGeolocation::JSBind(globalObj);
@@ -1701,6 +1750,7 @@ void JSWeb::JSBind(BindingTarget globalObj)
     JSFullScreenExitHandler::JSBind(globalObj);
     JSWebHttpAuth::JSBind(globalObj);
     JSWebSslError::JSBind(globalObj);
+    JSWebAllSslError::JSBind(globalObj);
     JSWebSslSelectCert::JSBind(globalObj);
     JSWebPermissionRequest::JSBind(globalObj);
     JSContextMenuParam::JSBind(globalObj);
@@ -1872,6 +1922,25 @@ JSRef<JSVal> WebSslErrorEventToJSValue(const WebSslErrorEvent& eventInfo)
     jsWebSslError->SetResult(eventInfo.GetResult());
     obj->SetPropertyObject("handler", resultObj);
     obj->SetProperty("error", eventInfo.GetError());
+    return JSRef<JSVal>::Cast(obj);
+}
+
+JSRef<JSVal> WebAllSslErrorEventToJSValue(const WebAllSslErrorEvent& eventInfo)
+{
+    JSRef<JSObject> obj = JSRef<JSObject>::New();
+    JSRef<JSObject> resultObj = JSClass<JSWebAllSslError>::NewInstance();
+    auto jsWebAllSslError = Referenced::Claim(resultObj->Unwrap<JSWebAllSslError>());
+    if (!jsWebAllSslError) {
+        return JSRef<JSVal>::Cast(obj);
+    }
+    jsWebAllSslError->SetResult(eventInfo.GetResult());
+    obj->SetPropertyObject("handler", resultObj);
+    obj->SetProperty("error", eventInfo.GetError());
+    obj->SetProperty("url", eventInfo.GetUrl());
+    obj->SetProperty("originalUrl", eventInfo.GetOriginalUrl());
+    obj->SetProperty("referrer", eventInfo.GetReferrer());
+    obj->SetProperty("isFatalError", eventInfo.GetIsFatalError());
+    obj->SetProperty("isMainFrame", eventInfo.GetIsMainFrame());
     return JSRef<JSVal>::Cast(obj);
 }
 
@@ -2077,7 +2146,7 @@ void JSWeb::OnCommonDialog(const JSCallbackInfo& args, int dialogEventType)
     if (!args[0]->IsFunction()) {
         return;
     }
-    WeakPtr<NG::FrameNode> frameNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    WeakPtr<NG::FrameNode> frameNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
     auto jsFunc =
         AceType::MakeRefPtr<JsEventFunction<WebDialogEvent, 1>>(JSRef<JSFunc>::Cast(args[0]), WebDialogEventToJSValue);
     auto instanceId = Container::CurrentId();
@@ -2107,7 +2176,7 @@ void JSWeb::OnConsoleLog(const JSCallbackInfo& args)
     auto jsFunc = AceType::MakeRefPtr<JsEventFunction<LoadWebConsoleLogEvent, 1>>(
         JSRef<JSFunc>::Cast(args[0]), LoadWebConsoleLogEventToJSValue);
 
-    WeakPtr<NG::FrameNode> frameNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    WeakPtr<NG::FrameNode> frameNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
     auto jsCallback = [execCtx = args.GetExecutionContext(), func = std::move(jsFunc), node = frameNode](
                           const BaseEventInfo* info) -> bool {
         bool result = false;
@@ -2135,7 +2204,7 @@ void JSWeb::OnPageStart(const JSCallbackInfo& args)
         JSRef<JSFunc>::Cast(args[0]), LoadWebPageStartEventToJSValue);
 
     auto instanceId = Container::CurrentId();
-    WeakPtr<NG::FrameNode> frameNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    WeakPtr<NG::FrameNode> frameNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
     auto jsCallback = [execCtx = args.GetExecutionContext(), func = std::move(jsFunc), instanceId, node = frameNode](
                           const BaseEventInfo* info) {
         ContainerScope scope(instanceId);
@@ -2158,7 +2227,7 @@ void JSWeb::OnPageFinish(const JSCallbackInfo& args)
         JSRef<JSFunc>::Cast(args[0]), LoadWebPageFinishEventToJSValue);
 
     auto instanceId = Container::CurrentId();
-    WeakPtr<NG::FrameNode> frameNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    WeakPtr<NG::FrameNode> frameNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
     auto jsCallback = [execCtx = args.GetExecutionContext(), func = std::move(jsFunc), instanceId, node = frameNode](
                           const BaseEventInfo* info) {
         ContainerScope scope(instanceId);
@@ -2181,7 +2250,7 @@ void JSWeb::OnProgressChange(const JSCallbackInfo& args)
         JSRef<JSFunc>::Cast(args[0]), LoadWebProgressChangeEventToJSValue);
 
     auto instanceId = Container::CurrentId();
-    WeakPtr<NG::FrameNode> frameNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    WeakPtr<NG::FrameNode> frameNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
     auto jsCallback = [execCtx = args.GetExecutionContext(), func = std::move(jsFunc), instanceId, node = frameNode](
                           const BaseEventInfo* info) {
         ContainerScope scope(instanceId);
@@ -2200,7 +2269,7 @@ void JSWeb::OnTitleReceive(const JSCallbackInfo& args)
     if (!args[0]->IsFunction()) {
         return;
     }
-    WeakPtr<NG::FrameNode> frameNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    WeakPtr<NG::FrameNode> frameNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
     auto jsFunc = AceType::MakeRefPtr<JsEventFunction<LoadWebTitleReceiveEvent, 1>>(
         JSRef<JSFunc>::Cast(args[0]), LoadWebTitleReceiveEventToJSValue);
     auto instanceId = Container::CurrentId();
@@ -2222,7 +2291,7 @@ void JSWeb::OnFullScreenExit(const JSCallbackInfo& args)
     if (!args[0]->IsFunction()) {
         return;
     }
-    WeakPtr<NG::FrameNode> frameNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    WeakPtr<NG::FrameNode> frameNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
     auto jsFunc = AceType::MakeRefPtr<JsEventFunction<FullScreenExitEvent, 1>>(
         JSRef<JSFunc>::Cast(args[0]), FullScreenExitEventToJSValue);
     auto instanceId = Container::CurrentId();
@@ -2244,7 +2313,7 @@ void JSWeb::OnFullScreenEnter(const JSCallbackInfo& args)
     if (args.Length() < 1 || !args[0]->IsFunction()) {
         return;
     }
-    WeakPtr<NG::FrameNode> frameNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    WeakPtr<NG::FrameNode> frameNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
     auto jsFunc = AceType::MakeRefPtr<JsEventFunction<FullScreenEnterEvent, 1>>(
         JSRef<JSFunc>::Cast(args[0]), FullScreenEnterEventToJSValue);
     auto instanceId = Container::CurrentId();
@@ -2268,7 +2337,7 @@ void JSWeb::OnGeolocationHide(const JSCallbackInfo& args)
     if (!args[0]->IsFunction()) {
         return;
     }
-    WeakPtr<NG::FrameNode> frameNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    WeakPtr<NG::FrameNode> frameNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
     auto jsFunc = AceType::MakeRefPtr<JsEventFunction<LoadWebGeolocationHideEvent, 1>>(
         JSRef<JSFunc>::Cast(args[0]), LoadWebGeolocationHideEventToJSValue);
     auto instanceId = Container::CurrentId();
@@ -2290,7 +2359,7 @@ void JSWeb::OnGeolocationShow(const JSCallbackInfo& args)
     if (!args[0]->IsFunction()) {
         return;
     }
-    WeakPtr<NG::FrameNode> frameNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    WeakPtr<NG::FrameNode> frameNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
     auto jsFunc = AceType::MakeRefPtr<JsEventFunction<LoadWebGeolocationShowEvent, 1>>(
         JSRef<JSFunc>::Cast(args[0]), LoadWebGeolocationShowEventToJSValue);
     auto instanceId = Container::CurrentId();
@@ -2312,7 +2381,7 @@ void JSWeb::OnRequestFocus(const JSCallbackInfo& args)
     if (!args[0]->IsFunction()) {
         return;
     }
-    WeakPtr<NG::FrameNode> frameNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    WeakPtr<NG::FrameNode> frameNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
     auto jsFunc = AceType::MakeRefPtr<JsEventFunction<LoadWebRequestFocusEvent, 1>>(
         JSRef<JSFunc>::Cast(args[0]), LoadWebRequestFocusEventToJSValue);
     auto jsCallback = [execCtx = args.GetExecutionContext(), func = std::move(jsFunc), node = frameNode](
@@ -2332,7 +2401,7 @@ void JSWeb::OnDownloadStart(const JSCallbackInfo& args)
     if (!args[0]->IsFunction()) {
         return;
     }
-    WeakPtr<NG::FrameNode> frameNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    WeakPtr<NG::FrameNode> frameNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
     auto jsFunc = AceType::MakeRefPtr<JsEventFunction<DownloadStartEvent, 1>>(
         JSRef<JSFunc>::Cast(args[0]), DownloadStartEventToJSValue);
     auto instanceId = Container::CurrentId();
@@ -2354,7 +2423,7 @@ void JSWeb::OnHttpAuthRequest(const JSCallbackInfo& args)
     if (args.Length() < 1 || !args[0]->IsFunction()) {
         return;
     }
-    WeakPtr<NG::FrameNode> frameNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    WeakPtr<NG::FrameNode> frameNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
     auto jsFunc = AceType::MakeRefPtr<JsEventFunction<WebHttpAuthEvent, 1>>(
         JSRef<JSFunc>::Cast(args[0]), WebHttpAuthEventToJSValue);
     auto instanceId = Container::CurrentId();
@@ -2385,7 +2454,7 @@ void JSWeb::OnSslErrorRequest(const JSCallbackInfo& args)
     if (args.Length() < 1 || !args[0]->IsFunction()) {
         return;
     }
-    WeakPtr<NG::FrameNode> frameNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    WeakPtr<NG::FrameNode> frameNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
     auto jsFunc = AceType::MakeRefPtr<JsEventFunction<WebSslErrorEvent, 1>>(
         JSRef<JSFunc>::Cast(args[0]), WebSslErrorEventToJSValue);
     auto instanceId = Container::CurrentId();
@@ -2403,12 +2472,35 @@ void JSWeb::OnSslErrorRequest(const JSCallbackInfo& args)
     WebModel::GetInstance()->SetOnSslErrorRequest(jsCallback);
 }
 
+void JSWeb::OnAllSslErrorRequest(const JSCallbackInfo& args)
+{
+    if (args.Length() < 1 || !args[0]->IsFunction()) {
+        return;
+    }
+    WeakPtr<NG::FrameNode> frameNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    auto jsFunc = AceType::MakeRefPtr<JsEventFunction<WebAllSslErrorEvent, 1>>(
+        JSRef<JSFunc>::Cast(args[0]), WebAllSslErrorEventToJSValue);
+    auto instanceId = Container::CurrentId();
+    auto jsCallback = [execCtx = args.GetExecutionContext(), func = std::move(jsFunc), instanceId, node = frameNode](
+                          const BaseEventInfo* info) -> bool {
+        ContainerScope scope(instanceId);
+        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx, false);
+        auto pipelineContext = PipelineContext::GetCurrentContext();
+        CHECK_NULL_RETURN(pipelineContext, false);
+        pipelineContext->UpdateCurrentActiveNode(node);
+        auto* eventInfo = TypeInfoHelper::DynamicCast<WebAllSslErrorEvent>(info);
+        func->Execute(*eventInfo);
+        return true;
+    };
+    WebModel::GetInstance()->SetOnAllSslErrorRequest(jsCallback);
+}
+
 void JSWeb::OnSslSelectCertRequest(const JSCallbackInfo& args)
 {
     if (args.Length() < 1 || !args[0]->IsFunction()) {
         return;
     }
-    WeakPtr<NG::FrameNode> frameNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    WeakPtr<NG::FrameNode> frameNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
     auto jsFunc = AceType::MakeRefPtr<JsEventFunction<WebSslSelectCertEvent, 1>>(
         JSRef<JSFunc>::Cast(args[0]), WebSslSelectCertEventToJSValue);
     auto instanceId = Container::CurrentId();
@@ -2440,7 +2532,7 @@ void JSWeb::OnKeyEvent(const JSCallbackInfo& args)
         return;
     }
 
-    WeakPtr<NG::FrameNode> frameNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    WeakPtr<NG::FrameNode> frameNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
     RefPtr<JsKeyFunction> jsOnKeyEventFunc = AceType::MakeRefPtr<JsKeyFunction>(JSRef<JSFunc>::Cast(args[0]));
     auto jsCallback = [execCtx = args.GetExecutionContext(), func = std::move(jsOnKeyEventFunc), node = frameNode](
                           KeyEventInfo& keyEventInfo) {
@@ -2494,7 +2586,7 @@ void JSWeb::OnErrorReceive(const JSCallbackInfo& args)
     if (!args[0]->IsFunction()) {
         return;
     }
-    WeakPtr<NG::FrameNode> frameNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    WeakPtr<NG::FrameNode> frameNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
     auto jsFunc = AceType::MakeRefPtr<JsEventFunction<ReceivedErrorEvent, 1>>(
         JSRef<JSFunc>::Cast(args[0]), ReceivedErrorEventToJSValue);
     auto instanceId = Container::CurrentId();
@@ -2516,7 +2608,7 @@ void JSWeb::OnHttpErrorReceive(const JSCallbackInfo& args)
     if (!args[0]->IsFunction()) {
         return;
     }
-    WeakPtr<NG::FrameNode> frameNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    WeakPtr<NG::FrameNode> frameNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
     auto jsFunc = AceType::MakeRefPtr<JsEventFunction<ReceivedHttpErrorEvent, 1>>(
         JSRef<JSFunc>::Cast(args[0]), ReceivedHttpErrorEventToJSValue);
     auto instanceId = Container::CurrentId();
@@ -2548,7 +2640,7 @@ void JSWeb::OnInterceptRequest(const JSCallbackInfo& args)
     if ((args.Length() <= 0) || !args[0]->IsFunction()) {
         return;
     }
-    WeakPtr<NG::FrameNode> frameNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    WeakPtr<NG::FrameNode> frameNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
     auto jsFunc = AceType::MakeRefPtr<JsEventFunction<OnInterceptRequestEvent, 1>>(
         JSRef<JSFunc>::Cast(args[0]), OnInterceptRequestEventToJSValue);
     auto instanceId = Container::CurrentId();
@@ -2578,7 +2670,7 @@ void JSWeb::OnUrlLoadIntercept(const JSCallbackInfo& args)
     if (!args[0]->IsFunction()) {
         return;
     }
-    WeakPtr<NG::FrameNode> frameNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    WeakPtr<NG::FrameNode> frameNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
     auto jsFunc = AceType::MakeRefPtr<JsEventFunction<UrlLoadInterceptEvent, 1>>(
         JSRef<JSFunc>::Cast(args[0]), UrlLoadInterceptEventToJSValue);
     auto instanceId = Container::CurrentId();
@@ -2608,7 +2700,7 @@ void JSWeb::OnLoadIntercept(const JSCallbackInfo& args)
         JSRef<JSFunc>::Cast(args[0]), LoadInterceptEventToJSValue);
     auto instanceId = Container::CurrentId();
 
-    WeakPtr<NG::FrameNode> frameNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    WeakPtr<NG::FrameNode> frameNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
     auto uiCallback = [execCtx = args.GetExecutionContext(), func = std::move(jsFunc), instanceId, node = frameNode](
                           const BaseEventInfo* info) -> bool {
         ContainerScope scope(instanceId);
@@ -2649,7 +2741,7 @@ void JSWeb::OnFileSelectorShow(const JSCallbackInfo& args)
         return;
     }
 
-    WeakPtr<NG::FrameNode> frameNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    WeakPtr<NG::FrameNode> frameNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
     auto jsFunc = AceType::MakeRefPtr<JsEventFunction<FileSelectorEvent, 1>>(
         JSRef<JSFunc>::Cast(args[0]), FileSelectorEventToJSValue);
     auto instanceId = Container::CurrentId();
@@ -2692,7 +2784,7 @@ void JSWeb::OnContextMenuShow(const JSCallbackInfo& args)
     if (args.Length() < 1 || !args[0]->IsFunction()) {
         return;
     }
-    WeakPtr<NG::FrameNode> frameNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    WeakPtr<NG::FrameNode> frameNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
     auto jsFunc = AceType::MakeRefPtr<JsEventFunction<ContextMenuEvent, 1>>(
         JSRef<JSFunc>::Cast(args[0]), ContextMenuEventToJSValue);
     auto instanceId = Container::CurrentId();
@@ -2718,7 +2810,7 @@ void JSWeb::OnContextMenuHide(const JSCallbackInfo& args)
     if (!args[0]->IsFunction()) {
         return;
     }
-    WeakPtr<NG::FrameNode> frameNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    WeakPtr<NG::FrameNode> frameNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
     auto jsFunc = AceType::MakeRefPtr<JsEventFunction<ContextMenuHideEvent, 1>>(
         JSRef<JSFunc>::Cast(args[0]), ContextMenuHideEventToJSValue);
 
@@ -2869,7 +2961,7 @@ void JSWeb::OnRenderExited(const JSCallbackInfo& args)
     if (!args[0]->IsFunction()) {
         return;
     }
-    WeakPtr<NG::FrameNode> frameNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    WeakPtr<NG::FrameNode> frameNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
     auto jsFunc = AceType::MakeRefPtr<JsEventFunction<RenderExitedEvent, 1>>(
         JSRef<JSFunc>::Cast(args[0]), RenderExitedEventToJSValue);
     auto instanceId = Container::CurrentId();
@@ -2891,7 +2983,7 @@ void JSWeb::OnRefreshAccessedHistory(const JSCallbackInfo& args)
     if (!args[0]->IsFunction()) {
         return;
     }
-    WeakPtr<NG::FrameNode> frameNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    WeakPtr<NG::FrameNode> frameNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
     auto jsFunc = AceType::MakeRefPtr<JsEventFunction<RefreshAccessedHistoryEvent, 1>>(
         JSRef<JSFunc>::Cast(args[0]), RefreshAccessedHistoryEventToJSValue);
     auto instanceId = Container::CurrentId();
@@ -2979,7 +3071,7 @@ void JSWeb::OnMouse(const JSCallbackInfo& args)
         return;
     }
 
-    WeakPtr<NG::FrameNode> frameNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    WeakPtr<NG::FrameNode> frameNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
     RefPtr<JsClickFunction> jsOnMouseFunc = AceType::MakeRefPtr<JsClickFunction>(JSRef<JSFunc>::Cast(args[0]));
     auto jsCallback = [execCtx = args.GetExecutionContext(), func = std::move(jsOnMouseFunc), node = frameNode](
                           MouseInfo& info) {
@@ -3004,7 +3096,7 @@ void JSWeb::OnResourceLoad(const JSCallbackInfo& args)
     if (args.Length() < 1 || !args[0]->IsFunction()) {
         return;
     }
-    WeakPtr<NG::FrameNode> frameNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    WeakPtr<NG::FrameNode> frameNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
     auto jsFunc = AceType::MakeRefPtr<JsEventFunction<ResourceLoadEvent, 1>>(
         JSRef<JSFunc>::Cast(args[0]), ResourceLoadEventToJSValue);
     auto instanceId = Container::CurrentId();
@@ -3034,7 +3126,7 @@ void JSWeb::OnScaleChange(const JSCallbackInfo& args)
     if (args.Length() < 1 || !args[0]->IsFunction()) {
         return;
     }
-    WeakPtr<NG::FrameNode> frameNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    WeakPtr<NG::FrameNode> frameNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
     auto jsFunc = AceType::MakeRefPtr<JsEventFunction<ScaleChangeEvent, 1>>(
         JSRef<JSFunc>::Cast(args[0]), ScaleChangeEventToJSValue);
     auto instanceId = Container::CurrentId();
@@ -3065,7 +3157,7 @@ void JSWeb::OnScroll(const JSCallbackInfo& args)
         return;
     }
 
-    WeakPtr<NG::FrameNode> frameNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    WeakPtr<NG::FrameNode> frameNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
     auto jsFunc =
         AceType::MakeRefPtr<JsEventFunction<WebOnScrollEvent, 1>>(JSRef<JSFunc>::Cast(args[0]), ScrollEventToJSValue);
     auto instanceId = Container::CurrentId();
@@ -3097,7 +3189,7 @@ void JSWeb::OnPermissionRequest(const JSCallbackInfo& args)
     if (args.Length() < 1 || !args[0]->IsFunction()) {
         return;
     }
-    WeakPtr<NG::FrameNode> frameNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    WeakPtr<NG::FrameNode> frameNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
     auto jsFunc = AceType::MakeRefPtr<JsEventFunction<WebPermissionRequestEvent, 1>>(
         JSRef<JSFunc>::Cast(args[0]), PermissionRequestEventToJSValue);
     auto instanceId = Container::CurrentId();
@@ -3129,7 +3221,7 @@ void JSWeb::OnScreenCaptureRequest(const JSCallbackInfo& args)
     if (args.Length() < 1 || !args[0]->IsFunction()) {
         return;
     }
-    WeakPtr<NG::FrameNode> frameNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    WeakPtr<NG::FrameNode> frameNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
     auto jsFunc = AceType::MakeRefPtr<JsEventFunction<WebScreenCaptureRequestEvent, 1>>(
         JSRef<JSFunc>::Cast(args[0]), ScreenCaptureRequestEventToJSValue);
     auto instanceId = Container::CurrentId();
@@ -3178,7 +3270,7 @@ void JSWeb::OnSearchResultReceive(const JSCallbackInfo& args)
     if (!args[0]->IsFunction()) {
         return;
     }
-    WeakPtr<NG::FrameNode> frameNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    WeakPtr<NG::FrameNode> frameNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
     auto jsFunc = AceType::MakeRefPtr<JsEventFunction<SearchResultReceiveEvent, 1>>(
         JSRef<JSFunc>::Cast(args[0]), SearchResultReceiveEventToJSValue);
     auto instanceId = Container::CurrentId();
@@ -3201,7 +3293,7 @@ void JSWeb::JsOnDragStart(const JSCallbackInfo& info)
         return;
     }
 
-    WeakPtr<NG::FrameNode> frameNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    WeakPtr<NG::FrameNode> frameNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
     RefPtr<JsDragFunction> jsOnDragStartFunc = AceType::MakeRefPtr<JsDragFunction>(JSRef<JSFunc>::Cast(info[0]));
     auto onDragStartId = [execCtx = info.GetExecutionContext(), func = std::move(jsOnDragStartFunc), node = frameNode](
                              const RefPtr<DragEvent>& info, const std::string& extraParams) -> NG::DragDropBaseInfo {
@@ -3246,7 +3338,7 @@ void JSWeb::JsOnDragEnter(const JSCallbackInfo& info)
         return;
     }
 
-    WeakPtr<NG::FrameNode> frameNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    WeakPtr<NG::FrameNode> frameNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
     RefPtr<JsDragFunction> jsOnDragEnterFunc = AceType::MakeRefPtr<JsDragFunction>(JSRef<JSFunc>::Cast(info[0]));
     auto onDragEnterId = [execCtx = info.GetExecutionContext(), func = std::move(jsOnDragEnterFunc), node = frameNode](
                              const RefPtr<DragEvent>& info, const std::string& extraParams) {
@@ -3267,7 +3359,7 @@ void JSWeb::JsOnDragMove(const JSCallbackInfo& info)
         return;
     }
 
-    WeakPtr<NG::FrameNode> frameNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    WeakPtr<NG::FrameNode> frameNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
     RefPtr<JsDragFunction> jsOnDragMoveFunc = AceType::MakeRefPtr<JsDragFunction>(JSRef<JSFunc>::Cast(info[0]));
     auto onDragMoveId = [execCtx = info.GetExecutionContext(), func = std::move(jsOnDragMoveFunc), node = frameNode](
                             const RefPtr<DragEvent>& info, const std::string& extraParams) {
@@ -3288,7 +3380,7 @@ void JSWeb::JsOnDragLeave(const JSCallbackInfo& info)
         return;
     }
 
-    WeakPtr<NG::FrameNode> frameNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    WeakPtr<NG::FrameNode> frameNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
     RefPtr<JsDragFunction> jsOnDragLeaveFunc = AceType::MakeRefPtr<JsDragFunction>(JSRef<JSFunc>::Cast(info[0]));
     auto onDragLeaveId = [execCtx = info.GetExecutionContext(), func = std::move(jsOnDragLeaveFunc), node = frameNode](
                              const RefPtr<DragEvent>& info, const std::string& extraParams) {
@@ -3309,7 +3401,7 @@ void JSWeb::JsOnDrop(const JSCallbackInfo& info)
         return;
     }
 
-    WeakPtr<NG::FrameNode> frameNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    WeakPtr<NG::FrameNode> frameNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
     RefPtr<JsDragFunction> jsOnDropFunc = AceType::MakeRefPtr<JsDragFunction>(JSRef<JSFunc>::Cast(info[0]));
     auto onDropId = [execCtx = info.GetExecutionContext(), func = std::move(jsOnDropFunc), node = frameNode](
                         const RefPtr<DragEvent>& info, const std::string& extraParams) {
@@ -3376,7 +3468,7 @@ void JSWeb::OnWindowNew(const JSCallbackInfo& args)
         return;
     }
 
-    WeakPtr<NG::FrameNode> frameNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    WeakPtr<NG::FrameNode> frameNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
     auto jsFunc = AceType::MakeRefPtr<JsEventFunction<WebWindowNewEvent, 1>>(
         JSRef<JSFunc>::Cast(args[0]), WindowNewEventToJSValue);
     auto instanceId = Container::CurrentId();
@@ -3407,7 +3499,7 @@ void JSWeb::OnWindowExit(const JSCallbackInfo& args)
     if (args.Length() < 1 || !args[0]->IsFunction()) {
         return;
     }
-    WeakPtr<NG::FrameNode> frameNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    WeakPtr<NG::FrameNode> frameNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
     auto jsFunc = AceType::MakeRefPtr<JsEventFunction<WebWindowExitEvent, 1>>(
         JSRef<JSFunc>::Cast(args[0]), WindowExitEventToJSValue);
     auto instanceId = Container::CurrentId();
@@ -3515,7 +3607,7 @@ void JSWeb::OnPageVisible(const JSCallbackInfo& args)
     if (!args[0]->IsFunction()) {
         return;
     }
-    WeakPtr<NG::FrameNode> frameNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    WeakPtr<NG::FrameNode> frameNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
     auto jsFunc = AceType::MakeRefPtr<JsEventFunction<PageVisibleEvent, 1>>(
         JSRef<JSFunc>::Cast(args[0]), PageVisibleEventToJSValue);
 
@@ -3541,7 +3633,7 @@ void JSWeb::OnInterceptKeyEvent(const JSCallbackInfo& args)
         return;
     }
 
-    WeakPtr<NG::FrameNode> frameNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    WeakPtr<NG::FrameNode> frameNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
     RefPtr<JsKeyFunction> jsOnPreKeyEventFunc = AceType::MakeRefPtr<JsKeyFunction>(JSRef<JSFunc>::Cast(args[0]));
     auto uiCallback = [execCtx = args.GetExecutionContext(), func = std::move(jsOnPreKeyEventFunc), node = frameNode](
                           KeyEventInfo& keyEventInfo) -> bool {
@@ -3582,7 +3674,7 @@ void JSWeb::OnDataResubmitted(const JSCallbackInfo& args)
         JSRef<JSFunc>::Cast(args[0]), DataResubmittedEventToJSValue);
 
     auto instanceId = Container::CurrentId();
-    WeakPtr<NG::FrameNode> frameNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    WeakPtr<NG::FrameNode> frameNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
     auto uiCallback = [execCtx = args.GetExecutionContext(), func = std::move(jsFunc), instanceId, node = frameNode](
                           const std::shared_ptr<BaseEventInfo>& info) {
         ContainerScope scope(instanceId);
@@ -3681,7 +3773,7 @@ void JSWeb::OnFaviconReceived(const JSCallbackInfo& args)
     if (args.Length() < 1 || !args[0]->IsFunction()) {
         return;
     }
-    WeakPtr<NG::FrameNode> frameNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    WeakPtr<NG::FrameNode> frameNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
     auto jsFunc = AceType::MakeRefPtr<JsEventFunction<FaviconReceivedEvent, 1>>(
         JSRef<JSFunc>::Cast(args[0]), FaviconReceivedEventToJSValue);
 
@@ -3714,7 +3806,7 @@ void JSWeb::OnTouchIconUrlReceived(const JSCallbackInfo& args)
     if (!args[0]->IsFunction()) {
         return;
     }
-    WeakPtr<NG::FrameNode> frameNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    WeakPtr<NG::FrameNode> frameNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
     auto jsFunc = AceType::MakeRefPtr<JsEventFunction<TouchIconUrlEvent, 1>>(
         JSRef<JSFunc>::Cast(args[0]), TouchIconUrlEventToJSValue);
 
@@ -3782,7 +3874,7 @@ void JSWeb::OnAudioStateChanged(const JSCallbackInfo& args)
         return;
     }
 
-    WeakPtr<NG::FrameNode> frameNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    WeakPtr<NG::FrameNode> frameNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
     auto jsFunc = AceType::MakeRefPtr<JsEventFunction<AudioStateChangedEvent, 1>>(
         JSRef<JSFunc>::Cast(args[0]), AudioStateChangedEventToJSValue);
 
@@ -3832,7 +3924,7 @@ void JSWeb::OnFirstContentfulPaint(const JSCallbackInfo& args)
     if (!args[0]->IsFunction()) {
         return;
     }
-    WeakPtr<NG::FrameNode> frameNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    WeakPtr<NG::FrameNode> frameNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
     auto jsFunc = AceType::MakeRefPtr<JsEventFunction<FirstContentfulPaintEvent, 1>>(
         JSRef<JSFunc>::Cast(args[0]), FirstContentfulPaintEventToJSValue);
 
@@ -3852,6 +3944,74 @@ void JSWeb::OnFirstContentfulPaint(const JSCallbackInfo& args)
     WebModel::GetInstance()->SetFirstContentfulPaintId(std::move(uiCallback));
 }
 
+JSRef<JSVal> FirstMeaningfulPaintEventToJSValue(const FirstMeaningfulPaintEvent& eventInfo)
+{
+    JSRef<JSObject> obj = JSRef<JSObject>::New();
+    obj->SetProperty("navigationStartTime", eventInfo.GetNavigationStartTime());
+    obj->SetProperty("firstMeaningfulPaintTime", eventInfo.GetFirstMeaningfulPaintTime());
+    return JSRef<JSVal>::Cast(obj);
+}
+
+void JSWeb::OnFirstMeaningfulPaint(const JSCallbackInfo& args)
+{
+    if (args.Length() < 1 || args[0]->IsUndefined() || args[0]->IsNull() || !args[0]->IsFunction()) {
+        return;
+    }
+    WeakPtr<NG::FrameNode> frameNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    auto jsFunc = AceType::MakeRefPtr<JsEventFunction<FirstMeaningfulPaintEvent, 1>>(
+        JSRef<JSFunc>::Cast(args[0]), FirstMeaningfulPaintEventToJSValue);
+    auto instanceId = Container::CurrentId();
+    auto uiCallback = [execCtx = args.GetExecutionContext(), func = std::move(jsFunc), instanceId, node = frameNode](
+                          const std::shared_ptr<BaseEventInfo>& info) {
+        ContainerScope scope(instanceId);
+        auto context = PipelineBase::GetCurrentContext();
+        CHECK_NULL_VOID(context);
+        context->UpdateCurrentActiveNode(node);
+        context->PostAsyncEvent([execCtx, postFunc = func, info]() {
+            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+            auto* eventInfo = TypeInfoHelper::DynamicCast<FirstMeaningfulPaintEvent>(info.get());
+            postFunc->Execute(*eventInfo);
+        });
+    };
+    WebModel::GetInstance()->SetFirstMeaningfulPaintId(std::move(uiCallback));
+}
+
+JSRef<JSVal> LargestContentfulPaintEventToJSValue(const LargestContentfulPaintEvent& eventInfo)
+{
+    JSRef<JSObject> obj = JSRef<JSObject>::New();
+    obj->SetProperty("navigationStartTime", eventInfo.GetNavigationStartTime());
+    obj->SetProperty("largestImagePaintTime", eventInfo.GetLargestImagePaintTime());
+    obj->SetProperty("largestTextPaintTime", eventInfo.GetLargestTextPaintTime());
+    obj->SetProperty("largestImageLoadStartTime", eventInfo.GetLargestImageLoadStartTime());
+    obj->SetProperty("largestImageLoadEndTime", eventInfo.GetLargestImageLoadEndTime());
+    obj->SetProperty("imageBPP", eventInfo.GetImageBPP());
+    return JSRef<JSVal>::Cast(obj);
+}
+
+void JSWeb::OnLargestContentfulPaint(const JSCallbackInfo& args)
+{
+    if (args.Length() < 1 || args[0]->IsUndefined() || args[0]->IsNull() || !args[0]->IsFunction()) {
+        return;
+    }
+    WeakPtr<NG::FrameNode> frameNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    auto jsFunc = AceType::MakeRefPtr<JsEventFunction<LargestContentfulPaintEvent, 1>>(
+        JSRef<JSFunc>::Cast(args[0]), LargestContentfulPaintEventToJSValue);
+    auto instanceId = Container::CurrentId();
+    auto uiCallback = [execCtx = args.GetExecutionContext(), func = std::move(jsFunc), instanceId, node = frameNode](
+                          const std::shared_ptr<BaseEventInfo>& info) {
+        ContainerScope scope(instanceId);
+        auto context = PipelineBase::GetCurrentContext();
+        CHECK_NULL_VOID(context);
+        context->UpdateCurrentActiveNode(node);
+        context->PostAsyncEvent([execCtx, postFunc = func, info]() {
+            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+            auto* eventInfo = TypeInfoHelper::DynamicCast<LargestContentfulPaintEvent>(info.get());
+            postFunc->Execute(*eventInfo);
+        });
+    };
+    WebModel::GetInstance()->SetLargestContentfulPaintId(std::move(uiCallback));
+}
+
 JSRef<JSVal> SafeBrowsingCheckResultEventToJSValue(const SafeBrowsingCheckResultEvent& eventInfo)
 {
     JSRef<JSObject> obj = JSRef<JSObject>::New();
@@ -3864,7 +4024,7 @@ void JSWeb::OnSafeBrowsingCheckResult(const JSCallbackInfo& args)
     if (args.Length() < 1 || !args[0]->IsFunction()) {
         return;
     }
-    WeakPtr<NG::FrameNode> frameNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    WeakPtr<NG::FrameNode> frameNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
     auto jsFunc = AceType::MakeRefPtr<JsEventFunction<SafeBrowsingCheckResultEvent, 1>>(
         JSRef<JSFunc>::Cast(args[0]), SafeBrowsingCheckResultEventToJSValue);
 
@@ -3900,7 +4060,7 @@ void JSWeb::OnNavigationEntryCommitted(const JSCallbackInfo& args)
     if (!args[0]->IsFunction()) {
         return;
     }
-    WeakPtr<NG::FrameNode> frameNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    WeakPtr<NG::FrameNode> frameNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
     auto jsFunc = AceType::MakeRefPtr<JsEventFunction<NavigationEntryCommittedEvent, 1>>(
         JSRef<JSFunc>::Cast(args[0]), NavigationEntryCommittedEventToJSValue);
 
@@ -3934,7 +4094,7 @@ void JSWeb::OnIntelligentTrackingPreventionResult(const JSCallbackInfo& args)
     if (args.Length() < 1 || !args[0]->IsFunction()) {
         return;
     }
-    WeakPtr<NG::FrameNode> frameNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    WeakPtr<NG::FrameNode> frameNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
     auto jsFunc = AceType::MakeRefPtr<JsEventFunction<IntelligentTrackingPreventionResultEvent, 1>>(
         JSRef<JSFunc>::Cast(args[0]), IntelligentTrackingPreventionResultEventToJSValue);
 
@@ -3959,7 +4119,7 @@ void JSWeb::OnControllerAttached(const JSCallbackInfo& args)
     if (!args[0]->IsFunction()) {
         return;
     }
-    WeakPtr<NG::FrameNode> frameNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    WeakPtr<NG::FrameNode> frameNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
     auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSFunc>::Cast(args[0]));
     auto instanceId = Container::CurrentId();
     auto uiCallback = [execCtx = args.GetExecutionContext(), func = std::move(jsFunc), instanceId, node = frameNode]() {
@@ -3967,7 +4127,7 @@ void JSWeb::OnControllerAttached(const JSCallbackInfo& args)
         auto context = PipelineBase::GetCurrentContext();
         CHECK_NULL_VOID(context);
         context->UpdateCurrentActiveNode(node);
-        context->PostAsyncEvent([execCtx, postFunc = func]() {
+        context->PostSyncEvent([execCtx, postFunc = func]() {
             JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
             postFunc->Execute();
         });
@@ -3991,7 +4151,19 @@ JSRef<JSVal> EmbedLifecycleChangeToJSValue(const NativeEmbedDataInfo& eventInfo)
     requestObj->SetProperty("width", eventInfo.GetEmebdInfo().width);
     requestObj->SetProperty("height", eventInfo.GetEmebdInfo().height);
     requestObj->SetProperty("url", eventInfo.GetEmebdInfo().url);
-    requestObj->SetProperty("params", eventInfo.GetEmebdInfo().params);
+
+    JSRef<JSObject> positionObj = objectTemplate->NewInstance();
+    positionObj->SetProperty("x", eventInfo.GetEmebdInfo().x);
+    positionObj->SetProperty("y", eventInfo.GetEmebdInfo().y);
+    requestObj->SetPropertyObject("position", positionObj);
+
+    auto params = eventInfo.GetEmebdInfo().params;
+    JSRef<JSObject> paramsObj = objectTemplate->NewInstance();
+    for (const auto& item : params) {
+        paramsObj->SetProperty(item.first.c_str(), item.second.c_str());
+    }
+    requestObj->SetPropertyObject("params", paramsObj);
+
     obj->SetPropertyObject("info", requestObj);
 
     return JSRef<JSVal>::Cast(obj);
@@ -4025,14 +4197,14 @@ JSRef<JSObject> CreateTouchInfo(const TouchLocationInfo& touchInfo, TouchEventIn
     const OHOS::Ace::Offset& screenLocation = touchInfo.GetScreenLocation();
     touchInfoObj->SetProperty<int32_t>("type", static_cast<int32_t>(touchInfo.GetTouchType()));
     touchInfoObj->SetProperty<int32_t>("id", touchInfo.GetFingerId());
-    touchInfoObj->SetProperty<double>("displayX", PipelineBase::Px2VpWithCurrentDensity(screenLocation.GetX()));
-    touchInfoObj->SetProperty<double>("displayY", PipelineBase::Px2VpWithCurrentDensity(screenLocation.GetY()));
-    touchInfoObj->SetProperty<double>("windowX", PipelineBase::Px2VpWithCurrentDensity(globalLocation.GetX()));
-    touchInfoObj->SetProperty<double>("windowY", PipelineBase::Px2VpWithCurrentDensity(globalLocation.GetY()));
-    touchInfoObj->SetProperty<double>("screenX", PipelineBase::Px2VpWithCurrentDensity(globalLocation.GetX()));
-    touchInfoObj->SetProperty<double>("screenY", PipelineBase::Px2VpWithCurrentDensity(globalLocation.GetY()));
-    touchInfoObj->SetProperty<double>("x", PipelineBase::Px2VpWithCurrentDensity(localLocation.GetX()));
-    touchInfoObj->SetProperty<double>("y", PipelineBase::Px2VpWithCurrentDensity(localLocation.GetY()));
+    touchInfoObj->SetProperty<double>("displayX", screenLocation.GetX());
+    touchInfoObj->SetProperty<double>("displayY", screenLocation.GetY());
+    touchInfoObj->SetProperty<double>("windowX", globalLocation.GetX());
+    touchInfoObj->SetProperty<double>("windowY", globalLocation.GetY());
+    touchInfoObj->SetProperty<double>("screenX", globalLocation.GetX());
+    touchInfoObj->SetProperty<double>("screenY", globalLocation.GetY());
+    touchInfoObj->SetProperty<double>("x", localLocation.GetX());
+    touchInfoObj->SetProperty<double>("y", localLocation.GetY());
     touchInfoObj->Wrap<TouchEventInfo>(&info);
     return touchInfoObj;
 }
@@ -4114,7 +4286,7 @@ void JSWeb::OnOverScroll(const JSCallbackInfo& args)
     if (args.Length() < 1 || !args[0]->IsFunction()) {
         return;
     }
-    WeakPtr<NG::FrameNode> frameNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    WeakPtr<NG::FrameNode> frameNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
     auto jsFunc = AceType::MakeRefPtr<JsEventFunction<WebOnOverScrollEvent, 1>>(
         JSRef<JSFunc>::Cast(args[0]), OverScrollEventToJSValue);
     auto instanceId = Container::CurrentId();
@@ -4177,6 +4349,15 @@ void JSWeb::SetNestedScroll(const JSCallbackInfo& args)
     args.ReturnSelf();
 }
 
+void JSWeb::SetMetaViewport(const JSCallbackInfo& args)
+{
+    if (args.Length() < 1 || !args[0]->IsBoolean()) {
+        return;
+    }
+    bool enabled = args[0]->ToBoolean();
+    WebModel::GetInstance()->SetMetaViewport(enabled);
+}
+
 void JSWeb::ParseScriptItems(const JSCallbackInfo& args, ScriptItems& scriptItems)
 {
     if (args.Length() != 1 || args[0]->IsUndefined() || args[0]->IsNull() || !args[0]->IsArray()) {
@@ -4236,7 +4417,7 @@ void JSWeb::OnOverrideUrlLoading(const JSCallbackInfo& args)
         JSRef<JSFunc>::Cast(args[0]), LoadOverrideEventToJSValue);
     auto instanceId = Container::CurrentId();
 
-    WeakPtr<NG::FrameNode> frameNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    WeakPtr<NG::FrameNode> frameNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
     auto uiCallback = [execCtx = args.GetExecutionContext(), func = std::move(jsFunc), instanceId, node = frameNode](
                           const BaseEventInfo* info) -> bool {
         ContainerScope scope(instanceId);
@@ -4275,5 +4456,14 @@ void JSWeb::CopyOption(int32_t copyOption)
             break;
     }
     WebModel::GetInstance()->SetCopyOptionMode(mode);
+}
+
+void JSWeb::TextAutosizing(const JSCallbackInfo& args)
+{
+    if (args.Length() < 1 || !args[0]->IsBoolean()) {
+        return;
+    }
+    bool isTextAutosizing = args[0]->ToBoolean();
+    WebModel::GetInstance()->SetTextAutosizing(isTextAutosizing);
 }
 } // namespace OHOS::Ace::Framework

@@ -116,6 +116,7 @@ struct SelectOverlayInfo {
     bool isNewAvoid = false;
     SelectHandleInfo firstHandle;
     SelectHandleInfo secondHandle;
+    std::optional<Color> handlerColor;
     HitTestMode hitTestMode = HitTestMode::HTMTRANSPARENT_SELF;
 
     // show area

@@ -134,6 +134,7 @@ public:
     ACE_WEB_EVENT_PROPERTY(OnFullScreenEnter, void);
     ACE_WEB_EVENT_PROPERTY(OnHttpAuthRequest, bool);
     ACE_WEB_EVENT_PROPERTY(OnSslErrorRequest, bool);
+    ACE_WEB_EVENT_PROPERTY(OnAllSslErrorRequest, bool);
     ACE_WEB_EVENT_PROPERTY(OnSslSelectCertRequest, bool);
     ACE_WEB_EVENT_PROPERTY(OnInterceptRequest, RefPtr<WebResponse>);
     ACE_WEB_EVENT_PROPERTY(OnUrlLoadIntercept, bool);
@@ -156,6 +157,8 @@ public:
     ACE_WEB_EVENT_PROPERTY(OnDataResubmitted, void);
     ACE_WEB_EVENT_PROPERTY(OnFaviconReceived, void);
     ACE_WEB_EVENT_PROPERTY(OnFirstContentfulPaint, void);
+    ACE_WEB_EVENT_PROPERTY(OnFirstMeaningfulPaint, void);
+    ACE_WEB_EVENT_PROPERTY(OnLargestContentfulPaint, void);
     ACE_WEB_EVENT_PROPERTY(OnTouchIconUrl, void);
     ACE_WEB_EVENT_PROPERTY(OnOverScroll, void);
     ACE_WEB_EVENT_PROPERTY(OnNavigationEntryCommitted, void);

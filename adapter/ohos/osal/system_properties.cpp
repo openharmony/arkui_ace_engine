@@ -661,6 +661,11 @@ void SystemProperties::SetLayoutTraceEnabled(bool layoutTraceEnable)
     layoutTraceEnable_ = layoutTraceEnable && developerModeOn_;
 }
 
+void SystemProperties::SetInputEventTraceEnabled(bool inputEventTraceEnable)
+{
+    traceInputEventEnable_ = inputEventTraceEnable && IsDeveloperModeOn();
+}
+
 void SystemProperties::SetSecurityDevelopermodeLayoutTraceEnabled(bool layoutTraceEnable)
 {
     layoutTraceEnable_ = layoutTraceEnable && IsLayoutTraceEnabled();

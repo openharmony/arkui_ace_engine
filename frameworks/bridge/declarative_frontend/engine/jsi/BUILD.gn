@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2024 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -206,6 +206,7 @@ template("declarative_js_engine_ark") {
       "nativeModule/arkts_native_radio_bridge.cpp",
       "nativeModule/arkts_native_rating_bridge.cpp",
       "nativeModule/arkts_native_rect_bridge.cpp",
+      "nativeModule/arkts_native_refresh_bridge.cpp",
       "nativeModule/arkts_native_render_node_bridge.cpp",
       "nativeModule/arkts_native_rich_editor_bridge.cpp",
       "nativeModule/arkts_native_row_bridge.cpp",
@@ -230,6 +231,7 @@ template("declarative_js_engine_ark") {
       "nativeModule/arkts_native_textpicker_bridge.cpp",
       "nativeModule/arkts_native_timepicker_bridge.cpp",
       "nativeModule/arkts_native_toggle_bridge.cpp",
+      "nativeModule/arkts_native_utils_bridge.cpp",
       "nativeModule/arkts_native_video_bridge.cpp",
       "nativeModule/arkts_native_water_flow_bridge.cpp",
       "nativeModule/arkts_utils.cpp",

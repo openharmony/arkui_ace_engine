@@ -396,7 +396,7 @@ HWTEST_F(FlexTestNg, FlexPatternTest002, TestSize.Level1)
 {
     FlexModelNG flexModelNG;
     flexModelNG.CreateFlexRow();
-    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    auto frameNode = AceType::Claim(ViewStackProcessor::GetInstance()->GetMainFrameNode());
     EXPECT_FALSE(frameNode == nullptr);
     RefPtr<LayoutProperty> layoutProperty = frameNode->GetLayoutProperty();
     EXPECT_FALSE(layoutProperty == nullptr);
@@ -427,7 +427,7 @@ HWTEST_F(FlexTestNg, FlexWrapPatternTest002, TestSize.Level1)
 {
     FlexModelNG flexModelNG;
     flexModelNG.CreateWrap();
-    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    auto frameNode = AceType::Claim(ViewStackProcessor::GetInstance()->GetMainFrameNode());
     EXPECT_FALSE(frameNode == nullptr);
     RefPtr<LayoutProperty> layoutProperty = frameNode->GetLayoutProperty();
     EXPECT_FALSE(layoutProperty == nullptr);

@@ -183,11 +183,7 @@ ArkUINativeModuleValue DataPanelBridge::SetTrackShadow(ArkUIRuntimeCallInfo* run
     auto jsOffsetY = obj->Get(vm, panda::StringRef::NewFromUtf8(vm, "offsetY"));
     RefPtr<DataPanelTheme> theme = ArkTSUtils::GetTheme<DataPanelTheme>();
     double radius = 0.0;
-    if (!ArkTSUtils::ParseJsDouble(vm, jsRadius, radius)) {
-        radius = theme->GetTrackShadowRadius().ConvertToVp();
-    }
-
-    if (NonPositive(radius)) {
+    if (!ArkTSUtils::ParseJsDouble(vm, jsRadius, radius) || NonPositive(radius)) {
         radius = theme->GetTrackShadowRadius().ConvertToVp();
     }
 
@@ -203,7 +199,9 @@ ArkUINativeModuleValue DataPanelBridge::SetTrackShadow(ArkUIRuntimeCallInfo* run
 
     auto colors = obj->Get(vm, panda::StringRef::NewFromUtf8(vm, "colors"));
     std::vector<OHOS::Ace::NG::Gradient> shadowColors;
+    ConvertThemeColor(shadowColors);
     if (!colors.IsEmpty() && colors->IsArray(vm)) {
+        shadowColors.clear();
         auto colorsArray = panda::CopyableGlobal<panda::ArrayRef>(vm, colors);
         for (size_t i = 0; i < colorsArray->Length(vm); ++i) {
             auto item = colorsArray->GetValueAt(vm, colors, i);
@@ -287,14 +285,14 @@ ArkUINativeModuleValue DataPanelBridge::SetDataPanelStrokeWidth(ArkUIRuntimeCall
     Local<JSValueRef> jsValue = runtimeCallInfo->GetCallArgRef(1);
 
     RefPtr<DataPanelTheme> theme = ArkTSUtils::GetTheme<DataPanelTheme>();
-
     CalcDimension strokeWidth;
 
-    if (!ArkTSUtils::ParseJsDimensionVp(vm, jsValue, strokeWidth)) {
+    if (!ArkTSUtils::ParseJsDimensionVpNG(vm, jsValue, strokeWidth)) {
         strokeWidth = theme->GetThickness();
     }
 
-    if (jsValue->IsString() && jsValue->ToString(vm)->ToString().empty()) {
+    if (jsValue->IsString() && (jsValue->ToString(vm)->ToString().empty()|| !StringUtils::StringToDimensionWithUnitNG(
+        jsValue->ToString(vm)->ToString(), strokeWidth))) {
         strokeWidth = theme->GetThickness();
     }
 
@@ -303,7 +301,7 @@ ArkUINativeModuleValue DataPanelBridge::SetDataPanelStrokeWidth(ArkUIRuntimeCall
     }
 
     GetArkUINodeModifiers()->getDataPanelModifier()->setDataPanelStrokeWidth(
-        nativeNode, strokeWidth.Value(), static_cast<int>(strokeWidth.Unit()));
+        nativeNode, strokeWidth.Value(), static_cast<int32_t>(strokeWidth.Unit()));
     return panda::JSValueRef::Undefined(vm);
 }
 

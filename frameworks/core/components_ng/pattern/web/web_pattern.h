@@ -59,6 +59,11 @@ struct MouseClickInfo {
     TimeStamp start;
 };
 
+struct ReachEdge {
+    bool atStart = false;
+    bool atEnd = false;
+};
+
 #ifdef OHOS_STANDARD_SYSTEM
 struct TouchInfo {
     double x = -1;
@@ -118,7 +123,7 @@ public:
 
     bool NeedSoftKeyboard() const override;
 
-    void UpdateSlideOffset(SizeF frameSize) override;
+    void UpdateSlideOffset() override;
 
     RefPtr<EventHub> CreateEventHub() override
     {
@@ -309,14 +314,17 @@ public:
     {
         return axis_;
     }
-    ScrollResult HandleScroll(float offset, int32_t source, NestedState state) override;
+    ScrollResult HandleScroll(float offset, int32_t source, NestedState state, float velocity = 0.f) override;
+    ScrollResult HandleScroll(RefPtr<NestableScrollContainer> parent, float offset, int32_t source, NestedState state);
     bool HandleScrollVelocity(float velocity) override;
-    void OnScrollStartRecursive(float position) override;
+    bool HandleScrollVelocity(RefPtr<NestableScrollContainer> parent, float velocity);
+    void OnScrollStartRecursive(float position, float velocity = 0.f) override;
+    void OnScrollStartRecursive(std::vector<float> positions);
     void OnScrollEndRecursive(const std::optional<float>& velocity) override;
     void OnAttachToBuilderNode(NodeStatus nodeStatus) override;
     Axis GetParentAxis();
-    RefPtr<NestableScrollContainer> WebSearchParent();
-    void SetNestedScroll(const NestedScrollOptions& nestedOpt);
+    RefPtr<NestableScrollContainer> SearchParent() override;
+    RefPtr<NestableScrollContainer> SearchParent(Axis scrollAxis);
     /**
      *  End of NestableScrollContainer implementations
      */
@@ -364,9 +372,11 @@ public:
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, ScrollBarColor, std::string);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, OverScrollMode, int32_t);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, CopyOptionMode, int32_t);
+    ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, MetaViewport, bool);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, NativeEmbedModeEnabled, bool);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, NativeEmbedRuleTag, std::string);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, NativeEmbedRuleType, std::string);
+    ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, TextAutosizing, bool);
 
     void RequestFullScreen();
     void ExitFullScreen();
@@ -474,7 +484,7 @@ private:
     void OnWindowSizeChanged(int32_t width, int32_t height, WindowSizeChangeReason type) override;
     void OnInActive() override;
     void OnActive() override;
-    void OnVisibleChange(bool isVisible) override;
+    void OnVisibleAreaChange(bool isVisible);
     void OnAreaChangedInner() override;
     void OnNotifyMemoryLevel(int32_t level) override;
 
@@ -522,9 +532,11 @@ private:
     void OnScrollBarColorUpdate(const std::string& value);
     void OnOverScrollModeUpdate(const int32_t value);
     void OnCopyOptionModeUpdate(const int32_t value);
+    void OnMetaViewportUpdate(bool value);
     void OnNativeEmbedModeEnabledUpdate(bool value);
     void OnNativeEmbedRuleTagUpdate(const std::string& tag);
     void OnNativeEmbedRuleTypeUpdate(const std::string& type);
+    void OnTextAutosizingUpdate(bool isTextAutosizing);
     int GetWebId();
 
     void InitEvent();
@@ -556,8 +568,8 @@ private:
     void ResetDragAction();
     void UpdateRelativeOffset();
     void InitSlideUpdateListener();
-    void CalculateHorizontalDrawRect(const SizeF frameSize);
-    void CalculateVerticalDrawRect(const SizeF frameSize);
+    void CalculateHorizontalDrawRect();
+    void CalculateVerticalDrawRect();
 
     NG::DragDropInfo HandleOnDragStart(const RefPtr<OHOS::Ace::DragEvent>& info);
     void HandleOnDragEnter(const RefPtr<OHOS::Ace::DragEvent>& info);
@@ -628,6 +640,11 @@ private:
         std::shared_ptr<NWeb::NWebDateTimeChooserCallback> callback);
     void PostTaskToUI(const std::function<void()>&& task) const;
     void OfflineMode();
+    void OnOverScrollFlingVelocityHandler(float velocity, bool isFling);
+    bool FilterScrollEventHandleOffset(const float offset);
+    bool FilterScrollEventHandlevVlocity(const float velocity);
+    void UpdateFlingReachEdgeState(const float value, bool status);
+    void RegisterVisibleAreaChangeCallback();
 
     std::optional<std::string> webSrc_;
     std::optional<std::string> webData_;
@@ -688,16 +705,19 @@ private:
     bool isParentHasScroll_ = false;
     OffsetF relativeOffsetOfScroll_;
     bool isFirstFlingScrollVelocity_ = true;
+    bool isNeedUpdateScrollAxis_ = true;
+    bool isNeedUpdateFilterScrolAxis_ = true;
     WebLayoutMode layoutMode_ = WebLayoutMode::NONE;
     bool scrollState_ = false;
-    NestedScrollMode nestedScrollForwardMode_ = NestedScrollMode::SELF_FIRST;
-    NestedScrollMode nestedScrollBackwardMode_ = NestedScrollMode::SELF_FIRST;
-    Axis axis_ = Axis::NONE;
+    Axis axis_ = Axis::FREE;
+    Axis syncAxis_ = Axis::NONE;
+    Axis expectedScrollAxis_ = Axis::FREE;
+    Axis expectedFilterScrollAxis_ = Axis::FREE;
     int32_t rootLayerWidth_ = 0;
     int32_t rootLayerHeight_ = 0;
     int32_t drawRectWidth_ = 0;
     int32_t drawRectHeight_ = 0;
-    WeakPtr<NestableScrollContainer> parent_;
+    std::unordered_map<Axis, WeakPtr<NestableScrollContainer>> parentsMap_;
     RefPtr<WebDelegate> delegate_;
     RefPtr<WebDelegateObserver> observer_;
     std::set<OHOS::Ace::KeyCode> KeyCodeSet_;
@@ -709,6 +729,8 @@ private:
     RefPtr<WebAccessibilityNode> webAccessibilityNode_;
     TouchEventInfo touchEventInfo_{"touchEvent"};
     std::vector<TouchEventInfo> touchEventInfoList_ {};
+    bool isParentReachEdge_ = false;
+    ReachEdge isFlingReachEdge_ = { false, false };
 };
 } // namespace OHOS::Ace::NG
 

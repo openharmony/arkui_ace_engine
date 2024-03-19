@@ -25,6 +25,8 @@ void TabsTestNg::SetUpTestSuite()
     tabTheme->defaultTabBarName_ = "tabBarItemName";
     tabTheme->tabBarDefaultWidth_ = Dimension(TABBAR_DEFAULT_WIDTH);
     tabTheme->tabBarDefaultHeight_ = Dimension(TABBAR_DEFAULT_HEIGHT);
+    tabTheme->subTabBarHoverColor_ = Color::RED;
+    tabTheme->subTabBarPressedColor_ = Color::GREEN;
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(tabTheme));
 }
 
@@ -90,7 +92,7 @@ void TabsTestNg::Create(const std::function<void(TabsModelNG)>& callback, BarPos
     if (callback) {
         callback(model);
     }
-    auto tabNode = AceType::DynamicCast<TabsNode>(ViewStackProcessor::GetInstance()->GetMainElementNode());
+    auto tabNode = AceType::DynamicCast<TabsNode>(ViewStackProcessor::GetInstance()->GetMainFrameNode());
     auto tabBarNode = AceType::DynamicCast<FrameNode>(tabNode->GetTabBar());
     tabBarNode->GetOrCreateFocusHub();
     model.Pop();
@@ -107,6 +109,21 @@ void TabsTestNg::CreateWithItem(
                 callback(model);
             }
             CreateItem(TABCONTENT_NUMBER);
+        },
+        barPosition, index);
+}
+
+void TabsTestNg::CreateWithItemWithoutBuilder(
+    const std::function<void(TabsModelNG)>& callback, BarPosition barPosition, int32_t index)
+{
+    Create(
+        [callback](TabsModelNG model) {
+            if (callback) {
+                callback(model);
+            }
+            for (int32_t index = 0; index < TABCONTENT_NUMBER; index++) {
+                CreateSingleItemWithoutBuilder([](TabContentModelNG tabContentModel) {}, index);
+            }
         },
         barPosition, index);
 }
@@ -187,11 +204,38 @@ TabBarBuilderFunc TabsTestNg::TabBarItemBuilder()
     };
 }
 
-void TabsTestNg::SwipeTo(int32_t index)
+void TabsTestNg::SwipeToWithoutAnimation(int32_t index)
 {
     swiperController_->SwipeToWithoutAnimation(index);
     frameNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE); // for update swiper
     FlushLayoutTask(frameNode_);
+}
+
+void TabsTestNg::ClickTo(Offset offset)
+{
+    GestureEvent info;
+    info.SetLocalLocation(offset);
+    tabBarPattern_->HandleClick(info);
+    frameNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE); // for update swiper
+    FlushLayoutTask(frameNode_);
+}
+
+void TabsTestNg::MouseTo(MouseAction action, Offset location, bool isHover)
+{
+    MouseInfo mouseInfo;
+    mouseInfo.SetAction(action);
+    mouseInfo.SetLocalLocation(location);
+    tabBarPattern_->HandleMouseEvent(mouseInfo);
+    // when on the tabBar is true, else false
+    tabBarPattern_->HandleHoverEvent(isHover);
+}
+
+void TabsTestNg::TouchTo(TouchType type, Offset location)
+{
+    TouchLocationInfo touchInfo(0);
+    touchInfo.SetTouchType(type);
+    touchInfo.SetLocalLocation(location);
+    tabBarPattern_->HandleTouchEvent(touchInfo);
 }
 
 /**
@@ -810,29 +854,6 @@ HWTEST_F(TabsTestNg, TabBarPatternPlayPressAnimation001, TestSize.Level1)
 }
 
 /**
- * @tc.name: TabBarPatternHandleClick001
- * @tc.desc: test HandleClick
- * @tc.type: FUNC
- */
-HWTEST_F(TabsTestNg, TabBarPatternHandleClick001, TestSize.Level1)
-{
-    CreateWithItem([](TabsModelNG model) {});
-    tabBarPattern_->tabBarStyle_ = TabBarStyle::SUBTABBATSTYLE;
-    tabBarPattern_->tabItemOffsets_ = { { 0.0f, 0.0f }, { 10.0f, 10.0f } };
-
-    GestureEvent info;
-    Offset offset(1, 1);
-    info.SetLocalLocation(offset);
-    tabBarLayoutProperty_->UpdateAxis(Axis::HORIZONTAL);
-    tabBarPattern_->HandleClick(info);
-    EXPECT_EQ(tabBarLayoutProperty_->GetAxisValue(), Axis::HORIZONTAL);
-
-    tabBarPattern_->indicator_ = 1;
-    tabBarPattern_->HandleClick(info);
-    EXPECT_EQ(tabBarPattern_->indicator_, 1);
-}
-
-/**
  * @tc.name: TabContentModel001
  * @tc.desc: test TabsModel
  * @tc.type: FUNC
@@ -898,67 +919,6 @@ HWTEST_F(TabsTestNg, InitSurfaceChangedCallback001, TestSize.Level1)
      */
     func(100.f, 100.f, TABS_WIDTH, TABS_HEIGHT, WindowSizeChangeReason::TRANSFORM);
     EXPECT_EQ(tabBarPattern_->windowSizeChangeReason_, WindowSizeChangeReason::ROTATION);
-}
-
-/**
- * @tc.name: TabBarPatternHandleSubTabBarClick001
- * @tc.desc: test HandleSubTabBarClick
- * @tc.type: FUNC
- */
-HWTEST_F(TabsTestNg, TabBarPatternHandleSubTabBarClick001, TestSize.Level1)
-{
-    CreateWithItem([](TabsModelNG model) {});
-    auto tabContentFrameNode = AceType::DynamicCast<TabContentNode>(GetChildFrameNode(swiperNode_, 0));
-    auto tabContentPattern = tabContentFrameNode->GetPattern<TabContentPattern>();
-    tabContentPattern->SetTabBarStyle(TabBarStyle::SUBTABBATSTYLE);
-    EXPECT_EQ(tabContentPattern->GetTabBarStyle(), TabBarStyle::SUBTABBATSTYLE);
-    tabContentPattern->SetTabBarStyle(TabBarStyle::SUBTABBATSTYLE);
-    EXPECT_EQ(tabContentPattern->GetTabBarStyle(), TabBarStyle::SUBTABBATSTYLE);
-    tabBarLayoutProperty_->UpdateAxis(Axis::VERTICAL);
-    EXPECT_EQ(tabBarLayoutProperty_->GetAxisValue(), Axis::VERTICAL);
-    tabBarPattern_->tabItemOffsets_ = { { 0.0f, 0.0f }, { 10.0f, 10.0f } };
-
-    GestureEvent info;
-    Offset offset(1, 1);
-    info.SetLocalLocation(offset);
-    tabBarLayoutProperty_->UpdateAxis(Axis::HORIZONTAL);
-    EXPECT_EQ(tabBarLayoutProperty_->GetAxisValue(), Axis::HORIZONTAL);
-    tabBarPattern_->SetTabBarStyle(TabBarStyle::SUBTABBATSTYLE, 1);
-    EXPECT_EQ(tabBarPattern_->tabBarStyles_[1], TabBarStyle::SUBTABBATSTYLE);
-    tabBarPattern_->indicator_ = 1;
-    tabBarPattern_->SetTabBarStyle(TabBarStyle::SUBTABBATSTYLE, 0);
-    EXPECT_EQ(tabBarPattern_->tabBarStyles_[0], TabBarStyle::SUBTABBATSTYLE);
-    tabBarPattern_->HandleClick(info);
-
-    tabBarLayoutProperty_->UpdateAxis(Axis::VERTICAL);
-    EXPECT_EQ(tabBarLayoutProperty_->GetAxisValue(), Axis::VERTICAL);
-    tabBarPattern_->SetTabBarStyle(TabBarStyle::SUBTABBATSTYLE, 1);
-    EXPECT_EQ(tabBarPattern_->tabBarStyles_[1], TabBarStyle::SUBTABBATSTYLE);
-    tabBarPattern_->indicator_ = 1;
-    tabBarPattern_->SetTabBarStyle(TabBarStyle::SUBTABBATSTYLE, 0);
-    EXPECT_EQ(tabBarPattern_->tabBarStyles_[0], TabBarStyle::SUBTABBATSTYLE);
-    tabBarPattern_->HandleClick(info);
-
-    tabBarLayoutProperty_->UpdateAxis(Axis::HORIZONTAL);
-    EXPECT_EQ(tabBarLayoutProperty_->GetAxisValue(), Axis::HORIZONTAL);
-    tabBarPattern_->SetTabBarStyle(TabBarStyle::SUBTABBATSTYLE, 1);
-    EXPECT_EQ(tabBarPattern_->tabBarStyles_[1], TabBarStyle::SUBTABBATSTYLE);
-    tabBarPattern_->indicator_ = 1;
-    tabBarPattern_->SetTabBarStyle(TabBarStyle::BOTTOMTABBATSTYLE, 0);
-    EXPECT_EQ(tabBarPattern_->tabBarStyles_[0], TabBarStyle::BOTTOMTABBATSTYLE);
-    tabBarPattern_->HandleClick(info);
-
-    tabBarLayoutProperty_->UpdateAxis(Axis::HORIZONTAL);
-    tabBarPattern_->SetTabBarStyle(TabBarStyle::BOTTOMTABBATSTYLE, 1);
-    EXPECT_EQ(tabBarPattern_->tabBarStyles_[1], TabBarStyle::BOTTOMTABBATSTYLE);
-    tabBarPattern_->indicator_ = 1;
-    tabBarPattern_->SetTabBarStyle(TabBarStyle::SUBTABBATSTYLE, 0);
-    EXPECT_EQ(tabBarPattern_->tabBarStyles_[0], TabBarStyle::SUBTABBATSTYLE);
-    tabBarPattern_->HandleClick(info);
-
-    tabBarPattern_->indicator_ = 1;
-    tabBarPattern_->HandleSubTabBarClick(tabBarLayoutProperty_, 1);
-    EXPECT_EQ(tabBarPattern_->indicator_, 1);
 }
 
 /**
@@ -1317,46 +1277,6 @@ HWTEST_F(TabsTestNg, TabsModelSetBarOverlap001, TestSize.Level1)
 }
 
 /**
- * @tc.name: TabsEventHubChangeEvent001
- * @tc.desc: Tabs OnChangeEvent
- * @tc.type: FUNC
- */
-HWTEST_F(TabsTestNg, TabsEventHubChangeEvent001, TestSize.Level1)
-{
-    CreateWithItem([](TabsModelNG model) {
-        model.SetOnChangeEvent([](const BaseEventInfo* info) {});
-    });
-    ASSERT_NE(pattern_->onIndexChangeEvent_, nullptr);
-}
-
-void BuildTabBar(const RefPtr<TabsNode>& tabsNode, TabBarStyle tabBarStyle1, TabBarStyle tabBarStyle2)
-{
-    const std::string text_test = "text_test";
-    TabContentModelNG tabContentModel;
-    tabContentModel.Create();
-    auto tabContentFrameNode =
-        AceType::DynamicCast<TabContentNode>(ViewStackProcessor::GetInstance()->GetMainFrameNode());
-    auto tabContentPattern = tabContentFrameNode->GetPattern<TabContentPattern>();
-    auto swiperNode = AceType::DynamicCast<FrameNode>(tabsNode->GetChildAtIndex(TEST_SWIPER_INDEX));
-    tabContentFrameNode->MountToParent(swiperNode);
-    tabContentPattern->SetTabBar(text_test, "", nullptr);
-    tabContentPattern->SetTabBarStyle(tabBarStyle1);
-    EXPECT_EQ(tabContentPattern->GetTabBarParam().GetText(), text_test);
-    tabContentModel.AddTabBarItem(tabContentFrameNode, 0, false);
-
-    TabContentModelNG tabContentModel2;
-    tabContentModel2.Create();
-    auto tabContentFrameNode2 =
-        AceType::DynamicCast<TabContentNode>(ViewStackProcessor::GetInstance()->GetMainFrameNode());
-    auto tabContentPattern2 = tabContentFrameNode2->GetPattern<TabContentPattern>();
-    tabContentFrameNode2->MountToParent(swiperNode);
-    tabContentPattern2->SetTabBar(text_test, "", nullptr);
-    tabContentPattern2->SetTabBarStyle(tabBarStyle2);
-    EXPECT_EQ(tabContentPattern2->GetTabBarParam().GetText(), text_test);
-    tabContentModel2.AddTabBarItem(tabContentFrameNode2, 1, false);
-}
-
-/**
  * @tc.name: TabBarPatternHandleBottomTabBarChange001
  * @tc.desc: test HandleBottomTabBarChange
  * @tc.type: FUNC
@@ -1588,19 +1508,13 @@ HWTEST_F(TabsTestNg, TabBarPatternChangeMask001, TestSize.Level1)
     auto tabBarGeometryNode = tabBarNode_->GetGeometryNode();
     auto tabBarOffset = tabBarGeometryNode->GetMarginFrameOffset();
 
-    auto mockRenderContext1 = AceType::MakeRefPtr<MockRenderContext>();
     auto maskNode1 = AceType::DynamicCast<FrameNode>(
         tabBarNode_->GetChildAtIndex(tabBarNode_->GetChildren().size() - TEST_SELECTED_MASK_COUNT));
     auto imageNode1 = AceType::DynamicCast<FrameNode>(maskNode1->GetChildren().front());
-    imageNode1->renderContext_ = mockRenderContext1;
-    EXPECT_CALL(*mockRenderContext1, SetVisible(_)).Times(1);
 
-    auto mockRenderContext2 = AceType::MakeRefPtr<MockRenderContext>();
     auto maskNode2 = AceType::DynamicCast<FrameNode>(
         tabBarNode_->GetChildAtIndex(tabBarNode_->GetChildren().size() - TEST_SELECTED_MASK_COUNT + 1));
     auto imageNode2 = AceType::DynamicCast<FrameNode>(maskNode2->GetChildren().front());
-    imageNode2->renderContext_ = mockRenderContext2;
-    EXPECT_CALL(*mockRenderContext2, SetVisible(_)).Times(1);
 
     tabBarPattern_->ChangeMask(TEST_TAB_BAR_INDEX, 1.0f, tabBarOffset, 1.0f, TEST_MASK_MIDDLE_RADIUS_RATIO, true);
     tabBarPattern_->ChangeMask(TEST_TAB_BAR_INDEX, 1.0f, tabBarOffset, 0.99f, TEST_MASK_MIDDLE_RADIUS_RATIO, false);
@@ -2580,17 +2494,11 @@ HWTEST_F(TabsTestNg, TabsModelSetOnChange001, TestSize.Level1)
  */
 HWTEST_F(TabsTestNg, TabsModelNg001, TestSize.Level1)
 {
-    auto onAnimationStart = [](int32_t index, int32_t targetIndex, const AnimationCallbackInfo& info) {};
-    auto onAnimationEnd = [](int32_t index, const AnimationCallbackInfo& info) {};
     auto onGestureSwipe = [](int32_t index, const AnimationCallbackInfo& info) {};
     CreateWithItem([=](TabsModelNG model) {
-        model.SetOnAnimationStart(std::move(onAnimationStart));
-        model.SetOnAnimationEnd(std::move(onAnimationEnd));
         model.SetOnGestureSwipe(std::move(onGestureSwipe));
     });
     auto eventHub = swiperNode_->GetEventHub<SwiperEventHub>();
-    EXPECT_NE(pattern_->animationStartEvent_, nullptr);
-    EXPECT_NE(pattern_->animationEndEvent_, nullptr);
     EXPECT_NE(eventHub->gestureSwipeEvent_, nullptr);
 }
 
@@ -2739,58 +2647,6 @@ HWTEST_F(TabsTestNg, TabBarPatternOnModifyDone001, TestSize.Level1)
         tabBarPattern_->OnModifyDone();
         tabBarLayoutProperty_->UpdateTabBarMode(TabBarMode::FIXED);
     }
-}
-
-/**
- * @tc.name: TabBarPatternHandleClick002
- * @tc.desc: test HandleClick
- * @tc.type: FUNC
- */
-HWTEST_F(TabsTestNg, TabBarPatternHandleClick002, TestSize.Level1)
-{
-    CreateWithItem([](TabsModelNG model) {});
-    tabBarLayoutProperty_->UpdateTabBarMode(TabBarMode::SCROLLABLE);
-    tabBarLayoutProperty_->UpdateAxis(Axis::HORIZONTAL);
-    GestureEvent info;
-    Offset offset(1, 1);
-    info.SetLocalLocation(offset);
-    RefPtr<Scrollable> scrollable = AceType::MakeRefPtr<Scrollable>();
-    scrollable->SetAxis(Axis::HORIZONTAL);
-    auto scrollableEvent = AceType::MakeRefPtr<ScrollableEvent>(Axis::HORIZONTAL);
-    scrollableEvent->SetAxis(Axis::VERTICAL);
-    scrollableEvent->SetScrollable(scrollable);
-    tabBarPattern_->scrollableEvent_ = scrollableEvent;
-
-    /**
-     * @tc.steps: step2. Test function HandleClick.
-     * @tc.expected: Related functions run ok.
-     */
-    for (int i = 0; i <= 1; i++) {
-        for (int j = 0; j <= 1; j++) {
-            for (int k = 0; k <= 1; k++) {
-                tabBarPattern_->HandleClick(info);
-                tabBarLayoutProperty_->UpdateTabBarMode(TabBarMode::FIXED);
-            }
-            tabBarLayoutProperty_->UpdateAxis(Axis::VERTICAL);
-        }
-        tabBarLayoutProperty_->UpdateTabBarMode(TabBarMode::SCROLLABLE);
-    }
-
-    tabBarLayoutProperty_->UpdateTabBarMode(TabBarMode::SCROLLABLE);
-    tabBarLayoutProperty_->UpdateAxis(Axis::HORIZONTAL);
-    auto springController = AceType::MakeRefPtr<Animator>();
-    springController->SetTempo(0.1f);
-    springController->status_ = Animator::Status::RUNNING;
-    for (int i = 0; i <= 1; i++) {
-        tabBarPattern_->HandleClick(info);
-        tabBarPattern_->scrollableEvent_ = scrollableEvent;
-    }
-
-    OffsetF c1(0.1f, 0.1f);
-    OffsetF c2(0.2f, 0.2f);
-    tabBarPattern_->tabItemOffsets_.emplace_back(c1);
-    tabBarPattern_->tabItemOffsets_.emplace_back(c2);
-    tabBarPattern_->HandleClick(info);
 }
 
 /**
@@ -3469,19 +3325,13 @@ HWTEST_F(TabsTestNg, TabBarPatternPlayMaskAnimation001, TestSize.Level1)
     OffsetF originalUnselectedMaskOffset(0.1f, 0.2f);
     int32_t unselectedIndex = 1;
 
-    auto mockRenderContext1 = AceType::MakeRefPtr<MockRenderContext>();
     auto maskNode1 = AceType::DynamicCast<FrameNode>(
         tabBarNode_->GetChildAtIndex(tabBarNode_->GetChildren().size() - TEST_SELECTED_MASK_COUNT));
     auto imageNode1 = AceType::DynamicCast<FrameNode>(maskNode1->GetChildren().front());
-    imageNode1->renderContext_ = mockRenderContext1;
-    EXPECT_CALL(*mockRenderContext1, SetVisible(_)).Times(1);
 
-    auto mockRenderContext2 = AceType::MakeRefPtr<MockRenderContext>();
     auto maskNode2 = AceType::DynamicCast<FrameNode>(
         tabBarNode_->GetChildAtIndex(tabBarNode_->GetChildren().size() - TEST_SELECTED_MASK_COUNT + 1));
     auto imageNode2 = AceType::DynamicCast<FrameNode>(maskNode2->GetChildren().front());
-    imageNode2->renderContext_ = mockRenderContext2;
-    EXPECT_CALL(*mockRenderContext2, SetVisible(_)).Times(1);
 
     tabBarPattern_->PlayMaskAnimation(selectedImageSize, originalSelectedMaskOffset, selectedIndex, unselectedImageSize,
         originalUnselectedMaskOffset, unselectedIndex);
@@ -3939,86 +3789,6 @@ HWTEST_F(TabsTestNg, TabsModelSetOnTabBarClick001, TestSize.Level1)
 }
 
 /**
- * @tc.name: TabBarPatternGetNextFocusNode001
- * @tc.desc: test GetNextFocusNode
- * @tc.type: FUNC
- */
-HWTEST_F(TabsTestNg, TabBarPatternGetNextFocusNode001, TestSize.Level1)
-{
-    Create([](TabsModelNG model) {
-        CreateSingleItem([](TabContentModelNG tabContentModel) {
-            tabContentModel.SetTabBarStyle(TabBarStyle::BOTTOMTABBATSTYLE);
-        }, 0);
-        CreateSingleItem([](TabContentModelNG tabContentModel) {
-            tabContentModel.SetTabBarStyle(TabBarStyle::BOTTOMTABBATSTYLE);
-        }, 1);
-    }, BarPosition::END);
-    tabBarNode_->GetOrCreateFocusHub();
-    auto tabsPattern = frameNode_->GetPattern<TabsPattern>();
-    auto tabsLayoutProperty = layoutProperty_;
-    auto swiperFocusNode = swiperNode_->GetFocusHub();
-    auto tabBarFocusNode = tabBarNode_->GetFocusHub();
-
-    /**
-     * @tc.steps: steps2. GetNextFocusNode
-     * @tc.expected: steps2. Check the result of GetNextFocusNode
-     */
-    tabsLayoutProperty->UpdateTabBarPosition(BarPosition::START);
-    tabsLayoutProperty->UpdateAxis(Axis::HORIZONTAL);
-    tabsPattern->GetNextFocusNode(FocusStep::DOWN, tabBarFocusNode);
-    tabsPattern->GetNextFocusNode(FocusStep::UP, tabBarFocusNode);
-    tabsPattern->GetNextFocusNode(FocusStep::LEFT, tabBarFocusNode);
-    EXPECT_EQ(tabsLayoutProperty->GetAxis().value(), Axis::HORIZONTAL);
-
-    tabsLayoutProperty->UpdateTabBarPosition(BarPosition::START);
-    tabsLayoutProperty->UpdateAxis(Axis::VERTICAL);
-    tabsPattern->GetNextFocusNode(FocusStep::RIGHT, tabBarFocusNode);
-    tabsPattern->GetNextFocusNode(FocusStep::UP, tabBarFocusNode);
-    tabsPattern->GetNextFocusNode(FocusStep::LEFT, tabBarFocusNode);
-    EXPECT_EQ(tabsLayoutProperty->GetAxis().value(), Axis::VERTICAL);
-
-    tabsLayoutProperty->UpdateTabBarPosition(BarPosition::END);
-    tabsLayoutProperty->UpdateAxis(Axis::HORIZONTAL);
-    tabsPattern->GetNextFocusNode(FocusStep::UP, tabBarFocusNode);
-    tabsPattern->GetNextFocusNode(FocusStep::LEFT, tabBarFocusNode);
-    EXPECT_EQ(tabsLayoutProperty->GetAxis().value(), Axis::HORIZONTAL);
-
-    tabsLayoutProperty->UpdateTabBarPosition(BarPosition::END);
-    tabsLayoutProperty->UpdateAxis(Axis::VERTICAL);
-    tabsPattern->GetNextFocusNode(FocusStep::LEFT, tabBarFocusNode);
-    EXPECT_EQ(tabsLayoutProperty->GetAxis().value(), Axis::VERTICAL);
-
-    tabsLayoutProperty->UpdateTabBarPosition(BarPosition::START);
-    tabsLayoutProperty->UpdateAxis(Axis::HORIZONTAL);
-    tabsPattern->GetNextFocusNode(FocusStep::UP, swiperFocusNode);
-    tabsPattern->GetNextFocusNode(FocusStep::UP_END, swiperFocusNode);
-    EXPECT_EQ(tabsLayoutProperty->GetAxis().value(), Axis::HORIZONTAL);
-
-    tabsLayoutProperty->UpdateTabBarPosition(BarPosition::START);
-    tabsLayoutProperty->UpdateAxis(Axis::VERTICAL);
-    tabsPattern->GetNextFocusNode(FocusStep::LEFT, swiperFocusNode);
-    tabsPattern->GetNextFocusNode(FocusStep::LEFT_END, swiperFocusNode);
-    EXPECT_EQ(tabsLayoutProperty->GetAxis().value(), Axis::VERTICAL);
-
-    tabsLayoutProperty->UpdateTabBarPosition(BarPosition::END);
-    tabsLayoutProperty->UpdateAxis(Axis::HORIZONTAL);
-    tabsPattern->GetNextFocusNode(FocusStep::DOWN, swiperFocusNode);
-    tabsPattern->GetNextFocusNode(FocusStep::DOWN_END, swiperFocusNode);
-    EXPECT_EQ(tabsLayoutProperty->GetAxis().value(), Axis::HORIZONTAL);
-
-    tabsLayoutProperty->UpdateTabBarPosition(BarPosition::END);
-    tabsLayoutProperty->UpdateAxis(Axis::VERTICAL);
-    tabsPattern->GetNextFocusNode(FocusStep::UP, swiperFocusNode);
-    EXPECT_EQ(tabsLayoutProperty->GetAxis().value(), Axis::VERTICAL);
-
-    tabsLayoutProperty->UpdateTabBarPosition(BarPosition::END);
-    tabsLayoutProperty->UpdateAxis(Axis::VERTICAL);
-    tabsPattern->GetNextFocusNode(FocusStep::RIGHT, swiperFocusNode);
-    tabsPattern->GetNextFocusNode(FocusStep::RIGHT_END, swiperFocusNode);
-    EXPECT_EQ(tabsLayoutProperty->GetAxis().value(), Axis::VERTICAL);
-}
-
-/**
  * @tc.name: TabBarPatternInitScrollable004
  * @tc.desc: test InitScrollable
  * @tc.type: FUNC
@@ -4243,10 +4013,6 @@ HWTEST_F(TabsTestNg, TabBarLayoutAlgorithmLayoutMask004, TestSize.Level1)
      * @tc.steps: step4. call LayoutMask function.
      * @tc.expected: step4. expect The function is run ok.
      */
-    auto mockRenderContext = AceType::MakeRefPtr<MockRenderContext>();
-    imageNode->renderContext_ = mockRenderContext;
-    EXPECT_CALL(*mockRenderContext, SetVisible(_)).Times(1);
-
     tabBarLayoutAlgorithm->LayoutMask(&layoutWrapper, childOffsetDelta);
     EXPECT_EQ(tabBarLayoutProperty_->GetSelectedMask().value_or(-1), 0);
     EXPECT_EQ(tabBarLayoutProperty_->GetUnselectedMask().value_or(-1), 1);
@@ -5733,29 +5499,6 @@ HWTEST_F(TabsTestNg, OnDetachFromMainTree001, TestSize.Level1)
 }
 
 /**
- * @tc.name: SetOnChangeEvent001.
- * @tc.desc: Test the SetOnChangeEvent function in the TabsPattern class.
- * @tc.type: FUNC
- */
-HWTEST_F(TabsTestNg, SetOnChangeEvent001, TestSize.Level1)
-{
-    Color color = Color::RED;
-    TabsItemDivider divider;
-    divider.color = color;
-    CreateWithItem([divider](TabsModelNG model) {
-        model.SetDivider(divider);
-    });
-
-    /**
-     * @tc.steps: step2. Get tabs pattern to create layoutAlgorithm, and call measure and layout functions.
-     * @tc.expected: step2. related function is called.
-     */
-    pattern_->onChangeEvent_ = std::make_shared<ChangeEvent>();
-    pattern_->SetOnChangeEvent([](const BaseEventInfo* info) {});
-    swiperPattern_->FireChangeEvent();
-}
-
-/**
  * @tc.name: TabPatternOnModifyDone001.
  * @tc.desc: test OnModifyDone in TabsPattern class.
  * @tc.type: FUNC
@@ -5920,38 +5663,6 @@ HWTEST_F(TabsTestNg, SetOnChangeEvent002, TestSize.Level1)
 }
 
 /**
- * @tc.name: TabBarPatternHandleClick003
- * @tc.desc: test HandleClick
- * @tc.type: FUNC
- */
-HWTEST_F(TabsTestNg, TabBarPatternHandleClick003, TestSize.Level1)
-{
-    CreateWithItem([](TabsModelNG model) {});
-    auto tabContentFrameNode = AceType::DynamicCast<TabContentNode>(GetChildFrameNode(swiperNode_, 0));
-    auto tabContentPattern = tabContentFrameNode->GetPattern<TabContentPattern>();
-    tabBarLayoutProperty_->UpdateAxis(Axis::VERTICAL);
-    EXPECT_EQ(tabBarLayoutProperty_->GetAxisValue(), Axis::VERTICAL);
-    tabBarPattern_->tabBarStyle_ = TabBarStyle::SUBTABBATSTYLE;
-    tabBarPattern_->tabItemOffsets_ = { { 0.0f, 0.0f }, { 10.0f, 10.0f } };
-
-    GestureEvent info;
-    Offset offset(1, 1);
-    info.SetLocalLocation(offset);
-    info.SetSourceDevice(SourceType::KEYBOARD);
-    tabBarLayoutProperty_->UpdateAxis(Axis::HORIZONTAL);
-    tabBarPattern_->HandleClick(info);
-    EXPECT_EQ(tabBarLayoutProperty_->GetAxisValue(), Axis::HORIZONTAL);
-
-    tabBarPattern_->indicator_ = 1;
-    tabBarPattern_->HandleClick(info);
-    EXPECT_EQ(tabBarPattern_->indicator_, 1);
-    info.deviceType_ = SourceType::NONE;
-    tabBarPattern_->tabItemOffsets_ = { { 10.0f, 10.0f } };
-    tabBarPattern_->HandleClick(info);
-    EXPECT_FALSE(tabBarPattern_->tabItemOffsets_.empty());
-}
-
-/**
  * @tc.name: TabBarPatternGetInnerFocusPaintRect001
  * @tc.desc: test GetInnerFocusPaintRect
  * @tc.type: FUNC
@@ -6004,36 +5715,6 @@ HWTEST_F(TabsTestNg, TabBarPatternInitScrollable005, TestSize.Level1)
 }
 
 /**
- * @tc.name: TabBarPatternHandleClick005
- * @tc.desc: test HandleClick
- * @tc.type: FUNC
- */
-HWTEST_F(TabsTestNg, TabBarPatternHandleClick005, TestSize.Level1)
-{
-    CreateWithItem([](TabsModelNG model) {});
-    tabBarLayoutProperty_->UpdateTabBarMode(TabBarMode::SCROLLABLE);
-    tabBarLayoutProperty_->UpdateAxis(Axis::HORIZONTAL);
-    GestureEvent info;
-    Offset offset(1, 1);
-    info.SetLocalLocation(offset);
-    RefPtr<Scrollable> scrollable = AceType::MakeRefPtr<Scrollable>();
-    scrollable->SetAxis(Axis::HORIZONTAL);
-    auto scrollableEvent = AceType::MakeRefPtr<ScrollableEvent>(Axis::HORIZONTAL);
-    scrollableEvent->SetAxis(Axis::VERTICAL);
-    scrollableEvent->SetScrollable(scrollable);
-    tabBarPattern_->scrollableEvent_ = scrollableEvent;
-    tabBarLayoutProperty_->UpdateTabBarMode(TabBarMode::FIXED);
-    tabBarLayoutProperty_->UpdateAxis(Axis::HORIZONTAL);
-    /**
-     * @tc.steps: step2. Test function HandleClick.
-     * @tc.expected: Related functions run ok.
-     */
-    info.deviceType_ = SourceType::KEYBOARD;
-    tabBarPattern_->HandleClick(info);
-    EXPECT_EQ(info.deviceType_, SourceType::KEYBOARD);
-}
-
-/**
  * @tc.name: TabsModelNGSetIndex001
  * @tc.desc: Test the SetIndex function in the TabsModelNG class.
  * @tc.type: FUNC
@@ -6049,42 +5730,6 @@ HWTEST_F(TabsTestNg, TabsModelNGSetIndex001, TestSize.Level2)
     EXPECT_EQ(swiperNode_->TotalChildCount(), 4);
     CreateWithItem([](TabsModelNG model) {}, BarPosition::START, 1);
     EXPECT_EQ(swiperNode_->TotalChildCount(), 4);
-}
-
-/**
- * @tc.name: TabBarPatternHandleClick006
- * @tc.desc: test HandleClick
- * @tc.type: FUNC
- */
-HWTEST_F(TabsTestNg, TabBarPatternHandleClick006, TestSize.Level1)
-{
-    CreateWithItem([](TabsModelNG model) {});
-    tabBarLayoutProperty_->UpdateTabBarMode(TabBarMode::SCROLLABLE);
-    tabBarLayoutProperty_->UpdateAxis(Axis::HORIZONTAL);
-    GestureEvent info;
-    Offset offset(1, 1);
-    info.SetLocalLocation(offset);
-    auto scrollableEvent = AceType::MakeRefPtr<ScrollableEvent>(Axis::HORIZONTAL);
-    scrollableEvent->SetAxis(Axis::VERTICAL);
-    tabBarPattern_->scrollableEvent_ = scrollableEvent;
-    tabBarLayoutProperty_->UpdateTabBarMode(TabBarMode::SCROLLABLE);
-    tabBarLayoutProperty_->UpdateAxis(Axis::HORIZONTAL);
-    /**
-     * @tc.steps: step2. Test function HandleClick.
-     * @tc.expected: Related functions run ok.
-     */
-    info.deviceType_ = SourceType::MOUSE;
-    tabBarPattern_->scrollableEvent_->scrollable_ = AceType::MakeRefPtr<Scrollable>();
-    auto scrollable = tabBarPattern_->scrollableEvent_->GetScrollable();
-
-    tabBarLayoutProperty_->UpdateTabBarMode(TabBarMode::FIXED);
-    tabBarPattern_->HandleClick(info);
-    EXPECT_NE(tabBarPattern_->scrollableEvent_->GetScrollable(), nullptr);
-    EXPECT_NE(tabBarPattern_->scrollableEvent_->GetScrollable()->IsSpringStopped(), false);
-    tabBarLayoutProperty_->UpdateTabBarMode(TabBarMode::FIXED_START);
-    tabBarPattern_->HandleClick(info);
-    EXPECT_NE(tabBarPattern_->scrollableEvent_->GetScrollable(), nullptr);
-    EXPECT_NE(tabBarPattern_->scrollableEvent_->GetScrollable()->IsSpringStopped(), false);
 }
 
 /*

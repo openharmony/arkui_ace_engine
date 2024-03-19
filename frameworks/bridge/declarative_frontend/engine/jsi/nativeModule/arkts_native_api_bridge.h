@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -34,6 +34,7 @@ public:
     static ArkUINativeModuleValue GetArkUINativeModule(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue GetUIState(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue SetSupportedUIState(ArkUIRuntimeCallInfo* runtimeCallInfo);
+    static ArkUINativeModuleValue GetFrameNodeByKey(ArkUIRuntimeCallInfo* runtimeCallInfo);
 private:
     static void RegisterButtonAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
     static void RegisterToggleAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
@@ -90,6 +91,7 @@ private:
     static void RegisterTextTimerAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
     static void RegisterXComponentAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
     static void RegisterTabContentAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
+    static void RegisterRefreshAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
 };
 } // namespace OHOS::Ace::NG
 #endif // FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_ENGINE_JSI_NATIVEMODULE_ARKTS_NATIVE_API_BRIDGE_H

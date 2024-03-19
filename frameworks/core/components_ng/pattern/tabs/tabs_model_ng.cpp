@@ -234,6 +234,20 @@ void TabsModelNG::SetTabBarHeight(const Dimension& tabBarHeight)
     tabBarLayoutProperty->UpdateTabBarHeight(tabBarHeight);
 }
 
+void TabsModelNG::SetWidthAuto(bool isAuto)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    ACE_UPDATE_LAYOUT_PROPERTY(TabsLayoutProperty, WidthAuto, isAuto);
+}
+
+void TabsModelNG::SetHeightAuto(bool isAuto)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    ACE_UPDATE_LAYOUT_PROPERTY(TabsLayoutProperty, HeightAuto, isAuto);
+}
+
 void TabsModelNG::SetBarAdaptiveHeight(bool barAdaptiveHeight)
 {
     auto tabBarLayoutProperty = GetTabBarLayoutProperty();

@@ -156,6 +156,7 @@ public:
     std::string description;
     std::string content;
     uint32_t unicode = 0;
+    std::pair<int32_t, int32_t> interval;
     std::unique_ptr<FontStyle> fontStyle = std::make_unique<FontStyle>();
     std::unique_ptr<TextLineStyle> textLineStyle = std::make_unique<TextLineStyle>();
     // for text background style
@@ -180,6 +181,9 @@ public:
     virtual void UpdateTextStyleForAISpan(
         const std::string& content, const RefPtr<Paragraph>& builder, const std::optional<TextStyle>& textStyle);
     virtual void UpdateTextStyle(
+        const std::string& content, const RefPtr<Paragraph>& builder, const std::optional<TextStyle>& textStyle,
+        const int32_t selStart, const int32_t selEnd);
+    virtual void UpdateContentTextStyle(
         const std::string& content, const RefPtr<Paragraph>& builder, const std::optional<TextStyle>& textStyle);
     virtual void SetAiSpanTextStyle(std::optional<TextStyle>& textStyle);
     virtual void GetIndex(int32_t& start, int32_t& end) const;
@@ -189,6 +193,8 @@ public:
     virtual void StartDrag(int32_t start, int32_t end);
     virtual void EndDrag();
     virtual bool IsDragging();
+    RefPtr<SpanItem> GetSameStyleSpanItem() const;
+    std::optional<std::pair<int32_t, int32_t>> GetIntersectionInterval(std::pair<int32_t, int32_t> interval) const;
     std::optional<TextStyle> GetTextStyle() const
     {
         return textStyle_;
@@ -253,6 +259,7 @@ enum class PropertyInfo {
     SYMBOL_COLOR,
     SYMBOL_RENDERING_STRATEGY,
     SYMBOL_EFFECT_STRATEGY,
+    WORD_BREAK,
 };
 
 class ACE_EXPORT BaseSpan : public virtual AceType {
@@ -362,6 +369,7 @@ public:
     DEFINE_SPAN_FONT_STYLE_ITEM(SymbolEffectStrategy, uint32_t);
     DEFINE_SPAN_TEXT_LINE_STYLE_ITEM(LineHeight, Dimension);
     DEFINE_SPAN_TEXT_LINE_STYLE_ITEM(TextAlign, TextAlign);
+    DEFINE_SPAN_TEXT_LINE_STYLE_ITEM(WordBreak, WordBreak);
     DEFINE_SPAN_TEXT_LINE_STYLE_ITEM(LeadingMargin, LeadingMargin);
 
     // Mount to the previous Span node or Text node.
@@ -412,7 +420,7 @@ public:
             PropertyInfo::FONTSTYLE, PropertyInfo::FONTWEIGHT, PropertyInfo::FONTFAMILY, PropertyInfo::TEXTDECORATION,
             PropertyInfo::TEXTCASE, PropertyInfo::LETTERSPACE, PropertyInfo::LINEHEIGHT, PropertyInfo::TEXT_ALIGN,
             PropertyInfo::LEADING_MARGIN, PropertyInfo::TEXTSHADOW, PropertyInfo::SYMBOL_COLOR,
-            PropertyInfo::SYMBOL_RENDERING_STRATEGY, PropertyInfo::SYMBOL_EFFECT_STRATEGY };
+            PropertyInfo::SYMBOL_RENDERING_STRATEGY, PropertyInfo::SYMBOL_EFFECT_STRATEGY, PropertyInfo::WORD_BREAK };
         set_difference(propertyInfoContainer.begin(), propertyInfoContainer.end(), propertyInfo_.begin(),
             propertyInfo_.end(), inserter(inheritPropertyInfo, inheritPropertyInfo.begin()));
         return inheritPropertyInfo;

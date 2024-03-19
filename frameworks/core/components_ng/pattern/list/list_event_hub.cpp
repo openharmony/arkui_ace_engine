@@ -59,6 +59,24 @@ void ListEventHub::InitItemDragEvent(const RefPtr<GestureEventHub>& gestureHub)
     gestureHub->SetDragEvent(dragEvent, { PanDirection::ALL }, DEFAULT_PAN_FINGER, DEFAULT_PAN_DISTANCE);
 }
 
+void ListEventHub::OnItemDragStart(const GestureEvent& info, const DragDropInfo& dragDropInfo)
+{
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto manager = pipeline->GetDragDropManager();
+    CHECK_NULL_VOID(manager);
+    if (dragDropInfo.pixelMap) {
+        dragDropProxy_ = manager->CreateAndShowDragWindow(dragDropInfo.pixelMap, info);
+    } else if (dragDropInfo.customNode) {
+        dragDropProxy_ = manager->CreateAndShowDragWindow(dragDropInfo.customNode, info);
+    }
+    CHECK_NULL_VOID(dragDropProxy_);
+    dragDropProxy_->OnItemDragStart(info, GetFrameNode());
+    if (!manager->IsDraggingPressed(info.GetPointerId())) {
+        HandleOnItemDragEnd(info);
+    }
+}
+
 void ListEventHub::HandleOnItemDragStart(const GestureEvent& info)
 {
     auto pipeline = PipelineContext::GetCurrentContext();
@@ -79,8 +97,12 @@ void ListEventHub::HandleOnItemDragStart(const GestureEvent& info)
     itemDragInfo.SetY(pipeline->ConvertPxToVp(Dimension(globalY, DimensionUnit::PX)));
     auto customNode = FireOnItemDragStart(itemDragInfo, draggedIndex_);
     CHECK_NULL_VOID(customNode);
+    auto dragDropManager = pipeline->GetDragDropManager();
+    CHECK_NULL_VOID(dragDropManager);
+    dragDropManager->SetDraggingPointer(info.GetPointerId());
+    dragDropManager->SetDraggingPressedState(true);
 #if defined(PIXEL_MAP_SUPPORTED)
-    auto callback = [id = Container::CurrentId(), pipeline, info, host, weak = WeakClaim(this)](
+    auto callback = [id = Container::CurrentId(), pipeline, info, weak = WeakClaim(this)](
                         std::shared_ptr<Media::PixelMap> mediaPixelMap, int32_t /*arg*/,
                         const std::function<void()>& /*unused*/) {
         ContainerScope scope(id);
@@ -88,29 +110,23 @@ void ListEventHub::HandleOnItemDragStart(const GestureEvent& info)
             TAG_LOGE(AceLogTag::ACE_DRAG, "listItem drag start failed, custom component screenshot is empty.");
             return;
         }
-        auto pixelMap = PixelMap::CreatePixelMap(reinterpret_cast<void*>(&mediaPixelMap));
-        CHECK_NULL_VOID(pixelMap);
+        DragDropInfo dragDropInfo;
+        dragDropInfo.pixelMap = PixelMap::CreatePixelMap(reinterpret_cast<void*>(&mediaPixelMap));
         auto taskScheduler = pipeline->GetTaskExecutor();
         CHECK_NULL_VOID(taskScheduler);
         taskScheduler->PostTask(
-            [weak, pipeline, info, pixelMap, host]() {
+            [weak, info, dragDropInfo]() {
                 auto eventHub = weak.Upgrade();
                 CHECK_NULL_VOID(eventHub);
-                auto manager = pipeline->GetDragDropManager();
-                CHECK_NULL_VOID(manager);
-                eventHub->dragDropProxy_ = manager->CreateAndShowDragWindow(pixelMap, info);
-                CHECK_NULL_VOID(eventHub->dragDropProxy_);
-                eventHub->dragDropProxy_->OnItemDragStart(info, host);
+                eventHub->OnItemDragStart(info, dragDropInfo);
             },
             TaskExecutor::TaskType::UI);
     };
     NG::ComponentSnapshot::Create(customNode, std::move(callback), false, CREATE_PIXELMAP_TIME);
 #else
-    auto manager = pipeline->GetDragDropManager();
-    CHECK_NULL_VOID(manager);
-    dragDropProxy_ = manager->CreateAndShowDragWindow(customNode, info);
-    CHECK_NULL_VOID(dragDropProxy_);
-    dragDropProxy_->OnItemDragStart(info, GetFrameNode());
+    DragDropInfo dragDropInfo;
+    dragDropInfo.customNode = customNode;
+    OnItemDragStart(info, dragDropInfo);
 #endif
 }
 

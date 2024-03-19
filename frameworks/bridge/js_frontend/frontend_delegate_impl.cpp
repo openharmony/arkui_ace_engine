@@ -514,16 +514,16 @@ void FrontendDelegateImpl::FireSyncEvent(
         args.append(",").append(jsonArgs); // method args
     }
     taskExecutor_->PostSyncTask(
-        [weak = AceType::WeakClaim(this), eventId, args = std::move(args)] {
+        [weak = AceType::WeakClaim(this), eventId, args = std::move(args), callbackId, &result] {
             auto delegate = weak.Upgrade();
             if (delegate) {
                 delegate->syncEvent_(eventId, args);
+                result = delegate->jsCallBackResult_[callbackId];
+                LOGD("FireSyncEvent eventId: %{public}s, callbackId: %{public}d", eventId.c_str(), callbackId);
+                delegate->jsCallBackResult_.erase(callbackId);
             }
         },
         TaskExecutor::TaskType::JS);
-
-    result = jsCallBackResult_[callbackId];
-    jsCallBackResult_.erase(callbackId);
 }
 
 void FrontendDelegateImpl::FireExternalEvent(
@@ -762,8 +762,9 @@ size_t FrontendDelegateImpl::GetComponentsCount()
 
 std::string FrontendDelegateImpl::GetParams()
 {
-    if (pageParamMap_.find(pageId_) != pageParamMap_.end()) {
-        return pageParamMap_.find(pageId_)->second;
+    auto iter = pageParamMap_.find(pageId_);
+    if (iter != pageParamMap_.end()) {
+        return iter->second;
     } else {
         return "";
     }
@@ -895,8 +896,8 @@ Size FrontendDelegateImpl::MeasureTextSize(const MeasureContext& context)
     return MeasureUtil::MeasureTextSize(context);
 }
 
-void FrontendDelegateImpl::ShowToast(
-    const std::string& message, int32_t duration, const std::string& bottom, const NG::ToastShowMode& /* showMode */)
+void FrontendDelegateImpl::ShowToast(const std::string& message, int32_t duration, const std::string& bottom,
+    const NG::ToastShowMode& /* showMode */, int32_t alignment, std::optional<DimensionOffset> offset)
 {
     int32_t durationTime = std::clamp(duration, TOAST_TIME_DEFAULT, TOAST_TIME_MAX);
     auto pipelineContext = AceType::DynamicCast<PipelineContext>(pipelineContextHolder_.Get());

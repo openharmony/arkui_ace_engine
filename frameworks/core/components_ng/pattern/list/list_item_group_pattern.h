@@ -170,9 +170,14 @@ public:
         return layouted_ && (layoutedItemInfo_.has_value() || itemTotalCount_ == 0);
     }
 
-    const LayoutConstraintF& GetLayoutConstraint() const
+    void SetItemPressed(bool isPressed, int32_t id)
     {
-        return layoutConstraint_;
+        for (auto& child : itemPosition_) {
+            if (child.second.id == id) {
+                child.second.isPressed = isPressed;
+                break;
+            }
+        }
     }
 
 private:
@@ -201,7 +206,6 @@ private:
 
     std::optional<LayoutedItemInfo> layoutedItemInfo_;
     bool layouted_ = false;
-    LayoutConstraintF layoutConstraint_;
 
     ListItemGroupLayoutAlgorithm::PositionMap itemPosition_;
     float spaceWidth_ = 0.0f;

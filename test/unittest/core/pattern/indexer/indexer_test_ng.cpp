@@ -28,6 +28,7 @@
 
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
+#include "core/common/container.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/layout/layout_property.h"
 #include "core/components_ng/pattern/indexer/indexer_layout_property.h"
@@ -545,7 +546,7 @@ HWTEST_F(IndexerTestNg, IndexerPattern002, TestSize.Level1)
 
     pattern_->MoveIndexByStep(1);
     ASSERT_NE(pattern_->popupNode_, nullptr);
-    auto listNode = pattern_->popupNode_->GetLastChild();
+    auto listNode = pattern_->popupNode_->GetLastChild()->GetFirstChild();
     auto listItemNode = AceType::DynamicCast<FrameNode>(listNode->GetFirstChild());
     auto textNode = AceType::DynamicCast<FrameNode>(listItemNode->GetFirstChild());
     ASSERT_NE(textNode, nullptr);
@@ -577,7 +578,7 @@ HWTEST_F(IndexerTestNg, IndexerPattern003, TestSize.Level1)
      * @tc.steps: step1. TouchType::DOWN
      * @tc.expected: trigger OnListItemClick.
      */
-    auto listNode = pattern_->popupNode_->GetLastChild();
+    auto listNode = pattern_->popupNode_->GetLastChild()->GetFirstChild();
     auto listItemNode = AceType::DynamicCast<FrameNode>(listNode->GetFirstChild());
     auto gesture = listItemNode->GetOrCreateGestureEventHub();
     auto touchCallback = gesture->touchEventActuator_->touchEvents_.front()->GetTouchEventCallback();
@@ -621,7 +622,10 @@ HWTEST_F(IndexerTestNg, IndexerUpdateBubble001, TestSize.Level1)
     ASSERT_NE(columnLayoutProperty, nullptr);
     ASSERT_NE(columnLayoutProperty->calcLayoutConstraint_, nullptr);
     auto bubbleSize = Dimension(BUBBLE_BOX_SIZE, DimensionUnit::VP).ConvertToPx();
-    auto columnCalcSize = CalcSize(CalcLength(bubbleSize), CalcLength(bubbleSize * 3));
+    auto columnCalcSize =
+        Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)
+            ? CalcSize(CalcLength(bubbleSize), CalcLength(BUBBLE_ITEM_SIZE * 3 + BUBBLE_DIVIDER_SIZE * 4))
+            : CalcSize(CalcLength(bubbleSize), CalcLength(bubbleSize * 3));
     EXPECT_EQ(columnLayoutProperty->calcLayoutConstraint_->selfIdealSize, columnCalcSize);
 }
 
@@ -648,7 +652,10 @@ HWTEST_F(IndexerTestNg, IndexerUpdateBubble002, TestSize.Level1)
     ASSERT_NE(columnLayoutProperty, nullptr);
     ASSERT_NE(columnLayoutProperty->calcLayoutConstraint_, nullptr);
     auto bubbleSize = Dimension(BUBBLE_BOX_SIZE, DimensionUnit::VP).ConvertToPx();
-    auto columnCalcSize = CalcSize(CalcLength(bubbleSize), CalcLength(bubbleSize * 3));
+    auto columnCalcSize =
+        Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)
+            ? CalcSize(CalcLength(bubbleSize), CalcLength(BUBBLE_ITEM_SIZE * 3 + BUBBLE_DIVIDER_SIZE * 4))
+            : CalcSize(CalcLength(bubbleSize), CalcLength(bubbleSize * 3));
     EXPECT_EQ(columnLayoutProperty->calcLayoutConstraint_->selfIdealSize, columnCalcSize);
 }
 
@@ -675,7 +682,10 @@ HWTEST_F(IndexerTestNg, IndexerUpdateBubble003, TestSize.Level1)
     ASSERT_NE(columnLayoutProperty, nullptr);
     ASSERT_NE(columnLayoutProperty->calcLayoutConstraint_, nullptr);
     auto bubbleSize = Dimension(BUBBLE_BOX_SIZE, DimensionUnit::VP).ConvertToPx();
-    auto columnCalcSize = CalcSize(CalcLength(bubbleSize), CalcLength(bubbleSize * 6));
+    auto columnCalcSize =
+        Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)
+            ? CalcSize(CalcLength(bubbleSize), CalcLength(BUBBLE_ITEM_SIZE * 6 + BUBBLE_DIVIDER_SIZE * 7))
+            : CalcSize(CalcLength(bubbleSize), CalcLength(bubbleSize * 6));
     EXPECT_EQ(columnLayoutProperty->calcLayoutConstraint_->selfIdealSize, columnCalcSize);
 }
 
@@ -926,6 +936,162 @@ HWTEST_F(IndexerTestNg, IndexerModelNGTest003, TestSize.Level1)
     EXPECT_FALSE(paintProperty_->GetPopupItemBackground().has_value());
     EXPECT_FALSE(layoutProperty_->GetPopupHorizontalSpace().has_value());
     EXPECT_FALSE(layoutProperty_->GetFontSize().has_value());
+}
+
+/**
+ * @tc.name: IndexerModelNGTest004
+ * @tc.desc: Test newly added properties of indexer.
+ * @tc.type: FUNC
+ */
+HWTEST_F(IndexerTestNg, IndexerModelNGTest004, TestSize.Level1)
+{
+    BlurStyleOption indexerBlurStyle;
+    indexerBlurStyle.blurStyle = BlurStyle::COMPONENT_REGULAR;
+    Create([&indexerBlurStyle](IndexerModelNG model) {
+        model.SetPopupItemBorderRadius(Dimension(24));
+        model.SetPopupBorderRadius(Dimension(28));
+        model.SetItemBorderRadius(Dimension(12));
+        model.SetIndexerBorderRadius(Dimension(16));
+        model.SetPopupBackgroundBlurStyle(indexerBlurStyle);
+        model.SetPopupTitleBackground(Color(0x00000000));
+    });
+
+    /**
+     * @tc.steps: step1. Get properties.
+     * @tc.expected: Properties are correct.
+     */
+    EXPECT_EQ(paintProperty_->GetPopupItemBorderRadiusValue(), Dimension(24));
+    EXPECT_EQ(paintProperty_->GetPopupBorderRadiusValue(), Dimension(28));
+    EXPECT_EQ(paintProperty_->GetItemBorderRadiusValue(), Dimension(12));
+    EXPECT_EQ(paintProperty_->GetIndexerBorderRadiusValue(), Dimension(16));
+    EXPECT_EQ(paintProperty_->GetPopupBackgroundBlurStyleValue(), indexerBlurStyle);
+    EXPECT_EQ(paintProperty_->GetPopupTitleBackgroundValue(), Color(0x00000000));
+}
+
+/**
+ * @tc.name: IndexerModelNGTest005
+ * @tc.desc: Test newly added properties of indexer.
+ * @tc.type: FUNC
+ */
+HWTEST_F(IndexerTestNg, IndexerModelNGTest005, TestSize.Level1)
+{
+    Create([](IndexerModelNG model) {
+        model.SetPopupTitleBackground(std::nullopt);
+    });
+
+    /**
+     * @tc.steps: step1. Get properties.
+     * @tc.expected: Properties are correct.
+     */
+    EXPECT_FALSE(paintProperty_->GetPopupTitleBackground().has_value());
+}
+
+/**
+ * @tc.name: IndexerModelNGTest006
+ * @tc.desc: Test newly added properties of indexer.
+ * @tc.type: FUNC
+ */
+HWTEST_F(IndexerTestNg, IndexerModelNGTest006, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create indexer.
+     */
+    IndexerModelNG model;
+    model.Create(CREATE_ARRAY, 0);
+    GetInstance();
+    FlushLayoutTask(frameNode_);
+
+    /**
+     * @tc.steps: step2. set Invalid value.
+     * @tc.expected: Properties are not set.
+     */
+    model.SetFontSize(AceType::RawPtr(frameNode_), Dimension());
+    model.SetPopupHorizontalSpace(AceType::RawPtr(frameNode_), Dimension(-1));
+    model.SetPopupUnselectedColor(AceType::RawPtr(frameNode_), std::nullopt);
+    model.SetPopupItemBackground(AceType::RawPtr(frameNode_), std::nullopt);
+    model.SetColor(AceType::RawPtr(frameNode_), std::nullopt);
+    model.SetPopupColor(AceType::RawPtr(frameNode_), std::nullopt);
+    model.SetSelectedColor(AceType::RawPtr(frameNode_), std::nullopt);
+    model.SetPopupBackground(AceType::RawPtr(frameNode_), std::nullopt);
+    model.SetSelectedBackgroundColor(AceType::RawPtr(frameNode_), std::nullopt);
+    model.SetPopupHorizontalSpace(AceType::RawPtr(frameNode_), Dimension(-1));
+    model.SetSelected(AceType::RawPtr(frameNode_), -1);
+    model.SetPopupSelectedColor(AceType::RawPtr(frameNode_), std::nullopt);
+    model.SetItemSize(AceType::RawPtr(frameNode_), Dimension(-1));
+    model.SetPopupPositionX(AceType::RawPtr(frameNode_), std::nullopt);
+    model.SetPopupPositionY(AceType::RawPtr(frameNode_), std::nullopt);
+
+    EXPECT_FALSE(layoutProperty_->GetSelectedColor().has_value());
+    EXPECT_FALSE(layoutProperty_->GetColor().has_value());
+    EXPECT_FALSE(layoutProperty_->GetPopupColor().has_value());
+    EXPECT_EQ(layoutProperty_->GetItemSizeValue(), Dimension(INDEXER_ITEM_SIZE, DimensionUnit::VP));
+    EXPECT_EQ(layoutProperty_->GetSelectedValue(), 0);
+    EXPECT_FALSE(layoutProperty_->GetPopupPositionX().has_value());
+    EXPECT_FALSE(layoutProperty_->GetPopupPositionY().has_value());
+    EXPECT_FALSE(paintProperty_->GetSelectedBackgroundColor().has_value());
+    EXPECT_FALSE(paintProperty_->GetPopupBackground().has_value());
+    EXPECT_FALSE(paintProperty_->GetPopupSelectedColor().has_value());
+    EXPECT_FALSE(paintProperty_->GetPopupUnselectedColor().has_value());
+    EXPECT_FALSE(paintProperty_->GetPopupItemBackground().has_value());
+    EXPECT_FALSE(layoutProperty_->GetPopupHorizontalSpace().has_value());
+    EXPECT_FALSE(layoutProperty_->GetFontSize().has_value());
+}
+
+/**
+ * @tc.name: IndexerModelNGTest007
+ * @tc.desc: Test newly added properties of indexer.
+ * @tc.type: FUNC
+ */
+HWTEST_F(IndexerTestNg, IndexerModelNGTest007, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create indexer.
+     */
+    IndexerModelNG model;
+    model.Create(CREATE_ARRAY, 0);
+    GetInstance();
+    FlushLayoutTask(frameNode_);
+
+    /**
+     * @tc.steps: step2. set valid value.
+     * @tc.expected: Properties are set.
+     */
+    model.SetSelectedColor(AceType::RawPtr(frameNode_), Color::WHITE);
+    model.SetColor(AceType::RawPtr(frameNode_), Color::WHITE);
+    model.SetPopupColor(AceType::RawPtr(frameNode_), Color::WHITE);
+    model.SetSelectedBackgroundColor(AceType::RawPtr(frameNode_), Color::WHITE);
+    model.SetPopupBackground(AceType::RawPtr(frameNode_), Color::WHITE);
+    model.SetUsingPopup(AceType::RawPtr(frameNode_), true);
+    model.SetItemSize(AceType::RawPtr(frameNode_), Dimension(24));
+    model.SetAlignStyle(AceType::RawPtr(frameNode_), 0);
+    model.SetPopupHorizontalSpace(AceType::RawPtr(frameNode_), Dimension(50));
+    model.SetSelected(AceType::RawPtr(frameNode_), 0);
+    model.SetPopupPositionX(AceType::RawPtr(frameNode_), Dimension(-96.f, DimensionUnit::VP));
+    model.SetPopupPositionY(AceType::RawPtr(frameNode_), Dimension(48.f, DimensionUnit::VP));
+    model.SetPopupItemBackground(AceType::RawPtr(frameNode_), Color::WHITE);
+    model.SetPopupSelectedColor(AceType::RawPtr(frameNode_), Color::WHITE);
+    model.SetPopupUnselectedColor(AceType::RawPtr(frameNode_), Color::WHITE);
+    model.SetFontSize(AceType::RawPtr(frameNode_), Dimension(24));
+    model.SetFontWeight(AceType::RawPtr(frameNode_), FontWeight::MEDIUM);
+
+    EXPECT_EQ(layoutProperty_->GetArrayValueValue(), CREATE_ARRAY);
+    EXPECT_EQ(layoutProperty_->GetSelectedColorValue(), Color::WHITE);
+    EXPECT_EQ(layoutProperty_->GetColorValue(), Color::WHITE);
+    EXPECT_EQ(layoutProperty_->GetPopupColorValue(), Color::WHITE);
+    EXPECT_EQ(paintProperty_->GetSelectedBackgroundColorValue(), Color::WHITE);
+    EXPECT_EQ(paintProperty_->GetPopupBackgroundValue(), Color::WHITE);
+    EXPECT_EQ(layoutProperty_->GetUsingPopupValue(), true);
+    EXPECT_EQ(layoutProperty_->GetItemSizeValue(), Dimension(24));
+    EXPECT_EQ(layoutProperty_->GetAlignStyleValue(), AlignStyle::LEFT);
+    EXPECT_EQ(layoutProperty_->GetPopupHorizontalSpaceValue(), Dimension(50));
+    EXPECT_EQ(layoutProperty_->GetSelectedValue(), 0);
+    EXPECT_EQ(layoutProperty_->GetPopupPositionXValue(), Dimension(-96.f, DimensionUnit::VP));
+    EXPECT_EQ(layoutProperty_->GetPopupPositionYValue(), Dimension(48.f, DimensionUnit::VP));
+    EXPECT_EQ(paintProperty_->GetPopupItemBackgroundValue(), Color::WHITE);
+    EXPECT_EQ(paintProperty_->GetPopupSelectedColorValue(), Color::WHITE);
+    EXPECT_EQ(paintProperty_->GetPopupUnselectedColorValue(), Color::WHITE);
+    EXPECT_EQ(layoutProperty_->GetFontSizeValue(), Dimension(24));
+    EXPECT_EQ(layoutProperty_->GetFontWeightValue(), FontWeight::MEDIUM);
 }
 
 /**

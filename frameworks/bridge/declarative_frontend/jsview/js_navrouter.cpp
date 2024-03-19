@@ -80,7 +80,7 @@ void JSNavRouter::SetOnStateChange(const JSCallbackInfo& info)
     }
     if (info[0]->IsFunction()) {
         auto onStateChangeCallback = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(info[0]));
-        WeakPtr<NG::FrameNode> targetNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+        auto targetNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
         auto onStateChange = [execCtx = info.GetExecutionContext(), func = std::move(onStateChangeCallback),
                                  node = targetNode](bool isActivated) {
             JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);

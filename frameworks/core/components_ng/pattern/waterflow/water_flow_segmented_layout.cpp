@@ -128,7 +128,7 @@ float PrepareJump(WaterFlowLayoutInfo& info)
     info.jumpIndex_ = info.startIndex_;
     info.align_ = ScrollAlign::START;
     float itemOffset = (info.itemInfos_.size() <= static_cast<size_t>(info.startIndex_))
-                           ? 0.0f
+                           ? info.storedOffset_
                            : info.currentOffset_ + info.itemInfos_[info.startIndex_].mainOffset;
 
     info.startIndex_ = 0;
@@ -313,7 +313,10 @@ void WaterFlowSegmentedLayout::MeasureOnOffset()
 
 void WaterFlowSegmentedLayout::MeasureOnJump(int32_t jumpIdx)
 {
-    if (jumpIdx >= info_.childrenCount_ || jumpIdx == LAST_ITEM) {
+    if (jumpIdx >= info_.childrenCount_) {
+        return;
+    }
+    if (jumpIdx == LAST_ITEM) {
         jumpIdx = info_.childrenCount_ - 1;
     }
     if (static_cast<size_t>(jumpIdx) >= info_.itemInfos_.size()) {

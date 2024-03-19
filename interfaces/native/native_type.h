@@ -48,14 +48,24 @@ extern "C" {
  * @since 12
  */
 struct ArkUI_Node;
-
+/**
+ * @brief Defines the custom dialog box controller of ArkUI on the native side.
+ *
+ * @since 12
+ */
+struct ArkUI_NativeDialog;
 /**
  * @brief Defines the pointer to the ArkUI native component object.
  *
  * @since 12
  */
 typedef struct ArkUI_Node* ArkUI_NodeHandle;
-
+/**
+ * @brief Defines the pointer to the custom dialog box controller of ArkUI on the native side.
+ *
+ * @since 12
+ */
+typedef struct ArkUI_NativeDialog* ArkUI_NativeDialogHandle;
 /**
  * @brief Provides the number types of ArkUI in the native code.
  *
@@ -227,6 +237,22 @@ typedef enum {
     /** Number input mode with a decimal point. */
     ARKUI_TEXTINPUT_TYPE_NUMBER_DECIMAL = 12,
 } ArkUI_TextInputType;
+
+/**
+ * @brief Enumerates the text box types.
+ *
+ * @since 12
+ */
+typedef enum {
+    /** Normal input mode. */
+    ARKUI_TEXTAREA_TYPE_NORMAL = 0,
+    /** Number input mode. */
+    ARKUI_TEXTAREA_TYPE_NUMBER = 2,
+    /** Phone number input mode. */
+    ARKUI_TEXTAREA_TYPE_PHONE_NUMBER = 3,
+    /** Email address input mode. */
+    ARKUI_TEXTAREA_TYPE_EMAIL = 5,
+} ArkUI_TextAreaType;
 
 /**
  * @brief Enumerates the styles of the Cancel button.
@@ -1224,6 +1250,82 @@ typedef enum {
     /** No gradient. */
     ARKUI_LINEAR_GRADIENT_DIRECTION_NONE,
 } ArkUI_LinearGradientDirection;
+
+/**
+ * @brief Enumerates the word break rules.
+ *
+ * @since 12
+ */
+typedef enum {
+    /** Word breaks can occur between any two characters for Chinese, Japanese, and Korean (CJK) text, but can occur
+     *  only at a space character for non-CJK text (such as English). */
+    ARKUI_WORD_BREAK_NORMAL = 0,
+    /** Word breaks can occur between any two characters for non-CJK text. CJK text behavior is the same as for
+     *  <b>NORMAL</b>. */
+    ARKUI_WORD_BREAK_BREAK_ALL,
+    /** This option has the same effect as <b>BREAK_ALL</b> for non-CJK text, except that if it preferentially wraps
+     *  lines at appropriate characters (for example, spaces) whenever possible.
+        CJK text behavior is the same as for <b>NORMAL</b>. */
+    ARKUI_WORD_BREAK_BREAK_WORD,
+} ArkUI_WordBreak;
+
+/**
+ * @brief Enumerates the ellipsis positions.
+ *
+ * @since 12
+ */
+typedef enum {
+    /** An ellipsis is used at the start of the line of text. */
+    ARKUI_ELLIPSIS_MODE_START = 0,
+    /** An ellipsis is used at the center of the line of text. */
+    ARKUI_ELLIPSIS_MODE_CENTER,
+    /** An ellipsis is used at the end of the line of text. */
+    ARKUI_ELLIPSIS_MODE_END,
+} ArkUI_EllipsisMode;
+
+/**
+ * @brief Enumerates the image rendering modes.
+ *
+ * @since 12
+ */
+typedef enum {
+    /** Render image pixels as they are in the original source image. */
+    ARKUI_IMAGE_RENDER_MODE_ORIGINAL = 0,
+    /** Render image pixels to create a monochrome template image. */
+    ARKUI_IMAGE_RENDER_MODE_TEMPLATE,
+} ArkUI_ImageRenderMode;
+
+/**
+ * @brief Enumerates the slide-in and slide-out positions of the component from the screen edge during transition.
+ *
+ * @since 12
+ */
+typedef enum {
+    /** Top edge of the window. */
+    ARKUI_TRANSITION_EDGE_TOP = 0,
+    /** Bottom edge of the window. */
+    ARKUI_TRANSITION_EDGE_BOTTOM,
+    /** Left edge of the window. */
+    ARKUI_TRANSITION_EDGE_START,
+    /** Right edge of the window. */
+    ARKUI_TRANSITION_EDGE_END,
+} ArkUI_TransitionEdge;
+
+/**
+ * @brief Defines a mask area.
+ *
+ * @since 12
+ */
+typedef struct {
+    /** X coordinate of the mask area. */
+    float x;
+    /** Y coordinate of the mask area. */
+    float y;
+    /** Width of the mask area. */
+    float width;
+    /** Height of the mask area. */
+    float height;
+} ArkUI_Rect;
 
 #ifdef __cplusplus
 };

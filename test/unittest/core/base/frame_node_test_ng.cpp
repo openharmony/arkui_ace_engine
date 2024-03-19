@@ -35,6 +35,7 @@
 #include "core/components_ng/animation/geometry_transition.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/frame_scene_status.h"
+#include "core/components_ng/base/modifier.h"
 #include "core/components_ng/event/focus_hub.h"
 #include "core/components_ng/layout/layout_wrapper.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
@@ -313,6 +314,39 @@ HWTEST_F(FrameNodeTestNg, FrameNodeTestNg008, TestSize.Level1)
      */
     EXPECT_TRUE(parentNode->HaveSecurityComponent());
     EXPECT_TRUE(node->HaveSecurityComponent());
+}
+
+/**
+ * @tc.name: FrameNodeTestNg009
+ * @tc.desc: Test frame node method
+ * @tc.type: FUNC
+ */
+HWTEST_F(FrameNodeTestNg, FrameNodeTestNg009, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step 1. create framenode and initialize the params used in Test.
+     */
+    RefPtr<NG::DrawModifier> drawModifier = AceType::MakeRefPtr<NG::DrawModifier>();
+    ASSERT_NE(drawModifier, nullptr);
+
+    /**
+     * @tc.steps: step 2. call get function .
+     * @tc.expect: expect the return value to be correct.
+     */
+    EXPECT_TRUE(FRAME_NODE->IsSupportDrawModifier());
+
+    /**
+     * @tc.steps: step 3. call GetContentModifier when drawModifier is null .
+     * @tc.expect: expect the return value to be correct.
+     */
+    EXPECT_EQ(FRAME_NODE->GetContentModifier(), nullptr);
+
+    /**
+     * @tc.steps: step 4. call GetContentModifier when drawModifier is not null .
+     * @tc.expect: expect the return value to be correct.
+     */
+    FRAME_NODE->SetDrawModifier(drawModifier);
+    EXPECT_NE(FRAME_NODE->GetContentModifier(), nullptr);
 }
 
 /**
@@ -2516,5 +2550,132 @@ HWTEST_F(FrameNodeTestNg, FindChildByNameTest002, TestSize.Level1)
     nodeParent->Clean();
     auto noHaveResult = FrameNode::FindChildByName(nodeParent, nodeTwoChildName);
     EXPECT_EQ(noHaveResult, nullptr);
+}
+
+/**
+ * @tc.name: SetOnSizeChangeCallback001
+ * @tc.desc: Test SetOnSizeChangeCallback 
+ * @tc.type: FUNC
+ */
+HWTEST_F(FrameNodeTestNg, SetOnSizeChangeCallback001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. build a object to SetOnSizeChangeCallback
+     * @tc.expected: expect cover branch lastFrameNodeRect_ non null and function is run ok.
+     */
+    OnSizeChangedFunc callback = [](const RectF& oldRect, const RectF& rect) {};
+    FRAME_NODE2->SetOnSizeChangeCallback(std::move(callback));
+    EXPECT_NE(FRAME_NODE2->lastFrameNodeRect_, nullptr);
+    auto eventHub = FRAME_NODE2->GetEventHub<NG::EventHub>();
+    EXPECT_NE(eventHub, nullptr);
+    EXPECT_TRUE(eventHub->HasOnSizeChanged());
+
+    /**
+     * @tc.steps: step2.test while callback is nullptr
+     * @tc.expected:expect cover branch lastFrameNodeRect_ non null and function is run ok.
+     */
+    FRAME_NODE2->lastFrameNodeRect_ = std::make_unique<RectF>();
+    FRAME_NODE2->SetOnSizeChangeCallback(nullptr);
+    EXPECT_NE(FRAME_NODE2->lastFrameNodeRect_, nullptr);
+    EXPECT_NE(eventHub, nullptr);
+    EXPECT_FALSE(eventHub->HasOnSizeChanged());
+}
+
+/**
+ * @tc.name: TriggerOnSizeChangeCallback001
+ * @tc.desc: Test frame node method
+ * @tc.type: FUNC
+ */
+HWTEST_F(FrameNodeTestNg, TriggerOnSizeChangeCallback001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. set a flag and init a callback(onSizeChanged)
+     */
+    bool flag = false;
+    OnSizeChangedFunc onSizeChanged = [&flag](const RectF& oldRect, const RectF& rect) { flag = !flag; };
+
+    /**
+     * @tc.steps: step2. call TriggerOnSizeChangeCallback before set callback
+     * @tc.expected: expect flag is still false
+     */
+    FRAME_NODE2->TriggerOnSizeChangeCallback();
+    EXPECT_FALSE(flag);
+
+    /**
+     * @tc.steps: step3.set callback and release lastFrameNodeRect_
+     * @tc.expected: expect flag is still false
+     */
+    FRAME_NODE2->eventHub_->SetOnSizeChanged(std::move(onSizeChanged));
+    FRAME_NODE2->lastFrameNodeRect_ = nullptr;
+    FRAME_NODE2->TriggerOnSizeChangeCallback();
+    EXPECT_FALSE(flag);
+
+    /**
+     * @tc.steps: step4.set lastFrameNodeRect_
+     * @tc.expected: expect flag is still false
+     */
+    FRAME_NODE2->lastFrameNodeRect_ = std::make_unique<RectF>();
+    FRAME_NODE2->TriggerOnSizeChangeCallback();
+    EXPECT_FALSE(flag);
+}
+
+/**
+ * @tc.name: OnTouchInterceptTest001
+ * @tc.desc: Test onTouchIntercept method
+ * @tc.type: FUNC
+ */
+HWTEST_F(FrameNodeTestNg, OnTouchInterceptTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. construct TouchTest parameters.
+     */
+    PointF globalPoint;
+    PointF parentLocalPoint;
+    TouchRestrict touchRestrict;
+    TouchTestResult result;
+
+    /**
+     * @tc.steps: step2. create node and set callback.
+     */
+    auto childNode = FrameNode::CreateFrameNode("main", 2, AceType::MakeRefPtr<Pattern>(), true);
+    childNode->SetExclusiveEventForChild(true);
+    auto mockRenderContextforChild = AceType::MakeRefPtr<MockRenderContext>();
+    childNode->renderContext_ = mockRenderContextforChild;
+    auto localPoint = PointF(10, 10);
+    mockRenderContextforChild->rect_ = RectF(0, 0, 100, 100);
+    EXPECT_CALL(*mockRenderContextforChild, GetPointWithTransform(_))
+        .WillRepeatedly(DoAll(SetArgReferee<0>(localPoint)));
+    auto childEventHub = childNode->GetOrCreateGestureEventHub();
+    childEventHub->SetHitTestMode(HitTestMode::HTMBLOCK);
+    childNode->SetActive(true);
+    EXPECT_NE(childNode->eventHub_->GetGestureEventHub(), nullptr);
+    auto callback = [](TouchEventInfo& event) -> HitTestMode { return HitTestMode::HTMNONE; };
+    childEventHub->SetOnTouchIntercept(callback);
+
+    /**
+     * @tc.steps: step3. trigger touch test.
+     * @tc.expected: expect the touch test mode is correct.
+     */
+    HitTestMode hitTestModeofChilds[] = { HitTestMode::HTMDEFAULT, HitTestMode::HTMBLOCK, HitTestMode::HTMTRANSPARENT,
+        HitTestMode::HTMNONE, HitTestMode::HTMTRANSPARENT_SELF };
+    for (auto hitTestModeofChild : hitTestModeofChilds) {
+        childEventHub->SetHitTestMode(hitTestModeofChild);
+        childNode->TouchTest(globalPoint, parentLocalPoint, parentLocalPoint, touchRestrict, result, 1);
+        auto mode = childEventHub->GetHitTestMode();
+        EXPECT_EQ(mode, HitTestMode::HTMNONE);
+    }
+
+    /**
+     * @tc.steps: step4. modify callback and trigger touch test.
+     * @tc.expected: expect the touch test mode is correct.
+     */
+    auto blockCallback = [](TouchEventInfo& event) -> HitTestMode { return HitTestMode::HTMBLOCK; };
+    childEventHub->SetOnTouchIntercept(blockCallback);
+    for (auto hitTestModeofChild : hitTestModeofChilds) {
+        childEventHub->SetHitTestMode(hitTestModeofChild);
+        childNode->TouchTest(globalPoint, parentLocalPoint, parentLocalPoint, touchRestrict, result, 1);
+        auto mode = childEventHub->GetHitTestMode();
+        EXPECT_EQ(mode, HitTestMode::HTMBLOCK);
+    }
 }
 } // namespace OHOS::Ace::NG

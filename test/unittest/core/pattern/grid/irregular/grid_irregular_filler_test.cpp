@@ -238,7 +238,7 @@ HWTEST_F(GridIrregularFillerTest, MeasureItem001, TestSize.Level1)
     Create([option](GridModelNG model) {
         model.SetColumnsTemplate("1fr 1fr 1fr 1fr");
         model.SetLayoutOptions(option);
-        CreateRowItem(10);
+        CreateFixedItem(10);
     });
 
     GridLayoutInfo info;
@@ -276,7 +276,7 @@ HWTEST_F(GridIrregularFillerTest, MeasureItem002, TestSize.Level1)
     Create([option](GridModelNG model) {
         model.SetColumnsTemplate("1fr 1fr 1fr 1fr");
         model.SetLayoutOptions(option);
-        CreateRowItem(10);
+        CreateFixedItem(10);
     });
 
     GridLayoutInfo info;
@@ -311,7 +311,7 @@ HWTEST_F(GridIrregularFillerTest, Fill001, TestSize.Level1)
     Create([](GridModelNG model) {
         model.SetColumnsTemplate("1fr 1fr 1fr");
         model.SetLayoutOptions(GetOptionDemo9());
-        CreateRowItem(10);
+        CreateItem(10, ITEM_WIDTH, NULL_VALUE, GridItemStyle::NONE);
     });
 
     GridLayoutInfo info;
@@ -339,7 +339,7 @@ HWTEST_F(GridIrregularFillerTest, Fill002, TestSize.Level1)
     Create([](GridModelNG model) {
         model.SetColumnsTemplate("1fr 1fr 1fr");
         model.SetLayoutOptions(GetOptionDemo11());
-        CreateRowItem(10);
+        CreateItem(10, ITEM_WIDTH, NULL_VALUE, GridItemStyle::NONE);
     });
 
     GridLayoutInfo info;
@@ -491,7 +491,7 @@ HWTEST_F(GridIrregularFillerTest, FillMatrixOnly001, TestSize.Level1)
     Create([](GridModelNG model) {
         model.SetColumnsTemplate("1fr 1fr 1fr");
         model.SetLayoutOptions(GetOptionDemo8());
-        CreateColItem(7);
+        CreateFixedItem(7);
     });
 
     GridLayoutInfo info;
@@ -521,7 +521,7 @@ HWTEST_F(GridIrregularFillerTest, MeasureBackward001, TestSize.Level1)
     Create([](GridModelNG model) {
         model.SetColumnsTemplate("1fr 1fr 1fr");
         model.SetLayoutOptions(GetOptionDemo8());
-        CreateRowItem(10);
+        CreateItem(10, ITEM_WIDTH, NULL_VALUE, GridItemStyle::NONE);
     });
 
     GridIrregularFiller filler(&info, AceType::RawPtr(frameNode_));

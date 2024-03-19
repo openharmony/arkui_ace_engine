@@ -129,7 +129,7 @@ uint32_t IndexerItemComponent::AddIndexKey(const std::string& indexKey)
     }
 
     if (it == indexKey_.end()) {
-        indexKey_.push_back(indexKey);
+        indexKey_.emplace_back(indexKey);
         itemIndex++;
     }
 
@@ -173,7 +173,7 @@ uint32_t IndexerItemComponent::AddIndexKeyForSharp(const std::string& indexKey)
     }
 
     if (item == indexKey_.end()) {
-        indexKey_.push_back(indexKey);
+        indexKey_.emplace_back(indexKey);
         itemIndex++;
     }
 

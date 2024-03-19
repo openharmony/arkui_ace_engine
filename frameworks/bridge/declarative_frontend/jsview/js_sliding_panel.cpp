@@ -284,7 +284,7 @@ void JSSlidingPanel::SetOnHeightChange(const JSCallbackInfo& args)
     }
 
     auto onHeightChangeCallback = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(args[0]));
-    WeakPtr<NG::FrameNode> targetNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    WeakPtr<NG::FrameNode> targetNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
     auto onHeightChange = [execCtx = args.GetExecutionContext(), func = std::move(onHeightChangeCallback),
                               node = targetNode](int32_t height) {
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
@@ -338,7 +338,7 @@ void ParseModeObject(const JSCallbackInfo& info, const JSRef<JSVal>& changeEvent
     CHECK_NULL_VOID(changeEventVal->IsFunction());
 
     auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(changeEventVal));
-    WeakPtr<NG::FrameNode> targetNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    WeakPtr<NG::FrameNode> targetNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
     auto onMode = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc), node = targetNode](
                       const BaseEventInfo* baseEventInfo) {
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);

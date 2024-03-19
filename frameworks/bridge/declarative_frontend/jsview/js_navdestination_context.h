@@ -56,6 +56,8 @@ public:
         return onPop_;
     }
 
+    napi_value GetParamObj() const override;
+
 private:
     JSRef<JSVal> param_;
     JSRef<JSVal> onPop_;

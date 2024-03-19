@@ -107,6 +107,7 @@ void TextPickerPattern::SetButtonIdeaSize()
         auto buttonConfirmRenderContext = buttonNode->GetRenderContext();
         buttonConfirmRenderContext->UpdateBackgroundColor(Color::TRANSPARENT);
         buttonNode->MarkModifyDone();
+        buttonNode->MarkDirtyNode();
     }
 }
 
@@ -951,6 +952,6 @@ void TextPickerPattern::CheckAndUpdateColumnSize(SizeF& size)
     pickerContentSize.Constrain(minSize, stackLayoutConstraint->maxSize, version10OrLarger);
 
     size.SetWidth(pickerContentSize.Width() / std::max(childCount, 1.0f));
-    size.SetHeight(pickerContentSize.Height());
+    size.SetHeight(std::min(pickerContentSize.Height(), size.Height()));
 }
 } // namespace OHOS::Ace::NG

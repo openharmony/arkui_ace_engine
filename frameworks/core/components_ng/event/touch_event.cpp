@@ -63,7 +63,7 @@ bool TouchEventActuator::TriggerTouchCallBack(const TouchEvent& point)
         firstInputTime_.reset();
     }
 
-    if (touchEvents_.empty() && !userCallback_ && !onTouchEventCallback_) {
+    if (touchEvents_.empty() && !userCallback_ && !onTouchEventCallback_ && !commonTouchEventCallback_) {
         return true;
     }
     TouchEvent lastPoint;
@@ -173,6 +173,11 @@ bool TouchEventActuator::TriggerTouchCallBack(const TouchEvent& point)
         // actuator->onTouchEventCallback_ may be overwritten in its invoke so we copy it first
         auto onTouchEventCallback = onTouchEventCallback_;
         (*onTouchEventCallback)(event);
+    }
+    if (commonTouchEventCallback_) {
+        // actuator->commonTouchEventCallback_ may be overwritten in its invoke so we copy it first
+        auto commonTouchEventCallback = commonTouchEventCallback_;
+        (*commonTouchEventCallback)(event);
     }
     return !event.IsStopPropagation();
 }

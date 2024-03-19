@@ -134,18 +134,14 @@ public:
                 return theme;
             }
             theme = AceType::Claim(new CalendarTheme());
-            ParseNewPattern(themeConstants->GetThemeStyle(), theme);
-            ParsePattern(themeConstants->GetThemeStyle(), theme);
+            ParseNewPattern(themeConstants, theme);
+            ParsePattern(themeConstants, theme);
             return theme;
         }
     private:
-        void ParsePattern(const RefPtr<ThemeStyle>& themeStyle, const RefPtr<CalendarTheme>& theme) const
+        void ParsePattern(const RefPtr<ThemeConstants>& themeConstants, const RefPtr<CalendarTheme>& theme) const
         {
-            if (!themeStyle) {
-                LOGW("Calendar parse pattern failed, themeStyle is invalid.");
-                return;
-            }
-            auto pattern = themeStyle->GetAttr<RefPtr<ThemeStyle>>(THEME_PATTERN_CALENDAR, nullptr);
+            RefPtr<ThemeStyle> pattern = themeConstants->GetPatternByName(THEME_PATTERN_CALENDAR);
             if (!pattern) {
                 LOGW("find pattern of calendar fail");
                 return;
@@ -286,13 +282,9 @@ public:
             theme->dialogBorderRadius_ = pattern->GetAttr<Dimension>("calendar_picker_dialog_border_radius", 0.0_vp);
         }
 
-        void ParseNewPattern(const RefPtr<ThemeStyle>& themeStyle, const RefPtr<CalendarTheme>& theme) const
+        void ParseNewPattern(const RefPtr<ThemeConstants>& themeConstants, const RefPtr<CalendarTheme>& theme) const
         {
-            if (!themeStyle) {
-                LOGW("Calendar parse pattern failed, themeStyle is invalid.");
-                return;
-            }
-            auto pattern = themeStyle->GetAttr<RefPtr<ThemeStyle>>(THEME_PATTERN_CALENDAR, nullptr);
+            RefPtr<ThemeStyle> pattern = themeConstants->GetPatternByName(THEME_PATTERN_CALENDAR);
             if (!pattern) {
                 LOGW("find pattern of calendar fail");
                 return;

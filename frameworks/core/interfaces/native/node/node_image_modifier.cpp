@@ -148,6 +148,14 @@ void ResetRenderMode(ArkUINodeHandle node)
     ImageModelNG::SetImageRenderMode(frameNode, ImageRenderMode::ORIGINAL);
 }
 
+int32_t GetRenderMode(ArkUINodeHandle node)
+{
+    int32_t defaultRenderMode = static_cast<int32_t>(ImageRenderMode::ORIGINAL);
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, defaultRenderMode);
+    return static_cast<int32_t>(ImageModelNG::GetImageRenderMode(frameNode));
+}
+
 void SetSyncLoad(ArkUINodeHandle node, ArkUI_Bool syncLoadValue)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -317,12 +325,8 @@ ArkUIFilterColorType GetColorFilter(ArkUINodeHandle node)
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_RETURN(frameNode, colorFilter);
     auto filterFloatArray = ImageModelNG::GetColorFilter(frameNode);
-    std::vector<int32_t> filterArray;
-    for (size_t i = 0; i < filterFloatArray.size(); i++) {
-        filterArray.emplace_back(static_cast<int32_t>(filterFloatArray[i]));
-    }
-    colorFilter.filterArray = filterArray.size() > 0 ? &filterArray[0] : nullptr;
-    colorFilter.filterSize = filterArray.size();
+    colorFilter.filterArray = filterFloatArray.size() > 0 ? &filterFloatArray[0] : nullptr;
+    colorFilter.filterSize = filterFloatArray.size();
     return colorFilter;
 }
 
@@ -390,6 +394,13 @@ void ResetImageDraggable(ArkUINodeHandle node)
     ImageModelNG::SetDraggable(frameNode, DEFAULT_DRAGGABLE);
 }
 
+int32_t GetImageDraggable(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, DEFAULT_DRAGGABLE);
+    return ImageModelNG::GetDraggable(frameNode);
+}
+
 /**
  * @param values radius values
  * value[0] : radius value for TopLeft，value[1] : radius value for TopRight
@@ -446,6 +457,8 @@ void ResetEdgeAntialiasing(ArkUINodeHandle node)
     CHECK_NULL_VOID(frameNode);
     ImageModelNG::SetSmoothEdge(frameNode, DEFAULT_IMAGE_EDGE_ANTIALIASING);
 }
+
+
 } // namespace
 
 namespace NodeModifier {
@@ -459,7 +472,8 @@ const ArkUIImageModifier* GetImageModifier()
         ResetImageSyncLoad, SetImageObjectFit, ResetImageObjectFit, SetImageFitOriginalSize, ResetImageFitOriginalSize,
         SetImageDraggable, ResetImageDraggable, SetImageBorderRadius, ResetImageBorderRadius, SetImageBorder,
         ResetImageBorder, SetImageOpacity, ResetImageOpacity, SetEdgeAntialiasing, ResetEdgeAntialiasing, GetImageSrc,
-        GetAutoResize, GetObjectRepeat, GetObjectFit, GetImageInterpolation, GetColorFilter, GetAlt };
+        GetAutoResize, GetObjectRepeat, GetObjectFit, GetImageInterpolation, GetColorFilter, GetAlt,
+        GetImageDraggable, GetRenderMode };
     return &modifier;
 }
 

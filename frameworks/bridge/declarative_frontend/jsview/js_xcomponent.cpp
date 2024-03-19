@@ -202,7 +202,7 @@ void JSXComponent::JsOnLoad(const JSCallbackInfo& args)
         return;
     }
     auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(args[0]));
-    WeakPtr<NG::FrameNode> targetNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    WeakPtr<NG::FrameNode> targetNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
     auto onLoad = [execCtx = args.GetExecutionContext(), func = std::move(jsFunc), node = targetNode](
                       const std::string& xcomponentId) {
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
@@ -264,7 +264,7 @@ void JSXComponent::JsOnDestroy(const JSCallbackInfo& args)
         return;
     }
     auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(args[0]));
-    WeakPtr<NG::FrameNode> targetNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    WeakPtr<NG::FrameNode> targetNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
     auto onDestroy = [execCtx = args.GetExecutionContext(), func = std::move(jsFunc), node = targetNode]() {
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
         ACE_SCORING_EVENT("XComponent.onDestroy");

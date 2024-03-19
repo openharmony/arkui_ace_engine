@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -20,7 +20,7 @@
 #include "core/components/picker/picker_base_component.h"
 #include "core/components_ng/pattern/text_picker/textpicker_event_hub.h"
 #include "core/components_ng/pattern/text_picker/textpicker_model.h"
-
+#include "core/components_ng/pattern/text_picker/textpicker_properties.h"
 namespace OHOS::Ace::NG {
 class ACE_EXPORT TextPickerModelNG : public TextPickerModel {
 public:
@@ -82,6 +82,7 @@ public:
     bool GetMultiOptions(std::vector<NG::TextCascadePickerOptions>& options) override;
     void SetOnValueChangeEvent(TextCascadeValueChangeEvent&& onChange) override;
     void SetOnSelectedChangeEvent(TextCascadeSelectedChangeEvent&& onChange) override;
+    void SetDivider(const ItemDivider& divider) override;
 
     static void SetCanLoop(FrameNode* frameNode, const bool value);
     static void SetSelected(FrameNode* frameNode, uint32_t value);
@@ -106,6 +107,7 @@ public:
     static void SetValues(FrameNode* frameNode, const std::vector<std::string>& values);
     static void SetColumns(FrameNode* frameNode, const std::vector<NG::TextCascadePickerOptions>& options);
     static void SetDefaultAttributes(RefPtr<FrameNode>& frameNode, const RefPtr<PickerTheme>& pickerTheme);
+    static void SetDivider(FrameNode* frameNode, const ItemDivider& divider);
     static PickerTextStyle getSelectedTextStyle(FrameNode* frameNode);
     static PickerTextStyle getNormalTextStyle(FrameNode* frameNode);
     static PickerTextStyle getDisappearTextStyle(FrameNode* frameNode);

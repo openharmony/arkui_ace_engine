@@ -133,7 +133,7 @@ class ObservedPropertyPU<T> extends ObservedPropertyAbstractPU<T>
     this.recordPropertyDependentUpdate();
     if (this.shouldInstallTrackedObjectReadCb) {
       stateMgmtConsole.propertyAccess(`${this.debugInfo()}: get: @Track optimised mode. Will install read cb func if value is an object`);
-      ObservedObject.registerPropertyReadCb(this.wrappedValue_, this.onOptimisedObjectPropertyRead.bind(this));
+      ObservedObject.registerPropertyReadCb(this.wrappedValue_, this.onOptimisedObjectPropertyRead, this);
     } else {
       stateMgmtConsole.propertyAccess(`${this.debugInfo()}: get: compatibility mode. `);
     }
@@ -156,8 +156,8 @@ class ObservedPropertyPU<T> extends ObservedPropertyAbstractPU<T>
     const oldValue = this.wrappedValue_;
     if (this.setValueInternal(newValue)) {
       TrackedObject.notifyObjectValueAssignment(/* old value */ oldValue, /* new value */ this.wrappedValue_,
-        this.notifyPropertyHasChangedPU.bind(this),
-        this.notifyTrackedObjectPropertyHasChanged.bind(this));
+        this.notifyPropertyHasChangedPU,
+        this.notifyTrackedObjectPropertyHasChanged, this);
     }
   }
 

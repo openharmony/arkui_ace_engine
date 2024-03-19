@@ -161,6 +161,7 @@ public:
     void SetClickEffectLevel(const ClickEffectLevel& level, float scaleValue) override {}
     void SetOnClick(GestureEventFunc&& tapEventFunc, ClickEventFunc&& clickEventFunc) override;
     void SetOnGestureJudgeBegin(NG::GestureJudgeFunc&& gestureJudgeFunc) override {}
+    void SetOnTouchIntercept(NG::TouchInterceptFunc&& touchInterceptFunc) override {}
     void SetOnTouch(TouchEventFunc&& touchEventFunc) override;
     void SetOnKeyEvent(OnKeyCallbackFunc&& onKeyCallback) override;
     void SetOnMouse(OnMouseEventFunc&& onMouseEventFunc) override;
@@ -176,6 +177,7 @@ public:
     void SetDraggable(bool draggable) override {}
     void SetDragPreviewOptions(const NG::DragPreviewOption& previewOption) override {};
     void SetOnDragStart(NG::OnDragStartFunc&& onDragStart) override;
+    void SetOnPreDrag(NG::OnPreDragFunc&& onPreDrag) override;
     void SetOnDragEnd(OnNewDragFunc&& onDragEnd) override;
     void SetOnDragEnter(NG::OnDragDropFunc&& onDragEnter) override;
     void SetOnDragLeave(NG::OnDragDropFunc&& onDragLeave) override;

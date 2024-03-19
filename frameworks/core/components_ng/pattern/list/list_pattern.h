@@ -147,7 +147,7 @@ public:
     void ScrollToItemInGroup(int32_t index, int32_t indexInGroup, bool smooth = false,
         ScrollAlign align = ScrollAlign::START);
     bool CheckTargetValid(int32_t index, int32_t indexInGroup);
-    bool ScrollPage(bool reverse);
+    void ScrollPage(bool reverse, bool smooth = false) override;
     void ScrollBy(float offset);
     bool AnimateToTarget(int32_t index, std::optional<int32_t> indexInGroup, ScrollAlign align);
     Offset GetCurrentOffset() const;
@@ -212,10 +212,6 @@ public:
     {
         return predictLayoutParam_;
     }
-    const LayoutConstraintF& GetLayoutConstraint() const
-    {
-        return layoutConstraint_;
-    }
 
     void CloseAllSwipeActions(OnFinishFunc&&);
 
@@ -235,6 +231,16 @@ public:
 
     std::vector<RefPtr<FrameNode>> GetVisibleSelectedItems() override;
     void registerSlideUpdateListener(const std::shared_ptr<ISlideUpdateCallback>& listener);
+
+    void SetItemPressed(bool isPressed, int32_t id)
+    {
+        for (auto& child : itemPosition_) {
+            if (child.second.id == id) {
+                child.second.isPressed = isPressed;
+                break;
+            }
+        }
+    }
 
 private:
     bool IsNeedInitClickEventRecorder() const override
@@ -353,8 +359,8 @@ private:
     RefPtr<Scrollable> scrollableTouchEvent_;
 
     bool isScrollEnd_ = false;
+    bool needReEstimateOffset_ = false;
     std::optional<ListPredictLayoutParam> predictLayoutParam_;
-    LayoutConstraintF layoutConstraint_;
 
     bool isNeedToUpdateListDirection_ = false;
 

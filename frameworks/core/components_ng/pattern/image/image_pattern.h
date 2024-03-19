@@ -33,7 +33,7 @@
 #include "interfaces/inner_api/ace/ai/image_analyzer.h"
 
 namespace OHOS::Ace {
-class ImageAnalyzerAdapter;
+class ImageAnalyzerManager;
 }
 
 namespace OHOS::Ace::NG {
@@ -64,7 +64,7 @@ public:
 
     RefPtr<LayoutAlgorithm> CreateLayoutAlgorithm() override
     {
-        return MakeRefPtr<ImageLayoutAlgorithm>(loadingCtx_, altLoadingCtx_, autoResizeDefault_);
+        return MakeRefPtr<ImageLayoutAlgorithm>(loadingCtx_, altLoadingCtx_);
     }
 
     RefPtr<EventHub> CreateEventHub() override
@@ -131,11 +131,6 @@ public:
         syncLoad_ = value;
     }
 
-    void EnableAnalyzer(bool value)
-    {
-        isEnableAnalyzer_ = value;
-    }
-
     void SetImageAnalyzerConfig(const ImageAnalyzerConfig& config);
     void SetImageAnalyzerConfig(void* config);
     void BeforeCreatePaintWrapper() override;
@@ -151,6 +146,8 @@ public:
     {
         return WeakClaim(AceType::RawPtr(altLoadingCtx_));
     }
+    void EnableAnalyzer(bool value);
+    bool hasSceneChanged();
 
 protected:
     void RegisterWindowStateChangedCallback();
@@ -185,6 +182,12 @@ private:
 
     void OnLanguageConfigurationUpdate() override;
 
+    /**
+     * @brief Start decoding image after ImageData is ready and dstSize is determined.
+     *
+     * @param dstSize The size of the image to be decoded.
+     */
+    void StartDecoding(const SizeF& dstSize);
     void OnImageDataReady();
     void OnImageLoadFail(const std::string& errorMsg);
     void OnImageLoadSuccess();
@@ -217,17 +220,19 @@ private:
     LoadFailNotifyTask CreateLoadFailCallbackForAlt();
 
     void OnColorConfigurationUpdate() override;
+    void OnDirectionConfigurationUpdate() override;
     void OnIconConfigurationUpdate() override;
     void OnConfigurationUpdate();
     void LoadImage(const ImageSourceInfo& src);
     void LoadAltImage(const ImageSourceInfo& altImageSourceInfo);
 
-    void UpdateAnalyzerUIConfig(const RefPtr<GeometryNode>& geometryNode);
     void CreateAnalyzerOverlay();
     void UpdateAnalyzerOverlay();
-    void DeleteAnalyzerOverlay();
-    bool IsSupportImageAnalyzerFeature();
     void UpdateAnalyzerOverlayLayout();
+    void UpdateAnalyzerUIConfig(const RefPtr<NG::GeometryNode>& geometryNode);
+    void DestroyAnalyzerOverlay();
+    void ReleaseImageAnalyzer();
+    bool IsSupportImageAnalyzerFeature();
     void InitDefaultValue();
 
     CopyOptions copyOption_ = CopyOptions::None;
@@ -251,14 +256,10 @@ private:
     RefPtr<InputEvent> mouseEvent_;
     RefPtr<Clipboard> clipboard_;
     RefPtr<SelectOverlayProxy> selectOverlay_;
-    std::shared_ptr<ImageAnalyzerAdapter> imageAnalyzerAdapter_;
-    ImageAnalyzerInnerConfig analyzerUIConfig_;
-
-    void* overlayData_ = nullptr;
+    std::shared_ptr<ImageAnalyzerManager> imageAnalyzerManager_;
 
     bool syncLoad_ = false;
     bool isEnableAnalyzer_ = false;
-    bool isAnalyzerOverlayBuild_ = false;
     bool autoResizeDefault_ = true;
     ImageInterpolation interpolationDefault_ = ImageInterpolation::NONE;
 

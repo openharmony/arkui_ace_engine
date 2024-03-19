@@ -54,18 +54,13 @@ constexpr float DEFAULT_MAX_SPACE_SCALE = 2.0f;
 
 void ListPattern::OnModifyDone()
 {
-    if (!isInitialized_) {
-        jumpIndex_ = GetLayoutProperty<ListLayoutProperty>()->GetInitialIndex().value_or(0);
-        if (NeedScrollSnapAlignEffect()) {
-            scrollAlign_ = GetScrollAlignByScrollSnapAlign();
-        }
-    }
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto listLayoutProperty = host->GetLayoutProperty<ListLayoutProperty>();
     CHECK_NULL_VOID(listLayoutProperty);
     auto axis = listLayoutProperty->GetListDirection().value_or(Axis::VERTICAL);
     if (axis != GetAxis()) {
+        needReEstimateOffset_ = true;
         SetAxis(axis);
         ChangeAxis(GetHost());
     }
@@ -137,12 +132,14 @@ bool ListPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, c
     float relativeOffset = listLayoutAlgorithm->GetCurrentOffset();
     auto predictSnapOffset = listLayoutAlgorithm->GetPredictSnapOffset();
     auto predictSnapEndPos = listLayoutAlgorithm->GetPredictSnapEndPosition();
-    if (listLayoutAlgorithm->NeedEstimateOffset()) {
+    if (listLayoutAlgorithm->NeedEstimateOffset() || needReEstimateOffset_) {
         lanes_ = listLayoutAlgorithm->GetLanes();
         auto calculate = ListHeightOffsetCalculator(itemPosition_, spaceWidth_, lanes_, GetAxis());
         calculate.GetEstimateHeightAndOffset(GetHost());
         currentOffset_ = calculate.GetEstimateOffset();
         isJump = true;
+        relativeOffset = 0.0f;
+        needReEstimateOffset_ = false;
     } else {
         // correct the currentOffset when the startIndex is 0.
         if (listLayoutAlgorithm->GetStartIndex() == 0) {
@@ -197,7 +194,6 @@ bool ListPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, c
     startMainPos_ = listLayoutAlgorithm->GetStartPosition();
     endMainPos_ = listLayoutAlgorithm->GetEndPosition();
     crossMatchChild_ = listLayoutAlgorithm->IsCrossMatchChild();
-    layoutConstraint_ = listLayoutAlgorithm->GetLayoutConstraint();
     bool sizeDiminished =
         LessNotEqual(endMainPos_ - startMainPos_, contentMainSize_ - contentStartOffset_ - contentEndOffset_) &&
         GreatOrEqual(prevTotalSize, prevContentSize) && LessNotEqual(endMainPos_ - startMainPos_, prevTotalSize);
@@ -471,9 +467,8 @@ void ListPattern::CheckScrollable()
 
 RefPtr<LayoutAlgorithm> ListPattern::CreateLayoutAlgorithm()
 {
-    auto host = GetHost();
-    CHECK_NULL_RETURN(host, nullptr);
-    auto listLayoutProperty = host->GetLayoutProperty<ListLayoutProperty>();
+    auto listLayoutProperty = GetLayoutProperty<ListLayoutProperty>();
+    CHECK_NULL_RETURN(listLayoutProperty, nullptr);
     RefPtr<ListLayoutAlgorithm> listLayoutAlgorithm;
     if (listLayoutProperty->HasLanes() || listLayoutProperty->HasLaneMinLength() ||
         listLayoutProperty->HasLaneMaxLength()) {
@@ -484,6 +479,12 @@ RefPtr<LayoutAlgorithm> ListPattern::CreateLayoutAlgorithm()
         listLayoutAlgorithm.Swap(lanesLayoutAlgorithm);
     } else {
         listLayoutAlgorithm.Swap(MakeRefPtr<ListLayoutAlgorithm>());
+    }
+    if (!isInitialized_) {
+        jumpIndex_ = listLayoutProperty->GetInitialIndex().value_or(0);
+        if (NeedScrollSnapAlignEffect()) {
+            scrollAlign_ = GetScrollAlignByScrollSnapAlign();
+        }
     }
     if (jumpIndex_) {
         listLayoutAlgorithm->SetIndex(jumpIndex_.value());
@@ -680,7 +681,7 @@ OverScrollOffset ListPattern::GetOverScrollOffset(double delta) const
     if (endIndex_ == maxListItemIndex_ && groupAtEnd) {
         auto endPos = endMainPos_ + GetChainDelta(endIndex_);
         auto contentEndPos = contentMainSize_ - contentEndOffset_;
-        if (GreatNotEqual(contentEndPos, endMainPos_ - startMainPos_)) {
+        if (GreatNotEqual(contentEndPos, endMainPos_ - startMainPos_) && !IsScrollSnapAlignCenter()) {
             endPos = startMainPos_ + contentEndPos;
         }
         auto newEndPos = endPos + delta;
@@ -1424,7 +1425,8 @@ bool ListPattern::GetListItemGroupAnimatePosWithIndexInGroup(int32_t index, int3
     if (it == itemsPosInGroup.end()) {
         return false;
     }
-    std::optional<std::pair<float, float>> itemPosInGroup = it->second;
+    auto groupStartPos = it->second.startPos;
+    auto groupEndPos = it->second.endPos;
     auto padding = groupWrapper->GetGeometryNode()->GetPadding()->top;
     float paddingBeforeContent = 0.0f;
     if (padding) {
@@ -1433,7 +1435,7 @@ bool ListPattern::GetListItemGroupAnimatePosWithIndexInGroup(int32_t index, int3
     switch (align) {
         case ScrollAlign::START:
         case ScrollAlign::NONE:
-            targetPos = paddingBeforeContent + startPos + itemPosInGroup.value().first;
+            targetPos = paddingBeforeContent + startPos + groupStartPos;
             if (stickyStyle == V2::StickyStyle::HEADER || stickyStyle == V2::StickyStyle::BOTH) {
                 targetPos -= groupPattern->GetHeaderMainSize();
             }
@@ -1443,11 +1445,11 @@ bool ListPattern::GetListItemGroupAnimatePosWithIndexInGroup(int32_t index, int3
             break;
         case ScrollAlign::CENTER:
             targetPos = paddingBeforeContent + startPos +
-                (itemPosInGroup.value().first + itemPosInGroup.value().second) / 2.0f -
+                (groupStartPos + groupEndPos) / 2.0f -
                 contentMainSize_ / 2.0f;
             break;
         case ScrollAlign::END:
-            targetPos = paddingBeforeContent + startPos + itemPosInGroup.value().second - contentMainSize_;
+            targetPos = paddingBeforeContent + startPos + groupEndPos - contentMainSize_;
             if (stickyStyle == V2::StickyStyle::FOOTER || stickyStyle == V2::StickyStyle::BOTH) {
                 targetPos += groupPattern->GetFooterMainSize();
             }
@@ -1456,8 +1458,8 @@ bool ListPattern::GetListItemGroupAnimatePosWithIndexInGroup(int32_t index, int3
             }
             break;
         case ScrollAlign::AUTO:
-            float itemStartPos = paddingBeforeContent + startPos + itemPosInGroup.value().first;
-            float itemEndPos = paddingBeforeContent + startPos + itemPosInGroup.value().second;
+            float itemStartPos = paddingBeforeContent + startPos + groupStartPos;
+            float itemEndPos = paddingBeforeContent + startPos + groupEndPos;
             if (stickyStyle == V2::StickyStyle::HEADER || stickyStyle == V2::StickyStyle::BOTH) {
                 itemStartPos -= groupPattern->GetHeaderMainSize();
             }
@@ -1506,13 +1508,17 @@ bool ListPattern::AnimateToTarget(int32_t index, std::optional<int32_t> indexInG
     return true;
 }
 
-bool ListPattern::ScrollPage(bool reverse)
+void ListPattern::ScrollPage(bool reverse, bool smooth)
 {
-    StopAnimate();
     float distance = reverse ? contentMainSize_ : -contentMainSize_;
-    UpdateCurrentOffset(distance, SCROLL_FROM_JUMP);
-    isScrollEnd_ = true;
-    return true;
+    if (smooth) {
+        float position = -GetCurrentOffset().GetY() + distance;
+        AnimateTo(-position, -1, nullptr, true);
+    } else {
+        StopAnimate();
+        UpdateCurrentOffset(distance, SCROLL_FROM_JUMP);
+        isScrollEnd_ = true;
+    }
 }
 
 void ListPattern::ScrollBy(float offset)
@@ -2210,12 +2216,9 @@ void ListPattern::registerSlideUpdateListener(const std::shared_ptr<ISlideUpdate
 
 void ListPattern::UpdateFrameSizeToWeb()
 {
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    auto frameSize = host->GetGeometryNode()->GetFrameSize();
     for (auto listenerItem : listenerVector_) {
         if (listenerItem) {
-            listenerItem->OnSlideUpdate(frameSize);
+            listenerItem->OnSlideUpdate();
         }
     }
 }

@@ -39,6 +39,7 @@
 #include <stdbool.h>
 #include <stdint.h>
 
+#include "native_event.h"
 #include "native_type.h"
 #include "native_xcomponent_key_event.h"
 #include "ui_input_event.h"
@@ -672,6 +673,42 @@ int32_t OH_NativeXComponent_RegisterUIInputEventCallback(OH_NativeXComponent* co
  * @version 1.0
  */
 int32_t OH_NativeXComponent_SetNeedSoftKeyboard(OH_NativeXComponent* component, bool needSoftKeyboard);
+
+/**
+ * @brief Registers a callback for this <b>OH_NativeXComponent</b> instance.
+ *
+ * @param component Indicates the pointer to this <b>OH_NativeXComponent</b> instance.
+ * @param callback Indicates the pointer to a surface show event callback.
+ * @return Returns the status code of the execution.
+ * @since 12
+ * @version 1.0
+ */
+int32_t OH_NativeXComponent_RegisterSurfaceShowCallback(
+    OH_NativeXComponent* component, void (*callback)(OH_NativeXComponent* component, void* window));
+
+/**
+ * @brief Registers a callback for this <b>OH_NativeXComponent</b> instance.
+ *
+ * @param component Indicates the pointer to this <b>OH_NativeXComponent</b> instance.
+ * @param callback Indicates the pointer to a surface hide event callback.
+ * @return Returns the status code of the execution.
+ * @since 12
+ * @version 1.0
+ */
+int32_t OH_NativeXComponent_RegisterSurfaceHideCallback(
+    OH_NativeXComponent* component, void (*callback)(OH_NativeXComponent* component, void* window));
+
+/**
+ * @brief Registers a callback for this <b>OH_NativeXComponent</b> instance.
+ *
+ * @param component Indicates the pointer to this <b>OH_NativeXComponent</b> instance.
+ * @param callback Indicates the pointer to a key event callback.
+ * @return Returns the status code of the execution.
+ * @since 10
+ * @version 1.0
+ */
+int32_t OH_NativeXComponent_RegisterOnTouchInterceptCallback(
+    OH_NativeXComponent* component, HitTestMode (*callback)(OH_NativeXComponent* component, ArkUI_UIInputEvent* event));
 
 #ifdef __cplusplus
 };

@@ -170,6 +170,7 @@ template("declarative_js_engine") {
       "engine/functions/js_swiper_function.cpp",
       "engine/functions/js_tabs_function.cpp",
       "engine/functions/js_touch_function.cpp",
+      "engine/functions/js_touch_intercept_function.cpp",
       "engine/functions/js_webview_function.cpp",
       "engine/js_types.cpp",
       "interfaces/profiler/js_profiler.cpp",
@@ -193,6 +194,7 @@ template("declarative_js_engine") {
       "jsview/js_checkbox.cpp",
       "jsview/js_checkboxgroup.cpp",
       "jsview/js_circle.cpp",
+      "jsview/js_circle_shape.cpp",
       "jsview/js_clipboard.cpp",
       "jsview/js_column.cpp",
       "jsview/js_column_split.cpp",
@@ -205,6 +207,7 @@ template("declarative_js_engine") {
       "jsview/js_divider.cpp",
       "jsview/js_dump_log.cpp",
       "jsview/js_ellipse.cpp",
+      "jsview/js_ellipse_shape.cpp",
       "jsview/js_environment.cpp",
       "jsview/js_flex.cpp",
       "jsview/js_flex_impl.cpp",
@@ -256,6 +259,7 @@ template("declarative_js_engine") {
       "jsview/js_paste_button.cpp",
       "jsview/js_path.cpp",
       "jsview/js_path2d.cpp",
+      "jsview/js_path_shape.cpp",
       "jsview/js_pattern_lock.cpp",
       "jsview/js_persistent.cpp",
       "jsview/js_polygon.cpp",
@@ -264,6 +268,7 @@ template("declarative_js_engine") {
       "jsview/js_qrcode.cpp",
       "jsview/js_radio.cpp",
       "jsview/js_rect.cpp",
+      "jsview/js_rect_shape.cpp",
       "jsview/js_recycle_view.cpp",
       "jsview/js_refresh.cpp",
       "jsview/js_relative_container.cpp",
@@ -322,6 +327,8 @@ template("declarative_js_engine") {
       "jsview/menu/js_context_menu.cpp",
       "jsview/scroll_bar/js_scroll_bar.cpp",
       "sharedata/js_share_data.cpp",
+      "style_string/js_span_object.cpp",
+      "style_string/js_span_string.cpp",
       "view_stack_processor.cpp",
 
       # Models implemenations for classic fw
@@ -571,6 +578,8 @@ template("declarative_js_engine") {
 
     deps += [ ":ark_modifier" ]
 
+    deps += [ ":shape" ]
+
     include_dirs +=
         [ "//foundation/window/window_manager/interfaces/innerkits" ]
 
@@ -673,6 +682,7 @@ template("declarative_js_engine_ng") {
       "engine/functions/js_swiper_function.cpp",
       "engine/functions/js_tabs_function.cpp",
       "engine/functions/js_touch_function.cpp",
+      "engine/functions/js_touch_intercept_function.cpp",
       "engine/functions/js_webview_function.cpp",
       "engine/js_types.cpp",
       "jsview/js_dump_log.cpp",
@@ -707,6 +717,7 @@ template("declarative_js_engine_ng") {
       "jsview/js_checkbox.cpp",
       "jsview/js_checkboxgroup.cpp",
       "jsview/js_circle.cpp",
+      "jsview/js_circle_shape.cpp",
       "jsview/js_clipboard.cpp",
       "jsview/js_column.cpp",
       "jsview/js_column_split.cpp",
@@ -718,6 +729,7 @@ template("declarative_js_engine_ng") {
       "jsview/js_datepicker.cpp",
       "jsview/js_divider.cpp",
       "jsview/js_ellipse.cpp",
+      "jsview/js_ellipse_shape.cpp",
       "jsview/js_flex.cpp",
       "jsview/js_flex_impl.cpp",
       "jsview/js_folder_stack.cpp",
@@ -765,12 +777,14 @@ template("declarative_js_engine_ng") {
       "jsview/js_paste_button.cpp",
       "jsview/js_path.cpp",
       "jsview/js_path2d.cpp",
+      "jsview/js_path_shape.cpp",
       "jsview/js_polygon.cpp",
       "jsview/js_polyline.cpp",
       "jsview/js_progress.cpp",
       "jsview/js_radio.cpp",
       "jsview/js_rating.cpp",
       "jsview/js_rect.cpp",
+      "jsview/js_rect_shape.cpp",
       "jsview/js_recycle_view.cpp",
       "jsview/js_refresh.cpp",
       "jsview/js_render_image.cpp",
@@ -821,6 +835,8 @@ template("declarative_js_engine_ng") {
       "jsview/js_water_flow_sections.cpp",
       "jsview/menu/js_context_menu.cpp",
       "jsview/scroll_bar/js_scroll_bar.cpp",
+      "style_string/js_span_object.cpp",
+      "style_string/js_span_string.cpp",
     ]
 
     sources += [
@@ -981,6 +997,8 @@ template("declarative_js_engine_ng") {
 
     deps += [ ":ark_modifier" ]
 
+    deps += [ ":shape" ]
+
     if (defined(config.enable_drag_framework) && config.enable_drag_framework &&
         defined(global_parts_info.distributeddatamgr_udmf)) {
       external_deps += [
@@ -1055,6 +1073,15 @@ ohos_abc("x_node") {
 ohos_abc("ark_modifier") {
   sources = [ "engine/arkModifier.js" ]
   output_name = "modifier"
+  install_images = [ "system" ]
+  module_install_dir = "etc/abc/arkui"
+  subsystem_name = ace_engine_subsystem
+  part_name = ace_engine_part
+}
+
+ohos_abc("shape") {
+  sources = [ "engine/jsShape.js" ]
+  output_name = "shape"
   install_images = [ "system" ]
   module_install_dir = "etc/abc/arkui"
   subsystem_name = ace_engine_subsystem

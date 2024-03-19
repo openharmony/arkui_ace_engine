@@ -38,9 +38,6 @@ type ProfileRecursionCounter = { total: number };
 
 type ProvidedVarsMapPU = Map<string, ObservedPropertyAbstractPU<any>>;
 
-// denotes a missing elemntId, this is the case during initial render
-const UndefinedElmtId = -1;
-
 // function type of partial update function
 type UpdateFunc = (elmtId: number, isFirstRender: boolean) => void;
 type UIClassObject = { prototype: Object, pop?: () => void };
@@ -116,12 +113,12 @@ abstract class ViewPU extends NativeViewPartialUpdate
   private isInitialRenderDone: boolean = false;
 
   // indicates the currently rendered or rendered UINode's elmtIds
-  // or -1 if none is currently rendering
+  // or UINodeRegisterProxy.notRecordingDependencies if none is currently rendering
   // isRenderInProgress == true always when currentlyRenderedElmtIdStack_.length >= 0 
   private currentlyRenderedElmtIdStack_: Array<number> = new Array<number>();
 
   // static flag for paused rendering
-  // when paused, getCurrentlyRenderedElmtId() will return -1
+  // when paused, getCurrentlyRenderedElmtId() will return UINodeRegisterProxy.notRecordingDependencies
   private static renderingPaused: boolean = false;
 
   // flag if active of inActive
@@ -173,19 +170,30 @@ abstract class ViewPU extends NativeViewPartialUpdate
   }
 
   protected obtainOwnObservedProperties(): void {
+    let usesStateMgmtVersion = 0;
     Object.getOwnPropertyNames(this)
       .filter((propName) => {
-        return propName.startsWith("__")
+        return (propName.startsWith("__") && !propName.startsWith(ObserveV3.OB_PREFIX))
       })
       .forEach((propName) => {
         const stateVar = Reflect.get(this, propName) as Object;
         if (stateVar && typeof stateVar === 'object' && "notifyPropertyHasChangedPU" in stateVar) {
           stateMgmtConsole.debug(`... add state variable ${propName} to ${stateVar}`)
           this.ownObservedPropertiesStore_.add(stateVar as unknown as ObservedPropertyAbstractPU<any>);
+          usesStateMgmtVersion = 2;
         } else {
           stateMgmtConsole.debug(`${this.debugInfo__()} ${propName} application may use an unregular naming style, or stateVar may be Non-Object.`);
         }
       });
+
+    if (this.isViewV3==true) {
+      if (usesStateMgmtVersion==2) {
+        const error = `${this.debugInfo__()}: mixed use of stateMgmt V2 and V3 variable decorators. Application error!`;
+        stateMgmtConsole.applicationError(error);
+        throw new Error(error);
+      }
+    }
+    stateMgmtConsole.debug(`${this.debugInfo__()}: uses stateMgmt version ${this.isViewV3==true ? 3 : 2}`);
   }
 
   protected get localStorage_() {
@@ -212,6 +220,17 @@ abstract class ViewPU extends NativeViewPartialUpdate
     this.localStoragebackStore_ = instance;
   }
 
+  // FIXME 
+  // indicate if this is  V2 or a V3 component
+  // V2 by default, changed to V3 by the first V3 decorated variable
+  // when splitting ViewPU and ViewV3
+  // use instanceOf. Until then, this is a workaround.
+  // @state, @track, etc V3 decorator functions modify isViewV3 to return true
+  // (decorator can modify functions in prototype)
+  private get isViewV3() : boolean {
+    return false;
+  }
+
   /**
    * Create a View
    *
@@ -227,12 +246,12 @@ abstract class ViewPU extends NativeViewPartialUpdate
    *    - localStorage do not specify, will inherit from parent View.
    *
   */
-  constructor(parent: ViewPU, localStorage: LocalStorage, elmtId: number = -1, extraInfo: ExtraInfo = undefined) {
+  constructor(parent: ViewPU, localStorage: LocalStorage, elmtId: number = UINodeRegisterProxy.notRecordingDependencies, extraInfo: ExtraInfo = undefined) {
     super();
     // if set use the elmtId also as the ViewPU object's subscribable id.
     // these matching is requirement for updateChildViewById(elmtId) being able to
     // find the child ViewPU object by given elmtId
-    this.id_ = elmtId == -1 ? SubscriberManager.MakeId() : elmtId;
+    this.id_ = elmtId == UINodeRegisterProxy.notRecordingDependencies ? SubscriberManager.MakeId() : elmtId;
 
     this.localStoragebackStore_ = undefined;
     stateMgmtConsole.debug(`ViewPU constructor: Creating @Component '${this.constructor.name}' from parent '${parent?.constructor.name}'`);
@@ -302,8 +321,8 @@ abstract class ViewPU extends NativeViewPartialUpdate
     stateMgmtConsole.debug(`${this.constructor.name}: aboutToBeDeletedInternal `);
 
     // purge the elmtIds owned by this viewPU from the updateFuncByElmtId and also the state variable dependent elmtIds
-    Array.from(this.updateFuncByElmtId.keys()).forEach((elemId: number) => {
-      this.purgeDeleteElmtId(elemId);
+    Array.from(this.updateFuncByElmtId.keys()).forEach((elmtId: number) => {
+      this.purgeDeleteElmtId(elmtId);
     })
 
     if (this.hasRecycleManager()) {
@@ -318,7 +337,7 @@ abstract class ViewPU extends NativeViewPartialUpdate
 
     // unregisters its own id once its children are unregistered above
     UINodeRegisterProxy.unregisterRemovedElmtsFromViewPUs([this.id__()]);
-
+    
     stateMgmtConsole.debug(`${this.debugInfo__()}: onUnRegElementID  - DONE`);
 
     // in case ViewPU is currently frozen
@@ -344,6 +363,9 @@ abstract class ViewPU extends NativeViewPartialUpdate
       // it means rmElmtId has finished all the unregistration from the js side, ElementIdToOwningViewPU_  does not need to keep it
       UINodeRegisterProxy.ElementIdToOwningViewPU_.delete(rmElmtId);
     }
+    
+    // FIXME: only do this if app uses V3
+    ObserveV3.getObserve().clearBinding(rmElmtId);
     return result;
   }
 
@@ -555,10 +577,10 @@ abstract class ViewPU extends NativeViewPartialUpdate
     const updateFunc = entry ? entry.getUpdateFunc() : undefined;
 
     if (typeof updateFunc !== "function") {
-      stateMgmtConsole.debug(`${this.debugInfo__()}: update function of elmtId ${elmtId} not found, internal error!`);
+      stateMgmtConsole.debug(`${this.debugInfo__()}: UpdateElement: update function of elmtId ${elmtId} not found, internal error!`);
     } else {
       const componentName = entry.getComponentName();
-      stateMgmtConsole.debug(`${this.debugInfo__()}: updateDirtyElements: re-render of ${componentName} elmtId ${elmtId} start ...`);
+      stateMgmtConsole.debug(`${this.debugInfo__()}: UpdateElement: re-render of ${componentName} elmtId ${elmtId} start ...`);
       this.isRenderInProgress = true;
       stateMgmtProfiler.begin("ViewPU.updateFunc");
       updateFunc(elmtId, /* isFirstRender */ false);
@@ -567,7 +589,7 @@ abstract class ViewPU extends NativeViewPartialUpdate
       this.finishUpdateFunc(elmtId);
       stateMgmtProfiler.end();
       this.isRenderInProgress = false;
-      stateMgmtConsole.debug(`${this.debugInfo__()}: updateDirtyElements: re-render of ${componentName} elmtId ${elmtId} - DONE`);
+      stateMgmtConsole.debug(`${this.debugInfo__()}: UpdateElement: re-render of ${componentName} elmtId ${elmtId} - DONE`);
     }
     stateMgmtProfiler.end();
   }
@@ -649,41 +671,41 @@ abstract class ViewPU extends NativeViewPartialUpdate
   // implements IMultiPropertiesChangeSubscriber
   viewPropertyHasChanged(varName: PropertyInfo, dependentElmtIds: Set<number>): void {
     stateMgmtProfiler.begin("ViewPU.viewPropertyHasChanged");
-    stateMgmtTrace.scopedTrace(() => {
-      if (this.isRenderInProgress) {
-        stateMgmtConsole.applicationError(`${this.debugInfo__()}: State variable '${varName}' has changed during render! It's illegal to change @Component state while build (initial render or re-render) is on-going. Application error!`);
+    aceTrace.begin("ViewPU.viewPropertyHasChanged", this.constructor.name, varName, dependentElmtIds.size);
+    if (this.isRenderInProgress) {
+      stateMgmtConsole.applicationError(`${this.debugInfo__()}: State variable '${varName}' has changed during render! It's illegal to change @Component state while build (initial render or re-render) is on-going. Application error!`);
+    }
+
+    this.syncInstanceId();
+
+    if (dependentElmtIds.size && !this.isFirstRender()) {
+      if (!this.dirtDescendantElementIds_.size && !this.runReuse_) {
+        // mark ComposedElement dirty when first elmtIds are added
+        // do not need to do this every time
+        this.markNeedUpdate();
       }
-
-      this.syncInstanceId();
-
-      if (dependentElmtIds.size && !this.isFirstRender()) {
-        if (!this.dirtDescendantElementIds_.size && !this.runReuse_) {
-          // mark ComposedElement dirty when first elmtIds are added
-          // do not need to do this every time
-          this.markNeedUpdate();
+      stateMgmtConsole.debug(`${this.debugInfo__()}: viewPropertyHasChanged property: elmtIds that need re-render due to state variable change: ${this.debugInfoElmtIds(Array.from(dependentElmtIds))} .`)
+      for (const elmtId of dependentElmtIds) {
+        if (this.hasRecycleManager()) {
+          this.dirtDescendantElementIds_.add(this.recycleManager_.proxyNodeId(elmtId));
+        } else {
+          this.dirtDescendantElementIds_.add(elmtId);
         }
-        stateMgmtConsole.debug(`${this.debugInfo__()}: viewPropertyHasChanged property: elmtIds that need re-render due to state variable change: ${this.debugInfoElmtIds(Array.from(dependentElmtIds))} .`)
-        for (const elmtId of dependentElmtIds) {
-          if (this.hasRecycleManager()) {
-            this.dirtDescendantElementIds_.add(this.recycleManager_.proxyNodeId(elmtId));
-          } else {
-            this.dirtDescendantElementIds_.add(elmtId);
-          }
-        }
-        stateMgmtConsole.debug(`   ... updated full list of elmtIds that need re-render [${this.debugInfoElmtIds(Array.from(this.dirtDescendantElementIds_))}].`)
-      } else {
-        stateMgmtConsole.debug(`${this.debugInfo__()}: viewPropertyHasChanged: state variable change adds no elmtIds for re-render`);
-        stateMgmtConsole.debug(`   ... unchanged full list of elmtIds that need re-render [${this.debugInfoElmtIds(Array.from(this.dirtDescendantElementIds_))}].`)
       }
+      stateMgmtConsole.debug(`   ... updated full list of elmtIds that need re-render [${this.debugInfoElmtIds(Array.from(this.dirtDescendantElementIds_))}].`)
+    } else {
+      stateMgmtConsole.debug(`${this.debugInfo__()}: viewPropertyHasChanged: state variable change adds no elmtIds for re-render`);
+      stateMgmtConsole.debug(`   ... unchanged full list of elmtIds that need re-render [${this.debugInfoElmtIds(Array.from(this.dirtDescendantElementIds_))}].`)
+    }
 
-      let cb = this.watchedProps.get(varName)
-      if (cb) {
-        stateMgmtConsole.debug(`   ... calling @Watch function`);
-        cb.call(this, varName);
-      }
+    let cb = this.watchedProps.get(varName)
+    if (cb) {
+      stateMgmtConsole.debug(`   ... calling @Watch function`);
+      cb.call(this, varName);
+    }
 
-      this.restoreInstanceId();
-    }, "ViewPU.viewPropertyHasChanged", this.constructor.name, varName, dependentElmtIds.size);
+    this.restoreInstanceId();
+    aceTrace.end();
     stateMgmtProfiler.end();
   }
 
@@ -698,16 +720,15 @@ abstract class ViewPU extends NativeViewPartialUpdate
     }
 
     stateMgmtProfiler.begin(`ViewPU.uiNodeNeedUpdate ${this.debugInfoElmtId(elmtId)}`);
-
-    // FIXME Its slow to make native calls: what is this for, is this really needed ?
-    // this.syncInstanceId();
-
-      if (!this.dirtDescendantElementIds_.size && !this.runReuse_) {
-        // mark ComposedElement dirty when first elmtIds are added
-        // do not need to do this every time
-        this.markNeedUpdate();
-      }
-      if (this.hasRecycleManager()) {
+    
+    if (!this.dirtDescendantElementIds_.size && !this.runReuse_) {
+      // mark ComposedElement dirty when first elmtIds are added
+      // do not need to do this every time
+      this.syncInstanceId();
+      this.markNeedUpdate();
+      this.restoreInstanceId();
+    }
+    if (this.hasRecycleManager()) {
         this.dirtDescendantElementIds_.add(this.recycleManager_.proxyNodeId(elmtId));
       } else {
         this.dirtDescendantElementIds_.add(elmtId);
@@ -723,36 +744,35 @@ abstract class ViewPU extends NativeViewPartialUpdate
       return;
     }
     stateMgmtProfiler.begin("ViewPU.performDelayedUpdate");
-    stateMgmtTrace.scopedTrace(() => {
-      stateMgmtConsole.debug(`${this.debugInfo__()}: performDelayedUpdate start ...`);
-      this.syncInstanceId();
+    aceTrace.begin("ViewPU.performDelayedUpdate", this.constructor.name);
+    stateMgmtConsole.debug(`${this.debugInfo__()}: performDelayedUpdate start ...`);
+    this.syncInstanceId();
 
-      for (const stateLinkPropVar of this.ownObservedPropertiesStore_) {
-        const changedElmtIds = stateLinkPropVar.moveElmtIdsForDelayedUpdate();
-        if (changedElmtIds) {
-          const varName = stateLinkPropVar.info();
-          if (changedElmtIds.size && !this.isFirstRender()) {
-            for (const elmtId of changedElmtIds) {
-              this.dirtDescendantElementIds_.add(elmtId);
-            }
-          }
-
-          stateMgmtConsole.debug(`${this.debugInfo__()}: performDelayedUpdate: all elmtIds that need re-render [${Array.from(this.dirtDescendantElementIds_).toString()}].`);
-
-          const cb = this.watchedProps.get(varName)
-          if (cb) {
-            stateMgmtConsole.debug(`   ... calling @Watch function`);
-            cb.call(this, varName);
+    for (const stateLinkPropVar of this.ownObservedPropertiesStore_) {
+      const changedElmtIds = stateLinkPropVar.moveElmtIdsForDelayedUpdate();
+      if (changedElmtIds) {
+        const varName = stateLinkPropVar.info();
+        if (changedElmtIds.size && !this.isFirstRender()) {
+          for (const elmtId of changedElmtIds) {
+            this.dirtDescendantElementIds_.add(elmtId);
           }
         }
-      } // for all ownStateLinkProps_
-      this.restoreInstanceId();
 
-      if (this.dirtDescendantElementIds_.size) {
-        this.markNeedUpdate();
+        stateMgmtConsole.debug(`${this.debugInfo__()}: performDelayedUpdate: all elmtIds that need re-render [${Array.from(this.dirtDescendantElementIds_).toString()}].`);
+
+        const cb = this.watchedProps.get(varName)
+        if (cb) {
+          stateMgmtConsole.debug(`   ... calling @Watch function`);
+          cb.call(this, varName);
+        }
       }
+    } // for all ownStateLinkProps_
+    this.restoreInstanceId();
 
-    }, "ViewPU.performDelayedUpdate", this.constructor.name);
+    if (this.dirtDescendantElementIds_.size) {
+      this.markNeedUpdate();
+    }
+    aceTrace.end()
     stateMgmtProfiler.end();
   }
 
@@ -847,6 +867,8 @@ abstract class ViewPU extends NativeViewPartialUpdate
       // ascending order ensures parent nodes will be updated before their children
       // prior cleanup ensure no already deleted Elements have their update func executed
       const dirtElmtIdsFromRootNode= Array.from(this.dirtDescendantElementIds_).sort(ViewPU.compareNumber);
+      // if state changed during exec update lambda inside UpdateElement, then the dirty elmtIds will be added 
+      // to newly created this.dirtDescendantElementIds_ Set
       dirtElmtIdsFromRootNode.forEach(elmtId => {
         if (this.hasRecycleManager()) {
           this.UpdateElement(this.recycleManager_.proxyNodeId(elmtId));
@@ -886,11 +908,13 @@ abstract class ViewPU extends NativeViewPartialUpdate
 
   /**
    * return its elmtId if currently rendering or re-rendering an UINode
-   * otherwise return -1
+   * otherwise return UINodeRegisterProxy.notRecordingDependencies
    * set in observeComponentCreation(2)
    */
   public getCurrentlyRenderedElmtId() {
-    return ViewPU.renderingPaused || this.currentlyRenderedElmtIdStack_.length == 0 ? -1 : this.currentlyRenderedElmtIdStack_.slice(-1)[0];
+    return ViewPU.renderingPaused || this.currentlyRenderedElmtIdStack_.length == 0 
+      ? UINodeRegisterProxy.notRecordingDependencies 
+      : this.currentlyRenderedElmtIdStack_[this.currentlyRenderedElmtIdStack_.length-1];
   }
 
   public static pauseRendering() {
@@ -943,13 +967,15 @@ abstract class ViewPU extends NativeViewPartialUpdate
     const updateFunc = (elmtId: number, isFirstRender: boolean) => {
       this.syncInstanceId();
       stateMgmtConsole.debug(`${this.debugInfo__()}: ${isFirstRender ? `First render` : `Re-render/update`} ${_componentName}[${elmtId}] start ....`);
-      
-      ViewStackProcessor.StartGetAccessRecordingFor(elmtId);     
+
+      ViewStackProcessor.StartGetAccessRecordingFor(elmtId);
+      // FIXME: Because ReactNative dynamic viewer app library uses V3 @observe within V2 @Component, 
+      // the framework needs to enable both V2 recording and 
+      // V3 recording with startBind as well.
       this.currentlyRenderedElmtIdStack_.push(elmtId);
-      if (ConfigureStateMgmt.instance.needsV3Observe()) {
-        // FIXME - we probably need the same stack-based solution for startBind as for old system
-        ObserveV3.getObserve().startBind(this, elmtId);
-      }
+      // FIXME: like in V2 setting bindId_ in ObserveV3 does not work with 'stacked' 
+      // update + initial render calls, ike in if and ForEach case, convert to stack as well
+      ObserveV3.getObserve().startBind(this, elmtId);
 
       compilerAssignedUpdateFunc(elmtId, isFirstRender);
       if (!isFirstRender) {
@@ -961,10 +987,7 @@ abstract class ViewPU extends NativeViewPartialUpdate
         (node as ArkComponent).cleanStageValue();
       }
 
-      if (ConfigureStateMgmt.instance.needsV3Observe()) {
-        // FIXME dito
-        ObserveV3.getObserve().startBind(null, -1);
-      }
+      ObserveV3.getObserve().startBind(null, UINodeRegisterProxy.notRecordingDependencies);
       this.currentlyRenderedElmtIdStack_.pop();
       ViewStackProcessor.StopGetAccessRecording();
 
@@ -1394,7 +1417,7 @@ abstract class ViewPU extends NativeViewPartialUpdate
             let input: string[] = command.split('=');
             if (input[1]) {
               let viewId: number = Number.parseInt(input[1]);
-              dfxCommand.viewId = Number.isNaN(viewId) ? -1 : viewId;
+              dfxCommand.viewId = Number.isNaN(viewId) ? UINodeRegisterProxy.notRecordingDependencies : viewId;
             }
           }
         } else if (command.match("-r")) {

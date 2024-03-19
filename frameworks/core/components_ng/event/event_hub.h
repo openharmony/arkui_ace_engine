@@ -32,6 +32,7 @@ namespace OHOS::Ace::NG {
 class FrameNode;
 using OnAreaChangedFunc =
     std::function<void(const RectF& oldRect, const OffsetF& oldOrigin, const RectF& rect, const OffsetF& origin)>;
+using OnPreDragFunc = std::function<void(const PreDragStatus)>;
 
 using OnSizeChangedFunc = std::function<void(const RectF& oldRect, const RectF& rect)>;
 
@@ -148,26 +149,11 @@ public:
         onAppear_ = std::move(onAppear);
     }
 
-    void FireOnAppear()
-    {
-        if (onAppear_) {
-            auto pipeline = PipelineBase::GetCurrentContext();
-            CHECK_NULL_VOID(pipeline);
-            auto taskScheduler = pipeline->GetTaskExecutor();
-            CHECK_NULL_VOID(taskScheduler);
-            taskScheduler->PostTask(
-                [weak = WeakClaim(this)]() {
-                    auto eventHub = weak.Upgrade();
-                    CHECK_NULL_VOID(eventHub);
-                    if (eventHub->onAppear_) {
-                        // callback may be overwritten in its invoke so we copy it first
-                        auto onAppear = eventHub->onAppear_;
-                        onAppear();
-                    }
-                },
-                TaskExecutor::TaskType::UI);
-        }
-    }
+    void SetJSFrameNodeOnAppear(std::function<void()>&& onAppear);
+
+    void ClearJSFrameNodeOnAppear();
+
+    void FireOnAppear();
 
     void ClearUserOnDisAppear()
     {
@@ -181,14 +167,11 @@ public:
         onDisappear_ = std::move(onDisappear);
     }
 
-    virtual void FireOnDisappear()
-    {
-        if (onDisappear_) {
-            // callback may be overwritten in its invoke so we copy it first
-            auto onDisappear = onDisappear_;
-            onDisappear();
-        }
-    }
+    void SetJSFrameNodeOnDisappear(std::function<void()>&& onDisappear);
+
+    void ClearJSFrameNodeOnDisappear();
+
+    virtual void FireOnDisappear();
 
     void ClearUserOnAreaChanged()
     {
@@ -239,6 +222,17 @@ public:
     using OnDragFunc = std::function<void(const RefPtr<OHOS::Ace::DragEvent>&, const std::string&)>;
     using OnNewDragFunc = std::function<void(const RefPtr<OHOS::Ace::DragEvent>&)>;
     using OnDragStartFunc = std::function<DragDropInfo(const RefPtr<OHOS::Ace::DragEvent>&, const std::string&)>;
+
+    void SetOnPreDrag(OnPreDragFunc&& onPreDragFunc)
+    {
+        onPreDragFunc_ = std::move(onPreDragFunc);
+    }
+
+    const OnPreDragFunc& GetOnPreDrag() const
+    {
+        return onPreDragFunc_;
+    }
+
     void SetOnDragStart(OnDragStartFunc&& onDragStart)
     {
         onDragStart_ = std::move(onDragStart);
@@ -259,51 +253,21 @@ public:
         onDragEnter_ = std::move(onDragEnter);
     }
 
-    void FireOnDragEnter(const RefPtr<OHOS::Ace::DragEvent>& info, const std::string& extraParams)
-    {
-        if (SystemProperties::GetDebugEnabled()) {
-            LOGI("DragDropManager fire onDragEnter");
-        }
-        if (onDragEnter_) {
-            // callback may be overwritten in its invoke so we copy it first
-            auto onDragEnter = onDragEnter_;
-            onDragEnter(info, extraParams);
-        }
-    }
+    void FireOnDragEnter(const RefPtr<OHOS::Ace::DragEvent>& info, const std::string& extraParams);
 
     void SetOnDragLeave(OnDragFunc&& onDragLeave)
     {
         onDragLeave_ = std::move(onDragLeave);
     }
 
-    void FireOnDragLeave(const RefPtr<OHOS::Ace::DragEvent>& info, const std::string& extraParams)
-    {
-        if (SystemProperties::GetDebugEnabled()) {
-            LOGI("DragDropManager fire onDragLeave");
-        }
-        if (onDragLeave_) {
-            // callback may be overwritten in its invoke so we copy it first
-            auto onDragLeave = onDragLeave_;
-            onDragLeave(info, extraParams);
-        }
-    }
+    void FireOnDragLeave(const RefPtr<OHOS::Ace::DragEvent>& info, const std::string& extraParams);
 
     void SetOnDragMove(OnDragFunc&& onDragMove)
     {
         onDragMove_ = std::move(onDragMove);
     }
 
-    void FireOnDragMove(const RefPtr<OHOS::Ace::DragEvent>& info, const std::string& extraParams)
-    {
-        if (SystemProperties::GetDebugEnabled()) {
-            LOGI("DragDropManager fire onDragMove");
-        }
-        if (onDragMove_) {
-            // callback may be overwritten in its invoke so we copy it first
-            auto onDragMove = onDragMove_;
-            onDragMove(info, extraParams);
-        }
-    }
+    void FireOnDragMove(const RefPtr<OHOS::Ace::DragEvent>& info, const std::string& extraParams);
 
     bool HasOnDragMove() const
     {
@@ -340,17 +304,7 @@ public:
         return false;
     }
 
-    void FireOnDrop(const RefPtr<OHOS::Ace::DragEvent>& info, const std::string& extraParams)
-    {
-        if (SystemProperties::GetDebugEnabled()) {
-            LOGI("DragDropManager fire onDrop");
-        }
-        if (onDrop_) {
-            // callback may be overwritten in its invoke so we copy it first
-            auto onDrop = onDrop_;
-            onDrop(info, extraParams);
-        }
-    }
+    void FireOnDrop(const RefPtr<OHOS::Ace::DragEvent>& info, const std::string& extraParams);
 
     bool HasOnDrop() const
     {
@@ -584,10 +538,13 @@ private:
 
     std::function<void()> onAppear_;
     std::function<void()> onDisappear_;
+    std::function<void()> onJSFrameNodeAppear_;
+    std::function<void()> onJSFrameNodeDisappear_;
     OnAreaChangedFunc onAreaChanged_;
     std::unordered_map<int32_t, OnAreaChangedFunc> onAreaChangedInnerCallbacks_;
     OnSizeChangedFunc onSizeChanged_;
 
+    OnPreDragFunc onPreDragFunc_;
     OnDragStartFunc onDragStart_;
     OnDragFunc onDragEnter_;
     OnDragFunc onDragLeave_;

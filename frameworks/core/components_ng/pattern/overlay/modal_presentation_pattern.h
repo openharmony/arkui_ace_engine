@@ -19,13 +19,14 @@
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
 #include "core/common/ace_application_info.h"
+#include "core/components_ng/manager/focus/focus_view.h"
 #include "core/components_ng/pattern/overlay/modal_presentation_layout_algorithm.h"
 #include "core/components_ng/pattern/overlay/modal_style.h"
 #include "core/components_ng/pattern/overlay/popup_base_pattern.h"
 
 namespace OHOS::Ace::NG {
-class ACE_EXPORT ModalPresentationPattern : public PopupBasePattern {
-    DECLARE_ACE_TYPE(ModalPresentationPattern, PopupBasePattern);
+class ACE_EXPORT ModalPresentationPattern : public PopupBasePattern, public FocusView {
+    DECLARE_ACE_TYPE(ModalPresentationPattern, PopupBasePattern, FocusView);
 
 public:
     ModalPresentationPattern(int32_t targetId, ModalTransition type, std::function<void(const std::string&)>&& callback)
@@ -104,6 +105,11 @@ public:
     FocusPattern GetFocusPattern() const override
     {
         return { FocusType::SCOPE, true };
+    }
+
+    std::list<int32_t> GetRouteOfFirstScope() override
+    {
+        return { 0 };
     }
 
     bool IsExecuteOnDisappear() const

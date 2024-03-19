@@ -26,6 +26,7 @@
  */
 
 class ObserveV3 {
+  public static readonly V3_DECO_META = Symbol('__v3_deco_meta__'); 
   public static readonly SYMBOL_REFS = Symbol('__use_refs__');
   private static readonly SYMBOL_PROXY_GET_TARGET = Symbol("__proxy_get_target");
 
@@ -34,7 +35,8 @@ class ObserveV3 {
 
   // used by array Handler to create dependency on artificial "length"
   // property of array, mark it as changed when array has changed.
-  private static readonly OB_LENGTH = "length"; 
+  private static readonly OB_LENGTH = "___obj_length"; 
+  private static readonly OB_MAP_SET_ANY_PROPERTY = "___ob_map_set"; 
   private static readonly OB_DATE = "__date__";
 
   // see MonitorV3.observeObjectAccess: bindCmp is the MonitorV3
@@ -42,7 +44,7 @@ class ObserveV3 {
   private bindCmp_: MonitorV3 | ViewPU | null = null;
 
   // bindId: UINode elmtId or watchId, depending on what is being observed
-  private bindId_: number = -1;
+  private bindId_: number = UINodeRegisterProxy.notRecordingDependencies;
 
   // Map bindId to ViewPU/MonitorV3
   // FIXME use Map<number, ViewPU | MonitorV3>
@@ -76,6 +78,11 @@ class ObserveV3 {
     return this.obsInstance_;
   }
 
+  // return true given value is @observed object
+  public static IsObservedObjectV3(value : any) : boolean {
+    return (value && typeof(value) == "object" && value[ObserveV3.V3_DECO_META])
+  }
+
   // At the start of observeComponentCreation or
   // MonitorV3.observeObjectAccess
   public startBind(cmp: ViewPU | MonitorV3 | null, id: number): void {
@@ -106,6 +113,11 @@ class ObserveV3 {
   public addRef(target: object, attrName: string): void {
     if (this.bindCmp_ === null) {
       return
+    }
+    if (this.bindId_ == UINodeRegisterProxy.monitorIllegalV2V3StateAccess) {
+      const error = `${attrName}: ObserveV3.addRef: trying to use V3 state '${attrName}' to init/update child V2 @Component. Application error`;
+      stateMgmtConsole.applicationError(error);
+      throw new TypeError(error);
     }
 
     if (!target[ObserveV3.SYMBOL_REFS]) {
@@ -176,8 +188,8 @@ class ObserveV3 {
    * 
    * !!! Use with Caution !!!
    * 
-   * @param task 
-   * @returns 
+   * @param task a function to execute without monitoring state changes
+   * @returns task function return value
    */
   public executeUnobserved<Z>(task: () => Z): Z {
     stateMgmtConsole.propertyAccess(`executeUnobserved - start`);
@@ -214,7 +226,7 @@ class ObserveV3 {
 
       // Cannot fireChange the object that is being created.
       if (id === this.bindId_) {
-        return
+        continue;
       }
 
       // if this is the first id to be added to elmtIdsChanged_ and monitorIdsChanged_, 
@@ -248,8 +260,9 @@ class ObserveV3 {
   private updateDirtyMonitors(recursionDepth : number): void {
     if (recursionDepth>20) {
       // limit recursion depth to avoid infinite loops
+      // and skip any pending @monitor function executions
       stateMgmtConsole.applicationError(`20 loops in @monitor function execution detected. Stopping processing. Application error!`)
-      this.monitorIdsChanged_ = new Set<number>();
+      this.monitorIdsChanged_.clear(); // Clear the contents
       return;
     }
     stateMgmtConsole.debug(`updateDirtyMonitors  ${JSON.stringify(Array.from(this.monitorIdsChanged_))} ...`);
@@ -269,11 +282,11 @@ class ObserveV3 {
   }
 
   private notifyDirtyElmtIdsToOwningViews() : void {
-    let view : ViewPU | undefined;
+    let view : WeakRef<ViewPU> | undefined;
     stateMgmtConsole.debug(`notifyDirtyElmtIdsToOwningViews ${JSON.stringify(Array.from(this.elmtIdsChanged_))} ...`);
     this.elmtIdsChanged_.forEach((elmtId) => {
-      if ((view = this.id2cmp_[elmtId]) && (view instanceof ViewPU)) {
-        // FIXME uiNodeNeedUpdateV3 just copies elmtIfs to another set
+      if ((view = this.id2cmp_[elmtId]?.deref()) && (view instanceof ViewPU)) {
+        // FIXME Review: uiNodeNeedUpdateV3 just copies elmtIds to another set
         // waits for FlushBuild to call rerender call updateDirtyElements
         // to actually render the UINodes. Could we call ViewPU.UpdateElement 
         // right away?        
@@ -312,13 +325,13 @@ class ObserveV3 {
 
     // Only collections require proxy observation, and if it has been observed, it does not need to be observed again.
     if (!val[ObserveV3.SYMBOL_PROXY_GET_TARGET]) {
-      target[key] = new Proxy(val, this.arraySetMapProxy)
+      target[key] = new Proxy(val, ObserveV3.arraySetMapProxy)
       val = target[key]
     }
 
     // If the return value is an array, a length observation should be added to the array.
     if (Array.isArray(val)) {
-      ObserveV3.getObserve().addRef(val, this.OB_LENGTH)
+      ObserveV3.getObserve().addRef(val, ObserveV3.OB_LENGTH)
     }
 
     return val
@@ -333,8 +346,20 @@ class ObserveV3 {
   public static readonly arraySetMapProxy = {
     get(target: any, key: string | symbol, receiver: any) {
       if (typeof key === "symbol") {
-        return key === ObserveV3.SYMBOL_PROXY_GET_TARGET ? target : target[key]
+        if (key === Symbol.iterator) {
+          ObserveV3.getObserve().fireChange(target, ObserveV3.OB_MAP_SET_ANY_PROPERTY);
+          ObserveV3.getObserve().addRef(target, ObserveV3.OB_LENGTH)
+          return (...args) => target[key](...args);
+        } else {
+          return key === ObserveV3.SYMBOL_PROXY_GET_TARGET ? target : target[key]
+        }
       }
+
+      if (key === "size") {
+        ObserveV3.getObserve().addRef(target, ObserveV3.OB_LENGTH);
+        return target.size;
+      }
+
       let ret = ObserveV3.autoProxyObject(target, key)
       if (typeof (ret) !== "function") {
         ObserveV3.getObserve().addRef(target, key)
@@ -379,33 +404,42 @@ class ObserveV3 {
       if (target instanceof Set || target instanceof Map) {
         if (key === "has") {
           return prop => {
-            ObserveV3.getObserve().addRef(target, prop)
-            return target.has(prop)
+            const ret= target.has(prop);
+            if (ret) {
+              ObserveV3.getObserve().addRef(target, prop);
+            } else {
+              ObserveV3.getObserve().addRef(target, ObserveV3.OB_LENGTH);
+            }
+            return ret;
           }
         }
         if (key === "delete") {
           return prop => {
-            ObserveV3.getObserve().fireChange(target, prop)
             if (target.has(prop)) {
-              ObserveV3.getObserve().fireChange(target, this.OB_LENGTH)
+              ObserveV3.getObserve().fireChange(target, prop)
+              ObserveV3.getObserve().fireChange(target, ObserveV3.OB_LENGTH)
+              return target.delete(prop);
+            } else {
+              return false;
             }
-            return target.delete(prop)
           }
         }
         if (key === "clear") {
           return () => {
-            target.forEach((_, prop) => {
-              ObserveV3.getObserve().fireChange(target, prop.toString())
-            })
             if (target.size > 0) {
-              ObserveV3.getObserve().fireChange(target, this.OB_LENGTH)
+              target.forEach((_, prop) => {
+                ObserveV3.getObserve().fireChange(target, prop.toString())
+              })
+              ObserveV3.getObserve().fireChange(target, ObserveV3.OB_LENGTH)
+              ObserveV3.getObserve().addRef(target, ObserveV3.OB_MAP_SET_ANY_PROPERTY)
+              target.clear()
             }
-            target.clear()
           }
         }
         if (key === "keys" || key === "values" || key === "entries") {
           return () => {
-            ObserveV3.getObserve().addRef(target, this.OB_LENGTH)
+            ObserveV3.getObserve().addRef(target, ObserveV3.OB_MAP_SET_ANY_PROPERTY)
+            ObserveV3.getObserve().addRef(target, ObserveV3.OB_LENGTH)
             return target[key]()
           }
         }
@@ -414,36 +448,45 @@ class ObserveV3 {
       if (target instanceof Set) {
         return key === "add" ? val => {
           ObserveV3.getObserve().fireChange(target, val.toString())
+          ObserveV3.getObserve().fireChange(target, ObserveV3.OB_MAP_SET_ANY_PROPERTY)
           if (!target.has(val)) {
-            ObserveV3.getObserve().fireChange(target, this.OB_LENGTH)
+            ObserveV3.getObserve().fireChange(target, ObserveV3.OB_LENGTH)
+            target.add(val);
           }
-          return target.add(val)
-        } : ret
+          // return proxied This
+          return receiver;
+        } : (typeof ret == "function")
+            ? ret.bind(target) : ret;
       }
 
       if (target instanceof Map) {
         if (key === "get") { // for Map
           return (prop) => {
-            ObserveV3.getObserve().addRef(target, prop)
-            if (!target.has(prop)) {
-              ObserveV3.getObserve().fireChange(target, this.OB_LENGTH)
+            if (target.has(prop)) {
+              ObserveV3.getObserve().addRef(target, prop)
+            } else {
+              ObserveV3.getObserve().addRef(target, ObserveV3.OB_LENGTH)
             }
             return target.get(prop)
           }
         }
         if (key === "set") { // for Map
           return (prop, val) => {
-            ObserveV3.getObserve().fireChange(target, prop)
             if (!target.has(prop)) {
-              ObserveV3.getObserve().fireChange(target, this.OB_LENGTH)
+              ObserveV3.getObserve().fireChange(target, ObserveV3.OB_LENGTH);
+            } else if(target.get(prop) !== val) {
+              ObserveV3.getObserve().fireChange(target, prop)
             }
-            return target.set(prop, val)
+            ObserveV3.getObserve().fireChange(target, ObserveV3.OB_MAP_SET_ANY_PROPERTY)
+            target.set(prop, val)
+            return receiver;
           }
         }
       }
 
-      return ret
+      return (typeof ret == "function") ? ret.bind(target) : ret;
     },
+    
     set(target: any, key: string | symbol, value: any) {
       if (typeof key === 'symbol') {
         if (key !== ObserveV3.SYMBOL_PROXY_GET_TARGET) {
@@ -460,7 +503,35 @@ class ObserveV3 {
       return true
     }
   }
-}
+
+  /**
+   * Helper function to add meta data about decorator to ViewPU
+   * @param proto prototype object of application class derived from ViewPU 
+   * @param varName decorated variable
+   * @param deco "@state", "@event", etc (note "@model" gets transpiled in "@param" and "@event")
+   */
+  public static addVariableDecoMeta(proto: Object, varName: string, deco: string): void {
+    // add decorator meta data
+    const meta = proto[ObserveV3.V3_DECO_META] ??= {};
+    meta[varName] = {};
+    meta[varName]["deco"] = deco;
+
+    // FIXME 
+    // when splitting ViewPU and ViewV3
+    // use instanceOf. Until then, this is a workaround.
+    // any @state, @track, etc V3 event handles this function to return false
+    Reflect.defineProperty(proto, "isViewV3", {
+      get() { return true; },
+      enumerable: false
+    }
+    );
+  }
+
+ 
+  public static usesV3Variables(proto : Object) : boolean {
+  return (proto && typeof proto =="object" && proto[ObserveV3.V3_DECO_META]);
+  }
+} // class ObserveV3
 
 /**
  * @track class property decorator 
@@ -502,6 +573,9 @@ const trackInternal = (target: any, propertyKey: string) => {
     },
     enumerable: true
   })
+  // this marks the proto as having at least one @track property inside 
+  // used by IsObservedObjectV3
+  target[ObserveV3.V3_DECO_META]??={};
 } // track
 
 
@@ -515,10 +589,18 @@ const trackInternal = (target: any, propertyKey: string) => {
  * @from 12
  * 
  */
-type Constructor = { new(...args: any[]): any };
+type ConstructorV3 = { new(...args: any[]): any };
 
-function observed<T extends Constructor>(BaseClass: T) : Constructor {
-  ConfigureStateMgmt.instance.intentUsingV3(`@observed`, BaseClass.name);
+function observed<T extends ConstructorV3>(BaseClass: T) : ConstructorV3 {
+  ConfigureStateMgmt.instance.intentUsingV3(`@observed`, BaseClass?.name);
+
+  // prevent @Track inside @observed class
+  if (BaseClass.prototype && Reflect.has(BaseClass.prototype,  TrackedObject.___IS_TRACKED_OPTIMISED)) {
+    const error=`'@observed class ${BaseClass?.name}': invalid use of V2 @Track decorator inside V3 @observed class. Need to fix class definition to use @track.`
+    stateMgmtConsole.applicationError(error);
+    throw new Error(error);
+  }
+
   return class extends BaseClass {
     constructor(...args) {
       super(...args)

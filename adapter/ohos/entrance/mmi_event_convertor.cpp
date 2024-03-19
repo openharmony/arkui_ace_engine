@@ -23,6 +23,7 @@
 #include "adapter/ohos/entrance/ace_extra_input_data.h"
 #include "base/utils/time_util.h"
 #include "base/utils/utils.h"
+#include "core/event/ace_events.h"
 #include "core/pipeline/pipeline_base.h"
 
 namespace OHOS::Ace::Platform {
@@ -124,54 +125,82 @@ TouchEvent ConvertTouchEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEv
     auto touchPoint = ConvertTouchPoint(item);
     std::chrono::microseconds microseconds(pointerEvent->GetActionTime());
     TimeStamp time(microseconds);
-    TouchEvent event { touchPoint.id, touchPoint.x, touchPoint.y, touchPoint.screenX, touchPoint.screenY,
-        TouchType::UNKNOWN, TouchType::UNKNOWN, time, touchPoint.size, touchPoint.force, touchPoint.tiltX,
-        touchPoint.tiltY, pointerEvent->GetDeviceId(), pointerEvent->GetTargetDisplayId(), SourceType::NONE,
-        touchPoint.sourceTool, pointerEvent->GetId() };
+    TouchEvent event;
+    event.SetId(touchPoint.id)
+        .SetX(touchPoint.x)
+        .SetY(touchPoint.y)
+        .SetScreenX(touchPoint.screenX)
+        .SetScreenY(touchPoint.screenY)
+        .SetType(TouchType::UNKNOWN)
+        .SetPullType(TouchType::UNKNOWN)
+        .SetTime(time)
+        .SetSize(touchPoint.size)
+        .SetForce(touchPoint.force)
+        .SetTiltX(touchPoint.tiltX)
+        .SetTiltY(touchPoint.tiltY)
+        .SetDeviceId(pointerEvent->GetDeviceId())
+        .SetTargetDisplayId(pointerEvent->GetTargetDisplayId())
+        .SetSourceType(SourceType::NONE)
+        .SetSourceTool(touchPoint.sourceTool)
+        .SetTouchEventId(pointerEvent->GetId());
     AceExtraInputData::ReadToTouchEvent(pointerEvent, event);
     event.pointerEvent = pointerEvent;
     int32_t orgDevice = pointerEvent->GetSourceType();
     GetEventDevice(orgDevice, event);
     int32_t orgAction = pointerEvent->GetPointerAction();
+    SetTouchEventType(orgAction, event);
+    UpdateTouchEvent(pointerEvent, event);
+    return event;
+}
+
+void SetTouchEventType(int32_t orgAction, TouchEvent& event)
+{
     switch (orgAction) {
         case OHOS::MMI::PointerEvent::POINTER_ACTION_CANCEL:
             event.type = TouchType::CANCEL;
-            break;
+            return;
         case OHOS::MMI::PointerEvent::POINTER_ACTION_DOWN:
             event.type = TouchType::DOWN;
-            break;
+            return;
         case OHOS::MMI::PointerEvent::POINTER_ACTION_MOVE:
             event.type = TouchType::MOVE;
-            break;
+            return;
         case OHOS::MMI::PointerEvent::POINTER_ACTION_UP:
             event.type = TouchType::UP;
-            break;
+            return;
         case OHOS::MMI::PointerEvent::POINTER_ACTION_PULL_DOWN:
             event.type = TouchType::PULL_DOWN;
             event.pullType = TouchType::PULL_DOWN;
-            break;
+            return;
         case OHOS::MMI::PointerEvent::POINTER_ACTION_PULL_MOVE:
             event.type = TouchType::PULL_MOVE;
             event.pullType = TouchType::PULL_MOVE;
-            break;
+            return;
         case OHOS::MMI::PointerEvent::POINTER_ACTION_PULL_UP:
             event.type = TouchType::PULL_UP;
             event.pullType = TouchType::PULL_UP;
-            break;
+            return;
         case OHOS::MMI::PointerEvent::POINTER_ACTION_PULL_IN_WINDOW:
             event.type = TouchType::PULL_IN_WINDOW;
             event.pullType = TouchType::PULL_IN_WINDOW;
-            break;
+            return;
         case OHOS::MMI::PointerEvent::POINTER_ACTION_PULL_OUT_WINDOW:
             event.type = TouchType::PULL_OUT_WINDOW;
             event.pullType = TouchType::PULL_OUT_WINDOW;
-            break;
+            return;
+        case OHOS::MMI::PointerEvent::POINTER_ACTION_HOVER_ENTER:
+            event.type = TouchType::HOVER_ENTER;
+            return;
+        case OHOS::MMI::PointerEvent::POINTER_ACTION_HOVER_MOVE:
+            event.type = TouchType::HOVER_MOVE;
+            return;
+        case OHOS::MMI::PointerEvent::POINTER_ACTION_HOVER_EXIT:
+            event.type = TouchType::HOVER_EXIT;
+            return;
         default:
             LOGW("unknown type");
-            break;
+            return;
     }
-    UpdateTouchEvent(pointerEvent, event);
-    return event;
 }
 
 void GetMouseEventAction(int32_t action, MouseEvent& events, bool isScenceBoardWindow)

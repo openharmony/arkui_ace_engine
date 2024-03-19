@@ -40,6 +40,7 @@
 #include "core/components/dialog/dialog_component.h"
 #include "core/components/toast/toast_component.h"
 #include "core/components_ng/base/ui_node.h"
+#include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/base/view_stack_model.h"
 #include "core/components_ng/pattern/overlay/overlay_manager.h"
 #include "core/components_ng/pattern/stage/page_pattern.h"
@@ -1130,8 +1131,9 @@ std::string FrontendDelegateDeclarative::GetParams()
         ContainerScope scope(currentId.value());
         return pageRouterManager_->GetParams();
     }
-    if (pageParamMap_.find(pageId_) != pageParamMap_.end()) {
-        return pageParamMap_.find(pageId_)->second;
+    auto iter = pageParamMap_.find(pageId_);
+    if (iter != pageParamMap_.end()) {
+        return iter->second;
     }
     return "";
 }
@@ -1525,18 +1527,18 @@ Size FrontendDelegateDeclarative::MeasureTextSize(const MeasureContext& context)
     return MeasureUtil::MeasureTextSize(context);
 }
 
-void FrontendDelegateDeclarative::ShowToast(
-    const std::string& message, int32_t duration, const std::string& bottom, const NG::ToastShowMode& showMode)
+void FrontendDelegateDeclarative::ShowToast(const std::string& message, int32_t duration, const std::string& bottom,
+    const NG::ToastShowMode& showMode, int32_t alignment, std::optional<DimensionOffset> offset)
 {
     TAG_LOGD(AceLogTag::ACE_OVERLAY, "show toast enter");
     int32_t durationTime = std::clamp(duration, TOAST_TIME_DEFAULT, TOAST_TIME_MAX);
     bool isRightToLeft = AceApplicationInfo::GetInstance().IsRightToLeft();
     if (Container::IsCurrentUseNewPipeline()) {
-        auto task = [durationTime, message, bottom, isRightToLeft, showMode, containerId = Container::CurrentId()](
-                        const RefPtr<NG::OverlayManager>& overlayManager) {
+        auto task = [durationTime, message, bottom, isRightToLeft, showMode, alignment, offset,
+                        containerId = Container::CurrentId()](const RefPtr<NG::OverlayManager>& overlayManager) {
             CHECK_NULL_VOID(overlayManager);
             ContainerScope scope(containerId);
-            overlayManager->ShowToast(message, durationTime, bottom, isRightToLeft, showMode);
+            overlayManager->ShowToast(message, durationTime, bottom, isRightToLeft, showMode, alignment, offset);
         };
         MainWindowOverlay(std::move(task));
         return;
@@ -1669,6 +1671,13 @@ void FrontendDelegateDeclarative::ShowDialog(const PromptDialogAttr& dialogAttr,
         .isModal = dialogAttr.isModal,
         .maskRect = dialogAttr.maskRect,
     };
+#if defined(PREVIEW)
+    if (dialogProperties.isShowInSubWindow) {
+        LOGW("[Engine Log] Unable to use the SubWindow in the Previewer. Perform this operation on the "
+             "emulator or a real device instead.");
+        dialogProperties.isShowInSubWindow = false;
+    }
+#endif
     if (dialogAttr.alignment.has_value()) {
         dialogProperties.alignment = dialogAttr.alignment.value();
     }
@@ -1693,6 +1702,13 @@ void FrontendDelegateDeclarative::ShowDialog(const PromptDialogAttr& dialogAttr,
         .onStatusChanged = std::move(onStatusChanged),
         .maskRect = dialogAttr.maskRect,
     };
+#if defined(PREVIEW)
+    if (dialogProperties.isShowInSubWindow) {
+        LOGW("[Engine Log] Unable to use the SubWindow in the Previewer. Perform this operation on the "
+             "emulator or a real device instead.");
+        dialogProperties.isShowInSubWindow = false;
+    }
+#endif
     if (dialogAttr.alignment.has_value()) {
         dialogProperties.alignment = dialogAttr.alignment.value();
     }
@@ -1704,15 +1720,7 @@ void FrontendDelegateDeclarative::ShowDialog(const PromptDialogAttr& dialogAttr,
 
 void FrontendDelegateDeclarative::RemoveCustomDialog()
 {
-    auto context = NG::PipelineContext::GetCurrentContext();
-    CHECK_NULL_VOID(context);
-    auto overlayManager = context->GetOverlayManager();
-    CHECK_NULL_VOID(overlayManager);
-    auto rootNode = overlayManager->GetRootNode().Upgrade();
-    CHECK_NULL_VOID(rootNode);
-    auto overlay = AceType::DynamicCast<NG::FrameNode>(rootNode->GetLastChild());
-    CHECK_NULL_VOID(overlay);
-    overlayManager->RemoveDialog(overlay, false);
+    NG::ViewAbstract::DismissDialog();
 }
 
 void FrontendDelegateDeclarative::OpenCustomDialog(const PromptDialogAttr &dialogAttr,
@@ -1724,15 +1732,29 @@ void FrontendDelegateDeclarative::OpenCustomDialog(const PromptDialogAttr &dialo
         .isSysBlurStyle = false,
         .customBuilder = dialogAttr.customBuilder,
         .maskRect = dialogAttr.maskRect,
-        .onWillDismiss = dialogAttr.customOnWillDismiss
+        .onWillDismiss = dialogAttr.customOnWillDismiss,
+        .borderWidth = dialogAttr.borderWidth,
+        .borderColor = dialogAttr.borderColor,
+        .borderStyle = dialogAttr.borderStyle,
+        .borderRadius = dialogAttr.borderRadius,
+        .shadow = dialogAttr.shadow,
+        .backgroundColor = dialogAttr.backgroundColor,
+        .width = dialogAttr.width,
+        .height = dialogAttr.height,
     };
+#if defined(PREVIEW)
+    if (dialogProperties.isShowInSubWindow) {
+        LOGW("[Engine Log] Unable to use the SubWindow in the Previewer. Perform this operation on the "
+             "emulator or a real device instead.");
+        dialogProperties.isShowInSubWindow = false;
+    }
+#endif
     if (dialogAttr.alignment.has_value()) {
         dialogProperties.alignment = dialogAttr.alignment.value();
     }
     if (dialogAttr.offset.has_value()) {
         dialogProperties.offset = dialogAttr.offset.value();
     }
-    auto pipelineContext = pipelineContextHolder_.Get();
     if (Container::IsCurrentUseNewPipeline()) {
         LOGI("Dialog IsCurrentUseNewPipeline.");
         auto task = [dialogAttr, dialogProperties, callback](const RefPtr<NG::OverlayManager>& overlayManager) mutable {
@@ -1741,7 +1763,6 @@ void FrontendDelegateDeclarative::OpenCustomDialog(const PromptDialogAttr &dialo
             if (dialogProperties.isShowInSubWindow) {
                 SubwindowManager::GetInstance()->OpenCustomDialogNG(dialogProperties, std::move(callback));
                 if (dialogProperties.isModal) {
-                    // temporary not support isShowInSubWindow and isModal
                     LOGW("temporary not support isShowInSubWindow and isModal");
                 }
             } else {
@@ -1753,7 +1774,6 @@ void FrontendDelegateDeclarative::OpenCustomDialog(const PromptDialogAttr &dialo
     } else {
         LOGW("not support old pipeline");
     }
-    return;
 }
 
 void FrontendDelegateDeclarative::CloseCustomDialog(const int32_t dialogId)
@@ -1877,6 +1897,13 @@ void FrontendDelegateDeclarative::ShowActionMenu(const PromptDialogAttr& dialogA
         .isShowInSubWindow = dialogAttr.showInSubWindow,
         .isModal = dialogAttr.isModal,
     };
+#if defined(PREVIEW)
+    if (dialogProperties.isShowInSubWindow) {
+        LOGW("[Engine Log] Unable to use the SubWindow in the Previewer. Perform this operation on the "
+             "emulator or a real device instead.");
+        dialogProperties.isShowInSubWindow = false;
+    }
+#endif
     ShowActionMenuInner(dialogProperties, buttons, std::move(callback));
 }
 

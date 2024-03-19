@@ -35,6 +35,8 @@ protected:
     static void SetBarMode(const JSCallbackInfo& info);
     static void SetBarWidth(const JSCallbackInfo& info);
     static void SetBarHeight(const JSCallbackInfo& info);
+    static void SetWidth(const JSCallbackInfo& info);
+    static void SetHeight(const JSCallbackInfo& info);
     static void SetOnChange(const JSCallbackInfo& info);
     static void SetOnTabBarClick(const JSCallbackInfo& info);
     static void SetOnAnimationStart(const JSCallbackInfo& info);

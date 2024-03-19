@@ -352,7 +352,7 @@ void ImageModelNG::SetColorFilterMatrix(FrameNode *frameNode, const std::vector<
 
 void ImageModelNG::SetDraggable(FrameNode *frameNode, bool draggable)
 {
-    auto gestureHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeGestureEventHub();
+    auto gestureHub = frameNode->GetOrCreateGestureEventHub();
     CHECK_NULL_VOID(gestureHub);
     if (draggable) {
         if (!frameNode->IsDraggable()) {
@@ -464,6 +464,20 @@ ImageSourceInfo ImageModelNG::GetAlt(FrameNode* frameNode)
     auto layoutProperty = frameNode->GetLayoutProperty<ImageLayoutProperty>();
     CHECK_NULL_RETURN(layoutProperty, defaultImageSourceInfo);
     return layoutProperty->GetAlt().value_or(defaultImageSourceInfo);
+}
+
+bool ImageModelNG::GetDraggable(FrameNode* frameNode)
+{
+    CHECK_NULL_RETURN(frameNode, false);
+    return frameNode->IsDraggable();
+}
+
+ImageRenderMode ImageModelNG::GetImageRenderMode(FrameNode* frameNode)
+{
+    CHECK_NULL_RETURN(frameNode, ImageRenderMode::ORIGINAL);
+    auto paintProperty = frameNode->GetPaintProperty<ImageRenderProperty>();
+    CHECK_NULL_RETURN(paintProperty, ImageRenderMode::ORIGINAL);
+    return paintProperty->GetImagePaintStyle()->GetImageRenderMode().value_or(ImageRenderMode::ORIGINAL);
 }
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_IMAGE_IMAGE_MODEL_NG_CPP

@@ -28,6 +28,8 @@ class JsTouchFunction : public virtual JsFunction {
 
 public:
     explicit JsTouchFunction(const JSRef<JSFunc>& jsFunction) : JsFunction(JSRef<JSObject>(), jsFunction) {}
+    JsTouchFunction(const JSRef<JSObject>& jsObject, const JSRef<JSFunc>& jsFunction) : JsFunction(jsObject, jsFunction)
+    {}
     ~JsTouchFunction() override {};
 
     void Execute() override
@@ -35,10 +37,8 @@ public:
         JsFunction::Execute();
     }
     void Execute(TouchEventInfo& info);
-
-private:
-    JSRef<JSObject> CreateTouchInfo(const TouchLocationInfo& touchInfo, TouchEventInfo& info);
-    JSRef<JSObject> CreateJSEventInfo(TouchEventInfo& info);
+    static JSRef<JSObject> CreateTouchInfo(const TouchLocationInfo& touchInfo, TouchEventInfo& info);
+    static JSRef<JSObject> CreateJSEventInfo(TouchEventInfo& info);
 };
 
 } // namespace OHOS::Ace::Framework

@@ -84,6 +84,36 @@ public:
         return opacity_;
     }
 
+    void SetPageTransitionRectF(const RectF& pageTransitionRectF)
+    {
+        pageTransitionRectF_ = pageTransitionRectF;
+    }
+
+    const std::optional<RectF>& GetPageTransitionRectF() const
+    {
+        return pageTransitionRectF_;
+    }
+
+    void SetInitialBackgroundColor(const Color& initialBackgroundColor)
+    {
+        initialBackgroundColor_ = initialBackgroundColor;
+    }
+
+    const std::optional<Color>& GetInitialBackgroundColor() const
+    {
+        return initialBackgroundColor_;
+    }
+
+    void SetBackgroundColor(const Color& backgroundColor)
+    {
+        backgroundColor_ = backgroundColor;
+    }
+
+    const std::optional<Color>& GetBackgroundColor() const
+    {
+        return backgroundColor_;
+    }
+
     // test whether this effect can match the pageTransitionType
     bool CanFit(PageTransitionType type) const
     {
@@ -136,6 +166,9 @@ private:
     std::optional<ScaleOptions> scale_;
     std::optional<SlideEffect> slide_;
     std::optional<float> opacity_;
+    std::optional<RectF> pageTransitionRectF_;
+    std::optional<Color> initialBackgroundColor_;
+    std::optional<Color> backgroundColor_;
     PageTransitionOption animationOption_;
     // user defined onEnter or onExit callback;
     PageTransitionEventFunc userCallback_;

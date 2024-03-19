@@ -29,6 +29,17 @@ struct ScrollableUtils {
      * @return The height expansion amount.
      */
     static float CheckHeightExpansion(const RefPtr<LayoutProperty>& layoutProps, Axis axis);
+
+    /**
+     * @brief Recycle items which are out of boundary.
+     *
+     * @param axis scroll direction
+     * @param offset scroll offset, positive means scroll down, negative means scroll up.
+     * @param start first item index
+     * @param end last item index
+     * @param wrapper layout wrapper
+     */
+    static void RecycleItemsOutOfBoundary(Axis axis, float offset, int32_t start, int32_t end, LayoutWrapper* wrapper);
 };
 } // namespace OHOS::Ace::NG
 

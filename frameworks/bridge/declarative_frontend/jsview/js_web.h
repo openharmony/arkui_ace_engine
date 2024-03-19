@@ -86,6 +86,7 @@ public:
     static void OnHttpAuthRequest(const JSCallbackInfo& args);
     static void OnSslErrRequest(const JSCallbackInfo& args);
     static void OnSslErrorRequest(const JSCallbackInfo& args);
+    static void OnAllSslErrorRequest(const JSCallbackInfo& args);
     static void OnSslSelectCertRequest(const JSCallbackInfo& args);
     static void OnPermissionRequest(const JSCallbackInfo& args);
     static void OnScreenCaptureRequest(const JSCallbackInfo& args);
@@ -128,6 +129,8 @@ public:
     static void OnAudioStateChanged(const JSCallbackInfo& args);
     static void MediaOptions(const JSCallbackInfo& args);
     static void OnFirstContentfulPaint(const JSCallbackInfo& args);
+    static void OnFirstMeaningfulPaint(const JSCallbackInfo& args);
+    static void OnLargestContentfulPaint(const JSCallbackInfo& args);
     static void OnSafeBrowsingCheckResult(const JSCallbackInfo& args);
     static void OnNavigationEntryCommitted(const JSCallbackInfo& args);
     static void OnIntelligentTrackingPreventionResult(const JSCallbackInfo& args);
@@ -135,6 +138,7 @@ public:
     static void OnOverScroll(const JSCallbackInfo& args);
     static void SetLayoutMode(int32_t layoutMode);
     static void SetNestedScroll(const JSCallbackInfo& info);
+    static void SetMetaViewport(const JSCallbackInfo& args);
     static void OverScrollMode(int overScrollMode);
     static void EnableNativeEmbedMode(bool isEmbedModeEnabled);
     static void RegisterNativeEmbedRule(const std::string& tag, const std::string& type);
@@ -147,6 +151,7 @@ public:
     static JSwebEventCallback OnControllerAttachedCallback_;
     static void CopyOption(int32_t copyOption);
     static void OnOverrideUrlLoading(const JSCallbackInfo& args);
+    static void TextAutosizing(const JSCallbackInfo& args);
 
 protected:
     static void OnCommonDialog(const JSCallbackInfo& args, int dialogEventType);

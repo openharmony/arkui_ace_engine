@@ -14,6 +14,7 @@
  */
 
 #include "core/components_ng/pattern/model/model_touch_handler.h"
+#include "core/event/touch_event.h"
 
 namespace OHOS::Ace::NG {
 
@@ -64,14 +65,13 @@ bool ModelTouchHandler::HandleTouchEvent(const TouchEventInfo& info, uint32_t vi
 TouchEvent ModelTouchHandler::CreateTouchEvent(const TouchEventInfo& info) const
 {
     auto point = info.GetChangedTouches().front();
-    return {
-        .id = point.GetFingerId(),
-        .x = point.GetLocalLocation().GetX(),
-        .y = point.GetLocalLocation().GetY(),
-        .screenX = point.GetGlobalLocation().GetX(),
-        .screenY = point.GetGlobalLocation().GetY(),
-        .type = point.GetTouchType()
-    };
+    return TouchEvent {}
+        .SetId(point.GetFingerId())
+        .SetX(point.GetLocalLocation().GetX())
+        .SetY(point.GetLocalLocation().GetY())
+        .SetScreenX(point.GetGlobalLocation().GetX())
+        .SetScreenY(point.GetGlobalLocation().GetY())
+        .SetType(point.GetTouchType());
 }
 
 Render3D::PointerEvent ModelTouchHandler::CreateSceneTouchEvent(const TouchEvent& point,
@@ -95,7 +95,7 @@ Render3D::PointerEvent ModelTouchHandler::CreateSceneTouchEvent(const TouchEvent
         deltaChange.SetX(point.screenX - oldPoint.screenX);
         deltaChange.SetY(point.screenY - oldPoint.screenY);
     }
-    
+
     pointerEvent.deltaX_ = deltaChange.GetX() / viewWidth;
     pointerEvent.deltaY_ = deltaChange.GetY() / viewHeight;
     switch (point.type) {
@@ -116,10 +116,13 @@ Render3D::PointerEvent ModelTouchHandler::CreateSceneTouchEvent(const TouchEvent
         case TouchType::PULL_MOVE:
         case TouchType::PULL_IN_WINDOW:
         case TouchType::PULL_OUT_WINDOW:
+        case TouchType::HOVER_ENTER:
+        case TouchType::HOVER_MOVE:
+        case TouchType::HOVER_EXIT:
         case TouchType::UNKNOWN:
             break;
     }
-    
+
     return pointerEvent;
 }
-} // namespace OHOS::Ace
+} // namespace OHOS::Ace::NG

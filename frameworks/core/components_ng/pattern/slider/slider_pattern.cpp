@@ -64,13 +64,6 @@ void SliderPattern::OnModifyDone()
     auto sliderPaintProperty = host->GetPaintProperty<SliderPaintProperty>();
     CHECK_NULL_VOID(sliderPaintProperty);
     showTips_ = sliderPaintProperty->GetShowTips().value_or(false);
-    float min = sliderPaintProperty->GetMin().value_or(0.0f);
-    float max = sliderPaintProperty->GetMax().value_or(100.0f);
-    value_ = sliderPaintProperty->GetValue().value_or(min);
-    float step = sliderPaintProperty->GetStep().value_or(1.0f);
-    CancelExceptionValue(min, max, step);
-    valueRatio_ = (value_ - min) / (max - min);
-    stepRatio_ = step / (max - min);
     UpdateCircleCenterOffset();
     UpdateBlock();
     InitClickEvent(gestureHub);
@@ -82,6 +75,21 @@ void SliderPattern::OnModifyDone()
     InitOnKeyEvent(focusHub);
     InitializeBubble();
     SetAccessibilityAction();
+}
+
+void SliderPattern::CalcSliderValue()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto sliderPaintProperty = host->GetPaintProperty<SliderPaintProperty>();
+    CHECK_NULL_VOID(sliderPaintProperty);
+    float min = sliderPaintProperty->GetMin().value_or(0.0f);
+    float max = sliderPaintProperty->GetMax().value_or(100.0f);
+    value_ = sliderPaintProperty->GetValue().value_or(min);
+    float step = sliderPaintProperty->GetStep().value_or(1.0f);
+    CancelExceptionValue(min, max, step);
+    valueRatio_ = (value_ - min) / (max - min);
+    stepRatio_ = step / (max - min);
 }
 
 void SliderPattern::CancelExceptionValue(float& min, float& max, float& step)
@@ -101,7 +109,13 @@ void SliderPattern::CancelExceptionValue(float& min, float& max, float& step)
     if (value_ < min || value_ > max) {
         value_ = std::clamp(value_, min, max);
         sliderPaintProperty->UpdateValue(value_);
-        FireChangeEvent(SliderChangeMode::End);
+        auto context = PipelineContext::GetCurrentContext();
+        CHECK_NULL_VOID(context);
+        context->AddAfterRenderTask([weak = WeakClaim(this)]() {
+            auto pattern = weak.Upgrade();
+            CHECK_NULL_VOID(pattern);
+            pattern->FireChangeEvent(SliderChangeMode::End);
+        });
     }
 }
 
@@ -1048,17 +1062,12 @@ void SliderPattern::SetAccessibilityAction()
 
 void SliderPattern::UpdateValue(float value)
 {
-    if (panMoveFlag_) {
-        return;
+    if (!panMoveFlag_) {
+        auto sliderPaintProperty = GetPaintProperty<SliderPaintProperty>();
+        CHECK_NULL_VOID(sliderPaintProperty);
+        sliderPaintProperty->UpdateValue(value);
     }
-    auto sliderPaintProperty = GetPaintProperty<SliderPaintProperty>();
-    CHECK_NULL_VOID(sliderPaintProperty);
-    sliderPaintProperty->UpdateValue(value);
-}
-
-void SliderPattern::OnAttachToFrameNode()
-{
-    RegisterVisibleAreaChange();
+    CalcSliderValue();
 }
 
 void SliderPattern::OnVisibleChange(bool isVisible)
@@ -1093,28 +1102,6 @@ void SliderPattern::StopAnimation()
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
-void SliderPattern::RegisterVisibleAreaChange()
-{
-    if (hasVisibleChangeRegistered_) {
-        return;
-    }
-
-    auto pipeline = PipelineContext::GetCurrentContext();
-    CHECK_NULL_VOID(pipeline);
-    auto callback = [weak = WeakClaim(this)](bool visible, double ratio) {
-        auto pattern = weak.Upgrade();
-        CHECK_NULL_VOID(pattern);
-        pattern->isVisibleArea_ = visible;
-        visible ? pattern->StartAnimation() : pattern->StopAnimation();
-    };
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    std::vector<double> ratioList = {0.0};
-    pipeline->AddVisibleAreaChangeNode(host, ratioList, callback, false);
-    pipeline->AddWindowStateChangedCallback(host->GetId());
-    hasVisibleChangeRegistered_ = true;
-}
-
 void SliderPattern::OnWindowHide()
 {
     isShow_ = false;
@@ -1129,7 +1116,7 @@ void SliderPattern::OnWindowShow()
 
 bool SliderPattern::IsSliderVisible()
 {
-    return isVisibleArea_ && isVisible_ && isShow_;
+    return isVisible_ && isShow_;
 }
 
 void SliderPattern::UpdateTipState()
@@ -1189,14 +1176,5 @@ void SliderPattern::RemoveIsFocusActiveUpdateEvent()
     auto pipline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipline);
     pipline->RemoveIsFocusActiveUpdateEvent(GetHost());
-}
-
-void SliderPattern::OnDetachFromFrameNode(FrameNode* frameNode)
-{
-    auto pipeline = PipelineContext::GetCurrentContext();
-    CHECK_NULL_VOID(pipeline);
-    pipeline->RemoveVisibleAreaChangeNode(frameNode->GetId());
-    pipeline->RemoveWindowStateChangedCallback(frameNode->GetId());
-    hasVisibleChangeRegistered_ = false;
 }
 } // namespace OHOS::Ace::NG

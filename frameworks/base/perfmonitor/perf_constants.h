@@ -39,6 +39,9 @@ public:
     // app swiper scroll
     static constexpr char APP_SWIPER_SCROLL[] = "APP_SWIPER_SCROLL";
 
+    // app tab switch
+    static constexpr char APP_TAB_SWITCH[] = "APP_TAB_SWITCH";
+
     // volume bar show
     static constexpr char VOLUME_BAR_SHOW[] = "VOLUME_BAR_SHOW";
 
@@ -80,6 +83,9 @@ public:
 
     // another app jamps back to A app
     static constexpr char APP_TRANSITION_FROM_OTHER_APP[] = "APP_TRANSITION_FROM_OTHER_APP";
+
+    // mutitask scroll
+    static constexpr char SNAP_RECENT_ANI[] = "SNAP_RECENT_ANI";
 };
 } // namespace OHOS::Ace
 #endif // ARKUI_PERF_SCENE_ID_H

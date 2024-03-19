@@ -81,16 +81,18 @@ void TimePickerRowPattern::SetButtonIdeaSize()
         auto buttonConfirmRenderContext = buttonNode->GetRenderContext();
         buttonConfirmRenderContext->UpdateBackgroundColor(Color::TRANSPARENT);
         buttonNode->MarkModifyDone();
+        buttonNode->MarkDirtyNode();
     }
 }
 
 void TimePickerRowPattern::OnModifyDone()
 {
-    if (isFiredTimeChange_) {
+    if (isFiredTimeChange_ && !isForceUpdate_) {
         isFiredTimeChange_ = false;
         return;
     }
 
+    isForceUpdate_ = false;
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto pickerProperty = host->GetLayoutProperty<TimePickerLayoutProperty>();

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -21,10 +21,11 @@
 #include "base/memory/referenced.h"
 #include "base/utils/macros.h"
 #include "base/utils/utils.h"
+#include "core/components/common/properties/color.h"
 #include "core/components_ng/pattern/pattern.h"
+#include "core/components_ng/pattern/text_picker/textpicker_properties.h"
 #include "core/components_ng/render/divider_painter.h"
 #include "core/components_ng/render/node_paint_method.h"
-
 namespace OHOS::Ace::NG {
 
 class ACE_EXPORT TextPickerPaintMethod : public NodePaintMethod {
@@ -56,13 +57,15 @@ public:
     }
 
     CanvasDrawFunction GetForegroundDrawFunction(PaintWrapper* paintWrapper) override;
-    void PaintDividerLines(RSCanvas& canvas, RectF contentRect, double dividerHeight);
+    void PaintDividerLines(RSCanvas& canvas, RectF contentRect, const DividerInfo &info);
 
 private:
     double defaultPickerItemHeight_ = 0.0;
     bool enabled_ = true;
 
     WeakPtr<Pattern> pattern_;
+
+    bool NeedPaintDividerLines(RectF contentRect, DividerInfo& info);
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_TEXT_PICKER_TEXT_PICKER_PAINT_METHOD_H

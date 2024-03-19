@@ -524,6 +524,63 @@ ArkUI_Uint32 GetButtonFontColor(ArkUINodeHandle node)
     return ButtonModelNG::GetFontColor(frameNode).GetValue();
 }
 
+void SetButtonRole(ArkUINodeHandle node, ArkUI_Uint32 buttonRole)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ButtonRole role = ButtonRole::NORMAL;
+    if (buttonRole >= static_cast<uint32_t>(ButtonRole::NORMAL) && buttonRole <=
+    static_cast<uint32_t>(ButtonRole::ERROR)) {
+        role = static_cast<ButtonRole>(buttonRole);
+    }
+    ButtonModelNG::SetRole(frameNode, role);
+}
+
+void ResetButtonRole(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ButtonModelNG::SetRole(frameNode, ButtonRole::NORMAL);
+}
+
+void SetButtonStyle(ArkUINodeHandle node, ArkUI_Uint32 buttonStyle)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ButtonStyleMode style = ButtonStyleMode::EMPHASIZE;
+    if (buttonStyle >= static_cast<uint32_t>(ButtonStyleMode::NORMAL) && buttonStyle <=
+    static_cast<uint32_t>(ButtonStyleMode::TEXT)) {
+        style = static_cast<ButtonStyleMode>(buttonStyle);
+    }
+    ButtonModelNG::SetButtonStyle(frameNode, style);
+}
+
+void ResetButtonStyle(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ButtonModelNG::SetButtonStyle(frameNode, ButtonStyleMode::EMPHASIZE);
+}
+
+void SetButtonControlSize(ArkUINodeHandle node, ArkUI_Uint32 controlSize)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ControlSize size = ControlSize::NORMAL;
+    if (controlSize >= static_cast<uint32_t>(ControlSize::SMALL) && controlSize <=
+    static_cast<uint32_t>(ControlSize::NORMAL)) {
+        size = static_cast<ControlSize>(controlSize);
+    }
+    ButtonModelNG::SetControlSize(frameNode, size);
+}
+
+void ResetButtonControlSize(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ButtonModelNG::SetControlSize(frameNode, ControlSize::NORMAL);
+}
+
 namespace NodeModifier {
 const ArkUIButtonModifier* GetButtonModifier()
 {
@@ -533,8 +590,9 @@ const ArkUIButtonModifier* GetButtonModifier()
         SetButtonFontWeight, ResetButtonFontWeight, SetButtonFontStyle, ResetButtonFontStyle, SetButtonFontFamily,
         ResetButtonFontFamily, SetButtonLabelStyle, ResetButtonLabelStyle, SetButtonBackgroundColor,
         ResetButtonBackgroundColor, SetButtonBorderRadius, ResetButtonBorderRadius, SetButtonFontWeightEnum,
-        SetButtonSize, ResetButtonSize, GetButtonLabel, GetButtonFontSize, GetButtonFontWeight, GetButtonFontColor };
-
+        SetButtonSize, ResetButtonSize, GetButtonLabel, GetButtonFontSize, GetButtonFontWeight, GetButtonFontColor,
+        SetButtonRole, ResetButtonRole, SetButtonStyle, ResetButtonStyle, SetButtonControlSize, ResetButtonControlSize
+        };
     return &modifier;
 }
 }

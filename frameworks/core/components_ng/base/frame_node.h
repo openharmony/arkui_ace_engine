@@ -85,8 +85,7 @@ public:
 
     static void ProcessOffscreenNode(const RefPtr<FrameNode>& node);
     // avoid use creator function, use CreateFrameNode
-    FrameNode(const std::string& tag, int32_t nodeId, const RefPtr<Pattern>& pattern, int32_t instanceId = -1,
-        bool isRoot = false);
+    FrameNode(const std::string& tag, int32_t nodeId, const RefPtr<Pattern>& pattern, bool isRoot = false);
 
     ~FrameNode() override;
 
@@ -128,10 +127,11 @@ public:
 
     virtual void MarkModifyDone();
 
-    void MarkDirtyNode(PropertyChangeFlag extraFlag = PROPERTY_UPDATE_NORMAL) override;
-
     void MarkDirtyNode(
-        bool isMeasureBoundary, bool isRenderBoundary, PropertyChangeFlag extraFlag = PROPERTY_UPDATE_NORMAL);
+        PropertyChangeFlag extraFlag = PROPERTY_UPDATE_NORMAL, bool childExpansiveAndMark = false) override;
+
+    void MarkDirtyNode(bool isMeasureBoundary, bool isRenderBoundary,
+        PropertyChangeFlag extraFlag = PROPERTY_UPDATE_NORMAL, bool childExpansiveAndMark = false);
 
     void ProcessPropertyDiff()
     {
@@ -210,6 +210,12 @@ public:
     const RefPtr<Pattern>& GetPattern() const;
 
     template<typename T>
+    T* GetPatternPtr() const
+    {
+        return reinterpret_cast<T*>(RawPtr(pattern_));
+    }
+
+    template<typename T>
     RefPtr<T> GetPattern() const
     {
         return DynamicCast<T>(pattern_);
@@ -222,9 +228,21 @@ public:
     }
 
     template<typename T>
+    T* GetLayoutPropertyPtr() const
+    {
+        return reinterpret_cast<T*>(RawPtr(layoutProperty_));
+    }
+
+    template<typename T>
     RefPtr<T> GetLayoutProperty() const
     {
         return DynamicCast<T>(layoutProperty_);
+    }
+
+    template<typename T>
+    T* GetPaintPropertyPtr() const
+    {
+        return reinterpret_cast<T*>(RawPtr(paintProperty_));
     }
 
     template<typename T>
@@ -272,7 +290,7 @@ public:
 
     // If return true, will prevent TouchTest Bubbling to parent and brother nodes.
     HitTestResult TouchTest(const PointF& globalPoint, const PointF& parentLocalPoint, const PointF& parentRevertPoint,
-        const TouchRestrict& touchRestrict, TouchTestResult& result, int32_t touchId, bool isDispatch = false) override;
+        TouchRestrict& touchRestrict, TouchTestResult& result, int32_t touchId, bool isDispatch = false) override;
 
     HitTestResult MouseTest(const PointF& globalPoint, const PointF& parentLocalPoint, MouseTestResult& onMouseResult,
         MouseTestResult& onHoverResult, RefPtr<FrameNode>& hoverNode) override;
@@ -404,7 +422,8 @@ public:
     bool HasPositionProp() const
     {
         CHECK_NULL_RETURN(renderContext_, false);
-        return renderContext_->HasPosition() || renderContext_->HasOffset() || renderContext_->HasAnchor();
+        return renderContext_->HasPosition() || renderContext_->HasOffset() || renderContext_->HasPositionEdges() ||
+               renderContext_->HasOffsetEdges() || renderContext_->HasAnchor();
     }
 
     // The function is only used for fast preview.
@@ -486,7 +505,13 @@ public:
     void SetDrawModifier(const RefPtr<NG::DrawModifier>& drawModifier)
     {
         drawModifier_ = drawModifier;
+        auto contentModifier = GetContentModifier();
+        if (contentModifier) {
+            contentModifier->SetDrawModifier(drawModifier);
+        }
     }
+
+    bool IsSupportDrawModifier();
 
     void SetDragPreview(const NG::DragDropInfo& info)
     {
@@ -585,8 +610,9 @@ public:
         return layoutProperty_;
     }
 
-    RefPtr<LayoutWrapper> GetOrCreateChildByIndex(uint32_t index, bool addToRenderTree = true) override;
-    RefPtr<LayoutWrapper> GetChildByIndex(uint32_t index) override;
+    RefPtr<LayoutWrapper> GetOrCreateChildByIndex(
+        uint32_t index, bool addToRenderTree = true, bool isCache = false) override;
+    RefPtr<LayoutWrapper> GetChildByIndex(uint32_t index, bool isCache = false) override;
     /**
      * @brief Get the index of Child among all FrameNode children of [this].
      * Handles intermediate SyntaxNodes like LazyForEach.
@@ -595,6 +621,7 @@ public:
      * @return index of Child, or -1 if not found.
      */
     int32_t GetChildTrueIndex(const RefPtr<LayoutWrapper>& child) const;
+    uint32_t GetChildTrueTotalCount() const;
     const std::list<RefPtr<LayoutWrapper>>& GetAllChildrenWithBuild(bool addToRenderTree = true) override;
     void RemoveChildInRenderTree(uint32_t index) override;
     void RemoveAllChildInRenderTree() override;
@@ -625,9 +652,14 @@ public:
 
     void SetActive(bool active = true) override;
 
+    bool GetBypass() const
+    {
+        return bypass_;
+    }
+
     bool IsOutOfLayout() const override
     {
-        return renderContext_->HasPosition();
+        return renderContext_->HasPosition() || renderContext_->HasPositionEdges();
     }
 
     bool SkipMeasureContent() const override;
@@ -636,7 +668,7 @@ public:
         int32_t cacheCount = 0, const std::optional<LayoutConstraintF>& itemConstraint = std::nullopt) override;
 
     void SyncGeometryNode(bool needSkipSync = false);
-    RefPtr<UINode> GetFrameChildByIndex(uint32_t index, bool needBuild) override;
+    RefPtr<UINode> GetFrameChildByIndex(uint32_t index, bool needBuild, bool isCache = false) override;
     bool CheckNeedForceMeasureAndLayout() override;
 
     bool SetParentLayoutConstraint(const SizeF& size) const override;
@@ -730,6 +762,7 @@ public:
     OffsetF CalculateCachedTransformRelativeOffset(uint64_t nanoTimestamp);
 
     void PaintDebugBoundary(bool flag) override;
+    RectF GetRectWithRender();
 
 private:
     void MarkNeedRender(bool isRenderBoundary);
@@ -744,7 +777,7 @@ private:
      *
      * @return true if Parent is successfully marked dirty.
      */
-    virtual bool RequestParentDirty();
+    virtual bool RequestParentDirty(bool childExpansiveAndMark = false);
 
     void UpdateChildrenLayoutWrapper(const RefPtr<LayoutWrapperNode>& self, bool forceMeasure, bool forceLayout);
     void AdjustLayoutWrapperTree(const RefPtr<LayoutWrapperNode>& parent, bool forceMeasure, bool forceLayout) override;
@@ -772,6 +805,7 @@ private:
     void DumpSafeAreaInfo();
     void DumpAdvanceInfo() override;
     void DumpViewDataPageNode(RefPtr<ViewDataWrap> viewDataWrap) override;
+    void DumpOnSizeChangeInfo();
     bool CheckAutoSave() override;
     void FocusToJsonValue(std::unique_ptr<JsonValue>& json) const;
     void MouseToJsonValue(std::unique_ptr<JsonValue>& json) const;
@@ -808,6 +842,10 @@ private:
     const std::pair<uint64_t, OffsetF>& GetCachedTransformRelativeOffset() const;
 
     void SetCachedTransformRelativeOffset(const std::pair<uint64_t, OffsetF>& timestampOffset);
+
+    HitTestMode TriggerOnTouchIntercept(const TouchEvent& touchEvent);
+
+    void AddTouchEventAllFingersInfo(TouchEventInfo& event, const TouchEvent& touchEvent);
 
     // sort in ZIndex.
     std::multiset<WeakPtr<FrameNode>, ZIndexComparator> frameChildren_;
@@ -885,6 +923,13 @@ private:
 
     std::pair<uint64_t, OffsetF> cachedGlobalOffset_ = { 0, OffsetF() };
     std::pair<uint64_t, OffsetF> cachedTransformRelativeOffset_ = { 0, OffsetF() };
+
+    struct onSizeChangeDumpInfo {
+        int64_t onSizeChangeTimeStamp;
+        RectF lastFrameRect;
+        RectF currFrameRect;
+    };
+    std::vector<onSizeChangeDumpInfo> onSizeChangeDumpInfos;
 
     friend class RosenRenderContext;
     friend class RenderContext;

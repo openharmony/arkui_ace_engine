@@ -31,7 +31,8 @@ class SessionWrapperImpl : public SessionWrapper {
     DECLARE_ACE_TYPE(SessionWrapperImpl, SessionWrapper);
 
 public:
-    SessionWrapperImpl(const WeakPtr<UIExtensionPattern>& hostPattern, int32_t instanceId, bool isTransferringCaller);
+    SessionWrapperImpl(const WeakPtr<UIExtensionPattern>& hostPattern, int32_t instanceId, bool isTransferringCaller,
+        SessionType sessionType);
     ~SessionWrapperImpl() override;
 
     // About session
@@ -64,6 +65,11 @@ public:
     void NotifyDestroy() override;
     void NotifyConfigurationUpdate() override;
 
+    // Notify the Host
+    void OnConnect() override;
+    void OnDisconnect(bool isAbnormal) override;
+    void OnAccessibilityEvent(const Accessibility::AccessibilityEventInfo& info, int64_t offset) override;
+
     // The interface about the accessibility
     bool TransferExecuteAction(int64_t elementId, const std::map<std::string, std::string>& actionArguments,
         int32_t action, int64_t offset) override;
@@ -76,28 +82,29 @@ public:
     void FocusMoveSearch(int64_t elementId, int32_t direction, int64_t baseParent,
         Accessibility::AccessibilityElementInfo& output) override;
 
-    // The interface to control the display area
+    // The interface to control the display area and the avoid area
     std::shared_ptr<Rosen::RSSurfaceNode> GetSurfaceNode() const override;
-    void RefreshDisplayArea(const RectF& displayArea) override;
-    void OnSizeChanged(WindowSizeChangeReason type,
-        const std::shared_ptr<Rosen::RSTransaction>& rsTransaction) override;
+    void NotifyDisplayArea(const RectF& displayArea) override;
+    void NotifySizeChangeReason(
+        WindowSizeChangeReason type, const std::shared_ptr<Rosen::RSTransaction>& rsTransaction) override;
+    void NotifyOriginAvoidArea(const Rosen::AvoidArea& avoidArea, uint32_t type) const override;
+    bool NotifyOccupiedAreaChangeInfo(sptr<Rosen::OccupiedAreaChangeInfo> info) const override;
 
     // The interface to send the data for ArkTS
     void SendDataAsync(const AAFwk::WantParams& params) const override;
     int32_t SendDataSync(const AAFwk::WantParams& wantParams, AAFwk::WantParams& reWantParams) const override;
 
-    // The interface to control the avoid area
-    void NotifyOriginAvoidArea(const Rosen::AvoidArea& avoidArea, uint32_t type) const override;
-    bool NotifyOccupiedAreaChangeInfo(sptr<Rosen::OccupiedAreaChangeInfo> info) const override;
-
 private:
     void InitAllCallback();
-    sptr<Rosen::ExtensionSession> session_;
     WeakPtr<UIExtensionPattern> hostPattern_;
-    RectF displayArea_;
-    bool isNotifyOccupiedAreaChange_ = false;
+    RefPtr<TaskExecutor> taskExecutor_;
     int32_t instanceId_;
     bool isTransferringCaller_;
+    SessionType sessionType_ = SessionType::UI_EXTENSION_ABILITY;
+    int32_t uiExtensionId_ = 0;
+    sptr<Rosen::ExtensionSession> session_;
+    bool isNotifyOccupiedAreaChange_ = false;
+    RectF displayArea_;
     std::shared_ptr<Rosen::ILifecycleListener> lifecycleListener_;
     std::function<void((OHOS::Rosen::WSError))> foregroundCallback_;
     std::function<void((OHOS::Rosen::WSError))> backgroundCallback_;

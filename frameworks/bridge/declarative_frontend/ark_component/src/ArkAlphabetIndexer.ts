@@ -101,6 +101,22 @@ class ArkAlphabetIndexerComponent extends ArkComponent implements AlphabetIndexe
     modifierWithKey(this._modifiersWithKeys, PopupPositionModifier.identity, PopupPositionModifier, value);
     return this;
   }
+  popupItemBorderRadius(value: number): this {
+    modifierWithKey(this._modifiersWithKeys, PopupItemBorderRadiusModifier.identity, PopupItemBorderRadiusModifier, value);
+    return this;
+  }
+  itemBorderRadius(value: number): this {
+    modifierWithKey(this._modifiersWithKeys, ItemBorderRadiusModifier.identity, ItemBorderRadiusModifier, value);
+    return this;
+  }
+  popupBackgroundBlurStyle(value: BlurStyle): this {
+    modifierWithKey(this._modifiersWithKeys, PopupBackgroundBlurStyleModifier.identity, PopupBackgroundBlurStyleModifier, value);
+    return this;
+  }
+  popupTitleBackground(value: ResourceColor): this {
+    modifierWithKey(this._modifiersWithKeys, PopupTitleBackgroundModifier.identity, PopupTitleBackgroundModifier, value);
+    return this;
+  }
 }
 // @ts-ignore
 globalThis.AlphabetIndexer.attributeModifier = function (modifier) {
@@ -424,5 +440,61 @@ class PopupPositionModifier extends ModifierWithKey<Position> {
     let xEQ = isBaseOrResourceEqual(this.stageValue.x, this.value.x);
     let yEQ = isBaseOrResourceEqual(this.stageValue.y, this.value.y);
     return !xEQ || !yEQ;
+  }
+}
+
+class PopupItemBorderRadiusModifier extends ModifierWithKey<number> {
+  constructor(value: number) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('popupItemBorderRadius');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().alphabetIndexer.resetPopupItemBorderRadius(node);
+    } else {
+      getUINativeModule().alphabetIndexer.setPopupItemBorderRadius(node, this.value);
+    }
+  }
+}
+
+class ItemBorderRadiusModifier extends ModifierWithKey<number> {
+  constructor(value: number) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('itemBorderRadius');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().alphabetIndexer.resetItemBorderRadius(node);
+    } else {
+      getUINativeModule().alphabetIndexer.setItemBorderRadius(node, this.value);
+    }
+  }
+}
+
+class PopupBackgroundBlurStyleModifier extends ModifierWithKey<BlurStyle> {
+  constructor(value: BlurStyle) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('popupBackgroundBlurStyle');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().alphabetIndexer.resetPopupBackgroundBlurStyle(node);
+    } else {
+      getUINativeModule().alphabetIndexer.setPopupBackgroundBlurStyle(node, this.value);
+    }
+  }
+}
+
+class PopupTitleBackgroundModifier extends ModifierWithKey<ResourceColor> {
+  constructor(value: ResourceColor) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('popupTitleBackground');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().alphabetIndexer.resetPopupTitleBackground(node);
+    } else {
+      getUINativeModule().alphabetIndexer.setPopupTitleBackground(node, this.value);
+    }
   }
 }

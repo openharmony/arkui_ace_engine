@@ -212,9 +212,10 @@ protected:
     RefPtr<AceType> canvasPattern_;
     RefPtr<AceType> offscreenPattern_;
 
+    int32_t instanceId_ = INSTANCE_ID_UNDEFINED;
+
 private:
     void ExtractInfoToImage(CanvasImage& image, const JSCallbackInfo& info, bool isImage);
-    int32_t instanceId_ = INSTANCE_ID_UNDEFINED;
     PaintState paintState_;
     TextStyle style_;
     static std::unordered_map<int32_t, std::shared_ptr<Pattern>> pattern_;

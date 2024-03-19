@@ -26,6 +26,7 @@
 #include "base/geometry/dimension.h"
 #include "base/memory/ace_type.h"
 #include "base/utils/macros.h"
+#include "core/components/common/layout/position_param.h"
 #include "core/components/common/properties/alignment.h"
 #include "core/components/common/properties/blend_mode.h"
 #include "core/components/common/properties/popup_param.h"
@@ -145,6 +146,8 @@ public:
     // position
     virtual void SetPosition(const Dimension& x, const Dimension& y) = 0;
     virtual void SetOffset(const Dimension& x, const Dimension& y) = 0;
+    virtual void SetPositionEdges(const EdgesParam& value) {};
+    virtual void SetOffsetEdges(const EdgesParam& value) {};
     virtual void MarkAnchor(const Dimension& x, const Dimension& y) = 0;
 
     // transforms
@@ -215,6 +218,7 @@ public:
     // event
     virtual void SetOnClick(GestureEventFunc&& tapEventFunc, ClickEventFunc&& clickEventFunc) = 0;
     virtual void SetOnGestureJudgeBegin(NG::GestureJudgeFunc&& gestureJudgeFunc) = 0;
+    virtual void SetOnTouchIntercept(NG::TouchInterceptFunc&& touchInterceptFunc) = 0;
     virtual void SetOnTouch(TouchEventFunc&& touchEventFunc) = 0;
     virtual void SetOnKeyEvent(OnKeyCallbackFunc&& onKeyCallback) = 0;
     virtual void SetOnMouse(OnMouseEventFunc&& onMouseEventFunc) = 0;
@@ -230,6 +234,7 @@ public:
     virtual void SetDraggable(bool draggable) = 0;
     virtual void SetDragPreviewOptions(const NG::DragPreviewOption& previewOption) = 0;
     virtual void SetOnDragStart(NG::OnDragStartFunc&& onDragStart) = 0;
+    virtual void SetOnPreDrag(NG::OnPreDragFunc&& onPreDrag) = 0;
     virtual void SetOnDragEnter(NG::OnDragDropFunc&& onDragEnter) = 0;
     virtual void SetOnDragEnd(OnNewDragFunc&& onDragEnd) = 0;
     virtual void SetOnDragLeave(NG::OnDragDropFunc&& onDragLeave) = 0;

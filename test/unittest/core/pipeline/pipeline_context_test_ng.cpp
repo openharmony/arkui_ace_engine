@@ -53,6 +53,7 @@
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/event/event_hub.h"
 #include "core/components_ng/event/focus_hub.h"
+#include "core/components_ng/manager/focus/focus_view.h"
 #include "core/components_ng/pattern/bubble/bubble_pattern.h"
 #include "core/components_ng/pattern/button/button_event_hub.h"
 #include "core/components_ng/pattern/container_modal/container_modal_pattern.h"
@@ -366,7 +367,7 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg004, TestSize.Level1)
 
 /**
  * @tc.name: PipelineContextTestNg005
- * @tc.desc: Test the function FlushFocus and RequestDefaultFocus.
+ * @tc.desc: Test the function FlushFocus.
  * @tc.type: FUNC
  */
 HWTEST_F(PipelineContextTestNg, PipelineContextTestNg005, TestSize.Level1)
@@ -418,76 +419,6 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg005, TestSize.Level1)
     frameNode_->eventHub_->focusHub_ = nullptr;
     context_->FlushFocus();
     EXPECT_EQ(context_->dirtyFocusNode_.Upgrade(), nullptr);
-
-    /**
-    * @tc.steps5: set stageManager_ and stageNode_, stageNode_'s child,
-               create frameNode_1's focusHub and call SetIsDefaultHasFocused with true
-    * @tc.expected: RequestDefaultFocus returns false.
-    */
-    context_->stageManager_->stageNode_ = frameNode_;
-    frameNodeId_ = ElementRegister::GetInstance()->MakeUniqueId();
-    auto frameNode_1 = FrameNode::GetOrCreateFrameNode(TEST_TAG, frameNodeId_, nullptr);
-    frameNode_->children_.push_back(frameNode_1);
-    focusHub = frameNode_1->eventHub_->GetOrCreateFocusHub();
-    focusHub->SetIsDefaultHasFocused(true);
-    EXPECT_FALSE(context_->RequestDefaultFocus(focusHub));
-    /**
-     * @tc.steps6: call SetIsDefaultHasFocused with false and create a new frameNode
-                init frameNode_2's focusHub
-     * @tc.expected: RequestDefaultFocus returns true while IsFocusableWholePath return true
-                    RequestDefaultFocus returns false while IsFocusableWholePath return false.
-     */
-    focusHub->SetFocusType(FocusType::SCOPE);
-    focusHub->focusable_ = true;
-    focusHub->SetIsDefaultHasFocused(false);
-    auto frameNodeId_2 = ElementRegister::GetInstance()->MakeUniqueId();
-    auto frameNode_2 = FrameNode::GetOrCreateFrameNode(TEST_TAG, frameNodeId_2, nullptr);
-    frameNode_1->children_.push_back(frameNode_2);
-    frameNode_2->parent_ = frameNode_1;
-    auto newFocusHub = frameNode_2->eventHub_->GetOrCreateFocusHub();
-    newFocusHub->SetIsDefaultFocus(true);
-    newFocusHub->SetFocusType(FocusType::NODE);
-    frameNode_2->eventHub_->enabled_ = true;
-    newFocusHub->focusable_ = true;
-    newFocusHub->parentFocusable_ = true;
-    EXPECT_TRUE(context_->RequestDefaultFocus(focusHub));
-    focusHub->SetIsDefaultHasFocused(false);
-    focusHub->currentFocus_ = false;
-    focusHub->focusable_ = false;
-    newFocusHub->currentFocus_ = false;
-    newFocusHub->focusable_ = false;
-    EXPECT_FALSE(context_->RequestDefaultFocus(focusHub));
-
-    /**
-     * @tc.steps7: Create a new frameNode and call AddDirtyDefaultFocus
-     * @tc.expected: dirtyDefaultFocusNode_ is null
-     */
-    auto frameNodeId_3 = ElementRegister::GetInstance()->MakeUniqueId();
-    auto frameNode_3 = FrameNode::GetOrCreateFrameNode(TEST_TAG, frameNodeId_3, nullptr);
-    eventHub = frameNode_3->GetEventHub<EventHub>();
-    eventHub->SetEnabled(true);
-
-    focusHub = eventHub->GetOrCreateFocusHub();
-    focusHub->SetFocusType(FocusType::NODE);
-    focusHub->SetIsDefaultFocus(true);
-
-    context_->AddDirtyDefaultFocus(frameNode_3);
-    EXPECT_FALSE(context_->dirtyDefaultFocusNode_.Invalid());
-    context_->FlushFocus();
-    EXPECT_TRUE(context_->dirtyDefaultFocusNode_.Invalid());
-    EXPECT_FALSE(context_->dirtyFocusNode_.Upgrade());
-    EXPECT_FALSE(context_->dirtyFocusScope_.Upgrade());
-
-    auto frameNodeId_4 = ElementRegister::GetInstance()->MakeUniqueId();
-    auto frameNode_4 = FrameNode::GetOrCreateFrameNode(TEST_TAG, frameNodeId_4, nullptr);
-    auto eventHubRoot = frameNode_4->GetEventHub<EventHub>();
-    auto focusHubRoot = eventHubRoot->GetOrCreateFocusHub();
-    focusHubRoot->currentFocus_ = true;
-    focusHub->SetFocusType(FocusType::NODE);
-
-    context_->rootNode_ = frameNode_4;
-    context_->FlushFocus();
-    EXPECT_TRUE(focusHubRoot->IsCurrentFocus());
 }
 
 /**
@@ -3005,11 +2936,11 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg066, TestSize.Level1)
     auto timeStampThree = TimeStamp(std::chrono::nanoseconds(3000));
     auto timeStampFour = TimeStamp(std::chrono::nanoseconds(4000));
     std::vector<TouchEvent> history;
-    history.push_back(TouchEvent { .x = 100.0f, .y = 200.0f, .time = timeStampAce });
-    history.push_back(TouchEvent { .x = 150.0f, .y = 250.0f, .time = timeStampTwo });
+    history.push_back(TouchEvent {}.SetX(100.0f).SetY(200.0f).SetTime(timeStampAce));
+    history.push_back(TouchEvent {}.SetX(150.0f).SetY(250.0f).SetTime(timeStampTwo));
     std::vector<TouchEvent> current;
-    current.push_back(TouchEvent { .x = 200.0f, .y = 300.0f, .time = timeStampThree });
-    current.push_back(TouchEvent { .x = 250.0f, .y = 350.0f, .time = timeStampFour });
+    current.push_back(TouchEvent {}.SetX(200.0f).SetY(300.0f).SetTime(timeStampThree));
+    current.push_back(TouchEvent {}.SetX(250.0f).SetY(350.0f).SetTime(timeStampFour));
 
     auto resampledCoord = context_->GetResampleCoord(history, current, 2500, true);
 
@@ -3043,8 +2974,8 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg068, TestSize.Level1)
     auto timeStampAce = TimeStamp(std::chrono::nanoseconds(1000));
     auto timeStampTwo = TimeStamp(std::chrono::nanoseconds(2000));
     std::vector<TouchEvent> current;
-    current.push_back(TouchEvent { .x = 100.0f, .y = 200.0f, .time = timeStampAce });
-    current.push_back(TouchEvent { .x = 150.0f, .y = 250.0f, .time = timeStampTwo });
+    current.push_back(TouchEvent {}.SetX(100.0f).SetY(200.0f).SetTime(timeStampAce));
+    current.push_back(TouchEvent {}.SetX(150.0f).SetY(250.0f).SetTime(timeStampTwo));
     uint64_t nanoTimeStamp = 1500;
 
     TouchEvent latestPoint = context_->GetLatestPoint(current, nanoTimeStamp);
@@ -3065,11 +2996,11 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg069, TestSize.Level1)
     auto timeStampThree = TimeStamp(std::chrono::nanoseconds(3000));
     auto timeStampFour = TimeStamp(std::chrono::nanoseconds(4000));
     std::vector<TouchEvent> history;
-    history.push_back(TouchEvent { .x = 100.0f, .y = 200.0f, .time = timeStampAce });
-    history.push_back(TouchEvent { .x = 150.0f, .y = 250.0f, .time = timeStampTwo });
+    history.push_back(TouchEvent {}.SetX(100.0f).SetY(200.0f).SetTime(timeStampAce));
+    history.push_back(TouchEvent {}.SetX(150.0f).SetY(250.0f).SetTime(timeStampTwo));
     std::vector<TouchEvent> current;
-    current.push_back(TouchEvent { .x = 200.0f, .y = 300.0f, .time = timeStampThree });
-    current.push_back(TouchEvent { .x = 250.0f, .y = 350.0f, .time = timeStampFour });
+    current.push_back(TouchEvent {}.SetX(200.0f).SetY(300.0f).SetTime(timeStampThree));
+    current.push_back(TouchEvent {}.SetX(250.0f).SetY(350.0f).SetTime(timeStampFour));
     uint64_t nanoTimeStamp = 2500;
 
     TouchEvent resampledTouchEvent = context_->GetResampleTouchEvent(history, current, nanoTimeStamp);
@@ -3139,6 +3070,39 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg072, TestSize.Level1)
 
     TouchEvent result = context_->GetLatestPoint(events, nanoTimeStamp);
     ASSERT_LT(static_cast<uint64_t>(result.time.time_since_epoch().count()), nanoTimeStamp);
+}
+
+/**
+ * @tc.name: PipelineContextTestNg073
+ * @tc.desc: Test the function GetSafeArea and GetSafeAreaWithoutProcess.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PipelineContextTestNg, PipelineContextTestNg073, TestSize.Level1)
+{
+    /**
+     * @tc.steps1: initialize parameters.
+     * @tc.expected: All pointer is non-null.
+     */
+    ASSERT_NE(context_, nullptr);
+    /**
+     * @tc.steps2: call UpdateSystemSafeArea and SetIgnoreViewSafeArea, then check the value of GetSafeArea
+                and GetSafeAreaWithoutProcess.
+     * @tc.expected: The GetSafeArea is empty, and the GetSafeAreaWithoutProcess is systemSafeArea.
+     */
+    SafeAreaInsets::Inset left { 0, 1 };
+    SafeAreaInsets::Inset top { 0, 2 };
+    SafeAreaInsets::Inset right { 0, 3 };
+    SafeAreaInsets::Inset bottom { 0, 4 };
+    SafeAreaInsets safeAreaInsets(left, top, right, bottom);
+
+    SafeAreaInsets::Inset inset {};
+    SafeAreaInsets emptySafeAreaInsets(inset, inset, inset, inset);
+
+    context_->UpdateSystemSafeArea(safeAreaInsets);
+    context_->SetIgnoreViewSafeArea(true);
+
+    EXPECT_EQ(context_->safeAreaManager_->GetSafeArea(), emptySafeAreaInsets);
+    EXPECT_EQ(context_->safeAreaManager_->GetSafeAreaWithoutProcess(), safeAreaInsets);
 }
 } // namespace NG
 } // namespace OHOS::Ace

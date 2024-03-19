@@ -41,9 +41,7 @@ public:
         {
             RefPtr<ShadowTheme> theme = AceType::Claim(new ShadowTheme());
             CHECK_NULL_RETURN(themeConstants, theme);
-            auto themeStyle = themeConstants->GetThemeStyle();
-            CHECK_NULL_RETURN(themeStyle, theme);
-            auto shadowTheme = themeStyle->GetAttr<RefPtr<ThemeStyle>>(THEME_PATTERN_SHADOW, nullptr);
+            RefPtr<ThemeStyle> shadowTheme = themeConstants->GetPatternByName(THEME_PATTERN_SHADOW);
             if (!shadowTheme) {
                 TAG_LOGW(AceLogTag::ACE_THEME, "find pattern of shadow fail");
                 return theme;

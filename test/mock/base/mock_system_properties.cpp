@@ -13,6 +13,8 @@
  * limitations under the License.
  */
 
+#include "test/mock/base/mock_system_properties.h"
+
 #include <string>
 
 #include "base/utils/system_properties.h"
@@ -53,12 +55,15 @@ int32_t SystemProperties::devicePhysicalWidth_ = 0;
 int32_t SystemProperties::devicePhysicalHeight_ = 0;
 bool SystemProperties::enableScrollableItemPool_ = false;
 bool SystemProperties::navigationBlurEnabled_ = false;
-bool SystemProperties::gridCacheEnabled_ = false;
+bool SystemProperties::gridCacheEnabled_ = true;
 bool SystemProperties::sideBarContainerBlurEnable_ = false;
 bool SystemProperties::stateManagerEnable_ = false;
 bool SystemProperties::acePerformanceMonitorEnable_ = false;
 bool SystemProperties::debugBoundaryEnabled_ = false;
 bool SystemProperties::developerModeOn_ = false;
+
+bool g_irregularGrid = true;
+bool g_segmentedWaterflow = true;
 
 float SystemProperties::GetFontWeightScale()
 {
@@ -134,12 +139,12 @@ bool SystemProperties::GetGridCacheEnabled()
 
 bool SystemProperties::GetGridIrregularLayoutEnabled()
 {
-    return false;
+    return g_irregularGrid;
 }
 
 bool SystemProperties::WaterFlowUseSegmentedLayout()
 {
-    return true;
+    return g_segmentedWaterflow;
 }
 
 bool SystemProperties::GetSideBarContainerBlurEnable()

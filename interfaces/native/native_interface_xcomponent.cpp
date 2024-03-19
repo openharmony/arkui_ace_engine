@@ -268,6 +268,29 @@ int32_t OH_NativeXComponent_SetNeedSoftKeyboard(OH_NativeXComponent* component, 
     return component ? component->SetNeedSoftKeyboard(needSoftKeyboard) : OH_NATIVEXCOMPONENT_RESULT_BAD_PARAMETER;
 }
 
+int32_t OH_NativeXComponent_RegisterSurfaceShowCallback(
+    OH_NativeXComponent* component, void (*callback)(OH_NativeXComponent* component, void* window))
+{
+    return (component && callback) ? component->RegisterSurfaceShowCallback(callback)
+        : OH_NATIVEXCOMPONENT_RESULT_BAD_PARAMETER;
+}
+
+int32_t OH_NativeXComponent_RegisterSurfaceHideCallback(
+    OH_NativeXComponent* component, void (*callback)(OH_NativeXComponent* component, void* window))
+{
+    return (component && callback) ? component->RegisterSurfaceHideCallback(callback)
+        : OH_NATIVEXCOMPONENT_RESULT_BAD_PARAMETER;
+}
+
+int32_t OH_NativeXComponent_RegisterOnTouchInterceptCallback(
+    OH_NativeXComponent* component, HitTestMode (*callback)(OH_NativeXComponent* component, ArkUI_UIInputEvent* event))
+{
+    if ((component == nullptr) || (callback == nullptr)) {
+        return OHOS::Ace::ERROR_CODE_PARAM_INVALID;
+    }
+    return component->RegisterOnTouchInterceptCallback(callback);
+}
+
 #ifdef __cplusplus
 };
 #endif
