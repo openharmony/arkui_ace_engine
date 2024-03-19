@@ -2200,6 +2200,7 @@ class SubscribableHandler {
             // PU code path
             if ('onTrackedObjectPropertyCompatModeHasChangedPU' in owningProperty) {
                 owningProperty.onTrackedObjectPropertyCompatModeHasChangedPU(this, propName);
+                return;
             }
             // FU code path
             if ('hasChanged' in owningProperty) {
@@ -2244,10 +2245,10 @@ class SubscribableHandler {
             default:
                 const result = Reflect.get(target, property, receiver);
                 let propertyStr = String(property);
-                if (this.readCbFunc_ && typeof result !== 'function') {
+                if (this.readCbFunc_ && typeof result !== 'function' && this.obSelf_ != undefined) {
                     let isTracked = this.isPropertyTracked(target, propertyStr);
                     
-                    this.readCbFunc_(receiver, propertyStr, isTracked);
+                    this.readCbFunc_.call(this.obSelf_, receiver, propertyStr, isTracked);
                 }
                 else {
                     // result is function or in compatibility mode (in compat mode cbFunc will never be set)
@@ -2273,6 +2274,10 @@ class SubscribableHandler {
                 // assignment obsObj[SubscribableHandler.SET_ONREAD_CB] = readCallbackFunc
                 
                 this.readCbFunc_ = TrackedObject.isCompatibilityMode(target) ? undefined : newValue;
+                return true;
+                break;
+            case SubscribableHandler.RAW_THIS:
+                this.obSelf_ = TrackedObject.isCompatibilityMode(target) ? undefined : newValue;
                 return true;
                 break;
             default:
@@ -2313,6 +2318,7 @@ SubscribableHandler.SUBSCRIBE = Symbol("_____subscribe__");
 SubscribableHandler.UNSUBSCRIBE = Symbol("_____unsubscribe__");
 SubscribableHandler.COUNT_SUBSCRIBERS = Symbol("____count_subscribers__");
 SubscribableHandler.SET_ONREAD_CB = Symbol("_____set_onread_cb__");
+SubscribableHandler.RAW_THIS = Symbol("_____raw_this");
 class SubscribableMapSetHandler extends SubscribableHandler {
     constructor(owningProperty) {
         super(owningProperty);
@@ -2564,11 +2570,12 @@ class ObservedObject extends ExtendableProxy {
     /*
       set or unset callback function to be called when a property has been called
     */
-    static registerPropertyReadCb(obj, readPropCb) {
+    static registerPropertyReadCb(obj, readPropCb, obSelf) {
         if (!ObservedObject.IsObservedObject(obj)) {
             return false;
         }
         obj[SubscribableHandler.SET_ONREAD_CB] = readPropCb;
+        obj[SubscribableHandler.RAW_THIS] = obSelf;
         return true;
     }
     static unregisterPropertyReadCb(obj) {
@@ -2576,6 +2583,7 @@ class ObservedObject extends ExtendableProxy {
             return false;
         }
         obj[SubscribableHandler.SET_ONREAD_CB] = undefined;
+        obj[SubscribableHandler.RAW_THIS] = undefined;
         return true;
     }
     /**
@@ -3670,12 +3678,12 @@ class TrackedObject {
      * if optimisation can not be applied calls notifyPropertyChanged and returns false
      */
     static notifyObjectValueAssignment(obj1, obj2, notifyPropertyChanged, // notify as assignment (none-optimised)
-    notifyTrackedPropertyChange) {
+    notifyTrackedPropertyChange, obSelf) {
         if (!obj1 || !obj2 || (typeof obj1 !== 'object') || (typeof obj2 !== 'object') ||
             (obj1.constructor !== obj2.constructor) ||
             TrackedObject.isCompatibilityMode(obj1)) {
             
-            notifyPropertyChanged();
+            notifyPropertyChanged.call(obSelf);
             return false;
         }
         
@@ -3688,7 +3696,7 @@ class TrackedObject {
             if (Reflect.has(obj1Raw, `${TrackedObject.___TRACKED_PREFIX}${propName}`) &&
                 (Reflect.get(obj1Raw, propName) !== Reflect.get(obj2Raw, propName))) {
                 
-                notifyTrackedPropertyChange(propName);
+                notifyTrackedPropertyChange.call(obSelf, propName);
                 shouldFakePropPropertyBeNotified = true;
             }
             else {
@@ -3700,14 +3708,14 @@ class TrackedObject {
         // reporting the property as changed causes @Prop sync from source
         if (shouldFakePropPropertyBeNotified) {
             
-            notifyTrackedPropertyChange(TrackedObject.___TRACKED_OPTI_ASSIGNMENT_FAKE_PROP_PROPERTY);
+            notifyTrackedPropertyChange.call(obSelf, TrackedObject.___TRACKED_OPTI_ASSIGNMENT_FAKE_PROP_PROPERTY);
         }
         // always notify this non-existing object property has changed for SynchedPropertyNestedObject as 
         // the object has changed in assigment.
         // SynchedPropertyNestedObject.set() reports a 'read' on this property, thereby creating a dependency
         // reporting the property as changed causes @ObjectLink sync from source
         
-        notifyTrackedPropertyChange(TrackedObject.___TRACKED_OPTI_ASSIGNMENT_FAKE_OBJLINK_PROPERTY);
+        notifyTrackedPropertyChange.call(obSelf, TrackedObject.___TRACKED_OPTI_ASSIGNMENT_FAKE_OBJLINK_PROPERTY);
         return true;
     }
 }
@@ -3968,9 +3976,19 @@ class ObservedPropertyAbstractPU extends ObservedPropertyAbstract {
       FIXME this expects the Map, Set patch to go in
      */
     checkIsSupportedValue(value) {
-        return this.checkNewValue(`undefined, null, number, boolean, string, or Object but not function, not V3 @observed / @track class`, value, () => ((typeof value == "object" && typeof value != "function" && !ObserveV3.IsObservedObjectV3(value))
+        let res = ((typeof value == "object" && typeof value != "function" && !ObserveV3.IsObservedObjectV3(value))
             || typeof value == "number" || typeof value == "string" || typeof value == "boolean"
-            || value == undefined || value == null));
+            || value == undefined || value == null);
+        if (!res) {
+            errorReport.varValueCheckFailed({
+                customComponent: this.debugInfoOwningView(),
+                variableDeco: this.debugInfoDecorator(),
+                variableName: this.info(),
+                expectedType: `undefined, null, number, boolean, string, or Object but not function, not V3 @observed / @track class`,
+                value: value
+            });
+        }
+        return res;
     }
     /*
       type checking for allowed Object type value
@@ -3979,15 +3997,35 @@ class ObservedPropertyAbstractPU extends ObservedPropertyAbstract {
         FIXME this expects the Map, Set patch to go in
      */
     checkIsObject(value) {
-        return this.checkNewValue(`undefined, null, Object including Array and instance of SubscribableAbstract and excluding function and V3 @observed/@track object`, value, () => ((typeof value == "object" && typeof value != "function" && !ObserveV3.IsObservedObjectV3(value))
-            || value == undefined || value == null));
+        let res = ((typeof value == "object" && typeof value != "function" && !ObserveV3.IsObservedObjectV3(value))
+            || value == undefined || value == null);
+        if (!res) {
+            errorReport.varValueCheckFailed({
+                customComponent: this.debugInfoOwningView(),
+                variableDeco: this.debugInfoDecorator(),
+                variableName: this.info(),
+                expectedType: `undefined, null, Object including Array and instance of SubscribableAbstract and excluding function and V3 @observed/@track object`,
+                value: value
+            });
+        }
+        return res;
     }
     /*
       type checking for allowed simple types value
       see 1st parameter for explanation what is allowed
      */
     checkIsSimple(value) {
-        return this.checkNewValue(`undefined, number, boolean, string`, value, () => (value == undefined || typeof value == "number" || typeof value == "string" || typeof value == "boolean"));
+        let res = (value == undefined || typeof value == "number" || typeof value == "string" || typeof value == "boolean");
+        if (!res) {
+            errorReport.varValueCheckFailed({
+                customComponent: this.debugInfoOwningView(),
+                variableDeco: this.debugInfoDecorator(),
+                variableName: this.info(),
+                expectedType: `undefined, number, boolean, string`,
+                value: value
+            });
+        }
+        return res;
     }
     checkNewValue(isAllowedComment, newValue, validator) {
         if (validator(newValue)) {
@@ -4289,7 +4327,7 @@ class ObservedPropertyPU extends ObservedPropertyAbstractPU {
         this.recordPropertyDependentUpdate();
         if (this.shouldInstallTrackedObjectReadCb) {
             
-            ObservedObject.registerPropertyReadCb(this.wrappedValue_, this.onOptimisedObjectPropertyRead.bind(this));
+            ObservedObject.registerPropertyReadCb(this.wrappedValue_, this.onOptimisedObjectPropertyRead, this);
         }
         else {
             
@@ -4310,7 +4348,7 @@ class ObservedPropertyPU extends ObservedPropertyAbstractPU {
         
         const oldValue = this.wrappedValue_;
         if (this.setValueInternal(newValue)) {
-            TrackedObject.notifyObjectValueAssignment(/* old value */ oldValue, /* new value */ this.wrappedValue_, this.notifyPropertyHasChangedPU.bind(this), this.notifyTrackedObjectPropertyHasChanged.bind(this));
+            TrackedObject.notifyObjectValueAssignment(/* old value */ oldValue, /* new value */ this.wrappedValue_, this.notifyPropertyHasChangedPU, this.notifyTrackedObjectPropertyHasChanged, this);
         }
     }
     onOptimisedObjectPropertyRead(readObservedObject, readPropertyName, isTracked) {
@@ -4508,7 +4546,7 @@ class SynchedPropertyOneWayPU extends ObservedPropertyAbstractPU {
         this.recordPropertyDependentUpdate();
         if (this.shouldInstallTrackedObjectReadCb) {
             
-            ObservedObject.registerPropertyReadCb(this.localCopyObservedObject_, this.onOptimisedObjectPropertyRead.bind(this));
+            ObservedObject.registerPropertyReadCb(this.localCopyObservedObject_, this.onOptimisedObjectPropertyRead, this);
         }
         else {
             
@@ -4525,7 +4563,7 @@ class SynchedPropertyOneWayPU extends ObservedPropertyAbstractPU {
         
         const oldValue = this.localCopyObservedObject_;
         if (this.resetLocalValue(newValue, /* needCopyObject */ false)) {
-            TrackedObject.notifyObjectValueAssignment(/* old value */ oldValue, /* new value */ this.localCopyObservedObject_, this.notifyPropertyHasChangedPU.bind(this), this.notifyTrackedObjectPropertyHasChanged.bind(this));
+            TrackedObject.notifyObjectValueAssignment(/* old value */ oldValue, /* new value */ this.localCopyObservedObject_, this.notifyPropertyHasChangedPU, this.notifyTrackedObjectPropertyHasChanged, this);
         }
     }
     onOptimisedObjectPropertyRead(readObservedObject, readPropertyName, isTracked) {
@@ -4871,7 +4909,7 @@ class SynchedPropertyTwoWayPU extends ObservedPropertyAbstractPU {
         const result = this.getUnmonitored();
         if (this.shouldInstallTrackedObjectReadCb) {
             
-            ObservedObject.registerPropertyReadCb(result, this.onOptimisedObjectPropertyRead.bind(this));
+            ObservedObject.registerPropertyReadCb(result, this.onOptimisedObjectPropertyRead, this);
         }
         else {
             
@@ -4892,7 +4930,7 @@ class SynchedPropertyTwoWayPU extends ObservedPropertyAbstractPU {
         this.changeNotificationIsOngoing_ = true;
         let oldValue = this.getUnmonitored();
         this.setObject(newValue);
-        TrackedObject.notifyObjectValueAssignment(/* old value */ oldValue, /* new value */ newValue, this.notifyPropertyHasChangedPU.bind(this), this.notifyTrackedObjectPropertyHasChanged.bind(this));
+        TrackedObject.notifyObjectValueAssignment(/* old value */ oldValue, /* new value */ newValue, this.notifyPropertyHasChangedPU, this.notifyTrackedObjectPropertyHasChanged, this);
         this.changeNotificationIsOngoing_ = false;
         
     }
@@ -4980,7 +5018,7 @@ class SynchedPropertyNestedObjectPU extends ObservedPropertyAbstractPU {
         this.recordPropertyDependentUpdate();
         if (this.shouldInstallTrackedObjectReadCb) {
             
-            ObservedObject.registerPropertyReadCb(this.obsObject_, this.onOptimisedObjectPropertyRead.bind(this));
+            ObservedObject.registerPropertyReadCb(this.obsObject_, this.onOptimisedObjectPropertyRead, this);
         }
         else {
             
@@ -5000,7 +5038,7 @@ class SynchedPropertyNestedObjectPU extends ObservedPropertyAbstractPU {
         if (this.setValueInternal(newValue)) {
             this.createSourceDependency(newValue);
             // notify value change to subscribing View
-            TrackedObject.notifyObjectValueAssignment(/* old value */ oldValue, /* new value */ this.obsObject_, this.notifyPropertyHasChangedPU.bind(this), this.notifyTrackedObjectPropertyHasChanged.bind(this));
+            TrackedObject.notifyObjectValueAssignment(/* old value */ oldValue, /* new value */ this.obsObject_, this.notifyPropertyHasChangedPU, this.notifyTrackedObjectPropertyHasChanged, this);
         }
     }
     onOptimisedObjectPropertyRead(readObservedObject, readPropertyName, isTracked) {
@@ -5684,39 +5722,39 @@ class ViewPU extends NativeViewPartialUpdate {
     // implements IMultiPropertiesChangeSubscriber
     viewPropertyHasChanged(varName, dependentElmtIds) {
         
-        stateMgmtTrace.scopedTrace(() => {
-            if (this.isRenderInProgress) {
-                stateMgmtConsole.applicationError(`${this.debugInfo__()}: State variable '${varName}' has changed during render! It's illegal to change @Component state while build (initial render or re-render) is on-going. Application error!`);
+        aceTrace.begin("ViewPU.viewPropertyHasChanged", this.constructor.name, varName, dependentElmtIds.size);
+        if (this.isRenderInProgress) {
+            stateMgmtConsole.applicationError(`${this.debugInfo__()}: State variable '${varName}' has changed during render! It's illegal to change @Component state while build (initial render or re-render) is on-going. Application error!`);
+        }
+        this.syncInstanceId();
+        if (dependentElmtIds.size && !this.isFirstRender()) {
+            if (!this.dirtDescendantElementIds_.size && !this.runReuse_) {
+                // mark ComposedElement dirty when first elmtIds are added
+                // do not need to do this every time
+                this.markNeedUpdate();
             }
-            this.syncInstanceId();
-            if (dependentElmtIds.size && !this.isFirstRender()) {
-                if (!this.dirtDescendantElementIds_.size && !this.runReuse_) {
-                    // mark ComposedElement dirty when first elmtIds are added
-                    // do not need to do this every time
-                    this.markNeedUpdate();
+            
+            for (const elmtId of dependentElmtIds) {
+                if (this.hasRecycleManager()) {
+                    this.dirtDescendantElementIds_.add(this.recycleManager_.proxyNodeId(elmtId));
                 }
-                
-                for (const elmtId of dependentElmtIds) {
-                    if (this.hasRecycleManager()) {
-                        this.dirtDescendantElementIds_.add(this.recycleManager_.proxyNodeId(elmtId));
-                    }
-                    else {
-                        this.dirtDescendantElementIds_.add(elmtId);
-                    }
+                else {
+                    this.dirtDescendantElementIds_.add(elmtId);
                 }
-                
             }
-            else {
-                
-                
-            }
-            let cb = this.watchedProps.get(varName);
-            if (cb) {
-                
-                cb.call(this, varName);
-            }
-            this.restoreInstanceId();
-        }, "ViewPU.viewPropertyHasChanged", this.constructor.name, varName, dependentElmtIds.size);
+            
+        }
+        else {
+            
+            
+        }
+        let cb = this.watchedProps.get(varName);
+        if (cb) {
+            
+            cb.call(this, varName);
+        }
+        this.restoreInstanceId();
+        aceTrace.end();
         
     }
     /**
@@ -5751,31 +5789,31 @@ class ViewPU extends NativeViewPartialUpdate {
             return;
         }
         
-        stateMgmtTrace.scopedTrace(() => {
-            
-            this.syncInstanceId();
-            for (const stateLinkPropVar of this.ownObservedPropertiesStore_) {
-                const changedElmtIds = stateLinkPropVar.moveElmtIdsForDelayedUpdate();
-                if (changedElmtIds) {
-                    const varName = stateLinkPropVar.info();
-                    if (changedElmtIds.size && !this.isFirstRender()) {
-                        for (const elmtId of changedElmtIds) {
-                            this.dirtDescendantElementIds_.add(elmtId);
-                        }
-                    }
-                    
-                    const cb = this.watchedProps.get(varName);
-                    if (cb) {
-                        
-                        cb.call(this, varName);
+        aceTrace.begin("ViewPU.performDelayedUpdate", this.constructor.name);
+        
+        this.syncInstanceId();
+        for (const stateLinkPropVar of this.ownObservedPropertiesStore_) {
+            const changedElmtIds = stateLinkPropVar.moveElmtIdsForDelayedUpdate();
+            if (changedElmtIds) {
+                const varName = stateLinkPropVar.info();
+                if (changedElmtIds.size && !this.isFirstRender()) {
+                    for (const elmtId of changedElmtIds) {
+                        this.dirtDescendantElementIds_.add(elmtId);
                     }
                 }
-            } // for all ownStateLinkProps_
-            this.restoreInstanceId();
-            if (this.dirtDescendantElementIds_.size) {
-                this.markNeedUpdate();
+                
+                const cb = this.watchedProps.get(varName);
+                if (cb) {
+                    
+                    cb.call(this, varName);
+                }
             }
-        }, "ViewPU.performDelayedUpdate", this.constructor.name);
+        } // for all ownStateLinkProps_
+        this.restoreInstanceId();
+        if (this.dirtDescendantElementIds_.size) {
+            this.markNeedUpdate();
+        }
+        aceTrace.end();
         
     }
     /**

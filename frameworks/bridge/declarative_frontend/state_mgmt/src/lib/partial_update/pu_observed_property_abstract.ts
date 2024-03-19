@@ -297,13 +297,19 @@ implements ISinglePropertyChangeSubscriber<T>, IMultiPropertiesChangeSubscriber,
    */
 
   protected checkIsSupportedValue(value: T): boolean {
-    return this.checkNewValue(
-      `undefined, null, number, boolean, string, or Object but not function, not V3 @observed / @track class`,
-      value,
-      () => ((typeof value == "object" && typeof value != "function" && !ObserveV3.IsObservedObjectV3(value))
-        || typeof value == "number" || typeof value == "string" || typeof value == "boolean"
-        || value == undefined || value == null)
-    );
+    let res = ((typeof value == "object" && typeof value != "function" && !ObserveV3.IsObservedObjectV3(value))
+    || typeof value == "number" || typeof value == "string" || typeof value == "boolean"
+    || value == undefined || value == null);
+    if (!res) {
+      errorReport.varValueCheckFailed({
+          customComponent: this.debugInfoOwningView(),
+          variableDeco: this.debugInfoDecorator(),
+          variableName: this.info(),
+          expectedType: `undefined, null, number, boolean, string, or Object but not function, not V3 @observed / @track class`,
+          value: value
+        })
+    }
+    return res;
   }
 
   /*
@@ -313,12 +319,18 @@ implements ISinglePropertyChangeSubscriber<T>, IMultiPropertiesChangeSubscriber,
       FIXME this expects the Map, Set patch to go in
    */
   protected checkIsObject(value: T): boolean {
-    return this.checkNewValue(
-      `undefined, null, Object including Array and instance of SubscribableAbstract and excluding function and V3 @observed/@track object`,
-      value,
-      () => ((typeof value == "object" && typeof value != "function" && !ObserveV3.IsObservedObjectV3(value))
-        || value == undefined || value == null)
-    );
+    let res = ((typeof value == "object" && typeof value != "function" && !ObserveV3.IsObservedObjectV3(value))
+    || value == undefined || value == null);
+    if (!res) {
+      errorReport.varValueCheckFailed({
+          customComponent: this.debugInfoOwningView(),
+          variableDeco: this.debugInfoDecorator(),
+          variableName: this.info(),
+          expectedType: `undefined, null, Object including Array and instance of SubscribableAbstract and excluding function and V3 @observed/@track object`,
+          value: value
+        })
+    }
+    return res;
   }
 
   /*
@@ -326,11 +338,17 @@ implements ISinglePropertyChangeSubscriber<T>, IMultiPropertiesChangeSubscriber,
     see 1st parameter for explanation what is allowed
    */
   protected checkIsSimple(value: T): boolean {
-    return this.checkNewValue(
-      `undefined, number, boolean, string`,
-      value,
-      () => (value == undefined || typeof value == "number" || typeof value == "string" || typeof value == "boolean")
-    );
+    let res = (value == undefined || typeof value == "number" || typeof value == "string" || typeof value == "boolean");
+    if (!res) {
+      errorReport.varValueCheckFailed({
+        customComponent: this.debugInfoOwningView(),
+        variableDeco: this.debugInfoDecorator(),
+        variableName: this.info(),
+        expectedType: `undefined, number, boolean, string`,
+        value: value
+      })
+    }
+    return res;
   }
 
   protected checkNewValue(isAllowedComment : string, newValue: T, validator: (value: T) => boolean) : boolean {

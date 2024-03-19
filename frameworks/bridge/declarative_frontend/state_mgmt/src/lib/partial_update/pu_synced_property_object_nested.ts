@@ -70,7 +70,7 @@ class SynchedPropertyNestedObjectPU<C extends Object>
     this.recordPropertyDependentUpdate();
     if (this.shouldInstallTrackedObjectReadCb) {
       stateMgmtConsole.propertyAccess(`${this.debugInfo()}: get: @Track optimised mode. Will install read cb func if value is an object`);
-      ObservedObject.registerPropertyReadCb(this.obsObject_, this.onOptimisedObjectPropertyRead.bind(this));
+      ObservedObject.registerPropertyReadCb(this.obsObject_, this.onOptimisedObjectPropertyRead, this);
     } else {
       stateMgmtConsole.propertyAccess(`${this.debugInfo()}: get: compatibility mode. `);
     }
@@ -92,8 +92,8 @@ class SynchedPropertyNestedObjectPU<C extends Object>
       this.createSourceDependency(newValue);
       // notify value change to subscribing View
       TrackedObject.notifyObjectValueAssignment(/* old value */ oldValue, /* new value */ this.obsObject_,
-        this.notifyPropertyHasChangedPU.bind(this),
-        this.notifyTrackedObjectPropertyHasChanged.bind(this));
+        this.notifyPropertyHasChangedPU,
+        this.notifyTrackedObjectPropertyHasChanged, this);
     }
   }
 
