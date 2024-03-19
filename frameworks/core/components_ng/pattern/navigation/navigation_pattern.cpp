@@ -22,6 +22,7 @@
 #include "base/perfmonitor/perf_monitor.h"
 #include "core/common/container.h"
 #include "core/common/manager_interface.h"
+#include "core/components_ng/base/observer_handler.h"
 #include "core/components_ng/pattern/navigation/nav_bar_layout_property.h"
 #include "core/components_ng/pattern/navigation/nav_bar_node.h"
 #include "core/components_ng/pattern/navigation/navigation_model_data.h"
@@ -39,9 +40,27 @@ constexpr Dimension DEFAULT_DRAG_REGION = 12.0_vp;
 constexpr float DEFAULT_HALF = 2.0f;
 const Color MASK_COLOR = Color::FromARGB(25, 0, 0, 0);
 namespace {
-
 constexpr static int32_t PLATFORM_VERSION_TEN = 10;
 
+void BuildNavDestinationInfoFromContext(const std::string& navigationId, NavDestinationState state,
+    const RefPtr<NavDestinationContext>& context, std::optional<NavDestinationInfo>& info)
+{
+    if (!context) {
+        info.reset();
+        return;
+    }
+
+    int32_t index = context->GetIndex();
+    std::string navDestinationId = std::to_string(context->GetNavDestinationId());
+    std::string name;
+    napi_value param = nullptr;
+    auto pathInfo = context->GetNavPathInfo();
+    if (pathInfo) {
+        name = pathInfo->GetName();
+        param = pathInfo->GetParamObj();
+    }
+    info = std::make_optional<NavDestinationInfo>(navigationId, name, state, index, param, navDestinationId);
+}
 } // namespace
 
 NavigationPattern::NavigationPattern()
@@ -1651,6 +1670,10 @@ void NavigationPattern::FireInterceptionEvent(bool isBefore,
     }
     navigationStack_->FireNavigationInterception(isBefore, preContext_, to, operation,
         isAnimated_);
+
+    if (!isBefore) {
+        NotifyNavDestinationSwitch(preContext_, to, operation);
+    }
 }
 
 void NavigationPattern::UpdateIsAnimation(const std::optional<std::pair<std::string, RefPtr<UINode>>>& preTopNavPath)
@@ -1684,5 +1707,22 @@ void NavigationPattern::UpdateIsAnimation(const std::optional<std::pair<std::str
         return;
     }
     isAnimated_ = isCustomAnimation_;
+}
+
+void NavigationPattern::NotifyNavDestinationSwitch(const RefPtr<NavDestinationContext>& from,
+    const RefPtr<NavDestinationContext>& to, NavigationOperation operation)
+{
+    auto host = GetHost();
+    if (!host) {
+        return;
+    }
+
+    std::string navigationId = host->GetInspectorIdValue("");
+    std::optional<NavDestinationInfo> fromInfo;
+    std::optional<NavDestinationInfo> toInfo;
+    BuildNavDestinationInfoFromContext(navigationId, NavDestinationState::ON_HIDDEN, from, fromInfo);
+    BuildNavDestinationInfoFromContext(navigationId, NavDestinationState::ON_SHOWN, to, toInfo);
+    UIObserverHandler::GetInstance().NotifyNavDestinationSwitch(
+        std::move(fromInfo), std::move(toInfo), operation);
 }
 } // namespace OHOS::Ace::NG
