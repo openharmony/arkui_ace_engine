@@ -3739,7 +3739,7 @@ int32_t SetScrollTo(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
         values[4] = item->value[2].i32;
     }
     // check size
-    if (item->size > 3 || !CheckAttributeIsAnimationCurve(item->value[3].i32)) {
+    if (item->size > NUM_3 && CheckAttributeIsAnimationCurve(item->value[NUM_3].i32)) {
         values[5] = item->value[3].i32;
     }
     if (item->size > 4) {
