@@ -227,6 +227,8 @@ void CheckBoxModifier::DrawCheck(
     RSCanvas& canvas, const OffsetF& origin, RSPen& pen, RSPen& shadowPen, const SizeF& paintSize) const
 {
     if (strokeSize_->Get() == CHECKBOX_LENGTH_ZERO || checkStroke_->Get() == CHECKBOX_LENGTH_ZERO) {
+        TAG_LOGD(AceLogTag::ACE_SELECT_COMPONENT, "checkbox draw check zero %{public}f %{public}f", strokeSize_->Get(),
+            checkStroke_->Get());
         return;
     }
 #ifndef USE_ROSEN_DRAWING

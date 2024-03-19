@@ -179,6 +179,7 @@ void ToggleModelNG::SetSwitchSelected(RefPtr<FrameNode>& childFrameNode, bool is
     }
     auto eventHub = childFrameNode->GetEventHub<SwitchEventHub>();
     CHECK_NULL_VOID(eventHub);
+    TAG_LOGD(AceLogTag::ACE_SELECT_COMPONENT, "switch mouse event %{public}d", isOn);
     eventHub->SetCurrentUIState(UI_STATE_SELECTED, isOn);
 }
 

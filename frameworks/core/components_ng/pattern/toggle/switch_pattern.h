@@ -128,7 +128,6 @@ private:
     void SetAccessibilityAction();
     void UpdateSelectStatus(bool isSelected);
     void OnAfterModifyDone() override;
-    void OnAttachToFrameNode() override;
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, bool skipMeasure, bool skipLayout) override;
     RefPtr<Curve> GetCurve() const;
     int32_t GetDuration() const;

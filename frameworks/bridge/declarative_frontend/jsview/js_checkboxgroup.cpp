@@ -135,6 +135,7 @@ void JSCheckboxGroup::SetSelectAll(const JSCallbackInfo& info)
     if (info.Length() > 0 && info[0]->IsBoolean()) {
         selectAll = info[0]->ToBoolean();
     }
+    TAG_LOGD(AceLogTag::ACE_SELECT_COMPONENT, "checkboxgroup select all %{public}d", selectAll);
     CheckBoxGroupModel::GetInstance()->SetSelectAll(selectAll);
     if (info.Length() > 1 && info[1]->IsFunction()) {
         ParseSelectAllObject(info, info[1]);

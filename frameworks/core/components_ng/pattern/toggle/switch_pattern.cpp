@@ -35,11 +35,6 @@ namespace {
 constexpr int32_t DEFAULT_DURATION = 200;
 const Color ITEM_FILL_COLOR = Color::TRANSPARENT;
 } // namespace
-void SwitchPattern::OnAttachToFrameNode()
-{
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-}
 
 bool SwitchPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, bool skipMeasure, bool skipLayout)
 {
@@ -258,6 +253,7 @@ void SwitchPattern::UpdateChangeEvent() const
 void SwitchPattern::OnClick()
 {
     isOn_ = !isOn_.value_or(false);
+    TAG_LOGD(AceLogTag::ACE_SELECT_COMPONENT, "switch click result %{public}d", isOn_.value_or(false));
     OnChange();
     auto host = GetHost();
     CHECK_NULL_VOID(host);
@@ -266,6 +262,7 @@ void SwitchPattern::OnClick()
 
 void SwitchPattern::OnTouchDown()
 {
+    TAG_LOGD(AceLogTag::ACE_SELECT_COMPONENT, "switch touch down hover status %{public}d", isHover_);
     if (isHover_) {
         touchHoverType_ = TouchHoverAnimationType::HOVER_TO_PRESS;
     } else {
@@ -279,6 +276,7 @@ void SwitchPattern::OnTouchDown()
 
 void SwitchPattern::OnTouchUp()
 {
+    TAG_LOGD(AceLogTag::ACE_SELECT_COMPONENT, "switch touch up hover status %{public}d", isHover_);
     if (isHover_) {
         touchHoverType_ = TouchHoverAnimationType::PRESS_TO_HOVER;
     } else {
@@ -297,6 +295,7 @@ void SwitchPattern::InitPanEvent(const RefPtr<GestureEventHub>& gestureHub)
     }
 
     auto actionStartTask = [weak = WeakClaim(this)](const GestureEvent& info) {
+        TAG_LOGD(AceLogTag::ACE_SELECT_COMPONENT, "switch drag start");
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
         if (info.GetInputEventType() == InputEventType::AXIS) {
@@ -312,6 +311,7 @@ void SwitchPattern::InitPanEvent(const RefPtr<GestureEventHub>& gestureHub)
     };
 
     auto actionEndTask = [weak = WeakClaim(this)](const GestureEvent& info) {
+        TAG_LOGD(AceLogTag::ACE_SELECT_COMPONENT, "switch drag end");
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
         if (info.GetInputEventType() == InputEventType::AXIS) {
@@ -321,6 +321,7 @@ void SwitchPattern::InitPanEvent(const RefPtr<GestureEventHub>& gestureHub)
     };
 
     auto actionCancelTask = [weak = WeakClaim(this)]() {
+        TAG_LOGD(AceLogTag::ACE_SELECT_COMPONENT, "switch drag cancel");
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
         pattern->HandleDragEnd();
@@ -431,6 +432,7 @@ void SwitchPattern::GetInnerFocusPaintRect(RoundRect& paintRect)
 
 void SwitchPattern::HandleMouseEvent(bool isHover)
 {
+    TAG_LOGD(AceLogTag::ACE_SELECT_COMPONENT, "switch mouse event %{public}d", isHover);
     isHover_ = isHover;
     if (isHover) {
         touchHoverType_ = TouchHoverAnimationType::HOVER;
@@ -450,6 +452,7 @@ void SwitchPattern::HandleDragStart()
 void SwitchPattern::HandleDragUpdate(const GestureEvent& info)
 {
     dragOffsetX_ = static_cast<float>(info.GetLocalLocation().GetX());
+    TAG_LOGD(AceLogTag::ACE_SELECT_COMPONENT, "switch drag update %{public}f", dragOffsetX_);
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);

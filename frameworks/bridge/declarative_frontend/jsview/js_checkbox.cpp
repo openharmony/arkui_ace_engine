@@ -125,6 +125,7 @@ void JSCheckbox::SetSelect(const JSCallbackInfo& info)
     if (info.Length() > 0 && info[0]->IsBoolean()) {
         select = info[0]->ToBoolean();
     }
+    TAG_LOGD(AceLogTag::ACE_SELECT_COMPONENT, "checkbox set select %{public}d", select);
     CheckBoxModel::GetInstance()->SetSelect(select);
     if (info.Length() > 1 && info[1]->IsFunction()) {
         ParseSelectObject(info, info[1]);
