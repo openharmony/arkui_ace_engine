@@ -135,7 +135,6 @@ void UITaskScheduler::FlushLayoutTask(bool forceUseMainThread)
             continue;
         }
         time = GetSysTimestamp();
-        frameId_++;
         node->CreateLayoutTask(forceUseMainThread);
         time = GetSysTimestamp() - time;
         if (frameInfo_ != nullptr) {
