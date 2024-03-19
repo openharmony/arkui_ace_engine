@@ -395,6 +395,8 @@ void DialogLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
             DimensionRect(Dimension(childSize.Width()), Dimension(childSize.Height()), DimensionOffset(topLeftPoint_)),
             frameNode);
     }
+    topLeftPoint_.SetX(std::max(topLeftPoint_.GetX(), 0.0f));
+    topLeftPoint_.SetY(std::max(topLeftPoint_.GetY(), 0.0f));
     child->GetGeometryNode()->SetMarginFrameOffset(topLeftPoint_);
     child->Layout();
     SetSubWindowHotarea(dialogProp, childSize, selfSize, frameNode->GetId());
@@ -512,6 +514,8 @@ OffsetF DialogLayoutAlgorithm::ComputeChildPosition(
     if (!SetAlignmentSwitch(maxSize, childSize, topLeftPoint)) {
         topLeftPoint = OffsetF(maxSize.Width() - childSize.Width(), maxSize.Height() - childSize.Height()) / HALF;
     }
+    topLeftPoint.SetX(std::max(topLeftPoint.GetX(), 0.0f));
+    topLeftPoint.SetY(std::max(topLeftPoint.GetY(), 0.0f));
     const auto& expandSafeAreaOpts = prop->GetSafeAreaExpandOpts();
     bool needAvoidKeyboard = true;
     if (expandSafeAreaOpts && (expandSafeAreaOpts->type | SAFE_AREA_TYPE_KEYBOARD)) {
