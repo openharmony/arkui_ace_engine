@@ -95,7 +95,7 @@ config("reduce_eh_frame_config") {
 }
 
 ohos_shared_library("libace_compatible") {
-  if (is_mingw || is_mac || is_linux || is_ohos) {
+  if (use_hilog) {
     external_deps = [ "hilog:libhilog" ]
   }
   if (is_ohos) {
@@ -122,7 +122,7 @@ ohos_shared_library("libace_compatible") {
 
 if (!is_asan) {
   ohos_shared_library("libace") {
-    if (is_mingw || is_mac || is_linux || is_ohos) {
+    if (use_hilog) {
       external_deps = [ "hilog:libhilog" ]
     }
     if (is_ohos) {

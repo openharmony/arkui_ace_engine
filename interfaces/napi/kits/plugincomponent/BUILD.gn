@@ -29,10 +29,12 @@ ohos_shared_library("plugincomponent") {
     "js_plugin_callback.cpp",
     "js_plugin_callback_mgr.cpp",
     "js_plugin_component.cpp",
-    "js_plugin_log_wrapper.cpp",
     "js_plugin_util.cpp",
     "js_plugin_want.cpp",
   ]
+
+  defines = [ "OHOS_PLATFORM" ]
+  sources += [ "$ace_root/adapter/ohos/osal/log_wrapper.cpp" ]
 
   deps = [ "$ace_root/build:libace_compatible" ]
 

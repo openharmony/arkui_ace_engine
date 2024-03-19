@@ -19,17 +19,11 @@ template("napi_dragcontroller_static") {
 
   ohos_source_set(target_name) {
     defines += invoker.defines
-
     defines += [ "USE_ARK_ENGINE" ]
     cflags_cc += invoker.cflags_cc
-    if (is_mac) {
-      cflags_cc += [ "-O0" ]
-    }
+    configs = [ "$ace_root/interfaces/napi/kits:ace_napi_config" ]
 
     include_dirs = [
-      "$ace_root",
-      "$ace_root/frameworks",
-      "$root_out_dir/arkui/framework",
       "$ark_ets_path",
       "$ark_runtime_path",
     ]

@@ -15,6 +15,25 @@ import("//build/ohos.gni")
 import("//foundation/arkui/ace_engine/ace_config.gni")
 import("napi_lib.gni")
 
+config("ace_napi_config") {
+  include_dirs = [
+    "$ace_root",
+    "$arkui_root",
+    "$ace_root/frameworks",
+    "$root_out_dir/arkui",
+    "$root_out_dir/arkui/framework",
+    "//third_party/zlib",
+  ]
+
+  if (use_hilog) {
+    include_dirs += [ "$hilog_root/interfaces/native/innerkits/include" ]
+  }
+
+  if (is_mac) {
+    cflags_cc = [ "-O0" ]
+  }
+}
+
 common_targets = []
 foreach(module, common_napi_libs) {
   if (use_mac) {

@@ -109,7 +109,7 @@ template("ace_bridge_engine") {
     assert(defined(platform) && (platform == "ohos" || platform == "ohos_ng"),
            "Only ohos need separated engine lib")
 
-    if (is_mingw || is_mac || is_linux || is_ohos) {
+    if (use_hilog) {
       external_deps = [ "hilog:libhilog" ]
     }
     if (build_type == "engine") {

@@ -60,7 +60,7 @@ static constexpr OHOS::HiviewDFX::HiLogLabel LOG_LABEL = {LOG_CORE, FR_LOG_DOMAI
         FR_FILENAME, __FUNCTION__, __LINE__, ##__VA_ARGS__)
 
 #define HILOG_FATAL(fmt, ...) PRINT_HILOG(FATAL, fmt, ##__VA_ARGS__)
-#define HILOG_ERROR(fmt, ...) PRINT_HILOG(ERROR, fmt,##__VA_ARGS__)
+#define HILOG_ERROR(fmt, ...) PRINT_HILOG(ERROR, fmt, ##__VA_ARGS__)
 #define HILOG_WARN(fmt, ...) PRINT_HILOG(WARN, fmt, ##__VA_ARGS__)
 #define HILOG_INFO(fmt, ...) PRINT_HILOG(INFO, fmt, ##__VA_ARGS__)
 #define HILOG_DEBUG(fmt, ...) PRINT_HILOG(DEBUG, fmt, ##__VA_ARGS__)

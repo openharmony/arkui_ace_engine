@@ -33,7 +33,7 @@
 #define ACE_LOG_ID_WITH_REASON
 #endif
 
-#if defined(OHOS_PLATFORM) || defined(PREVIEW)
+#if defined(USE_HILOG)
 #include "hilog/log.h"
 constexpr uint32_t ACE_DOMAIN = 0xD003900;
 constexpr uint32_t APP_DOMAIN = 0xC0D0;
