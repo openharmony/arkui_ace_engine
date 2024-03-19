@@ -1718,6 +1718,7 @@ bool TextPattern::BetweenSelectedPosition(const Offset& globalOffset)
 
 void TextPattern::OnModifyDone()
 {
+#if (defined(__aarch64__) || defined(__x86_64__))
     FrameNode::PostTask(
         [weak = WeakClaim(this)]() {
             auto pattern = weak.Upgrade();
@@ -1725,6 +1726,7 @@ void TextPattern::OnModifyDone()
             pattern->OnAfterModifyDone();
         },
         TaskExecutor::TaskType::UI);
+#endif
     auto textLayoutProperty = GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_VOID(textLayoutProperty);
     auto host = GetHost();
