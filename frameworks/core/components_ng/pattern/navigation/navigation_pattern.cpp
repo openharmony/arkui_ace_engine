@@ -855,15 +855,18 @@ bool NavigationPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& di
                 if (!defaultFocusHub && navDestinationNode->GetChildren().size() <= EMPTY_DESTINATION_CHILD_SIZE &&
                     navDestinationPattern->GetBackButtonState()) {
                     auto titleBarNode = AceType::DynamicCast<TitleBarNode>(navDestinationNode->GetTitleBarNode());
-                    if (titleBarNode) {
-                        auto backButtonNode = AceType::DynamicCast<FrameNode>(titleBarNode->GetBackButton());
-                        backButtonNode->GetOrCreateFocusHub()->SetIsDefaultFocus(true);
+                    CHECK_NULL_VOID(titleBarNode);
+                    auto backButtonNode = AceType::DynamicCast<FrameNode>(titleBarNode->GetBackButton());
+                    backButtonNode->GetOrCreateFocusHub()->SetIsDefaultFocus(true);
+                    auto navigation = pattern->GetHost();
+                    CHECK_NULL_VOID(navigation);
+                    auto navigationFocusHub = navigation->GetFocusHub();
+                    CHECK_NULL_VOID(navigationFocusHub);
+                    auto navDestinationFocusView = navDestinationNode->GetPattern<FocusView>();
+                    if (navigationFocusHub->IsCurrentFocus() && navDestinationFocusView) {
+                        navDestinationFocusView->SetIsViewRootScopeFocused(false);
+                        navDestinationFocusView->FocusViewShow();
                     }
-                }
-                auto navDestinationFocusView = navDestinationNode->GetPattern<FocusView>();
-                if (navDestinationFocusView) {
-                    navDestinationFocusView->SetIsViewRootScopeFocused(false);
-                    navDestinationFocusView->FocusViewShow();
                 }
             },
             TaskExecutor::TaskType::UI);
