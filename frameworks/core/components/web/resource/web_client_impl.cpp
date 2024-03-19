@@ -547,6 +547,35 @@ bool WebClientImpl::OnSslErrorRequestByJS(std::shared_ptr<NWeb::NWebJSSslErrorRe
     return jsResult;
 }
 
+bool WebClientImpl::OnAllSslErrorRequestByJS(std::shared_ptr<NWeb::NWebJSAllSslErrorResult> result,
+    OHOS::NWeb::SslError error,
+    const std::string& url,
+    const std::string& originalUrl,
+    const std::string& referrer,
+    bool isFatalError,
+    bool isMainFrame)
+{
+    ContainerScope scope(instanceId_);
+
+    bool jsResult = false;
+    auto param = std::make_shared<WebAllSslErrorEvent>(AceType::MakeRefPtr<AllSslErrorResultOhos>(result),
+        static_cast<int32_t>(error), url, originalUrl, referrer, isFatalError, isMainFrame);
+    auto task = Container::CurrentTaskExecutor();
+    if (task == nullptr) {
+        return false;
+    }
+    task->PostSyncTask([webClient = this, &param, &jsResult] {
+            if (!webClient) {
+                return;
+            }
+            auto delegate = webClient->webDelegate_.Upgrade();
+            if (delegate) {
+                jsResult = delegate->OnAllSslErrorRequest(param);
+            }
+        }, OHOS::Ace::TaskExecutor::TaskType::JS);
+    return jsResult;
+}
+
 bool WebClientImpl::OnSslSelectCertRequestByJS(
     std::shared_ptr<NWeb::NWebJSSslSelectCertResult> result,
     const std::string& host,
