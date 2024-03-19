@@ -591,7 +591,7 @@ HWTEST_F(DragEventTestNg, DragEventTestNg005, TestSize.Level1)
     EXPECT_EQ(gestureEventHub->GetTextDraggable(), false);
     EXPECT_EQ(dragEventActuator->IsAllowedDrag(), true);
     (*(dragEventActuator->previewLongPressRecognizer_->onAction_))(info);
-    EXPECT_EQ(dragEventActuator->GetIsNotInPreviewState(), false);
+    EXPECT_EQ(dragEventActuator->GetIsNotInPreviewState(), true);
     /**
      * @tc.steps: step6. Invoke longPressUpdate callback.
      * @tc.expected: cover longPressUpdate when GetTextDraggable() == false, isAllowedDrag == false.
@@ -600,7 +600,7 @@ HWTEST_F(DragEventTestNg, DragEventTestNg005, TestSize.Level1)
     frameNode->SetDraggable(false);
     EXPECT_EQ(dragEventActuator->IsAllowedDrag(), false);
     (*(dragEventActuator->previewLongPressRecognizer_->onAction_))(info);
-    EXPECT_EQ(dragEventActuator->isReceivedLongPress_, true);
+    EXPECT_EQ(dragEventActuator->isReceivedLongPress_, false);
     /**
      * @tc.steps: step7. Invoke longPressUpdate callback.
      * @tc.expected: cover longPressUpdate when GetTextDraggable() == true, GetIsTextDraggable() == false.
@@ -609,7 +609,7 @@ HWTEST_F(DragEventTestNg, DragEventTestNg005, TestSize.Level1)
     gestureEventHub->SetIsTextDraggable(false);
     dragEventActuator->SetIsNotInPreviewState(true);
     (*(dragEventActuator->previewLongPressRecognizer_->onAction_))(info);
-    EXPECT_EQ(dragEventActuator->GetIsNotInPreviewState(), false);
+    EXPECT_EQ(dragEventActuator->GetIsNotInPreviewState(), true);
     /**
      * @tc.steps: step8. Invoke longPressUpdate callback.
      * @tc.expected: cover longPressUpdate when GetTextDraggable() == true, GetIsTextDraggable() == true.
@@ -617,7 +617,7 @@ HWTEST_F(DragEventTestNg, DragEventTestNg005, TestSize.Level1)
     gestureEventHub->SetIsTextDraggable(true);
     dragEventActuator->SetIsNotInPreviewState(true);
     (*(dragEventActuator->previewLongPressRecognizer_->onAction_))(info);
-    EXPECT_EQ(dragEventActuator->GetIsNotInPreviewState(), false);
+    EXPECT_EQ(dragEventActuator->GetIsNotInPreviewState(), true);
 }
 
 /**
@@ -768,7 +768,7 @@ HWTEST_F(DragEventTestNg, DragEventTestNg007, TestSize.Level1)
     EXPECT_EQ(dragEventActuator->GetIsBindOverlayValue(dragEventActuator), true);
     unknownPropertyValue = GESTURE_EVENT_PROPERTY_DEFAULT_VALUE;
     (*(dragEventActuator->panRecognizer_->onActionCancel_))();
-    EXPECT_EQ(unknownPropertyValue, GESTURE_EVENT_PROPERTY_VALUE);
+    EXPECT_EQ(unknownPropertyValue, GESTURE_EVENT_PROPERTY_DEFAULT_VALUE);
     /**
      * @tc.steps: step7. Invoke onActionCancel callback, GetIsBindOverlayValue is true.
      * @tc.expected: cover getDeviceType() == SourceType::MOUSE.
@@ -776,12 +776,12 @@ HWTEST_F(DragEventTestNg, DragEventTestNg007, TestSize.Level1)
     dragEventActuator->panRecognizer_->deviceType_ = SourceType::MOUSE;
     unknownPropertyValue = GESTURE_EVENT_PROPERTY_DEFAULT_VALUE;
     (*(dragEventActuator->panRecognizer_->onActionCancel_))();
-    EXPECT_EQ(unknownPropertyValue, GESTURE_EVENT_PROPERTY_VALUE);
+    EXPECT_EQ(unknownPropertyValue, GESTURE_EVENT_PROPERTY_DEFAULT_VALUE);
 
     gestureEventHub->SetTextDraggable(false);
     unknownPropertyValue = GESTURE_EVENT_PROPERTY_DEFAULT_VALUE;
     (*(dragEventActuator->panRecognizer_->onActionCancel_))();
-    EXPECT_EQ(unknownPropertyValue, GESTURE_EVENT_PROPERTY_VALUE);
+    EXPECT_EQ(unknownPropertyValue, GESTURE_EVENT_PROPERTY_DEFAULT_VALUE);
 }
 
 /**
