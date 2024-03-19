@@ -94,9 +94,11 @@ class FrameNode {
   private type_: string;
   private _commonAttribute: FrameNodeModifier;
   private _commonEvent: UICommonEvent;
+  private _childList :Map<number,FrameNode>
   constructor(uiContext: UIContext, type: string) {
     this.uiContext_ = uiContext;
     this.nodeId_ = -1;
+    this._childList = new Map();
     if (type === 'BuilderNode' || type === 'ArkTsNode') {
       this.renderNode_ = new RenderNode('BuilderNode');
       this.type_ = type;
@@ -190,6 +192,7 @@ class FrameNode {
     if (!flag) {
       throw { message: 'The FrameNode is not modifiable.', code: 100021 };
     }
+    this._childList.set(node.nodeId_,node);
   }
   insertChildAfter(child: FrameNode, sibling: FrameNode): void {
     this.checkType();
@@ -209,6 +212,7 @@ class FrameNode {
     if (!flag) {
       throw { message: 'The FrameNode is not modifiable.', code: 100021 };
     }
+    this._childList.set(sibling.nodeId_,sibling);
   }
   removeChild(node: FrameNode): void {
     this.checkType();
@@ -216,10 +220,12 @@ class FrameNode {
       return;
     }
     getUINativeModule().frameNode.removeChild(this.nodePtr_, node.nodePtr_);
+    this._childList.delete(node.nodeId_);
   }
   clearChildren(): void {
     this.checkType();
     getUINativeModule().frameNode.clearChildren(this.nodePtr_);
+    this._childList.clear();
   }
   getChild(index: number): FrameNode | null {
     const nodePtr = getUINativeModule().frameNode.getChild(this.nodePtr_, index);

@@ -44,5 +44,16 @@ class FrameNodeFinalizationRegisterProxy {
 
   public static instance_: FrameNodeFinalizationRegisterProxy = new FrameNodeFinalizationRegisterProxy();
   public static ElementIdToOwningFrameNode_ = new Map<number, WeakRef<FrameNode>>();
+  public static FrameNodeInMainTree_ = new Map<number, FrameNode>();
   private finalizationRegistry_: FinalizationRegistry;
+}
+
+globalThis.__AttachToMainTree__ = function __AttachToMainTree__(nodeId: number) {
+  if (FrameNodeFinalizationRegisterProxy.ElementIdToOwningFrameNode_.has(nodeId)) {
+    FrameNodeFinalizationRegisterProxy.FrameNodeInMainTree_.set(nodeId, FrameNodeFinalizationRegisterProxy.ElementIdToOwningFrameNode_.get(nodeId).deref());
+  }
+}
+
+globalThis.__DetachToMainTree__ = function __DetachToMainTree__(nodeId: number) {
+  FrameNodeFinalizationRegisterProxy.FrameNodeInMainTree_.delete(nodeId);
 }
