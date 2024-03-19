@@ -248,6 +248,20 @@ void ResetSearchCopyOption(ArkUINodeHandle node)
     SearchModelNG::SetCopyOption(frameNode, copyOptions);
 }
 
+void SetSearchEnterKeyType(ArkUINodeHandle node, ArkUI_Int32 value)
+{
+    auto *frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    SearchModelNG::SetSearchEnterKeyType(frameNode, CastToTextInputAction(value));
+}
+
+void ResetSearchEnterKeyType(ArkUINodeHandle node)
+{
+    auto *frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    SearchModelNG::SetSearchEnterKeyType(frameNode, TextInputAction::SEARCH);
+}
+
 void SetSearchHeight(ArkUINodeHandle node, ArkUI_Float32 heightValue, ArkUI_Int32 heightUnit)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -271,8 +285,7 @@ const ArkUISearchModifier* GetSearchModifier()
         ResetSearchCancelButton, SetSearchEnableKeyboardOnFocus, ResetSearchEnableKeyboardOnFocus,
         SetSearchPlaceholderFont, ResetSearchPlaceholderFont, SetSearchSearchIcon, ResetSearchSearchIcon,
         SetSearchSearchButton, ResetSearchSearchButton, SetSearchFontColor, ResetSearchFontColor, SetSearchCopyOption,
-        ResetSearchCopyOption, SetSearchHeight, ResetSearchHeight };
-
+        ResetSearchCopyOption, SetSearchEnterKeyType, ResetSearchEnterKeyType, SetSearchHeight, ResetSearchHeight };
     return &modifier;
 }
 }

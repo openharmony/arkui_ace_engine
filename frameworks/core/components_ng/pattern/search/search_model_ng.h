@@ -60,6 +60,7 @@ public:
     void SetOnChangeEvent(std::function<void(const std::string&)>&& onChangeEvent) override;
     void SetSelectionMenuHidden(bool selectionMenuHidden) override;
     void SetCustomKeyboard(const std::function<void ()> &&buildFunc) override;
+    void SetSearchEnterKeyType(TextInputAction value) override;
     void SetMaxLength(uint32_t value) override;
     void ResetMaxLength() override;
     void SetType(TextInputType value) override;
@@ -89,6 +90,7 @@ public:
     static void SetCancelIconSize(FrameNode* frameNode, const Dimension& value);
     static void SetCancelButtonStyle(FrameNode* frameNode, CancelButtonStyle style);
     static void SetHeight(FrameNode* frameNode, const Dimension& height);
+    static void SetSearchEnterKeyType(FrameNode* frameNode, TextInputAction value);
 private:
     void CreateTextField(const RefPtr<SearchNode>& parentNode,
         const std::optional<std::string>& placeholder, const std::optional<std::string>& value, bool hasTextFieldNode);
