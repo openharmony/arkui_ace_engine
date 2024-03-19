@@ -2884,7 +2884,7 @@ void TextPattern::UpdateSpanItems(const std::list<RefPtr<SpanItem>>& spanItems)
 
 #define INHERIT_TEXT_STYLE(group, name, func)                                     \
     do {                                                                          \
-        if ((textLayoutProp)->Has##name() && spanItem->group->Has##name()) {      \
+        if ((textLayoutProp)->Has##name() && !spanItem->group->Has##name()) {      \
             spanItem->group->func(textLayoutProp->Get##name().value());           \
         }                                                                         \
     } while (false)
