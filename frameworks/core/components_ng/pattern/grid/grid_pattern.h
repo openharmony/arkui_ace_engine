@@ -159,7 +159,7 @@ public:
 
     bool OutBoundaryCallback() override;
 
-    void ScrollPage(bool reverse, bool smooth = false) override;
+    void ScrollPage(bool reverse);
 
     bool UpdateStartIndex(int32_t index);
 

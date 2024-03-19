@@ -168,6 +168,7 @@ void GridPattern::OnModifyDone()
             return grid->GetMainContentSize();
         });
     }
+
     Register2DragDropManager();
     if (IsNeedInitClickEventRecorder()) {
         Pattern::InitClickEventRecorder();
@@ -1241,19 +1242,16 @@ bool GridPattern::HandleDirectionKey(KeyCode code)
     return false;
 }
 
-void GridPattern::ScrollPage(bool reverse, bool smooth)
+void GridPattern::ScrollPage(bool reverse)
 {
-    float distance = reverse ? GetMainContentSize() : -GetMainContentSize();
-    if (smooth) {
-        float position = -currentHeight_ + distance;
-        ScrollablePattern::AnimateTo(-position, -1, nullptr, true);
+    StopAnimate();
+    if (!isConfigScrollable_) {
         return;
+    }
+    if (!reverse) {
+        UpdateCurrentOffset(-GetMainContentSize(), SCROLL_FROM_JUMP);
     } else {
-        if (!isConfigScrollable_) {
-            return;
-        }
-        StopAnimate();
-        UpdateCurrentOffset(distance, SCROLL_FROM_JUMP);
+        UpdateCurrentOffset(GetMainContentSize(), SCROLL_FROM_JUMP);
     }
     // AccessibilityEventType::SCROLL_END
 }

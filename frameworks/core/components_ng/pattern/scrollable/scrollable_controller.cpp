@@ -86,21 +86,16 @@ void ScrollableController::ScrollToEdge(ScrollEdgeType scrollEdgeType, bool smoo
     }
 }
 
-void ScrollableController::ScrollPage(bool reverse, bool smooth)
+void ScrollableController::ScrollPage(bool reverse, bool /* smooth */)
 {
     auto pattern = scroll_.Upgrade();
     CHECK_NULL_VOID(pattern);
     if (pattern->GetAxis() == Axis::NONE) {
         return;
     }
+    pattern->StopAnimate();
     auto offset = reverse ? pattern->GetMainContentSize() : -pattern->GetMainContentSize();
-    if (smooth) {
-        auto position = pattern->GetTotalOffset() - offset;
-        pattern->AnimateTo(position, -1, nullptr, true);
-    } else {
-        pattern->StopAnimate();
-        pattern->UpdateCurrentOffset(offset, SCROLL_FROM_JUMP);
-    }
+    pattern->UpdateCurrentOffset(offset, SCROLL_FROM_JUMP);
 }
 
 bool ScrollableController::IsAtEnd() const

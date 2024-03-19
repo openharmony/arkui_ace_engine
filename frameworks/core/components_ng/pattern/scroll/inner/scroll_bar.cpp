@@ -83,24 +83,6 @@ bool ScrollBar::InBarRectRegion(const Point& point) const
     return false;
 }
 
-BarDirection ScrollBar::CheckBarDirection(const Point& point, const Axis& axis)
-{
-    if (!InBarRectRegion(point)) {
-        return BarDirection::BAR_NONE;
-    }
-    auto touchRegion = GetTouchRegion();
-    auto pointOffset = OffsetF(point.GetX(), point.GetY());
-    auto scrollBarTopOffset = OffsetF(touchRegion.Left(), touchRegion.Top());
-    auto scrollBarBottomOffset = OffsetF(touchRegion.Right(), touchRegion.Bottom());
-    if (pointOffset.GetMainOffset(axis) < scrollBarTopOffset.GetMainOffset(axis)) {
-        return BarDirection::PAGE_UP;
-    } else if (pointOffset.GetMainOffset(axis) > scrollBarBottomOffset.GetMainOffset(axis)) {
-        return BarDirection::PAGE_DOWN;
-    } else {
-        return BarDirection::BAR_NONE;
-    }
-}
-
 void ScrollBar::FlushBarWidth()
 {
     SetBarRegion(paintOffset_, viewPortSize_);
