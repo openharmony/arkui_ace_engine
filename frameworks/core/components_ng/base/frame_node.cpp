@@ -1178,11 +1178,13 @@ void FrameNode::ProcessAllVisibleCallback(const std::vector<double>& visibleArea
             isVisible = false;
             isHandled = true;
         } else if (NearEqual(callbackRatio, VISIBLE_RATIO_MIN) && NearEqual(currentVisibleRatio, callbackRatio)) {
-            lastVisibleCallbackRatio_ = currentVisibleRatio;
+            lastVisibleCallbackRatio_ = VISIBLE_RATIO_MIN;
+            currentVisibleRatio = VISIBLE_RATIO_MIN;
             isVisible = false;
             isHandled = true;
         } else if (NearEqual(callbackRatio, VISIBLE_RATIO_MAX) && NearEqual(currentVisibleRatio, callbackRatio)) {
-            lastVisibleCallbackRatio_ = currentVisibleRatio;
+            lastVisibleCallbackRatio_ = VISIBLE_RATIO_MAX;
+            currentVisibleRatio = VISIBLE_RATIO_MAX;
             isVisible = true;
             isHandled = true;
         }
