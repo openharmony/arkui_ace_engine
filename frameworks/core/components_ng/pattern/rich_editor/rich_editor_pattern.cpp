@@ -4243,6 +4243,7 @@ void RichEditorPattern::ShowSelectOverlay(const RectF& firstHandle, const RectF&
                                responseType](bool hasData) mutable {
         auto pattern = weak.Upgrade();
         SelectOverlayInfo selectInfo;
+        selectInfo.handlerColor = pattern->GetCaretColor();
         selectInfo.handleReverse = handleReverse;
         bool usingMouse = pattern->IsUsingMouse();
         if (!usingMouse && responseType == TextResponseType::LONG_PRESS && pattern->sourceType_ != SourceType::MOUSE) {
