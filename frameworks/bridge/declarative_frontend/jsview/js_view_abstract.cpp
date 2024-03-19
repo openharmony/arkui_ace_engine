@@ -5380,7 +5380,7 @@ void JSViewAbstract::SetPopupDismiss(
     } else if (onWillDismissFunc->IsFunction()) {
         auto onWillDismissCallback = ParsePopupCallback(info, popupObj);
         popupParam->SetOnWillDismiss(std::move(onWillDismissCallback));
-        popupParam->SetInteractiveDismiss(false);
+        popupParam->SetInteractiveDismiss(true);
         if (onWillDismissCallback != nullptr) {
             TAG_LOGI(AceLogTag::ACE_FORM, "popup register onWillDismiss");
         }
