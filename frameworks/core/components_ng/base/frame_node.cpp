@@ -3283,13 +3283,18 @@ void FrameNode::DoSetActiveChildRange(int32_t start, int32_t end)
 void FrameNode::OnInspectorIdUpdate(const std::string& id)
 {
     renderContext_->UpdateNodeName(id);
-    PostTask(
-        [weak = WeakClaim(this), inspectorId = id]() {
-            auto host = weak.Upgrade();
-            CHECK_NULL_VOID(host);
-            host->RecordExposureIfNeed(inspectorId);
-        },
-        TaskExecutor::TaskType::UI);
+    if (Recorder::EventRecorder::Get().IsExposureRecordEnable()) {
+        if (exposureProcessor_) {
+            return;
+        }
+        PostTask(
+            [weak = WeakClaim(this), inspectorId = id]() {
+                auto host = weak.Upgrade();
+                CHECK_NULL_VOID(host);
+                host->RecordExposureIfNeed(inspectorId);
+            },
+            TaskExecutor::TaskType::UI);
+    }
     auto parent = GetAncestorNodeOfFrame();
     CHECK_NULL_VOID(parent);
     if (parent->GetTag() == V2::RELATIVE_CONTAINER_ETS_TAG) {
@@ -3299,12 +3304,6 @@ void FrameNode::OnInspectorIdUpdate(const std::string& id)
 
 void FrameNode::RecordExposureIfNeed(const std::string& inspectorId)
 {
-    if (exposureProcessor_) {
-        return;
-    }
-    if (!Recorder::EventRecorder::Get().IsExposureRecordEnable()) {
-        return;
-    }
     auto pageUrl = Recorder::GetPageUrlByNode(Claim(this));
     exposureProcessor_ = MakeRefPtr<Recorder::ExposureProcessor>(pageUrl, inspectorId);
     if (!exposureProcessor_->IsNeedRecord()) {
