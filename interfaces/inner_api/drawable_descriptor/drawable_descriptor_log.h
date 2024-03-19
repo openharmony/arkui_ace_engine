@@ -18,13 +18,13 @@
 
 #include "hilog/log.h"
 
-#define PRINT_LOG(level, fmt, ...) \
+#define PRINT_HILOG(level, fmt, ...) \
     HILOG_IMPL(LOG_CORE, LOG_##level, 0xD003900, "AceDrawableDescriptor", "[%{public}s:%{public}d]" fmt, \
         __FUNCTION__, __LINE__, ##__VA_ARGS__)
 
-#define LOGE(fmt, ...) PRINT_LOG(ERROR, fmt, ##__VA_ARGS__)
-#define LOGW(fmt, ...) PRINT_LOG(WARN, fmt, ##__VA_ARGS__)
-#define LOGI(fmt, ...) PRINT_LOG(INFO, fmt, ##__VA_ARGS__)
-#define LOGD(fmt, ...) PRINT_LOG(DEBUG, fmt, ##__VA_ARGS__)
+#define HILOGE(fmt, ...) PRINT_HILOG(ERROR, fmt, ##__VA_ARGS__)
+#define HILOGW(fmt, ...) PRINT_HILOG(WARN, fmt, ##__VA_ARGS__)
+#define HILOGI(fmt, ...) PRINT_HILOG(INFO, fmt, ##__VA_ARGS__)
+#define HILOGD(fmt, ...) PRINT_HILOG(DEBUG, fmt, ##__VA_ARGS__)
 
 #endif // INTERFACES_INNER_API_ACE_ARKUI_LOG_H

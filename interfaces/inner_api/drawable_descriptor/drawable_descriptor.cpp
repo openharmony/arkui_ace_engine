@@ -105,7 +105,7 @@ bool LayeredDrawableDescriptor::PreGetPixelMapFromJsonBuf(
     }
     if (item == nullptr) {
         cJSON_Delete(roots);
-        LOGE("GetObjectItem from json buffer failed");
+        HILOGE("GetObjectItem from json buffer failed");
         return false;
     }
     if (cJSON_IsString(item)) {
@@ -125,7 +125,7 @@ bool LayeredDrawableDescriptor::PreGetPixelMapFromJsonBuf(
 void LayeredDrawableDescriptor::InitialResource(const std::shared_ptr<Global::Resource::ResourceManager>& resourceMgr)
 {
     if (!resourceMgr) {
-        LOGE("Global resource manager is null!");
+        HILOGE("Global resource manager is null!");
         return;
     }
     // preprocess get default mask
@@ -133,10 +133,10 @@ void LayeredDrawableDescriptor::InitialResource(const std::shared_ptr<Global::Re
     resourceMgr->GetMediaDataByName(defaultMaskName.c_str(), defaultMaskDataLength_, defaultMaskData_);
     // preprocess get background and foreground
     if (!PreGetPixelMapFromJsonBuf(resourceMgr, true)) {
-        LOGE("Create background Item imageSource from json buffer failed");
+        HILOGE("Create background Item imageSource from json buffer failed");
     }
     if (!PreGetPixelMapFromJsonBuf(resourceMgr, false)) {
-        LOGE("Create foreground Item imageSource from json buffer failed");
+        HILOGE("Create foreground Item imageSource from json buffer failed");
     }
 }
 
@@ -147,7 +147,7 @@ bool DrawableDescriptor::GetPixelMapFromBuffer()
     std::unique_ptr<Media::ImageSource> imageSource =
         Media::ImageSource::CreateImageSource(mediaData_.get(), len_, opts, errorCode);
     if (errorCode != 0) {
-        LOGE("CreateImageSource from buffer failed");
+        HILOGE("CreateImageSource from buffer failed");
         return false;
     }
     mediaData_.reset();
@@ -158,7 +158,7 @@ bool DrawableDescriptor::GetPixelMapFromBuffer()
         pixelMap_ = std::shared_ptr<Media::PixelMap>(pixelMapPtr.release());
     }
     if (errorCode != 0 || !pixelMap_) {
-        LOGE("Get PixelMap from buffer failed");
+        HILOGE("Get PixelMap from buffer failed");
         return false;
     }
     return true;
@@ -172,7 +172,7 @@ std::shared_ptr<Media::PixelMap> DrawableDescriptor::GetPixelMap()
     if (GetPixelMapFromBuffer()) {
         return pixelMap_.value();
     }
-    LOGE("Failed to GetPixelMap!");
+    HILOGE("Failed to GetPixelMap!");
     return nullptr;
 }
 
@@ -180,7 +180,7 @@ std::unique_ptr<Media::ImageSource> LayeredDrawableDescriptor::CreateImageSource
     DrawableItem& drawableItem, uint32_t& errorCode)
 {
     if (drawableItem.state_ != Global::Resource::SUCCESS) {
-        LOGE("GetDrawableInfoById failed");
+        HILOGE("GetDrawableInfoById failed");
         return nullptr;
     }
 
@@ -200,7 +200,7 @@ bool LayeredDrawableDescriptor::GetPixelMapFromJsonBuf(bool isBackground)
         std::unique_ptr<Media::ImageSource> imageSource =
             LayeredDrawableDescriptor::CreateImageSource(isBackground ? backgroundItem_ : foregroundItem_, errorCode);
         if (errorCode != 0) {
-            LOGE("CreateImageSource from json buffer failed");
+            HILOGE("CreateImageSource from json buffer failed");
             return false;
         }
         Media::DecodeOptions decodeOpts;
@@ -208,7 +208,7 @@ bool LayeredDrawableDescriptor::GetPixelMapFromJsonBuf(bool isBackground)
         if (imageSource) {
             auto pixelMapPtr = imageSource->CreatePixelMap(decodeOpts, errorCode);
             if (errorCode != 0) {
-                LOGE("Get PixelMap from json buffer failed");
+                HILOGE("Get PixelMap from json buffer failed");
                 return false;
             }
 
@@ -219,7 +219,7 @@ bool LayeredDrawableDescriptor::GetPixelMapFromJsonBuf(bool isBackground)
             }
         }
     } else {
-        LOGE("Get background from json buffer failed");
+        HILOGE("Get background from json buffer failed");
         return false;
     }
     return true;
@@ -242,7 +242,7 @@ bool LayeredDrawableDescriptor::GetDefaultMask()
         mask_ = std::shared_ptr<Media::PixelMap>(pixelMapPtr.release());
     }
     if (errorCode != 0 || !mask_) {
-        LOGE("Get mask failed");
+        HILOGE("Get mask failed");
         return false;
     }
     return true;
@@ -274,7 +274,7 @@ void LayeredDrawableDescriptor::InitLayeredParam(std::pair<std::unique_ptr<uint8
 bool LayeredDrawableDescriptor::GetMaskByPath()
 {
     if (maskPath_.empty()) {
-        LOGD("maskPath is null");
+        HILOGD("maskPath is null");
         return false;
     }
     Media::SourceOptions opts;
@@ -288,7 +288,7 @@ bool LayeredDrawableDescriptor::GetMaskByPath()
         mask_ = std::shared_ptr<Media::PixelMap>(pixelMapPtr.release());
     }
     if (errorCode != 0 || !mask_) {
-        LOGE("Get mask failed");
+        HILOGE("Get mask failed");
         return false;
     }
     return true;
@@ -311,7 +311,7 @@ bool LayeredDrawableDescriptor::GetMaskByName(
         mask_ = std::shared_ptr<Media::PixelMap>(pixelMapPtr.release());
     }
     if (errorCode != 0 || !mask_) {
-        LOGE("Get mask failed");
+        HILOGE("Get mask failed");
         return false;
     }
     return true;
@@ -327,7 +327,7 @@ std::unique_ptr<DrawableDescriptor> LayeredDrawableDescriptor::GetForeground()
         return std::make_unique<DrawableDescriptor>(foreground_.value());
     }
 
-    LOGE("GetForeground failed");
+    HILOGE("GetForeground failed");
     return nullptr;
 }
 
@@ -340,7 +340,7 @@ std::unique_ptr<DrawableDescriptor> LayeredDrawableDescriptor::GetBackground()
     if (GetPixelMapFromJsonBuf(true)) {
         return std::make_unique<DrawableDescriptor>(background_.value());
     }
-    LOGE("GetBackground failed");
+    HILOGE("GetBackground failed");
     return nullptr;
 }
 
@@ -358,7 +358,7 @@ std::unique_ptr<DrawableDescriptor> LayeredDrawableDescriptor::GetMask()
         return std::make_unique<DrawableDescriptor>(mask_.value());
     }
 
-    LOGE("GetMask failed");
+    HILOGE("GetMask failed");
     return nullptr;
 }
 
@@ -398,7 +398,7 @@ bool LayeredDrawableDescriptor::CreatePixelMap()
     } else if (GetPixelMapFromJsonBuf(false) && foreground_.has_value()) {
         foreground = ImageConverter::PixelMapToBitmap(foreground_.value());
     } else {
-        LOGI("Get pixelMap of foreground failed.");
+        HILOGI("Get pixelMap of foreground failed.");
         return false;
     }
 
@@ -408,7 +408,7 @@ bool LayeredDrawableDescriptor::CreatePixelMap()
     } else if (GetPixelMapFromJsonBuf(true) && background_.has_value()) {
         background = ImageConverter::PixelMapToBitmap(background_.value());
     } else {
-        LOGE("Get pixelMap of background failed.");
+        HILOGE("Get pixelMap of background failed.");
         return false;
     }
 
@@ -420,7 +420,7 @@ bool LayeredDrawableDescriptor::CreatePixelMap()
     } else if (GetDefaultMask() && mask_.has_value()) {
         mask = ImageConverter::PixelMapToBitmap(mask_.value());
     } else {
-        LOGE("Get pixelMap of mask failed.");
+        HILOGE("Get pixelMap of mask failed.");
         return false;
     }
 
@@ -455,7 +455,7 @@ bool LayeredDrawableDescriptor::CreatePixelMap()
     if (foreground_.has_value() || GetPixelMapFromJsonBuf(false)) {
         foreground = ImageConverter::PixelMapToBitmap(foreground_.value());
     } else {
-        LOGI("Get pixelMap of foreground failed.");
+        HILOGI("Get pixelMap of foreground failed.");
         return false;
     }
 
@@ -463,7 +463,7 @@ bool LayeredDrawableDescriptor::CreatePixelMap()
     if (background_.has_value() || GetPixelMapFromJsonBuf(true)) {
         background = ImageConverter::PixelMapToBitmap(background_.value());
     } else {
-        LOGE("Get pixelMap of background failed.");
+        HILOGE("Get pixelMap of background failed.");
         return false;
     }
 
@@ -471,7 +471,7 @@ bool LayeredDrawableDescriptor::CreatePixelMap()
     if (mask_.has_value() || GetMaskByPath() || GetDefaultMask()) {
         mask = ImageConverter::PixelMapToBitmap(mask_.value());
     } else {
-        LOGE("Get pixelMap of mask failed.");
+        HILOGE("Get pixelMap of mask failed.");
         return false;
     }
 
@@ -518,7 +518,7 @@ std::shared_ptr<Media::PixelMap> LayeredDrawableDescriptor::GetPixelMap()
         return layeredPixelMap_.value();
     }
 
-    LOGE("Failed to GetPixelMap!");
+    HILOGE("Failed to GetPixelMap!");
     return nullptr;
 }
 
@@ -540,7 +540,7 @@ std::string LayeredDrawableDescriptor::GetStaticMaskClipPath()
     char pathBuf[size + 1];
     if (_NSGetExecutablePath(pathBuf, &size) != 0) {
         pathBuf[0] = '\0';
-        LOGE("Failed, buffer too small!");
+        HILOGE("Failed, buffer too small!");
     }
     pathBuf[size] = '\0';
 

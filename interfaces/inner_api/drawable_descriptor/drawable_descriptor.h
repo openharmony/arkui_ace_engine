@@ -156,23 +156,23 @@ public:
         std::unique_ptr<uint8_t[]> jsonBuf;
         state = resourceMgr->GetDrawableInfoById(id, type, len, jsonBuf, density);
         if (state != Global::Resource::SUCCESS) {
-            LOGE("Failed to get drawable info from resmgr");
+            HILOGE("Failed to get drawable info from resmgr");
             return nullptr;
         }
         transform(type.begin(), type.end(), type.begin(), ::tolower);
         if (type == "json") {
-            LOGD("Create LayeredDrawableDescriptor object");
+            HILOGD("Create LayeredDrawableDescriptor object");
             drawableType = DrawableDescriptor::DrawableType::LAYERED;
             state = Global::Resource::SUCCESS;
             return std::make_unique<LayeredDrawableDescriptor>(std::move(jsonBuf), len, resourceMgr);
         }
         if (type == "png" || type == "jpg" || type == "bmp" || type == "svg" || type == "gif" || type == "webp") {
-            LOGD("Create DrawableDescriptor object");
+            HILOGD("Create DrawableDescriptor object");
             drawableType = DrawableDescriptor::DrawableType::BASE;
             state = Global::Resource::SUCCESS;
             return std::make_unique<DrawableDescriptor>(std::move(jsonBuf), len);
         }
-        LOGE("unknow resource type: %{public}s", type.c_str());
+        HILOGE("unknow resource type: %{public}s", type.c_str());
         state = Global::Resource::INVALID_FORMAT;
         return nullptr;
     }
@@ -186,23 +186,23 @@ public:
         std::unique_ptr<uint8_t[]> jsonBuf;
         state = resourceMgr->GetDrawableInfoByName(name, type, len, jsonBuf, density);
         if (state != Global::Resource::SUCCESS) {
-            LOGE("Failed to get drawable info from resmgr");
+            HILOGE("Failed to get drawable info from resmgr");
             return nullptr;
         }
         transform(type.begin(), type.end(), type.begin(), ::tolower);
         if (type == "json") {
-            LOGD("Create LayeredDrawableDescriptor object");
+            HILOGD("Create LayeredDrawableDescriptor object");
             drawableType = DrawableDescriptor::DrawableType::LAYERED;
             state = Global::Resource::SUCCESS;
             return std::make_unique<LayeredDrawableDescriptor>(std::move(jsonBuf), len, resourceMgr);
         }
         if (type == "png" || type == "jpg" || type == "bmp" || type == "svg" || type == "gif" || type == "webp") {
-            LOGD("Create DrawableDescriptor object");
+            HILOGD("Create DrawableDescriptor object");
             drawableType = DrawableDescriptor::DrawableType::BASE;
             state = Global::Resource::SUCCESS;
             return std::make_unique<DrawableDescriptor>(std::move(jsonBuf), len);
         }
-        LOGE("unknow resource type: %{public}s", type.c_str());
+        HILOGE("unknow resource type: %{public}s", type.c_str());
         state = Global::Resource::INVALID_FORMAT;
         return nullptr;
     }
@@ -217,7 +217,7 @@ public:
         std::tuple<std::string, size_t, std::string> info;
         state = resourceMgr->GetDrawableInfoById(resId, info, jsonBuf, iconType, density);
         if (state != Global::Resource::SUCCESS) {
-            LOGW("Failed to get drawable info from resmgr");
+            HILOGW("Failed to get drawable info from resmgr");
             return nullptr;
         }
         std::string type = std::get<0>(info);
@@ -225,7 +225,7 @@ public:
         std::string path = std::get<2>(info);
         transform(type.begin(), type.end(), type.begin(), ::tolower);
         if (type == "json") {
-            LOGD("Create LayeredDrawableDescriptor object");
+            HILOGD("Create LayeredDrawableDescriptor object");
             drawableType = DrawableDescriptor::DrawableType::LAYERED;
             auto layeredDrawableDescriptor =
                 std::make_unique<LayeredDrawableDescriptor>(std::move(jsonBuf), len, resourceMgr,
@@ -233,11 +233,11 @@ public:
             return layeredDrawableDescriptor;
         }
         if (type == "png" || type == "jpg" || type == "bmp" || type == "svg" || type == "gif" || type == "webp") {
-            LOGD("Create DrawableDescriptor object");
+            HILOGD("Create DrawableDescriptor object");
             drawableType = DrawableDescriptor::DrawableType::BASE;
             return std::make_unique<DrawableDescriptor>(std::move(jsonBuf), len);
         }
-        LOGE("unknow resource type: %{public}s", type.c_str());
+        HILOGE("unknow resource type: %{public}s", type.c_str());
         state = Global::Resource::INVALID_FORMAT;
         return nullptr;
     }
@@ -252,7 +252,7 @@ public:
         std::tuple<std::string, size_t, std::string> info;
         state = resourceMgr->GetDrawableInfoByName(name, info, jsonBuf, iconType, density);
         if (state != Global::Resource::SUCCESS) {
-            LOGW("Failed to get drawable info from resmgr");
+            HILOGW("Failed to get drawable info from resmgr");
             return nullptr;
         }
         std::string type = std::get<0>(info);
@@ -260,18 +260,18 @@ public:
         std::string path = std::get<2>(info);
         transform(type.begin(), type.end(), type.begin(), ::tolower);
         if (type == "json") {
-            LOGD("Create LayeredDrawableDescriptor object");
+            HILOGD("Create LayeredDrawableDescriptor object");
             drawableType = DrawableDescriptor::DrawableType::LAYERED;
             auto layeredDrawableDescriptor = std::make_unique<LayeredDrawableDescriptor>(
                 std::move(jsonBuf), len, resourceMgr, path, iconType, density);
             return layeredDrawableDescriptor;
         }
         if (type == "png" || type == "jpg" || type == "bmp" || type == "svg" || type == "gif" || type == "webp") {
-            LOGD("Create DrawableDescriptor object");
+            HILOGD("Create DrawableDescriptor object");
             drawableType = DrawableDescriptor::DrawableType::BASE;
             return std::make_unique<DrawableDescriptor>(std::move(jsonBuf), len);
         }
-        LOGE("unknow resource type: %{public}s", type.c_str());
+        HILOGE("unknow resource type: %{public}s", type.c_str());
         state = Global::Resource::INVALID_FORMAT;
         return nullptr;
     }

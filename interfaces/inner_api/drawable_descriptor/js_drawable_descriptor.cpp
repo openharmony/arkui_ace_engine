@@ -121,7 +121,7 @@ napi_value JsDrawableDescriptor::ToNapi(
         NAPI_CALL(env, napi_new_instance(env, constructor, 0, nullptr, &result));
         NAPI_CALL(env, napi_wrap(env, result, drawable, Destructor, nullptr, nullptr));
     } else {
-        LOGI("create reference failed, drawable constructor is null");
+        HILOGI("create reference failed, drawable constructor is null");
     }
 
     return result;
@@ -209,7 +209,7 @@ napi_value JsDrawableDescriptor::GetMaskClipPath(napi_env env, napi_callback_inf
     auto path = OHOS::Ace::Napi::LayeredDrawableDescriptor::GetStaticMaskClipPath();
     napi_value result = nullptr;
     if (napi_ok != napi_create_string_utf8(env, path.c_str(), NAPI_AUTO_LENGTH, &result)) {
-        LOGI("JsDrawableDescriptor Failed");
+        HILOGI("JsDrawableDescriptor Failed");
     }
     return result;
 }
