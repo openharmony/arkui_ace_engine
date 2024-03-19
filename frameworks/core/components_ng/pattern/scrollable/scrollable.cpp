@@ -226,6 +226,9 @@ void Scrollable::HandleTouchUp()
     }
     if (isSpringAnimationStop_ && scrollOverCallback_) {
         ProcessScrollOverCallback(0.0);
+        if (onScrollStartRec_) {
+            onScrollStartRec_(static_cast<float>(axis_));
+        }
     }
 }
 
