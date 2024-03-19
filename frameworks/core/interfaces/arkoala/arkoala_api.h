@@ -3307,8 +3307,6 @@ struct ArkUIBasicAPI {
     void (*applyModifierFinish)(ArkUINodeHandle nodePtr);
     // the flag can combine different flag like ARKUI_DIRTY_FLAG_MEASURE | ARKUI_DIRTY_FLAG_RENDER
     void (*markDirty)(ArkUINodeHandle nodePtr, ArkUI_Uint32 dirtyFlag);
-    // ContainerScope
-    void (*containerScopeBind)();
 };
 
 struct ArkUIDialogAPI {
