@@ -25,20 +25,28 @@ void UIDisplaySync::CheckRate(int32_t vsyncRate, int32_t refreshRateMode)
     CHECK_NULL_VOID(data_->rate_);
     CHECK_NULL_VOID(data_->rateRange_);
     if (IsCommonDivisor(data_->rateRange_->preferred_, vsyncRate)) {
-        int32_t curRate = vsyncRate / data_->rateRange_->preferred_;
-        if (data_->rate_ != curRate) {
-            data_->rate_ = curRate;
-            rateChanged_ = true;
-            ACE_SCOPED_TRACE("[%s] Id[%" PRIu64 "] RateChangedTo: %d", __func__, GetId(), data_->rate_);
-        }
+        drawFPS_ = data_->rateRange_->preferred_;
+    } else {
+        drawFPS_ = SearchMatchedRate(vsyncRate);
+    }
+
+    if (drawFPS_ == 0) {
+        return;
+    }
+
+    int32_t curRate = vsyncRate / drawFPS_;
+    if (data_->rate_ != curRate) {
+        data_->rate_ = curRate;
+        rateChanged_ = true;
+        ACE_SCOPED_TRACE("[%s] Id[%" PRIu64 "] RateChangedTo: %d", __func__, GetId(), data_->rate_);
     }
     return;
 }
 
-void UIDisplaySync::UpdateData(uint64_t nanoTimestamp, int32_t vsyncPeriod)
+void UIDisplaySync::UpdateData(int64_t nanoTimestamp, int32_t vsyncPeriod)
 {
     SetTimestampData(nanoTimestamp);
-    uint64_t targetTimestamp = nanoTimestamp + static_cast<uint64_t>(vsyncPeriod * data_->rate_);
+    int64_t targetTimestamp = nanoTimestamp + static_cast<int64_t>(vsyncPeriod * data_->rate_);
     SetTargetTimestampData(targetTimestamp);
 }
 
@@ -49,23 +57,24 @@ void UIDisplaySync::JudgeWhetherSkip()
         rateChanged_ = false;
     }
 
-    data_->count_++;
-    if (data_->count_ % data_->rate_ == 0) {
+    if (data_->count_ == 0) {
         data_->noSkip_ = true;
-        data_->count_ = 0;
     } else {
         data_->noSkip_ = false;
     }
+
+    if (data_->rate_ && (data_->rate_ - data_->count_) == 1) {
+        data_->count_ = -1;
+    }
+    data_->count_++;
 }
 
 void UIDisplaySync::OnFrame()
 {
     ACE_SCOPED_TRACE("DisplaySyncId[%" PRIu64 "] Timestamp[%" PRIu64 "] TargetTimestamp[%" PRIu64 "]"
-                     "Preferred[%d] VSyncRate[%d] Rate[%d] noSkip[%d]",
+                     "Preferred[%d] DrawFPS[%d] VSyncRate[%d] Rate[%d] noSkip[%d]",
                      GetId(), data_->timestamp_, data_->targetTimestamp_,
-                     data_->rateRange_->preferred_, sourceVsyncRate_, data_->rate_, data_->noSkip_);
-    CheckShouldUnregisterOnFrame();
-
+                     data_->rateRange_->preferred_, drawFPS_, sourceVsyncRate_, data_->rate_, data_->noSkip_);
     if (data_->noSkip_ && data_->onFrame_) {
         data_->onFrame_();
     }
@@ -83,14 +92,22 @@ void UIDisplaySync::OnFrame()
 
 void UIDisplaySync::AddToPipeline(WeakPtr<PipelineBase>& pipelineContext)
 {
+    if (GetCurrentContext()) {
+        TAG_LOGD(AceLogTag::ACE_ANIMATION, "[DisplaySync] existed in Pipeline.");
+        return;
+    }
+
     auto context = pipelineContext.Upgrade();
     if (!context) {
         context = PipelineBase::GetCurrentContextSafely();
         if (!context) {
+            TAG_LOGD(AceLogTag::ACE_ANIMATION, "[DisplaySync] CurrentContext is nullptr.");
             return;
         }
+        TAG_LOGD(AceLogTag::ACE_ANIMATION, "[DisplaySync] Add to current context safely.");
     }
 
+    context_ = context;
     RefPtr<UIDisplaySyncManager> dsm = context->GetOrCreateUIDisplaySyncManager();
     if (!dsm) {
         return;
@@ -100,12 +117,9 @@ void UIDisplaySync::AddToPipeline(WeakPtr<PipelineBase>& pipelineContext)
 
 void UIDisplaySync::DelFromPipeline(WeakPtr<PipelineBase>& pipelineContext)
 {
-    auto context = pipelineContext.Upgrade();
+    auto context = GetCurrentContext();
     if (!context) {
-        context = PipelineBase::GetCurrentContextSafely();
-        if (!context) {
-            return;
-        }
+        return;
     }
 
     RefPtr<UIDisplaySyncManager> dsm = context->GetOrCreateUIDisplaySyncManager();
@@ -113,11 +127,12 @@ void UIDisplaySync::DelFromPipeline(WeakPtr<PipelineBase>& pipelineContext)
         return;
     }
     dsm->RemoveDisplaySync(AceType::Claim(this));
+    context_ = nullptr;
 }
 
 bool UIDisplaySync::IsAddToPipeline(WeakPtr<PipelineBase>& pipelineContext)
 {
-    auto context = pipelineContext.Upgrade();
+    auto context = GetCurrentContext();
     if (!context) {
         return false;
     }
@@ -151,8 +166,7 @@ bool UIDisplaySync::IsOnPipeline()
 
 void UIDisplaySync::RequestFrame()
 {
-    WeakPtr<PipelineBase> pipeline = PipelineBase::GetCurrentContext();
-    auto context = pipeline.Upgrade();
+    auto context = GetCurrentContext();
     if (!context) {
         return;
     }
@@ -184,38 +198,27 @@ void UIDisplaySync::RegisterOnFrameWithTimestamp(OnFrameCallBackWithTimestamp&& 
 
 void UIDisplaySync::UnregisterOnFrame()
 {
-    needUnregisterOnFrame_ = true;
-}
-
-void UIDisplaySync::CheckShouldUnregisterOnFrame()
-{
-    if (!needUnregisterOnFrame_) {
-        return;
-    }
-
     data_->onFrame_ = nullptr;
     data_->onFrameWithData_ = nullptr;
     data_->onFrameWithTimestamp_ = nullptr;
-
-    needUnregisterOnFrame_ = false;
 }
 
-void UIDisplaySync::SetTimestampData(uint64_t timestamp)
+void UIDisplaySync::SetTimestampData(int64_t timestamp)
 {
     data_->SetTimestamp(timestamp);
 }
 
-uint64_t UIDisplaySync::GetTimestampData() const
+int64_t UIDisplaySync::GetTimestampData() const
 {
     return data_->GetTimestamp();
 }
 
-void UIDisplaySync::SetTargetTimestampData(uint64_t targetTimestamp)
+void UIDisplaySync::SetTargetTimestampData(int64_t targetTimestamp)
 {
     data_->SetTargetTimestamp(targetTimestamp);
 }
 
-uint64_t UIDisplaySync::GetTargetTimestampData() const
+int64_t UIDisplaySync::GetTargetTimestampData() const
 {
     return data_->GetTargetTimestamp();
 }
@@ -238,6 +241,31 @@ bool UIDisplaySync::IsAutoRefreshRateMode() const
 bool UIDisplaySync::IsNonAutoRefreshRateMode() const
 {
     return refreshRateMode_ != static_cast<int32_t>(RefreshRateMode::REFRESHRATE_MODE_AUTO);
+}
+
+int32_t UIDisplaySync::SearchMatchedRate(int32_t vsyncRate, int32_t iterCount)
+{
+    if (vsyncRate != 0 && iterCount >= vsyncRate) {
+        return iterCount / vsyncRate;
+    }
+
+    if (iterCount == 0) {
+        return vsyncRate;
+    }
+
+    int32_t expectedRate = vsyncRate / iterCount;
+    if (data_->rateRange_->min_ <= expectedRate &&
+        data_->rateRange_->max_ >= expectedRate) {
+        return expectedRate;
+    }
+
+    return SearchMatchedRate(vsyncRate, ++iterCount);
+}
+
+RefPtr<PipelineBase> UIDisplaySync::GetCurrentContext()
+{
+    auto context = context_.Upgrade();
+    return context;
 }
 
 UIDisplaySync::UIDisplaySync() {}
@@ -270,7 +298,7 @@ bool UIDisplaySync::IsCommonDivisor(int32_t expectedRate, int32_t vsyncRate)
     }
 
     int32_t n = vsyncRate / expectedRate;
-    if (vsyncRate % n == 0) {
+    if (expectedRate * n == vsyncRate) {
         return true;
     }
     return false;

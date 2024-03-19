@@ -43,6 +43,7 @@ constexpr int32_t ANIMATION_BASE_DURATION = 256;
 constexpr Dimension BLANK_MIN_HEIGHT = 8.0_vp;
 constexpr Dimension DRAG_UP_THRESHOLD = 48.0_vp;
 constexpr double VELOCITY_THRESHOLD = 1000.0; // Move 1000px per second.
+constexpr int32_t FRAME_RATE = 120;
 
 } // namespace
 
@@ -622,6 +623,7 @@ void SlidingPanelPattern::AnimateTo(float targetLocation, PanelMode mode)
     isAnimating_ = true;
     animator_->ClearInterpolators();
     animator_->ClearAllListeners();
+    animator_->SetExpectedFrameRateRange(FrameRateRange(FRAME_RATE, FRAME_RATE, FRAME_RATE));
     if (animator_->IsRunning()) {
         animator_->Stop();
     }
