@@ -31,6 +31,8 @@
 #include "core/components_ng/animation/geometry_transition.h"
 #include "core/components_ng/base/ui_node.h"
 #include "core/components_ng/pattern/calendar_picker/calendar_type_define.h"
+#include "core/components_ng/pattern/overlay/content_cover_param.h"
+#include "core/components_ng/pattern/overlay/modal_presentation_pattern.h"
 #include "core/components_ng/pattern/overlay/modal_style.h"
 #include "core/components_ng/pattern/overlay/sheet_style.h"
 #include "core/components_ng/pattern/picker/datepicker_event_hub.h"
@@ -356,11 +358,13 @@ public:
     void BindContentCover(bool isShow, std::function<void(const std::string&)>&& callback,
         std::function<RefPtr<UINode>()>&& buildNodeFunc, NG::ModalStyle& modalStyle, std::function<void()>&& onAppear,
         std::function<void()>&& onDisappear, std::function<void()>&& onWillAppear,
-        std::function<void()>&& onWillDisappear, const RefPtr<FrameNode>& targetNode, int32_t sessionId = 0);
+        std::function<void()>&& onWillDisappear, const NG::ContentCoverParam& contentCoverParam,
+        const RefPtr<FrameNode>& targetNode, int32_t sessionId = 0);
     void OnBindContentCover(bool isShow, std::function<void(const std::string&)>&& callback,
         std::function<RefPtr<UINode>()>&& buildNodeFunc, NG::ModalStyle& modalStyle, std::function<void()>&& onAppear,
         std::function<void()>&& onDisappear, std::function<void()>&& onWillAppear,
-        std::function<void()>&& onWillDisappear, const RefPtr<FrameNode>& targetNode, int32_t sessionId = 0);
+        std::function<void()>&& onWillDisappear, const NG::ContentCoverParam& contentCoverParam,
+        const RefPtr<FrameNode>& targetNode, int32_t sessionId = 0);
     void BindSheet(bool isShow, std::function<void(const std::string&)>&& callback,
         std::function<RefPtr<UINode>()>&& buildNodeFunc, std::function<RefPtr<UINode>()>&& buildTitleNodeFunc,
         NG::SheetStyle& sheetStyle, std::function<void()>&& onAppear, std::function<void()>&& onDisappear,
@@ -374,6 +378,7 @@ public:
     void CloseSheet(int32_t targetId);
 
     void DismissSheet();
+    void DismissContentCover();
 
     void SetDismissTargetId(int32_t targetId)
     {
@@ -386,7 +391,10 @@ public:
 
     RefPtr<FrameNode> GetSheetMask(const RefPtr<FrameNode>& sheetNode);
 
+    RefPtr<FrameNode> GetModal(int32_t targetId);
+    void RemoveModal(int32_t targetId);
     void DeleteModal(int32_t targetId, bool needOnWillDisappear = true);
+    void PopTopModalNode();
 
     void DeleteModalNode(int32_t targetId, RefPtr<FrameNode>& modalNode, bool isModal, bool needOnWillDisappear);
 
@@ -485,6 +493,8 @@ private:
     void SetContainerButtonEnable(bool isEnabled);
 
     void SaveLastModalNode();
+    void PlayTransitionEffectIn(const RefPtr<FrameNode>& topModalNode);
+    void PlayTransitionEffectOut(const RefPtr<FrameNode>& topModalNode);
     void PlayDefaultModalTransition(const RefPtr<FrameNode>& modalNode, bool isTransitionIn);
     void DefaultModalTransition(bool isTransitionIn);
     void PlayAlphaModalTransition(const RefPtr<FrameNode>& modalNode, bool isTransitionIn);
@@ -525,10 +535,12 @@ private:
         const WeakPtr<OverlayManager> weak, int32_t instanceId);
     void UpdateMenuVisibility(const RefPtr<FrameNode>& menu);
 
+    bool CheckTopModalNode(const RefPtr<FrameNode>& topModalNode, int32_t targetId);
     void HandleModalShow(std::function<void(const std::string&)>&& callback,
         std::function<RefPtr<UINode>()>&& buildNodeFunc, NG::ModalStyle& modalStyle, std::function<void()>&& onAppear,
         std::function<void()>&& onDisappear, std::function<void()>&& onWillDisappear, const RefPtr<UINode> rootNode,
-        int32_t targetId, std::optional<ModalTransition> modalTransition);
+        const NG::ContentCoverParam& contentCoverParam, int32_t targetId,
+        std::optional<ModalTransition> modalTransition);
     void HandleModalPop(std::function<void()>&& onWillDisappear, const RefPtr<UINode> rootNode, int32_t targetId);
 
     // Key: target Id, Value: PopupInfo
