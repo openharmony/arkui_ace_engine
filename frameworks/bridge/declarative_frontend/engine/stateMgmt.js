@@ -6783,7 +6783,6 @@ class ObserveV3 {
         });
         delete this.id2targets_[id];
         delete this.id2cmp_[id];
-        
     }
     // add dependency view model object 'target' property 'attrName'
     // to current this.bindId
