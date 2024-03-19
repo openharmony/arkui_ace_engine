@@ -2412,7 +2412,7 @@ RectF RosenRenderContext::AdjustPaintRect()
     Dimension parentPaddingTop;
     GetPaddingOfFirstFrameNodeParent(parentPaddingLeft, parentPaddingTop);
     // Position properties take precedence over offset locations.
-    if (hasPosition) {
+    if (HasPosition() && IsUsingPosition(frameNode)) {
         CombineMarginAndPosition(
             resultX, resultY, parentPaddingLeft, parentPaddingTop, widthPercentReference, heightPercentReference);
         rect.SetLeft(resultX.ConvertToPx() - anchorX.value_or(0));
