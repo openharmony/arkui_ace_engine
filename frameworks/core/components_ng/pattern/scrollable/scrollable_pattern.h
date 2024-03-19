@@ -472,17 +472,6 @@ public:
         animateCanOverScroll_ = canScroll && animateCanOverScroll;
     }
 
-    virtual void InitScrollBarClickEvent();
-    void HandleClickEvent(GestureEvent& info);
-    virtual void InitScrollBarLongPressEvent();
-    void HandleLongPress(bool smooth);
-    virtual void InitScrollBarTouchEvent();
-    void OnTouchUp();
-    void OnTouchDown();
-    void ScheduleCaretLongPress();
-    void StartLongPressEventTimer();
-    virtual void ScrollPage(bool reverse, bool smooth = false);
-    bool AnalysisUpOrDown(Point point, bool& reverse);
     void PrintOffsetLog(AceLogTag tag, int32_t id, double finalOffset);
 
     void SetScrollToSafeAreaHelper(bool isScrollToSafeAreaHelper)
@@ -729,8 +718,6 @@ private:
     void HandleLeaveHotzoneEvent();
     bool isVertical() const;
     void AddHotZoneSenceInterface(SceneStatus scene);
-    bool isMousePressed_ = false;
-    Offset locationInfo_;
 };
 } // namespace OHOS::Ace::NG
 

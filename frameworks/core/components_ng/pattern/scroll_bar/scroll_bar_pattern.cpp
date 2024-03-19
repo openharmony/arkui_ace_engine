@@ -25,7 +25,6 @@ constexpr int32_t BAR_DISAPPEAR_DURATION = 400;        // 400ms
 constexpr int32_t BAR_DISAPPEAR_FRAME_RATE = 20;
 constexpr int32_t BAR_DISAPPEAR_MIN_FRAME_RATE = 0;
 constexpr int32_t BAR_DISAPPEAR_MAX_FRAME_RATE = 90;
-constexpr int32_t LONG_PRESS_PAGE_INTERVAL_MS = 100;
 } // namespace
 
 void ScrollBarPattern::OnAttachToFrameNode()
@@ -111,9 +110,6 @@ void ScrollBarPattern::OnModifyDone()
         });
     gestureHub->AddScrollableEvent(scrollableEvent_);
     SetAccessibilityAction();
-    InitClickEvent();
-    InitTouchEvent();
-    InitLongPressEvent();
     if (!panRecognizer_) {
         InitPanRecognizer();
     }
@@ -153,19 +149,6 @@ bool ScrollBarPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dir
         }
     }
     return false;
-}
-
-bool ScrollBarPattern::IsInScrollBar()
-{
-    auto scrollBar = GetHost();
-    CHECK_NULL_RETURN(scrollBar, false);
-    auto scrollBarSize = scrollBar->GetGeometryNode()->GetFrameSize();
-    const bool isInVerticalScrollBar = (locationInfo_.GetX() >= 0 && locationInfo_.GetX() <= scrollBarSize.Width()) &&
-                                       (locationInfo_.GetY() >= 0 && locationInfo_.GetY() <= scrollBarSize.Height());
-
-    const bool isInHorizontalScrollBar = (locationInfo_.GetY() >= 0 && locationInfo_.GetY() <= scrollBarSize.Width()) &&
-                                         (locationInfo_.GetX() >= 0 && locationInfo_.GetX() <= scrollBarSize.Height());
-    return (axis_ == Axis::VERTICAL) ? isInVerticalScrollBar : isInHorizontalScrollBar;
 }
 
 bool ScrollBarPattern::IsAtTop() const
@@ -419,133 +402,5 @@ void ScrollBarPattern::OnCollectTouchTarget(const OffsetF& coordinateOffset,
         panRecognizer_->SetIsSystemGesture(true);
         result.emplace_front(panRecognizer_);
     }
-}
-
-void ScrollBarPattern::InitClickEvent()
-{
-    CHECK_NULL_VOID(!clickListener_);
-    auto gesture = GetHost()->GetOrCreateGestureEventHub();
-    auto clickCallback = [weak = WeakClaim(this)](GestureEvent& info) {
-        auto pattern = weak.Upgrade();
-        CHECK_NULL_VOID(pattern);
-        pattern->HandleClickEvent(info);
-    };
-    clickListener_ = MakeRefPtr<ClickEvent>(std::move(clickCallback));
-    gesture->AddClickEvent(clickListener_);
-}
-
-void ScrollBarPattern::HandleClickEvent(GestureEvent& info)
-{
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    auto localLocation = info.GetLocalLocation();
-    auto infoOffset = OffsetF(localLocation.GetX(), localLocation.GetY());
-    auto scrollBarTopOffset = OffsetF(childRect_.Left(), childRect_.Top());
-    auto scrollBarBottomOffset = OffsetF(childRect_.Right(), childRect_.Bottom());
-    if (infoOffset.GetMainOffset(axis_) < scrollBarTopOffset.GetMainOffset(axis_)) {
-        scrollBarProxy_->ScrollPage(true, true);
-    } else if (infoOffset.GetMainOffset(axis_) > scrollBarBottomOffset.GetMainOffset(axis_)) {
-        scrollBarProxy_->ScrollPage(false, true);
-    }
-}
-
-void ScrollBarPattern::InitLongPressEvent()
-{
-    CHECK_NULL_VOID(!longPressEvent_);
-    auto gesture = GetHost()->GetOrCreateGestureEventHub();
-    auto longPressCallback = [weak = WeakClaim(this)](GestureEvent& info) {
-        auto pattern = weak.Upgrade();
-        CHECK_NULL_VOID(pattern);
-        pattern->HandleLongPress(true);
-    };
-    longPressEvent_ = MakeRefPtr<LongPressEvent>(std::move(longPressCallback));
-    gesture->SetLongPressEvent(longPressEvent_);
-}
-
-void ScrollBarPattern::HandleLongPress(bool smooth)
-{
-    bool reverse = false;
-    auto infoOffset = OffsetF(locationInfo_.GetX(), locationInfo_.GetY());
-    auto scrollBarTopOffset = OffsetF(childRect_.Left(), childRect_.Top());
-    auto scrollBarBottomOffset = OffsetF(childRect_.Right(), childRect_.Bottom());
-    if (infoOffset.GetMainOffset(axis_) < scrollBarTopOffset.GetMainOffset(axis_)) {
-        reverse = true;
-        if (scrollingDown_) {
-            return;
-        }
-        scrollingUp_ = true;
-        scrollingDown_ = false;
-    } else if (infoOffset.GetMainOffset(axis_) > scrollBarBottomOffset.GetMainOffset(axis_)) {
-        reverse = false;
-        if (scrollingUp_) {
-            return;
-        }
-        scrollingUp_ = false;
-        scrollingDown_ = true;
-    } else {
-        isMousePressed_ = false;
-        scrollingUp_ = false;
-        scrollingDown_ = false;
-    }
-    if (isMousePressed_ && IsInScrollBar()) {
-        scrollBarProxy_->ScrollPage(reverse, smooth);
-        StartLongPressEventTimer();
-    }
-}
-
-void ScrollBarPattern::ScheduleCaretLongPress()
-{
-    auto context = OHOS::Ace::PipelineContext::GetCurrentContext();
-    CHECK_NULL_VOID(context);
-    if (!context->GetTaskExecutor()) {
-        return;
-    }
-    auto taskExecutor = context->GetTaskExecutor();
-    CHECK_NULL_VOID(taskExecutor);
-    taskExecutor->PostDelayedTask(
-        [=]() { HandleLongPress(true); }, TaskExecutor::TaskType::UI, LONG_PRESS_PAGE_INTERVAL_MS);
-}
-
-void ScrollBarPattern::StartLongPressEventTimer()
-{
-    auto tmpHost = GetHost();
-    CHECK_NULL_VOID(tmpHost);
-    tmpHost->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
-    ScheduleCaretLongPress();
-}
-
-void ScrollBarPattern::InitTouchEvent()
-{
-    CHECK_NULL_VOID(!touchListener_);
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    auto gesture = host->GetOrCreateGestureEventHub();
-    CHECK_NULL_VOID(gesture);
-    auto touchCallback = [weak = WeakClaim(this)](const TouchEventInfo& info) {
-        auto pattern = weak.Upgrade();
-        CHECK_NULL_VOID(pattern);
-        if (info.GetTouches().front().GetTouchType() == TouchType::DOWN) {
-            pattern->OnTouchDown();
-        }
-        if (info.GetTouches().front().GetTouchType() == TouchType::UP ||
-            info.GetTouches().front().GetTouchType() == TouchType::CANCEL) {
-            pattern->OnTouchUp();
-        }
-        pattern->locationInfo_ = info.GetTouches().front().GetLocalLocation();
-    };
-    touchListener_ = MakeRefPtr<TouchEventImpl>(std::move(touchCallback));
-    gesture->AddTouchEvent(touchListener_);
-}
-
-void ScrollBarPattern::OnTouchUp()
-{
-    isMousePressed_ = false;
-    scrollingUp_ = false;
-    scrollingDown_ = false;
-}
-
-void ScrollBarPattern::OnTouchDown()
-{
-    isMousePressed_ = true;
 }
 } // namespace OHOS::Ace::NG

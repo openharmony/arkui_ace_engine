@@ -33,7 +33,6 @@ struct ScrollableNodeInfo {
     CalePredictSnapOffsetCallback calePredictSnapOffsetCallback;
     StartScrollSnapMotionCallback startScrollSnapMotionCallback;
     ScrollBarFRCallback scrollbarFRcallback;
-    std::function<void(bool, bool smooth)> scrollPageCallback;
 
     bool operator==(const ScrollableNodeInfo& info) const
     {
@@ -104,8 +103,6 @@ public:
     {
         return scrollSnapTrigger_;
     }
-
-    void ScrollPage(bool reverse, bool smooth);
 
 private:
     /*
