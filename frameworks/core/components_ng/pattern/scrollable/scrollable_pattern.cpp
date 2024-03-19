@@ -1951,6 +1951,27 @@ void ScrollablePattern::ScrollToEdge(ScrollEdgeType scrollEdgeType, bool smooth)
     }
 }
 
+void ScrollablePattern::Fling(double flingVelocity)
+{
+    if (!IsScrollableStopped()) {
+        scrollAbort_ = true;
+        StopScrollable();
+    }
+    if (!isAnimationStop_) {
+        scrollAbort_ = true;
+        StopAnimation(springAnimation_);
+        StopAnimation(curveAnimation_);
+    }
+    if (animator_ && !animator_->IsStopped()) {
+        scrollAbort_ = true;
+        animator_->Stop();
+    }
+    CHECK_NULL_VOID(scrollableEvent_);
+    auto scrollable = scrollableEvent_->GetScrollable();
+    CHECK_NULL_VOID(scrollable);
+    scrollable->StartScrollAnimation(0.0, flingVelocity);
+}
+
 void ScrollablePattern::NotifyFRCSceneInfo(const std::string& scene, double velocity, SceneStatus sceneStatus)
 {
     auto host = GetHost();
