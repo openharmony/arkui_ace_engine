@@ -681,7 +681,7 @@ OverScrollOffset ListPattern::GetOverScrollOffset(double delta) const
     if (endIndex_ == maxListItemIndex_ && groupAtEnd) {
         auto endPos = endMainPos_ + GetChainDelta(endIndex_);
         auto contentEndPos = contentMainSize_ - contentEndOffset_;
-        if (GreatNotEqual(contentEndPos, endMainPos_ - startMainPos_)) {
+        if (GreatNotEqual(contentEndPos, endMainPos_ - startMainPos_) && !IsScrollSnapAlignCenter()) {
             endPos = startMainPos_ + contentEndPos;
         }
         auto newEndPos = endPos + delta;
