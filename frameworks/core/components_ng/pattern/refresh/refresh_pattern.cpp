@@ -61,7 +61,9 @@ const RefPtr<Curve> DEFAULT_CURVE = AceType::MakeRefPtr<CubicCurve>(0.2f, 0.0f, 
 const std::string REFRESH_DRAG_SCENE = "refresh_drag_scene";
 constexpr Dimension DARK_MODE_BLUR_RADIUS = 2.0_vp;
 constexpr double DARK_MODE_LOADING_PROGRESS_BORDER_WIDTH = 2.4f;
+constexpr double LIGHT_MODE_LOADING_PROGRESS_BORDER_WIDTH = 0.0f;
 constexpr double DARK_MODE_LOADING_PROGRESS_BACKGROUND_ALPHA = 0.53f;
+constexpr double LIGHT_MODE_LOADING_PROGRESS_BACKGROUND_ALPHA = 0.0f;
 constexpr Dimension LOADING_TEXT_TOP_MARGIN = 16.0_vp;
 constexpr Dimension LOADING_TEXT_DISPLAY_DISTANCE = 80.0_vp;
 } // namespace
@@ -298,18 +300,14 @@ void RefreshPattern::OnColorConfigurationUpdate()
     if (SystemProperties::GetColorMode() == ColorMode::DARK) {
         loadingProgressRenderContext->UpdateBackgroundColor(
             theme->GetBackgroundColor().BlendOpacity(DARK_MODE_LOADING_PROGRESS_BACKGROUND_ALPHA));
-
         loadingProgressRenderContext->UpdateFrontBlurRadius(DARK_MODE_BLUR_RADIUS);
         UpdateRefreshBorderWidth(GetFollowRatio());
 
     } else {
-        loadingProgressRenderContext->UpdateBackgroundColor(theme->GetBackgroundColor());
+        loadingProgressRenderContext->UpdateBackgroundColor(
+            theme->GetBackgroundColor().BlendOpacity(LIGHT_MODE_LOADING_PROGRESS_BACKGROUND_ALPHA));
         loadingProgressRenderContext->UpdateFrontBlurRadius(Dimension(0, DimensionUnit::VP));
-        auto host = GetHost();
-        CHECK_NULL_VOID(host);
-        BorderWidthProperty borderWidth;
-        borderWidth.SetBorderWidth(Dimension(0, DimensionUnit::VP));
-        host->GetLayoutProperty<RefreshLayoutProperty>()->UpdateBorderWidth(borderWidth);
+        UpdateRefreshBorderWidth(LIGHT_MODE_LOADING_PROGRESS_BORDER_WIDTH);
     }
 
     auto layoutProperty = GetLayoutProperty<RefreshLayoutProperty>();
