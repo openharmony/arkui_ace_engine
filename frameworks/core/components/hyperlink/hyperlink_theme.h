@@ -45,18 +45,14 @@ public:
             }
             theme->textSelectedDecoration_ = TextDecoration::UNDERLINE;
             theme->textUnSelectedDecoration_ = TextDecoration::NONE;
-            ParsePattern(themeConstants->GetThemeStyle(), theme);
+            ParsePattern(themeConstants, theme);
             return theme;
         }
 
     private:
-        void ParsePattern(const RefPtr<ThemeStyle>& themeStyle, const RefPtr<HyperlinkTheme>& theme) const
+        void ParsePattern(const RefPtr<ThemeConstants>& themeConstants, const RefPtr<HyperlinkTheme>& theme) const
         {
-            if (!themeStyle) {
-                LOGI("hyperlink theme style is null");
-                return;
-            }
-            auto pattern = themeStyle->GetAttr<RefPtr<ThemeStyle>>(THEME_PATTERN_HYPERLINK, nullptr);
+            RefPtr<ThemeStyle> pattern = themeConstants->GetPatternByName(THEME_PATTERN_HYPERLINK);
             if (!pattern) {
                 LOGW("find pattern of hyperlink fail");
                 return;

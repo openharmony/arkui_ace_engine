@@ -52,7 +52,7 @@ public:
             if (!themeConstants) {
                 return theme;
             }
-            ParsePattern(themeConstants->GetThemeStyle(), theme);
+            ParsePattern(themeConstants, theme);
             theme->showTime_ = SHOW_TIME;
             theme->hideTime_ = HIDE_TIME;
             theme->targetSpace_ = TARGET_SPACE;
@@ -60,12 +60,12 @@ public:
         }
 
     private:
-        void ParsePattern(const RefPtr<ThemeStyle>& themeStyle, const RefPtr<PopupTheme>& theme) const
+        void ParsePattern(const RefPtr<ThemeConstants>& themeConstants, const RefPtr<PopupTheme>& theme) const
         {
-            if (!themeStyle || !theme) {
+            if (!theme) {
                 return;
             }
-            auto pattern = themeStyle->GetAttr<RefPtr<ThemeStyle>>(THEME_PATTERN_POPUP, nullptr);
+            RefPtr<ThemeStyle> pattern = themeConstants->GetPatternByName(THEME_PATTERN_POPUP);
             if (!pattern) {
                 LOGW("find pattern of popup fail");
                 return;

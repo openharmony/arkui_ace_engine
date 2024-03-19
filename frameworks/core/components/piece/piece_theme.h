@@ -43,17 +43,14 @@ public:
                 return theme;
             }
             theme->iconResource_ = themeConstants->GetResourceId(THEME_PIECE_ICON_SOURCE);
-            ParsePattern(themeConstants->GetThemeStyle(), theme);
+            ParsePattern(themeConstants, theme);
             return theme;
         }
 
     private:
-        void ParsePattern(const RefPtr<ThemeStyle>& themeStyle, const RefPtr<PieceTheme>& theme) const
+        void ParsePattern(const RefPtr<ThemeConstants>& themeConstants, const RefPtr<PieceTheme>& theme) const
         {
-            if (!themeStyle || !theme) {
-                return;
-            }
-            auto pattern = themeStyle->GetAttr<RefPtr<ThemeStyle>>(THEME_PATTERN_PIECE, nullptr);
+            RefPtr<ThemeStyle> pattern = themeConstants->GetPatternByName(THEME_PATTERN_PIECE);
             if (!pattern) {
                 LOGW("find pattern of piece fail");
                 return;

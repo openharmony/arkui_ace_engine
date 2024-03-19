@@ -38,17 +38,14 @@ public:
             if (!themeConstants) {
                 return theme;
             }
-            ParsePattern(themeConstants->GetThemeStyle(), theme);
+            ParsePattern(themeConstants, theme);
             return theme;
         }
 
     private:
-        void ParsePattern(const RefPtr<ThemeStyle>& themeStyle, const RefPtr<DataPanelTheme>& theme) const
+        void ParsePattern(const RefPtr<ThemeConstants>& themeConstants, const RefPtr<DataPanelTheme>& theme) const
         {
-            if (!themeStyle) {
-                return;
-            }
-            auto dataPanelPattern = themeStyle->GetAttr<RefPtr<ThemeStyle>>(THEME_PATTERN_DATA_PANEL, nullptr);
+            RefPtr<ThemeStyle> dataPanelPattern = themeConstants->GetPatternByName(THEME_PATTERN_DATA_PANEL);
             if (!dataPanelPattern) {
                 LOGW("find pattern of datapanel fail");
                 return;

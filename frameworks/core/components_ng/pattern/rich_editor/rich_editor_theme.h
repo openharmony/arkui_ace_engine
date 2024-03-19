@@ -45,17 +45,17 @@ public:
                 themeConstants->GetDimension(THEME_TEXTFIELD_PADDING_VERTICAL),
                 themeConstants->GetDimension(THEME_TEXTFIELD_PADDING_HORIZONTAL),
                 themeConstants->GetDimension(THEME_TEXTFIELD_PADDING_VERTICAL));
-            ParsePattern(themeConstants->GetThemeStyle(), theme);
+            ParsePattern(themeConstants, theme);
             return theme;
         }
 
     private:
-        void ParsePattern(const RefPtr<ThemeStyle>& themeStyle, const RefPtr<RichEditorTheme>& theme) const
+        void ParsePattern(const RefPtr<ThemeConstants>& themeConstants, const RefPtr<RichEditorTheme>& theme) const
         {
-            if (!themeStyle || !theme) {
+            if (!theme) {
                 return;
             }
-            auto pattern = themeStyle->GetAttr<RefPtr<ThemeStyle>>(THEME_PATTERN_RICH_EDITOR, nullptr);
+            RefPtr<ThemeStyle> pattern = themeConstants->GetPatternByName(THEME_PATTERN_RICH_EDITOR);
             if (!pattern) {
                 return;
             }

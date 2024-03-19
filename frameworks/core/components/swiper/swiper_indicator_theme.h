@@ -67,16 +67,13 @@ public:
             if (!themeConstants) {
                 return theme;
             }
-            ParsePattern(themeConstants->GetThemeStyle(), theme);
+            ParsePattern(themeConstants, theme);
             return theme;
         }
 
-        void ParsePattern(const RefPtr<ThemeStyle>& themeStyle, const RefPtr<SwiperIndicatorTheme>& theme) const
+        void ParsePattern(const RefPtr<ThemeConstants>& themeConstants, const RefPtr<SwiperIndicatorTheme>& theme) const
         {
-            if (!themeStyle) {
-                return;
-            }
-            auto swiperPattern = themeStyle->GetAttr<RefPtr<ThemeStyle>>(THEME_PATTERN_SWIPER, nullptr);
+            RefPtr<ThemeStyle> swiperPattern = themeConstants->GetPatternByName(THEME_PATTERN_SWIPER);
             if (!swiperPattern) {
                 LOGW("find pattern of swiper fail");
                 return;

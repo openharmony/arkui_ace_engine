@@ -203,17 +203,14 @@ public:
                 LOGI("Build AppTheme error, themeConstants is null!");
                 return theme;
             }
-            ParsePattern(themeConstants->GetThemeStyle(), theme);
+            ParsePattern(themeConstants, theme);
             return theme;
         }
 
     private:
-        void ParsePattern(const RefPtr<ThemeStyle>& themeStyle, const RefPtr<CheckboxTheme>& theme) const
+        void ParsePattern(const RefPtr<ThemeConstants>& themeConstants, const RefPtr<CheckboxTheme>& theme) const
         {
-            if (!themeStyle) {
-                return;
-            }
-            auto checkboxPattern = themeStyle->GetAttr<RefPtr<ThemeStyle>>(THEME_PATTERN_CHECKBOX, nullptr);
+            RefPtr<ThemeStyle> checkboxPattern = themeConstants->GetPatternByName(THEME_PATTERN_CHECKBOX);
             if (!checkboxPattern) {
                 LOGE("Pattern of checkbox is null, please check!");
                 return;
@@ -297,17 +294,14 @@ public:
                 LOGE("Build AppTheme error, themeConstants is null!");
                 return theme;
             }
-            ParsePattern(themeConstants->GetThemeStyle(), theme);
+            ParsePattern(themeConstants, theme);
             return theme;
         }
 
     private:
-        void ParsePattern(const RefPtr<ThemeStyle>& themeStyle, const RefPtr<SwitchTheme>& theme) const
+        void ParsePattern(const RefPtr<ThemeConstants>& themeConstants, const RefPtr<SwitchTheme>& theme) const
         {
-            if (!themeStyle) {
-                return;
-            }
-            auto switchPattern = themeStyle->GetAttr<RefPtr<ThemeStyle>>(THEME_PATTERN_SWITCH, nullptr);
+            RefPtr<ThemeStyle> switchPattern = themeConstants->GetPatternByName(THEME_PATTERN_SWITCH);
             if (!switchPattern) {
                 LOGE("Pattern of switch is null, please check!");
                 return;
@@ -388,17 +382,14 @@ public:
             if (!themeConstants) {
                 return theme;
             }
-            ParsePattern(themeConstants->GetThemeStyle(), theme);
+            ParsePattern(themeConstants, theme);
             return theme;
         }
 
     private:
-        void ParsePattern(const RefPtr<ThemeStyle>& themeStyle, const RefPtr<RadioTheme>& theme) const
+        void ParsePattern(const RefPtr<ThemeConstants>& themeConstants, const RefPtr<RadioTheme>& theme) const
         {
-            if (!themeStyle) {
-                return;
-            }
-            auto radioPattern = themeStyle->GetAttr<RefPtr<ThemeStyle>>(THEME_PATTERN_RADIO, nullptr);
+            RefPtr<ThemeStyle> radioPattern = themeConstants->GetPatternByName(THEME_PATTERN_RADIO);
             if (!radioPattern) {
                 LOGW("find pattern of radio fail");
                 return;

@@ -48,11 +48,7 @@ public:
                 return theme;
             }
 
-            auto themeStyle = themeConstants->GetThemeStyle();
-            if (!themeStyle) {
-                return theme;
-            }
-            auto pattern = themeStyle->GetAttr<RefPtr<ThemeStyle>>(THEME_PATTERN_MARQUEE, nullptr);
+            RefPtr<ThemeStyle> pattern = themeConstants->GetPatternByName(THEME_PATTERN_MARQUEE);
             if (pattern) {
                 theme->textColor_ = pattern->GetAttr<Color>(PATTERN_TEXT_COLOR, Color::BLACK);
                 theme->fontSize_ = pattern->GetAttr<Dimension>("marquee_font_size", MARQUEE_FONT_SIZE);

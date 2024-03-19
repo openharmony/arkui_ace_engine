@@ -82,17 +82,17 @@ public:
                 theme->pathStrokeWidth_ = DEFAULT_PATH_STROKE_WIDTH;
                 theme->activeCircleRadius_ = DEFAULT_ACTIVE_CIRCLE_RADIUS;
                 theme->backgroundCircleRadius_ = DEFAULT_BACKGROUND_CIRCLE_RADIUS;
-                ParsePattern(themeConstants->GetThemeStyle(), theme);
+                ParsePattern(themeConstants, theme);
             }
             return theme;
         }
 
-        void ParsePattern(const RefPtr<ThemeStyle>& themeStyle, const RefPtr<PatternLockTheme>& theme) const
+        void ParsePattern(const RefPtr<ThemeConstants>& themeConstants, const RefPtr<PatternLockTheme>& theme) const
         {
-            if (themeStyle == nullptr || theme == nullptr) {
+            if (theme == nullptr) {
                 return;
             }
-            auto pattern = themeStyle->GetAttr<RefPtr<ThemeStyle>>(THEME_PATTERN_PATTERN_LOCK, nullptr);
+            RefPtr<ThemeStyle> pattern = themeConstants->GetPatternByName(THEME_PATTERN_PATTERN_LOCK);
             if (pattern) {
                 theme->regularColor_ = pattern->GetAttr<Color>("regular_color", Color::BLACK);
                 theme->activeColor_ = pattern->GetAttr<Color>("selected_color", Color::BLACK);
