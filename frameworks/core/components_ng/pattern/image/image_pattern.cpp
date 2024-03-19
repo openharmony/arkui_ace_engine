@@ -246,8 +246,15 @@ void ImagePattern::OnImageDataReady()
         geometryNode->GetContentOffset().GetX(), geometryNode->GetContentOffset().GetY());
     imageEventHub->FireCompleteEvent(event);
 
-    auto geo = host->GetGeometryNode();
-    if (geo->GetContent() && !host->CheckNeedForceMeasureAndLayout()) {
+    const auto& props = DynamicCast<ImageLayoutProperty>(host->GetLayoutProperty());
+    if (!props) {
+        host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+        return;
+    }
+    auto&& layoutConstraint = props->GetCalcLayoutConstraint();
+
+    if (layoutConstraint && layoutConstraint->selfIdealSize && layoutConstraint->selfIdealSize->IsValid()) {
+        auto geo = host->GetGeometryNode();
         StartDecoding(geo->GetContentSize());
     } else {
         host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
