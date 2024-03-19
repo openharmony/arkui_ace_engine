@@ -17586,6 +17586,27 @@ class ArkProgressComponent extends ArkComponent {
     modifierWithKey(this._modifiersWithKeys, ProgressBackgroundColorModifier.identity, ProgressBackgroundColorModifier, value);
     return this;
   }
+  setContentModifier(modifier) {
+    if (modifier === undefined || modifier === null) {
+      getUINativeModule().progress.setContentModifierBuilder(this.nativePtr, false);
+      return;
+    }
+    this.builder = modifier.applyContent();
+    this.modifier = modifier;
+    getUINativeModule().progress.setContentModifierBuilder(this.nativePtr, this);
+    return this;
+  }
+  makeContentModifierNode(context, progressConfig) {
+    progressConfig.contentModifier = this.modifier;
+    if (isUndefined(this.progressNode)) {
+      let xNode = globalThis.requireNapi('arkui.node');
+      this.progressNode = new xNode.BuilderNode(context);
+      this.progressNode.build(this.builder, progressConfig);
+    } else {
+      this.progressNode.update(progressConfig);
+    }
+    return this.progressNode.getFrameNode();
+  }
 }
 class ProgressValueModifier extends ModifierWithKey {
   applyPeer(node, reset) {
@@ -17677,6 +17698,18 @@ if (globalThis.Progress !== undefined) {
     }, (nativePtr, classType, modifierJS) => {
       return new modifierJS.ProgressModifier(nativePtr, classType);
     });
+  };
+}
+
+// @ts-ignore
+if (globalThis.Progress !== undefined) {
+  globalThis.Progress.contentModifier = function (modifier) {
+    const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
+    let nativeNode = getUINativeModule().getFrameNodeById(elmtId);
+    let component = this.createOrGetNode(elmtId, () => {
+      return new ArkProgressComponent(nativeNode);
+    });
+    component.setContentModifier(modifier);
   };
 }
 
