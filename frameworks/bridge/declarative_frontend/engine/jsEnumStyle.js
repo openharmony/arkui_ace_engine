@@ -870,6 +870,7 @@ var SearchType;
   SearchType[SearchType["NUMBER"] = 2] = "NUMBER";
   SearchType[SearchType["PHONE_NUMBER"] = 3] = "PHONE_NUMBER";
   SearchType[SearchType["EMAIL"] = 5] = "EMAIL";
+  SearchType[SearchType["NUMBER_DECIMAL"] = 12] = "NUMBER_DECIMAL";
 })(SearchType || (SearchType = {}));
 
 var TextAreaType;
@@ -878,6 +879,7 @@ var TextAreaType;
   TextAreaType[TextAreaType["NUMBER"] = 2] = "NUMBER";
   TextAreaType[TextAreaType["PHONE_NUMBER"] = 3] = "PHONE_NUMBER";
   TextAreaType[TextAreaType["EMAIL"] = 5] = "EMAIL";
+  TextAreaType[TextAreaType["NUMBER_DECIMAL"] = 12] = "NUMBER_DECIMAL";
 })(TextAreaType || (TextAreaType = {}));
 
 var EnterKeyType;
