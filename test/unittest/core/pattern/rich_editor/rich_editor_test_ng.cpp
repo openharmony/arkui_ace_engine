@@ -1761,6 +1761,9 @@ HWTEST_F(RichEditorTestNg, HandleMouseLeftButton001, TestSize.Level1)
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
     MouseInfo mouseInfo;
     mouseInfo.action_ = MouseAction::MOVE;
+    auto focusHub = richEditorNode_->GetOrCreateFocusHub();
+    ASSERT_NE(focusHub, nullptr);
+    focusHub->RequestFocusImmediately();
 
     richEditorPattern->mouseStatus_ = MouseStatus::NONE;
     richEditorPattern->leftMousePress_ = false;
