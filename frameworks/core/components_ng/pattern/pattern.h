@@ -38,6 +38,7 @@ class AccessibilityEventInfo;
 }
 
 namespace OHOS::Ace::NG {
+class AccessibilitySessionAdapter;
 struct DirtySwapConfig {
     bool frameSizeChange = false;
     bool frameOffsetChange = false;
@@ -85,7 +86,7 @@ public:
     {
         return false;
     }
-    
+
     virtual bool IsSupportDrawModifier() const
     {
         return true;
@@ -481,6 +482,11 @@ public:
         int64_t elementId, const std::map<std::string, std::string>& actionArguments, int32_t action, int64_t offset)
     {
         return false;
+    }
+
+    virtual RefPtr<AccessibilitySessionAdapter> GetAccessibilitySessionAdapter()
+    {
+        return nullptr;
     }
 
     virtual int32_t GetUiExtensionId()

@@ -82,7 +82,7 @@ public:
 
     RefPtr<LayoutAlgorithm> CreateLayoutAlgorithm() override;
     FocusPattern GetFocusPattern() const override;
-    RefPtr<AccessibilitySessionAdapter> GetAccessibilitySessionAdapter();
+    RefPtr<AccessibilitySessionAdapter> GetAccessibilitySessionAdapter() override;
 
     void UpdateWant(const RefPtr<OHOS::Ace::WantWrap>& wantWrap);
     void UpdateWant(const AAFwk::Want& want);

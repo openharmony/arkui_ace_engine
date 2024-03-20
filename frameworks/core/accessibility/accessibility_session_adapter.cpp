@@ -17,28 +17,12 @@
 
 #include <map>
 #include "core/components_ng/base/frame_node.h"
-#include "core/components_ng/pattern/ui_extension/ui_extension_pattern.h"
 
 namespace OHOS::Ace::NG {
-RefPtr<AccessibilitySessionAdapter> GetSessionAdapterForUIExtension(const RefPtr<FrameNode>& node)
-{
-#ifdef WINDOW_SCENE_SUPPORTED
-    auto pattern = AceType::DynamicCast<UIExtensionPattern>(node->GetPattern());
-    CHECK_NULL_RETURN(pattern, nullptr);
-    return pattern->GetAccessibilitySessionAdapter();
-#endif
-    return nullptr;
-}
-
 RefPtr<AccessibilitySessionAdapter> AccessibilitySessionAdapter::GetSessionAdapter(const RefPtr<FrameNode>& node)
 {
-    static std::map<std::string, decltype(&GetSessionAdapterForUIExtension)> SESSION_ADAPTER_MAP {
-        { V2::UI_EXTENSION_COMPONENT_ETS_TAG, GetSessionAdapterForUIExtension }
-    };
-    auto handler = SESSION_ADAPTER_MAP.find(node->GetTag());
-    if (handler == SESSION_ADAPTER_MAP.end()) {
-        return nullptr;
-    }
-    return handler->second(node);
+    auto pattern = node->GetPattern();
+    CHECK_NULL_RETURN(pattern, nullptr);
+    return pattern->GetAccessibilitySessionAdapter();
 }
 } // namespace OHOS::Ace::NG

@@ -88,6 +88,11 @@ FocusPattern UIExtensionPattern::GetFocusPattern() const
     return { FocusType::NODE, true, FocusStyleType::NONE };
 }
 
+RefPtr<AccessibilitySessionAdapter> UIExtensionPattern::GetAccessibilitySessionAdapter()
+{
+    return accessibilitySessionAdapter_;
+}
+
 void UIExtensionPattern::InitializeDynamicComponent(
     const std::string& hapPath, const std::string& abcPath, const std::string& entryPoint, void* runtime)
 {
@@ -837,11 +842,6 @@ void UIExtensionPattern::OnColorConfigurationUpdate()
 int32_t UIExtensionPattern::GetSessionId()
 {
     return sessionWrapper_ ? sessionWrapper_->GetSessionId() : 0;
-}
-
-RefPtr<SessionWrapper>& UIExtensionPattern::GetSessionWrapper()
-{
-    return sessionWrapper_;
 }
 
 int32_t UIExtensionPattern::GetUiExtensionId()
