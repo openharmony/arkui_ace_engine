@@ -523,8 +523,8 @@ class TextFontFeatureModifier extends ModifierWithKey<FontFeature> {
 }
 
 class ArkTextComponent extends ArkComponent implements TextAttribute {
-  constructor(nativePtr: KNode) {
-    super(nativePtr);
+  constructor(nativePtr: KNode, classType?: ModifierType) {
+    super(nativePtr, classType);
   }
   enableDataDetector(value: boolean): this {
     modifierWithKey(this._modifiersWithKeys, TextEnableDataDetectorModifier.identity, TextEnableDataDetectorModifier, value);
@@ -650,13 +650,10 @@ class ArkTextComponent extends ArkComponent implements TextAttribute {
   }
 }
 // @ts-ignore
-globalThis.Text.attributeModifier = function (modifier) {
-  const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
-  let nativeNode = getUINativeModule().getFrameNodeById(elmtId);
-
-  let component = this.createOrGetNode(elmtId, () => {
-    return new ArkTextComponent(nativeNode);
+globalThis.Text.attributeModifier = function (modifier: ArkComponent) {
+  attributeModifierFunc.call(this, modifier, (nativePtr: KNode) => {
+    return new ArkTextComponent(nativePtr);
+  }, (nativePtr: KNode, classType: ModifierType, modifierJS: ModifierJS) => {
+    return new modifierJS.TextModifier(nativePtr, classType);
   });
-  applyUIAttributes(modifier, nativeNode, component);
-  component.applyModifierPatch();
 };

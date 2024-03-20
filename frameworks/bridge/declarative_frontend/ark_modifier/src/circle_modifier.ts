@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -14,14 +14,15 @@
  */
 
 /// <reference path='./import.ts' />
-class ArkCircleComponent extends ArkCommonShapeComponent implements CircleAttribute {
-}
+class CircleModifier extends ArkCircleComponent implements AttributeModifier<CircleAttribute> {
 
-// @ts-ignore
-globalThis.Circle.attributeModifier = function (modifier: ArkComponent) {
-  attributeModifierFunc.call(this, modifier, (nativePtr: KNode) => {
-    return new ArkCircleComponent(nativePtr);
-  }, (nativePtr: KNode, classType: ModifierType, modifierJS: ModifierJS) => {
-    return new modifierJS.CircleModifier(nativePtr, classType);
-  });
-};
+  constructor(nativePtr: KNode, classType: ModifierType) {
+    super(nativePtr, classType);
+    this._modifiersWithKeys = new ModifierMap();
+  }
+  
+  applyNormalAttribute(instance: CircleAttribute): void {
+    ModifierUtils.applySetOnChange(this);
+    ModifierUtils.applyAndMergeModifier<CircleAttribute, ArkCircleComponent, ArkComponent>(instance, this);
+  }
+}
