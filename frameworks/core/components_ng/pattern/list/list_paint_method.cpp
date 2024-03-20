@@ -100,6 +100,9 @@ void ListPaintMethod::UpdateDividerList(const DividerInfo& dividerInfo)
     bool nextIsPressed = false;
 
     for (const auto& child : itemPosition_) {
+        auto nextId = child.first - lanes;
+        nextIsPressed = nextId < 0 || lastIsItemGroup || child.second.isGroup ?
+            false : itemPosition_[nextId].isPressed;
         if (!isFirstItem && !(child.second.isPressed || nextIsPressed)) {
             float divOffset = (dividerInfo.space + dividerInfo.constrainStrokeWidth) / 2; /* 2 half */
             float mainPos = child.second.startPos - divOffset + dividerInfo.mainPadding;
@@ -122,16 +125,17 @@ void ListPaintMethod::UpdateDividerList(const DividerInfo& dividerInfo)
         lastIsItemGroup = child.second.isGroup;
         laneIdx = (lanes <= 1 || (laneIdx + 1) >= lanes || child.second.isGroup) ? 0 : laneIdx + 1;
         isFirstItem = isFirstItem ? laneIdx > 0 : false;
-        nextIsPressed = child.second.isPressed;
     }
     if (!lastLineIndex.empty() && lastLineIndex.rbegin()->first < dividerInfo.totalItemCount - 1) {
         int32_t laneIdx = 0;
         for (auto index : lastLineIndex) {
-            if (index.first + lanes >= dividerInfo.totalItemCount || itemPosition_.at(index.first).isPressed) {
+            if (index.first + lanes >= dividerInfo.totalItemCount) {
                 break;
             }
-            dividerMap[-index.second] = HandleLastLineIndex(index.first, laneIdx, dividerInfo);
-            laneIdx++;
+            if (!itemPosition_.at(index.first).isPressed) {
+                dividerMap[-index.second] = HandleLastLineIndex(index.first, laneIdx, dividerInfo);
+                laneIdx++;
+            }
         }
     }
     listContentModifier_->SetDividerMap(std::move(dividerMap));
