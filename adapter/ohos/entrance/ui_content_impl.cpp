@@ -2593,6 +2593,17 @@ bool UIContentImpl::NotifyExecuteAction(
     return container->NotifyExecuteAction(elementId, actionArguments, action, offset);
 }
 
+void UIContentImpl::HandleAccessibilityHoverEvent(float pointX, float pointY, int32_t sourceType,
+    int32_t eventType, int64_t timeMs)
+{
+    auto container = Platform::AceContainer::GetContainer(instanceId_);
+    CHECK_NULL_VOID(container);
+    TAG_LOGI(AceLogTag::ACE_ACCESSIBILITY, "HandleAccessibilityHoverEvent Point:[%{public}f, %{public}f] "
+        "source:%{public}d type:%{public}d time:%{public}" PRId64,
+        pointX, pointY, sourceType, eventType, timeMs);
+    container->HandleAccessibilityHoverEvent(pointX, pointY, sourceType, eventType, timeMs);
+}
+
 std::string UIContentImpl::RecycleForm()
 {
     auto container = Platform::AceContainer::GetContainer(instanceId_);

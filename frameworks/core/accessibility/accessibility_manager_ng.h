@@ -21,6 +21,7 @@
 #include "base/memory/ace_type.h"
 
 #include "base/geometry/ng/point_t.h"
+#include "base/utils/type_definition.h"
 #include "core/event/ace_events.h"
 
 namespace OHOS::Ace {
@@ -29,12 +30,7 @@ struct TouchEvent;
 
 namespace NG {
 class FrameNode;
-
-enum class AccessibilityHoverEventType {
-    ENTER,
-    MOVE,
-    EXIT
-};
+enum class AccessibilityHoverEventType;
 
 struct AccessibilityHoverState {
     SourceType source = SourceType::NONE;
@@ -49,6 +45,8 @@ class AccessibilityManagerNG final: public AceType {
 public:
     void HandleAccessibilityHoverEvent(const RefPtr<FrameNode>& root, const MouseEvent& event);
     void HandleAccessibilityHoverEvent(const RefPtr<FrameNode>& root, const TouchEvent& event);
+    void HandleAccessibilityHoverEvent(const RefPtr<FrameNode>& root, float pointX, float pointY,
+        int32_t sourceType, int32_t eventType, int64_t timeMs);
     void HoverTestDebug(const RefPtr<FrameNode>& root, const PointF& point,
         std::string& summary, std::string& detail) const;
 
@@ -66,6 +64,10 @@ private:
         TimeStamp time);
 
     void ResetHoverState();
+    static void NotifyHoverEventToNodeSession(
+        const RefPtr<FrameNode>& node,
+        const RefPtr<FrameNode>& rootNode, const PointF& pointRoot,
+        SourceType sourceType, AccessibilityHoverEventType eventType, TimeStamp time);
 
     AccessibilityHoverState hoverState_;
 };

@@ -59,7 +59,9 @@ UIExtensionPattern::UIExtensionPattern(
     CHECK_NULL_VOID(uiExtensionManager);
     uiExtensionId_ = uiExtensionManager->ApplyExtensionId();
     sessionWrapper_ = SessionWrapperFactory::CreateSessionWrapper(
-        sessionType, AceType::WeakClaim(this), instanceId_, isTransferringCaller_);
+        sessionType, WeakClaim(this), instanceId_, isTransferringCaller_);
+    accessibilitySessionAdapter_ =
+        AceType::MakeRefPtr<AccessibilitySessionAdapterUIExtension>(WeakClaim(sessionWrapper_));
     UIEXT_LOGI("The %{public}smodal UIExtension is created.", isModal_ ? "" : "non");
 }
 
@@ -835,6 +837,11 @@ void UIExtensionPattern::OnColorConfigurationUpdate()
 int32_t UIExtensionPattern::GetSessionId()
 {
     return sessionWrapper_ ? sessionWrapper_->GetSessionId() : 0;
+}
+
+RefPtr<SessionWrapper>& UIExtensionPattern::GetSessionWrapper()
+{
+    return sessionWrapper_;
 }
 
 int32_t UIExtensionPattern::GetUiExtensionId()

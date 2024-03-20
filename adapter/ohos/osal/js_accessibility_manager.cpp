@@ -23,6 +23,7 @@
 #include "accessibility_system_ability_client.h"
 
 #include "adapter/ohos/entrance/ace_application_info.h"
+#include "adapter/ohos/entrance/ace_container.h"
 #include "base/log/ace_trace.h"
 #include "base/log/dump_log.h"
 #include "base/log/event_report.h"
@@ -1902,10 +1903,12 @@ static void DumpCommonPropertyNG(const AccessibilityElementInfo& nodeInfo)
     DumpLog::GetInstance().AddDesc("popup supported: ", BoolToString(nodeInfo.IsPopupSupported()));
 }
 
-bool IsExtensionSendAccessibilitySyncEvent()
+bool IsExtensionSendAccessibilitySyncEvent(RefPtr<NG::PipelineContext>& pipeline)
 {
-    auto container = Container::Current();
-    return container && container->IsUIExtensionWindow();
+    CHECK_NULL_RETURN(pipeline, false);
+    auto container = Platform::AceContainer::GetContainer(pipeline->GetInstanceId());
+    CHECK_NULL_RETURN(container, false);
+    return container->IsUIExtensionWindow();
 }
 
 void GenerateAccessibilityEventInfo(const AccessibilityEvent& accessibilityEvent, AccessibilityEventInfo& eventInfo)
@@ -2034,24 +2037,12 @@ void JsAccessibilityManager::InitializeCallback()
 bool JsAccessibilityManager::SendExtensionAccessibilitySyncEvent(
     const AccessibilityEvent& accessibilityEvent, const Accessibility::AccessibilityEventInfo& eventInfo)
 {
-    if (!IsRegister()) {
-        return false;
-    }
-
-    auto client = AccessibilitySystemAbilityClient::GetInstance();
-    CHECK_NULL_RETURN(client, false);
-    bool isEnabled = false;
-    client->IsEnabled(isEnabled);
-    if (!isEnabled) {
-        return false;
-    }
 #ifdef WINDOW_SCENE_SUPPORTED
-    auto ngPipeline = NG::PipelineContext::GetCurrentContext();
+    auto ngPipeline = AceType::DynamicCast<NG::PipelineContext>(context_.Upgrade());
+    CHECK_NULL_RETURN(ngPipeline, false);
     auto uiExtensionManager = ngPipeline->GetUIExtensionManager();
     CHECK_NULL_RETURN(uiExtensionManager, false);
-    if (IsExtensionSendAccessibilitySyncEvent()) {
-        return uiExtensionManager->SendAccessibilityEventInfo(eventInfo, NG::UI_EXTENSION_UNKNOW_ID, ngPipeline);
-    }
+    return uiExtensionManager->SendAccessibilityEventInfo(eventInfo, NG::UI_EXTENSION_UNKNOW_ID, ngPipeline);
 #endif
     return false;
 }
@@ -2069,13 +2060,9 @@ bool JsAccessibilityManager::SendAccessibilitySyncEvent(
     if (!isEnabled) {
         return false;
     }
-    TAG_LOGD(AceLogTag::ACE_ACCESSIBILITY, "send accessibility event:%{public}d aid:%{public}lld",
-        eventInfo.GetEventType(), static_cast<int64_t>(eventInfo.GetAccessibilityId()));
+    TAG_LOGI(AceLogTag::ACE_ACCESSIBILITY, "send accessibility event:%{public}d accessibilityId:%{public}" PRId64,
+        eventInfo.GetEventType(), eventInfo.GetAccessibilityId());
     const AccessibilityElementInfo& elementInfo = eventInfo.GetElementInfo();
-    TAG_LOGI(AceLogTag::ACE_ACCESSIBILITY, "The element info bundleName: %{public}s, elementId: %{public}" PRId64
-        ", componentType: %{public}s, text: %{public}s", elementInfo.GetBundleName().c_str(),
-        static_cast<int64_t>(elementInfo.GetAccessibilityId()), elementInfo.GetComponentType().c_str(),
-        elementInfo.GetContent().c_str());
     return client->SendEvent(eventInfo);
 }
 
@@ -2083,10 +2070,7 @@ bool JsAccessibilityManager::TransferAccessibilityAsyncEvent(
     const AccessibilityEventInfo& eventInfo, int64_t uiExtensionOffset)
 {
 #ifdef WINDOW_SCENE_SUPPORTED
-    if (!IsRegister()) {
-        return false;
-    }
-
+    
     auto client = AccessibilitySystemAbilityClient::GetInstance();
     CHECK_NULL_RETURN(client, false);
     bool isEnabled = false;
@@ -2106,12 +2090,19 @@ bool JsAccessibilityManager::TransferAccessibilityAsyncEvent(
         return uiExtensionManager->SendAccessibilityEventInfo(eventInfo,
             uiExtensionOffset / NG::UI_EXTENSION_ID_FACTOR, pipeline);
     }
+    if (!IsRegister()) {
+        return false;
+    }
     AccessibilityEventInfo eventInfoNew = eventInfo;
     eventInfoNew.SetSource(uiExtensionOffset + eventInfo.GetViewId());
-#endif
-    TAG_LOGD(AceLogTag::ACE_ACCESSIBILITY, "send accessibility event:%{public}d aid:%{public}lld",
-        eventInfoNew.GetEventType(), static_cast<int64_t>(eventInfoNew.GetAccessibilityId()));
+    AccessibilityElementInfo elementInfo;
+    FillElementInfo(eventInfoNew.GetAccessibilityId(), elementInfo, pipeline, Claim(this));
+    eventInfoNew.SetElementInfo(elementInfo);
+    TAG_LOGI(AceLogTag::ACE_ACCESSIBILITY, "send accessibility event:%{public}d accessibilityId:%{public}" PRId64,
+        eventInfoNew.GetEventType(), eventInfoNew.GetAccessibilityId());
     return client->SendEvent(eventInfoNew);
+#endif
+    return false;
 }
 
 void JsAccessibilityManager::SendExtensionAccessibilityEvent(
@@ -2149,7 +2140,8 @@ void JsAccessibilityManager::SendAccessibilityAsyncEvent(const AccessibilityEven
 
     GenerateAccessibilityEventInfo(accessibilityEvent, eventInfo);
 
-    if (IsExtensionSendAccessibilitySyncEvent()) {
+    auto ngPipeline = AceType::DynamicCast<NG::PipelineContext>(context);
+    if (IsExtensionSendAccessibilitySyncEvent(ngPipeline)) {
         SendExtensionAccessibilitySyncEvent(accessibilityEvent, eventInfo);
     } else {
         context->GetTaskExecutor()->PostTask(

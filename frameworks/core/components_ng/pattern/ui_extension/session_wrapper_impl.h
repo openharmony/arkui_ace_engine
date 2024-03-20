@@ -81,6 +81,8 @@ public:
         Accessibility::AccessibilityElementInfo& output) override;
     void FocusMoveSearch(int64_t elementId, int32_t direction, int64_t baseParent,
         Accessibility::AccessibilityElementInfo& output) override;
+    void TransferAccessibilityHoverEvent(float pointX, float pointY, int32_t sourceType, int32_t eventType,
+        int64_t timeMs) override;
 
     // The interface to control the display area and the avoid area
     std::shared_ptr<Rosen::RSSurfaceNode> GetSurfaceNode() const override;
