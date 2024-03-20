@@ -502,6 +502,71 @@ HWTEST_F(OverlayTestNg, OnBindContentCover004, TestSize.Level1)
 }
 
 /**
+ * @tc.name: OnBindContentCover005
+ * @tc.desc: Test OverlayManager::OnBindContentCover improvement supplement.
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayTestNg, OnBindContentCover005, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create target node.
+     */
+    auto targetNode = CreateTargetNode();
+    auto stageNode = FrameNode::CreateFrameNode(
+        V2::STAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<StagePattern>());
+    auto rootNode = FrameNode::CreateFrameNode(V2::ROOT_ETS_TAG, 1, AceType::MakeRefPtr<RootPattern>());
+    stageNode->MountToParent(rootNode);
+    targetNode->MountToParent(stageNode);
+    rootNode->MarkDirtyNode();
+
+    /**
+     * @tc.steps: step2. create modal page node.
+     */
+    auto builderFunc = []() -> RefPtr<UINode> {
+        auto frameNode =
+            FrameNode::GetOrCreateFrameNode(V2::COLUMN_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+                []() { return AceType::MakeRefPtr<LinearLayoutPattern>(true); });
+        auto childFrameNode = FrameNode::GetOrCreateFrameNode(V2::BUTTON_ETS_TAG,
+            ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<ButtonPattern>(); });
+        frameNode->AddChild(childFrameNode);
+        return frameNode;
+    };
+
+    /**
+     * @tc.steps: step3. create modal node and call DismissContentCover.
+     * @tc.expected: destroy modal page successfully
+     */
+    ModalStyle modalStyle;
+    bool isShow = true;
+    auto overlayManager = AceType::MakeRefPtr<OverlayManager>(rootNode);
+    overlayManager->OnBindContentCover(isShow, nullptr, std::move(builderFunc), modalStyle, nullptr, nullptr, nullptr,
+        nullptr, ContentCoverParam(), targetNode);
+    EXPECT_FALSE(overlayManager->modalStack_.empty());
+    auto topModalNode = overlayManager->modalStack_.top().Upgrade();
+    ASSERT_NE(topModalNode, nullptr);
+    auto topModalPattern = topModalNode->GetPattern<ModalPresentationPattern>();
+    ASSERT_NE(topModalPattern, nullptr);
+    auto targetId = topModalPattern->GetTargetId();
+    overlayManager->SetDismissTargetId(targetId);
+    overlayManager->DismissContentCover();
+    EXPECT_TRUE(overlayManager->modalStack_.empty());
+
+    /**
+     * @tc.steps: step4. call RemoveModal.
+     * @tc.expected: modal node is nullptr
+     */
+    overlayManager->OnBindContentCover(isShow, nullptr, std::move(builderFunc), modalStyle, nullptr, nullptr, nullptr,
+        nullptr, ContentCoverParam(), targetNode);
+    topModalNode = overlayManager->modalStack_.top().Upgrade();
+    topModalPattern = topModalNode->GetPattern<ModalPresentationPattern>();
+    topModalPattern->ModalInteractiveDismiss();
+    targetId = topModalPattern->GetTargetId();
+    EXPECT_NE(overlayManager->GetModal(targetId), nullptr);
+    overlayManager->RemoveModal(targetId);
+    EXPECT_EQ(overlayManager->GetModal(targetId), nullptr);
+}
+
+/**
  * @tc.name: PopupTest002
  * @tc.desc: Test OverlayManager::PopupEvent functions.
  * @tc.type: FUNC
