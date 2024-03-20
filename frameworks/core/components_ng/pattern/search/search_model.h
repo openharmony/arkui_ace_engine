@@ -71,6 +71,7 @@ public:
     virtual void SetOnChangeEvent(std::function<void(const std::string&)>&& onChangeEvent);
     virtual void SetSelectionMenuHidden(bool selectionMenuHidden) = 0;
     virtual void SetCustomKeyboard(const std::function<void ()> &&buildFunc);
+    virtual void SetSearchEnterKeyType(TextInputAction value);
     virtual void SetMaxLength(uint32_t value);
     virtual void ResetMaxLength();
     virtual void SetType(TextInputType value);

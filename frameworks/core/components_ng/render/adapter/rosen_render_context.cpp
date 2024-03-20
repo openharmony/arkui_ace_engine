@@ -1062,6 +1062,8 @@ Rosen::EmitterConfig RosenRenderContext::ConvertParticleEmitterOption(
                                             ConvertDimensionToPx(sizeOpt.value().second, rect.Height()))
                                       : OHOS::Rosen::Vector2f(rect.Width(), rect.Height());
     auto shapeInt = static_cast<int32_t>(shapeOpt.value_or(ParticleEmitterShape::RECTANGLE));
+    auto lifeTimeRange = OHOS::Rosen::Range<int64_t>(
+        lifeTimeOpt.value_or(PARTICLE_DEFAULT_LIFETIME), lifeTimeOpt.value_or(PARTICLE_DEFAULT_LIFETIME));
     if (particleType == ParticleType::IMAGE) {
         auto imageParameter = particleConfig.GetImageParticleParameter();
         auto imageSource = imageParameter.GetImageSource();
@@ -1076,14 +1078,13 @@ Rosen::EmitterConfig RosenRenderContext::ConvertParticleEmitterOption(
         OHOS::Rosen::Vector2f rsImageSize(imageWidth.ConvertToPx(), imageHeight.ConvertToPx());
         return OHOS::Rosen::EmitterConfig(emitterRateOpt.value_or(PARTICLE_DEFAULT_EMITTER_RATE),
             static_cast<OHOS::Rosen::ShapeType>(shapeInt), rsPoint, rsSize, particleCount,
-            lifeTimeOpt.value_or(PARTICLE_DEFAULT_LIFETIME), OHOS::Rosen::ParticleType::IMAGES, 0.0f, rsImagePtr,
-            rsImageSize);
+            lifeTimeRange, OHOS::Rosen::ParticleType::IMAGES, 0.0f, rsImagePtr, rsImageSize);
     } else {
         auto pointParameter = particleConfig.GetPointParticleParameter();
         auto radius = pointParameter.GetRadius();
         return OHOS::Rosen::EmitterConfig(emitterRateOpt.value_or(PARTICLE_DEFAULT_EMITTER_RATE),
             static_cast<OHOS::Rosen::ShapeType>(shapeInt), rsPoint, rsSize, particleCount,
-            lifeTimeOpt.value_or(PARTICLE_DEFAULT_LIFETIME), OHOS::Rosen::ParticleType::POINTS, radius,
+            lifeTimeRange, OHOS::Rosen::ParticleType::POINTS, radius,
             std::make_shared<OHOS::Rosen::RSImage>(), OHOS::Rosen::Vector2f());
     }
 }
@@ -2411,7 +2412,7 @@ RectF RosenRenderContext::AdjustPaintRect()
     Dimension parentPaddingTop;
     GetPaddingOfFirstFrameNodeParent(parentPaddingLeft, parentPaddingTop);
     // Position properties take precedence over offset locations.
-    if (hasPosition) {
+    if (HasPosition() && IsUsingPosition(frameNode)) {
         CombineMarginAndPosition(
             resultX, resultY, parentPaddingLeft, parentPaddingTop, widthPercentReference, heightPercentReference);
         rect.SetLeft(resultX.ConvertToPx() - anchorX.value_or(0));

@@ -269,6 +269,17 @@ public:
         }
     }
 
+    void RecycleItemsByIndex(uint32_t start, uint32_t end)
+    {
+        for (auto it = partFrameNodeChildren_.begin(); it != partFrameNodeChildren_.end();) {
+            if (it->first >= start && it->first < end) {
+                it = partFrameNodeChildren_.erase(it);
+            } else {
+                it++;
+            }
+        }
+    }
+
     void RemoveAllChildInRenderTree()
     {
         SetAllChildrenInActive();
@@ -1178,11 +1189,13 @@ void FrameNode::ProcessAllVisibleCallback(const std::vector<double>& visibleArea
             isVisible = false;
             isHandled = true;
         } else if (NearEqual(callbackRatio, VISIBLE_RATIO_MIN) && NearEqual(currentVisibleRatio, callbackRatio)) {
-            lastVisibleCallbackRatio_ = currentVisibleRatio;
+            lastVisibleCallbackRatio_ = VISIBLE_RATIO_MIN;
+            currentVisibleRatio = VISIBLE_RATIO_MIN;
             isVisible = false;
             isHandled = true;
         } else if (NearEqual(callbackRatio, VISIBLE_RATIO_MAX) && NearEqual(currentVisibleRatio, callbackRatio)) {
-            lastVisibleCallbackRatio_ = currentVisibleRatio;
+            lastVisibleCallbackRatio_ = VISIBLE_RATIO_MAX;
+            currentVisibleRatio = VISIBLE_RATIO_MAX;
             isVisible = true;
             isHandled = true;
         }
@@ -1211,6 +1224,9 @@ void FrameNode::SetActive(bool active)
         auto parent = GetAncestorNodeOfFrame();
         if (parent) {
             parent->MarkNeedSyncRenderTree();
+        }
+        if (isActive_ && SystemProperties::GetDeveloperModeOn()) {
+            PaintDebugBoundary(SystemProperties::GetDebugBoundaryEnabled());
         }
     }
 }
@@ -1408,11 +1424,14 @@ void FrameNode::AdjustLayoutWrapperTree(const RefPtr<LayoutWrapperNode>& parent,
 
 RefPtr<ContentModifier> FrameNode::GetContentModifier()
 {
+    CHECK_NULL_RETURN(pattern_, nullptr);
     auto wrapper = CreatePaintWrapper();
+    CHECK_NULL_RETURN(wrapper, nullptr);
     auto paintMethod = pattern_->CreateNodePaintMethod();
     if (!paintMethod && drawModifier_) {
         paintMethod = pattern_->CreateDefaultNodePaintMethod();
     }
+    CHECK_NULL_RETURN(paintMethod, nullptr);
     auto contentModifier = DynamicCast<ContentModifier>(paintMethod->GetContentModifier(AceType::RawPtr(wrapper)));
     return contentModifier;
 }
@@ -3140,6 +3159,11 @@ void FrameNode::RemoveAllChildInRenderTree()
 void FrameNode::SetActiveChildRange(int32_t start, int32_t end)
 {
     frameProxy_->SetActiveChildRange(start, end);
+}
+
+void FrameNode::RecycleItemsByIndex(int32_t start, int32_t end)
+{
+    frameProxy_->RecycleItemsByIndex(start, end);
 }
 
 void FrameNode::RemoveChildInRenderTree(uint32_t index)

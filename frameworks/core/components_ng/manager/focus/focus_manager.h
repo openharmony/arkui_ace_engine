@@ -47,6 +47,11 @@ public:
         return lastFocusView_;
     }
 
+    const std::list<WeakPtr<FocusView>>& GetWeakFocusViewList() const
+    {
+        return focusViewStack_;
+    }
+
 private:
     void GetFocusViewMap(FocusViewMap& focusViewMap);
 

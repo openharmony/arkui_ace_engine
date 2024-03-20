@@ -392,6 +392,8 @@ public:
 
     virtual void ScrollToEdge(ScrollEdgeType scrollEdgeType, bool smooth);
 
+    virtual void Fling(double flingVelocity);
+
     void SetPositionController(RefPtr<ScrollableController> control)
     {
         positionController_ = control;
@@ -673,7 +675,7 @@ private:
     float barOffset_ = 0.0f;
     float estimatedHeight_ = 0.0f;
     bool isReactInParentMovement_ = false;
-    bool isRefreshInReactive_ = false;
+    bool isRefreshInReactive_ = false; // true if Refresh component is ready to receive scroll offset.
     bool isSheetInReactive_ = false;
     bool isCoordEventNeedSpring_ = true;
     double scrollBarOutBoundaryExtent_ = 0.0;

@@ -159,6 +159,9 @@ public:
         return contentMainSize_;
     };
 
+    void UpdatePosMapStart(float delta);
+    void UpdatePosMapEnd();
+    void CalculateCurrentOffset(float delta);
     void UpdateScrollBarOffset() override;
     // chain animation
     void SetChainAnimation();
@@ -234,15 +237,19 @@ public:
 
     void SetItemPressed(bool isPressed, int32_t id)
     {
-        for (auto& child : itemPosition_) {
-            if (child.second.id == id) {
-                child.second.isPressed = isPressed;
-                break;
-            }
+        if (isPressed) {
+            pressedItem_.emplace(id);
+        } else {
+            pressedItem_.erase(id);
         }
     }
 
 private:
+    struct PositionInfo {
+        float mainPos;
+        float mainSize;
+    };
+
     bool IsNeedInitClickEventRecorder() const override
     {
         return true;
@@ -338,8 +345,10 @@ private:
     bool isNeedCheckOffset_ = false;
 
     ListLayoutAlgorithm::PositionMap itemPosition_;
+    std::map<int32_t, PositionInfo> posMap_;
 
     std::map<int32_t, int32_t> lanesItemRange_;
+    std::set<int32_t> pressedItem_;
     int32_t lanes_ = 1;
     float laneGutter_ = 0.0f;
     // chain animation

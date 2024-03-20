@@ -91,7 +91,7 @@ HWTEST_F(SwiperAttrTestNg, AttrIndex004, TestSize.Level1)
 HWTEST_F(SwiperAttrTestNg, AttrAutoPlay001, TestSize.Level1)
 {
     /**
-     * @tc.cases: Do not set value
+     * @tc.steps: step1. Do not set value
      * @tc.expected: AutoPlay is false, interval is default, isLoop is true
      */
     CreateWithItem([](SwiperModelNG model) {});

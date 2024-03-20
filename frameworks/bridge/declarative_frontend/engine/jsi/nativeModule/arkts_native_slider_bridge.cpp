@@ -104,6 +104,7 @@ ArkUINativeModuleValue SliderBridge::SetBlockSize(ArkUIRuntimeCallInfo* runtimeC
     bool hasBlockHeight = ArkTSUtils::ParseJsDimensionVp(vm, thirdArg, blockHeight);
     if (!hasBlockWidth && !hasBlockHeight) {
         GetArkUINodeModifiers()->getSliderModifier()->resetBlockSize(nativeNode);
+        return panda::JSValueRef::Undefined(vm);
     }
 
     GetArkUINodeModifiers()->getSliderModifier()->setBlockSize(nativeNode,

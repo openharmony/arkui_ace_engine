@@ -786,7 +786,8 @@ public:
     bool GetErrorTextState() const;
     std::string GetShowPasswordIconString() const;
     int32_t GetNakedCharPosition() const;
-    void SetSelectionFlag(int32_t selectionStart, int32_t selectionEnd);
+    void SetSelectionFlag(int32_t selectionStart, int32_t selectionEnd,
+        const std::optional<SelectionOptions>& options = std::nullopt);
     void HandleBlurEvent();
     void HandleFocusEvent();
     bool OnBackPressed() override;

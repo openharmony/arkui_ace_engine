@@ -217,10 +217,17 @@ bool FocusHub::RequestFocusImmediately(bool isJudgeRootTree)
 
     auto parent = GetParentFocusHub();
     if (parent) {
-        auto curFocusView = FocusView::GetCurrentFocusView();
-        auto viewRootScope = curFocusView ? curFocusView->GetViewRootScope() : nullptr;
-        if (viewRootScope && parent == viewRootScope) {
-            curFocusView->SetIsViewRootScopeFocused(false);
+        auto focusManager = context->GetFocusManager();
+        if (focusManager) {
+            auto weakFocusViewList = focusManager->GetWeakFocusViewList();
+            for (const auto& weakFocusView : weakFocusViewList) {
+                auto focusView = weakFocusView.Upgrade();
+                auto viewRootScope = focusView ? focusView->GetViewRootScope() : nullptr;
+                if (parent == viewRootScope) {
+                    focusView->SetIsViewRootScopeFocused(false);
+                    break;
+                }
+            }
         }
         parent->SwitchFocus(AceType::Claim(this));
     }
@@ -620,7 +627,7 @@ bool FocusHub::OnKeyEventScope(const KeyEvent& keyEvent)
     }
     if (keyEvent.IsKey({ KeyCode::KEY_TAB }) && pipeline->IsTabJustTriggerOnKeyEvent()) {
         ScrollToLastFocusIndex();
-        return false;
+        return true;
     }
 
     ScrollToLastFocusIndex();

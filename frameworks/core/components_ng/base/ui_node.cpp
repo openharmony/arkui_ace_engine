@@ -227,7 +227,9 @@ void UINode::Clean(bool cleanDirectly, bool allowTransition)
         }
         ++index;
     }
-    children_.clear();
+    if (tag_ != V2::JS_IF_ELSE_ETS_TAG) {
+        children_.clear();
+    }
     MarkNeedSyncRenderTree(true);
 }
 
@@ -1069,10 +1071,16 @@ void UINode::UpdateNodeStatus(NodeStatus nodeStatus)
 
 // Collects  all the child elements of "children" in a recursive manner
 // Fills the "removedElmtId" list with the collected child elements
-void UINode::CollectRemovedChildren(const std::list<RefPtr<UINode>>& children, std::list<int32_t>& removedElmtId)
+void UINode::CollectRemovedChildren(const std::list<RefPtr<UINode>>& children,
+    std::list<int32_t>& removedElmtId, bool isEntry)
 {
     for (auto const& child : children) {
-        CollectRemovedChild(child, removedElmtId);
+        if (!child->IsDisappearing()) {
+            CollectRemovedChild(child, removedElmtId);
+        }
+    }
+    if (isEntry) {
+        children_.clear();
     }
 }
 
@@ -1082,7 +1090,7 @@ void UINode::CollectRemovedChild(const RefPtr<UINode>& child, std::list<int32_t>
     // Fetch all the child elementIDs recursively
     if (child->GetTag() != V2::JS_VIEW_ETS_TAG) {
         // add CustomNode but do not recurse into its children
-        CollectRemovedChildren(child->GetChildren(), removedElmtId);
+        CollectRemovedChildren(child->GetChildren(), removedElmtId, false);
     }
 }
 

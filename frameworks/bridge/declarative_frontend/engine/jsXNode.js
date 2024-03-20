@@ -347,6 +347,15 @@ class FrameNodeFinalizationRegisterProxy {
 }
 FrameNodeFinalizationRegisterProxy.instance_ = new FrameNodeFinalizationRegisterProxy();
 FrameNodeFinalizationRegisterProxy.ElementIdToOwningFrameNode_ = new Map();
+FrameNodeFinalizationRegisterProxy.FrameNodeInMainTree_ = new Map();
+globalThis.__AttachToMainTree__ = function __AttachToMainTree__(nodeId) {
+    if (FrameNodeFinalizationRegisterProxy.ElementIdToOwningFrameNode_.has(nodeId)) {
+        FrameNodeFinalizationRegisterProxy.FrameNodeInMainTree_.set(nodeId, FrameNodeFinalizationRegisterProxy.ElementIdToOwningFrameNode_.get(nodeId).deref());
+    }
+}
+globalThis.__DetachToMainTree__ = function __DetachToMainTree__(nodeId) {
+    FrameNodeFinalizationRegisterProxy.FrameNodeInMainTree_.delete(nodeId);
+}
 /*
  * Copyright (c) 2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -457,6 +466,7 @@ class FrameNode {
     constructor(uiContext, type) {
         this.uiContext_ = uiContext;
         this.nodeId_ = -1;
+        this._childList = new Map();
         if (type === 'BuilderNode' || type === 'ArkTsNode') {
             this.renderNode_ = new RenderNode('BuilderNode');
             this.type_ = type;
@@ -547,6 +557,7 @@ class FrameNode {
         if (!flag) {
             throw { message: 'The FrameNode is not modifiable.', code: 100021 };
         }
+        this._childList.set(node.nodeId_, node);
     }
     insertChildAfter(child, sibling) {
         this.checkType();
@@ -566,6 +577,7 @@ class FrameNode {
         if (!flag) {
             throw { message: 'The FrameNode is not modifiable.', code: 100021 };
         }
+        this._childList.set(sibling.nodeId_, sibling);
     }
     removeChild(node) {
         this.checkType();
@@ -573,10 +585,12 @@ class FrameNode {
             return;
         }
         getUINativeModule().frameNode.removeChild(this.nodePtr_, node.nodePtr_);
+        this._childList.delete(node.nodeId_);
     }
     clearChildren() {
         this.checkType();
         getUINativeModule().frameNode.clearChildren(this.nodePtr_);
+        this._childList.clear();
     }
     getChild(index) {
         const nodePtr = getUINativeModule().frameNode.getChild(this.nodePtr_, index);

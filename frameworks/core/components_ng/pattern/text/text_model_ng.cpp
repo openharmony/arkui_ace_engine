@@ -556,7 +556,7 @@ TextDecoration TextModelNG::GetDecoration(FrameNode* frameNode)
     CHECK_NULL_RETURN(frameNode, TextDecoration::NONE);
     auto layoutProperty = frameNode->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_RETURN(layoutProperty, TextDecoration::NONE);
-    return layoutProperty->GetFontStyle()->GetTextDecoration().value_or(TextDecoration::NONE);
+    return layoutProperty->GetTextDecoration().value_or(TextDecoration::NONE);
 }
 
 Color TextModelNG::GetTextDecorationColor(FrameNode* frameNode)
@@ -572,7 +572,7 @@ TextCase TextModelNG::GetTextCase(FrameNode* frameNode)
     CHECK_NULL_RETURN(frameNode, TextCase::NORMAL);
     auto layoutProperty = frameNode->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_RETURN(layoutProperty, TextCase::NORMAL);
-    return layoutProperty->GetFontStyle()->GetTextCase().value_or(TextCase::NORMAL);
+    return layoutProperty->GetTextCase().value_or(TextCase::NORMAL);
 }
 
 Dimension TextModelNG::GetLetterSpacing(FrameNode* frameNode)
@@ -581,7 +581,7 @@ Dimension TextModelNG::GetLetterSpacing(FrameNode* frameNode)
     CHECK_NULL_RETURN(frameNode, defaultSpacing);
     auto layoutProperty = frameNode->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_RETURN(layoutProperty, defaultSpacing);
-    return layoutProperty->GetFontStyle()->GetLetterSpacing().value_or(defaultSpacing);
+    return layoutProperty->GetLetterSpacing().value_or(defaultSpacing);
 }
 
 uint32_t TextModelNG::GetMaxLines(FrameNode* frameNode)
@@ -603,10 +603,10 @@ TextAlign TextModelNG::GetTextAlign(FrameNode* frameNode)
 
 TextOverflow TextModelNG::GetTextOverflow(FrameNode* frameNode)
 {
-    CHECK_NULL_RETURN(frameNode, TextOverflow::NONE);
+    CHECK_NULL_RETURN(frameNode, TextOverflow::CLIP);
     auto layoutProperty = frameNode->GetLayoutProperty<TextLayoutProperty>();
-    CHECK_NULL_RETURN(layoutProperty, TextOverflow::NONE);
-    return layoutProperty->GetTextLineStyle()->GetTextOverflow().value_or(TextOverflow::NONE);
+    CHECK_NULL_RETURN(layoutProperty, TextOverflow::CLIP);
+    return layoutProperty->GetTextLineStyle()->GetTextOverflow().value_or(TextOverflow::CLIP);
 }
 
 Dimension TextModelNG::GetTextIndent(FrameNode* frameNode)

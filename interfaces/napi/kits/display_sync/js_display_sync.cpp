@@ -113,8 +113,8 @@ void CreateTimeInfoJsObject(const napi_env env, RefPtr<DisplaySyncData> displayS
 
     napi_value timestamp;
     napi_value targetTimestamp;
-    napi_create_bigint_uint64(env, displaySyncData->timestamp_, &timestamp);
-    napi_create_bigint_uint64(env, displaySyncData->targetTimestamp_, &targetTimestamp);
+    napi_create_int64(env, displaySyncData->timestamp_, &timestamp);
+    napi_create_int64(env, displaySyncData->targetTimestamp_, &targetTimestamp);
     auto resultTimestamp = napi_set_named_property(env, intervalInfo, "timestamp", timestamp);
     auto resultTargetTimestamp = napi_set_named_property(env, intervalInfo, "targetTimestamp", targetTimestamp);
     if (resultTimestamp != napi_ok || resultTargetTimestamp != napi_ok) {
@@ -145,11 +145,11 @@ napi_value ParseExpectedFrameRateRange(napi_env env, napi_callback_info info, Fr
     ParseJsValue(env, nativeObj, "max", maxFPS);
     ParseJsValue(env, nativeObj, "expected", expectedFPS);
 
-    if (!(minFPS <= maxFPS && expectedFPS >= minFPS && expectedFPS <= maxFPS)) {
+    frameRateRange.Set(minFPS, maxFPS, expectedFPS);
+    if (!frameRateRange.IsValid()) {
         NapiThrow(env, "ExpectedFrameRateRange Error", ERROR_CODE_PARAM_INVALID);
         return NapiGetUndefined(env);
     }
-    frameRateRange.Set(minFPS, maxFPS, expectedFPS);
     return NapiGetUndefined(env);
 }
 
@@ -174,9 +174,7 @@ napi_value JSStart(napi_env env, napi_callback_info info)
         return NapiGetUndefined(env);
     }
 
-    if (!uiDisplaySync->IsOnPipeline()) {
-        uiDisplaySync->AddToPipelineOnContainer();
-    }
+    uiDisplaySync->AddToPipelineOnContainer();
     return NapiGetUndefined(env);
 }
 
@@ -187,9 +185,7 @@ napi_value JSStop(napi_env env, napi_callback_info info)
         return NapiGetUndefined(env);
     }
 
-    if (uiDisplaySync->IsOnPipeline()) {
-        uiDisplaySync->DelFromPipelineOnContainer();
-    }
+    uiDisplaySync->DelFromPipelineOnContainer();
     return NapiGetUndefined(env);
 }
 

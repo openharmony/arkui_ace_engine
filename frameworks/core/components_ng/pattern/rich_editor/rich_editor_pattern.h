@@ -77,10 +77,12 @@ public:
     ~RichEditorPattern() override;
 
     struct OperationRecord {
+        OperationRecord() : deleteCaretPostion(-1) {}
         std::optional<std::string> addText;
         std::optional<std::string> deleteText;
         int32_t beforeCaretPosition;
         int32_t afterCaretPosition;
+        int32_t deleteCaretPostion;
     };
 
     // RichEditor needs softkeyboard, override function.
@@ -153,13 +155,16 @@ public:
     void UpdateEditingValue(const std::shared_ptr<TextEditingValue>& value, bool needFireChangeEvent = true) override;
     void PerformAction(TextInputAction action, bool forceCloseKeyboard = true) override;
     void InsertValue(const std::string& insertValue) override;
-    void InsertValueOperation(const std::string& insertValue, OperationRecord* const record = nullptr);
+    void InsertValue(const std::string& insertValue, bool isIME);
+    void InsertValueOperation(
+        const std::string& insertValue, OperationRecord* const record = nullptr, bool isIME = true);
+    void DeleteSelectOperation(OperationRecord* const record);
     void InsertValueAfterBeforeSpan(RefPtr<SpanNode>& spanNodeBefore, RefPtr<SpanNode>& spanNode,
-        const TextInsertValueInfo& info, const std::string& insertValue);
+        const TextInsertValueInfo& info, const std::string& insertValue, bool isIME = true);
     void InsertDiffStyleValueInSpan(
-        RefPtr<SpanNode>& spanNode, const TextInsertValueInfo& info, const std::string& insertValue);
+        RefPtr<SpanNode>& spanNode, const TextInsertValueInfo& info, const std::string& insertValue, bool isIME = true);
     void InsertValueWithoutSpan(
-        RefPtr<SpanNode>& spanNode, const TextInsertValueInfo& info, const std::string& insertValue);
+        RefPtr<SpanNode>& spanNode, const TextInsertValueInfo& info, const std::string& insertValue, bool isIME = true);
     void InsertValueByPaste(const std::string& insertValue);
     bool IsLineSeparatorInLast(RefPtr<SpanNode>& spanNode);
     void InsertValueToSpanNode(
@@ -520,6 +525,7 @@ private:
     void UpdateTextFieldManager(const Offset& offset, float height);
     void ScrollToSafeArea() const override;
     void InitDragDropEvent();
+    void OnDragStartAndEnd();
     void onDragDropAndLeave();
     void ClearDragDropEvent();
     void OnDragMove(const RefPtr<OHOS::Ace::DragEvent>& event);
@@ -574,7 +580,9 @@ private:
     bool OnKeyEvent(const KeyEvent& keyEvent);
     void MoveCaretAfterTextChange();
     bool BeforeIMEInsertValue(const std::string& insertValue);
-    void AfterIMEInsertValue(const RefPtr<SpanNode>& spanNode, int32_t moveLength, bool isCreate);
+    void AfterInsertValue(
+        const RefPtr<SpanNode>& spanNode, int32_t insertValueLength, bool isCreate, bool isIme = true);
+    bool AfterIMEInsertValue(const RefPtr<SpanNode>& spanNode, int32_t moveLength, bool isCreate);
     RefPtr<SpanNode> InsertValueToBeforeSpan(RefPtr<SpanNode>& spanNodeBefore, const std::string& insertValue);
     void SetCaretSpanIndex(int32_t index);
     bool HasSameTypingStyle(const RefPtr<SpanNode>& spanNode);
@@ -625,6 +633,11 @@ private:
     RectF GetSelectArea();
     void UpdateOverlaySelectArea();
     bool IsTouchInFrameArea(const PointF& touchPoint);
+    void HandleOnDragDrop(const RefPtr<OHOS::Ace::DragEvent>& event);
+    void DeleteForward(int32_t currentPosition, int32_t length);
+    void DragDropTextOperation(const std::string& insertValue);
+    void UndoDrag(const OperationRecord& record);
+    void RedoDrag(const OperationRecord& record);
 
 #if defined(ENABLE_STANDARD_INPUT)
     sptr<OHOS::MiscServices::OnTextChangedListener> richEditTextChangeListener_;
@@ -700,6 +713,8 @@ private:
     bool isShowMenu_ = true;
     bool isShowPlaceholder_ = false;
     SelectionRangeInfo lastSelectionRange_{-1, -1};
+    bool isDragSponsor_ = false;
+    int32_t dragPosition_ = 0;
     ACE_DISALLOW_COPY_AND_MOVE(RichEditorPattern);
 };
 } // namespace OHOS::Ace::NG

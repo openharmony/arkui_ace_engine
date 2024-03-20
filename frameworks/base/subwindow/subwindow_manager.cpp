@@ -459,9 +459,8 @@ RefPtr<NG::FrameNode> SubwindowManager::ShowDialogNG(
     }
     return subwindow->ShowDialogNG(dialogProps, std::move(buildFunc));
 }
-
-RefPtr<NG::FrameNode> SubwindowManager::ShowDialogNGWithNode(
-    const DialogProperties& dialogProps, const RefPtr<NG::UINode>& customNode)
+RefPtr<NG::FrameNode> SubwindowManager::ShowDialogNGWithNode(const DialogProperties& dialogProps,
+    const RefPtr<NG::UINode>& customNode)
 {
     TAG_LOGD(AceLogTag::ACE_SUB_WINDOW, "show dialog ng enter");
     auto containerId = Container::CurrentId();
@@ -474,7 +473,6 @@ RefPtr<NG::FrameNode> SubwindowManager::ShowDialogNGWithNode(
     }
     return subwindow->ShowDialogNGWithNode(dialogProps, customNode);
 }
-
 void SubwindowManager::CloseDialogNG(const RefPtr<NG::FrameNode>& dialogNode)
 {
     TAG_LOGD(AceLogTag::ACE_SUB_WINDOW, "close dialog ng enter");

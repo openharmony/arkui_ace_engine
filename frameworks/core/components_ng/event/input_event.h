@@ -106,7 +106,7 @@ public:
     void ClearJSFrameNodeCallback()
     {
         if (userJSFrameNodeCallback_) {
-            userCallback_.Reset();
+            userJSFrameNodeCallback_.Reset();
         }
     }
 

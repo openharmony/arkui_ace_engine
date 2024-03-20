@@ -13,7 +13,8 @@
         "name": "ace_engine",
         "subsystem": "arkui",
         "syscap": [
-            "SystemCapability.ArkUI.ArkUI.Full"
+            "SystemCapability.ArkUI.ArkUI.Full",
+            "SystemCapability.ArkUI.ArkUI.Lite"
         ],
         "features": [],
         "adapted_system_type": [

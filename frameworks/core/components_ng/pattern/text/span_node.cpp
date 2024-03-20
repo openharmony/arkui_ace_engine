@@ -426,6 +426,8 @@ void SpanItem::UpdateTextStyle(
             TextStyle selectedTextStyle = textStyle.value_or(normalStyle);
             Color color = selectedTextStyle.GetTextColor().ChangeAlpha(DRAGGED_TEXT_OPACITY);
             selectedTextStyle.SetTextColor(color);
+            Color textDecorationColor = selectedTextStyle.GetTextDecorationColor().ChangeAlpha(DRAGGED_TEXT_OPACITY);
+            selectedTextStyle.SetTextDecorationColor(textDecorationColor);
             auto selectedText = displayContent.substr(finalSelStart, finalSelEnd - finalSelStart);
             UpdateContentTextStyle(StringUtils::Str16ToStr8(selectedText), builder, selectedTextStyle);
         }

@@ -20,6 +20,7 @@
 #include "core/animation/curves.h"
 #include "core/components/common/properties/color.h"
 #include "core/components/slider/slider_theme.h"
+#include "core/components_ng/render/drawing.h"
 #include "core/components_ng/render/drawing_prop_convertor.h"
 #include "core/components_ng/render/path_painter.h"
 #include "core/pipeline/pipeline_base.h"
@@ -43,7 +44,8 @@ SliderContentModifier::SliderContentModifier(const Parameters& parameters,
     blockCenterX_ = AceType::MakeRefPtr<AnimatablePropertyFloat>(parameters.circleCenter.GetX());
     blockCenterY_ = AceType::MakeRefPtr<AnimatablePropertyFloat>(parameters.circleCenter.GetY());
     trackThickness_ = AceType::MakeRefPtr<AnimatablePropertyFloat>(parameters.trackThickness);
-    trackBackgroundColor_ = AceType::MakeRefPtr<AnimatablePropertyColor>(LinearColor(parameters.trackBackgroundColor));
+    trackBackgroundColor_ =
+        AceType::MakeRefPtr<AnimatablePropertyVectorColor>(GradientArithmetic(parameters.trackBackgroundColor));
     selectColor_ = AceType::MakeRefPtr<AnimatablePropertyColor>(LinearColor(parameters.selectColor));
     blockColor_ = AceType::MakeRefPtr<AnimatablePropertyColor>(LinearColor(parameters.blockColor));
     trackBorderRadius_ = AceType::MakeRefPtr<AnimatablePropertyFloat>(parameters.trackThickness * HALF);
@@ -132,13 +134,43 @@ void SliderContentModifier::DrawBackground(DrawingContext& context)
 {
     auto& canvas = context.canvas;
     auto trackBorderRadius = trackBorderRadius_->Get();
+    std::vector<GradientColor> gradientColors = GetTrackBackgroundColor();
+    std::vector<RSColorQuad> colors;
+    std::vector<float> pos;
+    for (size_t i = 0; i < gradientColors.size(); i++) {
+        colors.emplace_back(gradientColors[i].GetLinearColor().GetValue());
+        pos.emplace_back(gradientColors[i].GetDimension().Value());
+    }
+    RSRect trackRect = GetTrackRect();
+
+    RSPoint startPoint;
+    startPoint.SetX(trackRect.GetLeft());
+    startPoint.SetY(trackRect.GetTop());
+    RSPoint endPoint;
+    endPoint.SetX(trackRect.GetRight());
+    endPoint.SetY(trackRect.GetBottom());
 
     RSBrush brush;
     brush.SetAntiAlias(true);
-    brush.SetColor(ToRSColor(trackBackgroundColor_->Get()));
-
+    if (reverse_) {
+#ifndef USE_ROSEN_DRAWING
+        brush.SetShaderEffect(
+            RSShaderEffect::CreateLinearGradient(endPoint, startPoint, colors, pos, RSTileMode::CLAMP));
+#else
+        brush.SetShaderEffect(
+            RSRecordingShaderEffect::CreateLinearGradient(endPoint, startPoint, colors, pos, RSTileMode::CLAMP));
+#endif
+    } else {
+#ifndef USE_ROSEN_DRAWING
+        brush.SetShaderEffect(
+            RSShaderEffect::CreateLinearGradient(startPoint, endPoint, colors, pos, RSTileMode::CLAMP));
+#else
+        brush.SetShaderEffect(
+            RSRecordingShaderEffect::CreateLinearGradient(startPoint, endPoint, colors, pos, RSTileMode::CLAMP));
+#endif
+    }
     canvas.AttachBrush(brush);
-    RSRoundRect roundRect(GetTrackRect(), trackBorderRadius, trackBorderRadius);
+    RSRoundRect roundRect(trackRect, trackBorderRadius, trackBorderRadius);
     canvas.DrawRoundRect(roundRect);
     canvas.DetachBrush();
     canvas.Save();
@@ -791,5 +823,37 @@ void SliderContentModifier::SetBlockClip(DrawingContext& context)
     RectF rect(blockCenter.GetX() - blockSize.Width() * HALF, blockCenter.GetY() - blockSize.Height() * HALF,
         blockSize.Width(), blockSize.Height());
     canvas.ClipRect(ToRSRect(rect), RSClipOp::INTERSECT);
+}
+
+std::vector<GradientColor> SliderContentModifier::GetTrackBackgroundColor() const
+{
+    Gradient gradient = SortGradientColorsByOffset(trackBackgroundColor_->Get().GetGradient());
+    std::vector<GradientColor> gradientColors = gradient.GetColors();
+    // Fault protection processing, if gradientColors is empty, set to default colors.
+
+    if (gradientColors.empty()) {
+        auto pipeline = PipelineBase::GetCurrentContext();
+        CHECK_NULL_RETURN(pipeline, gradientColors);
+        auto theme = pipeline->GetTheme<SliderTheme>();
+        CHECK_NULL_RETURN(theme, gradientColors);
+        gradientColors = SliderModelNG::CreateSolidGradient(theme->GetTrackBgColor()).GetColors();
+    }
+    return gradientColors;
+}
+
+Gradient SliderContentModifier::SortGradientColorsByOffset(const Gradient& gradient) const
+{
+    auto srcGradientColors = gradient.GetColors();
+    std::sort(
+        srcGradientColors.begin(), srcGradientColors.end(), [](const GradientColor& left, const GradientColor& right) {
+            return left.GetDimension().Value() < right.GetDimension().Value();
+        });
+
+    Gradient sortedGradient;
+    for (const auto& item : srcGradientColors) {
+        sortedGradient.AddColor(item);
+    }
+
+    return sortedGradient;
 }
 } // namespace OHOS::Ace::NG

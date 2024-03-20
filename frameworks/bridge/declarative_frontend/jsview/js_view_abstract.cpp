@@ -5404,7 +5404,7 @@ void JSViewAbstract::SetPopupDismiss(
     } else if (onWillDismissFunc->IsFunction()) {
         auto onWillDismissCallback = ParsePopupCallback(info, popupObj);
         popupParam->SetOnWillDismiss(std::move(onWillDismissCallback));
-        popupParam->SetInteractiveDismiss(false);
+        popupParam->SetInteractiveDismiss(true);
         if (onWillDismissCallback != nullptr) {
             TAG_LOGI(AceLogTag::ACE_FORM, "popup register onWillDismiss");
         }
@@ -6322,18 +6322,27 @@ void JSViewAbstract::JsBindContextMenu(const JSCallbackInfo& info)
     ViewAbstractModel::GetInstance()->BindContextMenu(responseType, buildFunc, menuParam, previewBuildFunc);
 }
 
-void JSViewAbstract::JsBindContentCover(const JSCallbackInfo& info)
+bool ParseBindContentCoverIsShow(const JSCallbackInfo& info)
 {
-    // parse isShow
     bool isShow = false;
-    DoubleBindCallback callback = nullptr;
     if (info[0]->IsBoolean()) {
         isShow = info[0]->ToBoolean();
     } else if (info[0]->IsObject()) {
         JSRef<JSObject> callbackObj = JSRef<JSObject>::Cast(info[0]);
-        callback = ParseDoubleBindCallback(info, callbackObj);
         auto isShowObj = callbackObj->GetProperty("value");
         isShow = isShowObj->IsBoolean() ? isShowObj->ToBoolean() : false;
+    }
+    return isShow;
+}
+
+void JSViewAbstract::JsBindContentCover(const JSCallbackInfo& info)
+{
+    // parse isShow
+    bool isShow = ParseBindContentCoverIsShow(info);
+    DoubleBindCallback callback = nullptr;
+    if (info[0]->IsObject()) {
+        JSRef<JSObject> callbackObj = JSRef<JSObject>::Cast(info[0]);
+        callback = ParseDoubleBindCallback(info, callbackObj);
     }
 
     // parse builder
@@ -6362,10 +6371,15 @@ void JSViewAbstract::JsBindContentCover(const JSCallbackInfo& info)
     std::function<void()> onDismissCallback;
     std::function<void()> onWillShowCallback;
     std::function<void()> onWillDismissCallback;
+    NG::ContentCoverParam contentCoverParam;
+    std::function<void(const int32_t&)> onWillDismissFunc;
     if (info.Length() == 3) {
         if (info[2]->IsObject()) {
-            ParseOverlayCallback(info[2], onShowCallback, onDismissCallback, onWillShowCallback, onWillDismissCallback);
+            ParseOverlayCallback(info[2], onShowCallback, onDismissCallback, onWillShowCallback, /* 2:args index */
+                onWillDismissCallback, onWillDismissFunc);
             ParseModalStyle(info[2], modalStyle);
+            contentCoverParam.onWillDismiss = std::move(onWillDismissFunc);
+            ParseModalTransitonEffect(info[2], contentCoverParam, info.GetExecutionContext()); /* 2:args index */
         } else if (info[2]->IsNumber()) {
             auto transitionNumber = info[2]->ToNumber<int32_t>();
             if (transitionNumber >= 0 && transitionNumber <= 2) {
@@ -6375,7 +6389,17 @@ void JSViewAbstract::JsBindContentCover(const JSCallbackInfo& info)
     }
     ViewAbstractModel::GetInstance()->BindContentCover(isShow, std::move(callback), std::move(buildFunc), modalStyle,
         std::move(onShowCallback), std::move(onDismissCallback), std::move(onWillShowCallback),
-        std::move(onWillDismissCallback));
+        std::move(onWillDismissCallback), contentCoverParam);
+}
+
+void JSViewAbstract::ParseModalTransitonEffect(
+    const JSRef<JSObject>& paramObj, NG::ContentCoverParam& contentCoverParam, const JSExecutionContext& context)
+{
+    auto transitionEffectValue = paramObj->GetProperty("transition");
+    if (transitionEffectValue->IsObject()) {
+        JSRef<JSObject> obj = JSRef<JSObject>::Cast(transitionEffectValue);
+        contentCoverParam.transitionEffect = ParseChainedTransition(obj, context);
+    }
 }
 
 void JSViewAbstract::ParseModalStyle(const JSRef<JSObject>& paramObj, NG::ModalStyle& modalStyle)
@@ -6707,14 +6731,21 @@ panda::Local<panda::JSValueRef> JSViewAbstract::JsDismissSheet(panda::JsiRuntime
     return JSValueRef::Undefined(runtimeCallInfo->GetVM());
 }
 
-void JSViewAbstract::ParseOverlayCallback(
-    const JSRef<JSObject>& paramObj, std::function<void()>& onAppear, std::function<void()>& onDisappear,
-    std::function<void()>& onWillAppear, std::function<void()>& onWillDisappear)
+panda::Local<panda::JSValueRef> JSViewAbstract::JsDismissContentCover(panda::JsiRuntimeCallInfo* runtimeCallInfo)
+{
+    ViewAbstractModel::GetInstance()->DismissContentCover();
+    return JSValueRef::Undefined(runtimeCallInfo->GetVM());
+}
+
+void JSViewAbstract::ParseOverlayCallback(const JSRef<JSObject>& paramObj, std::function<void()>& onAppear,
+    std::function<void()>& onDisappear, std::function<void()>& onWillAppear, std::function<void()>& onWillDisappear,
+    std::function<void(const int32_t& info)>& onWillDismiss)
 {
     auto showCallback = paramObj->GetProperty("onAppear");
     auto dismissCallback = paramObj->GetProperty("onDisappear");
     auto willShowCallback = paramObj->GetProperty("onWillAppear");
     auto willDismissCallback = paramObj->GetProperty("onWillDisappear");
+    auto onWillDismissFunc = paramObj->GetProperty("onWillDismiss");
     WeakPtr<NG::FrameNode> frameNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
     if (showCallback->IsFunction()) {
         RefPtr<JsFunction> jsFunc =
@@ -6741,6 +6772,22 @@ void JSViewAbstract::ParseOverlayCallback(
         RefPtr<JsFunction> jsFunc =
             AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(willDismissCallback));
         onWillDisappear = [func = std::move(jsFunc)]() { func->Execute(); };
+    }
+    if (onWillDismissFunc->IsFunction()) {
+        RefPtr<JsFunction> jsFunc =
+            AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(onWillDismissFunc));
+        onWillDismiss = [func = std::move(jsFunc), node = frameNode](const int32_t& info) {
+            ACE_SCORING_EVENT("contentCover.dismiss");
+            PipelineContext::SetCallBackNode(node);
+            JSRef<JSObjTemplate> objectTemplate = JSRef<JSObjTemplate>::New();
+            objectTemplate->SetInternalFieldCount(1);
+            JSRef<JSObject> dismissObj = objectTemplate->NewInstance();
+            dismissObj->SetPropertyObject(
+                "dismiss", JSRef<JSFunc>::New<FunctionCallback>(JSViewAbstract::JsDismissContentCover));
+            dismissObj->SetProperty<int32_t>("reason", info);
+            JSRef<JSVal> newJSVal = JSRef<JSObject>::Cast(dismissObj);
+            func->ExecuteJS(1, &newJSVal);
+        };
     }
 }
 

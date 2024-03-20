@@ -684,7 +684,7 @@ HWTEST_F(TextFieldUXTest, TextInputTypeToString001, TestSize.Level1)
     /**
      * @tc.steps: step2. Call TextInputTypeToString.
      */
-    EXPECT_EQ(pattern_->TextInputTypeToString(), "InputType.Number");
+    EXPECT_EQ(pattern_->TextInputTypeToString(), "TextAreaType.NUMBER");
 }
 
 /**
@@ -704,7 +704,7 @@ HWTEST_F(TextFieldUXTest, TextInputTypeToString002, TestSize.Level1)
     /**
      * @tc.steps: step2. Call TextInputTypeToString.
      */
-    EXPECT_EQ(pattern_->TextInputTypeToString(), "InputType.Email");
+    EXPECT_EQ(pattern_->TextInputTypeToString(), "TextAreaType.EMAIL");
 }
 
 /**

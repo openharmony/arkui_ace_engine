@@ -720,6 +720,11 @@ void TextFieldLayoutAlgorithm::UpdateTextStyleMore(const RefPtr<FrameNode>& fram
     const RefPtr<TextFieldLayoutProperty>& layoutProperty, const RefPtr<TextFieldTheme>& theme,
     TextStyle& textStyle, bool isDisabled)
 {
+    auto pattern = frameNode->GetPattern<TextFieldPattern>();
+    CHECK_NULL_VOID(pattern);
+    if (pattern->IsInPasswordMode()) {
+        return;
+    }
     if (layoutProperty->HasTextDecoration()) {
         textStyle.SetTextDecoration(layoutProperty->GetTextDecoration().value());
     }
@@ -741,20 +746,5 @@ void TextFieldLayoutAlgorithm::UpdatePlaceholderTextStyleMore(const RefPtr<Frame
     const RefPtr<TextFieldLayoutProperty>& layoutProperty, const RefPtr<TextFieldTheme>& theme,
     TextStyle& placeholderTextStyle, bool isDisabled)
 {
-    if (layoutProperty->HasTextDecoration()) {
-        placeholderTextStyle.SetTextDecoration(layoutProperty->GetTextDecoration().value());
-    }
-    if (layoutProperty->HasTextDecorationColor()) {
-        placeholderTextStyle.SetTextDecorationColor(layoutProperty->GetTextDecorationColor().value());
-    }
-    if (layoutProperty->HasTextDecorationStyle()) {
-        placeholderTextStyle.SetTextDecorationStyle(layoutProperty->GetTextDecorationStyle().value());
-    }
-    if (layoutProperty->HasLetterSpacing()) {
-        placeholderTextStyle.SetLetterSpacing(layoutProperty->GetLetterSpacing().value());
-    }
-    if (layoutProperty->HasLineHeight()) {
-        placeholderTextStyle.SetLineHeight(layoutProperty->GetLineHeight().value());
-    }
 }
 } // namespace OHOS::Ace::NG

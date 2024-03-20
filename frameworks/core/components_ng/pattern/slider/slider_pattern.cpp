@@ -64,13 +64,6 @@ void SliderPattern::OnModifyDone()
     auto sliderPaintProperty = host->GetPaintProperty<SliderPaintProperty>();
     CHECK_NULL_VOID(sliderPaintProperty);
     showTips_ = sliderPaintProperty->GetShowTips().value_or(false);
-    float min = sliderPaintProperty->GetMin().value_or(0.0f);
-    float max = sliderPaintProperty->GetMax().value_or(100.0f);
-    value_ = sliderPaintProperty->GetValue().value_or(min);
-    float step = sliderPaintProperty->GetStep().value_or(1.0f);
-    CancelExceptionValue(min, max, step);
-    valueRatio_ = (value_ - min) / (max - min);
-    stepRatio_ = step / (max - min);
     UpdateCircleCenterOffset();
     UpdateBlock();
     InitClickEvent(gestureHub);
@@ -82,6 +75,21 @@ void SliderPattern::OnModifyDone()
     InitOnKeyEvent(focusHub);
     InitializeBubble();
     SetAccessibilityAction();
+}
+
+void SliderPattern::CalcSliderValue()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto sliderPaintProperty = host->GetPaintProperty<SliderPaintProperty>();
+    CHECK_NULL_VOID(sliderPaintProperty);
+    float min = sliderPaintProperty->GetMin().value_or(0.0f);
+    float max = sliderPaintProperty->GetMax().value_or(100.0f);
+    value_ = sliderPaintProperty->GetValue().value_or(min);
+    float step = sliderPaintProperty->GetStep().value_or(1.0f);
+    CancelExceptionValue(min, max, step);
+    valueRatio_ = (value_ - min) / (max - min);
+    stepRatio_ = step / (max - min);
 }
 
 void SliderPattern::CancelExceptionValue(float& min, float& max, float& step)
@@ -101,7 +109,13 @@ void SliderPattern::CancelExceptionValue(float& min, float& max, float& step)
     if (value_ < min || value_ > max) {
         value_ = std::clamp(value_, min, max);
         sliderPaintProperty->UpdateValue(value_);
-        FireChangeEvent(SliderChangeMode::End);
+        auto context = PipelineContext::GetCurrentContext();
+        CHECK_NULL_VOID(context);
+        context->AddAfterRenderTask([weak = WeakClaim(this)]() {
+            auto pattern = weak.Upgrade();
+            CHECK_NULL_VOID(pattern);
+            pattern->FireChangeEvent(SliderChangeMode::End);
+        });
     }
 }
 
@@ -813,7 +827,9 @@ SliderContentModifier::Parameters SliderPattern::UpdateContentParameters()
     auto centerWidth = direction_ == Axis::HORIZONTAL ? contentSize->Height() : contentSize->Width();
     centerWidth *= HALF;
     parameters.selectColor = paintProperty->GetSelectColor().value_or(theme->GetTrackSelectedColor());
-    parameters.trackBackgroundColor = paintProperty->GetTrackBackgroundColor().value_or(theme->GetTrackBgColor());
+
+    Gradient defaultValue = SliderModelNG::CreateSolidGradient(Color(theme->GetBlockColor()));
+    parameters.trackBackgroundColor = paintProperty->GetTrackBackgroundColor().value_or(defaultValue);
     parameters.blockColor = paintProperty->GetBlockColor().value_or(theme->GetBlockColor());
 
     GetSelectPosition(parameters, centerWidth, contentOffset);
@@ -1048,12 +1064,12 @@ void SliderPattern::SetAccessibilityAction()
 
 void SliderPattern::UpdateValue(float value)
 {
-    if (panMoveFlag_) {
-        return;
+    if (!panMoveFlag_) {
+        auto sliderPaintProperty = GetPaintProperty<SliderPaintProperty>();
+        CHECK_NULL_VOID(sliderPaintProperty);
+        sliderPaintProperty->UpdateValue(value);
     }
-    auto sliderPaintProperty = GetPaintProperty<SliderPaintProperty>();
-    CHECK_NULL_VOID(sliderPaintProperty);
-    sliderPaintProperty->UpdateValue(value);
+    CalcSliderValue();
 }
 
 void SliderPattern::OnVisibleChange(bool isVisible)

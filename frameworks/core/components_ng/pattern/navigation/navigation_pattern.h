@@ -378,6 +378,8 @@ private:
     void RefreshNavDestination();
     RefPtr<NavigationPattern> GetParentNavigationPattern();
     void DealTransitionVisibility(const RefPtr<FrameNode>& node, bool isVisible, bool isNavBar);
+    void NotifyNavDestinationSwitch(const RefPtr<NavDestinationContext>& from,
+        const RefPtr<NavDestinationContext>& to, NavigationOperation operation);
 
     void UpdateIsAnimation(const std::optional<std::pair<std::string, RefPtr<UINode>>>& preTopNavPath);
 

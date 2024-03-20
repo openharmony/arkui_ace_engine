@@ -630,6 +630,8 @@ private:
     void InheritParentProperties(const RefPtr<SpanItem>& spanItem);
     // to check if drag is in progress
 
+    void AddUdmfTxtPreProcessor(const ResultObject src, ResultObject& result, bool isAppend);
+
     bool isMeasureBoundary_ = false;
     bool isMousePressed_ = false;
     bool leftMousePressed_ = false;

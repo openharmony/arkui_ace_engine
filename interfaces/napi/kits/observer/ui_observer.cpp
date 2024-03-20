@@ -674,6 +674,83 @@ void UIObserver::UnRegisterNavDestinationSwitchCallback(int32_t uiContextInstanc
     }
 }
 
+void UIObserver::HandleNavDestinationSwitch(
+    const NG::AbilityContextInfo& info, NG::NavDestinationSwitchInfo& switchInfo)
+{
+    HandleAbilityUIContextNavDestinationSwitch(info, switchInfo);
+    HandleUIContextNavDestinationSwitch(switchInfo);
+}
+
+void UIObserver::HandleAbilityUIContextNavDestinationSwitch(
+    const NG::AbilityContextInfo& info, NG::NavDestinationSwitchInfo& switchInfo)
+{
+    napi_value uiContextBackup = switchInfo.context;
+    for (auto listenerPair : abilityUIContextNavDesSwitchListeners_) {
+        auto ref = listenerPair.first;
+        auto localInfo = infosForNavDesSwitch_[ref];
+        if (!info.IsEqual(localInfo)) {
+            continue;
+        }
+
+        auto env = GetCurrentNapiEnv();
+        napi_value abilityContext = nullptr;
+        napi_get_reference_value(env, ref, &abilityContext);
+
+        switchInfo.context = abilityContext;
+        auto& listenersMap = listenerPair.second;
+        HandleListenersWithEmptyNavigationId(listenersMap, switchInfo);
+        HandleListenersWithSpecifiedNavigationId(listenersMap, switchInfo);
+        break;
+    }
+    switchInfo.context = uiContextBackup;
+}
+
+void UIObserver::HandleUIContextNavDestinationSwitch(const NG::NavDestinationSwitchInfo& switchInfo)
+{
+    auto currentId = Container::CurrentId();
+    auto listenersMapIter = uiContextNavDesSwitchListeners_.find(currentId);
+    if (listenersMapIter == uiContextNavDesSwitchListeners_.end()) {
+        return;
+    }
+    auto& listenersMap = listenersMapIter->second;
+    HandleListenersWithEmptyNavigationId(listenersMap, switchInfo);
+    HandleListenersWithSpecifiedNavigationId(listenersMap, switchInfo);
+}
+
+void UIObserver::HandleListenersWithEmptyNavigationId(
+    const NavIdAndListenersMap& listenersMap, const NG::NavDestinationSwitchInfo& switchInfo)
+{
+    std::optional<std::string> navId;
+    auto it = listenersMap.find(navId);
+    if (it != listenersMap.end()) {
+        const auto& listeners = it->second;
+        for (const auto& listener : listeners) {
+            listener->OnNavDestinationSwitch(switchInfo);
+        }
+    }
+}
+
+void UIObserver::HandleListenersWithSpecifiedNavigationId(
+    const NavIdAndListenersMap& listenersMap, const NG::NavDestinationSwitchInfo& switchInfo)
+{
+    std::string navigationId;
+    if (switchInfo.from.has_value()) {
+        navigationId = switchInfo.from.value().navigationId;
+    } else if (switchInfo.to.has_value()) {
+        navigationId = switchInfo.to.value().navigationId;
+    }
+    if (!navigationId.empty()) {
+        std::optional<std::string> navId{navigationId};
+        auto it = listenersMap.find(navId);
+        if (it != listenersMap.end()) {
+            const auto& listeners = it->second;
+            for (const auto& listener : listeners) {
+                listener->OnNavDestinationSwitch(switchInfo);
+            }
+        }
+    }
+}
+
 void UIObserver::GetAbilityInfos(napi_env env, napi_value abilityContext, NG::AbilityContextInfo& info)
 {
     if (!env || !abilityContext) {

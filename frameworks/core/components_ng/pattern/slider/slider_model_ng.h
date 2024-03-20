@@ -28,7 +28,8 @@ public:
     void SetDirection(Axis value) override;
     void SetReverse(bool value) override;
     void SetBlockColor(const Color& value) override;
-    void SetTrackBackgroundColor(const Color& value) override;
+    void SetTrackBackgroundColor(const Color& value) override {};
+    void SetTrackBackgroundColor(const Gradient& value) override;
     void SetSelectColor(const Color& value) override;
     void SetMinLabel(float value) override;
     void SetMaxLabel(float value) override;
@@ -68,7 +69,7 @@ public:
     static void SetBlockBorderColor(FrameNode* frameNode, const Color& value);
     static void SetBlockBorderWidth(FrameNode* frameNode, const Dimension& value);
     static void SetBlockColor(FrameNode* frameNode, const Color& value);
-    static void SetTrackBackgroundColor(FrameNode* frameNode, const Color& value);
+    static void SetTrackBackgroundColor(FrameNode* frameNode, const Gradient& value);
     static void SetSelectColor(FrameNode* frameNode, const Color& value);
     static void SetShowSteps(FrameNode* frameNode, bool value);
     static void SetBlockImage(
@@ -96,7 +97,7 @@ public:
     static void SetSliderMode(FrameNode* frameNode, const SliderMode& value);
 
     static Color GetBlockColor(FrameNode* frameNode);
-    static Color GetTrackBackgroundColor(FrameNode* frameNode);
+    static Gradient GetTrackBackgroundColor(FrameNode* frameNode);
     static Color GetSelectColor(FrameNode* frameNode);
     static bool GetShowSteps(FrameNode* frameNode);
     static BlockStyleType GetBlockType(FrameNode* frameNode);
@@ -109,6 +110,8 @@ public:
     static SliderModel::SliderMode GetSliderMode(FrameNode* frameNode);
     static std::string GetBlockImageValue(FrameNode* frameNode);
     static RefPtr<BasicShape> GetBlockShape(FrameNode* frameNode);
+    static Gradient CreateSolidGradient(Color value);
+
 private:
     void SetSliderValue(float value);
 };
