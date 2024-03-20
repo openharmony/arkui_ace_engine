@@ -107,15 +107,13 @@ void WaterFlowLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     }
     MinusPaddingToSize(layoutProperty->CreatePaddingAndBorder(), idealSize);
 
-    auto oldCount = layoutInfo_.childrenCount_;
-    layoutInfo_.childrenCount_ = layoutWrapper->GetTotalChildCount();
     int32_t updateIdx = layoutWrapper->GetHostNode()->GetChildrenUpdated();
     if (updateIdx != -1) {
-        if (oldCount != layoutInfo_.childrenCount_) {
-            layoutInfo_.Reset(updateIdx);
-        }
+        layoutInfo_.Reset(updateIdx);
         layoutWrapper->GetHostNode()->ChildrenUpdatedFrom(-1);
     }
+
+    layoutInfo_.childrenCount_ = layoutWrapper->GetTotalChildCount();
 
     InitialItemsCrossSize(layoutProperty, idealSize, layoutInfo_.childrenCount_);
     mainSize_ = GetMainAxisSize(idealSize, axis);
