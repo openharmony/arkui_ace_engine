@@ -3938,6 +3938,89 @@ HWTEST_F(RichEditorTestNg, RichEditorDragTest002, TestSize.Level1)
         ViewStackProcessor::GetInstance()->elementsStack_.pop();
     }
 }
+
+/**
+ * @tc.name: RichEditorDragTest003
+ * @tc.desc: test the drag of RichEditor with developer's onDragDrop function
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorTestNg, RichEditorDragTest003, TestSize.Level1)
+{
+    RichEditorModelNG model;
+    model.Create();
+    auto host = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(host, nullptr);
+    host->draggable_ = true;
+    auto eventHub = host->GetEventHub<EventHub>();
+    ASSERT_NE(eventHub, nullptr);
+    auto pattern = host->GetPattern<RichEditorPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto gesture = host->GetOrCreateGestureEventHub();
+    ASSERT_NE(gesture, nullptr);
+    EXPECT_TRUE(gesture->GetTextDraggable());
+    gesture->SetIsTextDraggable(true);
+    pattern->InitDragDropEvent();
+    EXPECT_TRUE(eventHub->HasDefaultOnDragStart());
+    EXPECT_TRUE(eventHub->HasOnDrop());
+    auto controller = pattern->GetRichEditorController();
+    ASSERT_NE(controller, nullptr);
+    TextStyle style;
+    TextSpanOptions options;
+    options.value = INIT_VALUE_3;
+    options.style = style;
+    auto index = controller->AddTextSpan(options);
+    EXPECT_EQ(index, 0);
+    pattern->textSelector_.Update(0, 6);
+    auto event = AceType::MakeRefPtr<OHOS::Ace::DragEvent>();
+    eventHub->FireOnDrop(event, "");
+    EXPECT_EQ(pattern->status_, Status::NONE);
+    while (!ViewStackProcessor::GetInstance()->elementsStack_.empty()) {
+        ViewStackProcessor::GetInstance()->elementsStack_.pop();
+    }
+}
+
+/**
+ * @tc.name: RichEditorDragTest004
+ * @tc.desc: test the drag of RichEditor with developer's DragDropTextOperation function
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorTestNg, RichEditorDragTest004, TestSize.Level1)
+{
+    RichEditorModelNG model;
+    model.Create();
+    auto host = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(host, nullptr);
+    host->draggable_ = true;
+    auto eventHub = host->GetEventHub<EventHub>();
+    ASSERT_NE(eventHub, nullptr);
+    auto pattern = host->GetPattern<RichEditorPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto gesture = host->GetOrCreateGestureEventHub();
+    ASSERT_NE(gesture, nullptr);
+    EXPECT_TRUE(gesture->GetTextDraggable());
+    gesture->SetIsTextDraggable(true);
+    pattern->InitDragDropEvent();
+    EXPECT_TRUE(eventHub->HasOnDrop());
+    auto controller = pattern->GetRichEditorController();
+    ASSERT_NE(controller, nullptr);
+    TextStyle style;
+    TextSpanOptions options;
+    options.value = INIT_VALUE_1 + INIT_VALUE_1;
+    options.style = style;
+    auto index = controller->AddTextSpan(options);
+    EXPECT_EQ(index, 0);
+    pattern->dragPosition_ = 0;
+    pattern->caretPosition_ = options.value.length();
+    pattern->DragDropTextOperation(INIT_VALUE_1);
+    pattern->dragPosition_ = options.value.length();
+    pattern->caretPosition_ = 0;
+    pattern->DragDropTextOperation(INIT_VALUE_1);
+    EXPECT_EQ(pattern->status_, Status::NONE);
+    while (!ViewStackProcessor::GetInstance()->elementsStack_.empty()) {
+        ViewStackProcessor::GetInstance()->elementsStack_.pop();
+    }
+}
+
 /**
  * @tc.name: GetTextSpansInfo
  * @tc.desc: test get paragraphStyle
