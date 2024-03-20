@@ -15,6 +15,7 @@
 
 #include "frameworks/bridge/declarative_frontend/jsview/js_slider.h"
 
+#include "bridge/declarative_frontend/jsview/js_linear_gradient.h"
 #include "bridge/declarative_frontend/jsview/js_view_common_def.h"
 #include "bridge/declarative_frontend/jsview/models/slider_model_impl.h"
 #include "core/components/slider/render_slider.h"
@@ -233,13 +234,51 @@ void JSSlider::SetTrackColor(const JSCallbackInfo& info)
     if (info.Length() < 1) {
         return;
     }
-    Color colorVal;
-    if (!ParseJsColor(info[0], colorVal)) {
-        auto theme = GetTheme<SliderTheme>();
-        CHECK_NULL_VOID(theme);
-        colorVal = theme->GetTrackBgColor();
+    NG::Gradient gradient;
+    if (!ConvertGradientColor(info[0], gradient)) {
+        Color colorVal;
+        if (info[0]->IsNull() || info[0]->IsUndefined() || !ParseJsColor(info[0], colorVal)) {
+            auto theme = GetTheme<SliderTheme>();
+            CHECK_NULL_VOID(theme);
+            colorVal = theme->GetTrackBgColor();
+        }
+        gradient = NG::SliderModelNG::CreateSolidGradient(colorVal);
+        // Set track color to Framework::SliderModelImpl. Need to backward compatibility with old pipeline.
+        SliderModel::GetInstance()->SetTrackBackgroundColor(colorVal);
     }
-    SliderModel::GetInstance()->SetTrackBackgroundColor(colorVal);
+    // Set track gradient color to NG::SliderModelNG
+    SliderModel::GetInstance()->SetTrackBackgroundColor(gradient);
+}
+
+bool JSSlider::ConvertGradientColor(const JsiRef<JsiValue>& param, NG::Gradient& gradient)
+{
+    if (param->IsNull() || param->IsUndefined() || !param->IsObject()) {
+        return false;
+    }
+
+    JSLinearGradient* jsLinearGradient = JSRef<JSObject>::Cast(param)->Unwrap<JSLinearGradient>();
+    if (!jsLinearGradient || jsLinearGradient->GetGradient().empty()) {
+        return false;
+    }
+
+    size_t size = jsLinearGradient->GetGradient().size();
+    if (size == 1) {
+        // If there is only one color, then this color is used for both the begin and end side.
+        NG::GradientColor gradientColor;
+        gradientColor.SetLinearColor(LinearColor(jsLinearGradient->GetGradient().front().first));
+        gradientColor.SetDimension(jsLinearGradient->GetGradient().front().second);
+        gradient.AddColor(gradientColor);
+        gradient.AddColor(gradientColor);
+        return true;
+    }
+
+    for (size_t colorIndex = 0; colorIndex < size; colorIndex++) {
+        NG::GradientColor gradientColor;
+        gradientColor.SetLinearColor(LinearColor(jsLinearGradient->GetGradient().at(colorIndex).first));
+        gradientColor.SetDimension(jsLinearGradient->GetGradient().at(colorIndex).second);
+        gradient.AddColor(gradientColor);
+    }
+    return true;
 }
 
 void JSSlider::SetSelectedColor(const JSCallbackInfo& info)
