@@ -60,6 +60,11 @@ class ArkTextPickerComponent extends ArkComponent implements TextPickerAttribute
       this._modifiersWithKeys, TextpickerSelectedIndexModifier.identity, TextpickerSelectedIndexModifier, value);
     return this;
   }
+  divider(value: DividerOptions | null): this {
+    modifierWithKey(
+      this._modifiersWithKeys, TextpickerDividerModifier.identity, TextpickerDividerModifier, value);
+    return this;
+  }
 }
 
 class TextpickerCanLoopModifier extends ModifierWithKey<boolean> {
@@ -99,6 +104,27 @@ class TextpickerSelectedIndexModifier extends ModifierWithKey<number | number[]>
     }
   }
 
+}
+
+class TextpickerDividerModifier extends ModifierWithKey<DividerOptions | null> {
+  constructor(value: DividerOptions | null) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('textpickerDivider');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().textpicker.resetDivider(node);
+    } else {
+      getUINativeModule().textpicker.setDivider(node, this.value?.strokeWidth, this.value?.color, this.value?.startMargin, this.value?.endMargin);
+    }
+  }
+
+  checkObjectDiff(): boolean {
+    return !(this.stageValue?.strokeWidth === this.value?.strokeWidth &&
+      this.stageValue?.color === this.value?.color &&
+      this.stageValue?.startMargin === this.value?.startMargin &&
+      this.stageValue?.endMargin === this.value?.endMargin);
+  }
 }
 
 class TextpickerTextStyleModifier extends ModifierWithKey<PickerTextStyle> {

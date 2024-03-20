@@ -11734,6 +11734,10 @@ class ArkTextPickerComponent extends ArkComponent {
     modifierWithKey(this._modifiersWithKeys, TextpickerSelectedIndexModifier.identity, TextpickerSelectedIndexModifier, value);
     return this;
   }
+  divider(value) {
+    modifierWithKey(this._modifiersWithKeys, TextpickerDividerModifier.identity, TextpickerDividerModifier, value);
+    return this;
+  }
 }
 class TextpickerCanLoopModifier extends ModifierWithKey {
   constructor(value) {
@@ -11774,6 +11778,28 @@ class TextpickerSelectedIndexModifier extends ModifierWithKey {
   }
 }
 TextpickerSelectedIndexModifier.identity = Symbol('textpickerSelectedIndex');
+class TextpickerDividerModifier extends ModifierWithKey {
+    constructor(value) {
+        super(value);
+    }
+    applyPeer(node, reset) {
+        var _a, _b, _c, _d;
+        if (reset) {
+            getUINativeModule().textpicker.resetDivider(node);
+        }
+        else {
+            getUINativeModule().textpicker.setDivider(node, (_a = this.value) === null || _a === void 0 ? void 0 : _a.strokeWidth, (_b = this.value) === null || _b === void 0 ? void 0 : _b.color, (_c = this.value) === null || _c === void 0 ? void 0 : _c.startMargin, (_d = this.value) === null || _d === void 0 ? void 0 : _d.endMargin);
+        }
+    }
+    checkObjectDiff() {
+        var _a, _b, _c, _d, _e, _f, _g, _h;
+        return !(((_a = this.stageValue) === null || _a === void 0 ? void 0 : _a.strokeWidth) === ((_b = this.value) === null || _b === void 0 ? void 0 : _b.strokeWidth) &&
+            ((_c = this.stageValue) === null || _c === void 0 ? void 0 : _c.color) === ((_d = this.value) === null || _d === void 0 ? void 0 : _d.color) &&
+            ((_e = this.stageValue) === null || _e === void 0 ? void 0 : _e.startMargin) === ((_f = this.value) === null || _f === void 0 ? void 0 : _f.startMargin) &&
+            ((_g = this.stageValue) === null || _g === void 0 ? void 0 : _g.endMargin) === ((_h = this.value) === null || _h === void 0 ? void 0 : _h.endMargin));
+    }
+}
+TextpickerDividerModifier.identity = Symbol('textpickerDivider');
 class TextpickerTextStyleModifier extends ModifierWithKey {
   constructor(value) {
     super(value);
