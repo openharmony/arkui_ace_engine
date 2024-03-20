@@ -218,7 +218,7 @@ export struct EditableTitleBar {
       } else {
         EditableTitleBar.countOfImageItem = EditableTitleBar.commonZero;
       }
-      let nValue = Number(newValue.width)
+      let nValue = Number(newValue.width);
       nValue = nValue - EditableTitleBar.leftPadding -
         EditableTitleBar.rightPadding - EditableTitleBar.titlePadding;
       nValue = nValue - ImageMenuItem.imageHotZoneWidth;
@@ -400,7 +400,6 @@ struct ImageMenuItem {
           .focusable(false)
           .enabled(this.item.isEnabled)
           .objectFit(ImageFit.Cover)
-          .onClick(() => this.item.isEnabled && this.item.action && this.item.action())
 
         Button({ type: ButtonType.Circle })
           .width(ImageMenuItem.imageHotZoneWidth)
@@ -430,6 +429,45 @@ struct ImageMenuItem {
               })
             }
           })
+        .onFocus(() => {
+          if (!this.item.isEnabled) {
+            return;
+          }
+          this.isOnFocus = true;
+        })
+        .onBlur(() => this.isOnFocus = false)
+        .onHover((isOn) => {
+          if (!this.item.isEnabled) {
+            return;
+          }
+          this.isOnHover = isOn;
+        })
+        .onKeyEvent((event) => {
+          if (!this.item.isEnabled) {
+            return;
+          }
+          if (event.keyCode !== KeyCode.KEYCODE_ENTER && event.keyCode !== KeyCode.KEYCODE_SPACE) {
+            return;
+          }
+          if (event.type === KeyType.Down) {
+            this.isOnClick = true;
+          }
+          if (event.type === KeyType.Up) {
+            this.isOnClick = false;
+          }
+        })
+        .onTouch((event) => {
+          if (!this.item.isEnabled) {
+            return;
+          }
+          if (event.type === TouchType.Down) {
+            this.isOnClick = true;
+          }
+          if (event.type === TouchType.Up) {
+            this.isOnClick = false;
+          }
+        })
+        .onClick(() => this.item.isEnabled && this.item.action && this.item.action())
       }.margin({
         left: ImageMenuItem.iconBackgroundSpaceHorizontal,
       })
