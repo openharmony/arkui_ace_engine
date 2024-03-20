@@ -80,7 +80,7 @@ public:
     void HidePopup(int32_t targetId, const PopupInfo& popupInfo);
     RefPtr<FrameNode> HidePopupWithoutAnimation(int32_t targetId, const PopupInfo& popupInfo);
     void ShowPopup(int32_t targetId, const PopupInfo& popupInfo,
-        const std::function<void(int32_t)>&& onWillDismiss = nullptr, bool interactiveDismiss = false);
+        const std::function<void(int32_t)>&& onWillDismiss = nullptr, bool interactiveDismiss = true);
     void ErasePopup(int32_t targetId);
     void HideAllPopups();
     void HideCustomPopups();
@@ -516,7 +516,7 @@ private:
     void PlayBubbleStyleSheetTransition(RefPtr<FrameNode> sheetNode, bool isTransitionIn);
     void CheckReturnFocus(RefPtr<FrameNode> node);
     void MountPopup(int32_t targetId, const PopupInfo& popupInfo,
-        const std::function<void(int32_t)>&& onWillDismiss = nullptr, bool interactiveDismiss = false);
+        const std::function<void(int32_t)>&& onWillDismiss = nullptr, bool interactiveDismiss = true);
 
     int32_t GetPopupIdByNode(const RefPtr<FrameNode>& overlay);
     bool PopupInteractiveDismiss(const RefPtr<FrameNode>& overlay);

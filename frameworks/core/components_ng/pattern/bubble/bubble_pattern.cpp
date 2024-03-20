@@ -190,7 +190,7 @@ void BubblePattern::HandleTouchDown(const Offset& clickPosition)
     }
     auto autoCancel = bubbleRenderProp->GetAutoCancel().value_or(true);
     if (autoCancel) {
-        if (GetInteractiveDismiss()) {
+        if (!GetInteractiveDismiss()) {
             return;
         }
         if (HasOnWillDismiss()) {

@@ -1999,10 +1999,7 @@ bool OverlayManager::PopupInteractiveDismiss(const RefPtr<FrameNode>& overlay)
 {
     auto bubblePattern = overlay->GetPattern<BubblePattern>();
     CHECK_NULL_RETURN(bubblePattern, false);
-    if (bubblePattern->GetInteractiveDismiss()) {
-        return true;
-    }
-    return false;
+    return !bubblePattern->GetInteractiveDismiss();
 }
 
 bool OverlayManager::PopupCallBackOnWillDismiss(const RefPtr<FrameNode>& overlay)
