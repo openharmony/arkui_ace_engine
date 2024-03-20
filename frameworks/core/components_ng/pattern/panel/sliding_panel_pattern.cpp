@@ -281,10 +281,8 @@ void SlidingPanelPattern::FirstLayout()
             FireSizeChangeEvent();
         }
         isShow_ = true;
-        auto focusHub = host->GetFocusHub();
-        if (focusHub) {
-            focusHub->RequestFocus();
-        }
+        SetIsViewRootScopeFocused(false);
+        FocusViewShow();
         if (layoutProperty->GetHasDragBarValue(true)) {
             auto dragBar = GetDragBarNode();
             CHECK_NULL_VOID(dragBar);
@@ -304,12 +302,11 @@ void SlidingPanelPattern::IsShowChanged(bool isShow)
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto focusHub = host->GetFocusHub();
-    CHECK_NULL_VOID(focusHub);
     if (isShow) {
-        focusHub->RequestFocus();
+        SetIsViewRootScopeFocused(false);
+        FocusViewShow();
     } else {
-        focusHub->RemoveSelf();
+        FocusViewClose();
     }
     auto layoutProperty = GetLayoutProperty<SlidingPanelLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
