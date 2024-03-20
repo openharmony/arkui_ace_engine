@@ -470,6 +470,9 @@ public:
             node.second.second->PaintDebugBoundaryTreeAll(flag);
         }
         for (const auto& node : expiringItem_) {
+            if (node.second.second == nullptr) {
+                continue;
+            }
             node.second.second->PaintDebugBoundaryTreeAll(flag);
         }
     }
