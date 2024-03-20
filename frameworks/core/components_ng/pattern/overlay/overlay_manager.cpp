@@ -1644,24 +1644,40 @@ RefPtr<FrameNode> OverlayManager::ShowDialog(
     RefPtr<UINode> customNode;
     // create custom builder content
     if (buildFunc) {
-        customNode = BuildFrameNode(buildFunc);
+        NG::ScopedViewStackProcessor builderViewStackProcessor;
+        buildFunc();
+        customNode = NG::ViewStackProcessor::GetInstance()->Finish();
+        CHECK_NULL_RETURN(customNode, nullptr);
     }
-    return ShowDialogWithNode(dialogProps, customNode, isRightToLeft);
-}
 
-RefPtr<UINode> OverlayManager::BuildFrameNode(std::function<void()>& buildFunc)
-{
-    RefPtr<UINode> customNode;
-    NG::ScopedViewStackProcessor builderViewStackProcessor;
-    buildFunc();
-    customNode = NG::ViewStackProcessor::GetInstance()->Finish();
-    CHECK_NULL_RETURN(customNode, nullptr);
-    return customNode;
+    auto dialog = DialogView::CreateDialogNode(dialogProps, customNode);
+    CHECK_NULL_RETURN(dialog, nullptr);
+    BeforeShowDialog(dialog);
+    if (dialogProps.transitionEffect != nullptr) {
+        SetDialogTransitionEffect(dialog);
+    } else {
+        OpenDialogAnimation(dialog);
+    }
+    dialogCount_++;
+    // set close button disable
+    SetContainerButtonEnable(false);
+    if (Recorder::EventRecorder::Get().IsComponentRecordEnable()) {
+        Recorder::EventParamsBuilder builder;
+        builder
+            .SetType("Dialog")
+            .SetEventType(Recorder::EventType::DIALOG_SHOW)
+            .SetExtra(Recorder::KEY_TITLE, dialogProps.title)
+            .SetExtra(Recorder::KEY_SUB_TITLE, dialogProps.subtitle);
+        Recorder::EventRecorder::Get().OnEvent(std::move(builder));
+    }
+    return dialog;
 }
 
 RefPtr<FrameNode> OverlayManager::ShowDialogWithNode(
     const DialogProperties& dialogProps, const RefPtr<UINode>& customNode, bool isRightToLeft)
 {
+    TAG_LOGD(AceLogTag::ACE_OVERLAY, "show dialog enter");
+    CHECK_NULL_RETURN(customNode, nullptr);
     auto dialog = DialogView::CreateDialogNode(dialogProps, customNode);
     CHECK_NULL_RETURN(dialog, nullptr);
     BeforeShowDialog(dialog);
