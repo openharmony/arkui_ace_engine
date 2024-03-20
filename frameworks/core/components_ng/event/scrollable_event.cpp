@@ -59,6 +59,8 @@ void ScrollableActuator::CollectTouchTarget(const OffsetF& coordinateOffset, con
         }
         if (event->InBarRegion(localPoint, touchRestrict.sourceType)) {
             event->BarCollectTouchTarget(coordinateOffset, getEventTargetImpl, result, frameNode, targetComponent);
+        } else if (event->InBarRectRegion(localPoint, touchRestrict.sourceType)) {
+            event->BarCollectLongPressTarget(coordinateOffset, getEventTargetImpl, result, frameNode, targetComponent);
         } else if (event->GetScrollable()) {
             const auto& scrollable = event->GetScrollable();
             scrollable->SetGetEventTargetImpl(getEventTargetImpl);

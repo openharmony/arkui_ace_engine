@@ -132,7 +132,6 @@ constexpr char16_t OBSCURING_CHARACTER_FOR_AR = u'*';
 const std::string NEWLINE = "\n";
 const std::wstring WIDE_NEWLINE = StringUtils::ToWstring(NEWLINE);
 constexpr int32_t AUTO_FILL_FAILED = 1;
-constexpr int32_t LONG_PRESS_PAGE_INTERVAL_MS = 100;
 
 // need to be moved to formatter
 const std::string DIGIT_WHITE_LIST = "[0-9]";
@@ -1389,17 +1388,14 @@ void TextFieldPattern::HandleTouchEvent(const TouchEventInfo& info)
     }
 
     if (touchType == TouchType::DOWN) {
-        hasMousePressed_ = true;
         HandleTouchDown(info.GetTouches().front().GetLocalLocation());
     } else if (touchType == TouchType::UP) {
-        hasMousePressed_ = false;
         HandleTouchUp();
     } else if (touchType == TouchType::MOVE) {
         if (!isUsingMouse_) {
             HandleTouchMove(info);
         }
     }
-    locationInfo_ = info.GetTouches().front().GetLocalLocation();
 }
 
 void TextFieldPattern::HandleTouchDown(const Offset& offset)
@@ -1804,10 +1800,10 @@ void TextFieldPattern::HandleClickEvent(GestureEvent& info)
             return;
         }
     }
-    if (IsMouseOverScrollBar(info)) {
+    if (IsMouseOverScrollBar(info) && hasMousePressed_) {
         Point point(info.GetLocalLocation().GetX(), info.GetLocalLocation().GetY());
         bool reverse = false;
-        if (AnalysisUpOrDown(point, reverse)) {
+        if (GetScrollBar()->AnalysisUpOrDown(point, reverse)) {
             ScrollPage(reverse);
         }
         return;
@@ -2498,9 +2494,6 @@ void TextFieldPattern::HandleLongPress(GestureEvent& info)
         shouldProcessOverlayAfterLayout = true;
         host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
     }
-    if (IsLongMouseOverScrollBar(info)) {
-        return;
-    }
     if (info.GetSourceDevice() == SourceType::MOUSE) {
         return;
     }
@@ -2539,17 +2532,6 @@ bool TextFieldPattern::IsMouseOverScrollBar(const GestureEvent& info)
     CHECK_NULL_RETURN(GetScrollBar(), false);
     Point point(info.GetLocalLocation().GetX(), info.GetLocalLocation().GetY());
     return GetScrollBar()->InBarRectRegion(point);
-}
-
-bool TextFieldPattern::IsLongMouseOverScrollBar(GestureEvent& info)
-{
-    CHECK_NULL_RETURN(GetScrollBar(), false);
-    Point point(info.GetLocalLocation().GetX(), info.GetLocalLocation().GetY());
-    auto isInBarRegion = GetScrollBar()->InBarRectRegion(point);
-    if (isInBarRegion) {
-        LongScrollPage();
-    }
-    return isInBarRegion;
 }
 
 void TextFieldPattern::UpdateCaretPositionWithClamp(const int32_t& pos)
@@ -2950,6 +2932,11 @@ void TextFieldPattern::InitMouseEvent()
         auto pattern = weak.Upgrade();
         if (pattern) {
             pattern->HandleMouseEvent(info);
+            if (info.GetButton() == MouseButton::LEFT_BUTTON && info.GetAction() == MouseAction::PRESS) {
+                pattern->hasMousePressed_ = true;
+            } else {
+                pattern->hasMousePressed_ = false;
+            }
         }
     };
     mouseEvent_ = MakeRefPtr<InputEvent>(std::move(mouseTask));
@@ -3038,8 +3025,7 @@ void TextFieldPattern::HandleMouseEvent(MouseInfo& info)
     info.SetStopPropagation(true);
     auto scrollBar = GetScrollBar();
     Point point(info.GetLocalLocation().GetX(), info.GetLocalLocation().GetY());
-    auto inBarRect = scrollBar->InBarRectRegion(point);
-    if ((scrollBar && (scrollBar->IsPressed() || scrollBar->IsHover())) || inBarRect) {
+    if (scrollBar && (scrollBar->IsPressed() || scrollBar->IsHover() || scrollBar->InBarRectRegion(point))) {
         pipeline->SetMouseStyleHoldNode(frameId);
         pipeline->ChangeMouseStyle(frameId, MouseFormat::DEFAULT);
         return;
@@ -6940,41 +6926,5 @@ void TextFieldPattern::ScrollPage(bool reverse, bool smooth)
     float maxFrameHeight = maxFrameHeight_ - preErrorMargin_ - maxFrameOffsetY_;
     float distance = reverse ? maxFrameHeight : -maxFrameHeight;
     OnScrollCallback(distance, SCROLL_FROM_JUMP);
-}
-
-void TextFieldPattern::LongScrollPage()
-{
-    Point point(locationInfo_.GetX(), locationInfo_.GetY());
-    bool reverse = false;
-    if (AnalysisUpOrDown(point, reverse) && hasMousePressed_) {
-        ScrollPage(reverse);
-        StartLongPressEventTimer();
-    }
-}
-
-void TextFieldPattern::ScheduleCaretLongPress()
-{
-    auto context = OHOS::Ace::PipelineContext::GetCurrentContext();
-    CHECK_NULL_VOID(context);
-    if (!context->GetTaskExecutor()) {
-        return;
-    }
-    auto taskExecutor = context->GetTaskExecutor();
-    CHECK_NULL_VOID(taskExecutor);
-    taskExecutor->PostDelayedTask(
-        [weak = WeakClaim(this)]() {
-            auto pattern = weak.Upgrade();
-            CHECK_NULL_VOID(pattern);
-            pattern->LongScrollPage();
-        },
-        TaskExecutor::TaskType::UI, LONG_PRESS_PAGE_INTERVAL_MS);
-}
-
-void TextFieldPattern::StartLongPressEventTimer()
-{
-    auto tmpHost = GetHost();
-    CHECK_NULL_VOID(tmpHost);
-    tmpHost->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
-    ScheduleCaretLongPress();
 }
 } // namespace OHOS::Ace::NG
