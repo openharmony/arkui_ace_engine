@@ -134,6 +134,8 @@ void OverlayTestNg::SetUpTestCase()
             return AceType::MakeRefPtr<ToastTheme>();
         } else if (type == SheetTheme::TypeId()) {
             return AceType::MakeRefPtr<SheetTheme>();
+        } else if (type == TextTheme::TypeId()) {
+            return AceType::MakeRefPtr<TextTheme>();
         } else {
             return nullptr;
         }
@@ -142,6 +144,7 @@ void OverlayTestNg::SetUpTestCase()
 }
 void OverlayTestNg::TearDownTestCase()
 {
+    MockPipelineContext::GetCurrent()->themeManager_ = nullptr;
     MockPipelineContext::TearDown();
 }
 
@@ -1200,6 +1203,40 @@ HWTEST_F(OverlayTestNg, ToastTest002, TestSize.Level1)
     overlayManager->PopToast(toastId);
     EXPECT_TRUE(overlayManager->toastMap_.empty());
 }
+
+/**
+ * @tc.name: ToastTest004
+ * @tc.desc: Test OverlayManager::ShowToast->PopToast.
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayTestNg, ToastTest004, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create toast node with alignment.
+     * @tc.expected: toast property has alignment.
+     */
+    auto offset = DimensionOffset(MENU_OFFSET);
+    auto toastNode =
+        ToastView::CreateToastNode(MESSAGE, BOTTOMSTRING, true, ToastShowMode::DEFAULT, Alignment::TOP_LEFT, offset);
+    ASSERT_NE(toastNode, nullptr);
+    auto toastProperty = toastNode->GetLayoutProperty<ToastLayoutProperty>();
+    EXPECT_TRUE(toastProperty->HasToastAlignment());
+    EXPECT_EQ(toastProperty->GetToastAlignmentValue(), Alignment::TOP_LEFT);
+    auto pattern = toastNode->GetPattern<ToastPattern>();
+    ASSERT_NE(pattern, nullptr);
+    /**
+     * @tc.steps: step2. update different alignment to property.
+     * @tc.expected: call the OnDirtyLayoutWrapperSwap function always return true.
+     */
+    std::vector<Alignment> alignments = { Alignment::TOP_LEFT, Alignment::TOP_CENTER, Alignment::TOP_RIGHT,
+        Alignment::CENTER_LEFT, Alignment::CENTER, Alignment::CENTER_RIGHT, Alignment::BOTTOM_LEFT,
+        Alignment::BOTTOM_CENTER, Alignment::BOTTOM_RIGHT };
+    for (auto alignment : alignments) {
+        toastProperty->UpdateToastAlignment(alignment);
+        EXPECT_TRUE(pattern->OnDirtyLayoutWrapperSwap(toastNode, DirtySwapConfig()));
+    }
+}
+
 /**
  * @tc.name: DialogTest001
  * @tc.desc: Test OverlayManager::ShowCustomDialog->CloseDialog.
@@ -1638,21 +1675,6 @@ HWTEST_F(OverlayTestNg, CaculateMenuSize, TestSize.Level1)
     previewNode->MountToParent(menuWrapperNode);
     menuWrapperNode->MountToParent(rootNode);
 
-    /**
-     * @tc.steps: step2. set theme.
-     */
-    auto pipeline = PipelineContext::GetCurrentContext();
-    auto theme = AceType::MakeRefPtr<MockThemeManager>();
-    pipeline->SetThemeManager(theme);
-    EXPECT_CALL(*theme, GetTheme(_)).WillRepeatedly([](ThemeType type) -> RefPtr<Theme> {
-        if (type == TextTheme::TypeId()) {
-            return AceType::MakeRefPtr<TextTheme>();
-        } else if (type == SelectTheme::TypeId()) {
-            return AceType::MakeRefPtr<SelectTheme>();
-        } else {
-            return nullptr;
-        }
-    });
     /**
      * @tc.steps: step3. create overlayManager and call CaculateMenuSize.
      * @tc.expected: idealSize is (0, 0).
