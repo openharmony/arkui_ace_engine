@@ -948,9 +948,11 @@ void DialogPattern::OnColorConfigurationUpdate()
     CHECK_NULL_VOID(context);
     auto dialogTheme = context->GetTheme<DialogTheme>();
     CHECK_NULL_VOID(dialogTheme);
+    dialogTheme_ = dialogTheme;
     UpdateWrapperBackgroundStyle(host, dialogTheme);
     CHECK_NULL_VOID(buttonContainer_);
     int32_t btnIndex = 0;
+    isFirstDefaultFocus_ = true;
     for (const auto& buttonNode : buttonContainer_->GetChildren()) {
         if (buttonNode->GetTag() != V2::BUTTON_ETS_TAG) {
             continue;
@@ -960,18 +962,21 @@ void DialogPattern::OnColorConfigurationUpdate()
         auto pattern = buttonFrameNode->GetPattern<ButtonPattern>();
         CHECK_NULL_VOID(pattern);
         pattern->SetSkipColorConfigurationUpdate();
+        // parse button text color and background color
+        std::string textColorStr;
+        std::optional<Color> bgColor;
+        ParseButtonFontColorAndBgColor(dialogProperties_.buttons[btnIndex], textColorStr, bgColor);
+        // update background color
+        auto renderContext = buttonFrameNode->GetRenderContext();
+        CHECK_NULL_VOID(renderContext);
+        renderContext->UpdateBackgroundColor(bgColor.value());
         auto buttonTextNode = DynamicCast<FrameNode>(buttonFrameNode->GetFirstChild());
         CHECK_NULL_VOID(buttonTextNode);
         auto buttonTextLayoutProperty = buttonTextNode->GetLayoutProperty<TextLayoutProperty>();
         CHECK_NULL_VOID(buttonTextLayoutProperty);
-        auto textColorStr = dialogProperties_.buttons[btnIndex].textColor;
-        if (!textColorStr.empty()) {
-            Color textColor;
-            Color::ParseColorString(textColorStr, textColor);
-            buttonTextLayoutProperty->UpdateTextColor(textColor);
-        } else {
-            buttonTextLayoutProperty->UpdateTextColor(dialogTheme->GetButtonDefaultFontColor());
-        }
+        Color textColor;
+        Color::ParseColorString(textColorStr, textColor);
+        buttonTextLayoutProperty->UpdateTextColor(textColor);
         buttonTextNode->MarkModifyDone();
         buttonTextNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
         ++btnIndex;
