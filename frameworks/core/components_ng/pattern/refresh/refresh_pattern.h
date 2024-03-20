@@ -138,7 +138,6 @@ private:
     void FireRefreshing();
     void FireChangeEvent(const std::string& value);
     void UpdateDragFRCSceneInfo(const std::string& scene, float speed, SceneStatus sceneStatus);
-    void UpdateRefreshBorderWidth(float ratio);
     void InitProgressColumn();
     bool HasLoadingText();
     void UpdateLoadingTextOpacity(float opacity);
