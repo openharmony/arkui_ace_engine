@@ -59,11 +59,6 @@ constexpr Dimension LOADING_PROGRESS_SIZE = 32.0_vp;
 constexpr float DEFAULT_FRICTION = 62.0f;
 const RefPtr<Curve> DEFAULT_CURVE = AceType::MakeRefPtr<CubicCurve>(0.2f, 0.0f, 0.1f, 1.0f);
 const std::string REFRESH_DRAG_SCENE = "refresh_drag_scene";
-constexpr Dimension DARK_MODE_BLUR_RADIUS = 2.0_vp;
-constexpr double DARK_MODE_LOADING_PROGRESS_BORDER_WIDTH = 2.4f;
-constexpr double LIGHT_MODE_LOADING_PROGRESS_BORDER_WIDTH = 0.0f;
-constexpr double DARK_MODE_LOADING_PROGRESS_BACKGROUND_ALPHA = 0.53f;
-constexpr double LIGHT_MODE_LOADING_PROGRESS_BACKGROUND_ALPHA = 0.0f;
 constexpr Dimension LOADING_TEXT_TOP_MARGIN = 16.0_vp;
 constexpr Dimension LOADING_TEXT_DISPLAY_DISTANCE = 80.0_vp;
 } // namespace
@@ -239,19 +234,6 @@ void RefreshPattern::UpdateLoadingTextOpacity(float opacity)
     loadingTextRenderContext->UpdateOpacity(opacity);
 }
 
-void RefreshPattern::UpdateRefreshBorderWidth(float ratio)
-{
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    BorderWidthProperty borderWidth;
-    if (SystemProperties::GetColorMode() == ColorMode::DARK) {
-        borderWidth.SetBorderWidth(Dimension(DARK_MODE_LOADING_PROGRESS_BORDER_WIDTH * ratio, DimensionUnit::VP));
-    } else {
-        borderWidth.SetBorderWidth(Dimension(0, DimensionUnit::VP));
-    }
-    host->GetLayoutProperty<RefreshLayoutProperty>()->UpdateBorderWidth(borderWidth);
-}
-
 void RefreshPattern::InitProgressColumn()
 {
     auto host = GetHost();
@@ -284,32 +266,13 @@ void RefreshPattern::OnColorConfigurationUpdate()
     if (isCustomBuilderExist_) {
         return;
     }
-
     CHECK_NULL_VOID(progressChild_);
-    auto loadingProgressLayoutProperty = progressChild_->GetLayoutProperty<LoadingProgressLayoutProperty>();
-    CHECK_NULL_VOID(loadingProgressLayoutProperty);
-    auto loadingProgressRenderContext = progressChild_->GetRenderContext();
-    CHECK_NULL_VOID(loadingProgressRenderContext);
     auto pipeline = PipelineContext::GetCurrentContextSafely();
     CHECK_NULL_VOID(pipeline);
     auto themeManager = pipeline->GetThemeManager();
     CHECK_NULL_VOID(themeManager);
     auto theme = themeManager->GetTheme<RefreshTheme>();
     CHECK_NULL_VOID(theme);
-
-    if (SystemProperties::GetColorMode() == ColorMode::DARK) {
-        loadingProgressRenderContext->UpdateBackgroundColor(
-            theme->GetBackgroundColor().BlendOpacity(DARK_MODE_LOADING_PROGRESS_BACKGROUND_ALPHA));
-        loadingProgressRenderContext->UpdateFrontBlurRadius(DARK_MODE_BLUR_RADIUS);
-        UpdateRefreshBorderWidth(GetFollowRatio());
-
-    } else {
-        loadingProgressRenderContext->UpdateBackgroundColor(
-            theme->GetBackgroundColor().BlendOpacity(LIGHT_MODE_LOADING_PROGRESS_BACKGROUND_ALPHA));
-        loadingProgressRenderContext->UpdateFrontBlurRadius(Dimension(0, DimensionUnit::VP));
-        UpdateRefreshBorderWidth(LIGHT_MODE_LOADING_PROGRESS_BORDER_WIDTH);
-    }
-
     auto layoutProperty = GetLayoutProperty<RefreshLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
     auto progressPaintProperty = progressChild_->GetPaintProperty<LoadingProgressPaintProperty>();
@@ -647,7 +610,6 @@ void RefreshPattern::UpdateLoadingProgressStatus(RefreshAnimationState state, fl
         case RefreshAnimationState::FOLLOW_HAND:
         case RefreshAnimationState::RECYCLE:
             progressPaintProperty->UpdateRefreshSizeScaleRatio(ratio);
-            UpdateRefreshBorderWidth(std::clamp(ratio, 0.0f, 1.0f));
             break;
         default:
             break;
@@ -955,7 +917,6 @@ void RefreshPattern::HandleDragUpdateLowVersion(float delta)
                 ? 1.0f
                 : (scrollOffset_ - triggerLoadingDistance_) / (triggerRefreshDistance - triggerLoadingDistance_);
         progressPaintProperty->UpdateRefreshSizeScaleRatio(std::clamp(ratio, 0.0f, 1.0f));
-        UpdateRefreshBorderWidth(std::clamp(ratio, 0.0f, 1.0f));
     }
 }
 
@@ -1022,7 +983,6 @@ void RefreshPattern::UpdateLoadingProgress()
     auto progressPaintProperty = progressChild_->GetPaintProperty<LoadingProgressPaintProperty>();
     CHECK_NULL_VOID(progressPaintProperty);
     progressPaintProperty->UpdateRefreshSizeScaleRatio(ratio);
-    UpdateRefreshBorderWidth(std::clamp(ratio, 0.0f, 1.0f));
     auto progressContext = progressChild_->GetRenderContext();
     CHECK_NULL_VOID(progressContext);
     progressContext->UpdateOpacity(std::clamp(ratio, 0.0f, 1.0f));
