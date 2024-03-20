@@ -116,10 +116,34 @@ public:
 
     bool FireOnBackPressedEvent()
     {
-        if (onBackPressedEvent_) {
-            return onBackPressedEvent_();
+        if (onBackPressedEvent_ && onBackPressedEvent_()) {
+            UIObserverHandler::GetInstance().NotifyNavigationStateChange(GetNavDestinationPattern(),
+                                                                         NavDestinationState::ON_BACKPRESS);
+            return true;
         }
         return false;
+    }
+
+    void FireOnAppear() override
+    {
+        UIObserverHandler::GetInstance().NotifyNavigationStateChange(GetNavDestinationPattern(),
+                                                                     NavDestinationState::ON_APPEAR);
+        if (onAppear_) {
+            auto onAppear = onAppear_;
+            onAppear();
+        }
+
+        if (onJSFrameNodeAppear_) {
+            auto onJSFrameNodeAppear = onJSFrameNodeAppear_;
+            onJSFrameNodeAppear();
+        }
+    }
+
+    void FireOnDisappear() override
+    {
+        UIObserverHandler::GetInstance().NotifyNavigationStateChange(GetNavDestinationPattern(),
+                                                                     NavDestinationState::ON_DISAPPEAR);
+        EventHub::FireOnDisappear();
     }
 
     void SetOnReady(const std::function<void(RefPtr<NavDestinationContext>)>& onReady)

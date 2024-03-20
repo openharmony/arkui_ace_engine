@@ -171,13 +171,16 @@ public:
         return navigationNode_.Upgrade();
     }
 
-    void OnAttachToMainTree() override;
-
     void DumpInfo() override;
 
     uint64_t GetNavDestinationId() const
     {
         return navDestinationId_;
+    }
+
+    void SetNavigationNode(const RefPtr<UINode>& navigationNode)
+    {
+        navigationNode_ = AceType::WeakClaim(RawPtr(navigationNode));
     }
 
 private:
