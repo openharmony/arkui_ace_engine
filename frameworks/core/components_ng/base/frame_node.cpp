@@ -269,6 +269,17 @@ public:
         }
     }
 
+    void RecycleItemsByIndex(uint32_t start, uint32_t end)
+    {
+        for (auto it = partFrameNodeChildren_.begin(); it != partFrameNodeChildren_.end();) {
+            if (it->first >= start && it->first < end) {
+                it = partFrameNodeChildren_.erase(it);
+            } else {
+                it++;
+            }
+        }
+    }
+
     void RemoveAllChildInRenderTree()
     {
         SetAllChildrenInActive();
@@ -3148,6 +3159,11 @@ void FrameNode::RemoveAllChildInRenderTree()
 void FrameNode::SetActiveChildRange(int32_t start, int32_t end)
 {
     frameProxy_->SetActiveChildRange(start, end);
+}
+
+void FrameNode::RecycleItemsByIndex(int32_t start, int32_t end)
+{
+    frameProxy_->RecycleItemsByIndex(start, end);
 }
 
 void FrameNode::RemoveChildInRenderTree(uint32_t index)
