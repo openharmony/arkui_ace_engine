@@ -18,6 +18,7 @@
 #include "base/utils/utils.h"
 #include "core/components/common/properties/state_attributes.h"
 #include "core/components_ng/base/group_node.h"
+#include "core/components_ng/base/ui_node.h"
 #include "core/components_ng/layout/layout_property.h"
 #include "core/components_ng/pattern/custom/custom_node.h"
 #include "core/components_ng/syntax/for_each_node.h"
