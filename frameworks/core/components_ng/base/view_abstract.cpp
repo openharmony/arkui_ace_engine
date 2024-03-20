@@ -2147,8 +2147,8 @@ void ViewAbstract::SetKeyboardShortcut(const std::string &value, const std::vect
     CHECK_NULL_VOID(eventHub);
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
-    if (value.empty() || (keys.size() == 0 && value.length() == 1)) {
-        eventHub->SetKeyboardShortcut("", 0, nullptr);
+    if (value.empty() || keys.empty()) {
+        eventHub->ClearSingleKeyboardShortcut();
         return;
     }
     auto key = eventManager->GetKeyboardShortcutKeys(keys);
@@ -2931,8 +2931,8 @@ void ViewAbstract::SetKeyboardShortcut(FrameNode* frameNode, const std::string& 
     CHECK_NULL_VOID(eventHub);
     CHECK_NULL_VOID(frameNode);
     auto frameNodeRef = AceType::Claim<FrameNode>(frameNode);
-    if (value.empty() || (keys.empty() && value.length() == 1)) {
-        eventHub->SetKeyboardShortcut("", 0, nullptr);
+    if (value.empty() || keys.empty()) {
+        eventHub->ClearSingleKeyboardShortcut();
         return;
     }
     auto key = eventManager->GetKeyboardShortcutKeys(keys);

@@ -47,7 +47,7 @@ public:
     bool NotifyFocusStateSync(bool focusState) override;
     bool NotifyBackPressedSync() override;
     bool NotifyPointerEventSync(const std::shared_ptr<OHOS::MMI::PointerEvent>& pointerEvent) override;
-    bool NotifyKeyEventSync(const std::shared_ptr<OHOS::MMI::KeyEvent>& keyEvent) override;
+    bool NotifyKeyEventSync(const std::shared_ptr<OHOS::MMI::KeyEvent>& keyEvent, bool isPreIme) override;
     bool NotifyAxisEventSync(const std::shared_ptr<OHOS::MMI::AxisEvent>& axisEvent) override;
 
     // Asynchronous interface for event notify

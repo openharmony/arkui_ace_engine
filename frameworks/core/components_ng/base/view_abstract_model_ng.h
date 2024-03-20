@@ -791,6 +791,13 @@ public:
         ViewAbstract::SetOnKeyEvent(std::move(onKeyCallback));
     }
 
+    void SetOnKeyPreIme(OnKeyPreImeFunc&& onKeyCallback) override
+    {
+        auto focusHub = ViewStackProcessor::GetInstance()->GetOrCreateMainFrameNodeFocusHub();
+        CHECK_NULL_VOID(focusHub);
+        focusHub->SetOnKeyPreImeCallback(std::move(onKeyCallback));
+    }
+
     void SetOnMouse(OnMouseEventFunc&& onMouseEventFunc) override
     {
         ViewAbstract::SetOnMouse(std::move(onMouseEventFunc));
@@ -1093,6 +1100,13 @@ public:
     void DisableOnKeyEvent() override
     {
         ViewAbstract::DisableOnKeyEvent();
+    }
+
+    void DisableOnKeyPreIme() override
+    {
+        auto focusHub = ViewStackProcessor::GetInstance()->GetOrCreateMainFrameNodeFocusHub();
+        CHECK_NULL_VOID(focusHub);
+        focusHub->ClearOnKeyPreIme();
     }
 
     void DisableOnHover() override

@@ -40,6 +40,10 @@ struct KeyboardShortcut {
     std::string value;
     uint8_t keys = 0;
     std::function<void()> onKeyboardShortcutAction = nullptr;
+    bool IsEqualTrigger(const KeyboardShortcut& other)
+    {
+        return (keys == other.keys) && (value == other.value);
+    }
 };
 
 enum class DragFuncType {
@@ -397,19 +401,28 @@ public:
     void SetKeyboardShortcut(
         const std::string& value, uint8_t keys, const std::function<void()>& onKeyboardShortcutAction)
     {
-        if (value.empty() && keys == 0) {
-            if (keyboardShortcut_.size() == 1) {
-                keyboardShortcut_.clear();
-            }
-            return;
-        }
         KeyboardShortcut keyboardShortcut;
         for (auto&& ch : value) {
             keyboardShortcut.value.push_back(static_cast<char>(std::toupper(ch)));
         }
         keyboardShortcut.keys = keys;
         keyboardShortcut.onKeyboardShortcutAction = onKeyboardShortcutAction;
+
+        for (auto &shortCut: keyboardShortcut_) {
+            if (shortCut.IsEqualTrigger(keyboardShortcut)) {
+                shortCut.onKeyboardShortcutAction = onKeyboardShortcutAction;
+                return;
+            }
+        }
         keyboardShortcut_.emplace_back(keyboardShortcut);
+    }
+
+    
+    void ClearSingleKeyboardShortcut()
+    {
+        if (keyboardShortcut_.size() == 1) {
+            keyboardShortcut_.clear();
+        }
     }
 
     std::vector<KeyboardShortcut>& GetKeyboardShortcut()

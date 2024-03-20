@@ -196,8 +196,8 @@ private:
     void HandleTouchEvent(const TouchEventInfo& info);
     void HandleMouseEvent(const MouseInfo& info);
     void HandleHoverEvent(bool isHover);
-    void DispatchKeyEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent);
-    bool DispatchKeyEventSync(const std::shared_ptr<MMI::KeyEvent>& keyEvent);
+    void DispatchKeyEvent(const KeyEvent& event);
+    bool DispatchKeyEventSync(const KeyEvent& event);
     void DispatchFocusActiveEvent(bool isFocusActive);
     void DispatchFocusState(bool focusState);
     void DispatchPointerEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent);

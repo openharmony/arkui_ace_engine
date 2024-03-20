@@ -7080,6 +7080,7 @@ void JSViewAbstract::JSBind(BindingTarget globalObj)
     JSClass<JSViewAbstract>::StaticMethod("grayscale", &JSViewAbstract::JsGrayScale);
     JSClass<JSViewAbstract>::StaticMethod("focusable", &JSViewAbstract::JsFocusable);
     JSClass<JSViewAbstract>::StaticMethod("onKeyEvent", &JSViewAbstract::JsOnKeyEvent);
+    JSClass<JSViewAbstract>::StaticMethod("onKeyPreIme", &JSInteractableView::JsOnKeyPreIme);
     JSClass<JSViewAbstract>::StaticMethod("onFocusMove", &JSViewAbstract::JsOnFocusMove);
     JSClass<JSViewAbstract>::StaticMethod("onFocus", &JSViewAbstract::JsOnFocus);
     JSClass<JSViewAbstract>::StaticMethod("onBlur", &JSViewAbstract::JsOnBlur);
@@ -8232,18 +8233,22 @@ void JSViewAbstract::JsKeyboardShortcut(const JSCallbackInfo& info)
         return;
     }
     if ((!info[0]->IsString() && !info[0]->IsNumber()) || !info[1]->IsArray()) {
-        ViewAbstractModel::GetInstance()->SetKeyboardShortcut("", std::vector<ModifierKey>(), nullptr);
+        // clear shortcut key
+        ViewAbstractModel::GetInstance()->SetKeyboardShortcut({}, {}, nullptr);
         return;
     }
 
     std::string value;
     if (info[0]->IsString()) {
+        // common letter/number/symbol
         value = info[0]->ToString();
-        if (value.empty() || value.size() > 1) {
-            ViewAbstractModel::GetInstance()->SetKeyboardShortcut("", std::vector<ModifierKey>(), nullptr);
+        if (value.size() != 1) {
+            // clear shortcut key
+            ViewAbstractModel::GetInstance()->SetKeyboardShortcut({}, {}, nullptr);
             return;
         }
     } else {
+        // function keys such as F1-F10/ESC
         FunctionKey functionkey = static_cast<FunctionKey>(info[0]->ToNumber<int32_t>());
         value = GetFunctionKeyName(functionkey);
     }

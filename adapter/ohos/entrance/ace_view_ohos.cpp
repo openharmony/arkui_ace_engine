@@ -211,11 +211,12 @@ void AceViewOhos::DispatchEventToPerf(const std::shared_ptr<MMI::KeyEvent>& keyE
     pMonitor->RecordInputEvent(inputType, sourceType, inputTime);
 }
 
-bool AceViewOhos::DispatchKeyEvent(AceViewOhos* view, const std::shared_ptr<MMI::KeyEvent>& keyEvent)
+bool AceViewOhos::DispatchKeyEvent(AceViewOhos* view,
+    const std::shared_ptr<MMI::KeyEvent>& keyEvent, bool isPreIme)
 {
     CHECK_NULL_RETURN(view, false);
     DispatchEventToPerf(keyEvent);
-    return view->ProcessKeyEvent(keyEvent);
+    return view->ProcessKeyEvent(keyEvent, isPreIme);
 }
 
 bool AceViewOhos::DispatchRotationEvent(AceViewOhos* view, float rotationValue)
@@ -390,11 +391,12 @@ void AceViewOhos::ProcessAxisEvent(const std::shared_ptr<MMI::PointerEvent>& poi
     axisEventCallback_(event, markProcess, node);
 }
 
-bool AceViewOhos::ProcessKeyEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent)
+bool AceViewOhos::ProcessKeyEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent, bool isPreIme)
 {
     CHECK_NULL_RETURN(keyEventCallback_, false);
     KeyEvent event;
     ConvertKeyEvent(keyEvent, event);
+    event.isPreIme = isPreIme;
     return keyEventCallback_(event);
 }
 

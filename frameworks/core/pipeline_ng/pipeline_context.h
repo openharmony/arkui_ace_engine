@@ -687,6 +687,8 @@ private:
 
     void InspectDrew();
 
+    bool TriggerKeyEventDispatch(const KeyEvent& event);
+
     void FlushBuildFinishCallbacks();
 
     void DumpPipelineInfo() const;

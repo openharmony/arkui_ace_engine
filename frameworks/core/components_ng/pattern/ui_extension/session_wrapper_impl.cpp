@@ -324,11 +324,11 @@ bool SessionWrapperImpl::NotifyPointerEventSync(const std::shared_ptr<OHOS::MMI:
     return false;
 }
 
-bool SessionWrapperImpl::NotifyKeyEventSync(const std::shared_ptr<OHOS::MMI::KeyEvent>& keyEvent)
+bool SessionWrapperImpl::NotifyKeyEventSync(const std::shared_ptr<OHOS::MMI::KeyEvent>& keyEvent, bool isPreIme)
 {
     CHECK_NULL_RETURN(session_, false);
     bool isConsumed = false;
-    session_->TransferKeyEventForConsumed(keyEvent, isConsumed);
+    session_->TransferKeyEventForConsumed(keyEvent, isConsumed, isPreIme);
     UIEXT_LOGD("The key evnet is notified to the provider and %{public}s consumed.", isConsumed ? "is" : "is not");
     return isConsumed;
 }

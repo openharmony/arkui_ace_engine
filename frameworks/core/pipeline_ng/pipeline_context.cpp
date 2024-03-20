@@ -2299,25 +2299,16 @@ bool PipelineContext::ChangeMouseStyle(int32_t nodeId, MouseFormat format)
     return mouseStyle->ChangePointerStyle(GetWindowId(), format);
 }
 
-bool PipelineContext::OnKeyEvent(const KeyEvent& event)
+bool PipelineContext::TriggerKeyEventDispatch(const KeyEvent& event)
 {
-    eventManager_->SetPressedKeyCodes(event.pressedCodes);
-    CHECK_NULL_RETURN(eventManager_, false);
-    if (event.action == KeyAction::DOWN) {
-        eventManager_->DispatchKeyboardShortcut(event);
-    }
-    if (event.code == KeyCode::KEY_ESCAPE) {
-        auto manager = GetDragDropManager();
-        if (manager && manager->IsMsdpDragging()) {
-            manager->SetIsDragCancel(true);
-            manager->OnDragEnd(PointerEvent(0, 0), "");
-            manager->SetIsDragCancel(false);
-            return true;
-        }
+    auto curFocusView = focusManager_ ? focusManager_->GetLastFocusView().Upgrade() : nullptr;
+    auto curEntryFocusView = curFocusView ? curFocusView->GetEntryFocusView() : nullptr;
+    auto curEntryFocusViewFrame = curEntryFocusView ? curEntryFocusView->GetFrameNode() : nullptr;
+    if (event.isPreIme) {
+        return eventManager_->DispatchKeyEventNG(event, curEntryFocusViewFrame);
     }
 
     auto isKeyTabDown = event.action == KeyAction::DOWN && event.IsKey({ KeyCode::KEY_TAB });
-    auto curFocusView = focusManager_ ? focusManager_->GetLastFocusView().Upgrade() : nullptr;
     auto isViewRootScopeFocused = curFocusView ? curFocusView->GetIsViewRootScopeFocused() : true;
     isTabJustTriggerOnKeyEvent_ = false;
     if (isKeyTabDown && isViewRootScopeFocused && curFocusView) {
@@ -2330,24 +2321,52 @@ bool PipelineContext::OnKeyEvent(const KeyEvent& event)
     // If return true. This tab key will just trigger onKeyEvent process.
     bool isHandleFocusActive = isKeyTabDown && SetIsFocusActive(true);
     isTabJustTriggerOnKeyEvent_ = isTabJustTriggerOnKeyEvent_ || isHandleFocusActive;
+    if (eventManager_->DispatchTabIndexEventNG(event, curEntryFocusViewFrame)) {
+        return true;
+    }
+    return eventManager_->DispatchKeyEventNG(event, curEntryFocusViewFrame);
+}
 
-    auto curEntryFocusView = curFocusView ? curFocusView->GetEntryFocusView() : nullptr;
-    auto curEntryFocusViewFrame = curEntryFocusView ? curEntryFocusView->GetFrameNode() : nullptr;
-    if (!eventManager_->DispatchTabIndexEventNG(event, curEntryFocusViewFrame)) {
-        auto result = eventManager_->DispatchKeyEventNG(event, curEntryFocusViewFrame);
-        if (!result && event.code == KeyCode::KEY_ESCAPE && event.action == KeyAction::DOWN) {
-            CHECK_NULL_RETURN(overlayManager_, false);
-            auto currentContainer = Container::Current();
-            if (currentContainer->IsSubContainer() || currentContainer->IsDialogContainer()) {
-                return overlayManager_->RemoveOverlayInSubwindow();
-            } else {
-                return overlayManager_->RemoveOverlay(false);
-            }
-        } else {
-            return result;
+bool PipelineContext::OnKeyEvent(const KeyEvent& event)
+{
+    CHECK_NULL_RETURN(eventManager_, false);
+    eventManager_->SetPressedKeyCodes(event.pressedCodes);
+
+    // onKeyPreIme
+    if (event.isPreIme) {
+        if (TriggerKeyEventDispatch(event)) {
+            return true;
+        }
+        return eventManager_->DispatchKeyboardShortcut(event);
+    }
+
+    // process drag cancel
+    if (event.code == KeyCode::KEY_ESCAPE) {
+        auto manager = GetDragDropManager();
+        if (manager && manager->IsMsdpDragging()) {
+            manager->SetIsDragCancel(true);
+            manager->OnDragEnd(PointerEvent(0, 0), "");
+            manager->SetIsDragCancel(false);
+            return true;
         }
     }
-    return true;
+
+    // OnKeyEvent
+    if (TriggerKeyEventDispatch(event)) {
+        return true;
+    }
+
+    // process exit overlay
+    if (event.code == KeyCode::KEY_ESCAPE && event.action == KeyAction::DOWN) {
+        CHECK_NULL_RETURN(overlayManager_, false);
+        auto currentContainer = Container::Current();
+        if (currentContainer->IsSubContainer() || currentContainer->IsDialogContainer()) {
+            return overlayManager_->RemoveOverlayInSubwindow();
+        } else {
+            return overlayManager_->RemoveOverlay(false);
+        }
+    }
+    return false;
 }
 
 bool PipelineContext::RequestFocus(const std::string& targetNodeId)
