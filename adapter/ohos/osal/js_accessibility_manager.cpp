@@ -2062,7 +2062,6 @@ bool JsAccessibilityManager::SendAccessibilitySyncEvent(
     }
     TAG_LOGI(AceLogTag::ACE_ACCESSIBILITY, "send accessibility event:%{public}d accessibilityId:%{public}" PRId64,
         eventInfo.GetEventType(), eventInfo.GetAccessibilityId());
-    const AccessibilityElementInfo& elementInfo = eventInfo.GetElementInfo();
     return client->SendEvent(eventInfo);
 }
 
@@ -2070,7 +2069,7 @@ bool JsAccessibilityManager::TransferAccessibilityAsyncEvent(
     const AccessibilityEventInfo& eventInfo, int64_t uiExtensionOffset)
 {
 #ifdef WINDOW_SCENE_SUPPORTED
-    
+
     auto client = AccessibilitySystemAbilityClient::GetInstance();
     CHECK_NULL_RETURN(client, false);
     bool isEnabled = false;

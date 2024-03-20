@@ -24,6 +24,7 @@ void AccessibilitySessionAdapterUIExtension::TransferHoverEvent(const PointF &po
     AccessibilityHoverEventType eventType, TimeStamp time)
 {
     auto sessionWrapper = sessionWrapper_.Upgrade();
+    CHECK_NULL_VOID(sessionWrapper);
     int64_t timeMs = std::chrono::time_point_cast<std::chrono::microseconds>(time).time_since_epoch().count();
     TAG_LOGI(AceLogTag::ACE_ACCESSIBILITY, "TransferHoverEvent point:%{public}s, sourceType:%{public}d, "
         "eventType:%{public}d, timeMs:%{public}" PRId64,
