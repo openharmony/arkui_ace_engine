@@ -23,13 +23,14 @@
 #include "base/utils/utils.h"
 #include "core/common/container.h"
 #include "core/components_ng/base/observer_handler.h"
-#include "core/components_ng/pattern/scrollable/scrollable.h"
 #include "core/components_ng/manager/select_overlay/select_overlay_scroll_notifier.h"
 #include "core/components_ng/pattern/scroll/effect/scroll_fade_effect.h"
 #include "core/components_ng/pattern/scroll/scroll_pattern.h"
 #include "core/components_ng/pattern/scroll/scroll_spring_effect.h"
 #include "core/components_ng/pattern/scrollable/nestable_scroll_container.h"
+#include "core/components_ng/pattern/scrollable/scrollable.h"
 #include "core/components_ng/pattern/scrollable/scrollable_event_hub.h"
+#include "core/components_ng/pattern/scrollable/scrollable_properties.h"
 #include "core/pipeline/pipeline_base.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
@@ -187,18 +188,28 @@ bool ScrollablePattern::OnScrollPosition(double& offset, int32_t source)
     return true;
 }
 
+namespace {
+inline bool FromDrag(int32_t source)
+{
+    return source == SCROLL_FROM_UPDATE || source == SCROLL_FROM_AXIS;
+}
+} // namespace
+
 bool ScrollablePattern::NeedSplitScroll(OverScrollOffset& overOffsets, int32_t source)
 {
     return GreatNotEqual(overOffsets.start, 0.0) && refreshCoordination_ && refreshCoordination_->InCoordination() &&
            !isRefreshInReactive_ &&
-           (source == SCROLL_FROM_UPDATE || source == SCROLL_FROM_AXIS || source == SCROLL_FROM_ANIMATION_SPRING ||
+           (FromDrag(source) || source == SCROLL_FROM_ANIMATION_SPRING ||
                source == SCROLL_FROM_ANIMATION) &&
-           (axis_ == Axis::VERTICAL);
+           axis_ == Axis::VERTICAL;
 }
 
 RefreshCoordinationMode ScrollablePattern::CoordinateWithRefresh(double& offset, int32_t source, bool isAtTop)
 {
-    auto coordinationMode = RefreshCoordinationMode::UNKNOWN;
+    // use first scroll update to trigger scrollStart. Ignore SCROLL_FROM_START.
+    if (source == SCROLL_FROM_START) {
+        return RefreshCoordinationMode::UNKNOWN;
+    }
     if (!refreshCoordination_) {
         CreateRefreshCoordination();
     }
@@ -208,44 +219,38 @@ RefreshCoordinationMode ScrollablePattern::CoordinateWithRefresh(double& offset,
         offset = offset - overOffsets.start;
         OnScrollCallback(offset, source);
         isRefreshInReactive_ = true;
-        if (refreshCoordination_) {
-            refreshCoordination_->OnScrollStart(
-                source == SCROLL_FROM_UPDATE || source == SCROLL_FROM_AXIS, GetVelocity());
-        }
+        refreshCoordination_->OnScrollStart(FromDrag(source), GetVelocity());
     }
-    if (IsAtTop() &&
-        (Positive(offset) || (Negative(offset) && refreshCoordination_ && refreshCoordination_->IsRefreshInScroll())) &&
-        (source == SCROLL_FROM_UPDATE || source == SCROLL_FROM_AXIS || source == SCROLL_FROM_ANIMATION) &&
+    bool hasScrollSpace = Positive(offset) || (Negative(offset) && refreshCoordination_->IsRefreshInScroll());
+    if (IsAtTop() && hasScrollSpace &&
+        (FromDrag(source) || source == SCROLL_FROM_ANIMATION) &&
         !isRefreshInReactive_ && (axis_ == Axis::VERTICAL)) {
         isRefreshInReactive_ = true;
-        if (refreshCoordination_) {
-            refreshCoordination_->OnScrollStart(
-                source == SCROLL_FROM_UPDATE || source == SCROLL_FROM_AXIS, GetVelocity());
-        }
+        refreshCoordination_->OnScrollStart(FromDrag(source), GetVelocity());
     }
     if (Container::LessThanAPIVersion(PlatformVersion::VERSION_ELEVEN) &&
-        (refreshCoordination_ && refreshCoordination_->InCoordination()) && source != SCROLL_FROM_UPDATE &&
+        refreshCoordination_->InCoordination() && source != SCROLL_FROM_UPDATE &&
         source != SCROLL_FROM_AXIS && isRefreshInReactive_) {
         isRefreshInReactive_ = false;
         refreshCoordination_->OnScrollEnd(GetVelocity());
     }
-    if (refreshCoordination_ && refreshCoordination_->InCoordination() && isRefreshInReactive_) {
+    auto mode = RefreshCoordinationMode::UNKNOWN;
+    if (refreshCoordination_->InCoordination() && isRefreshInReactive_) {
         if (!refreshCoordination_->OnScroll(
                 GreatNotEqual(overOffsets.start, 0.0) ? overOffsets.start : offset, GetVelocity())) {
             isRefreshInReactive_ = false;
-            coordinationMode = RefreshCoordinationMode::SCROLLABLE_SCROLL;
         }
         if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
-            coordinationMode = RefreshCoordinationMode::REFRESH_SCROLL;
+            mode = RefreshCoordinationMode::REFRESH_SCROLL;
         } else {
             if (scrollEffect_ && scrollEffect_->IsSpringEffect()) {
-                coordinationMode = RefreshCoordinationMode::SCROLLABLE_SCROLL;
+                mode = RefreshCoordinationMode::SCROLLABLE_SCROLL;
             } else {
-                coordinationMode = RefreshCoordinationMode::REFRESH_SCROLL;
+                mode = RefreshCoordinationMode::REFRESH_SCROLL;
             }
         }
     }
-    return coordinationMode;
+    return mode;
 }
 
 ModalSheetCoordinationMode ScrollablePattern::CoordinateWithSheet(double& offset, int32_t source, bool isAtTop)
@@ -1588,6 +1593,7 @@ void ScrollablePattern::ProcessSpringEffect(float velocity)
 {
     CHECK_NULL_VOID(InstanceOf<ScrollSpringEffect>(scrollEffect_));
     if (!OutBoundaryCallback() && !GetCanOverScroll()) {
+        OnScrollEnd();
         return;
     }
     CHECK_NULL_VOID(scrollableEvent_);
