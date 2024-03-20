@@ -26,6 +26,7 @@
 #include "core/components/declaration/swiper/swiper_declaration.h"
 #include "core/components_ng/base/view_abstract_model.h"
 #include "core/components_ng/pattern/scrollable/scrollable_properties.h"
+#include "core/components_ng/pattern/swiper/swiper_content_transition_proxy.h"
 #include "core/components_v2/inspector/inspector_composed_component.h"
 
 namespace OHOS::Ace {
@@ -77,6 +78,8 @@ using AnimationStartEventPtr = std::shared_ptr<AnimationStartEvent>;
 using AnimationEndEvent = std::function<void(int32_t index, const AnimationCallbackInfo& info)>;
 using AnimationEndEventPtr = std::shared_ptr<AnimationEndEvent>;
 using GestureSwipeEvent = std::function<void(int32_t index, const AnimationCallbackInfo& info)>;
+using ContentDidScrollEvent =
+    std::function<void(int32_t selectedIndex, int32_t index, float position,float mainLength)>;
 
 class ACE_EXPORT SwiperModel {
 public:
@@ -127,6 +130,8 @@ public:
     virtual void SetHoverShow(bool hoverShow) {}
     virtual void SetNestedScroll(const NestedScrollOptions& nestedOpt) {}
     virtual void SetSwipeByGroup(bool swipeByGroup) {}
+    virtual void SetCustomContentTransition(SwiperContentAnimatedTransition& transition) {}
+    virtual void SetOnContentDidScroll(ContentDidScrollEvent&& onContentDidScroll) {}
 private:
     static std::unique_ptr<SwiperModel> instance_;
     static std::mutex mutex_;

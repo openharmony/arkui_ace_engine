@@ -35,12 +35,14 @@
 #include "core/components/swiper/swiper_indicator_theme.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/scrollable/scrollable_properties.h"
+#include "core/components_ng/pattern/swiper/swiper_content_transition_proxy.h"
 #include "core/components_ng/pattern/swiper/swiper_model.h"
 #include "core/components_ng/pattern/swiper/swiper_model_ng.h"
 
 namespace OHOS::Ace {
 namespace {
 constexpr float ARROW_SIZE_COEFFICIENT = 0.75f;
+constexpr int32_t DEFAULT_CUSTOM_ANIMATION_TIMEOUT = 0;
 } // namespace
 std::unique_ptr<SwiperModel> SwiperModel::instance_ = nullptr;
 std::mutex SwiperModel::mutex_;
@@ -106,6 +108,7 @@ void JSSwiper::JsRemoteMessage(const JSCallbackInfo& info)
 
 void JSSwiper::JSBind(BindingTarget globalObj)
 {
+    JsSwiperContentTransitionProxy::JSBind(globalObj);
     JSClass<JSSwiper>::Declare("Swiper");
     MethodOptions opt = MethodOptions::NONE;
     JSClass<JSSwiper>::StaticMethod("create", &JSSwiper::Create, opt);
@@ -144,6 +147,8 @@ void JSSwiper::JSBind(BindingTarget globalObj)
     JSClass<JSSwiper>::StaticMethod("size", &JSSwiper::SetSize);
     JSClass<JSSwiper>::StaticMethod("displayArrow", &JSSwiper::SetDisplayArrow);
     JSClass<JSSwiper>::StaticMethod("nestedScroll", &JSSwiper::SetNestedScroll);
+    JSClass<JSSwiper>::StaticMethod("customContentTransition", &JSSwiper::SetCustomContentTransition);
+    JSClass<JSSwiper>::StaticMethod("onContentDidScroll", &JSSwiper::SetOnContentDidScroll);
     JSClass<JSSwiper>::InheritAndBind<JSContainerBase>(globalObj);
 }
 
@@ -1125,5 +1130,52 @@ void JSSwiper::SetNestedScroll(const JSCallbackInfo& args)
     nestedOpt.backward = mode;
     SwiperModel::GetInstance()->SetNestedScroll(nestedOpt);
     args.ReturnSelf();
+}
+
+void JSSwiper::SetCustomContentTransition(const JSCallbackInfo& info)
+{
+    if (info.Length() < 1 || !info[0]->IsObject()) {
+        return;
+    }
+
+    SwiperContentAnimatedTransition transitionInfo;
+    auto transitionObj = JSRef<JSObject>::Cast(info[0]);
+    JSRef<JSVal> timeoutProperty = transitionObj->GetProperty("timeout");
+    if (timeoutProperty->IsNumber()) {
+        auto timeout = timeoutProperty->ToNumber<int32_t>();
+        transitionInfo.timeout = timeout < 0 ? DEFAULT_CUSTOM_ANIMATION_TIMEOUT : timeout;
+    } else {
+        transitionInfo.timeout = DEFAULT_CUSTOM_ANIMATION_TIMEOUT;
+    }
+
+    JSRef<JSVal> transition = transitionObj->GetProperty("transition");
+    if (transition->IsFunction()) {
+        auto jsOnTransition = AceType::MakeRefPtr<JsSwiperFunction>(JSRef<JSFunc>::Cast(transition));
+        auto onTransition = [execCtx = info.GetExecutionContext(), func = std::move(jsOnTransition)](
+                                const RefPtr<SwiperContentTransitionProxy>& proxy) {
+            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+            ACE_SCORING_EVENT("Swiper.customContentTransition");
+            func->Execute(proxy);
+        };
+        transitionInfo.transition = std::move(onTransition);
+    }
+    SwiperModel::GetInstance()->SetCustomContentTransition(transitionInfo);
+}
+
+void JSSwiper::SetOnContentDidScroll(const JSCallbackInfo& info)
+{
+    if (info.Length() < 1 || !info[0]->IsFunction()) {
+        return;
+    }
+
+    auto contentDidScrollHandler = AceType::MakeRefPtr<JsSwiperFunction>(JSRef<JSFunc>::Cast(info[0]));
+    auto onContentDidScroll = [execCtx = info.GetExecutionContext(),
+                                func = std::move(contentDidScrollHandler)](
+                                int32_t selectedIndex, int32_t index, float position, float mainLength) {
+        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+        ACE_SCORING_EVENT("Swiper.onContentDidScroll");
+        func->Execute(selectedIndex, index, position, mainLength);
+    };
+    SwiperModel::GetInstance()->SetOnContentDidScroll(std::move(onContentDidScroll));
 }
 } // namespace OHOS::Ace::Framework
