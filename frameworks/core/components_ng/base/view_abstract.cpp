@@ -347,6 +347,19 @@ void ViewAbstract::SetBackgroundBlurStyle(const BlurStyleOption &bgBlurStyle)
     }
 }
 
+void ViewAbstract::SetForegroundEffect(float radius)
+{
+    if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
+        return;
+    }
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto target = frameNode->GetRenderContext();
+    if (target) {
+        target->UpdateForegroundEffect(radius);
+    }
+}
+
 void ViewAbstract::SetBackgroundEffect(const EffectOption &effectOption)
 {
     if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {

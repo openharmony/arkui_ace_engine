@@ -622,6 +622,13 @@ void RosenRenderContext::OnForegroundColorUpdate(const Color& value)
     RequestNextFrame();
 }
 
+void RosenRenderContext::OnForegroundEffectUpdate(float radius)
+{
+    CHECK_NULL_VOID(rsNode_);
+    rsNode_->SetForegroundEffectRadius(radius);
+    RequestNextFrame();
+}
+
 void RosenRenderContext::OnForegroundColorStrategyUpdate(const ForegroundColorStrategy& value)
 {
     CHECK_NULL_VOID(rsNode_);

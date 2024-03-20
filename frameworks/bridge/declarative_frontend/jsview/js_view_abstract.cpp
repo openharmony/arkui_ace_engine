@@ -2389,6 +2389,24 @@ void JSViewAbstract::ParseEffectOption(const JSRef<JSObject>& jsOption, EffectOp
     effectOption = { radius, saturation, brightness, color, adaptiveColor, blurOption };
 }
 
+void JSViewAbstract::JsForegroundEffect(const JSCallbackInfo& info)
+{
+    LOGW("wjh in JsForegroundEffect");
+    if (info.Length() == 0) {
+        return;
+    }
+    double radius = 0.0;
+    if (info[0]->IsObject()) {
+        JSRef<JSObject> jsOption = JSRef<JSObject>::Cast(info[0]);
+        ParseJsDouble(jsOption->GetProperty("radius"), radius);
+    }
+    if(LessNotEqual(0.0, radius)) {
+        radius = 0.0;
+    }
+    radius = GreatOrEqual(0.0, radius) ? radius : 0.0;
+    ViewAbstractModel::GetInstance()->SetForegroundEffect(radius);
+}
+
 void JSViewAbstract::JsBackgroundEffect(const JSCallbackInfo& info)
 {
     if (info.Length() == 0) {
@@ -7038,6 +7056,7 @@ void JSViewAbstract::JSBind(BindingTarget globalObj)
     JSClass<JSViewAbstract>::StaticMethod("paddingRight", &JSViewAbstract::SetPaddingRight, opt);
 
     JSClass<JSViewAbstract>::StaticMethod("foregroundColor", &JSViewAbstract::JsForegroundColor);
+    JSClass<JSViewAbstract>::StaticMethod("foregroundEffect", &JSViewAbstract::JsForegroundEffect);
     JSClass<JSViewAbstract>::StaticMethod("backgroundColor", &JSViewAbstract::JsBackgroundColor);
     JSClass<JSViewAbstract>::StaticMethod("backgroundImage", &JSViewAbstract::JsBackgroundImage);
     JSClass<JSViewAbstract>::StaticMethod("backgroundImageSize", &JSViewAbstract::JsBackgroundImageSize);

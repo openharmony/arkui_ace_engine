@@ -1086,7 +1086,12 @@ public:
     {
         ViewAbstract::SetForegroundColorStrategy(strategy);
     }
-
+    
+    void SetForegroundEffect(float radius) override
+    {
+        ViewAbstract::SetForegroundEffect(radius);
+    }
+    
     void DisableOnClick() override
     {
         ViewAbstract::DisableOnClick();

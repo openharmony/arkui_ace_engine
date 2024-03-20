@@ -134,6 +134,7 @@ public:
     static void SetBackgroundBlurStyle(const BlurStyleOption &bgBlurStyle);
     static void SetBackgroundEffect(const EffectOption &effectOption);
     static void SetBackgroundImageResizableSlice(const ImageResizableSlice& slice);
+    static void SetForegroundEffect(float radius);
     static void SetForegroundBlurStyle(const BlurStyleOption &fgBlurStyle);
     static void SetSphericalEffect(double radio);
     static void SetPixelStretchEffect(PixStretchEffectOption &option);
