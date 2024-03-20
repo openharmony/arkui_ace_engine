@@ -64,7 +64,8 @@ NG::OffsetF TextFieldController::GetCaretPosition()
     return OffsetF(ERROR, ERROR);
 }
 
-void TextFieldController::SetTextSelection(int32_t selectionStart, int32_t selectionEnd)
+void TextFieldController::SetTextSelection(
+    int32_t selectionStart, int32_t selectionEnd, const std::optional<SelectionOptions>& options)
 {
     if (selectionEnd < selectionStart) {
         return;
@@ -75,7 +76,7 @@ void TextFieldController::SetTextSelection(int32_t selectionStart, int32_t selec
     int32_t length = static_cast<int32_t>(wideText.length());
     selectionStart = std::clamp(selectionStart, 0, length);
     selectionEnd = std::clamp(selectionEnd, 0, length);
-    textFieldPattern->SetSelectionFlag(selectionStart, selectionEnd);
+    textFieldPattern->SetSelectionFlag(selectionStart, selectionEnd, options);
 }
 
 Rect TextFieldController::GetTextContentRect()

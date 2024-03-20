@@ -4692,7 +4692,8 @@ void TextFieldPattern::SetCaretPosition(int32_t position)
     tmpHost->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
-void TextFieldPattern::SetSelectionFlag(int32_t selectionStart, int32_t selectionEnd)
+void TextFieldPattern::SetSelectionFlag(
+    int32_t selectionStart, int32_t selectionEnd, const std::optional<SelectionOptions>& options)
 {
     if (!HasFocus()) {
         return;
@@ -4709,6 +4710,18 @@ void TextFieldPattern::SetSelectionFlag(int32_t selectionStart, int32_t selectio
     }
     if (RequestKeyboard(false, true, true)) {
         NotifyOnEditChanged(true);
+    }
+
+    if (options.has_value()) {
+        if (options.value().menuPolicy == MenuPolicy::ALWAYS) {
+            SetIsSingleHandle(!IsSelected());
+            ProcessOverlay(true, true);
+            UpdateSelectMenuVisibility(true);
+        } else if (options.value().menuPolicy == MenuPolicy::NEVER) {
+            SetIsSingleHandle(!IsSelected());
+            UpdateSelectMenuVisibility(false);
+            ProcessOverlay(true, true, false);
+        }
     }
     auto host = GetHost();
     CHECK_NULL_VOID(host);
@@ -5733,7 +5746,7 @@ void TextFieldPattern::SetAccessibilityAction()
     accessibilityProperty->SetActionSetSelection([weakPtr = WeakClaim(this)](int32_t start, int32_t end) {
         const auto& pattern = weakPtr.Upgrade();
         CHECK_NULL_VOID(pattern);
-        pattern->SetSelectionFlag(start, end);
+        pattern->SetSelectionFlag(start, end, std::nullopt);
     });
 
     accessibilityProperty->SetActionCopy([weakPtr = WeakClaim(this)]() {
@@ -5767,7 +5780,7 @@ void TextFieldPattern::SetAccessibilityAction()
         auto current = pattern->selectController_->GetEndIndex();
         pattern->SetInSelectMode(SelectionMode::NONE);
         pattern->UpdateSelection(current);
-        pattern->SetSelectionFlag(current, current);
+        pattern->SetSelectionFlag(current, current, std::nullopt);
         pattern->CloseSelectOverlay(true);
         pattern->StartTwinkling();
     });
