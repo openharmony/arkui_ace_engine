@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -61,17 +61,8 @@ void IndexerLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
                             : std::clamp(contentHeight, 0.0f, layoutConstraint.maxSize.Height());
     contentHeight = GreatNotEqual(contentHeight, actualHeight_) ? actualHeight_ : contentHeight;
     itemWidth_ = GreatOrEqual(actualWidth - horizontalPadding, 0.0f) ? actualWidth - horizontalPadding : 0.0f;
-    itemSizeRender_ =
-        GreatOrEqual(contentHeight - verticalPadding, 0.0f) ? (contentHeight - verticalPadding) / itemCount_ : 0.0f;
-    auto childLayoutConstraint = indexerLayoutProperty->CreateChildConstraint();
-    for (int32_t index = 0; index < itemCount_; index++) {
-        auto childWrapper = layoutWrapper->GetOrCreateChildByIndex(index);
-        CHECK_NULL_VOID(childWrapper);
-        childLayoutConstraint.UpdateSelfMarginSizeWithCheck(OptionalSizeF(itemWidth_, itemSizeRender_));
-        childWrapper->Measure(childLayoutConstraint);
-    }
+    auto childCount = layoutWrapper->GetTotalChildCount();
     if (indexerLayoutProperty->GetIsPopupValue(false)) {
-        auto childCount = layoutWrapper->GetTotalChildCount();
         auto childWrapper = layoutWrapper->GetOrCreateChildByIndex(childCount - 1);
         CHECK_NULL_VOID(childWrapper);
         auto childLayoutProperty = AceType::DynamicCast<LinearLayoutProperty>(childWrapper->GetLayoutProperty());
@@ -79,6 +70,16 @@ void IndexerLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
         auto layoutConstraint = childLayoutProperty->GetLayoutConstraint();
         layoutConstraint->Reset();
         childWrapper->Measure(layoutConstraint);
+        childCount--;
+    }
+    itemSizeRender_ = GreatOrEqual(contentHeight - verticalPadding, 0.0f) && childCount > 0
+                        ? (contentHeight - verticalPadding) / childCount : 0.0f;
+    auto childLayoutConstraint = indexerLayoutProperty->CreateChildConstraint();
+    for (int32_t index = 0; index < childCount; index++) {
+        auto childWrapper = layoutWrapper->GetOrCreateChildByIndex(index);
+        CHECK_NULL_VOID(childWrapper);
+        childLayoutConstraint.UpdateSelfMarginSizeWithCheck(OptionalSizeF(itemWidth_, itemSizeRender_));
+        childWrapper->Measure(childLayoutConstraint);
     }
     
     layoutWrapper->GetGeometryNode()->SetFrameSize(SizeF(actualWidth, actualHeight_));
