@@ -219,6 +219,11 @@ public:
         onControllerAttachedCallback_ = std::move(callback);
     }
 
+    void SetPermissionClipboardCallback(PermissionClipboardCallback&& Callback)
+    {
+        permissionClipboardCallback_ = std::move(Callback);
+    }
+
     OnControllerAttachedCallback GetOnControllerAttachedCallback()
     {
         return onControllerAttachedCallback_;
@@ -330,7 +335,10 @@ public:
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, OverScrollMode, int32_t);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, TextAutosizing, bool);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, MetaViewport, bool);
-    
+    ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, CopyOptionMode, int32_t);
+    ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, NativeEmbedModeEnabled, bool);
+    ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, NativeEmbedRuleTag, std::string);
+    ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, NativeEmbedRuleType, std::string);
     void RequestFullScreen();
     void ExitFullScreen();
     bool IsFullScreen() const
@@ -456,6 +464,10 @@ private:
     void InitSlideUpdateListener();
     void CalculateHorizontalDrawRect(const SizeF frameSize);
     void CalculateVerticalDrawRect(const SizeF frameSize);
+    void OnNativeEmbedModeEnabledUpdate(bool value);
+    void OnNativeEmbedRuleTagUpdate(const std::string& tag);
+    void OnNativeEmbedRuleTypeUpdate(const std::string& type);
+    void OnCopyOptionModeUpdate(const int32_t value);
     int onDragMoveCnt = 0;
     std::chrono::time_point<std::chrono::system_clock> firstMoveInTime;
     std::chrono::time_point<std::chrono::system_clock> preMoveInTime;
@@ -496,6 +508,7 @@ private:
     SetHapPathCallback setHapPathCallback_ = nullptr;
     JsProxyCallback jsProxyCallback_ = nullptr;
     OnControllerAttachedCallback onControllerAttachedCallback_ = nullptr;
+    PermissionClipboardCallback permissionClipboardCallback_ = nullptr;
     RefPtr<TouchEventImpl> touchEvent_;
     RefPtr<InputEvent> mouseEvent_;
     RefPtr<InputEvent> hoverEvent_;
