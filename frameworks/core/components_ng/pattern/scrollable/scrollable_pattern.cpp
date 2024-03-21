@@ -1836,7 +1836,7 @@ bool ScrollablePattern::HandleOverScroll(float velocity)
     // parent handle over scroll first
     if ((velocity < 0 && (nestedScroll.forward == NestedScrollMode::SELF_FIRST)) ||
         (velocity > 0 && (nestedScroll.backward == NestedScrollMode::SELF_FIRST)) ||
-        !InstanceOf<ScrollablePattern>(parent)) {
+        (!InstanceOf<ScrollablePattern>(parent) && !IsOutOfBoundary())) {
         if (parent->HandleScrollVelocity(velocity)) {
             OnScrollEnd();
             return true;
