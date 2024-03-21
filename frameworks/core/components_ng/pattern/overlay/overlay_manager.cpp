@@ -2170,7 +2170,7 @@ bool OverlayManager::RemoveModalInOverlay()
     auto rootNode = FindWindowScene(topModalNode);
     CHECK_NULL_RETURN(rootNode, true);
     auto overlay = DynamicCast<FrameNode>(rootNode->GetLastChild());
-    if (overlay && overlay->GetFirstChild() != topModalNode) {
+    if (overlay && overlay->GetTag() == V2::SHEET_WRAPPER_TAG && overlay->GetFirstChild() != topModalNode) {
         return true;
     }
     ModalPageLostFocus(topModalNode);
