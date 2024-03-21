@@ -270,7 +270,7 @@ export struct SubHeader {
     Column() {
       Text($$.content)
         .primaryTitleStyles({
-          fontWeight: FontWeight.Medium,
+          fontWeight: FontWeight.Bold,
           maxLines: SINGLE_LINE_NUM,
           alignment: Alignment.Start,
         })
@@ -348,7 +348,7 @@ export struct SubHeader {
     Column() {
       Text($$.content)
         .primaryTitleStyles({
-          fontWeight: FontWeight.Medium,
+          fontWeight: FontWeight.Bold,
           maxLines: DOUBLE_LINE_NUM,
           alignment: Alignment.Start,
         })

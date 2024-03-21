@@ -638,7 +638,7 @@ export class SubHeader extends ViewPU {
     this.observeComponentCreation2((w8, x8) => {
       Text.create(p8.content);
       __Text__primaryTitleStyles({
-        fontWeight: FontWeight.Medium,
+        fontWeight: FontWeight.Bold,
         maxLines: SINGLE_LINE_NUM,
         alignment: Alignment.Start,
       });
@@ -743,7 +743,7 @@ export class SubHeader extends ViewPU {
     this.observeComponentCreation2((p7, q7) => {
       Text.create(l7.content);
       __Text__primaryTitleStyles({
-        fontWeight: FontWeight.Medium,
+        fontWeight: FontWeight.Bold,
         maxLines: DOUBLE_LINE_NUM,
         alignment: Alignment.Start,
       });
