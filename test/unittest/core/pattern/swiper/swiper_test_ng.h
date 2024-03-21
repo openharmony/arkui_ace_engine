@@ -88,6 +88,7 @@ public:
     void AddArrowChild(const RefPtr<FrameNode>& arrowNode, const RefPtr<LayoutWrapperNode>& arrowLayoutWrapper);
     void CreateSwiperLayoutWrapper(const RefPtr<FrameNode>& frameNode_, RefPtr<LayoutWrapperNode>& swiperLayoutWrapper);
     void InitCaptureTest();
+    void CreateWithCustomAnimation();
 
     RefPtr<FrameNode> frameNode_;
     RefPtr<SwiperPattern> pattern_;

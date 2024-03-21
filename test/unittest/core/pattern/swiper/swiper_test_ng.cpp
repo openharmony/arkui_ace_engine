@@ -11732,4 +11732,206 @@ HWTEST_F(SwiperTestNg, SwipeCaptureLayoutInfo002, TestSize.Level1)
         EXPECT_EQ(offset.GetX(), CAPTURE_MARGIN_SIZE - size.Width());
     }
 }
+
+void SwiperTestNg::CreateWithCustomAnimation()
+{
+    CreateWithItem([](SwiperModelNG model) {
+        SwiperContentAnimatedTransition transitionInfo;
+        transitionInfo.timeout = 0;
+        transitionInfo.transition = [](const RefPtr<SwiperContentTransitionProxy>& proxy) {};
+        model.SetCustomContentTransition(transitionInfo);
+
+        auto onContentDidScroll = [](int32_t selectedIndex, int32_t index, float position, float mainAxisLength) {};
+        model.SetOnContentDidScroll(std::move(onContentDidScroll));
+    });
+    pattern_->contentMainSize_ = SWIPER_WIDTH;
+    EXPECT_TRUE(pattern_->SupportSwiperCustomAnimation());
+}
+
+/**
+ * @tc.name: SwipeCustomAnimationTest001
+ * @tc.desc: Test check itemPositionInAnimation map info
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperTestNg, SwipeCustomAnimationTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create swiper and set SetCustomContentTransition interface
+     */
+    CreateWithCustomAnimation();
+
+    /**
+     * @tc.steps: step2. set loop to true, displayCount to 2 and swipeByGroup to true, init itemPosition map info.
+     */
+    layoutProperty_->UpdateLoop(true);
+    layoutProperty_->UpdateDisplayCount(2);
+    layoutProperty_->UpdateSwipeByGroup(true);
+
+    struct SwiperItemInfo swiperItemInfo1;
+    struct SwiperItemInfo swiperItemInfo2;
+    swiperItemInfo1.startPos = 0.0f;
+    swiperItemInfo1.endPos = SWIPER_WIDTH / 2;
+    swiperItemInfo2.startPos = SWIPER_WIDTH / 2;
+    swiperItemInfo2.endPos = SWIPER_WIDTH;
+    pattern_->itemPosition_.clear();
+    pattern_->itemPosition_.emplace(std::make_pair(0, swiperItemInfo1));
+    pattern_->itemPosition_.emplace(std::make_pair(1, swiperItemInfo2));
+
+    /**
+     * @tc.steps: step3. set different offset, calculate and update itemPositionInAnimation info.
+     */
+    auto offset1 = -10.0f;
+    pattern_->HandleSwiperCustomAnimation(offset1);
+    EXPECT_FALSE(pattern_->itemPositionInAnimation_.find(2) == pattern_->itemPositionInAnimation_.end());
+    EXPECT_FALSE(pattern_->itemPositionInAnimation_.find(3) == pattern_->itemPositionInAnimation_.end());
+    EXPECT_EQ(pattern_->itemPositionInAnimation_[3].startPos, SWIPER_WIDTH * 3 / 2 + offset1);
+    EXPECT_EQ(pattern_->itemPositionInAnimation_[3].endPos, SWIPER_WIDTH * 2 + offset1);
+    pattern_->itemPosition_ = pattern_->itemPositionInAnimation_;
+
+    auto offset2 = 20.0f;
+    pattern_->HandleSwiperCustomAnimation(offset2);
+    EXPECT_FALSE(pattern_->itemPositionInAnimation_.find(2) == pattern_->itemPositionInAnimation_.end());
+    EXPECT_FALSE(pattern_->itemPositionInAnimation_.find(3) == pattern_->itemPositionInAnimation_.end());
+    EXPECT_EQ(pattern_->itemPositionInAnimation_[2].startPos, offset1 + offset2 - SWIPER_WIDTH);
+    EXPECT_EQ(pattern_->itemPositionInAnimation_[2].endPos, offset1 + offset2 - SWIPER_WIDTH / 2);
+    pattern_->itemPosition_ = pattern_->itemPositionInAnimation_;
+
+    auto offset3 = -10.0f;
+    pattern_->HandleSwiperCustomAnimation(offset3);
+    EXPECT_TRUE(pattern_->itemPositionInAnimation_.find(2) == pattern_->itemPositionInAnimation_.end());
+    EXPECT_TRUE(pattern_->itemPositionInAnimation_.find(3) == pattern_->itemPositionInAnimation_.end());
+    EXPECT_EQ(pattern_->itemPositionInAnimation_[0].startPos, 0.0f);
+    EXPECT_EQ(pattern_->itemPositionInAnimation_[0].endPos, SWIPER_WIDTH / 2);
+}
+
+/**
+ * @tc.name: SwipeCustomAnimationTest002
+ * @tc.desc: Test check itemPositionInAnimation map info
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperTestNg, SwipeCustomAnimationTest002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create swiper and set SetCustomContentTransition interface
+     */
+    CreateWithCustomAnimation();
+
+    /**
+     * @tc.steps: step2. set loop to true, itemSpace to 10, prevMargin to 20, nextMargin to 30,
+     * init itemPosition map info.
+     */
+    layoutProperty_->UpdateLoop(true);
+    auto itemSpace = 10.0f;
+    auto prevMargin = 20.0f;
+    auto nextMargin = 30.0f;
+    layoutProperty_->UpdateItemSpace(Dimension(itemSpace));
+    layoutProperty_->UpdatePrevMargin(Dimension(prevMargin));
+    layoutProperty_->UpdateNextMargin(Dimension(nextMargin));
+
+    auto mainAxisLength = SWIPER_WIDTH - prevMargin - nextMargin - itemSpace * 2;
+    struct SwiperItemInfo swiperItemInfo1;
+    struct SwiperItemInfo swiperItemInfo2;
+    struct SwiperItemInfo swiperItemInfo3;
+    swiperItemInfo1.startPos = - mainAxisLength - itemSpace;
+    swiperItemInfo1.endPos = - itemSpace;
+    swiperItemInfo2.startPos = 0.0f;
+    swiperItemInfo2.endPos = mainAxisLength;
+    swiperItemInfo3.startPos = mainAxisLength + itemSpace;
+    swiperItemInfo3.endPos = mainAxisLength * 2 + itemSpace;
+    pattern_->itemPosition_.clear();
+    pattern_->itemPosition_.emplace(std::make_pair(3, swiperItemInfo1));
+    pattern_->itemPosition_.emplace(std::make_pair(0, swiperItemInfo2));
+    pattern_->itemPosition_.emplace(std::make_pair(1, swiperItemInfo3));
+
+    /**
+     * @tc.steps: step3. set different offset, calculate and update itemPositionInAnimation info.
+     */
+    auto offset1 = -400.0f;
+    pattern_->HandleSwiperCustomAnimation(offset1);
+    EXPECT_TRUE(pattern_->itemPositionInAnimation_.find(3) == pattern_->itemPositionInAnimation_.end());
+    EXPECT_FALSE(pattern_->itemPositionInAnimation_.find(2) == pattern_->itemPositionInAnimation_.end());
+    EXPECT_EQ(pattern_->itemPositionInAnimation_[2].startPos, mainAxisLength * 2 + itemSpace * 2 + offset1);
+    EXPECT_EQ(pattern_->itemPositionInAnimation_[2].endPos, mainAxisLength * 3 + itemSpace * 2 + offset1);
+    pattern_->itemPosition_ = pattern_->itemPositionInAnimation_;
+
+    auto offset2 = 500.0f;
+    pattern_->HandleSwiperCustomAnimation(offset2);
+    EXPECT_TRUE(pattern_->itemPositionInAnimation_.find(1) == pattern_->itemPositionInAnimation_.end());
+    EXPECT_TRUE(pattern_->itemPositionInAnimation_.find(2) == pattern_->itemPositionInAnimation_.end());
+    EXPECT_FALSE(pattern_->itemPositionInAnimation_.find(3) == pattern_->itemPositionInAnimation_.end());
+    EXPECT_EQ(pattern_->itemPositionInAnimation_.find(3)->second.startPos,
+        - itemSpace - mainAxisLength + offset1 + offset2);
+    EXPECT_EQ(pattern_->itemPositionInAnimation_.find(3)->second.endPos, - itemSpace + offset1 + offset2);
+}
+
+/**
+ * @tc.name: SwipeCustomAnimationTest003
+ * @tc.desc: Test check itemPositionInAnimation map info
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperTestNg, SwipeCustomAnimationTest003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create swiper and set SetCustomContentTransition interface
+     */
+    CreateWithCustomAnimation();
+
+    /**
+     * @tc.steps: step2. set loop to false, isDragging to true, init itemPosition map info.
+     */
+    layoutProperty_->UpdateLoop(false);
+    pattern_->isDragging_ = true;
+
+    struct SwiperItemInfo swiperItemInfo1;
+    swiperItemInfo1.startPos = 0.0f;
+    swiperItemInfo1.endPos = SWIPER_WIDTH;
+    pattern_->itemPosition_.clear();
+    pattern_->itemPosition_.emplace(std::make_pair(0, swiperItemInfo1));
+
+    /**
+     * @tc.steps: step3. set different offset in fade edge effect, calculate and update itemPositionInAnimation info.
+     */
+    frameNode_->GetPaintProperty<SwiperPaintProperty>()->UpdateEdgeEffect(EdgeEffect::FADE);
+
+    auto offset1 = -10.0f;
+    pattern_->UpdateCurrentOffset(offset1);
+    EXPECT_EQ(pattern_->itemPositionInAnimation_[0].startPos, offset1);
+    EXPECT_EQ(pattern_->itemPositionInAnimation_[0].endPos, SWIPER_WIDTH + offset1);
+    pattern_->itemPosition_ = pattern_->itemPositionInAnimation_;
+
+    auto offset2 = 20.0f;
+    pattern_->UpdateCurrentOffset(offset2);
+    EXPECT_EQ(pattern_->itemPositionInAnimation_[0].startPos, 0.0f);
+    EXPECT_EQ(pattern_->itemPositionInAnimation_[0].endPos, SWIPER_WIDTH);
+    pattern_->itemPosition_ = pattern_->itemPositionInAnimation_;
+
+    /**
+     * @tc.steps: step4. set different offset without edge effect, calculate and update itemPositionInAnimation info.
+     */
+    frameNode_->GetPaintProperty<SwiperPaintProperty>()->UpdateEdgeEffect(EdgeEffect::NONE);
+
+    pattern_->UpdateCurrentOffset(offset1);
+    EXPECT_EQ(pattern_->itemPositionInAnimation_[0].startPos, offset1);
+    EXPECT_EQ(pattern_->itemPositionInAnimation_[0].endPos, SWIPER_WIDTH + offset1);
+    pattern_->itemPosition_ = pattern_->itemPositionInAnimation_;
+
+    pattern_->UpdateCurrentOffset(offset2);
+    EXPECT_EQ(pattern_->itemPositionInAnimation_[0].startPos, 0.0f);
+    EXPECT_EQ(pattern_->itemPositionInAnimation_[0].endPos, SWIPER_WIDTH);
+    pattern_->itemPosition_ = pattern_->itemPositionInAnimation_;
+
+    /**
+     * @tc.steps: step5. set different offset in spring edge effect, calculate and update itemPositionInAnimation info.
+     */
+    frameNode_->GetPaintProperty<SwiperPaintProperty>()->UpdateEdgeEffect(EdgeEffect::SPRING);
+
+    pattern_->UpdateCurrentOffset(offset1);
+    EXPECT_EQ(pattern_->itemPositionInAnimation_[0].startPos, offset1);
+    EXPECT_EQ(pattern_->itemPositionInAnimation_[0].endPos, SWIPER_WIDTH + offset1);
+    pattern_->itemPosition_ = pattern_->itemPositionInAnimation_;
+
+    pattern_->UpdateCurrentOffset(offset2);
+    EXPECT_EQ(pattern_->itemPositionInAnimation_[0].startPos, offset1 + offset2);
+    EXPECT_EQ(pattern_->itemPositionInAnimation_[0].endPos, SWIPER_WIDTH + offset1 + offset2);
+}
 } // namespace OHOS::Ace::NG

@@ -802,6 +802,7 @@ bool SwiperPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty,
     if (SupportSwiperCustomAnimation()) {
         needUnmountIndexs_ = swiperLayoutAlgorithm->GetNeedUnmountIndexs();
         itemPositionInAnimation_ = swiperLayoutAlgorithm->GetItemsPositionInAnimation();
+        FireContentDidScrollEvent();
     }
 
     autoLinearReachBoundary = false;
@@ -1024,22 +1025,33 @@ void SwiperPattern::HandleSwiperCustomAnimation(float offset)
         return;
     }
 
-    std::set<int32_t> indexInVisibleArea = CalculateAndUpdateItemInfo(offset);
+    if (itemPositionInAnimation_.empty()) {
+        for (auto& item : itemPosition_) {
+            UpdateItemInfoInCustomAnimation(item.first, item.second.startPos, item.second.endPos);
+        }
+    }
+    indexsInAnimation_.clear();
+    CalculateAndUpdateItemInfo(offset);
+
+    SwiperLayoutAlgorithm::PositionMap itemsAnimationFinished;
     for (auto& item : itemPositionInAnimation_) {
-        if (indexInVisibleArea.find(item.first) == indexInVisibleArea.end() &&
+        if (indexsInAnimation_.find(item.first) == indexsInAnimation_.end() &&
             needUnmountIndexs_.find(item.first) == needUnmountIndexs_.end()) {
-            indexInVisibleArea.insert(item.first);
+            indexsInAnimation_.insert(item.first);
             needUnmountIndexs_.insert(item.first);
             item.second.startPos += offset;
             item.second.endPos += offset;
-            OnSwiperCustomAnimationFinish(item);
+            itemsAnimationFinished.insert(item);
         }
     }
+    for (auto& item : itemsAnimationFinished) {
+        OnSwiperCustomAnimationFinish(item);
+    }
 
-    FireSwiperCustomAnimationEvent(indexInVisibleArea);
+    FireSwiperCustomAnimationEvent();
 }
 
-std::set<int32_t> SwiperPattern::CalculateAndUpdateItemInfo(float offset)
+void SwiperPattern::CalculateAndUpdateItemInfo(float offset)
 {
     auto prevMargin = GetPrevMargin();
     auto nextMargin = GetNextMargin();
@@ -1049,7 +1061,6 @@ std::set<int32_t> SwiperPattern::CalculateAndUpdateItemInfo(float offset)
     auto displayCount = GetDisplayCount();
     auto swipeByGroup = IsSwipeByGroup();
 
-    std::set<int32_t> indexInVisibleArea;
     for (auto& item : itemPosition_) {
         auto index = item.first;
         auto startPos = item.second.startPos + offset;
@@ -1079,28 +1090,26 @@ std::set<int32_t> SwiperPattern::CalculateAndUpdateItemInfo(float offset)
         auto currentIndex = index - 1;
         while (currentIndex >= pageStartIndex && itemPosition_.find(currentIndex) == itemPosition_.end()) {
             UpdateItemInfoInCustomAnimation(currentIndex, startPos - itemPosDiff * (index - currentIndex),
-                endPos - itemPosDiff * (index - currentIndex), indexInVisibleArea);
+                endPos - itemPosDiff * (index - currentIndex));
             currentIndex--;
         }
         currentIndex = index + 1;
         while (currentIndex <= pageEndIndex && itemPosition_.find(currentIndex) == itemPosition_.end()) {
             UpdateItemInfoInCustomAnimation(currentIndex, startPos + itemPosDiff * (currentIndex - index),
-                endPos + itemPosDiff * (currentIndex - index), indexInVisibleArea);
+                endPos + itemPosDiff * (currentIndex - index));
             currentIndex++;
         }
-        UpdateItemInfoInCustomAnimation(index, startPos, endPos, indexInVisibleArea);
+        UpdateItemInfoInCustomAnimation(index, startPos, endPos);
     }
-    return indexInVisibleArea;
 }
 
-void SwiperPattern::UpdateItemInfoInCustomAnimation(int32_t index, float startPos, float endPos,
-    std::set<int32_t>& indexInVisibleArea)
+void SwiperPattern::UpdateItemInfoInCustomAnimation(int32_t index, float startPos, float endPos)
 {
     index = GetLoopIndex(index);
     if (IsSwipeByGroup() && index >= RealTotalCount()) {
         return;
     }
-    indexInVisibleArea.insert(index);
+    indexsInAnimation_.insert(index);
     needUnmountIndexs_.erase(index);
     auto itemInAnimation = itemPositionInAnimation_.find(index);
     if (itemInAnimation == itemPositionInAnimation_.end()) {
@@ -1114,38 +1123,60 @@ void SwiperPattern::UpdateItemInfoInCustomAnimation(int32_t index, float startPo
     }
 }
 
-void SwiperPattern::FireSwiperCustomAnimationEvent(std::set<int32_t> indexInVisibleArea)
+void SwiperPattern::FireSwiperCustomAnimationEvent()
 {
+    CHECK_NULL_VOID(onSwiperCustomContentTransition_);
+    auto transition = onSwiperCustomContentTransition_->transition;
+    CHECK_NULL_VOID(transition);
+
     auto selectedIndex = GetCurrentIndex();
     for (auto& item : itemPositionInAnimation_) {
-        if (indexInVisibleArea.find(item.first) == indexInVisibleArea.end()) {
+        if (indexsInAnimation_.find(item.first) == indexsInAnimation_.end()) {
             continue;
         }
         auto offset = Dimension(item.second.startPos, DimensionUnit::PX).ConvertToVp();
-        auto mainLength = Dimension(item.second.endPos - item.second.startPos, DimensionUnit::PX).ConvertToVp();
-        if (NonPositive(mainLength)) {
+        auto mainAxisLength = Dimension(item.second.endPos - item.second.startPos, DimensionUnit::PX).ConvertToVp();
+        if (NonPositive(mainAxisLength)) {
             continue;
         }
-        auto position = offset / mainLength;
-        if (onSwiperCustomContentTransition_ && onSwiperCustomContentTransition_->transition) {
-            auto proxy = AceType::MakeRefPtr<SwiperContentTransitionProxy>();
-            proxy->SetSelectedIndex(selectedIndex);
-            proxy->SetIndex(item.first);
-            proxy->SetPosition(position);
-            proxy->SetMainLength(mainLength);
-            proxy->SetFinishTransitionEvent([weak = WeakClaim(this), &item]() {
-                auto swiper = weak.Upgrade();
-                CHECK_NULL_VOID(swiper);
-                item.second.isFinishAnimation = true;
-                swiper->OnSwiperCustomAnimationFinish(item);
-            });
-            onSwiperCustomContentTransition_->transition(proxy);
-        }
-        if (onContentDidScroll_) {
-            auto event = *onContentDidScroll_;
-            event(selectedIndex, item.first, position, mainLength);
-        }
+        auto position = offset / mainAxisLength;
+        auto proxy = AceType::MakeRefPtr<SwiperContentTransitionProxy>();
+        proxy->SetSelectedIndex(selectedIndex);
+        proxy->SetIndex(item.first);
+        proxy->SetPosition(position);
+        proxy->SetMainAxisLength(mainAxisLength);
+        proxy->SetFinishTransitionEvent([weak = WeakClaim(this), &item]() {
+            auto swiper = weak.Upgrade();
+            CHECK_NULL_VOID(swiper);
+            item.second.isFinishAnimation = true;
+            swiper->OnSwiperCustomAnimationFinish(item);
+        });
+        transition(proxy);
     }
+}
+
+void SwiperPattern::FireContentDidScrollEvent()
+{
+    if (indexsInAnimation_.empty()) {
+        return;
+    }
+
+    CHECK_NULL_VOID(onContentDidScroll_);
+    auto event = *onContentDidScroll_;
+    auto selectedIndex = GetCurrentIndex();
+    for (auto& item : itemPositionInAnimation_) {
+        if (indexsInAnimation_.find(item.first) == indexsInAnimation_.end()) {
+            continue;
+        }
+        auto offset = Dimension(item.second.startPos, DimensionUnit::PX).ConvertToVp();
+        auto mainAxisLength = Dimension(item.second.endPos - item.second.startPos, DimensionUnit::PX).ConvertToVp();
+        if (NonPositive(mainAxisLength)) {
+            continue;
+        }
+        auto position = offset / mainAxisLength;
+        event(selectedIndex, item.first, position, mainAxisLength);
+    }
+    indexsInAnimation_.clear();
 }
 
 void SwiperPattern::OnSwiperCustomAnimationFinish(std::pair<int32_t, SwiperItemInfo> item)

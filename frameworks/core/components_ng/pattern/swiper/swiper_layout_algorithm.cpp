@@ -961,12 +961,12 @@ void SwiperLayoutAlgorithm::LayoutItem(LayoutWrapper* layoutWrapper, Axis axis, 
     float crossOffset = 0.0f;
     if (axis == Axis::VERTICAL) {
         offset += OffsetF(crossOffset, pos.second.startPos);
-        if (prevMargin_ != 0.0f) {
+        if (!NearZero(prevMargin_)) {
             offset += OffsetF(crossOffset, prevMargin_ + spaceWidth_);
         }
     } else {
         offset += OffsetF(pos.second.startPos, crossOffset);
-        if (prevMargin_ != 0.0f) {
+        if (!NearZero(prevMargin_)) {
             offset += OffsetF(prevMargin_ + spaceWidth_, crossOffset);
         }
     }
