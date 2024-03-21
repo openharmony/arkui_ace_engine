@@ -191,6 +191,10 @@ constexpr int32_t DATEPICKER_START_TIME = 1970;
 constexpr int32_t CALENDAR_PICKER_FONT_COLOR_INDEX = 0;
 constexpr int32_t CALENDAR_PICKER_FONT_SIZE_INDEX = 1;
 constexpr int32_t CALENDAR_PICKER_FONT_WEIGHT_INDEX = 2;
+constexpr int32_t IMAGE_SIZE_TYPE_CONTAIN_INDEX = 0;
+constexpr int32_t IMAGE_SIZE_TYPE_COVER_INDEX = 1;
+constexpr int32_t IMAGE_SIZE_TYPE_AUTO_INDEX = 2;
+constexpr int32_t IMAGE_SIZE_TYPE_LENGTH_INDEX = 3;
 const std::string EMPTY_STR = "";
 const std::vector<std::string> ACCESSIBILITY_LEVEL_VECTOR = { "auto", "yes", "no", "no-hide-descendants" };
 std::map<std::string, int32_t> ACCESSIBILITY_LEVEL_MAP = { { "auto", 0 }, { "yes", 1 }, { "no", 2 },
@@ -5951,9 +5955,29 @@ int32_t SetBackgroundImageSize(ArkUI_NodeHandle node, const ArkUI_AttributeItem*
     if (actualSize < 0) {
         return ERROR_CODE_PARAM_INVALID;
     }
+    if (LessNotEqual(item->value[BACKGROUND_IMAGE_WIDTH_INDEX].f32, 0.0f) ||
+        LessNotEqual(item->value[BACKGROUND_IMAGE_HEIGHT_INDEX].f32, 0.0f)) {
+        return ERROR_CODE_PARAM_INVALID;
+    }
     fullImpl->getNodeModifiers()->getCommonModifier()->setBackgroundImageSize(node->uiNodeHandle,
-        item->value[BACKGROUND_IMAGE_WIDTH_INDEX].f32, item->value[BACKGROUND_IMAGE_HEIGHT_INDEX].f32, 0, 0);
+        item->value[BACKGROUND_IMAGE_WIDTH_INDEX].f32, item->value[BACKGROUND_IMAGE_HEIGHT_INDEX].f32,
+        IMAGE_SIZE_TYPE_LENGTH_INDEX, IMAGE_SIZE_TYPE_LENGTH_INDEX);
     return ERROR_CODE_NO_ERROR;
+}
+
+int32_t GetBackgroundImageSizeType(ArkUI_ImageSize nativeImageSizeType)
+{
+    switch (nativeImageSizeType) {
+        case ARKUI_IMAGE_SIZE_AUTO:
+            return IMAGE_SIZE_TYPE_AUTO_INDEX;
+        case ARKUI_IMAGE_SIZE_COVER:
+            return IMAGE_SIZE_TYPE_COVER_INDEX;
+        case ARKUI_IMAGE_SIZE_CONTAIN:
+            return IMAGE_SIZE_TYPE_CONTAIN_INDEX;
+        default:
+            break;
+    }
+    return IMAGE_SIZE_TYPE_AUTO_INDEX;
 }
 
 int32_t SetBackgroundImageSizeWithStyle(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
@@ -5964,8 +5988,9 @@ int32_t SetBackgroundImageSizeWithStyle(ArkUI_NodeHandle node, const ArkUI_Attri
         item->value[0].i32 > static_cast<int32_t>(ARKUI_IMAGE_SIZE_CONTAIN)) {
         return ERROR_CODE_PARAM_INVALID;
     }
+    auto imageSizeType = GetBackgroundImageSizeType(static_cast<ArkUI_ImageSize>(item->value[0].i32));
     fullImpl->getNodeModifiers()->getCommonModifier()->setBackgroundImageSize(
-        node->uiNodeHandle, -1.0f, -1.0f, item->value[0].i32, item->value[0].i32);
+        node->uiNodeHandle, 0.0f, 0.0f, imageSizeType, imageSizeType);
     return ERROR_CODE_NO_ERROR;
 }
 
