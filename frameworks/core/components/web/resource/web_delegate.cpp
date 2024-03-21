@@ -4069,6 +4069,9 @@ void WebDelegate::OnPageFinished(const std::string& param)
             if (onPageFinishedV2) {
                 onPageFinishedV2(std::make_shared<LoadWebPageFinishEvent>(param));
             }
+            auto webPattern = delegate->webPattern_.Upgrade();
+            CHECK_NULL_VOID(webPattern);
+            webPattern->OnScrollEndRecursive(std::nullopt);
             delegate->RecordWebEvent(Recorder::EventType::WEB_PAGE_END, param);
         },
         TaskExecutor::TaskType::JS);
