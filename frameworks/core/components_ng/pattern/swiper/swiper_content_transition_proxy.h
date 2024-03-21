@@ -18,6 +18,7 @@
 
 #include <cstdint>
 #include <functional>
+
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
 #include "base/memory/type_info_base.h"
@@ -58,14 +59,14 @@ public:
         position_ = position;
     }
 
-    float GetMainLength() const
+    float GetMainAxisLength() const
     {
-        return mainLength_;
+        return mainAxisLength_;
     }
 
-    void SetMainLength(float mainLength)
+    void SetMainAxisLength(float mainAxisLength)
     {
-        mainLength_ = mainLength;
+        mainAxisLength_ = mainAxisLength;
     }
 
     void FinishTransition()
@@ -89,7 +90,7 @@ private:
     int32_t selectedIndex_ = 0;
     int32_t index_ = 0;
     float position_ = 0.0f;
-    float mainLength_ = 0.0f;
+    float mainAxisLength_ = 0.0f;
     std::shared_ptr<std::function<void()>> finishTransitionEvent_;
 };
 
