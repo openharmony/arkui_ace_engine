@@ -15,7 +15,7 @@
 
 #include "core/components_ng/pattern/ui_extension/accessibility_session_adapter_ui_extension.h"
 
-#include <inttypes.h>
+#include <cinttypes>
 #include "base/log/log.h"
 #include "core/accessibility/accessibility_constants.h"
 #include "core/components_ng/pattern/ui_extension/session_wrapper.h"
