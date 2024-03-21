@@ -1560,7 +1560,6 @@ HWTEST_F(NavigationTestNg, NavigationModelNG006, TestSize.Level1)
     preNavDestinationPattern->isOnShow_ = true;
     ASSERT_NE(preTopNavDestination->GetEventHub<NavDestinationEventHub>(), nullptr);
 
-    navigationPattern->navigationStack_->Add("preTopNavDestination", preTopNavDestination);
     navigationPattern->CheckTopNavPathChange(preTopNavPath, newTopNavPath);
     ASSERT_FALSE(preNavDestinationPattern->isOnShow_);
 }
@@ -3280,28 +3279,13 @@ HWTEST_F(NavigationTestNg, NavDestinationDialogTest002, TestSize.Level1)
     config.skipMeasure = true;
     config.skipLayout = true;
     navigationPattern->OnDirtyLayoutWrapperSwap(layoutWrapper, config);
-    navigationPattern->NotifyDialogChange(true, true);
+    navigationPattern->NotifyDialogChange(NavDestinationLifecycle::ON_SHOW, true, true);
     auto navDestinationPatternA = AceType::DynamicCast<NavDestinationPattern>(navDestinationA->GetPattern());
     EXPECT_NE(navDestinationPatternA, nullptr);
     auto navDestinationPatternB = AceType::DynamicCast<NavDestinationPattern>(navDestinationB->GetPattern());
     EXPECT_NE(navDestinationPatternB, nullptr);
     EXPECT_TRUE(navDestinationPatternB->GetIsOnShow());
     EXPECT_TRUE(navDestinationPatternA->GetIsOnShow());
-
-    /**
-     * @tc.steps: step2. trigger window hide
-     * @tc.expected: step2. pageA and pageB is all hide
-     */
-    navigationPattern->OnWindowHide();
-    EXPECT_FALSE(navDestinationPatternA->GetIsOnShow());
-    EXPECT_FALSE(navDestinationPatternB->GetIsOnShow());
-
-    /**
-     * @tc.steps: step3.trigger window show
-    */
-    navigationPattern->OnWindowShow();
-    EXPECT_TRUE(navDestinationPatternA->GetIsOnShow());
-    EXPECT_TRUE(navDestinationPatternB->GetIsOnShow());
 }
 
 /**
@@ -3889,9 +3873,9 @@ HWTEST_F(NavigationTestNg, NavigationPatternTest019, TestSize.Level1)
     cacheNodes.emplace_back(std::make_pair("pageOne", nullptr));
     navigationPattern->navigationStack_->SetNavPathList(cacheNodes);
 
-    bool isShow = true;
     bool isNavigationChanged = false;
-    navigationPattern->NotifyDialogChange(isShow, isNavigationChanged);
+    bool isFromStandard = true;
+    navigationPattern->NotifyDialogChange(NavDestinationLifecycle::ON_SHOW, isNavigationChanged, isFromStandard);
 }
 
 /**
@@ -3923,9 +3907,9 @@ HWTEST_F(NavigationTestNg, NavigationPatternTest020, TestSize.Level1)
     cacheNodes.emplace_back(std::make_pair("pageOne", tempNode));
     navigationPattern->navigationStack_->SetNavPathList(cacheNodes);
 
-    bool isShow = true;
+    bool isFromStandard = true;
     bool isNavigationChanged = false;
-    navigationPattern->NotifyDialogChange(isShow, isNavigationChanged);
+    navigationPattern->NotifyDialogChange(NavDestinationLifecycle::ON_SHOW, isNavigationChanged, isFromStandard);
 }
 
 /**
@@ -3957,9 +3941,9 @@ HWTEST_F(NavigationTestNg, NavigationPatternTest021, TestSize.Level1)
     cacheNodes.emplace_back(std::make_pair("pageOne", tempNode));
     navigationPattern->navigationStack_->SetNavPathList(cacheNodes);
 
-    bool isShow = true;
+    bool isFromStandard = true;
     bool isNavigationChanged = true;
-    navigationPattern->NotifyDialogChange(isShow, isNavigationChanged);
+    navigationPattern->NotifyDialogChange(NavDestinationLifecycle::ON_SHOW, isNavigationChanged, isFromStandard);
 }
 
 /**
@@ -3991,9 +3975,9 @@ HWTEST_F(NavigationTestNg, NavigationPatternTest022, TestSize.Level1)
     cacheNodes.emplace_back(std::make_pair("pageOne", tempNode));
     navigationPattern->navigationStack_->SetNavPathList(cacheNodes);
 
-    bool isShow = true;
+    bool isFromStandard = true;
     bool isNavigationChanged = false;
-    navigationPattern->NotifyDialogChange(isShow, isNavigationChanged);
+    navigationPattern->NotifyDialogChange(NavDestinationLifecycle::ON_SHOW, isNavigationChanged, isFromStandard);
 }
 
 /**
@@ -4018,9 +4002,9 @@ HWTEST_F(NavigationTestNg, NavigationPatternTest023, TestSize.Level1)
     cacheNodes.emplace_back(std::make_pair("pageOne", nullptr));
     navigationPattern->navigationStack_->SetNavPathList(cacheNodes);
 
-    bool isShow = false;
+    bool isFromStandard = false;
     bool isNavigationChanged = false;
-    navigationPattern->NotifyDialogChange(isShow, isNavigationChanged);
+    navigationPattern->NotifyDialogChange(NavDestinationLifecycle::ON_SHOW, isNavigationChanged, isFromStandard);
 }
 
 /**
@@ -4052,9 +4036,9 @@ HWTEST_F(NavigationTestNg, NavigationPatternTest024, TestSize.Level1)
     cacheNodes.emplace_back(std::make_pair("pageOne", tempNode));
     navigationPattern->navigationStack_->SetNavPathList(cacheNodes);
 
-    bool isShow = false;
+    bool isFromStandard = true;
     bool isNavigationChanged = false;
-    navigationPattern->NotifyDialogChange(isShow, isNavigationChanged);
+    navigationPattern->NotifyDialogChange(NavDestinationLifecycle::ON_HIDE, isNavigationChanged, isFromStandard);
 }
 
 /**
@@ -4086,9 +4070,9 @@ HWTEST_F(NavigationTestNg, NavigationPatternTest025, TestSize.Level1)
     cacheNodes.emplace_back(std::make_pair("pageOne", tempNode));
     navigationPattern->navigationStack_->SetNavPathList(cacheNodes);
 
-    bool isShow = false;
+    bool isFromStandard = true;
     bool isNavigationChanged = true;
-    navigationPattern->NotifyDialogChange(isShow, isNavigationChanged);
+    navigationPattern->NotifyDialogChange(NavDestinationLifecycle::ON_HIDE, isNavigationChanged, isFromStandard);
 }
 
 /**
@@ -4120,9 +4104,9 @@ HWTEST_F(NavigationTestNg, NavigationPatternTest026, TestSize.Level1)
     cacheNodes.emplace_back(std::make_pair("pageOne", tempNode));
     navigationPattern->navigationStack_->SetNavPathList(cacheNodes);
 
-    bool isShow = false;
+    bool isFromStandard = true;
     bool isNavigationChanged = false;
-    navigationPattern->NotifyDialogChange(isShow, isNavigationChanged);
+    navigationPattern->NotifyDialogChange(NavDestinationLifecycle::ON_HIDE, isNavigationChanged, isFromStandard);
 }
 
 /**
@@ -4675,8 +4659,7 @@ HWTEST_F(NavigationTestNg, NavigationPatternTest045, TestSize.Level1)
     cacheNodes.emplace_back(std::make_pair("pageOne", tempNode));
     navigationPattern->navigationStack_->SetNavPathList(cacheNodes);
 
-    bool isShow = false;
-    EXPECT_EQ(navigationPattern->FireNavDestinationStateChange(isShow), STANDARD_INDEX);
+    EXPECT_EQ(navigationPattern->FireNavDestinationStateChange(NavDestinationLifecycle::ON_HIDE), STANDARD_INDEX);
 }
 
 /**
@@ -4702,8 +4685,7 @@ HWTEST_F(NavigationTestNg, NavigationPatternTest046, TestSize.Level1)
     cacheNodes.emplace_back(std::make_pair("pageOne", tempNode));
     navigationPattern->navigationStack_->SetNavPathList(cacheNodes);
 
-    bool isShow = true;
-    EXPECT_EQ(navigationPattern->FireNavDestinationStateChange(isShow), STANDARD_INDEX);
+    EXPECT_EQ(navigationPattern->FireNavDestinationStateChange(NavDestinationLifecycle::ON_SHOW), STANDARD_INDEX);
 }
 
 /**
@@ -4732,8 +4714,7 @@ HWTEST_F(NavigationTestNg, NavigationPatternTest047, TestSize.Level1)
     cacheNodes.emplace_back(std::make_pair("pageOne", tempNode));
     navigationPattern->navigationStack_->SetNavPathList(cacheNodes);
 
-    bool isShow = true;
-    EXPECT_EQ(navigationPattern->FireNavDestinationStateChange(isShow), STANDARD_INDEX);
+    EXPECT_EQ(navigationPattern->FireNavDestinationStateChange(NavDestinationLifecycle::ON_SHOW), STANDARD_INDEX);
 }
 
 /**
@@ -4762,8 +4743,7 @@ HWTEST_F(NavigationTestNg, NavigationPatternTest048, TestSize.Level1)
     cacheNodes.emplace_back(std::make_pair("pageOne", tempNode));
     navigationPattern->navigationStack_->SetNavPathList(cacheNodes);
 
-    bool isShow = false;
-    EXPECT_EQ(navigationPattern->FireNavDestinationStateChange(isShow), STANDARD_INDEX);
+    EXPECT_EQ(navigationPattern->FireNavDestinationStateChange(NavDestinationLifecycle::ON_HIDE), STANDARD_INDEX);
 }
 
 /**

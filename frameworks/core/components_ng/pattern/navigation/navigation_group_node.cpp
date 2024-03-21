@@ -205,6 +205,7 @@ bool NavigationGroupNode::ReorderNavDestination(
 void NavigationGroupNode::RemoveRedundantNavDestination(
     RefPtr<FrameNode>& navigationContentNode, const RefPtr<UINode>& remainChild, size_t slot, bool& hasChanged)
 {
+    auto pattern = GetPattern<NavigationPattern>();
     while (slot < navigationContentNode->GetChildren().size()) {
         // delete useless nodes that are not at the top
         auto navDestination = AceType::DynamicCast<NavDestinationGroupNode>(navigationContentNode->GetLastChild());
@@ -228,9 +229,9 @@ void NavigationGroupNode::RemoveRedundantNavDestination(
             auto navDestinationPattern = navDestination->GetPattern<NavDestinationPattern>();
             TAG_LOGI(AceLogTag::ACE_NAVIGATION, "remove child: %{public}s", navDestinationPattern->GetName().c_str());
             if (navDestinationPattern->GetIsOnShow()) {
-                eventHub->FireOnHiddenEvent(navDestinationPattern->GetName());
+                pattern->NotifyDestinationLifecycle(navDestination,
+                    NavDestinationLifecycle::ON_HIDE, true);
                 navDestinationPattern->SetIsOnShow(false);
-                NavigationPattern::FireNavigationStateChange(navDestination, false);
             }
             auto shallowBuilder = navDestinationPattern->GetShallowBuilder();
             if (shallowBuilder) {
@@ -841,18 +842,15 @@ bool NavigationGroupNode::UpdateNavDestinationVisibility(const RefPtr<NavDestina
     }
     if (index < lastStandardIndex_) {
         auto pattern = AceType::DynamicCast<NavDestinationPattern>(navDestination->GetPattern());
-        if (!navDestination->IsOnAnimation()) {
-            if (pattern && pattern->GetIsOnShow()) {
-                // fire hidden event
-                eventHub->FireOnHiddenEvent(pattern->GetName());
-                eventHub->FireChangeEvent(false);
-                pattern->SetIsOnShow(false);
-                NavigationPattern::FireNavigationStateChange(navDestination, false);
-            }
-            if (navDestination->GetPattern<NavDestinationPattern>()->GetCustomNode() != remainChild) {
-                navDestination->GetLayoutProperty()->UpdateVisibility(VisibleType::INVISIBLE);
-                navDestination->SetJSViewActive(false);
-            }
+        if (navDestination->IsOnAnimation()) {
+            return false;
+        }
+        if (!pattern || !pattern->GetIsOnShow()) {
+            return false;
+        }
+        eventHub->FireChangeEvent(false);
+        if (pattern->GetCustomNode() != remainChild) {
+            hideNodes_.emplace_back(navDestination);
         }
         return false;
     }
@@ -905,5 +903,31 @@ void NavigationGroupNode::OnAttachToMainTree(bool recursive)
         pattern->AttachNavigationStackToParent();
         pattern->AddToDumpManager();
     }
+}
+
+void NavigationGroupNode::FireHideNodeChange(NavDestinationLifecycle lifecycle)
+{
+    if (hideNodes_.size() == 0) {
+        return;
+    }
+    for (auto iter = hideNodes_.begin(); iter != hideNodes_.end(); iter++) {
+        auto navDestination = (*iter);
+        if (!navDestination) {
+            continue;
+        }
+        auto pattern = AceType::DynamicCast<NavDestinationPattern>(navDestination->GetPattern());
+        if (!pattern->GetIsOnShow()) {
+            continue;
+        }
+        NavigationPattern::FireNavigationStateChange(navDestination, lifecycle);
+        auto eventHub = navDestination->GetEventHub<NavDestinationEventHub>();
+        eventHub->FireOnHiddenEvent(pattern->GetName());
+        auto navigationPattern = GetPattern<NavigationPattern>();
+        navigationPattern->NotifyPageHide(pattern->GetName());
+        pattern->SetIsOnShow(false);
+        navDestination->GetLayoutProperty()->UpdateVisibility(VisibleType::INVISIBLE);
+        navDestination->SetJSViewActive(false);
+    }
+    hideNodes_.clear();
 }
 } // namespace OHOS::Ace::NG

@@ -74,6 +74,9 @@ public:
     void SetName(const std::string& name)
     {
         name_ = name;
+        auto eventHub = GetEventHub<NavDestinationEventHub>();
+        CHECK_NULL_VOID(eventHub);
+        eventHub->SetName(name);
     }
 
     const std::string& GetName()

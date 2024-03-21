@@ -190,6 +190,13 @@ enum class NavigationOperation {
     REPLACE,
 };
 
+enum NavDestinationLifecycle {
+    ON_APPEAR,
+    ON_SHOW,
+    ON_HIDE,
+    ON_DISAPPEAR
+};
+
 struct NavContentInfo {
     std::string name;
     int32_t index = 0;

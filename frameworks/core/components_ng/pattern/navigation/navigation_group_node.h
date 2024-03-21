@@ -146,6 +146,8 @@ public:
     void OnDetachFromMainTree(bool recursive) override;
     void OnAttachToMainTree(bool recursive) override;
 
+    void FireHideNodeChange(NavDestinationLifecycle lifecycle);
+
 private:
     bool UpdateNavDestinationVisibility(const RefPtr<NavDestinationGroupNode>& navDestination,
         const RefPtr<UINode>& remainChild, int32_t index, size_t destinationSize);
@@ -158,6 +160,7 @@ private:
     RefPtr<UINode> navBarNode_;
     RefPtr<UINode> contentNode_;
     RefPtr<UINode> dividerNode_;
+    std::vector<RefPtr<NavDestinationGroupNode>> hideNodes_; // dialog destination hide pages.
     int32_t lastStandardIndex_ = -1;
     bool isOnAnimation_ { false };
     bool isModeChange_ { false };
