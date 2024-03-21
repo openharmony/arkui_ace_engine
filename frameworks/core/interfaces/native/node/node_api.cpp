@@ -374,11 +374,6 @@ void MarkDirty(ArkUINodeHandle nodePtr, ArkUI_Uint32 flag)
     }
 }
 
-void ContainerScopeBind()
-{
-    ContainerScope scope(Container::CurrentIdSafely());
-}
-
 static void SetCallbackMethod(ArkUIAPICallbackMethod* method)
 {
     ViewModel::SetCallbackMethod(method);
@@ -523,7 +518,6 @@ const ArkUIBasicAPI* GetBasicAPI()
 
         ApplyModifierFinish,
         MarkDirty,
-        ContainerScopeBind,
     };
     /* clang-format on */
 

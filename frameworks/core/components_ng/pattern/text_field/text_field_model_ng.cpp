@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -253,6 +253,18 @@ void TextFieldModelNG::SetPlaceholderColor(const Color& value)
     ACE_UPDATE_LAYOUT_PROPERTY(TextFieldLayoutProperty, PlaceholderTextColor, value);
 }
 
+void TextFieldModelNG::SetContentType(const TextContentType& value)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto layoutProperty = frameNode->GetLayoutProperty<TextFieldLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    if (layoutProperty->HasTextContentType() && layoutProperty->GetTextContentTypeValue() != value) {
+        layoutProperty->UpdateTextContentTypeChanged(true);
+    }
+    ACE_UPDATE_LAYOUT_PROPERTY(TextFieldLayoutProperty, TextContentType, value);
+}
+
 void TextFieldModelNG::SetPlaceholderFont(const Font& value)
 {
     if (value.fontSize.has_value()) {
@@ -356,6 +368,10 @@ void TextFieldModelNG::SetTextColor(const Color& value)
     ACE_RESET_RENDER_CONTEXT(RenderContext, ForegroundColorStrategy);
     ACE_UPDATE_RENDER_CONTEXT(ForegroundColorFlag, true);
     ACE_UPDATE_PAINT_PROPERTY(TextFieldPaintProperty, TextColorFlagByUser, true);
+}
+void TextFieldModelNG::SetWordBreak(Ace::WordBreak value)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(TextFieldLayoutProperty, WordBreak, value);
 }
 void TextFieldModelNG::SetFontStyle(Ace::FontStyle value)
 {
@@ -719,6 +735,8 @@ void TextFieldModelNG::SetCanacelIconSrc(
     const std::string& iconSrc, const std::string& bundleName, const std::string& moduleName)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(TextFieldLayoutProperty, IconSrc, iconSrc);
+    ACE_UPDATE_LAYOUT_PROPERTY(TextFieldLayoutProperty, BundleName, bundleName);
+    ACE_UPDATE_LAYOUT_PROPERTY(TextFieldLayoutProperty, ModuleName, moduleName);
 }
 
 void TextFieldModelNG::SetCancelIconColor(const Color& iconColor)
@@ -823,6 +841,17 @@ void TextFieldModelNG::SetType(FrameNode* frameNode, TextInputType value)
         layoutProperty->UpdateTypeChanged(true);
     }
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, TextInputType, value, frameNode);
+}
+
+void TextFieldModelNG::SetContentType(const FrameNode* frameNode, const TextContentType& value)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto layoutProperty = frameNode->GetLayoutProperty<TextFieldLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    if (layoutProperty->HasTextContentType() && layoutProperty->GetTextContentTypeValue() != value) {
+        layoutProperty->UpdateTextContentTypeChanged(true);
+    }
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, TextContentType, value, frameNode);
 }
 
 void TextFieldModelNG::SetCopyOption(FrameNode* frameNode, CopyOptions copyOption)

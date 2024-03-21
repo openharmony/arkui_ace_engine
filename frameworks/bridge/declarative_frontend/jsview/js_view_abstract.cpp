@@ -1960,7 +1960,7 @@ void JSViewAbstract::JsPixelRound(const JSCallbackInfo& info)
 
 void JSViewAbstract::JsLayoutWeight(const JSCallbackInfo& info)
 {
-    float value = 0.0;
+    float value = 0.0f;
     std::vector<JSCallbackInfoType> checkList { JSCallbackInfoType::STRING, JSCallbackInfoType::NUMBER };
     if (!CheckJSCallbackInfo("JsLayoutWeight", info, checkList)) {
         if (!info[0]->IsUndefined()) {
@@ -1969,13 +1969,13 @@ void JSViewAbstract::JsLayoutWeight(const JSCallbackInfo& info)
     }
 
     if (info[0]->IsNumber()) {
-        if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TWELVE)) {
+        if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
             value = info[0]->ToNumber<float>();
         } else {
             value = info[0]->ToNumber<int32_t>();
         }
     } else {
-        if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TWELVE)) {
+        if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
             value = static_cast<float>(StringUtils::StringToUint(info[0]->ToString()));
         } else {
             value = static_cast<int32_t>(StringUtils::StringToUint(info[0]->ToString()));
@@ -4740,10 +4740,18 @@ bool JSViewAbstract::ParseJsMedia(const JSRef<JSVal>& jsValue, std::string& resu
                 result = resourceWrapper->GetMediaPathByName(param->ToString());
                 return true;
             }
+            if (type == static_cast<int32_t>(ResourceType::STRING)) {
+                result = resourceWrapper->GetStringByName(param->ToString());
+                return true;
+            }
             return false;
         }
         if (type == static_cast<int32_t>(ResourceType::MEDIA)) {
             result = resourceWrapper->GetMediaPath(resId->ToNumber<uint32_t>());
+            return true;
+        }
+        if (type == static_cast<int32_t>(ResourceType::STRING)) {
+            result = resourceWrapper->GetString(resId->ToNumber<uint32_t>());
             return true;
         }
         return false;
@@ -5404,7 +5412,7 @@ void JSViewAbstract::SetPopupDismiss(
     } else if (onWillDismissFunc->IsFunction()) {
         auto onWillDismissCallback = ParsePopupCallback(info, popupObj);
         popupParam->SetOnWillDismiss(std::move(onWillDismissCallback));
-        popupParam->SetInteractiveDismiss(false);
+        popupParam->SetInteractiveDismiss(true);
         if (onWillDismissCallback != nullptr) {
             TAG_LOGI(AceLogTag::ACE_FORM, "popup register onWillDismiss");
         }
@@ -5895,6 +5903,17 @@ void JSViewAbstract::JsClip(const JSCallbackInfo& info)
     }
 }
 
+void JSViewAbstract::JsClipShape(const JSCallbackInfo& info)
+{
+    if (info[0]->IsObject()) {
+        JSShapeAbstract* clipShape = JSRef<JSObject>::Cast(info[0])->Unwrap<JSShapeAbstract>();
+        if (clipShape == nullptr) {
+            return;
+        }
+        ViewAbstractModel::GetInstance()->SetClipShape(clipShape->GetBasicShape());
+    }
+}
+
 void JSViewAbstract::JsMask(const JSCallbackInfo& info)
 {
     JSRef<JSVal> arg = info[0];
@@ -5939,6 +5958,19 @@ void JSViewAbstract::JsMask(const JSCallbackInfo& info)
         };
         ViewAbstractModel::GetInstance()->SetMask(maskShape->GetBasicShape());
     }
+}
+
+void JSViewAbstract::JsMaskShape(const JSCallbackInfo& info)
+{
+    if (!info[0]->IsObject()) {
+        return;
+    }
+
+    JSShapeAbstract* maskShape = JSRef<JSObject>::Cast(info[0])->Unwrap<JSShapeAbstract>();
+    if (maskShape == nullptr) {
+        return;
+    };
+    ViewAbstractModel::GetInstance()->SetMask(maskShape->GetBasicShape());
 }
 
 void JSViewAbstract::JsFocusable(const JSCallbackInfo& info)
@@ -6298,18 +6330,27 @@ void JSViewAbstract::JsBindContextMenu(const JSCallbackInfo& info)
     ViewAbstractModel::GetInstance()->BindContextMenu(responseType, buildFunc, menuParam, previewBuildFunc);
 }
 
-void JSViewAbstract::JsBindContentCover(const JSCallbackInfo& info)
+bool ParseBindContentCoverIsShow(const JSCallbackInfo& info)
 {
-    // parse isShow
     bool isShow = false;
-    DoubleBindCallback callback = nullptr;
     if (info[0]->IsBoolean()) {
         isShow = info[0]->ToBoolean();
     } else if (info[0]->IsObject()) {
         JSRef<JSObject> callbackObj = JSRef<JSObject>::Cast(info[0]);
-        callback = ParseDoubleBindCallback(info, callbackObj);
         auto isShowObj = callbackObj->GetProperty("value");
         isShow = isShowObj->IsBoolean() ? isShowObj->ToBoolean() : false;
+    }
+    return isShow;
+}
+
+void JSViewAbstract::JsBindContentCover(const JSCallbackInfo& info)
+{
+    // parse isShow
+    bool isShow = ParseBindContentCoverIsShow(info);
+    DoubleBindCallback callback = nullptr;
+    if (info[0]->IsObject()) {
+        JSRef<JSObject> callbackObj = JSRef<JSObject>::Cast(info[0]);
+        callback = ParseDoubleBindCallback(info, callbackObj);
     }
 
     // parse builder
@@ -6338,10 +6379,15 @@ void JSViewAbstract::JsBindContentCover(const JSCallbackInfo& info)
     std::function<void()> onDismissCallback;
     std::function<void()> onWillShowCallback;
     std::function<void()> onWillDismissCallback;
+    NG::ContentCoverParam contentCoverParam;
+    std::function<void(const int32_t&)> onWillDismissFunc;
     if (info.Length() == 3) {
         if (info[2]->IsObject()) {
-            ParseOverlayCallback(info[2], onShowCallback, onDismissCallback, onWillShowCallback, onWillDismissCallback);
+            ParseOverlayCallback(info[2], onShowCallback, onDismissCallback, onWillShowCallback, /* 2:args index */
+                onWillDismissCallback, onWillDismissFunc);
             ParseModalStyle(info[2], modalStyle);
+            contentCoverParam.onWillDismiss = std::move(onWillDismissFunc);
+            ParseModalTransitonEffect(info[2], contentCoverParam, info.GetExecutionContext()); /* 2:args index */
         } else if (info[2]->IsNumber()) {
             auto transitionNumber = info[2]->ToNumber<int32_t>();
             if (transitionNumber >= 0 && transitionNumber <= 2) {
@@ -6351,7 +6397,17 @@ void JSViewAbstract::JsBindContentCover(const JSCallbackInfo& info)
     }
     ViewAbstractModel::GetInstance()->BindContentCover(isShow, std::move(callback), std::move(buildFunc), modalStyle,
         std::move(onShowCallback), std::move(onDismissCallback), std::move(onWillShowCallback),
-        std::move(onWillDismissCallback));
+        std::move(onWillDismissCallback), contentCoverParam);
+}
+
+void JSViewAbstract::ParseModalTransitonEffect(
+    const JSRef<JSObject>& paramObj, NG::ContentCoverParam& contentCoverParam, const JSExecutionContext& context)
+{
+    auto transitionEffectValue = paramObj->GetProperty("transition");
+    if (transitionEffectValue->IsObject()) {
+        JSRef<JSObject> obj = JSRef<JSObject>::Cast(transitionEffectValue);
+        contentCoverParam.transitionEffect = ParseChainedTransition(obj, context);
+    }
 }
 
 void JSViewAbstract::ParseModalStyle(const JSRef<JSObject>& paramObj, NG::ModalStyle& modalStyle)
@@ -6683,14 +6739,21 @@ panda::Local<panda::JSValueRef> JSViewAbstract::JsDismissSheet(panda::JsiRuntime
     return JSValueRef::Undefined(runtimeCallInfo->GetVM());
 }
 
-void JSViewAbstract::ParseOverlayCallback(
-    const JSRef<JSObject>& paramObj, std::function<void()>& onAppear, std::function<void()>& onDisappear,
-    std::function<void()>& onWillAppear, std::function<void()>& onWillDisappear)
+panda::Local<panda::JSValueRef> JSViewAbstract::JsDismissContentCover(panda::JsiRuntimeCallInfo* runtimeCallInfo)
+{
+    ViewAbstractModel::GetInstance()->DismissContentCover();
+    return JSValueRef::Undefined(runtimeCallInfo->GetVM());
+}
+
+void JSViewAbstract::ParseOverlayCallback(const JSRef<JSObject>& paramObj, std::function<void()>& onAppear,
+    std::function<void()>& onDisappear, std::function<void()>& onWillAppear, std::function<void()>& onWillDisappear,
+    std::function<void(const int32_t& info)>& onWillDismiss)
 {
     auto showCallback = paramObj->GetProperty("onAppear");
     auto dismissCallback = paramObj->GetProperty("onDisappear");
     auto willShowCallback = paramObj->GetProperty("onWillAppear");
     auto willDismissCallback = paramObj->GetProperty("onWillDisappear");
+    auto onWillDismissFunc = paramObj->GetProperty("onWillDismiss");
     WeakPtr<NG::FrameNode> frameNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
     if (showCallback->IsFunction()) {
         RefPtr<JsFunction> jsFunc =
@@ -6717,6 +6780,22 @@ void JSViewAbstract::ParseOverlayCallback(
         RefPtr<JsFunction> jsFunc =
             AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(willDismissCallback));
         onWillDisappear = [func = std::move(jsFunc)]() { func->Execute(); };
+    }
+    if (onWillDismissFunc->IsFunction()) {
+        RefPtr<JsFunction> jsFunc =
+            AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(onWillDismissFunc));
+        onWillDismiss = [func = std::move(jsFunc), node = frameNode](const int32_t& info) {
+            ACE_SCORING_EVENT("contentCover.dismiss");
+            PipelineContext::SetCallBackNode(node);
+            JSRef<JSObjTemplate> objectTemplate = JSRef<JSObjTemplate>::New();
+            objectTemplate->SetInternalFieldCount(1);
+            JSRef<JSObject> dismissObj = objectTemplate->NewInstance();
+            dismissObj->SetPropertyObject(
+                "dismiss", JSRef<JSFunc>::New<FunctionCallback>(JSViewAbstract::JsDismissContentCover));
+            dismissObj->SetProperty<int32_t>("reason", info);
+            JSRef<JSVal> newJSVal = JSRef<JSObject>::Cast(dismissObj);
+            func->ExecuteJS(1, &newJSVal);
+        };
     }
 }
 
@@ -7016,7 +7095,9 @@ void JSViewAbstract::JSBind(BindingTarget globalObj)
     JSClass<JSViewAbstract>::StaticMethod("systemBarEffect", &JSViewAbstract::JsSystemBarEffect);
     JSClass<JSViewAbstract>::StaticMethod("hueRotate", &JSViewAbstract::JsHueRotate);
     JSClass<JSViewAbstract>::StaticMethod("clip", &JSViewAbstract::JsClip);
+    JSClass<JSViewAbstract>::StaticMethod("clipShape", &JSViewAbstract::JsClip);
     JSClass<JSViewAbstract>::StaticMethod("mask", &JSViewAbstract::JsMask);
+    JSClass<JSViewAbstract>::StaticMethod("maskShape", &JSViewAbstract::JsMask);
     JSClass<JSViewAbstract>::StaticMethod("key", &JSViewAbstract::JsKey);
     JSClass<JSViewAbstract>::StaticMethod("id", &JSViewAbstract::JsId);
     JSClass<JSViewAbstract>::StaticMethod("restoreId", &JSViewAbstract::JsRestoreId);
@@ -7048,6 +7129,7 @@ void JSViewAbstract::JSBind(BindingTarget globalObj)
     JSClass<JSViewAbstract>::StaticMethod("onChildTouchTest", &JSViewAbstract::JsOnChildTouchTest);
     JSClass<JSViewAbstract>::StaticMethod("keyboardShortcut", &JSViewAbstract::JsKeyboardShortcut);
     JSClass<JSViewAbstract>::StaticMethod("obscured", &JSViewAbstract::JsObscured);
+    JSClass<JSViewAbstract>::StaticMethod("privacySensitive", &JSViewAbstract::JsPrivacySensitive);
     JSClass<JSViewAbstract>::StaticMethod("allowDrop", &JSViewAbstract::JsAllowDrop);
     JSClass<JSViewAbstract>::StaticMethod("dragPreview", &JSViewAbstract::JsDragPreview);
 
@@ -8234,6 +8316,7 @@ bool JSViewAbstract::CheckLength(
     return true;
 }
 
+// obscured means that the developer calls the component to be private style.
 void JSViewAbstract::JsObscured(const JSCallbackInfo& info)
 {
     if (info[0]->IsUndefined()) {
@@ -8257,6 +8340,21 @@ void JSViewAbstract::JsObscured(const JSCallbackInfo& info)
     }
 
     ViewAbstractModel::GetInstance()->SetObscured(reasons);
+}
+
+// PrivacySensitive means that the component will change style when system calls the app to be privated.
+void JSViewAbstract::JsPrivacySensitive(const JSCallbackInfo& info)
+{
+    auto sensitiveInfo = info[0];
+    if (sensitiveInfo->IsUndefined()) {
+        ViewAbstractModel::GetInstance()->SetPrivacySensitive(false);
+        return;
+    }
+    bool sensitive = false;
+    if (sensitiveInfo->IsBoolean()) {
+        sensitive = sensitiveInfo->ToBoolean();
+    }
+    ViewAbstractModel::GetInstance()->SetPrivacySensitive(sensitive);
 }
 
 void JSViewAbstract::JSRenderGroup(const JSCallbackInfo& info)

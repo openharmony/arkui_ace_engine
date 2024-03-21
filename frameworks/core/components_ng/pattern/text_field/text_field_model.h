@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -34,6 +34,7 @@
 #include "core/components_ng/base/view_abstract_model_ng.h"
 #include "core/components_ng/pattern/text/text_menu_extension.h"
 #include "core/components_ng/property/measure_property.h"
+#include "core/components_ng/pattern/text_field/text_content_type.h"
 #include "core/components_ng/pattern/text_field/text_field_event_hub.h"
 
 namespace OHOS::Ace {
@@ -100,6 +101,12 @@ enum class CleanNodeStyle {
     INPUT,
 };
 
+enum class MenuPolicy { DEFAULT = 0, NEVER, ALWAYS };
+
+struct SelectionOptions {
+    MenuPolicy menuPolicy = MenuPolicy::DEFAULT;
+};
+
 class ACE_EXPORT TextFieldControllerBase : public AceType {
     DECLARE_ACE_TYPE(TextFieldControllerBase, AceType);
 
@@ -119,7 +126,8 @@ public:
     {
         return {};
     }
-    virtual void SetTextSelection(int32_t selectionStart, int32_t selectionEnd) {}
+    virtual void SetTextSelection(int32_t selectionStart, int32_t selectionEnd,
+        const std::optional<SelectionOptions>& options = std::nullopt) {}
     virtual Rect GetTextContentRect()
     {
         return {};
@@ -211,6 +219,7 @@ public:
     virtual void RequestKeyboardOnFocus(bool needToRequest) = 0;
     virtual void SetWidthAuto(bool isAuto) {}
     virtual void SetType(TextInputType value) = 0;
+    virtual void SetContentType(const NG::TextContentType& value) = 0;
     virtual void SetPlaceholderColor(const Color& value) = 0;
     virtual void SetPlaceholderFont(const Font& value) = 0;
     virtual void SetEnterKeyType(TextInputAction value) = 0;
@@ -224,6 +233,7 @@ public:
     virtual void SetFontSize(const Dimension& value) = 0;
     virtual void SetFontWeight(FontWeight value) = 0;
     virtual void SetTextColor(const Color& value) = 0;
+    virtual void SetWordBreak(Ace::WordBreak value) {};
     virtual void SetFontStyle(FontStyle value) = 0;
     virtual void SetFontFamily(const std::vector<std::string>& value) = 0;
     virtual void SetInputFilter(const std::string& value, const std::function<void(const std::string&)>& onError) = 0;

@@ -80,6 +80,23 @@ static std::string ConvertControlSizeToString(ControlSize controlSize)
     }
     return result;
 }
+
+void RecordChange(RefPtr<FrameNode> host, int32_t index, const std::string& value)
+{
+    if (Recorder::EventRecorder::Get().IsComponentRecordEnable()) {
+        auto inspectorId = host->GetInspectorId().value_or("");
+        Recorder::EventParamsBuilder builder;
+        builder.SetId(inspectorId)
+            .SetType(host->GetTag())
+            .SetIndex(index)
+            .SetText(value)
+            .SetDescription(host->GetAutoEventParamValue(""));
+        Recorder::EventRecorder::Get().OnChange(std::move(builder));
+        if (!inspectorId.empty()) {
+            Recorder::NodeDataCache::Get().PutMultiple(host, inspectorId, value, index);
+        }
+    }
+}
 } // namespace
 
 void SelectPattern::OnAttachToFrameNode()
@@ -152,20 +169,7 @@ void SelectPattern::ShowSelectMenu()
         auto scrollLayoutProps = scroll->GetLayoutProperty<ScrollLayoutProperty>();
         CHECK_NULL_VOID(scrollLayoutProps);
         scrollLayoutProps->UpdateScrollWidth(selectWidth);
-    
-        for (size_t i = 0; i < options_.size(); ++i) {
-            auto optionGeoNode = options_[i]->GetGeometryNode();
-            CHECK_NULL_VOID(optionGeoNode);
-    
-            auto optionWidth = selectWidth - OPTION_MARGIN.ConvertToPx();
-        
-            auto optionPattern = options_[i]->GetPattern<OptionPattern>();
-            CHECK_NULL_VOID(optionPattern);
-            optionPattern->SetIsWidthModifiedBySelect(true);
-            auto optionPaintProperty = options_[i]->GetPaintProperty<OptionPaintProperty>();
-            CHECK_NULL_VOID(optionPaintProperty);
-            optionPaintProperty->UpdateSelectModifiedWidth(optionWidth);
-        }
+        UpdateOptionsWidth(selectWidth);
     }
     
     auto offset = GetHost()->GetPaintRectOffset();
@@ -175,8 +179,23 @@ void SelectPattern::ShowSelectMenu()
     } else {
         offset.AddY(selectSize_.Height());
     }
-    
+    TAG_LOGD(AceLogTag::ACE_SELECT_COMPONENT, "select click to show menu.");
     overlayManager->ShowMenu(GetHost()->GetId(), offset, menuWrapper_);
+}
+
+void SelectPattern::UpdateOptionsWidth(float selectWidth)
+{
+    for (size_t i = 0; i < options_.size(); ++i) {
+        auto optionGeoNode = options_[i]->GetGeometryNode();
+        CHECK_NULL_VOID(optionGeoNode);
+        auto optionWidth = selectWidth - OPTION_MARGIN.ConvertToPx();
+        auto optionPattern = options_[i]->GetPattern<OptionPattern>();
+        CHECK_NULL_VOID(optionPattern);
+        optionPattern->SetIsWidthModifiedBySelect(true);
+        auto optionPaintProperty = options_[i]->GetPaintProperty<OptionPaintProperty>();
+        CHECK_NULL_VOID(optionPaintProperty);
+        optionPaintProperty->UpdateSelectModifiedWidth(optionWidth);
+    }
 }
 
 // add click event to show menu
@@ -237,6 +256,7 @@ void SelectPattern::RegisterOnHover()
     auto inputHub = host->GetOrCreateInputEventHub();
     CHECK_NULL_VOID(inputHub);
     auto mouseCallback = [weak = WeakClaim(this)](bool isHover) {
+        TAG_LOGD(AceLogTag::ACE_SELECT_COMPONENT, "select mouse hover %{public}d", isHover);
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
         pattern->SetIsHover(isHover);
@@ -269,6 +289,7 @@ void SelectPattern::RegisterOnPress()
         const auto& renderContext = host->GetRenderContext();
         CHECK_NULL_VOID(renderContext);
         // update press status, repaint background color
+        TAG_LOGD(AceLogTag::ACE_SELECT_COMPONENT, "select touch type %{public}zu", touchType);
         if (touchType == TouchType::DOWN) {
             pattern->SetBgBlendColor(theme->GetClickedColor());
             pattern->PlayBgColorAnimation(false);
@@ -317,22 +338,12 @@ void SelectPattern::CreateSelectedCallback()
         CHECK_NULL_VOID(newSelected);
         auto value = newSelected->GetText();
         auto onSelect = hub->GetSelectEvent();
+        TAG_LOGD(
+            AceLogTag::ACE_SELECT_COMPONENT, "select choice index %{public}d value %{public}s", index, value.c_str());
         if (onSelect) {
             onSelect(index, value);
         }
-        if (Recorder::EventRecorder::Get().IsComponentRecordEnable()) {
-            auto inspectorId = host->GetInspectorId().value_or("");
-            Recorder::EventParamsBuilder builder;
-            builder.SetId(inspectorId)
-                .SetType(host->GetTag())
-                .SetIndex(index)
-                .SetText(value)
-                .SetDescription(host->GetAutoEventParamValue(""));
-            Recorder::EventRecorder::Get().OnChange(std::move(builder));
-            if (!inspectorId.empty()) {
-                Recorder::NodeDataCache::Get().PutMultiple(host, inspectorId, value, index);
-            }
-        }
+        RecordChange(host, index, value);
     };
     for (auto&& option : options_) {
         auto hub = option->GetEventHub<OptionEventHub>();

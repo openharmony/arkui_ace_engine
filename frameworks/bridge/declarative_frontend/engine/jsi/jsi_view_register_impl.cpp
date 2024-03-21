@@ -53,6 +53,7 @@
 #include "bridge/declarative_frontend/jsview/js_checkbox.h"
 #include "bridge/declarative_frontend/jsview/js_checkboxgroup.h"
 #include "bridge/declarative_frontend/jsview/js_circle.h"
+#include "bridge/declarative_frontend/jsview/js_circle_shape.h"
 #include "bridge/declarative_frontend/jsview/js_clipboard.h"
 #include "bridge/declarative_frontend/jsview/js_column.h"
 #include "bridge/declarative_frontend/jsview/js_column_split.h"
@@ -64,6 +65,7 @@
 #include "bridge/declarative_frontend/jsview/js_datepicker.h"
 #include "bridge/declarative_frontend/jsview/js_divider.h"
 #include "bridge/declarative_frontend/jsview/js_ellipse.h"
+#include "bridge/declarative_frontend/jsview/js_ellipse_shape.h"
 #include "bridge/declarative_frontend/jsview/js_environment.h"
 #include "bridge/declarative_frontend/jsview/js_flex_impl.h"
 #include "bridge/declarative_frontend/jsview/js_folder_stack.h"
@@ -111,6 +113,7 @@
 #include "bridge/declarative_frontend/jsview/js_particle.h"
 #include "bridge/declarative_frontend/jsview/js_paste_button.h"
 #include "bridge/declarative_frontend/jsview/js_path.h"
+#include "bridge/declarative_frontend/jsview/js_path_shape.h"
 #include "bridge/declarative_frontend/jsview/js_path2d.h"
 #include "bridge/declarative_frontend/jsview/js_pattern_lock.h"
 #include "bridge/declarative_frontend/jsview/js_persistent.h"
@@ -119,6 +122,7 @@
 #include "bridge/declarative_frontend/jsview/js_progress.h"
 #include "bridge/declarative_frontend/jsview/js_qrcode.h"
 #include "bridge/declarative_frontend/jsview/js_radio.h"
+#include "bridge/declarative_frontend/jsview/js_rect_shape.h"
 #include "bridge/declarative_frontend/jsview/js_rect.h"
 #include "bridge/declarative_frontend/jsview/js_recycle_view.h"
 #include "bridge/declarative_frontend/jsview/js_refresh.h"
@@ -792,6 +796,10 @@ static const std::unordered_map<std::string, std::function<void(BindingTarget)>>
     { "SymbolGlyph", JSSymbol::JSBind },
     { "SymbolSpan", JSSymbolSpan::JSBind },
     { "ContainerSpan",  JSContainerSpan::JSBind},
+    { "__RectShape__", JSRectShape::JSBind },
+    { "__CircleShape__", JSCircleShape::JSBind },
+    { "__EllipseShape__", JSEllipseShape::JSBind },
+    { "__PathShape__", JSPathShape::JSBind },
 };
 
 void RegisterAllModule(BindingTarget globalObj, void* nativeEngine)
@@ -834,6 +842,10 @@ void RegisterAllModule(BindingTarget globalObj, void* nativeEngine)
     JSTextController::JSBind(globalObj);
     JSNodeContainer::JSBind(globalObj);
     JSBaseNode::JSBind(globalObj);
+    JSRectShape::JSBind(globalObj);
+    JSCircleShape::JSBind(globalObj);
+    JSEllipseShape::JSBind(globalObj);
+    JSPathShape::JSBind(globalObj);
     for (auto& iter : bindFuncs) {
         iter.second(globalObj);
     }

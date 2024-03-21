@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -12,13 +12,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
- 
+
 #ifndef FOUNDATION_ACE_INTERFACE_INNERKITS_ACE_POPUP_CONFIG_H
 #define FOUNDATION_ACE_INTERFACE_INNERKITS_ACE_POPUP_CONFIG_H
- 
+
 #include <optional>
 #include <string>
- 
+
 namespace OHOS::Ace {
 enum class PopupPlacement {
     LEFT,
@@ -35,7 +35,7 @@ enum class PopupPlacement {
     RIGHT_BOTTOM,
     NONE,
 };
- 
+
 enum class PopupDimensionUnit {
     PX = 0,
     VP,
@@ -45,26 +45,28 @@ enum class PopupDimensionUnit {
     AUTO,
     CALC,
 };
- 
+
 struct PopupOffset {
     PopupDimensionUnit unit = PopupDimensionUnit::PX;
     double deltaX = 0.0;
     double deltaY = 0.0;
 };
- 
+
 struct PopupSize {
     PopupDimensionUnit unit = PopupDimensionUnit::PX;
     double width = 0.0;
     double height = 0.0;
 };
- 
+
 struct PopupLength {
     PopupDimensionUnit unit = PopupDimensionUnit::PX;
     double length = 0.0;
 };
- 
+
 struct CustomPopupUIExtensionConfig {
     bool isShowInSubWindow = true;
+    bool isFocusable = true;
+    std::int32_t nodeId = -1;
     std::string inspectorId;
     std::optional<bool> isAutoCancel;
     std::optional<bool> isEnableArrow;

@@ -38,7 +38,7 @@ public:
     bool RemoveDisplaySync(const RefPtr<UIDisplaySync>& displaySync);
     bool HasDisplaySync(const RefPtr<UIDisplaySync>& displaySync);
 
-    void DispatchFunc(uint64_t nanoTimestamp);
+    void DispatchFunc(int64_t nanoTimestamp);
 
     bool SetVsyncRate(int32_t vsyncRate);
     int32_t GetVsyncRate() const;
@@ -52,6 +52,10 @@ public:
     bool IsSupportSkip() const;
     bool IsAutoRefreshRateMode() const;
     bool IsNonAutoRefreshRateMode() const;
+
+    std::set<int32_t> FindRefreshRateFactors(int32_t refreshRate);
+    int32_t FindMatchedRefreshRate(int32_t target);
+    void FindAllRefreshRateFactors();
 
     UIDisplaySyncManager();
     ~UIDisplaySyncManager() noexcept override;
@@ -69,6 +73,8 @@ private:
     IdToDisplaySyncMap uiDisplaySyncMap_;
     std::once_flag isEnablePropertyFlag_;
     bool supportSkipEnabled_ = true;
+    std::vector<int32_t> refreshRateFactors_;
+    std::once_flag computeFactorsFlag_;
 };
 } // namespace OHOS::Ace
 

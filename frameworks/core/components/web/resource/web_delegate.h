@@ -149,6 +149,19 @@ private:
     std::shared_ptr<OHOS::NWeb::NWebJSSslErrorResult> result_;
 };
 
+class AllSslErrorResultOhos : public AllSslErrorResult {
+    DECLARE_ACE_TYPE(AllSslErrorResultOhos, AllSslErrorResult)
+
+public:
+    AllSslErrorResultOhos(std::shared_ptr<OHOS::NWeb::NWebJSAllSslErrorResult> result) : result_(result) {}
+
+    void HandleConfirm() override;
+    void HandleCancel() override;
+
+private:
+    std::shared_ptr<OHOS::NWeb::NWebJSAllSslErrorResult> result_;
+};
+
 class SslSelectCertResultOhos : public SslSelectCertResult {
     DECLARE_ACE_TYPE(SslSelectCertResultOhos, SslSelectCertResult)
 
@@ -428,6 +441,22 @@ private:
     WeakPtr<PipelineBase> context_;
 };
 
+class GestureEventResultOhos : public GestureEventResult {
+    DECLARE_ACE_TYPE(GestureEventResultOhos, GestureEventResult);
+
+public:
+    GestureEventResultOhos(std::shared_ptr<OHOS::NWeb::NWebGestureEventResult> result)
+        : result_(result) {}
+
+    void SetGestureEventResult(bool result) override;
+    bool HasSendTask() { return sendTask_; }
+    void SetSendTask() { sendTask_ = true; }
+
+private:
+    std::shared_ptr<OHOS::NWeb::NWebGestureEventResult> result_;
+    bool sendTask_ = false;
+};
+
 enum class ScriptItemType {
     DOCUMENT_START = 0,
     DOCUMENT_END
@@ -537,6 +566,7 @@ public:
     void UpdateNativeEmbedRuleType(const std::string& type);
     void UpdateCopyOptionMode(const int32_t copyOptionModeValue);
     void UpdateTextAutosizing(bool isTextAutosizing);
+    void UpdateMetaViewport(bool isMetaViewportEnabled);
     void LoadUrl();
     void CreateWebMessagePorts(std::vector<RefPtr<WebMessagePort>>& ports);
     void PostWebMessage(std::string& message, std::vector<RefPtr<WebMessagePort>>& ports, std::string& uri);
@@ -615,6 +645,7 @@ public:
     bool OnCommonDialog(const std::shared_ptr<BaseEventInfo>& info, DialogEventType dialogEventType);
     bool OnHttpAuthRequest(const std::shared_ptr<BaseEventInfo>& info);
     bool OnSslErrorRequest(const std::shared_ptr<BaseEventInfo>& info);
+    bool OnAllSslErrorRequest(const std::shared_ptr<BaseEventInfo>& info);
     bool OnSslSelectCertRequest(const std::shared_ptr<BaseEventInfo>& info);
     void OnDownloadStart(const std::string& url, const std::string& userAgent, const std::string& contentDisposition,
         const std::string& mimetype, long contentLength);

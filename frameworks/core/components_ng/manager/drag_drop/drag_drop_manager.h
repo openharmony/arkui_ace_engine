@@ -293,6 +293,16 @@ public:
         return preDragStatus_;
     }
 
+    void ResetPullMoveReceivedForCurrentDrag(bool isPullMoveReceivedForCurrentDrag = false)
+    {
+        isPullMoveReceivedForCurrentDrag_ = isPullMoveReceivedForCurrentDrag;
+    }
+
+    bool IsPullMoveReceivedForCurrentDrag() const
+    {
+        return isPullMoveReceivedForCurrentDrag_;
+    }
+
 private:
     double CalcDragPreviewDistanceWithPoint(
         const OHOS::Ace::Dimension& preserverHeight, int32_t x, int32_t y, const DragPreviewInfo& info);
@@ -352,6 +362,7 @@ private:
     bool isWindowConsumed_ = false;
     bool isDragWindowShow_ = false;
     bool hasNotifiedTransformation_ = false;
+    bool isPullMoveReceivedForCurrentDrag_ = false;
     VelocityTracker velocityTracker_;
     DragDropMgrState dragDropState_ = DragDropMgrState::IDLE;
     PreDragStatus preDragStatus_ = PreDragStatus::ACTION_DETECTING_STATUS;

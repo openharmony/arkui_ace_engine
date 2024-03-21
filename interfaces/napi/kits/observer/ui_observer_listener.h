@@ -41,10 +41,12 @@ public:
     void OnRouterPageStateChange(napi_value context, int32_t index,
         const std::string& name, const std::string& path, NG::RouterPageState state);
     void OnDensityChange(double density);
+    void OnNavDestinationSwitch(const NG::NavDestinationSwitchInfo& switchInfo);
     bool NapiEqual(napi_value cb);
     void OnDrawOrLayout();
 
 private:
+    napi_value CreateNavDestinationSwitchInfoObj(const NG::NavDestinationSwitchInfo& switchInfo);
     napi_value CreateNavDestinationInfoObj(const NG::NavDestinationInfo& info);
     napi_value GetNapiCallback();
     napi_env env_ = nullptr;

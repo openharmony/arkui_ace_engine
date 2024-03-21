@@ -109,18 +109,15 @@ void WaterFlowLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
 
     int32_t updateIdx = layoutWrapper->GetHostNode()->GetChildrenUpdated();
     if (updateIdx != -1) {
-        if (layoutInfo_.footerIndex_ == 0) {
-            --updateIdx;
-        }
-        layoutInfo_.ClearCacheAfterIndex(updateIdx - 1);
+        layoutInfo_.Reset(updateIdx);
         layoutWrapper->GetHostNode()->ChildrenUpdatedFrom(-1);
     }
 
     layoutInfo_.childrenCount_ = layoutWrapper->GetTotalChildCount();
 
-    InitialItemsCrossSize(layoutProperty, idealSize, layoutWrapper->GetTotalChildCount());
+    InitialItemsCrossSize(layoutProperty, idealSize, layoutInfo_.childrenCount_);
     mainSize_ = GetMainAxisSize(idealSize, axis);
-    if (layoutInfo_.jumpIndex_ >= 0 && layoutInfo_.jumpIndex_ < layoutWrapper->GetTotalChildCount()) {
+    if (layoutInfo_.jumpIndex_ >= 0 && layoutInfo_.jumpIndex_ < layoutInfo_.childrenCount_) {
         auto crossIndex = layoutInfo_.GetCrossIndex(layoutInfo_.jumpIndex_);
         if (crossIndex == -1) {
             // jump to out of cache
@@ -315,7 +312,7 @@ void WaterFlowLayoutAlgorithm::FillViewport(float mainSize, LayoutWrapper* layou
     }
     layoutInfo_.endIndex_ = currentIndex - 1;
 
-    layoutInfo_.itemEnd_ = GetChildIndexWithFooter(currentIndex) == layoutWrapper->GetTotalChildCount();
+    layoutInfo_.itemEnd_ = GetChildIndexWithFooter(currentIndex) == layoutInfo_.childrenCount_;
     if (layoutInfo_.itemEnd_) {
         ModifyCurrentOffsetWhenReachEnd(mainSize, layoutWrapper);
     } else {

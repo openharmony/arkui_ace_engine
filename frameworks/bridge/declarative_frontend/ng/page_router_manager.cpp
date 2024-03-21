@@ -268,18 +268,9 @@ void PageRouterManager::ReplaceNamedRoute(const RouterPageInfo& target)
     }
     RouterOptScope scope(this);
     CleanPageOverlay();
-    PopPage("", false, false);
-    if (target.routerMode == RouterMode::SINGLE) {
-        auto pageInfo = FindPageInStack(target.url);
-        if (pageInfo.second) {
-            // find page in stack, move postion and update params.
-            MovePageToFront(pageInfo.first, pageInfo.second, target, false, true, false);
-            return;
-        }
-    }
     RouterPageInfo info = target;
     info.isNamedRouterMode = true;
-    LoadPage(GenerateNextPageId(), info, false, false);
+    DealReplacePage(info);
 }
 
 void PageRouterManager::BackWithTarget(const RouterPageInfo& target)
@@ -985,18 +976,7 @@ void PageRouterManager::StartReplace(const RouterPageInfo& target)
         return;
     }
 
-    PopPage("", false, false);
-
-    if (info.routerMode == RouterMode::SINGLE) {
-        auto pageInfo = FindPageInStack(info.url);
-        if (pageInfo.second) {
-            // find page in stack, move position and update params.
-            MovePageToFront(pageInfo.first, pageInfo.second, info, false, true, false);
-            return;
-        }
-    }
-
-    LoadPage(GenerateNextPageId(), info, false, false);
+    DealReplacePage(info);
 }
 
 void PageRouterManager::StartBack(const RouterPageInfo& target)
@@ -1416,5 +1396,40 @@ void PageRouterManager::CleanPageOverlay()
     }
 
     overlayManager->RemoveOverlay(true, true);
+}
+
+void PageRouterManager::DealReplacePage(const RouterPageInfo& info)
+{
+    if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
+        auto pipelineContext = PipelineContext::GetCurrentContext();
+        CHECK_NULL_VOID(pipelineContext);
+        auto stageManager = pipelineContext->GetStageManager();
+        auto stageNode = stageManager->GetStageNode();
+        auto popNode = stageNode->GetChildren().back();
+        if (info.routerMode == RouterMode::SINGLE) {
+            auto pageInfo = FindPageInStack(info.url);
+            if (pageInfo.second) {
+                // find page in stack, move position and update params.
+                MovePageToFront(pageInfo.first, pageInfo.second, info, false, true, false);
+                popNode->MovePosition(stageNode->GetChildren().size() - 1);
+                PopPage("", true, false);
+                return;
+            }
+        }
+        LoadPage(GenerateNextPageId(), info, true, false);
+        popNode->MovePosition(stageNode->GetChildren().size() - 1);
+        PopPage("", false, false);
+        return;
+    }
+    PopPage("", false, false);
+    if (info.routerMode == RouterMode::SINGLE) {
+        auto pageInfo = FindPageInStack(info.url);
+        if (pageInfo.second) {
+            // find page in stack, move position and update params.
+            MovePageToFront(pageInfo.first, pageInfo.second, info, false, true, false);
+            return;
+        }
+    }
+    LoadPage(GenerateNextPageId(), info, false, false);
 }
 } // namespace OHOS::Ace::NG

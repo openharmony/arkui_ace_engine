@@ -870,6 +870,7 @@ var SearchType;
   SearchType[SearchType["NUMBER"] = 2] = "NUMBER";
   SearchType[SearchType["PHONE_NUMBER"] = 3] = "PHONE_NUMBER";
   SearchType[SearchType["EMAIL"] = 5] = "EMAIL";
+  SearchType[SearchType["NUMBER_DECIMAL"] = 12] = "NUMBER_DECIMAL";
 })(SearchType || (SearchType = {}));
 
 var TextAreaType;
@@ -878,6 +879,7 @@ var TextAreaType;
   TextAreaType[TextAreaType["NUMBER"] = 2] = "NUMBER";
   TextAreaType[TextAreaType["PHONE_NUMBER"] = 3] = "PHONE_NUMBER";
   TextAreaType[TextAreaType["EMAIL"] = 5] = "EMAIL";
+  TextAreaType[TextAreaType["NUMBER_DECIMAL"] = 12] = "NUMBER_DECIMAL";
 })(TextAreaType || (TextAreaType = {}));
 
 var EnterKeyType;
@@ -1384,6 +1386,33 @@ var FunctionKey;
   FunctionKey[FunctionKey["F11"] = 11] = "F11";
   FunctionKey[FunctionKey["F12"] = 12] = "F12";
 })(FunctionKey || (FunctionKey = {}));
+
+var ContentType;
+(function (ContentType) {
+  ContentType[ContentType['USER_NAME'] = 0] = 'USER_NAME';
+  ContentType[ContentType['PASSWORD'] = 1] = 'PASSWORD';
+  ContentType[ContentType['NEW_PASSWORD'] = 2] = 'NEW_PASSWORD';
+  ContentType[ContentType['FULL_STREET_ADDRESS'] = 3] = 'FULL_STREET_ADDRESS';
+  ContentType[ContentType['HOUSE_NUMBER'] = 4] = 'HOUSE_NUMBER';
+  ContentType[ContentType['DISTRICT_ADDRESS'] = 5] = 'DISTRICT_ADDRESS';
+  ContentType[ContentType['CITY_ADDRESS'] = 6] = 'CITY_ADDRESS';
+  ContentType[ContentType['PROVINCE_ADDRESS'] = 7] = 'PROVINCE_ADDRESS';
+  ContentType[ContentType['COUNTRY_ADDRESS'] = 8] = 'COUNTRY_ADDRESS';
+  ContentType[ContentType['PERSON_FULL_NAME'] = 9] = 'PERSON_FULL_NAME';
+  ContentType[ContentType['PERSON_LAST_NAME'] = 10] = 'PERSON_LAST_NAME';
+  ContentType[ContentType['PERSON_FIRST_NAME'] = 11] = 'PERSON_FIRST_NAME';
+  ContentType[ContentType['PHONE_NUMBER'] = 12] = 'PHONE_NUMBER';
+  ContentType[ContentType['PHONE_COUNTRY_CODE'] = 13] = 'PHONE_COUNTRY_CODE';
+  ContentType[ContentType['FULL_PHONE_NUMBER'] = 14] = 'FULL_PHONE_NUMBER';
+  ContentType[ContentType['EMAIL_ADDRESS'] = 15] = 'EMAIL_ADDRESS';
+  ContentType[ContentType['BANK_CARD_NUMBER'] = 16] = 'BANK_CARD_NUMBER';
+  ContentType[ContentType['ID_CARD_NUMBER'] = 17] = 'ID_CARD_NUMBER';
+  ContentType[ContentType['PRECISE_TIME'] = 18] = 'PRECISE_TIME';
+  ContentType[ContentType['HOUR_AND_MINUTE'] = 19] = 'HOUR_AND_MINUTE';
+  ContentType[ContentType['DATE'] = 20] = 'DATE';
+  ContentType[ContentType['MONTH'] = 21] = 'MONTH';
+  ContentType[ContentType['YEAR'] = 22] = 'YEAR';
+})(ContentType || (ContentType = {}));
 
 var GestureJudgeResult;
 (function (GestureJudgeResult) {

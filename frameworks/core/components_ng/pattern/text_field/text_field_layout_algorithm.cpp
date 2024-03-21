@@ -28,6 +28,7 @@
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/text/text_layout_adapter.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
+#include "core/components_ng/pattern/text/text_styles.h"
 #include "core/components_ng/pattern/text_field/text_field_content_modifier.h"
 #include "core/components_ng/pattern/text_field/text_field_layout_property.h"
 #include "core/components_ng/pattern/text_field/text_field_pattern.h"
@@ -64,6 +65,10 @@ void TextFieldLayoutAlgorithm::ConstructTextStyles(
             textStyle.SetTextOverflow(TextOverflow::ELLIPSIS);
         } else {
             textStyle.SetTextOverflow(TextOverflow::CLIP);
+        }
+
+        if (pattern->IsTextArea() || isInlineStyle) {
+            textStyle.SetWordBreak(textFieldLayoutProperty->GetWordBreak().value_or(WordBreak::BREAK_WORD));
         }
     } else {
         UpdatePlaceholderTextStyle(
@@ -720,6 +725,11 @@ void TextFieldLayoutAlgorithm::UpdateTextStyleMore(const RefPtr<FrameNode>& fram
     const RefPtr<TextFieldLayoutProperty>& layoutProperty, const RefPtr<TextFieldTheme>& theme,
     TextStyle& textStyle, bool isDisabled)
 {
+    auto pattern = frameNode->GetPattern<TextFieldPattern>();
+    CHECK_NULL_VOID(pattern);
+    if (pattern->IsInPasswordMode()) {
+        return;
+    }
     if (layoutProperty->HasTextDecoration()) {
         textStyle.SetTextDecoration(layoutProperty->GetTextDecoration().value());
     }
@@ -741,20 +751,5 @@ void TextFieldLayoutAlgorithm::UpdatePlaceholderTextStyleMore(const RefPtr<Frame
     const RefPtr<TextFieldLayoutProperty>& layoutProperty, const RefPtr<TextFieldTheme>& theme,
     TextStyle& placeholderTextStyle, bool isDisabled)
 {
-    if (layoutProperty->HasTextDecoration()) {
-        placeholderTextStyle.SetTextDecoration(layoutProperty->GetTextDecoration().value());
-    }
-    if (layoutProperty->HasTextDecorationColor()) {
-        placeholderTextStyle.SetTextDecorationColor(layoutProperty->GetTextDecorationColor().value());
-    }
-    if (layoutProperty->HasTextDecorationStyle()) {
-        placeholderTextStyle.SetTextDecorationStyle(layoutProperty->GetTextDecorationStyle().value());
-    }
-    if (layoutProperty->HasLetterSpacing()) {
-        placeholderTextStyle.SetLetterSpacing(layoutProperty->GetLetterSpacing().value());
-    }
-    if (layoutProperty->HasLineHeight()) {
-        placeholderTextStyle.SetLineHeight(layoutProperty->GetLineHeight().value());
-    }
 }
 } // namespace OHOS::Ace::NG

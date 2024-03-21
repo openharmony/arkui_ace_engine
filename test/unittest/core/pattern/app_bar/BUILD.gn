@@ -15,8 +15,5 @@ import("//foundation/arkui/ace_engine/test/unittest/ace_unittest.gni")
 
 ace_unittest("app_bar_test_ng") {
   type = "new"
-  sources = [
-    "$ace_root/test/mock/core/pattern/mock_ui_extension_model_ng.cpp",
-    "app_bar_test_ng.cpp",
-  ]
+  sources = [ "app_bar_test_ng.cpp" ]
 }

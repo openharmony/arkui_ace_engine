@@ -240,6 +240,15 @@ void WebModelNG::SetOnSslErrorRequest(std::function<bool(const BaseEventInfo* in
     webEventHub->SetOnSslErrorRequestEvent(std::move(uiCallback));
 }
 
+void WebModelNG::SetOnAllSslErrorRequest(std::function<bool(const BaseEventInfo* info)>&& jsCallback)
+{
+    auto func = jsCallback;
+    auto uiCallback = [func](const std::shared_ptr<BaseEventInfo>& info) -> bool { return func(info.get()); };
+    auto webEventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<WebEventHub>();
+    CHECK_NULL_VOID(webEventHub);
+    webEventHub->SetOnAllSslErrorRequestEvent(std::move(uiCallback));
+}
+
 void WebModelNG::SetOnSslSelectCertRequest(std::function<bool(const BaseEventInfo* info)>&& jsCallback)
 {
     auto func = jsCallback;
@@ -979,6 +988,13 @@ void WebModelNG::SetNestedScroll(const NestedScrollOptions& nestedOpt)
     auto webPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPattern>();
     CHECK_NULL_VOID(webPattern);
     webPattern->SetNestedScroll(nestedOpt);
+}
+
+void WebModelNG::SetMetaViewport(bool enabled)
+{
+    auto webPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPattern>();
+    CHECK_NULL_VOID(webPattern);
+    webPattern->UpdateMetaViewport(enabled);
 }
 
 void WebModelNG::JavaScriptOnDocumentStart(const ScriptItems& scriptItems)

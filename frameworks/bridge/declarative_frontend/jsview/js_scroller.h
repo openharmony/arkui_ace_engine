@@ -34,6 +34,7 @@ public:
 
     void ScrollTo(const JSCallbackInfo& args);
     void ScrollEdge(const JSCallbackInfo& args);
+    void Fling(const JSCallbackInfo& args);
     void ScrollPage(const JSCallbackInfo& args);
     void CurrentOffset(const JSCallbackInfo& args);
     void ScrollToIndex(const JSCallbackInfo& args);

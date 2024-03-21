@@ -1280,25 +1280,31 @@ NG::DragDropInfo TextPattern::OnDragStart(const RefPtr<Ace::DragEvent>& event, c
     return itemInfo;
 }
 
+void TextPattern::AddUdmfTxtPreProcessor(const ResultObject src, ResultObject& result, bool isAppend)
+{
+    auto valueString = GetSelectedSpanText(StringUtils::ToWstring(src.valueString),
+        src.offsetInSpan[RichEditorSpanRange::RANGESTART], src.offsetInSpan[RichEditorSpanRange::RANGEEND]);
+    if (isAppend) {
+        result.valueString = result.valueString + valueString;
+    } else {
+        result.valueString = valueString;
+    }
+}
+
 void TextPattern::AddUdmfData(const RefPtr<Ace::DragEvent>& event)
 {
     RefPtr<UnifiedData> unifiedData = UdmfClient::GetInstance()->CreateUnifiedData();
-    auto txtPreProcessor = [weak = WeakClaim(this)](const ResultObject src, ResultObject& result) {
-        auto pattern = weak.Upgrade();
-        CHECK_NULL_VOID(pattern);
-        auto valueString = pattern->GetSelectedSpanText(StringUtils::ToWstring(src.valueString),
-            src.offsetInSpan[RichEditorSpanRange::RANGESTART],
-            src.offsetInSpan[RichEditorSpanRange::RANGEEND]);
-        result.valueString = result.valueString + valueString;
-    };
     std::list<ResultObject> finalResult;
     auto type = SelectSpanType::TYPESPAN;
     for (const auto& resultObj : dragResultObjects_) {
         if (finalResult.empty() || resultObj.type != SelectSpanType::TYPESPAN || type != SelectSpanType::TYPESPAN) {
             type = resultObj.type;
             finalResult.emplace_back(resultObj);
+            if (resultObj.type == SelectSpanType::TYPESPAN) {
+                AddUdmfTxtPreProcessor(resultObj, finalResult.back(), false);
+            }
         } else {
-            txtPreProcessor(resultObj, finalResult.back());
+            AddUdmfTxtPreProcessor(resultObj, finalResult.back(), true);
         }
     }
     auto resultProcessor = [unifiedData, weak = WeakClaim(this)](const ResultObject& result) {

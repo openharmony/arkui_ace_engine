@@ -1288,6 +1288,7 @@ void DragDropManager::DoDragMoveAnimate(const PointerEvent& pointerEvent)
     if (!IsNeedScaleDragPreview()) {
         return;
     }
+    isPullMoveReceivedForCurrentDrag_ = true;
     auto pipeline = PipelineContext::GetCurrentContext();
     auto containerId = Container::CurrentId();
     auto subwindow = SubwindowManager::GetInstance()->GetSubwindow(containerId);
@@ -1329,7 +1330,9 @@ void DragDropManager::DoDragStartAnimation(const RefPtr<OverlayManager>& overlay
     if (!(GetDragPreviewInfo(overlayManager, info_)) || !IsNeedScaleDragPreview()) {
         return;
     }
+    auto containerId = Container::CurrentId();
     isDragFwkShow_ = false;
+    ResetPullMoveReceivedForCurrentDrag();
     Dimension preserveHeight = 8.0_vp;
     Offset newOffset = CalcDragMoveOffset(preserveHeight,
         static_cast<int32_t>(event.GetGlobalLocation().GetX()), static_cast<int32_t>(event.GetGlobalLocation().GetY()),
@@ -1339,6 +1342,12 @@ void DragDropManager::DoDragStartAnimation(const RefPtr<OverlayManager>& overlay
     constexpr int32_t animateDuration = 30;
     option.SetCurve(curve);
     option.SetDuration(animateDuration);
+    option.SetOnFinishEvent([weakManager = WeakClaim(this), containerId]() {
+        auto dragDropManager = weakManager.Upgrade();
+        if (dragDropManager && !dragDropManager->IsPullMoveReceivedForCurrentDrag()) {
+            dragDropManager->TransDragWindowToDragFwk(containerId);
+        }
+    });
     auto renderContext = info_.imageNode->GetRenderContext();
     AnimationUtils::Animate(
         option,

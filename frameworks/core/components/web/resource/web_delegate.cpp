@@ -266,6 +266,20 @@ void SslErrorResultOhos::HandleCancel()
     }
 }
 
+void AllSslErrorResultOhos::HandleConfirm()
+{
+    if (result_) {
+        result_->HandleConfirm();
+    }
+}
+
+void AllSslErrorResultOhos::HandleCancel()
+{
+    if (result_) {
+        result_->HandleCancel();
+    }
+}
+
 void SslSelectCertResultOhos::HandleConfirm(const std::string& privateKeyFile, const std::string& certChainFile)
 {
     if (result_) {
@@ -660,6 +674,14 @@ void WebDelegateObserver::NotifyDestory()
             }
         },
         TaskExecutor::TaskType::UI, DESTRUCT_DELAY_MILLISECONDS);
+}
+
+void GestureEventResultOhos::SetGestureEventResult(bool result)
+{
+    if (result_) {
+        result_->SetGestureEventResult(result);
+        SetSendTask();
+    }
 }
 
 WebDelegate::~WebDelegate()
@@ -4055,6 +4077,9 @@ void WebDelegate::OnPageFinished(const std::string& param)
             if (onPageFinishedV2) {
                 onPageFinishedV2(std::make_shared<LoadWebPageFinishEvent>(param));
             }
+            auto webPattern = delegate->webPattern_.Upgrade();
+            CHECK_NULL_VOID(webPattern);
+            webPattern->OnScrollEndRecursive(std::nullopt);
             delegate->RecordWebEvent(Recorder::EventType::WEB_PAGE_END, param);
         },
         TaskExecutor::TaskType::JS);
@@ -4407,6 +4432,27 @@ bool WebDelegate::OnSslErrorRequest(const std::shared_ptr<BaseEventInfo>& info)
         CHECK_NULL_VOID(webCom);
         result = webCom->OnSslErrorRequest(info.get());
 #endif
+    });
+    return result;
+}
+
+bool WebDelegate::OnAllSslErrorRequest(const std::shared_ptr<BaseEventInfo>& info)
+{
+    auto context = context_.Upgrade();
+    CHECK_NULL_RETURN(context, false);
+    bool result = false;
+    auto jsTaskExecutor = SingleTaskExecutor::Make(context->GetTaskExecutor(), TaskExecutor::TaskType::JS);
+    jsTaskExecutor.PostSyncTask([weak = WeakClaim(this), info, &result]() {
+        auto delegate = weak.Upgrade();
+        CHECK_NULL_VOID(delegate);
+        auto webPattern = delegate->webPattern_.Upgrade();
+        CHECK_NULL_VOID(webPattern);
+        auto webEventHub = webPattern->GetWebEventHub();
+        CHECK_NULL_VOID(webEventHub);
+        auto propOnAllSslErrorEvent = webEventHub->GetOnAllSslErrorRequestEvent();
+        CHECK_NULL_VOID(propOnAllSslErrorEvent);
+        result = propOnAllSslErrorEvent(info);
+        return;
     });
     return result;
 }
@@ -5775,14 +5821,18 @@ void WebDelegate::OnNativeEmbedGestureEvent(std::shared_ptr<OHOS::NWeb::NWebNati
     SetTouchEventInfo(event, touchEventInfo);
     CHECK_NULL_VOID(context);
     TAG_LOGD(AceLogTag::ACE_WEB, "hit Emebed gusture event notify");
+    auto param = AceType::MakeRefPtr<GestureEventResultOhos>(event->GetResult());
     context->GetTaskExecutor()->PostTask(
-        [weak = WeakClaim(this), embedId, touchEventInfo]() {
+        [weak = WeakClaim(this), embedId, touchEventInfo, param]() {
             auto delegate = weak.Upgrade();
             CHECK_NULL_VOID(delegate);
             auto OnNativeEmbedGestureEventV2_ = delegate->OnNativeEmbedGestureEventV2_;
             if (OnNativeEmbedGestureEventV2_) {
                 OnNativeEmbedGestureEventV2_(
-                    std::make_shared<NativeEmbeadTouchInfo>(embedId, touchEventInfo));
+                    std::make_shared<NativeEmbeadTouchInfo>(embedId, touchEventInfo, param));
+                if (!param->HasSendTask()) {
+                    param->SetGestureEventResult(true);
+                }
             }
         },
         TaskExecutor::TaskType::JS);
@@ -6034,5 +6084,22 @@ bool WebDelegate::OnHandleOverrideLoading(std::shared_ptr<OHOS::NWeb::NWebUrlRes
         result = webCom->OnOverrideUrlLoading(param.get());
     });
     return result;
+}
+
+void WebDelegate::UpdateMetaViewport(bool isMetaViewportEnabled)
+{
+    auto context = context_.Upgrade();
+    CHECK_NULL_VOID(context);
+    context->GetTaskExecutor()->PostTask(
+        [weak = WeakClaim(this), isMetaViewportEnabled]() {
+            auto delegate = weak.Upgrade();
+            if (delegate && delegate->nweb_) {
+                std::shared_ptr<OHOS::NWeb::NWebPreference> setting = delegate->nweb_->GetPreference();
+                if (setting) {
+                    setting->SetViewportEnable(isMetaViewportEnabled);
+                }
+            }
+        },
+        TaskExecutor::TaskType::PLATFORM);
 }
 } // namespace OHOS::Ace

@@ -317,6 +317,18 @@ public:
         return layoutProperty_->GetVisibility().value_or(VisibleType::VISIBLE) == VisibleType::VISIBLE;
     }
 
+    bool IsPrivacySensitive() const
+    {
+        return isPrivacySensitive_;
+    }
+
+    void SetPrivacySensitive(bool flag)
+    {
+        isPrivacySensitive_ = flag;
+    }
+
+    void ChangeSensitiveStyle(bool isSensitive);
+
     void ToJsonValue(std::unique_ptr<JsonValue>& json) const override;
 
     void FromJson(const std::unique_ptr<JsonValue>& json) override;
@@ -628,6 +640,7 @@ public:
     void DoRemoveChildInRenderTree(uint32_t index, bool isAll) override;
     void SetActiveChildRange(int32_t start, int32_t end) override;
     void DoSetActiveChildRange(int32_t start, int32_t end) override;
+    void RecycleItemsByIndex(int32_t start, int32_t end) override;
     const std::string& GetHostTag() const override
     {
         return GetTag();
@@ -882,6 +895,7 @@ private:
     bool isRenderDirtyMarked_ = false;
     bool isMeasureBoundary_ = false;
     bool hasPendingRequest_ = false;
+    bool isPrivacySensitive_ = false;
 
     // for container, this flag controls only the last child in touch area is consuming event.
     bool exclusiveEventForChild_ = false;

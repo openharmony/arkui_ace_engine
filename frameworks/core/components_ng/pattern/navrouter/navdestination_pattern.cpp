@@ -231,19 +231,6 @@ void NavDestinationPattern::OnAttachToFrameNode()
     }
 }
 
-void NavDestinationPattern::OnAttachToMainTree()
-{
-    RefPtr<UINode> node = DynamicCast<UINode>(GetHost());
-    while (node) {
-        if (node->GetTag() == V2::NAVIGATION_VIEW_ETS_TAG) {
-            break;
-        }
-        node = node->GetParent();
-    }
-    CHECK_NULL_VOID(node);
-    navigationNode_ = AceType::WeakClaim(RawPtr(node));
-}
-
 void NavDestinationPattern::DumpInfo()
 {
     DumpLog::GetInstance().AddDesc(std::string("name: ").append(name_));

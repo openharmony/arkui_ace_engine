@@ -197,7 +197,10 @@ public:
             if (frameNode) {
                 frameNode->SetActive(false);
             }
-            expiringItem_.try_emplace(node.first, LazyForEachCacheChild(index, std::move(node.second)));
+            auto pair = expiringItem_.try_emplace(node.first, LazyForEachCacheChild(index, std::move(node.second)));
+            if (!pair.second) {
+                TAG_LOGW(AceLogTag::ACE_LAZY_FOREACH, "Use repeat key for index: %{public}d", index);
+            }
             needBuild = true;
         }
         return needBuild;
@@ -455,6 +458,22 @@ public:
         }
         for (const auto& node : expiringItem_) {
             node.second.second->SetJSViewActive(active);
+        }
+    }
+
+    void PaintDebugBoundaryTreeAll(bool flag)
+    {
+        for (const auto& node : cachedItems_) {
+            if (node.second.second == nullptr) {
+                continue;
+            }
+            node.second.second->PaintDebugBoundaryTreeAll(flag);
+        }
+        for (const auto& node : expiringItem_) {
+            if (node.second.second == nullptr) {
+                continue;
+            }
+            node.second.second->PaintDebugBoundaryTreeAll(flag);
         }
     }
 

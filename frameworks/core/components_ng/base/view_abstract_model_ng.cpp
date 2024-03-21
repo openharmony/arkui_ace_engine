@@ -354,7 +354,8 @@ void ViewAbstractModelNG::SetScale(float x, float y, float z)
 
 void ViewAbstractModelNG::BindContentCover(bool isShow, std::function<void(const std::string&)>&& callback,
     std::function<void()>&& buildFunc, NG::ModalStyle& modalStyle, std::function<void()>&& onAppear,
-    std::function<void()>&& onDisappear, std::function<void()>&& onWillAppear, std::function<void()>&& onWillDisappear)
+    std::function<void()>&& onDisappear, std::function<void()>&& onWillAppear, std::function<void()>&& onWillDisappear,
+    const NG::ContentCoverParam& contentCoverParam)
 {
     auto targetNode = AceType::Claim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
     CHECK_NULL_VOID(targetNode);
@@ -380,8 +381,8 @@ void ViewAbstractModelNG::BindContentCover(bool isShow, std::function<void(const
     targetNode->PushDestroyCallback(destructor);
 
     overlayManager->BindContentCover(isShow, std::move(callback), std::move(buildNodeFunc), modalStyle,
-        std::move(onAppear), std::move(onDisappear),
-        std::move(onWillAppear), std::move(onWillDisappear), targetNode);
+        std::move(onAppear), std::move(onDisappear), std::move(onWillAppear), std::move(onWillDisappear),
+        contentCoverParam, targetNode);
 }
 
 void ViewAbstractModelNG::RegisterContextMenuKeyEvent(
@@ -456,6 +457,15 @@ void ViewAbstractModelNG::DismissSheet()
     auto overlayManager = context->GetOverlayManager();
     CHECK_NULL_VOID(overlayManager);
     overlayManager->DismissSheet();
+}
+
+void ViewAbstractModelNG::DismissContentCover()
+{
+    auto context = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(context);
+    auto overlayManager = context->GetOverlayManager();
+    CHECK_NULL_VOID(overlayManager);
+    overlayManager->DismissContentCover();
 }
 
 void ViewAbstractModelNG::SetAccessibilityGroup(bool accessible)

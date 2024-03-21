@@ -5837,6 +5837,22 @@ class SearchTextAlignModifier extends ModifierWithKey {
   }
 }
 SearchTextAlignModifier.identity = Symbol('searchTextAlign');
+class SearchEnterKeyTypeModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().search.resetSearchEnterKeyType(node);
+    } else {
+      getUINativeModule().search.setSearchEnterKeyType(node, this.value);
+    }
+  }
+  checkObjectDiff() {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+SearchEnterKeyTypeModifier.identity = Symbol('searchEnterKeyType');
 class SearchHeightModifier extends ModifierWithKey {
   constructor(value) {
     super(value);
@@ -5949,6 +5965,10 @@ class ArkSearchComponent extends ArkComponent {
   }
   textAlign(value) {
     modifierWithKey(this._modifiersWithKeys, SearchTextAlignModifier.identity, SearchTextAlignModifier, value);
+    return this;
+  }
+  enterKeyType(value) {
+    modifierWithKey(this._modifiersWithKeys, SearchEnterKeyTypeModifier.identity, SearchEnterKeyTypeModifier, value);
     return this;
   }
   height(value) {
@@ -11932,7 +11952,7 @@ class ArkSliderComponent extends ArkComponent {
     throw new Error('Method not implemented.');
   }
   showSteps(value) {
-    modifier(this._modifiers, ShowStepsModifier, value);
+    modifierWithKey(this._modifiersWithKeys, ShowStepsModifier.identity, ShowStepsModifier, value);
     return this;
   }
   showTips(value, content) {
@@ -16202,6 +16222,9 @@ class ArkWebComponent extends ArkComponent {
     throw new Error('Method not implemented.');
   }
   onSslErrorEventReceive(callback) {
+    throw new Error('Method not implemented.');
+  }
+  onSslErrorEvent(callback) {
     throw new Error('Method not implemented.');
   }
   onClientAuthenticationRequest(callback) {

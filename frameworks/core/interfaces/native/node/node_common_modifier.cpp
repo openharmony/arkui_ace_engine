@@ -88,8 +88,6 @@ constexpr int32_t ARRAY_SIZE = 3;
 constexpr float HALF = 0.5f;
 constexpr float DEFAULT_SATURATE = 1.0f;
 constexpr float DEFAULT_BRIGHTNESS = 1.0f;
-constexpr int32_t ORIGINAL_IMAGE_SIZE_AUTO = 0;
-constexpr int32_t ORIGINAL_IMAGE_SIZE_CONTAIN = 2;
 
 const int32_t ERROR_INT_CODE = -1;
 const float ERROR_FLOAT_CODE = -1.0f;
@@ -1704,37 +1702,16 @@ void ResetBackgroundImagePosition(ArkUINodeHandle node)
     ViewAbstract::SetBackgroundImagePosition(frameNode, bgImgPosition);
 }
 
-int32_t GetBackgroundImageSizeType(ArkUI_Int32 nativeImageSizeType)
-{
-    switch (nativeImageSizeType) {
-        case ORIGINAL_IMAGE_SIZE_AUTO:
-            return static_cast<int32_t>(OHOS::Ace::BackgroundImageSizeType::AUTO);
-        case ORIGINAL_IMAGE_SIZE_CONTAIN:
-            return static_cast<int32_t>(OHOS::Ace::BackgroundImageSizeType::CONTAIN);
-        default:
-            break;
-    }
-    return nativeImageSizeType;
-}
-
 void SetBackgroundImageSize(ArkUINodeHandle node, ArkUI_Float32 valueWidth, ArkUI_Float32 valueHeight,
     ArkUI_Int32 typeWidth, ArkUI_Int32 typeHeight)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     BackgroundImageSize bgImgSize;
-    if (LessNotEqual(valueWidth, 0.0f)) {
-        bgImgSize.SetSizeTypeX(static_cast<OHOS::Ace::BackgroundImageSizeType>(GetBackgroundImageSizeType(typeWidth)));
-    } else {
-        bgImgSize.SetSizeValueX(valueWidth);
-        bgImgSize.SetSizeTypeX(BackgroundImageSizeType::LENGTH);
-    }
-    if (LessNotEqual(valueHeight, 0.0f)) {
-        bgImgSize.SetSizeTypeY(static_cast<OHOS::Ace::BackgroundImageSizeType>(GetBackgroundImageSizeType(typeHeight)));
-    } else {
-        bgImgSize.SetSizeValueY(valueHeight);
-        bgImgSize.SetSizeTypeY(BackgroundImageSizeType::LENGTH);
-    }
+    bgImgSize.SetSizeTypeX(static_cast<OHOS::Ace::BackgroundImageSizeType>(typeWidth));
+    bgImgSize.SetSizeValueX(valueWidth);
+    bgImgSize.SetSizeTypeY(static_cast<OHOS::Ace::BackgroundImageSizeType>(typeHeight));
+    bgImgSize.SetSizeValueY(valueHeight);
     ViewAbstract::SetBackgroundImageSize(frameNode, bgImgSize);
 }
 
@@ -4835,9 +4812,9 @@ void SetOnClick(ArkUINodeHandle node, void* extraParam)
         Offset localOffset = info.GetLocalLocation();
         Offset screenOffset = info.GetScreenLocation();
         //x
-        event.componentAsyncEvent.data[0].f32 = PipelineBase::Px2VpWithCurrentDensity(localOffset.GetY());
+        event.componentAsyncEvent.data[0].f32 = PipelineBase::Px2VpWithCurrentDensity(localOffset.GetX());
         //y
-        event.componentAsyncEvent.data[1].f32 = PipelineBase::Px2VpWithCurrentDensity(localOffset.GetX());
+        event.componentAsyncEvent.data[1].f32 = PipelineBase::Px2VpWithCurrentDensity(localOffset.GetY());
         //timestamp
         event.componentAsyncEvent.data[2].f32 = static_cast<double>(info.GetTimeStamp().time_since_epoch().count());
         //source

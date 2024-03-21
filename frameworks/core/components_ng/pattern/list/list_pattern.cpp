@@ -140,14 +140,9 @@ bool ListPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, c
         isJump = true;
         relativeOffset = 0.0f;
         needReEstimateOffset_ = false;
-    } else {
-        // correct the currentOffset when the startIndex is 0.
-        if (listLayoutAlgorithm->GetStartIndex() == 0) {
-            currentOffset_ = -itemPosition_.begin()->second.startPos;
-        } else {
-            currentOffset_ = currentOffset_ + relativeOffset;
-        }
+        posMap_.clear();
     }
+    CalculateCurrentOffset(relativeOffset);
     if (targetIndex_) {
         AnimateToTarget(targetIndex_.value(), targetIndexInGroup_, scrollAlign_);
         targetIndex_.reset();
@@ -326,9 +321,8 @@ RefPtr<NodePaintMethod> ListPattern::CreateNodePaintMethod()
         OffsetF offset = geometryNode->GetPaddingOffset() - geometryNode->GetFrameOffset();
         listContentModifier_ = AceType::MakeRefPtr<ListContentModifier>(offset, size);
     }
-
     paint->SetLaneGutter(laneGutter_);
-    paint->SetItemsPosition(itemPosition_);
+    paint->SetItemsPosition(itemPosition_, pressedItem_);
     paint->SetContentModifier(listContentModifier_);
     return paint;
 }
@@ -681,7 +675,7 @@ OverScrollOffset ListPattern::GetOverScrollOffset(double delta) const
     if (endIndex_ == maxListItemIndex_ && groupAtEnd) {
         auto endPos = endMainPos_ + GetChainDelta(endIndex_);
         auto contentEndPos = contentMainSize_ - contentEndOffset_;
-        if (GreatNotEqual(contentEndPos, endMainPos_ - startMainPos_)) {
+        if (GreatNotEqual(contentEndPos, endMainPos_ - startMainPos_) && !IsScrollSnapAlignCenter()) {
             endPos = startMainPos_ + contentEndPos;
         }
         auto newEndPos = endPos + delta;
@@ -1611,6 +1605,79 @@ Rect ListPattern::GetItemRectInGroup(int32_t index, int32_t indexInGroup) const
     return Rect(itemGroupGeometry->GetFrameRect().GetX() + groupItemGeometry->GetFrameRect().GetX(),
         itemGroupGeometry->GetFrameRect().GetY() + groupItemGeometry->GetFrameRect().GetY(),
         groupItemGeometry->GetFrameRect().Width(), groupItemGeometry->GetFrameRect().Height());
+}
+
+void ListPattern::UpdatePosMapStart(float delta)
+{
+    currentOffset_ += delta;
+    if (itemPosition_.empty()) {
+        return;
+    }
+
+    int32_t startIndex = itemPosition_.begin()->first;
+    if (startIndex == 0) {
+        currentOffset_ = -itemPosition_.begin()->second.startPos;
+        return;
+    }
+    auto it = posMap_.find(startIndex);
+    if (it == posMap_.begin() || it == posMap_.end()) {
+        return;
+    }
+    float startPos = it->second.mainPos;
+    it--;
+    float prevPos = it->second.mainPos + it->second.mainSize + spaceWidth_;
+    int32_t prevIndex = it->first;
+    if (prevIndex + 1 >= startIndex) {
+        if (NearEqual(prevPos, startPos)) {
+            return;
+        }
+    } else {
+        if (LessNotEqual(prevPos, startPos)) {
+            return;
+        }
+    }
+    currentOffset_ += prevPos - startPos;
+}
+
+void ListPattern::UpdatePosMapEnd()
+{
+    if (itemPosition_.empty()) {
+        return;
+    }
+    int32_t prevIndex = itemPosition_.rbegin()->first;
+    auto it = posMap_.find(prevIndex);
+    if (it == posMap_.end()) {
+        return;
+    }
+    float prevPos = it->second.mainPos + it->second.mainSize + spaceWidth_;
+    it++;
+    if (it == posMap_.end()) {
+        return;
+    }
+    if (prevIndex + 1 >= it->first) {
+        if (NearEqual(prevPos, it->second.mainPos)) {
+            return;
+        }
+    } else {
+        if (LessNotEqual(prevPos, it->second.mainPos)) {
+            return;
+        }
+    }
+    float delta = prevPos - it->second.mainPos;
+    while (it != posMap_.end()) {
+        it->second.mainPos += delta;
+        it++;
+    }
+}
+
+void ListPattern::CalculateCurrentOffset(float delta)
+{
+    UpdatePosMapStart(delta);
+    for (auto& [index, pos] : itemPosition_) {
+        float height = pos.endPos - pos.startPos;
+        posMap_[index] = { currentOffset_ + pos.startPos, height };
+    }
+    UpdatePosMapEnd();
 }
 
 void ListPattern::UpdateScrollBarOffset()

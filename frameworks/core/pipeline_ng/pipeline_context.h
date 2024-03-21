@@ -36,6 +36,7 @@
 #include "core/components_ng/manager/frame_rate/frame_rate_manager.h"
 #include "core/components_ng/manager/full_screen/full_screen_manager.h"
 #include "core/components_ng/manager/post_event/post_event_manager.h"
+#include "core/components_ng/manager/privacy_sensitive/privacy_sensitive_manager.h"
 #include "core/components_ng/manager/safe_area/safe_area_manager.h"
 #include "core/components_ng/manager/navigation_dump/navigation_dump_manager.h"
 #include "core/components_ng/manager/select_overlay/select_overlay_manager.h"
@@ -650,6 +651,16 @@ public:
         return navigationDumpMgr_;
     }
 
+    RefPtr<PrivacySensitiveManager> GetPrivacySensitiveManager() const
+    {
+        return privacySensitiveManager_;
+    }
+
+    void ChangeSensitiveNodes(bool flag) override
+    {
+        privacySensitiveManager_->TriggerFrameNodesSensitive(flag);
+    }
+
 protected:
     void StartWindowSizeChangeAnimate(int32_t width, int32_t height, WindowSizeChangeReason type,
         const std::shared_ptr<Rosen::RSTransaction>& rsTransaction = nullptr);
@@ -791,6 +802,7 @@ private:
 #endif
     RefPtr<SafeAreaManager> safeAreaManager_ = MakeRefPtr<SafeAreaManager>();
     RefPtr<FrameRateManager> frameRateManager_ = MakeRefPtr<FrameRateManager>();
+    RefPtr<PrivacySensitiveManager> privacySensitiveManager_ = MakeRefPtr<PrivacySensitiveManager>();
     Rect displayAvailableRect_;
     std::unordered_map<size_t, TouchTestResult> touchTestResults_;
     WeakPtr<FrameNode> dirtyFocusNode_;

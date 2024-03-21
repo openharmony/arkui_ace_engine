@@ -127,14 +127,17 @@ public:
     static void ParseSheetDetentHeight(const JSRef<JSVal>& args, NG::SheetHeight& detent);
     static bool ParseSheetBackgroundBlurStyle(const JSRef<JSVal>& args, BlurStyleOption& blurStyleOptions);
     static void ParseSheetCallback(const JSRef<JSObject>& paramObj, std::function<void()>& onAppear,
-        std::function<void()>& onDisappear, std::function<void()>& onWillAppear, std::function<void()>& onWillDisappear,
-        std::function<void()>& shouldDismiss);
+        std::function<void()>& onDisappear, std::function<void()>& shouldDismiss, std::function<void()>& onWillAppear,
+        std::function<void()>& onWillDisappear);
     static void ParseSheetTitle(const JSRef<JSObject>& paramObj, NG::SheetStyle& sheetStyle,
         std::function<void()>& titleBuilderFunction);
     static panda::Local<panda::JSValueRef> JsDismissSheet(panda::JsiRuntimeCallInfo* runtimeCallInfo);
+    static panda::Local<panda::JSValueRef> JsDismissContentCover(panda::JsiRuntimeCallInfo* runtimeCallInfo);
+    static void ParseModalTransitonEffect(
+        const JSRef<JSObject>& paramObj, NG::ContentCoverParam& contentCoverParam, const JSExecutionContext& context);
     static void ParseOverlayCallback(const JSRef<JSObject>& paramObj, std::function<void()>& onAppear,
-        std::function<void()>& onDisappear, std::function<void()>& onWillAppear,
-        std::function<void()>& onWillDisappear);
+        std::function<void()>& onDisappear, std::function<void()>& onWillAppear, std::function<void()>& onWillDisappear,
+        std::function<void(const int32_t& info)>& onWillDismiss);
     static void JsBorderColor(const JSCallbackInfo& info);
     static void ParseBorderColor(const JSRef<JSVal>& args);
     static void JsPadding(const JSCallbackInfo& info);
@@ -313,7 +316,10 @@ public:
     static void JsHueRotate(const JSCallbackInfo& info);
 
     static void JsClip(const JSCallbackInfo& info);
+    static void JsClipShape(const JSCallbackInfo& info);
+
     static void JsMask(const JSCallbackInfo& info);
+    static void JsMaskShape(const JSCallbackInfo& info);
 
     static void JsKey(const std::string& key);
     static void JsId(const JSCallbackInfo& info);
@@ -333,6 +339,7 @@ public:
     static void JsKeyboardShortcut(const JSCallbackInfo& info);
 
     static void JsObscured(const JSCallbackInfo& info);
+    static void JsPrivacySensitive(const JSCallbackInfo& info);
 
     static void JsAccessibilityGroup(bool accessible);
     static void JsAccessibilityText(const std::string& text);

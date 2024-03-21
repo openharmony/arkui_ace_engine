@@ -331,6 +331,24 @@ void SwiperModelNG::SetSwipeByGroup(bool swipeByGroup)
     ACE_UPDATE_LAYOUT_PROPERTY(SwiperLayoutProperty, SwipeByGroup, swipeByGroup);
 }
 
+void SwiperModelNG::SetCustomContentTransition(SwiperContentAnimatedTransition& transition)
+{
+    auto swiperNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(swiperNode);
+    auto pattern = swiperNode->GetPattern<SwiperPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetSwiperCustomContentTransition(transition);
+}
+
+void SwiperModelNG::SetOnContentDidScroll(ContentDidScrollEvent&& onContentDidScroll)
+{
+    auto swiperNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(swiperNode);
+    auto pattern = swiperNode->GetPattern<SwiperPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetOnContentDidScroll(std::move(onContentDidScroll));
+}
+
 void SwiperModelNG::SetNextMargin(FrameNode* frameNode, const Dimension& nextMargin)
 {
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(SwiperLayoutProperty, NextMargin, nextMargin, frameNode);

@@ -77,12 +77,21 @@ public:
         const std::optional<std::string>& navigationId, napi_value callback);
     static void UnRegisterNavDestinationSwitchCallback(int32_t uiContextInstanceId,
         const std::optional<std::string>& navigationId, napi_value callback);
+    static void HandleNavDestinationSwitch(
+        const NG::AbilityContextInfo& info, NG::NavDestinationSwitchInfo& switchInfo);
 
     static bool ParseStringFromNapi(napi_env env, napi_value val, std::string& str);
     static bool MatchValueType(napi_env env, napi_value value, napi_valuetype targetType);
 private:
+    static void HandleAbilityUIContextNavDestinationSwitch(
+        const NG::AbilityContextInfo& info, NG::NavDestinationSwitchInfo& switchInfo);
+    static void HandleUIContextNavDestinationSwitch(const NG::NavDestinationSwitchInfo& switchInfo);
     using NavIdAndListenersMap =
         std::unordered_map<std::optional<std::string>, std::list<std::shared_ptr<UIObserverListener>>>;
+    static void HandleListenersWithEmptyNavigationId(
+        const NavIdAndListenersMap& listenersMap, const NG::NavDestinationSwitchInfo& switchInfo);
+    static void HandleListenersWithSpecifiedNavigationId(
+        const NavIdAndListenersMap& listenersMap, const NG::NavDestinationSwitchInfo& switchInfo);
     static void GetAbilityInfos(napi_env env, napi_value abilityContext, NG::AbilityContextInfo& info);
     static napi_env GetCurrentNapiEnv();
 

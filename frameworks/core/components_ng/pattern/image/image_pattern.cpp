@@ -13,6 +13,8 @@
  * limitations under the License.
  */
 
+#include "third_party/libphonenumber/cpp/src/phonenumbers/base/logging.h"
+#include "core/components_ng/pattern/image/image_event_hub.h"
 #include "core/image/image_source_info.h"
 #define NAPI_VERSION 8
 
@@ -36,12 +38,16 @@
 #include "core/components/theme/icon_theme.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/image/image_layout_property.h"
+#include "core/components_ng/manager/select_overlay/select_overlay_manager.h"
 #include "core/components_ng/pattern/image/image_paint_method.h"
 #include "core/components_ng/pattern/image/image_pattern.h"
 #include "core/components_ng/property/measure_property.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
+
+constexpr float BOX_EPSILON = 0.5f;
+
 ImagePattern::ImagePattern()
 {
     InitDefaultValue();
@@ -154,6 +160,77 @@ void ImagePattern::RegisterVisibleAreaChange()
     pipeline->AddVisibleAreaChangeNode(host, ratioList, callback, false);
 }
 
+void ImagePattern::CheckHandles(SelectHandleInfo& handleInfo)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto renderContext = host->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    if (!renderContext->GetClipEdge().value_or(true)) {
+        return;
+    }
+    // use global offset.
+    const auto& geometryNode = host->GetGeometryNode();
+    auto contentRect = geometryNode->GetContentRect();
+    RectF visibleContentRect(contentRect.GetOffset() + parentGlobalOffset_, contentRect.GetSize());
+    auto parent = host->GetAncestorNodeOfFrame();
+    visibleContentRect = GetVisibleContentRect(parent, visibleContentRect);
+    auto paintRect = handleInfo.paintRect;
+    PointF bottomPoint = { paintRect.Left(), paintRect.Bottom() - BOX_EPSILON };
+    PointF topPoint = { paintRect.Left(), paintRect.Top() + BOX_EPSILON };
+    handleInfo.isShow = visibleContentRect.IsInRegion(bottomPoint) && visibleContentRect.IsInRegion(topPoint);
+}
+
+void ImagePattern::CalAndUpdateSelectOverlay()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto rect = host->GetTransformRectRelativeToWindow();
+    SelectOverlayInfo info;
+    SizeF handleSize = { SelectHandleInfo::GetDefaultLineWidth().ConvertToPx(), info.singleLineHeight };
+    info.firstHandle.paintRect = RectF(rect.GetOffset(), handleSize);
+    CheckHandles(info.firstHandle);
+    OffsetF offset(rect.Width() - handleSize.Width(), rect.Height() - handleSize.Height());
+    info.secondHandle.paintRect = RectF(rect.GetOffset() + offset, handleSize);
+    CheckHandles(info.secondHandle);
+    selectOverlay_->UpdateFirstAndSecondHandleInfo(info.firstHandle, info.secondHandle);
+}
+
+OffsetF ImagePattern::GetParentGlobalOffset() const
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, {});
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_RETURN(pipeline, {});
+    auto rootOffset = pipeline->GetRootRect().GetOffset();
+    return host->GetPaintRectOffset() - rootOffset;
+}
+
+void ImagePattern::OnAreaChangedInner()
+{
+    if (selectOverlay_ && !selectOverlay_->IsClosed()) {
+        auto parentGlobalOffset = GetParentGlobalOffset();
+        if (parentGlobalOffset != parentGlobalOffset_) {
+            parentGlobalOffset_ = parentGlobalOffset;
+            CalAndUpdateSelectOverlay();
+        }
+    }
+}
+
+void ImagePattern::RemoveAreaChangeInner()
+{
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto eventHub = host->GetEventHub<ImageEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    if (eventHub->HasOnAreaChanged()) {
+        return;
+    }
+    pipeline->RemoveOnAreaChangeNode(host->GetId());
+}
+
 RectF ImagePattern::CalcImageContentPaintSize(const RefPtr<GeometryNode>& geometryNode)
 {
     RectF paintSize;
@@ -246,8 +323,15 @@ void ImagePattern::OnImageDataReady()
         geometryNode->GetContentOffset().GetX(), geometryNode->GetContentOffset().GetY());
     imageEventHub->FireCompleteEvent(event);
 
-    auto geo = host->GetGeometryNode();
-    if (geo->GetContent() && !host->CheckNeedForceMeasureAndLayout()) {
+    const auto& props = DynamicCast<ImageLayoutProperty>(host->GetLayoutProperty());
+    if (!props) {
+        host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+        return;
+    }
+    auto&& layoutConstraint = props->GetCalcLayoutConstraint();
+
+    if (layoutConstraint && layoutConstraint->selfIdealSize && layoutConstraint->selfIdealSize->IsValid()) {
+        auto geo = host->GetGeometryNode();
         StartDecoding(geo->GetContentSize());
     } else {
         host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
@@ -834,11 +918,11 @@ void ImagePattern::OpenSelectOverlay()
         }
     };
 
-    CloseSelectOverlay();
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
     selectOverlay_ = pipeline->GetSelectOverlayManager()->CreateAndShowSelectOverlay(info, WeakClaim(this));
-
+    CHECK_NULL_VOID(selectOverlay_);
+    pipeline->AddOnAreaChangeNode(host->GetId());
     // paint selected mask effect
     host->MarkNeedRenderOnly();
 }
@@ -855,6 +939,7 @@ void ImagePattern::CloseSelectOverlay()
     // remove selected mask effect
     auto host = GetHost();
     CHECK_NULL_VOID(host);
+    RemoveAreaChangeInner();
     host->MarkNeedRenderOnly();
 }
 
@@ -1012,7 +1097,12 @@ void ImagePattern::OnConfigurationUpdate()
 void ImagePattern::EnableAnalyzer(bool value)
 {
     isEnableAnalyzer_ = value;
-    if (isEnableAnalyzer_) {
+    if (!isEnableAnalyzer_) {
+        DestroyAnalyzerOverlay();
+        return;
+    }
+
+    if (!imageAnalyzerManager_) {
         imageAnalyzerManager_ = std::make_shared<ImageAnalyzerManager>(GetHost(), ImageAnalyzerHolder::IMAGE);
     }
 }

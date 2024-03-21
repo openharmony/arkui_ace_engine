@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -32,6 +32,7 @@
 #include "base/thread/task_executor.h"
 #include "base/view_data/view_data_wrap.h"
 #include "core/common/asset_manager_impl.h"
+#include "core/common/render_boundary_manager.h"
 #include "core/components/common/properties/popup_param.h"
 
 namespace OHOS::Accessibility {
@@ -92,6 +93,8 @@ public:
     void ProcessFormVisibleChange(bool isVisible) override;
     void UpdateTitleInTargetPos(bool isShow, int32_t height) override;
     void NotifyRotationAnimationEnd() override;
+
+    void ChangeSensitiveNodes(bool isSensitive) override;
 
     // Window color
     uint32_t GetBackgroundColor() override;
@@ -207,7 +210,8 @@ public:
 
     void SetParentToken(sptr<IRemoteObject> token) override;
     sptr<IRemoteObject> GetParentToken() override;
-    bool DumpViewData(AbilityBase::ViewData& viewData) override;
+    AbilityBase::AutoFillType ViewDataToType(const AbilityBase::ViewData& viewData);
+    bool DumpViewData(AbilityBase::ViewData& viewData, AbilityBase::AutoFillType& type) override;
     bool CheckNeedAutoSave() override;
     bool DumpViewData(const RefPtr<NG::FrameNode>& node, RefPtr<ViewDataWrap> viewDataWrap);
 
@@ -238,6 +242,7 @@ public:
     std::string RecycleForm() override;
 
     void RecoverForm(const std::string& statusData) override;
+    Shadow GetPopupShadow();
 
     int32_t CreateCustomPopupUIExtension(const AAFwk::Want& want,
         const ModalUIExtensionCallbacks& callbacks, const CustomPopupUIExtensionConfig& config) override;
@@ -342,6 +347,7 @@ private:
     std::shared_ptr<TaskWrapper> taskWrapper_;
 
     sptr<IRemoteObject> parentToken_ = nullptr;
+    RefPtr<RenderBoundaryManager> renderBoundaryManager_ = Referenced::MakeRefPtr<RenderBoundaryManager>();
     bool isUIExtensionSubWindow_ = false;
     bool isUIExtensionAbilityProcess_ = false;
     bool isUIExtensionAbilityHost_ = false;

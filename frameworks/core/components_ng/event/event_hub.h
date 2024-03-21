@@ -153,7 +153,7 @@ public:
 
     void ClearJSFrameNodeOnAppear();
 
-    void FireOnAppear();
+    virtual void FireOnAppear();
 
     void ClearUserOnDisAppear()
     {
@@ -528,6 +528,8 @@ public:
 
 protected:
     virtual void OnModifyDone() {}
+    std::function<void()> onAppear_;
+    std::function<void()> onJSFrameNodeAppear_;
 
 private:
     WeakPtr<FrameNode> host_;
@@ -536,9 +538,7 @@ private:
     RefPtr<FocusHub> focusHub_;
     RefPtr<StateStyleManager> stateStyleMgr_;
 
-    std::function<void()> onAppear_;
     std::function<void()> onDisappear_;
-    std::function<void()> onJSFrameNodeAppear_;
     std::function<void()> onJSFrameNodeDisappear_;
     OnAreaChangedFunc onAreaChanged_;
     std::unordered_map<int32_t, OnAreaChangedFunc> onAreaChangedInnerCallbacks_;

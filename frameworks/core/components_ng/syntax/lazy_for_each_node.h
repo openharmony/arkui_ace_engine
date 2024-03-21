@@ -123,7 +123,12 @@ public:
             isActive_ = active;
         }
     }
-
+    void PaintDebugBoundaryTreeAll(bool flag) override
+    {
+        if (builder_) {
+            builder_->PaintDebugBoundaryTreeAll(flag);
+        }
+    }
     int32_t GetIndexByUINode(const RefPtr<UINode>& uiNode) const;
     void SetNodeIndexOffset(int32_t start, int32_t count) override
     {
