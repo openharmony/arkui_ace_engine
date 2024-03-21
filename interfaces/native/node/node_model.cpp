@@ -122,6 +122,8 @@ struct ExtraData {
     std::unordered_map<int64_t, InnerEventExtraParam*> eventMap;
 };
 
+std::set<ArkUI_NodeHandle> g_nodeSet;
+
 ArkUI_NodeHandle CreateNode(ArkUI_NodeType type)
 {
     static const ArkUINodeType nodes[] = { ARKUI_TEXT, ARKUI_SPAN, ARKUI_IMAGE_SPAN, ARKUI_IMAGE, ARKUI_TOGGLE,
@@ -144,7 +146,9 @@ ArkUI_NodeHandle CreateNode(ArkUI_NodeType type)
         return nullptr;
     }
     impl->getBasicAPI()->markDirty(uiNode, ARKUI_DIRTY_FLAG_ATTRIBUTE_DIFF);
-    return new ArkUI_Node({ type, uiNode });
+    auto node = new ArkUI_Node({ type, uiNode });
+    g_nodeSet.emplace(node);
+    return node;
 }
 
 void DisposeNode(ArkUI_NodeHandle nativePtr)
@@ -153,6 +157,7 @@ void DisposeNode(ArkUI_NodeHandle nativePtr)
     // already check in entry point.
     auto* impl = GetFullImpl();
     impl->getBasicAPI()->disposeNode(nativePtr->uiNodeHandle);
+    g_nodeSet.erase(nativePtr);
     delete nativePtr;
 }
 
@@ -282,6 +287,9 @@ void HandleInnerNodeEvent(ArkUINodeEvent* innerEvent)
     }
     ArkUI_NodeEvent event;
     auto* nodePtr = reinterpret_cast<ArkUI_NodeHandle>(innerEvent->extraParam);
+    if (g_nodeSet.count(nodePtr) == 0) {
+        return;
+    }
     if (!nodePtr->extraData) {
         return;
     }

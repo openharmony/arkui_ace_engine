@@ -39,6 +39,7 @@
 #include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/base/view_abstract_model_ng.h"
 #include "core/components_ng/pattern/shape/shape_abstract_model_ng.h"
+#include "core/components_ng/pattern/text/span_model_ng.h"
 #include "core/components_ng/property/transition_property.h"
 #include "core/image/image_source_info.h"
 #include "core/interfaces/arkoala/arkoala_api.h"
@@ -3854,6 +3855,8 @@ void SetMaskShape(ArkUINodeHandle node, ArkUI_CharPtr type, ArkUI_Uint32 fill, A
         shape->SetWidth(width);
         shape->SetHeight(height);
         shape->SetColor(Color(fill));
+        shape->SetStrokeColor(stroke);
+        shape->SetStrokeWidth(strokeWidth);
         ViewAbstract::SetMask(frameNode, shape);
     } else if (shapeType == "ellipse") {
         auto shape = AceType::MakeRefPtr<Ellipse>();
@@ -4404,30 +4407,18 @@ void GetMask(ArkUINodeHandle node, ArkUIMaskOptions* options)
     CHECK_NULL_VOID(frameNode);
     auto basicShape = ViewAbstract::GetMask(frameNode);
     options->type = static_cast<ArkUI_Int32>(basicShape->GetBasicShapeType());
+    options->fill = basicShape->GetColor().GetValue();
+    options->strockColor = basicShape->GetStrokeColor();
+    options->strockWidth = basicShape->GetStrokeWidth();
+    options->width = basicShape->GetWidth().Value();
+    options->height = basicShape->GetHeight().Value();
     if (basicShape->GetBasicShapeType() == BasicShapeType::PATH) {
         auto path = AceType::DynamicCast<Path>(basicShape);
         options->commands = path->GetValue().c_str();
-        options->color = basicShape->GetColor().GetValue();
-        options->strockColor = basicShape->GetStrokeColor();
-        options->strockWidth = basicShape->GetStrokeWidth();
-        options->width = basicShape->GetWidth().Value();
-        options->height = basicShape->GetHeight().Value();
     } else if (basicShape->GetBasicShapeType() == BasicShapeType::RECT) {
         auto shapeRect = AceType::DynamicCast<ShapeRect>(basicShape);
-        options->color = basicShape->GetColor().GetValue();
-        options->strockColor = basicShape->GetStrokeColor();
-        options->strockWidth = basicShape->GetStrokeWidth();
-        options->width = basicShape->GetWidth().Value();
-        options->height = basicShape->GetHeight().Value();
         options->radiusWidth = shapeRect->GetTopLeftRadius().GetX().Value();
         options->radiusHeight = shapeRect->GetTopLeftRadius().GetY().Value();
-    } else if (basicShape->GetBasicShapeType() == BasicShapeType::CIRCLE ||
-               basicShape->GetBasicShapeType() == BasicShapeType::ELLIPSE) {
-        options->color = basicShape->GetColor().GetValue();
-        options->strockColor = basicShape->GetStrokeColor();
-        options->strockWidth = basicShape->GetStrokeWidth();
-        options->width = basicShape->GetWidth().Value();
-        options->height = basicShape->GetHeight().Value();
     } else {
         auto process = ViewAbstract::GetMaskProgress(frameNode);
         options->value = process->GetValue();
@@ -4821,9 +4812,9 @@ void SetOnAreaChange(ArkUINodeHandle node, void* extraParam)
 
 void SetOnClick(ArkUINodeHandle node, void* extraParam)
 {
-    auto* frameNode = reinterpret_cast<FrameNode*>(node);
-    CHECK_NULL_VOID(frameNode);
-    int32_t nodeId = frameNode->GetId();
+    auto* uiNode = reinterpret_cast<UINode*>(node);
+    CHECK_NULL_VOID(uiNode);
+    int32_t nodeId = uiNode->GetId();
     auto onEvent = [nodeId, extraParam](GestureEvent& info) {
         ArkUINodeEvent event;
         event.kind = COMPONENT_ASYNC_EVENT;
@@ -4853,7 +4844,12 @@ void SetOnClick(ArkUINodeHandle node, void* extraParam)
 
         SendArkUIAsyncEvent(&event);
     };
-    ViewAbstract::SetOnClick(frameNode, std::move(onEvent));
+    if (uiNode->GetTag() == "Span") {
+        SpanModelNG::SetOnClick(uiNode, std::move(onEvent));
+    } else {
+        auto* frameNode = reinterpret_cast<FrameNode*>(node);
+        ViewAbstract::SetOnClick(frameNode, std::move(onEvent));
+    }
 }
 
 void SetOnTouch(ArkUINodeHandle node, void* extraParam)
