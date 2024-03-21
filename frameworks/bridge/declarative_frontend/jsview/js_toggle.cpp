@@ -126,7 +126,7 @@ void JSToggle::Create(const JSCallbackInfo& info)
     } else {
         isOn = tempIsOn->IsBoolean() ? tempIsOn->ToBoolean() : false;
     }
-
+    TAG_LOGD(AceLogTag::ACE_SELECT_COMPONENT, "toggle create type %{public}d isOn %{public}d", toggleTypeInt, isOn);
     ToggleModel::GetInstance()->Create(NG::ToggleType(toggleTypeInt), isOn);
     if (!changeEventVal->IsUndefined() && changeEventVal->IsFunction()) {
         ParseToggleIsOnObject(info, changeEventVal);
