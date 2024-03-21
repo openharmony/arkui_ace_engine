@@ -632,12 +632,13 @@ struct CustomDialogContentComponent {
         Text(this.primaryTitle)
           .fontWeight(FontWeight.Bold)
           .fontColor($r('sys.color.font_primary'))
-          .textAlign(TextAlign.Start)
+          .textAlign(this.getTitleTextAlign())
           .maxFontSize($r('sys.float.Title_S'))
           .minFontSize($r('sys.float.Body_L'))
           .maxLines(TITLE_MAX_LINES)
           .heightAdaptivePolicy(TextHeightAdaptivePolicy.MIN_FONT_SIZE_FIRST)
           .textOverflow({ overflow: TextOverflow.Ellipsis })
+          .width('100%')
       }
       .width('100%')
 
@@ -651,12 +652,13 @@ struct CustomDialogContentComponent {
         Text(this.secondaryTitle)
           .fontWeight(FontWeight.Regular)
           .fontColor($r('sys.color.font_secondary'))
-          .textAlign(TextAlign.Start)
+          .textAlign(this.getTitleTextAlign())
           .maxFontSize($r('sys.float.Subtitle_S'))
           .minFontSize($r('sys.float.Body_S'))
           .maxLines(TITLE_MAX_LINES)
           .heightAdaptivePolicy(TextHeightAdaptivePolicy.MIN_FONT_SIZE_FIRST)
           .textOverflow({ overflow: TextOverflow.Ellipsis })
+          .width('100%')
       }
       .width('100%')
     }
@@ -916,6 +918,25 @@ struct CustomDialogContentComponent {
     }
     return false;
   }
+
+  /**
+   * get tile TextAlign
+   * @returns TextAlign
+   */
+  private getTitleTextAlign(): TextAlign {
+    let textAlign: number = getEnumNumberByResource('alert_title_alignment');
+    if (textAlign === TextAlign.Start) {
+      return TextAlign.Start;
+    } else if (textAlign === TextAlign.Center) {
+      return TextAlign.Center;
+    } else if (textAlign === TextAlign.End) {
+      return TextAlign.End;
+    } else if (textAlign === TextAlign.JUSTIFY) {
+      return TextAlign.JUSTIFY;
+    } else {
+      return TextAlign.Center;
+    }
+  }
 }
 
 @Component
@@ -1014,6 +1035,24 @@ function getNumberByResource(resourceName: string): number {
     return 0;
   }
 }
+
+/**
+ * get enum number
+ *
+ * @param resourceName resource name
+ * @returns number
+ */
+function getEnumNumberByResource(resourceName: string): number {
+  try {
+    return getContext().resourceManager.getNumberByName(resourceName);
+  } catch (error) {
+    let code: number = (error as BusinessError).code;
+    let message: string = (error as BusinessError).message;
+    hilog.error(0x3900, 'Ace', `getEnumNumberByResource error, code: ${code}, message: ${message}`);
+    return -1;
+  }
+}
+
 
 @CustomDialog
 export struct LoadingDialog {
