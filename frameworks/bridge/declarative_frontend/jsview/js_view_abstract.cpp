@@ -4740,10 +4740,18 @@ bool JSViewAbstract::ParseJsMedia(const JSRef<JSVal>& jsValue, std::string& resu
                 result = resourceWrapper->GetMediaPathByName(param->ToString());
                 return true;
             }
+            if (type == static_cast<int32_t>(ResourceType::STRING)) {
+                result = resourceWrapper->GetStringByName(param->ToString());
+                return true;
+            }
             return false;
         }
         if (type == static_cast<int32_t>(ResourceType::MEDIA)) {
             result = resourceWrapper->GetMediaPath(resId->ToNumber<uint32_t>());
+            return true;
+        }
+        if (type == static_cast<int32_t>(ResourceType::STRING)) {
+            result = resourceWrapper->GetString(resId->ToNumber<uint32_t>());
             return true;
         }
         return false;
