@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -32,6 +32,7 @@
 #include "frameworks/core/common/ime/text_input_type.h"
 #include "frameworks/core/components/text_field/text_field_component.h"
 #include "frameworks/core/components/text_field/textfield_theme.h"
+#include "frameworks/core/components_ng/pattern/text_field/text_content_type.h"
 
 namespace OHOS::Ace::Framework {
 
@@ -41,6 +42,7 @@ void JSTextInput::JSBind(BindingTarget globalObj)
     MethodOptions opt = MethodOptions::NONE;
     JSClass<JSTextInput>::StaticMethod("create", &JSTextInput::Create, opt);
     JSClass<JSTextInput>::StaticMethod("type", &JSTextField::SetType);
+    JSClass<JSTextInput>::StaticMethod("contentType", &JSTextField::SetContentType);
     JSClass<JSTextInput>::StaticMethod("placeholderColor", &JSTextField::SetPlaceholderColor);
     JSClass<JSTextInput>::StaticMethod("placeholderFont", &JSTextField::SetPlaceholderFont);
     JSClass<JSTextInput>::StaticMethod("backgroundColor", &JSTextField::SetBackgroundColor);

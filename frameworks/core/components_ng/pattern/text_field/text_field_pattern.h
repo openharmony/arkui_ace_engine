@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -51,6 +51,7 @@
 #include "core/components_ng/pattern/text_drag/text_drag_base.h"
 #include "core/components_ng/pattern/text_field/content_controller.h"
 #include "core/components_ng/pattern/text_field/text_editing_value_ng.h"
+#include "core/components_ng/pattern/text_field/text_content_type.h"
 #include "core/components_ng/pattern/text_field/text_field_accessibility_property.h"
 #include "core/components_ng/pattern/text_field/text_field_controller.h"
 #include "core/components_ng/pattern/text_field/text_field_event_hub.h"
@@ -764,6 +765,7 @@ public:
     // xts
     std::string TextInputTypeToString() const;
     std::string TextInputActionToString() const;
+    std::string TextContentTypeToString() const;
     std::string GetPlaceholderFont() const;
     RefPtr<TextFieldTheme> GetTheme() const;
     std::string GetTextColor() const;
@@ -937,6 +939,16 @@ public:
     float GetPreviewWidth() const
     {
         return inlineState_.frameRect.Width();
+    }
+
+    void SetFillRequestFinish(bool success)
+    {
+        isFillRequestFinish_ = success;
+    }
+
+    bool IsFillRequestFinish()
+    {
+        return isFillRequestFinish_;
     }
 
     bool IsNormalInlineState() const;
@@ -1184,6 +1196,7 @@ private:
 
     void AfterSelection();
 
+    void AutoFillValueChanged();
     void FireEventHubOnChange(const std::string& text);
     // The return value represents whether the editor content has change.
     bool FireOnTextChangeEvent();
@@ -1277,7 +1290,7 @@ private:
     bool HasInputOperation();
     AceAutoFillType ConvertToAceAutoFillType(TextInputType type);
     bool CheckAutoFill();
-    bool ProcessAutoFill();
+    bool ProcessAutoFill(bool& isPopup);
     void ScrollToSafeArea() const override;
     void RecordSubmitEvent() const;
     void UpdateCancelNode();
@@ -1288,6 +1301,12 @@ private:
     void UpdateBlurReason();
     RectF GetSelectArea();
     void UpdateOverlaySelectArea();
+    AceAutoFillType TextContentTypeToAceAutoFillType(const TextContentType& type);
+    bool CheckAutoFillType(const AceAutoFillType& aceAutoFillAllType);
+    AceAutoFillType GetAutoFillType();
+    bool IsAutoFillPasswordType(const AceAutoFillType& autoFillType);
+    void DoProcessAutoFill();
+    void KeyboardContentTypeToInputType();
 
     RectF frameRect_;
     RectF textRect_;
@@ -1454,6 +1473,7 @@ private:
     bool hasMousePressed_ = false;
     bool isLongPressPage_ = false;
     Offset locationInfo_;
+    bool isFillRequestFinish_ = false;
 };
 } // namespace OHOS::Ace::NG
 

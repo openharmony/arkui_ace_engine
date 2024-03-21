@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -87,6 +87,8 @@ public:
         bool useNewPipeline = false);
 
     ~AceContainer() override;
+
+    bool UpdatePopupUIExtension(const RefPtr<NG::FrameNode>& node) override;
 
     void Initialize() override;
 
@@ -523,7 +525,7 @@ public:
     bool GetCurPointerEventInfo(int32_t pointerId, int32_t& globalX, int32_t& globalY, int32_t& sourceType,
         StopDragCallback&& stopDragCallback) override;
 
-    bool RequestAutoFill(const RefPtr<NG::FrameNode>& node, AceAutoFillType autoFillType) override;
+    bool RequestAutoFill(const RefPtr<NG::FrameNode>& node, AceAutoFillType autoFillType, bool& isPopup) override;
     bool RequestAutoSave(const RefPtr<NG::FrameNode>& node) override;
     std::shared_ptr<NavigationController> GetNavigationController(const std::string& navigationId) override;
 

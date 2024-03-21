@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,10 +16,12 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_BASE_PAGE_NODE_INFO_WRAP_H
 #define FOUNDATION_ACE_FRAMEWORKS_BASE_PAGE_NODE_INFO_WRAP_H
 
+#include "base/geometry/ng/rect_t.h"
 #include "base/memory/ace_type.h"
 #include "base/view_data/ace_auto_fill_type.h"
 
 namespace OHOS::AbilityBase {
+struct Rect;
 struct PageNodeInfo;
 } // namespace OHOS::AbilityBase
 
@@ -63,8 +65,17 @@ public:
     virtual void SetEnableAutoFill(bool enableAutoFill) {}
     virtual bool GetEnableAutoFill() const
     {
-        return 0;
+        return false;
     }
+
+    virtual void SetIsFocus(bool isFocus) {}
+    virtual bool GetIsFocus() const
+    {
+        return false;
+    }
+
+    virtual void SetPageNodeRect(const NG::RectF& rect) {}
+    virtual const NG::RectF& GetPageNodeRect() const = 0;
 };
 } // namespace OHOS::Ace
 #endif // FOUNDATION_ACE_FRAMEWORKS_BASE_PAGE_NODE_INFO_WRAP_H
