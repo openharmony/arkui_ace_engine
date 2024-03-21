@@ -156,14 +156,22 @@ void TabContentNode::ToJsonValue(std::unique_ptr<JsonValue>& json) const
     label->Put("heightAdaptivePolicy", V2::ConvertWrapTextHeightAdaptivePolicyToString(
         labelStyle.heightAdaptivePolicy.value_or(TextHeightAdaptivePolicy::MAX_LINES_FIRST)).c_str());
     label->Put("font", font);
-    label->Put("unselectedColor", labelStyle.unselectedColor.value().ColorToString().c_str());
-    label->Put("selectedColor", labelStyle.selectedColor.value().ColorToString().c_str());
+    auto pipelineContext = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipelineContext);
+    auto tabTheme = pipelineContext->GetTheme<TabTheme>();
+    CHECK_NULL_VOID(tabTheme);
+    label->Put("unselectedColor", labelStyle.unselectedColor.value_or(
+        tabTheme->GetSubTabTextOffColor()).ColorToString().c_str());
+    label->Put("selectedColor", labelStyle.selectedColor.value_or(
+        tabTheme->GetSubTabTextOnColor()).ColorToString().c_str());
     tabBar->Put("labelStyle", label);
 
     auto iconStyle = tabContentPattern->GetIconStyle();
     auto icon = JsonUtil::Create(true);
-    icon->Put("unselectedColor", iconStyle.unselectedColor.value().ColorToString().c_str());
-    icon->Put("selectedColor", iconStyle.selectedColor.value().ColorToString().c_str());
+    icon->Put("unselectedColor", iconStyle.unselectedColor.value_or(
+        tabTheme->GetBottomTabIconOff()).ColorToString().c_str());
+    icon->Put("selectedColor", iconStyle.selectedColor.value_or(
+        tabTheme->GetBottomTabIconOn()).ColorToString().c_str());
     tabBar->Put("iconStyle", icon);
 
     tabBar->Put("padding", tabContentPattern->GetPadding().ToJsonString().c_str());
