@@ -389,6 +389,19 @@ void RemoveChild(void* parentNode, void* childNode)
     parent->RemoveChild(AceType::Claim(child));
 }
 
+void InsertChildAt(void* parentNode, void* childNode, int32_t position)
+{
+    CHECK_NULL_VOID(parentNode);
+    CHECK_NULL_VOID(childNode);
+    auto* parent = reinterpret_cast<UINode*>(parentNode);
+    auto* child = reinterpret_cast<UINode*>(childNode);
+    parent->AddChild(AceType::Claim(child), position);
+    auto* frameNode = AceType::DynamicCast<FrameNode>(child);
+    if (frameNode) {
+        frameNode->OnMountToParentDone();
+    }
+}
+
 void InsertChildAfter(void* parentNode, void* childNode, void* siblingNode)
 {
     CHECK_NULL_VOID(parentNode);
@@ -412,7 +425,31 @@ void InsertChildAfter(void* parentNode, void* childNode, void* siblingNode)
     if (frameNode) {
         frameNode->OnMountToParentDone();
     }
-    parent->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+}
+
+void InsertChildBefore(void* parentNode, void* childNode, void* siblingNode)
+{
+    CHECK_NULL_VOID(parentNode);
+    CHECK_NULL_VOID(childNode);
+    auto* parent = reinterpret_cast<UINode*>(parentNode);
+    auto* child = reinterpret_cast<UINode*>(childNode);
+
+    if (AceType::InstanceOf<GroupNode>(parent)) {
+        auto* groupNode = AceType::DynamicCast<GroupNode>(parent);
+        groupNode->AddChildToGroup(AceType::Claim(child));
+        parent->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+        return;
+    }
+    auto* sibling = reinterpret_cast<UINode*>(siblingNode);
+    if (sibling) {
+        parent->AddChildBefore(AceType::Claim(child), AceType::Claim(sibling));
+    } else {
+        parent->AddChild(AceType::Claim(child));
+    }
+    auto* frameNode = AceType::DynamicCast<FrameNode>(child);
+    if (frameNode) {
+        frameNode->OnMountToParentDone();
+    }
 }
 
 void RegisterCompanion(void* node, int peerId, ArkUI_Int32 flags)

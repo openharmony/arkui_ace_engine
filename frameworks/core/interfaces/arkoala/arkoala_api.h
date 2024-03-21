@@ -1178,7 +1178,7 @@ struct ArkUICommonModifier {
     void (*setResponseRegion)(
         ArkUINodeHandle node, const ArkUI_Float32* values, const ArkUI_Int32* units, ArkUI_Int32 length);
     void (*resetResponseRegion)(ArkUINodeHandle node);
-    void (*setBackgroundEffect)(ArkUINodeHandle node, ArkUI_CharPtr radius, ArkUI_Float32 saturation,
+    void (*setBackgroundEffect)(ArkUINodeHandle node, ArkUI_Float32 radius, ArkUI_Float32 saturation,
         ArkUI_Float32 brightness, ArkUI_Uint32 color, ArkUI_Int32 adaptiveColor, const ArkUI_Float32* blurValues,
         ArkUI_Int32 blurValuesSize);
     void (*resetBackgroundEffect)(ArkUINodeHandle node);
@@ -3345,6 +3345,8 @@ struct ArkUIBasicAPI {
     void (*addChild)(ArkUINodeHandle parent, ArkUINodeHandle child);
     void (*removeChild)(ArkUINodeHandle parent, ArkUINodeHandle child);
     void (*insertChildAfter)(ArkUINodeHandle parent, ArkUINodeHandle child, ArkUINodeHandle sibling);
+    void (*insertChildBefore)(ArkUINodeHandle parent, ArkUINodeHandle child, ArkUINodeHandle sibling);
+    void (*insertChildAt)(ArkUINodeHandle parent, ArkUINodeHandle child, ArkUI_Int32 position);
 
     // Returned pointer is valid only till node is alive.
     ArkUI_CharPtr (*getAttribute)(ArkUINodeHandle node, ArkUI_CharPtr attribute);
