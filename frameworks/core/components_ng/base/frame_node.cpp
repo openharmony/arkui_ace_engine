@@ -1479,9 +1479,20 @@ void FrameNode::RebuildRenderContextTree()
 void FrameNode::MarkModifyDone()
 {
     pattern_->OnModifyDone();
+    auto pipeline = PipelineContext::GetCurrentContextSafely();
+    if (pipeline) {
+        auto privacyManager = pipeline->GetPrivacySensitiveManager();
+        if (privacyManager) {
+            if (IsPrivacySensitive()) {
+                LOGI("store sensitive node, %{public}d", GetId());
+                privacyManager->StoreNode(AceType::WeakClaim(this));
+            } else {
+                privacyManager->RemoveNode(AceType::WeakClaim(this));
+            }
+        }
+    }
     if (!isRestoreInfoUsed_) {
         isRestoreInfoUsed_ = true;
-        auto pipeline = PipelineContext::GetCurrentContext();
         int32_t restoreId = GetRestoreId();
         if (pipeline && restoreId >= 0) {
             // store distribute node
@@ -3663,6 +3674,11 @@ void FrameNode::AddTouchEventAllFingersInfo(TouchEventInfo& event, const TouchEv
         info.SetSourceTool(item.sourceTool);
         event.AddTouchLocationInfo(std::move(info));
     }
+}
+
+void FrameNode::ChangeSensitiveStyle(bool isSensitive)
+{
+    pattern_->OnSensitiveStyleChange(isSensitive);
 }
 
 } // namespace OHOS::Ace::NG
