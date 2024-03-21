@@ -126,6 +126,9 @@ const uint32_t RENDER_STRATEGY_MULTI_COLOR = 1;
 const uint32_t EFFECT_STRATEGY_NONE = 0;
 const uint32_t EFFECT_STRATEGY_SCALE = 1;
 const SizeF CONTAINER_SIZE(720.0f, 1136.0f);
+constexpr float DEFAILT_OPACITY = 0.2f;
+constexpr Color SYSTEM_CARET_COLOR = Color(0xff007dff);
+constexpr Color SYSTEM_SELECT_BACKGROUND_COLOR = Color(0x33007dff);
 } // namespace
 
 class RichEditorTestNg : public testing::Test {
@@ -4371,5 +4374,45 @@ HWTEST_F(RichEditorTestNg, SetSelection, TestSize.Level1)
     EXPECT_EQ(info1.selection_.resultObjects.front().textStyle.lineHeight, LINE_HEIGHT_VALUE.ConvertToVp());
     EXPECT_EQ(info1.selection_.resultObjects.front().textStyle.letterSpacing, LETTER_SPACING.ConvertToVp());
     ClearSpan();
+}
+
+/**
+ * @tc.name: CaretColorTest001
+ * @tc.desc: test set and get caretColor
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorTestNg, CaretColorTest001, TestSize.Level1)
+{
+    RichEditorModelNG model;
+    model.Create();
+    auto host = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(host, nullptr);
+    auto richEditorPattern = host->GetPattern<RichEditorPattern>();
+    Color patternCaretColor = richEditorPattern->GetCaretColor();
+    EXPECT_EQ(patternCaretColor, SYSTEM_CARET_COLOR);
+    model.SetCaretColor(Color::BLUE);
+    patternCaretColor = richEditorPattern->GetCaretColor();
+    EXPECT_EQ(patternCaretColor, Color::BLUE);
+}
+
+/**
+ * @tc.name: SelectedBackgroundColorTest001
+ * @tc.desc: test set and get selectedBackgroundColor
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorTestNg, SelectedBackgroundColorTest001, TestSize.Level1)
+{
+    RichEditorModelNG model;
+    model.Create();
+    auto host = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(host, nullptr);
+    auto richEditorPattern = host->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    Color patternSelectedBackgroundColor = richEditorPattern->GetSelectedBackgroundColor();
+    EXPECT_EQ(patternSelectedBackgroundColor, SYSTEM_SELECT_BACKGROUND_COLOR);
+    model.SetSelectedBackgroundColor(Color::RED);
+    patternSelectedBackgroundColor = richEditorPattern->GetSelectedBackgroundColor();
+    auto selectedBackgroundColorResult = Color::RED.ChangeOpacity(DEFAILT_OPACITY);
+    EXPECT_EQ(patternSelectedBackgroundColor, selectedBackgroundColorResult);
 }
 } // namespace OHOS::Ace::NG
