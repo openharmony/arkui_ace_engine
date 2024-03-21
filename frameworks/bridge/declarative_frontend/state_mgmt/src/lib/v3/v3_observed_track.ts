@@ -39,8 +39,8 @@ class ObserveV3 {
   private static readonly OB_DATE = "__date__";
 
   // see MonitorV3.observeObjectAccess: bindCmp is the MonitorV3
-  // see modified observeComponentCreation, bindCmp is the ViewPU
-  private bindCmp_: ViewPU | MonitorV3 | ComputedV3 | null = null;
+  // see modified ViewV2 and ViewPU observeComponentCreation, bindCmp is the ViewV2 or ViewPU
+  private bindCmp_: IView | MonitorV3 | ComputedV3 | null = null;
 
   // bindId: UINode elmtId or watchId, depending on what is being observed
   private bindId_: number = UINodeRegisterProxy.notRecordingDependencies;
@@ -86,7 +86,7 @@ class ObserveV3 {
 
   // At the start of observeComponentCreation or
   // MonitorV3.observeObjectAccess
-  public startBind(cmp: ViewPU | MonitorV3 | ComputedV3 | null, id: number): void {
+  public startBind(cmp: IView | MonitorV3 | ComputedV3 | null, id: number): void {
     this.bindCmp_ = cmp;
     this.bindId_ = id;
     if (cmp != null) {
@@ -364,7 +364,7 @@ class ObserveV3 {
     stateMgmtConsole.debug(`ObservedV3.updateDirty2 ... `);
     // obtain and unregister the removed elmtIds 
     UINodeRegisterProxy.obtainDeletedElmtIds();
-    UINodeRegisterProxy.unregisterElmtIdsFromViewPUs();
+    UINodeRegisterProxy.unregisterElmtIdsFromIViews();
 
     // priority order of processing:
     // 1- update computed properties until no more need computed props update 
@@ -405,8 +405,8 @@ class ObserveV3 {
       let comp: ComputedV3 | undefined;
       let weakComp: WeakRef<ComputedV3 | undefined> = this.id2cmp_[id];
       if (weakComp && "deref" in weakComp && (comp = weakComp.deref()) && comp instanceof ComputedV3) {
-        const target = comp.getTarget() as ViewPU;
-        if (target instanceof ViewPU && !target.isViewActive()) {
+        const target = comp.getTarget();
+        if (target instanceof ViewV2 && !target.isViewActive()) {
           // FIXME @Component freeze enable
           // view.addDelayedComputedIds(id);
         } else {
@@ -427,14 +427,12 @@ class ObserveV3 {
     monitors.forEach((watchId) => {
       weakMonitor = this.id2cmp_[watchId];
       if (weakMonitor && "deref" in weakMonitor && (monitor = weakMonitor.deref()) && monitor instanceof MonitorV3) {
-        if (monitor instanceof MonitorV3) {
-          if (((monitorTarget = monitor.getTarget()) instanceof ViewPU) && !monitorTarget.isViewActive()) {
-            // FIXME @Component freeze enable
-            // monitor notifyChange delayed if target is a View that is not active
-            // monitorTarget.addDelayedMonitorIds(watchId);
-          } else {
-            monitor.notifyChange();
-          }
+        if (((monitorTarget = monitor.getTarget()) instanceof ViewV2) && !monitorTarget.isViewActive()) {
+          // FIXME @Component freeze enable
+          // monitor notifyChange delayed if target is a View that is not active
+          // monitorTarget.addDelayedMonitorIds(watchId);
+        } else {
+          monitor.notifyChange();
         }
       }
     });
@@ -444,7 +442,7 @@ class ObserveV3 {
   /**
    * This version of UpdateUINodes does not wait for VSYNC, violates rules
    * calls UpdateElement, thereby avoids the long and frequent code path from 
-   * FlushDirtyNodesUpdate to CustomNode to ViewPU.updateDirtyElements to UpdateElement
+   * FlushDirtyNodesUpdate to CustomNode to ViewV2.updateDirtyElements to UpdateElement
    * Code left here to reproduce benchmark measurements, compare with future optimisation
    * @param elmtIds 
    */
@@ -455,7 +453,7 @@ class ObserveV3 {
     let weak: any;
     elmtIds.forEach((elmtId) => {
       if ((weak = this.id2cmp_[elmtId]) && (typeof weak == "object") && ("deref" in weak)
-        && (view = weak.deref()) && (view instanceof ViewPU)) {
+        && (view = weak.deref()) && ((view instanceof ViewV2) || (view instanceof ViewPU))) {
         if (view.isViewActive()) {
           // FIXME need to call syncInstanceId before update?
           view.UpdateElement(elmtId);
@@ -463,13 +461,13 @@ class ObserveV3 {
           // FIXME @Component freeze
           //....
         }
-      } // if ViewPU
+      } // if ViewV2 or ViewPU
     });
     aceTrace.end();
   }
 
   // This is the code path similar to V2, follows the rule that UI updates on VSYNC.
-  // ViewPU queues the elmtId that need update, marks the CustomNode dirty in RenderContext
+  // ViewPU/ViewV2 queues the elmtId that need update, marks the CustomNode dirty in RenderContext
   // On next VSYNC runs FlushDirtyNodesUpdate to call rerender to call UpdateElement. Much longer code path
   // much slower
   private updateUINodes(elmtIds: Array<number>): void {
@@ -479,7 +477,8 @@ class ObserveV3 {
     let view: Object | undefined;
     elmtIds.forEach((elmtId) => {
       viewWeak = this.id2cmp_[elmtId];
-      if (viewWeak && "deref" in viewWeak && (view = viewWeak.deref()) && view instanceof ViewPU) {
+      if (viewWeak && "deref" in viewWeak && (view = viewWeak.deref()) 
+          && ((view instanceof ViewV2) || (view instanceof ViewPU))) {
         if (view.isViewActive()) {
           view.uiNodeNeedUpdateV3(elmtId);
         } else {
@@ -711,8 +710,8 @@ class ObserveV3 {
   }
 
   /**
-   * Helper function to add meta data about decorator to ViewPU
-   * @param proto prototype object of application class derived from ViewPU 
+   * Helper function to add meta data about decorator to ViewPU or ViewV2
+   * @param proto prototype object of application class derived from  ViewPU or ViewV2 
    * @param varName decorated variable
    * @param deco "@state", "@event", etc (note "@model" gets transpiled in "@param" and "@event")
    */
@@ -833,21 +832,21 @@ function ObservedV2<T extends ConstructorV3>(BaseClass: T) : ConstructorV3 {
 
   if (BaseClass.prototype && !Reflect.has(BaseClass.prototype, ObserveV3.V3_DECO_META)) {
     // not an error, suspicious of developer oversight
-    stateMgmtConsole.warn(`'@observed class ${BaseClass?.name}': no @track property inside. Is thi intended? Check our application.`);
+    stateMgmtConsole.warn(`'@observed class ${BaseClass?.name}': no @track property inside. Is this intended? Check our application.`);
   }
 
   // Use ID_REFS only if number of observed attrs is significant
   const attrList = Object.getOwnPropertyNames(BaseClass.prototype);
   const count = attrList.filter(attr => attr.startsWith(ObserveV3.OB_PREFIX)).length;
   if (count > 5) {
+    stateMgmtConsole.log(`'@observed class ${BaseClass?.name}' configured to use ID_REFS optimization`);
     BaseClass.prototype[ObserveV3.ID_REFS] = {};
   }
-
   return class extends BaseClass {
     constructor(...args) {
       super(...args)
-        AsyncAddMonitorV3.addMonitor(this, BaseClass.name)
-        AsyncAddComputedV3.addComputed(this, BaseClass.name)
+      AsyncAddMonitorV3.addMonitor(this, BaseClass.name)
+      AsyncAddComputedV3.addComputed(this, BaseClass.name)
     }
   }
 }

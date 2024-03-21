@@ -30,8 +30,8 @@ type RepeatKeyGenFunc<T> = (item: T, index?: number) => string;
     returns an object that retains the state of Repeat instance between render calls
     exec attribute functions on this instance.
 */
-const Repeat: <T>(arr: Array<T>, owningView?: ViewPU) => RepeatAPI<T> =
-    <T>(arr: Array<T>, owningView?: ViewPU): RepeatAPI<T> => {
+const Repeat: <T>(arr: Array<T>, owningView?: ViewV2) => RepeatAPI<T> =
+    <T>(arr: Array<T>, owningView?: ViewV2): RepeatAPI<T> => {
         if (!owningView) {
             throw new Error("Transpilation error, Repeat lacks 2nd parameter owningView");
         }

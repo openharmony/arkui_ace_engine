@@ -87,7 +87,7 @@ class MonitorV3 {
 
 
   private values_: Array<MonitorValueV3<unknown>> = new Array<MonitorValueV3<unknown>>();
-  private target_: object  // @Monitor function 'this': data object or ViewPU
+  private target_: object  // @monitor function 'this': data object or ViewV2
   private monitorFunction: (m: IMonitor) => void;
   private watchId_: number;  // unique id, similar to elmtId but identifies this object
 
@@ -100,8 +100,8 @@ class MonitorV3 {
     let paths = pathsString.split(/\s+/g)
     paths.forEach(path => this.values_.push(new MonitorValueV3<unknown>(path)))
 
-    // add watchId to owning ViewPU or view model data object
-    // ViewPU uses to call clearBinding(id)
+    // add watchId to owning ViewV2 or view model data object
+    // ViewV2 uses to call clearBinding(id)
     // FIXME data object leave data inside ObservedV3, because they can not 
     // call clearBinding(id) before they get deleted.
     const meta = target[MonitorV3.WATCH_INSTANCE_PREFIX]??={};

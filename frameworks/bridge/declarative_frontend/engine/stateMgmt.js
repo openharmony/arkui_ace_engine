@@ -3645,6 +3645,530 @@ class View extends NativeViewFullUpdate {
     }
 }
 /*
+ * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+/*
+ * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+// UpdateFuncRecord: misc framework-internal info related to updating of a UINode C++ object 
+// that TS side needs to know. 
+// updateFunc_  lambda function to update the UINode
+// JS interface class reference (it only has static functions)
+class UpdateFuncRecord {
+    constructor(params) {
+        this.updateFunc_ = params.updateFunc;
+        this.classObject_ = params.classObject;
+        this.node_ = params.node;
+    }
+    getUpdateFunc() {
+        return this.updateFunc_;
+    }
+    getComponentClass() {
+        return this.classObject_;
+    }
+    getComponentName() {
+        return (this.classObject_ && ("name" in this.classObject_)) ? Reflect.get(this.classObject_, "name") : "unspecified UINode";
+    }
+    getPopFunc() {
+        return (this.classObject_ && "pop" in this.classObject_) ? this.classObject_.pop : () => { };
+    }
+    getNode() {
+        return this.node_;
+    }
+    setNode(node) {
+        this.node_ = node;
+    }
+} // UpdateFuncRecord
+class UpdateFuncsByElmtId {
+    constructor() {
+        this.map_ = new Map();
+    }
+    delete(elmtId) {
+        return this.map_.delete(elmtId);
+    }
+    set(elmtId, params) {
+        (typeof params === 'object') ?
+            this.map_.set(elmtId, new UpdateFuncRecord(params)) :
+            this.map_.set(elmtId, new UpdateFuncRecord({ updateFunc: params }));
+    }
+    get(elmtId) {
+        return this.map_.get(elmtId);
+    }
+    has(elmtId) {
+        return this.map_.has(elmtId);
+    }
+    keys() {
+        return this.map_.keys();
+    }
+    clear() {
+        return this.map_.clear();
+    }
+    get size() {
+        return this.map_.size;
+    }
+    forEach(callbackfn) {
+        this.map_.forEach(callbackfn);
+    }
+    // dump info about known elmtIds to a string
+    // use function only for debug output and DFX.
+    debugInfoRegisteredElmtIds() {
+        let result = "";
+        let sepa = "";
+        this.map_.forEach((value, elmtId) => {
+            result += `${sepa}${value.getComponentName()}[${elmtId}]`;
+            sepa = ", ";
+        });
+        return result;
+    }
+    debugInfoElmtId(elmtId) {
+        const updateFuncEntry = this.map_.get(elmtId);
+        return updateFuncEntry ? `'${updateFuncEntry.getComponentName()}[${elmtId}]'` : `'unknown component type'[${elmtId}]`;
+    }
+} // class UpdateFuncByElmtId
+// NativeView
+// implemented in C++  for release
+class PUV2ViewBase extends NativeViewPartialUpdate {
+    constructor(parent, elmtId = UINodeRegisterProxy.notRecordingDependencies, extraInfo = undefined) {
+        super();
+        // indicates the currently re/rendered UINode's elmtIds
+        // or UINodeRegisterProxy.notRecordingDependencies if none is currently rendering
+        // isRenderInProgress == true always when currentlyRenderedElmtIdStack_ length >= 0
+        this.currentlyRenderedElmtIdStack_ = new Array();
+        this.parent_ = undefined;
+        this.childrenWeakrefMap_ = new Map();
+        // flag if active of inActive
+        // inActive means updates are delayed
+        this.isActive_ = true;
+        // flag if {aboutToBeDeletedInternal} is called and the instance of ViewPU/V2 has not been GC.
+        this.isDeleting_ = false;
+        // KEEP
+        this.isCompFreezeAllowed_ = false;
+        // registry of update functions
+        // the key is the elementId of the Component/Element that's the result of this function
+        this.updateFuncByElmtId = new UpdateFuncsByElmtId();
+        this.extraInfo_ = undefined;
+        // if set use the elmtId also as the ViewPU/V2 object's subscribable id.
+        // these matching is requirement for updateChildViewById(elmtId) being able to
+        // find the child ViewPU/V2 object by given elmtId
+        this.id_ = elmtId == UINodeRegisterProxy.notRecordingDependencies ? SubscriberManager.MakeId() : elmtId;
+        
+        if (extraInfo) {
+            this.extraInfo_ = extraInfo;
+        }
+        if (parent) {
+            // this View is not a top-level View
+            this.setCardId(parent.getCardId());
+            // Call below will set this.parent_ to parent as well
+            parent.addChild(this); // FIXME
+        }
+        this.isCompFreezeAllowed_ = this.isCompFreezeAllowed_ || (this.parent_ && this.parent_.isCompFreezeAllowed());
+        
+    }
+    // globally unique id, this is different from compilerAssignedUniqueChildId!
+    id__() {
+        return this.id_;
+    }
+    updateId(elmtId) {
+        this.id_ = elmtId;
+    }
+    setParent(parent) {
+        if (this.parent_ && parent) {
+            stateMgmtConsole.warn(`${this.debugInfo__()}: setChild: changing parent to '${parent === null || parent === void 0 ? void 0 : parent.debugInfo__()} (unsafe operation)`);
+        }
+        this.parent_ = parent;
+    }
+    getParent() {
+        return this.parent_;
+    }
+    /**
+    * add given child and set 'this' as its parent
+    * @param child child to add
+    * @returns returns false if child with given child's id already exists
+    *
+    * framework internal function
+    * Note: Use of WeakRef ensures child and parent do not generate a cycle dependency.
+    * The add. Set<ids> is required to reliably tell what children still exist.
+    */
+    addChild(child) {
+        if (this.childrenWeakrefMap_.has(child.id__())) {
+            stateMgmtConsole.warn(`${this.debugInfo__()}: addChild '${child === null || child === void 0 ? void 0 : child.debugInfo__()}' elmtId already exists ${child.id__()}. Internal error!`);
+            return false;
+        }
+        this.childrenWeakrefMap_.set(child.id__(), new WeakRef(child));
+        child.setParent(this); // FIXME
+        return true;
+    }
+    /**
+     * remove given child and remove 'this' as its parent
+     * @param child child to add
+     * @returns returns false if child with given child's id does not exist
+     */
+    removeChild(child) {
+        const hasBeenDeleted = this.childrenWeakrefMap_.delete(child.id__());
+        if (!hasBeenDeleted) {
+            stateMgmtConsole.warn(`${this.debugInfo__()}: removeChild '${child === null || child === void 0 ? void 0 : child.debugInfo__()}', child id ${child.id__()} not known. Internal error!`);
+        }
+        else {
+            child.setParent(undefined);
+        }
+        return hasBeenDeleted;
+    }
+    /**
+     * Retrieve child by given id
+     * @param id
+     * @returns child if in map and weak ref resolves to IView object
+     */
+    getChildById(id) {
+        const childWeakRef = this.childrenWeakrefMap_.get(id);
+        return childWeakRef ? childWeakRef.deref() : undefined;
+    }
+    aboutToReuse(_) { }
+    aboutToRecycle() { }
+    // KEEP
+    isDeleting() {
+        return this.isDeleting_;
+    }
+    // KEEP
+    setDeleting() {
+        this.isDeleting_ = true;
+    }
+    // KEEP
+    setDeleteStatusRecursively() {
+        if (!this.childrenWeakrefMap_.size) {
+            return;
+        }
+        this.childrenWeakrefMap_.forEach((value) => {
+            let child = value.deref();
+            if (child) {
+                child.setDeleting();
+                child.setDeleteStatusRecursively();
+            }
+        });
+    }
+    // KEEP
+    isCompFreezeAllowed() {
+        return this.isCompFreezeAllowed_;
+    }
+    // KEEP, FIXME
+    purgeDeleteElmtId(rmElmtId) {
+        
+        const result = this.updateFuncByElmtId.delete(rmElmtId);
+        if (result) {
+            this.purgeVariableDependenciesOnElmtIdOwnFunc(rmElmtId);
+            // it means rmElmtId has finished all the unregistration from the js side, ElementIdToOwningViewPU_  does not need to keep it
+            UINodeRegisterProxy.ElementIdToOwningViewPU_.delete(rmElmtId);
+        }
+        // FIXME: only do this if app uses V3
+        ObserveV3.getObserve().clearBinding(rmElmtId);
+        return result;
+    }
+    purgeVariableDependenciesOnElmtIdOwnFunc(elmtId) {
+        // ViewPU overrides to unregister ViewPU from variables, 
+        // not in use in ViewV2
+    }
+    // KEEP, overwritten by sub classes
+    debugInfo__() {
+        return `@Component '${this.constructor.name}'[${this.id__()}]`;
+    }
+    debugInfoRegisteredElmtIds() {
+        return this.updateFuncByElmtId.debugInfoRegisteredElmtIds();
+    }
+    // for given elmtIds look up their component name/type and format a string out of this info
+    // use function only for debug output and DFX.
+    // KEEP
+    debugInfoElmtIds(elmtIds) {
+        let result = "";
+        let sepa = "";
+        elmtIds.forEach((elmtId) => {
+            result += `${sepa}${this.debugInfoElmtId(elmtId)}`;
+            sepa = ", ";
+        });
+        return result;
+    }
+    // KEEP
+    debugInfoElmtId(elmtId) {
+        return this.updateFuncByElmtId.debugInfoElmtId(elmtId);
+    }
+    dumpStateVars() {
+        
+    }
+    isViewActive() {
+        return this.isActive_;
+    }
+    /**
+     * Indicate if this @Component is allowed to freeze by calling with freezeState=true
+     * Called with value of the @Component decorator 'freezeWhenInactive' parameter
+     * or depending how UI compiler works also with 'undefined'
+     * @param freezeState only value 'true' will be used, otherwise inherits from parent
+     *      if not parent, set to false.
+     */
+    initAllowComponentFreeze(freezeState) {
+        // set to true if freeze parameter set for this @Component to true
+        // otherwise inherit from parent @Component (if it exists).
+        this.isCompFreezeAllowed_ = freezeState || this.isCompFreezeAllowed_;
+        
+    }
+    dumpReport() {
+        stateMgmtConsole.warn(`Printing profiler information`);
+        stateMgmtProfiler.report();
+    }
+    // KEEP  
+    updateStateVarsOfChildByElmtId(elmtId, params) {
+        
+        
+        if (elmtId < 0) {
+            stateMgmtConsole.warn(`${this.debugInfo__()}: updateChildViewById(${elmtId}) - invalid elmtId - internal error!`);
+            
+            return;
+        }
+        let iChild = this.getChildById(elmtId);
+        if (!iChild || !((iChild instanceof ViewPU) || (iChild instanceof ViewV2))) {
+            stateMgmtConsole.warn(`${this.debugInfo__()}: updateChildViewById(${elmtId}) - no child with this elmtId - internal error!`);
+            
+            return;
+        }
+        const child = iChild;
+        child.updateStateVars(params);
+        
+        
+    }
+    // request list of all (global) elmtIds of deleted UINodes and unregister from the all ViewPUs/ViewV2
+    // this function equals purgeDeletedElmtIdsRecursively because it does un-registration for all ViewPU/V2's
+    // KEEP
+    purgeDeletedElmtIds() {
+        
+        // request list of all (global) elmtIds of deleted UINodes that need to be unregistered
+        UINodeRegisterProxy.obtainDeletedElmtIds();
+        // unregister the removed elmtIds requested from the cpp side for all ViewPUs/ViewV2, it will make the first ViewPUs/ViewV2 slower
+        // than before, but the rest ViewPUs/ViewV2 will be faster
+        UINodeRegisterProxy.unregisterElmtIdsFromIViews();
+        
+    }
+    // KEEP
+    static pauseRendering() {
+        PUV2ViewBase.renderingPaused = true;
+    }
+    // KEEP
+    static restoreRendering() {
+        PUV2ViewBase.renderingPaused = false;
+    }
+    // performs the update on a branch within if() { branch } else if (..) { branch } else { branch }
+    ifElseBranchUpdateFunction(branchId, branchfunc) {
+        const oldBranchid = If.getBranchId();
+        if (branchId == oldBranchid) {
+            
+            return;
+        }
+        // branchid identifies uniquely the if .. <1> .. else if .<2>. else .<3>.branch
+        // ifElseNode stores the most recent branch, so we can compare
+        // removedChildElmtIds will be filled with the elmtIds of all children and their children will be deleted in response to if .. else change
+        let removedChildElmtIds = new Array();
+        If.branchId(branchId, removedChildElmtIds);
+        //un-registers the removed child elementIDs using proxy
+        UINodeRegisterProxy.unregisterRemovedElmtsFromViewPUs(removedChildElmtIds);
+        // purging these elmtIds from state mgmt will make sure no more update function on any deleted child wi;ll be executed
+        
+        this.purgeDeletedElmtIds();
+        branchfunc();
+    }
+    /**
+     Partial updates for ForEach.
+     * @param elmtId ID of element.
+     * @param itemArray Array of items for use of itemGenFunc.
+     * @param itemGenFunc Item generation function to generate new elements. If index parameter is
+     *                    given set itemGenFuncUsesIndex to true.
+     * @param idGenFunc   ID generation function to generate unique ID for each element. If index parameter is
+     *                    given set idGenFuncUsesIndex to true.
+     * @param itemGenFuncUsesIndex itemGenFunc optional index parameter is given or not.
+     * @param idGenFuncUsesIndex idGenFunc optional index parameter is given or not.
+     */
+    forEachUpdateFunction(elmtId, itemArray, itemGenFunc, idGenFunc, itemGenFuncUsesIndex = false, idGenFuncUsesIndex = false) {
+        
+        
+        if (itemArray === null || itemArray === undefined) {
+            stateMgmtConsole.applicationError(`${this.debugInfo__()}: forEachUpdateFunction (ForEach re-render): input array is null or undefined error. Application error!`);
+            
+            return;
+        }
+        if (typeof itemGenFunc !== "function") {
+            stateMgmtConsole.applicationError(`${this.debugInfo__()}: forEachUpdateFunction (ForEach re-render): Item generation function missing. Application error!`);
+            
+            return;
+        }
+        if (idGenFunc !== undefined && typeof idGenFunc !== "function") {
+            stateMgmtConsole.applicationError(`${this.debugInfo__()}: forEachUpdateFunction (ForEach re-render): id generator is not a function. Application error!`);
+            
+            return;
+        }
+        if (idGenFunc === undefined) {
+            
+            idGenFuncUsesIndex = true;
+            // catch possible error caused by Stringify and re-throw an Error with a meaningful (!) error message
+            idGenFunc = (item, index) => {
+                try {
+                    return `${index}__${JSON.stringify(item)}`;
+                }
+                catch (e) {
+                    throw new Error(`${this.debugInfo__()}: ForEach id ${elmtId}: use of default id generator function not possible on provided data structure. Need to specify id generator function (ForEach 3rd parameter). Application Error!`);
+                }
+            };
+        }
+        let diffIndexArray = []; // New indexes compared to old one.
+        let newIdArray = [];
+        let idDuplicates = [];
+        const arr = itemArray; // just to trigger a 'get' onto the array
+        // ID gen is with index.
+        if (idGenFuncUsesIndex || idGenFunc.length > 1) {
+            // Create array of new ids.
+            arr.forEach((item, indx) => {
+                newIdArray.push(idGenFunc(item, indx));
+            });
+        }
+        else {
+            // Create array of new ids.
+            arr.forEach((item, index) => {
+                newIdArray.push(`${itemGenFuncUsesIndex ? index + '_' : ''}` + idGenFunc(item));
+            });
+        }
+        // Set new array on C++ side.
+        // C++ returns array of indexes of newly added array items.
+        // these are indexes in new child list.
+        ForEach.setIdArray(elmtId, newIdArray, diffIndexArray, idDuplicates);
+        // Its error if there are duplicate IDs.
+        if (idDuplicates.length > 0) {
+            idDuplicates.forEach((indx) => {
+                stateMgmtConsole.error(`Error: ${newIdArray[indx]} generated for ${indx}${indx < 4 ? indx == 2 ? "nd" : "rd" : "th"} array item ${arr[indx]}.`);
+            });
+            stateMgmtConsole.applicationError(`${this.debugInfo__()}: Ids generated by the ForEach id gen function must be unique. Application error!`);
+        }
+        
+        // Item gen is with index.
+        
+        // Create new elements if any.
+        
+        diffIndexArray.forEach((indx) => {
+            ForEach.createNewChildStart(newIdArray[indx], this);
+            if (itemGenFuncUsesIndex) {
+                itemGenFunc(arr[indx], indx);
+            }
+            else {
+                itemGenFunc(arr[indx]);
+            }
+            ForEach.createNewChildFinish(newIdArray[indx], this);
+        });
+        
+        
+        
+    }
+    createOrGetNode(elmtId, builder) {
+        const entry = this.updateFuncByElmtId.get(elmtId);
+        if (entry === undefined) {
+            throw new Error(`${this.debugInfo__()} fail to create node, elmtId is illegal`);
+        }
+        let nodeInfo = entry.getNode();
+        if (nodeInfo === undefined) {
+            nodeInfo = builder();
+            entry.setNode(nodeInfo);
+        }
+        return nodeInfo;
+    }
+    /**
+     * getNodeById is used to get ArkComponent stored updateFuncByElmtId
+     * @param elmtId -  the id of the component
+     * @returns ArkComponent | undefined
+     */
+    // KEEP
+    getNodeById(elmtId) {
+        const entry = this.updateFuncByElmtId.get(elmtId);
+        return entry ? entry.getNode() : undefined;
+    }
+    /**
+     * return its elmtId if currently rendering or re-rendering an UINode
+     * otherwise return UINodeRegisterProxy.notRecordingDependencies
+     * set in observeComponentCreation(2)
+     */
+    getCurrentlyRenderedElmtId() {
+        return PUV2ViewBase.renderingPaused || this.currentlyRenderedElmtIdStack_.length === 0
+            ? UINodeRegisterProxy.notRecordingDependencies
+            : this.currentlyRenderedElmtIdStack_[this.currentlyRenderedElmtIdStack_.length - 1];
+    }
+    debugInfoViewHierarchy(recursive = false) {
+        return this.debugInfoViewHierarchyInternal(0, recursive);
+    }
+    // KEEP
+    debugInfoViewHierarchyInternal(depth = 0, recursive = false) {
+        let retVaL = `\n${"  ".repeat(depth)}|--${this.constructor.name}[${this.id__()}]`;
+        if (this.isCompFreezeAllowed()) {
+            retVaL += ` {freezeWhenInactive : ${this.isCompFreezeAllowed()}}`;
+        }
+        if (depth < 1 || recursive) {
+            this.childrenWeakrefMap_.forEach((weakChild) => {
+                var _a;
+                retVaL += (_a = weakChild.deref()) === null || _a === void 0 ? void 0 : _a.debugInfoViewHierarchyInternal(depth + 1, recursive);
+            });
+        }
+        return retVaL;
+    }
+    // KEEP
+    debugInfoUpdateFuncByElmtId(recursive = false) {
+        return this.debugInfoUpdateFuncByElmtIdInternal({ total: 0 }, 0, recursive);
+    }
+    // KEEP
+    debugInfoUpdateFuncByElmtIdInternal(counter, depth = 0, recursive = false) {
+        let retVaL = `\n${"  ".repeat(depth)}|--${this.constructor.name}[${this.id__()}]: {`;
+        this.updateFuncByElmtId.forEach((value, key, map) => {
+            retVaL += `\n${"  ".repeat(depth + 2)}${value.getComponentName()}[${key}]`;
+        });
+        counter.total += this.updateFuncByElmtId.size;
+        retVaL += `\n${"  ".repeat(depth + 1)}}[${this.updateFuncByElmtId.size}]`;
+        if (recursive) {
+            this.childrenWeakrefMap_.forEach((value, key, map) => {
+                var _a;
+                retVaL += (_a = value.deref()) === null || _a === void 0 ? void 0 : _a.debugInfoUpdateFuncByElmtIdInternal(counter, depth + 1, recursive);
+            });
+        }
+        if (recursive && depth == 0) {
+            retVaL += `\nTotal: ${counter.total}`;
+        }
+        return retVaL;
+    }
+    debugInfoInactiveComponents() {
+        return Array.from(PUV2ViewBase.inactiveComponents_)
+            .map((component) => `- ${component}`).join('\n');
+    }
+} // class PUV2ViewBase
+// List of inactive components used for Dfx
+PUV2ViewBase.inactiveComponents_ = new Set();
+// Array.sort() converts array items to string to compare them!
+PUV2ViewBase.compareNumber = (a, b) => {
+    return (a < b) ? -1 : (a > b) ? 1 : 0;
+};
+// static flag for paused rendering
+// when paused, getCurrentlyRenderedElmtId() will return UINodeRegisterProxy.notRecordingDependencies
+PUV2ViewBase.renderingPaused = false;
+/*
  * Copyright (c) 2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -5154,7 +5678,7 @@ class SynchedPropertyNesedObjectPU extends SynchedPropertyNestedObjectPU {
 function uiNodeCleanUpIdleTask() {
     
     UINodeRegisterProxy.obtainDeletedElmtIds();
-    UINodeRegisterProxy.unregisterElmtIdsFromViewPUs();
+    UINodeRegisterProxy.unregisterElmtIdsFromIViews();
     UINodeRegisterProxy.cleanUpDeadReferences();
 }
 class UINodeRegisterProxy {
@@ -5170,15 +5694,16 @@ class UINodeRegisterProxy {
             UINodeRegisterProxy.instance_.obtainDeletedElmtIds();
         }
     }
-    static unregisterElmtIdsFromViewPUs() {
+    // FIXME unregisterElmtIdsFromIViews needs adaptation
+    static unregisterElmtIdsFromIViews() {
         
-        UINodeRegisterProxy.instance_.unregisterElmtIdsFromViewPUs();
+        UINodeRegisterProxy.instance_.unregisterElmtIdsFromIViews();
     }
     // unregisters all the received removedElements in func parameter
     static unregisterRemovedElmtsFromViewPUs(removedElements) {
         
         UINodeRegisterProxy.instance_.populateRemoveElementInfo(removedElements);
-        UINodeRegisterProxy.instance_.unregisterElmtIdsFromViewPUs();
+        UINodeRegisterProxy.instance_.unregisterElmtIdsFromIViews();
     }
     populateRemoveElementInfo(removedElements) {
         for (const elmtId of removedElements) {
@@ -5195,7 +5720,7 @@ class UINodeRegisterProxy {
         
         this.removeElementsInfo_ = removedElementsInfo;
     }
-    unregisterElmtIdsFromViewPUs() {
+    unregisterElmtIdsFromIViews() {
         
         if (this.removeElementsInfo_.length == 0) {
             
@@ -5231,7 +5756,7 @@ UINodeRegisterProxy.monitorIllegalV2V3StateAccess = -2;
 UINodeRegisterProxy.instance_ = new UINodeRegisterProxy();
 UINodeRegisterProxy.ElementIdToOwningViewPU_ = new Map();
 /*
- * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -5248,39 +5773,7 @@ UINodeRegisterProxy.ElementIdToOwningViewPU_ = new Map();
  *
 * all definitions in this file are framework internal
 */
-// UpdateFuncRecord: misc framework-internal info related to updating of a UINode C++ object 
-// that TS side needs to know. 
-// updateFunc_  lambda function to update the UINode
-// JS interface class reference (it only has static functions)
-class UpdateFuncRecord {
-    constructor(params) {
-        this.updateFunc_ = params.updateFunc;
-        this.classObject_ = params.classObject;
-        this.node_ = params.node;
-    }
-    getUpdateFunc() {
-        return this.updateFunc_;
-    }
-    getComponentClass() {
-        return this.classObject_;
-    }
-    getComponentName() {
-        return (this.classObject_ && ("name" in this.classObject_)) ? Reflect.get(this.classObject_, "name") : "unspecified UINode";
-    }
-    getPopFunc() {
-        return (this.classObject_ && "pop" in this.classObject_) ? this.classObject_.pop : () => { };
-    }
-    getNode() {
-        return this.node_;
-    }
-    setNode(node) {
-        this.node_ = node;
-    }
-}
-// NativeView
-// implemented in C++  for release
-// and in utest/view_native_mock.ts for testing
-class ViewPU extends NativeViewPartialUpdate {
+class ViewPU extends PUV2ViewBase {
     /**
      * Create a View
      *
@@ -5297,85 +5790,33 @@ class ViewPU extends NativeViewPartialUpdate {
      *
     */
     constructor(parent, localStorage, elmtId = UINodeRegisterProxy.notRecordingDependencies, extraInfo = undefined) {
-        super();
-        this.parent_ = undefined;
-        this.childrenWeakrefMap_ = new Map();
+        super(parent, elmtId, extraInfo);
         // flag for initial rendering or re-render on-going.
         this.isRenderInProgress = false;
         // flag for initial rendering being done
         this.isInitialRenderDone = false;
-        // indicates the currently rendered or rendered UINode's elmtIds
-        // or UINodeRegisterProxy.notRecordingDependencies if none is currently rendering
-        // isRenderInProgress == true always when currentlyRenderedElmtIdStack_.length >= 0 
-        this.currentlyRenderedElmtIdStack_ = new Array();
-        // flag if active of inActive
-        // inActive means updates are delayed
-        this.isActive_ = true;
-        /*
-        private elmtIdsDelayedUpdate: Set<number> = new Set()
-        private monitorIdsDelayedUpdate: Set<number> = new Set()
-        private computedIdsDelayedUpdate: Set<number> = new Set()
-        */
         this.runReuse_ = false;
         this.hasBeenRecycled_ = false;
-        // flag if {aboutToBeDeletedInternal} is called and the instance of ViewPU has not been GC.
-        this.isDeleting_ = false;
         this.watchedProps = new Map();
         this.recycleManager_ = undefined;
-        this.isCompFreezeAllowed = false;
-        this.extraInfo_ = undefined;
         // @Provide'd variables by this class and its ancestors
         this.providedVars_ = new Map();
-        // Map elmtId -> Repeat instance in this ViewPU
-        this.elmtId2Repeat_ = new Map();
         // Set of dependent elmtIds that need partial update
         // during next re-render
         this.dirtDescendantElementIds_ = new Set();
-        // registry of update functions
-        // the key is the elementId of the Component/Element that's the result of this function
-        this.updateFuncByElmtId = new UpdateFuncsByElmtId();
         // my LocalStorage instance, shared with ancestor Views.
         // create a default instance on demand if none is initialized
         this.localStoragebackStore_ = undefined;
-        /**
-         * on first render create a new Instance of Repeat
-         * on re-render connect to existing instance
-         * @param arr
-         * @returns
-         */
-        this.__mkRepeatAPI = (arr) => {
-            // factory is for future extensions, currently always return the same
-            const elmtId = this.getCurrentlyRenderedElmtId();
-            let repeat = this.elmtId2Repeat_.get(elmtId);
-            if (!repeat) {
-                repeat = new __Repeat(this, arr);
-                this.elmtId2Repeat_.set(elmtId, repeat);
-            }
-            else {
-                repeat.updateArr(arr);
-            }
-            return repeat;
-        };
         // if set use the elmtId also as the ViewPU object's subscribable id.
         // these matching is requirement for updateChildViewById(elmtId) being able to
         // find the child ViewPU object by given elmtId
-        this.id_ = elmtId == UINodeRegisterProxy.notRecordingDependencies ? SubscriberManager.MakeId() : elmtId;
+        //this.id_ = elmtId == UINodeRegisterProxy.notRecordingDependencies ? SubscriberManager.MakeId() : elmtId;
         this.localStoragebackStore_ = undefined;
         
-        if (extraInfo) {
-            this.extraInfo_ = extraInfo;
-        }
-        if (parent) {
-            // this View is not a top-level View
-            this.setCardId(parent.getCardId());
-            // Call below will set this.parent_ to parent as well
-            parent.addChild(this);
-        }
         if (localStorage) {
             this.localStorage_ = localStorage;
             
         }
-        this.isCompFreezeAllowed = this.isCompFreezeAllowed || (this.parent_ && this.parent_.isCompFreezeAllowed);
         SubscriberManager.Add(this);
         
     }
@@ -5418,9 +5859,9 @@ class ViewPU extends NativeViewPartialUpdate {
         
     }
     get localStorage_() {
-        if (!this.localStoragebackStore_ && this.parent_) {
+        if (!this.localStoragebackStore_ && this.getParent()) {
             
-            this.localStoragebackStore_ = this.parent_.localStorage_;
+            this.localStoragebackStore_ = this.getParent().localStorage_;
         }
         if (!this.localStoragebackStore_) {
             
@@ -5445,36 +5886,18 @@ class ViewPU extends NativeViewPartialUpdate {
     // use instanceOf. Until then, this is a workaround.
     // @state, @track, etc V3 decorator functions modify isViewV3 to return true
     // (decorator can modify functions in prototype)
+    // FIXME
     get isViewV3() {
         return false;
     }
-    // globally unique id, this is different from compilerAssignedUniqueChildId!
-    id__() {
-        return this.id_;
-    }
-    updateId(elmtId) {
-        this.id_ = elmtId;
-    }
     aboutToReuse(params) { }
     aboutToRecycle() { }
-    setDeleteStatusRecursively() {
-        if (!this.childrenWeakrefMap_.size) {
-            return;
-        }
-        this.childrenWeakrefMap_.forEach((value) => {
-            let child = value.deref();
-            if (child) {
-                child.isDeleting_ = true;
-                child.setDeleteStatusRecursively();
-            }
-        });
-    }
     // super class will call this function from
     // its aboutToBeDeleted implementation
     aboutToBeDeletedInternal() {
         
         // if this.isDeleting_ is true already, it may be set delete status recursively by its parent, so it is not necessary
-        // to set and resursively set its children any more
+        // to set and recursively set its children any more
         if (!this.isDeleting_) {
             this.isDeleting_ = true;
             this.setDeleteStatusRecursively();
@@ -5489,15 +5912,16 @@ class ViewPU extends NativeViewPartialUpdate {
         if (this.hasRecycleManager()) {
             this.getRecycleManager().purgeAllCachedRecycleNode();
         }
-        // unregistration of ElementIDs
+        // un-registration of ElementIDs
         
-        // it will unregister removed elementids from all the viewpu, equals purgeDeletedElmtIdsRecursively
+        // it will unregister removed elmtIds from all ViewPu, equals purgeDeletedElmtIdsRecursively
         this.purgeDeletedElmtIds();
-        // unregisters its own id once its children are unregistered above
+        // un-registers its own id once its children are unregistered above
         UINodeRegisterProxy.unregisterRemovedElmtsFromViewPUs([this.id__()]);
         
-        // in case ViewPU is currently frozen
-        ViewPU.inactiveComponents_.delete(`${this.constructor.name}[${this.id__()}]`);
+        // in case this ViewPU is currently frozen
+        PUV2ViewBase.inactiveComponents_.delete(`${this.constructor.name}[${this.id__()}]`);
+        // FIXME needed ?
         MonitorV3.clearWatchesFromTarget(this);
         this.updateFuncByElmtId.clear();
         this.watchedProps.clear();
@@ -5505,45 +5929,10 @@ class ViewPU extends NativeViewPartialUpdate {
         if (this.ownObservedPropertiesStore__) {
             this.ownObservedPropertiesStore__.clear();
         }
-        if (this.parent_) {
-            this.parent_.removeChild(this);
+        if (this.getParent()) {
+            this.getParent().removeChild(this);
         }
         this.localStoragebackStore_ = undefined;
-    }
-    purgeDeleteElmtId(rmElmtId) {
-        
-        const result = this.updateFuncByElmtId.delete(rmElmtId);
-        if (result) {
-            this.purgeVariableDependenciesOnElmtIdOwnFunc(rmElmtId);
-            // it means rmElmtId has finished all the unregistration from the js side, ElementIdToOwningViewPU_  does not need to keep it
-            UINodeRegisterProxy.ElementIdToOwningViewPU_.delete(rmElmtId);
-        }
-        // FIXME: only do this if app uses V3
-        ObserveV3.getObserve().clearBinding(rmElmtId);
-        return result;
-    }
-    debugInfo__() {
-        return `@Component '${this.constructor.name}'[${this.id__()}]`;
-    }
-    debugInfoRegisteredElmtIds() {
-        return this.updateFuncByElmtId.debugInfoRegisteredElmtIds();
-    }
-    // for given elmtIds look up their component name/type and format a string out of this info
-    // use function only for debug output and DFX.
-    debugInfoElmtIds(elmtIds) {
-        let result = "";
-        let sepa = "";
-        elmtIds.forEach((elmtId) => {
-            result += `${sepa}${this.debugInfoElmtId(elmtId)}`;
-            sepa = ", ";
-        });
-        return result;
-    }
-    debugInfoElmtId(elmtId) {
-        return this.updateFuncByElmtId.debugInfoElmtId(elmtId);
-    }
-    dumpStateVars() {
-        
     }
     debugInfoStateVars() {
         let result = `|--${this.constructor.name}[${this.id__()}]`;
@@ -5571,7 +5960,7 @@ class ViewPU extends NativeViewPartialUpdate {
    */
     setActiveInternal(active) {
         
-        if (!this.isCompFreezeAllowed) {
+        if (!this.isCompFreezeAllowed()) {
             
             
             return;
@@ -5624,73 +6013,6 @@ class ViewPU extends NativeViewPartialUpdate {
             this.getRecycleManager().setActive(this.isActive_);
         }
     }
-    setParent(parent) {
-        if (this.parent_ && parent) {
-            stateMgmtConsole.warn(`${this.debugInfo__()}: setChild: changing parent to '${parent === null || parent === void 0 ? void 0 : parent.debugInfo__()} (unsafe operation)`);
-        }
-        this.parent_ = parent;
-    }
-    getParent() {
-        return this.parent_;
-    }
-    /**
-     * Indicate if this @Component is allowed to freeze by calling with freezeState=true
-     * Called with value of the @Component decorator 'freezeWhenInactive' parameter
-     * or depending how UI compiler works also with 'undefined'
-     * @param freezeState only value 'true' will be used, otherwise inherits from parent
-     *      if not parent, set to false.
-     */
-    initAllowComponentFreeze(freezeState) {
-        // set to true if freeze parameter set for this @Component to true
-        // otherwise inherit from parent @Component (if it exists).
-        this.isCompFreezeAllowed = freezeState || this.isCompFreezeAllowed;
-        
-    }
-    /**
-     * add given child and set 'this' as its parent
-     * @param child child to add
-     * @returns returns false if child with given child's id already exists
-     *
-     * framework internal function
-     * Note: Use of WeakRef ensures child and parent do not generate a cycle dependency.
-     * The add. Set<ids> is required to reliably tell what children still exist.
-     */
-    addChild(child) {
-        if (this.childrenWeakrefMap_.has(child.id__())) {
-            stateMgmtConsole.warn(`${this.debugInfo__()}: addChild '${child === null || child === void 0 ? void 0 : child.debugInfo__()}' id already exists ${child.id__()}. Internal error!`);
-            return false;
-        }
-        this.childrenWeakrefMap_.set(child.id__(), new WeakRef(child));
-        child.setParent(this);
-        return true;
-    }
-    /**
-     * remove given child and remove 'this' as its parent
-     * @param child child to add
-     * @returns returns false if child with given child's id does not exist
-     */
-    removeChild(child) {
-        const hasBeenDeleted = this.childrenWeakrefMap_.delete(child.id__());
-        if (!hasBeenDeleted) {
-            stateMgmtConsole.warn(`${this.debugInfo__()}: removeChild '${child === null || child === void 0 ? void 0 : child.debugInfo__()}', child id ${child.id__()} not known. Internal error!`);
-        }
-        else {
-            child.setParent(undefined);
-        }
-        return hasBeenDeleted;
-    }
-    /**
-     * Retrieve child by given id
-     * @param id
-     * @returns child if in map and weak ref can still be downreferenced
-     */
-    getChildById(id) {
-        const childWeakRef = this.childrenWeakrefMap_.get(id);
-        return childWeakRef ? childWeakRef.deref() : undefined;
-    }
-    updateStateVars(params) {
-        stateMgmtConsole.error(`${this.debugInfo__()}: updateStateVars unimplemented. Pls upgrade to latest eDSL transpiler version. Application error.`);
-    }
     initialRenderView() {
         
         this.obtainOwnObservedProperties();
@@ -5728,10 +6050,6 @@ class ViewPU extends NativeViewPartialUpdate {
         }
         
     }
-    dumpReport() {
-        stateMgmtConsole.warn(`Printing profiler information`);
-        stateMgmtProfiler.report();
-    }
     /**
      * force a complete rerender / update by executing all update functions
      * exec a regular rerender first
@@ -5751,7 +6069,12 @@ class ViewPU extends NativeViewPartialUpdate {
             this.childrenWeakrefMap_.forEach((weakRefChild) => {
                 const child = weakRefChild.deref();
                 if (child) {
-                    child.forceCompleteRerender(true);
+                    if (child instanceof ViewPU) {
+                        child.forceCompleteRerender(true);
+                    }
+                    else {
+                        throw new Error("forceCompleteRerender not implemented for ViewV2, yet");
+                    }
                 }
             });
         }
@@ -5773,24 +6096,6 @@ class ViewPU extends NativeViewPartialUpdate {
         this.UpdateElement(elmtId);
         // remove elemtId from dirtDescendantElementIds.
         this.dirtDescendantElementIds_.delete(elmtId);
-        
-    }
-    updateStateVarsOfChildByElmtId(elmtId, params) {
-        
-        
-        if (elmtId < 0) {
-            stateMgmtConsole.warn(`${this.debugInfo__()}: updateChildViewById(${elmtId}) - invalid elmtId - internal error!`);
-            
-            return;
-        }
-        let child = this.getChildById(elmtId);
-        if (!child) {
-            stateMgmtConsole.warn(`${this.debugInfo__()}: updateChildViewById(${elmtId}) - no child with this elmtId - internal error!`);
-            
-            return;
-        }
-        child.updateStateVars(params);
-        
         
     }
     // implements IMultiPropertiesChangeSubscriber
@@ -5832,18 +6137,18 @@ class ViewPU extends NativeViewPartialUpdate {
         
     }
     /**
-     *  inform that UINode with given elmtId needs rerender
-     *  does NOT exec @Watch function.
-     *  only used on V3 code path from ObserveV3.fireChange.
-     *
-     * FIXME will still use in the future?
-     */
+   *  inform that UINode with given elmtId needs rerender
+   *  does NOT exec @Watch function.
+   *  only used on V3 code path from ObserveV3.fireChange.
+   *
+   * FIXME will still use in the future?
+   */
     uiNodeNeedUpdateV3(elmtId) {
         if (this.isFirstRender()) {
             return;
         }
         
-        if (!this.dirtDescendantElementIds_.size && !this.runReuse_) {
+        if (!this.dirtDescendantElementIds_.size) { //  && !this.runReuse_) {
             // mark ComposedElement dirty when first elmtIds are added
             // do not need to do this every time
             this.syncInstanceId();
@@ -5859,35 +6164,6 @@ class ViewPU extends NativeViewPartialUpdate {
         
         
     }
-    /*
-    private performDelayedUpdateV3(): void {
-      FIXME Component freeze
-      if(this.computedIdsDelayedUpdate.size) {
-        // exec computed functions
-        ObserveV3.getObserve().updateDirtyComputedProps(this.computedIdsDelayedUpdate);
-      }
-      if(this.monitorIdsDelayedUpdate.size) {
-        // exec  monitor functions
-        ObserveV3.getObserve().updateDirtyMonitors(this.monitorIdsDelayedUpdate);
-      }
-      if(this.elmtIdsDelayedUpdate.size) {
-        // update re-render of updated element ids once the view gets active
-        if(this.dirtDescendantElementIds_.size === 0) {
-          this.dirtDescendantElementIds_ = new Set(this.elmtIdsDelayedUpdate);
-        }
-        else {
-          this.elmtIdsDelayedUpdate.forEach((element) => {
-            this.dirtDescendantElementIds_.add(element);
-          });
-        }
-      }
-      this.markNeedUpdate();
-      this.elmtIdsDelayedUpdate.clear();
-      this.monitorIdsDelayedUpdate.clear();
-      this.computedIdsDelayedUpdate.clear();
-    }
-  }
-     */
     performDelayedUpdate() {
         if (!this.ownObservedPropertiesStore_.size) {
             return;
@@ -5938,18 +6214,18 @@ class ViewPU extends NativeViewPartialUpdate {
      * @param store the backing store object for this variable (not the get/set variable!)
      */
     addProvidedVar(providedPropName, store, allowOverride = false) {
-        if (!allowOverride && this.findProvide(providedPropName)) {
+        if (!allowOverride && this.findProvidePU(providedPropName)) {
             throw new ReferenceError(`${this.constructor.name}: duplicate @Provide property with name ${providedPropName}. Property with this name is provided by one of the ancestor Views already. @Provide override not allowed.`);
         }
         store.setDecoratorInfo("@Provide");
         this.providedVars_.set(providedPropName, store);
     }
     /*
-      findProvide finds @Provided property recursively by traversing ViewPU's towards that of the UI tree root @Component:
+      findProvidePU finds @Provided property recursively by traversing ViewPU's towards that of the UI tree root @Component:
       if 'this' ViewPU has a @Provide("providedPropName") return it, otherwise ask from its parent ViewPU.
     */
-    findProvide(providedPropName) {
-        return this.providedVars_.get(providedPropName) || (this.parent_ && this.parent_.findProvide(providedPropName));
+    findProvidePU(providedPropName) {
+        return this.providedVars_.get(providedPropName) || (this.parent_ && this.parent_.findProvidePU(providedPropName));
     }
     /**
      * Method for the sub-class to call from its constructor for resolving
@@ -5963,7 +6239,7 @@ class ViewPU extends NativeViewPartialUpdate {
      * @returns initializing value of the @Consume backing store
      */
     initializeConsume(providedPropName, consumeVarName) {
-        let providedVarStore = this.findProvide(providedPropName);
+        let providedVarStore = this.findProvidePU(providedPropName);
         if (providedVarStore === undefined) {
             throw new ReferenceError(`${this.debugInfo__()} missing @Provide property with name ${providedPropName}.
           Fail to resolve @Consume(${providedPropName}).`);
@@ -5982,8 +6258,8 @@ class ViewPU extends NativeViewPartialUpdate {
      * @param elmtId
      */
     markElemenDirtyById(elmtId) {
-        // TODO ace-ets2bundle, framework, compilated apps need to update together
-        // this function will be removed after a short transiition periode
+        // TODO ace-ets2bundle, framework, compiled apps need to update together
+        // this function will be removed after a short transition period
         stateMgmtConsole.applicationError(`${this.debugInfo__()}: markElemenDirtyById no longer supported.
         Please update your ace-ets2bundle and recompile your application. Application error!`);
     }
@@ -6021,38 +6297,6 @@ class ViewPU extends NativeViewPartialUpdate {
         
         //this.dumpStateVars();
         
-    }
-    // request list of all (global) elmtIds of deleted UINodes and unregister from the all ViewPUs
-    // this function equals purgeDeletedElmtIdsRecursively because it does unregistration for all ViewPUs
-    purgeDeletedElmtIds() {
-        
-        // request list of all (global) elmtIds of deleted UINodes that need to be unregistered
-        UINodeRegisterProxy.obtainDeletedElmtIds();
-        // unregister the removed elementids requested from the cpp side for all viewpus, it will make the first viewpu slower
-        // than before, but the rest viewpu will be faster
-        UINodeRegisterProxy.unregisterElmtIdsFromViewPUs();
-        
-    }
-    purgeVariableDependenciesOnElmtIdOwnFunc(elmtId) {
-        this.ownObservedPropertiesStore_.forEach((stateVar) => {
-            stateVar.purgeDependencyOnElmtId(elmtId);
-        });
-    }
-    /**
-     * return its elmtId if currently rendering or re-rendering an UINode
-     * otherwise return UINodeRegisterProxy.notRecordingDependencies
-     * set in observeComponentCreation(2)
-     */
-    getCurrentlyRenderedElmtId() {
-        return ViewPU.renderingPaused || this.currentlyRenderedElmtIdStack_.length == 0
-            ? UINodeRegisterProxy.notRecordingDependencies
-            : this.currentlyRenderedElmtIdStack_[this.currentlyRenderedElmtIdStack_.length - 1];
-    }
-    static pauseRendering() {
-        ViewPU.renderingPaused = true;
-    }
-    static restoreRendering() {
-        ViewPU.renderingPaused = false;
     }
     // executed on first render only
     // kept for backward compatibility with old ace-ets2bundle
@@ -6222,9 +6466,17 @@ class ViewPU extends NativeViewPartialUpdate {
         this.updateDirtyElements();
         this.childrenWeakrefMap_.forEach((weakRefChild) => {
             const child = weakRefChild.deref();
-            if (child && !child.hasBeenRecycled_) {
-                child.aboutToReuseInternal();
-            }
+            if (child) {
+                if (child instanceof ViewPU) {
+                    if (!child.hasBeenRecycled_) {
+                        child.aboutToReuseInternal();
+                    }
+                }
+                else {
+                    // FIXME fix for mixed V2 - V3 Hierarchies 
+                    throw new Error("aboutToReuseInternal: Recycle not implemented for ViewV2, yet");
+                }
+            } // if child
         });
         this.runReuse_ = false;
     }
@@ -6235,132 +6487,31 @@ class ViewPU extends NativeViewPartialUpdate {
         }, "aboutToRecycle", this.constructor.name);
         this.childrenWeakrefMap_.forEach((weakRefChild) => {
             const child = weakRefChild.deref();
-            if (child && !child.hasBeenRecycled_) {
-                child.aboutToRecycleInternal();
-            }
+            if (child) {
+                if (child instanceof ViewPU) {
+                    if (!child.hasBeenRecycled_) {
+                        child.aboutToRecycleInternal();
+                    }
+                }
+                else {
+                    // FIXME fix for mixed V2 - V3 Hierarchies 
+                    throw new Error("aboutToRecycleInternal: Recycle not yet implemented for ViewV2");
+                }
+            } // if child
         });
         this.runReuse_ = false;
     }
     // add current JS object to it's parent recycle manager
     recycleSelf(name) {
-        if (this.parent_ && !this.parent_.isDeleting_) {
-            this.parent_.getOrCreateRecycleManager().pushRecycleNode(name, this);
+        if (this.getParent() && !this.getParent().isDeleting() && this.getParent() instanceof ViewPU) {
+            const parentPU = this.getParent();
+            parentPU.getOrCreateRecycleManager().pushRecycleNode(name, this);
             this.hasBeenRecycled_ = true;
         }
         else {
             this.resetRecycleCustomNode();
             stateMgmtConsole.error(`${this.constructor.name}[${this.id__()}]: recycleNode must have a parent`);
         }
-    }
-    // performs the update on a branch within if() { branch } else if (..) { branch } else { branch }
-    ifElseBranchUpdateFunction(branchId, branchfunc) {
-        const oldBranchid = If.getBranchId();
-        if (branchId == oldBranchid) {
-            
-            return;
-        }
-        // branchid identifies uniquely the if .. <1> .. else if .<2>. else .<3>.branch
-        // ifElseNode stores the most recent branch, so we can compare
-        // removedChildElmtIds will be filled with the elmtIds of all children and their children will be deleted in response to if .. else change
-        let removedChildElmtIds = new Array();
-        If.branchId(branchId, removedChildElmtIds);
-        //unregisters the removed child elementIDs using proxy
-        UINodeRegisterProxy.unregisterRemovedElmtsFromViewPUs(removedChildElmtIds);
-        // purging these elmtIds from state mgmt will make sure no more update function on any deleted child wi;ll be executed
-        
-        this.purgeDeletedElmtIds();
-        branchfunc();
-    }
-    /**
-     Partial updates for ForEach.
-     * @param elmtId ID of element.
-     * @param itemArray Array of items for use of itemGenFunc.
-     * @param itemGenFunc Item generation function to generate new elements. If index parameter is
-     *                    given set itemGenFuncUsesIndex to true.
-     * @param idGenFunc   ID generation function to generate unique ID for each element. If index parameter is
-     *                    given set idGenFuncUsesIndex to true.
-     * @param itemGenFuncUsesIndex itemGenFunc optional index parameter is given or not.
-     * @param idGenFuncUsesIndex idGenFunc optional index parameter is given or not.
-     */
-    forEachUpdateFunction(elmtId, itemArray, itemGenFunc, idGenFunc, itemGenFuncUsesIndex = false, idGenFuncUsesIndex = false) {
-        
-        
-        if (itemArray === null || itemArray === undefined) {
-            stateMgmtConsole.applicationError(`${this.debugInfo__()}: forEachUpdateFunction (ForEach re-render): input array is null or undefined error. Application error!`);
-            
-            return;
-        }
-        if (typeof itemGenFunc !== "function") {
-            stateMgmtConsole.applicationError(`${this.debugInfo__()}: forEachUpdateFunction (ForEach re-render): Item generation function missing. Application error!`);
-            
-            return;
-        }
-        if (idGenFunc !== undefined && typeof idGenFunc !== "function") {
-            stateMgmtConsole.applicationError(`${this.debugInfo__()}: forEachUpdateFunction (ForEach re-render): id generator is not a function. Application error!`);
-            
-            return;
-        }
-        if (idGenFunc === undefined) {
-            
-            idGenFuncUsesIndex = true;
-            // catch possible error caused by Stringify and re-throw an Error with a meaningful (!) error message
-            idGenFunc = (item, index) => {
-                try {
-                    return `${index}__${JSON.stringify(item)}`;
-                }
-                catch (e) {
-                    throw new Error(`${this.debugInfo__()}: ForEach id ${elmtId}: use of default id generator function not possible on provided data structure. Need to specify id generator function (ForEach 3rd parameter). Application Error!`);
-                }
-            };
-        }
-        let diffIndexArray = []; // New indexes compared to old one.
-        let newIdArray = [];
-        let idDuplicates = [];
-        const arr = itemArray; // just to trigger a 'get' onto the array
-        // ID gen is with index.
-        if (idGenFuncUsesIndex || idGenFunc.length > 1) {
-            // Create array of new ids.
-            arr.forEach((item, indx) => {
-                newIdArray.push(idGenFunc(item, indx));
-            });
-        }
-        else {
-            // Create array of new ids.
-            arr.forEach((item, index) => {
-                newIdArray.push(`${itemGenFuncUsesIndex ? index + '_' : ''}` + idGenFunc(item));
-            });
-        }
-        // Set new array on C++ side.
-        // C++ returns array of indexes of newly added array items.
-        // these are indexes in new child list.
-        ForEach.setIdArray(elmtId, newIdArray, diffIndexArray, idDuplicates);
-        // Its error if there are duplicate IDs.
-        if (idDuplicates.length > 0) {
-            idDuplicates.forEach((indx) => {
-                stateMgmtConsole.error(`Error: ${newIdArray[indx]} generated for ${indx}${indx < 4 ? indx == 2 ? "nd" : "rd" : "th"} array item ${arr[indx]}.`);
-            });
-            stateMgmtConsole.applicationError(`${this.debugInfo__()}: Ids generated by the ForEach id gen function must be unique. Application error!`);
-        }
-        aceTrace.begin(`forEach update id: ${elmtId}, idDuplicates.length: ${idDuplicates.length}, diffIndexArray.length: ${diffIndexArray.length}`);
-        
-        // Item gen is with index.
-        
-        // Create new elements if any.
-        
-        diffIndexArray.forEach((indx) => {
-            ForEach.createNewChildStart(newIdArray[indx], this);
-            if (itemGenFuncUsesIndex) {
-                itemGenFunc(arr[indx], indx);
-            }
-            else {
-                itemGenFunc(arr[indx]);
-            }
-            ForEach.createNewChildFinish(newIdArray[indx], this);
-        });
-        
-        
-        
-        aceTrace.end();
     }
     UpdateLazyForEachElements(elmtIds) {
         if (!Array.isArray(elmtIds)) {
@@ -6418,27 +6569,6 @@ class ViewPU extends NativeViewPartialUpdate {
         localStorageProp.setDecoratorInfo("@LocalStorageProp");
         return localStorageProp;
     }
-    createOrGetNode(elmtId, builder) {
-        const entry = this.updateFuncByElmtId.get(elmtId);
-        if (entry === undefined) {
-            throw new Error(`${this.debugInfo__()} fail to create node, elmtId is illegal`);
-        }
-        let nodeInfo = entry.getNode();
-        if (nodeInfo === undefined) {
-            nodeInfo = builder();
-            entry.setNode(nodeInfo);
-        }
-        return nodeInfo;
-    }
-    /**
-     * getNodeById is used to get ArkComponent stored updateFuncByElmtId
-     * @param elmtId -  the id of the component
-     * @returns ArkComponent | undefined
-     */
-    getNodeById(elmtId) {
-        const entry = this.updateFuncByElmtId.get(elmtId);
-        return entry ? entry.getNode() : undefined;
-    }
     /**
      * onDumpInfo is used to process commands delivered by the hidumper process
      * @param commands -  list of commands provided in the shell
@@ -6449,7 +6579,7 @@ class ViewPU extends NativeViewPartialUpdate {
         dfxCommands.forEach((command) => {
             let view = undefined;
             if (command.viewId) {
-                view = this.findViewInHierarchy(command.viewId);
+                view = this.findViewPUInHierarchy(command.viewId);
                 if (!view) {
                     DumpLog.print(0, `\nTarget view: ${command.viewId} not found for command: ${command.what}\n`);
                     return;
@@ -6534,14 +6664,17 @@ class ViewPU extends NativeViewPartialUpdate {
         }
         return dfxCommands;
     }
-    findViewInHierarchy(id) {
-        let weak = this.childrenWeakrefMap_.get(id);
-        if (weak) {
-            return weak.deref();
+    findViewPUInHierarchy(id) {
+        let weakChild = this.childrenWeakrefMap_.get(id);
+        if (weakChild) {
+            const child = weakChild.deref();
+            // found child with id, is it a ViewPU?
+            return (child instanceof ViewPU) ? child : undefined;
         }
+        // did not find, continue searching
         let retVal = undefined;
         for (const [key, value] of this.childrenWeakrefMap_.entries()) {
-            retVal = value.deref().findViewInHierarchy(id);
+            retVal = value.deref().findViewPUInHierarchy(id);
             if (retVal)
                 break;
         }
@@ -6557,48 +6690,6 @@ class ViewPU extends NativeViewPartialUpdate {
         retVal += `\n\nRegistered Element IDs:\n${this.debugInfoUpdateFuncByElmtId(recursive)}`;
         retVal += `\n\nDirty Registered Element IDs:\n${this.debugInfoDirtDescendantElementIds(recursive)}`;
         return retVal;
-    }
-    debugInfoViewHierarchy(recursive = false) {
-        return this.debugInfoViewHierarchyInternal(0, recursive);
-    }
-    debugInfoViewHierarchyInternal(depth = 0, recursive = false) {
-        let retVaL = `\n${"  ".repeat(depth)}|--${this.constructor.name}[${this.id__()}]`;
-        if (this.isCompFreezeAllowed) {
-            retVaL += ` {freezewhenInactive : ${this.isCompFreezeAllowed}}`;
-        }
-        if (depth < 1 || recursive) {
-            this.childrenWeakrefMap_.forEach((value, key, map) => {
-                var _a;
-                retVaL += (_a = value.deref()) === null || _a === void 0 ? void 0 : _a.debugInfoViewHierarchyInternal(depth + 1, recursive);
-            });
-        }
-        return retVaL;
-    }
-    debugInfoUpdateFuncByElmtId(recursive = false) {
-        return this.debugInfoUpdateFuncByElmtIdInternal({ total: 0 }, 0, recursive);
-    }
-    debugInfoUpdateFuncByElmtIdInternal(counter, depth = 0, recursive = false) {
-        let retVaL = `\n${"  ".repeat(depth)}|--${this.constructor.name}[${this.id__()}]: {`;
-        this.updateFuncByElmtId.forEach((value, key, map) => {
-            var _a;
-            let componentName = value.getComponentName();
-            if (componentName === "unspecified UINode") {
-                componentName = (_a = this.getChildById(key)) === null || _a === void 0 ? void 0 : _a.constructor.name;
-            }
-            retVaL += `\n${"  ".repeat(depth + 2)}${componentName}[${key}]`;
-        });
-        counter.total += this.updateFuncByElmtId.size;
-        retVaL += `\n${"  ".repeat(depth + 1)}}[${this.updateFuncByElmtId.size}]`;
-        if (recursive) {
-            this.childrenWeakrefMap_.forEach((value, key, map) => {
-                var _a;
-                retVaL += (_a = value.deref()) === null || _a === void 0 ? void 0 : _a.debugInfoUpdateFuncByElmtIdInternal(counter, depth + 1, recursive);
-            });
-        }
-        if (recursive && depth == 0) {
-            retVaL += `\nTotal: ${counter.total}`;
-        }
-        return retVaL;
     }
     debugInfoDirtDescendantElementIds(recursive = false) {
         return this.debugInfoDirtDescendantElementIdsInternal(0, recursive, { total: 0 });
@@ -6621,115 +6712,7 @@ class ViewPU extends NativeViewPartialUpdate {
         }
         return retVaL;
     }
-    debugInfoInactiveComponents() {
-        return Array.from(ViewPU.inactiveComponents_)
-            .map((component) => `- ${component}`).join('\n');
-    }
-    /**
-     *
-     * @param paramVariableName
-     * @param @once paramVariableName
-     * @param is read only, therefore, init from parent needs to be done without
-     *        causing property setter() to be called
-     * @param newValue
-     */
-    initParam(paramVariableName, newValue) {
-        VariableUtilV3.initParam(this, paramVariableName, newValue);
-    }
-    /**
-   *
-   * @param paramVariableName
-   * @param @once paramVariableName
-   * @param is read only, therefore, update from parent needs to be done without
-   *        causing property setter() to be called
-   * @param @once reject any update
-    * @param newValue
-   */
-    updateParam(paramVariableName, newValue) {
-        VariableUtilV3.updateParam(this, paramVariableName, newValue);
-    }
-    /**
-     * sub-class must call this function at the end of its constructor
-     * especially after init variables from parent ViewPU has been done
-     */
-    finalizeConstruction() {
-        // FIXME, can we skip for apps that do not use V3 at all?
-        ObserveV3.getObserve().constructMonitor(this, this.constructor.name);
-        ObserveV3.getObserve().constructComputed(this, this.constructor.name);
-        ProvideConsumeUtilV3.setupConsumeVarsV3(this);
-        // Always use ID_REFS in ViewPU
-        this[ObserveV3.ID_REFS] = {};
-    }
-    // WatchIds that needs to be fired later gets added to monitorIdsDelayedUpdate
-    // monitor fireChange will be triggered for all these watchIds once this view gets active
-    addDelayedMonitorIds(watchId) {
-        /* FIXME @Component freeze
-        
-        this.monitorIdsDelayedUpdate.add(watchId);
-        */
-    }
-    addDelayedComputedIds(watchId) {
-        /* FIXME @Component freeze
-        
-        this.computedIdsDelayedUpdate.add(watchId);
-      */
-    }
 } // class ViewPU
-// Array.sort() converts array items to string to compare them!
-ViewPU.compareNumber = (a, b) => {
-    return (a < b) ? -1 : (a > b) ? 1 : 0;
-};
-// List of inactive components used for Dfx
-ViewPU.inactiveComponents_ = new Set();
-// static flag for paused rendering
-// when paused, getCurrentlyRenderedElmtId() will return UINodeRegisterProxy.notRecordingDependencies
-ViewPU.renderingPaused = false;
-class UpdateFuncsByElmtId {
-    constructor() {
-        this.map_ = new Map();
-    }
-    delete(elmtId) {
-        return this.map_.delete(elmtId);
-    }
-    set(elmtId, params) {
-        (typeof params === 'object') ?
-            this.map_.set(elmtId, new UpdateFuncRecord(params)) :
-            this.map_.set(elmtId, new UpdateFuncRecord({ updateFunc: params }));
-    }
-    get(elmtId) {
-        return this.map_.get(elmtId);
-    }
-    has(elmtId) {
-        return this.map_.has(elmtId);
-    }
-    keys() {
-        return this.map_.keys();
-    }
-    clear() {
-        return this.map_.clear();
-    }
-    get size() {
-        return this.map_.size;
-    }
-    forEach(callbackfn) {
-        this.map_.forEach(callbackfn);
-    }
-    // dump info about known elmtIds to a string
-    // use function only for debug output and DFX.
-    debugInfoRegisteredElmtIds() {
-        let result = "";
-        let sepa = "";
-        this.map_.forEach((value, elmtId) => {
-            result += `${sepa}${value.getComponentName()}[${elmtId}]`;
-            sepa = ", ";
-        });
-        return result;
-    }
-    debugInfoElmtId(elmtId) {
-        const updateFuncEntry = this.map_.get(elmtId);
-        return updateFuncEntry ? `'${updateFuncEntry.getComponentName()}[${elmtId}]'` : `'unknown component type'[${elmtId}]`;
-    }
-} // class UpdateFuncByElmtId
 /*
  * Copyright (c) 2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -6922,7 +6905,7 @@ function makeBuilderParameterProxy(builderName, source) {
 class ObserveV3 {
     constructor() {
         // see MonitorV3.observeObjectAccess: bindCmp is the MonitorV3
-        // see modified observeComponentCreation, bindCmp is the ViewPU
+        // see modified ViewV2 and ViewPU observeComponentCreation, bindCmp is the ViewV2 or ViewPU
         this.bindCmp_ = null;
         // bindId: UINode elmtId or watchId, depending on what is being observed
         this.bindId_ = UINodeRegisterProxy.notRecordingDependencies;
@@ -7220,7 +7203,7 @@ class ObserveV3 {
         
         // obtain and unregister the removed elmtIds 
         UINodeRegisterProxy.obtainDeletedElmtIds();
-        UINodeRegisterProxy.unregisterElmtIdsFromViewPUs();
+        UINodeRegisterProxy.unregisterElmtIdsFromIViews();
         // priority order of processing:
         // 1- update computed properties until no more need computed props update 
         // 2- update monitors until no more monitors and no more computed props
@@ -7258,7 +7241,7 @@ class ObserveV3 {
             let weakComp = this.id2cmp_[id];
             if (weakComp && "deref" in weakComp && (comp = weakComp.deref()) && comp instanceof ComputedV3) {
                 const target = comp.getTarget();
-                if (target instanceof ViewPU && !target.isViewActive()) {
+                if (target instanceof ViewV2 && !target.isViewActive()) {
                     // FIXME @Component freeze enable
                     // view.addDelayedComputedIds(id);
                 }
@@ -7278,15 +7261,13 @@ class ObserveV3 {
         monitors.forEach((watchId) => {
             weakMonitor = this.id2cmp_[watchId];
             if (weakMonitor && "deref" in weakMonitor && (monitor = weakMonitor.deref()) && monitor instanceof MonitorV3) {
-                if (monitor instanceof MonitorV3) {
-                    if (((monitorTarget = monitor.getTarget()) instanceof ViewPU) && !monitorTarget.isViewActive()) {
-                        // FIXME @Component freeze enable
-                        // monitor notifyChange delayed if target is a View that is not active
-                        // monitorTarget.addDelayedMonitorIds(watchId);
-                    }
-                    else {
-                        monitor.notifyChange();
-                    }
+                if (((monitorTarget = monitor.getTarget()) instanceof ViewV2) && !monitorTarget.isViewActive()) {
+                    // FIXME @Component freeze enable
+                    // monitor notifyChange delayed if target is a View that is not active
+                    // monitorTarget.addDelayedMonitorIds(watchId);
+                }
+                else {
+                    monitor.notifyChange();
                 }
             }
         });
@@ -7295,7 +7276,7 @@ class ObserveV3 {
     /**
      * This version of UpdateUINodes does not wait for VSYNC, violates rules
      * calls UpdateElement, thereby avoids the long and frequent code path from
-     * FlushDirtyNodesUpdate to CustomNode to ViewPU.updateDirtyElements to UpdateElement
+     * FlushDirtyNodesUpdate to CustomNode to ViewV2.updateDirtyElements to UpdateElement
      * Code left here to reproduce benchmark measurements, compare with future optimisation
      * @param elmtIds
      */
@@ -7306,7 +7287,7 @@ class ObserveV3 {
         let weak;
         elmtIds.forEach((elmtId) => {
             if ((weak = this.id2cmp_[elmtId]) && (typeof weak == "object") && ("deref" in weak)
-                && (view = weak.deref()) && (view instanceof ViewPU)) {
+                && (view = weak.deref()) && ((view instanceof ViewV2) || (view instanceof ViewPU))) {
                 if (view.isViewActive()) {
                     // FIXME need to call syncInstanceId before update?
                     view.UpdateElement(elmtId);
@@ -7315,12 +7296,12 @@ class ObserveV3 {
                     // FIXME @Component freeze
                     //....
                 }
-            } // if ViewPU
+            } // if ViewV2 or ViewPU
         });
         aceTrace.end();
     }
     // This is the code path similar to V2, follows the rule that UI updates on VSYNC.
-    // ViewPU queues the elmtId that need update, marks the CustomNode dirty in RenderContext
+    // ViewPU/ViewV2 queues the elmtId that need update, marks the CustomNode dirty in RenderContext
     // On next VSYNC runs FlushDirtyNodesUpdate to call rerender to call UpdateElement. Much longer code path
     // much slower
     updateUINodes(elmtIds) {
@@ -7330,7 +7311,8 @@ class ObserveV3 {
         let view;
         elmtIds.forEach((elmtId) => {
             viewWeak = this.id2cmp_[elmtId];
-            if (viewWeak && "deref" in viewWeak && (view = viewWeak.deref()) && view instanceof ViewPU) {
+            if (viewWeak && "deref" in viewWeak && (view = viewWeak.deref())
+                && ((view instanceof ViewV2) || (view instanceof ViewPU))) {
                 if (view.isViewActive()) {
                     view.uiNodeNeedUpdateV3(elmtId);
                 }
@@ -7389,8 +7371,8 @@ class ObserveV3 {
         return val;
     }
     /**
-     * Helper function to add meta data about decorator to ViewPU
-     * @param proto prototype object of application class derived from ViewPU
+     * Helper function to add meta data about decorator to ViewPU or ViewV2
+     * @param proto prototype object of application class derived from  ViewPU or ViewV2
      * @param varName decorated variable
      * @param deco "@state", "@event", etc (note "@model" gets transpiled in "@param" and "@event")
      */
@@ -7666,12 +7648,13 @@ function ObservedV2(BaseClass) {
     }
     if (BaseClass.prototype && !Reflect.has(BaseClass.prototype, ObserveV3.V3_DECO_META)) {
         // not an error, suspicious of developer oversight
-        stateMgmtConsole.warn(`'@observed class ${BaseClass === null || BaseClass === void 0 ? void 0 : BaseClass.name}': no @track property inside. Is thi intended? Check our application.`);
+        stateMgmtConsole.warn(`'@observed class ${BaseClass === null || BaseClass === void 0 ? void 0 : BaseClass.name}': no @track property inside. Is this intended? Check our application.`);
     }
     // Use ID_REFS only if number of observed attrs is significant
     const attrList = Object.getOwnPropertyNames(BaseClass.prototype);
     const count = attrList.filter(attr => attr.startsWith(ObserveV3.OB_PREFIX)).length;
     if (count > 5) {
+        
         BaseClass.prototype[ObserveV3.ID_REFS] = {};
     }
     return class extends BaseClass {
@@ -7737,8 +7720,8 @@ class MonitorV3 {
         // split space separated array of paths
         let paths = pathsString.split(/\s+/g);
         paths.forEach(path => this.values_.push(new MonitorValueV3(path)));
-        // add watchId to owning ViewPU or view model data object
-        // ViewPU uses to call clearBinding(id)
+        // add watchId to owning ViewV2 or view model data object
+        // ViewV2 uses to call clearBinding(id)
         // FIXME data object leave data inside ObservedV3, because they can not 
         // call clearBinding(id) before they get deleted.
         const meta = (_a = target[_b = MonitorV3.WATCH_INSTANCE_PREFIX]) !== null && _a !== void 0 ? _a : (target[_b] = {});
@@ -7984,7 +7967,7 @@ target[watchProp] ? target[watchProp][propertyKey] = computeFunction
  * limitations under the License.
  */
 /**
- * @state @Component/ViewPU variable decorator
+ * @state @ComponenV2t/ViewV2 variable decorator
  *
  * local init required - transpiler needs to support
  * no init or update form parent - transpiler needs to support
@@ -8007,9 +7990,9 @@ const state = (target: Object, propertyKey: string) => {
  * init from parent is mandatory when no local init, otherwise optional - transpiler needs to support
  * update from parent if init from parent, unless @once is used
  * new value assignment not allowed = has no setter. For update from parent @Component,
- *               transpiler calls ViewPU.updateParam(paramName).
+ *               transpiler calls ViewV2.updateParam(paramName).
  *
- * @param target  ViewPU class prototype object
+ * @param target  ViewV2 class prototype object
  * @param propertyKey  class property name
  *
  * turns given property into getter and setter functions
@@ -8055,7 +8038,7 @@ class VariableUtilV3 {
     /**
        * setReadOnlyAttr - helper function used to update @param
        * from parent @Component. Not allowed for @param @once .
-       * @param target  - the object, usually the ViewPU
+       * @param target  - the object, usually the ViewV2
        * @param attrName - @param variable name
        * @param newValue - update to new value
        */
@@ -8071,11 +8054,12 @@ class VariableUtilV3 {
         const storeProp = ObserveV3.OB_PREFIX + attrName;
         
         target[storeProp] = newValue;
+        ObserveV3.getObserve().addRef(target, attrName);
     }
     /**
      * setReadOnlyAttr - helper function used to update @param
      * from parent @Component. Not allowed for @param @once .
-     * @param target  - the object, usually the ViewPU
+     * @param target  - the object, usually the ViewV2
      * @param attrName - @param variable name
      * @param newValue - update to new value
      */
@@ -8106,7 +8090,7 @@ class VariableUtilV3 {
     }
 }
 /**
- * @event @Component/ViewPU variable decorator
+ * @event @ComponentV2/ViewV2 variable decorator
  *
  * @param target
  * @param propertyKey
@@ -8117,9 +8101,9 @@ const event = (target, propertyKey) => {
 };
 class ProvideConsumeUtilV3 {
     /**
-     * Helper function to add meta data about @provide and @comnsume decorators to ViewPU
+     * Helper function to add meta data about @provide and @consume decorators to ViewV2
      * similar to @see addVariableDecoMeta, but adds the alias to allow search from @consume for @provide counterpart
-     * @param proto prototype object of application class derived from ViewPU
+     * @param proto prototype object of application class derived from ViewV2
      * @param varName decorated variable
      * @param deco "@state", "@event", etc (note "@model" gets transpiled in "@param" and "@event")
      */
@@ -8134,7 +8118,7 @@ class ProvideConsumeUtilV3 {
         const aliasProp = ProvideConsumeUtilV3.ALIAS_PREFIX + aliasName;
         meta[aliasProp] = { "varName": varName, "deco": deco };
         // FIXME 
-        // when splitting ViewPU and ViewV3
+        // when splitting ViewPU and ViewV2
         // use instanceOf. Until then, this is a workaround.
         // any @state, @track, etc V3 event handles this function to return false
         Reflect.defineProperty(proto, "isViewV3", {
@@ -8161,7 +8145,7 @@ class ProvideConsumeUtilV3 {
         }
     }
     /**
-    * v3: find a @provide'ed variable from its nearest ancestor ViewPU.
+    * v3: find a @provide'ed variable from its nearest ancestor ViewV2.
     * @param searchingAliasName The key name to search for.
     * @returns A tuple containing the ViewPU instance where the provider is found
     * and the provider name
@@ -8172,7 +8156,7 @@ class ProvideConsumeUtilV3 {
         let checkView = view === null || view === void 0 ? void 0 : view.getParent();
         while (checkView) {
             const meta = (_a = checkView.constructor) === null || _a === void 0 ? void 0 : _a.prototype[ObserveV3.V3_DECO_META];
-            if (meta && meta[searchingPrefixedAliasName]) {
+            if (checkView instanceof ViewV2 && meta && meta[searchingPrefixedAliasName]) {
                 const aliasMeta = meta[searchingPrefixedAliasName];
                 const providedVarName = aliasMeta && (aliasMeta["deco"] == "@provide" ? aliasMeta["varName"] : undefined);
                 if (providedVarName) {
@@ -8180,7 +8164,7 @@ class ProvideConsumeUtilV3 {
                     return [checkView, providedVarName];
                 }
             }
-            checkView = checkView.getParent();
+            checkView = checkView.getParent(); // FIXME IView
         }
         ; // while
         
@@ -8248,25 +8232,32 @@ class ProvideConsumeUtilV3 {
 }
 ProvideConsumeUtilV3.ALIAS_PREFIX = '___pc_alias_';
 /**
- * ViewPU variable decorator @provide(alias> : string) varName
+ * @ComponentV2 / ViewV2 variable decorator @Provider(alias? : string) varName
  * @param alias defaults to varName
- * @returns
+ *
+ * @since 12
  */
 const provide = (aliasName) => {
-    return (target, varName) => {
+    return (proto, varName) => {
         const providedUnderName = aliasName || varName;
-        ProvideConsumeUtilV3.addProvideConsumeVariableDecoMeta(target, varName, providedUnderName, "@provide");
-        trackInternal(target, varName);
+        ProvideConsumeUtilV3.addProvideConsumeVariableDecoMeta(proto, varName, providedUnderName, "@provide");
+        trackInternal(proto, varName);
     };
-}; // @provide
+}; // @Provider
+/**
+ * @ComponentV2 / ViewV2 variable decorator @Consumer(alias? : string) varName
+ * @param alias defaults to varName
+ *
+ * @since 12
+ */
 const consume = (aliasName) => {
-    return (target, varName) => {
+    return (proto, varName) => {
         const searchForProvideWithName = aliasName || varName;
-        // redefining the property happens when ViewPU gets constructed
-        // and @Consume gets connected to @provide counterpart
-        ProvideConsumeUtilV3.addProvideConsumeVariableDecoMeta(target, varName, searchForProvideWithName, "@consume");
+        // redefining the property happens when owning ViewV2 gets constructed
+        // and @Consumer gets connected to @provide counterpart
+        ProvideConsumeUtilV3.addProvideConsumeVariableDecoMeta(proto, varName, searchForProvideWithName, "@consume");
     };
-};
+}; // @Consumer
 // The prop parameter is not carried when the component is updated.
 // FIXME what is the purpose of this ?
 /*
@@ -8546,6 +8537,312 @@ class __Repeat {
         // execute the ItemGen function
         this.itemGenFunc_(repeatItem);
         RepeatNative.createNewChildFinish(key);
+    }
+}
+/*
+ * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+class ViewV2 extends PUV2ViewBase {
+    constructor(parent, elmtId = UINodeRegisterProxy.notRecordingDependencies, extraInfo = undefined) {
+        super(parent, elmtId, extraInfo);
+        // Set of elmtIds that need re-render
+        this.dirtDescendantElementIds_ = new Set();
+        // Map elmtId -> Repeat instance in this ViewPU
+        this.elmtId2Repeat_ = new Map();
+        /**
+       * on first render create a new Instance of Repeat
+       * on re-render connect to existing instance
+       * @param arr
+       * @returns
+       */
+        this.__mkRepeatAPI = (arr) => {
+            // factory is for future extensions, currently always return the same
+            const elmtId = this.getCurrentlyRenderedElmtId();
+            let repeat = this.elmtId2Repeat_.get(elmtId);
+            if (!repeat) {
+                repeat = new __Repeat(this, arr);
+                this.elmtId2Repeat_.set(elmtId, repeat);
+            }
+            else {
+                repeat.updateArr(arr);
+            }
+            return repeat;
+        };
+        
+    }
+    finalizeConstruction() {
+        ObserveV3.getObserve().constructMonitor(this, this.constructor.name);
+        ObserveV3.getObserve().constructComputed(this, this.constructor.name);
+        ProvideConsumeUtilV3.setupConsumeVarsV3(this);
+        // Always use ID_REFS in ViewPU
+        this[ObserveV3.ID_REFS] = {};
+    }
+    debugInfo__() {
+        return `@ComponentV2 '${this.constructor.name}'[${this.id__()}]`;
+    }
+    get isViewV3() {
+        return true;
+    }
+    // super class will call this function from
+    // its aboutToBeDeleted implementation
+    aboutToBeDeletedInternal() {
+        
+        // if this.isDeleting_ is true already, it may be set delete status recursively by its parent, so it is not necessary
+        // to set and resursively set its children any more
+        if (!this.isDeleting_) {
+            this.isDeleting_ = true;
+            this.setDeleteStatusRecursively();
+        }
+        // tell UINodeRegisterProxy that all elmtIds under
+        // this ViewPU should be treated as already unregistered
+        
+        // purge the elmtIds owned by this viewPU from the updateFuncByElmtId and also the state variable dependent elmtIds
+        Array.from(this.updateFuncByElmtId.keys()).forEach((elmtId) => {
+            // FIXME split View: enable delete  this.purgeDeleteElmtId(elmtId);
+        });
+        //if (this.hasRecycleManager()) {
+        //   this.getRecycleManager().purgeAllCachedRecycleNode();
+        //}
+        // unregistration of ElementIDs
+        
+        // it will unregister removed elementids from all the viewpu, equals purgeDeletedElmtIdsRecursively
+        this.purgeDeletedElmtIds();
+        // unregisters its own id once its children are unregistered above
+        UINodeRegisterProxy.unregisterRemovedElmtsFromViewPUs([this.id__()]);
+        
+        // in case ViewPU is currently frozen
+        // ViewPU.inactiveComponents_.delete(`${this.constructor.name}[${this.id__()}]`);
+        MonitorV3.clearWatchesFromTarget(this);
+        this.updateFuncByElmtId.clear();
+        if (this.parent_) {
+            this.parent_.removeChild(this);
+        }
+    }
+    initialRenderView() {
+        
+        this.initialRender();
+        
+    }
+    observeComponentCreation2(compilerAssignedUpdateFunc, classObject) {
+        if (this.isDeleting_) {
+            stateMgmtConsole.error(`@ComponentV2 ${this.constructor.name} elmtId ${this.id__()} is already in process of destruction, will not execute observeComponentCreation2 `);
+            return;
+        }
+        const _componentName = (classObject && ("name" in classObject)) ? Reflect.get(classObject, "name") : "unspecified UINode";
+        const _popFunc = (classObject && "pop" in classObject) ? classObject.pop : () => { };
+        const updateFunc = (elmtId, isFirstRender) => {
+            this.syncInstanceId();
+            
+            ViewStackProcessor.StartGetAccessRecordingFor(elmtId);
+            ObserveV3.getObserve().startBind(this, elmtId);
+            compilerAssignedUpdateFunc(elmtId, isFirstRender);
+            if (!isFirstRender) {
+                _popFunc();
+            }
+            let node = this.getNodeById(elmtId);
+            if (node !== undefined) {
+                node.cleanStageValue();
+            }
+            ObserveV3.getObserve().startBind(null, UINodeRegisterProxy.notRecordingDependencies);
+            ViewStackProcessor.StopGetAccessRecording();
+            
+            this.restoreInstanceId();
+        };
+        const elmtId = ViewStackProcessor.AllocateNewElmetIdForNextComponent();
+        // needs to move set before updateFunc.
+        // make sure the key and object value exist since it will add node in attributeModifier during updateFunc.
+        this.updateFuncByElmtId.set(elmtId, { updateFunc: updateFunc, classObject: classObject });
+        // add element id -> owning ViewPU
+        UINodeRegisterProxy.ElementIdToOwningViewPU_.set(elmtId, new WeakRef(this));
+        try {
+            updateFunc(elmtId, /* is first render */ true);
+        }
+        catch (error) {
+            // avoid the incompatible change that move set function before updateFunc.
+            this.updateFuncByElmtId.delete(elmtId);
+            UINodeRegisterProxy.ElementIdToOwningViewPU_.delete(elmtId);
+            stateMgmtConsole.applicationError(`${this.debugInfo__()} has error in update func: ${error.message}`);
+            throw error;
+        }
+        
+    }
+    /**
+   *
+   * @param paramVariableName
+   * @param @once paramVariableName
+   * @param is read only, therefore, init from parent needs to be done without
+   *        causing property setter() to be called
+   * @param newValue
+   */
+    initParam(paramVariableName, newValue) {
+        VariableUtilV3.initParam(this, paramVariableName, newValue);
+    }
+    /**
+   *
+   * @param paramVariableName
+   * @param @once paramVariableName
+   * @param is read only, therefore, update from parent needs to be done without
+   *        causing property setter() to be called
+   * @param @once reject any update
+    * @param newValue
+   */
+    updateParam(paramVariableName, newValue) {
+        VariableUtilV3.updateParam(this, paramVariableName, newValue);
+    }
+    /**
+   *  inform that UINode with given elmtId needs rerender
+   *  does NOT exec @Watch function.
+   *  only used on V3 code path from ObserveV3.fireChange.
+   *
+   * FIXME will still use in the future?
+   */
+    uiNodeNeedUpdateV3(elmtId) {
+        if (this.isFirstRender()) {
+            return;
+        }
+        
+        if (!this.dirtDescendantElementIds_.size) { //  && !this.runReuse_) {
+            // mark ComposedElement dirty when first elmtIds are added
+            // do not need to do this every time
+            this.syncInstanceId();
+            this.markNeedUpdate();
+            this.restoreInstanceId();
+        }
+        //  if (this.hasRecycleManager()) {
+        //      this.dirtDescendantElementIds_.add(this.recycleManager_.proxyNodeId(elmtId));
+        //  } else {
+        this.dirtDescendantElementIds_.add(elmtId);
+        // }
+        
+        
+    }
+    /**
+ * For each recorded dirty Element in this custom component
+ * run its update function
+ *
+ */
+    updateDirtyElements() {
+        
+        do {
+            
+            // see which elmtIds are managed by this View
+            // and clean up all book keeping for them
+            this.purgeDeletedElmtIds();
+            // process all elmtIds marked as needing update in ascending order.
+            // ascending order ensures parent nodes will be updated before their children
+            // prior cleanup ensure no already deleted Elements have their update func executed
+            const dirtElmtIdsFromRootNode = Array.from(this.dirtDescendantElementIds_).sort(ViewPU.compareNumber);
+            // if state changed during exec update lambda inside UpdateElement, then the dirty elmtIds will be added 
+            // to newly created this.dirtDescendantElementIds_ Set
+            dirtElmtIdsFromRootNode.forEach(elmtId => {
+                //if (this.hasRecycleManager()) {
+                //   this.UpdateElement(this.recycleManager_.proxyNodeId(elmtId));
+                // } else {
+                this.UpdateElement(elmtId);
+                // }
+                this.dirtDescendantElementIds_.delete(elmtId);
+            });
+            if (this.dirtDescendantElementIds_.size) {
+                stateMgmtConsole.applicationError(`${this.debugInfo__()}: New UINode objects added to update queue while re-render! - Likely caused by @Component state change during build phase, not allowed. Application error!`);
+            }
+        } while (this.dirtDescendantElementIds_.size);
+        
+        
+    }
+    UpdateElement(elmtId) {
+        
+        if (elmtId == this.id__()) {
+            // do not attempt to update itself.
+            // a @Prop can add a dependency of the ViewPU onto itself. Ignore it.
+            
+            return;
+        }
+        // do not process an Element that has been marked to be deleted
+        const entry = this.updateFuncByElmtId.get(elmtId);
+        const updateFunc = entry ? entry.getUpdateFunc() : undefined;
+        if (typeof updateFunc !== "function") {
+            
+        }
+        else {
+            const componentName = entry.getComponentName();
+            
+            
+            updateFunc(elmtId, /* isFirstRender */ false);
+            
+            
+            this.finishUpdateFunc(elmtId);
+            
+            
+        }
+        
+    }
+    /**
+ * Retrieve child by given id
+ * @param id
+ * @returns child if child with this id exists and it is instance of ViewV2
+ */
+    getViewV2ChildById(id) {
+        const childWeakRef = this.childrenWeakrefMap_.get(id);
+        const child = childWeakRef ? childWeakRef.deref() : undefined;
+        return (child && child instanceof ViewV2) ? child : undefined;
+    }
+    /**
+     * findViewPUInHierarchy function needed for @Component and @ComponentV2 mixed
+     * parent - child hierarchies. Not used by ViewV2
+     */
+    findViewPUInHierarchy(id) {
+        // this ViewV2 is not a ViewPU, continue searching amongst children
+        let retVal = undefined;
+        for (const [key, value] of this.childrenWeakrefMap_.entries()) {
+            retVal = value.deref().findViewPUInHierarchy(id);
+            if (retVal)
+                break;
+        }
+        return retVal;
+    }
+    setActiveInternal(newState) {
+        throw new Error("ViewV2: setActiveInternal is unimplemented");
+    }
+    /*
+      findProvidePU finds @Provided property recursively by traversing ViewPU's towards that of the UI tree root @Component:
+      if 'this' ViewPU has a @Provide("providedPropName") return it, otherwise ask from its parent ViewPU.
+      function needed for mixed @Component and @ComponentV2 parent child hierarchies.
+    */
+    findProvidePU(providedPropName) {
+        var _a;
+        return (_a = this.getParent()) === null || _a === void 0 ? void 0 : _a.findProvidePU(providedPropName);
+    }
+    get localStorage_() {
+        // FIXME check this also works for root @ComponentV2
+        return (this.getParent()) ? this.getParent().localStorage_ : new LocalStorage({ /* empty */});
+    }
+    debugInfoDirtDescendantElementIdsInternal(depth = 0, recursive = false, counter) {
+        let retVaL = `\n${"  ".repeat(depth)}|--${this.constructor.name}[${this.id__()}]: {`;
+        retVaL += `ViewV2 keeps no info about dirty elmtIds`;
+        if (recursive) {
+            this.childrenWeakrefMap_.forEach((value, key, map) => {
+                var _a;
+                retVaL += (_a = value.deref()) === null || _a === void 0 ? void 0 : _a.debugInfoDirtDescendantElementIdsInternal(depth + 1, recursive, counter);
+            });
+        }
+        if (recursive && depth == 0) {
+            retVaL += `\nTotal: ${counter.total}`;
+        }
+        return retVaL;
+    }
+    debugInfoStateVars() {
+        return ""; // TODO read out META
     }
 }
 /*

@@ -54,12 +54,17 @@
     "src/lib/full_update/fu_synced_property_object_nested.ts",
     "src/lib/full_update/fu_view.ts",
 
+    // partial update and v2 common
+    "src/lib/puv2_common/puv2_viewstack_processor.d.ts",
+    "src/lib/puv2_common/iview.ts",
+    "src/lib/puv2_common/puv2_updatefunc.ts",
+    "src/lib/puv2_common/puv2_view_native_base.d.ts",
+    "src/lib/puv2_common/puv2_view_base.ts",
+
     // partial_update specific
     "src/lib/partial_update/pu_types_events.ts",
     "src/lib/partial_update/pu_tracked_object.ts",
-    "src/lib/partial_update/pu_viewstack_processor.d.ts",
     "src/lib/partial_update/pu_foreach.d.ts",
-    "src/lib/partial_update/pu_view_native.d.ts",
     "src/lib/partial_update/pu_observed_property_abstract.ts",
     "src/lib/partial_update/pu_observed_property.ts",
     "src/lib/partial_update/pu_synced_property_one_way.ts",
@@ -79,6 +84,8 @@
     // partial_update specific
     "src/lib/partial_update/pu_repeat.ts",
 
+    "src/lib/v3/v3_view.ts",
+  
     // init
     "src/index.ts",
   ],

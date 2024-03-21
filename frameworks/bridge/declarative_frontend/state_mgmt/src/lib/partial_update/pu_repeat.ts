@@ -39,7 +39,7 @@ class __RepeatItem<T> implements RepeatItem<T>, __IRepeatItemInternal<T> {
     private _observedItem: ObservedPropertyPU<T>;
     private _observedIndex?: ObservedPropertyPU<number>;
 
-    constructor(owningView: ViewPU, initialItem: T, initialIndex?: number) {
+    constructor(owningView: ViewV2, initialItem: T, initialIndex?: number) {
         this._observedItem = new ObservedPropertyPU<T>(initialItem, owningView, "Repeat item");
         if (initialIndex !== undefined) {
             this._observedIndex = new ObservedPropertyPU<number>(initialIndex, owningView, "Repeat index");
@@ -139,14 +139,14 @@ class __RepeatDefaultKeyGen {
 // __Repeat implements ForEach with child re-use for both existing state observation
 // and deep observation , for non-virtual and virtual code paths (TODO)
 class __Repeat<T> implements RepeatAPI<T> {
-    private owningView_ : ViewPU;
+    private owningView_ : ViewV2;
     private arr_: Array<T>;
     private itemGenFunc_?: RepeatItemGenFunc<T>;
     private keyGenFunction_?: RepeatKeyGenFunc<T>;
     private isVirtualScroll: boolean = false;
     private key2Item_: Map<string, __RepeatItemInfo<T>> = new Map<string, __RepeatItemInfo<T>>();
 
-    constructor(owningView: ViewPU, arr: Array<T>) {
+    constructor(owningView: ViewV2, arr: Array<T>) {
         //console.log(`Repeat.constructor`);
         this.owningView_ = owningView;
         this.arr_ = arr ?? [];
