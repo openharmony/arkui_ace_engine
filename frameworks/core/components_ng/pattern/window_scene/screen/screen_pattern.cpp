@@ -197,6 +197,8 @@ bool ScreenPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty,
         screenBounds.rect_.width_, screenBounds.rect_.height_ };
     float density = GetDensityInCurrentResolution();
     rootScene->SetDisplayDensity(density);
+    int32_t orientation = static_cast<int32_t>(screenSession_->GetScreenProperty().GetDisplayOrientation());
+    rootScene->SetDisplayOrientation(orientation);
     rootScene->UpdateViewportConfig(rect, Rosen::WindowSizeChangeReason::UNDEFINED);
     return true;
 }
