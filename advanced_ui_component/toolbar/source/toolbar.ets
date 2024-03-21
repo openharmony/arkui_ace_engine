@@ -28,6 +28,11 @@ const PUBLIC_MORE = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAGAAAABgCAYAA
   "n83s1o3AAAAAAAAAAAAAEAysyKS6zYrIrlusyKS6zYrwqyIdGZFJDMrIplZETPIrIh5qdusCLMi0pkVkcysiAqYFVEJsyIAAAAAAAAAKOYXUlF" +
   "8EUcdfbsAAAAASUVORK5CYII=";
 
+interface MenuController {
+  value: string;
+  action: () => void;
+}
+
 @Observed
 export class ToolBarOption {
   public content: string = '';
@@ -37,22 +42,16 @@ export class ToolBarOption {
 }
 
 @Observed
-class MenuController {
-  public value: string = '';
-  public action: () => void = () => { };
-}
-
-@Observed
 export class ToolBarOptions extends Array<ToolBarOption> {
 }
 
 @Component
 export struct ToolBar {
   @ObjectLink toolBarList: ToolBarOptions
-  controller: TabsController = new TabsController()
+  controller: TabsController = new TabsController();
   @Prop activateIndex: number = -1
-  @Prop moreText: string = '更多'
-  @State menuContent: MenuController[] = []
+  @Prop moreText: string = "更多"
+  @State menuContent: MenuController[] = [];
   toolBarItemBackground: Resource[] = []
   @State itemBackground: Resource = $r('sys.color.ohos_id_color_toolbar_bg')
   @Builder MoreTabBuilder(index: number) {

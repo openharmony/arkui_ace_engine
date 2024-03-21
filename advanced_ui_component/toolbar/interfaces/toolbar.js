@@ -62,16 +62,6 @@ let ToolBarOption = class {
 ToolBarOption = __decorate([Observed], ToolBarOption);
 
 export { ToolBarOption };
-let MenuController = class MenuController {
-  constructor() {
-    this.value = '';
-    this.action = () => { };
-  }
-};
-MenuController = __decorate([
-  Observed
-], MenuController);
-
 let ToolBarOptions = class extends Array {
 };
 ToolBarOptions = __decorate([Observed], ToolBarOptions);
@@ -101,7 +91,7 @@ export class ToolBar extends ViewPU {
     this.__toolBarList.set(e.toolBarList);
     void 0 !== e.controller && (this.controller = e.controller);
     void 0 !== e.activateIndex ? this.__activateIndex.set(e.activateIndex) : this.__activateIndex.set(-1);
-    void 0 !== e.moreText ? this.__moreText.set(e.moreText) : this.__moreText.set('更多');
+    void 0 !== e.moreText ? this.__moreText.set(e.moreText) : this.__moreText.set("更多");
     void 0 !== e.menuContent && (this.menuContent = e.menuContent);
     void 0 !== e.toolBarItemBackground && (this.toolBarItemBackground = e.toolBarItemBackground);
     void 0 !== e.itemBackground && (this.itemBackground = e.itemBackground);
