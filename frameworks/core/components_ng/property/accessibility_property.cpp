@@ -285,7 +285,6 @@ std::pair<bool, bool> AccessibilityProperty::GetSearchStrategy(const RefPtr<Fram
         auto eventHub = node->GetEventHub<EventHub>();
         if (!eventHub->IsEnabled()) {
             shouldSearchChildren = false;
-            shouldSearchSelf = false;
             break;
         }
         HitTestMode hitTestMode = node->GetHitTestMode();

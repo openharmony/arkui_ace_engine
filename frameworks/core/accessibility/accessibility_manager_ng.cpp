@@ -84,7 +84,7 @@ void AccessibilityManagerNG::HandleAccessibilityHoverEvent(const RefPtr<FrameNod
 {
     if (root == nullptr ||
         !AceApplicationInfo::GetInstance().IsAccessibilityEnabled() ||
-        eventType < 0 || eventType >= AccessibilityHoverEventType::Count) {
+        eventType < 0 || eventType >= static_cast<int32_t>(AccessibilityHoverEventType::Count)) {
         return;
     }
     PointF point(pointX, pointY);
