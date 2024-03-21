@@ -1405,6 +1405,10 @@ bool MenuLayoutAlgorithm::GetIfNeedArrow(const LayoutWrapper* layoutWrapper, con
         }
     }
 
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
+        return (menuPattern->IsContextMenu() || menuPattern->IsMenu()) && !targetTag_.empty() && arrowInMenu_;
+    }
+
     return menuPattern->IsContextMenu() && !targetTag_.empty() && arrowInMenu_;
 }
 
