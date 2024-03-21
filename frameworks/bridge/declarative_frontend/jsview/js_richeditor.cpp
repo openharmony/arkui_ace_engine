@@ -1495,20 +1495,30 @@ void JSRichEditorController::SetSelection(const JSCallbackInfo& args)
     auto controller = controllerWeak_.Upgrade();
     CHECK_NULL_VOID(controller);
     std::optional<SelectionOptions> options = std::nullopt;
-    if (3 <= args.Length()) { // 3:Protect operations
-        SelectionOptions optionTemp;
-        auto temp = args[2]; // 2:Get the third parameter
-        if (temp->IsObject()) {
-            JSRef<JSObject> placeholderOptionObject = JSRef<JSObject>::Cast(temp);
-            JSRef<JSVal> menuPolicy = placeholderOptionObject->GetProperty("menuPolicy");
-            int32_t tempPolicy = 0;
-            if (!menuPolicy->IsNull() && JSContainerBase::ParseJsInt32(menuPolicy, tempPolicy)) {
-                optionTemp.menuPolicy = static_cast<MenuPolicy>(tempPolicy);
-                options = optionTemp;
-            }
+    ParseJsSelectionOptions(args, options);
+    controller->SetSelection(selectionStart, selectionEnd, options);
+}
+
+void JSRichEditorController::ParseJsSelectionOptions(
+    const JSCallbackInfo& args, std::optional<SelectionOptions>& options)
+{
+    if (args.Length() < 3) { // 3:Protect operations
+        return;
+    }
+    auto temp = args[2]; // 2:Get the third parameter
+    if (!temp->IsObject()) {
+        return;
+    }
+    SelectionOptions optionTemp;
+    JSRef<JSObject> placeholderOptionObject = JSRef<JSObject>::Cast(temp);
+    JSRef<JSVal> menuPolicy = placeholderOptionObject->GetProperty("menuPolicy");
+    double tempPolicy = 0.0;
+    if (!menuPolicy->IsNull() && JSContainerBase::ParseJsDouble(menuPolicy, tempPolicy)) {
+        if (0 == tempPolicy || 1 == tempPolicy || 2 == tempPolicy) { // 0:DEFAULT, 1:NEVER, 2:ALWAYS
+            optionTemp.menuPolicy = static_cast<MenuPolicy>(tempPolicy);
+            options = optionTemp;
         }
     }
-    controller->SetSelection(selectionStart, selectionEnd, options);
 }
 
 void JSRichEditorController::GetSelection(const JSCallbackInfo& args)

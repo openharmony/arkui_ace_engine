@@ -1523,6 +1523,8 @@ void RichEditorPattern::HandleClickEvent(GestureEvent& info)
     if (!focusHub->IsFocusable()) {
         return;
     }
+    selectionMenuOffsetClick_ = OffsetF(
+        static_cast<float>(info.GetGlobalLocation().GetX()), static_cast<float>(info.GetGlobalLocation().GetY()));
     if (dataDetectorAdapter_->hasClickedAISpan_) {
         dataDetectorAdapter_->hasClickedAISpan_ = false;
     } else if (hasClicked_) {
@@ -1927,7 +1929,7 @@ void RichEditorPattern::HandleLongPress(GestureEvent& info)
     }
     TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "handle long press!");
     caretUpdateType_ = CaretUpdateType::LONG_PRESSED;
-    selectionMenuOffsetByMouseLongPress_ = OffsetF(
+    selectionMenuOffsetClick_ = OffsetF(
         static_cast<float>(info.GetGlobalLocation().GetX()), static_cast<float>(info.GetGlobalLocation().GetY()));
     HandleDoubleClickOrLongPress(info);
     caretUpdateType_ = CaretUpdateType::NONE;
@@ -4035,8 +4037,10 @@ void RichEditorPattern::HandleMouseLeftButtonRelease(const MouseInfo& info)
     StopAutoScroll();
     if (textSelector_.IsValid() && !textSelector_.StartEqualToDest() && IsSelectedBindSelectionMenu() &&
         oldMouseStatus == MouseStatus::MOVE) {
-        selectionMenuOffsetByMouse_ = OffsetF(static_cast<float>(info.GetGlobalLocation().GetX()),
-            static_cast<float>(info.GetGlobalLocation().GetY()));
+        auto offsetX = static_cast<float>(info.GetGlobalLocation().GetX());
+        auto offsetY = static_cast<float>(info.GetGlobalLocation().GetY());
+        selectionMenuOffsetByMouse_ = OffsetF(offsetX, offsetY);
+        selectionMenuOffsetClick_ = OffsetF(offsetX, offsetY);
         ShowSelectOverlay(RectF(), RectF(), false, TextResponseType::SELECTED_BY_MOUSE);
     }
 }
@@ -4046,8 +4050,6 @@ void RichEditorPattern::HandleMouseLeftButton(const MouseInfo& info)
     if (info.GetAction() == MouseAction::MOVE) {
         HandleMouseLeftButtonMove(info);
     } else if (info.GetAction() == MouseAction::PRESS) {
-        selectionMenuOffsetByMouseLongPress_ = OffsetF(
-            static_cast<float>(info.GetGlobalLocation().GetX()), static_cast<float>(info.GetGlobalLocation().GetY()));
         HandleMouseLeftButtonPress(info);
     } else if (info.GetAction() == MouseAction::RELEASE) {
         HandleMouseLeftButtonRelease(info);
@@ -4066,8 +4068,10 @@ void RichEditorPattern::HandleMouseRightButton(const MouseInfo& info)
         usingMouseRightButton_ = true;
         CloseSelectionMenu();
     } else if (info.GetAction() == MouseAction::RELEASE) {
-        selectionMenuOffsetByMouse_ = OffsetF(
-            static_cast<float>(info.GetGlobalLocation().GetX()), static_cast<float>(info.GetGlobalLocation().GetY()));
+        auto offsetX = static_cast<float>(info.GetGlobalLocation().GetX());
+        auto offsetY = static_cast<float>(info.GetGlobalLocation().GetY());
+        selectionMenuOffsetByMouse_ = OffsetF(offsetX, offsetY);
+        selectionMenuOffsetClick_ = OffsetF(offsetX, offsetY);
         if (textSelector_.IsValid() && BetweenSelectedPosition(info.GetGlobalLocation())) {
             ShowSelectOverlay(RectF(), RectF(), IsSelectAll(), TextResponseType::RIGHT_CLICK);
             isMousePressed_ = false;
@@ -4843,7 +4847,7 @@ void RichEditorPattern::HandleSelectOverlayWithOptions(const SelectionOptions& o
 {
     if (options.menuPolicy == MenuPolicy::ALWAYS) {
         if (isMousePressed_ || sourceType_ == SourceType::MOUSE) {
-            selectionMenuOffsetByMouse_ = selectionMenuOffsetByMouseLongPress_;
+            selectionMenuOffsetByMouse_ = selectionMenuOffsetClick_;
         }
         CalculateHandleOffsetAndShowOverlay();
         if (SelectOverlayIsOn()) {
@@ -4887,7 +4891,9 @@ void RichEditorPattern::SetSelection(int32_t start, int32_t end, const std::opti
             FireOnSelect(textSelector_.GetTextStart(), textSelector_.GetTextEnd());
         }
     }
-    if (options.has_value() && MenuPolicy::DEFAULT != options.value().menuPolicy && textSelector_.IsValid()) {
+    bool isNotUseDefault =
+        options.has_value() && MenuPolicy::DEFAULT != options.value().menuPolicy && !textSelector_.SelectNothing();
+    if (isNotUseDefault) {
         HandleSelectOverlayWithOptions(options.value());
     } else if (SelectOverlayIsOn()) {
         isMousePressed_ = selectOverlayProxy_->GetSelectOverlayMangerInfo().isUsingMouse;
