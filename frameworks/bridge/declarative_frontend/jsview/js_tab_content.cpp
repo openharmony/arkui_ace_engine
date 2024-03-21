@@ -417,9 +417,30 @@ void JSTabContent::CompleteParameters(LabelStyle& labelStyle, bool isSubTabStyle
     }
 }
 
+void SetBuilderNode(const JSRef<JSObject>& paramObject)
+{
+    JSRef<JSVal> contentParam = paramObject->GetProperty("content");
+    if (!contentParam->IsObject()) {
+        return;
+    }
+    auto contentObject = JSRef<JSObject>::Cast(contentParam);
+    JSRef<JSVal> nodeptr = contentObject->GetProperty("nodePtr_");
+    if (nodeptr.IsEmpty()) {
+        return;
+    }
+    const auto* vm = nodeptr->GetEcmaVM();
+    auto* node = nodeptr->GetLocalHandle()->ToNativePointer(vm)->Value();
+    auto* frameNode = reinterpret_cast<NG::FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    RefPtr<NG::FrameNode> refPtrFrameNode = AceType::Claim(frameNode);
+    TabContentModel::GetInstance()->SetCustomStyleNode(refPtrFrameNode);
+}
+
 void JSTabContent::SetSubTabBarStyle(const JSRef<JSObject>& paramObject)
 {
     JSRef<JSVal> contentParam = paramObject->GetProperty("content");
+    SetBuilderNode(paramObject);
+
     auto isContentEmpty = contentParam->IsEmpty() || contentParam->IsUndefined() || contentParam->IsNull();
     if (isContentEmpty) {
         LOGW("The content param is empty");
