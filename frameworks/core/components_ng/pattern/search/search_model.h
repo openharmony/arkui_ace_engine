@@ -79,6 +79,7 @@ public:
     virtual void SetTextDecoration(Ace::TextDecoration value) {};
     virtual void SetTextDecorationColor(const Color& value) {};
     virtual void SetTextDecorationStyle(Ace::TextDecorationStyle value) {};
+    virtual void UpdateInspectorId(const std::string& key) {};
 
 private:
     static std::unique_ptr<SearchModel> instance_;

@@ -38,6 +38,9 @@ constexpr int32_t IMAGE_INDEX = 1;
 constexpr int32_t CANCEL_IMAGE_INDEX = 2;
 constexpr int32_t CANCEL_BUTTON_INDEX = 3;
 constexpr int32_t BUTTON_INDEX = 4;
+const std::string INSPECTOR_PREFIX = "__SearchField__";
+const std::vector<std::string> SPECICALIZED_INSPECTOR_INDEXS = { "", "Image__", "CancelImage__", "CancelButton__",
+    "Button__" };
 } // namespace
 
 RefPtr<TextFieldControllerBase> SearchModelNG::Create(const std::optional<std::string>& value,
@@ -681,6 +684,7 @@ void SearchModelNG::CreateTextField(const RefPtr<SearchNode>& parentNode, const 
 
 void SearchModelNG::CreateImage(const RefPtr<SearchNode>& parentNode, const std::string& src, bool hasImageNode)
 {
+    auto parentInspector = parentNode->GetInspectorIdValue("");
     auto nodeId = parentNode->GetImageId();
     auto frameNode = FrameNode::GetOrCreateFrameNode(
         V2::IMAGE_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<ImagePattern>(); });
@@ -701,6 +705,7 @@ void SearchModelNG::CreateImage(const RefPtr<SearchNode>& parentNode, const std:
     auto iconHeight = searchTheme->GetIconHeight();
     CalcSize imageCalcSize((CalcLength(iconHeight)), CalcLength(iconHeight));
     imageLayoutProperty->UpdateUserDefinedIdealSize(imageCalcSize);
+    frameNode->UpdateInspectorId(INSPECTOR_PREFIX + SPECICALIZED_INSPECTOR_INDEXS[IMAGE_INDEX] + parentInspector);
     if (!hasImageNode) {
         frameNode->MountToParent(parentNode);
         frameNode->MarkModifyDone();
@@ -738,6 +743,9 @@ void SearchModelNG::CreateCancelImage(const RefPtr<SearchNode>& parentNode, bool
     auto iconHeight = searchTheme->GetIconHeight();
     CalcSize imageCalcSize((CalcLength(iconHeight)), CalcLength(iconHeight));
     imageLayoutProperty->UpdateUserDefinedIdealSize(imageCalcSize);
+    auto parentInspector = parentNode->GetInspectorIdValue("");
+    frameNode->UpdateInspectorId(INSPECTOR_PREFIX + SPECICALIZED_INSPECTOR_INDEXS[CANCEL_IMAGE_INDEX] +
+        parentInspector);
 
     auto imageRenderProperty = frameNode->GetPaintProperty<ImageRenderProperty>();
     CHECK_NULL_VOID(imageRenderProperty);
@@ -757,6 +765,7 @@ void SearchModelNG::CreateButton(const RefPtr<SearchNode>& parentNode, bool hasB
     if (hasButtonNode) {
         return;
     }
+    auto parentInspector = parentNode->GetInspectorIdValue("");
 
     auto searchTheme = PipelineBase::GetCurrentContext()->GetTheme<SearchTheme>();
     auto nodeId = parentNode->GetButtonId();
@@ -790,6 +799,7 @@ void SearchModelNG::CreateButton(const RefPtr<SearchNode>& parentNode, bool hasB
     searchButtonEvent->SetEnabled(false);
     auto pattern = parentNode->GetPattern<SearchPattern>();
     CHECK_NULL_VOID(pattern);
+    frameNode->UpdateInspectorId(INSPECTOR_PREFIX + SPECICALIZED_INSPECTOR_INDEXS[BUTTON_INDEX] + parentInspector);
     pattern->SetButtonNode(frameNode);
     frameNode->MountToParent(parentNode);
     frameNode->MarkModifyDone();
@@ -804,6 +814,7 @@ void SearchModelNG::CreateCancelButton(const RefPtr<SearchNode>& parentNode, boo
     if (hasCancelButtonNode) {
         return;
     }
+    auto parentInspector = parentNode->GetInspectorIdValue("");
     auto nodeId = parentNode->GetCancelButtonId();
     auto frameNode = FrameNode::GetOrCreateFrameNode(
         V2::BUTTON_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<ButtonPattern>(); });
@@ -813,6 +824,8 @@ void SearchModelNG::CreateCancelButton(const RefPtr<SearchNode>& parentNode, boo
         CHECK_NULL_VOID(textNode);
         frameNode->AddChild(textNode);
     }
+    frameNode->UpdateInspectorId(INSPECTOR_PREFIX + SPECICALIZED_INSPECTOR_INDEXS[CANCEL_BUTTON_INDEX] +
+        parentInspector);
     auto cancelButtonRenderContext = frameNode->GetRenderContext();
     cancelButtonRenderContext->UpdateBackgroundColor(Color::TRANSPARENT);
     auto textFrameNode = AceType::DynamicCast<FrameNode>(frameNode->GetChildren().front());
@@ -828,6 +841,22 @@ void SearchModelNG::CreateCancelButton(const RefPtr<SearchNode>& parentNode, boo
     pattern->SetCancelButtonNode(frameNode);
     frameNode->MountToParent(parentNode);
     frameNode->MarkModifyDone();
+}
+
+void SearchModelNG::UpdateInspectorId(const std::string& key)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto updateInspectorCallback = [id = key](FrameNode* parentNode, int32_t index) {
+        auto currentNode = AceType::DynamicCast<FrameNode>(parentNode->GetChildAtIndex(index));
+        if (currentNode) {
+            currentNode->UpdateInspectorId(INSPECTOR_PREFIX + SPECICALIZED_INSPECTOR_INDEXS[index] + id);
+        }
+    };
+    updateInspectorCallback(frameNode, IMAGE_INDEX);
+    updateInspectorCallback(frameNode, CANCEL_IMAGE_INDEX);
+    updateInspectorCallback(frameNode, CANCEL_BUTTON_INDEX);
+    updateInspectorCallback(frameNode, BUTTON_INDEX);
 }
 
 RefPtr<SearchNode> SearchModelNG::GetOrCreateSearchNode(

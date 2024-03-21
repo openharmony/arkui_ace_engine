@@ -107,6 +107,8 @@ void JSSearch::JSBind(BindingTarget globalObj)
     JSClass<JSSearch>::StaticMethod("decoration", &JSSearch::SetDecoration);
     JSClass<JSSearch>::StaticMethod("letterSpacing", &JSSearch::SetLetterSpacing);
     JSClass<JSSearch>::StaticMethod("lineHeight", &JSSearch::SetLineHeight);
+    JSClass<JSSearch>::StaticMethod("id", &JSSearch::SetId);
+    JSClass<JSSearch>::StaticMethod("key", &JSSearch::SetKey);
     JSClass<JSSearch>::InheritAndBind<JSViewAbstract>(globalObj);
 }
 
@@ -180,6 +182,23 @@ void JSSearch::SetEnableKeyboardOnFocus(const JSCallbackInfo& info)
         return;
     }
     SearchModel::GetInstance()->RequestKeyboardOnFocus(info[0]->ToBoolean());
+}
+
+void JSSearch::SetId(const JSCallbackInfo& info)
+{
+    JSViewAbstract::JsId(info);
+    JSRef<JSVal> arg = info[0];
+    std::string id;
+    if (arg->IsString()) {
+        id = arg->ToString();
+    }
+    SearchModel::GetInstance()->UpdateInspectorId(id);
+}
+
+void JSSearch::SetKey(const std::string& key)
+{
+    JSViewAbstract::JsKey(key);
+    SearchModel::GetInstance()->UpdateInspectorId(key);
 }
 
 void JSSearch::SetSearchButton(const JSCallbackInfo& info)
