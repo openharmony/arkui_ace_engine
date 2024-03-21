@@ -64,6 +64,10 @@ void FocusManager::FocusViewClose(const RefPtr<FocusView>& focusView)
     if (std::find(focusViewStack_.begin(), focusViewStack_.end(), focusViewWeak) != focusViewStack_.end()) {
         focusViewStack_.remove(focusViewWeak);
     }
+    if (focusViewStack_.empty()) {
+        lastFocusView_ = nullptr;
+        return;
+    }
     if (focusViewStack_.back() != lastFocusView_) {
         lastFocusView_ = focusViewStack_.back();
     }

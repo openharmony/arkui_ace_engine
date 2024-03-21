@@ -324,10 +324,7 @@ public:
 
     const RefPtr<DragDropManager>& GetDragDropManager();
 
-    const RefPtr<FocusManager>& GetFocusManager()
-    {
-        return focusManager_;
-    }
+    const RefPtr<FocusManager>& GetFocusManager() const;
 
     const RefPtr<FrameRateManager>& GetFrameRateManager()
     {
