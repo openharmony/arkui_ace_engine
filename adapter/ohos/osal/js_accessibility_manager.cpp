@@ -2069,7 +2069,6 @@ bool JsAccessibilityManager::TransferAccessibilityAsyncEvent(
     const AccessibilityEventInfo& eventInfo, int64_t uiExtensionOffset)
 {
 #ifdef WINDOW_SCENE_SUPPORTED
-
     auto client = AccessibilitySystemAbilityClient::GetInstance();
     CHECK_NULL_RETURN(client, false);
     bool isEnabled = false;
