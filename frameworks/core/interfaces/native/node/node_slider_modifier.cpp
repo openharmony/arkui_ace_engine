@@ -202,7 +202,7 @@ void SetTrackBackgroundColor(ArkUINodeHandle node, uint32_t color)
 {
     auto *frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    SliderModelNG::SetTrackBackgroundColor(frameNode, SliderModelNG::CreateSolidGradient(Color(color)));
+    SliderModelNG::SetTrackBackgroundColor(frameNode, Color(color));
 }
 
 void ResetTrackBackgroundColor(ArkUINodeHandle node)
@@ -214,7 +214,7 @@ void ResetTrackBackgroundColor(ArkUINodeHandle node)
     auto theme = pipelineContext->GetTheme<SliderTheme>();
     CHECK_NULL_VOID(theme);
 
-    SliderModelNG::SetTrackBackgroundColor(frameNode, SliderModelNG::CreateSolidGradient(theme->GetTrackBgColor()));
+    SliderModelNG::SetTrackBackgroundColor(frameNode, theme->GetTrackBgColor());
 }
 
 void SetSelectColor(ArkUINodeHandle node, uint32_t color)
@@ -467,8 +467,7 @@ ArkUI_Uint32 GetTrackBackgroundColor(ArkUINodeHandle node)
 {
     auto *frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_RETURN(frameNode, ERROR_UINT_CODE);
-    NG::Gradient gradient = SliderModelNG::GetTrackBackgroundColor(frameNode);
-    return gradient.GetColors().at(0).GetColor().GetValue();
+    return SliderModelNG::GetTrackBackgroundColor(frameNode).GetValue();
 }
 
 ArkUI_Uint32 GetSelectColor(ArkUINodeHandle node)

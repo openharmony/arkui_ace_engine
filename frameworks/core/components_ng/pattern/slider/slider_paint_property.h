@@ -44,35 +44,6 @@ public:
         ResetSliderTipStyle();
     }
 
-    std::string ToJsonTrackBackgroundColor() const
-    {
-        Gradient colors;
-        if (HasTrackBackgroundColor()) {
-            colors = GetTrackBackgroundColor().value();
-            return GradientToJson(colors);
-        }
-        auto pipeline = PipelineBase::GetCurrentContext();
-        CHECK_NULL_RETURN(pipeline, "");
-        auto theme = pipeline->GetTheme<SliderTheme>();
-        CHECK_NULL_RETURN(theme, "");
-
-        colors = SliderModelNG::CreateSolidGradient(theme->GetTrackBgColor());
-        return GradientToJson(colors);
-    }
-
-    std::string GradientToJson(Gradient colors) const
-    {
-        auto jsonArray = JsonUtil::CreateArray(true);
-        for (size_t index = 0; index < colors.GetColors().size(); ++index) {
-            auto gradientColor = colors.GetColors()[index];
-            auto gradientColorJson = JsonUtil::Create(true);
-            gradientColorJson->Put("color", gradientColor.GetLinearColor().ToColor().ColorToString().c_str());
-            gradientColorJson->Put("offset", std::to_string(gradientColor.GetDimension().Value()).c_str());
-            jsonArray->Put(std::to_string(index).c_str(), gradientColorJson);
-        }
-        return jsonArray->ToString();
-    }
-
     void ToJsonValue(std::unique_ptr<JsonValue>& json) const override
     {
         auto pipeline = PipelineBase::GetCurrentContext();
@@ -90,7 +61,7 @@ public:
             (GetDirection().value_or(Axis::HORIZONTAL)) == Axis::VERTICAL ? "Axis.Vertical" : "Axis.Horizontal");
         json->Put("constructor", jsonConstructor);
         json->Put("blockColor", GetBlockColor().value_or(theme->GetBlockColor()).ColorToString().c_str());
-        json->Put("trackColor", ToJsonTrackBackgroundColor().c_str());
+        json->Put("trackColor", GetTrackBackgroundColor().value_or(theme->GetTrackBgColor()).ColorToString().c_str());
         json->Put("selectedColor", GetSelectColor().value_or(theme->GetTrackSelectedColor()).ColorToString().c_str());
         json->Put("showSteps", GetShowSteps().value_or(false) ? "true" : "false");
         json->Put("showTips", GetShowTips().value_or(false) ? "true" : "false");
@@ -134,7 +105,7 @@ public:
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(SliderPaintStyle, Reverse, bool, PROPERTY_UPDATE_RENDER)
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(SliderPaintStyle, Direction, Axis, PROPERTY_UPDATE_RENDER)
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(SliderPaintStyle, BlockColor, Color, PROPERTY_UPDATE_RENDER)
-    ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(SliderPaintStyle, TrackBackgroundColor, Gradient, PROPERTY_UPDATE_RENDER)
+    ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(SliderPaintStyle, TrackBackgroundColor, Color, PROPERTY_UPDATE_RENDER)
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(SliderPaintStyle, SelectColor, Color, PROPERTY_UPDATE_RENDER)
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(SliderPaintStyle, ShowSteps, bool, PROPERTY_UPDATE_RENDER)
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(SliderPaintStyle, BlockBorderColor, Color, PROPERTY_UPDATE_RENDER)

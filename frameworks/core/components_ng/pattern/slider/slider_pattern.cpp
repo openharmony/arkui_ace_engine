@@ -835,9 +835,7 @@ SliderContentModifier::Parameters SliderPattern::UpdateContentParameters()
     auto centerWidth = direction_ == Axis::HORIZONTAL ? contentSize->Height() : contentSize->Width();
     centerWidth *= HALF;
     parameters.selectColor = paintProperty->GetSelectColor().value_or(theme->GetTrackSelectedColor());
-
-    Gradient defaultValue = SliderModelNG::CreateSolidGradient(Color(theme->GetBlockColor()));
-    parameters.trackBackgroundColor = paintProperty->GetTrackBackgroundColor().value_or(defaultValue);
+    parameters.trackBackgroundColor = paintProperty->GetTrackBackgroundColor().value_or(theme->GetTrackBgColor());
     parameters.blockColor = paintProperty->GetBlockColor().value_or(theme->GetBlockColor());
 
     GetSelectPosition(parameters, centerWidth, contentOffset);

@@ -56,7 +56,6 @@ public:
 
 private:
     static void ResetBlockStyle();
-    static bool ConvertGradientColor(const JsiRef<JsiValue>& param, NG::Gradient& gradient);
 };
 
 } // namespace OHOS::Ace::Framework
