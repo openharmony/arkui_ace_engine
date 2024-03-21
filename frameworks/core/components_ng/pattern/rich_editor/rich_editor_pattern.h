@@ -264,6 +264,7 @@ public:
     void HandleOnCopy(bool isUsingExternalKeyboard = false) override;
     bool JudgeDraggable(GestureEvent& info);
     void CalculateCaretOffsetAndHeight(OffsetF& caretOffset, float& caretHeight);
+    OffsetF CalculateEmptyValueCaretRect();
 
     bool IsUsingMouse() const
     {

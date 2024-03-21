@@ -1718,6 +1718,9 @@ void RichEditorPattern::CalcCaretInfoByClick(GestureEvent& info)
 
     lastClickOffset.AddX(textRect.GetX());
     lastClickOffset.AddY(textRect.GetY());
+    if (isShowPlaceholder_) {
+        lastClickOffset = CalculateEmptyValueCaretRect();
+    }
 
     CHECK_NULL_VOID(overlayMod_);
     DynamicCast<RichEditorOverlayModifier>(overlayMod_)->SetCaretOffsetAndHeight(lastClickOffset, selectLineHeight);
@@ -1898,16 +1901,16 @@ bool RichEditorPattern::JudgeDraggable(GestureEvent& info)
 void RichEditorPattern::CalculateCaretOffsetAndHeight(OffsetF& caretOffset, float& caretHeight)
 {
     auto caretPosition = GetCaretPosition();
-    if (GetTextContentLength() <= 0 && !IsShowPlaceholder()) {
-        auto rect = GetTextContentRect();
+    float caretHeightUp = 0.0f;
+    OffsetF caretOffsetUp = CalcCursorOffsetByPosition(caretPosition, caretHeightUp, false, false);
+    if (GetTextContentLength() <= 0) {
         constexpr float DEFAULT_CARET_HEIGHT = 18.5f;
-        caretOffset = OffsetF(rect.GetX(), rect.GetY());
-        caretHeight = Dimension(DEFAULT_CARET_HEIGHT, DimensionUnit::VP).ConvertToPx();
+        caretOffset = CalculateEmptyValueCaretRect();
+        caretHeight =
+            isShowPlaceholder_ ? caretHeightUp : Dimension(DEFAULT_CARET_HEIGHT, DimensionUnit::VP).ConvertToPx();
         return;
     }
-    float caretHeightUp = 0.0f;
     float caretHeightDown = 0.0f;
-    OffsetF caretOffsetUp = CalcCursorOffsetByPosition(caretPosition, caretHeightUp, false, false);
     OffsetF caretOffsetDown = CalcCursorOffsetByPosition(caretPosition, caretHeightDown, true, false);
     bool isShowCaretDown = true;
     if (lastClickOffset_.NonNegative()) {
@@ -1918,6 +1921,37 @@ void RichEditorPattern::CalculateCaretOffsetAndHeight(OffsetF& caretOffset, floa
     }
     caretOffset = isShowCaretDown ? caretOffsetDown : caretOffsetUp;
     caretHeight = isShowCaretDown ? caretHeightDown : caretHeightUp;
+}
+
+OffsetF RichEditorPattern::CalculateEmptyValueCaretRect()
+{
+    OffsetF offset;
+    auto layoutProperty = GetLayoutProperty<TextLayoutProperty>();
+    CHECK_NULL_RETURN(layoutProperty, offset);
+    auto textAlign = layoutProperty->GetTextAlignValue(TextAlign::START);
+    auto direction = layoutProperty->GetLayoutDirection();
+    if (direction == TextDirection::RTL) {
+        if (textAlign == TextAlign::START) {
+            textAlign = TextAlign::END;
+        } else {
+            textAlign = TextAlign::START;
+        }
+    }
+    switch (textAlign) {
+        case TextAlign::START:
+            offset.SetX(contentRect_.GetX());
+            break;
+        case TextAlign::CENTER:
+            offset.SetX(contentRect_.GetX() + contentRect_.Width() / 2.0f);
+            break;
+        case TextAlign::END:
+            offset.SetX(contentRect_.GetX() + contentRect_.Width());
+            break;
+        default:
+            break;
+    }
+    offset.SetY(contentRect_.GetY());
+    return offset;
 }
 
 void RichEditorPattern::HandleLongPress(GestureEvent& info)
@@ -4684,7 +4718,7 @@ void RichEditorPattern::CalculateHandleOffsetAndShowOverlay(bool isUsingMouse)
         secondHandleOffset = caretOffset + textPaintOffset - rootOffset;
         // only show the second handle.
         firstHandlePaintSize = SizeF{};
-        firstHandleOffset = OffsetF{};
+        firstHandleOffset = secondHandleOffset;
     }
     textSelector_.selectionBaseOffset = firstHandleOffset;
     textSelector_.selectionDestinationOffset = secondHandleOffset;
@@ -5807,6 +5841,9 @@ RectF RichEditorPattern::GetSelectArea()
     if (selectRects.empty()) {
         float caretHeight = 0.0f;
         auto caretOffset = CalcCursorOffsetByPosition(GetCaretPosition(), caretHeight);
+        if (isShowPlaceholder_) {
+            caretOffset = CalculateEmptyValueCaretRect();
+        }
         auto caretWidth = Dimension(1.5f, DimensionUnit::VP).ConvertToPx();
         return RectF(caretOffset + parentGlobalOffset_, SizeF(caretWidth, caretHeight));
     }
