@@ -2871,6 +2871,20 @@ void UIContentImpl::SubscribeContainerModalButtonsRectChange(
     pipeline->SubscribeContainerModalButtonsRectChange(std::move(wrapFunc));
 }
 
+void UIContentImpl::ChangeSensitiveNodes(bool isSensitive)
+{
+    auto container = Platform::AceContainer::GetContainer(instanceId_);
+    CHECK_NULL_VOID(container);
+    ContainerScope scope(instanceId_);
+    LOGI("UIContentImpl::ChangeSensitiveNodes");
+    auto pipeline = container->GetPipelineContext();
+    CHECK_NULL_VOID(pipeline);
+    auto taskExecutor = container->GetTaskExecutor();
+    CHECK_NULL_VOID(taskExecutor);
+    taskExecutor->PostTask(
+        [pipeline, isSensitive]() { pipeline->ChangeSensitiveNodes(isSensitive); }, TaskExecutor::TaskType::UI);
+}
+
 void UIContentImpl::UpdateTransform(const OHOS::Rosen::Transform& transform)
 {
     LOGI("[%{public}s][%{public}s][%{public}d]: UIContentImpl: UpdateTransform, window scale is %{public}f",
