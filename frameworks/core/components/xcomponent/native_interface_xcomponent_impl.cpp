@@ -306,3 +306,10 @@ int32_t OH_NativeXComponent::RegisterOnTouchInterceptCallback(
     xcomponentImpl_->SetOnTouchInterceptCallback(callback);
     return OH_NATIVEXCOMPONENT_RESULT_SUCCESS;
 }
+
+int32_t OH_NativeXComponent::GetSourceType(int32_t pointId, OH_NativeXComponent_EventSourceType* sourceType)
+{
+    return (xcomponentImpl_ && xcomponentImpl_->GetSourceType(pointId, sourceType))
+               ? OH_NATIVEXCOMPONENT_RESULT_SUCCESS
+               : OH_NATIVEXCOMPONENT_RESULT_BAD_PARAMETER;
+}

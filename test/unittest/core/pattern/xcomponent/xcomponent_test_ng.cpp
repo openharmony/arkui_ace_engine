@@ -663,8 +663,8 @@ HWTEST_F(XComponentTestNg, XComponentTouchEventTest008, TestSize.Level1)
 
     /**
      * @tc.steps: step5. call HandleTouchEvent
-     *            case: different sourceType
-     * @tc.expected: sourceType fit
+     *            case: different sourceToolType
+     * @tc.expected: sourceToolType fit
      */
     TouchEventInfo touchEventInfo("onTouch");
     TouchLocationInfo locationInfo(0);
@@ -1762,5 +1762,42 @@ HWTEST_F(XComponentTestNg, XComponentAxisEventTest012, TestSize.Level1)
     AxisInfo event;
     pattern->HandleAxisEvent(event);
     EXPECT_TRUE(isAxis);
+}
+
+/**
+ * @tc.name: XComponentSourceTypeTest
+ * @tc.desc: Test SourceType
+ * @tc.type: FUNC
+ */
+HWTEST_F(XComponentTestNg, XComponentSourceTypeTest, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. set type = XCOMPONENT_SURFACE_TYPE and call CreateXComponentNode
+     * @tc.expected: xcomponent frameNode create successfully
+     */
+    testProperty.xcType = XCOMPONENT_SURFACE_TYPE_VALUE;
+    auto frameNode = CreateXComponentNode(testProperty);
+    ASSERT_TRUE(frameNode);
+    auto pattern = frameNode->GetPattern<XComponentPattern>();
+    ASSERT_TRUE(pattern);
+
+    /**
+     * @tc.steps: step2. call HandleTouchEvent
+     *            case: set source type
+     * @tc.expected: sourceType fit
+     */
+    TouchEventInfo touchEventInfoSourceType("onTouch");
+    TouchLocationInfo locationInfoSourceType(0);
+    pattern->GetNativeXComponent();
+    touchEventInfoSourceType.AddChangedTouchLocationInfo(std::move(locationInfoSourceType));
+    std::vector<SourceType> sourceTypes { SourceType::NONE, SourceType::MOUSE, SourceType::TOUCH, SourceType::TOUCH_PAD,
+        SourceType::KEYBOARD };
+    for (SourceType& sourceType : sourceTypes) {
+        touchEventInfoSourceType.SetSourceDevice(sourceType);
+        pattern->HandleTouchEvent(touchEventInfoSourceType);
+        EXPECT_EQ(pattern->nativeXComponentImpl_->curSourceType_.first, 0);
+        EXPECT_EQ(static_cast<int>(pattern->nativeXComponentImpl_->curSourceType_.second),
+            static_cast<int>(ConvertNativeXComponentEventSourceType(sourceType)));
+    }
 }
 } // namespace OHOS::Ace::NG
