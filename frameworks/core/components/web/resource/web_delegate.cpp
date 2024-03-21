@@ -676,6 +676,14 @@ void WebDelegateObserver::NotifyDestory()
         TaskExecutor::TaskType::UI, DESTRUCT_DELAY_MILLISECONDS);
 }
 
+void GestureEventResultOhos::SetGestureEventResult(bool result)
+{
+    if (result_) {
+        result_->SetGestureEventResult(result);
+        SetSendTask();
+    }
+}
+
 WebDelegate::~WebDelegate()
 {
     ReleasePlatformResource();
@@ -5810,14 +5818,18 @@ void WebDelegate::OnNativeEmbedGestureEvent(std::shared_ptr<OHOS::NWeb::NWebNati
     SetTouchEventInfo(event, touchEventInfo);
     CHECK_NULL_VOID(context);
     TAG_LOGD(AceLogTag::ACE_WEB, "hit Emebed gusture event notify");
+    auto param = AceType::MakeRefPtr<GestureEventResultOhos>(event->GetResult());
     context->GetTaskExecutor()->PostTask(
-        [weak = WeakClaim(this), embedId, touchEventInfo]() {
+        [weak = WeakClaim(this), embedId, touchEventInfo, param]() {
             auto delegate = weak.Upgrade();
             CHECK_NULL_VOID(delegate);
             auto OnNativeEmbedGestureEventV2_ = delegate->OnNativeEmbedGestureEventV2_;
             if (OnNativeEmbedGestureEventV2_) {
                 OnNativeEmbedGestureEventV2_(
-                    std::make_shared<NativeEmbeadTouchInfo>(embedId, touchEventInfo));
+                    std::make_shared<NativeEmbeadTouchInfo>(embedId, touchEventInfo, param));
+                if (!param->HasSendTask()) {
+                    param->SetGestureEventResult(true);
+                }
             }
         },
         TaskExecutor::TaskType::JS);
