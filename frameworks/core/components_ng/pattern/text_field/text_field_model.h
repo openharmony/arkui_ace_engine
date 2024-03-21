@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -34,6 +34,7 @@
 #include "core/components_ng/base/view_abstract_model_ng.h"
 #include "core/components_ng/pattern/text/text_menu_extension.h"
 #include "core/components_ng/property/measure_property.h"
+#include "core/components_ng/pattern/text_field/text_content_type.h"
 #include "core/components_ng/pattern/text_field/text_field_event_hub.h"
 
 namespace OHOS::Ace {
@@ -218,6 +219,7 @@ public:
     virtual void RequestKeyboardOnFocus(bool needToRequest) = 0;
     virtual void SetWidthAuto(bool isAuto) {}
     virtual void SetType(TextInputType value) = 0;
+    virtual void SetContentType(const NG::TextContentType& value) = 0;
     virtual void SetPlaceholderColor(const Color& value) = 0;
     virtual void SetPlaceholderFont(const Font& value) = 0;
     virtual void SetEnterKeyType(TextInputAction value) = 0;

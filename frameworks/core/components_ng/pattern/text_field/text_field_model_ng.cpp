@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -251,6 +251,18 @@ void TextFieldModelNG::SetType(TextInputType value)
 void TextFieldModelNG::SetPlaceholderColor(const Color& value)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(TextFieldLayoutProperty, PlaceholderTextColor, value);
+}
+
+void TextFieldModelNG::SetContentType(const TextContentType& value)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto layoutProperty = frameNode->GetLayoutProperty<TextFieldLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    if (layoutProperty->HasTextContentType() && layoutProperty->GetTextContentTypeValue() != value) {
+        layoutProperty->UpdateTextContentTypeChanged(true);
+    }
+    ACE_UPDATE_LAYOUT_PROPERTY(TextFieldLayoutProperty, TextContentType, value);
 }
 
 void TextFieldModelNG::SetPlaceholderFont(const Font& value)
@@ -829,6 +841,17 @@ void TextFieldModelNG::SetType(FrameNode* frameNode, TextInputType value)
         layoutProperty->UpdateTypeChanged(true);
     }
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, TextInputType, value, frameNode);
+}
+
+void TextFieldModelNG::SetContentType(const FrameNode* frameNode, const TextContentType& value)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto layoutProperty = frameNode->GetLayoutProperty<TextFieldLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    if (layoutProperty->HasTextContentType() && layoutProperty->GetTextContentTypeValue() != value) {
+        layoutProperty->UpdateTextContentTypeChanged(true);
+    }
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, TextContentType, value, frameNode);
 }
 
 void TextFieldModelNG::SetCopyOption(FrameNode* frameNode, CopyOptions copyOption)

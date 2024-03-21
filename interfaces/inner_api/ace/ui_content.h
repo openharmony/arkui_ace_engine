@@ -74,6 +74,7 @@ class PixelMap;
 
 namespace AbilityBase {
 struct ViewData;
+enum class AutoFillType;
 } // namespace AbilityBase
 
 class RefBase;
@@ -244,7 +245,7 @@ public:
      */
     virtual sptr<IRemoteObject> GetParentToken();
 
-    virtual bool DumpViewData(AbilityBase::ViewData& viewData)
+    virtual bool DumpViewData(AbilityBase::ViewData& viewData, AbilityBase::AutoFillType& type)
     {
         return false;
     }

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -73,6 +73,7 @@
 #include "core/common/modal_ui_extension.h"
 #include "core/common/recorder/event_recorder.h"
 #include "core/common/resource/resource_manager.h"
+#include "core/components/theme/shadow_theme.h"
 #include "core/components_ng/base/inspector.h"
 #include "core/components_ng/base/view_abstract.h"
 #include "core/image/image_file_cache.h"
@@ -2483,7 +2484,7 @@ bool UIContentImpl::CheckNeedAutoSave()
     return needAutoSave;
 }
 
-bool UIContentImpl::DumpViewData(AbilityBase::ViewData& viewData)
+bool UIContentImpl::DumpViewData(AbilityBase::ViewData& viewData, AbilityBase::AutoFillType& type)
 {
     auto container = Platform::AceContainer::GetContainer(instanceId_);
     CHECK_NULL_RETURN(container, false);
@@ -2501,7 +2502,7 @@ bool UIContentImpl::DumpViewData(AbilityBase::ViewData& viewData)
             viewData = viewDataWrapOhos->GetViewData();
         },
         TaskExecutor::TaskType::UI);
-
+    type = ViewDataWrap::ViewDataToType(viewData);
     TAG_LOGI(AceLogTag::ACE_AUTO_FILL, "UIContentImpl DumpViewData, ret is %{public}d", ret);
     return ret;
 }
@@ -2636,7 +2637,7 @@ RefPtr<PopupParam> UIContentImpl::CreateCustomPopupParam(bool isShow, const Cust
     popupParam->SetIsShow(isShow);
     popupParam->SetUseCustomComponent(true);
     popupParam->SetShowInSubWindow(config.isShowInSubWindow);
-
+    popupParam->SetShadow(GetPopupShadow());
     if (config.isAutoCancel.has_value()) {
         popupParam->SetHasAction(!config.isAutoCancel.value());
     }
@@ -2681,6 +2682,19 @@ RefPtr<PopupParam> UIContentImpl::CreateCustomPopupParam(bool isShow, const Cust
     return popupParam;
 }
 
+Shadow UIContentImpl::GetPopupShadow()
+{
+    Shadow shadow;
+    auto colorMode = SystemProperties::GetColorMode();
+    auto container = Container::Current();
+    CHECK_NULL_RETURN(container, shadow);
+    auto pipelineContext = container->GetPipelineContext();
+    CHECK_NULL_RETURN(pipelineContext, shadow);
+    auto shadowTheme = pipelineContext->GetTheme<ShadowTheme>();
+    CHECK_NULL_RETURN(shadowTheme, shadow);
+    return shadowTheme->GetShadow(ShadowStyle::OuterDefaultMD, colorMode);
+}
+
 void UIContentImpl::OnPopupStateChange(
     const std::string& event, const CustomPopupUIExtensionConfig& config, int32_t nodeId)
 {
@@ -2713,18 +2727,29 @@ int32_t UIContentImpl::CreateCustomPopupUIExtension(
     int32_t nodeId = 0;
     taskExecutor->PostSyncTask(
         [want, &nodeId, callbacks = callbacks, config = config, this]() {
-            if (config.inspectorId.empty()) {
+            int32_t nodeIdLabel = -1;
+            RefPtr<NG::FrameNode> targetNode = nullptr;
+            if (config.nodeId > -1) {
+                nodeIdLabel = config.nodeId;
+                targetNode = ElementRegister::GetInstance()->GetSpecificItemById<NG::FrameNode>(nodeIdLabel);
+                CHECK_NULL_VOID(targetNode);
+            } else if (!config.inspectorId.empty()) {
+                targetNode = NG::Inspector::GetFrameNodeByKey(config.inspectorId);
+                CHECK_NULL_VOID(targetNode);
+                nodeIdLabel = targetNode->GetId();
+            } else {
+                CHECK_NULL_VOID(targetNode);
+            }
+            if (customPopupConfigMap_.find(nodeIdLabel) != customPopupConfigMap_.end()) {
+                LOGW("Nodeid=%{public}d has unclosed popup, cannot create new", nodeIdLabel);
                 return;
             }
-            auto targetNode = NG::Inspector::GetFrameNodeByKey(config.inspectorId);
-            CHECK_NULL_VOID(targetNode);
-            if (customPopupConfigMap_.find(targetNode->GetId()) != customPopupConfigMap_.end()) {
-                LOGW("Nodeid=%{public}d has unclosed popup, cannot create new", targetNode->GetId());
-                return;
-            }
-
             auto popupParam = CreateCustomPopupParam(true, config);
             auto uiExtNode = ModalUIExtension::Create(want, callbacks);
+            auto focusHub = uiExtNode->GetFocusHub();
+            if (focusHub) {
+                focusHub->SetFocusable(config.isFocusable);
+            }
             if (config.targetSize.has_value()) {
                 auto layoutProperty = uiExtNode->GetLayoutProperty();
                 CHECK_NULL_VOID(layoutProperty);
@@ -2735,7 +2760,7 @@ int32_t UIContentImpl::CreateCustomPopupUIExtension(
                 layoutProperty->UpdateUserDefinedIdealSize(NG::CalcSize(width, height));
             }
             uiExtNode->MarkModifyDone();
-            nodeId = targetNode->GetId();
+            nodeId = nodeIdLabel;
             popupParam->SetOnStateChange(
                 [config, nodeId, this](const std::string& event) { this->OnPopupStateChange(event, config, nodeId); });
 
