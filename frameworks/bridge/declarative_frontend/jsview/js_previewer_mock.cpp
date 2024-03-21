@@ -448,10 +448,6 @@ void JSVideo::JSBind(BindingTarget globalObj)
     JSClass<JSVideo>::StaticMethod("onAppear", &JSVideo::Mock);
     JSClass<JSVideo>::StaticMethod("onDisAppear", &JSVideo::Mock);
     JSClass<JSVideo>::StaticMethod("remoteMessage", &JSVideo::Mock);
-
-    // override method
-    JSClass<JSVideo>::StaticMethod("opacity", &JSVideo::Mock);
-    JSClass<JSVideo>::StaticMethod("transition", &JSVideo::Mock);
     JSClass<JSVideo>::InheritAndBind<JSViewAbstract>(globalObj);
 }
 
