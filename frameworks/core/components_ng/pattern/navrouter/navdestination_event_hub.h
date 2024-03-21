@@ -116,10 +116,10 @@ public:
 
     bool FireOnBackPressedEvent()
     {
-        if (onBackPressedEvent_ && onBackPressedEvent_()) {
-            UIObserverHandler::GetInstance().NotifyNavigationStateChange(GetNavDestinationPattern(),
-                                                                         NavDestinationState::ON_BACKPRESS);
-            return true;
+        UIObserverHandler::GetInstance().NotifyNavigationStateChange(GetNavDestinationPattern(),
+                                                                     NavDestinationState::ON_BACKPRESS);
+        if (onBackPressedEvent_) {
+            return onBackPressedEvent_();
         }
         return false;
     }
