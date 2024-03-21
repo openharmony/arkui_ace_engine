@@ -197,22 +197,16 @@ void SetAttribute(ArkUI_NodeHandle node, ArkUI_NodeAttributeType attribute, cons
 
 int32_t SetAttribute(ArkUI_NodeHandle node, ArkUI_NodeAttributeType attribute, const ArkUI_AttributeItem* value)
 {
-    auto* impl = GetFullImpl();
-    impl->getBasicAPI()->containerScopeBind();
     return SetNodeAttribute(node, attribute, value);
 }
 
 int32_t ResetAttribute(ArkUI_NodeHandle node, ArkUI_NodeAttributeType attribute)
 {
-    auto* impl = GetFullImpl();
-    impl->getBasicAPI()->containerScopeBind();
     return ResetNodeAttribute(node, attribute);
 }
 
 const ArkUI_AttributeItem* GetAttribute(ArkUI_NodeHandle node, ArkUI_NodeAttributeType attribute)
 {
-    auto* impl = GetFullImpl();
-    impl->getBasicAPI()->containerScopeBind();
     return GetNodeAttribute(node, attribute);
 }
 
@@ -225,7 +219,6 @@ int32_t RegisterNodeEvent(ArkUI_NodeHandle nodePtr, ArkUI_NodeEventType eventTyp
     }
     // already check in entry point.
     auto* impl = GetFullImpl();
-    impl->getBasicAPI()->containerScopeBind();
     auto* extraParam = new InnerEventExtraParam({eventId});
     if (nodePtr->extraData) {
         auto* extraData = reinterpret_cast<ExtraData*>(nodePtr->extraData);
