@@ -1552,11 +1552,7 @@ void RichEditorPattern::HandleSingleClickEvent(OHOS::Ace::GestureEvent& info)
         return;
     }
 
-    auto textRect = GetTextRect();
-    textRect.SetTop(textRect.GetY() - std::min(baselineOffset_, 0.0f));
-    textRect.SetHeight(textRect.Height() - std::max(baselineOffset_, 0.0f));
-    Offset textOffset = { info.GetLocalLocation().GetX() - textRect.GetX(),
-        info.GetLocalLocation().GetY() - textRect.GetY() };
+    Offset textOffset = ConvertTouchOffsetToTextOffset(info.GetLocalLocation());
     if (!isMousePressed_) {
         HandleClickAISpanEvent(PointF(textOffset.GetX(), textOffset.GetY()));
     }
@@ -1575,9 +1571,45 @@ void RichEditorPattern::HandleSingleClickEvent(OHOS::Ace::GestureEvent& info)
 
     caretUpdateType_ = CaretUpdateType::PRESSED;
     UseHostToUpdateTextFieldManager();
-
+    CHECK_NULL_VOID(overlayMod_);
+    auto lastCaretPosition = caretPosition_;
+    float caretHeight = DynamicCast<RichEditorOverlayModifier>(overlayMod_)->GetCaretHeight();
+    OffsetF caretOffset = DynamicCast<RichEditorOverlayModifier>(overlayMod_)->GetCaretOffset();
+    RectF lastCaretRect = RectF{ caretOffset.GetX() - caretHeight / 2, caretOffset.GetY(), caretHeight, caretHeight };
     MoveCaretAndStartFocus(textOffset);
     CalcCaretInfoByClick(info);
+    if (RepeatClickCaret(info.GetLocalLocation(), lastCaretPosition, lastCaretRect)) {
+        CreateAndShowSingleHandle(info);
+    }
+}
+
+Offset RichEditorPattern::ConvertTouchOffsetToTextOffset(const Offset& touchOffset)
+{
+    richTextRect_.SetTop(richTextRect_.GetY() - std::min(baselineOffset_, 0.0f));
+    richTextRect_.SetHeight(richTextRect_.Height() - std::max(baselineOffset_, 0.0f));
+    return touchOffset - Offset(richTextRect_.GetX(), richTextRect_.GetY());
+}
+
+bool RichEditorPattern::RepeatClickCaret(const Offset& offset, int32_t lastCaretPosition, const RectF& lastCaretRect)
+{
+    CHECK_NULL_RETURN(caretTwinkling_, false);
+    if (lastCaretPosition != GetTextContentLength() && lastCaretPosition != 0) {
+        Offset textOffset = ConvertTouchOffsetToTextOffset(offset);
+        auto position = paragraphs_.GetIndex(textOffset);
+        return lastCaretPosition == position && HasFocus();
+    }
+    return lastCaretRect.IsInRegion(PointF(offset.GetX(), offset.GetY()));
+}
+
+void RichEditorPattern::CreateAndShowSingleHandle(GestureEvent& info)
+{
+    if (info.GetSourceDevice() == SourceType::MOUSE) {
+        return;
+    }
+    isSingleHandle_ = true;
+    textSelector_.Update(caretPosition_);
+    CalculateHandleOffsetAndShowOverlay();
+    ShowSelectOverlay(textSelector_.firstHandle, textSelector_.secondHandle);
 }
 
 void RichEditorPattern::MoveCaretAndStartFocus(const Offset& textOffset)
@@ -2009,7 +2041,9 @@ void RichEditorPattern::HandleDoubleClickOrLongPress(GestureEvent& info)
         }
         ShowSelectOverlay(textSelector_.firstHandle, textSelector_.secondHandle);
         FireOnSelectionChange(selectStart, selectEnd);
-        StopTwinkling();
+        if (!isSingleHandle_) {
+            StopTwinkling();
+        }
     } else if (selectStart == selectEnd) {
         StartTwinkling();
     } else {
@@ -3011,7 +3045,9 @@ void RichEditorPattern::DeleteBackward(int32_t length)
 std::wstring RichEditorPattern::DeleteBackwardOperation(int32_t length)
 {
     if (textSelector_.IsValid()) {
-        length = textSelector_.GetTextEnd() - textSelector_.GetTextStart();
+        if (!textSelector_.StartEqualToDest()) {
+            length = textSelector_.GetTextEnd() - textSelector_.GetTextStart();
+        }
         caretPosition_ = textSelector_.GetTextEnd();
         CloseSelectOverlay();
         ResetSelection();
@@ -3946,13 +3982,42 @@ void RichEditorPattern::HandleTouchEvent(const TouchEventInfo& info)
     }
     auto touchType = info.GetTouches().front().GetTouchType();
     if (touchType == TouchType::DOWN) {
+        HandleTouchDown(info.GetTouches().front().GetLocalLocation());
     } else if (touchType == TouchType::UP) {
+        isTouchCaret_ = false;
 #if defined(OHOS_STANDARD_SYSTEM) && !defined(PREVIEW)
         if (isLongPress_) {
             isLongPress_ = false;
         }
 #endif
+    } else if (touchType == TouchType::MOVE) {
+        HandleTouchMove(info.GetTouches().front().GetLocalLocation());
     }
+}
+
+void RichEditorPattern::HandleTouchDown(const Offset& offset)
+{
+    CHECK_NULL_VOID(HasFocus());
+    CHECK_NULL_VOID(overlayMod_);
+    float caretHeight = DynamicCast<RichEditorOverlayModifier>(overlayMod_)->GetCaretHeight();
+    OffsetF caretOffset = DynamicCast<RichEditorOverlayModifier>(overlayMod_)->GetCaretOffset();
+    RectF lastCaretRect = RectF{ caretOffset.GetX() - caretHeight / 2, caretOffset.GetY(), caretHeight, caretHeight };
+    isTouchCaret_ = RepeatClickCaret(offset, caretPosition_, lastCaretRect);
+}
+
+void RichEditorPattern::HandleTouchMove(const Offset& offset)
+{
+    CHECK_NULL_VOID(isTouchCaret_);
+    Offset textOffset = ConvertTouchOffsetToTextOffset(offset);
+    auto position = paragraphs_.GetIndex(textOffset);
+    SetCaretPosition(position);
+    float caretHeight = 0.0f;
+    auto lastClickOffset = paragraphs_.ComputeCursorInfoByClick(position, caretHeight,
+        OffsetF(static_cast<float>(textOffset.GetX()), static_cast<float>(textOffset.GetY())));
+    SetLastClickOffset(lastClickOffset + richTextRect_.GetOffset());
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
 bool RichEditorPattern::IsScrollBarPressed(const MouseInfo& info)
@@ -4135,11 +4200,7 @@ void RichEditorPattern::HandleMouseRightButton(const MouseInfo& info)
 
 void RichEditorPattern::MouseRightFocus(const MouseInfo& info)
 {
-    auto textRect = GetTextRect();
-    textRect.SetTop(textRect.GetY() - std::min(baselineOffset_, 0.0f));
-    textRect.SetHeight(textRect.Height() - std::max(baselineOffset_, 0.0f));
-    Offset textOffset = { info.GetLocalLocation().GetX() - textRect.GetX(),
-        info.GetLocalLocation().GetY() - textRect.GetY() };
+    Offset textOffset = ConvertTouchOffsetToTextOffset(info.GetLocalLocation());
     InitSelection(textOffset);
     auto selectStart = std::min(textSelector_.baseOffset, textSelector_.destinationOffset);
     auto selectEnd = std::max(textSelector_.baseOffset, textSelector_.destinationOffset);
@@ -4215,7 +4276,9 @@ void RichEditorPattern::OnHandleMoveDone(const RectF& handleRect, bool isFirstHa
     auto selectStart = std::min(textSelector_.baseOffset, textSelector_.destinationOffset);
     auto selectEnd = std::max(textSelector_.baseOffset, textSelector_.destinationOffset);
     FireOnSelect(selectStart, selectEnd);
-    SetCaretPosition(selectEnd);
+    if (!isSingleHandle_) {
+        SetCaretPosition(selectEnd);
+    }
     CalculateHandleOffsetAndShowOverlay();
     StopAutoScroll();
     if (selectOverlayProxy_) {
@@ -4380,6 +4443,10 @@ void RichEditorPattern::UpdateSelectOverlayOrCreate(SelectOverlayInfo& selectInf
     bool isOriginMenuShow = true;
     if (selectOverlayProxy_ && !selectOverlayProxy_->IsClosed()) {
         isOriginMenuShow = GetOriginIsMenuShow();
+    }
+    if (isSingleHandle_) {
+        selectInfo.isHandleLineShow = false;
+        selectInfo.isSingleHandle = true;
     }
     TextPattern::UpdateSelectOverlayOrCreate(selectInfo, animation);
     CHECK_NULL_VOID(selectOverlayProxy_);
@@ -4591,15 +4658,37 @@ void RichEditorPattern::OnHandleMove(const RectF& handleRect, bool isFirstHandle
     CHECK_NULL_VOID(HasFocus());
     CHECK_NULL_VOID(SelectOverlayIsOn());
     TextPattern::OnHandleMove(handleRect, isFirstHandle);
-    if (!isFirstHandle) {
-        SetCaretPosition(textSelector_.destinationOffset);
-    }
     auto localOffset = handleRect.GetOffset() - parentGlobalOffset_;
     AutoScrollParam param = { .autoScrollEvent = AutoScrollEvent::HANDLE,
         .handleRect = handleRect,
         .isFirstHandle = isFirstHandle,
         .showScrollbar = true };
     AutoScrollByEdgeDetection(param, localOffset, EdgeDetectionStrategy::OUT_BOUNDARY);
+}
+
+void RichEditorPattern::UpdateSelectorOnHandleMove(const OffsetF& localOffset, float handleHeight, bool isFirstHandle)
+{
+    CHECK_NULL_VOID(selectOverlayProxy_);
+    bool isUseHandleTop = (isFirstHandle != selectOverlayProxy_->IsHandleReverse());
+    auto handleBaseLineOffset = Offset(localOffset.GetX(), localOffset.GetY() + (isUseHandleTop ? 0 : handleHeight));
+    auto currentHandleIndex = GetHandleIndex(handleBaseLineOffset);
+    if (isFirstHandle) {
+        HandleSelectionChange(currentHandleIndex, textSelector_.destinationOffset);
+    } else {
+        SetCaretPosition(currentHandleIndex);
+        if (isSingleHandle_) {
+            float selectLineHeight = 0.0f;
+            auto textOffset = OffsetF(
+                static_cast<float>(handleBaseLineOffset.GetX()), static_cast<float>(handleBaseLineOffset.GetY()));
+            textOffset = textOffset + contentRect_.GetOffset() - richTextRect_.GetOffset();
+            auto lastClickOffset =
+                paragraphs_.ComputeCursorInfoByClick(currentHandleIndex, selectLineHeight, textOffset);
+            SetLastClickOffset(lastClickOffset + richTextRect_.GetOffset());
+            textSelector_.Update(currentHandleIndex);
+        } else {
+            HandleSelectionChange(textSelector_.baseOffset, currentHandleIndex);
+        }
+    }
 }
 
 std::function<void(Offset)> RichEditorPattern::GetThumbnailCallback()
@@ -4700,30 +4789,35 @@ void RichEditorPattern::CalculateHandleOffsetAndShowOverlay(bool isUsingMouse)
     textSelector_.ReverseTextSelector();
     int32_t baseOffset = std::min(textSelector_.baseOffset, GetTextContentLength());
     int32_t destinationOffset = std::min(textSelector_.destinationOffset, GetTextContentLength());
-    auto startOffset = CalcCursorOffsetByPosition(baseOffset, startSelectHeight, true, false);
-    auto endOffset =
-        CalcCursorOffsetByPosition(destinationOffset, endSelectHeight, false, false);
-    if (baseOffset == destinationOffset && NearEqual(startOffset.GetX(), endOffset.GetX())) {
-        endOffset = CalcCursorOffsetByPosition(destinationOffset, endSelectHeight, true, false);
-    }
-    SizeF firstHandlePaintSize = { SelectHandleInfo::GetDefaultLineWidth().ConvertToPx(), startSelectHeight };
-    SizeF secondHandlePaintSize = { SelectHandleInfo::GetDefaultLineWidth().ConvertToPx(), endSelectHeight };
-    OffsetF firstHandleOffset = startOffset + textPaintOffset - rootOffset;
-    OffsetF secondHandleOffset = endOffset + textPaintOffset - rootOffset;
-    if (GetTextContentLength() == 0) {
+    SizeF firstHandlePaintSize;
+    SizeF secondHandlePaintSize;
+    OffsetF firstHandleOffset;
+    OffsetF secondHandleOffset;
+    isSingleHandle_ = IsSingleHandle();
+    if (IsSingleHandle()) {
         OffsetF caretOffset;
         float caretHeight = 0.0f;
         CalculateCaretOffsetAndHeight(caretOffset, caretHeight);
+        // only show the second handle.
         secondHandlePaintSize = { SelectHandleInfo::GetDefaultLineWidth().ConvertToPx(), caretHeight };
         secondHandleOffset = caretOffset + textPaintOffset - rootOffset;
-        // only show the second handle.
-        firstHandlePaintSize = SizeF{};
-        firstHandleOffset = secondHandleOffset;
+    } else {
+        auto startOffset = CalcCursorOffsetByPosition(baseOffset, startSelectHeight, true, false);
+        auto endOffset = CalcCursorOffsetByPosition(destinationOffset, endSelectHeight, false, false);
+        firstHandlePaintSize = { SelectHandleInfo::GetDefaultLineWidth().ConvertToPx(), startSelectHeight };
+        secondHandlePaintSize = { SelectHandleInfo::GetDefaultLineWidth().ConvertToPx(), endSelectHeight };
+        firstHandleOffset = startOffset + textPaintOffset - rootOffset;
+        secondHandleOffset = endOffset + textPaintOffset - rootOffset;
     }
     textSelector_.selectionBaseOffset = firstHandleOffset;
     textSelector_.selectionDestinationOffset = secondHandleOffset;
     textSelector_.firstHandle = RectF{ firstHandleOffset, firstHandlePaintSize };
     textSelector_.secondHandle = RectF{ secondHandleOffset, secondHandlePaintSize };
+}
+
+bool RichEditorPattern::IsSingleHandle()
+{
+    return GetTextContentLength() == 0 || !IsSelected();
 }
 
 void RichEditorPattern::ResetSelection()
@@ -4852,28 +4946,9 @@ void RichEditorPattern::InitSelection(const Offset& pos)
     adjusted_ = AdjustWordSelection(currentPosition, nextPosition);
     textSelector_.Update(currentPosition, nextPosition);
     auto selectedRects = paragraphs_.GetRects(currentPosition, nextPosition);
-    if (selectedRects.empty() || (selectedRects.size() == 1 && NearZero((selectedRects[0].Width())))) {
+    bool isSelctEmpty = selectedRects.empty() || (selectedRects.size() == 1 && NearZero((selectedRects[0].Width())));
+    if (isSelctEmpty) {
         textSelector_.Update(currentPosition, currentPosition);
-    }
-    if (adjusted_) {
-        return;
-    }
-
-    bool selectedSingle =
-        selectedRects.size() == 1 && (pos.GetX() < selectedRects[0].Left() || pos.GetY() < selectedRects[0].Top());
-    bool selectedLast = selectedRects.empty() && currentPosition == GetTextContentLength();
-    if (selectedSingle || selectedLast) {
-        if (selectedLast) {
-            nextPosition = currentPosition + 1;
-        }
-        auto selectedNextRects = paragraphs_.GetRects(currentPosition - 1, nextPosition - 1);
-        if (selectedNextRects.size() == 1) {
-            bool isInRange = pos.GetX() >= selectedNextRects[0].Left() && pos.GetX() <= selectedNextRects[0].Right() &&
-                             pos.GetY() >= selectedNextRects[0].Top() && pos.GetY() <= selectedNextRects[0].Bottom();
-            if (isInRange) {
-                textSelector_.Update(currentPosition - 1, nextPosition - 1);
-            }
-        }
     }
 }
 
