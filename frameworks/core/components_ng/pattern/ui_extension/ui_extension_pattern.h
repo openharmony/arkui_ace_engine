@@ -123,8 +123,8 @@ public:
     void FireOnReleaseCallback(int32_t releaseCode);
     void SetOnResultCallback(const std::function<void(int32_t, const AAFwk::Want&)>&& callback);
     void FireOnResultCallback(int32_t code, const AAFwk::Want& want);
-    void SetOnTerminatedCallback(const std::function<void(std::optional<int32_t>, const RefPtr<WantWrap>&)>&& callback);
-    void FireOnTerminatedCallback(std::optional<int32_t> code, const RefPtr<WantWrap>& wantWrap);
+    void SetOnTerminatedCallback(const std::function<void(int32_t, const RefPtr<WantWrap>&)>&& callback);
+    void FireOnTerminatedCallback(int32_t code, const RefPtr<WantWrap>& wantWrap);
     void SetOnReceiveCallback(const std::function<void(const AAFwk::WantParams&)>&& callback);
     void FireOnReceiveCallback(const AAFwk::WantParams& params);
     void SetOnErrorCallback(
@@ -215,7 +215,7 @@ private:
     std::function<void(const RefPtr<UIExtensionProxy>&)> onRemoteReadyCallback_;
     std::function<void(int32_t)> onReleaseCallback_;
     std::function<void(int32_t, const AAFwk::Want&)> onResultCallback_;
-    std::function<void(std::optional<int32_t>, const RefPtr<WantWrap>&)> onTerminatedCallback_;
+    std::function<void(int32_t, const RefPtr<WantWrap>&)> onTerminatedCallback_;
     std::function<void(const AAFwk::WantParams&)> onReceiveCallback_;
     std::function<void(int32_t code, const std::string& name, const std::string& message)> onErrorCallback_;
     std::list<std::function<void(const RefPtr<UIExtensionProxy>&)>> onSyncOnCallbackList_;
