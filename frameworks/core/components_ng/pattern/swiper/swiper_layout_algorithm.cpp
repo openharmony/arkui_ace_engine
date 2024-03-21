@@ -85,7 +85,7 @@ void SwiperLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
 
     OptionalSizeF contentIdealSize;
     if (isSingleCase) {
-        contentIdealSize = CreateIdealSize(contentConstraint, axis, MeasureType::MATCH_CONTENT);
+        contentIdealSize = CreateIdealSizeByPercentRef(contentConstraint, axis, MeasureType::MATCH_CONTENT);
         if (mainSizeIsMeasured_) {
             if (layoutWrapper->IsContraintNoChanged()) {
                 contentIdealSize.SetMainSize(contentMainSize_, axis);
@@ -94,7 +94,7 @@ void SwiperLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
             }
         }
     } else {
-        contentIdealSize = CreateIdealSize(contentConstraint, axis, MeasureType::MATCH_PARENT_MAIN_AXIS);
+        contentIdealSize = CreateIdealSizeByPercentRef(contentConstraint, axis, MeasureType::MATCH_PARENT_MAIN_AXIS);
     }
 
     const auto& padding = swiperLayoutProperty->CreatePaddingAndBorder();
@@ -290,7 +290,7 @@ void SwiperLayoutAlgorithm::MeasureTabsCustomAnimation(LayoutWrapper* layoutWrap
     CHECK_NULL_VOID(layoutProperty);
     auto axis = layoutProperty->GetDirection().value_or(Axis::HORIZONTAL);
     auto contentConstraint = layoutProperty->GetContentLayoutConstraint().value();
-    auto contentIdealSize = CreateIdealSize(contentConstraint, axis, MeasureType::MATCH_PARENT_MAIN_AXIS);
+    auto contentIdealSize = CreateIdealSizeByPercentRef(contentConstraint, axis, MeasureType::MATCH_PARENT_MAIN_AXIS);
     auto childLayoutConstraint = SwiperUtils::CreateChildConstraint(layoutProperty, contentIdealSize, false);
 
     auto currentIndex = layoutProperty->GetIndex().value_or(0);
