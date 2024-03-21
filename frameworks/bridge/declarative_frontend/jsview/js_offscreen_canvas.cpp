@@ -64,6 +64,9 @@ napi_value AttachOffscreenCanvas(napi_env env, void* value, void*)
         LOGW("Invalid context.");
         return nullptr;
     }
+    auto offscreenCanvasPattern = AceType::MakeRefPtr<NG::OffscreenCanvasPattern>(
+        workCanvas->GetWidth(), workCanvas->GetHeight());
+    workCanvas->SetOffscreenPattern(offscreenCanvasPattern);
 
     napi_value offscreenCanvas = nullptr;
     napi_create_object(env, &offscreenCanvas);
@@ -136,10 +139,6 @@ napi_value JSOffscreenCanvas::Constructor(napi_env env, napi_callback_info info)
     double fWidth = 0.0;
     double fHeight = 0.0;
     auto workCanvas = new (std::nothrow) JSOffscreenCanvas();
-    auto context = PipelineBase::GetCurrentContext();
-    if (context != nullptr) {
-        workCanvas->instanceId_ = context->GetInstanceId();
-    }
     if (napi_get_value_double(env, argv[0], &fWidth) == napi_ok) {
         fWidth = PipelineBase::Vp2PxWithCurrentDensity(fWidth);
         workCanvas->SetWidth(fWidth);
@@ -148,7 +147,8 @@ napi_value JSOffscreenCanvas::Constructor(napi_env env, napi_callback_info info)
         fHeight = PipelineBase::Vp2PxWithCurrentDensity(fHeight);
         workCanvas->SetHeight(fHeight);
     }
-
+    workCanvas->offscreenCanvasPattern_ = AceType::MakeRefPtr<NG::OffscreenCanvasPattern>(
+        static_cast<int32_t>(fWidth), static_cast<int32_t>(fHeight));
     napi_coerce_to_native_binding_object(
         env, thisVar, DetachOffscreenCanvas, AttachOffscreenCanvas, workCanvas, nullptr);
     napi_wrap(
@@ -393,13 +393,6 @@ napi_value JSOffscreenCanvas::CreateContext2d(napi_env env, double width, double
     status = napi_new_instance(env, constructor, 0, nullptr, &thisVal);
     if (status != napi_ok) {
         return nullptr;
-    }
-    if (instanceId_ != -1) {
-        offscreenCanvasPattern_ = AceType::MakeRefPtr<NG::OffscreenCanvasPattern>(
-            GetContext(), static_cast<int32_t>(width), static_cast<int32_t>(height));
-    } else {
-        offscreenCanvasPattern_ = AceType::MakeRefPtr<NG::OffscreenCanvasPattern>(
-            static_cast<int32_t>(width), static_cast<int32_t>(height));
     }
     if (offscreenCanvasPattern_ == nullptr) {
         return thisVal;
