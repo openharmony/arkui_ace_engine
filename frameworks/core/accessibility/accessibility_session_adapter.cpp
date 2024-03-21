@@ -17,6 +17,7 @@
 
 #include <map>
 #include "core/components_ng/base/frame_node.h"
+#include "core/components_ng/pattern/pattern.h"
 
 namespace OHOS::Ace::NG {
 RefPtr<AccessibilitySessionAdapter> AccessibilitySessionAdapter::GetSessionAdapter(const RefPtr<FrameNode>& node)

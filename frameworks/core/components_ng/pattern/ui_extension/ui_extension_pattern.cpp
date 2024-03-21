@@ -61,7 +61,7 @@ UIExtensionPattern::UIExtensionPattern(
     sessionWrapper_ = SessionWrapperFactory::CreateSessionWrapper(
         sessionType, WeakClaim(this), instanceId_, isTransferringCaller_);
     accessibilitySessionAdapter_ =
-        AceType::MakeRefPtr<AccessibilitySessionAdapterUIExtension>(WeakClaim(sessionWrapper_));
+        AceType::MakeRefPtr<AccessibilitySessionAdapterUIExtension>(sessionWrapper_);
     UIEXT_LOGI("The %{public}smodal UIExtension is created.", isModal_ ? "" : "non");
 }
 
