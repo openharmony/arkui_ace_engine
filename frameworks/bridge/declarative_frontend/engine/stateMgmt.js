@@ -6627,12 +6627,26 @@ class ViewPU extends NativeViewPartialUpdate {
     }
     /**
      *
-     * @param paramVariableName @param is read only, therefore, update form parent needs to be done without
+     * @param paramVariableName
+     * @param @once paramVariableName
+     * @param is read only, therefore, init from parent needs to be done without
      *        causing property setter() to be called
      * @param newValue
      */
+    initParam(paramVariableName, newValue) {
+        VariableUtilV3.initParam(this, paramVariableName, newValue);
+    }
+    /**
+   *
+   * @param paramVariableName
+   * @param @once paramVariableName
+   * @param is read only, therefore, update from parent needs to be done without
+   *        causing property setter() to be called
+   * @param @once reject any update
+    * @param newValue
+   */
     updateParam(paramVariableName, newValue) {
-        ObserveV3.getObserve().setReadOnlyAttr(this, paramVariableName, newValue);
+        VariableUtilV3.updateParam(this, paramVariableName, newValue);
     }
     /**
      * sub-class must call this function at the end of its constructor
@@ -7103,31 +7117,6 @@ class ObserveV3 {
         targetSet.add(new WeakRef(target));
     }
     /**
-     * setReadOnlyAttr - helper function used to update an immutable attribute
-     * such update as a @param variable from parent @Component
-     * @param target  - the object, usually the ViewPU
-     * @param attrName - @param variable name
-     * @param newValue - update to new value
-     */
-    setReadOnlyAttr(target, attrName, newValue) {
-        const storeProp = ObserveV3.OB_PREFIX + attrName;
-        if (storeProp in target) {
-            // @observed class and @track attrName
-            if (newValue === target[storeProp]) {
-                
-                return;
-            }
-            
-            target[storeProp] = newValue;
-            ObserveV3.getObserve().fireChange(target, attrName);
-        }
-        else {
-            
-            // untracked attrName
-            target[attrName] = newValue;
-        }
-    }
-    /**
      *
      * @param target set tracked attribute to new value without notifying the change
      *               !! use with caution !!
@@ -7412,6 +7401,27 @@ class ObserveV3 {
         const meta = (_a = proto[_b = ObserveV3.V3_DECO_META]) !== null && _a !== void 0 ? _a : (proto[_b] = {});
         meta[varName] = {};
         meta[varName]["deco"] = deco;
+        // FIXME 
+        // when splitting ViewPU and ViewV3
+        // use instanceOf. Until then, this is a workaround.
+        // any @state, @track, etc V3 event handles this function to return false
+        Reflect.defineProperty(proto, "isViewV3", {
+            get() { return true; },
+            enumerable: false
+        });
+    }
+    static addParamVariableDecoMeta(proto, varName, deco, deco2) {
+        var _a, _b;
+        var _c;
+        // add decorator meta data
+        const meta = (_a = proto[_c = ObserveV3.V3_DECO_META]) !== null && _a !== void 0 ? _a : (proto[_c] = {});
+        (_b = meta[varName]) !== null && _b !== void 0 ? _b : (meta[varName] = {});
+        if (deco) {
+            meta[varName]["deco"] = deco;
+        }
+        if (deco2) {
+            meta[varName]["deco2"] = deco2;
+        }
         // FIXME 
         // when splitting ViewPU and ViewV3
         // use instanceOf. Until then, this is a workaround.
@@ -7986,15 +7996,16 @@ target[watchProp] ? target[watchProp][propertyKey] = computeFunction
  */
 /*
 const state = (target: Object, propertyKey: string) => {
-    ObserveV3.addVariableDecoMeta(target, propertyKey, "@state");
-    return trackInternal(target, propertyKey);
-  }
-  */
+  ObserveV3.addVariableDecoMeta(target, propertyKey, "@state");
+  return trackInternal(target, propertyKey);
+}
+*/
 /**
  * @param class property decorator
  *
  * local init optional - transpiler needs to support
- * init and update form parent is mandatory when no local init, otherwise optional - transpiler needs to support
+ * init from parent is mandatory when no local init, otherwise optional - transpiler needs to support
+ * update from parent if init from parent, unless @once is used
  * new value assignment not allowed = has no setter. For update from parent @Component,
  *               transpiler calls ViewPU.updateParam(paramName).
  *
@@ -8008,38 +8019,102 @@ const state = (target: Object, propertyKey: string) => {
  * @from 12
  *
  */
-/*
-const param = (target : Object, propertyKey : string) => {
-  ObserveV3.addVariableDecoMeta(target, propertyKey, "@param");
-
-  let storeProp = ObserveV3.OB_PREFIX + propertyKey
-  target[storeProp] = target[propertyKey]
-  Reflect.defineProperty(target, propertyKey, {
-    get() {
-      ObserveV3.getObserve().addRef(this, propertyKey)
-      return ObserveV3.autoProxyObject(this, ObserveV3.OB_PREFIX + propertyKey)
-    },
-    set(_) {
-      stateMgmtConsole.applicationError(`@param ${propertyKey.toString()}: can not assign a new value, application error.`)
-      return;
-    },
-    // @param can not be assigned, no setter
-    enumerable: true
-  })
-} // param
-*/
+const param = (proto, propertyKey) => {
+    
+    ObserveV3.addParamVariableDecoMeta(proto, propertyKey, "@param", undefined);
+    let storeProp = ObserveV3.OB_PREFIX + propertyKey;
+    proto[storeProp] = proto[propertyKey];
+    Reflect.defineProperty(proto, propertyKey, {
+        get() {
+            ObserveV3.getObserve().addRef(this, propertyKey);
+            return ObserveV3.autoProxyObject(this, ObserveV3.OB_PREFIX + propertyKey);
+        },
+        set(_) {
+            stateMgmtConsole.applicationError(`@param ${propertyKey.toString()}: can not assign a new value, application error.`);
+            return;
+        },
+        // @param can not be assigned, no setter
+        enumerable: true
+    });
+}; // param
+/**
+ * @once component variable decorator
+ * must use like this @param @once varName
+ * prevents @param variable updates from parent component
+ * @param proto
+ * @param propertyKey
+ */
+const once = (proto, propertyKey) => {
+    
+    ObserveV3.addParamVariableDecoMeta(proto, propertyKey, undefined, "@once");
+};
+/**
+ * Helper class for handling V3 decorated variables
+ */
+class VariableUtilV3 {
+    /**
+       * setReadOnlyAttr - helper function used to update @param
+       * from parent @Component. Not allowed for @param @once .
+       * @param target  - the object, usually the ViewPU
+       * @param attrName - @param variable name
+       * @param newValue - update to new value
+       */
+    static initParam(target, attrName, newValue) {
+        var _a;
+        const meta = (_a = target[ObserveV3.V3_DECO_META]) === null || _a === void 0 ? void 0 : _a[attrName];
+        if (!meta || meta["deco"] != '@param') {
+            const error = `Use initParam(${attrName}) only to init @param. Internal error!`;
+            stateMgmtConsole.error(error);
+            throw new Error(error);
+        }
+        // prevent update for @param @once
+        const storeProp = ObserveV3.OB_PREFIX + attrName;
+        
+        target[storeProp] = newValue;
+    }
+    /**
+     * setReadOnlyAttr - helper function used to update @param
+     * from parent @Component. Not allowed for @param @once .
+     * @param target  - the object, usually the ViewPU
+     * @param attrName - @param variable name
+     * @param newValue - update to new value
+     */
+    static updateParam(target, attrName, newValue) {
+        var _a;
+        // prevent update for @param @once
+        const meta = (_a = target[ObserveV3.V3_DECO_META]) === null || _a === void 0 ? void 0 : _a[attrName];
+        if (!meta || meta["deco"] != '@param') {
+            const error = `Use updateParm(${attrName}) only to update @param. Internal error!`;
+            stateMgmtConsole.error(error);
+            throw new Error(error);
+        }
+        const storeProp = ObserveV3.OB_PREFIX + attrName;
+        // @observed class and @track attrName
+        if (newValue === target[storeProp]) {
+            
+            return;
+        }
+        if (meta["deco2"] == "@once") {
+            // @param @once - init but no update
+            
+        }
+        else {
+            
+            target[storeProp] = newValue;
+            ObserveV3.getObserve().fireChange(target, attrName);
+        }
+    }
+}
 /**
  * @event @Component/ViewPU variable decorator
  *
  * @param target
  * @param propertyKey
  */
-/*
 const event = (target, propertyKey) => {
-  ObserveV3.addVariableDecoMeta(target, propertyKey, "@event");
-  target[propertyKey] = () => {};
-}
-*/
+    ObserveV3.addVariableDecoMeta(target, propertyKey, "@event");
+    target[propertyKey] = () => { };
+};
 class ProvideConsumeUtilV3 {
     /**
      * Helper function to add meta data about @provide and @comnsume decorators to ViewPU

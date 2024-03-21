@@ -1622,14 +1622,30 @@ abstract class ViewPU extends NativeViewPartialUpdate
       .map((component) => `- ${component}`).join('\n');
   }
 
+  
+  
   /**
    * 
-   * @param paramVariableName @param is read only, therefore, update form parent needs to be done without
+   * @param paramVariableName 
+   * @param @once paramVariableName
+   * @param is read only, therefore, init from parent needs to be done without
    *        causing property setter() to be called
    * @param newValue 
    */
+  protected initParam<Z>(paramVariableName : string, newValue : Z) {
+   VariableUtilV3.initParam<Z>(this, paramVariableName, newValue);
+  }
+    /**
+   * 
+   * @param paramVariableName 
+   * @param @once paramVariableName
+   * @param is read only, therefore, update from parent needs to be done without
+   *        causing property setter() to be called
+   * @param @once reject any update
+    * @param newValue 
+   */
   protected updateParam<Z>(paramVariableName : string, newValue : Z) {
-    ObserveV3.getObserve().setReadOnlyAttr<Z>(this, paramVariableName, newValue);
+    VariableUtilV3.updateParam<Z>(this, paramVariableName, newValue);
   }
 
   /**

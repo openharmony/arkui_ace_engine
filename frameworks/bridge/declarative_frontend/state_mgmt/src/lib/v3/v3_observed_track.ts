@@ -21,7 +21,7 @@
 
 class ObserveV3 {
   // meta data about decorated variable inside prototype
-  public static readonly V3_DECO_META = Symbol('__v3_deco_meta__'); 
+  public static readonly V3_DECO_META = Symbol('__v3_deco_meta__');
 
   public static readonly SYMBOL_REFS = Symbol('__use_refs__');
   public static readonly ID_REFS = Symbol('__id_refs__');
@@ -34,13 +34,13 @@ class ObserveV3 {
 
   // used by array Handler to create dependency on artificial "length"
   // property of array, mark it as changed when array has changed.
-  private static readonly OB_LENGTH = "___obj_length"; 
-  private static readonly OB_MAP_SET_ANY_PROPERTY = "___ob_map_set"; 
+  private static readonly OB_LENGTH = "___obj_length";
+  private static readonly OB_MAP_SET_ANY_PROPERTY = "___ob_map_set";
   private static readonly OB_DATE = "__date__";
 
   // see MonitorV3.observeObjectAccess: bindCmp is the MonitorV3
   // see modified observeComponentCreation, bindCmp is the ViewPU
-  private bindCmp_:  ViewPU | MonitorV3 | ComputedV3 | null = null;
+  private bindCmp_: ViewPU | MonitorV3 | ComputedV3 | null = null;
 
   // bindId: UINode elmtId or watchId, depending on what is being observed
   private bindId_: number = UINodeRegisterProxy.notRecordingDependencies;
@@ -65,10 +65,10 @@ class ObserveV3 {
   private startDirty_: boolean = false
 
   // flag to indicate change observation is disabled
-  private disabled_ : boolean = false;
+  private disabled_: boolean = false;
 
   // flag to indicate ComputedV3 calculation is ongoing
-  private calculatingComputedProp_ : boolean = false;
+  private calculatingComputedProp_: boolean = false;
 
   private static obsInstance_: ObserveV3;
 
@@ -80,8 +80,8 @@ class ObserveV3 {
   }
 
   // return true given value is @observed object
-  public static IsObservedObjectV3(value : any) : boolean {
-    return (value && typeof(value) == "object" && value[ObserveV3.V3_DECO_META])
+  public static IsObservedObjectV3(value: any): boolean {
+    return (value && typeof (value) == "object" && value[ObserveV3.V3_DECO_META])
   }
 
   // At the start of observeComponentCreation or
@@ -254,38 +254,13 @@ class ObserveV3 {
   }
 
   /**
-   * setReadOnlyAttr - helper function used to update an immutable attribute
-   * such update as a @param variable from parent @Component
-   * @param target  - the object, usually the ViewPU
-   * @param attrName - @param variable name
-   * @param newValue - update to new value
-   */
-  public setReadOnlyAttr<Z>(target: object, attrName: string, newValue: Z): void {
-    const storeProp = ObserveV3.OB_PREFIX + attrName;
-    if (storeProp in target) {
-      // @observed class and @track attrName
-      if (newValue === target[storeProp]) {
-        stateMgmtConsole.propertyAccess(`setReadOnlyAttr '${attrName}' - tracked but unchanged. Doing nothing.`);
-        return;
-      }
-      stateMgmtConsole.propertyAccess(`setReadOnlyAttr '${attrName}' - updating backing store and fireChange.`);
-      target[storeProp] = newValue;
-      ObserveV3.getObserve().fireChange(target, attrName)
-    } else {
-      stateMgmtConsole.propertyAccess(`setReadOnlyAttr '${attrName}' - untracked, assigning straight.`);
-      // untracked attrName
-      target[attrName] = newValue;
-    }
-  }
-
-  /**
    * 
    * @param target set tracked attribute to new value without notifying the change
    *               !! use with caution !!
    * @param attrName 
    * @param newValue 
    */
-  public setUnmonitored<Z>(target: object, attrName: string, newValue: Z): void {    
+  public setUnmonitored<Z>(target: object, attrName: string, newValue: Z): void {
     const storeProp = ObserveV3.OB_PREFIX + attrName;
     if (storeProp in target) {
       // @track attrName
@@ -311,7 +286,7 @@ class ObserveV3 {
   public executeUnobserved<Z>(task: () => Z): Z {
     stateMgmtConsole.propertyAccess(`executeUnobserved - start`);
     this.disabled_ = true;
-    let ret : Z;
+    let ret: Z;
     try {
       ret = task();
     } catch (e) {
@@ -321,7 +296,7 @@ class ObserveV3 {
     stateMgmtConsole.propertyAccess(`executeUnobserved - done`);
     return ret;
   }
- 
+
 
   // mark view model object 'target' property 'attrName' as changed
   // notify affected watchIds and elmtIds
@@ -402,7 +377,7 @@ class ObserveV3 {
           //  sort the ids and update in ascending order
           // If a @computed property depends on other @computed properties, their
           // ids will be smaller as they are defined first.
-          const computedProps = Array.from(this.computedPropIdsChanged_).sort((id1, id2) => id1-id2);
+          const computedProps = Array.from(this.computedPropIdsChanged_).sort((id1, id2) => id1 - id2);
           this.computedPropIdsChanged_ = new Set<number>();
           this.updateDirtyComputedProps(computedProps);
         }
@@ -415,7 +390,7 @@ class ObserveV3 {
       } while (this.monitorIdsChanged_.size + this.computedPropIdsChanged_.size > 0)
 
       if (this.elmtIdsChanged_.size) {
-        const elmtIds = Array.from(this.elmtIdsChanged_).sort((elmtId1, elmtId2) => elmtId1-elmtId2);
+        const elmtIds = Array.from(this.elmtIdsChanged_).sort((elmtId1, elmtId2) => elmtId1 - elmtId2);
         this.elmtIdsChanged_ = new Set<number>();
         this.updateUINodes(elmtIds);
       }
@@ -476,8 +451,8 @@ class ObserveV3 {
   private updateUINodesWithoutVSync(elmtIds: Array<number>): void {
     stateMgmtConsole.debug(`ObserveV3.updateUINodes: ${elmtIds.length} elmtIds: ${JSON.stringify(elmtIds)} ...`);
     aceTrace.begin(`ObserveV3.updateUINodes: ${elmtIds.length} elmtId`)
-    let view : Object;
-    let weak : any;
+    let view: Object;
+    let weak: any;
     elmtIds.forEach((elmtId) => {
       if ((weak = this.id2cmp_[elmtId]) && (typeof weak == "object") && ("deref" in weak)
         && (view = weak.deref()) && (view instanceof ViewPU)) {
@@ -500,11 +475,11 @@ class ObserveV3 {
   private updateUINodes(elmtIds: Array<number>): void {
     stateMgmtConsole.debug(`ObserveV3.updateUINodesSlow: ${elmtIds.length} elmtIds need rerender: ${JSON.stringify(elmtIds)} ...`);
     aceTrace.begin(`ObserveV3.updateUINodesSlow: ${elmtIds.length} elmtId`);
-    let viewWeak : WeakRef<Object>;
-    let view : Object | undefined;
+    let viewWeak: WeakRef<Object>;
+    let view: Object | undefined;
     elmtIds.forEach((elmtId) => {
       viewWeak = this.id2cmp_[elmtId];
-      if (viewWeak && "deref" in viewWeak && (view=viewWeak.deref()) && view instanceof ViewPU) {
+      if (viewWeak && "deref" in viewWeak && (view = viewWeak.deref()) && view instanceof ViewPU) {
         if (view.isViewActive()) {
           view.uiNodeNeedUpdateV3(elmtId);
         } else {
@@ -612,7 +587,7 @@ class ObserveV3 {
             ObserveV3.getObserve().fireChange(target, ObserveV3.OB_LENGTH);
             return result;
           };
-        } else { 
+        } else {
           return ret.bind(receiver);
         }
       }
@@ -627,7 +602,7 @@ class ObserveV3 {
             // bind "this" to target inside the function
           }.bind(target)
         } else {
-            ObserveV3.getObserve().addRef(target, ObserveV3.OB_DATE);
+          ObserveV3.getObserve().addRef(target, ObserveV3.OB_DATE);
         }
         return ret.bind(target);
       }
@@ -635,7 +610,7 @@ class ObserveV3 {
       if (target instanceof Set || target instanceof Map) {
         if (key === "has") {
           return prop => {
-            const ret= target.has(prop);
+            const ret = target.has(prop);
             if (ret) {
               ObserveV3.getObserve().addRef(target, prop);
             } else {
@@ -687,7 +662,7 @@ class ObserveV3 {
           // return proxied This
           return receiver;
         } : (typeof ret == "function")
-            ? ret.bind(target) : ret;
+          ? ret.bind(target) : ret;
       }
 
       if (target instanceof Map) {
@@ -705,7 +680,7 @@ class ObserveV3 {
           return (prop, val) => {
             if (!target.has(prop)) {
               ObserveV3.getObserve().fireChange(target, ObserveV3.OB_LENGTH);
-            } else if(target.get(prop) !== val) {
+            } else if (target.get(prop) !== val) {
               ObserveV3.getObserve().fireChange(target, prop)
             }
             ObserveV3.getObserve().fireChange(target, ObserveV3.OB_MAP_SET_ANY_PROPERTY)
@@ -717,7 +692,7 @@ class ObserveV3 {
 
       return (typeof ret == "function") ? ret.bind(target) : ret;
     },
-    
+
     set(target: any, key: string | symbol, value: any) {
       if (typeof key === 'symbol') {
         if (key !== ObserveV3.SYMBOL_PROXY_GET_TARGET) {
@@ -759,8 +734,31 @@ class ObserveV3 {
   }
 
 
-  public static usesV3Variables(proto : Object) : boolean {
-  return (proto && typeof proto =="object" && proto[ObserveV3.V3_DECO_META]);
+  public static addParamVariableDecoMeta(proto: Object, varName: string, deco?: string, deco2?: string): void {
+    // add decorator meta data
+    const meta = proto[ObserveV3.V3_DECO_META] ??= {};
+    meta[varName]??= {};
+    if (deco) { 
+      meta[varName]["deco"] = deco;
+    }
+    if (deco2) { 
+      meta[varName]["deco2"] = deco2;
+    }
+    
+    // FIXME 
+    // when splitting ViewPU and ViewV3
+    // use instanceOf. Until then, this is a workaround.
+    // any @state, @track, etc V3 event handles this function to return false
+    Reflect.defineProperty(proto, "isViewV3", {
+      get() { return true; },
+      enumerable: false
+    }
+    );
+  }
+
+
+  public static usesV3Variables(proto: Object): boolean {
+    return (proto && typeof proto == "object" && proto[ObserveV3.V3_DECO_META]);
   }
 } // class ObserveV3
 
@@ -797,7 +795,7 @@ const trackInternal = (target: any, propertyKey: string) => {
       // If the object has not been observed, you can directly assign a value to it. This improves performance.
       if (val !== this[storeProp]) {
         this[storeProp] = val
-      if (this[ObserveV3.SYMBOL_REFS]) { // This condition can improve performance.
+        if (this[ObserveV3.SYMBOL_REFS]) { // This condition can improve performance.
           ObserveV3.getObserve().fireChange(this, propertyKey)
         }
       }
@@ -806,7 +804,7 @@ const trackInternal = (target: any, propertyKey: string) => {
   })
   // this marks the proto as having at least one @track property inside 
   // used by IsObservedObjectV3
-  target[ObserveV3.V3_DECO_META]??={};
+  target[ObserveV3.V3_DECO_META] ??= {};
 } // track
 
 
@@ -826,8 +824,8 @@ function ObservedV2<T extends ConstructorV3>(BaseClass: T) : ConstructorV3 {
   ConfigureStateMgmt.instance.usingV2ObservedTrack(`@observed`, BaseClass?.name);
 
   // prevent @Track inside @observed class
-  if (BaseClass.prototype && Reflect.has(BaseClass.prototype,  TrackedObject.___IS_TRACKED_OPTIMISED)) {
-    const error=`'@observed class ${BaseClass?.name}': invalid use of V2 @Track decorator inside V3 @observed class. Need to fix class definition to use @track.`
+  if (BaseClass.prototype && Reflect.has(BaseClass.prototype, TrackedObject.___IS_TRACKED_OPTIMISED)) {
+    const error = `'@observed class ${BaseClass?.name}': invalid use of V2 @Track decorator inside V3 @observed class. Need to fix class definition to use @track.`
     stateMgmtConsole.applicationError(error);
     throw new Error(error);
   }

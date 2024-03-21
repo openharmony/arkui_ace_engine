@@ -26,68 +26,137 @@
  * @from 12
  *
  */
+
 /*
 const state = (target: Object, propertyKey: string) => {
-    ObserveV3.addVariableDecoMeta(target, propertyKey, "@state");
-    return trackInternal(target, propertyKey);
-  }
-  */
-  
+  ObserveV3.addVariableDecoMeta(target, propertyKey, "@state");
+  return trackInternal(target, propertyKey);
+}
+*/
+
+/**
+ * @param class property decorator 
+ * 
+ * local init optional - transpiler needs to support
+ * init from parent is mandatory when no local init, otherwise optional - transpiler needs to support
+ * update from parent if init from parent, unless @once is used 
+ * new value assignment not allowed = has no setter. For update from parent @Component, 
+ *               transpiler calls ViewPU.updateParam(paramName).
+ * 
+ * @param target  ViewPU class prototype object
+ * @param propertyKey  class property name
+ * 
+ * turns given property into getter and setter functions
+ * adds property target[storeProp] as the backing store
+ *
+ * part of SDK
+ * @from 12
+ *
+ */
+const param = (proto: Object, propertyKey: string) => {
+  stateMgmtConsole.debug(`@param ${propertyKey}`)
+  ObserveV3.addParamVariableDecoMeta(proto, propertyKey, "@param", undefined);
+
+  let storeProp = ObserveV3.OB_PREFIX + propertyKey;
+  proto[storeProp] = proto[propertyKey];
+  Reflect.defineProperty(proto, propertyKey, {
+    get() {
+      ObserveV3.getObserve().addRef(this, propertyKey)
+      return ObserveV3.autoProxyObject(this, ObserveV3.OB_PREFIX + propertyKey)
+    },
+    set(_) {
+      stateMgmtConsole.applicationError(`@param ${propertyKey.toString()}: can not assign a new value, application error.`)
+      return;
+    },
+    // @param can not be assigned, no setter
+    enumerable: true
+  })
+} // param
+
+/**
+ * @once component variable decorator 
+ * must use like this @param @once varName
+ * prevents @param variable updates from parent component
+ * @param proto
+ * @param propertyKey
+ */
+const once = (proto: Object, propertyKey: string) => {
+  stateMgmtConsole.debug(`@once ${propertyKey}`);
+  ObserveV3.addParamVariableDecoMeta(proto, propertyKey, undefined, "@once");
+}
+
+/**
+ * Helper class for handling V3 decorated variables
+ */
+class VariableUtilV3 {
   /**
-   * @param class property decorator 
-   * 
-   * local init optional - transpiler needs to support
-   * init and update form parent is mandatory when no local init, otherwise optional - transpiler needs to support
-   * new value assignment not allowed = has no setter. For update from parent @Component, 
-   *               transpiler calls ViewPU.updateParam(paramName).
-   * 
-   * @param target  ViewPU class prototype object
-   * @param propertyKey  class property name
-   * 
-   * turns given property into getter and setter functions
-   * adds property target[storeProp] as the backing store
-   *
-   * part of SDK
-   * @from 12
-   *
-   */
-  /*
-  const param = (target : Object, propertyKey : string) => {
-    ObserveV3.addVariableDecoMeta(target, propertyKey, "@param");
-  
-    let storeProp = ObserveV3.OB_PREFIX + propertyKey
-    target[storeProp] = target[propertyKey]
-    Reflect.defineProperty(target, propertyKey, {
-      get() {
-        ObserveV3.getObserve().addRef(this, propertyKey)
-        return ObserveV3.autoProxyObject(this, ObserveV3.OB_PREFIX + propertyKey)
-      },
-      set(_) {
-        stateMgmtConsole.applicationError(`@param ${propertyKey.toString()}: can not assign a new value, application error.`)
-        return;
-      },
-      // @param can not be assigned, no setter
-      enumerable: true
-    })
-  } // param
-  */
-  
-  /**
-   * @event @Component/ViewPU variable decorator
-   * 
-   * @param target 
-   * @param propertyKey 
-   */
-  
-  /*
-  const event = (target, propertyKey) => {
-    ObserveV3.addVariableDecoMeta(target, propertyKey, "@event");
-    target[propertyKey] = () => {};
+     * setReadOnlyAttr - helper function used to update @param
+     * from parent @Component. Not allowed for @param @once .
+     * @param target  - the object, usually the ViewPU
+     * @param attrName - @param variable name
+     * @param newValue - update to new value
+     */
+  public static initParam<Z>(target: object, attrName: string, newValue: Z): void {
+    const meta = target[ObserveV3.V3_DECO_META]?.[attrName];
+    if (!meta || meta["deco"] != '@param') {
+      const error = `Use initParam(${attrName}) only to init @param. Internal error!`;
+      stateMgmtConsole.error(error);
+      throw new Error(error);
+    }
+    // prevent update for @param @once
+    const storeProp = ObserveV3.OB_PREFIX + attrName;
+    stateMgmtConsole.propertyAccess(`initParam '@param ${attrName}' - setting backing store`);
+    target[storeProp] = newValue;
   }
-  */
+
+    /**
+     * setReadOnlyAttr - helper function used to update @param
+     * from parent @Component. Not allowed for @param @once .
+     * @param target  - the object, usually the ViewPU
+     * @param attrName - @param variable name
+     * @param newValue - update to new value
+     */
+  public static updateParam<Z>(target: object, attrName: string, newValue: Z): void {
+    // prevent update for @param @once
+    const meta = target[ObserveV3.V3_DECO_META]?.[attrName];
+    if (!meta || meta["deco"] != '@param') {
+      const error = `Use updateParm(${attrName}) only to update @param. Internal error!`;
+      stateMgmtConsole.error(error);
+      throw new Error(error);
+    }
+
+    const storeProp = ObserveV3.OB_PREFIX + attrName;
+    // @observed class and @track attrName
+    if (newValue === target[storeProp]) {
+      stateMgmtConsole.propertyAccess(`updateParm '@param ${attrName}' unchanged. Doing nothing.`);
+      return;
+    }
+    if (meta["deco2"] == "@once") {
+      // @param @once - init but no update
+      stateMgmtConsole.log(`updateParm: '@param @once ${attrName}' - Skip updating.`);
+    } else {
+      stateMgmtConsole.propertyAccess(`updateParm '@param ${attrName}' - updating backing store and fireChange.`);
+      target[storeProp] = newValue;
+      ObserveV3.getObserve().fireChange(target, attrName)
+    }
+  }
+}
+
+/**
+ * @event @Component/ViewPU variable decorator
+ * 
+ * @param target 
+ * @param propertyKey 
+ */
+
+const event = (target, propertyKey) => {
+  ObserveV3.addVariableDecoMeta(target, propertyKey, "@event");
+  target[propertyKey] = () => { };
+}
+
 
 class ProvideConsumeUtilV3 {
-  private static readonly ALIAS_PREFIX='___pc_alias_';
+  private static readonly ALIAS_PREFIX = '___pc_alias_';
 
   /**
    * Helper function to add meta data about @provide and @comnsume decorators to ViewPU
@@ -117,14 +186,14 @@ class ProvideConsumeUtilV3 {
     );
   }
 
-  public static setupConsumeVarsV3(view : ViewPU) : boolean {
+  public static setupConsumeVarsV3(view: ViewPU): boolean {
     const meta = view && view[ObserveV3.V3_DECO_META];
     if (!meta) {
       return;
     }
-  
+
     for (const [key, value] of Object.entries(meta)) {
-      if (value["deco"]=="@consume" && value["varName"]) {
+      if (value["deco"] == "@consume" && value["varName"]) {
         const prefixedAliasName = key;
         let result = ProvideConsumeUtilV3.findProvide(view, prefixedAliasName);
         if (result && result[0] && result[1]) {
@@ -162,7 +231,7 @@ class ProvideConsumeUtilV3 {
     return undefined;
   }
 
-  private static connectConsume2Provide(consumeView : ViewPU, consumeVarName : string, provideView : ViewPU, provideVarName: string) {
+  private static connectConsume2Provide(consumeView: ViewPU, consumeVarName: string, provideView: ViewPU, provideVarName: string) {
     stateMgmtConsole.debug(`connectConsume2PRovide: Connect ${consumeView.debugInfo__()} '@consume ${consumeVarName}' to ${provideView.debugInfo__()} '@provide ${provideVarName}'`);
 
     // weakref provideView ?
@@ -173,9 +242,9 @@ class ProvideConsumeUtilV3 {
       get() {
         stateMgmtConsole.propertyAccess(`@consume ${consumeVarName} get`)
         ObserveV3.getObserve().addRef(this, consumeVarName);
-        const view=weakView.deref();
+        const view = weakView.deref();
         if (!view) {
-          const error=`${this.debugInfo__()}: get() on @consume ${consumeVarName}: providing @ComponentV2 ${provideViewName} no longer exists. Application error.` 
+          const error = `${this.debugInfo__()}: get() on @consume ${consumeVarName}: providing @ComponentV2 ${provideViewName} no longer exists. Application error.`
           stateMgmtConsole.error(error);
           throw new Error(error);
         }
@@ -184,9 +253,9 @@ class ProvideConsumeUtilV3 {
       set(val) {
         // If the object has not been observed, you can directly assign a value to it. This improves performance.
         stateMgmtConsole.propertyAccess(`@consume ${consumeVarName} set`)
-        const view=weakView.deref();
+        const view = weakView.deref();
         if (!view) {
-          const error=`${this.debugInfo__()}: set() on @consume ${consumeVarName}: providing @ComponentV2 ${provideViewName} no longer exists. Application error.` 
+          const error = `${this.debugInfo__()}: set() on @consume ${consumeVarName}: providing @ComponentV2 ${provideViewName} no longer exists. Application error.`
           stateMgmtConsole.error(error);
           throw new Error(error);
         }
@@ -194,7 +263,7 @@ class ProvideConsumeUtilV3 {
         if (val !== view[provideVarName]) {
           stateMgmtConsole.propertyAccess(`@consume ${consumeVarName} valueChanged`);
           view[provideVarName] = val;
-        if (this[ObserveV3.SYMBOL_REFS]) { // This condition can improve performance.
+          if (this[ObserveV3.SYMBOL_REFS]) { // This condition can improve performance.
             ObserveV3.getObserve().fireChange(this, consumeVarName);
           }
         }
@@ -202,8 +271,8 @@ class ProvideConsumeUtilV3 {
       enumerable: true
     })
   }
-  
-  private static defineConsumeWithoutProvide(consumeView : ViewPU, consumeVarName : string) {
+
+  private static defineConsumeWithoutProvide(consumeView: ViewPU, consumeVarName: string) {
     stateMgmtConsole.debug(`defineConsumeWithoutProvide: ${consumeView.debugInfo__()} @consume ${consumeVarName} does not have @provide counter part, uses local init value`);
 
     const storeProp = ObserveV3.OB_PREFIX + consumeVarName;
@@ -216,7 +285,7 @@ class ProvideConsumeUtilV3 {
       set(val) {
         if (val !== this[storeProp]) {
           this[storeProp] = val
-        if (this[ObserveV3.SYMBOL_REFS]) { // This condition can improve performance.
+          if (this[ObserveV3.SYMBOL_REFS]) { // This condition can improve performance.
             ObserveV3.getObserve().fireChange(this, consumeVarName)
           }
         }
@@ -240,14 +309,14 @@ const provide = (aliasName?: string) => {
   }
 } // @provide
 
-const consume = (aliasName?: string ) => {
+const consume = (aliasName?: string) => {
   return (target: ViewPU, varName: string) => {
     const searchForProvideWithName: string = aliasName || varName;
 
     // redefining the property happens when ViewPU gets constructed
     // and @Consume gets connected to @provide counterpart
     ProvideConsumeUtilV3.addProvideConsumeVariableDecoMeta(target, varName, searchForProvideWithName, "@consume");
-}
+  }
 }
 
 
