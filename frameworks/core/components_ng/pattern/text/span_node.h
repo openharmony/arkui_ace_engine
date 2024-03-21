@@ -193,6 +193,7 @@ public:
     virtual void StartDrag(int32_t start, int32_t end);
     virtual void EndDrag();
     virtual bool IsDragging();
+    TextStyle InheritParentProperties(const RefPtr<FrameNode>& frameNode);
     RefPtr<SpanItem> GetSameStyleSpanItem() const;
     std::optional<std::pair<int32_t, int32_t>> GetIntersectionInterval(std::pair<int32_t, int32_t> interval) const;
     std::optional<TextStyle> GetTextStyle() const

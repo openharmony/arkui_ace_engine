@@ -627,7 +627,6 @@ private:
 
     bool IsLineBreakOrEndOfParagraph(int32_t pos) const;
     void ToJsonValue(std::unique_ptr<JsonValue>& json) const override;
-    void InheritParentProperties(const RefPtr<SpanItem>& spanItem);
     // to check if drag is in progress
 
     void AddUdmfTxtPreProcessor(const ResultObject src, ResultObject& result, bool isAppend);
