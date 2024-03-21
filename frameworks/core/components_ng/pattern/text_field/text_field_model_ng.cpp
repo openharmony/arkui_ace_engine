@@ -719,6 +719,8 @@ void TextFieldModelNG::SetCanacelIconSrc(
     const std::string& iconSrc, const std::string& bundleName, const std::string& moduleName)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(TextFieldLayoutProperty, IconSrc, iconSrc);
+    ACE_UPDATE_LAYOUT_PROPERTY(TextFieldLayoutProperty, BundleName, bundleName);
+    ACE_UPDATE_LAYOUT_PROPERTY(TextFieldLayoutProperty, ModuleName, moduleName);
 }
 
 void TextFieldModelNG::SetCancelIconColor(const Color& iconColor)
