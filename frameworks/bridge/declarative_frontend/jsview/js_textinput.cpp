@@ -75,6 +75,7 @@ void JSTextInput::JSBind(BindingTarget globalObj)
     JSClass<JSTextInput>::StaticMethod("showError", &JSTextField::SetShowError);
     JSClass<JSTextInput>::StaticMethod("barState", &JSTextField::SetBarState);
     JSClass<JSTextInput>::StaticMethod("maxLines", &JSTextField::SetMaxLines);
+    JSClass<JSTextInput>::StaticMethod("wordBreak", &JSTextField::SetWordBreak);
     // API7 onEditChanged deprecated
     JSClass<JSTextInput>::StaticMethod("onEditChanged", &JSTextField::SetOnEditChanged);
     JSClass<JSTextInput>::StaticMethod("onEditChange", &JSTextField::SetOnEditChanged);

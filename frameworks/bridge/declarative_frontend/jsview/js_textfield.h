@@ -85,6 +85,7 @@ public:
     static void SetShowError(const JSCallbackInfo& info);
     static void SetBarState(const JSCallbackInfo& info);
     static void SetMaxLines(const JSCallbackInfo& info);
+    static void SetWordBreak(const JSCallbackInfo& info);
 
     static void SetShowUnderline(const JSCallbackInfo& info);
     static void SetUnderlineColor(const JSCallbackInfo& info);

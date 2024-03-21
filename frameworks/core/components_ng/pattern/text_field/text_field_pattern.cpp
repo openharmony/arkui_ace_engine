@@ -5935,6 +5935,8 @@ void TextFieldPattern::DumpInfo()
                                            .append(", Attached: ")
                                            .append(std::to_string(isCustomKeyboardAttached_)));
     }
+    DumpLog::GetInstance().AddDesc(std::string("wordBreak:")
+        .append(V2::ConvertWrapWordBreakToString(layoutProperty->GetWordBreak().value_or(WordBreak::BREAK_WORD))));
 }
 
 void TextFieldPattern::DumpAdvanceInfo()

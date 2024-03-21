@@ -28,6 +28,7 @@
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/text/text_layout_adapter.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
+#include "core/components_ng/pattern/text/text_styles.h"
 #include "core/components_ng/pattern/text_field/text_field_content_modifier.h"
 #include "core/components_ng/pattern/text_field/text_field_layout_property.h"
 #include "core/components_ng/pattern/text_field/text_field_pattern.h"
@@ -64,6 +65,10 @@ void TextFieldLayoutAlgorithm::ConstructTextStyles(
             textStyle.SetTextOverflow(TextOverflow::ELLIPSIS);
         } else {
             textStyle.SetTextOverflow(TextOverflow::CLIP);
+        }
+
+        if (pattern->IsTextArea() || isInlineStyle) {
+            textStyle.SetWordBreak(textFieldLayoutProperty->GetWordBreak().value_or(WordBreak::BREAK_WORD));
         }
     } else {
         UpdatePlaceholderTextStyle(
