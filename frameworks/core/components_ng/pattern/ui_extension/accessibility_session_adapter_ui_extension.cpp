@@ -15,6 +15,8 @@
 
 #include "core/components_ng/pattern/ui_extension/accessibility_session_adapter_ui_extension.h"
 
+#include <inttypes.h>
+#include "base/log/log.h"
 #include "core/accessibility/accessibility_constants.h"
 #include "core/components_ng/pattern/ui_extension/session_wrapper.h"
 #include "core/event/ace_events.h"
@@ -25,7 +27,7 @@ void AccessibilitySessionAdapterUIExtension::TransferHoverEvent(const PointF &po
 {
     auto sessionWrapper = sessionWrapper_.Upgrade();
     CHECK_NULL_VOID(sessionWrapper);
-    int64_t timeMs = std::chrono::time_point_cast<std::chrono::microseconds>(time).time_since_epoch().count();
+    int64_t timeMs = std::chrono::time_point_cast<std::chrono::milliseconds>(time).time_since_epoch().count();
     TAG_LOGI(AceLogTag::ACE_ACCESSIBILITY, "TransferHoverEvent point:%{public}s, sourceType:%{public}d, "
         "eventType:%{public}d, timeMs:%{public}" PRId64,
         point.ToString().c_str(), source, eventType, timeMs);
