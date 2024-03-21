@@ -21,7 +21,8 @@ namespace OHOS::Ace::NG {
 enum class AccessibilityHoverEventType {
     ENTER,
     MOVE,
-    EXIT
+    EXIT,
+    Count
 };
 
 } // namespace OHOS::Ace::NG

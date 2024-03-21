@@ -83,22 +83,14 @@ void AccessibilityManagerNG::HandleAccessibilityHoverEvent(const RefPtr<FrameNod
     int32_t sourceType, int32_t eventType, int64_t timeMs)
 {
     if (root == nullptr ||
-        !AceApplicationInfo::GetInstance().IsAccessibilityEnabled()) {
+        !AceApplicationInfo::GetInstance().IsAccessibilityEnabled() ||
+        eventType < 0 || eventType >= AccessibilityHoverEventType::Count) {
         return;
-    }
-    AccessibilityHoverEventType type = static_cast<AccessibilityHoverEventType>(eventType);
-    switch (type) {
-        case AccessibilityHoverEventType::ENTER:
-        case AccessibilityHoverEventType::MOVE:
-        case AccessibilityHoverEventType::EXIT:
-            break;
-        default:
-            return;
     }
     PointF point(pointX, pointY);
     TimeStamp time((std::chrono::milliseconds(timeMs)));
     HandleAccessibilityHoverEventInner(root, point, static_cast<SourceType>(sourceType),
-        type, time);
+        static_cast<AccessibilityHoverEventType>(eventType), time);
 }
 
 void AccessibilityManagerNG::HandleAccessibilityHoverEventInner(
