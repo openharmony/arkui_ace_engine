@@ -73,6 +73,11 @@ public:
     RefPtr<TextControllerBase> GetTextController() override;
     void SetClipEdge() override;
     void SetFontFeature(const FONT_FEATURES_MAP& value) override;
+    void SetMarqueeOptions(const std::optional<bool>& start, const std::optional<double>& step,
+        const std::optional<int32_t>& loop, const std::optional<int32_t>& delay,
+        const std::optional<MarqueeDirection>& direction) override;
+    void SetOnMarqueeStateChange(std::function<void(const int32_t)>&& func) override;
+
     static RefPtr<FrameNode> CreateFrameNode(int32_t nodeId, const std::string& content);
     static void InitText(FrameNode* frameNode, std::string& value);
     static void SetFontWeight(FrameNode* frameNode, Ace::FontWeight value);

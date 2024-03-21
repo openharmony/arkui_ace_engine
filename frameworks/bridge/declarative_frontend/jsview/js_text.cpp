@@ -893,6 +893,8 @@ void JSText::JSBind(BindingTarget globalObj)
     JSClass<JSText>::StaticMethod("clip", &JSText::JsClip);
     JSClass<JSText>::StaticMethod("fontFeature", &JSText::SetFontFeature);
     JSClass<JSText>::StaticMethod("foregroundColor", &JSText::SetForegroundColor);
+    JSClass<JSText>::StaticMethod("marqueeOptions", &JSText::SetMarqueeOptions);
+    JSClass<JSText>::StaticMethod("onMarqueeStateChange", &JSText::SetOnMarqueeStateChange);
     JSClass<JSText>::InheritAndBind<JSContainerBase>(globalObj);
 }
 
@@ -946,4 +948,83 @@ void JSText::ParseMenuParam(
         menuParam.onDisappear = std::move(onDisappear);
     }
 }
+
+void JSText::SetMarqueeOptions(const JSCallbackInfo& info) {
+    if (info.Length() < 1 || !info[0]->IsObject()) {
+        LOGE("SetMarqueeOptions param invalid");
+        return;
+    }
+
+    auto paramObject = JSRef<JSObject>::Cast(info[0]);
+    auto start = paramObject->GetProperty("start");
+    std::optional<bool> startOpt = start->IsBoolean() ? start->ToBoolean() : false;
+
+    auto getLoop = paramObject->GetProperty("loop");
+    std::optional<int32_t> loopOpt;
+    if (getLoop->IsNumber()) {
+        auto loopDouble = getLoop->ToNumber<double>();
+        int32_t loop = -1;
+        if (GreatNotEqual(loopDouble, 0.0)) {
+            loop = static_cast<int32_t>(loopDouble);
+            if (loop == std::numeric_limits<int32_t>::max() || loop < 0) {
+                loop = -1;
+            }
+        }
+        loopOpt = loop;
+    }
+
+    auto step = paramObject->GetProperty("step");
+    std::optional<double> stepOpt;
+    if (step->IsNumber()) {
+        auto stepDouble = step->ToNumber<double>();
+        if (GreatNotEqual(stepDouble, 0.0)) {
+            stepOpt = Dimension(stepDouble, DimensionUnit::VP).ConvertToPx();
+        }
+    }
+
+    auto delay = paramObject->GetProperty("delay");
+    std::optional<int32_t> delayOpt;
+    if (delay->IsNumber()) {
+       auto delayDouble = delay->ToNumber<double>();
+       int32_t delayValue = -1;
+        if (GreatNotEqual(delayDouble, 0.0)) {
+            delayValue = static_cast<int32_t>(delayDouble);
+            if (delayValue == std::numeric_limits<int32_t>::max() || delayValue < 0) {
+                delayValue = 0;
+            }
+        }
+        delayOpt = delayValue;
+    }
+
+    auto getFromStart = paramObject->GetProperty("fromStart");
+    bool fromStart = getFromStart->IsBoolean() ? getFromStart->ToBoolean() : true;
+    std::optional<MarqueeDirection> directionOpt;
+    if (fromStart) {
+        directionOpt = MarqueeDirection::LEFT;
+    } else {
+        directionOpt = MarqueeDirection::RIGHT;
+    }
+
+    TextModel::GetInstance()->SetMarqueeOptions(startOpt, stepOpt, loopOpt, delayOpt, directionOpt);
+}
+
+void JSText::SetOnMarqueeStateChange(const JSCallbackInfo& info) {
+    if (!info[0]->IsFunction()) {
+        return;
+    }
+
+    auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(info[0]));
+    WeakPtr<NG::FrameNode> targetNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    auto onMarqueeStateChange = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc), node = targetNode](
+                             const int32_t& value) {
+        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+        ACE_SCORING_EVENT("Text.onMarqueeStateChange");
+        PipelineContext::SetCallBackNode(node);
+        auto newJSVal = JSRef<JSVal>::Make(ToJSValue(value));
+        func->ExecuteJS(1, &newJSVal);
+    };
+
+    TextModel::GetInstance()->SetOnMarqueeStateChange(std::move(onMarqueeStateChange));
+}
+
 } // namespace OHOS::Ace::Framework

@@ -543,6 +543,41 @@ void TextModelNG::SetFontFeature(FrameNode* frameNode, const FONT_FEATURES_MAP& 
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextLayoutProperty, FontFeature, value, frameNode);
 }
 
+void TextModelNG::SetMarqueeOptions(const std::optional<bool>& start, const std::optional<double>& step,
+    const std::optional<int32_t>& loop, const std::optional<int32_t>& delay,
+    const std::optional<MarqueeDirection>& direction)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+
+    if (start.has_value()) {
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextLayoutProperty, TextMarqueeStart, start.value(), frameNode);
+    } 
+    
+    if (step.has_value()) {
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextLayoutProperty, TextMarqueeStep, step.value(), frameNode);
+    } 
+
+    if (loop.has_value()) {
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextLayoutProperty, TextMarqueeLoop, loop.value(), frameNode);
+    } 
+
+    if (direction.has_value()) {
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextLayoutProperty, TextMarqueeDirection, direction.value(), frameNode);
+    } 
+
+     if (delay.has_value()) {
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextLayoutProperty, TextMarqueeDelay, delay.value(), frameNode);
+    } 
+}
+
+void TextModelNG::SetOnMarqueeStateChange(std::function<void(const int32_t)>&& func)
+{
+    auto eventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<TextEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnMarqueeStateChange(std::move(func));
+}
+
 std::string TextModelNG::GetContent(FrameNode* frameNode)
 {
     CHECK_NULL_RETURN(frameNode, "");
