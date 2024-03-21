@@ -707,6 +707,7 @@ private:
     bool isFirstFlingScrollVelocity_ = true;
     bool isNeedUpdateScrollAxis_ = true;
     bool isNeedUpdateFilterScrolAxis_ = true;
+    bool isScrollStarted_ = false;
     WebLayoutMode layoutMode_ = WebLayoutMode::NONE;
     bool scrollState_ = false;
     Axis axis_ = Axis::FREE;

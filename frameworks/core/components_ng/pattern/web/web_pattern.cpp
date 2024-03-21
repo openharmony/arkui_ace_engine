@@ -2905,6 +2905,7 @@ void WebPattern::OnScrollStartRecursive(std::vector<float> positions)
     isFirstFlingScrollVelocity_ = true;
     isNeedUpdateScrollAxis_ = true;
     isNeedUpdateFilterScrolAxis_ = true;
+    isScrollStarted_ = true;
 }
 
 void WebPattern::OnAttachToBuilderNode(NodeStatus nodeStatus)
@@ -2919,12 +2920,14 @@ void WebPattern::OnAttachToBuilderNode(NodeStatus nodeStatus)
 void WebPattern::OnScrollEndRecursive(const std::optional<float>& velocity)
 {
     TAG_LOGI(AceLogTag::ACE_WEB, "WebPattern::OnScrollEndRecursive");
+    CHECK_EQUAL_VOID(isScrollStarted_, false);
     for (auto parentMap : parentsMap_) {
         auto parent = parentMap.second.Upgrade();
         if (parent) {
             parent->OnScrollEndRecursive(std::nullopt);
         }
     }
+    isScrollStarted_ = false;
 }
 
 void WebPattern::OnOverScrollFlingVelocity(float xVelocity, float yVelocity, bool isFling)
@@ -2966,7 +2969,7 @@ void WebPattern::OnOverScrollFlingVelocityHandler(float velocity, bool isFling)
                 remain = -velocity;
             }
             if (!NearZero(remain)) {
-                HandleScroll(remain, SCROLL_FROM_UPDATE, NestedState::CHILD_OVER_SCROLL);
+                HandleScroll(parent.Upgrade(), remain, SCROLL_FROM_UPDATE, NestedState::CHILD_OVER_SCROLL);
             }
         }
     } else {
