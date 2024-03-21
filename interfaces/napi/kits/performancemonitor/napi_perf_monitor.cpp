@@ -26,8 +26,8 @@ static constexpr uint32_t LAST_UP = 1;
 static constexpr uint32_t FIRST_MOVE = 2;
 static constexpr uint32_t PERF_TOUCH_EVENT = 0;
 static constexpr uint32_t PERF_MOUSE_EVENT = 1;
-static constexpr uint32_t PERF_TOUCH_PAD_EVENT = 2;
-static constexpr uint32_t PERF_JOY_STICK_EVENT = 3;
+static constexpr uint32_t PERF_TOUCHPAD_EVENT = 2;
+static constexpr uint32_t PERF_JOYSTICK_EVENT = 3;
 static constexpr uint32_t PERF_KEY_EVENT = 4;
 constexpr int FIRST_ARG_INDEX = 0;
 constexpr int SECOND_ARG_INDEX = 1;
@@ -227,10 +227,10 @@ static napi_value PerfMonitorInit(napi_env env, napi_value exports)
     napi_set_named_property(env, sourceType, "PERF_TOUCH_EVENT", prop);
     napi_create_uint32(env, PERF_MOUSE_EVENT, &prop);
     napi_set_named_property(env, sourceType, "PERF_MOUSE_EVENT", prop);
-    napi_create_uint32(env, PERF_TOUCH_PAD_EVENT, &prop);
-    napi_set_named_property(env, sourceType, "PERF_TOUCH_PAD_EVENT", prop);
-    napi_create_uint32(env, PERF_JOY_STICK_EVENT, &prop);
-    napi_set_named_property(env, sourceType, "PERF_JOY_STICK_EVENT", prop);
+    napi_create_uint32(env, PERF_TOUCHPAD_EVENT, &prop);
+    napi_set_named_property(env, sourceType, "PERF_TOUCHPAD_EVENT", prop);
+    napi_create_uint32(env, PERF_JOYSTICK_EVENT, &prop);
+    napi_set_named_property(env, sourceType, "PERF_JOYSTICK_EVENT", prop);
     napi_create_uint32(env, PERF_KEY_EVENT, &prop);
     napi_set_named_property(env, sourceType, "PERF_KEY_EVENT", prop);
 
