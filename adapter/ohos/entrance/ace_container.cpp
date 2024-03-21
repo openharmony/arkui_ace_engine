@@ -2480,6 +2480,7 @@ void AceContainer::HandleAccessibilityHoverEvent(float pointX, float pointY, int
         [weak = WeakClaim(this), pointX, pointY, sourceType, eventType, timeMs] {
             auto container = weak.Upgrade();
             CHECK_NULL_VOID(container);
+            ContainerScope scope(container->GetInstanceId());
             auto pipelineContext = container->GetPipelineContext();
             auto ngPipeline = AceType::DynamicCast<NG::PipelineContext>(pipelineContext);
             CHECK_NULL_VOID(ngPipeline);
