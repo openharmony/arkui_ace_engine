@@ -60,6 +60,8 @@ private:
 
     float GetShadowOffset(const std::list<RefPtr<SpanItem>>& group);
 
+    void UpdateRichTextRect(const SizeF& res, const float& textHeight, LayoutWrapper* layoutWrapper);
+
     void SetPlaceholder(LayoutWrapper* layoutWrapper);
 
     std::string SpansToString()
