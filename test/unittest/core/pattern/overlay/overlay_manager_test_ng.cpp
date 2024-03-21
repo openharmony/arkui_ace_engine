@@ -151,6 +151,7 @@ void OverlayManagerTestNg::SetUpTestCase()
 }
 void OverlayManagerTestNg::TearDownTestCase()
 {
+    MockPipelineContext::GetCurrent()->themeManager_ = nullptr;
     MockPipelineContext::TearDown();
 }
 
