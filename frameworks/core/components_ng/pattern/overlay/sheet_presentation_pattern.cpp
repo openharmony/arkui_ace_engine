@@ -1383,7 +1383,7 @@ float SheetPresentationPattern::GetFitContentHeight()
     auto builderNode = DynamicCast<FrameNode>(scrollNode->GetChildAtIndex(0));
     CHECK_NULL_RETURN(builderNode, 0.0f);
     auto builderGeometryNode = builderNode->GetGeometryNode();
-    return builderGeometryNode->GetFrameSize().Height() + titleGeometryNode->GetFrameSize().Height();
+    return builderGeometryNode->GetMarginFrameSize().Height() + titleGeometryNode->GetFrameSize().Height();
 }
 void SheetPresentationPattern::ProcessColumnRect(float height)
 {
