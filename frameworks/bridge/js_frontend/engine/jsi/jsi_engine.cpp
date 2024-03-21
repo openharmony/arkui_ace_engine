@@ -3207,8 +3207,7 @@ void JsiEngine::RegisterOffWorkerFunc()
 void JsiEngine::RegisterAssetFunc()
 {
     auto weakDelegate = WeakPtr(engineInstance_->GetDelegate());
-    auto && assetFunc = [weakDelegate](const std::string& uri, uint8_t** buff, size_t* buffSize, std::string& ami,
-        bool& useSecureMem, bool isRestricted) {
+    auto&& assetFunc = [weakDelegate](const std::string& uri, std::vector<uint8_t>& content, std::string& ami) {
         LOGI("WorkerCore RegisterAssetFunc called");
         auto delegate = weakDelegate.Upgrade();
         if (delegate == nullptr) {
@@ -3219,11 +3218,7 @@ void JsiEngine::RegisterAssetFunc()
         if (index == std::string::npos) {
             LOGE("invalid uri");
         } else {
-            std::vector<uint8_t> content;
             delegate->GetResourceData(uri.substr(0, index) + ".abc", content, ami);
-            *buff = content.data();
-            *buffSize = content.size();
-            useSecureMem = false;
         }
     };
     nativeEngine_->SetGetAssetFunc(assetFunc);
