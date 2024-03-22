@@ -35,6 +35,8 @@
 #include "core/components_ng/pattern/scroll/scroll_model_ng.h"
 #include "core/components_ng/pattern/shape/circle_model_ng.h"
 #include "core/components_ng/pattern/stack/stack_model_ng.h"
+#include "core/components_ng/pattern/tabs/tab_content_model_ng.h"
+#include "core/components_ng/pattern/tabs/tabs_model_ng.h"
 #include "core/components_ng/pattern/text_field/text_field_model_ng.h"
 #include "core/components_ng/pattern/text/image_span_view.h"
 #include "core/components_ng/pattern/text/text_model_ng.h"
@@ -340,6 +342,13 @@ void* createGridNode(ArkUI_Int32 nodeId)
     return AceType::RawPtr(frameNode);
 }
 
+void* createTabsNode(ArkUI_Int32 nodeId)
+{
+    auto frameNode = TabsModelNG::CreateFrameNode(nodeId);
+    frameNode->IncRefCount();
+    return AceType::RawPtr(frameNode);
+}
+
 void* createGridItemNode(ArkUI_Int32 nodeId)
 {
     auto frameNode = GridItemModelNG::CreateFrameNode(nodeId);
@@ -410,6 +419,13 @@ void* createSelectNode(ArkUI_Int32 nodeId)
     return AceType::RawPtr(frameNode);
 }
 
+void* createTabContentNode(ArkUI_Int32 nodeId)
+{
+    auto frameNode = TabContentModelNG::CreateFrameNode(nodeId);
+    frameNode->IncRefCount();
+    return AceType::RawPtr(frameNode);
+}
+
 using createArkUIFrameNode = void*(ArkUI_Int32 nodeId);
 void* CreateNode(ArkUINodeType tag, ArkUI_Int32 nodeId)
 {
@@ -434,7 +450,7 @@ void* CreateNode(ArkUINodeType tag, ArkUI_Int32 nodeId)
         createRowNode,
         createFlexNode,
         createListItemNode,
-        nullptr, // Tabs
+        createTabsNode,
         nullptr, // Navigator
         nullptr, // Web
         createSliderNode,
@@ -469,6 +485,7 @@ void* CreateNode(ArkUINodeType tag, ArkUI_Int32 nodeId)
         createSelectNode,
         createImageAnimatorNode,
         createCircleNode,
+        createTabContentNode,
     };
     if (tag >= sizeof(createArkUIFrameNodes) / sizeof(createArkUIFrameNode*)) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "fail to create %{public}d type of node", tag);

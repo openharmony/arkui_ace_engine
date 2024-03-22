@@ -22,7 +22,6 @@
 #include "base/utils/macros.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components/common/properties/decoration.h"
-#include "core/components_ng/pattern/swiper/swiper_event_hub.h"
 #include "core/components_ng/pattern/swiper/swiper_layout_property.h"
 #include "core/components_ng/pattern/tabs/tab_bar_layout_property.h"
 #include "core/components_ng/pattern/tabs/tab_bar_paint_property.h"
@@ -67,6 +66,7 @@ public:
     void SetOnContentWillChange(std::function<bool(int32_t, int32_t)>&& callback) override;
     static RefPtr<TabsNode> GetOrCreateTabsNode(
         const std::string& tag, int32_t nodeId, const std::function<RefPtr<Pattern>(void)>& patternCreator);
+    static RefPtr<FrameNode> CreateFrameNode(int32_t nodeId);
     static void SetWidthAuto(FrameNode* frameNode, bool isAuto);
     static void SetHeightAuto(FrameNode* frameNode, bool isAuto);
     static void SetTabBarMode(FrameNode* frameNode, TabBarMode tabBarMode);
@@ -87,6 +87,11 @@ public:
     static void SetClipEdge(FrameNode* frameNode, bool clipEdge);
 
 private:
+    static void InitTabsNode(RefPtr<TabsNode> tabsNode, const RefPtr<SwiperController>& swiperController);
+    static RefPtr<SwiperController> GetSwiperController(RefPtr<FrameNode> swiperNode,
+        const RefPtr<SwiperController>& swiperController);
+    static void InitSelectedMaskNode(RefPtr<FrameNode> maskNode);
+    static void InitUnselectedMaskNode(RefPtr<FrameNode> maskNode);
     static RefPtr<TabBarLayoutProperty> GetTabBarLayoutProperty();
     static RefPtr<TabBarPaintProperty> GetTabBarPaintProperty();
     static RefPtr<SwiperLayoutProperty> GetSwiperLayoutProperty();

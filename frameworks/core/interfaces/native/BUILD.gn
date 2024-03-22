@@ -112,6 +112,7 @@ template("ace_core_interfaces_native_node") {
       "node/side_bar_container_modifier.cpp",
       "node/stepper_item_modifier.cpp",
       "node/swiper_controller_modifier.cpp",
+      "node/tab_content_modifier.cpp",
       "node/tabs_modifier.cpp",
       "node/text_clock_modifier.cpp",
       "node/text_timer_modifier.cpp",
