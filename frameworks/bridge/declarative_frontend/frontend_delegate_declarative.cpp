@@ -947,6 +947,15 @@ void FrontendDelegateDeclarative::Back(const std::string& uri, const std::string
     BackWithTarget(PageTarget(uri), params);
 }
 
+bool FrontendDelegateDeclarative::CheckIndexValid(int32_t index) const
+{
+    if (index > static_cast<int32_t>(pageRouteStack_.size()) || index <= 0) {
+        LOGE("The index is less than or equal to zero or exceeds the maximum length of the page stack");
+        return false;
+    }
+    return true;
+}
+
 void FrontendDelegateDeclarative::BackToIndex(int32_t index, const std::string& params)
 {
     if (Container::IsCurrentUseNewPipeline()) {
@@ -958,8 +967,7 @@ void FrontendDelegateDeclarative::BackToIndex(int32_t index, const std::string& 
         OnMediaQueryUpdate();
         return;
     }
-    if (index > pageRouteStack_.size() || index <= 0) {
-        LOGE("The index is less than or equal to zero or exceeds the maximum length of the page stack");
+    if (!CheckIndexValid(index)) {
         return;
     }
     std::string url;
@@ -1050,8 +1058,7 @@ void FrontendDelegateDeclarative::GetRouterStateByIndex(int32_t& index, std::str
         pageRouterManager_->GetStateByIndex(index, name, path, params);
         return;
     }
-    if (index > pageRouteStack_.size() || index <= 0) {
-        LOGE("The index is less than or equal to zero or exceeds the maximum length of the page stack");
+    if (!CheckIndexValid(index)) {
         return;
     }
     std::string url;
@@ -1148,7 +1155,7 @@ int32_t FrontendDelegateDeclarative::GetIndexByUrl(const std::string& url)
         return pageRouterManager_->GetIndexByUrl(url);
     }
     std::lock_guard<std::mutex> lock(mutex_);
-    for (int32_t i = 0; i < pageRouteStack_.size(); ++ i) {
+    for (size_t i = 0; i < pageRouteStack_.size(); ++i) {
         if (pageRouteStack_[i].url == url) {
             return i;
         }
@@ -1731,16 +1738,16 @@ void FrontendDelegateDeclarative::OpenCustomDialog(const PromptDialogAttr &dialo
         .isModal = dialogAttr.isModal,
         .isSysBlurStyle = false,
         .customBuilder = dialogAttr.customBuilder,
-        .maskRect = dialogAttr.maskRect,
         .onWillDismiss = dialogAttr.customOnWillDismiss,
+        .backgroundColor = dialogAttr.backgroundColor,
+        .borderRadius = dialogAttr.borderRadius,
         .borderWidth = dialogAttr.borderWidth,
         .borderColor = dialogAttr.borderColor,
         .borderStyle = dialogAttr.borderStyle,
-        .borderRadius = dialogAttr.borderRadius,
         .shadow = dialogAttr.shadow,
-        .backgroundColor = dialogAttr.backgroundColor,
         .width = dialogAttr.width,
         .height = dialogAttr.height,
+        .maskRect = dialogAttr.maskRect,
     };
 #if defined(PREVIEW)
     if (dialogProperties.isShowInSubWindow) {

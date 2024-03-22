@@ -74,8 +74,6 @@ template("ace_napi_lib") {
       ldflags += [ "--coverage" ]
     }
     if (use_hilog) {
-      include_dirs += [ "$ace_root/frameworks" ]
-      sources += [ "$ace_root/adapter/ohos/osal/log_wrapper.cpp" ]
       external_deps = [ "hilog:libhilog" ]
     }
     relative_install_dir = "module" + install_dir

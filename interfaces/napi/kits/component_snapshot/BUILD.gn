@@ -23,7 +23,6 @@ template("napi_componentsnapshot_static") {
     configs = [ "$ace_root/interfaces/napi/kits:ace_napi_config" ]
 
     sources = [ "js_component_snapshot.cpp" ]
-
     deps = [ "../utils:napi_utils_static_${platform}" ]
     external_deps = []
     if (defined(config.libace_target)) {

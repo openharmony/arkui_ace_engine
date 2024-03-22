@@ -26,7 +26,6 @@ template("napi_prompt_static") {
       "../promptaction/js_prompt_action.cpp",
       "../promptaction/prompt_action.cpp",
     ]
-
     deps = []
     external_deps = []
     if (platform != "" && is_arkui_x) {

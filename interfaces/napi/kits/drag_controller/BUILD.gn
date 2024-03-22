@@ -29,7 +29,6 @@ template("napi_dragcontroller_static") {
     ]
 
     sources = [ "js_drag_controller.cpp" ]
-
     deps = [ "../utils:napi_utils_static_${platform}" ]
     external_deps = []
     if (defined(config.libace_target)) {

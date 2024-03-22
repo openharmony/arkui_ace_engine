@@ -23,7 +23,6 @@ template("napi_device_static") {
     configs = [ "$ace_root/interfaces/napi/kits:ace_napi_config" ]
 
     sources = [ "js_device.cpp" ]
-
     deps = []
     external_deps = []
     if (platform != "" && is_arkui_x) {

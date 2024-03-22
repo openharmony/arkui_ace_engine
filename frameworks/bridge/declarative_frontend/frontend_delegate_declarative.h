@@ -419,6 +419,7 @@ private:
     bool IsNavigationStage(const PageTarget& target);
     void RecycleSinglePage();
     void ClearAlertCallback(PageInfo pageInfo);
+    bool CheckIndexValid(int32_t index) const;
 
     std::atomic<uint64_t> pageIdPool_ = 0;
     int32_t callbackCnt_ = 0;

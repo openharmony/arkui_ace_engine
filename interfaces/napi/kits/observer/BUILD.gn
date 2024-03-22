@@ -27,7 +27,6 @@ template("napi_observer_static") {
       "ui_observer.cpp",
       "ui_observer_listener.cpp",
     ]
-
     deps = []
     external_deps = []
     if (platform != "" && is_arkui_x) {
