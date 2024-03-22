@@ -50,6 +50,16 @@ public:
     void HoverTestDebug(const RefPtr<FrameNode>& root, const PointF& point,
         std::string& summary, std::string& detail) const;
 
+    /*
+    * Convert coordinates of point relative to ancestor (x_ances, y_ances) to
+    * coordinates of point relative to node (x_node, y_node)
+    * { return } true if succeeded, and the new point is saved in ${pointNode}
+    *            false if nullptr or ${ancestor} is not ancestor of ${node}
+    */
+    static bool ConvertPointFromAncestorToNode(
+        const RefPtr<NG::FrameNode>& ancestor, const RefPtr<NG::FrameNode>& node,
+        const PointF& pointAncestor, PointF& pointNode);
+
 private:
     /*
     * Compute components which are hovered in accessibility mode.

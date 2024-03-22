@@ -599,16 +599,6 @@ public:
         return false;
     }
 
-    /*
-    * Convert coordinates of point relative to ancestor (x_ances, y_ances) to
-    * coordinates of point relative to node (x_node, y_node)
-    * { return } true if succeeded, and the new point is saved in ${pointNode}
-    *            false if nullptr or ${ancestor} is not ancestor of ${node}
-    */
-    static bool ConvertPointFromAncestorToNode(
-        const RefPtr<NG::FrameNode>& ancestor, const RefPtr<NG::FrameNode>& node,
-        const PointF& pointAncestor, PointF& pointNode);
-
 protected:
     RenderContext() = default;
     std::shared_ptr<SharedTransitionOption> sharedTransitionOption_;

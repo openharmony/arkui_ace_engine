@@ -183,7 +183,7 @@ void AccessibilityManagerNG::NotifyHoverEventToNodeSession(const RefPtr<FrameNod
     auto sessionAdapter = AccessibilitySessionAdapter::GetSessionAdapter(node);
     CHECK_NULL_VOID(sessionAdapter);
     PointF pointNode(pointRoot);
-    if (RenderContext::ConvertPointFromAncestorToNode(rootNode, node, pointRoot, pointNode)) {
+    if (AccessibilityManagerNG::ConvertPointFromAncestorToNode(rootNode, node, pointRoot, pointNode)) {
         sessionAdapter->TransferHoverEvent(pointNode, sourceType, eventType, time);
     }
 }
@@ -229,5 +229,28 @@ void AccessibilityManagerNG::HoverTestDebug(const RefPtr<FrameNode>& root, const
     std::stringstream detailFiltered;
     summary = summaryJson->ToString();
     detail = detailJson->ToString();
+}
+
+bool AccessibilityManagerNG::ConvertPointFromAncestorToNode(
+    const RefPtr<NG::FrameNode>& ancestor, const RefPtr<NG::FrameNode>& endNode,
+    const PointF& pointAncestor, PointF& pointNode)
+{
+    CHECK_NULL_RETURN(ancestor, false);
+    CHECK_NULL_RETURN(endNode, false);
+    std::vector<RefPtr<NG::FrameNode>> path;
+    RefPtr<NG::FrameNode> curr = endNode;
+    while (curr != nullptr && curr->GetId() != ancestor->GetId()) {
+        path.push_back(curr);
+        curr = curr->GetAncestorNodeOfFrame();
+    }
+    CHECK_NULL_RETURN(curr, false);
+    pointNode = pointAncestor;
+    for (const auto& node : path) {
+        auto renderContext = node->GetRenderContext();
+        renderContext->GetPointWithRevert(pointNode);
+        auto rect = renderContext->GetPaintRectWithoutTransform();
+        pointNode = pointNode - rect.GetOffset();
+    }
+    return true;
 }
 } // namespace OHOS::Ace::NG
