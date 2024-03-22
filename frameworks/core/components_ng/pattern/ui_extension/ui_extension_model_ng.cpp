@@ -165,8 +165,7 @@ void UIExtensionModelNG::SetOnResult(std::function<void(int32_t, const AAFwk::Wa
     pattern->SetOnResultCallback(std::move(onResult));
 }
 
-void UIExtensionModelNG::SetOnTerminated(
-    std::function<void(std::optional<int32_t>, const RefPtr<WantWrap>&)>&& onTerminated)
+void UIExtensionModelNG::SetOnTerminated(std::function<void(int32_t, const RefPtr<WantWrap>&)>&& onTerminated)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);

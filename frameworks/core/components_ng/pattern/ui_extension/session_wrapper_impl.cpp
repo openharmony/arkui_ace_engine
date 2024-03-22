@@ -438,7 +438,7 @@ void SessionWrapperImpl::OnDisconnect(bool isAbnormal)
                 pattern->FireOnErrorCallback(
                     ERROR_CODE_UIEXTENSION_EXITED_ABNORMALLY, EXIT_ABNORMALLY_NAME, EXIT_ABNORMALLY_MESSAGE);
             } else {
-                pattern->FireOnTerminatedCallback(std::nullopt, nullptr);
+                pattern->FireOnTerminatedCallback(0, nullptr);
             }
         },
         TaskExecutor::TaskType::UI);

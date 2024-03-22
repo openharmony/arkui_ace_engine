@@ -704,12 +704,12 @@ void UIExtensionPattern::FireOnResultCallback(int32_t code, const AAFwk::Want& w
 }
 
 void UIExtensionPattern::SetOnTerminatedCallback(
-    const std::function<void(std::optional<int32_t>, const RefPtr<WantWrap>& wantWrap)>&& callback)
+    const std::function<void(int32_t, const RefPtr<WantWrap>& wantWrap)>&& callback)
 {
     onTerminatedCallback_ = std::move(callback);
 }
 
-void UIExtensionPattern::FireOnTerminatedCallback(std::optional<int32_t> code, const RefPtr<WantWrap>& wantWrap)
+void UIExtensionPattern::FireOnTerminatedCallback(int32_t code, const RefPtr<WantWrap>& wantWrap)
 {
     UIEXT_LOGD("The state is changing from '%{public}s' to 'DESTRUCTION'.", ToString(state_));
     if (onTerminatedCallback_ && (state_ != AbilityState::DESTRUCTION)) {
