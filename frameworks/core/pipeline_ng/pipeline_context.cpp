@@ -1027,6 +1027,11 @@ const RefPtr<DragDropManager>& PipelineContext::GetDragDropManager()
     return dragDropManager_;
 }
 
+const RefPtr<FocusManager>& PipelineContext::GetFocusManager() const
+{
+    return focusManager_;
+}
+
 const RefPtr<SelectOverlayManager>& PipelineContext::GetSelectOverlayManager()
 {
     return selectOverlayManager_;
