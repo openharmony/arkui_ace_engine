@@ -1025,4 +1025,12 @@ void WebModelNG::SetTextAutosizing(bool isTextAutosizing)
     CHECK_NULL_VOID(webPattern);
     webPattern->UpdateTextAutosizing(isTextAutosizing);
 }
+
+void WebModelNG::SetNativeVideoPlayerConfig(bool enable, bool shouldOverlay)
+{
+    auto webPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPattern>();
+    CHECK_NULL_VOID(webPattern);
+
+    webPattern->UpdateNativeVideoPlayerConfig(std::make_tuple(enable, shouldOverlay));
+}
 } // namespace OHOS::Ace::NG
