@@ -69,6 +69,7 @@ public:
     void SetTextDecoration(Ace::TextDecoration value) override;
     void SetTextDecorationColor(const Color& value) override;
     void SetTextDecorationStyle(Ace::TextDecorationStyle value) override;
+    void UpdateInspectorId(const std::string& key) override;
     static void RequestKeyboardOnFocus(FrameNode* frameNode, bool needToRequest);
     static void SetPlaceholderFont(FrameNode* frameNode, const Font& font);
     static void SetSearchIconSize(FrameNode* frameNode, const Dimension& value);
