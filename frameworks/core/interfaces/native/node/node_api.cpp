@@ -38,8 +38,9 @@
 #include "core/interfaces/native/node/node_slider_modifier.h"
 #include "core/interfaces/native/node/node_swiper_modifier.h"
 #include "core/interfaces/native/node/view_model.h"
+#include "core/interfaces/native/node/util_modifier.h"
 #include "core/pipeline_ng/pipeline_context.h"
-#include "frameworks/core/common/container.h"
+#include "core/common/container.h"
 
 namespace OHOS::Ace::NG {
 
@@ -81,11 +82,12 @@ int CheckEvent(ArkUINodeEvent* event)
     return 0;
 }
 
-void (*g_fliter)(ArkUINodeEvent* event) = nullptr;
+static EventReceiver globalEventReceiver = nullptr;
+
 void SendArkUIAsyncEvent(ArkUINodeEvent* event)
 {
-    if (g_fliter) {
-        g_fliter(event);
+    if (globalEventReceiver) {
+        globalEventReceiver(event);
     } else {
         g_eventQueue.push_back(*event);
     }
@@ -108,6 +110,21 @@ ArkUINodeHandle CreateNode(ArkUINodeType type, int peerId, ArkUI_Int32 flags)
 void DisposeNode(ArkUINodeHandle node)
 {
     ViewModel::DisposeNode(node);
+}
+
+ArkUI_CharPtr GetName(ArkUINodeHandle node)
+{
+    return ViewModel::GetName(node);
+}
+
+static void DumpTree(ArkUINodeHandle node, int indent)
+{
+    TAG_LOGI(AceLogTag::ACE_NATIVE_NODE, "dumpTree %{public}p", node);
+}
+
+void DumpTreeNode(ArkUINodeHandle node)
+{
+    DumpTree(node, 0);
 }
 
 void AddChild(ArkUINodeHandle parent, ArkUINodeHandle child)
@@ -135,11 +152,27 @@ void InsertChildBefore(ArkUINodeHandle parent, ArkUINodeHandle child, ArkUINodeH
     ViewModel::InsertChildBefore(parent, child, sibling);
 }
 
+void SetAttribute(ArkUINodeHandle node, ArkUI_CharPtr attribute, ArkUI_CharPtr value)
+{
+    TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "%{public}p SetAttribute %{public}s, %{public}s", node, attribute, value);
+}
+
+ArkUI_CharPtr GetAttribute(ArkUINodeHandle node, ArkUI_CharPtr attribute)
+{
+    TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "%{public}p GetAttribute %{public}s", node, attribute);
+    return "";
+}
+
+void ResetAttribute(ArkUINodeHandle nodePtr, ArkUI_CharPtr attribute)
+{
+    TAG_LOGI(AceLogTag::ACE_NATIVE_NODE, "Reset attribute %{public}s", attribute);
+}
+
 typedef void (*ComponentAsyncEventHandler)(ArkUINodeHandle node, void* extraParam);
 
 /**
  * IMPORTANT!!!
- * the order of declaring the handler must be same as the ArkUIEventSubKind did
+ * the order of declaring the handler must be same as the in the ArkUIEventSubKind enum
  */
 /* clang-format off */
 const ComponentAsyncEventHandler commonNodeAsyncEventHandlers[] = {
@@ -265,7 +298,7 @@ void NotifyComponentAsyncEvent(ArkUINodeHandle node, ArkUIEventSubKind kind, Ark
             break;
         }
         case ARKUI_TEXT_INPUT: {
-            // textinput event type.
+            // text input event type.
             if (subKind >= sizeof(textInputNodeAsyncEventHandlers) / sizeof(ComponentAsyncEventHandler)) {
                 TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "NotifyComponentAsyncEvent kind:%{public}d NOT IMPLEMENT", kind);
                 return;
@@ -380,9 +413,14 @@ void NotifyResetComponentAsyncEvent(ArkUINodeHandle node, ArkUIEventSubKind subK
     // TODO
 }
 
-void RegisterNodeAsyncEventReceiver(void (*eventReceiver)(ArkUINodeEvent* event))
+void RegisterNodeAsyncEventReceiver(EventReceiver eventReceiver)
 {
-    NodeEvent::g_fliter = eventReceiver;
+    NodeEvent::globalEventReceiver = eventReceiver;
+}
+
+void UnregisterNodeAsyncEventReceiver()
+{
+    NodeEvent::globalEventReceiver = nullptr;
 }
 
 void ApplyModifierFinish(ArkUINodeHandle nodePtr)
@@ -527,22 +565,22 @@ const ArkUIBasicAPI* GetBasicAPI()
     static const ArkUIBasicAPI basicImpl = {
         CreateNode,
         DisposeNode,
-        nullptr,
-        nullptr,
+        GetName,
+        DumpTreeNode,
 
         AddChild,
         RemoveChild,
         InsertChildAfter,
         InsertChildBefore,
         InsertChildAt,
-        nullptr,
-        nullptr,
-        nullptr,
+        GetAttribute,
+        SetAttribute,
+        ResetAttribute,
 
         NotifyComponentAsyncEvent,
         NotifyResetComponentAsyncEvent,
         RegisterNodeAsyncEventReceiver,
-        nullptr,
+        UnregisterNodeAsyncEventReceiver,
 
         nullptr,
 
@@ -636,10 +674,10 @@ ArkUI_Int32 CloseDialog(ArkUIDialogHandle handle)
     return CustomDialog::CloseDialog(handle);
 }
 
-// 注册关闭事件
-ArkUI_Int32 RegiesterOnWillDialogDismiss(ArkUIDialogHandle handle, bool (*eventHandler)(ArkUI_Int32))
+// Register closing event
+ArkUI_Int32 RegisterOnWillDialogDismiss(ArkUIDialogHandle handle, bool (*eventHandler)(ArkUI_Int32))
 {
-    return CustomDialog::RegiesterOnWillDialogDismiss(handle, eventHandler);
+    return CustomDialog::RegisterOnWillDialogDismiss(handle, eventHandler);
 }
 
 const ArkUIDialogAPI* GetDialogAPI()
@@ -661,7 +699,7 @@ const ArkUIDialogAPI* GetDialogAPI()
         EnableDialogCustomAnimation,
         ShowDialog,
         CloseDialog,
-        RegiesterOnWillDialogDismiss,
+        RegisterOnWillDialogDismiss,
     };
     return &dialogImpl;
 }
@@ -670,11 +708,12 @@ void ShowCrash(ArkUI_CharPtr message)
 {
     TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "Arkoala crash: %{public}s", message);
 }
+
 /* clang-format off */
 ArkUIExtendedNodeAPI impl_extended = {
     ARKUI_EXTENDED_API_VERSION,
 
-    nullptr, // getUtilsModifier
+    NodeModifier::GetUtilsModifier, // getUtilsModifier
     nullptr, // getCanvasRenderingContext2DModifier
 
     SetCallbackMethod,
@@ -694,10 +733,10 @@ ArkUIExtendedNodeAPI impl_extended = {
     nullptr, // indexerChecker
     nullptr, // setRangeUpdater
     nullptr, // setLazyItemIndexer
-    OHOS::Ace::NG::SetVsyncCallback,
-    OHOS::Ace::NG::UnblockVsyncWait,
-    OHOS::Ace::NG::NodeEvent::CheckEvent,
-    nullptr, // sendEvent
+    SetVsyncCallback,
+    UnblockVsyncWait,
+    NodeEvent::CheckEvent,
+    NodeEvent::SendArkUIAsyncEvent, // sendEvent
     nullptr, // callContinuation
     nullptr, // setChildTotalCount
     ShowCrash,

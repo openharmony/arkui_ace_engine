@@ -358,6 +358,13 @@ void* CreateNode(ArkUINodeType tag, ArkUI_Int32 nodeId)
     return createArkUIFrameNodes[tag](nodeId);
 }
 
+ArkUI_CharPtr GetName(void* nativePtr)
+{
+    CHECK_NULL_RETURN(nativePtr, nullptr);
+    auto* frameNode = reinterpret_cast<UINode*>(nativePtr);
+    return frameNode->GetTag().c_str();
+}
+
 void DisposeNode(void* nativePtr)
 {
     CHECK_NULL_VOID(nativePtr);

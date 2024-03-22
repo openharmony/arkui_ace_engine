@@ -60,7 +60,7 @@ ArkUI_NativeDialogAPI_1 dialogImpl_1 = {
     OHOS::Ace::DialogModel::SetGridColumnCount,
     OHOS::Ace::DialogModel::EnableCustomStyle,
     OHOS::Ace::DialogModel::EnableCustomAnimation,
-    OHOS::Ace::DialogModel::RegiesterOnWillDismiss,
+    OHOS::Ace::DialogModel::RegisterOnWillDismiss,
     OHOS::Ace::DialogModel::Show,
     OHOS::Ace::DialogModel::Close,
 };
