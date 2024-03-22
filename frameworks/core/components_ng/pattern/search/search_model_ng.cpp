@@ -41,6 +41,21 @@ constexpr int32_t BUTTON_INDEX = 4;
 const std::string INSPECTOR_PREFIX = "__SearchField__";
 const std::vector<std::string> SPECICALIZED_INSPECTOR_INDEXS = { "", "Image__", "CancelImage__", "CancelButton__",
     "Button__" };
+
+void UpdateInnerInspector(FrameNode* frameNode, const std::string& key)
+{
+    auto updateInspectorCallback = [id = key](FrameNode* parentNode, int32_t index) {
+        auto currentNode = AceType::DynamicCast<FrameNode>(parentNode->GetChildAtIndex(index));
+        if (currentNode) {
+            auto test = INSPECTOR_PREFIX + SPECICALIZED_INSPECTOR_INDEXS[index] + id;
+            currentNode->UpdateInspectorId(INSPECTOR_PREFIX + SPECICALIZED_INSPECTOR_INDEXS[index] + id);
+        }
+    };
+    updateInspectorCallback(frameNode, IMAGE_INDEX);
+    updateInspectorCallback(frameNode, CANCEL_IMAGE_INDEX);
+    updateInspectorCallback(frameNode, CANCEL_BUTTON_INDEX);
+    updateInspectorCallback(frameNode, BUTTON_INDEX);
+}
 } // namespace
 
 RefPtr<TextFieldControllerBase> SearchModelNG::Create(const std::optional<std::string>& value,
@@ -847,16 +862,7 @@ void SearchModelNG::UpdateInspectorId(const std::string& key)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
-    auto updateInspectorCallback = [id = key](FrameNode* parentNode, int32_t index) {
-        auto currentNode = AceType::DynamicCast<FrameNode>(parentNode->GetChildAtIndex(index));
-        if (currentNode) {
-            currentNode->UpdateInspectorId(INSPECTOR_PREFIX + SPECICALIZED_INSPECTOR_INDEXS[index] + id);
-        }
-    };
-    updateInspectorCallback(frameNode, IMAGE_INDEX);
-    updateInspectorCallback(frameNode, CANCEL_IMAGE_INDEX);
-    updateInspectorCallback(frameNode, CANCEL_BUTTON_INDEX);
-    updateInspectorCallback(frameNode, BUTTON_INDEX);
+    UpdateInnerInspector(frameNode, key);
 }
 
 RefPtr<SearchNode> SearchModelNG::GetOrCreateSearchNode(
@@ -1338,6 +1344,12 @@ void SearchModelNG::SetSearchEnterKeyType(FrameNode* frameNode, TextInputAction 
 void SearchModelNG::SetHeight(FrameNode* frameNode, const Dimension& height)
 {
     NG::ViewAbstract::SetHeight(frameNode, NG::CalcLength(height));
+}
+
+void SearchModelNG::SetId(FrameNode* frameNode, const std::string& id)
+{
+    NG::ViewAbstract::SetInspectorId(frameNode, id);
+    UpdateInnerInspector(frameNode, id);
 }
 
 void SearchModelNG::SetLetterSpacing(const Dimension& value)

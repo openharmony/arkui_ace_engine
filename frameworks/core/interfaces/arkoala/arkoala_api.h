@@ -26,10 +26,10 @@
 extern "C" {
 #endif
 
-#define ARKUI_FULL_API_VERSION 80
+#define ARKUI_FULL_API_VERSION 81
 // When changing ARKUI_BASIC_API_VERSION, ARKUI_FULL_API_VERSION must be
 // increased as well.
-#define ARKUI_NODE_API_VERSION 80
+#define ARKUI_NODE_API_VERSION 81
 
 #define ARKUI_BASIC_API_VERSION 6
 #define ARKUI_EXTENDED_API_VERSION 6
@@ -2658,6 +2658,8 @@ struct ArkUISearchModifier {
     void (*resetSearchEnterKeyType)(ArkUINodeHandle node);
     void (*setSearchHeight)(ArkUINodeHandle node, ArkUI_Float32 heightValue, ArkUI_Int32 heightUnit);
     void (*resetSearchHeight)(ArkUINodeHandle node);
+    void (*setSearchInspectorId)(ArkUINodeHandle node, ArkUI_CharPtr key);
+    void (*resetSearchInspectorId)(ArkUINodeHandle node);
 };
 
 struct ArkUISearchControllerModifier {
