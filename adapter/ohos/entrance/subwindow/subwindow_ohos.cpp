@@ -26,6 +26,7 @@
 #include "core/components/root/root_element.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/ui_node.h"
+#include "core/components_ng/property/property.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/pipeline_ng/pipeline_context.h"
 #if defined(ENABLE_ROSEN_BACKEND) and !defined(UPLOAD_GPU_DISABLED)
@@ -1532,5 +1533,16 @@ void SubwindowOhos::ResizeWindowForFoldStatus()
     TAG_LOGI(AceLogTag::ACE_SUB_WINDOW,
         "SubwindowOhos window rect is resized to x: %{public}d, y: %{public}d, width: %{public}u, height: %{public}u",
         window_->GetRect().posX_, window_->GetRect().posY_, window_->GetRect().width_, window_->GetRect().height_);
+}
+
+void SubwindowOhos::MarkDirtyDialogSafeArea()
+{
+    auto aceContainer = Platform::AceContainer::GetContainer(childContainerId_);
+    CHECK_NULL_VOID(aceContainer);
+    auto context = DynamicCast<NG::PipelineContext>(aceContainer->GetPipelineContext());
+    CHECK_NULL_VOID(context);
+    auto rootNode = context->GetRootElement();
+    CHECK_NULL_VOID(rootNode);
+    rootNode->GetLastChild()->MarkDirtyNode(NG::PROPERTY_UPDATE_MEASURE);
 }
 } // namespace OHOS::Ace

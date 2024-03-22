@@ -819,4 +819,15 @@ void SubwindowManager::ResizeWindowForFoldStatus(int32_t parentContainerId)
     }
     subwindow->ResizeWindowForFoldStatus(parentContainerId);
 }
+
+
+void SubwindowManager::MarkDirtyDialogSafeArea()
+{
+    auto containerId = Container::CurrentId();
+    auto manager = SubwindowManager::GetInstance();
+    CHECK_NULL_VOID(manager);
+    auto subwindow = manager->GetSubwindow(containerId);
+    CHECK_NULL_VOID(subwindow);
+    subwindow->MarkDirtyDialogSafeArea();
+}
 } // namespace OHOS::Ace
