@@ -67,6 +67,7 @@ public:
     static bool ParseResourceToDouble(const EcmaVM* vm, const Local<JSValueRef>& jsValue, double& result);
     static bool ParseJsIntegerArray(const EcmaVM* vm, Local<JSValueRef> values, std::vector<uint32_t>& result);
     static bool ParseJsString(const EcmaVM *vm, const Local<JSValueRef> &value, std::string& result);
+    static panda::Local<panda::ObjectRef> GetContext(EcmaVM* vm);
     static bool ParseJsStringFromResource(const EcmaVM *vm, const Local<JSValueRef> &jsValue, std::string& result);
     static uint32_t parseShadowColor(const EcmaVM* vm, const Local<JSValueRef>& jsValue);
     static uint32_t parseShadowFill(const EcmaVM* vm, const Local<JSValueRef>& jsValue);

@@ -269,6 +269,20 @@ CheckBoxStyle CheckBoxModelNG::GetCheckboxStyle(FrameNode* frameNode)
     return value;
 }
 
+void CheckBoxModelNG::SetBuilderFunc(FrameNode* frameNode, NG::CheckBoxMakeCallback&& makeFunc)
+{
+    auto pattern = frameNode->GetPattern<CheckBoxPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetBuilderFunc(std::move(makeFunc));
+}
+
+void CheckBoxModelNG::SetChangeValue(FrameNode* frameNode, bool value)
+{
+    auto pattern = frameNode->GetPattern<CheckBoxPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetCheckBoxSelect(value);
+}
+
 void CheckBoxModelNG::SetOnChange(FrameNode* frameNode, ChangeEvent&& onChange)
 {
     auto eventHub = frameNode->GetEventHub<CheckBoxEventHub>();

@@ -15,6 +15,9 @@
 
 /// <reference path='./import.ts' />
 class ArkCheckboxComponent extends ArkComponent implements CheckboxAttribute {
+  builder: WrappedBuilder<Object[]> | null = null;
+  checkboxNode: BuilderNode<[CheckBoxConfiguration]> | null = null;
+  modifier: ContentModifier<CheckBoxConfiguration>;
   constructor(nativePtr: KNode, classType?: ModifierType) {
     super(nativePtr, classType);
   }
@@ -80,6 +83,22 @@ class ArkCheckboxComponent extends ArkComponent implements CheckboxAttribute {
     modifierWithKey(
       this._modifiersWithKeys, CheckBoxResponseRegionModifier.identity, CheckBoxResponseRegionModifier, value);
     return this;
+  }
+  setContentModifier(modifier: ContentModifier<CheckBoxConfiguration>): this {
+    this.builder = modifier.applyContent();
+    this.modifier = modifier;
+    getUINativeModule().checkbox.setContentModifierBuilder(this.nativePtr, this);
+  }
+  makeContentModifierNode(context: UIContext, checkBoxConfiguration: CheckBoxConfiguration): FrameNode | null {
+    checkBoxConfiguration.contentModifier = this.modifier;
+    if (isUndefined(this.checkboxNode)) {
+      const xNode = globalThis.requireNapi('arkui.node');
+      this.checkboxNode = new xNode.BuilderNode(context);
+      this.checkboxNode.build(this.builder, checkBoxConfiguration);
+    } else {
+      this.checkboxNode.update(checkBoxConfiguration);
+    }
+    return this.checkboxNode.getFrameNode();
   }
   onChange(callback: (value: boolean) => void): this {
     throw new Error('Method not implemented.');
@@ -300,4 +319,14 @@ globalThis.Checkbox.attributeModifier = function (modifier: ArkComponent): void 
   }, (nativePtr: KNode, classType: ModifierType, modifierJS: ModifierJS) => {
     return new modifierJS.CheckboxModifier(nativePtr, classType);
   });
+};
+
+// @ts-ignore
+globalThis.Checkbox.contentModifier = function (modifier) {
+  const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
+  let nativeNode = getUINativeModule().getFrameNodeById(elmtId);
+  let component = this.createOrGetNode(elmtId, () => {
+    return new ArkCheckboxComponent(nativeNode);
+  });
+  component.setContentModifier(modifier);
 };

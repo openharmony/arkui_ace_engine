@@ -13640,6 +13640,22 @@ class ArkCheckboxComponent extends ArkComponent {
     modifierWithKey(this._modifiersWithKeys, CheckBoxResponseRegionModifier.identity, CheckBoxResponseRegionModifier, value);
     return this;
   }
+  setContentModifier(modifier) {
+    this.builder = modifier.applyContent();
+    this.modifier = modifier;
+    getUINativeModule().checkbox.setContentModifierBuilder(this.nativePtr, this);
+  }
+  makeContentModifierNode(context, checkBoxConfiguration) {
+    checkBoxConfiguration.contentModifier = this.modifier;
+    if (isUndefined(this.checkboxNode)) {
+      const xNode = globalThis.requireNapi('arkui.node');
+      this.checkboxNode = new xNode.BuilderNode(context);
+      this.checkboxNode.build(this.builder, checkBoxConfiguration);
+    } else {
+      this.checkboxNode.update(checkBoxConfiguration);
+    }
+    return this.checkboxNode.getFrameNode();
+  }
   onChange(callback) {
     throw new Error('Method not implemented.');
   }
@@ -13856,6 +13872,14 @@ if (globalThis.Checkbox !== undefined) {
     }, (nativePtr, classType, modifierJS) => {
       return new modifierJS.CheckboxModifier(nativePtr, classType);
     });
+  };
+  globalThis.Checkbox.contentModifier = function (modifier) {
+    const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
+    let nativeNode = getUINativeModule().getFrameNodeById(elmtId);
+    let component = this.createOrGetNode(elmtId, () => {
+      return new ArkCheckboxComponent(nativeNode);
+    });
+    component.setContentModifier(modifier);
   };
 }
 

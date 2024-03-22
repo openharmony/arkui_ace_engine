@@ -85,6 +85,7 @@ void CheckBoxPattern::OnModifyDone()
     CHECK_NULL_VOID(focusHub);
     InitOnKeyEvent(focusHub);
     SetAccessibilityAction();
+    FireBuilder();
 }
 
 void CheckBoxPattern::SetAccessibilityAction()
@@ -266,6 +267,9 @@ void CheckBoxPattern::HandleBlurEvent()
 
 void CheckBoxPattern::OnClick()
 {
+    if (UseContentModifier()) {
+        return;
+    }
     TAG_LOGD(AceLogTag::ACE_SELECT_COMPONENT, "checkbox onclick");
     auto host = GetHost();
     CHECK_NULL_VOID(host);
@@ -283,6 +287,9 @@ void CheckBoxPattern::OnClick()
 
 void CheckBoxPattern::OnTouchDown()
 {
+    if (UseContentModifier()) {
+        return;
+    }
     TAG_LOGD(AceLogTag::ACE_SELECT_COMPONENT, "checkbox touch down %{public}d", isHover_);
     if (isHover_) {
         touchHoverType_ = TouchHoverAnimationType::HOVER_TO_PRESS;
@@ -297,6 +304,9 @@ void CheckBoxPattern::OnTouchDown()
 
 void CheckBoxPattern::OnTouchUp()
 {
+    if (UseContentModifier()) {
+        return;
+    }
     TAG_LOGD(AceLogTag::ACE_SELECT_COMPONENT, "checkbox touch up %{public}d", isHover_);
     if (isHover_) {
         touchHoverType_ = TouchHoverAnimationType::PRESS_TO_HOVER;
@@ -428,6 +438,7 @@ void CheckBoxPattern::ChangeSelfStatusAndNotify(const RefPtr<CheckBoxPaintProper
         }
     }
     UpdateCheckBoxGroupStatus(host, checkBoxGroupMap, isSelected);
+    FireBuilder();
 }
 
 void CheckBoxPattern::UpdateCheckBoxGroupStatus(const RefPtr<FrameNode>& checkBoxFrameNode,
@@ -768,6 +779,61 @@ void CheckBoxPattern::OnRestoreInfo(const std::string& restoreInfo)
     }
     auto jsonCheckBoxSelect = info->GetValue("isOn");
     checkBoxPaintProperty->UpdateCheckBoxSelect(jsonCheckBoxSelect->GetBool());
+}
+
+
+void CheckBoxPattern::SetCheckBoxSelect(bool select)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto eventHub = host->GetEventHub<EventHub>();
+    CHECK_NULL_VOID(eventHub);
+    auto enabled = eventHub->IsEnabled();
+    if (!enabled) {
+        return;
+    }
+    auto paintProperty = host->GetPaintProperty<CheckBoxPaintProperty>();
+    CHECK_NULL_VOID(paintProperty);
+    paintProperty->UpdateCheckBoxSelect(select);
+    UpdateState();
+    OnModifyDone();
+}
+
+void CheckBoxPattern::FireBuilder()
+{
+    if (!makeFunc_.has_value()) {
+        return;
+    }
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    host->RemoveChildAtIndex(0);
+    contentModifierNode_ = BuildContentModifierNode();
+    CHECK_NULL_VOID(contentModifierNode_);
+    host->AddChild(contentModifierNode_, 0);
+    host->MarkNeedFrameFlushDirty(PROPERTY_UPDATE_MEASURE);
+}
+
+RefPtr<FrameNode> CheckBoxPattern::BuildContentModifierNode()
+{
+    if (!makeFunc_.has_value()) {
+        return nullptr;
+    }
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, nullptr);
+    auto eventHub = host->GetEventHub<CheckBoxEventHub>();
+    CHECK_NULL_RETURN(eventHub, nullptr);
+    auto name = eventHub->GetName();
+    auto enabled = eventHub->IsEnabled();
+    auto paintProperty = host->GetPaintProperty<CheckBoxPaintProperty>();
+    CHECK_NULL_RETURN(paintProperty, nullptr);
+    bool isSelected = false;
+    if (paintProperty->HasCheckBoxSelect()) {
+        isSelected = paintProperty->GetCheckBoxSelectValue();
+    } else {
+        isSelected = false;
+    }
+    CheckBoxConfiguration checkBoxConfiguration(name, isSelected, enabled);
+    return (makeFunc_.value())(checkBoxConfiguration);
 }
 
 void CheckBoxPattern::OnColorConfigurationUpdate()
