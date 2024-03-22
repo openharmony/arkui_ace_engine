@@ -18,6 +18,7 @@
 #include <algorithm>
 
 #include "base/i18n/localization.h"
+#include "core/common/ace_application_info.h"
 #include "core/common/container.h"
 #include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/pattern/bubble/bubble_pattern.h"
@@ -197,23 +198,44 @@ RefPtr<FrameNode> NavigationTitleUtil::CreateMenuItemButton(RefPtr<NavigationBar
     auto buttonPattern = AceType::MakeRefPtr<NG::ButtonPattern>();
     CHECK_NULL_RETURN(buttonPattern, nullptr);
     buttonPattern->setComponentButtonType(ComponentButtonType::NAVIGATION);
-    buttonPattern->SetFocusBorderColor(theme->GetToolBarItemFocusColor());
-    buttonPattern->SetFocusBorderWidth(theme->GetToolBarItemFocusBorderWidth());
+    if (!AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
+        buttonPattern->SetFocusBorderColor(theme->GetToolBarItemFocusColor());
+        buttonPattern->SetFocusBorderWidth(theme->GetToolBarItemFocusBorderWidth());
+    } else {
+        buttonPattern->SetBlendColor(theme->GetBackgroundPressedColor(), theme->GetBackgroundHoverColor());
+        buttonPattern->SetFocusBorderColor(theme->GetBackgroundFocusOutlineColor());
+        buttonPattern->SetFocusBorderWidth(theme->GetBackgroundFocusOutlineWeight());
+    }
     auto menuItemNode = FrameNode::CreateFrameNode(
         V2::MENU_ITEM_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), buttonPattern);
     CHECK_NULL_RETURN(menuItemNode, nullptr);
     auto menuItemLayoutProperty = menuItemNode->GetLayoutProperty<ButtonLayoutProperty>();
     CHECK_NULL_RETURN(menuItemLayoutProperty, nullptr);
-    menuItemLayoutProperty->UpdateUserDefinedIdealSize(
-        CalcSize(CalcLength(BACK_BUTTON_SIZE), CalcLength(BACK_BUTTON_SIZE)));
     menuItemLayoutProperty->UpdateType(ButtonType::NORMAL);
-    menuItemLayoutProperty->UpdateBorderRadius(BorderRadiusProperty(BUTTON_RADIUS_SIZE));
     auto renderContext = menuItemNode->GetRenderContext();
     CHECK_NULL_RETURN(renderContext, nullptr);
-    renderContext->UpdateBackgroundColor(Color::TRANSPARENT);
-    PaddingProperty padding;
-    padding.SetEdges(CalcLength(BUTTON_PADDING));
-    menuItemLayoutProperty->UpdatePadding(padding);
+    if (!AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
+        menuItemLayoutProperty->UpdateUserDefinedIdealSize(
+            CalcSize(CalcLength(BACK_BUTTON_SIZE), CalcLength(BACK_BUTTON_SIZE)));
+        menuItemLayoutProperty->UpdateBorderRadius(BorderRadiusProperty(BUTTON_RADIUS_SIZE));
+        renderContext->UpdateBackgroundColor(Color::TRANSPARENT);
+        PaddingProperty padding;
+        padding.SetEdges(CalcLength(BUTTON_PADDING));
+        menuItemLayoutProperty->UpdatePadding(padding);
+    } else {
+        auto iconBackgroundWidth = theme->GetIconBackgroundWidth();
+        auto iconBackgroundHeight = theme->GetIconBackgroundHeight();
+        menuItemLayoutProperty->UpdateUserDefinedIdealSize(
+            CalcSize(CalcLength(iconBackgroundWidth), CalcLength(iconBackgroundHeight)));
+        menuItemLayoutProperty->UpdateBorderRadius(BorderRadiusProperty(theme->GetCornerRadius()));
+        renderContext->UpdateBackgroundColor(theme->GetCompBackgroundColor());
+        PaddingProperty padding;
+        padding.SetEdges(CalcLength(MENU_BUTTON_PADDING));
+        menuItemLayoutProperty->UpdatePadding(padding);
+        MarginProperty margin;
+        margin.right = CalcLength(theme->GetCompPadding());
+        menuItemLayoutProperty->UpdateMargin(margin);
+    }
     return menuItemNode;
 }
 
@@ -240,16 +262,24 @@ RefPtr<FrameNode> NavigationTitleUtil::CreateBarItemIconNode(const std::string& 
     auto theme = NavigationGetTheme();
     CHECK_NULL_RETURN(theme, nullptr);
 
+    Color iconColor = theme->GetMenuIconColor();
+    double iconOpacity = theme->GetAlphaDisabled();
+    auto iconWidth = theme->GetMenuIconSize();
+    auto iconHeight = theme->GetMenuIconSize();
+    if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
+        iconColor = theme->GetIconColor();
+        iconOpacity = theme->GetIconDisableAlpha();
+        iconWidth = theme->GetIconWidth();
+        iconHeight = theme->GetIconHeight();
+    }
     if (isButtonEnabled) {
-        info.SetFillColor(theme->GetMenuIconColor());
+        info.SetFillColor(iconColor);
     } else {
-        info.SetFillColor(theme->GetMenuIconColor().BlendOpacity(theme->GetAlphaDisabled()));
+        info.SetFillColor(iconColor.BlendOpacity(iconOpacity));
     }
 
     imageLayoutProperty->UpdateImageSourceInfo(info);
-
-    auto iconSize = theme->GetMenuIconSize();
-    imageLayoutProperty->UpdateUserDefinedIdealSize(CalcSize(CalcLength(iconSize), CalcLength(iconSize)));
+    imageLayoutProperty->UpdateUserDefinedIdealSize(CalcSize(CalcLength(iconWidth), CalcLength(iconHeight)));
     iconNode->MarkModifyDone();
     return iconNode;
 }

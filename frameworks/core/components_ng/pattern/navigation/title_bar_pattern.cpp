@@ -16,6 +16,7 @@
 #include "core/components_ng/pattern/navigation/title_bar_pattern.h"
 
 #include "core/animation/spring_curve.h"
+#include "core/common/ace_application_info.h"
 #include "core/common/container.h"
 #include "core/components_ng/pattern/image/image_layout_property.h"
 #include "core/components_ng/pattern/image/image_render_property.h"
@@ -152,12 +153,18 @@ void MountSubTitle(const RefPtr<TitleBarNode>& hostNode)
     auto titleLayoutProperty = subtitleNode->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_VOID(titleLayoutProperty);
 
+    auto theme = NavigationGetTheme();
+    CHECK_NULL_VOID(theme);
     if (titleBarLayoutProperty->GetTitleModeValue(NavigationTitleMode::FREE) == NavigationTitleMode::MINI) {
-        auto theme = NavigationGetTheme();
-        CHECK_NULL_VOID(theme);
         titleLayoutProperty->UpdateAdaptMinFontSize(MIN_ADAPT_SUBTITLE_FONT_SIZE);
         titleLayoutProperty->UpdateAdaptMaxFontSize(theme->GetSubTitleFontSize());
         titleLayoutProperty->UpdateHeightAdaptivePolicy(TextHeightAdaptivePolicy::MIN_FONT_SIZE_FIRST);
+    } else {
+        if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
+            titleLayoutProperty->UpdateFontSize(theme->GetSubTitleFontSizeS());
+            titleLayoutProperty->UpdateTextColor(theme->GetSubTitleFontColor());
+            titleLayoutProperty->UpdateFontWeight(theme->GetSubTitleFontWeight());
+        }
     }
 
     subtitleNode->MarkModifyDone();
@@ -179,6 +186,9 @@ void TitleBarPattern::InitTitleParam()
     fontSize_.reset();
     opacity_.reset();
     isFreeTitleUpdated_ = false;
+    auto theme = NavigationGetTheme();
+    CHECK_NULL_VOID(theme);
+    titleSpaceVertical_ = theme->GetTitleSpaceVertical();
 }
 
 bool TitleBarPattern::IsHidden()
@@ -221,18 +231,38 @@ void TitleBarPattern::MountTitle(const RefPtr<TitleBarNode>& hostNode)
             titleLayoutProperty->UpdateFontSize(theme->GetTitleFontSizeMin());
             titleLayoutProperty->UpdateAdaptMaxFontSize(theme->GetTitleFontSizeMin());
         }
+        titleLayoutProperty->UpdateTextColor(theme->GetTitleColor());
+        titleLayoutProperty->UpdateFontWeight(FontWeight::MEDIUM);
         UpdateSubTitleOpacity(1.0);
     } else if (titleMode == NavigationTitleMode::FULL) {
-        titleLayoutProperty->UpdateFontSize(theme->GetTitleFontSizeBig());
-        titleLayoutProperty->UpdateAdaptMaxFontSize(theme->GetTitleFontSizeBig());
+        if (!AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
+            titleLayoutProperty->UpdateFontSize(theme->GetTitleFontSizeBig());
+            titleLayoutProperty->UpdateAdaptMaxFontSize(theme->GetTitleFontSizeBig());
+        } else {
+            titleLayoutProperty->UpdateFontSize(theme->GetMainTitleFontSizeL());
+            titleLayoutProperty->UpdateAdaptMaxFontSize(theme->GetMainTitleFontSizeL());
+            titleLayoutProperty->UpdateTextColor(theme->GetMainTitleFontColor());
+            titleLayoutProperty->UpdateFontWeight(theme->GetMainTitleFontWeight());
+        }
         UpdateSubTitleOpacity(1.0);
     } else {
         if (fontSize_.has_value()) {
             titleLayoutProperty->UpdateFontSize(fontSize_.value());
             titleLayoutProperty->UpdateAdaptMaxFontSize(fontSize_.value());
+        if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
+                titleLayoutProperty->UpdateTextColor(theme->GetMainTitleFontColor());
+                titleLayoutProperty->UpdateFontWeight(theme->GetMainTitleFontWeight());
+            }
         } else {
-            titleLayoutProperty->UpdateFontSize(theme->GetTitleFontSizeBig());
-            titleLayoutProperty->UpdateAdaptMaxFontSize(theme->GetTitleFontSizeBig());
+            if (!AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
+                titleLayoutProperty->UpdateFontSize(theme->GetTitleFontSizeBig());
+                titleLayoutProperty->UpdateAdaptMaxFontSize(theme->GetTitleFontSizeBig());
+            } else {
+                titleLayoutProperty->UpdateFontSize(theme->GetMainTitleFontSizeL());
+                titleLayoutProperty->UpdateAdaptMaxFontSize(theme->GetMainTitleFontSizeL());
+                titleLayoutProperty->UpdateTextColor(theme->GetMainTitleFontColor());
+                titleLayoutProperty->UpdateFontWeight(theme->GetMainTitleFontWeight());
+            }
         }
         if (opacity_.has_value()) {
             UpdateSubTitleOpacity(opacity_.value());
@@ -436,18 +466,24 @@ Dimension TitleBarPattern::GetFontSize(float offset)
     auto titleBarHeight = defaultTitleBarHeight_ + offset;
     auto theme = NavigationGetTheme();
     CHECK_NULL_RETURN(theme, Dimension(0.0f, DimensionUnit::FP));
-    auto titleFontSizeDiff = theme->GetTitleFontSizeBig() - theme->GetTitleFontSize();
+    Dimension titleL = theme->GetMainTitleFontSizeL();
+    Dimension titleM = theme->GetMainTitleFontSizeM();
+    if (!AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
+        titleL = theme->GetTitleFontSizeBig();
+        titleM = theme->GetTitleFontSize();
+    }
+    auto titleFontSizeDiff = titleL - titleM;
     auto titleBarHeightDiff = maxTitleBarHeight_ - static_cast<float>(SINGLE_LINE_TITLEBAR_HEIGHT.ConvertToPx());
     if (!NearZero(titleBarHeightDiff)) {
         fontSizeRatio_ = titleFontSizeDiff.Value() / titleBarHeightDiff;
     }
-    auto tempFontSize = theme->GetTitleFontSize().Value() +
+    auto tempFontSize = titleM.Value() +
         (titleBarHeight - static_cast<float>(SINGLE_LINE_TITLEBAR_HEIGHT.ConvertToPx())) * fontSizeRatio_;
-    if (GreatNotEqual(tempFontSize, theme->GetTitleFontSizeBig().Value())) {
-        tempFontSize = theme->GetTitleFontSizeBig().Value();
+    if (GreatNotEqual(tempFontSize, titleL.Value())) {
+        tempFontSize = titleL.Value();
     }
-    if (LessNotEqual(tempFontSize, theme->GetTitleFontSize().Value())) {
-        tempFontSize = theme->GetTitleFontSize().Value();
+    if (LessNotEqual(tempFontSize, titleM.Value())) {
+        tempFontSize = titleM.Value();
     }
     return Dimension(tempFontSize, DimensionUnit::FP);
 }
@@ -610,7 +646,12 @@ void TitleBarPattern::SetTempTitleOffsetY()
 
 void TitleBarPattern::SetTempSubTitleOffsetY()
 {
-    tempSubTitleOffsetY_ = tempTitleOffsetY_ + GetTitleHeight();
+    if (!AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
+        tempSubTitleOffsetY_ = tempTitleOffsetY_ + GetTitleHeight();
+    } else {
+        tempSubTitleOffsetY_ = tempTitleOffsetY_ + GetTitleHeight() +
+            static_cast<float>(titleSpaceVertical_.ConvertToPx());
+    }
     if (tempTitleOffsetY_ < minTitleOffsetY_) {
         tempSubTitleOffsetY_ = minTitleOffsetY_;
     }
