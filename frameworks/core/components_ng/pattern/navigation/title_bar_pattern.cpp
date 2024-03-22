@@ -21,6 +21,7 @@
 #include "core/components_ng/pattern/image/image_render_property.h"
 #include "core/components_ng/pattern/navigation/nav_bar_layout_property.h"
 #include "core/components_ng/pattern/navigation/nav_bar_node.h"
+#include "core/components_ng/pattern/navigation/navigation_title_util.h"
 #include "core/components_ng/pattern/navigation/title_bar_layout_property.h"
 #include "core/components_ng/pattern/navigation/title_bar_node.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
@@ -251,6 +252,43 @@ void TitleBarPattern::MountTitle(const RefPtr<TitleBarNode>& hostNode)
     titleNode->MarkModifyDone();
 }
 
+void TitleBarPattern::MountMenu(const RefPtr<TitleBarNode>& hostNode)
+{
+    auto titleBarLayoutProperty = hostNode->GetLayoutProperty<TitleBarLayoutProperty>();
+    CHECK_NULL_VOID(titleBarLayoutProperty);
+    if (titleBarLayoutProperty->GetTitleBarParentTypeValue(TitleBarParentType::NAVBAR) !=
+        TitleBarParentType::NAV_DESTINATION) {
+        return;
+    }
+    if (hostNode->GetMenuNodeOperationValue(ChildNodeOperation::NONE) == ChildNodeOperation::REPLACE) {
+        hostNode->RemoveChild(hostNode->GetMenu());
+        hostNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    }
+    if (hostNode->GetPrevMenuIsCustomValue(false)) {
+        if (hostNode->GetMenuNodeOperationValue(ChildNodeOperation::NONE) == ChildNodeOperation::NONE) {
+            return;
+        }
+        hostNode->SetMenu(hostNode->GetMenu());
+        hostNode->AddChild(hostNode->GetMenu());
+        hostNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    } else {
+        auto titleBarMenuItems = GetTitleBarMenuItems();
+        if (HasMenuNodeId()) {
+            auto navDesNode = AceType::DynamicCast<NavDestinationGroupNode>(hostNode->GetParent());
+            CHECK_NULL_VOID(navDesNode);
+            auto hub = navDesNode->GetEventHub<EventHub>();
+            CHECK_NULL_VOID(hub);
+            auto isButtonEnabled = hub->IsEnabled();
+            auto menuNode =
+                NavigationTitleUtil::CreateMenuItems(GetMenuNodeId(), titleBarMenuItems, hostNode, isButtonEnabled);
+            CHECK_NULL_VOID(menuNode);
+            hostNode->SetMenu(menuNode);
+            hostNode->AddChild(hostNode->GetMenu());
+            hostNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+        }
+    }
+}
+
 void TitleBarPattern::OnModifyDone()
 {
     Pattern::OnModifyDone();
@@ -262,6 +300,7 @@ void TitleBarPattern::OnModifyDone()
     MountBackButton(hostNode);
     MountTitle(hostNode);
     MountSubTitle(hostNode);
+    MountMenu(hostNode);
     auto titleBarLayoutProperty = hostNode->GetLayoutProperty<TitleBarLayoutProperty>();
     CHECK_NULL_VOID(titleBarLayoutProperty);
     if (titleBarLayoutProperty->GetTitleModeValue(NavigationTitleMode::FREE) != NavigationTitleMode::FREE ||
@@ -705,6 +744,9 @@ void TitleBarPattern::OnAttachToFrameNode()
         SafeAreaExpandOpts opts = {.type = SAFE_AREA_TYPE_SYSTEM, .edges = SAFE_AREA_EDGE_TOP};
         host->GetLayoutProperty()->UpdateSafeAreaExpandOpts(opts);
     }
+    auto pipelineContext = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipelineContext);
+    pipelineContext->AddWindowSizeChangeCallback(host->GetId());
 }
 
 void TitleBarPattern::OnCoordScrollStart()
@@ -936,6 +978,60 @@ void TitleBarPattern::SetTitlebarOptions(NavigationTitlebarOptions&& opt)
         renderContext->UpdateBackBlurStyle(blur);
     } else {
         renderContext->ResetBackBlurStyle();
+    }
+}
+
+void TitleBarPattern::OnDetachFromFrameNode(FrameNode* frameNode)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    pipeline->RemoveWindowSizeChangeCallback(frameNode->GetId());
+}
+
+void TitleBarPattern::OnWindowSizeChanged(int32_t width, int32_t height, WindowSizeChangeReason type)
+{
+    auto titleBarNode = AceType::DynamicCast<TitleBarNode>(GetHost());
+    CHECK_NULL_VOID(titleBarNode);
+    auto titleBarLayoutProperty = titleBarNode->GetLayoutProperty<TitleBarLayoutProperty>();
+    CHECK_NULL_VOID(titleBarLayoutProperty);
+    if (titleBarLayoutProperty->GetTitleBarParentTypeValue(TitleBarParentType::NAVBAR) !=
+        TitleBarParentType::NAV_DESTINATION) {
+        return;
+    }
+    // change menu num in landscape and orientation
+    do {
+        if (titleBarNode->GetPrevMenuIsCustomValue(false)) {
+            break;
+        }
+        auto targetNum = SystemProperties::GetDeviceOrientation() == DeviceOrientation::LANDSCAPE ? MAX_MENU_NUM_LARGE
+                                                                                                  : MAX_MENU_NUM_SMALL;
+        if (targetNum == maxMenuNums_) {
+            break;
+        }
+        maxMenuNums_ = targetNum;
+        MountMenu(titleBarNode);
+        titleBarNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_CHILD);
+    } while (0);
+    bool isTitleMenuNodeShow = false;
+    if (isTitleMenuNodeShow == titleBarNode->IsTitleMenuNodeShowing()) {
+        return;
+    }
+    if (type == WindowSizeChangeReason::ROTATION || type == WindowSizeChangeReason::RESIZE) {
+        isTitleMenuNodeShow = titleBarNode->IsTitleMenuNodeShowing();
+    }
+    if (titleBarNode->GetMenu()) {
+        auto buttonNode = titleBarNode->GetMenu()->GetLastChild();
+        CHECK_NULL_VOID(buttonNode);
+        auto barItemNode = buttonNode->GetFirstChild();
+        CHECK_NULL_VOID(barItemNode);
+        auto barItemFrameNode = AceType::DynamicCast<BarItemNode>(barItemNode);
+        CHECK_NULL_VOID(barItemFrameNode);
+        if (barItemFrameNode->IsMoreItemNode() && isTitleMenuNodeShow) {
+            auto eventHub = barItemFrameNode->GetEventHub<BarItemEventHub>();
+            CHECK_NULL_VOID(eventHub);
+            eventHub->FireItemAction();
+        }
     }
 }
 } // namespace OHOS::Ace::NG
