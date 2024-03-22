@@ -75,7 +75,8 @@ void GaugeModifier::UpdateValue()
     AnimationUtils::Animate(option, [&]() { value_->Set(end_); });
 }
 
-void GaugeModifier::initProperty() {
+void GaugeModifier::initProperty()
+{
     auto pattern = DynamicCast<GaugePattern>(pattern_.Upgrade());
     CHECK_NULL_VOID(pattern);
     auto paintProperty = pattern->GetPaintProperty<GaugePaintProperty>();
@@ -105,7 +106,7 @@ void GaugeModifier::initProperty() {
     
     if (paintProperty->GetColors().has_value()) {
         auto colors = paintProperty->GetColorsValue();
-        for(int i = 0; i < colors.size(); i++) {
+        for (int i = 0; i < colors.size(); i++) {
             auto color =  AceType::MakeRefPtr<AnimatablePropertyColor>(LinearColor(colors[i]));
             AttachProperty(color);
             colors_.emplace_back(color);
@@ -114,7 +115,7 @@ void GaugeModifier::initProperty() {
 
     if (paintProperty->HasGradientColors()) {
         auto colors = paintProperty->GetGradientColorsValue().at(0);
-        for(int i = 0; i < colors.size(); i++) {
+        for (int i = 0; i < colors.size(); i++) {
             auto color =  AceType::MakeRefPtr<AnimatablePropertyColor>(LinearColor(colors[i].first));
             AttachProperty(color);
             gradientColors_.emplace_back(color);
@@ -122,7 +123,8 @@ void GaugeModifier::initProperty() {
     }
 }
 
-void GaugeModifier::updateProperty(RefPtr<GaugePaintProperty>& paintProperty) {
+void GaugeModifier::updateProperty(RefPtr<GaugePaintProperty>& paintProperty)
+{
     float startAngle = paintProperty->GetStartAngleValue();
     float endAngle = paintProperty->GetEndAngleValue();
     float max = paintProperty->GetMaxValue();
@@ -147,14 +149,14 @@ void GaugeModifier::updateProperty(RefPtr<GaugePaintProperty>& paintProperty) {
     
     if (paintProperty->GetColors().has_value()) {
         auto colors = paintProperty->GetColorsValue();
-        for(int i = 0; i < colors.size() && i < colors_.size(); i++) {
+        for (int i = 0; i < colors.size() && i < colors_.size(); i++) {
             colors_[i]->Set(LinearColor(colors[i]));
         }
     }
 
     if (paintProperty->HasGradientColors()) {
         auto colors = paintProperty->GetGradientColorsValue().at(0);
-        for(int i = 0; i < colors.size() && i < colors_.size(); i++) {
+        for (int i = 0; i < colors.size() && i < gradientColors_.size(); i++) {
             gradientColors_[i]->Set(LinearColor(colors[i].first));
         }
     }
