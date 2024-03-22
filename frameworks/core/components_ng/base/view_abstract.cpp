@@ -1769,6 +1769,19 @@ void ViewAbstract::SetTransition(const TransitionOptions &options)
     ACE_UPDATE_RENDER_CONTEXT(Transition, options);
 }
 
+void ViewAbstract::CleanTransition()
+{
+    if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
+        return;
+    }
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto target = frameNode->GetRenderContext();
+    if (target) {
+        target->CleanTransition();
+    }
+}
+
 void ViewAbstract::SetChainedTransition(const RefPtr<NG::ChainedTransitionEffect> &effect)
 {
     if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {

@@ -4307,6 +4307,12 @@ ArkUINativeModuleValue CommonBridge::ResetTransition(ArkUIRuntimeCallInfo* runti
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Framework::JsiCallbackInfo info = Framework::JsiCallbackInfo(runtimeCallInfo);
+    if (!info[1]->IsObject()) {
+        ViewAbstractModel::GetInstance()->CleanTransition();
+        ViewAbstractModel::GetInstance()->SetChainedTransition(nullptr);
+        return panda::JSValueRef::Undefined(vm);
+    }
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     auto* frameNode = reinterpret_cast<FrameNode*>(nativeNode);
@@ -4340,6 +4346,11 @@ ArkUINativeModuleValue CommonBridge::ResetTransitionPassThrough(ArkUIRuntimeCall
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Framework::JsiCallbackInfo info = Framework::JsiCallbackInfo(runtimeCallInfo);
+    if (!info[1]->IsObject()) {
+        ViewAbstractModel::GetInstance()->CleanTransition();
+        ViewAbstractModel::GetInstance()->SetChainedTransition(nullptr);
+    }
     return panda::JSValueRef::Undefined(vm);
 }
 
