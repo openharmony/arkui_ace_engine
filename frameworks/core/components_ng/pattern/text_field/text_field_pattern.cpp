@@ -433,6 +433,7 @@ bool TextFieldPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dir
         textFieldContentModifier_->ContentChange();
     }
 
+    auto oldParentGlobalOffset = parentGlobalOffset_;
     parentGlobalOffset_ = textFieldLayoutAlgorithm->GetParentGlobalOffset();
     inlineMeasureItem_ = textFieldLayoutAlgorithm->GetInlineMeasureItem();
     auto isEditorValueChanged = FireOnTextChangeEvent();
@@ -447,15 +448,7 @@ bool TextFieldPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dir
     if (hostLayoutProperty) {
         hostLayoutProperty->ResetTextAlignChanged();
     }
-    if (processOverlayDelayTask_) {
-        processOverlayDelayTask_();
-        processOverlayDelayTask_ = nullptr;
-    }
-    if (needToRefreshSelectOverlay_ && SelectOverlayIsOn()) {
-        StopTwinkling();
-        ProcessOverlay();
-        needToRefreshSelectOverlay_ = false;
-    }
+    ProcessOverlayAfterLayout(oldParentGlobalOffset != parentGlobalOffset_);
     if (inlineSelectAllFlag_) {
         HandleOnSelectAll(false, true);
         inlineSelectAllFlag_ = false;
@@ -477,6 +470,24 @@ bool TextFieldPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dir
         }
     }
     return true;
+}
+
+void TextFieldPattern::ProcessOverlayAfterLayout(bool isGlobalAreaChange)
+{
+    if (processOverlayDelayTask_) {
+        processOverlayDelayTask_();
+        processOverlayDelayTask_ = nullptr;
+        return;
+    }
+    if (isGlobalAreaChange) {
+        HandleParentGlobalOffsetChange();
+        return;
+    }
+    if (needToRefreshSelectOverlay_ && SelectOverlayIsOn()) {
+        StopTwinkling();
+        ProcessOverlay();
+        needToRefreshSelectOverlay_ = false;
+    }
 }
 
 bool TextFieldPattern::HasFocus() const
@@ -4435,17 +4446,21 @@ void TextFieldPattern::OnAreaChangedInner()
     if (parentGlobalOffset != parentGlobalOffset_) {
         parentGlobalOffset_ = parentGlobalOffset;
         UpdateTextFieldManager(Offset(parentGlobalOffset_.GetX(), parentGlobalOffset_.GetY()), frameRect_.Height());
-        selectController_->CalculateHandleOffset();
-        if (SelectOverlayIsOn()) {
-            if (IsUsingMouse()) {
-                CloseSelectOverlay();
-            } else {
-                ProcessOverlay(false);
-                UpdateSelectMenuVisibility(false);
-            }
-        }
+        HandleParentGlobalOffsetChange();
     }
     RequestKeyboardOnFocus();
+}
+
+void TextFieldPattern::HandleParentGlobalOffsetChange()
+{
+    selectController_->CalculateHandleOffset();
+    CHECK_NULL_VOID(SelectOverlayIsOn());
+    if (IsUsingMouse()) {
+        CloseSelectOverlay();
+    } else {
+        ProcessOverlay(false);
+        UpdateSelectMenuVisibility(false);
+    }
 }
 
 void TextFieldPattern::RequestKeyboardOnFocus()
