@@ -123,7 +123,7 @@ void ParseGradientAngle(const EcmaVM *vm, const Local<JSValueRef> &value, std::v
     values.push_back(static_cast<ArkUI_Float32>(angleValue));
 }
 
-void ParseGradientColorStops(const EcmaVM *vm, const Local<JSValueRef> &value, std::vector<ArkUI_Float32> &colors)
+void ParseGradientColorStops(const EcmaVM *vm, const Local<JSValueRef> &value, std::vector<ArkUIInt32orFloat32> &colors)
 {
     if (!value->IsArray(vm)) {
         return;
@@ -153,9 +153,15 @@ void ParseGradientColorStops(const EcmaVM *vm, const Local<JSValueRef> &value, s
                 hasDimension = true;
             }
         }
-        colors.push_back(static_cast<ArkUI_Float32>(color.GetValue()));
-        colors.push_back(static_cast<ArkUI_Float32>(hasDimension));
-        colors.push_back(static_cast<ArkUI_Float32>(dimension));
+        ArkUIInt32orFloat32 colorUInt32;
+        colorUInt32.u32 = static_cast<ArkUI_Uint32>(color.GetValue());
+        ArkUIInt32orFloat32 hasDimensionU32;
+        hasDimensionU32.i32 = static_cast<ArkUI_Int32>(hasDimension);
+        ArkUIInt32orFloat32 dimensionF32;
+        dimensionF32.f32 = static_cast<ArkUI_Float32>(dimension);
+        colors.push_back(colorUInt32);
+        colors.push_back(hasDimensionU32);
+        colors.push_back(dimensionF32);
     }
 }
 
@@ -368,18 +374,12 @@ void ParseBorderImageLinearGradient(ArkUINodeHandle node,
     int32_t direction = static_cast<int32_t>(GradientDirection::NONE);
     ParseJsInt32(vm, directionArg, direction);
     options.push_back(static_cast<ArkUI_Float32>(direction));
-    std::vector<ArkUI_Float32> colors;
+    std::vector<ArkUIInt32orFloat32> colors;
     ParseGradientColorStops(vm, colorsArg, colors);
     auto repeating = repeatingArg->IsBoolean() ? repeatingArg->BooleaValue() : false;
     options.push_back(static_cast<ArkUI_Float32>(repeating));
-    ArkUIInt32orFloat32 colorsUnion[colors.size()];
-    for (int i = 0; i < colors.size(); i++) {
-        colorsUnion[i * NUM_3 + NUM_0].u32 = colors.data()[i];
-        colorsUnion[i * NUM_3 + NUM_1].i32 = colors.data()[i + NUM_1];
-        colorsUnion[i * NUM_3 + NUM_2].f32 = colors.data()[i + NUM_2];
-    }
     GetArkUINodeModifiers()->getCommonModifier()->setBorderImageGradient(node,
-        options.data(), options.size(), colorsUnion, colors.size());
+        options.data(), options.size(), colors.data(), colors.size());
 }
 
 bool ParseBorderImageSource(ArkUIRuntimeCallInfo* runtimeCallInfo, uint32_t& offset,
@@ -2163,18 +2163,12 @@ ArkUINativeModuleValue CommonBridge::SetLinearGradient(ArkUIRuntimeCallInfo *run
     ParseJsInt32(vm, directionArg, direction);
     values.push_back(static_cast<ArkUI_Float32>(direction));
 
-    std::vector<ArkUI_Float32> colors;
+    std::vector<ArkUIInt32orFloat32> colors;
     ParseGradientColorStops(vm, colorsArg, colors);
     auto repeating = repeatingArg->IsBoolean() ? repeatingArg->BooleaValue() : false;
     values.push_back(static_cast<ArkUI_Float32>(repeating));
-    ArkUIInt32orFloat32 colorsUnion[colors.size()/NUM_3];
-    for (int i = 0; i < colors.size()/NUM_3; i++) {
-        colorsUnion[i * NUM_3 + NUM_0].u32 = colors.data()[i];
-        colorsUnion[i * NUM_3 + NUM_1].i32 = colors.data()[i + NUM_1];
-        colorsUnion[i * NUM_3 + NUM_2].f32 = colors.data()[i + NUM_2];
-    }
     GetArkUINodeModifiers()->getCommonModifier()->setLinearGradient(nativeNode, values.data(), values.size(),
-        colorsUnion, colors.size());
+        colors.data(), colors.size());
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -2205,18 +2199,12 @@ ArkUINativeModuleValue CommonBridge::SetSweepGradient(ArkUIRuntimeCallInfo *runt
     ParseGradientAngle(vm, startArg, values);
     ParseGradientAngle(vm, endArg, values);
     ParseGradientAngle(vm, rotationArg, values);
-    std::vector<ArkUI_Float32> colors;
+    std::vector<ArkUIInt32orFloat32> colors;
     ParseGradientColorStops(vm, colorsArg, colors);
     auto repeating = repeatingArg->IsBoolean() ? repeatingArg->BooleaValue() : false;
     values.push_back(static_cast<ArkUI_Float32>(repeating));
-    ArkUIInt32orFloat32 colorsUnion[colors.size()/NUM_3];
-    for (int i = 0; i < colors.size() / NUM_3; i++) {
-        colorsUnion[i * NUM_3 + NUM_0].u32 = colors.data()[i];
-        colorsUnion[i * NUM_3 + NUM_1].i32 = colors.data()[i + NUM_1];
-        colorsUnion[i * NUM_3 + NUM_2].f32 = colors.data()[i + NUM_2];
-    }
     GetArkUINodeModifiers()->getCommonModifier()->setSweepGradient(nativeNode, values.data(), values.size(),
-        colorsUnion, colors.size());
+        colors.data(), colors.size());
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -2247,18 +2235,12 @@ ArkUINativeModuleValue CommonBridge::SetRadialGradient(ArkUIRuntimeCallInfo *run
     values.push_back(static_cast<ArkUI_Float32>(hasRadius));
     values.push_back(static_cast<ArkUI_Float32>(radius.Value()));
     values.push_back(static_cast<ArkUI_Float32>(radius.Unit()));
-    std::vector<ArkUI_Float32> colors;
+    std::vector<ArkUIInt32orFloat32> colors;
     ParseGradientColorStops(vm, colorsArg, colors);
     auto repeating = repeatingArg->IsBoolean() ? repeatingArg->BooleaValue() : false;
     values.push_back(static_cast<ArkUI_Float32>(repeating));
-    ArkUIInt32orFloat32 colorsUnion[colors.size() / NUM_3];
-    for (int i = 0; i < colors.size() / NUM_3; i++) {
-        colorsUnion[i * NUM_3 + NUM_0].u32 = colors.data()[i];
-        colorsUnion[i * NUM_3 + NUM_1].i32 = colors.data()[i + NUM_1];
-        colorsUnion[i * NUM_3 + NUM_2].f32 = colors.data()[i + NUM_2];
-    }
     GetArkUINodeModifiers()->getCommonModifier()->setRadialGradient(nativeNode, values.data(), values.size(),
-        colorsUnion, colors.size());
+        colors.data(), colors.size());
     return panda::JSValueRef::Undefined(vm);
 }
 
