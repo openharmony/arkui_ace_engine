@@ -114,6 +114,11 @@ void AddChild(ArkUINodeHandle parent, ArkUINodeHandle child)
     ViewModel::AddChild(parent, child);
 }
 
+void InsertChildAt(ArkUINodeHandle parent, ArkUINodeHandle child, int32_t position)
+{
+    ViewModel::InsertChildAt(parent, child, position);
+}
+
 void RemoveChild(ArkUINodeHandle parent, ArkUINodeHandle child)
 {
     ViewModel::RemoveChild(parent, child);
@@ -122,6 +127,11 @@ void RemoveChild(ArkUINodeHandle parent, ArkUINodeHandle child)
 void InsertChildAfter(ArkUINodeHandle parent, ArkUINodeHandle child, ArkUINodeHandle sibling)
 {
     ViewModel::InsertChildAfter(parent, child, sibling);
+}
+
+void InsertChildBefore(ArkUINodeHandle parent, ArkUINodeHandle child, ArkUINodeHandle sibling)
+{
+    ViewModel::InsertChildBefore(parent, child, sibling);
 }
 
 typedef void (*ComponentAsyncEventHandler)(ArkUINodeHandle node, void* extraParam);
@@ -505,6 +515,8 @@ const ArkUIBasicAPI* GetBasicAPI()
         AddChild,
         RemoveChild,
         InsertChildAfter,
+        InsertChildBefore,
+        InsertChildAt,
         nullptr,
         nullptr,
         nullptr,

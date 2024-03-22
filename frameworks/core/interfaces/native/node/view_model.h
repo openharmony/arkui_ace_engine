@@ -28,7 +28,11 @@ void AddChild(void* parentNode, void* childNode);
 
 void RemoveChild(void* parentNode, void* childNode);
 
+void InsertChildAt(void* parentNode, void* childNode, int32_t position);
+
 void InsertChildAfter(void* parentNode, void* childNode, void* siblingNode);
+
+void InsertChildBefore(void* parentNode, void* childNode, void* siblingNode);
 
 void RegisterCompanion(void* node, int peerId, ArkUI_Int32 flags);
 

@@ -1545,7 +1545,7 @@ void SetBackgroundBlurStyle(
     BlurStyleOption bgBlurStyle;
     if (blurStyle >= 0) {
         if (blurStyle >= static_cast<int>(BlurStyle::NO_MATERIAL) &&
-            blurStyle <= static_cast<int>(BlurStyle::BACKGROUND_ULTRA_THICK)) {
+            blurStyle <= static_cast<int>(BlurStyle::COMPONENT_ULTRA_THICK)) {
             bgBlurStyle.blurStyle = static_cast<BlurStyle>(blurStyle);
         }
     }
@@ -3033,13 +3033,14 @@ void ResetResponseRegion(ArkUINodeHandle node)
     ViewAbstract::SetResponseRegion(frameNode, region);
 }
 
-void SetBackgroundEffect(ArkUINodeHandle node, ArkUI_CharPtr radiusArg, ArkUI_Float32 saturationArg,
+void SetBackgroundEffect(ArkUINodeHandle node, ArkUI_Float32 radiusArg, ArkUI_Float32 saturationArg,
     ArkUI_Float32 brightnessArg, ArkUI_Uint32 colorArg, ArkUI_Int32 adaptiveColorArg, const ArkUI_Float32* blurValues,
     ArkUI_Int32 blurValuesSize)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
 
-    CalcDimension radius(radiusArg);
+    CalcDimension radius;
+    radius.SetValue(radiusArg);
     Color color(colorArg);
 
     BlurOption blurOption;
