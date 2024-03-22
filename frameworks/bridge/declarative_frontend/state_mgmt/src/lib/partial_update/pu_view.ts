@@ -1013,13 +1013,13 @@ abstract class ViewPU extends NativeViewPartialUpdate
         this.aboutToReuse(params);
       }
     }, "aboutToReuse", this.constructor.name);
+    this.updateDirtyElements();
     this.childrenWeakrefMap_.forEach((weakRefChild) => {
       const child = weakRefChild.deref();
       if (child && !child.hasBeenRecycled_) {
         child.aboutToReuseInternal();
       }
     });
-    this.updateDirtyElements();
     this.runReuse_ = false;
   }
 
