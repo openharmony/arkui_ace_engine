@@ -4161,6 +4161,20 @@ void ResetBlendMode(ArkUINodeHandle node)
     ViewAbstract::SetBlendMode(frameNode, BlendMode::NONE);
 }
 
+void SetMonopolizeEvents(ArkUINodeHandle node, ArkUI_Bool value)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ViewAbstractModelNG::SetMonopolizeEvents(frameNode, value);
+}
+
+void ResetMonopolizeEvents(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ViewAbstractModelNG::SetMonopolizeEvents(frameNode, false);
+}
+
 void SetConstraintSize(ArkUINodeHandle node, const ArkUI_Float32* values, const ArkUI_Int32* units)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -4671,19 +4685,20 @@ const ArkUICommonModifier* GetCommonModifier()
         SetHoverEffect, ResetHoverEffect, SetClickEffect, ResetClickEffect, SetKeyBoardShortCut, ResetKeyBoardShortCut,
         SetClip, SetClipShape, SetClipPath, ResetClip, SetTransitionCenter, SetOpacityTransition, SetRotateTransition,
         SetScaleTransition, SetTranslateTransition, SetMaskShape, SetMaskPath, SetProgressMask, SetBlendMode,
-        ResetBlendMode, nullptr, nullptr, SetConstraintSize, ResetConstraintSize, SetOutlineColor, ResetOutlineColor,
-        SetOutlineRadius, ResetOutlineRadius, SetOutlineWidth, ResetOutlineWidth, SetOutlineStyle, ResetOutlineStyle,
-        SetOutline, ResetOutline, GetFocusable, GetDefaultFocus, GetResponseRegion, GetOverlay, GetAccessibilityGroup,
-        GetAccessibilityText, GetAccessibilityDescription, GetAccessibilityLevel, SetNeedFocus, GetNeedFocus,
-        GetOpacity, GetBorderWidth, GetBorderRadius, GetBorderColor, GetBorderStyle, GetZIndex, GetVisibility, GetClip,
-        GetClipShape, GetTransform, GetHitTestBehavior, GetPosition, GetShadow, GetCustomShadow, GetSweepGradient,
-        GetRadialGradient, GetMask, GetBlendMode, GetDirection, GetAlignSelf, GetTransformCenter, GetOpacityTransition,
-        GetRotateTransition, GetScaleTransition, GetTranslateTransition, GetOffset, GetMarkAnchor, GetAlignRules,
-        GetBackgroundBlurStyle, GetBackgroundImageSize, GetBackgroundImageSizeWidthStyle, GetScale, GetRotate,
-        GetBrightness, GetSaturate, GetBackgroundImagePosition, GetFlexGrow, GetFlexShrink, GetFlexBasis,
-        GetConstraintSize, GetGrayScale, GetInvert, GetSepia, GetContrast, GetForegroundColor, GetBlur,
-        GetLinearGradient, GetAlign, GetWidth, GetHeight, GetBackgroundColor, GetBackgroundImage, GetPadding, GetKey,
-        GetEnabled, GetMargin, GetTranslate, SetMoveTransition, GetMoveTransition, ResetMask, GetAspectRatio };
+        ResetBlendMode, SetMonopolizeEvents, ResetMonopolizeEvents, SetConstraintSize, ResetConstraintSize,
+        SetOutlineColor, ResetOutlineColor, SetOutlineRadius, ResetOutlineRadius, SetOutlineWidth, ResetOutlineWidth,
+        SetOutlineStyle, ResetOutlineStyle, SetOutline, ResetOutline, GetFocusable, GetDefaultFocus, GetResponseRegion,
+        GetOverlay, GetAccessibilityGroup, GetAccessibilityText, GetAccessibilityDescription, GetAccessibilityLevel,
+        SetNeedFocus, GetNeedFocus, GetOpacity, GetBorderWidth, GetBorderRadius, GetBorderColor, GetBorderStyle,
+        GetZIndex, GetVisibility, GetClip, GetClipShape, GetTransform, GetHitTestBehavior, GetPosition, GetShadow,
+        GetCustomShadow, GetSweepGradient, GetRadialGradient, GetMask, GetBlendMode, GetDirection, GetAlignSelf,
+        GetTransformCenter, GetOpacityTransition, GetRotateTransition, GetScaleTransition, GetTranslateTransition,
+        GetOffset, GetMarkAnchor, GetAlignRules, GetBackgroundBlurStyle, GetBackgroundImageSize,
+        GetBackgroundImageSizeWidthStyle, GetScale, GetRotate, GetBrightness, GetSaturate, GetBackgroundImagePosition,
+        GetFlexGrow, GetFlexShrink, GetFlexBasis, GetConstraintSize, GetGrayScale, GetInvert, GetSepia, GetContrast,
+        GetForegroundColor, GetBlur, GetLinearGradient, GetAlign, GetWidth, GetHeight, GetBackgroundColor,
+        GetBackgroundImage, GetPadding, GetKey, GetEnabled, GetMargin, GetTranslate, SetMoveTransition,
+        GetMoveTransition, ResetMask, GetAspectRatio };
 
     return &modifier;
 }
