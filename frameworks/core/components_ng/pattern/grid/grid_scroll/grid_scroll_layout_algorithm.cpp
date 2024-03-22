@@ -242,8 +242,8 @@ void GridScrollLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
             if (!wrapper) {
                 continue;
             }
-            startIndex = startIndex == -1 ? itemIdex : startIndex;
-            endIndex = itemIdex;
+            startIndex = startIndex == -1 ? itemIdex : std::min(startIndex, itemIdex);
+            endIndex = std::max(itemIdex, endIndex);
             auto frSize = itemsCrossSize_.at(iter->first);
             SizeF blockSize = gridLayoutProperty->IsVertical() ? SizeF(frSize, lineHeight) : SizeF(lineHeight, frSize);
             auto translate = OffsetF(0.0f, 0.0f);
