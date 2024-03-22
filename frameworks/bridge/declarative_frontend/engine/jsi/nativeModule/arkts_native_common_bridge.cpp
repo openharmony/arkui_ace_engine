@@ -1889,13 +1889,21 @@ ArkUINativeModuleValue CommonBridge::SetBackdropBlur(ArkUIRuntimeCallInfo *runti
     EcmaVM *vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
-    Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(NUM_1);
+    Local<JSValueRef> blurArg = runtimeCallInfo->GetCallArgRef(NUM_1);
+    Local<JSValueRef> blurOptionArg = runtimeCallInfo->GetCallArgRef(NUM_2);
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
-    if (secondArg->IsNumber()) {
-        GetArkUINodeModifiers()->getCommonModifier()->setBackdropBlur(nativeNode, secondArg->ToNumber(vm)->Value());
-    } else {
+
+    double blur = 0.0;
+    if (!ArkTSUtils::ParseJsDouble(vm, blurArg, blur)) {
         GetArkUINodeModifiers()->getCommonModifier()->resetBackdropBlur(nativeNode);
+        return panda::JSValueRef::Undefined(vm);
     }
+    BlurOption blurOption;
+    if (blurOptionArg->IsArray(vm)) {
+        ParseBlurOption(vm, blurOptionArg, blurOption);
+    }
+    GetArkUINodeModifiers()->getCommonModifier()->setBackdropBlur(
+        nativeNode, blur, blurOption.grayscale.data(), blurOption.grayscale.size());
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -1947,16 +1955,45 @@ ArkUINativeModuleValue CommonBridge::ResetHueRotate(ArkUIRuntimeCallInfo *runtim
 
 ArkUINativeModuleValue CommonBridge::SetInvert(ArkUIRuntimeCallInfo *runtimeCallInfo)
 {
-    EcmaVM *vm = runtimeCallInfo->GetVM();
+    EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
-    Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(NUM_1);
+    Local<JSValueRef> invertValueArg = runtimeCallInfo->GetCallArgRef(NUM_1);
+    Local<JSValueRef> optionLowArg = runtimeCallInfo->GetCallArgRef(NUM_2);
+    Local<JSValueRef> optionHighArg = runtimeCallInfo->GetCallArgRef(NUM_3);
+    Local<JSValueRef> optionThresholdArg = runtimeCallInfo->GetCallArgRef(NUM_4);
+    Local<JSValueRef> optionThresholdRangeArg = runtimeCallInfo->GetCallArgRef(NUM_5);
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
-    if (secondArg->IsNumber()) {
-        GetArkUINodeModifiers()->getCommonModifier()->setInvert(nativeNode, secondArg->ToNumber(vm)->Value());
+
+    if (!invertValueArg->IsUndefined()) {
+        double invertValue = 0.0;
+        if (ArkTSUtils::ParseJsDouble(vm, invertValueArg, invertValue)) {
+            ArkUI_Float32 invert[] = { invertValue };
+            GetArkUINodeModifiers()->getCommonModifier()->setInvert(nativeNode, invert, NUM_1);
+        } else {
+            GetArkUINodeModifiers()->getCommonModifier()->resetInvert(nativeNode);
+        }
     } else {
-        GetArkUINodeModifiers()->getCommonModifier()->resetInvert(nativeNode);
+        ArkUI_Float32 invert[] = { 0.0, 0.0, 0.0, 0.0 };
+        double low = 0.0;
+        double high = 0.0;
+        double threshold = 0.0;
+        double thresholdRange = 0.0;
+        if (ArkTSUtils::ParseJsDouble(vm, optionLowArg, low)) {
+            invert[NUM_0] = std::clamp(low, 0.0, 1.0);
+        }
+        if (ArkTSUtils::ParseJsDouble(vm, optionHighArg, high)) {
+            invert[NUM_1] = std::clamp(high, 0.0, 1.0);
+        }
+        if (ArkTSUtils::ParseJsDouble(vm, optionThresholdArg, threshold)) {
+            invert[NUM_2] = std::clamp(threshold, 0.0, 1.0);
+        }
+        if (ArkTSUtils::ParseJsDouble(vm, optionThresholdRangeArg, thresholdRange)) {
+            invert[NUM_3] = std::clamp(thresholdRange, 0.0, 1.0);
+        }
+        GetArkUINodeModifiers()->getCommonModifier()->setInvert(nativeNode, invert, NUM_4);
     }
+
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -2126,13 +2163,21 @@ ArkUINativeModuleValue CommonBridge::SetBlur(ArkUIRuntimeCallInfo *runtimeCallIn
     EcmaVM *vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
-    Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(NUM_1);
+    Local<JSValueRef> blurArg = runtimeCallInfo->GetCallArgRef(NUM_1);
+    Local<JSValueRef> blurOptionArg = runtimeCallInfo->GetCallArgRef(NUM_2);
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
-    if (secondArg->IsNumber()) {
-        GetArkUINodeModifiers()->getCommonModifier()->setBlur(nativeNode, secondArg->ToNumber(vm)->Value());
-    } else {
+    double blur = 0.0;
+    if (!ArkTSUtils::ParseJsDouble(vm, blurArg, blur)) {
         GetArkUINodeModifiers()->getCommonModifier()->resetBlur(nativeNode);
+        return panda::JSValueRef::Undefined(vm);
     }
+    BlurOption blurOption;
+    if (blurOptionArg->IsArray(vm)) {
+        ParseBlurOption(vm, blurOptionArg, blurOption);
+    }
+    GetArkUINodeModifiers()->getCommonModifier()->setBlur(
+        nativeNode, blur, blurOption.grayscale.data(), blurOption.grayscale.size());
+
     return panda::JSValueRef::Undefined(vm);
 }
 

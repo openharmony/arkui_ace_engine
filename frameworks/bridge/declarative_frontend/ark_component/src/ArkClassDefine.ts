@@ -374,6 +374,28 @@ class ArkScrollEdgeEffect {
   }
 }
 
+class ArkBlurOptions{
+  value: number;
+  options?: BlurOptions | undefined;
+  constructor() {
+    this.value = undefined;
+    this.options = undefined;
+  }
+}
+
+class InvertOptions{
+  high: number;
+  low: number;
+  threshold: number;
+  thresholdRange: number;
+  constructor() {
+    this.high = undefined;
+    this.low = undefined;
+    this.threshold = undefined;
+    this.thresholdRange = undefined;
+  }
+}
+
 class ArkMenuAlignType {
   alignType: number | MenuAlignType;
   dx: Length;

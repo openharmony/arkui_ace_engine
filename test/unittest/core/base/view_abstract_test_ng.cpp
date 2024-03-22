@@ -818,9 +818,9 @@ HWTEST_F(ViewAbstractTestNg, ViewAbstractTest015, TestSize.Level1)
     Matrix4 matrix;
     ViewAbstract::SetTransformMatrix(std::move(matrix));
     ViewAbstract::SetBackdropBlur(RADIUS, blurOption);
-    ViewAbstract::SetBackdropBlur(nullptr, RADIUS);
+    ViewAbstract::SetBackdropBlur(nullptr, RADIUS, blurOption);
     ViewAbstract::SetFrontBlur(RADIUS, blurOption);
-    ViewAbstract::SetFrontBlur(nullptr, RADIUS);
+    ViewAbstract::SetFrontBlur(nullptr, RADIUS, blurOption);
     ViewAbstract::SetInspectorId(srcimages);
 
     Vector5F scale(1.0f, 1.0f, 2.0f, 2.0f, 0.0f);

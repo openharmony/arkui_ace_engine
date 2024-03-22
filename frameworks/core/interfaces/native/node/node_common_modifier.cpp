@@ -1008,7 +1008,8 @@ void ResetAlign(ArkUINodeHandle node)
     ViewAbstract::SetAlign(frameNode, Alignment::CENTER);
 }
 
-void SetBackdropBlur(ArkUINodeHandle node, ArkUI_Float32 value)
+void SetBackdropBlur(
+    ArkUINodeHandle node, ArkUI_Float32 value, const ArkUI_Float32* blurValues, ArkUI_Int32 blurValuesSize)
 {
     ArkUI_Float32 blur = 0.0f;
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -1016,8 +1017,10 @@ void SetBackdropBlur(ArkUINodeHandle node, ArkUI_Float32 value)
     if (value > 0) {
         blur = value;
     }
+    BlurOption blurOption;
+    blurOption.grayscale.assign(blurValues, blurValues + blurValuesSize);
     CalcDimension dimensionRadius(blur, DimensionUnit::PX);
-    ViewAbstract::SetBackdropBlur(frameNode, dimensionRadius);
+    ViewAbstract::SetBackdropBlur(frameNode, dimensionRadius, blurOption);
 }
 
 void ResetBackdropBlur(ArkUINodeHandle node)
@@ -1025,8 +1028,9 @@ void ResetBackdropBlur(ArkUINodeHandle node)
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     double blur = 0.0;
+    BlurOption option;
     CalcDimension dimensionRadius(blur, DimensionUnit::PX);
-    ViewAbstract::SetBackdropBlur(frameNode, dimensionRadius);
+    ViewAbstract::SetBackdropBlur(frameNode, dimensionRadius, option);
 }
 
 void SetHueRotate(ArkUINodeHandle node, ArkUI_Float32 deg)
@@ -1048,11 +1052,21 @@ void ResetHueRotate(ArkUINodeHandle node)
     ViewAbstract::SetHueRotate(frameNode, deg);
 }
 
-void SetInvert(ArkUINodeHandle node, ArkUI_Float32 invert)
+void SetInvert(ArkUINodeHandle node, ArkUI_Float32* invert, ArkUI_Int32 length)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    InvertVariant invertVariant = static_cast<float>(invert);
+    InvertVariant invertVariant;
+    if (length == NUM_4) {
+        InvertOption option;
+        option.low_ = invert[NUM_0];
+        option.high_ = invert[NUM_1];
+        option.threshold_ = invert[NUM_2];
+        option.thresholdRange_ = invert[NUM_3];
+        invertVariant = option;
+    } else {
+        invertVariant = invert[NUM_0];
+    }
     ViewAbstract::SetInvert(frameNode, invertVariant);
 }
 
@@ -1177,16 +1191,18 @@ void ResetBrightness(ArkUINodeHandle node)
     ViewAbstract::SetBrightness(frameNode, value);
 }
 
-void SetBlur(ArkUINodeHandle node, ArkUI_Float32 value)
+void SetBlur(ArkUINodeHandle node, ArkUI_Float32 value, const ArkUI_Float32* blurValues, ArkUI_Int32 blurValuesSize)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     ArkUI_Float32 blur = 0.0f;
+    BlurOption blurOption;
+    blurOption.grayscale.assign(blurValues, blurValues + blurValuesSize);
     if (value > 0) {
         blur = value;
     }
     CalcDimension dimensionBlur(blur, DimensionUnit::PX);
-    ViewAbstract::SetFrontBlur(frameNode, dimensionBlur);
+    ViewAbstract::SetFrontBlur(frameNode, dimensionBlur, blurOption);
 }
 
 void ResetBlur(ArkUINodeHandle node)
@@ -1194,8 +1210,9 @@ void ResetBlur(ArkUINodeHandle node)
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     double blur = 0.0;
+    BlurOption option;
     CalcDimension dimensionBlur(blur, DimensionUnit::PX);
-    ViewAbstract::SetFrontBlur(frameNode, dimensionBlur);
+    ViewAbstract::SetFrontBlur(frameNode, dimensionBlur, option);
 }
 
 /**
@@ -2826,11 +2843,9 @@ void SetFlexBasis(ArkUINodeHandle node, const struct ArkUIStringAndFloat* flexBa
     Dimension result;
     if (flexBasisValue->valueStr != nullptr) {
         result = StringUtils::StringToDimensionWithUnit(std::string(flexBasisValue->valueStr), DimensionUnit::VP);
-        if (Container::LessThanAPIVersion(PlatformVersion::VERSION_TEN)) {
-            // flexbasis don't support percent case.
-            if (result.Unit() == DimensionUnit::PERCENT) {
-                result.SetUnit(DimensionUnit::AUTO);
-            }
+        // flexbasis don't support percent case.
+        if (result.Unit() == DimensionUnit::PERCENT) {
+            result.SetUnit(DimensionUnit::AUTO);
         }
     } else {
         result = Dimension(flexBasisValue->value, DimensionUnit::VP);
@@ -4173,14 +4188,16 @@ void SetBlendMode(ArkUINodeHandle node, int32_t blendMode, ArkUI_Int32 blendAppl
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    ViewAbstract::SetBlendMode(frameNode, static_cast<BlendMode>(blendMode));
+    ViewAbstractModelNG::SetBlendMode(frameNode, static_cast<OHOS::Ace::BlendMode>(blendMode));
+    ViewAbstractModelNG::SetBlendApplyType(frameNode, static_cast<OHOS::Ace::BlendApplyType>(blendApplyTypeValue));
 }
 
 void ResetBlendMode(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    ViewAbstract::SetBlendMode(frameNode, BlendMode::NONE);
+    ViewAbstractModelNG::SetBlendMode(frameNode, OHOS::Ace::BlendMode::NONE);
+    ViewAbstractModelNG::SetBlendApplyType(frameNode, OHOS::Ace::BlendApplyType::FAST);
 }
 
 void SetConstraintSize(ArkUINodeHandle node, const ArkUI_Float32* values, const ArkUI_Int32* units)

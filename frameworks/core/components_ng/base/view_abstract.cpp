@@ -1601,7 +1601,7 @@ void ViewAbstract::SetBackdropBlur(const Dimension &radius, const BlurOption &bl
     }
 }
 
-void ViewAbstract::SetBackdropBlur(FrameNode *frameNode, const Dimension &radius)
+void ViewAbstract::SetBackdropBlur(FrameNode *frameNode, const Dimension &radius, const BlurOption &blurOption)
 {
     CHECK_NULL_VOID(frameNode);
     auto target = frameNode->GetRenderContext();
@@ -1609,7 +1609,7 @@ void ViewAbstract::SetBackdropBlur(FrameNode *frameNode, const Dimension &radius
         if (target->GetBackgroundEffect().has_value()) {
             target->UpdateBackgroundEffect(std::nullopt);
         }
-        target->UpdateBackBlurRadius(radius);
+        target->UpdateBackBlur(radius, blurOption);
         if (target->GetBackBlurStyle().has_value()) {
             target->UpdateBackBlurStyle(std::nullopt);
         }
@@ -1649,12 +1649,12 @@ void ViewAbstract::SetFrontBlur(const Dimension &radius, const BlurOption &blurO
     }
 }
 
-void ViewAbstract::SetFrontBlur(FrameNode *frameNode, const Dimension &radius)
+void ViewAbstract::SetFrontBlur(FrameNode *frameNode, const Dimension &radius, const BlurOption &blurOption)
 {
     CHECK_NULL_VOID(frameNode);
     auto target = frameNode->GetRenderContext();
     if (target) {
-        target->UpdateFrontBlurRadius(radius);
+        target->UpdateFrontBlur(radius, blurOption);
         if (target->GetFrontBlurStyle().has_value()) {
             target->UpdateFrontBlurStyle(std::nullopt);
         }
