@@ -151,6 +151,7 @@ public:
 
     virtual void OnModifyDone()
     {
+#if (defined(__aarch64__) || defined(__x86_64__))
         FrameNode::PostTask(
             [weak = WeakClaim(this)]() {
                 if (Recorder::EventRecorder::Get().IsComponentRecordEnable()) {
@@ -163,6 +164,7 @@ public:
         if (IsNeedInitClickEventRecorder()) {
             InitClickEventRecorder();
         }
+#endif
         auto frameNode = frameNode_.Upgrade();
         auto children = frameNode->GetChildren();
         if (children.empty()) {
