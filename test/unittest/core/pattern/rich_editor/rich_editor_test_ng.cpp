@@ -708,11 +708,12 @@ HWTEST_F(RichEditorTestNg, RichEditorModel013, TestSize.Level1)
     auto spanItem = spanItemChildren.back();
     EXPECT_EQ(spanItemChildren.size(), 1);
     EXPECT_EQ(spanItem->GetSpanContent(), INIT_VALUE_1);
-    ASSERT_FALSE(spanItem->fontStyle->propTextColor.has_value());
-    ASSERT_FALSE(spanItem->fontStyle->propFontSize.has_value());
-    ASSERT_FALSE(spanItem->fontStyle->propItalicFontStyle.has_value());
-    ASSERT_FALSE(spanItem->fontStyle->propFontWeight.has_value());
-    ASSERT_FALSE(spanItem->fontStyle->propFontFamily.has_value());
+    EXPECT_FALSE(spanItem->fontStyle->propTextColor.has_value());
+    EXPECT_FALSE(spanItem->fontStyle->propFontSize.has_value());
+    EXPECT_FALSE(spanItem->fontStyle->propItalicFontStyle.has_value());
+    EXPECT_FALSE(spanItem->fontStyle->propFontWeight.has_value());
+    ASSERT_TRUE(spanItem->fontStyle->propFontFamily.has_value());
+    EXPECT_TRUE(spanItem->fontStyle->propFontFamily.value().empty());
 
     while (!ViewStackProcessor::GetInstance()->elementsStack_.empty()) {
         ViewStackProcessor::GetInstance()->elementsStack_.pop();
@@ -1317,6 +1318,7 @@ HWTEST_F(RichEditorTestNg, HandleClickEvent001, TestSize.Level1)
     richEditorPattern->HandleClickEvent(info);
     EXPECT_EQ(richEditorPattern->caretPosition_, 0);
 
+    richEditorPattern->caretPosition_ = 1;
     richEditorPattern->textSelector_.baseOffset = -1;
     richEditorPattern->textSelector_.destinationOffset = -1;
 
@@ -1327,6 +1329,7 @@ HWTEST_F(RichEditorTestNg, HandleClickEvent001, TestSize.Level1)
     EXPECT_EQ(richEditorPattern->textSelector_.destinationOffset, -1);
     EXPECT_EQ(richEditorPattern->caretPosition_, 0);
 
+    richEditorPattern->caretPosition_ = 1;
     richEditorPattern->isMouseSelect_ = false;
     richEditorPattern->hasClicked_ = false;
     richEditorPattern->HandleClickEvent(info);
@@ -1334,6 +1337,7 @@ HWTEST_F(RichEditorTestNg, HandleClickEvent001, TestSize.Level1)
     EXPECT_EQ(richEditorPattern->textSelector_.destinationOffset, -1);
     EXPECT_EQ(richEditorPattern->caretPosition_, 0);
 
+    richEditorPattern->caretPosition_ = 1;
     richEditorPattern->textSelector_.baseOffset = 0;
     richEditorPattern->textSelector_.destinationOffset = 1;
 
@@ -1344,6 +1348,7 @@ HWTEST_F(RichEditorTestNg, HandleClickEvent001, TestSize.Level1)
     EXPECT_EQ(richEditorPattern->textSelector_.destinationOffset, 1);
     EXPECT_EQ(richEditorPattern->caretPosition_, 0);
 
+    richEditorPattern->caretPosition_ = 1;
     richEditorPattern->isMouseSelect_ = false;
     richEditorPattern->hasClicked_ = false;
     richEditorPattern->HandleClickEvent(info);
@@ -3263,7 +3268,7 @@ HWTEST_F(RichEditorTestNg, DoubleHandleClickEvent001, TestSize.Level1)
     richEditorPattern->isMouseSelect_ = false;
     richEditorPattern->caretVisible_ = true;
     richEditorPattern->HandleDoubleClickEvent(info);
-    EXPECT_FALSE(richEditorPattern->caretVisible_);
+    EXPECT_TRUE(richEditorPattern->caretVisible_);
 
     AddSpan(INIT_VALUE_3);
     info.localLocation_ = Offset(50, 50);
@@ -3941,6 +3946,89 @@ HWTEST_F(RichEditorTestNg, RichEditorDragTest002, TestSize.Level1)
         ViewStackProcessor::GetInstance()->elementsStack_.pop();
     }
 }
+
+/**
+ * @tc.name: RichEditorDragTest003
+ * @tc.desc: test the drag of RichEditor with developer's onDragDrop function
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorTestNg, RichEditorDragTest003, TestSize.Level1)
+{
+    RichEditorModelNG model;
+    model.Create();
+    auto host = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(host, nullptr);
+    host->draggable_ = true;
+    auto eventHub = host->GetEventHub<EventHub>();
+    ASSERT_NE(eventHub, nullptr);
+    auto pattern = host->GetPattern<RichEditorPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto gesture = host->GetOrCreateGestureEventHub();
+    ASSERT_NE(gesture, nullptr);
+    EXPECT_TRUE(gesture->GetTextDraggable());
+    gesture->SetIsTextDraggable(true);
+    pattern->InitDragDropEvent();
+    EXPECT_TRUE(eventHub->HasDefaultOnDragStart());
+    EXPECT_TRUE(eventHub->HasOnDrop());
+    auto controller = pattern->GetRichEditorController();
+    ASSERT_NE(controller, nullptr);
+    TextStyle style;
+    TextSpanOptions options;
+    options.value = INIT_VALUE_3;
+    options.style = style;
+    auto index = controller->AddTextSpan(options);
+    EXPECT_EQ(index, 0);
+    pattern->textSelector_.Update(0, 6);
+    auto event = AceType::MakeRefPtr<OHOS::Ace::DragEvent>();
+    eventHub->FireOnDrop(event, "");
+    EXPECT_EQ(pattern->status_, Status::NONE);
+    while (!ViewStackProcessor::GetInstance()->elementsStack_.empty()) {
+        ViewStackProcessor::GetInstance()->elementsStack_.pop();
+    }
+}
+
+/**
+ * @tc.name: RichEditorDragTest004
+ * @tc.desc: test the drag of RichEditor with developer's DragDropTextOperation function
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorTestNg, RichEditorDragTest004, TestSize.Level1)
+{
+    RichEditorModelNG model;
+    model.Create();
+    auto host = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(host, nullptr);
+    host->draggable_ = true;
+    auto eventHub = host->GetEventHub<EventHub>();
+    ASSERT_NE(eventHub, nullptr);
+    auto pattern = host->GetPattern<RichEditorPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto gesture = host->GetOrCreateGestureEventHub();
+    ASSERT_NE(gesture, nullptr);
+    EXPECT_TRUE(gesture->GetTextDraggable());
+    gesture->SetIsTextDraggable(true);
+    pattern->InitDragDropEvent();
+    EXPECT_TRUE(eventHub->HasOnDrop());
+    auto controller = pattern->GetRichEditorController();
+    ASSERT_NE(controller, nullptr);
+    TextStyle style;
+    TextSpanOptions options;
+    options.value = INIT_VALUE_1 + INIT_VALUE_1;
+    options.style = style;
+    auto index = controller->AddTextSpan(options);
+    EXPECT_EQ(index, 0);
+    pattern->dragPosition_ = 0;
+    pattern->caretPosition_ = options.value.length();
+    pattern->DragDropTextOperation(INIT_VALUE_1);
+    pattern->dragPosition_ = options.value.length();
+    pattern->caretPosition_ = 0;
+    pattern->DragDropTextOperation(INIT_VALUE_1);
+    EXPECT_EQ(pattern->status_, Status::NONE);
+    while (!ViewStackProcessor::GetInstance()->elementsStack_.empty()) {
+        ViewStackProcessor::GetInstance()->elementsStack_.pop();
+    }
+}
+
 /**
  * @tc.name: GetTextSpansInfo
  * @tc.desc: test get paragraphStyle

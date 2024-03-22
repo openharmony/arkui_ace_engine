@@ -315,23 +315,28 @@ void TextPattern::OnHandleMove(const RectF& handleRect, bool isFirstHandle)
 
     CHECK_NULL_VOID(paragraph_);
     // the handle position is calculated based on the middle of the handle height.
-    if (isFirstHandle) {
-        auto start = GetHandleIndex(Offset(localOffset.GetX(),
-            localOffset.GetY() + (selectOverlayProxy_->IsHandleReverse() ? handleRect.Height() : 0)));
-        HandleSelectionChange(start, textSelector_.destinationOffset);
-    } else {
-        auto end = GetHandleIndex(Offset(localOffset.GetX(),
-            localOffset.GetY() + (selectOverlayProxy_->IsHandleReverse() || NearEqual(localOffset.GetY(), 0)
-                                         ? 0
-                                         : handleRect.Height())));
-        HandleSelectionChange(textSelector_.baseOffset, end);
-    }
+    UpdateSelectorOnHandleMove(localOffset, handleRect.Height(), isFirstHandle);
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 
     CHECK_NULL_VOID(selectOverlayProxy_);
     auto start = textSelector_.GetTextStart();
     auto end = textSelector_.GetTextEnd();
     selectOverlayProxy_->SetSelectInfo(GetSelectedText(start, end));
+}
+
+void TextPattern::UpdateSelectorOnHandleMove(const OffsetF& localOffset, float handleHeight, bool isFirstHandle)
+{
+    if (isFirstHandle) {
+        auto start = GetHandleIndex(Offset(localOffset.GetX(),
+            localOffset.GetY() + (selectOverlayProxy_->IsHandleReverse() ? handleHeight : 0)));
+        HandleSelectionChange(start, textSelector_.destinationOffset);
+    } else {
+        auto end = GetHandleIndex(Offset(localOffset.GetX(),
+            localOffset.GetY() + (selectOverlayProxy_->IsHandleReverse() || NearEqual(localOffset.GetY(), 0)
+                                         ? 0
+                                         : handleHeight)));
+        HandleSelectionChange(textSelector_.baseOffset, end);
+    }
 }
 
 void TextPattern::OnHandleMoveDone(const RectF& handleRect, bool isFirstHandle)
@@ -1920,11 +1925,6 @@ void TextPattern::OnModifyDone()
         enabled_ = enabledCache;
         host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     }
-    if (isSpanStringMode_) {
-        for (const auto& span : spans_) {
-            InheritParentProperties(span);
-        }
-    }
 }
 
 void TextPattern::ToJsonValue(std::unique_ptr<JsonValue>& json) const
@@ -2125,6 +2125,14 @@ void TextPattern::BeforeCreateLayoutWrapper()
     if (!isSpanStringMode_) {
         PreCreateLayoutWrapper();
     } else {
+        auto host = GetHost();
+        CHECK_NULL_VOID(host);
+        for (const auto& child : host->GetChildren()) {
+            host->RemoveChild(child);
+        }
+        for (const auto& span : spans_) {
+            textForDisplay_ += span->content;
+        }
         // mark content dirty
         if (contentMod_) {
             contentMod_->ContentChange();
@@ -2876,37 +2884,7 @@ void TextPattern::UpdateSpanItems(const std::list<RefPtr<SpanItem>>& spanItems)
     spans_ = spanItems;
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    for (const auto& span : spans_) {
-        InheritParentProperties(span);
-    }
+    CloseSelectOverlay();
     host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
-}
-
-#define INHERIT_TEXT_STYLE(group, name, func)                                     \
-    do {                                                                          \
-        if ((textLayoutProp)->Has##name() && !spanItem->group->Has##name()) {      \
-            spanItem->group->func(textLayoutProp->Get##name().value());           \
-        }                                                                         \
-    } while (false)
-
-void TextPattern::InheritParentProperties(const RefPtr<SpanItem>& spanItem)
-{
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    auto textLayoutProp = host->GetLayoutProperty<TextLayoutProperty>();
-    CHECK_NULL_VOID(textLayoutProp);
-    INHERIT_TEXT_STYLE(fontStyle, FontSize, UpdateFontSize);
-    INHERIT_TEXT_STYLE(fontStyle, TextColor, UpdateTextColor);
-    INHERIT_TEXT_STYLE(fontStyle, ItalicFontStyle, UpdateItalicFontStyle);
-    INHERIT_TEXT_STYLE(fontStyle, FontWeight, UpdateFontWeight);
-    INHERIT_TEXT_STYLE(fontStyle, FontFamily, UpdateFontFamily);
-    INHERIT_TEXT_STYLE(fontStyle, TextShadow, UpdateTextShadow);
-    INHERIT_TEXT_STYLE(fontStyle, TextCase, UpdateTextCase);
-    INHERIT_TEXT_STYLE(fontStyle, TextDecoration, UpdateTextDecoration);
-    INHERIT_TEXT_STYLE(fontStyle, TextDecorationColor, UpdateTextDecorationColor);
-    INHERIT_TEXT_STYLE(fontStyle, TextDecorationStyle, UpdateTextDecorationStyle);
-    INHERIT_TEXT_STYLE(fontStyle, LetterSpacing, UpdateLetterSpacing);
-
-    INHERIT_TEXT_STYLE(textLineStyle, LineHeight, UpdateLineHeight);
 }
 } // namespace OHOS::Ace::NG

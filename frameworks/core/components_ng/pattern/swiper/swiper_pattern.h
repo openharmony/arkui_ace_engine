@@ -38,6 +38,7 @@
 #include "core/components_ng/pattern/swiper/swiper_model.h"
 #include "core/components_ng/pattern/swiper/swiper_paint_method.h"
 #include "core/components_ng/pattern/swiper/swiper_paint_property.h"
+#include "core/components_ng/pattern/swiper/swiper_utils.h"
 #include "core/components_ng/pattern/tabs/tab_content_transition_proxy.h"
 #include "core/components_v2/inspector/utils.h"
 
@@ -690,11 +691,11 @@ private:
     void FireAnimationStartEvent(int32_t currentIndex, int32_t nextIndex, const AnimationCallbackInfo& info) const;
     void FireAnimationEndEvent(int32_t currentIndex, const AnimationCallbackInfo& info) const;
     void FireGestureSwipeEvent(int32_t currentIndex, const AnimationCallbackInfo& info) const;
-    void FireSwiperCustomAnimationEvent(std::set<int32_t> indexInVisibleArea);
+    void FireSwiperCustomAnimationEvent();
+    void FireContentDidScrollEvent();
     void HandleSwiperCustomAnimation(float offset);
-    std::set<int32_t> CalculateAndUpdateItemInfo(float offset);
-    void UpdateItemInfoInCustomAnimation(int32_t index, float startPos, float endPos,
-        std::set<int32_t>& indexInVisibleArea);
+    void CalculateAndUpdateItemInfo(float offset);
+    void UpdateItemInfoInCustomAnimation(int32_t index, float startPos, float endPos);
 
     float GetItemSpace() const;
     float GetPrevMargin() const;
@@ -893,7 +894,9 @@ private:
 
     bool SupportSwiperCustomAnimation()
     {
-        return (onSwiperCustomContentTransition_ || onContentDidScroll_) && !hasCachedCapture_;
+        auto swiperLayoutProperty = GetLayoutProperty<SwiperLayoutProperty>();
+        return (onSwiperCustomContentTransition_ || onContentDidScroll_) &&
+            !hasCachedCapture_ && SwiperUtils::IsStretch(swiperLayoutProperty);
     }
 
     RefPtr<PanEvent> panEvent_;

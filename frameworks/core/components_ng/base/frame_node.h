@@ -317,6 +317,18 @@ public:
         return layoutProperty_->GetVisibility().value_or(VisibleType::VISIBLE) == VisibleType::VISIBLE;
     }
 
+    bool IsPrivacySensitive() const
+    {
+        return isPrivacySensitive_;
+    }
+
+    void SetPrivacySensitive(bool flag)
+    {
+        isPrivacySensitive_ = flag;
+    }
+
+    void ChangeSensitiveStyle(bool isSensitive);
+
     void ToJsonValue(std::unique_ptr<JsonValue>& json) const override;
 
     void FromJson(const std::unique_ptr<JsonValue>& json) override;
@@ -801,6 +813,7 @@ private:
 
     // dump self info.
     void DumpInfo() override;
+    void DumpDragInfo();
     void DumpOverlayInfo();
     void DumpCommonInfo();
     void DumpSafeAreaInfo();
@@ -883,6 +896,7 @@ private:
     bool isRenderDirtyMarked_ = false;
     bool isMeasureBoundary_ = false;
     bool hasPendingRequest_ = false;
+    bool isPrivacySensitive_ = false;
 
     // for container, this flag controls only the last child in touch area is consuming event.
     bool exclusiveEventForChild_ = false;

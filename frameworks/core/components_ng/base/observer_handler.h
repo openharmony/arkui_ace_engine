@@ -32,6 +32,9 @@ namespace OHOS::Ace::NG {
 enum class NavDestinationState {
     ON_SHOWN = 0,
     ON_HIDDEN = 1,
+    ON_APPEAR = 2,
+    ON_DISAPPEAR = 3,
+    ON_BACKPRESS = 100,
 };
 
 struct NavDestinationInfo {

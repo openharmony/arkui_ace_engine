@@ -1923,6 +1923,7 @@ void OverlayManager::CloseDialog(const RefPtr<FrameNode>& dialogNode)
     TAG_LOGD(AceLogTag::ACE_OVERLAY, "close dialog enter");
     DeleteDialogHotAreas(dialogNode);
     auto dialogLayoutProp = AceType::DynamicCast<DialogLayoutProperty>(dialogNode->GetLayoutProperty());
+    CHECK_NULL_VOID(dialogLayoutProp);
     if (dialogLayoutProp && dialogLayoutProp->GetShowInSubWindowValue(false) &&
         dialogLayoutProp->GetIsModal().value_or(true)) {
         auto parentPipelineContext = PipelineContext::GetMainPipelineContext();
@@ -2169,7 +2170,7 @@ bool OverlayManager::RemoveModalInOverlay()
     auto rootNode = FindWindowScene(topModalNode);
     CHECK_NULL_RETURN(rootNode, true);
     auto overlay = DynamicCast<FrameNode>(rootNode->GetLastChild());
-    if (overlay && overlay->GetFirstChild() != topModalNode) {
+    if (overlay && overlay->GetTag() == V2::SHEET_WRAPPER_TAG && overlay->GetFirstChild() != topModalNode) {
         return true;
     }
     ModalPageLostFocus(topModalNode);
@@ -3656,6 +3657,7 @@ void OverlayManager::PlayKeyboardTransition(RefPtr<FrameNode> customKeyboard, bo
         return;
     }
     auto pageHeight = pageNode->GetGeometryNode()->GetFrameSize().Height();
+    auto keyboardHeight = customKeyboard->GetGeometryNode()->GetFrameSize().Height();
     if (isTransitionIn) {
         context->OnTransformTranslateUpdate({ 0.0f, pageHeight, 0.0f });
         AnimationUtils::Animate(option, [context]() {
@@ -3671,9 +3673,9 @@ void OverlayManager::PlayKeyboardTransition(RefPtr<FrameNode> customKeyboard, bo
             parent->RemoveChild(customKeyboard);
         });
         context->OnTransformTranslateUpdate({ 0.0f, 0.0f, 0.0f });
-        AnimationUtils::Animate(option, [context, pageHeight]() {
+        AnimationUtils::Animate(option, [context, keyboardHeight]() {
                 if (context) {
-                    context->OnTransformTranslateUpdate({ 0.0f, pageHeight, 0.0f });
+                    context->OnTransformTranslateUpdate({ 0.0f, keyboardHeight, 0.0f });
                 }
             },
             option.GetOnFinishEvent());

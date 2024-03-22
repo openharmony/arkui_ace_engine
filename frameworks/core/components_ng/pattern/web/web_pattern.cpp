@@ -1595,6 +1595,14 @@ void WebPattern::OnDefaultTextEncodingFormatUpdate(const std::string& value)
     }
 }
 
+void WebPattern::OnNativeVideoPlayerConfigUpdate(const std::tuple<bool, bool>& config)
+{
+    if (delegate_) {
+        delegate_->UpdateNativeVideoPlayerConfig(
+            std::get<0>(config), std::get<1>(config));
+    }
+}
+
 void WebPattern::RegistVirtualKeyBoardListener()
 {
     if (!needUpdateWeb_) {

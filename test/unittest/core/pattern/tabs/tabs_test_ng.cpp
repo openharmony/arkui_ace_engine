@@ -1960,6 +1960,26 @@ HWTEST_F(TabsTestNg, TabsModelSetTabBarWidth001, TestSize.Level1)
 }
 
 /**
+ * @tc.name: TabsModelSetWidthAuto001
+ * @tc.desc: test SetWidthAuto and SetHeightAuto
+ * @tc.type: FUNC
+ */
+HWTEST_F(TabsTestNg, TabsModelSetWidthAuto001, TestSize.Level1)
+{
+ /**
+  * @tc.steps: step1. Test function SetWidthAuto and SetHeightAuto When isAuto is true.
+  * @tc.expected: Related functions run ok.
+  */
+    CreateWithItem([](TabsModelNG model) {
+        model.SetWidthAuto(true);
+        model.SetHeightAuto(true);
+    });
+    auto tabsLayoutProperty = layoutProperty_;
+    EXPECT_TRUE(tabsLayoutProperty->GetWidthAutoValue(false));
+    EXPECT_TRUE(tabsLayoutProperty->GetHeightAutoValue(false));
+}
+
+/**
  * @tc.name: TabsModelSetAnimationDuration001
  * @tc.desc: test SetAnimationDuration
  * @tc.type: FUNC

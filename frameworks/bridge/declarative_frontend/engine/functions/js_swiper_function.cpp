@@ -28,7 +28,8 @@ void JsSwiperContentTransitionProxy::JSBind(BindingTarget globalObj)
     JSClass<JsSwiperContentTransitionProxy>::CustomProperty(
         "position", &JsSwiperContentTransitionProxy::GetPosition, &JsSwiperContentTransitionProxy::SetPosition);
     JSClass<JsSwiperContentTransitionProxy>::CustomProperty(
-        "mainLength", &JsSwiperContentTransitionProxy::GetMainLength, &JsSwiperContentTransitionProxy::SetMainLength);
+        "mainAxisLength", &JsSwiperContentTransitionProxy::GetMainAxisLength,
+        &JsSwiperContentTransitionProxy::SetMainAxisLength);
     JSClass<JsSwiperContentTransitionProxy>::CustomMethod(
         "finishTransition", &JsSwiperContentTransitionProxy::FinishTransition);
     JSClass<JsSwiperContentTransitionProxy>::Bind(
@@ -80,18 +81,18 @@ void JsSwiperContentTransitionProxy::GetPosition(const JSCallbackInfo& args)
     args.SetReturnValue(toRef);
 }
 
-void JsSwiperContentTransitionProxy::SetMainLength(const JSCallbackInfo& args)
+void JsSwiperContentTransitionProxy::SetMainAxisLength(const JSCallbackInfo& args)
 {
-    TAG_LOGD(AceLogTag::ACE_SWIPER, "SwiperContentTransitionProxy can not support set mainLength value.");
+    TAG_LOGD(AceLogTag::ACE_SWIPER, "SwiperContentTransitionProxy can not support set mainAxisLength value.");
 }
 
-void JsSwiperContentTransitionProxy::GetMainLength(const JSCallbackInfo& args)
+void JsSwiperContentTransitionProxy::GetMainAxisLength(const JSCallbackInfo& args)
 {
-    auto mainLength = 0.0f;
+    auto mainAxisLength = 0.0f;
     if (proxy_) {
-        mainLength = proxy_->GetMainLength();
+        mainAxisLength = proxy_->GetMainAxisLength();
     }
-    auto toRef = JSRef<JSVal>::Make(JSVal(ToJSValue(mainLength)));
+    auto toRef = JSRef<JSVal>::Make(JSVal(ToJSValue(mainAxisLength)));
     args.SetReturnValue(toRef);
 }
 
@@ -180,14 +181,14 @@ void JsSwiperFunction::Execute(const RefPtr<SwiperContentTransitionProxy>& proxy
     JsFunction::ExecuteJS(1, &param);
 }
 
-void JsSwiperFunction::Execute(int32_t selectedIndex, int32_t index, float position, float mainLength)
+void JsSwiperFunction::Execute(int32_t selectedIndex, int32_t index, float position, float mainAxisLength)
 {
     JSRef<JSVal> selectedIndexValue = JSRef<JSVal>::Make(ToJSValue(selectedIndex));
     JSRef<JSVal> indexValue = JSRef<JSVal>::Make(ToJSValue(index));
     JSRef<JSVal> positionValue = JSRef<JSVal>::Make(ToJSValue(position));
-    JSRef<JSVal> mainLengthValue = JSRef<JSVal>::Make(ToJSValue(mainLength));
+    JSRef<JSVal> mainAxisLengthValue = JSRef<JSVal>::Make(ToJSValue(mainAxisLength));
 
-    JSRef<JSVal> params[] = { selectedIndexValue, indexValue, positionValue, mainLengthValue };
+    JSRef<JSVal> params[] = { selectedIndexValue, indexValue, positionValue, mainAxisLengthValue };
     JsFunction::ExecuteJS(4, params);
 }
 } // namespace OHOS::Ace::Framework

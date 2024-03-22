@@ -18,6 +18,7 @@
 
 #include <optional>
 #include <string>
+#include <tuple>
 
 #include "core/components/web/web_property.h"
 #include "core/components_ng/property/property.h"
@@ -72,6 +73,8 @@ struct WebPatternProperty {
     ACE_DEFINE_PROPERTY_GROUP_ITEM(NativeEmbedRuleTag, std::string);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(NativeEmbedRuleType, std::string);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(TextAutosizing, bool);
+    using NativeVideoPlayerConfigType = std::tuple<bool, bool>;
+    ACE_DEFINE_PROPERTY_GROUP_ITEM(NativeVideoPlayerConfig, NativeVideoPlayerConfigType);
 };
 
 } // namespace OHOS::Ace::NG

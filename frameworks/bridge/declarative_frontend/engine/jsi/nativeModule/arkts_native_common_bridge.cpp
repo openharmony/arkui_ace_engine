@@ -4218,7 +4218,8 @@ ArkUINativeModuleValue CommonBridge::SetBackgroundEffect(ArkUIRuntimeCallInfo* r
         ParseBlurOption(vm, blurOptionsArg, blurOption);
     }
 
-    GetArkUINodeModifiers()->getCommonModifier()->setBackgroundEffect(nativeNode, radius.CalcValue().c_str(),
+    GetArkUINodeModifiers()->getCommonModifier()->setBackgroundEffect(
+        nativeNode, static_cast<ArkUI_Float32>(radius.Value()),
         saturation, brightness, color.GetValue(), static_cast<ArkUI_Int32>(adaptiveColor),
         blurOption.grayscale.data(), blurOption.grayscale.size());
 

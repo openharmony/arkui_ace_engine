@@ -190,6 +190,29 @@ int32_t InsertChildAfter(ArkUI_NodeHandle parentNode, ArkUI_NodeHandle childNode
     return ERROR_CODE_NO_ERROR;
 }
 
+int32_t InsertChildBefore(ArkUI_NodeHandle parentNode, ArkUI_NodeHandle childNode, ArkUI_NodeHandle siblingNode)
+{
+    CHECK_NULL_RETURN(parentNode, ERROR_CODE_PARAM_INVALID);
+    CHECK_NULL_RETURN(childNode, ERROR_CODE_PARAM_INVALID);
+    // already check in entry point.
+    auto* impl = GetFullImpl();
+    impl->getBasicAPI()->insertChildBefore(
+        parentNode->uiNodeHandle, childNode->uiNodeHandle, siblingNode ? siblingNode->uiNodeHandle : nullptr);
+    impl->getBasicAPI()->markDirty(parentNode->uiNodeHandle, ARKUI_DIRTY_FLAG_MEASURE_BY_CHILD_REQUEST);
+    return ERROR_CODE_NO_ERROR;
+}
+
+int32_t InsertChildAt(ArkUI_NodeHandle parentNode, ArkUI_NodeHandle childNode, int32_t position)
+{
+    CHECK_NULL_RETURN(parentNode, ERROR_CODE_PARAM_INVALID);
+    CHECK_NULL_RETURN(childNode, ERROR_CODE_PARAM_INVALID);
+    // already check in entry point.
+    auto* impl = GetFullImpl();
+    impl->getBasicAPI()->insertChildAt(parentNode->uiNodeHandle, childNode->uiNodeHandle, position);
+    impl->getBasicAPI()->markDirty(parentNode->uiNodeHandle, ARKUI_DIRTY_FLAG_MEASURE_BY_CHILD_REQUEST);
+    return ERROR_CODE_NO_ERROR;
+}
+
 void SetAttribute(ArkUI_NodeHandle node, ArkUI_NodeAttributeType attribute, const char* value)
 {
     SetNodeAttribute(node, attribute, value);

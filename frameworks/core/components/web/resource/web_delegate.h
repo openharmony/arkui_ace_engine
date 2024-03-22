@@ -567,6 +567,7 @@ public:
     void UpdateCopyOptionMode(const int32_t copyOptionModeValue);
     void UpdateTextAutosizing(bool isTextAutosizing);
     void UpdateMetaViewport(bool isMetaViewportEnabled);
+    void UpdateNativeVideoPlayerConfig(bool enable, bool shouldOverlay);
     void LoadUrl();
     void CreateWebMessagePorts(std::vector<RefPtr<WebMessagePort>>& ports);
     void PostWebMessage(std::string& message, std::vector<RefPtr<WebMessagePort>>& ports, std::string& uri);

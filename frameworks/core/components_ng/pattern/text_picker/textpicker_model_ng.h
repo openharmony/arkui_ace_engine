@@ -107,7 +107,6 @@ public:
     static void SetValues(FrameNode* frameNode, const std::vector<std::string>& values);
     static void SetColumns(FrameNode* frameNode, const std::vector<NG::TextCascadePickerOptions>& options);
     static void SetDefaultAttributes(RefPtr<FrameNode>& frameNode, const RefPtr<PickerTheme>& pickerTheme);
-    static void SetDivider(FrameNode* frameNode, const ItemDivider& divider);
     static PickerTextStyle getSelectedTextStyle(FrameNode* frameNode);
     static PickerTextStyle getNormalTextStyle(FrameNode* frameNode);
     static PickerTextStyle getDisappearTextStyle(FrameNode* frameNode);

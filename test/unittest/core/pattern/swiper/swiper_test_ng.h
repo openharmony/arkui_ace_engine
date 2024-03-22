@@ -82,6 +82,7 @@ public:
     static void CreateItem(int32_t itemNumber = ITEM_NUMBER);
 
     void InitCaptureTest();
+    void CreateWithCustomAnimation();
 
     RefPtr<FrameNode> frameNode_;
     RefPtr<SwiperPattern> pattern_;

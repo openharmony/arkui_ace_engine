@@ -125,6 +125,29 @@ void UINode::AddChildAfter(const RefPtr<UINode>& child, const RefPtr<UINode>& si
     DoAddChild(it, child, false);
 }
 
+void UINode::AddChildBefore(const RefPtr<UINode>& child, const RefPtr<UINode>& siblingNode)
+{
+    CHECK_NULL_VOID(child);
+    CHECK_NULL_VOID(siblingNode);
+    auto it = std::find(children_.begin(), children_.end(), child);
+    if (it != children_.end()) {
+        LOGW("Child node already exists. Existing child nodeId %{public}d, add %{public}s child nodeId nodeId "
+             "%{public}d",
+            (*it)->GetId(), child->GetTag().c_str(), child->GetId());
+        return;
+    }
+    // remove from disappearing children
+    RemoveDisappearingChild(child);
+    auto siblingNodeIter = std::find(children_.begin(), children_.end(), siblingNode);
+    if (siblingNodeIter != children_.end()) {
+        DoAddChild(siblingNodeIter, child, false);
+        return;
+    }
+    it = children_.begin();
+    std::advance(it, -1);
+    DoAddChild(it, child, false);
+}
+
 std::list<RefPtr<UINode>>::iterator UINode::RemoveChild(const RefPtr<UINode>& child, bool allowTransition)
 {
     CHECK_NULL_RETURN(child, children_.end());

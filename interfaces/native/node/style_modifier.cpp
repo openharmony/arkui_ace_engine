@@ -3721,14 +3721,14 @@ int32_t SetScrollTo(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
     values[2] = item->value[1].f32;
     values[3] = UNIT_VP;
     if (item->size > 2) {
-        values[4] = item->value[2].i32;
+        values[NUM_4] = static_cast<ArkUI_Float32>(item->value[NUM_2].i32);
     }
     // check size
     if (item->size > NUM_3 && CheckAttributeIsAnimationCurve(item->value[NUM_3].i32)) {
-        values[5] = item->value[3].i32;
+        values[NUM_5] = static_cast<ArkUI_Float32>(item->value[NUM_3].i32);
     }
     if (item->size > 4) {
-        values[6] = item->value[4].i32;
+        values[NUM_6] = static_cast<ArkUI_Float32>(item->value[NUM_4].i32);
     }
     fullImpl->getNodeModifiers()->getScrollModifier()->setScrollTo(node->uiNodeHandle, values);
     return ERROR_CODE_NO_ERROR;

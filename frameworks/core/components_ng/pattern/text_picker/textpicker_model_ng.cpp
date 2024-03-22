@@ -1030,12 +1030,7 @@ void TextPickerModelNG::SetDivider(const ItemDivider& divider)
     auto textPickerPattern = frameNode->GetPattern<TextPickerPattern>();
     CHECK_NULL_VOID(textPickerPattern);
     textPickerPattern->SetDivider(divider);
+    textPickerPattern->SetCustomDividerFlag(true);
     ACE_UPDATE_LAYOUT_PROPERTY(TextPickerLayoutProperty, Divider, divider);
-}
-
-void TextPickerModelNG::SetDivider(FrameNode* frameNode, const ItemDivider& divider)
-{
-    CHECK_NULL_VOID(frameNode);
-    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextPickerLayoutProperty, Divider, divider, frameNode);
 }
 } // namespace OHOS::Ace::NG

@@ -153,7 +153,7 @@ public:
 
     void ClearJSFrameNodeOnAppear();
 
-    void FireOnAppear();
+    virtual void FireOnAppear();
 
     void ClearUserOnDisAppear()
     {
@@ -289,6 +289,16 @@ public:
         return onDragEnd_;
     }
 
+    bool HasOnDragEnter() const
+    {
+        return static_cast<bool>(onDragEnter_);
+    }
+
+    bool HasOnDragLeave() const
+    {
+        return static_cast<bool>(onDragLeave_);
+    }
+
     bool HasOnDragEnd() const
     {
         return static_cast<bool>(onDragEnd_);
@@ -309,6 +319,26 @@ public:
     bool HasOnDrop() const
     {
         return onDrop_ != nullptr;
+    }
+
+    bool HasCustomerOnDragEnter() const
+    {
+        return customerOnDragEnter_ != nullptr;
+    }
+
+    bool HasCustomerOnDragLeave() const
+    {
+        return customerOnDragLeave_ != nullptr;
+    }
+
+    bool HasCustomerOnDragMove() const
+    {
+        return customerOnDragMove_ != nullptr;
+    }
+
+    bool HasCustomerOnDragEnd() const
+    {
+        return customerOnDragEnd_ != nullptr;
     }
 
     bool HasCustomerOnDrop() const
@@ -528,6 +558,8 @@ public:
 
 protected:
     virtual void OnModifyDone() {}
+    std::function<void()> onAppear_;
+    std::function<void()> onJSFrameNodeAppear_;
 
 private:
     WeakPtr<FrameNode> host_;
@@ -536,9 +568,7 @@ private:
     RefPtr<FocusHub> focusHub_;
     RefPtr<StateStyleManager> stateStyleMgr_;
 
-    std::function<void()> onAppear_;
     std::function<void()> onDisappear_;
-    std::function<void()> onJSFrameNodeAppear_;
     std::function<void()> onJSFrameNodeDisappear_;
     OnAreaChangedFunc onAreaChanged_;
     std::unordered_map<int32_t, OnAreaChangedFunc> onAreaChangedInnerCallbacks_;
