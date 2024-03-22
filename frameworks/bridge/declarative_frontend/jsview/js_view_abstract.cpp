@@ -7638,7 +7638,11 @@ bool JSViewAbstract::ParseShadowProps(const JSRef<JSVal>& jsValue, Shadow& shado
     } else if (ParseJsColor(jsObj->GetProperty("color"), color)) {
         shadow.SetColor(color);
     }
-    auto type = jsObj->GetPropertyValue<int32_t>("type", static_cast<int32_t>(ShadowType::COLOR));
+    int32_t type = static_cast<int32_t>(ShadowType::COLOR);
+    JSViewAbstract::ParseJsInt32(jsObj->GetProperty("type"), type);
+    if (type != static_cast<int32_t>(ShadowType::BLUR)) {
+        type = static_cast<int32_t>(ShadowType::COLOR);
+    }
     type = std::clamp(type, static_cast<int32_t>(ShadowType::COLOR), static_cast<int32_t>(ShadowType::BLUR));
     shadow.SetShadowType(static_cast<ShadowType>(type));
     bool isFilled = jsObj->GetPropertyValue<bool>("fill", false);
