@@ -5155,6 +5155,7 @@ function uiNodeCleanUpIdleTask() {
     
     UINodeRegisterProxy.obtainDeletedElmtIds();
     UINodeRegisterProxy.unregisterElmtIdsFromViewPUs();
+    UINodeRegisterProxy.cleanUpDeadReferences();
 }
 class UINodeRegisterProxy {
     constructor() {
@@ -5219,6 +5220,10 @@ class UINodeRegisterProxy {
             ObserveV3.getObserve().clearBinding(rmElmtInfo.elmtId);
         });
         this.removeElementsInfo_.length = 0;
+    }
+    static cleanUpDeadReferences() {
+        
+        ObserveV3.getObserve().cleanUpDeadReferences();
     }
 }
 UINodeRegisterProxy.notRecordingDependencies = -1;
@@ -6950,64 +6955,129 @@ class ObserveV3 {
         this.bindId_ = id;
         if (cmp != null) {
             this.clearBinding(id);
-            this.id2cmp_[id] = (cmp instanceof ViewPU) ? new WeakRef(cmp) : cmp;
+            this.id2cmp_[id] = new WeakRef(cmp);
         }
     }
     // clear any previously created dependency view model object to elmtId
     // find these view model objects with the reverse map id2targets_
     clearBinding(id) {
-        var _a;
-        (_a = this.id2targets_[id]) === null || _a === void 0 ? void 0 : _a.forEach((target) => {
-            var _a, _b;
-            const idRefs = target[ObserveV3.ID_REFS];
-            const symRefs = target[ObserveV3.SYMBOL_REFS];
-            if (idRefs) {
-                (_a = idRefs[id]) === null || _a === void 0 ? void 0 : _a.forEach(key => { var _a; return (_a = symRefs === null || symRefs === void 0 ? void 0 : symRefs[key]) === null || _a === void 0 ? void 0 : _a.delete(id); });
-                delete idRefs[id];
-            }
-            else {
-                for (let key in symRefs) {
-                    (_b = symRefs[key]) === null || _b === void 0 ? void 0 : _b.delete(id);
+        const targetSet = this.id2targets_[id];
+        let target;
+        if (targetSet && targetSet instanceof Set) {
+            targetSet.forEach((weakTarget) => {
+                var _a, _b;
+                if ((target = weakTarget.deref()) && target instanceof Object) {
+                    const idRefs = target[ObserveV3.ID_REFS];
+                    const symRefs = target[ObserveV3.SYMBOL_REFS];
+                    if (idRefs) {
+                        (_a = idRefs[id]) === null || _a === void 0 ? void 0 : _a.forEach(key => { var _a; return (_a = symRefs === null || symRefs === void 0 ? void 0 : symRefs[key]) === null || _a === void 0 ? void 0 : _a.delete(id); });
+                        delete idRefs[id];
+                    }
+                    else {
+                        for (let key in symRefs) {
+                            (_b = symRefs[key]) === null || _b === void 0 ? void 0 : _b.delete(id);
+                        }
+                        ;
+                    }
                 }
-                ;
-            }
-        });
+            });
+        }
         delete this.id2targets_[id];
         delete this.id2cmp_[id];
         
         
     }
     /**
-     * Method only for testing
      *
-     * @param expectedLength
-     * @returns true if length matches
+     * this.cleanUpId2CmpDeadReferences()
+     * id2cmp is a 'map' object id => WeakRef<Object> where object is ViewV2, ViewPU, MonitorV3 or ComputedV3
+     * This method iterates over the object entries and deleted all those entries whose value can no longer
+     * be deref'ed.
+     *
+     * cleanUpId2TargetsDeadReferences()
+     * is2targets is a 'map' object id => Set<WeakRef<Object>>
+     * the method traverses over the object entries and for each value of type
+     * Set<WeakRef<Object>> removes all those items from the set that can no longer be deref'ed.
+     *
+     * According to JS specifications, it is up to ArlTS runtime GC implementation when to collect unreferences objects.
+     * Parameters such as available memory, ArkTS processing load, number and size of all JS objects for GC collection
+     * can impact the time delay between an object loosing last reference and GC collecting this object.
+     *
+     * WeakRef.deref() returns the object until GC has collected it.
+     * The id2cmp and is2targets cleanup herein depends on WeakRef.deref() to return undefined, i.e. it depends on GC
+     * collecting 'cmp' or 'target' objects. Only then the algorithm can remove the entry from id2cmp / from id2target.
+     * It is therefore to be expected behavior that these map objects grow and they a contain a larger number of
+     * MonitorV3, ComputedV3, and/or view model @Observed class objects that are no longer used / referenced by the application.
+     * Only after ArkTS runtime GC has collected them, this function is able to clean up the id2cmp and is2targets.
+     *
+     * This cleanUpDeadReferences() function gets called from UINodeRegisterProxy.uiNodeCleanUpIdleTask()
+     *
      */
-    get id2CompLength() {
-        return Object.keys(this.id2cmp_).length;
+    cleanUpDeadReferences() {
+        this.cleanUpId2CmpDeadReferences();
+        this.cleanUpId2TargetsDeadReferences();
     }
-    assertOnId2Comp(expectedLength) {
-        const result = expectedLength == this.id2CompLength;
-        if (!result) {
-            stateMgmtConsole.error(`assertOnId2Comp expected length ${expectedLength}, actual ${this.id2CompLength}, entries=${JSON.stringify(Object.keys(this.id2cmp_))}`);
+    cleanUpId2CmpDeadReferences() {
+        
+        for (const id in this.id2cmp_) {
+            
+            let weakRef = this.id2cmp_[id];
+            if (weakRef && typeof weakRef == "object" && "deref" in weakRef && weakRef.deref() == undefined) {
+                
+                delete this.id2cmp_[id];
+            }
         }
-        return result;
+    }
+    cleanUpId2TargetsDeadReferences() {
+        for (const id in this.id2targets_) {
+            const targetSet = this.id2targets_[id];
+            if (targetSet && targetSet instanceof Set) {
+                for (let weakTarget of targetSet) {
+                    if (weakTarget.deref() == undefined) {
+                        
+                        targetSet.delete(weakTarget);
+                    }
+                } // for targetSet
+            }
+        } // for id2targets_
     }
     /**
-     * Method only for testing
-     *
-     * @param expectedLength
-     * @returns true if length matches
+     * counts number of WeakRef<Object> entries in id2cmp_ 'map' object
+     * @returns total count and count of WeakRefs that can be deref'ed
+     * Methods only for testing
      */
-    get id2TargetsLength() {
-        return Object.keys(this.id2targets_).length;
-    }
-    assertOnId2Targets(expectedLength) {
-        const result = expectedLength == Object.keys(this.id2cmp_).length;
-        if (!result) {
-            stateMgmtConsole.error(`assertOnId2Target expected length ${expectedLength}, actual ${Object.keys(this.id2targets_)}, entries=${JSON.stringify(Object.keys(this.id2targets_))}`);
+    get id2CompDeRefSize() {
+        let totalCount = 0;
+        let aliveCount = 0;
+        let comp;
+        for (const id in this.id2cmp_) {
+            totalCount++;
+            let weakRef = this.id2cmp_[id];
+            if (weakRef && "deref" in weakRef && (comp = weakRef.deref()) && comp instanceof Object) {
+                aliveCount++;
+            }
         }
-        return result;
+        return [totalCount, aliveCount];
+    }
+    /** counts number of target WeakRef<object> entries in all the Sets inside id2targets 'map' object
+   * @returns total count and those can be dereferenced
+   * Methods only for testing
+   */
+    get id2TargetsDerefSize() {
+        let totalCount = 0;
+        let aliveCount = 0;
+        for (const id in this.id2targets_) {
+            const targetSet = this.id2targets_[id];
+            if (targetSet && targetSet instanceof Set) {
+                for (let weakTarget of targetSet) {
+                    totalCount++;
+                    if (weakTarget.deref()) {
+                        aliveCount++;
+                    }
+                } // for targetSet
+            }
+        } // for id2targets_
+        return [totalCount, aliveCount];
     }
     // add dependency view model object 'target' property 'attrName'
     // to current this.bindId
@@ -7035,8 +7105,8 @@ class ObserveV3 {
             (_c = idRefs[id]) !== null && _c !== void 0 ? _c : (idRefs[id] = new Set());
             idRefs[id].add(attrName);
         }
-        (_d = (_f = this.id2targets_)[id]) !== null && _d !== void 0 ? _d : (_f[id] = new Set());
-        this.id2targets_[id].add(target);
+        const targetSet = (_d = (_f = this.id2targets_)[id]) !== null && _d !== void 0 ? _d : (_f[id] = new Set());
+        targetSet.add(new WeakRef(target));
     }
     /**
      * setReadOnlyAttr - helper function used to update an immutable attribute
@@ -7201,8 +7271,9 @@ class ObserveV3 {
         
         aceTrace.begin(`ObservedV3.updateDirtyComputedProps ${computed.length} @computed`);
         computed.forEach((id) => {
-            let comp = this.id2cmp_[id];
-            if (comp instanceof ComputedV3) {
+            let comp;
+            let weakComp = this.id2cmp_[id];
+            if (weakComp && "deref" in weakComp && (comp = weakComp.deref()) && comp instanceof ComputedV3) {
                 const target = comp.getTarget();
                 if (target instanceof ViewPU && !target.isViewActive()) {
                     // FIXME @Component freeze enable
@@ -7218,18 +7289,21 @@ class ObserveV3 {
     updateDirtyMonitors(monitors) {
         
         aceTrace.begin(`ObservedV3.updateDirtyMonitors: ${Array.from(monitors).length} @monitor`);
+        let weakMonitor;
         let monitor;
         let monitorTarget;
         monitors.forEach((watchId) => {
-            monitor = this.id2cmp_[watchId];
-            if (monitor instanceof MonitorV3) {
-                if (((monitorTarget = monitor.getTarget()) instanceof ViewPU) && !monitorTarget.isViewActive()) {
-                    // FIXME @Component freeze enable
-                    // monitor notifyChange delayed if target is a View that is not active
-                    // monitorTarget.addDelayedMonitorIds(watchId);
-                }
-                else {
-                    monitor.notifyChange();
+            weakMonitor = this.id2cmp_[watchId];
+            if (weakMonitor && "deref" in weakMonitor && (monitor = weakMonitor.deref()) && monitor instanceof MonitorV3) {
+                if (monitor instanceof MonitorV3) {
+                    if (((monitorTarget = monitor.getTarget()) instanceof ViewPU) && !monitorTarget.isViewActive()) {
+                        // FIXME @Component freeze enable
+                        // monitor notifyChange delayed if target is a View that is not active
+                        // monitorTarget.addDelayedMonitorIds(watchId);
+                    }
+                    else {
+                        monitor.notifyChange();
+                    }
                 }
             }
         });
@@ -7288,8 +7362,13 @@ class ObserveV3 {
         let watchProp = Symbol.for(MonitorV3.WATCH_PREFIX + name);
         if (target && (typeof target == "object") && target[watchProp]) {
             Object.entries(target[watchProp]).forEach(([funcName, func]) => {
+                var _a;
+                var _b;
                 if (func && funcName && typeof func == "function") {
-                    new MonitorV3(target, funcName, func).InitRun();
+                    const monitor = new MonitorV3(target, funcName, func);
+                    monitor.InitRun();
+                    const refs = (_a = target[_b = ObserveV3.MONITOR_REFS]) !== null && _a !== void 0 ? _a : (target[_b] = {});
+                    refs[name] = monitor;
                 }
                 // FIXME Else handle error
             });
@@ -7355,6 +7434,7 @@ class ObserveV3 {
 ObserveV3.V3_DECO_META = Symbol('__v3_deco_meta__');
 ObserveV3.SYMBOL_REFS = Symbol('__use_refs__');
 ObserveV3.ID_REFS = Symbol('__id_refs__');
+ObserveV3.MONITOR_REFS = Symbol("___monitor_refs_");
 ObserveV3.SYMBOL_PROXY_GET_TARGET = Symbol("__proxy_get_target");
 ObserveV3.OB_PREFIX = "__ob_"; // OB_PREFIX + attrName => backing store attribute name
 ObserveV3.OB_PREFIX_LEN = 5;

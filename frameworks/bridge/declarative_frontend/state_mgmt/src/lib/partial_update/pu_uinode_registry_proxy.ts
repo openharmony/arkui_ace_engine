@@ -50,6 +50,7 @@ function uiNodeCleanUpIdleTask(): void {
     stateMgmtConsole.debug(`UINodeRegisterProxy. static uiNodeCleanUpIdleTask:`);
     UINodeRegisterProxy.obtainDeletedElmtIds();
     UINodeRegisterProxy.unregisterElmtIdsFromViewPUs();
+    UINodeRegisterProxy.cleanUpDeadReferences();
 }
 
 class UINodeRegisterProxy {
@@ -120,6 +121,11 @@ class UINodeRegisterProxy {
         })
 
         this.removeElementsInfo_.length = 0;
+    }
+
+    public static cleanUpDeadReferences(): void {
+        stateMgmtConsole.debug('UINodeRegisterProxy.cleanUpDeadReferences');
+        ObserveV3.getObserve().cleanUpDeadReferences();
     }
 
     public static instance_: UINodeRegisterProxy = new UINodeRegisterProxy();
