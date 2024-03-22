@@ -16,15 +16,15 @@
 import { KeyCode } from '@ohos.multimodalInput.keyCode'
 import MeasureText from '@ohos.measure'
 
-export declare class TabTitleBarMenuItem {
-  public value: ResourceStr;
-  public isEnabled?: boolean;
-  public action?: () => void;
+export interface TabTitleBarMenuItem {
+  value: ResourceStr;
+  isEnabled?: boolean;
+  action?: () => void;
 }
 
-export declare class TabTitleBarTabItem {
-  public title: ResourceStr;
-  public icon?: ResourceStr;
+export interface TabTitleBarTabItem {
+  title: ResourceStr;
+  icon?: ResourceStr;
 }
 
 const PUBLIC_MORE = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAMAAAADACAYAAABS3GwHAAAAIGNIUk0AAHomAACAhAAA+' +
@@ -130,7 +130,7 @@ export struct TabTitleBar {
           Stack({ alignContent: Alignment.Start }) {
             Column() {
               List({ initialIndex: 0, scroller: this.scroller, space: 0 }) {
-                ForEach(this.tabItems, (tabItem: TabTitleBarTabItem, index) => {
+                ForEach(this.tabItems, (tabItem: TabTitleBarTabItem, index: number) => {
                   ListItem() {
                     TabContentItem({
                       item: tabItem,
@@ -247,11 +247,12 @@ struct CollapsibleMenuSection {
     Column() {
       Row() {
         if (this.menuItems.length <= CollapsibleMenuSection.maxCountOfVisibleItems) {
-          ForEach(this.menuItems, (item: TabTitleBarMenuItem, index) => {
+          ForEach(this.menuItems, (item: TabTitleBarMenuItem, index: number) => {
             ImageMenuItem({ item: item, index: this.index * 1000 + index + 1 })
           })
         } else {
-          ForEach(this.menuItems.slice(0, CollapsibleMenuSection.maxCountOfVisibleItems - 1), (item: TabTitleBarMenuItem, index) => {
+          ForEach(this.menuItems.slice(0, CollapsibleMenuSection.maxCountOfVisibleItems - 1),
+            (item: TabTitleBarMenuItem, index: number) => {
             ImageMenuItem({ item: item, index: this.index * 1000 + index + 1 })
           })
 
@@ -328,7 +329,8 @@ struct CollapsibleMenuSection {
   @Builder
   popupBuilder() {
     Column() {
-      ForEach(this.menuItems.slice(CollapsibleMenuSection.maxCountOfVisibleItems - 1, this.menuItems.length), (item: TabTitleBarMenuItem, index) => {
+      ForEach(this.menuItems.slice(CollapsibleMenuSection.maxCountOfVisibleItems - 1, this.menuItems.length),
+        (item: TabTitleBarMenuItem, index: number) => {
         ImageMenuItem({ item: item, index: this.index * 1000 + CollapsibleMenuSection.maxCountOfVisibleItems + index })
       })
     }
