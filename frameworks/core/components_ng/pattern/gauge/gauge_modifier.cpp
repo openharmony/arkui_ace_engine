@@ -54,6 +54,7 @@ void GaugeModifier::UpdateValue()
     CHECK_NULL_VOID(pattern);
     auto paintProperty = pattern->GetPaintProperty<GaugePaintProperty>();
     CHECK_NULL_VOID(paintProperty);
+    updateProperty(paintProperty);
     float value = paintProperty->GetValueValue();
     float max = paintProperty->GetMaxValue();
     float min = paintProperty->GetMinValue();
@@ -73,6 +74,92 @@ void GaugeModifier::UpdateValue()
     option.SetIteration(ANIMATION_TIMES);
     AnimationUtils::Animate(option, [&]() { value_->Set(end_); });
 }
+
+void GaugeModifier::initProperty() {
+    auto pattern = DynamicCast<GaugePattern>(pattern_.Upgrade());
+    CHECK_NULL_VOID(pattern);
+    auto paintProperty = pattern->GetPaintProperty<GaugePaintProperty>();
+    CHECK_NULL_VOID(paintProperty);
+
+    float startAngle = paintProperty->GetStartAngleValue();
+    float endAngle = paintProperty->GetEndAngleValue();
+    float max = paintProperty->GetMaxValue();
+    float min = paintProperty->GetMinValue();
+    startAngle_ = AceType::MakeRefPtr<AnimatablePropertyFloat>(startAngle);
+    endAngle_ = AceType::MakeRefPtr<AnimatablePropertyFloat>(endAngle);
+    max_ = AceType::MakeRefPtr<AnimatablePropertyFloat>(max);
+    min_ = AceType::MakeRefPtr<AnimatablePropertyFloat>(min);
+
+    float strokeWidth = paintProperty->GetStrokeWidth()->ConvertToPx();
+    strokeWidth_ = AceType::MakeRefPtr<AnimatablePropertyFloat>(strokeWidth);
+    float indicatorSpace = paintProperty->GetIndicatorSpaceValue(INDICATOR_DISTANCE_TO_TOP).ConvertToPx();
+    indicatorSpace_ = AceType::MakeRefPtr<AnimatablePropertyFloat>(indicatorSpace);
+    GaugeType gaugeType = paintProperty->GetGaugeTypeValue(GaugeType::TYPE_CIRCULAR_SINGLE_SEGMENT_GRADIENT);
+    gaugeTypeValue_ = AceType::MakeRefPtr<AnimatablePropertyFloat>(static_cast<int>(gaugeType));
+    isShowIndicator_ = AceType::MakeRefPtr<PropertyBool>(paintProperty->GetIsShowIndicatorValue(true));
+
+    GaugeShadowOptions shadowOptions = paintProperty->GetShadowOptionsValue();
+    shadowRadiusFloat_ = AceType::MakeRefPtr<AnimatablePropertyFloat>(shadowOptions.radius);
+    shadowOffsetXFloat_ = AceType::MakeRefPtr<AnimatablePropertyFloat>(shadowOptions.offsetX);
+    shadowOffsetYFloat_ = AceType::MakeRefPtr<AnimatablePropertyFloat>(shadowOptions.offsetY);
+    
+    if (paintProperty->GetColors().has_value()) {
+        auto colors = paintProperty->GetColorsValue();
+        for(int i = 0; i < colors.size(); i++) {
+            auto color =  AceType::MakeRefPtr<AnimatablePropertyColor>(LinearColor(colors[i]));
+            AttachProperty(color);
+            colors_.emplace_back(color);
+        }
+    }
+
+    if (paintProperty->HasGradientColors()) {
+        auto colors = paintProperty->GetGradientColorsValue().at(0);
+        for(int i = 0; i < colors.size(); i++) {
+            auto color =  AceType::MakeRefPtr<AnimatablePropertyColor>(LinearColor(colors[i].first));
+            AttachProperty(color);
+            gradientColors_.emplace_back(color);
+        }
+    }
+}
+
+void GaugeModifier::updateProperty(RefPtr<GaugePaintProperty>& paintProperty) {
+    float startAngle = paintProperty->GetStartAngleValue();
+    float endAngle = paintProperty->GetEndAngleValue();
+    float max = paintProperty->GetMaxValue();
+    float min = paintProperty->GetMinValue();
+    startAngle_->Set(startAngle);
+    endAngle_->Set(endAngle);
+    max_->Set(max);
+    min_->Set(min);
+
+    float strokeWidth = paintProperty->GetStrokeWidth()->ConvertToPx();
+    strokeWidth_->Set(strokeWidth);
+    float indicatorSpace = paintProperty->GetIndicatorSpaceValue(INDICATOR_DISTANCE_TO_TOP).ConvertToPx();
+    indicatorSpace_->Set(indicatorSpace);
+    GaugeType gaugeType = paintProperty->GetGaugeTypeValue(GaugeType::TYPE_CIRCULAR_SINGLE_SEGMENT_GRADIENT);
+    gaugeTypeValue_->Set(static_cast<int>(gaugeType));
+    isShowIndicator_ = AceType::MakeRefPtr<PropertyBool>(paintProperty->GetIsShowIndicatorValue(true));
+
+    GaugeShadowOptions shadowOptions = paintProperty->GetShadowOptionsValue();
+    shadowRadiusFloat_->Set(shadowOptions.radius);
+    shadowOffsetXFloat_->Set(shadowOptions.offsetX);
+    shadowOffsetYFloat_->Set(shadowOptions.offsetY);
+    
+    if (paintProperty->GetColors().has_value()) {
+        auto colors = paintProperty->GetColorsValue();
+        for(int i = 0; i < colors.size() && i < colors_.size(); i++) {
+            colors_[i]->Set(LinearColor(colors[i]));
+        }
+    }
+
+    if (paintProperty->HasGradientColors()) {
+        auto colors = paintProperty->GetGradientColorsValue().at(0);
+        for(int i = 0; i < colors.size() && i < colors_.size(); i++) {
+            gradientColors_[i]->Set(LinearColor(colors[i].first));
+        }
+    }
+}
+
 
 void GaugeModifier::PaintCircularAndIndicator(RSCanvas& canvas)
 {
