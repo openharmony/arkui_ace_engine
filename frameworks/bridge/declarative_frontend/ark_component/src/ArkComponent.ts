@@ -1282,8 +1282,8 @@ class RotateModifier extends ModifierWithKey<RotateOptions> {
   }
 }
 
-class GeometryTransitionModifier extends ModifierWithKey<string> {
-  constructor(value: string) {
+class GeometryTransitionModifier extends ModifierWithKey<ArkGeometryTransition> {
+  constructor(value: ArkGeometryTransition) {
     super(value);
   }
   static identity: Symbol = Symbol('geometryTransition');
@@ -1291,7 +1291,8 @@ class GeometryTransitionModifier extends ModifierWithKey<string> {
     if (reset) {
       getUINativeModule().common.resetGeometryTransition(node);
     } else {
-      getUINativeModule().common.setGeometryTransition(node, this.value);
+      getUINativeModule().common.setGeometryTransition(node, this.value.id, 
+        (this.value.options as GeometryTransitionOptions)?.follow);
     }
   }
 }
@@ -3347,10 +3348,11 @@ class ArkComponent implements CommonMethod<CommonAttribute> {
     return this;
   }
 
-  geometryTransition(id: string): this {
-    if (isString(id)) {
-      modifierWithKey(this._modifiersWithKeys, GeometryTransitionModifier.identity, GeometryTransitionModifier, id);
-    }
+  geometryTransition(id: string, options?: GeometryTransitionOptions): this {
+    let arkGeometryTransition = new ArkGeometryTransition();
+    arkGeometryTransition.id = id;
+    arkGeometryTransition.options = options;
+    modifierWithKey(this._modifiersWithKeys, GeometryTransitionModifier.identity, GeometryTransitionModifier, arkGeometryTransition);
     return this;
   }
 

@@ -1230,11 +1230,13 @@ class GeometryTransitionModifier extends ModifierWithKey {
     super(value);
   }
   applyPeer(node, reset) {
+    let _a;
     if (reset) {
       getUINativeModule().common.resetGeometryTransition(node);
     }
     else {
-      getUINativeModule().common.setGeometryTransition(node, this.value);
+      getUINativeModule().common.setGeometryTransition(node, this.value.id, (_a = this.value.options) === null ||
+       _a === void 0 ? void 0 : _a.follow);
     }
   }
 }
@@ -3202,10 +3204,11 @@ class ArkComponent {
     }
     return this;
   }
-  geometryTransition(id) {
-    if (isString(id)) {
-      modifierWithKey(this._modifiersWithKeys, GeometryTransitionModifier.identity, GeometryTransitionModifier, id);
-    }
+  geometryTransition(id, options) {
+    let arkGeometryTransition = new ArkGeometryTransition();
+    arkGeometryTransition.id = id;
+    arkGeometryTransition.options = options;
+    modifierWithKey(this._modifiersWithKeys, GeometryTransitionModifier.identity, GeometryTransitionModifier, arkGeometryTransition);
     return this;
   }
   bindPopup(show, popup) {
@@ -9625,7 +9628,15 @@ class ArkScrollSnapOptions {
       && (this.enableSnapToEnd === another.enableSnapToEnd));
   }
 }
-
+class ArkGeometryTransition {
+  constructor() {
+      this.id = undefined;
+      this.options = undefined;
+  }
+  isEqual(another) {
+      return (this.id === another.id && this.options === another.options);
+  }
+}
 /// <reference path='./import.ts' />
 /// <reference path='./ArkComponent.ts' />
 const FontWeightMap = {

@@ -1997,12 +1997,12 @@ void ResetRotate(ArkUINodeHandle node)
     ViewAbstract::SetPivot(frameNode, center);
 }
 
-void SetGeometryTransition(ArkUINodeHandle node, ArkUI_CharPtr id)
+void SetGeometryTransition(ArkUINodeHandle node, ArkUI_CharPtr id, ArkUI_Bool options)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     std::string idStr(id);
-    ViewAbstract::SetGeometryTransition(frameNode, idStr, false);
+    ViewAbstract::SetGeometryTransition(frameNode, idStr, static_cast<bool>(options));
 }
 
 void ResetGeometryTransition(ArkUINodeHandle node)

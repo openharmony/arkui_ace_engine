@@ -2814,14 +2814,19 @@ ArkUINativeModuleValue CommonBridge::SetGeometryTransition(ArkUIRuntimeCallInfo 
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
     Local<JSValueRef> idArg = runtimeCallInfo->GetCallArgRef(NUM_1);
+    Local<JSValueRef> optionsArg = runtimeCallInfo->GetCallArgRef(NUM_2);
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
-    if (!idArg->IsString()) {
+    if (idArg->IsUndefined() || idArg->IsNull() || !idArg->IsString()) {
         GetArkUINodeModifiers()->getCommonModifier()->resetGeometryTransition(nativeNode);
         return panda::JSValueRef::Undefined(vm);
     }
-
     std::string id = idArg->ToString(vm)->ToString();
-    GetArkUINodeModifiers()->getCommonModifier()->setGeometryTransition(nativeNode, id.c_str());
+    bool options = false;
+    if (optionsArg->IsBoolean()) {
+        options = optionsArg->ToBoolean(vm)->Value();
+    }
+    GetArkUINodeModifiers()->getCommonModifier()->setGeometryTransition(
+        nativeNode, id.c_str(), static_cast<int32_t>(options));
     return panda::JSValueRef::Undefined(vm);
 }
 

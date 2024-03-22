@@ -1097,3 +1097,17 @@ class ArkScrollSnapOptions {
       && (this.enableSnapToEnd === another.enableSnapToEnd));
   }
 }
+
+class ArkGeometryTransition {
+  id: string | undefined;
+  options: GeometryTransitionOptions | undefined;
+  
+  constructor() {
+    this.id = undefined;
+    this.options = undefined;   
+  }
+
+  isEqual(another: ArkGeometryTransition): boolean {
+    return (this.id === another.id && this.options === another.options);
+  }
+}
