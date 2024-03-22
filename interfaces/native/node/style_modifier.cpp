@@ -3602,13 +3602,22 @@ void ResetScrollScrollable(ArkUI_NodeHandle node)
 
 const ArkUI_AttributeItem* GetScrollEdgeEffect(ArkUI_NodeHandle node)
 {
-    ArkUI_Int32 values[32];
-    auto valueSize =
-        GetFullImpl()->getNodeModifiers()->getScrollModifier()->getScrollEdgeEffect(node->uiNodeHandle, values);
-    for (int i = 0; i < valueSize; i++) {
-        g_numberValues[i].i32 = values[i];
+    ArkUI_Int32 values[2];
+    if (node->type == ARKUI_NODE_LIST) {
+        auto valueSize =
+            GetFullImpl()->getNodeModifiers()->getListModifier()->getListEdgeEffect(node->uiNodeHandle, values);
+        for (int i = 0; i < valueSize; i++) {
+            g_numberValues[i].i32 = values[i];
+        }
+        g_attributeItem.size = valueSize;
+    } else if (node->type == ARKUI_NODE_SCROLL) {
+        auto valueSize =
+            GetFullImpl()->getNodeModifiers()->getScrollModifier()->getScrollEdgeEffect(node->uiNodeHandle, values);
+        for (int i = 0; i < valueSize; i++) {
+            g_numberValues[i].i32 = values[i];
+        }
+        g_attributeItem.size = valueSize;
     }
-    g_attributeItem.size = valueSize;
     return &g_attributeItem;
 }
 
@@ -3621,7 +3630,12 @@ int32_t SetScrollEdgeEffect(ArkUI_NodeHandle node, const ArkUI_AttributeItem* it
     auto fullImpl = GetFullImpl();
     auto attrVal = item->value[NUM_0].i32;
     auto alwaysEnabled = (item->size > NUM_1) ? item->value[NUM_1].i32 : true;
-    fullImpl->getNodeModifiers()->getScrollModifier()->setScrollEdgeEffect(node->uiNodeHandle, attrVal, alwaysEnabled);
+    if (node->type == ARKUI_NODE_LIST) {
+        fullImpl->getNodeModifiers()->getListModifier()->setListEdgeEffect(node->uiNodeHandle, attrVal, alwaysEnabled);
+    } else if (node->type == ARKUI_NODE_SCROLL) {
+        fullImpl->getNodeModifiers()->getScrollModifier()->setScrollEdgeEffect(
+            node->uiNodeHandle, attrVal, alwaysEnabled);
+    }
     return ERROR_CODE_NO_ERROR;
 }
 
