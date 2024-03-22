@@ -33,7 +33,8 @@
 #include "core/components_ng/property/measure_property.h"
 
 namespace OHOS::Ace {
-using onAnalyzedCallback = std::optional<std::function<void(bool)>>;
+enum class ImageAnalyzerState;
+using onAnalyzedCallback = std::optional<std::function<void(ImageAnalyzerState)>>;
 
 enum class ImageAnalyzerType {
     SUBJECT = 0,
@@ -47,6 +48,13 @@ enum class ImageAnalyzerHolder {
     VIDEO,
     WEB,
     OTHERS,
+};
+
+enum class ImageAnalyzerState {
+    UNSUPPORTED = 0,
+    ONGOING,
+    STOPPED,
+    FINISHED
 };
 
 struct ImageAnalyzerConfig {
