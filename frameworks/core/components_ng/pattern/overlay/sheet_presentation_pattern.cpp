@@ -589,6 +589,7 @@ void SheetPresentationPattern::SheetTransition(bool isTransitionIn, float dragVe
         if (isTransitionIn) {
             if (!pattern->GetAnimationBreak()) {
                 pattern->SetAnimationProcess(false);
+                pattern->ChangeSheetPage(pattern->height_);
             } else {
                 pattern->isAnimationBreak_ = false;
             }
