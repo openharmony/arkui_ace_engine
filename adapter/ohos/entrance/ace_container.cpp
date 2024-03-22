@@ -1031,9 +1031,6 @@ UIContentErrorCode AceContainer::RunPage(
     if (isNamedRouter) {
         return front->RunPageByNamedRouter(content);
     }
-    if (content.substr(0, strlen(BUNDLE_TAG)) == BUNDLE_TAG) {
-        return UIContentErrorCode::INVALID_URL;
-    }
 
     return front->RunPage(content, params);
 }
