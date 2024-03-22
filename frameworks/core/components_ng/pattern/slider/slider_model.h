@@ -34,6 +34,7 @@ public:
     enum class SliderMode {
         OUTSET,  // block on track, track is thin
         INSET,   // block inside track, track is rough
+        NONE,    // no block
         CAPSULE, // capsule slider.
     };
 
@@ -63,6 +64,7 @@ public:
     virtual void SetBlockBorderWidth(const Dimension& value) = 0;
     virtual void SetStepColor(const Color& value) = 0;
     virtual void SetTrackBorderRadius(const Dimension& value) = 0;
+    virtual void SetSelectedBorderRadius(const Dimension& value) = 0;
     virtual void SetBlockSize(const Dimension& width, const Dimension& height) = 0;
     virtual void SetBlockType(BlockStyleType value) = 0;
     virtual void SetBlockImage(
@@ -76,6 +78,7 @@ public:
     virtual void ResetBlockBorderWidth() = 0;
     virtual void ResetStepColor() = 0;
     virtual void ResetTrackBorderRadius() = 0;
+    virtual void ResetSelectedBorderRadius() = 0;
     virtual void ResetBlockSize() = 0;
     virtual void ResetBlockType() = 0;
     virtual void ResetBlockImage() = 0;

@@ -100,6 +100,9 @@ public:
         if (GetTrackBorderRadius().has_value()) {
             json->Put("trackBorderRadius", GetTrackBorderRadius().value().ToString().c_str());
         }
+        if (GetSelectedBorderRadius().has_value()) {
+            json->Put("selectedBorderRadius", GetSelectedBorderRadius().value().ToString().c_str());
+        }
         static const std::array<std::string, 3> SLIDER_BLOCK_TYPE_TO_STRING = {
             "BlockStyleType.DEFAULT",
             "BlockStyleType.IMAGE",
@@ -141,6 +144,7 @@ public:
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(SliderPaintStyle, BlockBorderWidth, Dimension, PROPERTY_UPDATE_RENDER)
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(SliderPaintStyle, StepColor, Color, PROPERTY_UPDATE_RENDER)
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(SliderPaintStyle, TrackBorderRadius, Dimension, PROPERTY_UPDATE_RENDER)
+    ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(SliderPaintStyle, SelectedBorderRadius, Dimension, PROPERTY_UPDATE_RENDER)
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(
         SliderPaintStyle, BlockType, SliderModel::BlockStyleType, PROPERTY_UPDATE_RENDER)
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(SliderPaintStyle, BlockImage, std::string, PROPERTY_UPDATE_RENDER)

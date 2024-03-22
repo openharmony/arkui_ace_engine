@@ -113,8 +113,14 @@ void SliderModelNG::SetThickness(const Dimension& value)
         auto theme = pipeline->GetTheme<SliderTheme>();
         CHECK_NULL_VOID(theme);
         auto sliderMode = layoutProperty->GetSliderModeValue(SliderModel::SliderMode::OUTSET);
-        auto themeTrackThickness = sliderMode == SliderModel::SliderMode::OUTSET ? theme->GetOutsetTrackThickness()
-                                                                                 : theme->GetInsetTrackThickness();
+        Dimension themeTrackThickness;
+        if (sliderMode == SliderModel::SliderMode::OUTSET) {
+            themeTrackThickness = theme->GetOutsetTrackThickness();
+        } else if (sliderMode == SliderModel::SliderMode::INSET) {
+            themeTrackThickness = theme->GetInsetTrackThickness();
+        } else {
+            themeTrackThickness = theme->GetNoneTrackThickness();
+        }
         ACE_UPDATE_LAYOUT_PROPERTY(SliderLayoutProperty, Thickness, themeTrackThickness);
     } else {
         ACE_UPDATE_LAYOUT_PROPERTY(SliderLayoutProperty, Thickness, value);
@@ -135,6 +141,10 @@ void SliderModelNG::SetStepColor(const Color& value)
 void SliderModelNG::SetTrackBorderRadius(const Dimension& value)
 {
     ACE_UPDATE_PAINT_PROPERTY(SliderPaintProperty, TrackBorderRadius, value);
+}
+void SliderModelNG::SetSelectedBorderRadius(const Dimension& value)
+{
+    ACE_UPDATE_PAINT_PROPERTY(SliderPaintProperty, SelectedBorderRadius, value);
 }
 void SliderModelNG::SetBlockSize(const Dimension& width, const Dimension& height)
 {
@@ -217,6 +227,11 @@ void SliderModelNG::ResetTrackBorderRadius()
     ACE_RESET_PAINT_PROPERTY_WITH_FLAG(SliderPaintProperty, TrackBorderRadius, PROPERTY_UPDATE_RENDER);
 }
 
+void SliderModelNG::ResetSelectedBorderRadius()
+{
+    ACE_RESET_PAINT_PROPERTY_WITH_FLAG(SliderPaintProperty, SelectedBorderRadius, PROPERTY_UPDATE_RENDER);
+}
+
 void SliderModelNG::ResetBlockSize()
 {
     ACE_RESET_LAYOUT_PROPERTY_WITH_FLAG(SliderLayoutProperty, BlockSize, PROPERTY_UPDATE_MEASURE);
@@ -265,8 +280,14 @@ void SliderModelNG::SetThickness(FrameNode* frameNode, const Dimension& value)
         auto theme = pipeline->GetTheme<SliderTheme>();
         CHECK_NULL_VOID(theme);
         auto sliderMode = layoutProperty->GetSliderModeValue(SliderModel::SliderMode::OUTSET);
-        auto themeTrackThickness = sliderMode == SliderModel::SliderMode::OUTSET ? theme->GetOutsetTrackThickness()
-                                                                                 : theme->GetInsetTrackThickness();
+        Dimension themeTrackThickness;
+        if (sliderMode == SliderModel::SliderMode::OUTSET) {
+            themeTrackThickness = theme->GetOutsetTrackThickness();
+        } else if (sliderMode == SliderModel::SliderMode::INSET) {
+            themeTrackThickness = theme->GetInsetTrackThickness();
+        } else {
+            themeTrackThickness = theme->GetNoneTrackThickness();
+        }
         ACE_UPDATE_NODE_LAYOUT_PROPERTY(SliderLayoutProperty, Thickness, themeTrackThickness, frameNode);
     } else {
         ACE_UPDATE_NODE_LAYOUT_PROPERTY(SliderLayoutProperty, Thickness, value, frameNode);

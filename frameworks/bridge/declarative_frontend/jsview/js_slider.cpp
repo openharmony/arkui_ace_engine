@@ -72,6 +72,7 @@ void JSSlider::JSBind(BindingTarget globalObj)
     JSClass<JSSlider>::StaticMethod("blockBorderWidth", &JSSlider::SetBlockBorderWidth);
     JSClass<JSSlider>::StaticMethod("stepColor", &JSSlider::SetStepColor);
     JSClass<JSSlider>::StaticMethod("trackBorderRadius", &JSSlider::SetTrackBorderRadius);
+    JSClass<JSSlider>::StaticMethod("selectedBorderRadius", &JSSlider::SetSelectedBorderRadius);
     JSClass<JSSlider>::StaticMethod("blockSize", &JSSlider::SetBlockSize);
     JSClass<JSSlider>::StaticMethod("blockStyle", &JSSlider::SetBlockStyle);
     JSClass<JSSlider>::StaticMethod("stepSize", &JSSlider::SetStepSize);
@@ -181,6 +182,8 @@ void JSSlider::Create(const JSCallbackInfo& info)
         sliderMode = SliderModel::SliderMode::INSET;
     } else if (sliderStyle == SliderStyle::CAPSULE) {
         sliderMode = SliderModel::SliderMode::CAPSULE;
+    } else if (sliderStyle == SliderStyle::NONE) {
+        sliderMode = SliderModel::SliderMode::NONE;
     } else {
         sliderMode = SliderModel::SliderMode::OUTSET;
     }
@@ -406,6 +409,24 @@ void JSSlider::SetTrackBorderRadius(const JSCallbackInfo& info)
         return;
     }
     SliderModel::GetInstance()->SetTrackBorderRadius(trackBorderRadius);
+}
+
+void JSSlider::SetSelectedBorderRadius(const JSCallbackInfo& info)
+{
+    if (info.Length() < 1) {
+        return;
+    }
+
+    CalcDimension selectedBorderRadius;
+    if (!ParseJsDimensionVpNG(info[0], selectedBorderRadius, true)) {
+        SliderModel::GetInstance()->ResetSelectedBorderRadius();
+        return;
+    }
+    if (LessNotEqual(selectedBorderRadius.Value(), 0.0)) {
+        SliderModel::GetInstance()->ResetSelectedBorderRadius();
+        return;
+    }
+    SliderModel::GetInstance()->SetSelectedBorderRadius(selectedBorderRadius);
 }
 
 void JSSlider::SetBlockSize(const JSCallbackInfo& info)
