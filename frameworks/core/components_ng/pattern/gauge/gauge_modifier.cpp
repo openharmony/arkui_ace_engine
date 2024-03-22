@@ -250,6 +250,7 @@ void GaugeModifier::NewPaintCircularAndIndicator(RSCanvas& canvas)
 
     canvas.Save();
     auto paddingSize = geometryNode->GetPaddingSize();
+    CHECK_NULL_VOID(geometryNode->GetPadding());
     auto left = geometryNode->GetPadding()->left.value_or(0.0f);
     auto top = geometryNode->GetPadding()->top.value_or(0.0f);
     auto radius = std::min(paddingSize.Width(), paddingSize.Height()) * PERCENT_HALF;
