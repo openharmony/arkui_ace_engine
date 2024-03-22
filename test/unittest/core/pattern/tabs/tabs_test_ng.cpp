@@ -440,6 +440,8 @@ HWTEST_F(TabsTestNg, TabContentModelSetLabelStyle001, TestSize.Level1)
     EXPECT_EQ(tabContentPattern->GetLabelStyle().fontWeight, std::nullopt);
     EXPECT_EQ(tabContentPattern->GetLabelStyle().fontFamily, std::nullopt);
     EXPECT_EQ(tabContentPattern->GetLabelStyle().fontStyle, std::nullopt);
+    EXPECT_EQ(tabContentPattern->GetLabelStyle().unselectedColor, std::nullopt);
+    EXPECT_EQ(tabContentPattern->GetLabelStyle().selectedColor, std::nullopt);
 }
 
 /**
@@ -462,6 +464,8 @@ HWTEST_F(TabsTestNg, TabContentModelSetLabelStyle002, TestSize.Level1)
     labelStyle.fontFamily = { "unknown" };
     std::vector<std::string> fontVect = { "" };
     labelStyle.fontStyle = Ace::FontStyle::NORMAL;
+    labelStyle.unselectedColor = Color::WHITE;
+    labelStyle.selectedColor = Color::WHITE;
     tabContentPattern->SetLabelStyle(labelStyle);
     EXPECT_EQ(tabContentPattern->GetLabelStyle().textOverflow, labelStyle.textOverflow);
     EXPECT_EQ(tabContentPattern->GetLabelStyle().maxLines, labelStyle.maxLines);
@@ -472,6 +476,40 @@ HWTEST_F(TabsTestNg, TabContentModelSetLabelStyle002, TestSize.Level1)
     EXPECT_EQ(tabContentPattern->GetLabelStyle().fontWeight, labelStyle.fontWeight);
     EXPECT_EQ(tabContentPattern->GetLabelStyle().fontFamily, labelStyle.fontFamily);
     EXPECT_EQ(tabContentPattern->GetLabelStyle().fontStyle, labelStyle.fontStyle);
+    EXPECT_EQ(tabContentPattern->GetLabelStyle().unselectedColor, labelStyle.unselectedColor);
+    EXPECT_EQ(tabContentPattern->GetLabelStyle().selectedColor, labelStyle.selectedColor);
+}
+
+/**
+ * @tc.name: TabContentModelSetIconStyle001
+ * @tc.desc: test SetIconStyle
+ * @tc.type: FUNC
+ */
+HWTEST_F(TabsTestNg, TabContentModelSetIconStyle001, TestSize.Level1)
+{
+    CreateWithItem([](TabsModelNG model) {});
+    auto tabContentPattern = GetChildPattern<TabContentPattern>(swiperNode_, 0);
+    IconStyle iconStyle;
+    tabContentPattern->SetIconStyle(iconStyle);
+    EXPECT_EQ(tabContentPattern->GetIconStyle().unselectedColor, std::nullopt);
+    EXPECT_EQ(tabContentPattern->GetIconStyle().selectedColor, std::nullopt);
+}
+
+/**
+ * @tc.name: TabContentModelSetIconStyle002
+ * @tc.desc: test SetIconStyle
+ * @tc.type: FUNC
+ */
+HWTEST_F(TabsTestNg, TabContentModelSetIconStyle002, TestSize.Level1)
+{
+    CreateWithItem([](TabsModelNG model) {});
+    auto tabContentPattern = GetChildPattern<TabContentPattern>(swiperNode_, 0);
+    IconStyle iconStyle;
+    iconStyle.unselectedColor = Color::WHITE;
+    iconStyle.selectedColor = Color::WHITE;
+    tabContentPattern->SetIconStyle(iconStyle);
+    EXPECT_EQ(tabContentPattern->GetIconStyle().unselectedColor, iconStyle.unselectedColor);
+    EXPECT_EQ(tabContentPattern->GetIconStyle().selectedColor, iconStyle.selectedColor);
 }
 
 /**
@@ -1475,6 +1513,10 @@ HWTEST_F(TabsTestNg, TabBarPatternMaskAnimationFinish002, TestSize.Level1)
      * @tc.steps: step2. call MaskAnimationFinish function.
      * @tc.expected: step2. expect The function is run ok.
      */
+    IconStyle iconStyle;
+    iconStyle.unselectedColor = Color::WHITE;
+    iconStyle.selectedColor = Color::WHITE;
+    tabBarPattern_->SetIconStyle(iconStyle, 0);
     tabBarPattern_->MaskAnimationFinish(tabBarNode_, 0, false);
     EXPECT_NE(tabBarNode_->GetChildAtIndex(0), nullptr);
     tabBarPattern_->MaskAnimationFinish(tabBarNode_, 1, true);
@@ -2201,6 +2243,17 @@ HWTEST_F(TabsTestNg, TabBarPatternGetBottomTabBarImageSizeAndOffset001, TestSize
      * @tc.expected: Related function runs ok.
      */
     int32_t maskIndex = 0;
+    for (int i = 0; i <= 1; i++) {
+        tabBarPattern_->GetBottomTabBarImageSizeAndOffset(selectedIndexes, maskIndex, selectedImageSize,
+            unselectedImageSize, originalSelectedMaskOffset, originalUnselectedMaskOffset);
+        maskIndex = 1;
+    }
+
+    IconStyle iconStyle;
+    iconStyle.unselectedColor = Color::WHITE;
+    iconStyle.selectedColor = Color::WHITE;
+    tabBarPattern_->SetIconStyle(iconStyle, 0);
+    maskIndex = 0;
     for (int i = 0; i <= 1; i++) {
         tabBarPattern_->GetBottomTabBarImageSizeAndOffset(selectedIndexes, maskIndex, selectedImageSize,
             unselectedImageSize, originalSelectedMaskOffset, originalUnselectedMaskOffset);
@@ -2953,6 +3006,14 @@ HWTEST_F(TabsTestNg, TabBarPatternUpdateTextColorAndFontWeight001, TestSize.Leve
      * @tc.expected: Related functions run ok.
      */
     int32_t index = 0;
+    tabBarPattern_->UpdateTextColorAndFontWeight(index);
+    tabBarPattern_->UpdateImageColor(index);
+
+    IconStyle iconStyle;
+    iconStyle.unselectedColor = Color::WHITE;
+    iconStyle.selectedColor = Color::WHITE;
+    tabBarPattern_->SetIconStyle(iconStyle, 0);
+    index = 0;
     tabBarPattern_->UpdateTextColorAndFontWeight(index);
     tabBarPattern_->UpdateImageColor(index);
 }
