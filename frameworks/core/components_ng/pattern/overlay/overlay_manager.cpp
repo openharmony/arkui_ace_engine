@@ -3657,6 +3657,7 @@ void OverlayManager::PlayKeyboardTransition(RefPtr<FrameNode> customKeyboard, bo
         return;
     }
     auto pageHeight = pageNode->GetGeometryNode()->GetFrameSize().Height();
+    auto keyboardHeight = customKeyboard->GetGeometryNode()->GetFrameSize().Height();
     if (isTransitionIn) {
         context->OnTransformTranslateUpdate({ 0.0f, pageHeight, 0.0f });
         AnimationUtils::Animate(option, [context]() {
@@ -3672,9 +3673,9 @@ void OverlayManager::PlayKeyboardTransition(RefPtr<FrameNode> customKeyboard, bo
             parent->RemoveChild(customKeyboard);
         });
         context->OnTransformTranslateUpdate({ 0.0f, 0.0f, 0.0f });
-        AnimationUtils::Animate(option, [context, pageHeight]() {
+        AnimationUtils::Animate(option, [context, keyboardHeight]() {
                 if (context) {
-                    context->OnTransformTranslateUpdate({ 0.0f, pageHeight, 0.0f });
+                    context->OnTransformTranslateUpdate({ 0.0f, keyboardHeight, 0.0f });
                 }
             },
             option.GetOnFinishEvent());
