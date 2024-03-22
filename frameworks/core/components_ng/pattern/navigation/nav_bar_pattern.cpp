@@ -602,7 +602,7 @@ float NavBarPattern::OnCoordScrollUpdate(float offset)
 
 void NavBarPattern::OnCoordScrollEnd()
 {
-    if (isHideTitlebar_ || titleMode_ != NavigationTitleMode::FREE) {
+    if (titleMode_ != NavigationTitleMode::FREE) {
         return;
     }
     auto hostNode = AceType::DynamicCast<NavBarNode>(GetHost());
