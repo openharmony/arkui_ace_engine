@@ -50,19 +50,13 @@ std::string CheckBoxGroupAccessibilityProperty::GetText() const
 
 int32_t CheckBoxGroupAccessibilityProperty::GetCollectionItemCounts() const
 {
-    auto pipelineContext = PipelineContext::GetCurrentContext();
-    CHECK_NULL_RETURN(pipelineContext, 0);
-    auto stageManager = pipelineContext->GetStageManager();
-    CHECK_NULL_RETURN(stageManager, 0);
-    auto pageNode = stageManager->GetLastPage();
-    CHECK_NULL_RETURN(pageNode, 0);
-    auto pageEventHub = pageNode->GetEventHub<NG::PageEventHub>();
-    CHECK_NULL_RETURN(pageEventHub, 0);
-    auto checkBoxGroupMap = pageEventHub->GetCheckBoxGroupMap();
     auto frameNode = host_.Upgrade();
     CHECK_NULL_RETURN(frameNode, 0);
     auto checkBoxGroupPattern = frameNode->GetPattern<CheckBoxGroupPattern>();
     CHECK_NULL_RETURN(checkBoxGroupPattern, 0);
+    auto groupManager = checkBoxGroupPattern->GetGroupManager();
+    CHECK_NULL_RETURN(groupManager, 0);
+    auto checkBoxGroupMap = groupManager->GetCheckBoxGroupMap();
     auto checkBoxGroupEventHub = checkBoxGroupPattern->GetEventHub<CheckBoxGroupEventHub>();
     CHECK_NULL_RETURN(checkBoxGroupEventHub, 0);
     auto group = checkBoxGroupEventHub->GetGroupName();

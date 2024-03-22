@@ -2167,10 +2167,11 @@ HWTEST_F(CheckBoxTestNG, CheckBoxPatternTest0118, TestSize.Level1)
     RefPtr<FrameNode> stageNode = AceType::MakeRefPtr<FrameNode>("STAGE", -1, AceType::MakeRefPtr<CheckBoxPattern>());
     auto pageNode = AceType::MakeRefPtr<FrameNode>("STAGE", 0, AceType::MakeRefPtr<CheckBoxPattern>());
     auto pageEventHub = AceType::MakeRefPtr<NG::PageEventHub>();
-    pageEventHub->AddCheckBoxToGroup(GROUP_NAME, 2);
-    pageEventHub->AddCheckBoxToGroup(GROUP_NAME, 3);
-    pageEventHub->AddCheckBoxToGroup(GROUP_NAME, 4);
-    pageEventHub->AddCheckBoxToGroup(GROUP_NAME, 5);
+    auto groupManager = pageEventHub->GetGroupManager();
+    groupManager->AddCheckBoxToGroup(GROUP_NAME, 2);
+    groupManager->AddCheckBoxToGroup(GROUP_NAME, 3);
+    groupManager->AddCheckBoxToGroup(GROUP_NAME, 4);
+    groupManager->AddCheckBoxToGroup(GROUP_NAME, 5);
     pageNode->eventHub_ = pageEventHub;
 
     stageNode->AddChild(pageNode);
@@ -2252,8 +2253,9 @@ HWTEST_F(CheckBoxTestNG, CheckBoxPatternTest0119, TestSize.Level1)
     RefPtr<FrameNode> stageNode = AceType::MakeRefPtr<FrameNode>("STAGE", -1, AceType::MakeRefPtr<CheckBoxPattern>());
     auto pageNode = AceType::MakeRefPtr<FrameNode>("STAGE", 0, AceType::MakeRefPtr<CheckBoxPattern>());
     auto pageEventHub = AceType::MakeRefPtr<NG::PageEventHub>();
-    pageEventHub->AddCheckBoxToGroup(GROUP_NAME, 2);
-    pageEventHub->AddCheckBoxToGroup(GROUP_NAME, 3);
+    auto groupManager = pageEventHub->GetGroupManager();
+    groupManager->AddCheckBoxToGroup(GROUP_NAME, 2);
+    groupManager->AddCheckBoxToGroup(GROUP_NAME, 3);
     pageNode->eventHub_ = pageEventHub;
 
     stageNode->AddChild(pageNode);
@@ -2316,9 +2318,10 @@ HWTEST_F(CheckBoxTestNG, CheckBoxPatternTest0120, TestSize.Level1)
     RefPtr<FrameNode> stageNode = AceType::MakeRefPtr<FrameNode>("STAGE", -1, AceType::MakeRefPtr<CheckBoxPattern>());
     auto pageNode = AceType::MakeRefPtr<FrameNode>("STAGE", 0, AceType::MakeRefPtr<CheckBoxPattern>());
     auto pageEventHub = AceType::MakeRefPtr<NG::PageEventHub>();
-    pageEventHub->AddCheckBoxToGroup(GROUP_NAME, 2);
-    pageEventHub->AddCheckBoxToGroup(GROUP_NAME, 3);
-    pageEventHub->AddCheckBoxToGroup(GROUP_NAME, 4);
+    auto groupManager = pageEventHub->GetGroupManager();
+    groupManager->AddCheckBoxToGroup(GROUP_NAME, 2);
+    groupManager->AddCheckBoxToGroup(GROUP_NAME, 3);
+    groupManager->AddCheckBoxToGroup(GROUP_NAME, 4);
     pageNode->eventHub_ = pageEventHub;
     stageNode->AddChild(pageNode);
     auto stageManager = AceType::MakeRefPtr<StageManager>(stageNode);
