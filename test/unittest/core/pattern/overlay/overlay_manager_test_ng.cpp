@@ -78,6 +78,16 @@ using namespace testing;
 using namespace testing::ext;
 namespace OHOS::Ace::NG {
 namespace {
+const NG::BorderWidthProperty BORDER_WIDTH_TEST = { 1.0_vp, 1.0_vp, 1.0_vp, 1.0_vp };
+const NG::BorderStyleProperty BORDER_STYLE_TEST = {BorderStyle::SOLID,
+    BorderStyle::SOLID, BorderStyle::SOLID, BorderStyle::SOLID};
+const NG::BorderColorProperty BORDER_COLOR_TEST = { Color::BLUE,
+    Color::BLUE, Color::BLUE, Color::BLUE };
+const NG::BorderWidthProperty NEW_BORDER_WIDTH_TEST = { 10.0_vp, 15.0_vp, 5.0_vp, 10.0_vp };
+const NG::BorderStyleProperty NEW_BORDER_STYLE_TEST = {BorderStyle::SOLID,
+    BorderStyle::DASHED, BorderStyle::DOTTED, BorderStyle::NONE};
+const NG::BorderColorProperty NEW_BORDER_COLOR_TEST = { Color::RED,
+    Color::GREEN, Color::GRAY, Color::BLACK };
 const std::string TEXT_TAG = "text";
 const OffsetF MENU_OFFSET(10.0, 10.0);
 const std::string MESSAGE = "hello world";
@@ -1673,6 +1683,134 @@ HWTEST_F(OverlayManagerTestNg, OnBindSheet007, TestSize.Level1)
      */
     overlayManager->DismissSheet();
     EXPECT_FALSE(topSheetPattern->callback_);
+}
+
+/**
+ * @tc.name: OnBindSheet008
+ * @tc.desc: Test OverlayManager::OnBindSheet change sheetStyle width.
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayManagerTestNg, OnBindSheet008, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create target node.
+     */
+    auto targetNode = CreateTargetNode();
+    auto stageNode = FrameNode::CreateFrameNode(
+        V2::STAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<StagePattern>());
+    auto rootNode = FrameNode::CreateFrameNode(V2::ROOT_ETS_TAG, 1, AceType::MakeRefPtr<RootPattern>());
+    stageNode->MountToParent(rootNode);
+    targetNode->MountToParent(stageNode);
+    rootNode->MarkDirtyNode();
+
+    /**
+     * @tc.steps: step2. create sheetNode, get sheetPattern.
+     */
+    SheetStyle sheetStyle;
+    bool isShow = true;
+    CreateSheetBuilder();
+    auto overlayManager = AceType::MakeRefPtr<OverlayManager>(rootNode);
+    overlayManager->OnBindSheet(isShow, nullptr, std::move(builderFunc_), std::move(titleBuilderFunc_), sheetStyle,
+        nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, targetNode);
+    EXPECT_FALSE(overlayManager->modalStack_.empty());
+    auto sheetNode = overlayManager->modalStack_.top().Upgrade();
+    ASSERT_NE(sheetNode, nullptr);
+    auto sheetLayoutProperty = sheetNode->GetLayoutProperty<SheetPresentationProperty>();
+    EXPECT_FALSE(sheetLayoutProperty == nullptr);
+    auto style = sheetLayoutProperty->GetSheetStyle();
+    EXPECT_EQ(style->width.has_value(), false);
+
+    /**
+     * @tc.steps: step3. Change the sheetStyle width.
+     * @tc.expected: the sheetStyle width is updated successfully
+     */
+    Dimension width{ 300, DimensionUnit::VP };
+    sheetStyle.width = width;
+    overlayManager->OnBindSheet(isShow, nullptr, std::move(builderFunc_), std::move(titleBuilderFunc_), sheetStyle,
+        nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, targetNode);
+    sheetNode = overlayManager->modalStack_.top().Upgrade();
+    sheetLayoutProperty = sheetNode->GetLayoutProperty<SheetPresentationProperty>();
+    style = sheetLayoutProperty->GetSheetStyle();
+    EXPECT_EQ(style->width.value(), width);
+
+    Dimension widthNew{ 400, DimensionUnit::VP };
+    sheetStyle.width = widthNew;
+    overlayManager->OnBindSheet(isShow, nullptr, std::move(builderFunc_), std::move(titleBuilderFunc_), sheetStyle,
+        nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, targetNode);
+    sheetNode = overlayManager->modalStack_.top().Upgrade();
+    sheetLayoutProperty = sheetNode->GetLayoutProperty<SheetPresentationProperty>();
+    style = sheetLayoutProperty->GetSheetStyle();
+    EXPECT_EQ(style->width.value(), widthNew);
+}
+
+/**
+ * @tc.name: OnBindSheet009
+ * @tc.desc: Test OverlayManager::OnBindSheet change sheetStyle border and shadow.
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayManagerTestNg, OnBindSheet009, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create target node.
+     */
+    auto targetNode = CreateTargetNode();
+    auto stageNode = FrameNode::CreateFrameNode(
+        V2::STAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<StagePattern>());
+    auto rootNode = FrameNode::CreateFrameNode(V2::ROOT_ETS_TAG, 1, AceType::MakeRefPtr<RootPattern>());
+    stageNode->MountToParent(rootNode);
+    targetNode->MountToParent(stageNode);
+    rootNode->MarkDirtyNode();
+
+    /**
+     * @tc.steps: step2. create sheetNode, get sheetPattern.
+     */
+    SheetStyle sheetStyle;
+    bool isShow = true;
+    CreateSheetBuilder();
+    auto overlayManager = AceType::MakeRefPtr<OverlayManager>(rootNode);
+    overlayManager->OnBindSheet(isShow, nullptr, std::move(builderFunc_), std::move(titleBuilderFunc_), sheetStyle,
+        nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, targetNode);
+    EXPECT_FALSE(overlayManager->modalStack_.empty());
+    auto sheetNode = overlayManager->modalStack_.top().Upgrade();
+    ASSERT_NE(sheetNode, nullptr);
+    auto renderContext = sheetNode->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+    EXPECT_EQ(renderContext->GetBorderWidth().has_value(), false);
+    EXPECT_EQ(renderContext->GetBorderColor().has_value(), false);
+    EXPECT_EQ(renderContext->GetBorderStyle().has_value(), false);
+    EXPECT_EQ(renderContext->GetBackShadow().has_value(), false);
+
+    /**
+     * @tc.steps: step3. Change the sheetStyle border and shadow.
+     * @tc.expected: the sheetStyle is updated successfully
+     */
+    Shadow shadow = ShadowConfig::DefaultShadowL;
+    sheetStyle.borderWidth = BORDER_WIDTH_TEST;
+    sheetStyle.borderColor = BORDER_COLOR_TEST;
+    sheetStyle.borderStyle = BORDER_STYLE_TEST;
+    sheetStyle.shadow = shadow;
+    overlayManager->OnBindSheet(isShow, nullptr, std::move(builderFunc_), std::move(titleBuilderFunc_), sheetStyle,
+        nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, targetNode);
+    sheetNode = overlayManager->modalStack_.top().Upgrade();
+    renderContext = sheetNode->GetRenderContext();
+    EXPECT_EQ(renderContext->GetBorderWidth().value(), BORDER_WIDTH_TEST);
+    EXPECT_EQ(renderContext->GetBorderColor().value(), BORDER_COLOR_TEST);
+    EXPECT_EQ(renderContext->GetBorderStyle().value(), BORDER_STYLE_TEST);
+    EXPECT_EQ(renderContext->GetBackShadow().value(), shadow);
+
+    Shadow shadowNew = ShadowConfig::NoneShadow;
+    sheetStyle.borderWidth = NEW_BORDER_WIDTH_TEST;
+    sheetStyle.borderColor = NEW_BORDER_COLOR_TEST;
+    sheetStyle.borderStyle = NEW_BORDER_STYLE_TEST;
+    sheetStyle.shadow = shadowNew;
+    overlayManager->OnBindSheet(isShow, nullptr, std::move(builderFunc_), std::move(titleBuilderFunc_), sheetStyle,
+        nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, targetNode);
+    sheetNode = overlayManager->modalStack_.top().Upgrade();
+    renderContext = sheetNode->GetRenderContext();
+    EXPECT_EQ(renderContext->GetBorderWidth().value(), NEW_BORDER_WIDTH_TEST);
+    EXPECT_EQ(renderContext->GetBorderColor().value(), NEW_BORDER_COLOR_TEST);
+    EXPECT_EQ(renderContext->GetBorderStyle().value(), NEW_BORDER_STYLE_TEST);
+    EXPECT_EQ(renderContext->GetBackShadow().value(), shadowNew);
 }
 
 /**
