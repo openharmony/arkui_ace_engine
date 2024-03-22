@@ -315,23 +315,28 @@ void TextPattern::OnHandleMove(const RectF& handleRect, bool isFirstHandle)
 
     CHECK_NULL_VOID(paragraph_);
     // the handle position is calculated based on the middle of the handle height.
-    if (isFirstHandle) {
-        auto start = GetHandleIndex(Offset(localOffset.GetX(),
-            localOffset.GetY() + (selectOverlayProxy_->IsHandleReverse() ? handleRect.Height() : 0)));
-        HandleSelectionChange(start, textSelector_.destinationOffset);
-    } else {
-        auto end = GetHandleIndex(Offset(localOffset.GetX(),
-            localOffset.GetY() + (selectOverlayProxy_->IsHandleReverse() || NearEqual(localOffset.GetY(), 0)
-                                         ? 0
-                                         : handleRect.Height())));
-        HandleSelectionChange(textSelector_.baseOffset, end);
-    }
+    UpdateSelectorOnHandleMove(localOffset, handleRect.Height(), isFirstHandle);
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 
     CHECK_NULL_VOID(selectOverlayProxy_);
     auto start = textSelector_.GetTextStart();
     auto end = textSelector_.GetTextEnd();
     selectOverlayProxy_->SetSelectInfo(GetSelectedText(start, end));
+}
+
+void TextPattern::UpdateSelectorOnHandleMove(const OffsetF& localOffset, float handleHeight, bool isFirstHandle)
+{
+    if (isFirstHandle) {
+        auto start = GetHandleIndex(Offset(localOffset.GetX(),
+            localOffset.GetY() + (selectOverlayProxy_->IsHandleReverse() ? handleHeight : 0)));
+        HandleSelectionChange(start, textSelector_.destinationOffset);
+    } else {
+        auto end = GetHandleIndex(Offset(localOffset.GetX(),
+            localOffset.GetY() + (selectOverlayProxy_->IsHandleReverse() || NearEqual(localOffset.GetY(), 0)
+                                         ? 0
+                                         : handleHeight)));
+        HandleSelectionChange(textSelector_.baseOffset, end);
+    }
 }
 
 void TextPattern::OnHandleMoveDone(const RectF& handleRect, bool isFirstHandle)

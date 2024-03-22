@@ -542,6 +542,7 @@ protected:
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
     bool IsSelectAll();
     virtual int32_t GetHandleIndex(const Offset& offset) const;
+    virtual void UpdateSelectorOnHandleMove(const OffsetF& localOffset, float handleHeight, bool isFirstHandle);
     std::wstring GetWideText() const;
     std::string GetSelectedText(int32_t start, int32_t end) const;
     void CalcCaretMetricsByPosition(

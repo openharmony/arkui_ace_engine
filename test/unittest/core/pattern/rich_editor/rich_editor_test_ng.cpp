@@ -708,11 +708,12 @@ HWTEST_F(RichEditorTestNg, RichEditorModel013, TestSize.Level1)
     auto spanItem = spanItemChildren.back();
     EXPECT_EQ(spanItemChildren.size(), 1);
     EXPECT_EQ(spanItem->GetSpanContent(), INIT_VALUE_1);
-    ASSERT_FALSE(spanItem->fontStyle->propTextColor.has_value());
-    ASSERT_FALSE(spanItem->fontStyle->propFontSize.has_value());
-    ASSERT_FALSE(spanItem->fontStyle->propItalicFontStyle.has_value());
-    ASSERT_FALSE(spanItem->fontStyle->propFontWeight.has_value());
-    ASSERT_FALSE(spanItem->fontStyle->propFontFamily.has_value());
+    EXPECT_FALSE(spanItem->fontStyle->propTextColor.has_value());
+    EXPECT_FALSE(spanItem->fontStyle->propFontSize.has_value());
+    EXPECT_FALSE(spanItem->fontStyle->propItalicFontStyle.has_value());
+    EXPECT_FALSE(spanItem->fontStyle->propFontWeight.has_value());
+    ASSERT_TRUE(spanItem->fontStyle->propFontFamily.has_value());
+    EXPECT_TRUE(spanItem->fontStyle->propFontFamily.value().empty());
 
     while (!ViewStackProcessor::GetInstance()->elementsStack_.empty()) {
         ViewStackProcessor::GetInstance()->elementsStack_.pop();
@@ -1317,6 +1318,7 @@ HWTEST_F(RichEditorTestNg, HandleClickEvent001, TestSize.Level1)
     richEditorPattern->HandleClickEvent(info);
     EXPECT_EQ(richEditorPattern->caretPosition_, 0);
 
+    richEditorPattern->caretPosition_ = 1;
     richEditorPattern->textSelector_.baseOffset = -1;
     richEditorPattern->textSelector_.destinationOffset = -1;
 
@@ -1327,6 +1329,7 @@ HWTEST_F(RichEditorTestNg, HandleClickEvent001, TestSize.Level1)
     EXPECT_EQ(richEditorPattern->textSelector_.destinationOffset, -1);
     EXPECT_EQ(richEditorPattern->caretPosition_, 0);
 
+    richEditorPattern->caretPosition_ = 1;
     richEditorPattern->isMouseSelect_ = false;
     richEditorPattern->hasClicked_ = false;
     richEditorPattern->HandleClickEvent(info);
@@ -1334,6 +1337,7 @@ HWTEST_F(RichEditorTestNg, HandleClickEvent001, TestSize.Level1)
     EXPECT_EQ(richEditorPattern->textSelector_.destinationOffset, -1);
     EXPECT_EQ(richEditorPattern->caretPosition_, 0);
 
+    richEditorPattern->caretPosition_ = 1;
     richEditorPattern->textSelector_.baseOffset = 0;
     richEditorPattern->textSelector_.destinationOffset = 1;
 
@@ -1344,6 +1348,7 @@ HWTEST_F(RichEditorTestNg, HandleClickEvent001, TestSize.Level1)
     EXPECT_EQ(richEditorPattern->textSelector_.destinationOffset, 1);
     EXPECT_EQ(richEditorPattern->caretPosition_, 0);
 
+    richEditorPattern->caretPosition_ = 1;
     richEditorPattern->isMouseSelect_ = false;
     richEditorPattern->hasClicked_ = false;
     richEditorPattern->HandleClickEvent(info);
@@ -3263,7 +3268,7 @@ HWTEST_F(RichEditorTestNg, DoubleHandleClickEvent001, TestSize.Level1)
     richEditorPattern->isMouseSelect_ = false;
     richEditorPattern->caretVisible_ = true;
     richEditorPattern->HandleDoubleClickEvent(info);
-    EXPECT_FALSE(richEditorPattern->caretVisible_);
+    EXPECT_TRUE(richEditorPattern->caretVisible_);
 
     AddSpan(INIT_VALUE_3);
     info.localLocation_ = Offset(50, 50);

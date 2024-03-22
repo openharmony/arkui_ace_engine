@@ -256,6 +256,7 @@ public:
         TextResponseType responseType = TextResponseType::LONG_PRESS, bool handlReverse = false);
     void CheckEditorTypeChange();
     void OnHandleMove(const RectF& handleRect, bool isFirstHandle) override;
+    void UpdateSelectorOnHandleMove(const OffsetF& localOffset, float handleHeight, bool isFirstHandle)override;
     int32_t GetHandleIndex(const Offset& offset) const override;
     void OnAreaChangedInner() override;
     void CreateHandles() override;
@@ -305,6 +306,7 @@ public:
     RectF GetCaretRect() const override;
     void CloseSelectOverlay() override;
     void CalculateHandleOffsetAndShowOverlay(bool isUsingMouse = false);
+    bool IsSingleHandle();
     void CopySelectionMenuParams(SelectOverlayInfo& selectInfo, TextResponseType responseType);
     std::function<void(Offset)> GetThumbnailCallback() override;
     void HandleOnDragStatusCallback(
@@ -487,6 +489,9 @@ private:
     void HandleFocusEvent();
     void HandleClickEvent(GestureEvent& info);
     void HandleSingleClickEvent(GestureEvent& info);
+    Offset ConvertTouchOffsetToTextOffset(const Offset& touchOffset);
+    bool RepeatClickCaret(const Offset& offset, int32_t lastCaretPosition, const RectF& lastCaretRect);
+    void CreateAndShowSingleHandle(GestureEvent& info);
     void MoveCaretAndStartFocus(const Offset& offset);
     void HandleDoubleClickEvent(GestureEvent& info);
     bool HandleUserClickEvent(GestureEvent& info);
@@ -521,6 +526,8 @@ private:
     void HandleMouseRightButton(const MouseInfo& info);
     void HandleMouseEvent(const MouseInfo& info);
     void HandleTouchEvent(const TouchEventInfo& info);
+    void HandleTouchDown(const Offset& offset);
+    void HandleTouchMove(const Offset& offset);
     void InitLongPressEvent(const RefPtr<GestureEventHub>& gestureHub);
     void UseHostToUpdateTextFieldManager();
     void UpdateTextFieldManager(const Offset& offset, float height);
@@ -713,6 +720,8 @@ private:
     bool adjusted_ = false;
     bool isShowMenu_ = true;
     bool isShowPlaceholder_ = false;
+    bool isSingleHandle_ = false;
+    bool isTouchCaret_ = false;
     SelectionRangeInfo lastSelectionRange_{-1, -1};
     bool isDragSponsor_ = false;
     int32_t dragPosition_ = 0;
