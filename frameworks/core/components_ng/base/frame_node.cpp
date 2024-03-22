@@ -853,10 +853,20 @@ void FrameNode::OnConfigurationUpdate(const ConfigurationChange& configurationCh
     }
 }
 
-void FrameNode::OnVisibleChange(bool isVisible)
+void FrameNode::NotifyVisibleChange(bool isVisible)
 {
     pattern_->OnVisibleChange(isVisible);
     UpdateChildrenVisible(isVisible);
+}
+
+void FrameNode::TryVisibleChangeOnDescendant(bool isVisible)
+{
+    auto layoutProperty = GetLayoutProperty();
+    if (layoutProperty &&
+        layoutProperty->GetVisibilityValue(VisibleType::VISIBLE) != VisibleType::VISIBLE) {
+        return;
+    }
+    NotifyVisibleChange(isVisible);
 }
 
 void FrameNode::OnDetachFromMainTree(bool recursive)
@@ -1559,8 +1569,9 @@ RefPtr<FrameNode> FrameNode::GetAncestorNodeOfFrame(bool checkBoundary) const
     }
     auto parent = GetParent();
     while (parent) {
-        if (InstanceOf<FrameNode>(parent)) {
-            return DynamicCast<FrameNode>(parent);
+        auto parentFrame = DynamicCast<FrameNode>(parent);
+        if (parentFrame) {
+            return parentFrame;
         }
         parent = parent->GetParent();
     }

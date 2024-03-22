@@ -804,7 +804,7 @@ void UINode::SetJSViewActive(bool active)
     }
 }
 
-void UINode::OnVisibleChange(bool isVisible)
+void UINode::TryVisibleChangeOnDescendant(bool isVisible)
 {
     UpdateChildrenVisible(isVisible);
 }
@@ -812,15 +812,7 @@ void UINode::OnVisibleChange(bool isVisible)
 void UINode::UpdateChildrenVisible(bool isVisible) const
 {
     for (const auto& child : GetChildren()) {
-        if (InstanceOf<FrameNode>(child)) {
-            auto childLayoutProperty = DynamicCast<FrameNode>(child)->GetLayoutProperty();
-            if (childLayoutProperty &&
-                childLayoutProperty->GetVisibilityValue(VisibleType::VISIBLE) != VisibleType::VISIBLE) {
-                // child is invisible, no need to update visible state.
-                continue;
-            }
-        }
-        child->OnVisibleChange(isVisible);
+        child->TryVisibleChangeOnDescendant(isVisible);
     }
 }
 

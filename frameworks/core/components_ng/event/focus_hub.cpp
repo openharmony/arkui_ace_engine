@@ -410,17 +410,12 @@ void FocusHub::SetEnabled(bool enabled)
 
 bool FocusHub::IsShow() const
 {
-    auto frameNode = GetFrameNode();
-    CHECK_NULL_RETURN(frameNode, true);
-    bool curIsVisible = frameNode->IsVisible();
-    auto parent = frameNode->GetParent();
-    while (parent) {
-        auto parentFrame = AceType::DynamicCast<FrameNode>(parent);
-        if (parentFrame && !parentFrame->IsVisible()) {
+    bool curIsVisible = true;
+    for (RefPtr<UINode> node = GetFrameNode(); curIsVisible && node; node = node->GetParent()) {
+        auto frameNode = AceType::DynamicCast<FrameNode>(node);
+        if (frameNode && !frameNode->IsVisible()) {
             curIsVisible = false;
-            break;
         }
-        parent = parent->GetParent();
     }
     return curIsVisible;
 }

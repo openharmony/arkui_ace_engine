@@ -948,11 +948,11 @@ HWTEST_F(UINodeTestNg, UINodeTestNg028, TestSize.Level1)
 HWTEST_F(UINodeTestNg, UINodeTestNg029, TestSize.Level1)
 {
     /**
-     * @tc.steps: step1. add one child for ZERO and call OnVisibleChange
-     * @tc.expected: the OnVisibleChange function is run ok
+     * @tc.steps: step1. add one child for ZERO and call TryVisibleChangeOnDescendant
+     * @tc.expected: the TryVisibleChangeOnDescendant function is run ok
      */
     ZERO->AddChild(ONE, 1, false);
-    ZERO->UINode::OnVisibleChange(true);
+    ZERO->UINode::TryVisibleChangeOnDescendant(true);
     EXPECT_EQ(ZERO->children_.size(), 1);
     ZERO->Clean();
 }
