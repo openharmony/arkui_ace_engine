@@ -1370,6 +1370,7 @@ public:
     void OnSurfaceCapture(std::shared_ptr<Media::PixelMap> pixelMap) override
     {
         if (pixelMap == nullptr) {
+            TAG_LOGW(AceLogTag::ACE_DRAG, "pixelMap is null!");
             thumbnailGet.notify_all();
             return;
         }

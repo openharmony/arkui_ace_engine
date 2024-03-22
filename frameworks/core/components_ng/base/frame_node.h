@@ -813,6 +813,7 @@ private:
 
     // dump self info.
     void DumpInfo() override;
+    void DumpDragInfo();
     void DumpOverlayInfo();
     void DumpCommonInfo();
     void DumpSafeAreaInfo();

@@ -571,10 +571,57 @@ void FrameNode::DumpCommonInfo()
                 .append(layoutProperty_->GetContentLayoutConstraint().has_value() ?
                             layoutProperty_->GetContentLayoutConstraint().value().ToString() : "NA"));
     }
+    DumpDragInfo();
     DumpOverlayInfo();
     if (frameProxy_->Dump().compare("totalCount is 0") != 0) {
         DumpLog::GetInstance().AddDesc(std::string("FrameProxy: ").append(frameProxy_->Dump().c_str()));
     }
+}
+
+void FrameNode::DumpDragInfo()
+{
+    DumpLog::GetInstance().AddDesc("------------start print dragInfo");
+    DumpLog::GetInstance().AddDesc(std::string("Draggable: ")
+                                        .append(draggable_ ? "true" : "false")
+                                        .append(" UserSet: ")
+                                        .append(userSet_ ? "true" : "false")
+                                        .append(" CustomerSet: ")
+                                        .append(customerSet_ ? "true" : "false"));
+    auto dragPreviewStr =
+        std::string("DragPreview: Has customNode: ").append(dragPreviewInfo_.customNode ? "YES" : "NO");
+    dragPreviewStr.append(" Has pixelMap: ").append(dragPreviewInfo_.pixelMap ? "YES" : "NO");
+    dragPreviewStr.append(" extraInfo: ").append(dragPreviewInfo_.extraInfo.c_str());
+    DumpLog::GetInstance().AddDesc(dragPreviewStr);
+    DumpLog::GetInstance().AddDesc(
+        std::string("DragPreviewMode: ")
+            .append(previewOption_.mode == DragPreviewMode::DISABLE_SCALE ? "DISABLE_SCALE" : "AUTO"));
+    auto eventHub = GetEventHub<EventHub>();
+    DumpLog::GetInstance().AddDesc(std::string("Event: ")
+                                        .append("OnDragStart: ")
+                                        .append(eventHub->HasOnDragStart() ? "YES" : "NO")
+                                        .append(" OnDragEnter: ")
+                                        .append(eventHub->HasOnDragEnter() ? "YES" : "NO")
+                                        .append(" OnDragLeave: ")
+                                        .append(eventHub->HasOnDragLeave() ? "YES" : "NO")
+                                        .append(" OnDragMove: ")
+                                        .append(eventHub->HasOnDragMove() ? "YES" : "NO")
+                                        .append(" OnDrop: ")
+                                        .append(eventHub->HasOnDrop() ? "YES" : "NO")
+                                        .append("OnDragEnd: ")
+                                        .append(eventHub->HasOnDragEnd() ? "YES" : "NO"));
+    DumpLog::GetInstance().AddDesc(std::string("DefaultOnDragStart: ")
+                                        .append(eventHub->HasDefaultOnDragStart() ? "YES" : "NO")
+                                        .append("CustomerOnDragEnter: ")
+                                        .append(eventHub->HasCustomerOnDragEnter() ? "YES" : "NO")
+                                        .append(" CustomerOnDragLeave: ")
+                                        .append(eventHub->HasCustomerOnDragLeave() ? "YES" : "NO")
+                                        .append(" CustomerOnDragMove: ")
+                                        .append(eventHub->HasCustomerOnDragMove() ? "YES" : "NO")
+                                        .append(" CustomerOnDrop: ")
+                                        .append(eventHub->HasCustomerOnDrop() ? "YES" : "NO")
+                                        .append(" CustomerOnDragEnd: ")
+                                        .append(eventHub->HasCustomerOnDragEnd() ? "YES" : "NO"));
+    DumpLog::GetInstance().AddDesc("------------end print dragInfo");
 }
 
 void FrameNode::DumpOnSizeChangeInfo()
