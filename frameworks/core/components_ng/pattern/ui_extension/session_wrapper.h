@@ -78,7 +78,7 @@ public:
     virtual bool NotifyFocusStateSync(bool focusState) = 0;
     virtual bool NotifyBackPressedSync() = 0;
     virtual bool NotifyPointerEventSync(const std::shared_ptr<OHOS::MMI::PointerEvent>& pointerEvent) = 0;
-    virtual bool NotifyKeyEventSync(const std::shared_ptr<OHOS::MMI::KeyEvent>& keyEvent) = 0;
+    virtual bool NotifyKeyEventSync(const std::shared_ptr<OHOS::MMI::KeyEvent>& keyEvent, bool isPreIme) = 0;
     virtual bool NotifyAxisEventSync(const std::shared_ptr<OHOS::MMI::AxisEvent>& axisEvent) = 0;
 
     // Asynchronous interface for event notify

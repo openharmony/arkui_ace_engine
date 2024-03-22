@@ -222,6 +222,7 @@ public:
     virtual void SetOnTouchIntercept(NG::TouchInterceptFunc&& touchInterceptFunc) = 0;
     virtual void SetOnTouch(TouchEventFunc&& touchEventFunc) = 0;
     virtual void SetOnKeyEvent(OnKeyCallbackFunc&& onKeyCallback) = 0;
+    virtual void SetOnKeyPreIme(OnKeyPreImeFunc&& onKeyCallback) {}
     virtual void SetOnMouse(OnMouseEventFunc&& onMouseEventFunc) = 0;
     virtual void SetOnHover(OnHoverFunc&& onHoverEventFunc) = 0;
     virtual void SetOnDelete(std::function<void()>&& onDeleteCallback) = 0;
@@ -257,6 +258,7 @@ public:
     virtual void DisableOnClick() = 0;
     virtual void DisableOnTouch() = 0;
     virtual void DisableOnKeyEvent() = 0;
+    virtual void DisableOnKeyPreIme() {}
     virtual void DisableOnHover() = 0;
     virtual void DisableOnMouse() = 0;
     virtual void DisableOnAppear() = 0;
@@ -277,7 +279,7 @@ public:
     virtual void SetDefaultFocus(bool isSet) = 0;
     virtual void SetGroupDefaultFocus(bool isSet) = 0;
     virtual void SetInspectorId(const std::string& inspectorId) = 0;
-    virtual void SetAutoEventParam(const std::string& param) {};
+    virtual void SetAutoEventParam(const std::string& param) {}
     virtual void SetRestoreId(int32_t restoreId) = 0;
     virtual void SetDebugLine(const std::string& line) = 0;
     virtual void SetHoverEffect(HoverEffectType hoverEffect) = 0;
