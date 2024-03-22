@@ -1022,7 +1022,7 @@ void JSRichEditorController::ParseJsSymbolSpanStyle(
         updateSpanStyle.updateFontSize = size;
         style.SetFontSize(size);
     }
-    ParseJsLineHeightLetterSpacingTextStyle(styleObject, style, updateSpanStyle, false);
+    ParseJsLineHeightLetterSpacingTextStyle(styleObject, style, updateSpanStyle, true);
     JSRef<JSVal> fontWeight = styleObject->GetProperty("fontWeight");
     std::string weight;
     if (!fontWeight->IsNull() && (fontWeight->IsNumber() || JSContainerBase::ParseJsString(fontWeight, weight))) {
