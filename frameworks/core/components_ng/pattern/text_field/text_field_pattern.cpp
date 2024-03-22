@@ -1093,6 +1093,9 @@ void TextFieldPattern::HandleOnSelectAll(bool isKeyEvent, bool inlineStyle)
     showSelect_ = true;
     if (isKeyEvent || inlineSelectAllFlag_ || IsUsingMouse()) {
         CloseSelectOverlay(true);
+        if (inlineSelectAllFlag_ && !isKeyEvent && !IsUsingMouse()) {
+            return;
+        }
         if (IsSelected()) {
             PushSelectedByMouseInfoToManager();
         }
@@ -5589,7 +5592,9 @@ void TextFieldPattern::RestorePreInlineStates()
     if (Container::LessThanAPIVersion(PlatformVersion::VERSION_TEN) || IsNormalInlineState()) {
         textRect_.SetOffset(OffsetF(GetPaddingLeft(), GetPaddingTop()));
     }
-    layoutProperty->UpdateMargin(inlineState_.margin);
+    if (!restoreMarginState_) {
+        layoutProperty->UpdateMargin(inlineState_.margin);
+    }
     renderContext->UpdateBackgroundColor(inlineState_.bgColor);
     layoutProperty->UpdateBorderWidth(inlineState_.borderWidth);
     renderContext->UpdateBorderWidth(inlineState_.borderWidth);
