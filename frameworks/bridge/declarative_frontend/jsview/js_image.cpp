@@ -363,13 +363,19 @@ void JSImage::SetImageFill(const JSCallbackInfo& info)
     ImageModel::GetInstance()->SetImageFill(color);
 }
 
-void JSImage::SetImageRenderMode(int32_t imageRenderMode)
+void JSImage::SetImageRenderMode(const JSCallbackInfo& info)
 {
-    auto renderMode = static_cast<ImageRenderMode>(imageRenderMode);
-    if (renderMode < ImageRenderMode::ORIGINAL || renderMode > ImageRenderMode::TEMPLATE) {
-        renderMode = ImageRenderMode::ORIGINAL;
+    if (info.Length() < 1) {
+        return;
     }
-    ImageModel::GetInstance()->SetImageRenderMode(renderMode);
+    auto jsImageRenderMode = info[0];
+    if (jsImageRenderMode->IsNumber()) {
+        auto renderMode = static_cast<ImageRenderMode>(jsImageRenderMode->ToNumber<int32_t>());
+        if (renderMode < ImageRenderMode::ORIGINAL || renderMode > ImageRenderMode::TEMPLATE) {
+            renderMode = ImageRenderMode::ORIGINAL;
+        }
+        ImageModel::GetInstance()->SetImageRenderMode(renderMode);
+    }
 }
 
 void JSImage::SetImageInterpolation(int32_t imageInterpolation)

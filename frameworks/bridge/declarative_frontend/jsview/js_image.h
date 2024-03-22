@@ -33,7 +33,7 @@ public:
     static void SetObjectFit(const JSCallbackInfo& args);
     static void SetImageFill(const JSCallbackInfo& info);
     static void SetImageInterpolation(int32_t imageInterpolation);
-    static void SetImageRenderMode(int32_t imageRenderMode);
+    static void SetImageRenderMode(const JSCallbackInfo& info);
     static void SetImageRepeat(int32_t imageRepeat);
     static void JSBind(BindingTarget globalObj);
     static void OnComplete(const JSCallbackInfo& args);
