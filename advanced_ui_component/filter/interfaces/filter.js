@@ -176,7 +176,7 @@ class ListFilterRow extends ViewPU {
     this.__backgroundColorRow = new SynchedPropertyNesedObjectPU(p17.backgroundColorRow, this, 'backgroundColorRow');
     this.__isBackgroundHoverRow =
       new SynchedPropertyNesedObjectPU(p17.isBackgroundHoverRow, this, 'isBackgroundHoverRow');
-    this.filterRow = new FilterParams();
+    this.filterRow = { name: '', options: [] };
     this.onItemClick = () => { };
     this.rowIndex = 0;
     this.setInitiallyProvidedValue(p17);

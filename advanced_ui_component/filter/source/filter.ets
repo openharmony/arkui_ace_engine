@@ -118,7 +118,7 @@ struct ListFilterRow {
   @ObjectLink fontWeightRow: FontWeightArray
   @ObjectLink backgroundColorRow: ResourceArray
   @ObjectLink isBackgroundHoverRow: BooleanArray
-  filterRow: FilterParams = new FilterParams()
+  filterRow: FilterParams = { name: '', options: [] };
   onItemClick: (colIndex: number) => void = () => {}
   rowIndex: number = 0
 
