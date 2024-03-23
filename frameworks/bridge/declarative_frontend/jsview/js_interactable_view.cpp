@@ -150,11 +150,12 @@ void JSInteractableView::JsMonopolizeEvents(const JSCallbackInfo& info)
 
 void JSInteractableView::JsOnClick(const JSCallbackInfo& info)
 {
-    if (info[0]->IsUndefined() && IsDisableEventVersion()) {
+    JSRef<JSVal> jsOnClickVal = info[0];
+    if (jsOnClickVal->IsUndefined() && IsDisableEventVersion()) {
         ViewAbstractModel::GetInstance()->DisableOnClick();
         return;
     }
-    if (!info[0]->IsFunction()) {
+    if (!jsOnClickVal->IsFunction()) {
         return;
     }
     WeakPtr<NG::FrameNode> frameNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
