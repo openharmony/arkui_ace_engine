@@ -17,24 +17,24 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PROPERTIES_CONSTRAINT_FLAGS_H
 #include "core/components_ng/property/layout_constraint.h"
 namespace OHOS::Ace::NG {
-    struct ConstraintFlags {
-        /**
-        * @brief Compare previous layout constraint and current layout constraint to update flags.
-        * 
-        * @param preConstraint previous layout constraint
-        * @param constraint current layout constraint
-        */
-        void UpdateFlags(
-            const std::optional<LayoutConstraintF>& preConstraint, const std::optional<LayoutConstraintF>& constraint);
+struct ConstraintFlags {
+    /**
+    * @brief Compare previous layout constraint and current layout constraint to update flags.
+    *
+    * @param preConstraint previous layout constraint
+    * @param constraint current layout constraint
+    */
+    void UpdateFlags(
+        const std::optional<LayoutConstraintF>& preConstraint, const std::optional<LayoutConstraintF>& constraint);
 
-        std::string ToString() const;
+    std::string ToString() const;
 
-        bool idealSize = false;
-        bool parentIdealSize = false;
-        bool minSize = false;
-        bool maxSize = false;
-        bool percentRef = false;
-        bool scaleProperty = false;
-    };
-}
+    bool idealSize = false;
+    bool parentIdealSize = false;
+    bool minSize = false;
+    bool maxSize = false;
+    bool percentRef = false;
+    bool scaleProperty = false;
+};
+} // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PROPERTIES_CONSTRAINT_FLAGS_H

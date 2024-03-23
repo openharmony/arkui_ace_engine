@@ -35,7 +35,8 @@ void ConstraintFlags::UpdateFlags(
     }
 }
 
-std::string ConstraintFlags::ToString() const{
+std::string ConstraintFlags::ToString() const
+{
     std::string result = "ConstraintFlags: ";
     result += "idealSize: " + std::to_string(idealSize) + ", ";
     result += "parentIdealSize: " + std::to_string(parentIdealSize) + ", ";

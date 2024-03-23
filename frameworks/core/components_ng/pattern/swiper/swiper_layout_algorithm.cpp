@@ -94,14 +94,9 @@ void SwiperLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
             }
         }
     } else {
-        if (!layoutWrapper->IsContraintNoChanged()) {
-            LOGI("ZTE print constraint Changes %s, CONTENT changes = %s",
-                layoutWrapper->GetConstraintChanges().ToString().c_str(),
-                layoutWrapper->GetContentChanges().ToString().c_str());
-        }
         contentIdealSize = CreateIdealSizeByPercentRef(contentConstraint, axis, MeasureType::MATCH_PARENT_MAIN_AXIS);
         if (!layoutWrapper->IsContraintNoChanged()) {
-            auto&& changeFlags = layoutWrapper->GetContentChanges();
+            const auto& changeFlags = layoutWrapper->GetContentChanges();
             if (changeFlags.minSize && !changeFlags.parentIdealSize) {
                 mainSizeIsMeasured_ = false;
                 jumpIndex_ = currentIndex_;
