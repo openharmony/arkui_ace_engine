@@ -1010,11 +1010,12 @@ struct ArkUICommonModifier {
     void (*resetOpacity)(ArkUINodeHandle node);
     void (*setAlign)(ArkUINodeHandle node, ArkUI_Int32 align);
     void (*resetAlign)(ArkUINodeHandle node);
-    void (*setBackdropBlur)(ArkUINodeHandle node, ArkUI_Float32 value);
+    void (*setBackdropBlur)(
+        ArkUINodeHandle node, ArkUI_Float32 value, const ArkUI_Float32* blurValues, ArkUI_Int32 blurValuesSize);
     void (*resetBackdropBlur)(ArkUINodeHandle node);
     void (*setHueRotate)(ArkUINodeHandle node, ArkUI_Float32 deg);
     void (*resetHueRotate)(ArkUINodeHandle node);
-    void (*setInvert)(ArkUINodeHandle node, ArkUI_Float32 invert);
+    void (*setInvert)(ArkUINodeHandle node, ArkUI_Float32* invert, ArkUI_Int32 length);
     void (*resetInvert)(ArkUINodeHandle node);
     void (*setSepia)(ArkUINodeHandle node, ArkUI_Float32 sepia);
     void (*resetSepia)(ArkUINodeHandle node);
@@ -1028,7 +1029,8 @@ struct ArkUICommonModifier {
     void (*resetContrast)(ArkUINodeHandle node);
     void (*setBrightness)(ArkUINodeHandle node, ArkUI_Float32 brightness);
     void (*resetBrightness)(ArkUINodeHandle node);
-    void (*setBlur)(ArkUINodeHandle node, ArkUI_Float32 value);
+    void (*setBlur)(
+        ArkUINodeHandle node, ArkUI_Float32 value, const ArkUI_Float32* blurValues, ArkUI_Int32 blurValuesSize);
     void (*resetBlur)(ArkUINodeHandle node);
     void (*setLinearGradient)(ArkUINodeHandle node, const ArkUI_Float32* values, ArkUI_Int32 valuesLength,
         const ArkUIInt32orFloat32* colors, ArkUI_Int32 colorsLength);

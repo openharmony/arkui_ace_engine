@@ -505,8 +505,8 @@ class AlignModifier extends ModifierWithKey<number> {
   }
 }
 
-class BackdropBlurModifier extends ModifierWithKey<number> {
-  constructor(value: number) {
+class BackdropBlurModifier extends ModifierWithKey<ArkBlurOptions> {
+  constructor(value: ArkBlurOptions) {
     super(value);
   }
   static identity: Symbol = Symbol('backdropBlur');
@@ -514,8 +514,12 @@ class BackdropBlurModifier extends ModifierWithKey<number> {
     if (reset) {
       getUINativeModule().common.resetBackdropBlur(node);
     } else {
-      getUINativeModule().common.setBackdropBlur(node, this.value);
+      getUINativeModule().common.setBackdropBlur(node, this.value.value, this.value.options?.grayscale);
     }
+  }
+  checkObjectDiff(): boolean {
+    return !((this.stageValue.value === this.value.value) &&
+      (this.stageValue.options === this.value.options));
   }
 }
 
@@ -533,8 +537,8 @@ class HueRotateModifier extends ModifierWithKey<number | string> {
   }
 }
 
-class InvertModifier extends ModifierWithKey<number> {
-  constructor(value: number) {
+class InvertModifier extends ModifierWithKey<number | InvertOptions> {
+  constructor(value: number | InvertOptions) {
     super(value);
   }
   static identity: Symbol = Symbol('invert');
@@ -542,8 +546,22 @@ class InvertModifier extends ModifierWithKey<number> {
     if (reset) {
       getUINativeModule().common.resetInvert(node);
     } else {
-      getUINativeModule().common.setInvert(node, this.value);
+      if(isNumber(this.value)) {
+        getUINativeModule().common.setInvert(node, this.value, undefined, undefined, undefined, undefined);
+      } else {
+        getUINativeModule().common.setInvert(node, undefined,
+          (this.value as InvertOptions).low,
+          (this.value as InvertOptions).high,
+          (this.value as InvertOptions).threshold,
+          (this.value as InvertOptions).thresholdRange);
+      }
     }
+  }
+  checkObjectDiff(): boolean {
+    return !((this.stageValue as InvertOptions).high == (this.value as InvertOptions).high &&
+      (this.stageValue as InvertOptions).low == (this.value as InvertOptions).low &&
+      (this.stageValue as InvertOptions).threshold == (this.value as InvertOptions).threshold &&
+      (this.stageValue as InvertOptions).thresholdRange == (this.value as InvertOptions).thresholdRange);
   }
 }
 
@@ -635,8 +653,8 @@ class BrightnessModifier extends ModifierWithKey<number> {
   }
 }
 
-class BlurModifier extends ModifierWithKey<number> {
-  constructor(value: number) {
+class BlurModifier extends ModifierWithKey<ArkBlurOptions> {
+  constructor(value: ArkBlurOptions) {
     super(value);
   }
   static identity: Symbol = Symbol('blur');
@@ -644,8 +662,12 @@ class BlurModifier extends ModifierWithKey<number> {
     if (reset) {
       getUINativeModule().common.resetBlur(node);
     } else {
-      getUINativeModule().common.setBlur(node, this.value);
+      getUINativeModule().common.setBlur(node, this.value.value, this.value.options?.grayscale);
     }
+  }
+  checkObjectDiff(): boolean {
+    return !((this.stageValue.value === this.value.value) &&
+      (this.stageValue.options === this.value.options));
   }
 }
 
@@ -2884,12 +2906,11 @@ class ArkComponent implements CommonMethod<CommonAttribute> {
     throw new Error('Method not implemented.');
   }
 
-  blur(value: number): this {
-    if (!isNumber(value)) {
-      modifierWithKey(this._modifiersWithKeys, BlurModifier.identity, BlurModifier, undefined);
-    } else {
-      modifierWithKey(this._modifiersWithKeys, BlurModifier.identity, BlurModifier, value);
-    }
+  blur(value: number, options?: BlurOptions): this {
+    let blur: ArkBlurOptions = new ArkBlurOptions();
+    blur.value = value;
+    blur.options = options;
+    modifierWithKey(this._modifiersWithKeys, BlurModifier.identity, BlurModifier, blur);
     return this;
   }
 
@@ -2958,11 +2979,11 @@ class ArkComponent implements CommonMethod<CommonAttribute> {
     return this;
   }
 
-  invert(value: number): this {
-    if (!isNumber(value)) {
-      modifierWithKey(this._modifiersWithKeys, InvertModifier.identity, InvertModifier, undefined);
-    } else {
+  invert(value: number | InvertOptions): this {
+    if (!isUndefined(value)) {
       modifierWithKey(this._modifiersWithKeys, InvertModifier.identity, InvertModifier, value);
+    } else {
+      modifierWithKey(this._modifiersWithKeys, InvertModifier.identity, InvertModifier, undefined);
     }
     return this;
   }
@@ -2981,12 +3002,11 @@ class ArkComponent implements CommonMethod<CommonAttribute> {
     return this;
   }
 
-  backdropBlur(value: number): this {
-    if (!isNumber(value)) {
-      modifierWithKey(this._modifiersWithKeys, BackdropBlurModifier.identity, BackdropBlurModifier, undefined);
-    } else {
-      modifierWithKey(this._modifiersWithKeys, BackdropBlurModifier.identity, BackdropBlurModifier, value);
-    }
+  backdropBlur(value: number, options?: BlurOptions): this {
+    let blur: ArkBlurOptions = new ArkBlurOptions();
+    blur.value = value;
+    blur.options = options;
+    modifierWithKey(this._modifiersWithKeys, BackdropBlurModifier.identity, BackdropBlurModifier, blur);
     return this;
   }
 

@@ -476,8 +476,13 @@ class BackdropBlurModifier extends ModifierWithKey {
       getUINativeModule().common.resetBackdropBlur(node);
     }
     else {
-      getUINativeModule().common.setBackdropBlur(node, this.value);
+      getUINativeModule().common.setBackdropBlur(
+        node, this.value.value, (_a = this.value.options) === null || _a === void 0 ? void 0 : _a.grayscale);
     }
+  }
+  checkObjectDiff() {
+    return !((this.stageValue.value === this.value.value) &&
+      (this.stageValue.options === this.value.options));
   }
 }
 BackdropBlurModifier.identity = Symbol('backdropBlur');
@@ -504,8 +509,20 @@ class InvertModifier extends ModifierWithKey {
       getUINativeModule().common.resetInvert(node);
     }
     else {
-      getUINativeModule().common.setInvert(node, this.value);
+      if (isNumber(this.value)) {
+        getUINativeModule().common.setInvert(node, this.value, undefined, undefined, undefined, undefined);
+      }
+      else {
+        getUINativeModule().common.setInvert(
+          node, undefined, this.value.low, this.value.high, this.value.threshold, this.value.thresholdRange);
+      }
     }
+  }
+  checkObjectDiff() {
+    return !(this.stageValue.high == this.value.high &&
+      this.stageValue.low == this.value.low &&
+      this.stageValue.threshold == this.value.threshold &&
+      this.stageValue.thresholdRange == this.value.thresholdRange);
   }
 }
 InvertModifier.identity = Symbol('invert');
@@ -605,8 +622,13 @@ class BlurModifier extends ModifierWithKey {
       getUINativeModule().common.resetBlur(node);
     }
     else {
-      getUINativeModule().common.setBlur(node, this.value);
+      getUINativeModule().common.setBlur(
+        node, this.value.value, (_a = this.value.options) === null || _a === void 0 ? void 0 : _a.grayscale);
     }
+  }
+  checkObjectDiff() {
+    return !((this.stageValue.value === this.value.value) &&
+      (this.stageValue.options === this.value.options));
   }
 }
 BlurModifier.identity = Symbol('blur');
@@ -2797,13 +2819,11 @@ class ArkComponent {
   parallelGesture(gesture, mask) {
     throw new Error('Method not implemented.');
   }
-  blur(value) {
-    if (!isNumber(value)) {
-      modifierWithKey(this._modifiersWithKeys, BlurModifier.identity, BlurModifier, undefined);
-    }
-    else {
-      modifierWithKey(this._modifiersWithKeys, BlurModifier.identity, BlurModifier, value);
-    }
+  blur(value, options) {
+    let blur = new ArkBlurOptions();
+    blur.value = value;
+    blur.options = options;
+    modifierWithKey(this._modifiersWithKeys, BlurModifier.identity, BlurModifier, blur);
     return this;
   }
   linearGradientBlur(value, options) {
@@ -2868,11 +2888,11 @@ class ArkComponent {
     return this;
   }
   invert(value) {
-    if (!isNumber(value)) {
-      modifierWithKey(this._modifiersWithKeys, InvertModifier.identity, InvertModifier, undefined);
+    if (!isUndefined(value)) {
+      modifierWithKey(this._modifiersWithKeys, InvertModifier.identity, InvertModifier, value);
     }
     else {
-      modifierWithKey(this._modifiersWithKeys, InvertModifier.identity, InvertModifier, value);
+      modifierWithKey(this._modifiersWithKeys, InvertModifier.identity, InvertModifier, undefined);
     }
     return this;
   }
@@ -2889,13 +2909,11 @@ class ArkComponent {
     modifierWithKey(this._modifiersWithKeys, UseEffectModifier.identity, UseEffectModifier, value);
     return this;
   }
-  backdropBlur(value) {
-    if (!isNumber(value)) {
-      modifierWithKey(this._modifiersWithKeys, BackdropBlurModifier.identity, BackdropBlurModifier, undefined);
-    }
-    else {
-      modifierWithKey(this._modifiersWithKeys, BackdropBlurModifier.identity, BackdropBlurModifier, value);
-    }
+  backdropBlur(value, options) {
+    let blur = new ArkBlurOptions();
+    blur.value = value;
+    blur.options = options;
+    modifierWithKey(this._modifiersWithKeys, BackdropBlurModifier.identity, BackdropBlurModifier, blur);
     return this;
   }
   renderGroup(value) {
@@ -9105,6 +9123,20 @@ class ArkScrollEdgeEffect {
   isEqual(another) {
     return (this.value === another.value) &&
       (this.options === another.options);
+  }
+}
+class ArkBlurOptions {
+  constructor() {
+    this.value = undefined;
+    this.options = undefined;
+  }
+}
+class InvertOptions {
+  constructor() {
+    this.high = undefined;
+    this.low = undefined;
+    this.threshold = undefined;
+    this.thresholdRange = undefined;
   }
 }
 class ArkMenuAlignType {
