@@ -274,11 +274,7 @@ export struct SelectDialog{
               .fontWeight(FontWeight.Regular)
               .fontColor($r('sys.color.font_primary'))
               .textOverflow({overflow: TextOverflow.Ellipsis})
-          }.padding({
-            left: $r('sys.float.padding_level12'),
-            right: $r('sys.float.padding_level12'),
-            bottom: $r('sys.float.padding_level4')
-          }).width('100%')
+          }.paddingContentStyle().width('100%')
         }
         List({space: 1}) {
           ForEach(this.radioContent, (item: SheetInfo, index?: number) => {
@@ -296,42 +292,41 @@ export struct SelectDialog{
                       .checked(this.selectedIndex === index)
                       .hitTestBehavior(HitTestMode.None)
                   }.constraintSize({ minHeight: LIST_MIN_HEIGHT }).clip(false)
-                  .padding({
-                    top: $r('sys.float.padding_level4'),
-                    bottom: $r('sys.float.padding_level4')
+                  .padding({ top: $r('sys.float.padding_level4'), bottom: $r('sys.float.padding_level4')
                   }).onClick(() => {
                     item.action && item.action()
                     this.controller.close()
                   })
-                }
-                .type(ButtonType.Normal)
-                .borderRadius($r('sys.float.corner_radius_level8'))
-                .buttonStyle(ButtonStyleMode.TEXTUAL)
-                .padding({
-                  left: $r('sys.float.padding_level6'),
-                  right: $r('sys.float.padding_level6')
-                })
+                }.type(ButtonType.Normal).borderRadius($r('sys.float.corner_radius_level8'))
+                .buttonStyle(ButtonStyleMode.TEXTUAL).paddingStyle()
                 .onClick(() => {
                   item.action && item.action()
                   this.controller.close()
                 })
                 if (index < this.radioContent.length - 1) {
-                  Divider()
-                    .color($r('sys.color.comp_divider'))
-                    .padding({
-                      left: $r('sys.float.padding_level6'),
-                      right: $r('sys.float.padding_level6')
-                    })
+                  Divider().color($r('sys.color.comp_divider')).paddingStyle()
                 }
-              }.padding({
-                left: $r('sys.float.padding_level6'),
-                right: $r('sys.float.padding_level6')
-              })
+              }.paddingStyle()
             }
           })
         }.width('100%').clip(false)
       }
     }.scrollBar(BarState.Auto)
+  }
+
+  @Styles paddingContentStyle() {
+    .padding({
+      left: $r('sys.float.padding_level12'),
+      right: $r('sys.float.padding_level12'),
+      bottom: $r('sys.float.padding_level4')
+    })
+  }
+
+  @Styles paddingStyle() {
+    .padding({
+      left: $r('sys.float.padding_level6'),
+      right: $r('sys.float.padding_level6')
+    })
   }
 
   build() {
@@ -488,6 +483,8 @@ export struct ConfirmDialog{
 @CustomDialog
 export struct AlertDialog {
   controller: CustomDialogController;
+  primaryTitle?: ResourceStr | undefined = undefined;
+  secondaryTitle?: ResourceStr | undefined = undefined;
   content: ResourceStr = '';
   primaryButton?: ButtonOptions | null = null;
   secondaryButton?: ButtonOptions | null = null;
@@ -496,6 +493,8 @@ export struct AlertDialog {
 
   build() {
     CustomDialogComponent({
+      primaryTitle: this.primaryTitle,
+      secondaryTitle: this.secondaryTitle,
       controller: this.controller,
       contentBuilder: () => {
         this.AlertDialogContentBuilder();
@@ -575,6 +574,7 @@ export struct CustomContentDialog {
   primaryTitle?: ResourceStr;
   secondaryTitle?: ResourceStr;
   @BuilderParam contentBuilder: () => void;
+  contentAreaPadding?: Padding;
   buttons?: ButtonOptions[];
 
   build() {
@@ -585,6 +585,7 @@ export struct CustomContentDialog {
       contentBuilder: () => {
         this.contentBuilder();
       },
+      contentAreaPadding: this.contentAreaPadding,
       buttons: this.buttons,
     });
   }
@@ -631,12 +632,13 @@ struct CustomDialogContentComponent {
         Text(this.primaryTitle)
           .fontWeight(FontWeight.Bold)
           .fontColor($r('sys.color.font_primary'))
-          .textAlign(TextAlign.Start)
+          .textAlign(this.getTitleTextAlign())
           .maxFontSize($r('sys.float.Title_S'))
           .minFontSize($r('sys.float.Body_L'))
           .maxLines(TITLE_MAX_LINES)
           .heightAdaptivePolicy(TextHeightAdaptivePolicy.MIN_FONT_SIZE_FIRST)
           .textOverflow({ overflow: TextOverflow.Ellipsis })
+          .width('100%')
       }
       .width('100%')
 
@@ -650,12 +652,13 @@ struct CustomDialogContentComponent {
         Text(this.secondaryTitle)
           .fontWeight(FontWeight.Regular)
           .fontColor($r('sys.color.font_secondary'))
-          .textAlign(TextAlign.Start)
+          .textAlign(this.getTitleTextAlign())
           .maxFontSize($r('sys.float.Subtitle_S'))
           .minFontSize($r('sys.float.Body_S'))
           .maxLines(TITLE_MAX_LINES)
           .heightAdaptivePolicy(TextHeightAdaptivePolicy.MIN_FONT_SIZE_FIRST)
           .textOverflow({ overflow: TextOverflow.Ellipsis })
+          .width('100%')
       }
       .width('100%')
     }
@@ -687,11 +690,19 @@ struct CustomDialogContentComponent {
       Button(buttonOptions.value)
         .setButtonProperties(buttonOptions, this.controller)
         .role(buttonOptions.role ?? ButtonRole.NORMAL)
+    } else if (buttonOptions.background !== undefined && buttonOptions.fontColor !== undefined) {
+      Button(buttonOptions.value)
+        .setButtonProperties(buttonOptions, this.controller)
+        .backgroundColor(buttonOptions.background)
+        .fontColor(buttonOptions.fontColor)
+    } else if (buttonOptions.background !== undefined) {
+      Button(buttonOptions.value)
+        .setButtonProperties(buttonOptions, this.controller)
+        .backgroundColor(buttonOptions.background)
     } else {
       Button(buttonOptions.value)
         .setButtonProperties(buttonOptions, this.controller)
-        .backgroundColor(buttonOptions.background ?? $r('sys.color.ohos_id_color_background_transparent'))
-        .fontColor(buttonOptions.fontColor ?? $r('sys.color.ohos_id_color_text_primary_activated'))
+        .fontColor(buttonOptions.fontColor)
     }
   }
 
@@ -907,6 +918,25 @@ struct CustomDialogContentComponent {
     }
     return false;
   }
+
+  /**
+   * get tile TextAlign
+   * @returns TextAlign
+   */
+  private getTitleTextAlign(): TextAlign {
+    let textAlign: number = getEnumNumberByResource('alert_title_alignment');
+    if (textAlign === TextAlign.Start) {
+      return TextAlign.Start;
+    } else if (textAlign === TextAlign.Center) {
+      return TextAlign.Center;
+    } else if (textAlign === TextAlign.End) {
+      return TextAlign.End;
+    } else if (textAlign === TextAlign.JUSTIFY) {
+      return TextAlign.JUSTIFY;
+    } else {
+      return TextAlign.Center;
+    }
+  }
 }
 
 @Component
@@ -1005,6 +1035,24 @@ function getNumberByResource(resourceName: string): number {
     return 0;
   }
 }
+
+/**
+ * get enum number
+ *
+ * @param resourceName resource name
+ * @returns number
+ */
+function getEnumNumberByResource(resourceName: string): number {
+  try {
+    return getContext().resourceManager.getNumberByName(resourceName);
+  } catch (error) {
+    let code: number = (error as BusinessError).code;
+    let message: string = (error as BusinessError).message;
+    hilog.error(0x3900, 'Ace', `getEnumNumberByResource error, code: ${code}, message: ${message}`);
+    return -1;
+  }
+}
+
 
 @CustomDialog
 export struct LoadingDialog {
