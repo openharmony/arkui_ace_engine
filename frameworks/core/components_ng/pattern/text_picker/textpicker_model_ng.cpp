@@ -254,6 +254,16 @@ void TextPickerModelNG::SetDefaultPickerItemHeight(const Dimension& value)
     ACE_UPDATE_LAYOUT_PROPERTY(TextPickerLayoutProperty, DefaultPickerItemHeight, value);
 }
 
+void TextPickerModelNG::SetGradientHeight(const Dimension& value)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto textPickerPattern = frameNode->GetPattern<TextPickerPattern>();
+    CHECK_NULL_VOID(textPickerPattern);
+    textPickerPattern->SetGradientHeight(value);
+    ACE_UPDATE_LAYOUT_PROPERTY(TextPickerLayoutProperty, GradientHeight, value);
+}
+
 void TextPickerModelNG::SetCanLoop(const bool value)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(TextPickerLayoutProperty, CanLoop, value);
