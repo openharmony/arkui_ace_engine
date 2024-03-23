@@ -28,6 +28,7 @@
 #include "core/interfaces/native/node/node_image_modifier.h"
 #include "core/interfaces/native/node/node_refresh_modifier.h"
 #include "core/interfaces/native/node/node_date_picker_modifier.h"
+#include "core/interfaces/native/node/node_list_modifier.h"
 #include "core/interfaces/native/node/node_scroll_modifier.h"
 #include "core/interfaces/native/node/node_text_input_modifier.h"
 #include "core/interfaces/native/node/node_text_area_modifier.h"
@@ -222,6 +223,14 @@ const ComponentAsyncEventHandler SWIPER_NODE_ASYNC_EVENT_HANDLERS[] = {
     NodeModifier::SetSwiperGestureSwipe,
 };
 
+const ComponentAsyncEventHandler listNodeAsyncEventHandlers[] = {
+    NodeModifier::SetOnListScroll,
+    nullptr,
+    NodeModifier::SetOnListScrollStart,
+    NodeModifier::SetOnListScrollStop,
+    NodeModifier::SetOnListScrollFrameBegin,
+};
+
 /* clang-format on */
 void NotifyComponentAsyncEvent(ArkUINodeHandle node, ArkUIEventSubKind kind, ArkUI_Int64 extraParam)
 {
@@ -343,6 +352,15 @@ void NotifyComponentAsyncEvent(ArkUINodeHandle node, ArkUIEventSubKind kind, Ark
                 return;
             }
             eventHandle = SWIPER_NODE_ASYNC_EVENT_HANDLERS[subKind];
+            break;
+        }
+        case ARKUI_LIST: {
+            // list event type.
+            if (subKind >= sizeof(listNodeAsyncEventHandlers) / sizeof(ComponentAsyncEventHandler)) {
+                TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "NotifyComponentAsyncEvent kind:%{public}d NOT IMPLEMENT", kind);
+                return;
+            }
+            eventHandle = listNodeAsyncEventHandlers[subKind];
             break;
         }
         default: {

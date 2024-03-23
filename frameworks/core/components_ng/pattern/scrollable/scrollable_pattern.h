@@ -413,6 +413,11 @@ public:
         edgeEffectAlwaysEnabled_ = alwaysEnabled;
     }
 
+    EdgeEffect GetEdgeEffect()
+    {
+        return edgeEffect_;
+    }
+
     bool GetAlwaysEnabled() const
     {
         return edgeEffectAlwaysEnabled_;

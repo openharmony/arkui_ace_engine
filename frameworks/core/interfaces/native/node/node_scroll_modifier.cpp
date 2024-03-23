@@ -280,8 +280,8 @@ ArkUI_Int32 GetScrollEdgeEffect(ArkUINodeHandle node, ArkUI_Int32* values)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_RETURN(frameNode, ERROR_INT_CODE);
-    values[SCROLL_TO_INDEX_0] = ScrollModelNG::GetScrollEnabled(frameNode);
-    values[SCROLL_TO_INDEX_1] = ScrollModelNG::GetEdgeEffectAlways(frameNode);
+    values[SCROLL_TO_INDEX_0] = static_cast<ArkUI_Int32>(ScrollModelNG::GetEdgeEffect(frameNode));
+    values[SCROLL_TO_INDEX_1] = static_cast<ArkUI_Int32>(ScrollModelNG::GetEdgeEffectAlways(frameNode));
     return SCROLL_TO_INDEX_2;
 }
 
@@ -313,7 +313,12 @@ void SetEnableScrollInteraction(ArkUINodeHandle node, ArkUI_Bool enableScrollInt
     ScrollModelNG::SetScrollEnabled(frameNode, enableScrollInteraction);
 }
 
-void ResetEnableScrollInteraction(ArkUINodeHandle node) {}
+void ResetEnableScrollInteraction(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ScrollModelNG::SetScrollEnabled(frameNode, true);
+}
 
 void SetScrollTo(ArkUINodeHandle node, const ArkUI_Float32* values)
 {
