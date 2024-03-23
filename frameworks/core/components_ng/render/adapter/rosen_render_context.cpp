@@ -3636,6 +3636,12 @@ void RosenRenderContext::UpdateTransition(const TransitionOptions& options)
     }
 }
 
+void RosenRenderContext::CleanTransition()
+{
+    propTransitionDisappearing_.reset();
+    propTransitionDisappearing_.reset();
+}
+
 std::shared_ptr<Rosen::RSTransitionEffect> RosenRenderContext::GetRSTransitionWithoutType(
     const std::unique_ptr<TransitionOptions>& options, const SizeF& frameSize)
 {
