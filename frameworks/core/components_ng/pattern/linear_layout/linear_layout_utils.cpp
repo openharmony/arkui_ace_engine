@@ -83,8 +83,8 @@ void TravelChildrenFlexProps(LayoutWrapper* layoutWrapper, LinearMeasureProperty
 {
     for (const auto& child : layoutWrapper->GetAllChildrenWithBuild()) {
         const auto& magicItemProperty = child->GetLayoutProperty()->GetMagicItemProperty();
-        if (magicItemProperty && (magicItemProperty->GetLayoutWeight().value_or(-1) > 0)) {
-            linearMeasureProperty.totalFlexWeight += magicItemProperty->GetLayoutWeight().value();
+        if (magicItemProperty.GetLayoutWeight().value_or(-1) > 0) {
+            linearMeasureProperty.totalFlexWeight += magicItemProperty.GetLayoutWeight().value();
             linearMeasureProperty.weightNodes.emplace_back(child);
         } else {
             linearMeasureProperty.relativeNodes.emplace_back(child);
@@ -171,7 +171,7 @@ void LinearLayoutUtils::Measure(LayoutWrapper* layoutWrapper, bool isVertical)
         }
         for (auto& child : linearMeasureProperty.weightNodes) {
             auto childMainSize = remainSize *
-                                 child->GetLayoutProperty()->GetMagicItemProperty()->GetLayoutWeight().value() /
+                                 child->GetLayoutProperty()->GetMagicItemProperty().GetLayoutWeight().value() /
                                  linearMeasureProperty.totalFlexWeight;
             SetIdealMainSize(childConstraint, childMainSize, isVertical);
             child->Measure(childConstraint);
