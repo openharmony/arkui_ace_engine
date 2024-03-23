@@ -712,6 +712,7 @@ void TextFieldPattern::HandleFocusEvent()
     TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "TextField %{public}d on focus", host->GetId());
     auto context = PipelineContext::GetCurrentContextSafely();
     CHECK_NULL_VOID(context);
+    context->AddOnAreaChangeNode(host->GetId());
     auto globalOffset = host->GetPaintRectOffset() - context->GetRootRect().GetOffset();
     UpdateTextFieldManager(Offset(globalOffset.GetX(), globalOffset.GetY()), frameRect_.Height());
     needToRequestKeyboardInner_ = !isLongPress_ && (dragRecipientStatus_ != DragStatus::DRAGGING);
@@ -1042,6 +1043,11 @@ void TextFieldPattern::HandleBlurEvent()
     selectController_->UpdateCaretIndex(selectController_->GetCaretIndex());
     NotifyOnEditChanged(false);
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+    auto eventHub = host->GetEventHub<TextFieldEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    if (!eventHub->HasOnAreaChanged()) {
+        context->RemoveOnAreaChangeNode(host->GetId());
+    }
 }
 
 bool TextFieldPattern::OnKeyEvent(const KeyEvent& event)
@@ -1686,7 +1692,7 @@ void TextFieldPattern::InitDragDropCallBack()
         auto touchX = event->GetX();
         auto touchY = event->GetY();
         Offset offset = Offset(touchX, touchY) - Offset(pattern->textRect_.GetX(), pattern->textRect_.GetY()) -
-                        Offset(pattern->parentGlobalOffset_.GetX(), pattern->parentGlobalOffset_.GetY()) -
+                        Offset(pattern->GetTextPaintOffset().GetX(), pattern->GetTextPaintOffset().GetY()) -
                         Offset(0, theme->GetInsertCursorOffset().ConvertToPx());
         auto position = pattern->ConvertTouchOffsetToCaretPosition(offset);
         pattern->SetCaretPosition(position);
@@ -2125,6 +2131,75 @@ void TextFieldPattern::CheckIfNeedToResetKeyboard()
     }
 #endif
 }
+
+RefPtr<TextFieldLayoutProperty> TextFieldPattern::GetTextFieldLayoutProperty()
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, nullptr);
+    auto layoutProperty = host->GetLayoutProperty<TextFieldLayoutProperty>();
+    CHECK_NULL_RETURN(layoutProperty, nullptr);
+    return layoutProperty;
+}
+
+void TextFieldPattern::ProcessScroll()
+{
+    auto layoutProperty = GetTextFieldLayoutProperty();
+    CHECK_NULL_VOID(layoutProperty);
+    if (IsTextArea() || IsNormalInlineState()) {
+        SetAxis(Axis::VERTICAL);
+        if (!GetScrollableEvent()) {
+            AddScrollEvent();
+        }
+        auto barState = layoutProperty->GetDisplayModeValue(DisplayMode::AUTO);
+        if (!barState_.has_value()) {
+            barState_ = barState;
+        }
+        scrollBarVisible_ = barState != DisplayMode::OFF;
+        SetScrollBar(barState == DisplayMode::OFF ? DisplayMode::ON : barState);
+        auto scrollBar = GetScrollBar();
+        if (scrollBar) {
+            scrollBar->SetMinHeight(SCROLL_BAR_MIN_HEIGHT);
+        }
+        if (textFieldOverlayModifier_) {
+            textFieldOverlayModifier_->SetScrollBar(scrollBar);
+            UpdateScrollBarOffset();
+        }
+    } else {
+        SetAxis(Axis::HORIZONTAL);
+        SetScrollBar(DisplayMode::OFF);
+        if (!GetScrollableEvent()) {
+            AddScrollEvent();
+            SetScrollEnable(false);
+        }
+    }
+}
+
+void TextFieldPattern::ProcessCounter()
+{
+    auto layoutProperty = GetTextFieldLayoutProperty();
+    CHECK_NULL_VOID(layoutProperty);
+    if (layoutProperty->GetShowCounterValue(false) && !IsNormalInlineState() && !IsInPasswordMode()) {
+        AddCounterNode();
+    } else {
+        CleanCounterNode();
+    }
+    if (IsTextArea()) {
+        if (setBorderFlag_ && layoutProperty->HasMaxLength()) {
+            auto textFieldTheme = GetTheme();
+            lastDiffBorderColor_.SetColor(textFieldTheme->GetOverCountBorderColor());
+            lastDiffBorderWidth_.SetBorderWidth(OVER_COUNT_BORDER_WIDTH);
+            setBorderFlag_ = false;
+        }
+        HandleCounterBorder();
+    } else {
+        isTextInput_ = true;
+    }
+    UpdateCounterMargin();
+    auto maxlength = GetMaxLength();
+    auto originLength = static_cast<int32_t>(contentController_->GetWideText().length());
+    HandleInputCounterBorder(originLength, maxlength);
+}
+
 void TextFieldPattern::OnModifyDone()
 {
     Pattern::OnModifyDone();
@@ -2163,7 +2238,6 @@ void TextFieldPattern::OnModifyDone()
     ProcessResponseArea();
     InitDragEvent();
     Register2DragDropManager();
-    context->AddOnAreaChangeNode(host->GetId());
     if (!clipboard_ && context) {
         clipboard_ = ClipboardProxy::GetInstance()->GetClipboard(context->GetTaskExecutor());
     }
@@ -2197,45 +2271,8 @@ void TextFieldPattern::OnModifyDone()
         operationRecords_.clear();
         redoOperationRecords_.clear();
     }
-    if (IsTextArea() || IsNormalInlineState()) {
-        SetAxis(Axis::VERTICAL);
-        if (!GetScrollableEvent()) {
-            AddScrollEvent();
-        }
-        auto barState = layoutProperty->GetDisplayModeValue(DisplayMode::AUTO);
-        if (!barState_.has_value()) {
-            barState_ = barState;
-        }
-        scrollBarVisible_ = barState != DisplayMode::OFF;
-        SetScrollBar(barState == DisplayMode::OFF ? DisplayMode::ON : barState);
-        auto scrollBar = GetScrollBar();
-        if (scrollBar) {
-            scrollBar->SetMinHeight(SCROLL_BAR_MIN_HEIGHT);
-        }
-        if (textFieldOverlayModifier_) {
-            textFieldOverlayModifier_->SetScrollBar(scrollBar);
-            UpdateScrollBarOffset();
-        }
-    } else {
-        SetAxis(Axis::HORIZONTAL);
-        SetScrollBar(DisplayMode::OFF);
-        if (!GetScrollableEvent()) {
-            AddScrollEvent();
-            SetScrollEnable(false);
-        }
-    }
-    if (IsTextArea()) {
-        if (setBorderFlag_ && layoutProperty->HasMaxLength()) {
-            auto textFieldTheme = GetTheme();
-            lastDiffBorderColor_.SetColor(textFieldTheme->GetOverCountBorderColor());
-            lastDiffBorderWidth_.SetBorderWidth(OVER_COUNT_BORDER_WIDTH);
-            setBorderFlag_ = false;
-        }
-        HandleCounterBorder();
-    } else {
-        isTextInput_ = true;
-    }
-    UpdateCounterMargin();
+    ProcessScroll();
+    ProcessCounter();
     bool underline = layoutProperty->GetShowUnderlineValue(false) && IsUnspecifiedOrTextType() &&
                      (!IsNormalInlineState() || !HasFocus());
     if (preUnderline && !underline) {
@@ -2265,9 +2302,6 @@ void TextFieldPattern::OnModifyDone()
         }
         host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     }
-    auto maxlength = GetMaxLength();
-    auto originLength = static_cast<int32_t>(contentController_->GetWideText().length());
-    HandleInputCounterBorder(originLength, maxlength);
     preInline = IsNormalInlineState();
     preUnderline = underline;
     Register2DragDropManager();
@@ -2804,7 +2838,7 @@ void TextFieldPattern::OnHandleMove(const RectF& handleRect, bool isFirstHandle)
 {
     CHECK_NULL_VOID(SelectOverlayIsOn());
     CHECK_NULL_VOID(!contentController_->IsEmpty());
-    auto localOffset = handleRect.GetOffset() - parentGlobalOffset_;
+    auto localOffset = handleRect.GetOffset() - GetTextPaintOffset();
     magnifierController_->SetLocalOffset(localOffset);
     if (isSingleHandle_) {
         selectController_->UpdateCaretInfoByOffset(Offset(localOffset.GetX(), localOffset.GetY()));
@@ -3354,7 +3388,7 @@ std::optional<MiscServices::TextConfig> TextFieldPattern::GetMiscTextConfig() co
     double height = frameRect_.Height();
     auto offset = AVOID_OFFSET.ConvertToPx();
     height =
-        selectController_->GetCaretRect().Bottom() + windowRect.Top() + parentGlobalOffset_.GetY() + offset - positionY;
+        selectController_->GetCaretRect().Bottom() + windowRect.Top() + GetTextPaintOffset().GetY() + offset - positionY;
 
     if (IsNormalInlineState()) {
         auto safeBoundary = theme->GetInlineBorderWidth().ConvertToPx() * 2;
@@ -3363,8 +3397,8 @@ std::optional<MiscServices::TextConfig> TextFieldPattern::GetMiscTextConfig() co
     }
 
     MiscServices::CursorInfo cursorInfo { .left = selectController_->GetCaretRect().Left() + windowRect.Left() +
-                                                  parentGlobalOffset_.GetX(),
-        .top = selectController_->GetCaretRect().Top() + windowRect.Top() + parentGlobalOffset_.GetY(),
+                                                  GetTextPaintOffset().GetX(),
+        .top = selectController_->GetCaretRect().Top() + windowRect.Top() + GetTextPaintOffset().GetY(),
         .width = theme->GetCursorWidth().ConvertToPx(),
         .height = selectController_->GetCaretRect().Height() };
     MiscServices::InputAttribute inputAttribute = { .inputPattern = (int32_t)keyboard_,
@@ -6042,7 +6076,7 @@ bool TextFieldPattern::CheckHandleVisible(const RectF& paintRect)
     auto host = GetHost();
     CHECK_NULL_RETURN(host, false);
     // use global offset.
-    RectF visibleContentRect(contentRect_.GetOffset() + parentGlobalOffset_, contentRect_.GetSize());
+    RectF visibleContentRect(contentRect_.GetOffset() + GetTextPaintOffset(), contentRect_.GetSize());
     auto parent = host->GetAncestorNodeOfFrame();
     visibleContentRect = GetVisibleContentRect(parent, visibleContentRect);
     if (!IsTextArea()) {
@@ -6260,7 +6294,7 @@ OffsetF TextFieldPattern::GetDragUpperLeftCoordinates()
     if (startOffset.GetX() < contentRect_.GetX()) {
         startOffset.SetX(contentRect_.GetX());
     }
-    return startOffset + parentGlobalOffset_;
+    return startOffset + GetTextPaintOffset();
 }
 
 void TextFieldPattern::OnColorConfigurationUpdate()
