@@ -4047,11 +4047,15 @@ ArkUINativeModuleValue CommonBridge::SetAllowDrop(ArkUIRuntimeCallInfo* runtimeC
         return panda::JSValueRef::Undefined(vm);
     }
     Local<panda::ArrayRef> allowDropArray = static_cast<Local<panda::ArrayRef>>(secondArg);
-    std::vector<std::string> keepStr;
+    auto length = allowDropArray->Length(vm);
+    if (length <= 0) {
+        return panda::JSValueRef::Undefined(vm);
+    }
+    std::vector<std::string> keepStr(length);
     std::vector<const char*> strList;
-    for (size_t i = 0; i < allowDropArray->Length(vm); i++) {
+    for (size_t i = 0; i < length; i++) {
         Local<JSValueRef> objValue = allowDropArray->GetValueAt(vm, secondArg, i);
-        keepStr.push_back(objValue->ToString(vm)->ToString());
+        keepStr[i] = objValue->ToString(vm)->ToString();
         strList.push_back(keepStr[i].c_str());
     }
     GetArkUINodeModifiers()->getCommonModifier()->setAllowDrop(nativeNode, strList.data(), strList.size());
