@@ -1311,6 +1311,9 @@ private:
     bool IsAutoFillPasswordType(const AceAutoFillType& autoFillType);
     void DoProcessAutoFill();
     void KeyboardContentTypeToInputType();
+    void ProcessScroll();
+    void ProcessCounter();
+    RefPtr<TextFieldLayoutProperty> GetTextFieldLayoutProperty();
 
     RectF frameRect_;
     RectF textRect_;

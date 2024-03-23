@@ -1877,7 +1877,7 @@ void TextPattern::OnModifyDone()
         auto obscuredReasons = renderContext->GetObscured().value_or(std::vector<ObscuredReasons>());
         bool ifHaveObscured = std::any_of(obscuredReasons.begin(), obscuredReasons.end(),
             [](const auto& reason) { return reason == ObscuredReasons::PLACEHOLDER; });
-        if (ifHaveObscured) {
+        if (ifHaveObscured && !isSpanStringMode_) {
             CloseSelectOverlay();
             ResetSelection();
             copyOption_ = CopyOptions::None;
