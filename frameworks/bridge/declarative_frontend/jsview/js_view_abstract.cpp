@@ -3913,21 +3913,19 @@ void JSViewAbstract::JsUseShadowBatching(const JSCallbackInfo& info)
 
 void JSViewAbstract::JsBackdropBlur(const JSCallbackInfo& info)
 {
-    if (info.Length() == 0) {
-        return;
-    }
     double blur = 0.0;
-    if (!ParseJsDouble(info[0], blur)) {
+    BlurOption blurOption;
+    if (info.Length() == 0 || !ParseJsDouble(info[0], blur)) {
+        CalcDimension dimensionRadius(blur, DimensionUnit::PX);
+        ViewAbstractModel::GetInstance()->SetBackdropBlur(dimensionRadius, blurOption);
         return;
     }
-    BlurOption blurOption;
+    CalcDimension dimensionRadius(blur, DimensionUnit::PX);
     if (info.Length() > 1 && info[1]->IsObject()) {
         JSRef<JSObject> jsBlurOption = JSRef<JSObject>::Cast(info[1]);
         ParseBlurOption(jsBlurOption, blurOption);
     }
-    CalcDimension dimensionRadius(blur, DimensionUnit::PX);
     ViewAbstractModel::GetInstance()->SetBackdropBlur(dimensionRadius, blurOption);
-
     info.SetReturnValue(info.This());
 }
 
