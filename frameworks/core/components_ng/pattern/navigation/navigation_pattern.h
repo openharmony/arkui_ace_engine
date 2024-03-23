@@ -343,6 +343,7 @@ public:
 
     void NotifyDestinationLifecycle(const RefPtr<UINode>& destinationNode,
         NavDestinationLifecycle lifecycle, bool isNavigationChanged);
+    void AbortAnimation(RefPtr<NavigationGroupNode>& hostNode);
 
 private:
     void CheckTopNavPathChange(const std::optional<std::pair<std::string, RefPtr<UINode>>>& preTopNavPath,
