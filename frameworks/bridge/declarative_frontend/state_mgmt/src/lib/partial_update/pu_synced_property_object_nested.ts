@@ -41,6 +41,7 @@ class SynchedPropertyNestedObjectPU<C extends Object>
     this.obsObject_ = obsObject;
     this.createSourceDependency(obsObject);
     this.setValueInternal(obsObject);
+    this.setDecoratorInfo("@ObjectLink");
   }
 
   /*
