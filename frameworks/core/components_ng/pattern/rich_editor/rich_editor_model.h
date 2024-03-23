@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -102,6 +102,7 @@ struct UpdateSpanStyle {
         updateTextDecoration.reset();
         updateTextDecorationColor.reset();
         updateTextShadows.reset();
+        updateFontFeature.reset();
 
         updateLineHeight.reset();
         updateLetterSpacing.reset();
@@ -126,6 +127,7 @@ struct UpdateSpanStyle {
     std::optional<TextDecoration> updateTextDecoration = std::nullopt;
     std::optional<Color> updateTextDecorationColor = std::nullopt;
     std::optional<std::vector<Shadow>> updateTextShadows = std::nullopt;
+    std::optional<NG::FONT_FEATURES_MAP> updateFontFeature = std::nullopt;
 
     std::optional<CalcDimension> updateLineHeight = std::nullopt;
     std::optional<CalcDimension> updateLetterSpacing = std::nullopt;

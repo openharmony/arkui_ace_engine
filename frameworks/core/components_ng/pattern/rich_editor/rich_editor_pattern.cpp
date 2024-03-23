@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -39,6 +39,7 @@
 #include "core/common/container_scope.h"
 #include "core/common/ime/text_input_client.h"
 #include "core/components/common/layout/constants.h"
+#include "core/components/common/properties/text_style_parser.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/event/event_hub.h"
 #include "core/components_ng/event/gesture_event_hub.h"
@@ -77,6 +78,7 @@
 #endif
 
 namespace OHOS::Ace::NG {
+
 namespace {
 #if defined(ENABLE_STANDARD_INPUT)
 // should be moved to theme
@@ -107,6 +109,7 @@ const std::wstring lineSeparator = L"\n";
 constexpr static int32_t AI_TEXT_RANGE_LEFT = 50;
 constexpr static int32_t AI_TEXT_RANGE_RIGHT = 50;
 } // namespace
+
 RichEditorPattern::RichEditorPattern() {}
 
 RichEditorPattern::~RichEditorPattern()
@@ -527,6 +530,8 @@ int32_t RichEditorPattern::AddTextSpanOperation(
         spanNode->AddPropertyInfo(PropertyInfo::LINEHEIGHT);
         spanNode->UpdateLetterSpacing(options.style.value().GetLetterSpacing());
         spanNode->AddPropertyInfo(PropertyInfo::LETTERSPACE);
+        spanNode->UpdateFontFeature(options.style.value().GetFontFeatures());
+        spanNode->AddPropertyInfo(PropertyInfo::FONTFEATURE);
     }
     auto spanItem = spanNode->GetSpanItem();
     spanItem->content = options.value;
@@ -901,6 +906,11 @@ void RichEditorPattern::CopyTextSpanFontStyle(RefPtr<SpanNode>& source, RefPtr<S
         target->UpdateLetterSpacing(source->GetLetterSpacingValue(Dimension()));
         target->AddPropertyInfo(PropertyInfo::LETTERSPACE);
     }
+
+    if (source->HasFontFeature()) {
+        target->UpdateFontFeature(source->GetFontFeatureValue(ParseFontFeatureSettings("\"pnum\" 1")));
+        target->AddPropertyInfo(PropertyInfo::FONTFEATURE);
+    }
 }
 
 void RichEditorPattern::CopyTextSpanLineStyle(
@@ -1135,6 +1145,15 @@ void RichEditorPattern::SetTypingStyle(struct UpdateSpanStyle typingStyle, TextS
     typingTextStyle_ = textStyle;
 }
 
+void RichEditorPattern::UpdateFontFeatureTextStyle(
+    RefPtr<SpanNode>& spanNode, struct UpdateSpanStyle& updateSpanStyle, TextStyle& textStyle)
+{
+    if (updateSpanStyle.updateFontFeature.has_value()) {
+        spanNode->UpdateFontFeature(textStyle.GetFontFeatures());
+        spanNode->AddPropertyInfo(PropertyInfo::FONTFEATURE);
+    }
+}
+
 void RichEditorPattern::UpdateTextStyle(
     RefPtr<SpanNode>& spanNode, struct UpdateSpanStyle updateSpanStyle, TextStyle textStyle)
 {
@@ -1143,6 +1162,7 @@ void RichEditorPattern::UpdateTextStyle(
     }
     auto host = GetHost();
     CHECK_NULL_VOID(host);
+    UpdateFontFeatureTextStyle(spanNode, updateSpanStyle, textStyle);
     if (updateSpanStyle.updateTextColor.has_value()) {
         spanNode->UpdateTextColor(textStyle.GetTextColor());
         spanNode->AddPropertyInfo(PropertyInfo::FONTCOLOR);
@@ -1195,6 +1215,7 @@ void RichEditorPattern::UpdateSymbolStyle(
     }
     auto host = GetHost();
     CHECK_NULL_VOID(host);
+    UpdateFontFeatureTextStyle(spanNode, updateSpanStyle, textStyle);
     if (updateSpanStyle.updateFontSize.has_value()) {
         spanNode->UpdateFontSize(textStyle.GetFontSize());
         spanNode->AddPropertyInfo(PropertyInfo::FONTSIZE);
@@ -2928,6 +2949,7 @@ bool RichEditorPattern::AfterIMEInsertValue(const RefPtr<SpanNode>& spanNode, in
     }
     retInfo.SetFontFamily(fontFamilyValue);
     retInfo.SetTextDecoration(spanNode->GetTextDecorationValue(TextDecoration::NONE));
+    retInfo.SetFontFeature(spanNode->GetFontFeatureValue(ParseFontFeatureSettings("\"pnum\" 1")));
     retInfo.SetColor(spanNode->GetTextDecorationColorValue(Color::BLACK).ColorToString());
     eventHub->FireOnIMEInputComplete(retInfo);
     return true;
