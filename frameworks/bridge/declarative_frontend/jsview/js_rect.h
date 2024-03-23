@@ -45,6 +45,8 @@ private:
     static void SetRadiusWithJsVal(const RefPtr<ShapeRect>& shapeRect, const JSRef<JSVal>& jsVal);
     static void SetRadiusWidth(const JSRef<JSVal>& jsVal);
     static void SetRadiusHeight(const JSRef<JSVal>& jsVal);
+    static void ParseRectObjBelowApi12(const RefPtr<ShapeRect>& rect, const JSRef<JSObject>& obj);
+    static void ParseRectObjAboveApi12(const RefPtr<ShapeRect>& rect, const JSRef<JSObject>& obj);
 };
 
 } // namespace OHOS::Ace::Framework
