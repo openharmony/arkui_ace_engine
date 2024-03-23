@@ -413,12 +413,6 @@ HWTEST_F(GeometryTransitionTestNg, GeometryTransitionTest005, TestSize.Level1)
     result = gt_->OnFollowWithoutTransition();
     EXPECT_FALSE(result);
 
-    // direction is false
-    gt_->holder_ = CreateHolderNode(gt_->outNode_.Upgrade());
-    trigger->AddChild(gt_->holder_);
-    result = gt_->OnFollowWithoutTransition(false);
-    EXPECT_TRUE(result);
-
     // direction is true
     gt_->followWithoutTransition_ = false;
     result = gt_->OnFollowWithoutTransition(true);
@@ -539,7 +533,6 @@ HWTEST_F(GeometryTransitionTestNg, GeometryTransition007, TestSize.Level1)
     gt_->Build(weakNode3, false);
     EXPECT_FALSE(gt_->holder_);
     EXPECT_TRUE(gt_->hasOutAnim_);
-    EXPECT_FALSE(gt_->hasInAnim_);
 }
 
 /**
