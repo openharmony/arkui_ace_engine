@@ -809,7 +809,8 @@ void DeclarativeFrontend::UpdateState(Frontend::State state)
     auto container = Container::Current();
     CHECK_NULL_VOID(container);
     const auto& setting = container->GetSettings();
-    needPostJsTask = !(setting.usePlatformAsUIThread && setting.useUIAsJSThread);
+    needPostJsTask = !(setting.usePlatformAsUIThread && setting.useUIAsJSThread)
+        && !taskExecutor_->WillRunOnCurrentThread(TaskExecutor::TaskType::JS);
     if (needPostJsTask) {
         delegate_->UpdateApplicationState(delegate_->GetAppID(), state);
         return;
