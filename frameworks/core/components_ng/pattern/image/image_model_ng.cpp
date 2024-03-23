@@ -477,6 +477,7 @@ ImageRenderMode ImageModelNG::GetImageRenderMode(FrameNode* frameNode)
     CHECK_NULL_RETURN(frameNode, ImageRenderMode::ORIGINAL);
     auto paintProperty = frameNode->GetPaintProperty<ImageRenderProperty>();
     CHECK_NULL_RETURN(paintProperty, ImageRenderMode::ORIGINAL);
+    CHECK_NULL_RETURN(paintProperty->GetImagePaintStyle(), ImageRenderMode::ORIGINAL);
     return paintProperty->GetImagePaintStyle()->GetImageRenderMode().value_or(ImageRenderMode::ORIGINAL);
 }
 } // namespace OHOS::Ace::NG
