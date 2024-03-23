@@ -179,9 +179,6 @@ public:
         return navigationStackProvided_;
     }
 
-    void OnWindowHide() override;
-    void OnWindowShow() override;
-
     void SetNavBarVisibilityChange(bool isChange)
     {
         navBarVisibilityChange_ = isChange;
@@ -307,9 +304,12 @@ public:
 
     void OnNavigationModeChange(bool modeChange);
 
-    static void FireNavigationStateChange(const RefPtr<UINode>& node, bool show);
+    static void FireNavigationStateChange(const RefPtr<UINode>& node, bool isShow);
 
-    void NotifyDialogChange(bool isShow, bool isNavigationChanged);
+    static void FireNavigationLifecycleChange(const RefPtr<UINode>& node, NavDestinationLifecycle lifecycle);
+
+    // type: will_show + on_show, will_hide + on_hide, hide, show, willShow, willHide
+    void NotifyDialogChange(NavDestinationLifecycle lifecycle, bool isNavigationChanged, bool isFromStandard);
     void NotifyPageHide(const std::string& pageName);
     void DumpInfo() override;
 
@@ -341,6 +341,9 @@ public:
     void AddToDumpManager();
     void RemoveFromDumpManager();
 
+    void NotifyDestinationLifecycle(const RefPtr<UINode>& destinationNode,
+        NavDestinationLifecycle lifecycle, bool isNavigationChanged);
+
 private:
     void CheckTopNavPathChange(const std::optional<std::pair<std::string, RefPtr<UINode>>>& preTopNavPath,
         const std::optional<std::pair<std::string, RefPtr<UINode>>>& newTopNavPath);
@@ -371,7 +374,7 @@ private:
         const RefPtr<NavigationGroupNode>& hostNode, const RefPtr<NavigationLayoutProperty>& navigationLayoutProperty);
     bool UpdateTitleModeChangeEventHub(const RefPtr<NavigationGroupNode>& hostNode);
     void NotifyPageShow(const std::string& pageName);
-    int32_t FireNavDestinationStateChange(bool show);
+    int32_t FireNavDestinationStateChange(NavDestinationLifecycle lifecycle);
     void UpdatePreNavDesZIndex(const RefPtr<FrameNode> &preTopNavDestination,
         const RefPtr<FrameNode> &newTopNavDestination);
     void UpdateNavPathList();
@@ -382,6 +385,9 @@ private:
         const RefPtr<NavDestinationContext>& to, NavigationOperation operation);
 
     void UpdateIsAnimation(const std::optional<std::pair<std::string, RefPtr<UINode>>>& preTopNavPath);
+    void StartTransition(const RefPtr<NavDestinationGroupNode>& preDestination,
+    const RefPtr<NavDestinationGroupNode>& topDestination,
+    bool isAnimated, bool isPopPage, bool isNeedVisible = false);
 
     NavigationMode navigationMode_ = NavigationMode::AUTO;
     std::function<void(std::string)> builder_;
