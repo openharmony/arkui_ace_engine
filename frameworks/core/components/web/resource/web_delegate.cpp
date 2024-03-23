@@ -425,12 +425,12 @@ std::string WebScreenCaptureRequestOhos::GetOrigin() const
 
 void WebScreenCaptureRequestOhos::SetCaptureMode(int32_t mode)
 {
-    config_.mode = mode;
+    config_->SetMode(mode);
 }
 
 void WebScreenCaptureRequestOhos::SetSourceId(int32_t sourceId)
 {
-    config_.sourceId = sourceId;
+    config_->SetSourceId(sourceId);
 }
 
 void WebScreenCaptureRequestOhos::Grant() const
@@ -5129,15 +5129,17 @@ void WebDelegate::OnAudioStateChanged(bool audible)
     }
 }
 
-void WebDelegate::OnGetTouchHandleHotZone(OHOS::NWeb::TouchHandleHotZone& hotZone)
+void WebDelegate::OnGetTouchHandleHotZone(std::shared_ptr<OHOS::NWeb::NWebTouchHandleHotZone> hotZone)
 {
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
     auto theme = pipeline->GetTheme<TextOverlayTheme>();
     CHECK_NULL_VOID(theme);
     auto touchHandleSize = theme->GetHandleHotZoneRadius().ConvertToPx();
-    hotZone.width = touchHandleSize;
-    hotZone.height = touchHandleSize;
+    if (hotZone) {
+        hotZone->SetWidth(touchHandleSize);
+        hotZone->SetHeight(touchHandleSize);
+    }
 }
 
 RefPtr<PixelMap> WebDelegate::GetDragPixelMap()
@@ -5341,10 +5343,8 @@ void WebDelegate::OnSelectPopupMenu(std::shared_ptr<OHOS::NWeb::NWebSelectPopupM
 void WebDelegate::HandleDragEvent(int32_t x, int32_t y, const DragAction& dragAction)
 {
     if (nweb_) {
-        OHOS::NWeb::DragEvent dragEvent;
-        dragEvent.x = x;
-        dragEvent.y = y;
-        dragEvent.action = static_cast<OHOS::NWeb::DragAction>(dragAction);
+        std::shared_ptr<NWebDragEventImpl> dragEvent =
+	    std::make_shared<NWebDragEventImpl>(x, y, static_cast<OHOS::NWeb::DragAction>(dragAction));
         nweb_->SendDragEvent(dragEvent);
     }
 }
@@ -5738,7 +5738,7 @@ void WebDelegate::OnResizeNotWork()
     webPattern->OnResizeNotWork();
 }
 
-void WebDelegate::OnDateTimeChooserPopup(const OHOS::NWeb::DateTimeChooser& chooser,
+void WebDelegate::OnDateTimeChooserPopup(std::shared_ptr<OHOS::NWeb::NWebDateTimeChooser> chooser,
     const std::vector<std::shared_ptr<OHOS::NWeb::NWebDateTimeSuggestion>>& suggestions,
     std::shared_ptr<OHOS::NWeb::NWebDateTimeChooserCallback> callback)
 {

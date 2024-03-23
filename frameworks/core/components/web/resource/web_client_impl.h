@@ -184,7 +184,7 @@ public:
         std::shared_ptr<OHOS::NWeb::NWebTouchHandleState> insertHandle,
         std::shared_ptr<OHOS::NWeb::NWebTouchHandleState> startSelectionHandle,
         std::shared_ptr<OHOS::NWeb::NWebTouchHandleState> endSelectionHandle) override;
-    bool OnDragAndDropData(const void* data, size_t len, const NWeb::ImageOptions& opt) override;
+    bool OnDragAndDropData(const void* data, size_t len, std::shared_ptr<NWeb::NWebImageOptions> opt) override;
     bool OnDragAndDropDataUdmf(std::shared_ptr<NWeb::NWebDragData> dragData) override;
     void UpdateDragCursor(NWeb::NWebDragData::DragOperation op) override;
     void OnWindowNewByJS(
@@ -213,9 +213,9 @@ public:
     void OnSafeBrowsingCheckResult(int threat_type) override;
     void OnCompleteSwapWithNewSize() override;
     void OnResizeNotWork() override;
-    void OnGetTouchHandleHotZone(NWeb::TouchHandleHotZone& hotZone) override;
+    void OnGetTouchHandleHotZone(std::shared_ptr<NWeb::NWebTouchHandleHotZone> hotZone) override;
     void OnDateTimeChooserPopup(
-        const NWeb::DateTimeChooser& chooser,
+        std::shared_ptr<NWeb::NWebDateTimeChooser> chooser,
         const std::vector<std::shared_ptr<NWeb::NWebDateTimeSuggestion>>& suggestions,
         std::shared_ptr<NWeb::NWebDateTimeChooserCallback> callback) override;
     void OnDateTimeChooserClose() override;

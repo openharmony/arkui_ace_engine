@@ -2471,14 +2471,18 @@ void WebPattern::OnSelectPopupMenu(std::shared_ptr<OHOS::NWeb::NWebSelectPopupMe
     overlayManager->ShowMenu(id, offset, menu);
 }
 
-void WebPattern::OnDateTimeChooserPopup(const NWeb::DateTimeChooser& chooser,
+void WebPattern::OnDateTimeChooserPopup(std::shared_ptr<OHOS::NWeb::NWebDateTimeChooser> chooser,
     const std::vector<std::shared_ptr<OHOS::NWeb::NWebDateTimeSuggestion>>& suggestions,
     std::shared_ptr<NWeb::NWebDateTimeChooserCallback> callback)
 {
+    if (!chooser) {
+        return;
+    }
+
     bool result = false;
     if (suggestions.size() != 0) {
         result = ShowDateTimeSuggestionDialog(chooser, suggestions, callback);
-    } else if (chooser.type == NWeb::DTC_TIME) {
+    } else if (chooser->GetType() == NWeb::DTC_TIME) {
         result = ShowTimeDialog(chooser, suggestions, callback);
     } else {
         result = ShowDateTimeDialog(chooser, suggestions, callback);
@@ -2501,7 +2505,7 @@ DialogProperties WebPattern::GetDialogProperties(const RefPtr<DialogTheme>& them
     return properties;
 }
 
-bool WebPattern::ShowDateTimeDialog(const NWeb::DateTimeChooser& chooser,
+bool WebPattern::ShowDateTimeDialog(std::shared_ptr<OHOS::NWeb::NWebDateTimeChooser> chooser,
     const std::vector<std::shared_ptr<OHOS::NWeb::NWebDateTimeSuggestion>>& suggestions,
     std::shared_ptr<NWeb::NWebDateTimeChooserCallback> callback)
 {
@@ -2518,30 +2522,32 @@ bool WebPattern::ShowDateTimeDialog(const NWeb::DateTimeChooser& chooser,
     CHECK_NULL_RETURN(theme, false);
     NG::DatePickerSettingData settingData;
     settingData.isLunar = false;
-    settingData.showTime = chooser.type == NWeb::DTC_DATETIME_LOCAL;
+    settingData.showTime = chooser->GetType() == NWeb::DTC_DATETIME_LOCAL;
     settingData.useMilitary = true;
     DialogProperties properties = GetDialogProperties(theme);
     std::map<std::string, PickerDate> datePickerProperty;
     std::map<std::string, PickerTime> timePickerProperty;
+    OHOS::NWeb::DateTime minimum = chooser->GetMinimum();
+    OHOS::NWeb::DateTime maximum = chooser->GetMaximum();
+    OHOS::NWeb::DateTime dialogValue = chooser->GetDialogValue();
     settingData.datePickerProperty["start"] = PickerDate(
-        chooser.minimum.year, chooser.minimum.month + 1, chooser.minimum.day);
+        minimum.year, minimum.month + 1, minimum.day);
     settingData.datePickerProperty["end"] = PickerDate(
-        chooser.maximum.year, chooser.maximum.month + 1, chooser.maximum.day);
-    if (chooser.hasSelected) {
-        int32_t day = (chooser.dialogValue.day == 0) ? 1 : chooser.dialogValue.day;
+        maximum.year, maximum.month + 1, maximum.day);
+    if (chooser->GetHasSelected()) {
+        int32_t day = (dialogValue.day == 0) ? 1 : dialogValue.day;
         settingData.datePickerProperty["selected"] =
-            PickerDate(chooser.dialogValue.year, chooser.dialogValue.month + 1, day);
+            PickerDate(dialogValue.year, dialogValue.month + 1, day);
     }
     std::map<std::string, NG::DialogEvent> dialogEvent;
     std::map<std::string, NG::DialogGestureEvent> dialogCancelEvent;
-    auto acceptId = [callback](const std::string& info) {
+    dialogEvent["acceptId"] = [callback](const std::string& info) {
         OHOS::NWeb::DateTime result;
         bool success = ParseDateTimeJson(info, result);
         callback->Continue(success, result);
     };
-    dialogEvent["acceptId"] = acceptId;
-    auto cancelId = [callback](const GestureEvent&) { callback->Continue(false, OHOS::NWeb::DateTime()); };
-    dialogCancelEvent["cancelId"] = cancelId;
+    dialogCancelEvent["cancelId"] =
+        [callback](const GestureEvent&) { callback->Continue(false, OHOS::NWeb::DateTime()); };
     overlayManager->RegisterOnHideDialog([callback] { callback->Continue(false, OHOS::NWeb::DateTime()); });
     executor->PostTask(
         [properties, settingData, dialogEvent, dialogCancelEvent, weak = WeakPtr<NG::OverlayManager>(overlayManager)] {
@@ -2553,7 +2559,7 @@ bool WebPattern::ShowDateTimeDialog(const NWeb::DateTimeChooser& chooser,
     return true;
 }
 
-bool WebPattern::ShowTimeDialog(const NWeb::DateTimeChooser& chooser,
+bool WebPattern::ShowTimeDialog(std::shared_ptr<OHOS::NWeb::NWebDateTimeChooser> chooser,
     const std::vector<std::shared_ptr<OHOS::NWeb::NWebDateTimeSuggestion>>& suggestions,
     std::shared_ptr<NWeb::NWebDateTimeChooserCallback> callback)
 {
@@ -2572,22 +2578,24 @@ bool WebPattern::ShowTimeDialog(const NWeb::DateTimeChooser& chooser,
     settingData.isUseMilitaryTime = true;
     DialogProperties properties = GetDialogProperties(theme);
     std::map<std::string, PickerTime> timePickerProperty;
-    timePickerProperty["start"] = PickerTime(chooser.minimum.hour, chooser.minimum.minute, chooser.minimum.second);
-    timePickerProperty["selected"] = PickerTime(chooser.maximum.hour, chooser.maximum.minute, chooser.maximum.second);
-    if (chooser.hasSelected) {
+    OHOS::NWeb::DateTime minimum = chooser->GetMinimum();
+    OHOS::NWeb::DateTime maximum = chooser->GetMaximum();
+    OHOS::NWeb::DateTime dialogValue = chooser->GetDialogValue();
+    timePickerProperty["start"] = PickerTime(minimum.hour, minimum.minute, minimum.second);
+    timePickerProperty["selected"] = PickerTime(maximum.hour, maximum.minute, maximum.second);
+    if (chooser->GetHasSelected()) {
         timePickerProperty["selected"] =
-            PickerTime(chooser.dialogValue.hour, chooser.dialogValue.minute, chooser.dialogValue.second);
+            PickerTime(dialogValue.hour, dialogValue.minute, dialogValue.second);
     }
     std::map<std::string, NG::DialogEvent> dialogEvent;
     std::map<std::string, NG::DialogGestureEvent> dialogCancelEvent;
-    auto acceptId = [callback](const std::string& info) {
+    dialogEvent["acceptId"] = [callback](const std::string& info) {
         OHOS::NWeb::DateTime result;
         bool success = ParseDateTimeJson(info, result);
         callback->Continue(success, result);
     };
-    dialogEvent["acceptId"] = acceptId;
-    auto cancelId = [callback](const GestureEvent&) { callback->Continue(false, OHOS::NWeb::DateTime()); };
-    dialogCancelEvent["cancelId"] = cancelId;
+    dialogCancelEvent["cancelId"] =
+        [callback](const GestureEvent&) { callback->Continue(false, OHOS::NWeb::DateTime()); };
     overlayManager->RegisterOnHideDialog([callback] { callback->Continue(false, OHOS::NWeb::DateTime()); });
     executor->PostTask(
         [properties, settingData, timePickerProperty, dialogEvent, dialogCancelEvent,
@@ -2600,7 +2608,7 @@ bool WebPattern::ShowTimeDialog(const NWeb::DateTimeChooser& chooser,
     return true;
 }
 
-bool WebPattern::ShowDateTimeSuggestionDialog(const NWeb::DateTimeChooser& chooser,
+bool WebPattern::ShowDateTimeSuggestionDialog(std::shared_ptr<OHOS::NWeb::NWebDateTimeChooser> chooser,
     const std::vector<std::shared_ptr<OHOS::NWeb::NWebDateTimeSuggestion>>& suggestions,
     std::shared_ptr<NWeb::NWebDateTimeChooserCallback> callback)
 {
@@ -2626,12 +2634,11 @@ bool WebPattern::ShowDateTimeSuggestionDialog(const NWeb::DateTimeChooser& choos
         suggestionMap.emplace(std::make_pair(suggestions[i]->GetLocalizedValue(), suggestions[i]->GetValue()));
     }
     settingData.columnKind = NG::TEXT;
-    settingData.selected = chooser.suggestionIndex;
+    settingData.selected = chooser->GetSuggestionIndex();
     DialogProperties properties = GetDialogProperties(theme);
     std::map<std::string, NG::DialogTextEvent> dialogEvent;
     std::map<std::string, NG::DialogGestureEvent> dialogCancelEvent;
-    auto cancelId = [callback](const GestureEvent&) { callback->Continue(false, OHOS::NWeb::DateTime()); };
-    auto acceptId = [suggestionMap, callback](const std::string& info) {
+    dialogEvent["acceptId"] = [suggestionMap, callback](const std::string& info) {
         std::string value = ParseTextJsonValue(info);
         if (suggestionMap.find(value) != suggestionMap.end()) {
             callback->Continue(true, suggestionMap.at(value));
@@ -2639,8 +2646,8 @@ bool WebPattern::ShowDateTimeSuggestionDialog(const NWeb::DateTimeChooser& choos
             callback->Continue(false, OHOS::NWeb::DateTime());
         }
     };
-    dialogEvent["acceptId"] = acceptId;
-    dialogCancelEvent["cancelId"] = cancelId;
+    dialogCancelEvent["cancelId"] =
+        [callback](const GestureEvent&) { callback->Continue(false, OHOS::NWeb::DateTime()); };
     overlayManager->RegisterOnHideDialog([callback] { callback->Continue(false, OHOS::NWeb::DateTime()); });
     executor->PostTask(
         [properties, settingData, dialogEvent, dialogCancelEvent, weak = WeakPtr<NG::OverlayManager>(overlayManager)] {
@@ -2684,11 +2691,13 @@ void WebPattern::RegisterSelectPopupCallback(RefPtr<FrameNode>& menu,
     }
 }
 
-OffsetF WebPattern::GetSelectPopupPostion(const OHOS::NWeb::SelectMenuBound& bounds)
+OffsetF WebPattern::GetSelectPopupPostion(std::shared_ptr<OHOS::NWeb::NWebSelectMenuBound> bound)
 {
     auto offset = GetCoordinatePoint().value_or(OffsetF());
-    offset.AddX(bounds.x);
-    offset.AddY(bounds.y + bounds.height);
+    if (bound) {
+        offset.AddX(bound->GetX());
+        offset.AddY(bound->GetY() + bound->GetHeight());
+    }
     return offset;
 }
 
