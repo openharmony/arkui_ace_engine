@@ -47,6 +47,8 @@ void TabsLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
         geometryNode->SetFrameSize(SizeF());
         return;
     }
+    bool autoWidth = layoutProperty->GetWidthAutoValue(false);
+    bool autoHeight = layoutProperty->GetHeightAutoValue(false);
     geometryNode->SetFrameSize(idealSize);
     MinusPaddingToSize(layoutProperty->CreatePaddingAndBorder(), idealSize);
     auto childLayoutConstraint = layoutProperty->CreateChildConstraint();
@@ -71,33 +73,23 @@ void TabsLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
 
     // Measure swiper.
     auto swiperWrapper = layoutWrapper->GetOrCreateChildByIndex(SWIPER_INDEX);
+    SizeF swiperSize;
     if (swiperWrapper) {
-        SizeF parentIdealSize = idealSize;
-        if (axis == Axis::HORIZONTAL) {
-            if (!barOverlap) {
-                childLayoutConstraint.selfIdealSize.SetHeight(
-                    idealSize.Height() - tabBarSize.Height() - dividerStrokeWidth);
-                childLayoutConstraint.selfIdealSize.SetWidth(idealSize.Width());
-                parentIdealSize.SetHeight(idealSize.Height() - tabBarSize.Height() - dividerStrokeWidth);
-            } else {
-                childLayoutConstraint.selfIdealSize.SetHeight(idealSize.Height());
-                childLayoutConstraint.selfIdealSize.SetWidth(idealSize.Width());
-                parentIdealSize.SetHeight(idealSize.Height());
-            }
-        } else if (axis == Axis::VERTICAL) {
-            if (!barOverlap) {
-                childLayoutConstraint.selfIdealSize.SetWidth(
-                    idealSize.Width() - tabBarSize.Width() - dividerStrokeWidth);
-                childLayoutConstraint.selfIdealSize.SetHeight(idealSize.Height());
-                parentIdealSize.SetWidth(idealSize.Width() - tabBarSize.Width() - dividerStrokeWidth);
-            } else {
-                childLayoutConstraint.selfIdealSize.SetWidth(idealSize.Width());
-                childLayoutConstraint.selfIdealSize.SetHeight(idealSize.Height());
-                parentIdealSize.SetWidth(idealSize.Width());
-            }
+        swiperSize = MeasureSwiper(layoutProperty, swiperWrapper, idealSize, tabBarSize, dividerStrokeWidth);
+    }
+
+    if ((axis == Axis::VERTICAL) && autoWidth) {
+        if (!barOverlap) {
+            geometryNode->SetFrameWidth(tabBarSize.Width() + dividerStrokeWidth + swiperSize.Width());
+        } else {
+            geometryNode->SetFrameWidth(dividerStrokeWidth + swiperSize.Width());
         }
-        childLayoutConstraint.parentIdealSize = OptionalSizeF(parentIdealSize);
-        swiperWrapper->Measure(childLayoutConstraint);
+    } else if ((axis == Axis::HORIZONTAL) && autoHeight) {
+        if (!barOverlap) {
+            geometryNode->SetFrameHeight(tabBarSize.Height() + dividerStrokeWidth + swiperSize.Height());
+        } else {
+            geometryNode->SetFrameHeight(dividerStrokeWidth + swiperSize.Height());
+        }
     }
 }
 
@@ -238,5 +230,53 @@ float TabsLayoutAlgorithm::MeasureDivider(const RefPtr<TabsLayoutProperty>& layo
     dividerWrapper->Measure(dividerLayoutConstraint);
 
     return divider.isNull ? 0.0f : dividerStrokeWidth;
+}
+
+SizeF TabsLayoutAlgorithm::MeasureSwiper(const RefPtr<TabsLayoutProperty>& layoutProperty,
+    RefPtr<LayoutWrapper>& swiperWrapper, const SizeF& idealSize, const SizeF& tabBarSize, const float dividerWidth)
+{
+    auto axis = layoutProperty->GetAxis().value_or(Axis::HORIZONTAL);
+    auto barOverlap = layoutProperty->GetBarOverlap().value_or(false);
+    bool autoWidth = layoutProperty->GetWidthAutoValue(false);
+    bool autoHeight = layoutProperty->GetHeightAutoValue(false);
+    SizeF parentIdealSize = idealSize;
+    auto childLayoutConstraint = layoutProperty->CreateChildConstraint();
+    childLayoutConstraint.parentIdealSize = OptionalSizeF(idealSize);
+
+    if (axis == Axis::HORIZONTAL) {
+        if (!barOverlap) {
+            if (!autoHeight) {
+                childLayoutConstraint.selfIdealSize.SetHeight(
+                    idealSize.Height() - tabBarSize.Height() - dividerWidth);
+            }
+            childLayoutConstraint.selfIdealSize.SetWidth(idealSize.Width());
+            parentIdealSize.SetHeight(idealSize.Height() - tabBarSize.Height() - dividerWidth);
+        } else {
+            if (!autoHeight) {
+                childLayoutConstraint.selfIdealSize.SetHeight(idealSize.Height());
+            }
+            childLayoutConstraint.selfIdealSize.SetWidth(idealSize.Width());
+            parentIdealSize.SetHeight(idealSize.Height());
+        }
+    } else if (axis == Axis::VERTICAL) {
+        if (!barOverlap) {
+            if (!autoWidth) {
+                childLayoutConstraint.selfIdealSize.SetWidth(
+                    idealSize.Width() - tabBarSize.Width() - dividerWidth);
+            }
+            childLayoutConstraint.selfIdealSize.SetHeight(idealSize.Height());
+            parentIdealSize.SetWidth(idealSize.Width() - tabBarSize.Width() - dividerWidth);
+        } else {
+            if (!autoWidth) {
+                childLayoutConstraint.selfIdealSize.SetWidth(idealSize.Width());
+            }
+            childLayoutConstraint.selfIdealSize.SetHeight(idealSize.Height());
+            parentIdealSize.SetWidth(idealSize.Width());
+        }
+    }
+    childLayoutConstraint.parentIdealSize = OptionalSizeF(parentIdealSize);
+    swiperWrapper->Measure(childLayoutConstraint);
+
+    return swiperWrapper->GetGeometryNode()->GetMarginFrameSize();
 }
 } // namespace OHOS::Ace::NG

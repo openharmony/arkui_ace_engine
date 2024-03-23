@@ -14,6 +14,23 @@
  */
 
 /// <reference path='./import.ts' />
+class TextEnableDataDetectorModifier extends ModifierWithKey<boolean> {
+  constructor(value: boolean) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('textEnableDataDetector');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().text.resetEnableDataDetector(node);
+    } else {
+      getUINativeModule().text.setEnableDataDetector(node, this.value!);
+    }
+  }
+  checkObjectDiff(): boolean {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+
 class FontColorModifier extends ModifierWithKey<ResourceColor> {
   constructor(value: ResourceColor) {
     super(value);
@@ -136,6 +153,23 @@ class TextWordBreakModifier extends ModifierWithKey<WordBreak> {
       getUINativeModule().text.resetWordBreak(node);
     } else {
       getUINativeModule().text.setWordBreak(node, this.value!);
+    }
+  }
+  checkObjectDiff(): boolean {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+
+class TextEllipsisModeModifier extends ModifierWithKey<EllipsisMode> {
+  constructor(value: EllipsisMode) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('textEllipsisMode');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().text.resetEllipsisMode(node);
+    } else {
+      getUINativeModule().text.setEllipsisMode(node, this.value!);
     }
   }
   checkObjectDiff(): boolean {
@@ -475,8 +509,9 @@ class ArkTextComponent extends ArkComponent implements TextAttribute {
   constructor(nativePtr: KNode) {
     super(nativePtr);
   }
-  enableDataDetector(enable: boolean): this {
-    throw new Error('Method not implemented.');
+  enableDataDetector(value: boolean): this {
+    modifierWithKey(this._modifiersWithKeys, TextEnableDataDetectorModifier.identity, TextEnableDataDetectorModifier, value);
+    return this;
   }
   dataDetectorConfig(config: any): this {
     throw new Error('Method not implemented.');
@@ -585,7 +620,8 @@ class ArkTextComponent extends ArkComponent implements TextAttribute {
     throw new Error('Method not implemented.');
   }
   ellipsisMode(value: EllipsisMode): TextAttribute {
-    throw new Error('Method not implemented.');
+    modifierWithKey(this._modifiersWithKeys, TextEllipsisModeModifier.identity, TextEllipsisModeModifier, value);
+    return this;
   }
   clip(value: boolean | CircleAttribute | EllipseAttribute | PathAttribute | RectAttribute): this {
     modifierWithKey(this._modifiersWithKeys, TextClipModifier.identity, TextClipModifier, value);

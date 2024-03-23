@@ -36,10 +36,16 @@ public:
     void BindSelectionMenu(TextSpanType& editorType, TextResponseType& responseType,
         std::function<void()>& buildFunc, SelectMenuParam& menuParam) override;
     void SetOnPaste(std::function<void(NG::TextCommonEvent&)>&& func) override;
+    void SetPlaceholder(PlaceholderOptions& options) override;
     void SetTextDetectEnable(bool value) override;
     void SetTextDetectConfig(const std::string& value, std::function<void(const std::string&)>&& onResult) override;
+    void SetSelectedBackgroundColor(const Color& selectedColor) override;
+    void SetCaretColor(const Color& color) override;
 
+    static void SetTextDetectEnable(FrameNode* frameNode, bool value);
     static void SetCopyOption(FrameNode* frameNode, CopyOptions& copyOptions);
+    static void SetCaretColor(FrameNode* frameNode, const Color& color);
+    static void SetSelectedBackgroundColor(FrameNode* frameNode, const Color& selectedColor);
 
 private:
     void SetDraggable(bool draggable);

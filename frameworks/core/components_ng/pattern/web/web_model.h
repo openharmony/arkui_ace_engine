@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -29,10 +29,11 @@ public:
     virtual ~WebModel() = default;
 
     virtual void Create(const std::string& src, const RefPtr<WebController>& webController,
-        WebType type = WebType::SURFACE, bool incognitoMode = false) = 0;
+        RenderMode renderMode = RenderMode::ASYNC_RENDER, bool incognitoMode = false) = 0;
     virtual void Create(const std::string& src, std::function<void(int32_t)>&& setWebIdCallback,
         std::function<void(const std::string&)>&& setHapPathCallback,
-        int32_t parentWebId, bool popup, WebType type = WebType::SURFACE, bool incognitoMode = false) = 0;
+        int32_t parentWebId, bool popup, RenderMode renderMode = RenderMode::ASYNC_RENDER,
+        bool incognitoMode = false) = 0;
     virtual void SetCustomScheme(const std::string& cmdLine) = 0;
     virtual void SetFocusable(bool focusable) {};
     virtual void SetFocusNode(bool isFocusNode) {};
@@ -51,6 +52,7 @@ public:
     virtual void SetOnDownloadStart(std::function<void(const BaseEventInfo* info)>&& jsCallback) = 0;
     virtual void SetOnHttpAuthRequest(std::function<bool(const BaseEventInfo* info)>&& jsCallback) = 0;
     virtual void SetOnSslErrorRequest(std::function<bool(const BaseEventInfo* info)>&& jsCallback) = 0;
+    virtual void SetOnAllSslErrorRequest(std::function<bool(const BaseEventInfo *info)> &&jsCallback) = 0;
     virtual void SetOnSslSelectCertRequest(std::function<bool(const BaseEventInfo* info)>&& jsCallback) = 0;
     virtual void SetMediaPlayGestureAccess(bool isNeedGestureAccess) = 0;
     virtual void SetOnKeyEvent(std::function<void(KeyEventInfo& keyEventInfo)>&& jsCallback) = 0;
@@ -113,6 +115,7 @@ public:
     virtual void SetWebStandardFont(const std::string& standardFontFamily) {};
     virtual void SetDefaultFixedFontSize(int32_t defaultFixedFontSize) {};
     virtual void SetDefaultFontSize(int32_t defaultFontSize) {};
+    virtual void SetDefaultTextEncodingFormat(const std::string& textEncodingFormat) {};
     virtual void SetMinFontSize(int32_t minFontSize) {};
     virtual void SetMinLogicalFontSize(int32_t minLogicalFontSize) {};
     virtual void SetBlockNetwork(bool isNetworkBlocked) {};
@@ -122,6 +125,10 @@ public:
         std::function<void(const std::shared_ptr<BaseEventInfo>& info)>&& audioStateChanged) {};
     virtual void SetFirstContentfulPaintId(
         std::function<void(const std::shared_ptr<BaseEventInfo>& info)>&& firstContentfulPaintId) {};
+    virtual void SetFirstMeaningfulPaintId(
+        std::function<void(const std::shared_ptr<BaseEventInfo>& info)>&& firstMeaningfulPaintId) {};
+    virtual void SetLargestContentfulPaintId(
+        std::function<void(const std::shared_ptr<BaseEventInfo>& info)>&& largestContentfulPaintId) {};
     virtual void SetSafeBrowsingCheckResultId(
         std::function<void(const std::shared_ptr<BaseEventInfo>& info)>&& safeBrowsingCheckResultId) {};
     virtual void SetNavigationEntryCommittedId(
@@ -146,11 +153,13 @@ public:
     virtual void SetAudioExclusive(bool audioExclusive) {};
     virtual void SetOverScrollId(std::function<void(const BaseEventInfo* info)>&& jsCallback) = 0;
     virtual void SetNativeEmbedModeEnabled(bool isEmbedModeEnabled) = 0;
+    virtual void RegisterNativeEmbedRule(const std::string&, const std::string&) = 0;
     virtual void SetNativeEmbedLifecycleChangeId(std::function<void(const BaseEventInfo* info)>&& jsCallback) = 0;
     virtual void SetNativeEmbedGestureEventId(std::function<void(const BaseEventInfo* info)>&& jsCallback) = 0;
 
     virtual void SetScreenCaptureRequestEventId(std::function<void(const BaseEventInfo* info)>&& jsCallback) {};
     virtual void SetNestedScroll(const NestedScrollOptions& nestedOpt) {}
+    virtual void SetMetaViewport(bool enabled) {}
     virtual void SetLayoutMode(WebLayoutMode mode) {}
     virtual void SetOverScrollMode(OverScrollMode mode) {}
     virtual void JavaScriptOnDocumentStart(const ScriptItems& scriptItems) {};
@@ -158,6 +167,12 @@ public:
 
     virtual void SetCopyOptionMode(CopyOptions mode) {};
     virtual void SetPermissionClipboard(std::function<void(const std::shared_ptr<BaseEventInfo>&)>&& jsCallback) {};
+    virtual void SetIntelligentTrackingPreventionResultId(
+        std::function<void(const std::shared_ptr<BaseEventInfo>& info)>&&
+            intelligentTrackingPreventionResultId) {};
+    virtual void SetOnOverrideUrlLoading(std::function<bool(const BaseEventInfo* info)>&& jsCallback) = 0;
+    virtual void SetTextAutosizing(bool isTextAutosizing) {};
+    virtual void SetNativeVideoPlayerConfig(bool enable, bool shouldOverlay) = 0;
 private:
     static std::unique_ptr<WebModel> instance_;
     static std::mutex mutex_;

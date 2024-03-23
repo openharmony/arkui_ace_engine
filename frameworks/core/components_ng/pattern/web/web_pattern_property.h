@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -18,6 +18,7 @@
 
 #include <optional>
 #include <string>
+#include <tuple>
 
 #include "core/components/web/web_property.h"
 #include "core/components_ng/property/property.h"
@@ -58,6 +59,7 @@ struct WebPatternProperty {
     ACE_DEFINE_PROPERTY_GROUP_ITEM(WebStandardFont, std::string);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(DefaultFixedFontSize, int32_t);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(DefaultFontSize, int32_t);
+    ACE_DEFINE_PROPERTY_GROUP_ITEM(DefaultTextEncodingFormat, std::string);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(MinFontSize, int32_t);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(MinLogicalFontSize, int32_t);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(BlockNetwork, bool);
@@ -66,7 +68,13 @@ struct WebPatternProperty {
     ACE_DEFINE_PROPERTY_GROUP_ITEM(ScrollBarColor, std::string);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(OverScrollMode, int32_t);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(CopyOptionMode, int32_t);
+    ACE_DEFINE_PROPERTY_GROUP_ITEM(MetaViewport, bool);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(NativeEmbedModeEnabled, bool);
+    ACE_DEFINE_PROPERTY_GROUP_ITEM(NativeEmbedRuleTag, std::string);
+    ACE_DEFINE_PROPERTY_GROUP_ITEM(NativeEmbedRuleType, std::string);
+    ACE_DEFINE_PROPERTY_GROUP_ITEM(TextAutosizing, bool);
+    using NativeVideoPlayerConfigType = std::tuple<bool, bool>;
+    ACE_DEFINE_PROPERTY_GROUP_ITEM(NativeVideoPlayerConfig, NativeVideoPlayerConfigType);
 };
 
 } // namespace OHOS::Ace::NG

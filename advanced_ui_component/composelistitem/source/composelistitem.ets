@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -32,9 +32,9 @@ enum ItemHeight {
   FIFTH_HEIGHT = 96
 }
 
-export type OperateItem = {
-  icon?: OperateIcon,
-  subIcon ?: OperateIcon,
+export declare class OperateItem {
+  icon?: OperateIcon;
+  subIcon?: OperateIcon;
   button?: OperateButton;
   switch?: OperateCheck;
   checkbox?: OperateCheck;
@@ -44,7 +44,7 @@ export type OperateItem = {
   arrow?: OperateIcon;
 }
 
-export type ContentItem = {
+export declare class ContentItem {
   iconStyle?: IconType;
   icon?: ResourceStr;
   primaryText?: ResourceStr;
@@ -52,24 +52,27 @@ export type ContentItem = {
   description?: ResourceStr;
 }
 
-export declare type OperateIcon = {
-  value: ResourceStr,
-  action?: () => void
+export declare class OperateIcon {
+  value: ResourceStr;
+  action?: () => void;
 }
 
-export type OperateButton = {
-  text?: string
+export declare class OperateButton {
+  text?: string;
 }
 
-export declare type OperateCheck = {
-  isCheck?: boolean,
-  onChange?: (value: boolean) => void
+export declare class OperateCheck {
+  isCheck?: boolean;
+  onChange?: (value: boolean) => void;
 }
 
 const TEXT_MAX_LINE = 1;
 const ITEM_BORDER_SHOWN = 2;
 const TEXT_COLUMN_SPACE = 4;
 const TEXT_SAFE_MARGIN = 8;
+const LISTITEM_PADDING = 6;
+const SWITCH_PADDING = 4;
+const STACK_PADDING = 4;
 const BADGE_SIZE = 8;
 const SMALL_ICON_SIZE = 16;
 const SYSTEM_ICON_SIZE = 24;
@@ -88,11 +91,17 @@ const DEFAULT_ROW_SPACE = 0;
 const SPECICAL_ROW_SPACE = 4;
 const OPERATEITEM_ICONLIKE_SIZE = 24;
 const OPERATEITEM_ARROW_WIDTH = 12
-const OPERATEITEM_ICON_CLICKABLE_SIZE = 48;
+const OPERATEITEM_ICON_CLICKABLE_SIZE = 40;
 const OPERATEITEM_IMAGE_SIZE = 48;
 const HOVERING_COLOR = '#0d000000';
 const TOUCH_DOWN_COLOR = '#1a000000';
 const ACTIVED_COLOR = '#1a0a59f7';
+const RIGHT_CONTENT_NULL_LEFTWIDTH = '100%';
+const RIGHT_CONTENT_NULL_RIGHTWIDTH = '0vp';
+const LEFT_PART_WIDTH = 'calc(66% - 16vp)';
+const RIGHT_PART_WIDTH = '34%';
+const LEFT_ONLY_ARROW_WIDTH = 'calc(100% - 40vp)';
+const RIGHT_ONLY_ARROW_WIDTH = '24vp';
 const ICON_SIZE_MAP: Map<number, number> = new Map([
   [IconType.BADGE, BADGE_SIZE],
   [IconType.NORMAL_ICON, SMALL_ICON_SIZE],
@@ -106,12 +115,13 @@ const ICON_SIZE_MAP: Map<number, number> = new Map([
 
 @Component
 struct ContentItemStruct {
-  iconStyle: IconType = null
-  icon: Resource = null
-  primaryText: string = null
-  secondaryText: string = null
-  description: string = null
+  iconStyle: IconType | null = null;
+  icon: Resource | null = null;
+  primaryText: string | null = null;
+  secondaryText: string | null = null;
+  description: string | null = null;
   private itemRowSpace: number = NORMAL_ITEM_ROW_SPACE
+  @State leftWidth: string = LEFT_PART_WIDTH
 
   aboutToAppear() {
     if (this.icon == null && this.iconStyle == null) {
@@ -130,6 +140,7 @@ struct ContentItemStruct {
           .borderRadius($r('sys.float.ohos_id_corner_radius_default_m'))
           .focusable(true)
           .draggable(false)
+          .fillColor($r('sys.color.ohos_id_color_secondary'))
       }
       else {
         Image(this.icon)
@@ -143,6 +154,7 @@ struct ContentItemStruct {
           .borderRadius($r('sys.float.ohos_id_corner_radius_default_m'))
           .focusable(true)
           .draggable(false)
+          .fillColor($r('sys.color.ohos_id_color_secondary'))
       }
     }
   }
@@ -191,25 +203,27 @@ struct ContentItemStruct {
       this.createText()
     }
     .margin({ right: 16 })
-    .width("calc(66% - 16vp)")
+    .padding({ left: LISTITEM_PADDING })
+    .width(this.leftWidth)
     .flexShrink(1)
   }
 }
 
 @Component
 struct OperateItemStruct {
-  arrow: OperateIcon = null
-  icon: OperateIcon = null
-  subIcon: OperateIcon = null
-  button: OperateButton = null
-  switch: OperateCheck = null
-  checkBox: OperateCheck = null
-  radio: OperateCheck = null
-  image: Resource = null
-  text: string = null
+  arrow: OperateIcon | null = null;
+  icon: OperateIcon | null = null;
+  subIcon: OperateIcon | null = null;
+  button: OperateButton | null = null;
+  switch: OperateCheck | null = null;
+  checkBox: OperateCheck | null = null;
+  radio: OperateCheck | null = null;
+  image: Resource | null = null;
+  text: string | null = null;
   @State switchState: boolean = false
   @State radioState: boolean = false
   @State checkBoxState: boolean = false
+  @State rightWidth: string = RIGHT_PART_WIDTH
   @Link parentCanFocus: boolean
   @Link parentCanTouch: boolean
   @Link parentIsHover: boolean
@@ -220,13 +234,13 @@ struct OperateItemStruct {
 
   aboutToAppear() {
     if (this.switch != null) {
-      this.switchState = this.switch.isCheck
+      this.switchState = this.switch.isCheck as boolean;
     }
     if (this.radio != null) {
-      this.radioState = this.radio.isCheck
+      this.radioState = this.radio.isCheck as boolean;
     }
     if (this.checkBox != null) {
-      this.checkBoxState = this.checkBox.isCheck
+      this.checkBoxState = this.checkBox.isCheck as boolean;
     }
 
     if ((this.button == null && this.image == null && this.icon != null && this.text != null) ||
@@ -247,6 +261,7 @@ struct OperateItemStruct {
         right: TEXT_SAFE_MARGIN
       })
     }
+    .margin({ right: LISTITEM_PADDING })
     .hitTestBehavior(HitTestMode.Block)
     .fontSize($r('sys.float.ohos_id_text_size_button3'))
     .fontColor($r('sys.color.ohos_id_color_text_primary_activated_transparent'))
@@ -327,11 +342,13 @@ struct OperateItemStruct {
       .height(OPERATEITEM_IMAGE_SIZE)
       .width(OPERATEITEM_IMAGE_SIZE)
       .draggable(false)
+      .margin({ right: LISTITEM_PADDING })
   }
 
   @Builder
   createText(text: string) {
     Text(text)
+      .margin({ right: LISTITEM_PADDING })
       .fontSize($r('sys.float.ohos_id_text_size_body2'))
       .fontColor($r('sys.color.ohos_id_color_text_secondary'))
       .focusable(true)
@@ -349,6 +366,7 @@ struct OperateItemStruct {
         .fillColor($r('sys.color.ohos_id_color_fourth'))
         .draggable(false)
     }
+    .margin({ right: LISTITEM_PADDING })
     .hitTestBehavior(HitTestMode.Block)
     .backgroundColor(Color.Transparent)
     .height(OPERATEITEM_ICONLIKE_SIZE)
@@ -381,7 +399,8 @@ struct OperateItemStruct {
 
   @Builder
   createRadio(radio: OperateCheck) {
-    Radio({ value: null, group: null })
+    Radio({ value: '', group: '' })
+      .margin({ right: LISTITEM_PADDING })
       .checked(this.radioState)
       .onChange(radio.onChange)
       .height(OPERATEITEM_ICONLIKE_SIZE)
@@ -415,6 +434,7 @@ struct OperateItemStruct {
   @Builder
   createCheckBox(checkBox: OperateCheck) {
     Checkbox()
+      .margin({ right: LISTITEM_PADDING })
       .select(this.checkBoxState)
       .onChange(checkBox.onChange)
       .height(OPERATEITEM_ICONLIKE_SIZE)
@@ -455,6 +475,7 @@ struct OperateItemStruct {
         })
         .hitTestBehavior(HitTestMode.Block)
     }
+    .margin({ right: SWITCH_PADDING })
     .height(OPERATEITEM_ICON_CLICKABLE_SIZE)
     .width(OPERATEITEM_ICON_CLICKABLE_SIZE)
     .justifyContent(FlexAlign.Center)
@@ -493,7 +514,7 @@ struct OperateItemStruct {
           .focusable(true)
           .draggable(false)
           .constraintSize({
-            maxWidth: `calc(100% - ${ OPERATEITEM_ARROW_WIDTH }vp)`
+            maxWidth: `calc(100% - ${OPERATEITEM_ARROW_WIDTH}vp)`
           })
         Image(icon.value)
           .height(OPERATEITEM_ICONLIKE_SIZE)
@@ -504,7 +525,7 @@ struct OperateItemStruct {
       }
       .padding({
         left: TEXT_SAFE_MARGIN,
-        right: TEXT_SAFE_MARGIN
+        right: LISTITEM_PADDING
       })
     }
     .hitTestBehavior(HitTestMode.Block)
@@ -545,7 +566,7 @@ struct OperateItemStruct {
       space: this.rowSpace
     }) {
       if (this.button != null) {
-        this.createButton(this.button.text)
+        this.createButton(this.button.text as string)
       }
 
       else if (this.image != null) {
@@ -580,7 +601,7 @@ struct OperateItemStruct {
         }
       }
     }
-    .width("34%")
+    .width(this.rightWidth)
     .flexShrink(1)
     .justifyContent(FlexAlign.End)
   }
@@ -588,8 +609,8 @@ struct OperateItemStruct {
 
 @Component
 export struct ComposeListItem {
-  @Prop contentItem: ContentItem = null;
-  @Prop operateItem: OperateItem = null;
+  @Prop contentItem: ContentItem | null = null;
+  @Prop operateItem: OperateItem | null = null;
   @State frontColor: string = Color.Transparent.toString()
   @State borderSize: number = 0;
   @State canFocus: boolean = false
@@ -601,22 +622,22 @@ export struct ComposeListItem {
 
   aboutToAppear() {
     if (this.contentItem === undefined) {
-      if (this.operateItem.image !== undefined || this.operateItem.icon !== undefined || this.operateItem.subIcon !== undefined) {
+      if (this.operateItem?.image !== undefined || this.operateItem?.icon !== undefined || this.operateItem?.subIcon !== undefined) {
         this.itemHeight = OPERATEITEM_IMAGE_SIZE + SAFE_LIST_PADDING
       }
       return
     }
 
-    if (this.contentItem.secondaryText === undefined && this.contentItem.description === undefined) {
-      if (this.contentItem.icon === undefined) {
+    if (this.contentItem?.secondaryText === undefined && this.contentItem?.description === undefined) {
+      if (this.contentItem?.icon === undefined) {
         this.itemHeight = ItemHeight.FIRST_HEIGHT
       }
       else {
-        this.itemHeight = this.contentItem.iconStyle <= IconType.HEAD_SCULPTURE ? ItemHeight.SECOND_HEIGHT : ItemHeight.THIRD_HEIGHT
+        this.itemHeight = this.contentItem.iconStyle as number <= IconType.HEAD_SCULPTURE ? ItemHeight.SECOND_HEIGHT : ItemHeight.THIRD_HEIGHT;
       }
     }
     else if (this.contentItem.description === undefined) {
-      if (this.contentItem.icon === undefined || (this.contentItem.icon !== undefined && this.contentItem.iconStyle <= IconType.SYSTEM_ICON)) {
+      if (this.contentItem.icon === undefined || (this.contentItem.icon !== undefined && this.contentItem.iconStyle as number <= IconType.SYSTEM_ICON)) {
         this.itemHeight = ItemHeight.THIRD_HEIGHT
       }
       else {
@@ -627,8 +648,28 @@ export struct ComposeListItem {
       this.itemHeight = ItemHeight.FIFTH_HEIGHT
     }
 
-    if (ICON_SIZE_MAP.get(this.contentItem.iconStyle) >= this.itemHeight) {
-      this.itemHeight = ICON_SIZE_MAP.get(this.contentItem.iconStyle) + SAFE_LIST_PADDING;
+    if (ICON_SIZE_MAP.get(this.contentItem?.iconStyle as number) as number >= this.itemHeight) {
+      this.itemHeight = ICON_SIZE_MAP.get(this.contentItem?.iconStyle as number) as number + SAFE_LIST_PADDING;
+    }
+  }
+
+  calculatedLeftWidth(): string {
+    if (this.operateItem === null || JSON.stringify(this.operateItem) === '{}') {
+      return RIGHT_CONTENT_NULL_LEFTWIDTH
+    } else if (this.operateItem.arrow != null && this.operateItem.text == null) {
+      return LEFT_ONLY_ARROW_WIDTH
+    } else {
+      return LEFT_PART_WIDTH
+    }
+  }
+
+  calculatedRightWidth(): string {
+    if (this.operateItem === null || JSON.stringify(this.operateItem) === '{}') {
+      return RIGHT_CONTENT_NULL_RIGHTWIDTH
+    } else if (this.operateItem.arrow != null && this.operateItem.text == null) {
+      return RIGHT_ONLY_ARROW_WIDTH
+    } else {
+      return RIGHT_PART_WIDTH
     }
   }
 
@@ -644,7 +685,8 @@ export struct ComposeListItem {
             iconStyle: this.contentItem.iconStyle,
             primaryText: typeof this.contentItem.primaryText === 'string' ? this.contentItem.primaryText : null,
             secondaryText: typeof this.contentItem.secondaryText === 'string' ? this.contentItem.secondaryText : null,
-            description: typeof this.contentItem.description === 'string' ? this.contentItem.description : null
+            description: typeof this.contentItem.description === 'string' ? this.contentItem.description : null,
+            leftWidth: this.calculatedLeftWidth()
           })
         }
         if (this.operateItem !== null) {
@@ -663,7 +705,8 @@ export struct ComposeListItem {
             parentIsHover: this.isHover,
             parentFrontColor: this.frontColor,
             parentIsActive: this.isActive,
-            parentCanHover: this.canHover
+            parentCanHover: this.canHover,
+            rightWidth: this.calculatedRightWidth()
           })
             .onFocus(() => {
               this.canFocus = false
@@ -697,22 +740,27 @@ export struct ComposeListItem {
           this.frontColor = this.isActive ? ACTIVED_COLOR : Color.Transparent.toString()
         }
       })
-
-      if (this.canFocus) {
-        Row()
-          .height(this.itemHeight)
-          .width('100%')
-          .hitTestBehavior(HitTestMode.None)
+      .stateStyles({
+        focused: {
           .border({
+            radius: $r('sys.float.ohos_id_corner_radius_default_m'),
             width: ITEM_BORDER_SHOWN,
-            color: $r('sys.color.ohos_id_color_focused_outline')
+            color: $r('sys.color.ohos_id_color_focused_outline'),
+            style: BorderStyle.Solid
           })
-          .borderRadius($r('sys.float.ohos_id_corner_radius_default_m'))
-      }
+        },
+        normal: {
+          .border({
+            radius: $r('sys.float.ohos_id_corner_radius_default_m'),
+            width: ITEM_BORDER_SHOWN,
+            color: Color.Transparent
+          })
+        }
+      })
     }
     .padding({
-      left: $r('sys.float.ohos_id_default_padding_start'),
-      right: $r('sys.float.ohos_id_default_padding_end')
+      left: STACK_PADDING,
+      right: STACK_PADDING
     })
   }
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -46,6 +46,14 @@ void RefreshModelNG::Create()
         V2::REFRESH_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<RefreshPattern>(); });
     CHECK_NULL_VOID(frameNode);
     stack->Push(frameNode);
+    if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
+        auto pattern = frameNode->GetPattern<RefreshPattern>();
+        CHECK_NULL_VOID(pattern);
+        pattern->UpdateNestedModeForChildren(NestedScrollOptions({
+            .forward = NestedScrollMode::PARENT_FIRST,
+            .backward = NestedScrollMode::SELF_FIRST,
+        }));
+    }
     ACE_UPDATE_LAYOUT_PROPERTY(
         RefreshLayoutProperty, IndicatorOffset, Dimension(DEFAULT_INDICATOR_OFFSET, DimensionUnit::VP));
     ACE_UPDATE_LAYOUT_PROPERTY(RefreshLayoutProperty, Friction, DEFAULT_FRICTION_RATIO);
@@ -59,6 +67,16 @@ RefPtr<FrameNode> RefreshModelNG::CreateFrameNode(int32_t nodeId)
     layoutProperty->UpdateIndicatorOffset(Dimension(DEFAULT_INDICATOR_OFFSET, DimensionUnit::VP));
     layoutProperty->UpdateFriction(DEFAULT_FRICTION_RATIO);
     return frameNode;
+}
+
+void RefreshModelNG::SetPullToRefresh(bool pullToRefresh)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(RefreshLayoutProperty, PullToRefresh, pullToRefresh);
+}
+
+void RefreshModelNG::SetRefreshOffset(const Dimension& offset)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(RefreshLayoutProperty, RefreshOffset, offset);
 }
 
 void RefreshModelNG::SetRefreshing(bool isRefreshing)
@@ -79,6 +97,11 @@ void RefreshModelNG::SetFriction(int32_t friction)
 void RefreshModelNG::SetProgressColor(const Color& progressColor)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(RefreshLayoutProperty, ProgressColor, progressColor);
+}
+
+void RefreshModelNG::SetLoadingText(const std::string& loadingText)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(RefreshLayoutProperty, LoadingText, loadingText);
 }
 
 void RefreshModelNG::SetOnStateChange(StateChangeEvent&& stateChange)
@@ -117,6 +140,14 @@ void RefreshModelNG::SetCustomBuilder(const RefPtr<NG::UINode>& customBuilder)
     pattern->AddCustomBuilderNode(customBuilder);
 }
 
+void RefreshModelNG::SetCustomBuilder(FrameNode* frameNode, FrameNode* customBuilder)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<RefreshPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->AddCustomBuilderNode(AceType::Claim<UINode>(customBuilder));
+}
+
 void RefreshModelNG::SetOnStateChange(FrameNode* frameNode, StateChangeEvent&& stateChange)
 {
     CHECK_NULL_VOID(frameNode);
@@ -141,9 +172,17 @@ void RefreshModelNG::SetRefreshing(FrameNode* frameNode, bool isRefreshing)
 bool RefreshModelNG::GetRefreshing(FrameNode* frameNode)
 {
     bool value = false;
-    ACE_GET_NODE_LAYOUT_PROPERTY(RefreshLayoutProperty, IsRefreshing, value, frameNode);
+    ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(RefreshLayoutProperty, IsRefreshing, value, frameNode, value);
     return value;
 }
 
+void RefreshModelNG::SetRefreshOffset(FrameNode* frameNode, const Dimension& offset)
+{
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(RefreshLayoutProperty, RefreshOffset, offset, frameNode);
+}
 
+void RefreshModelNG::SetPullToRefresh(FrameNode* frameNode, bool pullToRefresh)
+{
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(RefreshLayoutProperty, PullToRefresh, pullToRefresh, frameNode);
+}
 } // namespace OHOS::Ace::NG

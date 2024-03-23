@@ -73,6 +73,7 @@ public:
     void AddChild(const RefPtr<UINode>& child, int32_t slot = DEFAULT_NODE_SLOT, bool silently = false,
         bool addDefaultTransition = false);
     void AddChildAfter(const RefPtr<UINode>& child, const RefPtr<UINode>& siblingNode);
+    void AddChildBefore(const RefPtr<UINode>& child, const RefPtr<UINode>& siblingNode);
 
     std::list<RefPtr<UINode>>::iterator RemoveChild(const RefPtr<UINode>& child, bool allowTransition = false);
     int32_t RemoveChildAndReturnIndex(const RefPtr<UINode>& child);
@@ -256,7 +257,7 @@ public:
     void SetChildrenInDestroying();
 
     virtual HitTestResult TouchTest(const PointF& globalPoint, const PointF& parentLocalPoint,
-        const PointF& parentRevertPoint, const TouchRestrict& touchRestrict, TouchTestResult& result, int32_t touchId,
+        const PointF& parentRevertPoint, TouchRestrict& touchRestrict, TouchTestResult& result, int32_t touchId,
         bool isDispatch = false);
     virtual HitTestMode GetHitTestMode() const
     {
@@ -277,7 +278,8 @@ public:
 
     virtual void AdjustParentLayoutFlag(PropertyChangeFlag& flag);
 
-    virtual void MarkDirtyNode(PropertyChangeFlag extraFlag = PROPERTY_UPDATE_NORMAL);
+    virtual void MarkDirtyNode(
+        PropertyChangeFlag extraFlag = PROPERTY_UPDATE_NORMAL, bool childExpansiveAndMark = false);
 
     virtual void MarkNeedFrameFlushDirty(PropertyChangeFlag extraFlag = PROPERTY_UPDATE_NORMAL);
 
@@ -311,7 +313,11 @@ public:
 
     virtual void SetJSViewActive(bool active);
 
-    virtual void OnVisibleChange(bool isVisible);
+    virtual void TryVisibleChangeOnDescendant(bool isVisible);
+
+    // call by recycle framework.
+    virtual void OnRecycle();
+    virtual void OnReuse();
 
     virtual bool MarkRemoving();
 
@@ -381,7 +387,7 @@ public:
         newChild->MountToParent(AceType::Claim(this), slot, false);
     }
     virtual void FastPreviewUpdateChildDone() {}
-    virtual RefPtr<UINode> GetFrameChildByIndex(uint32_t index, bool needBuild);
+    virtual RefPtr<UINode> GetFrameChildByIndex(uint32_t index, bool needBuild, bool isCache = false);
 
     void SetDebugLine(const std::string& line)
     {
@@ -525,6 +531,10 @@ public:
 
     virtual bool SetParentLayoutConstraint(const SizeF& size) const;
 
+    virtual void SetNodeIndexOffset(int32_t start, int32_t count) {}
+
+    virtual void PaintDebugBoundaryTreeAll(bool flag);
+
 protected:
     std::list<RefPtr<UINode>>& ModifyChildren()
     {
@@ -571,8 +581,13 @@ protected:
     // update visible change signal to children
     void UpdateChildrenVisible(bool isVisible) const;
 
-protected:
+    void CollectRemovedChildren(const std::list<RefPtr<UINode>>& children,
+        std::list<int32_t>& removedElmtId, bool isEntry);
+    void CollectRemovedChild(const RefPtr<UINode>& child, std::list<int32_t>& removedElmtId);
+
     bool needCallChildrenUpdate_ = true;
+
+    virtual void PaintDebugBoundary(bool flag) {}
 
 private:
     void DoAddChild(std::list<RefPtr<UINode>>::iterator& it, const RefPtr<UINode>& child, bool silently = false,
@@ -597,6 +612,7 @@ private:
     bool isBuildByJS_ = false;
     NodeStatus nodeStatus_ = NodeStatus::NORMAL_NODE;
     RefPtr<ExportTextureInfo> exportTextureInfo_;
+    int32_t instanceId_ = -1;
 
     int32_t childrenUpdatedFrom_ = -1;
     static thread_local int64_t currentAccessibilityId_;

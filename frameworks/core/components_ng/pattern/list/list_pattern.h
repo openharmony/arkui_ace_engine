@@ -27,6 +27,7 @@
 #include "core/components_ng/pattern/scroll/inner/scroll_bar.h"
 #include "core/components_ng/pattern/scroll_bar/proxy/scroll_bar_proxy.h"
 #include "core/components_ng/pattern/scrollable/scrollable_pattern.h"
+#include "core/components_ng/pattern/web/slide_update_listener.h"
 #include "core/components_ng/render/render_context.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
@@ -146,7 +147,7 @@ public:
     void ScrollToItemInGroup(int32_t index, int32_t indexInGroup, bool smooth = false,
         ScrollAlign align = ScrollAlign::START);
     bool CheckTargetValid(int32_t index, int32_t indexInGroup);
-    bool ScrollPage(bool reverse);
+    void ScrollPage(bool reverse, bool smooth = false) override;
     void ScrollBy(float offset);
     bool AnimateToTarget(int32_t index, std::optional<int32_t> indexInGroup, ScrollAlign align);
     Offset GetCurrentOffset() const;
@@ -158,6 +159,9 @@ public:
         return contentMainSize_;
     };
 
+    void UpdatePosMapStart(float delta);
+    void UpdatePosMapEnd();
+    void CalculateCurrentOffset(float delta);
     void UpdateScrollBarOffset() override;
     // chain animation
     void SetChainAnimation();
@@ -228,7 +232,24 @@ public:
         return isNeedToUpdateListDirection_;
     }
 
+    std::vector<RefPtr<FrameNode>> GetVisibleSelectedItems() override;
+    void registerSlideUpdateListener(const std::shared_ptr<ISlideUpdateCallback>& listener);
+
+    void SetItemPressed(bool isPressed, int32_t id)
+    {
+        if (isPressed) {
+            pressedItem_.emplace(id);
+        } else {
+            pressedItem_.erase(id);
+        }
+    }
+
 private:
+    struct PositionInfo {
+        float mainPos;
+        float mainSize;
+    };
+
     bool IsNeedInitClickEventRecorder() const override
     {
         return true;
@@ -289,7 +310,9 @@ private:
     void GetListItemGroupEdge(bool& groupAtStart, bool& groupAtEnd) const;
     void RefreshLanesItemRange();
     void UpdateListDirectionInCardStyle();
+    void UpdateFrameSizeToWeb();
     RefPtr<ListContentModifier> listContentModifier_;
+    std::vector<std::shared_ptr<ISlideUpdateCallback>> listenerVector_;
 
     int32_t maxListItemIndex_ = 0;
     int32_t startIndex_ = -1;
@@ -307,6 +330,7 @@ private:
     bool crossMatchChild_ = false;
     bool smooth_ = false;
     float scrollSnapVelocity_ = 0.0f;
+    bool snapTrigOnScrollStart_ = false;
 
     std::optional<int32_t> jumpIndex_;
     std::optional<int32_t> jumpIndexInGroup_;
@@ -321,8 +345,10 @@ private:
     bool isNeedCheckOffset_ = false;
 
     ListLayoutAlgorithm::PositionMap itemPosition_;
+    std::map<int32_t, PositionInfo> posMap_;
 
     std::map<int32_t, int32_t> lanesItemRange_;
+    std::set<int32_t> pressedItem_;
     int32_t lanes_ = 1;
     float laneGutter_ = 0.0f;
     // chain animation
@@ -342,6 +368,7 @@ private:
     RefPtr<Scrollable> scrollableTouchEvent_;
 
     bool isScrollEnd_ = false;
+    bool needReEstimateOffset_ = false;
     std::optional<ListPredictLayoutParam> predictLayoutParam_;
 
     bool isNeedToUpdateListDirection_ = false;

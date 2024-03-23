@@ -51,4 +51,17 @@ void SearchTextFieldPattern::InitDragEvent()
     host->SetDraggable(true);
     TextFieldPattern::InitDragEvent();
 }
+
+void SearchTextFieldPattern::InitBackGroundColorAndBorderRadius()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto renderContext = host->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    auto textFieldTheme = GetTheme();
+    CHECK_NULL_VOID(textFieldTheme);
+    if (!renderContext->HasBackgroundColor()) {
+        renderContext->UpdateBackgroundColor(textFieldTheme->GetBgColor());
+    }
+}
 } // namespace OHOS::Ace::NG

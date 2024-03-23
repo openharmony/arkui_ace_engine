@@ -173,7 +173,7 @@ void JSNavDestination::SetOnShown(const JSCallbackInfo& info)
     }
 
     auto onShownCallback = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(info[0]));
-    WeakPtr<NG::FrameNode> targetNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    WeakPtr<NG::FrameNode> targetNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
     auto onShown = [execCtx = info.GetExecutionContext(), func = std::move(onShownCallback), node = targetNode]() {
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
         ACE_SCORING_EVENT("NavDestination.onShown");
@@ -192,7 +192,7 @@ void JSNavDestination::SetOnHidden(const JSCallbackInfo& info)
         return;
     }
     auto onHiddenCallback = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(info[0]));
-    WeakPtr<NG::FrameNode> targetNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    WeakPtr<NG::FrameNode> targetNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
     auto onHidden = [execCtx = info.GetExecutionContext(), func = std::move(onHiddenCallback), node = targetNode]() {
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
         ACE_SCORING_EVENT("NavDestination.onHidden");
@@ -249,6 +249,35 @@ void JSNavDestination::SetMode(const JSCallbackInfo& info)
     NavDestinationModel::GetInstance()->SetNavDestinationMode(static_cast<NG::NavDestinationMode>(mode));
 }
 
+void JSNavDestination::SetMenus(const JSCallbackInfo& info)
+{
+    if (info.Length() < 1) {
+        return;
+    }
+
+    if (info[0]->IsUndefined() || info[0]->IsArray()) {
+        std::vector<NG::BarItem> menuItems;
+        if (info[0]->IsUndefined()) {
+            menuItems = {};
+        } else {
+            JSNavigation::ParseBarItems(info, JSRef<JSArray>::Cast(info[0]), menuItems);
+        }
+        NavDestinationModel::GetInstance()->SetMenuItems(std::move(menuItems));
+        return;
+
+    } else if (info[0]->IsObject()) {
+        auto builderObject = JSRef<JSObject>::Cast(info[0])->GetProperty("builder");
+        if (builderObject->IsFunction()) {
+            ViewStackModel::GetInstance()->NewScope();
+            JsFunction jsBuilderFunc(info.This(), JSRef<JSObject>::Cast(builderObject));
+            ACE_SCORING_EVENT("NavDestiNation.menu.builder");
+            jsBuilderFunc.Execute();
+            auto customNode = ViewStackModel::GetInstance()->Finish();
+            NavDestinationModel::GetInstance()->SetCustomMenu(customNode);
+        }
+    }
+}
+
 void JSNavDestination::JSBind(BindingTarget globalObj)
 {
     JSClass<JSNavDestination>::Declare("NavDestination");
@@ -265,6 +294,7 @@ void JSNavDestination::JSBind(BindingTarget globalObj)
     JSClass<JSNavDestination>::StaticMethod("onTouch", &JSInteractableView::JsOnTouch);
     JSClass<JSNavDestination>::StaticMethod("id", &JSViewAbstract::JsId);
     JSClass<JSNavDestination>::StaticMethod("mode", &JSNavDestination::SetMode);
+    JSClass<JSNavDestination>::StaticMethod("menus", &JSNavDestination::SetMenus);
     JSClass<JSNavDestination>::InheritAndBind<JSContainerBase>(globalObj);
 }
 

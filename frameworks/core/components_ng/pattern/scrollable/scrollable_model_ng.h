@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -31,6 +31,8 @@ public:
     static void SetScrollBarWidth(const std::string& value);
 
     static void SetOnScroll(OnScrollEvent&& onScroll);
+    static void SetOnWillScroll(OnScrollEvent&& onScroll);
+    static void SetOnDidScroll(OnScrollEvent&& onScroll);
     static void SetOnScrollStart(OnScrollStartEvent&& onScrollStart);
     static void SetOnScrollStop(OnScrollStopEvent&& onScrollStop);
     static void SetOnReachStart(OnReachEvent&& onReachStart);
@@ -42,6 +44,9 @@ public:
     static void SetScrollBarWidth(FrameNode* frameNode, const std::string& value);
     static void SetScrollBarColor(FrameNode* frameNode, const std::string& value);
     static void SetMaxFlingSpeed(double max);
+
+    static int32_t GetEdgeEffect(FrameNode* frameNode);
+    static int32_t GetAlwaysEnabled(FrameNode* frameNode);
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_SCROLLABLE_SCROLLABLE_MODEL_H

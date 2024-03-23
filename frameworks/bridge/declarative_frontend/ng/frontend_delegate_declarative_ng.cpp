@@ -165,7 +165,7 @@ void FrontendDelegateDeclarativeNG::AttachSubPipelineContext(const RefPtr<Pipeli
 }
 
 void FrontendDelegateDeclarativeNG::RunPage(
-    const std::string& url, const std::string& params, const std::string& profile)
+    const std::string& url, const std::string& params, const std::string& profile, bool isNamedRouter)
 {
     ACE_SCOPED_TRACE("FrontendDelegateDeclarativeNG::RunPage");
 
@@ -187,11 +187,15 @@ void FrontendDelegateDeclarativeNG::RunPage(
     }
     taskExecutor_->PostTask(
         [manifestParser = manifestParser_, delegate = Claim(this),
-            weakPtr = WeakPtr<NG::PageRouterManager>(pageRouterManager_), url, params]() {
+            weakPtr = WeakPtr<NG::PageRouterManager>(pageRouterManager_), url, params, isNamedRouter]() {
             auto pageRouterManager = weakPtr.Upgrade();
             CHECK_NULL_VOID(pageRouterManager);
             pageRouterManager->SetManifestParser(manifestParser);
-            pageRouterManager->RunPage(url, params);
+            if (isNamedRouter) {
+                pageRouterManager->RunPageByNamedRouter(url, params);
+            } else {
+                pageRouterManager->RunPage(url, params);
+            }
             auto pipeline = delegate->GetPipelineContext();
             // TODO: get platform version from context, and should stored in AceApplicationInfo.
             if (manifestParser->GetMinPlatformVersion() > 0) {
@@ -448,6 +452,12 @@ void FrontendDelegateDeclarativeNG::Back(const std::string& uri, const std::stri
     pageRouterManager_->BackWithTarget(NG::RouterPageInfo({ uri, params }));
 }
 
+void FrontendDelegateDeclarativeNG::BackToIndex(int32_t index, const std::string& params)
+{
+    CHECK_NULL_VOID(pageRouterManager_);
+    pageRouterManager_->BackToIndexWithTarget(index, params);
+}
+
 void FrontendDelegateDeclarativeNG::Clear()
 {
     CHECK_NULL_VOID(pageRouterManager_);
@@ -464,6 +474,19 @@ void FrontendDelegateDeclarativeNG::GetState(int32_t& index, std::string& name, 
 {
     CHECK_NULL_VOID(pageRouterManager_);
     pageRouterManager_->GetState(index, name, path);
+}
+
+void FrontendDelegateDeclarativeNG::GetRouterStateByIndex(int32_t& index, std::string& name,
+    std::string& path, std::string& params)
+{
+    CHECK_NULL_VOID(pageRouterManager_);
+    pageRouterManager_->GetStateByIndex(index, name, path, params);
+}
+
+void FrontendDelegateDeclarativeNG::GetRouterStateByUrl(std::string& url, std::vector<StateInfo>& stateArray)
+{
+    CHECK_NULL_VOID(pageRouterManager_);
+    pageRouterManager_->GetStateByUrl(url, stateArray);
 }
 
 std::string FrontendDelegateDeclarativeNG::GetParams()
@@ -863,17 +886,17 @@ size_t FrontendDelegateDeclarativeNG::GetComponentsCount()
     return pageNode->GetAllDepthChildrenCount();
 }
 
-void FrontendDelegateDeclarativeNG::ShowToast(
-    const std::string& message, int32_t duration, const std::string& bottom, const NG::ToastShowMode& showMode)
+void FrontendDelegateDeclarativeNG::ShowToast(const std::string& message, int32_t duration, const std::string& bottom,
+    const NG::ToastShowMode& showMode, int32_t alignment, std::optional<DimensionOffset> offset)
 {
     TAG_LOGD(AceLogTag::ACE_OVERLAY, "show toast enter");
     int32_t durationTime = std::clamp(duration, TOAST_TIME_DEFAULT, TOAST_TIME_MAX);
     bool isRightToLeft = AceApplicationInfo::GetInstance().IsRightToLeft();
-    auto task = [durationTime, message, bottom, isRightToLeft, showMode, containerId = Container::CurrentId()](
-                    const RefPtr<NG::OverlayManager>& overlayManager) {
+    auto task = [durationTime, message, bottom, isRightToLeft, showMode, alignment, offset,
+                    containerId = Container::CurrentId()](const RefPtr<NG::OverlayManager>& overlayManager) {
         CHECK_NULL_VOID(overlayManager);
         ContainerScope scope(containerId);
-        overlayManager->ShowToast(message, durationTime, bottom, isRightToLeft, showMode);
+        overlayManager->ShowToast(message, durationTime, bottom, isRightToLeft, showMode, alignment,  offset);
     };
     MainWindowOverlay(std::move(task));
 }

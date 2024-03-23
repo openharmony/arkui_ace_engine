@@ -94,6 +94,7 @@ if (defined(global_parts_info.graphic_graphic_3d)) {
 
 window_scene_support = true
 dynamic_component_support = true
+vsync_timeout_check = true
 
 if (defined(preview_support) && preview_support) {
   defines += [ "PREVIEW" ]
@@ -192,6 +193,10 @@ if (defined(global_parts_info.hiviewdfx_hichecker)) {
 
 if (dynamic_component_support) {
   defines += [ "DYNAMIC_COMPONENT_SUPPORT" ]
+}
+
+if (vsync_timeout_check) {
+  defines += [ "VSYNC_TIMEOUT_CHECK" ]
 }
 
 cflags_cc = [

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,6 +15,7 @@
 
 #include "core/components_ng/pattern/scrollable/scrollable_model_ng.h"
 
+#include "base/utils/utils.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/scrollable/scrollable_event_hub.h"
 #include "core/components_ng/pattern/scrollable/scrollable_pattern.h"
@@ -52,6 +53,24 @@ void ScrollableModelNG::SetOnScroll(OnScrollEvent&& onScroll)
     auto eventHub = frameNode->GetEventHub<ScrollableEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnScroll(std::move(onScroll));
+}
+
+void ScrollableModelNG::SetOnWillScroll(OnScrollEvent&& onScroll)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetEventHub<ScrollableEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnWillScroll(std::move(onScroll));
+}
+
+void ScrollableModelNG::SetOnDidScroll(OnScrollEvent&& onScroll)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetEventHub<ScrollableEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnDidScroll(std::move(onScroll));
 }
 
 void ScrollableModelNG::SetOnScrollStart(OnScrollStartEvent&& onScrollStart)
@@ -133,4 +152,21 @@ void ScrollableModelNG::SetMaxFlingSpeed(double max)
     CHECK_NULL_VOID(pattern);
     pattern->SetMaxFlingVelocity(max);
 }
+
+int32_t ScrollableModelNG::GetEdgeEffect(FrameNode* frameNode)
+{
+    CHECK_NULL_RETURN(frameNode, 0);
+    const auto& pattern = frameNode->GetPattern<ScrollablePattern>();
+    CHECK_NULL_RETURN(pattern, 0);
+    return static_cast<int32_t>(pattern->GetEdgeEffect());
+}
+
+int32_t ScrollableModelNG::GetAlwaysEnabled(FrameNode* frameNode)
+{
+    CHECK_NULL_RETURN(frameNode, 0);
+    const auto& pattern = frameNode->GetPattern<ScrollablePattern>();
+    CHECK_NULL_RETURN(pattern, 0);
+    return pattern->GetAlwaysEnabled();
+}
+
 } // namespace OHOS::Ace::NG

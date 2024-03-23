@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -86,6 +86,8 @@
 namespace OHOS::Ace::Platform {
 namespace {
 constexpr uint32_t DIRECTION_KEY = 0b1000;
+constexpr uint32_t POPUPSIZE_HEIGHT = 200;
+constexpr uint32_t POPUPSIZE_WIDTH = 400;
 
 #ifdef _ARM64_
 const std::string ASSET_LIBARCH_PATH = "/lib/arm64";
@@ -453,12 +455,14 @@ bool AceContainer::OnBackPressed(int32_t instanceId)
             return overlayManager->RemoveOverlayInSubwindow();
         }
         SubwindowManager::GetInstance()->CloseMenu();
+        LOGI("Menu consumed backpressed event");
         return true;
 #endif
     }
     // remove overlay through SubwindowManager if subwindow unfocused.
     auto subwindow = SubwindowManager::GetInstance()->GetSubwindow(instanceId);
     if (subwindow) {
+        LOGI("subwindow consumed backpressed event");
         if (subwindow->GetShown()) {
             auto overlayManager = subwindow->GetOverlayManager();
             CHECK_NULL_RETURN(overlayManager, false);
@@ -1008,6 +1012,19 @@ UIContentErrorCode AceContainer::RunPage(
 {
     auto container = AceEngine::Get().GetContainer(instanceId);
     CHECK_NULL_RETURN(container, UIContentErrorCode::NULL_POINTER);
+
+    auto aceContainer = DynamicCast<AceContainer>(container);
+    CHECK_NULL_RETURN(aceContainer, UIContentErrorCode::NULL_POINTER);
+    bool isStageModel = aceContainer->IsUseStageModel();
+    bool isFormRender = aceContainer->IsFormRender();
+    if (isStageModel && content.size() == 0) {
+        return UIContentErrorCode::NULL_URL;
+    }
+
+    if (!isFormRender && !isNamedRouter && isStageModel && !CheckUrlValid(content, container->GetHapPath())) {
+        return UIContentErrorCode::INVALID_URL;
+    }
+
     ContainerScope scope(instanceId);
     auto front = container->GetFrontend();
     CHECK_NULL_RETURN(front, UIContentErrorCode::NULL_POINTER);
@@ -1109,24 +1126,61 @@ private:
     AceAutoFillType autoFillType_ = AceAutoFillType::ACE_UNSPECIFIED;
 };
 
-bool AceContainer::RequestAutoFill(const RefPtr<NG::FrameNode>& node, AceAutoFillType autoFillType)
+bool AceContainer::UpdatePopupUIExtension(const RefPtr<NG::FrameNode>& node)
 {
-    TAG_LOGI(AceLogTag::ACE_AUTO_FILL, "called, autoFillType: %{public}d", static_cast<int32_t>(autoFillType));
-    auto pipelineContext = AceType::DynamicCast<NG::PipelineContext>(pipelineContext_);
-    CHECK_NULL_RETURN(pipelineContext, false);
+    CHECK_NULL_RETURN(node, false);
     CHECK_NULL_RETURN(uiWindow_, false);
     auto uiContent = uiWindow_->GetUIContent();
     auto uiContentImpl = reinterpret_cast<UIContentImpl*>(uiContent);
     CHECK_NULL_RETURN(uiContentImpl, false);
     auto viewDataWrap = ViewDataWrap::CreateViewDataWrap();
     uiContentImpl->DumpViewData(node, viewDataWrap);
+    auto viewDataWrapOhos = AceType::DynamicCast<ViewDataWrapOhos>(viewDataWrap);
+    CHECK_NULL_RETURN(viewDataWrapOhos, false);
+    auto viewData = viewDataWrapOhos->GetViewData();
+    AbilityRuntime::AutoFillManager::GetInstance().UpdateCustomPopupUIExtension(uiContent, viewData);
+    return true;
+}
+
+bool AceContainer::RequestAutoFill(const RefPtr<NG::FrameNode>& node, AceAutoFillType autoFillType, bool& isPopup)
+{
+    TAG_LOGI(AceLogTag::ACE_AUTO_FILL, "called, autoFillType: %{public}d", static_cast<int32_t>(autoFillType));
+    auto pipelineContext = AceType::DynamicCast<NG::PipelineContext>(pipelineContext_);
+    CHECK_NULL_RETURN(node, false);
+    CHECK_NULL_RETURN(pipelineContext, false);
+    CHECK_NULL_RETURN(uiWindow_, false);
+    auto uiContent = uiWindow_->GetUIContent();
+    CHECK_NULL_RETURN(uiContent, false);
+    auto uiContentImpl = reinterpret_cast<UIContentImpl*>(uiContent);
+    CHECK_NULL_RETURN(uiContentImpl, false);
+    auto viewDataWrap = ViewDataWrap::CreateViewDataWrap();
+    CHECK_NULL_RETURN(viewDataWrap, false);
+    uiContentImpl->DumpViewData(node, viewDataWrap);
 
     auto callback = std::make_shared<FillRequestCallback>(pipelineContext, node, autoFillType);
     auto viewDataWrapOhos = AceType::DynamicCast<ViewDataWrapOhos>(viewDataWrap);
     CHECK_NULL_RETURN(viewDataWrapOhos, false);
     auto viewData = viewDataWrapOhos->GetViewData();
-    if (AbilityRuntime::AutoFillManager::GetInstance().RequestAutoFill(
-        static_cast<AbilityBase::AutoFillType>(autoFillType), uiContent, viewData, callback) != 0) {
+    AbilityRuntime::AutoFill::PopupSize popupSize;
+    popupSize.height = POPUPSIZE_HEIGHT;
+    popupSize.width = POPUPSIZE_WIDTH;
+    AbilityRuntime::AutoFill::AutoFillCustomConfig customConfig;
+    customConfig.targetSize = popupSize;
+    customConfig.isShowInSubWindow = false;
+    customConfig.nodeId = node->GetId();
+    customConfig.isEnableArrow = false;
+    auto inputInspectorId = node->GetInspectorId().value_or("");
+    if (!inputInspectorId.empty()) {
+        TAG_LOGI(AceLogTag::ACE_AUTO_FILL, "inputInspectorId is: %{public}s", inputInspectorId.c_str());
+        customConfig.inspectorId = inputInspectorId;
+    }
+    AbilityRuntime::AutoFill::AutoFillRequest autoFillRequest;
+    autoFillRequest.config = customConfig;
+    autoFillRequest.autoFillType = static_cast<AbilityBase::AutoFillType>(autoFillType);
+    autoFillRequest.autoFillCommand = AbilityRuntime::AutoFill::AutoFillCommand::FILL;
+    autoFillRequest.viewData = viewDataWrapOhos->GetViewData();
+    if (AbilityRuntime::AutoFillManager::GetInstance().
+        RequestAutoFill(uiContent, autoFillRequest, callback, isPopup) != 0) {
         return false;
     }
     return true;
@@ -1161,7 +1215,11 @@ bool AceContainer::RequestAutoSave(const RefPtr<NG::FrameNode>& node)
     auto viewDataWrapOhos = AceType::DynamicCast<ViewDataWrapOhos>(viewDataWrap);
     CHECK_NULL_RETURN(viewDataWrapOhos, false);
     auto viewData = viewDataWrapOhos->GetViewData();
-    if (AbilityRuntime::AutoFillManager::GetInstance().RequestAutoSave(uiContent, viewData, callback) != 0) {
+    AbilityRuntime::AutoFill::AutoFillRequest autoFillRequest;
+    autoFillRequest.viewData = viewData;
+    autoFillRequest.autoFillCommand = AbilityRuntime::AutoFill::AutoFillCommand::SAVE;
+    autoFillRequest.autoFillType = ViewDataWrap::ViewDataToType(viewData);
+    if (AbilityRuntime::AutoFillManager::GetInstance().RequestAutoSave(uiContent, autoFillRequest, callback) != 0) {
         return false;
     }
     return true;
@@ -1789,7 +1847,10 @@ NG::SafeAreaInsets AceContainer::GetViewSafeAreaByType(OHOS::Rosen::AvoidAreaTyp
     Rosen::AvoidArea avoidArea;
     Rosen::WMError ret = uiWindow_->GetAvoidAreaByType(type, avoidArea);
     if (ret == Rosen::WMError::WM_OK) {
-        return ConvertAvoidArea(avoidArea);
+        auto safeAreaInsets = ConvertAvoidArea(avoidArea);
+        LOGI("SafeArea get success, area type is:%{public}d insets area is:%{public}s", static_cast<int32_t>(type),
+            safeAreaInsets.ToString().c_str());
+        return safeAreaInsets;
     }
     return {};
 }
@@ -1982,7 +2043,9 @@ void AceContainer::UpdateConfiguration(const ParsedConfig& parsedConfig, const s
     themeManager->LoadResourceThemes();
     auto front = GetFrontend();
     CHECK_NULL_VOID(front);
-    front->OnConfigurationUpdated(configuration);
+    if (!configurationChange.directionUpdate && !configurationChange.dpiUpdate) {
+        front->OnConfigurationUpdated(configuration);
+    }
 #ifdef PLUGIN_COMPONENT_SUPPORTED
     OHOS::Ace::PluginManager::GetInstance().UpdateConfigurationInPlugin(resConfig, taskExecutor_);
 #endif
@@ -2450,6 +2513,27 @@ bool AceContainer::NotifyExecuteAction(
         },
         TaskExecutor::TaskType::UI, 1500);
     return IsExecuted;
+}
+
+void AceContainer::HandleAccessibilityHoverEvent(float pointX, float pointY, int32_t sourceType,
+    int32_t eventType, int64_t timeMs)
+{
+    CHECK_NULL_VOID(taskExecutor_);
+    taskExecutor_->PostTask(
+        [weak = WeakClaim(this), pointX, pointY, sourceType, eventType, timeMs] {
+            auto container = weak.Upgrade();
+            CHECK_NULL_VOID(container);
+            ContainerScope scope(container->GetInstanceId());
+            auto pipelineContext = container->GetPipelineContext();
+            auto ngPipeline = AceType::DynamicCast<NG::PipelineContext>(pipelineContext);
+            CHECK_NULL_VOID(ngPipeline);
+            auto root = ngPipeline->GetRootElement();
+            CHECK_NULL_VOID(root);
+            auto accessibilityManagerNG = ngPipeline->GetAccessibilityManagerNG();
+            CHECK_NULL_VOID(accessibilityManagerNG);
+            accessibilityManagerNG->HandleAccessibilityHoverEvent(root, pointX, pointY, sourceType, eventType, timeMs);
+        },
+        TaskExecutor::TaskType::UI);
 }
 
 extern "C" ACE_FORCE_EXPORT void OHOS_ACE_HotReloadPage()

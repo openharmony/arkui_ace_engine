@@ -484,7 +484,7 @@ void JSList::ItemDragStartCallback(const JSCallbackInfo& info)
     }
 
     RefPtr<JsDragFunction> jsOnDragFunc = AceType::MakeRefPtr<JsDragFunction>(JSRef<JSFunc>::Cast(info[0]));
-    WeakPtr<NG::FrameNode> frameNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    WeakPtr<NG::FrameNode> frameNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
     auto onItemDragStart = [execCtx = info.GetExecutionContext(), func = std::move(jsOnDragFunc), node = frameNode](
                                const ItemDragInfo& dragInfo, int32_t itemIndex) -> RefPtr<AceType> {
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx, nullptr);
@@ -519,7 +519,7 @@ void JSList::ItemDragEnterCallback(const JSCallbackInfo& info)
     if (!info[0]->IsFunction()) {
         return;
     }
-    WeakPtr<NG::FrameNode> frameNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    WeakPtr<NG::FrameNode> frameNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
     RefPtr<JsDragFunction> jsOnDragEnterFunc = AceType::MakeRefPtr<JsDragFunction>(JSRef<JSFunc>::Cast(info[0]));
     auto onItemDragEnter = [execCtx = info.GetExecutionContext(), func = std::move(jsOnDragEnterFunc),
                                node = frameNode](const ItemDragInfo& dragInfo) {

@@ -21,6 +21,7 @@
 #include "gtest/gtest.h"
 #define private public
 #define protected public
+
 #include "core/components_ng/event/event_hub.h"
 #include "core/components_ng/event/touch_event.h"
 #include "core/components_v2/inspector/inspector_constants.h"
@@ -191,7 +192,8 @@ HWTEST_F(TouchEventTestNg, TouchEventActuatorHandleAndDispatchTest004, TestSize.
      * @tc.steps: step2. Invoke DispatchEvent.
      * @tc.expected: TouchTestResult size has been increased one.
      */
-    const TouchEvent touchEvent { .tiltX = TILT_X_VALUE, .tiltY = TILT_Y_VALUE, .pointers = POINTERS };
+    TouchEvent touchEvent;
+    touchEvent.SetTiltX(TILT_X_VALUE).SetTiltY(TILT_Y_VALUE).SetPointers(POINTERS);
     EXPECT_TRUE(touchEventActuator->DispatchEvent(touchEvent));
 
     /**
@@ -241,7 +243,8 @@ HWTEST_F(TouchEventTestNg, TouchEventActuatorHandleAndDispatchTest004, TestSize.
      * @tc.expected: HandleEvent return true;
      */
     touchEventActuator->userCallback_ = nullptr;
-    const TouchEvent touchEvent3 { .pointers = POINTERS_2 };
+    TouchEvent touchEvent3;
+    touchEvent3.SetPointers(POINTERS_2);
     EXPECT_TRUE(touchEventActuator->HandleEvent(touchEvent3));
 
     /**
@@ -274,7 +277,8 @@ HWTEST_F(TouchEventTestNg, TouchEventDisable001, TestSize.Level1)
      * @tc.steps: step2. Invoke DispatchEvent.
      * @tc.expected: TouchTestResult size has been increased one.
      */
-    const TouchEvent touchEvent { .tiltX = TILT_X_VALUE, .tiltY = TILT_Y_VALUE, .pointers = POINTERS };
+    TouchEvent touchEvent;
+    touchEvent.SetTiltX(TILT_X_VALUE).SetTiltY(TILT_Y_VALUE).SetPointers(POINTERS);
     EXPECT_TRUE(touchEventActuator->DispatchEvent(touchEvent));
 
     /**
@@ -379,7 +383,8 @@ HWTEST_F(TouchEventTestNg, TriggerTouchCallBack001, TestSize.Level1)
      * @tc.steps: step2. create TouchEvent object and call TriggerTouchCallBack.
      * @tc.expected: Execute function return value is true.
      */
-    TouchEvent touchEvent { .tiltX = TILT_X_VALUE, .tiltY = TILT_Y_VALUE, .pointers = POINTERS };
+    TouchEvent touchEvent;
+    touchEvent.SetTiltX(TILT_X_VALUE).SetTiltY(TILT_Y_VALUE).SetPointers(POINTERS);
     EXPECT_TRUE(touchEventActuator->TriggerTouchCallBack(touchEvent));
 
     /**
@@ -390,21 +395,28 @@ HWTEST_F(TouchEventTestNg, TriggerTouchCallBack001, TestSize.Level1)
     TouchEventFunc&& callback_1 = std::forward<TouchEventFunc>(callback);
 
     /**
-     * @tc.steps: step4. onTouchEventCallback_ assignment and call TriggerTouchCallBack.
+     * @tc.steps: step4. commonTouchEventCallback_ assignment is not nullptr.
+     * @tc.expected: Execute function return value is true.
+     */
+    touchEventActuator->commonTouchEventCallback_ = AceType::MakeRefPtr<TouchEventImpl>(std::move(callback_1));
+    EXPECT_TRUE(touchEventActuator->TriggerTouchCallBack(touchEvent));
+
+    /**
+     * @tc.steps: step5. onTouchEventCallback_ assignment and call TriggerTouchCallBack.
      * @tc.expected: Execute function return value is true.
      */
     touchEventActuator->onTouchEventCallback_ = AceType::MakeRefPtr<TouchEventImpl>(std::move(callback_1));
     EXPECT_TRUE(touchEventActuator->TriggerTouchCallBack(touchEvent));
 
     /**
-     * @tc.steps: step5. userCallback_ assignment and call TriggerTouchCallBack.
+     * @tc.steps: step6. userCallback_ assignment and call TriggerTouchCallBack.
      * @tc.expected: Execute function return value is true.
      */
     touchEventActuator->userCallback_ = AceType::MakeRefPtr<TouchEventImpl>(std::move(callback_1));
     EXPECT_TRUE(touchEventActuator->TriggerTouchCallBack(touchEvent));
 
     /**
-     * @tc.steps: step6. isInterpolated assignment and call TriggerTouchCallBack.
+     * @tc.steps: step7. isInterpolated assignment and call TriggerTouchCallBack.
      * @tc.expected: Execute function return value is true.
      */
     auto touchEventImp = AceType::MakeRefPtr<TouchEventImpl>(std::move(callback));
@@ -413,19 +425,21 @@ HWTEST_F(TouchEventTestNg, TriggerTouchCallBack001, TestSize.Level1)
     EXPECT_TRUE(touchEventActuator->TriggerTouchCallBack(touchEvent));
 
     /**
-     * @tc.steps: step7. create TouchEvent object and call TriggerTouchCallBack.
+     * @tc.steps: step8. create TouchEvent object and call TriggerTouchCallBack.
      * @tc.expected: Execute function return value is true.
      */
-    TouchEvent touchEvent_2 { .tiltX = TILT_X_VALUE, .tiltY = TILT_Y_VALUE, .pointers = POINTERS_2 };
+    TouchEvent touchEvent_2;
+    touchEvent_2.SetTiltX(TILT_X_VALUE).SetTiltY(TILT_Y_VALUE).SetPointers(POINTERS_2);
     TouchEvent touchEvent_3;
     touchEvent_2.history.push_back(touchEvent_3);
     EXPECT_TRUE(touchEventActuator->TriggerTouchCallBack(touchEvent_3));
 
     /**
-     * @tc.steps: step8. create TouchEvent object and call isFlushTouchEventsEnd_ assignment.
+     * @tc.steps: step9. create TouchEvent object and call isFlushTouchEventsEnd_ assignment.
      * @tc.expected: Execute function return value is true.
      */
-    TouchEvent touchEvent_4 { .tiltX = TILT_X_VALUE, .tiltY = TILT_Y_VALUE, .pointers = POINTERS_2 };
+    TouchEvent touchEvent_4;
+    touchEvent_4.SetTiltX(TILT_X_VALUE).SetTiltY(TILT_Y_VALUE).SetPointers(POINTERS_2);
     touchEvent_2.history.push_back(touchEvent_4);
     touchEventActuator->isFlushTouchEventsEnd_ = true;
     EXPECT_TRUE(touchEventActuator->TriggerTouchCallBack(touchEvent_2));

@@ -147,10 +147,24 @@ public:
 
     OffsetF GetWindowWrapperOffset();
 
+    SafeAreaInsets GetSafeAreaWithoutProcess() const;
+
     bool SetIsFullScreen(bool value);
     bool SetIsNeedAvoidWindow(bool value);
     bool SetIgnoreSafeArea(bool value);
     bool SetKeyBoardAvoidMode(bool value);
+    bool IsIgnoreAsfeArea()
+    {
+        return ignoreSafeArea_;
+    }
+    bool IsNeedAvoidWindow()
+    {
+        return isNeedAvoidWindow_;
+    }
+    bool IsFullScreen()
+    {
+        return isFullScreen_;
+    }
     bool SetIsAtomicService(bool value);
     bool IsAtomicService() const;
 

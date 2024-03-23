@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -30,24 +30,28 @@
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
-void WebModelNG::Create(const std::string& src, const RefPtr<WebController>& webController, WebType type,
+void WebModelNG::Create(const std::string& src, const RefPtr<WebController>& webController, RenderMode renderMode,
                         bool incognitoMode)
 {
     auto* stack = ViewStackProcessor::GetInstance();
     auto nodeId = stack->ClaimNodeId();
     ACE_LAYOUT_SCOPED_TRACE("Create[%s][self:%d]", V2::WEB_ETS_TAG, nodeId);
     auto frameNode = FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId,
-        [src, webController, type, incognitoMode]() {
-            return AceType::MakeRefPtr<WebPattern>(src, webController, type,
+        [src, webController, renderMode, incognitoMode]() {
+            return AceType::MakeRefPtr<WebPattern>(src, webController, renderMode,
                 incognitoMode);
         });
     stack->Push(frameNode);
 
     auto webPattern = frameNode->GetPattern<WebPattern>();
     CHECK_NULL_VOID(webPattern);
+    webPattern->SetNestedScroll(NestedScrollOptions({
+            .forward = NestedScrollMode::SELF_FIRST,
+            .backward = NestedScrollMode::SELF_FIRST,
+        }));
     webPattern->SetWebSrc(src);
     webPattern->SetWebController(webController);
-    webPattern->SetWebType(type);
+    webPattern->SetRenderMode(renderMode);
     webPattern->SetIncognitoMode(incognitoMode);
 
     auto pipeline = NG::PipelineContext::GetCurrentContext();
@@ -58,24 +62,28 @@ void WebModelNG::Create(const std::string& src, const RefPtr<WebController>& web
 }
 
 void WebModelNG::Create(const std::string& src, std::function<void(int32_t)>&& setWebIdCallback,
-    std::function<void(const std::string&)>&& setHapPathCallback, int32_t parentWebId, bool popup, WebType type,
-    bool incognitoMode)
+    std::function<void(const std::string&)>&& setHapPathCallback, int32_t parentWebId, bool popup,
+    RenderMode renderMode, bool incognitoMode)
 {
     auto* stack = ViewStackProcessor::GetInstance();
     auto nodeId = stack->ClaimNodeId();
     auto frameNode = FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId,
-        [src, setWebIdCallback, type, incognitoMode]() {
-            return AceType::MakeRefPtr<WebPattern>(src, std::move(setWebIdCallback), type, incognitoMode);
+        [src, setWebIdCallback, renderMode, incognitoMode]() {
+            return AceType::MakeRefPtr<WebPattern>(src, std::move(setWebIdCallback), renderMode, incognitoMode);
         });
     stack->Push(frameNode);
     auto webPattern = frameNode->GetPattern<WebPattern>();
     CHECK_NULL_VOID(webPattern);
+    webPattern->SetNestedScroll(NestedScrollOptions({
+            .forward = NestedScrollMode::SELF_FIRST,
+            .backward = NestedScrollMode::SELF_FIRST,
+        }));
     webPattern->SetWebSrc(src);
     webPattern->SetPopup(popup);
     webPattern->SetSetWebIdCallback(std::move(setWebIdCallback));
     webPattern->SetSetHapPathCallback(std::move(setHapPathCallback));
     webPattern->SetParentNWebId(parentWebId);
-    webPattern->SetWebType(type);
+    webPattern->SetRenderMode(renderMode);
     webPattern->SetIncognitoMode(incognitoMode);
     auto pipeline = NG::PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
@@ -232,6 +240,15 @@ void WebModelNG::SetOnSslErrorRequest(std::function<bool(const BaseEventInfo* in
     webEventHub->SetOnSslErrorRequestEvent(std::move(uiCallback));
 }
 
+void WebModelNG::SetOnAllSslErrorRequest(std::function<bool(const BaseEventInfo* info)>&& jsCallback)
+{
+    auto func = jsCallback;
+    auto uiCallback = [func](const std::shared_ptr<BaseEventInfo>& info) -> bool { return func(info.get()); };
+    auto webEventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<WebEventHub>();
+    CHECK_NULL_VOID(webEventHub);
+    webEventHub->SetOnAllSslErrorRequestEvent(std::move(uiCallback));
+}
+
 void WebModelNG::SetOnSslSelectCertRequest(std::function<bool(const BaseEventInfo* info)>&& jsCallback)
 {
     auto func = jsCallback;
@@ -297,6 +314,15 @@ void WebModelNG::SetOnLoadIntercept(std::function<bool(const BaseEventInfo* info
     auto webEventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<WebEventHub>();
     CHECK_NULL_VOID(webEventHub);
     webEventHub->SetOnLoadInterceptEvent(std::move(uiCallback));
+}
+
+void WebModelNG::SetOnOverrideUrlLoading(std::function<bool(const BaseEventInfo* info)>&& jsCallback)
+{
+    auto func = jsCallback;
+    auto uiCallback = [func](const std::shared_ptr<BaseEventInfo>& info) -> bool { return func(info.get()); };
+    auto webEventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<WebEventHub>();
+    CHECK_NULL_VOID(webEventHub);
+    webEventHub->SetOnOverrideUrlLoadingEvent(std::move(uiCallback));
 }
 
 void WebModelNG::SetOnInterceptRequest(std::function<RefPtr<WebResponse>(const BaseEventInfo* info)>&& jsCallback)
@@ -696,6 +722,13 @@ void WebModelNG::SetDefaultFontSize(int32_t defaultFontSize)
     webPattern->UpdateDefaultFontSize(defaultFontSize);
 }
 
+void WebModelNG::SetDefaultTextEncodingFormat(const std::string& textEncodingFormat)
+{
+    auto webPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPattern>();
+    CHECK_NULL_VOID(webPattern);
+    webPattern->UpdateDefaultTextEncodingFormat(textEncodingFormat);
+}
+
 void WebModelNG::SetMinFontSize(int32_t minFontSize)
 {
     auto webPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPattern>();
@@ -779,6 +812,22 @@ void WebModelNG::SetFirstContentfulPaintId(
     webEventHub->SetOnFirstContentfulPaintEvent(std::move(firstContentfulPaintId));
 }
 
+void WebModelNG::SetFirstMeaningfulPaintId(
+    std::function<void(const std::shared_ptr<BaseEventInfo>& info)>&& firstMeaningfulPaintId)
+{
+    auto webEventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<WebEventHub>();
+    CHECK_NULL_VOID(webEventHub);
+    webEventHub->SetOnFirstMeaningfulPaintEvent(std::move(firstMeaningfulPaintId));
+}
+
+void WebModelNG::SetLargestContentfulPaintId(
+    std::function<void(const std::shared_ptr<BaseEventInfo>& info)>&& largestContentfulPaintId)
+{
+    auto webEventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<WebEventHub>();
+    CHECK_NULL_VOID(webEventHub);
+    webEventHub->SetOnLargestContentfulPaintEvent(std::move(largestContentfulPaintId));
+}
+
 void WebModelNG::SetNavigationEntryCommittedId(
     std::function<void(const std::shared_ptr<BaseEventInfo>& info)>&& navigationEntryCommittedId)
 {
@@ -800,6 +849,17 @@ void WebModelNG::SetSafeBrowsingCheckResultId(
     auto webEventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<WebEventHub>();
     CHECK_NULL_VOID(webEventHub);
     webEventHub->SetOnSafeBrowsingCheckResultEvent(std::move(safeBrowsingCheckResultId));
+}
+
+void WebModelNG::SetIntelligentTrackingPreventionResultId(
+    std::function<void(const std::shared_ptr<BaseEventInfo>& info)>&&
+        intelligentTrackingPreventionResultId)
+{
+    auto webEventHub = ViewStackProcessor::GetInstance()->
+        GetMainFrameNodeEventHub<WebEventHub>();
+    CHECK_NULL_VOID(webEventHub);
+    webEventHub->SetOnIntelligentTrackingPreventionResultEvent(
+        std::move(intelligentTrackingPreventionResultId));
 }
 
 void WebModelNG::SetDarkMode(WebDarkMode mode)
@@ -837,6 +897,14 @@ void WebModelNG::SetNativeEmbedModeEnabled(bool isEmbedModeEnabled)
     webPattern->UpdateNativeEmbedModeEnabled(isEmbedModeEnabled);
 }
 
+void WebModelNG::RegisterNativeEmbedRule(const std::string& tag, const std::string& type)
+{
+    auto webPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPattern>();
+    CHECK_NULL_VOID(webPattern);
+    webPattern->UpdateNativeEmbedRuleTag(tag);
+    webPattern->UpdateNativeEmbedRuleType(type);
+}
+
 void WebModelNG::SetOnControllerAttached(std::function<void()>&& callback)
 {
     auto webPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPattern>();
@@ -848,10 +916,9 @@ void WebModelNG::NotifyPopupWindowResult(int32_t webId, bool result)
 {
 #if !defined(IOS_PLATFORM) && !defined(ANDROID_PLATFORM)
     if (webId != -1) {
-        std::weak_ptr<OHOS::NWeb::NWeb> nwebWeak = OHOS::NWeb::NWebHelper::Instance().GetNWeb(webId);
-        auto nwebSptr = nwebWeak.lock();
-        if (nwebSptr) {
-            nwebSptr->NotifyPopupWindowResult(result);
+        std::shared_ptr<OHOS::NWeb::NWeb> nweb = OHOS::NWeb::NWebHelper::Instance().GetNWeb(webId);
+        if (nweb) {
+            nweb->NotifyPopupWindowResult(result);
         }
     }
 #endif
@@ -866,7 +933,7 @@ void WebModelNG::AddDragFrameNodeToManager()
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
 
-    dragDropManager->AddDragFrameNode(frameNode->GetId(), frameNode);
+    dragDropManager->AddDragFrameNode(frameNode->GetId(), AceType::WeakClaim(frameNode));
 }
 
 void WebModelNG::SetAudioResumeInterval(int32_t resumeInterval)
@@ -923,6 +990,13 @@ void WebModelNG::SetNestedScroll(const NestedScrollOptions& nestedOpt)
     webPattern->SetNestedScroll(nestedOpt);
 }
 
+void WebModelNG::SetMetaViewport(bool enabled)
+{
+    auto webPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPattern>();
+    CHECK_NULL_VOID(webPattern);
+    webPattern->UpdateMetaViewport(enabled);
+}
+
 void WebModelNG::JavaScriptOnDocumentStart(const ScriptItems& scriptItems)
 {
     auto webPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPattern>();
@@ -943,5 +1017,20 @@ void WebModelNG::SetPermissionClipboard(std::function<void(const std::shared_ptr
     CHECK_NULL_VOID(webPattern);
     
     webPattern->SetPermissionClipboardCallback(std::move(jsCallback));
+}
+
+void WebModelNG::SetTextAutosizing(bool isTextAutosizing)
+{
+    auto webPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPattern>();
+    CHECK_NULL_VOID(webPattern);
+    webPattern->UpdateTextAutosizing(isTextAutosizing);
+}
+
+void WebModelNG::SetNativeVideoPlayerConfig(bool enable, bool shouldOverlay)
+{
+    auto webPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPattern>();
+    CHECK_NULL_VOID(webPattern);
+
+    webPattern->UpdateNativeVideoPlayerConfig(std::make_tuple(enable, shouldOverlay));
 }
 } // namespace OHOS::Ace::NG

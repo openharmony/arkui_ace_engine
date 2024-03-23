@@ -379,8 +379,9 @@ void SubwindowOhos::HideWindow()
     if (!rootNode->GetChildren().empty() &&
         !(rootNode->GetChildren().size() == 1 && rootNode->GetLastChild()->GetTag() == V2::KEYBOARD_ETS_TAG)) {
         auto lastChildId = rootNode->GetLastChild()->GetId();
-        if (hotAreasMap_.find(lastChildId) != hotAreasMap_.end()) {
-            auto hotAreaRect = hotAreasMap_[lastChildId];
+        auto iter = hotAreasMap_.find(lastChildId);
+        if (iter != hotAreasMap_.end()) {
+            auto hotAreaRect = iter->second;
             OHOS::Rosen::WMError ret = window_->SetTouchHotAreas(hotAreaRect);
             if (ret != OHOS::Rosen::WMError::WM_OK) {
                 TAG_LOGW(AceLogTag::ACE_SUB_WINDOW, "Set hot areas failed with errCode: %{public}d",
@@ -400,9 +401,9 @@ void SubwindowOhos::HideWindow()
         CHECK_NULL_VOID(rootNode);
         if (!rootNode->GetChildren().empty() &&
             !(rootNode->GetChildren().size() == 1 && rootNode->GetLastChild()->GetTag() == V2::KEYBOARD_ETS_TAG)) {
-            auto lastChildId = rootNode->GetLastChild()->GetId();
-            if (hotAreasMap_.find(lastChildId) != hotAreasMap_.end()) {
-                auto hotAreaRect = hotAreasMap_[lastChildId];
+            auto it = hotAreasMap_.find(rootNode->GetLastChild()->GetId());
+            if (it != hotAreasMap_.end()) {
+                auto hotAreaRect = it->second;
                 OHOS::Rosen::WMError ret = window_->SetTouchHotAreas(hotAreaRect);
                 if (ret != OHOS::Rosen::WMError::WM_OK) {
                     TAG_LOGW(AceLogTag::ACE_SUB_WINDOW, "Set hot areas failed with errCode: %{public}d",
@@ -426,9 +427,7 @@ void SubwindowOhos::HideWindow()
     }
 #endif
 
-    if (!window_->IsFocused()) {
-        ContainerModalUnFocus();
-    }
+    ContainerModalUnFocus();
 
     OHOS::Rosen::WMError ret = window_->Hide();
     auto parentContainer = Platform::AceContainer::GetContainer(parentContainerId_);
@@ -581,7 +580,6 @@ void SubwindowOhos::HideMenuNG(const RefPtr<NG::FrameNode>& menu, int32_t target
     HideFilter();
 }
 
-
 void SubwindowOhos::UpdateHideMenuOffsetNG(const NG::OffsetF& offset)
 {
     ContainerScope scope(childContainerId_);
@@ -595,7 +593,7 @@ void SubwindowOhos::UpdateHideMenuOffsetNG(const NG::OffsetF& offset)
     overlay->UpdateContextMenuDisappearPosition(offset);
 }
 
-void SubwindowOhos::ClearMenuNG(bool inWindow, bool showAnimation)
+void SubwindowOhos::ClearMenuNG(int32_t targetId, bool inWindow, bool showAnimation)
 {
     TAG_LOGD(AceLogTag::ACE_SUB_WINDOW, "clear menu ng enter");
     auto aceContainer = Platform::AceContainer::GetContainer(childContainerId_);
@@ -607,7 +605,7 @@ void SubwindowOhos::ClearMenuNG(bool inWindow, bool showAnimation)
     if (showAnimation) {
         overlay->CleanMenuInSubWindowWithAnimation();
     } else {
-        overlay->CleanMenuInSubWindow();
+        overlay->CleanMenuInSubWindow(targetId);
     }
     HideWindow();
     context->FlushPipelineImmediately();
@@ -695,6 +693,39 @@ void SubwindowOhos::SetHotAreas(const std::vector<Rect>& rects, int32_t overlayI
     window_->SetTouchHotAreas(hotAreas);
 }
 
+void SubwindowOhos::SetPopupHotAreas(const std::vector<Rect>& rects, int32_t overlayId)
+{
+    CHECK_NULL_VOID(window_);
+    std::vector<Rosen::Rect> hotAreas;
+    Rosen::Rect rosenRect {};
+    for (const auto& rect : rects) {
+        RectConverter(rect, rosenRect);
+        hotAreas.emplace_back(rosenRect);
+    }
+    if (overlayId >= 0) {
+        popupHotAreasMap_[overlayId] = hotAreas;
+    }
+    std::vector<Rosen::Rect> hotAreasNow;
+    for (auto it = popupHotAreasMap_.begin(); it != popupHotAreasMap_.end(); it++) {
+        for (auto it2 = it->second.begin(); it2 != it->second.end(); it2++) {
+            hotAreasNow.emplace_back(*it2);
+        }
+    }
+    window_->SetTouchHotAreas(hotAreasNow);
+}
+
+void SubwindowOhos::DeletePopupHotAreas(int32_t overlayId)
+{
+    popupHotAreasMap_.erase(overlayId);
+    std::vector<Rosen::Rect> hotAreas;
+    for (auto it = popupHotAreasMap_.begin(); it != popupHotAreasMap_.end(); it++) {
+        for (auto it2 = it->second.begin(); it2 != it->second.end(); it2++) {
+            hotAreas.emplace_back(*it2);
+        }
+    }
+    window_->SetTouchHotAreas(hotAreas);
+}
+
 void SubwindowOhos::SetDialogHotAreas(const std::vector<Rect>& rects, int32_t overlayId)
 {
     TAG_LOGD(AceLogTag::ACE_SUB_WINDOW, "set dialog hot areas enter");
@@ -766,6 +797,40 @@ RefPtr<NG::FrameNode> SubwindowOhos::ShowDialogNG(
     return dialog;
 }
 
+RefPtr<NG::FrameNode> SubwindowOhos::ShowDialogNGWithNode(const DialogProperties& dialogProps,
+    const RefPtr<NG::UINode>& customNode)
+{
+    TAG_LOGD(AceLogTag::ACE_SUB_WINDOW, "show dialog ng enter");
+    auto aceContainer = Platform::AceContainer::GetContainer(childContainerId_);
+    CHECK_NULL_RETURN(aceContainer, nullptr);
+    auto context = DynamicCast<NG::PipelineContext>(aceContainer->GetPipelineContext());
+    CHECK_NULL_RETURN(context, nullptr);
+    auto overlay = context->GetOverlayManager();
+    CHECK_NULL_RETURN(overlay, nullptr);
+    std::map<int32_t, RefPtr<NG::FrameNode>> DialogMap(overlay->GetDialogMap().begin(), overlay->GetDialogMap().end());
+    int dialogMapSize = static_cast<int>(DialogMap.size());
+    if (dialogMapSize == 0) {
+        auto parentAceContainer = Platform::AceContainer::GetContainer(parentContainerId_);
+        CHECK_NULL_RETURN(parentAceContainer, nullptr);
+        auto parentcontext = DynamicCast<NG::PipelineContext>(parentAceContainer->GetPipelineContext());
+        CHECK_NULL_RETURN(parentcontext, nullptr);
+        auto parentOverlay = parentcontext->GetOverlayManager();
+        CHECK_NULL_RETURN(parentOverlay, nullptr);
+        parentOverlay->SetSubWindowId(SubwindowManager::GetInstance()->GetDialogSubwindowInstanceId(GetSubwindowId()));
+    }
+    SubwindowManager::GetInstance()->SetDialogSubWindowId(
+        SubwindowManager::GetInstance()->GetDialogSubwindowInstanceId(GetSubwindowId()));
+    ShowWindow();
+    window_->SetFullScreen(true);
+    window_->SetTouchable(true);
+    ResizeWindow();
+    ContainerScope scope(childContainerId_);
+    auto dialog = overlay->ShowDialogWithNode(dialogProps, customNode);
+    CHECK_NULL_RETURN(dialog, nullptr);
+    haveDialog_ = true;
+    return dialog;
+}
+
 void SubwindowOhos::CloseDialogNG(const RefPtr<NG::FrameNode>& dialogNode)
 {
     TAG_LOGD(AceLogTag::ACE_SUB_WINDOW, "close dialog ng enter");
@@ -777,6 +842,51 @@ void SubwindowOhos::CloseDialogNG(const RefPtr<NG::FrameNode>& dialogNode)
     CHECK_NULL_VOID(overlay);
     ContainerScope scope(childContainerId_);
     return overlay->CloseDialog(dialogNode);
+}
+
+void SubwindowOhos::OpenCustomDialogNG(
+    const DialogProperties& dialogProps, std::function<void(int32_t)>&& callback)
+{
+    TAG_LOGD(AceLogTag::ACE_SUB_WINDOW, "open customDialog ng subwindow enter");
+    auto aceContainer = Platform::AceContainer::GetContainer(childContainerId_);
+    CHECK_NULL_VOID(aceContainer);
+    auto context = DynamicCast<NG::PipelineContext>(aceContainer->GetPipelineContext());
+    CHECK_NULL_VOID(context);
+    auto overlay = context->GetOverlayManager();
+    CHECK_NULL_VOID(overlay);
+    std::map<int32_t, RefPtr<NG::FrameNode>> DialogMap(overlay->GetDialogMap().begin(), overlay->GetDialogMap().end());
+    int dialogMapSize = static_cast<int>(DialogMap.size());
+    if (dialogMapSize == 0) {
+        auto parentAceContainer = Platform::AceContainer::GetContainer(parentContainerId_);
+        CHECK_NULL_VOID(parentAceContainer);
+        auto parentcontext = DynamicCast<NG::PipelineContext>(parentAceContainer->GetPipelineContext());
+        CHECK_NULL_VOID(parentcontext);
+        auto parentOverlay = parentcontext->GetOverlayManager();
+        CHECK_NULL_VOID(parentOverlay);
+        parentOverlay->SetSubWindowId(SubwindowManager::GetInstance()->GetDialogSubwindowInstanceId(GetSubwindowId()));
+    }
+    SubwindowManager::GetInstance()->SetDialogSubWindowId(
+        SubwindowManager::GetInstance()->GetDialogSubwindowInstanceId(GetSubwindowId()));
+    ShowWindow();
+    window_->SetFullScreen(true);
+    window_->SetTouchable(true);
+    ResizeWindow();
+    ContainerScope scope(childContainerId_);
+    overlay->OpenCustomDialog(dialogProps, std::move(callback));
+    haveDialog_ = true;
+}
+
+void SubwindowOhos::CloseCustomDialogNG(int32_t dialogId)
+{
+    TAG_LOGD(AceLogTag::ACE_SUB_WINDOW, "close customDialog ng subwindow enter");
+    auto aceContainer = Platform::AceContainer::GetContainer(childContainerId_);
+    CHECK_NULL_VOID(aceContainer);
+    auto context = DynamicCast<NG::PipelineContext>(aceContainer->GetPipelineContext());
+    CHECK_NULL_VOID(context);
+    auto overlay = context->GetOverlayManager();
+    CHECK_NULL_VOID(overlay);
+    ContainerScope scope(childContainerId_);
+    return overlay->CloseCustomDialog(dialogId);
 }
 
 void SubwindowOhos::HideSubWindowNG()
@@ -915,8 +1025,8 @@ void SubwindowOhos::ClearToast()
     HideWindow();
 }
 
-void SubwindowOhos::ShowToastForAbility(
-    const std::string& message, int32_t duration, const std::string& bottom, const NG::ToastShowMode& showMode)
+void SubwindowOhos::ShowToastForAbility(const std::string& message, int32_t duration, const std::string& bottom,
+    const NG::ToastShowMode& showMode, int32_t alignment, std::optional<DimensionOffset> offset)
 {
     TAG_LOGD(AceLogTag::ACE_SUB_WINDOW, "show toast for ability enter, containerId : %{public}d", childContainerId_);
     SubwindowManager::GetInstance()->SetCurrentSubwindow(AceType::Claim(this));
@@ -941,11 +1051,11 @@ void SubwindowOhos::ShowToastForAbility(
         ResizeWindow();
         window_->SetTouchable(false);
     }
-    delegate->ShowToast(message, duration, bottom, showMode);
+    delegate->ShowToast(message, duration, bottom, showMode, alignment, offset);
 }
 
-void SubwindowOhos::ShowToastForService(
-    const std::string& message, int32_t duration, const std::string& bottom, const NG::ToastShowMode& showMode)
+void SubwindowOhos::ShowToastForService(const std::string& message, int32_t duration, const std::string& bottom,
+    const NG::ToastShowMode& showMode, int32_t alignment, std::optional<DimensionOffset> offset)
 {
     TAG_LOGD(AceLogTag::ACE_SUB_WINDOW, "show toast for Service enter");
     bool ret = CreateEventRunner();
@@ -998,14 +1108,14 @@ void SubwindowOhos::ShowToastForService(
     }
 }
 
-void SubwindowOhos::ShowToast(
-    const std::string& message, int32_t duration, const std::string& bottom, const NG::ToastShowMode& showMode)
+void SubwindowOhos::ShowToast(const std::string& message, int32_t duration, const std::string& bottom,
+    const NG::ToastShowMode& showMode, int32_t alignment, std::optional<DimensionOffset> offset)
 {
     TAG_LOGD(AceLogTag::ACE_SUB_WINDOW, "show toast enter");
     if (parentContainerId_ >= MIN_PA_SERVICE_ID || parentContainerId_ < 0) {
-        ShowToastForService(message, duration, bottom, showMode);
+        ShowToastForService(message, duration, bottom, showMode, alignment, offset);
     } else {
-        ShowToastForAbility(message, duration, bottom, showMode);
+        ShowToastForAbility(message, duration, bottom, showMode, alignment, offset);
     }
 }
 

@@ -26,6 +26,7 @@
 #endif
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/image/image_pattern.h"
+#include "core/components_ng/pattern/image/image_layout_property.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 
 namespace OHOS::Ace::NG {
@@ -73,7 +74,7 @@ RefPtr<FrameNode> ImageModelNG::CreateFrameNode(int32_t nodeId, const std::strin
     auto frameNode = FrameNode::CreateFrameNode(V2::IMAGE_ETS_TAG, nodeId, AceType::MakeRefPtr<ImagePattern>());
     CHECK_NULL_RETURN(frameNode, nullptr);
     // set draggable for framenode
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = PipelineContext::GetCurrentContextSafely();
     CHECK_NULL_RETURN(pipeline, nullptr);
     auto draggable = pipeline->GetDraggable<ImageTheme>();
     if (draggable && !frameNode->IsDraggable()) {
@@ -351,7 +352,7 @@ void ImageModelNG::SetColorFilterMatrix(FrameNode *frameNode, const std::vector<
 
 void ImageModelNG::SetDraggable(FrameNode *frameNode, bool draggable)
 {
-    auto gestureHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeGestureEventHub();
+    auto gestureHub = frameNode->GetOrCreateGestureEventHub();
     CHECK_NULL_VOID(gestureHub);
     if (draggable) {
         if (!frameNode->IsDraggable()) {
@@ -371,6 +372,13 @@ void ImageModelNG::EnableAnalyzer(bool isEnableAnalyzer)
 }
 
 void ImageModelNG::SetImageAnalyzerConfig(const ImageAnalyzerConfig& config)
+{
+    auto pattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<ImagePattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetImageAnalyzerConfig(config);
+}
+
+void ImageModelNG::SetImageAnalyzerConfig(void* config)
 {
     auto pattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<ImagePattern>();
     CHECK_NULL_VOID(pattern);
@@ -397,6 +405,80 @@ void ImageModelNG::SetOnError(FrameNode* frameNode, std::function<void(const Loa
     auto eventHub = frameNode->GetEventHub<ImageEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnError(std::move(callback));
+}
+
+ImageSourceInfo ImageModelNG::GetSrc(FrameNode* frameNode)
+{
+    ImageSourceInfo defaultImageSourceInfo;
+    CHECK_NULL_RETURN(frameNode, defaultImageSourceInfo);
+    auto layoutProperty = frameNode->GetLayoutProperty<ImageLayoutProperty>();
+    CHECK_NULL_RETURN(layoutProperty, defaultImageSourceInfo);
+    return layoutProperty->GetImageSourceInfo().value_or(defaultImageSourceInfo);
+}
+
+ImageFit ImageModelNG::GetObjectFit(FrameNode* frameNode)
+{
+    CHECK_NULL_RETURN(frameNode, ImageFit::COVER);
+    auto layoutProperty = frameNode->GetLayoutProperty<ImageLayoutProperty>();
+    CHECK_NULL_RETURN(layoutProperty, ImageFit::COVER);
+    return layoutProperty->GetImageFit().value_or(ImageFit::COVER);
+}
+
+ImageInterpolation ImageModelNG::GetInterpolation(FrameNode* frameNode)
+{
+    CHECK_NULL_RETURN(frameNode, ImageInterpolation::NONE);
+    auto paintProperty = frameNode->GetPaintProperty<ImageRenderProperty>();
+    CHECK_NULL_RETURN(paintProperty, ImageInterpolation::NONE);
+    return paintProperty->GetImagePaintStyle()->GetImageInterpolation().value_or(ImageInterpolation::NONE);
+}
+
+ImageRepeat ImageModelNG::GetObjectRepeat(FrameNode* frameNode)
+{
+    CHECK_NULL_RETURN(frameNode, ImageRepeat::NO_REPEAT);
+    auto paintProperty = frameNode->GetPaintProperty<ImageRenderProperty>();
+    CHECK_NULL_RETURN(paintProperty, ImageRepeat::NO_REPEAT);
+    return paintProperty->GetImagePaintStyle()->GetImageRepeat().value_or(ImageRepeat::NO_REPEAT);
+}
+
+std::vector<float> ImageModelNG::GetColorFilter(FrameNode* frameNode)
+{
+    std::vector<float> defaultColorFilter;
+    CHECK_NULL_RETURN(frameNode, defaultColorFilter);
+    auto paintProperty = frameNode->GetPaintProperty<ImageRenderProperty>();
+    CHECK_NULL_RETURN(paintProperty, defaultColorFilter);
+    return paintProperty->GetImagePaintStyle()->GetColorFilter().value_or(defaultColorFilter);
+}
+
+bool ImageModelNG::GetAutoResize(FrameNode* frameNode)
+{
+    CHECK_NULL_RETURN(frameNode, true);
+    auto layoutProperty = frameNode->GetLayoutProperty<ImageLayoutProperty>();
+    CHECK_NULL_RETURN(layoutProperty, true);
+    return layoutProperty->GetImageSizeStyle()->GetAutoResize().value_or(true);
+}
+
+ImageSourceInfo ImageModelNG::GetAlt(FrameNode* frameNode)
+{
+    ImageSourceInfo defaultImageSourceInfo;
+    CHECK_NULL_RETURN(frameNode, defaultImageSourceInfo);
+    auto layoutProperty = frameNode->GetLayoutProperty<ImageLayoutProperty>();
+    CHECK_NULL_RETURN(layoutProperty, defaultImageSourceInfo);
+    return layoutProperty->GetAlt().value_or(defaultImageSourceInfo);
+}
+
+bool ImageModelNG::GetDraggable(FrameNode* frameNode)
+{
+    CHECK_NULL_RETURN(frameNode, false);
+    return frameNode->IsDraggable();
+}
+
+ImageRenderMode ImageModelNG::GetImageRenderMode(FrameNode* frameNode)
+{
+    CHECK_NULL_RETURN(frameNode, ImageRenderMode::ORIGINAL);
+    auto paintProperty = frameNode->GetPaintProperty<ImageRenderProperty>();
+    CHECK_NULL_RETURN(paintProperty, ImageRenderMode::ORIGINAL);
+    CHECK_NULL_RETURN(paintProperty->GetImagePaintStyle(), ImageRenderMode::ORIGINAL);
+    return paintProperty->GetImagePaintStyle()->GetImageRenderMode().value_or(ImageRenderMode::ORIGINAL);
 }
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_IMAGE_IMAGE_MODEL_NG_CPP

@@ -33,7 +33,7 @@ public:
 
     void InitSurface() override;
 
-    void UpdateXComponentConfig() override;
+    void UpdateSurfaceConfig() override;
 
     void* GetNativeWindow() override;
 

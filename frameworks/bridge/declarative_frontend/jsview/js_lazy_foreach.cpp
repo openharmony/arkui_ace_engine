@@ -85,11 +85,16 @@ void JSDataChangeListener::JSBind(BindingTarget globalObj)
     // API7 onDataMoved deprecated
     JSClass<JSDataChangeListener>::CustomMethod("onDataMoved", &JSDataChangeListener::OnDataMoved);
     JSClass<JSDataChangeListener>::CustomMethod("onDataMove", &JSDataChangeListener::OnDataMoved);
+    // temporary interface
+    JSClass<JSDataChangeListener>::CustomMethod("onDataBulkAdded", &JSDataChangeListener::OnDataBulkAdded);
+    JSClass<JSDataChangeListener>::CustomMethod("onDataBulkAdd", &JSDataChangeListener::OnDataBulkAdded);
+    JSClass<JSDataChangeListener>::CustomMethod("onDataBulkDeleted", &JSDataChangeListener::OnDataBulkDeleted);
+    JSClass<JSDataChangeListener>::CustomMethod("onDataBulkDelete", &JSDataChangeListener::OnDataBulkDeleted);
     JSClass<JSDataChangeListener>::Bind(
         globalObj, &JSDataChangeListener::Constructor, &JSDataChangeListener::Destructor);
 }
 
-RefPtr<JSLazyForEachActuator> CreateActuator(const std::string viewId)
+RefPtr<JSLazyForEachActuator> CreateActuator(const std::string& viewId)
 {
 #ifdef NG_BUILD
     return AceType::MakeRefPtr<JSLazyForEachBuilder>();
@@ -134,7 +139,8 @@ bool ParseAndVerifyParams(const JSCallbackInfo& info, JSRef<JSVal> (&params)[MAX
     if (!info[PARAM_ITEM_GENERATOR]->IsFunction()) {
         return false;
     }
-    if (info.Length() > MIN_PARAM_SIZE && !info[PARAM_KEY_GENERATOR]->IsFunction()) {
+    if (info.Length() > MIN_PARAM_SIZE &&
+        !(info[PARAM_KEY_GENERATOR]->IsFunction() || info[PARAM_KEY_GENERATOR]->IsUndefined())) {
         return false;
     }
     if (info.Length() > MIN_PARAM_SIZE + 1 && !info[PARAM_UPDATE_CHANGEDNODE]->IsBoolean()) {

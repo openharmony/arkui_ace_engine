@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -42,7 +42,7 @@ class LocalStorage extends NativeLocalStorage {
   /**
    * Construct new instance of LocalStorage
    * initialzie with all properties and their values that Object.keys(params) returns
-   * Property values must not be undefined.
+   * Property values must not be undefined for API 9 and lower, undefined allowed for API10
    * @param initializingProperties Object containing keys and values. @see set() for valid values
    * 
    * @since 9
@@ -73,8 +73,9 @@ class LocalStorage extends NativeLocalStorage {
   public initializeProps(initializingProperties: Object = {}) {
     stateMgmtConsole.debug(`${this.constructor.name} initializing with Object keys: [${Object.keys(initializingProperties)}].`)
     this.storage_.clear();
-    Object.keys(initializingProperties).filter((propName) => initializingProperties[propName] != undefined).forEach((propName) =>
-      this.addNewPropertyInternal(propName, initializingProperties[propName])
+    Object.keys(initializingProperties)
+      .filter((propName) => (initializingProperties[propName] != null || Utils.isApiVersionEQAbove(12)))
+      .forEach((propName) => this.addNewPropertyInternal(propName, initializingProperties[propName])
     );
   }
 
@@ -156,7 +157,7 @@ class LocalStorage extends NativeLocalStorage {
    */
   public set<T>(propName: string, newValue: T): boolean {
     stateMgmtProfiler.begin("LocalStorage.set");
-    if (newValue == undefined) {
+    if (newValue == undefined && !Utils.isApiVersionEQAbove(12)) {
       stateMgmtConsole.warn(`${this.constructor.name}: set('${propName}') with newValue == undefined not allowed.`);
       stateMgmtProfiler.end();
       return false;
@@ -186,7 +187,7 @@ class LocalStorage extends NativeLocalStorage {
    */
   public setOrCreate<T>(propName: string, newValue: T): boolean {
     stateMgmtProfiler.begin("LocalStorage.setOrCreate");
-    if (newValue == undefined) {
+    if (newValue == undefined && !Utils.isApiVersionEQAbove(12)) {
       stateMgmtConsole.warn(`${this.constructor.name}: setOrCreate('${propName}') with newValue == undefined not allowed.`);
       stateMgmtProfiler.end();
       return false;
@@ -459,7 +460,8 @@ class LocalStorage extends NativeLocalStorage {
     if (p == undefined) {
       // property named 'storagePropName' not yet in storage
       // add new property to storage
-      if (defaultValue === undefined) {
+      // We do not want to add undefined to older API verions, but null is added
+      if (defaultValue === undefined && !Utils.isApiVersionEQAbove(12)) {
         stateMgmtConsole.error(`${this.constructor.name}.__createSync(${storagePropName}, non-existing property and undefined default value. ERROR.`);
         return undefined;
       }

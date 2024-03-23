@@ -18,7 +18,7 @@
 #include <shlwapi.h>
 #endif
 namespace OHOS::Ace {
-    bool RealPath(const std::string fileName, char* realPath)
+    bool RealPath(const std::string& fileName, char* realPath)
 {
 #if defined(WINDOWS_PLATFORM)
         return PathCanonicalize(realPath, fileName.c_str()) != 0;

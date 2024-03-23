@@ -36,6 +36,12 @@ std::map<SliderModel::BlockStyleType, int> SLIDER_STYLE_TYPE_MAP = {
     { SliderModel::BlockStyleType::IMAGE, 1 },
     { SliderModel::BlockStyleType::SHAPE, 2 } };
 
+std::map<BasicShapeType, int> SHAPE_TYPE_MAP = {
+    { BasicShapeType::RECT, 0 },
+    { BasicShapeType::CIRCLE, 1 },
+    { BasicShapeType::ELLIPSE, 2 },
+    { BasicShapeType::PATH, 3 } };
+
 const float DEFAULT_VALUE = 0.0;
 const float DEFAULT_MAX_VALUE = 100.0;
 const float DEFAULT_MIN_VALUE = 0.0;
@@ -44,8 +50,10 @@ const float DEFAULT_STEP_VALUE = 1.0;
 const uint32_t ERROR_UINT_CODE = -1;
 const float ERROR_FLOAT_CODE = -1.0f;
 const int32_t ERROR_INT_CODE = -1;
-
 namespace SliderModifier {
+
+std::string g_strValue;
+
 void SetShowTips(ArkUINodeHandle node, ArkUI_Bool isShow, const char *value)
 {
     auto *frameNode = reinterpret_cast<FrameNode *>(node);
@@ -194,7 +202,7 @@ void SetTrackBackgroundColor(ArkUINodeHandle node, uint32_t color)
 {
     auto *frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    SliderModelNG::SetTrackBackgroundColor(frameNode, Color(color));
+    SliderModelNG::SetTrackBackgroundColor(frameNode, SliderModelNG::CreateSolidGradient(Color(color)));
 }
 
 void ResetTrackBackgroundColor(ArkUINodeHandle node)
@@ -206,7 +214,7 @@ void ResetTrackBackgroundColor(ArkUINodeHandle node)
     auto theme = pipelineContext->GetTheme<SliderTheme>();
     CHECK_NULL_VOID(theme);
 
-    SliderModelNG::SetTrackBackgroundColor(frameNode, theme->GetTrackBgColor());
+    SliderModelNG::SetTrackBackgroundColor(frameNode, SliderModelNG::CreateSolidGradient(theme->GetTrackBgColor()));
 }
 
 void SetSelectColor(ArkUINodeHandle node, uint32_t color)
@@ -459,7 +467,8 @@ ArkUI_Uint32 GetTrackBackgroundColor(ArkUINodeHandle node)
 {
     auto *frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_RETURN(frameNode, ERROR_UINT_CODE);
-    return SliderModelNG::GetTrackBackgroundColor(frameNode).GetValue();
+    NG::Gradient gradient = SliderModelNG::GetTrackBackgroundColor(frameNode);
+    return gradient.GetColors().at(0).GetColor().GetValue();
 }
 
 ArkUI_Uint32 GetSelectColor(ArkUINodeHandle node)
@@ -531,6 +540,45 @@ ArkUI_Int32 GetSliderStyle(ArkUINodeHandle node)
     CHECK_NULL_RETURN(frameNode, ERROR_INT_CODE);
     return SLIDER_MODE_MAP[SliderModelNG::GetSliderMode(frameNode)];
 }
+ArkUI_CharPtr GetBlockImageValue(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, nullptr);
+    g_strValue = SliderModelNG::GetBlockImageValue(frameNode);
+    return g_strValue.c_str();
+}
+
+ArkUI_CharPtr GetSliderBlockShape(ArkUINodeHandle node, ArkUI_Float32* value)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, nullptr);
+    RefPtr<BasicShape> basicShape = SliderModelNG::GetBlockShape(frameNode);
+    auto shapeType = basicShape->GetBasicShapeType();
+    //index 0 shapeType
+    value[0] = SHAPE_TYPE_MAP[shapeType];
+    //index 1 width
+    value[1] = basicShape->GetWidth().Value();
+    //index 2 height
+    value[2] = basicShape->GetHeight().Value();
+    switch (shapeType) {
+        case BasicShapeType::PATH: {
+            auto path = AceType::DynamicCast<Path>(basicShape);
+            g_strValue = path->GetValue();
+            return g_strValue.c_str();
+        }
+        case BasicShapeType::RECT: {
+            auto shapeRect = AceType::DynamicCast<ShapeRect>(basicShape);
+            //index 3 radius x
+            value[3] = shapeRect->GetTopLeftRadius().GetX().Value();
+            //index 4 radius y
+            value[4] = shapeRect->GetTopLeftRadius().GetY().Value();
+            break;
+        }
+        default:
+            break;
+    }
+    return nullptr;
+}
 } // namespace SliderModifier
 
 namespace NodeModifier {
@@ -593,21 +641,23 @@ const ArkUISliderModifier* GetSliderModifier()
         SliderModifier::GetDirection,
         SliderModifier::GetStep,
         SliderModifier::GetReverse,
-        SliderModifier::GetSliderStyle
+        SliderModifier::GetSliderStyle,
+        SliderModifier::GetBlockImageValue,
+        SliderModifier::GetSliderBlockShape
     };
 
     return &modifier;
 }
 
-void SetSliderChange(ArkUINodeHandle node, ArkUI_Int32 eventId, void* extraParam)
+void SetSliderChange(ArkUINodeHandle node, void* extraParam)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    auto onEvent = [node, eventId, extraParam](float value, int32_t mode) {
+    auto onEvent = [node, extraParam](float value, int32_t mode) {
         ArkUINodeEvent event;
-        event.kind = ON_SLIDER_CHANGE;
-        event.eventId = eventId;
-        event.extraParam = extraParam;
+        event.kind = COMPONENT_ASYNC_EVENT;
+        event.extraParam = reinterpret_cast<intptr_t>(extraParam);
+        event.componentAsyncEvent.subKind = ON_SLIDER_CHANGE;
         event.componentAsyncEvent.data[0].f32 = value;
         event.componentAsyncEvent.data[1].i32 = mode;
         SendArkUIAsyncEvent(&event);

@@ -50,30 +50,11 @@ void RichEditorPaintMethod::UpdateOverlayModifier(PaintWrapper* paintWrapper)
     auto caretVisible = richEditorPattern->GetCaretVisible();
     overlayMod->SetShowSelect(richEditorPattern->GetShowSelect());
     overlayMod->SetCaretVisible(caretVisible);
-    overlayMod->SetCaretColor(Color::BLUE.GetValue());
+    overlayMod->SetCaretColor(richEditorPattern->GetCaretColor().GetValue());
+    overlayMod->SetSelectedBackgroundColor(richEditorPattern->GetSelectedBackgroundColor().GetValue());
     constexpr float CARET_WIDTH = 1.5f;
     overlayMod->SetCaretWidth(static_cast<float>(Dimension(CARET_WIDTH, DimensionUnit::VP).ConvertToPx()));
-    auto caretPosition = richEditorPattern->GetCaretPosition();
-    if (richEditorPattern->GetTextContentLength() > 0) {
-        float caretHeight = 0.0f;
-        OffsetF caretOffsetDown =
-            richEditorPattern->CalcCursorOffsetByPosition(caretPosition, caretHeight, true, false);
-        OffsetF lastClickOffset = richEditorPattern->GetLastClickOffset();
-        if (lastClickOffset.NonNegative() && !NearEqual(lastClickOffset.GetX(), caretOffsetDown.GetX())) {
-            caretHeight = 0.0f;
-            OffsetF caretOffsetUp =
-                richEditorPattern->CalcCursorOffsetByPosition(caretPosition, caretHeight, false, false);
-            overlayMod->SetCaretOffsetAndHeight(caretOffsetUp, caretHeight);
-        } else {
-            overlayMod->SetCaretOffsetAndHeight(caretOffsetDown, caretHeight);
-        }
-    } else {
-        auto rect = richEditorPattern->GetTextContentRect();
-        auto pipeline = PipelineBase::GetCurrentContext();
-        auto theme = pipeline->GetTheme<RichEditorTheme>();
-        overlayMod->SetCaretOffsetAndHeight(
-            OffsetF(rect.GetX(), rect.GetY()), theme->GetDefaultCaretHeight().ConvertToPx());
-    }
+    SetCaretOffsetAndHeight(paintWrapper);
     std::vector<RectF> selectedRects;
     const auto& selection = richEditorPattern->GetTextSelector();
     if (richEditorPattern->GetTextContentLength() > 0 && selection.GetTextStart() != selection.GetTextEnd()) {
@@ -86,6 +67,18 @@ void RichEditorPaintMethod::UpdateOverlayModifier(PaintWrapper* paintWrapper)
     overlayMod->SetFrameSize(frameSize);
     overlayMod->UpdateScrollBar(paintWrapper);
     overlayMod->SetIsClip(false);
+}
+
+void RichEditorPaintMethod::SetCaretOffsetAndHeight(PaintWrapper* paintWrapper)
+{
+    auto richEditorPattern = DynamicCast<RichEditorPattern>(GetPattern().Upgrade());
+    CHECK_NULL_VOID(richEditorPattern);
+    auto overlayMod = DynamicCast<RichEditorOverlayModifier>(GetOverlayModifier(paintWrapper));
+    CHECK_NULL_VOID(overlayMod);
+    OffsetF caretOffset;
+    float caretHeight = 0.0f;
+    richEditorPattern->CalculateCaretOffsetAndHeight(caretOffset, caretHeight);
+    overlayMod->SetCaretOffsetAndHeight(caretOffset, caretHeight);
 }
 
 void RichEditorPaintMethod::UpdateContentModifier(PaintWrapper* paintWrapper)

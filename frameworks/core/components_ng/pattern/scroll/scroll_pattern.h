@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -27,7 +27,7 @@
 #include "core/components_ng/pattern/scroll_bar/proxy/scroll_bar_proxy.h"
 #include "core/components_ng/pattern/scrollable/scrollable_pattern.h"
 #include "core/components_ng/pattern/scrollable/scrollable_properties.h"
-#include "core/components_ng/pattern/web/scroll_update_listener.h"
+#include "core/components_ng/pattern/web/slide_update_listener.h"
 
 namespace OHOS::Ace::NG {
 
@@ -153,7 +153,7 @@ public:
     bool UpdateCurrentOffset(float offset, int32_t source) override;
     void ScrollToEdge(ScrollEdgeType scrollEdgeType, bool smooth) override;
     void ScrollBy(float pixelX, float pixelY, bool smooth, const std::function<void()>& onFinish = nullptr);
-    bool ScrollPage(bool reverse, bool smooth, const std::function<void()>& onFinish = nullptr);
+    void ScrollPage(bool reverse, bool smooth = false) override;
     void ScrollTo(float position) override;
     void JumpToPosition(float position, int32_t source = SCROLL_FROM_JUMP);
     float GetMainContentSize() const override
@@ -173,7 +173,7 @@ public:
     bool NeedScrollSnapToSide(float delta) override;
     void CaleSnapOffsets();
     void CaleSnapOffsetsByInterval(ScrollSnapAlign scrollSnapAlign);
-    void CaleSnapOffsetsByPaginations();
+    void CaleSnapOffsetsByPaginations(ScrollSnapAlign scrollSnapAlign);
 
     float GetSelectScrollWidth();
 
@@ -247,7 +247,7 @@ public:
         return scrollLayoutProperty->GetScrollSnapAlign().value_or(ScrollSnapAlign::NONE);
     }
 
-    void registerScrollUpdateListener(const std::shared_ptr<IScrollUpdateCallback>& listener);
+    void registerSlideUpdateListener(const std::shared_ptr<ISlideUpdateCallback>& listener);
 
     std::string ProvideRestoreInfo() override;
     void OnRestoreInfo(const std::string& restoreInfo) override;
@@ -298,6 +298,25 @@ public:
         return !snapOffsets_.empty() && GetScrollSnapAlign() != ScrollSnapAlign::NONE;
     }
 
+    void TriggerModifyDone();
+
+    void SetInitialOffset(const OffsetT<CalcDimension>& offset)
+    {
+        initialOffset_ = offset;
+    }
+
+    OffsetT<CalcDimension> GetInitialOffset()
+    {
+        return initialOffset_;
+    }
+
+    bool IsInitialized()
+    {
+        return isInitialized_;
+    }
+
+    void ToJsonValue(std::unique_ptr<JsonValue>& json) const override;
+
 protected:
     void DoJump(float position, int32_t source = SCROLL_FROM_JUMP);
 
@@ -317,7 +336,10 @@ private:
     void RegisterScrollBarEventTask();
     void HandleScrollEffect();
     void ValidateOffset(int32_t source);
-    void HandleScrollPosition(float scroll, int32_t scrollState);
+    float ValidateOffset(int32_t source, float willScrollOffset);
+    void HandleScrollPosition(float scroll);
+    void FireOnWillScroll(float scroll);
+    void FireOnDidScroll(float scroll);
     void SetEdgeEffectCallback(const RefPtr<ScrollEdgeEffect>& scrollEffect) override;
     void UpdateScrollBarOffset() override;
     void SetAccessibilityAction();
@@ -336,7 +358,7 @@ private:
     SizeF viewSize_;
     SizeF viewPortExtent_;
     FlexDirection direction_ { FlexDirection::COLUMN };
-    std::vector<std::shared_ptr<IScrollUpdateCallback>> listenerVector_;
+    std::vector<std::shared_ptr<ISlideUpdateCallback>> listenerVector_;
 
     // scrollSnap
     std::vector<float> snapOffsets_;
@@ -354,6 +376,9 @@ private:
     float lastPageLength_ = 0.0f;
     float GetPagingOffset(float delta, float dragDistance, float velocity)  const;
     float GetPagingDelta(float dragDistance, float velocity, float pageLength) const;
+
+    //initialOffset
+    OffsetT<CalcDimension> initialOffset_;
 };
 
 } // namespace OHOS::Ace::NG

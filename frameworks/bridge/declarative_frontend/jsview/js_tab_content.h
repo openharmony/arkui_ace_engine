@@ -62,14 +62,19 @@ private:
     static void SetSelectedMode(const JSRef<JSVal>& info);
     static void SetSubTabBarStyle(const JSRef<JSObject>& paramObject);
     static void SetLabelStyle(const JSRef<JSVal>& info, bool isSubTabStyle);
+    static void SetIconStyle(const JSRef<JSVal>& info);
     static void SetPadding(const JSRef<JSVal>& info, bool isSubTabStyle);
     static void GetFontContent(JSRef<JSVal> font, LabelStyle& labelStyle, bool isSubTabStyle);
+    static void GetLabelUnselectedContent(JSRef<JSVal> unselectedColorValue, LabelStyle& labelStyle);
+    static void GetLabelSelectedContent(JSRef<JSVal> selectedColorValue, LabelStyle& labelStyle);
     static void CompleteParameters(LabelStyle& buttonParameters, bool isSubTabStyle);
     static void SetLayoutMode(const JSRef<JSVal>& info);
     static void SetVerticalAlign(const JSRef<JSVal>& info);
     static void SetSymmetricExtensible(const JSRef<JSVal>& info);
     static void SetId(const JSRef<JSVal>& info);
     static void SetBottomTabBarStyle(const JSRef<JSObject>& paramObject);
+    static void SetOnWillShow(const JSCallbackInfo& info);
+    static void SetOnWillHide(const JSCallbackInfo& info);
 };
 
 } // namespace OHOS::Ace::Framework

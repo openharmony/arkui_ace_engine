@@ -21,238 +21,243 @@
 #include "base/want/want_wrap.h"
 #include "core/common/app_bar_helper.h"
 #include "core/common/container.h"
+#include "core/components_ng/base/view_stack_processor.h"
+#include "core/components_ng/event/focus_hub.h"
+#include "core/components_ng/layout/layout_property.h"
 #include "core/components_ng/pattern/app_bar/app_bar_theme.h"
 #include "core/components_ng/pattern/app_bar/atomic_service_pattern.h"
 #include "core/components_ng/pattern/button/button_layout_property.h"
 #include "core/components_ng/pattern/button/button_pattern.h"
+#include "core/components_ng/pattern/divider/divider_layout_property.h"
+#include "core/components_ng/pattern/divider/divider_pattern.h"
+#include "core/components_ng/pattern/divider/divider_render_property.h"
+#include "core/components_ng/pattern/image/image_layout_property.h"
 #include "core/components_ng/pattern/image/image_pattern.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
+#include "core/components_ng/pattern/linear_layout/linear_layout_property.h"
 #include "core/components_ng/pattern/stage/stage_pattern.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/components_ng/property/border_property.h"
+#include "core/components_ng/property/calc_length.h"
+#include "core/components_ng/property/measure_property.h"
 #include "core/components_v2/inspector/inspector_constants.h"
+#include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
 namespace {
-
-const Dimension MARGIN_TEXT_LEFT = 24.0_vp;
-const Dimension MARGIN_TEXT_RIGHT = 84.0_vp;
-const Dimension MARGIN_BUTTON = 12.0_vp;
-const Dimension MARGIN_BACK_BUTTON_RIGHT = -20.0_vp;
-const float REVERSED_X = -1.0f;
-const float UNCHANGED_X = 1.0f;
-const float UNCHANGED_Y = 1.0f;
-constexpr int32_t LABLE_ROWSIZE = 2;
-
-bool HasNavigation(const RefPtr<UINode>& node)
+RefPtr<AppBarTheme> GetAppBarTheme()
 {
-    if (node->GetTag() == V2::NAVIGATION_VIEW_ETS_TAG) {
-        return true;
-    }
-    const auto& children = node->GetChildren();
-    return std::any_of(children.begin(), children.end(), [](const auto& node) { return HasNavigation(node); });
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_RETURN(pipeline, nullptr);
+    return pipeline->GetTheme<AppBarTheme>();
 }
 } // namespace
 
-RefPtr<FrameNode> AppBarView::Create(RefPtr<FrameNode>& content)
+RefPtr<FrameNode> AppBarView::Create(const RefPtr<FrameNode>& stage)
 {
     auto atom = FrameNode::CreateFrameNode(V2::ATOMIC_SERVICE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
         AceType::MakeRefPtr<AtomicServicePattern>());
-    auto titleBar = BuildBarTitle();
+    // add children
+    auto menuBarRow = BuildMenuBarRow();
+    atom->AddChild(stage);
+    atom->AddChild(menuBarRow);
+    // init
     atom->GetLayoutProperty()->UpdateMeasureType(MeasureType::MATCH_PARENT);
-    atom->AddChild(titleBar);
-    atom->AddChild(content);
-#ifndef IS_EMULATOR
-    auto faButton = BuildFaButton();
-    atom->AddChild(faButton);
-#endif
-    content->GetLayoutProperty()->UpdateLayoutWeight(1.0f);
-    content->GetLayoutProperty()->UpdateMeasureType(MeasureType::MATCH_PARENT);
+    stage->GetLayoutProperty()->UpdateMeasureType(MeasureType::MATCH_PARENT);
+    atomicService_ = atom;
+    auto pattern = atom->GetPattern<AtomicServicePattern>();
+    CHECK_NULL_RETURN(pattern, nullptr);
+    pattern->UpdateColor();
+    pattern->UpdateLayout();
     return atom;
 }
 
-void AppBarView::iniBehavior()
+RefPtr<FrameNode> AppBarView::BuildMenuBarRow()
 {
-    CHECK_NULL_VOID(atom_);
-    auto titleBar = AceType::DynamicCast<FrameNode>(atom_->GetFirstChild());
-    CHECK_NULL_VOID(titleBar);
-    auto content = AceType::DynamicCast<FrameNode>(atom_->GetChildAtIndex(1));
-    CHECK_NULL_VOID(content);
-    auto stagePattern = content->GetPattern<StagePattern>();
-    CHECK_NULL_VOID(stagePattern);
-    stagePattern->SetOnRebuildFrameCallback([titleBar, content, this]() {
-        auto backButton = AceType::DynamicCast<FrameNode>(titleBar->GetFirstChild());
-        CHECK_NULL_VOID(backButton);
-        if (content->GetChildren().size() > 1) {
-            backButton->GetLayoutProperty()->UpdateVisibility(VisibleType::VISIBLE);
-            if (!isVisibleSetted) {
-                titleBar->GetLayoutProperty()->UpdateVisibility(VisibleType::VISIBLE);
-            }
-            return;
-        }
-        backButton->GetLayoutProperty()->UpdateVisibility(VisibleType::GONE);
-        if (HasNavigation(content)) {
-            titleBar->GetLayoutProperty()->UpdateVisibility(VisibleType::GONE);
-        }
-    });
-    UpdateRowLayout();
-}
-
-RefPtr<FrameNode> AppBarView::BuildBarTitle()
-{
-    auto appBarRow = FrameNode::CreateFrameNode(V2::APP_BAR_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+    auto menuBarRow = FrameNode::CreateFrameNode(V2::APP_BAR_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
         AceType::MakeRefPtr<LinearLayoutPattern>(false));
-    auto layoutProperty = appBarRow->GetLayoutProperty<LinearLayoutProperty>();
-    CHECK_NULL_RETURN(layoutProperty, nullptr);
-    auto pipeline = PipelineContext::GetCurrentContext();
-    CHECK_NULL_RETURN(pipeline, nullptr);
-    auto appBarTheme = pipeline->GetTheme<AppBarTheme>();
+    auto theme = GetAppBarTheme();
+    CHECK_NULL_RETURN(theme, nullptr);
+
+    auto menuBar = BuildMenuBar();
+    menuBarRow->AddChild(menuBar);
+
+    auto layoutProperty = menuBarRow->GetLayoutProperty<LinearLayoutProperty>();
+    auto renderContext = menuBarRow->GetRenderContext();
+    // size
     layoutProperty->UpdateUserDefinedIdealSize(
-        CalcSize(CalcLength(1.0, DimensionUnit::PERCENT), CalcLength(appBarTheme->GetAppBarHeight())));
+        CalcSize(CalcLength(1.0, DimensionUnit::PERCENT), CalcLength(theme->GetMenuBarHeight())));
+    // main axis align
+    layoutProperty->UpdateMainAxisAlign(FlexAlign::FLEX_END);
+    // position
+    renderContext->UpdatePosition(OffsetT<Dimension>(0.0_vp, theme->GetMenuBarTopMargin()));
+    // background color
+    renderContext->UpdateBackgroundColor(Color::TRANSPARENT);
+    // hit test mode
+    menuBarRow->SetHitTestMode(HitTestMode::HTMTRANSPARENT_SELF);
+
+    menuBarRow->MarkModifyDone();
+    return menuBarRow;
+}
+
+RefPtr<FrameNode> AppBarView::BuildMenuBar()
+{
+    auto menuBar = FrameNode::CreateFrameNode(V2::ROW_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<LinearLayoutPattern>(false));
+    auto theme = GetAppBarTheme();
+    CHECK_NULL_RETURN(theme, nullptr);
+
+    auto menuButton = BuildButton(true);
+    BindMenuCallback(menuButton);
+    menuBar->AddChild(menuButton);
+    auto divider = BuildDivider();
+    menuBar->AddChild(divider);
+    auto closeButton = BuildButton(false);
+    BindCloseCallback(closeButton);
+    menuBar->AddChild(closeButton);
+
+    auto layoutProperty = menuBar->GetLayoutProperty<LinearLayoutProperty>();
+    auto renderContext = menuBar->GetRenderContext();
+    // main axis align
     layoutProperty->UpdateMainAxisAlign(FlexAlign::FLEX_START);
-    layoutProperty->UpdateCrossAxisAlign(FlexAlign::CENTER);
-    auto renderContext = appBarRow->GetRenderContext();
-    CHECK_NULL_RETURN(renderContext, nullptr);
-    renderContext->UpdateBackgroundColor(appBarTheme->GetBgColor());
+    // border width
+    BorderWidthProperty borderWidth;
+    borderWidth.SetBorderWidth(theme->GetBorderWidth());
+    layoutProperty->UpdateBorderWidth(borderWidth);
+    renderContext->UpdateBorderWidth(borderWidth);
+    // border radius
+    auto bent = theme->GetBentRadius();
+    renderContext->UpdateBorderRadius(BorderRadiusProperty(bent));
 
-    auto titleLabel = BuildBarLabel();
-    appBarRow->AddChild(BuildIconButton(
-        InternalResource::ResourceId::APP_BAR_BACK_SVG,
-        [pipeline](GestureEvent& info) {
-            if (pipeline) {
-                pipeline->CallRouterBackToPopPage();
-            }
-        },
-        true));
-    appBarRow->AddChild(titleLabel);
-    return appBarRow;
+    menuBar->MarkModifyDone();
+    return menuBar;
 }
 
-RefPtr<FrameNode> AppBarView::BuildBarLabel()
+RefPtr<FrameNode> AppBarView::BuildButton(bool isMenuButton)
 {
-    // create title label
-    auto appBarLabel = FrameNode::CreateFrameNode(
-        V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
-    auto textLayoutProperty = appBarLabel->GetLayoutProperty<TextLayoutProperty>();
-    CHECK_NULL_RETURN(textLayoutProperty, nullptr);
-    auto pipeline = PipelineContext::GetCurrentContext();
-    CHECK_NULL_RETURN(pipeline, nullptr);
-    auto themeManager = pipeline->GetThemeManager();
-    CHECK_NULL_RETURN(themeManager, nullptr);
-    auto themeConstants = themeManager->GetThemeConstants();
-    CHECK_NULL_RETURN(themeConstants, nullptr);
-#ifdef PREVIEW
-    auto label = themeConstants->GetString(pipeline->GetAppLabelId());
-    if (label.empty()) {
-        label = "label";
-        LOGW("[Engine Log] Unable to get label for shared library in the Previewer. Perform this operation on the "
-             "emulator or a real device instead.");
-    }
-    textLayoutProperty->UpdateContent(label);
-#else
-    textLayoutProperty->UpdateContent(themeConstants->GetString(pipeline->GetAppLabelId()));
-#endif
-    auto appBarTheme = pipeline->GetTheme<AppBarTheme>();
-    textLayoutProperty->UpdateMaxLines(LABLE_ROWSIZE);
-    textLayoutProperty->UpdateTextOverflow(TextOverflow::ELLIPSIS);
-    textLayoutProperty->UpdateFontSize(appBarTheme->GetFontSize());
-    textLayoutProperty->UpdateTextColor(appBarTheme->GetTextColor());
-    textLayoutProperty->UpdateFontWeight(FontWeight::MEDIUM);
-    textLayoutProperty->UpdateAlignment(Alignment::CENTER_LEFT);
-    textLayoutProperty->UpdateLayoutWeight(1.0f);
-    
+    auto button = FrameNode::CreateFrameNode(
+        V2::BUTTON_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<ButtonPattern>());
+    auto renderContext = button->GetRenderContext();
+    renderContext->UpdateBackgroundColor(Color::TRANSPARENT);
+    auto theme = GetAppBarTheme();
+    CHECK_NULL_RETURN(theme, nullptr);
+
+    auto icon = BuildIcon(isMenuButton);
+    button->AddChild(icon);
+
+    auto layoutProperty = button->GetLayoutProperty<ButtonLayoutProperty>();
+    // type
+    layoutProperty->UpdateType(ButtonType::NORMAL);
+    // size
+    layoutProperty->UpdateUserDefinedIdealSize(
+        CalcSize(CalcLength(theme->GetButtonWidth()), CalcLength(theme->GetButtonHeight())));
+    // focus style type
+    auto focusHub = button->GetFocusHub();
+    CHECK_NULL_RETURN(focusHub, nullptr);
+    focusHub->SetFocusStyleType(FocusStyleType::INNER_BORDER);
+    // focus border width
+    auto buttonPattern = button->GetPattern<ButtonPattern>();
+    CHECK_NULL_RETURN(buttonPattern, nullptr);
+    buttonPattern->SetFocusBorderWidth(theme->GetFocusedOutlineWidth());
+
+    button->MarkModifyDone();
+    return button;
+}
+
+RefPtr<FrameNode> AppBarView::BuildIcon(bool isMenuIcon)
+{
+    auto icon = FrameNode::CreateFrameNode(
+        V2::IMAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<ImagePattern>());
+    auto theme = GetAppBarTheme();
+    CHECK_NULL_RETURN(theme, nullptr);
+
+    ImageSourceInfo imageSourceInfo;
+    imageSourceInfo.SetResourceId(
+        isMenuIcon ? InternalResource::ResourceId::APP_BAR_MENU_SVG : InternalResource::ResourceId::APP_BAR_CLOSE_SVG);
+    auto layoutProperty = icon->GetLayoutProperty<ImageLayoutProperty>();
+    layoutProperty->UpdateImageSourceInfo(imageSourceInfo);
+    // size
+    layoutProperty->UpdateUserDefinedIdealSize(
+        CalcSize(CalcLength(theme->GetNewIconSize()), CalcLength(theme->GetNewIconSize())));
+    // focusable
+    auto focusHub = icon->GetFocusHub();
+    CHECK_NULL_RETURN(focusHub, nullptr);
+    focusHub->SetFocusable(true);
+
+    icon->MarkModifyDone();
+    return icon;
+}
+
+RefPtr<FrameNode> AppBarView::BuildDivider()
+{
+    auto divider = FrameNode::CreateFrameNode(
+        V2::DIVIDER_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<DividerPattern>());
+    auto theme = GetAppBarTheme();
+    CHECK_NULL_RETURN(theme, nullptr);
+
+    auto layoutProperty = divider->GetLayoutProperty<DividerLayoutProperty>();
+    // size
+    layoutProperty->UpdateUserDefinedIdealSize(
+        CalcSize(CalcLength(theme->GetDividerWidth()), CalcLength(theme->GetDividerHeight())));
+    // direction
+    layoutProperty->UpdateVertical(true);
+    // stroke width
+    layoutProperty->UpdateStrokeWidth(theme->GetDividerWidth());
+    // marigin
     MarginProperty margin;
-    margin.left = CalcLength(MARGIN_TEXT_LEFT);
-    margin.right = CalcLength(MARGIN_TEXT_RIGHT);
-    textLayoutProperty->UpdateMargin(margin);
-	
-    return appBarLabel;
+    margin.left = CalcLength(-(theme->GetDividerWidth()));
+    auto renderProperty = divider->GetPaintProperty<DividerRenderProperty>();
+    // color
+    renderProperty->UpdateDividerColor(theme->GetDividerColor());
+    // line cap
+    renderProperty->UpdateLineCap(LineCap::ROUND);
+
+    divider->MarkModifyDone();
+    return divider;
 }
 
-RefPtr<FrameNode> AppBarView::BuildFaButton()
+void AppBarView::BindMenuCallback(const RefPtr<FrameNode>& menuButton)
 {
-    auto buttonNode = BuildIconButton(InternalResource::ResourceId::APP_BAR_FA_SVG, nullptr, false);
-    CHECK_NULL_RETURN(buttonNode, nullptr);
-    auto renderContext = buttonNode->GetRenderContext();
-    CHECK_NULL_RETURN(renderContext, nullptr);
-    renderContext->UpdatePosition(OffsetT<Dimension>());
-    auto pipeline = PipelineContext::GetCurrentContext();
-    CHECK_NULL_RETURN(pipeline, nullptr);
-    auto appBarTheme = pipeline->GetTheme<AppBarTheme>();
-    auto clickCallback = [pipeline, appBarTheme, buttonNode](GestureEvent& info) {
+    auto clickCallback = [weakButton = WeakClaim(RawPtr(menuButton))](GestureEvent& info) {
 #ifdef PREVIEW
-        LOGW("[Engine Log] Unable to show the SharePanel in the Previewer. Perform this operation on the "
-             "emulator or a real device instead.");
+        LOGW("[Engine Log] Unable to show the SharePanel in the Previewer. "
+             "Perform this operation on the emulator or a real device instead.");
 #else
-        if (!pipeline || !appBarTheme) {
-            return;
-        }
+        auto pipeline = PipelineContext::GetCurrentContext();
+        CHECK_NULL_VOID(pipeline);
+        auto theme = pipeline->GetTheme<AppBarTheme>();
+        CHECK_NULL_VOID(theme);
         if (SystemProperties::GetExtSurfaceEnabled()) {
-            LOGI("start panel bundleName is %{public}s, abilityName is %{public}s",
-                appBarTheme->GetBundleName().c_str(), appBarTheme->GetAbilityName().c_str());
-            pipeline->FireSharePanelCallback(appBarTheme->GetBundleName(), appBarTheme->GetAbilityName());
+            LOGI("start panel bundleName is %{public}s, abilityName is %{public}s", theme->GetBundleName().c_str(),
+                theme->GetAbilityName().c_str());
+            pipeline->FireSharePanelCallback(theme->GetBundleName(), theme->GetAbilityName());
         } else {
-            BindContentCover(buttonNode);
+            auto menuButton = weakButton.Upgrade();
+            CHECK_NULL_VOID(menuButton);
+            BindContentCover(menuButton);
         }
 #endif
     };
-    auto buttonEventHub = buttonNode->GetOrCreateGestureEventHub();
-    if (buttonEventHub) {
-        buttonEventHub->AddClickEvent(AceType::MakeRefPtr<ClickEvent>(std::move(clickCallback)));
+    auto eventHub = menuButton->GetOrCreateGestureEventHub();
+    if (eventHub) {
+        eventHub->AddClickEvent(AceType::MakeRefPtr<ClickEvent>(std::move(clickCallback)));
     }
-    return buttonNode;
 }
 
-RefPtr<FrameNode> AppBarView::BuildIconButton(
-    InternalResource::ResourceId icon, GestureEventFunc&& clickCallback, bool isBackButton)
+void AppBarView::BindCloseCallback(const RefPtr<FrameNode>& closeButton)
 {
-    // button image icon
-    ImageSourceInfo imageSourceInfo;
-    auto imageIcon = FrameNode::CreateFrameNode(
-        V2::IMAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<ImagePattern>());
-
-    imageSourceInfo.SetResourceId(icon);
-    auto imageLayoutProperty = imageIcon->GetLayoutProperty<ImageLayoutProperty>();
-    CHECK_NULL_RETURN(imageLayoutProperty, nullptr);
-    auto pipeline = PipelineContext::GetCurrentContext();
-    CHECK_NULL_RETURN(pipeline, nullptr);
-    auto appBarTheme = pipeline->GetTheme<AppBarTheme>();
-    imageLayoutProperty->UpdateUserDefinedIdealSize(
-        CalcSize(CalcLength(appBarTheme->GetIconSize()), CalcLength(appBarTheme->GetIconSize())));
-    imageLayoutProperty->UpdateImageSourceInfo(imageSourceInfo);
-    imageIcon->MarkModifyDone();
-
-    auto buttonNode = FrameNode::CreateFrameNode(
-        V2::BUTTON_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<ButtonPattern>());
-
-    auto renderContext = buttonNode->GetRenderContext();
-    CHECK_NULL_RETURN(renderContext, nullptr);
-    renderContext->UpdateBackgroundColor(Color::TRANSPARENT);
-
-    auto buttonPattern = AceType::DynamicCast<ButtonPattern>(buttonNode->GetPattern());
-    CHECK_NULL_RETURN(buttonPattern, nullptr);
-    buttonPattern->SetClickedColor(appBarTheme->GetClickEffectColor());
-
-    auto buttonEventHub = buttonNode->GetOrCreateGestureEventHub();
-    CHECK_NULL_RETURN(buttonEventHub, nullptr);
-    auto clickEvent = AceType::MakeRefPtr<ClickEvent>(std::move(clickCallback));
-    buttonEventHub->AddClickEvent(clickEvent);
-
-    auto buttonLayoutProperty = buttonNode->GetLayoutProperty<ButtonLayoutProperty>();
-    CHECK_NULL_RETURN(buttonLayoutProperty, nullptr);
-    buttonLayoutProperty->UpdateType(ButtonType::NORMAL);
-    auto butttonRadius = appBarTheme->GetIconCornerRadius();
-    buttonLayoutProperty->UpdateBorderRadius(BorderRadiusProperty(butttonRadius));
-    buttonLayoutProperty->UpdateUserDefinedIdealSize(
-        CalcSize(CalcLength(appBarTheme->GetIconSize() * 2), CalcLength(appBarTheme->GetIconSize() * 2)));
-    MarginProperty margin;
-    margin.left = CalcLength(isBackButton ? MARGIN_BUTTON : -MARGIN_BUTTON);
-    margin.right = CalcLength(isBackButton ? MARGIN_BACK_BUTTON_RIGHT : MARGIN_BUTTON);
-    buttonLayoutProperty->UpdateMargin(margin);
-    buttonNode->MarkModifyDone();
-    buttonNode->AddChild(imageIcon);
-    return buttonNode;
+    auto clickCallback = [](GestureEvent& info) {
+        auto pipeline = PipelineContext::GetCurrentContext();
+        CHECK_NULL_VOID(pipeline);
+        auto windowManager = pipeline->GetWindowManager();
+        CHECK_NULL_VOID(windowManager);
+        windowManager->WindowMinimize();
+    };
+    auto eventHub = closeButton->GetOrCreateGestureEventHub();
+    if (eventHub) {
+        eventHub->AddClickEvent(AceType::MakeRefPtr<ClickEvent>(std::move(clickCallback)));
+    }
 }
 
 void AppBarView::BindContentCover(const RefPtr<FrameNode>& targetNode)
@@ -268,34 +273,25 @@ void AppBarView::BindContentCover(const RefPtr<FrameNode>& targetNode)
     CHECK_NULL_VOID(overlayManager);
 
     std::string stageAbilityName = "";
-    auto appBarTheme = pipeline->GetTheme<AppBarTheme>();
-    if (appBarTheme) {
-        stageAbilityName = appBarTheme->GetStageAbilityName();
+    auto theme = pipeline->GetTheme<AppBarTheme>();
+    if (theme) {
+        stageAbilityName = theme->GetStageAbilityName();
     }
     NG::ModalStyle modalStyle;
     modalStyle.modalTransition = NG::ModalTransition::NONE;
     auto buildNodeFunc = [targetNode, overlayManager, &modalStyle, &stageAbilityName]() -> RefPtr<UINode> {
         auto onRelease = [overlayManager, &modalStyle, targetNode](int32_t releaseCode) {
-            overlayManager->BindContentCover(false, nullptr, nullptr, modalStyle, nullptr, nullptr, targetNode);
+            overlayManager->BindContentCover(false, nullptr, nullptr, modalStyle, nullptr, nullptr, nullptr,
+                nullptr, ContentCoverParam(), targetNode);
         };
         auto onError = [overlayManager, &modalStyle, targetNode](
                            int32_t code, const std::string& name, const std::string& message) {
-            overlayManager->BindContentCover(false, nullptr, nullptr, modalStyle, nullptr, nullptr, targetNode);
+            overlayManager->BindContentCover(false, nullptr, nullptr, modalStyle, nullptr, nullptr, nullptr,
+                nullptr, ContentCoverParam(), targetNode);
         };
 
         // Create parameters of UIExtension.
-        auto missionId = AceApplicationInfo::GetInstance().GetMissionId();
-        std::map<std::string, std::string> params;
-        params.try_emplace("bundleName", AceApplicationInfo::GetInstance().GetProcessName());
-        params.try_emplace("abilityName", AceApplicationInfo::GetInstance().GetAbilityName());
-        params.try_emplace("module", Container::Current()->GetModuleName());
-        if (missionId != -1) {
-            params.try_emplace("missionId", std::to_string(missionId));
-        }
-        params.try_emplace("ability.want.params.uiExtensionType", "sys/commonUI");
-        LOGI("BundleName: %{public}s, AbilityName: %{public}s, Module: %{public}s",
-            AceApplicationInfo::GetInstance().GetProcessName().c_str(),
-            AceApplicationInfo::GetInstance().GetAbilityName().c_str(), Container::Current()->GetModuleName().c_str());
+        std::map<std::string, std::string> params = CreateUIExtensionParams();
 
         // Create UIExtension node.
         auto appGalleryBundleName = OHOS::Ace::AppBarHelper::QueryAppGalleryBundleName();
@@ -312,216 +308,55 @@ void AppBarView::BindContentCover(const RefPtr<FrameNode>& targetNode)
         uiExtNode->MarkModifyDone();
         return uiExtNode;
     };
-    overlayManager->BindContentCover(true, nullptr, std::move(buildNodeFunc), modalStyle, nullptr, nullptr, targetNode);
+    overlayManager->BindContentCover(true, nullptr, std::move(buildNodeFunc), modalStyle, nullptr, nullptr, nullptr,
+        nullptr, ContentCoverParam(), targetNode);
 }
 
-void AppBarView::SetVisible(bool visible)
+std::map<std::string, std::string> AppBarView::CreateUIExtensionParams()
 {
-    CHECK_NULL_VOID(atom_);
-    auto uiRow = atom_->GetFirstChild();
-    CHECK_NULL_VOID(uiRow);
-    auto row = AceType::DynamicCast<FrameNode>(uiRow);
-    row->GetLayoutProperty()->UpdateVisibility(visible ? VisibleType::VISIBLE : VisibleType::GONE);
-    row->MarkModifyDone();
-    row->MarkDirtyNode();
-    isVisibleSetted = true;
-}
-
-void AppBarView::SetRowColor(const std::optional<Color>& color)
-{
-    CHECK_NULL_VOID(atom_);
-    auto uiRow = atom_->GetFirstChild();
-    CHECK_NULL_VOID(uiRow);
-    auto row = AceType::DynamicCast<FrameNode>(uiRow);
-    if (color) {
-        row->GetRenderContext()->UpdateBackgroundColor(color.value());
-    } else {
-        auto pipeline = PipelineContext::GetCurrentContext();
-        CHECK_NULL_VOID(pipeline);
-        auto appBarTheme = pipeline->GetTheme<AppBarTheme>();
-        row->GetRenderContext()->UpdateBackgroundColor(appBarTheme->GetBgColor());
+    auto missionId = AceApplicationInfo::GetInstance().GetMissionId();
+    std::map<std::string, std::string> params;
+    params.try_emplace("bundleName", AceApplicationInfo::GetInstance().GetProcessName());
+    params.try_emplace("abilityName", AceApplicationInfo::GetInstance().GetAbilityName());
+    params.try_emplace("module", Container::Current()->GetModuleName());
+    if (missionId != -1) {
+        params.try_emplace("missionId", std::to_string(missionId));
     }
-    row->MarkModifyDone();
-    row->MarkDirtyNode();
-    isRowColorSetted = color.has_value();
+    params.try_emplace("ability.want.params.uiExtensionType", "sys/commonUI");
+    LOGI("BundleName: %{public}s, AbilityName: %{public}s, Module: %{public}s",
+        AceApplicationInfo::GetInstance().GetProcessName().c_str(),
+        AceApplicationInfo::GetInstance().GetAbilityName().c_str(), Container::Current()->GetModuleName().c_str());
+    return params;
 }
 
-void AppBarView::SetContent(const std::string& content)
-{
-    CHECK_NULL_VOID(atom_);
-    auto uiRow = atom_->GetFirstChild();
-    CHECK_NULL_VOID(uiRow);
-    auto uiLabel = uiRow->GetLastChild();
-    CHECK_NULL_VOID(uiLabel);
-    auto label = AceType::DynamicCast<FrameNode>(uiLabel);
-    label->GetLayoutProperty<TextLayoutProperty>()->UpdateContent(content);
-    label->MarkModifyDone();
-    label->MarkDirtyNode();
-}
-
-void AppBarView::SetFontStyle(Ace::FontStyle fontStyle)
-{
-    CHECK_NULL_VOID(atom_);
-    auto uiRow = atom_->GetFirstChild();
-    CHECK_NULL_VOID(uiRow);
-    auto uiLabel = uiRow->GetLastChild();
-    CHECK_NULL_VOID(uiLabel);
-    auto label = AceType::DynamicCast<FrameNode>(uiLabel);
-    label->GetLayoutProperty<TextLayoutProperty>()->UpdateItalicFontStyle(fontStyle);
-    label->MarkModifyDone();
-    label->MarkDirtyNode();
-}
-
-void AppBarView::SetIconColor(const std::optional<Color>& color)
-{
-    CHECK_NULL_VOID(atom_);
-    auto row = atom_->GetFirstChild();
-    CHECK_NULL_VOID(row);
-    auto backButton = row->GetFirstChild();
-    CHECK_NULL_VOID(backButton);
-    auto backIcon = AceType::DynamicCast<FrameNode>(backButton->GetFirstChild());
-    SetEachIconColor(backIcon, color, InternalResource::ResourceId::APP_BAR_BACK_SVG);
-    isIconColorSetted = color.has_value();
-    auto faButton = GetFaButton();
-    CHECK_NULL_VOID(faButton);
-    auto faIcon = AceType::DynamicCast<FrameNode>(faButton->GetFirstChild());
-    SetEachIconColor(faIcon, color, InternalResource::ResourceId::APP_BAR_FA_SVG);
-}
-
-void AppBarView::SetRowWidth(const Dimension& width)
+std::optional<RectF> AppBarView::GetAppBarRect()
 {
     auto pipeline = PipelineContext::GetCurrentContext();
-    CHECK_NULL_VOID(pipeline);
-    auto appBarTheme = pipeline->GetTheme<AppBarTheme>();
-    auto butttonRadius = appBarTheme->GetIconCornerRadius();
-    Dimension offset = appBarTheme->GetIconSize() * 3;
-    Dimension positionX = width - offset;
-    Dimension positionLeftX = appBarTheme->GetIconSize() - butttonRadius;
-    Dimension positionY = (appBarTheme->GetAppBarHeight() / 2.0f) - appBarTheme->GetIconSize();
-    auto faButton = GetFaButton();
-    CHECK_NULL_VOID(faButton);
-    auto renderContext = faButton->GetRenderContext();
-    CHECK_NULL_VOID(renderContext);
-    bool isRtl = AceApplicationInfo::GetInstance().IsRightToLeft();
-    if (!isRtl) {
-        renderContext->UpdatePosition(OffsetT(positionX, positionY));
-    } else {
-        renderContext->UpdatePosition(OffsetT(positionLeftX, positionY));
+    if (!pipeline || !pipeline->GetInstallationFree()) {
+        return std::nullopt;
     }
-}
-
-void AppBarView::SetEachIconColor(
-    RefPtr<FrameNode> icon, const std::optional<Color>& color, InternalResource::ResourceId image)
-{
-    CHECK_NULL_VOID(icon);
-    ImageSourceInfo info;
-    if (color.has_value()) {
-        info.SetResourceId(image, color);
-    } else {
-        auto pipeline = PipelineContext::GetCurrentContext();
-        CHECK_NULL_VOID(pipeline);
-        auto appBarTheme = pipeline->GetTheme<AppBarTheme>();
-        info.SetResourceId(image, appBarTheme->GetTextColor());
+    auto theme = GetAppBarTheme();
+    CHECK_NULL_RETURN(theme, std::nullopt);
+    auto atom = atomicService_.Upgrade();
+    CHECK_NULL_RETURN(atom, std::nullopt);
+    auto pattern = atom->GetPattern<AtomicServicePattern>();
+    CHECK_NULL_RETURN(pattern, std::nullopt);
+    auto menuBar = pattern->GetMenuBar();
+    CHECK_NULL_RETURN(menuBar, std::nullopt);
+    auto size = menuBar->GetGeometryNode()->GetMarginFrameSize();
+    auto offset = menuBar->GetGeometryNode()->GetMarginFrameOffset();
+    auto parent = menuBar->GetParent();
+    while (parent) {
+        auto frameNode = AceType::DynamicCast<FrameNode>(parent);
+        if (frameNode) {
+            offset += frameNode->GetGeometryNode()->GetFrameOffset();
+        }
+        parent = parent->GetParent();
     }
-    icon->GetLayoutProperty<ImageLayoutProperty>()->UpdateImageSourceInfo(info);
-    icon->MarkModifyDone();
-    icon->MarkDirtyNode();
-}
-
-void AppBarView::IniColor()
-{
-    CHECK_NULL_VOID(atom_);
-    auto pipeline = PipelineContext::GetCurrentContext();
-    CHECK_NULL_VOID(pipeline);
-    auto appBarTheme = pipeline->GetTheme<AppBarTheme>();
-
-    auto row = atom_->GetFirstChild();
-    auto label = AceType::DynamicCast<FrameNode>(row->GetLastChild());
-    CHECK_NULL_VOID(label);
-    auto textLayoutProperty = label->GetLayoutProperty<TextLayoutProperty>();
-    CHECK_NULL_VOID(textLayoutProperty);
-    textLayoutProperty->UpdateTextColor(appBarTheme->GetTextColor());
-
-    if (!isRowColorSetted) {
-        SetRowColor(std::nullopt);
-    }
-
-    if (!isIconColorSetted) {
-        SetIconColor(std::nullopt);
-    }
-}
-
-RefPtr<FrameNode> AppBarView::GetFaButton()
-{
-#ifndef IS_EMULATOR
-    CHECK_NULL_RETURN(atom_, nullptr);
-    return AceType::DynamicCast<FrameNode>(atom_->GetLastChild());
-#endif
-    return nullptr;
-}
-
-RefPtr<FrameNode> AppBarView::GetBackButton()
-{
-    CHECK_NULL_RETURN(atom_, nullptr);
-    auto row = atom_->GetFirstChild();
-    CHECK_NULL_RETURN(row, nullptr);
-    return AceType::DynamicCast<FrameNode>(row->GetFirstChild());
-}
-
-void AppBarView::ReverseBackButton()
-{
-    bool isRtl = AceApplicationInfo::GetInstance().IsRightToLeft();
-    auto backButton = GetBackButton();
-    CHECK_NULL_VOID(backButton);
-    auto renderContext = backButton->GetRenderContext();
-    CHECK_NULL_VOID(renderContext);
-    auto buttonLayoutProperty = backButton->GetLayoutProperty();
-    CHECK_NULL_VOID(buttonLayoutProperty);
-
-    MarginProperty buttonmargin;
-    bool isBackButton = true;
-    if (!isRtl) {
-        buttonmargin.left = CalcLength(isBackButton ? MARGIN_BUTTON : -MARGIN_BUTTON);
-        buttonmargin.right = CalcLength(isBackButton ? MARGIN_BACK_BUTTON_RIGHT : MARGIN_BUTTON);
-        renderContext->UpdateTransformScale(VectorF(UNCHANGED_X, UNCHANGED_Y));
-    } else {
-        buttonmargin.right = CalcLength(isBackButton ? MARGIN_BUTTON : -MARGIN_BUTTON);
-        buttonmargin.left = CalcLength(isBackButton ? MARGIN_BACK_BUTTON_RIGHT : MARGIN_BUTTON);
-        renderContext->UpdateTransformScale(VectorF(REVERSED_X, UNCHANGED_Y));
-    }
-    buttonLayoutProperty->UpdateMargin(buttonmargin);
-
-    backButton->MarkModifyDone();
-    backButton->MarkDirtyNode();
-}
-
-void AppBarView::UpdateRowLayout()
-{
-    bool isRtl = AceApplicationInfo::GetInstance().IsRightToLeft();
-    if (isRtlSetted == isRtl) {
-        return;
-    }
-    CHECK_NULL_VOID(atom_);
-    auto row = atom_->GetFirstChild();
-    auto label = AceType::DynamicCast<FrameNode>(row->GetChildAtIndex(1));
-    CHECK_NULL_VOID(label);
-    auto textLayoutProperty = label->GetLayoutProperty<TextLayoutProperty>();
-    MarginProperty textmargin;
-    if (!isRtl) {
-        textLayoutProperty->UpdateTextAlign(TextAlign::LEFT);
-        textmargin.left = CalcLength(MARGIN_TEXT_LEFT);
-        textmargin.right = CalcLength(MARGIN_TEXT_RIGHT);
-        isRtlSetted = false;
-    } else {
-        textLayoutProperty->UpdateTextAlign(TextAlign::RIGHT);
-        textmargin.right = CalcLength(MARGIN_TEXT_LEFT);
-        textmargin.left = CalcLength(MARGIN_TEXT_RIGHT);
-        isRtlSetted = true;
-    }
-    textLayoutProperty->UpdateMargin(textmargin);
-    label->MarkModifyDone();
-    label->MarkDirtyNode();
-
-    ReverseBackButton();
+    offset.AddY(theme->GetMenuBarTopMargin().ConvertToPx());
+    auto manager = pipeline->GetSafeAreaManager();
+    CHECK_NULL_RETURN(manager, std::nullopt);
+    offset.AddY(manager->GetSystemSafeArea().top_.Length());
+    return RectF(offset, size);
 }
 } // namespace OHOS::Ace::NG

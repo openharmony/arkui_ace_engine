@@ -33,7 +33,7 @@ const char NULL_STRING[] = "";
 const char ERROR_MSG[] = "errormsg";
 const char ERROR_CODE[] = "errorcode";
 
-inline std::string GetStringFromMap(const std::map<std::string, std::string>& map, std::string key)
+inline std::string GetStringFromMap(const std::map<std::string, std::string>& map, const std::string& key)
 {
     auto iter = map.find(key);
     if (iter != map.end()) {

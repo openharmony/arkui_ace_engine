@@ -56,12 +56,23 @@
 // define just once to get just one Symbol
 const __IS_OBSERVED_PROXIED = Symbol("_____is_observed_proxied__");
 
-function Observed(constructor_: any, _?: any): any {
-  stateMgmtConsole.debug(`@Observed class decorator: Overwriting constructor for '${constructor_.name}', gets wrapped inside ObservableObject proxy.`);
-  let ObservedClass = class extends constructor_ {
+type Constructor = { new(...args: any[]): any };
+
+function Observed<T extends Constructor>(BaseClass: T): Constructor {
+  stateMgmtConsole.debug(`@Observed class decorator: Overwriting constructor for '${BaseClass.name}', gets wrapped inside ObservableObject proxy.`);
+
+  // prevent use of V3 @track inside V2 @Observed class
+  if (BaseClass.prototype && Reflect.has(BaseClass.prototype, ObserveV3.SYMBOL_REFS)) {
+    const error = `'@Observed class ${BaseClass?.name}': invalid use of V3 @track decorator inside V2 @Observed class. Need to fix class definition to use @Track.`;
+    stateMgmtConsole.error(error);
+    throw new Error(error);
+  }
+
+  return class extends BaseClass {
     constructor(...args: any) {
       super(...args);
-      stateMgmtConsole.debug(`@Observed '${constructor_.name}' modified constructor.`);
+      stateMgmtConsole.debug(`@Observed '${BaseClass.name}' modified constructor.`);
+      ConfigureStateMgmt.instance.intentUsingV2(`@Observed`, BaseClass.name);
       let isProxied = Reflect.has(this, __IS_OBSERVED_PROXIED);
       Object.defineProperty(this, __IS_OBSERVED_PROXIED, {
         value: true,
@@ -70,21 +81,15 @@ function Observed(constructor_: any, _?: any): any {
         writable: false
       });
       if (isProxied) {
-        stateMgmtConsole.debug(`   ... new '${constructor_.name}', is proxied already`);
+        stateMgmtConsole.debug(`   ... new '${BaseClass.name}', is proxied already`);
         return this;
       } else {
-        stateMgmtConsole.debug(`   ... new '${constructor_.name}', wrapping inside ObservedObject proxy`);
+        stateMgmtConsole.debug(`   ... new '${BaseClass.name}', wrapping inside ObservedObject proxy`);
         return ObservedObject.createNewInternal(this, undefined);
       }
     }
   };
-  return ObservedClass;
 }
-
-// force tsc to generate the __decorate data structure needed for @Observed
-// tsc will not generate unless the @Observed class decorator is used at least once
-@Observed class __IGNORE_FORCE_decode_GENERATION__ { }
-
 
 /**
  * class ObservedObject and supporting Handler classes, 
@@ -103,9 +108,11 @@ class SubscribableHandler {
   static readonly UNSUBSCRIBE = Symbol("_____unsubscribe__")
   static readonly COUNT_SUBSCRIBERS = Symbol("____count_subscribers__")
   static readonly SET_ONREAD_CB = Symbol("_____set_onread_cb__");
+  static readonly RAW_THIS = Symbol("_____raw_this");
 
   private owningProperties_: Set<number>;
   private readCbFunc_?: PropertyReadCbFunc;
+  private obSelf_?: ObservedPropertyAbstractPU<any>;
 
   constructor(owningProperty: IPropertySubscriber) {
     this.owningProperties_ = new Set<number>();
@@ -155,6 +162,7 @@ class SubscribableHandler {
       // PU code path
       if ('onTrackedObjectPropertyCompatModeHasChangedPU' in owningProperty) {
         (owningProperty as unknown as ObservedObjectEventsPUReceiver<any>).onTrackedObjectPropertyCompatModeHasChangedPU(this, propName);
+        return;
       }
 
       // FU code path
@@ -194,13 +202,18 @@ class SubscribableHandler {
       case SubscribableHandler.COUNT_SUBSCRIBERS:
         return this.owningProperties_.size
         break;
+      case ObserveV3.SYMBOL_REFS:
+      case ObserveV3.V3_DECO_META:
+        // return result unmonitored
+        return Reflect.get(target, property, receiver);
+        break;
       default:
         const result = Reflect.get(target, property, receiver);
         let propertyStr : string = String(property);
-        if (this.readCbFunc_ && typeof result !== 'function') {
+        if (this.readCbFunc_ && typeof result !== 'function' && this.obSelf_ != undefined) {
           let isTracked = this.isPropertyTracked(target, propertyStr);
           stateMgmtConsole.debug(`SubscribableHandler: get ObservedObject property '${isTracked ? "@Track " : ""}${propertyStr}' notifying read.`);
-          this.readCbFunc_(receiver, propertyStr, isTracked);
+          this.readCbFunc_.call(this.obSelf_, receiver, propertyStr, isTracked);
         } else {
           // result is function or in compatibility mode (in compat mode cbFunc will never be set)
           stateMgmtConsole.debug(`SubscribableHandler: get ObservedObject property '${propertyStr}' not notifying read.`);
@@ -226,6 +239,10 @@ class SubscribableHandler {
         // assignment obsObj[SubscribableHandler.SET_ONREAD_CB] = readCallbackFunc
         stateMgmtConsole.debug(`SubscribableHandler: setReadingProperty: ${TrackedObject.isCompatibilityMode(target) ? 'not used in compatibility mode' : newValue ? 'set new cb function' : 'unset cb function'}.`);
         this.readCbFunc_ = TrackedObject.isCompatibilityMode(target) ? undefined : (newValue as (PropertyReadCbFunc | undefined));
+        return true;
+        break;
+      case SubscribableHandler.RAW_THIS:
+        this.obSelf_ = TrackedObject.isCompatibilityMode(target) ? undefined : newValue;
         return true;
         break;
       default:
@@ -528,11 +545,12 @@ class ObservedObject<T extends Object> extends ExtendableProxy {
   /*
     set or unset callback function to be called when a property has been called
   */
-  public static registerPropertyReadCb(obj: Object, readPropCb: PropertyReadCbFunc): boolean {
+  public static registerPropertyReadCb(obj: Object, readPropCb: PropertyReadCbFunc, obSelf: ObservedPropertyAbstractPU<any>): boolean {
     if (!ObservedObject.IsObservedObject(obj)) {
       return false;
     }
     obj[SubscribableHandler.SET_ONREAD_CB] = readPropCb;
+    obj[SubscribableHandler.RAW_THIS] = obSelf;
     return true;
   }
 
@@ -541,6 +559,7 @@ class ObservedObject<T extends Object> extends ExtendableProxy {
       return false;
     }
     obj[SubscribableHandler.SET_ONREAD_CB] = undefined;
+    obj[SubscribableHandler.RAW_THIS] = undefined;
     return true;
   }
 

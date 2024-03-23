@@ -20,6 +20,8 @@
 
 namespace OHOS::Ace::NG::NodeModifier {
 const ArkUICalendarPickerModifier* GetCalendarPickerModifier();
+void ParseDateByStr(const std::string& date, ArkUISelectedDateType& selectedDate);
+void SetCalendarPickerOnChange(ArkUINodeHandle node, void* extraParam);
 }
 
 #endif // FRAMEWORKS_INTERFACE_INNER_API_NATIVE_NODE_CALENDAR_PICKER_MODIFIER_H

@@ -13,16 +13,35 @@
  * limitations under the License.
  */
 
-#include "frameworks/core/components_ng/svg/parse/svg_fe_color_matrix.h"
-
-#include "include/core/SkColorFilter.h"
-#include "securec.h"
-#include "third_party/skia/include/effects/SkImageFilters.h"
+#include "core/components_ng/svg/parse/svg_fe_color_matrix.h"
 
 #include "base/utils/utils.h"
-#include "frameworks/core/components/declaration/svg/svg_fe_colormatrix_declaration.h"
+#include "core/components/declaration/svg/svg_declaration.h"
+#include "core/components/declaration/svg/svg_fe_colormatrix_declaration.h"
 
 namespace OHOS::Ace::NG {
+
+static constexpr float HUE_R = 0.213f;
+static constexpr float HUE_G = 0.715f;
+static constexpr float HUE_B = 0.072f;
+
+static constexpr float LUM_COEFF_R = 0.2126f;
+static constexpr float LUM_COEFF_G = 0.7152f;
+static constexpr float LUM_COEFF_B = 0.0722f;
+
+const std::vector<float> luminanceMatrix_ = {
+    0, 0, 0, 0, 0,
+    0, 0, 0, 0, 0,
+    0, 0, 0, 0, 0,
+    LUM_COEFF_R, LUM_COEFF_G, LUM_COEFF_B, 0, 0
+};
+
+static void SetRow(float* row, float r, float g, float b)
+{
+    row[0] = r;
+    row[1] = g;
+    row[2] = b;
+}
 
 RefPtr<SvgNode> SvgFeColorMatrix::Create()
 {
@@ -36,50 +55,107 @@ SvgFeColorMatrix::SvgFeColorMatrix() : SvgFe()
     declaration_->InitializeStyle();
 }
 
-void SvgFeColorMatrix::OnInitStyle()
+void SvgFeColorMatrix::MakeMatrix(const std::string& value)
 {
-    auto declaration = AceType::DynamicCast<SvgFeColorMatrixDeclaration>(declaration_);
-    CHECK_NULL_VOID(declaration);
-    auto value = declaration->GetValues();
-    if (memset_s(matrix_, sizeof(matrix_), 0, sizeof(matrix_)) != EOK) {
-        return;
-    }
     std::vector<float> matrix;
     StringUtils::StringSplitter(value, ' ', matrix);
     if (matrix.empty()) {
         StringUtils::StringSplitter(value, ',', matrix);
     }
-    for (int i = 0; i < int(sizeof(matrix_) / sizeof(float)) && i < (int)matrix.size(); i++) {
-        // tv skia is range 0.0 and 1.0
-        matrix_[i] = matrix[i];
+    // when matrix length < 20, then return
+    if (matrix.size() < matrix_.size()) {
+        return;
+    }
+    matrix_ = matrix;
+}
+
+void SvgFeColorMatrix::MakeHueRotate(const std::string& value)
+{
+    float theta = std::stof(value);
+    if (GreatNotEqual(theta, 360.0f) || LessNotEqual(theta, 0.0f)) {
+        return;
+    }
+    const float cosValue = cos(theta);
+    const float sinValue = sin(theta);
+    // The source of the formula is this website: https://www.w3.org/TR/SVG11/filters.html#FilterPrimitiveSubRegion
+    matrix_ = {
+        0.213f + cosValue*0.787f + sinValue*-0.213f,
+        0.715f + cosValue*-0.715f + sinValue*-0.715f,
+        0.072f + cosValue*-0.072f + sinValue* 0.928f,
+        0,
+        0,
+
+        0.213f + cosValue*-0.213f + sinValue* 0.143f,
+        0.715f + cosValue* 0.285f + sinValue* 0.140f,
+        0.072f + cosValue*-0.072f + sinValue*-0.283f,
+        0,
+        0,
+
+        0.213f + cosValue*-0.213f + sinValue*-0.787f,
+        0.715f + cosValue*-0.715f + sinValue* 0.715f,
+        0.072f + cosValue* 0.928f + sinValue* 0.072f,
+        0,
+        0,
+
+        0, 0, 0, 1, 0
+    };
+}
+
+void SvgFeColorMatrix::MakeSaturate(const std::string& value)
+{
+    float satValue = std::stof(value);
+    if (GreatNotEqual(satValue, 1.0f) || LessNotEqual(satValue, 0.0f)) {
+        return;
+    }
+
+    const float RValue = HUE_R * (1 - satValue);
+    const float GValue = HUE_G * (1 - satValue);
+    const float BValue = HUE_B * (1 - satValue);
+
+    SetRow(matrix_.data() +  0, RValue + satValue, GValue, BValue);
+    SetRow(matrix_.data() +  5, RValue, GValue + satValue, BValue);
+    SetRow(matrix_.data() + 10, RValue, GValue, BValue + satValue);
+}
+
+void SvgFeColorMatrix::MakeLuminanceToAlpha()
+{
+    matrix_ = luminanceMatrix_;
+}
+
+void SvgFeColorMatrix::OnInitStyle()
+{
+    auto declaration = AceType::DynamicCast<SvgFeColorMatrixDeclaration>(declaration_);
+    CHECK_NULL_VOID(declaration);
+    auto type = declaration->GetType();
+    switch (type) {
+        case SvgFeColorMatrixType::Saturate:
+            MakeSaturate(declaration->GetValues());
+            break;
+        case SvgFeColorMatrixType::HueRotate:
+            MakeHueRotate(declaration->GetValues());
+            break;
+        case SvgFeColorMatrixType::LuminanceToAlpha:
+            MakeLuminanceToAlpha();
+            break;
+        default:
+            MakeMatrix(declaration->GetValues());
+            break;
     }
 }
 
-#ifndef USE_ROSEN_DRAWING
-void SvgFeColorMatrix::OnAsImageFilter(sk_sp<SkImageFilter>& imageFilter, const ColorInterpolationType& srcColor,
-    ColorInterpolationType& currentColor) const
-#else
 void SvgFeColorMatrix::OnAsImageFilter(std::shared_ptr<RSImageFilter>& imageFilter,
     const ColorInterpolationType& srcColor, ColorInterpolationType& currentColor) const
-#endif
 {
     auto declaration = AceType::DynamicCast<SvgFeColorMatrixDeclaration>(declaration_);
     CHECK_NULL_VOID(declaration);
     imageFilter = MakeImageFilter(declaration->GetIn(), imageFilter);
 
-#ifndef USE_ROSEN_DRAWING
-
-    auto colorFilter = SkColorFilters::Matrix(matrix_);
-
-    imageFilter = SkImageFilters::ColorFilter(colorFilter, imageFilter);
-#else
     RSColorMatrix colorMatrix;
-    colorMatrix.SetArray(matrix_);
+    colorMatrix.SetArray(matrix_.data());
     auto colorFilter = RSRecordingColorFilter::CreateMatrixColorFilter(colorMatrix);
     CHECK_NULL_VOID(colorFilter);
 
     imageFilter = RSRecordingImageFilter::CreateColorFilterImageFilter(*colorFilter, imageFilter);
-#endif
     ConverImageFilterColor(imageFilter, srcColor, currentColor);
 }
 

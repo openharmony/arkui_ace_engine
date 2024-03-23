@@ -71,6 +71,10 @@ void OptionPattern::OnModifyDone()
         CHECK_NULL_VOID(textLayoutProperty);
         textLayoutProperty->UpdateTextColor(selectTheme_->GetDisabledMenuFontColor());
         text_->MarkModifyDone();
+        if (icon_) {
+            icon_->GetRenderContext()->UpdateOpacity(selectTheme_->GetDisabledFontColorAlpha());
+            icon_->MarkModifyDone();
+        }
     } else {
         UpdatePasteFontColor(selectTheme_->GetMenuFontColor());
     }

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -37,6 +37,9 @@ public:
     void SetOnRefreshing(RefreshingEvent&& refreshing) override;
     void SetChangeEvent(RefreshChangeEvent&& changeEvent) override;
     void SetCustomBuilder(const RefPtr<NG::UINode>& customBuilder) override;
+    void SetLoadingText(const std::string& loadingText) override;
+    void SetRefreshOffset(const Dimension& offset) override;
+    void SetPullToRefresh(bool isPullToRefresh) override;
     // @deprecated
     void Pop() override {}
     void SetRefreshDistance(const Dimension& refreshDistance) override {}
@@ -54,8 +57,11 @@ public:
     static RefPtr<FrameNode> CreateFrameNode(int32_t nodeId);
     static void SetRefreshing(FrameNode* frameNode, bool isRefreshing);
     static bool GetRefreshing(FrameNode* frameNode);
+    static void SetCustomBuilder(FrameNode* frameNode, FrameNode* customBuilder);
     static void SetOnStateChange(FrameNode* frameNode, StateChangeEvent&& stateChange);
     static void SetOnRefreshing(FrameNode* frameNode, RefreshingEvent&& refreshing);
+    static void SetRefreshOffset(FrameNode* frameNode, const Dimension& offset);
+    static void SetPullToRefresh(FrameNode* frameNode, bool isPullToRefresh);
 
 };
 } // namespace OHOS::Ace::NG

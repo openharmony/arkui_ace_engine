@@ -100,7 +100,7 @@ RefPtr<FrameNode> TextClockTestNG::CreateTextClockParagraph(const TestProperty& 
     if (testProperty.fontFeature.has_value()) {
         textClockModel.SetFontFeature(testProperty.fontFeature.value());
     }
-    return ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    return AceType::Claim(ViewStackProcessor::GetInstance()->GetMainFrameNode());
 }
 
 /**
@@ -869,7 +869,7 @@ HWTEST_F(TextClockTestNG, TextClockTest013, TestSize.Level1)
      */
     TextClockModelNG model;
     model.Create();
-    RefPtr<FrameNode> frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     auto layoutProperty = frameNode->GetLayoutProperty<TextClockLayoutProperty>();
 
     /**

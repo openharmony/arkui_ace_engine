@@ -15,11 +15,11 @@
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_search_bridge.h"
 
 #include "base/geometry/dimension.h"
-#include "base/utils/utils.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components/text_field/textfield_theme.h"
 #include "frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_utils.h"
 #include "core/components/search/search_theme.h"
+#include "base/utils/string_utils.h"
 
 namespace OHOS::Ace::NG {
 constexpr int NUM_0 = 0;
@@ -64,7 +64,7 @@ ArkUINativeModuleValue SearchBridge::SetTextFont(ArkUIRuntimeCallInfo* runtimeCa
     if (threeArg->IsString() || threeArg->IsNumber()) {
         if (threeArg->IsString()) {
             auto weightStr = threeArg->ToString(vm)->ToString();
-            value.fontWeight = std::stoi(weightStr);
+            value.fontWeight = OHOS::Ace::StringUtils::StringToInt(weightStr);
         }
 
         if (threeArg->IsNumber()) {
@@ -351,7 +351,7 @@ ArkUINativeModuleValue SearchBridge::SetPlaceholderFont(ArkUIRuntimeCallInfo* ru
     if (threeArg->IsString() || threeArg->IsNumber()) {
         if (threeArg->IsString()) {
             auto weightStr = threeArg->ToString(vm)->ToString();
-            value.fontWeight = std::stoi(weightStr);
+            value.fontWeight = OHOS::Ace::StringUtils::StringToInt(weightStr);
         }
 
         if (threeArg->IsNumber()) {
@@ -558,6 +558,33 @@ ArkUINativeModuleValue SearchBridge::ResetCopyOption(ArkUIRuntimeCallInfo* runti
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     GetArkUINodeModifiers()->getSearchModifier()->resetSearchCopyOption(nativeNode);
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue SearchBridge::SetSearchEnterKeyType(ArkUIRuntimeCallInfo *runtimeCallInfo)
+{
+    EcmaVM *vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
+    Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(1);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+
+    if (secondArg->IsNumber()) {
+        int32_t value = secondArg->Int32Value(vm);
+        GetArkUINodeModifiers()->getSearchModifier()->setSearchEnterKeyType(nativeNode, value);
+    } else {
+        GetArkUINodeModifiers()->getSearchModifier()->resetSearchEnterKeyType(nativeNode);
+    }
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue SearchBridge::ResetSearchEnterKeyType(ArkUIRuntimeCallInfo *runtimeCallInfo)
+{
+    EcmaVM *vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    GetArkUINodeModifiers()->getSearchModifier()->resetSearchEnterKeyType(nativeNode);
     return panda::JSValueRef::Undefined(vm);
 }
 

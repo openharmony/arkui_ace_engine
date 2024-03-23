@@ -588,6 +588,12 @@ void SelectOverlayNode::CreateCustomSelectOverlay(const std::shared_ptr<SelectOv
         selectMenu_->GetLayoutProperty()->UpdateVisibility(VisibleType::GONE);
         selectMenuStatus_ = FrameNodeStatus::GONE;
     }
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto shadowTheme = pipeline->GetTheme<ShadowTheme>();
+    CHECK_NULL_VOID(shadowTheme);
+    auto colorMode = SystemProperties::GetColorMode();
+    selectMenu_->GetRenderContext()->UpdateBackShadow(shadowTheme->GetShadow(ShadowStyle::OuterDefaultMD, colorMode));
     selectMenu_->MarkModifyDone();
 }
 
@@ -928,14 +934,12 @@ void SelectOverlayNode::CreateToolBar()
     }
 
     selectMenuInner_->MountToParent(selectMenu_);
-    selectMenuInner_->GetOrCreateGestureEventHub()->MarkResponseRegion(true);
 
     auto shadowTheme = pipeline->GetTheme<ShadowTheme>();
     CHECK_NULL_VOID(shadowTheme);
     auto colorMode = SystemProperties::GetColorMode();
     selectMenu_->GetRenderContext()->UpdateBackShadow(shadowTheme->GetShadow(ShadowStyle::OuterDefaultMD, colorMode));
     selectMenu_->MountToParent(Claim(this));
-    selectMenu_->GetOrCreateGestureEventHub()->MarkResponseRegion(true);
     selectMenu_->MarkModifyDone();
 }
 

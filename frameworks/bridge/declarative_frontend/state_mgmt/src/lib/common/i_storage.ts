@@ -16,6 +16,7 @@
 interface IStorage {
   get<T>(key: string): T | undefined;
   set<T>(key: string, val: T): void;
+  has<T>(key: string): boolean;
   clear(): void;
   delete(key: string): void;
 }

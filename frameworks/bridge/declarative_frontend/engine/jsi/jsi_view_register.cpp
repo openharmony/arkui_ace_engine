@@ -1104,14 +1104,15 @@ panda::Local<panda::JSValueRef> RestoreDefault(panda::JsiRuntimeCallInfo* runtim
 }
 
 #ifdef FORM_SUPPORTED
-void JsRegisterFormViews(BindingTarget globalObj, const std::unordered_set<std::string>& formModuleList, bool isReload)
+void JsRegisterFormViews(
+    BindingTarget globalObj, const std::unordered_set<std::string>& formModuleList, bool isReload, void* nativeEngine)
 {
     auto runtime = std::static_pointer_cast<ArkJSRuntime>(JsiDeclarativeEngineInstance::GetCurrentRuntime());
     if (!runtime) {
         return;
     }
     if (isReload) {
-        JsBindFormViews(globalObj, formModuleList, isReload);
+        JsBindFormViews(globalObj, formModuleList, nativeEngine, isReload);
         return;
     }
     auto vm = runtime->GetEcmaVm();
@@ -1166,7 +1167,7 @@ void JsRegisterFormViews(BindingTarget globalObj, const std::unordered_set<std::
     globalObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "setAppBgColor"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), SetAppBackgroundColor));
 
-    JsBindFormViews(globalObj, formModuleList);
+    JsBindFormViews(globalObj, formModuleList, nativeEngine);
 
     JSObjectTemplate toggleType;
     toggleType.Constant("Checkbox", 0);

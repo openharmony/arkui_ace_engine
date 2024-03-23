@@ -171,8 +171,8 @@ RefPtr<FrameNode> PanelTestNg::CreateSlidingPanel(const TestProperty& testProper
     if (testProperty.showCloseIcon.has_value()) {
         slidingPanelModelNG.SetShowCloseIcon(testProperty.showCloseIcon.value());
     }
-
-    return ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    
+    return AceType::Claim(ViewStackProcessor::GetInstance()->GetMainFrameNode());
 }
 
 RefPtr<FrameNode> PanelTestNg::CreateSlidingPanelwithCloseIcon()

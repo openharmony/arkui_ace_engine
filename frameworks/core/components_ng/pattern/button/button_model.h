@@ -49,9 +49,11 @@ public:
     virtual void SetBorderRadius(const std::optional<Dimension>& radiusTopLeft,
         const std::optional<Dimension>& radiusTopRight, const std::optional<Dimension>& radiusBottomLeft,
         const std::optional<Dimension>& radiusBottomRight) = 0;
+    virtual void ResetBorderRadius() {}
     virtual void SetRemoteMessage(RemoteCallback&& remoteCallback) {}
     virtual void SetButtonStyle(const std::optional<ButtonStyleMode>& buttonStyle) {}
     virtual void SetControlSize(const std::optional<ControlSize>& controlSize) {}
+    virtual void SetRole(const std::optional<ButtonRole>& buttonRole) {}
 
 private:
     static std::unique_ptr<ButtonModel> instance_;

@@ -20,18 +20,23 @@
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/group_node.h"
 #include "core/components_ng/base/ui_node.h"
+#include "core/components_ng/pattern/calendar_picker/calendar_picker_model_ng.h"
 #include "core/components_ng/pattern/common_view/common_view_model_ng.h"
 #include "core/components_ng/pattern/linear_layout/column_model_ng.h"
 #include "core/components_ng/pattern/linear_layout/row_model_ng.h"
 #include "core/components_ng/pattern/list/list_model_ng.h"
 #include "core/components_ng/pattern/list/list_item_model_ng.h"
 #include "core/components_ng/pattern/list/list_item_group_model_ng.h"
+#include "core/components_ng/pattern/picker/datepicker_model_ng.h"
 #include "core/components_ng/pattern/scroll/scroll_model_ng.h"
+#include "core/components_ng/pattern/shape/circle_model_ng.h"
 #include "core/components_ng/pattern/stack/stack_model_ng.h"
 #include "core/components_ng/pattern/text_field/text_field_model_ng.h"
 #include "core/components_ng/pattern/text/image_span_view.h"
 #include "core/components_ng/pattern/text/text_model_ng.h"
 #include "core/components_ng/pattern/text/span_model_ng.h"
+#include "core/components_ng/pattern/text_picker/textpicker_model_ng.h"
+#include "core/components_ng/pattern/time_picker/timepicker_model_ng.h"
 #include "core/components_ng/pattern/toggle/toggle_model_ng.h"
 #include "core/components_ng/pattern/image/image_model_ng.h"
 #include "core/components_ng/pattern/list/list_model_ng.h"
@@ -46,11 +51,15 @@
 #include "core/components_ng/pattern/refresh/refresh_model_ng.h"
 #include "core/components_ng/pattern/xcomponent/xcomponent_model_ng.h"
 #include "core/components_ng/pattern/slider/slider_model_ng.h"
+#include "core/components_ng/pattern/waterflow/water_flow_model_ng.h"
 #include "core/interfaces/native/node/node_api.h"
 #include "core/pipeline/base/element_register.h"
 
 
 namespace OHOS::Ace::NG::ViewModel {
+std::map<void*, std::shared_ptr<ExtensionCompanionNode>> registeredNodes;
+ArkUIAPICallbackMethod* callbacks = nullptr;
+
 void* createTextNode(ArkUI_Int32 nodeId)
 {
     auto frameNode = TextModelNG::CreateFrameNode(nodeId, "");
@@ -232,9 +241,58 @@ void* createListItemGroupNode(ArkUI_Int32 nodeId)
     return AceType::RawPtr(frameNode);
 }
 
-void* createSliderSliderNode(ArkUI_Int32 nodeId)
+void* createSliderNode(ArkUI_Int32 nodeId)
 {
     auto frameNode = SliderModelNG::CreateFrameNode(nodeId);
+    frameNode->IncRefCount();
+    return AceType::RawPtr(frameNode);
+}
+
+void* createDatePickerNode(ArkUI_Int32 nodeId)
+{
+    auto frameNode = DatePickerModelNG::CreateFrameNode(nodeId);
+    frameNode->IncRefCount();
+    return AceType::RawPtr(frameNode);
+}
+
+void* createTimePickerNode(ArkUI_Int32 nodeId)
+{
+    auto frameNode = TimePickerModelNG::CreateFrameNode(nodeId);
+    frameNode->IncRefCount();
+    return AceType::RawPtr(frameNode);
+}
+
+void* createTextPickerNode(ArkUI_Int32 nodeId)
+{
+    auto frameNode = TextPickerModelNG::CreateFrameNode(nodeId);
+    frameNode->IncRefCount();
+    return AceType::RawPtr(frameNode);
+}
+
+void* createCalendarPickerNode(ArkUI_Int32 nodeId)
+{
+    auto frameNode = CalendarPickerModelNG::CreateFrameNode(nodeId);
+    frameNode->IncRefCount();
+    return AceType::RawPtr(frameNode);
+}
+
+void* createCustomNode(ArkUI_Int32 nodeId)
+{
+    auto frameNode = StackModelNG::CreateFrameNode(nodeId);
+    frameNode->IncRefCount();
+    return AceType::RawPtr(frameNode);
+}
+
+void* createWaterFlowNode(ArkUI_Int32 nodeId)
+{
+    auto frameNode = WaterFlowModelNG::CreateFrameNode(nodeId);
+    frameNode->IncRefCount();
+    return AceType::RawPtr(frameNode);
+}
+
+void* createCircleNode(ArkUI_Int32 nodeId)
+{
+    auto frameNode = CircleModelNG::CreateFrameNode(nodeId);
     frameNode->IncRefCount();
     return AceType::RawPtr(frameNode);
 }
@@ -263,29 +321,31 @@ void* CreateNode(ArkUINodeType tag, ArkUI_Int32 nodeId)
         createRowNode,
         createFlexNode,
         createListItemNode,
-        nullptr,
-        nullptr,
-        nullptr,
-        createSliderSliderNode,
-        nullptr,
-        nullptr,
-        nullptr,
+        nullptr, // Tabs
+        nullptr, // Navigator
+        nullptr, // Web
+        createSliderNode,
+        nullptr, // Canvas
+        nullptr, // Radio
+        nullptr, // Grid
 #ifdef XCOMPONENT_SUPPORTED
         createXComponentNode,
 #else
         nullptr,
 #endif
-        nullptr,
+        nullptr, // SideBar
         createRefreshNode,
         createRootNode,
         createComponentRootNode,
-        nullptr,
-        nullptr,
         createListItemGroupNode,
-        nullptr, // DatePicker
-        nullptr, // TimePicker
-        nullptr, // TextPicker
+        createDatePickerNode,
+        createTimePickerNode,
+        createTextPickerNode,
+        createCalendarPickerNode,
         nullptr, // GridItem
+        createCustomNode,
+        createWaterFlowNode,
+        createCircleNode,
     };
     if (tag >= sizeof(createArkUIFrameNodes) / sizeof(createArkUIFrameNode*)) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "fail to create %{public}d type of node", tag);
@@ -303,6 +363,8 @@ void DisposeNode(void* nativePtr)
     CHECK_NULL_VOID(nativePtr);
     auto* frameNode = reinterpret_cast<UINode*>(nativePtr);
     frameNode->DecRefCount();
+
+    registeredNodes.erase(nativePtr);
 }
 
 void AddChild(void* parentNode, void* childNode)
@@ -327,13 +389,26 @@ void RemoveChild(void* parentNode, void* childNode)
     parent->RemoveChild(AceType::Claim(child));
 }
 
+void InsertChildAt(void* parentNode, void* childNode, int32_t position)
+{
+    CHECK_NULL_VOID(parentNode);
+    CHECK_NULL_VOID(childNode);
+    auto* parent = reinterpret_cast<UINode*>(parentNode);
+    auto* child = reinterpret_cast<UINode*>(childNode);
+    parent->AddChild(AceType::Claim(child), position);
+    auto* frameNode = AceType::DynamicCast<FrameNode>(child);
+    if (frameNode) {
+        frameNode->OnMountToParentDone();
+    }
+}
+
 void InsertChildAfter(void* parentNode, void* childNode, void* siblingNode)
 {
     CHECK_NULL_VOID(parentNode);
     CHECK_NULL_VOID(childNode);
     auto* parent = reinterpret_cast<UINode*>(parentNode);
     auto* child = reinterpret_cast<UINode*>(childNode);
-
+    
     if (AceType::InstanceOf<GroupNode>(parent)) {
         auto* groupNode = AceType::DynamicCast<GroupNode>(parent);
         groupNode->AddChildToGroup(AceType::Claim(child));
@@ -350,7 +425,85 @@ void InsertChildAfter(void* parentNode, void* childNode, void* siblingNode)
     if (frameNode) {
         frameNode->OnMountToParentDone();
     }
-    parent->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+}
+
+void InsertChildBefore(void* parentNode, void* childNode, void* siblingNode)
+{
+    CHECK_NULL_VOID(parentNode);
+    CHECK_NULL_VOID(childNode);
+    auto* parent = reinterpret_cast<UINode*>(parentNode);
+    auto* child = reinterpret_cast<UINode*>(childNode);
+
+    if (AceType::InstanceOf<GroupNode>(parent)) {
+        auto* groupNode = AceType::DynamicCast<GroupNode>(parent);
+        groupNode->AddChildToGroup(AceType::Claim(child));
+        parent->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+        return;
+    }
+    auto* sibling = reinterpret_cast<UINode*>(siblingNode);
+    if (sibling) {
+        parent->AddChildBefore(AceType::Claim(child), AceType::Claim(sibling));
+    } else {
+        parent->AddChild(AceType::Claim(child));
+    }
+    auto* frameNode = AceType::DynamicCast<FrameNode>(child);
+    if (frameNode) {
+        frameNode->OnMountToParentDone();
+    }
+}
+
+void RegisterCompanion(void* node, int peerId, ArkUI_Int32 flags)
+{
+    auto companion = std::make_shared<ExtensionCompanionNode>(peerId, flags);
+    companion->peer = node;
+    registeredNodes[node] = std::move(companion);
+}
+
+ExtensionCompanionNode* GetCompanion(void* nodePtr)
+{
+    auto it = registeredNodes.find(nodePtr);
+    if (it != registeredNodes.end()) {
+        return it->second.get();
+    }
+    return nullptr;
+}
+
+void SetCustomCallback(void* nodePtr, ArkUI_Int32 callback)
+{
+    auto* node = GetCompanion(nodePtr);
+    CHECK_NULL_VOID(node);
+    node->setCallbackId(callback);
+}
+
+void SetCallbackMethod(ArkUIAPICallbackMethod* method)
+{
+    callbacks = method;
+}
+
+ArkUIAPICallbackMethod* GetCallbackMethod()
+{
+    return callbacks;
+}
+
+ArkUI_Int32 MeasureNode(ArkUIVMContext context, ArkUINodeHandle nodePtr, ArkUI_Float32* data)
+{
+    auto node = GetCompanion(nodePtr);
+    CHECK_NULL_RETURN(node, 0);
+    return node->measure(context, data, callbacks);
+}
+
+ArkUI_Int32 LayoutNode(ArkUIVMContext context, ArkUINodeHandle nodePtr, ArkUI_Float32* data)
+{
+    auto node = GetCompanion(nodePtr);
+    CHECK_NULL_RETURN(node, 0);
+    return node->layout(context, data, callbacks);
+}
+
+ArkUI_Int32 DrawNode(ArkUIVMContext context, ArkUINodeHandle nodePtr, ArkUI_Float32* data)
+{
+    auto node = GetCompanion(nodePtr);
+    CHECK_NULL_RETURN(node, 0);
+    return node->draw(context, data, callbacks);
 }
 
 } // namespace OHOS::Ace::NG::ViewModel

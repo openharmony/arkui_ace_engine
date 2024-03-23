@@ -334,7 +334,6 @@ protected:
 #ifndef USE_ROSEN_DRAWING
     void UpdateLineDash(SkPaint& paint);
     void UpdatePaintShader(const OffsetF& offset, SkPaint& paint, const Ace::Gradient& gradient);
-    void UpdatePaintShader(const Ace::Pattern& pattern, SkPaint& paint);
     void InitPaintBlend(SkPaint& paint);
     sk_sp<SkShader> MakeConicGradient(SkPaint& paint, const Ace::Gradient& gradient);
 #else
@@ -513,6 +512,8 @@ protected:
         FIVE_PARAMS,
         NINE_PARAMS,
     };
+    static const LinearMapNode<void (*)(std::shared_ptr<RSImage>&, std::shared_ptr<RSShaderEffect>&, RSMatrix&)>
+        staticPattern[];
 };
 } // namespace OHOS::Ace::NG
 

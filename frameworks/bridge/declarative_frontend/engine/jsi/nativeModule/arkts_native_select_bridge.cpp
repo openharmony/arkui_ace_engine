@@ -561,7 +561,8 @@ ArkUINativeModuleValue SelectBridge::SetWidth(ArkUIRuntimeCallInfo* runtimeCallI
     Local<JSValueRef> widthArg = runtimeCallInfo->GetCallArgRef(1);
     auto nativeNode = nodePtr(nodeArg->ToNativePointer(vm)->Value());
     CalcDimension width;
-    if (!ArkTSUtils::ParseJsDimensionVp(vm, widthArg, width, false)) {
+    if (!ArkTSUtils::ParseJsDimensionVpNG(vm, widthArg, width)) {
+        GetArkUINodeModifiers()->getSelectModifier()->resetSelectWidth(nativeNode);
         return panda::JSValueRef::Undefined(vm);
     }
     if (LessNotEqual(width.Value(), 0.0)) {
@@ -591,7 +592,8 @@ ArkUINativeModuleValue SelectBridge::SetHeight(ArkUIRuntimeCallInfo* runtimeCall
     Local<JSValueRef> heightArg = runtimeCallInfo->GetCallArgRef(1);
     auto nativeNode = nodePtr(nodeArg->ToNativePointer(vm)->Value());
     CalcDimension height;
-    if (!ArkTSUtils::ParseJsDimensionVp(vm, heightArg, height, false)) {
+    if (!ArkTSUtils::ParseJsDimensionVpNG(vm, heightArg, height)) {
+        GetArkUINodeModifiers()->getSelectModifier()->resetSelectHeight(nativeNode);
         return panda::JSValueRef::Undefined(vm);
     }
     if (LessNotEqual(height.Value(), 0.0)) {
@@ -623,26 +625,52 @@ ArkUINativeModuleValue SelectBridge::SetSize(ArkUIRuntimeCallInfo* runtimeCallIn
     auto nativeNode = nodePtr(nodeArg->ToNativePointer(vm)->Value());
     CalcDimension width;
     CalcDimension height;
-    if (widthArg->IsUndefined() || !ArkTSUtils::ParseJsDimensionVp(vm, widthArg, width, false)) {
-        return panda::JSValueRef::Undefined(vm);
+    if (!ArkTSUtils::ParseJsDimensionVpNG(vm, widthArg, width)) {
+        GetArkUINodeModifiers()->getSelectModifier()->resetSelectWidth(nativeNode);
+    } else {
+        std::string widthCalc = width.CalcValue();
+        if (LessNotEqual(width.Value(), 0.0)) {
+            width.SetValue(0.0);
+        }
+        GetArkUINodeModifiers()->getSelectModifier()->setSelectWidth(
+            nativeNode, width.Value(), static_cast<int32_t>(width.Unit()), widthCalc.c_str());
     }
-    if (LessNotEqual(width.Value(), 0.0)) {
-        width.SetValue(0.0);
+    if (!ArkTSUtils::ParseJsDimensionVpNG(vm, heightArg, height)) {
+        GetArkUINodeModifiers()->getSelectModifier()->resetSelectHeight(nativeNode);
+    } else {
+        std::string heightCalc = height.CalcValue();
+        if (LessNotEqual(height.Value(), 0.0)) {
+            height.SetValue(0.0);
+        }
+        GetArkUINodeModifiers()->getSelectModifier()->setSelectHeight(
+            nativeNode, height.Value(), static_cast<int32_t>(height.Unit()), heightCalc.c_str());
     }
+    return panda::JSValueRef::Undefined(vm);
+}
 
-    if (heightArg->IsUndefined() || !ArkTSUtils::ParseJsDimensionVp(vm, heightArg, height, false)) {
-        return panda::JSValueRef::Undefined(vm);
+ArkUINativeModuleValue SelectBridge::SetControlSize(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> nodeArg = runtimeCallInfo->GetCallArgRef(0);
+    Local<JSValueRef> controlSizeArg = runtimeCallInfo->GetCallArgRef(1);  // 1: index of width value
+    auto nativeNode = nodePtr(nodeArg->ToNativePointer(vm)->Value());
+    auto controlSize = controlSizeArg->Int32Value(vm);
+    if (!ArkTSUtils::ParseJsInteger(vm, controlSizeArg, controlSize)) {
+        GetArkUINodeModifiers()->getSelectModifier()->resetControlSize(nativeNode);
+    } else {
+        GetArkUINodeModifiers()->getSelectModifier()->setControlSize(nativeNode, controlSize);
     }
-    if (LessNotEqual(height.Value(), 0.0)) {
-        height.SetValue(0.0);
-    }
+    return panda::JSValueRef::Undefined(vm);
+}
 
-    std::string widthCalc = width.CalcValue();
-    std::string heightCalc = height.CalcValue();
-    GetArkUINodeModifiers()->getSelectModifier()->setSelectWidth(
-        nativeNode, width.Value(), static_cast<int32_t>(width.Unit()), widthCalc.c_str());
-    GetArkUINodeModifiers()->getSelectModifier()->setSelectHeight(
-        nativeNode, height.Value(), static_cast<int32_t>(height.Unit()), heightCalc.c_str());
+ArkUINativeModuleValue SelectBridge::ResetControlSize(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> nodeArg = runtimeCallInfo->GetCallArgRef(0);
+    auto nativeNode = nodePtr(nodeArg->ToNativePointer(vm)->Value());
+    GetArkUINodeModifiers()->getSelectModifier()->resetControlSize(nativeNode);
     return panda::JSValueRef::Undefined(vm);
 }
 

@@ -52,6 +52,7 @@ public:
     static void SetOptionWidthFitTrigger(const JSCallbackInfo& info);
     static void SetMenuBackgroundColor(const JSCallbackInfo& info);
     static void SetMenuBackgroundBlurStyle(const JSCallbackInfo& info);
+    static void SetControlSize(const JSCallbackInfo& info);
 };
 } // namespace OHOS::Ace::Framework
 #endif

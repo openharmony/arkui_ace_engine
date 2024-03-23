@@ -46,6 +46,7 @@
 #include "frameworks/bridge/declarative_frontend/jsview/js_checkbox.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_checkboxgroup.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_circle.h"
+#include "frameworks/bridge/declarative_frontend/jsview/js_circle_shape.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_clipboard.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_column.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_column_split.h"
@@ -58,6 +59,7 @@
 #include "frameworks/bridge/declarative_frontend/jsview/js_divider.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_dump_log.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_ellipse.h"
+#include "frameworks/bridge/declarative_frontend/jsview/js_ellipse_shape.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_environment.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_flex_impl.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_foreach.h"
@@ -91,6 +93,7 @@
 #include "frameworks/bridge/declarative_frontend/jsview/js_menu.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_menu_item.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_menu_item_group.h"
+#include "frameworks/bridge/declarative_frontend/jsview/js_nav_path_stack.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_navdestination.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_navigation.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_navigator.h"
@@ -99,6 +102,7 @@
 #include "frameworks/bridge/declarative_frontend/jsview/js_offscreen_rendering_context.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_page_transition.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_path.h"
+#include "frameworks/bridge/declarative_frontend/jsview/js_path_shape.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_path2d.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_persistent.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_polygon.h"
@@ -106,6 +110,7 @@
 #include "frameworks/bridge/declarative_frontend/jsview/js_progress.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_radio.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_rating.h"
+#include "frameworks/bridge/declarative_frontend/jsview/js_rect_shape.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_rect.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_recycle_view.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_refresh.h"
@@ -151,6 +156,8 @@
 #include "frameworks/bridge/declarative_frontend/ng/declarative_frontend_ng.h"
 #include "frameworks/bridge/declarative_frontend/ng/frontend_delegate_declarative_ng.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_scrollable_base.h"
+#include "frameworks/bridge/declarative_frontend/style_string/js_span_string.h"
+#include "frameworks/bridge/declarative_frontend/style_string/js_span_object.h"
 
 #ifdef USE_COMPONENTS_LIB
 #include "frameworks/bridge/js_frontend/engine/jsi/ark_js_value.h"
@@ -366,7 +373,7 @@ void UpdateRootComponent(const panda::Local<panda::ObjectRef>& obj)
 }
 
 #ifdef USE_COMPONENTS_LIB
-void JSBindLibs(const std::string moduleName, const std::string exportModuleName, bool isController = false)
+void JSBindLibs(const std::string& moduleName, const std::string& exportModuleName, bool isController = false)
 {
     auto runtime = std::static_pointer_cast<ArkJSRuntime>(JsiDeclarativeEngineInstance::GetCurrentRuntime());
     std::shared_ptr<JsValue> global = runtime->GetGlobal();
@@ -420,6 +427,9 @@ void JsBindViews(BindingTarget globalObj, void* nativeEngine)
     JSEnvironment::JSBind(globalObj);
     JSFlexImpl::JSBind(globalObj);
     JSSpan::JSBind(globalObj);
+    JSSpanString::JSBind(globalObj);
+    JSMutableSpanString::JSBind(globalObj);
+    JSFontSpan::JSBind(globalObj);
     JSTabs::JSBind(globalObj);
     JSTabContent::JSBind(globalObj);
     JSTabsController::JSBind(globalObj);
@@ -483,6 +493,10 @@ void JsBindViews(BindingTarget globalObj, void* nativeEngine)
     JSScrollBar::JSBind(globalObj);
     JSButton::JSBind(globalObj);
     JSRadio::JSBind(globalObj);
+    JSRectShape::JSBind(globalObj);
+    JSEllipseShape::JSBind(globalObj);
+    JSCircleShape::JSBind(globalObj);
+    JSPathShape::JSBind(globalObj);
     JSRect::JSBind(globalObj);
     JSAnimator::JSBind(globalObj);
     JSCanvas::JSBind(globalObj);
@@ -557,6 +571,7 @@ void JsBindViews(BindingTarget globalObj, void* nativeEngine)
     JSRecycleView::JSBind(globalObj);
     JSLinearGradient::JSBind(globalObj);
     JSNavigation::JSBind(globalObj);
+    JSNavPathStack::JSBind(globalObj);
     JSTextField::JSBind(globalObj);
     JSCustomDialogController::JSBind(globalObj);
     JSNavDestination::JSBind(globalObj);

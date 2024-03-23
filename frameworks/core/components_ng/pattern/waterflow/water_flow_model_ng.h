@@ -60,6 +60,8 @@ public:
     void SetScrollBarColor(const std::string& value) override;
     void SetScrollBarWidth(const std::string& value) override;
 
+    RefPtr<WaterFlowSections> GetOrCreateWaterFlowSections() override;
+    static RefPtr<FrameNode> CreateFrameNode(int32_t nodeId);
     static void SetColumnsTemplate(FrameNode* frameNode, const std::string& value);
     static void SetRowsTemplate(FrameNode* frameNode, const std::string& value);
     static void SetScrollEnabled(FrameNode* frameNode, bool scrollEnabled);
@@ -72,7 +74,7 @@ public:
     static void SetLayoutDirection(FrameNode* frameNode, FlexDirection value);
     static void SetNestedScroll(FrameNode* frameNode, const NestedScrollOptions& nestedOpt);
     static void SetFriction(FrameNode* frameNode, double friction);
-
+    static FlexDirection GetLayoutDirection(FrameNode* frameNode);
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_WATERFLOW_WATER_FLOW_MODEL_NG_H

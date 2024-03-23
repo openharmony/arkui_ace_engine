@@ -20,6 +20,8 @@ declare class UIContext {
 declare interface TouchEvent {
 }
 
+declare interface Position { x?: number; y?: number; }
+
 declare type UpdateFunc = (elmtId: number, isFirstRender: boolean, param?: Object) => void;
 
 interface UpdateFuncRecord {
@@ -89,6 +91,37 @@ declare interface RegisterParams {
 }
 
 declare class FinalizationRegistry {
-  constructor(fun: (arg0: RegisterParams) => void);
-  register(target: BuilderNode, heldValue: RegisterParams): undefined;
+  constructor(fun: (arg0: RegisterParams | number) => void);
+  register(target: BuilderNode | FrameNode, heldValue: RegisterParams | number): undefined;
+}
+
+declare function getUINativeModule(): any;
+
+declare function applyUIAttributes(modifier: AttributeModifier<CommonAttribute>, nativeNode: NodePtr, component: ArkComponent): void
+
+declare interface CommonAttribute { }
+
+declare interface AttributeModifier<T> { }
+
+declare class ArkComponent {
+  nativePtr: NodePtr;
+  _modifiersWithKeys: FrameNodeAttributeMap;
+  constructor(nativePtr: NodePtr);
+}
+
+declare class UICommonEvent {
+  private _nodePtr: NodePtr;
+  private _instanceId: number;
+  constructor(nodePtr: NodePtr);
+  setInstanceId(instanceId: number): void;
+  setNodePtr(nodePtr: NodePtr): void;
+}
+
+declare class ModifierWithKey<T extends number | string | boolean | object> {
+  stageValue?: T;
+  value?: T;
+  constructor(value: T);
+  applyStage(node: NodePtr): boolean;
+  applyPeer(node: NodePtr, reset: boolean): void;
+  checkObjectDiff(): boolean;
 }

@@ -130,7 +130,7 @@ double PipelineBase::GetCurrentDensity()
         auto container = Container::GetActive();
         pipelineContext = container ? container->GetPipelineContext() : nullptr;
     }
-    return pipelineContext ? pipelineContext->GetDensity() : SystemProperties::GetResolution();
+    return pipelineContext ? pipelineContext->GetDensity() : SystemProperties::GetDefaultResolution();
 }
 
 double PipelineBase::Px2VpWithCurrentDensity(double px)
@@ -539,6 +539,9 @@ bool PipelineBase::Animate(const AnimationOption& option, const RefPtr<Curve>& c
 
 std::function<void()> PipelineBase::GetWrappedAnimationCallback(const std::function<void()>& finishCallback)
 {
+    if (!IsFormRender() && !finishCallback) {
+        return nullptr;
+    }
     auto finishPtr = std::make_shared<std::function<void()>>(finishCallback);
     finishFunctions_.emplace(finishPtr);
     auto wrapFinishCallback = [weak = AceType::WeakClaim(this),

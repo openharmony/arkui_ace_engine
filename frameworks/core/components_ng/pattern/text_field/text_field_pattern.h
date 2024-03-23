@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -50,8 +50,8 @@
 #include "core/components_ng/pattern/text_area/text_area_layout_algorithm.h"
 #include "core/components_ng/pattern/text_drag/text_drag_base.h"
 #include "core/components_ng/pattern/text_field/content_controller.h"
-#include "core/components_ng/pattern/text_field/magnifier_controller.h"
 #include "core/components_ng/pattern/text_field/text_editing_value_ng.h"
+#include "core/components_ng/pattern/text_field/text_content_type.h"
 #include "core/components_ng/pattern/text_field/text_field_accessibility_property.h"
 #include "core/components_ng/pattern/text_field/text_field_controller.h"
 #include "core/components_ng/pattern/text_field/text_field_event_hub.h"
@@ -63,6 +63,8 @@
 #include "core/components_ng/pattern/text_field/text_selector.h"
 #include "core/components_ng/pattern/text_input/text_input_layout_algorithm.h"
 #include "core/components_ng/property/property.h"
+#include "core/components_ng/pattern/select_overlay/magnifier_controller.h"
+#include "core/components_ng/pattern/select_overlay/magnifier.h"
 
 #if not defined(ACE_UNITTEST)
 #if defined(ENABLE_STANDARD_INPUT)
@@ -119,7 +121,7 @@ struct PasswordModeStyle {
     MarginProperty margin;
 };
 
-struct PreInlineState {
+struct PreState {
     Color textColor;
     Color bgColor;
     BorderRadiusProperty radius;
@@ -129,7 +131,7 @@ struct PreInlineState {
     MarginProperty margin;
     RectF frameRect;
     bool setHeight = false;
-    bool saveInlineState = false;
+    bool saveState = false;
     bool hasBorderColor = false;
 };
 
@@ -145,8 +147,10 @@ class TextFieldPattern : public ScrollablePattern,
                          public TextDragBase,
                          public ValueChangeObserver,
                          public TextInputClient,
-                         public TextBase {
-    DECLARE_ACE_TYPE(TextFieldPattern, ScrollablePattern, TextDragBase, ValueChangeObserver, TextInputClient, TextBase);
+                         public TextBase,
+                         public Magnifier {
+    DECLARE_ACE_TYPE(TextFieldPattern, ScrollablePattern, TextDragBase, ValueChangeObserver, TextInputClient, TextBase,
+        Magnifier);
 
 public:
     TextFieldPattern();
@@ -207,6 +211,7 @@ public:
 
     void InsertValue(const std::string& insertValue) override;
     void InsertValueOperation(const std::string& insertValue);
+    void UpdateObscure(const std::string& insertValue, bool hasInsertValue);
     void UpdateOverCounterColor();
     void UpdateCounterMargin();
     void CleanCounterNode();
@@ -315,9 +320,19 @@ public:
         return contentController_->GetWideText();
     }
 
-    int32_t GetCaretIndex() const
+    int32_t GetCaretIndex() const override
     {
         return selectController_->GetCaretIndex();
+    }
+
+    OffsetF GetFirstHandleOffset() const override
+    {
+        return selectController_->GetFirstHandleOffset();
+    }
+
+    OffsetF GetSecondHandleOffset() const override
+    {
+        return selectController_->GetSecondHandleOffset();
     }
 
     ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(TextInputAction, TextInputAction)
@@ -354,7 +369,7 @@ public:
         return rightClickOffset_;
     }
 
-    OffsetF GetCaretOffset() const
+    OffsetF GetCaretOffset() const override
     {
         return selectController_->GetCaretRect().GetOffset();
     }
@@ -439,11 +454,6 @@ public:
     void SetTextRect(const RectF& textRect)
     {
         textRect_ = textRect;
-    }
-
-    const RectF& GetContentRect() const
-    {
-        return contentRect_;
     }
 
     const RectF& GetFrameRect() const
@@ -557,7 +567,8 @@ public:
 
     static std::u16string CreateObscuredText(int32_t len);
     static std::u16string CreateDisplayText(
-        const std::string& content, int32_t nakedCharPosition, bool needObscureText);
+        const std::string& content, int32_t nakedCharPosition,
+        bool needObscureText, bool showPasswordDirectly);
     bool IsTextArea() const override;
 
     const RefPtr<TouchEventImpl>& GetTouchListener()
@@ -607,7 +618,8 @@ public:
     }
 
     void ProcessInnerPadding();
-    void OnCursorMoveDone(TextAffinity textAffinity = TextAffinity::UPSTREAM);
+    void OnCursorMoveDone(
+        TextAffinity textAffinity = TextAffinity::UPSTREAM, std::optional<Offset> offset = std::nullopt);
     bool IsDisabled();
     bool AllowCopy();
 
@@ -754,6 +766,7 @@ public:
     // xts
     std::string TextInputTypeToString() const;
     std::string TextInputActionToString() const;
+    std::string TextContentTypeToString() const;
     std::string GetPlaceholderFont() const;
     RefPtr<TextFieldTheme> GetTheme() const;
     std::string GetTextColor() const;
@@ -775,7 +788,8 @@ public:
     bool GetErrorTextState() const;
     std::string GetShowPasswordIconString() const;
     int32_t GetNakedCharPosition() const;
-    void SetSelectionFlag(int32_t selectionStart, int32_t selectionEnd);
+    void SetSelectionFlag(int32_t selectionStart, int32_t selectionEnd,
+        const std::optional<SelectionOptions>& options = std::nullopt);
     void HandleBlurEvent();
     void HandleFocusEvent();
     bool OnBackPressed() override;
@@ -853,6 +867,21 @@ public:
         underlineColor_ = underlineColor;
     }
 
+    void SetNormalUnderlineColor(const Color& normalColor)
+    {
+        userUnderlineColor_.normal = normalColor;
+    }
+
+    void SetUserUnderlineColor(UserUnderlineColor userUnderlineColor)
+    {
+        userUnderlineColor_ = userUnderlineColor;
+    }
+
+    UserUnderlineColor GetUserUnderlineColor()
+    {
+        return userUnderlineColor_;
+    }
+
     void SetUnderlineWidth(Dimension underlineWidth)
     {
         underlineWidth_ = underlineWidth;
@@ -914,6 +943,16 @@ public:
         return inlineState_.frameRect.Width();
     }
 
+    void SetFillRequestFinish(bool success)
+    {
+        isFillRequestFinish_ = success;
+    }
+
+    bool IsFillRequestFinish()
+    {
+        return isFillRequestFinish_;
+    }
+
     bool IsNormalInlineState() const;
     bool IsUnspecifiedOrTextType() const;
     void TextIsEmptyRect(RectF& rect);
@@ -925,7 +964,24 @@ public:
     void SetCustomKeyboard(const std::function<void()>&& keyboardBuilder)
     {
         if (customKeyboardBuilder_ && isCustomKeyboardAttached_ && !keyboardBuilder) {
+            // close customKeyboard and request system keyboard
             CloseCustomKeyboard();
+            customKeyboardBuilder_ = keyboardBuilder; // refresh current keyboard
+            RequestKeyboard(false, true, true);
+            StartTwinkling();
+            return;
+        }
+        if (!customKeyboardBuilder_ && keyboardBuilder) {
+            // close system keyboard and request custom keyboard
+#if defined(OHOS_STANDARD_SYSTEM) && !defined(PREVIEW)
+            if (imeShown_) {
+                CloseKeyboard(true);
+                customKeyboardBuilder_ = keyboardBuilder; // refresh current keyboard
+                RequestKeyboard(false, true, true);
+                StartTwinkling();
+                return;
+            }
+#endif
         }
         customKeyboardBuilder_ = keyboardBuilder;
     }
@@ -1022,36 +1078,11 @@ public:
 
     bool HandleSpaceEvent();
 
-    RefPtr<PixelMap> GetPixelMap();
+    virtual void InitBackGroundColorAndBorderRadius();
 
-    void UpdateShowMagnifier(bool isShowMagnifier = false)
-    {
-        isShowMagnifier_ = isShowMagnifier;
-        if (isShowMagnifier_) {
-            magnifierController_->OpenMagnifier();
-        } else {
-            magnifierController_->CloseMagnifier();
-        }
-    }
+    void SavePreUnderLineState();
 
-    bool GetShowMagnifier() const
-    {
-        return isShowMagnifier_;
-    }
-
-    void SetLocalOffset(OffsetF localOffset)
-    {
-        localOffset_.SetX(localOffset.GetX());
-        localOffset_.SetY(localOffset.GetY());
-        UpdateShowMagnifier(true);
-    }
-
-    OffsetF GetLocalOffset() const
-    {
-        return localOffset_;
-    }
-
-    int32_t GetContentWideTextLength()
+    int32_t GetContentWideTextLength() override
     {
         return static_cast<int32_t>(contentController_->GetWideText().length());
     }
@@ -1086,22 +1117,7 @@ public:
 
     void GetCaretMetrics(CaretMetricsF& caretCaretMetric) override;
 
-    void SetMagnifierRect(MagnifierRect magnifierRect)
-    {
-        magnifierRect_ = magnifierRect;
-    }
-
-    MagnifierRect GetMagnifierRect()
-    {
-        return magnifierRect_;
-    }
-
-    OffsetF GetTextPaintOffset() const;
-
-    const RefPtr<MagnifierController>& GetMagnifierController()
-    {
-        return magnifierController_;
-    }
+    OffsetF GetTextPaintOffset() const override;
 
     void NeedRequestKeyboard()
     {
@@ -1111,6 +1127,13 @@ public:
     void CleanNodeResponseKeyEvent();
 
     void OnVirtualKeyboardAreaChanged() override;
+    void ScrollPage(bool reverse, bool smooth = false) override;
+    void LongScrollPage();
+    void ScheduleCaretLongPress();
+    void StartLongPressEventTimer();
+    void InitScrollBarClickEvent() override {}
+    void InitScrollBarLongPressEvent() override {}
+    void InitScrollBarTouchEvent() override {}
 
 protected:
     virtual void InitDragEvent();
@@ -1177,6 +1200,7 @@ private:
 
     void AfterSelection();
 
+    void AutoFillValueChanged();
     void FireEventHubOnChange(const std::string& text);
     // The return value represents whether the editor content has change.
     bool FireOnTextChangeEvent();
@@ -1221,8 +1245,9 @@ private:
 
     void UpdateCopyAllStatus();
     void SaveInlineStates();
-    void ApplyInlineStates(bool focusStatus);
+    void ApplyInlineStates();
     void RestorePreInlineStates();
+    void RestoreUnderlineStates();
     void CalcInlineScrollRect(Rect& inlineScrollRect);
 
     bool ResetObscureTickCountDown();
@@ -1252,6 +1277,9 @@ private:
     void PasswordResponseKeyEvent();
     void UnitResponseKeyEvent();
     void ProcNormalInlineStateInBlurEvent();
+    bool IsMouseOverScrollBar(const GestureEvent& info);
+    bool IsLongMouseOverScrollBar(GestureEvent& info);
+    
 #if defined(ENABLE_STANDARD_INPUT)
     std::optional<MiscServices::TextConfig> GetMiscTextConfig() const;
 #endif
@@ -1266,7 +1294,7 @@ private:
     bool HasInputOperation();
     AceAutoFillType ConvertToAceAutoFillType(TextInputType type);
     bool CheckAutoFill();
-    bool ProcessAutoFill();
+    bool ProcessAutoFill(bool& isPopup);
     void ScrollToSafeArea() const override;
     void RecordSubmitEvent() const;
     void UpdateCancelNode();
@@ -1277,9 +1305,14 @@ private:
     void UpdateBlurReason();
     RectF GetSelectArea();
     void UpdateOverlaySelectArea();
+    AceAutoFillType TextContentTypeToAceAutoFillType(const TextContentType& type);
+    bool CheckAutoFillType(const AceAutoFillType& aceAutoFillAllType);
+    AceAutoFillType GetAutoFillType();
+    bool IsAutoFillPasswordType(const AceAutoFillType& autoFillType);
+    void DoProcessAutoFill();
+    void KeyboardContentTypeToInputType();
 
     RectF frameRect_;
-    RectF contentRect_;
     RectF textRect_;
     RefPtr<Paragraph> paragraph_;
     RefPtr<Paragraph> errorParagraph_;
@@ -1338,7 +1371,8 @@ private:
     float previewWidth_ = 0.0f;
     float lastTextRectY_ = 0.0f;
     std::optional<DisplayMode> barState_;
-    InputStyle preInputStyle_ = InputStyle::DEFAULT;
+    bool preInline = false;
+    bool preUnderline = false;
     bool preErrorState_ = false;
     float preErrorMargin_ = 0.0f;
     bool restoreMarginState_ = false;
@@ -1351,6 +1385,7 @@ private:
     float countHeight_ = 0.0f;
     Dimension underlineWidth_ = 1.0_px;
     Color underlineColor_;
+    UserUnderlineColor userUnderlineColor_ = UserUnderlineColor();
     bool scrollBarVisible_ = false;
     bool isCounterIdealheight_ = false;
     float maxFrameOffsetY_ = 0.0f;
@@ -1371,6 +1406,7 @@ private:
 
     int32_t dragTextStart_ = 0;
     int32_t dragTextEnd_ = 0;
+    std::string dragValue_;
     RefPtr<FrameNode> dragNode_;
     DragStatus dragStatus_ = DragStatus::NONE; // The status of the dragged initiator
     DragStatus dragRecipientStatus_ = DragStatus::NONE; // Drag the recipient's state
@@ -1389,8 +1425,9 @@ private:
     float inlineSingleLineHeight_ = 0.0f;
     float inlinePadding_ = 0.0f;
     bool needApplyInlineSize_ = false;
-    PreInlineState inlineState_;
+    PreState inlineState_;
     // inline --end
+    PreState preUnderlineState_;
 
 #if defined(ENABLE_STANDARD_INPUT)
     sptr<OHOS::MiscServices::OnTextChangedListener> textChangeListener_;
@@ -1419,6 +1456,7 @@ private:
     bool leftMouseCanMove_ = false;
     bool isSingleHandle_ = true;
     bool isLongPress_ = false;
+    bool isEdit_ = false;
     RefPtr<ContentController> contentController_;
     RefPtr<TextSelectController> selectController_;
     RefPtr<NG::UINode> unitNode_;
@@ -1428,17 +1466,18 @@ private:
     bool isSupportCameraInput_ = false;
     std::function<void()> processOverlayDelayTask_;
     FocuseIndex focusIndex_ = FocuseIndex::TEXT;
-    bool isShowMagnifier_ = false;
-    OffsetF localOffset_;
     bool isTouchCaret_ = false;
     bool needSelectAll_ = false;
     bool isModifyDone_ = false;
     bool initTextRect_ = false;
     bool colorModeChange_ = false;
     Offset clickLocation_;
-    MagnifierRect magnifierRect_;
-    RefPtr<MagnifierController> magnifierController_;
     bool isKeyboardClosedByUser_ = false;
+    bool lockRecord_ = false;
+    bool hasMousePressed_ = false;
+    bool isLongPressPage_ = false;
+    Offset locationInfo_;
+    bool isFillRequestFinish_ = false;
 };
 } // namespace OHOS::Ace::NG
 

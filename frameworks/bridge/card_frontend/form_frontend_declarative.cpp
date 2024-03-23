@@ -98,7 +98,26 @@ void FormFrontendDeclarative::UpdatePageData(const std::string& dataList)
 }
 
 void FormFrontendDeclarative::SetColorMode(ColorMode colorMode) {}
-void FormFrontendDeclarative::OnSurfaceChanged(int32_t width, int32_t height) {}
+
+void FormFrontendDeclarative::OnSurfaceChanged(int32_t width, int32_t height)
+{
+    TAG_LOGI(AceLogTag::ACE_FORM, "FormFrontendDeclarative OnSurfaceChanged entry");
+    auto jsEngine = GetJsEngine();
+    auto delegate = GetDelegate();
+    if (!jsEngine || !delegate) {
+        TAG_LOGE(AceLogTag::ACE_FORM, "FormFrontendDeclarative OnSurfaceChanged fail");
+        return;
+    }
+    auto mediaQuery = delegate->GetMediaQueryInfoInstance();
+    if (!mediaQuery) {
+        TAG_LOGE(AceLogTag::ACE_FORM, "FormFrontendDeclarative OnSurfaceChanged, mediaQuery is null");
+        return;
+    }
+    mediaQuery->EnsureListenerIdValid();
+    const auto& listenerId = mediaQuery->GetListenerId();
+    auto json = JsonUtil::Create(true);
+    jsEngine->MediaQueryCallback(listenerId, json->ToString());
+}
 
 void FormFrontendDeclarative::HandleSurfaceChanged(int32_t width, int32_t height)
 {

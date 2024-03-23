@@ -99,10 +99,12 @@ void FormPattern::OnAttachToFrameNode()
         CHECK_NULL_VOID(pattern);
         auto host = pattern->GetHost();
         CHECK_NULL_VOID(host);
+        auto context = host->GetContext();
+        CHECK_NULL_VOID(context);
         auto subContainer = pattern->GetSubContainer();
         CHECK_NULL_VOID(subContainer);
         auto uiTaskExecutor =
-            SingleTaskExecutor::Make(host->GetContext()->GetTaskExecutor(), TaskExecutor::TaskType::UI);
+            SingleTaskExecutor::Make(context->GetTaskExecutor(), TaskExecutor::TaskType::UI);
         auto id = subContainer->GetRunningCardId();
         FormManager::GetInstance().AddSubContainer(id, subContainer);
         uiTaskExecutor.PostDelayedTask(
@@ -768,7 +770,7 @@ void FormPattern::InitFormManagerDelegate()
 
     formManagerBridge_->AddActionEventHandle([weak = WeakClaim(this), instanceID](const std::string& action) {
         ContainerScope scope(instanceID);
-        TAG_LOGI(AceLogTag::ACE_FORM, "Card receive action event, action: %{public}s", action.c_str());
+        TAG_LOGI(AceLogTag::ACE_FORM, "Card receive action event, action: %{public}zu", action.length());
         auto formPattern = weak.Upgrade();
         CHECK_NULL_VOID(formPattern);
         formPattern->OnActionEvent(action);
@@ -1190,7 +1192,8 @@ void FormPattern::RegistVisibleAreaChangeCallback()
             CHECK_NULL_VOID(formPattern);
             formPattern->OnVisibleAreaChange(visible);
         };
-        pipeline->AddVisibleAreaChangeNode(host, 0.0f, callback, false);
+        std::vector<double> ratioList = {0.0};
+        pipeline->AddVisibleAreaChangeNode(host, ratioList, callback, false);
     }
 }
 } // namespace OHOS::Ace::NG

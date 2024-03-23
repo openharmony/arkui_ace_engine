@@ -25,29 +25,43 @@ void ListItemGroupPaintMethod::PaintDivider(PaintWrapper* paintWrapper, RSCanvas
     auto frameSize = geometryNode->GetPaddingSize();
     OffsetF paddingOffset = geometryNode->GetPaddingOffset() - geometryNode->GetFrameOffset();
     Axis axis = vertical_ ? Axis::HORIZONTAL : Axis::VERTICAL;
-
-    int32_t lanes = lanes_ > 1 ? lanes_ : 1;
-    float crossSize = frameSize.CrossSize(axis);
-    float constrainStrokeWidth = divider_.strokeWidth.ConvertToPx();
-    float halfSpaceWidth = (spaceWidth_ + divider_.strokeWidth.ConvertToPx()) / 2.0f; /* 2.0f half */
-    auto startMargin = std::max(0.0, divider_.startMargin.ConvertToPx());
-    auto endMargin = std::max(0.0, divider_.endMargin.ConvertToPx());
-    float fSpacingTotal = (lanes - 1) * laneGutter_;
-    float laneLen = (crossSize - fSpacingTotal) / lanes - startMargin - endMargin;
+    DividerGroupInfo dgInfo = {
+        .lanes = lanes_ > 1 ? lanes_ : 1,
+        .crossSize = frameSize.CrossSize(axis),
+        .constrainStrokeWidth = divider_.strokeWidth.ConvertToPx(),
+        .halfSpaceWidth = (spaceWidth_ + divider_.strokeWidth.ConvertToPx()) / 2.0f, /* 2.0f half */
+        .startMargin = std::max(0.0, divider_.startMargin.ConvertToPx()),
+        .endMargin = std::max(0.0, divider_.endMargin.ConvertToPx())
+    };
+    fSpacingTotal_ = (dgInfo.lanes - 1) * laneGutter_;
+    float laneLen = (dgInfo.crossSize - fSpacingTotal_) / dgInfo.lanes -
+        dgInfo.startMargin - dgInfo.endMargin;
     if (NearZero(laneLen)) return;
     if (LessNotEqual(laneLen, 0.0f)) {
-        startMargin = 0.0f;
-        endMargin = 0.0f;
-        laneLen = (crossSize - fSpacingTotal) / lanes - startMargin - endMargin;
+        dgInfo.startMargin = 0.0f;
+        dgInfo.endMargin = 0.0f;
+        laneLen = (dgInfo.crossSize - fSpacingTotal_) / dgInfo.lanes -
+            dgInfo.startMargin - dgInfo.endMargin;
     }
-    DividerPainter dividerPainter(constrainStrokeWidth, laneLen, vertical_, divider_.color, LineCap::SQUARE);
+    DividerPainter dividerPainter(
+        dgInfo.constrainStrokeWidth, laneLen, vertical_, divider_.color, LineCap::SQUARE);
+    UpdateDividerList(dgInfo, dividerPainter, paddingOffset, canvas);
+}
+
+void ListItemGroupPaintMethod::UpdateDividerList(const DividerGroupInfo& dgInfo,
+    DividerPainter dividerPainter, OffsetF paddingOffset, RSCanvas& canvas)
+{
     int32_t laneIdx = 0;
     bool isFirstItem = (itemPosition_.begin()->first == 0);
     std::list<int32_t> lastLineIndex;
+    bool nextIsPressed = false;
     for (const auto& child : itemPosition_) {
-        if (!isFirstItem) {
-            float mainPos = child.second.first - halfSpaceWidth;
-            float crossPos = startMargin + laneIdx * ((crossSize - fSpacingTotal) / lanes + laneGutter_);
+        auto nextId = child.first - dgInfo.lanes;
+        nextIsPressed = nextId < 0 ? child.second.isPressed : itemPosition_[nextId].isPressed;
+        if (!isFirstItem && !(child.second.isPressed || nextIsPressed)) {
+            float mainPos = child.second.startPos - dgInfo.halfSpaceWidth;
+            float crossPos = dgInfo.startMargin +
+                laneIdx * ((dgInfo.crossSize - fSpacingTotal_) / dgInfo.lanes + laneGutter_);
             OffsetF offset = vertical_ ? OffsetF(mainPos, crossPos) : OffsetF(crossPos, mainPos);
             dividerPainter.DrawLine(canvas, offset + paddingOffset);
         }
@@ -55,20 +69,23 @@ void ListItemGroupPaintMethod::PaintDivider(PaintWrapper* paintWrapper, RSCanvas
             lastLineIndex.clear();
         }
         lastLineIndex.emplace_back(child.first);
-        laneIdx = (laneIdx + 1) >= lanes ? 0 : laneIdx + 1;
+        laneIdx = (laneIdx + 1) >= dgInfo.lanes ? 0 : laneIdx + 1;
         isFirstItem = isFirstItem ? laneIdx > 0 : false;
     }
     if (!lastLineIndex.empty() && *lastLineIndex.rbegin() < totalItemCount_ - 1) {
         int32_t laneIdx = 0;
         for (auto index : lastLineIndex) {
-            if (index + lanes >= totalItemCount_) {
+            if (index + dgInfo.lanes >= totalItemCount_) {
                 break;
             }
-            float mainPos = itemPosition_.at(index).second + spaceWidth_ - halfSpaceWidth;
-            float crossPos = startMargin + laneIdx * ((crossSize - fSpacingTotal) / lanes + laneGutter_);
-            OffsetF offset = vertical_ ? OffsetF(mainPos, crossPos) : OffsetF(crossPos, mainPos);
-            dividerPainter.DrawLine(canvas, offset);
-            laneIdx++;
+            if (!itemPosition_.at(index).isPressed) {
+                float mainPos = itemPosition_.at(index).endPos + spaceWidth_ - dgInfo.halfSpaceWidth;
+                float crossPos = dgInfo.startMargin +
+                    laneIdx * ((dgInfo.crossSize - fSpacingTotal_) / dgInfo.lanes + laneGutter_);
+                OffsetF offset = vertical_ ? OffsetF(mainPos, crossPos) : OffsetF(crossPos, mainPos);
+                dividerPainter.DrawLine(canvas, offset);
+                laneIdx++;
+            }
         }
     }
 }

@@ -28,6 +28,7 @@ public:
     void SetSymbolRenderingStrategy(const std::uint32_t renderingStrategy) override;
     void SetFontColor(std::vector<Color>& symbolColor) override;
     void SetSymbolEffect(const std::uint32_t effectStrategy) override;
+    void SetClipEdge() override;
 };
 } // namespace OHOS::Ace::NG
 

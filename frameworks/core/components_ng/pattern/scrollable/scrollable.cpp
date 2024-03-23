@@ -226,6 +226,9 @@ void Scrollable::HandleTouchUp()
     }
     if (isSpringAnimationStop_ && scrollOverCallback_) {
         ProcessScrollOverCallback(0.0);
+        if (onScrollStartRec_) {
+            onScrollStartRec_(static_cast<float>(axis_));
+        }
     }
 }
 
@@ -903,11 +906,16 @@ void Scrollable::ProcessSpringMotion(double position)
     lastVsyncTime_ = currentVsync;
     if (NearEqual(currentPos_, position)) {
         // trace stop at OnScrollStop
-        AceAsyncTraceBegin(0, TRAILING_ANIMATION);
+        if (!isFadingAway_) {
+            AceAsyncTraceBegin(0, TRAILING_ANIMATION);
+        }
         UpdateScrollPosition(0.0, SCROLL_FROM_ANIMATION_SPRING);
     } else {
+        auto distance = currentPos_ - finalPosition_;
+        auto nextDistance = position - finalPosition_;
+        isFadingAway_ = GreatNotEqual(std::abs(nextDistance), std::abs(distance));
         moved_ = UpdateScrollPosition(position - currentPos_, SCROLL_FROM_ANIMATION_SPRING);
-        if ((currentPos_ - finalPosition_) * (position - finalPosition_) < 0) {
+        if (distance * nextDistance < 0) {
             double currentVelocity = currentVelocity_;
             scrollPause_ = true;
             MarkNeedFlushAnimationStartTime();
@@ -1157,6 +1165,7 @@ void Scrollable::StopSpringAnimation()
     if (!isSpringAnimationStop_) {
         ACE_DEBUG_SCOPED_TRACE("Scrollable stop spring animation");
         isSpringAnimationStop_ = true;
+        isFadingAway_ = false;
         AnimationOption option;
         option.SetCurve(Curves::EASE);
         option.SetDuration(0);

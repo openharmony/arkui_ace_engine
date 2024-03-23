@@ -258,6 +258,28 @@ std::vector<std::string> NavigationStack::GetAllPathName()
     return pathNames;
 }
 
+std::vector<int32_t> NavigationStack::GetRemoveArray()
+{
+    return {};
+}
+
+void NavigationStack::UpdateRemovedNavPathList()
+{
+    auto removeArray = GetRemoveArray();
+    if (navPathList_.empty() || removeArray.empty()) {
+        return;
+    }
+    int32_t navPathListSize = static_cast<int32_t>(navPathList_.size());
+    auto iter = navPathList_.begin();
+    for (int32_t i = static_cast<int32_t>(removeArray.size()) - 1; i >= 0; --i) {
+        auto index = removeArray[i];
+        if (index >= 0 && index < navPathListSize) {
+            navPathList_.erase(iter + index);
+        }
+    }
+    ClearRemoveArray();
+}
+
 void NavigationStack::Push(const std::string& name, const RefPtr<RouteInfo>& routeInfo) {}
 
 void NavigationStack::Push(const std::string& name, int32_t index) {}
@@ -269,6 +291,8 @@ void NavigationStack::Clear()
     navPathList_.clear();
     cacheNodes_.clear();
 }
+
+void NavigationStack::ClearRemoveArray() {}
 
 RefPtr<UINode> NavigationStack::CreateNodeByIndex(int32_t index)
 {
@@ -395,5 +419,16 @@ std::optional<std::pair<std::string, RefPtr<UINode>>> NavigationStack::GetFromCa
         }
     }
     return std::nullopt;
+}
+
+std::vector<std::string> NavigationStack::DumpStackInfo() const
+{
+    std::vector<std::string> dumpInfos;
+    for (size_t i = 0; i < navPathList_.size(); ++i) {
+        const auto& name = navPathList_[i].first;
+        std::string info = "[" + std::to_string(i) + "]{ name: \"" + name + "\" }";
+        dumpInfos.push_back(std::move(info));
+    }
+    return dumpInfos;
 }
 } // namespace OHOS::Ace::NG

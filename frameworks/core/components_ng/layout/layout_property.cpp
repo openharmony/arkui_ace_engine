@@ -93,7 +93,7 @@ void LayoutProperty::Reset()
     margin_.reset();
     borderWidth_.reset();
     outerBorderWidth_.reset();
-    magicItemProperty_.reset();
+    magicItemProperty_.Reset();
     positionProperty_.reset();
     measureType_.reset();
     layoutDirection_.reset();
@@ -106,7 +106,7 @@ void LayoutProperty::ToJsonValue(std::unique_ptr<JsonValue>& json) const
 {
     ACE_PROPERTY_TO_JSON_VALUE(calcLayoutConstraint_, MeasureProperty);
     ACE_PROPERTY_TO_JSON_VALUE(positionProperty_, PositionProperty);
-    ACE_PROPERTY_TO_JSON_VALUE(magicItemProperty_, MagicItemProperty);
+    magicItemProperty_.ToJsonValue(json);
     ACE_PROPERTY_TO_JSON_VALUE(flexItemProperty_, FlexItemProperty);
     ACE_PROPERTY_TO_JSON_VALUE(gridProperty_, GridProperty);
 
@@ -208,9 +208,7 @@ void LayoutProperty::UpdateLayoutProperty(const LayoutProperty* layoutProperty)
     if (layoutProperty->borderWidth_) {
         borderWidth_ = std::make_unique<BorderWidthProperty>(*layoutProperty->borderWidth_);
     }
-    if (layoutProperty->magicItemProperty_) {
-        magicItemProperty_ = std::make_unique<MagicItemProperty>(*layoutProperty->magicItemProperty_);
-    }
+    magicItemProperty_ = layoutProperty->magicItemProperty_;
     if (layoutProperty->positionProperty_) {
         positionProperty_ = std::make_unique<PositionProperty>(*layoutProperty->positionProperty_);
     }
@@ -317,11 +315,10 @@ void LayoutProperty::CheckBorderAndPadding()
 
 void LayoutProperty::CheckAspectRatio()
 {
-    auto hasAspectRatio = magicItemProperty_ ? magicItemProperty_->HasAspectRatio() : false;
-    if (!hasAspectRatio) {
+    if (!magicItemProperty_.HasAspectRatio()) {
         return;
     }
-    auto aspectRatio = magicItemProperty_->GetAspectRatioValue();
+    auto aspectRatio = magicItemProperty_.GetAspectRatioValue();
     // Adjust by aspect ratio, firstly pick height based on width. It means that when width, height and aspectRatio are
     // all set, the height is not used.
     auto maxWidth = layoutConstraint_->maxSize.Width();
@@ -592,7 +589,7 @@ void LayoutProperty::OnVisibilityUpdate(VisibleType visible, bool allowTransitio
 
     // update visibility value.
     propVisibility_ = visible;
-    host->OnVisibleChange(visible == VisibleType::VISIBLE);
+    host->NotifyVisibleChange(visible == VisibleType::VISIBLE);
     if (allowTransition && preVisibility) {
         if (preVisibility.value() == VisibleType::VISIBLE && visible != VisibleType::VISIBLE) {
             host->GetRenderContext()->OnNodeDisappear(false);
@@ -651,39 +648,30 @@ bool LayoutProperty::HasFixedHeight() const
 
 bool LayoutProperty::HasAspectRatio() const
 {
-    if (!magicItemProperty_) {
-        return false;
-    }
-    return magicItemProperty_->HasAspectRatio();
+    return magicItemProperty_.HasAspectRatio();
 }
 
 float LayoutProperty::GetAspectRatio() const
 {
-    if (magicItemProperty_ && magicItemProperty_->HasAspectRatio()) {
-        return magicItemProperty_->GetAspectRatioValue();
+    if (magicItemProperty_.HasAspectRatio()) {
+        return magicItemProperty_.GetAspectRatioValue();
     }
     return 0.0f;
 }
 
 void LayoutProperty::UpdateAspectRatio(float ratio)
 {
-    if (!magicItemProperty_) {
-        magicItemProperty_ = std::make_unique<MagicItemProperty>();
-    }
-    if (magicItemProperty_->UpdateAspectRatio(ratio)) {
+    if (magicItemProperty_.UpdateAspectRatio(ratio)) {
         propertyChangeFlag_ = propertyChangeFlag_ | PROPERTY_UPDATE_MEASURE;
     }
 }
 
 void LayoutProperty::ResetAspectRatio()
 {
-    if (!magicItemProperty_) {
-        return;
-    }
-    if (magicItemProperty_->HasAspectRatio()) {
+    if (magicItemProperty_.HasAspectRatio()) {
         propertyChangeFlag_ = propertyChangeFlag_ | PROPERTY_UPDATE_MEASURE;
+        magicItemProperty_.ResetAspectRatio();
     }
-    magicItemProperty_->ResetAspectRatio();
 }
 
 void LayoutProperty::UpdateGeometryTransition(const std::string& id, bool followWithoutTransition)
@@ -713,8 +701,15 @@ void LayoutProperty::UpdateGeometryTransition(const std::string& id, bool follow
     TAG_LOGD(AceLogTag::ACE_GEOMETRY_TRANSITION, "node: %{public}d update id, old id: %{public}s, new id: %{public}s",
         host->GetId(), geometryTransitionOld ? geometryTransitionOld->GetId().c_str() : "empty",
         geometryTransitionNew ? id.c_str() : "empty");
-    ElementRegister::GetInstance()->DumpGeometryTransition();
     propertyChangeFlag_ = propertyChangeFlag_ | PROPERTY_UPDATE_LAYOUT | PROPERTY_UPDATE_MEASURE;
+}
+
+void LayoutProperty::ResetGeometryTransition()
+{
+    if (!GetGeometryTransition()) {
+        return;
+    }
+    UpdateGeometryTransition("");
 }
 
 void LayoutProperty::UpdateLayoutDirection(TextDirection value)
@@ -728,10 +723,7 @@ void LayoutProperty::UpdateLayoutDirection(TextDirection value)
 
 void LayoutProperty::UpdateLayoutWeight(float value)
 {
-    if (!magicItemProperty_) {
-        magicItemProperty_ = std::make_unique<MagicItemProperty>();
-    }
-    if (magicItemProperty_->UpdateLayoutWeight(value)) {
+    if (magicItemProperty_.UpdateLayoutWeight(value)) {
         propertyChangeFlag_ = propertyChangeFlag_ | PROPERTY_UPDATE_MEASURE;
     }
 }

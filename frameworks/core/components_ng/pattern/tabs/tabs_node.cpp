@@ -28,6 +28,21 @@ namespace OHOS::Ace::NG {
 namespace {
 
 constexpr int32_t ANIMATION_DURATION_DEFAULT = 200;
+const std::string BAR_BLURSTYLE[] = {
+    "BlurStyle.NONE",
+    "BlurStyle.Thin",
+    "BlurStyle.Regular",
+    "BlurStyle.Thick",
+    "BlurStyle.BACKGROUND_THIN",
+    "BlurStyle.BACKGROUND_REGULAR",
+    "BlurStyle.BACKGROUND_THICK",
+    "BlurStyle.BACKGROUND_ULTRA_THICK",
+    "BlurStyle.COMPONENT_ULTRA_THIN",
+    "BlurStyle.COMPONENT_THIN",
+    "BlurStyle.COMPONENT_REGULAR",
+    "BlurStyle.COMPONENT_THICK",
+    "BlurStyle.COMPONENT_ULTRA_THICK"
+};
 
 } // namespace
 
@@ -70,6 +85,7 @@ void TabsNode::ToJsonValue(std::unique_ptr<JsonValue>& json) const
     json->Put("barHeight", GetBarAdaptiveHeight() ? "auto" : std::to_string(GetBarHeight().Value()).c_str());
     json->Put("fadingEdge", GetFadingEdge() ? "true" : "false");
     json->Put("barBackgroundColor", GetBarBackgroundColor().ColorToString().c_str());
+    json->Put("barBackgroundBlurStyle", BAR_BLURSTYLE[static_cast<int32_t>(GetBarBackgroundBlurStyle())].c_str());
 
     auto barGridAlignJson = JsonUtil::Create(true);
     auto barGridAlign = GetBarGridAlign();
@@ -177,6 +193,19 @@ Color TabsNode::GetBarBackgroundColor() const
     auto tabBarPaintProperty = tabBarNode->GetPaintProperty<TabBarPaintProperty>();
     CHECK_NULL_RETURN(tabBarPaintProperty, backgroundColor);
     return tabBarPaintProperty->GetBarBackgroundColor().value_or(backgroundColor);
+}
+
+BlurStyle TabsNode::GetBarBackgroundBlurStyle() const
+{
+    auto barBackgroundBlurStyle = BlurStyle::NO_MATERIAL;
+    if (!tabBarId_.has_value()) {
+        return barBackgroundBlurStyle;
+    }
+    auto tabBarNode = GetFrameNode(V2::TAB_BAR_ETS_TAG, tabBarId_.value());
+    CHECK_NULL_RETURN(tabBarNode, barBackgroundBlurStyle);
+    auto tabBarPaintProperty = tabBarNode->GetPaintProperty<TabBarPaintProperty>();
+    CHECK_NULL_RETURN(tabBarPaintProperty, barBackgroundBlurStyle);
+    return tabBarPaintProperty->GetTabBarBlurStyle().value_or(barBackgroundBlurStyle);
 }
 
 bool TabsNode::GetFadingEdge() const

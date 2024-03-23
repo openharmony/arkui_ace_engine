@@ -32,7 +32,8 @@ enum BreakPointsType {
 export interface IconCommonOptions {
   src: ResourceStr;
   size?: SizeOptions;
-  fillColor?: ResourceColor
+  fillColor?: ResourceColor;
+  activatedFillColor?: ResourceColor;
 }
 
 export interface SuffixIconOptions extends IconCommonOptions {
@@ -50,6 +51,7 @@ export interface LabelOptions {
   text: string;
   fontSize?: Dimension;
   fontColor?: ResourceColor;
+  activatedFontColor?: ResourceColor;
   fontFamily?: string;
   labelMargin?: LabelMarginOptions;
 }
@@ -57,6 +59,7 @@ export interface LabelOptions {
 interface IconTheme {
   size: SizeOptions;
   fillColor: ResourceColor;
+  activatedFillColor: ResourceColor;
 }
 
 interface PrefixIconTheme extends IconTheme {}
@@ -70,6 +73,7 @@ interface LabelTheme {
   normalFontSize: Dimension;
   smallFontSize: Dimension;
   fontColor: ResourceColor;
+  activatedFontColor: ResourceColor;
   fontFamily: string;
   normalMargin: Margin;
   smallMargin: Margin;
@@ -94,7 +98,9 @@ interface ChipNodeTheme {
   normalHeight: Dimension;
   smallHeight: Dimension;
   enabled: boolean;
+  activated: boolean;
   backgroundColor: ResourceColor;
+  activatedBackgroundColor: ResourceColor;
   focusOutlineColor: ResourceColor;
   normalBorderRadius: Dimension;
   smallBorderRadius: Dimension;
@@ -118,18 +124,21 @@ export const defaultTheme: ChipTheme = {
   prefixIcon: {
     size: { width: 16, height: 16 },
     fillColor: $r('sys.color.ohos_id_color_secondary'),
+    activatedFillColor: $r('sys.color.ohos_id_color_text_primary_contrary'),
   },
   label: {
     normalFontSize: $r('sys.float.ohos_id_text_size_button2'),
-    smallFontSize: $r('sys.float.ohos_id_text_size_button3'),
+    smallFontSize: $r('sys.float.ohos_id_text_size_button2'),
     fontColor: $r('sys.color.ohos_id_color_text_primary'),
+    activatedFontColor: $r('sys.color.ohos_id_color_text_primary_contrary'),
     fontFamily: "HarmonyOS Sans",
     normalMargin: { left: 6, right: 6, top: 0, bottom: 0 },
     smallMargin: { left: 4, right: 4, top: 0, bottom: 0 },
   },
   suffixIcon: {
     size: { width: 16, height: 16 },
-    fillColor: $r('sys.color.ohos_id_color_primary'),
+    fillColor: $r('sys.color.ohos_id_color_secondary'),
+    activatedFillColor: $r('sys.color.ohos_id_color_text_primary_contrary'),
     defaultDeleteIcon: $r('sys.media.ohos_ic_public_cancel', 16, 16),
     focusable: false,
   },
@@ -138,7 +147,9 @@ export const defaultTheme: ChipTheme = {
     normalHeight: 36,
     smallHeight: 28,
     enabled: true,
+    activated: false,
     backgroundColor: $r('sys.color.ohos_id_color_button_normal'),
+    activatedBackgroundColor: $r('sys.color.ohos_id_color_emphasize'),
     focusOutlineColor: $r('sys.color.ohos_id_color_focused_outline'),
     normalBorderRadius: $r('sys.float.ohos_id_corner_radius_tips_instant_tip'),
     smallBorderRadius: $r('sys.float.ohos_id_corner_radius_piece'),
@@ -166,10 +177,13 @@ interface ChipOptions {
   suffixIcon?: SuffixIconOptions;
   allowClose?: boolean;
   enabled?: boolean;
+  activated?: boolean;
   backgroundColor?: ResourceColor;
+  activatedBackgroundColor?: ResourceColor;
   borderRadius?: Dimension;
   size?: ChipSize | SizeOptions;
   onClose?: () => void
+  onClicked?: () => void
 }
 
 @Builder
@@ -181,9 +195,12 @@ export function Chip(options: ChipOptions) {
     suffixIcon: options.suffixIcon,
     allowClose: options.allowClose,
     chipEnabled: options.enabled,
+    chipActivated: options.activated,
     chipNodeBackgroundColor: options.backgroundColor,
+    chipNodeActivatedBackgroundColor: options.activatedBackgroundColor,
     chipNodeRadius: options.borderRadius,
-    onClose: options.onClose
+    onClose: options.onClose,
+    onClicked: options.onClicked,
   })
 }
 
@@ -196,8 +213,10 @@ export struct ChipComponent {
   @Prop label: LabelOptions = { text: "" }
   @Prop suffixIcon: SuffixIconOptions = { src: "" }
   @Prop chipNodeBackgroundColor: ResourceColor = this.theme.chipNode.backgroundColor
+  @Prop chipNodeActivatedBackgroundColor: ResourceColor = this.theme.chipNode.activatedBackgroundColor
   @Prop chipNodeRadius: Dimension | undefined = void (0)
   @Prop chipEnabled: boolean = true
+  @Prop chipActivated: boolean = false
   @State isHover: boolean = false
   @State chipScale: ScaleOptions = { x: 1, y: 1 }
   @State chipOpacity: number = 1
@@ -207,6 +226,7 @@ export struct ChipComponent {
   @State useDefaultSuffixIcon: boolean = false
   private chipNodeSize: SizeOptions = {}
   private onClose: () => void = noop
+  private onClicked: () => void = noop
   @State suffixIconOnFocus: boolean = false
   @State chipBreakPoints: BreakPointsType = BreakPointsType.SM
   private smListener: mediaquery.MediaQueryListener = mediaquery.matchMediaSync("0vp<width<600vp")
@@ -238,11 +258,21 @@ export struct ChipComponent {
   }
 
   private getLabelFontColor(): ResourceColor {
+    if (this.getChipActive()) {
+      return this.label?.activatedFontColor ?? this.theme.label.activatedFontColor
+    }
     return this.label?.fontColor ?? this.theme.label.fontColor
   }
 
   private getLabelFontFamily(): string {
     return this.label?.fontFamily ?? this.theme.label.fontFamily
+  }
+
+  private getLabelFontWeight(): FontWeight {
+    if (this.getChipActive()) {
+      return FontWeight.Medium
+    }
+    return FontWeight.Regular
   }
 
   private toVp(value: Dimension | Length | undefined): number {
@@ -367,10 +397,16 @@ export struct ChipComponent {
   }
 
   private getPrefixIconFilledColor(): ResourceColor {
+    if (this.getChipActive()) {
+      return this.prefixIcon?.activatedFillColor ?? this.theme.prefixIcon.activatedFillColor
+    }
     return this.prefixIcon?.fillColor ?? this.theme.prefixIcon.fillColor
   }
 
   private getSuffixIconFilledColor(): ResourceColor {
+    if (this.getChipActive()) {
+      return this.suffixIcon?.activatedFillColor ?? this.theme.suffixIcon.activatedFillColor
+    }
     return this.suffixIcon?.fillColor ?? this.theme.suffixIcon.fillColor
   }
 
@@ -391,6 +427,9 @@ export struct ChipComponent {
   }
 
   private getChipNodeBackGroundColor(): ResourceColor {
+    if (this.getChipActive()) {
+      return this.chipNodeActivatedBackgroundColor ?? this.theme.chipNode.activatedBackgroundColor
+    }
     return this.chipNodeBackgroundColor ?? this.theme.chipNode.backgroundColor
   }
 
@@ -408,6 +447,7 @@ export struct ChipComponent {
       textContent: this.label?.text ?? "",
       fontSize: this.getLabelFontSize(),
       fontFamily: this.label?.fontFamily ?? this.theme.label.fontFamily,
+      fontWeight: this.getLabelFontWeight(),
       maxLines: 1,
       overflow: TextOverflow.Ellipsis,
       textAlign: TextAlign.Center
@@ -432,6 +472,10 @@ export struct ChipComponent {
 
   private getChipEnable(): boolean {
     return this.chipEnabled || this.chipEnabled === void (0)
+  }
+
+  private getChipActive(): boolean {
+    return this.chipActivated || this.chipActivated === void (0)
   }
 
   private getChipNodeOpacity(): number {
@@ -636,6 +680,7 @@ export struct ChipComponent {
         .fontSize(this.getLabelFontSize())
         .fontColor(this.getLabelFontColor())
         .fontFamily(this.getLabelFontFamily())
+        .fontWeight(this.getLabelFontWeight())
         .margin(this.getLabelMargin())
         .enabled(this.getChipEnable())
         .maxLines(1)
@@ -678,6 +723,7 @@ export struct ChipComponent {
             this.deleteChipNodeAnimate()
             return
           }
+          this.onClicked()
         })
     }
     .alignItems(VerticalAlign.Center)
@@ -711,6 +757,9 @@ export struct ChipComponent {
       if (event.type === KeyType.Down && event.keyCode === KeyCode.KEYCODE_FORWARD_DEL && !this.suffixIconOnFocus) {
         this.deleteChipNodeAnimate()
       }
+    })
+    .onClick(() => {
+      this.onClicked()
     })
   }
 

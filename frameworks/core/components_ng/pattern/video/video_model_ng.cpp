@@ -199,6 +199,15 @@ void VideoModelNG::SetOnUpdate(VideoEventFunc&& onUpdate)
     eventHub->SetOnUpdate(std::move(onUpdate));
 }
 
+void VideoModelNG::SetOnStop(VideoEventFunc&& onStop)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetEventHub<VideoEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnStop(std::move(onStop));
+}
+
 void VideoModelNG::SetOnFullScreenChange(VideoEventFunc&& onFullScreenChange)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
@@ -214,7 +223,7 @@ void VideoModelNG::AddDragFrameNodeToManager() const
     CHECK_NULL_VOID(pipeline);
     auto dragDropManager = pipeline->GetDragDropManager();
     CHECK_NULL_VOID(dragDropManager);
-    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    auto frameNode = AceType::Claim(ViewStackProcessor::GetInstance()->GetMainFrameNode());
     CHECK_NULL_VOID(frameNode);
 
     dragDropManager->AddDragFrameNode(frameNode->GetId(), frameNode);

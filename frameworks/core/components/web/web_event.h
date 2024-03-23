@@ -493,6 +493,82 @@ private:
     int32_t error_;
 };
 
+class ACE_EXPORT AllSslErrorResult : public AceType {
+    DECLARE_ACE_TYPE(AllSslErrorResult, AceType)
+
+public:
+    AllSslErrorResult() = default;
+    ~AllSslErrorResult() = default;
+    virtual void HandleConfirm() = 0;
+    virtual void HandleCancel() = 0;
+};
+
+class ACE_EXPORT WebAllSslErrorEvent : public BaseEventInfo {
+    DECLARE_RELATIONSHIP_OF_CLASSES(WebAllSslErrorEvent, BaseEventInfo);
+
+public:
+    WebAllSslErrorEvent(const RefPtr<AllSslErrorResult>& result,
+                        int32_t error,
+                        const std::string& url,
+                        const std::string& originalUrl,
+                        const std::string& referrer,
+                        bool isFatalError,
+                        bool isMainFrame
+    )
+        : BaseEventInfo("WebAllSslErrorEvent"), result_(result),
+                                                error_(error),
+                                                url_(url),
+                                                originalUrl_(originalUrl),
+                                                referrer_(referrer),
+                                                isFatalError_(isFatalError),
+                                                isMainFrame_(isMainFrame) {}
+    ~WebAllSslErrorEvent() = default;
+
+    const RefPtr<AllSslErrorResult>& GetResult() const
+    {
+        return result_;
+    }
+
+    int32_t GetError() const
+    {
+        return error_;
+    }
+
+    std::string GetUrl() const
+    {
+        return url_;
+    }
+
+    std::string GetOriginalUrl() const
+    {
+        return originalUrl_;
+    }
+
+    std::string GetReferrer() const
+    {
+        return referrer_;
+    }
+
+    bool GetIsFatalError() const
+    {
+        return isFatalError_;
+    }
+
+    bool GetIsMainFrame() const
+    {
+        return isMainFrame_;
+    }
+
+private:
+    RefPtr<AllSslErrorResult> result_;
+    int32_t error_;
+    const std::string& url_;
+    const std::string& originalUrl_;
+    const std::string& referrer_;
+    bool isFatalError_;
+    bool isMainFrame_;
+};
+
 class ACE_EXPORT SslSelectCertResult : public AceType {
     DECLARE_ACE_TYPE(SslSelectCertResult, AceType)
 public:
@@ -710,8 +786,11 @@ class ACE_EXPORT FullScreenEnterEvent : public BaseEventInfo {
     DECLARE_RELATIONSHIP_OF_CLASSES(FullScreenEnterEvent, BaseEventInfo);
 
 public:
-    FullScreenEnterEvent(const RefPtr<FullScreenExitHandler>& handler)
-        : BaseEventInfo("FullScreenEnterEvent"), handler_(handler) {}
+    FullScreenEnterEvent(
+        const RefPtr<FullScreenExitHandler>& handler, int videoNaturalWidth, int videoNaturalHeight)
+        : BaseEventInfo("FullScreenEnterEvent"), handler_(handler), videoNaturalWidth_(videoNaturalWidth),
+          videoNaturalHeight_(videoNaturalHeight)
+    {}
     ~FullScreenEnterEvent() = default;
 
     const RefPtr<FullScreenExitHandler>& GetHandler() const
@@ -719,8 +798,20 @@ public:
         return handler_;
     }
 
+    int GetVideoNaturalWidth() const
+    {
+        return videoNaturalWidth_;
+    }
+
+    int GetVideoNaturalHeight() const
+    {
+        return videoNaturalHeight_;
+    }
+
 private:
     RefPtr<FullScreenExitHandler> handler_;
+    int videoNaturalWidth_;
+    int videoNaturalHeight_;
 };
 
 class ACE_EXPORT FullScreenExitEvent : public BaseEventInfo {
@@ -763,6 +854,23 @@ public:
     explicit LoadInterceptEvent(const RefPtr<WebRequest>& request) :
         BaseEventInfo("LoadInterceptEvent"), request_(request) {}
     ~LoadInterceptEvent() = default;
+
+    const RefPtr<WebRequest>& GetRequest() const
+    {
+        return request_;
+    }
+
+private:
+    RefPtr<WebRequest> request_;
+};
+
+class ACE_EXPORT LoadOverrideEvent : public BaseEventInfo {
+    DECLARE_RELATIONSHIP_OF_CLASSES(LoadOverrideEvent, BaseEventInfo);
+
+public:
+    explicit LoadOverrideEvent(const RefPtr<WebRequest>& request) :
+        BaseEventInfo("LoadOverrideEvent"), request_(request) {}
+    ~LoadOverrideEvent() = default;
 
     const RefPtr<WebRequest>& GetRequest() const
     {
@@ -1416,6 +1524,86 @@ private:
     int64_t firstContentfulPaintMs_;
 };
 
+class ACE_EXPORT FirstMeaningfulPaintEvent : public BaseEventInfo {
+    DECLARE_RELATIONSHIP_OF_CLASSES(FirstMeaningfulPaintEvent, BaseEventInfo);
+
+public:
+    FirstMeaningfulPaintEvent(int64_t navigationStartTime, int64_t firstMeaningfulPaintTime)
+        : BaseEventInfo("FirstMeaningfulPaintEvent"), navigationStartTime_(navigationStartTime),
+          firstMeaningfulPaintTime_(firstMeaningfulPaintTime)
+    {}
+
+    ~FirstMeaningfulPaintEvent() = default;
+
+    int64_t GetNavigationStartTime() const
+    {
+        return navigationStartTime_;
+    }
+
+    int64_t GetFirstMeaningfulPaintTime() const
+    {
+        return firstMeaningfulPaintTime_;
+    }
+
+private:
+    int64_t navigationStartTime_;
+    int64_t firstMeaningfulPaintTime_;
+};
+
+class ACE_EXPORT LargestContentfulPaintEvent : public BaseEventInfo {
+    DECLARE_RELATIONSHIP_OF_CLASSES(LargestContentfulPaintEvent, BaseEventInfo);
+
+public:
+    LargestContentfulPaintEvent(int64_t navigationStartTime, int64_t largestImagePaintTime,
+        int64_t largestTextPaintTime, int64_t largestImageLoadStartTime, int64_t largestImageLoadEndTime,
+        double_t imageBPP)
+        : BaseEventInfo("LargestContentfulPaintEvent"), navigationStartTime_(navigationStartTime),
+          largestImagePaintTime_(largestImagePaintTime), largestTextPaintTime_(largestTextPaintTime),
+          largestImageLoadStartTime_(largestImageLoadStartTime), largestImageLoadEndTime_(largestImageLoadEndTime),
+          imageBPP_(imageBPP)
+    {}
+
+    ~LargestContentfulPaintEvent() = default;
+
+    int64_t GetNavigationStartTime() const
+    {
+        return navigationStartTime_;
+    }
+
+    int64_t GetLargestImagePaintTime() const
+    {
+        return largestImagePaintTime_;
+    }
+
+    int64_t GetLargestTextPaintTime() const
+    {
+        return largestTextPaintTime_;
+    }
+
+    int64_t GetLargestImageLoadStartTime() const
+    {
+        return largestImageLoadStartTime_;
+    }
+
+    int64_t GetLargestImageLoadEndTime() const
+    {
+        return largestImageLoadEndTime_;
+    }
+
+    double_t GetImageBPP() const
+    {
+        return imageBPP_;
+    }
+
+private:
+    int64_t navigationStartTime_;
+    int64_t largestImagePaintTime_;
+    int64_t largestTextPaintTime_;
+    int64_t largestImageLoadStartTime_;
+    int64_t largestImageLoadEndTime_;
+    double_t imageBPP_;
+};
+
 class ACE_EXPORT SafeBrowsingCheckResultEvent : public BaseEventInfo {
     DECLARE_RELATIONSHIP_OF_CLASSES(SafeBrowsingCheckResultEvent, BaseEventInfo);
 
@@ -1498,13 +1686,43 @@ private:
     bool didReplaceEntry_ = false;
 };
 
+class ACE_EXPORT IntelligentTrackingPreventionResultEvent : public BaseEventInfo {
+    DECLARE_RELATIONSHIP_OF_CLASSES(IntelligentTrackingPreventionResultEvent, BaseEventInfo);
+
+public:
+    IntelligentTrackingPreventionResultEvent(
+        const std::string& websiteHost, const std::string& trackerHost)
+        : BaseEventInfo("IntelligentTrackingPreventionResultEvent"),
+          host_(websiteHost), trackerHost_(trackerHost) {}
+
+    ~IntelligentTrackingPreventionResultEvent() = default;
+
+    const std::string& GetHost() const
+    {
+        return host_;
+    }
+
+    const std::string& GetTrackerHost() const
+    {
+        return trackerHost_;
+    }
+
+private:
+    std::string host_;
+    std::string trackerHost_;
+};
+
 struct EmbedInfo final {
     std::string id = "";
     std::string type = "";
     std::string src = "";
     std::string url = "";
+    std::string tag = "";
     int32_t width = 0;
     int32_t height = 0;
+    int32_t x = 0;
+    int32_t y = 0;
+    std::map<std::string, std::string> params;
 };
 
 class ACE_EXPORT NativeEmbedDataInfo : public BaseEventInfo {

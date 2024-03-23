@@ -27,6 +27,7 @@
 #include "base/log/frame_report.h"
 #include "base/memory/referenced.h"
 #include "base/view_data/view_data_wrap.h"
+#include "core/accessibility/accessibility_manager_ng.h"
 #include "core/common/frontend.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components_ng/base/frame_node.h"
@@ -35,13 +36,16 @@
 #include "core/components_ng/manager/frame_rate/frame_rate_manager.h"
 #include "core/components_ng/manager/full_screen/full_screen_manager.h"
 #include "core/components_ng/manager/post_event/post_event_manager.h"
+#include "core/components_ng/manager/privacy_sensitive/privacy_sensitive_manager.h"
 #include "core/components_ng/manager/safe_area/safe_area_manager.h"
+#include "core/components_ng/manager/navigation_dump/navigation_dump_manager.h"
 #include "core/components_ng/manager/select_overlay/select_overlay_manager.h"
 #include "core/components_ng/manager/shared_overlay/shared_overlay_manager.h"
 #include "core/components_ng/pattern/custom/custom_node.h"
 #ifdef WINDOW_SCENE_SUPPORTED
 #include "core/components_ng/pattern/ui_extension/ui_extension_manager.h"
 #endif
+#include "core/components_ng/manager/focus/focus_manager.h"
 #include "core/components_ng/pattern/overlay/overlay_manager.h"
 #include "core/components_ng/pattern/stage/stage_manager.h"
 #include "core/components_ng/property/safe_area_insets.h"
@@ -186,8 +190,8 @@ public:
 
     void HandleOnAreaChangeEvent(uint64_t nanoTimestamp);
 
-    void AddVisibleAreaChangeNode(
-        const RefPtr<FrameNode>& node, double ratio, const VisibleRatioCallback& callback, bool isUserCallback = true);
+    void AddVisibleAreaChangeNode(const RefPtr<FrameNode>& node,
+        const std::vector<double>& ratio, const VisibleRatioCallback& callback, bool isUserCallback = true);
     void RemoveVisibleAreaChangeNode(int32_t nodeId);
 
     void AddFormVisibleChangeNode(const RefPtr<FrameNode>& node, const std::function<void(bool)>& callback);
@@ -276,6 +280,9 @@ public:
     void UpdateNavSafeArea(const SafeAreaInsets& navSafeArea) override;
     void UpdateOriginAvoidArea(const Rosen::AvoidArea& avoidArea, uint32_t type) override;
 
+    void UpdateSizeChangeReason(
+        WindowSizeChangeReason type, const std::shared_ptr<Rosen::RSTransaction>& rsTransaction = nullptr);
+
     void UpdateDisplayAvailableRect(const Rect& displayAvailableRect)
     {
         displayAvailableRect_ = displayAvailableRect;
@@ -292,7 +299,11 @@ public:
     }
     virtual SafeAreaInsets GetSafeArea() const;
 
+    virtual SafeAreaInsets GetSafeAreaWithoutProcess() const;
+
     const RefPtr<FullScreenManager>& GetFullScreenManager();
+
+    RefPtr<AccessibilityManagerNG> GetAccessibilityManagerNG();
 
     const RefPtr<StageManager>& GetStageManager();
 
@@ -313,6 +324,8 @@ public:
 #endif
 
     const RefPtr<DragDropManager>& GetDragDropManager();
+
+    const RefPtr<FocusManager>& GetFocusManager() const;
 
     const RefPtr<FrameRateManager>& GetFrameRateManager()
     {
@@ -384,10 +397,8 @@ public:
 
     bool ChangeMouseStyle(int32_t nodeId, MouseFormat format);
 
-    bool RequestDefaultFocus(const RefPtr<FocusHub>& mainView);
     bool RequestFocus(const std::string& targetNodeId) override;
     void AddDirtyFocus(const RefPtr<FrameNode>& node);
-    void AddDirtyDefaultFocus(const RefPtr<FrameNode>& node);
     void AddDirtyRequestFocus(const RefPtr<FrameNode>& node);
     void RootLostFocus(BlurReason reason = BlurReason::FOCUS_SWITCH) const;
 
@@ -558,6 +569,16 @@ public:
         return screenNode_.Upgrade();
     }
 
+    void SetFocusedWindowSceneNode(const RefPtr<FrameNode>& node)
+    {
+        CHECK_NULL_VOID(node);
+        windowSceneNode_ = AceType::WeakClaim(AceType::RawPtr(node));
+    }
+    RefPtr<FrameNode> GetFocusedWindowSceneNode() const
+    {
+        return windowSceneNode_.Upgrade();
+    }
+
     void SetJSViewActive(bool active, WeakPtr<CustomNode> custom);
 
     void UpdateCurrentActiveNode(const WeakPtr<FrameNode>& node) override
@@ -622,6 +643,21 @@ public:
         vsyncListener_ = std::move(vsync);
     }
 
+    const RefPtr<NavigationDumpManager>& GetNavigationDumpManager() const
+    {
+        return navigationDumpMgr_;
+    }
+
+    RefPtr<PrivacySensitiveManager> GetPrivacySensitiveManager() const
+    {
+        return privacySensitiveManager_;
+    }
+
+    void ChangeSensitiveNodes(bool flag) override
+    {
+        privacySensitiveManager_->TriggerFrameNodesSensitive(flag);
+    }
+
 protected:
     void StartWindowSizeChangeAnimate(int32_t width, int32_t height, WindowSizeChangeReason type,
         const std::shared_ptr<Rosen::RSTransaction>& rsTransaction = nullptr);
@@ -653,9 +689,13 @@ private:
 
     void FlushTouchEvents();
 
+    void FlushFocusView();
+
     void ProcessDelayTasks();
 
     void InspectDrew();
+
+    bool TriggerKeyEventDispatch(const KeyEvent& event);
 
     void FlushBuildFinishCallbacks();
 
@@ -664,6 +704,10 @@ private:
     void RegisterRootEvent();
 
     void ResetDraggingStatus(const TouchEvent& touchPoint);
+
+    void CompensateTouchMoveEvent(const TouchEvent& event);
+
+    bool CompensateTouchMoveEventFromUnhandledEvents(const TouchEvent& event);
 
     FrameInfo* GetCurrentFrameInfo(uint64_t recvTime, uint64_t timeStamp);
 
@@ -738,30 +782,35 @@ private:
     FoldStatusChangedCallbackMap foldStatusChangedCallbackMap_;
     FoldDisplayModeChangedCallbackMap foldDisplayModeChangedCallbackMap_;
 
+    bool isOnAreaChangeNodesCacheVaild_ = false;
+    std::vector<FrameNode*> onAreaChangeNodesCache_;
     std::unordered_set<int32_t> onAreaChangeNodeIds_;
     std::unordered_set<int32_t> onVisibleAreaChangeNodeIds_;
     std::unordered_set<int32_t> onFormVisibleChangeNodeIds_;
     std::unordered_map<int32_t, std::list<std::pair<int32_t, std::function<void()>>>> pageIdOnShowMap_;
     std::unordered_map<int32_t, std::list<std::pair<int32_t, std::function<void()>>>> pageIdOnHideMap_;
 
+    RefPtr<AccessibilityManagerNG> accessibilityManagerNG_;
     RefPtr<StageManager> stageManager_;
     RefPtr<OverlayManager> overlayManager_;
     RefPtr<FullScreenManager> fullScreenManager_;
     RefPtr<SelectOverlayManager> selectOverlayManager_;
     RefPtr<DragDropManager> dragDropManager_;
+    RefPtr<FocusManager> focusManager_;
     RefPtr<SharedOverlayManager> sharedTransitionManager_;
 #ifdef WINDOW_SCENE_SUPPORTED
     RefPtr<UIExtensionManager> uiExtensionManager_;
 #endif
     RefPtr<SafeAreaManager> safeAreaManager_ = MakeRefPtr<SafeAreaManager>();
     RefPtr<FrameRateManager> frameRateManager_ = MakeRefPtr<FrameRateManager>();
+    RefPtr<PrivacySensitiveManager> privacySensitiveManager_ = MakeRefPtr<PrivacySensitiveManager>();
     Rect displayAvailableRect_;
     std::unordered_map<size_t, TouchTestResult> touchTestResults_;
     WeakPtr<FrameNode> dirtyFocusNode_;
     WeakPtr<FrameNode> dirtyFocusScope_;
-    WeakPtr<FrameNode> dirtyDefaultFocusNode_;
     WeakPtr<FrameNode> dirtyRequestFocusNode_;
     WeakPtr<FrameNode> screenNode_;
+    WeakPtr<FrameNode> windowSceneNode_;
     uint32_t nextScheduleTaskId_ = 0;
     int32_t mouseStyleNodeId_ = -1;
     uint64_t resampleTimeStamp_ = 0;
@@ -805,10 +854,15 @@ private:
     std::list<DelayedTask> delayedTasks_;
     RefPtr<PostEventManager> postEventManager_;
 
+    std::unordered_map<int32_t, TouchEvent> idToTouchPoints_;
+    std::unordered_map<int32_t, uint64_t> lastDispatchTime_;
+
     VsyncCallbackFun vsyncListener_;
     ACE_DISALLOW_COPY_AND_MOVE(PipelineContext);
 
     int32_t preNodeId_ = -1;
+
+    RefPtr<NavigationDumpManager> navigationDumpMgr_ = MakeRefPtr<NavigationDumpManager>();
 };
 } // namespace OHOS::Ace::NG
 

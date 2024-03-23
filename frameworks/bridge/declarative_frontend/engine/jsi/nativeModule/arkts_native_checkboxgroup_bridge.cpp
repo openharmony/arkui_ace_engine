@@ -107,20 +107,20 @@ ArkUINativeModuleValue CheckboxGroupBridge::SetCheckboxGroupWidth(ArkUIRuntimeCa
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
-    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
-    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
-    Local<JSValueRef> jsValue = runtimeCallInfo->GetCallArgRef(1);
+    Local<JSValueRef> nodeArg = runtimeCallInfo->GetCallArgRef(0);
+    Local<JSValueRef> widthArg = runtimeCallInfo->GetCallArgRef(1);
+    auto nativeNode = nodePtr(nodeArg->ToNativePointer(vm)->Value());
     CalcDimension width;
-    if (!jsValue->IsUndefined()) {
-        ArkTSUtils::ParseJsDimensionVp(vm, jsValue, width);
-        if (width.IsNegative()) {
-            GetArkUINodeModifiers()->getCheckboxGroupModifier()->resetCheckboxGroupWidth(nativeNode);
-            return panda::JSValueRef::Undefined(vm);
-        }
-
-        GetArkUINodeModifiers()->getCheckboxGroupModifier()->setCheckboxGroupWidth(
-            nativeNode, width.Value(), static_cast<int>(width.Unit()));
+    if (!ArkTSUtils::ParseJsDimensionVpNG(vm, widthArg, width)) {
+        GetArkUINodeModifiers()->getCheckboxGroupModifier()->resetCheckboxGroupWidth(nativeNode);
+        return panda::JSValueRef::Undefined(vm);
     }
+    if (LessNotEqual(width.Value(), 0.0)) {
+        width.SetValue(0.0);
+    }
+    std::string widthCalc = width.CalcValue();
+    GetArkUINodeModifiers()->getCheckboxGroupModifier()->setCheckboxGroupWidth(
+        nativeNode, width.Value(), static_cast<int32_t>(width.Unit()), widthCalc.c_str());
     return panda::JSValueRef::Undefined(vm);
 }
 ArkUINativeModuleValue CheckboxGroupBridge::ResetCheckboxGroupWidth(ArkUIRuntimeCallInfo* runtimeCallInfo)
@@ -136,21 +136,20 @@ ArkUINativeModuleValue CheckboxGroupBridge::SetCheckboxGroupHeight(ArkUIRuntimeC
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
-    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
-    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
-    Local<JSValueRef> jsValue = runtimeCallInfo->GetCallArgRef(1);
+    Local<JSValueRef> nodeArg = runtimeCallInfo->GetCallArgRef(0);
+    Local<JSValueRef> heightArg = runtimeCallInfo->GetCallArgRef(1);
+    auto nativeNode = nodePtr(nodeArg->ToNativePointer(vm)->Value());
     CalcDimension height;
-    if (!jsValue->IsUndefined()) {
-        ArkTSUtils::ParseJsDimensionVp(vm, jsValue, height);
-        if (height.IsNegative()) {
-            GetArkUINodeModifiers()->getCheckboxGroupModifier()->resetCheckboxGroupHeight(nativeNode);
-            return panda::JSValueRef::Undefined(vm);
-        }
-
-        GetArkUINodeModifiers()->getCheckboxGroupModifier()->setCheckboxGroupHeight(
-            nativeNode, height.Value(), static_cast<int>(height.Unit()));
+    if (!ArkTSUtils::ParseJsDimensionVpNG(vm, heightArg, height)) {
+        GetArkUINodeModifiers()->getCheckboxGroupModifier()->resetCheckboxGroupHeight(nativeNode);
+        return panda::JSValueRef::Undefined(vm);
     }
-
+    if (LessNotEqual(height.Value(), 0.0)) {
+        height.SetValue(0.0);
+    }
+    std::string heightCalc = height.CalcValue();
+    GetArkUINodeModifiers()->getCheckboxGroupModifier()->setCheckboxGroupHeight(
+        nativeNode, height.Value(), static_cast<int32_t>(height.Unit()), heightCalc.c_str());
     return panda::JSValueRef::Undefined(vm);
 }
 ArkUINativeModuleValue CheckboxGroupBridge::ResetCheckboxGroupHeight(ArkUIRuntimeCallInfo* runtimeCallInfo)
@@ -217,22 +216,28 @@ ArkUINativeModuleValue CheckboxGroupBridge::SetCheckboxGroupSize(ArkUIRuntimeCal
     Local<JSValueRef> widthArg = runtimeCallInfo->GetCallArgRef(1);
     Local<JSValueRef> heightArg = runtimeCallInfo->GetCallArgRef(2); // 2: index of parameter CheckboxGroup height
     auto nativeNode = nodePtr(nodeArg->ToNativePointer(vm)->Value());
-    CalcDimension height;
-    if (!ArkTSUtils::ParseJsDimensionVp(vm, heightArg, height) || height.IsNegative()) {
-        GetArkUINodeModifiers()->getCheckboxGroupModifier()->resetCheckboxGroupHeight(nativeNode);
-    } else {
-        GetArkUINodeModifiers()->getCheckboxGroupModifier()->setCheckboxGroupHeight(
-            nativeNode, height.Value(), static_cast<int>(height.Unit()));
-    }
-
     CalcDimension width;
-    if (!ArkTSUtils::ParseJsDimensionVp(vm, widthArg, width) || width.IsNegative()) {
+    CalcDimension height;
+    if (!ArkTSUtils::ParseJsDimensionVpNG(vm, widthArg, width)) {
         GetArkUINodeModifiers()->getCheckboxGroupModifier()->resetCheckboxGroupWidth(nativeNode);
     } else {
+        std::string widthCalc = width.CalcValue();
+        if (LessNotEqual(width.Value(), 0.0)) {
+            width.SetValue(0.0);
+        }
         GetArkUINodeModifiers()->getCheckboxGroupModifier()->setCheckboxGroupWidth(
-            nativeNode, width.Value(), static_cast<int>(width.Unit()));
+            nativeNode, width.Value(), static_cast<int32_t>(width.Unit()), widthCalc.c_str());
     }
-
+    if (!ArkTSUtils::ParseJsDimensionVpNG(vm, heightArg, height)) {
+        GetArkUINodeModifiers()->getCheckboxGroupModifier()->resetCheckboxGroupHeight(nativeNode);
+    } else {
+        std::string heightCalc = height.CalcValue();
+        if (LessNotEqual(height.Value(), 0.0)) {
+            height.SetValue(0.0);
+        }
+        GetArkUINodeModifiers()->getCheckboxGroupModifier()->setCheckboxGroupHeight(
+            nativeNode, height.Value(), static_cast<int32_t>(height.Unit()), heightCalc.c_str());
+    }
     return panda::JSValueRef::Undefined(vm);
 }
 

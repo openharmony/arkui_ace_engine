@@ -51,6 +51,8 @@ void JSDynamicComponent::JSBind(BindingTarget globalObj)
     MethodOptions opt = MethodOptions::NONE;
     JSClass<JSDynamicComponent>::StaticMethod("create", &JSDynamicComponent::Create, opt);
     JSClass<JSDynamicComponent>::StaticMethod("onSizeChanged", &JSDynamicComponent::SetOnSizeChanged, opt);
+    JSClass<JSDynamicComponent>::StaticMethod("onAppear", &JSInteractableView::JsOnAppear);
+    JSClass<JSDynamicComponent>::StaticMethod("onDisAppear", &JSInteractableView::JsOnDisAppear);
     JSClass<JSDynamicComponent>::InheritAndBind<JSViewAbstract>(globalObj);
 }
 
@@ -89,7 +91,7 @@ void JSDynamicComponent::Create(const JSCallbackInfo& info)
     CHECK_NULL_VOID(frameNode);
     auto instanceId = Container::CurrentId();
 
-    worker->RegisterCallbackForWorkerEnv([instanceId, weak = AceType::WeakClaim(AceType::RawPtr(frameNode)), hapPath,
+    worker->RegisterCallbackForWorkerEnv([instanceId, weak = AceType::WeakClaim(frameNode), hapPath,
                                              abcPath, entryPoint](napi_env env) {
         ContainerScope scope(instanceId);
         auto container = Container::Current();

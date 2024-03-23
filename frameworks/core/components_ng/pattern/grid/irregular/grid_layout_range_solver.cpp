@@ -92,10 +92,11 @@ std::pair<int32_t, float> GridLayoutRangeSolver::AddNextRows(float mainGap, int3
     // consider irregular items occupying multiple rows
     const auto& row = info_->gridMatrix_.at(idx);
     for (int c = 0; c < info_->crossCount_; ++c) {
-        if (row.find(c) == row.end()) {
+        auto it = row.find(c);
+        if (it == row.end()) {
             continue;
         }
-        const auto& itemIdx = row.at(c);
+        const auto& itemIdx = it->second;
         if (itemIdx < 0) {
             continue;
         }
@@ -155,18 +156,19 @@ int32_t GridLayoutRangeSolver::CheckMultiRow(int32_t idx)
     const auto& mat = info_->gridMatrix_;
     const auto& row = mat.at(idx);
     for (int c = 0; c < info_->crossCount_; ++c) {
-        if (row.find(c) == row.end()) {
+        auto it = row.find(c);
+        if (it == row.end()) {
             continue;
         }
 
         int32_t r = idx;
-        if (row.at(c) < 0) {
+        if (it->second < 0) {
             // traverse upwards to find the first row occupied by this item
             while (r > 0 && mat.at(r).at(c) < 0) {
                 --r;
             }
             rowCnt = std::max(rowCnt, idx - r + 1);
-        } else if (row.at(c) == 0) {
+        } else if (it->second == 0) {
             // Item 0 always start at [0, 0]
             rowCnt = idx + 1;
         }

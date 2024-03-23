@@ -24,6 +24,7 @@
 #include "core/components_ng/event/event_hub.h"
 #include "core/components_ng/pattern/pattern.h"
 #include "core/components_ng/pattern/swiper/swiper_model.h"
+#include "core/components_ng/pattern/tabs/tab_bar_pattern.h"
 #include "core/components_ng/pattern/tabs/tabs_layout_algorithm.h"
 #include "core/components_ng/pattern/tabs/tabs_layout_property.h"
 
@@ -131,6 +132,11 @@ public:
         return interceptStatus_;
     }
 
+    void HandleChildrenUpdated(const RefPtr<FrameNode>& swiperNode, const RefPtr<FrameNode>& tabBarNode);
+
+    void HandleMaskAnimationByCreate(const RefPtr<FrameNode>& tabBarNode, const RefPtr<FrameNode>& swiperNode,
+        const RefPtr<TabBarPattern>& tabBarPattern, const RefPtr<TabsLayoutProperty>& tabsLayoutProperty, int index);
+
 private:
     void OnAttachToFrameNode() override;
     void OnAfterModifyDone() override;
@@ -143,6 +149,7 @@ private:
 
     bool isCustomAnimation_ = false;
     bool isDisableSwipe_ = false;
+    bool isInit_ = true;
 
     ChangeEventPtr onChangeEvent_;
     ChangeEventPtr onTabBarClickEvent_;

@@ -32,4 +32,12 @@ JsiRef<JsiValue> JsConverter::ConvertNapiValueToJsVal(napi_value napiValue)
     JsiValue jsiValue(localRef);
     return JsiRef<JsiValue>::Make(jsiValue);
 }
+
+napi_value JsConverter::ConvertJsValToNapiValue(JSRef<JSVal> jsVal)
+{
+    if (jsVal->IsEmpty() || !JsiDeclarativeEngineInstance::GetCurrentRuntime()) {
+        return nullptr;
+    }
+    return LocalValueToLocalNapiValue(jsVal->GetLocalHandle());
+}
 } // namespace OHOS::Ace::Framework

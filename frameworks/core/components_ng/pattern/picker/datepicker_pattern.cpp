@@ -75,7 +75,7 @@ bool DatePickerPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& di
     auto children = host->GetChildren();
     auto heigth = pickerTheme->GetDividerSpacing();
     for (const auto& child : children) {
-        auto columnNode = DynamicCast<FrameNode>(child->GetLastChild());
+        auto columnNode = DynamicCast<FrameNode>(child->GetLastChild()->GetLastChild());
         auto width = columnNode->GetGeometryNode()->GetFrameSize().Width();
         auto buttonNode = DynamicCast<FrameNode>(child->GetFirstChild());
         auto buttonConfirmLayoutProperty = buttonNode->GetLayoutProperty<ButtonLayoutProperty>();
@@ -87,6 +87,7 @@ bool DatePickerPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& di
         auto buttonConfirmRenderContext = buttonNode->GetRenderContext();
         buttonConfirmRenderContext->UpdateBackgroundColor(Color::TRANSPARENT);
         buttonNode->MarkModifyDone();
+        buttonNode->MarkDirtyNode();
     }
     return true;
 }
@@ -95,10 +96,10 @@ void DatePickerPattern::OnModifyDone()
 {
     if (isFiredDateChange_ && !isForceUpdate_) {
         isFiredDateChange_ = false;
-        isForceUpdate_ = false;
         return;
     }
 
+    isForceUpdate_ = false;
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     InitDisabled();
@@ -145,12 +146,14 @@ void DatePickerPattern::OnLanguageConfigurationUpdate()
     auto confirmNode = buttonConfirmNode->GetFirstChild();
     auto confirmNodeLayout = AceType::DynamicCast<FrameNode>(confirmNode)->GetLayoutProperty<TextLayoutProperty>();
     confirmNodeLayout->UpdateContent(Localization::GetInstance()->GetEntryLetters("common.ok"));
+    confirmNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
 
     auto buttonCancelNode = weakButtonCancel_.Upgrade();
     CHECK_NULL_VOID(buttonCancelNode);
     auto cancelNode = buttonCancelNode->GetFirstChild();
     auto cancelNodeLayout = AceType::DynamicCast<FrameNode>(cancelNode)->GetLayoutProperty<TextLayoutProperty>();
     cancelNodeLayout->UpdateContent(Localization::GetInstance()->GetEntryLetters("common.cancel"));
+    cancelNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
 }
 
 void DatePickerPattern::HandleColumnChange(const RefPtr<FrameNode>& tag, bool isAdd, uint32_t index, bool needNotify)
@@ -185,7 +188,9 @@ void DatePickerPattern::SetEventCallback(EventCallback&& value)
     for (const auto& child : children) {
         auto stackNode = DynamicCast<FrameNode>(child);
         CHECK_NULL_VOID(stackNode);
-        auto childNode = stackNode->GetChildAtIndex(1);
+        auto blendNode = DynamicCast<FrameNode>(stackNode->GetLastChild());
+        CHECK_NULL_VOID(blendNode);
+        auto childNode = blendNode->GetLastChild();
         CHECK_NULL_VOID(childNode);
         auto datePickerColumnPattern = DynamicCast<FrameNode>(childNode)->GetPattern<DatePickerColumnPattern>();
         CHECK_NULL_VOID(datePickerColumnPattern);
@@ -201,7 +206,9 @@ void DatePickerPattern::SetChangeCallback(ColumnChangeCallback&& value)
     for (const auto& child : children) {
         auto stackNode = DynamicCast<FrameNode>(child);
         CHECK_NULL_VOID(stackNode);
-        auto childNode = stackNode->GetChildAtIndex(1);
+        auto blendNode = DynamicCast<FrameNode>(stackNode->GetLastChild());
+        CHECK_NULL_VOID(blendNode);
+        auto childNode = blendNode->GetLastChild();
         CHECK_NULL_VOID(childNode);
         auto datePickerColumnPattern = DynamicCast<FrameNode>(childNode)->GetPattern<DatePickerColumnPattern>();
         CHECK_NULL_VOID(datePickerColumnPattern);
@@ -303,7 +310,9 @@ void DatePickerPattern::GetInnerFocusPaintRect(RoundRect& paintRect)
     }
     auto stackChild = DynamicCast<FrameNode>(host->GetChildAtIndex(focusKeyID_));
     CHECK_NULL_VOID(stackChild);
-    auto pickerChild = DynamicCast<FrameNode>(stackChild->GetLastChild());
+    auto blendChild = DynamicCast<FrameNode>(stackChild->GetLastChild());
+    CHECK_NULL_VOID(blendChild);
+    auto pickerChild = DynamicCast<FrameNode>(blendChild->GetLastChild());
     CHECK_NULL_VOID(pickerChild);
     auto columnWidth = pickerChild->GetGeometryNode()->GetFrameSize().Width();
     auto pipeline = PipelineBase::GetCurrentContext();
@@ -355,7 +364,7 @@ bool DatePickerPattern::HandleDirectionKey(KeyCode code)
     CHECK_NULL_RETURN(host, false);
 
     auto stackChild = DynamicCast<FrameNode>(host->GetChildAtIndex(focusKeyID_));
-    auto pickerChild = DynamicCast<FrameNode>(stackChild->GetChildAtIndex(1));
+    auto pickerChild = DynamicCast<FrameNode>(stackChild->GetLastChild()->GetLastChild());
     auto pattern = pickerChild->GetPattern<DatePickerColumnPattern>();
     auto totalOptionCount = GetOptionCount(pickerChild);
     if (totalOptionCount == 0) {
@@ -416,19 +425,25 @@ std::unordered_map<std::string, RefPtr<FrameNode>> DatePickerPattern::GetAllChil
     auto iter = children.begin();
     auto year = (*iter);
     CHECK_NULL_RETURN(year, allChildNode);
+    auto stackYear = DynamicCast<FrameNode>(year);
+    auto blendYear = DynamicCast<FrameNode>(stackYear->GetLastChild());
+    CHECK_NULL_RETURN(blendYear, allChildNode);
     iter++;
     auto month = *iter;
     CHECK_NULL_RETURN(month, allChildNode);
+    auto stackMonth = DynamicCast<FrameNode>(month);
+    auto blendMonth = DynamicCast<FrameNode>(stackMonth->GetLastChild());
+    CHECK_NULL_RETURN(blendMonth, allChildNode);
     iter++;
     auto day = *iter;
     CHECK_NULL_RETURN(day, allChildNode);
-    auto stackYear = DynamicCast<FrameNode>(year);
-    auto yearNode = DynamicCast<FrameNode>(stackYear->GetChildAtIndex(1));
-    auto stackMonth = DynamicCast<FrameNode>(month);
-    auto monthNode = DynamicCast<FrameNode>(stackMonth->GetChildAtIndex(1));
     auto stackDay = DynamicCast<FrameNode>(day);
-    auto dayNode = DynamicCast<FrameNode>(stackDay->GetChildAtIndex(1));
+    auto blendDay = DynamicCast<FrameNode>(stackDay->GetLastChild());
+    CHECK_NULL_RETURN(blendDay, allChildNode);
 
+    auto yearNode = DynamicCast<FrameNode>(blendYear->GetLastChild());
+    auto monthNode = DynamicCast<FrameNode>(blendMonth->GetLastChild());
+    auto dayNode = DynamicCast<FrameNode>(blendDay->GetLastChild());
     CHECK_NULL_RETURN(yearNode, allChildNode);
     CHECK_NULL_RETURN(monthNode, allChildNode);
     CHECK_NULL_RETURN(dayNode, allChildNode);
@@ -491,9 +506,13 @@ void DatePickerPattern::FlushMonthDaysColumn()
     auto year = *iter;
     CHECK_NULL_VOID(year);
     auto stackMonthDays = DynamicCast<FrameNode>(monthDays);
-    auto monthDaysNode = DynamicCast<FrameNode>(stackMonthDays->GetChildAtIndex(1));
+    auto blendMonthDays = DynamicCast<FrameNode>(stackMonthDays->GetLastChild());
+    CHECK_NULL_VOID(blendMonthDays);
+    auto monthDaysNode = DynamicCast<FrameNode>(blendMonthDays->GetLastChild());
     auto stackYear = DynamicCast<FrameNode>(year);
-    auto yearDaysNode = DynamicCast<FrameNode>(stackYear->GetChildAtIndex(1));
+    auto blendYear = DynamicCast<FrameNode>(stackYear->GetLastChild());
+    CHECK_NULL_VOID(blendYear);
+    auto yearDaysNode = DynamicCast<FrameNode>(blendYear->GetLastChild());
     CHECK_NULL_VOID(monthDaysNode);
     CHECK_NULL_VOID(yearDaysNode);
     auto dataPickerRowLayoutProperty = host->GetLayoutProperty<DataPickerRowLayoutProperty>();
@@ -586,7 +605,9 @@ void DatePickerPattern::HandleMonthDaysChange(
     CHECK_NULL_VOID(monthDays);
 
     auto stackMonthDays = DynamicCast<FrameNode>(monthDays);
-    auto monthDaysNode = DynamicCast<FrameNode>(stackMonthDays->GetChildAtIndex(1));
+    auto blendMonthDays = DynamicCast<FrameNode>(stackMonthDays->GetLastChild());
+    CHECK_NULL_VOID(blendMonthDays);
+    auto monthDaysNode = DynamicCast<FrameNode>(blendMonthDays->GetLastChild());
     if (tag != monthDaysNode) {
         return;
     }
@@ -827,7 +848,9 @@ void DatePickerPattern::HandleSolarMonthDaysChange(bool isAdd, uint32_t index)
     CHECK_NULL_VOID(monthDays);
     auto stackMonthDays = DynamicCast<FrameNode>(monthDays);
     CHECK_NULL_VOID(stackMonthDays);
-    auto monthDaysNode = DynamicCast<FrameNode>(stackMonthDays->GetChildAtIndex(1));
+    auto blendMonthDays = DynamicCast<FrameNode>(stackMonthDays->GetLastChild());
+    CHECK_NULL_VOID(blendMonthDays);
+    auto monthDaysNode = DynamicCast<FrameNode>(blendMonthDays->GetLastChild());
     CHECK_NULL_VOID(monthDaysNode);
     auto monthDaysDatePickerColumnPattern = monthDaysNode->GetPattern<DatePickerColumnPattern>();
     CHECK_NULL_VOID(monthDaysDatePickerColumnPattern);
@@ -884,9 +907,13 @@ void DatePickerPattern::HandleAddLunarMonthDaysChange(uint32_t index)
     auto year = *iter;
     CHECK_NULL_VOID(year);
     auto stackMonthDays = DynamicCast<FrameNode>(monthDays);
-    auto monthDaysNode = DynamicCast<FrameNode>(stackMonthDays->GetChildAtIndex(1));
+    auto blendMonthDays = DynamicCast<FrameNode>(stackMonthDays->GetLastChild());
+    CHECK_NULL_VOID(blendMonthDays);
+    auto monthDaysNode = DynamicCast<FrameNode>(blendMonthDays->GetLastChild());
     auto stackYear = DynamicCast<FrameNode>(year);
-    auto yearDaysNode = DynamicCast<FrameNode>(stackYear->GetChildAtIndex(1));
+    auto blendYear = DynamicCast<FrameNode>(stackYear->GetLastChild());
+    CHECK_NULL_VOID(blendYear);
+    auto yearDaysNode = DynamicCast<FrameNode>(blendYear->GetLastChild());
     CHECK_NULL_VOID(monthDaysNode);
     CHECK_NULL_VOID(yearDaysNode);
 
@@ -924,9 +951,13 @@ void DatePickerPattern::HandleReduceLunarMonthDaysChange(uint32_t index)
     auto year = *iter;
     CHECK_NULL_VOID(year);
     auto stackMonthDays = DynamicCast<FrameNode>(monthDays);
-    auto monthDaysNode = DynamicCast<FrameNode>(stackMonthDays->GetChildAtIndex(1));
+    auto blendMonthDays = DynamicCast<FrameNode>(stackMonthDays->GetLastChild());
+    CHECK_NULL_VOID(blendMonthDays);
+    auto monthDaysNode = DynamicCast<FrameNode>(blendMonthDays->GetLastChild());
     auto stackYear = DynamicCast<FrameNode>(year);
-    auto yearDaysNode = DynamicCast<FrameNode>(stackYear->GetChildAtIndex(1));
+    auto blendYear = DynamicCast<FrameNode>(stackYear->GetLastChild());
+    CHECK_NULL_VOID(blendYear);
+    auto yearDaysNode = DynamicCast<FrameNode>(blendYear->GetLastChild());
     CHECK_NULL_VOID(monthDaysNode);
     CHECK_NULL_VOID(yearDaysNode);
 
@@ -1104,11 +1135,11 @@ LunarDate DatePickerPattern::GetCurrentLunarDate(uint32_t lunarYear) const
     CHECK_NULL_RETURN(day, lunarResult);
 
     auto stackYear = DynamicCast<FrameNode>(year);
-    auto yearColumn = DynamicCast<FrameNode>(stackYear->GetChildAtIndex(1));
+    auto yearColumn = DynamicCast<FrameNode>(stackYear->GetLastChild()->GetLastChild());
     auto stackMonth = DynamicCast<FrameNode>(month);
-    auto monthColumn = DynamicCast<FrameNode>(stackMonth->GetChildAtIndex(1));
+    auto monthColumn = DynamicCast<FrameNode>(stackMonth->GetLastChild()->GetLastChild());
     auto stackDay = DynamicCast<FrameNode>(day);
-    auto dayColumn = DynamicCast<FrameNode>(stackDay->GetChildAtIndex(1));
+    auto dayColumn = DynamicCast<FrameNode>(stackDay->GetLastChild()->GetLastChild());
     CHECK_NULL_RETURN(yearColumn, lunarResult);
     CHECK_NULL_RETURN(monthColumn, lunarResult);
     CHECK_NULL_RETURN(dayColumn, lunarResult);
@@ -1184,11 +1215,17 @@ PickerDate DatePickerPattern::GetCurrentDateByYearMonthDayColumn() const
     CHECK_NULL_RETURN(day, currentDate);
 
     auto stackYear = DynamicCast<FrameNode>(year);
-    auto yearColumn = DynamicCast<FrameNode>(stackYear->GetChildAtIndex(1));
+    auto blendYear = DynamicCast<FrameNode>(stackYear->GetLastChild());
+    CHECK_NULL_RETURN(blendYear, currentDate);
+    auto yearColumn = DynamicCast<FrameNode>(blendYear->GetLastChild());
     auto stackMonth = DynamicCast<FrameNode>(month);
-    auto monthColumn = DynamicCast<FrameNode>(stackMonth->GetChildAtIndex(1));
+    auto blendMonth = DynamicCast<FrameNode>(stackMonth->GetLastChild());
+    CHECK_NULL_RETURN(blendMonth, currentDate);
+    auto monthColumn = DynamicCast<FrameNode>(blendMonth->GetLastChild());
     auto stackDay = DynamicCast<FrameNode>(day);
-    auto dayColumn = DynamicCast<FrameNode>(stackDay->GetChildAtIndex(1));
+    auto blendDay = DynamicCast<FrameNode>(stackDay->GetLastChild());
+    CHECK_NULL_RETURN(blendDay, currentDate);
+    auto dayColumn = DynamicCast<FrameNode>(blendDay->GetLastChild());
     CHECK_NULL_RETURN(yearColumn, currentDate);
     CHECK_NULL_RETURN(monthColumn, currentDate);
     CHECK_NULL_RETURN(dayColumn, currentDate);
@@ -1227,9 +1264,13 @@ PickerDate DatePickerPattern::GetCurrentDateByMonthDaysColumn() const
     auto year = *iter;
     CHECK_NULL_RETURN(year, currentDate);
     auto stackMonthDays = DynamicCast<FrameNode>(monthDays);
-    auto monthDaysNode = DynamicCast<FrameNode>(stackMonthDays->GetChildAtIndex(1));
+    auto blendMonthDays = DynamicCast<FrameNode>(stackMonthDays->GetLastChild());
+    CHECK_NULL_RETURN(blendMonthDays, currentDate);
+    auto monthDaysNode = DynamicCast<FrameNode>(blendMonthDays->GetLastChild());
     auto stackYear = DynamicCast<FrameNode>(year);
-    auto yearDaysNode = DynamicCast<FrameNode>(stackYear->GetChildAtIndex(1));
+    auto blendYear = DynamicCast<FrameNode>(stackYear->GetLastChild());
+    CHECK_NULL_RETURN(blendYear, currentDate);
+    auto yearDaysNode = DynamicCast<FrameNode>(blendYear->GetLastChild());
     CHECK_NULL_RETURN(monthDaysNode, currentDate);
     CHECK_NULL_RETURN(yearDaysNode, currentDate);
 
@@ -1277,9 +1318,11 @@ LunarDate DatePickerPattern::GetCurrentLunarDateByMonthDaysColumn(uint32_t lunar
     auto year = *iter;
     CHECK_NULL_RETURN(year, lunarResult);
     auto stackMonthDays = DynamicCast<FrameNode>(monthDays);
-    auto monthDaysNode = DynamicCast<FrameNode>(stackMonthDays->GetChildAtIndex(1));
+    auto monthDaysNode = DynamicCast<FrameNode>(stackMonthDays->GetLastChild()->GetLastChild());
     auto stackYear = DynamicCast<FrameNode>(year);
-    auto yearDaysNode = DynamicCast<FrameNode>(stackYear->GetChildAtIndex(1));
+    auto blendYear = DynamicCast<FrameNode>(stackYear->GetLastChild());
+    CHECK_NULL_RETURN(blendYear, lunarResult);
+    auto yearDaysNode = DynamicCast<FrameNode>(blendYear->GetLastChild());
     CHECK_NULL_RETURN(monthDaysNode, lunarResult);
     CHECK_NULL_RETURN(yearDaysNode, lunarResult);
 
@@ -1372,7 +1415,9 @@ void DatePickerPattern::LunarColumnsBuilding(const LunarDate& current)
     int index = 0;
     for (const auto& stackChild : host->GetChildren()) {
         CHECK_NULL_VOID(stackChild);
-        auto child = stackChild->GetChildAtIndex(1);
+        auto blendChild = stackChild->GetLastChild();
+        CHECK_NULL_VOID(blendChild);
+        auto child = blendChild->GetLastChild();
         CHECK_NULL_VOID(child);
         if (index == 0) {
             yearColumn = GetColumn(child->GetId());
@@ -1479,7 +1524,9 @@ void DatePickerPattern::SolarColumnsBuilding(const PickerDate& current)
     int index = 0;
     for (const auto& stackChild : host->GetChildren()) {
         CHECK_NULL_VOID(stackChild);
-        auto child = stackChild->GetChildAtIndex(1);
+        auto blendChild = stackChild->GetLastChild();
+        CHECK_NULL_VOID(blendChild);
+        auto child = blendChild->GetLastChild();
         if (index == 0) {
             yearColumn = GetColumn(child->GetId());
         }
@@ -1587,9 +1634,13 @@ void DatePickerPattern::LunarMonthDaysColumnBuilding(const LunarDate& current)
     auto year = *iter;
     CHECK_NULL_VOID(year);
     auto stackMonthDays = DynamicCast<FrameNode>(monthDays);
-    auto monthDaysNode = DynamicCast<FrameNode>(stackMonthDays->GetChildAtIndex(1));
+    auto blendMonthDays = DynamicCast<FrameNode>(stackMonthDays->GetLastChild());
+    CHECK_NULL_VOID(blendMonthDays);
+    auto monthDaysNode = DynamicCast<FrameNode>(blendMonthDays->GetLastChild());
     auto stackYear = DynamicCast<FrameNode>(year);
-    auto yearDaysNode = DynamicCast<FrameNode>(stackYear->GetChildAtIndex(1));
+    auto blendYear = DynamicCast<FrameNode>(stackYear->GetLastChild());
+    CHECK_NULL_VOID(blendYear);
+    auto yearDaysNode = DynamicCast<FrameNode>(blendYear->GetLastChild());
     CHECK_NULL_VOID(monthDaysNode);
     CHECK_NULL_VOID(yearDaysNode);
 
@@ -1643,9 +1694,13 @@ void DatePickerPattern::SolarMonthDaysColumnsBuilding(const PickerDate& current)
     auto year = *iter;
     CHECK_NULL_VOID(year);
     auto stackMonthDays = DynamicCast<FrameNode>(monthDays);
-    auto monthDaysNode = DynamicCast<FrameNode>(stackMonthDays->GetChildAtIndex(1));
+    auto blendMonthDays = DynamicCast<FrameNode>(stackMonthDays->GetLastChild());
+    CHECK_NULL_VOID(blendMonthDays);
+    auto monthDaysNode = DynamicCast<FrameNode>(blendMonthDays->GetLastChild());
     auto stackYear = DynamicCast<FrameNode>(year);
-    auto yearDaysNode = DynamicCast<FrameNode>(stackYear->GetChildAtIndex(1));
+    auto blendYear = DynamicCast<FrameNode>(stackYear->GetLastChild());
+    CHECK_NULL_VOID(blendYear);
+    auto yearDaysNode = DynamicCast<FrameNode>(blendYear->GetLastChild());
     monthDaysColumn = GetColumn(monthDaysNode->GetId());
     yearColumn = GetColumn(yearDaysNode->GetId());
     CHECK_NULL_VOID(monthDaysColumn);
@@ -1852,12 +1907,15 @@ const std::string& DatePickerPattern::GetYear(uint32_t year)
         return empty_;
     }
     auto index = year - 1900;
-    if (years_.find(index) == years_.end()) {
+    auto it = years_.find(index);
+    if (it == years_.end()) {
         DateTime date;
         date.year = year;
-        years_[index] = Localization::GetInstance()->FormatDateTime(date, "y");
+        auto& dateYear = years_[index];
+        dateYear = Localization::GetInstance()->FormatDateTime(date, "y");
+        return dateYear;
     }
-    return years_[index]; // index in [0, 200]
+    return it->second; // index in [0, 200]
 }
 
 const std::string& DatePickerPattern::GetSolarMonth(uint32_t month)
@@ -1867,16 +1925,19 @@ const std::string& DatePickerPattern::GetSolarMonth(uint32_t month)
         return empty_;
     }
     auto index = month - 1;
-    if (solarMonths_.find(index) == solarMonths_.end()) {
+    auto it = solarMonths_.find(index);
+    if (it == solarMonths_.end()) {
+        auto& dateMonth = solarMonths_[index];
         if (index < localizedMonths_.size()) {
-            solarMonths_[index] = localizedMonths_[index];
+            dateMonth = localizedMonths_[index];
         } else {
             DateTime date;
             date.month = month - 1; // W3C's month start from 0 to 11
-            solarMonths_[index] = Localization::GetInstance()->FormatDateTime(date, "M");
+            dateMonth = Localization::GetInstance()->FormatDateTime(date, "M");
         }
+        return dateMonth;
     }
-    return solarMonths_[index]; // index in [0,11]
+    return it->second; // index in [0,11]
 }
 
 const std::string& DatePickerPattern::GetSolarDay(uint32_t day)
@@ -1886,12 +1947,15 @@ const std::string& DatePickerPattern::GetSolarDay(uint32_t day)
         return empty_;
     }
     auto index = day - 1;
-    if (solarDays_.find(index) == solarDays_.end()) {
+    auto it = solarDays_.find(index);
+    if (it == solarDays_.end()) {
+        auto& dateDay = solarDays_[index];
         DateTime date;
         date.day = day;
-        solarDays_[index] = Localization::GetInstance()->FormatDateTime(date, "d");
+        dateDay = Localization::GetInstance()->FormatDateTime(date, "d");
+        return dateDay;
     }
-    return solarDays_[index]; // index in [0,30]
+    return it->second; // index in [0,30]
 }
 
 const std::string& DatePickerPattern::GetLunarMonth(uint32_t month, bool isLeap)
@@ -1901,10 +1965,13 @@ const std::string& DatePickerPattern::GetLunarMonth(uint32_t month, bool isLeap)
     if (!(1 <= index && index <= 24)) {             // lunar month need in [1,24]
         return empty_;
     }
-    if (lunarMonths_.find(index - 1) == lunarMonths_.end()) {
-        lunarMonths_[index - 1] = Localization::GetInstance()->GetLunarMonth(month, isLeap);
+    auto it = lunarMonths_.find(index - 1);
+    if (it == lunarMonths_.end()) {
+        auto& dateMonth = lunarMonths_[index - 1];
+        dateMonth = Localization::GetInstance()->GetLunarMonth(month, isLeap);
+        return dateMonth;
     }
-    return lunarMonths_[index - 1]; // index in [0,23]
+    return it->second; // index in [0,23]
 }
 
 const std::string& DatePickerPattern::GetLunarDay(uint32_t day)
@@ -1914,10 +1981,13 @@ const std::string& DatePickerPattern::GetLunarDay(uint32_t day)
         return empty_;
     }
     auto index = day - 1;
-    if (lunarDays_.find(index) == lunarDays_.end()) {
-        lunarDays_[index] = Localization::GetInstance()->GetLunarDay(day);
+    auto it = lunarDays_.find(index);
+    if (it == lunarDays_.end()) {
+        auto& dateDay = lunarDays_[index];
+        dateDay = Localization::GetInstance()->GetLunarDay(day);
+        return dateDay;
     }
-    return lunarDays_[index]; // index in [0,29]
+    return it->second; // index in [0,29]
 }
 
 const std::string DatePickerPattern::GetFormatString(PickerDateF date)

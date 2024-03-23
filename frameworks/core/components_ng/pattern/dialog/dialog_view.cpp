@@ -63,13 +63,20 @@ RefPtr<FrameNode> DialogView::CreateDialogNode(
     CHECK_NULL_RETURN(dialogLayoutProp, dialog);
     dialogLayoutProp->UpdateDialogAlignment(param.alignment);
     dialogLayoutProp->UpdateDialogOffset(param.offset);
-    dialogLayoutProp->UpdateGridCount(param.gridCount);
     dialogLayoutProp->UpdateUseCustomStyle(param.customStyle);
     dialogLayoutProp->UpdateAutoCancel(param.autoCancel);
     dialogLayoutProp->UpdateShowInSubWindow(param.isShowInSubWindow);
     dialogLayoutProp->UpdateDialogButtonDirection(param.buttonDirection);
     dialogLayoutProp->UpdateIsModal(param.isModal);
     dialogLayoutProp->UpdateIsScenceBoardDialog(param.isScenceBoardDialog);
+    if (param.width.has_value()) {
+        dialogLayoutProp->UpdateWidth(param.width.value());
+    } else {
+        dialogLayoutProp->UpdateGridCount(param.gridCount);
+    }
+    if (param.height.has_value()) {
+        dialogLayoutProp->UpdateHeight(param.height.value());
+    }
     // create gray background
     auto dialogContext = dialog->GetRenderContext();
     CHECK_NULL_RETURN(dialogContext, dialog);
@@ -91,10 +98,15 @@ RefPtr<FrameNode> DialogView::CreateDialogNode(
     auto pattern = dialog->GetPattern<DialogPattern>();
     CHECK_NULL_RETURN(pattern, nullptr);
     pattern->BuildChild(param);
+    pattern->SetOnWillDismiss(param.onWillDismiss);
 
-    // set open and close animation
-    pattern->SetOpenAnimation(param.openAnimation);
-    pattern->SetCloseAnimation(param.closeAnimation);
+    if (param.transitionEffect != nullptr) {
+        dialogContext->UpdateChainedTransition(param.transitionEffect);
+    } else {
+        // set open and close animation
+        pattern->SetOpenAnimation(param.openAnimation);
+        pattern->SetCloseAnimation(param.closeAnimation);
+    }
 
     pattern->SetDialogProperties(param);
 

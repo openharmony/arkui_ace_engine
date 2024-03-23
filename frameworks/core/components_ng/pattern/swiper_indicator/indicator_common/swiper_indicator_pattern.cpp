@@ -482,9 +482,9 @@ void SwiperIndicatorPattern::UpdateTextContentSub(const RefPtr<SwiperIndicatorLa
     lastTextLayoutProperty->UpdateFontWeight(fontWeight);
     lastTextLayoutProperty->UpdateContent("/" + std::to_string(swiperPattern->RealTotalCount()));
     firstTextNode->MarkModifyDone();
-    firstTextNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+    firstTextNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_PARENT);
     lastTextNode->MarkModifyDone();
-    lastTextNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+    lastTextNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_PARENT);
 }
 
 void SwiperIndicatorPattern::HandleDragStart(const GestureEvent& info)

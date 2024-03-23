@@ -28,15 +28,16 @@
 #include "core/components_ng/pattern/navrouter/navdestination_layout_property.h"
 #include "core/components_ng/pattern/pattern.h"
 #include "core/components_ng/syntax/shallow_builder.h"
+#include "core/components_v2/inspector/inspector_constants.h"
 
 namespace OHOS::Ace::NG {
 
-class NavDestinationPattern : public Pattern {
-    DECLARE_ACE_TYPE(NavDestinationPattern, Pattern);
+class NavDestinationPattern : public Pattern, public FocusView {
+    DECLARE_ACE_TYPE(NavDestinationPattern, Pattern, FocusView);
 
 public:
-    explicit NavDestinationPattern(const RefPtr<ShallowBuilder>& shallowBuilder) : shallowBuilder_(shallowBuilder) {}
-    NavDestinationPattern() = default;
+    explicit NavDestinationPattern(const RefPtr<ShallowBuilder>& shallowBuilder);
+    NavDestinationPattern();
     ~NavDestinationPattern() override;
 
     bool IsAtomicNode() const override
@@ -73,6 +74,9 @@ public:
     void SetName(const std::string& name)
     {
         name_ = name;
+        auto eventHub = GetEventHub<NavDestinationEventHub>();
+        CHECK_NULL_VOID(eventHub);
+        eventHub->SetName(name);
     }
 
     const std::string& GetName()
@@ -104,9 +108,19 @@ public:
         return navDestinationContext_ ? navDestinationContext_->GetNavigationStack() : nullptr;
     }
 
+    void SetIndex(int32_t index)
+    {
+        if (navDestinationContext_) {
+            navDestinationContext_->SetIndex(index);
+        }
+    }
+
     void SetNavDestinationContext(const RefPtr<NavDestinationContext>& context)
     {
         navDestinationContext_ = context;
+        if (navDestinationContext_) {
+            navDestinationContext_->SetNavDestinationId(navDestinationId_);
+        }
     }
 
     RefPtr<NavDestinationContext> GetNavDestinationContext() const
@@ -129,6 +143,20 @@ public:
         return { FocusType::SCOPE, true };
     }
 
+    std::list<int32_t> GetRouteOfFirstScope() override
+    {
+        return { 2, 0 };
+    }
+
+    std::string GetEntryFocusViewName() override
+    {
+        /*
+        |-> Navigation (root focus view)
+          |-> NavDestination
+        */
+        return V2::NAVIGATION_VIEW_ETS_TAG;
+    }
+
     void SetIsOnShow(bool isOnShow)
     {
         isOnShow_ = isOnShow;
@@ -146,9 +174,17 @@ public:
         return navigationNode_.Upgrade();
     }
 
-    void OnAttachToMainTree() override;
-
     void DumpInfo() override;
+
+    uint64_t GetNavDestinationId() const
+    {
+        return navDestinationId_;
+    }
+
+    void SetNavigationNode(const RefPtr<UINode>& navigationNode)
+    {
+        navigationNode_ = AceType::WeakClaim(RawPtr(navigationNode));
+    }
 
 private:
     void UpdateNameIfNeeded(RefPtr<NavDestinationGroupNode>& hostNode);
@@ -161,6 +197,7 @@ private:
     RefPtr<UINode> customNode_;
     WeakPtr<UINode> navigationNode_;
     bool isOnShow_ = false;
+    uint64_t navDestinationId_ = 0;
     void OnAttachToFrameNode() override;
 };
 

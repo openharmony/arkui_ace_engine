@@ -90,6 +90,8 @@ public:
     virtual void SetHasOptionWidth(bool hasOptionWidth);
     virtual void SetMenuBackgroundColor(const Color& color);
     virtual void SetMenuBackgroundBlurStyle(const BlurStyleOption& blurStyle);
+    virtual void SetControlSize(const std::optional<ControlSize>& controlSize);
+    virtual ControlSize GetControlSize();
 private:
     static std::unique_ptr<SelectModel> instance_;
     static std::mutex mutex_;

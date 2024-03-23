@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -40,6 +40,7 @@
 #include "core/components/common/layout/constants.h"
 #include "core/components/text_field/textfield_theme.h"
 #include "core/components_ng/base/view_abstract.h"
+#include "core/components_ng/pattern/text_field/text_content_type.h"
 #include "core/components_ng/pattern/text_field/text_field_model.h"
 #include "core/components_ng/pattern/text_field/text_field_model_ng.h"
 #include "core/pipeline/pipeline_base.h"
@@ -77,6 +78,7 @@ namespace {
 const std::vector<TextAlign> TEXT_ALIGNS = { TextAlign::START, TextAlign::CENTER, TextAlign::END, TextAlign::JUSTIFY };
 const std::vector<FontStyle> FONT_STYLES = { FontStyle::NORMAL, FontStyle::ITALIC };
 const std::vector<std::string> INPUT_FONT_FAMILY_VALUE = { "sans-serif" };
+const std::vector<WordBreak> WORD_BREAK_TYPES = { WordBreak::NORMAL, WordBreak::BREAK_ALL, WordBreak::BREAK_WORD };
 constexpr uint32_t MAX_LINES = 3;
 constexpr uint32_t MINI_VAILD_VALUE = 1;
 constexpr uint32_t MAX_VAILD_VALUE = 100;
@@ -113,6 +115,7 @@ void JSTextField::CreateTextInput(const JSCallbackInfo& info)
             if (changeEventVal->IsFunction()) {
                 textValue = valueObj->GetProperty("value");
             }
+            value = "";
             if (ParseJsString(textValue, text)) {
                 value = text;
             }
@@ -202,6 +205,22 @@ void JSTextField::SetType(const JSCallbackInfo& info)
     }
     TextInputType textInputType = static_cast<TextInputType>(info[0]->ToNumber<int32_t>());
     TextFieldModel::GetInstance()->SetType(textInputType);
+}
+
+void JSTextField::SetContentType(const JSCallbackInfo& info)
+{
+    if (info.Length() < 1) {
+        return;
+    }
+    if (info[0]->IsUndefined()) {
+        TextFieldModel::GetInstance()->SetContentType(NG::TextContentType::UNSPECIFIED);
+        return;
+    }
+    if (!info[0]->IsNumber()) {
+        return;
+    }
+    NG::TextContentType textContentType = static_cast<NG::TextContentType>(info[0]->ToNumber<int32_t>());
+    TextFieldModel::GetInstance()->SetContentType(textContentType);
 }
 
 void JSTextField::SetPlaceholderColor(const JSCallbackInfo& info)
@@ -441,6 +460,21 @@ void JSTextField::SetTextColor(const JSCallbackInfo& info)
     TextFieldModel::GetInstance()->SetTextColor(textColor);
 }
 
+void JSTextField::SetWordBreak(const JSCallbackInfo& info)
+{
+    if (info.Length() < 1) {
+        return;
+    }
+    if (!info[0]->IsNumber()) {
+        return;
+    }
+    auto index = info[0]->ToNumber<int32_t>();
+    if (index < 0 || index >= static_cast<int32_t>(WORD_BREAK_TYPES.size())) {
+        return;
+    }
+    TextFieldModel::GetInstance()->SetWordBreak(WORD_BREAK_TYPES[index]);
+}
+
 void JSTextField::SetForegroundColor(const JSCallbackInfo& info)
 {
     if (info.Length() < 1) {
@@ -497,7 +531,7 @@ void JSTextField::SetInputFilter(const JSCallbackInfo& info)
     }
     if (info.Length() > 1 && info[1]->IsFunction()) {
         auto jsFunc = AceType::MakeRefPtr<JsClipboardFunction>(JSRef<JSFunc>::Cast(info[1]));
-        WeakPtr<NG::FrameNode> targetNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+        auto targetNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
         auto resultId = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc), node = targetNode](
                             const std::string& info) {
             JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
@@ -800,7 +834,7 @@ void JSTextField::CreateJsTextFieldCommonEvent(const JSCallbackInfo &info)
 {
     auto jsTextFunc = AceType::MakeRefPtr<JsCommonEventFunction<NG::TextFieldCommonEvent, 2>>(
         JSRef<JSFunc>::Cast(info[0]));
-    WeakPtr<NG::FrameNode> targetNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    WeakPtr<NG::FrameNode> targetNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
     auto callback = [execCtx = info.GetExecutionContext(), func = std::move(jsTextFunc), node = targetNode](int32_t key,
                        NG::TextFieldCommonEvent& event) {
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
@@ -939,6 +973,43 @@ void JSTextField::SetShowUnderline(const JSCallbackInfo& info)
         return;
     }
     TextFieldModel::GetInstance()->SetShowUnderline(info[0]->ToBoolean());
+}
+
+void JSTextField::SetUnderlineColor(const JSCallbackInfo& info)
+{
+    if (info.Length() < 1) {
+        return;
+    }
+    Color underlineColor;
+    if (ParseJsColor(info[0], underlineColor)) {
+        TextFieldModel::GetInstance()->SetNormalUnderlineColor(underlineColor);
+    } else if (info[0]->IsObject()) {
+        auto param = JSRef<JSObject>::Cast(info[0]);
+        UserUnderlineColor userColor = UserUnderlineColor();
+        auto typingColorProp = param->GetProperty("typing");
+        Color typing;
+        if (ParseJsColor(typingColorProp, typing)) {
+            userColor.typing = typing;
+        }
+        auto normalColorProp = param->GetProperty("normal");
+        Color normal;
+        if (ParseJsColor(normalColorProp, normal)) {
+            userColor.normal = normal;
+        }
+        auto errorColorProp = param->GetProperty("error");
+        Color error;
+        if (ParseJsColor(errorColorProp, error)) {
+            userColor.error = error;
+        }
+        auto disableColorProp = param->GetProperty("disable");
+        Color disable;
+        if (ParseJsColor(disableColorProp, disable)) {
+            userColor.disable = disable;
+        }
+        TextFieldModel::GetInstance()->SetUserUnderlineColor(userColor);
+    } else {
+        TextFieldModel::GetInstance()->SetUserUnderlineColor(UserUnderlineColor());
+    }
 }
 
 void JSTextField::SetPasswordIcon(const JSCallbackInfo& info)
@@ -1148,7 +1219,7 @@ bool JSTextField::ParseJsCustomKeyboardBuilder(
     }
     auto builderFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSFunc>::Cast(builder));
     CHECK_NULL_RETURN(builderFunc, false);
-    WeakPtr<NG::FrameNode> targetNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    WeakPtr<NG::FrameNode> targetNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
     buildFunc = [execCtx = info.GetExecutionContext(), func = std::move(builderFunc), node = targetNode]() {
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
         ACE_SCORING_EVENT("CustomKeyboard");
@@ -1223,7 +1294,7 @@ void JSTextField::SetCancelButton(const JSCallbackInfo& info)
     if (iconJsVal->IsUndefined() || iconJsVal->IsNull() || !iconJsVal->IsObject()) {
         TextFieldModel::GetInstance()->SetCancelIconColor(Color());
         TextFieldModel::GetInstance()->SetCancelIconSize(theme->GetIconSize());
-        TextFieldModel::GetInstance()->SetCanacelIconSrc(std::string());
+        TextFieldModel::GetInstance()->SetCanacelIconSrc(std::string(), std::string(), std::string());
         return;
     }
     auto iconParam = JSRef<JSObject>::Cast(iconJsVal);
@@ -1240,19 +1311,21 @@ void JSTextField::SetCancelButton(const JSCallbackInfo& info)
     TextFieldModel::GetInstance()->SetCancelIconSize(iconSize);
     // set icon src
     std::string iconSrc;
+    std::string bundleName;
+    std::string moduleName;
     auto iconSrcProp = iconParam->GetProperty("src");
     if (iconSrcProp->IsUndefined() || iconSrcProp->IsNull() || !ParseJsMedia(iconSrcProp, iconSrc)) {
         iconSrc = "";
     }
-    TextFieldModel::GetInstance()->SetCanacelIconSrc(iconSrc);
+    GetJsMediaBundleInfo(iconSrcProp, bundleName, moduleName);
+    TextFieldModel::GetInstance()->SetCanacelIconSrc(iconSrc, bundleName, moduleName);
     // set icon color
     Color iconColor;
     auto iconColorProp = iconParam->GetProperty("color");
-    if (!iconColorProp->IsUndefined() && !iconColorProp->IsNull() && ParseJsColor(iconColorProp, iconColor)) {
-        TextFieldModel::GetInstance()->SetCancelIconColor(iconColor);
-    } else {
-        TextFieldModel::GetInstance()->SetCancelIconColor(iconColor);
+    if (!iconColorProp->IsUndefined() && !iconColorProp->IsNull()) {
+        ParseJsColor(iconColorProp, iconColor);
     }
+    TextFieldModel::GetInstance()->SetCancelIconColor(iconColor);
 }
 
 void JSTextField::SetSelectAllValue(const JSCallbackInfo& info)
@@ -1265,5 +1338,64 @@ void JSTextField::SetSelectAllValue(const JSCallbackInfo& info)
 
     bool isSetSelectAllValue = infoValue->ToBoolean();
     TextFieldModel::GetInstance()->SetSelectAllValue(isSetSelectAllValue);
+}
+
+void JSTextField::SetDecoration(const JSCallbackInfo& info)
+{
+    do {
+        auto tmpInfo = info[0];
+        if (!tmpInfo->IsObject()) {
+            break;
+        }
+        JSRef<JSObject> obj = JSRef<JSObject>::Cast(tmpInfo);
+        JSRef<JSVal> typeValue = obj->GetProperty("type");
+        JSRef<JSVal> colorValue = obj->GetProperty("color");
+        JSRef<JSVal> styleValue = obj->GetProperty("style");
+
+        auto pipelineContext = PipelineBase::GetCurrentContext();
+        CHECK_NULL_VOID(pipelineContext);
+        auto theme = pipelineContext->GetTheme<TextFieldTheme>();
+        CHECK_NULL_VOID(theme);
+        TextDecoration textDecoration = theme->GetTextStyle().GetTextDecoration();
+        if (typeValue->IsNumber()) {
+            textDecoration = static_cast<TextDecoration>(typeValue->ToNumber<int32_t>());
+        }
+        Color result = theme->GetTextStyle().GetTextDecorationColor();
+        ParseJsColor(colorValue, result, Color::BLACK);
+        std::optional<TextDecorationStyle> textDecorationStyle;
+        if (styleValue->IsNumber()) {
+            textDecorationStyle = static_cast<TextDecorationStyle>(styleValue->ToNumber<int32_t>());
+        }
+        TextFieldModel::GetInstance()->SetTextDecoration(textDecoration);
+        TextFieldModel::GetInstance()->SetTextDecorationColor(result);
+        if (textDecorationStyle) {
+            TextFieldModel::GetInstance()->SetTextDecorationStyle(textDecorationStyle.value());
+        }
+    } while (false);
+}
+
+void JSTextField::SetLetterSpacing(const JSCallbackInfo& info)
+{
+    CalcDimension value;
+    if (!ParseJsDimensionFpNG(info[0], value, false)) {
+        value.Reset();
+        TextFieldModel::GetInstance()->SetLetterSpacing(value);
+        return;
+    }
+    TextFieldModel::GetInstance()->SetLetterSpacing(value);
+}
+
+void JSTextField::SetLineHeight(const JSCallbackInfo& info)
+{
+    CalcDimension value;
+    if (!ParseJsDimensionFpNG(info[0], value)) {
+        value.Reset();
+        TextFieldModel::GetInstance()->SetLineHeight(value);
+        return;
+    }
+    if (value.IsNegative()) {
+        value.Reset();
+    }
+    TextFieldModel::GetInstance()->SetLineHeight(value);
 }
 } // namespace OHOS::Ace::Framework

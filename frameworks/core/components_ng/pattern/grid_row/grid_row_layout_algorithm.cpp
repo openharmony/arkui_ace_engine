@@ -20,6 +20,7 @@
 
 #include "grid_row_event_hub.h"
 
+#include "base/log/log.h"
 #include "base/utils/utils.h"
 #include "core/common/container.h"
 #include "core/components_ng/pattern/grid_col/grid_col_layout_property.h"
@@ -85,14 +86,19 @@ void CalculateOffsetOfNewline(const RefPtr<GridColLayoutProperty>& gridCol, int3
 
 } // namespace
 
-void GridRowLayoutAlgorithm::MeasureSelf(LayoutWrapper* layoutWrapper, float childHeight)
+void GridRowLayoutAlgorithm::MeasureSelf(LayoutWrapper* layoutWrapper, float childHeight, float selfHeight)
 {
     const auto& layoutProperty = DynamicCast<GridRowLayoutProperty>(layoutWrapper->GetLayoutProperty());
     auto layoutConstraint = layoutProperty->GetLayoutConstraint();
     auto padding = layoutProperty->CreatePaddingAndBorder();
 
     auto idealSize = CreateIdealSize(layoutConstraint.value(), Axis::HORIZONTAL, MeasureType::MATCH_PARENT);
-    idealSize.SetHeight(childHeight + padding.Height());
+    if (layoutConstraint->selfIdealSize.Height() &&
+        Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
+        idealSize.SetHeight(selfHeight + padding.Height());
+    } else {
+        idealSize.SetHeight(childHeight + padding.Height());
+    }
     if (Container::LessThanAPIVersion(PlatformVersion::VERSION_TEN)) {
         idealSize.Constrain(layoutConstraint->minSize, layoutConstraint->maxSize);
     } else {
@@ -248,6 +254,9 @@ void GridRowLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
         Size(maxSize.Width(), maxSize.Height()), mode, PipelineBase::GetCurrentContext());
     if (hostLayoutProperty->GetSizeTypeValue(V2::GridSizeType::UNDEFINED) != sizeType) {
         auto sizeTypeString = ConvertSizeTypeToString(sizeType);
+        TAG_LOGD(AceLogTag::ACE_GRIDROW,
+            "breakpoint has changed to a new sizeType:%{public}s and breakpoint reference %{public}d",
+            sizeTypeString.c_str(), layoutProperty->GetBreakPointsValue().reference);
         layoutWrapper->GetHostNode()->GetEventHub<GridRowEventHub>()->FireChangeEvent(sizeTypeString);
         hostLayoutProperty->UpdateSizeType(sizeType);
     }
@@ -261,8 +270,9 @@ void GridRowLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     columnUnitWidth_ = GridContainerUtils::ProcessColumnWidth(gutterInDouble_, columnNum, maxSize.Width());
     float childrenHeight =
         MeasureChildren(layoutWrapper, columnUnitWidth_, maxSize.Height(), gutterInDouble_, sizeType, columnNum);
+    float selfHeight = maxSize.Height();
 
-    MeasureSelf(layoutWrapper, childrenHeight);
+    MeasureSelf(layoutWrapper, childrenHeight, selfHeight);
 }
 
 void GridRowLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)

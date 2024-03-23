@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -64,9 +64,10 @@ enum class ResourceType : uint32_t {
 enum class JSCallbackInfoType { STRING, NUMBER, OBJECT, BOOLEAN, FUNCTION };
 
 RefPtr<ResourceObject> GetResourceObject(const JSRef<JSObject>& jsObj);
+RefPtr<ResourceObject> GetResourceObjectByBundleAndModule(const JSRef<JSObject>& jsObj);
 RefPtr<ResourceWrapper> CreateResourceWrapper(const JSRef<JSObject>& jsObj, RefPtr<ResourceObject>& resourceObject);
 RefPtr<ResourceWrapper> CreateResourceWrapper();
-
+using PopupOnWillDismiss = std::function<void(int32_t)>;
 class JSViewAbstract {
 public:
     static void GetAngle(
@@ -100,6 +101,7 @@ public:
     static void JsTransition(const JSCallbackInfo& info);
     static NG::TransitionOptions ParseTransition(std::unique_ptr<JsonValue>& transitionArgs);
     static NG::TransitionOptions ParseJsTransition(const JSRef<JSVal>& transitionArgs);
+    static RefPtr<NG::ChainedTransitionEffect> ParseJsTransitionEffect(const JSCallbackInfo& info);
     static void JsWidth(const JSCallbackInfo& info);
     static void JsHeight(const JSCallbackInfo& info);
     static void JsBackgroundColor(const JSCallbackInfo& info);
@@ -125,12 +127,17 @@ public:
     static void ParseSheetDetentHeight(const JSRef<JSVal>& args, NG::SheetHeight& detent);
     static bool ParseSheetBackgroundBlurStyle(const JSRef<JSVal>& args, BlurStyleOption& blurStyleOptions);
     static void ParseSheetCallback(const JSRef<JSObject>& paramObj, std::function<void()>& onAppear,
-        std::function<void()>& onDisappear, std::function<void()>& shouldDismiss);
+        std::function<void()>& onDisappear, std::function<void()>& shouldDismiss, std::function<void()>& onWillAppear,
+        std::function<void()>& onWillDisappear);
     static void ParseSheetTitle(const JSRef<JSObject>& paramObj, NG::SheetStyle& sheetStyle,
         std::function<void()>& titleBuilderFunction);
     static panda::Local<panda::JSValueRef> JsDismissSheet(panda::JsiRuntimeCallInfo* runtimeCallInfo);
-    static void ParseOverlayCallback(
-        const JSRef<JSObject>& paramObj, std::function<void()>& onAppear, std::function<void()>& onDisappear);
+    static panda::Local<panda::JSValueRef> JsDismissContentCover(panda::JsiRuntimeCallInfo* runtimeCallInfo);
+    static void ParseModalTransitonEffect(
+        const JSRef<JSObject>& paramObj, NG::ContentCoverParam& contentCoverParam, const JSExecutionContext& context);
+    static void ParseOverlayCallback(const JSRef<JSObject>& paramObj, std::function<void()>& onAppear,
+        std::function<void()>& onDisappear, std::function<void()>& onWillAppear, std::function<void()>& onWillDisappear,
+        std::function<void(const int32_t& info)>& onWillDismiss);
     static void JsBorderColor(const JSCallbackInfo& info);
     static void ParseBorderColor(const JSRef<JSVal>& args);
     static void JsPadding(const JSCallbackInfo& info);
@@ -181,6 +188,7 @@ public:
     static void JsOnHover(const JSCallbackInfo& info);
     static void JsOnClick(const JSCallbackInfo& info);
     static void JsOnGestureJudgeBegin(const JSCallbackInfo& args);
+    static void JsOnTouchIntercept(const JSCallbackInfo& info);
     static void JsClickEffect(const JSCallbackInfo& info);
     static void JsRestoreId(int32_t restoreId);
     static void JsOnVisibleAreaChange(const JSCallbackInfo& info);
@@ -218,6 +226,7 @@ public:
     static bool ParseJsInt32(const JSRef<JSVal>& jsValue, int32_t& result);
     static bool ParseJsColorFromResource(const JSRef<JSVal>& jsValue, Color& result);
     static bool ParseJsColor(const JSRef<JSVal>& jsValue, Color& result);
+    static bool ParseJsColor(const JSRef<JSVal>& jsValue, Color& result, const Color& defaultColor);
     static bool ParseJsColorStrategy(const JSRef<JSVal>& jsValue, ForegroundColorStrategy& strategy);
     static bool ParseJsShadowColorStrategy(const JSRef<JSVal>& jsValue, ShadowColorStrategy& strategy);
     static bool ParseJsFontFamilies(const JSRef<JSVal>& jsValue, std::vector<std::string>& result);
@@ -283,8 +292,10 @@ public:
     static void JsOnDragEnd(const JSCallbackInfo& info);
     static void JsOnDragMove(const JSCallbackInfo& info);
     static void JsOnDragLeave(const JSCallbackInfo& info);
+    static void JsOnPreDrag(const JSCallbackInfo& info);
     static void JsOnDrop(const JSCallbackInfo& info);
     static void JsOnAreaChange(const JSCallbackInfo& info);
+    static void JsOnSizeChange(const JSCallbackInfo& info);
 
     static void JsLinearGradient(const JSCallbackInfo& info);
     static void JsRadialGradient(const JSCallbackInfo& info);
@@ -305,7 +316,10 @@ public:
     static void JsHueRotate(const JSCallbackInfo& info);
 
     static void JsClip(const JSCallbackInfo& info);
+    static void JsClipShape(const JSCallbackInfo& info);
+
     static void JsMask(const JSCallbackInfo& info);
+    static void JsMaskShape(const JSCallbackInfo& info);
 
     static void JsKey(const std::string& key);
     static void JsId(const JSCallbackInfo& info);
@@ -325,6 +339,7 @@ public:
     static void JsKeyboardShortcut(const JSCallbackInfo& info);
 
     static void JsObscured(const JSCallbackInfo& info);
+    static void JsPrivacySensitive(const JSCallbackInfo& info);
 
     static void JsAccessibilityGroup(bool accessible);
     static void JsAccessibilityText(const std::string& text);
@@ -332,6 +347,7 @@ public:
     static void JsAccessibilityImportance(const std::string& importance);
     static void JsAccessibilityLevel(const std::string& level);
     static void JsAllowDrop(const JSCallbackInfo& info);
+    static void JsDrawModifier(const JSCallbackInfo& info);
     static void JsDragPreview(const JSCallbackInfo& info);
     static void JsAccessibilityVirtualNode(const JSCallbackInfo& info);
 
@@ -345,20 +361,24 @@ public:
 
     static void JsExpandSafeArea(const JSCallbackInfo& info);
 
-    static void ParseImageAnalyzerTextOptions(const JSRef<JSVal>& optionVal, ImageAnalyzerConfig& analyzerConfig);
-    static void ParseImageAnalyzerSubjectOptions(const JSRef<JSVal>& optionVal, ImageAnalyzerConfig& analyzerConfig);
-
     static void ParseMenuOptions(
         const JSCallbackInfo& info, const JSRef<JSArray>& jsArray, std::vector<NG::MenuOptionsParam>& items);
 
 #ifndef WEARABLE_PRODUCT
     static void JsBindPopup(const JSCallbackInfo& info);
+    static void SetPopupDismiss(
+        const JSCallbackInfo& info, const JSRef<JSObject>& popupObj, const RefPtr<PopupParam>& popupParam);
+    static PopupOnWillDismiss ParsePopupCallback(const JSCallbackInfo& info, const JSRef<JSObject>& paramObj);
+    static panda::Local<panda::JSValueRef> JsDismissPopup(panda::JsiRuntimeCallInfo* runtimeCallInfo);
 #endif
 
     /**
      * Binds the native methods to the the js object
      */
     static void JSBind(BindingTarget globalObj);
+    static void ParseDialogCallback(const JSRef<JSObject>& paramObj,
+        std::function<void(const int32_t& info)>& onWillDismiss);
+    static panda::Local<panda::JSValueRef> JsDismissDialog(panda::JsiRuntimeCallInfo* runtimeCallInfo);
 
     static RefPtr<PipelineBase> GetPipelineContext()
     {
@@ -419,8 +439,8 @@ public:
         }
 
         JSRef<JSObject> jsObj = JSRef<JSObject>::Cast(jsValue);
-        JSRef<JSVal> type = jsObj->GetProperty("type");
-        if (!type->IsNumber()) {
+        int32_t resType = jsObj->GetPropertyValue<int32_t>("type", -1);
+        if (resType == -1) {
             return false;
         }
 
@@ -430,7 +450,7 @@ public:
             return false;
         }
 
-        auto resourceObject = GetResourceObject(jsObj);
+        auto resourceObject = GetResourceObjectByBundleAndModule(jsObj);
         auto resourceWrapper = CreateResourceWrapper(jsObj, resourceObject);
         auto resIdNum = resId->ToNumber<int32_t>();
         if (resIdNum == -1) {
@@ -440,13 +460,13 @@ public:
             JSRef<JSVal> args = jsObj->GetProperty("params");
             JSRef<JSArray> params = JSRef<JSArray>::Cast(args);
             auto param = params->GetValueAt(0);
-            if (type->ToNumber<uint32_t>() == static_cast<uint32_t>(ResourceType::INTEGER)) {
+            if (resType == static_cast<int32_t>(ResourceType::INTEGER)) {
                 result = static_cast<T>(resourceWrapper->GetIntByName(param->ToString()));
                 return true;
             }
             return false;
         }
-        if (type->ToNumber<uint32_t>() == static_cast<uint32_t>(ResourceType::INTEGER)) {
+        if (resType == static_cast<int32_t>(ResourceType::INTEGER)) {
             result = static_cast<T>(resourceWrapper->GetInt(resId->ToNumber<uint32_t>()));
             return true;
         }
@@ -455,50 +475,23 @@ public:
 
     static std::string GetFunctionKeyName(FunctionKey functionkey)
     {
-        switch (functionkey) {
-            case FunctionKey::ESC:
-                return "ESC";
-                break;
-            case FunctionKey::F1:
-                return "F1";
-                break;
-            case FunctionKey::F2:
-                return "F2";
-                break;
-            case FunctionKey::F3:
-                return "F3";
-                break;
-            case FunctionKey::F4:
-                return "F4";
-                break;
-            case FunctionKey::F5:
-                return "F5";
-                break;
-            case FunctionKey::F6:
-                return "F6";
-                break;
-            case FunctionKey::F7:
-                return "F7";
-                break;
-            case FunctionKey::F8:
-                return "F8";
-                break;
-            case FunctionKey::F9:
-                return "F9";
-                break;
-            case FunctionKey::F10:
-                return "F10";
-                break;
-            case FunctionKey::F11:
-                return "F11";
-                break;
-            case FunctionKey::F12:
-                return "F12";
-                break;
-            default:
-                return "";
-                break;
-        }
+        std::map<FunctionKey, std::string> keyNameMap {
+            {FunctionKey::ESC, "ESC"},
+            {FunctionKey::F1, "F1"},
+            {FunctionKey::F2, "F2"},
+            {FunctionKey::F3, "F3"},
+            {FunctionKey::F4, "F4"},
+            {FunctionKey::F5, "F5"},
+            {FunctionKey::F6, "F6"},
+            {FunctionKey::F7, "F7"},
+            {FunctionKey::F8, "F8"},
+            {FunctionKey::F9, "F9"},
+            {FunctionKey::F10, "F10"},
+            {FunctionKey::F11, "F11"},
+            {FunctionKey::F12, "F12"}
+        };
+        auto result = keyNameMap.find(functionkey);
+        return (result != keyNameMap.end()) ? result->second : std::string();
     }
 
     static bool CheckColor(const JSRef<JSVal>& jsValue, Color& result, const char* componentName, const char* propName);
@@ -507,6 +500,11 @@ public:
     static bool ParseJsSymbolId(
         const JSRef<JSVal>& jsValue, uint32_t& symbolId, RefPtr<ResourceObject>& symbolResourceObject);
     static bool ParseJsSymbolColor(const JSRef<JSVal>& jsValue, std::vector<Color>& result);
+    static bool ParseBorderWidthProps(const JSRef<JSVal>& args, NG::BorderWidthProperty& borderWidthProperty);
+    static bool ParseBorderColorProps(const JSRef<JSVal>& args, NG::BorderColorProperty& colorProperty);
+    static bool ParseBorderStyleProps(const JSRef<JSVal>& args, NG::BorderStyleProperty& borderStyleProperty);
+    static bool ParseBorderRadius(const JSRef<JSVal>& args, NG::BorderRadiusProperty& radius);
+    static void SetDialogProperties(const JSRef<JSObject>& obj, DialogProperties& properties);
 };
 } // namespace OHOS::Ace::Framework
 #endif // JS_VIEW_ABSTRACT_H

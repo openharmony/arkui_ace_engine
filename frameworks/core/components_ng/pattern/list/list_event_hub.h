@@ -178,6 +178,7 @@ public:
 
     void InitItemDragEvent(const RefPtr<GestureEventHub>& gestureHub);
     void HandleOnItemDragStart(const GestureEvent& info);
+    void OnItemDragStart(const GestureEvent& info, const DragDropInfo& dragDropInfo);
     void HandleOnItemDragUpdate(const GestureEvent& info);
     void HandleOnItemDragEnd(const GestureEvent& info);
     void HandleOnItemDragCancel();

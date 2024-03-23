@@ -34,6 +34,7 @@ public:
     MOCK_METHOD(int32_t, SetData, (const RefPtr<UnifiedData>& unifiedData, std::string& key), (override));
     MOCK_METHOD(int32_t, GetData, (const RefPtr<UnifiedData>& unifiedData, const std::string& key), (override));
     MOCK_METHOD(int32_t, GetSummary, (std::string& key, (std::map<std::string, int64_t>& summaryMap)), (override));
+    MOCK_METHOD(bool, GetRemoteStatus, (std::string& key), (override));
     MOCK_METHOD(void, AddFormRecord,
         (const RefPtr<UnifiedData>& unifiedData, int32_t formId, const RequestFormInfo& cardInfo), (override));
     MOCK_METHOD(void, AddLinkRecord,

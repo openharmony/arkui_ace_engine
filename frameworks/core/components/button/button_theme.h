@@ -43,39 +43,44 @@ public:
             if (!themeConstants) {
                 return theme;
             }
-            ParsePattern(themeConstants->GetThemeStyle(), theme);
+            ParsePattern(themeConstants, theme);
             return theme;
         }
 
     private:
-        void ParsePattern(const RefPtr<ThemeStyle>& themeStyle, const RefPtr<ButtonTheme>& theme) const
+        void ParsePattern(const RefPtr<ThemeConstants>& themeConstants, const RefPtr<ButtonTheme>& theme) const
         {
-            if (!themeStyle) {
+            if (!themeConstants) {
                 return;
             }
-            auto buttonPattern = themeStyle->GetAttr<RefPtr<ThemeStyle>>(THEME_PATTERN_BUTTON, nullptr);
+            RefPtr<ThemeStyle> buttonPattern = themeConstants->GetPatternByName(THEME_PATTERN_BUTTON);
             if (!buttonPattern) {
                 LOGW("find pattern of button fail");
                 return;
             }
             theme->bgColor_ = buttonPattern->GetAttr<Color>("button_bg_color", Color());
+            theme->roleWarningColor_ = buttonPattern->GetAttr<Color>("role_warning", Color());
             theme->clickedColor_ = buttonPattern->GetAttr<Color>("bg_color_clicked_blend", Color());
-            theme->disabledColor_ = theme->bgColor_
-                .BlendOpacity(buttonPattern->GetAttr<double>(PATTERN_BG_COLOR_DISABLED_ALPHA, 0.0));
+            theme->disabledColor_ =
+                theme->bgColor_.BlendOpacity(buttonPattern->GetAttr<double>(PATTERN_BG_COLOR_DISABLED_ALPHA, 0.0));
             theme->hoverColor_ = buttonPattern->GetAttr<Color>("bg_color_hovered_blend", Color());
             theme->borderColor_ = buttonPattern->GetAttr<Color>("border_color", Color());
             theme->borderWidth_ = buttonPattern->GetAttr<Dimension>("border_width", 0.0_vp);
             theme->textStyle_.SetTextColor(buttonPattern->GetAttr<Color>("button_text_color", Color()));
-            theme->textDisabledColor_ = buttonPattern->GetAttr<Color>(PATTERN_TEXT_COLOR, Color())
-                .BlendOpacity(buttonPattern->GetAttr<double>("text_color_disabled_alpha", 0.0));
+            theme->textDisabledColor_ =
+                buttonPattern->GetAttr<Color>(PATTERN_TEXT_COLOR, Color())
+                    .BlendOpacity(buttonPattern->GetAttr<double>("text_color_disabled_alpha", 0.0));
             theme->textWaitingColor_ = buttonPattern->GetAttr<Color>("waiting_button_text_color", Color());
             theme->normalTextColor_ = buttonPattern->GetAttr<Color>("normal_text_color", Color());
-            theme->downloadBackgroundColor_ = buttonPattern->GetAttr<Color>("download_button_bg_color", Color())
-                .BlendOpacity(buttonPattern->GetAttr<double>("download_button_bg_color_alpha", 0.0));
-            theme->downloadBorderColor_ = buttonPattern->GetAttr<Color>("download_button_border_color", Color())
-                .BlendOpacity(buttonPattern->GetAttr<double>("download_button_border_color_alpha", 0.0));
-            theme->downloadProgressColor_ = buttonPattern->GetAttr<Color>("download_button_process_color", Color())
-                .BlendOpacity(buttonPattern->GetAttr<double>("download_button_process_color_alpha", 0.0));
+            theme->downloadBackgroundColor_ =
+                buttonPattern->GetAttr<Color>("download_button_bg_color", Color())
+                    .BlendOpacity(buttonPattern->GetAttr<double>("download_button_bg_color_alpha", 0.0));
+            theme->downloadBorderColor_ =
+                buttonPattern->GetAttr<Color>("download_button_border_color", Color())
+                    .BlendOpacity(buttonPattern->GetAttr<double>("download_button_border_color_alpha", 0.0));
+            theme->downloadProgressColor_ =
+                buttonPattern->GetAttr<Color>("download_button_process_color", Color())
+                    .BlendOpacity(buttonPattern->GetAttr<double>("download_button_process_color_alpha", 0.0));
             theme->downloadTextColor_ = buttonPattern->GetAttr<Color>("download_button_text_color", Color());
             theme->progressColor_ = buttonPattern->GetAttr<Color>("process_button_text_color", Color());
             theme->radius_ = buttonPattern->GetAttr<Dimension>("button_radius", 0.0_vp);
@@ -113,18 +118,26 @@ public:
 
         void ParseSubStylePattern(const RefPtr<ThemeStyle>& buttonPattern, const RefPtr<ButtonTheme>& theme) const
         {
-            theme->bgColorMap_.insert(std::pair<ButtonStyleMode, Color>(ButtonStyleMode::EMPHASIZE, theme->bgColor_));
-            theme->bgColorMap_.insert(std::pair<ButtonStyleMode, Color>(
-                ButtonStyleMode::NORMAL, buttonPattern->GetAttr<Color>("bg_color_normal", Color())));
-            theme->bgColorMap_.insert(std::pair<ButtonStyleMode, Color>(ButtonStyleMode::TEXT, Color::TRANSPARENT));
-
+            std::unordered_map<ButtonStyleMode, Color> normalBgColorMap_ = { { ButtonStyleMode::EMPHASIZE,
+                                                                                 theme->bgColor_ },
+                { ButtonStyleMode::NORMAL, buttonPattern->GetAttr<Color>("bg_color_normal", Color()) },
+                { ButtonStyleMode::TEXT, Color::TRANSPARENT } };
+            std::unordered_map<ButtonStyleMode, Color> errorBgColorMap_ = { { ButtonStyleMode::EMPHASIZE,
+                                                                                theme->roleWarningColor_ },
+                { ButtonStyleMode::NORMAL, buttonPattern->GetAttr<Color>("bg_color_normal", Color()) },
+                { ButtonStyleMode::TEXT, Color::TRANSPARENT } };
+            theme->bgColorMap_.emplace(ButtonRole::NORMAL, normalBgColorMap_);
+            theme->bgColorMap_.emplace(ButtonRole::ERROR, errorBgColorMap_);
             theme->textColorMap_.insert(std::pair<ButtonStyleMode, Color>(
                 ButtonStyleMode::EMPHASIZE, buttonPattern->GetAttr<Color>("emphasize_button_text_color", Color())));
             theme->textColorMap_.insert(
                 std::pair<ButtonStyleMode, Color>(ButtonStyleMode::NORMAL, theme->normalTextColor_));
             theme->textColorMap_.insert(
                 std::pair<ButtonStyleMode, Color>(ButtonStyleMode::TEXT, theme->normalTextColor_));
-
+            theme->textColorByRoleMap_.insert(
+                std::pair<ButtonRole, Color>(ButtonRole::NORMAL, theme->normalTextColor_));
+            theme->textColorByRoleMap_.insert(
+                std::pair<ButtonRole, Color>(ButtonRole::ERROR, theme->roleWarningColor_));
             theme->heightMap_.insert(std::pair<ControlSize, Dimension>(ControlSize::NORMAL, theme->height_));
             theme->heightMap_.insert(std::pair<ControlSize, Dimension>(
                 ControlSize::SMALL, buttonPattern->GetAttr<Dimension>("small_button_height", 0.0_vp)));
@@ -326,19 +339,30 @@ public:
         return innerPadding_;
     }
 
-    const Color& GetBgColor(ButtonStyleMode buttonStyle) const
+    Color GetBgColor(ButtonStyleMode buttonStyle, ButtonRole buttonRole) const
     {
-        auto result = bgColorMap_.find(buttonStyle);
-        if (result != bgColorMap_.end()) {
-            return result->second;
+        auto bgColorMapByRole_ = bgColorMap_.find(buttonRole);
+        if (bgColorMapByRole_ != bgColorMap_.end()) {
+            std::unordered_map<ButtonStyleMode, Color> bgColorMapByStyle_ = bgColorMapByRole_->second;
+            auto result = bgColorMapByStyle_.find(buttonStyle);
+            if (result != bgColorMapByStyle_.end()) {
+                return result->second;
+            }
         }
         return bgColor_;
     }
 
-    const Color& GetTextColor(ButtonStyleMode buttonStyle) const
+    const Color& GetTextColor(ButtonStyleMode buttonStyle, ButtonRole buttonRole) const
     {
+        auto roleResult = textColorByRoleMap_.find(buttonRole);
         auto result = textColorMap_.find(buttonStyle);
-        if (result != textColorMap_.end()) {
+        if (roleResult != textColorByRoleMap_.end() && result != textColorMap_.end()) {
+            if (buttonRole == ButtonRole::ERROR) {
+                if (buttonStyle == ButtonStyleMode::EMPHASIZE) {
+                    return result->second;
+                }
+                return roleResult->second;
+            }
             return result->second;
         }
         return normalTextColor_;
@@ -376,6 +400,7 @@ protected:
 
 private:
     Color bgColor_;
+    Color roleWarningColor_;
     Color bgFocusColor_;
     Color clickedColor_;
     Color disabledColor_;
@@ -410,7 +435,8 @@ private:
     Dimension borderWidth_;
     Dimension downloadHeight_;
 
-    std::unordered_map<ButtonStyleMode, Color> bgColorMap_;
+    std::unordered_map<ButtonRole, std::unordered_map<ButtonStyleMode, Color>> bgColorMap_;
+    std::unordered_map<ButtonRole, Color> textColorByRoleMap_;
     std::unordered_map<ButtonStyleMode, Color> textColorMap_;
     std::unordered_map<ControlSize, Dimension> heightMap_;
     std::unordered_map<ControlSize, Dimension> textSizeMap_;

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -86,6 +86,7 @@ public:
     static void OnHttpAuthRequest(const JSCallbackInfo& args);
     static void OnSslErrRequest(const JSCallbackInfo& args);
     static void OnSslErrorRequest(const JSCallbackInfo& args);
+    static void OnAllSslErrorRequest(const JSCallbackInfo& args);
     static void OnSslSelectCertRequest(const JSCallbackInfo& args);
     static void OnPermissionRequest(const JSCallbackInfo& args);
     static void OnScreenCaptureRequest(const JSCallbackInfo& args);
@@ -112,6 +113,7 @@ public:
     static void WebStandardFont(const std::string& standardFontFamily);
     static void DefaultFixedFontSize(int32_t defaultFixedFontSize);
     static void DefaultFontSize(int32_t defaultFontSize);
+    static void DefaultTextEncodingFormat(const JSCallbackInfo& args);
     static void MinFontSize(int32_t minFontSize);
     static void MinLogicalFontSize(int32_t minLogicalFontSize);
     static void BlockNetwork(bool isNetworkBlocked);
@@ -127,14 +129,19 @@ public:
     static void OnAudioStateChanged(const JSCallbackInfo& args);
     static void MediaOptions(const JSCallbackInfo& args);
     static void OnFirstContentfulPaint(const JSCallbackInfo& args);
+    static void OnFirstMeaningfulPaint(const JSCallbackInfo& args);
+    static void OnLargestContentfulPaint(const JSCallbackInfo& args);
     static void OnSafeBrowsingCheckResult(const JSCallbackInfo& args);
     static void OnNavigationEntryCommitted(const JSCallbackInfo& args);
+    static void OnIntelligentTrackingPreventionResult(const JSCallbackInfo& args);
     static void OnControllerAttached(const JSCallbackInfo& args);
     static void OnOverScroll(const JSCallbackInfo& args);
     static void SetLayoutMode(int32_t layoutMode);
     static void SetNestedScroll(const JSCallbackInfo& info);
+    static void SetMetaViewport(const JSCallbackInfo& args);
     static void OverScrollMode(int overScrollMode);
     static void EnableNativeEmbedMode(bool isEmbedModeEnabled);
+    static void RegisterNativeEmbedRule(const std::string& tag, const std::string& type);
     static void OnNativeEmbedLifecycleChange(const JSCallbackInfo& args);
     static void OnNativeEmbedGestureEvent(const JSCallbackInfo& args);
     static void JavaScriptOnDocumentStart(const JSCallbackInfo& args);
@@ -143,6 +150,9 @@ public:
     static bool webDebuggingAccess_;
     static JSwebEventCallback OnControllerAttachedCallback_;
     static void CopyOption(int32_t copyOption);
+    static void OnOverrideUrlLoading(const JSCallbackInfo& args);
+    static void TextAutosizing(const JSCallbackInfo& args);
+    static void EnableNativeVideoPlayer(const JSCallbackInfo& args);
 
 protected:
     static void OnCommonDialog(const JSCallbackInfo& args, int dialogEventType);

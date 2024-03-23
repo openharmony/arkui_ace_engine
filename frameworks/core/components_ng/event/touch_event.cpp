@@ -47,7 +47,23 @@ bool TouchEventActuator::HandleEvent(const TouchEvent& point)
 
 bool TouchEventActuator::TriggerTouchCallBack(const TouchEvent& point)
 {
-    if (touchEvents_.empty() && !userCallback_ && !onTouchEventCallback_) {
+    if (point.type == TouchType::DOWN && !firstInputTime_.has_value()) {
+        firstInputTime_ = point.time;
+    }
+    if (point.type == TouchType::UP) {
+        int64_t overTime = GetSysTimestamp();
+        int64_t inputTime = overTime;
+        if (firstInputTime_.has_value()) {
+            inputTime = static_cast<int64_t>(firstInputTime_.value().time_since_epoch().count());
+        }
+        if (SystemProperties::GetTraceInputEventEnabled()) {
+            ACE_SCOPED_TRACE("UserEvent InputTime:%lld OverTime:%lld InputType:TouchEvent",
+                static_cast<long long>(inputTime), static_cast<long long>(overTime));
+        }
+        firstInputTime_.reset();
+    }
+
+    if (touchEvents_.empty() && !userCallback_ && !onTouchEventCallback_ && !commonTouchEventCallback_) {
         return true;
     }
     TouchEvent lastPoint;
@@ -157,6 +173,11 @@ bool TouchEventActuator::TriggerTouchCallBack(const TouchEvent& point)
         // actuator->onTouchEventCallback_ may be overwritten in its invoke so we copy it first
         auto onTouchEventCallback = onTouchEventCallback_;
         (*onTouchEventCallback)(event);
+    }
+    if (commonTouchEventCallback_) {
+        // actuator->commonTouchEventCallback_ may be overwritten in its invoke so we copy it first
+        auto commonTouchEventCallback = commonTouchEventCallback_;
+        (*commonTouchEventCallback)(event);
     }
     return !event.IsStopPropagation();
 }

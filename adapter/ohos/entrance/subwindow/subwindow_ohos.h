@@ -71,10 +71,14 @@ public:
     bool CancelPopup(const std::string& id) override;
     void CloseMenu() override;
     void ClearMenu() override;
-    void ClearMenuNG(bool inWindow, bool showAnimation = false) override;
+    void ClearMenuNG(int32_t targetId, bool inWindow, bool showAnimation = false) override;
     void ClearPopupNG() override;
     RefPtr<NG::FrameNode> ShowDialogNG(const DialogProperties& dialogProps, std::function<void()>&& buildFunc) override;
+    RefPtr<NG::FrameNode> ShowDialogNGWithNode(const DialogProperties& dialogProps,
+        const RefPtr<NG::UINode>& customNode) override;
     void CloseDialogNG(const RefPtr<NG::FrameNode>& dialogNode) override;
+    void OpenCustomDialogNG(const DialogProperties& dialogProps, std::function<void(int32_t)>&& callback) override;
+    void CloseCustomDialogNG(int32_t dialogId) override;
     void HideSubWindowNG() override;
     bool GetShown() override
     {
@@ -86,7 +90,7 @@ public:
     void DeleteHotAreas(int32_t overlayId) override;
     void ClearToast() override;
     void ShowToast(const std::string& message, int32_t duration, const std::string& bottom,
-        const NG::ToastShowMode& showMode) override;
+        const NG::ToastShowMode& showMode, int32_t alignment, std::optional<DimensionOffset> offset) override;
     void ShowDialog(const std::string& title, const std::string& message, const std::vector<ButtonInfo>& buttons,
         bool autoCancel, std::function<void(int32_t, int32_t)>&& callback,
         const std::set<std::string>& callbacks) override;
@@ -129,6 +133,8 @@ public:
     }
     void ResizeWindowForFoldStatus() override;
     void ResizeWindowForFoldStatus(int32_t parentContainerId) override;
+    void SetPopupHotAreas(const std::vector<Rect>& rects, int32_t overlayId) override;
+    void DeletePopupHotAreas(int32_t overlayId) override;
 private:
     RefPtr<StackElement> GetStack();
     void AddMenu(const RefPtr<Component>& newComponent);
@@ -143,10 +149,10 @@ private:
         int32_t& width, int32_t& height, int32_t& posX, int32_t& posY, float& density) const;
     bool InitToastDialogWindow(int32_t width, int32_t height, int32_t posX, int32_t posY, bool isToast = false);
     bool InitToastDialogView(int32_t width, int32_t height, float density);
-    void ShowToastForAbility(
-        const std::string& message, int32_t duration, const std::string& bottom, const NG::ToastShowMode& showMode);
-    void ShowToastForService(
-        const std::string& message, int32_t duration, const std::string& bottom, const NG::ToastShowMode& showMode);
+    void ShowToastForAbility(const std::string& message, int32_t duration, const std::string& bottom,
+        const NG::ToastShowMode& showMode, int32_t alignment, std::optional<DimensionOffset> offset);
+    void ShowToastForService(const std::string& message, int32_t duration, const std::string& bottom,
+        const NG::ToastShowMode& showMode, int32_t alignment, std::optional<DimensionOffset> offset);
     void ShowDialogForAbility(const std::string& title, const std::string& message,
         const std::vector<ButtonInfo>& buttons, bool autoCancel, std::function<void(int32_t, int32_t)>&& callback,
         const std::set<std::string>& callbacks);
@@ -179,6 +185,7 @@ private:
     sptr<OHOS::Rosen::Window> window_ = nullptr;
     RefPtr<SelectPopupComponent> popup_;
     std::unordered_map<int32_t, std::vector<Rosen::Rect>> hotAreasMap_;
+    std::unordered_map<int32_t, std::vector<Rosen::Rect>> popupHotAreasMap_;
 
     sptr<OHOS::Rosen::Window> dialogWindow_;
     std::shared_ptr<AppExecFwk::EventRunner> eventLoop_;

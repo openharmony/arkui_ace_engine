@@ -45,53 +45,53 @@ void JsiClockBridge::ParseClockConfig(const shared_ptr<JsRuntime>& runtime, cons
         if (item->IsString(runtime) || item->IsNumber(runtime)) {
             std::string valStr = item->ToString(runtime);
             // static linear map must be sorted by key.
-            static const LinearMapNode<void (*)(std::string, JsiClockBridge&)> clockConfigOperators[] = {
+            static const LinearMapNode<void (*)(std::string&, JsiClockBridge&)> clockConfigOperators[] = {
                 { DOM_DIGIT_COLOR,
-                    [](std::string valStr, JsiClockBridge& clockBridge) {
+                    [](std::string& valStr, JsiClockBridge& clockBridge) {
                         clockBridge.clockConfig_.digitColor_ = valStr;
                     } },
                 { DOM_DIGIT_COLOR_NIGHT,
-                    [](std::string valStr, JsiClockBridge& clockBridge) {
+                    [](std::string& valStr, JsiClockBridge& clockBridge) {
                         clockBridge.clockConfig_.digitColorNight_ = valStr;
                     } },
                 { DOM_DIGIT_RADIUS_RATIO,
-                    [](std::string valStr, JsiClockBridge& clockBridge) {
+                    [](std::string& valStr, JsiClockBridge& clockBridge) {
                         clockBridge.clockConfig_.digitRadiusRatio_ = StringToDouble(valStr);
                     } },
                 { DOM_DIGIT_SIZE_RATIO,
-                    [](std::string valStr, JsiClockBridge& clockBridge) {
+                    [](std::string& valStr, JsiClockBridge& clockBridge) {
                         clockBridge.clockConfig_.digitSizeRatio_ = StringToDouble(valStr);
                     } },
                 { DOM_CLOCK_FACE_SOURCE,
-                    [](std::string valStr, JsiClockBridge& clockBridge) {
+                    [](std::string& valStr, JsiClockBridge& clockBridge) {
                         clockBridge.clockConfig_.clockFaceSrc_ = valStr;
                     } },
                 { DOM_CLOCK_FACE_SOURCE_NIGHT,
-                    [](std::string valStr, JsiClockBridge& clockBridge) {
+                    [](std::string& valStr, JsiClockBridge& clockBridge) {
                         clockBridge.clockConfig_.clockFaceNightSrc_ = valStr;
                     } },
                 { DOM_HOUR_HAND_SOURCE,
-                    [](std::string valStr, JsiClockBridge& clockBridge) {
+                    [](std::string& valStr, JsiClockBridge& clockBridge) {
                         clockBridge.clockConfig_.hourHandSrc_ = valStr;
                     } },
                 { DOM_HOUR_HAND_SOURCE_NIGHT,
-                    [](std::string valStr, JsiClockBridge& clockBridge) {
+                    [](std::string& valStr, JsiClockBridge& clockBridge) {
                         clockBridge.clockConfig_.hourHandNightSrc_ = valStr;
                     } },
                 { DOM_MINUTE_HAND_SOURCE,
-                    [](std::string valStr, JsiClockBridge& clockBridge) {
+                    [](std::string& valStr, JsiClockBridge& clockBridge) {
                         clockBridge.clockConfig_.minuteHandSrc_ = valStr;
                     } },
                 { DOM_MINUTE_HAND_SOURCE_NIGHT,
-                    [](std::string valStr, JsiClockBridge& clockBridge) {
+                    [](std::string& valStr, JsiClockBridge& clockBridge) {
                         clockBridge.clockConfig_.minuteHandNightSrc_ = valStr;
                     } },
                 { DOM_SECOND_HAND_SOURCE,
-                    [](std::string valStr, JsiClockBridge& clockBridge) {
+                    [](std::string& valStr, JsiClockBridge& clockBridge) {
                         clockBridge.clockConfig_.secondHandSrc_ = valStr;
                     } },
                 { DOM_SECOND_HAND_SOURCE_NIGHT,
-                    [](std::string valStr, JsiClockBridge& clockBridge) {
+                    [](std::string& valStr, JsiClockBridge& clockBridge) {
                         clockBridge.clockConfig_.secondHandNightSrc_ = valStr;
                     } },
             };

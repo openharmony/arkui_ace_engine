@@ -47,6 +47,8 @@ public:
         }
         if (!pixelMap) {
             callback_(nullptr, ERROR_CODE_INTERNAL_ERROR, [node = node_]() {
+                TAG_LOGW(AceLogTag::ACE_COMPONENT_SNAPSHOT,
+                    "Internal error! The pixelmap returned by the system is null");
                 auto frameNode = node.Upgrade();
                 CHECK_NULL_VOID(frameNode);
                 Inspector::RemoveOffscreenNode(frameNode);
@@ -64,6 +66,20 @@ private:
     ComponentSnapshot::JsCallback callback_;
     WeakPtr<FrameNode> node_;
 };
+
+class NormalCaptureCallback : public Rosen::SurfaceCaptureCallback {
+public:
+    explicit NormalCaptureCallback(ComponentSnapshot::NormalCallback&& callback) : callback_(std::move(callback)) {}
+    ~NormalCaptureCallback() override = default;
+    void OnSurfaceCapture(std::shared_ptr<Media::PixelMap> pixelMap) override
+    {
+        CHECK_NULL_VOID(callback_);
+        callback_(pixelMap);
+    }
+
+private:
+    ComponentSnapshot::NormalCallback callback_;
+};
 } // namespace
 
 std::shared_ptr<Rosen::RSNode> ComponentSnapshot::GetRsNode(const RefPtr<FrameNode>& node)
@@ -80,6 +96,9 @@ void ComponentSnapshot::Get(const std::string& componentId, JsCallback&& callbac
     auto node = Inspector::GetFrameNodeByKey(componentId);
     if (!node) {
         callback(nullptr, ERROR_CODE_INTERNAL_ERROR, nullptr);
+        TAG_LOGW(AceLogTag::ACE_COMPONENT_SNAPSHOT,
+            "Can't find a component that id or key are %{public}s, Please check your parameters are correct",
+            componentId.c_str());
         return;
     }
     auto rsNode = GetRsNode(node);
@@ -116,6 +135,8 @@ void ComponentSnapshot::Create(
     CHECK_NULL_VOID(pipeline);
     auto executor = pipeline->GetTaskExecutor();
     CHECK_NULL_VOID(executor);
+    pipeline->FlushUITasks();
+    pipeline->FlushMessages();
 
     executor->PostDelayedTask(
         [callback, node, enableInspector]() mutable {
@@ -127,5 +148,12 @@ void ComponentSnapshot::Create(
                 rsNode, std::make_shared<CustomizedCallback>(std::move(callback), enableInspector ? node : nullptr));
         },
         TaskExecutor::TaskType::UI, delayTime);
+}
+
+void ComponentSnapshot::GetNormalCapture(const RefPtr<FrameNode>& frameNode, NormalCallback&& callback)
+{
+    auto rsNode = GetRsNode(frameNode);
+    auto& rsInterface = Rosen::RSInterfaces::GetInstance();
+    rsInterface.TakeSurfaceCaptureForUI(rsNode, std::make_shared<NormalCaptureCallback>(std::move(callback)));
 }
 } // namespace OHOS::Ace::NG

@@ -17,7 +17,8 @@
  * @addtogroup ArkUI_NativeModule
  * @{
  *
- * @brief 提供ArkUI在Native侧的UI能力，如UI组件创建销毁、树节点操作，属性设置，事件监听等。
+ * @brief Provides UI capabilities of ArkUI on the native side, such as UI component creation and destruction,
+ * tree node operations, attribute setting, and event listening.
  *
  * @since 12
  */
@@ -25,7 +26,7 @@
 /**
  * @file native_type.h
  *
- * @brief 提供NativeModule公共的类型定义。
+ * @brief Defines the common types for the native module.
  *
  * @library libace_ndk.z.so
  * @syscap SystemCapability.ArkUI.ArkUI.Full
@@ -42,89 +43,99 @@ extern "C" {
 #endif
 
 /**
- * @brief 提供ArkUI native组件实例对象定义。
+ * @brief Defines the ArkUI native component object.
  *
  * @since 12
  */
 struct ArkUI_Node;
-
 /**
- * @brief 定义ArkUI native组件实例对象指针定义。
+ * @brief Defines the custom dialog box controller of ArkUI on the native side.
+ *
+ * @since 12
+ */
+struct ArkUI_NativeDialog;
+/**
+ * @brief Defines the pointer to the ArkUI native component object.
  *
  * @since 12
  */
 typedef struct ArkUI_Node* ArkUI_NodeHandle;
-
 /**
- * @brief ArkUI在native侧的数字类型定义。
+ * @brief Defines the pointer to the custom dialog box controller of ArkUI on the native side.
+ *
+ * @since 12
+ */
+typedef struct ArkUI_NativeDialog* ArkUI_NativeDialogHandle;
+/**
+ * @brief Provides the number types of ArkUI in the native code.
  *
  * @since 12
  */
 typedef union {
-    /** 浮点类型。*/
+    /** Floating-point type. */
     float f32;
-    /** 有符号整型。*/
+    /** Signed integer. */
     int32_t i32;
-    /** 无符号整型。*/
+    /** Unsigned integer. */
     uint32_t u32;
 } ArkUI_NumberValue;
 
 /**
- * @brief 定义布局对齐枚举值。
+ * @brief Enumerates the alignment modes.
  *
  * @since 12
  */
 typedef enum {
-    /** 顶部起始。 */
+    /** Top start. */
     ARKUI_ALIGNMENT_TOP_START = 0,
-    /** 顶部居中。*/
+    /** Top center. */
     ARKUI_ALIGNMENT_TOP,
-    /** 顶部尾端。*/
+    /** Top end. */
     ARKUI_ALIGNMENT_TOP_END,
-    /** 起始端纵向居中。*/
+    /** Vertically centered start. */
     ARKUI_ALIGNMENT_START,
-    /** 横向和纵向居中。*/
+    /** Horizontally and vertically centered. */
     ARKUI_ALIGNMENT_CENTER,
-    /** 尾端纵向居中。*/
+    /** Vertically centered end. */
     ARKUI_ALIGNMENT_END,
-    /** 底部起始端。*/
+    /** Bottom start. */
     ARKUI_ALIGNMENT_BOTTOM_START,
-    /** 底部横向居中。*/
+    /** Horizontally centered on the bottom. */
     ARKUI_ALIGNMENT_BOTTOM,
-    /** 底部尾端。*/
+    /** Bottom end. */
     ARKUI_ALIGNMENT_BOTTOM_END,
 } ArkUI_Alignment;
 
 /**
- * @brief 定义图片重复铺设枚举值。
+ * @brief Enumerates the image repeat patterns.
  *
  * @since 12
  */
 typedef enum {
-    /** 不重复。 */
+    /** The image is not repeatedly drawn. */
     ARKUI_IMAGE_REPEAT_NONE = 0,
-    /** 在X轴方向重复。 */
+    /** The image is repeatedly drawn only along the x-axis. */
     ARKUI_IMAGE_REPEAT_X,
-    /** 在Y轴方向重复。 */
+    /** The image is repeatedly drawn only along the y-axis. */
     ARKUI_IMAGE_REPEAT_Y,
-    /** 在X轴和Y轴方向重复。 */
+    /** The image is repeatedly drawn along both axes. */
     ARKUI_IMAGE_REPEAT_XY,
 } ArkUI_ImageRepeat;
 
 /**
- * @brief 定义字体样式枚举值。
+ * @brief Enumerates the font styles.
  *
  * @since 12
  */
 typedef enum {
-    /** 标准字体样式。 */
+    /** Standard font style. */
     ARKUI_FONT_STYLE_NORMAL = 0,
-    /** 斜体字体样式。 */
+    /** Italic font style. */
     ARKUI_FONT_STYLE_ITALIC
 } ArkUI_FontStyle;
 
 /**
- * @brief 定义字体粗细/字重枚举值。
+ * @brief Enumerates the font weights.
  *
  * @since 12
  */
@@ -147,985 +158,1177 @@ typedef enum {
     ARKUI_FONT_WEIGHT_W800,
     /** 900 */
     ARKUI_FONT_WEIGHT_W900,
-    /** 字体较粗。 */
+    /** The font weight is bold. */
     ARKUI_FONT_WEIGHT_BOLD,
-    /** 字体粗细正常 */
+    /** The font weight is normal. */
     ARKUI_FONT_WEIGHT_NORMAL,
-    /** 字体非常粗。 */
+    /** The font weight is bolder. */
     ARKUI_FONT_WEIGHT_BOLDER,
-    /** 字体较细。 */
+    /** The font weight is lighter. */
     ARKUI_FONT_WEIGHT_LIGHTER,
-    /** 字体粗细适中。 */
+    /** The font weight is medium. */
     ARKUI_FONT_WEIGHT_MEDIUM,
-    /** 字体粗细正常 */
+    /** The font weight is normal. */
     ARKUI_FONT_WEIGHT_REGULAR,
 } ArkUI_FontWeight;
 
 /**
- * @brief 定义字体水平对齐样式枚举值。
+ * @brief Enumerates the text alignment mode.
  *
  * @since 12
  */
 typedef enum {
-    /** 水平对齐首部。 */
+    /** Aligned with the start. */
     ARKUI_TEXT_ALIGNMENT_START = 0,
-    /** 水平居中对齐。 */
+    /** Horizontally centered. */
     ARKUI_TEXT_ALIGNMENT_CENTER,
-    /** 水平对齐尾部。 */
+    /** Aligned with the end. */
     ARKUI_TEXT_ALIGNMENT_END,
-    /** 双端对齐。 */
+    /** Aligned with both margins. */
     ARKUI_TEXT_ALIGNMENT_JUSTIFY,
 } ArkUI_TextAlignment;
 
 /**
- * @brief 定义单行文本输入法回车键类型枚举值。
+ * @brief Enumerates the types of the Enter key for a single-line text box.
  *
  * @since 12
  */
 typedef enum {
-    /** 显示为开始样式。 */
+    /** The Enter key is labeled "Go." */
     ARKUI_ENTER_KEY_TYPE_GO = 2,
-    /** 显示为搜索样式。 */
+    /** The Enter key is labeled "Search." */
     ARKUI_ENTER_KEY_TYPE_SEARCH = 3,
-    /** 显示为发送样式。 */
+    /** The Enter key is labeled "Send." */
     ARKUI_ENTER_KEY_TYPE_SEND,
-    /** 显示为下一个样式。 */
+    /** The Enter key is labeled "Next." */
     ARKUI_ENTER_KEY_TYPE_NEXT,
-    /** 显示为完成样式。 */
+    /** The Enter key is labeled "Done." */
     ARKUI_ENTER_KEY_TYPE_DONE,
-    /** 显示为上一个样式。 */
+    /** The Enter key is labeled "Previous." */
     ARKUI_ENTER_KEY_TYPE_PREVIOUS,
-    /** 显示为换行样式。 */
+    /** The Enter key is labeled "New Line." */
     ARKUI_ENTER_KEY_TYPE_NEW_LINE,
 } ArkUI_EnterKeyType;
 
 /**
- * @brief 定义单行文本输入法类型枚举值。
+ * @brief Enumerates the text input types.
  *
  * @since 12
  */
 typedef enum {
-    /** 基本输入模式。 */
+    /** Normal input mode. */
     ARKUI_TEXTINPUT_TYPE_NORMAL = 0,
-    /** 纯数字模式。 */
+    /** Number input mode. */
     ARKUI_TEXTINPUT_TYPE_NUMBER = 2,
-    /** 电话号码输入模式。 */
+    /** Phone number input mode. */
     ARKUI_TEXTINPUT_TYPE_PHONE_NUMBER = 3,
-    /** 邮箱地址输入模式。 */
+    /** Email address input mode. */
     ARKUI_TEXTINPUT_TYPE_EMAIL = 5,
-    /** 密码输入模式。 */
+    /** Password input mode. */
     ARKUI_TEXTINPUT_TYPE_PASSWORD = 7,
-    /** 纯数字密码输入模式。 */
+    /** Numeric password input mode. */
     ARKUI_TEXTINPUT_TYPE_NUMBER_PASSWORD = 8,
-    /** 锁屏应用密码输入模式。 */
+    /** Lock screen password input mode. */
     ARKUI_TEXTINPUT_TYPE_SCREEN_LOCK_PASSWORD = 9,
-    /** 用户名输入模式。 */
+    /** Username input mode. */
     ARKUI_TEXTINPUT_TYPE_USER_NAME = 10,
-    /** 新密码输入模式。 */
+    /** New password input mode. */
     ARKUI_TEXTINPUT_TYPE_NEW_PASSWORD = 11,
-    /** 带小数点的数字输入模式。 */
+    /** Number input mode with a decimal point. */
     ARKUI_TEXTINPUT_TYPE_NUMBER_DECIMAL = 12,
 } ArkUI_TextInputType;
 
 /**
- * @brief 定义清除按钮样式枚举值。
+ * @brief Enumerates the text box types.
  *
  * @since 12
  */
 typedef enum {
-    /** 清除按钮常显样式。*/
+    /** Normal input mode. */
+    ARKUI_TEXTAREA_TYPE_NORMAL = 0,
+    /** Number input mode. */
+    ARKUI_TEXTAREA_TYPE_NUMBER = 2,
+    /** Phone number input mode. */
+    ARKUI_TEXTAREA_TYPE_PHONE_NUMBER = 3,
+    /** Email address input mode. */
+    ARKUI_TEXTAREA_TYPE_EMAIL = 5,
+} ArkUI_TextAreaType;
+
+/**
+ * @brief Enumerates the styles of the Cancel button.
+ *
+ * @since 12
+ */
+typedef enum {
+    /** The Cancel button is always displayed. */
     ARKUI_CANCELBUTTON_STYLE_CONSTANT = 0,
-    /** 清除按钮常隐样式。*/
+    /** The Cancel button is always hidden. */
     ARKUI_CANCELBUTTON_STYLE_INVISIBLE,
-    /** 清除按钮输入样式。*/
+    /** The Cancel button is displayed when there is text input. */
     ARKUI_CANCELBUTTON_STYLE_INPUT,
 } ArkUI_CancelButtonStyle;
 
 /**
- * @brief 定义XComponent类型枚举值。
+ * @brief Enumerates the types of the <b><XComponent></b> component.
  *
  * @since 12
  */
 typedef enum {
-    /** 用于EGL/OpenGLES和媒体数据写入，开发者定制绘制内容单独显示在屏幕上。*/
+    /** The custom content of EGL/OpenGL ES and media data is displayed individually on the screen. */
     ARKUI_XCOMPONENT_TYPE_SURFACE = 0,
-    /** 用于EGL/OpenGLES和媒体数据写入，开发者定制绘制内容和XComponent组件内容合成后展示在屏幕上。*/
+    /** The custom content of EGL/OpenGL ES and media data is grouped and displayed together with content
+      * of the component.
+      */
     ARKUI_XCOMPONENT_TYPE_TEXTURE = 2,
 } ArkUI_XComponentType;
 
 /**
- * @brief 定义进度条类型枚举值。
+ * @brief Enumerates the styles of the progress indicator.
  *
  * @since 12
  */
 typedef enum {
-    /** 线性样式。*/
-    ARKUI_PROGRESS_LINEAR = 0,
-    /** 环形无刻度样式。*/
-    ARKUI_PROGRESS_RING,
-    /** 圆形样式。*/
-    ARKUI_PROGRESS_ECLIPSE,
-    /** 唤醒有刻度样式。*/
-    ARKUI_PROGRESS_SCALERING,
-    /** 胶囊样式。*/
-    ARKUI_PROGRESS_CAPSULE,
+    /** Linear style. */
+    ARKUI_PROGRESS_TYPE_LINEAR = 0,
+    /** Indeterminate ring style. */
+    ARKUI_PROGRESS_TYPE_RING,
+    /** Eclipse style. */
+    ARKUI_PROGRESS_TYPE_ECLIPSE,
+    /** Determinate ring style. */
+    ARKUI_PROGRESS_TYPE_SCALE_RING,
+    /** Capsule style. */
+    ARKUI_PROGRESS_TYPE_CAPSULE,
 }ArkUI_ProgressType;
 
 /**
- * @brief 定义装饰线样式枚举值。
+ * @brief Enumerates the text decoration styles.
  *
  * @since 12
  */
 typedef enum {
-    /** 不使用装饰线。*/
+    /** No text decoration. */
     ARKUI_TEXT_DECORATION_TYPE_NONE = 0,
-    /** 文字下划线修饰。*/
+    /** Line under the text. */
     ARKUI_TEXT_DECORATION_TYPE_UNDERLINE,
-    /** 文字上划线修饰。*/
+    /** Line over the text. */
     ARKUI_TEXT_DECORATION_TYPE_OVERLINE,
-    /** 穿过文本的修饰线。*/
+    /** Line through the text. */
     ARKUI_TEXT_DECORATION_TYPE_LINE_THROUGH,
 } ArkUI_TextDecorationType;
 
 /**
- * @brief 定义文本大小写枚举值。
+ * @brief Enumerates the text cases.
  *
  * @since 12
  */
 typedef enum {
-    /** 保持原有大小写。*/
+    /** The original case of the text is retained. */
     ARKUI_TEXT_CASE_NORMAL = 0,
-    /** 文本全小写。*/
+    /** All letters in the text are in lowercase. */
     ARKUI_TEXT_CASE_LOWER,
-    /** 文本全大写。*/
+    /** All letters in the text are in uppercase. */
     ARKUI_TEXT_CASE_UPPER,
 } ArkUI_TextCase;
 
 /**
- * @brief 定义文本复制黏贴模式枚举值。
+ * @brief Enumerates the text copy and paste modes.
  *
  * @since 12
  */
 typedef enum {
-    /** 不支持复制。*/
+    /** Copy is not allowed. */
     ARKUI_COPY_OPTIONS_NONE = 0,
-    /** 支持应用内复制。*/
+    /** Intra-application copy is allowed. */
     ARKUI_COPY_OPTIONS_IN_APP,
-    /** 支持设备内复制。*/
+    /** Intra-device copy is allowed. */
     ARKUI_COPY_OPTIONS_LOCAL_DEVICE,
-    /** 支持跨设备复制。*/
+    /** Cross-device copy is allowed. */
     ARKUI_COPY_OPTIONS_CROSS_DEVICE,
 } ArkUI_CopyOptions;
 
 /**
- * @brief 定义阴影类型枚举值。
+ * @brief Enumerates the shadow types.
  *
  * @since 12
  */
 typedef enum {
-    /** 颜色。*/
+    /** Color. */
     ARKUI_SHADOW_TYPE_COLOR = 0,
-    /** 模糊。*/
+    /** Blur. */
     ARKUI_SHADOW_TYPE_BLUR
 } ArkUI_ShadowType;
 
 /**
- * @brief 定义滑动选择文本选择器输入类型。
+ * @brief Enumerates the types of the text picker.
  *
  * @since 12
  */
 typedef enum {
-    /** 单列数据选择器。*/
+    /** Single-column text picker. */
     ARKUI_TEXTPICKER_RANGETYPE_SINGLE = 0,
-    /** 多列数据选择器。*/
+    /** Multi-column text picker. */
     ARKUI_TEXTPICKER_RANGETYPE_MULTI,
-    /** 支持图片资源的单列数据选择器。*/
-    ARKUI_TEXTPICKER_RANGETYPE_RANGE_C0NTENT,
-    /** 支持联动的多列数据选择器。*/
+    /** Single-column text picker with image resources. */
+    ARKUI_TEXTPICKER_RANGETYPE_RANGE_CONTENT,
+    /** Interconnected multi-column text picker. */
     ARKUI_TEXTPICKER_RANGETYPE_CASCADE_RANGE_CONTENT,
 } ArkUI_TextPickerRangeType;
 
 /**
- * @brief 定义单列滑动数据选择器支持图片资源的输入结构体。
+ * @brief Defines the input structure of the single-column text picker with image resources.
  *
  * @since 12
  */
 typedef struct {
-    /** 图片资源。*/
+    /** Image resource. */
     const char* icon;
-    /** 文本信息。*/
+    /** Text information. */
     const char* text;
 } ARKUI_TextPickerRangeContent;
 
 /**
- * @brief 定义多列带联动能力的滑动数据选择器的输入结构体。
+ * @brief Defines the input structure of the interconnected multi-column text picker.
  *
  * @since 12
  */
 typedef struct {
-    /** 文本信息。*/
+    /** Text information. */
     const char* text;
-    /** 联动数据。*/
+    /** Interconnected data. */
     const ARKUI_TextPickerRangeContent* children;
-    /** 联动数据数组大小。*/
+    /** Size of the interconnected data array. */
     int32_t size;
 } ARKUI_TextPickerCascadeRangeContent;
 
 /**
- * @brief 定义边缘滑动效果枚举值。
+ * @brief Enumerates the effects used at the edges of the component when the boundary of the
+ * scrollable content is reached.
  *
  * @since 12
  */
 typedef enum {
-    /** 弹性物理动效，滑动到边缘后可以根据初始速度或通过触摸事件继续滑动一段距离，松手后回弹。*/
+    /** Spring effect. When at one of the edges, the component can move beyond the bounds based on the
+     * initial speed or through touches, and produces a bounce effect when the user releases their finger.
+     */
     ARKUI_EDGE_EFFECT_SPRING = 0,
-    /** 阴影效果，滑动到边缘后会有圆弧状的阴影。*/
+    /** Fade effect. When at one of the edges, the component produces a fade effect. */
     ARKUI_EDGE_EFFECT_FADE,
-    /** 滑动到边缘后无效果。*/
+    /** No effect after the scrollbar is moved to the edge. */
     ARKUI_EDGE_EFFECT_NONE,
 } ArkUI_EdgeEffect;
 
 /**
- * @brief 定义列表项滚动结束对齐效果枚举值。
+ * @brief Enumerates the scroll directions for the <b><Scroll></b> component.
  *
  * @since 12
  */
 typedef enum {
-    /** 默认无项目滚动对齐效果。*/
+    /** Only vertical scrolling is supported. */
+    ARKUI_SCROLL_DIRECTION_VERTICAL = 0,
+    /** Only horizontal scrolling is supported. */
+    ARKUI_SCROLL_DIRECTION_HORIZONTAL,
+    /** Scrolling is not allowed. */
+    ARKUI_SCROLL_DIRECTION_NONE = 3,
+} ArkUI_ScrollDirection;
+
+/**
+ * @brief Enumerates the alignment modes of list items when scrolling ends.
+ *
+ * @since 12
+ */
+typedef enum {
+    /** No alignment. This is the default value. */
     ARKUI_SCROLL_SNAP_ALIGN_NONE = 0,
-    /** 视图中的第一项将在列表的开头对齐。*/
+    /** The first item in the view is aligned at the start of the list. */
     ARKUI_SCROLL_SNAP_ALIGN_START,
-    /** 视图中的中间项将在列表中心对齐。*/
+    /** The middle items in the view are aligned in the center of the list. */
     ARKUI_SCROLL_SNAP_ALIGN_CENTER,
-    /** 视图中的最后一项将在列表末尾对齐。*/
+    /** The last item in the view is aligned at the end of the list. */
     ARKUI_SCROLL_SNAP_ALIGN_END,
 } ArkUI_ScrollSnapAlign;
 
 /**
- * @brief 定义滚动条状态枚举值。
+ * @brief Enumerates the scrollbar display modes.
  *
  * @since 12
  */
 typedef enum {
-    /** 不显示。*/
+    /** Hide. */
     ARKUI_SCROLL_BAR_DISPLAY_MODE_OFF = 0,
-    /** 按需显示(触摸时显示，2s后消失)。*/
+    /** Display on demand (displays when the screen is touched and disappears after 2s). */
     ARKUI_SCROLL_BAR_DISPLAY_MODE_AUTO,
-    /** 常驻显示。*/
+    /** Always display. */
     ARKUI_SCROLL_BAR_DISPLAY_MODE_ON,
 } ArkUI_ScrollBarDisplayMode;
 
 /**
- * @brief 定义滚动方向和List组件排列方向枚举值。
+ * @brief Enumerates the scroll directions for the <b><List></b> component.
  *
  * @since 12
  */
 typedef enum {
-    /** 仅支持竖直方向滚动。*/
+    /** Only vertical scrolling is supported. */
     ARKUI_AXIS_VERTICAL = 0,
-    /** 仅支持水平方向滚动。*/
+    /** Only horizontal scrolling is supported. */
     ARKUI_AXIS_HORIZONTAL,
 } ArkUI_Axis;
 
 /**
- * @brief 定义列表是否吸顶和吸底枚举值。
+ * @brief Enumerates the modes for pinning the header to the top or the footer to the bottom.
  *
  * @since 12
  */
 typedef enum {
-    /** ListItemGroup的header不吸顶，footer不吸底。*/
+    /** In the list item group, the header is not pinned to the top, and the footer is not pinned to the bottom. */
     ARKUI_STICKY_STYLE_NONE = 0,
-    /** ListItemGroup的header吸顶，footer不吸底。*/
+    /** In the list item group, the header is pinned to the top, and the footer is not pinned to the bottom. */
     ARKUI_STICKY_STYLE_HEADER = 1,
-    /** ListItemGroup的footer吸底，header不吸顶。*/
+    /** In the list item group, the footer is pinned to the bottom, and the header is not pinned to the top. */
     ARKUI_STICKY_STYLE_FOOTER = 2,
-    /** ListItemGroup的footer吸底，header吸顶。*/
+    /** In the list item group, the footer is pinned to the bottom, and the header is pinned to the top. */
     ARKUI_STICKY_STYLE_BOTH = 3,
 } ArkUI_StickyStyle;
 
 
 /**
- * @brief 边框线条样式枚举值。
+ * @brief Enumerates the border styles.
  *
  * @since 12
  */
 typedef enum {
-    /** 显示为一条实线。 */
+    /** Solid border. */
     ARKUI_BORDER_STYLE_SOLID = 0,
-    /** 显示为一系列短的方形虚线。*/
+    /** Dashed border. */
     ARKUI_BORDER_STYLE_DASHED,
-    /** 显示为一系列圆点。*/
+    /** Dotted border. */
     ARKUI_BORDER_STYLE_DOTTED,
 } ArkUI_BorderStyle;
 
 /**
- * @brief 触摸测试控制枚举值。
+ * @brief Enumerates the hit test modes.
  *
  * @since 12
  */
 typedef enum {
-    /** 默认触摸测试效果。 */
+    /** Both the node and its child node respond to the hit test of a touch event,
+     * but its sibling node is blocked from the hit test.
+     */
     ARKUI_HIT_TEST_MODE_DEFAULT = 0,
-    /** 自身响应触摸测试。*/
+    /** The node responds to the hit test of a touch event, but its child node and sibling node are blocked from
+     * the hit test.
+     */
     ARKUI_HIT_TEST_MODE_BLOCK,
-    /** 自身和子节点都响应触摸测试。*/
+    /** Both the node and its child node respond to the hit test of a touch event, and its sibling node is also
+     * considered during the hit test.
+     */
     ARKUI_HIT_TEST_MODE_TRANSPARENT,
-    /** 自身不响应触摸测试。*/
+    /** The node does not respond to the hit test of a touch event. */
     ARKUI_HIT_TEST_MODE_NONE
 } ArkUI_HitTestMode;
 
 /**
- * @brief 阴影效果枚举值。
+ * @brief Enumerates the shadow styles.
  *
  * @since 12
  */
 typedef enum {
-    /** 超小阴影。 */
+    /** Mini shadow. */
     ARKUI_SHADOW_STYLE_OUTER_DEFAULT_XS = 0,
-    /** 小阴影。*/
+    /** Little shadow. */
     ARKUI_SHADOW_STYLE_OUTER_DEFAULT_SM,
-    /** 中阴影。*/
+    /** Medium shadow. */
     ARKUI_SHADOW_STYLE_OUTER_DEFAULT_MD,
-    /** 大阴影。*/
+    /** Large shadow. */
     ARKUI_SHADOW_STYLE_OUTER_DEFAULT_LG,
-    /** 浮动小阴影。*/
+    /** Floating small shadow. */
     ARKUI_SHADOW_STYLE_OUTER_FLOATING_SM,
-    /** 浮动中阴影。*/
+    /** Floating medium shadow. */
     ARKUI_SHADOW_STYLE_OUTER_FLOATING_MD,
 } ArkUI_ShadowStyle;
 
 /**
- * @brief 动画曲线枚举值。
+ * @brief Enumerates the animation curves.
  *
  * @since 12
  */
 typedef enum {
-    /** 动画从头到尾的速度都是相同。 */
+    /** The animation speed keeps unchanged. */
     ARKUI_CURVE_LINEAR = 0,
-    /** 动画以低速开始，然后加快，在结束前变慢。 */
+    /** The animation starts slowly, accelerates, and then slows down towards the end. */
     ARKUI_CURVE_EASE,
-    /** 动画以低速开始。 */
+    /** The animation starts at a low speed and then picks up speed until the end. */
     ARKUI_CURVE_EASE_IN,
-    /** 动画以低速结束。 */
+    /** The animation ends at a low speed. */
     ARKUI_CURVE_EASE_OUT,
-    /** 动画以低速开始和结束。 */
+    /** The animation starts and ends at a low speed. */
     ARKUI_CURVE_EASE_IN_OUT,
-    /** 动画标准曲线。 */
+    /** The animation uses the standard curve */
     ARKUI_CURVE_FAST_OUT_SLOW_IN,
-    /** 动画减速曲线。 */
+    /** The animation uses the deceleration curve. */
     ARKUI_CURVE_LINEAR_OUT_SLOW_IN,
-    /** 动画加速曲线。 */
+    /** The animation uses the acceleration curve. */
     ARKUI_CURVE_FAST_OUT_LINEAR_IN,
-    /** 动画急缓曲线。 */
+    /** The animation uses the extreme deceleration curve. */
     ARKUI_CURVE_EXTREME_DECELERATION,
-    /** 动画锐利曲线。 */
+    /** The animation uses the sharp curve. */
     ARKUI_CURVE_SHARP,
-    /** 动画节奏曲线。 */
+    /** The animation uses the rhythm curve. */
     ARKUI_CURVE_RHYTHM,
-    /** 动画平滑曲线。 */
+    /** The animation uses the smooth curve. */
     ARKUI_CURVE_SMOOTH,
-    /** 动画阻尼曲线。 */
+    /** The animation uses the friction curve */
     ARKUI_CURVE_FRICTION,
 } ArkUI_AnimationCurve;
 
 /**
- * @brief Swiper导航点箭头枚举值。
+ * @brief Enumerates arrow styles of the navigation point indicator.
  *
  * @since 12
  */
 typedef enum {
-    /** 不显示swiper中导航点箭头。 */
+    /** The arrow is not displayed for the navigation point indicator. */
     ARKUI_SWIPER_ARROW_HIDE = 0,
-    /** 显示swiper中导航点箭头。 */
+    /** The arrow is displayed for the navigation point indicator. */
     ARKUI_SWIPER_ARROW_SHOW,
-    /** 在hover状态下显示swiper中导航点箭头。 */
+    /** The arrow is displayed only when the mouse pointer hovers over the navigation point indicator. */
     ARKUI_SWIPER_ARROW_SHOW_ON_HOVER,
 } ArkUI_SwiperArrow;
 
 
 /**
- * @brief 定义无障碍重要性。
+ * @brief Enumerates the accessibility modes.
  *
  * @since 12
  */
 typedef enum {
-    /** 根据组件不同会转换为“yes”或者“no”。 */
-    ARKUI_ACCESSIBILITY_LEVEL_AUTO = 0,
-    /** 当前组件可被无障碍辅助服务所识别。*/
-    ARKUI_ACCESSIBILITY_LEVEL_YES,
-    /** 当前组件不可被无障碍辅助服务所识别。*/
-    ARKUI_ACCESSIBILITY_LEVEL_NO,
-    /** 当前组件及其所有子组件不可被无障碍辅助服务所识别。*/
-    ARKUI_ACCESSIBILITY_LEVEL_NO_HIDE_DESCENDANTS,
-} ArkUI_AccessibilityLevel;
+    /** Whether the component can be identified by the accessibility service is dependent on the component. */
+    ARKUI_ACCESSIBILITY_MODE_AUTO = 0,
+    /** The component can be identified by the accessibility service. */
+    ARKUI_ACCESSIBILITY_MODE_ENABLED,
+    /** The component cannot be identified by the accessibility service. */
+    ARKUI_ACCESSIBILITY_MODE_DISABLED,
+    /** The component and all its child components cannot be identified by the accessibility service. */
+    ARKUI_ACCESSIBILITY_MODE_DISABLED_FOR_DESCENDANTS,
+} ArkUI_AccessibilityMode;
 
 /**
- * @brief 定义组件支持设置文本是否可复制粘贴。
+ * @brief Defines whether copy and paste is allowed for text content.
  *
  * @since 12
  */
 typedef enum {
-    /** 不支持复制。 */
+    /** Copy is not allowed. */
     ARKUI_TEXT_COPY_OPTIONS_NONE = 0,
-    /** 支持应用内复制。*/
+    /** Intra-application copy is allowed. */
     ARKUI_TEXT_COPY_OPTIONS_IN_APP,
-    /** 支持设备内复制。*/
+    /** Intra-device copy is allowed. */
     ARKUI_TEXT_COPY_OPTIONS_LOCAL_DEVICE,
-    /** 支持跨设备复制。*/
+    /** Cross-device copy is allowed. */
     ARKUI_TEXT_COPY_OPTIONS_CROSS_DEVICE,
 } ArkUI_TextCopyOptions;
 
 
 /**
- * @brief 定义文本自适应高度的方式。
+ * @brief Defines how the adaptive height is determined for the text.
  *
  * @since 12
  */
 typedef enum {
-    /** 设置文本高度自适应方式为以MaxLines优先。 */
+    /** Prioritize the <b>maxLines</b> settings. */
     ARKUI_TEXT_HEIGHT_ADAPTIVE_POLICY_MAX_LINES_FIRST = 0,
-    /** 设置文本高度自适应方式为以缩小字体优先。*/
+    /** Prioritize the <b>minFontSize</b> settings. */
     ARKUI_TEXT_HEIGHT_ADAPTIVE_POLICY_MIN_FONT_SIZE_FIRST,
-    /** 设置文本高度自适应方式为以布局约束（高度）优先。*/
+    /** Prioritize the layout constraint settings in terms of height. */
     ARKUI_TEXT_HEIGHT_ADAPTIVE_POLICY_LAYOUT_CONSTRAINT_FIRST,
 } ArkUI_TextHeightAdaptivePolicy;
 
 
 /**
- * @brief 定义嵌套滚动选项。
+ * @brief Defines nested scrolling options.
  *
  * @since 12
  */
 typedef enum {
-    /** 只自身滚动，不与父组件联动。 */
+    /** The scrolling is contained within the component, and no scroll chaining occurs, that is, the parent component
+     * does not scroll when the component scrolling reaches the boundary.
+     */
     ARKUI_SCROLL_NESTED_MODE_SELF_ONLY = 0,
-    /** 自身先滚动，自身滚动到边缘以后父组件滚动。父组件滚动到边缘以后
-    如果父组件有边缘效果，则父组件触发边缘效果，否则子组件触发边缘效果。*/
+    /** The component scrolls first, and when it hits the boundary, the parent component scrolls.
+    * When the parent component hits the boundary, its edge effect is displayed. If no edge effect is specified for
+     * the parent component, the edge effect of the child component is displayed instead.
+     */
     ARKUI_SCROLL_NESTED_MODE_SELF_FIRST,
-    /** 父组件先滚动，父组件滚动到边缘以后自身滚动。
-    身滚动到边缘后，如果有边缘效果，会触发自身的边缘效果，否则触发父组件的边缘效果。*/
+    /** The parent component scrolls first, and when it hits the boundary, the component scrolls.
+     * When the component hits the boundary, its edge effect is displayed. If no edge effect is specified for the
+     * component, the edge effect of the parent component is displayed instead.
+     */
     ARKUI_SCROLL_NESTED_MODE_PARENT_FIRST,
-    /** 自身和父组件同时滚动，自身和父组件都到达边缘以后
-    如果自身有边缘效果，则自身触发边缘效果，否则父组件触发边缘效果。*/
+    /** The component and its parent component scroll at the same time. When both the component and its parent component
+     * hit the boundary, the edge effect of the component is displayed. If no edge effect is specified for the
+     * component, the edge effect of the parent component is displayed instead.
+     */
     ARKUI_SCROLL_NESTED_MODE_PARALLEL,
 } ArkUI_ScrollNestedMode;
 
 
 /**
- * @brief 定义滚动到的边缘位置。
+ * @brief Defines the edge to which the component scrolls.
  *
  * @since 12
  */
 typedef enum {
-    /** 竖直方向上边缘。*/
+    /** Top edge in the vertical direction. */
     ARKUI_SCROLL_EDGE_TOP = 0,
-    /** 竖直方向下边缘。*/
+    /** Bottom edge in the vertical direction. */
     ARKUI_SCROLL_EDGE_BOTTOM,
-    /** 水平方向起始位置。*/
+    /** Start position in the horizontal direction. */
     ARKUI_SCROLL_EDGE_START,
-    /** 水平方向末尾位置。*/
+    /** End position in the horizontal direction. */
     ARKUI_SCROLL_EDGE_END,
 } ArkUI_ScrollEdge;
 
 /**
- * @brief 定义滑块形状。
+ * @brief Enumerates the types of the slider in the block direction.
  *
  * @since 12
  */
 typedef enum {
-    /** 使用默认滑块（圆形）。*/
+    /** Round slider. */
     ARKUI_SLIDER_BLOCK_STYLE_DEFAULT = 0,
-    /** 使用图片资源作为滑块。*/
+    /** Slider with an image background. */
     ARKUI_SLIDER_BLOCK_STYLE_IMAGE,
-    /** 使用自定义形状作为滑块。*/
+    /** Slider in a custom shape. */
     ARKUI_SLIDER_BLOCK_STYLE_SHAPE,
 } ArkUI_SliderBlockStyle;
 
 /**
- * @brief 定义滑动条滑动方向。
+ * @brief Enumerates the scroll directions of the slider.
  *
  * @since 12
  */
 typedef enum {
-    /** 方向为纵向。*/
+    /** Vertical direction. */
     ARKUI_SLIDER_DIRECTION_VERTICAL = 0,
-    /** 方向为横向。*/
+    /** Horizontal direction. */
     ARKUI_SLIDER_DIRECTION_HORIZONTAL,
 } ArkUI_SliderDirection;
 
 /**
- * @brief 定义滑块与滑轨显示样式。
+ * @brief Enumerates the slider styles.
  *
  * @since 12
  */
 typedef enum {
-    /** 滑块在滑轨上。*/
+    /** The slider is on the slider track. */
     ARKUI_SLIDER_STYLE_OUT_SET = 0,
-    /** 滑块在滑轨内。*/
+    /** The slider is in the slider track. */
     ARKUI_SLIDER_STYLE_IN_SET,
 } ArkUI_SliderStyle;
 
 /**
- * @brief 定义CheckBox组件形状。
+ * @brief Enumerates the shapes of the check box
  *
  * @since 12
  */
 typedef enum {
-    /** 圆形。*/
+    /** Circle. */
     ArkUI_CHECKBOX_SHAPE_CIRCLE = 0,
-    /** 圆角方形。*/
+    /** Rounded square. */
     ArkUI_CHECKBOX_SHAPE_ROUNDED_SQUARE,
 } ArkUI_CheckboxShape;
 
 /**
- * @brief 定义动画播放模式。
+ * @brief Enumerates the animation playback modes.
  *
  * @since 12
  */
 typedef enum {
-    /** 动画正向播放。*/
+    /** The animation is played forwards. */
     ARKUI_ANIMATION_PLAY_MODE_NORMAL = 0,
-    /** 动画反向播放。*/
+    /** The animation is played reversely. */
     ARKUI_ANIMATION_PLAY_MODE_REVERSE,
-    /** 动画在奇数次（1、3、5...）正向播放，在偶数次（2、4、6...）反向播放。*/
+    /** The animation is played normally for an odd number of times (1, 3, 5...) and reversely for an even number of
+     * times (2, 4, 6...).
+     */
     ARKUI_ANIMATION_PLAY_MODE_ALTERNATE,
-    /** 动画在奇数次（1、3、5...）反向播放，在偶数次（2、4、6...）正向播放。*/
+    /** The animation is played reversely for an odd number of times (1, 3, 5...) and normally for an even number of
+     * times (2, 4, 6...).
+     */
     ARKUI_ANIMATION_PLAY_MODE_ALTERNATE_REVERSE,
 } ArkUI_AnimationPlayMode;
 
 /**
- * @brief 定义图片宽高样式。
+ * @brief Defines the image size.
  *
  * @since 12
  */
 typedef enum {
-    /** 保持原图的比例不变。*/
+    /** The original image aspect ratio is retained. */
     ARKUI_IMAGE_SIZE_AUTO = 0,
-    /** 默认值，保持宽高比进行缩小或者放大，使得图片两边都大于或等于显示边界。*/
+    /** Default value. The image is scaled with its aspect ratio retained for both sides to be greater than or equal to
+     * the display boundaries.
+     */
     ARKUI_IMAGE_SIZE_COVER,
-    /** 保持宽高比进行缩小或者放大，使得图片完全显示在显示边界内。*/
+    /** The image is scaled with its aspect ratio retained for the content to be completely displayed within the
+     * display boundaries.
+     */
     ARKUI_IMAGE_SIZE_CONTAIN,
 } ArkUI_ImageSize;
 
 /**
- * @brief 定义取色模式。
+ * @brief Enumerates the adaptive color modes.
  *
  * @since 12
  */
 typedef enum {
-    /** 不使用取色模糊。*/
+    /** Adaptive color mode is not used. */
     ARKUI_ADAPTIVE_COLOR_DEFAULT = 0,
-    /** 使用取色模糊。*/
+    /** Adaptive color mode is used. */
     ARKUI_ADAPTIVE_COLOR_AVERAGE,
 } ArkUI_AdaptiveColor;
 
 /**
- * @brief 定义深浅色模式。
+ * @brief Enumerates the color modes.
  *
  * @since 12
  */
 typedef enum {
-    /** 跟随系统深浅色模式。*/
+    /** Following the system color mode. */
     ARKUI_COLOR_MODE_SYSTEM = 0,
-    /** 固定使用浅色模式。*/
+    /** Light color mode. */
     ARKUI_COLOR_MODE_LIGHT,
-    /** 固定使用深色模式。 */
+    /** Dark color mode. */
     ARKUI_COLOR_MODE_DARK,
 } ArkUI_ColorMode;
 
 /**
- * @brief 定义背景模糊样式。
+ * @brief Enumerates the blur styles.
  *
  * @since 12
  */
 typedef enum {
-    /** 轻薄材质模糊。 */
+    /** Thin material. */
     ARKUI_BLUR_STYLE_THIN = 0,
-    /** 普通厚度材质模糊。 */
+    /** Regular material. */
     ARKUI_BLUR_STYLE_REGULAR,
-    /** 厚材质模糊。 */
+    /** Thick material. */
     ARKUI_BLUR_STYLE_THICK,
-    /** 近距景深模糊。 */
+    /** Material that creates the minimum depth of field effect. */
     ARKUI_BLUR_STYLE_BACKGROUND_THIN,
-    /** 中距景深模糊。 */
+    /** Material that creates a medium shallow depth of field effect. */
     ARKUI_BLUR_STYLE_BACKGROUND_REGULAR,
-    /** 远距景深模糊。 */
+    /** Material that creates a high shallow depth of field effect. */
     ARKUI_BLUR_STYLE_BACKGROUND_THICK,
-    /** 超远距景深模糊。 */
+    /** Material that creates the maximum depth of field effect. */
     ARKUI_BLUR_STYLE_BACKGROUND_ULTRA_THICK,
-    /** 关闭模糊。 */
+    /** No blur. */
     ARKUI_BLUR_STYLE_NONE,
-    /** 组件超轻薄材质模糊。 */
+    /** Component ultra-thin material. */
     ARKUI_BLUR_STYLE_COMPONENT_ULTRA_THIN,
-    /** 组件轻薄材质模糊。 */
+    /** Component thin material. */
     ARKUI_BLUR_STYLE_COMPONENT_THIN,
-    /** 组件普通材质模糊。 */
+    /** Component regular material. */
     ARKUI_BLUR_STYLE_COMPONENT_REGULAR,
-    /** 组件厚材质模糊。 */
+    /** Component thick material. */
     ARKUI_BLUR_STYLE_COMPONENT_THICK,
-    /** 组件超厚材质模糊。 */
+    /** Component ultra-thick material. */
     ARKUI_BLUR_STYLE_COMPONENT_ULTRA_THICK,
 } ArkUI_BlurStyle;
 
 /**
- * @brief 定义垂直对齐方式。
+ * @brief Enumerates the vertical alignment modes.
  *
  * @since 12
  */
 typedef enum {
-    /** 顶部对齐。 */
+    /** Top aligned. */
     ARKUI_VERTICAL_ALIGNMENT_TOP = 0,
-    /** 居中对齐，默认对齐方式。 */
+    /** Center aligned. This is the default alignment mode. */
     ARKUI_VERTICAL_ALIGNMENT_CENTER,
-    /** 底部对齐。 */
+    /** Bottom aligned. */
     ARKUI_VERTICAL_ALIGNMENT_BOTTOM,
 } ArkUI_VerticalAlignment;
 
 /**
- * @brief 定义语言方向对齐方式。
+ * @brief Enumerates the alignment mode in the horizontal direction.
  *
  * @since 12
  */
 typedef enum {
-    /** 按照语言方向起始端对齐。 */
+    /** Aligned with the start edge in the same direction as the language in use. */
     ARKUI_HORIZONTAL_ALIGNMENT_START = 0,
-    /** 居中对齐，默认对齐方式。 */
+    /** Center aligned. This is the default alignment mode. */
     ARKUI_HORIZONTAL_ALIGNMENT_CENTER,
-    /** 按照语言方向末端对齐。 */
+    /** Aligned with the end edge in the same direction as the language in use. */
     ARKUI_HORIZONTAL_ALIGNMENT_END,
 } ArkUI_HorizontalAlignment;
 
 /**
- * @brief 定义文本超长时的显示方式。
+ * @brief Enumerates the display modes when the text is too long.
  *
  * @since 12
  */
 typedef enum {
-    /** 文本超长时不裁剪显示。 */
+    /** Extra-long text is not clipped. */
     ARKUI_TEXT_OVERFLOW_NONE = 0,
-    /** 文本超长时进行裁剪显示。 */
+    /** Extra-long text is clipped. */
     ARKUI_TEXT_OVERFLOW_CLIP,
-    /** 文本超长时显示不下的文本用省略号代替。 */
+    /** An ellipsis (...) is used to represent text overflow. */
     ARKUI_TEXT_OVERFLOW_ELLIPSIS,
-    /** 文本超长时以跑马灯的方式展示。 */
+    /** Text continuously scrolls when text overflow occurs. */
     ARKUI_TEXT_OVERFLOW_MARQUEE,
 } ArkUI_TextOverflow;
 
 /**
- * @brief 定义图片基于文本的对齐方式。
+ * @brief Enumerates the alignment mode of the image with the text.
  *
  * @since 12
  */
 typedef enum {
-    /** 图片下边沿与文本BaseLine对齐。*/
+    /** The image is bottom aligned with the text baseline. */
     ARKUI_IMAGE_SPAN_ALIGNMENT_BASELINE = 0,
-    /** 图片下边沿与文本下边沿对齐。*/
+    /** The image is bottom aligned with the text. */
     ARKUI_IMAGE_SPAN_ALIGNMENT_BOTTOM,
-    /** 图片中间与文本中间对齐。*/
+    /** The image is centered aligned with the text. */
     ARKUI_IMAGE_SPAN_ALIGNMENT_CENTER,
-    /** 图片上边沿与文本上边沿对齐。 */
+    /** The image is top aligned with the text. */
     ARKUI_IMAGE_SPAN_ALIGNMENT_TOP,
 } ArkUI_ImageSpanAlignment;
 
 /**
- * @brief 定义image填充效果。
+ * @brief Defines how the image is resized to fit its container.
  *ImageSpanAlignment
  * @since 12
  */
 typedef enum {
-    /** 保持宽高比进行缩小或者放大，使得图片完全显示在显示边界内。 */
+    /** The image is scaled with its aspect ratio retained for the content to be completely displayed within the
+     * display boundaries.
+     */
     ARKUI_OBJECT_FIT_CONTAIN = 0,
-    /** 保持宽高比进行缩小或者放大，使得图片两边都大于或等于显示边界。*/
+    /** The image is scaled with its aspect ratio retained for both sides to be greater than or equal to the
+     * display boundaries.
+     */
     ARKUI_OBJECT_FIT_COVER,
-    /** 自适应显示。*/
+    /** The image is scaled automatically to fit the display area. */
     ARKUI_OBJECT_FIT_AUTO,
-    /** 不保持宽高比进行放大缩小，使得图片充满显示边界。*/
+    /** The image is scaled to fill the display area, and its aspect ratio is not retained. */
     ARKUI_OBJECT_FIT_FILL,
-    /** 保持宽高比显示，图片缩小或者保持不变。*/
+    /** The image content is displayed with its aspect ratio retained. The size is smaller than or equal to the
+     * original size.
+     */
     ARKUI_OBJECT_FIT_SCALE_DOWN,
-    /** 保持原有尺寸显示。*/
+    /** The original size is retained. */
     ARKUI_OBJECT_FIT_NONE,
 } ArkUI_ObjectFit;
 
 /**
- * @brief 定义图片插值效果。
+ * @brief Enumerates the image interpolation effect.
  *
  * @since 12
  */
 typedef enum {
-    /** 不使用图片插值。*/
+    /** No image interpolation. */
     ARKUI_IMAGE_INTERPOLATION_NONE = 0,
-    /** 低图片插值。*/
+    /** Low quality interpolation. */
     ARKUI_IMAGE_INTERPOLATION_LOW,
-    /** 中图片插值。*/
+    /** Medium quality interpolation. */
     ARKUI_IMAGE_INTERPOLATION_MEDIUM,
-    /** 高图片插值，插值质量最高。*/
+    /** High quality interpolation. This mode produces scaled images of the highest possible quality. */
     ARKUI_IMAGE_INTERPOLATION_HIGH,
 } ArkUI_ImageInterpolation;
 
 
 /**
- * @brief 混合模式枚举值。
+ * @brief Enumerates the blend modes.
  *
  * @since 12
  */
 typedef enum {
-    /** 将上层图像直接覆盖到下层图像上，不进行任何混合操作。 */
+    /** The top image is superimposed on the bottom image without any blending. */
     ARKUI_BLEND_MODE_NONE = 0,
-    /** 将源像素覆盖的目标像素清除为完全透明。 */
+    /** The target pixels covered by the source pixels are erased by being turned to completely transparent. */
     ARKUI_BLEND_MODE_CLEAR,
-    /** r = s，只显示源像素。 */
+    /** r = s: Only the source pixels are displayed. */
     ARKUI_BLEND_MODE_SRC,
-    /** r = d，只显示目标像素。 */
+    /** r = d: Only the target pixels are displayed. */
     ARKUI_BLEND_MODE_DST,
-    /** r = s + (1 - sa) * d，将源像素按照透明度进行混合，覆盖在目标像素上。 */
+    /** r = s + (1 - sa) * d: The source pixels are blended based on opacity and cover the target pixels. */
     ARKUI_BLEND_MODE_SRC_OVER,
-    /** r = d + (1 - da) * s，将目标像素按照透明度进行混合，覆盖在源像素上。 */
+    /** r = d + (1 - da) * s: The target pixels are blended based on opacity and cover on the source pixels. */
     ARKUI_BLEND_MODE_DST_OVER,
-    /** r = s * da，只显示源像素中与目标像素重叠的部分。 */
+    /** r = s * da: Only the part of the source pixels that overlap with the target pixels is displayed. */
     ARKUI_BLEND_MODE_SRC_IN,
-    /** r = d * sa，只显示目标像素中与源像素重叠的部分。 */
+    /** r = d * sa: Only the part of the target pixels that overlap with the source pixels is displayed. */
     ARKUI_BLEND_MODE_DST_IN,
-    /** r = s * (1 - da)，只显示源像素中与目标像素不重叠的部分。 */
+    /** r = s * (1 - da): Only the part of the source pixels that do not overlap with the target pixels is displayed. */
     ARKUI_BLEND_MODE_SRC_OUT,
-    /** r = d * (1 - sa)，只显示目标像素中与源像素不重叠的部分。 */
+    /** r = d * (1 - sa): Only the part of the target pixels that do not overlap with the source pixels is displayed. */
     ARKUI_BLEND_MODE_DST_OUT,
-    /** r = s * da + d * (1 - sa)，在源像素和目标像素重叠的地方绘制源像素，在源像素和目标像素不重叠的地方绘制目标像素。
+    /** r = s * da + d * (1 - sa): The part of the source pixels that overlap with the target pixels is displayed and
+     * the part of the target pixels that do not overlap with the source pixels are displayed.
      */
     ARKUI_BLEND_MODE_SRC_ATOP,
-    /** r = d * sa + s * (1 - da)，在源像素和目标像素重叠的地方绘制目标像素，在源像素和目标像素不重叠的地方绘制源像素。
+    /** r = d * sa + s * (1 - da): The part of the target pixels that overlap with the source pixels and the part of
+     * the source pixels that do not overlap with the target pixels are displayed.
      */
     ARKUI_BLEND_MODE_DST_ATOP,
-    /** r = s * (1 - da) + d * (1 - sa)，只显示源像素与目标像素不重叠的部分。 */
+    /** r = s * (1 - da) + d * (1 - sa): Only the non-overlapping part between the source pixels and the target pixels
+     * is displayed.
+     */
     ARKUI_BLEND_MODE_XOR,
-    /** r = min(s + d, 1)，将源像素值与目标像素值相加，并将结果作为新的像素值。 */
+    /** r = min(s + d, 1): New pixels resulting from adding the source pixels to the target pixels are displayed. */
     ARKUI_BLEND_MODE_PLUS,
-    /** r = s * d，将源像素与目标像素进行乘法运算，并将结果作为新的像素值。 */
+    /** r = s * d: New pixels resulting from multiplying the source pixels with the target pixels are displayed. */
     ARKUI_BLEND_MODE_MODULATE,
-    /** r = s + d - s * d，将两个图像的像素值相加，然后减去它们的乘积来实现混合。 */
+    /** r = s + d - s * d: Pixels are blended by adding the source pixels to the target pixels and subtracting the
+     * product of their multiplication.
+     */
     ARKUI_BLEND_MODE_SCREEN,
-    /** 根据目标像素来决定使用MULTIPLY混合模式还是SCREEN混合模式。 */
+    /** The MULTIPLY or SCREEN mode is used based on the target pixels. */
     ARKUI_BLEND_MODE_OVERLAY,
-    /** rc = s + d - max(s * da, d * sa), ra = kSrcOver，当两个颜色重叠时，较暗的颜色会覆盖较亮的颜色。 */
+    /** rc = s + d - max(s * da, d * sa), ra = kSrcOver: When two colors overlap, whichever is darker is used. */
     ARKUI_BLEND_MODE_DARKEN,
     /** rc = s + d - min(s * da, d * sa), ra =
-       kSrcOver，将源图像和目标图像中的像素进行比较，选取两者中较亮的像素作为最终的混合结果。 */
+     * kSrcOver: The final pixels are composed of the lightest values of pixels.
+     */
     ARKUI_BLEND_MODE_LIGHTEN,
-    /** 使目标像素变得更亮来反映源像素。 */
+    /** The colors of the target pixels are lightened to reflect the source pixels. */
     ARKUI_BLEND_MODE_COLOR_DODGE,
-    /** 使目标像素变得更暗来反映源像素。 */
+    /** The colors of the target pixels are darkened to reflect the source pixels. */
     ARKUI_BLEND_MODE_COLOR_BURN,
-    /** 根据源像素的值来决定目标像素变得更亮或者更暗。根据源像素来决定使用MULTIPLY混合模式还是SCREEN混合模式。 */
+    /** The MULTIPLY or SCREEN mode is used, depending on the source pixels. */
     ARKUI_BLEND_MODE_HARD_LIGHT,
-    /** 根据源像素来决定使用LIGHTEN混合模式还是DARKEN混合模式。 */
+    /** The LIGHTEN or DARKEN mode is used, depending on the source pixels. */
     ARKUI_BLEND_MODE_SOFT_LIGHT,
     /** rc = s + d - 2 * (min(s * da, d * sa)), ra =
-       kSrcOver，对比源像素和目标像素，亮度更高的像素减去亮度更低的像素，产生高对比度的效果。 */
+       kSrcOver: The final pixel is the result of subtracting the darker of the two pixels (source and target) from
+       the lighter one. */
     ARKUI_BLEND_MODE_DIFFERENCE,
-    /** rc = s + d - two(s * d), ra = kSrcOver，对比源像素和目标像素，亮度更高的像素减去亮度更低的像素，产生柔和的效果。
+    /** rc = s + d - two(s * d), ra = kSrcOver: The final pixel is similar to <b>DIFFERENCE</b>, but with less contrast.
      */
     ARKUI_BLEND_MODE_EXCLUSION,
-    /** r = s * (1 - da) + d * (1 - sa) + s * d，将源图像与目标图像进行乘法混合，得到一张新的图像。	 */
+    /** r = s * (1 - da) + d * (1 - sa) + s * d: The final pixel is the result of multiplying the source pixel
+     *  by the target pixel.	 */
     ARKUI_BLEND_MODE_MULTIPLY,
-    /** 保留源图像的亮度和饱和度，但会使用目标图像的色调来替换源图像的色调。 */
+    /** The resultant image is created with the luminance and saturation of the source image and the hue of the target
+     *  image. */
     ARKUI_BLEND_MODE_HUE,
-    /** 保留目标像素的亮度和色调，但会使用源像素的饱和度来替换目标像素的饱和度。 */
+    /** The resultant image is created with the luminance and hue of the target image and the saturation of the source
+     *  image. */
     ARKUI_BLEND_MODE_SATURATION,
-    /** 保留源像素的饱和度和色调，但会使用目标像素的亮度来替换源像素的亮度。 */
+    /** The resultant image is created with the saturation and hue of the source image and the luminance of the target
+     *  image. */
     ARKUI_BLEND_MODE_COLOR,
-    /** 保留目标像素的色调和饱和度，但会用源像素的亮度替换目标像素的亮度。 */
+    /** The resultant image is created with the saturation and hue of the target image and the luminance of the source
+     *  image. */
     ARKUI_BLEND_MODE_LUMINOSITY,
 } ArkUI_BlendMode;
 
 /**
- * @brief 设置容器元素内主轴方向上的布局枚举值。
+ * @brief Enumerates the modes in which components are laid out along the main axis of the container.
  *
  * @since 12
  */
 typedef enum {
-    /** 元素从左到右布局。 */
+    /** Components are arranged from left to right. */
     ARKUI_DIRECTION_LTR = 0,
-    /** 元素从右到左布局。 */
+    /** Components are arranged from right to left. */
     ARKUI_DIRECTION_RTL,
-    /** 使用系统默认布局方向。 */
+    /** The default layout direction is used. */
     ARKUI_DIRECTION_AUTO = 3,
 } ArkUI_Direction;
 
 /**
- * @brief 设置子组件在父容器交叉轴的对齐格式枚举值。
+ * @brief Enumerates the modes in which components are laid out along the cross axis of the container.
  *
  * @since 12
  */
 typedef enum {
-    /** 使用Flex容器中默认配置。 */
-    ARKUI_ITEM_ALIGN_AUTO = 0,
-    /** 元素在Flex容器中，交叉轴方向首部对齐。 */
-    ARKUI_ITEM_ALIGN_START,
-    /** 元素在Flex容器中，交叉轴方向居中对齐。 */
-    ARKUI_ITEM_ALIGN_CENTER,
-    /** 元素在Flex容器中，交叉轴方向底部对齐。 */
-    ARKUI_ITEM_ALIGN_END,
-    /** 元素在Flex容器中，交叉轴方向拉伸填充。 */
-    ARKUI_ITEM_ALIGN_STRETCH,
-    /** 元素在Flex容器中，交叉轴方向文本基线对齐。 */
-    ARKUI_ITEM_ALIGN_BASELINE,
-} ArkUI_ItemAlign;
+    /** The default configuration in the container is used. */
+    ARKUI_ITEM_ALIGNMENT_AUTO = 0,
+    /** The items in the container are aligned with the cross-start edge. */
+    ARKUI_ITEM_ALIGNMENT_START,
+    /** The items in the container are centered along the cross axis. */
+    ARKUI_ITEM_ALIGNMENT_CENTER,
+    /** The items in the container are aligned with the cross-end edge. */
+    ARKUI_ITEM_ALIGNMENT_END,
+    /** The items in the container are stretched and padded along the cross axis. */
+    ARKUI_ITEM_ALIGNMENT_STRETCH,
+    /** The items in the container are aligned in such a manner that their text baselines are aligned along the
+     * cross axis.
+     */
+    ARKUI_ITEM_ALIGNMENT_BASELINE,
+} ArkUI_ItemAlignment;
 
 /**
- * @brief 前景色枚举值。
+ * @brief Enumerates the foreground colors.
  *
  * @since 12
  */
 typedef enum {
-    /** 前景色为控件背景色的反色。 */
+    /** The foreground colors are the inverse of the component background colors. */
     ARKUI_COLOR_STRATEGY_INVERT = 0,
-    /** 控件背景阴影色为控件背景阴影区域的平均色。 */
+    /** The shadow colors of the component are the average color obtained from the component background shadow area. */
     ARKUI_COLOR_STRATEGY_AVERAGE,
-    /** 控件背景阴影色为控件背景阴影区域的主色。 */
+    /** The shadow colors of the component are the primary color obtained from the component background shadow area. */
     ARKUI_COLOR_STRATEGY_PRIMARY,
 } ArkUI_ColorStrategy;
 
 /**
- * @brief 定义垂直方向对齐方式。
+ * @brief Enumerates the vertical alignment modes.
  *
  * @since 12
  */
 typedef enum {
-    /** 主轴方向首端对齐。 */
-    ARKUI_FLEX_ALIGN_START = 1,
-    /** 主轴方向中心对齐。 */
-    ARKUI_FLEX_ALIGN_CENTER = 2,
-    /** 主轴方向尾部对齐。 */
-    ARKUI_FLEX_ALIGN_END = 3,
-    /** Flex主轴方向均匀分配弹性元素，相邻元素之间距离相同，第一个元素行首对齐，最后的元素行尾对齐。 */
-    ARKUI_FLEX_ALIGN_SPACE_BETWEEN = 6,
-    /** Flex主轴方向均匀分配弹性元素，相邻元素之间距离相同，第一个元素到行首的距离时相邻元素间距离的一半。 */
-    ARKUI_FLEX_ALIGN_SPACE_AROUND = 7,
-    /** Flex主轴方向均匀分配弹性元素，相邻元素之间距离、第一个元素到行首的距离和最后的元素到行尾的距离均相等。 */
-    ARKUI_FLEX_ALIGN_SPACE_EVENLY = 8,
-} ArkUI_FlexAlign;
+    /** The child components are aligned with the start edge of the main axis. */
+    ARKUI_FLEX_ALIGNMENT_START = 1,
+    /** The child components are aligned in the center of the main axis. */
+    ARKUI_FLEX_ALIGNMENT_CENTER = 2,
+    /** The child components are aligned with the end edge of the main axis. */
+    ARKUI_FLEX_ALIGNMENT_END = 3,
+    /** The child components are evenly distributed along the main axis. The space between any two adjacent components
+     * is the same. The first component is aligned with the main-start, and the last component is aligned with
+     * the main-end.
+     */
+    ARKUI_FLEX_ALIGNMENT_SPACE_BETWEEN = 6,
+    /** The child components are evenly distributed along the main axis. The space between any two adjacent components
+     * is the same. The space between the first component and main-start, and that between the last component and
+     * cross-main are both half the size of the space between two adjacent components.
+     */
+    ARKUI_FLEX_ALIGNMENT_SPACE_AROUND = 7,
+    /** The child components are evenly distributed along the main axis. The space between the first component
+     * and main-start, the space between the last component and main-end, and the space between any two adjacent
+     * components are the same.
+     */
+    ARKUI_FLEX_ALIGNMENT_SPACE_EVENLY = 8,
+} ArkUI_FlexAlignment;
 
 /**
- * @brief 定义Flex容器的主轴方向。
+ * @brief Enumerates the directions of the main axis in the flex container.
  *
  * @since 12
  */
 typedef enum {
-    /** 主轴与行方向一致。 */
+    /** The child components are arranged in the same direction as the main axis runs along the rows. */
     ARKUI_FLEX_DIRECTION_ROW = 0,
-    /** 主轴与列方向一致。 */
+    /** The child components are arranged in the same direction as the main axis runs down the columns. */
     ARKUI_FLEX_DIRECTION_COLUMN,
-    /** 主轴与行方向相反。 */
+    /** The child components are arranged opposite to the <b>ROW</b> direction. */
     ARKUI_FLEX_DIRECTION_ROW_REVERSE,
-    /** 主轴与列方向相反。 */
+    /** The child components are arranged opposite to the <b>COLUMN</b> direction. */
     ARKUI_FLEX_DIRECTION_COLUMN_REVERSE,
 } ArkUI_FlexDirection;
 
 /**
- * @brief 定义Flex行列布局模式模式。
+ * @brief Defines whether the flex container has a single line or multiple lines.
  *
  * @since 12
  */
 typedef enum {
-    /** 单行/单列布局，子项不能超出容器。 */
+    /** The child components in the flex container are arranged in a single line, and they cannot overflow. */
     ARKUI_FLEX_WRAP_NO_WRAP = 0,
-    /** 多行/多列布局，子项允许超出容器。 */
+    /** The child components in the flex container are arranged in multiple lines, and they may overflow. */
     ARKUI_FLEX_WRAP_WRAP,
-    /** 反向多行/多列布局，子项允许超出容器。 */
+    /** The child components in the flex container are reversely arranged in multiple lines, and they may overflow. */
     ARKUI_FLEX_WRAP_WRAP_REVERSE,
 } ArkUI_FlexWrap;
 
 /**
- * @brief 控制组件的显隐枚举值。
+ * @brief Enumerates the visibility values.
  *
  * @since 12
  */
 typedef enum {
-    /** 显示。 */
+    /** The component is visible. */
     ARKUI_VISIBILITY_VISIBLE = 0,
-    /** 隐藏，但参与布局进行占位。 */
+    /** The component is hidden, and a placeholder is used for it in the layout. */
     ARKUI_VISIBILITY_HIDDEN,
-    /** 隐藏，但不参与布局，不进行占位。 */
+    /** The component is hidden. It is not involved in the layout, and no placeholder is used for it. */
     ARKUI_VISIBILITY_NONE,
 } ArkUI_Visibility;
 
 /**
- * @brief 日历选择器与入口组件对齐方式。
+ * @brief Enumerates the alignment modes between the calendar picker and the entry component.
  *
  * @since 12
  */
 typedef enum {
-    /** 选择器和入口组件左对齐方式。 */
+    /** Left aligned. */
     ARKUI_CALENDAR_ALIGNMENT_START = 0,
-    /** 选择器和入口组件居中对齐方式。 */
+    /** Center aligned. */
     ARKUI_CALENDAR_ALIGNMENT_CENTER,
-    /** 选择器和入口组件右对齐方式。 */
+    /** Right aligned. */
     ARKUI_CALENDAR_ALIGNMENT_END,
 } ArkUI_CalendarAlignment;
 
 /**
- * @brief 遮罩类型枚举。
+ * @brief Enumerates the mask types.
  *
  * @since 12
  */
 typedef enum {
-    /** 矩形类型。 */
-    ARKUI_MASK_TYPE_RECT = 0,
-    /** 圆形类型。 */
+    /** Rectangle. */
+    ARKUI_MASK_TYPE_RECTANGLE = 0,
+    /** Circle. */
     ARKUI_MASK_TYPE_CIRCLE,
-    /** 椭圆形类型。 */
+    /** Ellipse. */
     ARKUI_MASK_TYPE_ELLIPSE,
-    /** 路径类型。 */
+    /** Path. */
     ARKUI_MASK_TYPE_PATH,
-    /** 进度类型。 */
+    /** Progress indicator. */
     ARKUI_MASK_TYPE_PROGRESS,
 } ArkUI_MaskType;
 
 /**
- * @brief 裁剪类型枚举。
+ * @brief Enumerates the clipping region types.
  *
  * @since 12
  */
 typedef enum {
-    /** 矩形类型。 */
-    ARKUI_CLIP_TYPE_RECT = 0,
-    /** 圆形类型。 */
+    /** Rectangle. */
+    ARKUI_CLIP_TYPE_RECTANGLE = 0,
+    /** Circle. */
     ARKUI_CLIP_TYPE_CIRCLE,
-    /** 椭圆形类型。 */
+    /** Ellipse. */
     ARKUI_CLIP_TYPE_ELLIPSE,
-    /** 路径类型。 */
+    /** Path. */
     ARKUI_CLIP_TYPE_PATH,
 } ArkUI_ClipType;
 
 /**
- * @brief 定义渐变色结构。
+ * @brief Defines the gradient color stop structure.
  *
  * @since 12
  */
 typedef struct {
-    /** 颜色数组。*/
+    /** Color array. */
     const uint32_t* colors;
-    /** 位置数组。*/
+    /** Position array. */
     float* stops;
-    /** 数组长度。*/
+    /** Length array. */
     int size;
 } ArkUI_ColorStop;
 
 /**
- * @brief 自定义形状。
+ * @brief Enumerates the custom shapes.
  *
  * @since 12
  */
 typedef enum {
-    /** 矩形类型。 */
-    ARKUI_SHAPE_TYPE_RECT = 0,
-    /** 圆形类型。 */
+    /** Rectangle. */
+    ARKUI_SHAPE_TYPE_RECTANGLE = 0,
+    /** Circle. */
     ARKUI_SHAPE_TYPE_CIRCLE,
-    /** 椭圆形类型。 */
+    /** Ellipse. */
     ARKUI_SHAPE_TYPE_ELLIPSE,
-    /** 路径类型。 */
+    /** Path. */
     ARKUI_SHAPE_TYPE_PATH,
 } ArkUI_ShapeType;
+
+/**
+ * @brief Enumerates the gradient directions.
+ *
+ * @since 12
+ */
+typedef enum {
+    /** From right to left. */
+    ARKUI_LINEAR_GRADIENT_DIRECTION_LEFT = 0,
+    /** From bottom to top. */
+    ARKUI_LINEAR_GRADIENT_DIRECTION_TOP,
+    /** From left to right. */
+    ARKUI_LINEAR_GRADIENT_DIRECTION_RIGHT,
+    /** From top to bottom. */
+    ARKUI_LINEAR_GRADIENT_DIRECTION_BOTTOM,
+    /** From lower right to upper left. */
+    ARKUI_LINEAR_GRADIENT_DIRECTION_LEFT_TOP,
+    /** From upper right to lower left. */
+    ARKUI_LINEAR_GRADIENT_DIRECTION_LEFT_BOTTOM,
+    /** From lower left to upper right. */
+    ARKUI_LINEAR_GRADIENT_DIRECTION_RIGHT_TOP,
+    /** From upper left to lower right. */
+    ARKUI_LINEAR_GRADIENT_DIRECTION_RIGHT_BOTTOM,
+    /** No gradient. */
+    ARKUI_LINEAR_GRADIENT_DIRECTION_NONE,
+    /** 自定义渐变方向. */
+    ARKUI_LINEAR_GRADIENT_DIRECTION_CUSTOM,
+} ArkUI_LinearGradientDirection;
+
+/**
+ * @brief Enumerates the word break rules.
+ *
+ * @since 12
+ */
+typedef enum {
+    /** Word breaks can occur between any two characters for Chinese, Japanese, and Korean (CJK) text, but can occur
+     *  only at a space character for non-CJK text (such as English). */
+    ARKUI_WORD_BREAK_NORMAL = 0,
+    /** Word breaks can occur between any two characters for non-CJK text. CJK text behavior is the same as for
+     *  <b>NORMAL</b>. */
+    ARKUI_WORD_BREAK_BREAK_ALL,
+    /** This option has the same effect as <b>BREAK_ALL</b> for non-CJK text, except that if it preferentially wraps
+     *  lines at appropriate characters (for example, spaces) whenever possible.
+        CJK text behavior is the same as for <b>NORMAL</b>. */
+    ARKUI_WORD_BREAK_BREAK_WORD,
+} ArkUI_WordBreak;
+
+/**
+ * @brief Enumerates the ellipsis positions.
+ *
+ * @since 12
+ */
+typedef enum {
+    /** An ellipsis is used at the start of the line of text. */
+    ARKUI_ELLIPSIS_MODE_START = 0,
+    /** An ellipsis is used at the center of the line of text. */
+    ARKUI_ELLIPSIS_MODE_CENTER,
+    /** An ellipsis is used at the end of the line of text. */
+    ARKUI_ELLIPSIS_MODE_END,
+} ArkUI_EllipsisMode;
+
+/**
+ * @brief Enumerates the image rendering modes.
+ *
+ * @since 12
+ */
+typedef enum {
+    /** Render image pixels as they are in the original source image. */
+    ARKUI_IMAGE_RENDER_MODE_ORIGINAL = 0,
+    /** Render image pixels to create a monochrome template image. */
+    ARKUI_IMAGE_RENDER_MODE_TEMPLATE,
+} ArkUI_ImageRenderMode;
+
+/**
+ * @brief Enumerates the slide-in and slide-out positions of the component from the screen edge during transition.
+ *
+ * @since 12
+ */
+typedef enum {
+    /** Top edge of the window. */
+    ARKUI_TRANSITION_EDGE_TOP = 0,
+    /** Bottom edge of the window. */
+    ARKUI_TRANSITION_EDGE_BOTTOM,
+    /** Left edge of the window. */
+    ARKUI_TRANSITION_EDGE_START,
+    /** Right edge of the window. */
+    ARKUI_TRANSITION_EDGE_END,
+} ArkUI_TransitionEdge;
+
+/**
+ * @brief Defines a mask area.
+ *
+ * @since 12
+ */
+typedef struct {
+    /** X coordinate of the mask area. */
+    float x;
+    /** Y coordinate of the mask area. */
+    float y;
+    /** Width of the mask area. */
+    float width;
+    /** Height of the mask area. */
+    float height;
+} ArkUI_Rect;
+
 #ifdef __cplusplus
 };
 #endif

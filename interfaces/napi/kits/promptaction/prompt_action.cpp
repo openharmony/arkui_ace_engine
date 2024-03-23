@@ -25,6 +25,8 @@
 #include "base/utils/system_properties.h"
 #include "bridge/common/utils/engine_helper.h"
 #include "core/common/ace_engine.h"
+#include "core/components/common/properties/shadow.h"
+#include "core/components/theme/shadow_theme.h"
 #include "core/components_ng/pattern/toast/toast_layout_property.h"
 
 namespace OHOS::Ace::Napi {
@@ -71,6 +73,38 @@ bool HasProperty(napi_env env, napi_value value, const std::string& targetStr)
     return hasProperty;
 }
 
+bool ParseNapiDimension(napi_env env, CalcDimension& result, napi_value napiValue, DimensionUnit defaultUnit)
+{
+    napi_valuetype valueType = napi_undefined;
+    napi_typeof(env, napiValue, &valueType);
+    if (valueType == napi_number) {
+        double value = 0;
+        napi_get_value_double(env, napiValue, &value);
+        result.SetUnit(defaultUnit);
+        result.SetValue(value);
+        return true;
+    } else if (valueType == napi_string) {
+        std::string valueString;
+        if (!GetNapiString(env, napiValue, valueString, valueType)) {
+            return false;
+        }
+        result = StringUtils::StringToCalcDimension(valueString, false, defaultUnit);
+        return true;
+    } else if (valueType == napi_object) {
+        ResourceInfo recv;
+        std::string parameterStr;
+        if (!ParseResourceParam(env, napiValue, recv)) {
+            return false;
+        }
+        if (!ParseString(recv, parameterStr)) {
+            return false;
+        }
+        result = StringUtils::StringToDimensionWithUnit(parameterStr, defaultUnit);
+        return true;
+    }
+    return false;
+}
+
 napi_value GetReturnObject(napi_env env, std::string callbackString)
 {
     napi_value result = nullptr;
@@ -98,9 +132,13 @@ napi_value JSPromptShowToast(napi_env env, napi_callback_info info)
     napi_value durationNApi = nullptr;
     napi_value bottomNApi = nullptr;
     napi_value showModeNApi = nullptr;
+    napi_value alignmentApi = nullptr;
+    napi_value offsetApi = nullptr;
     std::string messageString;
     std::string bottomString;
     NG::ToastShowMode showMode = NG::ToastShowMode::DEFAULT;
+    int32_t alignment = -1;
+    std::optional<DimensionOffset> offset;
     napi_valuetype valueType = napi_undefined;
     napi_typeof(env, argv, &valueType);
     if (valueType == napi_object) {
@@ -113,6 +151,8 @@ napi_value JSPromptShowToast(napi_env env, napi_callback_info info)
         napi_get_named_property(env, argv, "duration", &durationNApi);
         napi_get_named_property(env, argv, "bottom", &bottomNApi);
         napi_get_named_property(env, argv, "showMode", &showModeNApi);
+        napi_get_named_property(env, argv, "alignment", &alignmentApi);
+        napi_get_named_property(env, argv, "offset", &offsetApi);
     } else {
         NapiThrow(env, "The type of parameters is incorrect.", ERROR_CODE_PARAM_INVALID);
         return nullptr;
@@ -180,7 +220,6 @@ napi_value JSPromptShowToast(napi_env env, napi_callback_info info)
         }
     }
 
-    // parse alignment
     napi_typeof(env, showModeNApi, &valueType);
     if (valueType == napi_number) {
         int32_t num = -1;
@@ -188,6 +227,26 @@ napi_value JSPromptShowToast(napi_env env, napi_callback_info info)
         if (num >= 0 && num <= static_cast<int32_t>(NG::ToastShowMode::TOP_MOST)) {
             showMode = static_cast<NG::ToastShowMode>(num);
         }
+    }
+
+    // parse alignment
+    napi_typeof(env, alignmentApi, &valueType);
+    if (valueType == napi_number) {
+        napi_get_value_int32(env, alignmentApi, &alignment);
+    }
+
+    // parse offset
+    napi_typeof(env, offsetApi, &valueType);
+    if (valueType == napi_object) {
+        napi_value dxApi = nullptr;
+        napi_value dyApi = nullptr;
+        napi_get_named_property(env, offsetApi, "dx", &dxApi);
+        napi_get_named_property(env, offsetApi, "dy", &dyApi);
+        CalcDimension dx;
+        CalcDimension dy;
+        ParseNapiDimension(env, dx, dxApi, DimensionUnit::VP);
+        ParseNapiDimension(env, dy, dyApi, DimensionUnit::VP);
+        offset = DimensionOffset { dx, dy };
     }
 #ifdef OHOS_STANDARD_SYSTEM
     if ((SystemProperties::GetExtSurfaceEnabled() || !ContainerIsService()) && !ContainerIsScenceBoard() &&
@@ -198,10 +257,10 @@ napi_value JSPromptShowToast(napi_env env, napi_callback_info info)
             return nullptr;
         }
         TAG_LOGD(AceLogTag::ACE_DIALOG, "before delegate show toast");
-        delegate->ShowToast(messageString, duration, bottomString, showMode);
+        delegate->ShowToast(messageString, duration, bottomString, showMode, alignment, offset);
     } else if (SubwindowManager::GetInstance() != nullptr) {
         TAG_LOGD(AceLogTag::ACE_DIALOG, "before subwindow manager show toast");
-        SubwindowManager::GetInstance()->ShowToast(messageString, duration, bottomString, showMode);
+        SubwindowManager::GetInstance()->ShowToast(messageString, duration, bottomString, showMode, alignment, offset);
     }
 #else
     auto delegate = EngineHelper::GetCurrentDelegateSafely();
@@ -209,7 +268,7 @@ napi_value JSPromptShowToast(napi_env env, napi_callback_info info)
         NapiThrow(env, "UI execution context not found.", ERROR_CODE_INTERNAL_ERROR);
         return nullptr;
     }
-    delegate->ShowToast(messageString, duration, bottomString, NG::ToastShowMode::DEFAULT);
+    delegate->ShowToast(messageString, duration, bottomString, NG::ToastShowMode::DEFAULT, alignment, offset);
 #endif
     return nullptr;
 }
@@ -226,6 +285,15 @@ struct PromptAsyncContext {
     napi_value offsetApi = nullptr;
     napi_value maskRectApi = nullptr;
     napi_value builder = nullptr;
+    napi_value onWillDismiss = nullptr;
+    napi_value backgroundColorApi = nullptr;
+    napi_value borderWidthApi = nullptr;
+    napi_value borderColorApi = nullptr;
+    napi_value borderStyleApi = nullptr;
+    napi_value borderRadiusApi = nullptr;
+    napi_value shadowApi = nullptr;
+    napi_value widthApi = nullptr;
+    napi_value heightApi = nullptr;
     napi_ref callbackSuccess = nullptr;
     napi_ref callbackCancel = nullptr;
     napi_ref callbackComplete = nullptr;
@@ -242,6 +310,7 @@ struct PromptAsyncContext {
     napi_deferred deferred = nullptr;
     napi_ref callbackRef = nullptr;
     napi_ref builderRef = nullptr;
+    napi_ref onWillDismissRef = nullptr;
     int32_t callbackType = -1;
     int32_t successType = -1;
     bool valid = true;
@@ -303,38 +372,6 @@ bool ParseButtons(napi_env env, std::shared_ptr<PromptAsyncContext>& context, in
     return true;
 }
 
-bool ParseNapiDimension(napi_env env, CalcDimension& result, napi_value napiValue, DimensionUnit defaultUnit)
-{
-    napi_valuetype valueType = napi_undefined;
-    napi_typeof(env, napiValue, &valueType);
-    if (valueType == napi_number) {
-        double value = 0;
-        napi_get_value_double(env, napiValue, &value);
-        result.SetUnit(defaultUnit);
-        result.SetValue(value);
-        return true;
-    } else if (valueType == napi_string) {
-        std::string valueString;
-        if (!GetNapiString(env, napiValue, valueString, valueType)) {
-            return false;
-        }
-        result = StringUtils::StringToCalcDimension(valueString, false, defaultUnit);
-        return true;
-    } else if (valueType == napi_object) {
-        ResourceInfo recv;
-        std::string parameterStr;
-        if (!ParseResourceParam(env, napiValue, recv)) {
-            return false;
-        }
-        if (!ParseString(recv, parameterStr)) {
-            return false;
-        }
-        result = StringUtils::StringToDimensionWithUnit(parameterStr, defaultUnit);
-        return true;
-    }
-    return false;
-}
-
 void GetNapiDialogProps(napi_env env, const std::shared_ptr<PromptAsyncContext>& asyncContext,
     std::optional<DialogAlignment>& alignment, std::optional<DimensionOffset>& offset,
     std::optional<DimensionRect>& maskRect)
@@ -389,6 +426,453 @@ void GetNapiDialogProps(napi_env env, const std::shared_ptr<PromptAsyncContext>&
     }
 }
 
+bool ParseNapiDimensionNG(
+    napi_env env, CalcDimension& result, napi_value napiValue, DimensionUnit defaultUnit, bool isSupportPercent)
+{
+    napi_valuetype valueType = napi_undefined;
+    napi_typeof(env, napiValue, &valueType);
+    if (valueType == napi_number) {
+        double value = 0;
+        napi_get_value_double(env, napiValue, &value);
+
+        result.SetUnit(defaultUnit);
+        result.SetValue(value);
+        return true;
+    } else if (valueType == napi_string) {
+        std::string valueString;
+        if (!GetNapiString(env, napiValue, valueString, valueType)) {
+            return false;
+        }
+        if (valueString.back() == '%' && !isSupportPercent) {
+            return false;
+        }
+        return StringUtils::StringToCalcDimensionNG(valueString, result, false, defaultUnit);
+    } else if (valueType == napi_object) {
+        ResourceInfo recv;
+        std::string parameterStr;
+        if (!ParseResourceParam(env, napiValue, recv)) {
+            return false;
+        }
+        if (!ParseString(recv, parameterStr)) {
+            return false;
+        }
+        if (!ParseIntegerToString(recv, parameterStr)) {
+            return false;
+        }
+        result = StringUtils::StringToDimensionWithUnit(parameterStr, defaultUnit);
+        return true;
+    }
+    return false;
+}
+
+void CheckNapiDimension(CalcDimension value)
+{
+    if (value.IsNegative()) {
+        value.Reset();
+    }
+}
+
+bool ParseNapiColor(napi_env env, napi_value value, Color& result)
+{
+    napi_valuetype valueType = GetValueType(env, value);
+    if (valueType != napi_number && valueType != napi_string && valueType != napi_object) {
+        return false;
+    }
+    if (valueType == napi_number) {
+        int32_t colorId = 0;
+        napi_get_value_int32(env, value, &colorId);
+        constexpr uint32_t colorAlphaOffset = 24;
+        constexpr uint32_t colorAlphaDefaultValue = 0xFF000000;
+        auto origin = static_cast<uint32_t>(colorId);
+        uint32_t alphaResult = origin;
+        if ((origin >> colorAlphaOffset) == 0) {
+            alphaResult = origin | colorAlphaDefaultValue;
+        }
+        result = Color(alphaResult);
+        return true;
+    }
+    if (valueType == napi_string) {
+        std::optional<std::string> colorString = GetStringFromValueUtf8(env, value);
+        if (!colorString.has_value()) {
+            LOGE("Parse color from string failed");
+            return false;
+        }
+        return Color::ParseColorString(colorString.value(), result);
+    }
+
+    return ParseColorFromResourceObject(env, value, result);
+}
+
+std::optional<NG::BorderColorProperty> GetBorderColorProps(
+    napi_env env, const std::shared_ptr<PromptAsyncContext>& asyncContext)
+{
+    napi_valuetype valueType = napi_undefined;
+    NG::BorderColorProperty colorProperty;
+    napi_typeof(env, asyncContext->borderColorApi, &valueType);
+    if (valueType != napi_number && valueType != napi_string && valueType != napi_object) {
+        return std::nullopt;
+    }
+    Color borderColor;
+    if (ParseNapiColor(env, asyncContext->borderColorApi, borderColor)) {
+        colorProperty.SetColor(borderColor);
+        return colorProperty;
+    } else if (valueType == napi_object) {
+        napi_value leftApi = nullptr;
+        napi_value rightApi = nullptr;
+        napi_value topApi = nullptr;
+        napi_value bottomApi = nullptr;
+        napi_get_named_property(env, asyncContext->borderColorApi, "left", &leftApi);
+        napi_get_named_property(env, asyncContext->borderColorApi, "right", &rightApi);
+        napi_get_named_property(env, asyncContext->borderColorApi, "top", &topApi);
+        napi_get_named_property(env, asyncContext->borderColorApi, "bottom", &bottomApi);
+        Color leftColor;
+        Color rightColor;
+        Color topColor;
+        Color bottomColor;
+        if (ParseNapiColor(env, leftApi, leftColor)) {
+            colorProperty.leftColor = leftColor;
+        }
+        if (ParseNapiColor(env, rightApi, rightColor)) {
+            colorProperty.rightColor = rightColor;
+        }
+        if (ParseNapiColor(env, topApi, topColor)) {
+            colorProperty.topColor = topColor;
+        }
+        if (ParseNapiColor(env, bottomApi, bottomColor)) {
+            colorProperty.bottomColor = bottomColor;
+        }
+        colorProperty.multiValued = true;
+        return colorProperty;
+    }
+    return std::nullopt;
+}
+
+std::optional<NG::BorderWidthProperty> GetBorderWidthProps(
+    napi_env env, const std::shared_ptr<PromptAsyncContext>& asyncContext)
+{
+    napi_valuetype valueType = napi_undefined;
+    napi_typeof(env, asyncContext->borderWidthApi, &valueType);
+    if (valueType != napi_number && valueType != napi_string && valueType != napi_object) {
+        return std::nullopt;
+    }
+    NG::BorderWidthProperty borderWidthProps;
+    CalcDimension borderWidth;
+    if (ParseNapiDimensionNG(env, borderWidth, asyncContext->borderWidthApi, DimensionUnit::VP, true)) {
+        CheckNapiDimension(borderWidth);
+        borderWidthProps = NG::BorderWidthProperty({ borderWidth, borderWidth, borderWidth, borderWidth });
+        return borderWidthProps;
+    } else if (valueType == napi_object) {
+        napi_value leftApi = nullptr;
+        napi_value rightApi = nullptr;
+        napi_value topApi = nullptr;
+        napi_value bottomApi = nullptr;
+        napi_get_named_property(env, asyncContext->borderWidthApi, "left", &leftApi);
+        napi_get_named_property(env, asyncContext->borderWidthApi, "right", &rightApi);
+        napi_get_named_property(env, asyncContext->borderWidthApi, "top", &topApi);
+        napi_get_named_property(env, asyncContext->borderWidthApi, "bottom", &bottomApi);
+        CalcDimension leftDimen;
+        CalcDimension rightDimen;
+        CalcDimension topDimen;
+        CalcDimension bottomDimen;
+        if (ParseNapiDimensionNG(env, leftDimen, leftApi, DimensionUnit::VP, true)) {
+            CheckNapiDimension(leftDimen);
+            borderWidthProps.leftDimen = leftDimen;
+        }
+        if (ParseNapiDimensionNG(env, rightDimen, rightApi, DimensionUnit::VP, true)) {
+            CheckNapiDimension(rightDimen);
+            borderWidthProps.rightDimen = rightDimen;
+        }
+        if (ParseNapiDimensionNG(env, topDimen, topApi, DimensionUnit::VP, true)) {
+            CheckNapiDimension(topDimen);
+            borderWidthProps.topDimen = topDimen;
+        }
+        if (ParseNapiDimensionNG(env, bottomDimen, bottomApi, DimensionUnit::VP, true)) {
+            CheckNapiDimension(bottomDimen);
+            borderWidthProps.bottomDimen = bottomDimen;
+        }
+        borderWidthProps.multiValued = true;
+        return borderWidthProps;
+    }
+    return std::nullopt;
+}
+
+std::optional<NG::BorderRadiusProperty> GetBorderRadiusProps(
+    napi_env env, const std::shared_ptr<PromptAsyncContext>& asyncContext)
+{
+    napi_valuetype valueType = napi_undefined;
+    napi_typeof(env, asyncContext->borderRadiusApi, &valueType);
+    if (valueType != napi_number && valueType != napi_object && valueType != napi_string) {
+        return std::nullopt;
+    }
+    CalcDimension borderRadius;
+    if (ParseNapiDimensionNG(env, borderRadius, asyncContext->borderRadiusApi, DimensionUnit::VP, true)) {
+        CheckNapiDimension(borderRadius);
+        return NG::BorderRadiusProperty(borderRadius);
+    } else if (valueType == napi_object) {
+        NG::BorderRadiusProperty radiusProps;
+        napi_value topLeft = nullptr;
+        napi_value topRight = nullptr;
+        napi_value bottomLeft = nullptr;
+        napi_value bottomRight = nullptr;
+        napi_get_named_property(env, asyncContext->borderRadiusApi, "topLeft", &topLeft);
+        napi_get_named_property(env, asyncContext->borderRadiusApi, "topRight", &topRight);
+        napi_get_named_property(env, asyncContext->borderRadiusApi, "bottomLeft", &bottomLeft);
+        napi_get_named_property(env, asyncContext->borderRadiusApi, "bottomRight", &bottomRight);
+        CalcDimension radiusTopLeft;
+        CalcDimension radiusTopRight;
+        CalcDimension radiusBottomLeft;
+        CalcDimension radiusBottomRight;
+        if (ParseNapiDimensionNG(env, radiusTopLeft, topLeft, DimensionUnit::VP, true)) {
+            CheckNapiDimension(radiusTopLeft);
+            radiusProps.radiusTopLeft = radiusTopLeft;
+        }
+        if (ParseNapiDimensionNG(env, radiusTopRight, topRight, DimensionUnit::VP, true)) {
+            CheckNapiDimension(radiusTopRight);
+            radiusProps.radiusTopRight = radiusTopRight;
+        }
+        if (ParseNapiDimensionNG(env, radiusBottomLeft, bottomLeft, DimensionUnit::VP, true)) {
+            CheckNapiDimension(radiusBottomLeft);
+            radiusProps.radiusBottomLeft = radiusBottomLeft;
+        }
+        if (ParseNapiDimensionNG(env, radiusBottomRight, bottomRight, DimensionUnit::VP, true)) {
+            CheckNapiDimension(radiusBottomRight);
+            radiusProps.radiusBottomRight = radiusBottomRight;
+        }
+        radiusProps.multiValued = true;
+        return radiusProps;
+    }
+    return std::nullopt;
+}
+
+std::optional<Color> GetBackgroundColorProps(napi_env env, napi_value value)
+{
+    Color color;
+    if (ParseNapiColor(env, value, color)) {
+        return color;
+    }
+    return std::nullopt;
+}
+
+bool ParseStyle(napi_env env, napi_value value, std::optional<BorderStyle>& style)
+{
+    napi_valuetype valueType = GetValueType(env, value);
+    if (valueType != napi_number) {
+        return false;
+    }
+    int32_t num;
+    napi_get_value_int32(env, value, &num);
+    style = static_cast<BorderStyle>(num);
+    if (style < BorderStyle::SOLID || style > BorderStyle::NONE) {
+        return false;
+    }
+    return true;
+}
+
+std::optional<NG::BorderStyleProperty> GetBorderStyleProps(
+    napi_env env, const std::shared_ptr<PromptAsyncContext>& asyncContext)
+{
+    NG::BorderStyleProperty styleProps;
+    napi_valuetype valueType = napi_undefined;
+    napi_typeof(env, asyncContext->borderStyleApi, &valueType);
+    if (valueType != napi_number && valueType != napi_object) {
+        return std::nullopt;
+    } else if (valueType == napi_object) {
+        napi_value leftApi = nullptr;
+        napi_value rightApi = nullptr;
+        napi_value topApi = nullptr;
+        napi_value bottomApi = nullptr;
+        napi_get_named_property(env, asyncContext->borderStyleApi, "left", &leftApi);
+        napi_get_named_property(env, asyncContext->borderStyleApi, "right", &rightApi);
+        napi_get_named_property(env, asyncContext->borderStyleApi, "top", &topApi);
+        napi_get_named_property(env, asyncContext->borderStyleApi, "bottom", &bottomApi);
+        std::optional<BorderStyle> styleLeft;
+        std::optional<BorderStyle> styleRight;
+        std::optional<BorderStyle> styleTop;
+        std::optional<BorderStyle> styleBottom;
+        if (ParseStyle(env, leftApi, styleLeft)) {
+            styleProps.styleLeft = styleLeft;
+        }
+        if (ParseStyle(env, rightApi, styleRight)) {
+            styleProps.styleRight = styleRight;
+        }
+        if (ParseStyle(env, topApi, styleTop)) {
+            styleProps.styleTop = styleTop;
+        }
+        if (ParseStyle(env, bottomApi, styleBottom)) {
+            styleProps.styleBottom = styleBottom;
+        }
+        styleProps.multiValued = true;
+        return styleProps;
+    }
+    std::optional<BorderStyle> borderStyle;
+    if (ParseStyle(env, asyncContext->borderStyleApi, borderStyle)) {
+        styleProps = NG::BorderStyleProperty({ borderStyle, borderStyle, borderStyle, borderStyle });
+        return styleProps;
+    }
+    return std::nullopt;
+}
+
+bool ParseShadowColorStrategy(napi_env env, napi_value value, ShadowColorStrategy& strategy)
+{
+    napi_valuetype valueType = GetValueType(env, value);
+    if (valueType == napi_string) {
+        std::optional<std::string> colorStr = GetStringFromValueUtf8(env, value);
+        if (colorStr.has_value()) {
+            if (colorStr->compare("average") == 0) {
+                strategy = ShadowColorStrategy::AVERAGE;
+                return true;
+            } else if (colorStr->compare("primary") == 0) {
+                strategy = ShadowColorStrategy::PRIMARY;
+                return true;
+            }
+        }
+    }
+    return false;
+}
+
+bool GetShadowFromTheme(ShadowStyle shadowStyle, Shadow& shadow)
+{
+    auto colorMode = SystemProperties::GetColorMode();
+    if (shadowStyle == ShadowStyle::None) {
+        return true;
+    }
+    auto container = Container::Current();
+    CHECK_NULL_RETURN(container, false);
+    auto pipelineContext = container->GetPipelineContext();
+    CHECK_NULL_RETURN(pipelineContext, false);
+    auto shadowTheme = pipelineContext->GetTheme<ShadowTheme>();
+    if (!shadowTheme) {
+        return false;
+    }
+    shadow = shadowTheme->GetShadow(shadowStyle, colorMode);
+    return true;
+}
+
+void GetNapiObjectShadow(napi_env env, const std::shared_ptr<PromptAsyncContext>& asyncContext, Shadow& shadow)
+{
+    napi_value radiusApi = nullptr;
+    napi_value colorApi = nullptr;
+    napi_value typeApi = nullptr;
+    napi_value fillApi = nullptr;
+    napi_get_named_property(env, asyncContext->shadowApi, "radius", &radiusApi);
+    napi_get_named_property(env, asyncContext->shadowApi, "color", &colorApi);
+    napi_get_named_property(env, asyncContext->shadowApi, "type", &typeApi);
+    napi_get_named_property(env, asyncContext->shadowApi, "fill", &fillApi);
+    double radius = 0.0;
+    napi_get_value_double(env, radiusApi, &radius);
+    if (LessNotEqual(radius, 0.0)) {
+        radius = 0.0;
+    }
+    shadow.SetBlurRadius(radius);
+    Color color;
+    ShadowColorStrategy shadowColorStrategy;
+    if (ParseShadowColorStrategy(env, colorApi, shadowColorStrategy)) {
+        shadow.SetShadowColorStrategy(shadowColorStrategy);
+    } else if (ParseNapiColor(env, colorApi, color)) {
+        shadow.SetColor(color);
+    }
+    napi_valuetype valueType = GetValueType(env, typeApi);
+    int32_t shadowType = static_cast<int32_t>(ShadowType::COLOR);
+    if (valueType == napi_number) {
+        napi_get_value_int32(env, typeApi, &shadowType);
+    }
+    shadowType =
+        std::clamp(shadowType, static_cast<int32_t>(ShadowType::COLOR), static_cast<int32_t>(ShadowType::BLUR));
+    shadow.SetShadowType(static_cast<ShadowType>(shadowType));
+    bool isFilled = false;
+    if (napi_get_value_bool(env, fillApi, &isFilled) == napi_ok) {
+        isFilled = true;
+    }
+    shadow.SetIsFilled(isFilled);
+}
+
+std::optional<Shadow> GetShadowProps(napi_env env, const std::shared_ptr<PromptAsyncContext>& asyncContext)
+{
+    Shadow shadow;
+    napi_valuetype valueType = napi_undefined;
+    napi_typeof(env, asyncContext->shadowApi, &valueType);
+    if (valueType != napi_object && valueType != napi_number) {
+        return std::nullopt;
+    }
+    if (valueType == napi_number) {
+        int32_t num = 0;
+        if (napi_get_value_int32(env, asyncContext->shadowApi, &num) == napi_ok) {
+            auto style = static_cast<ShadowStyle>(num);
+            GetShadowFromTheme(style, shadow);
+            return shadow;
+        }
+    } else if (valueType == napi_object) {
+        napi_value offsetXApi = nullptr;
+        napi_value offsetYApi = nullptr;
+        napi_get_named_property(env, asyncContext->shadowApi, "offsetX", &offsetXApi);
+        napi_get_named_property(env, asyncContext->shadowApi, "offsetY", &offsetYApi);
+        ResourceInfo recv;
+        if (ParseResourceParam(env, offsetXApi, recv)) {
+            auto resourceWrapper = CreateResourceWrapper(recv);
+            auto offsetX = resourceWrapper->GetDimension(recv.resId);
+            shadow.SetOffsetX(offsetX.Value());
+        } else {
+            CalcDimension offsetX;
+            if (ParseNapiDimension(env, offsetX, offsetXApi, DimensionUnit::VP)) {
+                shadow.SetOffsetX(offsetX.Value());
+            }
+        }
+        if (ParseResourceParam(env, offsetYApi, recv)) {
+            auto resourceWrapper = CreateResourceWrapper(recv);
+            auto offsetY = resourceWrapper->GetDimension(recv.resId);
+            shadow.SetOffsetY(offsetY.Value());
+        } else {
+            CalcDimension offsetY;
+            if (ParseNapiDimension(env, offsetY, offsetYApi, DimensionUnit::VP)) {
+                shadow.SetOffsetY(offsetY.Value());
+            }
+        }
+        GetNapiObjectShadow(env, asyncContext, shadow);
+        return shadow;
+    }
+    return std::nullopt;
+}
+
+std::optional<CalcDimension> GetNapiDialogWidthProps(
+    napi_env env, const std::shared_ptr<PromptAsyncContext>& asyncContext)
+{
+    std::optional<CalcDimension> widthProperty;
+    CalcDimension width;
+    if (ParseNapiDimensionNG(env, width, asyncContext->widthApi, DimensionUnit::VP, true)) {
+        widthProperty = width;
+    }
+    return widthProperty;
+}
+
+std::optional<CalcDimension> GetNapiDialogHeightProps(
+    napi_env env, const std::shared_ptr<PromptAsyncContext>& asyncContext)
+{
+    std::optional<CalcDimension> heightProperty;
+    CalcDimension height;
+    if (ParseNapiDimensionNG(env, height, asyncContext->heightApi, DimensionUnit::VP, true)) {
+        heightProperty = height;
+    }
+    return heightProperty;
+}
+
+void GetNapiNamedProperties(napi_env env, napi_value* argv, std::shared_ptr<PromptAsyncContext>& asyncContext)
+{
+    napi_get_named_property(env, argv[0], "showInSubWindow", &asyncContext->showInSubWindow);
+    napi_get_named_property(env, argv[0], "isModal", &asyncContext->isModal);
+    napi_get_named_property(env, argv[0], "alignment", &asyncContext->alignmentApi);
+    napi_get_named_property(env, argv[0], "offset", &asyncContext->offsetApi);
+    napi_get_named_property(env, argv[0], "maskRect", &asyncContext->maskRectApi);
+    napi_get_named_property(env, argv[0], "builder", &asyncContext->builder);
+    napi_get_named_property(env, argv[0], "backgroundColor", &asyncContext->backgroundColorApi);
+    napi_get_named_property(env, argv[0], "cornerRadius", &asyncContext->borderRadiusApi);
+    napi_get_named_property(env, argv[0], "borderWidth", &asyncContext->borderWidthApi);
+    napi_get_named_property(env, argv[0], "borderColor", &asyncContext->borderColorApi);
+    napi_get_named_property(env, argv[0], "borderStyle", &asyncContext->borderStyleApi);
+    napi_get_named_property(env, argv[0], "shadow", &asyncContext->shadowApi);
+    napi_get_named_property(env, argv[0], "width", &asyncContext->widthApi);
+    napi_get_named_property(env, argv[0], "height", &asyncContext->heightApi);
+}
+
 bool JSPromptParseParam(napi_env env, size_t argc, napi_value* argv, std::shared_ptr<PromptAsyncContext>& asyncContext)
 {
     for (size_t i = 0; i < argc; i++) {
@@ -399,18 +883,11 @@ bool JSPromptParseParam(napi_env env, size_t argc, napi_value* argv, std::shared
                 DeleteContextAndThrowError(env, asyncContext, "The type of parameters is incorrect.");
                 return false;
             }
-            napi_get_named_property(env, argv[0], "showInSubWindow", &asyncContext->showInSubWindow);
-            napi_get_named_property(env, argv[0], "isModal", &asyncContext->isModal);
-            napi_get_named_property(env, argv[0], "alignment", &asyncContext->alignmentApi);
-            napi_get_named_property(env, argv[0], "offset", &asyncContext->offsetApi);
-            napi_get_named_property(env, argv[0], "maskRect", &asyncContext->maskRectApi);
-
-            napi_get_named_property(env, argv[0], "builder", &asyncContext->builder);
+            GetNapiNamedProperties(env, argv, asyncContext);
             napi_typeof(env, asyncContext->builder, &valueType);
             if (valueType == napi_function) {
                 napi_create_reference(env, asyncContext->builder, 1, &asyncContext->builderRef);
             }
-
             napi_typeof(env, asyncContext->autoCancel, &valueType);
             if (valueType == napi_boolean) {
                 napi_get_value_bool(env, asyncContext->autoCancel, &asyncContext->autoCancelBool);
@@ -423,6 +900,11 @@ bool JSPromptParseParam(napi_env env, size_t argc, napi_value* argv, std::shared
             if (valueType == napi_boolean) {
                 napi_get_value_bool(env, asyncContext->isModal, &asyncContext->isModalBool);
             }
+            napi_get_named_property(env, argv[0], "onWillDismiss", &asyncContext->onWillDismiss);
+            napi_typeof(env, asyncContext->onWillDismiss, &valueType);
+            if (valueType == napi_function) {
+                napi_create_reference(env, asyncContext->onWillDismiss, 1, &asyncContext->onWillDismissRef);
+            }
         } else if (valueType == napi_function) {
             napi_create_reference(env, argv[i], 1, &asyncContext->callbackRef);
         } else {
@@ -433,7 +915,7 @@ bool JSPromptParseParam(napi_env env, size_t argc, napi_value* argv, std::shared
     return true;
 }
 
-void JSPromptThrowInterError(napi_env env, std::shared_ptr<PromptAsyncContext>& asyncContext, std::string strMsg)
+void JSPromptThrowInterError(napi_env env, std::shared_ptr<PromptAsyncContext>& asyncContext, std::string& strMsg)
 {
     napi_value code = nullptr;
     std::string strCode = std::to_string(ERROR_CODE_INTERNAL_ERROR);
@@ -890,6 +1372,90 @@ napi_value JSPromptShowActionMenu(napi_env env, napi_callback_info info)
     return result;
 }
 
+napi_value JSRemoveCustomDialog(napi_env env, napi_callback_info info)
+{
+    auto delegate = EngineHelper::GetCurrentDelegateSafely();
+    if (delegate) {
+        delegate->RemoveCustomDialog();
+    }
+    return nullptr;
+}
+
+void ParseDialogCallback(std::shared_ptr<PromptAsyncContext>& asyncContext,
+    std::function<void(const int32_t& info)>& onWillDismiss)
+{
+    onWillDismiss = [env = asyncContext->env, onWillDismissRef = asyncContext->onWillDismissRef]
+        (const int32_t& info) {
+        if (onWillDismissRef) {
+            napi_value onWillDismissFunc = nullptr;
+            napi_value value = nullptr;
+            napi_value funcValue = nullptr;
+            napi_value paramObj = nullptr;
+            napi_create_object(env, &paramObj);
+
+            napi_create_function(env, "dismiss", strlen("dismiss"), JSRemoveCustomDialog, nullptr, &funcValue);
+            napi_set_named_property(env, paramObj, "dismiss", funcValue);
+
+            napi_create_int32(env, info, &value);
+            napi_set_named_property(env, paramObj, "reason", value);
+            napi_get_reference_value(env, onWillDismissRef, &onWillDismissFunc);
+            napi_call_function(env, nullptr, onWillDismissFunc, 1, &paramObj, nullptr);
+        }
+    };
+}
+
+PromptDialogAttr GetPromptActionDialog(napi_env env, const std::shared_ptr<PromptAsyncContext>& asyncContext,
+    std::function<void(const int32_t& info)> onWillDismiss)
+{
+    std::optional<DialogAlignment> alignment;
+    std::optional<DimensionOffset> offset;
+    std::optional<DimensionRect> maskRect;
+    GetNapiDialogProps(env, asyncContext, alignment, offset, maskRect);
+    auto borderWidthProps = GetBorderWidthProps(env, asyncContext);
+    std::optional<NG::BorderColorProperty> borderColorProps;
+    std::optional<NG::BorderStyleProperty> borderStyleProps;
+    if (borderWidthProps.has_value()) {
+        borderColorProps = GetBorderColorProps(env, asyncContext);
+        if (!borderColorProps.has_value()) {
+            borderColorProps = NG::BorderColorProperty({ Color::BLACK, Color::BLACK, Color::BLACK, Color::BLACK });
+        }
+        borderStyleProps = GetBorderStyleProps(env, asyncContext);
+        if (!borderStyleProps.has_value()) {
+            borderStyleProps = NG::BorderStyleProperty(
+                { BorderStyle::SOLID, BorderStyle::SOLID, BorderStyle::SOLID, BorderStyle::SOLID });
+        }
+    }
+    auto borderRadiusProps = GetBorderRadiusProps(env, asyncContext);
+    auto backgroundColorProps = GetBackgroundColorProps(env, asyncContext->backgroundColorApi);
+    auto widthProps = GetNapiDialogWidthProps(env, asyncContext);
+    auto heightProps = GetNapiDialogHeightProps(env, asyncContext);
+    auto shadowProps = GetShadowProps(env, asyncContext);
+    auto builder = [env = asyncContext->env, builderRef = asyncContext->builderRef]() {
+        if (builderRef) {
+            napi_value builderFunc = nullptr;
+            napi_get_reference_value(env, builderRef, &builderFunc);
+            napi_call_function(env, nullptr, builderFunc, 0, nullptr, nullptr);
+            napi_delete_reference(env, builderRef);
+        }
+    };
+    PromptDialogAttr promptDialogAttr = { .showInSubWindow = asyncContext->showInSubWindowBool,
+        .isModal = asyncContext->isModalBool,
+        .customBuilder = std::move(builder),
+        .customOnWillDismiss = std::move(onWillDismiss),
+        .alignment = alignment,
+        .offset = offset,
+        .maskRect = maskRect,
+        .borderColor = borderColorProps,
+        .borderWidth = borderWidthProps,
+        .borderRadius = borderRadiusProps,
+        .borderStyle = borderStyleProps,
+        .backgroundColor = backgroundColorProps,
+        .shadow = shadowProps,
+        .width = widthProps,
+        .height = heightProps };
+    return promptDialogAttr;
+}
+
 napi_value JSPromptOpenCustomDialog(napi_env env, napi_callback_info info)
 {
     size_t requireArgc = 1;
@@ -905,16 +1471,10 @@ napi_value JSPromptOpenCustomDialog(napi_env env, napi_callback_info info)
     auto asyncContext = std::make_shared<PromptAsyncContext>();
     asyncContext->env = env;
     asyncContext->instanceId = Container::CurrentIdSafely();
-
-    std::optional<DialogAlignment> alignment;
-    std::optional<DimensionOffset> offset;
-    std::optional<DimensionRect> maskRect;
-
     bool parseOK = JSPromptParseParam(env, argc, argv, asyncContext);
     if (!parseOK) {
         return nullptr;
     }
-    GetNapiDialogProps(env, asyncContext, alignment, offset, maskRect);
     napi_value result = nullptr;
     if (asyncContext->callbackRef == nullptr) {
         napi_create_promise(env, &asyncContext->deferred, &result);
@@ -963,23 +1523,11 @@ napi_value JSPromptOpenCustomDialog(napi_env env, napi_callback_info info)
             TaskExecutor::TaskType::JS);
         asyncContext = nullptr;
     };
-
-    auto builder = [env = asyncContext->env, builderRef = asyncContext->builderRef]() {
-        if (builderRef) {
-            napi_value builderFunc = nullptr;
-            napi_get_reference_value(env, builderRef, &builderFunc);
-            napi_call_function(env, nullptr, builderFunc, 0, nullptr, nullptr);
-            napi_delete_reference(env, builderRef);
-        }
-    };
-    PromptDialogAttr promptDialogAttr = {
-        .showInSubWindow = asyncContext->showInSubWindowBool,
-        .isModal = asyncContext->isModalBool,
-        .customBuilder = std::move(builder),
-        .alignment = alignment,
-        .offset = offset,
-        .maskRect = maskRect,
-    };
+    std::function<void(const int32_t& info)> onWillDismiss = nullptr;
+    if (asyncContext->onWillDismissRef) {
+        ParseDialogCallback(asyncContext, onWillDismiss);
+    }
+    PromptDialogAttr promptDialogAttr = GetPromptActionDialog(env, asyncContext, onWillDismiss);
 #ifdef OHOS_STANDARD_SYSTEM
     // NG
     if (SystemProperties::GetExtSurfaceEnabled() || !ContainerIsService()) {
@@ -997,7 +1545,6 @@ napi_value JSPromptOpenCustomDialog(napi_env env, napi_callback_info info)
 #else
     auto delegate = EngineHelper::GetCurrentDelegateSafely();
     if (delegate) {
-        promptDialogAttr.showInSubWindow = false;
         delegate->OpenCustomDialog(promptDialogAttr, std::move(callBack));
     } else {
         // throw internal error
@@ -1044,7 +1591,7 @@ napi_value JSPromptCloseCustomDialog(napi_env env, napi_callback_info info)
             JSPromptThrowInterError(env, asyncContext, strMsg);
         }
     } else if (SubwindowManager::GetInstance() != nullptr) {
-        SubwindowManager::GetInstance()->CloseCustomDialog(dialogId);
+        SubwindowManager::GetInstance()->CloseCustomDialogNG(dialogId);
     }
 #else
     auto delegate = EngineHelper::GetCurrentDelegateSafely();

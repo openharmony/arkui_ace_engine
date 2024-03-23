@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,6 +16,8 @@
 #include "frameworks/core/components/xcomponent/native_interface_xcomponent_impl.h"
 
 #include "securec.h"
+
+#include "base/error/error_code.h"
 
 int32_t OH_NativeXComponent::GetXComponentId(char* id, uint64_t* size)
 {
@@ -256,4 +258,58 @@ int32_t OH_NativeXComponent::DetachNativeRootNode(void* root)
     }
     xcomponentImpl_->DetachContainer(root);
     return OH_NATIVEXCOMPONENT_RESULT_SUCCESS;
+}
+
+int32_t OH_NativeXComponent::RegisterUIAxisEventCallback(
+    void (*callback)(OH_NativeXComponent* component, ArkUI_UIInputEvent* event, ArkUI_UIInputEvent_Type type))
+{
+    if (xcomponentImpl_ == nullptr) {
+        return OHOS::Ace::ERROR_CODE_PARAM_INVALID;
+    }
+    xcomponentImpl_->SetUIAxisEventCallback(callback);
+    return OH_NATIVEXCOMPONENT_RESULT_SUCCESS;
+}
+
+int32_t OH_NativeXComponent::SetNeedSoftKeyboard(bool needSoftKeyboard)
+{
+    if (xcomponentImpl_ == nullptr) {
+        return OH_NATIVEXCOMPONENT_RESULT_BAD_PARAMETER;
+    }
+    xcomponentImpl_->SetNeedSoftKeyboard(needSoftKeyboard);
+    return OH_NATIVEXCOMPONENT_RESULT_SUCCESS;
+}
+
+int32_t OH_NativeXComponent::RegisterSurfaceShowCallback(NativeXComponent_Surface_Callback callback)
+{
+    if (xcomponentImpl_ == nullptr) {
+        return OH_NATIVEXCOMPONENT_RESULT_BAD_PARAMETER;
+    }
+    xcomponentImpl_->SetSurfaceShowCallback(callback);
+    return OH_NATIVEXCOMPONENT_RESULT_SUCCESS;
+}
+
+int32_t OH_NativeXComponent::RegisterSurfaceHideCallback(NativeXComponent_Surface_Callback callback)
+{
+    if (xcomponentImpl_ == nullptr) {
+        return OH_NATIVEXCOMPONENT_RESULT_BAD_PARAMETER;
+    }
+    xcomponentImpl_->SetSurfaceHideCallback(callback);
+    return OH_NATIVEXCOMPONENT_RESULT_SUCCESS;
+}
+
+int32_t OH_NativeXComponent::RegisterOnTouchInterceptCallback(
+    HitTestMode (*callback)(OH_NativeXComponent* component, ArkUI_UIInputEvent* event))
+{
+    if (xcomponentImpl_ == nullptr) {
+        return OHOS::Ace::ERROR_CODE_PARAM_INVALID;
+    }
+    xcomponentImpl_->SetOnTouchInterceptCallback(callback);
+    return OH_NATIVEXCOMPONENT_RESULT_SUCCESS;
+}
+
+int32_t OH_NativeXComponent::GetSourceType(int32_t pointId, OH_NativeXComponent_EventSourceType* sourceType)
+{
+    return (xcomponentImpl_ && xcomponentImpl_->GetSourceType(pointId, sourceType))
+               ? OH_NATIVEXCOMPONENT_RESULT_SUCCESS
+               : OH_NATIVEXCOMPONENT_RESULT_BAD_PARAMETER;
 }

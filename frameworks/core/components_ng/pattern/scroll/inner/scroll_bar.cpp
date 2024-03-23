@@ -43,7 +43,7 @@ ScrollBar::ScrollBar(DisplayMode displayMode, ShapeMode shapeMode, PositionMode 
 
 void ScrollBar::InitTheme()
 {
-    auto pipelineContext = PipelineContext::GetCurrentContext();
+    auto pipelineContext = PipelineContext::GetCurrentContextSafely();
     CHECK_NULL_VOID(pipelineContext);
     auto theme = pipelineContext->GetTheme<ScrollBarTheme>();
     CHECK_NULL_VOID(theme);
@@ -81,6 +81,24 @@ bool ScrollBar::InBarRectRegion(const Point& point) const
         return barRect_.IsInRegion(point);
     }
     return false;
+}
+
+BarDirection ScrollBar::CheckBarDirection(const Point& point, const Axis& axis)
+{
+    if (!InBarRectRegion(point)) {
+        return BarDirection::BAR_NONE;
+    }
+    auto touchRegion = GetTouchRegion();
+    auto pointOffset = OffsetF(point.GetX(), point.GetY());
+    auto scrollBarTopOffset = OffsetF(touchRegion.Left(), touchRegion.Top());
+    auto scrollBarBottomOffset = OffsetF(touchRegion.Right(), touchRegion.Bottom());
+    if (pointOffset.GetMainOffset(axis) < scrollBarTopOffset.GetMainOffset(axis)) {
+        return BarDirection::PAGE_UP;
+    } else if (pointOffset.GetMainOffset(axis) > scrollBarBottomOffset.GetMainOffset(axis)) {
+        return BarDirection::PAGE_DOWN;
+    } else {
+        return BarDirection::BAR_NONE;
+    }
 }
 
 void ScrollBar::FlushBarWidth()
@@ -432,18 +450,18 @@ void ScrollBar::CalcReservedHeight()
     float endRadiusHeight = 0.0;
     switch (positionMode_) {
         case PositionMode::LEFT:
-            startRadius = hostBorderRadius_.radiusTopLeft->ConvertToPx();
-            endRadius = hostBorderRadius_.radiusBottomLeft->ConvertToPx();
+            startRadius = hostBorderRadius_.radiusTopLeft.value_or(Dimension()).ConvertToPx();
+            endRadius = hostBorderRadius_.radiusBottomLeft.value_or(Dimension()).ConvertToPx();
             padding = NormalizeToPx(padding_.Left());
             break;
         case PositionMode::RIGHT:
-            startRadius = hostBorderRadius_.radiusTopRight->ConvertToPx();
-            endRadius = hostBorderRadius_.radiusBottomRight->ConvertToPx();
+            startRadius = hostBorderRadius_.radiusTopRight.value_or(Dimension()).ConvertToPx();
+            endRadius = hostBorderRadius_.radiusBottomRight.value_or(Dimension()).ConvertToPx();
             padding = NormalizeToPx(padding_.Right());
             break;
         case PositionMode::BOTTOM:
-            startRadius = hostBorderRadius_.radiusBottomLeft->ConvertToPx();
-            endRadius = hostBorderRadius_.radiusBottomRight->ConvertToPx();
+            startRadius = hostBorderRadius_.radiusBottomLeft.value_or(Dimension()).ConvertToPx();
+            endRadius = hostBorderRadius_.radiusBottomRight.value_or(Dimension()).ConvertToPx();
             padding = NormalizeToPx(padding_.Bottom());
             break;
         default:

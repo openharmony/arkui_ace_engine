@@ -59,6 +59,8 @@ struct SpanPosition {
 
 struct SymbolSpanStyle {
     double fontSize = 0.0;
+    double lineHeight = 0.0;
+    double letterSpacing = 0.0;
     std::string symbolColor;
     int32_t fontWeight = 0;
     uint32_t renderingStrategy;
@@ -68,12 +70,15 @@ struct SymbolSpanStyle {
 struct TextStyleResult {
     std::string fontColor;
     double fontSize = 0.0;
+    double lineHeight = 0.0;
+    double letterSpacing = 0.0;
     int32_t fontStyle = 0;
     int32_t fontWeight = 0;
     std::string fontFamily;
     int32_t decorationType = 0;
     std::string decorationColor;
     int32_t textAlign = 0;
+    int32_t wordBreak = static_cast<int32_t>(WordBreak::BREAK_WORD);
     float leadingMarginSize[2] = { 0.0, 0.0 };
 };
 
@@ -148,6 +153,17 @@ public:
     int32_t start_;
 
     int32_t end_;
+
+    void reset()
+    {
+        start_ = -1;
+        end_ = -1;
+    }
+
+    bool operator==(const SelectionRangeInfo& rhs) const
+    {
+        return start_ == rhs.start_ && end_ == rhs.end_;
+    }
 };
 
 struct ParagraphInfo {
@@ -155,6 +171,7 @@ struct ParagraphInfo {
     RefPtr<PixelMap> leadingMarginPixmap;
     float leadingMarginSize[2] = { 0.0, 0.0 };
     int32_t textAlign = 0;
+    int32_t wordBreak = static_cast<int32_t>(WordBreak::BREAK_WORD);
 
     std::pair<int32_t, int32_t> range;
 };

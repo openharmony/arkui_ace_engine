@@ -365,6 +365,7 @@ void SideBarContainerPattern::OnModifyDone()
     OnUpdateShowSideBar(layoutProperty);
     OnUpdateShowControlButton(layoutProperty, host);
     OnUpdateShowDivider(layoutProperty, host);
+    UpdateControlButtonIcon();
 
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
@@ -945,7 +946,6 @@ void SideBarContainerPattern::AddDividerHotZoneRect(const RefPtr<SideBarContaine
     DimensionRect responseRect(Dimension(dragRect_.Width(), DimensionUnit::PX),
         Dimension(dragRect_.Height(), DimensionUnit::PX), responseOffset);
     responseRegion.emplace_back(responseRect);
-    dividerGestureHub->MarkResponseRegion(true);
     dividerGestureHub->SetResponseRegion(responseRegion);
 }
 

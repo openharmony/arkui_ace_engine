@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -33,8 +33,8 @@ const char* const SURFACE_STRIDE_ALIGNMENT = "8";
 constexpr int32_t EXT_SURFACE_DEFAULT_SIZE = 1;
 constexpr int32_t MAX_BUFFER_SIZE = 3;
 const std::string PATTERN_TYPE_WEB = "WEBPATTERN";
-const std::vector<int32_t> DEFAULT_HEIGHT_GEAR { 7998, 7999, 8001, 8002, 8003 };
-const std::vector<int32_t> DEFAULT_ORIGN_GEAR { 0, 2000, 4000, 6000, 8000 };
+const uint32_t ADJUST_WEB_DRAW_LENGTH = 3000;
+const uint32_t DEFAULT_WEB_DRAW_LENGTH = 6167;
 } // namespace
 
 #ifdef OHOS_PLATFORM
@@ -132,7 +132,7 @@ void RosenRenderSurface::RegisterSurface() const
     }
 }
 
-void RosenRenderSurface::UpdateXComponentConfig()
+void RosenRenderSurface::UpdateSurfaceConfig()
 {
     CHECK_NULL_VOID(producerSurface_);
     producerSurface_->SetQueueSize(queueSize_);
@@ -265,28 +265,29 @@ void RosenRenderSurface::ConsumeWebBuffer()
         LOGE("cannot acquire buffer error = %{public}d", surfaceErr);
         return;
     }
+    PostRenderOnlyTaskToUI();
+
+    int32_t bufferWidth = surfaceBuffer->GetSurfaceBufferWidth();
     int32_t bufferHeight = surfaceBuffer->GetSurfaceBufferHeight();
-    auto renderContext = renderContext_.Upgrade();
-    CHECK_NULL_VOID(renderContext);
-    auto task = [renderContext]() {
-        auto rosenRenderContext = DynamicCast<RosenRenderContext>(renderContext);
-        CHECK_NULL_VOID(rosenRenderContext);
-        auto host = rosenRenderContext->GetHost();
-        CHECK_NULL_VOID(host);
-        host->MarkNeedRenderOnly();
-    };
-    PostTaskToUI(std::move(task));
-
-    if (std::count(DEFAULT_HEIGHT_GEAR.begin(), DEFAULT_HEIGHT_GEAR.end(), bufferHeight)) {
-        auto iterator = std::find(DEFAULT_HEIGHT_GEAR.begin(), DEFAULT_HEIGHT_GEAR.end(), bufferHeight);
-        int32_t index = iterator - DEFAULT_HEIGHT_GEAR.begin();
-        if (index >= static_cast<int32_t>(DEFAULT_HEIGHT_GEAR.size())) {
-            LOGE("surfaceBuffer'height out of range");
-            return;
+    if (axis_ == Axis::VERTICAL) {
+        if (webOffset_ >= 0 || bufferHeight < ADJUST_WEB_DRAW_LENGTH * 2 || bufferHeight >= DEFAULT_WEB_DRAW_LENGTH) {
+            orgin_.SetY(0);
+        } else {
+            int32_t stepStear = bufferHeight - ADJUST_WEB_DRAW_LENGTH * 2;
+            orgin_.SetY(stepStear * ADJUST_WEB_DRAW_LENGTH);
         }
-        orgin_.SetY(DEFAULT_ORIGN_GEAR[index]);
+    } else if (axis_ == Axis::HORIZONTAL) {
+        if (webOffset_ >= 0 || bufferWidth < ADJUST_WEB_DRAW_LENGTH * 2 || bufferWidth >= DEFAULT_WEB_DRAW_LENGTH) {
+            orgin_.SetX(0);
+        } else {
+            int32_t stepStear = bufferWidth - ADJUST_WEB_DRAW_LENGTH * 2;
+            orgin_.SetX(stepStear * ADJUST_WEB_DRAW_LENGTH);
+        }
+    } else {
+        LOGE("ConsumeWebBuffer axis is not vertical or horizontal");
     }
-
+    LOGD("ConsumeWebBuffer x : %{public}f, y : %{public}f, width : %{public}d, height : %{public}d",
+        orgin_.GetX(), orgin_.GetY(), bufferWidth, bufferHeight);
     std::shared_ptr<SurfaceBufferNode> surfaceNode = nullptr;
     {
         std::lock_guard<std::mutex> lock(surfaceNodeMutex_);
@@ -300,9 +301,15 @@ void RosenRenderSurface::ConsumeWebBuffer()
 #endif
 }
 
-void RosenRenderSurface::PostTaskToUI(const std::function<void()>&& task) const
+void RosenRenderSurface::PostRenderOnlyTaskToUI()
 {
-    CHECK_NULL_VOID(task);
+    auto task = [weak = renderContext_]() {
+        auto renderContext = weak.Upgrade();
+        CHECK_NULL_VOID(renderContext);
+        auto host = renderContext->GetHost();
+        CHECK_NULL_VOID(host);
+        host->MarkNeedRenderOnly();
+    };
     auto container = AceEngine::Get().GetContainer(instanceId_);
     CHECK_NULL_VOID(container);
     auto context = container->GetPipelineContext();
@@ -328,15 +335,7 @@ void RosenRenderSurface::ConsumeXComponentBuffer()
         TAG_LOGW(AceLogTag::ACE_XCOMPONENT, "XComponent cannot acquire buffer error = %{public}d", surfaceErr);
         return;
     }
-
-    auto task = [weak = renderContext_]() {
-        auto renderContext = weak.Upgrade();
-        CHECK_NULL_VOID(renderContext);
-        auto host = renderContext->GetHost();
-        CHECK_NULL_VOID(host);
-        host->MarkNeedRenderOnly();
-    };
-    PostTaskToUI(std::move(task));
+    PostRenderOnlyTaskToUI();
 
     std::shared_ptr<SurfaceBufferNode> surfaceNode = nullptr;
     {
@@ -354,7 +353,16 @@ void RosenRenderSurface::ConsumeXComponentBuffer()
 #endif
 }
 
-void RosenRenderSurface::DrawBufferForXComponent(RSCanvas& canvas, float width, float height)
+void RosenRenderSurface::releaseSurfaceBuffers()
+{
+#ifdef OHOS_PLATFORM
+    CHECK_NULL_VOID(producerSurface_);
+    producerSurface_->CleanCache();
+#endif
+}
+
+void RosenRenderSurface::DrawBufferForXComponent(
+    RSCanvas& canvas, float width, float height, float offsetX, float offsetY)
 {
 #ifdef OHOS_PLATFORM
     auto renderContext = renderContext_.Upgrade();
@@ -379,13 +387,13 @@ void RosenRenderSurface::DrawBufferForXComponent(RSCanvas& canvas, float width, 
     CHECK_NULL_VOID(skCanvas);
     auto* recordingCanvas = static_cast<OHOS::Rosen::RSRecordingCanvas*>(skCanvas);
     CHECK_NULL_VOID(recordingCanvas);
-    Rosen::RSSurfaceBufferInfo info { surfaceNode->buffer_, 0, 0, static_cast<int32_t>(width),
+    Rosen::RSSurfaceBufferInfo info { surfaceNode->buffer_, offsetX, offsetY, static_cast<int32_t>(width),
         static_cast<int32_t>(height) };
     recordingCanvas->DrawSurfaceBuffer(info);
 #else
     auto& recordingCanvas = static_cast<RSRecordingCanvas&>(canvas);
-    Rosen::DrawingSurfaceBufferInfo info {surfaceNode->buffer_, 0, 0, static_cast<int32_t>(width),
-        static_cast<int32_t>(height)};
+    Rosen::DrawingSurfaceBufferInfo info { surfaceNode->buffer_, offsetX, offsetY, static_cast<int32_t>(width),
+        static_cast<int32_t>(height) };
     recordingCanvas.DrawSurfaceBuffer(info);
 #endif
 #endif

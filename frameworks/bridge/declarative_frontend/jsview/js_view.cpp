@@ -41,6 +41,7 @@
 #include "core/components_ng/base/view_stack_model.h"
 #include "core/components_ng/layout/layout_wrapper.h"
 #include "core/components_ng/pattern/custom/custom_measure_layout_node.h"
+#include "core/components_ng/pattern/recycle_view/recycle_dummy_node.h"
 #include "core/pipeline/base/element_register.h"
 
 namespace OHOS::Ace {
@@ -522,7 +523,7 @@ JSViewPartialUpdate::~JSViewPartialUpdate()
 
 RefPtr<AceType> JSViewPartialUpdate::CreateViewNode(bool isTitleNode)
 {
-    auto updateViewIdFunc = [weak = AceType::WeakClaim(this)](const std::string viewId) {
+    auto updateViewIdFunc = [weak = AceType::WeakClaim(this)](const std::string& viewId) {
         auto jsView = weak.Upgrade();
         CHECK_NULL_VOID(jsView);
         jsView->viewId_ = viewId;
@@ -868,14 +869,17 @@ void JSViewPartialUpdate::CreateRecycle(const JSCallbackInfo& info)
     // update view and node property
     view->SetRecycleCustomNodeName(nodeName);
 
+    RefPtr<AceType> node;
+
     // get or create recycle node
     if (recycle) {
-        auto node = view->GetCachedRecycleNode();
-        node->SetRecycleRenderFunc(std::move(recycleUpdateFunc));
-        ViewStackModel::GetInstance()->Push(node, true);
+        node = view->GetCachedRecycleNode();
+        AceType::DynamicCast<NG::CustomNodeBase>(node)->SetRecycleRenderFunc(std::move(recycleUpdateFunc));
     } else {
-        ViewStackModel::GetInstance()->Push(view->CreateViewNode(), true);
+        node = view->CreateViewNode();
     }
+    auto dummyNode = NG::RecycleDummyNode::WrapRecycleDummyNode(node);
+    ViewStackModel::GetInstance()->Push(dummyNode, true);
 }
 
 void JSViewPartialUpdate::OnDumpInfo(const std::vector<std::string>& params)

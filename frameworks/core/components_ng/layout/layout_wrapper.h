@@ -58,12 +58,14 @@ public:
     virtual const RefPtr<GeometryNode>& GetGeometryNode() const = 0;
     virtual const RefPtr<LayoutProperty>& GetLayoutProperty() const = 0;
 
-    virtual RefPtr<LayoutWrapper> GetOrCreateChildByIndex(uint32_t index, bool addToRenderTree = true) = 0;
-    virtual RefPtr<LayoutWrapper> GetChildByIndex(uint32_t index) = 0;
+    virtual RefPtr<LayoutWrapper> GetOrCreateChildByIndex(
+        uint32_t index, bool addToRenderTree = true, bool isCache = false) = 0;
+    virtual RefPtr<LayoutWrapper> GetChildByIndex(uint32_t index, bool isCache = false) = 0;
     virtual const std::list<RefPtr<LayoutWrapper>>& GetAllChildrenWithBuild(bool addToRenderTree = true) = 0;
     virtual void RemoveChildInRenderTree(uint32_t index) = 0;
     virtual void RemoveAllChildInRenderTree() = 0;
     virtual void SetActiveChildRange(int32_t start, int32_t end) = 0;
+    virtual void RecycleItemsByIndex(int32_t start, int32_t end) = 0;
 
     RefPtr<FrameNode> GetHostNode() const;
     virtual const std::string& GetHostTag() const = 0;
@@ -145,6 +147,9 @@ protected:
     void OffsetNodeToSafeArea();
     // keyboard avoidance is done by offsetting, to expand into keyboard area, reverse the offset.
     void ExpandIntoKeyboard();
+    void RestoreExpansiveChildren();
+    void RestoreExpansiveChild(const RefPtr<UINode>& node);
+    bool CheckValidSafeArea();
 
     WeakPtr<FrameNode> hostNode_;
 

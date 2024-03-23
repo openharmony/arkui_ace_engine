@@ -210,8 +210,9 @@ public:
     uint32_t GetOptionCount(const RefPtr<FrameNode>& frmeNode)
     {
         uint32_t count = 0;
-        if (optionsWithNode_.find(frmeNode) != optionsWithNode_.end()) {
-            count = optionsWithNode_[frmeNode].size();
+        auto it = optionsWithNode_.find(frmeNode);
+        if (it != optionsWithNode_.end()) {
+            count = it->second.size();
         }
         return count;
     }
@@ -311,6 +312,34 @@ public:
 
     void CheckAndUpdateColumnSize(SizeF& size);
 
+    void SetDivider(const ItemDivider& divider)
+    {
+        divider_ = divider;
+    }
+
+    ItemDivider GetDivider()
+    {
+        return divider_;
+    }
+
+    void SetCustomDividerFlag(bool customDividerFlag)
+    {
+        customDividerFlag_ = customDividerFlag;
+    }
+
+    bool GetCustomDividerFlag()
+    {
+        return customDividerFlag_;
+    }
+    void SetGradientHeight(const Dimension& value)
+    {
+        value_ = value;
+    }
+
+    Dimension GetGradientHeight()
+    {
+        return value_;
+    }
 private:
     void OnModifyDone() override;
     void OnAttachToFrameNode() override;
@@ -371,6 +400,9 @@ private:
     bool isPicker_ = true;
     bool isFiredSelectsChange_ = false;
     std::optional<std::string> firedSelectsStr_;
+    ItemDivider divider_;
+    bool customDividerFlag_ = false;
+    Dimension value_;
 };
 } // namespace OHOS::Ace::NG
 

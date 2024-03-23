@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,9 +15,9 @@
 
 import { KeyCode } from '@ohos.multimodalInput.keyCode'
 
-export declare type SelectTitleBarMenuItem = {
+export declare class SelectTitleBarMenuItem {
   value: ResourceStr
-  isEnabled: boolean
+  isEnabled?: boolean
   action?: () => void
 }
 
@@ -63,14 +63,14 @@ const PUBLIC_BACK = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAMAAAADACAY' 
 export struct SelectTitleBar {
   @State selected: number = 0
 
-  options: Array<SelectOption>
-  menuItems: Array<SelectTitleBarMenuItem>
+  options: Array<SelectOption> = []
+  menuItems: Array<SelectTitleBarMenuItem> = []
 
-  subtitle: ResourceStr
-  badgeValue: number
-  hidesBackButton: boolean
+  subtitle: ResourceStr = ''
+  badgeValue: number = 0
+  hidesBackButton: boolean = false
 
-  onSelected: ((index: number) => void)
+  onSelected: ((index: number) => void) = () => {}
 
   private static readonly badgeSize = 16
   private static readonly totalHeight = 56
@@ -102,7 +102,7 @@ export struct SelectTitleBar {
         }
 
         Column() {
-          if (this.badgeValue !== undefined) {
+          if (this.badgeValue) {
             Badge({
               count: this.badgeValue,
               position: BadgePosition.Right,
@@ -117,7 +117,7 @@ export struct SelectTitleBar {
                 Select(this.options)
                   .selected(this.selected)
                   .value(this.selected < this.options.length ? this.options[this.selected].value.toString() : "")
-                  .font({ size: this.hidesBackButton && this.subtitle === undefined
+                  .font({ size: this.hidesBackButton && !this.subtitle
                     ? $r('sys.float.ohos_id_text_size_headline7')
                     : $r('sys.float.ohos_id_text_size_headline8') })
                   .fontColor($r('sys.color.ohos_id_color_titlebar_text'))
@@ -134,7 +134,7 @@ export struct SelectTitleBar {
               Select(this.options)
                 .selected(this.selected)
                 .value(this.selected < this.options.length ? this.options[this.selected].value.toString() : "")
-                .font({ size: this.hidesBackButton && this.subtitle === undefined
+                .font({ size: this.hidesBackButton && !this.subtitle
                   ? $r('sys.float.ohos_id_text_size_headline7')
                   : $r('sys.float.ohos_id_text_size_headline8') })
                 .fontColor($r('sys.color.ohos_id_color_titlebar_text'))
@@ -187,7 +187,7 @@ export struct SelectTitleBar {
           newWidth -= ImageMenuItem.imageHotZoneWidth * menusLength
         }
       }
-      if (this.badgeValue !== undefined) {
+      if (this.badgeValue) {
         this.selectMaxWidth = newWidth - SelectTitleBar.badgeSize - SelectTitleBar.leftPadding - SelectTitleBar.rightPadding - SelectTitleBar.badgePadding
       } else {
         this.selectMaxWidth = newWidth - SelectTitleBar.leftPadding - SelectTitleBar.rightPadding
@@ -198,8 +198,8 @@ export struct SelectTitleBar {
 
 @Component
 struct CollapsibleMenuSection {
-  menuItems: Array<SelectTitleBarMenuItem>
-  index: number
+  menuItems: Array<SelectTitleBarMenuItem> = []
+  index: number = 0
 
   static readonly maxCountOfVisibleItems = 3
   private static readonly focusPadding = 4
@@ -240,11 +240,11 @@ struct CollapsibleMenuSection {
     Column() {
       Row() {
         if (this.menuItems.length <= CollapsibleMenuSection.maxCountOfVisibleItems) {
-          ForEach(this.menuItems, (item, index) => {
+          ForEach(this.menuItems, (item: SelectTitleBarMenuItem, index) => {
             ImageMenuItem({ item: item, index: this.index * 1000 + index + 1 })
           })
         } else {
-          ForEach(this.menuItems.slice(0, CollapsibleMenuSection.maxCountOfVisibleItems - 1), (item, index) => {
+          ForEach(this.menuItems.slice(0, CollapsibleMenuSection.maxCountOfVisibleItems - 1), (item: SelectTitleBarMenuItem, index) => {
             ImageMenuItem({ item: item, index: this.index * 1000 + index + 1 })
           })
 
@@ -322,7 +322,7 @@ struct CollapsibleMenuSection {
   @Builder
   popupBuilder() {
     Column() {
-      ForEach(this.menuItems.slice(CollapsibleMenuSection.maxCountOfVisibleItems - 1, this.menuItems.length), (item, index) => {
+      ForEach(this.menuItems.slice(CollapsibleMenuSection.maxCountOfVisibleItems - 1, this.menuItems.length), (item: SelectTitleBarMenuItem, index) => {
         ImageMenuItem({ item: item, index: this.index * 1000 + CollapsibleMenuSection.maxCountOfVisibleItems + index })
       })
     }
@@ -336,8 +336,8 @@ struct CollapsibleMenuSection {
 
 @Component
 struct ImageMenuItem {
-  item: SelectTitleBarMenuItem
-  index: number
+  item: SelectTitleBarMenuItem = {} as SelectTitleBarMenuItem
+  index: number = 0
 
   static readonly imageSize = 24
   static readonly imageHotZoneWidth = 48
@@ -438,5 +438,3 @@ struct ImageMenuItem {
     .onClick(() => this.item.isEnabled && this.item.action && this.item.action())
   }
 }
-
-export default { SelectTitleBar }

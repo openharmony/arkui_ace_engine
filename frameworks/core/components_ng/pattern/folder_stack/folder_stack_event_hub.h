@@ -22,6 +22,7 @@
 
 namespace OHOS::Ace::NG {
 using ChangeEvent = std::function<void(const FolderEventInfo& folderEventInfo)>;
+using HoverStatusChangeEvent = std::function<void(const FolderEventInfo& folderEventInfo)>;
 
 class FolderStackEventHub : public EventHub {
     DECLARE_ACE_TYPE(FolderStackEventHub, EventHub)
@@ -32,6 +33,11 @@ public:
         changeEvent_ = std::move(changeEvent);
     }
 
+    void SetOnHoverStatusChange(HoverStatusChangeEvent&& hoverStatusChangeEvent)
+    {
+        hoverStatusChangeEvent_ = std::move(hoverStatusChangeEvent);
+    }
+
     void OnFolderStateChange(const FolderEventInfo& folderEventInfo) const
     {
         if (changeEvent_) {
@@ -39,8 +45,16 @@ public:
         }
     }
 
+    void OnHoverStatusChange(const FolderEventInfo&& folderEventInfo) const
+    {
+        if (hoverStatusChangeEvent_) {
+            hoverStatusChangeEvent_(folderEventInfo);
+        }
+    }
+
 private:
     ChangeEvent changeEvent_;
+    HoverStatusChangeEvent hoverStatusChangeEvent_;
 };
 } // namespace OHOS::Ace::NG
 

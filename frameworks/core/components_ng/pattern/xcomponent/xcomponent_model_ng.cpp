@@ -22,6 +22,7 @@
 #include "core/components_v2/inspector/inspector_constants.h"
 
 namespace OHOS::Ace::NG {
+const uint32_t DEFAULT_SURFACE_SIZE = 0;
 void XComponentModelNG::Create(const std::string& id, XComponentType type, const std::string& libraryname,
     const std::shared_ptr<InnerXComponentController>& xcomponentController)
 {
@@ -68,12 +69,13 @@ XComponentType XComponentModelNG::GetTypeImpl(const RefPtr<FrameNode>& frameNode
 
 XComponentType XComponentModelNG::GetType()
 {
-    return GetTypeImpl(ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    auto frameNode = AceType::Claim(ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    return GetTypeImpl(frameNode);
 }
 
 void XComponentModelNG::SetSoPath(const std::string& soPath)
 {
-    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    auto frameNode = AceType::Claim(ViewStackProcessor::GetInstance()->GetMainFrameNode());
     CHECK_NULL_VOID(frameNode);
     auto type = GetTypeImpl(frameNode);
     if (type == XComponentType::COMPONENT || type == XComponentType::NODE) {
@@ -86,7 +88,7 @@ void XComponentModelNG::SetSoPath(const std::string& soPath)
 
 void XComponentModelNG::SetOnLoad(LoadEvent&& onLoad)
 {
-    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    auto frameNode = AceType::Claim(ViewStackProcessor::GetInstance()->GetMainFrameNode());
     CHECK_NULL_VOID(frameNode);
     auto type = GetTypeImpl(frameNode);
     if (type == XComponentType::COMPONENT || type == XComponentType::NODE) {
@@ -99,7 +101,7 @@ void XComponentModelNG::SetOnLoad(LoadEvent&& onLoad)
 
 void XComponentModelNG::SetOnDestroy(DestroyEvent&& onDestroy)
 {
-    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    auto frameNode = AceType::Claim(ViewStackProcessor::GetInstance()->GetMainFrameNode());
     CHECK_NULL_VOID(frameNode);
     auto type = GetTypeImpl(frameNode);
     if (type == XComponentType::COMPONENT || type == XComponentType::NODE) {
@@ -138,14 +140,14 @@ void XComponentModelNG::RegisterOnDestroy(const RefPtr<AceType>& node, DestroyEv
 
 bool XComponentModelNG::IsTexture()
 {
-    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    auto frameNode = AceType::Claim(ViewStackProcessor::GetInstance()->GetMainFrameNode());
     CHECK_NULL_RETURN(frameNode, false);
     return GetTypeImpl(frameNode) == XComponentType::TEXTURE;
 }
 
 void XComponentModelNG::SetDetachCallback(DetachCallback&& onDetach)
 {
-    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    auto frameNode = AceType::Claim(ViewStackProcessor::GetInstance()->GetMainFrameNode());
     CHECK_NULL_VOID(frameNode);
     auto type = GetTypeImpl(frameNode);
     if (type == XComponentType::COMPONENT || type == XComponentType::NODE) {
@@ -195,12 +197,43 @@ void XComponentModelNG::SetXComponentType(FrameNode* frameNode, XComponentType t
     auto xcPattern = AceType::DynamicCast<XComponentPattern>(frameNode->GetPattern());
     CHECK_NULL_VOID(xcPattern);
     xcPattern->SetType(type);
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(XComponentLayoutProperty, XComponentType, type, frameNode);
 }
 
 void XComponentModelNG::SetXComponentSurfaceSize(FrameNode* frameNode, uint32_t width, uint32_t height)
 {
     auto xcPattern = AceType::DynamicCast<XComponentPattern>(frameNode->GetPattern());
     CHECK_NULL_VOID(xcPattern);
-    xcPattern->SetSurfaceSize(width, height);
+    xcPattern->ConfigSurface(width, height);
+}
+
+std::string XComponentModelNG::GetXComponentId(FrameNode* frameNode)
+{
+    auto xcPattern = AceType::DynamicCast<XComponentPattern>(frameNode->GetPattern());
+    CHECK_NULL_RETURN(xcPattern, "");
+    return xcPattern->GetId();
+}
+
+XComponentType XComponentModelNG::GetXComponentType(FrameNode* frameNode)
+{
+    auto xcPattern = AceType::DynamicCast<XComponentPattern>(frameNode->GetPattern());
+    CHECK_NULL_RETURN(xcPattern, XComponentType::SURFACE);
+    return xcPattern->GetType();
+}
+
+uint32_t XComponentModelNG::GetXComponentSurfaceWidth(FrameNode* frameNode)
+{
+    auto xcPattern = AceType::DynamicCast<XComponentPattern>(frameNode->GetPattern());
+    CHECK_NULL_RETURN(xcPattern, DEFAULT_SURFACE_SIZE);
+    auto drawSize = xcPattern->GetDrawSize();
+    return drawSize.Width();
+}
+
+uint32_t XComponentModelNG::GetXComponentSurfaceHeight(FrameNode* frameNode)
+{
+    auto xcPattern = AceType::DynamicCast<XComponentPattern>(frameNode->GetPattern());
+    CHECK_NULL_RETURN(xcPattern, DEFAULT_SURFACE_SIZE);
+    auto drawSize = xcPattern->GetDrawSize();
+    return drawSize.Height();
 }
 } // namespace OHOS::Ace::NG

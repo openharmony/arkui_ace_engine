@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -43,7 +43,9 @@ void IndexerLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     auto itemSize = indexerLayoutProperty->GetItemSize().value_or(Dimension(INDEXER_ITEM_SIZE, DimensionUnit::VP));
     itemSize_ = ConvertToPx(itemSize, layoutConstraint.scaleProperty, layoutConstraint.maxSize.Height()).value();
     auto defaultHorizontalPadding = Dimension(INDEXER_PADDING_LEFT, DimensionUnit::VP).ConvertToPx();
-    auto defaultVerticalPadding = Dimension(INDEXER_PADDING_TOP, DimensionUnit::VP).ConvertToPx();
+    auto defaultVerticalPadding = Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)
+                                      ? Dimension(INDEXER_PADDING_TOP_API_TWELVE, DimensionUnit::VP).ConvertToPx()
+                                      : Dimension(INDEXER_PADDING_TOP, DimensionUnit::VP).ConvertToPx();
     const auto& padding = layoutWrapper->GetLayoutProperty()->CreatePaddingAndBorderWithDefault(
         static_cast<float>(defaultHorizontalPadding), static_cast<float>(defaultVerticalPadding), 0, 0);
     auto verticalPadding = (padding.top.value_or(0) + padding.bottom.value_or(0));
@@ -59,17 +61,8 @@ void IndexerLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
                             : std::clamp(contentHeight, 0.0f, layoutConstraint.maxSize.Height());
     contentHeight = GreatNotEqual(contentHeight, actualHeight_) ? actualHeight_ : contentHeight;
     itemWidth_ = GreatOrEqual(actualWidth - horizontalPadding, 0.0f) ? actualWidth - horizontalPadding : 0.0f;
-    itemSizeRender_ =
-        GreatOrEqual(contentHeight - verticalPadding, 0.0f) ? (contentHeight - verticalPadding) / itemCount_ : 0.0f;
-    auto childLayoutConstraint = indexerLayoutProperty->CreateChildConstraint();
-    for (int32_t index = 0; index < itemCount_; index++) {
-        auto childWrapper = layoutWrapper->GetOrCreateChildByIndex(index);
-        CHECK_NULL_VOID(childWrapper);
-        childLayoutConstraint.UpdateSelfMarginSizeWithCheck(OptionalSizeF(itemWidth_, itemSizeRender_));
-        childWrapper->Measure(childLayoutConstraint);
-    }
+    auto childCount = layoutWrapper->GetTotalChildCount();
     if (indexerLayoutProperty->GetIsPopupValue(false)) {
-        auto childCount = layoutWrapper->GetTotalChildCount();
         auto childWrapper = layoutWrapper->GetOrCreateChildByIndex(childCount - 1);
         CHECK_NULL_VOID(childWrapper);
         auto childLayoutProperty = AceType::DynamicCast<LinearLayoutProperty>(childWrapper->GetLayoutProperty());
@@ -77,6 +70,16 @@ void IndexerLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
         auto layoutConstraint = childLayoutProperty->GetLayoutConstraint();
         layoutConstraint->Reset();
         childWrapper->Measure(layoutConstraint);
+        childCount--;
+    }
+    itemSizeRender_ = GreatOrEqual(contentHeight - verticalPadding, 0.0f) && childCount > 0
+                        ? (contentHeight - verticalPadding) / childCount : 0.0f;
+    auto childLayoutConstraint = indexerLayoutProperty->CreateChildConstraint();
+    for (int32_t index = 0; index < childCount; index++) {
+        auto childWrapper = layoutWrapper->GetOrCreateChildByIndex(index);
+        CHECK_NULL_VOID(childWrapper);
+        childLayoutConstraint.UpdateSelfMarginSizeWithCheck(OptionalSizeF(itemWidth_, itemSizeRender_));
+        childWrapper->Measure(childLayoutConstraint);
     }
     
     layoutWrapper->GetGeometryNode()->SetFrameSize(SizeF(actualWidth, actualHeight_));
@@ -87,11 +90,14 @@ void IndexerLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     CHECK_NULL_VOID(layoutWrapper);
     auto layoutProperty = DynamicCast<IndexerLayoutProperty>(layoutWrapper->GetLayoutProperty());
     CHECK_NULL_VOID(layoutProperty);
-    auto size = layoutWrapper->GetGeometryNode()->GetFrameSize();
+    auto frameSize = layoutWrapper->GetGeometryNode()->GetFrameSize();
     auto defaultHorizontalPadding = Dimension(INDEXER_PADDING_LEFT, DimensionUnit::VP).ConvertToPx();
-    auto defaultVerticalPadding = Dimension(INDEXER_PADDING_TOP, DimensionUnit::VP).ConvertToPx();
+    auto defaultVerticalPadding = Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)
+                                      ? Dimension(INDEXER_PADDING_TOP_API_TWELVE, DimensionUnit::VP).ConvertToPx()
+                                      : Dimension(INDEXER_PADDING_TOP, DimensionUnit::VP).ConvertToPx();
     const auto& padding = layoutProperty->CreatePaddingAndBorderWithDefault(
         static_cast<float>(defaultHorizontalPadding), static_cast<float>(defaultVerticalPadding), 0, 0);
+    auto size = frameSize;
     MinusPaddingToSize(padding, size);
     auto left = padding.left.value_or(0);
     auto top = padding.top.value_or(0);
@@ -104,7 +110,7 @@ void IndexerLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     auto childCount = layoutWrapper->GetTotalChildCount();
     if (layoutProperty->GetIsPopupValue(false)) {
         const auto& child = layoutWrapper->GetChildByIndex(childCount - 1);
-        auto offset = GetPositionOfPopupNode(layoutProperty, size.Width());
+        auto offset = GetPositionOfPopupNode(layoutProperty, frameSize.Width());
         child->GetHostNode()->GetRenderContext()->UpdatePosition(offset);
         child->Layout();
         childCount -= 1;
@@ -133,15 +139,18 @@ OffsetT<Dimension> IndexerLayoutAlgorithm::GetPositionOfPopupNode(
         layoutProperty->GetPopupPositionY().value_or(Dimension(NG::BUBBLE_POSITION_Y, DimensionUnit::VP)).ConvertToPx();
     auto userDefineSpace = layoutProperty->GetPopupHorizontalSpace();
 
+    auto padding = layoutProperty->CreatePaddingWithoutBorder();
+    auto left = padding.left.value_or(0);
+    auto top = padding.top.value_or(0);
     if (alignMent == NG::AlignStyle::LEFT) {
-        auto xPos = userDefineSpace ? userDefineSpace.value().ConvertToPx() + indexerWidth
-                                    : userDefinePositionX + indexerWidth / 2;
-        return OffsetT<Dimension>(Dimension(xPos), Dimension(userDefinePositionY));
+        userDefinePositionX = (userDefineSpace ? userDefineSpace.value().ConvertToPx() + indexerWidth
+                                    : userDefinePositionX + indexerWidth / 2) - left;
     } else {
         auto bubbleSize = Dimension(BUBBLE_BOX_SIZE, DimensionUnit::VP).ConvertToPx();
-        auto xPos = (userDefineSpace ? -userDefineSpace.value().ConvertToPx()
-                                    : -userDefinePositionX + indexerWidth / 2) - bubbleSize;
-        return OffsetT<Dimension>(Dimension(xPos), Dimension(userDefinePositionY));
+        userDefinePositionX = (userDefineSpace ? -userDefineSpace.value().ConvertToPx()
+                                    : -userDefinePositionX + indexerWidth / 2)  - left - bubbleSize;
     }
+    userDefinePositionY -= top;
+    return OffsetT<Dimension>(Dimension(userDefinePositionX), Dimension(userDefinePositionY));
 }
 } // namespace OHOS::Ace::NG

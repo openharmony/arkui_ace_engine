@@ -83,6 +83,18 @@ struct DrawingContext {
     float height = 0;
 };
 
+using DrawModifierFunc = std::function<void(NG::DrawingContext& drawingContext)>;
+
+class ACE_EXPORT DrawModifier : public virtual AceType {
+public:
+    DECLARE_ACE_TYPE(DrawModifier, AceType);
+
+public:
+    DrawModifierFunc jsDrawBehindFunc;
+    DrawModifierFunc jsDrawContentFunc;
+    DrawModifierFunc jsDrawFrontFunc;
+};
+
 template<typename T>
 class NormalProperty : public PropertyBase {
     DECLARE_ACE_TYPE(NormalProperty, PropertyBase);
@@ -156,51 +168,6 @@ private:
     ACE_DISALLOW_COPY_AND_MOVE(AnimatableProperty);
 };
 
-class ContentModifier : public Modifier {
-    DECLARE_ACE_TYPE(ContentModifier, Modifier);
-
-public:
-    ContentModifier() = default;
-    ~ContentModifier() override = default;
-    virtual void onDraw(DrawingContext& Context) = 0;
-
-    void AttachProperty(const RefPtr<PropertyBase>& prop)
-    {
-        attachedProperties_.push_back(prop);
-    }
-
-    const std::vector<RefPtr<PropertyBase>>& GetAttachedProperties()
-    {
-        return attachedProperties_;
-    }
-
-    const std::optional<RectF>& GetBoundsRect()
-    {
-        return rect_;
-    }
-
-    void SetBoundsRect(const std::optional<RectF>& rect)
-    {
-        rect_ = rect;
-    }
-
-    void SetIsCustomFont(bool isCustomFont)
-    {
-        isCustomFont_ = isCustomFont;
-    }
-
-    bool GetIsCustomFont()
-    {
-        return isCustomFont_;
-    }
-
-private:
-    std::vector<RefPtr<PropertyBase>> attachedProperties_;
-    std::optional<RectF> rect_;
-    bool isCustomFont_ = false;
-    ACE_DISALLOW_COPY_AND_MOVE(ContentModifier);
-};
-
 class OverlayModifier : public Modifier {
     DECLARE_ACE_TYPE(OverlayModifier, Modifier);
 
@@ -261,6 +228,84 @@ DECLARE_PROP_TYPED_CLASS(AnimatablePropertyVectorColor, AnimatableProperty, Grad
 DECLARE_PROP_TYPED_CLASS(AnimatablePropertyOffsetF, AnimatableProperty, OffsetF);
 DECLARE_PROP_TYPED_CLASS(AnimatablePropertySizeF, AnimatableProperty, SizeF);
 DECLARE_PROP_TYPED_CLASS(AnimatableArithmeticProperty, AnimatableProperty, RefPtr<CustomAnimatableArithmetic>);
+
+class ContentModifier : public Modifier {
+    DECLARE_ACE_TYPE(ContentModifier, Modifier);
+
+public:
+    ContentModifier()
+    {
+        changeCount_ = MakeRefPtr<PropertyInt>(0);
+        AttachProperty(changeCount_);
+    };
+    ~ContentModifier() override = default;
+    virtual void onDraw(DrawingContext& Context) = 0;
+    void Draw(DrawingContext& Context)
+    {
+        if (drawModifier_ && drawModifier_->jsDrawBehindFunc) {
+            drawModifier_->jsDrawBehindFunc(Context);
+        }
+
+        if (drawModifier_ && drawModifier_->jsDrawContentFunc) {
+            drawModifier_->jsDrawContentFunc(Context);
+        } else {
+            onDraw(Context);
+        }
+
+        if (drawModifier_ && drawModifier_->jsDrawFrontFunc) {
+            drawModifier_->jsDrawFrontFunc(Context);
+        }
+    }
+
+    void AttachProperty(const RefPtr<PropertyBase>& prop)
+    {
+        attachedProperties_.push_back(prop);
+    }
+
+    const std::vector<RefPtr<PropertyBase>>& GetAttachedProperties()
+    {
+        return attachedProperties_;
+    }
+
+    const std::optional<RectF>& GetBoundsRect()
+    {
+        return rect_;
+    }
+
+    void SetBoundsRect(const std::optional<RectF>& rect)
+    {
+        rect_ = rect;
+    }
+
+    void SetIsCustomFont(bool isCustomFont)
+    {
+        isCustomFont_ = isCustomFont;
+    }
+
+    bool GetIsCustomFont()
+    {
+        return isCustomFont_;
+    }
+
+    void SetDrawModifier(const RefPtr<NG::DrawModifier>& drawModifier)
+    {
+        drawModifier_ = drawModifier;
+    }
+
+    void SetContentChange()
+    {
+        CHECK_NULL_VOID(changeCount_);
+        changeCount_->Set(changeCount_->Get() + 1);
+    }
+
+private:
+    std::vector<RefPtr<PropertyBase>> attachedProperties_;
+    std::optional<RectF> rect_;
+    bool isCustomFont_ = false;
+    RefPtr<NG::DrawModifier> drawModifier_;
+    RefPtr<PropertyInt> changeCount_; // use to trigger rerendering
+    ACE_DISALLOW_COPY_AND_MOVE(ContentModifier);
+};
 
 class ModifierImpl {
 };

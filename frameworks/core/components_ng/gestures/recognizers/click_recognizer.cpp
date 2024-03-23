@@ -96,6 +96,17 @@ void ClickRecognizer::InitGlobalValue(SourceType sourceType)
 
 void ClickRecognizer::OnAccepted()
 {
+    int64_t acceptTime = GetSysTimestamp();
+    int64_t inputTime = acceptTime;
+    if (firstInputTime_.has_value()) {
+        inputTime = static_cast<int64_t>(firstInputTime_.value().time_since_epoch().count());
+    }
+    if (SystemProperties::GetTraceInputEventEnabled()) {
+        ACE_SCOPED_TRACE("UserEvent InputTime:%lld AcceptTime:%lld InputType:ClickGesture",
+            static_cast<long long>(inputTime), static_cast<long long>(acceptTime));
+    }
+    firstInputTime_.reset();
+
     auto node = GetAttachedNode().Upgrade();
     TAG_LOGI(AceLogTag::ACE_GESTURE, "Click gesture has been accepted, node tag = %{public}s, id = %{public}s",
         node ? node->GetTag().c_str() : "null", node ? std::to_string(node->GetId()).c_str() : "invalid");
@@ -137,15 +148,27 @@ void ClickRecognizer::OnAccepted()
     }
     UpdateFingerListInfo();
     SendCallbackMsg(onAction_);
+
+    int64_t overTime = GetSysTimestamp();
+    if (SystemProperties::GetTraceInputEventEnabled()) {
+        ACE_SCOPED_TRACE("UserEvent InputTime:%lld OverTime:%lld InputType:ClickGesture",
+            static_cast<long long>(inputTime), static_cast<long long>(overTime));
+    }
+    firstInputTime_.reset();
 }
 
 void ClickRecognizer::OnRejected()
 {
     refereeState_ = RefereeState::FAIL;
+    firstInputTime_.reset();
 }
 
 void ClickRecognizer::HandleTouchDownEvent(const TouchEvent& event)
 {
+    if (!firstInputTime_.has_value()) {
+        firstInputTime_ = event.time;
+    }
+
     auto pipeline = PipelineBase::GetCurrentContext();
     if (pipeline && pipeline->IsFormRender()) {
         touchDownTime_ = event.time;

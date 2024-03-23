@@ -2246,8 +2246,7 @@ HWTEST_F(GestureEventHubTestNg, GetDragDropInfo001, TestSize.Level1)
     /**
      * @tc.steps: step2. set defaultOnDragStart for eventHub
      */
-    auto defaultOnDragStart = [](
-        const RefPtr<OHOS::Ace::DragEvent>& dragEvent, const std::string& /* param */) {
+    auto defaultOnDragStart = [](const RefPtr<OHOS::Ace::DragEvent>& dragEvent, const std::string& /* param */) {
         DragDropInfo dragDropInfo;
         auto unifiedData = AceType::MakeRefPtr<MockUnifiedData>();
         dragEvent->SetData(unifiedData);
@@ -2283,8 +2282,7 @@ HWTEST_F(GestureEventHubTestNg, GetDragDropInfo001, TestSize.Level1)
     /**
      * @tc.steps: step5. set onDragStart for eventHub
      */
-    auto onDragStart = [](
-        const RefPtr<OHOS::Ace::DragEvent>& dragEvent, const std::string& /* param */) {
+    auto onDragStart = [](const RefPtr<OHOS::Ace::DragEvent>& dragEvent, const std::string& /* param */) {
         DragDropInfo dragDropInfo;
         auto unifiedData = AceType::MakeRefPtr<MockUnifiedData>();
         dragEvent->SetData(unifiedData);
@@ -2324,8 +2322,7 @@ HWTEST_F(GestureEventHubTestNg, GetDragDropInfo002, TestSize.Level1)
     /**
      * @tc.steps: step2. set onDragStart for eventHub
      */
-    auto onDragStart = [](
-        const RefPtr<OHOS::Ace::DragEvent>& dragEvent, const std::string& /* param */) {
+    auto onDragStart = [](const RefPtr<OHOS::Ace::DragEvent>& dragEvent, const std::string& /* param */) {
         DragDropInfo dragDropInfo;
         auto unifiedData = AceType::MakeRefPtr<MockUnifiedData>();
         dragEvent->SetData(unifiedData);
@@ -2383,8 +2380,7 @@ HWTEST_F(GestureEventHubTestNg, GetUnifiedData001, TestSize.Level1)
      *            case: user not set onDragStart callback function
      */
     RefPtr<OHOS::Ace::DragEvent> dragEvent = AceType::MakeRefPtr<OHOS::Ace::DragEvent>();
-    auto defaultOnDragStart = [](
-        const RefPtr<OHOS::Ace::DragEvent>& dragEvent, const std::string& /* param */) {
+    auto defaultOnDragStart = [](const RefPtr<OHOS::Ace::DragEvent>& dragEvent, const std::string& /* param */) {
         DragDropInfo dragDropInfo;
         auto unifiedData = AceType::MakeRefPtr<MockUnifiedData>();
         dragEvent->SetData(unifiedData);
@@ -2400,7 +2396,7 @@ HWTEST_F(GestureEventHubTestNg, GetUnifiedData001, TestSize.Level1)
      * @tc.expected: unifiedData is not null, extraInfo is not empty.
      */
     DragDropInfo dragDropInfo;
-    gestureEventHub->GetUnifiedData(dragDropInfo, dragEvent);
+    gestureEventHub->GetUnifiedData("", dragDropInfo, dragEvent);
     EXPECT_TRUE(dragEvent->GetData());
     EXPECT_EQ(dragDropInfo.extraInfo, "default extraInfo");
 
@@ -2412,7 +2408,7 @@ HWTEST_F(GestureEventHubTestNg, GetUnifiedData001, TestSize.Level1)
     dragEvent->SetData(nullptr);
     dragDropInfo.extraInfo = "";
     eventHub->SetDefaultOnDragStart(nullptr);
-    gestureEventHub->GetUnifiedData(dragDropInfo, dragEvent);
+    gestureEventHub->GetUnifiedData("", dragDropInfo, dragEvent);
     EXPECT_EQ(dragEvent->GetData(), nullptr);
     EXPECT_EQ(dragDropInfo.extraInfo, "");
 }
@@ -2438,8 +2434,7 @@ HWTEST_F(GestureEventHubTestNg, GetUnifiedData002, TestSize.Level1)
      *            case: set user set onDragStart and defaultOnDragStart
      */
     RefPtr<OHOS::Ace::DragEvent> dragEvent = AceType::MakeRefPtr<OHOS::Ace::DragEvent>();
-    auto defaultOnDragStart = [](
-        const RefPtr<OHOS::Ace::DragEvent>& dragEvent, const std::string& /* param */) {
+    auto defaultOnDragStart = [](const RefPtr<OHOS::Ace::DragEvent>& dragEvent, const std::string& /* param */) {
         DragDropInfo dragDropInfo;
         auto unifiedData = AceType::MakeRefPtr<MockUnifiedData>();
         dragEvent->SetData(unifiedData);
@@ -2455,7 +2450,7 @@ HWTEST_F(GestureEventHubTestNg, GetUnifiedData002, TestSize.Level1)
      * @tc.expected: unifiedData is not null, extraInfo is not empty.
      */
     DragDropInfo dragDropInfo;
-    gestureEventHub->GetUnifiedData(dragDropInfo, dragEvent);
+    gestureEventHub->GetUnifiedData("", dragDropInfo, dragEvent);
     EXPECT_TRUE(dragEvent->GetData());
     EXPECT_EQ(dragDropInfo.extraInfo, "default extraInfo");
 
@@ -2474,8 +2469,81 @@ HWTEST_F(GestureEventHubTestNg, GetUnifiedData002, TestSize.Level1)
      *            case: user set unifiedData and extraInfo
      * @tc.expected: unifiedData is not null, extraInfo is not empty.
      */
-    gestureEventHub->GetUnifiedData(dragDropInfo, dragEvent);
+    gestureEventHub->GetUnifiedData("", dragDropInfo, dragEvent);
     EXPECT_TRUE(dragEvent->GetData());
     EXPECT_EQ(dragDropInfo.extraInfo, "user set extraInfo");
+}
+
+/**
+ * @tc.name: GestureEventHubNodeTest001
+ * @tc.desc: Test SetJSFrameNodeOnClick and ClearJSFrameNodeOnClick.
+ * @tc.type: FUNC
+ */
+HWTEST_F(GestureEventHubTestNg, GestureEventHubNodeTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create GestureEventHub.
+     * @tc.expected: gestureEventHub is not null.
+     */
+    auto eventHub = AceType::MakeRefPtr<EventHub>();
+    EXPECT_TRUE(eventHub);
+    auto gestureEventHub = AceType::MakeRefPtr<GestureEventHub>(eventHub);
+    EXPECT_TRUE(gestureEventHub);
+
+    /**
+     * @tc.steps: step2. Create GestureEventFunc and call SetJSFrameNodeOnClick.
+     * @tc.expected: ClickEventActuator_ is not nullptr.
+     */
+    GestureEventFunc gestureEventFunc = [](GestureEvent& info) {};
+    gestureEventHub->SetJSFrameNodeOnClick(std::move(gestureEventFunc));
+    EXPECT_NE(gestureEventHub->clickEventActuator_, nullptr);
+
+    /**
+     * @tc.steps: step3. Set parallelCombineClick and call SetJSFrameNodeOnClick.
+     * @tc.expected: userParallelClickEventActuator_ is not nullptr.
+     */
+    gestureEventHub->parallelCombineClick = true;
+    gestureEventHub->SetJSFrameNodeOnClick(std::move(gestureEventFunc));
+    EXPECT_NE(gestureEventHub->userParallelClickEventActuator_, nullptr);
+
+    /**
+     * @tc.steps: step4. Call ClearJSFrameNodeOnClick.
+     * @tc.expected: jsFrameNodeCallback_ is nullptr.
+     */
+    gestureEventHub->ClearJSFrameNodeOnClick();
+    EXPECT_EQ(gestureEventHub->clickEventActuator_->jsFrameNodeCallback_, nullptr);
+}
+
+/**
+ * @tc.name: GestureEventHubNodeTest002
+ * @tc.desc: Test SetOnTouchEvent, SetJSFrameNodeOnTouchEvent and ClearJSFrameNodeOnClick.
+ * @tc.type: FUNC
+ */
+HWTEST_F(GestureEventHubTestNg, GestureEventHubNodeTest002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create GestureEventHub.
+     * @tc.expected: gestureEventHub is not null.
+     */
+    auto eventHub = AceType::MakeRefPtr<EventHub>();
+    EXPECT_TRUE(eventHub);
+    auto gestureEventHub = AceType::MakeRefPtr<GestureEventHub>(eventHub);
+    EXPECT_TRUE(gestureEventHub);
+
+    /**
+     * @tc.steps: step2. Create touchEventFunc and call SetOnTouchEvent.
+     * @tc.expected: ouchEventActuator_ is not nullptr.
+     */
+    TouchEventFunc touchEventFunc = [](TouchEventInfo& info) {};
+    gestureEventHub->SetOnTouchEvent(std::move(touchEventFunc));
+    gestureEventHub->SetJSFrameNodeOnTouchEvent(std::move(touchEventFunc));
+    EXPECT_NE(gestureEventHub->touchEventActuator_, nullptr);
+
+    /**
+     * @tc.steps: step3. Call ClearJSFrameNodeOnTouch.
+     * @tc.expected: commonTouchEventCallback_ is nullptr.
+     */
+    gestureEventHub->ClearJSFrameNodeOnTouch();
+    EXPECT_EQ(gestureEventHub->touchEventActuator_->commonTouchEventCallback_, nullptr);
 }
 } // namespace OHOS::Ace::NG

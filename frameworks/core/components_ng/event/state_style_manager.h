@@ -121,6 +121,7 @@ public:
 private:
     void FireStateFunc();
 
+    void PostListItemPressStyleTask(UIState state);
     void PostPressStyleTask(uint32_t delayTime);
     void PostPressCancelStyleTask(uint32_t delayTime);
 

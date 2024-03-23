@@ -19,7 +19,6 @@
 #include "core/components/common/properties/color.h"
 #include "core/components/theme/theme.h"
 #include "core/components/theme/theme_constants.h"
-#include "core/components/theme/theme_constants_defines.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -65,19 +64,14 @@ public:
                 return theme;
             }
 
-            ParsePattern(themeConstants->GetThemeStyle(), theme);
+            ParsePattern(themeConstants, theme);
             return theme;
         }
 
     private:
-        void ParsePattern(const RefPtr<ThemeStyle>& themeStyle, const RefPtr<SheetTheme>& theme) const
+        void ParsePattern(const RefPtr<ThemeConstants>& themeConstants, const RefPtr<SheetTheme>& theme) const
         {
-            if (!themeStyle) {
-                LOGE("themeStyle is null");
-                return;
-            }
-
-            auto sheetPattern = themeStyle->GetAttr<RefPtr<ThemeStyle>>(THEME_PATTERN_SHEET, nullptr);
+            RefPtr<ThemeStyle> sheetPattern = themeConstants->GetPatternByName(THEME_PATTERN_SHEET);
             if (!sheetPattern) {
                 LOGE("sheetPattern is null");
                 return;

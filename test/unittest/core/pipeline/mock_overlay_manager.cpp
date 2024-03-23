@@ -21,7 +21,7 @@ namespace {
 bool removeOverlayFlag = false;
 } // namespace
 void OverlayManager::ShowToast(const std::string& message, int32_t duration, const std::string& bottom,
-    bool isRightToLeft, const ToastShowMode& showMode)
+    bool isRightToLeft, const ToastShowMode& showMode, int32_t alignment, std::optional<DimensionOffset> offset)
 {}
 
 void OverlayManager::ClearToastInSubwindow() {}
@@ -56,7 +56,7 @@ void OverlayManager::HideAllMenus() {}
 
 void OverlayManager::DeleteMenu(int32_t targetId) {}
 
-void OverlayManager::CleanMenuInSubWindow() {}
+void OverlayManager::CleanMenuInSubWindow(int32_t targetId) {}
 
 RefPtr<FrameNode> OverlayManager::ShowDialog(
     const DialogProperties& dialogProps, std::function<void()>&& buildFunc, bool isRightToLeft)
@@ -65,17 +65,20 @@ RefPtr<FrameNode> OverlayManager::ShowDialog(
 }
 
 void OverlayManager::ShowDateDialog(const DialogProperties& dialogProps, const DatePickerSettingData& settingData,
-    std::map<std::string, NG::DialogEvent> dialogEvent, std::map<std::string, NG::DialogGestureEvent> dialogCancelEvent)
+    std::map<std::string, NG::DialogEvent> dialogEvent, std::map<std::string, NG::DialogGestureEvent> dialogCancelEvent,
+    std::map<std::string, NG::DialogCancelEvent> dialogLifeCycleEvent)
 {}
 
 void OverlayManager::ShowTimeDialog(const DialogProperties& dialogProps, const TimePickerSettingData& settingData,
     std::map<std::string, PickerTime> timePickerProperty, std::map<std::string, NG::DialogEvent> dialogEvent,
-    std::map<std::string, NG::DialogGestureEvent> dialogCancelEvent)
+    std::map<std::string, NG::DialogGestureEvent> dialogCancelEvent,
+    std::map<std::string, NG::DialogCancelEvent> dialogLifeCycleEvent)
 {}
 
 void OverlayManager::ShowTextDialog(const DialogProperties& dialogProps, const TextPickerSettingData& settingData,
     std::map<std::string, NG::DialogTextEvent> dialogEvent,
-    std::map<std::string, NG::DialogGestureEvent> dialogCancelEvent)
+    std::map<std::string, NG::DialogGestureEvent> dialogCancelEvent,
+    std::map<std::string, NG::DialogCancelEvent> dialogLifeCycleEvent)
 {}
 
 void OverlayManager::CloseDialog(const RefPtr<FrameNode>& dialogNode)

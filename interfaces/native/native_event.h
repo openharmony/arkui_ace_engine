@@ -17,7 +17,9 @@
  * @addtogroup ArkUI_NativeModule
  * @{
  *
- * @brief 提供ArkUI在Native侧的UI能力，如UI组件创建销毁、树节点操作，属性设置，事件监听等。
+ * @brief Provides UI capabilities of ArkUI on the native side, such as UI
+ * component creation and destruction, tree node operations, attribute setting,
+ * and event listening.
  *
  * @since 12
  */
@@ -25,7 +27,7 @@
 /**
  * @file native_event.h
  *
- * @brief 提供ArkUI在Native侧的事件类型定义集合。
+ * @brief Provides the event type definitions of ArkUI on the native side.
  *
  * @library libace_ndk.z.so
  * @syscap SystemCapability.ArkUI.ArkUI.Full
@@ -43,178 +45,216 @@ extern "C" {
 #endif
 
 /**
- * @brief Touch事件的工具类型定义。
+ * @brief Enumerates the tool types of the touch event.
  *
  * @since 12
  */
 typedef enum {
-    /** 不支持的工具类型。 */
+    /** Unknown tool type. */
     NODE_TOOL_TYPE_UNKNOWN = -1,
 
-    /** 手指。 */
+    /** Finger. */
     NODE_TOOL_TYPE_FINGER = 0,
 
-    /** 笔。 */
+    /** Stylus. */
     NODE_TOOL_TYPE_STYLUS = 1,
 } ArkUI_NodeToolType;
 
 /**
- * @brief 产生Touch事件的来源类型定义。
+ * @brief Enumerates the source types of the touch event.
  *
  * @since 12
  */
 typedef enum {
-    /** 不支持的来源类型。 */
+    /** Unknown source type. */
     NODE_SOURCE_TYPE_UNKNOWN = -1,
-    /** 触摸屏。 */
+    /** Touchscreen. */
     NODE_SOURCE_TYPE_TOUCH_SCREEN = 0,
-    /** 手写笔。 */
+    /** Stylus. */
     NODE_SOURCE_TYPE_STYLUS = 1,
-    /** 触控板。 */
+    /** Touchpad. */
     NODE_SOURCE_TYPE_TOUCHPAD = 2,
 } ArkUI_NodeSourceType;
 
 /**
- * @brief 定义Touch事件触控点信息的数据结构。
+ * @brief Defines the data structure of the touch point information of the
+ * touch event.
  *
  * @since 12
  */
 typedef struct {
-    /** 触控事件标识。 */
+    /** ID of the touch event. */
     int32_t id;
 
-    /** 手指按下的时间戳，单位为微秒（us）。*/
+    /** Timestamp when a finger is pressed, in μs. */
     int64_t pressedTime;
 
-    /** 触摸位置所属的屏幕X坐标。 */
+    /** X coordinate of the touch point on the screen. */
     int32_t screenX;
 
-    /** 触摸位置所属的屏幕Y坐标。 */
+    /** Y coordinate of the touch point on the screen. */
     int32_t screenY;
 
-    /** 触摸位置在窗口中的X坐标。 */
+    /** X coordinate of the touch point in the window. */
     int32_t windowX;
 
-    /** 触摸位置在窗口中的Y坐标。 */
+    /** Y coordinate of the touch point in the window. */
     int32_t windowY;
 
-    /** 触摸位置在当前触发事件组件中的X坐标。 */
+    /** X coordinate of the touch point in the component that triggers the event. */
     int32_t nodeX;
 
-    /** 触摸位置在当前触发事件组件中的Y坐标。 */
+    /** Y coordinate of the touch point in the component that triggers the event. */
     int32_t nodeY;
 
-    /** 压力值，取值范围是[0.0, 1.0]，0.0表示不支持。 */
+    /** Pressure value. The value range is [0.0, 1.0]. The value 0.0 indicates
+        that the pressure is not supported. */
     double pressure;
 
-    /** 触摸区域的宽度。 */
+    /** Width of the touch area. */
     int32_t contactAreaWidth;
 
-    /** 触摸区域的高度。 */
+    /** Height of the touch area. */
     int32_t contactAreaHeight;
 
-    /** 相对YZ平面的角度，取值范围是[-90, 90]，其中正值是向右倾斜。 */
+    /** Angle relative to the YZ plane. The value range is [-90, 90]. A positive value indicates a rightward tilt. */
     double tiltX;
 
-    /** 相对XZ平面的角度，取值范围是[-90, 90]，其中正值是向下倾斜。 */
+    /** Angle relative to the XZ plane. The value range is [-90, 90]. A positive value indicates a downward tilt. */
     double tiltY;
 
-    /** 工具区域的中心点X坐标。 */
+    /** X coordinate of the center point of the tool area. */
     int32_t toolX;
 
-    /** 工具区域的中心点Y坐标。 */
+    /** Y coordinate of the center point of the tool area. */
     int32_t toolY;
 
-    /** 工具接触区域的宽度。 */
+    /** Width of the tool area. */
     int32_t toolWidth;
 
-    /** 工具接触区域的高度。 */
+    /** Height of the tool area. */
     int32_t toolHeight;
 
-    /** 输入设备上的X坐标。 */
+    /** X coordinate of the input device. */
     int32_t rawX;
 
-    /** 输入设备上的Y坐标。 */
+    /** Y coordinate of the input device. */
     int32_t rawY;
 
-    /** 工具类型。 */
+    /** Tool type. */
     ArkUI_NodeToolType toolType;
 } ArkUI_NodeTouchPoint;
 
 /**
- * @brief 定义触屏事件类型的枚举值。
+ * @brief Enumerates touch event types.
  *
  * @since 12
  */
 typedef enum {
-    /** 触摸取消。 */
+    /** Cancellation of touch. */
     NODE_ACTION_CANCEL = 0,
-    /** 触摸按下。 */
+    /** Pressing of a touch point. */
     NODE_ACTION_DOWN = 1,
-    /** 触摸移动。 */
+    /** Moving of a touch point. */
     NODE_ACTION_MOVE = 2,
-    /** 触摸抬起。 */
+    /** Lifting of a touch point. */
     NODE_ACTION_UP = 3,
 } ArkUI_NodeTouchEventAction;
 
 /**
- * @brief 定义历史点信息的结构类型。
+ * @brief Defines the data structure of the historical point information.
  *
  * @since 12
  */
 typedef struct {
-    /** 触屏事件类型。*/
+    /** Touch event type. */
     ArkUI_NodeTouchEventAction action;
-    /** 触屏历史事件时间戳，单位为微秒（us）。*/
+    /** Timestamp of the historical touch event, in μs. */
     int64_t timeStamp;
-    /** 历史触摸事件来源类型。*/
+    /** Source type of the historical touch event. */
     ArkUI_NodeTouchPoint actionTouch;
-    /** 历史触摸事件来源类型。*/
+    /** Source type of the historical touch event. */
     ArkUI_NodeSourceType sourceType;
 } ArkUI_NodeHistoricalTouchPoint;
 
 /**
- * @brief 定义Touch事件的结构类型。
+ * @brief Defines the data structure of the touch event.
  *
  * @since 12
  */
 typedef struct {
-    /** 触屏事件的类型。*/
+    /** Touch event type. */
     ArkUI_NodeTouchEventAction action;
 
-    /** 触屏事件时间戳，单位为微秒（us）。 */
+    /** Timestamp of the touch event, in μs. */
     int64_t timeStamp;
 
-    /** 当前触屏事件的触控点信息。*/
+    /** Touch point information of the touch event. */
     ArkUI_NodeTouchPoint actionTouch;
 
     /**
-     * @brief 返回此事件发生时所有屏幕接触点信息。
-     * @param points 用来接受数据的指针对象。
-     * @return 屏幕接触点数据数组元素数量。
+     * @brief Returns information about all touch points when this event occurs.
+     * @param points Indicates the pointer to the object that receives data.
+     * @return Returns the number of elements in the touch point information array.
      * @note
-     * ArkUI会在该函数调用时创建触控点信息数组的堆内存对象并返回指针，开发者需要在使用完成后调用delete[]手动释放内存。
+     * When this function is called, ArkUI creates a heap memory object of the touch point information array and
+     * returns the pointer to the pointer. You need to call <b>delete[]</b> to manually free the memory when the
+     * object is not in use.
      */
     int32_t (*getTouches)(ArkUI_NodeTouchPoint** points);
 
     /**
-     * @brief 返回此事件中的历史点信息。这些是在此事件和上一个事件之间发生的运动。
-     * @param historicalPoints 用来接受数据的指针对象。
-     * @return 历史点数据数组元素数量。
+     * @brief Returns the historical point information of this event, which covers actions that occur between
+     * this event and the previous event.
+     * @param historicalPoints Indicates the pointer to the object that receives data.
+     * @return Returns the number of elements in the historical touch point information array.
      * @note
-     * 框架会在该函数调用时创建历史点数据数组的堆内存对象并返回指针，开发者需要在使用完成后调用delete[]手动释放内存。
+     * When this function is called, ArkUI creates a heap memory object of the historical touch point information array
+     * and returns the pointer to the pointer. You need to call <b>delete[]</b> to manually free the memory
+     * when the object is not in use.
      */
     int32_t (*getHistoricalPoints)(ArkUI_NodeHistoricalTouchPoint** historicalPoints);
 
-    /** 触发事件来源的类型。*/
+    /** Source type of the touch event. */
     ArkUI_NodeSourceType sourceType;
 
-    /** 阻止事件进一步向父节点冒泡处理。*/
+    /** Whether to prevent propagation of the event to the parent node. */
     bool stopPropagation;
 
-    /** 阻止当前节点的默认事件处理行为，允许事件进一步向上冒泡。*/
+    /** Whether to prevent the default event processing behavior of the current node and allow propagation of the event. */
     bool preventDefault;
 } ArkUI_NodeTouchEvent;
+
+/**
+ * @brief Enumerates HitTestMode types.
+ *
+ * @since 12
+ */
+typedef enum {
+    /**
+     *  Both self and children respond to the hit test for touch events,
+     *  but block hit test of the other nodes which is masked by this node.
+     */
+    HTM_DEFAULT = 0,
+
+    /**
+     * Self respond to the hit test for touch events,
+     * but block hit test of children and other nodes which is masked by this node.
+     */
+    HTM_BLOCK,
+
+    /**
+     * Self and child respond to the hit test for touch events,
+     * and allow hit test of other nodes which is masked by this node.
+     */
+    HTM_TRANSPARENT,
+
+    /**
+     * Self not respond to the hit test for touch events,
+     * but children respond to the hit test for touch events.
+     */
+    HTM_NONE,
+} HitTestMode;
 
 #ifdef __cplusplus
 };

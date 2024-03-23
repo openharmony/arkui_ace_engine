@@ -368,13 +368,13 @@ HWTEST_F(BubbleTestNg, PanelPatternTest003, TestSize.Level1)
      */
     bubbleHub->FireChangeEvent(false);
     auto jsonFalse = JsonUtil::Create(true);
-    jsonFalse->Put("isVisible", false);
-    EXPECT_EQ(stateChange, jsonFalse->ToString());
+    jsonFalse->Put("isVisible", true);
+    EXPECT_EQ(stateChange, jsonFalse->GetValue("isVisible")->ToString());
 
     bubbleHub->FireChangeEvent(true);
     auto jsonTrue = JsonUtil::Create(true);
     jsonTrue->Put("isVisible", true);
-    EXPECT_EQ(stateChange, jsonTrue->ToString());
+    EXPECT_EQ(stateChange, jsonTrue->GetValue("isVisible")->ToString());
 }
 
 /**
@@ -578,6 +578,7 @@ HWTEST_F(BubbleTestNg, BubblePatternTest007, TestSize.Level1)
     popupParam->SetFontSize(BUBBLE_PAINT_PROPERTY_FONT_SIZE);
     popupParam->SetFontWeight(BUBBLE_PAINT_PROPERTY_FONT_WEIGHT);
     popupParam->SetFontStyle(Ace::FontStyle::ITALIC);
+    popupParam->SetHasTransition(true);
 
     // create bubbleNode
     auto targetNode = FrameNode::GetOrCreateFrameNode(V2::BUTTON_ETS_TAG,
@@ -589,6 +590,7 @@ HWTEST_F(BubbleTestNg, BubblePatternTest007, TestSize.Level1)
     EXPECT_CALL(*themeManagerOne, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<PopupTheme>()));
     auto popupNode = BubbleView::CreateBubbleNode(targetNode->GetTag(), targetNode->GetId(), popupParam);
     EXPECT_NE(popupNode, nullptr);
+    EXPECT_EQ(popupNode->GetPattern<BubblePattern>()->GetHasTransition(), true);
     auto firstTextNode = BubbleView::CreateMessage(popupParam->GetMessage(), popupParam->IsUseCustom());
     EXPECT_NE(firstTextNode, nullptr);
 
@@ -599,6 +601,7 @@ HWTEST_F(BubbleTestNg, BubblePatternTest007, TestSize.Level1)
     popupParam->SetUseCustomComponent(!popupParam->IsUseCustom());
     popupParam->SetHasAction(true);
     BubbleView::UpdatePopupParam(popupId, popupParam, targetNode);
+    EXPECT_EQ(popupNode->GetPattern<BubblePattern>()->GetHasTransition(), true);
     auto secondTextNode = BubbleView::CreateMessage(popupParam->GetMessage(), popupParam->IsUseCustom());
     EXPECT_NE(secondTextNode, nullptr);
 }
@@ -628,6 +631,7 @@ HWTEST_F(BubbleTestNg, BubblePatternTest008, TestSize.Level1)
     popupParam->SetTextColor(BUBBLE_PAINT_PROPERTY_TEXT_COLOR);
     popupParam->SetFontSize(BUBBLE_PAINT_PROPERTY_FONT_SIZE);
     popupParam->SetFontWeight(BUBBLE_PAINT_PROPERTY_FONT_WEIGHT);
+    popupParam->SetHasTransition(true);
     /**
      * @tc.steps: step2. create custom bubble and get popupNode.
      * @tc.expected: Check the popupNode were created successfully.
@@ -643,6 +647,7 @@ HWTEST_F(BubbleTestNg, BubblePatternTest008, TestSize.Level1)
     auto popupNode =
         BubbleView::CreateCustomBubbleNode(targetNode->GetTag(), targetNode->GetId(), rowFrameNode, popupParam);
     ASSERT_NE(popupNode, nullptr);
+    EXPECT_EQ(popupNode->GetPattern<BubblePattern>()->GetHasTransition(), true);
     /**
      * @tc.steps: step3. update customBubbleNode.
      */
@@ -651,6 +656,7 @@ HWTEST_F(BubbleTestNg, BubblePatternTest008, TestSize.Level1)
     popupParam->SetMessage(BUBBLE_NEW_MESSAGE);
     popupParam->SetHasAction(true);
     BubbleView::UpdateCustomPopupParam(popupId, popupParam);
+    EXPECT_EQ(popupNode->GetPattern<BubblePattern>()->GetHasTransition(), true);
     /**
      * @tc.steps: step4. using default param to create custom bubble and get popupNode.
      * @tc.expected: Check the popupNode were created successfully.

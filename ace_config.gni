@@ -55,6 +55,9 @@ declare_args() {
 
   # Enable when build for text engine adapter
   enable_graphic_text_gine = true
+
+  # Don't use currentIdSafely in some function
+  use_origin_scope = false
 }
 
 enable_dump_drawcmd = false
@@ -100,6 +103,7 @@ ark_ets_path = "//arkcompiler/ets_runtime"
 crossplatform_plugin_root = "//plugins"
 crossplatform_multimedia_root = "//foundation/multimedia"
 skia_root_new = "//third_party/skia"
+checking_function_root = "//third_party/bounds_checking_function"
 
 # Config toolchain
 windows_buildtool = "//build/toolchain/mingw:mingw_x86_64"
@@ -273,4 +277,8 @@ foreach(item, ace_platforms) {
       (use_mac && item.name == "mac") || (use_linux && item.name == "linux")) {
     current_platform = item
   }
+}
+
+if (defined(use_origin_scope) && use_origin_scope) {
+  ace_common_defines += [ "USE_ORIGIN_SCOPE" ]
 }

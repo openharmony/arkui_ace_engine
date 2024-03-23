@@ -45,7 +45,7 @@ void LoadingProgressPattern::OnAttachToFrameNode()
 
 void LoadingProgressPattern::OnDetachFromFrameNode(FrameNode* frameNode)
 {
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = PipelineContext::GetCurrentContextSafely();
     CHECK_NULL_VOID(pipeline);
     pipeline->RemoveVisibleAreaChangeNode(frameNode->GetId());
     pipeline->RemoveWindowStateChangedCallback(frameNode->GetId());
@@ -98,7 +98,7 @@ void LoadingProgressPattern::RegisterVisibleAreaChange()
     if (hasVisibleChangeRegistered_) {
         return;
     }
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = PipelineContext::GetCurrentContextSafely();
     CHECK_NULL_VOID(pipeline);
     auto callback = [weak = WeakClaim(this)](bool visible, double ratio) {
         auto pattern = weak.Upgrade();
@@ -113,7 +113,8 @@ void LoadingProgressPattern::RegisterVisibleAreaChange()
     };
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    pipeline->AddVisibleAreaChangeNode(host, 0.0f, callback, false);
+    std::vector<double> ratioList = {0.0};
+    pipeline->AddVisibleAreaChangeNode(host, ratioList, callback, false);
     pipeline->AddWindowStateChangedCallback(host->GetId());
     hasVisibleChangeRegistered_ = true;
 }

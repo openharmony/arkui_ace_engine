@@ -94,6 +94,8 @@ private:
     WeakPtr<NG::FrameNode> frameNode_;
     bool aiDetectInitialized_ = false;
     bool hasClickedAISpan_ = false;
+    bool pressedByLeftMouse_ = false;
+    AISpan clickedAISpan_;
     std::string textDetectTypes_;
     std::string textForAI_;
     std::set<std::string> textDetectTypesSet_;

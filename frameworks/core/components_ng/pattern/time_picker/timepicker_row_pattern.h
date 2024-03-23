@@ -19,6 +19,7 @@
 #include <optional>
 
 #include "base/i18n/localization.h"
+#include "core/components/common/properties/color.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
 #include "core/components_ng/pattern/time_picker/timepicker_column_pattern.h"
 #include "core/components_ng/pattern/time_picker/timepicker_event_hub.h"
@@ -177,6 +178,7 @@ public:
 
     void SetHour24(bool value)
     {
+        isForceUpdate_ = value != hour24_;
         hour24_ = value;
     }
 
@@ -310,6 +312,11 @@ public:
         backgroundColor_ = color;
     }
 
+    const Color GetBackgroundColor() const
+    {
+        return backgroundColor_;
+    }
+
     bool IsAmHour(uint32_t hourOf24) const;
 
     uint32_t GetAmPmHour(uint32_t hourOf24) const;
@@ -414,6 +421,7 @@ private:
     WeakPtr<FrameNode> contentRowNode_;
     bool isPicker_ = false;
     bool isFiredTimeChange_ = false;
+    bool isForceUpdate_ = false;
     std::optional<std::string> firedTimeStr_;
 };
 } // namespace OHOS::Ace::NG

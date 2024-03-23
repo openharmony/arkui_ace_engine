@@ -456,58 +456,6 @@ HWTEST_F(EventManagerTestNg, EventManagerTest007, TestSize.Level1)
 }
 
 /**
- * @tc.name: EventManagerTest008
- * @tc.desc: Test IsSystemKeyboardShortcut
- * @tc.type: FUNC
- */
-HWTEST_F(EventManagerTestNg, EventManagerTest008, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. Create EventManager.
-     * @tc.expected: eventManager is not null.
-     */
-    auto eventManager = AceType::MakeRefPtr<EventManager>();
-    ASSERT_NE(eventManager, nullptr);
-
-    /**
-     * @tc.steps: step2. Call IsSameKeyboardShortcutNode with CTRL C.
-     * @tc.expected: retFlag is true.
-     */
-    std::string value = SHORT_CUT_VALUE_A;
-    uint8_t keys = static_cast<uint8_t>(CtrlKeysBit::CTRL);
-    auto retFlag = eventManager->IsSystemKeyboardShortcut(value, keys);
-    ASSERT_TRUE(retFlag);
-    retFlag = eventManager->IsSameKeyboardShortcutNode(value, keys);
-    ASSERT_TRUE(retFlag);
-
-    /**
-     * @tc.steps: step2. Call IsSystemKeyboardShortcut with SHIFT A.
-     * @tc.expected: retFlag is true.
-     */
-    auto frameNode = FrameNode::GetOrCreateFrameNode(CTRL, NUM_CTRL_VALUE, nullptr);
-    frameNode->eventHub_ = nullptr;
-    eventManager->AddKeyboardShortcutNode(WeakPtr<NG::FrameNode>(frameNode));
-
-    auto frameNodeShift = FrameNode::GetOrCreateFrameNode(SHIFT, NUM_SHIFT_VALUE, nullptr);
-    frameNodeShift->eventHub_->SetKeyboardShortcut(SHORT_CUT_VALUE_A, static_cast<int>(CtrlKeysBit::SHIFT), []() {});
-    eventManager->AddKeyboardShortcutNode(WeakPtr<NG::FrameNode>(frameNodeShift));
-
-    value = SHORT_CUT_VALUE_A;
-    keys = static_cast<uint8_t>(CtrlKeysBit::SHIFT);
-    retFlag = eventManager->IsSameKeyboardShortcutNode(value, keys);
-    ASSERT_TRUE(retFlag);
-
-    /**
-     * @tc.steps: step3. Call IsSystemKeyboardShortcut with SHIFT X while shortcut in frameNode is SHIFT A.
-     * @tc.expected: retFlag is true.
-     */
-    value = SHORT_CUT_VALUE_X;
-    keys = static_cast<uint8_t>(CtrlKeysBit::SHIFT);
-    retFlag = eventManager->IsSameKeyboardShortcutNode(value, keys);
-    ASSERT_FALSE(retFlag);
-}
-
-/**
  * @tc.name: EventManagerTest009
  * @tc.desc: Test ClearResults
  * @tc.type: FUNC
@@ -1267,7 +1215,8 @@ HWTEST_F(EventManagerTestNg, EventManagerTest025, TestSize.Level1)
     touchTestResults.push_back(AceType::MakeRefPtr<MockTouchEventTarget>());
     eventManager->touchTestResults_.emplace(resultId, touchTestResults);
 
-    TouchEvent event { .id = resultId };
+    TouchEvent event {};
+    event.id = resultId;
     std::list<TouchEvent> touchEvents { event };
     eventManager->FlushTouchEventsBegin(touchEvents);
     EXPECT_NE(eventManager->touchTestResults_.find(event.id), eventManager->touchTestResults_.end());
@@ -1292,7 +1241,8 @@ HWTEST_F(EventManagerTestNg, EventManagerTest026, TestSize.Level1)
     touchTestResults.push_back(AceType::MakeRefPtr<MockTouchEventTarget>());
     eventManager->touchTestResults_.emplace(resultId, touchTestResults);
 
-    TouchEvent event { .id = resultId };
+    TouchEvent event {};
+    event.id = resultId;
     std::list<TouchEvent> touchEvents { event };
     eventManager->FlushTouchEventsEnd(touchEvents);
     EXPECT_NE(eventManager->touchTestResults_.find(event.id), eventManager->touchTestResults_.end());
@@ -1312,7 +1262,10 @@ HWTEST_F(EventManagerTestNg, EventManagerTest027, TestSize.Level1)
     auto eventManager = AceType::MakeRefPtr<EventManager>();
     ASSERT_NE(eventManager, nullptr);
 
-    AxisEvent axisEvent { .x = 1, .y = 2, .sourceType = SourceType::TOUCH };
+    AxisEvent axisEvent;
+    axisEvent.x = 1;
+    axisEvent.y = 2;
+    axisEvent.sourceType = SourceType::TOUCH;
     auto nodeId = ElementRegister::GetInstance()->MakeUniqueId();
     auto frameNode = FrameNode::GetOrCreateFrameNode(V2::LOCATION_BUTTON_ETS_TAG, nodeId, nullptr);
     eventManager->AxisTest(axisEvent, frameNode);

@@ -22,6 +22,8 @@
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/event/touch_event.h"
 #include "core/components_ng/pattern/custom/custom_node_base.h"
+#include "core/components_ng/pattern/list/list_pattern.h"
+#include "core/components_ng/pattern/list/list_item_group_pattern.h"
 #include "core/components_ng/pattern/navigation/navigation_group_node.h"
 #include "core/components_ng/pattern/overlay/popup_base_pattern.h"
 #include "core/event/touch_event.h"
@@ -72,6 +74,7 @@ const RefPtr<TouchEventImpl>& StateStyleManager::GetPressedListener()
                 stateStyleMgr->pointerId_.erase(lastPoint.GetFingerId());
                 if (stateStyleMgr->pointerId_.size() == 0) {
                     stateStyleMgr->ResetPressedState();
+                    stateStyleMgr->PostListItemPressStyleTask(stateStyleMgr->currentState_);
                 }
             }
         }
@@ -85,6 +88,7 @@ void StateStyleManager::HandleTouchDown()
     HandleScrollingParent();
     if (!hasScrollingParent_) {
         UpdateCurrentUIState(UI_STATE_PRESSED);
+        PostListItemPressStyleTask(currentState_);
     } else {
         if (IsPressedCancelStatePending()) {
             ResetPressedCancelState();
@@ -104,6 +108,7 @@ void StateStyleManager::HandleTouchUp()
         PendingCancelPressedState();
     } else if (!IsPressedCancelStatePending()) {
         ResetPressedState();
+        PostListItemPressStyleTask(currentState_);
     }
     if (hasScrollingParent_) {
         CleanScrollingParentListener();
@@ -170,6 +175,7 @@ void StateStyleManager::PostPressStyleTask(uint32_t delayTime)
         CHECK_NULL_VOID(stateStyleMgr);
         stateStyleMgr->ResetPressedPendingState();
         stateStyleMgr->UpdateCurrentUIState(UI_STATE_PRESSED);
+        stateStyleMgr->PostListItemPressStyleTask(stateStyleMgr->currentState_);
     });
 
     taskExecutor->PostDelayedTask(pressStyleTask_, TaskExecutor::TaskType::UI, delayTime);
@@ -192,9 +198,34 @@ void StateStyleManager::PostPressCancelStyleTask(uint32_t delayTime)
         CHECK_NULL_VOID(stateStyleMgr);
         stateStyleMgr->ResetPressedCancelPendingState();
         stateStyleMgr->ResetCurrentUIState(UI_STATE_PRESSED);
+        stateStyleMgr->PostListItemPressStyleTask(stateStyleMgr->currentState_);
     });
 
     taskExecutor->PostDelayedTask(pressCancelStyleTask_, TaskExecutor::TaskType::UI, delayTime);
+}
+
+void StateStyleManager::PostListItemPressStyleTask(UIState state)
+{
+    bool isPressed = state == UI_STATE_PRESSED;
+    auto node = host_.Upgrade();
+    CHECK_NULL_VOID(node);
+    auto nodeId = node->GetId();
+    if (node->GetTag() == V2::LIST_ITEM_ETS_TAG) {
+        auto frameNode = node->GetAncestorNodeOfFrame();
+        CHECK_NULL_VOID(frameNode);
+        if (frameNode->GetTag() == V2::LIST_ITEM_GROUP_ETS_TAG) {
+            auto listGroupPattern = DynamicCast<ListItemGroupPattern>(frameNode->GetPattern());
+            CHECK_NULL_VOID(listGroupPattern);
+            listGroupPattern->SetItemPressed(isPressed, nodeId);
+            frameNode->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+        }
+        if (frameNode->GetTag() == V2::LIST_ETS_TAG) {
+            auto listPattern = DynamicCast<ListPattern>(frameNode->GetPattern());
+            CHECK_NULL_VOID(listPattern);
+            listPattern->SetItemPressed(isPressed, nodeId);
+            frameNode->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+        }
+    }
 }
 
 void StateStyleManager::HandleScrollingParent()
@@ -206,6 +237,7 @@ void StateStyleManager::HandleScrollingParent()
         auto stateStyleMgr = weak.Upgrade();
         CHECK_NULL_VOID(stateStyleMgr);
         stateStyleMgr->ResetCurrentUIState(UI_STATE_PRESSED);
+        stateStyleMgr->PostListItemPressStyleTask(stateStyleMgr->currentState_);
         stateStyleMgr->pointerId_.clear();
         stateStyleMgr->ResetPressedPendingState();
         if (stateStyleMgr->pressStyleTask_) {

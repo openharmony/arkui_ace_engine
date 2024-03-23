@@ -35,6 +35,7 @@
 #include "core/components_ng/animation/geometry_transition.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/frame_scene_status.h"
+#include "core/components_ng/base/modifier.h"
 #include "core/components_ng/event/focus_hub.h"
 #include "core/components_ng/layout/layout_wrapper.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
@@ -316,6 +317,39 @@ HWTEST_F(FrameNodeTestNg, FrameNodeTestNg008, TestSize.Level1)
 }
 
 /**
+ * @tc.name: FrameNodeTestNg009
+ * @tc.desc: Test frame node method
+ * @tc.type: FUNC
+ */
+HWTEST_F(FrameNodeTestNg, FrameNodeTestNg009, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step 1. create framenode and initialize the params used in Test.
+     */
+    RefPtr<NG::DrawModifier> drawModifier = AceType::MakeRefPtr<NG::DrawModifier>();
+    ASSERT_NE(drawModifier, nullptr);
+
+    /**
+     * @tc.steps: step 2. call get function .
+     * @tc.expect: expect the return value to be correct.
+     */
+    EXPECT_TRUE(FRAME_NODE->IsSupportDrawModifier());
+
+    /**
+     * @tc.steps: step 3. call GetContentModifier when drawModifier is null .
+     * @tc.expect: expect the return value to be correct.
+     */
+    EXPECT_EQ(FRAME_NODE->GetContentModifier(), nullptr);
+
+    /**
+     * @tc.steps: step 4. Nodes created by virtual classes, call GetContentModifier when drawModifier is null .
+     * @tc.expect: expect the return value to be correct.
+     */
+    FRAME_NODE->SetDrawModifier(drawModifier);
+    EXPECT_EQ(FRAME_NODE->GetContentModifier(), nullptr);
+}
+
+/**
  * @tc.name: FrameNodeTouchTest001
  * @tc.desc: Test frame node method
  * @tc.type: FUNC
@@ -427,9 +461,6 @@ HWTEST_F(FrameNodeTestNg, FrameNodeTestNg005, TestSize.Level1)
      */
     auto one = FrameNode::CreateFrameNodeWithTree("main", 10, AceType::MakeRefPtr<Pattern>());
     EXPECT_NE(one, nullptr);
-
-    auto wrapper = FRAME_NODE->CreatePaintWrapper();
-    EXPECT_EQ(wrapper, nullptr);
 
     MeasureProperty calcLayoutConstraint;
     FRAME_NODE->UpdateLayoutConstraint(std::move(calcLayoutConstraint));
@@ -619,7 +650,6 @@ HWTEST_F(FrameNodeTestNg, FrameNodeOnAttachToMainTree008, TestSize.Level1)
      * @tc.steps: step1. build a object to OnAttachToMainTree
      * @tc.expected: expect The function is run ok.
      */
-    FRAME_NODE2->IsResponseRegion();
     FRAME_NODE2->OnAttachToMainTree(true);
 
     auto request = FRAME_NODE2->hasPendingRequest_ = true;
@@ -640,18 +670,18 @@ HWTEST_F(FrameNodeTestNg, FrameNodeOnAttachToMainTree008, TestSize.Level1)
 }
 
 /**
- * @tc.name: FrameNodeTestNg_OnVisibleChange009
+ * @tc.name: FrameNodeTestNg_NotifyVisibleChange009
  * @tc.desc: Test frame node method
  * @tc.type: FUNC
  */
-HWTEST_F(FrameNodeTestNg, FrameNodeOnVisibleChange009, TestSize.Level1)
+HWTEST_F(FrameNodeTestNg, FrameNodeNotifyVisibleChange009, TestSize.Level1)
 {
     /**
-     * @tc.steps: step1. build a object to OnVisibleChange
+     * @tc.steps: step1. build a object to NotifyVisibleChange
      * @tc.expected: expect The FRAME_NODE2 is not nullptr.
      */
     FRAME_NODE2->AddChild(FRAME_NODE3);
-    FRAME_NODE2->OnVisibleChange(false);
+    FRAME_NODE2->NotifyVisibleChange(false);
     FRAME_NODE2->Clean();
     EXPECT_NE(FRAME_NODE2, nullptr);
 }
@@ -803,7 +833,7 @@ HWTEST_F(FrameNodeTestNg, FrameNodeTriggerVisibleAreaChangeCallback0014, TestSiz
      * @tc.expected: expect The function is run ok.
      */
     VisibleCallbackInfo callbackInfo;
-    FRAME_NODE2->AddVisibleAreaUserCallback(0.0f, callbackInfo);
+    FRAME_NODE2->SetVisibleAreaUserCallback({0.0f}, callbackInfo);
     FRAME_NODE2->TriggerVisibleAreaChangeCallback();
 
     /**
@@ -1197,24 +1227,6 @@ HWTEST_F(FrameNodeTestNg, FrameNodeCalculateCurrentVisibleRatio0030, TestSize.Le
 }
 
 /**
- * @tc.name: FrameNodeTestNg00_OnVisibleAreaChangeCallback31
- * @tc.desc: Test frame node method
- * @tc.type: FUNC
- */
-HWTEST_F(FrameNodeTestNg, FrameNodeOnVisibleAreaChangeCallback31, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. callback RemoveLastHotZoneRect.
-     * @tc.expected: step1. expect The function is run ok.
-     */
-    std::unordered_map<double, VisibleCallbackInfo> map;
-    VisibleCallbackInfo info;
-    bool isHandled = false;
-    FRAME_NODE2->OnVisibleAreaChangeCallback(map, true, 1.0, isHandled);
-    EXPECT_TRUE(map.empty());
-}
-
-/**
  * @tc.name: FrameNodeTestNg_InitializePatternAndContext0032
  * @tc.desc: Test InitializePatternAndContext
  * @tc.type: FUNC
@@ -1242,65 +1254,48 @@ HWTEST_F(FrameNodeTestNg, FrameNodeInitializePatternAndContext0032, TestSize.Lev
 HWTEST_F(FrameNodeTestNg, FrameNodeProcessAllVisibleCallback0033, TestSize.Level1)
 {
     /**
-     * @tc.steps: step1. create a node and init a map for preparing for args, then set a flag
+     * @tc.steps: step1. create a node and init a vector for preparing for args, then set a flag
      */
     auto one = FrameNode::GetOrCreateFrameNode("one", 11, []() { return AceType::MakeRefPtr<Pattern>(); });
-    std::unordered_map<double, VisibleCallbackInfo> visibleAreaCallbacks;
-    auto insert = [&visibleAreaCallbacks](double callbackRatio, std::function<void(bool, double)> callback,
-                      bool isCurrentVisible = false, double visibleRatio = 1.0) {
-        VisibleCallbackInfo callbackInfo { callback, visibleRatio, isCurrentVisible };
-        visibleAreaCallbacks.emplace(callbackRatio, callbackInfo);
-    };
-    bool flag = false;
-    auto defaultCallback = [&flag](bool input1, double input2) { flag = !flag; };
-    insert(0.2, std::function<void(bool, double)>(defaultCallback), false);
-    insert(0.8, std::function<void(bool, double)>(defaultCallback), true);
-    insert(0.21, std::function<void(bool, double)>(defaultCallback), true);
-    insert(0.79, std::function<void(bool, double)>(defaultCallback), false);
-    insert(0.5, std::function<void(bool, double)>(defaultCallback), false);
+    std::vector<double> visibleAreaRatios{0.2, 0.8, 0.21, 0.79, 0.5};
+    int flag = 0;
+    auto defaultCallback = [&flag](bool input1, double input2) { flag += 1; };
+    VisibleCallbackInfo callbackInfo { defaultCallback, 1.0, false };
 
     /**
-     * @tc.steps: step2. call ProcessAllVisibleCallback with .5
-     * @tc.expected: flag is true
+     * @tc.steps: step2. call ProcessAllVisibleCallback with 0.5 from 0
+     * @tc.expected: flag is 1
      */
-    one->ProcessAllVisibleCallback(visibleAreaCallbacks, 0.5);
-    EXPECT_TRUE(flag);
+    one->ProcessAllVisibleCallback(visibleAreaRatios, callbackInfo, 0.5, 0);
+    EXPECT_EQ(flag, 1);
 
     /**
-     * @tc.steps: step3. call ProcessAllVisibleCallback with 0
-     * @tc.expected: flag turns false
+     * @tc.steps: step3. call ProcessAllVisibleCallback with 0 from 0.5
+     * @tc.expected: flag is 2
      */
-    visibleAreaCallbacks.clear();
-    insert(0, std::function<void(bool, double)>(defaultCallback), false);
-    one->ProcessAllVisibleCallback(visibleAreaCallbacks, 0);
-    EXPECT_FALSE(flag);
+    one->ProcessAllVisibleCallback(visibleAreaRatios, callbackInfo, 0, 0.5);
+    EXPECT_EQ(flag, 2);
 
     /**
-     * @tc.steps: step4. call ProcessAllVisibleCallback with 0
-     * @tc.expected: flag turns true
+     * @tc.steps: step4. call ProcessAllVisibleCallback with 0 from 0
+     * @tc.expected: flag is 2
      */
-    visibleAreaCallbacks.clear();
-    insert(0, std::function<void(bool, double)>(defaultCallback), true);
-    one->ProcessAllVisibleCallback(visibleAreaCallbacks, 0);
-    EXPECT_TRUE(flag);
+    one->ProcessAllVisibleCallback(visibleAreaRatios, callbackInfo, 0, 0);
+    EXPECT_EQ(flag, 2);
 
     /**
-     * @tc.steps: step5. call ProcessAllVisibleCallback with 0
-     * @tc.expected: flag turns false
+     * @tc.steps: step5. call ProcessAllVisibleCallback with 1 from 0
+     * @tc.expected: flag is 3
      */
-    visibleAreaCallbacks.clear();
-    insert(1, std::function<void(bool, double)>(defaultCallback), false);
-    one->ProcessAllVisibleCallback(visibleAreaCallbacks, 1);
-    EXPECT_FALSE(flag);
+    one->ProcessAllVisibleCallback(visibleAreaRatios, callbackInfo, 1, 0);
+    EXPECT_EQ(flag, 3);
 
     /**
-     * @tc.steps: step6. call ProcessAllVisibleCallback with 1
-     * @tc.expected: flag turns true
+     * @tc.steps: step6. call ProcessAllVisibleCallback with 1 from 1
+     * @tc.expected: flag is 3
      */
-    visibleAreaCallbacks.clear();
-    insert(1, std::function<void(bool, double)>(defaultCallback), true);
-    one->ProcessAllVisibleCallback(visibleAreaCallbacks, 1);
-    EXPECT_TRUE(flag);
+    one->ProcessAllVisibleCallback(visibleAreaRatios, callbackInfo, 1, 1);
+    EXPECT_EQ(flag, 3);
 }
 
 /**
@@ -1445,7 +1440,7 @@ HWTEST_F(FrameNodeTestNg, FrameNodeUpdateAnimatableArithmeticProperty0038, TestS
 
 /**
  * @tc.name: FrameNodeTestNg0039
- * @tc.desc: Test of FramePorxy
+ * @tc.desc: Test of FrameProxy
  * @tc.type: FUNC
  */
 HWTEST_F(FrameNodeTestNg, FrameNodeTestNg0039, TestSize.Level1)
@@ -2552,5 +2547,132 @@ HWTEST_F(FrameNodeTestNg, FindChildByNameTest002, TestSize.Level1)
     nodeParent->Clean();
     auto noHaveResult = FrameNode::FindChildByName(nodeParent, nodeTwoChildName);
     EXPECT_EQ(noHaveResult, nullptr);
+}
+
+/**
+ * @tc.name: SetOnSizeChangeCallback001
+ * @tc.desc: Test SetOnSizeChangeCallback 
+ * @tc.type: FUNC
+ */
+HWTEST_F(FrameNodeTestNg, SetOnSizeChangeCallback001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. build a object to SetOnSizeChangeCallback
+     * @tc.expected: expect cover branch lastFrameNodeRect_ non null and function is run ok.
+     */
+    OnSizeChangedFunc callback = [](const RectF& oldRect, const RectF& rect) {};
+    FRAME_NODE2->SetOnSizeChangeCallback(std::move(callback));
+    EXPECT_NE(FRAME_NODE2->lastFrameNodeRect_, nullptr);
+    auto eventHub = FRAME_NODE2->GetEventHub<NG::EventHub>();
+    EXPECT_NE(eventHub, nullptr);
+    EXPECT_TRUE(eventHub->HasOnSizeChanged());
+
+    /**
+     * @tc.steps: step2.test while callback is nullptr
+     * @tc.expected:expect cover branch lastFrameNodeRect_ non null and function is run ok.
+     */
+    FRAME_NODE2->lastFrameNodeRect_ = std::make_unique<RectF>();
+    FRAME_NODE2->SetOnSizeChangeCallback(nullptr);
+    EXPECT_NE(FRAME_NODE2->lastFrameNodeRect_, nullptr);
+    EXPECT_NE(eventHub, nullptr);
+    EXPECT_FALSE(eventHub->HasOnSizeChanged());
+}
+
+/**
+ * @tc.name: TriggerOnSizeChangeCallback001
+ * @tc.desc: Test frame node method
+ * @tc.type: FUNC
+ */
+HWTEST_F(FrameNodeTestNg, TriggerOnSizeChangeCallback001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. set a flag and init a callback(onSizeChanged)
+     */
+    bool flag = false;
+    OnSizeChangedFunc onSizeChanged = [&flag](const RectF& oldRect, const RectF& rect) { flag = !flag; };
+
+    /**
+     * @tc.steps: step2. call TriggerOnSizeChangeCallback before set callback
+     * @tc.expected: expect flag is still false
+     */
+    FRAME_NODE2->TriggerOnSizeChangeCallback();
+    EXPECT_FALSE(flag);
+
+    /**
+     * @tc.steps: step3.set callback and release lastFrameNodeRect_
+     * @tc.expected: expect flag is still false
+     */
+    FRAME_NODE2->eventHub_->SetOnSizeChanged(std::move(onSizeChanged));
+    FRAME_NODE2->lastFrameNodeRect_ = nullptr;
+    FRAME_NODE2->TriggerOnSizeChangeCallback();
+    EXPECT_FALSE(flag);
+
+    /**
+     * @tc.steps: step4.set lastFrameNodeRect_
+     * @tc.expected: expect flag is still false
+     */
+    FRAME_NODE2->lastFrameNodeRect_ = std::make_unique<RectF>();
+    FRAME_NODE2->TriggerOnSizeChangeCallback();
+    EXPECT_FALSE(flag);
+}
+
+/**
+ * @tc.name: OnTouchInterceptTest001
+ * @tc.desc: Test onTouchIntercept method
+ * @tc.type: FUNC
+ */
+HWTEST_F(FrameNodeTestNg, OnTouchInterceptTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. construct TouchTest parameters.
+     */
+    PointF globalPoint;
+    PointF parentLocalPoint;
+    TouchRestrict touchRestrict;
+    TouchTestResult result;
+
+    /**
+     * @tc.steps: step2. create node and set callback.
+     */
+    auto childNode = FrameNode::CreateFrameNode("main", 2, AceType::MakeRefPtr<Pattern>(), true);
+    childNode->SetExclusiveEventForChild(true);
+    auto mockRenderContextforChild = AceType::MakeRefPtr<MockRenderContext>();
+    childNode->renderContext_ = mockRenderContextforChild;
+    auto localPoint = PointF(10, 10);
+    mockRenderContextforChild->rect_ = RectF(0, 0, 100, 100);
+    EXPECT_CALL(*mockRenderContextforChild, GetPointWithTransform(_))
+        .WillRepeatedly(DoAll(SetArgReferee<0>(localPoint)));
+    auto childEventHub = childNode->GetOrCreateGestureEventHub();
+    childEventHub->SetHitTestMode(HitTestMode::HTMBLOCK);
+    childNode->SetActive(true);
+    EXPECT_NE(childNode->eventHub_->GetGestureEventHub(), nullptr);
+    auto callback = [](TouchEventInfo& event) -> HitTestMode { return HitTestMode::HTMNONE; };
+    childEventHub->SetOnTouchIntercept(callback);
+
+    /**
+     * @tc.steps: step3. trigger touch test.
+     * @tc.expected: expect the touch test mode is correct.
+     */
+    HitTestMode hitTestModeofChilds[] = { HitTestMode::HTMDEFAULT, HitTestMode::HTMBLOCK, HitTestMode::HTMTRANSPARENT,
+        HitTestMode::HTMNONE, HitTestMode::HTMTRANSPARENT_SELF };
+    for (auto hitTestModeofChild : hitTestModeofChilds) {
+        childEventHub->SetHitTestMode(hitTestModeofChild);
+        childNode->TouchTest(globalPoint, parentLocalPoint, parentLocalPoint, touchRestrict, result, 1);
+        auto mode = childEventHub->GetHitTestMode();
+        EXPECT_EQ(mode, HitTestMode::HTMNONE);
+    }
+
+    /**
+     * @tc.steps: step4. modify callback and trigger touch test.
+     * @tc.expected: expect the touch test mode is correct.
+     */
+    auto blockCallback = [](TouchEventInfo& event) -> HitTestMode { return HitTestMode::HTMBLOCK; };
+    childEventHub->SetOnTouchIntercept(blockCallback);
+    for (auto hitTestModeofChild : hitTestModeofChilds) {
+        childEventHub->SetHitTestMode(hitTestModeofChild);
+        childNode->TouchTest(globalPoint, parentLocalPoint, parentLocalPoint, touchRestrict, result, 1);
+        auto mode = childEventHub->GetHitTestMode();
+        EXPECT_EQ(mode, HitTestMode::HTMBLOCK);
+    }
 }
 } // namespace OHOS::Ace::NG

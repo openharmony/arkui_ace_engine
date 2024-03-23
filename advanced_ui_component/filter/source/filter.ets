@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -44,15 +44,15 @@ export enum FilterType {
   LIST_FILTER
 }
 
-export declare type FilterParams = {
-  name: ResourceStr,
-  options: Array<ResourceStr>
+export interface FilterParams {
+  name: ResourceStr;
+  options: Array<ResourceStr>;
 }
 
-export declare type FilterResult = {
-  name: ResourceStr,
-  index: number,
-  value: ResourceStr
+export interface FilterResult {
+  name: ResourceStr;
+  index: number;
+  value: ResourceStr;
 }
 
 @Observed
@@ -87,10 +87,10 @@ class ObservedNumber {
 
 @Component
 struct GradientMask {
-  x0: number
-  y0: number
-  x1: number
-  y1: number
+  x0: number = 0;
+  y0: number = 0;
+  x1: number = 0;
+  y1: number = 0;
   private settings: RenderingContextSettings = new RenderingContextSettings(true)
   private context2D: CanvasRenderingContext2D = new CanvasRenderingContext2D(this.settings)
 
@@ -100,7 +100,7 @@ struct GradientMask {
         .width(GRADIENT_WIDTH)
         .height(LIST_ROW_HEIGHT)
         .onReady(() => {
-          var grad = this.context2D.createLinearGradient(this.x0, this.y0, this.x1, this.y1)
+          let grad = this.context2D.createLinearGradient(this.x0, this.y0, this.x1, this.y1)
           grad.addColorStop(0.0, '#ffffffff')
           grad.addColorStop(1, '#00ffffff')
           this.context2D.fillStyle = grad
@@ -118,15 +118,15 @@ struct ListFilterRow {
   @ObjectLink fontWeightRow: FontWeightArray
   @ObjectLink backgroundColorRow: ResourceArray
   @ObjectLink isBackgroundHoverRow: BooleanArray
-  filterRow: FilterParams
-  onItemClick: (colIndex: number) => void
-  rowIndex: number
+  filterRow: FilterParams = { name: '', options: [] };
+  onItemClick: (colIndex: number) => void = () => {}
+  rowIndex: number = 0
 
   build() {
     Stack({ alignContent: Alignment.End }) {
       Stack({ alignContent: Alignment.Start }) {
         List() {
-          ForEach(this.filterRow.options, (option, colIndex?: number) => {
+          ForEach(this.filterRow.options, (option: Array<ResourceStr>, colIndex: number) => {
             if (colIndex == 0) {
               ListItem()
                 .width($r('sys.float.ohos_id_max_padding_start'))
@@ -233,8 +233,8 @@ struct MultiFilterRow {
   @ObjectLink twoLineModeItemNumRecordRow: ObservedNumber
   @ObjectLink arrowShowStateRow: ObservedBoolean
   @ObjectLink isArrowIconDown: ObservedBoolean
-  filterRow: FilterParams = null
-  onItemClick: (colIndex: number) => void
+  filterRow: FilterParams | null = null
+  onItemClick: (colIndex: number) => void = () => {}
   @State arrowBgColorRow: Resource = $r('sys.color.ohos_id_color_hover')
   @State isArrowBgHoverRow: boolean = false
   private filterColumnWidth: number = 0
@@ -242,34 +242,36 @@ struct MultiFilterRow {
   private rowIndex: number = 0
 
   private calcMultiFilterRowItemNum() {
-    var curLineRetainWidth = this.filterColumnWidth - vp2px(MULTI_LINE_PADDING)
-    var curLineSum = 0
-    var curLine = 1
-    for (var i = 0; i < this.filterRow.options.length; i++) {
-      let option = this.filterRow.options[i]
-      let itemWidth = measure.measureText({
-        textContent: option,
-        fontSize: FILTER_FONT_SIZE
-      })
-      if (i === 0) {
-        continue
-      } else {
-        itemWidth += vp2px(TEXT_HOT_AREA_WIDTH * 2)
-      }
-      if (curLineRetainWidth - itemWidth >= 0) {
-        curLineRetainWidth -= itemWidth
-        curLineSum += 1
-      } else {
-        if (curLineSum === 0) {
-          curLineSum++
-          curLineRetainWidth = 0
-        }
-        if (curLine === 1) {
-          curLine += 1
-          curLineRetainWidth = this.filterColumnWidth - vp2px(ARROW_IMG_SIZE) - vp2px(MULTI_LINE_PADDING)
-          i--
+    let curLineRetainWidth = this.filterColumnWidth - vp2px(MULTI_LINE_PADDING)
+    let curLineSum = 0
+    let curLine = 1
+    if (this.filterRow) {
+      for (let i = 0; i < this.filterRow.options.length; i++) {
+        let option = this.filterRow.options[i]
+        let itemWidth = measure.measureText({
+          textContent: option,
+          fontSize: FILTER_FONT_SIZE,
+        })
+        if (i === 0) {
+          continue
         } else {
-          break
+          itemWidth += vp2px(TEXT_HOT_AREA_WIDTH * 2)
+        }
+        if (curLineRetainWidth - itemWidth >= 0) {
+          curLineRetainWidth -= itemWidth
+          curLineSum += 1
+        } else {
+          if (curLineSum === 0) {
+            curLineSum++
+            curLineRetainWidth = 0
+          }
+          if (curLine === 1) {
+            curLine += 1
+            curLineRetainWidth = this.filterColumnWidth - vp2px(ARROW_IMG_SIZE) - vp2px(MULTI_LINE_PADDING)
+            i--
+          } else {
+            break
+          }
         }
       }
     }
@@ -350,7 +352,7 @@ struct MultiFilterRow {
         animateTo({
           curve: INTER_POLATING_SPRING,
         }, () => {
-          this.twoLineModeItemNumRow.value = this.filterRow.options.length
+          this.twoLineModeItemNumRow.value = this.filterRow?.options.length as number
         })
 
         animateTo({
@@ -384,11 +386,11 @@ struct MultiFilterRow {
 
   build() {
     Row() {
-      if (this.filterRow.options && this.filterRow.options.length > 0) {
-        Text(this.filterRow.options[0].toString())
+      if (this.filterRow?.options && this.filterRow?.options.length > 0) {
+        Text(this.filterRow?.options[0].toString())
           .height(LIST_ROW_HEIGHT)
           .width(px2vp(measure.measureText({
-            textContent: this.filterRow.options[0].toString(),
+            textContent: this.filterRow?.options[0].toString(),
             fontSize: FILTER_FONT_SIZE
           })) + (TEXT_HOT_AREA_WIDTH * 2))
           .margin({ left: -TEXT_HOT_AREA_WIDTH })
@@ -455,7 +457,8 @@ struct MultiFilterRow {
       }
       Row() {
         Flex({ direction: FlexDirection.Row, wrap: FlexWrap.Wrap }) {
-          ForEach(this.filterRow.options.slice(0, this.twoLineModeItemNumRow.value + 1), (option, colIndex?: number) => {
+          ForEach(this.filterRow?.options.slice(0, this.twoLineModeItemNumRow.value + 1),
+            (option: Array<ResourceStr>, colIndex?: number) => {
             if (colIndex > 0) {
               Text(option.toString())
                 .transition(TransitionEffect.OPACITY)
@@ -531,17 +534,17 @@ struct MultiFilterRow {
       .onAreaChange((_oldValue: Area, newValue: Area) => {
         this.filterColumnWidth = vp2px(parseInt(newValue.width.toString(), 0))
         if (this.twoLineModeItemNumRow.value === 0) {
-          var curLineSum = this.calcMultiFilterRowItemNum()
+          let curLineSum = this.calcMultiFilterRowItemNum()
           this.twoLineModeItemNumRow.value = curLineSum
           this.twoLineModeItemNumRecordRow.value = curLineSum
-          if (curLineSum < this.filterRow.options.length - 1) {
+          if (this.filterRow && curLineSum < this.filterRow.options.length - 1) {
             this.arrowShowStateRow.value = true
           } else {
             this.arrowShowStateRow.value = false
           }
-        }else if (this.filterColumnWidth !== this.lastFilterColumnWidth){
-          var curLineSum = this.calcMultiFilterRowItemNum()
-          if (curLineSum < this.filterRow.options.length - 1) {
+        } else if (this.filterColumnWidth !== this.lastFilterColumnWidth){
+          let curLineSum = this.calcMultiFilterRowItemNum()
+          if (this.filterRow && curLineSum < this.filterRow.options.length - 1) {
             if (!this.arrowShowStateRow.value || this.isArrowIconDown.value) {
               this.arrowShowStateRow.value = true
               this.isArrowIconDown.value = true
@@ -568,21 +571,21 @@ struct MultiFilterRow {
 export struct Filter {
   @BuilderParam container: () => void
   @Prop multiFilters: Array<FilterParams> = []
-  @Prop additionFilters: FilterParams = null
-  onFilterChanged: (filterResults: Array<FilterResult>) => void = null
+  @Prop additionFilters: FilterParams | null = null
+  onFilterChanged: ((filterResults: Array<FilterResult>) => void) | null = null
   @Prop filterType: FilterType = FilterType.LIST_FILTER
-  private selectedFilters: Array<FilterResult> = null
-  @State private colorArr: Array<ResourceArray> = null
-  @State private fontWeightArr: Array<FontWeightArray> = null
-  @State private backgroundColorArr: Array<ResourceArray> = null
-  @State private isBackgroundHover: Array<BooleanArray> = null
-  @State private floatArrowBgColor: Resource = null
+  private selectedFilters: Array<FilterResult> | null = null
+  @State private colorArr: Array<ResourceArray> | null = null
+  @State private fontWeightArr: Array<FontWeightArray> | null = null
+  @State private backgroundColorArr: Array<ResourceArray> | null = null
+  @State private isBackgroundHover: Array<BooleanArray> | null = null
+  @State private floatArrowBgColor: Resource | null = null
   @State private isFloatArrowBgHover: boolean = false
-  @State private isArrowIconDownArr: Array<ObservedBoolean> = null
-  @State private additionColorArr: Array<Resource> = null
-  @State private additionFontWeightArr: Array<FontWeight> = null
-  @State private additionBackgroundColorArr: Array<Resource> = null
-  @State private isAdditionBackgroundHover: Array<boolean> = null
+  @State private isArrowIconDownArr: Array<ObservedBoolean> | null = null
+  @State private additionColorArr: Array<Resource> | null = null
+  @State private additionFontWeightArr: Array<FontWeight> | null = null
+  @State private additionBackgroundColorArr: Array<Resource> | null = null
+  @State private isAdditionBackgroundHover: Array<boolean> | null = null
   @State colorRefresh: boolean = false
   @State isFloatBarShow: boolean = false
   isFloatBarShowWithoutAnimation: boolean = false
@@ -592,13 +595,14 @@ export struct Filter {
   @State floatFilterBarHeight: number = 0
   @State floatFilterBarPosition: number = 0
   filterDynamicHeight: number = 0
-  @State twoLineModeItemNum: Array<ObservedNumber> = null
-  @State twoLineModeItemNumRecord: Array<ObservedNumber> = null
-  @State downArrowShowState: Array<ObservedBoolean> = null
+  @State twoLineModeItemNum: Array<ObservedNumber> | null = null
+  @State twoLineModeItemNumRecord: Array<ObservedNumber> | null = null
+  @State downArrowShowState: Array<ObservedBoolean> | null = null
   @State floatFilterBarText: string = ''
 
   textColor(rowIndex: number, colIndex: number) {
-    if (this.selectedFilters.length > rowIndex && this.selectedFilters[rowIndex].index === colIndex) {
+    if (this.selectedFilters && this.selectedFilters.length > rowIndex &&
+      this.selectedFilters[rowIndex].index === colIndex) {
       return $r('sys.color.ohos_id_color_text_primary_activated')
     }
     return $r('sys.color.ohos_id_color_text_primary')
@@ -610,27 +614,34 @@ export struct Filter {
 
   private filterItemClick(rowIndex: number, colIndex: number) {
     let selectedFilterValue = this.multiFilters[rowIndex].options[colIndex]
-    if (colIndex != this.selectedFilters[rowIndex].index) {
-      this.colorArr[rowIndex][colIndex] = $r('sys.color.ohos_id_color_text_primary_activated')
-      this.colorArr[rowIndex][this.selectedFilters[rowIndex].index] = $r('sys.color.ohos_id_color_text_primary')
-      this.fontWeightArr[rowIndex][colIndex] = FontWeight.Medium
-      this.fontWeightArr[rowIndex][this.selectedFilters[rowIndex].index] = FontWeight.Regular
+    if (this.selectedFilters && colIndex !== this.selectedFilters[rowIndex].index) {
+      if (this.colorArr) {
+        this.colorArr[rowIndex][colIndex] = $r('sys.color.ohos_id_color_text_primary_activated')
+        this.colorArr[rowIndex][this.selectedFilters[rowIndex].index] = $r('sys.color.ohos_id_color_text_primary')
+      }
+      if (this.fontWeightArr) {
+        this.fontWeightArr[rowIndex][colIndex] = FontWeight.Medium
+        this.fontWeightArr[rowIndex][this.selectedFilters[rowIndex].index] = FontWeight.Regular
+      }
       this.colorRefresh = !this.colorRefresh
       this.selectedFilters[rowIndex].value = selectedFilterValue
       this.selectedFilters[rowIndex].index = colIndex
-      this.onFilterChanged && this.onFilterChanged(this.selectedFilters)
+      let filterChanged = this.onFilterChanged
+      filterChanged && filterChanged(this.selectedFilters)
     }
     this.refreshFloatFilterBarText()
   }
 
   private refreshFloatFilterBarText() {
     this.floatFilterBarText = ''
-    for (let i = 0; i < this.selectedFilters.length; i++) {
-      if (this.selectedFilters[i].value !== null) {
-        if (i === 0) {
-          this.floatFilterBarText += this.selectedFilters[i].value
-        }else {
-          this.floatFilterBarText += '/' + this.selectedFilters[i].value
+    if (this.selectedFilters) {
+      for (let i = 0; i < this.selectedFilters.length; i++) {
+        if (this.selectedFilters[i].value !== null) {
+          if (i === 0) {
+            this.floatFilterBarText += this.selectedFilters[i].value
+          } else {
+            this.floatFilterBarText += '/' + this.selectedFilters[i].value
+          }
         }
       }
     }
@@ -640,7 +651,7 @@ export struct Filter {
     if (!this.selectedFilters) {
       this.selectedFilters = []
       for (let filter of this.multiFilters) {
-        var result: FilterResult = { name: filter.name, index: -1, value: null }
+        let result: FilterResult = { name: filter.name, index: -1, value: '' }
         if (filter.options.length > 0) {
           result.index = 0
           result.value = filter.options[0]
@@ -648,7 +659,7 @@ export struct Filter {
         this.selectedFilters.push(result)
       }
       if (this.additionFilters && this.additionFilters.name) {
-        var result: FilterResult = { name: this.additionFilters.name, index: -1, value: null }
+        let result: FilterResult = { name: this.additionFilters.name, index: -1, value: '' }
         this.selectedFilters.push(result)
       }
       this.refreshFloatFilterBarText();
@@ -661,10 +672,10 @@ export struct Filter {
       this.isArrowIconDownArr = []
       this.floatArrowBgColor = $r('sys.color.ohos_id_color_background')
       for (let filter of this.multiFilters) {
-        var colorRow = new ResourceArray()
-        var fontWeightRow = new FontWeightArray()
-        var backgroundColorRow = new ResourceArray()
-        var isBackgroundHoverRow = new BooleanArray()
+        let colorRow = new ResourceArray()
+        let fontWeightRow = new FontWeightArray()
+        let backgroundColorRow = new ResourceArray()
+        let isBackgroundHoverRow = new BooleanArray()
         for (let index of filter.options.keys()) {
           if (index === 0) {
             colorRow.push($r('sys.color.ohos_id_color_text_primary_activated'))
@@ -708,12 +719,12 @@ export struct Filter {
 
   @Builder ListFilter() {
     Column() {
-      ForEach(this.multiFilters, (filter: FilterParams, rowIndex?: number) => {
+      ForEach(this.multiFilters, (filter: FilterParams, rowIndex: number) => {
         ListFilterRow({
-          colorRow: this.colorArr[rowIndex],
-          fontWeightRow: this.fontWeightArr[rowIndex],
-          backgroundColorRow: this.backgroundColorArr[rowIndex],
-          isBackgroundHoverRow: this.isBackgroundHover[rowIndex],
+          colorRow: this.colorArr ? this.colorArr[rowIndex] : [],
+          fontWeightRow: this.fontWeightArr ? this.fontWeightArr[rowIndex] : [],
+          backgroundColorRow: this.backgroundColorArr ? this.backgroundColorArr[rowIndex] : [],
+          isBackgroundHoverRow: this.isBackgroundHover ? this.isBackgroundHover[rowIndex] : [],
           filterRow: filter,
           onItemClick: (colIndex: number) => {
             this.filterItemClick(rowIndex, colIndex);
@@ -737,16 +748,17 @@ export struct Filter {
 
   @Builder MultiLineFilter() {
     Column() {
-      ForEach(this.multiFilters, (filterItem: FilterParams, rowIndex?: number) => {
+      ForEach(this.multiFilters, (filterItem: FilterParams, rowIndex: number) => {
         MultiFilterRow({
-          colorRow: this.colorArr[rowIndex],
-          fontWeightRow: this.fontWeightArr[rowIndex],
-          backgroundColorRow: this.backgroundColorArr[rowIndex],
-          isBackgroundHoverRow: this.isBackgroundHover[rowIndex],
-          arrowShowStateRow: this.downArrowShowState[rowIndex],
-          twoLineModeItemNumRow: this.twoLineModeItemNum[rowIndex],
-          twoLineModeItemNumRecordRow: this.twoLineModeItemNumRecord[rowIndex],
-          isArrowIconDown: this.isArrowIconDownArr[rowIndex],
+          colorRow: this.colorArr ? this.colorArr[rowIndex] : [],
+          fontWeightRow: this.fontWeightArr ? this.fontWeightArr[rowIndex] : [],
+          backgroundColorRow: this.backgroundColorArr ? this.backgroundColorArr[rowIndex] : [],
+          isBackgroundHoverRow: this.isBackgroundHover ? this.isBackgroundHover[rowIndex] : [],
+          arrowShowStateRow: this.downArrowShowState ? this.downArrowShowState[rowIndex] : new ObservedBoolean(false),
+          twoLineModeItemNumRow: this.twoLineModeItemNum ? this.twoLineModeItemNum[rowIndex] : new ObservedNumber(0),
+          twoLineModeItemNumRecordRow: this.twoLineModeItemNumRecord ? this.twoLineModeItemNumRecord[rowIndex] :
+            new ObservedNumber(0),
+          isArrowIconDown: this.isArrowIconDownArr ? this.isArrowIconDownArr[rowIndex] : new ObservedBoolean(false),
           filterRow: filterItem,
           onItemClick: (colIndex: number) => {
             this.filterItemClick(rowIndex, colIndex);
@@ -769,34 +781,38 @@ export struct Filter {
 
   private additionItemClick(index: number) {
     let additionRowIndex = this.multiFilters.length
-    if (this.selectedFilters[additionRowIndex].index != index) {
+    if (this.selectedFilters && this.selectedFilters[additionRowIndex].index !== index) {
       if (this.selectedFilters[additionRowIndex].index === -1) {
-        this.additionColorArr[index] = $r('sys.color.ohos_id_color_text_primary_activated')
-        this.additionFontWeightArr[index] = FontWeight.Medium
-        this.selectedFilters[additionRowIndex].value = this.additionFilters.options[index]
+        this.additionColorArr && (this.additionColorArr[index] = $r('sys.color.ohos_id_color_text_primary_activated'))
+        this.additionFontWeightArr && (this.additionFontWeightArr[index] = FontWeight.Medium)
+        this.selectedFilters[additionRowIndex].value = this.additionFilters ? this.additionFilters.options[index] : ''
         this.selectedFilters[additionRowIndex].index = index
       } else {
         let lastIndex = this.selectedFilters[additionRowIndex].index
-        this.additionColorArr[lastIndex] = $r('sys.color.ohos_id_color_text_primary')
-        this.additionColorArr[index] = $r('sys.color.ohos_id_color_text_primary_activated')
-        this.additionFontWeightArr[lastIndex] = FontWeight.Regular
-        this.additionFontWeightArr[index] = FontWeight.Medium
-        this.selectedFilters[additionRowIndex].value = this.additionFilters.options[index]
-        this.selectedFilters[additionRowIndex].index = index
+        this.additionColorArr && (this.additionColorArr[lastIndex] = $r('sys.color.ohos_id_color_text_primary'))
+        this.additionColorArr && (this.additionColorArr[index] = $r('sys.color.ohos_id_color_text_primary_activated'))
+        this.additionFontWeightArr && (this.additionFontWeightArr[lastIndex] = FontWeight.Regular)
+        this.additionFontWeightArr && (this.additionFontWeightArr[index] = FontWeight.Medium)
+        this.selectedFilters && (this.selectedFilters[additionRowIndex].value = this.additionFilters ?
+        this.additionFilters.options[index] : '')
+        this.selectedFilters && (this.selectedFilters[additionRowIndex].index = index)
       }
     } else {
-      this.additionColorArr[index] = $r('sys.color.ohos_id_color_text_primary')
-      this.additionFontWeightArr[index] = FontWeight.Regular
-      this.selectedFilters[additionRowIndex].value = null
-      this.selectedFilters[additionRowIndex].index = -1
+      this.additionColorArr && (this.additionColorArr[index] = $r('sys.color.ohos_id_color_text_primary'))
+      this.additionFontWeightArr && (this.additionFontWeightArr[index] = FontWeight.Regular)
+      this.selectedFilters && (this.selectedFilters[additionRowIndex].value = '')
+      this.selectedFilters && (this.selectedFilters[additionRowIndex].index = -1)
     }
-    this.onFilterChanged && this.onFilterChanged(this.selectedFilters)
+    if (this.selectedFilters) {
+      this.onFilterChanged && this.onFilterChanged(this.selectedFilters)
+    }
     this.colorRefresh = !this.colorRefresh
     this.refreshFloatFilterBarText()
   }
 
   @Builder AdditionFilterList() {
-    if (this.additionFilters && this.additionFilters.name && this.additionFilters.options && this.additionFilters.options.length != 0) {
+    if (this.additionFilters && this.additionFilters.name && this.additionFilters.options &&
+      this.additionFilters.options.length != 0) {
       Stack({ alignContent: Alignment.End }) {
         Stack({ alignContent: Alignment.Start }) {
           List() {
@@ -815,26 +831,28 @@ export struct Filter {
             }.height(PERCENT_100)
             .margin({ left: -TEXT_HOT_AREA_WIDTH })
 
-            ForEach(this.additionFilters.options, (option, index?: number) => {
+            ForEach(this.additionFilters.options, (option: Array<ResourceStr>, index: number) => {
               ListItem() {
                 Text(option.toString())
                   .fontSize($r('sys.float.ohos_id_text_size_body3'))
-                  .fontColor(this.additionColorArr[index])
-                  .fontWeight(this.additionFontWeightArr[index])
+                  .fontColor(this.additionColorArr ? this.additionColorArr[index] : '')
+                  .fontWeight(this.additionFontWeightArr ? this.additionFontWeightArr[index] : '')
                   .focusable(true)
               }
               .height(PERCENT_100)
-              .backgroundColor(this.isAdditionBackgroundHover[index] ? this.additionBackgroundColorArr[index] : TRANS_COLOR)
+              .backgroundColor(this.isAdditionBackgroundHover && this.isAdditionBackgroundHover[index] ?
+                this.additionBackgroundColorArr ? this.additionBackgroundColorArr[index] : '' : TRANS_COLOR)
               .onHover((isHover: boolean) => {
                 animateTo({
                   curve: FRICTION_CUBIC_BEZIER,
                   duration: ANIMATION_DURATION_250
                 }, () => {
                   if (isHover) {
-                    this.additionBackgroundColorArr[index] = $r('sys.color.ohos_id_color_hover')
-                    this.isAdditionBackgroundHover[index] = true
+                    this.additionBackgroundColorArr &&
+                      (this.additionBackgroundColorArr[index] = $r('sys.color.ohos_id_color_hover'))
+                    this.isAdditionBackgroundHover && (this.isAdditionBackgroundHover[index] = true)
                   } else {
-                    this.isAdditionBackgroundHover[index] = false
+                    this.isAdditionBackgroundHover && (this.isAdditionBackgroundHover[index] = false)
                   }
                 })
               })
@@ -844,15 +862,16 @@ export struct Filter {
                     curve: SHARP_CUBIC_BEZIER,
                     duration: ANIMATION_DURATION_100
                   }, () => {
-                    this.additionBackgroundColorArr[index] = $r('sys.color.ohos_id_color_click_effect')
-                    this.isAdditionBackgroundHover[index] = true
+                    this.additionBackgroundColorArr &&
+                      (this.additionBackgroundColorArr[index] = $r('sys.color.ohos_id_color_click_effect'))
+                    this.isAdditionBackgroundHover && (this.isAdditionBackgroundHover[index] = true)
                   })
                 } else if (event.type === TouchType.Up) {
                   animateTo({
                     curve: SHARP_CUBIC_BEZIER,
                     duration: ANIMATION_DURATION_100
                   }, () => {
-                    this.isAdditionBackgroundHover[index] = false
+                    this.isAdditionBackgroundHover && (this.isAdditionBackgroundHover[index] = false)
                   })
                 }
               })

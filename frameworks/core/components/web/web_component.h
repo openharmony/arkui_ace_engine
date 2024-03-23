@@ -17,6 +17,7 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_WEB_WEB_COMPONENT_H
 
 #include <string>
+#include <tuple>
 #include <utility>
 
 #include "base/geometry/size.h"
@@ -632,6 +633,22 @@ public:
         isNativeEmbedMode_ = isEnabled;
     }
 
+    const std::tuple<bool, bool>& GetNativeVideoPlayerConfig() const
+    {
+        return native_video_player_config_;
+    }
+
+    void SetNativeVideoPlayerConfig(bool enable, bool shouldOverlay)
+    {
+        native_video_player_config_ = std::make_tuple(enable, shouldOverlay);
+    }
+
+    void RegisterNativeEmbedRule(const std::string& tag, const std::string& type)
+    {
+        tag_ = tag;
+        tag_type_ = type;
+    }
+
     using OnCommonDialogImpl = std::function<bool(const BaseEventInfo* info)>;
     bool OnCommonDialog(const BaseEventInfo* info, DialogEventType dialogEventType) const
     {
@@ -715,6 +732,23 @@ public:
             return;
         }
         onSslErrorRequestImpl_ = std::move(onSslErrorRequestImpl);
+    }
+
+    using OnAllSslErrorRequestImpl = std::function<bool(const BaseEventInfo* info)>;
+    bool OnAllSslErrorRequest(const BaseEventInfo* info) const
+    {
+        if (onAllSslErrorRequestImpl_) {
+            return onAllSslErrorRequestImpl_(info);
+        }
+        return false;
+    }
+
+    void SetOnAllSslErrorRequestImpl(OnAllSslErrorRequestImpl && onAllSslErrorRequestImpl)
+    {
+        if (onAllSslErrorRequestImpl == nullptr) {
+            return;
+        }
+        onAllSslErrorRequestImpl_ = std::move(onAllSslErrorRequestImpl);
     }
 
     using OnSslSelectCertRequestImpl = std::function<bool(const BaseEventInfo* info)>;
@@ -834,6 +868,23 @@ public:
         }
 
         onLoadInterceptImpl_ = onLoadInterceptImpl;
+    }
+
+    using OnOverrideUrlLoadingImpl = std::function<bool(const BaseEventInfo* info)>;
+    bool OnOverrideUrlLoading(const BaseEventInfo* info) const
+    {
+        if (onOverrideUrlLoadingImpl_) {
+            return onOverrideUrlLoadingImpl_(info);
+        }
+        return false;
+    }
+    void SetOnOverrideUrlLoading(OnOverrideUrlLoadingImpl&& onOverrideUrlLoadingImpl)
+    {
+        if (onOverrideUrlLoadingImpl == nullptr) {
+            return;
+        }
+
+        onOverrideUrlLoadingImpl_ = onOverrideUrlLoadingImpl;
     }
 
     using OnInterceptRequestImpl = std::function<RefPtr<WebResponse>(const BaseEventInfo* info)>;
@@ -1024,8 +1075,10 @@ private:
     OnFullScreenEnterImpl onFullScreenEnterImpl_;
     OnUrlLoadInterceptImpl onUrlLoadInterceptImpl_;
     OnLoadInterceptImpl onLoadInterceptImpl_;
+    OnOverrideUrlLoadingImpl onOverrideUrlLoadingImpl_;
     OnHttpAuthRequestImpl onHttpAuthRequestImpl_;
     OnSslErrorRequestImpl onSslErrorRequestImpl_;
+    OnAllSslErrorRequestImpl onAllSslErrorRequestImpl_;
     OnSslSelectCertRequestImpl onSslSelectCertRequestImpl_;
     OnContextMenuImpl onContextMenuImpl_;
     OnContextMenuHideImpl onContextMenuHideImpl_;
@@ -1063,6 +1116,8 @@ private:
     bool isBackgroundColor_ = false;
     bool isNeedGestureAccess_ = true;
     bool isNativeEmbedMode_ = false;
+    std::string tag_;
+    std::string tag_type_;
     OnDragFunc onDragStartId_;
     OnDropFunc onDragEnterId_;
     OnDropFunc onDragMoveId_;
@@ -1074,6 +1129,7 @@ private:
     int32_t parentNWebId_ = -1;
     OverScrollMode OverScrollMode_ = OverScrollMode::NEVER;
     CopyOptions CopyOptionMode_ = CopyOptions::Distributed;
+    std::tuple<bool, bool> native_video_player_config_{false, false};
 };
 
 } // namespace OHOS::Ace

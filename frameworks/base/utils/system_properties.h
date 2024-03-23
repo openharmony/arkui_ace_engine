@@ -232,9 +232,19 @@ public:
         return isHookModeEnabled_;
     }
 
+    static bool GetDeveloperModeOn()
+    {
+        return developerModeOn_;
+    }
+
     static bool GetDebugBoundaryEnabled()
     {
         return debugBoundaryEnabled_;
+    }
+
+    static bool GetDebugOffsetLogEnabled()
+    {
+        return debugOffsetLogEnabled_;
     }
 
     static bool GetDebugAutoUIEnabled()
@@ -260,6 +270,21 @@ public:
     static bool GetLayoutTraceEnabled()
     {
         return layoutTraceEnable_;
+    }
+
+    static bool GetTraceInputEventEnabled()
+    {
+        return traceInputEventEnable_;
+    }
+
+    static bool GetStateManagerEnabled()
+    {
+        return stateManagerEnable_;
+    }
+
+    static void SetStateManagerEnabled(bool stateManagerEnable)
+    {
+        stateManagerEnable_ = stateManagerEnable;
     }
 
     static bool GetBuildTraceEnabled()
@@ -369,6 +394,11 @@ public:
         return astcPsnr_;
     }
 
+    static bool IsImageFileCacheConvertAstcEnabled()
+    {
+        return imageFileCacheConvertAstc_;
+    }
+
     static void SetExtSurfaceEnabled(bool extSurfaceEnabled)
     {
         extSurfaceEnabled_ = extSurfaceEnabled;
@@ -415,18 +445,37 @@ public:
 
     static bool GetGridIrregularLayoutEnabled();
 
+    static bool WaterFlowUseSegmentedLayout();
+
     static bool GetSideBarContainerBlurEnable();
 
-    static void AddWatchSystemParameter(void *context);
+    using EnableSystemParameterCallback = void (*)(const char* key, const char* value, void* context);
 
-    static void EnableSystemParameterCallback(const char *key, const char *value, void *context);
+    static void AddWatchSystemParameter(const char* key, void* context, EnableSystemParameterCallback callback);
 
-    static void RemoveWatchSystemParameter(void *context);
+    static void RemoveWatchSystemParameter(const char* key, void* context, EnableSystemParameterCallback callback);
+
+    static float GetDefaultResolution();
+
+    static void SetLayoutTraceEnabled(bool layoutTraceEnable);
+
+    static void SetInputEventTraceEnabled(bool inputEventTraceEnable);
+
+    static void SetSecurityDevelopermodeLayoutTraceEnabled(bool layoutTraceEnable);
+
+    static void SetDebugBoundaryEnabled(bool debugBoundaryEnabled);
+
+    static bool GetAcePerformanceMonitorEnabled()
+    {
+        return acePerformanceMonitorEnable_;
+    }
 
 private:
     static bool traceEnabled_;
+    static bool developerModeOn_;
     static bool svgTraceEnable_;
     static bool layoutTraceEnable_;
+    static bool traceInputEventEnable_;
     static bool buildTraceEnable_;
     static bool accessibilityEnabled_;
     static bool isRound_;
@@ -456,12 +505,14 @@ private:
     static bool debugEnabled_;
     static bool debugBoundaryEnabled_;
     static bool debugAutoUIEnabled_; // for AutoUI Test
+    static bool debugOffsetLogEnabled_;
     static bool downloadByNetworkEnabled_;
     static bool gpuUploadEnabled_;
     static bool isHookModeEnabled_;
     static bool astcEnabled_;
     static int32_t astcMax_;
     static int32_t astcPsnr_;
+    static bool imageFileCacheConvertAstc_;
     static bool extSurfaceEnabled_;
     static uint32_t dumpFrameCount_;
     static bool resourceDecoupling_;
@@ -469,6 +520,8 @@ private:
     static bool navigationBlurEnabled_;
     static bool gridCacheEnabled_;
     static bool sideBarContainerBlurEnable_;
+    static bool stateManagerEnable_;
+    static bool acePerformanceMonitorEnable_;
 };
 
 } // namespace OHOS::Ace

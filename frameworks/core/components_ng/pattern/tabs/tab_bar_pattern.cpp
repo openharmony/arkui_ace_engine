@@ -43,6 +43,8 @@
 #include "core/components_ng/property/safe_area_insets.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/pipeline_ng/pipeline_context.h"
+#include "base/perfmonitor/perf_constants.h"
+#include "base/perfmonitor/perf_monitor.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -728,6 +730,7 @@ bool TabBarPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty,
 
 void TabBarPattern::HandleClick(const GestureEvent& info)
 {
+    PerfMonitor::GetPerfMonitor()->Start(PerfConstants::APP_TAB_SWITCH, PerfActionType::FIRST_MOVE, "");
     if (info.GetSourceDevice() == SourceType::KEYBOARD) {
         return;
     }
@@ -907,16 +910,56 @@ void TabBarPattern::GetBottomTabBarImageSizeAndOffset(const std::vector<int32_t>
 
     auto selectedImageLayoutProperty = selectedImageNode->GetLayoutProperty<ImageLayoutProperty>();
     CHECK_NULL_VOID(selectedImageLayoutProperty);
-    imageSourceInfo.SetFillColor(tabTheme->GetBottomTabIconOn());
+    UpdateBottomTabBarImageColor(selectedIndexes, maskIndex);
     selectedImageLayoutProperty->UpdateImageSourceInfo(imageSourceInfo);
-
-    imageSourceInfo.SetFillColor(tabTheme->GetBottomTabIconOff());
     imageLayoutProperty->UpdateImageSourceInfo(imageSourceInfo);
 
     selectedImageNode->MarkModifyDone();
     selectedImageNode->MarkDirtyNode();
     imageNode->MarkModifyDone();
     imageNode->MarkDirtyNode();
+}
+
+void TabBarPattern::UpdateBottomTabBarImageColor(const std::vector<int32_t>& selectedIndexes, int32_t maskIndex)
+{
+    auto pipelineContext = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipelineContext);
+    auto tabTheme = pipelineContext->GetTheme<TabTheme>();
+    CHECK_NULL_VOID(tabTheme);
+
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+
+    auto columnNode = AceType::DynamicCast<FrameNode>(host->GetChildAtIndex(selectedIndexes[maskIndex]));
+    CHECK_NULL_VOID(columnNode);
+    auto imageNode = AceType::DynamicCast<FrameNode>(columnNode->GetChildren().front());
+    CHECK_NULL_VOID(imageNode);
+
+    auto maskPosition = host->GetChildren().size() - MASK_COUNT;
+    if (maskPosition < 0) {
+        return;
+    }
+    auto selectedMaskNode = AceType::DynamicCast<FrameNode>(host->GetChildAtIndex(maskPosition + maskIndex));
+    CHECK_NULL_VOID(selectedMaskNode);
+    auto selectedImageNode = AceType::DynamicCast<FrameNode>(selectedMaskNode->GetChildren().front());
+    CHECK_NULL_VOID(selectedImageNode);
+
+    auto selectedImagePaintProperty = selectedImageNode->GetPaintProperty<ImageRenderProperty>();
+    CHECK_NULL_VOID(selectedImagePaintProperty);
+    auto unselectedImagePaintProperty = imageNode->GetPaintProperty<ImageRenderProperty>();
+    CHECK_NULL_VOID(unselectedImagePaintProperty);
+    if (iconStyles_[selectedIndexes[maskIndex]].selectedColor.has_value()) {
+        selectedImagePaintProperty->UpdateSvgFillColor(iconStyles_[selectedIndexes[maskIndex]].selectedColor.value());
+    } else {
+        selectedImagePaintProperty->UpdateSvgFillColor(tabTheme->GetBottomTabIconOn());
+    }
+
+    if (iconStyles_[selectedIndexes[maskIndex]].unselectedColor.has_value()) {
+        unselectedImagePaintProperty->UpdateSvgFillColor(
+            iconStyles_[selectedIndexes[maskIndex]].unselectedColor.value());
+    } else {
+        unselectedImagePaintProperty->UpdateSvgFillColor(tabTheme->GetBottomTabIconOff());
+    }
 }
 
 void TabBarPattern::PlayMaskAnimation(float selectedImageSize,
@@ -985,6 +1028,8 @@ void TabBarPattern::MaskAnimationFinish(const RefPtr<FrameNode>& host, int32_t s
 
     auto imageLayoutProperty = imageNode->GetLayoutProperty<ImageLayoutProperty>();
     CHECK_NULL_VOID(imageLayoutProperty);
+    auto imagePaintProperty = imageNode->GetPaintProperty<ImageRenderProperty>();
+    CHECK_NULL_VOID(imagePaintProperty);
     ImageSourceInfo info;
     auto imageSourceInfo = imageLayoutProperty->GetImageSourceInfo().value_or(info);
 
@@ -992,8 +1037,22 @@ void TabBarPattern::MaskAnimationFinish(const RefPtr<FrameNode>& host, int32_t s
     CHECK_NULL_VOID(pipelineContext);
     auto tabTheme = pipelineContext->GetTheme<TabTheme>();
     CHECK_NULL_VOID(tabTheme);
-    imageSourceInfo.SetFillColor(isSelected ? tabTheme->GetBottomTabIconOn() :
-        tabTheme->GetBottomTabIconOff());
+    auto tabBarPattern = host->GetPattern<TabBarPattern>();
+    CHECK_NULL_VOID(tabBarPattern);
+    auto iconStyles = tabBarPattern->GetIconStyle();
+    if (isSelected) {
+        if (iconStyles[selectedIndex].selectedColor.has_value()) {
+            imagePaintProperty->UpdateSvgFillColor(iconStyles[selectedIndex].selectedColor.value());
+        } else {
+            imagePaintProperty->UpdateSvgFillColor(tabTheme->GetBottomTabIconOn());
+        }
+    } else {
+        if (iconStyles[selectedIndex].unselectedColor.has_value()) {
+            imagePaintProperty->UpdateSvgFillColor(iconStyles[selectedIndex].unselectedColor.value());
+        } else {
+            imagePaintProperty->UpdateSvgFillColor(tabTheme->GetBottomTabIconOff());
+        }
+    }
     imageLayoutProperty->UpdateImageSourceInfo(imageSourceInfo);
 
     host->MarkDirtyNode();
@@ -1324,8 +1383,19 @@ void TabBarPattern::UpdateTextColorAndFontWeight(int32_t indicator)
         auto textLayoutProperty = textNode->GetLayoutProperty<TextLayoutProperty>();
         CHECK_NULL_VOID(textLayoutProperty);
         auto isSelected = columnNode->GetId() == selectedColumnId;
-        textLayoutProperty->UpdateTextColor(isSelected ? tabTheme->GetSubTabTextOnColor()
-                                                       : tabTheme->GetSubTabTextOffColor());
+        if (isSelected) {
+            if (labelStyles_[index].selectedColor.has_value()) {
+                textLayoutProperty->UpdateTextColor(labelStyles_[index].selectedColor.value());
+            } else {
+                textLayoutProperty->UpdateTextColor(tabTheme->GetSubTabTextOnColor());
+            }
+        } else {
+            if (labelStyles_[index].unselectedColor.has_value()) {
+                textLayoutProperty->UpdateTextColor(labelStyles_[index].unselectedColor.value());
+            } else {
+                textLayoutProperty->UpdateTextColor(tabTheme->GetSubTabTextOffColor());
+            }
+        }
         if (IsNeedUpdateFontWeight(index)) {
             textLayoutProperty->UpdateFontWeight(isSelected ? FontWeight::MEDIUM : FontWeight::NORMAL);
         }
@@ -1363,6 +1433,7 @@ void TabBarPattern::UpdateImageColor(int32_t indicator)
     CHECK_NULL_VOID(pipelineContext);
     auto tabTheme = pipelineContext->GetTheme<TabTheme>();
     CHECK_NULL_VOID(tabTheme);
+    int32_t index = 0;
     for (const auto& columnNode : tabBarNode->GetChildren()) {
         CHECK_NULL_VOID(columnNode);
         auto imageNode = AceType::DynamicCast<FrameNode>(columnNode->GetChildren().front());
@@ -1370,13 +1441,28 @@ void TabBarPattern::UpdateImageColor(int32_t indicator)
 
         auto imageLayoutProperty = imageNode->GetLayoutProperty<ImageLayoutProperty>();
         CHECK_NULL_VOID(imageLayoutProperty);
+        auto isSelected = columnNode->GetId() == selectedColumnId;
+        auto imagePaintProperty = imageNode->GetPaintProperty<ImageRenderProperty>();
+        CHECK_NULL_VOID(imagePaintProperty);
         ImageSourceInfo info;
         auto imageSourceInfo = imageLayoutProperty->GetImageSourceInfo().value_or(info);
-        imageSourceInfo.SetFillColor(columnNode->GetId() == selectedColumnId ? tabTheme->GetBottomTabIconOn() :
-            tabTheme->GetBottomTabIconOff());
+        if (isSelected) {
+            if (iconStyles_[index].selectedColor.has_value()) {
+                imagePaintProperty->UpdateSvgFillColor(iconStyles_[index].selectedColor.value());
+            } else {
+                imagePaintProperty->UpdateSvgFillColor(tabTheme->GetBottomTabIconOn());
+            }
+        } else {
+            if (iconStyles_[index].unselectedColor.has_value()) {
+                imagePaintProperty->UpdateSvgFillColor(iconStyles_[index].unselectedColor.value());
+            } else {
+                imagePaintProperty->UpdateSvgFillColor(tabTheme->GetBottomTabIconOff());
+            }
+        }
         imageLayoutProperty->UpdateImageSourceInfo(imageSourceInfo);
         imageNode->MarkModifyDone();
         imageNode->MarkDirtyNode();
+        index++;
     }
     SetImageColorOnIndex(indicator);
 }
@@ -2022,7 +2108,8 @@ void TabBarPattern::TabBarClickEvent(int32_t index) const
     CHECK_NULL_VOID(tabsPattern);
     auto tabBarClickEvent = tabsPattern->GetTabBarClickEvent();
     CHECK_NULL_VOID(tabBarClickEvent);
-    (*tabBarClickEvent)(index);
+    auto event = *tabBarClickEvent;
+    event(index);
 }
 
 

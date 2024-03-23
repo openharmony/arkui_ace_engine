@@ -26,8 +26,8 @@ namespace OHOS::Ace::NG {
 
 class ACE_EXPORT ToastView {
 public:
-    static RefPtr<FrameNode> CreateToastNode(
-        const std::string& message, const std::string& bottom, bool isRightToLeft, const ToastShowMode& showMode);
+    static RefPtr<FrameNode> CreateToastNode(const std::string& message, const std::string& bottom, bool isRightToLeft,
+        const ToastShowMode& showMode, std::optional<Alignment> alignment, std::optional<DimensionOffset> offset);
 
 private:
     static void UpdateTextLayoutProperty(

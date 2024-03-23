@@ -18,6 +18,7 @@
 
 #include "key_event.h"
 #include "pointer_event.h"
+#include "input_manager.h"
 
 #include "base/geometry/ng/offset_t.h"
 #include "base/geometry/ng/vector.h"
@@ -70,6 +71,8 @@ void GetEventDevice(int32_t sourceType, E& event)
 }
 
 TouchEvent ConvertTouchEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent);
+
+void SetTouchEventType(int32_t orgAction, TouchEvent& event);
 
 void CalculatePointerEvent(const NG::OffsetF& offsetF, const std::shared_ptr<MMI::PointerEvent>& point,
     const NG::VectorF& scale, int32_t udegree = 0);

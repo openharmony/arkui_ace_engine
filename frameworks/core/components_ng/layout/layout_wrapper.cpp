@@ -80,17 +80,8 @@ void LayoutWrapper::OffsetNodeToSafeArea()
 
 void LayoutWrapper::RestoreGeoState()
 {
-    auto pipeline = PipelineContext::GetCurrentContext();
-    CHECK_NULL_VOID(pipeline);
-    auto manager = pipeline->GetSafeAreaManager();
-    CHECK_NULL_VOID(manager);
-    auto&& restoreNodes = manager->GetGeoRestoreNodes();
-    if (restoreNodes.find(hostNode_) != restoreNodes.end()) {
-        if (GetGeometryNode()) {
-            GetGeometryNode()->Restore();
-        }
-        manager->RemoveRestoreNode(hostNode_);
-        manager->AddNeedExpandNode(hostNode_);
+    if (GetGeometryNode()) {
+        GetGeometryNode()->Restore();
     }
 }
 
@@ -105,11 +96,12 @@ void LayoutWrapper::AvoidKeyboard(bool isFocusOnPage)
             return;
         }
         auto safeArea = manager->GetSafeArea();
+        auto x = GetGeometryNode()->GetFrameOffset().GetX();
         if (manager->IsAtomicService()) {
-            GetGeometryNode()->SetFrameOffset(OffsetF(0, manager->GetKeyboardOffset()));
+            GetGeometryNode()->SetFrameOffset(OffsetF(x, manager->GetKeyboardOffset()));
             return;
         }
-        GetGeometryNode()->SetFrameOffset(OffsetF(0, safeArea.top_.Length() + manager->GetKeyboardOffset()));
+        GetGeometryNode()->SetFrameOffset(OffsetF(x, safeArea.top_.Length() + manager->GetKeyboardOffset()));
     }
 }
 
@@ -124,14 +116,45 @@ void LayoutWrapper::SaveGeoState()
     manager->AddGeoRestoreNode(GetHostNode());
 }
 
+bool LayoutWrapper::CheckValidSafeArea()
+{
+    auto host = GetHostNode();
+    CHECK_NULL_RETURN(host, false);
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_RETURN(pipeline, false);
+    auto safeAreaManager = pipeline->GetSafeAreaManager();
+    CHECK_NULL_RETURN(safeAreaManager, false);
+    SafeAreaInsets safeArea;
+    auto&& opts = GetLayoutProperty()->GetSafeAreaExpandOpts();
+    // if self does not have opts, check parent's
+    if (!opts) {
+        auto parent = host->GetAncestorNodeOfFrame();
+        CHECK_NULL_RETURN(parent, false);
+        CHECK_NULL_RETURN(parent->GetLayoutProperty(), false);
+        auto&& parentOpts = parent->GetLayoutProperty()->GetSafeAreaExpandOpts();
+        CHECK_NULL_RETURN(parentOpts, false);
+        safeArea = safeAreaManager->GetCombinedSafeArea(*parentOpts);
+    } else {
+        safeArea = safeAreaManager->GetCombinedSafeArea(*opts);
+    }
+    return safeArea.IsValid();
+}
+
 void LayoutWrapper::ExpandSafeArea(bool isFocusOnPage)
 {
-    auto&& opts = GetLayoutProperty()->GetSafeAreaExpandOpts();
-    CHECK_NULL_VOID(opts && opts->Expansive());
-
-    // children of Scrollable nodes don't support expandSafeArea
     auto host = GetHostNode();
     CHECK_NULL_VOID(host);
+    auto&& opts = GetLayoutProperty()->GetSafeAreaExpandOpts();
+    auto selfExpansive = host->SelfExpansive();
+    if (!selfExpansive && !host->NeedRestoreSafeArea()) {
+        // if safeArea switch from valid to not valid, keep node restored and return
+        // otherwise if node restored, meaning expansive parent did not adjust child or so on, restore cache
+        if (CheckValidSafeArea()) {
+            GetGeometryNode()->RestoreCache();
+        }
+        return;
+    }
+    CHECK_NULL_VOID(selfExpansive);
     auto parent = host->GetAncestorNodeOfFrame();
     if (parent && parent->GetPattern<ScrollablePattern>()) {
         return;
@@ -181,9 +204,12 @@ void LayoutWrapper::ExpandSafeArea(bool isFocusOnPage)
     if (!diff.NonOffset()) {
         // children's position should remain the same.
         AdjustChildren(diff);
+    } else {
+        RestoreExpansiveChildren();
     }
     geometryNode->SetFrameOffset(frame.GetOffset());
     geometryNode->SetFrameSize(frame.GetSize());
+    host->SetNeedRestoreSafeArea(true);
 }
 
 void LayoutWrapper::AdjustChildren(const OffsetF& offset)
@@ -205,9 +231,40 @@ void LayoutWrapper::AdjustChild(RefPtr<UINode> childUI, const OffsetF& offset)
         }
         return;
     }
+    if (child->NeedRestoreSafeArea()) {
+        return;
+    }
     auto childGeo = child->GetGeometryNode();
     child->SaveGeoState();
     childGeo->SetFrameOffset(childGeo->GetFrameOffset() + offset);
+    child->SetNeedRestoreSafeArea(true);
+}
+
+void LayoutWrapper::RestoreExpansiveChildren()
+{
+    for (const auto& childUI : GetHostNode()->GetChildren()) {
+        RestoreExpansiveChild(childUI);
+    }
+}
+
+void LayoutWrapper::RestoreExpansiveChild(const RefPtr<UINode>& childUI)
+{
+    auto child = DynamicCast<FrameNode>(childUI);
+    if (!child) {
+        if (!IsSyntaxNode(childUI->GetTag())) {
+            return;
+        }
+        for (const auto& syntaxChild : childUI->GetChildren()) {
+            RestoreExpansiveChild(syntaxChild);
+        }
+        return;
+    }
+    if (!child->SelfExpansive() || !child->NeedRestoreSafeArea()) {
+        return;
+    }
+    auto childGeo = child->GetGeometryNode();
+    childGeo->Restore();
+    child->SetNeedRestoreSafeArea(false);
 }
 
 void LayoutWrapper::ExpandIntoKeyboard()
@@ -234,14 +291,14 @@ void LayoutWrapper::ApplyConstraint(LayoutConstraintF constraint)
     GetGeometryNode()->SetParentLayoutConstraint(constraint);
 
     auto layoutProperty = GetLayoutProperty();
-    const auto& magicItemProperty = layoutProperty->GetMagicItemProperty();
-    if (magicItemProperty && magicItemProperty->HasAspectRatio()) {
+    auto& magicItemProperty = layoutProperty->GetMagicItemProperty();
+    if (magicItemProperty.HasAspectRatio()) {
         std::optional<CalcSize> idealSize = std::nullopt;
         if (layoutProperty->GetCalcLayoutConstraint()) {
             idealSize = layoutProperty->GetCalcLayoutConstraint()->selfIdealSize;
         }
         auto greaterThanApiTen = Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TEN);
-        constraint.ApplyAspectRatio(magicItemProperty->GetAspectRatioValue(), idealSize, greaterThanApiTen);
+        constraint.ApplyAspectRatio(magicItemProperty.GetAspectRatioValue(), idealSize, greaterThanApiTen);
     }
 
     auto&& insets = layoutProperty->GetSafeAreaInsets();
@@ -257,10 +314,9 @@ void LayoutWrapper::CreateRootConstraint()
     LayoutConstraintF layoutConstraint;
     layoutConstraint.percentReference.SetWidth(PipelineContext::GetCurrentRootWidth());
     auto layoutProperty = GetLayoutProperty();
-    const auto& magicItemProperty = layoutProperty->GetMagicItemProperty();
-    auto hasAspectRatio = magicItemProperty && magicItemProperty->HasAspectRatio();
-    if (hasAspectRatio) {
-        auto aspectRatio = magicItemProperty->GetAspectRatioValue();
+    auto& magicItemProperty = layoutProperty->GetMagicItemProperty();
+    if (magicItemProperty.HasAspectRatio()) {
+        auto aspectRatio = magicItemProperty.GetAspectRatioValue();
         if (Positive(aspectRatio)) {
             auto height = PipelineContext::GetCurrentRootHeight() / aspectRatio;
             layoutConstraint.percentReference.SetHeight(height);

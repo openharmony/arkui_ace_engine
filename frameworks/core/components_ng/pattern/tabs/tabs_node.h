@@ -145,6 +145,7 @@ private:
     Dimension GetBarHeight() const;
     bool GetBarAdaptiveHeight() const;
     Color GetBarBackgroundColor() const;
+    BlurStyle GetBarBackgroundBlurStyle() const;
     int32_t GetIndex() const;
     bool GetFadingEdge() const;
     BarGridColumnOptions GetBarGridAlign() const;

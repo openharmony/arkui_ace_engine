@@ -49,7 +49,7 @@ void JSInteractableView::JsOnTouch(const JSCallbackInfo& args)
         return;
     }
     RefPtr<JsTouchFunction> jsOnTouchFunc = AceType::MakeRefPtr<JsTouchFunction>(JSRef<JSFunc>::Cast(args[0]));
-    WeakPtr<NG::FrameNode> frameNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    WeakPtr<NG::FrameNode> frameNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
     auto onTouch = [execCtx = args.GetExecutionContext(), func = std::move(jsOnTouchFunc), node = frameNode](
                        TouchEventInfo& info) {
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
@@ -70,7 +70,7 @@ void JSInteractableView::JsOnKey(const JSCallbackInfo& args)
         return;
     }
     RefPtr<JsKeyFunction> JsOnKeyEvent = AceType::MakeRefPtr<JsKeyFunction>(JSRef<JSFunc>::Cast(args[0]));
-    WeakPtr<NG::FrameNode> frameNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    WeakPtr<NG::FrameNode> frameNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
     auto onKeyEvent = [execCtx = args.GetExecutionContext(), func = std::move(JsOnKeyEvent), node = frameNode](
                           KeyEventInfo& info) {
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
@@ -79,6 +79,28 @@ void JSInteractableView::JsOnKey(const JSCallbackInfo& args)
         func->Execute(info);
     };
     ViewAbstractModel::GetInstance()->SetOnKeyEvent(std::move(onKeyEvent));
+}
+
+void JSInteractableView::JsOnKeyPreIme(const JSCallbackInfo& args)
+{
+    if (args[0]->IsUndefined()) {
+        ViewAbstractModel::GetInstance()->DisableOnKeyPreIme();
+        return;
+    }
+    if (!args[0]->IsFunction()) {
+        return;
+    }
+    RefPtr<JsKeyFunction> JsOnPreImeEvent = AceType::MakeRefPtr<JsKeyFunction>(JSRef<JSFunc>::Cast(args[0]));
+    WeakPtr<NG::FrameNode> frameNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    auto onPreImeEvent = [execCtx = args.GetExecutionContext(), func = std::move(JsOnPreImeEvent), node = frameNode](
+                          KeyEventInfo& info) -> bool {
+        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx, false);
+        ACE_SCORING_EVENT("onKeyPreIme");
+        PipelineContext::SetCallBackNode(node);
+        auto ret = func->ExecuteWithValue(info);
+        return ret->IsBoolean() ? ret->ToBoolean() : false;
+    };
+    ViewAbstractModel::GetInstance()->SetOnKeyPreIme(std::move(onPreImeEvent));
 }
 
 void JSInteractableView::JsOnHover(const JSCallbackInfo& info)
@@ -91,7 +113,7 @@ void JSInteractableView::JsOnHover(const JSCallbackInfo& info)
         return;
     }
     RefPtr<JsHoverFunction> jsOnHoverFunc = AceType::MakeRefPtr<JsHoverFunction>(JSRef<JSFunc>::Cast(info[0]));
-    WeakPtr<NG::FrameNode> frameNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    WeakPtr<NG::FrameNode> frameNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
     auto onHover = [execCtx = info.GetExecutionContext(), func = std::move(jsOnHoverFunc), node = frameNode](
                        bool isHover, HoverInfo& hoverInfo) {
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
@@ -121,7 +143,7 @@ void JSInteractableView::JsOnDelete(const JSCallbackInfo& info)
     if (info[0]->IsFunction()) {
         RefPtr<JsFunction> jsOnDeleteFunc =
             AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(info[0]));
-        WeakPtr<NG::FrameNode> frameNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+        auto frameNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
         auto onDelete = [execCtx = info.GetExecutionContext(), func = std::move(jsOnDeleteFunc), node = frameNode]() {
             JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
             ACE_SCORING_EVENT("onDelete");
@@ -150,14 +172,15 @@ void JSInteractableView::JsMonopolizeEvents(const JSCallbackInfo& info)
 
 void JSInteractableView::JsOnClick(const JSCallbackInfo& info)
 {
-    if (info[0]->IsUndefined() && IsDisableEventVersion()) {
+    JSRef<JSVal> jsOnClickVal = info[0];
+    if (jsOnClickVal->IsUndefined() && IsDisableEventVersion()) {
         ViewAbstractModel::GetInstance()->DisableOnClick();
         return;
     }
-    if (!info[0]->IsFunction()) {
+    if (!jsOnClickVal->IsFunction()) {
         return;
     }
-    WeakPtr<NG::FrameNode> frameNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    WeakPtr<NG::FrameNode> frameNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
     auto jsOnClickFunc = AceType::MakeRefPtr<JsClickFunction>(JSRef<JSFunc>::Cast(info[0]));
     auto onTap = [execCtx = info.GetExecutionContext(), func = jsOnClickFunc, node = frameNode](GestureEvent& info) {
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
@@ -198,7 +221,7 @@ void JSInteractableView::JsOnAppear(const JSCallbackInfo& info)
     if (info[0]->IsFunction()) {
         RefPtr<JsFunction> jsOnAppearFunc =
             AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(info[0]));
-        WeakPtr<NG::FrameNode> frameNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+        auto frameNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
         auto onAppear = [execCtx = info.GetExecutionContext(), func = std::move(jsOnAppearFunc), node = frameNode]() {
             JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
             ACE_SCORING_EVENT("onAppear");
@@ -218,7 +241,7 @@ void JSInteractableView::JsOnDisAppear(const JSCallbackInfo& info)
     if (info[0]->IsFunction()) {
         RefPtr<JsFunction> jsOnDisAppearFunc =
             AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(info[0]));
-        WeakPtr<NG::FrameNode> frameNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+        auto frameNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
         auto onDisappear = [execCtx = info.GetExecutionContext(), func = std::move(jsOnDisAppearFunc),
                                node = frameNode]() {
             JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
@@ -236,7 +259,7 @@ void JSInteractableView::JsOnAccessibility(const JSCallbackInfo& info)
         return;
     }
     RefPtr<JsFunction> jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(info[0]));
-    WeakPtr<NG::FrameNode> frameNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    WeakPtr<NG::FrameNode> frameNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
     auto onAccessibility = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc), node = frameNode](
                                const std::string& param) {
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);

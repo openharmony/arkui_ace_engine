@@ -32,12 +32,12 @@ public:
     static RefPtr<FrameNode> Create(const std::string& bundleName, const std::string& abilityName,
         const std::map<std::string, std::string>& params, std::function<void(int32_t)>&& onRelease,
         std::function<void(int32_t, const std::string&, const std::string&)>&& onError);
-    static RefPtr<FrameNode> Create(const AAFwk::Want& want, const ModalUIExtensionCallbacks& callbacks,
-        bool isAsyncModalBinding = false);
+    static RefPtr<FrameNode> Create(
+        const AAFwk::Want& want, const ModalUIExtensionCallbacks& callbacks, bool isAsyncModalBinding = false);
 
     void Create(const RefPtr<OHOS::Ace::WantWrap>& wantWrap, bool transferringCaller = false) override;
     // for Embedded Component
-    void Create(const RefPtr<OHOS::Ace::WantWrap>& wantWrap, int32_t embeddedType) override;
+    void Create(const RefPtr<OHOS::Ace::WantWrap>& wantWrap, SessionType sessionType) override;
     // for dynamic component
     void Create() override;
     void InitializeDynamicComponent(const RefPtr<FrameNode>& frameNode, const std::string& hapPath,
@@ -47,6 +47,7 @@ public:
     void SetOnRemoteReady(std::function<void(const RefPtr<UIExtensionProxy>&)>&& onRemoteReady) override;
     void SetOnRelease(std::function<void(int32_t)>&& onRelease) override;
     void SetOnResult(std::function<void(int32_t, const AAFwk::Want&)>&& onResult) override;
+    void SetOnTerminated(std::function<void(int32_t, const RefPtr<WantWrap>&)>&& onTerminated) override;
     void SetOnReceive(std::function<void(const AAFwk::WantParams&)>&& onReceive) override;
     void SetOnError(
         std::function<void(int32_t code, const std::string& name, const std::string& message)>&& onError) override;

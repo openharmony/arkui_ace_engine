@@ -53,6 +53,9 @@ function uiNodeCleanUpIdleTask(): void {
 }
 
 class UINodeRegisterProxy {
+    public static readonly notRecordingDependencies : number = -1;
+    public static readonly monitorIllegalV2V3StateAccess : number = -2;
+
     public static obtainDeletedElmtIds(): void {
         stateMgmtConsole.debug(`UINodeRegisterProxy. static obtainDeletedElmtIds:`);
         if ((!UINodeRegisterProxy.instance_.obtainDeletedElmtIds) || typeof UINodeRegisterProxy.instance_.obtainDeletedElmtIds != "function") {
@@ -65,6 +68,21 @@ class UINodeRegisterProxy {
     public static unregisterElmtIdsFromViewPUs(): void {
         stateMgmtConsole.debug('UINodeRegisterProxy.unregisterElmtIdsFromViewPUs elmtIds');
         UINodeRegisterProxy.instance_.unregisterElmtIdsFromViewPUs();
+    }
+
+     // unregisters all the received removedElements in func parameter
+     public static unregisterRemovedElmtsFromViewPUs(removedElements: Array<number>): void {
+
+        stateMgmtConsole.debug(`UINodeRegisterProxy.unregisterRemovedElmtsFromViewPUs elmtIds ${removedElements}`);
+        UINodeRegisterProxy.instance_.populateRemoveElementInfo(removedElements);
+        UINodeRegisterProxy.instance_.unregisterElmtIdsFromViewPUs();
+    }
+
+    private populateRemoveElementInfo(removedElements: Array<number>) {
+        for (const elmtId of removedElements) {
+            const removedElementInfo: RemovedElementInfo = { elmtId, tag: "" };
+            this.removeElementsInfo_.push(removedElementInfo);
+        }
     }
 
     /* just get the remove items from the native side
@@ -86,7 +104,7 @@ class UINodeRegisterProxy {
         }
         let owningView : ViewPU | undefined;
         this.removeElementsInfo_.forEach((rmElmtInfo  : RemovedElementInfo) => {
-            const owningViewPUWeak : WeakRef<ViewPU> = UINodeRegisterProxy.ElementIdToOwningViewPU_.get(rmElmtInfo.elmtId );
+            const owningViewPUWeak : WeakRef<ViewPU> | undefined = UINodeRegisterProxy.ElementIdToOwningViewPU_.get(rmElmtInfo.elmtId );
             if (owningViewPUWeak != undefined) {
                 owningView = owningViewPUWeak.deref();
                 if (owningView) {
@@ -95,8 +113,11 @@ class UINodeRegisterProxy {
                     stateMgmtConsole.debug(`elmtIds ${rmElmtInfo.elmtId} tag: ${rmElmtInfo.tag} has not been removed because of failure of updating the weakptr of viewpu. Internal error!.`);
                 }
             } else {
-                stateMgmtConsole.debug(`elmtIds ${rmElmtInfo.elmtId} tag: ${rmElmtInfo.tag} cannot find its owning viewpu, maybe this viewpu has already been abouttobedeleted. Internal error!`)
+                stateMgmtConsole.debug(`elmtIds ${rmElmtInfo.elmtId} tag: ${rmElmtInfo.tag} cannot find its owning ViewPU, maybe this ViewPu has already been aboutToBeDeleted. Internal error!`)
             }
+
+            // FIXME: only do this if app uses V3
+            ObserveV3.getObserve().clearBinding(rmElmtInfo.elmtId);
         })
 
         this.removeElementsInfo_.length = 0;

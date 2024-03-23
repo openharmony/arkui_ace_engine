@@ -27,9 +27,9 @@
 namespace OHOS::Ace {
 namespace {
 #if (defined(__aarch64__) || defined(__x86_64__))
-const std::string FRAME_AWARE_SO_PATH = "/system/lib64/libframe_ui_intf.z.so";
+const std::string FRAME_AWARE_SO_PATH = "/system/lib64/platformsdk/libframe_ui_intf.z.so";
 #else
-const std::string FRAME_AWARE_SO_PATH = "/system/lib/libframe_ui_intf.z.so";
+const std::string FRAME_AWARE_SO_PATH = "/system/lib/platformsdk/libframe_ui_intf.z.so";
 #endif
 } // namespace
 FrameReport& FrameReport::GetInstance()
@@ -84,6 +84,8 @@ bool FrameReport::LoadLibrary()
         CHECK_NULL_RETURN(flushBeginFunc_, false);
         flushEndFunc_ = (FlushEndFunc)LoadSymbol("FlushEnd");
         CHECK_NULL_RETURN(flushEndFunc_, false);
+        setFrameParamFunc_ = (SetFrameParamFunc)LoadSymbol("SetFrameParam");
+        CHECK_NULL_RETURN(setFrameParamFunc_, false);
         frameSchedSoLoaded_ = true;
     }
     return true;
@@ -252,5 +254,13 @@ void FrameReport::FlushEnd()
         return;
     }
     flushEndFunc_();
+}
+
+void FrameReport::SetFrameParam(int requestId, int load, int schedFrameNum, int value)
+{
+    if (!enable_) {
+        return;
+    }
+    setFrameParamFunc_(requestId, load, schedFrameNum, value);
 }
 } // namespace OHOS::Ace

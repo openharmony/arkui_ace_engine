@@ -62,6 +62,7 @@ void CustomDialogControllerModelNG::SetOpenDialog(DialogProperties& dialogProper
                 DialogProperties Maskarg;
                 Maskarg.isMask = true;
                 Maskarg.autoCancel = dialogProperties.autoCancel;
+                Maskarg.onWillDismiss = dialogProperties.onWillDismiss;
                 Maskarg.maskColor = dialogProperties.maskColor;
                 auto mask = overlayManager->ShowDialog(Maskarg, nullptr, false);
                 CHECK_NULL_VOID(mask);
@@ -74,6 +75,40 @@ void CustomDialogControllerModelNG::SetOpenDialog(DialogProperties& dialogProper
         dialogs.emplace_back(dialog);
     };
     executor->PostTask(task, TaskExecutor::TaskType::UI);
+}
+
+RefPtr<UINode> CustomDialogControllerModelNG::SetOpenDialogWithNode(DialogProperties& dialogProperties,
+    const RefPtr<UINode>& customNode)
+{
+    ContainerScope scope(Container::CurrentIdSafely());
+    auto container = Container::Current();
+    CHECK_NULL_RETURN(container, nullptr);
+    if (container->IsSubContainer() && !dialogProperties.isShowInSubWindow) {
+        auto currentId = SubwindowManager::GetInstance()->GetParentContainerId(Container::CurrentId());
+        container = AceEngine::Get().GetContainer(currentId);
+    }
+    auto pipelineContext = container->GetPipelineContext();
+    CHECK_NULL_RETURN(pipelineContext, nullptr);
+    auto context = AceType::DynamicCast<NG::PipelineContext>(pipelineContext);
+    CHECK_NULL_RETURN(context, nullptr);
+    auto overlayManager = context->GetOverlayManager();
+    CHECK_NULL_RETURN(overlayManager, nullptr);
+    RefPtr<NG::FrameNode> dialog;
+    if (dialogProperties.isShowInSubWindow) {
+        dialog = SubwindowManager::GetInstance()->ShowDialogNGWithNode(dialogProperties, customNode);
+        if (dialogProperties.isModal && !dialogProperties.isScenceBoardDialog) {
+            DialogProperties Maskarg;
+            Maskarg.isMask = true;
+            Maskarg.autoCancel = dialogProperties.autoCancel;
+            Maskarg.maskColor = dialogProperties.maskColor;
+            auto mask = overlayManager->ShowDialogWithNode(Maskarg, nullptr, false);
+            CHECK_NULL_RETURN(mask, dialog);
+            overlayManager->SetMaskNodeId(dialog->GetId(), mask->GetId());
+        }
+    } else {
+        dialog = overlayManager->ShowDialogWithNode(dialogProperties, customNode, false);
+    }
+    return dialog;
 }
 
 void CustomDialogControllerModelNG::SetCloseDialog(DialogProperties& dialogProperties,
@@ -125,5 +160,21 @@ void CustomDialogControllerModelNG::SetCloseDialog(DialogProperties& dialogPrope
         }
     };
     executor->PostTask(task, TaskExecutor::TaskType::UI);
+}
+
+void CustomDialogControllerModelNG::SetCloseDialogForNDK(FrameNode* dialogNode)
+{
+    CHECK_NULL_VOID(dialogNode);
+    ContainerScope scope(Container::CurrentIdSafely());
+    auto container = Container::Current();
+    CHECK_NULL_VOID(container);
+    auto pipelineContext = container->GetPipelineContext();
+    CHECK_NULL_VOID(pipelineContext);
+    auto context = AceType::DynamicCast<NG::PipelineContext>(pipelineContext);
+    CHECK_NULL_VOID(context);
+    auto overlayManager = context->GetOverlayManager();
+    CHECK_NULL_VOID(overlayManager);
+    auto dialogRef = AceType::Claim(dialogNode);
+    overlayManager->CloseDialog(dialogRef);
 }
 } // namespace OHOS::Ace::NG

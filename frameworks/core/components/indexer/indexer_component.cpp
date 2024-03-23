@@ -75,8 +75,8 @@ void IndexerComponent::BuildIndexerAlphabet()
     size_t countAlphabet = 0;
     for (size_t i = 0; i < indexerLabel_.size(); ++i) {
         if (indexerLabel_[i] != INDEXER_STR_DOT) {
-            sectionsLocal_.push_back(indexerLabel_[i]);
-            labelLocal_.push_back(indexerLabel_[i]);
+            sectionsLocal_.emplace_back(indexerLabel_[i]);
+            labelLocal_.emplace_back(indexerLabel_[i]);
             ++countAlphabet;
         } else {
             if (i == indexerLabel_.size() - 1) { // while this "." is the last item
@@ -85,16 +85,16 @@ void IndexerComponent::BuildIndexerAlphabet()
                     strItem += INDEXER_STR_SPACE;
                     ++countAlphabet;
                 }
-                sectionsLocal_.push_back(strItem);
-                labelLocal_.push_back(indexerLabel_[i]);
+                sectionsLocal_.emplace_back(strItem);
+                labelLocal_.emplace_back(indexerLabel_[i]);
             } else if (indexerLabel_[i + 1] != INDEXER_STR_DOT) { // while the next item is not "."
                 while ((countAlphabet < alphabet.size()) && (indexerLabel_[i + 1] != alphabet[countAlphabet])) {
                     strItem += alphabet[countAlphabet];
                     strItem += INDEXER_STR_SPACE;
                     ++countAlphabet;
                 }
-                sectionsLocal_.push_back(strItem);
-                labelLocal_.push_back(indexerLabel_[i]);
+                sectionsLocal_.emplace_back(strItem);
+                labelLocal_.emplace_back(indexerLabel_[i]);
             } else {
                 // Do nothing while the next item is "." too
             }
@@ -211,7 +211,7 @@ void IndexerComponent::BuildTextItem(const std::u16string& strSection, const std
             isFirstItem_ = false;
         }
     }
-    listItem_.push_back(textItem);
+    listItem_.emplace_back(textItem);
     AppendChild(textItem);
     ++itemCount_;
 }
@@ -224,7 +224,7 @@ void IndexerComponent::BuildCollapseItem()
     collapseItem->SetActiveTextStyle(activeStyle_);
     collapseItem->SetTextStyle(false);
     collapseItem->MarkItemPrimary();
-    listItem_.push_back(collapseItem);
+    listItem_.emplace_back(collapseItem);
     AppendChild(collapseItem);
     ++itemCount_;
     hasCollapseItem_ = true;

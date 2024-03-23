@@ -44,11 +44,7 @@ public:
             if (!themeConstants) {
                 return theme;
             }
-            auto themeStyle = themeConstants->GetThemeStyle();
-            if (!themeStyle) {
-                return theme;
-            }
-            auto pattern = themeStyle->GetAttr<RefPtr<ThemeStyle>>(THEME_PATTERN_CLOSE_ICON, nullptr);
+            RefPtr<ThemeStyle> pattern = themeConstants->GetPatternByName(THEME_PATTERN_CLOSE_ICON);
             if (pattern) {
                 theme->closeIconWidth_ = pattern->GetAttr<Dimension>(CLOSE_ICON_WIDTH, PANEL_CLOSE_ICON_WIDTH);
                 theme->closeIconHeight_ = pattern->GetAttr<Dimension>(CLOSE_ICON_Height, PANEL_CLOSE_ICON_Height);

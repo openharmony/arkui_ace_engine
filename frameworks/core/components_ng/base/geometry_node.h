@@ -107,6 +107,16 @@ public:
         frame_.rect_.SetSize(size);
     }
 
+    void SetFrameHeight(const float heigth)
+    {
+        frame_.rect_.SetHeight(heigth);
+    }
+
+    void SetFrameWidth(const float width)
+    {
+        frame_.rect_.SetWidth(width);
+    }
+
     SizeF GetPaddingSize() const
     {
         auto size = frame_.rect_.GetSize();
@@ -306,6 +316,7 @@ public:
         return previousState_;
     }
     void Restore();
+    void RestoreCache();
     void Save();
 
     void ToJsonValue(std::unique_ptr<JsonValue>& json) const;
@@ -327,6 +338,7 @@ private:
 
     // save node's state before SafeArea expansion
     std::unique_ptr<RectF> previousState_;
+    std::unique_ptr<RectF> restoreCache_;
 
     OffsetF parentGlobalOffset_;
     OffsetF parentAbsoluteOffset_;

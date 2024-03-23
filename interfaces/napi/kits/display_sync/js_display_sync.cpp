@@ -113,8 +113,8 @@ void CreateTimeInfoJsObject(const napi_env env, RefPtr<DisplaySyncData> displayS
 
     napi_value timestamp;
     napi_value targetTimestamp;
-    napi_create_bigint_uint64(env, displaySyncData->timestamp_, &timestamp);
-    napi_create_bigint_uint64(env, displaySyncData->targetTimestamp_, &targetTimestamp);
+    napi_create_int64(env, displaySyncData->timestamp_, &timestamp);
+    napi_create_int64(env, displaySyncData->targetTimestamp_, &targetTimestamp);
     auto resultTimestamp = napi_set_named_property(env, intervalInfo, "timestamp", timestamp);
     auto resultTargetTimestamp = napi_set_named_property(env, intervalInfo, "targetTimestamp", targetTimestamp);
     if (resultTimestamp != napi_ok || resultTargetTimestamp != napi_ok) {
@@ -145,11 +145,11 @@ napi_value ParseExpectedFrameRateRange(napi_env env, napi_callback_info info, Fr
     ParseJsValue(env, nativeObj, "max", maxFPS);
     ParseJsValue(env, nativeObj, "expected", expectedFPS);
 
-    if (!(minFPS <= maxFPS && expectedFPS >= minFPS && expectedFPS <= maxFPS)) {
+    frameRateRange.Set(minFPS, maxFPS, expectedFPS);
+    if (!frameRateRange.IsValid()) {
         NapiThrow(env, "ExpectedFrameRateRange Error", ERROR_CODE_PARAM_INVALID);
         return NapiGetUndefined(env);
     }
-    frameRateRange.Set(minFPS, maxFPS, expectedFPS);
     return NapiGetUndefined(env);
 }
 
@@ -163,7 +163,7 @@ napi_value JSSetExpectedFrameRateRange(napi_env env, napi_callback_info info)
         return NapiGetUndefined(env);
     }
 
-    uiDisplaySync->SetExpectedFrameRateRange(std::move(frameRateRange));
+    uiDisplaySync->SetExpectedFrameRateRange(frameRateRange);
     return NapiGetUndefined(env);
 }
 
@@ -174,9 +174,7 @@ napi_value JSStart(napi_env env, napi_callback_info info)
         return NapiGetUndefined(env);
     }
 
-    if (!uiDisplaySync->IsOnPipeline()) {
-        uiDisplaySync->AddToPipelineOnContainer();
-    }
+    uiDisplaySync->AddToPipelineOnContainer();
     return NapiGetUndefined(env);
 }
 
@@ -187,9 +185,7 @@ napi_value JSStop(napi_env env, napi_callback_info info)
         return NapiGetUndefined(env);
     }
 
-    if (uiDisplaySync->IsOnPipeline()) {
-        uiDisplaySync->DelFromPipelineOnContainer();
-    }
+    uiDisplaySync->DelFromPipelineOnContainer();
     return NapiGetUndefined(env);
 }
 
@@ -257,11 +253,12 @@ void DisplaySync::RegisterOnFrameCallback(napi_value cb, napi_ref& onFrameRef,
     });
 }
 
-void DisplaySync::UnRegisterOnFrameCallback(napi_env env, size_t argc, napi_ref& onFrameRef)
+void DisplaySync::UnregisterOnFrameCallback(napi_env env, size_t argc, napi_ref& onFrameRef)
 {
     if (argc >= 1) {
         napi_delete_reference(env, onFrameRef);
-        GetUIDisplaySync()->UnRegisterOnFrame();
+        onFrameRef = nullptr;
+        GetUIDisplaySync()->UnregisterOnFrame();
     }
     return;
 }
@@ -307,7 +304,7 @@ napi_value JSOnFrame_Off(napi_env env, napi_callback_info info)
         return NapiGetUndefined(env);
     }
     if (callbackType == CallbackType::ONFRAME) {
-        displaySync->UnRegisterOnFrameCallback(env, argc, displaySync->onFrameRef_);
+        displaySync->UnregisterOnFrameCallback(env, argc, displaySync->onFrameRef_);
     }
     return NapiGetUndefined(env);
 }

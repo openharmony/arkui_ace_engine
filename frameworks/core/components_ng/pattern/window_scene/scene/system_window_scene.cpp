@@ -59,6 +59,10 @@ void SystemWindowScene::OnBoundsChanged(const Rosen::Vector4f& bounds)
     windowRect.posX_ = std::round(bounds.x_ + session_->GetOffsetX());
     windowRect.posY_ = std::round(bounds.y_ + session_->GetOffsetY());
     session_->UpdateRect(windowRect, Rosen::SizeChangeReason::UNDEFINED);
+
+    auto pipelineContext = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipelineContext);
+    pipelineContext->UpdateSizeChangeReason(static_cast<WindowSizeChangeReason>(session_->GetSizeChangeReason()));
 }
 
 void SystemWindowScene::OnAttachToFrameNode()
@@ -125,14 +129,10 @@ void SystemWindowScene::RegisterEventCallback()
     };
     session_->SetNotifySystemSessionPointerEventFunc(std::move(pointerEventCallback));
 
-    auto keyEventCallback = [instanceId = instanceId_](std::shared_ptr<MMI::KeyEvent> KeyEvent) {
+    auto keyEventCallback = [instanceId = instanceId_](std::shared_ptr<MMI::KeyEvent> KeyEvent,
+        bool isPreImeEvent) -> bool {
         ContainerScope Scope(instanceId);
-        auto pipelineContext = PipelineContext::GetCurrentContext();
-        CHECK_NULL_VOID(pipelineContext);
-        pipelineContext->PostAsyncEvent([KeyEvent]() {
-            WindowSceneHelper::InjectKeyEvent(KeyEvent);
-        },
-            TaskExecutor::TaskType::UI);
+        return WindowSceneHelper::InjectKeyEvent(KeyEvent, isPreImeEvent);
     };
     session_->SetNotifySystemSessionKeyEventFunc(std::move(keyEventCallback));
 }
@@ -182,35 +182,32 @@ void SystemWindowScene::RegisterFocusCallback()
         ContainerScope scope(instanceId);
         auto pipelineContext = PipelineContext::GetCurrentContext();
         CHECK_NULL_VOID(pipelineContext);
+        auto pattern = weakThis.Upgrade();
+        auto frameNode = pattern ? pattern->GetHost() : nullptr;
+        pipelineContext->SetFocusedWindowSceneNode(frameNode);
         pipelineContext->PostAsyncEvent([weakThis]() {
             auto self = weakThis.Upgrade();
             CHECK_NULL_VOID(self);
-            auto host = self->GetHost();
-            CHECK_NULL_VOID(host);
-            auto focusHub = host->GetFocusHub();
-            CHECK_NULL_VOID(focusHub);
-            focusHub->SetParentFocusable(true);
-            focusHub->RequestFocusWithDefaultFocusFirstly();
+            self->FocusViewShow();
         },
             TaskExecutor::TaskType::UI);
     };
     session_->SetNotifyUIRequestFocusFunc(requestFocusCallback);
 
-    auto lostFocusCallback = [weakThis = WeakClaim(this), instanceId = instanceId_]() {
-        ContainerScope scope(instanceId);
-        auto pipelineContext = PipelineContext::GetCurrentContext();
-        CHECK_NULL_VOID(pipelineContext);
-        pipelineContext->PostAsyncEvent([weakThis]() {
-            auto self = weakThis.Upgrade();
-            CHECK_NULL_VOID(self);
-            auto host = self->GetHost();
-            CHECK_NULL_VOID(host);
-            auto focusHub = host->GetFocusHub();
-            CHECK_NULL_VOID(focusHub);
-            focusHub->SetParentFocusable(false);
-        },
-            TaskExecutor::TaskType::UI);
-    };
+    auto lostFocusCallback = [weakThis = WeakClaim(this), instanceId = instanceId_]() {};
     session_->SetNotifyUILostFocusFunc(lostFocusCallback);
+}
+
+void SystemWindowScene::LostViewFocus()
+{
+    TAG_LOGI(
+        AceLogTag::ACE_FOCUS, "Focus view: %{public}s/%{public}d lost focus", GetFrameName().c_str(), GetFrameId());
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto screenNode = pipeline->GetScreenNode();
+    CHECK_NULL_VOID(screenNode);
+    auto screenNodeFocusHub = screenNode->GetFocusHub();
+    CHECK_NULL_VOID(screenNodeFocusHub);
+    screenNodeFocusHub->LostFocus(BlurReason::VIEW_SWITCH);
 }
 } // namespace OHOS::Ace::NG

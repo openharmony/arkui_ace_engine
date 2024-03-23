@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -39,6 +39,13 @@ enum class IndexerCollapsingMode {
     SEVEN // 7 + 1 collapsing mode
 };
 
+enum class PopupListGradientStatus {
+    NONE,
+    TOP,
+    BOTTOM,
+    BOTH
+};
+
 class IndexerPattern : public Pattern {
     DECLARE_ACE_TYPE(IndexerPattern, Pattern);
 
@@ -63,7 +70,7 @@ public:
 
     RefPtr<LayoutAlgorithm> CreateLayoutAlgorithm() override
     {
-        auto indexerLayoutAlgorithm = MakeRefPtr<IndexerLayoutAlgorithm>(itemCount_);
+        auto indexerLayoutAlgorithm = MakeRefPtr<IndexerLayoutAlgorithm>(static_cast<int32_t>(fullArrayValue_.size()));
         return indexerLayoutAlgorithm;
     }
 
@@ -156,6 +163,18 @@ private:
     void FireOnSelect(int32_t selectIndex, bool fromPress);
     void SetAccessibilityAction();
     void RemoveBubble();
+    void UpdateBubbleBackgroundView();
+    CalcSize CalcBubbleListSize(int32_t popupSize, int32_t maxItemsSize);
+    GradientColor CreatePercentGradientColor(float percent, Color color);
+    void UpdateBubbleLetterStackAndLetterTextView();
+    void DrawPopupListGradient(PopupListGradientStatus gradientStatus);
+    void UpdatePopupListGradientView(int32_t popupSize, int32_t maxItemsSize);
+    RefPtr<FrameNode> GetLetterNode();
+    RefPtr<FrameNode> GetAutoCollapseLetterNode();
+    void UpdateBubbleListSize(std::vector<std::string>& currentListData);
+    void UpdateBubbleListItemContext(
+        const RefPtr<FrameNode>& listNode, RefPtr<IndexerTheme>& indexerTheme, uint32_t pos);
+    void UpdateBubbleListItemMarkModify(RefPtr<FrameNode>& textNode, RefPtr<FrameNode>& listItemNode);
     
     RefPtr<FrameNode> popupNode_;
     RefPtr<TouchEventImpl> touchListener_;

@@ -32,8 +32,9 @@ int32_t TimePickerColumnAccessibilityProperty::GetCollectionItemCounts() const
     auto pattern = frameNode->GetPattern<TimePickerColumnPattern>();
     CHECK_NULL_RETURN(pattern, 0);
     auto options = pattern->GetOptions();
-    if (options.find(frameNode) != options.end()) {
-        return options[frameNode];
+    auto it = options.find(frameNode);
+    if (it != options.end()) {
+        return it->second;
     }
     return 0;
 }
@@ -85,7 +86,9 @@ std::string TimePickerColumnAccessibilityProperty::GetText() const
 {
     auto frameNode = host_.Upgrade();
     CHECK_NULL_RETURN(frameNode, "");
-    auto stackNode = DynamicCast<FrameNode>(frameNode->GetParent());
+    auto blendNode = DynamicCast<FrameNode>(frameNode->GetParent());
+    CHECK_NULL_RETURN(blendNode, "");
+    auto stackNode = DynamicCast<FrameNode>(blendNode->GetParent());
     CHECK_NULL_RETURN(stackNode, "");
     auto parentNode = DynamicCast<FrameNode>(stackNode->GetParent());
     CHECK_NULL_RETURN(parentNode, "");
@@ -95,8 +98,9 @@ std::string TimePickerColumnAccessibilityProperty::GetText() const
     CHECK_NULL_RETURN(pattern, "");
     auto index = pattern->GetCurrentIndex();
     auto options = pattern->GetOptions();
-    if (options.find(frameNode) != options.end()) {
-        if (options[frameNode] < index) {
+    auto it = options.find(frameNode);
+    if (it != options.end()) {
+        if (it->second < index) {
             return "";
         }
         return timePickerRowPattern->GetOptionsValue(frameNode, index);

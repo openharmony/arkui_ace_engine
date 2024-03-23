@@ -63,30 +63,12 @@ RefPtr<PipelineContext> GetMainPipelineContext()
 bool ToastPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& changeConfig)
 {
     CHECK_NULL_RETURN(dirty, false);
-
-    auto toastBottom = GetBottomValue(dirty);
-    // todo get parent width and height
     auto context = IsDefaultToast() ? PipelineContext::GetCurrentContext() : GetMainPipelineContext();
     CHECK_NULL_RETURN(context, false);
-    auto rootHeight = context->GetRootHeight();
-    auto rootWidth = context->GetRootWidth();
-    auto text = dirty->GetOrCreateChildByIndex(0);
-    CHECK_NULL_RETURN(text, false);
     auto toastNode = dirty->GetHostNode();
     auto toastContext = toastNode->GetRenderContext();
     CHECK_NULL_RETURN(toastContext, false);
-
-    OffsetT<Dimension> offset { Dimension((rootWidth - text->GetGeometryNode()->GetMarginFrameSize().Width()) / 2.0f),
-        {} };
-    if (context->GetMinPlatformVersion() > API_VERSION_9) {
-        auto layoutProperty = dirty->GetLayoutProperty();
-        CHECK_NULL_RETURN(layoutProperty, false);
-        const auto& safeArea = layoutProperty->GetSafeAreaInsets();
-        offset.SetY(Dimension { rootHeight - toastBottom - dirty->GetGeometryNode()->GetMarginFrameSize().Height() -
-                                (safeArea ? safeArea->bottom_.Length() : 0.0f) });
-    } else {
-        offset.SetY(Dimension { rootHeight - toastBottom });
-    }
+    OffsetT<Dimension> offset { GetOffsetX(dirty), GetOffsetY(dirty) };
     // show in the float subwindow
     if (!IsDefaultToast()) {
         OffsetT<Dimension> displayWindowOffset = { Dimension(context->GetDisplayWindowRectInfo().GetOffset().GetX()),
@@ -95,6 +77,65 @@ bool ToastPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, 
     }
     toastContext->UpdateOffset(offset);
     return true;
+}
+
+Dimension ToastPattern::GetOffsetX(const RefPtr<LayoutWrapper>& layoutWrapper)
+{
+    auto context = IsDefaultToast() ? PipelineContext::GetCurrentContext() : GetMainPipelineContext();
+    CHECK_NULL_RETURN(context, Dimension(0.0));
+    auto text = layoutWrapper->GetOrCreateChildByIndex(0);
+    CHECK_NULL_RETURN(text, Dimension(0.0));
+    auto rootWidth = context->GetRootWidth();
+    auto toastProp = DynamicCast<ToastLayoutProperty>(layoutWrapper->GetLayoutProperty());
+    CHECK_NULL_RETURN(toastProp, Dimension(0.0));
+    auto textWidth = text->GetGeometryNode()->GetMarginFrameSize().Width();
+    Alignment alignment = toastProp->GetToastAlignmentValue(Alignment::BOTTOM_CENTER);
+    Dimension offsetX;
+    if (alignment == Alignment::TOP_LEFT || alignment == Alignment::CENTER_LEFT ||
+        alignment == Alignment::BOTTOM_LEFT) {
+        offsetX = Dimension(0.0);
+    } else if (alignment == Alignment::TOP_RIGHT || alignment == Alignment::CENTER_RIGHT ||
+               alignment == Alignment::BOTTOM_RIGHT) {
+        offsetX = Dimension(rootWidth - textWidth);
+    } else {
+        offsetX = Dimension((rootWidth - textWidth) / 2.0f);
+    }
+    return offsetX + toastProp->GetToastOffsetValue(DimensionOffset()).GetX();
+}
+
+Dimension ToastPattern::GetOffsetY(const RefPtr<LayoutWrapper>& layoutWrapper)
+{
+    auto context = IsDefaultToast() ? PipelineContext::GetCurrentContext() : GetMainPipelineContext();
+    CHECK_NULL_RETURN(context, Dimension(0.0));
+    auto text = layoutWrapper->GetOrCreateChildByIndex(0);
+    CHECK_NULL_RETURN(text, Dimension(0.0));
+    auto rootHeight = context->GetRootHeight();
+    auto toastProp = DynamicCast<ToastLayoutProperty>(layoutWrapper->GetLayoutProperty());
+    CHECK_NULL_RETURN(toastProp, Dimension(0.0));
+    auto textHeight = text->GetGeometryNode()->GetMarginFrameSize().Height();
+    Dimension offsetY;
+    const auto& safeArea = toastProp->GetSafeAreaInsets();
+    auto safeAreaOffset = safeArea ? safeArea->bottom_.Length() : 0.0f;
+    if (!toastProp->HasToastAlignment()) {
+        auto toastBottom = GetBottomValue(layoutWrapper);
+        if (context->GetMinPlatformVersion() > API_VERSION_9) {
+            offsetY = Dimension(rootHeight - toastBottom - textHeight - safeAreaOffset);
+        } else {
+            offsetY = Dimension(rootHeight - toastBottom);
+        }
+    } else {
+        Alignment alignment = toastProp->GetToastAlignmentValue(Alignment::BOTTOM_CENTER);
+        if (alignment == Alignment::TOP_LEFT || alignment == Alignment::TOP_CENTER ||
+            alignment == Alignment::TOP_RIGHT) {
+            offsetY = Dimension(0.0);
+        } else if (alignment == Alignment::CENTER_LEFT || alignment == Alignment::CENTER ||
+                   alignment == Alignment::CENTER_RIGHT) {
+            offsetY = Dimension((rootHeight - textHeight - safeAreaOffset) / 2.0f);
+        } else {
+            offsetY = Dimension(rootHeight - textHeight - safeAreaOffset);
+        }
+    }
+    return offsetY + toastProp->GetToastOffsetValue(DimensionOffset()).GetY();
 }
 
 double ToastPattern::GetBottomValue(const RefPtr<LayoutWrapper>& layoutWrapper)

@@ -20,7 +20,8 @@
 namespace OHOS::Ace::NG {
 namespace {
 inline constexpr int32_t TOTAL_MINUTE_OF_HOUR = 60;
-inline const std::string DEFAULT_FORMAT = "hms";
+inline const std::string DEFAULT_FORMAT_API_ELEVEN = "aa hh:mm:ss";
+inline const std::string DEFAULT_FORMAT_API_TEN = "hms";
 inline int32_t GetSystemTimeZone()
 {
     struct timeval currentTime {};
@@ -78,7 +79,11 @@ std::string ConvertFeature(const FONT_FEATURES_MAP& fontFeaTures)
 void TextClockLayoutProperty::ToJsonValue(std::unique_ptr<JsonValue>& json) const
 {
     LayoutProperty::ToJsonValue(json);
-    json->Put("format", propFormat_.value_or(DEFAULT_FORMAT).c_str());
+    if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
+        json->Put("format", propFormat_.value_or(DEFAULT_FORMAT_API_ELEVEN).c_str());
+    } else {
+        json->Put("format", propFormat_.value_or(DEFAULT_FORMAT_API_TEN).c_str());
+    }
     json->Put("timeZoneOffset", std::to_string(propHoursWest_.value_or(GetSystemTimeZone())).c_str());
     json->Put("fontSize", GetFontSize().value_or(Dimension()).ToString().c_str());
     json->Put("fontColor", GetTextColor().value_or(Color::BLACK).ColorToString().c_str());

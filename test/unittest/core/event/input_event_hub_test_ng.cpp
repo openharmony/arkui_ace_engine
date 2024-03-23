@@ -33,7 +33,7 @@ namespace {
 constexpr uint32_t INPUT_EVENTS_SIZE = 1;
 constexpr uint32_t INPUT_EVENTS_SIZE_2 = 2;
 constexpr uint32_t INPUT_EVENTS_SIZE_0 = 0;
-constexpr uint32_t MOUSE_RESULT_SIZE = 6;
+constexpr uint32_t MOUSE_RESULT_SIZE = 10;
 constexpr uint32_t AXIS_RESULT_SIZE = 1;
 const HoverEffectType HOVER_EFFECT_TYPE = HoverEffectType::BOARD;
 constexpr float WIDTH = 400.0f;
@@ -252,7 +252,7 @@ HWTEST_F(InputEventHubTestNg, InputEventHubProcessMouseTest005, TestSize.Level1)
 
     /**
      * @tc.steps: step3. Initialize mouseEventActuator_ and mouseEventActuator_, their inputEvents_ is empty and
-     * userCallback_ is nullptr.
+     * userCallback_ is nullptr and userJSFrameNodeCallback_ is nullptr too.
      * @tc.expected: OnCollectMouseEvent will return directly, and ProcessMouseTestHit return false.
      */
     inputEventHub->mouseEventActuator_ =
@@ -262,7 +262,16 @@ HWTEST_F(InputEventHubTestNg, InputEventHubProcessMouseTest005, TestSize.Level1)
     EXPECT_FALSE(inputEventHub->ProcessMouseTestHit(COORDINATE_OFFSET, mouseResult));
 
     /**
-     * @tc.steps: step4. Invoke ProcessMouseTestHit when hoverNode is nullptr and the hover effect is UNKNOWN or not.
+     * @tc.steps: step4. Create mouse event and initialize userJSFrameNodeCallback_ .
+     * @tc.expected: userJSFrameNodeCallback_ will be initialized and ProcessMouseTestHit return false.
+     */
+    const OnMouseEventFunc onMouse = [](MouseInfo& info) {};
+    OnMouseEventFunc onMouse1 = onMouse;
+    inputEventHub->SetJSFrameNodeOnMouseEvent(std::move(onMouse1));
+    EXPECT_FALSE(inputEventHub->ProcessMouseTestHit(COORDINATE_OFFSET, mouseResult));
+
+    /**
+     * @tc.steps: step5. Invoke ProcessMouseTestHit when hoverNode is nullptr and the hover effect is UNKNOWN or not.
      * @tc.expected: OnCollectMouseEvent will return directly, and ProcessMouseTestHit return false.
      */
     EXPECT_FALSE(inputEventHub->ProcessMouseTestHit(COORDINATE_OFFSET, mouseResult));
@@ -270,15 +279,14 @@ HWTEST_F(InputEventHubTestNg, InputEventHubProcessMouseTest005, TestSize.Level1)
     EXPECT_FALSE(inputEventHub->ProcessMouseTestHit(COORDINATE_OFFSET, mouseResult));
 
     /**
-     * @tc.steps: step5. Set MouseEvent and mouseEventActuator_ and userCallback_ will be initialized.
+     * @tc.steps: step6. Set MouseEvent and mouseEventActuator_ and userCallback_ will be initialized.
      */
-    const OnMouseEventFunc onMouse = [](MouseInfo& info) {};
-    OnMouseEventFunc onMouse1 = onMouse;
-    inputEventHub->SetMouseEvent(std::move(onMouse1));
+    OnMouseEventFunc onMouse2 = onMouse;
+    inputEventHub->SetMouseEvent(std::move(onMouse2));
     EXPECT_NE(inputEventHub->mouseEventActuator_->userCallback_, nullptr);
 
     /**
-     * @tc.steps: step6. Set HoverEvent and hoverEventActuator_ and userCallback_ will be initialized.
+     * @tc.steps: step7. Set HoverEvent and hoverEventActuator_ and userCallback_ will be initialized.
      */
     const OnHoverFunc onHover = [](bool, HoverInfo) {};
     OnHoverFunc onHover1 = onHover;
@@ -286,16 +294,16 @@ HWTEST_F(InputEventHubTestNg, InputEventHubProcessMouseTest005, TestSize.Level1)
     EXPECT_NE(inputEventHub->hoverEventActuator_->userCallback_, nullptr);
 
     /**
-     * @tc.steps: step7. Add OnMouseEvent and inputEvents_ will not be empty.
+     * @tc.steps: step8. Add OnMouseEvent and inputEvents_ will not be empty.
      */
-    OnMouseEventFunc onMouse2 = onMouse;
-    auto inputEvent = AceType::MakeRefPtr<InputEvent>(std::move(onMouse2));
+    OnMouseEventFunc onMouse3 = onMouse;
+    auto inputEvent = AceType::MakeRefPtr<InputEvent>(std::move(onMouse3));
     inputEventHub->AddOnMouseEvent(inputEvent);
     inputEventHub->AddOnMouseEvent(nullptr);
     EXPECT_EQ(inputEventHub->mouseEventActuator_->inputEvents_.size(), INPUT_EVENTS_SIZE_2);
 
     /**
-     * @tc.steps: step8. Set HoverEvent and inputEvents_ will not be empty.
+     * @tc.steps: step9. Set HoverEvent and inputEvents_ will not be empty.
      */
     OnHoverFunc onHover2 = onHover;
     auto onHoverEvent = AceType::MakeRefPtr<InputEvent>(std::move(onHover2));
@@ -304,7 +312,7 @@ HWTEST_F(InputEventHubTestNg, InputEventHubProcessMouseTest005, TestSize.Level1)
     EXPECT_EQ(inputEventHub->hoverEventActuator_->inputEvents_.size(), INPUT_EVENTS_SIZE_2);
 
     /**
-     * @tc.steps: step9. Invoke ProcessMouseTestHit when inputEvents_ is not empty and userCallback_ has already been
+     * @tc.steps: step10. Invoke ProcessMouseTestHit when inputEvents_ is not empty and userCallback_ has already been
      * initialized.
      * @tc.expected: ProcessMouseTestHit return false, mouse and hover result size has been increased one.
      */
@@ -318,7 +326,7 @@ HWTEST_F(InputEventHubTestNg, InputEventHubProcessMouseTest005, TestSize.Level1)
     EXPECT_EQ(mouseResult.size(), MOUSE_RESULT_SIZE);
 
     /**
-     * @tc.steps: step10. Handle mouse and hover event when the events and userCallback is nullptr or not.
+     * @tc.steps: step11. Handle mouse and hover event when the events and userCallback is nullptr or not.
      */
     const MouseEvent mouseEvent = { .action = MouseAction::MOVE };
     EXPECT_FALSE(inputEventHub->hoverEventActuator_->hoverEventTarget_->HandleHoverEvent(HOVER_VALUE));

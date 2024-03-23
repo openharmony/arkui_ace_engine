@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -84,7 +84,7 @@ public:
 
     void SetLayoutPriority(int32_t priority) override;
     void SetPixelRound(uint8_t value) override;
-    void SetLayoutWeight(int32_t value) override;
+    void SetLayoutWeight(float value) override;
     void SetLayoutDirection(TextDirection value) override;
     void SetAspectRatio(float ratio) override;
     void ResetAspectRatio() override {};
@@ -161,6 +161,7 @@ public:
     void SetClickEffectLevel(const ClickEffectLevel& level, float scaleValue) override {}
     void SetOnClick(GestureEventFunc&& tapEventFunc, ClickEventFunc&& clickEventFunc) override;
     void SetOnGestureJudgeBegin(NG::GestureJudgeFunc&& gestureJudgeFunc) override {}
+    void SetOnTouchIntercept(NG::TouchInterceptFunc&& touchInterceptFunc) override {}
     void SetOnTouch(TouchEventFunc&& touchEventFunc) override;
     void SetOnKeyEvent(OnKeyCallbackFunc&& onKeyCallback) override;
     void SetOnMouse(OnMouseEventFunc&& onMouseEventFunc) override;
@@ -176,6 +177,7 @@ public:
     void SetDraggable(bool draggable) override {}
     void SetDragPreviewOptions(const NG::DragPreviewOption& previewOption) override {};
     void SetOnDragStart(NG::OnDragStartFunc&& onDragStart) override;
+    void SetOnPreDrag(NG::OnPreDragFunc&& onPreDrag) override;
     void SetOnDragEnd(OnNewDragFunc&& onDragEnd) override;
     void SetOnDragEnter(NG::OnDragDropFunc&& onDragEnter) override;
     void SetOnDragLeave(NG::OnDragDropFunc&& onDragLeave) override;
@@ -186,6 +188,8 @@ public:
     void SetOnAreaChanged(
         std::function<void(const Rect& oldRect, const Offset& oldOrigin, const Rect& rect, const Offset& origin)>&&
             onAreaChanged) override;
+    void SetOnSizeChanged(
+        std::function<void(const NG::RectF& oldRect, const NG::RectF& rect)>&& onSizeChanged) override {};
 
     void SetResponseRegion(const std::vector<DimensionRect>& responseRegion) override;
     void SetEnabled(bool enabled) override;
@@ -205,6 +209,7 @@ public:
     void SetKeyboardShortcut(const std::string& value, const std::vector<ModifierKey>& keys,
         std::function<void()>&& onKeyboardShortcutAction) override {};
     void SetObscured(const std::vector<ObscuredReasons>& reasons) override {};
+    void SetPrivacySensitive(bool flag) override {};
     void SetMonopolizeEvents(bool monopolizeEvents) override {};
 
     // Disable event.
@@ -221,6 +226,8 @@ public:
 
     void BindBackground(std::function<void()>&& buildFunc, const Alignment& align) override;
     void BindPopup(const RefPtr<PopupParam>& param, const RefPtr<AceType>& customNode) override;
+    void DismissPopup() override {}
+
     void BindMenu(std::vector<NG::OptionParam>&& params, std::function<void()>&& buildFunc,
         const NG::MenuParam& menuParam) override;
 
@@ -228,12 +235,16 @@ public:
         std::function<void()>& previewBuildFunc) override;
     void BindContentCover(bool isShow, std::function<void(const std::string&)>&& callback,
         std::function<void()>&& buildFunc, NG::ModalStyle& modalStyle, std::function<void()>&& onAppear,
-        std::function<void()>&& onDisappear) override {}
+        std::function<void()>&& onDisappear, std::function<void()>&& onWillAppear,
+        std::function<void()>&& onWillDisappear, const NG::ContentCoverParam& contentCoverParam) override
+    {}
     void BindSheet(bool isShow, std::function<void(const std::string&)>&& callback,
         std::function<void()>&& buildFunc, std::function<void()>&& titleBuildFunc, NG::SheetStyle& sheetStyle,
         std::function<void()>&& onAppear, std::function<void()>&& onDisappear,
-        std::function<void()>&& shouldDismiss) override {}
+        std::function<void()>&& shouldDismiss, std::function<void()>&& onWillAppear,
+        std::function<void()>&& onWillDisappear) override {}
     void DismissSheet() override {}
+    void DismissContentCover() override {}
 
     void SetAccessibilityGroup(bool accessible) override;
     void SetAccessibilityText(const std::string& text) override;
@@ -244,6 +255,8 @@ public:
     void SetProgressMask(const RefPtr<NG::ProgressMaskProperty>& progress) override {}
     void SetForegroundColor(const Color& color) override {}
     void SetForegroundColorStrategy(const ForegroundColorStrategy& strategy) override {}
+    void SetDrawModifier(const RefPtr<NG::DrawModifier>& drawModifier) override {}
+    void* GetFrameNode() override { return nullptr; }
     void SetAllowDrop(const std::set<std::string>& allowDrop) override {}
     void SetDragPreview(const NG::DragDropInfo& info) override {}
 

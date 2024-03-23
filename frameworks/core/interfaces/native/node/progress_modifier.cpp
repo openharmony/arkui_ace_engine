@@ -46,6 +46,9 @@ constexpr double DEFAULT_STROKE_WIDTH = 4;
 constexpr double DEFAULT_BORDER_WIDTH = 1;
 constexpr double DEFAULT_SCALE_WIDTHS = 2;
 constexpr double DEFAULT_FONT_SIZE = 12;
+const uint32_t ERROR_UINT_CODE = -1;
+const float ERROR_FLOAT_CODE = -1.0f;
+const int32_t ERROR_INT_CODE = -1;
 /**
  * @param colors color value
  * colors[0], colors[1], colors[2] : color[0](color, hasDimension, dimension)
@@ -87,6 +90,28 @@ void ResetProgressValue(ArkUINodeHandle node)
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     ProgressModelNG::SetValue(frameNode, DEFAULT_PROGRESS_VALUE);
+}
+
+
+void SetProgressTotal(ArkUINodeHandle node, ArkUI_Float32 value)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ProgressModelNG::SetTotal(frameNode, value);
+}
+
+void SetProgressType(ArkUINodeHandle node, int type)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ProgressModelNG::SetType(frameNode, static_cast<ProgressType>(type));
+}
+
+void ResetProgressType(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ProgressModelNG::SetType(frameNode, ProgressType::LINEAR);
 }
 
 void SetProgressGradientColor(ArkUINodeHandle node, const struct ArkUIGradientType* gradient, int32_t length)
@@ -365,12 +390,41 @@ void ResetProgressBackgroundColor(ArkUINodeHandle node)
     ProgressModelNG::SetBackgroundColor(frameNode, backgroundColor);
 }
 
+ArkUI_Float32 GetProgressValue(ArkUINodeHandle node)
+{
+    auto *frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_RETURN(frameNode, ERROR_FLOAT_CODE);
+    return ProgressModelNG::GetValue(frameNode);
+}
+
+ArkUI_Float32 GetProgressTotal(ArkUINodeHandle node)
+{
+    auto *frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_RETURN(frameNode, ERROR_FLOAT_CODE);
+    return ProgressModelNG::GetTotal(frameNode);
+}
+
+ArkUI_Int32 GetProgressType(ArkUINodeHandle node)
+{
+    auto *frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_RETURN(frameNode, ERROR_INT_CODE);
+    return static_cast<ArkUI_Int32>(ProgressModelNG::GetType(frameNode));
+}
+
+ArkUI_Uint32 GetProgressColor(ArkUINodeHandle node)
+{
+    auto *frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_RETURN(frameNode, ERROR_UINT_CODE);
+    return ProgressModelNG::GetColor(frameNode).GetValue();
+}
+
 namespace NodeModifier {
 const ArkUIProgressModifier* GetProgressModifier()
 {
     static const ArkUIProgressModifier modifier = { SetProgressValue, ResetProgressValue, SetProgressGradientColor,
         SetProgressColor, ResetProgressColor, SetProgressStyle, ResetProgressStyle, SetProgressBackgroundColor,
-        ResetProgressBackgroundColor };
+        ResetProgressBackgroundColor, SetProgressTotal, SetProgressType, ResetProgressType, GetProgressValue,
+        GetProgressTotal, GetProgressType, GetProgressColor };
     return &modifier;
 }
 }

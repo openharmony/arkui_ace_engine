@@ -115,6 +115,10 @@ constexpr Dimension BUBBLE_VERTICAL_HEIGHT = 32.0_vp;
 constexpr Dimension BUBBLE_HORIZONTAL_WIDTH = 48.0_vp;
 constexpr Dimension BUBBLE_HORIZONTAL_HEIGHT = 40.0_vp;
 const OffsetF SLIDER_GLOBAL_OFFSET = { 200.0f, 200.0f };
+constexpr Dimension ARROW_HEIGHT = 8.0_vp;
+constexpr Dimension ARROW_WIDTH = 16.0_vp;
+constexpr Dimension CIRCULAR_HORIZON_OFFSET = 13.86_vp;
+constexpr Dimension TEXT_MAX = 36.0_vp;
 } // namespace
 class SliderTestNg : public testing::Test {
 public:
@@ -150,7 +154,7 @@ void SliderTestNg::SetSliderContentModifier(SliderContentModifier& sliderContent
     sliderContentModifier.InitializeShapeProperty();
     sliderContentModifier.SetTrackThickness(SLIDER_CONTENT_MODIFIER_TRACK_THICKNESS);
     sliderContentModifier.SetTrackBorderRadius(SLIDER_CONTENT_MODIFIER_TRACK_BORDER_RADIUS);
-    sliderContentModifier.SetTrackBackgroundColor(TEST_COLOR);
+    sliderContentModifier.SetTrackBackgroundColor(SliderModelNG::CreateSolidGradient(TEST_COLOR));
     sliderContentModifier.SetShowSteps(true);
     sliderContentModifier.SetStepSize(SLIDER_CONTENT_MODIFIER_STEP_SIZE);
     sliderContentModifier.SetStepColor(TEST_COLOR);
@@ -251,7 +255,7 @@ HWTEST_F(SliderTestNg, SliderTestNg002, TestSize.Level1)
     sliderModelNG.SetDirection(TEST_AXIS);
     sliderModelNG.SetReverse(BOOL_VAULE);
     sliderModelNG.SetBlockColor(TEST_COLOR);
-    sliderModelNG.SetTrackBackgroundColor(TEST_COLOR);
+    sliderModelNG.SetTrackBackgroundColor(SliderModelNG::CreateSolidGradient(TEST_COLOR));
     sliderModelNG.SetSelectColor(TEST_COLOR);
     sliderModelNG.SetShowSteps(BOOL_VAULE);
     sliderModelNG.SetThickness(WIDTH);
@@ -273,7 +277,7 @@ HWTEST_F(SliderTestNg, SliderTestNg002, TestSize.Level1)
     EXPECT_EQ(sliderPaintProperty->GetReverse(), BOOL_VAULE);
     EXPECT_EQ(sliderPaintProperty->GetDirection(), TEST_AXIS);
     EXPECT_EQ(sliderPaintProperty->GetBlockColor(), TEST_COLOR);
-    EXPECT_EQ(sliderPaintProperty->GetTrackBackgroundColor(), TEST_COLOR);
+    EXPECT_EQ(sliderPaintProperty->GetTrackBackgroundColor(), SliderModelNG::CreateSolidGradient(TEST_COLOR));
     EXPECT_EQ(sliderPaintProperty->GetSelectColor(), TEST_COLOR);
     EXPECT_EQ(sliderPaintProperty->GetShowSteps(), BOOL_VAULE);
 }
@@ -612,10 +616,10 @@ HWTEST_F(SliderTestNg, SliderTestNg008, TestSize.Level1)
      */
     paintProperty->UpdateMin(MIN_LABEL);
     paintProperty->UpdateMax(MAX_LABEL);
-    sliderPattern->OnModifyDone();
+    sliderPattern->CalcSliderValue();
     EXPECT_EQ(paintProperty->GetValue().value(), MAX_LABEL);
     paintProperty->UpdateValue(0);
-    sliderPattern->OnModifyDone();
+    sliderPattern->CalcSliderValue();
     EXPECT_EQ(paintProperty->GetValue().value(), MIN_LABEL);
     /**
      * @tc.cases: case3. when slider stepSize value is less than or equal to 0, take 1 by defualt;
@@ -624,10 +628,11 @@ HWTEST_F(SliderTestNg, SliderTestNg008, TestSize.Level1)
     paintProperty->UpdateStep(0);
     paintProperty->UpdateMin(MIN);
     paintProperty->UpdateMax(MAX);
-    sliderPattern->OnModifyDone();
+    sliderPattern->CalcSliderValue();
     EXPECT_EQ(paintProperty->GetStep().value(), STEP);
     paintProperty->UpdateStep(-1);
-    sliderPattern->OnModifyDone();
+    sliderPattern->UpdateValue(-1);
+    sliderPattern->CalcSliderValue();
     EXPECT_EQ(paintProperty->GetStep().value(), STEP);
 }
 
@@ -3177,6 +3182,62 @@ HWTEST_F(SliderTestNg, SliderContentModifierTest019, TestSize.Level1)
 }
 
 /**
+ * @tc.name: SliderContentModifierTest020
+ * @tc.desc: TEST gradient track background
+ * @tc.type: FUNC
+ */
+HWTEST_F(SliderTestNg, SliderContentModifierTest020, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create frameNode and sliderContentModifier.
+     */
+    RefPtr<SliderPattern> sliderPattern = AceType::MakeRefPtr<SliderPattern>();
+    ASSERT_NE(sliderPattern, nullptr);
+    auto frameNode = FrameNode::CreateFrameNode(V2::SLIDER_ETS_TAG, -1, sliderPattern);
+    ASSERT_NE(frameNode, nullptr);
+    auto sliderPaintProperty = frameNode->GetPaintProperty<SliderPaintProperty>();
+    ASSERT_NE(sliderPaintProperty, nullptr);
+    SliderContentModifier::Parameters parameters;
+    SliderContentModifier sliderContentModifier(parameters, nullptr, nullptr);
+    /**
+     * @tc.steps: step2. set sliderContentModifier attribute and call onDraw function.
+     */
+    SetSliderContentModifier(sliderContentModifier);
+
+    Gradient gradient;
+    GradientColor gradientColor1;
+    gradientColor1.SetLinearColor(LinearColor(Color::WHITE));
+    gradientColor1.SetDimension(Dimension(0.0));
+    gradient.AddColor(gradientColor1);
+    GradientColor gradientColor2;
+    gradientColor2.SetLinearColor(LinearColor(Color::RED));
+    gradientColor2.SetDimension(Dimension(0.5));
+    gradient.AddColor(gradientColor2);
+    GradientColor gradientColor3;
+    gradientColor3.SetLinearColor(LinearColor(Color::BLUE));
+    gradientColor3.SetDimension(Dimension(1.0));
+    gradient.AddColor(gradientColor3);
+    std::vector<GradientColor> gradientColors = gradient.GetColors();
+    sliderContentModifier.SetTrackBackgroundColor(gradient);
+
+    Testing::MockCanvas canvas;
+    MockCanvasFunction(canvas);
+    DrawingContext context { canvas, SLIDER_WIDTH, SLIDER_HEIGHT };
+    sliderContentModifier.onDraw(context);
+
+    Gradient gradient2 = sliderContentModifier.trackBackgroundColor_->Get().GetGradient();
+    std::vector<GradientColor> gradientColors2 = gradient2.GetColors();
+
+    EXPECT_EQ(gradientColors.size(), gradientColors2.size());
+    EXPECT_EQ(gradientColors[0].GetLinearColor(), gradientColors2[0].GetLinearColor());
+    EXPECT_EQ(gradientColors[1].GetLinearColor(), gradientColors2[1].GetLinearColor());
+    EXPECT_EQ(gradientColors[2].GetLinearColor(), gradientColors2[2].GetLinearColor());
+    EXPECT_EQ(gradientColors[0].GetDimension(), gradientColors2[0].GetDimension());
+    EXPECT_EQ(gradientColors[1].GetDimension(), gradientColors2[1].GetDimension());
+    EXPECT_EQ(gradientColors[2].GetDimension(), gradientColors2[2].GetDimension());
+}
+
+/**
  * @tc.name: SliderPatternChangeEventTestNg001
  * @tc.desc: Test the Text property of Slider
  * @tc.type: FUNC
@@ -3191,7 +3252,6 @@ HWTEST_F(SliderTestNg, SliderPatternChangeEventTestNg001, TestSize.Level1)
     ASSERT_NE(frameNode, nullptr);
     auto sliderEventHub = frameNode->GetEventHub<NG::SliderEventHub>();
     ASSERT_NE(sliderEventHub, nullptr);
-    sliderEventHub->SetOnChangeEvent(std::move(eventOnChange));
     ASSERT_NE(sliderEventHub->onChangeEvent_, nullptr);
     sliderEventHub->FireChangeEvent(1.0, 1);
     sliderEventHub->SetOnChangeEvent(nullptr);
@@ -3284,4 +3344,88 @@ HWTEST_F(SliderTestNg, SliderPatternDistributed001, TestSize.Level1)
     sliderPattern->OnRestoreInfo(restoreInfo_);
     EXPECT_EQ(sliderPaintProperty->GetValue().value_or(0), 2);
 }
+
+/**
+ * @tc.name: SliderPatternOnIsFocusActiveUpdate001
+ * @tc.desc: Test Is not Focus when slider active update
+ * @tc.type: FUNC
+ */
+HWTEST_F(SliderTestNg, SliderPatternOnIsFocusActiveUpdate001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create frameNode.
+     */
+    RefPtr<SliderPattern> sliderPattern = AceType::MakeRefPtr<SliderPattern>();
+    ASSERT_NE(sliderPattern, nullptr);
+    auto frameNode = FrameNode::CreateFrameNode(V2::SLIDER_ETS_TAG, -1, sliderPattern);
+    ASSERT_NE(frameNode, nullptr);
+    auto sliderPaintProperty = sliderPattern->GetPaintProperty<SliderPaintProperty>();
+    ASSERT_NE(sliderPaintProperty, nullptr);
+
+    /**
+     * @tc.steps: step2. slider is focus,showtip is true.expect bubbleFlag_ is true.
+     * @tc.expected: Function ProvideRestoreInfo is called.
+     */
+    sliderPaintProperty->UpdateShowTips(true);
+    sliderPattern->OnModifyDone();
+    sliderPattern->focusFlag_ = true;
+    sliderPattern->OnIsFocusActiveUpdate(true);
+    EXPECT_TRUE(sliderPattern->bubbleFlag_);
+}
+
+/**
+ * @tc.name: SliderTipModifierPaintText001
+ * @tc.desc: Test offset of text on slider
+ * @tc.type: FUNC
+ */
+HWTEST_F(SliderTestNg, SliderTipModifierPaintText001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create frameNode and sliderTipModifier.
+     */
+    RefPtr<SliderPattern> sliderPattern = AceType::MakeRefPtr<SliderPattern>();
+    ASSERT_NE(sliderPattern, nullptr);
+    auto frameNode = FrameNode::CreateFrameNode(V2::SLIDER_ETS_TAG, -1, sliderPattern);
+    ASSERT_NE(frameNode, nullptr);
+    auto sliderLayoutProperty = frameNode->GetLayoutProperty<SliderLayoutProperty>();
+    ASSERT_NE(sliderLayoutProperty, nullptr);
+    SliderTipModifier sliderTipModifier(
+        [sliderPattern]() { return sliderPattern->GetBubbleVertexPosition(OffsetF(), 0.0f, SizeF()); });
+    /**
+     * @tc.steps: step2. set sliderTipModifier's axis is HORIZONTAL and call PaintText function.
+     * @tc.expected: text's offsetX is equal to half of vertex_'s width.
+     */
+    auto arrowSizeWidth = static_cast<float>(ARROW_WIDTH.ConvertToPx());
+    auto arrowSizeHeight = static_cast<float>(ARROW_HEIGHT.ConvertToPx());
+    auto circularOffset = static_cast<float>(CIRCULAR_HORIZON_OFFSET.ConvertToPx());
+    sliderTipModifier.SetSliderGlobalOffset(SLIDER_GLOBAL_OFFSET);
+    sliderTipModifier.tipFlag_ = AceType::MakeRefPtr<PropertyBool>(true);
+    Testing::MockCanvas canvas;
+    MockCanvasFunction(canvas);
+    DrawingContext context { canvas, SLIDER_WIDTH, SLIDER_HEIGHT };
+    sliderTipModifier.axis_ = Axis::HORIZONTAL;
+    sliderTipModifier.isMask_ = true;
+    auto paragraph = MockParagraph::GetOrCreateMockParagraph();
+    sliderTipModifier.SetParagraph(paragraph);
+    sliderTipModifier.PaintTip(context);
+    SizeF textSize = { 0, 0 };
+    textSize =
+        SizeF(std::min(sliderTipModifier.paragraph_->GetLongestLine(), static_cast<float>(TEXT_MAX.ConvertToPx())),
+            sliderTipModifier.paragraph_->GetHeight());
+    EXPECT_EQ(sliderTipModifier.textOffset_.GetX(), sliderTipModifier.vertex_.GetX() - textSize.Width() * HALF);
+    EXPECT_EQ(sliderTipModifier.textOffset_.GetY(),
+        sliderTipModifier.vertex_.GetY() -
+            (sliderTipModifier.bubbleSize_.Height() + textSize.Height() + arrowSizeHeight) * HALF);
+    /**
+     * @tc.steps: step2. set sliderTipModifier's axis is VERTICAL and call PaintText function.
+     */
+    sliderTipModifier.axis_ = Axis::VERTICAL;
+    sliderTipModifier.PaintText(context);
+    EXPECT_EQ(sliderTipModifier.textOffset_.GetY(), sliderTipModifier.vertex_.GetY() - textSize.Height() * HALF);
+    EXPECT_EQ(sliderTipModifier.textOffset_.GetX(),
+        sliderTipModifier.vertex_.GetX() - (sliderTipModifier.bubbleSize_.Width() + textSize.Width() + arrowSizeHeight +
+                                               circularOffset - arrowSizeWidth) *
+                                               HALF);
+}
+
 } // namespace OHOS::Ace::NG

@@ -37,6 +37,7 @@ group("core_pattern_unittest") {
     "form:form_test_ng",
     "gauge:gauge_test_ng",
     "grid:grid_test_ng",
+    "grid:grid_test_regular",
     "grid_col:grid_col_test_ng",
     "grid_container:grid_container_test_ng",
     "grid_row:grid_row_test_ng",
@@ -92,6 +93,7 @@ group("core_pattern_unittest") {
     "toggle:toggle_test_ng",
     "video:video_test_ng",
     "waterflow:water_flow_test_ng",
+    "waterflow:water_flow_test_old",
     "xcomponent:xcomponent_test_ng",
   ]
 }

@@ -23,6 +23,7 @@
 
 #include "base/geometry/ng/rect_t.h"
 #include "base/memory/ace_type.h"
+#include "core/common/window_animation_config.h"
 
 namespace OHOS {
 template<typename T>
@@ -37,6 +38,7 @@ class AxisEvent;
 namespace Rosen {
 class OccupiedAreaChangeInfo;
 class RSSurfaceNode;
+class RSTransaction;
 class AvoidArea;
 } // namespace Rosen
 
@@ -53,6 +55,11 @@ class AccessibilityEventInfo;
 } // namespace OHOS
 
 namespace OHOS::Ace::NG {
+enum class SessionType : int32_t {
+    EMBEDDED_UI_EXTENSION = 0,
+    UI_EXTENSION_ABILITY = 1,
+    CLOUD_CARD = 2,
+};
 class SessionWrapper : public AceType {
     DECLARE_ACE_TYPE(SessionWrapper, AceType);
 
@@ -71,7 +78,7 @@ public:
     virtual bool NotifyFocusStateSync(bool focusState) = 0;
     virtual bool NotifyBackPressedSync() = 0;
     virtual bool NotifyPointerEventSync(const std::shared_ptr<OHOS::MMI::PointerEvent>& pointerEvent) = 0;
-    virtual bool NotifyKeyEventSync(const std::shared_ptr<OHOS::MMI::KeyEvent>& keyEvent) = 0;
+    virtual bool NotifyKeyEventSync(const std::shared_ptr<OHOS::MMI::KeyEvent>& keyEvent, bool isPreIme) = 0;
     virtual bool NotifyAxisEventSync(const std::shared_ptr<OHOS::MMI::AxisEvent>& axisEvent) = 0;
 
     // Asynchronous interface for event notify
@@ -89,6 +96,11 @@ public:
     virtual void NotifyDestroy() = 0;
     virtual void NotifyConfigurationUpdate() = 0;
 
+    // The interface for responsing provider
+    virtual void OnConnect() = 0;
+    virtual void OnDisconnect(bool isAbnormal) = 0;
+    virtual void OnAccessibilityEvent(const Accessibility::AccessibilityEventInfo& info, int64_t offset) = 0;
+
     // The interface about the accessibility
     virtual bool TransferExecuteAction(int64_t elementId, const std::map<std::string, std::string>& actionArguments,
         int32_t action, int64_t offset) = 0;
@@ -100,18 +112,20 @@ public:
         int64_t elementId, int32_t focusType, int64_t baseParent, Accessibility::AccessibilityElementInfo& output) = 0;
     virtual void FocusMoveSearch(
         int64_t elementId, int32_t direction, int64_t baseParent, Accessibility::AccessibilityElementInfo& output) = 0;
+    virtual void TransferAccessibilityHoverEvent(float pointX, float pointY, int32_t sourceType, int32_t eventType,
+        int64_t timeMs) = 0;
 
-    // The interface to control the display area
+    // The interface to control the display area and the avoid area
     virtual std::shared_ptr<Rosen::RSSurfaceNode> GetSurfaceNode() const = 0;
-    virtual void RefreshDisplayArea(const RectF& displayArea) = 0;
+    virtual void NotifyDisplayArea(const RectF& displayArea) = 0;
+    virtual void NotifySizeChangeReason(
+        WindowSizeChangeReason type, const std::shared_ptr<Rosen::RSTransaction>& rsTransaction) = 0;
+    virtual void NotifyOriginAvoidArea(const Rosen::AvoidArea& avoidArea, uint32_t type) const = 0;
+    virtual bool NotifyOccupiedAreaChangeInfo(sptr<Rosen::OccupiedAreaChangeInfo> info) const = 0;
 
     // The interface to send the data for ArkTS
     virtual void SendDataAsync(const AAFwk::WantParams& params) const = 0;
     virtual int32_t SendDataSync(const AAFwk::WantParams& wantParams, AAFwk::WantParams& reWantParams) const = 0;
-
-    // The interface to control the avoid area
-    virtual void NotifyOriginAvoidArea(const Rosen::AvoidArea& avoidArea, uint32_t type) const = 0;
-    virtual bool NotifyOccupiedAreaChangeInfo(sptr<Rosen::OccupiedAreaChangeInfo> info) const = 0;
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_UI_EXTENSION_SESSION_WRAPPER_H

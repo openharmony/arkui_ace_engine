@@ -95,9 +95,9 @@ namespace {
 #if defined(ANDROID_PLATFORM)
 const std::string ARK_DEBUGGER_LIB_PATH = "libark_debugger.so";
 #elif defined(APP_USE_ARM)
-const std::string ARK_DEBUGGER_LIB_PATH = "/system/lib/libark_debugger.z.so";
+const std::string ARK_DEBUGGER_LIB_PATH = "/system/lib/platformsdk/libark_debugger.z.so";
 #else
-const std::string ARK_DEBUGGER_LIB_PATH = "/system/lib64/libark_debugger.z.so";
+const std::string ARK_DEBUGGER_LIB_PATH = "/system/lib64/platformsdk/libark_debugger.z.so";
 #endif
 const std::string FORM_ES_MODULE_CARD_PATH = "ets/widgets.abc";
 const std::string FORM_ES_MODULE_PATH = "ets/modules.abc";
@@ -264,6 +264,8 @@ thread_local shared_ptr<JsRuntime> localRuntime_;
 thread_local bool isUnique_ = false;
 // ArkTsCard end
 
+thread_local bool isWorker_ = false;
+
 JsiDeclarativeEngineInstance::~JsiDeclarativeEngineInstance()
 {
     CHECK_RUN_ON(JS);
@@ -426,6 +428,7 @@ extern "C" ACE_FORCE_EXPORT void OHOS_ACE_PreloadAceModuleWorker(void* runtime)
 
 void JsiDeclarativeEngineInstance::PreloadAceModuleWorker(void* runtime)
 {
+    isWorker_ = true;
     auto sharedRuntime = reinterpret_cast<NativeEngine*>(runtime);
 
     if (!sharedRuntime) {
@@ -480,13 +483,12 @@ void JsiDeclarativeEngineInstance::PreloadAceModule(void* runtime)
     if (!arkRuntime->InitializeFromExistVM(vm)) {
         return;
     }
-    arkRuntime->SetNativeEngine(nativeArkEngine);
     LocalScope scope(vm);
     {
         std::unique_lock<std::shared_mutex> lock(globalRuntimeMutex_);
         globalRuntime_ = arkRuntime;
     }
-    
+
     // preload js views
     JsRegisterViews(JSNApi::GetGlobalObject(vm), runtime);
 
@@ -785,6 +787,10 @@ shared_ptr<JsRuntime> JsiDeclarativeEngineInstance::GetCurrentRuntime()
 
     // ArkTsCard
     if (isUnique_ && localRuntime_) {
+        return localRuntime_;
+    }
+
+    if (isWorker_ && localRuntime_) {
         return localRuntime_;
     }
 
@@ -1113,14 +1119,19 @@ void JsiDeclarativeEngine::RegisterOffWorkerFunc()
 void JsiDeclarativeEngine::RegisterAssetFunc()
 {
     auto weakDelegate = WeakPtr(engineInstance_->GetDelegate());
-    auto&& assetFunc = [weakDelegate](const std::string& uri, std::vector<uint8_t>& content, std::string& ami) {
+    auto && assetFunc = [weakDelegate](const std::string& uri, uint8_t** buff, size_t* buffSize, std::string& ami,
+        bool& useSecureMem, bool isRestricted) {
         auto delegate = weakDelegate.Upgrade();
         if (delegate == nullptr) {
             return;
         }
         size_t index = uri.find_last_of(".");
         if (index != std::string::npos) {
+            std::vector<uint8_t> content;
             delegate->GetResourceData(uri.substr(0, index) + ".abc", content, ami);
+            *buff = content.data();
+            *buffSize = content.size();
+            useSecureMem = false;
         }
     };
     nativeEngine_->SetGetAssetFunc(assetFunc);
@@ -1389,8 +1400,10 @@ void JsiDeclarativeEngine::LoadJsWithModule(
     auto container = Container::Current();
     CHECK_NULL_VOID(container);
     auto runtime = std::static_pointer_cast<ArkJSRuntime>(engineInstance_->GetJsRuntime());
-    const std::string assetPath = ASSET_PATH_PREFIX + container->GetModuleName() + "/" + FORM_ES_MODULE_PATH;
+    const std::string moduleName = container->GetModuleName();
+    const std::string assetPath = ASSET_PATH_PREFIX + moduleName + "/" + FORM_ES_MODULE_PATH;
     runtime->SetAssetPath(assetPath);
+    runtime->SetModuleName(moduleName);
     if (urlName.substr(0, strlen(BUNDLE_TAG)) != BUNDLE_TAG) {
         urlName = container->GetModuleName() + "/ets/" + urlName;
     }
@@ -1401,13 +1414,7 @@ void JsiDeclarativeEngine::LoadJsWithModule(
 bool JsiDeclarativeEngine::LoadFaAppSource()
 {
     ACE_SCOPED_TRACE("JsiDeclarativeEngine::LoadFaAppSource");
-    if (!ExecuteAbc("commons.abc")) {
-        return false;
-    }
-    if (!ExecuteAbc("vendors.abc")) {
-        return false;
-    }
-    if (!ExecuteAbc("app.abc")) {
+    if (!ExecuteAbc("commons.abc") || !ExecuteAbc("vendors.abc") || !ExecuteAbc("app.abc")) {
         return false;
     }
     CallAppFunc("onCreate");
@@ -2234,7 +2241,7 @@ void JsiDeclarativeEngineInstance::PreloadAceModuleCard(
     }
 
     // preload js views
-    JsRegisterFormViews(JSNApi::GetGlobalObject(vm), formModuleList);
+    JsRegisterFormViews(JSNApi::GetGlobalObject(vm), formModuleList, false, runtime);
     // preload aceConsole
     shared_ptr<JsValue> global = arkRuntime->GetGlobal();
     PreloadAceConsole(arkRuntime, global);

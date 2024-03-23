@@ -82,25 +82,9 @@ void IfElseNode::SetBranchId(int32_t value, std::list<int32_t>& removedElmtId)
         // collect elmtIds of all children and their children up to CustomNode object
         // these will be removed, but possibly with a delay if their is an animation
         // list of elmtIds is sent back to calling TS ViewPU.ifElseBranchUpdateFunction()
-        CollectRemovedChildren(GetChildren(), removedElmtId);
         Clean(false, true);
+        CollectRemovedChildren(GetChildren(), removedElmtId, true);
         branchId_ = value;
-    }
-}
-
-void IfElseNode::CollectRemovedChildren(const std::list<RefPtr<UINode>>& children, std::list<int32_t>& removedElmtId)
-{
-    for (auto const& child : children) {
-        CollectRemovedChild(child, removedElmtId);
-    }
-}
-
-void IfElseNode::CollectRemovedChild(const RefPtr<UINode>& child, std::list<int32_t>& removedElmtId)
-{
-    removedElmtId.emplace_back(child->GetId());
-    if (child->GetTag() != V2::JS_VIEW_ETS_TAG) {
-        // add CustomNode but do not recurse into its children
-        CollectRemovedChildren(child->GetChildren(), removedElmtId);
     }
 }
 

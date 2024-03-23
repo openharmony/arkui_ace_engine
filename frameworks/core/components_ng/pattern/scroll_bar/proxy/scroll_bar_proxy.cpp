@@ -78,7 +78,8 @@ void ScrollBarProxy::UnRegisterScrollBar(const WeakPtr<ScrollBarPattern>& scroll
     }
 }
 
-void ScrollBarProxy::NotifyScrollableNode(float distance, const WeakPtr<ScrollBarPattern>& weakScrollBar) const
+void ScrollBarProxy::NotifyScrollableNode(
+    float distance, int32_t source, const WeakPtr<ScrollBarPattern>& weakScrollBar) const
 {
     auto scrollBar = weakScrollBar.Upgrade();
     CHECK_NULL_VOID(scrollBar);
@@ -93,7 +94,7 @@ void ScrollBarProxy::NotifyScrollableNode(float distance, const WeakPtr<ScrollBa
             continue;
         }
         float value = CalcPatternOffset(GetScrollableDistance(scrollable), controlDistance, distance);
-        node.onPositionChanged(value, SCROLL_FROM_BAR);
+        node.onPositionChanged(value, source);
         if (node.scrollbarFRcallback) {
             node.scrollbarFRcallback(0, SceneStatus::RUNNING);
         }
@@ -203,6 +204,16 @@ float ScrollBarProxy::CalcPatternOffset(float scrollableDistance, float controlD
         return delta * scrollableDistance / controlDistance;
     } else {
         return 0.0f;
+    }
+}
+
+void ScrollBarProxy::ScrollPage(bool reverse, bool smooth)
+{
+    for (const auto& node : scrollableNodes_) {
+        if (node.scrollPageCallback == nullptr) {
+            continue;
+        }
+        node.scrollPageCallback(reverse, smooth);
     }
 }
 } // namespace OHOS::Ace::NG

@@ -81,6 +81,8 @@ enum class HitTestMode {
     HTMTRANSPARENT_SELF,
 };
 
+using TouchInterceptFunc = std::function<NG::HitTestMode(TouchEventInfo&)>;
+
 enum class TouchTestStrategy {
     DEFAULT = 0,
     FORWARD_COMPETITION,
@@ -125,6 +127,9 @@ struct DragDropInfo {
     RefPtr<UINode> customNode;
     RefPtr<PixelMap> pixelMap;
     std::string extraInfo;
+    // The inspectorId acts as a preview surrogate identifier which is used
+    // to retrieve a preview image for the item being dragged.
+    std::string inspectorId;
 };
 
 using DragNotifyMsgCore = OHOS::Ace::DragNotifyMsg;
@@ -153,6 +158,23 @@ public:
         gestures_.emplace_back(gesture);
         backupGestures_.emplace_back(gesture);
         recreateGesture_ = true;
+    }
+
+    // call by CAPI do distinguish with AddGesture called by ARKUI;
+    void AttachGesture(const RefPtr<NG::Gesture>& gesture)
+    {
+        gestures_.emplace_back(gesture);
+        backupGestures_.emplace_back(gesture);
+        recreateGesture_ = true;
+        OnModifyDone();
+    }
+
+    void RemoveGesture(const RefPtr<NG::Gesture>& gesture)
+    {
+        gestures_.remove(gesture);
+        backupGestures_.remove(gesture);
+        recreateGesture_ = true;
+        OnModifyDone();
     }
 
     void AddScrollableEvent(const RefPtr<ScrollableEvent>& scrollableEvent)
@@ -205,13 +227,9 @@ public:
     }
 
     // Set by node container.
-    void SetOnTouchEvent(TouchEventFunc&& touchEventFunc)
-    {
-        if (!touchEventActuator_) {
-            touchEventActuator_ = MakeRefPtr<TouchEventActuator>();
-        }
-        touchEventActuator_->SetOnTouchEvent(std::move(touchEventFunc));
-    }
+    void SetOnTouchEvent(TouchEventFunc&& touchEventFunc);
+    // Set by JS FrameNode.
+    void SetJSFrameNodeOnTouchEvent(TouchEventFunc&& touchEventFunc);
 
     void AddTouchEvent(const RefPtr<TouchEventImpl>& touchEvent)
     {
@@ -245,7 +263,14 @@ public:
     // Set by user define, which will replace old one.
     void SetUserOnClick(GestureEventFunc&& clickEvent);
 
+     // Set by JS FrameNode.
+    void SetJSFrameNodeOnClick(GestureEventFunc&& clickEvent);
+
     void SetOnGestureJudgeBegin(GestureJudgeFunc&& gestureJudgeFunc);
+
+    void SetOnTouchIntercept(TouchInterceptFunc&& touchInterceptFunc);
+
+    TouchInterceptFunc GetOnTouchIntercept() const;
 
     void SetOnGestureJudgeNativeBegin(GestureJudgeFunc&& gestureJudgeFunc);
 
@@ -263,6 +288,10 @@ public:
     void ClearUserOnClick();
     void ClearUserOnTouch();
 
+
+    void ClearJSFrameNodeOnClick();
+    void ClearJSFrameNodeOnTouch();
+
     void AddClickEvent(const RefPtr<ClickEvent>& clickEvent);
 
     void RemoveClickEvent(const RefPtr<ClickEvent>& clickEvent)
@@ -271,6 +300,14 @@ public:
             return;
         }
         clickEventActuator_->RemoveClickEvent(clickEvent);
+    }
+
+    void RemoveLongPressEvent(const RefPtr<LongPressEvent>& longPressEvent)
+    {
+        if (!longPressEventActuator_) {
+            return;
+        }
+        longPressEventActuator_->RemoveLongPressEvent(longPressEvent);
     }
 
     bool IsClickEventsEmpty() const
@@ -386,15 +423,6 @@ public:
     void CombineIntoExclusiveRecognizer(
         const PointF& globalPoint, const PointF& localPoint, TouchTestResult& result, int32_t touchId);
 
-    bool IsResponseRegion() const
-    {
-        return isResponseRegion_;
-    }
-    void MarkResponseRegion(bool isResponseRegion)
-    {
-        isResponseRegion_ = isResponseRegion;
-    }
-
     const std::vector<DimensionRect>& GetResponseRegion() const
     {
         return responseRegion_;
@@ -410,16 +438,7 @@ public:
         responseRegionFunc_ = func;
     }
 
-    void SetResponseRegion(const std::vector<DimensionRect>& responseRegion)
-    {
-        responseRegion_ = responseRegion;
-        if (!responseRegion_.empty()) {
-            isResponseRegion_ = true;
-        }
-        if (responseRegionFunc_) {
-            responseRegionFunc_(responseRegion_);
-        }
-    }
+    void SetResponseRegion(const std::vector<DimensionRect>& responseRegion);
 
     void SetOnTouchTestFunc(OnChildTouchTestFunc&& callback)
     {
@@ -449,21 +468,7 @@ public:
         }
     }
 
-    void RemoveLastResponseRect()
-    {
-        if (responseRegion_.empty()) {
-            isResponseRegion_ = false;
-            return;
-        }
-        responseRegion_.pop_back();
-        if (responseRegion_.empty()) {
-            isResponseRegion_ = false;
-        }
-
-        if (responseRegionFunc_) {
-            responseRegionFunc_(responseRegion_);
-        }
-    }
+    void RemoveLastResponseRect();
 
     bool GetTouchable() const
     {
@@ -481,6 +486,10 @@ public:
             dragEventActuator_->SetThumbnailCallback(std::move(callback));
         }
     }
+
+    bool IsDragForbidden();
+
+    void SetDragForbiddenForcely(bool isDragForbidden);
 
     bool GetTextDraggable() const
     {
@@ -599,7 +608,8 @@ public:
     DragDropInfo GetDragDropInfo(const GestureEvent& info, const RefPtr<FrameNode> frameNode,
         DragDropInfo& dragPreviewInfo, const RefPtr<OHOS::Ace::DragEvent>& dragEvent);
 
-    RefPtr<UnifiedData> GetUnifiedData(DragDropInfo& dragDropInfo, const RefPtr<OHOS::Ace::DragEvent>& dragEvent);
+    RefPtr<UnifiedData> GetUnifiedData(const std::string& frameTag, DragDropInfo& dragDropInfo,
+        const RefPtr<OHOS::Ace::DragEvent>& dragEvent);
 
 private:
     void ProcessTouchTestHierarchy(const OffsetF& coordinateOffset, const TouchRestrict& touchRestrict,
@@ -660,7 +670,10 @@ private:
     GestureJudgeFunc gestureJudgeFunc_;
     GestureJudgeFunc gestureJudgeNativeFunc_;
 
+    TouchInterceptFunc touchInterceptFunc_;
+
     MenuPreviewMode previewMode_ = MenuPreviewMode::NONE;
+    bool isDragForbidden_ = false;
     bool textDraggable_ = false;
     bool isTextDraggable_ = false;
     bool monopolizeEvents_ = false;

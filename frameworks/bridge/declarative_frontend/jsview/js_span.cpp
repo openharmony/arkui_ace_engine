@@ -87,16 +87,15 @@ void JSSpan::SetFontSize(const JSCallbackInfo& info)
     if (info.Length() < 1) {
         return;
     }
-    auto theme = GetTheme<TextTheme>();
-    CHECK_NULL_VOID(theme);
-    CalcDimension fontSize = theme->GetTextStyle().GetFontSize();
-    if (!ParseJsDimensionFpNG(info[0], fontSize, false)) {
+    CalcDimension fontSize;
+    if (!ParseJsDimensionFpNG(info[0], fontSize, false) || fontSize.IsNegative()) {
+        auto pipelineContext = PipelineBase::GetCurrentContext();
+        CHECK_NULL_VOID(pipelineContext);
+        auto theme = pipelineContext->GetTheme<TextTheme>();
+        CHECK_NULL_VOID(theme);
         fontSize = theme->GetTextStyle().GetFontSize();
         SpanModel::GetInstance()->SetFontSize(fontSize);
         return;
-    }
-    if (fontSize.IsNegative()) {
-        fontSize = theme->GetTextStyle().GetFontSize();
     }
 
     SpanModel::GetInstance()->SetFontSize(fontSize);
@@ -109,9 +108,6 @@ void JSSpan::SetFontWeight(const std::string& value)
 
 void JSSpan::SetTextColor(const JSCallbackInfo& info)
 {
-    if (info.Length() < 1) {
-        return;
-    }
     Color textColor;
     if (!ParseJsColor(info[0], textColor)) {
         auto pipelineContext = PipelineBase::GetCurrentContext();
@@ -213,7 +209,7 @@ void JSSpan::JsOnClick(const JSCallbackInfo& info)
             return;
         }
         auto jsOnClickFunc = AceType::MakeRefPtr<JsClickFunction>(JSRef<JSFunc>::Cast(info[0]));
-        WeakPtr<NG::FrameNode> targetNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+        auto targetNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
         auto onClick = [execCtx = info.GetExecutionContext(), func = jsOnClickFunc, node = targetNode](
                            const BaseEventInfo* info) {
             const auto* clickInfo = TypeInfoHelper::DynamicCast<GestureEvent>(info);
@@ -231,7 +227,7 @@ void JSSpan::JsOnClick(const JSCallbackInfo& info)
         CHECK_NULL_VOID(inspector);
         auto impl = inspector->GetInspectorFunctionImpl();
         RefPtr<JsClickFunction> jsOnClickFunc = AceType::MakeRefPtr<JsClickFunction>(JSRef<JSFunc>::Cast(info[0]));
-        WeakPtr<NG::FrameNode> targetNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+        auto targetNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
         auto clickFunc = [execCtx = info.GetExecutionContext(), func = std::move(jsOnClickFunc), impl,
                              node = targetNode](const BaseEventInfo* info) {
             JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);

@@ -112,10 +112,14 @@ public:
     static void SetPreviewDefaultAnimateProperty(const RefPtr<FrameNode>& imageNode);
     static void MountPixelMap(const RefPtr<OverlayManager>& overlayManager, const RefPtr<GestureEventHub>& manager,
         const RefPtr<FrameNode>& imageNode);
+    static RefPtr<PixelMap> GetPreviewPixelMap(const std::string& inspectorId, const RefPtr<FrameNode>& selfFrameNode);
+    static RefPtr<PixelMap> GetPreviewPixelMapByInspectorId(const std::string& inspectorId);
+    static RefPtr<PixelMap> GetScreenShotPixelMap(const RefPtr<FrameNode>& frameNode);
+    static void ExecutePreDragAction(const PreDragStatus preDragStatus, const RefPtr<FrameNode>& frameNode = nullptr);
     void SetPixelMap(const RefPtr<DragEventActuator>& actuator);
     void SetEventColumn(const RefPtr<DragEventActuator>& actuator);
     void HideFilter();
-    void HidePixelMap(bool startDrag = false, double x = 0, double y = 0);
+    void HidePixelMap(bool startDrag = false, double x = 0, double y = 0, bool showAnimation = true);
     void HideEventColumn();
     void BindClickEvent(const RefPtr<FrameNode>& columnNode);
     void ShowPixelMapAnimation(const RefPtr<FrameNode>& imageNode, bool hasContextMenu);

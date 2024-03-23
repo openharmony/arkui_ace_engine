@@ -55,7 +55,9 @@ void ShowScaleAnimation(
     AnimationOption scaleOption;
     auto motion = AceType::MakeRefPtr<ResponsiveSpringMotion>(springMotionResponse, springMotionDampingFraction);
     scaleOption.SetCurve(motion);
-
+    DragEventActuator::ExecutePreDragAction(PreDragStatus::PREVIEW_LIFT_STARTED);
+    scaleOption.SetOnFinishEvent(
+        []() { DragEventActuator::ExecutePreDragAction(PreDragStatus::PREVIEW_LIFT_FINISHED); });
     context->UpdateTransformScale(VectorF(previewBeforeAnimationScale, previewBeforeAnimationScale));
     AnimationUtils::Animate(
         scaleOption,
@@ -118,9 +120,11 @@ bool MenuPreviewPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& d
             }
         },
         option.GetOnFinishEvent());
-    auto menuWrapper = GetMenuWrapper();
-    auto menuPattern = GetMenuPattern(menuWrapper);
-    ShowScaleAnimation(context, menuTheme, menuPattern);
+    if (!hasPreviewTransitionEffect_) {
+        auto menuWrapper = GetMenuWrapper();
+        auto menuPattern = GetMenuPattern(menuWrapper);
+        ShowScaleAnimation(context, menuTheme, menuPattern);
+    }
     isFirstShow_ = false;
     return false;
 }

@@ -99,6 +99,9 @@ RSBitmap QRCodeModifier::CreateBitMap(
             }
         }
     }
+    if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
+        return bitMap;
+    }
     for (int32_t i = 0; i <= maxWidth; i++) {
         for (int32_t j = 0; j <= maxHeight; j++) {
             if (!qrCode.getModule(i / blockWidth, j / blockWidth)) {

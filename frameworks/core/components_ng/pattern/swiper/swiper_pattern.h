@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -38,6 +38,7 @@
 #include "core/components_ng/pattern/swiper/swiper_model.h"
 #include "core/components_ng/pattern/swiper/swiper_paint_method.h"
 #include "core/components_ng/pattern/swiper/swiper_paint_property.h"
+#include "core/components_ng/pattern/swiper/swiper_utils.h"
 #include "core/components_ng/pattern/tabs/tab_content_transition_proxy.h"
 #include "core/components_v2/inspector/utils.h"
 
@@ -378,6 +379,7 @@ public:
     void ShowNext();
     void ShowPrevious();
     void SwipeTo(int32_t index);
+    void ChangeIndex(int32_t index, bool useAnimation);
 
     void OnVisibleChange(bool isVisible) override;
 
@@ -474,11 +476,6 @@ public:
         indicatorIsBoolean_ = isBoolean;
     }
 
-    void SetNestedScroll(const NestedScrollOptions& nestedOpt)
-    {
-        enableNestedScroll_ = nestedOpt.NeedParent();
-    }
-
     bool GetIsAtHotRegion() const
     {
         return isAtHotRegion_;
@@ -532,6 +529,7 @@ public:
     std::string ProvideRestoreInfo() override;
     void OnRestoreInfo(const std::string& restoreInfo) override;
     bool IsAutoFill() const;
+    bool HasTabsAncestor() const;
     void OnTouchTestHit(SourceType hitTestType) override;
     void SwipeToWithoutAnimation(int32_t index);
     void StopAutoPlay();
@@ -544,6 +542,7 @@ public:
     RefPtr<Curve> GetCurveIncludeMotion();
     void OnCustomContentTransition(int32_t toIndex);
     void OnCustomAnimationFinish(int32_t fromIndex, int32_t toIndex, bool hasOnChanged);
+    void OnSwiperCustomAnimationFinish(std::pair<int32_t, SwiperItemInfo> item);
 
     void SetCustomAnimationToIndex(int32_t toIndex)
     {
@@ -555,15 +554,35 @@ public:
         return customAnimationToIndex_;
     }
 
-    void SetCustomContentTransition(std::function<TabContentAnimatedTransition(int32_t, int32_t)>&& event)
+    void SetTabsCustomContentTransition(std::function<TabContentAnimatedTransition(int32_t, int32_t)>&& event)
     {
-        onCustomContentTransition_ =
+        onTabsCustomContentTransition_ =
             std::make_shared<std::function<TabContentAnimatedTransition(int32_t, int32_t)>>(event);
     }
 
-    CustomContentTransitionPtr GetCustomContentTransition() const
+    CustomContentTransitionPtr GetTabsCustomContentTransition() const
     {
-        return onCustomContentTransition_;
+        return onTabsCustomContentTransition_;
+    }
+
+    void SetSwiperCustomContentTransition(SwiperContentAnimatedTransition& transition)
+    {
+        onSwiperCustomContentTransition_ = std::make_shared<SwiperContentAnimatedTransition>(transition);
+    }
+
+    std::shared_ptr<SwiperContentAnimatedTransition> GetSwiperCustomContentTransition() const
+    {
+        return onSwiperCustomContentTransition_;
+    }
+
+    void SetOnContentDidScroll(ContentDidScrollEvent&& onContentDidScroll)
+    {
+        onContentDidScroll_ = std::make_shared<ContentDidScrollEvent>(onContentDidScroll);
+    }
+
+    std::shared_ptr<ContentDidScrollEvent> GetOnContentDidScroll() const
+    {
+        return onContentDidScroll_;
     }
 
     void SetSwiperEventCallback(bool disableSwipe);
@@ -597,6 +616,10 @@ public:
         return nextValidIndex_;
     }
     void UpdateNextValidIndex();
+
+    void FireWillHideEvent(int32_t willHideIndex) const;
+    void FireWillShowEvent(int32_t willShowIndex) const;
+    void SetOnHiddenChangeForParent();
 
 private:
     void OnModifyDone() override;
@@ -640,6 +663,7 @@ private:
     void HandleMouseEvent(const MouseInfo& info);
     void PlayTranslateAnimation(
         float startPos, float endPos, int32_t nextIndex, bool restartAutoPlay = false, float velocity = 0.0f);
+    void OnTranslateAnimationFinish();
     void PlaySpringAnimation(double dragVelocity);
     void PlayFadeAnimation();
 
@@ -657,6 +681,8 @@ private:
     void StopFadeAnimation();
 
     bool IsOutOfBoundary(float mainOffset = 0.0f) const;
+    bool IsOutOfStart(float mainOffset = 0.0f) const;
+    bool IsOutOfEnd(float mainOffset = 0.0f) const;
     bool AutoLinearIsOutOfBoundary(float mainOffset) const;
     float GetDistanceToEdge() const;
     float MainSize() const;
@@ -665,6 +691,11 @@ private:
     void FireAnimationStartEvent(int32_t currentIndex, int32_t nextIndex, const AnimationCallbackInfo& info) const;
     void FireAnimationEndEvent(int32_t currentIndex, const AnimationCallbackInfo& info) const;
     void FireGestureSwipeEvent(int32_t currentIndex, const AnimationCallbackInfo& info) const;
+    void FireSwiperCustomAnimationEvent();
+    void FireContentDidScrollEvent();
+    void HandleSwiperCustomAnimation(float offset);
+    void CalculateAndUpdateItemInfo(float offset);
+    void UpdateItemInfoInCustomAnimation(int32_t index, float startPos, float endPos);
 
     float GetItemSpace() const;
     float GetPrevMargin() const;
@@ -772,14 +803,18 @@ private:
      *
      * @param offset The scroll offset from DragUpdate.
      */
-    void CloseTheGap(float offset);
+    void CloseTheGap(float& offset);
 
-    ScrollResult HandleScroll(float offset, int32_t source, NestedState state) override;
-    ScrollResult HandleScrollSelfFirst(float offset, int32_t source, NestedState state);
+    ScrollResult HandleScroll(
+        float offset, int32_t source, NestedState state = NestedState::GESTURE, float velocity = 0.f) override;
+
+    ScrollResult HandleScrollSelfFirst(float offset, int32_t source, NestedState state, float velocity = 0.f);
+
+    ScrollResult HandleScrollParentFirst(float offset, int32_t source, NestedState state, float velocity = 0.f);
 
     bool HandleScrollVelocity(float velocity) override;
 
-    void OnScrollStartRecursive(float position) override;
+    void OnScrollStartRecursive(float position, float velocity = 0.f) override;
     void OnScrollEndRecursive(const std::optional<float>& velocity) override;
 
     /**
@@ -800,6 +835,7 @@ private:
     RefPtr<FrameNode> GetCurrentFrameNode(int32_t currentIndex) const;
     bool FadeOverScroll(float offset);
     int32_t ComputeSwipePageNextIndex(float velocity, bool onlyDistance = false) const;
+    int32_t ComputeNextIndexInSinglePage(float velocity, bool onlyDistance) const;
     int32_t ComputePageIndex(int32_t index) const;
     void UpdateIndexOnAnimationStop();
     void UpdateIndexOnSwipePageStop(int32_t pauseTargetIndex);
@@ -808,11 +844,60 @@ private:
 
     int32_t CheckTargetIndex(int32_t targetIndex, bool isForceBackward = false);
 
-    WeakPtr<NestableScrollContainer> parent_;
-    /**
-     *  ============================================================
-     *  End of NestableScrollContainer implementations
-     */
+    void PreloadItems(const std::set<int32_t>& indexSet);
+    void DoPreloadItems(const std::set<int32_t>& indexSet, int32_t errorCode);
+    void FirePreloadFinishEvent(int32_t errorCode);
+    // capture node start
+    void InitCapture();
+    int32_t GetLeftCaptureId()
+    {
+        if (!leftCaptureId_.has_value()) {
+            leftCaptureId_ = ElementRegister::GetInstance()->MakeUniqueId();
+        }
+        return leftCaptureId_.value();
+    }
+    int32_t GetRightCaptureId()
+    {
+        if (!rightCaptureId_.has_value()) {
+            rightCaptureId_ = ElementRegister::GetInstance()->MakeUniqueId();
+        }
+        return rightCaptureId_.value();
+    }
+    void RemoveAllCaptureNode()
+    {
+        auto swiperNode = GetHost();
+        CHECK_NULL_VOID(swiperNode);
+        swiperNode->RemoveChildAtIndex(swiperNode->GetChildIndexById(GetLeftCaptureId()));
+        leftCaptureId_ = std::nullopt;
+        swiperNode->RemoveChildAtIndex(swiperNode->GetChildIndexById(GetRightCaptureId()));
+        rightCaptureId_ = std::nullopt;
+    }
+    RefPtr<FrameNode> GetLeftCaptureNode()
+    {
+        auto swiperNode = GetHost();
+        CHECK_NULL_RETURN(swiperNode, nullptr);
+        return DynamicCast<FrameNode>(swiperNode->GetChildAtIndex(swiperNode->GetChildIndexById(GetLeftCaptureId())));
+    }
+    RefPtr<FrameNode> GetRightCaptureNode()
+    {
+        auto swiperNode = GetHost();
+        CHECK_NULL_RETURN(swiperNode, nullptr);
+        return DynamicCast<FrameNode>(swiperNode->GetChildAtIndex(swiperNode->GetChildIndexById(GetRightCaptureId())));
+    }
+    bool IsCaptureNodeValid()
+    {
+        return hasCachedCapture_ && GetLeftCaptureNode() && GetRightCaptureNode();
+    }
+    void UpdateTargetCapture(bool forceUpdate);
+    void CreateCaptureCallback(int32_t targetIndex, int32_t captureId, bool forceUpdate);
+    void UpdateCaptureSource(std::shared_ptr<Media::PixelMap> pixelMap, int32_t captureId, int32_t targetIndex);
+
+    bool SupportSwiperCustomAnimation()
+    {
+        auto swiperLayoutProperty = GetLayoutProperty<SwiperLayoutProperty>();
+        return (onSwiperCustomContentTransition_ || onContentDidScroll_) &&
+            !hasCachedCapture_ && SwiperUtils::IsStretch(swiperLayoutProperty);
+    }
 
     RefPtr<PanEvent> panEvent_;
     RefPtr<TouchEventImpl> touchEvent_;
@@ -830,7 +915,10 @@ private:
     // Control translate animation for indicator.
     std::shared_ptr<AnimationUtils::Animation> indicatorAnimation_;
 
+    std::shared_ptr<AnimationUtils::Animation> translateAnimation_;
+
     bool indicatorAnimationIsRunning_ = false;
+    bool translateAnimationIsRunning_ = false;
 
     // stop indicator animation callback
     std::function<void(bool)> stopIndicatorAnimationFunc_;
@@ -838,7 +926,6 @@ private:
     RefPtr<SwiperController> swiperController_;
     RefPtr<InputEvent> mouseEvent_;
 
-    bool enableNestedScroll_ = false;
     bool isLastIndicatorFocused_ = false;
     int32_t startIndex_ = 0;
     int32_t endIndex_ = 0;
@@ -872,6 +959,7 @@ private:
     bool isAtHotRegion_ = false;
     bool isDragging_ = false;
     bool needTurn_ = false;
+    bool isParentHiddenChange_ = false;
     /**
      * @brief Indicates whether the child NestableScrollContainer is currently scrolling and affecting Swiper.
      */
@@ -896,6 +984,8 @@ private:
     std::optional<int32_t> indicatorId_;
     std::optional<int32_t> leftButtonId_;
     std::optional<int32_t> rightButtonId_;
+    std::optional<int32_t> leftCaptureId_;
+    std::optional<int32_t> rightCaptureId_;
     std::optional<SwiperIndicatorType> lastSwiperIndicatorType_;
 
     float startMainPos_ = 0.0f;
@@ -942,13 +1032,21 @@ private:
     std::vector<RefPtr<ScrollingListener>> scrollingListener_;
     FinishCallbackType finishCallbackType_ = FinishCallbackType::REMOVED;
 
-    CustomContentTransitionPtr onCustomContentTransition_;
+    CustomContentTransitionPtr onTabsCustomContentTransition_;
+    std::shared_ptr<SwiperContentAnimatedTransition> onSwiperCustomContentTransition_;
+    std::shared_ptr<ContentDidScrollEvent> onContentDidScroll_;
     std::set<int32_t> indexsInAnimation_;
     std::set<int32_t> needUnmountIndexs_;
     std::optional<int32_t> customAnimationToIndex_;
     RefPtr<TabContentTransitionProxy> currentProxyInAnimation_;
     PaddingPropertyF tabsPaddingAndBorder_;
     std::map<int32_t, bool> indexCanChangeMap_;
+    // capture
+    std::optional<int32_t> leftCaptureIndex_;
+    std::optional<int32_t> rightCaptureIndex_;
+    bool hasCachedCapture_ = false;
+    bool isCaptureReverse_ = false;
+    OffsetF captureFinalOffset_;
 };
 } // namespace OHOS::Ace::NG
 

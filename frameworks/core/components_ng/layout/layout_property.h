@@ -78,7 +78,7 @@ public:
         return parentLayoutConstraint_;
     }
 
-    const std::unique_ptr<MagicItemProperty>& GetMagicItemProperty() const
+    MagicItemProperty& GetMagicItemProperty()
     {
         return magicItemProperty_;
     }
@@ -157,6 +157,8 @@ public:
     void UpdateLayoutDirection(TextDirection value);
 
     void UpdateGeometryTransition(const std::string& id, bool followWithoutTransition = false);
+
+    void ResetGeometryTransition();
 
     void UpdateAspectRatio(float ratio);
     void ResetAspectRatio();
@@ -334,7 +336,7 @@ private:
 
     std::unique_ptr<BorderWidthProperty> borderWidth_;
     std::unique_ptr<BorderWidthProperty> outerBorderWidth_;
-    std::unique_ptr<MagicItemProperty> magicItemProperty_;
+    MagicItemProperty magicItemProperty_;
     std::unique_ptr<PositionProperty> positionProperty_;
     std::unique_ptr<FlexItemProperty> flexItemProperty_;
     std::unique_ptr<GridProperty> gridProperty_;

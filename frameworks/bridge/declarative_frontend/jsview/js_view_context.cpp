@@ -68,10 +68,40 @@ namespace {
 
 constexpr uint32_t DEFAULT_DURATION = 1000; // ms
 constexpr int64_t MICROSEC_TO_MILLISEC = 1000;
+enum class AnimationInterface : int32_t {
+    ANIMATION = 0,
+    ANIMATE_TO,
+    ANIMATE_TO_IMMEDIATELY,
+    KEYFRAME_ANIMATE_TO,
+};
+const char* g_animationInterfaceNames[] = {
+    "animation",
+    "animateTo",
+    "animateToImmediately",
+    "keyframeAnimateTo",
+};
+
+void PrintInfiniteAnimation(const AnimationOption& option, AnimationInterface interface)
+{
+    if (option.GetIteration() == ANIMATION_REPEAT_INFINITE) {
+        if (interface == AnimationInterface::KEYFRAME_ANIMATE_TO) {
+            TAG_LOGI(AceLogTag::ACE_ANIMATION,
+                "keyframeAnimateTo iteration is infinite, remember to stop it. total duration:%{public}d",
+                option.GetDuration());
+        } else {
+            TAG_LOGI(AceLogTag::ACE_ANIMATION,
+                "%{public}s iteration is infinite, remember to stop it. duration:%{public}d, curve:%{public}s",
+                g_animationInterfaceNames[static_cast<int>(interface)], option.GetDuration(),
+                option.GetCurve()->ToString().c_str());
+        }
+    }
+}
 
 void AnimateToForStageMode(const RefPtr<PipelineBase>& pipelineContext, AnimationOption& option,
     JSRef<JSFunc> jsAnimateToFunc, std::function<void()>& onFinishEvent, bool immediately)
 {
+    ACE_SCOPED_TRACE("duration:%d, curve:%s, iteration:%d", option.GetDuration(), option.GetCurve()->ToString().c_str(),
+        option.GetIteration());
     auto triggerId = Container::CurrentIdSafely();
     AceEngine::Get().NotifyContainers([triggerId, option](const RefPtr<Container>& container) {
         auto context = container->GetPipelineContext();
@@ -127,6 +157,8 @@ void AnimateToForStageMode(const RefPtr<PipelineBase>& pipelineContext, Animatio
 void AnimateToForFaMode(const RefPtr<PipelineBase>& pipelineContext, AnimationOption& option,
     const JSCallbackInfo& info, std::function<void()>& onFinishEvent, bool immediately)
 {
+    ACE_SCOPED_TRACE("duration:%d, curve:%s, iteration:%d", option.GetDuration(), option.GetCurve()->ToString().c_str(),
+        option.GetIteration());
     pipelineContext->FlushBuild();
     pipelineContext->OpenImplicitAnimation(option, option.GetCurve(), onFinishEvent);
     pipelineContext->SetSyncAnimationOption(option);
@@ -160,7 +192,7 @@ std::function<float(float)> ParseCallBackFunction(const JSRef<JSObject>& curveOb
     std::function<float(float)> customCallBack = nullptr;
     JSRef<JSVal> onCallBack = curveObj->GetProperty("__curveCustomFunc");
     if (onCallBack->IsFunction()) {
-        WeakPtr<NG::FrameNode> frameNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+        auto frameNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
         RefPtr<JsFunction> jsFuncCallBack =
             AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(onCallBack));
         customCallBack = [func = std::move(jsFuncCallBack), id = Container::CurrentIdSafely(), node = frameNode](
@@ -358,7 +390,7 @@ void JSViewContext::JSAnimation(const JSCallbackInfo& info)
     JSRef<JSVal> onFinish = obj->GetProperty("onFinish");
     std::function<void()> onFinishEvent;
     if (onFinish->IsFunction()) {
-        WeakPtr<NG::FrameNode> frameNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+        auto frameNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
         RefPtr<JsFunction> jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(onFinish));
         onFinishEvent = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc),
                             id = Container::CurrentIdSafely(), node = frameNode]() mutable {
@@ -385,6 +417,9 @@ void JSViewContext::JSAnimation(const JSCallbackInfo& info)
     if (SystemProperties::GetRosenBackendEnabled()) {
         option.SetAllowRunningAsynchronously(true);
     }
+    PrintInfiniteAnimation(option, AnimationInterface::ANIMATION);
+    AceScopedTrace paramTrace("duration:%d, curve:%s, iteration:%d", option.GetDuration(),
+        option.GetCurve()->ToString().c_str(), option.GetIteration());
     ViewContextModel::GetInstance()->openAnimation(option);
     JankFrameReport::GetInstance().ReportJSAnimation();
 }
@@ -403,7 +438,11 @@ void JSViewContext::JSAnimateToImmediately(const JSCallbackInfo& info)
 
 void JSViewContext::AnimateToInner(const JSCallbackInfo& info, bool immediately)
 {
+#ifdef USE_ORIGIN_SCOPE
+    auto scopedDelegate = EngineHelper::GetCurrentDelegate();
+#else
     auto scopedDelegate = EngineHelper::GetCurrentDelegateSafely();
+#endif
     if (!scopedDelegate) {
         // this case usually means there is no foreground container, need to figure out the reason.
         return;
@@ -435,7 +474,7 @@ void JSViewContext::AnimateToInner(const JSCallbackInfo& info, bool immediately)
     std::function<void()> onFinishEvent;
     auto traceStreamPtr = std::make_shared<std::stringstream>();
     if (onFinish->IsFunction()) {
-        WeakPtr<NG::FrameNode> frameNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+        auto frameNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
         RefPtr<JsFunction> jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(onFinish));
         onFinishEvent = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc),
                             id = Container::CurrentIdSafely(), traceStreamPtr, node = frameNode]() mutable {
@@ -463,6 +502,8 @@ void JSViewContext::AnimateToInner(const JSCallbackInfo& info, bool immediately)
                     << ",tempo:" << option.GetTempo()
                     << ",direction:" << (uint32_t) option.GetAnimationDirection()
                     << ",curve:" << (option.GetCurve() ? option.GetCurve()->ToString().c_str() : "");
+    PrintInfiniteAnimation(
+        option, immediately ? AnimationInterface::ANIMATE_TO_IMMEDIATELY : AnimationInterface::ANIMATE_TO);
     AceAsyncTraceBegin(0, traceStreamPtr->str().c_str(), true);
     if (CheckIfSetFormAnimationDuration(pipelineContext, option)) {
         option.SetDuration(DEFAULT_DURATION - GetFormAnimationTimeInterval(pipelineContext));
@@ -541,6 +582,7 @@ void JSViewContext::JSKeyframeAnimateTo(const JSCallbackInfo& info)
     overallAnimationOption.SetDuration(duration);
     // actual curve is in keyframe, this curve will not be effective
     overallAnimationOption.SetCurve(Curves::EASE_IN_OUT);
+    PrintInfiniteAnimation(overallAnimationOption, AnimationInterface::KEYFRAME_ANIMATE_TO);
     pipelineContext->FlushBuild();
     pipelineContext->OpenImplicitAnimation(
         overallAnimationOption, overallAnimationOption.GetCurve(), overallAnimationOption.GetOnFinishEvent());

@@ -17,6 +17,7 @@
 
 #include "base/geometry/axis.h"
 #include "base/geometry/dimension.h"
+#include "base/log/log_wrapper.h"
 #include "base/utils/utils.h"
 #include "core/common/recorder/event_recorder.h"
 #include "core/common/recorder/node_data_cache.h"
@@ -30,6 +31,7 @@
 #include "core/components_ng/pattern/tabs/tab_bar_layout_property.h"
 #include "core/components_ng/pattern/tabs/tab_bar_paint_property.h"
 #include "core/components_ng/pattern/tabs/tab_bar_pattern.h"
+#include "core/components_ng/pattern/tabs/tab_content_node.h"
 #include "core/components_ng/pattern/tabs/tabs_layout_property.h"
 #include "core/components_ng/pattern/tabs/tabs_node.h"
 #include "core/components_ng/property/property.h"
@@ -97,26 +99,23 @@ void TabsPattern::SetOnChangeEvent(std::function<void(const BaseEventInfo*)>&& e
         }
         /* js callback */
         if (jsEvent && tabsNode->IsOnMainTree()) {
+            if (Recorder::EventRecorder::Get().IsComponentRecordEnable() && weak.Upgrade()) {
+                auto inspectorId = tabsNode->GetInspectorId().value_or("");
+                auto pattern = weak.Upgrade();
+                auto tabBarText = pattern->GetTabBarTextByIndex(index);
+                Recorder::EventParamsBuilder builder;
+                builder.SetId(inspectorId)
+                    .SetType(tabsNode->GetTag())
+                    .SetIndex(index)
+                    .SetText(tabBarText)
+                    .SetDescription(tabsNode->GetAutoEventParamValue(""));
+                Recorder::EventRecorder::Get().OnChange(std::move(builder));
+                if (!inspectorId.empty()) {
+                    Recorder::NodeDataCache::Get().PutMultiple(tabsNode, inspectorId, tabBarText, index);
+                }
+            }
             TabContentChangeEvent eventInfo(index);
             jsEvent(&eventInfo);
-
-            if (!Recorder::EventRecorder::Get().IsComponentRecordEnable()) {
-                return;
-            }
-            auto inspectorId = tabsNode->GetInspectorId().value_or("");
-            auto pattern = weak.Upgrade();
-            CHECK_NULL_VOID(pattern);
-            auto tabBarText = pattern->GetTabBarTextByIndex(index);
-            Recorder::EventParamsBuilder builder;
-            builder.SetId(inspectorId)
-                .SetType(tabsNode->GetTag())
-                .SetIndex(index)
-                .SetText(tabBarText)
-                .SetDescription(tabsNode->GetAutoEventParamValue(""));
-            Recorder::EventRecorder::Get().OnChange(std::move(builder));
-            if (!inspectorId.empty()) {
-                Recorder::NodeDataCache::Get().PutMultiple(inspectorId, tabBarText, index);
-            }
         }
     });
 
@@ -289,7 +288,7 @@ void TabsPattern::OnAfterModifyDone()
     CHECK_NULL_VOID(property);
     auto index = property->GetIndexValue(0);
     auto tabBarText = GetTabBarTextByIndex(index);
-    Recorder::NodeDataCache::Get().PutMultiple(inspectorId, tabBarText, index);
+    Recorder::NodeDataCache::Get().PutMultiple(host, inspectorId, tabBarText, index);
 }
 
 void TabsPattern::SetOnIndexChangeEvent(std::function<void(const BaseEventInfo*)>&& event)
@@ -441,13 +440,97 @@ void TabsPattern::BeforeCreateLayoutWrapper()
         index = 0;
     }
 
+    if (isInit_) {
+        auto swiperPattern = swiperNode->GetPattern<SwiperPattern>();
+        CHECK_NULL_VOID(swiperPattern);
+        swiperPattern->SetOnHiddenChangeForParent();
+        auto parent = tabsNode->GetAncestorNodeOfFrame();
+        CHECK_NULL_VOID(parent);
+        while (parent) {
+            auto navTag = parent->GetTag();
+            if (navTag == V2::NAVDESTINATION_VIEW_ETS_TAG) {
+                break;
+            }
+            parent = parent->GetAncestorNodeOfFrame();
+        }
+        if (!parent) {
+            auto willShowIndex = tabsLayoutProperty->GetIndex().value_or(0);
+            swiperPattern->FireWillShowEvent(willShowIndex);
+        }
+        isInit_ = false;
+    }
+
     auto tabBarNode = AceType::DynamicCast<FrameNode>(tabsNode->GetTabBar());
     CHECK_NULL_VOID(tabBarNode);
+    if (swiperNode->GetChildrenUpdated() != -1) {
+        HandleChildrenUpdated(swiperNode, tabBarNode);
+    }
+
     auto tabBarPattern = tabBarNode->GetPattern<TabBarPattern>();
     CHECK_NULL_VOID(tabBarPattern);
     if (!tabBarPattern->IsMaskAnimationByCreate()) {
         return;
     }
+    HandleMaskAnimationByCreate(tabBarNode, swiperNode, tabBarPattern, tabsLayoutProperty, index);
+}
+
+/**
+ * @brief Handles the update of children in the TabsPattern component.
+ *
+ * This function is responsible for updating the children of the TabsPattern component,
+ * specifically the swiperNode and tabBarNode. It performs the following steps:
+ * 1. Calls the ChildrenUpdatedFrom function on the swiperNode with -1 as the parameter.
+ * 2. Creates a map of tabBarItems using the tabBarItemNodes from the tabBarNode.
+ * 3. Traverses the tree of UINodes starting from the swiperNode using a stack.
+ * 4. For each UINode, if it is an instance of TabContentNode, it retrieves the corresponding
+ *    tabBarItem from the tabBarItems map and moves it to position 0.
+ * 5. Continues traversing the tree by pushing the children of the current UINode onto the stack.
+ *
+ * @param swiperNode The FrameNode representing the swiper component.
+ * @param tabBarNode The FrameNode representing the tab bar component.
+ */
+void TabsPattern::HandleChildrenUpdated(const RefPtr<FrameNode>& swiperNode, const RefPtr<FrameNode>& tabBarNode)
+{
+    swiperNode->ChildrenUpdatedFrom(-1);
+    std::map<int32_t, RefPtr<FrameNode>> tabBarItems;
+    for (const auto& tabBarItemNode : tabBarNode->GetChildren()) {
+        CHECK_NULL_VOID(tabBarItemNode);
+        auto tabBarItemFrameNode = AceType::DynamicCast<FrameNode>(tabBarItemNode);
+        tabBarItems[tabBarItemFrameNode->GetId()] = tabBarItemFrameNode;
+    }
+    std::stack<RefPtr<UINode>> stack;
+    stack.push(swiperNode);
+    while (!stack.empty()) {
+        auto parent = stack.top();
+        stack.pop();
+        if (AceType::InstanceOf<TabContentNode>(parent)) {
+            auto tabContentNode = AceType::DynamicCast<TabContentNode>(parent);
+            auto tabBarItem = tabBarItems[tabContentNode->GetTabBarItemId()];
+            CHECK_NULL_VOID(tabBarItem);
+            tabBarItem->MovePosition(0);
+            continue;
+        }
+        for (const auto& child : parent->GetChildren()) {
+            stack.push(child);
+        }
+    }
+}
+
+/**
+ * @brief Handles the mask animation when creating a tab.
+ *
+ * This function is responsible for updating the indicator, text color, font weight, image color,
+ * and index of the tab bar and swiper nodes when creating a tab.
+ *
+ * @param tabBarNode The node representing the tab bar.
+ * @param swiperNode The node representing the swiper.
+ * @param tabBarPattern The pattern for the tab bar.
+ * @param tabsLayoutProperty The layout property for the tabs.
+ * @param index The index of the tab being created.
+ */
+void TabsPattern::HandleMaskAnimationByCreate(const RefPtr<FrameNode>& tabBarNode, const RefPtr<FrameNode>& swiperNode,
+    const RefPtr<TabBarPattern>& tabBarPattern, const RefPtr<TabsLayoutProperty>& tabsLayoutProperty, int index)
+{
     auto tabBarLayoutProperty = tabBarNode->GetLayoutProperty<TabBarLayoutProperty>();
     CHECK_NULL_VOID(tabBarLayoutProperty);
     tabBarLayoutProperty->UpdateIndicator(index);
@@ -458,4 +541,5 @@ void TabsPattern::BeforeCreateLayoutWrapper()
     swiperLayoutProperty->UpdateIndex(index);
     tabsLayoutProperty->UpdateIndex(index);
 }
+
 } // namespace OHOS::Ace::NG

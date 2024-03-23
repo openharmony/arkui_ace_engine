@@ -137,6 +137,12 @@ enum class FormExcepType {
     ACTION_EVENT_CALLBACK_ERR,
 };
 
+#ifdef VSYNC_TIMEOUT_CHECK
+enum class VsyncExcepType {
+    VSYNC_TIMEOUT
+};
+#endif
+
 enum class RawEventType { WARNING, FREEZE, RECOVER };
 
 struct EventInfo {
@@ -164,6 +170,9 @@ public:
     static void SendInternalException(InternalExcepType type);
     static void SendAccessibilityException(AccessibilityExcepType type);
     static void SendFormException(FormExcepType type);
+#ifdef VSYNC_TIMEOUT_CHECK
+    static void SendVsyncException(VsyncExcepType type);
+#endif
 
     static void JsEventReport(int32_t eventType, const std::string& jsonStr);
     static void JsErrReport(

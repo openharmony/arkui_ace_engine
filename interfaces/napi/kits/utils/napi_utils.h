@@ -27,6 +27,7 @@
 #include "base/log/log.h"
 #include "bridge/common/utils/utils.h"
 #include "core/common/container.h"
+#include "core/common/resource/resource_wrapper.h"
 #include "core/components/common/properties/color.h"
 #include "securec.h"
 
@@ -61,7 +62,7 @@ void NapiThrow(napi_env env, const std::string& message, int32_t errCode);
 
 napi_value ParseCurve(napi_env env, napi_value value, std::string& curveTypeString, std::vector<float>& curveValue);
 
-napi_value CreateNapiString(napi_env env, std::string rawStr);
+napi_value CreateNapiString(napi_env env, const std::string& rawStr);
 
 void CompleteResourceParam(napi_env env, napi_value value);
 
@@ -84,6 +85,12 @@ std::string ErrorToMessage(int32_t code);
 bool GetSingleParam(napi_env env, napi_callback_info info, napi_value* argv, napi_valuetype& valueType);
 
 std::optional<Color> GetOptionalColor(napi_env env, napi_value argv, napi_valuetype& valueType);
+
+napi_valuetype GetValueType(napi_env env, napi_value value);
+RefPtr<ResourceWrapper> CreateResourceWrapper(const ResourceInfo& info);
+std::optional<std::string> GetStringFromValueUtf8(napi_env env, napi_value value);
+bool ParseIntegerToString(const ResourceInfo& info, std::string& result);
+bool ParseColorFromResourceObject(napi_env env, napi_value value, Color& colorResult);
 } // namespace OHOS::Ace::Napi
 
 #endif // FOUNDATION_ACE_INTERFACES_NAPI_KITS_UTILS_H

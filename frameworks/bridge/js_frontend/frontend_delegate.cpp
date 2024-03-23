@@ -17,7 +17,10 @@
 
 #include <string>
 
+#include "base/utils/utils.h"
 #include "core/common/ace_application_info.h"
+#include "core/components_ng/event/focus_hub.h"
+#include "core/pipeline_ng/pipeline_context.h"
 #include "frameworks/bridge/common/utils/utils.h"
 #include "frameworks/core/components_ng/base/inspector.h"
 
@@ -118,6 +121,18 @@ bool FrontendDelegate::GetResourceData(const std::string& fileUri, T& content)
 void FrontendDelegate::GetRectangleById(const std::string& key, NG::Rectangle& rectangle)
 {
     NG::Inspector::GetRectangleById(key, rectangle);
+}
+
+void FrontendDelegate::ResetFocus()
+{
+    NG::FocusHub::LostFocusToViewRoot();
+}
+
+bool FrontendDelegate::RequestFocus(const std::string& value)
+{
+    auto pipeline = NG::PipelineContext::GetCurrentContext();
+    CHECK_NULL_RETURN(pipeline, false);
+    return pipeline->RequestFocus(value);
 }
 
 template<typename T>

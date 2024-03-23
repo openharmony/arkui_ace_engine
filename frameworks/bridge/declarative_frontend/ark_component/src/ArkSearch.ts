@@ -238,6 +238,24 @@ class SearchTextAlignModifier extends ModifierWithKey<TextAlign> {
   }
 }
 
+class SearchEnterKeyTypeModifier extends ModifierWithKey<number> {
+  constructor(value: number) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('searchEnterKeyType');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().search.resetSearchEnterKeyType(node);
+    } else {
+      getUINativeModule().search.setSearchEnterKeyType(node, this.value);
+    }
+  }
+
+  checkObjectDiff(): boolean {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+
 class SearchHeightModifier extends ModifierWithKey<Length> {
   constructor(value: Length) {
     super(value);
@@ -352,6 +370,11 @@ class ArkSearchComponent extends ArkComponent implements CommonMethod<SearchAttr
   }
   textAlign(value: TextAlign): SearchAttribute {
     modifierWithKey(this._modifiersWithKeys, SearchTextAlignModifier.identity, SearchTextAlignModifier, value);
+    return this;
+  }
+  enterKeyType(value: EnterKeyType): SearchAttribute {
+    modifierWithKey(this._modifiersWithKeys, SearchEnterKeyTypeModifier.identity,
+      SearchEnterKeyTypeModifier, value);
     return this;
   }
   height(value: Length): this {

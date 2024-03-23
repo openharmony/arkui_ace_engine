@@ -145,6 +145,7 @@ void CheckBoxGroupPattern::InitClickEvent()
     auto gesture = host->GetOrCreateGestureEventHub();
     CHECK_NULL_VOID(gesture);
     auto clickCallback = [weak = WeakClaim(this)](GestureEvent& info) {
+        TAG_LOGD(AceLogTag::ACE_SELECT_COMPONENT, "checkboxgroup onclick");
         auto checkboxPattern = weak.Upgrade();
         CHECK_NULL_VOID(checkboxPattern);
         checkboxPattern->OnClick();
@@ -228,6 +229,7 @@ void CheckBoxGroupPattern::OnClick()
 
 void CheckBoxGroupPattern::OnTouchDown()
 {
+    TAG_LOGD(AceLogTag::ACE_SELECT_COMPONENT, "checkboxgroup touch down %{public}d", isHover_);
     if (isHover_) {
         touchHoverType_ = TouchHoverAnimationType::HOVER_TO_PRESS;
     } else {
@@ -240,6 +242,7 @@ void CheckBoxGroupPattern::OnTouchDown()
 
 void CheckBoxGroupPattern::OnTouchUp()
 {
+    TAG_LOGD(AceLogTag::ACE_SELECT_COMPONENT, "checkboxgroup touch up %{public}d", isHover_);
     if (isHover_) {
         touchHoverType_ = TouchHoverAnimationType::PRESS_TO_HOVER;
     } else {
@@ -269,6 +272,8 @@ void CheckBoxGroupPattern::UpdateUIStatus(bool check)
     auto paintProperty = host->GetPaintProperty<CheckBoxGroupPaintProperty>();
     CHECK_NULL_VOID(paintProperty);
     auto selectStatus = paintProperty->GetSelectStatus();
+    TAG_LOGD(
+        AceLogTag::ACE_SELECT_COMPONENT, "checkboxgroup update ui status %{public}d %{public}d", check, selectStatus);
     if (selectStatus == CheckBoxGroupPaintProperty::SelectStatus::PART) {
         uiStatus_ = check ? UIStatus::PART_TO_ON : UIStatus::PART_TO_OFF;
     } else {
@@ -382,7 +387,7 @@ void CheckBoxGroupPattern::OnAfterModifyDone()
             vec.push_back(eventHub->GetName());
         }
     }
-    Recorder::NodeDataCache::Get().PutMultiple(inspectorId, eventHub->GetGroupName(), vec);
+    Recorder::NodeDataCache::Get().PutMultiple(host, inspectorId, eventHub->GetGroupName(), vec);
 }
 
 void CheckBoxGroupPattern::UpdateGroupCheckStatus(const RefPtr<FrameNode>& frameNode, bool select)

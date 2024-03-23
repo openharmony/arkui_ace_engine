@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,6 +15,7 @@
 
 #include "core/components_ng/pattern/scroll/scroll_model_ng.h"
 
+#include "base/geometry/axis.h"
 #include "base/memory/ace_type.h"
 #include "base/utils/utils.h"
 #include "core/components/common/layout/constants.h"
@@ -57,6 +58,7 @@ RefPtr<FrameNode> ScrollModelNG::CreateFrameNode(int32_t nodeId)
     pattern->SetAlwaysEnabled(true);
     auto positionController = AceType::MakeRefPtr<NG::ScrollableController>();
     pattern->SetPositionController(positionController);
+    pattern->TriggerModifyDone();
     positionController->SetScrollPattern(pattern);
     return frameNode;
 }
@@ -126,6 +128,12 @@ RefPtr<ScrollProxy> ScrollModelNG::CreateScrollBarProxy()
     return AceType::MakeRefPtr<ScrollBarProxy>();
 }
 
+int32_t ScrollModelNG::GetAxis(FrameNode *frameNode)
+{
+    CHECK_NULL_RETURN(frameNode, 0);
+    return static_cast<int32_t>(frameNode->GetLayoutProperty<ScrollLayoutProperty>()->GetAxisValue());
+}
+
 void ScrollModelNG::SetAxis(Axis axis)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(ScrollLayoutProperty, Axis, axis);
@@ -152,7 +160,25 @@ void ScrollModelNG::SetOnScrollFrameBegin(OnScrollFrameBeginEvent&& event)
 void ScrollModelNG::SetOnScroll(NG::ScrollEvent&& event)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
-    SetOnScroll(AceType::RawPtr(frameNode), std::move(event));
+    SetOnScroll(frameNode, std::move(event));
+}
+
+void ScrollModelNG::SetOnWillScroll(NG::ScrollEventWithState&& event)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetEventHub<ScrollEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnWillScrollEvent(std::move(event));
+}
+
+void ScrollModelNG::SetOnDidScroll(NG::ScrollEventWithState&& event)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetEventHub<ScrollEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnDidScrollEvent(std::move(event));
 }
 
 void ScrollModelNG::SetOnScrollEdge(NG::ScrollEdgeEvent&& event)
@@ -222,6 +248,14 @@ void ScrollModelNG::SetDisplayMode(int value)
     ACE_UPDATE_PAINT_PROPERTY(ScrollablePaintProperty, ScrollBarMode, displayMode);
 }
 
+int32_t ScrollModelNG::GetEnablePaging(FrameNode* frameNode)
+{
+    CHECK_NULL_RETURN(frameNode, 0.0f);
+    auto pattern = frameNode->GetPattern<ScrollPattern>();
+    CHECK_NULL_RETURN(pattern, 0.0f);
+    return static_cast<int32_t>(pattern->GetEnablePaging());
+}
+
 void ScrollModelNG::SetEnablePaging(bool enablePaging)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
@@ -244,6 +278,12 @@ void ScrollModelNG::SetEnablePaging(bool enablePaging)
     pattern->SetScrollSnapUpdate(true);
 }
 
+int32_t ScrollModelNG::GetScrollBar(FrameNode* frameNode)
+{
+    CHECK_NULL_RETURN(frameNode, 0);
+    return static_cast<int32_t>(frameNode->GetPaintProperty<ScrollablePaintProperty>()->GetScrollBarMode().value());
+}
+
 void ScrollModelNG::SetScrollBar(FrameNode* frameNode, DisplayMode barState)
 {
     ACE_UPDATE_NODE_PAINT_PROPERTY(ScrollablePaintProperty, ScrollBarMode, barState, frameNode);
@@ -255,6 +295,14 @@ void ScrollModelNG::SetNestedScroll(FrameNode* frameNode, const NestedScrollOpti
     auto pattern = frameNode->GetPattern<ScrollPattern>();
     CHECK_NULL_VOID(pattern);
     pattern->SetNestedScroll(nestedOpt);
+}
+
+float ScrollModelNG::GetFriction(FrameNode* frameNode)
+{
+    CHECK_NULL_RETURN(frameNode, 0.0f);
+    auto pattern = frameNode->GetPattern<ScrollPattern>();
+    CHECK_NULL_RETURN(pattern, 0.0f);
+    return pattern->GetFriction();
 }
 
 void ScrollModelNG::SetFriction(FrameNode* frameNode, double friction)
@@ -281,9 +329,24 @@ void ScrollModelNG::SetScrollSnap(FrameNode* frameNode, ScrollSnapAlign scrollSn
     pattern->SetEnablePaging(ScrollPagingStatus::INVALID);
 }
 
+int32_t ScrollModelNG::GetScrollEnabled(FrameNode* frameNode)
+{
+    CHECK_NULL_RETURN(frameNode, 0);
+    int32_t value = 0;
+    ACE_GET_NODE_LAYOUT_PROPERTY(ScrollLayoutProperty, ScrollEnabled, value, frameNode);
+    return value;
+}
+
 void ScrollModelNG::SetScrollEnabled(FrameNode* frameNode, bool scrollEnabled)
 {
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(ScrollLayoutProperty, ScrollEnabled, scrollEnabled, frameNode);
+}
+
+float ScrollModelNG::GetScrollBarWidth(FrameNode* frameNode)
+{
+    CHECK_NULL_RETURN(frameNode, 0.0f);
+    auto value = frameNode->GetPaintProperty<ScrollablePaintProperty>()->GetScrollBarWidth();
+    return value->ConvertToVp();
 }
 
 void ScrollModelNG::SetScrollBarWidth(const Dimension& dimension)
@@ -291,9 +354,28 @@ void ScrollModelNG::SetScrollBarWidth(const Dimension& dimension)
     ACE_UPDATE_PAINT_PROPERTY(ScrollablePaintProperty, ScrollBarWidth, dimension);
 }
 
+uint32_t ScrollModelNG::GetScrollBarColor(FrameNode* frameNode)
+{
+    CHECK_NULL_RETURN(frameNode, 0);
+    auto value = frameNode->GetPaintProperty<ScrollablePaintProperty>()->GetScrollBarColor();
+    return value->GetValue();
+}
+
 void ScrollModelNG::SetScrollBarColor(const Color& color)
 {
     ACE_UPDATE_PAINT_PROPERTY(ScrollablePaintProperty, ScrollBarColor, color);
+}
+
+int32_t ScrollModelNG::GetEdgeEffect(FrameNode* frameNode)
+{
+    CHECK_NULL_RETURN(frameNode, 0);
+    return ScrollableModelNG::GetEdgeEffect(frameNode);
+}
+
+int32_t ScrollModelNG::GetEdgeEffectAlways(FrameNode* frameNode)
+{
+    CHECK_NULL_RETURN(frameNode, 0.0f);
+    return ScrollableModelNG::GetAlwaysEnabled(frameNode);
 }
 
 void ScrollModelNG::SetEdgeEffect(EdgeEffect edgeEffect, bool alwaysEnabled)
@@ -440,5 +522,13 @@ ScrollEdgeType ScrollModelNG::GetOnScrollEdge(FrameNode* frameNode)
     return ScrollEdgeType::SCROLL_NONE;
 }
 
+void ScrollModelNG::SetInitialOffset(const OffsetT<CalcDimension>& offset)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<ScrollPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetInitialOffset(offset);
+}
 
 } // namespace OHOS::Ace::NG

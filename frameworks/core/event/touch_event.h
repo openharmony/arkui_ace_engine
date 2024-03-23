@@ -17,6 +17,9 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_EVENT_TOUCH_EVENT_H
 
 #include <list>
+#include <utility>
+
+#include "interfaces/native/ui_input_event.h"
 
 #include "base/geometry/offset.h"
 #include "base/memory/ace_type.h"
@@ -47,6 +50,9 @@ enum class TouchType : size_t {
     PULL_MOVE,
     PULL_IN_WINDOW,
     PULL_OUT_WINDOW,
+    HOVER_ENTER,
+    HOVER_MOVE,
+    HOVER_EXIT,
     UNKNOWN,
 };
 
@@ -68,7 +74,8 @@ struct TouchPoint final {
 /**
  * @brief TouchEvent contains the active change point and a list of all touch points.
  */
-struct TouchEvent final {
+struct TouchEvent final : public UIInputEvent {
+    ~TouchEvent() = default;
     // the active changed point info
     // The ID is used to identify the point of contact between the finger and the screen. Different fingers have
     // different ids.
@@ -79,8 +86,6 @@ struct TouchEvent final {
     float screenY = 0.0f;
     TouchType type = TouchType::UNKNOWN;
     TouchType pullType = TouchType::UNKNOWN;
-    // nanosecond time stamp.
-    TimeStamp time;
     double size = 0.0;
     float force = 0.0f;
     std::optional<float> tiltX;
@@ -89,6 +94,7 @@ struct TouchEvent final {
     int32_t targetDisplayId = 0;
     SourceType sourceType = SourceType::NONE;
     SourceTool sourceTool = SourceTool::UNKNOWN;
+    int32_t touchEventId;
     bool isInterpolated = false;
 
     // all points on the touch screen.
@@ -96,6 +102,167 @@ struct TouchEvent final {
     std::shared_ptr<MMI::PointerEvent> pointerEvent { nullptr };
     // historical points
     std::vector<TouchEvent> history;
+
+    std::list<std::string> childTouchTestList;
+
+    // Coordinates relative to the upper-left corner of the current component
+    float localX = 0.0f;
+    float localY = 0.0f;
+
+    TouchEvent()
+    {
+        eventType = ArkUI_UIInputEvent_Type::ARKUI_UIINPUTEVENT_TYPE_TOUCH;
+    }
+
+    TouchEvent& SetId(int32_t id)
+    {
+        this->id = id;
+        return *this;
+    }
+
+    TouchEvent& SetX(float x)
+    {
+        this->x = x;
+        return *this;
+    }
+
+    TouchEvent& SetY(float y)
+    {
+        this->y = y;
+        return *this;
+    }
+
+    TouchEvent& SetScreenX(float screenX)
+    {
+        this->screenX = screenX;
+        return *this;
+    }
+
+    TouchEvent& SetScreenY(float screenY)
+    {
+        this->screenY = screenY;
+        return *this;
+    }
+
+    TouchEvent& SetTime(TimeStamp time)
+    {
+        this->time = time;
+        return *this;
+    }
+
+    TouchEvent& SetType(TouchType type)
+    {
+        this->type = type;
+        return *this;
+    }
+
+    TouchEvent& SetPullType(TouchType pullType)
+    {
+        this->pullType = pullType;
+        return *this;
+    }
+
+    TouchEvent& SetSize(double size)
+    {
+        this->size = size;
+        return *this;
+    }
+
+    TouchEvent& SetForce(float force)
+    {
+        this->force = force;
+        return *this;
+    }
+
+    TouchEvent& SetTiltX(std::optional<float> tiltX)
+    {
+        this->tiltX = tiltX;
+        return *this;
+    }
+
+    TouchEvent& SetTiltY(std::optional<float> tiltY)
+    {
+        this->tiltY = tiltY;
+        return *this;
+    }
+
+    TouchEvent& SetDeviceId(int64_t deviceId)
+    {
+        this->deviceId = deviceId;
+        return *this;
+    }
+
+    TouchEvent& SetTargetDisplayId(int32_t targetDisplayId)
+    {
+        this->targetDisplayId = targetDisplayId;
+        return *this;
+    }
+
+    TouchEvent& SetSourceType(SourceType sourceType)
+    {
+        this->sourceType = sourceType;
+        return *this;
+    }
+
+    TouchEvent& SetSourceTool(SourceTool sourceTool)
+    {
+        this->sourceTool = sourceTool;
+        return *this;
+    }
+
+    TouchEvent& SetTouchEventId(int32_t touchEventId)
+    {
+        this->touchEventId = touchEventId;
+        return *this;
+    }
+
+    TouchEvent& SetIsInterpolated(bool isInterpolated)
+    {
+        this->isInterpolated = isInterpolated;
+        return *this;
+    }
+
+    TouchEvent& SetPointers(std::vector<TouchPoint> pointers)
+    {
+        this->pointers = std::move(pointers);
+        return *this;
+    }
+
+    TouchEvent& SetPointerEvent(std::shared_ptr<MMI::PointerEvent> pointerEvent)
+    {
+        this->pointerEvent = std::move(pointerEvent);
+        return *this;
+    }
+
+    TouchEvent CloneWith(float scale) const
+    {
+        return CloneWith(scale, 0.0f, 0.0f, std::nullopt);
+    }
+
+    TouchEvent CloneWith(float scale, float offsetX, float offsetY, std::optional<int32_t> pointId) const
+    {
+        return TouchEvent {}
+            .SetId(pointId.has_value() ? pointId.value() : id)
+            .SetX((x - offsetX) / scale)
+            .SetY((y - offsetY) / scale)
+            .SetScreenX((screenX - offsetX) / scale)
+            .SetScreenY((screenY - offsetY) / scale)
+            .SetType(type)
+            .SetPullType(pullType)
+            .SetTime(time)
+            .SetSize(size)
+            .SetForce(force)
+            .SetTiltX(tiltX)
+            .SetTiltY(tiltY)
+            .SetDeviceId(deviceId)
+            .SetTargetDisplayId(targetDisplayId)
+            .SetSourceType(sourceType)
+            .SetSourceTool(sourceTool)
+            .SetTouchEventId(touchEventId)
+            .SetIsInterpolated(isInterpolated)
+            .SetPointers(pointers)
+            .SetPointerEvent(pointerEvent);
+    }
 
     void ToJsonValue(std::unique_ptr<JsonValue>& json) const
     {
@@ -169,8 +336,7 @@ struct TouchEvent final {
     TouchEvent CreateScalePoint(float scale) const
     {
         if (NearZero(scale)) {
-            return { id, x, y, screenX, screenY, type, pullType, time, size, force, tiltX, tiltY, deviceId,
-                targetDisplayId, sourceType, sourceTool, isInterpolated, pointers, pointerEvent };
+            return CloneWith(1);
         }
         auto temp = pointers;
         std::for_each(temp.begin(), temp.end(), [scale](auto&& point) {
@@ -179,8 +345,7 @@ struct TouchEvent final {
             point.screenX = point.screenX / scale;
             point.screenY = point.screenY / scale;
         });
-        return { id, x / scale, y / scale, screenX / scale, screenY / scale, type, pullType, time, size, force, tiltX,
-            tiltY, deviceId, targetDisplayId, sourceType, sourceTool, isInterpolated, temp, pointerEvent };
+        return CloneWith(scale);
     }
 
     TouchEvent UpdateScalePoint(float scale, float offsetX, float offsetY, int32_t pointId) const
@@ -193,9 +358,7 @@ struct TouchEvent final {
                 point.screenX = point.screenX - offsetX;
                 point.screenY = point.screenY - offsetY;
             });
-            return { pointId, x - offsetX, y - offsetY, screenX - offsetX, screenY - offsetY, type, pullType, time,
-                size, force, tiltX, tiltY, deviceId, targetDisplayId, sourceType, sourceTool, isInterpolated, temp,
-                pointerEvent };
+            return CloneWith(1, offsetX, offsetY, pointId);
         }
 
         std::for_each(temp.begin(), temp.end(), [scale, offsetX, offsetY](auto&& point) {
@@ -204,9 +367,7 @@ struct TouchEvent final {
             point.screenX = (point.screenX - offsetX) / scale;
             point.screenY = (point.screenY - offsetY) / scale;
         });
-        return { pointId, (x - offsetX) / scale, (y - offsetY) / scale, (screenX - offsetX) / scale,
-            (screenY - offsetY) / scale, type, pullType, time, size, force, tiltX, tiltY, deviceId, targetDisplayId,
-            sourceType, sourceTool, isInterpolated, temp, pointerEvent };
+        return CloneWith(scale, offsetX, offsetY, pointId);
     }
 
     TouchEvent UpdatePointers() const
@@ -220,25 +381,29 @@ struct TouchEvent final {
             .size = size,
             .force = force,
             .isPressed = (type == TouchType::DOWN) };
-        TouchEvent event { .id = id,
-            .x = x,
-            .y = y,
-            .screenX = screenX,
-            .screenY = screenY,
-            .type = type,
-            .time = time,
-            .size = size,
-            .force = force,
-            .deviceId = deviceId,
-            .targetDisplayId = targetDisplayId,
-            .sourceType = sourceType,
-            .isInterpolated = isInterpolated,
-            .pointerEvent = pointerEvent
-        };
+        TouchEvent event;
+        event.SetId(id)
+            .SetX(x)
+            .SetY(y)
+            .SetScreenX(screenX)
+            .SetScreenY(screenY)
+            .SetType(type)
+            .SetTime(time)
+            .SetSize(size)
+            .SetForce(force)
+            .SetDeviceId(deviceId)
+            .SetTargetDisplayId(targetDisplayId)
+            .SetSourceType(sourceType)
+            .SetIsInterpolated(isInterpolated)
+            .SetPointerEvent(pointerEvent);
         event.pointers.emplace_back(std::move(point));
         return event;
     }
 };
+
+namespace Platform {
+Offset GetTouchEventOriginOffset(const TouchEvent& event);
+} // namespace Platform
 
 struct TouchRestrict final {
     static constexpr uint32_t NONE = 0x00000000;
@@ -264,6 +429,8 @@ struct TouchRestrict final {
     SourceType hitTestType = SourceType::TOUCH;
 
     TouchEvent touchEvent;
+
+    std::list<std::string> childTouchTestList;
 };
 
 class TouchCallBackInfo : public BaseEventInfo {
@@ -679,6 +846,7 @@ protected:
     Axis direction_ = Axis::NONE;
     RefPtr<NG::TargetComponent> targetComponent_;
     bool isPostEventResult_ = false;
+    std::optional<TimeStamp> firstInputTime_;
 };
 
 using TouchTestResult = std::list<RefPtr<TouchEventTarget>>;
@@ -734,6 +902,26 @@ public:
     {
         return isTouchEventsEnd_;
     }
+
+    TouchEvent ConvertToTouchEvent() const
+    {
+        TouchEvent touchEvent;
+        if (!changedTouches_.empty()) {
+            touchEvent.x = static_cast<float>(changedTouches_.front().GetGlobalLocation().GetX());
+            touchEvent.y = static_cast<float>(changedTouches_.front().GetGlobalLocation().GetY());
+            touchEvent.screenX = static_cast<float>(changedTouches_.front().GetScreenLocation().GetX());
+            touchEvent.screenY = static_cast<float>(changedTouches_.front().GetScreenLocation().GetY());
+            touchEvent.localX = static_cast<float>(changedTouches_.front().GetLocalLocation().GetX());
+            touchEvent.localY = static_cast<float>(changedTouches_.front().GetLocalLocation().GetY());
+            touchEvent.id = changedTouches_.front().GetFingerId();
+            touchEvent.force = changedTouches_.front().GetForce();
+            touchEvent.type = changedTouches_.front().GetTouchType();
+            touchEvent.tiltX = changedTouches_.front().GetTiltX();
+            touchEvent.tiltY = changedTouches_.front().GetTiltY();
+        }
+        touchEvent.time = timeStamp_;
+        return touchEvent;
+    }
 private:
     std::shared_ptr<MMI::PointerEvent> pointerEvent_;
     std::list<TouchLocationInfo> touches_;
@@ -742,12 +930,24 @@ private:
     bool isTouchEventsEnd_ {false};
 };
 
+class ACE_EXPORT GestureEventResult : public AceType {
+    DECLARE_ACE_TYPE(GestureEventResult, AceType)
+
+public:
+    GestureEventResult() = default;
+    ~GestureEventResult() = default;
+
+    virtual void SetGestureEventResult(bool result) = 0;
+};
+
 class NativeEmbeadTouchInfo : public BaseEventInfo {
     DECLARE_RELATIONSHIP_OF_CLASSES(NativeEmbeadTouchInfo, BaseEventInfo);
 
 public:
-    NativeEmbeadTouchInfo(const std::string& embedId, const TouchEventInfo & touchEventInfo)
-        : BaseEventInfo("NativeEmbeadTouchInfo"), embedId_(embedId), touchEvent_(touchEventInfo) {}
+    NativeEmbeadTouchInfo(const std::string& embedId,
+        const TouchEventInfo& touchEventInfo,
+        const RefPtr<GestureEventResult>& result)
+        : BaseEventInfo("NativeEmbeadTouchInfo"), embedId_(embedId), touchEvent_(touchEventInfo), result_(result) {}
     ~NativeEmbeadTouchInfo() override = default;
 
     const std::string& GetEmbedId() const
@@ -759,10 +959,14 @@ public:
     {
         return touchEvent_;
     }
-
+    const RefPtr<GestureEventResult>& GetResult() const
+    {
+        return result_;
+    }
 private:
     std::string embedId_;
     TouchEventInfo touchEvent_;
+    RefPtr<GestureEventResult> result_;
 };
 
 using TouchEventFunc = std::function<void(TouchEventInfo&)>;

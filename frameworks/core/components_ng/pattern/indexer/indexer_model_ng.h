@@ -16,6 +16,7 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_INDEXER_INDEXER_MODEL_NG_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_INDEXER_INDEXER_MODEL_NG_H
 
+#include "core/components/common/properties/decoration.h"
 #include "core/components_ng/pattern/indexer/indexer_model.h"
 
 namespace OHOS::Ace::NG {
@@ -52,6 +53,12 @@ public:
     void SetChangeEvent(std::function<void(const int32_t selected)>&& changeEvent) override;
     void SetCreatChangeEvent(std::function<void(const int32_t selected)>&& changeEvent) override;
     void SetAutoCollapse(bool state) override;
+    void SetPopupBorderRadius(const Dimension& radius) override;
+    void SetPopupItemBorderRadius(const Dimension& radius) override;
+    void SetItemBorderRadius(const Dimension& radius) override;
+    void SetIndexerBorderRadius(const Dimension& radius) override;
+    void SetPopupBackgroundBlurStyle(const BlurStyleOption& indexerBlurStyle) override;
+    void SetPopupTitleBackground(const std::optional<Color>& color) override;
 
     static void SetFontSize(FrameNode* frameNode, const Dimension& fontSize);
     static void SetFontWeight(FrameNode* frameNode, const FontWeight weight);
@@ -78,6 +85,12 @@ public:
     static void SetItemSize(FrameNode* frameNode, const Dimension& value);
     static void SetPopupPositionX(FrameNode* frameNode, const std::optional<Dimension>& popupPositionXOpt);
     static void SetPopupPositionY(FrameNode* frameNode, const std::optional<Dimension>& popupPositionYOpt);
+    static void SetPopupBorderRadius(FrameNode* frameNode, const Dimension& radius);
+    static void SetPopupItemBorderRadius(FrameNode* frameNode, const Dimension& radius);
+    static void SetItemBorderRadius(FrameNode* frameNode, const Dimension& radius);
+    static void SetIndexerBorderRadius(FrameNode* frameNode, const Dimension& radius);
+    static void SetPopupBackgroundBlurStyle(FrameNode* frameNode, const BlurStyleOption& indexerBlurStyle);
+    static void SetPopupTitleBackground(FrameNode* frameNode, const std::optional<Color>& color);
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_INDEXER_INDEXER_MODEL_NG_H

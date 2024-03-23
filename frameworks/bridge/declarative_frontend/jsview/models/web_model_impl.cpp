@@ -19,8 +19,8 @@
 #include "core/event/ace_event_handler.h"
 
 namespace OHOS::Ace::Framework {
-void WebModelImpl::Create(const std::string& src, const RefPtr<WebController>& webController, WebType /* type */,
-                          bool incognitoMode)
+void WebModelImpl::Create(const std::string& src, const RefPtr<WebController>& webController,
+    RenderMode /* renderMode */, bool incognitoMode)
 {
     RefPtr<WebComponent> webComponent;
     webComponent = AceType::MakeRefPtr<WebComponent>(src);
@@ -33,8 +33,8 @@ void WebModelImpl::Create(const std::string& src, const RefPtr<WebController>& w
 }
 
 void WebModelImpl::Create(const std::string& src, std::function<void(int32_t)>&& setWebIdCallback,
-    std::function<void(const std::string&)>&& setHapPathCallback, int32_t parentWebId, bool popup, WebType /* type */,
-    bool incognitoMode)
+    std::function<void(const std::string&)>&& setHapPathCallback, int32_t parentWebId, bool popup,
+    RenderMode /* renderMode */, bool incognitoMode)
 {
     RefPtr<WebComponent> webComponent;
     webComponent = AceType::MakeRefPtr<WebComponent>(src);
@@ -180,6 +180,13 @@ void WebModelImpl::SetOnSslErrorRequest(std::function<bool(const BaseEventInfo* 
     auto webComponent = AceType::DynamicCast<WebComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
     CHECK_NULL_VOID(webComponent);
     webComponent->SetOnSslErrorRequestImpl(std::move(jsCallback));
+}
+
+void WebModelImpl::SetOnAllSslErrorRequest(std::function<bool(const BaseEventInfo* info)>&& jsCallback)
+{
+    auto webComponent = AceType::DynamicCast<WebComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
+    CHECK_NULL_VOID(webComponent);
+    webComponent->SetOnAllSslErrorRequestImpl(std::move(jsCallback));
 }
 
 void WebModelImpl::SetOnSslSelectCertRequest(std::function<bool(const BaseEventInfo* info)>&& jsCallback)
@@ -579,6 +586,13 @@ void WebModelImpl::SetNativeEmbedModeEnabled(bool isEmbedModeEnabled)
     webComponent->SetNativeEmbedModeEnabled(isEmbedModeEnabled);
 }
 
+void WebModelImpl::RegisterNativeEmbedRule(const std::string& tag, const std::string& type)
+{
+    auto webComponent = AceType::DynamicCast<WebComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
+    CHECK_NULL_VOID(webComponent);
+    webComponent->RegisterNativeEmbedRule(tag, type);
+}
+
 void WebModelImpl::SetNativeEmbedLifecycleChangeId(std::function<void(const BaseEventInfo* info)>&& jsCallback)
 {
     auto webComponent = AceType::DynamicCast<WebComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
@@ -595,6 +609,20 @@ void WebModelImpl::SetNativeEmbedGestureEventId(std::function<void(const BaseEve
     auto eventMarker = EventMarker(std::move(jsCallback));
 
     webComponent->SetNativeEmbedGestureEventId(eventMarker);
+}
+
+void WebModelImpl::SetOnOverrideUrlLoading(std::function<bool(const BaseEventInfo* info)>&& jsCallback)
+{
+    auto webComponent = AceType::DynamicCast<WebComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
+    CHECK_NULL_VOID(webComponent);
+    webComponent->SetOnOverrideUrlLoading(std::move(jsCallback));
+}
+
+void WebModelImpl::SetNativeVideoPlayerConfig(bool enable, bool shouldOverlay)
+{
+    auto webComponent = AceType::DynamicCast<WebComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
+    CHECK_NULL_VOID(webComponent);
+    webComponent->SetNativeVideoPlayerConfig(enable, shouldOverlay);
 }
 
 } // namespace OHOS::Ace::Framework

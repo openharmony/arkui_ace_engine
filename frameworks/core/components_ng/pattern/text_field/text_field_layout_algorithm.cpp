@@ -28,6 +28,7 @@
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/text/text_layout_adapter.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
+#include "core/components_ng/pattern/text/text_styles.h"
 #include "core/components_ng/pattern/text_field/text_field_content_modifier.h"
 #include "core/components_ng/pattern/text_field/text_field_layout_property.h"
 #include "core/components_ng/pattern/text_field/text_field_pattern.h"
@@ -64,6 +65,10 @@ void TextFieldLayoutAlgorithm::ConstructTextStyles(
             textStyle.SetTextOverflow(TextOverflow::ELLIPSIS);
         } else {
             textStyle.SetTextOverflow(TextOverflow::CLIP);
+        }
+
+        if (pattern->IsTextArea() || isInlineStyle) {
+            textStyle.SetWordBreak(textFieldLayoutProperty->GetWordBreak().value_or(WordBreak::BREAK_WORD));
         }
     } else {
         UpdatePlaceholderTextStyle(
@@ -427,6 +432,7 @@ void TextFieldLayoutAlgorithm::UpdateTextStyle(const RefPtr<FrameNode>& frameNod
     if (layoutProperty->HasTextAlign()) {
         textStyle.SetTextAlign(layoutProperty->GetTextAlign().value());
     }
+    UpdateTextStyleMore(frameNode, layoutProperty, theme, textStyle, isDisabled);
 }
 
 void TextFieldLayoutAlgorithm::UpdatePlaceholderTextStyle(const RefPtr<FrameNode>& frameNode,
@@ -477,6 +483,7 @@ void TextFieldLayoutAlgorithm::UpdatePlaceholderTextStyle(const RefPtr<FrameNode
     }
     textStyle.SetTextOverflow(TextOverflow::ELLIPSIS);
     textStyle.SetTextAlign(layoutProperty->GetTextAlignValue(TextAlign::START));
+    UpdatePlaceholderTextStyleMore(frameNode, layoutProperty, theme, textStyle, isDisabled);
 }
 
 LayoutConstraintF TextFieldLayoutAlgorithm::CalculateContentMaxSizeWithCalculateConstraint(
@@ -563,7 +570,12 @@ void TextFieldLayoutAlgorithm::CreateParagraph(const TextStyle& textStyle, std::
     CHECK_NULL_VOID(paragraph_);
     paragraph_->PushStyle(textStyle);
     StringUtils::TransformStrCase(content, static_cast<int32_t>(textStyle.GetTextCase()));
-    auto displayText = TextFieldPattern::CreateDisplayText(content, nakedCharPosition, needObscureText);
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto theme = pipeline->GetTheme<TextFieldTheme>();
+    CHECK_NULL_VOID(theme);
+    auto displayText = TextFieldPattern::CreateDisplayText(content, nakedCharPosition,
+        needObscureText, theme->IsShowPasswordDirectly());
     paragraph_->AddText(displayText);
     paragraph_->Build();
 }
@@ -619,7 +631,12 @@ void TextFieldLayoutAlgorithm::CreateInlineParagraph(const TextStyle& textStyle,
     CHECK_NULL_VOID(paragraph_);
     inlineParagraph_->PushStyle(textStyle);
     StringUtils::TransformStrCase(content, static_cast<int32_t>(textStyle.GetTextCase()));
-    auto displayText = TextFieldPattern::CreateDisplayText(content, nakedCharPosition, needObscureText);
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto theme = pipeline->GetTheme<TextFieldTheme>();
+    CHECK_NULL_VOID(theme);
+    auto displayText = TextFieldPattern::CreateDisplayText(content, nakedCharPosition,
+        needObscureText, theme->IsShowPasswordDirectly());
     inlineParagraph_->AddText(displayText);
     inlineParagraph_->Build();
 }
@@ -669,6 +686,9 @@ void TextFieldLayoutAlgorithm::SetPropertyToModifier(
     modifier->SetTextColor(textStyle.GetTextColor());
     modifier->SetFontStyle(textStyle.GetFontStyle());
     modifier->SetTextOverflow(textStyle.GetTextOverflow());
+    modifier->SetTextDecorationColor(textStyle.GetTextDecorationColor());
+    modifier->SetTextDecorationStyle(textStyle.GetTextDecorationStyle());
+    modifier->SetTextDecoration(textStyle.GetTextDecoration());
 }
 
 void TextFieldLayoutAlgorithm::UpdateUnitLayout(LayoutWrapper* layoutWrapper)
@@ -699,5 +719,37 @@ void TextFieldLayoutAlgorithm::UpdateUnitLayout(LayoutWrapper* layoutWrapper)
         }
         childWrapper->Layout();
     }
+}
+
+void TextFieldLayoutAlgorithm::UpdateTextStyleMore(const RefPtr<FrameNode>& frameNode,
+    const RefPtr<TextFieldLayoutProperty>& layoutProperty, const RefPtr<TextFieldTheme>& theme,
+    TextStyle& textStyle, bool isDisabled)
+{
+    auto pattern = frameNode->GetPattern<TextFieldPattern>();
+    CHECK_NULL_VOID(pattern);
+    if (pattern->IsInPasswordMode()) {
+        return;
+    }
+    if (layoutProperty->HasTextDecoration()) {
+        textStyle.SetTextDecoration(layoutProperty->GetTextDecoration().value());
+    }
+    if (layoutProperty->HasTextDecorationColor()) {
+        textStyle.SetTextDecorationColor(layoutProperty->GetTextDecorationColor().value());
+    }
+    if (layoutProperty->HasTextDecorationStyle()) {
+        textStyle.SetTextDecorationStyle(layoutProperty->GetTextDecorationStyle().value());
+    }
+    if (layoutProperty->HasLetterSpacing()) {
+        textStyle.SetLetterSpacing(layoutProperty->GetLetterSpacing().value());
+    }
+    if (layoutProperty->HasLineHeight()) {
+        textStyle.SetLineHeight(layoutProperty->GetLineHeight().value());
+    }
+}
+
+void TextFieldLayoutAlgorithm::UpdatePlaceholderTextStyleMore(const RefPtr<FrameNode>& frameNode,
+    const RefPtr<TextFieldLayoutProperty>& layoutProperty, const RefPtr<TextFieldTheme>& theme,
+    TextStyle& placeholderTextStyle, bool isDisabled)
+{
 }
 } // namespace OHOS::Ace::NG

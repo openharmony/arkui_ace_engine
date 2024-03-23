@@ -2,6 +2,7 @@
   "files": [
     // mock of what is implemented on native side
     "src/utest/common/state_mgmt_console_trace_mock.ts",
+    "src/lib/common/state_mgmt_configure.ts",
     "src/utest/mock/common/mock_storage.ts",
     "src/utest/mock/common/mock_environment_backend.ts",
     "src/utest/mock/common/local_storage_native_mock.ts",
@@ -35,6 +36,7 @@
     // common, non-sdk
     "src/lib/common/observed_object.ts",
     "src/lib/common/observed_property_abstract.ts",
+    "src/lib/common/utils.ts",
 
     // full_update specific
     "src/lib/full_update/fu_observed_property.ts",
@@ -59,6 +61,10 @@
     "src/lib/partial_update/pu_view.ts",
     "src/lib/partial_update/pu_recycle_manager.ts",
     "src/lib/partial_update/pu_builder_proxy.ts",
+
+        // stateMgmt vers 3
+    "src/lib/v3/v3_observed_track.ts",
+    "src/lib/v3/v3_monitor.ts",
 
     // unit testing
     "src/utest/common/helpers_for_test.ts",

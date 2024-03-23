@@ -234,6 +234,20 @@ void TabsModelNG::SetTabBarHeight(const Dimension& tabBarHeight)
     tabBarLayoutProperty->UpdateTabBarHeight(tabBarHeight);
 }
 
+void TabsModelNG::SetWidthAuto(bool isAuto)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    ACE_UPDATE_LAYOUT_PROPERTY(TabsLayoutProperty, WidthAuto, isAuto);
+}
+
+void TabsModelNG::SetHeightAuto(bool isAuto)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    ACE_UPDATE_LAYOUT_PROPERTY(TabsLayoutProperty, HeightAuto, isAuto);
+}
+
 void TabsModelNG::SetBarAdaptiveHeight(bool barAdaptiveHeight)
 {
     auto tabBarLayoutProperty = GetTabBarLayoutProperty();
@@ -893,7 +907,7 @@ void TabsModelNG::SetOnCustomAnimation(TabsCustomAnimationEvent&& onCustomAnimat
     CHECK_NULL_VOID(swiperNode);
     auto swiperPattern = swiperNode->GetPattern<SwiperPattern>();
     CHECK_NULL_VOID(swiperPattern);
-    swiperPattern->SetCustomContentTransition(std::move(onCustomAnimation));
+    swiperPattern->SetTabsCustomContentTransition(std::move(onCustomAnimation));
 }
 
 void TabsModelNG::SetClipEdge(FrameNode* frameNode, bool clipEdge)

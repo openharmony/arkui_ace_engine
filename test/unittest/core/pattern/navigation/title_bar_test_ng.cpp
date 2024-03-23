@@ -37,6 +37,9 @@ using namespace testing::ext;
 namespace OHOS::Ace::NG {
 namespace {
 constexpr float RET_VALUE = 0.0;
+constexpr float OFFSET_HANDLED = 0.07;
+constexpr float OFFSET_VALUE = 59.001;
+constexpr Color FRONT_COLOR = Color(0xff0000ff);
 const std::string BAR_ITEM_ETS_TAG = "TitleBar";
 const std::string NAV_BAR_ITEM_ETS_TAG = "NavBar";
 const std::string EMPTY_TEXT = "";
@@ -484,5 +487,486 @@ HWTEST_F(TitleBarTestNg, TitleBarPattern006, TestSize.Level1)
     CreateNavBar();
     titleBarPattern_->AnimateTo(0);
     EXPECT_NE(titleBarPattern_->animator_, nullptr);
+}
+
+/**
+ * @tc.name: TitleBarPattern007
+ * @tc.desc: Test CalculateHandledOffsetMinTitle function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TitleBarTestNg, TitleBarPattern007, TestSize.Level1)
+{
+    auto frameNode =
+        FrameNode::CreateFrameNode("BackButton", 33, AceType::MakeRefPtr<TitleBarPattern>());
+    EXPECT_NE(frameNode, nullptr);
+    auto titleBarPattern = frameNode->GetPattern<TitleBarPattern>();
+    EXPECT_NE(titleBarPattern, nullptr);
+    float offset = 0.07f;
+    float lastCordScrollOffset = 56.0001f;
+    EXPECT_EQ(titleBarPattern->CalculateHandledOffsetMinTitle(offset, lastCordScrollOffset), RET_VALUE);
+}
+
+/**
+ * @tc.name: TitleBarPattern008
+ * @tc.desc: Test CalculateHandledOffsetMinTitle function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TitleBarTestNg, TitleBarPattern008, TestSize.Level1)
+{
+    auto frameNode =
+        FrameNode::CreateFrameNode("BackButton", 33, AceType::MakeRefPtr<TitleBarPattern>());
+    EXPECT_NE(frameNode, nullptr);
+    auto titleBarPattern = frameNode->GetPattern<TitleBarPattern>();
+    EXPECT_NE(titleBarPattern, nullptr);
+    float offset = 0.07f;
+    float lastCordScrollOffset = 0.0001f;
+    EXPECT_EQ(titleBarPattern->CalculateHandledOffsetMinTitle(offset, lastCordScrollOffset), RET_VALUE);
+}
+
+/**
+ * @tc.name: TitleBarPattern009
+ * @tc.desc: Test CalculateHandledOffsetMinTitle function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TitleBarTestNg, TitleBarPattern009, TestSize.Level1)
+{
+    auto frameNode =
+        FrameNode::CreateFrameNode("BackButton", 33, AceType::MakeRefPtr<TitleBarPattern>());
+    EXPECT_NE(frameNode, nullptr);
+    auto titleBarPattern = frameNode->GetPattern<TitleBarPattern>();
+    EXPECT_NE(titleBarPattern, nullptr);
+    float offset = 0.07f;
+    float lastCordScrollOffset = 56.01f;
+    titleBarPattern->maxTitleBarHeight_ = 59.001f;
+    EXPECT_EQ(titleBarPattern->CalculateHandledOffsetMinTitle(offset, lastCordScrollOffset), OFFSET_HANDLED);
+}
+
+/**
+ * @tc.name: TitleBarPattern010
+ * @tc.desc: Test CalculateHandledOffsetMaxTitle function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TitleBarTestNg, TitleBarPattern010, TestSize.Level1)
+{
+    auto frameNode =
+        FrameNode::CreateFrameNode("BackButton", 33, AceType::MakeRefPtr<TitleBarPattern>());
+    EXPECT_NE(frameNode, nullptr);
+    auto titleBarPattern = frameNode->GetPattern<TitleBarPattern>();
+    EXPECT_NE(titleBarPattern, nullptr);
+    float offset = 0.07f;
+    float lastCordScrollOffset = 56.0001f;
+    EXPECT_EQ(titleBarPattern->CalculateHandledOffsetMaxTitle(offset, lastCordScrollOffset), RET_VALUE);
+}
+
+/**
+ * @tc.name: TitleBarPattern011
+ * @tc.desc: Test CalculateHandledOffsetMaxTitle function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TitleBarTestNg, TitleBarPattern011, TestSize.Level1)
+{
+    auto frameNode =
+        FrameNode::CreateFrameNode("BackButton", 33, AceType::MakeRefPtr<TitleBarPattern>());
+    EXPECT_NE(frameNode, nullptr);
+    auto titleBarPattern = frameNode->GetPattern<TitleBarPattern>();
+    EXPECT_NE(titleBarPattern, nullptr);
+    float offset = 0.07f;
+    float lastCordScrollOffset = 0.0001f;
+    titleBarPattern->maxTitleBarHeight_ = 59.001f;
+    EXPECT_EQ(titleBarPattern->CalculateHandledOffsetMaxTitle(offset, lastCordScrollOffset), OFFSET_VALUE);
+}
+
+/**
+ * @tc.name: TitleBarPattern013
+ * @tc.desc: Test CalculateHandledOffsetBetweenMinAndMaxTitle function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TitleBarTestNg, TitleBarPattern013, TestSize.Level1)
+{
+    auto frameNode =
+        FrameNode::CreateFrameNode("BackButton", 33, AceType::MakeRefPtr<TitleBarPattern>());
+    EXPECT_NE(frameNode, nullptr);
+    auto titleBarPattern = frameNode->GetPattern<TitleBarPattern>();
+    EXPECT_NE(titleBarPattern, nullptr);
+    float offset = 0.07f;
+    float lastCordScrollOffset = 0.0001f;
+    EXPECT_EQ(titleBarPattern->CalculateHandledOffsetBetweenMinAndMaxTitle(offset, lastCordScrollOffset), RET_VALUE);
+}
+
+/**
+ * @tc.name: TitleBarPattern014
+ * @tc.desc: Test CalculateHandledOffsetBetweenMinAndMaxTitle function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TitleBarTestNg, TitleBarPattern014, TestSize.Level1)
+{
+    auto frameNode =
+        FrameNode::CreateFrameNode("BackButton", 33, AceType::MakeRefPtr<TitleBarPattern>());
+    EXPECT_NE(frameNode, nullptr);
+    auto titleBarPattern = frameNode->GetPattern<TitleBarPattern>();
+    EXPECT_NE(titleBarPattern, nullptr);
+    float offset = 0.07f;
+    float lastCordScrollOffset = 0.01f;
+    EXPECT_EQ(titleBarPattern->CalculateHandledOffsetBetweenMinAndMaxTitle(offset, lastCordScrollOffset), RET_VALUE);
+}
+
+/**
+ * @tc.name: TitleBarPattern015
+ * @tc.desc: Test SetTitlebarOptions function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TitleBarTestNg, TitleBarPattern015, TestSize.Level1)
+{
+    auto frameNode =
+        FrameNode::CreateFrameNode("BackButton", 33, AceType::MakeRefPtr<TitleBarPattern>());
+    EXPECT_NE(frameNode, nullptr);
+    auto titleBarPattern = frameNode->GetPattern<TitleBarPattern>();
+    EXPECT_NE(titleBarPattern, nullptr);
+    NavigationTitlebarOptions opt;
+    titleBarPattern->SetTitlebarOptions(std::move(opt));
+}
+
+/**
+ * @tc.name: TitleBarPattern016
+ * @tc.desc: Test SetTitlebarOptions function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TitleBarTestNg, TitleBarPattern016, TestSize.Level1)
+{
+    auto frameNode =
+        FrameNode::CreateFrameNode("BackButton", 33, AceType::MakeRefPtr<TitleBarPattern>());
+    EXPECT_NE(frameNode, nullptr);
+    auto titleBarPattern = frameNode->GetPattern<TitleBarPattern>();
+    EXPECT_NE(titleBarPattern, nullptr);
+    NavigationTitlebarOptions opt;
+    opt.bgOptions.color = std::make_optional(FRONT_COLOR);
+    titleBarPattern->SetTitlebarOptions(std::move(opt));
+}
+
+/**
+ * @tc.name: TitleBarPattern017
+ * @tc.desc: Test SetTitlebarOptions function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TitleBarTestNg, TitleBarPattern017, TestSize.Level1)
+{
+    auto frameNode =
+        FrameNode::CreateFrameNode("BackButton", 33, AceType::MakeRefPtr<TitleBarPattern>());
+    EXPECT_NE(frameNode, nullptr);
+    auto titleBarPattern = frameNode->GetPattern<TitleBarPattern>();
+    EXPECT_NE(titleBarPattern, nullptr);
+    NavigationTitlebarOptions opt;
+    opt.bgOptions.blurStyle = std::make_optional(BlurStyle::NO_MATERIAL);
+    titleBarPattern->SetTitlebarOptions(std::move(opt));
+}
+
+/**
+ * @tc.name: TitleBarPattern018
+ * @tc.desc: Test UpdateScaleByDragOverDragOffset function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TitleBarTestNg, TitleBarPattern018, TestSize.Level1)
+{
+    auto frameNode =
+        FrameNode::CreateFrameNode("BackButton", 33, AceType::MakeRefPtr<TitleBarPattern>());
+    EXPECT_NE(frameNode, nullptr);
+    auto titleBarPattern = frameNode->GetPattern<TitleBarPattern>();
+    EXPECT_NE(titleBarPattern, nullptr);
+    float overDragOffset = -0.1;
+    titleBarPattern->UpdateScaleByDragOverDragOffset(overDragOffset);
+}
+
+/**
+ * @tc.name: TitleBarPatternProcessTitleDragStartTest019
+ * @tc.desc: Test ProcessTitleDragStart function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TitleBarTestNg, TitleBarPatternProcessTitleDragStartTest019, TestSize.Level1)
+{
+    constexpr float offset = 200.0f;
+    InitTitleBarTestNg();
+    auto titleBarLayoutProperty = frameNode_->GetLayoutProperty<TitleBarLayoutProperty>();
+    ASSERT_NE(titleBarLayoutProperty, nullptr);
+    titleBarPattern_->overDragOffset_ = 11.01;
+    titleBarPattern_->ProcessTitleDragStart(offset);
+}
+
+/**
+ * @tc.name: TitleBarPatternProcessTitleDragStartTest020
+ * @tc.desc: Test ProcessTitleDragEnd function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TitleBarTestNg, TitleBarPatternProcessTitleDragStartTest020, TestSize.Level1)
+{
+    InitTitleBarTestNg();
+    auto titleBarLayoutProperty = frameNode_->GetLayoutProperty<TitleBarLayoutProperty>();
+    ASSERT_NE(titleBarLayoutProperty, nullptr);
+    titleBarPattern_->overDragOffset_ = 11.01;
+    titleBarPattern_->ProcessTitleDragEnd();
+}
+
+/**
+ * @tc.name: TitleBarPatternProcessTitleDragStartTest021
+ * @tc.desc: Test ProcessTitleDragEnd function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TitleBarTestNg, TitleBarPatternProcessTitleDragStartTest021, TestSize.Level1)
+{
+    InitTitleBarTestNg();
+    auto titleBarLayoutProperty = frameNode_->GetLayoutProperty<TitleBarLayoutProperty>();
+    ASSERT_NE(titleBarLayoutProperty, nullptr);
+    titleBarPattern_->CanOverDrag_ = true;
+    titleBarPattern_->isTitleScaleChange_ = true;
+    titleBarPattern_->ProcessTitleDragEnd();
+}
+
+/**
+ * @tc.name: TitleBarPatternProcessTitleDragStartTest022
+ * @tc.desc: Test ProcessTitleDragEnd function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TitleBarTestNg, TitleBarPatternProcessTitleDragStartTest022, TestSize.Level1)
+{
+    InitTitleBarTestNg();
+    auto titleBarLayoutProperty = frameNode_->GetLayoutProperty<TitleBarLayoutProperty>();
+    ASSERT_NE(titleBarLayoutProperty, nullptr);
+    titleBarPattern_->CanOverDrag_ = false;
+    titleBarPattern_->isTitleScaleChange_ = false;
+    titleBarPattern_->ProcessTitleDragEnd();
+}
+
+/**
+ * @tc.name: TitleBarPatternOnCoordScrollStartTest023
+ * @tc.desc: Test OnCoordScrollStart function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TitleBarTestNg, TitleBarPatternOnCoordScrollStartTest023, TestSize.Level1)
+{
+    InitTitleBarTestNg();
+    auto titleBarLayoutProperty = frameNode_->GetLayoutProperty<TitleBarLayoutProperty>();
+    ASSERT_NE(titleBarLayoutProperty, nullptr);
+    titleBarLayoutProperty->GetTitleModeValue(NavigationTitleMode::FREE);
+    titleBarPattern_->OnCoordScrollStart();
+}
+
+/**
+ * @tc.name: TitleBarPatternOnCoordScrollStartTest024
+ * @tc.desc: Test OnCoordScrollStart function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TitleBarTestNg, TitleBarPatternOnCoordScrollStartTest024, TestSize.Level1)
+{
+    constexpr float offset = 190.0f;
+    InitTitleBarTestNg();
+    auto titleBarLayoutProperty = frameNode_->GetLayoutProperty<TitleBarLayoutProperty>();
+    ASSERT_NE(titleBarLayoutProperty, nullptr);
+    titleBarLayoutProperty->GetTitleModeValue(NavigationTitleMode::FREE);
+    titleBarPattern_->springMotion_ = nullptr;
+    titleBarPattern_->SpringAnimation(100.0f, 0);
+    titleBarPattern_->AnimateTo(offset);
+    titleBarPattern_->OnCoordScrollStart();
+}
+
+/**
+ * @tc.name: TitleBarPatternOnCoordScrollUpdateTest025
+ * @tc.desc: Test OnCoordScrollUpdate function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TitleBarTestNg, TitleBarPatternOnCoordScrollUpdateTest025, TestSize.Level1)
+{
+    constexpr float offset = -0.01f;
+    InitTitleBarTestNg();
+    auto titleBarLayoutProperty = frameNode_->GetLayoutProperty<TitleBarLayoutProperty>();
+    ASSERT_NE(titleBarLayoutProperty, nullptr);
+    EXPECT_EQ(titleBarPattern_->OnCoordScrollUpdate(offset), RET_VALUE);
+}
+
+/**
+ * @tc.name: TitleBarPatternOnCoordScrollUpdateTest026
+ * @tc.desc: Test OnCoordScrollUpdate function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TitleBarTestNg, TitleBarPatternOnCoordScrollUpdateTest026, TestSize.Level1)
+{
+    constexpr float offset = 0.01f;
+    InitTitleBarTestNg();
+    auto titleBarLayoutProperty = frameNode_->GetLayoutProperty<TitleBarLayoutProperty>();
+    ASSERT_NE(titleBarLayoutProperty, nullptr);
+    EXPECT_EQ(titleBarPattern_->OnCoordScrollUpdate(offset), RET_VALUE);
+}
+
+/**
+ * @tc.name: TitleBarPatterOnCoordScrollEndTest027
+ * @tc.desc: Test OnCoordScrollEnd function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TitleBarTestNg, TitleBarPatterOnCoordScrollEndTest027, TestSize.Level1)
+{
+    InitTitleBarTestNg();
+    auto titleBarLayoutProperty = frameNode_->GetLayoutProperty<TitleBarLayoutProperty>();
+    ASSERT_NE(titleBarLayoutProperty, nullptr);
+    titleBarPattern_->OnCoordScrollEnd();
+}
+
+/**
+ * @tc.name: TitleBarPatterOnCoordScrollEndTest028
+ * @tc.desc: Test OnCoordScrollEnd function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TitleBarTestNg, TitleBarPatterOnCoordScrollEndTest028, TestSize.Level1)
+{
+    InitTitleBarTestNg();
+    auto titleBarLayoutProperty = frameNode_->GetLayoutProperty<TitleBarLayoutProperty>();
+    ASSERT_NE(titleBarLayoutProperty, nullptr);
+    titleBarPattern_->coordScrollOffset_ = 0.1f;
+    titleBarPattern_->defaultTitleBarHeight_ = 0.003f;
+    titleBarPattern_->maxTitleBarHeight_ = 0.008f;
+    titleBarPattern_->OnCoordScrollEnd();
+}
+
+/**
+ * @tc.name: TitleBarPatterOnCoordScrollEndTest029
+ * @tc.desc: Test OnCoordScrollEnd function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TitleBarTestNg, TitleBarPatterOnCoordScrollEndTest029, TestSize.Level1)
+{
+    InitTitleBarTestNg();
+    auto titleBarLayoutProperty = frameNode_->GetLayoutProperty<TitleBarLayoutProperty>();
+    ASSERT_NE(titleBarLayoutProperty, nullptr);
+    titleBarPattern_->coordScrollOffset_ = 0.1f;
+    titleBarPattern_->maxTitleBarHeight_ = -0.008f;
+    titleBarPattern_->OnCoordScrollEnd();
+}
+
+/**
+ * @tc.name: TitleBarPatternUpdateTitleBarByCoordScrollTest030
+ * @tc.desc: Test UpdateTitleBarByCoordScroll function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TitleBarTestNg, TitleBarPatternUpdateTitleBarByCoordScrollTest030, TestSize.Level1)
+{
+    constexpr float offset = 190.0f;
+    InitTitleBarTestNg();
+    auto titleBarLayoutProperty = frameNode_->GetLayoutProperty<TitleBarLayoutProperty>();
+    ASSERT_NE(titleBarLayoutProperty, nullptr);
+    titleBarLayoutProperty->GetTitleModeValue(NavigationTitleMode::FREE);
+    titleBarPattern_->UpdateTitleBarByCoordScroll(offset);
+}
+
+/**
+ * @tc.name: TitleBarPatternUpdateTitleBarByCoordScrollTest031
+ * @tc.desc: Test SetTitleStyleByCoordScrollOffset function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TitleBarTestNg, TitleBarPatternUpdateTitleBarByCoordScrollTest031, TestSize.Level1)
+{
+    constexpr float offset = 190.0f;
+    InitTitleBarTestNg();
+    auto titleBarLayoutProperty = frameNode_->GetLayoutProperty<TitleBarLayoutProperty>();
+    ASSERT_NE(titleBarLayoutProperty, nullptr);
+    titleBarLayoutProperty->GetTitleModeValue(NavigationTitleMode::FREE);
+    titleBarPattern_->overDragOffset_ = 0.002f;
+    titleBarPattern_->SetTitleStyleByCoordScrollOffset(offset);
+}
+
+/**
+ * @tc.name: TitleBarPatternUpdateTitleBarByCoordScrollTest032
+ * @tc.desc: Test SetTitleStyleByCoordScrollOffset function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TitleBarTestNg, TitleBarPatternUpdateTitleBarByCoordScrollTest032, TestSize.Level1)
+{
+    constexpr float offset = 190.0f;
+    InitTitleBarTestNg();
+    auto titleBarLayoutProperty = frameNode_->GetLayoutProperty<TitleBarLayoutProperty>();
+    ASSERT_NE(titleBarLayoutProperty, nullptr);
+    titleBarLayoutProperty->GetTitleModeValue(NavigationTitleMode::FREE);
+    titleBarPattern_->overDragOffset_ = 0.00001f;
+    titleBarPattern_->SetTitleStyleByCoordScrollOffset(offset);
+}
+
+/**
+ * @tc.name: TitleBarPatternTest033
+ * @tc.desc: Test OnColorConfigurationUpdate function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TitleBarTestNg, TitleBarPatternTest033, TestSize.Level1)
+{
+    InitTitleBarTestNg();
+    auto backButton = FrameNode::CreateFrameNode("BackButton", 33, AceType::MakeRefPtr<TitleBarPattern>());
+    ASSERT_NE(backButton, nullptr);
+    frameNode_->SetBackButton(backButton);
+    titleBarPattern_->OnColorConfigurationUpdate();
+}
+
+/**
+ * @tc.name: TitleBarPatternTest034
+ * @tc.desc: Test OnColorConfigurationUpdate function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TitleBarTestNg, TitleBarPatternTest034, TestSize.Level1)
+{
+    InitTitleBarTestNg();
+    auto backButton = FrameNode::CreateFrameNode("Navigator", 33, AceType::MakeRefPtr<TitleBarPattern>());
+    ASSERT_NE(backButton, nullptr);
+    frameNode_->SetBackButton(backButton);
+    titleBarPattern_->OnColorConfigurationUpdate();
+}
+
+/**
+ * @tc.name: TitleBarPatternTest035
+ * @tc.desc: Test SetDefaultSubtitleOpacity function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TitleBarTestNg, TitleBarPatternTest035, TestSize.Level1)
+{
+    InitTitleBarTestNg();
+    auto subtitle = FrameNode::CreateFrameNode("Navigator", 33, AceType::MakeRefPtr<TitleBarPattern>());
+    ASSERT_NE(subtitle, nullptr);
+    frameNode_->SetSubtitle(subtitle);
+    titleBarPattern_->SetDefaultSubtitleOpacity();
+}
+
+/**
+ * @tc.name: TitleBarPatternTest036
+ * @tc.desc: Test SetDefaultSubtitleOpacity function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TitleBarTestNg, TitleBarPatternTest036, TestSize.Level1)
+{
+    InitTitleBarTestNg();
+    auto subtitle = FrameNode::CreateFrameNode("Navigator", 33, AceType::MakeRefPtr<TitleBarPattern>());
+    ASSERT_NE(subtitle, nullptr);
+    frameNode_->SetSubtitle(subtitle);
+    titleBarPattern_->defaultTitleBarHeight_ = 0.3f;
+    titleBarPattern_->SetDefaultSubtitleOpacity();
+}
+
+/**
+ * @tc.name: TitleBarPatternTest037
+ * @tc.desc: Test SetTempSubTitleOffsetY function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TitleBarTestNg, TitleBarPatternTest037, TestSize.Level1)
+{
+    InitTitleBarTestNg();
+    titleBarPattern_->tempTitleOffsetY_ = 0.3;
+    titleBarPattern_->SetTempSubTitleOffsetY();
+    EXPECT_EQ(titleBarPattern_->tempSubTitleOffsetY_, RET_VALUE);
+}
+
+/**
+ * @tc.name: TitleBarPatternTest038
+ * @tc.desc: Test SetMaxTitleBarHeight function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TitleBarTestNg, TitleBarPatternTest038, TestSize.Level1)
+{
+    InitTitleBarTestNg();
+    auto subtitle = FrameNode::CreateFrameNode("Navigator", 33, AceType::MakeRefPtr<TitleBarPattern>());
+    ASSERT_NE(subtitle, nullptr);
+    frameNode_->SetSubtitle(subtitle);
+    titleBarPattern_->SetMaxTitleBarHeight();
 }
 } // namespace OHOS::Ace::NG

@@ -46,10 +46,11 @@ constexpr int TOP_VALUE = 9;
 constexpr int WIDTH_VALUE = 10;
 constexpr int HEIGHT_VALUE = 11;
 
-RefPtr<RenderContext> GetRenderContext(UINode* UiNode)
+RefPtr<RenderContext> GetRenderContext(UINode* node)
 {
-    auto* frameNode = AceType::DynamicCast<FrameNode>(UiNode);
+    auto* frameNode = AceType::DynamicCast<FrameNode>(node);
     CHECK_NULL_RETURN(frameNode, nullptr);
+    CHECK_NULL_RETURN(node->GetTag() != "BuilderProxyNode", nullptr);
     auto context = frameNode->GetRenderContext();
     return context;
 }
@@ -95,6 +96,7 @@ void SetClipToFrame(ArkUINodeHandle node, ArkUI_Bool useClip)
     auto renderContext = GetRenderContext(currentNode);
     CHECK_NULL_VOID(renderContext);
     renderContext->SetClipToFrame(useClip);
+    renderContext->RequestNextFrame();
 }
 
 void SetRotation(ArkUINodeHandle node, ArkUI_Float32 rotationX, ArkUI_Float32 rotationY, ArkUI_Float32 rotationZ)
@@ -102,10 +104,8 @@ void SetRotation(ArkUINodeHandle node, ArkUI_Float32 rotationX, ArkUI_Float32 ro
     auto* currentNode = reinterpret_cast<UINode*>(node);
     auto renderContext = GetRenderContext(currentNode);
     CHECK_NULL_VOID(renderContext);
-    Dimension first = Dimension(rotationX, DimensionUnit::VP);
-    Dimension second = Dimension(rotationY, DimensionUnit::VP);
-    Dimension third = Dimension(rotationZ, DimensionUnit::VP);
-    renderContext->SetRotation(first.ConvertToPx(), second.ConvertToPx(), third.ConvertToPx());
+    renderContext->SetRotation(rotationX, rotationY, rotationZ);
+    renderContext->RequestNextFrame();
 }
 
 void SetShadowColor(ArkUINodeHandle node, uint32_t color)
@@ -114,6 +114,7 @@ void SetShadowColor(ArkUINodeHandle node, uint32_t color)
     auto renderContext = GetRenderContext(currentNode);
     CHECK_NULL_VOID(renderContext);
     renderContext->SetShadowColor(color);
+    renderContext->RequestNextFrame();
 }
 
 void SetShadowOffset(ArkUINodeHandle node, ArkUI_Float32 offsetX, ArkUI_Float32 offsetY)
@@ -121,9 +122,8 @@ void SetShadowOffset(ArkUINodeHandle node, ArkUI_Float32 offsetX, ArkUI_Float32 
     auto* currentNode = reinterpret_cast<UINode*>(node);
     auto renderContext = GetRenderContext(currentNode);
     CHECK_NULL_VOID(renderContext);
-    Dimension first = Dimension(offsetX, DimensionUnit::VP);
-    Dimension second = Dimension(offsetY, DimensionUnit::VP);
-    renderContext->SetShadowOffset(first.ConvertToPx(), second.ConvertToPx());
+    renderContext->SetShadowOffset(offsetX, offsetY);
+    renderContext->RequestNextFrame();
 }
 
 void SetShadowAlpha(ArkUINodeHandle node, ArkUI_Float32 alpha)
@@ -132,6 +132,7 @@ void SetShadowAlpha(ArkUINodeHandle node, ArkUI_Float32 alpha)
     auto renderContext = GetRenderContext(currentNode);
     CHECK_NULL_VOID(renderContext);
     renderContext->SetShadowAlpha(alpha);
+    renderContext->RequestNextFrame();
 }
 
 void SetShadowElevation(ArkUINodeHandle node, ArkUI_Float32 elevation)
@@ -140,6 +141,7 @@ void SetShadowElevation(ArkUINodeHandle node, ArkUI_Float32 elevation)
     auto renderContext = GetRenderContext(currentNode);
     CHECK_NULL_VOID(renderContext);
     renderContext->SetShadowElevation(elevation);
+    renderContext->RequestNextFrame();
 }
 
 void SetShadowRadius(ArkUINodeHandle node, ArkUI_Float32 radius)
@@ -148,6 +150,7 @@ void SetShadowRadius(ArkUINodeHandle node, ArkUI_Float32 radius)
     auto renderContext = GetRenderContext(currentNode);
     CHECK_NULL_VOID(renderContext);
     renderContext->SetShadowRadius(radius);
+    renderContext->RequestNextFrame();
 }
 
 void Invalidate(ArkUINodeHandle node)
@@ -156,7 +159,10 @@ void Invalidate(ArkUINodeHandle node)
     CHECK_NULL_VOID(frameNode);
     auto pattern = frameNode->GetPattern<RenderNodePattern>();
     CHECK_NULL_VOID(pattern);
+    auto renderContext = frameNode->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
     pattern->Invalidate();
+    renderContext->RequestNextFrame();
 }
 
 void SetScale(ArkUINodeHandle node, ArkUI_Float32 scaleX, ArkUI_Float32 scaleY)
@@ -165,6 +171,7 @@ void SetScale(ArkUINodeHandle node, ArkUI_Float32 scaleX, ArkUI_Float32 scaleY)
     auto renderContext = GetRenderContext(currentNode);
     CHECK_NULL_VOID(renderContext);
     renderContext->SetScale(scaleX, scaleY);
+    renderContext->RequestNextFrame();
 }
 
 void SetRenderNodeBackgroundColor(ArkUINodeHandle node, uint32_t colorValue)
@@ -173,6 +180,7 @@ void SetRenderNodeBackgroundColor(ArkUINodeHandle node, uint32_t colorValue)
     auto renderContext = GetRenderContext(currentNode);
     CHECK_NULL_VOID(renderContext);
     renderContext->SetBackgroundColor(colorValue);
+    renderContext->RequestNextFrame();
 }
 
 void SetPivot(ArkUINodeHandle node, ArkUI_Float32 pivotX, ArkUI_Float32 pivotY)
@@ -181,6 +189,7 @@ void SetPivot(ArkUINodeHandle node, ArkUI_Float32 pivotX, ArkUI_Float32 pivotY)
     auto renderContext = GetRenderContext(currentNode);
     CHECK_NULL_VOID(renderContext);
     renderContext->SetRenderPivot(pivotX, pivotY);
+    renderContext->RequestNextFrame();
 }
 
 void SetFrame(ArkUINodeHandle node, ArkUI_Float32 positionX, ArkUI_Float32 positionY,
@@ -190,6 +199,7 @@ void SetFrame(ArkUINodeHandle node, ArkUI_Float32 positionX, ArkUI_Float32 posit
     auto renderContext = GetRenderContext(currentNode);
     CHECK_NULL_VOID(renderContext);
     renderContext->SetFrame(positionX, positionY, width, height);
+    renderContext->RequestNextFrame();
 }
 
 void SetSize(ArkUINodeHandle node, ArkUI_Float32 width, ArkUI_Float32 height)
@@ -197,6 +207,7 @@ void SetSize(ArkUINodeHandle node, ArkUI_Float32 width, ArkUI_Float32 height)
     auto* currentNode = reinterpret_cast<UINode*>(node);
     auto* frameNode = AceType::DynamicCast<FrameNode>(currentNode);
     CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(frameNode->GetTag() != "BuilderProxyNode");
     auto layoutProperty = frameNode->GetLayoutProperty();
     CHECK_NULL_VOID(layoutProperty);
     layoutProperty->UpdateUserDefinedIdealSize(
@@ -210,6 +221,7 @@ void SetOpacity(ArkUINodeHandle node, ArkUI_Float32 opacity)
     auto renderContext = GetRenderContext(currentNode);
     CHECK_NULL_VOID(renderContext);
     renderContext->SetOpacity(opacity);
+    renderContext->RequestNextFrame();
 }
 
 void SetTranslate(ArkUINodeHandle node, ArkUI_Float32 translateX, ArkUI_Float32 translateY, ArkUI_Float32 translateZ)
@@ -218,6 +230,7 @@ void SetTranslate(ArkUINodeHandle node, ArkUI_Float32 translateX, ArkUI_Float32 
     auto renderContext = GetRenderContext(currentNode);
     CHECK_NULL_VOID(renderContext);
     renderContext->SetTranslate(translateX, translateY, translateZ);
+    renderContext->RequestNextFrame();
 }
 
 void SetBorderStyle(ArkUINodeHandle node, ArkUI_Int32 left, ArkUI_Int32 top, ArkUI_Int32 right, ArkUI_Int32 bottom)
@@ -299,6 +312,7 @@ void SetRectMask(ArkUINodeHandle node,
     RectF rect(rectX, rectY, rectW, rectH);
     ShapeMaskProperty property { fillColor, strokeColor, strokeWidth };
     renderContext->SetRectMask(rect, property);
+    renderContext->RequestNextFrame();
 }
 
 void SetCircleMask(ArkUINodeHandle node,
@@ -321,6 +335,7 @@ void SetCircleMask(ArkUINodeHandle node,
     ShapeMaskProperty property { fillColor, strokeColor, strokeWidth };
 
     renderContext->SetCircleMask(circle, property);
+    renderContext->RequestNextFrame();
 }
 
 void SetRoundRectMask(ArkUINodeHandle node, const ArkUI_Float32* roundRect, const ArkUI_Uint32 roundRectSize,
@@ -347,6 +362,7 @@ void SetRoundRectMask(ArkUINodeHandle node, const ArkUI_Float32* roundRect, cons
     ShapeMaskProperty property { fillColor, strokeColor, strokeWidth };
 
     renderContext->SetRoundRectMask(roundRectInstance, property);
+    renderContext->RequestNextFrame();
 }
 
 void SetOvalMask(ArkUINodeHandle node,
@@ -361,6 +377,7 @@ void SetOvalMask(ArkUINodeHandle node,
     RectF rect(rectX, rectY, rectW, rectH);
     ShapeMaskProperty property { fillColor, strokeColor, strokeWidth };
     renderContext->SetOvalMask(rect, property);
+    renderContext->RequestNextFrame();
 }
 
 void SetCommandPathMask(
@@ -374,6 +391,7 @@ void SetCommandPathMask(
 
     ShapeMaskProperty property { fillColor, strokeColor, strokeWidth };
     renderContext->SetCommandPathMask(std::string(commands), property);
+    renderContext->RequestNextFrame();
 }
 
 namespace NodeModifier {

@@ -557,7 +557,7 @@ HWTEST_F(TextTestNg, TextFrameNodeCreator003, TestSize.Level1)
 {
     TextModelNG textModelNG;
     textModelNG.Create(CREATE_VALUE);
-    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    auto frameNode = AceType::Claim(ViewStackProcessor::GetInstance()->GetMainFrameNode());
     ASSERT_NE(frameNode, nullptr);
     RefPtr<LayoutProperty> layoutProperty = frameNode->GetLayoutProperty();
     ASSERT_NE(layoutProperty, nullptr);
@@ -3676,7 +3676,7 @@ HWTEST_F(TextTestNg, HandleMouseEvent006, TestSize.Level1)
     textModelNG.Create("1234567890");
     textModelNG.SetCopyOption(CopyOptions::InApp);
     textModelNG.SetTextDetectEnable(true);
-    auto host = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    auto host = AceType::Claim(ViewStackProcessor::GetInstance()->GetMainFrameNode());
     auto pattern = host->GetPattern<TextPattern>();
     auto paragraph = MockParagraph::GetOrCreateMockParagraph();
     std::vector<RectF> rects { RectF(0, 0, 40, 40) };
@@ -4395,7 +4395,7 @@ HWTEST_F(TextTestNg, TextModelSetFont001, TestSize.Level1)
     font.fontWeight = FontWeight::BOLD;
     font.fontFamilies = FONT_FAMILY_VALUE;
     font.fontStyle = ITALIC_FONT_STYLE_VALUE;
-    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->GetMainElementNode());
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     ASSERT_NE(frameNode, nullptr);
     auto layoutProperty = frameNode->GetLayoutProperty();
     ASSERT_NE(layoutProperty, nullptr);
@@ -4425,7 +4425,7 @@ HWTEST_F(TextTestNg, TextModelGetFont001, TestSize.Level1)
      */
     TextModelNG textModelNG;
     textModelNG.Create(CREATE_VALUE);
-    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->GetMainElementNode());
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     ASSERT_NE(frameNode, nullptr);
     auto layoutProperty = frameNode->GetLayoutProperty();
     ASSERT_NE(layoutProperty, nullptr);
@@ -4667,7 +4667,7 @@ HWTEST_F(TextTestNg, SetDraggable001, TestSize.Level1)
      */
     TextModelNG textModelNG;
     textModelNG.Create(CREATE_VALUE);
-    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->GetMainElementNode());
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
 
     /**
      * @tc.steps: step3. construct 2 groups cases and corresponding expected results.
@@ -4694,7 +4694,6 @@ HWTEST_F(TextTestNg, SetMenuOptionItems001, TestSize.Level1)
     auto [host, pattern] = Init();
     TextModelNG textModelNG;
     textModelNG.Create(CREATE_VALUE);
-    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->GetMainElementNode());
 
     /**
      * @tc.steps: step2. construct menuOptionItems.
@@ -4724,7 +4723,6 @@ HWTEST_F(TextTestNg, ClearOnClick001, TestSize.Level1)
     auto [host, pattern] = Init();
     TextModelNG textModelNG;
     textModelNG.Create(CREATE_VALUE);
-    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->GetMainElementNode());
 
     /**
      * @tc.steps: step2. Running ClearOnClick function.
@@ -4747,7 +4745,7 @@ HWTEST_F(TextTestNg, SetFontSize001, TestSize.Level1)
     auto [host, pattern] = Init();
     TextModelNG textModelNG;
     textModelNG.Create(CREATE_VALUE);
-    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->GetMainElementNode());
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
 
     /**
      * @tc.steps: step2. Run SetFontSize with isvalid data.
@@ -4985,7 +4983,6 @@ HWTEST_F(TextTestNg, HandleDoubleClickEvent001, TestSize.Level1)
     EXPECT_FALSE(pattern->hasClicked_);
 }
 
-
 /**
  * @tc.name: HandleDoubleClickEvent002
  * @tc.desc: test test_pattern.h HandleDoubleClickEvent function.
@@ -5008,7 +5005,7 @@ HWTEST_F(TextTestNg, HandleDoubleClickEvent002, TestSize.Level1)
     TextResponseType textResponseType = TextResponseType::LONG_PRESS;
     textModelNG.BindSelectionMenu(textSpanType, textResponseType, buildFunc, memuParam);
     auto spanNode = CreateSpanNodeWithSetDefaultProperty("Hello World");
-    auto host = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    auto host = AceType::Claim(ViewStackProcessor::GetInstance()->GetMainFrameNode());
     host->AddChild(spanNode);
     spanNode->SetParent(host);
     auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
@@ -5054,10 +5051,10 @@ HWTEST_F(TextTestNg, HandleClickEventTest001, TestSize.Level1)
     auto host = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     auto pattern = host->GetPattern<TextPattern>();
     bool isSpanPhoneClicked = false;
-    auto spanNode = CreateSpanNodeWithSetDefaultProperty(SPAN_URL);
-    host->AddChild(spanNode);
-    spanNode = CreateSpanNodeWithSetDefaultProperty(SPAN_PHONE);
+    auto spanNode = CreateSpanNodeWithSetDefaultProperty(SPAN_PHONE);
     spanNode->UpdateOnClickEvent([&isSpanPhoneClicked](GestureEvent& info) { isSpanPhoneClicked = true; });
+    host->AddChild(spanNode);
+    spanNode = CreateSpanNodeWithSetDefaultProperty(SPAN_URL);
     host->AddChild(spanNode);
     auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
     frameNode->GetRenderContext()->UpdateClipEdge(false);
@@ -5335,7 +5332,7 @@ HWTEST_F(TextTestNg, OnTextSelectionChange002, TestSize.Level1)
      */
     auto paragraph = MockParagraph::GetOrCreateMockParagraph();
     pattern->paragraph_ = paragraph;
-    EXPECT_CALL(*paragraph, GetGlyphIndexByCoordinate(_)).WillRepeatedly(Return(0));
+    EXPECT_CALL(*paragraph, GetGlyphIndexByCoordinate(_, _)).WillRepeatedly(Return(0));
     EXPECT_CALL(*paragraph, GetWordBoundary(_, _, _))
         .WillRepeatedly(DoAll(SetArgReferee<1>(0), SetArgReferee<2>(2), Return(false)));
     GestureEvent info;
@@ -5520,7 +5517,7 @@ HWTEST_F(TextTestNg, InitSpanItem001, TestSize.Level1)
     /**
      * @tc.steps: step2. construct different child SpanNode.
      */
-    auto host = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    auto host = AceType::Claim(ViewStackProcessor::GetInstance()->GetMainFrameNode());
     auto childFrameNode =
         FrameNode::GetOrCreateFrameNode(V2::IMAGE_ETS_TAG, 2, []() { return AceType::MakeRefPtr<TextPattern>(); });
     host->AddChild(childFrameNode);
@@ -5630,7 +5627,7 @@ HWTEST_F(TextTestNg, HandleDragEvent002, TestSize.Level1)
     TextModelNG textModelNG;
     textModelNG.Create("1234567890abcdefghijklmnopqrstuvwxyz");
     textModelNG.SetCopyOption(CopyOptions::InApp);
-    auto host = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    auto host = AceType::Claim(ViewStackProcessor::GetInstance()->GetMainFrameNode());
     host->draggable_ = true;
     auto pattern = host->GetPattern<TextPattern>();
     pattern->contentMod_ = AceType::MakeRefPtr<TextContentModifier>(std::optional<TextStyle>(TextStyle()));
@@ -5679,7 +5676,7 @@ HWTEST_F(TextTestNg, HandleDragEvent002, TestSize.Level1)
      * @tc.steps: step3. test get text onDragMove.
      */
     eventHub->FireOnDragMove(dragEvent, "");
-    EXPECT_EQ(pattern->showSelect_, true);
+    EXPECT_EQ(pattern->showSelect_, false);
 
     /**
      * @tc.steps: step4. test textPattern onDragMove.
@@ -5705,7 +5702,7 @@ HWTEST_F(TextTestNg, GetTextResultObject001, TestSize.Level1)
     TextModelNG textModelNG;
     textModelNG.Create("");
     textModelNG.SetCopyOption(CopyOptions::InApp);
-    auto host = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    auto host = AceType::Claim(ViewStackProcessor::GetInstance()->GetMainFrameNode());
     host->draggable_ = true;
     auto pattern = host->GetPattern<TextPattern>();
     pattern->contentMod_ = AceType::MakeRefPtr<TextContentModifier>(std::optional<TextStyle>(TextStyle()));
@@ -5772,7 +5769,7 @@ HWTEST_F(TextTestNg, GetSymbolSpanResultObject001, TestSize.Level1)
     textModelNG.Create("");
     textModelNG.SetCopyOption(CopyOptions::InApp);
     auto stack = ViewStackProcessor::GetInstance();
-    auto host = stack->GetMainFrameNode();
+    auto host = AceType::Claim<FrameNode>(stack->GetMainFrameNode());
     host->draggable_ = true;
     auto pattern = host->GetPattern<TextPattern>();
     pattern->contentMod_ = AceType::MakeRefPtr<TextContentModifier>(std::optional<TextStyle>(TextStyle()));
@@ -5873,8 +5870,9 @@ HWTEST_F(TextTestNg, GetImageResultObject001, TestSize.Level1)
     auto onDragStart = eventHub->GetDefaultOnDragStart();
     auto dragDropInfo = onDragStart(dragEvent, "");
     EXPECT_EQ(pattern->dragResultObjects_.size(), 2); // 2 means result list size.
-    EXPECT_EQ(pattern->dragResultObjects_.front().imageStyle.verticalAlign, static_cast<int32_t>(ImageFit::FILL));
-    EXPECT_EQ(pattern->dragResultObjects_.front().imageStyle.objectFit, static_cast<int32_t>(VerticalAlign::CENTER));
+    EXPECT_EQ(
+        pattern->dragResultObjects_.front().imageStyle.verticalAlign, static_cast<int32_t>(VerticalAlign::CENTER));
+    EXPECT_EQ(pattern->dragResultObjects_.front().imageStyle.objectFit, static_cast<int32_t>(ImageFit::FILL));
     for (auto obj : pattern->dragResultObjects_) {
         EXPECT_EQ(obj.type, SelectSpanType::TYPEIMAGE);
     }
@@ -6188,7 +6186,7 @@ HWTEST_F(TextTestNg, TextLayoutAlgorithmLayout001, TestSize.Level1)
      */
     TextModelNG textModelNG;
     textModelNG.Create(CREATE_VALUE);
-    auto host = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    auto host = AceType::Claim(ViewStackProcessor::GetInstance()->GetMainFrameNode());
     auto pattern = host->GetPattern<TextPattern>();
     auto paragraph = MockParagraph::GetOrCreateMockParagraph();
     std::vector<RectF> selectedRects { RectF(0, 0, 20, 20), RectF(30, 30, 20, 20), RectF(60, 60, 20, 20) };

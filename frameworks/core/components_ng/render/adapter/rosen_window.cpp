@@ -17,6 +17,8 @@
 
 #include "transaction/rs_interfaces.h"
 
+#include "base/log/ace_performance_monitor.h"
+#include "base/log/event_report.h"
 #include "base/log/frame_report.h"
 #include "base/log/jank_frame_report.h"
 #include "base/thread/task_executor.h"
@@ -32,6 +34,10 @@
 namespace {
 constexpr int32_t IDLE_TASK_DELAY_MILLISECOND = 51;
 constexpr float ONE_SECOND_IN_NANO = 1000000000.0f;
+#ifdef VSYNC_TIMEOUT_CHECK
+constexpr int32_t VSYNC_TASK_DELAY_MILLISECOND = 3000;
+#endif
+
 #ifdef PREVIEW
 constexpr float PREVIEW_REFRESH_RATE = 30.0f;
 #endif
@@ -46,6 +52,7 @@ RosenWindow::RosenWindow(const OHOS::sptr<OHOS::Rosen::Window>& window, RefPtr<T
     vsyncCallback_->onCallback = [weakTask = taskExecutor_, id = id_](int64_t timeStampNanos) {
         auto taskExecutor = weakTask.Upgrade();
         auto onVsync = [id, timeStampNanos] {
+            ArkUIPerfMonitor::GetInstance().StartPerf();
             if (FrameReport::GetInstance().GetEnable()) {
                 FrameReport::GetInstance().FlushBegin();
             }
@@ -64,6 +71,7 @@ RosenWindow::RosenWindow(const OHOS::sptr<OHOS::Rosen::Window>& window, RefPtr<T
             if (FrameReport::GetInstance().GetEnable()) {
                 FrameReport::GetInstance().FlushEnd();
             }
+            ArkUIPerfMonitor::GetInstance().FinishPerf();
         };
         auto uiTaskRunner = SingleTaskExecutor::Make(taskExecutor, TaskExecutor::TaskType::UI);
         if (uiTaskRunner.IsRunOnCurrentThread()) {
@@ -112,12 +120,23 @@ void RosenWindow::RequestFrame()
     CHECK_NULL_VOID(onShow_);
     CHECK_RUN_ON(UI);
     CHECK_NULL_VOID(!isRequestVsync_);
+    auto taskExecutor = taskExecutor_.Upgrade();
     if (rsWindow_) {
         isRequestVsync_ = true;
         rsWindow_->RequestVsync(vsyncCallback_);
         lastRequestVsyncTime_ = GetSysTimestamp();
+    #ifdef VSYNC_TIMEOUT_CHECK
+        if (taskExecutor) {
+            auto task = []() {
+                LOGE("VsyncCallback not executed!");
+                EventReport::SendVsyncException(VsyncExcepType::VSYNC_TIMEOUT);
+            };
+            onVsyncEventCheckTimer_.Reset(task);
+            taskExecutor->PostDelayedTask(onVsyncEventCheckTimer_, TaskExecutor::TaskType::JS,
+                                          VSYNC_TASK_DELAY_MILLISECOND);
+        }
+    #endif
     }
-    auto taskExecutor = taskExecutor_.Upgrade();
     if (taskExecutor) {
         taskExecutor->PostDelayedTask(
             [id = id_]() {

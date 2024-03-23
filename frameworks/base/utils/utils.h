@@ -43,6 +43,20 @@
         }                                 \
     } while (0)                           \
 
+#define CHECK_EQUAL_VOID(var, value) \
+    do {                             \
+        if ((var) == (value)) {      \
+            return;                  \
+        }                            \
+    } while (0)                      \
+
+#define CHECK_EQUAL_RETURN(var, value, ret) \
+    do {                                    \
+        if ((var) == (value)) {             \
+            return ret;                     \
+        }                                   \
+    } while (0)                             \
+
 #define PRIMITIVE_CAT(x, y) x##y
 #define CAT(x, y) PRIMITIVE_CAT(x, y)
 
@@ -260,7 +274,7 @@ inline float CalculateFriction(float gamma)
     return SCROLL_RATIO * static_cast<float>(std::pow(1.0 - gamma, 2));
 }
 
-bool RealPath(const std::string fileName, char* realPath);
+bool RealPath(const std::string& fileName, char* realPath);
 
 } // namespace OHOS::Ace
 

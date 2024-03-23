@@ -16,12 +16,14 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_ATOMIC_SERVICE_PATTERN_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_ATOMIC_SERVICE_PATTERN_H
 
+#include "core/components_ng/pattern/app_bar/app_bar_theme.h"
 #include "core/components_ng/pattern/app_bar/atomic_service_layout_algorithm.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
 
 namespace OHOS::Ace::NG {
 class AtomicServicePattern : public LinearLayoutPattern {
     DECLARE_ACE_TYPE(AtomicServicePattern, LinearLayoutPattern);
+    ACE_DISALLOW_COPY_AND_MOVE(AtomicServicePattern);
 
 public:
     AtomicServicePattern() : LinearLayoutPattern(true) {};
@@ -35,8 +37,20 @@ public:
     {
         return MakeRefPtr<AtomicServiceLayoutAlgorithm>();
     }
-
-    ACE_DISALLOW_COPY_AND_MOVE(AtomicServicePattern);
+    RefPtr<FrameNode> GetMenuBarRow();
+    RefPtr<FrameNode> GetMenuBar();
+    RefPtr<FrameNode> GetMenuButton();
+    RefPtr<FrameNode> GetCloseButton();
+    RefPtr<FrameNode> GetMenuIcon();
+    RefPtr<FrameNode> GetCloseIcon();
+    void UpdateColor();
+    void UpdateMenuBarColor(RefPtr<AppBarTheme>& theme, RefPtr<FrameNode>& menuBar);
+    void UpdateButtonColor(RefPtr<AppBarTheme>& theme, RefPtr<FrameNode>& button);
+    void UpdateIconColor(RefPtr<AppBarTheme>& theme, RefPtr<FrameNode>& icon);
+    void UpdateLayout();
+    void UpdateMenuBarLayout(RefPtr<AppBarTheme>& theme, RefPtr<FrameNode>& menuBar, bool isRtl);
+    void UpdateButtonLayout(RefPtr<AppBarTheme>& theme, RefPtr<FrameNode>& button, bool isLeft);
+    void UpdateIconLayout(RefPtr<AppBarTheme>& theme, RefPtr<FrameNode>& icon, bool isLeft);
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_ATOMIC_SERVICE_PATTERN_H

@@ -29,6 +29,7 @@
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/event/focus_hub.h"
 #include "core/components_ng/event/touch_event.h"
+#include "core/components_ng/manager/focus/focus_view.h"
 #include "core/components_ng/pattern/button/button_pattern.h"
 #include "core/components_ng/pattern/flex/flex_layout_pattern.h"
 #include "core/components_ng/pattern/pattern.h"
@@ -600,7 +601,7 @@ HWTEST_F(FocusHubTestNg, FocusHubTestNg0014, TestSize.Level1)
     bool flagCbk2 = false;
     focusHub->onFocusInternal_ = [&flagCbk1]() { flagCbk1 = !flagCbk1; };
     focusHub->focusCallbackEvents_ = AceType::MakeRefPtr<FocusCallbackEvents>();
-    focusHub->focusCallbackEvents_->SetOnFocusCallback([&flagCbk2]() { flagCbk2 = !flagCbk2; });
+    focusHub->SetOnFocusCallback([&flagCbk2]() { flagCbk2 = !flagCbk2; });
     focusHub->OnFocus();
     EXPECT_TRUE(flagCbk1);
     EXPECT_TRUE(flagCbk2);
@@ -1140,7 +1141,7 @@ HWTEST_F(FocusHubTestNg, FocusHubSetIsFocusOnTouch001, TestSize.Level1)
      * @tc.expected: when touchEvents has been set, return.
      */
     focusHub->SetIsFocusOnTouch(true);
-    EXPECT_TRUE(focusHub->focusCallbackEvents_->IsFocusOnTouch().value());
+    EXPECT_TRUE(focusHub->IsFocusOnTouch().value());
 
     /**
      * @tc.steps4: test SetIsFocusOnTouch.
@@ -1153,7 +1154,7 @@ HWTEST_F(FocusHubTestNg, FocusHubSetIsFocusOnTouch001, TestSize.Level1)
      * @tc.steps5: test SetIsFocusOnTouch.
      * @tc.expected: set focusOnTouchListener_ success.
      */
-    focusHub->focusCallbackEvents_->SetIsFocusOnTouch(false);
+    focusHub->SetIsFocusOnTouch(false);
     focusHub->focusOnTouchListener_ = nullptr;
     focusHub->SetIsFocusOnTouch(true);
     EXPECT_TRUE(focusHub->focusOnTouchListener_);
@@ -2320,7 +2321,7 @@ HWTEST_F(FocusHubTestNg, FocusHubTestNg0055, TestSize.Level1)
     EXPECT_FALSE(focusHub->OnKeyEventScope(keyEvent));
     keyEvent.pressedCodes.emplace_back(KeyCode::KEY_SHIFT_LEFT);
     keyEvent.pressedCodes.emplace_back(KeyCode::KEY_TAB);
-    EXPECT_FALSE(focusHub->OnKeyEventScope(keyEvent));
+    EXPECT_TRUE(focusHub->OnKeyEventScope(keyEvent));
 }
 
 /**
@@ -3154,102 +3155,6 @@ HWTEST_F(FocusHubTestNg, FocusHubTestNg0084, TestSize.Level1)
 }
 
 /**
- * @tc.name: FocusHubTestNg0085
- * @tc.desc: Test the function GetMainViewRootScope.
- * @tc.type: FUNC
- */
-HWTEST_F(FocusHubTestNg, FocusHubTestNg0085, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. Create FocusHub with the WeakPtr eventHub_ owning frameNode.
-     * @tc.expected: eventHub can be updated and frameName = V2::DIALOG_ETS_TAG.
-     */
-    auto eventHub = AceType::MakeRefPtr<EventHub>();
-    auto frameNode = AceType::MakeRefPtr<FrameNode>(V2::DIALOG_ETS_TAG, -1, AceType::MakeRefPtr<Pattern>());
-    eventHub->AttachHost(frameNode);
-    auto focusHub = AceType::MakeRefPtr<FocusHub>(eventHub);
-    EXPECT_TRUE(focusHub->GetFrameNode() != nullptr);
-    EXPECT_TRUE(focusHub->GetGeometryNode() != nullptr);
-    EXPECT_EQ(focusHub->GetFrameName(), V2::DIALOG_ETS_TAG);
-    EXPECT_EQ(focusHub->GetInspectorKey(), std::nullopt);
-    EXPECT_FALSE(focusHub->GetMainViewRootScope());
-}
-
-/**
- * @tc.name: FocusHubTestNg0086
- * @tc.desc: Test the function GetMainViewRootScope.
- * @tc.type: FUNC
- */
-HWTEST_F(FocusHubTestNg, FocusHubTestNg0086, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. Create FocusHub with the WeakPtr eventHub_ owning frameNode.
-     * @tc.expected: eventHub can be updated and frameName = V2::POPUP_ETS_TAG.
-     */
-    auto eventHub = AceType::MakeRefPtr<EventHub>();
-    auto frameNode = AceType::MakeRefPtr<FrameNode>(V2::POPUP_ETS_TAG, -1, AceType::MakeRefPtr<Pattern>());
-    eventHub->AttachHost(frameNode);
-    auto focusHub = AceType::MakeRefPtr<FocusHub>(eventHub);
-    EXPECT_TRUE(focusHub->GetFrameNode() != nullptr);
-    EXPECT_TRUE(focusHub->GetGeometryNode() != nullptr);
-    EXPECT_EQ(focusHub->GetFrameName(), V2::POPUP_ETS_TAG);
-    EXPECT_EQ(focusHub->GetInspectorKey(), std::nullopt);
-    EXPECT_FALSE(focusHub->GetMainViewRootScope());
-}
-
-/**
- * @tc.name: LostFocusToViewRoot0087
- * @tc.desc: Test the function GetCurrentMainView.
- * @tc.type: FUNC
- */
-HWTEST_F(FocusHubTestNg, FocusHubTestNg0087, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. Create frameNode.
-     */
-    auto frameNode = FrameNode::CreateFrameNode(V2::ROW_ETS_TAG, 101, AceType::MakeRefPtr<ButtonPattern>());
-    auto eventHub = AceType::MakeRefPtr<EventHub>();
-    eventHub->AttachHost(frameNode);
-    auto focusHub = frameNode->GetFocusHub();
-    KeyEvent keyEvent;
-    std::list<RefPtr<FocusHub>> focusNodes;
-    auto itNewFocusNode = focusHub->FlushChildrenFocusHub(focusNodes);
-    EXPECT_EQ(itNewFocusNode, focusNodes.end());
-    auto pipeline = PipelineContext::GetCurrentContext();
-    auto screenNode = pipeline->screenNode_ = AceType::WeakClaim(AceType::RawPtr(frameNode));
-    EXPECT_FALSE(focusHub->GetCurrentMainView());
-}
-
-/**
- * @tc.name: FocusHubTestNg0088
- * @tc.desc: Test the function GetChildMainView.
- * @tc.type: FUNC
- */
-HWTEST_F(FocusHubTestNg, FocusHubTestNg0088, TestSize.Level1)
-{
-    /**
-     * @tc.steps1: create focusHub and construct allNodes.
-     */
-    auto frameNode = FrameNode::CreateFrameNode(V2::PAGE_ETS_TAG, 101, AceType::MakeRefPtr<ButtonPattern>());
-    frameNode->GetOrCreateFocusHub();
-    auto focusHub = frameNode->GetFocusHub();
-    ASSERT_NE(focusHub, nullptr);
-    auto frameNode1 = FrameNode::CreateFrameNode(V2::DIALOG_ETS_TAG, 101, AceType::MakeRefPtr<ButtonPattern>());
-    frameNode1->GetOrCreateFocusHub();
-    auto focusHub1 = frameNode1->GetFocusHub();
-    auto frameNode2 = FrameNode::CreateFrameNode(V2::MODAL_PAGE_TAG, 101, AceType::MakeRefPtr<ButtonPattern>());
-    frameNode2->GetOrCreateFocusHub();
-    auto focusHub2 = frameNode2->GetFocusHub();
-    std::list<RefPtr<FocusHub>> focusNodes;
-    auto itNewFocusNode = focusHub->FlushChildrenFocusHub(focusNodes);
-    EXPECT_EQ(itNewFocusNode, focusNodes.end());
-    focusHub->focusType_ = FocusType::SCOPE;
-    frameNode->children_.push_back(frameNode1);
-    frameNode->children_.push_back(frameNode2);
-    EXPECT_TRUE(focusHub->GetChildMainView() != nullptr);
-}
-
-/**
  * @tc.name: FocusHubTestNg0089
  * @tc.desc: Test the function IsOnRootTree.
  * @tc.type: FUNC
@@ -3273,28 +3178,6 @@ HWTEST_F(FocusHubTestNg, FocusHubTestNg0089, TestSize.Level1)
     ASSERT_TRUE(focusHub->IsFocusableScope());
     auto res = focusHub1->IsOnRootTree();
     ASSERT_FALSE(res);
-}
-
-/**
- * @tc.name: FocusHubTestNg0090
- * @tc.desc: Test the function RequestFocusWithDefaultFocusFirstly.
- * @tc.type: FUNC
- */
-HWTEST_F(FocusHubTestNg, FocusHubTestNg0090, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. Create frameNode.
-     */
-    auto frameNode = AceType::MakeRefPtr<FrameNode>(V2::MENU_WRAPPER_ETS_TAG, 101, AceType::MakeRefPtr<Pattern>());
-    auto child = AceType::MakeRefPtr<FrameNode>(V2::MENU_WRAPPER_ETS_TAG, 101, AceType::MakeRefPtr<ButtonPattern>());
-    child->GetOrCreateFocusHub();
-    frameNode->AddChild(child);
-    auto eventHub = AceType::MakeRefPtr<EventHub>();
-    auto eventHub1 = AceType::MakeRefPtr<EventHub>();
-    auto focusHub = AceType::MakeRefPtr<FocusHub>(eventHub);
-    auto focusHub1 = AceType::MakeRefPtr<FocusHub>(eventHub1);
-    focusHub->RequestFocusWithDefaultFocusFirstly();
-    ASSERT_TRUE(focusHub->currentFocus_ == false);
 }
 
 /**
@@ -3424,28 +3307,6 @@ HWTEST_F(FocusHubTestNg, FocusHubTestNg0094, TestSize.Level1)
 }
 
 /**
- * @tc.name: FocusHubTestNg0095
- * @tc.desc: Test the function RequestFocusWithDefaultFocusFirstly.
- * @tc.type: FUNC
- */
-HWTEST_F(FocusHubTestNg, FocusHubTestNg0095, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. Create frameNode.
-     */
-    auto eventHub = AceType::MakeRefPtr<EventHub>();
-    auto frameNode = AceType::MakeRefPtr<FrameNode>(V2::MENU_WRAPPER_ETS_TAG, -1, AceType::MakeRefPtr<Pattern>());
-    eventHub->AttachHost(frameNode);
-    auto focusHub = AceType::MakeRefPtr<FocusHub>(eventHub);
-    EXPECT_TRUE(focusHub->GetFrameNode() != nullptr);
-    EXPECT_TRUE(focusHub->GetGeometryNode() != nullptr);
-    EXPECT_EQ(focusHub->GetFrameName(), V2::MENU_WRAPPER_ETS_TAG);
-    EXPECT_EQ(focusHub->GetInspectorKey(), std::nullopt);
-    focusHub->RequestFocusWithDefaultFocusFirstly();
-    ASSERT_TRUE(focusHub->currentFocus_ == false);
-}
-
-/**
  * @tc.name: FocusHubTestNg0096
  * @tc.desc: Test the function OnFocusScope.
  * @tc.type: FUNC
@@ -3533,41 +3394,6 @@ HWTEST_F(FocusHubTestNg, FocusHubTestNg0098, TestSize.Level1)
     focusHub->lastWeakFocusNode_ = AceType::WeakClaim(AceType::RawPtr(focusHub1));
     focusHub->OnBlurScope();
     ASSERT_NE(focusHub->lastWeakFocusNode_.Upgrade(), nullptr);
-}
-
-/**
- * @tc.name: FocusHubTestNg0099
- * @tc.desc: Test the function HandleFocusOnMainView.
- * @tc.type: FUNC
- */
-HWTEST_F(FocusHubTestNg, FocusHubTestNg0099, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. Create FocusHub with the WeakPtr eventHub_ owning frameNode.
-     * @tc.expected: eventHub can be updated and frameName = V2::POPUP_ETS_TAG.
-     */
-    auto frameNode = FrameNode::CreateFrameNode("frameNode", -1, AceType::MakeRefPtr<ButtonPattern>());
-    frameNode->GetOrCreateFocusHub();
-    auto focusHub = frameNode->GetFocusHub();
-    ASSERT_NE(focusHub, nullptr);
-    auto frameNode1 = FrameNode::CreateFrameNode("frameNode", 101, AceType::MakeRefPtr<ButtonPattern>());
-    frameNode1->GetOrCreateFocusHub();
-    auto focusHub1 = frameNode1->GetFocusHub();
-    frameNode->children_.push_back(frameNode1);
-    auto rootScope = focusHub->GetChildren().front();
-    rootScope->focusType_ = FocusType::SCOPE;
-    ASSERT_TRUE(focusHub->IsFocusableNode());
-    ASSERT_TRUE(focusHub->currentFocus_ == false);
-    EXPECT_TRUE(focusHub->GetFrameNode() != nullptr);
-    EXPECT_TRUE(focusHub->GetGeometryNode() != nullptr);
-    EXPECT_EQ(focusHub->GetFrameName(), "frameNode");
-    EXPECT_EQ(focusHub->GetInspectorKey(), std::nullopt);
-    EXPECT_TRUE(focusHub->GetMainViewRootScope());
-    ASSERT_FALSE(focusHub->HandleFocusOnMainView());
-    focusHub->GetMainViewRootScope()->currentFocus_ = true;
-    ASSERT_FALSE(focusHub->HandleFocusOnMainView());
-    focusHub->GetMainViewRootScope()->focusDepend_ = FocusDependence::SELF;
-    ASSERT_TRUE(focusHub->HandleFocusOnMainView());
 }
 
 /**

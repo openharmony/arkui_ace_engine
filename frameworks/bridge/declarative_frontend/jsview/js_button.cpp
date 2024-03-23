@@ -96,6 +96,9 @@ void JSButton::SetFontFamily(const JSCallbackInfo& info)
     if (!ParseJsFontFamilies(info[0], fontFamilies)) {
         return;
     }
+    if (fontFamilies.empty()) {
+        return;
+    }
 
     ButtonModel::GetInstance()->SetFontFamily(fontFamilies);
 }
@@ -146,6 +149,18 @@ void JSButton::SetControlSize(const JSCallbackInfo& info)
         }
     }
     ButtonModel::GetInstance()->SetControlSize(static_cast<ControlSize>(value));
+}
+
+void JSButton::SetRole(const JSCallbackInfo& info)
+{
+    int32_t value = static_cast<int32_t>(ButtonRole::NORMAL);
+    if (info[0]->IsNumber()) {
+        auto valueT = info[0]->ToNumber<int32_t>();
+        if (valueT >= static_cast<int32_t>(ButtonRole::NORMAL) && valueT <= static_cast<int32_t>(ButtonRole::ERROR)) {
+            value = valueT;
+        }
+    }
+    ButtonModel::GetInstance()->SetRole(static_cast<ButtonRole>(value));
 }
 
 void JSButton::SetStateEffect(const JSCallbackInfo& info)
@@ -329,6 +344,7 @@ void JSButton::JSBind(BindingTarget globalObj)
     JSClass<JSButton>::StaticMethod("padding", &JSButton::JsPadding);
     JSClass<JSButton>::StaticMethod("buttonStyle", &JSButton::SetButtonStyle);
     JSClass<JSButton>::StaticMethod("controlSize", &JSButton::SetControlSize);
+    JSClass<JSButton>::StaticMethod("role", &JSButton::SetRole);
     JSClass<JSButton>::StaticMethod("createWithLabel", &JSButton::CreateWithLabel, MethodOptions::NONE);
     JSClass<JSButton>::StaticMethod("createWithChild", &JSButton::CreateWithChild, MethodOptions::NONE);
     JSClass<JSButton>::InheritAndBind<JSContainerBase>(globalObj);
@@ -372,8 +388,8 @@ Edge JSButton::GetOldPadding(const JSCallbackInfo& info)
         CalcDimension top = CalcDimension(0.0, DimensionUnit::VP);
         CalcDimension right = CalcDimension(0.0, DimensionUnit::VP);
         CalcDimension bottom = CalcDimension(0.0, DimensionUnit::VP);
-        if (jsObj->HasProperty("top") || jsObj->HasProperty("bottom")
-            || jsObj->HasProperty("left") || jsObj->HasProperty("right")) {
+        if (jsObj->HasProperty("top") || jsObj->HasProperty("bottom") || jsObj->HasProperty("left") ||
+            jsObj->HasProperty("right")) {
             ParseJsDimensionVp(jsObj->GetProperty("left"), left);
             ParseJsDimensionVp(jsObj->GetProperty("top"), top);
             ParseJsDimensionVp(jsObj->GetProperty("right"), right);
@@ -484,7 +500,7 @@ void JSButton::JsOnClick(const JSCallbackInfo& info)
     }
 
     auto jsOnClickFunc = AceType::MakeRefPtr<JsClickFunction>(JSRef<JSFunc>::Cast(info[0]));
-    WeakPtr<NG::FrameNode> targetNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    WeakPtr<NG::FrameNode> targetNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
     auto onTap = [execCtx = info.GetExecutionContext(), func = jsOnClickFunc, node = targetNode](GestureEvent& info) {
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
         ACE_SCORING_EVENT("onClick");
@@ -553,29 +569,23 @@ void JSButton::JsAspectRatio(const JSCallbackInfo& info)
 void JSButton::JsSize(const JSCallbackInfo& info)
 {
     if (!info[0]->IsObject()) {
+        JSViewAbstract::JsWidth(JSVal::Undefined());
+        JSViewAbstract::JsHeight(JSVal::Undefined());
         return;
     }
-
-    std::optional<CalcDimension> widthInfo;
-    std::optional<CalcDimension> heightInfo;
     JSRef<JSObject> sizeObj = JSRef<JSObject>::Cast(info[0]);
-    CalcDimension width;
-    if (ParseJsDimensionVp(sizeObj->GetProperty("width"), width)) {
-        widthInfo = width;
-    }
-    CalcDimension height;
-    if (ParseJsDimensionVp(sizeObj->GetProperty("height"), height)) {
-        heightInfo = height;
-    }
-
-    ButtonModel::GetInstance()->SetSize(widthInfo, heightInfo);
+    JSViewAbstract::JsWidth(sizeObj->GetProperty("width"));
+    JSViewAbstract::JsHeight(sizeObj->GetProperty("height"));
 }
 
 void JSButton::JsRadius(const JSCallbackInfo& info)
 {
     CalcDimension radius;
-    ParseJsDimensionVp(info[0], radius);
-    ButtonModel::GetInstance()->SetBorderRadius(radius);
+    if (!ParseJsDimensionVpNG(info[0], radius)) {
+        ButtonModel::GetInstance()->ResetBorderRadius();
+    } else {
+        ButtonModel::GetInstance()->SetBorderRadius(radius);
+    }
     HandleDifferentRadius(info[0]);
 }
 
@@ -659,6 +669,21 @@ CreateWithPara JSButton::ParseCreatePara(const JSCallbackInfo& info, bool hasLab
             para.controlSize = static_cast<ControlSize>(controlSizeIntValue);
         }
     }
+    ParseButtonRole(optionObj, para);
     return para;
+}
+
+void JSButton::ParseButtonRole(const JSRef<JSObject>& optionObj, CreateWithPara& param)
+{
+    if (optionObj->HasProperty(JSButton::ROLE)) {
+        param.buttonRole = ButtonRole::NORMAL;
+    }
+    if (optionObj->GetProperty(JSButton::ROLE)->IsNumber()) {
+        auto buttonRoleIntValue = optionObj->GetProperty(JSButton::ROLE)->ToNumber<int32_t>();
+        if (buttonRoleIntValue >= static_cast<int32_t>(ButtonRole::NORMAL) &&
+            buttonRoleIntValue <= static_cast<int32_t>(ButtonRole::ERROR)) {
+            param.buttonRole = static_cast<ButtonRole>(buttonRoleIntValue);
+        }
+    }
 }
 } // namespace OHOS::Ace::Framework

@@ -305,16 +305,31 @@ void JsDragEvent::GetDragInfo(const JSCallbackInfo& args)
     args.SetReturnValue(jsValue);
 }
 
+OHOS::Ace::DragBehavior convertDragBehavior(int32_t dragBehavior)
+{
+    switch (dragBehavior) {
+        case 0:
+            return OHOS::Ace::DragBehavior::COPY;
+        case 1:
+            return OHOS::Ace::DragBehavior::MOVE;
+        default:
+            return OHOS::Ace::DragBehavior::UNKNOWN;
+    }
+}
+
 void JsDragEvent::SetDragBehavior(const JSCallbackInfo& args)
 {
     if (args[0]->IsNumber()) {
         dragEvent_->SetCopy(!static_cast<bool>(args[0]->ToNumber<int32_t>()));
+        dragEvent_->SetDragBehavior(convertDragBehavior(args[0]->ToNumber<int32_t>()));
     }
 }
 
 void JsDragEvent::GetDragBehavior(const JSCallbackInfo& args)
 {
-    auto dragBehavior = JSVal(ToJSValue(static_cast<int32_t>(!dragEvent_->IsCopy())));
+    auto dragBehavior = JSVal(ToJSValue(static_cast<int32_t>(
+        dragEvent_->GetDragBehavior() == OHOS::Ace::DragBehavior::MOVE ? OHOS::Ace::DragBehavior::MOVE
+                                                                       : OHOS::Ace::DragBehavior::COPY)));
     auto dragBehaviorRef = JSRef<JSVal>::Make(dragBehavior);
     args.SetReturnValue(dragBehaviorRef);
 }
@@ -431,6 +446,13 @@ void JsDragFunction::ItemDropExecute(const ItemDragInfo& info, int32_t itemIndex
     JSRef<JSVal> isSuccessParam = JSRef<JSVal>::Make(ToJSValue(isSuccess));
     JSRef<JSVal> params[] = { itemDragInfo, itemIndexParam, insertIndexParam, isSuccessParam };
     JsFunction::ExecuteJS(4, params);
+}
+
+void JsDragFunction::PreDragExecute(const PreDragStatus preDragStatus)
+{
+    JSRef<JSVal> preDragStatusParam = JSRef<JSVal>::Make(ToJSValue(static_cast<int32_t>(preDragStatus)));
+    JSRef<JSVal> params[] = { preDragStatusParam };
+    JsFunction::ExecuteJS(1, params);
 }
 
 JSRef<JSObject> JsDragFunction::CreateDragEvent(const RefPtr<DragEvent>& info)

@@ -102,5 +102,105 @@
     {
         "first_introduced": "11",
         "name": "OH_ArkUI_GetNativeAPI"
+    },
+    {
+        "first_introduced": "12",
+        "name": "OH_ArkUI_GetNodeHandleFromNapiValue"
+    },
+    {
+        "first_introduced": "12",
+        "name": "OH_ArkUI_GestureEvent_GetActionType"
+    },
+    {
+        "first_introduced": "12",
+        "name": "OH_ArkUI_PanGesture_GetVelocity"
+    },
+    {
+        "first_introduced": "12",
+        "name": "OH_ArkUI_PanGesture_GetVelocityY"
+    },
+    {
+        "first_introduced": "12",
+        "name": "OH_ArkUI_PanGesture_GetVelocityX"
+    },
+    {
+        "first_introduced": "12",
+        "name": "OH_ArkUI_PanGesture_GetOffsetX"
+    },
+    {
+        "first_introduced": "12",
+        "name": "OH_ArkUI_PanGesture_GetOffsetY"
+    },
+    {
+        "first_introduced": "12",
+        "name": "OH_NativeXComponent_RegisterUIInputEventCallback"
+    },
+    {
+        "first_introduced": "12",
+        "name": "OH_ArkUI_UIInputEvent_GetType"
+    },
+    {
+        "first_introduced": "12",
+        "name": "OH_ArkUI_UIInputEvent_GetEventTime"
+    },
+    {
+        "first_introduced": "12",
+        "name": "OH_ArkUI_PointerEvent_GetX"
+    },
+    {
+        "first_introduced": "12",
+        "name": "OH_ArkUI_PointerEvent_GetY"
+    },
+    {
+        "first_introduced": "12",
+        "name": "OH_ArkUI_PointerEvent_GetWindowX"
+    },
+    {
+        "first_introduced": "12",
+        "name": "OH_ArkUI_PointerEvent_GetWindowY"
+    },
+    {
+        "first_introduced": "12",
+        "name": "OH_ArkUI_PointerEvent_GetDisplayX"
+    },
+    {
+        "first_introduced": "12",
+        "name": "OH_ArkUI_PointerEvent_GetDisplayY"
+    },
+    {
+        "first_introduced": "12",
+        "name": "OH_ArkUI_AxisEvent_GetVerticalAxisValue"
+    },
+    {
+        "first_introduced": "12",
+        "name": "OH_ArkUI_AxisEvent_GetHorizontalAxisValue"
+    },
+    {
+        "first_introduced": "12",
+        "name": "OH_ArkUI_AxisEvent_GetPinchAxisScaleValue"
+    },
+    {
+        "first_introduced": "12",
+        "name": "OH_NativeXComponent_SetNeedSoftKeyboard"
+    },
+    {
+        "first_introduced": "12",
+        "name": "OH_NativeXComponent_RegisterSurfaceShowCallback"
+    },
+    {
+        "first_introduced": "12",
+        "name": "OH_NativeXComponent_RegisterSurfaceHideCallback"
+    },
+    {
+        "first_introduced": "12",
+        "name": "OH_NativeXComponent_RegisterOnTouchInterceptCallback"
+    },
+    {
+        "first_introduced": "12",
+        "name": "OH_ArkUI_QueryModuleInterface"
+    },
+    {
+        "first_introduced": "12",
+        "name": "OH_NativeXComponent_GetTouchEventSourceType"
     }
 ]

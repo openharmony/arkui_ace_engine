@@ -24,9 +24,6 @@
 #include "napi/native_node_api.h"
 
 namespace OHOS::Ace::Napi {
-const std::string NAVDESTINATION_UPDATE = "navDestinationUpdate";
-const std::string ROUTERPAGE_UPDATE = "routerPageUpdate";
-
 class ObserverProcess {
 public:
     ObserverProcess();
@@ -37,11 +34,21 @@ public:
 private:
     napi_value ProcessNavigationRegister(napi_env env, napi_callback_info info);
     napi_value ProcessNavigationUnRegister(napi_env env, napi_callback_info info);
+    napi_value ProcessScrollEventRegister(napi_env env, napi_callback_info info);
+    napi_value ProcessScrollEventUnRegister(napi_env env, napi_callback_info info);
     napi_value ProcessRouterPageRegister(napi_env env, napi_callback_info info);
     napi_value ProcessRouterPageUnRegister(napi_env env, napi_callback_info info);
-    using Func = napi_value(ObserverProcess::*)(napi_env, napi_callback_info);
-    std::map<std::string, Func> registerProcess_;
-    std::map<std::string, Func> unregisterProcess_;
+    napi_value ProcessDensityRegister(napi_env env, napi_callback_info info);
+    using Func = napi_value (ObserverProcess::*)(napi_env, napi_callback_info);
+    napi_value ProcessDensityUnRegister(napi_env env, napi_callback_info info);
+    napi_value ProcessDrawCommandSendRegister(napi_env env, napi_callback_info info);
+    napi_value ProcessDrawCommandSendUnRegister(napi_env env, napi_callback_info info);
+    napi_value ProcessLayoutDoneRegister(napi_env env, napi_callback_info info);
+    napi_value ProcessLayoutDoneUnRegister(napi_env env, napi_callback_info info);
+    napi_value ProcessNavDestinationSwitchRegister(napi_env env, napi_callback_info info);
+    napi_value ProcessNavDestinationSwitchUnRegister(napi_env env, napi_callback_info info);
+    std::map<std::string, Func> registerProcessMap_;
+    std::map<std::string, Func> unregisterProcessMap_;
 };
 } // namespace OHOS::Ace::Napi
 

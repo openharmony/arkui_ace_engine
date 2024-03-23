@@ -136,6 +136,8 @@ enum class AceLogTag : uint8_t {
     ACE_OBSERVER,             // C03940
     ACE_EMBEDDED_COMPONENT,   // C03941
     ACE_TEXT_CLOCK,           // C03942
+    ACE_FOLDER_STACK,         // C03943
+    ACE_SELECT_COMPONENT,     // C03944
 
     FORM_RENDER = 255, // C039FF FormRenderer
     END = 256,         // Last one, do not use

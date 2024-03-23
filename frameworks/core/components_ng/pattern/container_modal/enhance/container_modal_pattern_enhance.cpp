@@ -77,6 +77,14 @@ void ContainerModalPatternEnhance::ShowTitle(bool isShow, bool hasDeco, bool nee
     auto renderContext = containerNode->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
     renderContext->UpdateBackgroundColor(isFocus_ ? CONTAINER_BACKGROUND_COLOR : CONTAINER_BACKGROUND_COLOR_LOST_FOCUS);
+    // only floating window show border
+    bool isFloatingWindow = windowManager->GetWindowMode() == WindowMode::WINDOW_MODE_FLOATING;
+    BorderRadiusProperty borderRadius;
+    borderRadius.SetRadius((isFloatingWindow && isShow) ? CONTAINER_OUTER_RADIUS : 0.0_vp);
+    renderContext->UpdateBorderRadius(borderRadius);
+    BorderColorProperty borderColor;
+    borderColor.SetColor((isFloatingWindow && isShow) ? CONTAINER_BORDER_COLOR : Color::TRANSPARENT);
+    renderContext->UpdateBorderColor(borderColor);
 
     // update stack content border
     auto stackLayoutProperty = stackNode->GetLayoutProperty();
@@ -226,26 +234,6 @@ void ContainerModalPatternEnhance::SetContainerButtonHide(bool hideSplit, bool h
     }
 }
 
-bool ContainerModalPatternEnhance::CanHideFloatingTitle()
-{
-    auto controlButtonsNode = GetControlButtonRow();
-    CHECK_NULL_RETURN(controlButtonsNode, true);
-    auto maximizeBtn = GetTitleItemByIndex(controlButtonsNode, MAX_RECOVER_BUTTON_INDEX);
-    CHECK_NULL_RETURN(maximizeBtn, true);
-    auto subwindowManager = SubwindowManager::GetInstance();
-    CHECK_NULL_RETURN(subwindowManager, true);
-    auto subwindow = subwindowManager->GetSubwindow(Container::CurrentId());
-    CHECK_NULL_RETURN(subwindow, true);
-    auto overlayManager = subwindow->GetOverlayManager();
-    CHECK_NULL_RETURN(overlayManager, true);
-    auto menu = overlayManager->GetMenuNode(maximizeBtn->GetId());
-    // current MaximizeBtnMenu is null!
-    if (menu == nullptr) {
-        return true;
-    }
-    return !subwindow->GetShown();
-}
-
 void ContainerModalPatternEnhance::UpdateTitleInTargetPos(bool isShow, int32_t height)
 {
     auto floatingTitleNode = GetFloatingTitleRow();
@@ -262,35 +250,40 @@ void ContainerModalPatternEnhance::UpdateTitleInTargetPos(bool isShow, int32_t h
     auto buttonsContext = controlButtonsNode->GetRenderContext();
     CHECK_NULL_VOID(buttonsContext);
 
-    auto titlePopupDistance = CONTAINER_TITLE_HEIGHT.ConvertToPx();
+    auto titlePopupDistance = titleHeight_.ConvertToPx();
     AnimationOption option;
     option.SetDuration(TITLE_POPUP_DURATION);
     option.SetCurve(Curves::EASE_IN_OUT);
 
-    if (isShow && this->CanShowFloatingTitle()) {
+    if (isShow && CanShowFloatingTitle()) {
         floatingContext->OnTransformTranslateUpdate({ 0.0f, height - static_cast<float>(titlePopupDistance), 0.0f });
         floatingLayoutProperty->UpdateVisibility(floatingTitleSettedShow_ ? VisibleType::VISIBLE : VisibleType::GONE);
         AnimationUtils::Animate(option, [floatingContext, height]() {
-            floatingContext->OnTransformTranslateUpdate({ 0.0f, height, 0.0f });
+            auto rect = floatingContext->GetPaintRectWithoutTransform();
+            floatingContext->OnTransformTranslateUpdate({ 0.0f, static_cast<float>(height - rect.GetY()), 0.0f });
         });
         buttonsContext->OnTransformTranslateUpdate({ 0.0f, height - static_cast<float>(titlePopupDistance), 0.0f });
+        SetControlButtonVisibleBeforeAnim(controlButtonsLayoutProperty->GetVisibilityValue());
         controlButtonsLayoutProperty->UpdateVisibility(VisibleType::VISIBLE);
         AnimationUtils::Animate(option, [buttonsContext, height]() {
-            buttonsContext->OnTransformTranslateUpdate({ 0.0f, height, 0.0f });
+            auto rect = buttonsContext->GetPaintRectWithoutTransform();
+            buttonsContext->OnTransformTranslateUpdate({ 0.0f, static_cast<float>(height - rect.GetY()), 0.0f });
         });
     }
 
-    if (!isShow && this->CanHideFloatingTitle()) {
+    if (!isShow && CanHideFloatingTitle()) {
+        auto beforeVisible = GetControlButtonVisibleBeforeAnim();
         AnimationUtils::Animate(
             option,
-            [floatingContext, buttonsContext, titlePopupDistance, height]() {
-                floatingContext->OnTransformTranslateUpdate({ 0.0f, static_cast<float>(titlePopupDistance)- height,
+            [floatingContext, buttonsContext, titlePopupDistance, beforeVisible]() {
+                floatingContext->OnTransformTranslateUpdate({ 0.0f, static_cast<float>(-titlePopupDistance),
                     0.0f });
-                buttonsContext->OnTransformTranslateUpdate({ 0.0f, static_cast<float>(titlePopupDistance) - height,
-                    0.0f });
+                buttonsContext->OnTransformTranslateUpdate({ 0.0f,
+                    beforeVisible == VisibleType::VISIBLE ? 0.0f : static_cast<float>(-titlePopupDistance), 0.0f });
             },
-            [floatingLayoutProperty]() {
+            [floatingLayoutProperty, controlButtonsLayoutProperty, beforeVisible]() {
                 floatingLayoutProperty->UpdateVisibility(VisibleType::GONE);
+                controlButtonsLayoutProperty->UpdateVisibility(beforeVisible);
             });
     }
 }

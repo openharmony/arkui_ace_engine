@@ -32,11 +32,12 @@ namespace OHOS::Ace {
 
 class DataProviderRes {
 public:
-    DataProviderRes(std::unique_ptr<uint8_t[]>&& data, int64_t size) : data_(std::move(data)), size_(size) {}
-    DataProviderRes(uint8_t* dataRes, int64_t size) : data_(std::unique_ptr<uint8_t[]>(dataRes)), size_(size) {}
+    DataProviderRes(std::unique_ptr<void, decltype(&std::free)>&& data, int64_t size)
+        : data_(std::move(data)), size_(size)
+    {}
     ~DataProviderRes() = default;
 
-    std::unique_ptr<uint8_t[]>&& GetData()
+    std::unique_ptr<void, decltype(&std::free)>&& GetData()
     {
         return std::move(data_);
     }
@@ -46,7 +47,7 @@ public:
     }
 
 private:
-    std::unique_ptr<uint8_t[]> data_;
+    std::unique_ptr<void, decltype(&std::free)> data_;
     int64_t size_ = 0;
 
     ACE_DISALLOW_COPY_AND_MOVE(DataProviderRes);

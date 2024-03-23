@@ -22,6 +22,7 @@
 #include "core/components_ng/pattern/waterflow/water_flow_event_hub.h"
 #include "core/components_ng/pattern/waterflow/water_flow_layout_info.h"
 #include "core/components_ng/pattern/waterflow/water_flow_layout_property.h"
+#include "core/components_ng/pattern/waterflow/water_flow_sections.h"
 
 namespace OHOS::Ace::NG {
 class ACE_EXPORT WaterFlowPattern : public ScrollablePattern {
@@ -57,23 +58,9 @@ public:
 
     bool UpdateStartIndex(int32_t index);
 
-    void AddFooter(const RefPtr<NG::UINode>& footer)
-    {
-        auto host = GetHost();
-        CHECK_NULL_VOID(host);
-        if (layoutInfo_.footerIndex_ < 0) {
-            layoutInfo_.footerIndex_ = 0;
-            host->AddChild(footer);
-        } else {
-            host->ReplaceChild(host->GetChildAtIndex(layoutInfo_.footerIndex_), footer);
-        }
-        footer->SetActive(false);
-    }
+    void AddFooter(const RefPtr<NG::UINode>& footer);
 
-    void ResetLayoutInfo()
-    {
-        layoutInfo_.Reset();
-    }
+    void ResetLayoutInfo();
 
     int32_t GetBeginIndex() const
     {
@@ -103,7 +90,7 @@ public:
 
     void OnAnimateStop() override;
 
-    void ScrollPage(bool reverse);
+    void ScrollPage(bool reverse, bool smooth = false) override;
 
     void ScrollToIndex(int32_t index, bool smooth = false, ScrollAlign align = ScrollAlign::START) override;
 
@@ -126,6 +113,18 @@ public:
     void OnRestoreInfo(const std::string& restoreInfo) override;
     Rect GetItemRect(int32_t index) const override;
 
+    RefPtr<WaterFlowSections> GetSections() const
+    {
+        return sections_;
+    }
+    RefPtr<WaterFlowSections> GetOrCreateWaterFlowSections();
+    /**
+     * @brief Callback function when Sections data has changed.
+     *
+     * @param start the index of the first modified section.
+     */
+    void OnSectionChanged(int32_t start);
+
 private:
     DisplayMode GetDefaultScrollBarDisplayMode() const override
     {
@@ -140,10 +139,11 @@ private:
     SizeF GetContentSize() const;
     void MarkDirtyNodeSelf();
     void OnScrollEndCallback() override;
-    bool ScrollToTargrtIndex(int32_t index);
+    bool ScrollToTargetIndex(int32_t index);
     bool NeedRender();
     std::optional<int32_t> targetIndex_;
     WaterFlowLayoutInfo layoutInfo_;
+    RefPtr<WaterFlowSections> sections_;
 
     float prevOffset_ = 0.0f;
     SizeF lastSize_;

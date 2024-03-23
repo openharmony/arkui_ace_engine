@@ -41,6 +41,7 @@ public:
     // TODO: add extra event for span.
     void SetOnClick(std::function<void(const BaseEventInfo* info)>&& click) override;
     void ClearOnClick() override;
+    
 
     static RefPtr<SpanNode> CreateSpanNode(int32_t nodeId, const std::string& content);
     static void InitSpan(UINode* uiNode, const std::string& content);
@@ -56,9 +57,24 @@ public:
     static void SetTextColor(UINode* uiNode, const Color& value);
     static void SetLetterSpacing(UINode* uiNode, const Dimension& value);
     static void SetFont(UINode* uiNode, const Font& value);
-
+    static std::string GetContent(UINode* uiNode);
+    static Ace::TextDecoration GetTextDecoration(UINode* uiNode);
+    static Color GetTextDecorationColor(UINode* uiNode);
+    static Color GetFontColor(UINode* uiNode);
+    static Dimension GetFontSize(UINode* uiNode);
+    static Ace::FontStyle GetFontStyle(UINode* uiNode);
+    static FontWeight GetFontWeight(UINode* uiNode);
+    static Dimension GetTextLineHeight(UINode* uiNode);
+    static Ace::TextCase GetTextCase(UINode* uiNode);
+    static Dimension GetLetterSpacing(UINode* uiNode);
+    static TextStyle GetDefaultTextStyle();
     void CreateContainSpan() override;
     void SetTextBackgroundStyle(const TextBackgroundStyle& style) override;
+    static void SetTextBackgroundStyle(UINode* uiNode, const TextBackgroundStyle& style);
+    static TextBackgroundStyle GetSpanTextBackgroundStyle(UINode* uiNode);
+    static void SetTextShadow(UINode* uiNode, const std::vector<Shadow>& value);
+    static std::vector<Shadow> GetTextShadow(UINode* uiNode);
+    static void SetOnClick(UINode* uiNode, GestureEventFunc&& click);
 };
 } // namespace OHOS::Ace::NG
 

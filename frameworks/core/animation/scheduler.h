@@ -76,13 +76,15 @@ public:
 
     bool PrintVsyncInfoIfNeed() const;
 
+    void SetExpectedFrameRateRange(const FrameRateRange& frameRateRange);
+
 private:
     int32_t scheduleId_ = 0;
     bool isRunning_ = false;
     uint64_t startupTimestamp_ = 0;
     OnFrameCallback callback_ = nullptr;
     WeakPtr<PipelineBase> context_;
-    RefPtr<UIDisplaySync> displaySync_;
+    RefPtr<UIDisplaySync> displaySync_ = AceType::MakeRefPtr<UIDisplaySync>();
 };
 
 class SchedulerBuilder {

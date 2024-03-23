@@ -14,6 +14,7 @@
  */
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_common_bridge.h"
 
+#include "base/memory/ace_type.h"
 #include "base/utils/string_utils.h"
 #include "base/utils/utils.h"
 #include "bridge/declarative_frontend/engine/js_ref_ptr.h"
@@ -33,7 +34,7 @@ using namespace OHOS::Ace::Framework;
 namespace OHOS::Ace::NG {
 namespace {
 constexpr uint32_t COLOR_ALPHA_VALUE = 0xFF000000;
-constexpr uint32_t ALIGNMENT_CENTER = 4;
+constexpr uint32_t ALIGNMENT_TOP_LEFT = 0;
 constexpr float DEFAULT_PROGRESS_TOTAL = 100.0f;
 constexpr int NUM_0 = 0;
 constexpr int NUM_1 = 1;
@@ -122,7 +123,7 @@ void ParseGradientAngle(const EcmaVM *vm, const Local<JSValueRef> &value, std::v
     values.push_back(static_cast<ArkUI_Float32>(angleValue));
 }
 
-void ParseGradientColorStops(const EcmaVM *vm, const Local<JSValueRef> &value, std::vector<ArkUI_Float32> &colors)
+void ParseGradientColorStops(const EcmaVM *vm, const Local<JSValueRef> &value, std::vector<ArkUIInt32orFloat32> &colors)
 {
     if (!value->IsArray(vm)) {
         return;
@@ -152,9 +153,15 @@ void ParseGradientColorStops(const EcmaVM *vm, const Local<JSValueRef> &value, s
                 hasDimension = true;
             }
         }
-        colors.push_back(static_cast<ArkUI_Float32>(color.GetValue()));
-        colors.push_back(static_cast<ArkUI_Float32>(hasDimension));
-        colors.push_back(static_cast<ArkUI_Float32>(dimension));
+        ArkUIInt32orFloat32 colorUInt32;
+        colorUInt32.u32 = static_cast<ArkUI_Uint32>(color.GetValue());
+        ArkUIInt32orFloat32 hasDimensionU32;
+        hasDimensionU32.i32 = static_cast<ArkUI_Int32>(hasDimension);
+        ArkUIInt32orFloat32 dimensionF32;
+        dimensionF32.f32 = static_cast<ArkUI_Float32>(dimension);
+        colors.push_back(colorUInt32);
+        colors.push_back(hasDimensionU32);
+        colors.push_back(dimensionF32);
     }
 }
 
@@ -367,7 +374,7 @@ void ParseBorderImageLinearGradient(ArkUINodeHandle node,
     int32_t direction = static_cast<int32_t>(GradientDirection::NONE);
     ParseJsInt32(vm, directionArg, direction);
     options.push_back(static_cast<ArkUI_Float32>(direction));
-    std::vector<ArkUI_Float32> colors;
+    std::vector<ArkUIInt32orFloat32> colors;
     ParseGradientColorStops(vm, colorsArg, colors);
     auto repeating = repeatingArg->IsBoolean() ? repeatingArg->BooleaValue() : false;
     options.push_back(static_cast<ArkUI_Float32>(repeating));
@@ -1727,38 +1734,38 @@ ArkUINativeModuleValue CommonBridge::SetShadow(ArkUIRuntimeCallInfo *runtimeCall
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     int32_t shadowStyle = 0;
     if (ArkTSUtils::ParseJsInteger(vm, styleArg, shadowStyle)) {
-        ArkUI_Float32 shadows[] = { shadowStyle };
+        ArkUIInt32orFloat32 shadows[] = { {.i32 = shadowStyle} };
         GetArkUINodeModifiers()->getCommonModifier()->setBackShadow(nativeNode, shadows,
             (sizeof(shadows) / sizeof(shadows[NUM_0])));
         return panda::JSValueRef::Undefined(vm);
     }
-
-    ArkUI_Float32 shadows[] = { 0.0, 0.0, 0.0, 0.0, static_cast<ArkUI_Float32>(ShadowType::COLOR), 0.0, 0.0 };
+    ArkUIInt32orFloat32 shadows[] = { { 0.0 }, { .i32 = 0  }, { 0.0 }, { 0.0 },
+        { .i32 = static_cast<ArkUI_Int32>(ShadowType::COLOR) }, { .u32 = 0 }, { .i32 = 0 } };
     double radius;
     ArkTSUtils::ParseJsDouble(vm, radiusArg, radius);
-    shadows[NUM_0] = radius;
+    shadows[NUM_0].f32 = radius;
 
-    shadows[NUM_0] = (LessNotEqual(shadows[NUM_0], 0.0)) ? 0.0 : shadows[NUM_0];
+    shadows[NUM_0].f32 = (LessNotEqual(shadows[NUM_0].f32, 0.0)) ? 0.0 : shadows[NUM_0].f32;
     CalcDimension offsetX;
     if (ParseJsShadowDimension(vm, offsetXArg, offsetX)) {
-        shadows[NUM_2] = offsetX.Value();
+        shadows[NUM_2].f32 = offsetX.Value();
     }
     CalcDimension offsetY;
     if (ParseJsShadowDimension(vm, offsetYArg, offsetY)) {
-        shadows[NUM_3] = offsetY.Value();
+        shadows[NUM_3].f32 = offsetY.Value();
     }
     if (typeArg->IsInt()) {
         uint32_t shadowType = typeArg->Uint32Value(vm);
-        shadows[NUM_4] = static_cast<ArkUI_Float32>(
-            std::clamp(shadowType, static_cast<uint32_t>(ShadowType::COLOR), static_cast<uint32_t>(ShadowType::BLUR)));
+        shadows[NUM_4].i32 =
+            std::clamp(shadowType, static_cast<uint32_t>(ShadowType::COLOR), static_cast<uint32_t>(ShadowType::BLUR));
     }
     int32_t type = 0;
     uint32_t color = 0;
     if (ParseJsShadowColor(vm, colorArg, type, color)) {
-        shadows[NUM_1] = static_cast<ArkUI_Float32>(type);
-        shadows[NUM_5] = static_cast<ArkUI_Float32>(color);
+        shadows[NUM_1].i32 = type;
+        shadows[NUM_5].u32 = color;
     }
-    shadows[NUM_6] = static_cast<uint32_t>((fillArg->IsBoolean()) ? fillArg->BooleaValue() : false);
+    shadows[NUM_6].i32 = static_cast<uint32_t>((fillArg->IsBoolean()) ? fillArg->BooleaValue() : false);
     GetArkUINodeModifiers()->getCommonModifier()->setBackShadow(nativeNode, shadows,
         (sizeof(shadows) / sizeof(shadows[NUM_0])));
     return panda::JSValueRef::Undefined(vm);
@@ -1882,13 +1889,21 @@ ArkUINativeModuleValue CommonBridge::SetBackdropBlur(ArkUIRuntimeCallInfo *runti
     EcmaVM *vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
-    Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(NUM_1);
+    Local<JSValueRef> blurArg = runtimeCallInfo->GetCallArgRef(NUM_1);
+    Local<JSValueRef> blurOptionArg = runtimeCallInfo->GetCallArgRef(NUM_2);
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
-    if (secondArg->IsNumber()) {
-        GetArkUINodeModifiers()->getCommonModifier()->setBackdropBlur(nativeNode, secondArg->ToNumber(vm)->Value());
-    } else {
+
+    double blur = 0.0;
+    if (!ArkTSUtils::ParseJsDouble(vm, blurArg, blur)) {
         GetArkUINodeModifiers()->getCommonModifier()->resetBackdropBlur(nativeNode);
+        return panda::JSValueRef::Undefined(vm);
     }
+    BlurOption blurOption;
+    if (blurOptionArg->IsArray(vm)) {
+        ParseBlurOption(vm, blurOptionArg, blurOption);
+    }
+    GetArkUINodeModifiers()->getCommonModifier()->setBackdropBlur(
+        nativeNode, blur, blurOption.grayscale.data(), blurOption.grayscale.size());
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -1940,16 +1955,45 @@ ArkUINativeModuleValue CommonBridge::ResetHueRotate(ArkUIRuntimeCallInfo *runtim
 
 ArkUINativeModuleValue CommonBridge::SetInvert(ArkUIRuntimeCallInfo *runtimeCallInfo)
 {
-    EcmaVM *vm = runtimeCallInfo->GetVM();
+    EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
-    Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(NUM_1);
+    Local<JSValueRef> invertValueArg = runtimeCallInfo->GetCallArgRef(NUM_1);
+    Local<JSValueRef> optionLowArg = runtimeCallInfo->GetCallArgRef(NUM_2);
+    Local<JSValueRef> optionHighArg = runtimeCallInfo->GetCallArgRef(NUM_3);
+    Local<JSValueRef> optionThresholdArg = runtimeCallInfo->GetCallArgRef(NUM_4);
+    Local<JSValueRef> optionThresholdRangeArg = runtimeCallInfo->GetCallArgRef(NUM_5);
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
-    if (secondArg->IsNumber()) {
-        GetArkUINodeModifiers()->getCommonModifier()->setInvert(nativeNode, secondArg->ToNumber(vm)->Value());
+
+    if (!invertValueArg->IsUndefined()) {
+        double invertValue = 0.0;
+        if (ArkTSUtils::ParseJsDouble(vm, invertValueArg, invertValue)) {
+            ArkUI_Float32 invert[] = { invertValue };
+            GetArkUINodeModifiers()->getCommonModifier()->setInvert(nativeNode, invert, NUM_1);
+        } else {
+            GetArkUINodeModifiers()->getCommonModifier()->resetInvert(nativeNode);
+        }
     } else {
-        GetArkUINodeModifiers()->getCommonModifier()->resetInvert(nativeNode);
+        ArkUI_Float32 invert[] = { 0.0, 0.0, 0.0, 0.0 };
+        double low = 0.0;
+        double high = 0.0;
+        double threshold = 0.0;
+        double thresholdRange = 0.0;
+        if (ArkTSUtils::ParseJsDouble(vm, optionLowArg, low)) {
+            invert[NUM_0] = std::clamp(low, 0.0, 1.0);
+        }
+        if (ArkTSUtils::ParseJsDouble(vm, optionHighArg, high)) {
+            invert[NUM_1] = std::clamp(high, 0.0, 1.0);
+        }
+        if (ArkTSUtils::ParseJsDouble(vm, optionThresholdArg, threshold)) {
+            invert[NUM_2] = std::clamp(threshold, 0.0, 1.0);
+        }
+        if (ArkTSUtils::ParseJsDouble(vm, optionThresholdRangeArg, thresholdRange)) {
+            invert[NUM_3] = std::clamp(thresholdRange, 0.0, 1.0);
+        }
+        GetArkUINodeModifiers()->getCommonModifier()->setInvert(nativeNode, invert, NUM_4);
     }
+
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -2119,13 +2163,21 @@ ArkUINativeModuleValue CommonBridge::SetBlur(ArkUIRuntimeCallInfo *runtimeCallIn
     EcmaVM *vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
-    Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(NUM_1);
+    Local<JSValueRef> blurArg = runtimeCallInfo->GetCallArgRef(NUM_1);
+    Local<JSValueRef> blurOptionArg = runtimeCallInfo->GetCallArgRef(NUM_2);
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
-    if (secondArg->IsNumber()) {
-        GetArkUINodeModifiers()->getCommonModifier()->setBlur(nativeNode, secondArg->ToNumber(vm)->Value());
-    } else {
+    double blur = 0.0;
+    if (!ArkTSUtils::ParseJsDouble(vm, blurArg, blur)) {
         GetArkUINodeModifiers()->getCommonModifier()->resetBlur(nativeNode);
+        return panda::JSValueRef::Undefined(vm);
     }
+    BlurOption blurOption;
+    if (blurOptionArg->IsArray(vm)) {
+        ParseBlurOption(vm, blurOptionArg, blurOption);
+    }
+    GetArkUINodeModifiers()->getCommonModifier()->setBlur(
+        nativeNode, blur, blurOption.grayscale.data(), blurOption.grayscale.size());
+
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -2156,11 +2208,10 @@ ArkUINativeModuleValue CommonBridge::SetLinearGradient(ArkUIRuntimeCallInfo *run
     ParseJsInt32(vm, directionArg, direction);
     values.push_back(static_cast<ArkUI_Float32>(direction));
 
-    std::vector<ArkUI_Float32> colors;
+    std::vector<ArkUIInt32orFloat32> colors;
     ParseGradientColorStops(vm, colorsArg, colors);
     auto repeating = repeatingArg->IsBoolean() ? repeatingArg->BooleaValue() : false;
     values.push_back(static_cast<ArkUI_Float32>(repeating));
-
     GetArkUINodeModifiers()->getCommonModifier()->setLinearGradient(nativeNode, values.data(), values.size(),
         colors.data(), colors.size());
     return panda::JSValueRef::Undefined(vm);
@@ -2193,7 +2244,7 @@ ArkUINativeModuleValue CommonBridge::SetSweepGradient(ArkUIRuntimeCallInfo *runt
     ParseGradientAngle(vm, startArg, values);
     ParseGradientAngle(vm, endArg, values);
     ParseGradientAngle(vm, rotationArg, values);
-    std::vector<ArkUI_Float32> colors;
+    std::vector<ArkUIInt32orFloat32> colors;
     ParseGradientColorStops(vm, colorsArg, colors);
     auto repeating = repeatingArg->IsBoolean() ? repeatingArg->BooleaValue() : false;
     values.push_back(static_cast<ArkUI_Float32>(repeating));
@@ -2229,7 +2280,7 @@ ArkUINativeModuleValue CommonBridge::SetRadialGradient(ArkUIRuntimeCallInfo *run
     values.push_back(static_cast<ArkUI_Float32>(hasRadius));
     values.push_back(static_cast<ArkUI_Float32>(radius.Value()));
     values.push_back(static_cast<ArkUI_Float32>(radius.Unit()));
-    std::vector<ArkUI_Float32> colors;
+    std::vector<ArkUIInt32orFloat32> colors;
     ParseGradientColorStops(vm, colorsArg, colors);
     auto repeating = repeatingArg->IsBoolean() ? repeatingArg->BooleaValue() : false;
     values.push_back(static_cast<ArkUI_Float32>(repeating));
@@ -2265,7 +2316,7 @@ ArkUINativeModuleValue CommonBridge::SetOverlay(ArkUIRuntimeCallInfo* runtimeCal
     if (valueArg->IsString()) {
         text = valueArg->ToString(vm)->ToString();
     }
-    int32_t align = ALIGNMENT_CENTER;
+    int32_t align = ALIGNMENT_TOP_LEFT;
     auto hasAlign = ArkTSUtils::ParseJsInteger(vm, alignArg, align);
     std::optional<CalcDimension> offsetX = CalcDimension(0);
     std::optional<CalcDimension> offsetY = CalcDimension(0);
@@ -2747,14 +2798,14 @@ ArkUINativeModuleValue CommonBridge::SetScale(ArkUIRuntimeCallInfo *runtimeCallI
 
         ArkUI_Float32 values[SIZE_OF_FIVE];
         int units[SIZE_OF_TWO];
-
-        values[NUM_0] = static_cast<ArkUI_Float32>(centerX.Value());
+        
+        values[NUM_0] = static_cast<ArkUI_Float32>(scaleX);
+        values[NUM_1] = static_cast<ArkUI_Float32>(scaleY);
+        values[NUM_2] = static_cast<ArkUI_Float32>(scaleZ);
+        values[NUM_3] = static_cast<ArkUI_Float32>(centerX.Value());
+        values[NUM_4] = static_cast<ArkUI_Float32>(centerY.Value());
         units[NUM_0] = static_cast<int>(centerX.Unit());
-        values[NUM_1] = static_cast<ArkUI_Float32>(centerY.Value());
         units[NUM_1] = static_cast<int>(centerY.Unit());
-        values[NUM_2] = static_cast<ArkUI_Float32>(scaleX);
-        values[NUM_3] = static_cast<ArkUI_Float32>(scaleY);
-        values[NUM_4] = static_cast<ArkUI_Float32>(scaleZ);
         GetArkUINodeModifiers()->getCommonModifier()->setScale(nativeNode, values, SIZE_OF_FIVE, units, SIZE_OF_TWO);
     } else {
         GetArkUINodeModifiers()->getCommonModifier()->resetScale(nativeNode);
@@ -2808,14 +2859,19 @@ ArkUINativeModuleValue CommonBridge::SetGeometryTransition(ArkUIRuntimeCallInfo 
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
     Local<JSValueRef> idArg = runtimeCallInfo->GetCallArgRef(NUM_1);
+    Local<JSValueRef> optionsArg = runtimeCallInfo->GetCallArgRef(NUM_2);
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
-    if (!idArg->IsString()) {
+    if (idArg->IsUndefined() || idArg->IsNull() || !idArg->IsString()) {
         GetArkUINodeModifiers()->getCommonModifier()->resetGeometryTransition(nativeNode);
         return panda::JSValueRef::Undefined(vm);
     }
-
     std::string id = idArg->ToString(vm)->ToString();
-    GetArkUINodeModifiers()->getCommonModifier()->setGeometryTransition(nativeNode, id.c_str());
+    bool options = false;
+    if (optionsArg->IsBoolean()) {
+        options = optionsArg->ToBoolean(vm)->Value();
+    }
+    GetArkUINodeModifiers()->getCommonModifier()->setGeometryTransition(
+        nativeNode, id.c_str(), static_cast<int32_t>(options));
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -4194,7 +4250,8 @@ ArkUINativeModuleValue CommonBridge::SetBackgroundEffect(ArkUIRuntimeCallInfo* r
         ParseBlurOption(vm, blurOptionsArg, blurOption);
     }
 
-    GetArkUINodeModifiers()->getCommonModifier()->setBackgroundEffect(nativeNode, radius.CalcValue().c_str(),
+    GetArkUINodeModifiers()->getCommonModifier()->setBackgroundEffect(
+        nativeNode, static_cast<ArkUI_Float32>(radius.Value()),
         saturation, brightness, color.GetValue(), static_cast<ArkUI_Int32>(adaptiveColor),
         blurOption.grayscale.data(), blurOption.grayscale.size());
 
@@ -4300,6 +4357,12 @@ ArkUINativeModuleValue CommonBridge::ResetTransition(ArkUIRuntimeCallInfo* runti
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Framework::JsiCallbackInfo info = Framework::JsiCallbackInfo(runtimeCallInfo);
+    if (!info[1]->IsObject()) {
+        ViewAbstractModel::GetInstance()->CleanTransition();
+        ViewAbstractModel::GetInstance()->SetChainedTransition(nullptr);
+        return panda::JSValueRef::Undefined(vm);
+    }
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     auto* frameNode = reinterpret_cast<FrameNode*>(nativeNode);
@@ -4333,6 +4396,11 @@ ArkUINativeModuleValue CommonBridge::ResetTransitionPassThrough(ArkUIRuntimeCall
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Framework::JsiCallbackInfo info = Framework::JsiCallbackInfo(runtimeCallInfo);
+    if (!info[1]->IsObject()) {
+        ViewAbstractModel::GetInstance()->CleanTransition();
+        ViewAbstractModel::GetInstance()->SetChainedTransition(nullptr);
+    }
     return panda::JSValueRef::Undefined(vm);
 }
 

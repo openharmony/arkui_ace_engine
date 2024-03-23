@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 #include "core/interfaces/native/node/node_refresh_modifier.h"
+#include "core/interfaces/native/node/node_refresh_modifier.h"
 
 #include "base/geometry/dimension.h"
 #include "core/components/common/layout/constants.h"
@@ -41,39 +42,70 @@ ArkUI_Bool GetRefreshing(ArkUINodeHandle node)
     return static_cast<ArkUI_Bool>(RefreshModelNG::GetRefreshing(frameNode));
 }
 
+void SetRefreshOffset(ArkUINodeHandle node, ArkUI_Float32 value, ArkUI_Int32 unit)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    RefreshModelNG::SetRefreshOffset(frameNode, Dimension(value, static_cast<OHOS::Ace::DimensionUnit>(unit)));
 }
+void ResetRefreshOffset(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    RefreshModelNG::SetRefreshOffset(frameNode, Dimension(0.0f, DimensionUnit::VP));
+}
+
+void SetPullToRefresh(ArkUINodeHandle node, ArkUI_Bool value)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    RefreshModelNG::SetPullToRefresh(frameNode, value);
+}
+
+void ResetPullToRefresh(ArkUINodeHandle node) {}
+
+void SetRefreshContent(ArkUINodeHandle node, ArkUINodeHandle content)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto contentNode = reinterpret_cast<FrameNode*>(content);
+    CHECK_NULL_VOID(contentNode);
+    RefreshModelNG::SetCustomBuilder(frameNode, contentNode);
+}
+} // namespace
 namespace NodeModifier {
 
 const ArkUIRefreshModifier* GetRefreshModifier()
 {
-    static const ArkUIRefreshModifier modifier = { SetRefreshing, GetRefreshing };
+    static const ArkUIRefreshModifier modifier = { SetRefreshing, GetRefreshing, SetRefreshOffset, ResetRefreshOffset,
+        SetPullToRefresh, ResetPullToRefresh, SetRefreshContent };
     return &modifier;
 }
 
-void SetRefreshOnStateChange(ArkUINodeHandle node, ArkUI_Int32 eventId, void* extraParam)
+void SetRefreshOnStateChange(ArkUINodeHandle node, void* extraParam)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    auto onEvent = [node, eventId, extraParam](const int32_t value) {
+    auto onEvent = [node, extraParam](const int32_t value) {
         ArkUINodeEvent event;
-        event.kind = ON_REFRESH_STATE_CHANGE;
-        event.eventId = eventId;
-        event.extraParam = extraParam;
+        event.kind = COMPONENT_ASYNC_EVENT;
+        event.extraParam = reinterpret_cast<intptr_t>(extraParam);
+        event.componentAsyncEvent.subKind = ON_REFRESH_STATE_CHANGE;
         event.componentAsyncEvent.data[0].i32 = value;
         SendArkUIAsyncEvent(&event);
     };
     RefreshModelNG::SetOnStateChange(frameNode, std::move(onEvent));
 }
 
-void SetOnRefreshing(ArkUINodeHandle node, ArkUI_Int32 eventId, void* extraParam)
+void SetOnRefreshing(ArkUINodeHandle node, void* extraParam)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    auto onEvent = [node, eventId, extraParam]() {
+    auto onEvent = [node, extraParam]() {
         ArkUINodeEvent event;
-        event.kind = ON_REFRESH_REFRESHING;
-        event.eventId = eventId;
-        event.extraParam = extraParam;
+        event.kind = COMPONENT_ASYNC_EVENT;
+        event.extraParam = reinterpret_cast<intptr_t>(extraParam);
+        event.componentAsyncEvent.subKind = ON_REFRESH_REFRESHING;
         SendArkUIAsyncEvent(&event);
     };
     RefreshModelNG::SetOnRefreshing(frameNode, std::move(onEvent));

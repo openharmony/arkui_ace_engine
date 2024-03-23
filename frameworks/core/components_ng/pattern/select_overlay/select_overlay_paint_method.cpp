@@ -70,7 +70,11 @@ void SelectOverlayPaintMethod::UpdateContentModifier(PaintWrapper* paintWrapper)
 
     selectOverlayContentModifier_->SetIsUsingMouse(info_.isUsingMouse);
 
-    selectOverlayContentModifier_->SetHandleColor(textOverlayTheme->GetHandleColor());
+    if (!AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
+        selectOverlayContentModifier_->SetHandleColor(textOverlayTheme->GetHandleColor());
+    } else {
+        selectOverlayContentModifier_->SetHandleColor(info_.handlerColor.value_or(textOverlayTheme->GetHandleColor()));
+    }
     selectOverlayContentModifier_->SetInnerHandleColor(textOverlayTheme->GetHandleColorInner());
     selectOverlayContentModifier_->SetHandleRadius(textOverlayTheme->GetHandleDiameter().ConvertToPx() / 2.0f);
     selectOverlayContentModifier_->SetInnerHandleRadius(

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -20,7 +20,7 @@
 #include "core/components/picker/picker_base_component.h"
 #include "core/components_ng/pattern/text_picker/textpicker_event_hub.h"
 #include "core/components_ng/pattern/text_picker/textpicker_model.h"
-
+#include "core/components_ng/pattern/text_picker/textpicker_properties.h"
 namespace OHOS::Ace::NG {
 class ACE_EXPORT TextPickerModelNG : public TextPickerModel {
 public:
@@ -29,6 +29,7 @@ public:
     void SetRange(const std::vector<NG::RangeContent>& value) override;
     void SetValue(const std::string& value) override;
     void SetDefaultPickerItemHeight(const Dimension& value) override;
+    void SetGradientHeight(const Dimension& value) override;
     void SetCanLoop(const bool value) override;
     void SetDefaultAttributes(const RefPtr<PickerTheme>& pickerTheme) override;
     void SetDisappearTextStyle(const RefPtr<PickerTheme>& pickerTheme, const NG::PickerTextStyle& value) override;
@@ -68,10 +69,21 @@ public:
         return isSingleRange_;
     }
 
+    static void SetTextPickerSingeRange(bool isSingleRange)
+    {
+        isSingleRange_ = isSingleRange;
+    }
+
+    static bool GetTextPickerSingeRange()
+    {
+        return isSingleRange_;
+    }
+
     void SetHasSelectAttr(bool value) override;
     bool GetMultiOptions(std::vector<NG::TextCascadePickerOptions>& options) override;
     void SetOnValueChangeEvent(TextCascadeValueChangeEvent&& onChange) override;
     void SetOnSelectedChangeEvent(TextCascadeSelectedChangeEvent&& onChange) override;
+    void SetDivider(const ItemDivider& divider) override;
 
     static void SetCanLoop(FrameNode* frameNode, const bool value);
     static void SetSelected(FrameNode* frameNode, uint32_t value);
@@ -90,21 +102,40 @@ public:
     static bool IsCascade(FrameNode* frameNode);
     static bool GetMultiOptions(FrameNode* frameNode, std::vector<NG::TextCascadePickerOptions>& options);
     static uint32_t GetMaxCount(FrameNode* frameNode);
+    static RefPtr<FrameNode> CreateFrameNode(int32_t nodeId);
+    static void SetRange(FrameNode* frameNode, const std::vector<NG::RangeContent>& value);
+    static void SetValue(FrameNode* frameNode, const std::string& value);
+    static void SetValues(FrameNode* frameNode, const std::vector<std::string>& values);
+    static void SetColumns(FrameNode* frameNode, const std::vector<NG::TextCascadePickerOptions>& options);
+    static void SetDefaultAttributes(RefPtr<FrameNode>& frameNode, const RefPtr<PickerTheme>& pickerTheme);
+    static PickerTextStyle getSelectedTextStyle(FrameNode* frameNode);
+    static PickerTextStyle getNormalTextStyle(FrameNode* frameNode);
+    static PickerTextStyle getDisappearTextStyle(FrameNode* frameNode);
+    static int32_t getTextPickerSelectedIndex(FrameNode* frameNode);
+    static std::string getTextPickerValue(FrameNode* frameNode);
+    static std::string getTextPickerRange(FrameNode* frameNode);
+    static int32_t isSingleRange()
+    {
+        return isSingleRange_;
+    }
 
 private:
     static RefPtr<FrameNode> CreateStackNode();
+    static RefPtr<FrameNode> CreateColumnNode();
     static RefPtr<FrameNode> CreateButtonNode();
-    RefPtr<FrameNode> CreateColumnNode(uint32_t columnKind, uint32_t showCount);
+    static RefPtr<FrameNode> CreateColumnNode(uint32_t columnKind, uint32_t showCount);
     void SetUnCascadeColumns(const std::vector<NG::TextCascadePickerOptions>& options);
     void SetCascadeColumns(const std::vector<NG::TextCascadePickerOptions>& options);
+    static void SetUnCascadeColumnsNode(FrameNode* frameNode, const std::vector<NG::TextCascadePickerOptions>& options);
+    static void SetCascadeColumnsNode(FrameNode* frameNode, const std::vector<NG::TextCascadePickerOptions>& options);
 
-    uint32_t showCount_ = 0;
+    static inline uint32_t showCount_ = 0;
     std::vector<uint32_t> kinds_;
-    bool isCascade_ = false;
-    std::vector<NG::RangeContent> rangeValue_;
-    std::vector<NG::TextCascadePickerOptions> options_;
+    static inline bool isCascade_ = false;
+    static inline std::vector<NG::RangeContent> rangeValue_;
+    static inline std::vector<NG::TextCascadePickerOptions> options_;
     uint32_t maxCount_ = 0;
-    bool isSingleRange_ = true;
+    static inline bool isSingleRange_ = true;
 };
 
 class ACE_EXPORT TextPickerDialogModelNG : public TextPickerDialogModel {
@@ -112,7 +143,8 @@ public:
     RefPtr<AceType> CreateObject() override;
     void SetTextPickerDialogShow(RefPtr<AceType>& PickerText, NG::TextPickerSettingData& settingData,
         std::function<void()>&& onCancel, std::function<void(const std::string&)>&& onAccept,
-        std::function<void(const std::string&)>&& onChange, TextPickerDialog& textPickerDialog) override;
+        std::function<void(const std::string&)>&& onChange, TextPickerDialog& textPickerDialog,
+        TextPickerDialogEvent& textPickerDialogEvent) override;
 };
 } // namespace OHOS::Ace::NG
 

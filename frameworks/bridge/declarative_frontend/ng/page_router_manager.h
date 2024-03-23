@@ -29,6 +29,7 @@
 #include "core/components_ng/base/frame_node.h"
 #include "frameworks/bridge/common/manifest/manifest_parser.h"
 #include "interfaces/inner_api/ace/constants.h"
+#include "bridge/js_frontend/frontend_delegate.h"
 
 namespace OHOS::Ace::NG {
 
@@ -117,10 +118,14 @@ public:
     void Replace(const RouterPageInfo& target);
     void ReplaceNamedRoute(const RouterPageInfo& target);
     void BackWithTarget(const RouterPageInfo& target);
+    void BackToIndexWithTarget(int32_t index, const std::string& params);
     void Clear();
     int32_t GetStackSize() const;
+    RouterPageInfo GetPageInfoByIndex(int32_t index, const std::string& params);
 
     void GetState(int32_t& index, std::string& name, std::string& path);
+    void GetStateByIndex(int32_t& index, std::string& name, std::string& path, std::string& params);
+    void GetStateByUrl(std::string& url, std::vector<Framework::StateInfo>& stateArray);
 
     std::string GetParams() const;
 
@@ -177,9 +182,11 @@ private:
     void StartPush(const RouterPageInfo& target);
     void StartReplace(const RouterPageInfo& target);
     void StartBack(const RouterPageInfo& target);
+    void StartBackToIndex(int32_t index, const std::string& params);
     bool StartPop();
     void StartRestore(const RouterPageInfo& target);
     void BackCheckAlert(const RouterPageInfo& target);
+    void BackToIndexCheckAlert(int32_t index, const std::string& params);
     void StartClean();
     void CleanPageOverlay();
 
@@ -189,6 +196,7 @@ private:
         bool needHideLast, bool forceShowCurrent = false, bool needTransition = true);
     void PopPage(const std::string& params, bool needShowNext, bool needTransition);
     void PopPageToIndex(int32_t index, const std::string& params, bool needShowNext, bool needTransition);
+    void DealReplacePage(const RouterPageInfo& target);
 
     static bool OnPageReady(const RefPtr<FrameNode>& pageNode, bool needHideLast, bool needTransition,
         bool isCardRouter = false, int64_t cardId = 0);

@@ -75,6 +75,8 @@ static std::unordered_map<InternalResource::ResourceId, std::string> RESOURCE_IC
     { InternalResource::ResourceId::INPUT_SEARCH_SVG, "ic_public_input_search" },
     { InternalResource::ResourceId::APP_BAR_BACK_SVG, "app_bar_back" },
     { InternalResource::ResourceId::APP_BAR_FA_SVG, "app_bar_fa" },
+    { InternalResource::ResourceId::APP_BAR_MENU_SVG, "app_bar_menu" },
+    { InternalResource::ResourceId::APP_BAR_CLOSE_SVG, "app_bar_close" },
     { InternalResource::ResourceId::MENU_OK_SVG, "ic_public_ok" },
     { InternalResource::ResourceId::LOCATION_BUTTON_FILLED_SVG, "location_button_filled"},
     { InternalResource::ResourceId::LOCATION_BUTTON_LINE_SVG, "location_button_line"},
@@ -105,7 +107,8 @@ static std::unordered_map<InternalResource::ResourceId, std::string> RESOURCE_IC
     { InternalResource::ResourceId::IC_WINDOW_MIN, "ic_window_min" },
     { InternalResource::ResourceId::IC_WINDOW_RESTORES, "ic_window_restores" },
     { InternalResource::ResourceId::IC_BOTTOMSHEET_CLOSE_SVG, "ic_bottomsheet_close" },
-    { InternalResource::ResourceId::IC_CANCEL_SVG, "ic_public_cancel" }
+    { InternalResource::ResourceId::IC_CANCEL_SVG, "ic_public_cancel" },
+    { InternalResource::ResourceId::MOON_PROGRESS_FG_CIRCLE_SHADOW, "moon_progress_fg_circle_shadow" }
 };
 }
 
@@ -115,16 +118,14 @@ RefPtr<IconTheme> IconTheme::Builder::Build(const RefPtr<ThemeConstants>& themeC
     if (!themeConstants) {
         return theme;
     }
-    ParsePattern(themeConstants->GetThemeStyle(), theme);
+    ParsePattern(themeConstants, theme);
     return theme;
 }
 
-void IconTheme::Builder::ParsePattern(const RefPtr<ThemeStyle>& themeStyle, const RefPtr<IconTheme>& theme) const
+void IconTheme::Builder::ParsePattern(
+    const RefPtr<ThemeConstants>& themeConstants, const RefPtr<IconTheme>& theme) const
 {
-    if (!themeStyle) {
-        return;
-    }
-    theme->pattern_ = themeStyle->GetAttr<RefPtr<ThemeStyle>>(THEME_PATTERN_ICON, nullptr);
+    theme->pattern_ = themeConstants->GetPatternByName(THEME_PATTERN_ICON);
 }
 
 std::string IconTheme::GetIconPath(const InternalResource::ResourceId& resourceId) const

@@ -332,6 +332,7 @@ HWTEST_F(TextInputCursorTest, CaretPosition001, TestSize.Level1)
      * @tc.steps: Create Text filed node with default text and placeholder
      */
     CreateTextField(DEFAULT_TEXT);
+    GetFocus();
 
     /**
      * @tc.expected: Current caret position is end of text
@@ -360,12 +361,12 @@ HWTEST_F(TextInputCursorTest, CaretPosition002, TestSize.Level1)
     /**
      * @tc.steps: Create Text filed node with default text and placeholder and set input type
      */
-    std::string text = "openharmony@huawei.com+*0123456789";
+    std::string text = "openharmony@harmony.com+* ()0123456789";
     std::vector<TestItem<TextInputType, int32_t>> testItems;
     testItems.emplace_back(TextInputType::TEXT, text.length(), "TextInputType::TEXT");
     testItems.emplace_back(TextInputType::NUMBER, 10, "TextInputType::NUMBER");
-    testItems.emplace_back(TextInputType::PHONE, 12, "TextInputType::PHONE");
-    testItems.emplace_back(TextInputType::EMAIL_ADDRESS, text.length() - 2, "TextInputType::EMAIL_ADDRESS");
+    testItems.emplace_back(TextInputType::PHONE, 15, "TextInputType::PHONE");
+    testItems.emplace_back(TextInputType::EMAIL_ADDRESS, text.length() - 5, "TextInputType::EMAIL_ADDRESS");
     testItems.emplace_back(TextInputType::VISIBLE_PASSWORD, text.length(), "TextInputType::VISIBLE_PASSWORD");
     testItems.emplace_back(TextInputType::NUMBER_PASSWORD, 10, "TextInputType::NUMBER_PASSWORD");
     testItems.emplace_back(TextInputType::SCREEN_LOCK_PASSWORD, text.length(), "TextInputType::SCREEN_LOCK_PASSWORD");
@@ -455,6 +456,7 @@ HWTEST_F(TextInputCursorTest, CaretPosition006, TestSize.Level1)
      * @tc.steps: Initialize text input and get select controller, update caret position and insert value
      */
     CreateTextField(DEFAULT_TEXT);
+    GetFocus();
 
     auto controller = pattern_->GetTextSelectController();
     controller->UpdateCaretIndex(2);
@@ -630,6 +632,7 @@ HWTEST_F(TextInputCursorTest, OnTextChangedListenerCaretPosition004, TestSize.Le
      * @tc.steps: Initialize insert text and expected values when 'IsSelected() = false'
      */
     CreateTextField(DEFAULT_TEXT, DEFAULT_PLACE_HOLDER);
+    GetFocus();
     pattern_->InsertValue("abc");
     FlushLayoutTask(frameNode_);
 
@@ -1465,7 +1468,7 @@ HWTEST_F(TextFieldControllerTest, ContentController001, TestSize.Level1)
     std::vector<std::string> insertValues = {
         "openharmony123_ *+%$",
         "openharmony123456*+&@huawei.com",
-        "openharmony#15612932075*.com",
+        "openharmony (new)#15612932075*.com",
         "open_harmony@@huawei.com*+$helloworld",
         "open_harmony123 password*+#",
         "openharmony123456*+&@huawei.com",
@@ -1474,7 +1477,7 @@ HWTEST_F(TextFieldControllerTest, ContentController001, TestSize.Level1)
     std::vector<TestItem<TextInputType, std::string>> testItems;
     testItems.emplace_back(TextInputType::TEXT, "openharmony123_ *+%$", "TextInputType::TEXT");
     testItems.emplace_back(TextInputType::NUMBER, "123456", "TextInputType::NUMBER");
-    testItems.emplace_back(TextInputType::PHONE, "#15612932075*", "TextInputType::PHONE");
+    testItems.emplace_back(TextInputType::PHONE, " ()#15612932075*", "TextInputType::PHONE");
     testItems.emplace_back(
         TextInputType::EMAIL_ADDRESS, "open_harmony@huawei.comhelloworld", "TextInputType::EMAIL_ADDRESS");
     testItems.emplace_back(
@@ -2644,7 +2647,9 @@ HWTEST_F(TextFieldUXTest, onDraw001, TestSize.Level1)
      * @tc.steps: step2. Move handle
      */
     OffsetF localOffset(1.0f, 1.0f);
-    pattern_->SetLocalOffset(localOffset);
+    auto controller = pattern_->GetMagnifierController();
+    ASSERT_NE(controller, nullptr);
+    controller->SetLocalOffset(localOffset);
     RectF handleRect;
     pattern_->OnHandleMove(handleRect, false);
 
@@ -2652,7 +2657,7 @@ HWTEST_F(TextFieldUXTest, onDraw001, TestSize.Level1)
      * @tc.steps: step3. Test magnifier open or close
      * @tc.expected: magnifier is open
      */
-    auto ret = pattern_->GetShowMagnifier();
+    auto ret = controller->GetShowMagnifier();
     EXPECT_TRUE(ret);
 
     /**
@@ -2686,7 +2691,7 @@ HWTEST_F(TextFieldUXTest, onDraw001, TestSize.Level1)
      * @tc.steps: step8. Test magnifier open or close
      * @tc.expected: magnifier is close
      */
-    ret = pattern_->GetShowMagnifier();
+    ret = controller->GetShowMagnifier();
     EXPECT_FALSE(ret);
 }
 
@@ -3070,6 +3075,41 @@ HWTEST_F(TextFieldControllerTest, CursorInContentRegion001, TestSize.Level1)
      */
     GetFocus();
     EXPECT_TRUE(pattern_->CursorInContentRegion());
+}
+
+/**
+ * @tc.name: CreateDisplayText001
+ * @tc.desc: Test textInput display of context.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldControllerTest, CreateDisplayText001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Initialize text input.
+     */
+    CreateTextField(DEFAULT_TEXT);
+
+    /**
+     * @tc.steps: step2. call CreateDisplayText with showPasswordDirectly is true
+     * tc.expected: step2. Check the CreateDisplayText return.
+     */
+    GetFocus();
+    PipelineBase::GetCurrentContext()->SetMinPlatformVersion((int32_t)PlatformVersion::VERSION_TWELVE);
+    std::string inputPartOne = "tes";
+    std::string inputPartTwo = "t";
+    std::string input = inputPartOne + inputPartTwo;
+    auto outputOne = pattern_->CreateObscuredText(static_cast<int32_t>(StringUtils::ToWstring(input).length()));
+    auto res = pattern_->CreateDisplayText(input, 3, true, true);
+    EXPECT_EQ(outputOne, res);
+
+    /**
+     * @tc.steps: step3. call CreateDisplayText with showPasswordDirectly is false
+     * tc.expected: step3. Check the CreateDisplayText return.
+     */
+    auto outputTwo = pattern_->CreateObscuredText(static_cast<int32_t>(StringUtils::ToWstring(inputPartOne).length()));
+    outputTwo += StringUtils::Str8ToStr16(inputPartTwo);
+    res = pattern_->CreateDisplayText(input, 3, true, false);
+    EXPECT_EQ(outputTwo, res);
 }
 
 /**
@@ -3636,6 +3676,53 @@ HWTEST_F(TextFieldUXTest, testShowUnderline001, TestSize.Level1)
 }
 
 /**
+ * @tc.name: testUnderlineColor001
+ * @tc.desc: test testInput underlineColor
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldUXTest, testUnderlineColor001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: Create Text filed node
+     * @tc.expected: underlineColor is Red
+     */
+    CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) {
+        model.SetShowUnderline(true);
+    });
+
+    /**
+     * @tc.step: step2. Set normalUnderlineColor is Red
+     */
+    pattern_->SetNormalUnderlineColor(Color::RED);
+    frameNode_->MarkModifyDone();
+    EXPECT_EQ(pattern_->GetUserUnderlineColor().normal, Color::RED);
+
+    /**
+     * @tc.step: step3. Set userUnderlineColor is RED, GREEN, BLUE, BLACK
+     */
+    UserUnderlineColor userColor = {Color::RED, Color::GREEN, Color::BLUE, Color::BLACK};
+    pattern_->SetUserUnderlineColor(userColor);
+    frameNode_->MarkModifyDone();
+    UserUnderlineColor userColorRes = pattern_->GetUserUnderlineColor();
+    EXPECT_EQ(userColorRes.typing, Color::RED);
+    EXPECT_EQ(userColorRes.normal, Color::GREEN);
+    EXPECT_EQ(userColorRes.error, Color::BLUE);
+    EXPECT_EQ(userColorRes.disable, Color::BLACK);
+
+    /**
+     * @tc.step: step4. Set userUnderlineColor is null
+     */
+    UserUnderlineColor userColorNull = UserUnderlineColor();
+    pattern_->SetUserUnderlineColor(userColorNull);
+    frameNode_->MarkModifyDone();
+    UserUnderlineColor userColorNullRes = pattern_->GetUserUnderlineColor();
+    EXPECT_EQ(userColorNullRes.typing, std::nullopt);
+    EXPECT_EQ(userColorNullRes.normal, std::nullopt);
+    EXPECT_EQ(userColorNullRes.error, std::nullopt);
+    EXPECT_EQ(userColorNullRes.disable, std::nullopt);
+}
+
+/**
  * @tc.name: testCaretPosition001
  * @tc.desc: test testInput caretPosition
  * @tc.type: FUNC
@@ -4065,5 +4152,107 @@ HWTEST_F(TextFieldUXTest, HandleOnUndoAction001, TestSize.Level1)
     pattern_->UpdateEditingValueToRecord();
     pattern_->HandleOnUndoAction();
     EXPECT_EQ(pattern_->selectController_->GetCaretIndex(), 0);
+}
+
+/**
+ * @tc.name: TextInputToJsonValue001
+ * @tc.desc: test attrs on ToJsonValue
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldUXTest, TextInputToJsonValue001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: Create Text filed node with default attrs
+     */
+    CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) {
+        model.SetTextDecoration(TextDecoration::LINE_THROUGH);
+        model.SetTextDecorationColor(Color::BLUE);
+        model.SetTextDecorationStyle(TextDecorationStyle::DOTTED);
+        model.SetLetterSpacing(1.0_px);
+        model.SetLineHeight(2.0_px);
+    });
+
+    /**
+     * @tc.expected: Check if all set properties are displayed in the corresponding JSON
+     */
+    auto json = JsonUtil::Create(true);
+    layoutProperty_->ToJsonValue(json);
+    EXPECT_TRUE(json->Contains("decoration"));
+    EXPECT_TRUE(json->Contains("letterSpacing"));
+    EXPECT_TRUE(json->Contains("lineHeight"));
+}
+
+/**
+ * @tc.name: TextInputLetterSpacing001
+ * @tc.desc: test TextInput letterSpacing
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldUXTest, TextInputLetterSpacing001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: Create Text filed node with set letterSpacing 1.0_fp
+     * @tc.expected: letterSpacing is 1.0_fp
+     */
+    CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) {
+        model.SetLetterSpacing(1.0_fp);
+    });
+
+    /**
+     * @tc.step: step2. test letterSpacing
+     */
+    EXPECT_EQ(layoutProperty_->GetLetterSpacing(), 1.0_fp);
+}
+
+/**
+ * @tc.name: TextInputLineHeight001
+ * @tc.desc: test TextInput lineHeight
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldUXTest, TextInputLineHeight001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: Create Text filed node with set lineHeight 2.0_fp
+     * @tc.expected: lineHeight is 2.0_fp
+     */
+    CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) {
+        model.SetLineHeight(2.0_fp);
+    });
+
+    /**
+     * @tc.step: step2. test maxLength
+     */
+    EXPECT_EQ(layoutProperty_->GetLineHeight(), 2.0_fp);
+}
+
+/**
+ * @tc.name: TextInputTextDecoration001
+ * @tc.desc: test TextInput decoration
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldUXTest, TextInputTextDecoration001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: Create Text filed node with set decoration(LINE_THROUGH, BLUE, DOTTED)
+     * @tc.expected: maxLength is decoration(LINE_THROUGH, BLUE, DOTTED)
+     */
+    CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) {
+        model.SetTextDecoration(TextDecoration::LINE_THROUGH);
+        model.SetTextDecorationColor(Color::BLUE);
+        model.SetTextDecorationStyle(TextDecorationStyle::DOTTED);
+    });
+    TextEditingValue value;
+    TextSelection selection;
+    value.text = "1234567890";
+    selection.baseOffset = value.text.length();
+    value.selection = selection;
+    pattern_->UpdateEditingValue(std::make_shared<TextEditingValue>(value));
+    FlushLayoutTask(frameNode_);
+
+    /**
+     * @tc.step: step2. test decoration
+     */
+    EXPECT_EQ(layoutProperty_->GetTextDecoration(), TextDecoration::LINE_THROUGH);
+    EXPECT_EQ(layoutProperty_->GetTextDecorationColor(), Color::BLUE);
+    EXPECT_EQ(layoutProperty_->GetTextDecorationStyle(), TextDecorationStyle::DOTTED);
 }
 } // namespace OHOS::Ace::NG

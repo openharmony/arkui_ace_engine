@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,6 +16,7 @@
 #include "core/components_ng/pattern/xcomponent/xcomponent_controller_ng.h"
 
 #include "base/log/log_wrapper.h"
+#include "base/utils/utils.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components_ng/pattern/xcomponent/xcomponent_pattern.h"
 
@@ -103,5 +104,65 @@ void XComponentControllerNG::SetPattern(const RefPtr<XComponentPattern>& pattern
 RefPtr<XComponentPattern> XComponentControllerNG::GetPattern()
 {
     return pattern_.Upgrade();
+}
+
+void XComponentControllerNG::GetLocalLocation(float& offsetX, float& offsetY)
+{
+    auto pattern = pattern_.Upgrade();
+    CHECK_NULL_VOID(pattern);
+    auto localPostion = pattern->GetLocalPosition();
+    offsetX = localPostion.GetX();
+    offsetY = localPostion.GetY();
+}
+
+void XComponentControllerNG::GetSurfaceSize(float& surfaceWidth, float& surfaceHeight)
+{
+    auto pattern = pattern_.Upgrade();
+    CHECK_NULL_VOID(pattern);
+    auto surfaceSize = pattern->GetSurfaceSize();
+    surfaceWidth = surfaceSize.Width();
+    surfaceHeight = surfaceSize.Height();
+}
+
+void XComponentControllerNG::SetIdealSurfaceWidth(float surfaceWidth)
+{
+    auto pattern = pattern_.Upgrade();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetIdealSurfaceWidth(surfaceWidth);
+}
+
+void XComponentControllerNG::SetIdealSurfaceHeight(float surfaceHeight)
+{
+    auto pattern = pattern_.Upgrade();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetIdealSurfaceHeight(surfaceHeight);
+}
+
+void XComponentControllerNG::SetIdealSurfaceOffsetX(float offsetX)
+{
+    auto pattern = pattern_.Upgrade();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetIdealSurfaceOffsetX(offsetX);
+}
+
+void XComponentControllerNG::SetIdealSurfaceOffsetY(float offsetY)
+{
+    auto pattern = pattern_.Upgrade();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetIdealSurfaceOffsetY(offsetY);
+}
+
+void XComponentControllerNG::ClearIdealSurfaceOffset(bool isXAxis)
+{
+    auto pattern = pattern_.Upgrade();
+    CHECK_NULL_VOID(pattern);
+    pattern->ClearIdealSurfaceOffset(isXAxis);
+}
+
+void XComponentControllerNG::UpdateSurfaceBounds()
+{
+    auto pattern = pattern_.Upgrade();
+    CHECK_NULL_VOID(pattern);
+    pattern->UpdateSurfaceBounds(true);
 }
 } // namespace OHOS::Ace::NG

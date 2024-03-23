@@ -139,6 +139,32 @@ class UIObserver {
     }
 }
 
+class MeasureUtils {
+    /**
+     * Construct new instance of MeasureUtils.
+     * initialize with instanceId.
+     * @param instanceId obtained on the c++ side.
+     * @since 12
+     */
+    constructor(instanceId) {
+        this.instanceId_ = instanceId;
+        this.ohos_measureUtils = globalThis.requireNapi('measure');
+    }
+
+    measureText(options) {
+        __JSScopeUtil__.syncInstanceId(this.instanceId_);
+        let number = this.ohos_measureUtils.measureText(options);
+        __JSScopeUtil__.restoreInstanceId();
+        return number;
+    }
+
+    measureTextSize(options) {
+        __JSScopeUtil__.syncInstanceId(this.instanceId_);
+        let sizeOption = this.ohos_measureUtils.measureTextSize(options);
+        __JSScopeUtil__.restoreInstanceId();
+        return sizeOption;
+    }
+}
 
 class UIContext {
     /**
@@ -273,7 +299,76 @@ class UIContext {
         Context.keyframeAnimateTo(param, keyframes);
         __JSScopeUtil__.restoreInstanceId();
     }
+
+    animateToImmediately(param, event) {
+        __JSScopeUtil__.syncInstanceId(this.instanceId_);
+        Context.animateToImmediately(param, event);
+        __JSScopeUtil__.restoreInstanceId();
+    }
+
+    getMeasureUtils() {
+        this.measureUtils_ = new MeasureUtils(this.instanceId_);
+        return this.measureUtils_;
+    }
+
+    getHostContext() {
+        __JSScopeUtil__.syncInstanceId(this.instanceId_);
+        let context = getContext();
+        __JSScopeUtil__.restoreInstanceId();
+        return context;
+    }
+
+    getSharedLocalStorage() {
+        __JSScopeUtil__.syncInstanceId(this.instanceId_);
+        let localStorage = NativeLocalStorage.GetShared();
+        __JSScopeUtil__.restoreInstanceId();
+        return localStorage;
+    }
+
+    getFrameNodeById(id) {
+        __JSScopeUtil__.syncInstanceId(this.instanceId_);
+        let nodePtr = getUINativeModule().getFrameNodeByKey(id);
+        let xNode = globalThis.requireNapi('arkui.node');
+        let node = xNode.FrameNodeUtils.searchNodeInRegisterProxy(nodePtr);
+        if (!node) {
+            node = xNode.FrameNodeUtils.createFrameNode(this, nodePtr);
+        }
+        __JSScopeUtil__.restoreInstanceId();
+        return node;
+    }
+    getFocusController() {
+        if (this.focusController_ == null) {
+            this.focusController_ = new FocusController(this.instanceId_);
+        }
+        return this.focusController_;
+    }
 }
+
+class FocusController {
+    /**
+     * Construct new instance of FocusController.
+     * initialzie with instanceId.
+     * @param instanceId obtained on the c++ side.
+     * @since 12
+     */
+    constructor(instanceId) {
+        this.instanceId_ = instanceId;
+        this.ohos_focusController = globalThis.requireNapi('arkui.focusController');
+    }
+    clearFocus() {
+        __JSScopeUtil__.syncInstanceId(this.instanceId_);
+        this.ohos_focusController.clearFocus();
+        __JSScopeUtil__.restoreInstanceId();
+    }
+
+    requestFocus(value) {
+        __JSScopeUtil__.syncInstanceId(this.instanceId_);
+        let result = this.ohos_focusController.requestFocus(value);
+        __JSScopeUtil__.restoreInstanceId();
+        return result;
+    }
+}
+
 class ComponentUtils {
     /**
      * Construct new instance of ComponentUtils.
@@ -345,9 +440,13 @@ class Router {
         }
     }
 
-    back(options) {
+    back(options, params) {
         __JSScopeUtil__.syncInstanceId(this.instanceId_);
-        this.ohos_router.back(options);
+        if (typeof options === 'number' || arguments.length === 2) {
+            this.ohos_router.back(options, params);
+        } else {
+            this.ohos_router.back(options);
+        }
         __JSScopeUtil__.restoreInstanceId();
     }
 
@@ -367,6 +466,20 @@ class Router {
     getState() {
         __JSScopeUtil__.syncInstanceId(this.instanceId_);
         let state = this.ohos_router.getState();
+        __JSScopeUtil__.restoreInstanceId();
+        return state;
+    }
+
+    getStateByIndex(index) {
+        __JSScopeUtil__.syncInstanceId(this.instanceId_);
+        let state = this.ohos_router.getState(index);
+        __JSScopeUtil__.restoreInstanceId();
+        return state;
+    }
+
+    getStateByUrl(url) {
+        __JSScopeUtil__.syncInstanceId(this.instanceId_);
+        let state = this.ohos_router.getState(url);
         __JSScopeUtil__.restoreInstanceId();
         return state;
     }

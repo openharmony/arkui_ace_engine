@@ -54,6 +54,9 @@ public:
     virtual void SetOnRefreshing(std::function<void()>&& refreshing) = 0;
     virtual void SetChangeEvent(std::function<void(const std::string)>&& changeEvent) = 0;
     virtual void SetCustomBuilder(const RefPtr<NG::UINode>& customBuilder) = 0;
+    virtual void SetLoadingText(const std::string& loadingText) = 0;
+    virtual void SetRefreshOffset(const Dimension& offset) = 0;
+    virtual void SetPullToRefresh(bool isPullToRefresh) = 0;
 
 private:
     static std::unique_ptr<RefreshModel> instance_;

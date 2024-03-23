@@ -16,6 +16,7 @@
 #pragma once
 
 #include "core/interfaces/native/node/node_api.h"
+#include "core/interfaces/native/node/extension_companion_node.h"
 
 namespace OHOS::Ace::NG::ViewModel {
 
@@ -27,6 +28,26 @@ void AddChild(void* parentNode, void* childNode);
 
 void RemoveChild(void* parentNode, void* childNode);
 
+void InsertChildAt(void* parentNode, void* childNode, int32_t position);
+
 void InsertChildAfter(void* parentNode, void* childNode, void* siblingNode);
+
+void InsertChildBefore(void* parentNode, void* childNode, void* siblingNode);
+
+void RegisterCompanion(void* node, int peerId, ArkUI_Int32 flags);
+
+ExtensionCompanionNode* GetCompanion(void* nodePtr);
+
+void SetCustomCallback(void* nodePtr, ArkUI_Int32 callback);
+
+void SetCallbackMethod(ArkUIAPICallbackMethod* method);
+
+ArkUIAPICallbackMethod* GetCallbackMethod();
+
+ArkUI_Int32 MeasureNode(ArkUIVMContext context, ArkUINodeHandle nodePtr, ArkUI_Float32* data);
+
+ArkUI_Int32 LayoutNode(ArkUIVMContext context, ArkUINodeHandle nodePtr, ArkUI_Float32* data);
+
+ArkUI_Int32 DrawNode(ArkUIVMContext context, ArkUINodeHandle nodePtr, ArkUI_Float32* data);
 
 } // namespace OHOS::Ace::NG::ViewModel

@@ -19,8 +19,10 @@
 #include "base/log/dump_log.h"
 #include "base/memory/referenced.h"
 #include "base/utils/noncopyable.h"
+#include "core/components_ng/event/event_hub.h"
 #include "core/components_ng/pattern/pattern.h"
 #include "core/components_ng/pattern/tabs/tab_bar_pattern.h"
+#include "core/components_ng/pattern/tabs/tab_content_event_hub.h"
 #include "core/components_ng/pattern/tabs/tab_content_layout_property.h"
 #include "core/components_ng/syntax/shallow_builder.h"
 
@@ -55,6 +57,7 @@ public:
         auto host = GetHost();
         CHECK_NULL_VOID(host);
         host->GetRenderContext()->UpdateClipEdge(true);
+        FireWillShowEvent();
     }
 
     void BeforeCreateLayoutWrapper() override
@@ -132,6 +135,16 @@ public:
         return labelStyle_;
     }
 
+    void SetIconStyle(const IconStyle& iconStyle)
+    {
+        iconStyle_ = iconStyle;
+    }
+
+    const IconStyle& GetIconStyle() const
+    {
+        return iconStyle_;
+    }
+
     void SetPadding(const PaddingProperty& padding)
     {
         padding_ = padding;
@@ -189,6 +202,40 @@ public:
         }
     }
 
+    RefPtr<EventHub> CreateEventHub() override
+    {
+        return MakeRefPtr<TabContentEventHub>();
+    }
+
+    void FireWillShowEvent()
+    {
+        auto tabContentEventHub = GetEventHub<TabContentEventHub>();
+        CHECK_NULL_VOID(tabContentEventHub);
+        tabContentEventHub->FireWillShowEvent();
+    }
+
+    void FireWillHideEvent()
+    {
+        auto tabContentEventHub = GetEventHub<TabContentEventHub>();
+        CHECK_NULL_VOID(tabContentEventHub);
+        tabContentEventHub->FireWillHideEvent();
+    }
+
+    bool HasSubTabBarStyleNode() const
+    {
+        return customStyleNode_ != nullptr;
+    }
+
+    void SetCustomStyleNode(const RefPtr<FrameNode>& customStyleNode)
+    {
+        customStyleNode_ = customStyleNode;
+    }
+
+    const RefPtr<FrameNode>& FireCustomStyleNode() const
+    {
+        return customStyleNode_;
+    }
+
 private:
     RefPtr<ShallowBuilder> shallowBuilder_;
     TabBarParam tabBarParam_;
@@ -196,9 +243,11 @@ private:
     SelectedMode selectedMode_ = SelectedMode::INDICATOR;
     BoardStyle boardStyle_;
     LabelStyle labelStyle_;
+    IconStyle iconStyle_;
     PaddingProperty padding_;
     std::string tabBarInspectorId_;
     BottomTabBarStyle bottomTabBarStyle_;
+    RefPtr<FrameNode> customStyleNode_ = nullptr;
 
     ACE_DISALLOW_COPY_AND_MOVE(TabContentPattern);
 };

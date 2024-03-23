@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -22,7 +22,7 @@
 #include "base/geometry/dimension.h"
 #include "core/components/picker/picker_theme.h"
 #include "core/components_ng/pattern/picker/picker_type_define.h"
-
+#include "core/components_ng/pattern/text_picker/textpicker_properties.h"
 namespace OHOS::Ace {
 struct TextPickerDialog {
     CalcDimension height;
@@ -34,6 +34,12 @@ struct TextPickerDialog {
     std::optional<DimensionRect> maskRect;
     std::optional<Color> backgroundColor;
     std::optional<int32_t> backgroundBlurStyle;
+};
+struct TextPickerDialogEvent {
+    std::function<void()> onDidAppear;
+    std::function<void()> onDidDisappear;
+    std::function<void()> onWillAppear;
+    std::function<void()> onWillDisappear;
 };
 using TextChangeEvent = std::function<void(const std::string&, double)>;
 using TextCascadeChangeEvent = std::function<void(const std::vector<std::string>&, const std::vector<double>&)>;
@@ -49,6 +55,7 @@ public:
     virtual void SetRange(const std::vector<NG::RangeContent>& value) = 0;
     virtual void SetValue(const std::string& value) = 0;
     virtual void SetDefaultPickerItemHeight(const Dimension& value) = 0;
+    virtual void SetGradientHeight(const Dimension& value) {};
     virtual void SetCanLoop(const bool value) = 0;
     virtual void SetDefaultAttributes(const RefPtr<PickerTheme>& pickerTheme) = 0;
     virtual void SetDisappearTextStyle(const RefPtr<PickerTheme>& pickerTheme, const NG::PickerTextStyle& value) = 0;
@@ -72,6 +79,7 @@ public:
     virtual void SetOnSelectedChangeEvent(TextCascadeSelectedChangeEvent&& onChange) = 0;
     virtual void SetSingleRange(bool isSingleRange) = 0;
     virtual bool GetSingleRange() = 0;
+    virtual void SetDivider(const NG::ItemDivider& divider) {};
 
 private:
     static std::unique_ptr<TextPickerModel> textPickerInstance_;
@@ -86,7 +94,8 @@ public:
     virtual RefPtr<AceType> CreateObject() = 0;
     virtual void SetTextPickerDialogShow(RefPtr<AceType>& PickerText, NG::TextPickerSettingData& settingData,
         std::function<void()>&& onCancel, std::function<void(const std::string&)>&& onAccept,
-        std::function<void(const std::string&)>&& onChange, TextPickerDialog& textPickerDialog) = 0;
+        std::function<void(const std::string&)>&& onChange, TextPickerDialog& textPickerDialog,
+        TextPickerDialogEvent& textPickerDialogEvent) = 0;
 
 private:
     static std::unique_ptr<TextPickerDialogModel> textPickerDialogInstance_;

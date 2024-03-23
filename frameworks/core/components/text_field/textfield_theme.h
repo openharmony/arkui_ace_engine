@@ -159,7 +159,10 @@ public:
             theme->inlineBorderColor_ = pattern->GetAttr<Color>(INLINE_BORDER_COLOR, Color());
             auto draggable = pattern->GetAttr<std::string>("draggable", "0");
             theme->draggable_ = StringUtils::StringToInt(draggable);
-            theme->height_ = pattern->GetAttr<Dimension>("textinput_default_height", 48.0_vp);
+            // The default height is 48VP, of which 12VP is 12VP each for the upper and lower padding
+            theme->height_ = pattern->GetAttr<Dimension>("textinput_default_height", 24.0_vp);
+            auto showPasswordDirectly = pattern->GetAttr<std::string>("show_password_directly", "0");
+            theme->showPasswordDirectly_ = StringUtils::StringToInt(showPasswordDirectly);
         }
     };
 
@@ -360,6 +363,11 @@ public:
         return overCountBorderColor_;
     }
 
+    TextStyle GetTextStyle() const
+    {
+        return textStyle_;
+    }
+
     const TextStyle& GetErrorTextStyle() const
     {
         return errorTextStyle_;
@@ -460,6 +468,11 @@ public:
         return passwordTypeHeight_;
     }
 
+    bool IsShowPasswordDirectly() const
+    {
+        return showPasswordDirectly_;
+    }
+
 protected:
     TextFieldTheme() = default;
 
@@ -499,6 +512,7 @@ private:
     Color passwordErrorInputColor_;
     Color passwordErrorBorderColor_;
     Color passwordErrorLableColor_;
+    TextStyle textStyle_;
     TextStyle errorTextStyle_;
     TextStyle countTextStyle_;
     TextStyle overCountStyle_;
@@ -534,6 +548,7 @@ private:
 
     bool showEllipsis_ = true;
     bool draggable_ = false;
+    bool showPasswordDirectly_ = false;
     Dimension passwordTypeHeight_ = 40.0_vp;;
 };
 

@@ -24,6 +24,7 @@
 #include "base/memory/referenced.h"
 #include "core/components/dialog/dialog_properties.h"
 #include "core/components/dialog/dialog_theme.h"
+#include "core/components_ng/manager/focus/focus_view.h"
 #include "core/components_ng/pattern/dialog//dialog_event_hub.h"
 #include "core/components_ng/pattern/dialog/dialog_accessibility_property.h"
 #include "core/components_ng/pattern/dialog/dialog_layout_algorithm.h"
@@ -31,8 +32,14 @@
 #include "core/components_ng/pattern/overlay/popup_base_pattern.h"
 
 namespace OHOS::Ace::NG {
-class DialogPattern : public PopupBasePattern {
-    DECLARE_ACE_TYPE(DialogPattern, PopupBasePattern);
+    
+enum class DialogDismissReason {
+    DIALOG_PRESS_BACK = 0,
+    DIALOG_TOUCH_OUTSIDE,
+    DIALOG_CLOSE_BUTTON,
+};
+class DialogPattern : public PopupBasePattern, public FocusView {
+    DECLARE_ACE_TYPE(DialogPattern, PopupBasePattern, FocusView);
 
 public:
     DialogPattern(const RefPtr<DialogTheme>& dialogTheme, const RefPtr<UINode>& customNode)
@@ -43,6 +50,26 @@ public:
     bool IsAtomicNode() const override
     {
         return false;
+    }
+
+    void SetOnWillDismiss(const std::function<void(const int32_t& info)>& onWillDismiss)
+    {
+        onWillDismiss_ = onWillDismiss;
+    }
+
+    bool ShouldDismiss() const
+    {
+        if (onWillDismiss_) {
+            return true;
+        }
+        return false;
+    }
+
+    void CallOnWillDismiss(const int32_t reason)
+    {
+        if (onWillDismiss_) {
+            onWillDismiss_(reason);
+        }
     }
 
     RefPtr<LayoutProperty> CreateLayoutProperty() override
@@ -68,6 +95,11 @@ public:
     FocusPattern GetFocusPattern() const override
     {
         return { FocusType::SCOPE, true };
+    }
+
+    std::list<int32_t> GetRouteOfFirstScope() override
+    {
+        return { 0, 0 };
     }
 
     void BuildChild(const DialogProperties& dialogProperties);
@@ -124,6 +156,59 @@ public:
 
     void OnColorConfigurationUpdate() override;
 
+    bool AvoidBottom() const override
+    {
+        return false;
+    }
+    
+    void RegisterDialogDidAppearCallback(std::function<void()>&& onDidAppear)
+    {
+        onDidAppearCallback_ = std::move(onDidAppear);
+    }
+
+    void RegisterDialogDidDisappearCallback(std::function<void()>&& onDidDisappear)
+    {
+        onDidDisappearCallback_ = std::move(onDidDisappear);
+    }
+
+    void RegisterDialogWillAppearCallback(std::function<void()>&& onWillAppear)
+    {
+        onWillAppearCallback_ = std::move(onWillAppear);
+    }
+
+    void RegisterDialogWillDisappearCallback(std::function<void()>&& onWillDisappear)
+    {
+        onWillDisappearCallback_ = std::move(onWillDisappear);
+    }
+
+    void CallDialogDidAppearCallback()
+    {
+        if (onDidAppearCallback_) {
+            onDidAppearCallback_();
+        }
+    }
+
+    void CallDialogDidDisappearCallback()
+    {
+        if (onDidDisappearCallback_) {
+            onDidDisappearCallback_();
+        }
+    }
+
+    void CallDialogWillAppearCallback()
+    {
+        if (onWillAppearCallback_) {
+            onWillAppearCallback_();
+        }
+    }
+
+    void CallDialogWillDisappearCallback()
+    {
+        if (onWillDisappearCallback_) {
+            onWillDisappearCallback_();
+        }
+    }
+
 private:
     bool AvoidKeyboard() const override
     {
@@ -170,7 +255,7 @@ private:
     // build actionMenu
     RefPtr<FrameNode> BuildMenu(const std::vector<ButtonInfo>& buttons, bool hasTitle);
     void RecordEvent(int32_t btnIndex) const;
-
+    void ParseBorderRadius(BorderRadiusProperty& raidus);
     RefPtr<DialogTheme> dialogTheme_;
     WeakPtr<UINode> customNode_;
     RefPtr<ClickEvent> onClick_;
@@ -182,6 +267,7 @@ private:
     std::string message_;
     std::string title_;
     std::string subtitle_;
+    std::function<void(const int32_t& info)> onWillDismiss_;
 
     DialogProperties dialogProperties_;
     WeakPtr<FrameNode> menuNode_;
@@ -189,6 +275,11 @@ private:
     RefPtr<FrameNode> buttonContainer_;
 
     ACE_DISALLOW_COPY_AND_MOVE(DialogPattern);
+
+    std::function<void()> onDidAppearCallback_ = nullptr;
+    std::function<void()> onDidDisappearCallback_ = nullptr;
+    std::function<void()> onWillAppearCallback_ = nullptr;
+    std::function<void()> onWillDisappearCallback_ = nullptr;
 };
 } // namespace OHOS::Ace::NG
 

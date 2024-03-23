@@ -62,7 +62,7 @@ void ParseRefreshingObject(const JSCallbackInfo& info, const JSRef<JSObject>& re
     CHECK_NULL_VOID(changeEventVal->IsFunction());
 
     auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(changeEventVal));
-    WeakPtr<NG::FrameNode> targetNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    WeakPtr<NG::FrameNode> targetNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
     auto changeEvent = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc), node = targetNode](
                            const std::string& param) {
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
@@ -78,17 +78,41 @@ void ParseRefreshingObject(const JSCallbackInfo& info, const JSRef<JSObject>& re
     RefreshModel::GetInstance()->SetChangeEvent(std::move(changeEvent));
 }
 
+void JSRefresh::SetPullToRefresh(bool value)
+{
+    RefreshModel::GetInstance()->SetPullToRefresh(value);
+}
+
 void JSRefresh::JSBind(BindingTarget globalObj)
 {
     JSClass<JSRefresh>::Declare("Refresh");
     MethodOptions opt = MethodOptions::NONE;
     JSClass<JSRefresh>::StaticMethod("create", &JSRefresh::Create, opt);
+    JSClass<JSRefresh>::StaticMethod("refreshOffset", &JSRefresh::JsRefreshOffset);
+    JSClass<JSRefresh>::StaticMethod("pullToRefresh", &JSRefresh::SetPullToRefresh, opt);
     JSClass<JSRefresh>::StaticMethod("onStateChange", &JSRefresh::OnStateChange);
     JSClass<JSRefresh>::StaticMethod("onRefreshing", &JSRefresh::OnRefreshing);
     JSClass<JSRefresh>::StaticMethod("onAppear", &JSInteractableView::JsOnAppear);
     JSClass<JSRefresh>::StaticMethod("onDisAppear", &JSInteractableView::JsOnDisAppear);
     JSClass<JSRefresh>::StaticMethod("onTouch", &JSInteractableView::JsOnTouch);
     JSClass<JSRefresh>::InheritAndBind<JSContainerBase>(globalObj);
+}
+
+void JSRefresh::JsRefreshOffset(const JSCallbackInfo& info)
+{
+    if (info.Length() < 1) {
+        return;
+    }
+    JsRefreshOffset(info[0]);
+}
+
+void JSRefresh::JsRefreshOffset(const JSRef<JSVal>& jsVal)
+{
+    CalcDimension value(0.0f);
+    if (!ParseJsDimensionVpNG(jsVal, value)) {
+        value.SetValue(0.0f);
+    }
+    RefreshModel::GetInstance()->SetRefreshOffset(value);
 }
 
 void JSRefresh::Create(const JSCallbackInfo& info)
@@ -104,6 +128,7 @@ void JSRefresh::Create(const JSCallbackInfo& info)
     auto refreshing = paramObject->GetProperty("refreshing");
     auto jsOffset = paramObject->GetProperty("offset");
     auto friction = paramObject->GetProperty("friction");
+    auto promptText = paramObject->GetProperty("promptText");
     RefreshModel::GetInstance()->Create();
     RefreshModel::GetInstance()->SetProgressColor(theme->GetProgressColor());
 
@@ -124,12 +149,17 @@ void JSRefresh::Create(const JSCallbackInfo& info)
     }
     ParsFrictionData(friction);
     ParseCustomBuilder(info);
+
+    std::string loadingStr = "";
+    if (ParseJsString(promptText, loadingStr)) {
+        RefreshModel::GetInstance()->SetLoadingText(loadingStr);
+    }
 }
 
-void JSRefresh::ParseCustomBuilder(const JSCallbackInfo& info)
+bool JSRefresh::ParseCustomBuilder(const JSCallbackInfo& info)
 {
     if (!info[0]->IsObject()) {
-        return;
+        return false;
     }
     auto paramObject = JSRef<JSObject>::Cast(info[0]);
     auto builder = paramObject->GetProperty("builder");
@@ -142,8 +172,10 @@ void JSRefresh::ParseCustomBuilder(const JSCallbackInfo& info)
             customNode = NG::ViewStackProcessor::GetInstance()->Finish();
         }
         RefreshModel::GetInstance()->SetCustomBuilder(customNode);
+        return true;
     } else {
         RefreshModel::GetInstance()->SetCustomBuilder(customNode);
+        return false;
     }
 }
 
@@ -153,7 +185,7 @@ void JSRefresh::OnStateChange(const JSCallbackInfo& args)
         return;
     }
     auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(args[0]));
-    WeakPtr<NG::FrameNode> targetNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    WeakPtr<NG::FrameNode> targetNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
     auto onStateChange = [execCtx = args.GetExecutionContext(), func = std::move(jsFunc), node = targetNode](
                              const int32_t& value) {
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
@@ -171,7 +203,7 @@ void JSRefresh::OnRefreshing(const JSCallbackInfo& args)
         return;
     }
     auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(args[0]));
-    WeakPtr<NG::FrameNode> targetNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    WeakPtr<NG::FrameNode> targetNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
     auto onRefreshing = [execCtx = args.GetExecutionContext(), func = std::move(jsFunc), node = targetNode]() {
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
         ACE_SCORING_EVENT("Refresh.OnRefreshing");

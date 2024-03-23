@@ -80,13 +80,7 @@ public:
 
     void SetUserCallback(GestureEventFunc&& callback)
     {
-        if (userCallback_) {
-            userCallback_.Reset();
-        }
         userCallback_ = MakeRefPtr<ClickEvent>(std::move(callback));
-        if (!clickRecognizer_) {
-            clickRecognizer_ = MakeRefPtr<ClickRecognizer>();
-        }
     }
 
     void ClearUserCallback()
@@ -126,13 +120,36 @@ public:
 
     const RefPtr<ClickRecognizer>& GetClickRecognizer()
     {
+        if (!clickRecognizer_) {
+            clickRecognizer_ = MakeRefPtr<ClickRecognizer>();
+        }
         return clickRecognizer_;
+    }
+
+    void SetJSFrameNodeCallback(GestureEventFunc&& callback)
+    {
+        if (jsFrameNodeCallback_) {
+            jsFrameNodeCallback_.Reset();
+        }
+        jsFrameNodeCallback_ = MakeRefPtr<ClickEvent>(std::move(callback));
+        if (!clickRecognizer_) {
+            clickRecognizer_ = MakeRefPtr<ClickRecognizer>();
+        }
+    }
+
+    void ClearJSFrameNodeCallback()
+    {
+        // When the event param is undefined, it will clear the callback.
+        if (jsFrameNodeCallback_) {
+            jsFrameNodeCallback_.Reset();
+        }
     }
 
     void CopyClickEvent(const RefPtr<ClickEventActuator>& clickEventActuator)
     {
         clickEvents_ = clickEventActuator->clickEvents_;
         userCallback_ = clickEventActuator->userCallback_;
+        jsFrameNodeCallback_ = clickEventActuator->jsFrameNodeCallback_;
         if (clickEventActuator->clickRecognizer_) {
             clickRecognizer_ = MakeRefPtr<ClickRecognizer>();
         }
@@ -142,6 +159,7 @@ private:
     WeakPtr<GestureEventHub> gestureEventHub_;
     std::list<RefPtr<ClickEvent>> clickEvents_;
     RefPtr<ClickEvent> userCallback_;
+    RefPtr<ClickEvent> jsFrameNodeCallback_;
     RefPtr<ClickRecognizer> clickRecognizer_;
 
     ACE_DISALLOW_COPY_AND_MOVE(ClickEventActuator);

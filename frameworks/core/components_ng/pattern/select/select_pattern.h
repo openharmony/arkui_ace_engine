@@ -192,6 +192,8 @@ public:
     void SetOptionHeight(const Dimension& value);
     void SetOptionWidthFitTrigger(bool isFitTrigger);
     void SetHasOptionWidth(bool hasOptionWidth);
+    void SetControlSize(const ControlSize& controlSize);
+    ControlSize GetControlSize();
 
 private:
     void OnAttachToFrameNode() override;
@@ -259,6 +261,8 @@ private:
     void InitTextProps(const RefPtr<TextLayoutProperty>& textProps, const RefPtr<SelectTheme>& theme);
     void InitSpinner(
         const RefPtr<FrameNode>& spinner, const RefPtr<IconTheme>& iconTheme, const RefPtr<SelectTheme>& selectTheme);
+    void ResetParams();
+    void UpdateOptionsWidth(float selectWidth);
 
     std::vector<RefPtr<FrameNode>> options_;
     RefPtr<FrameNode> menuWrapper_ = nullptr;
@@ -283,6 +287,7 @@ private:
     std::optional<Color> optionBgColor_;
 
     void ToJsonValue(std::unique_ptr<JsonValue>& json) const override;
+    void ToJsonArrowAndText(std::unique_ptr<JsonValue>& json) const;
     void ToJsonOptionAlign(std::unique_ptr<JsonValue>& json) const;
     void ToJsonMenuBackgroundStyle(std::unique_ptr<JsonValue>& json) const;
     // XTS inspector helper functions
@@ -298,9 +303,9 @@ private:
     bool isSelected_ = false;
     MenuAlign menuAlign_;
     std::string selectValue_;
-    bool isColorConfigurationUpdate_ = false;
     bool isFitTrigger_ = false;
     Color selectDefaultBgColor_ = Color::TRANSPARENT;
+    ControlSize controlSize_ = ControlSize::NORMAL;
     ACE_DISALLOW_COPY_AND_MOVE(SelectPattern);
 };
 

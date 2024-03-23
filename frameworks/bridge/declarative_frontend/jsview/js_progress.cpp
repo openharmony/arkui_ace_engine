@@ -468,6 +468,16 @@ bool JSProgress::ConvertGradientColor(const JsiRef<JsiValue>& param, NG::Gradien
     }
 
     JSLinearGradient* jsLinearGradient = JSRef<JSObject>::Cast(param)->Unwrap<JSLinearGradient>();
+    auto proxy = param->GetLocalHandle();
+    if (proxy->IsProxy()) {
+        auto vm = param->GetEcmaVM();
+        panda::Local<panda::ProxyRef> thisProxiedObj =
+            static_cast<panda::Local<panda::ProxyRef>>(proxy);
+        jsLinearGradient = static_cast<JSLinearGradient *>(
+            panda::Local<panda::ObjectRef>(thisProxiedObj->GetTarget(vm))
+                ->GetNativePointerField(0));
+    }
+
     if (!jsLinearGradient || jsLinearGradient->GetGradient().empty()) {
         return false;
     }

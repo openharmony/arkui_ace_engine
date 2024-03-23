@@ -1,4 +1,77 @@
 /*
+ * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+class ConfigureStateMgmt {
+    constructor() {
+        this.v2InUse_ = false;
+        this.v3InUse_ = false;
+    }
+    static get instance() {
+        return ConfigureStateMgmt.instance__
+            ? ConfigureStateMgmt.instance__
+            : (ConfigureStateMgmt.instance__ = new ConfigureStateMgmt());
+    }
+    /**
+     * framework code call this function when it sees use of a stateMgmt V3 feature
+     *
+     * @param feature specify feature separately from context of use, so that in future decision can be made
+     *                for individual features, not use permit either use of V2 or V3.
+     * @param contextOfUse purely for error messages. Give enough info that use is able to local the feature use in source code.
+     * @returns true if no mix of features detected, false if mix is detected
+     */
+    intentUsingV3(feature, contextOfUse = "") {
+        this.v3InUse_ = true;
+        const ret = !this.v2InUse_ && this.v3InUse_;
+        if (ret) {
+            
+        }
+        else {
+            stateMgmtConsole.featureCombinationError(`Found ${feature} ${contextOfUse} - ${ConfigureStateMgmt.HOW_TO_SAY}`);
+        }
+        return ret;
+    }
+    /**
+     * framework code call this function when it sees use of a stateMgmt V2 feature
+     *
+     * @param feature specify feature separately from context of use, so that in future decision can be made
+     *                for individual features, not use permit either use of V2 or V3.
+     * @param contextOfUse purely for error messages. Give enough info that use is able to local the feature use in source code.
+     * @returns true if no mix of features detected, false if mix is detected
+     */
+    intentUsingV2(feature, contextOfUse = "") {
+        this.v2InUse_ = true;
+        const ret = this.v2InUse_ && !this.v3InUse_;
+        if (ret) {
+            
+        }
+        else {
+            stateMgmtConsole.featureCombinationError(`Found ${feature} ${contextOfUse} - ${ConfigureStateMgmt.HOW_TO_SAY}`);
+        }
+        return ret;
+    }
+    /**
+     * Return true if object deep observation mechanisms need to be enabled
+     * that is when seen V3 @observe, @track, or @monitor decorator used in at least one class
+     * (we could but we do not check for class object instance creation for performance reasons)
+     * @returns
+     */
+    needsV3Observe() {
+        return this.v3InUse_;
+    }
+} // ConfigureStateMgmt
+ConfigureStateMgmt.HOW_TO_SAY = `Your application uses both state management V2 and V3 features! - It is strongly recommended not to mix V2 and V3. Consult the rules how state management V2 and V3 can be mixed in the same app.`;
+/*
  * Copyright (c) 2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -91,7 +164,7 @@ stateMgmtProfiler.instance = undefined;
  * limitations under the License.
  */
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -120,7 +193,7 @@ class LocalStorage extends NativeLocalStorage {
     /**
      * Construct new instance of LocalStorage
      * initialzie with all properties and their values that Object.keys(params) returns
-     * Property values must not be undefined.
+     * Property values must not be undefined for API 9 and lower, undefined allowed for API10
      * @param initializingProperties Object containing keys and values. @see set() for valid values
      *
      * @since 9
@@ -160,7 +233,9 @@ class LocalStorage extends NativeLocalStorage {
     initializeProps(initializingProperties = {}) {
         
         this.storage_.clear();
-        Object.keys(initializingProperties).filter((propName) => initializingProperties[propName] != undefined).forEach((propName) => this.addNewPropertyInternal(propName, initializingProperties[propName]));
+        Object.keys(initializingProperties)
+            .filter((propName) => (initializingProperties[propName] != null || Utils.isApiVersionEQAbove(12)))
+            .forEach((propName) => this.addNewPropertyInternal(propName, initializingProperties[propName]));
     }
     /**
      * Use before deleting owning Ability, window, or service UI
@@ -231,7 +306,7 @@ class LocalStorage extends NativeLocalStorage {
      */
     set(propName, newValue) {
         
-        if (newValue == undefined) {
+        if (newValue == undefined && !Utils.isApiVersionEQAbove(12)) {
             stateMgmtConsole.warn(`${this.constructor.name}: set('${propName}') with newValue == undefined not allowed.`);
             
             return false;
@@ -259,7 +334,7 @@ class LocalStorage extends NativeLocalStorage {
      */
     setOrCreate(propName, newValue) {
         
-        if (newValue == undefined) {
+        if (newValue == undefined && !Utils.isApiVersionEQAbove(12)) {
             stateMgmtConsole.warn(`${this.constructor.name}: setOrCreate('${propName}') with newValue == undefined not allowed.`);
             
             return false;
@@ -520,7 +595,8 @@ class LocalStorage extends NativeLocalStorage {
         if (p == undefined) {
             // property named 'storagePropName' not yet in storage
             // add new property to storage
-            if (defaultValue === undefined) {
+            // We do not want to add undefined to older API verions, but null is added
+            if (defaultValue === undefined && !Utils.isApiVersionEQAbove(12)) {
                 stateMgmtConsole.error(`${this.constructor.name}.__createSync(${storagePropName}, non-existing property and undefined default value. ERROR.`);
                 return undefined;
             }
@@ -1390,6 +1466,97 @@ class SubscribaleAbstract extends SubscribableAbstract {
  * limitations under the License.
  */
 /**
+ * MapInfo
+ *
+ * Helper class to persist Map in Persistent storage
+ *
+ */
+class MapInfo {
+    constructor(mapReplacer, keys, values) {
+        this.mapReplacer = mapReplacer;
+        this.keys = keys;
+        this.values = values;
+    }
+    // Check if the given object is of type MapInfo
+    static isObject(obj) {
+        const typedObject = obj;
+        if ('mapReplacer' in typedObject && typedObject.mapReplacer === MapInfo.replacer) {
+            return true;
+        }
+        return false;
+    }
+    // Convert Map to Object
+    static toObject(map) {
+        const keys = Array.from(map.keys());
+        const values = Array.from(map.values());
+        return new MapInfo(MapInfo.replacer, keys, values);
+    }
+    // Convert Object to Map
+    static toMap(obj) {
+        return new Map(obj.keys.map((key, i) => [key, obj.values[i]]));
+    }
+}
+MapInfo.replacer = "ace_engine_state_mgmt_map_replacer";
+/**
+ * SetInfo
+ *
+ * Helper class to persist Set in Persistent storage
+ *
+ */
+class SetInfo {
+    constructor(setReplacer, values) {
+        this.setReplacer = setReplacer;
+        this.values = values;
+    }
+    // Check if the given object is of type SetInfo
+    static isObject(obj) {
+        const typedObject = obj;
+        if ('setReplacer' in typedObject && typedObject.setReplacer === SetInfo.replacer) {
+            return true;
+        }
+        return false;
+    }
+    // Convert Set to Object
+    static toObject(set) {
+        const values = Array.from(set.values());
+        return new SetInfo(SetInfo.replacer, values);
+    }
+    // Convert Object to Set
+    static toSet(obj) {
+        return new Set(obj.values);
+    }
+}
+SetInfo.replacer = "ace_engine_state_mgmt_set_replacer";
+/**
+ * DateInfo
+ *
+ * Helper class to persist Date in Persistent storage
+ *
+ */
+class DateInfo {
+    constructor(dateReplacer, date) {
+        this.dateReplacer = dateReplacer;
+        this.date = date;
+    }
+    // Check if the given object is of type DateInfo
+    static isObject(obj) {
+        const typedObject = obj;
+        if ('dateReplacer' in typedObject && typedObject.dateReplacer === DateInfo.replacer) {
+            return true;
+        }
+        return false;
+    }
+    // Convert Date to Object
+    static toObject(date) {
+        return new DateInfo(DateInfo.replacer, date.toISOString());
+    }
+    // Convert Object to Date
+    static toDate(obj) {
+        return new Date(obj.date);
+    }
+}
+DateInfo.replacer = "ace_engine_state_mgmt_date_replacer";
+/**
  * PersistentStorage
  *
  * Keeps current values of select AppStorage property properties persisted to file.
@@ -1534,7 +1701,7 @@ class PersistentStorage {
       */
     static notifyHasChanged(propName) {
         
-        PersistentStorage.storage_.set(propName, PersistentStorage.getOrCreate().links_.get(propName).get());
+        PersistentStorage.getOrCreate().writeToPersistentStorage(propName, PersistentStorage.getOrCreate().links_.get(propName).get());
     }
     /**
      * @see notifyHasChanged
@@ -1542,7 +1709,7 @@ class PersistentStorage {
      */
     static NotifyHasChanged(propName) {
         
-        PersistentStorage.storage_.set(propName, PersistentStorage.getOrCreate().links_.get(propName).get());
+        PersistentStorage.getOrCreate().writeToPersistentStorage(propName, PersistentStorage.getOrCreate().links_.get(propName).get());
     }
     keys() {
         return this.links_.keys();
@@ -1551,14 +1718,14 @@ class PersistentStorage {
         if (this.persistProp1(propName, defaultValue)) {
             // persist new prop
             
-            PersistentStorage.storage_.set(propName, this.links_.get(propName).get());
+            this.writeToPersistentStorage(propName, this.links_.get(propName).get());
         }
     }
     // helper function to persist a property
     // does everything except writing prop to disk
     persistProp1(propName, defaultValue) {
         
-        if (defaultValue == null || defaultValue == undefined) {
+        if (defaultValue == null && !Utils.isApiVersionEQAbove(12)) {
             stateMgmtConsole.error(`PersistentStorage: persistProp for ${propName} called with 'null' or 'undefined' default value!`);
             return false;
         }
@@ -1572,14 +1739,13 @@ class PersistentStorage {
             this.links_.set(propName, link);
         }
         else {
-            let newValue = PersistentStorage.storage_.get(propName);
             let returnValue;
-            if (newValue == undefined || newValue == null) {
+            if (!PersistentStorage.storage_.has(propName)) {
                 
                 returnValue = defaultValue;
             }
             else {
-                returnValue = newValue;
+                returnValue = this.readFromPersistentStorage(propName);
             }
             link = AppStorage.setAndLink(propName, returnValue, this);
             this.links_.set(propName, link);
@@ -1606,8 +1772,39 @@ class PersistentStorage {
     write() {
         this.links_.forEach((link, propName, map) => {
             
-            PersistentStorage.storage_.set(propName, link.get());
+            this.writeToPersistentStorage(propName, link.get());
         });
+    }
+    // helper function to write to the persistent storage
+    // any additional check and formatting can to be done here
+    writeToPersistentStorage(propName, value) {
+        if (value instanceof Map) {
+            value = MapInfo.toObject(value);
+        }
+        else if (value instanceof Set) {
+            value = SetInfo.toObject(value);
+        }
+        else if (value instanceof Date) {
+            value = DateInfo.toObject(value);
+        }
+        PersistentStorage.storage_.set(propName, value);
+    }
+    // helper function to read from the persistent storage
+    // any additional check and formatting can to be done here
+    readFromPersistentStorage(propName) {
+        let newValue = PersistentStorage.storage_.get(propName);
+        if (newValue instanceof Object) {
+            if (MapInfo.isObject(newValue)) {
+                newValue = MapInfo.toMap(newValue);
+            }
+            else if (SetInfo.isObject(newValue)) {
+                newValue = SetInfo.toSet(newValue);
+            }
+            else if (DateInfo.isObject(newValue)) {
+                newValue = DateInfo.toDate(newValue);
+            }
+        }
+        return newValue;
     }
     // FU code path method
     propertyHasChanged(info) {
@@ -1835,10 +2032,13 @@ class stateMgmtConsole {
     }
     static propertyAccess(...args) {
         // enable for fine grain debugging variable observation
-        // aceConsole debug (...args)
+        // aceConsole.debug (...args)
     }
     static applicationError(...args) {
         aceConsole.error(`FIX THIS APPLICATION ERROR \n`, ...args);
+    }
+    static featureCombinationError(msg) {
+        aceConsole.warn(msg);
     }
 }
 class stateMgmtTrace {
@@ -1859,6 +2059,7 @@ class errorReport {
         }
         catch (e) { }
         msg += "!";
+        stateMgmtConsole.applicationError(msg);
         throw new TypeError(msg);
     }
     static varObservationFailed(params) {
@@ -1887,12 +2088,6 @@ class errorReport {
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
-    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
-    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
-    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
-    return c > 3 && r && Object.defineProperty(target, key, r), r;
-};
 /**
 * @Observed class decorator
 *
@@ -1931,12 +2126,19 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 */
 // define just once to get just one Symbol
 const __IS_OBSERVED_PROXIED = Symbol("_____is_observed_proxied__");
-function Observed(constructor_, _) {
+function Observed(BaseClass) {
     
-    let ObservedClass = class extends constructor_ {
+    // prevent use of V3 @track inside V2 @Observed class
+    if (BaseClass.prototype && Reflect.has(BaseClass.prototype, ObserveV3.SYMBOL_REFS)) {
+        const error = `'@Observed class ${BaseClass === null || BaseClass === void 0 ? void 0 : BaseClass.name}': invalid use of V3 @track decorator inside V2 @Observed class. Need to fix class definition to use @Track.`;
+        stateMgmtConsole.error(error);
+        throw new Error(error);
+    }
+    return class extends BaseClass {
         constructor(...args) {
             super(...args);
             
+            ConfigureStateMgmt.instance.intentUsingV2(`@Observed`, BaseClass.name);
             let isProxied = Reflect.has(this, __IS_OBSERVED_PROXIED);
             Object.defineProperty(this, __IS_OBSERVED_PROXIED, {
                 value: true,
@@ -1954,15 +2156,7 @@ function Observed(constructor_, _) {
             }
         }
     };
-    return ObservedClass;
 }
-// force tsc to generate the __decorate data structure needed for @Observed
-// tsc will not generate unless the @Observed class decorator is used at least once
-let __IGNORE_FORCE_decode_GENERATION__ = class __IGNORE_FORCE_decode_GENERATION__ {
-};
-__IGNORE_FORCE_decode_GENERATION__ = __decorate([
-    Observed
-], __IGNORE_FORCE_decode_GENERATION__);
 class SubscribableHandler {
     constructor(owningProperty) {
         this.owningProperties_ = new Set();
@@ -2006,6 +2200,7 @@ class SubscribableHandler {
             // PU code path
             if ('onTrackedObjectPropertyCompatModeHasChangedPU' in owningProperty) {
                 owningProperty.onTrackedObjectPropertyCompatModeHasChangedPU(this, propName);
+                return;
             }
             // FU code path
             if ('hasChanged' in owningProperty) {
@@ -2042,13 +2237,18 @@ class SubscribableHandler {
             case SubscribableHandler.COUNT_SUBSCRIBERS:
                 return this.owningProperties_.size;
                 break;
+            case ObserveV3.SYMBOL_REFS:
+            case ObserveV3.V3_DECO_META:
+                // return result unmonitored
+                return Reflect.get(target, property, receiver);
+                break;
             default:
                 const result = Reflect.get(target, property, receiver);
                 let propertyStr = String(property);
-                if (this.readCbFunc_ && typeof result !== 'function') {
+                if (this.readCbFunc_ && typeof result !== 'function' && this.obSelf_ != undefined) {
                     let isTracked = this.isPropertyTracked(target, propertyStr);
                     
-                    this.readCbFunc_(receiver, propertyStr, isTracked);
+                    this.readCbFunc_.call(this.obSelf_, receiver, propertyStr, isTracked);
                 }
                 else {
                     // result is function or in compatibility mode (in compat mode cbFunc will never be set)
@@ -2074,6 +2274,10 @@ class SubscribableHandler {
                 // assignment obsObj[SubscribableHandler.SET_ONREAD_CB] = readCallbackFunc
                 
                 this.readCbFunc_ = TrackedObject.isCompatibilityMode(target) ? undefined : newValue;
+                return true;
+                break;
+            case SubscribableHandler.RAW_THIS:
+                this.obSelf_ = TrackedObject.isCompatibilityMode(target) ? undefined : newValue;
                 return true;
                 break;
             default:
@@ -2114,6 +2318,7 @@ SubscribableHandler.SUBSCRIBE = Symbol("_____subscribe__");
 SubscribableHandler.UNSUBSCRIBE = Symbol("_____unsubscribe__");
 SubscribableHandler.COUNT_SUBSCRIBERS = Symbol("____count_subscribers__");
 SubscribableHandler.SET_ONREAD_CB = Symbol("_____set_onread_cb__");
+SubscribableHandler.RAW_THIS = Symbol("_____raw_this");
 class SubscribableMapSetHandler extends SubscribableHandler {
     constructor(owningProperty) {
         super(owningProperty);
@@ -2365,11 +2570,12 @@ class ObservedObject extends ExtendableProxy {
     /*
       set or unset callback function to be called when a property has been called
     */
-    static registerPropertyReadCb(obj, readPropCb) {
+    static registerPropertyReadCb(obj, readPropCb, obSelf) {
         if (!ObservedObject.IsObservedObject(obj)) {
             return false;
         }
         obj[SubscribableHandler.SET_ONREAD_CB] = readPropCb;
+        obj[SubscribableHandler.RAW_THIS] = obSelf;
         return true;
     }
     static unregisterPropertyReadCb(obj) {
@@ -2377,6 +2583,7 @@ class ObservedObject extends ExtendableProxy {
             return false;
         }
         obj[SubscribableHandler.SET_ONREAD_CB] = undefined;
+        obj[SubscribableHandler.RAW_THIS] = undefined;
         return true;
     }
     /**
@@ -2616,6 +2823,38 @@ class CustomDialogController extends NativeCustomDialogController {
         super(arg, view);
         this.arg_ = arg;
         this.view_ = view;
+    }
+}
+/*
+ * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+ */
+class Utils {
+    static getApiVersion() {
+        return typeof ViewStackProcessor["getApiVersion"] == "function"
+            ? ViewStackProcessor["getApiVersion"]()
+            : undefined;
+    }
+    static isApiVersionEQAbove(target) {
+        var version = Utils.getApiVersion();
+        if (version == null) {
+            return false;
+        }
+        if (typeof version == "number") {
+            version = version % 1000;
+        }
+        return version >= target;
     }
 }
 /*
@@ -3419,6 +3658,7 @@ class View extends NativeViewFullUpdate {
 // indicates to framework to track individual object property value changes
 function Track(target, property) {
     var _a;
+    ConfigureStateMgmt.instance.intentUsingV2(`@Track`, property);
     Reflect.set(target, `${TrackedObject.___TRACKED_PREFIX}${property}`, true);
     Reflect.set(target, TrackedObject.___IS_TRACKED_OPTIMISED, true);
     
@@ -3438,12 +3678,12 @@ class TrackedObject {
      * if optimisation can not be applied calls notifyPropertyChanged and returns false
      */
     static notifyObjectValueAssignment(obj1, obj2, notifyPropertyChanged, // notify as assignment (none-optimised)
-    notifyTrackedPropertyChange) {
+    notifyTrackedPropertyChange, obSelf) {
         if (!obj1 || !obj2 || (typeof obj1 !== 'object') || (typeof obj2 !== 'object') ||
             (obj1.constructor !== obj2.constructor) ||
             TrackedObject.isCompatibilityMode(obj1)) {
             
-            notifyPropertyChanged();
+            notifyPropertyChanged.call(obSelf);
             return false;
         }
         
@@ -3456,7 +3696,7 @@ class TrackedObject {
             if (Reflect.has(obj1Raw, `${TrackedObject.___TRACKED_PREFIX}${propName}`) &&
                 (Reflect.get(obj1Raw, propName) !== Reflect.get(obj2Raw, propName))) {
                 
-                notifyTrackedPropertyChange(propName);
+                notifyTrackedPropertyChange.call(obSelf, propName);
                 shouldFakePropPropertyBeNotified = true;
             }
             else {
@@ -3468,14 +3708,14 @@ class TrackedObject {
         // reporting the property as changed causes @Prop sync from source
         if (shouldFakePropPropertyBeNotified) {
             
-            notifyTrackedPropertyChange(TrackedObject.___TRACKED_OPTI_ASSIGNMENT_FAKE_PROP_PROPERTY);
+            notifyTrackedPropertyChange.call(obSelf, TrackedObject.___TRACKED_OPTI_ASSIGNMENT_FAKE_PROP_PROPERTY);
         }
         // always notify this non-existing object property has changed for SynchedPropertyNestedObject as 
         // the object has changed in assigment.
         // SynchedPropertyNestedObject.set() reports a 'read' on this property, thereby creating a dependency
         // reporting the property as changed causes @ObjectLink sync from source
         
-        notifyTrackedPropertyChange(TrackedObject.___TRACKED_OPTI_ASSIGNMENT_FAKE_OBJLINK_PROPERTY);
+        notifyTrackedPropertyChange.call(obSelf, TrackedObject.___TRACKED_OPTI_ASSIGNMENT_FAKE_OBJLINK_PROPERTY);
         return true;
     }
 }
@@ -3508,7 +3748,6 @@ class ObservedPropertyAbstractPU extends ObservedPropertyAbstract {
     constructor(subscriber, viewName) {
         super(subscriber, viewName);
         this.owningView_ = undefined;
-        this.dependentElementIds_ = new Set();
         // when owning ViewPU is inActive, delay notifying changes
         this.delayedNotification_ = ObservedPropertyAbstractPU.DelayedNotifyChangesEnum.do_not_delay;
         // install when current value is ObservedObject and the value type is not using compatibility mode
@@ -3525,6 +3764,7 @@ class ObservedPropertyAbstractPU extends ObservedPropertyAbstract {
                 this.subscriberRefs_.add(subscriber);
             }
         }
+        ConfigureStateMgmt.instance.intentUsingV2(`V2 Decorated variable`, this.debugInfo());
     }
     aboutToBeDeleted() {
         super.aboutToBeDeleted();
@@ -3563,8 +3803,8 @@ class ObservedPropertyAbstractPU extends ObservedPropertyAbstract {
         result += "\n  }";
         return result;
     }
-    debugInfoDependentElmtIds() {
-        return this.dependentElmtIdsByProperty_.dumpInfoDependencies();
+    debugInfoDependentElmtIds(dumpDependantElements = false) {
+        return this.dependentElmtIdsByProperty_.dumpInfoDependencies(this.owningView_, dumpDependantElements);
     }
     debugInfoElmtId(elmtId) {
         if (this.owningView_) {
@@ -3574,7 +3814,9 @@ class ObservedPropertyAbstractPU extends ObservedPropertyAbstract {
     }
     debugInfoDependentComponents() {
         let result = `|--Dependent elements: `;
-        let sepa = "";
+        let sepa = "; ";
+        let sepaDiff = "";
+        const dumpDependantElements = true;
         let queue = [this];
         let seen = new Set();
         while (queue.length) {
@@ -3582,15 +3824,9 @@ class ObservedPropertyAbstractPU extends ObservedPropertyAbstract {
             seen.add(item);
             if (item != this) {
                 result += `${sepa}${item.debugInfoOwningView()}`;
-                sepa = ", ";
             }
-            if (item.owningView_) {
-                item.dependentElementIds_.forEach((elmtId) => {
-                    const owningViewInfo = item.owningView_.debugInfoElmtId(elmtId);
-                    result += `${owningViewInfo ? sepa : ""}${owningViewInfo}`;
-                    sepa = ", ";
-                });
-            }
+            result += `${sepaDiff}${item.debugInfoDependentElmtIds(dumpDependantElements)}`; // new dependent elements
+            sepaDiff = ", ";
             item.subscriberRefs_.forEach((subscriber) => {
                 if ((subscriber instanceof ObservedPropertyAbstractPU)) {
                     if (!seen.has(subscriber)) {
@@ -3610,7 +3846,7 @@ class ObservedPropertyAbstractPU extends ObservedPropertyAbstract {
         return `${this.info()}_prop_fake_state_source___`;
     }
     isPropSourceObservedPropertyFakeName() {
-        return this.info().endsWith("_prop_fake_state_source___")
+        return this.info() && this.info().endsWith("_prop_fake_state_source___")
             ? this.info().substring(0, this.info().length - "_prop_fake_state_source___".length)
             : false;
     }
@@ -3740,9 +3976,19 @@ class ObservedPropertyAbstractPU extends ObservedPropertyAbstract {
       FIXME this expects the Map, Set patch to go in
      */
     checkIsSupportedValue(value) {
-        return this.checkNewValue(`undefined, null, number, boolean, string, or Object but not function`, value, () => ((typeof value == "object" && typeof value != "function")
-            || typeof value == "number" || typeof value == "string" || typeof value == "boolean")
-            || (value == undefined || value == null));
+        let res = ((typeof value == "object" && typeof value != "function" && !ObserveV3.IsObservedObjectV3(value))
+            || typeof value == "number" || typeof value == "string" || typeof value == "boolean"
+            || value == undefined || value == null);
+        if (!res) {
+            errorReport.varValueCheckFailed({
+                customComponent: this.debugInfoOwningView(),
+                variableDeco: this.debugInfoDecorator(),
+                variableName: this.info(),
+                expectedType: `undefined, null, number, boolean, string, or Object but not function, not V3 @observed / @track class`,
+                value: value
+            });
+        }
+        return res;
     }
     /*
       type checking for allowed Object type value
@@ -3751,14 +3997,35 @@ class ObservedPropertyAbstractPU extends ObservedPropertyAbstract {
         FIXME this expects the Map, Set patch to go in
      */
     checkIsObject(value) {
-        return this.checkNewValue(`undefined, null, Object including Array and instance of SubscribableAbstract and excluding function, Set, and Map`, value, () => (value == undefined || value == null || (typeof value == "object")));
+        let res = ((typeof value == "object" && typeof value != "function" && !ObserveV3.IsObservedObjectV3(value))
+            || value == undefined || value == null);
+        if (!res) {
+            errorReport.varValueCheckFailed({
+                customComponent: this.debugInfoOwningView(),
+                variableDeco: this.debugInfoDecorator(),
+                variableName: this.info(),
+                expectedType: `undefined, null, Object including Array and instance of SubscribableAbstract and excluding function and V3 @observed/@track object`,
+                value: value
+            });
+        }
+        return res;
     }
     /*
       type checking for allowed simple types value
       see 1st parameter for explanation what is allowed
      */
     checkIsSimple(value) {
-        return this.checkNewValue(`undefined, number, boolean, string`, value, () => (value == undefined || typeof value == "number" || typeof value == "string" || typeof value == "boolean"));
+        let res = (value == undefined || typeof value == "number" || typeof value == "string" || typeof value == "boolean");
+        if (!res) {
+            errorReport.varValueCheckFailed({
+                customComponent: this.debugInfoOwningView(),
+                variableDeco: this.debugInfoDecorator(),
+                variableName: this.info(),
+                expectedType: `undefined, number, boolean, string`,
+                value: value
+            });
+        }
+        return res;
     }
     checkNewValue(isAllowedComment, newValue, validator) {
         if (validator(newValue)) {
@@ -3793,12 +4060,12 @@ class ObservedPropertyAbstractPU extends ObservedPropertyAbstract {
     }
     /**
      * If owning viewPU is currently rendering or re-rendering a UINode, return its elmtId
-     * return -1 otherwise
+     * return notRecordingDependencies (-1) otherwise
      * ViewPU caches the info, it does not request the info from C++ side (by calling
      * ViewStackProcessor.GetElmtIdToAccountFor(); as done in earlier implementation
      */
     getRenderingElmtId() {
-        return (this.owningView_) ? this.owningView_.getCurrentlyRenderedElmtId() : -1;
+        return (this.owningView_) ? this.owningView_.getCurrentlyRenderedElmtId() : UINodeRegisterProxy.notRecordingDependencies;
     }
     /**
      * during 'get' access recording take note of the created component and its elmtId
@@ -3806,9 +4073,14 @@ class ObservedPropertyAbstractPU extends ObservedPropertyAbstract {
      */
     recordPropertyDependentUpdate() {
         const elmtId = this.getRenderingElmtId();
-        if (elmtId < 0) {
+        if (elmtId == UINodeRegisterProxy.notRecordingDependencies) {
             // not access recording 
             return;
+        }
+        if (elmtId == UINodeRegisterProxy.monitorIllegalV2V3StateAccess) {
+            const error = `${this.debugInfo()}: recordPropertyDependentUpdate trying to use V2 state to init/update child V3 @Component. Application error`;
+            stateMgmtConsole.applicationError(error);
+            throw new TypeError(error);
         }
         
         this.dependentElmtIdsByProperty_.addPropertyDependency(elmtId);
@@ -3925,10 +4197,14 @@ class PropertyDependencies {
         
         return dependentElmtIds;
     }
-    dumpInfoDependencies() {
-        let result = `dependencies: variable assignment (or object prop change in compat mode) affects elmtIds: ${JSON.stringify(Array.from(this.propertyDependencies_))} \n`;
+    dumpInfoDependencies(owningView = undefined, dumpDependantElements) {
+        const formatElmtId = owningView ? (elmtId => owningView.debugInfoElmtId(elmtId)) : (elmtId => elmtId);
+        let result = `dependencies: variable assignment (or object prop change in compat mode) affects elmtIds: ${Array.from(this.propertyDependencies_).map(formatElmtId).join(', ')}`;
+        const arr = Array.from(this.propertyDependencies_).map(formatElmtId);
+        if (dumpDependantElements)
+            return (arr.length > 1 ? arr.join(', ') : arr[0]);
         this.trackedObjectPropertyDependencies_.forEach((propertyElmtId, propertyName) => {
-            result += `  property '@Track ${propertyName}' change affects elmtIds: ${JSON.stringify(Array.from(propertyElmtId))} \n`;
+            result += `  property '@Track ${propertyName}' change affects elmtIds: ${Array.from(propertyElmtId).map(formatElmtId).join(', ')}`;
         });
         return result;
     }
@@ -4051,7 +4327,7 @@ class ObservedPropertyPU extends ObservedPropertyAbstractPU {
         this.recordPropertyDependentUpdate();
         if (this.shouldInstallTrackedObjectReadCb) {
             
-            ObservedObject.registerPropertyReadCb(this.wrappedValue_, this.onOptimisedObjectPropertyRead.bind(this));
+            ObservedObject.registerPropertyReadCb(this.wrappedValue_, this.onOptimisedObjectPropertyRead, this);
         }
         else {
             
@@ -4072,7 +4348,7 @@ class ObservedPropertyPU extends ObservedPropertyAbstractPU {
         
         const oldValue = this.wrappedValue_;
         if (this.setValueInternal(newValue)) {
-            TrackedObject.notifyObjectValueAssignment(/* old value */ oldValue, /* new value */ this.wrappedValue_, this.notifyPropertyHasChangedPU.bind(this), this.notifyTrackedObjectPropertyHasChanged.bind(this));
+            TrackedObject.notifyObjectValueAssignment(/* old value */ oldValue, /* new value */ this.wrappedValue_, this.notifyPropertyHasChangedPU, this.notifyTrackedObjectPropertyHasChanged, this);
         }
     }
     onOptimisedObjectPropertyRead(readObservedObject, readPropertyName, isTracked) {
@@ -4270,7 +4546,7 @@ class SynchedPropertyOneWayPU extends ObservedPropertyAbstractPU {
         this.recordPropertyDependentUpdate();
         if (this.shouldInstallTrackedObjectReadCb) {
             
-            ObservedObject.registerPropertyReadCb(this.localCopyObservedObject_, this.onOptimisedObjectPropertyRead.bind(this));
+            ObservedObject.registerPropertyReadCb(this.localCopyObservedObject_, this.onOptimisedObjectPropertyRead, this);
         }
         else {
             
@@ -4287,7 +4563,7 @@ class SynchedPropertyOneWayPU extends ObservedPropertyAbstractPU {
         
         const oldValue = this.localCopyObservedObject_;
         if (this.resetLocalValue(newValue, /* needCopyObject */ false)) {
-            TrackedObject.notifyObjectValueAssignment(/* old value */ oldValue, /* new value */ this.localCopyObservedObject_, this.notifyPropertyHasChangedPU.bind(this), this.notifyTrackedObjectPropertyHasChanged.bind(this));
+            TrackedObject.notifyObjectValueAssignment(/* old value */ oldValue, /* new value */ this.localCopyObservedObject_, this.notifyPropertyHasChangedPU, this.notifyTrackedObjectPropertyHasChanged, this);
         }
     }
     onOptimisedObjectPropertyRead(readObservedObject, readPropertyName, isTracked) {
@@ -4633,7 +4909,7 @@ class SynchedPropertyTwoWayPU extends ObservedPropertyAbstractPU {
         const result = this.getUnmonitored();
         if (this.shouldInstallTrackedObjectReadCb) {
             
-            ObservedObject.registerPropertyReadCb(result, this.onOptimisedObjectPropertyRead.bind(this));
+            ObservedObject.registerPropertyReadCb(result, this.onOptimisedObjectPropertyRead, this);
         }
         else {
             
@@ -4654,7 +4930,7 @@ class SynchedPropertyTwoWayPU extends ObservedPropertyAbstractPU {
         this.changeNotificationIsOngoing_ = true;
         let oldValue = this.getUnmonitored();
         this.setObject(newValue);
-        TrackedObject.notifyObjectValueAssignment(/* old value */ oldValue, /* new value */ newValue, this.notifyPropertyHasChangedPU.bind(this), this.notifyTrackedObjectPropertyHasChanged.bind(this));
+        TrackedObject.notifyObjectValueAssignment(/* old value */ oldValue, /* new value */ newValue, this.notifyPropertyHasChangedPU, this.notifyTrackedObjectPropertyHasChanged, this);
         this.changeNotificationIsOngoing_ = false;
         
     }
@@ -4742,7 +5018,7 @@ class SynchedPropertyNestedObjectPU extends ObservedPropertyAbstractPU {
         this.recordPropertyDependentUpdate();
         if (this.shouldInstallTrackedObjectReadCb) {
             
-            ObservedObject.registerPropertyReadCb(this.obsObject_, this.onOptimisedObjectPropertyRead.bind(this));
+            ObservedObject.registerPropertyReadCb(this.obsObject_, this.onOptimisedObjectPropertyRead, this);
         }
         else {
             
@@ -4762,7 +5038,7 @@ class SynchedPropertyNestedObjectPU extends ObservedPropertyAbstractPU {
         if (this.setValueInternal(newValue)) {
             this.createSourceDependency(newValue);
             // notify value change to subscribing View
-            TrackedObject.notifyObjectValueAssignment(/* old value */ oldValue, /* new value */ this.obsObject_, this.notifyPropertyHasChangedPU.bind(this), this.notifyTrackedObjectPropertyHasChanged.bind(this));
+            TrackedObject.notifyObjectValueAssignment(/* old value */ oldValue, /* new value */ this.obsObject_, this.notifyPropertyHasChangedPU, this.notifyTrackedObjectPropertyHasChanged, this);
         }
     }
     onOptimisedObjectPropertyRead(readObservedObject, readPropertyName, isTracked) {
@@ -4864,6 +5140,18 @@ class UINodeRegisterProxy {
         
         UINodeRegisterProxy.instance_.unregisterElmtIdsFromViewPUs();
     }
+    // unregisters all the received removedElements in func parameter
+    static unregisterRemovedElmtsFromViewPUs(removedElements) {
+        
+        UINodeRegisterProxy.instance_.populateRemoveElementInfo(removedElements);
+        UINodeRegisterProxy.instance_.unregisterElmtIdsFromViewPUs();
+    }
+    populateRemoveElementInfo(removedElements) {
+        for (const elmtId of removedElements) {
+            const removedElementInfo = { elmtId, tag: "" };
+            this.removeElementsInfo_.push(removedElementInfo);
+        }
+    }
     /* just get the remove items from the native side
     */
     obtainDeletedElmtIds() {
@@ -4894,10 +5182,14 @@ class UINodeRegisterProxy {
             else {
                 
             }
+            // FIXME: only do this if app uses V3
+            ObserveV3.getObserve().clearBinding(rmElmtInfo.elmtId);
         });
         this.removeElementsInfo_.length = 0;
     }
 }
+UINodeRegisterProxy.notRecordingDependencies = -1;
+UINodeRegisterProxy.monitorIllegalV2V3StateAccess = -2;
 UINodeRegisterProxy.instance_ = new UINodeRegisterProxy();
 UINodeRegisterProxy.ElementIdToOwningViewPU_ = new Map();
 /*
@@ -4918,8 +5210,6 @@ UINodeRegisterProxy.ElementIdToOwningViewPU_ = new Map();
  *
 * all definitions in this file are framework internal
 */
-// denotes a missing elemntId, this is the case during initial render
-const UndefinedElmtId = -1;
 // UpdateFuncRecord: misc framework-internal info related to updating of a UINode C++ object 
 // that TS side needs to know. 
 // updateFunc_  lambda function to update the UINode
@@ -4968,7 +5258,7 @@ class ViewPU extends NativeViewPartialUpdate {
      *    - localStorage do not specify, will inherit from parent View.
      *
     */
-    constructor(parent, localStorage, elmtId = -1, extraInfo = undefined) {
+    constructor(parent, localStorage, elmtId = UINodeRegisterProxy.notRecordingDependencies, extraInfo = undefined) {
         super();
         this.parent_ = undefined;
         this.childrenWeakrefMap_ = new Map();
@@ -4977,7 +5267,7 @@ class ViewPU extends NativeViewPartialUpdate {
         // flag for initial rendering being done
         this.isInitialRenderDone = false;
         // indicates the currently rendered or rendered UINode's elmtIds
-        // or -1 if none is currently rendering
+        // or UINodeRegisterProxy.notRecordingDependencies if none is currently rendering
         // isRenderInProgress == true always when currentlyRenderedElmtIdStack_.length >= 0 
         this.currentlyRenderedElmtIdStack_ = new Array();
         // flag if active of inActive
@@ -5005,7 +5295,7 @@ class ViewPU extends NativeViewPartialUpdate {
         // if set use the elmtId also as the ViewPU object's subscribable id.
         // these matching is requirement for updateChildViewById(elmtId) being able to
         // find the child ViewPU object by given elmtId
-        this.id_ = elmtId == -1 ? SubscriberManager.MakeId() : elmtId;
+        this.id_ = elmtId == UINodeRegisterProxy.notRecordingDependencies ? SubscriberManager.MakeId() : elmtId;
         this.localStoragebackStore_ = undefined;
         
         if (extraInfo) {
@@ -5017,7 +5307,7 @@ class ViewPU extends NativeViewPartialUpdate {
             // Call below will set this.parent_ to parent as well
             parent.addChild(this);
         }
-        else if (localStorage) {
+        if (localStorage) {
             this.localStorage_ = localStorage;
             
         }
@@ -5034,20 +5324,30 @@ class ViewPU extends NativeViewPartialUpdate {
         return this.ownObservedPropertiesStore__;
     }
     obtainOwnObservedProperties() {
+        let usesStateMgmtVersion = 0;
         Object.getOwnPropertyNames(this)
             .filter((propName) => {
-            return propName.startsWith("__");
+            return (propName.startsWith("__") && !propName.startsWith(ObserveV3.OB_PREFIX));
         })
             .forEach((propName) => {
             const stateVar = Reflect.get(this, propName);
             if (stateVar && typeof stateVar === 'object' && "notifyPropertyHasChangedPU" in stateVar) {
                 
                 this.ownObservedPropertiesStore_.add(stateVar);
+                usesStateMgmtVersion = 2;
             }
             else {
                 
             }
         });
+        if (this.isViewV3 == true) {
+            if (usesStateMgmtVersion == 2) {
+                const error = `${this.debugInfo__()}: mixed use of stateMgmt V2 and V3 variable decorators. Application error!`;
+                stateMgmtConsole.applicationError(error);
+                throw new Error(error);
+            }
+        }
+        
     }
     get localStorage_() {
         if (!this.localStoragebackStore_ && this.parent_) {
@@ -5069,6 +5369,16 @@ class ViewPU extends NativeViewPartialUpdate {
             stateMgmtConsole.applicationError(`${this.debugInfo__()}: constructor: is setting LocalStorage instance twice. Application error.`);
         }
         this.localStoragebackStore_ = instance;
+    }
+    // FIXME 
+    // indicate if this is  V2 or a V3 component
+    // V2 by default, changed to V3 by the first V3 decorated variable
+    // when splitting ViewPU and ViewV3
+    // use instanceOf. Until then, this is a workaround.
+    // @state, @track, etc V3 decorator functions modify isViewV3 to return true
+    // (decorator can modify functions in prototype)
+    get isViewV3() {
+        return false;
     }
     // globally unique id, this is different from compilerAssignedUniqueChildId!
     id__() {
@@ -5105,8 +5415,8 @@ class ViewPU extends NativeViewPartialUpdate {
         // this ViewPU should be treated as already unregistered
         
         // purge the elmtIds owned by this viewPU from the updateFuncByElmtId and also the state variable dependent elmtIds
-        Array.from(this.updateFuncByElmtId.keys()).forEach((elemId) => {
-            this.purgeDeleteElmtId(elemId);
+        Array.from(this.updateFuncByElmtId.keys()).forEach((elmtId) => {
+            this.purgeDeleteElmtId(elmtId);
         });
         if (this.hasRecycleManager()) {
             this.getRecycleManager().purgeAllCachedRecycleNode();
@@ -5115,6 +5425,8 @@ class ViewPU extends NativeViewPartialUpdate {
         
         // it will unregister removed elementids from all the viewpu, equals purgeDeletedElmtIdsRecursively
         this.purgeDeletedElmtIds();
+        // unregisters its own id once its children are unregistered above
+        UINodeRegisterProxy.unregisterRemovedElmtsFromViewPUs([this.id__()]);
         
         // in case ViewPU is currently frozen
         ViewPU.inactiveComponents_.delete(`${this.constructor.name}[${this.id__()}]`);
@@ -5137,6 +5449,8 @@ class ViewPU extends NativeViewPartialUpdate {
             // it means rmElmtId has finished all the unregistration from the js side, ElementIdToOwningViewPU_  does not need to keep it
             UINodeRegisterProxy.ElementIdToOwningViewPU_.delete(rmElmtId);
         }
+        // FIXME: only do this if app uses V3
+        ObserveV3.getObserve().clearBinding(rmElmtId);
         return result;
     }
     debugInfo__() {
@@ -5165,7 +5479,7 @@ class ViewPU extends NativeViewPartialUpdate {
     debugInfoStateVars() {
         let result = `|--${this.constructor.name}[${this.id__()}]`;
         Object.getOwnPropertyNames(this)
-            .filter((varName) => varName.startsWith("__"))
+            .filter((varName) => varName.startsWith("__") && !varName.startsWith(ObserveV3.OB_PREFIX))
             .forEach((varName) => {
             const prop = Reflect.get(this, varName);
             if ("debugInfoDecorator" in prop) {
@@ -5408,39 +5722,66 @@ class ViewPU extends NativeViewPartialUpdate {
     // implements IMultiPropertiesChangeSubscriber
     viewPropertyHasChanged(varName, dependentElmtIds) {
         
-        stateMgmtTrace.scopedTrace(() => {
-            if (this.isRenderInProgress) {
-                stateMgmtConsole.applicationError(`${this.debugInfo__()}: State variable '${varName}' has changed during render! It's illegal to change @Component state while build (initial render or re-render) is on-going. Application error!`);
+        aceTrace.begin("ViewPU.viewPropertyHasChanged", this.constructor.name, varName, dependentElmtIds.size);
+        if (this.isRenderInProgress) {
+            stateMgmtConsole.applicationError(`${this.debugInfo__()}: State variable '${varName}' has changed during render! It's illegal to change @Component state while build (initial render or re-render) is on-going. Application error!`);
+        }
+        this.syncInstanceId();
+        if (dependentElmtIds.size && !this.isFirstRender()) {
+            if (!this.dirtDescendantElementIds_.size && !this.runReuse_) {
+                // mark ComposedElement dirty when first elmtIds are added
+                // do not need to do this every time
+                this.markNeedUpdate();
             }
+            
+            for (const elmtId of dependentElmtIds) {
+                if (this.hasRecycleManager()) {
+                    this.dirtDescendantElementIds_.add(this.recycleManager_.proxyNodeId(elmtId));
+                }
+                else {
+                    this.dirtDescendantElementIds_.add(elmtId);
+                }
+            }
+            
+        }
+        else {
+            
+            
+        }
+        let cb = this.watchedProps.get(varName);
+        if (cb) {
+            
+            cb.call(this, varName);
+        }
+        this.restoreInstanceId();
+        aceTrace.end();
+        
+    }
+    /**
+     *  inform that UINode with given elmtId needs rerender
+     *  does NOT exec @Watch function.
+     *  only used on V3 code path from ObserveV3.fireChange.
+     */
+    uiNodeNeedUpdateV3(elmtId) {
+        if (this.isFirstRender()) {
+            return;
+        }
+        
+        if (!this.dirtDescendantElementIds_.size && !this.runReuse_) {
+            // mark ComposedElement dirty when first elmtIds are added
+            // do not need to do this every time
             this.syncInstanceId();
-            if (dependentElmtIds.size && !this.isFirstRender()) {
-                if (!this.dirtDescendantElementIds_.size && !this.runReuse_) {
-                    // mark ComposedElement dirty when first elmtIds are added
-                    // do not need to do this every time
-                    this.markNeedUpdate();
-                }
-                
-                for (const elmtId of dependentElmtIds) {
-                    if (this.hasRecycleManager()) {
-                        this.dirtDescendantElementIds_.add(this.recycleManager_.proxyNodeId(elmtId));
-                    }
-                    else {
-                        this.dirtDescendantElementIds_.add(elmtId);
-                    }
-                }
-                
-            }
-            else {
-                
-                
-            }
-            let cb = this.watchedProps.get(varName);
-            if (cb) {
-                
-                cb.call(this, varName);
-            }
+            this.markNeedUpdate();
             this.restoreInstanceId();
-        }, "ViewPU.viewPropertyHasChanged", this.constructor.name, varName, dependentElmtIds.size);
+        }
+        if (this.hasRecycleManager()) {
+            this.dirtDescendantElementIds_.add(this.recycleManager_.proxyNodeId(elmtId));
+        }
+        else {
+            this.dirtDescendantElementIds_.add(elmtId);
+        }
+        
+        // FIXME dito: this.restoreInstanceId();
         
     }
     performDelayedUpdate() {
@@ -5448,31 +5789,31 @@ class ViewPU extends NativeViewPartialUpdate {
             return;
         }
         
-        stateMgmtTrace.scopedTrace(() => {
-            
-            this.syncInstanceId();
-            for (const stateLinkPropVar of this.ownObservedPropertiesStore_) {
-                const changedElmtIds = stateLinkPropVar.moveElmtIdsForDelayedUpdate();
-                if (changedElmtIds) {
-                    const varName = stateLinkPropVar.info();
-                    if (changedElmtIds.size && !this.isFirstRender()) {
-                        for (const elmtId of changedElmtIds) {
-                            this.dirtDescendantElementIds_.add(elmtId);
-                        }
-                    }
-                    
-                    const cb = this.watchedProps.get(varName);
-                    if (cb) {
-                        
-                        cb.call(this, varName);
+        aceTrace.begin("ViewPU.performDelayedUpdate", this.constructor.name);
+        
+        this.syncInstanceId();
+        for (const stateLinkPropVar of this.ownObservedPropertiesStore_) {
+            const changedElmtIds = stateLinkPropVar.moveElmtIdsForDelayedUpdate();
+            if (changedElmtIds) {
+                const varName = stateLinkPropVar.info();
+                if (changedElmtIds.size && !this.isFirstRender()) {
+                    for (const elmtId of changedElmtIds) {
+                        this.dirtDescendantElementIds_.add(elmtId);
                     }
                 }
-            } // for all ownStateLinkProps_
-            this.restoreInstanceId();
-            if (this.dirtDescendantElementIds_.size) {
-                this.markNeedUpdate();
+                
+                const cb = this.watchedProps.get(varName);
+                if (cb) {
+                    
+                    cb.call(this, varName);
+                }
             }
-        }, "ViewPU.performDelayedUpdate", this.constructor.name);
+        } // for all ownStateLinkProps_
+        this.restoreInstanceId();
+        if (this.dirtDescendantElementIds_.size) {
+            this.markNeedUpdate();
+        }
+        aceTrace.end();
         
     }
     /**
@@ -5555,7 +5896,10 @@ class ViewPU extends NativeViewPartialUpdate {
             // process all elmtIds marked as needing update in ascending order.
             // ascending order ensures parent nodes will be updated before their children
             // prior cleanup ensure no already deleted Elements have their update func executed
-            Array.from(this.dirtDescendantElementIds_).sort(ViewPU.compareNumber).forEach(elmtId => {
+            const dirtElmtIdsFromRootNode = Array.from(this.dirtDescendantElementIds_).sort(ViewPU.compareNumber);
+            // if state changed during exec update lambda inside UpdateElement, then the dirty elmtIds will be added 
+            // to newly created this.dirtDescendantElementIds_ Set
+            dirtElmtIdsFromRootNode.forEach(elmtId => {
                 if (this.hasRecycleManager()) {
                     this.UpdateElement(this.recycleManager_.proxyNodeId(elmtId));
                 }
@@ -5590,11 +5934,13 @@ class ViewPU extends NativeViewPartialUpdate {
     }
     /**
      * return its elmtId if currently rendering or re-rendering an UINode
-     * otherwise return -1
+     * otherwise return UINodeRegisterProxy.notRecordingDependencies
      * set in observeComponentCreation(2)
      */
     getCurrentlyRenderedElmtId() {
-        return ViewPU.renderingPaused || this.currentlyRenderedElmtIdStack_.length == 0 ? -1 : this.currentlyRenderedElmtIdStack_.slice(-1)[0];
+        return ViewPU.renderingPaused || this.currentlyRenderedElmtIdStack_.length == 0
+            ? UINodeRegisterProxy.notRecordingDependencies
+            : this.currentlyRenderedElmtIdStack_[this.currentlyRenderedElmtIdStack_.length - 1];
     }
     static pauseRendering() {
         ViewPU.renderingPaused = true;
@@ -5633,11 +5979,6 @@ class ViewPU extends NativeViewPartialUpdate {
             throw error;
         }
     }
-    // executed on first render only
-    // added July 2023, replaces observeComponentCreation
-    // classObject is the ES6 class object , mandatory to specify even the class lacks the pop function.
-    // - prototype : Object is present for every ES6 class
-    // - pop : () => void, static function present for JSXXX classes such as Column, TapGesture, etc.
     observeComponentCreation2(compilerAssignedUpdateFunc, classObject) {
         if (this.isDeleting_) {
             stateMgmtConsole.error(`View ${this.constructor.name} elmtId ${this.id__()} is already in process of destruction, will not execute observeComponentCreation2 `);
@@ -5649,11 +5990,22 @@ class ViewPU extends NativeViewPartialUpdate {
             this.syncInstanceId();
             
             ViewStackProcessor.StartGetAccessRecordingFor(elmtId);
+            // FIXME: Because ReactNative dynamic viewer app library uses V3 @observe within V2 @Component, 
+            // the framework needs to enable both V2 recording and 
+            // V3 recording with startBind as well.
             this.currentlyRenderedElmtIdStack_.push(elmtId);
+            // FIXME: like in V2 setting bindId_ in ObserveV3 does not work with 'stacked' 
+            // update + initial render calls, ike in if and ForEach case, convert to stack as well
+            ObserveV3.getObserve().startBind(this, elmtId);
             compilerAssignedUpdateFunc(elmtId, isFirstRender);
             if (!isFirstRender) {
                 _popFunc();
             }
+            let node = this.getNodeById(elmtId);
+            if (node !== undefined) {
+                node.cleanStageValue();
+            }
+            ObserveV3.getObserve().startBind(null, UINodeRegisterProxy.notRecordingDependencies);
             this.currentlyRenderedElmtIdStack_.pop();
             ViewStackProcessor.StopGetAccessRecording();
             
@@ -5742,13 +6094,13 @@ class ViewPU extends NativeViewPartialUpdate {
                 this.aboutToReuse(params);
             }
         }, "aboutToReuse", this.constructor.name);
-        this.updateDirtyElements();
         this.childrenWeakrefMap_.forEach((weakRefChild) => {
             const child = weakRefChild.deref();
             if (child && !child.hasBeenRecycled_) {
                 child.aboutToReuseInternal();
             }
         });
+        this.updateDirtyElements();
         this.runReuse_ = false;
     }
     aboutToRecycleInternal() {
@@ -5784,9 +6136,11 @@ class ViewPU extends NativeViewPartialUpdate {
         }
         // branchid identifies uniquely the if .. <1> .. else if .<2>. else .<3>.branch
         // ifElseNode stores the most recent branch, so we can compare
-        // removedChildElmtIds will be filled with the elmtIds of all childten and their children will be deleted in response to if .. else chnage
+        // removedChildElmtIds will be filled with the elmtIds of all children and their children will be deleted in response to if .. else change
         let removedChildElmtIds = new Array();
         If.branchId(branchId, removedChildElmtIds);
+        //unregisters the removed child elementIDs using proxy
+        UINodeRegisterProxy.unregisterRemovedElmtsFromViewPUs(removedChildElmtIds);
         // purging these elmtIds from state mgmt will make sure no more update function on any deleted child wi;ll be executed
         
         this.purgeDeletedElmtIds();
@@ -5839,7 +6193,7 @@ class ViewPU extends NativeViewPartialUpdate {
         let idDuplicates = [];
         const arr = itemArray; // just to trigger a 'get' onto the array
         // ID gen is with index.
-        if (idGenFuncUsesIndex) {
+        if (idGenFuncUsesIndex || idGenFunc.length > 1) {
             // Create array of new ids.
             arr.forEach((item, indx) => {
                 newIdArray.push(idGenFunc(item, indx));
@@ -5946,6 +6300,15 @@ class ViewPU extends NativeViewPartialUpdate {
         return nodeInfo;
     }
     /**
+     * getNodeById is used to get ArkComponent stored updateFuncByElmtId
+     * @param elmtId -  the id of the component
+     * @returns ArkComponent | undefined
+     */
+    getNodeById(elmtId) {
+        const entry = this.updateFuncByElmtId.get(elmtId);
+        return entry ? entry.getNode() : undefined;
+    }
+    /**
      * onDumpInfo is used to process commands delivered by the hidumper process
      * @param commands -  list of commands provided in the shell
      * @returns void
@@ -6019,7 +6382,7 @@ class ViewPU extends NativeViewPartialUpdate {
                         let input = command.split('=');
                         if (input[1]) {
                             let viewId = Number.parseInt(input[1]);
-                            dfxCommand.viewId = Number.isNaN(viewId) ? -1 : viewId;
+                            dfxCommand.viewId = Number.isNaN(viewId) ? UINodeRegisterProxy.notRecordingDependencies : viewId;
                         }
                     }
                 }
@@ -6126,7 +6489,34 @@ class ViewPU extends NativeViewPartialUpdate {
         return Array.from(ViewPU.inactiveComponents_)
             .map((component) => `- ${component}`).join('\n');
     }
-}
+    /**
+     *
+     * @param paramVariableName @param is read only, therefore, update form parent needs to be done without
+     *        causing property setter() to be called
+     * @param newValue
+     */
+    updateParam(paramVariableName, newValue) {
+        ObserveV3.getObserve().setReadOnlyAttr(this, paramVariableName, newValue);
+    }
+    /**
+     * sub-class must call this function at the end of its constructor
+     * especially after init variables from parent ViewPU has been done
+     */
+    finalizeConstruction() {
+        if (ConfigureStateMgmt.instance.needsV3Observe()) {
+            ObserveV3.getObserve().constructMonitor(this, this.constructor.name);
+        }
+    }
+    /**
+     * v3: find a @provide'ed variable in the nearest ancestor ViewPU.
+     * @param provideName
+     * @returns
+     */
+    findProvideV3(provideName) {
+        // FIXME unimplemented
+        return [undefined, provideName, true];
+    }
+} // class ViewPU
 // Array.sort() converts array items to string to compare them!
 ViewPU.compareNumber = (a, b) => {
     return (a < b) ? -1 : (a > b) ? 1 : 0;
@@ -6134,7 +6524,7 @@ ViewPU.compareNumber = (a, b) => {
 // List of inactive components used for Dfx
 ViewPU.inactiveComponents_ = new Set();
 // static flag for paused rendering
-// when paused, getCurrentlyRenderedElmtId() will return -1
+// when paused, getCurrentlyRenderedElmtId() will return UINodeRegisterProxy.notRecordingDependencies
 ViewPU.renderingPaused = false;
 class UpdateFuncsByElmtId {
     constructor() {
@@ -6181,7 +6571,7 @@ class UpdateFuncsByElmtId {
         const updateFuncEntry = this.map_.get(elmtId);
         return updateFuncEntry ? `'${updateFuncEntry.getComponentName()}[${elmtId}]'` : `'unknown component type'[${elmtId}]`;
     }
-}
+} // class UpdateFuncByElmtId
 /*
  * Copyright (c) 2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -6352,6 +6742,657 @@ function makeBuilderParameterProxy(builderName, source) {
         } // get
     }); // new Proxy
 }
+/*
+ * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+/**
+ * @monitor function decorator implementation and supporting classes MonitorV3 and AsyncMonitorV3
+ */
+/**
+ * @observe class and @track class property decorators
+ * ObserveV3 core helper class to keep track of all the object -> UINode/elmtId
+ * and Monitor/watchId dependencies.
+ */
+class ObserveV3 {
+    constructor() {
+        // see MonitorV3.observeObjectAccess: bindCmp is the MonitorV3
+        // see modified observeComponentCreation, bindCmp is the ViewPU
+        this.bindCmp_ = null;
+        // bindId: UINode elmtId or watchId, depending on what is being observed
+        this.bindId_ = UINodeRegisterProxy.notRecordingDependencies;
+        // Map bindId to WeakRef<ViewPU> | MonitorV3
+        this.id2cmp_ = {};
+        // Map bindId -> Set of @observed class objects
+        // reverse dependency map for quickly removing all dependencies of a bindId
+        this.id2targets_ = {};
+        // queued up Set of bindId
+        // elmtIds of UINodes need re-render
+        // @monitor functions that need to execute
+        this.elmtIdsChanged_ = new Set();
+        this.monitorIdsChanged_ = new Set();
+        // avoid recursive execution of updateDirty
+        // by state changes => fireChange while
+        // UINode rerender or @monitor function execution
+        this.startDirty_ = false;
+        // flag to indicate change observation is disabled
+        this.disabled_ = false;
+    }
+    static getObserve() {
+        if (!this.obsInstance_) {
+            this.obsInstance_ = new ObserveV3();
+        }
+        return this.obsInstance_;
+    }
+    // return true given value is @observed object
+    static IsObservedObjectV3(value) {
+        return (value && typeof (value) == "object" && value[ObserveV3.V3_DECO_META]);
+    }
+    // At the start of observeComponentCreation or
+    // MonitorV3.observeObjectAccess
+    startBind(cmp, id) {
+        this.bindCmp_ = cmp;
+        this.bindId_ = id;
+        if (cmp != null) {
+            this.clearBinding(id);
+            this.id2cmp_[id] = (cmp instanceof ViewPU) ? new WeakRef(cmp) : cmp;
+        }
+    }
+    // clear any previously created dependency view model object to elmtId
+    // find these view model objects with the reverse map id2targets_
+    clearBinding(id) {
+        var _a;
+        (_a = this.id2targets_[id]) === null || _a === void 0 ? void 0 : _a.forEach((target) => {
+            for (let key in target[ObserveV3.SYMBOL_REFS]) {
+                if (id in target[ObserveV3.SYMBOL_REFS][key]) {
+                    delete target[ObserveV3.SYMBOL_REFS][key][id];
+                }
+            }
+        });
+        delete this.id2targets_[id];
+        delete this.id2cmp_[id];
+    }
+    // add dependency view model object 'target' property 'attrName'
+    // to current this.bindId
+    addRef(target, attrName) {
+        if (this.bindCmp_ === null) {
+            return;
+        }
+        if (this.bindId_ == UINodeRegisterProxy.monitorIllegalV2V3StateAccess) {
+            const error = `${attrName}: ObserveV3.addRef: trying to use V3 state '${attrName}' to init/update child V2 @Component. Application error`;
+            stateMgmtConsole.applicationError(error);
+            throw new TypeError(error);
+        }
+        if (!target[ObserveV3.SYMBOL_REFS]) {
+            target[ObserveV3.SYMBOL_REFS] = {};
+        }
+        if (!target[ObserveV3.SYMBOL_REFS][attrName]) {
+            target[ObserveV3.SYMBOL_REFS][attrName] = {};
+        }
+        let obj = target[ObserveV3.SYMBOL_REFS][attrName];
+        obj[this.bindId_] = 1;
+        if (!this.id2targets_[this.bindId_]) {
+            this.id2targets_[this.bindId_] = new Set();
+        }
+        this.id2targets_[this.bindId_].add(target);
+    }
+    /**
+     * setReadOnlyAttr - helper function used to update an immutable attribute
+     * such update as a @param variable from parent @Component
+     * @param target  - the object, usually the ViewPU
+     * @param attrName - @param variable name
+     * @param newValue - update to new value
+     */
+    setReadOnlyAttr(target, attrName, newValue) {
+        const storeProp = ObserveV3.OB_PREFIX + attrName;
+        if (storeProp in target) {
+            // @observed class and @track attrName
+            if (newValue === target[storeProp]) {
+                
+                return;
+            }
+            
+            target[storeProp] = newValue;
+            ObserveV3.getObserve().fireChange(target, attrName);
+        }
+        else {
+            
+            // untracked attrName
+            target[attrName] = newValue;
+        }
+    }
+    /**
+     *
+     * @param target set tracked attribute to new value without notifying the change
+     *               !! use with caution !!
+     * @param attrName
+     * @param newValue
+     */
+    setUnmonitored(target, attrName, newValue) {
+        const storeProp = ObserveV3.OB_PREFIX + attrName;
+        if (storeProp in target) {
+            // @track attrName
+            
+            target[storeProp] = newValue;
+        }
+        else {
+            
+            // untracked attrName
+            target[attrName] = newValue;
+        }
+    }
+    /**
+     * Execute given task while state change observation is disabled
+     * A state mutation caused by the task will NOT trigger UI rerender
+     * and @monitor function execution.
+     *
+     * !!! Use with Caution !!!
+     *
+     * @param task a function to execute without monitoring state changes
+     * @returns task function return value
+     */
+    executeUnobserved(task) {
+        
+        this.disabled_ = true;
+        let ret;
+        try {
+            ret = task();
+        }
+        catch (e) {
+            stateMgmtConsole.applicationError(`executeUnobserved - task execution caused error ${e} !`);
+        }
+        this.disabled_ = false;
+        
+        return ret;
+    }
+    // mark view model object 'target' property 'attrName' as changed
+    // notify affected watchIds and elmtIds
+    fireChange(target, attrName) {
+        if (!target[ObserveV3.SYMBOL_REFS] || this.disabled_) {
+            return;
+        }
+        let obj = target[ObserveV3.SYMBOL_REFS][attrName];
+        if (!obj) {
+            return;
+        }
+        
+        // FIXME seem to cause the crash, investigate
+        //  obj.forEach((id : number) => {
+        for (let idA in obj) {
+            const id = parseInt(idA);
+            // Cannot fireChange the object that is being created.
+            if (id === this.bindId_) {
+                continue;
+            }
+            // if this is the first id to be added to elmtIdsChanged_ and monitorIdsChanged_, 
+            // schedule an 'updateDirty' task
+            // that will run after the current call stack has unwound.
+            // purpose of check for startDirty_ is to avoid going into recursion. This could happen if
+            // exec a re-render or exec a monitor function changes some state -> calls fireChange -> ...
+            if ((0 === this.elmtIdsChanged_.size) && (0 === this.monitorIdsChanged_.size)
+                && !this.startDirty_) {
+                Promise.resolve(true).then(this.updateDirty.bind(this));
+            }
+            // add bindId to Set of pending changes.
+            (id < MonitorV3.MIN_WATCH_ID)
+                ? this.elmtIdsChanged_.add(id)
+                : this.monitorIdsChanged_.add(id);
+        } // for
+    }
+    updateDirty() {
+        this.startDirty_ = true;
+        this.updateDirty2();
+        this.startDirty_ = false;
+    }
+    updateDirty2() {
+        // process monitors first, because these might add more elmtIds of UINodes to rerender
+        this.updateDirtyMonitors(1);
+        this.notifyDirtyElmtIdsToOwningViews();
+    }
+    updateDirtyMonitors(recursionDepth) {
+        if (recursionDepth > 20) {
+            // limit recursion depth to avoid infinite loops
+            // and skip any pending @monitor function executions
+            stateMgmtConsole.applicationError(`20 loops in @monitor function execution detected. Stopping processing. Application error!`);
+            this.monitorIdsChanged_.clear(); // Clear the contents
+            return;
+        }
+        
+        const monitors = this.monitorIdsChanged_; // move Set
+        // exec @monitor functions might add new watchIds
+        this.monitorIdsChanged_ = new Set();
+        let monitor;
+        monitors.forEach((watchId) => {
+            if ((monitor = this.id2cmp_[watchId]) && (monitor instanceof MonitorV3)) {
+                monitor.fireChange();
+            }
+        });
+        if (this.monitorIdsChanged_.size) {
+            this.updateDirtyMonitors(recursionDepth + 1);
+        }
+    }
+    notifyDirtyElmtIdsToOwningViews() {
+        let view;
+        
+        this.elmtIdsChanged_.forEach((elmtId) => {
+            var _a;
+            if ((view = (_a = this.id2cmp_[elmtId]) === null || _a === void 0 ? void 0 : _a.deref()) && (view instanceof ViewPU)) {
+                // FIXME Review: uiNodeNeedUpdateV3 just copies elmtIds to another set
+                // waits for FlushBuild to call rerender call updateDirtyElements
+                // to actually render the UINodes. Could we call ViewPU.UpdateElement 
+                // right away?        
+                view.uiNodeNeedUpdateV3(elmtId);
+            }
+        });
+        this.elmtIdsChanged_.clear();
+    }
+    constructMonitor(target, name) {
+        let watchProp = Symbol.for(MonitorV3.WATCH_PREFIX + name);
+        if (target && target[watchProp]) {
+            Object.entries(target[watchProp]).forEach(([key, val]) => {
+                ObserveV3.getObserve().addWatch(target, key, val);
+            });
+        }
+    }
+    addWatch(target, props, func) {
+        return new MonitorV3(target, props, func).InitRun();
+    }
+    clearWatch(id) {
+        this.clearBinding(id);
+    }
+    static autoProxyObject(target, key) {
+        let val = target[key];
+        // Not an object, not a collection, no proxy required
+        if (!val || typeof (val) !== "object" || !(Array.isArray(val) ||
+            val instanceof Set || val instanceof Map || val instanceof Date)) {
+            return val;
+        }
+        // Only collections require proxy observation, and if it has been observed, it does not need to be observed again.
+        if (!val[ObserveV3.SYMBOL_PROXY_GET_TARGET]) {
+            target[key] = new Proxy(val, ObserveV3.arraySetMapProxy);
+            val = target[key];
+        }
+        // If the return value is an array, a length observation should be added to the array.
+        if (Array.isArray(val)) {
+            ObserveV3.getObserve().addRef(val, ObserveV3.OB_LENGTH);
+        }
+        return val;
+    }
+    /**
+     * Helper function to add meta data about decorator to ViewPU
+     * @param proto prototype object of application class derived from ViewPU
+     * @param varName decorated variable
+     * @param deco "@state", "@event", etc (note "@model" gets transpiled in "@param" and "@event")
+     */
+    static addVariableDecoMeta(proto, varName, deco) {
+        var _a;
+        var _b;
+        // add decorator meta data
+        const meta = (_a = proto[_b = ObserveV3.V3_DECO_META]) !== null && _a !== void 0 ? _a : (proto[_b] = {});
+        meta[varName] = {};
+        meta[varName]["deco"] = deco;
+        // FIXME 
+        // when splitting ViewPU and ViewV3
+        // use instanceOf. Until then, this is a workaround.
+        // any @state, @track, etc V3 event handles this function to return false
+        Reflect.defineProperty(proto, "isViewV3", {
+            get() { return true; },
+            enumerable: false
+        });
+    }
+    static usesV3Variables(proto) {
+        return (proto && typeof proto == "object" && proto[ObserveV3.V3_DECO_META]);
+    }
+} // class ObserveV3
+ObserveV3.V3_DECO_META = Symbol('__v3_deco_meta__');
+ObserveV3.SYMBOL_REFS = Symbol('__use_refs__');
+ObserveV3.SYMBOL_PROXY_GET_TARGET = Symbol("__proxy_get_target");
+ObserveV3.OB_PREFIX = "__ob_"; // OB_PREFIX + attrName => backing store attribute name
+ObserveV3.OB_PREFIX_LEN = 5;
+// used by array Handler to create dependency on artificial "length"
+// property of array, mark it as changed when array has changed.
+ObserveV3.OB_LENGTH = "___obj_length";
+ObserveV3.OB_MAP_SET_ANY_PROPERTY = "___ob_map_set";
+ObserveV3.OB_DATE = "__date__";
+ObserveV3.arrayLengthChangingFunctions = new Set(["push", "pop", "shift", "splice", "unshift"]);
+ObserveV3.arrayMutatingFunctions = new Set(["copyWithin", "fill", "reverse", "sort"]);
+ObserveV3.dateSetFunctions = new Set(["setFullYear", "setMonth", "setDate", "setHours", "setMinutes",
+    "setSeconds", "setMilliseconds", "setTime", "setUTCFullYear", "setUTCMonth", "setUTCDate", "setUTCHours",
+    "setUTCMinutes", "setUTCSeconds", "setUTCMilliseconds"]);
+ObserveV3.arraySetMapProxy = {
+    get(target, key, receiver) {
+        if (typeof key === "symbol") {
+            if (key === Symbol.iterator) {
+                ObserveV3.getObserve().fireChange(target, ObserveV3.OB_MAP_SET_ANY_PROPERTY);
+                ObserveV3.getObserve().addRef(target, ObserveV3.OB_LENGTH);
+                return (...args) => target[key](...args);
+            }
+            else {
+                return key === ObserveV3.SYMBOL_PROXY_GET_TARGET ? target : target[key];
+            }
+        }
+        if (key === "size") {
+            ObserveV3.getObserve().addRef(target, ObserveV3.OB_LENGTH);
+            return target.size;
+        }
+        let ret = ObserveV3.autoProxyObject(target, key);
+        if (typeof (ret) !== "function") {
+            ObserveV3.getObserve().addRef(target, key);
+            return ret;
+        }
+        if (Array.isArray(target)) {
+            if (ObserveV3.arrayMutatingFunctions.has(key)) {
+                return function (...args) {
+                    ret.call(target, ...args);
+                    ObserveV3.getObserve().fireChange(target, ObserveV3.OB_LENGTH);
+                    // returning the 'receiver(proxied object)' ensures that when chain calls also 2nd function call
+                    // operates on the proxied object.
+                    return receiver;
+                };
+            }
+            else if (ObserveV3.arrayLengthChangingFunctions.has(key)) {
+                return function (...args) {
+                    const result = ret.call(target, ...args);
+                    ObserveV3.getObserve().fireChange(target, ObserveV3.OB_LENGTH);
+                    return result;
+                };
+            }
+            else {
+                return ret.bind(receiver);
+            }
+        }
+        if (target instanceof Date) {
+            if (ObserveV3.dateSetFunctions.has(key)) {
+                return function (...args) {
+                    // execute original function with given arguments
+                    let result = ret.call(this, ...args);
+                    ObserveV3.getObserve().fireChange(target, ObserveV3.OB_DATE);
+                    return result;
+                    // bind "this" to target inside the function
+                }.bind(target);
+            }
+            else {
+                ObserveV3.getObserve().addRef(target, ObserveV3.OB_DATE);
+            }
+            return ret.bind(target);
+        }
+        if (target instanceof Set || target instanceof Map) {
+            if (key === "has") {
+                return prop => {
+                    const ret = target.has(prop);
+                    if (ret) {
+                        ObserveV3.getObserve().addRef(target, prop);
+                    }
+                    else {
+                        ObserveV3.getObserve().addRef(target, ObserveV3.OB_LENGTH);
+                    }
+                    return ret;
+                };
+            }
+            if (key === "delete") {
+                return prop => {
+                    if (target.has(prop)) {
+                        ObserveV3.getObserve().fireChange(target, prop);
+                        ObserveV3.getObserve().fireChange(target, ObserveV3.OB_LENGTH);
+                        return target.delete(prop);
+                    }
+                    else {
+                        return false;
+                    }
+                };
+            }
+            if (key === "clear") {
+                return () => {
+                    if (target.size > 0) {
+                        target.forEach((_, prop) => {
+                            ObserveV3.getObserve().fireChange(target, prop.toString());
+                        });
+                        ObserveV3.getObserve().fireChange(target, ObserveV3.OB_LENGTH);
+                        ObserveV3.getObserve().addRef(target, ObserveV3.OB_MAP_SET_ANY_PROPERTY);
+                        target.clear();
+                    }
+                };
+            }
+            if (key === "keys" || key === "values" || key === "entries") {
+                return () => {
+                    ObserveV3.getObserve().addRef(target, ObserveV3.OB_MAP_SET_ANY_PROPERTY);
+                    ObserveV3.getObserve().addRef(target, ObserveV3.OB_LENGTH);
+                    return target[key]();
+                };
+            }
+        }
+        if (target instanceof Set) {
+            return key === "add" ? val => {
+                ObserveV3.getObserve().fireChange(target, val.toString());
+                ObserveV3.getObserve().fireChange(target, ObserveV3.OB_MAP_SET_ANY_PROPERTY);
+                if (!target.has(val)) {
+                    ObserveV3.getObserve().fireChange(target, ObserveV3.OB_LENGTH);
+                    target.add(val);
+                }
+                // return proxied This
+                return receiver;
+            } : (typeof ret == "function")
+                ? ret.bind(target) : ret;
+        }
+        if (target instanceof Map) {
+            if (key === "get") { // for Map
+                return (prop) => {
+                    if (target.has(prop)) {
+                        ObserveV3.getObserve().addRef(target, prop);
+                    }
+                    else {
+                        ObserveV3.getObserve().addRef(target, ObserveV3.OB_LENGTH);
+                    }
+                    return target.get(prop);
+                };
+            }
+            if (key === "set") { // for Map
+                return (prop, val) => {
+                    if (!target.has(prop)) {
+                        ObserveV3.getObserve().fireChange(target, ObserveV3.OB_LENGTH);
+                    }
+                    else if (target.get(prop) !== val) {
+                        ObserveV3.getObserve().fireChange(target, prop);
+                    }
+                    ObserveV3.getObserve().fireChange(target, ObserveV3.OB_MAP_SET_ANY_PROPERTY);
+                    target.set(prop, val);
+                    return receiver;
+                };
+            }
+        }
+        return (typeof ret == "function") ? ret.bind(target) : ret;
+    },
+    set(target, key, value) {
+        if (typeof key === 'symbol') {
+            if (key !== ObserveV3.SYMBOL_PROXY_GET_TARGET) {
+                target[key] = value;
+            }
+            return true;
+        }
+        if (target[key] === value) {
+            return true;
+        }
+        target[key] = value;
+        ObserveV3.getObserve().fireChange(target, key.toString());
+        return true;
+    }
+};
+/**
+ * @track class property decorator
+ *
+ * @param target  class prototype object
+ * @param propertyKey  class property name
+ *
+ * turns given property into getter and setter functions
+ * adds property target[storeProp] as the backing store
+ *
+ * part of SDK
+ * @from 12
+ */
+const track = (target, propertyKey) => {
+    ConfigureStateMgmt.instance.intentUsingV3(`@track`, propertyKey);
+    return trackInternal(target, propertyKey);
+};
+const trackInternal = (target, propertyKey) => {
+    var _a;
+    var _b;
+    if (typeof target === "function" && !Reflect.has(target, propertyKey)) {
+        // dynamic track，and it not a static attribute
+        target = target.prototype;
+    }
+    let storeProp = ObserveV3.OB_PREFIX + propertyKey;
+    target[storeProp] = target[propertyKey];
+    Reflect.defineProperty(target, propertyKey, {
+        get() {
+            ObserveV3.getObserve().addRef(this, propertyKey);
+            return ObserveV3.autoProxyObject(this, ObserveV3.OB_PREFIX + propertyKey);
+        },
+        set(val) {
+            // If the object has not been observed, you can directly assign a value to it. This improves performance.
+            if (val !== this[storeProp]) {
+                this[storeProp] = val;
+                if (this[ObserveV3.SYMBOL_REFS]) { // This condition can improve performance.
+                    ObserveV3.getObserve().fireChange(this, propertyKey);
+                }
+            }
+        },
+        enumerable: true
+    });
+    // this marks the proto as having at least one @track property inside 
+    // used by IsObservedObjectV3
+    (_a = target[_b = ObserveV3.V3_DECO_META]) !== null && _a !== void 0 ? _a : (target[_b] = {});
+}; // track
+function observed(BaseClass) {
+    ConfigureStateMgmt.instance.intentUsingV3(`@observed`, BaseClass === null || BaseClass === void 0 ? void 0 : BaseClass.name);
+    // prevent @Track inside @observed class
+    if (BaseClass.prototype && Reflect.has(BaseClass.prototype, TrackedObject.___IS_TRACKED_OPTIMISED)) {
+        const error = `'@observed class ${BaseClass === null || BaseClass === void 0 ? void 0 : BaseClass.name}': invalid use of V2 @Track decorator inside V3 @observed class. Need to fix class definition to use @track.`;
+        stateMgmtConsole.applicationError(error);
+        throw new Error(error);
+    }
+    return class extends BaseClass {
+        constructor(...args) {
+            super(...args);
+            // After a "new" object, no matter how many times the watched value is assigned,
+            // only the last initial value is recognized. Therefore, you need to add "Monitor" asynchronously.
+            // Promise.resolve(true).then(() => constructMonitor(this, BaseClass.name)) // Low performance
+            AsyncAddMonitorV3.addWatch(this, BaseClass.name);
+        }
+    };
+}
+/*
+ * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+/**
+ * @monitor function decorator implementation and supporting classes MonitorV3 and AsyncMonitorV3
+ */
+/**
+ * MonitorV3
+ * one MonitorV3 object per @monitor function
+ * watchId - similar to elmtId, identify one MonitorV3 in Observe.idToCmp Map
+ * observeObjectAccess = get each object on the 'path' to create dependency and add them with Observe.addRef
+ * fireChange - exec @monitor function and re-new dependencies with observeObjectAccess
+ */
+class MonitorV3 {
+    constructor(target, props, func) {
+        ConfigureStateMgmt.instance.intentUsingV3(`@monitor`, props);
+        this.target_ = target;
+        this.func_ = func;
+        this.watchId_ = ++MonitorV3.nextWatchId_;
+        this.props_ = props.split(".");
+    }
+    InitRun() {
+        this.value_ = this.observeObjectAccess(true);
+        return this.watchId_;
+    }
+    // 监视到该Watch改变了数据
+    fireChange() {
+        let newVal = this.observeObjectAccess();
+        if (this.value_ !== newVal) {
+            
+            this.func_.call(this.target_, newVal, this.value_);
+            this.value_ = newVal;
+        }
+    }
+    // register current watchId while exec. analysisPath
+    observeObjectAccess(isInit = false) {
+        ObserveV3.getObserve().startBind(this, this.watchId_);
+        let ret = this.analysisPath(isInit);
+        ObserveV3.getObserve().startBind(null, 0);
+        return ret;
+    }
+    // traverse objects on the given monitor path and add dependency for
+    // watchId to each of the,
+    // this needs to be done at @monitor init and repeated every time
+    // one of the objects has changes
+    analysisPath(isInit) {
+        let obj = this.target_;
+        for (const prop of this.props_) {
+            if (typeof obj == "object" && Reflect.has(obj, prop)) {
+                obj = obj[prop];
+            }
+            else {
+                // FIXME change to stateMgmtConsole.applicationError
+                isInit && stateMgmtConsole.warn(`@monitor("${this.props_.join(".")}"): path currently does not exist (can be ok when monitoring union type values)`);
+                return undefined;
+            }
+        }
+        return obj;
+    }
+}
+//0x1.0000.0000.0000,
+// start with high number to avoid same id as elmtId for components.
+MonitorV3.MIN_WATCH_ID = 0x1000000000000;
+MonitorV3.nextWatchId_ = MonitorV3.MIN_WATCH_ID;
+MonitorV3.WATCH_PREFIX = "__wa_";
+/**
+ * @monitor("variable.path.expression") function decorator
+ */
+/*
+ const monitor = function (key) {
+  return function (target, _, descriptor) {
+    let watchProp = Symbol.for(MonitorV3.WATCH_PREFIX + target.constructor.name)
+    target[watchProp] ? target[watchProp][key] = descriptor.value : target[watchProp] = { [key]: descriptor.value }
+  }
+}
+*/
+// Performance Improvement
+class AsyncAddMonitorV3 {
+    static addWatch(target, name) {
+        if (AsyncAddMonitorV3.watches.length === 0) {
+            Promise.resolve(true).then(AsyncAddMonitorV3.run);
+        }
+        AsyncAddMonitorV3.watches.push([target, name]);
+    }
+    static run() {
+        for (let item of AsyncAddMonitorV3.watches) {
+            ObserveV3.getObserve().constructMonitor(item[0], item[1]);
+        }
+        AsyncAddMonitorV3.watches = [];
+    }
+}
+AsyncAddMonitorV3.watches = [];
 /*
  * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");

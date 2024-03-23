@@ -58,31 +58,29 @@ void CustomNodeBase::MarkNeedUpdate()
 
 void CustomNodeBase::FireRecycleSelf()
 {
-    std::queue<RefPtr<UINode>> q;
-    q.push(AceType::DynamicCast<UINode>(Claim(this)));
-    while (!q.empty()) {
-        auto node = q.front();
-        q.pop();
-        auto frameNode = AceType::DynamicCast<FrameNode>(node);
-        if (frameNode) {
-            auto layoutProperty = frameNode->GetLayoutProperty();
-            if (layoutProperty && layoutProperty->GetGeometryTransition()) {
-                layoutProperty->UpdateGeometryTransition("");
-            }
-            auto pattern = frameNode->GetPattern();
-            if (pattern) {
-                pattern->OnRecycle();
-                recyclePatterns_.emplace_back(WeakClaim(RawPtr(pattern)));
-            }
-        }
-        const auto& children = node->GetChildren();
-        for (const auto& child : children) {
-            q.push(child);
-        }
-    }
-
+    AceType::DynamicCast<UINode>(Claim(this))->OnRecycle();
     if (recycleCustomNodeFunc_) {
         recycleCustomNodeFunc_(AceType::Claim<CustomNodeBase>(this));
+    }
+}
+
+void CustomNodeBase::FireRecycleRenderFunc()
+{
+    if (recycleRenderFunc_) {
+        ACE_SCOPED_TRACE("CustomNode:BuildRecycle %s", GetJSViewName().c_str());
+        {
+            ScopedViewStackProcessor scopedViewStackProcessor;
+            recycleRenderFunc_();
+        }
+        AceType::DynamicCast<UINode>(Claim(this))->OnReuse();
+        recycleRenderFunc_ = nullptr;
+        if (SystemProperties::GetDeveloperModeOn()) {
+            auto pipeline = PipelineContext::GetCurrentContext();
+            CHECK_NULL_VOID(pipeline);
+            auto rootNode = pipeline->GetRootElement();
+            CHECK_NULL_VOID(rootNode);
+            rootNode->PaintDebugBoundaryTreeAll(SystemProperties::GetDebugBoundaryEnabled());
+        }
     }
 }
 

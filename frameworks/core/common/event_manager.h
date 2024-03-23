@@ -68,19 +68,19 @@ public:
     // After the touch down event is triggered, the touch test is performed to collect the corresponding
     // touch event target list.
     void TouchTest(const TouchEvent& touchPoint, const RefPtr<RenderNode>& renderNode,
-        const TouchRestrict& touchRestrict, const Offset& offset = Offset(),
+        TouchRestrict& touchRestrict, const Offset& offset = Offset(),
         float viewScale = 1.0f, bool needAppend = false);
 
     void TouchTest(const TouchEvent& touchPoint, const RefPtr<NG::FrameNode>& frameNode,
-        const TouchRestrict& touchRestrict, const Offset& offset = Offset(),
+        TouchRestrict& touchRestrict, const Offset& offset = Offset(),
         float viewScale = 1.0f, bool needAppend = false);
 
     bool PostEventTouchTest(const TouchEvent& touchPoint, const RefPtr<NG::UINode>& uiNode,
-        const TouchRestrict& touchRestrict);
+        TouchRestrict& touchRestrict);
 
-    void TouchTest(const AxisEvent& event, const RefPtr<RenderNode>& renderNode, const TouchRestrict& touchRestrict);
+    void TouchTest(const AxisEvent& event, const RefPtr<RenderNode>& renderNode, TouchRestrict& touchRestrict);
 
-    void TouchTest(const AxisEvent& event, const RefPtr<NG::FrameNode>& frameNode, const TouchRestrict& touchRestrict);
+    void TouchTest(const AxisEvent& event, const RefPtr<NG::FrameNode>& frameNode, TouchRestrict& touchRestrict);
 
     bool HasDifferentDirectionGesture();
 
@@ -114,7 +114,7 @@ public:
     bool DispatchMouseHoverEvent(const MouseEvent& event);
 
     void LogPrintMouseTest();
-    void MouseTest(const MouseEvent& event, const RefPtr<NG::FrameNode>& frameNode, const TouchRestrict& touchRestrict);
+    void MouseTest(const MouseEvent& event, const RefPtr<NG::FrameNode>& frameNode, TouchRestrict& touchRestrict);
     bool DispatchMouseEventNG(const MouseEvent& event);
     void DispatchMouseHoverAnimationNG(const MouseEvent& event);
     bool DispatchMouseHoverEventNG(const MouseEvent& event);
@@ -161,7 +161,7 @@ public:
         return refereeNG_;
     }
 
-    void DispatchKeyboardShortcut(const KeyEvent& event);
+    bool DispatchKeyboardShortcut(const KeyEvent& event);
 
     void AddKeyboardShortcutNode(const WeakPtr<NG::FrameNode>& node);
 
@@ -236,6 +236,14 @@ public:
         return innerEventWin_;
     }
 
+    void SetIsKeyConsumed(bool value)
+    {
+        // Once consumed, isKeyConsumed_ keeps true
+        if (!isKeyConsumed_ && value) {
+            isKeyConsumed_ = true;
+        }
+    }
+
 private:
     void SetHittedFrameNode(const std::list<RefPtr<NG::NGGestureRecognizer>>& touchTestResults);
     void CleanGestureEventHub();
@@ -263,6 +271,7 @@ private:
     bool inSelectedRect_ = false;
     bool isDragging_ = false;
     bool isLastMoveBeforeUp_ = false;
+    bool isKeyConsumed_ = false;
     RefPtr<GestureReferee> referee_;
     RefPtr<NG::GestureReferee> refereeNG_;
     RefPtr<NG::GestureReferee> postEventRefereeNG_;

@@ -13,6 +13,8 @@
  * limitations under the License.
  */
 
+#include "test/mock/base/mock_system_properties.h"
+
 #include <string>
 
 #include "base/utils/system_properties.h"
@@ -36,6 +38,7 @@ bool SystemProperties::isHookModeEnabled_ = false;
 bool SystemProperties::rosenBackendEnabled_ = true;
 bool SystemProperties::windowAnimationEnabled_ = true;
 bool SystemProperties::layoutTraceEnable_ = false;
+bool SystemProperties::traceInputEventEnable_ = false;
 bool SystemProperties::buildTraceEnable_ = false;
 double SystemProperties::resolution_ = 0.0;
 constexpr float defaultAnimationScale = 1.0f;
@@ -45,14 +48,22 @@ bool SystemProperties::debugEnabled_ = false;
 ColorMode SystemProperties::colorMode_ { ColorMode::LIGHT };
 int32_t SystemProperties::deviceWidth_ = 720;
 int32_t SystemProperties::deviceHeight_ = 1280;
+bool SystemProperties::debugOffsetLogEnabled_ = false;
 bool SystemProperties::downloadByNetworkEnabled_ = false;
 bool SystemProperties::traceEnabled_ = false;
 int32_t SystemProperties::devicePhysicalWidth_ = 0;
 int32_t SystemProperties::devicePhysicalHeight_ = 0;
 bool SystemProperties::enableScrollableItemPool_ = false;
 bool SystemProperties::navigationBlurEnabled_ = false;
-bool SystemProperties::gridCacheEnabled_ = false;
+bool SystemProperties::gridCacheEnabled_ = true;
 bool SystemProperties::sideBarContainerBlurEnable_ = false;
+bool SystemProperties::stateManagerEnable_ = false;
+bool SystemProperties::acePerformanceMonitorEnable_ = false;
+bool SystemProperties::debugBoundaryEnabled_ = false;
+bool SystemProperties::developerModeOn_ = false;
+
+bool g_irregularGrid = true;
+bool g_segmentedWaterflow = true;
 
 float SystemProperties::GetFontWeightScale()
 {
@@ -128,11 +139,21 @@ bool SystemProperties::GetGridCacheEnabled()
 
 bool SystemProperties::GetGridIrregularLayoutEnabled()
 {
-    return false;
+    return g_irregularGrid;
+}
+
+bool SystemProperties::WaterFlowUseSegmentedLayout()
+{
+    return g_segmentedWaterflow;
 }
 
 bool SystemProperties::GetSideBarContainerBlurEnable()
 {
     return sideBarContainerBlurEnable_;
+}
+
+float SystemProperties::GetDefaultResolution()
+{
+    return 1.0f;
 }
 } // namespace OHOS::Ace

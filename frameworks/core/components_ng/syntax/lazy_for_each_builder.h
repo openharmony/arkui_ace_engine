@@ -52,118 +52,28 @@ public:
         return OnGetTotalCount();
     }
 
-    std::pair<std::string, RefPtr<UINode>> GetChildByIndex(int32_t index, bool needBuild);
+    std::pair<std::string, RefPtr<UINode>> GetChildByIndex(int32_t index, bool needBuild, bool isCache = false);
 
     void ExpandChildrenOnInitial()
     {
         OnExpandChildrenOnInitialInNG();
     }
 
-    void OnDataReloaded()
-    {
-        for (auto& [key, node] : expiringItem_) {
-            node.first = -1;
-        }
-        for (auto& [index, node] : cachedItems_) {
-            if (node.second) {
-                expiringItem_.try_emplace(node.first, LazyForEachCacheChild(-1, std::move(node.second)));
-            }
-        }
-        cachedItems_.clear();
-        needTransition = true;
-    }
+    void OnDataReloaded();
 
-    bool OnDataAdded(size_t index)
-    {
-        NotifyDataAdded(index);
-        if (!cachedItems_.empty() && index <= static_cast<size_t>(cachedItems_.rbegin()->first)) {
-            decltype(cachedItems_) temp(std::move(cachedItems_));
+    bool OnDataAdded(size_t index);
 
-            for (auto& [oldindex, id] : temp) {
-                cachedItems_.try_emplace(
-                    index > static_cast<size_t>(oldindex) ? oldindex : oldindex + 1, std::move(id));
-            }
-        }
-        for (auto& [key, node] : expiringItem_) {
-            if (static_cast<size_t>(node.first) >= index && node.first != -1) {
-                node.first++;
-            }
-        }
+    bool OnDataBulkAdded(size_t index, size_t count);
 
-        return true;
-    }
+    RefPtr<UINode> OnDataDeleted(size_t index);
 
-    RefPtr<UINode> OnDataDeleted(size_t index)
-    {
-        RefPtr<UINode> node;
-        if (cachedItems_.empty()) {
-            return node;
-        }
-        if (index <= static_cast<size_t>(cachedItems_.rbegin()->first)) {
-            decltype(cachedItems_) temp(std::move(cachedItems_));
+    std::list<RefPtr<UINode>>& OnDataBulkDeleted(size_t index, size_t count);
 
-            for (auto& [oldindex, child] : temp) {
-                if (static_cast<size_t>(oldindex) == index) {
-                    node = child.second;
-                    KeepRemovedItemInCache(child, expiringItem_);
-                } else {
-                    cachedItems_.try_emplace(
-                        index > static_cast<size_t>(oldindex) ? oldindex : oldindex - 1, std::move(child));
-                }
-            }
-        }
-        NotifyDataDeleted(node, index, false);
-        for (auto& [key, child] : expiringItem_) {
-            if (static_cast<size_t>(child.first) > index) {
-                child.first--;
-                continue;
-            }
-            if (static_cast<size_t>(child.first) == index) {
-                child.first = -1;
-                node = child.second;
-            }
-        }
+    bool OnDataChanged(size_t index);
 
-        return node;
-    }
+    bool OnDataMoved(size_t from, size_t to);
 
-    bool OnDataChanged(size_t index)
-    {
-        auto keyIter = cachedItems_.find(index);
-        if (keyIter != cachedItems_.end()) {
-            if (keyIter->second.second) {
-                NotifyDataChanged(index, keyIter->second.second, false);
-                expiringItem_.try_emplace(
-                    keyIter->second.first, LazyForEachCacheChild(-1, std::move(keyIter->second.second)));
-            } else {
-                InvalidIndexOfChangedData(index);
-            }
-            cachedItems_.erase(keyIter);
-            return true;
-        }
-        return false;
-    }
-
-    bool OnDataMoved(size_t from, size_t to)
-    {
-        if (from == to) {
-            return false;
-        }
-        auto fromIter = cachedItems_.find(from);
-        auto toIter = cachedItems_.find(to);
-        if (fromIter != cachedItems_.end() && toIter != cachedItems_.end()) {
-            std::swap(fromIter->second, toIter->second);
-        } else if (fromIter != cachedItems_.end()) {
-            expiringItem_.try_emplace(
-                fromIter->second.first, LazyForEachCacheChild(to, std::move(fromIter->second.second)));
-            cachedItems_.erase(fromIter);
-        } else if (toIter != cachedItems_.end()) {
-            expiringItem_.try_emplace(
-                toIter->second.first, LazyForEachCacheChild(from, std::move(toIter->second.second)));
-            cachedItems_.erase(toIter);
-        }
-        return true;
-    }
+    void RecycleChildByIndex(int32_t index);
 
     void InvalidIndexOfChangedData(size_t index)
     {
@@ -248,16 +158,24 @@ public:
             if (frameNode) {
                 frameNode->SetActive(false);
             }
-            expiringItem_.try_emplace(node.first, LazyForEachCacheChild(index, std::move(node.second)));
+            auto pair = expiringItem_.try_emplace(node.first, LazyForEachCacheChild(index, std::move(node.second)));
+            if (!pair.second) {
+                TAG_LOGW(AceLogTag::ACE_LAZY_FOREACH, "Use repeat key for index: %{public}d", index);
+            }
         }
     }
 
-    void SetActiveChildRange(int32_t start, int32_t end)
+    bool SetActiveChildRange(int32_t start, int32_t end)
     {
+        bool needBuild = false;
         for (auto& [index, node] : cachedItems_) {
             if ((start <= end && start <= index && end >= index) ||
                 (start > end && (index <= end || index >= start))) {
                 if (node.second) {
+                    auto frameNode = AceType::DynamicCast<FrameNode>(node.second->GetFrameChildByIndex(0, true));
+                    if (frameNode) {
+                        frameNode->SetActive(true);
+                    }
                     continue;
                 }
                 auto keyIter = expiringItem_.find(node.first);
@@ -269,6 +187,7 @@ public:
                         frameNode->SetActive(true);
                     }
                 }
+                needBuild = true;
                 continue;
             }
             if (!node.second) {
@@ -278,8 +197,13 @@ public:
             if (frameNode) {
                 frameNode->SetActive(false);
             }
-            expiringItem_.try_emplace(node.first, LazyForEachCacheChild(index, std::move(node.second)));
+            auto pair = expiringItem_.try_emplace(node.first, LazyForEachCacheChild(index, std::move(node.second)));
+            if (!pair.second) {
+                TAG_LOGW(AceLogTag::ACE_LAZY_FOREACH, "Use repeat key for index: %{public}d", index);
+            }
+            needBuild = true;
         }
+        return needBuild;
     }
 
     void SetFlagForGeneratedItem(PropertyChangeFlag propertyChangeFlag)
@@ -495,6 +419,11 @@ public:
         isLoop_ = isLoop;
     }
 
+    void clearBulkDeletedNodes()
+    {
+        nodeList_.clear();
+    }
+
     const std::unordered_map<std::string, LazyForEachCacheChild>& GetCachedUINodeMap()
     {
         return expiringItem_;
@@ -532,6 +461,22 @@ public:
         }
     }
 
+    void PaintDebugBoundaryTreeAll(bool flag)
+    {
+        for (const auto& node : cachedItems_) {
+            if (node.second.second == nullptr) {
+                continue;
+            }
+            node.second.second->PaintDebugBoundaryTreeAll(flag);
+        }
+        for (const auto& node : expiringItem_) {
+            if (node.second.second == nullptr) {
+                continue;
+            }
+            node.second.second->PaintDebugBoundaryTreeAll(flag);
+        }
+    }
+
 protected:
     virtual int32_t OnGetTotalCount() = 0;
 
@@ -552,6 +497,7 @@ protected:
 private:
     std::map<int32_t, LazyForEachChild> cachedItems_;
     std::unordered_map<std::string, LazyForEachCacheChild> expiringItem_;
+    std::list<RefPtr<UINode>> nodeList_;
 
     int32_t startIndex_ = -1;
     int32_t endIndex_ = -1;

@@ -69,38 +69,28 @@ public:
     {
         auto host = GetHost();
         CHECK_NULL_VOID(host);
-        if (headerIndex_ < 0) {
-            headerIndex_ = itemStartIndex_;
+        auto prevHeader = header_.Upgrade();
+        if (!prevHeader) {
             host->AddChild(header);
-            itemStartIndex_++;
         } else {
-            host->ReplaceChild(host->GetChildAtIndex(headerIndex_), header);
+            host->ReplaceChild(prevHeader, header);
             host->MarkDirtyNode(PROPERTY_UPDATE_BY_CHILD_REQUEST);
         }
-        auto frameNode = AceType::DynamicCast<FrameNode>(header->GetFrameChildByIndex(0, false));
-        CHECK_NULL_VOID(frameNode);
-        auto renderContext = frameNode->GetRenderContext();
-        CHECK_NULL_VOID(renderContext);
-        renderContext->UpdateZIndex(1);
+        header_ = header;
     }
 
     void AddFooter(const RefPtr<NG::UINode>& footer)
     {
         auto host = GetHost();
         CHECK_NULL_VOID(host);
-        if (footerIndex_ < 0) {
-            footerIndex_ = itemStartIndex_;
+        auto prevFooter = footer_.Upgrade();
+        if (!prevFooter) {
             host->AddChild(footer);
-            itemStartIndex_++;
         } else {
-            host->ReplaceChild(host->GetChildAtIndex(footerIndex_), footer);
+            host->ReplaceChild(prevFooter, footer);
             host->MarkDirtyNode(PROPERTY_UPDATE_BY_CHILD_REQUEST);
         }
-        auto frameNode = AceType::DynamicCast<FrameNode>(footer->GetFrameChildByIndex(0, false));
-        CHECK_NULL_VOID(frameNode);
-        auto renderContext = frameNode->GetRenderContext();
-        CHECK_NULL_VOID(renderContext);
-        renderContext->UpdateZIndex(1);
+        footer_ = footer;
     }
 
     const ListItemGroupLayoutAlgorithm::PositionMap& GetItemPosition()
@@ -180,6 +170,15 @@ public:
         return layouted_ && (layoutedItemInfo_.has_value() || itemTotalCount_ == 0);
     }
 
+    void SetItemPressed(bool isPressed, int32_t id)
+    {
+        if (isPressed) {
+            pressedItem_.emplace(id);
+        } else {
+            pressedItem_.erase(id);
+        }
+    }
+
 private:
     bool IsNeedInitClickEventRecorder() const override
     {
@@ -195,8 +194,8 @@ private:
 
     int32_t indexInList_ = 0;
 
-    int32_t headerIndex_ = -1;
-    int32_t footerIndex_ = -1;
+    WeakPtr<UINode> header_;
+    WeakPtr<UINode> footer_;
     int32_t itemStartIndex_ = 0;
     int32_t itemTotalCount_ = -1;
     int32_t itemDisplayEndIndex_ = -1;
@@ -205,6 +204,7 @@ private:
     float_t footerMainSize_ = 0.0f;
 
     std::optional<LayoutedItemInfo> layoutedItemInfo_;
+    std::set<int32_t> pressedItem_;
     bool layouted_ = false;
 
     ListItemGroupLayoutAlgorithm::PositionMap itemPosition_;

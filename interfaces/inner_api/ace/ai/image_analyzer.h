@@ -33,31 +33,23 @@
 #include "core/components_ng/property/measure_property.h"
 
 namespace OHOS::Ace {
-using onSubcjectAnalyzedFunc = std::optional<std::function<void(const std::string&, std::vector<uint8_t>&)>>;
-using onTextAnalyzedFunc = std::optional<std::function<void(const std::string&, const std::string&)>>;
-using onTextSelectedFunc = std::optional<std::function<void(const std::string&, const std::string&)>>;
+using onAnalyzedCallback = std::optional<std::function<void(bool)>>;
 
 enum class ImageAnalyzerType {
     SUBJECT = 0,
     TEXT,
 };
 
-struct ImageAnalyzerSubjectOptions {
-    onSubcjectAnalyzedFunc onAnalyzedCallback;
-    std::vector<uint8_t> analyzedData;
-    napi_value sourcePixelmap;
-};
-
-struct ImageAnalyzerTextOptions {
-    onTextAnalyzedFunc onAnalyzedCallback;
-    onTextSelectedFunc onTextSelected;
-    std::string analyzedData;
-    bool isAutoDetectText = true;
+enum class ImageAnalyzerHolder {
+    IMAGE = 0,
+    CANVAS,
+    XCOMPONENT,
+    VIDEO,
+    WEB,
+    OTHERS,
 };
 
 struct ImageAnalyzerConfig {
-    ImageAnalyzerSubjectOptions subjectOptions_ {};
-    ImageAnalyzerTextOptions textOptions {};
     NG::MarginProperty aiButtonMargin;
     std::set<ImageAnalyzerType> types;
     std::string tag;
@@ -69,6 +61,7 @@ struct ImageAnalyzerInnerConfig {
     float contentHeight = 0.0f;
     ImageFit imageFit = ImageFit::COVER;
     Matrix4 transformMat = Matrix4::CreateIdentity();
+    onAnalyzedCallback onAnalyzed;
 };
 } // namespace OHOS::Ace
 #endif // FOUNDATION_ACE_INTERFACE_INNERKITS_PROPERTIES_IMAGE_ANALYZER_H

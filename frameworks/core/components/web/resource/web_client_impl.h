@@ -114,7 +114,7 @@ public:
     void SetNWeb(std::shared_ptr<OHOS::NWeb::NWeb> nweb) override;
     void OnProxyDied() override;
     void OnRouterPush(const std::string& param) override;
-    bool OnConsoleLog(const OHOS::NWeb::NWebConsoleLog& message) override;
+    bool OnConsoleLog(std::shared_ptr<OHOS::NWeb::NWebConsoleLog> message) override;
     void OnMessage(const std::string& param) override;
     void OnPageLoadBegin(const std::string& url) override;
     void OnPageLoadEnd(int httpStatusCode, const std::string& url) override;
@@ -123,6 +123,8 @@ public:
     void OnGeolocationHide() override;
     void OnFullScreenExit() override;
     void OnFullScreenEnter(std::shared_ptr<NWeb::NWebFullScreenExitHandler> handler) override;
+    void OnFullScreenEnterWithVideoSize(std::shared_ptr<NWeb::NWebFullScreenExitHandler> handler,
+        int videoNaturalWidth, int videoNaturalHeight) override;
     void OnGeolocationShow(const std::string& origin,
         std::shared_ptr<OHOS::NWeb::NWebGeolocationCallbackInterface> callback) override;
 
@@ -139,7 +141,7 @@ public:
                              const std::string &message,
                              const std::string &defaultValue,
                              std::shared_ptr<NWeb::NWebJSDialogResult> result) override;
-    bool OnFileSelectorShow(std::shared_ptr<NWeb::FileSelectorCallback> callback,
+    bool OnFileSelectorShow(std::shared_ptr<NWeb::NWebStringVectorValueCallback> callback,
                             std::shared_ptr<NWeb::NWebFileSelectorParams> params) override;
 
     bool OnFocus() override;
@@ -149,8 +151,8 @@ public:
         std::shared_ptr<OHOS::NWeb::NWebUrlResourceResponse> response) override;
     void OnRenderExited(OHOS::NWeb::RenderExitReason reason) override;
     void OnRefreshAccessedHistory(const std::string& url, bool isReload) override;
-    std::shared_ptr<OHOS::NWeb::NWebUrlResourceResponse> OnHandleInterceptRequest(
-        std::shared_ptr<OHOS::NWeb::NWebUrlResourceRequest> request) override;
+    bool OnHandleInterceptRequest(std::shared_ptr<OHOS::NWeb::NWebUrlResourceRequest> request,
+                                  std::shared_ptr<OHOS::NWeb::NWebUrlResourceResponse> response) override;
     bool OnHandleInterceptUrlLoading(std::shared_ptr<OHOS::NWeb::NWebUrlResourceRequest> request) override;
     void OnResource(const std::string& url) override;
     void OnScaleChanged(float oldScaleFactor, float newScaleFactor) override;
@@ -159,6 +161,13 @@ public:
         const std::string &realm) override;
     bool OnSslErrorRequestByJS(std::shared_ptr<NWeb::NWebJSSslErrorResult> result,
         OHOS::NWeb::SslError error) override;
+    bool OnAllSslErrorRequestByJS(std::shared_ptr<NWeb::NWebJSAllSslErrorResult> result,
+        OHOS::NWeb::SslError error,
+        const std::string& url,
+        const std::string& originalUrl,
+        const std::string& referrer,
+        bool isFatalError,
+        bool isMainFrame) override;
     bool OnSslSelectCertRequestByJS(
         std::shared_ptr<NWeb::NWebJSSslSelectCertResult> result,
         const std::string& host,
@@ -199,13 +208,15 @@ public:
                            std::shared_ptr<NWeb::NWebSelectPopupMenuCallback> callback) override;
     void OnAudioStateChanged(bool playing) override;
     void OnFirstContentfulPaint(int64_t navigationStartTick, int64_t firstContentfulPaintMs) override;
+    void OnFirstMeaningfulPaint(std::shared_ptr<NWeb::NWebFirstMeaningfulPaintDetails> details) override;
+    void OnLargestContentfulPaint(std::shared_ptr<NWeb::NWebLargestContentfulPaintDetails> details) override;
     void OnSafeBrowsingCheckResult(int threat_type) override;
     void OnCompleteSwapWithNewSize() override;
     void OnResizeNotWork() override;
     void OnGetTouchHandleHotZone(NWeb::TouchHandleHotZone& hotZone) override;
     void OnDateTimeChooserPopup(
         const NWeb::DateTimeChooser& chooser,
-        const std::vector<NWeb::DateTimeSuggestion>& suggestions,
+        const std::vector<std::shared_ptr<NWeb::NWebDateTimeSuggestion>>& suggestions,
         std::shared_ptr<NWeb::NWebDateTimeChooserCallback> callback) override;
     void OnDateTimeChooserClose() override;
     void OnOverScroll(float xOffset, float yOffset) override;
@@ -215,8 +226,11 @@ public:
     void OnScrollState(bool scrollState) override;
     void OnRootLayerChanged(int width, int height) override;
     bool FilterScrollEvent(const float x, const float y, const float xVelocity, const float yVelocity) override;
-    void OnNativeEmbedLifecycleChange(const NWeb::NativeEmbedDataInfo& dataInfo) override;
-    void OnNativeEmbedGestureEvent(const NWeb::NativeEmbedTouchEvent& event) override;
+    void OnNativeEmbedLifecycleChange(std::shared_ptr<NWeb::NWebNativeEmbedDataInfo> dataInfo) override;
+    void OnNativeEmbedGestureEvent(std::shared_ptr<NWeb::NWebNativeEmbedTouchEvent> event) override;
+    void OnIntelligentTrackingPreventionResult(
+        const std::string& websiteHost, const std::string& trackerHost) override;
+    bool OnHandleOverrideUrlLoading(std::shared_ptr<OHOS::NWeb::NWebUrlResourceRequest> request) override;
 
     void SetWebDelegate(const WeakPtr<WebDelegate>& delegate)
     {

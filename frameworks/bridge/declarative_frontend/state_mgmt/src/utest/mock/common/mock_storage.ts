@@ -61,6 +61,16 @@ class MockStorage implements IStorage {
   }
 
   /**
+   * check if property exists
+   * @param key property name
+   * @returns  true if exists, false otherwise
+   */
+  public has<T>(key: string): boolean {
+    console.debug(`MockStorage: has(${key}) returns ${key in this.data_}`);
+    return key in this.data_;
+  }
+
+  /**
    * Delete all contents from the DB
    */
   public clear(): void {

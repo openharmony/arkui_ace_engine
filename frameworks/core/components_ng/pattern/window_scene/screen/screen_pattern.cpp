@@ -192,11 +192,13 @@ bool ScreenPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty,
     CHECK_NULL_RETURN(window, false);
     auto rootScene = static_cast<Rosen::RootScene*>(window->GetRSWindow().GetRefPtr());
     CHECK_NULL_RETURN(rootScene, false);
-    auto screenBounds = screenSession_->GetScreenProperty().GetPhyBounds();
+    auto screenBounds = screenSession_->GetScreenProperty().GetBounds();
     Rosen::Rect rect = { screenBounds.rect_.left_, screenBounds.rect_.top_,
         screenBounds.rect_.width_, screenBounds.rect_.height_ };
     float density = GetDensityInCurrentResolution();
     rootScene->SetDisplayDensity(density);
+    int32_t orientation = static_cast<int32_t>(screenSession_->GetScreenProperty().GetDisplayOrientation());
+    rootScene->SetDisplayOrientation(orientation);
     rootScene->UpdateViewportConfig(rect, Rosen::WindowSizeChangeReason::UNDEFINED);
     return true;
 }

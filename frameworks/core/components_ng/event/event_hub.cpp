@@ -193,6 +193,54 @@ void EventHub::FireCustomerOnDragFunc(DragFuncType dragFuncType, const RefPtr<OH
     }
 }
 
+void EventHub::FireOnDragEnter(const RefPtr<OHOS::Ace::DragEvent>& info, const std::string& extraParams)
+{
+    if (SystemProperties::GetDebugEnabled()) {
+        LOGI("DragDropManager fire onDragEnter");
+    }
+    if (onDragEnter_) {
+        // callback may be overwritten in its invoke so we copy it first
+        auto onDragEnter = onDragEnter_;
+        onDragEnter(info, extraParams);
+    }
+}
+
+void EventHub::FireOnDragLeave(const RefPtr<OHOS::Ace::DragEvent>& info, const std::string& extraParams)
+{
+    if (SystemProperties::GetDebugEnabled()) {
+        LOGI("DragDropManager fire onDragLeave");
+    }
+    if (onDragLeave_) {
+        // callback may be overwritten in its invoke so we copy it first
+        auto onDragLeave = onDragLeave_;
+        onDragLeave(info, extraParams);
+    }
+}
+
+void EventHub::FireOnDragMove(const RefPtr<OHOS::Ace::DragEvent>& info, const std::string& extraParams)
+{
+    if (SystemProperties::GetDebugEnabled()) {
+        LOGI("DragDropManager fire onDragMove");
+    }
+    if (onDragMove_) {
+        // callback may be overwritten in its invoke so we copy it first
+        auto onDragMove = onDragMove_;
+        onDragMove(info, extraParams);
+    }
+}
+
+void EventHub::FireOnDrop(const RefPtr<OHOS::Ace::DragEvent>& info, const std::string& extraParams)
+{
+    if (SystemProperties::GetDebugEnabled()) {
+        LOGI("DragDropManager fire onDrop");
+    }
+    if (onDrop_) {
+        // callback may be overwritten in its invoke so we copy it first
+        auto onDrop = onDrop_;
+        onDrop(info, extraParams);
+    }
+}
+
 bool EventHub::IsFireOnDrop(const RefPtr<OHOS::Ace::DragEvent>& info)
 {
     return !HasCustomerOnDrop()
@@ -228,5 +276,93 @@ void EventHub::ClearCustomerOnDragFunc()
     customerOnDragMove_ = nullptr;
     customerOnDrop_ = nullptr;
     customerOnDragEnd_ = nullptr;
+}
+
+void EventHub::SetOnSizeChanged(OnSizeChangedFunc&& onSizeChanged)
+{
+    onSizeChanged_ = std::move(onSizeChanged);
+}
+
+void EventHub::FireOnSizeChanged(const RectF& oldRect, const RectF& rect)
+{
+    if (onSizeChanged_) {
+        // callback may be overwritten in its invoke so we copy it first
+        auto onSizeChanged = onSizeChanged_;
+        onSizeChanged(oldRect, rect);
+    }
+}
+
+bool EventHub::HasOnSizeChanged() const
+{
+    return static_cast<bool>(onSizeChanged_);
+}
+
+void EventHub::ClearOnAreaChangedInnerCallbacks()
+{
+    onAreaChangedInnerCallbacks_.clear();
+}
+
+void EventHub::SetJSFrameNodeOnAppear(std::function<void()>&& onAppear)
+{
+    onJSFrameNodeAppear_ = std::move(onAppear);
+}
+
+void EventHub::ClearJSFrameNodeOnAppear()
+{
+    if (onJSFrameNodeAppear_) {
+        onJSFrameNodeAppear_ = nullptr;
+    }
+}
+
+void EventHub::SetJSFrameNodeOnDisappear(std::function<void()>&& onDisappear)
+{
+    onJSFrameNodeDisappear_ = std::move(onDisappear);
+}
+
+void EventHub::ClearJSFrameNodeOnDisappear()
+{
+    if (onJSFrameNodeDisappear_) {
+        onJSFrameNodeDisappear_ = nullptr;
+    }
+}
+
+void EventHub::FireOnAppear()
+{
+    if (onAppear_ || onJSFrameNodeAppear_) {
+        auto pipeline = PipelineBase::GetCurrentContextSafely();
+        CHECK_NULL_VOID(pipeline);
+        auto taskScheduler = pipeline->GetTaskExecutor();
+        CHECK_NULL_VOID(taskScheduler);
+        taskScheduler->PostTask(
+            [weak = WeakClaim(this)]() {
+                auto eventHub = weak.Upgrade();
+                CHECK_NULL_VOID(eventHub);
+                if (eventHub->onAppear_) {
+                    // callback may be overwritten in its invoke so we copy it first
+                    auto onAppear = eventHub->onAppear_;
+                    onAppear();
+                }
+                if (eventHub->onJSFrameNodeAppear_) {
+                    // callback may be overwritten in its invoke so we copy it first
+                    auto onJSFrameNodeAppear = eventHub->onJSFrameNodeAppear_;
+                    onJSFrameNodeAppear();
+                }
+            },
+            TaskExecutor::TaskType::UI);
+    }
+}
+
+void EventHub::FireOnDisappear()
+{
+    if (onDisappear_) {
+        // callback may be overwritten in its invoke so we copy it first
+        auto onDisappear = onDisappear_;
+        onDisappear();
+    }
+    if (onJSFrameNodeDisappear_) {
+        // callback may be overwritten in its invoke so we copy it first
+        auto onJSFrameNodeDisappear = onJSFrameNodeDisappear_;
+        onJSFrameNodeDisappear();
+    }
 }
 } // namespace OHOS::Ace::NG

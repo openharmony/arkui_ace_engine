@@ -15,9 +15,9 @@
 #include "core/components_ng/manager/display_sync/ui_display_sync_manager.h"
 
 namespace OHOS::Ace {
-const std::vector<int32_t> UIDisplaySyncManager::REFRESH_RATE_LIST = { 30, 60, 72, 90, 120, 144 };
+const std::vector<int32_t> UIDisplaySyncManager::REFRESH_RATE_LIST = { 90, 120, 144 };
 
-void UIDisplaySyncManager::DispatchFunc(uint64_t nanoTimestamp)
+void UIDisplaySyncManager::DispatchFunc(int64_t nanoTimestamp)
 {
     CheckSkipEnableProperty();
     displaySyncRange_->Reset();
@@ -109,12 +109,9 @@ bool UIDisplaySyncManager::SetVsyncPeriod(int64_t vsyncPeriod)
     vsyncPeriod_ = vsyncPeriod;
 
     int32_t rate = static_cast<int32_t>(std::ceil(SECOND_IN_NANO / vsyncPeriod_));
-    for (const auto& refreshRate : REFRESH_RATE_LIST) {
-        if (std::abs(rate - refreshRate) <= ERROR_DELTA) {
-            SetVsyncRate(refreshRate);
-            return true;
-        }
-    }
+    std::call_once(computeFactorsFlag_, [this]() { FindAllRefreshRateFactors(); });
+    int32_t refreshRate = FindMatchedRefreshRate(rate);
+    SetVsyncRate(refreshRate);
 
     return true;
 }
@@ -174,6 +171,43 @@ bool UIDisplaySyncManager::IsAutoRefreshRateMode() const
 bool UIDisplaySyncManager::IsNonAutoRefreshRateMode() const
 {
     return refreshRateMode_ != static_cast<int32_t>(RefreshRateMode::REFRESHRATE_MODE_AUTO);
+}
+
+std::set<int32_t> UIDisplaySyncManager::FindRefreshRateFactors(int32_t refreshRate)
+{
+    std::set<int32_t> refreshRateFactors;
+    for (int32_t i = 1; i * i <= refreshRate; ++i) {
+        if (refreshRate % i == 0) {
+            refreshRateFactors.insert(i);
+            if (i != refreshRate / i) {
+                refreshRateFactors.insert(refreshRate / i);
+            }
+        }
+    }
+    return refreshRateFactors;
+}
+
+int32_t UIDisplaySyncManager::FindMatchedRefreshRate(int32_t target)
+{
+    auto it = std::lower_bound(refreshRateFactors_.begin(), refreshRateFactors_.end(), target);
+    if (it == refreshRateFactors_.begin()) {
+        return *it;
+    } else if (it == refreshRateFactors_.end()) {
+        return *(it - 1);
+    }
+    return std::abs(*it - target) < std::abs(*(it - 1) - target) ? *it : *(it - 1);
+}
+
+void UIDisplaySyncManager::FindAllRefreshRateFactors()
+{
+    std::set<int32_t> allFactors;
+    for (const auto& refreshRate : REFRESH_RATE_LIST) {
+        std::set<int32_t> factors = FindRefreshRateFactors(refreshRate);
+        allFactors.insert(factors.begin(), factors.end());
+    }
+    refreshRateFactors_.clear();
+    std::copy(allFactors.begin(), allFactors.end(), std::back_inserter(refreshRateFactors_));
+    return;
 }
 
 UIDisplaySyncManager::UIDisplaySyncManager() {}

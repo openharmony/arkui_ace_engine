@@ -916,7 +916,6 @@ void JSCanvasRenderer::JsCreatePattern(const JSCallbackInfo& info)
         if (jsImage == nullptr) {
             return;
         }
-        auto pixelMap = jsImage->GetPixelMap();
         std::string imageSrc = jsImage->GetSrc();
         double imgWidth = jsImage->GetWidth();
         double imgHeight = jsImage->GetHeight();
@@ -924,11 +923,14 @@ void JSCanvasRenderer::JsCreatePattern(const JSCallbackInfo& info)
 
         JSViewAbstract::ParseJsString(info[1], repeat);
         auto pattern = std::make_shared<Pattern>();
-        pattern->SetPixelMap(pixelMap);
         pattern->SetImgSrc(imageSrc);
         pattern->SetImageWidth(imgWidth);
         pattern->SetImageHeight(imgHeight);
         pattern->SetRepetition(repeat);
+#if !defined(PREVIEW)
+        auto pixelMap = jsImage->GetPixelMap();
+        pattern->SetPixelMap(pixelMap);
+#endif
         pattern_[patternCount_] = pattern;
 
         JSRef<JSObject> obj = JSClass<JSCanvasPattern>::NewInstance();

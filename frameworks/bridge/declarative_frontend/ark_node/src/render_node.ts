@@ -161,8 +161,8 @@ class ShapeMask {
 
 class RenderNode {
   private childrenList: Array<RenderNode>;
-  private nodePtr: number | null;
-  private parentRenderNode: RenderNode | null;
+  private nodePtr: NodePtr;
+  private parentRenderNode: WeakRef<RenderNode> | null;
   private backgroundColorValue: number;
   private clipToFrameValue: boolean;
   private frameValue: Frame;
@@ -205,7 +205,7 @@ class RenderNode {
       0, 0, 1, 0,
       0, 0, 0, 1];
     this.translationValue = { x: 0, y: 0 };
-    if (type === 'FrameNode') {
+    if (type === 'BuilderNode' || type === 'FrameNode') {
       return;
     }
     this.baseNode_ = new __JSBaseNode__();
@@ -215,11 +215,11 @@ class RenderNode {
 
   set backgroundColor(color: number) {
     this.backgroundColorValue = this.checkUndefinedOrNullWithDefaultValue<number>(color, 0);
-    GetUINativeModule().renderNode.setBackgroundColor(this.nodePtr, this.backgroundColorValue);
+    getUINativeModule().renderNode.setBackgroundColor(this.nodePtr, this.backgroundColorValue);
   }
   set clipToFrame(useClip: boolean) {
     this.clipToFrameValue = this.checkUndefinedOrNullWithDefaultValue<boolean>(useClip, false);
-    GetUINativeModule().renderNode.setClipToFrame(this.nodePtr, this.clipToFrameValue);
+    getUINativeModule().renderNode.setClipToFrame(this.nodePtr, this.clipToFrameValue);
   }
   set frame(frame: Frame) {
     if (frame === undefined || frame === null) {
@@ -231,7 +231,7 @@ class RenderNode {
   }
   set opacity(value: number) {
     this.opacityValue = this.checkUndefinedOrNullWithDefaultValue<number>(value, 1.0);
-    GetUINativeModule().common.setOpacity(this.nodePtr, this.opacityValue);
+    getUINativeModule().common.setOpacity(this.nodePtr, this.opacityValue);
   }
   set pivot(pivot: Vector2) {
     if (pivot === undefined || pivot === null) {
@@ -240,7 +240,7 @@ class RenderNode {
       this.pivotValue.x = this.checkUndefinedOrNullWithDefaultValue<number>(pivot.x, 0.5);
       this.pivotValue.y = this.checkUndefinedOrNullWithDefaultValue<number>(pivot.y, 0.5);
     }
-    GetUINativeModule().renderNode.setPivot(this.nodePtr, this.pivotValue.x, this.pivotValue.y);
+    getUINativeModule().renderNode.setPivot(this.nodePtr, this.pivotValue.x, this.pivotValue.y);
   }
   set position(position: Vector2) {
     if (position === undefined || position === null) {
@@ -250,7 +250,7 @@ class RenderNode {
       this.frameValue.x = this.checkUndefinedOrNullWithDefaultValue<number>(position.x, 0);
       this.frameValue.y = this.checkUndefinedOrNullWithDefaultValue<number>(position.y, 0);
     }
-    GetUINativeModule().common.setPosition(this.nodePtr, this.frameValue.x, this.frameValue.y);
+    getUINativeModule().common.setPosition(this.nodePtr, this.frameValue.x, this.frameValue.y);
   }
   set rotation(rotation: Vector3) {
     if (rotation === undefined || rotation === null) {
@@ -260,7 +260,7 @@ class RenderNode {
       this.rotationValue.y = this.checkUndefinedOrNullWithDefaultValue<number>(rotation.y, 0);
       this.rotationValue.z = this.checkUndefinedOrNullWithDefaultValue<number>(rotation.z, 0);
     }
-    GetUINativeModule().renderNode.setRotation(this.nodePtr, this.rotationValue.x, this.rotationValue.y, this.rotationValue.z);
+    getUINativeModule().renderNode.setRotation(this.nodePtr, this.rotationValue.x, this.rotationValue.y, this.rotationValue.z);
   }
   set scale(scale: Vector2) {
     if (scale === undefined || scale === null) {
@@ -269,11 +269,11 @@ class RenderNode {
       this.scaleValue.x = this.checkUndefinedOrNullWithDefaultValue<number>(scale.x, 1.0);
       this.scaleValue.y = this.checkUndefinedOrNullWithDefaultValue<number>(scale.y, 1.0);
     }
-    GetUINativeModule().renderNode.setScale(this.nodePtr, this.scaleValue.x, this.scaleValue.y);
+    getUINativeModule().renderNode.setScale(this.nodePtr, this.scaleValue.x, this.scaleValue.y);
   }
   set shadowColor(color: number) {
     this.shadowColorValue = this.checkUndefinedOrNullWithDefaultValue<number>(color, 0);
-    GetUINativeModule().renderNode.setShadowColor(this.nodePtr, this.shadowColorValue);
+    getUINativeModule().renderNode.setShadowColor(this.nodePtr, this.shadowColorValue);
   }
   set shadowOffset(offset: Vector2) {
     if (offset === undefined || offset === null) {
@@ -282,19 +282,19 @@ class RenderNode {
       this.shadowOffsetValue.x = this.checkUndefinedOrNullWithDefaultValue<number>(offset.x, 0);
       this.shadowOffsetValue.y = this.checkUndefinedOrNullWithDefaultValue<number>(offset.y, 0);
     }
-    GetUINativeModule().renderNode.setShadowOffset(this.nodePtr, this.shadowOffsetValue.x, this.shadowOffsetValue.y);
+    getUINativeModule().renderNode.setShadowOffset(this.nodePtr, this.shadowOffsetValue.x, this.shadowOffsetValue.y);
   }
   set shadowAlpha(alpha: number) {
     this.shadowAlphaValue = this.checkUndefinedOrNullWithDefaultValue<number>(alpha, 0);
-    GetUINativeModule().renderNode.setShadowAlpha(this.nodePtr, this.shadowAlphaValue);
+    getUINativeModule().renderNode.setShadowAlpha(this.nodePtr, this.shadowAlphaValue);
   }
   set shadowElevation(elevation: number) {
     this.shadowElevationValue = this.checkUndefinedOrNullWithDefaultValue<number>(elevation, 0);
-    GetUINativeModule().renderNode.setShadowElevation(this.nodePtr, this.shadowElevationValue);
+    getUINativeModule().renderNode.setShadowElevation(this.nodePtr, this.shadowElevationValue);
   }
   set shadowRadius(radius: number) {
     this.shadowRadiusValue = this.checkUndefinedOrNullWithDefaultValue<number>(radius, 0);
-    GetUINativeModule().renderNode.setShadowRadius(this.nodePtr, this.shadowRadiusValue);
+    getUINativeModule().renderNode.setShadowRadius(this.nodePtr, this.shadowRadiusValue);
   }
   set size(size: Size) {
     if (size === undefined || size === null) {
@@ -304,7 +304,7 @@ class RenderNode {
       this.frameValue.width = this.checkUndefinedOrNullWithDefaultValue<number>(size.width, 0);
       this.frameValue.height = this.checkUndefinedOrNullWithDefaultValue<number>(size.height, 0);
     }
-    GetUINativeModule().renderNode.setSize(this.nodePtr, this.frameValue.width, this.frameValue.height);
+    getUINativeModule().renderNode.setSize(this.nodePtr, this.frameValue.width, this.frameValue.height);
   }
   set transform(transform: Transform) {
     if (transform === undefined || transform === null) {
@@ -323,7 +323,7 @@ class RenderNode {
         i = i + 1;
       }
     }
-    GetUINativeModule().common.setTransform(this.nodePtr, this.transformValue);
+    getUINativeModule().common.setTransform(this.nodePtr, this.transformValue);
   }
   set translation(translation: Vector2) {
     if (translation === undefined || translation === null) {
@@ -332,7 +332,7 @@ class RenderNode {
       this.translationValue.x = this.checkUndefinedOrNullWithDefaultValue<number>(translation.x, 0);
       this.translationValue.y = this.checkUndefinedOrNullWithDefaultValue<number>(translation.y, 0);
     }
-    GetUINativeModule().renderNode.setTranslate(this.nodePtr, this.translationValue.x, this.translationValue.y, 0);
+    getUINativeModule().renderNode.setTranslate(this.nodePtr, this.translationValue.x, this.translationValue.y, 0);
   }
   get backgroundColor(): number {
     return this.backgroundColorValue;
@@ -397,8 +397,8 @@ class RenderNode {
       return;
     }
     this.childrenList.push(node);
-    node.parentRenderNode = this;
-    GetUINativeModule().renderNode.appendChild(this.nodePtr, node.nodePtr);
+    node.parentRenderNode = new WeakRef(this);
+    getUINativeModule().renderNode.appendChild(this.nodePtr, node.nodePtr);
   }
   insertChildAfter(child: RenderNode, sibling: RenderNode | null) {
     if (child === undefined || child === null) {
@@ -408,17 +408,17 @@ class RenderNode {
     if (indexOfNode !== -1) {
       return;
     }
-    child.parentRenderNode = this;
+    child.parentRenderNode = new WeakRef(this);
     let indexOfSibling = this.childrenList.findIndex(element => element === sibling);
     if (indexOfSibling === -1) {
       sibling === null;
     }
     if (sibling === undefined || sibling === null) {
       this.childrenList.splice(0, 0, child);
-      GetUINativeModule().renderNode.insertChildAfter(this.nodePtr, child.nodePtr, null);
+      getUINativeModule().renderNode.insertChildAfter(this.nodePtr, child.nodePtr, null);
     } else {
       this.childrenList.splice(indexOfSibling + 1, 0, child);
-      GetUINativeModule().renderNode.insertChildAfter(this.nodePtr, child.nodePtr, sibling.nodePtr);
+      getUINativeModule().renderNode.insertChildAfter(this.nodePtr, child.nodePtr, sibling.nodePtr);
     }
   }
   removeChild(node: RenderNode) {
@@ -432,11 +432,11 @@ class RenderNode {
     const child = this.childrenList[index];
     child.parentRenderNode = null;
     this.childrenList.splice(index, 1);
-    GetUINativeModule().renderNode.removeChild(this.nodePtr, node.nodePtr);
+    getUINativeModule().renderNode.removeChild(this.nodePtr, node.nodePtr);
   }
   clearChildren() {
     this.childrenList = new Array<RenderNode>();
-    GetUINativeModule().renderNode.clearChildren(this.nodePtr);
+    getUINativeModule().renderNode.clearChildren(this.nodePtr);
   }
   getChild(index: number): RenderNode | null {
     if (this.childrenList.length > index && index >= 0) {
@@ -454,25 +454,33 @@ class RenderNode {
     if (this.parentRenderNode === undefined || this.parentRenderNode === null) {
       return null;
     }
-    let siblingList = this.parentRenderNode.childrenList;
+    let parent = this.parentRenderNode.deref();
+    if (parent === undefined || parent === null) {
+      return null;
+    }
+    let siblingList = parent.childrenList;
     const index = siblingList.findIndex(element => element === this);
     if (index === -1) {
       return null;
     }
-    return this.parentRenderNode.getChild(index + 1);
+    return parent.getChild(index + 1);
   }
   getPreviousSibling(): RenderNode | null {
     if (this.parentRenderNode === undefined || this.parentRenderNode === null) {
       return null;
     }
-    let siblingList = this.parentRenderNode.childrenList;
+    let parent = this.parentRenderNode.deref();
+    if (parent === undefined || parent === null) {
+      return null;
+    }
+    let siblingList = parent.childrenList;
     const index = siblingList.findIndex(element => element === this);
     if (index === -1) {
       return null;
     }
-    return this.parentRenderNode.getChild(index - 1);
+    return parent.getChild(index - 1);
   }
-  setNodePtr(nodePtr: number | null) {
+  setNodePtr(nodePtr: NodePtr) {
     this.nodePtr = nodePtr;
   }
   setBaseNode(baseNode: BaseNode | null) {
@@ -481,13 +489,13 @@ class RenderNode {
   dispose() {
     this.baseNode_.dispose()
   }
-  getNodePtr(): number | null {
+  getNodePtr(): NodePtr {
     return this.nodePtr;
   }
   draw(context) {
   }
   invalidate() {
-    GetUINativeModule().renderNode.invalidate(this.nodePtr);
+    getUINativeModule().renderNode.invalidate(this.nodePtr);
   }
   set borderStyle(style: EdgeStyles) {
     if (style === undefined || style === null) {
@@ -495,7 +503,7 @@ class RenderNode {
     } else {
       this.borderStyleValue = style;
     }
-    GetUINativeModule().renderNode.setBorderStyle(this.nodePtr, this.borderStyleValue.left, this.borderStyleValue.top, this.borderStyleValue.right, this.borderStyleValue.bottom);
+    getUINativeModule().renderNode.setBorderStyle(this.nodePtr, this.borderStyleValue.left, this.borderStyleValue.top, this.borderStyleValue.right, this.borderStyleValue.bottom);
   }
   get borderStyle(): EdgeStyles {
     return this.borderStyleValue;
@@ -506,7 +514,7 @@ class RenderNode {
     } else {
       this.borderWidthValue = width;
     }
-    GetUINativeModule().renderNode.setBorderWidth(this.nodePtr, this.borderWidthValue.left, this.borderWidthValue.top, this.borderWidthValue.right, this.borderWidthValue.bottom);
+    getUINativeModule().renderNode.setBorderWidth(this.nodePtr, this.borderWidthValue.left, this.borderWidthValue.top, this.borderWidthValue.right, this.borderWidthValue.bottom);
   }
   get borderWidth(): EdgeWidths {
     return this.borderWidthValue;
@@ -517,7 +525,7 @@ class RenderNode {
     } else {
       this.borderColorValue = color;
     }
-    GetUINativeModule().renderNode.setBorderColor(this.nodePtr, this.borderColorValue.left, this.borderColorValue.top, this.borderColorValue.right, this.borderColorValue.bottom);
+    getUINativeModule().renderNode.setBorderColor(this.nodePtr, this.borderColorValue.left, this.borderColorValue.top, this.borderColorValue.right, this.borderColorValue.bottom);
   }
   get borderColor(): EdgeColors {
     return this.borderColorValue;
@@ -528,7 +536,7 @@ class RenderNode {
     } else {
       this.borderRadiusValue = radius;
     }
-    GetUINativeModule().renderNode.setBorderRadius(this.nodePtr, this.borderRadiusValue.topLeft, this.borderRadiusValue.topRight, this.borderRadiusValue.bottomLeft, this.borderRadiusValue.bottomRight);
+    getUINativeModule().renderNode.setBorderRadius(this.nodePtr, this.borderRadiusValue.topLeft, this.borderRadiusValue.topRight, this.borderRadiusValue.bottomLeft, this.borderRadiusValue.bottomRight);
   }
   get borderRadius(): BorderRadiuses {
     return this.borderRadiusValue;
@@ -541,15 +549,15 @@ class RenderNode {
     }
     if (this.shapeMaskValue.rect !== null) {
       const rectMask = this.shapeMaskValue.rect;
-      GetUINativeModule().renderNode.setRectMask(this.nodePtr, rectMask.left, rectMask.top, rectMask.right, rectMask.bottom, this.shapeMaskValue.fillColor, this.shapeMaskValue.strokeColor, this.shapeMaskValue.strokeWidth);
+      getUINativeModule().renderNode.setRectMask(this.nodePtr, rectMask.left, rectMask.top, rectMask.right, rectMask.bottom, this.shapeMaskValue.fillColor, this.shapeMaskValue.strokeColor, this.shapeMaskValue.strokeWidth);
     } else if (this.shapeMaskValue.circle !== null) {
       const circle = this.shapeMaskValue.circle;
-      GetUINativeModule().renderNode.setCircleMask(this.nodePtr, circle.centerX, circle.centerY, circle.radius, this.shapeMaskValue.fillColor, this.shapeMaskValue.strokeColor, this.shapeMaskValue.strokeWidth);
+      getUINativeModule().renderNode.setCircleMask(this.nodePtr, circle.centerX, circle.centerY, circle.radius, this.shapeMaskValue.fillColor, this.shapeMaskValue.strokeColor, this.shapeMaskValue.strokeWidth);
     } else if (this.shapeMaskValue.roundRect !== null) {
       const reoundRect = this.shapeMask.roundRect;
       const corners = reoundRect.corners;
       const rect = reoundRect.rect;
-      GetUINativeModule().renderNode.setRoundRectMask(
+      getUINativeModule().renderNode.setRoundRectMask(
         this.nodePtr, 
         corners.topLeft.x,
         corners.topLeft.y, 
@@ -568,10 +576,10 @@ class RenderNode {
         this.shapeMaskValue.strokeWidth);
     } else if (this.shapeMaskValue.oval !== null) {
       const oval = this.shapeMaskValue.oval;
-      GetUINativeModule().renderNode.setOvalMask(this.nodePtr, oval.left, oval.top, oval.right, oval.bottom, this.shapeMaskValue.fillColor, this.shapeMaskValue.strokeColor, this.shapeMaskValue.strokeWidth);
+      getUINativeModule().renderNode.setOvalMask(this.nodePtr, oval.left, oval.top, oval.right, oval.bottom, this.shapeMaskValue.fillColor, this.shapeMaskValue.strokeColor, this.shapeMaskValue.strokeWidth);
     } else if (this.shapeMaskValue.path !== null) {
       const path = this.shapeMaskValue.path;
-      GetUINativeModule().renderNode.setPath(this.nodePtr, path.commands, this.shapeMaskValue.fillColor, this.shapeMaskValue.strokeColor, this.shapeMaskValue.strokeWidth);
+      getUINativeModule().renderNode.setPath(this.nodePtr, path.commands, this.shapeMaskValue.fillColor, this.shapeMaskValue.strokeColor, this.shapeMaskValue.strokeWidth);
     }
   }
   get shapeMask(): ShapeMask {

@@ -47,7 +47,6 @@
 #include "core/image/image_provider.h"
 #include "core/image/sk_image_cache.h"
 #include "core/pipeline/base/rosen_render_context.h"
-#include "core/common/font_manager.h"
 
 #ifdef ENABLE_ROSEN_BACKEND
 #include "pipeline/rs_recording_canvas.h"
@@ -115,6 +114,40 @@ inline T ConvertStrToEnum(const char* key, const LinearMapNode<T>* map, size_t l
 }
 } // namespace
 
+const LinearMapNode<void (*)(std::shared_ptr<RSImage>&, std::shared_ptr<RSShaderEffect>&, RSMatrix&)>
+    CustomPaintPaintMethod::staticPattern[] = {
+        { "clamp",
+            [](std::shared_ptr<RSImage>& image, std::shared_ptr<RSShaderEffect>& shaderEffect, RSMatrix& matrix) {
+                shaderEffect = RSShaderEffect::CreateImageShader(
+                    *image, RSTileMode::CLAMP, RSTileMode::CLAMP, RSSamplingOptions(), matrix);
+            } },
+        { "mirror",
+            [](std::shared_ptr<RSImage>& image, std::shared_ptr<RSShaderEffect>& shaderEffect, RSMatrix& matrix) {
+                shaderEffect = RSShaderEffect::CreateImageShader(
+                    *image, RSTileMode::MIRROR, RSTileMode::MIRROR, RSSamplingOptions(), matrix);
+            } },
+        { "no-repeat",
+            [](std::shared_ptr<RSImage>& image, std::shared_ptr<RSShaderEffect>& shaderEffect, RSMatrix& matrix) {
+                shaderEffect = RSShaderEffect::CreateImageShader(
+                    *image, RSTileMode::DECAL, RSTileMode::DECAL, RSSamplingOptions(), matrix);
+            } },
+        { "repeat",
+            [](std::shared_ptr<RSImage>& image, std::shared_ptr<RSShaderEffect>& shaderEffect, RSMatrix& matrix) {
+                shaderEffect = RSShaderEffect::CreateImageShader(
+                    *image, RSTileMode::REPEAT, RSTileMode::REPEAT, RSSamplingOptions(), matrix);
+            } },
+        { "repeat-x",
+            [](std::shared_ptr<RSImage>& image, std::shared_ptr<RSShaderEffect>& shaderEffect, RSMatrix& matrix) {
+                shaderEffect = RSShaderEffect::CreateImageShader(
+                    *image, RSTileMode::REPEAT, RSTileMode::DECAL, RSSamplingOptions(), matrix);
+            } },
+        { "repeat-y",
+            [](std::shared_ptr<RSImage>& image, std::shared_ptr<RSShaderEffect>& shaderEffect, RSMatrix& matrix) {
+                shaderEffect = RSShaderEffect::CreateImageShader(
+                    *image, RSTileMode::DECAL, RSTileMode::REPEAT, RSSamplingOptions(), matrix);
+            } },
+    };
+
 void CustomPaintPaintMethod::UpdateRecordingCanvas(float width, float height)
 {
 #ifndef USE_ROSEN_DRAWING
@@ -125,17 +158,6 @@ void CustomPaintPaintMethod::UpdateRecordingCanvas(float width, float height)
     rsRecordingCanvas_ = std::make_shared<RSRecordingCanvas>(width, height);
     rsCanvas_ = std::static_pointer_cast<RSCanvas>(rsRecordingCanvas_);
     contentModifier_->UpdateCanvas(rsRecordingCanvas_);
-    auto context = context_.Upgrade();
-    CHECK_NULL_VOID(context);
-    auto fontManager = context->GetFontManager();
-    CHECK_NULL_VOID(fontManager);
-    if (fontManager->IsDefaultFontChanged()) {
-        CHECK_NULL_VOID(rsRecordingCanvas_);
-        rsRecordingCanvas_->SetIsCustomTextType(true);
-    } else {
-        CHECK_NULL_VOID(rsRecordingCanvas_);
-        rsRecordingCanvas_->SetIsCustomTextType(false);
-    }
 #endif
 }
 
@@ -385,105 +407,25 @@ std::shared_ptr<RSImage> CustomPaintPaintMethod::GetImage(const std::string& src
 }
 #endif
 
-#ifndef USE_ROSEN_DRAWING
-void CustomPaintPaintMethod::UpdatePaintShader(const Ace::Pattern& pattern, SkPaint& paint)
-{
-    auto pixelMap = pattern.GetPixelMap();
-    CHECK_NULL_VOID(pixelMap);
-    auto imageInfo = Ace::ImageProvider::MakeSkImageInfoFromPixelMap(pixelMap);
-    SkPixmap imagePixmap(imageInfo, reinterpret_cast<const void*>(pixelMap->GetPixels()), pixelMap->GetRowBytes());
-    sk_sp<SkImage> image;
-    image = SkImage::MakeFromRaster(imagePixmap, &PixelMap::ReleaseProc, PixelMap::GetReleaseContext(pixelMap));
-    CHECK_NULL_VOID(image);
-    SkMatrix* matrix = nullptr;
-    SkMatrix tempMatrix;
-    if (pattern.IsTransformable()) {
-        tempMatrix = GetMatrixFromPattern(pattern);
-        matrix = &tempMatrix;
-    }
-    static const LinearMapNode<void (*)(sk_sp<SkImage>, SkPaint&, SkMatrix*)> staticPattern[] = {
-        { "clamp",
-            [](sk_sp<SkImage> image, SkPaint& paint, SkMatrix* matrix) {
-                paint.setShader(image->makeShader(SkTileMode::kClamp, SkTileMode::kClamp, SkSamplingOptions(), matrix));
-            } },
-        { "mirror",
-            [](sk_sp<SkImage> image, SkPaint& paint, SkMatrix* matrix) {
-                paint.setShader(
-                    image->makeShader(SkTileMode::kMirror, SkTileMode::kMirror, SkSamplingOptions(), matrix));
-            } },
-        { "no-repeat",
-            [](sk_sp<SkImage> image, SkPaint& paint, SkMatrix* matrix) {
-                paint.setShader(image->makeShader(SkTileMode::kDecal, SkTileMode::kDecal, SkSamplingOptions(), matrix));
-            } },
-        { "repeat",
-            [](sk_sp<SkImage> image, SkPaint& paint, SkMatrix* matrix) {
-                paint.setShader(
-                    image->makeShader(SkTileMode::kRepeat, SkTileMode::kRepeat, SkSamplingOptions(), matrix));
-            } },
-        { "repeat-x",
-            [](sk_sp<SkImage> image, SkPaint& paint, SkMatrix* matrix) {
-                paint.setShader(
-                    image->makeShader(SkTileMode::kRepeat, SkTileMode::kDecal, SkSamplingOptions(), matrix));
-            } },
-        { "repeat-y",
-            [](sk_sp<SkImage> image, SkPaint& paint, SkMatrix* matrix) {
-                paint.setShader(
-                    image->makeShader(SkTileMode::kDecal, SkTileMode::kRepeat, SkSamplingOptions(), matrix));
-            } },
-    };
-    auto operatorIter = BinarySearchFindIndex(staticPattern, ArraySize(staticPattern), pattern.GetRepetition().c_str());
-    if (operatorIter != -1) {
-        staticPattern[operatorIter].value(image, paint, matrix);
-    }
-}
-#else
 void CustomPaintPaintMethod::UpdatePaintShader(const Ace::Pattern& pattern, RSPen* pen, RSBrush* brush)
 {
+#if !defined(PREVIEW)
     auto pixelMap = pattern.GetPixelMap();
     CHECK_NULL_VOID(pixelMap);
     auto rsBitmapFormat = Ace::ImageProvider::MakeRSBitmapFormatFromPixelMap(pixelMap);
     auto rsBitmap = std::make_shared<RSBitmap>();
-    rsBitmap->Build(pixelMap->GetWidth(), pixelMap->GetHeight(), rsBitmapFormat);
+    rsBitmap->Build(pixelMap->GetWidth(), pixelMap->GetHeight(), rsBitmapFormat, pixelMap->GetRowStride());
     rsBitmap->SetPixels(const_cast<void*>(reinterpret_cast<const void*>(pixelMap->GetPixels())));
     auto image = std::make_shared<RSImage>();
     CHECK_NULL_VOID(image->BuildFromBitmap(*rsBitmap));
+#else
+    auto image = GetImage(pattern.GetImgSrc());
+    CHECK_NULL_VOID(image);
+#endif
     RSMatrix matrix;
     if (pattern.IsTransformable()) {
         matrix = GetMatrixFromPattern(pattern);
     }
-    static const LinearMapNode<void (*)(std::shared_ptr<RSImage>&, std::shared_ptr<RSShaderEffect>&, RSMatrix&)>
-        staticPattern[] = {
-            { "clamp",
-                [](std::shared_ptr<RSImage>& image, std::shared_ptr<RSShaderEffect>& shaderEffect, RSMatrix& matrix) {
-                    shaderEffect = RSShaderEffect::CreateImageShader(
-                        *image, RSTileMode::CLAMP, RSTileMode::CLAMP, RSSamplingOptions(), matrix);
-                } },
-            { "mirror",
-                [](std::shared_ptr<RSImage>& image, std::shared_ptr<RSShaderEffect>& shaderEffect, RSMatrix& matrix) {
-                    shaderEffect = RSShaderEffect::CreateImageShader(
-                        *image, RSTileMode::MIRROR, RSTileMode::MIRROR, RSSamplingOptions(), matrix);
-                } },
-            { "no-repeat",
-                [](std::shared_ptr<RSImage>& image, std::shared_ptr<RSShaderEffect>& shaderEffect, RSMatrix& matrix) {
-                    shaderEffect = RSShaderEffect::CreateImageShader(
-                        *image, RSTileMode::DECAL, RSTileMode::DECAL, RSSamplingOptions(), matrix);
-                } },
-            { "repeat",
-                [](std::shared_ptr<RSImage>& image, std::shared_ptr<RSShaderEffect>& shaderEffect, RSMatrix& matrix) {
-                    shaderEffect = RSShaderEffect::CreateImageShader(
-                        *image, RSTileMode::REPEAT, RSTileMode::REPEAT, RSSamplingOptions(), matrix);
-                } },
-            { "repeat-x",
-                [](std::shared_ptr<RSImage>& image, std::shared_ptr<RSShaderEffect>& shaderEffect, RSMatrix& matrix) {
-                    shaderEffect = RSShaderEffect::CreateImageShader(
-                        *image, RSTileMode::REPEAT, RSTileMode::DECAL, RSSamplingOptions(), matrix);
-                } },
-            { "repeat-y",
-                [](std::shared_ptr<RSImage>& image, std::shared_ptr<RSShaderEffect>& shaderEffect, RSMatrix& matrix) {
-                    shaderEffect = RSShaderEffect::CreateImageShader(
-                        *image, RSTileMode::DECAL, RSTileMode::REPEAT, RSSamplingOptions(), matrix);
-                } },
-        };
     auto operatorIter = BinarySearchFindIndex(staticPattern, ArraySize(staticPattern), pattern.GetRepetition().c_str());
     if (operatorIter != -1) {
         std::shared_ptr<RSShaderEffect> shaderEffect = nullptr;
@@ -496,7 +438,6 @@ void CustomPaintPaintMethod::UpdatePaintShader(const Ace::Pattern& pattern, RSPe
         }
     }
 }
-#endif
 
 #ifndef USE_ROSEN_DRAWING
 void CustomPaintPaintMethod::InitPaintBlend(SkPaint& paint)
@@ -1458,8 +1399,8 @@ void CustomPaintPaintMethod::Arc(PaintWrapper* paintWrapper, const ArcParam& par
     RSPoint point1(left, top);
     RSPoint point2(right, bottom);
     if (!NearEqual(startAngle, endAngle) &&
-        (NearEqual(std::fmod(sweepAngle, FULL_CIRCLE_ANGLE), 0.0) ||
-            NearEqual(std::fmod(sweepAngle, FULL_CIRCLE_ANGLE), FULL_CIRCLE_ANGLE))) {
+        (NearEqual(std::abs(std::fmod(sweepAngle, FULL_CIRCLE_ANGLE)), 0.0) ||
+            NearEqual(std::abs(std::fmod(sweepAngle, FULL_CIRCLE_ANGLE)), FULL_CIRCLE_ANGLE))) {
         // draw circle
         double half = GreatNotEqual(sweepAngle, 0.0) ? HALF_CIRCLE_ANGLE : -HALF_CIRCLE_ANGLE;
         rsPath_.ArcTo(point1, point2, static_cast<RSScalar>(startAngle), static_cast<RSScalar>(half));
@@ -1511,23 +1452,19 @@ void CustomPaintPaintMethod::Ellipse(PaintWrapper* paintWrapper, const EllipsePa
 {
     OffsetF offset = GetContentOffset(paintWrapper);
     // Init the start and end angle, then calculated the sweepAngle.
-    double startAngle = std::fmod(param.startAngle, M_PI * 2.0);
-    double endAngle = std::fmod(param.endAngle, M_PI * 2.0);
-    startAngle = (startAngle < 0.0 ? startAngle + M_PI * 2.0 : startAngle) * HALF_CIRCLE_ANGLE / M_PI;
-    endAngle = (endAngle < 0.0 ? endAngle + M_PI * 2.0 : endAngle) * HALF_CIRCLE_ANGLE / M_PI;
+    double startAngle = param.startAngle * HALF_CIRCLE_ANGLE / M_PI;
+    double endAngle = param.endAngle * HALF_CIRCLE_ANGLE / M_PI;
     if (NearEqual(param.startAngle, param.endAngle)) {
         return; // Just return when startAngle is same as endAngle.
     }
     double rotation = param.rotation * HALF_CIRCLE_ANGLE / M_PI;
     double sweepAngle = endAngle - startAngle;
     if (param.anticlockwise) {
-        if (sweepAngle > 0.0) { // Make sure the sweepAngle is negative when anticlockwise.
-            sweepAngle -= FULL_CIRCLE_ANGLE;
-        }
+        sweepAngle =
+            endAngle > startAngle ? (std::fmod(sweepAngle, FULL_CIRCLE_ANGLE) - FULL_CIRCLE_ANGLE) : sweepAngle;
     } else {
-        if (sweepAngle < 0.0) { // Make sure the sweepAngle is positive when clockwise.
-            sweepAngle += FULL_CIRCLE_ANGLE;
-        }
+        sweepAngle =
+            endAngle > startAngle ? sweepAngle : (std::fmod(sweepAngle, FULL_CIRCLE_ANGLE) + FULL_CIRCLE_ANGLE);
     }
 
     // Init the oval Rect(left, top, right, bottom).
@@ -1562,12 +1499,19 @@ void CustomPaintPaintMethod::Ellipse(PaintWrapper* paintWrapper, const EllipsePa
         matrix.Rotate(-rotation, param.x + offset.GetX(), param.y + offset.GetY());
         rsPath_.Transform(matrix);
     }
-    if (NearZero(sweepAngle) && !NearZero(param.endAngle - param.startAngle)) {
-        // The entire ellipse needs to be drawn with two arcTo.
-        rsPath_.ArcTo(point1, point2, startAngle, HALF_CIRCLE_ANGLE);
-        rsPath_.ArcTo(point1, point2, startAngle + HALF_CIRCLE_ANGLE, HALF_CIRCLE_ANGLE);
+    if (NearEqual(std::abs(std::fmod(sweepAngle, FULL_CIRCLE_ANGLE)), 0.0) ||
+        NearEqual(std::abs(std::fmod(sweepAngle, FULL_CIRCLE_ANGLE)), FULL_CIRCLE_ANGLE)) {
+        double half = GreatNotEqual(sweepAngle, 0.0) ? HALF_CIRCLE_ANGLE : -HALF_CIRCLE_ANGLE;
+        rsPath_.ArcTo(point1, point2, static_cast<RSScalar>(startAngle), static_cast<RSScalar>(half));
+        rsPath_.ArcTo(point1, point2, static_cast<RSScalar>(half + startAngle), static_cast<RSScalar>(half));
+    } else if (!NearEqual(std::fmod(sweepAngle, FULL_CIRCLE_ANGLE), 0.0) && abs(sweepAngle) > FULL_CIRCLE_ANGLE) {
+        double half = GreatNotEqual(sweepAngle, 0.0) ? HALF_CIRCLE_ANGLE : -HALF_CIRCLE_ANGLE;
+        rsPath_.ArcTo(point1, point2, static_cast<RSScalar>(startAngle), static_cast<RSScalar>(half));
+        rsPath_.ArcTo(point1, point2, static_cast<RSScalar>(half + startAngle), static_cast<RSScalar>(half));
+        rsPath_.ArcTo(
+            point1, point2, static_cast<RSScalar>(half + half + startAngle), static_cast<RSScalar>(sweepAngle));
     } else {
-        rsPath_.ArcTo(point1, point2, startAngle, sweepAngle);
+        rsPath_.ArcTo(point1, point2, static_cast<RSScalar>(startAngle), static_cast<RSScalar>(sweepAngle));
     }
     if (!NearZero(rotation)) {
         RSMatrix matrix;
@@ -1737,13 +1681,18 @@ void CustomPaintPaintMethod::Path2DArc(const OffsetF& offset, const PathArgs& ar
         skPath2d_.arcTo(rect, startAngle, sweepAngle, false);
     }
 #else
-    if (NearEqual(std::fmod(sweepAngle, FULL_CIRCLE_ANGLE), 0.0) && !NearEqual(startAngle, endAngle)) {
-        rsPath2d_.ArcTo(point1, point2, startAngle, HALF_CIRCLE_ANGLE);
-        rsPath2d_.ArcTo(point1, point2, startAngle + HALF_CIRCLE_ANGLE, HALF_CIRCLE_ANGLE);
+    if (!NearEqual(startAngle, endAngle) &&
+        (NearEqual(std::abs(std::fmod(sweepAngle, FULL_CIRCLE_ANGLE)), 0.0) ||
+         NearEqual(std::abs(std::fmod(sweepAngle, FULL_CIRCLE_ANGLE)), FULL_CIRCLE_ANGLE))) {
+        double half = GreatNotEqual(sweepAngle, 0.0) ? HALF_CIRCLE_ANGLE : -HALF_CIRCLE_ANGLE;
+        rsPath2d_.ArcTo(point1, point2, static_cast<RSScalar>(startAngle), static_cast<RSScalar>(half));
+        rsPath2d_.ArcTo(point1, point2, static_cast<RSScalar>(half + startAngle), static_cast<RSScalar>(half));
     } else if (!NearEqual(std::fmod(sweepAngle, FULL_CIRCLE_ANGLE), 0.0) && abs(sweepAngle) > FULL_CIRCLE_ANGLE) {
-        rsPath2d_.ArcTo(point1, point2, startAngle, HALF_CIRCLE_ANGLE);
-        rsPath2d_.ArcTo(point1, point2, startAngle + HALF_CIRCLE_ANGLE, HALF_CIRCLE_ANGLE);
-        rsPath2d_.ArcTo(point1, point2, startAngle + HALF_CIRCLE_ANGLE + HALF_CIRCLE_ANGLE, sweepAngle);
+        double half = GreatNotEqual(sweepAngle, 0.0) ? HALF_CIRCLE_ANGLE : -HALF_CIRCLE_ANGLE;
+        rsPath2d_.ArcTo(point1, point2, static_cast<RSScalar>(startAngle), static_cast<RSScalar>(half));
+        rsPath2d_.ArcTo(point1, point2, static_cast<RSScalar>(half + startAngle), static_cast<RSScalar>(half));
+        rsPath2d_.ArcTo(
+            point1, point2, static_cast<RSScalar>(half + half + startAngle), static_cast<RSScalar>(sweepAngle));
     } else {
         rsPath2d_.ArcTo(point1, point2, startAngle, sweepAngle);
     }
@@ -1776,20 +1725,16 @@ void CustomPaintPaintMethod::Path2DEllipse(const OffsetF& offset, const PathArgs
     double rx = args.para3;
     double ry = args.para4;
     double rotation = args.para5 * HALF_CIRCLE_ANGLE / M_PI;
-    double startAngle = std::fmod(args.para6, M_PI * 2.0);
-    double endAngle = std::fmod(args.para7, M_PI * 2.0);
+    double startAngle = args.para6 * HALF_CIRCLE_ANGLE / M_PI;
+    double endAngle = args.para7 * HALF_CIRCLE_ANGLE / M_PI;
     bool anticlockwise = NearZero(args.para8) ? false : true;
-    startAngle = (startAngle < 0.0 ? startAngle + M_PI * 2.0 : startAngle) * HALF_CIRCLE_ANGLE / M_PI;
-    endAngle = (endAngle < 0.0 ? endAngle + M_PI * 2.0 : endAngle) * HALF_CIRCLE_ANGLE / M_PI;
     double sweepAngle = endAngle - startAngle;
     if (anticlockwise) {
-        if (sweepAngle > 0.0) { // Make sure the sweepAngle is negative when anticlockwise.
-            sweepAngle -= FULL_CIRCLE_ANGLE;
-        }
+        sweepAngle =
+            endAngle > startAngle ? (std::fmod(sweepAngle, FULL_CIRCLE_ANGLE) - FULL_CIRCLE_ANGLE) : sweepAngle;
     } else {
-        if (sweepAngle < 0.0) { // Make sure the sweepAngle is positive when clockwise.
-            sweepAngle += FULL_CIRCLE_ANGLE;
-        }
+        sweepAngle =
+            endAngle > startAngle ? sweepAngle : (std::fmod(sweepAngle, FULL_CIRCLE_ANGLE) + FULL_CIRCLE_ANGLE);
     }
 #ifndef USE_ROSEN_DRAWING
     auto rect = SkRect::MakeLTRB(
@@ -1821,10 +1766,17 @@ void CustomPaintPaintMethod::Path2DEllipse(const OffsetF& offset, const PathArgs
         matrix.Rotate(-rotation, x + offset.GetX(), y + offset.GetY());
         rsPath2d_.Transform(matrix);
     }
-    if (NearZero(sweepAngle) && !NearZero(args.para6 - args.para7)) {
-        // The entire ellipse needs to be drawn with two arcTo.
-        rsPath2d_.ArcTo(point1, point2, startAngle, HALF_CIRCLE_ANGLE);
-        rsPath2d_.ArcTo(point1, point2, startAngle + HALF_CIRCLE_ANGLE, HALF_CIRCLE_ANGLE);
+    if (NearEqual(std::abs(std::fmod(sweepAngle, FULL_CIRCLE_ANGLE)), 0.0) ||
+        NearEqual(std::abs(std::fmod(sweepAngle, FULL_CIRCLE_ANGLE)), FULL_CIRCLE_ANGLE)) {
+        double half = GreatNotEqual(sweepAngle, 0.0) ? HALF_CIRCLE_ANGLE : -HALF_CIRCLE_ANGLE;
+        rsPath2d_.ArcTo(point1, point2, static_cast<RSScalar>(startAngle), static_cast<RSScalar>(half));
+        rsPath2d_.ArcTo(point1, point2, static_cast<RSScalar>(half + startAngle), static_cast<RSScalar>(half));
+    } else if (!NearEqual(std::fmod(sweepAngle, FULL_CIRCLE_ANGLE), 0.0) && abs(sweepAngle) > FULL_CIRCLE_ANGLE) {
+        double half = GreatNotEqual(sweepAngle, 0.0) ? HALF_CIRCLE_ANGLE : -HALF_CIRCLE_ANGLE;
+        rsPath2d_.ArcTo(point1, point2, static_cast<RSScalar>(startAngle), static_cast<RSScalar>(half));
+        rsPath2d_.ArcTo(point1, point2, static_cast<RSScalar>(half + startAngle), static_cast<RSScalar>(half));
+        rsPath2d_.ArcTo(
+            point1, point2, static_cast<RSScalar>(half + half + startAngle), static_cast<RSScalar>(sweepAngle));
     } else {
         rsPath2d_.ArcTo(point1, point2, startAngle, sweepAngle);
     }
@@ -2699,8 +2651,7 @@ void CustomPaintPaintMethod::SaveLayer()
 {
     RSBrush compositeOperationpBrush;
     InitPaintBlend(compositeOperationpBrush);
-    auto rect = RSRect(0, 0, lastLayoutSize_.Width(), lastLayoutSize_.Height());
-    RSSaveLayerOps slo(&rect, &compositeOperationpBrush);
+    RSSaveLayerOps slo(nullptr, &compositeOperationpBrush);
     rsCanvas_->SaveLayer(slo);
 }
 

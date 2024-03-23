@@ -921,25 +921,27 @@ std::shared_ptr<Localization> Localization::GetInstance()
 void Localization::SetLocale(const std::string& language, const std::string& countryOrRegion, const std::string& script,
     const std::string& selectLanguage, const std::string& keywordsAndValues)
 {
+    std::lock_guard<std::mutex> lock(mutex_);
+
     if (instance_) {
         instance_->HandleOnChange();
         instance_->HandleOnMymrChange(script == "Qaag");
     }
+
     std::shared_ptr<Localization> instance;
-    {
-        std::lock_guard<std::mutex> lock(mutex_);
-        if (!firstInstance_ || !instance_) {
-            if (instance_) {
-                auto onMymrChange = instance_->GetOnMymrChange();
-                instance_ = std::make_shared<Localization>();
-                instance_->SetOnMymrChange(onMymrChange);
-            } else {
-                instance_ = std::make_shared<Localization>();
-            }
+    if (!firstInstance_ || !instance_) {
+        if (instance_) {
+            auto onMymrChange = instance_->GetOnMymrChange();
+            instance_ = std::make_shared<Localization>();
+            instance_->SetOnMymrChange(onMymrChange);
+        } else {
+            instance_ = std::make_shared<Localization>();
         }
-        firstInstance_ = false;
-        instance = instance_;
     }
+
+    firstInstance_ = false;
+    instance = instance_;
+
     instance->SetLocaleImpl(language, countryOrRegion, script, selectLanguage, keywordsAndValues);
 }
 

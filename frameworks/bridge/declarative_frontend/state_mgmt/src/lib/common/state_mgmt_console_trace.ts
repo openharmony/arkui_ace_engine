@@ -39,10 +39,13 @@ class stateMgmtConsole {
   }
   public static propertyAccess(...args: any): void {
     // enable for fine grain debugging variable observation
-    // aceConsole debug (...args)
+    // aceConsole.debug (...args)
   }
   public static applicationError(...args: any): void {
     aceConsole.error(`FIX THIS APPLICATION ERROR \n`, ...args);
+  }
+  public static featureCombinationError(msg: string): void {
+    aceConsole.warn(msg);
   }
 }
 
@@ -67,6 +70,7 @@ class errorReport {
     } catch (e) { }
 
     msg += "!";
+    stateMgmtConsole.applicationError(msg);
     throw new TypeError(msg);
   }
 

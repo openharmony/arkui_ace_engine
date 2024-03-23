@@ -38,6 +38,9 @@ constexpr int32_t IMAGE_INDEX = 1;
 constexpr int32_t CANCEL_IMAGE_INDEX = 2;
 constexpr int32_t CANCEL_BUTTON_INDEX = 3;
 constexpr int32_t BUTTON_INDEX = 4;
+const std::string INSPECTOR_PREFIX = "__SearchField__";
+const std::vector<std::string> SPECICALIZED_INSPECTOR_INDEXS = { "", "Image__", "CancelImage__", "CancelButton__",
+    "Button__" };
 } // namespace
 
 RefPtr<TextFieldControllerBase> SearchModelNG::Create(const std::optional<std::string>& value,
@@ -91,9 +94,7 @@ void SearchModelNG::SetCaretWidth(const Dimension& value)
     CHECK_NULL_VOID(textFrameNode);
     auto textPaintProperty = textFrameNode->GetPaintProperty<TextFieldPaintProperty>();
     CHECK_NULL_VOID(textPaintProperty);
-
     textPaintProperty->UpdateCursorWidth(value);
-    textFrameNode->MarkModifyDone();
     textFrameNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
 }
 
@@ -105,9 +106,7 @@ void SearchModelNG::SetCaretColor(const Color& color)
     CHECK_NULL_VOID(textFrameNode);
     auto textPaintProperty = textFrameNode->GetPaintProperty<TextFieldPaintProperty>();
     CHECK_NULL_VOID(textPaintProperty);
-
     textPaintProperty->UpdateCursorColor(color);
-    textFrameNode->MarkModifyDone();
     textFrameNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
 }
 
@@ -427,7 +426,6 @@ void SearchModelNG::SetTextColor(const Color& color)
     CHECK_NULL_VOID(textFieldLayoutProperty);
 
     textFieldLayoutProperty->UpdateTextColor(color);
-    textFieldChild->MarkModifyDone();
     textFieldChild->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
 }
 
@@ -631,7 +629,6 @@ void SearchModelNG::SetType(TextInputType value)
         layoutProperty->UpdateTypeChanged(true);
     }
     layoutProperty->UpdateTextInputType(value);
-    textFieldHost->MarkModifyDone();
     textFieldHost->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
 }
 
@@ -681,12 +678,13 @@ void SearchModelNG::CreateTextField(const RefPtr<SearchNode>& parentNode, const 
         CHECK_NULL_VOID(pattern);
         pattern->SetTextFieldNode(frameNode);
         frameNode->MountToParent(parentNode);
+        frameNode->MarkModifyDone();
     }
-    frameNode->MarkModifyDone();
 }
 
 void SearchModelNG::CreateImage(const RefPtr<SearchNode>& parentNode, const std::string& src, bool hasImageNode)
 {
+    auto parentInspector = parentNode->GetInspectorIdValue("");
     auto nodeId = parentNode->GetImageId();
     auto frameNode = FrameNode::GetOrCreateFrameNode(
         V2::IMAGE_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<ImagePattern>(); });
@@ -707,6 +705,7 @@ void SearchModelNG::CreateImage(const RefPtr<SearchNode>& parentNode, const std:
     auto iconHeight = searchTheme->GetIconHeight();
     CalcSize imageCalcSize((CalcLength(iconHeight)), CalcLength(iconHeight));
     imageLayoutProperty->UpdateUserDefinedIdealSize(imageCalcSize);
+    frameNode->UpdateInspectorId(INSPECTOR_PREFIX + SPECICALIZED_INSPECTOR_INDEXS[IMAGE_INDEX] + parentInspector);
     if (!hasImageNode) {
         frameNode->MountToParent(parentNode);
         frameNode->MarkModifyDone();
@@ -744,6 +743,9 @@ void SearchModelNG::CreateCancelImage(const RefPtr<SearchNode>& parentNode, bool
     auto iconHeight = searchTheme->GetIconHeight();
     CalcSize imageCalcSize((CalcLength(iconHeight)), CalcLength(iconHeight));
     imageLayoutProperty->UpdateUserDefinedIdealSize(imageCalcSize);
+    auto parentInspector = parentNode->GetInspectorIdValue("");
+    frameNode->UpdateInspectorId(INSPECTOR_PREFIX + SPECICALIZED_INSPECTOR_INDEXS[CANCEL_IMAGE_INDEX] +
+        parentInspector);
 
     auto imageRenderProperty = frameNode->GetPaintProperty<ImageRenderProperty>();
     CHECK_NULL_VOID(imageRenderProperty);
@@ -763,6 +765,7 @@ void SearchModelNG::CreateButton(const RefPtr<SearchNode>& parentNode, bool hasB
     if (hasButtonNode) {
         return;
     }
+    auto parentInspector = parentNode->GetInspectorIdValue("");
 
     auto searchTheme = PipelineBase::GetCurrentContext()->GetTheme<SearchTheme>();
     auto nodeId = parentNode->GetButtonId();
@@ -796,6 +799,7 @@ void SearchModelNG::CreateButton(const RefPtr<SearchNode>& parentNode, bool hasB
     searchButtonEvent->SetEnabled(false);
     auto pattern = parentNode->GetPattern<SearchPattern>();
     CHECK_NULL_VOID(pattern);
+    frameNode->UpdateInspectorId(INSPECTOR_PREFIX + SPECICALIZED_INSPECTOR_INDEXS[BUTTON_INDEX] + parentInspector);
     pattern->SetButtonNode(frameNode);
     frameNode->MountToParent(parentNode);
     frameNode->MarkModifyDone();
@@ -810,6 +814,7 @@ void SearchModelNG::CreateCancelButton(const RefPtr<SearchNode>& parentNode, boo
     if (hasCancelButtonNode) {
         return;
     }
+    auto parentInspector = parentNode->GetInspectorIdValue("");
     auto nodeId = parentNode->GetCancelButtonId();
     auto frameNode = FrameNode::GetOrCreateFrameNode(
         V2::BUTTON_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<ButtonPattern>(); });
@@ -819,6 +824,8 @@ void SearchModelNG::CreateCancelButton(const RefPtr<SearchNode>& parentNode, boo
         CHECK_NULL_VOID(textNode);
         frameNode->AddChild(textNode);
     }
+    frameNode->UpdateInspectorId(INSPECTOR_PREFIX + SPECICALIZED_INSPECTOR_INDEXS[CANCEL_BUTTON_INDEX] +
+        parentInspector);
     auto cancelButtonRenderContext = frameNode->GetRenderContext();
     cancelButtonRenderContext->UpdateBackgroundColor(Color::TRANSPARENT);
     auto textFrameNode = AceType::DynamicCast<FrameNode>(frameNode->GetChildren().front());
@@ -834,6 +841,22 @@ void SearchModelNG::CreateCancelButton(const RefPtr<SearchNode>& parentNode, boo
     pattern->SetCancelButtonNode(frameNode);
     frameNode->MountToParent(parentNode);
     frameNode->MarkModifyDone();
+}
+
+void SearchModelNG::UpdateInspectorId(const std::string& key)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto updateInspectorCallback = [id = key](FrameNode* parentNode, int32_t index) {
+        auto currentNode = AceType::DynamicCast<FrameNode>(parentNode->GetChildAtIndex(index));
+        if (currentNode) {
+            currentNode->UpdateInspectorId(INSPECTOR_PREFIX + SPECICALIZED_INSPECTOR_INDEXS[index] + id);
+        }
+    };
+    updateInspectorCallback(frameNode, IMAGE_INDEX);
+    updateInspectorCallback(frameNode, CANCEL_IMAGE_INDEX);
+    updateInspectorCallback(frameNode, CANCEL_BUTTON_INDEX);
+    updateInspectorCallback(frameNode, BUTTON_INDEX);
 }
 
 RefPtr<SearchNode> SearchModelNG::GetOrCreateSearchNode(
@@ -891,6 +914,20 @@ RefPtr<FrameNode> SearchModelNG::GetSearchTextFieldFrameNode() const
     return textFieldChild;
 }
 
+void SearchModelNG::SetSearchEnterKeyType(TextInputAction value)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto textFieldChild = AceType::DynamicCast<FrameNode>(frameNode->GetChildren().front());
+    CHECK_NULL_VOID(textFieldChild);
+    auto pattern = textFieldChild->GetPattern<TextFieldPattern>();
+    CHECK_NULL_VOID(pattern);
+    if (value == TextInputAction::UNSPECIFIED) {
+        value = TextInputAction::SEARCH;
+    }
+    pattern->UpdateTextInputAction(value);
+}
+
 void SearchModelNG::SetMaxLength(uint32_t value)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
@@ -900,7 +937,6 @@ void SearchModelNG::SetMaxLength(uint32_t value)
     auto textFieldLayoutProperty = textFieldChild->GetLayoutProperty<TextFieldLayoutProperty>();
     CHECK_NULL_VOID(textFieldLayoutProperty);
     textFieldLayoutProperty->UpdateMaxLength(value);
-    textFieldChild->MarkModifyDone();
     textFieldChild->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
 }
 
@@ -1080,7 +1116,6 @@ void SearchModelNG::SetTextColor(FrameNode* frameNode, const Color& color)
     CHECK_NULL_VOID(textFieldLayoutProperty);
 
     textFieldLayoutProperty->UpdateTextColor(color);
-    textFieldChild->MarkModifyDone();
     textFieldChild->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
 }
 
@@ -1147,9 +1182,7 @@ void SearchModelNG::SetCaretWidth(FrameNode* frameNode, const Dimension& value)
     CHECK_NULL_VOID(textFrameNode);
     auto textPaintProperty = textFrameNode->GetPaintProperty<TextFieldPaintProperty>();
     CHECK_NULL_VOID(textPaintProperty);
-
     textPaintProperty->UpdateCursorWidth(value);
-    textFrameNode->MarkModifyDone();
     textFrameNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
 }
 
@@ -1160,9 +1193,7 @@ void SearchModelNG::SetCaretColor(FrameNode* frameNode, const Color& color)
     CHECK_NULL_VOID(textFrameNode);
     auto textPaintProperty = textFrameNode->GetPaintProperty<TextFieldPaintProperty>();
     CHECK_NULL_VOID(textPaintProperty);
-
     textPaintProperty->UpdateCursorColor(color);
-    textFrameNode->MarkModifyDone();
     textFrameNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
 }
 
@@ -1291,8 +1322,81 @@ void SearchModelNG::SetRightIconSrcPath(FrameNode* frameNode, const std::string&
     imageFrameNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
 }
 
+void SearchModelNG::SetSearchEnterKeyType(FrameNode* frameNode, TextInputAction value)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto textFieldChild = AceType::DynamicCast<FrameNode>(frameNode->GetChildren().front());
+    CHECK_NULL_VOID(textFieldChild);
+    auto pattern = textFieldChild->GetPattern<TextFieldPattern>();
+    CHECK_NULL_VOID(pattern);
+    if (value == TextInputAction::UNSPECIFIED) {
+        value = TextInputAction::SEARCH;
+    }
+    pattern->UpdateTextInputAction(value);
+}
+
 void SearchModelNG::SetHeight(FrameNode* frameNode, const Dimension& height)
 {
     NG::ViewAbstract::SetHeight(frameNode, NG::CalcLength(height));
+}
+
+void SearchModelNG::SetLetterSpacing(const Dimension& value)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto textFieldChild = AceType::DynamicCast<FrameNode>(frameNode->GetChildren().front());
+    CHECK_NULL_VOID(textFieldChild);
+    auto textFieldLayoutProperty = textFieldChild->GetLayoutProperty<TextFieldLayoutProperty>();
+    CHECK_NULL_VOID(textFieldLayoutProperty);
+    textFieldLayoutProperty->UpdateLetterSpacing(value);
+    textFieldChild->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+}
+
+void SearchModelNG::SetLineHeight(const Dimension& value)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto textFieldChild = AceType::DynamicCast<FrameNode>(frameNode->GetChildren().front());
+    CHECK_NULL_VOID(textFieldChild);
+    auto textFieldLayoutProperty = textFieldChild->GetLayoutProperty<TextFieldLayoutProperty>();
+    CHECK_NULL_VOID(textFieldLayoutProperty);
+    textFieldLayoutProperty->UpdateLineHeight(value);
+    textFieldChild->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+}
+
+void SearchModelNG::SetTextDecoration(Ace::TextDecoration value)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto textFieldChild = AceType::DynamicCast<FrameNode>(frameNode->GetChildren().front());
+    CHECK_NULL_VOID(textFieldChild);
+    auto textFieldLayoutProperty = textFieldChild->GetLayoutProperty<TextFieldLayoutProperty>();
+    CHECK_NULL_VOID(textFieldLayoutProperty);
+    textFieldLayoutProperty->UpdateTextDecoration(value);
+    textFieldChild->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+}
+
+void SearchModelNG::SetTextDecorationColor(const Color& value)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto textFieldChild = AceType::DynamicCast<FrameNode>(frameNode->GetChildren().front());
+    CHECK_NULL_VOID(textFieldChild);
+    auto textFieldLayoutProperty = textFieldChild->GetLayoutProperty<TextFieldLayoutProperty>();
+    CHECK_NULL_VOID(textFieldLayoutProperty);
+    textFieldLayoutProperty->UpdateTextDecorationColor(value);
+    textFieldChild->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+}
+
+void SearchModelNG::SetTextDecorationStyle(Ace::TextDecorationStyle value)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto textFieldChild = AceType::DynamicCast<FrameNode>(frameNode->GetChildren().front());
+    CHECK_NULL_VOID(textFieldChild);
+    auto textFieldLayoutProperty = textFieldChild->GetLayoutProperty<TextFieldLayoutProperty>();
+    CHECK_NULL_VOID(textFieldLayoutProperty);
+    textFieldLayoutProperty->UpdateTextDecorationStyle(value);
+    textFieldChild->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
 }
 } // namespace OHOS::Ace::NG

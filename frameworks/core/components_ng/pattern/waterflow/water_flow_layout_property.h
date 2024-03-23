@@ -69,20 +69,10 @@ public:
     }
 
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP_AND_USING_CALLBACK(ColumnsGap, Dimension, PROPERTY_UPDATE_MEASURE);
-    void OnColumnsGapUpdate(Dimension /* columnsGap */) const
-    {
-        if (GetAxis() == Axis::HORIZONTAL) {
-            ResetWaterflowLayoutInfoAndMeasure();
-        }
-    }
+    void OnColumnsGapUpdate(Dimension /* columnsGap */) const;
 
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP_AND_USING_CALLBACK(RowsGap, Dimension, PROPERTY_UPDATE_MEASURE);
-    void OnRowsGapUpdate(Dimension /* rowsGap */) const
-    {
-        if (GetAxis() == Axis::VERTICAL) {
-            ResetWaterflowLayoutInfoAndMeasure();
-        }
-    }
+    void OnRowsGapUpdate(Dimension /* rowsGap */) const;
 
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(CachedCount, int32_t, PROPERTY_UPDATE_MEASURE_SELF);
 

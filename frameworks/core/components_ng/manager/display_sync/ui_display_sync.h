@@ -22,6 +22,7 @@
 #include <mutex>
 #include <iostream>
 #include <atomic>
+#include <set>
 
 #include "base/memory/ace_type.h"
 #include "base/utils/utils.h"
@@ -32,10 +33,6 @@
 namespace OHOS::Ace {
 enum class RefreshRateMode : int32_t {
     REFRESHRATE_MODE_AUTO = -1,
-    REFRESHRATE_MODE_NULL = 0,
-    REFRESHRATE_MODE_LOW = 1,
-    REFRESHRATE_MODE_MEDIUM,
-    REFRESHRATE_MODE_HIGH,
 };
 class PipelineBase;
 
@@ -109,22 +106,22 @@ using OnFrameCallBackWithTimestamp = std::function<void(uint64_t)>;
 class DisplaySyncData : public AceType {
     DECLARE_ACE_TYPE(DisplaySyncData, AceType)
 public:
-    void SetTimestamp(uint64_t timestamp)
+    void SetTimestamp(int64_t timestamp)
     {
         timestamp_ = timestamp;
     }
 
-    uint64_t GetTimestamp() const
+    int64_t GetTimestamp() const
     {
         return timestamp_;
     }
 
-    void SetTargetTimestamp(uint64_t targetTimestamp)
+    void SetTargetTimestamp(int64_t targetTimestamp)
     {
         targetTimestamp_ = targetTimestamp;
     }
 
-    uint64_t GetTargetTimestamp() const
+    int64_t GetTargetTimestamp() const
     {
         return targetTimestamp_;
     }
@@ -133,8 +130,8 @@ public:
     OnFrameCallBackWithData onFrameWithData_ = nullptr;
     OnFrameCallBackWithTimestamp onFrameWithTimestamp_ = nullptr;
 
-    uint64_t timestamp_ = 0;
-    uint64_t targetTimestamp_ = 0;
+    int64_t timestamp_ = 0;
+    int64_t targetTimestamp_ = 0;
 
     int32_t rate_ = 1;
     bool noSkip_ = true;
@@ -158,21 +155,21 @@ public:
     void RegisterOnFrameWithData(OnFrameCallBackWithData&& onFrameCallBack);
     void RegisterOnFrameWithTimestamp(OnFrameCallBackWithTimestamp&& onFrameCallBack);
 
-    void UnRegisterOnFrame();
+    void UnregisterOnFrame();
 
     void CheckRate(int32_t vsyncRate, int32_t refreshRateMode);
-    void UpdateData(uint64_t nanoTimestamp, int32_t vsyncPeriod);
+    void UpdateData(int64_t nanoTimestamp, int32_t vsyncPeriod);
     void JudgeWhetherSkip();
     void OnFrame();
 
-    void SetExpectedFrameRateRange(FrameRateRange&& frameRateRange);
+    void SetExpectedFrameRateRange(const FrameRateRange& frameRateRange);
     bool SetVsyncRate(int32_t vsyncRate);
     bool IsCommonDivisor(int32_t expectedRate, int32_t vsyncRate);
 
-    void SetTimestampData(uint64_t timestamp);
-    uint64_t GetTimestampData() const;
-    void SetTargetTimestampData(uint64_t targetTimestamp);
-    uint64_t GetTargetTimestampData() const;
+    void SetTimestampData(int64_t timestamp);
+    int64_t GetTimestampData() const;
+    void SetTargetTimestampData(int64_t targetTimestamp);
+    int64_t GetTargetTimestampData() const;
 
     RefPtr<DisplaySyncData> GetDisplaySyncData() const;
 
@@ -180,6 +177,9 @@ public:
     int32_t GetRefreshRateMode() const;
     bool IsAutoRefreshRateMode() const;
     bool IsNonAutoRefreshRateMode() const;
+
+    int32_t SearchMatchedRate(int32_t vsyncRate, int32_t iterCount = 1);
+    RefPtr<PipelineBase> GetCurrentContext();
 
     UIDisplaySync();
     ~UIDisplaySync() noexcept override;
@@ -189,6 +189,8 @@ private:
     int32_t sourceVsyncRate_ = 0;
     bool rateChanged_ = true;
     int32_t refreshRateMode_ = 0;
+    WeakPtr<PipelineBase> context_;
+    int32_t drawFPS_ = 0;
 };
 } // namespace OHOS::Ace
 

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -83,6 +83,10 @@ bool BubblePattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty,
 
 void BubblePattern::OnModifyDone()
 {
+    if (SystemProperties::GetColorMode() != colorMode_ && !isCustomPopup_) {
+        colorMode_ = SystemProperties::GetColorMode();
+        UpdateBubbleText();
+    }
     Pattern::OnModifyDone();
     InitTouchEvent();
     RegisterButtonOnHover();
@@ -186,6 +190,18 @@ void BubblePattern::HandleTouchDown(const Offset& clickPosition)
     }
     auto autoCancel = bubbleRenderProp->GetAutoCancel().value_or(true);
     if (autoCancel) {
+        if (!GetInteractiveDismiss()) {
+            return;
+        }
+        if (HasOnWillDismiss()) {
+            auto pipelineNg = PipelineContext::GetCurrentContext();
+            CHECK_NULL_VOID(pipelineNg);
+            auto overlayManager = pipelineNg->GetOverlayManager();
+            CHECK_NULL_VOID(overlayManager);
+            overlayManager->SetDismissPopupId(targetNodeId_);
+            CallOnWillDismiss(static_cast<int32_t>(DismissReason::TOUCH_OUTSIDE));
+            return;
+        }
         PopBubble();
     }
 }
@@ -391,10 +407,71 @@ bool BubblePattern::PostTask(const TaskExecutor::Task& task)
     return taskExecutor->PostTask(task, TaskExecutor::TaskType::UI);
 }
 
+void BubblePattern::StartEnteringTransitionEffects(
+    const RefPtr<FrameNode>& popupNode, const std::function<void()>& finish)
+{
+    auto popupId = popupNode->GetId();
+    auto layoutProp = popupNode->GetLayoutProperty<BubbleLayoutProperty>();
+    CHECK_NULL_VOID(layoutProp);
+    layoutProp->UpdateVisibility(VisibleType::VISIBLE, true);
+    auto showInSubWindow = layoutProp->GetShowInSubWindow().value_or(false);
+    auto isBlock = layoutProp->GetBlockEventValue(true);
+    auto& renderContext = popupNode->GetRenderContext();
+    renderContext->SetTransitionInCallback(
+        [weak = WeakClaim(this), finish, showInSubWindow, popupId, isBlock]() {
+            auto pattern = weak.Upgrade();
+            CHECK_NULL_VOID(pattern);
+            if (pattern->transitionStatus_ != TransitionStatus::ENTERING) {
+                return;
+            }
+            pattern->transitionStatus_ = TransitionStatus::NORMAL;
+            if (showInSubWindow) {
+                std::vector<Rect> rects;
+                if (!isBlock) {
+                    auto rect = Rect(pattern->GetChildOffset().GetX(), pattern->GetChildOffset().GetY(),
+                        pattern->GetChildSize().Width(), pattern->GetChildSize().Height());
+                    rects.emplace_back(rect);
+                } else {
+                    auto parentWindowRect = SubwindowManager::GetInstance()->GetParentWindowRect();
+                    auto rect = Rect(pattern->GetChildOffset().GetX(), pattern->GetChildOffset().GetY(),
+                        pattern->GetChildSize().Width(), pattern->GetChildSize().Height());
+                    rects.emplace_back(parentWindowRect);
+                    rects.emplace_back(rect);
+                }
+                auto subWindowMgr = SubwindowManager::GetInstance();
+                subWindowMgr->SetPopupHotAreas(rects, popupId, pattern->GetContainerId());
+            }
+            if (finish) {
+                finish();
+            }
+        });
+}
+
+void BubblePattern::StartExitingTransitionEffects(
+    const RefPtr<FrameNode>& popupNode, const std::function<void()>& finish)
+{
+    auto layoutProperty = popupNode->GetLayoutProperty();
+    layoutProperty->UpdateVisibility(VisibleType::INVISIBLE, true);
+    auto renderContext = popupNode->GetRenderContext();
+    renderContext->SetTransitionOutCallback(
+        [weak = WeakClaim(this), finish]() {
+            auto pattern = weak.Upgrade();
+            CHECK_NULL_VOID(pattern);
+            if (pattern->transitionStatus_ != TransitionStatus::EXITING) {
+                return;
+            }
+            pattern->transitionStatus_ = TransitionStatus::INVISIABLE;
+            if (finish) {
+                finish();
+            }
+        });
+}
+
 void BubblePattern::StartEnteringAnimation(std::function<void()> finish)
 {
     if (!arrowPlacement_.has_value()) {
         delayShow_ = true;
+        finish_ = finish;
         return;
     }
     if (IsOnShow()) {
@@ -406,7 +483,11 @@ void BubblePattern::StartEnteringAnimation(std::function<void()> finish)
     }
 
     StartOffsetEnteringAnimation();
-    StartAlphaEnteringAnimation(finish);
+    if (finish) {
+        StartAlphaEnteringAnimation(finish);
+    } else {
+        StartAlphaEnteringAnimation(finish_);
+    }
 }
 
 void BubblePattern::StartOffsetEnteringAnimation()
@@ -432,6 +513,13 @@ void BubblePattern::StartAlphaEnteringAnimation(std::function<void()> finish)
     AnimationOption optionAlpha;
     optionAlpha.SetDuration(ENTRY_ANIMATION_DURATION);
     optionAlpha.SetCurve(Curves::SHARP);
+    auto host = GetHost();
+    auto popupId = host->GetId();
+    CHECK_NULL_VOID(host);
+    auto layoutProp = host->GetLayoutProperty<BubbleLayoutProperty>();
+    CHECK_NULL_VOID(layoutProp);
+    auto showInSubWindow = layoutProp->GetShowInSubWindow().value_or(false);
+    auto isBlock = layoutProp->GetBlockEventValue(true);
     AnimationUtils::Animate(
         optionAlpha,
         [weak = WeakClaim(this)]() {
@@ -442,13 +530,29 @@ void BubblePattern::StartAlphaEnteringAnimation(std::function<void()> finish)
             CHECK_NULL_VOID(renderContext);
             renderContext->UpdateOpacity(VISIABLE_ALPHA);
         },
-        [weak = WeakClaim(this), finish]() {
+        [weak = WeakClaim(this), finish, showInSubWindow, popupId, isBlock]() {
             auto pattern = weak.Upgrade();
             CHECK_NULL_VOID(pattern);
             if (pattern->transitionStatus_ != TransitionStatus::ENTERING) {
                 return;
             }
             pattern->transitionStatus_ = TransitionStatus::NORMAL;
+            if (showInSubWindow) {
+                std::vector<Rect> rects;
+                if (!isBlock) {
+                    auto rect = Rect(pattern->GetChildOffset().GetX(), pattern->GetChildOffset().GetY(),
+                        pattern->GetChildSize().Width(), pattern->GetChildSize().Height());
+                    rects.emplace_back(rect);
+                } else {
+                    auto parentWindowRect = SubwindowManager::GetInstance()->GetParentWindowRect();
+                    auto rect = Rect(pattern->GetChildOffset().GetX(), pattern->GetChildOffset().GetY(),
+                        pattern->GetChildSize().Width(), pattern->GetChildSize().Height());
+                    rects.emplace_back(parentWindowRect);
+                    rects.emplace_back(rect);
+                }
+                auto subWindowMgr = SubwindowManager::GetInstance();
+                subWindowMgr->SetPopupHotAreas(rects, popupId, pattern->GetContainerId());
+            }
             if (finish) {
                 finish();
             }
@@ -618,11 +722,35 @@ void BubblePattern::OnWindowHide()
     }
 }
 
-void BubblePattern::OnColorConfigurationUpdate()
+
+void BubblePattern::UpdateText(const RefPtr<UINode>& node, const RefPtr<PopupTheme>& popupTheme)
 {
-    if (isCustomPopup_) {
-        return;
+    if (node->GetTag() == V2::TEXT_ETS_TAG) {
+        auto textNode = DynamicCast<FrameNode>(node);
+        CHECK_NULL_VOID(textNode);
+        auto textLayoutProperty = textNode->GetLayoutProperty<TextLayoutProperty>();
+        CHECK_NULL_VOID(textLayoutProperty);
+        auto parentNode = node->GetParent();
+        if (parentNode && parentNode->GetTag() == V2::BUTTON_ETS_TAG &&
+            !(Container::LessThanAPIVersion(PlatformVersion::VERSION_ELEVEN))) {
+            textLayoutProperty->UpdateTextColor(popupTheme->GetButtonFontColor());
+        } else if (!isSetMessageColor_) {
+            if ((Container::LessThanAPIVersion(PlatformVersion::VERSION_ELEVEN))) {
+                textLayoutProperty->UpdateTextColor(popupTheme->GetFontColor());
+            } else {
+                textLayoutProperty->UpdateTextColor(popupTheme->GetFontPrimaryColor());
+            }
+        }
+        textNode->MarkModifyDone();
+    } else {
+        for (const auto& childNode : node->GetChildren()) {
+            UpdateText(childNode, popupTheme);
+        }
     }
+}
+
+void BubblePattern::UpdateBubbleText()
+{
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     host->SetNeedCallChildrenUpdate(false);
@@ -630,26 +758,17 @@ void BubblePattern::OnColorConfigurationUpdate()
     CHECK_NULL_VOID(context);
     auto popupTheme = context->GetTheme<PopupTheme>();
     CHECK_NULL_VOID(popupTheme);
-    auto buttonRowNode = GetButtonRowNode();
-    CHECK_NULL_VOID(buttonRowNode);
-    for (const auto& child : buttonRowNode->GetChildren()) {
-        auto buttonNode = AceType::DynamicCast<FrameNode>(child);
-        CHECK_NULL_VOID(buttonNode);
-        if (buttonNode->GetTag() != V2::BUTTON_ETS_TAG) {
-            return;
-        }
-        auto renderContext = buttonNode->GetRenderContext();
-        CHECK_NULL_VOID(renderContext);
-        auto childText = buttonNode->GetFirstChild();
-        CHECK_NULL_VOID(childText);
-        auto textNode = DynamicCast<FrameNode>(childText);
-        CHECK_NULL_VOID(textNode);
-        auto textLayoutProperty = textNode->GetLayoutProperty<TextLayoutProperty>();
-        CHECK_NULL_VOID(textLayoutProperty);
-        textLayoutProperty->UpdateTextColor(popupTheme->GetFontColor());
-        textNode->MarkDirtyNode();
-    }
+    UpdateText(host, popupTheme);
     host->MarkDirtyNode();
+}
+
+void BubblePattern::OnColorConfigurationUpdate()
+{
+    if (isCustomPopup_) {
+        return;
+    }
+    colorMode_ = SystemProperties::GetColorMode();
+    UpdateBubbleText();
 }
 
 } // namespace OHOS::Ace::NG

@@ -38,12 +38,14 @@ public:
         return scroll_;
     }
     void JumpTo(int32_t index, bool smooth, ScrollAlign align, int32_t source) override;
-    bool AnimateTo(const Dimension& position, float duration, const RefPtr<Curve>& curve, bool smooth) override;
+    bool AnimateTo(const Dimension& position, float duration, const RefPtr<Curve>& curve, bool smooth,
+        bool canOverScroll = false) override;
     Offset GetCurrentOffset() const override;
     Axis GetScrollDirection() const override;
     void ScrollBy(double pixelX, double pixelY, bool smooth) override;
     void ScrollToEdge(ScrollEdgeType scrollEdgeType, bool smooth) override;
     void ScrollPage(bool reverse, bool smooth) override;
+    void Fling(double flingVelocity) override;
     bool IsAtEnd() const override;
     Rect GetItemRect(int32_t index) const override;
 

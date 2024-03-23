@@ -172,21 +172,23 @@ void RatingPattern::UpdatePaintConfig()
 RefPtr<NodePaintMethod> RatingPattern::CreateNodePaintMethod()
 {
     auto ratingLayoutProperty = GetLayoutProperty<RatingLayoutProperty>();
-    CHECK_NULL_RETURN(ratingLayoutProperty, nullptr);
-    CHECK_NULL_RETURN(foregroundImageCanvas_, nullptr);
-    CHECK_NULL_RETURN(secondaryImageCanvas_, nullptr);
-    CHECK_NULL_RETURN(backgroundImageCanvas_, nullptr);
-    CHECK_NULL_RETURN(foregroundImageLoadingCtx_, nullptr);
-    CHECK_NULL_RETURN(secondaryImageLoadingCtx_, nullptr);
-    CHECK_NULL_RETURN(backgroundImageLoadingCtx_, nullptr);
+    if (!ratingModifier_) {
+        ratingModifier_ = AceType::MakeRefPtr<RatingModifier>();
+    }
+    auto defaultPaintMethod = MakeRefPtr<RatingPaintMethod>(ratingModifier_, GetStarNum(ratingLayoutProperty), 
+        state_, false);
+    CHECK_NULL_RETURN(ratingLayoutProperty, defaultPaintMethod);
+    CHECK_NULL_RETURN(foregroundImageCanvas_, defaultPaintMethod);
+    CHECK_NULL_RETURN(secondaryImageCanvas_, defaultPaintMethod);
+    CHECK_NULL_RETURN(backgroundImageCanvas_, defaultPaintMethod);
+    CHECK_NULL_RETURN(foregroundImageLoadingCtx_, defaultPaintMethod);
+    CHECK_NULL_RETURN(secondaryImageLoadingCtx_, defaultPaintMethod);
+    CHECK_NULL_RETURN(backgroundImageLoadingCtx_, defaultPaintMethod);
     auto starNum = GetStarNum(GetLayoutProperty<RatingLayoutProperty>());
     UpdatePaintConfig();
     PrepareAnimation(foregroundImageCanvas_);
     PrepareAnimation(secondaryImageCanvas_);
     PrepareAnimation(backgroundImageCanvas_);
-    if (!ratingModifier_) {
-        ratingModifier_ = AceType::MakeRefPtr<RatingModifier>();
-    }
     // when frameNode mark dirty to update rendering, only when 3 images are all loaded successfully and
     // JudgeImageSourceInfo is true, pattern will update ratingModifier's CanvasImage.
     if (ratingModifier_->JudgeImageSourceInfo(foregroundImageLoadingCtx_->GetSourceInfo(),
@@ -374,7 +376,7 @@ void RatingPattern::FireChangeEvent() const
     if (inspectorId.empty()) {
         return;
     }
-    Recorder::NodeDataCache::Get().PutString(inspectorId, score);
+    Recorder::NodeDataCache::Get().PutString(host, inspectorId, score);
 }
 
 void RatingPattern::HandleDragEnd()

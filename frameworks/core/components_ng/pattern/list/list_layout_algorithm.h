@@ -35,6 +35,7 @@ struct ListItemInfo {
     float startPos;
     float endPos;
     bool isGroup;
+    bool isPressed = false;
 };
 
 struct ListPredictLayoutParam {
@@ -54,7 +55,7 @@ class ACE_EXPORT ListLayoutAlgorithm : public LayoutAlgorithm {
 
 public:
     using PositionMap = std::map<int32_t, ListItemInfo>;
-    static const int32_t LAST_ITEM = -1;
+    static constexpr int32_t LAST_ITEM = -1;
 
     ListLayoutAlgorithm() = default;
 
@@ -361,6 +362,7 @@ protected:
         int32_t& startIndex, float crossSize);
     static void SyncGeometry(RefPtr<LayoutWrapper>& wrapper);
     ListItemInfo GetListItemGroupPosition(const RefPtr<LayoutWrapper>& layoutWrapper, int32_t index);
+    bool CheckNeedMeasure(const RefPtr<LayoutWrapper>& layoutWrapper) const;
 
     Axis axis_ = Axis::VERTICAL;
     LayoutConstraintF childLayoutConstraint_;
@@ -415,6 +417,7 @@ private:
     bool forwardFeature_ = false;
     bool backwardFeature_ = false;
     bool isNeedCheckOffset_ = false;
+    bool expandSafeArea_ = false;
 
     int32_t totalItemCount_ = 0;
 

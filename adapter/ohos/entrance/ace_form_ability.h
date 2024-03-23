@@ -81,9 +81,10 @@ public:
      * @brief Called to notify the form provider to update a specified form.
      *
      * @param formId Indicates the ID of the form to update.
+     * @param wantParams Indicates the params of form to update.
      * @return none.
      */
-    void OnUpdate(const int64_t formId) override;
+    void OnUpdate(const int64_t formId, const OHOS::AAFwk::WantParams &wantParams) override;
 
     /**
      * @brief Called when the form provider is notified that a temporary form is successfully converted to

@@ -41,6 +41,8 @@ enum class ButtonStyleMode { NORMAL, EMPHASIZE, TEXT };
 
 enum class ControlSize { SMALL, NORMAL };
 
+enum class ButtonRole { NORMAL, ERROR };
+
 // Flex Styles
 enum class FlexDirection {
     ROW = 0,
@@ -625,7 +627,7 @@ enum class PositionMode {
 
 enum class XComponentType { UNKNOWN = -1, SURFACE = 0, COMPONENT, TEXTURE, NODE };
 
-enum class WebType { SURFACE = 0, TEXTURE };
+enum class RenderMode { ASYNC_RENDER = 0, SYNC_RENDER };
 
 inline constexpr uint32_t STATE_NORMAL = 0;
 inline constexpr uint32_t STATE_PRESSED = 1;

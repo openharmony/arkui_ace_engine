@@ -102,8 +102,14 @@ void JSSearch::JSBind(BindingTarget globalObj)
     JSClass<JSSearch>::StaticMethod("textMenuOptions", &JSSearch::JsMenuOptionsExtension);
     JSClass<JSSearch>::StaticMethod("selectionMenuHidden", &JSSearch::SetSelectionMenuHidden);
     JSClass<JSSearch>::StaticMethod("customKeyboard", &JSSearch::SetCustomKeyboard);
+    JSClass<JSSearch>::StaticMethod("enterKeyType", &JSSearch::SetEnterKeyType);
     JSClass<JSSearch>::StaticMethod("maxLength", &JSSearch::SetMaxLength);
     JSClass<JSSearch>::StaticMethod("type", &JSSearch::SetType);
+    JSClass<JSSearch>::StaticMethod("decoration", &JSSearch::SetDecoration);
+    JSClass<JSSearch>::StaticMethod("letterSpacing", &JSSearch::SetLetterSpacing);
+    JSClass<JSSearch>::StaticMethod("lineHeight", &JSSearch::SetLineHeight);
+    JSClass<JSSearch>::StaticMethod("id", &JSSearch::SetId);
+    JSClass<JSSearch>::StaticMethod("key", &JSSearch::SetKey);
     JSClass<JSSearch>::InheritAndBind<JSViewAbstract>(globalObj);
 }
 
@@ -177,6 +183,23 @@ void JSSearch::SetEnableKeyboardOnFocus(const JSCallbackInfo& info)
         return;
     }
     SearchModel::GetInstance()->RequestKeyboardOnFocus(info[0]->ToBoolean());
+}
+
+void JSSearch::SetId(const JSCallbackInfo& info)
+{
+    JSViewAbstract::JsId(info);
+    JSRef<JSVal> arg = info[0];
+    std::string id;
+    if (arg->IsString()) {
+        id = arg->ToString();
+    }
+    SearchModel::GetInstance()->UpdateInspectorId(id);
+}
+
+void JSSearch::SetKey(const std::string& key)
+{
+    JSViewAbstract::JsKey(key);
+    SearchModel::GetInstance()->UpdateInspectorId(key);
 }
 
 void JSSearch::SetSearchButton(const JSCallbackInfo& info)
@@ -687,6 +710,10 @@ void JSSearch::SetType(const JSCallbackInfo& info)
     if (info.Length() < 1) {
         return;
     }
+    if (info[0]->IsUndefined()) {
+        SearchModel::GetInstance()->SetType(TextInputType::UNSPECIFIED);
+        return;
+    }
     if (!info[0]->IsNumber()) {
         return;
     }
@@ -698,6 +725,22 @@ void JSSearchController::JSBind(BindingTarget globalObj)
 {
     JSClass<JSTextEditableController>::Declare("SearchController");
     JSTextEditableController::JSBind(globalObj);
+}
+
+void JSSearch::SetEnterKeyType(const JSCallbackInfo& info)
+{
+    if (info.Length() < 1) {
+        return;
+    }
+    if (info[0]->IsUndefined()) {
+        SearchModel::GetInstance()->SetSearchEnterKeyType(TextInputAction::SEARCH);
+        return;
+    }
+    if (!info[0]->IsNumber()) {
+        return;
+    }
+    TextInputAction textInputAction = CastToTextInputAction(info[0]->ToNumber<int32_t>());
+    SearchModel::GetInstance()->SetSearchEnterKeyType(textInputAction);
 }
 
 void JSSearch::SetMaxLength(const JSCallbackInfo& info)
@@ -716,5 +759,64 @@ void JSSearch::SetMaxLength(const JSCallbackInfo& info)
     } else {
         SearchModel::GetInstance()->ResetMaxLength();
     }
+}
+
+void JSSearch::SetDecoration(const JSCallbackInfo& info)
+{
+    do {
+        auto tmpInfo = info[0];
+        if (!tmpInfo->IsObject()) {
+            break;
+        }
+        JSRef<JSObject> obj = JSRef<JSObject>::Cast(tmpInfo);
+        JSRef<JSVal> typeValue = obj->GetProperty("type");
+        JSRef<JSVal> colorValue = obj->GetProperty("color");
+        JSRef<JSVal> styleValue = obj->GetProperty("style");
+
+        auto pipelineContext = PipelineBase::GetCurrentContext();
+        CHECK_NULL_VOID(pipelineContext);
+        auto theme = pipelineContext->GetTheme<SearchTheme>();
+        CHECK_NULL_VOID(theme);
+        TextDecoration textDecoration = theme->GetTextStyle().GetTextDecoration();
+        if (typeValue->IsNumber()) {
+            textDecoration = static_cast<TextDecoration>(typeValue->ToNumber<int32_t>());
+        }
+        Color result = theme->GetTextStyle().GetTextDecorationColor();
+        ParseJsColor(colorValue, result, Color::BLACK);
+        std::optional<TextDecorationStyle> textDecorationStyle;
+        if (styleValue->IsNumber()) {
+            textDecorationStyle = static_cast<TextDecorationStyle>(styleValue->ToNumber<int32_t>());
+        }
+        SearchModel::GetInstance()->SetTextDecoration(textDecoration);
+        SearchModel::GetInstance()->SetTextDecorationColor(result);
+        if (textDecorationStyle) {
+            SearchModel::GetInstance()->SetTextDecorationStyle(textDecorationStyle.value());
+        }
+    } while (false);
+}
+
+void JSSearch::SetLetterSpacing(const JSCallbackInfo& info)
+{
+    CalcDimension value;
+    if (!ParseJsDimensionFpNG(info[0], value, false)) {
+        value.Reset();
+        SearchModel::GetInstance()->SetLetterSpacing(value);
+        return;
+    }
+    SearchModel::GetInstance()->SetLetterSpacing(value);
+}
+
+void JSSearch::SetLineHeight(const JSCallbackInfo& info)
+{
+    CalcDimension value;
+    if (!ParseJsDimensionFpNG(info[0], value)) {
+        value.Reset();
+        SearchModel::GetInstance()->SetLineHeight(value);
+        return;
+    }
+    if (value.IsNegative()) {
+        value.Reset();
+    }
+    SearchModel::GetInstance()->SetLineHeight(value);
 }
 } // namespace OHOS::Ace::Framework

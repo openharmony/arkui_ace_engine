@@ -39,8 +39,10 @@ public:
     void SetBorderRadius(const Dimension& radius) override;
     void SetBorderRadius(const std::optional<Dimension>& radiusTopLeft, const std::optional<Dimension>& radiusTopRight,
         const std::optional<Dimension>& radiusBottomLeft, const std::optional<Dimension>& radiusBottomRight) override;
+    void ResetBorderRadius() override;
     void SetButtonStyle(const std::optional<ButtonStyleMode>& buttonStyle) override;
     void SetControlSize(const std::optional<ControlSize>& controlSize) override;
+    void SetRole(const std::optional<ButtonRole>& buttonRole) override;
     static RefPtr<FrameNode> CreateFrameNode(int32_t nodeId);
     static void SetFontSize(FrameNode* frameNode, const Dimension& fontSize);
     static void SetFontWeight(FrameNode* frameNode, const Ace::FontWeight& fontWeight);
@@ -57,6 +59,15 @@ public:
         const std::optional<Dimension>& radiusBottomRight);
     static void SetSize(
         FrameNode* frameNode, const std::optional<Dimension>& width, const std::optional<Dimension>& height);
+    static void SetLabel(FrameNode* frameNode, const char* label);
+    static std::string GetLabel(FrameNode* frameNode);
+    static Dimension GetFontSize(FrameNode* frameNode);
+    static Ace::FontWeight GetFontWeight(FrameNode* frameNode);
+    static Color GetFontColor(FrameNode* frameNode);
+    static void SetRole(FrameNode* frameNode, const std::optional<ButtonRole>& buttonRole);
+    static void SetButtonStyle(FrameNode* frameNode, const std::optional<ButtonStyleMode>& buttonStyle);
+    static void SetControlSize(FrameNode* frameNode, const std::optional<ControlSize>& controlSize);
+    
 
 private:
     static void CreateWithLabel(const std::string& label);

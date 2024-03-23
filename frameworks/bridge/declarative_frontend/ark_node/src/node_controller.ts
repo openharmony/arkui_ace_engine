@@ -13,29 +13,24 @@
  * limitations under the License.
  */
 
-const arkUINativeModule = globalThis.getArkUINativeModule();
-function GetUINativeModule() {
-  if (arkUINativeModule) {
-    return arkUINativeModule;
+class __InternalField__ {
+  _value: number;
+  constructor()
+  {
+    this._value = -1;
   }
-  return arkUINativeModule;
 }
 
 abstract class NodeController {
-  nodeContainerId_: number;
+  _nodeContainerId: __InternalField__;
   constructor() {
-    this.nodeContainerId_ = -1;
+    this._nodeContainerId = new __InternalField__();
   }
 
   abstract makeNode(UIContext: UIContext): FrameNode | null;
-  aboutToResize(size: Size) { }
-  aboutToAppear() { }
-  aboutToDisappear() { }
-  onTouchEvent(event: TouchEvent) { }
-
   rebuild() {
-    if (this.nodeContainerId_ >= 0) {
-      GetUINativeModule().nodeContainer.rebuild(this.nodeContainerId_);
+    if (this._nodeContainerId != undefined && this._nodeContainerId !== null && this._nodeContainerId._value >= 0) {
+      getUINativeModule().nodeContainer.rebuild(this._nodeContainerId._value);
     }
   }
 }

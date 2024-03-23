@@ -60,6 +60,9 @@ public:
     void SetShowUnderlineState(bool value);
     void SetFontReady(bool value);
     void SetTextOverflow(const TextOverflow value);
+    void SetTextDecoration(const TextDecoration& value);
+    void SetTextDecorationStyle(const TextDecorationStyle value);
+    void SetTextDecorationColor(const Color& value);
     void ContentChange();
 
 private:
@@ -68,9 +71,12 @@ private:
     void SetDefaultTextColor(const TextStyle& textStyle);
     void SetDefaultFontStyle(const TextStyle& textStyle);
     void SetDefaultTextOverflow(const TextStyle& textStyle);
+    void SetDefaultTextDecoration(const TextStyle& textStyle);
     void SetDefaultPropertyValue();
     void GetFrameRectClip(RSRect& clipRect, std::vector<RSPoint>& clipRadius);
     void ProcessErrorParagraph(DrawingContext& context, float errorMargin);
+    void ModifyDecorationInTextStyle(TextStyle& textStyle);
+    void UpdateTextDecorationMeasureFlag(PropertyChangeFlag& flag);
 
     WeakPtr<Pattern> pattern_;
     RefPtr<PropertyString> fontFamilyString_;
@@ -83,6 +89,13 @@ private:
 
     std::optional<Color> textColor_;
     RefPtr<AnimatablePropertyColor> animatableTextColor_;
+
+    float oldColorAlpha_ { 0.0f };
+    std::optional<TextDecoration> textDecoration_;
+    std::optional<TextDecorationStyle> textDecorationStyle_;
+    std::optional<Color> textDecorationColor_;
+    RefPtr<AnimatablePropertyFloat> textDecorationColorAlpha_;
+    bool textDecorationAnimatable_ { false };
 
     RefPtr<PropertyFloat> textRectX_;
     RefPtr<PropertyFloat> textRectY_;

@@ -177,9 +177,6 @@ void SearchPattern::OnModifyDone()
     CHECK_NULL_VOID(cancelButtonLayoutProperty);
     cancelButtonLayoutProperty->UpdateLabel("");
     cancelButtonFrameNode->MarkModifyDone();
-
-    HandleEnabled();
-
     InitButtonAndImageClickEvent();
     InitCancelButtonClickEvent();
     InitTextFieldValueChangeEvent();
@@ -192,6 +189,7 @@ void SearchPattern::OnModifyDone()
     InitOnKeyEvent(focusHub);
     InitFocusEvent(focusHub);
     InitClickEvent();
+    HandleEnabled();
 }
 
 void SearchPattern::HandleBackgroundColor()
@@ -282,6 +280,8 @@ void SearchPattern::InitTextFieldDragEvent()
     auto textFieldEventHub = textFieldFrameNode->GetEventHub<EventHub>();
     CHECK_NULL_VOID(textFieldEventHub);
 
+    textFieldFrameNode->SetDragPreview(host->GetDragPreview());
+
     auto dragStart = searchEventHub->GetOnDragStart();
     if (dragStart != nullptr) {
         textFieldEventHub->SetOnDragStart(std::move(dragStart));
@@ -338,7 +338,7 @@ void SearchPattern::OnAfterModifyDone()
         auto textFieldPattern = textFieldFrameNode->GetPattern<TextFieldPattern>();
         CHECK_NULL_VOID(textFieldPattern);
         auto text = textFieldPattern->GetTextValue();
-        Recorder::NodeDataCache::Get().PutString(inspectorId, text);
+        Recorder::NodeDataCache::Get().PutString(host, inspectorId, text);
     }
 }
 
@@ -552,7 +552,8 @@ void SearchPattern::OnClickButtonAndImage()
     CHECK_NULL_VOID(textFieldPattern);
     auto text = textFieldPattern->GetTextValue();
     searchEventHub->UpdateSubmitEvent(text);
-    textFieldPattern->CloseKeyboard(true);
+    // close keyboard and select background color
+    textFieldPattern->StopEditing();
 }
 
 void SearchPattern::OnClickCancelButton()
@@ -1141,8 +1142,41 @@ void SearchPattern::ToJsonValueForTextField(std::unique_ptr<JsonValue>& json) co
         ConvertCopyOptionsToString(textFieldLayoutProperty->GetCopyOptionsValue(CopyOptions::None)).c_str());
     auto maxLength = GetMaxLength();
     json->Put("maxLength", GreatOrEqual(maxLength, Infinity<uint32_t>()) ? "INF" : std::to_string(maxLength).c_str());
-    json->Put("type", textFieldPattern->TextInputTypeToString().c_str());
+    json->Put("type", SearchTypeToString().c_str());
     textFieldLayoutProperty->HasCopyOptions();
+    json->Put("letterSpacing", textFieldLayoutProperty->GetLetterSpacing().value_or(Dimension()).ToString().c_str());
+    json->Put("lineHeight", textFieldLayoutProperty->GetLineHeight().value_or(0.0_vp).ToString().c_str());
+    auto jsonDecoration = JsonUtil::Create(true);
+    std::string type = V2::ConvertWrapTextDecorationToStirng(
+        textFieldLayoutProperty->GetTextDecoration().value_or(TextDecoration::NONE));
+    jsonDecoration->Put("type", type.c_str());
+    jsonDecoration->Put("color",
+        textFieldLayoutProperty->GetTextDecorationColor().value_or(Color::BLACK).ColorToString().c_str());
+    std::string style =
+        V2::ConvertWrapTextDecorationStyleToString(
+            textFieldLayoutProperty->GetTextDecorationStyle().value_or(TextDecorationStyle::SOLID));
+    jsonDecoration->Put("style", style.c_str());
+    json->Put("decoration", jsonDecoration->ToString().c_str());
+}
+
+std::string SearchPattern::SearchTypeToString() const
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, "");
+    auto textFieldFrameNode = DynamicCast<FrameNode>(host->GetChildAtIndex(TEXTFIELD_INDEX));
+    CHECK_NULL_RETURN(textFieldFrameNode, "");
+    auto layoutProperty = textFieldFrameNode->GetLayoutProperty<TextFieldLayoutProperty>();
+    CHECK_NULL_RETURN(layoutProperty, "");
+    switch (layoutProperty->GetTextInputTypeValue(TextInputType::UNSPECIFIED)) {
+        case TextInputType::NUMBER:
+            return "SearchType.NUMBER";
+        case TextInputType::EMAIL_ADDRESS:
+            return "SearchType.EMAIL";
+        case TextInputType::PHONE:
+            return "SearchType.PHONE_NUMBER";
+        default:
+            return "SearchType.NORMAL";
+    }
 }
 
 void SearchPattern::ToJsonValueForSearchIcon(std::unique_ptr<JsonValue>& json) const

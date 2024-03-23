@@ -73,9 +73,9 @@ const int SYSTEM_BASE = 10;
 #if defined(ANDROID_PLATFORM)
 const std::string ARK_DEBUGGER_LIB_PATH = "libark_debugger.so";
 #elif defined(APP_USE_ARM)
-const std::string ARK_DEBUGGER_LIB_PATH = "/system/lib/libark_debugger.z.so";
+const std::string ARK_DEBUGGER_LIB_PATH = "/system/lib/platformsdk/libark_debugger.z.so";
 #else
-const std::string ARK_DEBUGGER_LIB_PATH = "/system/lib64/libark_debugger.z.so";
+const std::string ARK_DEBUGGER_LIB_PATH = "/system/lib64/platformsdk/libark_debugger.z.so";
 #endif
 const int32_t MAX_READ_TEXT_LENGTH = 4096;
 const std::regex URI_PATTERN("^\\/([a-z0-9A-Z_]+\\/)*[a-z0-9A-Z_]+\\.?[a-z0-9A-Z_]*$");
@@ -923,7 +923,7 @@ void ShowToast(const shared_ptr<JsRuntime>& runtime, const shared_ptr<JsValue>& 
         }
     }
 
-    GetFrontendDelegate(runtime)->ShowToast(message, duration, bottom, NG::ToastShowMode::DEFAULT);
+    GetFrontendDelegate(runtime)->ShowToast(message, duration, bottom, NG::ToastShowMode::DEFAULT, -1, std::nullopt);
 }
 
 std::vector<ButtonInfo> ParseDialogButtons(
@@ -3207,7 +3207,8 @@ void JsiEngine::RegisterOffWorkerFunc()
 void JsiEngine::RegisterAssetFunc()
 {
     auto weakDelegate = WeakPtr(engineInstance_->GetDelegate());
-    auto&& assetFunc = [weakDelegate](const std::string& uri, std::vector<uint8_t>& content, std::string& ami) {
+    auto && assetFunc = [weakDelegate](const std::string& uri, uint8_t** buff, size_t* buffSize, std::string& ami,
+        bool& useSecureMem, bool isRestricted) {
         LOGI("WorkerCore RegisterAssetFunc called");
         auto delegate = weakDelegate.Upgrade();
         if (delegate == nullptr) {
@@ -3218,7 +3219,11 @@ void JsiEngine::RegisterAssetFunc()
         if (index == std::string::npos) {
             LOGE("invalid uri");
         } else {
+            std::vector<uint8_t> content;
             delegate->GetResourceData(uri.substr(0, index) + ".abc", content, ami);
+            *buff = content.data();
+            *buffSize = content.size();
+            useSecureMem = false;
         }
     };
     nativeEngine_->SetGetAssetFunc(assetFunc);

@@ -95,6 +95,10 @@ void SetArrowPosition(ArkUINodeHandle node, ArkUI_Int32 arrowPosition)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
+    if (static_cast<OHOS::Ace::ArrowPosition>(arrowPosition) != OHOS::Ace::ArrowPosition::START &&
+        static_cast<OHOS::Ace::ArrowPosition>(arrowPosition) != OHOS::Ace::ArrowPosition::END) {
+        arrowPosition = 0;
+    }
     SelectModelNG::SetArrowPosition(frameNode, static_cast<ArrowPosition>(arrowPosition));
 }
 
@@ -323,8 +327,9 @@ void ResetFont(ArkUINodeHandle node)
     CHECK_NULL_VOID(selectTheme);
     auto textTheme = GetTheme<TextTheme>();
     CHECK_NULL_VOID(textTheme);
-
-    SelectModelNG::SetFontSize(frameNode, selectTheme->GetFontSize());
+    
+    auto controlSize = SelectModelNG::GetControlSize(frameNode);
+    SelectModelNG::SetFontSize(frameNode, selectTheme->GetFontSize(controlSize));
     SelectModelNG::SetFontWeight(frameNode, FontWeight::MEDIUM);
     SelectModelNG::SetFontFamily(frameNode, textTheme->GetTextStyle().GetFontFamilies());
     SelectModelNG::SetItalicFontStyle(frameNode, textTheme->GetTextStyle().GetFontStyle());
@@ -463,9 +468,19 @@ void ResetSelectSize(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    ViewAbstract::SetWidth(frameNode, CalcLength(0.0));
-    ViewAbstract::SetHeight(frameNode, CalcLength(0.0));
+    ViewAbstract::ClearWidthOrHeight(frameNode, true);
+    ViewAbstract::ClearWidthOrHeight(frameNode, false);
 }
+
+void SetControlSize(ArkUINodeHandle node, ArkUI_Int32 value)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto controlSize = static_cast<ControlSize>(value);
+    SelectModelNG::SetControlSize(frameNode, controlSize);
+}
+
+void ResetControlSize(ArkUINodeHandle node) {}
 
 namespace NodeModifier {
 const ArkUISelectModifier* GetSelectModifier()
@@ -477,7 +492,7 @@ const ArkUISelectModifier* GetSelectModifier()
         ResetSelectedOptionFontColor, ResetArrowPosition, ResetMenuAlign, ResetFont, ResetOptionFont,
         ResetSelectedOptionFont, SetSelectWidth, ResetSelectWidth, SetSelectHeight, ResetSelectHeight, SetSelectSize,
         ResetSelectSize, SetSelectOptionWidthFitTrigger, SetSelectOptionWidth, ResetSelectOptionWidth,
-        SetSelectOptionHeight, ResetSelectOptionHeight };
+        SetSelectOptionHeight, ResetSelectOptionHeight, SetControlSize, ResetControlSize };
 
     return &modifier;
 }

@@ -178,6 +178,24 @@ public:
             ConvertButtonStyleToString(layoutProperty->GetButtonStyle().value_or(ButtonStyleMode::EMPHASIZE)).c_str());
         json->Put("controlSize",
             ConvertControlSizeToString(layoutProperty->GetControlSize().value_or(ControlSize::NORMAL)).c_str());
+        json->Put(
+            "role", ConvertButtonRoleToString(layoutProperty->GetButtonRole().value_or(ButtonRole::NORMAL)).c_str());
+    }
+
+    static std::string ConvertButtonRoleToString(ButtonRole buttonRole)
+    {
+        std::string result;
+        switch (buttonRole) {
+            case ButtonRole::NORMAL:
+                result = "ButtonRole.NORMAL";
+                break;
+            case ButtonRole::ERROR:
+                result = "ButtonRole.ERROR";
+                break;
+            default:
+                break;
+        }
+        return result;
     }
 
     static std::string ConvertButtonTypeToString(ButtonType buttonType)
@@ -298,8 +316,8 @@ protected:
     void HandleBackgroundColor();
     void HandleEnabled();
     void InitButtonLabel();
-    void AnimateTouchAndHover(RefPtr<RenderContext>& renderContext, int32_t typeFrom, int32_t typeTo,
-        int32_t duration, const RefPtr<Curve>& curve);
+    void AnimateTouchAndHover(RefPtr<RenderContext>& renderContext, int32_t typeFrom, int32_t typeTo, int32_t duration,
+        const RefPtr<Curve>& curve);
     Color clickedColor_;
 
 private:

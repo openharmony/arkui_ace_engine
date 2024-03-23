@@ -46,6 +46,16 @@ RotationRecognizer::RotationRecognizer(int32_t fingers, double angle) : MultiFin
 
 void RotationRecognizer::OnAccepted()
 {
+    int64_t acceptTime = GetSysTimestamp();
+    int64_t inputTime = acceptTime;
+    if (firstInputTime_.has_value()) {
+        inputTime = static_cast<int64_t>(firstInputTime_.value().time_since_epoch().count());
+    }
+    if (SystemProperties::GetTraceInputEventEnabled()) {
+        ACE_SCOPED_TRACE("UserEvent InputTime:%lld AcceptTime:%lld InputType:RotationGesture",
+            static_cast<long long>(inputTime), static_cast<long long>(acceptTime));
+    }
+    
     auto node = GetAttachedNode().Upgrade();
     TAG_LOGI(AceLogTag::ACE_GESTURE, "Rotation gesture has been accepted, node tag = %{public}s, id = %{public}s",
         node ? node->GetTag().c_str() : "null", node ? std::to_string(node->GetId()).c_str() : "invalid");
@@ -58,10 +68,15 @@ void RotationRecognizer::OnRejected()
     if (refereeState_ != RefereeState::SUCCEED) {
         refereeState_ = RefereeState::FAIL;
     }
+    firstInputTime_.reset();
 }
 
 void RotationRecognizer::HandleTouchDownEvent(const TouchEvent& event)
 {
+    if (!firstInputTime_.has_value()) {
+        firstInputTime_ = event.time;
+    }
+
     if (static_cast<int32_t>(activeFingers_.size()) >= DEFAULT_ROTATION_FINGERS) {
         return;
     }
@@ -85,6 +100,9 @@ void RotationRecognizer::HandleTouchDownEvent(const TouchEvent& event)
 
 void RotationRecognizer::HandleTouchDownEvent(const AxisEvent& event)
 {
+    if (!firstInputTime_.has_value()) {
+        firstInputTime_ = event.time;
+    }
     if (!event.isRotationEvent) {
         return;
     }
@@ -114,6 +132,16 @@ void RotationRecognizer::HandleTouchUpEvent(const TouchEvent& event)
     if (refereeState_ == RefereeState::SUCCEED &&
         static_cast<int32_t>(activeFingers_.size()) == DEFAULT_ROTATION_FINGERS) {
         SendCallbackMsg(onActionEnd_);
+        int64_t overTime = GetSysTimestamp();
+        int64_t inputTime = overTime;
+        if (firstInputTime_.has_value()) {
+            inputTime = static_cast<int64_t>(firstInputTime_.value().time_since_epoch().count());
+        }
+        if (SystemProperties::GetTraceInputEventEnabled()) {
+            ACE_SCOPED_TRACE("UserEvent InputTime:%lld OverTime:%lld InputType:RotationGesture",
+                static_cast<long long>(inputTime), static_cast<long long>(overTime));
+        }
+        firstInputTime_.reset();
     }
     activeFingers_.remove(event.id);
 }
@@ -127,6 +155,16 @@ void RotationRecognizer::HandleTouchUpEvent(const AxisEvent& event)
     }
     if (refereeState_ == RefereeState::SUCCEED) {
         SendCallbackMsg(onActionEnd_);
+        int64_t overTime = GetSysTimestamp();
+        int64_t inputTime = overTime;
+        if (firstInputTime_.has_value()) {
+            inputTime = static_cast<int64_t>(firstInputTime_.value().time_since_epoch().count());
+        }
+        if (SystemProperties::GetTraceInputEventEnabled()) {
+            ACE_SCOPED_TRACE("UserEvent InputTime:%lld OverTime:%lld InputType:RotationGesture",
+                static_cast<long long>(inputTime), static_cast<long long>(overTime));
+        }
+        firstInputTime_.reset();
     }
 }
 

@@ -176,7 +176,7 @@ public:
 
     void SetShowLunar(bool value)
     {
-        isForceUpdate_ = true;
+        isForceUpdate_ = value != lunar_;
         lunar_ = value;
     }
 
@@ -257,23 +257,23 @@ public:
         return isShowInDialog_;
     }
 
-    uint32_t GetOptionCount(RefPtr<FrameNode>& frmeNode)
+    uint32_t GetOptionCount(RefPtr<FrameNode>& frameNode)
     {
-        return options_[frmeNode].size();
+        return options_[frameNode].size();
     }
 
-    PickerDateF GetOptionValue(RefPtr<FrameNode>& frmeNode, uint32_t index)
+    PickerDateF GetOptionValue(RefPtr<FrameNode>& frameNode, uint32_t index)
     {
-        if (index >= GetOptionCount(frmeNode)) {
+        if (index >= GetOptionCount(frameNode)) {
             LOGE("index out of range.");
             return {};
         }
-        return options_[frmeNode][index];
+        return options_[frameNode][index];
     }
 
-    const std::vector<PickerDateF>& GetAllOptions(RefPtr<FrameNode>& frmeNode)
+    const std::vector<PickerDateF>& GetAllOptions(RefPtr<FrameNode>& frameNode)
     {
-        return options_[frmeNode];
+        return options_[frameNode];
     }
 
     const std::map<WeakPtr<FrameNode>, std::vector<PickerDateF>>& GetOptions() const

@@ -43,6 +43,7 @@ public:
     static AceViewOhos* CreateView(
         int32_t instanceId, bool useCurrentEventRunner = false, bool usePlatformThread = false);
     static void SurfaceCreated(AceViewOhos* view, OHOS::sptr<OHOS::Rosen::Window> window);
+    static void ChangeViewSize(AceViewOhos* view, int32_t width, int32_t height);
     static void SurfaceChanged(AceViewOhos* view, int32_t width, int32_t height, int32_t orientation,
         WindowSizeChangeReason type = WindowSizeChangeReason::UNDEFINED,
         const std::shared_ptr<Rosen::RSTransaction>& rsTransaction = nullptr);
@@ -51,7 +52,7 @@ public:
 
     static void DispatchTouchEvent(AceViewOhos* view, const std::shared_ptr<MMI::PointerEvent>& pointerEvent,
         const RefPtr<OHOS::Ace::NG::FrameNode>& node = nullptr, const std::function<void()>& callback = nullptr);
-    static bool DispatchKeyEvent(AceViewOhos* view, const std::shared_ptr<MMI::KeyEvent>& keyEvent);
+    static bool DispatchKeyEvent(AceViewOhos* view, const std::shared_ptr<MMI::KeyEvent>& keyEvent, bool isPreIme = false);
     static bool DispatchRotationEvent(AceViewOhos* view, float rotationValue);
     static void DispatchEventToPerf(const std::shared_ptr<MMI::PointerEvent>& pointerEvent);
     static void DispatchEventToPerf(const std::shared_ptr<MMI::KeyEvent>& keyEvent);
@@ -79,7 +80,7 @@ public:
     void ProcessAxisEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent,
         const RefPtr<OHOS::Ace::NG::FrameNode>& node = nullptr);
 
-    bool ProcessKeyEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent);
+    bool ProcessKeyEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent, bool isPreIme);
 
     bool ProcessRotationEvent(float rotationValue);
 
@@ -161,6 +162,12 @@ private:
         if (viewChangeCallback_) {
             viewChangeCallback_(width, height, type, rsTransaction);
         }
+    }
+
+    void ChangeSize(int width, int height)
+    {
+        width_ = width;
+        height_ = height;
     }
 
     void NotifySurfacePositionChanged(int32_t posX, int32_t posY)

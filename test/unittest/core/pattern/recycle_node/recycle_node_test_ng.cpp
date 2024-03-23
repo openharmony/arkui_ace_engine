@@ -30,24 +30,11 @@ namespace OHOS::Ace::NG {
 class RecycleNodeTestNG : public testing::Test {};
 /**
  * @tc.name: RecycleNodeTestNg001
- * @tc.desc: create RecycleNode
- * @tc.type: FUNC
- * @tc.author:
- */
-HWTEST_F(RecycleNodeTestNG, RecycleNodeTestNg001, TestSize.Level1)
-{
-    int32_t nodeId = ElementRegister::GetInstance()->MakeUniqueId();
-    auto recycleNode = RecycleDummyNode::CreateRecycleDummyNode(nodeId);
-    EXPECT_EQ(ElementRegister::GetInstance()->GetNodeById(nodeId), recycleNode);
-}
-
-/**
- * @tc.name: RecycleNodeTestNg002
  * @tc.desc: destructor RecycleNode
  * @tc.type: FUNC
  * @tc.author:
  */
-HWTEST_F(RecycleNodeTestNG, RecycleNodeTestNG002, TestSize.Level1)
+HWTEST_F(RecycleNodeTestNG, RecycleNodeTestNG001, TestSize.Level1)
 {
     int32_t nodeId = ElementRegister::GetInstance()->MakeUniqueId();
     int32_t childNodeId = ElementRegister::GetInstance()->MakeUniqueId();

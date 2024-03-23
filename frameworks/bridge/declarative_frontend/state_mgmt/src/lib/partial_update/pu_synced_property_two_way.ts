@@ -121,7 +121,7 @@ class SynchedPropertyTwoWayPU<C> extends ObservedPropertyAbstractPU<C>
     const result = this.getUnmonitored();
     if (this.shouldInstallTrackedObjectReadCb) {
       stateMgmtConsole.propertyAccess(`${this.debugInfo()}: get: @Track optimised mode. Will install read cb func if value is an object`);
-      ObservedObject.registerPropertyReadCb(result, this.onOptimisedObjectPropertyRead.bind(this));
+      ObservedObject.registerPropertyReadCb(result, this.onOptimisedObjectPropertyRead, this);
     } else {
       stateMgmtConsole.propertyAccess(`${this.debugInfo()}: get: compatibility mode. `);
     }
@@ -146,8 +146,8 @@ class SynchedPropertyTwoWayPU<C> extends ObservedPropertyAbstractPU<C>
     let oldValue = this.getUnmonitored();
     this.setObject(newValue);
     TrackedObject.notifyObjectValueAssignment(/* old value */ oldValue, /* new value */ newValue,
-      this.notifyPropertyHasChangedPU.bind(this),
-      this.notifyTrackedObjectPropertyHasChanged.bind(this));
+      this.notifyPropertyHasChangedPU,
+      this.notifyTrackedObjectPropertyHasChanged, this);
     this.changeNotificationIsOngoing_ = false;
     stateMgmtProfiler.end();
   }

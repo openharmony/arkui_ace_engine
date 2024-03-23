@@ -102,7 +102,7 @@ int32_t ListLanesLayoutAlgorithm::LayoutALineForward(LayoutWrapper* layoutWrappe
             auto listLayoutProperty = AceType::DynamicCast<ListLayoutProperty>(layoutWrapper->GetLayoutProperty());
             SetListItemGroupParam(wrapper, currentIndex, startPos, true, listLayoutProperty, false);
             wrapper->Measure(groupLayoutConstraint_);
-        } else {
+        } else if (CheckNeedMeasure(wrapper)) {
             if (wrapper->GetHostNode()) {
                 ACE_SCOPED_TRACE("[MeasureListForwardItem:%d][self:%d][parent:%d]", currentIndex,
                     wrapper->GetHostNode()->GetId(), wrapper->GetHostNode()->GetParent() ?
@@ -162,7 +162,7 @@ int32_t ListLanesLayoutAlgorithm::LayoutALineBackward(LayoutWrapper* layoutWrapp
             auto listLayoutProperty = AceType::DynamicCast<ListLayoutProperty>(layoutWrapper->GetLayoutProperty());
             SetListItemGroupParam(wrapper, currentIndex, endPos, false, listLayoutProperty, false);
             wrapper->Measure(groupLayoutConstraint_);
-        } else {
+        } else if (CheckNeedMeasure(wrapper)) {
             if (wrapper->GetHostNode()) {
                 ACE_SCOPED_TRACE("[MeasureListBackwardItem:%d][self:%d][parent:%d]", currentIndex,
                     wrapper->GetHostNode()->GetId(), wrapper->GetHostNode()->GetParent() ?
@@ -391,8 +391,8 @@ std::list<int32_t> ListLanesLayoutAlgorithm::LayoutCachedALineForward(LayoutWrap
     int32_t cnt = 0;
     int32_t lanes = lanes_ > 1 ? lanes_ : 1;
     for (int32_t i = 0; i < lanes && index + i <= GetMaxListItemIndex(); i++) {
-        auto wrapper = layoutWrapper->GetChildByIndex(index + i);
-        if (!wrapper || wrapper->CheckNeedForceMeasureAndLayout()) {
+        auto wrapper = layoutWrapper->GetChildByIndex(index + i, true);
+        if (!wrapper || CheckNeedMeasure(wrapper)) {
             predictBuildList.emplace_back(index + i);
             continue;
         }
@@ -410,15 +410,16 @@ std::list<int32_t> ListLanesLayoutAlgorithm::LayoutCachedALineForward(LayoutWrap
     if (cnt > 0) {
         auto endPos = startPos + mainLen;
         for (int32_t i = 0; i < cnt; i++) {
-            posMap[index + i] = { startPos, endPos, isGroup };
+            posMap[index + i] = { 0, startPos, endPos, isGroup };
         }
         startPos = endPos + GetSpaceWidth();
         auto startIndex = index;
-        for (const auto& pos: posMap) {
-            auto wrapper = layoutWrapper->GetChildByIndex(pos.first);
+        for (auto& pos: posMap) {
+            auto wrapper = layoutWrapper->GetChildByIndex(pos.first, true);
             if (!wrapper) {
                 break;
             }
+            pos.second.id = wrapper->GetHostNode()->GetId();
             LayoutItem(wrapper, pos.first, pos.second, startIndex, crossSize);
             SyncGeometry(wrapper);
             wrapper->SetActive(false);
@@ -439,8 +440,8 @@ std::list<int32_t> ListLanesLayoutAlgorithm::LayoutCachedALineBackward(LayoutWra
     int32_t lanes = lanes_ > 1 ? lanes_ : 1;
     for (int32_t i = 0; i < lanes && index >= 0; i++) {
         auto idx = index - i;
-        auto wrapper = layoutWrapper->GetChildByIndex(idx);
-        if (!wrapper || wrapper->CheckNeedForceMeasureAndLayout()) {
+        auto wrapper = layoutWrapper->GetChildByIndex(idx, true);
+        if (!wrapper || CheckNeedMeasure(wrapper)) {
             predictBuildList.emplace_back(idx);
             continue;
         }
@@ -459,15 +460,16 @@ std::list<int32_t> ListLanesLayoutAlgorithm::LayoutCachedALineBackward(LayoutWra
     if (cnt > 0) {
         auto startPos = endPos - mainLen;
         for (int32_t i = 0; i < cnt; i++) {
-            posMap[index - i] = { startPos, endPos, isGroup };
+            posMap[index - i] = { 0, startPos, endPos, isGroup };
         }
         endPos = startPos - GetSpaceWidth();
         auto startIndex = index - cnt + 1;
-        for (const auto& pos: posMap) {
-            auto wrapper = layoutWrapper->GetChildByIndex(pos.first);
+        for (auto& pos: posMap) {
+            auto wrapper = layoutWrapper->GetChildByIndex(pos.first, true);
             if (!wrapper) {
                 break;
             }
+            pos.second.id = wrapper->GetHostNode()->GetId();
             LayoutItem(wrapper, pos.first, pos.second, startIndex, crossSize);
             SyncGeometry(wrapper);
             wrapper->SetActive(false);

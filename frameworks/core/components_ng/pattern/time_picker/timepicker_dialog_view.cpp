@@ -32,6 +32,7 @@ namespace {
 const int32_t MARGIN_HALF = 2;
 const int32_t BUFFER_NODE_NUMBER = 2;
 constexpr Dimension PICKER_DIALOG_MARGIN_FORM_EDGE = 24.0_vp;
+constexpr uint8_t PIXEL_ROUND = 18;
 } // namespace
 
 RefPtr<FrameNode> TimePickerDialogView::Show(const DialogProperties& dialogProperties,
@@ -95,26 +96,33 @@ RefPtr<FrameNode> TimePickerDialogView::Show(const DialogProperties& dialogPrope
     }
     if (!hasHourNode) {
         auto stackHourNode = CreateStackNode();
+        auto columnBlendNode = CreateColumnNode();
         auto buttonYearNode = CreateButtonNode();
         buttonYearNode->MountToParent(stackHourNode);
-        hourColumnNode->MountToParent(stackHourNode);
+        hourColumnNode->MountToParent(columnBlendNode);
+        columnBlendNode->MountToParent(stackHourNode);
         auto layoutProperty = stackHourNode->GetLayoutProperty<LayoutProperty>();
         layoutProperty->UpdateAlignment(Alignment::CENTER);
         layoutProperty->UpdateLayoutWeight(1);
         stackHourNode->MountToParent(timePickerNode);
+        hourColumnNode->GetLayoutProperty<LayoutProperty>()->UpdatePixelRound(PIXEL_ROUND);
     }
     if (!hasMinuteNode) {
         auto stackMinuteNode = CreateStackNode();
+        auto columnBlendNode = CreateColumnNode();
         auto buttonYearNode = CreateButtonNode();
         buttonYearNode->MountToParent(stackMinuteNode);
-        minuteColumnNode->MountToParent(stackMinuteNode);
+        minuteColumnNode->MountToParent(columnBlendNode);
+        columnBlendNode->MountToParent(stackMinuteNode);
         auto layoutProperty = stackMinuteNode->GetLayoutProperty<LayoutProperty>();
         layoutProperty->UpdateAlignment(Alignment::CENTER);
         layoutProperty->UpdateLayoutWeight(1);
         stackMinuteNode->MountToParent(timePickerNode);
+        minuteColumnNode->GetLayoutProperty<LayoutProperty>()->UpdatePixelRound(PIXEL_ROUND);
     }
-    if (timePickerProperty.find("selected") != timePickerProperty.end()) {
-        auto selectedTime = timePickerProperty["selected"];
+    auto it = timePickerProperty.find("selected");
+    if (it != timePickerProperty.end()) {
+        auto selectedTime = it->second;
         SetSelectedTime(timePickerRowPattern, selectedTime);
         SetDialogTitleDate(timePickerRowPattern, settingData.dialogTitleDate);
     }
@@ -175,6 +183,13 @@ RefPtr<FrameNode> TimePickerDialogView::CreateStackNode()
         V2::STACK_ETS_TAG, stackId, []() { return AceType::MakeRefPtr<StackPattern>(); });
 }
 
+RefPtr<FrameNode> TimePickerDialogView::CreateColumnNode()
+{
+    auto columnId = ElementRegister::GetInstance()->MakeUniqueId();
+    return FrameNode::GetOrCreateFrameNode(
+        V2::COLUMN_ETS_TAG, columnId, []() { return AceType::MakeRefPtr<LinearLayoutPattern>(true); });
+}
+
 RefPtr<FrameNode> TimePickerDialogView::CreateButtonNode()
 {
     auto buttonId = ElementRegister::GetInstance()->MakeUniqueId();
@@ -196,7 +211,7 @@ RefPtr<FrameNode> TimePickerDialogView::CreateDividerNode(const RefPtr<FrameNode
     auto dividerPaintProps = dividerNode->GetPaintProperty<DividerRenderProperty>();
     CHECK_NULL_RETURN(dividerPaintProps, nullptr);
     dividerPaintProps->UpdateDividerColor(dialogTheme->GetDividerColor());
-    
+
     auto dividerLayoutProps = dividerNode->GetLayoutProperty<DividerLayoutProperty>();
     CHECK_NULL_RETURN(dividerLayoutProps, nullptr);
     dividerLayoutProps->UpdateVertical(true);

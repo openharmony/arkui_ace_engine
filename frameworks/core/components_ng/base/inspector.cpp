@@ -27,6 +27,7 @@
 #include "core/components_ng/pattern/stage/page_pattern.h"
 #include "core/components_ng/pattern/text/span_node.h"
 #include "core/components_v2/inspector/inspector_constants.h"
+#include "core/event/touch_event.h"
 #include "core/pipeline_ng/pipeline_context.h"
 #include "frameworks/base/memory/type_info_base.h"
 
@@ -93,11 +94,12 @@ void DumpElementTree(
 
 TouchEvent GetUpPoint(const TouchEvent& downPoint)
 {
-    return { .x = downPoint.x,
-        .y = downPoint.y,
-        .type = TouchType::UP,
-        .time = std::chrono::high_resolution_clock::now(),
-        .sourceType = SourceType::TOUCH };
+    return TouchEvent {}
+        .SetX(downPoint.x)
+        .SetY(downPoint.y)
+        .SetType(TouchType::UP)
+        .SetTime(std::chrono::high_resolution_clock::now())
+        .SetSourceType(SourceType::TOUCH);
 }
 #ifdef PREVIEW
 void GetFrameNodeChildren(const RefPtr<NG::UINode>& uiNode, std::vector<RefPtr<NG::UINode>>& children, int32_t pageId)
@@ -185,12 +187,9 @@ void GetInspectorChildren(
         if (rect.IsEmpty()) {
             rect.SetRect(0, 0, 0, 0);
         }
-        auto strRec = std::to_string(rect.Left())
-                          .append(",")
-                          .append(std::to_string(rect.Top()))
-                          .append(",")
-                          .append(std::to_string(rect.Width()))
-                          .append(",")
+        auto strRec = std::to_string(rect.Left()).append(",")
+                          .append(std::to_string(rect.Top())).append(",")
+                          .append(std::to_string(rect.Width())).append(",")
                           .append(std::to_string(rect.Height()));
         jsonNode->Put(INSPECTOR_RECT, strRec.c_str());
         jsonNode->Put(INSPECTOR_DEBUGLINE, node->GetDebugLine().c_str());
@@ -203,6 +202,12 @@ void GetInspectorChildren(
     std::vector<RefPtr<NG::UINode>> children;
     for (const auto& item : parent->GetChildren()) {
         GetFrameNodeChildren(item, children, pageId);
+    }
+    if (node != nullptr) {
+        auto overlayNode = node->GetOverlayNode();
+        if (overlayNode != nullptr) {
+            GetFrameNodeChildren(overlayNode, children, pageId);
+        }
     }
     auto jsonChildrenArray = JsonUtil::CreateArray(true);
     for (auto uiNode : children) {
@@ -275,7 +280,6 @@ void GetInspectorChildren(
     jsonNode->Put(INSPECTOR_TYPE, parent->GetTag().c_str());
     jsonNode->Put(INSPECTOR_ID, parent->GetId());
     auto node = AceType::DynamicCast<FrameNode>(parent);
-    auto ctx = node->GetRenderContext();
 
     RectF rect;
     isActive = isActive && node->IsActive();
@@ -291,6 +295,10 @@ void GetInspectorChildren(
     std::vector<RefPtr<NG::UINode>> children;
     for (const auto& item : parent->GetChildren()) {
         GetFrameNodeChildren(item, children, pageId);
+    }
+    auto overlayNode = node->GetOverlayNode();
+    if (overlayNode != nullptr) {
+        GetFrameNodeChildren(overlayNode, children, pageId);
     }
     auto jsonChildrenArray = JsonUtil::CreateArray(true);
     for (auto uiNode : children) {
@@ -399,16 +407,22 @@ std::string Inspector::GetInspectorNodeByKey(const std::string& key)
 void Inspector::GetRectangleById(const std::string& key, Rectangle& rectangle)
 {
     auto frameNode = Inspector::GetFrameNodeByKey(key);
-    CHECK_NULL_VOID(frameNode);
+    if (!frameNode) {
+        TAG_LOGW(AceLogTag::DEFAULT,
+            "Can't find a component that id or key are %{public}s, Please check your parameters are correct",
+            key.c_str());
+        return;
+    }
     rectangle.size = frameNode->GetGeometryNode()->GetFrameSize();
     auto context = frameNode->GetRenderContext();
-    CHECK_NULL_VOID(context);
-    rectangle.localOffset = context->GetPaintRectWithTransform().GetOffset();
-    if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
-        rectangle.windowOffset = frameNode->GetTransformRelativeOffset();
-    } else {
-        rectangle.windowOffset = frameNode->GetOffsetRelativeToWindow();
+    if (!context) {
+        TAG_LOGW(AceLogTag::DEFAULT,
+            "Internal error! The RenderContext returned by the component(id=%{public}s) is null",
+            key.c_str());
+        return;
     }
+    rectangle.localOffset = context->GetPaintRectWithTransform().GetOffset();
+    rectangle.windowOffset = frameNode->GetOffsetRelativeToWindow();
     auto pipeline = NG::PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
     rectangle.screenRect = pipeline->GetCurrentWindowRect();
@@ -552,7 +566,6 @@ void GetSimplifiedInspectorChildren(
     auto jsonNode = JsonUtil::Create(true);
     jsonNode->Put(INSPECTOR_TYPE, parent->GetTag().c_str());
     auto node = AceType::DynamicCast<FrameNode>(parent);
-    auto ctx = node->GetRenderContext();
 
     RectF rect;
     isActive = isActive && node->IsActive();
@@ -643,12 +656,12 @@ bool Inspector::SendEventByKey(const std::string& key, int action, const std::st
             if (!context) {
                 return;
             }
-
-            TouchEvent point { .x = (rect.Left() + rect.Width() / 2),
-                .y = (rect.Top() + rect.Height() / 2),
-                .type = TouchType::DOWN,
-                .time = std::chrono::high_resolution_clock::now(),
-                .sourceType = SourceType::TOUCH };
+            TouchEvent point;
+            point.SetX(static_cast<float>(rect.Left() + rect.Width() / 2))
+                .SetY(static_cast<float>(rect.Top() + rect.Height() / 2))
+                .SetType(TouchType::DOWN)
+                .SetTime(std::chrono::high_resolution_clock::now())
+                .SetSourceType(SourceType::TOUCH);
             context->OnTouchEvent(point.UpdatePointers());
 
             switch (action) {

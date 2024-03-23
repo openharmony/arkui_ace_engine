@@ -56,7 +56,19 @@ enum class DragRet {
     ENABLE_DROP,
     DISABLE_DROP,
 };
+
+enum class PreDragStatus {
+    ACTION_DETECTING_STATUS = 0,
+    READY_TO_TRIGGER_DRAG_ACTION,
+    PREVIEW_LIFT_STARTED,
+    PREVIEW_LIFT_FINISHED,
+    PREVIEW_LANDING_STARTED,
+    PREVIEW_LANDING_FINISHED,
+    ACTION_CANCELED_BEFORE_DRAG,
+};
+
 enum class DragBehavior {
+    UNKNOWN = -1,
     COPY = 0,
     MOVE = 1,
 };
@@ -188,7 +200,17 @@ public:
         return copy_;
     }
 
-    void SetUdKey(const std::string udKey)
+    void SetDragBehavior(DragBehavior dragBehavior)
+    {
+        dragBehavior_ = dragBehavior;
+    }
+
+    DragBehavior GetDragBehavior() const
+    {
+        return dragBehavior_;
+    }
+
+    void SetUdKey(const std::string& udKey)
     {
         udKey_ = udKey;
     }
@@ -240,6 +262,7 @@ private:
     bool useCustomAnimation_ = false;
     bool isGetDataSuccess_ = false;
     bool copy_ = true;
+    DragBehavior dragBehavior_ = DragBehavior::UNKNOWN;
     RefPtr<UnifiedData> unifiedData_;
     RefPtr<UnifiedData> dragInfo_;
     Velocity velocity_;

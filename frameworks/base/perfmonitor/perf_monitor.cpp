@@ -227,7 +227,8 @@ bool SceneRecord::IsFirstFrame()
 
 bool SceneRecord::IsDisplayAnimator(const std::string& sceneId)
 {
-    if (sceneId == PerfConstants::APP_LIST_FLING || sceneId == PerfConstants::APP_SWIPER_SCROLL) {
+    if (sceneId == PerfConstants::APP_LIST_FLING || sceneId == PerfConstants::APP_SWIPER_SCROLL
+        || sceneId == PerfConstants::SNAP_RECENT_ANI) {
         return true;
     }
     return false;
@@ -374,8 +375,9 @@ void PerfMonitor::RecordBaseInfo(SceneRecord* record)
 
 SceneRecord* PerfMonitor::GetRecord(const std::string& sceneId)
 {
-    if (mRecords.find(sceneId) != mRecords.end()) {
-        return mRecords[sceneId];
+    auto iter = mRecords.find(sceneId);
+    if (iter != mRecords.end()) {
+        return iter->second;
     }
     return nullptr;
 }
@@ -484,7 +486,9 @@ bool PerfMonitor::IsExceptResponseTime(int64_t time, const std::string& sceneId)
 {
     if ((sceneId == PerfConstants::ABILITY_OR_PAGE_SWITCH
         && GetCurrentRealTimeNs() - time > RESPONSE_TIMEOUT)
-        || sceneId == PerfConstants::VOLUME_BAR_SHOW) {
+        || sceneId == PerfConstants::VOLUME_BAR_SHOW
+        || sceneId == PerfConstants::APP_TRANSITION_TO_OTHER_APP
+        || sceneId == PerfConstants::APP_TRANSITION_FROM_OTHER_APP) {
         return true;
     }
     if (sceneId == PerfConstants::PC_APP_CENTER_GESTURE_OPERATION ||

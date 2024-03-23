@@ -99,7 +99,7 @@ HWTEST_F(CustomPaintPatternTestNg, CustomPaintPatternTestNg001, TestSize.Level1)
      */
     auto customPattern = CreateCustomPaintPattern();
     ASSERT_NE(customPattern, nullptr);
-    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     ASSERT_NE(frameNode, nullptr);
     auto eventHub = frameNode->GetEventHub<CustomPaintEventHub>();
     ASSERT_NE(eventHub, nullptr);
@@ -138,7 +138,7 @@ HWTEST_F(CustomPaintPatternTestNg, CustomPaintPatternTestNg002, TestSize.Level1)
      */
     auto customPattern = CreateCustomPaintPattern();
     ASSERT_NE(customPattern, nullptr);
-    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    auto frameNode = AceType::Claim(ViewStackProcessor::GetInstance()->GetMainFrameNode());
     ASSERT_NE(frameNode, nullptr);
     RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
     ASSERT_NE(geometryNode, nullptr);
@@ -182,7 +182,7 @@ HWTEST_F(CustomPaintPatternTestNg, CustomPaintPatternTestNg003, TestSize.Level1)
     ASSERT_NE(customPattern, nullptr);
     auto paintMethod = AceType::DynamicCast<CanvasPaintMethod>(customPattern->CreateNodePaintMethod());
     ASSERT_NE(paintMethod, nullptr);
-    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    auto frameNode = AceType::Claim(ViewStackProcessor::GetInstance()->GetMainFrameNode());
     ASSERT_NE(frameNode, nullptr);
     RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
     ASSERT_NE(geometryNode, nullptr);
@@ -803,7 +803,7 @@ HWTEST_F(CustomPaintPatternTestNg, CustomPaintPatternTestNg017, TestSize.Level1)
      */
     auto customPattern = CreateCustomPaintPattern();
     ASSERT_NE(customPattern, nullptr);
-    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    auto frameNode = AceType::Claim(ViewStackProcessor::GetInstance()->GetMainFrameNode());
     ASSERT_NE(frameNode, nullptr);
     RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
     ASSERT_NE(geometryNode, nullptr);
@@ -828,6 +828,32 @@ HWTEST_F(CustomPaintPatternTestNg, CustomPaintPatternTestNg017, TestSize.Level1)
 
     config.frameOffsetChange = false;
     EXPECT_FALSE(customPattern->OnDirtyLayoutWrapperSwap(dirty, config));
+}
+
+/**
+ * @tc.name: CustomPaintPatternTestNg018
+ * @tc.desc: Test functions about EnableAnalyzer.
+ * @tc.type: FUNC
+ */
+HWTEST_F(CustomPaintPatternTestNg, CustomPaintPatternTestNg018, TestSize.Level1)
+{
+    /**
+     * @tc.steps1: initialize parameters.
+     * @tc.expected: All pointer is non-null.
+     */
+    auto customPattern = CreateCustomPaintPattern();
+    ASSERT_NE(customPattern, nullptr);
+
+    /**
+     * @tc.steps2: Test functions about EnableAnalyzer.
+     * @tc.expected: The result.
+     */
+    customPattern->EnableAnalyzer(true)
+    EXPECT_TRUE(customPattern->IsSupportImageAnalyzerFeature());
+
+    customPattern->EnableAnalyzer(false)
+    EXPECT_FALSE(customPattern->IsSupportImageAnalyzerFeature());
+
 }
 
 } // namespace OHOS::Ace::NG

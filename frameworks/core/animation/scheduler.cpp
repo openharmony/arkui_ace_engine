@@ -36,7 +36,6 @@ void Scheduler::Start()
     startupTimestamp_ = context->GetTimeFromExternalTimer();
     scheduleId_ = static_cast<int32_t>(context->AddScheduleTask(AceType::Claim(this)));
 
-    displaySync_ = AceType::MakeRefPtr<UIDisplaySync>();
     displaySync_->RegisterOnFrameWithTimestamp([weak = WeakClaim(this)] (uint64_t nanoTimestamp) {
         auto scheduler = weak.Upgrade();
         CHECK_NULL_VOID(scheduler);
@@ -59,6 +58,11 @@ void Scheduler::Stop()
     context->RemoveScheduleTask(scheduleId_);
     displaySync_->DelFromPipeline(context_);
     scheduleId_ = 0;
+}
+
+void Scheduler::SetExpectedFrameRateRange(const FrameRateRange& frameRateRange)
+{
+    displaySync_->SetExpectedFrameRateRange(frameRateRange);
 }
 
 void Scheduler::OnFrame(uint64_t nanoTimestamp)

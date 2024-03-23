@@ -83,6 +83,10 @@ void JSTextArea::JSBind(BindingTarget globalObj)
     JSClass<JSTextArea>::StaticMethod("onSubmit", &JSTextField::SetOnSubmit);
     JSClass<JSTextArea>::StaticMethod("enterKeyType", &JSTextField::SetEnterKeyType);
     JSClass<JSTextArea>::StaticMethod("type", &JSTextField::SetType);
+    JSClass<JSTextArea>::StaticMethod("decoration", &JSTextField::SetDecoration);
+    JSClass<JSTextArea>::StaticMethod("letterSpacing", &JSTextField::SetLetterSpacing);
+    JSClass<JSTextArea>::StaticMethod("lineHeight", &JSTextField::SetLineHeight);
+    JSClass<JSTextArea>::StaticMethod("wordBreak", &JSTextField::SetWordBreak);
     JSClass<JSTextArea>::InheritAndBind<JSViewAbstract>(globalObj);
 }
 

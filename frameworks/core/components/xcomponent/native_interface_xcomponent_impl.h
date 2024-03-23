@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -21,10 +21,15 @@
 #include <unistd.h>
 #include <vector>
 
+#include "interfaces/native/native_event.h"
 #include "interfaces/native/native_interface_xcomponent.h"
+#include "interfaces/native/ui_input_event.h"
 
 #include "base/memory/ace_type.h"
 #include "base/utils/utils.h"
+#include "core/components_ng/event/gesture_event_hub.h"
+
+using NativeXComponent_Surface_Callback = void (*)(OH_NativeXComponent*, void*);
 
 struct XComponentTouchPoint {
     float tiltX = 0.0f;
@@ -42,11 +47,15 @@ struct OH_NativeXComponent_KeyEvent {
     int64_t timestamp {};
 };
 
+using OnTouchIntercept_Callback = HitTestMode (*)(OH_NativeXComponent*, ArkUI_UIInputEvent*);
+
 namespace OHOS::Ace {
 class NativeXComponentImpl : public virtual AceType {
     DECLARE_ACE_TYPE(NativeXComponentImpl, AceType);
     using NativeXComponent_Callback = void (*)(OH_NativeXComponent*, void*);
-    using SetExpectedRateRangeEvent_Callback  = std::function<void()>;
+    using NativeXComponent_UIEventCallback = void (*)(
+        OH_NativeXComponent*, ArkUI_UIInputEvent*, ArkUI_UIInputEvent_Type);
+    using SetExpectedRateRangeEvent_Callback = std::function<void()>;
     using SetOnFrameEvent_Callback = std::function<void()>;
     using SetUnregisterOnFrameEvent_Callback = std::function<void()>;
     using OnFrame_Callback = void (*)(OH_NativeXComponent*, uint64_t, uint64_t);
@@ -135,6 +144,26 @@ public:
     const OH_NativeXComponent_MouseEvent_Callback* GetMouseEventCallback()
     {
         return mouseEventCallback_;
+    }
+
+    NativeXComponent_Surface_Callback GetSurfaceShowCallback() const
+    {
+        return surfaceShowCallback_;
+    }
+
+    void SetSurfaceShowCallback(NativeXComponent_Surface_Callback callback)
+    {
+        surfaceShowCallback_ = callback;
+    }
+
+    NativeXComponent_Surface_Callback GetSurfaceHideCallback() const
+    {
+        return surfaceHideCallback_;
+    }
+
+    void SetSurfaceHideCallback(NativeXComponent_Surface_Callback callback)
+    {
+        surfaceHideCallback_ = callback;
     }
 
     void SetTouchEvent(const OH_NativeXComponent_TouchEvent touchEvent)
@@ -236,6 +265,16 @@ public:
         return blurEventCallback_;
     }
 
+    void SetOnTouchInterceptCallback(OnTouchIntercept_Callback callback)
+    {
+        onTouchInterceptCallback_ = callback;
+    }
+
+    OnTouchIntercept_Callback GetOnTouchInterceptCallback()
+    {
+        return onTouchInterceptCallback_;
+    }
+
     void SetFocusEventCallback(NativeXComponent_Callback callback)
     {
         focusEventCallback_ = callback;
@@ -249,6 +288,16 @@ public:
     void SetBlurEventCallback(NativeXComponent_Callback callback)
     {
         blurEventCallback_ = callback;
+    }
+
+    void SetUIAxisEventCallback(NativeXComponent_UIEventCallback callback)
+    {
+        uiAxisEventCallback_ = callback;
+    }
+
+    NativeXComponent_UIEventCallback GetUIAxisEventCallback() const
+    {
+        return uiAxisEventCallback_;
     }
 
     void SetOnFrameCallback(OnFrame_Callback callback)
@@ -315,6 +364,30 @@ public:
         detachNativeNodeCallback_(container_, root);
     }
 
+    void SetNeedSoftKeyboard(bool needSoftKeyboard)
+    {
+        needSoftKeyboard_ = needSoftKeyboard;
+    }
+
+    bool IsNeedSoftKeyboard() const
+    {
+        return needSoftKeyboard_;
+    }
+
+    void SetCurrentSourceType(std::pair<int32_t, OH_NativeXComponent_EventSourceType>&& curSourceType)
+    {
+        curSourceType_ = std::move(curSourceType);
+    }
+
+    bool GetSourceType(int32_t pointId, OH_NativeXComponent_EventSourceType* sourceType) const
+    {
+        if (curSourceType_.first != pointId) {
+            return false;
+        }
+        (*sourceType) = curSourceType_.second;
+        return true;
+    }
+
 private:
     std::string xcomponentId_;
     void* window_ = nullptr;
@@ -327,16 +400,23 @@ private:
     OH_NativeXComponent_KeyEvent keyEvent_;
     OH_NativeXComponent_Callback* callback_ = nullptr;
     OH_NativeXComponent_MouseEvent_Callback* mouseEventCallback_ = nullptr;
+    NativeXComponent_Surface_Callback surfaceShowCallback_ = nullptr;
+    NativeXComponent_Surface_Callback surfaceHideCallback_ = nullptr;
     NativeXComponent_Callback focusEventCallback_ = nullptr;
     NativeXComponent_Callback keyEventCallback_ = nullptr;
     NativeXComponent_Callback blurEventCallback_ = nullptr;
+    NativeXComponent_UIEventCallback uiAxisEventCallback_ = nullptr;
     std::vector<XComponentTouchPoint> touchPoints_;
     std::vector<OH_NativeXComponent_HistoricalPoint> historicalPoints_;
     OnFrame_Callback onFrameCallback_ = nullptr;
     OH_NativeXComponent_ExpectedRateRange* rateRange_ = nullptr;
     NativeNode_Callback attachNativeNodeCallback_ = nullptr;
     NativeNode_Callback detachNativeNodeCallback_ = nullptr;
+    OnTouchIntercept_Callback onTouchInterceptCallback_ = nullptr;
     void* container_;
+    bool needSoftKeyboard_ = false;
+    std::pair<int32_t, OH_NativeXComponent_EventSourceType> curSourceType_ { -1,
+        OH_NativeXComponent_EventSourceType::OH_NATIVEXCOMPONENT_SOURCE_TYPE_UNKNOWN };
 };
 } // namespace OHOS::Ace
 
@@ -352,6 +432,8 @@ struct OH_NativeXComponent {
     int32_t GetHistoryPoints(const void* window, int32_t* size, OH_NativeXComponent_HistoricalPoint** historicalPoints);
     int32_t RegisterCallback(OH_NativeXComponent_Callback* callback);
     int32_t RegisterMouseEventCallback(OH_NativeXComponent_MouseEvent_Callback* callback);
+    int32_t RegisterSurfaceShowCallback(NativeXComponent_Surface_Callback callback);
+    int32_t RegisterSurfaceHideCallback(NativeXComponent_Surface_Callback callback);
     int32_t GetToolType(size_t pointIndex, OH_NativeXComponent_TouchPointToolType* toolType);
     int32_t GetTiltX(size_t pointIndex, float* tiltX);
     int32_t GetTiltY(size_t pointIndex, float* tiltY);
@@ -365,6 +447,12 @@ struct OH_NativeXComponent {
     int32_t UnregisterOnFrameCallback();
     int32_t AttachNativeRootNode(void* root);
     int32_t DetachNativeRootNode(void* root);
+    int32_t RegisterUIAxisEventCallback(
+        void (*callback)(OH_NativeXComponent* component, ArkUI_UIInputEvent* event, ArkUI_UIInputEvent_Type type));
+    int32_t SetNeedSoftKeyboard(bool needSoftKeyboard);
+    int32_t RegisterOnTouchInterceptCallback(
+        HitTestMode (*callback)(OH_NativeXComponent* component, ArkUI_UIInputEvent* event));
+    int32_t GetSourceType(int32_t pointId, OH_NativeXComponent_EventSourceType* sourceType);
 
 private:
     OHOS::Ace::NativeXComponentImpl* xcomponentImpl_ = nullptr;

@@ -76,7 +76,7 @@ public:
     }
 
     static std::unique_ptr<ImageSource> CreateImageSource(
-        const std::string path, const SourceOptions& opts, uint32_t& errorCode)
+        const std::string& path, const SourceOptions& opts, uint32_t& errorCode)
     {
         return nullptr;
     }

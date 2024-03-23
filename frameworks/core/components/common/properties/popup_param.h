@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -25,6 +25,7 @@
 #include "core/components/common/properties/decoration.h"
 #include "core/components/common/properties/edge.h"
 #include "core/components/common/properties/placement.h"
+#include "core/components_ng/property/transition_property.h"
 #include "core/event/ace_event_handler.h"
 #include "core/event/touch_event.h"
 
@@ -40,7 +41,7 @@ struct ButtonProperties {
 };
 
 using StateChangeFunc = std::function<void(const std::string&)>;
-
+using OnWillDismiss = std::function<void(int32_t)>;
 class PopupParam : public AceType {
     DECLARE_ACE_TYPE(PopupParam, AceType)
 
@@ -430,6 +431,45 @@ public:
         return blurStyle_;
     }
 
+    void SetInteractiveDismiss(bool interactiveDismiss)
+    {
+        interactiveDismiss_ = interactiveDismiss;
+    }
+
+    bool GetInteractiveDismiss() const
+    {
+        return interactiveDismiss_;
+    }
+
+    void SetOnWillDismiss(const OnWillDismiss&& onWillDismiss)
+    {
+        onWillDismiss_ = std::move(onWillDismiss);
+    }
+
+    OnWillDismiss GetOnWillDismiss() const
+    {
+        return onWillDismiss_;
+    }
+    void SetHasTransition(bool hasTransition)
+    {
+        hasTransition_ = hasTransition;
+    }
+
+    bool GetHasTransition() const
+    {
+        return hasTransition_;
+    }
+
+    void SetTransitionEffects(const RefPtr<NG::ChainedTransitionEffect>& transitionEffects)
+    {
+        transitionEffects_ = transitionEffects;
+    }
+
+    const RefPtr<NG::ChainedTransitionEffect> GetTransitionEffects() const
+    {
+        return transitionEffects_;
+    }
+
 private:
     bool isShow_ = true;
     bool hasAction_ = false;
@@ -443,6 +483,7 @@ private:
     bool setErrorArrowHeight_ = false;
     bool setErrorRadius_ = false;
     bool focusable_ = false;
+    bool interactiveDismiss_ = true;
     Color maskColor_;
     Color backgroundColor_;
     Placement placement_ = Placement::BOTTOM;
@@ -472,6 +513,9 @@ private:
     StateChangeFunc onStateChange_;
     ButtonProperties primaryButtonProperties_;   // first button.
     ButtonProperties secondaryButtonProperties_; // second button.
+    OnWillDismiss onWillDismiss_;
+    bool hasTransition_ = false;
+    RefPtr<NG::ChainedTransitionEffect> transitionEffects_ = nullptr;
 };
 
 } // namespace OHOS::Ace

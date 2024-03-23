@@ -145,7 +145,7 @@ void CheckBoxPattern::OnAfterModifyDone()
     }
     auto eventHub = host->GetEventHub<CheckBoxEventHub>();
     CHECK_NULL_VOID(eventHub);
-    Recorder::NodeDataCache::Get().PutMultiple(inspectorId, eventHub->GetName(), lastSelect_);
+    Recorder::NodeDataCache::Get().PutMultiple(host, inspectorId, eventHub->GetName(), lastSelect_);
 }
 
 void CheckBoxPattern::InitClickEvent()
@@ -214,6 +214,7 @@ void CheckBoxPattern::InitMouseEvent()
 
 void CheckBoxPattern::HandleMouseEvent(bool isHover)
 {
+    TAG_LOGD(AceLogTag::ACE_SELECT_COMPONENT, "checkbox on hover %{public}d", isHover);
     isHover_ = isHover;
     if (isHover) {
         touchHoverType_ = TouchHoverAnimationType::HOVER;
@@ -227,6 +228,7 @@ void CheckBoxPattern::HandleMouseEvent(bool isHover)
 
 void CheckBoxPattern::OnClick()
 {
+    TAG_LOGD(AceLogTag::ACE_SELECT_COMPONENT, "checkbox onclick");
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto paintProperty = host->GetPaintProperty<CheckBoxPaintProperty>();
@@ -243,6 +245,7 @@ void CheckBoxPattern::OnClick()
 
 void CheckBoxPattern::OnTouchDown()
 {
+    TAG_LOGD(AceLogTag::ACE_SELECT_COMPONENT, "checkbox touch down %{public}d", isHover_);
     if (isHover_) {
         touchHoverType_ = TouchHoverAnimationType::HOVER_TO_PRESS;
     } else {
@@ -256,6 +259,7 @@ void CheckBoxPattern::OnTouchDown()
 
 void CheckBoxPattern::OnTouchUp()
 {
+    TAG_LOGD(AceLogTag::ACE_SELECT_COMPONENT, "checkbox touch up %{public}d", isHover_);
     if (isHover_) {
         touchHoverType_ = TouchHoverAnimationType::PRESS_TO_HOVER;
     } else {
@@ -281,6 +285,7 @@ void CheckBoxPattern::UpdateUnSelect()
 
 void CheckBoxPattern::UpdateUIStatus(bool check)
 {
+    TAG_LOGD(AceLogTag::ACE_SELECT_COMPONENT, "checkbox update ui status %{public}d", check);
     uiStatus_ = check ? UIStatus::OFF_TO_ON : UIStatus::ON_TO_OFF;
     auto host = GetHost();
     CHECK_NULL_VOID(host);
@@ -380,6 +385,7 @@ void CheckBoxPattern::UpdateState()
             SetLastSelect(isSelected);
             auto checkboxEventHub = GetEventHub<CheckBoxEventHub>();
             CHECK_NULL_VOID(checkboxEventHub);
+            TAG_LOGD(AceLogTag::ACE_SELECT_COMPONENT, "checkbox update change event %{public}d", isSelected);
             checkboxEventHub->UpdateChangeEvent(isSelected);
         }
     }
@@ -430,6 +436,12 @@ void CheckBoxPattern::UpdateCheckBoxGroupStatus(const RefPtr<FrameNode>& checkBo
             vec.push_back(eventHub->GetName());
         }
     }
+    NotifyCheckboxGroupStatusChange(checkBoxGroupNode, vec, isSameAsSelf, select);
+}
+
+void CheckBoxPattern::NotifyCheckboxGroupStatusChange(
+    const RefPtr<FrameNode>& checkBoxGroupNode, std::vector<std::string> vec, bool isSameAsSelf, bool select)
+{
     CHECK_NULL_VOID(checkBoxGroupNode);
     auto groupPaintProperty = checkBoxGroupNode->GetPaintProperty<CheckBoxGroupPaintProperty>();
     CHECK_NULL_VOID(groupPaintProperty);
@@ -462,6 +474,7 @@ void CheckBoxPattern::UpdateCheckBoxGroupStatus(const RefPtr<FrameNode>& checkBo
     CheckboxGroupResult groupResult(vec, int(status));
     auto eventHub = checkBoxGroupNode->GetEventHub<CheckBoxGroupEventHub>();
     CHECK_NULL_VOID(eventHub);
+    TAG_LOGD(AceLogTag::ACE_SELECT_COMPONENT, "update checkboxgroup result %d", groupResult.GetStatus());
     eventHub->UpdateChangeEvent(&groupResult);
 }
 
@@ -523,6 +536,7 @@ void CheckBoxPattern::UpdateCheckBoxGroupStatusWhenDetach(const FrameNode* check
     CheckboxGroupResult groupResult(vec, int(status));
     auto eventHub = checkBoxGroupNode->GetEventHub<CheckBoxGroupEventHub>();
     CHECK_NULL_VOID(eventHub);
+    TAG_LOGD(AceLogTag::ACE_SELECT_COMPONENT, "update checkboxgroup result %d", groupResult.GetStatus());
     eventHub->UpdateChangeEvent(&groupResult);
 }
 

@@ -68,7 +68,9 @@ public:
 
     void OnDataReloaded() override;
     void OnDataAdded(size_t index) override;
+    void OnDataBulkAdded(size_t index, size_t count) override;
     void OnDataDeleted(size_t index) override;
+    void OnDataBulkDeleted(size_t index, size_t count) override;
     void OnDataChanged(size_t index) override;
     void OnDataMoved(size_t from, size_t to) override;
 
@@ -102,7 +104,7 @@ public:
     void MarkNeedSyncRenderTree(bool needRebuild = false) override;
 
     void BuildAllChildren();
-    RefPtr<UINode> GetFrameChildByIndex(uint32_t index, bool needBuild) override;
+    RefPtr<UINode> GetFrameChildByIndex(uint32_t index, bool needBuild, bool isCache = false) override;
     void DoRemoveChildInRenderTree(uint32_t index, bool isAll) override;
     void DoSetActiveChildRange(int32_t start, int32_t end) override;
 
@@ -121,8 +123,19 @@ public:
             isActive_ = active;
         }
     }
-
+    void PaintDebugBoundaryTreeAll(bool flag) override
+    {
+        if (builder_) {
+            builder_->PaintDebugBoundaryTreeAll(flag);
+        }
+    }
     int32_t GetIndexByUINode(const RefPtr<UINode>& uiNode) const;
+    void SetNodeIndexOffset(int32_t start, int32_t count) override
+    {
+        startIndex_ = start;
+        count_ = count;
+    }
+    void RecycleItems(int32_t from, int32_t to);
 
 private:
     void OnAttachToMainTree(bool recursive) override
@@ -167,6 +180,8 @@ private:
     mutable bool needPredict_ = false;
     bool needMarkParent_ = true;
     bool isActive_ = true;
+    int32_t startIndex_ = 0;
+    int32_t count_ = 0;
 
     RefPtr<LazyForEachBuilder> builder_;
 

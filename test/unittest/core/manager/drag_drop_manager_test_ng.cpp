@@ -1596,41 +1596,6 @@ HWTEST_F(DragDropManagerTestNg, DragDropManagerTest035, TestSize.Level1)
 }
 
 /**
- * @tc.name: DragDropManagerTest036
- * @tc.desc: Test FireOnDragEvent is empty branchsPoint.
- * @tc.type: FUNC
- * @tc.author:
- */
-HWTEST_F(DragDropManagerTestNg, DragDropManagerTest036, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. construct a DragDropManager.
-     * @tc.expected: dragDropManager is not null.
-     */
-    auto dragDropManager = AceType::MakeRefPtr<DragDropManager>();
-    ASSERT_NE(dragDropManager, nullptr);
-
-    /**
-     * @tc.steps: step2. call FireOnDragEvent with DragEventType::ENTER and frameNode.
-     * @tc.expected: step2. FireOnItemDropEvent.
-     */
-    Point point;
-    std::string extraInfo;
-    dragDropManager->extraInfo_ = EXTRA_INFO;
-    RefPtr<FrameNode> frameNode = AceType::MakeRefPtr<FrameNode>(NODE_TAG, -1, AceType::MakeRefPtr<Pattern>());
-    dragDropManager->FireOnDragEvent(frameNode, point, DragEventType::ENTER, extraInfo);
-    EXPECT_TRUE(extraInfo.empty());
-
-    /**
-     * @tc.steps: step3. call FireOnDragEvent with DragEventType::ENTER and frameNode.
-     * @tc.expected: step3. frameNode->GetEventHub<EventHub>() returns.
-     */
-    frameNode->eventHub_ = nullptr;
-    dragDropManager->FireOnDragEvent(frameNode, point, DragEventType::ENTER, extraInfo);
-    EXPECT_FALSE(frameNode->GetEventHub<EventHub>());
-}
-
-/**
  * @tc.name: DragDropManagerTest037
  * @tc.desc: Test GetItemIndex out of eventHub->CheckPostionInGrid is a true branch.
  * @tc.type: FUNC
@@ -3371,28 +3336,28 @@ HWTEST_F(DragDropManagerTestNg, DragDropManagerTest049, TestSize.Level1)
     frameNode->SetAllowDrop(allowDrop);
 
      /**
-     * @tc.steps: step3. call UpdateDragAllowDrop with frameNode and true.
+     * @tc.steps: step3. call UpdateDragAllowDrop with frameNode and copy.
      * @tc.expected: dragDropManager->summaryMap_.empty() return a true value.
      */
     dragDropManager->summaryMap_.clear();
-    dragDropManager->UpdateDragAllowDrop(frameNode, true);
+    dragDropManager->UpdateDragAllowDrop(frameNode, DragBehavior::COPY);
     EXPECT_TRUE(dragDropManager->summaryMap_.empty());
 
     /**
-     * @tc.steps: step4. call UpdateDragAllowDrop with frameNode and true.
+     * @tc.steps: step4. call UpdateDragAllowDrop with frameNode and copy.
      * @tc.expected: dragDropManager->summaryMap_.empty() return a false value.
      */
     dragDropManager->summaryMap_.insert(make_pair(NODE_TAG, frameNodeNullId));
-    dragDropManager->UpdateDragAllowDrop(frameNode, true);
+    dragDropManager->UpdateDragAllowDrop(frameNode, DragBehavior::COPY);
     EXPECT_FALSE(dragDropManager->summaryMap_.empty());
 
     /**
-     * @tc.steps: step5. call UpdateDragAllowDrop with frameNode and true.
+     * @tc.steps: step5. call UpdateDragAllowDrop with frameNode and copy.
      * @tc.expected: allowDrop.find(ROOT_ETS_TAG) is equal to allowDrop.end().
      */
     dragDropManager->summaryMap_.clear();
     dragDropManager->summaryMap_.insert(make_pair(ROOT_ETS_TAG, frameNodeNullId));
-    dragDropManager->UpdateDragAllowDrop(frameNode, true);
+    dragDropManager->UpdateDragAllowDrop(frameNode, DragBehavior::COPY);
     EXPECT_TRUE(allowDrop.find(ROOT_ETS_TAG) == allowDrop.end());
 }
 

@@ -22,12 +22,17 @@ namespace OHOS::Ace::Framework {
 
 class JSRefresh : public JSContainerBase {
 public:
-    static void ParseCustomBuilder(const JSCallbackInfo& info);
+    static bool ParseCustomBuilder(const JSCallbackInfo& info);
     static void Create(const JSCallbackInfo& info);
     static void JSBind(BindingTarget globalObj);
     static void OnStateChange(const JSCallbackInfo& args);
     static void OnRefreshing(const JSCallbackInfo& args);
     static void ParsFrictionData(const JsiRef<JsiValue>& value);
+
+private:
+    static void JsRefreshOffset(const JSCallbackInfo& info);
+    static void JsRefreshOffset(const JSRef<JSVal>& jsValue);
+    static void SetPullToRefresh(bool value);
 };
 
 } // namespace OHOS::Ace::Framework

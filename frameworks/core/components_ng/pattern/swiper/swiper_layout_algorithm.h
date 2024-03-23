@@ -31,7 +31,9 @@ struct SwiperItemInfo {
     float startPos = 0.0f;
     float endPos = 0.0f;
     RefPtr<FrameNode> node;
-    OffsetF finialOffset;
+    OffsetF finalOffset;
+    CancelableCallback<void()> task;
+    bool isFinishAnimation = false;
 };
 
 class ACE_EXPORT SwiperLayoutAlgorithm : public LayoutAlgorithm {
@@ -241,10 +243,42 @@ public:
         placeItemWidth_ = placeItemWidth;
     }
 
+    void SetHasCachedCapture(bool hasCachedCapture)
+    {
+        hasCachedCapture_ = hasCachedCapture;
+    }
+
+    void SetIsCaptureReverse(bool isCaptureReverse)
+    {
+        isCaptureReverse_ = isCaptureReverse;
+    }
+
+    bool GetIsCaptureReverse() const
+    {
+        return isCaptureReverse_;
+    }
+
+    bool GetIsNeedUpdateCapture() const
+    {
+        return isNeedUpdateCapture_;
+    }
+
+    void SetItemsPositionInAnimation(const PositionMap& itemPositionInAnimation)
+    {
+        itemPositionInAnimation_ = itemPositionInAnimation;
+    }
+
+    PositionMap&& GetItemsPositionInAnimation()
+    {
+        return std::move(itemPositionInAnimation_);
+    }
+
 private:
     void MeasureSwiper(LayoutWrapper* layoutWrapper, const LayoutConstraintF& layoutConstraint, Axis axis);
-    void MeasureCustomAnimation(LayoutWrapper* layoutWrapper);
+    void MeasureTabsCustomAnimation(LayoutWrapper* layoutWrapper);
+    void MeasureSwiperCustomAnimation(LayoutWrapper* layoutWrapper, const LayoutConstraintF& layoutConstraint);
     void LayoutCustomAnimation(LayoutWrapper* layoutWrapper) const;
+    void LayoutItem(LayoutWrapper* layoutWrapper, Axis axis, OffsetF offset, std::pair<int32_t, SwiperItemInfo> pos);
     void SetInactive(
         LayoutWrapper* layoutWrapper, float startMainPos, float endMainPos, std::optional<int32_t> targetIndex);
 
@@ -262,6 +296,9 @@ private:
     bool HasCustomIndicatorOffset(const RefPtr<LayoutWrapper>& indicatorWrapper);
     const OffsetF CalculateCustomOffset(
         const RefPtr<LayoutWrapper>& indicatorWrapper, const OffsetF& currentOffset);
+    void CaptureMeasure(LayoutWrapper* layoutWrapper, LayoutConstraintF& childLayoutConstraint);
+    void CaptureLayout(LayoutWrapper* layoutWrapper);
+    bool IsNormalItem(const RefPtr<LayoutWrapper>& wrapper) const;
 
     bool isLoop_ = true;
     float prevMargin_ = 0.0f;
@@ -269,6 +306,7 @@ private:
 
     PositionMap itemPosition_;
     PositionMap prevItemPosition_;
+    PositionMap itemPositionInAnimation_;
     float currentOffset_ = 0.0f;
     float currentDelta_ = 0.0f;
     float startMainPos_ = 0.0f;
@@ -304,6 +342,9 @@ private:
     int32_t realTotalCount_ = 0;
     std::optional<float> placeItemWidth_;
     bool useCustomIndicatorOffset = false;
+    bool hasCachedCapture_ = false;
+    bool isCaptureReverse_ = false;
+    bool isNeedUpdateCapture_ = false;
 };
 
 } // namespace OHOS::Ace::NG

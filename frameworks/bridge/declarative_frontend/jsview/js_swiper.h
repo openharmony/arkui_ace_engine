@@ -64,6 +64,8 @@ protected:
     static void SetIsIndicatorCustomSize(const Dimension& dimPosition, bool parseOk);
     static bool GetArrowInfo(const JSRef<JSObject>& obj, SwiperArrowParameters& swiperArrowParameters);
     static void SetNestedScroll(const JSCallbackInfo& info);
+    static void SetCustomContentTransition(const JSCallbackInfo& info);
+    static void SetOnContentDidScroll(const JSCallbackInfo& info);
 };
 
 class JSSwiperController final : public Referenced {
@@ -103,7 +105,10 @@ public:
         }
     }
 
+    void ChangeIndex(const JSCallbackInfo& args);
+
     void FinishAnimation(const JSCallbackInfo& args);
+    void PreloadItems(const JSCallbackInfo& args);
 
     void SetController(const RefPtr<SwiperController>& controller)
     {

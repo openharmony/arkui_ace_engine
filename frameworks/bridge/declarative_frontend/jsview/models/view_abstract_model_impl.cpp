@@ -561,7 +561,7 @@ void ViewAbstractModelImpl::SetLayoutPriority(int32_t priority)
 
 void ViewAbstractModelImpl::SetPixelRound(uint8_t value) {}
 
-void ViewAbstractModelImpl::SetLayoutWeight(int32_t value)
+void ViewAbstractModelImpl::SetLayoutWeight(float value)
 {
     auto flex = ViewStackProcessor::GetInstance()->GetFlexItemComponent();
     flex->SetFlexWeight(value);
@@ -1178,6 +1178,12 @@ void ViewAbstractModelImpl::SetOnDragStart(NG::OnDragStartFunc&& onDragStart)
 {
     auto box = ViewStackProcessor::GetInstance()->GetBoxComponent();
     box->SetOnDragStartId(ToDragFunc(std::move(onDragStart)));
+}
+
+void ViewAbstractModelImpl::SetOnPreDrag(NG::OnPreDragFunc&& onPreDrag)
+{
+    auto box = ViewStackProcessor::GetInstance()->GetBoxComponent();
+    box->SetOnPreDragId(onPreDrag);
 }
 
 void ViewAbstractModelImpl::SetOnDragEnter(NG::OnDragDropFunc&& onDragEnter)

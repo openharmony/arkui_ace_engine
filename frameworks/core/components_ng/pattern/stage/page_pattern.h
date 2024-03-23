@@ -44,8 +44,8 @@ enum class RouterPageState {
 };
 
 // PagePattern is the base class for page root render node.
-class ACE_EXPORT PagePattern : public ContentRootPattern {
-    DECLARE_ACE_TYPE(PagePattern, ContentRootPattern);
+class ACE_EXPORT PagePattern : public ContentRootPattern, public FocusView {
+    DECLARE_ACE_TYPE(PagePattern, ContentRootPattern, FocusView);
 
 public:
     explicit PagePattern(const RefPtr<PageInfo>& pageInfo) : pageInfo_(pageInfo) {}
@@ -123,6 +123,11 @@ public:
         return { FocusType::SCOPE, true };
     }
 
+    std::list<int32_t> GetRouteOfFirstScope() override
+    {
+        return { 0 };
+    }
+
     const SharedTransitionMap& GetSharedTransitionMap() const
     {
         return sharedTransitionMap_;
@@ -181,9 +186,9 @@ public:
         dynamicPageSizeCallback_ = std::move(dynamicPageSizeCallback);
     }
 
-    void SetDisappearCallback(std::function<void()>&& callback)
+    void SetOnHiddenChange(std::function<void(bool)>&& onHiddenChange)
     {
-        disappearCallback_ = std::move(callback);
+        onHiddenChange_ = std::move(onHiddenChange);
     }
 
 private:
@@ -210,9 +215,9 @@ private:
     std::function<void()> onPageShow_;
     std::function<void()> onPageHide_;
     std::function<bool()> onBackPressed_;
-    std::function<void()> disappearCallback_;
     std::function<void()> pageTransitionFunc_;
     std::function<void()> firstBuildCallback_;
+    std::function<void(bool)> onHiddenChange_;
     DynamicPageSizeCallback dynamicPageSizeCallback_;
     std::shared_ptr<std::function<void()>> pageTransitionFinish_;
     std::list<RefPtr<PageTransitionEffect>> pageTransitionEffects_;

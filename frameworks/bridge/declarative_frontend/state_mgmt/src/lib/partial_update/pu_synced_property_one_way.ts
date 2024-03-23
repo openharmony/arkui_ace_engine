@@ -194,7 +194,7 @@ class SynchedPropertyOneWayPU<C> extends ObservedPropertyAbstractPU<C>
     this.recordPropertyDependentUpdate();
     if (this.shouldInstallTrackedObjectReadCb) {
       stateMgmtConsole.propertyAccess(`${this.debugInfo()}: get: @Track optimised mode. Will install read cb func if value is an object`);
-      ObservedObject.registerPropertyReadCb(this.localCopyObservedObject_, this.onOptimisedObjectPropertyRead.bind(this));
+      ObservedObject.registerPropertyReadCb(this.localCopyObservedObject_, this.onOptimisedObjectPropertyRead, this);
     } else {
       stateMgmtConsole.propertyAccess(`${this.debugInfo()}: get: compatibility mode. `);
     }
@@ -214,8 +214,8 @@ class SynchedPropertyOneWayPU<C> extends ObservedPropertyAbstractPU<C>
     const oldValue = this.localCopyObservedObject_;
     if (this.resetLocalValue(newValue, /* needCopyObject */ false)) {
       TrackedObject.notifyObjectValueAssignment(/* old value */ oldValue, /* new value */ this.localCopyObservedObject_,
-        this.notifyPropertyHasChangedPU.bind(this),
-        this.notifyTrackedObjectPropertyHasChanged.bind(this));
+        this.notifyPropertyHasChangedPU,
+        this.notifyTrackedObjectPropertyHasChanged, this);
     }
   }
 

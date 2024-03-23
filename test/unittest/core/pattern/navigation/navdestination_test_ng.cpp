@@ -76,7 +76,7 @@ HWTEST_F(NavdestinationTestNg, NavdestinationTest001, TestSize.Level1)
     NavDestinationModelNG.SetHideTitleBar(true);
     NavDestinationModelNG.SetTitle(NAVIGATION_TITLE, true);
     NavDestinationModelNG.SetSubtitle(NAVIGATION_SUBTITLE);
-    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    auto frameNode = AceType::Claim(ViewStackProcessor::GetInstance()->GetMainFrameNode());
     ASSERT_NE(frameNode, nullptr);
     auto navigationGroupNode = AceType::DynamicCast<NavDestinationGroupNode>(frameNode);
     ASSERT_NE(navigationGroupNode, nullptr);
@@ -100,7 +100,7 @@ HWTEST_F(NavdestinationTestNg, NavdestinationTest003, TestSize.Level1)
     NavDestinationModelNG.SetHideTitleBar(false);
     NavDestinationModelNG.SetTitle(NAVIGATION_TITLE, false);
     NavDestinationModelNG.SetSubtitle(NAVIGATION_SUBTITLE);
-    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    auto frameNode = AceType::Claim(ViewStackProcessor::GetInstance()->GetMainFrameNode());
     ASSERT_NE(frameNode, nullptr);
     auto navigationGroupNode = AceType::DynamicCast<NavDestinationGroupNode>(frameNode);
     ASSERT_NE(navigationGroupNode, nullptr);
@@ -127,7 +127,7 @@ HWTEST_F(NavdestinationTestNg, NavdestinationTest004, TestSize.Level1)
 
     RefPtr<NG::UINode> customNode;
     NavDestinationModelNG.SetCustomTitle(customNode);
-    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    auto frameNode = AceType::Claim(ViewStackProcessor::GetInstance()->GetMainFrameNode());
     ASSERT_NE(frameNode, nullptr);
     auto navigationGroupNode = AceType::DynamicCast<NavDestinationGroupNode>(frameNode);
     ASSERT_NE(navigationGroupNode, nullptr);
@@ -160,5 +160,33 @@ HWTEST_F(NavdestinationTestNg, NavdestinationTest005, TestSize.Level1)
     ASSERT_TRUE(titleBarLayoutProperty->GetNoPixMap());
     ImageSourceInfo imageSourceInfo = titleBarLayoutProperty->GetImageSourceValue();
     ASSERT_EQ(imageSourceInfo.GetSrc(), imageSource);
+}
+
+/**
+ * @tc.name: NavDestinationOnReadyTest001
+ * @tc.desc: Test onReady of NavDestination
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavdestinationTestNg, NavdestinationOnReadyTest001, TestSize.Level1)
+{
+    MockPipelineContextGetTheme();
+    ViewStackProcessor::GetInstance()->StartGetAccessRecordingFor(ElementRegister::GetInstance()->MakeUniqueId());
+
+    /**
+     * @tc.steps: step1. create navdestination and set onReady callback
+     */
+    NavDestinationModelNG navDestinationModel;
+    navDestinationModel.Create([]() {}, AceType::MakeRefPtr<NavDestinationContext>());
+    bool onReadyFired = false;
+    navDestinationModel.SetOnReady([&onReadyFired](RefPtr<NG::NavDestinationContext>) { onReadyFired = true; });
+
+    /**
+     * @tc.steps: step2. process shallowBuilder
+     * @tc.expected: check if onReady was called
+     */
+    auto groupNode = AceType::DynamicCast<NavDestinationGroupNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(groupNode, nullptr);
+    groupNode->ProcessShallowBuilder();
+    EXPECT_TRUE(onReadyFired);
 }
 } // namespace OHOS::Ace::NG

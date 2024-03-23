@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -263,12 +263,15 @@ static napi_value JSReset(napi_env env, napi_callback_info info)
         NapiThrow(env, "Internal error. Animator is null in AnimatorResult.", ERROR_CODE_INTERNAL_ERROR);
         return nullptr;
     }
+    TAG_LOGI(AceLogTag::ACE_ANIMATION, "JsAnimator: JSReset, id:%{public}d ", animator->GetId());
     animator->ClearInterpolators();
     animator->ResetIsReverse();
     animatorResult->ApplyOption();
     napi_ref onframeRef = animatorResult->GetOnframeRef();
     if (onframeRef) {
-        auto onFrameCallback = [env, onframeRef](double value) {
+        auto onFrameCallback = [env, onframeRef,
+                                   weakOption = std::weak_ptr<AnimatorOption>(animatorResult->GetAnimatorOption())](
+                                   double value) {
             napi_handle_scope scope = nullptr;
             napi_open_handle_scope(env, &scope);
             if (scope == nullptr) {
@@ -278,10 +281,12 @@ static napi_value JSReset(napi_env env, napi_callback_info info)
             napi_value valueNapi = nullptr;
             napi_value onframe = nullptr;
             auto result = napi_get_reference_value(env, onframeRef, &onframe);
-            if (result != napi_ok || onframe == nullptr) {
+            auto option = weakOption.lock();
+            if (!(result == napi_ok && onframe && option)) {
                 napi_close_handle_scope(env, scope);
                 return;
             }
+            ACE_SCOPED_TRACE("ohos.animator onframe. duration:%d, curve:%s", option->duration, option->easing.c_str());
             napi_create_double(env, value, &valueNapi);
             napi_call_function(env, nullptr, onframe, 1, &valueNapi, &ret);
             napi_close_handle_scope(env, scope);
@@ -334,7 +339,8 @@ static napi_value JSPlay(napi_env env, napi_callback_info info)
             return nullptr;
         }
     }
-    TAG_LOGI(AceLogTag::ACE_ANIMATION, "JsAnimator: JSPlay, id:%{public}d", animator->GetId());
+    TAG_LOGI(AceLogTag::ACE_ANIMATION, "JsAnimator: JsPlay, id:%{public}d, %{public}s",
+        animator->GetId(), animatorResult->GetAnimatorOption()->ToString().c_str());
     if (animatorResult->GetMotion()) {
         animator->PlayMotion(animatorResult->GetMotion());
     } else {
@@ -352,6 +358,7 @@ static napi_value JSFinish(napi_env env, napi_callback_info info)
     if (!animator) {
         return nullptr;
     }
+    TAG_LOGI(AceLogTag::ACE_ANIMATION, "JsAnimator: JSFinish, id:%{public}d ", animator->GetId());
     animator->Finish();
     napi_value result = nullptr;
     napi_get_null(env, &result);
@@ -364,6 +371,7 @@ static napi_value JSPause(napi_env env, napi_callback_info info)
     if (!animator) {
         return nullptr;
     }
+    TAG_LOGI(AceLogTag::ACE_ANIMATION, "JsAnimator: JSPause, id:%{public}d ", animator->GetId());
     animator->Pause();
     napi_value result;
     napi_get_null(env, &result);
@@ -376,6 +384,7 @@ static napi_value JSCancel(napi_env env, napi_callback_info info)
     if (!animator) {
         return nullptr;
     }
+    TAG_LOGI(AceLogTag::ACE_ANIMATION, "JsAnimator: JSCancel, id:%{public}d ", animator->GetId());
     animator->Cancel();
     napi_value result;
     napi_get_null(env, &result);
@@ -406,10 +415,84 @@ static napi_value JSReverse(napi_env env, napi_callback_info info)
             return nullptr;
         }
     }
+    TAG_LOGI(AceLogTag::ACE_ANIMATION, "JsAnimator: JSReverse, id:%{public}d ", animator->GetId());
     animator->Reverse();
     napi_value result;
     napi_get_null(env, &result);
     return result;
+}
+
+static bool ParseJsValue(napi_env env, napi_value jsObject, const std::string& name, int32_t& data)
+{
+    napi_value value = nullptr;
+    napi_get_named_property(env, jsObject, name.c_str(), &value);
+    napi_valuetype type = napi_undefined;
+    napi_typeof(env, value, &type);
+    if (type == napi_number) {
+        napi_get_value_int32(env, value, &data);
+        return true;
+    } else {
+        return false;
+    }
+    return true;
+}
+
+static napi_value ParseExpectedFrameRateRange(napi_env env, napi_callback_info info, FrameRateRange& frameRateRange)
+{
+    size_t argc = 1;
+    napi_value argv[1];
+    napi_value thisVar = nullptr;
+    napi_get_cb_info(env, info, &argc, argv, &thisVar, nullptr);
+    if (argc != 1) {
+        NapiThrow(env, "The number of parameters is incorrect.", ERROR_CODE_PARAM_INVALID);
+        return nullptr;
+    }
+
+    napi_value& nativeObj = argv[0];
+    if (nativeObj == nullptr) {
+        NapiThrow(env, "The nativeObj is nullptr.", ERROR_CODE_PARAM_INVALID);
+        return nullptr;
+    }
+
+    int32_t minFPS = 0;
+    int32_t maxFPS = 0;
+    int32_t expectedFPS = 0;
+    ParseJsValue(env, nativeObj, "min", minFPS);
+    ParseJsValue(env, nativeObj, "max", maxFPS);
+    ParseJsValue(env, nativeObj, "expected", expectedFPS);
+
+    frameRateRange.Set(minFPS, maxFPS, expectedFPS);
+    if (!frameRateRange.IsValid()) {
+        NapiThrow(env, "ExpectedFrameRateRange Error", ERROR_CODE_PARAM_INVALID);
+        return nullptr;
+    }
+    return nullptr;
+}
+
+static napi_value JSSetExpectedFrameRateRange(napi_env env, napi_callback_info info)
+{
+    auto animatorResult = GetAnimatorResult(env, info);
+    if (!animatorResult) {
+        TAG_LOGW(AceLogTag::ACE_ANIMATION, "JsAnimator: cannot find animator when call SetExpectedFrameRateRange");
+        return nullptr;
+    }
+    auto animator = animatorResult->GetAnimator();
+    if (!animator) {
+        TAG_LOGW(AceLogTag::ACE_ANIMATION, "JsAnimator: no animator is created when call SetExpectedFrameRateRange");
+        return nullptr;
+    }
+    TAG_LOGI(AceLogTag::ACE_ANIMATION, "JsAnimator: JSSetExpectedFrameRateRange, id:%{public}d", animator->GetId());
+    if (!animator->HasScheduler()) {
+        auto result = animator->AttachSchedulerOnContainer();
+        if (!result) {
+            TAG_LOGW(AceLogTag::ACE_ANIMATION, "JsAnimator: SetExpectedFrameRateRange failed");
+            return nullptr;
+        }
+    }
+    FrameRateRange frameRateRange;
+    ParseExpectedFrameRateRange(env, info, frameRateRange);
+    animator->SetExpectedFrameRateRange(frameRateRange);
+    return nullptr;
 }
 
 static napi_value SetOnframe(napi_env env, napi_callback_info info)
@@ -440,7 +523,9 @@ static napi_value SetOnframe(napi_env env, napi_callback_info info)
     }
     napi_create_reference(env, onframe, 1, &onframeRef);
     animatorResult->SetOnframeRef(onframeRef);
-    auto onFrameCallback = [env, onframeRef](double value) {
+    auto onFrameCallback = [env, onframeRef,
+                               weakOption = std::weak_ptr<AnimatorOption>(animatorResult->GetAnimatorOption())](
+                               double value) {
         napi_handle_scope scope = nullptr;
         napi_open_handle_scope(env, &scope);
         if (scope == nullptr) {
@@ -450,10 +535,12 @@ static napi_value SetOnframe(napi_env env, napi_callback_info info)
         napi_value valueNapi = nullptr;
         napi_value onframe = nullptr;
         auto result = napi_get_reference_value(env, onframeRef, &onframe);
-        if (result != napi_ok || onframe == nullptr) {
+        auto option = weakOption.lock();
+        if (!(result == napi_ok && onframe && option)) {
             napi_close_handle_scope(env, scope);
             return;
         }
+        ACE_SCOPED_TRACE("ohos.animator onframe. duration:%d, curve:%s", option->duration, option->easing.c_str());
         napi_create_double(env, value, &valueNapi);
         napi_call_function(env, nullptr, onframe, 1, &valueNapi, &ret);
         napi_close_handle_scope(env, scope);
@@ -476,6 +563,11 @@ static napi_value SetOnframe(napi_env env, napi_callback_info info)
     napi_value undefined;
     napi_get_undefined(env, &undefined);
     return undefined;
+}
+
+static napi_value SetOnFrame(napi_env env, napi_callback_info info)
+{
+    return SetOnframe(env, info);
 }
 
 static napi_value SetOnfinish(napi_env env, napi_callback_info info)
@@ -527,6 +619,11 @@ static napi_value SetOnfinish(napi_env env, napi_callback_info info)
     return undefined;
 }
 
+static napi_value SetOnFinish(napi_env env, napi_callback_info info)
+{
+    return SetOnfinish(env, info);
+}
+
 static napi_value SetOncancel(napi_env env, napi_callback_info info)
 {
     AnimatorResult* animatorResult = nullptr;
@@ -574,6 +671,11 @@ static napi_value SetOncancel(napi_env env, napi_callback_info info)
     napi_value undefined;
     napi_get_undefined(env, &undefined);
     return undefined;
+}
+
+static napi_value SetOnCancel(napi_env env, napi_callback_info info)
+{
+    return SetOncancel(env, info);
 }
 
 static napi_value SetOnrepeat(napi_env env, napi_callback_info info)
@@ -625,6 +727,11 @@ static napi_value SetOnrepeat(napi_env env, napi_callback_info info)
     return undefined;
 }
 
+static napi_value SetOnRepeat(napi_env env, napi_callback_info info)
+{
+    return SetOnrepeat(env, info);
+}
+
 static napi_value JSCreate(napi_env env, napi_callback_info info)
 {
     auto option = std::make_shared<AnimatorOption>();
@@ -651,10 +758,15 @@ static napi_value JSCreate(napi_env env, napi_callback_info info)
         DECLARE_NAPI_FUNCTION("pause", JSPause),
         DECLARE_NAPI_FUNCTION("cancel", JSCancel),
         DECLARE_NAPI_FUNCTION("reverse", JSReverse),
+        DECLARE_NAPI_FUNCTION("setExpectedFrameRateRange", JSSetExpectedFrameRateRange),
         DECLARE_NAPI_SETTER("onframe", SetOnframe),
         DECLARE_NAPI_SETTER("onfinish", SetOnfinish),
         DECLARE_NAPI_SETTER("oncancel", SetOncancel),
         DECLARE_NAPI_SETTER("onrepeat", SetOnrepeat),
+        DECLARE_NAPI_SETTER("onFrame", SetOnFrame),
+        DECLARE_NAPI_SETTER("onFinish", SetOnFinish),
+        DECLARE_NAPI_SETTER("onCancel", SetOnCancel),
+        DECLARE_NAPI_SETTER("onRepeat", SetOnRepeat),
     };
 
     NAPI_CALL(env, napi_define_properties(env, jsAnimator, sizeof(resultFuncs) / sizeof(resultFuncs[0]), resultFuncs));

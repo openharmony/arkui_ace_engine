@@ -26,6 +26,7 @@
 #include "core/components/common/properties/alignment.h"
 #include "core/pipeline_ng/pipeline_context.h"
 #include "core/components_ng/base/observer_handler.h"
+#include "bridge/common/utils/engine_helper.h"
 
 namespace OHOS::Ace::NG {
 
@@ -137,7 +138,7 @@ void PagePattern::ProcessHideState()
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     host->SetActive(false);
-    host->OnVisibleChange(false);
+    host->NotifyVisibleChange(false);
     host->GetLayoutProperty()->UpdateVisibility(VisibleType::INVISIBLE);
     auto parent = host->GetAncestorNodeOfFrame();
     CHECK_NULL_VOID(parent);
@@ -150,7 +151,7 @@ void PagePattern::ProcessShowState()
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     host->SetActive(true);
-    host->OnVisibleChange(true);
+    host->NotifyVisibleChange(true);
     host->GetLayoutProperty()->UpdateVisibility(VisibleType::VISIBLE);
     auto parent = host->GetAncestorNodeOfFrame();
     CHECK_NULL_VOID(parent);
@@ -176,6 +177,9 @@ void PagePattern::ProcessShowState()
 
 void PagePattern::OnAttachToMainTree()
 {
+    std::string url = GetPageInfo()->GetPageUrl();
+    int32_t index = EngineHelper::GetCurrentDelegate()->GetIndexByUrl(url);
+    GetPageInfo()->SetPageIndex(index);
     state_ = RouterPageState::ABOUT_TO_APPEAR;
     UIObserverHandler::GetInstance().NotifyRouterPageStateChange(GetPageInfo(), state_);
 }
@@ -184,9 +188,6 @@ void PagePattern::OnDetachFromMainTree()
 {
     state_ = RouterPageState::ABOUT_TO_DISAPPEAR;
     UIObserverHandler::GetInstance().NotifyRouterPageStateChange(GetPageInfo(), state_);
-    if (disappearCallback_) {
-        disappearCallback_();
-    }
 }
 
 void PagePattern::OnShow()
@@ -218,6 +219,9 @@ void PagePattern::OnShow()
     }
     if (onPageShow_) {
         onPageShow_();
+    }
+    if (onHiddenChange_) {
+        onHiddenChange_(true);
     }
     if (Recorder::EventRecorder::Get().IsPageRecordEnable()) {
         std::string param;
@@ -255,6 +259,9 @@ void PagePattern::OnHide()
     }
     if (onPageHide_) {
         onPageHide_();
+    }
+    if (onHiddenChange_) {
+        onHiddenChange_(false);
     }
     if (Recorder::EventRecorder::Get().IsPageRecordEnable()) {
         auto entryPageInfo = DynamicCast<EntryPageInfo>(pageInfo_);

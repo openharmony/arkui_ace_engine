@@ -132,7 +132,7 @@ RefPtr<ResourceObject> GetResourceObject(const EcmaVM* vm, const Local<JSValueRe
                 resObjParams.type = OHOS::Ace::ResourceObjectParamType::INT;
             }
         }
-        resObjParamsList.push_back(resObjParams);
+        resObjParamsList.emplace_back(resObjParams);
     }
     auto resourceObject = AceType::MakeRefPtr<ResourceObject>(id, type, resObjParamsList, bundleName, moduleName);
     return resourceObject;

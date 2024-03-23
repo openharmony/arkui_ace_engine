@@ -278,6 +278,20 @@ public:
         }
     }
 
+    void SetIconStyle(const IconStyle& iconStyle, uint32_t position)
+    {
+        if (iconStyles_.size() == position) {
+            iconStyles_.emplace_back(iconStyle);
+        } else {
+            iconStyles_[position] = iconStyle;
+        }
+    }
+
+    std::vector<IconStyle> GetIconStyle()
+    {
+        return iconStyles_;
+    }
+
     bool IsMaskAnimationByCreate()
     {
         return isMaskAnimationByCreate_;
@@ -404,6 +418,7 @@ private:
     void GetBottomTabBarImageSizeAndOffset(const std::vector<int32_t>& selectedIndexes,
         int32_t maskIndex, float& selectedImageSize, float& unselectedImageSize, OffsetF& originalSelectedMaskOffset,
         OffsetF& originalUnselectedMaskOffset);
+    void UpdateBottomTabBarImageColor(const std::vector<int32_t>& selectedIndexes, int32_t maskIndex);
     bool CheckSvg(int32_t index) const;
 
     void HandleTouchDown(int32_t index);
@@ -485,6 +500,7 @@ private:
     std::vector<IndicatorStyle> indicatorStyles_;
     std::vector<TabBarStyle> tabBarStyles_;
     std::vector<LabelStyle> labelStyles_;
+    std::vector<IconStyle> iconStyles_;
     bool isFirstFocus_ = true;
     bool isTouchingSwiper_ = false;
     float indicatorStartPos_ = 0.0f;

@@ -37,6 +37,7 @@ void ActionSheetModelNG::ShowActionSheet(const DialogProperties& arg)
             DialogProperties Maskarg;
             Maskarg.isMask = true;
             Maskarg.autoCancel = arg.autoCancel;
+            Maskarg.onWillDismiss = arg.onWillDismiss;
             auto mask = overlayManager->ShowDialog(Maskarg, nullptr, false);
             CHECK_NULL_VOID(mask);
             overlayManager->SetMaskNodeId(dialog->GetId(), mask->GetId());
@@ -55,6 +56,12 @@ void ActionSheetModelNG::SetAction(GestureEventFunc&& eventFunc, ActionSheetInfo
 void ActionSheetModelNG::SetCancel(std::function<void()>&& eventFunc, DialogProperties& arg)
 {
     arg.onCancel = eventFunc;
+}
+
+void ActionSheetModelNG::SetOnWillDismiss(std::function<void(const int32_t& info)>&& onWillDismissFunc,
+    DialogProperties& arg)
+{
+    arg.onWillDismiss = std::move(onWillDismissFunc);
 }
 
 void ActionSheetModelNG::SetConfirm(

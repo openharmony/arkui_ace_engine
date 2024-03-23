@@ -128,6 +128,7 @@ void PipelineContext::SetupRootElement()
     fullScreenManager_ = MakeRefPtr<FullScreenManager>(rootNode_);
     selectOverlayManager_ = MakeRefPtr<SelectOverlayManager>(rootNode_);
     dragDropManager_ = MakeRefPtr<DragDropManager>();
+    focusManager_ = MakeRefPtr<FocusManager>();
     sharedTransitionManager_ = MakeRefPtr<SharedOverlayManager>(rootNode_);
 }
 
@@ -264,6 +265,11 @@ const RefPtr<DragDropManager>& PipelineContext::GetDragDropManager()
     return dragDropManager_;
 }
 
+const RefPtr<FocusManager>& PipelineContext::GetFocusManager() const
+{
+    return focusManager_;
+}
+
 const RefPtr<StageManager>& PipelineContext::GetStageManager()
 {
     return stageManager_;
@@ -312,8 +318,6 @@ void PipelineContext::AddDirtyFocus(const RefPtr<FrameNode>& node) {}
 
 void PipelineContext::AddDirtyPropertyNode(const RefPtr<FrameNode>& dirty) {}
 
-void PipelineContext::AddDirtyDefaultFocus(const RefPtr<FrameNode>& node) {}
-
 void PipelineContext::AddDirtyRequestFocus(const RefPtr<FrameNode>& node) {}
 
 // core/pipeline_ng/pipeline_context.h depends on the specific impl
@@ -350,7 +354,12 @@ void PipelineContext::AddSyncGeometryNodeTask(std::function<void()>&& task)
 
 void PipelineContext::FlushSyncGeometryNodeTasks() {}
 
-void PipelineContext::AddAfterRenderTask(std::function<void()>&& task) {}
+void PipelineContext::AddAfterRenderTask(std::function<void()>&& task)
+{
+    if (task) {
+        task();
+    }
+}
 
 void PipelineContext::FlushPipelineImmediately() {}
 
@@ -361,12 +370,12 @@ FrameInfo* PipelineContext::GetCurrentFrameInfo(uint64_t /* recvTime */, uint64_
 
 void PipelineContext::DumpPipelineInfo() const {}
 
-void PipelineContext::AddVisibleAreaChangeNode(
-    const RefPtr<FrameNode>& node, double ratio, const VisibleRatioCallback& callback, bool isUserCallback)
+void PipelineContext::AddVisibleAreaChangeNode(const RefPtr<FrameNode>& node,
+    const std::vector<double>& ratio, const VisibleRatioCallback& callback, bool isUserCallback)
 {
     CHECK_NULL_VOID(callback);
     callback(false, 0.0);
-    callback(true, ratio);
+    callback(true, ratio[0]);
 }
 
 void PipelineContext::RemoveVisibleAreaChangeNode(int32_t nodeId) {}
@@ -422,6 +431,11 @@ void PipelineContext::SetIsNeedAvoidWindow(bool value) {};
 SafeAreaInsets PipelineContext::GetSafeArea() const
 {
     // top inset = 1
+    return SafeAreaInsets({}, { 0, 1 }, {}, {});
+}
+
+SafeAreaInsets PipelineContext::GetSafeAreaWithoutProcess() const
+{
     return SafeAreaInsets({}, { 0, 1 }, {}, {});
 }
 
@@ -495,6 +509,19 @@ bool PipelineContext::PrintVsyncInfoIfNeed() const
 const SerializedGesture& PipelineContext::GetSerializedGesture() const
 {
     return serializedGesture_;
+}
+
+void PipelineContext::FlushFocusView()
+{
+    CHECK_NULL_VOID(focusManager_);
+    auto lastFocusView = (focusManager_->GetLastFocusView()).Upgrade();
+    CHECK_NULL_VOID(lastFocusView);
+    auto lastFocusViewHub = lastFocusView->GetFocusHub();
+    CHECK_NULL_VOID(lastFocusViewHub);
+    if (lastFocusView && (!lastFocusViewHub->IsCurrentFocus() || !lastFocusView->GetIsViewHasFocused()) &&
+        lastFocusViewHub->IsFocusableNode()) {
+        lastFocusView->RequestDefaultFocus();
+    }
 }
 
 } // namespace OHOS::Ace::NG

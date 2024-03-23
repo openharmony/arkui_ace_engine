@@ -171,6 +171,9 @@ void RenderWeb::Update(const RefPtr<Component>& component)
         delegate_->UpdatePinchSmoothModeEnabled(web->GetPinchSmoothModeEnabled());
         delegate_->UpdateMultiWindowAccess(web->GetMultiWindowAccessEnabled());
         delegate_->UpdateAllowWindowOpenMethod(web->GetAllowWindowOpenMethod());
+        delegate_->UpdateNativeVideoPlayerConfig(
+            std::get<0>(web->GetNativeVideoPlayerConfig()),
+            std::get<1>(web->GetNativeVideoPlayerConfig()));
         auto userAgent = web->GetUserAgent();
         if (!userAgent.empty()) {
             delegate_->UpdateUserAgent(userAgent);
@@ -1288,13 +1291,14 @@ void RenderWeb::OnSelectPopupMenu(
     popup_ = AceType::MakeRefPtr<SelectPopupComponent>();
     auto themeManager = context->GetThemeManager();
     popup_->InitTheme(themeManager);
-    for (size_t index = 0; index < params->menuItems.size(); index++) {
-        RefPtr<OptionComponent> option = BuildSelectMenu(params->menuItems[index].label);
+    std::vector<std::shared_ptr<OHOS::NWeb::NWebSelectPopupMenuItem>> menuItems = params->GetMenuItems();
+    for (size_t index = 0; index < menuItems.size(); index++) {
+        RefPtr<OptionComponent> option = BuildSelectMenu(menuItems[index]->GetLabel());
         if (!option) {
             continue;
         }
         popup_->AppendSelectOption(option);
-        if (index == params->selectedItem) {
+        if (index == params->GetSelectedItem()) {
             option->SetSelected(true);
         }
     }
@@ -1306,10 +1310,11 @@ void RenderWeb::OnSelectPopupMenu(
         callback->Cancel();
     });
 
-    Offset leftTop = { params->bounds.x + GetGlobalOffset().GetX(),
-                       params->bounds.y + GetGlobalOffset().GetY() };
-    Offset rightBottom = { params->bounds.x + GetGlobalOffset().GetX() + params->bounds.width,
-                           params->bounds.y + GetGlobalOffset().GetY() + params->bounds.height };
+    OHOS::NWeb::SelectMenuBound bounds = params->GetSelectMenuBound();
+    Offset leftTop = { bounds.x + GetGlobalOffset().GetX(),
+                       bounds.y + GetGlobalOffset().GetY() };
+    Offset rightBottom = { bounds.x + GetGlobalOffset().GetX() + bounds.width,
+                           bounds.y + GetGlobalOffset().GetY() + bounds.height };
     popup_->ShowDialog(stackElement, leftTop, rightBottom, false);
 }
 #endif

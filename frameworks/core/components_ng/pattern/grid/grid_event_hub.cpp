@@ -171,6 +171,10 @@ void GridEventHub::HandleOnItemDragStart(const GestureEvent& info)
     itemDragInfo.SetY(pipeline->ConvertPxToVp(Dimension(globalY, DimensionUnit::PX)));
     auto customNode = FireOnItemDragStart(itemDragInfo, draggedIndex_);
     CHECK_NULL_VOID(customNode);
+    auto dragDropManager = pipeline->GetDragDropManager();
+    CHECK_NULL_VOID(dragDropManager);
+    dragDropManager->SetDraggingPointer(info.GetPointerId());
+    dragDropManager->SetDraggingPressedState(true);
 #if defined(PIXEL_MAP_SUPPORTED)
     auto callback = [id = Container::CurrentId(), pipeline, info, host, gridItem, weak = WeakClaim(this)](
                         std::shared_ptr<Media::PixelMap> mediaPixelMap, int32_t /*arg*/,
@@ -195,6 +199,9 @@ void GridEventHub::HandleOnItemDragStart(const GestureEvent& info)
                 eventHub->dragDropProxy_->OnItemDragStart(info, host);
                 gridItem->GetLayoutProperty()->UpdateVisibility(VisibleType::INVISIBLE);
                 eventHub->draggingItem_ = gridItem;
+                if (!manager->IsDraggingPressed(info.GetPointerId())) {
+                    eventHub->HandleOnItemDragEnd(info);
+                }
             },
             TaskExecutor::TaskType::UI);
     };
@@ -207,6 +214,9 @@ void GridEventHub::HandleOnItemDragStart(const GestureEvent& info)
     dragDropProxy_->OnItemDragStart(info, host);
     gridItem->GetLayoutProperty()->UpdateVisibility(VisibleType::INVISIBLE);
     draggingItem_ = gridItem;
+    if (!manager->IsDraggingPressed(info.GetPointerId())) {
+        HandleOnItemDragEnd(info);
+    }
 #endif
 }
 

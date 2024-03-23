@@ -195,6 +195,10 @@ class ArkWebComponent extends ArkComponent implements WebAttribute {
   onSslErrorEventReceive(callback: (event: { handler: SslErrorHandler; error: SslError; }) => void): this {
     throw new Error('Method not implemented.');
   }
+  onSslErrorEvent(callback: (event: { handler: SslErrorHandler; error: SslError; url: string;
+    originalUrl: string; referrer: string; isFatalError: boolean; isMainFrame: boolean; }) => void): this {
+    throw new Error('Method not implemented.');
+  }
   onClientAuthenticationRequest(callback: (event: {
     handler: ClientAuthenticationHandler;
     host: string; port: number; keyTypes: string[]; issuers: string[];
@@ -292,6 +296,12 @@ class ArkWebComponent extends ArkComponent implements WebAttribute {
     throw new Error('Method not implemented.');
   }
   nestedScroll(value: NestedScrollOptions): this {
+    throw new Error('Method not implemented.');
+  }
+  onOverrideUrlLoading(callback: OnOverrideUrlLoadingCallback): this {
+    throw new Error('Method not implemented.');
+  }
+  enableNativeVideoPlayer(config: NativeVideoPlayerConfig): this {
     throw new Error('Method not implemented.');
   }
 }

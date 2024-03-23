@@ -38,6 +38,7 @@ class AccessibilityEventInfo;
 }
 
 namespace OHOS::Ace::NG {
+class AccessibilitySessionAdapter;
 struct DirtySwapConfig {
     bool frameSizeChange = false;
     bool frameOffsetChange = false;
@@ -77,6 +78,16 @@ public:
     // atomic node is like button, image, custom node and so on.
     // In ets UI compiler, the atomic node does not Add Pop function, only have Create function.
     virtual bool IsAtomicNode() const
+    {
+        return true;
+    }
+
+    virtual bool StopExpandMark()
+    {
+        return false;
+    }
+
+    virtual bool IsSupportDrawModifier() const
     {
         return true;
     }
@@ -137,6 +148,11 @@ public:
         return nullptr;
     }
 
+    virtual RefPtr<NodePaintMethod> CreateDefaultNodePaintMethod()
+    {
+        return MakeRefPtr<NodePaintMethod>();
+    }
+
     virtual std::optional<RectF> GetOverridePaintRect() const
     {
         return std::nullopt;
@@ -151,9 +167,10 @@ public:
 
     virtual void OnModifyDone()
     {
+#if (defined(__aarch64__) || defined(__x86_64__))
         FrameNode::PostTask(
             [weak = WeakClaim(this)]() {
-                if (Recorder::EventRecorder::Get().IsComponentRecordEnable()) {
+                if (Recorder::IsCacheAvaliable()) {
                     auto pattern = weak.Upgrade();
                     CHECK_NULL_VOID(pattern);
                     pattern->OnAfterModifyDone();
@@ -163,6 +180,7 @@ public:
         if (IsNeedInitClickEventRecorder()) {
             InitClickEventRecorder();
         }
+#endif
         auto frameNode = frameNode_.Upgrade();
         auto children = frameNode->GetChildren();
         if (children.empty()) {
@@ -233,6 +251,8 @@ public:
 
     virtual void OnMountToParentDone() {}
 
+    virtual void OnSensitiveStyleChange(bool isSensitive) {}
+
     virtual bool IsRootPattern() const
     {
         return false;
@@ -248,7 +268,7 @@ public:
         return true;
     }
 
-    virtual void UpdateScrollOffset(SizeF /* frameSize */) {}
+    virtual void UpdateSlideOffset() {}
 
     // TODO: for temp use, need to delete this.
     virtual bool OnDirtyLayoutWrapperSwap(
@@ -466,6 +486,11 @@ public:
         int64_t elementId, const std::map<std::string, std::string>& actionArguments, int32_t action, int64_t offset)
     {
         return false;
+    }
+
+    virtual RefPtr<AccessibilitySessionAdapter> GetAccessibilitySessionAdapter()
+    {
+        return nullptr;
     }
 
     virtual int32_t GetUiExtensionId()

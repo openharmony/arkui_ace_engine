@@ -26,6 +26,7 @@
 #include "core/components_ng/pattern/dialog/custom_dialog_controller_model_ng.h"
 #include "core/pipeline_ng/pipeline_context.h"
 #include "frameworks/bridge/common/utils/engine_helper.h"
+#include "frameworks/bridge/declarative_frontend/jsview/js_view_abstract.h"
 
 namespace OHOS::Ace {
 std::unique_ptr<CustomDialogControllerModel> CustomDialogControllerModel::instance_ = nullptr;
@@ -93,7 +94,7 @@ void JSCustomDialogController::ConstructorCallback(const JSCallbackInfo& info)
         // Process cancel function.
         JSRef<JSVal> cancelCallback = constructorArg->GetProperty("cancel");
         if (!cancelCallback->IsUndefined() && cancelCallback->IsFunction()) {
-            WeakPtr<NG::FrameNode> frameNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+            auto frameNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
             auto jsCancelFunction = AceType::MakeRefPtr<JsWeakFunction>(ownerObj, JSRef<JSFunc>::Cast(cancelCallback));
             instance->jsCancelFunction_ = jsCancelFunction;
 
@@ -108,6 +109,10 @@ void JSCustomDialogController::ConstructorCallback(const JSCallbackInfo& info)
             };
             instance->dialogProperties_.onCancel = onCancel;
         }
+
+        std::function<void(const int32_t& info)> onWillDismissFunc = nullptr;
+        JSViewAbstract::ParseDialogCallback(constructorArg, onWillDismissFunc);
+        instance->dialogProperties_.onWillDismiss = onWillDismissFunc;
 
         // Parses autoCancel.
         JSRef<JSVal> autoCancelValue = constructorArg->GetProperty("autoCancel");
@@ -172,14 +177,6 @@ void JSCustomDialogController::ConstructorCallback(const JSCallbackInfo& info)
             instance->dialogProperties_.backgroundColor = backgroundColor;
         }
 
-        // Parse cornerRadius.
-        auto cornerRadiusValue = constructorArg->GetProperty("cornerRadius");
-        NG::BorderRadiusProperty radius;
-        if (!cornerRadiusValue->IsUndefined()) {
-            ParseBorderRadius(cornerRadiusValue, radius);
-            instance->dialogProperties_.borderRadius = radius;
-        }
-
         auto execContext = info.GetExecutionContext();
         // Parse openAnimation.
         auto openAnimationValue = constructorArg->GetProperty("openAnimation");
@@ -211,6 +208,7 @@ void JSCustomDialogController::ConstructorCallback(const JSCallbackInfo& info)
         if (isModalValue->IsBoolean()) {
             instance->dialogProperties_.isModal = isModalValue->ToBoolean();
         }
+        JSViewAbstract::SetDialogProperties(constructorArg, instance->dialogProperties_);
         instance->IncRefCount();
         info.SetReturnValue(AceType::RawPtr(instance));
     }
@@ -221,46 +219,6 @@ void JSCustomDialogController::DestructorCallback(JSCustomDialogController* cont
     if (controller != nullptr) {
         controller->ownerView_ = nullptr;
         controller->DecRefCount();
-    }
-}
-
-void JSCustomDialogController::ParseBorderRadius(const JSRef<JSVal>& args, NG::BorderRadiusProperty& radius)
-{
-    if (!args->IsObject() && !args->IsNumber() && !args->IsString()) {
-        return;
-    }
-
-    std::optional<CalcDimension> radiusTopLeft;
-    std::optional<CalcDimension> radiusTopRight;
-    std::optional<CalcDimension> radiusBottomLeft;
-    std::optional<CalcDimension> radiusBottomRight;
-    CalcDimension borderRadius;
-    if (JSViewAbstract::ParseJsDimensionVp(args, borderRadius)) {
-        radius = NG::BorderRadiusProperty(borderRadius);
-        radius.multiValued = false;
-    } else if (args->IsObject()) {
-        JSRef<JSObject> object = JSRef<JSObject>::Cast(args);
-        CalcDimension topLeft;
-        if (JSViewAbstract::ParseJsDimensionVp(object->GetProperty("topLeft"), topLeft)) {
-            radiusTopLeft = topLeft;
-        }
-        CalcDimension topRight;
-        if (JSViewAbstract::ParseJsDimensionVp(object->GetProperty("topRight"), topRight)) {
-            radiusTopRight = topRight;
-        }
-        CalcDimension bottomLeft;
-        if (JSViewAbstract::ParseJsDimensionVp(object->GetProperty("bottomLeft"), bottomLeft)) {
-            radiusBottomLeft = bottomLeft;
-        }
-        CalcDimension bottomRight;
-        if (JSViewAbstract::ParseJsDimensionVp(object->GetProperty("bottomRight"), bottomRight)) {
-            radiusBottomRight = bottomRight;
-        }
-        radius.radiusTopLeft = radiusTopLeft;
-        radius.radiusTopRight = radiusTopRight;
-        radius.radiusBottomLeft = radiusBottomLeft;
-        radius.radiusBottomRight = radiusBottomRight;
-        radius.multiValued = true;
     }
 }
 
@@ -275,7 +233,7 @@ void JSCustomDialogController::JsOpenDialog(const JSCallbackInfo& info)
     }
     auto containerId = this->ownerView_->GetInstanceId();
     ContainerScope containerScope(containerId);
-    WeakPtr<NG::FrameNode> frameNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    WeakPtr<NG::FrameNode> frameNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
     auto pipelineContext = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipelineContext);
 
@@ -337,7 +295,7 @@ void JSCustomDialogController::JsCloseDialog(const JSCallbackInfo& info)
         return;
     }
 
-    WeakPtr<NG::FrameNode> frameNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    WeakPtr<NG::FrameNode> frameNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
     auto cancelTask = ([cancelCallback = jsCancelFunction_, node = frameNode]() {
         if (cancelCallback) {
             ACE_SCORING_EVENT("CustomDialog.cancel");
@@ -398,7 +356,7 @@ bool JSCustomDialogController::ParseAnimation(
     JSRef<JSVal> onFinish = obj->GetProperty("onFinish");
     std::function<void()> onFinishEvent;
     if (onFinish->IsFunction()) {
-        WeakPtr<NG::FrameNode> frameNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+        auto frameNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
         auto jsFunc = AceType::MakeRefPtr<JsWeakFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(onFinish));
         onFinishEvent = [execCtx = execContext, func = std::move(jsFunc), node = frameNode]() {
             JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);

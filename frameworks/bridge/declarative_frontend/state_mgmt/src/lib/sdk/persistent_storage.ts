@@ -14,6 +14,112 @@
  */
 
 /**
+ * MapInfo
+ *
+ * Helper class to persist Map in Persistent storage
+ *
+ */
+class MapInfo<K, V> {
+  static readonly replacer: string = "ace_engine_state_mgmt_map_replacer";
+
+  constructor(
+    public mapReplacer: string,
+    public keys: K[],
+    public values: V[]
+  ) { }
+
+  // Check if the given object is of type MapInfo
+  static isObject<K, V>(obj: unknown): obj is MapInfo<K, V> {
+    const typedObject = obj as MapInfo<K, V>;
+    if ('mapReplacer' in typedObject && typedObject.mapReplacer === MapInfo.replacer) {
+      return true;
+    }
+    return false;
+  }
+
+  // Convert Map to Object
+  static toObject<K, V>(map: Map<K, V>): MapInfo<K, V> {
+    const keys: K[] = Array.from(map.keys());
+    const values: V[] = Array.from(map.values());
+    return new MapInfo(MapInfo.replacer, keys, values);
+  }
+
+  // Convert Object to Map
+  static toMap<K, V>(obj: MapInfo<K, V>): Map<K, V> {
+    return new Map<K, V>(obj.keys.map((key, i) => [key, obj.values[i]]));
+  }
+}
+
+/**
+ * SetInfo
+ *
+ * Helper class to persist Set in Persistent storage
+ *
+ */
+class SetInfo<V> {
+  static readonly replacer: string = "ace_engine_state_mgmt_set_replacer";
+
+  constructor(
+    public setReplacer: string,
+    public values: V[]
+  ) { }
+
+  // Check if the given object is of type SetInfo
+  static isObject<V>(obj: unknown): obj is SetInfo<V> {
+    const typedObject = obj as SetInfo<V>;
+    if ('setReplacer' in typedObject && typedObject.setReplacer === SetInfo.replacer) {
+      return true;
+    }
+    return false;
+  }
+
+  // Convert Set to Object
+  static toObject<V>(set: Set<V>): SetInfo<V> {
+    const values: V[] = Array.from(set.values());
+    return new SetInfo(SetInfo.replacer, values);
+  }
+
+  // Convert Object to Set
+  static toSet<V>(obj: SetInfo<V>): Set<V> {
+    return new Set<V>(obj.values);
+  }
+}
+
+/**
+ * DateInfo
+ *
+ * Helper class to persist Date in Persistent storage
+ *
+ */
+class DateInfo {
+  static readonly replacer: string = "ace_engine_state_mgmt_date_replacer";
+
+  constructor(
+    public dateReplacer: string,
+    public date: string
+  ) { }
+
+  // Check if the given object is of type DateInfo
+  static isObject(obj: unknown): obj is DateInfo {
+    const typedObject = obj as DateInfo;
+    if ('dateReplacer' in typedObject && typedObject.dateReplacer === DateInfo.replacer) {
+      return true;
+    }
+    return false;
+  }
+
+  // Convert Date to Object
+  static toObject(date: Date): DateInfo {
+    return new DateInfo(DateInfo.replacer, date.toISOString());
+  }
+
+  // Convert Object to Date
+  static toDate(obj: DateInfo): Date {
+    return new Date(obj.date);
+  }
+}
+
+/**
  * PersistentStorage
  * 
  * Keeps current values of select AppStorage property properties persisted to file.
@@ -181,7 +287,7 @@ class PersistentStorage implements IMultiPropertiesChangeSubscriber {
   public static notifyHasChanged(propName: string) {
   stateMgmtConsole.debug(`PersistentStorage: force writing '${propName}'-
       '${PersistentStorage.getOrCreate().links_.get(propName)}' to storage`);
-  PersistentStorage.storage_.set(propName,
+  PersistentStorage.getOrCreate().writeToPersistentStorage(propName,
     PersistentStorage.getOrCreate().links_.get(propName).get());
   }
 
@@ -192,7 +298,7 @@ class PersistentStorage implements IMultiPropertiesChangeSubscriber {
   public static NotifyHasChanged(propName: string) {
     stateMgmtConsole.debug(`PersistentStorage: force writing '${propName}'-
         '${PersistentStorage.getOrCreate().links_.get(propName)}' to storage`);
-    PersistentStorage.storage_.set(propName,
+    PersistentStorage.getOrCreate().writeToPersistentStorage(propName,
       PersistentStorage.getOrCreate().links_.get(propName).get());
   }
 
@@ -214,7 +320,7 @@ class PersistentStorage implements IMultiPropertiesChangeSubscriber {
     if (this.persistProp1(propName, defaultValue)) {
       // persist new prop
       stateMgmtConsole.debug(`PersistentStorage: writing '${propName}' - '${this.links_.get(propName)}' to storage`);
-      PersistentStorage.storage_.set(propName, this.links_.get(propName).get());
+      this.writeToPersistentStorage(propName, this.links_.get(propName).get());
     }
   }
 
@@ -223,7 +329,7 @@ class PersistentStorage implements IMultiPropertiesChangeSubscriber {
   // does everything except writing prop to disk
   private persistProp1<T>(propName: string, defaultValue: T): boolean {
     stateMgmtConsole.debug(`PersistentStorage: persistProp1 ${propName} ${defaultValue}`);
-    if (defaultValue == null || defaultValue == undefined) {
+    if (defaultValue == null && !Utils.isApiVersionEQAbove(12)) {
       stateMgmtConsole.error(`PersistentStorage: persistProp for ${propName} called with 'null' or 'undefined' default value!`);
       return false;
     }
@@ -238,14 +344,13 @@ class PersistentStorage implements IMultiPropertiesChangeSubscriber {
       stateMgmtConsole.debug(`PersistentStorage: persistProp ${propName} in AppStorage, using that`);
       this.links_.set(propName, link);
     } else {
-      let newValue: T = PersistentStorage.storage_.get(propName);
       let returnValue: T;
-      if (newValue == undefined || newValue == null) {
+      if (!PersistentStorage.storage_.has(propName)) {
         stateMgmtConsole.debug(`PersistentStorage: no entry for ${propName}, will initialize with default value`);
         returnValue = defaultValue;
       }
       else {
-        returnValue = newValue;
+        returnValue = this.readFromPersistentStorage(propName);
       }
       link = AppStorage.setAndLink(propName, returnValue, this);
       this.links_.set(propName, link);
@@ -277,8 +382,39 @@ class PersistentStorage implements IMultiPropertiesChangeSubscriber {
   private write(): void {
     this.links_.forEach((link, propName, map) => {
       stateMgmtConsole.debug(`PersistentStorage: writing ${propName} to storage`);
-      PersistentStorage.storage_.set(propName, link.get());
+      this.writeToPersistentStorage(propName, link.get());
     });
+  }
+
+  // helper function to write to the persistent storage
+  // any additional check and formatting can to be done here
+  private writeToPersistentStorage<T>(propName: string, value: T): void {
+    if (value instanceof Map) {
+      value = MapInfo.toObject(value) as unknown as T;
+    } else if (value instanceof Set) {
+      value = SetInfo.toObject(value) as unknown as T;
+    } else if (value instanceof Date) {
+      value = DateInfo.toObject(value) as unknown as T;
+    }
+
+    PersistentStorage.storage_.set(propName, value);
+  }
+
+  // helper function to read from the persistent storage
+  // any additional check and formatting can to be done here
+  private readFromPersistentStorage<T>(propName: string): T {
+    let newValue: T = PersistentStorage.storage_.get(propName);
+    if (newValue instanceof Object) {
+      if (MapInfo.isObject(newValue)) {
+        newValue = MapInfo.toMap(newValue) as unknown as T;
+      } else if (SetInfo.isObject(newValue)) {
+        newValue = SetInfo.toSet(newValue) as unknown as T;
+      } else if (DateInfo.isObject(newValue)) {
+        newValue = DateInfo.toDate(newValue) as unknown as T;
+      }
+    }
+
+    return newValue;
   }
 
   // FU code path method

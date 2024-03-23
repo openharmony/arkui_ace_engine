@@ -166,7 +166,7 @@ void JSVideo::JsOnStart(const JSCallbackInfo& info)
         return;
     }
     auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(info[0]));
-    WeakPtr<NG::FrameNode> targetNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    WeakPtr<NG::FrameNode> targetNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
     auto onStart = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc), node = targetNode](
                        const std::string& param) {
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
@@ -184,7 +184,7 @@ void JSVideo::JsOnPause(const JSCallbackInfo& info)
         return;
     }
     auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(info[0]));
-    WeakPtr<NG::FrameNode> targetNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    WeakPtr<NG::FrameNode> targetNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
     auto onPause = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc), node = targetNode](
                        const std::string& param) {
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
@@ -202,7 +202,7 @@ void JSVideo::JsOnFinish(const JSCallbackInfo& info)
         return;
     }
     auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(info[0]));
-    WeakPtr<NG::FrameNode> targetNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    WeakPtr<NG::FrameNode> targetNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
     auto onFinish = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc), node = targetNode](
                         const std::string& param) {
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
@@ -214,13 +214,31 @@ void JSVideo::JsOnFinish(const JSCallbackInfo& info)
     VideoModel::GetInstance()->SetOnFinish(std::move(onFinish));
 }
 
+void JSVideo::JsOnStop(const JSCallbackInfo& info)
+{
+    if (!info[0]->IsFunction()) {
+        return;
+    }
+    auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(info[0]));
+    WeakPtr<NG::FrameNode> targetNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    auto onStop = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc), node = targetNode](
+                        const std::string& param) {
+        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+        ACE_SCORING_EVENT("Video.onStop");
+        PipelineContext::SetCallBackNode(node);
+        std::vector<std::string> keys = { "stop" };
+        func->Execute(keys, param);
+    };
+    VideoModel::GetInstance()->SetOnStop(std::move(onStop));
+}
+
 void JSVideo::JsOnFullscreenChange(const JSCallbackInfo& info)
 {
     if (!info[0]->IsFunction()) {
         return;
     }
     auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(info[0]));
-    WeakPtr<NG::FrameNode> targetNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    WeakPtr<NG::FrameNode> targetNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
     auto OnFullScreenChange = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc), node = targetNode](
                                   const std::string& param) {
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
@@ -238,7 +256,7 @@ void JSVideo::JsOnPrepared(const JSCallbackInfo& info)
         return;
     }
     auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(info[0]));
-    WeakPtr<NG::FrameNode> targetNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    WeakPtr<NG::FrameNode> targetNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
     auto onPrepared = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc), node = targetNode](
                           const std::string& param) {
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
@@ -256,7 +274,7 @@ void JSVideo::JsOnSeeking(const JSCallbackInfo& info)
         return;
     }
     auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(info[0]));
-    WeakPtr<NG::FrameNode> targetNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    WeakPtr<NG::FrameNode> targetNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
     auto onSeeking = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc), node = targetNode](
                          const std::string& param) {
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
@@ -274,7 +292,7 @@ void JSVideo::JsOnSeeked(const JSCallbackInfo& info)
         return;
     }
     auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(info[0]));
-    WeakPtr<NG::FrameNode> targetNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    WeakPtr<NG::FrameNode> targetNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
     auto onSeeked = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc), node = targetNode](
                         const std::string& param) {
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
@@ -292,7 +310,7 @@ void JSVideo::JsOnUpdate(const JSCallbackInfo& info)
         return;
     }
     auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(info[0]));
-    WeakPtr<NG::FrameNode> targetNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    WeakPtr<NG::FrameNode> targetNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
     auto onUpdate = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc), node = targetNode](
                         const std::string& param) {
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
@@ -310,7 +328,7 @@ void JSVideo::JsOnError(const JSCallbackInfo& info)
         return;
     }
     auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(info[0]));
-    WeakPtr<NG::FrameNode> targetNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    WeakPtr<NG::FrameNode> targetNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
     auto onError = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc), node = targetNode](
                        const std::string& param) {
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
@@ -329,7 +347,7 @@ EventMarker JSVideo::GetEventMarker(const JSCallbackInfo& info, const std::vecto
     }
 
     RefPtr<JsFunction> jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(info[0]));
-    WeakPtr<NG::FrameNode> targetNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    WeakPtr<NG::FrameNode> targetNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
     auto eventMarker = EventMarker([execCtx = info.GetExecutionContext(), func = std::move(jsFunc), keys,
                                        node = targetNode](const std::string& param) {
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
@@ -359,6 +377,7 @@ void JSVideo::JSBind(BindingTarget globalObj)
     JSClass<JSVideo>::StaticMethod("onSeeked", &JSVideo::JsOnSeeked);
     JSClass<JSVideo>::StaticMethod("onUpdate", &JSVideo::JsOnUpdate);
     JSClass<JSVideo>::StaticMethod("onError", &JSVideo::JsOnError);
+    JSClass<JSVideo>::StaticMethod("onStop", &JSVideo::JsOnStop);
 
     JSClass<JSVideo>::StaticMethod("onTouch", &JSInteractableView::JsOnTouch);
     JSClass<JSVideo>::StaticMethod("onHover", &JSInteractableView::JsOnHover);

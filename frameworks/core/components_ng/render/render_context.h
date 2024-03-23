@@ -28,6 +28,7 @@
 #include "base/utils/noncopyable.h"
 #include "core/animation/page_transition_common.h"
 #include "core/components/common/layout/constants.h"
+#include "core/components/common/layout/position_param.h"
 #include "core/components/common/properties/color.h"
 #include "core/components/common/properties/shared_transition_option.h"
 #include "core/components_ng/base/modifier.h"
@@ -140,7 +141,11 @@ public:
         std::optional<std::string> surfaceName;
         PatternType patternType = PatternType::DEFAULT;
     };
+#if defined(VIDEO_TEXTURE_SUPPORTED) && defined(XCOMPONENT_SUPPORTED)
+    virtual void InitContext(bool isRoot, const std::optional<ContextParam>& param, bool isUseExtSurface = false) {}
+#else
     virtual void InitContext(bool isRoot, const std::optional<ContextParam>& param) {}
+#endif
 
     virtual void SetSurfaceChangedCallBack(
         const std::function<void(float, float, float, float)>& callback) {}
@@ -257,6 +262,7 @@ public:
     virtual void OnTransformScaleUpdate(const VectorF& value) {}
     virtual void OnTransformCenterUpdate(const DimensionOffset& value) {}
     virtual void OnOffsetUpdate(const OffsetT<Dimension>& value) {}
+    virtual void OnOffsetEdgesUpdate(const EdgesParam& value) {}
 
     // used in arkts_native_render_node_modifier set property directly to rsNode
     virtual void SetRotation(float rotationX, float rotationY, float rotationZ) {}
@@ -271,7 +277,7 @@ public:
     virtual void SetFrame(float positionX, float positionY, float width, float height) {}
     virtual void SetOpacity(float opacity) {}
     virtual void SetTranslate(float translateX, float translateY, float translateZ) {}
-
+    virtual void CleanTransition() {}
     virtual void SetRectMask(const RectF& rect, const ShapeMaskProperty& property) {}
     virtual void SetCircleMask(const Circle& circle, const ShapeMaskProperty& property) {}
     virtual void SetRoundRectMask(const RoundRect& roundRect, const ShapeMaskProperty& property) {}
@@ -327,6 +333,8 @@ public:
     virtual void UpdateTranslateInXY(const OffsetF& offset) {}
 
     virtual void SetTransitionOutCallback(std::function<void()>&& callback) {}
+
+    virtual void SetTransitionInCallback(std::function<void()>&& callback) {}
 
     virtual void ToJsonValue(std::unique_ptr<JsonValue>& json) const;
 
@@ -392,6 +400,7 @@ public:
     virtual void UpdateMouseSelectWithRect(const RectF& rect, const Color& fillColor, const Color& strokeColor) {}
 
     virtual void OnPositionUpdate(const OffsetT<Dimension>& value) {}
+    virtual void OnPositionEdgesUpdate(const EdgesParam& value) {}
     virtual void OnZIndexUpdate(int32_t value) {}
 
     virtual void OnBackgroundColorUpdate(const Color& value) {}
@@ -402,8 +411,10 @@ public:
     virtual void OnLightUpEffectUpdate(double radio) {}
     virtual void OnClickEffectLevelUpdate(const ClickEffectInfo& info) {}
     virtual void OnRenderGroupUpdate(bool isRenderGroup) {}
+    virtual void UpdateRenderGroup(bool isRenderGroup, bool isForced, bool includeProperty) {}
     virtual void OnSuggestedRenderGroupUpdate(bool isRenderGroup) {}
     virtual void OnRenderFitUpdate(RenderFit renderFit) {}
+    virtual void OnNodeNameUpdate(const std::string& id) {}
     virtual void OnParticleOptionArrayUpdate(const std::list<ParticleOption>& optionArray) {}
     ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(SphericalEffect, double);
     ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(PixelStretchEffect, PixStretchEffectOption);
@@ -419,6 +430,7 @@ public:
     virtual void SetActualForegroundColor(const Color& value) {}
 
     virtual void ResetSurface() {}
+    virtual void PaintDebugBoundary(bool flag) {}
     // transform matrix
     ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(TransformMatrix, Matrix4);
 
@@ -452,6 +464,7 @@ public:
     ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(BackgroundColor, Color);
     ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(Opacity, double);
     ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(RenderGroup, bool);
+    ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(NodeName, std::string);
     ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(SuggestedRenderGroup, bool);
     ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(ForegroundColor, Color);
     ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(ForegroundColorStrategy, ForegroundColorStrategy);
@@ -510,6 +523,8 @@ public:
     ACE_DEFINE_PROPERTY_GROUP(PositionProperty, RenderPositionProperty);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(PositionProperty, Position, OffsetT<Dimension>);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(PositionProperty, Offset, OffsetT<Dimension>);
+    ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(PositionProperty, PositionEdges, EdgesParam);
+    ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(PositionProperty, OffsetEdges, EdgesParam);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(PositionProperty, Anchor, OffsetT<Dimension>);
 
     // zIndex

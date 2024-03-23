@@ -40,6 +40,7 @@
 #include "core/components/dialog/dialog_component.h"
 #include "core/components/toast/toast_component.h"
 #include "core/components_ng/base/ui_node.h"
+#include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/base/view_stack_model.h"
 #include "core/components_ng/pattern/overlay/overlay_manager.h"
 #include "core/components_ng/pattern/stage/page_pattern.h"
@@ -822,6 +823,9 @@ void FrontendDelegateDeclarative::Push(const std::string& uri, const std::string
 {
     if (Container::IsCurrentUseNewPipeline()) {
         CHECK_NULL_VOID(pageRouterManager_);
+        auto currentId = GetEffectiveContainerId();
+        CHECK_EQUAL_VOID(currentId.has_value(), false);
+        ContainerScope scope(currentId.value());
         pageRouterManager_->Push(NG::RouterPageInfo({ uri, params }));
         OnMediaQueryUpdate();
         return;
@@ -834,6 +838,9 @@ void FrontendDelegateDeclarative::PushWithMode(const std::string& uri, const std
 {
     if (Container::IsCurrentUseNewPipeline()) {
         CHECK_NULL_VOID(pageRouterManager_);
+        auto currentId = GetEffectiveContainerId();
+        CHECK_EQUAL_VOID(currentId.has_value(), false);
+        ContainerScope scope(currentId.value());
         pageRouterManager_->Push(NG::RouterPageInfo({ uri, params, static_cast<NG::RouterMode>(routerMode) }));
         OnMediaQueryUpdate();
         return;
@@ -846,13 +853,9 @@ void FrontendDelegateDeclarative::PushWithCallback(const std::string& uri, const
 {
     if (Container::IsCurrentUseNewPipeline()) {
         CHECK_NULL_VOID(pageRouterManager_);
-        auto container = Container::Current();
-        CHECK_NULL_VOID(container);
-        auto currentId = Container::CurrentId();
-        if (container->IsSubContainer()) {
-            currentId = SubwindowManager::GetInstance()->GetParentContainerId(Container::CurrentId());
-        }
-        ContainerScope scope(currentId);
+        auto currentId = GetEffectiveContainerId();
+        CHECK_EQUAL_VOID(currentId.has_value(), false);
+        ContainerScope scope(currentId.value());
         pageRouterManager_->Push(
             NG::RouterPageInfo({ uri, params, static_cast<NG::RouterMode>(routerMode), errorCallback }));
         OnMediaQueryUpdate();
@@ -865,6 +868,9 @@ void FrontendDelegateDeclarative::PushNamedRoute(const std::string& uri, const s
     const std::function<void(const std::string&, int32_t)>& errorCallback, uint32_t routerMode)
 {
     CHECK_NULL_VOID(pageRouterManager_);
+    auto currentId = GetEffectiveContainerId();
+    CHECK_EQUAL_VOID(currentId.has_value(), false);
+    ContainerScope scope(currentId.value());
     pageRouterManager_->PushNamedRoute(
         NG::RouterPageInfo({ uri, params, static_cast<NG::RouterMode>(routerMode), errorCallback }));
     OnMediaQueryUpdate();
@@ -874,6 +880,9 @@ void FrontendDelegateDeclarative::Replace(const std::string& uri, const std::str
 {
     if (Container::IsCurrentUseNewPipeline()) {
         CHECK_NULL_VOID(pageRouterManager_);
+        auto currentId = GetEffectiveContainerId();
+        CHECK_EQUAL_VOID(currentId.has_value(), false);
+        ContainerScope scope(currentId.value());
         pageRouterManager_->Replace(NG::RouterPageInfo({ uri, params }));
         OnMediaQueryUpdate();
         return;
@@ -886,6 +895,9 @@ void FrontendDelegateDeclarative::ReplaceWithMode(
 {
     if (Container::IsCurrentUseNewPipeline()) {
         CHECK_NULL_VOID(pageRouterManager_);
+        auto currentId = GetEffectiveContainerId();
+        CHECK_EQUAL_VOID(currentId.has_value(), false);
+        ContainerScope scope(currentId.value());
         pageRouterManager_->Replace(NG::RouterPageInfo({ uri, params, static_cast<NG::RouterMode>(routerMode) }));
         OnMediaQueryUpdate();
         return;
@@ -898,6 +910,9 @@ void FrontendDelegateDeclarative::ReplaceWithCallback(const std::string& uri, co
 {
     if (Container::IsCurrentUseNewPipeline()) {
         CHECK_NULL_VOID(pageRouterManager_);
+        auto currentId = GetEffectiveContainerId();
+        CHECK_EQUAL_VOID(currentId.has_value(), false);
+        ContainerScope scope(currentId.value());
         pageRouterManager_->Replace(
             NG::RouterPageInfo({ uri, params, static_cast<NG::RouterMode>(routerMode), errorCallback }));
         OnMediaQueryUpdate();
@@ -910,6 +925,9 @@ void FrontendDelegateDeclarative::ReplaceNamedRoute(const std::string& uri, cons
     const std::function<void(const std::string&, int32_t)>& errorCallback, uint32_t routerMode)
 {
     CHECK_NULL_VOID(pageRouterManager_);
+    auto currentId = GetEffectiveContainerId();
+    CHECK_EQUAL_VOID(currentId.has_value(), false);
+    ContainerScope scope(currentId.value());
     pageRouterManager_->ReplaceNamedRoute(
         NG::RouterPageInfo({ uri, params, static_cast<NG::RouterMode>(routerMode), errorCallback }));
     OnMediaQueryUpdate();
@@ -919,6 +937,9 @@ void FrontendDelegateDeclarative::Back(const std::string& uri, const std::string
 {
     if (Container::IsCurrentUseNewPipeline()) {
         CHECK_NULL_VOID(pageRouterManager_);
+        auto currentId = GetEffectiveContainerId();
+        CHECK_EQUAL_VOID(currentId.has_value(), false);
+        ContainerScope scope(currentId.value());
         pageRouterManager_->BackWithTarget(NG::RouterPageInfo({ uri, params }));
         OnMediaQueryUpdate();
         return;
@@ -926,10 +947,40 @@ void FrontendDelegateDeclarative::Back(const std::string& uri, const std::string
     BackWithTarget(PageTarget(uri), params);
 }
 
+void FrontendDelegateDeclarative::BackToIndex(int32_t index, const std::string& params)
+{
+    if (Container::IsCurrentUseNewPipeline()) {
+        CHECK_NULL_VOID(pageRouterManager_);
+        auto currentId = GetEffectiveContainerId();
+        CHECK_EQUAL_VOID(currentId.has_value(), false);
+        ContainerScope scope(currentId.value());
+        pageRouterManager_->BackToIndexWithTarget(index, params);
+        OnMediaQueryUpdate();
+        return;
+    }
+    if (index > pageRouteStack_.size() || index <= 0) {
+        LOGE("The index is less than or equal to zero or exceeds the maximum length of the page stack");
+        return;
+    }
+    std::string url;
+    int32_t counter = 1;
+    for (const auto& iter : pageRouteStack_) {
+        if (counter == index) {
+            url = iter.url;
+            break;
+        }
+        counter++;
+    }
+    BackWithTarget(PageTarget(url), params);
+}
+
 void FrontendDelegateDeclarative::Clear()
 {
     if (Container::IsCurrentUseNewPipeline()) {
         CHECK_NULL_VOID(pageRouterManager_);
+        auto currentId = GetEffectiveContainerId();
+        CHECK_EQUAL_VOID(currentId.has_value(), false);
+        ContainerScope scope(currentId.value());
         pageRouterManager_->Clear();
         return;
     }
@@ -948,6 +999,9 @@ int32_t FrontendDelegateDeclarative::GetStackSize() const
 {
     if (Container::IsCurrentUseNewPipeline()) {
         CHECK_NULL_RETURN(pageRouterManager_, 0);
+        auto currentId = GetEffectiveContainerId();
+        CHECK_EQUAL_RETURN(currentId.has_value(), false, 0);
+        ContainerScope scope(currentId.value());
         return pageRouterManager_->GetStackSize();
     }
     std::lock_guard<std::mutex> lock(mutex_);
@@ -958,6 +1012,9 @@ void FrontendDelegateDeclarative::GetState(int32_t& index, std::string& name, st
 {
     if (Container::IsCurrentUseNewPipeline()) {
         CHECK_NULL_VOID(pageRouterManager_);
+        auto currentId = GetEffectiveContainerId();
+        CHECK_EQUAL_VOID(currentId.has_value(), false);
+        ContainerScope scope(currentId.value());
         pageRouterManager_->GetState(index, name, path);
         return;
     }
@@ -982,14 +1039,101 @@ void FrontendDelegateDeclarative::GetState(int32_t& index, std::string& name, st
     }
 }
 
+void FrontendDelegateDeclarative::GetRouterStateByIndex(int32_t& index, std::string& name,
+    std::string& path, std::string& params)
+{
+    if (Container::IsCurrentUseNewPipeline()) {
+        CHECK_NULL_VOID(pageRouterManager_);
+        auto currentId = GetEffectiveContainerId();
+        CHECK_EQUAL_VOID(currentId.has_value(), false);
+        ContainerScope scope(currentId.value());
+        pageRouterManager_->GetStateByIndex(index, name, path, params);
+        return;
+    }
+    if (index > pageRouteStack_.size() || index <= 0) {
+        LOGE("The index is less than or equal to zero or exceeds the maximum length of the page stack");
+        return;
+    }
+    std::string url;
+    {
+        std::lock_guard<std::mutex> lock(mutex_);
+        if (pageRouteStack_.empty()) {
+            LOGI("pageRouteStack is empty");
+            return;
+        }
+        int32_t counter = 1;
+        for (const auto& iter : pageRouteStack_) {
+            if (counter == index) {
+                url = iter.url;
+                break;
+            }
+            counter++;
+        }
+    }
+    auto pos = url.rfind(".js");
+    if (pos == url.length() - 3) {
+        url = url.substr(0, pos);
+    }
+    pos = url.rfind("/");
+    if (pos != std::string::npos) {
+        name = url.substr(pos + 1);
+        path = url.substr(0, pos + 1);
+    }
+    params = GetParams();
+}
+
+void FrontendDelegateDeclarative::GetRouterStateByUrl(std::string& url, std::vector<StateInfo>& stateArray)
+{
+    if (Container::IsCurrentUseNewPipeline()) {
+        CHECK_NULL_VOID(pageRouterManager_);
+        auto currentId = GetEffectiveContainerId();
+        CHECK_EQUAL_VOID(currentId.has_value(), false);
+        ContainerScope scope(currentId.value());
+        pageRouterManager_->GetStateByUrl(url, stateArray);
+        return;
+    }
+
+    int32_t counter = 1;
+    std::string tempUrl;
+    StateInfo stateInfo;
+    {
+        std::lock_guard<std::mutex> lock(mutex_);
+        if (pageRouteStack_.empty()) {
+            LOGI("pageRouteStack is empty");
+            return;
+        }
+        for (const auto& iter : pageRouteStack_) {
+            if (iter.url == url) {
+                stateInfo.index = counter;
+                auto pos = url.rfind(".js");
+                if (pos == url.length() - 3) {
+                    tempUrl = url.substr(0, pos);
+                }
+                pos = tempUrl.rfind("/");
+                if (pos != std::string::npos) {
+                    stateInfo.name = tempUrl.substr(pos + 1);
+                    stateInfo.path = tempUrl.substr(0, pos + 1);
+                }
+                stateInfo.params = GetParams();
+                stateArray.emplace_back(stateInfo);
+            }
+            counter++;
+        }
+    }
+}
+
 std::string FrontendDelegateDeclarative::GetParams()
 {
     if (Container::IsCurrentUseNewPipeline()) {
         CHECK_NULL_RETURN(pageRouterManager_, "");
+        auto currentId = GetEffectiveContainerId();
+        CHECK_EQUAL_RETURN(currentId.has_value(), false, "");
+        ContainerScope scope(currentId.value());
         return pageRouterManager_->GetParams();
     }
-    if (pageParamMap_.find(pageId_) != pageParamMap_.end()) {
-        return pageParamMap_.find(pageId_)->second;
+    auto iter = pageParamMap_.find(pageId_);
+    if (iter != pageParamMap_.end()) {
+        return iter->second;
     }
     return "";
 }
@@ -998,6 +1142,9 @@ int32_t FrontendDelegateDeclarative::GetIndexByUrl(const std::string& url)
 {
     if (Container::IsCurrentUseNewPipeline()) {
         CHECK_NULL_RETURN(pageRouterManager_, INVALID_PAGE_ID);
+        auto currentId = GetEffectiveContainerId();
+        CHECK_EQUAL_RETURN(currentId.has_value(), false, 0);
+        ContainerScope scope(currentId.value());
         return pageRouterManager_->GetIndexByUrl(url);
     }
     std::lock_guard<std::mutex> lock(mutex_);
@@ -1380,18 +1527,18 @@ Size FrontendDelegateDeclarative::MeasureTextSize(const MeasureContext& context)
     return MeasureUtil::MeasureTextSize(context);
 }
 
-void FrontendDelegateDeclarative::ShowToast(
-    const std::string& message, int32_t duration, const std::string& bottom, const NG::ToastShowMode& showMode)
+void FrontendDelegateDeclarative::ShowToast(const std::string& message, int32_t duration, const std::string& bottom,
+    const NG::ToastShowMode& showMode, int32_t alignment, std::optional<DimensionOffset> offset)
 {
     TAG_LOGD(AceLogTag::ACE_OVERLAY, "show toast enter");
     int32_t durationTime = std::clamp(duration, TOAST_TIME_DEFAULT, TOAST_TIME_MAX);
     bool isRightToLeft = AceApplicationInfo::GetInstance().IsRightToLeft();
     if (Container::IsCurrentUseNewPipeline()) {
-        auto task = [durationTime, message, bottom, isRightToLeft, showMode, containerId = Container::CurrentId()](
-                        const RefPtr<NG::OverlayManager>& overlayManager) {
+        auto task = [durationTime, message, bottom, isRightToLeft, showMode, alignment, offset,
+                        containerId = Container::CurrentId()](const RefPtr<NG::OverlayManager>& overlayManager) {
             CHECK_NULL_VOID(overlayManager);
             ContainerScope scope(containerId);
-            overlayManager->ShowToast(message, durationTime, bottom, isRightToLeft, showMode);
+            overlayManager->ShowToast(message, durationTime, bottom, isRightToLeft, showMode, alignment, offset);
         };
         MainWindowOverlay(std::move(task));
         return;
@@ -1524,6 +1671,13 @@ void FrontendDelegateDeclarative::ShowDialog(const PromptDialogAttr& dialogAttr,
         .isModal = dialogAttr.isModal,
         .maskRect = dialogAttr.maskRect,
     };
+#if defined(PREVIEW)
+    if (dialogProperties.isShowInSubWindow) {
+        LOGW("[Engine Log] Unable to use the SubWindow in the Previewer. Perform this operation on the "
+             "emulator or a real device instead.");
+        dialogProperties.isShowInSubWindow = false;
+    }
+#endif
     if (dialogAttr.alignment.has_value()) {
         dialogProperties.alignment = dialogAttr.alignment.value();
     }
@@ -1548,6 +1702,13 @@ void FrontendDelegateDeclarative::ShowDialog(const PromptDialogAttr& dialogAttr,
         .onStatusChanged = std::move(onStatusChanged),
         .maskRect = dialogAttr.maskRect,
     };
+#if defined(PREVIEW)
+    if (dialogProperties.isShowInSubWindow) {
+        LOGW("[Engine Log] Unable to use the SubWindow in the Previewer. Perform this operation on the "
+             "emulator or a real device instead.");
+        dialogProperties.isShowInSubWindow = false;
+    }
+#endif
     if (dialogAttr.alignment.has_value()) {
         dialogProperties.alignment = dialogAttr.alignment.value();
     }
@@ -1555,6 +1716,11 @@ void FrontendDelegateDeclarative::ShowDialog(const PromptDialogAttr& dialogAttr,
         dialogProperties.offset = dialogAttr.offset.value();
     }
     ShowDialogInner(dialogProperties, std::move(callback), callbacks);
+}
+
+void FrontendDelegateDeclarative::RemoveCustomDialog()
+{
+    NG::ViewAbstract::DismissDialog();
 }
 
 void FrontendDelegateDeclarative::OpenCustomDialog(const PromptDialogAttr &dialogAttr,
@@ -1566,23 +1732,37 @@ void FrontendDelegateDeclarative::OpenCustomDialog(const PromptDialogAttr &dialo
         .isSysBlurStyle = false,
         .customBuilder = dialogAttr.customBuilder,
         .maskRect = dialogAttr.maskRect,
+        .onWillDismiss = dialogAttr.customOnWillDismiss,
+        .borderWidth = dialogAttr.borderWidth,
+        .borderColor = dialogAttr.borderColor,
+        .borderStyle = dialogAttr.borderStyle,
+        .borderRadius = dialogAttr.borderRadius,
+        .shadow = dialogAttr.shadow,
+        .backgroundColor = dialogAttr.backgroundColor,
+        .width = dialogAttr.width,
+        .height = dialogAttr.height,
     };
+#if defined(PREVIEW)
+    if (dialogProperties.isShowInSubWindow) {
+        LOGW("[Engine Log] Unable to use the SubWindow in the Previewer. Perform this operation on the "
+             "emulator or a real device instead.");
+        dialogProperties.isShowInSubWindow = false;
+    }
+#endif
     if (dialogAttr.alignment.has_value()) {
         dialogProperties.alignment = dialogAttr.alignment.value();
     }
     if (dialogAttr.offset.has_value()) {
         dialogProperties.offset = dialogAttr.offset.value();
     }
-    auto pipelineContext = pipelineContextHolder_.Get();
     if (Container::IsCurrentUseNewPipeline()) {
         LOGI("Dialog IsCurrentUseNewPipeline.");
         auto task = [dialogAttr, dialogProperties, callback](const RefPtr<NG::OverlayManager>& overlayManager) mutable {
             CHECK_NULL_VOID(overlayManager);
             LOGI("Begin to open custom dialog ");
             if (dialogProperties.isShowInSubWindow) {
-                SubwindowManager::GetInstance()->OpenCustomDialog(dialogAttr, std::move(callback));
+                SubwindowManager::GetInstance()->OpenCustomDialogNG(dialogProperties, std::move(callback));
                 if (dialogProperties.isModal) {
-                    // temporary not support isShowInSubWindow and isModal
                     LOGW("temporary not support isShowInSubWindow and isModal");
                 }
             } else {
@@ -1594,7 +1774,6 @@ void FrontendDelegateDeclarative::OpenCustomDialog(const PromptDialogAttr &dialo
     } else {
         LOGW("not support old pipeline");
     }
-    return;
 }
 
 void FrontendDelegateDeclarative::CloseCustomDialog(const int32_t dialogId)
@@ -1603,6 +1782,7 @@ void FrontendDelegateDeclarative::CloseCustomDialog(const int32_t dialogId)
         CHECK_NULL_VOID(overlayManager);
         LOGI("begin to close custom dialog.");
         overlayManager->CloseCustomDialog(dialogId);
+        SubwindowManager::GetInstance()->CloseCustomDialogNG(dialogId);
     };
     MainWindowOverlay(std::move(task));
     return;
@@ -1717,6 +1897,13 @@ void FrontendDelegateDeclarative::ShowActionMenu(const PromptDialogAttr& dialogA
         .isShowInSubWindow = dialogAttr.showInSubWindow,
         .isModal = dialogAttr.isModal,
     };
+#if defined(PREVIEW)
+    if (dialogProperties.isShowInSubWindow) {
+        LOGW("[Engine Log] Unable to use the SubWindow in the Previewer. Perform this operation on the "
+             "emulator or a real device instead.");
+        dialogProperties.isShowInSubWindow = false;
+    }
+#endif
     ShowActionMenuInner(dialogProperties, buttons, std::move(callback));
 }
 
@@ -2569,6 +2756,19 @@ void FrontendDelegateDeclarative::ReplacePageInSubStage(const RefPtr<JsAcePage>&
             delegate->isStagingPageExist_ = false;
         },
         TaskExecutor::TaskType::UI);
+}
+
+std::optional<int32_t> FrontendDelegateDeclarative::GetEffectiveContainerId() const
+{
+    std::optional<int32_t> id;
+    auto currentId = Container::CurrentId();
+    auto container = Container::GetContainer(currentId);
+    CHECK_NULL_RETURN(container, id);
+    if (container->IsSubContainer()) {
+        currentId = SubwindowManager::GetInstance()->GetParentContainerId(currentId);
+    }
+    id.emplace(currentId);
+    return id;
 }
 
 void FrontendDelegateDeclarative::LoadReplacePage(int32_t pageId, const PageTarget& target, const std::string& params)

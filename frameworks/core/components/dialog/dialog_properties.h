@@ -20,8 +20,10 @@
 
 #include "base/geometry/dimension_offset.h"
 #include "core/components/common/properties/color.h"
+#include "core/components/common/properties/shadow.h"
 #include "core/components_ng/event/click_event.h"
 #include "core/components_ng/property/border_property.h"
+#include "core/components_ng/property/transition_property.h"
 #include "core/event/ace_event_handler.h"
 #include "core/pipeline/base/component.h"
 
@@ -164,6 +166,7 @@ struct DialogProperties {
     bool isSelect = false;                // init checkbox state
     std::vector<ButtonInfo> buttons;
     std::function<void()> onCancel;       // NG cancel callback
+    std::function<void(const int32_t& info)> onWillDismiss; // Cancel Dismiss Callback
     std::function<void(int32_t, int32_t)> onSuccess;      // NG prompt success callback
     std::function<void(const bool)> onChange;             // onChange success callback
     DialogAlignment alignment = DialogAlignment::DEFAULT; // Alignment of dialog.
@@ -182,6 +185,12 @@ struct DialogProperties {
     bool isSysBlurStyle = true;           // init use sysBlurStyle
     std::function<void()> customBuilder;
     std::optional<int32_t> backgroundBlurStyle;
+    std::optional<NG::BorderWidthProperty> borderWidth;
+    std::optional<NG::BorderColorProperty> borderColor;
+    std::optional<NG::BorderStyleProperty> borderStyle;
+    std::optional<Shadow> shadow;
+    std::optional<CalcDimension> width;
+    std::optional<CalcDimension> height;
 
 #ifndef NG_BUILD
     std::unordered_map<std::string, EventMarker> callbacks; // <callback type(success, cancel, complete), eventId>
@@ -199,6 +208,7 @@ struct DialogProperties {
 
     WeakPtr<NG::UINode> windowScene;
     std::optional<DimensionRect> maskRect;
+    RefPtr<NG::ChainedTransitionEffect> transitionEffect = nullptr; // Used for AlertDialog and ActionSheet transition
 };
 
 struct PromptDialogAttr {
@@ -208,10 +218,19 @@ struct PromptDialogAttr {
     bool showInSubWindow = false;
     bool isModal = false;
     std::function<void()> customBuilder;
+    std::function<void(const int32_t& info)> customOnWillDismiss;
 
     std::optional<DialogAlignment> alignment;
     std::optional<DimensionOffset> offset;
     std::optional<DimensionRect> maskRect;
+    std::optional<Color> backgroundColor;
+    std::optional<NG::BorderWidthProperty> borderWidth;
+    std::optional<NG::BorderColorProperty> borderColor;
+    std::optional<NG::BorderStyleProperty> borderStyle;
+    std::optional<NG::BorderRadiusProperty> borderRadius;
+    std::optional<Shadow> shadow;
+    std::optional<CalcDimension> width;
+    std::optional<CalcDimension> height;
 };
 
 } // namespace OHOS::Ace

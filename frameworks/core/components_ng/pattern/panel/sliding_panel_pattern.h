@@ -23,6 +23,7 @@
 #include "core/components/common/layout/constants.h"
 #include "core/components/panel/panel_component.h"
 #include "core/components_ng/event/event_hub.h"
+#include "core/components_ng/manager/focus/focus_view.h"
 #include "core/components_ng/pattern/panel/close_icon_pattern.h"
 #include "core/components_ng/pattern/panel/drag_bar_pattern.h"
 #include "core/components_ng/pattern/panel/sliding_panel_event_hub.h"
@@ -32,8 +33,8 @@
 
 namespace OHOS::Ace::NG {
 
-class SlidingPanelPattern : public Pattern {
-    DECLARE_ACE_TYPE(SlidingPanelPattern, Pattern);
+class SlidingPanelPattern : public Pattern, public FocusView {
+    DECLARE_ACE_TYPE(SlidingPanelPattern, Pattern, FocusView);
 
 public:
     SlidingPanelPattern() = default;
@@ -68,6 +69,21 @@ public:
         return { FocusType::SCOPE, true };
     }
 
+    std::list<int32_t> GetRouteOfFirstScope() override
+    {
+        return { 0, 0, 0 };
+    }
+
+    void SetLastOffset(float lastOffset)
+    {
+        lastOffset_ = lastOffset;
+    }
+
+    float GetLastOffset() const
+    {
+        return lastOffset_;
+    }
+
     void OnAnimationStop();
     void UpdateCurrentOffset(float offset);
     void UpdateCurrentOffsetOnAnimate(float currentOffset);
@@ -83,6 +99,7 @@ private:
     // Init pan recognizer to move items when drag update, play translate animation when drag end.
     void InitPanEvent(const RefPtr<GestureEventHub>& gestureHub);
     void Update();
+    void UpdatePanelRenderContext();
     // Init LayoutProperties
     void InitializeLayoutProps();
 
@@ -147,6 +164,7 @@ private:
     std::queue<bool> isShowQueue_;
     bool isClosePanel_ = false;
     bool preAnimateFlag_ = false;
+    float lastOffset_ = 0.0f;
 
     ACE_DISALLOW_COPY_AND_MOVE(SlidingPanelPattern);
 };

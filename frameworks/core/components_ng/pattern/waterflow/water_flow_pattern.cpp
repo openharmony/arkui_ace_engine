@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -19,6 +19,7 @@
 #include "core/components/scroll/scroll_controller_base.h"
 #include "core/components_ng/pattern/waterflow/water_flow_layout_algorithm.h"
 #include "core/components_ng/pattern/waterflow/water_flow_paint_method.h"
+#include "core/components_ng/pattern/waterflow/water_flow_segmented_layout.h"
 
 namespace OHOS::Ace::NG {
 SizeF WaterFlowPattern::GetContentSize() const
@@ -49,7 +50,7 @@ bool WaterFlowPattern::UpdateCurrentOffset(float delta, int32_t source)
         return false;
     }
     SetScrollSource(source);
-
+    FireAndCleanScrollingListener();
     if (GetScrollEdgeEffect()) {
         // over scroll in drag update from normal to over scroll.
         float overScroll = 0.0f;
@@ -70,12 +71,14 @@ bool WaterFlowPattern::UpdateCurrentOffset(float delta, int32_t source)
         if (layoutInfo_.offsetEnd_ && delta < 0) {
             return false;
         }
+        if (GreatNotEqual(delta, 0.0f)) {
+            delta = std::min(delta, -layoutInfo_.currentOffset_);
+        }
     }
-
+    FireOnWillScroll(-delta);
     layoutInfo_.prevOffset_ = layoutInfo_.currentOffset_;
     layoutInfo_.currentOffset_ += delta;
     host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
-    FireAndCleanScrollingListener();
     return true;
 };
 
@@ -157,7 +160,12 @@ RefPtr<LayoutAlgorithm> WaterFlowPattern::CreateLayoutAlgorithm()
     if (targetIndex_.has_value()) {
         layoutInfo_.targetIndex_ = targetIndex_;
     }
-    auto algorithm = AceType::MakeRefPtr<WaterFlowLayoutAlgorithm>(layoutInfo_);
+    RefPtr<WaterFlowLayoutBase> algorithm;
+    if (sections_ || SystemProperties::WaterFlowUseSegmentedLayout()) {
+        algorithm = MakeRefPtr<WaterFlowSegmentedLayout>(layoutInfo_);
+    } else {
+        algorithm = MakeRefPtr<WaterFlowLayoutAlgorithm>(layoutInfo_);
+    }
     algorithm->SetCanOverScroll(CanOverScroll(GetScrollSource()));
     return algorithm;
 }
@@ -208,7 +216,7 @@ bool WaterFlowPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dir
     }
     auto layoutAlgorithmWrapper = dirty->GetLayoutAlgorithm();
     CHECK_NULL_RETURN(layoutAlgorithmWrapper, false);
-    auto layoutAlgorithm = DynamicCast<WaterFlowLayoutAlgorithm>(layoutAlgorithmWrapper->GetLayoutAlgorithm());
+    auto layoutAlgorithm = DynamicCast<WaterFlowLayoutBase>(layoutAlgorithmWrapper->GetLayoutAlgorithm());
     CHECK_NULL_RETURN(layoutAlgorithm, false);
     auto layoutInfo = layoutAlgorithm->GetLayoutInfo();
     auto host = GetHost();
@@ -216,8 +224,13 @@ bool WaterFlowPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dir
     auto eventHub = host->GetEventHub<WaterFlowEventHub>();
     CHECK_NULL_RETURN(eventHub, false);
     auto onScroll = eventHub->GetOnScroll();
+    PrintOffsetLog(AceLogTag::ACE_WATERFLOW, host->GetId(), prevOffset_ - layoutInfo.currentOffset_);
     if (onScroll) {
         FireOnScroll(prevOffset_ - layoutInfo.currentOffset_, onScroll);
+    }
+    auto onDidScroll = eventHub->GetOnDidScroll();
+    if (onDidScroll) {
+        FireOnScroll(prevOffset_ - layoutInfo.currentOffset_, onDidScroll);
     }
     bool indexChanged =
         layoutInfo_.firstIndex_ != layoutInfo.firstIndex_ || layoutInfo_.endIndex_ != layoutInfo.endIndex_;
@@ -239,7 +252,7 @@ bool WaterFlowPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dir
 
     layoutInfo_ = std::move(layoutInfo);
     if (targetIndex_.has_value()) {
-        ScrollToTargrtIndex(targetIndex_.value());
+        ScrollToTargetIndex(targetIndex_.value());
         targetIndex_.reset();
     }
     layoutInfo_.UpdateStartIndex();
@@ -252,7 +265,7 @@ bool WaterFlowPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dir
     return NeedRender();
 }
 
-bool WaterFlowPattern::ScrollToTargrtIndex(int32_t index)
+bool WaterFlowPattern::ScrollToTargetIndex(int32_t index)
 {
     if (index == LAST_ITEM) {
         auto host = GetHost();
@@ -264,7 +277,7 @@ bool WaterFlowPattern::ScrollToTargrtIndex(int32_t index)
     if (crossIndex == -1) {
         return false;
     }
-    auto item = layoutInfo_.waterFlowItems_[crossIndex][index];
+    auto item = layoutInfo_.items_[layoutInfo_.GetSegment(index)].at(crossIndex).at(index);
     float targetPosition = 0.0;
     ScrollAlign align = layoutInfo_.align_;
     switch (align) {
@@ -360,7 +373,7 @@ void WaterFlowPattern::SetAccessibilityAction()
     });
 }
 
-void WaterFlowPattern::ScrollPage(bool reverse)
+void WaterFlowPattern::ScrollPage(bool reverse, bool smooth)
 {
     CHECK_NULL_VOID(IsScrollable());
 
@@ -373,9 +386,13 @@ void WaterFlowPattern::ScrollPage(bool reverse)
     auto geometryNode = host->GetGeometryNode();
     CHECK_NULL_VOID(geometryNode);
     auto mainContentSize = geometryNode->GetPaddingSize().MainSize(axis);
-
-    UpdateCurrentOffset(reverse ? mainContentSize : -mainContentSize, SCROLL_FROM_JUMP);
-
+    if (smooth) {
+        float distance = reverse ? mainContentSize : -mainContentSize;
+        float position = layoutInfo_.currentOffset_ + distance;
+        AnimateTo(-position, -1, nullptr, true);
+    } else {
+        UpdateCurrentOffset(reverse ? mainContentSize : -mainContentSize, SCROLL_FROM_JUMP);
+    }
     // AccessibilityEventType::SCROLL_END
 }
 
@@ -416,6 +433,35 @@ Rect WaterFlowPattern::GetItemRect(int32_t index) const
         itemGeometry->GetFrameRect().Width(), itemGeometry->GetFrameRect().Height());
 }
 
+RefPtr<WaterFlowSections> WaterFlowPattern::GetOrCreateWaterFlowSections()
+{
+    if (sections_) {
+        return sections_;
+    }
+    sections_ = AceType::MakeRefPtr<WaterFlowSections>();
+    auto callback = [weakPattern = WeakClaim(this)](int32_t start) {
+        auto pattern = weakPattern.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        auto context = PipelineContext::GetCurrentContext();
+        CHECK_NULL_VOID(context);
+        context->AddBuildFinishCallBack([weakPattern, start]() {
+            auto pattern = weakPattern.Upgrade();
+            CHECK_NULL_VOID(pattern);
+            pattern->OnSectionChanged(start);
+        });
+        context->RequestFrame();
+    };
+    sections_->SetOnDataChange(callback);
+    return sections_;
+}
+
+void WaterFlowPattern::OnSectionChanged(int32_t start)
+{
+    layoutInfo_.InitSegments(sections_->GetSectionInfo(), start);
+    layoutInfo_.margins_.clear();
+    MarkDirtyNodeSelf();
+}
+
 void WaterFlowPattern::ScrollToIndex(int32_t index, bool smooth, ScrollAlign align)
 {
     SetScrollSource(SCROLL_FROM_JUMP);
@@ -423,7 +469,7 @@ void WaterFlowPattern::ScrollToIndex(int32_t index, bool smooth, ScrollAlign ali
     StopAnimate();
     if ((index >= 0) || (index == LAST_ITEM)) {
         if (smooth) {
-            if (!ScrollToTargrtIndex(index)) {
+            if (!ScrollToTargetIndex(index)) {
                 targetIndex_ = index;
                 auto host = GetHost();
                 CHECK_NULL_VOID(host);
@@ -482,7 +528,6 @@ void WaterFlowPattern::MarkDirtyNodeSelf()
 
 void WaterFlowPattern::OnScrollEndCallback()
 {
-    SetScrollSource(SCROLL_FROM_ANIMATION);
     scrollStop_ = true;
     MarkDirtyNodeSelf();
 }
@@ -508,5 +553,28 @@ bool WaterFlowPattern::NeedRender()
     CHECK_NULL_RETURN(host, false);
     needRender = property->GetPaddingProperty() != nullptr || needRender;
     return needRender;
+}
+
+void WaterFlowPattern::ResetLayoutInfo()
+{
+    layoutInfo_.Reset();
+    if (sections_) {
+        layoutInfo_.InitSegments(sections_->GetSectionInfo(), 0);
+    }
+}
+
+void WaterFlowPattern::AddFooter(const RefPtr<NG::UINode>& footer)
+{
+    // assume this is always before other children are modified, because it's called during State update.
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    if (layoutInfo_.footerIndex_ < 0) {
+        layoutInfo_.footerIndex_ = 0;
+        host->AddChild(footer);
+    } else {
+        auto oldChild = host->GetChildAtIndex(layoutInfo_.footerIndex_);
+        host->ReplaceChild(oldChild, footer);
+    }
+    footer->SetActive(false);
 }
 } // namespace OHOS::Ace::NG

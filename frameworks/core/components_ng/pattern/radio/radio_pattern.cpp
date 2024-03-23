@@ -158,7 +158,7 @@ void RadioPattern::OnAfterModifyDone()
     }
     auto eventHub = host->GetEventHub<RadioEventHub>();
     CHECK_NULL_VOID(eventHub);
-    Recorder::NodeDataCache::Get().PutMultiple(inspectorId, eventHub->GetValue(), preCheck_);
+    Recorder::NodeDataCache::Get().PutMultiple(host, inspectorId, eventHub->GetValue(), preCheck_);
 }
 
 void RadioPattern::InitClickEvent()

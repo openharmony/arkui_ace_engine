@@ -21,7 +21,7 @@ class XComponentNode extends FrameNode {
     id: string, type: XComponentType, libraryname?: string) {
     super(uiContext, 'XComponentNode');
     const elmtId = ViewStackProcessor.AllocateNewElmetIdForNextComponent();
-    this.xcomponentNode_ = GetUINativeModule().xcomponentNode;
+    this.xcomponentNode_ = getUINativeModule().xcomponentNode;
     this.renderType_ = options.type;
     const surfaceId = options.surfaceId;
     const selfIdealWidth = options.selfIdealSize.width;

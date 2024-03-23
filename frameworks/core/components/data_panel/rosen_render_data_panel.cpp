@@ -86,7 +86,7 @@ sk_sp<SkShader> BlendSkShader(SkScalar cx, SkScalar cy, const SkColor colors[], 
     bool useEffect = false)
 #else
 std::shared_ptr<RSShaderEffect> BlendShader(RSScalar cx, RSScalar cy, const std::vector<RSColorQuad> colors,
-    const std::vector<RSScalar> pos, int colorCount, RSScalar startAngle, RSScalar drawAngle,
+    const std::vector<RSScalar>& pos, int colorCount, RSScalar startAngle, RSScalar drawAngle,
     const RSMatrix* localMatrix, bool useAnimator = false, bool useEffect = false)
 #endif
 {

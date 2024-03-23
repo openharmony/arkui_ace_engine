@@ -179,6 +179,7 @@ void ToggleModelNG::SetSwitchSelected(RefPtr<FrameNode>& childFrameNode, bool is
     }
     auto eventHub = childFrameNode->GetEventHub<SwitchEventHub>();
     CHECK_NULL_VOID(eventHub);
+    TAG_LOGD(AceLogTag::ACE_SELECT_COMPONENT, "switch mouse event %{public}d", isOn);
     eventHub->SetCurrentUIState(UI_STATE_SELECTED, isOn);
 }
 
@@ -284,9 +285,9 @@ void ToggleModelNG::SetHeight(const Dimension& height)
     NG::ViewAbstract::SetHeight(NG::CalcLength(height));
 }
 
-void ToggleModelNG::SetBackgroundColor(const Color& color)
+void ToggleModelNG::SetBackgroundColor(const Color& color, bool flag)
 {
-    ToggleButtonModelNG::SetBackgroundColor(color);
+    ToggleButtonModelNG::SetBackgroundColor(color, flag);
 }
 
 bool ToggleModelNG::IsToggle()
@@ -433,11 +434,36 @@ void ToggleModelNG::Pop()
     ViewStackProcessor::GetInstance()->PopContainer();
 }
 
+void ToggleModelNG::SetPointRadius(const Dimension& switchPointRadius)
+{
+    ACE_UPDATE_PAINT_PROPERTY(SwitchPaintProperty, PointRadius, switchPointRadius);
+}
+
+void ToggleModelNG::ResetPointRadius()
+{
+    ACE_RESET_PAINT_PROPERTY_WITH_FLAG(SwitchPaintProperty, PointRadius, PROPERTY_UPDATE_RENDER);
+}
+
+void ToggleModelNG::SetUnselectedColor(const Color& unselectedColor)
+{
+    ACE_UPDATE_PAINT_PROPERTY(SwitchPaintProperty, UnselectedColor, unselectedColor);
+}
+
+void ToggleModelNG::SetTrackBorderRadius(const Dimension& borderRadius)
+{
+    ACE_UPDATE_PAINT_PROPERTY(SwitchPaintProperty, TrackBorderRadius, borderRadius);
+}
+
+void ToggleModelNG::ResetTrackBorderRadius()
+{
+    ACE_RESET_PAINT_PROPERTY_WITH_FLAG(SwitchPaintProperty, TrackBorderRadius, PROPERTY_UPDATE_RENDER);
+}
+
 void ToggleModelNG::SetSelectedColor(FrameNode* frameNode, const std::optional<Color>& selectedColor)
 {
     CHECK_NULL_VOID(frameNode);
 
-    auto pipeline = PipelineBase::GetCurrentContext();
+    auto pipeline = PipelineBase::GetCurrentContextSafely();
     CHECK_NULL_VOID(pipeline);
     Color color;
     if (selectedColor.has_value()) {
@@ -535,4 +561,20 @@ Color ToggleModelNG::GetSwitchPointColor(FrameNode* frameNode)
     return value;
 }
 
+void ToggleModelNG::SetSwitchIsOn(FrameNode* frameNode, bool isOn)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetEventHub<SwitchEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetCurrentUIState(UI_STATE_SELECTED, isOn);
+    ACE_UPDATE_NODE_PAINT_PROPERTY(SwitchPaintProperty, IsOn, isOn, frameNode);
+}
+
+bool ToggleModelNG::GetSwitchIsOn(FrameNode* frameNode)
+{
+    bool value = false;
+    CHECK_NULL_RETURN(frameNode, value);
+    ACE_GET_NODE_PAINT_PROPERTY_WITH_DEFAULT_VALUE(SwitchPaintProperty, IsOn, value, frameNode, value);
+    return value;
+}
 } // namespace OHOS::Ace::NG

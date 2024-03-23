@@ -52,7 +52,7 @@ enum class CtrlKeysBit {
 };
 
 void EventManager::TouchTest(const TouchEvent& touchPoint, const RefPtr<RenderNode>& renderNode,
-    const TouchRestrict& touchRestrict, const Offset& offset, float viewScale, bool needAppend)
+    TouchRestrict& touchRestrict, const Offset& offset, float viewScale, bool needAppend)
 {
     ContainerScope scope(instanceId_);
 
@@ -80,7 +80,7 @@ void EventManager::TouchTest(const TouchEvent& touchPoint, const RefPtr<RenderNo
 }
 
 void EventManager::TouchTest(const TouchEvent& touchPoint, const RefPtr<NG::FrameNode>& frameNode,
-    const TouchRestrict& touchRestrict, const Offset& offset, float viewScale, bool needAppend)
+    TouchRestrict& touchRestrict, const Offset& offset, float viewScale, bool needAppend)
 {
     ContainerScope scope(instanceId_);
 
@@ -220,7 +220,7 @@ void EventManager::LogTouchTestResultRecognizers(const TouchTestResult& result)
 }
 
 bool EventManager::PostEventTouchTest(
-    const TouchEvent& touchPoint, const RefPtr<NG::UINode>& uiNode, const TouchRestrict& touchRestrict)
+    const TouchEvent& touchPoint, const RefPtr<NG::UINode>& uiNode, TouchRestrict& touchRestrict)
 {
     ContainerScope scope(instanceId_);
     ACE_FUNCTION_TRACE();
@@ -250,7 +250,7 @@ bool EventManager::PostEventTouchTest(
 }
 
 void EventManager::TouchTest(
-    const AxisEvent& event, const RefPtr<NG::FrameNode>& frameNode, const TouchRestrict& touchRestrict)
+    const AxisEvent& event, const RefPtr<NG::FrameNode>& frameNode, TouchRestrict& touchRestrict)
 {
     ContainerScope scope(instanceId_);
 
@@ -424,7 +424,7 @@ void EventManager::HandleOutOfRectCallback(const Point& point, std::vector<RectC
 }
 
 void EventManager::TouchTest(
-    const AxisEvent& event, const RefPtr<RenderNode>& renderNode, const TouchRestrict& touchRestrict)
+    const AxisEvent& event, const RefPtr<RenderNode>& renderNode, TouchRestrict& touchRestrict)
 {
     ContainerScope scope(instanceId_);
 
@@ -726,6 +726,7 @@ bool EventManager::DispatchKeyEventNG(const KeyEvent& event, const RefPtr<NG::Fr
     TAG_LOGD(AceLogTag::ACE_FOCUS,
         "Dispatch key event: code:%{public}d/action:%{public}d on node: %{public}s/%{public}d.", event.code,
         event.action, focusNode->GetTag().c_str(), focusNode->GetId());
+    isKeyConsumed_ = false;
     auto focusNodeHub = focusNode->GetFocusHub();
     CHECK_NULL_RETURN(focusNodeHub, false);
     if (focusNodeHub->HandleKeyEvent(event)) {
@@ -733,9 +734,11 @@ bool EventManager::DispatchKeyEventNG(const KeyEvent& event, const RefPtr<NG::Fr
             event.code, event.action);
         return true;
     }
-    TAG_LOGD(AceLogTag::ACE_FOCUS, "Focus system do not handled the key event: code:%{public}d/action:%{public}d",
-        event.code, event.action);
-    return false;
+    if (!isKeyConsumed_) {
+        TAG_LOGD(AceLogTag::ACE_FOCUS, "Focus system do not handled the key event: code:%{public}d/action:%{public}d",
+            event.code, event.action);
+    }
+    return isKeyConsumed_;
 }
 
 void EventManager::MouseTest(const MouseEvent& event, const RefPtr<RenderNode>& renderNode)
@@ -875,7 +878,7 @@ void EventManager::LogPrintMouseTest()
 }
 
 void EventManager::MouseTest(
-    const MouseEvent& event, const RefPtr<NG::FrameNode>& frameNode, const TouchRestrict& touchRestrict)
+    const MouseEvent& event, const RefPtr<NG::FrameNode>& frameNode, TouchRestrict& touchRestrict)
 {
     TAG_LOGD(AceLogTag::ACE_MOUSE,
         "Mouse test start. Event is (%{public}f,%{public}f), button: %{public}d, action: %{public}d", event.x, event.y,
@@ -1410,10 +1413,10 @@ void AddKeyboardShortcutKeys(
     }
 }
 
-void TriggerKeyboardShortcut(const KeyEvent& event, const std::vector<NG::KeyboardShortcut>& keyboardShortcuts,
+bool TriggerKeyboardShortcut(const KeyEvent& event, const std::vector<NG::KeyboardShortcut>& keyboardShortcuts,
     const WeakPtr<NG::FrameNode>& node, const RefPtr<NG::EventHub>& eventHub)
 {
-    CHECK_NULL_VOID(eventHub);
+    CHECK_NULL_RETURN(eventHub, false);
     for (auto& keyboardShortcut : keyboardShortcuts) {
         if (keyboardShortcut.value.empty()) {
             continue;
@@ -1422,7 +1425,6 @@ void TriggerKeyboardShortcut(const KeyEvent& event, const std::vector<NG::Keyboa
         std::vector<std::vector<KeyCode>> keyCodes;
         std::vector<uint8_t> permutation;
         AddKeyboardShortcutKeys(keyboardShortcut.keys, keyCodes, permutation);
-        // FunctionKey
         if (event.IsFunctionKey() || event.IsEscapeKey()) {
             if (event.ConvertInputCodeToString() != keyboardShortcut.value) {
                 continue;
@@ -1446,11 +1448,13 @@ void TriggerKeyboardShortcut(const KeyEvent& event, const std::vector<NG::Keyboa
                 if (keyboardShortcut.onKeyboardShortcutAction) {
                     keyboardShortcut.onKeyboardShortcutAction();
                     LOGI("TriggerKeyboardShortcut action done.");
+                    return true;
                 } else {
                     auto gestureEventHub = eventHub->GetGestureEventHub();
                     if (gestureEventHub && gestureEventHub->IsClickable()) {
                         gestureEventHub->KeyBoardShortCutClick(event, node);
                         LOGI("TriggerKeyboardShortcut click done.");
+                        return true;
                     }
                 }
                 keyCode.pop_back();
@@ -1461,12 +1465,13 @@ void TriggerKeyboardShortcut(const KeyEvent& event, const std::vector<NG::Keyboa
         keyCodes.clear();
         permutation.clear();
     }
+    return false;
 }
 
-void EventManager::DispatchKeyboardShortcut(const KeyEvent& event)
+bool EventManager::DispatchKeyboardShortcut(const KeyEvent& event)
 {
     if (event.action != KeyAction::DOWN) {
-        return;
+        return false;
     }
     for (auto& node : keyboardShortcutNode_) {
         auto frameNode = node.Upgrade();
@@ -1479,8 +1484,11 @@ void EventManager::DispatchKeyboardShortcut(const KeyEvent& event)
         }
 
         auto keyboardShortcuts = eventHub->GetKeyboardShortcut();
-        TriggerKeyboardShortcut(event, keyboardShortcuts, node, eventHub);
+        if (TriggerKeyboardShortcut(event, keyboardShortcuts, node, eventHub)) {
+            return true;
+        }
     }
+    return false;
 }
 
 void EventManager::DelKeyboardShortcutNode(int32_t nodeId)

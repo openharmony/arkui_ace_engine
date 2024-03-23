@@ -22,7 +22,9 @@
 #include "base/utils/measure_util.h"
 #include "base/utils/utils.h"
 #include "core/common/container.h"
+#include "core/common/container.h"
 #include "core/components_ng/base/frame_node.h"
+#include "core/components_ng/pattern/app_bar/app_bar_theme.h"
 #include "core/components_ng/pattern/navigation/nav_bar_node.h"
 #include "core/components_ng/pattern/navigation/nav_bar_pattern.h"
 #include "core/components_ng/pattern/navigation/navigation_declaration.h"
@@ -121,8 +123,16 @@ float TitleBarLayoutAlgorithm::GetTitleWidth(const RefPtr<TitleBarNode>& titleBa
         } else {
             occupiedWidth += isCustom ? 0.0f : maxPaddingStart_.ConvertToPx();
         }
-        // right padding
-        occupiedWidth += isCustom ? 0.0f : maxPaddingEnd_.ConvertToPx();
+        // compute right padding
+        if (NearZero(menuWidth_)) {
+            occupiedWidth += isCustom ? 0.0f : maxPaddingEnd_.ConvertToPx();
+        } else {
+            occupiedWidth += menuWidth_;
+            if (!titleBarNode->GetPrevMenuIsCustomValue(false)) {
+                occupiedWidth += defaultPaddingStart_.ConvertToPx();
+                occupiedWidth += isCustom ? 0.0f : NAV_HORIZONTAL_MARGIN_L.ConvertToPx();
+            }
+        }
         return titleBarSize.Width() < occupiedWidth ? 0.0f : titleBarSize.Width() - occupiedWidth;
     }
     // navBar title bar
@@ -176,6 +186,42 @@ float TitleBarLayoutAlgorithm::GetTitleWidth(const RefPtr<TitleBarNode>& titleBa
         occupiedWidth += isCustom ? 0.0f : maxPaddingEnd_.ConvertToPx();
     }
     return titleBarSize.Width() < occupiedWidth ? 0.0f : titleBarSize.Width() - occupiedWidth;
+}
+
+float TitleBarLayoutAlgorithm::WidthAfterAvoidMenubar(const RefPtr<TitleBarNode>& titleBarNode, float width)
+{
+    float afterAvoidWidth = width;
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_RETURN(pipeline, afterAvoidWidth);
+    if (!pipeline->GetInstallationFree()) {
+        LOGI("xhq:: not install free");
+        return afterAvoidWidth;
+    }
+    
+    auto titlebarRect = titleBarNode->GetParentGlobalOffsetDuringLayout();
+
+    auto container = Container::Current();
+    CHECK_NULL_RETURN(container, afterAvoidWidth);
+    auto appBar = container->GetAppBar();
+    CHECK_NULL_RETURN(appBar, afterAvoidWidth);
+    auto appBarRect = appBar->GetAppBarRect();
+    CHECK_NULL_RETURN(appBarRect, afterAvoidWidth);
+    auto appBarOffset = appBarRect->GetOffset();
+    auto appBarSize = appBarRect->GetSize();
+
+    auto titleBarGeo = titleBarNode->GetGeometryNode();
+    CHECK_NULL_RETURN(titleBarGeo, afterAvoidWidth);
+
+    auto avoidArea = titlebarRect.GetX() + titleBarGeo->GetFrameSize().Width() - appBarOffset.GetX();
+    auto buttonTop = appBarOffset.GetY() + appBarSize.Height();
+    if (LessOrEqual(titlebarRect.GetY(), buttonTop) && GreatOrEqual(avoidArea, 0.0)) {
+        afterAvoidWidth = afterAvoidWidth - avoidArea;
+    }
+
+    if (LessOrEqual(afterAvoidWidth, 0.0)) {
+        return 0.0f;
+    }
+    return afterAvoidWidth;
 }
 
 void TitleBarLayoutAlgorithm::MeasureSubtitle(LayoutWrapper* layoutWrapper, const RefPtr<TitleBarNode>& titleBarNode,
@@ -307,12 +353,25 @@ void TitleBarLayoutAlgorithm::MeasureMenu(LayoutWrapper* layoutWrapper, const Re
     auto menuWrapper = layoutWrapper->GetOrCreateChildByIndex(index);
     CHECK_NULL_VOID(menuWrapper);
     auto constraint = titleBarLayoutProperty->CreateChildConstraint();
-    auto navBarNode = AceType::DynamicCast<NavBarNode>(titleBarNode->GetParent());
-    CHECK_NULL_VOID(navBarNode);
-    auto navBarPattern = AceType::DynamicCast<NavBarPattern>(navBarNode->GetPattern());
-    CHECK_NULL_VOID(navBarPattern);
-    auto maxMenu = navBarPattern->GetMaxMenuNum();
-    auto isCustomMenu = navBarNode->GetPrevMenuIsCustomValue(false);
+
+    auto layoutProperty = AceType::DynamicCast<TitleBarLayoutProperty>(layoutWrapper->GetLayoutProperty());
+    CHECK_NULL_VOID(layoutProperty);
+    bool isCustomMenu = false;
+    int32_t maxMenu = 0;
+    if (layoutProperty->GetTitleBarParentTypeValue(TitleBarParentType::NAVBAR) != TitleBarParentType::NAV_DESTINATION) {
+        auto navBarNode = AceType::DynamicCast<NavBarNode>(titleBarNode->GetParent());
+        CHECK_NULL_VOID(navBarNode);
+        isCustomMenu = navBarNode->GetPrevMenuIsCustomValue(false);
+        auto navBarPattern = AceType::DynamicCast<NavBarPattern>(navBarNode->GetPattern());
+        CHECK_NULL_VOID(navBarPattern);
+        maxMenu = navBarPattern->GetMaxMenuNum();
+    } else {
+        isCustomMenu = titleBarNode->GetPrevMenuIsCustomValue(false);
+        auto titleBarPattern = AceType::DynamicCast<TitleBarPattern>(titleBarNode->GetPattern());
+        CHECK_NULL_VOID(titleBarPattern);
+        maxMenu = titleBarPattern->GetMaxMenuNum();
+    }
+
     if (isCustomMenu) {
         // custom title can't be higher than 56vp
         constraint.parentIdealSize.SetHeight(SINGLE_LINE_TITLEBAR_HEIGHT.ConvertToPx());
@@ -513,18 +572,16 @@ void TitleBarLayoutAlgorithm::LayoutTitle(LayoutWrapper* layoutWrapper, const Re
         return;
     }
     auto titlePattern = titleBarNode->GetPattern<TitleBarPattern>();
+    if (isCustom) {
+        // customBuilder and NavigationCustomTitle offset is (0.0f, menuHeight_)
+        auto customOffsetY = NearZero(menuWidth_) ? 0.0f : menuHeight_;
+        geometryNode->SetMarginFrameOffset(OffsetF { 0.0f, customOffsetY});
+        titleWrapper->Layout();
+        return;
+    }
+    auto title = AceType::DynamicCast<FrameNode>(titleNode);
+    CHECK_NULL_VOID(title);
     if (isInitialTitle_) {
-        // free mode
-        if (isCustom) {
-            // customBuilder and NavigationCustomTitle offset is (0.0f, menuHeight_)
-            auto customOffsetY = NearZero(menuWidth_) ? 0.0f : menuHeight_;
-            geometryNode->SetMarginFrameOffset(OffsetF { 0.0f, customOffsetY});
-            titleWrapper->Layout();
-            return;
-        }
-        auto title = AceType::DynamicCast<FrameNode>(titleNode);
-        CHECK_NULL_VOID(title);
-
         auto textLayoutProperty = title->GetLayoutProperty<TextLayoutProperty>();
         if (!textLayoutProperty) {
             // current title mode is Navigation common title
@@ -672,8 +729,18 @@ void TitleBarLayoutAlgorithm::LayoutMenu(LayoutWrapper* layoutWrapper, const Ref
     auto geometryNode = menuWrapper->GetGeometryNode();
     auto menuWidth = geometryNode->GetMarginFrameSize().Width();
     auto maxWidth = geometryNode->GetParentLayoutConstraint()->maxSize.Width();
-    auto navBarNode = AceType::DynamicCast<NavBarNode>(titleBarNode->GetParent());
-    auto isCustomMenu = navBarNode->GetPrevMenuIsCustomValue(false);
+    maxWidth = WidthAfterAvoidMenubar(titleBarNode, maxWidth);
+
+    auto layoutProperty = AceType::DynamicCast<TitleBarLayoutProperty>(layoutWrapper->GetLayoutProperty());
+    CHECK_NULL_VOID(layoutProperty);
+    auto isCustomMenu = false;
+    if (layoutProperty->GetTitleBarParentTypeValue(TitleBarParentType::NAVBAR) != TitleBarParentType::NAV_DESTINATION) {
+        auto navBarNode = AceType::DynamicCast<NavBarNode>(titleBarNode->GetParent());
+        isCustomMenu = navBarNode->GetPrevMenuIsCustomValue(false);
+    } else {
+        isCustomMenu = titleBarNode->GetPrevMenuIsCustomValue(false);
+    }
+
     if (titleBarLayoutProperty->GetTitleModeValue(NavigationTitleMode::FREE) == NavigationTitleMode::FREE) {
         auto titlePattern = titleBarNode->GetPattern<TitleBarPattern>();
         auto overDragOffset = titlePattern->GetOverDragOffset();
@@ -751,6 +818,7 @@ void TitleBarLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     MeasureBackButton(layoutWrapper, titleBarNode, layoutProperty);
     MeasureMenu(layoutWrapper, titleBarNode, layoutProperty);
     auto titleMaxWidth = GetTitleWidth(titleBarNode, layoutProperty, size);
+    titleMaxWidth = WidthAfterAvoidMenubar(titleBarNode, titleMaxWidth);
     MeasureSubtitle(layoutWrapper, titleBarNode, layoutProperty, size, titleMaxWidth);
     MeasureTitle(layoutWrapper, titleBarNode, layoutProperty, size, titleMaxWidth);
     titlePattern->SetCurrentTitleBarHeight(size.Height());
@@ -759,6 +827,11 @@ void TitleBarLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
 
 void TitleBarLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
 {
+    auto pipeline = PipelineContext::GetCurrentContext();
+    if (pipeline && pipeline->GetInstallationFree()) {
+        //TitleBar run measure again during Layout in atomic service for avoiding menuBar
+        Measure(layoutWrapper);
+    }
     auto titleBarNode = AceType::DynamicCast<TitleBarNode>(layoutWrapper->GetHostNode());
     CHECK_NULL_VOID(titleBarNode);
     auto layoutProperty = AceType::DynamicCast<TitleBarLayoutProperty>(layoutWrapper->GetLayoutProperty());

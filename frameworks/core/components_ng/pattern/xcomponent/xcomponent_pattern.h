@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -77,7 +77,7 @@ public:
     RefPtr<NodePaintMethod> CreateNodePaintMethod() override
     {
         if (type_ == XComponentType::TEXTURE) {
-            auto paint = MakeRefPtr<XComponentPaintMethod>(renderSurface_);
+            auto paint = MakeRefPtr<XComponentPaintMethod>(renderSurface_, AceType::Claim(this));
             return paint;
         }
         return nullptr;
@@ -85,7 +85,15 @@ public:
 
     FocusPattern GetFocusPattern() const override
     {
+        if (type_ == XComponentType::NODE) {
+            return { FocusType::SCOPE, true };
+        }
         return { FocusType::NODE, false };
+    }
+
+    bool NeedSoftKeyboard() const override
+    {
+        return nativeXComponentImpl_ ? nativeXComponentImpl_->IsNeedSoftKeyboard() : false;
     }
 
     std::pair<RefPtr<OHOS::Ace::NativeXComponentImpl>, std::weak_ptr<OH_NativeXComponent>> GetNativeXComponent()
@@ -125,6 +133,7 @@ public:
     void NativeXComponentDispatchTouchEvent(const OH_NativeXComponent_TouchEvent& touchEvent,
         const std::vector<XComponentTouchPoint>& xComponentTouchPoints);
     void NativeXComponentDispatchMouseEvent(const OH_NativeXComponent_MouseEvent& mouseEvent);
+    void NativeXComponentDispatchAxisEvent(AxisEvent* axisEvent);
 
     void InitNativeWindow(float textureWidth, float textureHeight);
     void XComponentSizeInit();
@@ -170,14 +179,24 @@ public:
         type_ = type;
     }
 
-    SizeF GetDrawSize()
+    const SizeF& GetDrawSize() const
     {
         return drawSize_;
     }
 
-    OffsetF GetGlobalPosition()
+    const SizeF& GetSurfaceSize() const
+    {
+        return surfaceSize_;
+    }
+
+    const OffsetF& GetGlobalPosition() const
     {
         return globalPosition_;
+    }
+
+    const OffsetF& GetLocalPosition() const
+    {
+        return localPosition_;
     }
 
     OffsetF GetOffsetRelativeToWindow();
@@ -241,21 +260,36 @@ public:
     void SetExportTextureSurfaceId(const std::string& surfaceId);
     void FireExternalEvent(RefPtr<NG::PipelineContext> context,
         const std::string& componentId, const uint32_t nodeId, const bool isDestroy);
-    void SetSurfaceSize(uint32_t surfaceWidth, uint32_t surfaceHeight);
+    void ConfigSurface(uint32_t surfaceWidth, uint32_t surfaceHeight);
+
+    void SetIdealSurfaceWidth(float surfaceWidth);
+    void SetIdealSurfaceHeight(float surfaceHeight);
+    void SetIdealSurfaceOffsetX(float offsetX);
+    void SetIdealSurfaceOffsetY(float offsetY);
+    void ClearIdealSurfaceOffset(bool isXAxis);
+    void UpdateSurfaceBounds(bool needForceRender = false);
+
 private:
     void OnAttachToFrameNode() override;
     void OnDetachFromFrameNode(FrameNode* frameNode) override;
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
     void OnRebuildFrame() override;
     void OnAreaChangedInner() override;
+    void OnWindowHide() override;
+    void OnWindowShow() override;
+    void NativeSurfaceHide();
+    void NativeSurfaceShow();
     void OnModifyDone() override;
 
     void InitNativeNodeCallbacks();
     void InitEvent();
     void InitTouchEvent(const RefPtr<GestureEventHub>& gestureHub);
+    void InitOnTouchIntercept(const RefPtr<GestureEventHub>& gestureHub);
+    void InitAxisEvent(const RefPtr<InputEventHub>& inputHub);
     void HandleTouchEvent(const TouchEventInfo& info);
     void InitMouseEvent(const RefPtr<InputEventHub>& inputHub);
     void HandleMouseEvent(const MouseInfo& info);
+    void HandleAxisEvent(const AxisInfo& info);
     void InitMouseHoverEvent(const RefPtr<InputEventHub>& inputHub);
     void HandleMouseHoverEvent(bool isHover);
     void InitFocusEvent(const RefPtr<FocusHub>& focusHub);
@@ -265,7 +299,6 @@ private:
     ExternalEvent CreateExternalEvent();
     void CreateSurface();
     void SetMethodCall();
-    void ConfigSurface(uint32_t surfaceWidth, uint32_t surfaceHeight);
     void SetTouchPoint(
         const std::list<TouchLocationInfo>& touchInfoList, int64_t timeStamp, const TouchType& touchType);
     void HandleSetExpectedRateRangeEvent();
@@ -275,6 +308,13 @@ private:
     void AddAfterLayoutTaskForExportTexture();
     bool DoTextureExport();
     bool StopTextureExport();
+    void InitializeRenderContext();
+    void SetSurfaceNodeToGraphic();
+
+#if defined(VIDEO_TEXTURE_SUPPORTED) && defined(XCOMPONENT_SUPPORTED)
+    void RegisterRenderContextCallBack();
+    void RequestFocus();
+#endif
 
     std::vector<OH_NativeXComponent_HistoricalPoint> SetHistoryPoint(const std::list<TouchLocationInfo>& touchInfoList);
     std::string id_;
@@ -296,18 +336,28 @@ private:
     RefPtr<TouchEventImpl> touchEvent_;
     OH_NativeXComponent_TouchEvent touchEventPoint_;
     RefPtr<InputEvent> mouseEvent_;
+    RefPtr<InputEvent> axisEvent_;
     RefPtr<InputEvent> mouseHoverEvent_;
     std::vector<XComponentTouchPoint> nativeXComponentTouchPoints_;
     RefPtr<XComponentExtSurfaceCallbackClient> extSurfaceClient_;
     WeakPtr<NG::PipelineContext> context_;
     int32_t instanceId_;
     SizeF initSize_;
-    OffsetF localposition_;
+    OffsetF localPosition_;
     OffsetF globalPosition_;
     SizeF drawSize_;
+    SizeF surfaceSize_;
     RefPtr<UIDisplaySync> displaySync_ = AceType::MakeRefPtr<UIDisplaySync>();
+
+    std::optional<float> selfIdealSurfaceWidth_;
+    std::optional<float> selfIdealSurfaceHeight_;
+    std::optional<float> selfIdealSurfaceOffsetX_;
+    std::optional<float> selfIdealSurfaceOffsetY_;
+
+    // for export texture
     NodeRenderType renderType_ = NodeRenderType::RENDER_TYPE_DISPLAY;
     uint64_t exportTextureSurfaceId_ = 0U;
+    bool hasReleasedSurface_ = false;
 #ifdef OHOS_PLATFORM
     int64_t startIncreaseTime_ = 0;
 #endif

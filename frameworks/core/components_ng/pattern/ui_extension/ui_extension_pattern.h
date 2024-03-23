@@ -20,6 +20,7 @@
 #include <functional>
 #include <list>
 #include <memory>
+#include <optional>
 #include <refbase.h>
 #include <vector>
 
@@ -30,8 +31,25 @@
 #include "core/components_ng/event/gesture_event_hub.h"
 #include "core/components_ng/pattern/pattern.h"
 #include "core/components_ng/pattern/ui_extension/session_wrapper.h"
+#include "core/components_ng/pattern/ui_extension/accessibility_session_adapter_ui_extension.h"
 #include "core/event/mouse_event.h"
 #include "core/event/touch_event.h"
+
+#define UIEXT_LOGD(fmt, ...)                                                                                      \
+    TAG_LOGD(AceLogTag::ACE_UIEXTENSIONCOMPONENT, "[@%{public}d][ID: %{public}d] " fmt, __LINE__, uiExtensionId_, \
+        ##__VA_ARGS__)
+#define UIEXT_LOGI(fmt, ...)                                                                                      \
+    TAG_LOGI(AceLogTag::ACE_UIEXTENSIONCOMPONENT, "[@%{public}d][ID: %{public}d] " fmt, __LINE__, uiExtensionId_, \
+        ##__VA_ARGS__)
+#define UIEXT_LOGW(fmt, ...)                                                                                      \
+    TAG_LOGW(AceLogTag::ACE_UIEXTENSIONCOMPONENT, "[@%{public}d][ID: %{public}d] " fmt, __LINE__, uiExtensionId_, \
+        ##__VA_ARGS__)
+#define UIEXT_LOGE(fmt, ...)                                                                                      \
+    TAG_LOGE(AceLogTag::ACE_UIEXTENSIONCOMPONENT, "[@%{public}d][ID: %{public}d] " fmt, __LINE__, uiExtensionId_, \
+        ##__VA_ARGS__)
+#define UIEXT_LOGF(fmt, ...)                                                                                      \
+    TAG_LOGF(AceLogTag::ACE_UIEXTENSIONCOMPONENT, "[@%{public}d][ID: %{public}d] " fmt, __LINE__, uiExtensionId_, \
+        ##__VA_ARGS__)
 
 namespace OHOS::Accessibility {
 class AccessibilityElementInfo;
@@ -49,24 +67,22 @@ class ModalUIExtensionProxy;
 
 namespace OHOS::Rosen {
 class AvoidArea;
+class RSTransaction;
 } // namespace OHOS::Rosen
 
 namespace OHOS::Ace::NG {
-enum EmbeddedType : int32_t {
-    DEFAULT_TYPE = -1,
-    UI_EXTENSION = 0
-};
 class UIExtensionProxy;
 class UIExtensionPattern : public Pattern {
     DECLARE_ACE_TYPE(UIExtensionPattern, Pattern);
 
 public:
     explicit UIExtensionPattern(bool isTransferringCaller = false, bool isModal = false,
-        bool isAsyncModalBinding = false, int32_t embeddedType = EmbeddedType::DEFAULT_TYPE);
+        bool isAsyncModalBinding = false, SessionType sessionType = SessionType::UI_EXTENSION_ABILITY);
     ~UIExtensionPattern() override;
 
     RefPtr<LayoutAlgorithm> CreateLayoutAlgorithm() override;
     FocusPattern GetFocusPattern() const override;
+    RefPtr<AccessibilitySessionAdapter> GetAccessibilitySessionAdapter() override;
 
     void UpdateWant(const RefPtr<OHOS::Ace::WantWrap>& wantWrap);
     void UpdateWant(const AAFwk::Want& want);
@@ -96,8 +112,7 @@ public:
     }
 
     void OnConnect();
-    void OnDisconnect();
-    void OnExtensionDied();
+    void OnDisconnect(bool isAbnormal);
     void HandleDragEvent(const PointerEvent& info) override;
 
     void SetModalOnDestroy(const std::function<void()>&& callback);
@@ -110,6 +125,8 @@ public:
     void FireOnReleaseCallback(int32_t releaseCode);
     void SetOnResultCallback(const std::function<void(int32_t, const AAFwk::Want&)>&& callback);
     void FireOnResultCallback(int32_t code, const AAFwk::Want& want);
+    void SetOnTerminatedCallback(const std::function<void(int32_t, const RefPtr<WantWrap>&)>&& callback);
+    void FireOnTerminatedCallback(int32_t code, const RefPtr<WantWrap>& wantWrap);
     void SetOnReceiveCallback(const std::function<void(const AAFwk::WantParams&)>&& callback);
     void FireOnReceiveCallback(const AAFwk::WantParams& params);
     void SetOnErrorCallback(
@@ -122,6 +139,8 @@ public:
     void SetBindModalCallback(const std::function<void()>&& callback);
     void FireBindModalCallback();
 
+    void NotifySizeChangeReason(
+        WindowSizeChangeReason type, const std::shared_ptr<Rosen::RSTransaction>& rsTransaction);
     void NotifyForeground();
     void NotifyBackground();
     void NotifyDestroy();
@@ -131,7 +150,6 @@ public:
     int32_t GetUiExtensionId() override;
     int64_t WrapExtensionAbilityId(int64_t extensionOffset, int64_t abilityId) override;
     void DispatchOriginAvoidArea(const Rosen::AvoidArea& avoidArea, uint32_t type);
-    bool IsEmbeddedComponentType();
     void SetWantWrap(const RefPtr<OHOS::Ace::WantWrap>& wantWrap);
     RefPtr<OHOS::Ace::WantWrap> GetWantWrap();
 
@@ -148,11 +166,6 @@ public:
     void OnAccessibilityEvent(const Accessibility::AccessibilityEventInfo& info, int64_t uiExtensionOffset);
 
 private:
-    enum class ReleaseCode {
-        DESTROY_NORMAL = 0,
-        CONNECT_BROKEN,
-    };
-
     enum class AbilityState {
         NONE = 0,
         FOREGROUND,
@@ -168,6 +181,7 @@ private:
 
     enum class ComponentType { DYNAMIC, UI_EXTENSION };
 
+    const char* ToString(AbilityState state);
     void OnAttachToFrameNode() override;
     void OnDetachFromFrameNode(FrameNode* frameNode) override;
     void OnLanguageConfigurationUpdate() override;
@@ -184,17 +198,14 @@ private:
     void HandleTouchEvent(const TouchEventInfo& info);
     void HandleMouseEvent(const MouseInfo& info);
     void HandleHoverEvent(bool isHover);
-    void DispatchKeyEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent);
-    bool DispatchKeyEventSync(const std::shared_ptr<MMI::KeyEvent>& keyEvent);
+    void DispatchKeyEvent(const KeyEvent& event);
+    bool DispatchKeyEventSync(const KeyEvent& event);
     void DispatchFocusActiveEvent(bool isFocusActive);
     void DispatchFocusState(bool focusState);
     void DispatchPointerEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent);
     void DispatchDisplayArea(bool isForce = false);
 
     void RegisterVisibleAreaChange();
-    void UpdateTextFieldManager(const Offset& offset, float height);
-    bool IsCurrentFocus() const;
-    bool CheckCascadeStatus();
 
     RefPtr<TouchEventImpl> touchEvent_;
     RefPtr<InputEvent> mouseEvent_;
@@ -206,6 +217,7 @@ private:
     std::function<void(const RefPtr<UIExtensionProxy>&)> onRemoteReadyCallback_;
     std::function<void(int32_t)> onReleaseCallback_;
     std::function<void(int32_t, const AAFwk::Want&)> onResultCallback_;
+    std::function<void(int32_t, const RefPtr<WantWrap>&)> onTerminatedCallback_;
     std::function<void(const AAFwk::WantParams&)> onReceiveCallback_;
     std::function<void(int32_t code, const std::string& name, const std::string& message)> onErrorCallback_;
     std::list<std::function<void(const RefPtr<UIExtensionProxy>&)>> onSyncOnCallbackList_;
@@ -215,6 +227,7 @@ private:
     RefPtr<OHOS::Ace::WantWrap> curWant_;
     RefPtr<FrameNode> contentNode_;
     RefPtr<SessionWrapper> sessionWrapper_;
+    RefPtr<AccessibilitySessionAdapterUIExtension> accessibilitySessionAdapter_;
     ErrorMsg lastError_;
     int32_t instanceId_ = Container::CurrentId();
     AbilityState state_ = AbilityState::NONE;
@@ -225,7 +238,6 @@ private:
     int32_t uiExtensionId_ = 0;
     int32_t callbackId_ = 0;
     RectF displayArea_;
-    int32_t embeddedType_ = EmbeddedType::DEFAULT_TYPE;
 
     // for DynamicComponent
     ComponentType componentType_ = ComponentType::UI_EXTENSION;

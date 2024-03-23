@@ -37,12 +37,19 @@ void TestNG::TearDownTestSuite()
     MockContainer::TearDown();
 }
 
-void TestNG::FlushLayoutTask(const RefPtr<FrameNode>& frameNode)
+RefPtr<PaintWrapper> TestNG::FlushLayoutTask(const RefPtr<FrameNode>& frameNode)
 {
     frameNode->SetActive();
     frameNode->isLayoutDirtyMarked_ = true;
     frameNode->CreateLayoutTask();
+    auto paintProperty = frameNode->GetPaintProperty<PaintProperty>();
+    auto wrapper = frameNode->CreatePaintWrapper();
+    if (wrapper != nullptr) {
+        wrapper->FlushRender(frameNode->drawModifier_);
+    }
+    paintProperty->CleanDirty();
     frameNode->SetActive(false);
+    return wrapper;
 }
 
 uint64_t TestNG::GetActions(const RefPtr<AccessibilityProperty>& accessibilityProperty)
@@ -53,5 +60,15 @@ uint64_t TestNG::GetActions(const RefPtr<AccessibilityProperty>& accessibilityPr
         actions |= 1UL << static_cast<uint32_t>(action);
     }
     return actions;
+}
+
+TouchEventInfo TestNG::CreateTouchEventInfo(TouchType touchType, Offset location)
+{
+    TouchLocationInfo touchLocationInfo(1);
+    touchLocationInfo.SetTouchType(touchType);
+    touchLocationInfo.SetLocalLocation(location);
+    TouchEventInfo touchEventInfo("touch");
+    touchEventInfo.AddTouchLocationInfo(std::move(touchLocationInfo));
+    return touchEventInfo;
 }
 } // namespace OHOS::Ace::NG

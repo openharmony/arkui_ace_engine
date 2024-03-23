@@ -124,6 +124,16 @@ void ConvertKeyEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent, KeyEvent& e
 
 } // namespace
 
+Offset GetTouchEventOriginOffset(const TouchEvent& event)
+{
+    if (event.pointerEvent) {
+        for (auto& item : event.pointerEvent->pointers) {
+            return Offset(item.x, item.y);
+        }
+    }
+    return Offset();
+}
+
 EventDispatcher::EventDispatcher() {}
 
 EventDispatcher::~EventDispatcher() = default;
@@ -387,7 +397,12 @@ bool EventDispatcher::DispatchKeyEvent(const std::shared_ptr<MMI::KeyEvent>& key
 
     KeyEvent event;
     ConvertKeyEvent(keyEvent, event);
-    return aceView->HandleKeyEvent(event);
+    event.isPreIme = true;
+    if (!aceView->HandleKeyEvent(event)) {
+        event.isPreIme = false;
+        return aceView->HandleKeyEvent(event);
+    }
+    return true;
 }
 
 bool EventDispatcher::HandleTextKeyEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent)

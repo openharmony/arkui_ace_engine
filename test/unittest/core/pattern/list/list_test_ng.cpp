@@ -359,6 +359,55 @@ void ListTestNg::HandleDragEnd(int32_t index, float mainVelocity)
     FlushLayoutTask(frameNode_);
 }
 
+void ListTestNg::ScrollSnapForEqualHeightItem(float offset, float velocity)
+{
+    // Define (150.0, 500.0) as finger press position.
+    double touchPosX = 150.0;
+    double touchPosY = 500.0;
+    // Generate pan gesture from finger for List sliding.
+    GestureEvent info;
+    info.SetMainVelocity(velocity);
+    info.SetGlobalPoint(Point(touchPosX, touchPosY));
+    info.SetGlobalLocation(Offset(touchPosX, touchPosY));
+    info.SetSourceTool(SourceTool::FINGER);
+    info.SetInputEventType(InputEventType::TOUCH_SCREEN);
+    // Call HandleTouchDown and HandleDragStart.
+    pattern_->scrollableEvent_->GetScrollable()->HandleTouchDown();
+    pattern_->scrollableEvent_->GetScrollable()->isDragging_ = true;
+    pattern_->scrollableEvent_->GetScrollable()->HandleDragStart(info);
+
+    // Update finger position.
+    info.SetGlobalLocation(Offset(touchPosX, touchPosY + offset));
+    info.SetGlobalPoint(Point(touchPosX, touchPosY + offset));
+    info.SetMainVelocity(velocity);
+    info.SetMainDelta(offset);
+    pattern_->scrollableEvent_->GetScrollable()->HandleDragUpdate(info);
+    FlushLayoutTask(frameNode_);
+
+    // Lift finger and end List sliding.
+    info.SetMainVelocity(0.0);
+    info.SetMainDelta(0.0);
+    pattern_->scrollableEvent_->GetScrollable()->HandleTouchUp();
+    pattern_->scrollableEvent_->GetScrollable()->HandleDragEnd(info);
+    pattern_->scrollableEvent_->GetScrollable()->isDragging_ = false;
+    FlushLayoutTask(frameNode_);
+
+    if (pattern_->scrollableEvent_->GetScrollable()->IsSpringMotionRunning()) {
+        // If current position is out of boundary, trig spring motion.
+        float endValue = pattern_->scrollableEvent_->GetScrollable()->GetFinalPosition();
+        pattern_->scrollableEvent_->GetScrollable()->ProcessSpringMotion(endValue);
+        pattern_->scrollableEvent_->GetScrollable()->StopSpringAnimation();
+        FlushLayoutTask(frameNode_);
+    } else if (!(pattern_->scrollableEvent_->GetScrollable()->isSnapScrollAnimationStop_)) {
+        // StartScrollSnapMotion, for condition that equal item height.
+        float endValue = pattern_->scrollableEvent_->GetScrollable()->GetSnapFinalPosition();
+        pattern_->scrollableEvent_->GetScrollable()->ProcessScrollSnapMotion(endValue);
+        pattern_->scrollableEvent_->GetScrollable()->ProcessScrollSnapStop();
+        FlushLayoutTask(frameNode_);
+    }
+    pattern_->scrollableEvent_->GetScrollable()->StopScrollable();
+}
+
 void ListTestNg::ScrollSnap(float offset, float velocity)
 {
     pattern_->OnScrollSnapCallback(offset, velocity);
@@ -434,8 +483,8 @@ AssertionResult ListTestNg::VerifyGroupItemPosition(
     }
     for (int32_t index = 0; index < viewItemNumber; index++) {
         int32_t itemIndex = index;
-        float startPos = itemPosition[itemIndex].first;
-        float endPos = itemPosition[itemIndex].second;
+        float startPos = itemPosition[itemIndex].startPos;
+        float endPos = itemPosition[itemIndex].endPos;
         float expectStartPos = (index / lanes) * itemSpaceLength + startOffset;
         float expectEndPos = expectStartPos + itemMainLength;
         if (!NearEqual(startPos, expectStartPos) || !NearEqual(endPos, expectEndPos)) {

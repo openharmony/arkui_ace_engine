@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -206,6 +206,32 @@ void JSScroll::OnScrollCallback(const JSCallbackInfo& args)
     args.SetReturnValue(args.This());
 }
 
+void JSScroll::OnWillScrollCallback(const JSCallbackInfo& args)
+{
+    if (args.Length() > 0 && args[0]->IsFunction()) {
+        auto onScroll = [execCtx = args.GetExecutionContext(), func = JSRef<JSFunc>::Cast(args[0])](
+                            const Dimension& xOffset, const Dimension& yOffset, const ScrollState& scrollState) {
+            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+            auto params = ConvertToJSValues(xOffset, yOffset, scrollState);
+            func->Call(JSRef<JSObject>(), params.size(), params.data());
+        };
+        ScrollModel::GetInstance()->SetOnWillScroll(std::move(onScroll));
+    }
+}
+
+void JSScroll::OnDidScrollCallback(const JSCallbackInfo& args)
+{
+    if (args.Length() > 0 && args[0]->IsFunction()) {
+        auto onScroll = [execCtx = args.GetExecutionContext(), func = JSRef<JSFunc>::Cast(args[0])](
+                            const Dimension& xOffset, const Dimension& yOffset, const ScrollState& scrollState) {
+            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+            auto params = ConvertToJSValues(xOffset, yOffset, scrollState);
+            func->Call(JSRef<JSObject>(), params.size(), params.data());
+        };
+        ScrollModel::GetInstance()->SetOnDidScroll(std::move(onScroll));
+    }
+}
+
 void JSScroll::OnScrollEdgeCallback(const JSCallbackInfo& args)
 {
     if (args[0]->IsFunction()) {
@@ -289,6 +315,8 @@ void JSScroll::JSBind(BindingTarget globalObj)
     JSClass<JSScroll>::StaticMethod("onScrollBegin", &JSScroll::OnScrollBeginCallback, opt);
     JSClass<JSScroll>::StaticMethod("onScrollFrameBegin", &JSScroll::OnScrollFrameBeginCallback, opt);
     JSClass<JSScroll>::StaticMethod("onScroll", &JSScroll::OnScrollCallback, opt);
+    JSClass<JSScroll>::StaticMethod("onWillScroll", &JSScroll::OnWillScrollCallback, opt);
+    JSClass<JSScroll>::StaticMethod("onDidScroll", &JSScroll::OnDidScrollCallback, opt);
     JSClass<JSScroll>::StaticMethod("onScrollEdge", &JSScroll::OnScrollEdgeCallback, opt);
     JSClass<JSScroll>::StaticMethod("onScrollEnd", &JSScroll::OnScrollEndCallback, opt);
     JSClass<JSScroll>::StaticMethod("onScrollStart", &JSScroll::OnScrollStartCallback, opt);
@@ -315,6 +343,7 @@ void JSScroll::JSBind(BindingTarget globalObj)
     JSClass<JSScroll>::StaticMethod("scrollSnap", &JSScroll::SetScrollSnap);
     JSClass<JSScroll>::StaticMethod("clip", &JSScrollable::JsClip);
     JSClass<JSScroll>::StaticMethod("enablePaging", &JSScroll::SetEnablePaging);
+    JSClass<JSScroll>::StaticMethod("initialOffset", &JSScroll::SetInitialOffset);
     JSClass<JSScroll>::InheritAndBind<JSScrollableBase>(globalObj);
 }
 
@@ -458,5 +487,19 @@ void JSScroll::SetEnablePaging(const JSCallbackInfo& args)
         return;
     }
     ScrollModel::GetInstance()->SetEnablePaging(args[0]->ToBoolean());
+}
+
+void JSScroll::SetInitialOffset(const JSCallbackInfo& args)
+{
+    if (args.Length() < 1 || !args[0]->IsObject()) {
+        return;
+    }
+
+    JSRef<JSObject> obj = JSRef<JSObject>::Cast(args[0]);
+    CalcDimension xOffset;
+    ParseJsDimensionVp(obj->GetProperty("xOffset"), xOffset);
+    CalcDimension yOffset;
+    ParseJsDimensionVp(obj->GetProperty("yOffset"), yOffset);
+    ScrollModel::GetInstance()->SetInitialOffset(NG::OffsetT(xOffset, yOffset));
 }
 } // namespace OHOS::Ace::Framework

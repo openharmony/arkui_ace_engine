@@ -43,9 +43,10 @@ public:
     MOCK_METHOD1(CancelPopup, bool(const std::string& id));
     MOCK_METHOD0(CloseMenu, void());
     MOCK_METHOD0(ClearMenu, void());
-    MOCK_METHOD2(ClearMenuNG, void(bool inWindow, bool showAnimation));
+    MOCK_METHOD3(ClearMenuNG, void(int32_t targetId, bool inWindow, bool showAnimation));
     MOCK_METHOD2(
         ShowDialogNG, RefPtr<NG::FrameNode>(const DialogProperties& dialogProps, std::function<void()>&& buildFunc));
+    MOCK_METHOD2(ShowDialogNGWithNode, RefPtr<NG::FrameNode>(const DialogProperties&, const RefPtr<NG::UINode>&));
     MOCK_METHOD1(CloseDialogNG, void(const RefPtr<NG::FrameNode>& dialogNode));
     MOCK_METHOD0(HideSubWindowNG, void());
     MOCK_CONST_METHOD0(GetChildContainerId, int32_t());
@@ -53,8 +54,8 @@ public:
     MOCK_METHOD2(SetHotAreas, void(const std::vector<Rect>& rects, int32_t overlayId));
     MOCK_CONST_METHOD0(GetParentWindowRect, Rect());
     MOCK_METHOD0(ClearToast, void());
-    MOCK_METHOD4(ShowToast, void(const std::string& message, int32_t duration, const std::string& bottom,
-        const NG::ToastShowMode& showMode));
+    MOCK_METHOD6(ShowToast, void(const std::string& message, int32_t duration, const std::string& bottom,
+        const NG::ToastShowMode& showMode, int32_t alignment, std::optional<DimensionOffset> offset));
     MOCK_METHOD6(ShowDialog,
         void(const std::string& title, const std::string& message, const std::vector<ButtonInfo>& buttons,
             bool autoCancel, std::function<void(int32_t, int32_t)>&& callback, const std::set<std::string>& callbacks));
@@ -69,6 +70,9 @@ public:
     MOCK_METHOD0(IsFocused, bool());
     MOCK_METHOD2(OpenCustomDialog, void(const PromptDialogAttr& dialogAttr, std::function<void(int32_t)>&& callback));
     MOCK_METHOD1(CloseCustomDialog, void(const int32_t dialogId));
+    MOCK_METHOD2(
+        OpenCustomDialogNG, void(const DialogProperties& dialogProps, std::function<void(int32_t)>&& callback));
+    MOCK_METHOD1(CloseCustomDialogNG, void(int32_t dialogId));
     MOCK_METHOD0(ResizeWindowForFoldStatus, void());
     MOCK_METHOD1(ResizeWindowForFoldStatus, void(int32_t parentContainerId));
 };

@@ -32,30 +32,7 @@ constexpr Dimension DEFAULT_FONT_SIZE_VAL = 12.0_fp;
 const std::string DEFAULT_POPUP_ITEM_FONT_WEIGHT = "medium";
 constexpr Dimension DEFAULT_POPUP_POSITION_X = 60.0_vp;
 constexpr Dimension DEFAULT_POPUP_POSITION_Y = 48.0_vp;
-
-bool ParseJsInteger(const EcmaVM* vm, const Local<JSValueRef>& value, int32_t& result)
-{
-    if (value->IsNumber()) {
-        result = value->Int32Value(vm);
-        return true;
-    }
-    // resource ignore by design
-    return false;
-}
-
-bool ParseJsDimensionVp(const EcmaVM* vm, const Local<JSValueRef>& value, CalcDimension& result)
-{
-    if (value->IsNumber()) {
-        result = CalcDimension(value->ToNumber(vm)->Value(), DimensionUnit::VP);
-        return true;
-    }
-    if (value->IsString()) {
-        result = StringUtils::StringToCalcDimension(value->ToString(vm)->ToString(), false, DimensionUnit::VP);
-        return true;
-    }
-    // resource ignore by design
-    return false;
-}
+constexpr double RADIUS_OFFSET = 4.0;
 } // namespace
 
 ArkUINativeModuleValue AlphabetIndexerBridge::SetPopupItemFont(ArkUIRuntimeCallInfo* runtimeCallInfo)
@@ -76,7 +53,7 @@ ArkUINativeModuleValue AlphabetIndexerBridge::SetPopupItemFont(ArkUIRuntimeCallI
         if (weightArg->IsNumber()) {
             weight = std::to_string(weightArg->Int32Value(vm));
         } else {
-            if (ArkTSUtils::ParseJsString(vm, weightArg, weight) || weight.empty()) {
+            if (!ArkTSUtils::ParseJsString(vm, weightArg, weight) || weight.empty()) {
                 weight = DEFAULT_POPUP_ITEM_FONT_WEIGHT;
             }
         }
@@ -162,7 +139,7 @@ ArkUINativeModuleValue AlphabetIndexerBridge::SetPopupFont(ArkUIRuntimeCallInfo*
         (styleValArg->IsNull() || styleValArg->IsUndefined())) {
         GetArkUINodeModifiers()->getAlphabetIndexerModifier()->resetPopupFont(nativeNode);
     }
-    CalcDimension fontSizeData(DEFAULT_FONT_SIZE_VAL);
+    CalcDimension fontSizeData(Dimension(DEFAULT_POPUPITEMFONT_SIZE, DimensionUnit::FP));
     std::string fontSize = fontSizeData.ToString();
     if (!fontSizeArg->IsNull() && !fontSizeArg->IsUndefined() &&
         ArkTSUtils::ParseJsDimensionFp(vm, fontSizeArg, fontSizeData) && !fontSizeData.IsNegative() &&
@@ -529,7 +506,7 @@ ArkUINativeModuleValue AlphabetIndexerBridge::SetSelected(ArkUIRuntimeCallInfo* 
     Local<JSValueRef> selectedArg = runtimeCallInfo->GetCallArgRef(1);
     auto nativeNode = nodePtr(nodeArg->ToNativePointer(vm)->Value());
     int32_t selected = 0;
-    if (selectedArg->IsNull() || selectedArg->IsUndefined() || !ParseJsInteger(vm, selectedArg, selected)) {
+    if (selectedArg->IsNull() || selectedArg->IsUndefined() || !ArkTSUtils::ParseJsInteger(vm, selectedArg, selected)) {
         GetArkUINodeModifiers()->getAlphabetIndexerModifier()->resetAlphabetIndexerSelected(nativeNode);
     } else {
         GetArkUINodeModifiers()->getAlphabetIndexerModifier()->setAlphabetIndexerSelected(nativeNode, selected);
@@ -561,7 +538,7 @@ ArkUINativeModuleValue AlphabetIndexerBridge::SetItemSize(ArkUIRuntimeCallInfo* 
         GetArkUINodeModifiers()->getAlphabetIndexerModifier()->resetItemSize(nativeNode);
     }
 
-    if (ParseJsDimensionVp(vm, itemSizeArg, itemSize) && GreatNotEqual(itemSize.Value(), 0.0) &&
+    if (ArkTSUtils::ParseJsDimensionVp(vm, itemSizeArg, itemSize) && GreatNotEqual(itemSize.Value(), 0.0) &&
         itemSize.Unit() != DimensionUnit::PERCENT) {
         GetArkUINodeModifiers()->getAlphabetIndexerModifier()->setItemSize(
             nativeNode, itemSize.Value(), static_cast<int>(itemSize.Unit()));
@@ -611,4 +588,118 @@ ArkUINativeModuleValue AlphabetIndexerBridge::ResetPopupPosition(ArkUIRuntimeCal
     GetArkUINodeModifiers()->getAlphabetIndexerModifier()->resetPopupPosition(nativeNode);
     return panda::JSValueRef::Undefined(vm);
 }
+
+ArkUINativeModuleValue AlphabetIndexerBridge::SetPopupItemBorderRadius(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> nodeArg = runtimeCallInfo->GetCallArgRef(NUM_0);
+    auto nativeNode = nodePtr(nodeArg->ToNativePointer(vm)->Value());
+    Local<JSValueRef> radiusArg = runtimeCallInfo->GetCallArgRef(NUM_1);
+
+    CalcDimension radius;
+    CalcDimension popupRadius;
+    if (radiusArg->IsNull() || radiusArg->IsUndefined() || !radiusArg->IsNumber()) {
+        GetArkUINodeModifiers()->getAlphabetIndexerModifier()->resetPopupItemBorderRadius(nativeNode);
+    } else {
+        ArkTSUtils::ParseJsDimensionVp(vm, radiusArg, radius);
+        popupRadius.SetValue(radius.Value() + RADIUS_OFFSET);
+        popupRadius.SetUnit(DimensionUnit::VP);
+        GetArkUINodeModifiers()->getAlphabetIndexerModifier()->setPopupItemBorderRadius(nativeNode, radius.Value(),
+            static_cast<int>(radius.Unit()), popupRadius.Value(), static_cast<int>(popupRadius.Unit()));
+    }
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue AlphabetIndexerBridge::ResetPopupItemBorderRadius(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> nodeArg = runtimeCallInfo->GetCallArgRef(0);
+    auto nativeNode = nodePtr(nodeArg->ToNativePointer(vm)->Value());
+    GetArkUINodeModifiers()->getAlphabetIndexerModifier()->resetPopupItemBorderRadius(nativeNode);
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue AlphabetIndexerBridge::SetItemBorderRadius(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> nodeArg = runtimeCallInfo->GetCallArgRef(0);
+    auto nativeNode = nodePtr(nodeArg->ToNativePointer(vm)->Value());
+    Local<JSValueRef> radiusArg = runtimeCallInfo->GetCallArgRef(NUM_1);
+    auto radius = CalcDimension(ZERO_RADIUS, DimensionUnit::VP);
+    auto indexerRadius = Dimension(ZERO_RADIUS, DimensionUnit::VP);
+    if (radiusArg->IsNull() || radiusArg->IsUndefined() || !radiusArg->IsNumber()) {
+        GetArkUINodeModifiers()->getAlphabetIndexerModifier()->resetItemBorderRadius(nativeNode);
+    } else {
+        ArkTSUtils::ParseJsDimensionVp(vm, radiusArg, radius);
+        indexerRadius.SetValue(radius.Value() + RADIUS_OFFSET);
+        indexerRadius.SetUnit(DimensionUnit::VP);
+        GetArkUINodeModifiers()->getAlphabetIndexerModifier()->setItemBorderRadius(nativeNode, radius.Value(),
+            static_cast<int>(radius.Unit()), indexerRadius.Value(), static_cast<int>(indexerRadius.Unit()));
+    }
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue AlphabetIndexerBridge::ResetItemBorderRadius(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> nodeArg = runtimeCallInfo->GetCallArgRef(0);
+    auto nativeNode = nodePtr(nodeArg->ToNativePointer(vm)->Value());
+    GetArkUINodeModifiers()->getAlphabetIndexerModifier()->resetItemBorderRadius(nativeNode);
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue AlphabetIndexerBridge::SetPopupBackgroundBlurStyle(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> nodeArg = runtimeCallInfo->GetCallArgRef(0);
+    auto nativeNode = nodePtr(nodeArg->ToNativePointer(vm)->Value());
+    Local<JSValueRef> blurStyleArg = runtimeCallInfo->GetCallArgRef(NUM_1);
+    int32_t blurStyle = blurStyleArg->Int32Value(vm);
+    if (!ArkTSUtils::ParseJsInteger(vm, blurStyleArg, blurStyle)) {
+        GetArkUINodeModifiers()->getAlphabetIndexerModifier()->resetPopupBackgroundBlurStyle(nativeNode);
+    } else {
+        GetArkUINodeModifiers()->getAlphabetIndexerModifier()->setPopupBackgroundBlurStyle(nativeNode, blurStyle);
+    }
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue AlphabetIndexerBridge::ResetPopupBackgroundBlurStyle(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> nodeArg = runtimeCallInfo->GetCallArgRef(0);
+    auto nativeNode = nodePtr(nodeArg->ToNativePointer(vm)->Value());
+    GetArkUINodeModifiers()->getAlphabetIndexerModifier()->resetPopupBackgroundBlurStyle(nativeNode);
+    return panda::JSValueRef::Undefined(vm);
+}
+ArkUINativeModuleValue AlphabetIndexerBridge::SetPopupTitleBackground(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> nodeArg = runtimeCallInfo->GetCallArgRef(0);
+    auto nativeNode = nodePtr(nodeArg->ToNativePointer(vm)->Value());
+    Local<JSValueRef> colorArg = runtimeCallInfo->GetCallArgRef(NUM_1);
+    Color color;
+    if (!ArkTSUtils::ParseJsColorAlpha(vm, colorArg, color)) {
+        GetArkUINodeModifiers()->getAlphabetIndexerModifier()->resetPopupTitleBackground(nativeNode);
+    } else {
+        GetArkUINodeModifiers()->getAlphabetIndexerModifier()->setPopupTitleBackground(nativeNode, color.GetValue());
+    }
+    return panda::JSValueRef::Undefined(vm);
+}
+ArkUINativeModuleValue AlphabetIndexerBridge::ResetPopupTitleBackground(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> nodeArg = runtimeCallInfo->GetCallArgRef(0);
+    auto nativeNode = nodePtr(nodeArg->ToNativePointer(vm)->Value());
+    GetArkUINodeModifiers()->getAlphabetIndexerModifier()->resetPopupTitleBackground(nativeNode);
+    return panda::JSValueRef::Undefined(vm);
+}
+
 } // namespace OHOS::Ace::NG

@@ -18,6 +18,7 @@
 
 #include <cstdint>
 
+#include "core/components_ng/pattern/swiper/swiper_content_transition_proxy.h"
 #include "core/components_ng/pattern/swiper/swiper_model.h"
 #include "frameworks/bridge/declarative_frontend/engine/functions/js_function.h"
 
@@ -27,6 +28,7 @@ class JsSwiperFunction : public JsFunction {
 
 public:
     explicit JsSwiperFunction(const JSRef<JSFunc>& jsFunction) : JsFunction(JSRef<JSObject>(), jsFunction) {}
+    static void JSBind(BindingTarget globalObj);
 
     ~JsSwiperFunction() override {};
 
@@ -37,6 +39,38 @@ public:
 
     void Execute(int32_t index, int32_t targetIndex, const AnimationCallbackInfo& animationCallbackInfo);
     void Execute(int32_t index, const AnimationCallbackInfo& animationCallbackInfo);
+    void Execute(int32_t errorCode);
+    void Execute(const RefPtr<SwiperContentTransitionProxy>& proxy);
+    void Execute(int32_t selectedIndex, int32_t index, float position, float mainAxisLength);
+};
+
+class JsSwiperContentTransitionProxy : public Referenced {
+public:
+    static void JSBind(BindingTarget globalObj);
+    void SetSelectedIndex(const JSCallbackInfo& args);
+    void GetSelectedIndex(const JSCallbackInfo& args);
+    void SetIndex(const JSCallbackInfo& args);
+    void GetIndex(const JSCallbackInfo& args);
+    void SetPosition(const JSCallbackInfo& args);
+    void GetPosition(const JSCallbackInfo& args);
+    void SetMainAxisLength(const JSCallbackInfo& args);
+    void GetMainAxisLength(const JSCallbackInfo& args);
+    void FinishTransition(const JSCallbackInfo& args);
+
+    void SetProxy(const RefPtr<SwiperContentTransitionProxy>& proxy)
+    {
+        proxy_ = proxy;
+    }
+
+    RefPtr<SwiperContentTransitionProxy> GetProxy() const
+    {
+        return proxy_;
+    }
+
+private:
+    static void Constructor(const JSCallbackInfo& args);
+    static void Destructor(JsSwiperContentTransitionProxy* proxy);
+    RefPtr<SwiperContentTransitionProxy> proxy_;
 };
 } // namespace OHOS::Ace::Framework
 

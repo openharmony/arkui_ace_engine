@@ -162,9 +162,12 @@ public:
     void ReplaceNamedRoute(const std::string& uri, const std::string& params,
         const std::function<void(const std::string&, int32_t)>& errorCallback, uint32_t routerMode = 0) override;
     void Back(const std::string& uri, const std::string& params) override;
+    void BackToIndex(int32_t index, const std::string& params) override;
     void Clear() override;
     int32_t GetStackSize() const override;
     void GetState(int32_t& index, std::string& name, std::string& path) override;
+    void GetRouterStateByIndex(int32_t& index, std::string& name, std::string& path, std::string& params) override;
+    void GetRouterStateByUrl(std::string& url, std::vector<StateInfo>& stateArray) override;
     std::string GetParams() override;
     int32_t GetIndexByUrl(const std::string& url) override;
 
@@ -188,7 +191,8 @@ public:
     Size MeasureTextSize(const MeasureContext& context) override;
 
     void ShowToast(const std::string& message, int32_t duration, const std::string& bottom,
-        const NG::ToastShowMode& showMode = NG::ToastShowMode::DEFAULT) override;
+        const NG::ToastShowMode& showMode = NG::ToastShowMode::DEFAULT, int32_t alignment = -1,
+        std::optional<DimensionOffset> offset = std::nullopt) override;
     void SetToastStopListenerCallback(std::function<void()>&& stopCallback) override;
     void ShowDialog(const std::string& title, const std::string& message, const std::vector<ButtonInfo>& buttons,
         bool autoCancel, std::function<void(int32_t, int32_t)>&& callback,
@@ -203,6 +207,7 @@ public:
         std::function<void(bool)>&& onStatusChanged) override;
     void ShowDialogInner(DialogProperties& dialogProperties, std::function<void(int32_t, int32_t)>&& callback,
         const std::set<std::string>& callbacks);
+    void RemoveCustomDialog() override;
     void OpenCustomDialog(const PromptDialogAttr &dialogAttr, std::function<void(int32_t)> &&callback) override;
     void CloseCustomDialog(const int32_t dialogId) override;
 
@@ -382,6 +387,7 @@ private:
     void LoadReplacePage(int32_t pageId, const PageTarget& url, const std::string& params);
 
     void ReplacePageInSubStage(const RefPtr<JsAcePage>& page, const std::string& url);
+    std::optional<int32_t> GetEffectiveContainerId() const;
 
     uint64_t GetSystemRealTime();
 

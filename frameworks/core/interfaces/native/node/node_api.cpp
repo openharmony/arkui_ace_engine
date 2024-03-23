@@ -22,10 +22,13 @@
 #include "base/utils/macros.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/ui_node.h"
+#include "core/interfaces/native/node/calendar_picker_modifier.h"
+#include "core/interfaces/native/node/custom_dialog_model.h"
 #include "core/interfaces/native/node/node_common_modifier.h"
 #include "core/interfaces/native/node/node_image_modifier.h"
 #include "core/interfaces/native/node/node_refresh_modifier.h"
 #include "core/interfaces/native/node/node_date_picker_modifier.h"
+#include "core/interfaces/native/node/node_list_modifier.h"
 #include "core/interfaces/native/node/node_scroll_modifier.h"
 #include "core/interfaces/native/node/node_text_input_modifier.h"
 #include "core/interfaces/native/node/node_text_area_modifier.h"
@@ -33,17 +36,12 @@
 #include "core/interfaces/native/node/node_toggle_modifier.h"
 #include "core/interfaces/native/node/node_checkbox_modifier.h"
 #include "core/interfaces/native/node/node_slider_modifier.h"
+#include "core/interfaces/native/node/node_swiper_modifier.h"
 #include "core/interfaces/native/node/view_model.h"
 #include "core/pipeline_ng/pipeline_context.h"
 #include "frameworks/core/common/container.h"
 
 namespace OHOS::Ace::NG {
-
-ArkUINodeHandle GetFrameNodeById(ArkUI_Int32 nodeId)
-{
-    auto node = OHOS::Ace::ElementRegister::GetInstance()->GetNodeById(nodeId);
-    return reinterpret_cast<ArkUINodeHandle>(OHOS::Ace::AceType::RawPtr(node));
-}
 
 ArkUI_Int64 GetUIState(ArkUINodeHandle node)
 {
@@ -66,7 +64,7 @@ void SetSupportedUIState(ArkUINodeHandle node, ArkUI_Int64 state)
 namespace NodeModifier {
 const ArkUIStateModifier* GetUIStateModifier()
 {
-    static const ArkUIStateModifier modifier = { GetFrameNodeById, GetUIState, SetSupportedUIState };
+    static const ArkUIStateModifier modifier = { GetUIState, SetSupportedUIState };
     return &modifier;
 }
 }
@@ -96,9 +94,15 @@ void SendArkUIAsyncEvent(ArkUINodeEvent* event)
 
 namespace {
 
-ArkUINodeHandle CreateNode(ArkUINodeType type, int peerId, ArkUI_Int32 /*flags*/)
+void SetCustomCallback(ArkUINodeHandle node, ArkUI_Int32 callback)
 {
-    return reinterpret_cast<ArkUINodeHandle>(ViewModel::CreateNode(type, peerId));
+    ViewModel::SetCustomCallback(node, callback);
+}
+
+ArkUINodeHandle CreateNode(ArkUINodeType type, int peerId, ArkUI_Int32 flags)
+{
+    auto* node = reinterpret_cast<ArkUINodeHandle>(ViewModel::CreateNode(type, peerId));
+    return node;
 }
 
 void DisposeNode(ArkUINodeHandle node)
@@ -111,6 +115,11 @@ void AddChild(ArkUINodeHandle parent, ArkUINodeHandle child)
     ViewModel::AddChild(parent, child);
 }
 
+void InsertChildAt(ArkUINodeHandle parent, ArkUINodeHandle child, int32_t position)
+{
+    ViewModel::InsertChildAt(parent, child, position);
+}
+
 void RemoveChild(ArkUINodeHandle parent, ArkUINodeHandle child)
 {
     ViewModel::RemoveChild(parent, child);
@@ -121,16 +130,21 @@ void InsertChildAfter(ArkUINodeHandle parent, ArkUINodeHandle child, ArkUINodeHa
     ViewModel::InsertChildAfter(parent, child, sibling);
 }
 
-typedef void (*ComponentAsyncEventHandler)(ArkUINodeHandle node, ArkUI_Int32 eventId, void* extraParam);
+void InsertChildBefore(ArkUINodeHandle parent, ArkUINodeHandle child, ArkUINodeHandle sibling)
+{
+    ViewModel::InsertChildBefore(parent, child, sibling);
+}
+
+typedef void (*ComponentAsyncEventHandler)(ArkUINodeHandle node, void* extraParam);
 
 /**
  * IMPORTANT!!!
- * the order of declaring the handler must be same as the ArkUIAsyncEventKind did
+ * the order of declaring the handler must be same as the ArkUIEventSubKind did
  */
 /* clang-format off */
 const ComponentAsyncEventHandler commonNodeAsyncEventHandlers[] = {
     NodeModifier::SetOnAppear,
-    nullptr,
+    NodeModifier::SetOnDisappear,
     NodeModifier::SetOnTouch,
     NodeModifier::SetOnClick,
     nullptr,
@@ -155,12 +169,17 @@ const ComponentAsyncEventHandler textInputNodeAsyncEventHandlers[] = {
     nullptr,
     NodeModifier::SetTextInputOnSubmit,
     NodeModifier::SetOnTextInputChange,
+    NodeModifier::SetOnTextInputCut,
+    NodeModifier::SetOnTextInputPaste,
+    NodeModifier::SetOnTextInputSelectionChange,
 };
 
 const ComponentAsyncEventHandler textAreaNodeAsyncEventHandlers[] = {
     nullptr,
     nullptr,
     NodeModifier::SetOnTextAreaChange,
+    NodeModifier::SetOnTextAreaPaste,
+    NodeModifier::SetOnTextAreaSelectionChange,
 };
 
 const ComponentAsyncEventHandler refreshNodeAsyncEventHandlers[] = {
@@ -185,6 +204,10 @@ const ComponentAsyncEventHandler TIME_PICKER_NODE_ASYNC_EVENT_HANDLERS[] = {
     NodeModifier::SetTimePickerOnChange,
 };
 
+const ComponentAsyncEventHandler CALENDAR_PICKER_NODE_ASYNC_EVENT_HANDLERS[] = {
+    NodeModifier::SetCalendarPickerOnChange,
+};
+
 const ComponentAsyncEventHandler CHECKBOX_NODE_ASYNC_EVENT_HANDLERS[] = {
     NodeModifier::SetCheckboxChange,
 };
@@ -193,8 +216,23 @@ const ComponentAsyncEventHandler SLIDER_NODE_ASYNC_EVENT_HANDLERS[] = {
     NodeModifier::SetSliderChange,
 };
 
+const ComponentAsyncEventHandler SWIPER_NODE_ASYNC_EVENT_HANDLERS[] = {
+    NodeModifier::SetSwiperChange,
+    NodeModifier::SetSwiperAnimationStart,
+    NodeModifier::SetSwiperAnimationEnd,
+    NodeModifier::SetSwiperGestureSwipe,
+};
+
+const ComponentAsyncEventHandler listNodeAsyncEventHandlers[] = {
+    NodeModifier::SetOnListScroll,
+    nullptr,
+    NodeModifier::SetOnListScrollStart,
+    NodeModifier::SetOnListScrollStop,
+    NodeModifier::SetOnListScrollFrameBegin,
+};
+
 /* clang-format on */
-void NotifyComponentAsyncEvent(ArkUINodeHandle node, ArkUIAsyncEventKind kind, ArkUI_Int32 eventId, void* extraParam)
+void NotifyComponentAsyncEvent(ArkUINodeHandle node, ArkUIEventSubKind kind, ArkUI_Int64 extraParam)
 {
     unsigned int subClassType = kind / ARKUI_MAX_EVENT_NUM;
     unsigned int subKind = kind % ARKUI_MAX_EVENT_NUM;
@@ -280,6 +318,15 @@ void NotifyComponentAsyncEvent(ArkUINodeHandle node, ArkUIAsyncEventKind kind, A
             eventHandle = TIME_PICKER_NODE_ASYNC_EVENT_HANDLERS[subKind];
             break;
         }
+        case ARKUI_CALENDAR_PICKER: {
+            // calendar picker event type.
+            if (subKind >= sizeof(CALENDAR_PICKER_NODE_ASYNC_EVENT_HANDLERS) / sizeof(ComponentAsyncEventHandler)) {
+                TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "NotifyComponentAsyncEvent kind:%{public}d NOT IMPLEMENT", kind);
+                return;
+            }
+            eventHandle = CALENDAR_PICKER_NODE_ASYNC_EVENT_HANDLERS[subKind];
+            break;
+        }
         case ARKUI_CHECKBOX: {
             // timepicker event type.
             if (subKind >= sizeof(CHECKBOX_NODE_ASYNC_EVENT_HANDLERS) / sizeof(ComponentAsyncEventHandler)) {
@@ -298,18 +345,37 @@ void NotifyComponentAsyncEvent(ArkUINodeHandle node, ArkUIAsyncEventKind kind, A
             eventHandle = SLIDER_NODE_ASYNC_EVENT_HANDLERS[subKind];
             break;
         }
+        case ARKUI_SWIPER: {
+            // swiper event type.
+            if (subKind >= sizeof(SWIPER_NODE_ASYNC_EVENT_HANDLERS) / sizeof(ComponentAsyncEventHandler)) {
+                TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "NotifyComponentAsyncEvent kind:%{public}d NOT IMPLEMENT", kind);
+                return;
+            }
+            eventHandle = SWIPER_NODE_ASYNC_EVENT_HANDLERS[subKind];
+            break;
+        }
+        case ARKUI_LIST: {
+            // list event type.
+            if (subKind >= sizeof(listNodeAsyncEventHandlers) / sizeof(ComponentAsyncEventHandler)) {
+                TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "NotifyComponentAsyncEvent kind:%{public}d NOT IMPLEMENT", kind);
+                return;
+            }
+            eventHandle = listNodeAsyncEventHandlers[subKind];
+            break;
+        }
         default: {
             TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "NotifyComponentAsyncEvent kind:%{public}d NOT IMPLEMENT", kind);
         }
     }
     if (eventHandle) {
-        eventHandle(node, eventId, extraParam);
+        // TODO: fix handlers.
+        eventHandle(node, reinterpret_cast<void*>(static_cast<intptr_t>(extraParam)));
     } else {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "NotifyComponentAsyncEvent kind:%{public}d EMPTY IMPLEMENT", kind);
     }
 }
 
-void NotifyResetComponentAsyncEvent(ArkUINodeHandle node, ArkUIAsyncEventKind subKind)
+void NotifyResetComponentAsyncEvent(ArkUINodeHandle node, ArkUIEventSubKind subKind)
 {
     // TODO
 }
@@ -336,16 +402,14 @@ void MarkDirty(ArkUINodeHandle nodePtr, ArkUI_Uint32 flag)
     }
 }
 
-static ArkUIAPICallbackMethod* callbacks = nullptr;
-
 static void SetCallbackMethod(ArkUIAPICallbackMethod* method)
 {
-    callbacks = method;
+    ViewModel::SetCallbackMethod(method);
 }
 
 ArkUIAPICallbackMethod* GetArkUIAPICallbackMethod()
 {
-    return callbacks;
+    return ViewModel::GetCallbackMethod();
 }
 
 int SetVsyncCallback(ArkUIVMContext vmContext, ArkUI_Int32 device, ArkUI_Int32 callbackId)
@@ -367,9 +431,94 @@ void UnblockVsyncWait(ArkUIVMContext vmContext, ArkUI_Int32 device)
     PipelineContext::GetCurrentContext()->RequestFrame();
 }
 
+ArkUI_Int32 MeasureNode(ArkUIVMContext vmContext, ArkUINodeHandle node, ArkUI_Float32* data)
+{
+    return ViewModel::MeasureNode(vmContext, node, data);
+}
+
+ArkUI_Int32 LayoutNode(ArkUIVMContext vmContext, ArkUINodeHandle node, ArkUI_Float32* data)
+{
+    return ViewModel::LayoutNode(vmContext, node, data);
+}
+
+ArkUI_Int32 DrawNode(ArkUIVMContext vmContext, ArkUINodeHandle node, ArkUI_Float32* data)
+{
+    return ViewModel::DrawNode(vmContext, node, data);
+}
+
 ArkUI_Int32 MeasureLayoutAndDraw(ArkUIVMContext vmContext, ArkUINodeHandle rootPtr)
 {
+    auto* root = reinterpret_cast<FrameNode*>(rootPtr);
+    float scale = static_cast<float>(OHOS::Ace::SystemProperties::GetResolution());
+    float width = root->GetGeometryNode()->GetFrameSize().Width() / scale;
+    float height = root->GetGeometryNode()->GetFrameSize().Height() / scale;
+    // measure
+    ArkUI_Float32 measureData[] = { width, height, width, height };
+    MeasureNode(vmContext, rootPtr, &measureData[0]);
+    // layout
+    ArkUI_Float32 layoutData[] = { 0, 0, width, height };
+    LayoutNode(vmContext, rootPtr, &layoutData[0]);
+    // draw
+    ArkUI_Float32 drawData[] = { 0, 0, 0, 0 };
+    DrawNode(vmContext, rootPtr, &drawData[0]);
+
     return 0;
+}
+
+void SetMeasureWidth(ArkUINodeHandle node, ArkUI_Float32 value)
+{
+    auto* companion = ViewModel::GetCompanion(node);
+    CHECK_NULL_VOID(companion);
+    companion->setMeasureWidthValue(value);
+}
+
+ArkUI_Float32 GetMeasureWidth(ArkUINodeHandle node)
+{
+    auto* companion = ViewModel::GetCompanion(node);
+    CHECK_NULL_RETURN(companion, 0);
+    return companion->getMeasureWidthValue();
+}
+
+void SetMeasureHeight(ArkUINodeHandle node, ArkUI_Float32 value)
+{
+    auto* companion = ViewModel::GetCompanion(node);
+    CHECK_NULL_VOID(companion);
+    companion->setMeasureHeightValue(value);
+}
+
+ArkUI_Float32 GetMeasureHeight(ArkUINodeHandle node)
+{
+    auto* companion = ViewModel::GetCompanion(node);
+    CHECK_NULL_RETURN(companion, 0);
+    return companion->getMeasureHeightValue();
+}
+
+void SetX(ArkUINodeHandle node, ArkUI_Float32 value)
+{
+    auto* companion = ViewModel::GetCompanion(node);
+    CHECK_NULL_VOID(companion);
+    companion->setXValue(value);
+}
+
+void SetY(ArkUINodeHandle node, ArkUI_Float32 value)
+{
+    auto* companion = ViewModel::GetCompanion(node);
+    CHECK_NULL_VOID(companion);
+    companion->setYValue(value);
+}
+
+void SetAlignment(ArkUINodeHandle node, ArkUI_Int32 value)
+{
+    auto* companion = ViewModel::GetCompanion(node);
+    CHECK_NULL_VOID(companion);
+    companion->alignment = value;
+}
+
+ArkUI_Int32 GetAlignment(ArkUINodeHandle node)
+{
+    auto* companion = ViewModel::GetCompanion(node);
+    CHECK_NULL_RETURN(companion, 0);
+    return companion->alignment;
 }
 
 const ArkUIBasicAPI* GetBasicAPI()
@@ -384,6 +533,8 @@ const ArkUIBasicAPI* GetBasicAPI()
         AddChild,
         RemoveChild,
         InsertChildAfter,
+        InsertChildBefore,
+        InsertChildAt,
         nullptr,
         nullptr,
         nullptr,
@@ -403,6 +554,118 @@ const ArkUIBasicAPI* GetBasicAPI()
     return &basicImpl;
 }
 
+ArkUIDialogHandle CreateDialog()
+{
+    return CustomDialog::CreateDialog();
+}
+
+void DisposeDialog(ArkUIDialogHandle handle)
+{
+    CustomDialog::DisposeDialog(handle);
+}
+
+ArkUI_Int32 SetDialogContent(ArkUIDialogHandle handle, ArkUINodeHandle contentNode)
+{
+    return CustomDialog::SetDialogContent(handle, contentNode);
+}
+
+ArkUI_Int32 RemoveDialogContent(ArkUIDialogHandle handle)
+{
+    return CustomDialog::RemoveDialogContent(handle);
+}
+
+ArkUI_Int32 SetDialogContentAlignment(ArkUIDialogHandle handle, ArkUI_Int32 alignment,
+    ArkUI_Float32 offsetX, ArkUI_Float32 offsetY)
+{
+    return CustomDialog::SetDialogContentAlignment(handle, alignment, offsetX, offsetY);
+}
+
+ArkUI_Int32 ResetDialogContentAlignment(ArkUIDialogHandle handle)
+{
+    return CustomDialog::ResetDialogContentAlignment(handle);
+}
+
+ArkUI_Int32 SetDialogModalMode(ArkUIDialogHandle handle, ArkUI_Bool isModal)
+{
+    return CustomDialog::SetDialogModalMode(handle, isModal);
+}
+
+ArkUI_Int32 SetDialogAutoCancel(ArkUIDialogHandle handle, ArkUI_Bool autoCancel)
+{
+    return CustomDialog::SetDialogAutoCancel(handle, autoCancel);
+}
+
+ArkUI_Int32 SetDialogMask(ArkUIDialogHandle handle, ArkUI_Uint32 maskColor, ArkUIRect * rect)
+{
+    return CustomDialog::SetDialogMask(handle, maskColor, rect);
+}
+
+ArkUI_Int32 SetDialogBackgroundColor(ArkUIDialogHandle handle, uint32_t backgroundColor)
+{
+    return CustomDialog::SetDialogBackgroundColor(handle, backgroundColor);
+}
+
+ArkUI_Int32 SetDialogCornerRadius(ArkUIDialogHandle handle, float topLeft, float topRight,
+    float bottomLeft, float bottomRight)
+{
+    return CustomDialog::SetDialogCornerRadius(handle, topLeft, topRight, bottomLeft, bottomRight);
+}
+
+ArkUI_Int32 SetDialogGridColumnCount(ArkUIDialogHandle handle, int32_t gridCount)
+{
+    return CustomDialog::SetDialogGridColumnCount(handle, gridCount);
+}
+
+ArkUI_Int32 EnableDialogCustomStyle(ArkUIDialogHandle handle, ArkUI_Bool enableCustomStyle)
+{
+    return CustomDialog::EnableDialogCustomStyle(handle, enableCustomStyle);
+}
+
+ArkUI_Int32 EnableDialogCustomAnimation(ArkUIDialogHandle handle, ArkUI_Bool enableCustomAnimation)
+{
+    return CustomDialog::EnableDialogCustomAnimation(handle, enableCustomAnimation);
+}
+
+ArkUI_Int32 ShowDialog(ArkUIDialogHandle handle, ArkUI_Bool showInSubWindow)
+{
+    return CustomDialog::ShowDialog(handle, showInSubWindow);
+}
+
+ArkUI_Int32 CloseDialog(ArkUIDialogHandle handle)
+{
+    return CustomDialog::CloseDialog(handle);
+}
+
+// 注册关闭事件
+ArkUI_Int32 RegiesterOnWillDialogDismiss(ArkUIDialogHandle handle, bool (*eventHandler)(ArkUI_Int32))
+{
+    return CustomDialog::RegiesterOnWillDialogDismiss(handle, eventHandler);
+}
+
+const ArkUIDialogAPI* GetDialogAPI()
+{
+    static const ArkUIDialogAPI dialogImpl = {
+        CreateDialog,
+        DisposeDialog,
+        SetDialogContent,
+        RemoveDialogContent,
+        SetDialogContentAlignment,
+        ResetDialogContentAlignment,
+        SetDialogModalMode,
+        SetDialogAutoCancel,
+        SetDialogMask,
+        SetDialogBackgroundColor,
+        SetDialogCornerRadius,
+        SetDialogGridColumnCount,
+        EnableDialogCustomStyle,
+        EnableDialogCustomAnimation,
+        ShowDialog,
+        CloseDialog,
+        RegiesterOnWillDialogDismiss,
+    };
+    return &dialogImpl;
+}
+
 void ShowCrash(ArkUI_CharPtr message)
 {
     TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "Arkoala crash: %{public}s", message);
@@ -415,17 +678,19 @@ ArkUIExtendedNodeAPI impl_extended = {
     nullptr, // getCanvasRenderingContext2DModifier
 
     SetCallbackMethod,
-    nullptr, // setCustomCallback
+    SetCustomCallback, // setCustomCallback
     MeasureLayoutAndDraw,
-    nullptr, // measureNode
-    nullptr, // layoutNode
-    nullptr, // drawNode
-    nullptr, // setMeasureWidth
-    nullptr, // getMeasureWidth
-    nullptr, // setMeasureHeight
-    nullptr, // getMeasureHeight
-    nullptr, // setX
-    nullptr, // setY
+    MeasureNode,
+    LayoutNode,
+    DrawNode,
+    SetMeasureWidth, // setMeasureWidth
+    GetMeasureWidth, // getMeasureWidth
+    SetMeasureHeight, // setMeasureHeight
+    GetMeasureHeight, // getMeasureHeight
+    SetX, // setX
+    SetY, // setY
+    SetAlignment,
+    GetAlignment,
     nullptr, // indexerChecker
     nullptr, // setRangeUpdater
     nullptr, // setLazyItemIndexer
@@ -538,6 +803,7 @@ ArkUIFullNodeAPI impl_full = {
     GetAnimationAPI,        // Animation
     GetNavigationAPI,       // Navigation
     GetGraphicsAPI,         // Graphics
+    GetDialogAPI,
 };
 /* clang-format on */
 } // namespace

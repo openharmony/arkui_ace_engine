@@ -68,6 +68,11 @@ public:
         return true;
     }
 
+    bool IsSupportDrawModifier() const override
+    {
+        return false;
+    }
+
     void UpdateMuted(bool muted)
     {
         muted_ = muted;
@@ -314,6 +319,7 @@ private:
 #endif
 
     void RegisterRenderContextCallBack();
+    void ChangePlayerStatus(bool isPlaying, const PlaybackStatus& status);
 
     RefPtr<VideoControllerV2> videoControllerV2_;
     RefPtr<FrameNode> controlBar_;

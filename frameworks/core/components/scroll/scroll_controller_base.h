@@ -78,12 +78,14 @@ public:
         return Axis::NONE;
     }
 
-    virtual bool AnimateTo(const Dimension& position, float duration, const RefPtr<Curve>& curve, bool smooth)
+    virtual bool AnimateTo(
+        const Dimension& position, float duration, const RefPtr<Curve>& curve, bool smooth, bool canOverScroll = false)
     {
         return true;
     }
     virtual void ScrollBy(double pixelX, double pixelY, bool smooth) {}
     virtual void ScrollToEdge(ScrollEdgeType scrollEdgeType, bool smooth) {}
+    virtual void Fling(double flingVelocity) {}
     virtual void ScrollPage(bool reverse, bool smooth) {}
     virtual Offset GetCurrentOffset() const
     {

@@ -22,6 +22,7 @@
 #include "core/components_ng/pattern/navigation/navigation_stack.h"
 
 namespace OHOS::Ace::NG {
+class NavigationStack;
 class NavPathInfo : public virtual AceType {
     DECLARE_ACE_TYPE(NavPathInfo, AceType)
 public:
@@ -37,6 +38,11 @@ public:
     std::string GetName() const
     {
         return name_;
+    }
+
+    virtual napi_value GetParamObj() const
+    {
+        return nullptr;
     }
 
 protected:
@@ -69,7 +75,29 @@ public:
         return navigationStack_;
     }
 
+    int32_t GetIndex() const
+    {
+        return index_;
+    }
+
+    void SetIndex(int32_t index)
+    {
+        index_ = index;
+    }
+
+    uint64_t GetNavDestinationId() const
+    {
+        return navDestinationId_;
+    }
+
+    void SetNavDestinationId(uint64_t id)
+    {
+        navDestinationId_ = id;
+    }
+
 protected:
+    int32_t index_ = -1;
+    uint64_t navDestinationId_ = 0;
     RefPtr<NavPathInfo> pathInfo_;
     WeakPtr<NavigationStack> navigationStack_;
 };

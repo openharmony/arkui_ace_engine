@@ -124,6 +124,15 @@ RefPtr<NG::UINode> ElementRegister::GetUINodeById(ElementIdType elementId)
     return iter == itemMap_.end() ? nullptr : AceType::DynamicCast<NG::UINode>(iter->second).Upgrade();
 }
 
+NG::FrameNode* ElementRegister::GetFrameNodePtrById(ElementIdType elementId)
+{
+    if (elementId == ElementRegister::UndefinedElementId) {
+        return nullptr;
+    }
+    auto iter = itemMap_.find(elementId);
+    return iter == itemMap_.end() ? nullptr : AceType::DynamicCast<NG::FrameNode>(iter->second.GetRawPtr());
+}
+
 bool ElementRegister::AddUINode(const RefPtr<NG::UINode>& node)
 {
     if (!node || (node->GetId() == ElementRegister::UndefinedElementId)) {
@@ -175,14 +184,15 @@ RefPtr<NG::GeometryTransition> ElementRegister::GetOrCreateGeometryTransition(
     if (id.empty()) {
         return nullptr;
     }
-    RefPtr<NG::GeometryTransition> geometryTransition;
-    if (geometryTransitionMap_.find(id) == geometryTransitionMap_.end()) {
-        geometryTransition = AceType::MakeRefPtr<NG::GeometryTransition>(id, followWithoutTransition);
+    auto it = geometryTransitionMap_.find(id);
+    if (it == geometryTransitionMap_.end()) {
+        auto geometryTransition = AceType::MakeRefPtr<NG::GeometryTransition>(id, followWithoutTransition);
         geometryTransitionMap_.emplace(id, geometryTransition);
+        return geometryTransition;
     } else {
-        geometryTransition = geometryTransitionMap_[id];
+        return it->second;
     }
-    return geometryTransition;
+    return nullptr;
 }
 
 void ElementRegister::DumpGeometryTransition()
@@ -202,9 +212,12 @@ void ElementRegister::DumpGeometryTransition()
 
 void ElementRegister::ReSyncGeometryTransition(const WeakPtr<NG::FrameNode>& trigger, const AnimationOption& option)
 {
-    for (const auto& [itemId, item] : geometryTransitionMap_) {
-        if (item) {
-            item->OnReSync(trigger, option);
+    for (auto iter = geometryTransitionMap_.begin(); iter != geometryTransitionMap_.end();) {
+        if (!iter->second || iter->second->IsInAndOutEmpty()) {
+            iter = geometryTransitionMap_.erase(iter);
+        } else {
+            iter->second->OnReSync(trigger, option);
+            ++iter;
         }
     }
 }

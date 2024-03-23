@@ -243,7 +243,7 @@ void SubwindowManager::UpdateHideMenuOffsetNG(const NG::OffsetF& offset)
     }
 }
 
-void SubwindowManager::ClearMenuNG(int32_t instanceId, bool inWindow, bool showAnimation)
+void SubwindowManager::ClearMenuNG(int32_t instanceId, int32_t targetId, bool inWindow, bool showAnimation)
 {
     TAG_LOGD(AceLogTag::ACE_SUB_WINDOW, "clear menung enter");
     RefPtr<Subwindow> subwindow;
@@ -254,7 +254,7 @@ void SubwindowManager::ClearMenuNG(int32_t instanceId, bool inWindow, bool showA
         subwindow = GetCurrentWindow();
     }
     if (subwindow) {
-        subwindow->ClearMenuNG(inWindow, showAnimation);
+        subwindow->ClearMenuNG(targetId, inWindow, showAnimation);
     }
 }
 
@@ -400,6 +400,37 @@ void SubwindowManager::SetHotAreas(const std::vector<Rect>& rects, int32_t overl
         subwindow->SetHotAreas(rects, overlayId);
     }
 }
+
+void SubwindowManager::SetPopupHotAreas(const std::vector<Rect>& rects, int32_t overlayId, int32_t instanceId)
+{
+    RefPtr<Subwindow> subwindow;
+    if (instanceId != -1) {
+        // get the subwindow which overlay node in, not current
+        subwindow = GetSubwindow(instanceId >= MIN_SUBCONTAINER_ID ? GetParentContainerId(instanceId) : instanceId);
+    } else {
+        subwindow = GetCurrentWindow();
+    }
+
+    if (subwindow) {
+        subwindow->SetPopupHotAreas(rects, overlayId);
+    }
+}
+
+void SubwindowManager::DeletePopupHotAreas(int32_t overlayId, int32_t instanceId)
+{
+    RefPtr<Subwindow> subwindow;
+    if (instanceId != -1) {
+        // get the subwindow which overlay node in, not current
+        subwindow = GetSubwindow(instanceId >= MIN_SUBCONTAINER_ID ? GetParentContainerId(instanceId) : instanceId);
+    } else {
+        subwindow = GetCurrentWindow();
+    }
+
+    if (subwindow) {
+        subwindow->DeletePopupHotAreas(overlayId);
+    }
+}
+
 void SubwindowManager::SetDialogHotAreas(const std::vector<Rect>& rects, int32_t overlayId, int32_t instanceId)
 {
     TAG_LOGD(AceLogTag::ACE_SUB_WINDOW, "set dialog hot areas enter");
@@ -428,7 +459,20 @@ RefPtr<NG::FrameNode> SubwindowManager::ShowDialogNG(
     }
     return subwindow->ShowDialogNG(dialogProps, std::move(buildFunc));
 }
-
+RefPtr<NG::FrameNode> SubwindowManager::ShowDialogNGWithNode(const DialogProperties& dialogProps,
+    const RefPtr<NG::UINode>& customNode)
+{
+    TAG_LOGD(AceLogTag::ACE_SUB_WINDOW, "show dialog ng enter");
+    auto containerId = Container::CurrentId();
+    auto subwindow = GetSubwindow(containerId);
+    if (!subwindow) {
+        subwindow = Subwindow::CreateSubwindow(containerId);
+        CHECK_NULL_RETURN(subwindow, nullptr);
+        subwindow->InitContainer();
+        AddSubwindow(containerId, subwindow);
+    }
+    return subwindow->ShowDialogNGWithNode(dialogProps, customNode);
+}
 void SubwindowManager::CloseDialogNG(const RefPtr<NG::FrameNode>& dialogNode)
 {
     TAG_LOGD(AceLogTag::ACE_SUB_WINDOW, "close dialog ng enter");
@@ -439,6 +483,33 @@ void SubwindowManager::CloseDialogNG(const RefPtr<NG::FrameNode>& dialogNode)
         return;
     }
     return subwindow->CloseDialogNG(dialogNode);
+}
+
+void SubwindowManager::OpenCustomDialogNG(const DialogProperties& dialogProps, std::function<void(int32_t)>&& callback)
+{
+    TAG_LOGD(AceLogTag::ACE_SUB_WINDOW, "show customDialog ng enter");
+    auto containerId = Container::CurrentId();
+    auto subwindow = GetSubwindow(containerId);
+    if (!subwindow) {
+        subwindow = Subwindow::CreateSubwindow(containerId);
+        CHECK_NULL_VOID(subwindow);
+        subwindow->InitContainer();
+        AddSubwindow(containerId, subwindow);
+    }
+    return subwindow->OpenCustomDialogNG(dialogProps, std::move(callback));
+}
+
+void SubwindowManager::CloseCustomDialogNG(int32_t dialogId)
+{
+    TAG_LOGD(AceLogTag::ACE_SUB_WINDOW, "close customDialog ng enter");
+    auto iter = subwindowMap_.begin();
+    while (iter != subwindowMap_.end()) {
+        auto overlay = iter->second->GetOverlayManager();
+        if (overlay->GetDialogMap().find(dialogId) != overlay->GetDialogMap().end()) {
+            return overlay->CloseCustomDialog(dialogId);
+        }
+        iter++;
+    }
 }
 
 void SubwindowManager::HideDialogSubWindow(int32_t instanceId)
@@ -502,8 +573,8 @@ RefPtr<Subwindow> SubwindowManager::GetOrCreateSubWindow()
     return subwindow;
 }
 
-void SubwindowManager::ShowToast(
-    const std::string& message, int32_t duration, const std::string& bottom, const NG::ToastShowMode& showMode)
+void SubwindowManager::ShowToast(const std::string& message, int32_t duration, const std::string& bottom,
+    const NG::ToastShowMode& showMode, int32_t alignment, std::optional<DimensionOffset> offset)
 {
     TAG_LOGD(AceLogTag::ACE_SUB_WINDOW, "show toast enter");
     auto containerId = Container::CurrentId();
@@ -512,13 +583,13 @@ void SubwindowManager::ShowToast(
         auto subwindow = GetOrCreateSubWindow();
         CHECK_NULL_VOID(subwindow);
         TAG_LOGD(AceLogTag::ACE_SUB_WINDOW, "before show toast");
-        subwindow->ShowToast(message, duration, bottom, showMode);
+        subwindow->ShowToast(message, duration, bottom, showMode, alignment,  offset);
     } else {
         // for ability
         auto taskExecutor = Container::CurrentTaskExecutor();
         CHECK_NULL_VOID(taskExecutor);
         taskExecutor->PostTask(
-            [containerId, message, duration, bottom, showMode] {
+            [containerId, message, duration, bottom, showMode, alignment,  offset] {
                 auto manager = SubwindowManager::GetInstance();
                 CHECK_NULL_VOID(manager);
                 auto subwindow = manager->GetSubwindow(containerId);
@@ -529,7 +600,7 @@ void SubwindowManager::ShowToast(
                     manager->AddSubwindow(containerId, subwindow);
                 }
                 TAG_LOGD(AceLogTag::ACE_SUB_WINDOW, "before show toast : %{public}d", containerId);
-                subwindow->ShowToast(message, duration, bottom, showMode);
+                subwindow->ShowToast(message, duration, bottom, showMode, alignment,  offset);
             },
             TaskExecutor::TaskType::PLATFORM);
     }
