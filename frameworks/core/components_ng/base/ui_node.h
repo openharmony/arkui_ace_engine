@@ -313,7 +313,7 @@ public:
 
     virtual void SetJSViewActive(bool active);
 
-    virtual void OnVisibleChange(bool isVisible);
+    virtual void TryVisibleChangeOnDescendant(bool isVisible);
 
     // call by recycle framework.
     virtual void OnRecycle();

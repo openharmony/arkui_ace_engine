@@ -2522,7 +2522,6 @@ void PipelineContext::RemoveFormVisibleChangeNode(int32_t nodeId)
 
 void PipelineContext::HandleFormVisibleChangeEvent(bool isVisible)
 {
-    auto nodes = FrameNode::GetNodesById(onFormVisibleChangeNodeIds_);
     for (auto& pair : onFormVisibleChangeEvents_) {
         if (pair.second) {
             pair.second(isVisible);

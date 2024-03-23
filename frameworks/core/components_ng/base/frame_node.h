@@ -406,7 +406,8 @@ public:
     void OnAttachToMainTree(bool recursive) override;
     void OnAttachToBuilderNode(NodeStatus nodeStatus) override;
 
-    void OnVisibleChange(bool isVisible) override;
+    void TryVisibleChangeOnDescendant(bool isVisible) override;
+    void NotifyVisibleChange(bool isVisible);
 
     void PushDestroyCallback(std::function<void()>&& callback)
     {

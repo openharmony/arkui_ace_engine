@@ -673,18 +673,18 @@ HWTEST_F(FrameNodeTestNg, FrameNodeOnAttachToMainTree008, TestSize.Level1)
 }
 
 /**
- * @tc.name: FrameNodeTestNg_OnVisibleChange009
+ * @tc.name: FrameNodeTestNg_NotifyVisibleChange009
  * @tc.desc: Test frame node method
  * @tc.type: FUNC
  */
-HWTEST_F(FrameNodeTestNg, FrameNodeOnVisibleChange009, TestSize.Level1)
+HWTEST_F(FrameNodeTestNg, FrameNodeNotifyVisibleChange009, TestSize.Level1)
 {
     /**
-     * @tc.steps: step1. build a object to OnVisibleChange
+     * @tc.steps: step1. build a object to NotifyVisibleChange
      * @tc.expected: expect The FRAME_NODE2 is not nullptr.
      */
     FRAME_NODE2->AddChild(FRAME_NODE3);
-    FRAME_NODE2->OnVisibleChange(false);
+    FRAME_NODE2->NotifyVisibleChange(false);
     FRAME_NODE2->Clean();
     EXPECT_NE(FRAME_NODE2, nullptr);
 }
