@@ -1280,6 +1280,12 @@ UIContentErrorCode UIContentImpl::CommonInitialize(
         }
         SystemProperties::SetDeviceAccess(
             resConfig->GetInputDevice() == Global::Resource::InputDevice::INPUTDEVICE_POINTINGDEVICE);
+        LOGI("[%{public}s][%{public}s][%{public}d]: Set SystemProperties language: %{public}s, colorMode: %{public}s, "
+             "deviceAccess: %{public}d",
+            bundleName_.c_str(), moduleName_.c_str(), instanceId_,
+            AceApplicationInfo::GetInstance().GetLanguage().c_str(),
+            SystemProperties::GetColorMode() == ColorMode::DARK ? "dark" : "light",
+            SystemProperties::GetDeviceAccess());
     }
 
     auto abilityContext = OHOS::AbilityRuntime::Context::ConvertTo<OHOS::AbilityRuntime::AbilityContext>(context);
