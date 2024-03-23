@@ -464,6 +464,11 @@ bool AceContainer::OnBackPressed(int32_t instanceId)
     if (subwindow) {
         LOGI("subwindow consumed backpressed event");
         if (subwindow->GetShown()) {
+            auto subContainerId = SubwindowManager::GetInstance()->GetSubContainerId(instanceId);
+            if (subContainerId < 0) {
+                return false;
+            }
+            ContainerScope scope(subContainerId);
             auto overlayManager = subwindow->GetOverlayManager();
             CHECK_NULL_RETURN(overlayManager, false);
             return overlayManager->RemoveOverlayInSubwindow();

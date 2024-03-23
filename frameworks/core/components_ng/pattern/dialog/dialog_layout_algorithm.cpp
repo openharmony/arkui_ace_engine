@@ -395,8 +395,6 @@ void DialogLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
             DimensionRect(Dimension(childSize.Width()), Dimension(childSize.Height()), DimensionOffset(topLeftPoint_)),
             frameNode);
     }
-    topLeftPoint_.SetX(std::max(topLeftPoint_.GetX(), 0.0f));
-    topLeftPoint_.SetY(std::max(topLeftPoint_.GetY(), 0.0f));
     child->GetGeometryNode()->SetMarginFrameOffset(topLeftPoint_);
     child->Layout();
     SetSubWindowHotarea(dialogProp, childSize, selfSize, frameNode->GetId());
@@ -510,12 +508,12 @@ OffsetF DialogLayoutAlgorithm::ComputeChildPosition(
         ConvertToPx(CalcLength(dialogOffset_.GetY()), layoutConstraint->scaleProperty, selfSize.Height());
     OffsetF dialogOffset = OffsetF(dialogOffsetX.value_or(0.0), dialogOffsetY.value_or(0.0));
     auto maxSize = layoutConstraint->maxSize;
-    maxSize.MinusHeight(safeAreaInsets_.bottom_.Length());
+    if (!customSize_) {
+        maxSize.MinusHeight(safeAreaInsets_.bottom_.Length());
+    }
     if (!SetAlignmentSwitch(maxSize, childSize, topLeftPoint)) {
         topLeftPoint = OffsetF(maxSize.Width() - childSize.Width(), maxSize.Height() - childSize.Height()) / HALF;
     }
-    topLeftPoint.SetX(std::max(topLeftPoint.GetX(), 0.0f));
-    topLeftPoint.SetY(std::max(topLeftPoint.GetY(), 0.0f));
     const auto& expandSafeAreaOpts = prop->GetSafeAreaExpandOpts();
     bool needAvoidKeyboard = true;
     if (expandSafeAreaOpts && (expandSafeAreaOpts->type | SAFE_AREA_TYPE_KEYBOARD)) {
@@ -635,6 +633,7 @@ void DialogLayoutAlgorithm::UpdateSafeArea()
     if (container->IsSubContainer()) {
         currentId = SubwindowManager::GetInstance()->GetParentContainerId(Container::CurrentId());
         container = AceEngine::Get().GetContainer(currentId);
+        CHECK_NULL_VOID(container);
         ContainerScope scope(currentId);
     }
     auto pipelineContext = container->GetPipelineContext();

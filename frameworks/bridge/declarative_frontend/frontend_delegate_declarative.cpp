@@ -2767,7 +2767,9 @@ std::optional<int32_t> FrontendDelegateDeclarative::GetEffectiveContainerId() co
     if (container->IsSubContainer()) {
         currentId = SubwindowManager::GetInstance()->GetParentContainerId(currentId);
     }
-    id.emplace(currentId);
+    if (currentId != -1) {
+        id.emplace(currentId);
+    }
     return id;
 }
 
