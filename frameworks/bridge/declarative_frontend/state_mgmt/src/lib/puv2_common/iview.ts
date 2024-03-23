@@ -13,6 +13,16 @@
  * limitations under the License.
  */
 
+
+/**
+ * 
+ * This file includes only framework internal classes and functions 
+ * non are part of SDK. Do not access from app.
+ * 
+ * IView is an interface implemented by both ViewPU and ViewV2
+ * 
+ */
+
 interface IView {
     id__() : number;
     debugInfo__() : string;

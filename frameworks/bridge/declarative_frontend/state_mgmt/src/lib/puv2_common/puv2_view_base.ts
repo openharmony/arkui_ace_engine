@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,6 +13,16 @@
  * limitations under the License.
  *
 */
+
+/**
+ * 
+ * This file includes only framework internal classes and functions 
+ * non are part of SDK. Do not access from app.
+ * 
+ * PUV2ViewBase is the common base class of ViewPU and ViewV2
+ * 
+ */
+
 type ExtraInfo = { page: string, line: number };
 type ProfileRecursionCounter = { total: number };
 
@@ -148,7 +158,6 @@ abstract class PUV2ViewBase extends NativeViewPartialUpdate {
     return childWeakRef ? childWeakRef.deref() : undefined;
   }
 
-
   // inform the subscribed property
   // that the View and thereby all properties
   // are about to be deleted
@@ -195,7 +204,7 @@ abstract class PUV2ViewBase extends NativeViewPartialUpdate {
     }
 
     // FIXME: only do this if app uses V3
-    ObserveV3.getObserve().clearBinding(rmElmtId);
+    ObserveV2.getObserve().clearBinding(rmElmtId);
     return result;
   }
 

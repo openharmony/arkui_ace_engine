@@ -75,16 +75,16 @@
     "src/lib/partial_update/pu_recycle_manager.ts",
     "src/lib/partial_update/pu_builder_proxy.ts",
 
-    // stateMgmt vers 3
-    "src/lib/v3/v3_observed_track.ts",
-    "src/lib/v3/v3_monitor.ts",
-    "src/lib/v3/v3_computed.ts",
-    "src/lib/v3/v3_variable_decorators.ts",
+    // 'new' stateMgmt vers 2
+    "src/lib/v2/v2_change_observation.ts",
+    "src/lib/v2/v2_decorated_variables.ts",
+    "src/lib/v2/v2_monitor.ts",
+    "src/lib/v2/v2_computed.ts",
+    "src/lib/v2/v2_view.ts",
+    "src/lib/v2/v2_decorators.ts",
 
     // partial_update specific
     "src/lib/partial_update/pu_repeat.ts",
-
-    "src/lib/v3/v3_view.ts",
   
     // init
     "src/index.ts",

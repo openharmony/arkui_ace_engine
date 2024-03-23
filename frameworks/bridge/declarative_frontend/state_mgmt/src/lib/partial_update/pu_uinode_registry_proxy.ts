@@ -118,7 +118,7 @@ class UINodeRegisterProxy {
             }
 
             // FIXME: only do this if app uses V3
-            ObserveV3.getObserve().clearBinding(rmElmtInfo.elmtId);
+            ObserveV2.getObserve().clearBinding(rmElmtInfo.elmtId);
         })
 
         this.removeElementsInfo_.length = 0;
@@ -126,7 +126,7 @@ class UINodeRegisterProxy {
 
     public static cleanUpDeadReferences(): void {
         stateMgmtConsole.debug('UINodeRegisterProxy.cleanUpDeadReferences');
-        ObserveV3.getObserve().cleanUpDeadReferences();
+        ObserveV2.getObserve().cleanUpDeadReferences();
     }
 
     public static instance_: UINodeRegisterProxy = new UINodeRegisterProxy();

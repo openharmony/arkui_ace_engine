@@ -14,6 +14,15 @@
  */
 
 /**
+ * 
+ * This file includes only framework internal classes and functions 
+ * non are part of SDK. Do not access from app.
+ * 
+ * Helper classes used by ViewPU and ViewV2
+ * 
+ */
+
+/**
  * WeakRef
  * ref to an Object that does not prevent the Object from getting GC'ed
  * current version of tsc does not know about WeakRef

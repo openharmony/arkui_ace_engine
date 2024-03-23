@@ -13,6 +13,16 @@
  * limitations under the License.
  */
 
+/**
+ * 
+ * This file includes only framework internal classes and functions 
+ * non are part of SDK. Do not access from app.
+ * 
+ * Implementation of @ComponentV2 is ViewV2
+ * When transpiling @ComponentV2, the transpiler generates a class that extends from ViewV2.
+ * 
+ */
+
 abstract class ViewV2 extends PUV2ViewBase implements IView {
 
     // Set of elmtIds that need re-render
@@ -27,13 +37,13 @@ abstract class ViewV2 extends PUV2ViewBase implements IView {
     }
 
     protected finalizeConstruction(): void {
-        ObserveV3.getObserve().constructMonitor(this, this.constructor.name);
-        ObserveV3.getObserve().constructComputed(this, this.constructor.name);
+        ObserveV2.getObserve().constructMonitor(this, this.constructor.name);
+        ObserveV2.getObserve().constructComputed(this, this.constructor.name);
     
         ProvideConsumeUtilV3.setupConsumeVarsV3(this);
     
         // Always use ID_REFS in ViewPU
-        this[ObserveV3.ID_REFS] = {};
+        this[ObserveV2.ID_REFS] = {};
       } 
 
     public debugInfo__(): string {
@@ -83,7 +93,7 @@ abstract class ViewV2 extends PUV2ViewBase implements IView {
         // in case ViewPU is currently frozen
         // ViewPU.inactiveComponents_.delete(`${this.constructor.name}[${this.id__()}]`);
 
-        MonitorV3.clearWatchesFromTarget(this);
+        MonitorV2.clearWatchesFromTarget(this);
 
         this.updateFuncByElmtId.clear();
         if (this.parent_) {
@@ -109,7 +119,7 @@ abstract class ViewV2 extends PUV2ViewBase implements IView {
             stateMgmtConsole.debug(`@ComponentV2 ${this.debugInfo__()}: ${isFirstRender ? `First render` : `Re-render/update`} ${_componentName}[${elmtId}] - start ....`);
 
             ViewStackProcessor.StartGetAccessRecordingFor(elmtId);
-           ObserveV3.getObserve().startBind(this, elmtId);
+           ObserveV2.getObserve().startBind(this, elmtId);
 
             compilerAssignedUpdateFunc(elmtId, isFirstRender);
             if (!isFirstRender) {
@@ -121,7 +131,7 @@ abstract class ViewV2 extends PUV2ViewBase implements IView {
                 (node as ArkComponent).cleanStageValue();
             }
 
-            ObserveV3.getObserve().startBind(null, UINodeRegisterProxy.notRecordingDependencies);
+            ObserveV2.getObserve().startBind(null, UINodeRegisterProxy.notRecordingDependencies);
             ViewStackProcessor.StopGetAccessRecording();
 
             stateMgmtConsole.debug(`${this.debugInfo__()}: ${isFirstRender ? `First render` : `Re-render/update`}  ${_componentName}[${elmtId}] - DONE ....`);
@@ -173,7 +183,7 @@ abstract class ViewV2 extends PUV2ViewBase implements IView {
     /**
    *  inform that UINode with given elmtId needs rerender
    *  does NOT exec @Watch function.
-   *  only used on V3 code path from ObserveV3.fireChange.
+   *  only used on V3 code path from ObserveV2.fireChange.
    * 
    * FIXME will still use in the future?
    */
@@ -328,8 +338,10 @@ abstract class ViewV2 extends PUV2ViewBase implements IView {
         }
         return retVaL;
     }
+
+
     protected debugInfoStateVars(): string {
-        return ""; // TODO read out META
+        return ""; // TODO DFX, read out META
     }
 
     /**

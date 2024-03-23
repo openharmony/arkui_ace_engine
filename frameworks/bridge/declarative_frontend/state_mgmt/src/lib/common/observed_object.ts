@@ -62,7 +62,7 @@ function Observed<T extends Constructor>(BaseClass: T): Constructor {
   stateMgmtConsole.debug(`@Observed class decorator: Overwriting constructor for '${BaseClass.name}', gets wrapped inside ObservableObject proxy.`);
 
   // prevent use of V3 @track inside V2 @Observed class
-  if (BaseClass.prototype && Reflect.has(BaseClass.prototype, ObserveV3.SYMBOL_REFS)) {
+  if (BaseClass.prototype && Reflect.has(BaseClass.prototype, ObserveV2.SYMBOL_REFS)) {
     const error = `'@Observed class ${BaseClass?.name}': invalid use of V3 @track decorator inside V2 @Observed class. Need to fix class definition to use @Track.`;
     stateMgmtConsole.error(error);
     throw new Error(error);
@@ -202,8 +202,8 @@ class SubscribableHandler {
       case SubscribableHandler.COUNT_SUBSCRIBERS:
         return this.owningProperties_.size
         break;
-      case ObserveV3.SYMBOL_REFS:
-      case ObserveV3.V3_DECO_META:
+      case ObserveV2.SYMBOL_REFS:
+      case ObserveV2.V3_DECO_META:
         // return result unmonitored
         return Reflect.get(target, property, receiver);
         break;

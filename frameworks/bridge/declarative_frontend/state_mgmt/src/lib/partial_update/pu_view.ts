@@ -66,11 +66,11 @@ abstract class ViewPU extends PUV2ViewBase
     let usesStateMgmtVersion = 0;
     Object.getOwnPropertyNames(this)
       .filter((propName) => {
-        // do not include backing store, and ObserveV3/MonitorV3/ComputedV3 meta data objects
+        // do not include backing store, and ObserveV2/MonitorV2/ComputedV2 meta data objects
         return (propName.startsWith("__")
-          && !propName.startsWith(ObserveV3.OB_PREFIX)
-          && !propName.startsWith(MonitorV3.WATCH_PREFIX)
-          && !propName.startsWith(ComputedV3.COMPUTED_PREFIX))
+          && !propName.startsWith(ObserveV2.OB_PREFIX)
+          && !propName.startsWith(MonitorV2.WATCH_PREFIX)
+          && !propName.startsWith(ComputedV2.COMPUTED_PREFIX))
       })
       .forEach((propName) => {
         const stateVar = Reflect.get(this, propName) as Object;
@@ -212,7 +212,7 @@ abstract class ViewPU extends PUV2ViewBase
     PUV2ViewBase.inactiveComponents_.delete(`${this.constructor.name}[${this.id__()}]`);
 
     // FIXME needed ?
-    MonitorV3.clearWatchesFromTarget(this);
+    MonitorV2.clearWatchesFromTarget(this);
 
     this.updateFuncByElmtId.clear();
     this.watchedProps.clear();
@@ -229,7 +229,7 @@ abstract class ViewPU extends PUV2ViewBase
   protected debugInfoStateVars(): string {
     let result: string = `|--${this.constructor.name}[${this.id__()}]`;
     Object.getOwnPropertyNames(this)
-      .filter((varName: string) => varName.startsWith("__") && !varName.startsWith(ObserveV3.OB_PREFIX))
+      .filter((varName: string) => varName.startsWith("__") && !varName.startsWith(ObserveV2.OB_PREFIX))
       .forEach((varName) => {
         const prop: any = Reflect.get(this, varName);
         if ("debugInfoDecorator" in prop) {
@@ -460,7 +460,7 @@ abstract class ViewPU extends PUV2ViewBase
   /**
  *  inform that UINode with given elmtId needs rerender
  *  does NOT exec @Watch function.
- *  only used on V3 code path from ObserveV3.fireChange.
+ *  only used on V3 code path from ObserveV2.fireChange.
  * 
  * FIXME will still use in the future?
  */
@@ -692,9 +692,9 @@ abstract class ViewPU extends PUV2ViewBase
       // enable V2 object deep observation
       // FIXME: A @Component should only use PU or V2 state, but ReactNative dynamic viewer uses both.
       if (this.isViewV3 || ConfigureStateMgmt.instance.needsV2Observe()) {
-        // FIXME: like in V2 setting bindId_ in ObserveV3 does not work with 'stacked' 
+        // FIXME: like in V2 setting bindId_ in ObserveV2 does not work with 'stacked' 
         // update + initial render calls, like in if and ForEach case, convert to stack as well
-        ObserveV3.getObserve().startBind(this, elmtId);
+        ObserveV2.getObserve().startBind(this, elmtId);
       }
 
       compilerAssignedUpdateFunc(elmtId, isFirstRender);
@@ -708,7 +708,7 @@ abstract class ViewPU extends PUV2ViewBase
       }
 
       if (this.isViewV3 || ConfigureStateMgmt.instance.needsV2Observe()) {
-        ObserveV3.getObserve().startBind(null, UINodeRegisterProxy.notRecordingDependencies);
+        ObserveV2.getObserve().startBind(null, UINodeRegisterProxy.notRecordingDependencies);
       }
       if (!this.isViewV3) {
         this.currentlyRenderedElmtIdStack_.pop();
