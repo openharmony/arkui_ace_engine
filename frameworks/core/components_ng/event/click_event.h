@@ -80,13 +80,7 @@ public:
 
     void SetUserCallback(GestureEventFunc&& callback)
     {
-        if (userCallback_) {
-            userCallback_.Reset();
-        }
         userCallback_ = MakeRefPtr<ClickEvent>(std::move(callback));
-        if (!clickRecognizer_) {
-            clickRecognizer_ = MakeRefPtr<ClickRecognizer>();
-        }
     }
 
     void ClearUserCallback()
@@ -126,6 +120,9 @@ public:
 
     const RefPtr<ClickRecognizer>& GetClickRecognizer()
     {
+        if (!clickRecognizer_) {
+            clickRecognizer_ = MakeRefPtr<ClickRecognizer>();
+        }
         return clickRecognizer_;
     }
 
