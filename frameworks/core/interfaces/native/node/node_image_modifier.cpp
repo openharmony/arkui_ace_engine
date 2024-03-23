@@ -47,6 +47,7 @@ constexpr int32_t IMAGE_CONTENT_OFFSET_X_INDEX = 5;
 constexpr int32_t IMAGE_CONTENT_OFFSET_Y_INDEX = 6;
 constexpr int32_t IMAGE_CONTENT_WIDTH_INDEX = 7;
 constexpr int32_t IMAGE_CONTENT_HEIGHT_INDEX = 8;
+constexpr uint32_t MAX_COLOR_FILTER_SIZE = 20;
 std::string g_strValue;
 
 void SetImageSrc(ArkUINodeHandle node, const char* value)
@@ -319,15 +320,17 @@ void SetColorFilter(ArkUINodeHandle node, const ArkUI_Float32* array, int length
     ImageModelNG::SetColorFilterMatrix(frameNode, std::vector<float>(array, array + length));
 }
 
-ArkUIFilterColorType GetColorFilter(ArkUINodeHandle node)
+void GetColorFilter(ArkUINodeHandle node, ArkUIFilterColorType* colorFilter)
 {
-    ArkUIFilterColorType colorFilter = { nullptr, 0 };
+    CHECK_NULL_VOID(colorFilter);
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
-    CHECK_NULL_RETURN(frameNode, colorFilter);
+    CHECK_NULL_VOID(frameNode);
     auto filterFloatArray = ImageModelNG::GetColorFilter(frameNode);
-    colorFilter.filterArray = filterFloatArray.size() > 0 ? &filterFloatArray[0] : nullptr;
-    colorFilter.filterSize = filterFloatArray.size();
-    return colorFilter;
+    colorFilter->filterSize = filterFloatArray.size() < MAX_COLOR_FILTER_SIZE ? filterFloatArray.size() :
+        MAX_COLOR_FILTER_SIZE;
+    for (size_t i = 0; i < colorFilter->filterSize && i < MAX_COLOR_FILTER_SIZE; i++) {
+        *(colorFilter->filterArray+i) = filterFloatArray[i];
+    }
 }
 
 void ResetColorFilter(ArkUINodeHandle node)
