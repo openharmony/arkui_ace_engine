@@ -784,7 +784,7 @@ class RenderNode {
         this.childrenList = [];
         this.parentRenderNode = null;
         this.backgroundColorValue = 0;
-        this.clipToFrameValue = false;
+        this.clipToFrameValue = true;
         this.frameValue = { x: 0, y: 0, width: 0, height: 0 };
         this.opacityValue = 1.0;
         this.pivotValue = { x: 0.5, y: 0.5 };
@@ -812,7 +812,7 @@ class RenderNode {
         getUINativeModule().renderNode.setBackgroundColor(this.nodePtr, this.backgroundColorValue);
     }
     set clipToFrame(useClip) {
-        this.clipToFrameValue = this.checkUndefinedOrNullWithDefaultValue(useClip, false);
+        this.clipToFrameValue = this.checkUndefinedOrNullWithDefaultValue(useClip, true);
         getUINativeModule().renderNode.setClipToFrame(this.nodePtr, this.clipToFrameValue);
     }
     set frame(frame) {
