@@ -5122,16 +5122,29 @@ void JSViewAbstract::JsSetDragPreviewOptions(const JSCallbackInfo& info)
     }
     JSRef<JSObject> obj = JSRef<JSObject>::Cast(info[0]);
     auto mode = obj->GetProperty("mode");
-    if (!mode->IsNumber()) {
-        ViewAbstractModel::GetInstance()->SetDragPreviewOptions({NG::DragPreviewMode::AUTO});
-        return;
+    auto dragPreviewMode = NG::DragPreviewMode::AUTO;
+    if (mode->IsNumber()) {
+        int32_t modeValue = mode->ToNumber<int>();
+        if (modeValue >= static_cast<int32_t>(NG::DragPreviewMode::AUTO) &&
+            modeValue <= static_cast<int32_t>(NG::DragPreviewMode::DISABLE_SCALE)) {
+            dragPreviewMode = static_cast<NG::DragPreviewMode>(modeValue);
+        }
     }
-    int32_t dragPreviewMode = mode->ToNumber<int>();
-    if (!(dragPreviewMode >= static_cast<int32_t>(NG::DragPreviewMode::AUTO) &&
-            dragPreviewMode <= static_cast<int32_t>(NG::DragPreviewMode::DISABLE_SCALE))) {
-        dragPreviewMode = static_cast<int32_t>(NG::DragPreviewMode::AUTO);
+    bool defaultAnimationBeforeLifting = false;
+    bool isMultiSelecttionEnabled = false;
+    if (info.Length() > 1 && info[1]->IsObject()) {
+        JSRef<JSObject> interObj = JSRef<JSObject>::Cast(info[1]);
+        auto multiSelection = interObj->GetProperty("isMultiSelectionEnabled");
+        if (multiSelection->IsBoolean()) {
+            isMultiSelecttionEnabled = multiSelection->ToBoolean();
+        }
+        auto defaultAnimation = interObj->GetProperty("defaultAnimationBeforeLifting");
+        if (defaultAnimation->IsBoolean()) {
+            defaultAnimationBeforeLifting = defaultAnimation->ToBoolean();
+        }
     }
-    NG::DragPreviewOption option {static_cast<NG::DragPreviewMode>(dragPreviewMode)};
+    NG::DragPreviewOption option { dragPreviewMode, defaultAnimationBeforeLifting,
+        isMultiSelecttionEnabled };
     ViewAbstractModel::GetInstance()->SetDragPreviewOptions(option);
 }
 

@@ -91,6 +91,7 @@ constexpr int32_t TIME_THRESHOLD = 2 * 1000000; // 3 millisecond
 constexpr int32_t PLATFORM_VERSION_TEN = 10;
 constexpr int32_t USED_ID_FIND_FLAG = 3;                 // if args >3 , it means use id to find
 constexpr int32_t MILLISECONDS_TO_NANOSECONDS = 1000000; // Milliseconds to nanoseconds
+constexpr int32_t RESAMPLE_COORD_TIME_THRESHOLD = 20 * 1000 * 1000;
 } // namespace
 
 namespace OHOS::Ace::NG {
@@ -368,6 +369,20 @@ std::pair<float, float> PipelineContext::GetResampleCoord(const std::vector<Touc
 {
     if (history.empty() || current.empty()) {
         return std::make_pair(0.0f, 0.0f);
+    }
+    uint64_t lastTime = 0;
+    float x = 0.0f;
+    float y = 0.0f;
+    for (auto iter : current) {
+        uint64_t currentTime = static_cast<uint64_t>(iter.time.time_since_epoch().count());
+        if (lastTime < currentTime) {
+            lastTime = currentTime;
+            x = iter.x;
+            y = iter.y;
+        }
+    }
+    if (nanoTimeStamp > RESAMPLE_COORD_TIME_THRESHOLD + lastTime) {
+        return std::make_pair(x, y);
     }
     auto historyPoint = GetAvgPoint(history, isScreen);
     auto currentPoint = GetAvgPoint(current, isScreen);
