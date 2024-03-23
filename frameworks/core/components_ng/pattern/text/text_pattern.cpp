@@ -299,16 +299,20 @@ void TextPattern::OnHandleMove(const RectF& handleRect, bool isFirstHandle)
 
     auto localOffset = handleRect.GetOffset();
 
-    if (localOffset.GetX() < textContentGlobalOffset.GetX()) {
-        localOffset.SetX(textContentGlobalOffset.GetX());
-    } else if (GreatOrEqual(localOffset.GetX(), textContentGlobalOffset.GetX() + contentRect_.Width())) {
-        localOffset.SetX(textContentGlobalOffset.GetX() + contentRect_.Width());
-    }
+    auto renderContext = host->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    if (renderContext->GetClipEdge().value_or(true)) {
+        if (localOffset.GetX() < textContentGlobalOffset.GetX()) {
+            localOffset.SetX(textContentGlobalOffset.GetX());
+        } else if (GreatOrEqual(localOffset.GetX(), textContentGlobalOffset.GetX() + contentRect_.Width())) {
+            localOffset.SetX(textContentGlobalOffset.GetX() + contentRect_.Width());
+        }
 
-    if (localOffset.GetY() < textContentGlobalOffset.GetY()) {
-        localOffset.SetY(textContentGlobalOffset.GetY());
-    } else if (GreatNotEqual(localOffset.GetY(), textContentGlobalOffset.GetY() + contentRect_.Height())) {
-        localOffset.SetY(textContentGlobalOffset.GetY() + contentRect_.Height());
+        if (localOffset.GetY() < textContentGlobalOffset.GetY()) {
+            localOffset.SetY(textContentGlobalOffset.GetY());
+        } else if (GreatNotEqual(localOffset.GetY(), textContentGlobalOffset.GetY() + contentRect_.Height())) {
+            localOffset.SetY(textContentGlobalOffset.GetY() + contentRect_.Height());
+        }
     }
 
     localOffset -= textPaintOffset;
