@@ -85,12 +85,10 @@ void GaugeModifier::initProperty()
 
     float startAngle = paintProperty->GetStartAngleValue(DEFAULT_START_DEGREE);
     float endAngle = paintProperty->GetEndAngleValue(DEFAULT_END_DEGREE);
-    float max = paintProperty->GetMaxValue();
-    float min = paintProperty->GetMinValue();
     startAngle_ = AceType::MakeRefPtr<AnimatablePropertyFloat>(startAngle);
     endAngle_ = AceType::MakeRefPtr<AnimatablePropertyFloat>(endAngle);
-    max_ = AceType::MakeRefPtr<AnimatablePropertyFloat>(max);
-    min_ = AceType::MakeRefPtr<AnimatablePropertyFloat>(min);
+    max_ = AceType::MakeRefPtr<AnimatablePropertyFloat>(paintProperty->GetMaxValue());
+    min_ = AceType::MakeRefPtr<AnimatablePropertyFloat>(paintProperty->GetMinValue());
 
     float strokeWidth = DEFAULT_VALUE;
     if (paintProperty->GetStrokeWidth().has_value()) {
@@ -103,19 +101,16 @@ void GaugeModifier::initProperty()
     gaugeTypeValue_ = AceType::MakeRefPtr<AnimatablePropertyFloat>(static_cast<int>(gaugeType));
     isShowIndicator_ = AceType::MakeRefPtr<PropertyBool>(paintProperty->GetIsShowIndicatorValue(true));
 
-    float radius = DEFAULT_VALUE;
-    float offsetX = DEFAULT_VALUE;
-    float offsetY = DEFAULT_VALUE;
     if (paintProperty->HasShadowOptions()) {
         GaugeShadowOptions shadowOptions = paintProperty->GetShadowOptionsValue();
-        radius = shadowOptions.radius;
-        offsetX = shadowOptions.offsetX;
-        offsetY = shadowOptions.offsetY;
+        shadowRadiusFloat_ = AceType::MakeRefPtr<AnimatablePropertyFloat>(shadowOptions.radius);
+        shadowOffsetXFloat_ = AceType::MakeRefPtr<AnimatablePropertyFloat>(shadowOptions.offsetX);
+        shadowOffsetYFloat_ = AceType::MakeRefPtr<AnimatablePropertyFloat>(shadowOptions.offsetY);
+    } else {
+        shadowRadiusFloat_ = AceType::MakeRefPtr<AnimatablePropertyFloat>(DEFAULT_VALUE);
+        shadowOffsetXFloat_ = AceType::MakeRefPtr<AnimatablePropertyFloat>(DEFAULT_VALUE);
+        shadowOffsetYFloat_ = AceType::MakeRefPtr<AnimatablePropertyFloat>(DEFAULT_VALUE);
     }
-    shadowRadiusFloat_ = AceType::MakeRefPtr<AnimatablePropertyFloat>(radius);
-    shadowOffsetXFloat_ = AceType::MakeRefPtr<AnimatablePropertyFloat>(offsetX);
-    shadowOffsetYFloat_ = AceType::MakeRefPtr<AnimatablePropertyFloat>(offsetY);
-    
     if (paintProperty->GetColors().has_value()) {
         auto colors = paintProperty->GetColorsValue();
         for (int i = 0; i < colors.size(); i++) {
@@ -124,7 +119,6 @@ void GaugeModifier::initProperty()
             colors_.emplace_back(color);
         }
     }
-
     if (paintProperty->HasGradientColors()) {
         auto colors = paintProperty->GetGradientColorsValue().at(0);
         for (int i = 0; i < colors.size(); i++) {
