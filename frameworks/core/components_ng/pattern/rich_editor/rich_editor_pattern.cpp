@@ -897,6 +897,11 @@ void RichEditorPattern::CopyTextSpanFontStyle(RefPtr<SpanNode>& source, RefPtr<S
         target->AddPropertyInfo(PropertyInfo::TEXTCASE);
     }
 
+    if (source->HasLineHeight()) {
+        target->UpdateLineHeight(source->GetLineHeightValue(Dimension()));
+        target->AddPropertyInfo(PropertyInfo::LINEHEIGHT);
+    }
+
     if (source->HasLetterSpacing()) {
         target->UpdateLetterSpacing(source->GetLetterSpacingValue(Dimension()));
         target->AddPropertyInfo(PropertyInfo::LETTERSPACE);
@@ -906,19 +911,9 @@ void RichEditorPattern::CopyTextSpanFontStyle(RefPtr<SpanNode>& source, RefPtr<S
 void RichEditorPattern::CopyTextSpanLineStyle(
     RefPtr<SpanNode>& source, RefPtr<SpanNode>& target, bool needLeadingMargin)
 {
-    if (source->HasLineHeight()) {
-        target->UpdateLineHeight(source->GetLineHeightValue(Dimension()));
-        target->AddPropertyInfo(PropertyInfo::LINEHEIGHT);
-    }
-
     if (source->HasTextShadow()) {
         target->UpdateTextShadow(source->GetTextShadowValue({Shadow()}));
         target->AddPropertyInfo(PropertyInfo::TEXTSHADOW);
-    }
-
-    if (source->HasLetterSpacing()) {
-        target->UpdateLetterSpacing(source->GetLetterSpacingValue(Dimension()));
-        target->AddPropertyInfo(PropertyInfo::LETTERSPACE);
     }
 
     if (needLeadingMargin && source->HasLeadingMargin()) {
