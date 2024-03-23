@@ -198,6 +198,8 @@ public:
 
     void SetOnSizeChangeCallback(OnSizeChangedFunc&& callback);
 
+    void SetJSFrameNodeOnSizeChangeCallback(OnSizeChangedFunc&& callback);
+
     void TriggerOnSizeChangeCallback();
 
     void SetGeometryNode(const RefPtr<GeometryNode>& node);

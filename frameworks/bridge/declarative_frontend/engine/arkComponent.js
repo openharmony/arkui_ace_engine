@@ -3384,6 +3384,9 @@ class UICommonEvent {
   setOnMouse(callback) {
     getUINativeModule().frameNode.setOnMouse(this._nodePtr, callback, this._instanceId);
   }
+  setOnSizeChange(callback) {
+    getUINativeModule().frameNode.setOnSizeChange(this._nodePtr, callback, this._instanceId);
+  }
 }
 
 /// <reference path='./import.ts' />

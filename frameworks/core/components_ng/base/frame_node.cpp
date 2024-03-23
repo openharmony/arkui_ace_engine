@@ -1109,6 +1109,15 @@ void FrameNode::SetOnSizeChangeCallback(OnSizeChangedFunc&& callback)
     eventHub_->SetOnSizeChanged(std::move(callback));
 }
 
+
+void FrameNode::SetJSFrameNodeOnSizeChangeCallback(OnSizeChangedFunc&& callback)
+{
+    if (!lastFrameNodeRect_) {
+        lastFrameNodeRect_ = std::make_unique<RectF>();
+    }
+    eventHub_->SetJSFrameNodeOnSizeChangeCallback(std::move(callback));
+}
+
 RectF FrameNode::GetRectWithRender()
 {
     auto currFrameRect = geometryNode_->GetFrameRect();
@@ -1137,6 +1146,7 @@ void FrameNode::TriggerOnSizeChangeCallback()
             }
             onSizeChangeDumpInfos.emplace_back(dumpInfo);
             eventHub_->FireOnSizeChanged(*lastFrameNodeRect_, currFrameRect);
+            eventHub_->FireJSFrameNodeOnSizeChanged(*lastFrameNodeRect_, currFrameRect);
             *lastFrameNodeRect_ = currFrameRect;
         }
     }
