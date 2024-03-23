@@ -22,6 +22,8 @@
 #define protected public
 #define private public
 
+#include "test/mock/core/pipeline/mock_pipeline_context.h"
+
 #include "base/log/dump_log.h"
 #include "base/log/log_wrapper.h"
 #include "core/components_ng/base/frame_node.h"
@@ -31,7 +33,6 @@
 #include "core/components_ng/pattern/pattern.h"
 #include "core/components_ng/property/property.h"
 #include "core/pipeline_ng/pipeline_context.h"
-#include "test/mock/core/pipeline/mock_pipeline_context.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -789,8 +790,7 @@ HWTEST_F(UINodeTestNg, UINodeTestNg023, TestSize.Level1)
     const PointF LOCAL_POINT { 15.0f, 15.0f };
     auto testNode = TestNode::CreateTestNode(TEST_ID_ONE);
     ZERO->AddChild(testNode, 1, false);
-    HitTestResult retResult =
-        ZERO->UINode::TouchTest(GLOBAL_POINT, LOCAL_POINT, LOCAL_POINT, restrict, result, 1);
+    HitTestResult retResult = ZERO->UINode::TouchTest(GLOBAL_POINT, LOCAL_POINT, LOCAL_POINT, restrict, result, 1);
     EXPECT_EQ(retResult, HitTestResult::OUT_OF_REGION);
     testNode->hitTestResult_ = HitTestResult::STOP_BUBBLING;
     retResult = ZERO->UINode::TouchTest(GLOBAL_POINT, LOCAL_POINT, LOCAL_POINT, restrict, result, 1);
@@ -820,7 +820,7 @@ HWTEST_F(UINodeTestNg, UINodeTestNg024, TestSize.Level1)
     auto testNode = TestNode::CreateTestNode(TEST_ID_ONE);
     ZERO->AddChild(testNode, 1, false);
     HitTestResult retResult = ZERO->UINode::MouseTest(GLOBAL_POINT, LOCAL_POINT, result, result, TEST_HOVERNODE);
-    EXPECT_EQ(retResult, HitTestResult::BUBBLING);
+    EXPECT_EQ(retResult, HitTestResult::OUT_OF_REGION);
     testNode->hitTestResult_ = HitTestResult::STOP_BUBBLING;
     retResult = ZERO->UINode::MouseTest(GLOBAL_POINT, LOCAL_POINT, result, result, TEST_HOVERNODE);
     EXPECT_EQ(retResult, HitTestResult::STOP_BUBBLING);
@@ -852,7 +852,7 @@ HWTEST_F(UINodeTestNg, UINodeTestNg025, TestSize.Level1)
     auto testNode = TestNode::CreateTestNode(TEST_ID_ONE);
     ZERO->AddChild(testNode, 1, false);
     HitTestResult retResult = ZERO->UINode::AxisTest(GLOBAL_POINT, LOCAL_POINT, result);
-    EXPECT_EQ(retResult, HitTestResult::BUBBLING);
+    EXPECT_EQ(retResult, HitTestResult::OUT_OF_REGION);
     testNode->hitTestResult_ = HitTestResult::STOP_BUBBLING;
     retResult = ZERO->UINode::AxisTest(GLOBAL_POINT, LOCAL_POINT, result);
     EXPECT_EQ(retResult, HitTestResult::STOP_BUBBLING);

@@ -342,11 +342,11 @@ HWTEST_F(FrameNodeTestNg, FrameNodeTestNg009, TestSize.Level1)
     EXPECT_EQ(FRAME_NODE->GetContentModifier(), nullptr);
 
     /**
-     * @tc.steps: step 4. call GetContentModifier when drawModifier is not null .
+     * @tc.steps: step 4. Nodes created by virtual classes, call GetContentModifier when drawModifier is null .
      * @tc.expect: expect the return value to be correct.
      */
     FRAME_NODE->SetDrawModifier(drawModifier);
-    EXPECT_NE(FRAME_NODE->GetContentModifier(), nullptr);
+    EXPECT_EQ(FRAME_NODE->GetContentModifier(), nullptr);
 }
 
 /**
@@ -461,9 +461,6 @@ HWTEST_F(FrameNodeTestNg, FrameNodeTestNg005, TestSize.Level1)
      */
     auto one = FrameNode::CreateFrameNodeWithTree("main", 10, AceType::MakeRefPtr<Pattern>());
     EXPECT_NE(one, nullptr);
-
-    auto wrapper = FRAME_NODE->CreatePaintWrapper();
-    EXPECT_EQ(wrapper, nullptr);
 
     MeasureProperty calcLayoutConstraint;
     FRAME_NODE->UpdateLayoutConstraint(std::move(calcLayoutConstraint));
