@@ -3081,13 +3081,8 @@ bool WebPattern::FilterScrollEventHandleOffset(const float offset)
         auto result = HandleScroll(parent.Upgrade(), offset, SCROLL_FROM_UPDATE, NestedState::CHILD_SCROLL);
         isParentReachEdge_ = result.reachEdge;
         CHECK_NULL_RETURN(delegate_, false);
-        auto defaultDisplay = Rosen::DisplayManager::GetInstance().GetDefaultDisplay();
-        CHECK_NULL_RETURN(defaultDisplay, false);
-        auto ratio = defaultDisplay->GetVirtualPixelRatio();
-        if (ratio > 0) {
-            expectedScrollAxis_ == Axis::HORIZONTAL ? delegate_->ScrollBy(-result.remain / ratio, 0)
-                                                    : delegate_->ScrollBy(0, -result.remain / ratio);
-        }
+        expectedScrollAxis_ == Axis::HORIZONTAL ? delegate_->ScrollByRefScreen(-result.remain, 0)
+                                                : delegate_->ScrollByRefScreen(0, -result.remain);
         CHECK_NULL_RETURN(!NearZero(result.remain), true);
         UpdateFlingReachEdgeState(offset, false);
         return true;

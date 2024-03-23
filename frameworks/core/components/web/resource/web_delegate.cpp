@@ -5971,6 +5971,12 @@ void WebDelegate::ScrollBy(float deltaX, float deltaY)
     nweb_->ScrollBy(deltaX, deltaY);
 }
 
+void WebDelegate::ScrollByRefScreen(float deltaX, float deltaY, float vx, float vy)
+{
+    CHECK_NULL_VOID(nweb_);
+    nweb_->ScrollByRefScreen(deltaX, deltaY, vx, vy);
+}
+
 void WebDelegate::SetJavaScriptItems(const ScriptItems& scriptItems, const ScriptItemType& type)
 {
     if (type == ScriptItemType::DOCUMENT_START) {
