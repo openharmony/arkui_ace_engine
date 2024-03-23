@@ -7280,4 +7280,25 @@ HWTEST_F(TabsTestNg, SetOnContentWillChangeTest005, TestSize.Level1)
     FlushLayoutTask(frameNode_);
     EXPECT_EQ(isShow, 9);
 }
+
+/**
+ * @tc.name: SetCustomStyleNodeTest001
+ * @tc.desc: test the node can be saved in the pattern
+ * @tc.type: FUNC
+ */
+HWTEST_F(TabsTestNg, SetCustomStyleNodeTest001, TestSize.Level1)
+{
+    auto frameNode = FrameNode::CreateFrameNode(
+        V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(frameNode, nullptr);
+    Create([=](TabsModelNG model) {
+        CreateSingleItem([=](TabContentModelNG tabContentModel) {
+            tabContentModel.SetCustomStyleNode(frameNode);
+        }, 0);
+    });
+    auto tabContentFrameNode = AceType::DynamicCast<TabContentNode>(GetChildFrameNode(swiperNode_, 0));
+    auto tabContentPattern = tabContentFrameNode->GetPattern<TabContentPattern>();
+    ASSERT_NE(tabContentPattern, nullptr);
+    EXPECT_TRUE(tabContentPattern->HasSubTabBarStyleNode());
+}
 } // namespace OHOS::Ace::NG
