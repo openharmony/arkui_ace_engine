@@ -311,23 +311,12 @@ int32_t RichEditorPattern::AddImageSpan(const ImageSpanOptions& options, bool is
     // Masked the default drag behavior of node image
     gesture->SetDragEvent(nullptr, { PanDirection::DOWN }, 0, Dimension(0));
 
-    int32_t spanIndex = 0;
-    int32_t offset = -1;
-    if (options.offset.has_value()) {
-        offset = TextSpanSplit(options.offset.value());
-        if (offset == -1) {
-            spanIndex = static_cast<int32_t>(host->GetChildren().size());
-        } else {
-            spanIndex = offset;
-        }
-        imageNode->MountToParent(host, offset);
-    } else if (index != -1) {
-        imageNode->MountToParent(host, index);
-        spanIndex = index;
-    } else {
+    int32_t insertIndex = options.offset.value_or(GetTextContentLength());
+    int32_t spanIndex = TextSpanSplit(insertIndex);
+    if (spanIndex == -1) {
         spanIndex = static_cast<int32_t>(host->GetChildren().size());
-        imageNode->MountToParent(host);
     }
+    imageNode->MountToParent(host, spanIndex);
     std::function<ImageSourceInfo()> createSourceInfoFunc = CreateImageSourceInfo(options);
     imageLayoutProperty->UpdateImageSourceInfo(createSourceInfoFunc());
     if (options.imageAttribute.has_value()) {
@@ -364,7 +353,7 @@ int32_t RichEditorPattern::AddImageSpan(const ImageSpanOptions& options, bool is
     auto spanItem = imageNode->GetSpanItem();
     // The length of the imageSpan defaults to the length of a character to calculate the position
     spanItem->content = " ";
-    AddSpanItem(spanItem, offset);
+    AddSpanItem(spanItem, spanIndex);
     if (options.userGestureOption.onClick) {
         auto tmpClickFunc = options.userGestureOption.onClick;
         spanItem->SetOnClickEvent(std::move(tmpClickFunc));
@@ -373,13 +362,8 @@ int32_t RichEditorPattern::AddImageSpan(const ImageSpanOptions& options, bool is
         auto tmpLongPressFunc = options.userGestureOption.onLongPress;
         spanItem->SetLongPressEvent(std::move(tmpLongPressFunc));
     }
-    if (options.offset.has_value() && options.offset.value() <= GetCaretPosition()) {
-        SetCaretPosition(options.offset.value() + 1 + moveLength_);
-        moveLength_ = 0;
-    } else {
-        placeholderCount_++;
-        SetCaretPosition(GetTextContentLength());
-    }
+    placeholderCount_++;
+    SetCaretPosition(insertIndex + spanItem->content.length());
     if (!isPaste && textSelector_.IsValid()) {
         CloseSelectOverlay();
         ResetSelection();
@@ -413,31 +397,17 @@ int32_t RichEditorPattern::AddPlaceholderSpan(const RefPtr<UINode>& customNode, 
     SetSelfAndChildDraggableFalse(customNode);
     auto focusHub = placeholderSpanNode->GetOrCreateFocusHub();
     focusHub->SetFocusable(false);
-    int32_t spanIndex = 0;
-    int32_t offset = -1;
-    auto optionalPosition = options.offset.value_or(-1);
-    if (optionalPosition >= 0) {
-        offset = TextSpanSplit(options.offset.value());
-        if (offset == -1) {
-            spanIndex = static_cast<int32_t>(host->GetChildren().size());
-        } else {
-            spanIndex = offset;
-        }
-        placeholderSpanNode->MountToParent(host, offset);
-    } else {
+    int32_t insertIndex = options.offset.value_or(GetTextContentLength());
+    int32_t spanIndex = TextSpanSplit(insertIndex);
+    if (spanIndex == -1) {
         spanIndex = static_cast<int32_t>(host->GetChildren().size());
-        placeholderSpanNode->MountToParent(host);
     }
+    placeholderSpanNode->MountToParent(host, spanIndex);
     auto spanItem = placeholderSpanNode->GetSpanItem();
     spanItem->content = " ";
-    AddSpanItem(spanItem, offset);
-    if (options.offset.has_value() && options.offset.value() <= GetCaretPosition()) {
-        SetCaretPosition(options.offset.value() + 1 + moveLength_);
-        moveLength_ = 0;
-    } else {
-        placeholderCount_++;
-        SetCaretPosition(GetTextContentLength());
-    }
+    AddSpanItem(spanItem, spanIndex);
+    placeholderCount_++;
+    SetCaretPosition(insertIndex + spanItem->content.length());
     if (textSelector_.IsValid()) {
         CloseSelectOverlay();
         ResetSelection();
@@ -474,7 +444,7 @@ int32_t RichEditorPattern::AddTextSpan(const TextSpanOptions& options, bool isPa
     record.afterCaretPosition =
         record.beforeCaretPosition + static_cast<int32_t>(StringUtils::ToWstring(options.value).length());
     AddOperationRecord(record);
-    return AddTextSpanOperation(options, isPaste, index, false, false);
+    return AddTextSpanOperation(options, isPaste, index, false);
 }
 
 int32_t RichEditorPattern::AddTextSpanOperation(
@@ -549,9 +519,8 @@ int32_t RichEditorPattern::AddTextSpanOperation(
         spanItem->SetLongPressEvent(std::move(tmpLongPressFunc));
     }
     if (updateCaretOPosition) {
-        if (options.offset.has_value() && options.offset.value() <= GetCaretPosition()) {
-            SetCaretPosition(options.offset.value() + 1 + moveLength_);
-            moveLength_ = 0;
+        if (options.offset.has_value()) {
+            SetCaretPosition(options.offset.value() + StringUtils::ToWstring(options.value).length());
         } else {
             SetCaretPosition(GetTextContentLength());
         }
@@ -584,23 +553,12 @@ int32_t RichEditorPattern::AddSymbolSpanOperation(const SymbolSpanOptions& optio
     auto nodeId = stack->ClaimNodeId();
     auto spanNode = SpanNode::GetOrCreateSpanNode(V2::SYMBOL_SPAN_ETS_TAG, nodeId);
 
-    int32_t spanIndex = 0;
-    int32_t offset = -1;
-    if (options.offset.has_value()) {
-        offset = TextSpanSplit(options.offset.value());
-        if (offset == -1) {
-            spanIndex = static_cast<int32_t>(host->GetChildren().size());
-        } else {
-            spanIndex = offset;
-        }
-        spanNode->MountToParent(host, offset);
-    } else if (index != -1) {
-        spanNode->MountToParent(host, index);
-        spanIndex = index;
-    } else {
+    int32_t insertIndex = options.offset.value_or(GetTextContentLength());
+    int32_t spanIndex = TextSpanSplit(insertIndex);
+    if (spanIndex == -1) {
         spanIndex = static_cast<int32_t>(host->GetChildren().size());
-        spanNode->MountToParent(host);
     }
+    spanNode->MountToParent(host, spanIndex);
     spanNode->UpdateContent(options.symbolId);
     spanNode->AddPropertyInfo(PropertyInfo::NONE);
     if (options.style.has_value()) {
@@ -619,13 +577,8 @@ int32_t RichEditorPattern::AddSymbolSpanOperation(const SymbolSpanOptions& optio
     spanItem->content = "  ";
     spanItem->SetTextStyle(options.style);
     spanItem->SetResourceObject(options.resourceObject);
-    AddSpanItem(spanItem, offset);
-    if (options.offset.has_value() && options.offset.value() <= GetCaretPosition()) {
-        SetCaretPosition(options.offset.value() + SYMBOL_SPAN_LENGTH + moveLength_);
-        moveLength_ = 0;
-    } else {
-        SetCaretPosition(GetTextContentLength());
-    }
+    AddSpanItem(spanItem, spanIndex);
+    SetCaretPosition(insertIndex + spanItem->content.length());
     SpanNodeFission(spanNode);
     return spanIndex;
 }
