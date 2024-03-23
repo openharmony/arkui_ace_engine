@@ -1817,8 +1817,8 @@ bool RichEditorPattern::CheckBlurReason()
 
 void RichEditorPattern::HandleBlurEvent()
 {
+    isLongPress_ = false;
     if (textDetectEnable_) {
-        isLongPress_ = false;
         if (CanStartAITask()) {
             dataDetectorAdapter_->StartAITask();
         }
