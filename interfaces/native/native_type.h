@@ -54,6 +54,21 @@ struct ArkUI_Node;
  * @since 12
  */
 struct ArkUI_NativeDialog;
+
+/**
+ * @brief 约束尺寸，组件布局时，进行尺寸范围限制。
+ *
+ * @since 12
+ */
+struct ArkUI_LayoutConstraint;
+
+/**
+ * @brief 定义组件绘制上下文类型结构。
+ *
+ * @since 12
+ */
+struct ArkUI_DrawContext;
+
 /**
  * @brief Defines the pointer to the ArkUI native component object.
  *
@@ -1328,6 +1343,180 @@ typedef struct {
     /** Height of the mask area. */
     float height;
 } ArkUI_Rect;
+
+/**
+ * @brief 尺寸类型，用于描述组件的宽高。
+ *
+ * @since 12。
+ */
+typedef struct {
+    /** 宽度，单位为px。*/
+    int32_t width;
+    /** 高度，单位为px。*/
+    int32_t height;
+} ArkUI_IntSize;
+
+/**
+ * @brief 位置，用于描述组件的位置。
+ *
+ * @since 12。
+ */
+typedef struct {
+    /** 水平方向横坐标，单位为px。*/
+    int32_t x;
+    /** 竖直方向纵坐标，单位为px。*/
+    int32_t y;
+} ArkUI_IntOffset;
+
+/**
+* @brief 创建约束尺寸。
+*
+* @since 12
+*/
+ArkUI_LayoutConstraint* OH_ArkUI_LayoutConstraint_Create();
+
+/**
+* @brief 约束尺寸深拷贝。
+*
+* @param Constraint 约束尺寸。
+* @return 新的约束尺寸指针。
+* @since 12
+*/
+ArkUI_LayoutConstraint* OH_ArkUI_LayoutConstraint_Copy(const ArkUI_LayoutConstraint* Constraint);
+
+/**
+* @brief 销毁约束尺寸指针。
+*
+* @param Constraint 约束尺寸。
+* @since 12
+*/
+void* OH_ArkUI_LayoutConstraint_Dispose(ArkUI_LayoutConstraint* Constraint);
+
+/**
+* @brief 通过约束尺寸获取最大宽度，单位为px。
+*
+* @param Constraint 约束尺寸。
+* @return  最大宽度。
+* @since 12
+*/
+int32_t OH_ArkUI_LayoutConstraint_GetMaxWidth(const ArkUI_LayoutConstraint* Constraint);
+
+/**
+* @brief 通过约束尺寸获取最小宽度，单位为px。
+*
+* @param Constraint 约束尺寸。
+* @return  最小宽度。
+* @since 12
+*/
+int32_t OH_ArkUI_LayoutConstraint_GetMinWidth(const ArkUI_LayoutConstraint* Constraint);
+
+/**
+* @brief 通过约束尺寸获取最大高度，单位为px。
+*
+* @param Constraint 约束尺寸。
+* @return  最大宽度。
+* @since 12
+*/
+int32_t OH_ArkUI_LayoutConstraint_GetMaxHeight(const ArkUI_LayoutConstraint* Constraint);
+
+/**
+* @brief 通过约束尺寸获取最小高度，单位为px。
+*
+* @param Constraint 约束尺寸。
+* @return  最大宽度。
+* @since 12
+*/
+int32_t OH_ArkUI_LayoutConstraint_GetMinHeight(const ArkUI_LayoutConstraint* Constraint);
+
+/**
+* @brief 通过约束尺寸获取宽度百分比基准，单位为px。
+*
+* @param Constraint 约束尺寸。
+* @return  宽度百分比基准。
+* @since 12
+*/
+int32_t OH_ArkUI_LayoutConstraint_GetPercentReferenceWidth(const ArkUI_LayoutConstraint* Constraint);
+
+/**
+* @brief 通过约束尺寸获取高度百分比基准，单位为px。
+*
+* @param Constraint 约束尺寸。
+* @return  高度百分比基准。
+* @since 12
+*/
+int32_t OH_ArkUI_LayoutConstraint_GetPercentReferenceHeight(const ArkUI_LayoutConstraint* Constraint);
+
+/**
+* @brief 设置最大宽度。
+*
+* @param Constraint 约束尺寸。
+* @param value 最大宽度，单位为px。
+* @since 12
+*/
+void OH_ArkUI_LayoutConstraint_SetMaxWidth(ArkUI_LayoutConstraint* Constraint, int32_t value);
+
+/**
+* @brief 设置最小宽度。
+*
+* @param Constraint 约束尺寸。
+* @param value 最小宽度，单位为px。
+* @since 12
+*/
+void OH_ArkUI_LayoutConstraint_SetMinWidth(ArkUI_LayoutConstraint* Constraint, int32_t value);
+
+/**
+* @brief 设置最大高度。
+*
+* @param Constraint 约束尺寸。
+* @param value 最大高度，单位为px。
+* @since 12
+*/
+void OH_ArkUI_LayoutConstraint_SetMaxHeight(ArkUI_LayoutConstraint* Constraint, int32_t value);
+
+/**
+* @brief 设置最小高度。
+*
+* @param Constraint 约束尺寸。
+* @param value 最小高度，单位为px。
+* @since 12
+*/
+void OH_ArkUI_LayoutConstraint_SetMinHeight(ArkUI_LayoutConstraint* Constraint, int32_t value);
+
+/**
+* @brief 设置宽度百分比基准。
+*
+* @param Constraint 约束尺寸。
+* @param value 宽度百分比基准，单位为px。
+* @since 12
+*/
+void OH_ArkUI_LayoutConstraint_SetPercentReferenceWidth(ArkUI_LayoutConstraint* Constraint, int32_t value);
+
+/**
+* @brief 设置高度百分比基准。
+*
+* @param Constraint 约束尺寸。
+* @param value 高度百分比基准，单位为px。
+* @since 12
+*/
+void OH_ArkUI_LayoutConstraint_SetPercentReferenceHeight(ArkUI_LayoutConstraint* Constraint, int32_t value);
+
+/**
+* @brief 获取绘制canvas指针，可以转换为图形库的OH_Drawing_Canvas指针进行绘制。
+*
+* @param context 绘制上下文。
+* @return 用于绘制的canvas指针。
+* @since 12
+*/
+void* OH_ArkUI_DrawContext_GetCanvas(ArkUI_DrawContext* context);
+
+/**
+* @brief 获取可绘制区域大小。
+*
+* @param context 绘制上下文。
+* @return  可绘制区域大小。
+* @since 12
+*/
+ArkUI_IntSize OH_ArkUI_DrawContext_GetSize(ArkUI_DrawContext* context);
 
 #ifdef __cplusplus
 };

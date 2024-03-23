@@ -4189,6 +4189,31 @@ typedef enum {
 } ArkUI_NodeDirtyFlag;
 
 /**
+ * @brief 定义自定义组件事件类型。
+ *
+ * @since 12
+ */
+typedef enum {
+    /** measure 类型。*/
+    ARKUI_CUSTOM_NODE_EVENT_ON_MEASURE = 1 << 0,
+    /** layout 类型。*/
+    ARKUI_CUSTOM_NODE_EVENT_ON_LAYOUT = 1 << 1,
+    /** draw 类型。*/
+    ARKUI_CUSTOM_NODE_EVENT_ON_DRAW = 1 << 2,
+    /** foreground 类型。*/
+    ARKUI_CUSTOM_NODE_EVENT_ON_FOREGROUND_DRAW = 1 << 3,
+    /** overlay 类型。*/
+    ARKUI_CUSTOM_NODE_EVENT_ON_OVERLAY_DRAW = 1 << 4,
+} ArkUI_NodeCustomEventType;
+
+/**
+ * @brief 定义自定义组件事件的通用结构类型。
+ *
+ * @since 12
+ */
+struct ArkUI_NodeCustomEvent;
+
+/**
  * @brief Declares a collection of native node APIs provided by ArkUI.
  *
  * @version 1
@@ -4376,7 +4401,248 @@ typedef struct {
      * @param dirtyFlag Indicates type of dirty area.
      */
     void (*markDirty)(ArkUI_NodeHandle node, ArkUI_NodeDirtyFlag dirtyFlag);
+
+    /**
+     * @brief 获取子节点的个数。
+     *
+     * 当组件已经挂载在窗口上显示时，必须在主线程上调用。
+     *
+     * @param node 目标节点对象。
+     * @return 0 - 成功。
+     *         401 - 函数参数异常。
+     */
+    uint32_t (*getTotalChildCount)(ArkUI_NodeHandle node);
+
+    /**
+     * @brief 获取子节点。
+     *
+     * 当组件已经挂载在窗口上显示时，必须在主线程上调用。
+     *
+     * @param node 目标节点对象。
+     * @param position 子组件的位置。
+     * @return 返回组件的指针，如果没有返回NULL
+     */
+    ArkUI_NodeHandle (*getChildAt)(ArkUI_NodeHandle node, int32_t position);
+
+    /**
+     * @brief 获取第一个子节点。
+     *
+     * 当组件已经挂载在窗口上显示时，必须在主线程上调用。
+     *
+     * @param node 目标节点对象。
+     * @return 返回组件的指针，如果没有返回NULL
+     */
+    ArkUI_NodeHandle (*getFirstChild)(ArkUI_NodeHandle node);
+
+    /**
+     * @brief 获取最后一个子节点。
+     *
+     * 当组件已经挂载在窗口上显示时，必须在主线程上调用。
+     *
+     * @param node 目标节点对象。
+     * @return 返回组件的指针，如果没有返回NULL
+     */
+    ArkUI_NodeHandle (*getLastChild)(ArkUI_NodeHandle node);
+
+    /**
+     * @brief 获取上一个兄弟节点。
+     *
+     * 当组件已经挂载在窗口上显示时，必须在主线程上调用。
+     *
+     * @param node 目标节点对象。
+     * @return 返回组件的指针，如果没有返回NULL
+     */
+    ArkUI_NodeHandle (*getPreviousSibling)(ArkUI_NodeHandle node);
+
+    /**
+     * @brief 获取下一个兄弟节点。
+     *
+     * 当组件已经挂载在窗口上显示时，必须在主线程上调用。
+     *
+     * @param node 目标节点对象。
+     * @return 返回组件的指针，如果没有返回NULL
+     */
+    ArkUI_NodeHandle (*getNextSibling)(ArkUI_NodeHandle node);
+
+    /**
+     * @brief 注册自定义节点事件函数。事件触发时通过registerNodeCustomEventReceiver注册的自定义事件入口函数返回。
+     *
+     * 当组件已经挂载在窗口上显示时，必须在主线程上调用。
+     *
+     * @param node 需要注册事件的节点对象。
+     * @param eventType 需要注册的事件类型。
+     * @param targetId 自定义事件ID，当事件触发时在回调参数<@link ArkUI_NodeCustomEvent>中携带回来。
+     * @param userData 自定义事件参数，当事件触发时在回调参数<@link ArkUI_NodeCustomEvent>中携带回来。
+     * @return 0 - 成功。
+     *         401 - 函数参数异常。
+     *         106102 - 系统中未找到Native接口的动态实现库。
+     */
+    int32_t (*registerNodeCustomEvent)(
+        ArkUI_NodeHandle node, ArkUI_NodeCustomEventType eventType, int32_t targetId, void* userData);
+
+    /**
+     * @brief 反注册自定义节点事件函数。
+     *
+     * 当组件已经挂载在窗口上显示时，必须在主线程上调用。
+     *
+     * @param node 需要反注册事件的节点对象。
+     * @param eventType 需要反注册的事件类型。
+     */
+    void (*unregisterNodeCustomEvent)(ArkUI_NodeHandle node, ArkUI_NodeCustomEventType eventType);
+
+    /**
+     * @brief 注册自定义节点事件回调统一入口函数。
+     *
+     * ArkUI框架会统一收集过程中产生的自定义组件事件并通过注册的registerNodeCustomEventReceiver函数回调给开发者。\n
+     * 重复调用时会覆盖前一次注册的函数。
+     *
+     * @param eventReceiver 事件回调统一入口函数。
+     */
+    void (*registerNodeCustomEventReceiver)(void (*eventReceiver)(ArkUI_NodeCustomEvent* event));
+
+    /**
+     * @brief 反注册自定义节点事件回调统一入口函数。
+     *
+     * 当组件已经挂载在窗口上显示时，必须在主线程上调用。
+     *
+     */
+    void (*unRegisterNodeCustomEventReceiver)();
+
+    /**
+     * @brief 在测算回调函数中设置组件的测算完成后的宽和高。
+     *
+     * 当组件已经挂载在窗口上显示时，必须在主线程上调用。
+     *
+     * @param node 目标节点对象。
+     * @param width 设置的宽。
+     * @param height 设置的高。
+     * @return 0 - 成功。
+     *         401 - 函数参数异常。
+     */
+    int32_t (*setMeasuredSize)(ArkUI_NodeHandle node, int32_t width, int32_t height);
+
+    /**
+     * @brief 在布局回调函数中设置组件的位置。
+     *
+     * 当组件已经挂载在窗口上显示时，必须在主线程上调用。
+     *
+     * @param node 目标节点对象。
+     * @param positionX x轴坐标。
+     * @param positionY y轴坐标。
+     * @return 0 - 成功。
+     *         401 - 函数参数异常。
+     */
+    int32_t (*setLayoutPosition)(ArkUI_NodeHandle node, int32_t positionX, int32_t positionY);
+    
+    /**
+     * @brief 获取组件测算完成后的宽高尺寸。
+     *
+     * 当组件已经挂载在窗口上显示时，必须在主线程上调用。
+     *
+     * @param node 目标节点对象。
+     * @return ArkUI_IntSize 组件的宽高。
+     */
+    ArkUI_IntSize (*getMeasuredSize)(ArkUI_NodeHandle node);
+
+    /**
+     * @brief 获取组件布局完成后的位置。
+     *
+     * 当组件已经挂载在窗口上显示时，必须在主线程上调用。
+     *
+     * @param node 目标节点对象。
+     * @return ArkUI_IntOffset 组件的位置。
+     */
+    ArkUI_IntOffset (*getLayoutPosition)(ArkUI_NodeHandle node);
+
+    /**
+     * @brief 对特定组件进行测算，可以通过getMeasuredSize接口获取测算后的大小。
+     *
+     * 当组件已经挂载在窗口上显示时，必须在主线程上调用。
+     *
+     * @param node 目标节点对象。
+     * @param Constraint 约束尺寸。
+     * @return 0 - 成功。
+     *         401 - 函数参数异常。
+     */
+    int32_t (*measureNode)(ArkUI_NodeHandle node, ArkUI_LayoutConstraint* Constraint);
+
+    /**
+     * @brief 对特定组件进行布局并传递该组件相对父组件的期望位置。
+     *
+     * 当组件已经挂载在窗口上显示时，必须在主线程上调用。
+     *
+     * @param node 目标节点对象。
+     * @param positionX x轴坐标。
+     * @param positionY y轴坐标。
+     * @return 0 - 成功。
+     *         401 - 函数参数异常。
+     */
+    int32_t (*layoutNode)(ArkUI_NodeHandle node, int32_t positionX, int32_t positionY);
 } ArkUI_NativeNodeAPI_1;
+
+
+/**
+* @brief 通过自定义组件事件获取测算过程中的约束尺寸。
+*
+* @param event 自定义组件事件。
+* @return  约束尺寸指针。
+* @since 12
+*/
+ArkUI_LayoutConstraint* OH_ArkUI_NodeCustomEvent_GetLayoutConstraintInMeasure(ArkUI_NodeCustomEvent* event);
+
+/**
+* @brief 通过自定义组件事件获取在布局阶段期望自身相对父组件的位置。
+*
+* @param event 自定义组件事件。
+* @return  期望自身相对父组件的位置。
+* @since 12
+*/
+ArkUI_IntOffset OH_ArkUI_NodeCustomEvent_GetPositionInLayout(ArkUI_NodeCustomEvent* event);
+
+/**
+* @brief 通过自定义组件事件获取绘制上下文。
+*
+* @param event 自定义组件事件。
+* @return  绘制上下文。
+* @since 12
+*/
+ArkUI_DrawContext* OH_ArkUI_NodeCustomEvent_GetDrawContextInDraw(ArkUI_NodeCustomEvent* event);
+
+/**
+* @brief 通过自定义组件事件获取自定义事件ID。
+*
+* @param event 自定义组件事件。
+* @return  自定义事件ID。
+* @since 12
+*/
+int32_t OH_ArkUI_NodeCustomEvent_GetEventTargetId(ArkUI_NodeCustomEvent* event);
+
+/**
+* @brief 通过自定义组件事件获取自定义事件参数。
+*
+* @param event 自定义组件事件。
+* @return  自定义事件参数。
+* @since 12
+*/
+void* OH_ArkUI_NodeCustomEvent_GetUserData(ArkUI_NodeCustomEvent* event);
+
+/**
+* @brief 通过自定义组件事件获取组件对象。
+*
+* @param event 自定义组件事件。
+* @return  组件对象。
+* @since 12
+*/
+ArkUI_NodeHandle OH_ArkUI_NodeCustomEvent_GetNodeHandle(ArkUI_NodeCustomEvent* event);
+
+/**
+* @brief 通过自定义组件事件获取事件类型。
+*
+* @param event 自定义组件事件。
+* @return  组件自定义事件类型。
+* @since 12
+*/
+ArkUI_NodeCustomEventType OH_ArkUI_NodeCustomEvent_GetEventType(ArkUI_NodeCustomEvent* event);
 
 #ifdef __cplusplus
 };
