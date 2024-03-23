@@ -113,6 +113,7 @@ ohos_source_set("ace_components_base") {
   part_name = ace_engine_part
   sources = [
     "$ace_root/frameworks/core/components_ng/base/distributed_ui.cpp",
+    "$ace_root/frameworks/core/components_ng/base/extension_handler.cpp",
     "$ace_root/frameworks/core/components_ng/base/frame_node.cpp",
     "$ace_root/frameworks/core/components_ng/base/geometry_node.cpp",
     "$ace_root/frameworks/core/components_ng/base/inspector.cpp",

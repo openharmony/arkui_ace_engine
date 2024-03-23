@@ -417,6 +417,7 @@ private:
 };
 
 using RectF = RectT<float>;
+using RectInt = RectT<int32_t>;
 
 struct EdgeF {
     EdgeF() = default;

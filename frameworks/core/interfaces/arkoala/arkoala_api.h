@@ -32,7 +32,7 @@ extern "C" {
 #define ARKUI_NODE_API_VERSION 80
 
 #define ARKUI_BASIC_API_VERSION 6
-#define ARKUI_EXTENDED_API_VERSION 6
+#define ARKUI_EXTENDED_API_VERSION 7
 #define ARKUI_NODE_GRAPHICS_API_VERSION 5
 #define ARKUI_NODE_MODIFIERS_API_VERSION 6
 #define ARKUI_AUTO_GENERATE_NODE_ID -2
@@ -710,7 +710,7 @@ enum ArkUIEventCategory {
     COMPONENT_ASYNC_EVENT = 4,
     TEXT_INPUT = 5,
     GESTURE_ASYNC_EVENT = 6,
-    TOUCH_EVENT=7,
+    TOUCH_EVENT = 7,
 };
 
 #define ARKUI_MAX_EVENT_NUM 1000
@@ -825,6 +825,8 @@ enum ArkUIAPINodeFlags {
     CUSTOM_MEASURE = 1 << 0,
     CUSTOM_LAYOUT = 1 << 1,
     CUSTOM_DRAW = 1 << 2,
+    CUSTOM_FOREGROUND_DRAW = 1 << 3,
+    CUSTOM_OVERLAY_DRAW = 1 << 4,
 };
 
 enum ArkUIGestureDirection {
@@ -976,6 +978,19 @@ struct ArkUIShowCountOptions {
     ArkUI_Bool open;
     ArkUI_Int32 thresholdPercentage;
     ArkUI_Bool highlightBorder;
+};
+
+struct ArkUICustomNodeAsyncEvent {
+    ArkUIEventCallbackArg data[ARKUI_ASYNC_EVENT_ARGS_COUNT];
+};
+
+struct ArkUICustomNodeEvent {
+    ArkUI_Int32 kind;
+    void* extraParam;
+    union {
+        ArkUICustomNodeAsyncEvent componentAsyncEvent;
+    };
+    void* canvas;
 };
 
 struct ArkUICommonModifier {
@@ -3153,6 +3168,7 @@ struct ArkUIFrameNodeModifier {
     ArkUI_Float32* (*getPositionToWindow)(ArkUINodeHandle node);
     ArkUINodeHandle (*getFrameNodeById)(ArkUI_Int32 nodeId);
     ArkUINodeHandle (*getFrameNodeByKey)(ArkUI_CharPtr key);
+    ArkUINodeHandle (*getLast)(ArkUINodeHandle node);
 };
 
 struct ArkUIAnimation {
@@ -3409,17 +3425,35 @@ struct ArkUIExtendedNodeAPI {
     const ArkUICanvasRenderingContext2DModifier* (*getCanvasRenderingContext2DModifier)();
 
     void (*setCallbackMethod)(ArkUIAPICallbackMethod* method);
-    void (*setCustomCallback)(ArkUINodeHandle node, ArkUI_Int32 callbackId);
+
+    // for ndk side, the custom method is not set in create.
+    void (*setCustomMethodFlag)(ArkUINodeHandle node, ArkUI_Int32 flag);
+    ArkUI_Int32 (*getCustomMethodFlag)(ArkUINodeHandle node);
+
+    void (*registerCustomNodeAsyncEvent)(
+        ArkUINodeHandle nodePtr, ArkUI_Int32 kind, void* extraParam);
+    ArkUI_Int32 (*unregisterCustomNodeAsyncEvent)(ArkUINodeHandle nodePtr, ArkUI_Int32 kind);
+    void (*registerCustomNodeAsyncEventReceiver)(void (*eventReceiver)(ArkUICustomNodeEvent* event));
+
+    void (*setCustomCallback)(ArkUIVMContext vmContext, ArkUINodeHandle node, ArkUI_Int32 callbackId);
     ArkUI_Int32 (*measureLayoutAndDraw)(ArkUIVMContext vmContext, ArkUINodeHandle node);
     ArkUI_Int32 (*measureNode)(ArkUIVMContext vmContext, ArkUINodeHandle node, ArkUI_Float32* data);
     ArkUI_Int32 (*layoutNode)(ArkUIVMContext vmContext, ArkUINodeHandle node, ArkUI_Float32* data);
     ArkUI_Int32 (*drawNode)(ArkUIVMContext vmContext, ArkUINodeHandle node, ArkUI_Float32* data);
-    void (*setMeasureWidth)(ArkUINodeHandle node, ArkUI_Float32 value);
-    ArkUI_Float32 (*getMeasureWidth)(ArkUINodeHandle node);
-    void (*setMeasureHeight)(ArkUINodeHandle node, ArkUI_Float32 value);
-    ArkUI_Float32 (*getMeasureHeight)(ArkUINodeHandle node);
-    void (*setX)(ArkUINodeHandle node, ArkUI_Float32 value);
-    void (*setY)(ArkUINodeHandle node, ArkUI_Float32 value);
+
+    void (*setAttachNodePtr)(ArkUINodeHandle node, void* value);
+    void* (*getAttachNodePtr)(ArkUINodeHandle node);
+
+    // maybe better to use int in px unit.
+    void (*setMeasureWidth)(ArkUINodeHandle node, ArkUI_Int32 value);
+    ArkUI_Int32 (*getMeasureWidth)(ArkUINodeHandle node);
+    void (*setMeasureHeight)(ArkUINodeHandle node, ArkUI_Int32 value);
+    ArkUI_Int32 (*getMeasureHeight)(ArkUINodeHandle node);
+    void (*setX)(ArkUINodeHandle node, ArkUI_Int32 value);
+    void (*setY)(ArkUINodeHandle node, ArkUI_Int32 value);
+    ArkUI_Int32 (*getX)(ArkUINodeHandle node);
+    ArkUI_Int32 (*getY)(ArkUINodeHandle node);
+    void (*getLayoutConstraint)(ArkUINodeHandle node, ArkUI_Int32* value);
     void (*setAlignment)(ArkUINodeHandle node, ArkUI_Int32 value);
     ArkUI_Int32 (*getAlignment)(ArkUINodeHandle node);
     ArkUI_Int32 (*indexerChecker)(ArkUIVMContext context, ArkUINodeHandle node);
@@ -3464,6 +3498,7 @@ struct ArkUIFullNodeAPI {
     const ArkUINavigation* (*getNavigation)();
     const ArkUIGraphicsAPI* (*getGraphicsAPI)();
     const ArkUIDialogAPI* (*getDialogAPI)();
+    const ArkUIExtendedNodeAPI* (*getExtendedAPI)();
 };
 
 struct ArkUIAnyAPI {

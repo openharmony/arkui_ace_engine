@@ -7151,18 +7151,18 @@ void JSViewAbstract::JSBind(BindingTarget globalObj)
 
 void AddInvalidateFunc(JSRef<JSObject> jsDrawModifier, NG::FrameNode* frameNode)
 {
-    auto invalidate = [](panda::JsiRuntimeCallInfo *info) -> panda::Local<panda::JSValueRef> {
+    auto invalidate = [](panda::JsiRuntimeCallInfo* info) -> panda::Local<panda::JSValueRef> {
         auto vm = info->GetVM();
         Local<JSValueRef> thisObj = info->GetFunctionRef();
         auto thisObjRef = panda::Local<panda::ObjectRef>(thisObj);
         if (thisObjRef->GetNativePointerFieldCount() < 1) {
             return panda::JSValueRef::Undefined(vm);
         }
-        auto frameNode = static_cast<NG::FrameNode*>(thisObjRef->GetNativePointerField(0));
+        auto* frameNode = static_cast<NG::FrameNode*>(thisObjRef->GetNativePointerField(0));
         if (frameNode) {
-            auto contentModifier = frameNode->GetContentModifier();
-            if (contentModifier) {
-                contentModifier->SetContentChange();
+            const auto& extensionHandler = frameNode->GetExtensionHandler();
+            if (extensionHandler) {
+                extensionHandler->InvalidateRender();
             } else {
                 frameNode->MarkDirtyNode(NG::PROPERTY_UPDATE_RENDER);
             }
@@ -7172,9 +7172,9 @@ void AddInvalidateFunc(JSRef<JSObject> jsDrawModifier, NG::FrameNode* frameNode)
     };
     auto jsInvalidate = JSRef<JSFunc>::New<FunctionCallback>(invalidate);
     if (frameNode) {
-        auto contentModifier = frameNode->GetContentModifier();
-        if (contentModifier) {
-            contentModifier->SetContentChange();
+        const auto& extensionHandler = frameNode->GetExtensionHandler();
+        if (extensionHandler) {
+            extensionHandler->InvalidateRender();
         } else {
             frameNode->MarkDirtyNode(NG::PROPERTY_UPDATE_RENDER);
         }
@@ -7234,9 +7234,9 @@ void JSViewAbstract::JsDrawModifier(const JSCallbackInfo& info)
             };
     };
 
-    drawModifier->jsDrawBehindFunc = getDrawModifierFunc("drawBehind");
-    drawModifier->jsDrawContentFunc = getDrawModifierFunc("drawContent");
-    drawModifier->jsDrawFrontFunc = getDrawModifierFunc("drawFront");
+    drawModifier->drawBehindFunc = getDrawModifierFunc("drawBehind");
+    drawModifier->drawContentFunc = getDrawModifierFunc("drawContent");
+    drawModifier->drawFrontFunc = getDrawModifierFunc("drawFront");
 
     ViewAbstractModel::GetInstance()->SetDrawModifier(drawModifier);
     AddInvalidateFunc(jsDrawModifier, frameNode);

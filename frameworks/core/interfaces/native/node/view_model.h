@@ -38,7 +38,7 @@ void RegisterCompanion(void* node, int peerId, ArkUI_Int32 flags);
 
 ExtensionCompanionNode* GetCompanion(void* nodePtr);
 
-void SetCustomCallback(void* nodePtr, ArkUI_Int32 callback);
+void SetCustomCallback(ArkUIVMContext context, void* nodePtr, ArkUI_Int32 callback);
 
 void SetCallbackMethod(ArkUIAPICallbackMethod* method);
 
@@ -49,5 +49,8 @@ ArkUI_Int32 MeasureNode(ArkUIVMContext context, ArkUINodeHandle nodePtr, ArkUI_F
 ArkUI_Int32 LayoutNode(ArkUIVMContext context, ArkUINodeHandle nodePtr, ArkUI_Float32* data);
 
 ArkUI_Int32 DrawNode(ArkUIVMContext context, ArkUINodeHandle nodePtr, ArkUI_Float32* data);
+
+void SetAttachNodePtr(ArkUINodeHandle nodePtr, void* attachNode);
+void* GetAttachNodePtr(ArkUINodeHandle nodePtr);
 
 } // namespace OHOS::Ace::NG::ViewModel
