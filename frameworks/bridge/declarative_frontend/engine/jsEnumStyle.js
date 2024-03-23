@@ -1743,6 +1743,12 @@ var ContentTextStyle;
   ContentTextStyle[ContentTextStyle["ThreeLines"] = 2] = "ThreeLines";
 })(ContentTextStyle || (ContentTextStyle = {}));
 
+var MarqueeUpdateStrategy;
+(function (MarqueeUpdateStrategy) {
+  MarqueeUpdateStrategy["DEFAULT"] = "default";
+  MarqueeUpdateStrategy["PRESERVE_POSITION"] = "preserve_position";
+})(MarqueeUpdateStrategy || (MarqueeUpdateStrategy = {}));
+
 class NavPathInfo {
   constructor(name, param, onPop) {
     this.name = name;

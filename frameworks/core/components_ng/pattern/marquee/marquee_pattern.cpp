@@ -49,6 +49,7 @@ constexpr double DEFAULT_MARQUEE_SCROLL_DELAY = 85.0; // Delay time between each
 constexpr float HALF = 0.5f;
 constexpr float FAKE_VALUE = 0.1f;
 inline constexpr int32_t DEFAULT_MARQUEE_LOOP = -1;
+constexpr uint64_t ANIMATION_INITIAL_TIME = 0;
 } // namespace
 
 void MarqueePattern::OnAttachToFrameNode()
@@ -122,15 +123,7 @@ void MarqueePattern::StartMarqueeAnimation()
     TAG_LOGD(AceLogTag::ACE_MARQUEE, "Start Marquee Animation.");
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto geoNode = host->GetGeometryNode();
-    CHECK_NULL_VOID(geoNode);
-    auto marqueeSize = geoNode->GetFrameSize();
-    auto textNode = DynamicCast<FrameNode>(host->GetFirstChild());
-    CHECK_NULL_VOID(textNode);
-    auto textGeoNode = textNode->GetGeometryNode();
-    CHECK_NULL_VOID(textGeoNode);
-    auto textWidth = textGeoNode->GetFrameSize().Width();
-    if (GreatOrEqual(marqueeSize.Width(), textWidth)) {
+    if (!IsRunMarquee()) {
         return;
     }
     auto paintProperty = host->GetPaintProperty<MarqueePaintProperty>();
@@ -143,7 +136,8 @@ void MarqueePattern::StartMarqueeAnimation()
     }
     FireStartEvent();
     bool needSecondPlay = repeatCount != 1;
-    PlayMarqueeAnimation(0.0f, repeatCount, needSecondPlay);
+    auto startPosition = GetTextOffset();
+    PlayMarqueeAnimation(startPosition, repeatCount, needSecondPlay);
 }
 
 void MarqueePattern::PlayMarqueeAnimation(float start, int32_t playCount, bool needSecondPlay)
@@ -154,24 +148,24 @@ void MarqueePattern::PlayMarqueeAnimation(float start, int32_t playCount, bool n
         start, playCount, needSecondPlay);
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto geoNode = host->GetGeometryNode();
-    CHECK_NULL_VOID(geoNode);
     auto textNode = DynamicCast<FrameNode>(host->GetFirstChild());
     CHECK_NULL_VOID(textNode);
-    auto textGeoNode = textNode->GetGeometryNode();
-    CHECK_NULL_VOID(textGeoNode);
-    auto textWidth = textGeoNode->GetFrameSize().Width();
-    auto paintProperty = host->GetPaintProperty<MarqueePaintProperty>();
-    CHECK_NULL_VOID(paintProperty);
-    auto step = paintProperty->GetScrollAmount().value_or(DEFAULT_MARQUEE_SCROLL_AMOUNT.ConvertToPx());
+    auto textWidth = GetTextNodeWidth();
+    auto step = GetScrollAmount();
     if (GreatNotEqual(step, textWidth)) {
         step = DEFAULT_MARQUEE_SCROLL_AMOUNT.ConvertToPx();
     }
     auto end = CalculateEnd();
+    lastAnimationParam_.lastEnd = end;
+    lastAnimationParam_.lastStart = CalculateStart();
     auto duration = static_cast<int32_t>(std::abs(end - start) * DEFAULT_MARQUEE_SCROLL_DELAY);
+    lastAnimationParam_.lastDistance = std::abs(end - start);
+    lastAnimationParam_.lastStep = 1.0f;
     if (GreatNotEqual(step, 0.0)) {
         duration = static_cast<int32_t>(duration / step);
+        lastAnimationParam_.lastStep = step;
     }
+    lastAnimationParam_.lastDuration = duration;
     AnimationOption option;
     option.SetCurve(Curves::LINEAR);
     option.SetDuration(duration);
@@ -185,6 +179,14 @@ void MarqueePattern::PlayMarqueeAnimation(float start, int32_t playCount, bool n
         "duration is %{public}d.",
         host->GetId(), textNode->GetId(), textWidth, duration);
     SetTextOffset(start);
+    auto paintProperty = host->GetPaintProperty<MarqueePaintProperty>();
+    CHECK_NULL_VOID(paintProperty);
+    lastAnimationParam_.lastDirection = paintProperty->GetDirection().value_or(MarqueeDirection::LEFT);
+    ActionAnimation(option, end, playCount, needSecondPlay);
+}
+
+void MarqueePattern::ActionAnimation(AnimationOption& option, float end, int32_t playCount, bool needSecondPlay)
+{
     animationId_++;
     animation_ = AnimationUtils::StartAnimation(
         option,
@@ -213,6 +215,8 @@ void MarqueePattern::PlayMarqueeAnimation(float start, int32_t playCount, bool n
                     return;
                 }
                 auto newStart = pattern->CalculateStart();
+                pattern->lastAnimationParam_.lastAnimationPosition = newStart;
+                pattern->lastAnimationParam_.lastStartMilliseconds = GetMilliseconds();
                 pattern->PlayMarqueeAnimation(newStart, newPlayCount, false);
             };
             if (taskExecutor->WillRunOnCurrentThread(TaskExecutor::TaskType::UI)) {
@@ -224,6 +228,7 @@ void MarqueePattern::PlayMarqueeAnimation(float start, int32_t playCount, bool n
         [weak = AceType::WeakClaim(this)]() {
             auto pattern = weak.Upgrade();
             CHECK_NULL_VOID(pattern);
+            pattern->lastAnimationParam_.lastStartMilliseconds = GetMilliseconds();
             pattern->FireBounceEvent();
         });
 }
@@ -243,10 +248,11 @@ void MarqueePattern::StopMarqueeAnimation(bool stopAndStart)
     AnimationOption option;
     option.SetCurve(Curves::LINEAR);
     option.SetDuration(0);
-    AnimationUtils::Animate(option, [weak = AceType::WeakClaim(this)]() {
+    auto offset = stopAndStart ? GetTextOffset() : 0.0f;
+    AnimationUtils::Animate(option, [weak = AceType::WeakClaim(this), position = offset]() {
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
-        pattern->SetTextOffset(0.0f);
+        pattern->SetTextOffset(position);
     });
     if (stopAndStart) {
         auto taskExecutor = Container::CurrentTaskExecutor();
@@ -260,6 +266,9 @@ void MarqueePattern::StopMarqueeAnimation(bool stopAndStart)
                 }
             },
             TaskExecutor::TaskType::UI);
+    } else {
+        lastAnimationParam_.lastStartMilliseconds = ANIMATION_INITIAL_TIME;
+        lastAnimationParam_.lastAnimationPosition = 0.0f;
     }
 }
 
@@ -296,6 +305,46 @@ void MarqueePattern::SetTextOffset(float offsetX)
         "Marquee nodeId %{public}d, textNodeId %{public}d is setted text offsetX is %{public}f.", host->GetId(),
         textNode->GetId(), offsetX);
     renderContext->UpdateTransformTranslate({ offsetX, 0.0f, 0.0f });
+}
+
+float MarqueePattern::GetTextOffset()
+{
+    float offsetX = 0.0f;
+    if (!IsRunMarquee()) {
+        lastAnimationParam_.lastStartMilliseconds = ANIMATION_INITIAL_TIME;
+        lastAnimationParam_.lastAnimationPosition = 0.0f;
+        return offsetX;
+    }
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, offsetX);
+    auto layoutProperty = host->GetLayoutProperty<MarqueeLayoutProperty>();
+    CHECK_NULL_RETURN(layoutProperty, offsetX);
+    auto marqueeUpdateStrategy = layoutProperty->GetMarqueeUpdateStrategy().value_or(MarqueeUpdateStrategy::DEFAULT);
+    auto paintProperty = host->GetPaintProperty<MarqueePaintProperty>();
+    CHECK_NULL_RETURN(paintProperty, offsetX);
+    auto playStatus = paintProperty->GetPlayerStatus().value_or(false);
+    if (playStatus && (lastAnimationParam_.lastStartMilliseconds > ANIMATION_INITIAL_TIME) &&
+        (marqueeUpdateStrategy == MarqueeUpdateStrategy::PRESERVE_POSITION)) {
+        auto currentMilliseconds = GetMilliseconds();
+        auto animationSpeed = lastAnimationParam_.lastDistance/ lastAnimationParam_.lastDuration;
+        auto diffMilliseconds =
+            std::abs(static_cast<int32_t>(currentMilliseconds - lastAnimationParam_.lastStartMilliseconds));
+        auto tempStartPosition = lastAnimationParam_.lastAnimationPosition;
+        if ((diffMilliseconds / static_cast<int32_t>(lastAnimationParam_.lastDuration)) > 0) {
+            diffMilliseconds -= lastAnimationParam_.lastDuration;
+            auto duration = static_cast<int32_t>(
+                std::abs(lastAnimationParam_.lastEnd - lastAnimationParam_.lastStart) * DEFAULT_MARQUEE_SCROLL_DELAY);
+            duration = duration / lastAnimationParam_.lastStep;
+            diffMilliseconds %= (duration + 1);
+            tempStartPosition = lastAnimationParam_.lastStart;
+        }
+        offsetX = static_cast<int32_t>(animationSpeed * diffMilliseconds);
+        auto factor = lastAnimationParam_.lastDirection == MarqueeDirection::LEFT ? -1.0f : 1.0f;
+        offsetX = offsetX * factor + tempStartPosition;
+    }
+    lastAnimationParam_.lastStartMilliseconds = GetMilliseconds();
+    lastAnimationParam_.lastAnimationPosition = offsetX;
+    return offsetX;
 }
 
 void MarqueePattern::RegistVisibleAreaChangeCallback()
@@ -526,5 +575,42 @@ void MarqueePattern::DumpInfo()
     DumpLog::GetInstance().AddDesc(std::string("Play status: ").append(std::to_string(playStatus_)));
     DumpLog::GetInstance().AddDesc(std::string("loop: ").append(std::to_string(loop_)));
     DumpLog::GetInstance().AddDesc(std::string("step: ").append(std::to_string(scrollAmount_)));
+}
+
+float MarqueePattern::GetTextNodeWidth()
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, 0.0f);
+    auto geoNode = host->GetGeometryNode();
+    CHECK_NULL_RETURN(geoNode, 0.0f);
+    auto textNode = DynamicCast<FrameNode>(host->GetFirstChild());
+    CHECK_NULL_RETURN(textNode, 0.0f);
+    auto textGeoNode = textNode->GetGeometryNode();
+    CHECK_NULL_RETURN(textGeoNode, 0.0f);
+    return textGeoNode->GetFrameSize().Width();
+}
+
+double MarqueePattern::GetScrollAmount()
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, 0.0f);
+    auto paintProperty = host->GetPaintProperty<MarqueePaintProperty>();
+    CHECK_NULL_RETURN(paintProperty, 0.0f);
+    return paintProperty->GetScrollAmount().value_or(DEFAULT_MARQUEE_SCROLL_AMOUNT.ConvertToPx());
+}
+
+bool MarqueePattern::IsRunMarquee()
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, false);
+    auto geoNode = host->GetGeometryNode();
+    CHECK_NULL_RETURN(geoNode, false);
+    auto marqueeSize = geoNode->GetFrameSize();
+    auto textNode = DynamicCast<FrameNode>(host->GetFirstChild());
+    CHECK_NULL_RETURN(textNode, false);
+    auto textGeoNode = textNode->GetGeometryNode();
+    CHECK_NULL_RETURN(textGeoNode, false);
+    auto textWidth = textGeoNode->GetFrameSize().Width();
+    return GreatOrEqual(textWidth, marqueeSize.Width());
 }
 } // namespace OHOS::Ace::NG

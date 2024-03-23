@@ -44,6 +44,7 @@ public:
     virtual void SetOnStart(std::function<void()>&& onChange) = 0;
     virtual void SetOnBounce(std::function<void()>&& onChange) = 0;
     virtual void SetOnFinish(std::function<void()>&& onChange) = 0;
+    virtual void SetMarqueeUpdateStrategy(const std::optional<MarqueeUpdateStrategy>& marqueeUpdateStrategy) {};
 
 private:
     static std::unique_ptr<MarqueeModel> instance_;

@@ -32,6 +32,7 @@ public:
     void SetFontWeight(const std::optional<FontWeight>& fontWeight) override;
     void SetFontFamily(const std::optional<std::vector<std::string>>& fontFamilies) override;
     void SetAllowScale(const std::optional<bool>& allowScale) override;
+    void SetMarqueeUpdateStrategy(const std::optional<MarqueeUpdateStrategy>& marqueeUpdateStrategy) override;
     void SetOnStart(std::function<void()>&& onChange) override;
     void SetOnBounce(std::function<void()>&& onChange) override;
     void SetOnFinish(std::function<void()>&& onChange) override;
@@ -41,6 +42,8 @@ public:
     static void SetFontFamily(FrameNode* frameNode, const std::optional<std::vector<std::string>>& fontFamilies);
     static void SetFontSize(FrameNode* frameNode, const std::optional<Dimension>& fontSize);
     static void SetTextColor(FrameNode* frameNode, const std::optional<Color>& textColor);
+    static void SetMarqueeUpdateStrategy(FrameNode* frameNode,
+        const std::optional<MarqueeUpdateStrategy>& marqueeUpdateStrategy);
 };
 } // namespace OHOS::Ace::NG
 

@@ -29,8 +29,22 @@
 #include "core/components_ng/render/paint_property.h"
 #include "core/pipeline/base/constants.h"
 
+namespace OHOS::Ace {
+    class AnimationOption;
+}
+
 namespace OHOS::Ace::NG {
 using TimeCallback = std::function<void()>;
+struct LastAnimationParam {
+    uint64_t lastStartMilliseconds = 0;
+    float lastAnimationPosition = 0.0f;
+    float lastStep = 1.0f;
+    float lastDistance = 0.0f;
+    float lastDuration = 0.0f;
+    float lastStart = 0.0f;
+    float lastEnd = 0.0f;
+    MarqueeDirection lastDirection = MarqueeDirection::LEFT;
+};
 
 class MarqueePattern : public Pattern {
     DECLARE_ACE_TYPE(MarqueePattern, Pattern);
@@ -93,6 +107,11 @@ private:
     float CalculateStart();
     float CalculateEnd();
     void RegistOritationListener();
+    float GetTextOffset();
+    float GetTextNodeWidth();
+    double GetScrollAmount();
+    void ActionAnimation(AnimationOption& option, float end, int32_t playCount, bool needSecondPlay);
+    bool IsRunMarquee();
     bool measureChanged_ = false;
     int32_t animationId_ = 0;
     bool isRegistedAreaCallback_ = false;
@@ -103,6 +122,7 @@ private:
     MarqueeDirection direction_ = MarqueeDirection::LEFT;
     bool isOritationListenerRegisted_ = false;
     ACE_DISALLOW_COPY_AND_MOVE(MarqueePattern);
+    LastAnimationParam lastAnimationParam_;
 };
 } // namespace OHOS::Ace::NG
 
