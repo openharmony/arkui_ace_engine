@@ -316,8 +316,7 @@ void NavigationGroupNode::SetBackButtonEvent(const RefPtr<NavDestinationGroupNod
             TAG_LOGI(AceLogTag::ACE_NAVIGATION, "set hideNavBar and stack size is no more than one");
             return false;
         }
-        const auto& children = navigation->GetContentNode()->GetChildren();
-        auto isLastChild = children.size() == 1;
+        auto isLastChild = stack->Size() == 1;
         if (isOverride) {
             result = navigation->HandleBack(navDestination, isLastChild, true);
         } else {
