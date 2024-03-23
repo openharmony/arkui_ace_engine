@@ -3213,10 +3213,12 @@ void OverlayManager::PlaySheetTransition(
             auto context = sheetNode->GetRenderContext();
             CHECK_NULL_VOID(context);
             context->UpdateRenderGroup(false, true, true);
+            auto pattern = sheetNode->GetPattern<SheetPresentationPattern>();
             if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE) &&
                 isFirst) {
-                sheetNode->GetPattern<SheetPresentationPattern>()->OnAppear();
+                pattern->OnAppear();
             }
+            pattern->AvoidAiBar();
         });
         sheetParent->GetEventHub<EventHub>()->GetOrCreateGestureEventHub()->SetHitTestMode(HitTestMode::HTMDEFAULT);
         AnimationUtils::Animate(
