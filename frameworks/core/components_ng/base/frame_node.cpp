@@ -2719,6 +2719,19 @@ std::vector<RefPtr<FrameNode>> FrameNode::GetNodesById(const std::unordered_set<
     return nodes;
 }
 
+std::vector<FrameNode*> FrameNode::GetNodesPtrById(const std::unordered_set<int32_t>& set)
+{
+    std::vector<FrameNode*> nodes;
+    for (auto nodeId : set) {
+        NG::FrameNode* frameNode = ElementRegister::GetInstance()->GetFrameNodePtrById(nodeId);
+        if (!frameNode) {
+            continue;
+        }
+        nodes.emplace_back(frameNode);
+    }
+    return nodes;
+}
+
 double FrameNode::GetPreviewScaleVal() const
 {
     double scale = 1.0;
