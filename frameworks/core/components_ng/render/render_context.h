@@ -287,6 +287,14 @@ public:
         return {};
     }
 
+    virtual void SaveNotSyncedRect(bool isRound = true, uint8_t flag = 0) {}
+    virtual void SyncPartialRsProperties() {}
+    virtual void UpdateNotSyncedRect(RectF rect) {}
+    virtual RectF GetNotSyncedRect()
+    {
+        return RectF();
+    }
+
     virtual std::pair<RectF, bool> GetPaintRectWithTranslate()
     {
         return {};

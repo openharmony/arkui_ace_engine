@@ -2904,12 +2904,15 @@ void FrameNode::Layout()
     CHECK_NULL_VOID(pipeline);
     bool isFocusOnPage = pipeline->CheckPageFocus();
     AvoidKeyboard(isFocusOnPage);
-    auto task = [weak = WeakClaim(this), needSkipSync = needSkipSyncGeometryNode_]() {
+    bool needSyncRsNode = false;
+    bool willSyncGeoProperties = OnLayoutFinish(needSyncRsNode);
+    // skip wrapping task if node will not sync
+    CHECK_NULL_VOID(willSyncGeoProperties);
+    auto task = [weak = WeakClaim(this), needSync = needSyncRsNode]() {
         auto frameNode = weak.Upgrade();
         CHECK_NULL_VOID(frameNode);
-        frameNode->SyncGeometryNode(needSkipSync);
+        frameNode->SyncGeometryNode(needSync);
     };
-
     pipeline->AddSyncGeometryNodeTask(task);
     // if a node has geo transition but not the root node, add task only but not flush
     // or add to expand list, self node will be added to expand list in next layout
@@ -2949,20 +2952,18 @@ bool FrameNode::SelfOrParentExpansive()
     return SelfExpansive() || ParentExpansive();
 }
 
-void FrameNode::SyncGeometryNode(bool needSkipSync)
+bool FrameNode::OnLayoutFinish(bool& needSyncRsNode)
 {
     const auto& geometryTransition = layoutProperty_->GetGeometryTransition();
     bool hasTransition = geometryTransition != nullptr && geometryTransition->IsRunning(WeakClaim(this));
-
     if (!isActive_ && !hasTransition) {
         layoutAlgorithm_.Reset();
-        return;
+        return false;
     }
-    if (needSkipSync && (!geometryTransition || !geometryTransition->IsNodeInAndActive(Claim(this)))) {
+    if (needSkipSyncGeometryNode_ && (!geometryTransition || !geometryTransition->IsNodeInAndActive(Claim(this)))) {
         layoutAlgorithm_.Reset();
-        return;
+        return false;
     }
-
     // update layout size.
     bool frameSizeChange = true;
     bool frameOffsetChange = true;
@@ -2976,6 +2977,45 @@ void FrameNode::SyncGeometryNode(bool needSkipSync)
         oldGeometryNode_.Reset();
     }
 
+    // clean layout flag.
+    layoutProperty_->CleanDirty();
+    needSyncRsNode = frameSizeChange || frameOffsetChange ||
+                     (pattern_->GetContextParam().has_value() && contentSizeChange) || HasPositionProp() ||
+                     SelfOrParentExpansive();
+    if (hasTransition) {
+        geometryTransition->DidLayout(Claim(this));
+        if (geometryTransition->IsNodeOutAndActive(WeakClaim(this))) {
+            isLayoutDirtyMarked_ = true;
+        }
+        needSyncRsNode = false;
+    }
+    renderContext_->SaveNotSyncedRect(true, layoutProperty_->GetPixelRound());
+    renderContext_->SyncPartialRsProperties();
+    DirtySwapConfig config { frameSizeChange, frameOffsetChange, contentSizeChange, contentOffsetChange };
+    // check if need to paint content.
+    auto layoutAlgorithmWrapper = DynamicCast<LayoutAlgorithmWrapper>(layoutAlgorithm_);
+    CHECK_NULL_RETURN(layoutAlgorithmWrapper, false);
+    config.skipMeasure = layoutAlgorithmWrapper->SkipMeasure();
+    config.skipLayout = layoutAlgorithmWrapper->SkipLayout();
+    if (!config.skipMeasure && !config.skipLayout && GetInspectorId()) {
+        auto pipeline = PipelineContext::GetCurrentContext();
+        CHECK_NULL_RETURN(pipeline, false);
+        pipeline->OnLayoutCompleted(GetInspectorId()->c_str());
+    }
+    auto needRerender = pattern_->OnDirtyLayoutWrapperSwap(Claim(this), config);
+    needRerender =
+        needRerender || pattern_->OnDirtyLayoutWrapperSwap(Claim(this), config.skipMeasure, config.skipLayout);
+    if (needRerender || drawModifier_ || CheckNeedRender(paintProperty_->GetPropertyChangeFlag())) {
+        MarkDirtyNode(true, true, PROPERTY_UPDATE_RENDER);
+    }
+    layoutAlgorithm_.Reset();
+    return true;
+}
+
+void FrameNode::SyncGeometryNode(bool needSyncRsNode)
+{
+    ACE_LAYOUT_SCOPED_TRACE("SyncGeometryNode[%s][self:%d][parent:%d][key:%s]", GetTag().c_str(),
+        GetId(), GetParent() ? GetParent()->GetId() : 0, GetInspectorIdValue("").c_str());
     // update border.
     if (layoutProperty_->GetBorderWidthProperty()) {
         if (!renderContext_->HasBorderColor()) {
@@ -2997,39 +3037,10 @@ void FrameNode::SyncGeometryNode(bool needSkipSync)
                 ScaleProperty::CreateScaleProperty(), PipelineContext::GetCurrentRootWidth()));
         }
     }
-
-    // clean layout flag.
-    layoutProperty_->CleanDirty();
-
-    if (hasTransition) {
-        geometryTransition->DidLayout(Claim(this));
-        if (geometryTransition->IsNodeOutAndActive(WeakClaim(this))) {
-            isLayoutDirtyMarked_ = true;
-        }
-    } else if (frameSizeChange || frameOffsetChange || HasPositionProp() || SelfOrParentExpansive() ||
-               (pattern_->GetContextParam().has_value() && contentSizeChange)) {
+    if (needSyncRsNode) {
         isLayoutComplete_ = true;
         renderContext_->SyncGeometryProperties(RawPtr(geometryNode_), true, layoutProperty_->GetPixelRound());
         TriggerOnSizeChangeCallback();
-    }
-
-    DirtySwapConfig config { frameSizeChange, frameOffsetChange, contentSizeChange, contentOffsetChange };
-    // check if need to paint content.
-    auto layoutAlgorithmWrapper = DynamicCast<LayoutAlgorithmWrapper>(layoutAlgorithm_);
-    CHECK_NULL_VOID(layoutAlgorithmWrapper);
-    config.skipMeasure = layoutAlgorithmWrapper->SkipMeasure();
-    config.skipLayout = layoutAlgorithmWrapper->SkipLayout();
-    if (!config.skipMeasure && !config.skipLayout && GetInspectorId()) {
-        auto pipeline = PipelineContext::GetCurrentContext();
-        CHECK_NULL_VOID(pipeline);
-        pipeline->OnLayoutCompleted(GetInspectorId()->c_str());
-    }
-    auto needRerender = pattern_->OnDirtyLayoutWrapperSwap(Claim(this), config);
-    // TODO: temp use and need to delete.
-    needRerender =
-        needRerender || pattern_->OnDirtyLayoutWrapperSwap(Claim(this), config.skipMeasure, config.skipLayout);
-    if (needRerender || drawModifier_ || CheckNeedRender(paintProperty_->GetPropertyChangeFlag())) {
-        MarkDirtyNode(true, true, PROPERTY_UPDATE_RENDER);
     }
 
     // update background
@@ -3058,8 +3069,6 @@ void FrameNode::SyncGeometryNode(bool needSkipSync)
 
     /* Adjust components' position which have been set grid properties */
     AdjustGridOffset();
-
-    layoutAlgorithm_.Reset();
 }
 
 RefPtr<LayoutWrapper> FrameNode::GetOrCreateChildByIndex(uint32_t index, bool addToRenderTree)
@@ -3532,6 +3541,14 @@ bool FrameNode::SetParentLayoutConstraint(const SizeF& size) const
     layoutConstraint.UpdateIllegalParentIdealSizeWithCheck(OptionalSize(size));
     layoutProperty_->UpdateParentLayoutConstraint(layoutConstraint);
     return true;
+}
+
+void FrameNode::ForceSyncGeometryNode()
+{
+    CHECK_NULL_VOID(renderContext_);
+    oldGeometryNode_.Reset();
+    renderContext_->UpdateNotSyncedRect(GetGeometryNode()->GetFrameRect());
+    renderContext_->SyncGeometryProperties(RawPtr(geometryNode_));
 }
 
 const std::pair<uint64_t, OffsetF>& FrameNode::GetCachedGlobalOffset() const

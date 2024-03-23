@@ -150,6 +150,9 @@ void LayoutWrapper::ExpandSafeArea(bool isFocusOnPage)
         // otherwise if node restored, meaning expansive parent did not adjust child or so on, restore cache
         if (CheckValidSafeArea()) {
             GetGeometryNode()->RestoreCache();
+            auto renderContext = host->GetRenderContext();
+            CHECK_NULL_VOID(renderContext);
+            renderContext->UpdateNotSyncedRect(GetGeometryNode()->GetFrameRect());
         }
         return;
     }
@@ -209,6 +212,9 @@ void LayoutWrapper::ExpandSafeArea(bool isFocusOnPage)
     geometryNode->SetFrameOffset(frame.GetOffset());
     geometryNode->SetFrameSize(frame.GetSize());
     host->SetNeedRestoreSafeArea(true);
+    auto renderContext = host->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    renderContext->UpdateNotSyncedRect(geometryNode->GetFrameRect());
 }
 
 void LayoutWrapper::AdjustChildren(const OffsetF& offset)
@@ -237,6 +243,9 @@ void LayoutWrapper::AdjustChild(RefPtr<UINode> childUI, const OffsetF& offset)
     child->SaveGeoState();
     childGeo->SetFrameOffset(childGeo->GetFrameOffset() + offset);
     child->SetNeedRestoreSafeArea(true);
+    auto renderContext = child->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    renderContext->UpdateNotSyncedRect(childGeo->GetFrameRect());
 }
 
 void LayoutWrapper::RestoreExpansiveChildren()
@@ -264,6 +273,9 @@ void LayoutWrapper::RestoreExpansiveChild(const RefPtr<UINode>& childUI)
     auto childGeo = child->GetGeometryNode();
     childGeo->Restore();
     child->SetNeedRestoreSafeArea(false);
+    auto renderContext = child->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    renderContext->UpdateNotSyncedRect(childGeo->GetFrameRect());
 }
 
 void LayoutWrapper::ExpandIntoKeyboard()

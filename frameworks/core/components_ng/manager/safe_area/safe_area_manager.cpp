@@ -179,6 +179,7 @@ OffsetF SafeAreaManager::GetWindowWrapperOffset()
 
 void SafeAreaManager::ExpandSafeArea()
 {
+    ACE_LAYOUT_SCOPED_TRACE("ExpandSafeArea node count %zu", needExpandNodes_.size());
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
     bool isFocusOnPage = pipeline->CheckPageFocus();
