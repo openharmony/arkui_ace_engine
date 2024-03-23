@@ -141,6 +141,17 @@ void TabBarLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
 
     geometryNode->SetFrameSize(idealSize.ConvertToSizeT());
 
+    auto node = layoutWrapper->GetHostNode();
+    CHECK_NULL_VOID(node);
+    auto renderContext = node->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    if (NearZero(idealSize.ConvertToSizeT().Width()) || NearZero(idealSize.ConvertToSizeT().Height())) {
+        renderContext->SetVisible(false);
+        return;
+    } else {
+        renderContext->SetVisible(true);
+    }
+
     auto childLayoutConstraint = layoutProperty->CreateChildConstraint();
     UpdateChildConstraint(childLayoutConstraint, layoutProperty, idealSize.ConvertToSizeT(), childCount, axis);
 
