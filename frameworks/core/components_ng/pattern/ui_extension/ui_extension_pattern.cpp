@@ -59,7 +59,9 @@ UIExtensionPattern::UIExtensionPattern(
     CHECK_NULL_VOID(uiExtensionManager);
     uiExtensionId_ = uiExtensionManager->ApplyExtensionId();
     sessionWrapper_ = SessionWrapperFactory::CreateSessionWrapper(
-        sessionType, AceType::WeakClaim(this), instanceId_, isTransferringCaller_);
+        sessionType, WeakClaim(this), instanceId_, isTransferringCaller_);
+    accessibilitySessionAdapter_ =
+        AceType::MakeRefPtr<AccessibilitySessionAdapterUIExtension>(sessionWrapper_);
     UIEXT_LOGI("The %{public}smodal UIExtension is created.", isModal_ ? "" : "non");
 }
 
@@ -84,6 +86,11 @@ RefPtr<LayoutAlgorithm> UIExtensionPattern::CreateLayoutAlgorithm()
 FocusPattern UIExtensionPattern::GetFocusPattern() const
 {
     return { FocusType::NODE, true, FocusStyleType::NONE };
+}
+
+RefPtr<AccessibilitySessionAdapter> UIExtensionPattern::GetAccessibilitySessionAdapter()
+{
+    return accessibilitySessionAdapter_;
 }
 
 void UIExtensionPattern::InitializeDynamicComponent(

@@ -2518,6 +2518,27 @@ bool AceContainer::NotifyExecuteAction(
     return IsExecuted;
 }
 
+void AceContainer::HandleAccessibilityHoverEvent(float pointX, float pointY, int32_t sourceType,
+    int32_t eventType, int64_t timeMs)
+{
+    CHECK_NULL_VOID(taskExecutor_);
+    taskExecutor_->PostTask(
+        [weak = WeakClaim(this), pointX, pointY, sourceType, eventType, timeMs] {
+            auto container = weak.Upgrade();
+            CHECK_NULL_VOID(container);
+            ContainerScope scope(container->GetInstanceId());
+            auto pipelineContext = container->GetPipelineContext();
+            auto ngPipeline = AceType::DynamicCast<NG::PipelineContext>(pipelineContext);
+            CHECK_NULL_VOID(ngPipeline);
+            auto root = ngPipeline->GetRootElement();
+            CHECK_NULL_VOID(root);
+            auto accessibilityManagerNG = ngPipeline->GetAccessibilityManagerNG();
+            CHECK_NULL_VOID(accessibilityManagerNG);
+            accessibilityManagerNG->HandleAccessibilityHoverEvent(root, pointX, pointY, sourceType, eventType, timeMs);
+        },
+        TaskExecutor::TaskType::UI);
+}
+
 extern "C" ACE_FORCE_EXPORT void OHOS_ACE_HotReloadPage()
 {
     AceEngine::Get().NotifyContainers([](const RefPtr<Container>& container) {

@@ -21,6 +21,7 @@
 #include "base/memory/ace_type.h"
 
 #include "base/geometry/ng/point_t.h"
+#include "base/utils/type_definition.h"
 #include "core/event/ace_events.h"
 
 namespace OHOS::Ace {
@@ -29,12 +30,7 @@ struct TouchEvent;
 
 namespace NG {
 class FrameNode;
-
-enum class AccessibilityHoverEventType {
-    ENTER,
-    MOVE,
-    EXIT
-};
+enum class AccessibilityHoverEventType;
 
 struct AccessibilityHoverState {
     SourceType source = SourceType::NONE;
@@ -49,8 +45,20 @@ class AccessibilityManagerNG final: public AceType {
 public:
     void HandleAccessibilityHoverEvent(const RefPtr<FrameNode>& root, const MouseEvent& event);
     void HandleAccessibilityHoverEvent(const RefPtr<FrameNode>& root, const TouchEvent& event);
+    void HandleAccessibilityHoverEvent(const RefPtr<FrameNode>& root, float pointX, float pointY,
+        int32_t sourceType, int32_t eventType, int64_t timeMs);
     void HoverTestDebug(const RefPtr<FrameNode>& root, const PointF& point,
         std::string& summary, std::string& detail) const;
+
+    /*
+    * Convert coordinates of point relative to ancestor (x_ances, y_ances) to
+    * coordinates of point relative to node (x_node, y_node)
+    * { return } true if succeeded, and the new point is saved in ${pointNode}
+    *            false if nullptr or ${ancestor} is not ancestor of ${node}
+    */
+    static bool ConvertPointFromAncestorToNode(
+        const RefPtr<NG::FrameNode>& ancestor, const RefPtr<NG::FrameNode>& node,
+        const PointF& pointAncestor, PointF& pointNode);
 
 private:
     /*
@@ -66,6 +74,10 @@ private:
         TimeStamp time);
 
     void ResetHoverState();
+    static void NotifyHoverEventToNodeSession(
+        const RefPtr<FrameNode>& node,
+        const RefPtr<FrameNode>& rootNode, const PointF& pointRoot,
+        SourceType sourceType, AccessibilityHoverEventType eventType, TimeStamp time);
 
     AccessibilityHoverState hoverState_;
 };

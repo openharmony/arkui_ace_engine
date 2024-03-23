@@ -491,7 +491,14 @@ void SessionWrapperImpl::FocusMoveSearch(
     CHECK_NULL_VOID(session_);
     session_->TransferFocusMoveSearch(elementId, direction, baseParent, output);
 }
-/************************************************ Begin: The interface about the accessibility ************************/
+
+void SessionWrapperImpl::TransferAccessibilityHoverEvent(float pointX, float pointY, int32_t sourceType,
+    int32_t eventType, int64_t timeMs)
+{
+    CHECK_NULL_VOID(session_);
+    session_->TransferAccessibilityHoverEvent(pointX, pointY, sourceType, eventType, timeMs);
+}
+/************************************************ End: The interface about the accessibility **************************/
 
 /***************************** Begin: The interface to control the display area and the avoid area ********************/
 std::shared_ptr<Rosen::RSSurfaceNode> SessionWrapperImpl::GetSurfaceNode() const
