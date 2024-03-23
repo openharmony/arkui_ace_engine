@@ -4113,10 +4113,10 @@ bool JSViewAbstract::ParseJsDimensionNG(
     }
     if (jsValue->IsString()) {
         auto value = jsValue->ToString();
-        if (value.back() == '%' && !isSupportPercent) {
+        if (!isSupportPercent && value.back() == '%') {
             return false;
         }
-        return StringUtils::StringToCalcDimensionNG(jsValue->ToString(), result, false, defaultUnit);
+        return StringUtils::StringToCalcDimensionNG(value, result, false, defaultUnit);
     }
     if (jsValue->IsObject()) {
         JSRef<JSObject> jsObj = JSRef<JSObject>::Cast(jsValue);
