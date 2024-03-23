@@ -26,10 +26,10 @@
 extern "C" {
 #endif
 
-#define ARKUI_FULL_API_VERSION 83
+#define ARKUI_FULL_API_VERSION 84
 // When changing ARKUI_BASIC_API_VERSION, ARKUI_FULL_API_VERSION must be
 // increased as well.
-#define ARKUI_NODE_API_VERSION 83
+#define ARKUI_NODE_API_VERSION 84
 
 #define ARKUI_BASIC_API_VERSION 7
 #define ARKUI_EXTENDED_API_VERSION 6
@@ -1956,6 +1956,10 @@ struct ArkUITabsModifier {
     void (*resetAnimationDuration)(ArkUINodeHandle node);
     void (*setTabClip)(ArkUINodeHandle node, ArkUI_Bool clipEdge);
     void (*resetTabClip)(ArkUINodeHandle node);
+    void (*setTabWidthAuto)(ArkUINodeHandle node);
+    void (*resetTabWidthAuto)(ArkUINodeHandle node);
+    void (*setTabHeightAuto)(ArkUINodeHandle node);
+    void (*resetTabHeightAuto)(ArkUINodeHandle node);
 };
 
 struct ArkUIStepperItemModifier {

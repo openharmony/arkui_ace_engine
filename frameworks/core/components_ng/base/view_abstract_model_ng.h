@@ -1208,6 +1208,11 @@ public:
         ViewAbstract::SetKeyboardShortcut(frameNode, value, keys, std::move(onKeyboardShortcutAction));
     }
 
+    static void ClearWidthOrHeight(FrameNode* frameNode, bool isWidth)
+    {
+        ViewAbstract::ClearWidthOrHeight(frameNode, isWidth);
+    }
+
     static bool GetAccessibilityGroup(FrameNode* frameNode);
     static std::string GetAccessibilityText(FrameNode* frameNode);
     static std::string GetAccessibilityDescription(FrameNode* frameNode);
