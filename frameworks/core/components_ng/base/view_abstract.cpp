@@ -2138,9 +2138,14 @@ void ViewAbstract::SetForegroundColor(const Color &color)
     if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
         return;
     }
-    ACE_UPDATE_RENDER_CONTEXT(ForegroundColor, color);
-    ACE_RESET_RENDER_CONTEXT(RenderContext, ForegroundColorStrategy);
-    ACE_UPDATE_RENDER_CONTEXT(ForegroundColorFlag, true);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    auto renderContext = frameNode->GetRenderContext();
+    if (renderContext->GetForegroundColorStrategy().has_value()) {
+        renderContext->UpdateForegroundColorStrategy(ForegroundColorStrategy::NONE);
+        renderContext->ResetForegroundColorStrategy();
+    }
+    renderContext->UpdateForegroundColor(color);
+    renderContext->UpdateForegroundColorFlag(true);
 }
 
 void ViewAbstract::SetForegroundColorStrategy(const ForegroundColorStrategy &strategy)
@@ -2481,9 +2486,13 @@ void ViewAbstract::SetUseEffect(FrameNode* frameNode, bool useEffect)
 
 void ViewAbstract::SetForegroundColor(FrameNode* frameNode, const Color& color)
 {
-    ACE_UPDATE_NODE_RENDER_CONTEXT(ForegroundColor, color, frameNode);
-    ACE_RESET_NODE_RENDER_CONTEXT(RenderContext, ForegroundColorStrategy, frameNode);
-    ACE_UPDATE_NODE_RENDER_CONTEXT(ForegroundColorFlag, true, frameNode);
+    auto renderContext = frameNode->GetRenderContext();
+    if (renderContext->GetForegroundColorStrategy().has_value()) {
+        renderContext->UpdateForegroundColorStrategy(ForegroundColorStrategy::NONE);
+        renderContext->ResetForegroundColorStrategy();
+    }
+    renderContext->UpdateForegroundColor(color);
+    renderContext->UpdateForegroundColorFlag(true);
 }
 
 void ViewAbstract::SetForegroundColorStrategy(FrameNode* frameNode, const ForegroundColorStrategy& strategy)
