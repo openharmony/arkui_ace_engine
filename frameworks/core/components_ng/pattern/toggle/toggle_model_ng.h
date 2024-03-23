@@ -35,6 +35,11 @@ public:
     void SetResponseRegion(const std::vector<DimensionRect>& responseRegion) override;
     void SetHoverEffect(HoverEffectType hoverEffect) override;
     void Pop() override;
+    void SetPointRadius(const Dimension& switchPointRadius) override;
+    void ResetPointRadius() override;
+    void SetUnselectedColor(const Color& unselectedColor) override;
+    void SetTrackBorderRadius(const Dimension& borderRadius) override;
+    void ResetTrackBorderRadius() override;
     static RefPtr<FrameNode> CreateFrameNode(int32_t nodeId, ToggleType toggleType, bool isOn);
     static void SetSelectedColor(FrameNode* frameNode, const std::optional<Color>& selectedColor);
     static void SetSwitchPointColor(FrameNode* frameNode, const Color& switchPointColor);
