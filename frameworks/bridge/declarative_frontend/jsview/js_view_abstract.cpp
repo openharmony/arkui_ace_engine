@@ -3880,12 +3880,9 @@ void JSViewAbstract::JsBlur(const JSCallbackInfo& info)
 void JSViewAbstract::JsColorBlend(const JSCallbackInfo& info)
 {
     Color colorBlend;
-    if (info[0]->IsUndefined()) {
+    if (info[0]->IsUndefined() || !ParseJsColor(info[0], colorBlend)) {
         colorBlend = Color::TRANSPARENT;
         SetColorBlend(colorBlend);
-        return;
-    }
-    if (!ParseJsColor(info[0], colorBlend)) {
         return;
     }
     SetColorBlend(colorBlend);
