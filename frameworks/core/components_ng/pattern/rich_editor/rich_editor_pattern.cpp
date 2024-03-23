@@ -1577,7 +1577,7 @@ void RichEditorPattern::HandleSingleClickEvent(OHOS::Ace::GestureEvent& info)
     OffsetF caretOffset = DynamicCast<RichEditorOverlayModifier>(overlayMod_)->GetCaretOffset();
     RectF lastCaretRect = RectF{ caretOffset.GetX() - caretHeight / 2, caretOffset.GetY(), caretHeight, caretHeight };
     MoveCaretAndStartFocus(textOffset);
-    CalcCaretInfoByClick(info);
+    CalcCaretInfoByClick(info.GetLocalLocation());
     if (RepeatClickCaret(info.GetLocalLocation(), lastCaretPosition, lastCaretRect)) {
         CreateAndShowSingleHandle(info);
     }
@@ -1734,10 +1734,9 @@ bool RichEditorPattern::HandleUserClickEvent(GestureEvent& info)
     return HandleUserGestureEvent(info, std::move(clickFunc));
 }
 
-void RichEditorPattern::CalcCaretInfoByClick(GestureEvent& info)
+void RichEditorPattern::CalcCaretInfoByClick(const Offset& touchOffset)
 {
     auto textRect = GetTextRect();
-    auto touchOffset = info.GetLocalLocation();
     textRect.SetTop(textRect.GetY() - std::min(baselineOffset_, 0.0f));
     textRect.SetHeight(textRect.Height() - std::max(baselineOffset_, 0.0f));
     Offset textOffset = { touchOffset.GetX() - textRect.GetX(), touchOffset.GetY() - textRect.GetY() };
@@ -4110,6 +4109,7 @@ void RichEditorPattern::HandleMouseLeftButtonPress(const MouseInfo& info)
     }
     UseHostToUpdateTextFieldManager();
     MoveCaretAndStartFocus(textOffset);
+    CalcCaretInfoByClick(info.GetLocalLocation());
 }
 
 void RichEditorPattern::HandleMouseLeftButtonRelease(const MouseInfo& info)
