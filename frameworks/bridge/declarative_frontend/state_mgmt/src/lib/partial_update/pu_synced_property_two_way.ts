@@ -38,6 +38,7 @@ class SynchedPropertyTwoWayPU<C> extends ObservedPropertyAbstractPU<C>
     } else {
       throw new SyntaxError(`${this.debugInfo()}: constructor: source variable in parent/ancestor @Component must be defined. Application error!`);
     }
+    this.setDecoratorInfo("@Link");
   }
 
   /*
@@ -53,10 +54,6 @@ class SynchedPropertyTwoWayPU<C> extends ObservedPropertyAbstractPU<C>
       ObservedObject.removeOwningProperty(this.source_.getUnmonitored(), this);
     }
     super.aboutToBeDeleted();
-  }
-
-  public debugInfoDecorator(): string {
-    return `@Link/@Consume (class SynchedPropertyTwoWayPU)`;
   }
 
   private isStorageLinkProp(): boolean {
