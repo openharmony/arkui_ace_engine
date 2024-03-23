@@ -68,6 +68,11 @@ struct Font {
         }
         return flag;
     }
+
+    std::string GetFontColor() const
+    {
+        return fontColor.has_value() ? fontColor.value().ColorToString() : "";
+    }
 };
 
 struct CaretStyle {
