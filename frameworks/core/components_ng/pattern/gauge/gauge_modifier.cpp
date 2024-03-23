@@ -30,6 +30,7 @@
 
 namespace OHOS::Ace::NG {
 namespace {
+constexpr float DEFAULT_VALUE = 0.0f;
 constexpr float ZERO_CIRCLE = 0.0f;
 constexpr float MIN_CIRCLE = 2.0f;
 constexpr float HALF_CIRCLE = 180.0f;
@@ -82,8 +83,8 @@ void GaugeModifier::initProperty()
     auto paintProperty = pattern->GetPaintProperty<GaugePaintProperty>();
     CHECK_NULL_VOID(paintProperty);
 
-    float startAngle = paintProperty->GetStartAngleValue();
-    float endAngle = paintProperty->GetEndAngleValue();
+    float startAngle = paintProperty->GetStartAngleValue(DEFAULT_START_DEGREE);
+    float endAngle = paintProperty->GetEndAngleValue(DEFAULT_END_DEGREE);
     float max = paintProperty->GetMaxValue();
     float min = paintProperty->GetMinValue();
     startAngle_ = AceType::MakeRefPtr<AnimatablePropertyFloat>(startAngle);
@@ -91,7 +92,10 @@ void GaugeModifier::initProperty()
     max_ = AceType::MakeRefPtr<AnimatablePropertyFloat>(max);
     min_ = AceType::MakeRefPtr<AnimatablePropertyFloat>(min);
 
-    float strokeWidth = paintProperty->GetStrokeWidth()->ConvertToPx();
+    float strokeWidth = DEFAULT_VALUE;
+    if (paintProperty->GetStrokeWidth().has_value()) {
+        strokeWidth = paintProperty->GetStrokeWidth()->ConvertToPx();
+    }
     strokeWidth_ = AceType::MakeRefPtr<AnimatablePropertyFloat>(strokeWidth);
     float indicatorSpace = paintProperty->GetIndicatorSpaceValue(INDICATOR_DISTANCE_TO_TOP).ConvertToPx();
     indicatorSpace_ = AceType::MakeRefPtr<AnimatablePropertyFloat>(indicatorSpace);
@@ -99,10 +103,18 @@ void GaugeModifier::initProperty()
     gaugeTypeValue_ = AceType::MakeRefPtr<AnimatablePropertyFloat>(static_cast<int>(gaugeType));
     isShowIndicator_ = AceType::MakeRefPtr<PropertyBool>(paintProperty->GetIsShowIndicatorValue(true));
 
-    GaugeShadowOptions shadowOptions = paintProperty->GetShadowOptionsValue();
-    shadowRadiusFloat_ = AceType::MakeRefPtr<AnimatablePropertyFloat>(shadowOptions.radius);
-    shadowOffsetXFloat_ = AceType::MakeRefPtr<AnimatablePropertyFloat>(shadowOptions.offsetX);
-    shadowOffsetYFloat_ = AceType::MakeRefPtr<AnimatablePropertyFloat>(shadowOptions.offsetY);
+    float radius = DEFAULT_VALUE;
+    float offsetX = DEFAULT_VALUE;
+    float offsetY = DEFAULT_VALUE;
+    if (paintProperty->HasShadowOptions()) {
+        GaugeShadowOptions shadowOptions = paintProperty->GetShadowOptionsValue();
+        radius = shadowOptions.radius;
+        offsetX = shadowOptions.offsetX;
+        offsetY = shadowOptions.offsetY;
+    }
+    shadowRadiusFloat_ = AceType::MakeRefPtr<AnimatablePropertyFloat>(radius);
+    shadowOffsetXFloat_ = AceType::MakeRefPtr<AnimatablePropertyFloat>(offsetX);
+    shadowOffsetYFloat_ = AceType::MakeRefPtr<AnimatablePropertyFloat>(offsetY);
     
     if (paintProperty->GetColors().has_value()) {
         auto colors = paintProperty->GetColorsValue();
@@ -125,27 +137,28 @@ void GaugeModifier::initProperty()
 
 void GaugeModifier::updateProperty(RefPtr<GaugePaintProperty>& paintProperty)
 {
-    float startAngle = paintProperty->GetStartAngleValue();
-    float endAngle = paintProperty->GetEndAngleValue();
-    float max = paintProperty->GetMaxValue();
-    float min = paintProperty->GetMinValue();
-    startAngle_->Set(startAngle);
-    endAngle_->Set(endAngle);
-    max_->Set(max);
-    min_->Set(min);
+    startAngle_->Set(paintProperty->GetStartAngleValue(DEFAULT_START_DEGREE));
+    endAngle_->Set(paintProperty->GetEndAngleValue(DEFAULT_END_DEGREE));
+    max_->Set(paintProperty->GetMaxValue());
+    min_->Set(paintProperty->GetMinValue());
 
-    float strokeWidth = paintProperty->GetStrokeWidth()->ConvertToPx();
-    strokeWidth_->Set(strokeWidth);
-    float indicatorSpace = paintProperty->GetIndicatorSpaceValue(INDICATOR_DISTANCE_TO_TOP).ConvertToPx();
-    indicatorSpace_->Set(indicatorSpace);
+    if (paintProperty->GetStrokeWidth().has_value()) {
+        float strokeWidth = paintProperty->GetStrokeWidth()->ConvertToPx();
+        strokeWidth_->Set(strokeWidth);
+    } else {
+        strokeWidth_->Set(DEFAULT_VALUE);
+    }
+    indicatorSpace_->Set(paintProperty->GetIndicatorSpaceValue(INDICATOR_DISTANCE_TO_TOP).ConvertToPx());
     GaugeType gaugeType = paintProperty->GetGaugeTypeValue(GaugeType::TYPE_CIRCULAR_SINGLE_SEGMENT_GRADIENT);
     gaugeTypeValue_->Set(static_cast<int>(gaugeType));
     isShowIndicator_ = AceType::MakeRefPtr<PropertyBool>(paintProperty->GetIsShowIndicatorValue(true));
 
-    GaugeShadowOptions shadowOptions = paintProperty->GetShadowOptionsValue();
-    shadowRadiusFloat_->Set(shadowOptions.radius);
-    shadowOffsetXFloat_->Set(shadowOptions.offsetX);
-    shadowOffsetYFloat_->Set(shadowOptions.offsetY);
+    if (paintProperty->HasShadowOptions()) {
+        GaugeShadowOptions shadowOptions = paintProperty->GetShadowOptionsValue();
+        shadowRadiusFloat_->Set(shadowOptions.radius);
+        shadowOffsetXFloat_->Set(shadowOptions.offsetX);
+        shadowOffsetYFloat_->Set(shadowOptions.offsetY);
+    }
     
     if (paintProperty->GetColors().has_value()) {
         auto colors = paintProperty->GetColorsValue();
