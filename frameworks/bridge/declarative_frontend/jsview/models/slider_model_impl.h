@@ -58,6 +58,8 @@ public:
     void ResetBlockImage() override {};
     void ResetBlockShape() override {};
     void ResetStepSize() override {};
+    void ResetSliderInteractionMode() override {};
+    void ResetMinResponsiveDistance() override {};
 };
 
 } // namespace OHOS::Ace::Framework
