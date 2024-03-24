@@ -2611,6 +2611,13 @@ var ButtonStyleMode;
   ButtonStyleMode["TEXTUAL"] = 2;
 })(ButtonStyleMode || (ButtonStyleMode = {}));
 
+let RadioIndicatorType;
+(function (RadioIndicatorType) {
+  RadioIndicatorType[RadioIndicatorType.TICK = 0] = "TICK";
+  RadioIndicatorType[RadioIndicatorType.DOT = 1] = "DOT";
+  RadioIndicatorType[RadioIndicatorType.CUSTOM = 2] = "CUSTOM";
+})(RadioIndicatorType  || (RadioIndicatorType  = {}));
+
 var ControlSize;
 (function (ControlSize) {
   ControlSize[ControlSize["SMALL"] = 0] = "SMALL";

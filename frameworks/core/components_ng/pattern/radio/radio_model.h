@@ -28,9 +28,11 @@ public:
     static RadioModel* GetInstance();
     virtual ~RadioModel() = default;
 
-    virtual void Create(const std::optional<std::string>& value, const std::optional<std::string>& group);
+    virtual void Create(const std::optional<std::string>& value, const std::optional<std::string>& group,
+        const std::optional<int32_t>& indicator);
     virtual void SetChecked(bool isChecked);
     virtual void SetOnChange(NG::ChangeEvent&& onChange);
+    virtual void SetBuilder(std::function<void()>&& buildFunc) {};
     virtual void SetWidth(const Dimension& width);
     virtual void SetHeight(const Dimension& height);
     virtual void SetPadding(const NG::PaddingPropertyF& args, const NG::PaddingProperty& newArgs);
