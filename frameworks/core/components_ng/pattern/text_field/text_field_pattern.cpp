@@ -6796,6 +6796,9 @@ void TextFieldPattern::ShowMenu()
     } else {
         SetIsSingleHandle(false);
     }
+    if (isUsingMouse_) {
+        rightClickOffset_ = selectController_->GetCaretRect().GetOffset() + parentGlobalOffset_;
+    }
     ProcessOverlay(true, true, true);
 }
 
