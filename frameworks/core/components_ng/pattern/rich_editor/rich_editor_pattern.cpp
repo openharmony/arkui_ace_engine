@@ -2142,7 +2142,7 @@ void RichEditorPattern::OnDragStartAndEnd()
         CHECK_NULL_RETURN(pattern, itemInfo);
         if (!pattern->isDragSponsor_) {
             pattern->isDragSponsor_ = true;
-            pattern->dragPosition_ = pattern->textSelector_.GetTextStart();
+            pattern->dragRange_ = { pattern->textSelector_.GetTextStart(), pattern->textSelector_.GetTextEnd() };
         }
         pattern->timestamp_ = std::chrono::system_clock::now().time_since_epoch().count();
         auto eventHub = pattern->GetEventHub<RichEditorEventHub>();
@@ -2158,7 +2158,7 @@ void RichEditorPattern::OnDragStartAndEnd()
         auto pattern = weakPtr.Upgrade();
         CHECK_NULL_VOID(pattern);
         pattern->isDragSponsor_ = false;
-        pattern->dragPosition_ = 0;
+        pattern->dragRange_ = { 0, 0 };
         pattern->showSelect_ = true;
         pattern->StopAutoScroll();
         pattern->ClearRedoOperationRecords();
@@ -2604,7 +2604,7 @@ void RichEditorPattern::InsertValue(const std::string& insertValue, bool isIME)
     InsertValueOperation(insertValue, &record, isIME);
     record.afterCaretPosition = caretPosition_ + moveLength_ + StringUtils::ToWstring(insertValue).length();
     if (isDragSponsor_) {
-        record.deleteCaretPostion = dragPosition_;
+        record.deleteCaretPostion = dragRange_.first;
     }
     AddOperationRecord(record);
 }
@@ -2877,9 +2877,7 @@ void RichEditorPattern::AfterInsertValue(
     moveLength_ += insertValueLength;
 
     if (isIME) {
-        if (!AfterIMEInsertValue(spanNode, insertValueLength, isCreate)) {
-            return;
-        }
+        AfterIMEInsertValue(spanNode, insertValueLength, isCreate);
     }
 
     UpdateSpanPosition();
@@ -6073,7 +6071,7 @@ void RichEditorPattern::HandleOnDragDrop(const RefPtr<OHOS::Ace::DragEvent>& eve
     }
 
     if (isDragSponsor_) {
-        DragDropTextOperation(str);
+        HandleOnDragDropTextOperation(str);
     } else {
         InsertValue(str, false);
     }
@@ -6099,17 +6097,19 @@ void RichEditorPattern::DeleteForward(int32_t currentPosition, int32_t length)
     DeleteByDeleteValueInfo(info);
 }
 
-void RichEditorPattern::DragDropTextOperation(const std::string& insertValue)
+void RichEditorPattern::HandleOnDragDropTextOperation(const std::string& insertValue)
 {
     int32_t currentPosition = caretPosition_;
-    int32_t length = insertValue.length();
-    if (currentPosition < dragPosition_) {
-        DeleteForward(dragPosition_, length);
-        InsertValue(insertValue, false);
-    } else if (currentPosition > dragPosition_ + length) {
-        DeleteForward(dragPosition_, length);
-        caretPosition_ -= length;
-        InsertValue(insertValue, false);
+    int32_t length = dragRange_.second - dragRange_.first;
+    int32_t strLength = static_cast<int32_t>(StringUtils::ToWstring(insertValue).length());
+    if (currentPosition < dragRange_.first) {
+        HandleOnDragInsertValue(insertValue);
+        DeleteForward(dragRange_.first + strLength, length);
+        caretPosition_ += strLength;
+    } else if (currentPosition > dragRange_.second) {
+        HandleOnDragInsertValue(insertValue);
+        DeleteForward(dragRange_.first, length);
+        caretPosition_ -= (length - strLength);
     }
 }
 
@@ -6119,7 +6119,7 @@ void RichEditorPattern::UndoDrag(const OperationRecord& record)
         return;
     }
     const std::string& str = record.addText.value();
-    int32_t length = str.length();
+    int32_t length = static_cast<int32_t>(StringUtils::ToWstring(str).length());
     DeleteForward(record.beforeCaretPosition, length);
 
     caretPosition_ = record.deleteCaretPostion;
@@ -6132,9 +6132,36 @@ void RichEditorPattern::RedoDrag(const OperationRecord& record)
         return;
     }
     const std::string& str = record.addText.value();
-    int32_t length = str.length();
+    int32_t length = static_cast<int32_t>(StringUtils::ToWstring(str).length());
     DeleteForward(record.deleteCaretPostion, length);
     caretPosition_ = record.beforeCaretPosition;
     InsertValueOperation(str, nullptr, false);
+}
+
+void RichEditorPattern::HandleOnDragInsertValueOperation(const std::string& insertValue)
+{
+    TextSpanOptions options;
+    options.offset = caretPosition_;
+    options.value = insertValue;
+    if (typingStyle_.has_value() && typingTextStyle_.has_value()) {
+        options.style = typingTextStyle_.value();
+    }
+    AddTextSpanOperation(options, false, -1, false, false);
+}
+
+void RichEditorPattern::HandleOnDragInsertValue(const std::string& insertValue)
+{
+    OperationRecord record;
+    record.beforeCaretPosition = caretPosition_ + moveLength_;
+    if (textSelector_.IsValid()) {
+        record.beforeCaretPosition = textSelector_.GetTextStart();
+    }
+    record.addText = insertValue;
+    ClearRedoOperationRecords();
+    HandleOnDragInsertValueOperation(insertValue);
+    int32_t length = dragRange_.second - dragRange_.first;
+    record.afterCaretPosition = record.beforeCaretPosition + length;
+    record.deleteCaretPostion = dragRange_.first;
+    AddOperationRecord(record);
 }
 } // namespace OHOS::Ace::NG
