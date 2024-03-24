@@ -114,6 +114,7 @@ public:
     static int32_t getTextPickerSelectedIndex(FrameNode* frameNode);
     static std::string getTextPickerValue(FrameNode* frameNode);
     static std::string getTextPickerRange(FrameNode* frameNode);
+    static void SetDivider(FrameNode* frameNode, const ItemDivider& divider);
     static int32_t isSingleRange()
     {
         return isSingleRange_;
