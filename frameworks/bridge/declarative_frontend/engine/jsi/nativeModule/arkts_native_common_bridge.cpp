@@ -4049,6 +4049,7 @@ ArkUINativeModuleValue CommonBridge::SetAllowDrop(ArkUIRuntimeCallInfo* runtimeC
     Local<panda::ArrayRef> allowDropArray = static_cast<Local<panda::ArrayRef>>(secondArg);
     auto length = allowDropArray->Length(vm);
     if (length <= 0) {
+        GetArkUINodeModifiers()->getCommonModifier()->resetAllowDrop(nativeNode);
         return panda::JSValueRef::Undefined(vm);
     }
     std::vector<std::string> keepStr(length);
