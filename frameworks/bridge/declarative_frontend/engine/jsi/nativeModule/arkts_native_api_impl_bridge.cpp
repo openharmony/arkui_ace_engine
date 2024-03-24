@@ -1848,6 +1848,10 @@ void ArkUINativeModule::RegisterToggleAttributes(Local<panda::ObjectRef> object,
         panda::FunctionRef::New(const_cast<panda::EcmaVM *>(vm), ToggleBridge::SetHoverEffect));
     toggle->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetHoverEffect"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM *>(vm), ToggleBridge::ResetHoverEffect));
+    toggle->Set(vm, panda::StringRef::NewFromUtf8(vm, "setSwitchStyle"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM *>(vm), ToggleBridge::SetSwitchStyle));
+    toggle->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetSwitchStyle"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM *>(vm), ToggleBridge::ResetSwitchStyle));
     object->Set(vm, panda::StringRef::NewFromUtf8(vm, "toggle"), toggle);
 }
 

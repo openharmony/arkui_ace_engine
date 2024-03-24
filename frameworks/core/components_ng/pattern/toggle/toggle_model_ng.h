@@ -40,6 +40,11 @@ public:
     void SetUnselectedColor(const Color& unselectedColor) override;
     void SetTrackBorderRadius(const Dimension& borderRadius) override;
     void ResetTrackBorderRadius() override;
+    static void SetPointRadius(FrameNode* frameNode, const Dimension& switchPointRadius);
+    static void ResetPointRadius(FrameNode* frameNode);
+    static void SetUnselectedColor(FrameNode* frameNode, const Color& unselectedColor);
+    static void SetTrackBorderRadius(FrameNode* frameNode, const Dimension& borderRadius);
+    static void ResetTrackBorderRadius(FrameNode* frameNode);
     static RefPtr<FrameNode> CreateFrameNode(int32_t nodeId, ToggleType toggleType, bool isOn);
     static void SetSelectedColor(FrameNode* frameNode, const std::optional<Color>& selectedColor);
     static void SetSwitchPointColor(FrameNode* frameNode, const Color& switchPointColor);

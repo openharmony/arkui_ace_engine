@@ -26,10 +26,10 @@
 extern "C" {
 #endif
 
-#define ARKUI_FULL_API_VERSION 83
+#define ARKUI_FULL_API_VERSION 84
 // When changing ARKUI_BASIC_API_VERSION, ARKUI_FULL_API_VERSION must be
 // increased as well.
-#define ARKUI_NODE_API_VERSION 83
+#define ARKUI_NODE_API_VERSION 84
 
 #define ARKUI_BASIC_API_VERSION 7
 #define ARKUI_EXTENDED_API_VERSION 6
@@ -2423,6 +2423,12 @@ struct ArkUIToggleModifier {
     void (*setToggleIsOn)(ArkUINodeHandle node, ArkUI_Bool isOn);
     void (*resetToggleIsOn)(ArkUINodeHandle node);
     ArkUI_Int32 (*getToggleIsOn)(ArkUINodeHandle node);
+    void (*setTogglePointRadius)(ArkUINodeHandle node, ArkUI_Float32 value, ArkUI_Int32 unit);
+    void (*resetTogglePointRadius)(ArkUINodeHandle node);
+    void (*setToggleUnselectedColor)(ArkUINodeHandle node, ArkUI_Uint32 unselectedColor);
+    void (*resetToggleUnselectedColor)(ArkUINodeHandle node);
+    void (*setToggleTrackBorderRadius)(ArkUINodeHandle node, ArkUI_Float32 value, ArkUI_Int32 unit);
+    void (*resetToggleTrackBorderRadius)(ArkUINodeHandle node);
 };
 
 struct ArkUINavigationModifier {
