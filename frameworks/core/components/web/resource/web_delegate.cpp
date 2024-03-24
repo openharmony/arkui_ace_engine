@@ -5816,8 +5816,7 @@ void WebDelegate::OnNativeEmbedAllDestory()
                 embedInfo->GetParams()};
         }
         if (OnNativeEmbedAllDestoryV2_) {
-            OnNativeEmbedAllDestoryV2_(
-			OHOS::Ace::NativeEmbedStatus status = OHOS::Ace::NativeEmbedStatus::DESTROY;
+            OHOS::Ace::NativeEmbedStatus status = OHOS::Ace::NativeEmbedStatus::DESTROY;
             OnNativeEmbedAllDestoryV2_(
                 std::make_shared<NativeEmbedDataInfo>(status, surfaceId, embedId, info));
         }
