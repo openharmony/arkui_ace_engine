@@ -5811,7 +5811,9 @@ void WebDelegate::OnNativeEmbedAllDestory()
         auto embedInfo = dataInfo->GetNativeEmbedInfo();
         if (embedInfo) {
             info = {embedInfo->GetId(), embedInfo->GetType(), embedInfo->GetSrc(),
-                embedInfo->GetUrl(), embedInfo->GetWidth(), embedInfo->GetHeight()};
+                embedInfo->GetUrl(), embedInfo->GetTag(), embedInfo->GetWidth(),
+                embedInfo->GetHeight(), embedInfo->GetX(), embedInfo->GetY(),
+                embedInfo->GetParams()};
         }
         if (OnNativeEmbedAllDestoryV2_) {
             OnNativeEmbedAllDestoryV2_(
