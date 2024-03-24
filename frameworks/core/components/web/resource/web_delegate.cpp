@@ -686,7 +686,7 @@ void GestureEventResultOhos::SetGestureEventResult(bool result)
 
 WebDelegate::~WebDelegate()
 {
-	OnNativeEmbedAllDestory();
+    OnNativeEmbedAllDestory();
     ReleasePlatformResource();
     if (IsDeviceTabletOr2in1() && GetWebOptimizationValue()) {
         OHOS::Rosen::RSInterfaces::GetInstance().UnRegisterSurfaceOcclusionChangeCallback(surfaceNodeId_);
@@ -1743,7 +1743,7 @@ bool WebDelegate::PrepareInitOHOSWeb(const WeakPtr<PipelineBase>& context)
                                          webCom->GetOverScrollId(), oldContext);
         onScreenCaptureRequestV2_ = useNewPipe ? eventHub->GetOnScreenCaptureRequestEvent() : nullptr;
         onNavigationEntryCommittedV2_ = useNewPipe ? eventHub->GetOnNavigationEntryCommittedEvent() : nullptr;
-		OnNativeEmbedAllDestoryV2_ = useNewPipe ? eventHub->GetOnNativeEmbedLifecycleChangeEvent() : nullptr;
+        OnNativeEmbedAllDestoryV2_ = useNewPipe ? eventHub->GetOnNativeEmbedLifecycleChangeEvent() : nullptr;
         OnNativeEmbedLifecycleChangeV2_ = useNewPipe ? eventHub->GetOnNativeEmbedLifecycleChangeEvent()
                                             : AceAsyncEvent<void(const std::shared_ptr<BaseEventInfo>&)>::Create(
                                                 webCom->GetNativeEmbedLifecycleChangeId(), oldContext);
