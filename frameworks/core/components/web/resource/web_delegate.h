@@ -704,6 +704,7 @@ public:
     void OnScrollState(bool scrollState);
     void OnRootLayerChanged(int width, int height);
     bool FilterScrollEvent(const float x, const float y, const float xVelocity, const float yVelocity);
+	void OnNativeEmbedAllDestory();
     void OnNativeEmbedLifecycleChange(std::shared_ptr<NWeb::NWebNativeEmbedDataInfo> dataInfo);
     void OnNativeEmbedGestureEvent(std::shared_ptr<NWeb::NWebNativeEmbedTouchEvent> event);
     void SetNGWebPattern(const RefPtr<NG::WebPattern>& webPattern);
@@ -896,6 +897,7 @@ private:
     EventCallbackV2 onScreenCaptureRequestV2_;
     EventCallbackV2 onNavigationEntryCommittedV2_;
     EventCallbackV2 onSafeBrowsingCheckResultV2_;
+	EventCallbackV2 OnNativeEmbedAllDestoryV2_;
     EventCallbackV2 OnNativeEmbedLifecycleChangeV2_;
     EventCallbackV2 OnNativeEmbedGestureEventV2_;
     EventCallbackV2 onIntelligentTrackingPreventionResultV2_;
@@ -938,6 +940,7 @@ private:
     std::optional<std::string> richtextData_;
     bool incognitoMode_ = false;
     bool isEmbedModeEnabled_ = false;
+	std::map<std::string, std::shared_ptr<OHOS::NWeb::NWebNativeEmbedDataInfo>> embedDataInfo_;
     std::string tag_;
     std::string tag_type_;
 #endif

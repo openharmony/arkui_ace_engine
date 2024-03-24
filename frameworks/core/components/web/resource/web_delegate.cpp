@@ -686,6 +686,7 @@ void GestureEventResultOhos::SetGestureEventResult(bool result)
 
 WebDelegate::~WebDelegate()
 {
+	OnNativeEmbedAllDestory();
     ReleasePlatformResource();
     if (IsDeviceTabletOr2in1() && GetWebOptimizationValue()) {
         OHOS::Rosen::RSInterfaces::GetInstance().UnRegisterSurfaceOcclusionChangeCallback(surfaceNodeId_);
@@ -1742,6 +1743,7 @@ bool WebDelegate::PrepareInitOHOSWeb(const WeakPtr<PipelineBase>& context)
                                          webCom->GetOverScrollId(), oldContext);
         onScreenCaptureRequestV2_ = useNewPipe ? eventHub->GetOnScreenCaptureRequestEvent() : nullptr;
         onNavigationEntryCommittedV2_ = useNewPipe ? eventHub->GetOnNavigationEntryCommittedEvent() : nullptr;
+		OnNativeEmbedAllDestoryV2_ = useNewPipe ? eventHub->GetOnNativeEmbedLifecycleChangeEvent() : nullptr;
         OnNativeEmbedLifecycleChangeV2_ = useNewPipe ? eventHub->GetOnNativeEmbedLifecycleChangeEvent()
                                             : AceAsyncEvent<void(const std::shared_ptr<BaseEventInfo>&)>::Create(
                                                 webCom->GetNativeEmbedLifecycleChangeId(), oldContext);
@@ -5791,6 +5793,33 @@ void WebDelegate::SetTouchEventInfo(std::shared_ptr<OHOS::NWeb::NWebNativeEmbedT
     }
 }
 
+void WebDelegate::OnNativeEmbedAllDestory()
+{
+    if (!isEmbedModeEnabled_) {
+        return;
+    }
+    auto iter = embedDataInfo_.begin();
+    for(; iter != embedDataInfo_.end(); iter++) {
+        EmbedInfo info;
+        std::shared_ptr<OHOS::NWeb::NWebNativeEmbedDataInfo> dataInfo  = iter->second;
+        if (dataInfo == nullptr) {
+            continue;
+        }
+        std::string embedId = dataInfo->GetEmbedId();
+        TAG_LOGI(AceLogTag::ACE_WEB, "OnNativeEmbedAllDestory embdedid=%{public}s", embedId.c_str());
+        std::string surfaceId = dataInfo->GetSurfaceId();
+        auto embedInfo = dataInfo->GetNativeEmbedInfo();
+        if (embedInfo) {
+            info = {embedInfo->GetId(), embedInfo->GetType(), embedInfo->GetSrc(),
+                embedInfo->GetUrl(), embedInfo->GetWidth(), embedInfo->GetHeight()};
+        }
+        if (OnNativeEmbedAllDestoryV2_) {
+            OnNativeEmbedAllDestoryV2_(std::make_shared<NativeEmbedDataInfo>(OHOS::Ace::NativeEmbedStatus::DESTROY, surfaceId, embedId, info));
+        }
+    }
+    embedDataInfo_.clear();
+}
+
 void WebDelegate::OnNativeEmbedLifecycleChange(std::shared_ptr<OHOS::NWeb::NWebNativeEmbedDataInfo> dataInfo)
 {
     if (!isEmbedModeEnabled_) {
@@ -5812,6 +5841,15 @@ void WebDelegate::OnNativeEmbedLifecycleChange(std::shared_ptr<OHOS::NWeb::NWebN
                 embedInfo->GetUrl(), embedInfo->GetTag(), embedInfo->GetWidth(),
                 embedInfo->GetHeight(), embedInfo->GetX(), embedInfo->GetY(),
                 embedInfo->GetParams()};
+        }
+		
+        if (status == OHOS::Ace::NativeEmbedStatus::CREATE || status == OHOS::Ace::NativeEmbedStatus::UPDATE)  {
+            embedDataInfo_.insert_or_assign(embedId, dataInfo);
+        } else if (status == OHOS::Ace::NativeEmbedStatus::DESTROY) {
+            auto iter = embedDataInfo_.find(embedId);
+            if (iter != embedDataInfo_.end()) {
+                embedDataInfo_.erase(iter);
+            }
         }
     }
 
