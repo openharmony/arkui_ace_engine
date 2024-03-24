@@ -2661,6 +2661,8 @@ struct ArkUISearchModifier {
     void (*resetSearchEnterKeyType)(ArkUINodeHandle node);
     void (*setSearchHeight)(ArkUINodeHandle node, ArkUI_Float32 heightValue, ArkUI_Int32 heightUnit);
     void (*resetSearchHeight)(ArkUINodeHandle node);
+    void (*setSearchInspectorId)(ArkUINodeHandle node, ArkUI_CharPtr key);
+    void (*resetSearchInspectorId)(ArkUINodeHandle node);
 };
 
 struct ArkUISearchControllerModifier {

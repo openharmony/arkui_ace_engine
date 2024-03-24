@@ -5890,6 +5890,24 @@ class SearchHeightModifier extends ModifierWithKey {
   }
 }
 SearchHeightModifier.identity = Symbol('searchHeight');
+
+class SearchIdModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().search.resetSearchInspectorId(node);
+    } else {
+      getUINativeModule().search.setSearchInspectorId(node, this.value);
+    }
+  }
+
+  checkObjectDiff() {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+SearchIdModifier.identity = Symbol('searchId');
 class ArkSearchComponent extends ArkComponent {
   constructor(nativePtr) {
     super(nativePtr);
@@ -5994,6 +6012,14 @@ class ArkSearchComponent extends ArkComponent {
   }
   height(value) {
     modifierWithKey(this._modifiersWithKeys, SearchHeightModifier.identity, SearchHeightModifier, value);
+    return this;
+  }
+  id(value) {
+    modifierWithKey(this._modifiersWithKeys, SearchIdModifier.identity, SearchIdModifier, value);
+    return this;
+  }
+  key(value) {
+    modifierWithKey(this._modifiersWithKeys, SearchIdModifier.identity, SearchIdModifier, value);
     return this;
   }
 }
