@@ -5799,7 +5799,7 @@ void WebDelegate::OnNativeEmbedAllDestory()
         return;
     }
     auto iter = embedDataInfo_.begin();
-    for(; iter != embedDataInfo_.end(); iter++) {
+    for( ; iter != embedDataInfo_.end(); iter++) {
         EmbedInfo info;
         std::shared_ptr<OHOS::NWeb::NWebNativeEmbedDataInfo> dataInfo  = iter->second;
         if (dataInfo == nullptr) {
@@ -5814,7 +5814,8 @@ void WebDelegate::OnNativeEmbedAllDestory()
                 embedInfo->GetUrl(), embedInfo->GetWidth(), embedInfo->GetHeight()};
         }
         if (OnNativeEmbedAllDestoryV2_) {
-            OnNativeEmbedAllDestoryV2_(std::make_shared<NativeEmbedDataInfo>(OHOS::Ace::NativeEmbedStatus::DESTROY, surfaceId, embedId, info));
+            OnNativeEmbedAllDestoryV2_(
+			    std::make_shared<NativeEmbedDataInfo>(OHOS::Ace::NativeEmbedStatus::DESTROY, surfaceId, embedId, info));
         }
     }
     embedDataInfo_.clear();
@@ -5843,7 +5844,7 @@ void WebDelegate::OnNativeEmbedLifecycleChange(std::shared_ptr<OHOS::NWeb::NWebN
                 embedInfo->GetParams()};
         }
 		
-        if (status == OHOS::Ace::NativeEmbedStatus::CREATE || status == OHOS::Ace::NativeEmbedStatus::UPDATE)  {
+        if (status == OHOS::Ace::NativeEmbedStatus::CREATE || status == OHOS::Ace::NativeEmbedStatus::UPDATE) {
             embedDataInfo_.insert_or_assign(embedId, dataInfo);
         } else if (status == OHOS::Ace::NativeEmbedStatus::DESTROY) {
             auto iter = embedDataInfo_.find(embedId);
