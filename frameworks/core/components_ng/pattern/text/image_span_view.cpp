@@ -49,7 +49,8 @@ void ImageSpanView::SetPlaceHolderStyle(TextBackgroundStyle& style)
     ACE_UPDATE_LAYOUT_PROPERTY(ImageLayoutProperty, PlaceHolderStyle, style);
     ACE_UPDATE_LAYOUT_PROPERTY(ImageLayoutProperty, HasPlaceHolderStyle,
         style.backgroundColor.has_value() || style.backgroundRadius.has_value());
-    SpanNode::RequestTextFlushDirty(frameNode);
+    auto frameNodeRef = AceType::Claim<FrameNode>(frameNode);
+    SpanNode::RequestTextFlushDirty(AceType::Claim<FrameNode>(frameNode));
 }
 
 void ImageSpanView::Create()

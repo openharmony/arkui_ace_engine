@@ -1529,7 +1529,13 @@ void NavigationModelNG::SetHideNavBar(FrameNode* frameNode, bool hideNavBar)
     } else {
         pattern->SetNavBarVisibilityChange(true);
     }
-
+    auto navBarNode = AceType::DynamicCast<FrameNode>(navigationGroupNode->GetNavBarNode());
+    auto layoutProperty = navBarNode->GetLayoutProperty();
+    layoutProperty->UpdateVisibility(hideNavBar ? VisibleType::INVISIBLE : VisibleType::VISIBLE, true);
+    navBarNode->SetJSViewActive(!hideNavBar);
+    if (pattern->GetNavBarVisibilityChange()) {
+        navBarNode->MarkDirtyNode();
+    }
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(NavigationLayoutProperty, HideNavBar, hideNavBar, frameNode);
 }
 

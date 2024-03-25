@@ -32,7 +32,7 @@ export class ProgressButton extends ViewPU {
     this.__isLoading = new ObservedPropertySimplePU(!1, this, 'isLoading');
     this.__enable = new SynchedPropertySimpleOneWayPU(t.enable, this, 'enable');
     this.progressButtonWidth = 44;
-    this.clickCallback = null;
+    this.clickCallback = () => { };
     this.setInitiallyProvidedValue(t);
     this.declareWatch('progress', this.getProgressContext);
   }
@@ -142,7 +142,7 @@ export class ProgressButton extends ViewPU {
         moduleName: ''
       });
       Button.constraintSize({ minWidth: 44 });
-      Button.width(this.progressButtonWidth < BUTTON_NORMARL_WIDTH ? BUTTON_NORMARL_WIDTH : this.progressButtonWidth);
+      Button.width((this.progressButtonWidth && this.progressButtonWidth <  BUTTON_NORMARL_WIDTH) ?  BUTTON_NORMARL_WIDTH : this.progressButtonWidth);
       Button.stateEffect(this.enable);
       Button.onClick((() => {
         if (this.enable) {

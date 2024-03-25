@@ -55,9 +55,15 @@ public:
     {
         return std::make_shared<TestingShaderEffect>();
     }
+
     static std::shared_ptr<TestingShaderEffect> CreateTwoPointConical(const TestingPoint& startPt, scalar startRadius,
         const TestingPoint& endPt, scalar endRadius, const std::vector<ColorQuad>& colors,
         const std::vector<scalar>& pos, TileMode mode, const TestingMatrix* matrix)
+    {
+        return std::make_shared<TestingShaderEffect>();
+    }
+
+    static std::shared_ptr<TestingShaderEffect> CreateColorShader(ColorQuad color)
     {
         return std::make_shared<TestingShaderEffect>();
     }

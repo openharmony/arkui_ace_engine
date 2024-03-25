@@ -24,7 +24,7 @@ namespace OHOS::Ace::Framework {
 RefPtr<OHOS::Ace::SingleChild> JSPanHandler::CreateComponent(const JSCallbackInfo& args)
 {
     auto gestureComponent = ViewStackProcessor::GetInstance()->GetPanGestureListenerComponent();
-    WeakPtr<NG::FrameNode> frameNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    WeakPtr<NG::FrameNode> frameNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
     if (jsOnStartFunc_) {
         auto dragStartId = EventMarker(
             [execCtx = args.GetExecutionContext(), func = std::move(jsOnStartFunc_), node = frameNode](

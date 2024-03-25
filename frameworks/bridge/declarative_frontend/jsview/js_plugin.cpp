@@ -142,7 +142,7 @@ void JSPlugin::JsOnComplete(const JSCallbackInfo& info)
 {
 #if defined(PLUGIN_COMPONENT_SUPPORTED)
     if (info[0]->IsFunction()) {
-        WeakPtr<NG::FrameNode> frameNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+        auto frameNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
         auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(info[0]));
         auto OnComplete = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc), node = frameNode](
                               const std::string& param) {
@@ -160,7 +160,7 @@ void JSPlugin::JsOnError(const JSCallbackInfo& info)
 {
 #if defined(PLUGIN_COMPONENT_SUPPORTED)
     if (info[0]->IsFunction()) {
-        WeakPtr<NG::FrameNode> frameNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+        auto frameNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
         auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(info[0]));
         auto onError = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc), node = frameNode](
                            const std::string& param) {

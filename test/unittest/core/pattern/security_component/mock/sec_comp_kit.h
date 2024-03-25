@@ -89,6 +89,16 @@ public:
     {
         return 0;
     };
+
+    static bool IsServiceExist()
+    {
+        return false;
+    };
+
+    static bool LoadService()
+    {
+        return true;
+    };
 };
 }  // namespace SecurityComponent
 }  // namespace Security

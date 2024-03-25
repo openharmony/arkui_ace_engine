@@ -122,11 +122,9 @@ void NavBarTestNg::InitializationParameters(TestParameters& testParameters)
     ASSERT_NE(testParameters.pipeline, nullptr);
     testParameters.pipeline->SetThemeManager(themeManager);
     testParameters.theme = AceType::MakeRefPtr<NavigationBarTheme>();
-    std::cout << "navBarTest 3" << std::endl;
     ASSERT_NE(testParameters.theme, nullptr);
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(testParameters.theme));
     auto selectTheme = AceType::MakeRefPtr<SelectTheme>();
-    std::cout << "navBarTest 4" << std::endl;
     ASSERT_NE(selectTheme, nullptr);
     EXPECT_CALL(*themeManager, GetTheme(SelectTheme::TypeId())).WillRepeatedly(Return(selectTheme));
 

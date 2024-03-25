@@ -42,6 +42,7 @@
 #include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/components_ng/property/geometry_property.h"
 #include "core/components_ng/property/measure_property.h"
+#include "core/components_ng/pattern/menu/menu_view.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -607,5 +608,126 @@ HWTEST_F(OptionTestNg, CreatePasteButton001, TestSize.Level1)
     OptionView::CreatePasteButton(option, row, []() {});
     auto PasteButtonNode = option->GetChildAtIndex(0)->GetChildren();
     EXPECT_FALSE(PasteButtonNode.empty());
+}
+
+/**
+ * @tc.name: OptionLayoutTest005
+ * @tc.desc: Test OptionLayoutAlgorithm Measure
+ * @tc.type: FUNC
+ */
+HWTEST_F(OptionTestNg, OptionLayoutTest005, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. construct optionLayoutAlgorithm and layoutWrapper.
+     */
+    OptionLayoutAlgorithm rosenOptionLayoutAlgorithm;
+    rosenOptionLayoutAlgorithm.horInterval_ = 2.0;
+    EXPECT_FLOAT_EQ(rosenOptionLayoutAlgorithm.horInterval_, 2.0);
+    auto rosenMakeRefPtr = AceType::MakeRefPtr<OHOS::Ace::NG::LayoutProperty>();
+    auto rosenRefPtr = AceType::MakeRefPtr<OHOS::Ace::NG::GeometryNode>();
+    rosenRefPtr->margin_ = nullptr;
+    RefPtr<FrameNode> optionNode = OptionView::CreateSelectOption("optiontest", " ", 2);
+    LayoutWrapperNode* rosenLayoutWrapper = new LayoutWrapperNode(optionNode, rosenRefPtr, rosenMakeRefPtr);
+    auto childWrapper = AceType::MakeRefPtr<LayoutWrapperNode>(optionNode, rosenRefPtr, rosenMakeRefPtr);
+    rosenLayoutWrapper->AppendChild(childWrapper);
+    /**
+     * @tc.steps: step2. construct layoutConstraint and call Measure.
+     * @tc.expected: the value of horInterval_ is updated
+     */
+    LayoutConstraintF layoutConstraintSize;
+    layoutConstraintSize.selfIdealSize.SetSize(SizeF(WIDTH.ConvertToPx(), HEIGHT.ConvertToPx()));
+    rosenLayoutWrapper->GetLayoutProperty()->UpdateLayoutConstraint(layoutConstraintSize);
+    rosenLayoutWrapper->GetLayoutProperty()->UpdateContentConstraint();
+    MeasureProperty calcLayoutConstraint;
+    calcLayoutConstraint.UpdateMinSizeWithCheck(CalcSize(CalcLength(10.0), CalcLength(10.0)));
+    rosenLayoutWrapper->GetLayoutProperty()->UpdateCalcLayoutProperty(calcLayoutConstraint);
+    auto tmpOptionNode = rosenLayoutWrapper->GetHostNode();
+    CHECK_NULL_VOID(tmpOptionNode);
+    auto optionPattern = tmpOptionNode->GetPattern<OptionPattern>();
+    CHECK_NULL_VOID(optionPattern);
+    optionPattern->SetIsSelectOption(true);
+    optionPattern->SetHasOptionWidth(true);
+    rosenOptionLayoutAlgorithm.Measure(rosenLayoutWrapper);
+    EXPECT_NE(rosenOptionLayoutAlgorithm.horInterval_, 2.0);
+    EXPECT_TRUE(optionPattern->IsSelectOption());
+    EXPECT_TRUE(optionPattern->GetHasOptionWidth());
+}
+/**
+ * @tc.name: PerformActionTest003
+ * @tc.desc:  Test OptionPattern OnKeyEvent.
+ * @tc.type: FUNC
+ */
+HWTEST_F(OptionTestNg, PerformActionTest003, TestSize.Level1)
+{
+    optionPattern_->selectTheme_ = AceType::MakeRefPtr<SelectTheme>();
+    std::vector<SelectParam> params;
+    auto wrapperNode = MenuView::Create(params, 3, "");
+    ASSERT_NE(wrapperNode, nullptr);
+    auto menuNode = AceType::DynamicCast<FrameNode>(wrapperNode->GetChildAtIndex(0));
+    ASSERT_NE(menuNode, nullptr);
+    ASSERT_EQ(menuNode->GetChildren().size(), 1);
+
+    params.emplace_back("content1", "icon1");
+    params.emplace_back("content2", "");
+    params.emplace_back("", "icon3");
+    params.emplace_back("", "");
+    auto menuPattern = menuNode->GetPattern<MenuPattern>();
+    ASSERT_NE(menuPattern, nullptr);
+    menuPattern->UpdateSelectParam(params);
+    optionPattern_->SetMenu(menuNode);
+    /**
+     * @tc.steps: step1. Call OnHover.
+     * @tc.expected: the function runs normally
+     */
+    bool isHover[2] = { false, true };
+    Color hoverColor[2] = { Color::TRANSPARENT, Color(0x0c000000) };
+    for (int turn = 0; turn < 2; turn++) {
+        optionPattern_->OnHover(isHover[turn]);
+        EXPECT_EQ(optionPattern_->GetBgBlendColor(), hoverColor[turn]);
+    }
+    /**
+     * @tc.steps: step2. construct keyEvent and call OnKeyEvent.
+     * @tc.expected: the function runs normally
+     */
+    KeyEvent event;
+    EXPECT_FALSE(optionPattern_->OnKeyEvent(event));
+    event.action = KeyAction::DOWN;
+    EXPECT_FALSE(optionPattern_->OnKeyEvent(event));
+    event.code = KeyCode::KEY_ENTER;
+    EXPECT_TRUE(optionPattern_->OnKeyEvent(event));
+    event.code = KeyCode::KEY_MOVE_HOME;
+    optionPattern_->isSelectOption_ = true;
+    EXPECT_TRUE(optionPattern_->OnKeyEvent(event));
+}
+/**
+ * @tc.name: OptionPaintMethodTestNg004
+ * @tc.desc: Verify ToJsonValue default value.
+ * @tc.type: FUNC
+ */
+HWTEST_F(OptionTestNg, OptionPaintMethodTestNg004, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. prepare paintMethod, paintProp, canvas.
+     */
+    RefPtr<OptionPaintProperty> paintProp = AceType::MakeRefPtr<OptionPaintProperty>();
+    RefPtr<OptionPaintMethod> paintMethod = AceType::MakeRefPtr<OptionPaintMethod>();
+    paintProp->UpdatePress(false);
+    paintProp->UpdateHover(false);
+    paintProp->UpdateNeedDivider(true);
+    paintProp->UpdateHasIcon(false);
+    Testing::MockCanvas canvas;
+    EXPECT_CALL(canvas, AttachBrush(_)).WillRepeatedly(ReturnRef(canvas));
+    EXPECT_CALL(canvas, DetachBrush()).WillRepeatedly(ReturnRef(canvas));
+    EXPECT_CALL(canvas, DrawPath(_)).Times(AtLeast(1));
+    /**
+     * @tc.steps: step2. Execute GetOverlayDrawFunction.
+     * @tc.expected:  return value are as expected.
+     */
+    PaintWrapper* paintWrapper = GetPaintWrapper(paintProp);
+    paintMethod->PaintDivider(canvas, paintWrapper);
+    auto result = paintMethod->GetOverlayDrawFunction(paintWrapper);
+    EXPECT_NE(result, nullptr);
+    delete paintWrapper;
+    paintWrapper = nullptr;
 }
 } // namespace OHOS::Ace::NG

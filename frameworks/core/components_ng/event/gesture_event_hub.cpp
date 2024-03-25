@@ -230,7 +230,7 @@ void GestureEventHub::ProcessTouchTestHierarchy(const OffsetF& coordinateOffset,
         if (recognizerGroup) {
             recognizerGroup->SetRecognizerInfoRecursively(offset, host, targetComponent, getEventTargetImpl);
         }
-        
+
         recognizer->AttachFrameNode(WeakPtr<FrameNode>(host));
         recognizer->SetTargetComponent(targetComponent);
         recognizer->SetCoordinateOffset(offset);
@@ -543,9 +543,7 @@ OffsetF GestureEventHub::GetPixelMapOffset(
         result.SetX(size.Width() * PIXELMAP_WIDTH_RATE);
         result.SetY(PIXELMAP_DRAG_DEFAULT_HEIGHT);
     } else {
-        auto coordinateX = frameNodeOffset_.GetX() > SystemProperties::GetDevicePhysicalWidth()
-                               ? frameNodeOffset_.GetX() - SystemProperties::GetDevicePhysicalWidth()
-                               : frameNodeOffset_.GetX();
+        auto coordinateX = frameNodeOffset_.GetX();
         auto coordinateY = frameNodeOffset_.GetY();
         auto differentScale = (NearZero(frameNodeSize_.Width()) || NearZero(size.Width()))
                                   ? 1.0f
@@ -688,6 +686,7 @@ void GestureEventHub::HandleOnDragStart(const GestureEvent& info)
     }
     event->SetScreenX(info.GetScreenLocation().GetX());
     event->SetScreenY(info.GetScreenLocation().GetY());
+    event->SetSourceTool(info.GetSourceTool());
 
     auto frameTag = frameNode->GetTag();
     auto hostPattern = frameNode->GetPattern<TextDragBase>();
@@ -716,6 +715,14 @@ void GestureEventHub::HandleOnDragStart(const GestureEvent& info)
     CHECK_NULL_VOID(dragDropManager);
     dragDropManager->SetDraggingPointer(info.GetPointerId());
     dragDropManager->SetDraggingPressedState(true);
+    if (dragPreviewInfo.inspectorId != "") {
+        auto dragPreviewPixelMap = DragEventActuator::GetPreviewPixelMap(dragPreviewInfo.inspectorId, frameNode);
+        CHECK_NULL_VOID(dragPreviewPixelMap);
+        dragDropInfo.pixelMap = dragPreviewPixelMap;
+        OnDragStart(info, pipeline, frameNode, dragDropInfo, event);
+        return;
+    }
+
     if (info.GetSourceDevice() != SourceType::MOUSE) {
         if (dragPreviewInfo.pixelMap != nullptr || dragPreviewInfo.customNode != nullptr) {
             if (dragPreviewPixelMap_ != nullptr) {
@@ -798,6 +805,9 @@ void GestureEventHub::OnDragStart(const GestureEvent& info, const RefPtr<Pipelin
 
     std::map<std::string, int64_t> summary;
     ret = UdmfClient::GetInstance()->GetSummary(udKey, summary);
+    if (ret != 0) {
+        TAG_LOGI(AceLogTag::ACE_DRAG, "UDMF get summary failed, return value is %{public}d", ret);
+    }
     dragDropManager->SetSummaryMap(summary);
     RefPtr<PixelMap> pixelMap;
     if (dragDropInfo.pixelMap != nullptr) {
@@ -807,8 +817,6 @@ void GestureEventHub::OnDragStart(const GestureEvent& info, const RefPtr<Pipelin
         dragDropManager->SetIsMouseDrag(true);
         pixelMap = CreatePixelMapFromString(DEFAULT_MOUSE_DRAG_IMAGE);
         CHECK_NULL_VOID(pixelMap);
-        auto taskScheduler = pipeline->GetTaskExecutor();
-        CHECK_NULL_VOID(taskScheduler);
         GenerateMousePixelMap(info);
         if (pixelMap_) {
             pixelMap = pixelMap_;
@@ -826,14 +834,25 @@ void GestureEventHub::OnDragStart(const GestureEvent& info, const RefPtr<Pipelin
     if (IsPixelMapNeedScale()) {
         RefPtr<FrameNode> imageNode = overlayManager->GetPixelMapContentNode();
         DragEventActuator::CreatePreviewNode(frameNode, imageNode);
+        auto frameTag = frameNode->GetTag();
+        if (GetTextDraggable() && IsTextCategoryComponent(frameTag)) {
+            auto textDragPattern = frameNode->GetPattern<TextDragBase>();
+            CHECK_NULL_VOID(textDragPattern);
+            auto dragNode = textDragPattern->MoveDragNode();
+            if (dragNode) {
+                auto dragNodeOffset = dragNode->GetOffsetInScreen();
+                DragEventActuator::UpdatePreviewPositionAndScale(imageNode, dragNodeOffset);
+            }
+        }
         CHECK_NULL_VOID(imageNode);
         scale = static_cast<float>(imageNode->GetPreviewScaleVal());
         auto window = SubwindowManager::GetInstance()->ShowPreviewNG();
         if (window) {
-            overlayManager = window->GetOverlayManager();
-            CHECK_NULL_VOID(overlayManager);
-            DragEventActuator::MountPixelMap(overlayManager, eventHub->GetGestureEventHub(), imageNode);
-            dragDropManager->DoDragStartAnimation(overlayManager, info);
+            auto subWindowOverlayManager = window->GetOverlayManager();
+            CHECK_NULL_VOID(subWindowOverlayManager);
+            DragEventActuator::MountPixelMap(subWindowOverlayManager, eventHub->GetGestureEventHub(), imageNode);
+            dragDropManager->DoDragStartAnimation(subWindowOverlayManager, info);
+            overlayManager->RemovePixelMap();
             if (pixelMap_ != nullptr) {
                 pixelMap = pixelMap_;
             }
@@ -863,6 +882,16 @@ void GestureEventHub::OnDragStart(const GestureEvent& info, const RefPtr<Pipelin
     DragDataCore dragData { { shadowInfo }, {}, udKey, extraInfoLimited, arkExtraInfoJson->ToString(),
         static_cast<int32_t>(info.GetSourceDevice()), recordsSize, info.GetPointerId(), info.GetScreenLocation().GetX(),
         info.GetScreenLocation().GetY(), info.GetTargetDisplayId(), windowId, true, false, summary };
+    std::string summarys;
+    for (const auto& [udkey, recordSize] : summary) {
+        std::string str = udkey + "-" + std::to_string(recordSize) + ";";
+        summarys += str;
+    }
+    TAG_LOGI(AceLogTag::ACE_DRAG,
+        "Start drag, pixelMap width %{public}d height %{public}d, udkey %{public}s, recordsSize %{public}d, "
+        "pointerId %{public}d, displayId %{public}d, windowId %{public}d, summary %{public}s",
+        width, height, udKey.c_str(), recordsSize, info.GetPointerId(), info.GetTargetDisplayId(), windowId,
+        summarys.c_str());
     ret = InteractionInterface::GetInstance()->StartDrag(dragData, GetDragCallback(pipeline, eventHub));
     if (ret != 0) {
         if (dragDropManager->IsNeedScaleDragPreview()) {
@@ -1010,6 +1039,18 @@ void GestureEventHub::SetUserOnClick(GestureEventFunc&& clickEvent)
         SetFocusClickEvent(userParallelClickEventActuator_->GetClickEvent());
     } else {
         clickEventActuator_->SetUserCallback(std::move(clickEvent));
+        SetFocusClickEvent(clickEventActuator_->GetClickEvent());
+    }
+}
+
+void GestureEventHub::SetJSFrameNodeOnClick(GestureEventFunc&& clickEvent)
+{
+    CheckClickActuator();
+    if (parallelCombineClick) {
+        userParallelClickEventActuator_->SetJSFrameNodeCallback(std::move(clickEvent));
+        SetFocusClickEvent(userParallelClickEventActuator_->GetClickEvent());
+    } else {
+        clickEventActuator_->SetJSFrameNodeCallback(std::move(clickEvent));
         SetFocusClickEvent(clickEventActuator_->GetClickEvent());
     }
 }
@@ -1217,6 +1258,7 @@ OnDragCallbackCore GestureEventHub::GetDragCallback(const RefPtr<PipelineBase>& 
                 dragDropManager->SetDraggingPointer(-1);
                 dragDropManager->SetDraggingPressedState(false);
                 dragDropManager->ResetDragPreviewInfo();
+                dragDropManager->HideDragPreviewOverlay();
                 auto ret = InteractionInterface::GetInstance()->UnRegisterCoordinationListener();
                 if (ret != 0) {
                     TAG_LOGW(AceLogTag::ACE_DRAG, "Unregister coordination listener failed, error is %{public}d", ret);
@@ -1284,6 +1326,20 @@ void GestureEventHub::ClearUserOnTouch()
     }
 }
 
+void GestureEventHub::ClearJSFrameNodeOnClick()
+{
+    if (clickEventActuator_) {
+        clickEventActuator_->ClearJSFrameNodeCallback();
+    }
+}
+
+void GestureEventHub::ClearJSFrameNodeOnTouch()
+{
+    if (touchEventActuator_) {
+        touchEventActuator_->ClearJSFrameNodeCallback();
+    }
+}
+
 void GestureEventHub::CopyGestures(const RefPtr<GestureEventHub>& gestureEventHub)
 {
     CHECK_NULL_VOID(gestureEventHub);
@@ -1299,7 +1355,7 @@ void GestureEventHub::CopyEvent(const RefPtr<GestureEventHub>& gestureEventHub)
         touchEventActuator_ = MakeRefPtr<TouchEventActuator>();
         touchEventActuator_->CopyTouchEvent(originalTouchEventActuator);
     }
-    
+
     auto originalClickEventActuator = gestureEventHub->clickEventActuator_;
     if (originalClickEventActuator) {
         clickEventActuator_ = MakeRefPtr<ClickEventActuator>(WeakClaim(this));
@@ -1395,18 +1451,44 @@ void GestureEventHub::SetResponseRegion(const std::vector<DimensionRect>& respon
 }
 
 void GestureEventHub::RemoveLastResponseRect()
-    {
-        if (responseRegion_.empty()) {
-            isResponseRegion_ = false;
-            return;
-        }
-        responseRegion_.pop_back();
-        if (responseRegion_.empty()) {
-            isResponseRegion_ = false;
-        }
-
-        if (responseRegionFunc_) {
-            responseRegionFunc_(responseRegion_);
-        }
+{
+    if (responseRegion_.empty()) {
+        isResponseRegion_ = false;
+        return;
     }
+    responseRegion_.pop_back();
+    if (responseRegion_.empty()) {
+        isResponseRegion_ = false;
+    }
+
+    if (responseRegionFunc_) {
+        responseRegionFunc_(responseRegion_);
+    }
+}
+
+void GestureEventHub::SetOnTouchEvent(TouchEventFunc&& touchEventFunc)
+{
+    if (!touchEventActuator_) {
+        touchEventActuator_ = MakeRefPtr<TouchEventActuator>();
+    }
+    touchEventActuator_->SetOnTouchEvent(std::move(touchEventFunc));
+}
+
+void GestureEventHub::SetJSFrameNodeOnTouchEvent(TouchEventFunc&& touchEventFunc)
+{
+    if (!touchEventActuator_) {
+        touchEventActuator_ = MakeRefPtr<TouchEventActuator>();
+    }
+    touchEventActuator_->SetJSFrameNodeOnTouchEvent(std::move(touchEventFunc));
+}
+
+void GestureEventHub::SetDragForbiddenForcely(bool isDragForbidden)
+{
+    isDragForbidden_ = isDragForbidden;
+}
+
+bool GestureEventHub::IsDragForbidden()
+{
+    return isDragForbidden_;
+}
 } // namespace OHOS::Ace::NG

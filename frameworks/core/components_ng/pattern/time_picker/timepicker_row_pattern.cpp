@@ -87,6 +87,12 @@ void TimePickerRowPattern::SetButtonIdeaSize()
 
 void TimePickerRowPattern::OnModifyDone()
 {
+    if (isFiredTimeChange_ && !isForceUpdate_) {
+        isFiredTimeChange_ = false;
+        return;
+    }
+
+    isForceUpdate_ = false;
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto pickerProperty = host->GetLayoutProperty<TimePickerLayoutProperty>();
@@ -121,8 +127,6 @@ void TimePickerRowPattern::OnModifyDone()
         textLayoutProperty->UpdateContent(str.ToString(false));
     }
     host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
-    isFirstUpdate_ = false;
-    isContentUpdateOnly_ = false;
 }
 
 void TimePickerRowPattern::InitDisabled()
@@ -278,6 +282,7 @@ void TimePickerRowPattern::FireChangeEvent(bool refresh)
         auto info = std::make_shared<DatePickerChangeEvent>(str);
         timePickerEventHub->FireChangeEvent(info.get());
         timePickerEventHub->FireDialogChangeEvent(str);
+        firedTimeStr_ = str;
     }
 }
 
@@ -421,19 +426,19 @@ void TimePickerRowPattern::FlushColumn()
         CHECK_NULL_VOID(hourColumnPattern);
         hourColumnPattern->SetOptions(GetOptionsCount());
         hourColumnPattern->SetShowCount(GetShowCount());
-        hourColumnPattern->FlushCurrentOptions(false, isContentUpdateOnly_);
+        hourColumnPattern->FlushCurrentOptions();
     } else if (amPmColumn) {
         auto amPmColumnPattern = amPmColumn->GetPattern<TimePickerColumnPattern>();
         CHECK_NULL_VOID(amPmColumnPattern);
         amPmColumnPattern->SetShowCount(AM_PM_COUNT);
-        amPmColumnPattern->FlushCurrentOptions(false, isContentUpdateOnly_);
+        amPmColumnPattern->FlushCurrentOptions();
 
         CHECK_NULL_VOID(hourColumn);
         auto hourColumnPattern = hourColumn->GetPattern<TimePickerColumnPattern>();
         CHECK_NULL_VOID(hourColumnPattern);
         hourColumnPattern->SetOptions(GetOptionsCount());
         hourColumnPattern->SetShowCount(GetShowCount());
-        hourColumnPattern->FlushCurrentOptions(false, isContentUpdateOnly_);
+        hourColumnPattern->FlushCurrentOptions();
     }
 
     auto minuteColumn = allChildNode_["minute"].Upgrade();
@@ -441,7 +446,7 @@ void TimePickerRowPattern::FlushColumn()
     auto minuteColumnPattern = minuteColumn->GetPattern<TimePickerColumnPattern>();
     CHECK_NULL_VOID(minuteColumnPattern);
     minuteColumnPattern->SetShowCount(GetShowCount());
-    minuteColumnPattern->FlushCurrentOptions(false, isContentUpdateOnly_);
+    minuteColumnPattern->FlushCurrentOptions();
     if (hasSecond_) {
         auto secondColumn = allChildNode_["second"].Upgrade();
         CHECK_NULL_VOID(secondColumn);
@@ -449,7 +454,7 @@ void TimePickerRowPattern::FlushColumn()
         CHECK_NULL_VOID(secondColumnPattern);
         secondColumnPattern->SetOptions(GetOptionsCount());
         secondColumnPattern->SetShowCount(GetShowCount());
-        secondColumnPattern->FlushCurrentOptions(false, isContentUpdateOnly_);
+        secondColumnPattern->FlushCurrentOptions();
     }
 }
 

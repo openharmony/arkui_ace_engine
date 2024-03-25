@@ -47,17 +47,20 @@ public:
             if (child.second.isDelta == true && dividermap_.find(child.first) == dividermap_.end()) {
                 continue;
             } else if (child.second.isDelta == false) {
-                one[child.first].isDelta = false;
-                one[child.first].offset = child.second.offset;
-                one[child.first].length = child.second.length;
+                auto& listDivider = one[child.first];
+                listDivider.isDelta = false;
+                listDivider.length = child.second.length;
+                listDivider.offset = child.second.offset;
             }
         }
         for (auto child : dividermap_) {
-            if (another.find(child.first) != another.end() && another[child.first].isDelta == true) {
-                one[child.first].isDelta = true;
-                one[child.first].offset = child.second.offset + another[child.first].offset;
-                one[child.first].length = child.second.length + another[child.first].length;
-            } else if (child.second.isDelta == true && another.find(child.first) == another.end()) {
+            auto it = another.find(child.first);
+            if (it != another.end() && it->second.isDelta == true) {
+                auto& listDivider = one[child.first];
+                listDivider.isDelta = true;
+                listDivider.length = child.second.length + it->second.length;
+                listDivider.offset = child.second.offset + it->second.offset;
+            } else if (child.second.isDelta == true && it == another.end()) {
                 continue;
             }
         }
@@ -73,14 +76,16 @@ public:
         DividerMap another = rhs->GetDividerMap();
         DividerMap one;
         for (auto child : dividermap_) {
-            if (another.find(child.first) != another.end() && another[child.first].isDelta == true) {
-                one[child.first].isDelta = true;
-                one[child.first].offset = child.second.offset - another[child.first].offset;
-                one[child.first].length = child.second.length - another[child.first].length;
+            auto it = another.find(child.first);
+            auto& listDivider = one[child.first];
+            if (it != another.end() && it->second.isDelta == true) {
+                listDivider.isDelta = true;
+                listDivider.length = child.second.length - it->second.length;
+                listDivider.offset = child.second.offset - it->second.offset;
             } else {
-                one[child.first].isDelta = false;
-                one[child.first].offset = child.second.offset;
-                one[child.first].length = child.second.length;
+                listDivider.isDelta = false;
+                listDivider.length = child.second.length;
+                listDivider.offset = child.second.offset;
             }
         }
         return MakeRefPtr<ListDividerArithmetic>(one);
@@ -90,14 +95,15 @@ public:
     {
         DividerMap one;
         for (auto child : dividermap_) {
+            auto& listDivider = one[child.first];
             if (child.second.isDelta == true) {
-                one[child.first].isDelta = child.second.isDelta;
-                one[child.first].offset = child.second.offset * scale;
-                one[child.first].length = child.second.length * scale;
+                listDivider.isDelta = child.second.isDelta;
+                listDivider.offset = child.second.offset * scale;
+                listDivider.length = child.second.length * scale;
             } else {
-                one[child.first].isDelta = child.second.isDelta;
-                one[child.first].offset = child.second.offset;
-                one[child.first].length = child.second.length;
+                listDivider.isDelta = child.second.isDelta;
+                listDivider.offset = child.second.offset;
+                listDivider.length = child.second.length;
             }
         }
         return MakeRefPtr<ListDividerArithmetic>(one);

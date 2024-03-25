@@ -90,6 +90,10 @@ struct MenuParam {
     std::optional<Dimension> arrowOffset;
     bool isAboveApps = false;
     bool isShowInSubWindow = false;
+    bool hasTransitionEffect = false;
+    RefPtr<NG::ChainedTransitionEffect> transition;
+    bool hasPreviewTransitionEffect = false;
+    RefPtr<NG::ChainedTransitionEffect> previewTransition;
     MenuType type = MenuType::MENU;
     MenuPreviewMode previewMode = MenuPreviewMode::NONE;
     MenuPreviewAnimationOptions previewAnimationOptions;
@@ -204,6 +208,8 @@ public:
     // position
     static void SetPosition(const OffsetT<Dimension> &value);
     static void SetOffset(const OffsetT<Dimension> &value);
+    static void SetPositionEdges(const EdgesParam& value);
+    static void SetOffsetEdges(const EdgesParam& value);
     static void MarkAnchor(const OffsetT<Dimension> &value);
 
     // render position
@@ -255,6 +261,8 @@ public:
     static void SetDragPreviewOptions(const DragPreviewOption& previewOption);
     static void SetOnDragStart(
         std::function<DragDropInfo(const RefPtr<OHOS::Ace::DragEvent> &, const std::string &)> &&onDragStart);
+    static void SetOnPreDrag(
+        std::function<void(const PreDragStatus)> &&onPreDragFunc);
     static void SetOnDragEnter(
         std::function<void(const RefPtr<OHOS::Ace::DragEvent> &, const std::string &)> &&onDragEnter);
     static void SetOnDragLeave(
@@ -277,6 +285,7 @@ public:
         std::function<void()> &&onKeyboardShortcutAction);
     // obscured
     static void SetObscured(const std::vector<ObscuredReasons> &reasons);
+    static void SetPrivacySensitive(bool flag);
 
     // Bind properties
     static void BindPopup(const RefPtr<PopupParam> &param, const RefPtr<FrameNode> &targetNode,
@@ -299,6 +308,7 @@ public:
     static void SetDebugLine(const std::string &line);
     // transition
     static void SetTransition(const TransitionOptions &options);
+    static void CleanTransition();
     static void SetChainedTransition(const RefPtr<NG::ChainedTransitionEffect> &effect);
     // sharedTransition
     static void SetSharedTransition(const std::string &shareId, const std::shared_ptr<SharedTransitionOption> &option);
@@ -390,7 +400,7 @@ public:
     static void SetOpacity(FrameNode* frameNode, double opacity);
     static void SetZIndex(FrameNode* frameNode, int32_t value);
     static void SetAlign(FrameNode* frameNode, Alignment alignment);
-    static void SetBackdropBlur(FrameNode* frameNode, const Dimension& radius);
+    static void SetBackdropBlur(FrameNode* frameNode, const Dimension& radius, const BlurOption &blurOption);
     static void SetInvert(FrameNode* frameNode, const InvertVariant& invert);
     static void SetSepia(FrameNode* frameNode, const Dimension& sepia);
     static void SetSaturate(FrameNode* frameNode, const Dimension& saturate);
@@ -398,7 +408,7 @@ public:
     static void SetGrayScale(FrameNode* frameNode, const Dimension& grayScale);
     static void SetContrast(FrameNode* frameNode, const Dimension& contrast);
     static void SetBrightness(FrameNode* frameNode, const Dimension& brightness);
-    static void SetFrontBlur(FrameNode* frameNode, const Dimension& radius);
+    static void SetFrontBlur(FrameNode* frameNode, const Dimension& radius, const BlurOption &blurOption);
     static void SetHueRotate(FrameNode* frameNode, float hueRotate);
     static void SetLinearGradient(FrameNode* frameNode, const NG::Gradient& gradient);
     static void SetSweepGradient(FrameNode* frameNode, const NG::Gradient& gradient);
@@ -495,6 +505,7 @@ public:
         const std::vector<ModifierKey>& keys, std::function<void()>&& onKeyboardShortcutAction);
 
     static void SetOnAppear(FrameNode* frameNode, std::function<void()> &&onAppear);
+    static void SetOnDisappear(FrameNode* frameNode, std::function<void()> &&onDisappear);
     static void SetOnAreaChanged(FrameNode* frameNode, std::function<void(const RectF &oldRect,
         const OffsetF &oldOrigin, const RectF &rect, const OffsetF &origin)> &&onAreaChanged);
     static void SetOnFocus(FrameNode* frameNode, OnFocusFunc &&onFocusCallback);
@@ -529,6 +540,25 @@ public:
     static TextDirection GetDirection(FrameNode* frameNode);
     static std::map<AlignDirection, AlignRule> GetAlignRules(FrameNode* frameNode);
     static FlexAlign GetAlignSelf(FrameNode* frameNode);
+    // used in JS FrameNode
+    static void SetJSFrameNodeOnClick(FrameNode* frameNode, GestureEventFunc&& clickEventFunc);
+    static void SetJSFrameNodeOnTouch(FrameNode* frameNode, TouchEventFunc&& touchEventFunc);
+    static void SetJSFrameNodeOnAppear(FrameNode* frameNode, std::function<void()>&& onAppear);
+    static void SetJSFrameNodeOnDisappear(FrameNode* frameNode, std::function<void()>&& onDisappear);
+    static void SetJSFrameNodeOnKeyCallback(FrameNode* frameNode, OnKeyCallbackFunc&& onKeyCallback);
+    static void SetJSFrameNodeOnFocusCallback(FrameNode* frameNode, OnFocusFunc&& onFocusCallback);
+    static void SetJSFrameNodeOnBlurCallback(FrameNode* frameNode, OnBlurFunc&& onBlurCallback);
+    static void SetJSFrameNodeOnHover(FrameNode* frameNode, OnHoverFunc&& onHoverEventFunc);
+    static void SetJSFrameNodeOnMouse(FrameNode* frameNode, OnMouseEventFunc&& onMouseEventFunc);
+    static void ClearJSFrameNodeOnClick(FrameNode* frameNode);
+    static void ClearJSFrameNodeOnTouch(FrameNode* frameNode);
+    static void ClearJSFrameNodeOnAppear(FrameNode* frameNode);
+    static void ClearJSFrameNodeOnDisappear(FrameNode* frameNode);
+    static void ClearJSFrameNodeOnKeyCallback(FrameNode* frameNode);
+    static void ClearJSFrameNodeOnFocusCallback(FrameNode* frameNode);
+    static void ClearJSFrameNodeOnBlurCallback(FrameNode* frameNode);
+    static void ClearJSFrameNodeOnHover(FrameNode* frameNode);
+    static void ClearJSFrameNodeOnMouse(FrameNode* frameNode);
 
     static float GetFlexGrow(FrameNode* frameNode);
     static float GetFlexShrink(FrameNode* frameNode);
@@ -560,7 +590,7 @@ public:
     static bool GetEnabled(FrameNode* frameNode);
     static MarginProperty GetMargin(FrameNode* frameNode);
     static TranslateOptions GetTranslate(FrameNode* frameNode);
-
+    static float GetAspectRatio(FrameNode* frameNode);
 private:
     static void AddDragFrameNodeToManager();
 };

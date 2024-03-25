@@ -75,6 +75,8 @@ public:
     bool AddElement(const RefPtr<Element>& element);
 
     RefPtr<NG::UINode> GetUINodeById(ElementIdType elementId);
+    NG::FrameNode* GetFrameNodePtrById(ElementIdType elementId);
+
     bool AddUINode(const RefPtr<NG::UINode>& node);
 
     bool Exists(ElementIdType elementId);

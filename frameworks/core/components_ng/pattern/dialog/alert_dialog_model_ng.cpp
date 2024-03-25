@@ -55,6 +55,7 @@ void AlertDialogModelNG::SetShowDialog(const DialogProperties& arg)
             if (container->IsSubContainer()) {
                 currentId = SubwindowManager::GetInstance()->GetParentContainerId(currentId);
                 container = AceEngine::Get().GetContainer(currentId);
+                CHECK_NULL_VOID(container);
             }
             ContainerScope scope(currentId);
             RefPtr<NG::FrameNode> dialog;

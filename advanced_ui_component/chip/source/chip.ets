@@ -475,7 +475,7 @@ export struct ChipComponent {
   }
 
   private getChipActive(): boolean {
-    return this.chipActivated || this.chipActivated === void (0)
+    return this.chipActivated
   }
 
   private getChipNodeOpacity(): number {

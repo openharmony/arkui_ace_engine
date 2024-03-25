@@ -43,11 +43,15 @@
 namespace OHOS::Ace {
 namespace {
 constexpr int32_t MAXIMUM_WAITING_PERIOD = 2800;
-constexpr OHOS::HiviewDFX::HiLogLabel ACE_DOWNLOAD_MANAGER = { LOG_CORE, 0xC0393A, "DownloadManager" };
-#define LOGI(fmt, ...) \
-    (void)OHOS::HiviewDFX::HiLog::Info(ACE_DOWNLOAD_MANAGER, "[%{public}d]" fmt, __LINE__, ##__VA_ARGS__)
-#define LOGE(fmt, ...) \
-    (void)OHOS::HiviewDFX::HiLog::Error(ACE_DOWNLOAD_MANAGER, "[%{public}d]" fmt, __LINE__, ##__VA_ARGS__)
+
+#define PRINT_LOG(level, fmt, ...) \
+    HILOG_IMPL(LOG_CORE, LOG_##level, 0xC0393A, "DownloadManager", "[%{public}s:%{public}d]" fmt, \
+        __FUNCTION__, __LINE__, ##__VA_ARGS__)
+
+#define LOGE(fmt, ...) PRINT_LOG(ERROR, fmt, ##__VA_ARGS__)
+#define LOGW(fmt, ...) PRINT_LOG(WARN, fmt, ##__VA_ARGS__)
+#define LOGI(fmt, ...) PRINT_LOG(INFO, fmt, ##__VA_ARGS__)
+#define LOGD(fmt, ...) PRINT_LOG(DEBUG, fmt, ##__VA_ARGS__)
 } // namespace
 
 // For sync download tasks, this period may cause image not able to be loaded.

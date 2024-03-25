@@ -232,6 +232,11 @@ public:
         return isHookModeEnabled_;
     }
 
+    static bool GetDeveloperModeOn()
+    {
+        return developerModeOn_;
+    }
+
     static bool GetDebugBoundaryEnabled()
     {
         return debugBoundaryEnabled_;
@@ -454,6 +459,8 @@ public:
 
     static void SetLayoutTraceEnabled(bool layoutTraceEnable);
 
+    static void SetInputEventTraceEnabled(bool inputEventTraceEnable);
+
     static void SetSecurityDevelopermodeLayoutTraceEnabled(bool layoutTraceEnable);
 
     static void SetDebugBoundaryEnabled(bool debugBoundaryEnabled);
@@ -465,6 +472,7 @@ public:
 
 private:
     static bool traceEnabled_;
+    static bool developerModeOn_;
     static bool svgTraceEnable_;
     static bool layoutTraceEnable_;
     static bool traceInputEventEnable_;

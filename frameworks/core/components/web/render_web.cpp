@@ -171,6 +171,9 @@ void RenderWeb::Update(const RefPtr<Component>& component)
         delegate_->UpdatePinchSmoothModeEnabled(web->GetPinchSmoothModeEnabled());
         delegate_->UpdateMultiWindowAccess(web->GetMultiWindowAccessEnabled());
         delegate_->UpdateAllowWindowOpenMethod(web->GetAllowWindowOpenMethod());
+        delegate_->UpdateNativeVideoPlayerConfig(
+            std::get<0>(web->GetNativeVideoPlayerConfig()),
+            std::get<1>(web->GetNativeVideoPlayerConfig()));
         auto userAgent = web->GetUserAgent();
         if (!userAgent.empty()) {
             delegate_->UpdateUserAgent(userAgent);

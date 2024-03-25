@@ -94,6 +94,11 @@ public:
         gestureHub_ = gestureHub;
     }
 
+    void SetThumbnailDeadline(int32_t deadlineTime)
+    {
+        thumbnailDeadline = deadlineTime;
+    }
+
     void SetThumbnailCallback(std::function<void(Offset)>&& callback)
     {
         callback_ = std::move(callback);

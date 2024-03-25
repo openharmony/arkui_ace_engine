@@ -28,7 +28,9 @@
 namespace OHOS::Ace::NG {
 namespace {
 constexpr int32_t YEAR_INDEX = 0;
+constexpr int32_t FIRST_SLASH = 1;
 constexpr int32_t MONTH_INDEX = 2;
+constexpr int32_t SECOND_SLASH = 3;
 constexpr int32_t DAY_INDEX = 4;
 constexpr int32_t YEAR_LENTH = 4;
 constexpr int32_t ADD_BUTTON_INDEX = 0;
@@ -238,7 +240,9 @@ void CalendarPickerPattern::ResetTextState()
     auto contentNode = AceType::DynamicCast<FrameNode>(host->GetFirstChild());
     CHECK_NULL_VOID(contentNode);
     ResetTextStateByNode(DynamicCast<FrameNode>(contentNode->GetChildAtIndex(YEAR_INDEX)));
+    ResetTextStateByNode(DynamicCast<FrameNode>(contentNode->GetChildAtIndex(FIRST_SLASH)));
     ResetTextStateByNode(DynamicCast<FrameNode>(contentNode->GetChildAtIndex(MONTH_INDEX)));
+    ResetTextStateByNode(DynamicCast<FrameNode>(contentNode->GetChildAtIndex(SECOND_SLASH)));
     ResetTextStateByNode(DynamicCast<FrameNode>(contentNode->GetChildAtIndex(DAY_INDEX)));
 }
 

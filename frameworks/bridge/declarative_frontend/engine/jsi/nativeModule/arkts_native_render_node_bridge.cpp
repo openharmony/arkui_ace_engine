@@ -445,13 +445,9 @@ ArkUINativeModuleValue RenderNodeBridge::SetRectMask(ArkUIRuntimeCallInfo* runti
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
 
     auto leftValue = RenderNodeBridge::GetNumber<float>(vm, runtimeCallInfo, 1, 0.0f);
-    leftValue = PipelineBase::Vp2PxWithCurrentDensity(leftValue);
     auto topValue = RenderNodeBridge::GetNumber<float>(vm, runtimeCallInfo, 2, 0.0f);
-    topValue = PipelineBase::Vp2PxWithCurrentDensity(topValue);
     auto rightValue = RenderNodeBridge::GetNumber<float>(vm, runtimeCallInfo, 3, 0.0f);
-    rightValue = PipelineBase::Vp2PxWithCurrentDensity(rightValue);
     auto bottomValue = RenderNodeBridge::GetNumber<float>(vm, runtimeCallInfo, 4, 0.0f);
-    bottomValue = PipelineBase::Vp2PxWithCurrentDensity(bottomValue);
     auto fillColorValue = RenderNodeBridge::GetNumber<uint32_t>(vm, runtimeCallInfo, 5, DEFAULT_COLOR);
     auto strokeColorValue = RenderNodeBridge::GetNumber<uint32_t>(vm, runtimeCallInfo, 6, DEFAULT_COLOR);
     auto strokeWidthValue = RenderNodeBridge::GetNumber<float>(vm, runtimeCallInfo, 7, 0.0f);
@@ -470,11 +466,8 @@ ArkUINativeModuleValue RenderNodeBridge::SetCircleMask(ArkUIRuntimeCallInfo* run
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
 
     auto centerXValue = RenderNodeBridge::GetNumber<float>(vm, runtimeCallInfo, 1, 0.0f);
-    centerXValue = PipelineBase::Vp2PxWithCurrentDensity(centerXValue);
     auto centerYValue = RenderNodeBridge::GetNumber<float>(vm, runtimeCallInfo, 2, 0.0f);
-    centerYValue = PipelineBase::Vp2PxWithCurrentDensity(centerYValue);
     auto radiusValue = RenderNodeBridge::GetNumber<float>(vm, runtimeCallInfo, 3, 0.0f);
-    radiusValue = PipelineBase::Vp2PxWithCurrentDensity(radiusValue);
     auto fillColorValue = RenderNodeBridge::GetNumber<uint32_t>(vm, runtimeCallInfo, 4, DEFAULT_COLOR);
     auto strokeColorValue = RenderNodeBridge::GetNumber<uint32_t>(vm, runtimeCallInfo, 5, DEFAULT_COLOR);
     auto strokeWidthValue = RenderNodeBridge::GetNumber<float>(vm, runtimeCallInfo, 6, 0.0f);
@@ -505,13 +498,9 @@ ArkUINativeModuleValue RenderNodeBridge::SetRoundRectMask(ArkUIRuntimeCallInfo* 
     auto bottomRightYValue = RenderNodeBridge::GetNumber<float>(vm, runtimeCallInfo, 8, 0.0f);
 
     auto leftValue = RenderNodeBridge::GetNumber<float>(vm, runtimeCallInfo, 9, 0.0f);
-    leftValue = PipelineBase::Vp2PxWithCurrentDensity(leftValue);
     auto topValue = RenderNodeBridge::GetNumber<float>(vm, runtimeCallInfo, 10, 0.0f);
-    topValue = PipelineBase::Vp2PxWithCurrentDensity(topValue);
     auto rightValue = RenderNodeBridge::GetNumber<float>(vm, runtimeCallInfo, 11, 0.0f);
-    rightValue = PipelineBase::Vp2PxWithCurrentDensity(rightValue);
     auto bottomValue = RenderNodeBridge::GetNumber<float>(vm, runtimeCallInfo, 12, 0.0f);
-    bottomValue = PipelineBase::Vp2PxWithCurrentDensity(bottomValue);
 
     auto fillColorValue = RenderNodeBridge::GetNumber<uint32_t>(vm, runtimeCallInfo, 13, DEFAULT_COLOR);
     auto strokeColorValue = RenderNodeBridge::GetNumber<uint32_t>(vm, runtimeCallInfo, 14, DEFAULT_COLOR);
@@ -536,13 +525,9 @@ ArkUINativeModuleValue RenderNodeBridge::SetOvalMask(ArkUIRuntimeCallInfo* runti
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
 
     auto leftValue = RenderNodeBridge::GetNumber<float>(vm, runtimeCallInfo, 1, 0.0f);
-    leftValue = PipelineBase::Vp2PxWithCurrentDensity(leftValue);
     auto topValue = RenderNodeBridge::GetNumber<float>(vm, runtimeCallInfo, 2, 0.0f);
-    topValue = PipelineBase::Vp2PxWithCurrentDensity(topValue);
     auto rightValue = RenderNodeBridge::GetNumber<float>(vm, runtimeCallInfo, 3, 0.0f);
-    rightValue = PipelineBase::Vp2PxWithCurrentDensity(rightValue);
     auto bottomValue = RenderNodeBridge::GetNumber<float>(vm, runtimeCallInfo, 4, 0.0f);
-    bottomValue = PipelineBase::Vp2PxWithCurrentDensity(bottomValue);
 
     auto fillColorValue = RenderNodeBridge::GetNumber<uint32_t>(vm, runtimeCallInfo, 5, DEFAULT_COLOR);
     auto strokeColorValue = RenderNodeBridge::GetNumber<uint32_t>(vm, runtimeCallInfo, 6, DEFAULT_COLOR);

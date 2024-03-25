@@ -551,4 +551,14 @@ int32_t SecurityComponentHandler::ReportSecurityComponentClickEvent(int32_t& scI
     }
     return ReportSecurityComponentClickEventInner(scId, node, secEvent);
 }
+
+bool SecurityComponentHandler::IsSecurityComponentServiceExist()
+{
+    return SecCompKit::IsServiceExist();
+}
+
+bool SecurityComponentHandler::LoadSecurityComponentService()
+{
+    return SecCompKit::LoadService();
+}
 } // namespace OHOS::Ace::NG

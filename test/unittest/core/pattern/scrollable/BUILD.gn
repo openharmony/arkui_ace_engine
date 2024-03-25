@@ -15,5 +15,9 @@ import("//foundation/arkui/ace_engine/test/unittest/ace_unittest.gni")
 
 ace_unittest("scrollable_test_ng") {
   type = "new"
-  sources = [ "scrollable_test_ng.cpp" ]
+  sources = [
+    "scrollable_event_test.cpp",
+    "scrollable_test_ng.cpp",
+    "scrollable_utils_test.cpp",
+  ]
 }

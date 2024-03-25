@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -50,6 +50,14 @@ const std::vector<TextAlign> TEXT_ALIGNS = { TextAlign::START, TextAlign::CENTER
 const uint32_t ERROR_UINT_CODE = -1;
 const float ERROR_FLOAT_CODE = -1.0f;
 const int32_t ERROR_INT_CODE = -1;
+constexpr int CALL_ARG_0 = 0;
+constexpr int CALL_ARG_1 = 1;
+constexpr int CALL_ARG_2 = 2;
+constexpr int CALL_ARG_3 = 3;
+constexpr int32_t DEFAULT_GROUP_UNDERLINE_COLOR_VALUES_COUNT = 4;
+constexpr TextDecoration DEFAULT_TEXT_DECORATION = TextDecoration::NONE;
+constexpr Color DEFAULT_DECORATION_COLOR = Color(0xff000000);
+constexpr TextDecorationStyle DEFAULT_DECORATION_STYLE = TextDecorationStyle::SOLID;
 std::string g_strValue;
 
 void SetTextInputCaretColor(ArkUINodeHandle node, ArkUI_Uint32 color)
@@ -784,93 +792,151 @@ ArkUI_Float32 GetTextInputFontSize(ArkUINodeHandle node)
     return TextFieldModelNG::GetFontSize(frameNode).Value();
 }
 
+void SetTextInputBackgroundColor(ArkUINodeHandle node, ArkUI_Uint32 color)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    TextFieldModelNG::SetBackgroundColor(frameNode, Color(color));
+}
+
+void ResetTextInputBackgroundColor(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    Color backgroundColor;
+    auto pipeline = PipelineBase::GetCurrentContextSafely();
+    CHECK_NULL_VOID(pipeline);
+    auto buttonTheme = pipeline->GetTheme<TextFieldTheme>();
+    CHECK_NULL_VOID(buttonTheme);
+    backgroundColor = buttonTheme->GetBgColor();
+    TextFieldModelNG::SetBackgroundColor(frameNode, backgroundColor);
+}
+
+void SetTextInputNormalUnderlineColor(ArkUINodeHandle node, ArkUI_Uint32 normalColor)
+{
+    auto *frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    TextFieldModelNG::SetNormalUnderlineColor(frameNode, Color(normalColor));
+}
+
+void SetTextInputUserUnderlineColor(ArkUINodeHandle node, const ArkUI_Float32* values,
+    ArkUI_Int32 length)
+{
+    auto *frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    UserUnderlineColor userColor = UserUnderlineColor();
+    if (length != DEFAULT_GROUP_UNDERLINE_COLOR_VALUES_COUNT) {
+        return;
+    }
+    userColor.typing = Color(values[CALL_ARG_0]);
+    userColor.normal = Color(values[CALL_ARG_1]);
+    userColor.error = Color(values[CALL_ARG_2]);
+    userColor.disable = Color(values[CALL_ARG_3]);
+    TextFieldModelNG::SetUserUnderlineColor(frameNode, userColor);
+}
+
+void ResetTextInputUserUnderlineColor(ArkUINodeHandle node)
+{
+    auto *frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    UserUnderlineColor userColor = UserUnderlineColor();
+    TextFieldModelNG::SetUserUnderlineColor(frameNode, userColor);
+}
+
+void SetTextInputTextSelection(ArkUINodeHandle node, ArkUI_Int32 start, ArkUI_Int32 end)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    TextFieldModelNG::SetTextSelection(frameNode, start, end);
+}
+
+ArkUI_Int32 GetTextInputTextSelectionIndex(ArkUINodeHandle node, ArkUI_Bool isEnd)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, ERROR_INT_CODE);
+    return TextFieldModelNG::GetTextSelectionIndex(frameNode, isEnd);
+}
+void SetTextInputDecoration(ArkUINodeHandle node, ArkUI_Int32 decoration, ArkUI_Uint32 color, ArkUI_Int32 style)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    TextFieldModelNG::SetTextDecoration(frameNode, static_cast<TextDecoration>(decoration));
+    TextFieldModelNG::SetTextDecorationColor(frameNode, Color(color));
+    TextFieldModelNG::SetTextDecorationStyle(frameNode, static_cast<TextDecorationStyle>(style));
+}
+
+void ResetTextInputDecoration(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    TextFieldModelNG::SetTextDecoration(frameNode, DEFAULT_TEXT_DECORATION);
+    TextFieldModelNG::SetTextDecorationColor(frameNode, DEFAULT_DECORATION_COLOR);
+    TextFieldModelNG::SetTextDecorationStyle(frameNode, DEFAULT_DECORATION_STYLE);
+}
+
+void SetTextInputLetterSpacing(ArkUINodeHandle node, ArkUI_Float32 value, ArkUI_Int32 unit)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    TextFieldModelNG::SetLetterSpacing(frameNode, CalcDimension(value, (DimensionUnit)unit));
+}
+
+void ResetTextInputLetterSpacing(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    CalcDimension value;
+    value.Reset();
+    TextFieldModelNG::SetLetterSpacing(frameNode, value);
+}
+
+void SetTextInputLineHeight(ArkUINodeHandle node, ArkUI_Float32 value, ArkUI_Int32 unit)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    TextFieldModelNG::SetLineHeight(frameNode, CalcDimension(value, (DimensionUnit)unit));
+}
+
+void ResetTextInputLineHeight(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    CalcDimension value;
+    value.Reset();
+    TextFieldModelNG::SetLineHeight(frameNode, value);
+}
+
 } // namespace
 
 namespace NodeModifier {
 const ArkUITextInputModifier* GetTextInputModifier()
 {
-    static const ArkUITextInputModifier modifier = {
-        SetTextInputCaretColor,
-        ResetTextInputCaretColor,
-        SetTextInputType,
-        ResetTextInputType,
-        SetTextInputMaxLines,
-        ResetTextInputMaxLines,
-        SetTextInputPlaceholderColor,
-        ResetTextInputPlaceholderColor,
-        SetTextInputCaretPosition,
-        ResetTextInputCaretPosition,
-        SetTextInputCopyOption,
-        ResetTextInputCopyOption,
-        SetTextInputShowPasswordIcon,
-        ResetTextInputShowPasswordIcon,
-        SetTextInputPasswordIcon,
-        ResetTextInputPasswordIcon,
-        SetTextInputTextAlign,
-        ResetTextInputTextAlign,
-        SetTextInputStyle,
-        ResetTextInputStyle,
-        SetTextInputSelectionMenuHidden,
-        ResetTextInputSelectionMenuHidden,
-        SetTextInputShowUnderline,
-        ResetTextInputShowUnderline,
-        SetTextInputCaretStyle,
-        ResetTextInputCaretStyle,
-        SetTextInputEnableKeyboardOnFocus,
-        ResetTextInputEnableKeyboardOnFocus,
-        SetTextInputBarState,
-        ResetTextInputBarState,
-        SetTextInputEnterKeyType,
-        ResetTextInputEnterKeyType,
-        SetTextInputFontWeight,
-        ResetTextInputFontWeight,
-        SetTextInputFontSize,
-        ResetTextInputFontSize,
-        SetTextInputMaxLength,
-        ResetTextInputMaxLength,
-        SetTextInputSelectedBackgroundColor,
-        ResetTextInputSelectedBackgroundColor,
-        SetTextInputShowError,
-        ResetTextInputShowError,
-        SetTextInputPlaceholderFont,
-        ResetTextInputPlaceholderFont,
-        SetTextInputFontColor,
-        ResetTextInputFontColor,
-        SetTextInputFontStyle,
-        ResetTextInputFontStyle,
-        SetTextInputFontFamily,
-        ResetTextInputFontFamily,
-        SetTextInputPlaceholderString,
-        SetTextInputTextString,
-        SetTextInputFontWeightStr,
-        StopTextInputTextEditing,
-        SetTextInputCancelButton,
-        ResetTextInputCancelButton,
-        GetTextInputPlaceholder,
-        GetTextInputText,
-        GetTextInputCaretColor,
-        GetTextInputCaretStyle,
-        GetTextInputShowUnderline,
-        GetTextInputMaxLength,
-        GetTextInputEnterKeyType,
-        GetTextInputPlaceholderColor,
-        GetTextInputPlaceholderFont,
-        GetTextInputRequestKeyboardOnFocus,
-        GetTextInputType,
-        GetTextInputSelectedBackgroundColor,
-        GetTextInputShowPasswordIcon,
-        GetTextInputEditing,
-        GetTextInputShowCancelButton,
-        GetTextInputCancelIconSize,
-        GetTextInputTextCanacelIconSrc,
-        GetTextInputTextCanacelIconColor,
-        GetTextInputTextAlign,
-        GetTextInputFontColor,
-        GetTextInputFontStyle,
-        GetTextInputFontWeight,
-        GetTextInputFontSize,
-        GetTextInputCancelButtonStyle,
-    };
+    static const ArkUITextInputModifier modifier = { SetTextInputCaretColor, ResetTextInputCaretColor, SetTextInputType,
+        ResetTextInputType, SetTextInputMaxLines, ResetTextInputMaxLines, SetTextInputPlaceholderColor,
+        ResetTextInputPlaceholderColor, SetTextInputCaretPosition, ResetTextInputCaretPosition, SetTextInputCopyOption,
+        ResetTextInputCopyOption, SetTextInputShowPasswordIcon, ResetTextInputShowPasswordIcon,
+        SetTextInputPasswordIcon, ResetTextInputPasswordIcon, SetTextInputTextAlign, ResetTextInputTextAlign,
+        SetTextInputStyle, ResetTextInputStyle, SetTextInputSelectionMenuHidden, ResetTextInputSelectionMenuHidden,
+        SetTextInputShowUnderline, ResetTextInputShowUnderline, SetTextInputCaretStyle, ResetTextInputCaretStyle,
+        SetTextInputEnableKeyboardOnFocus, ResetTextInputEnableKeyboardOnFocus, SetTextInputBarState,
+        ResetTextInputBarState, SetTextInputEnterKeyType, ResetTextInputEnterKeyType, SetTextInputFontWeight,
+        ResetTextInputFontWeight, SetTextInputFontSize, ResetTextInputFontSize, SetTextInputMaxLength,
+        ResetTextInputMaxLength, SetTextInputSelectedBackgroundColor, ResetTextInputSelectedBackgroundColor,
+        SetTextInputShowError, ResetTextInputShowError, SetTextInputPlaceholderFont, ResetTextInputPlaceholderFont,
+        SetTextInputFontColor, ResetTextInputFontColor, SetTextInputFontStyle, ResetTextInputFontStyle,
+        SetTextInputFontFamily, ResetTextInputFontFamily, SetTextInputPlaceholderString, SetTextInputTextString,
+        SetTextInputFontWeightStr, StopTextInputTextEditing, SetTextInputCancelButton, ResetTextInputCancelButton,
+        GetTextInputPlaceholder, GetTextInputText, GetTextInputCaretColor, GetTextInputCaretStyle,
+        GetTextInputShowUnderline, GetTextInputMaxLength, GetTextInputEnterKeyType, GetTextInputPlaceholderColor,
+        GetTextInputPlaceholderFont, GetTextInputRequestKeyboardOnFocus, GetTextInputType,
+        GetTextInputSelectedBackgroundColor, GetTextInputShowPasswordIcon, GetTextInputEditing,
+        GetTextInputShowCancelButton, GetTextInputCancelIconSize, GetTextInputTextCanacelIconSrc,
+        GetTextInputTextCanacelIconColor, GetTextInputTextAlign, GetTextInputFontColor, GetTextInputFontStyle,
+        GetTextInputFontWeight, GetTextInputFontSize, GetTextInputCancelButtonStyle, SetTextInputBackgroundColor,
+        ResetTextInputBackgroundColor, SetTextInputNormalUnderlineColor, SetTextInputUserUnderlineColor,
+        ResetTextInputUserUnderlineColor, SetTextInputTextSelection, GetTextInputTextSelectionIndex,
+        SetTextInputDecoration, ResetTextInputDecoration, SetTextInputLetterSpacing, ResetTextInputLetterSpacing,
+        SetTextInputLineHeight, ResetTextInputLineHeight };
     return &modifier;
 }
 
@@ -934,5 +1000,20 @@ void SetOnTextInputPaste(ArkUINodeHandle node, void* extraParam)
     TextFieldModelNG::SetOnPasteWithEvent(frameNode, std::move(onPaste));
 }
 
+void SetOnTextInputSelectionChange(ArkUINodeHandle node, void* extraParam)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto onSelectionChange = [node, extraParam](int32_t start, int32_t end) {
+        ArkUINodeEvent event;
+        event.kind = TEXT_INPUT;
+        event.extraParam = reinterpret_cast<intptr_t>(extraParam);
+        event.textInputEvent.subKind = ON_TEXT_INPUT_TEXT_SELECTION_CHANGE;
+        event.componentAsyncEvent.data[0].i32 = static_cast<int>(start);
+        event.componentAsyncEvent.data[1].i32 = static_cast<int>(end);
+        SendArkUIAsyncEvent(&event);
+    };
+    TextFieldModelNG::SetOnTextSelectionChange(frameNode, std::move(onSelectionChange));
+}
 } // namespace NodeModifier
 } // namespace OHOS::Ace::NG

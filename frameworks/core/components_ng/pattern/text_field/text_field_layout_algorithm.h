@@ -137,6 +137,12 @@ protected:
     bool autoWidth_ = false;
 
 private:
+    static void UpdateTextStyleMore(const RefPtr<FrameNode>& frameNode,
+        const RefPtr<TextFieldLayoutProperty>& layoutProperty, const RefPtr<TextFieldTheme>& theme,
+        TextStyle& textStyle, bool isDisabled);
+    static void UpdatePlaceholderTextStyleMore(const RefPtr<FrameNode>& frameNode,
+        const RefPtr<TextFieldLayoutProperty>& layoutProperty, const RefPtr<TextFieldTheme>& theme,
+        TextStyle& placeholderTextStyle, bool isDisabled);
     float GetVisualTextWidth() const;
     void CalcInlineMeasureItem(LayoutWrapper* layoutWrapper);
 

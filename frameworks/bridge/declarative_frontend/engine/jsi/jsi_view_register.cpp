@@ -1235,6 +1235,7 @@ void JsRegisterFormViews(
     JSObjectTemplate sliderStyle;
     sliderStyle.Constant("OutSet", 0);
     sliderStyle.Constant("InSet", 1);
+    sliderStyle.Constant("NONE", 2);
 
     JSObjectTemplate sliderChangeMode;
     sliderChangeMode.Constant("Begin", 0);
@@ -1425,6 +1426,7 @@ void JsRegisterViews(BindingTarget globalObj, void* nativeEngine)
     JSObjectTemplate sliderStyle;
     sliderStyle.Constant("OutSet", 0);
     sliderStyle.Constant("InSet", 1);
+    sliderStyle.Constant("NONE", 2);
 
     JSObjectTemplate sliderChangeMode;
     sliderChangeMode.Constant("Begin", 0);

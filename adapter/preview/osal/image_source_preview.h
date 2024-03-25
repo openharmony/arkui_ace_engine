@@ -28,6 +28,7 @@ public:
     RefPtr<PixelMap> CreatePixelMap(uint32_t index, const Size& size) override;
     RefPtr<PixelMap> CreatePixelMap() override;
     Size GetImageSize() override;
+    uint32_t GetFrameCount() override;
 };
 } // namespace OHOS::Ace
 #endif // FOUNDATION_ACE_ADAPTER_PREVIEW_OSAL_IMAGE_SOURCE_PREVIEW_H

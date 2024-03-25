@@ -46,17 +46,13 @@ public:
             }
 
             // init theme from global data
-            ParsePattern(themeConstants->GetThemeStyle(), theme);
+            ParsePattern(themeConstants, theme);
             return theme;
         }
 
-        void ParsePattern(const RefPtr<ThemeStyle>& themeStyle, const RefPtr<CounterTheme>& theme) const
+        void ParsePattern(const RefPtr<ThemeConstants>& themeConstants, const RefPtr<CounterTheme>& theme) const
         {
-            if (!themeStyle) {
-                LOGW("Counter parse pattern failed, theme style is null");
-                return;
-            }
-            auto counterPattern = themeStyle->GetAttr<RefPtr<ThemeStyle>>(THEME_PATTERN_COUNTER, nullptr);
+            RefPtr<ThemeStyle> counterPattern = themeConstants->GetPatternByName(THEME_PATTERN_COUNTER);
             if (!counterPattern) {
                 LOGW("find pattern of counter fail");
                 return;

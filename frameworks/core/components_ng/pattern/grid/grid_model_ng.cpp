@@ -290,7 +290,7 @@ void GridModelNG::AddDragFrameNodeToManager() const
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
 
-    dragDropManager->AddGridDragFrameNode(frameNode->GetId(), AceType::WeakClaim(AceType::RawPtr(frameNode)));
+    dragDropManager->AddGridDragFrameNode(frameNode->GetId(), AceType::WeakClaim(frameNode));
 }
 
 void GridModelNG::SetOnScroll(OnScrollEvent&& onScroll)

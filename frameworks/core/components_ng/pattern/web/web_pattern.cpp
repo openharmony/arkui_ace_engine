@@ -39,6 +39,7 @@
 #include "core/components_ng/pattern/menu/menu_view.h"
 #include "core/components_ng/pattern/menu/wrapper/menu_wrapper_pattern.h"
 #include "core/components_ng/pattern/overlay/overlay_manager.h"
+#include "core/components_ng/pattern/refresh/refresh_pattern.h"
 #include "core/components_ng/pattern/swiper/swiper_pattern.h"
 #include "core/components_ng/pattern/web/web_event_hub.h"
 #include "core/event/key_event.h"
@@ -160,6 +161,7 @@ constexpr double DEFAULT_AXIS_RATIO = -0.06;
 constexpr double DEFAULT_WEB_WIDTH = 100.0;
 constexpr double DEFAULT_WEB_HEIGHT = 80.0;
 constexpr uint32_t ADJUST_WEB_DRAW_LENGTH = 3000;
+constexpr int32_t FIT_CONTENT_LIMIT_LENGTH = 8000;
 const std::string PATTERN_TYPE_WEB = "WEBPATTERN";
 const std::string DEFAULT_WEB_TEXT_ENCODING_FORMAT = "UTF-8";
 constexpr int32_t SYNC_SURFACE_QUEUE_SIZE = 8;
@@ -269,6 +271,8 @@ void WebPattern::InitEvent()
         WebPattern->UpdateLocale();
     };
     context->SetConfigChangedCallback(std::move(langTask));
+
+    RegisterVisibleAreaChangeCallback();
 }
 
 void WebPattern::InitFeatureParam()
@@ -285,9 +289,13 @@ void WebPattern::InitPanEvent(const RefPtr<GestureEventHub>& gestureHub)
     auto actionStartTask = [weak = WeakClaim(this)](const GestureEvent& event) {
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
+        // Determine if there is already a fixed nested scroll mode.
+        if (!pattern->GetIsFixedNestedScrollMode()) {
+            pattern->SetParentScrollable();
+        }
         pattern->OnScrollStartRecursive(pattern->GetParentAxis() == Axis::HORIZONTAL
-                                    ? event.GetGlobalLocation().GetX()
-                                    : event.GetGlobalLocation().GetY());
+            ? std::vector<float>({ event.GetGlobalLocation().GetX(), event.GetGlobalLocation().GetY() })
+            : std::vector<float>({ event.GetGlobalLocation().GetY(), event.GetGlobalLocation().GetX() }));
     };
     auto actionUpdateTask = [weak = WeakClaim(this)](const GestureEvent& event) {
         auto pattern = weak.Upgrade();
@@ -1337,6 +1345,13 @@ void WebPattern::OnCopyOptionModeUpdate(int32_t mode)
     }
 }
 
+void WebPattern::OnMetaViewportUpdate(bool value)
+{
+    if (delegate_) {
+        delegate_->UpdateMetaViewport(value);
+    }
+}
+
 void WebPattern::OnForceDarkAccessUpdate(bool access)
 {
     if (delegate_) {
@@ -1541,6 +1556,13 @@ void WebPattern::OnNativeEmbedRuleTypeUpdate(const std::string& type)
     }
 }
 
+void WebPattern::OnTextAutosizingUpdate(bool isTextAutosizing)
+{
+    if (delegate_) {
+        delegate_->UpdateTextAutosizing(isTextAutosizing);
+    }
+}
+
 bool WebPattern::IsRootNeedExportTexture()
 {
     auto host = GetHost();
@@ -1570,6 +1592,14 @@ void WebPattern::OnDefaultTextEncodingFormatUpdate(const std::string& value)
 {
     if (delegate_) {
         delegate_->UpdateDefaultTextEncodingFormat(value);
+    }
+}
+
+void WebPattern::OnNativeVideoPlayerConfigUpdate(const std::tuple<bool, bool>& config)
+{
+    if (delegate_) {
+        delegate_->UpdateNativeVideoPlayerConfig(
+            std::get<0>(config), std::get<1>(config));
     }
 }
 
@@ -1694,6 +1724,10 @@ void WebPattern::OnModifyDone()
         delegate_->UpdateScrollBarColor(GetScrollBarColorValue(DEFAULT_SCROLLBAR_COLOR));
         delegate_->UpdateOverScrollMode(GetOverScrollModeValue(OverScrollMode::NEVER));
         delegate_->UpdateCopyOptionMode(GetCopyOptionModeValue(static_cast<int32_t>(CopyOptions::Distributed)));
+        delegate_->UpdateTextAutosizing(GetTextAutosizingValue(true));
+        if (GetMetaViewport()) {
+            delegate_->UpdateMetaViewport(GetMetaViewport().value());
+        }
         if (GetBlockNetwork()) {
             delegate_->UpdateBlockNetwork(GetBlockNetwork().value());
         }
@@ -1709,6 +1743,8 @@ void WebPattern::OnModifyDone()
             webAccessibilityNode_ = AceType::MakeRefPtr<WebAccessibilityNode>(host);
         }
         delegate_->UpdateNativeEmbedModeEnabled(GetNativeEmbedModeEnabledValue(false));
+        delegate_->UpdateNativeEmbedRuleTag(GetNativeEmbedRuleTagValue(""));
+        delegate_->UpdateNativeEmbedRuleType(GetNativeEmbedRuleTypeValue(""));
         accessibilityState_ = AceApplicationInfo::GetInstance().IsAccessibilityEnabled();
         if (accessibilityState_) {
             delegate_->SetAccessibilityState(true);
@@ -1875,7 +1911,6 @@ void WebPattern::HandleTouchDown(const TouchEventInfo& info, bool fromOverlay)
 
 void WebPattern::HandleTouchUp(const TouchEventInfo& info, bool fromOverlay)
 {
-    ResetDragAction();
     CHECK_NULL_VOID(delegate_);
     std::list<TouchInfo> touchInfos;
     if (!ParseTouchInfo(info, touchInfos)) {
@@ -2776,7 +2811,7 @@ void WebPattern::OnActive()
     isActive_ = true;
 }
 
-void WebPattern::OnVisibleChange(bool isVisible)
+void WebPattern::OnVisibleAreaChange(bool isVisible)
 {
     if (isVisible_ == isVisible) {
         return;
@@ -2821,9 +2856,15 @@ int WebPattern::GetWebId()
     return -1;
 }
 
-ScrollResult WebPattern::HandleScroll(float offset, int32_t source, NestedState state)
+ScrollResult WebPattern::HandleScroll(float offset, int32_t source, NestedState state, float velocity)
 {
-    auto parent = parent_.Upgrade();
+    // If no parent object is specified, the nearest nested scrollable parent is used by default.
+    return HandleScroll(GetNestedScrollParent(), offset, source, state);
+}
+
+ScrollResult WebPattern::HandleScroll(RefPtr<NestableScrollContainer> parent, float offset,
+    int32_t source, NestedState state)
+{
     if (parent) {
         source = isMouseEvent_ ? SCROLL_FROM_AXIS : source;
         return parent->HandleScroll(offset, source, state);
@@ -2833,7 +2874,12 @@ ScrollResult WebPattern::HandleScroll(float offset, int32_t source, NestedState 
 
 bool WebPattern::HandleScrollVelocity(float velocity)
 {
-    auto parent = parent_.Upgrade();
+    // If no parent object is specified, the nearest nested scrollable parent is used by default.
+    return HandleScrollVelocity(GetNestedScrollParent(), velocity);
+}
+
+bool WebPattern::HandleScrollVelocity(RefPtr<NestableScrollContainer> parent, float velocity)
+{
     CHECK_NULL_RETURN(parent, false);
     if (InstanceOf<SwiperPattern>(parent)) {
         // When scrolling to the previous SwiperItem, that item needs to be visible. Update the offset slightly to make
@@ -2847,14 +2893,27 @@ bool WebPattern::HandleScrollVelocity(float velocity)
     return false;
 }
 
-void WebPattern::OnScrollStartRecursive(float position)
+void WebPattern::OnScrollStartRecursive(float position, float velocity)
+{
+    // If only one position value is passed, it will be notified to the nearest nested scrollable parent.
+    OnScrollStartRecursive(std::vector({ position }));
+}
+
+void WebPattern::OnScrollStartRecursive(std::vector<float> positions)
 {
     TAG_LOGI(AceLogTag::ACE_WEB, "WebPattern::OnScrollStartRecursive");
-    auto parent = parent_.Upgrade();
-    if (parent) {
-        parent->OnScrollStartRecursive(position);
+    auto it = positions.begin();
+    for (auto parentMap : parentsMap_) {
+        auto parent = parentMap.second.Upgrade();
+        if (parent && it < positions.end()) {
+            parent->OnScrollStartRecursive(*it);
+        }
+        it++;
     }
     isFirstFlingScrollVelocity_ = true;
+    isNeedUpdateScrollAxis_ = true;
+    isNeedUpdateFilterScrolAxis_ = true;
+    isScrollStarted_ = true;
 }
 
 void WebPattern::OnAttachToBuilderNode(NodeStatus nodeStatus)
@@ -2869,25 +2928,63 @@ void WebPattern::OnAttachToBuilderNode(NodeStatus nodeStatus)
 void WebPattern::OnScrollEndRecursive(const std::optional<float>& velocity)
 {
     TAG_LOGI(AceLogTag::ACE_WEB, "WebPattern::OnScrollEndRecursive");
-    auto parent = parent_.Upgrade();
-    if (parent) {
-        parent->OnScrollEndRecursive(std::nullopt);
+    CHECK_EQUAL_VOID(isScrollStarted_, false);
+    for (auto parentMap : parentsMap_) {
+        auto parent = parentMap.second.Upgrade();
+        if (parent) {
+            parent->OnScrollEndRecursive(std::nullopt);
+        }
     }
+    isScrollStarted_ = false;
 }
 
 void WebPattern::OnOverScrollFlingVelocity(float xVelocity, float yVelocity, bool isFling)
 {
-    float velocity = GetAxis() == Axis::HORIZONTAL ? xVelocity : yVelocity;
+    if (isNeedUpdateScrollAxis_) {
+        expectedScrollAxis_ = GetAxis();
+        if (parentsMap_.size() > 1) {
+            expectedScrollAxis_ = (abs(xVelocity) > abs(yVelocity)) ? Axis::HORIZONTAL : Axis::VERTICAL;
+        }
+        isNeedUpdateScrollAxis_ = false;
+    }
+    float velocity = (expectedScrollAxis_ == Axis::HORIZONTAL) ? xVelocity : yVelocity;
+    OnOverScrollFlingVelocityHandler(velocity, isFling);
+
+    if (isFling && Positive(velocity)) {
+        isFlingReachEdge_.atStart = true;
+    } else if (isFling && Negative(velocity)) {
+        isFlingReachEdge_.atEnd = true;
+    }
+}
+
+void WebPattern::OnOverScrollFlingVelocityHandler(float velocity, bool isFling)
+{
+    auto it = parentsMap_.find(expectedScrollAxis_);
+    CHECK_EQUAL_VOID(it, parentsMap_.end());
+    auto parent = it->second;
+    auto nestedScroll = GetNestedScroll();
+    ScrollResult result = { 0.f, true };
+    auto remain = 0.f;
     if (!isFling) {
-        if (scrollState_ && ((velocity < 0 && nestedScrollBackwardMode_ == NestedScrollMode::SELF_FIRST) ||
-                                (velocity > 0 && nestedScrollForwardMode_ == NestedScrollMode::SELF_FIRST))) {
-            HandleScroll(-velocity, SCROLL_FROM_UPDATE, NestedState::CHILD_SCROLL);
+        if (scrollState_) {
+            if (((velocity < 0 && nestedScroll.backward == NestedScrollMode::SELF_FIRST) ||
+                    (velocity > 0 && nestedScroll.forward == NestedScrollMode::SELF_FIRST))) {
+                result = HandleScroll(parent.Upgrade(), -velocity, SCROLL_FROM_UPDATE, NestedState::CHILD_SCROLL);
+                remain = result.remain;
+            } else if (InstanceOf<RefreshPattern>(parent.Upgrade()) &&
+                       ((velocity < 0 && nestedScroll.backward == NestedScrollMode::PARENT_FIRST) ||
+                           (velocity > 0 && nestedScroll.forward == NestedScrollMode::PARENT_FIRST))) {
+                remain = -velocity;
+            }
+            if (!NearZero(remain)) {
+                HandleScroll(parent.Upgrade(), remain, SCROLL_FROM_UPDATE, NestedState::CHILD_OVER_SCROLL);
+            }
         }
     } else {
-        if (((velocity > 0 && nestedScrollBackwardMode_ == NestedScrollMode::SELF_FIRST) ||
-                (velocity < 0 && nestedScrollForwardMode_ == NestedScrollMode::SELF_FIRST))) {
+        if (((velocity > 0 && nestedScroll.backward == NestedScrollMode::SELF_FIRST) ||
+                (velocity < 0 && nestedScroll.forward == NestedScrollMode::SELF_FIRST))) {
             if (isFirstFlingScrollVelocity_) {
-                HandleScrollVelocity(velocity);
+                HandleScrollVelocity(parent.Upgrade(), velocity);
                 isFirstFlingScrollVelocity_ = false;
             }
         }
@@ -2904,14 +3001,23 @@ void WebPattern::OnScrollState(bool scrollState)
 
 Axis WebPattern::GetParentAxis()
 {
-    auto parent = WebSearchParent();
-    parent_ = parent;
+    auto parent = GetNestedScrollParent();
     CHECK_NULL_RETURN(parent, Axis::HORIZONTAL);
     axis_ = parent->GetAxis();
+    parentsMap_ = { { axis_, parent } };
+    auto oppositeParent = SearchParent(axis_ == Axis::HORIZONTAL ? Axis::VERTICAL : Axis::HORIZONTAL);
+    if (oppositeParent) {
+        parentsMap_.emplace(oppositeParent->GetAxis(), oppositeParent);
+    }
     return axis_;
 }
 
-RefPtr<NestableScrollContainer> WebPattern::WebSearchParent()
+RefPtr<NestableScrollContainer> WebPattern::SearchParent()
+{
+    return SearchParent(Axis::NONE);
+}
+
+RefPtr<NestableScrollContainer> WebPattern::SearchParent(Axis scrollAxis)
 {
     auto host = GetHost();
     CHECK_NULL_RETURN(host, nullptr);
@@ -2921,10 +3027,14 @@ RefPtr<NestableScrollContainer> WebPattern::WebSearchParent()
             continue;
         }
         auto pattern = frameNode->GetPattern<NestableScrollContainer>();
-        if (!pattern) {
+        if (!pattern ||
+            (!AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE) &&
+                InstanceOf<RefreshPattern>(pattern))) {
             continue;
         }
-        return pattern;
+        if (scrollAxis == Axis::NONE || scrollAxis == pattern->GetAxis()) {
+            return pattern;
+        }
     }
     return nullptr;
 }
@@ -2947,36 +3057,80 @@ void WebPattern::OnRootLayerChanged(int width, int height)
     frameNode->MarkDirtyNode(PROPERTY_UPDATE_LAYOUT | PROPERTY_UPDATE_MEASURE_SELF_AND_PARENT);
 }
 
-void WebPattern::SetNestedScroll(const NestedScrollOptions& nestedOpt)
-{
-    nestedScrollForwardMode_ = nestedOpt.forward;
-    nestedScrollBackwardMode_ = nestedOpt.backward;
-}
-
 bool WebPattern::FilterScrollEvent(const float x, const float y, const float xVelocity, const float yVelocity)
 {
-    float offset = GetAxis() == Axis::HORIZONTAL ? x : y;
-    float velocity = GetAxis() == Axis::HORIZONTAL ? xVelocity : yVelocity;
-    if (((offset > 0 || velocity > 0) && nestedScrollBackwardMode_ == NestedScrollMode::PARENT_FIRST) ||
-        ((offset < 0 || velocity < 0) && nestedScrollForwardMode_ == NestedScrollMode::PARENT_FIRST)) {
-        if (offset != 0) {
-            auto result = HandleScroll(offset, SCROLL_FROM_UPDATE, NestedState::CHILD_SCROLL);
-            CHECK_NULL_RETURN(delegate_, false);
-            GetAxis() == Axis::HORIZONTAL ? delegate_->ScrollBy(-result.remain, 0)
-                                          : delegate_->ScrollBy(0, -result.remain);
-            return true;
-        } else {
-            return HandleScrollVelocity(velocity);
+    if (isNeedUpdateFilterScrolAxis_) {
+        expectedFilterScrollAxis_ = GetAxis();
+        if (parentsMap_.size() > 1) {
+            expectedFilterScrollAxis_ = (x != 0 || y != 0)
+                ? (abs(x) > abs(y) ? Axis::HORIZONTAL : Axis::VERTICAL)
+                : (abs(xVelocity) > abs(yVelocity) ? Axis::HORIZONTAL : Axis::VERTICAL);
         }
-    } else if (((offset > 0 || velocity > 0) && nestedScrollBackwardMode_ == NestedScrollMode::PARALLEL) ||
-               ((offset < 0 || velocity < 0) && nestedScrollForwardMode_ == NestedScrollMode::PARALLEL)) {
-        if (offset != 0) {
-            HandleScroll(offset, SCROLL_FROM_UPDATE, NestedState::CHILD_SCROLL);
-        } else {
-            HandleScrollVelocity(velocity);
-        }
+        isNeedUpdateFilterScrolAxis_ = false;
     }
+    float offset = expectedFilterScrollAxis_ == Axis::HORIZONTAL ? x : y;
+    float velocity = expectedFilterScrollAxis_ == Axis::HORIZONTAL ? xVelocity : yVelocity;
+    bool isConsumed = offset != 0 ? FilterScrollEventHandleOffset(offset) : FilterScrollEventHandlevVlocity(velocity);
+    return isConsumed;
+}
+
+bool WebPattern::FilterScrollEventHandleOffset(const float offset)
+{
+    auto it = parentsMap_.find(expectedFilterScrollAxis_);
+    CHECK_EQUAL_RETURN(it, parentsMap_.end(), false);
+    auto parent = it->second;
+    auto nestedScroll = GetNestedScroll();
+    if (((offset > 0) && nestedScroll.backward == NestedScrollMode::PARENT_FIRST) ||
+        ((offset < 0) && nestedScroll.forward == NestedScrollMode::PARENT_FIRST)) {
+        auto result = HandleScroll(parent.Upgrade(), offset, SCROLL_FROM_UPDATE, NestedState::CHILD_SCROLL);
+        isParentReachEdge_ = result.reachEdge;
+        CHECK_NULL_RETURN(delegate_, false);
+        auto defaultDisplay = Rosen::DisplayManager::GetInstance().GetDefaultDisplay();
+        CHECK_NULL_RETURN(defaultDisplay, false);
+        auto ratio = defaultDisplay->GetVirtualPixelRatio();
+        if (ratio > 0) {
+            expectedFilterScrollAxis_ == Axis::HORIZONTAL ? delegate_->ScrollBy(-result.remain / ratio, 0)
+                                                          : delegate_->ScrollBy(0, -result.remain / ratio);
+        }
+        CHECK_NULL_RETURN(!NearZero(result.remain), true);
+        UpdateFlingReachEdgeState(offset, false);
+        return true;
+    } else if (((offset > 0) && nestedScroll.backward == NestedScrollMode::PARALLEL) ||
+               ((offset < 0) && nestedScroll.forward == NestedScrollMode::PARALLEL)) {
+        HandleScroll(parent.Upgrade(), offset, SCROLL_FROM_UPDATE, NestedState::CHILD_SCROLL);
+    }
+    UpdateFlingReachEdgeState(offset, false);
     return false;
+}
+
+bool WebPattern::FilterScrollEventHandlevVlocity(const float velocity)
+{
+    auto it = parentsMap_.find(expectedFilterScrollAxis_);
+    CHECK_EQUAL_RETURN(it, parentsMap_.end(), false);
+    auto parent = it->second;
+    auto nestedScroll = GetNestedScroll();
+    if (((velocity > 0) && nestedScroll.backward == NestedScrollMode::PARENT_FIRST) ||
+        ((velocity < 0) && nestedScroll.forward == NestedScrollMode::PARENT_FIRST)) {
+        if (isParentReachEdge_ &&
+            ((Negative(velocity) && !isFlingReachEdge_.atEnd) || (Positive(velocity) && !isFlingReachEdge_.atStart))) {
+            return false;
+        }
+        return HandleScrollVelocity(parent.Upgrade(), velocity);
+    } else if ((velocity > 0 && nestedScroll.backward == NestedScrollMode::PARALLEL) ||
+               (velocity < 0 && nestedScroll.forward == NestedScrollMode::PARALLEL)) {
+        HandleScrollVelocity(parent.Upgrade(), velocity);
+    }
+    UpdateFlingReachEdgeState(velocity, false);
+    return false;
+}
+
+void WebPattern::UpdateFlingReachEdgeState(const float value, bool status)
+{
+    if (isFlingReachEdge_.atStart && Negative(value)) {
+        isFlingReachEdge_.atStart = status;
+    } else if (isFlingReachEdge_.atEnd && Positive(value)) {
+        isFlingReachEdge_.atEnd = status;
+    }
 }
 
 void WebPattern::UpdateRelativeOffset()
@@ -3023,35 +3177,35 @@ void WebPattern::InitSlideUpdateListener()
             CHECK_NULL_VOID(pattern);
             TAG_LOGI(AceLogTag::ACE_WEB, "WebPattern registerSlideUpdateListener List");
             pattern->registerSlideUpdateListener(listener);
-            axis_ = pattern->GetAxis();
+            syncAxis_ = pattern->GetAxis();
         } else {
             auto pattern = frameNode->GetPattern<ScrollPattern>();
             CHECK_NULL_VOID(pattern);
             TAG_LOGI(AceLogTag::ACE_WEB, "WebPattern registerSlideUpdateListener SCROLL");
             pattern->registerSlideUpdateListener(listener);
-            axis_ = pattern->GetAxis();
+            syncAxis_ = pattern->GetAxis();
         }
         CHECK_NULL_VOID(renderSurface_);
-        renderSurface_->SetWebSlideAxis(axis_);
+        renderSurface_->SetWebSlideAxis(syncAxis_);
     }
 }
 
-void WebPattern::UpdateSlideOffset(SizeF frameSize)
+void WebPattern::UpdateSlideOffset()
 {
     UpdateRelativeOffset();
-    switch (axis_) {
+    switch (syncAxis_) {
         case Axis::HORIZONTAL:
-            CalculateHorizontalDrawRect(frameSize);
+            CalculateHorizontalDrawRect();
             break;
         case Axis::VERTICAL:
-            CalculateVerticalDrawRect(frameSize);
+            CalculateVerticalDrawRect();
             break;
         default :
             break;
     }
 }
 
-void WebPattern::CalculateHorizontalDrawRect(SizeF frameSize)
+void WebPattern::CalculateHorizontalDrawRect()
 {
     CHECK_NULL_VOID(renderSurface_);
     renderSurface_->SetWebOffset(relativeOffsetOfScroll_.GetX());
@@ -3061,7 +3215,7 @@ void WebPattern::CalculateHorizontalDrawRect(SizeF frameSize)
 
     int32_t stepGear = (-relativeOffsetOfScroll_.GetX()) / ADJUST_WEB_DRAW_LENGTH;
     int32_t width = ADJUST_WEB_DRAW_LENGTH * 2 + stepGear;
-    int32_t height = (int32_t)frameSize.Height();
+    int32_t height = std::min(static_cast<int32_t>(drawSize_.Height()), FIT_CONTENT_LIMIT_LENGTH);
     int32_t x = ADJUST_WEB_DRAW_LENGTH * stepGear;
     int32_t y = 0;
     renderSurface_->SetWebMessage({ x, 0 });
@@ -3070,7 +3224,7 @@ void WebPattern::CalculateHorizontalDrawRect(SizeF frameSize)
     SetDrawRect(x, y, width, height);
 }
 
-void WebPattern::CalculateVerticalDrawRect(SizeF frameSize)
+void WebPattern::CalculateVerticalDrawRect()
 {
     CHECK_NULL_VOID(renderSurface_);
     renderSurface_->SetWebOffset(relativeOffsetOfScroll_.GetY());
@@ -3079,7 +3233,7 @@ void WebPattern::CalculateVerticalDrawRect(SizeF frameSize)
     }
 
     int32_t stepGear = (-relativeOffsetOfScroll_.GetY()) / ADJUST_WEB_DRAW_LENGTH;
-    int32_t width = (int32_t)frameSize.Width();
+    int32_t width = std::min(static_cast<int32_t>(drawSize_.Width()), FIT_CONTENT_LIMIT_LENGTH);
     int32_t height = ADJUST_WEB_DRAW_LENGTH * 2 + stepGear;
     int32_t x = 0;
     int32_t y = ADJUST_WEB_DRAW_LENGTH * stepGear;
@@ -3230,5 +3384,20 @@ void WebPattern::SetTouchEventInfo(const TouchEvent& touchEvent, TouchEventInfo&
     changedInfo.SetTouchType(touchEvent.type);
 
     touchEventInfo.AddChangedTouchLocationInfo(std::move(changedInfo));
+}
+
+void WebPattern::RegisterVisibleAreaChangeCallback()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto callback = [weak = WeakClaim(this)](bool visible, double ratio) {
+        auto webPattern = weak.Upgrade();
+        CHECK_NULL_VOID(webPattern);
+        webPattern->OnVisibleAreaChange(visible);
+    };
+    std::vector<double> ratioList = {0.0};
+    pipeline->AddVisibleAreaChangeNode(host, ratioList, callback, false);
 }
 } // namespace OHOS::Ace::NG

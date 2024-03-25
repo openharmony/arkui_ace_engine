@@ -24,7 +24,7 @@ class SlideUpdateListener : public ISlideUpdateCallback {
 public:
     SlideUpdateListener() = default;
     ~SlideUpdateListener() override = default;
-    void OnSlideUpdate(const SizeF& frameSize) override;
+    void OnSlideUpdate() override;
     void SetPatternToListener(WeakPtr<NG::Pattern> pattern)
     {
         pattern_ = pattern;

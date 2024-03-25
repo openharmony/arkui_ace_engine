@@ -107,7 +107,7 @@ void ParseSelectAllObject(const JSCallbackInfo& info, const JSRef<JSVal>& change
     CHECK_NULL_VOID(changeEventVal->IsFunction());
 
     auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(changeEventVal));
-    WeakPtr<NG::FrameNode> targetNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    WeakPtr<NG::FrameNode> targetNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
     auto changeEvent = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc), node = targetNode](
                            const BaseEventInfo* info) {
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
@@ -135,6 +135,7 @@ void JSCheckboxGroup::SetSelectAll(const JSCallbackInfo& info)
     if (info.Length() > 0 && info[0]->IsBoolean()) {
         selectAll = info[0]->ToBoolean();
     }
+    TAG_LOGD(AceLogTag::ACE_SELECT_COMPONENT, "checkboxgroup select all %{public}d", selectAll);
     CheckBoxGroupModel::GetInstance()->SetSelectAll(selectAll);
     if (info.Length() > 1 && info[1]->IsFunction()) {
         ParseSelectAllObject(info, info[1]);
@@ -148,7 +149,7 @@ void JSCheckboxGroup::SetOnChange(const JSCallbackInfo& args)
     }
     auto jsFunc = AceType::MakeRefPtr<JsEventFunction<CheckboxGroupResult, 1>>(
         JSRef<JSFunc>::Cast(args[0]), CheckboxGroupResultEventToJSValue);
-    WeakPtr<NG::FrameNode> targetNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    WeakPtr<NG::FrameNode> targetNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
     auto onChange = [execCtx = args.GetExecutionContext(), func = std::move(jsFunc), node = targetNode](
                         const BaseEventInfo* info) {
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);

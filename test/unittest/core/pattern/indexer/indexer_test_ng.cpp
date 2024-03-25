@@ -987,6 +987,114 @@ HWTEST_F(IndexerTestNg, IndexerModelNGTest005, TestSize.Level1)
 }
 
 /**
+ * @tc.name: IndexerModelNGTest006
+ * @tc.desc: Test newly added properties of indexer.
+ * @tc.type: FUNC
+ */
+HWTEST_F(IndexerTestNg, IndexerModelNGTest006, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create indexer.
+     */
+    IndexerModelNG model;
+    model.Create(CREATE_ARRAY, 0);
+    GetInstance();
+    FlushLayoutTask(frameNode_);
+
+    /**
+     * @tc.steps: step2. set Invalid value.
+     * @tc.expected: Properties are not set.
+     */
+    model.SetFontSize(AceType::RawPtr(frameNode_), Dimension());
+    model.SetPopupHorizontalSpace(AceType::RawPtr(frameNode_), Dimension(-1));
+    model.SetPopupUnselectedColor(AceType::RawPtr(frameNode_), std::nullopt);
+    model.SetPopupItemBackground(AceType::RawPtr(frameNode_), std::nullopt);
+    model.SetColor(AceType::RawPtr(frameNode_), std::nullopt);
+    model.SetPopupColor(AceType::RawPtr(frameNode_), std::nullopt);
+    model.SetSelectedColor(AceType::RawPtr(frameNode_), std::nullopt);
+    model.SetPopupBackground(AceType::RawPtr(frameNode_), std::nullopt);
+    model.SetSelectedBackgroundColor(AceType::RawPtr(frameNode_), std::nullopt);
+    model.SetPopupHorizontalSpace(AceType::RawPtr(frameNode_), Dimension(-1));
+    model.SetSelected(AceType::RawPtr(frameNode_), -1);
+    model.SetPopupSelectedColor(AceType::RawPtr(frameNode_), std::nullopt);
+    model.SetItemSize(AceType::RawPtr(frameNode_), Dimension(-1));
+    model.SetPopupPositionX(AceType::RawPtr(frameNode_), std::nullopt);
+    model.SetPopupPositionY(AceType::RawPtr(frameNode_), std::nullopt);
+
+    EXPECT_FALSE(layoutProperty_->GetSelectedColor().has_value());
+    EXPECT_FALSE(layoutProperty_->GetColor().has_value());
+    EXPECT_FALSE(layoutProperty_->GetPopupColor().has_value());
+    EXPECT_EQ(layoutProperty_->GetItemSizeValue(), Dimension(INDEXER_ITEM_SIZE, DimensionUnit::VP));
+    EXPECT_EQ(layoutProperty_->GetSelectedValue(), 0);
+    EXPECT_FALSE(layoutProperty_->GetPopupPositionX().has_value());
+    EXPECT_FALSE(layoutProperty_->GetPopupPositionY().has_value());
+    EXPECT_FALSE(paintProperty_->GetSelectedBackgroundColor().has_value());
+    EXPECT_FALSE(paintProperty_->GetPopupBackground().has_value());
+    EXPECT_FALSE(paintProperty_->GetPopupSelectedColor().has_value());
+    EXPECT_FALSE(paintProperty_->GetPopupUnselectedColor().has_value());
+    EXPECT_FALSE(paintProperty_->GetPopupItemBackground().has_value());
+    EXPECT_FALSE(layoutProperty_->GetPopupHorizontalSpace().has_value());
+    EXPECT_FALSE(layoutProperty_->GetFontSize().has_value());
+}
+
+/**
+ * @tc.name: IndexerModelNGTest007
+ * @tc.desc: Test newly added properties of indexer.
+ * @tc.type: FUNC
+ */
+HWTEST_F(IndexerTestNg, IndexerModelNGTest007, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create indexer.
+     */
+    IndexerModelNG model;
+    model.Create(CREATE_ARRAY, 0);
+    GetInstance();
+    FlushLayoutTask(frameNode_);
+
+    /**
+     * @tc.steps: step2. set valid value.
+     * @tc.expected: Properties are set.
+     */
+    model.SetSelectedColor(AceType::RawPtr(frameNode_), Color::WHITE);
+    model.SetColor(AceType::RawPtr(frameNode_), Color::WHITE);
+    model.SetPopupColor(AceType::RawPtr(frameNode_), Color::WHITE);
+    model.SetSelectedBackgroundColor(AceType::RawPtr(frameNode_), Color::WHITE);
+    model.SetPopupBackground(AceType::RawPtr(frameNode_), Color::WHITE);
+    model.SetUsingPopup(AceType::RawPtr(frameNode_), true);
+    model.SetItemSize(AceType::RawPtr(frameNode_), Dimension(24));
+    model.SetAlignStyle(AceType::RawPtr(frameNode_), 0);
+    model.SetPopupHorizontalSpace(AceType::RawPtr(frameNode_), Dimension(50));
+    model.SetSelected(AceType::RawPtr(frameNode_), 0);
+    model.SetPopupPositionX(AceType::RawPtr(frameNode_), Dimension(-96.f, DimensionUnit::VP));
+    model.SetPopupPositionY(AceType::RawPtr(frameNode_), Dimension(48.f, DimensionUnit::VP));
+    model.SetPopupItemBackground(AceType::RawPtr(frameNode_), Color::WHITE);
+    model.SetPopupSelectedColor(AceType::RawPtr(frameNode_), Color::WHITE);
+    model.SetPopupUnselectedColor(AceType::RawPtr(frameNode_), Color::WHITE);
+    model.SetFontSize(AceType::RawPtr(frameNode_), Dimension(24));
+    model.SetFontWeight(AceType::RawPtr(frameNode_), FontWeight::MEDIUM);
+
+    EXPECT_EQ(layoutProperty_->GetArrayValueValue(), CREATE_ARRAY);
+    EXPECT_EQ(layoutProperty_->GetSelectedColorValue(), Color::WHITE);
+    EXPECT_EQ(layoutProperty_->GetColorValue(), Color::WHITE);
+    EXPECT_EQ(layoutProperty_->GetPopupColorValue(), Color::WHITE);
+    EXPECT_EQ(paintProperty_->GetSelectedBackgroundColorValue(), Color::WHITE);
+    EXPECT_EQ(paintProperty_->GetPopupBackgroundValue(), Color::WHITE);
+    EXPECT_EQ(layoutProperty_->GetUsingPopupValue(), true);
+    EXPECT_EQ(layoutProperty_->GetItemSizeValue(), Dimension(24));
+    EXPECT_EQ(layoutProperty_->GetAlignStyleValue(), AlignStyle::LEFT);
+    EXPECT_EQ(layoutProperty_->GetPopupHorizontalSpaceValue(), Dimension(50));
+    EXPECT_EQ(layoutProperty_->GetSelectedValue(), 0);
+    EXPECT_EQ(layoutProperty_->GetPopupPositionXValue(), Dimension(-96.f, DimensionUnit::VP));
+    EXPECT_EQ(layoutProperty_->GetPopupPositionYValue(), Dimension(48.f, DimensionUnit::VP));
+    EXPECT_EQ(paintProperty_->GetPopupItemBackgroundValue(), Color::WHITE);
+    EXPECT_EQ(paintProperty_->GetPopupSelectedColorValue(), Color::WHITE);
+    EXPECT_EQ(paintProperty_->GetPopupUnselectedColorValue(), Color::WHITE);
+    EXPECT_EQ(layoutProperty_->GetFontSizeValue(), Dimension(24));
+    EXPECT_EQ(layoutProperty_->GetFontWeightValue(), FontWeight::MEDIUM);
+}
+
+/**
  * @tc.name: OnModifyDone001
  * @tc.desc: Test OnModifyDone
  * @tc.type: FUNC

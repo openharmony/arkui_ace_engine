@@ -243,7 +243,7 @@ void JSPatternLock::SetDotConnect(const JSCallbackInfo& args)
     }
 
     auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(args[0]));
-    WeakPtr<NG::FrameNode> targetNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    WeakPtr<NG::FrameNode> targetNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
     auto onDotConnect = [execCtx = args.GetExecutionContext(), func = std::move(jsFunc), node = targetNode](
                             int32_t code) {
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);

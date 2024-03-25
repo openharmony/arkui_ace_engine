@@ -22,6 +22,7 @@
 #include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/pattern/text_field/text_field_model.h"
 #include "core/components_ng/pattern/text_field/text_field_model_ng.h"
+#include "core/interfaces/arkoala/arkoala_api.h"
 #include "core/pipeline/base/element_register.h"
 #include "core/interfaces/native/node/node_api.h"
 
@@ -39,6 +40,9 @@ constexpr char DEFAULT_FONT_FAMILY[] = "HarmonyOS Sans";
 constexpr uint32_t DEFAULT_CARET_COLOR = 0xFF007DFF;
 const uint32_t ERROR_UINT_CODE = -1;
 const int32_t ERROR_INT_CODE = -1;
+constexpr TextDecoration DEFAULT_TEXT_DECORATION = TextDecoration::NONE;
+constexpr Color DEFAULT_DECORATION_COLOR = Color(0xff000000);
+constexpr TextDecorationStyle DEFAULT_DECORATION_STYLE = TextDecorationStyle::SOLID;
 std::string g_strValue;
 
 void SetTextAreaStyle(ArkUINodeHandle node, ArkUI_Int32 style)
@@ -336,7 +340,7 @@ void ResetTextAreaFontColor(ArkUINodeHandle node)
     auto *frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     int32_t textColor = 0;
-    auto pipeline = PipelineBase::GetCurrentContext();
+    auto pipeline = PipelineBase::GetCurrentContextSafely();
     CHECK_NULL_VOID(pipeline);
     auto theme = pipeline->GetThemeManager()->GetTheme<TextFieldTheme>();
     textColor = static_cast<int32_t>(theme->GetTextColor().GetValue());
@@ -504,60 +508,153 @@ ArkUI_Bool GetTextAreaEditing(ArkUINodeHandle node)
     return TextFieldModelNG::GetTextFieldEditing(frameNode);
 }
 
+void SetTextAreaBackgroundColor(ArkUINodeHandle node, uint32_t color)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    TextFieldModelNG::SetBackgroundColor(frameNode, Color(color));
+}
+
+void ResetTextAreaBackgroundColor(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    Color backgroundColor;
+    auto pipeline = PipelineBase::GetCurrentContextSafely();
+    CHECK_NULL_VOID(pipeline);
+    auto buttonTheme = pipeline->GetTheme<TextFieldTheme>();
+    CHECK_NULL_VOID(buttonTheme);
+    backgroundColor = buttonTheme->GetBgColor();
+    TextFieldModelNG::SetBackgroundColor(frameNode, backgroundColor);
+}
+
+void SetTextAreaType(ArkUINodeHandle node, ArkUI_Int32 type)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    TextFieldModelNG::SetType(frameNode, static_cast<Ace::TextInputType>(type));
+}
+
+void ResetTextAreaType(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    TextFieldModelNG::SetType(frameNode, Ace::TextInputType::TEXT);
+}
+
+ArkUI_Int32 GetTextAreaType(ArkUINodeHandle node)
+{
+    auto *frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_RETURN(frameNode, ERROR_UINT_CODE);
+    return static_cast<ArkUI_Int32>(TextFieldModelNG::GetType(frameNode));
+}
+
+ArkUI_Int32 GetTextAreaTextAlign(ArkUINodeHandle node)
+{
+    auto *frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_RETURN(frameNode, ERROR_INT_CODE);
+    return static_cast<ArkUI_Int32>(TextFieldModelNG::GetTextAlign(frameNode));
+}
+
+void SetTextAreaShowCounterOptions(
+    ArkUINodeHandle node, ArkUI_Bool open, ArkUI_Int32 thresholdPercentage, ArkUI_Bool highlightBorder)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    TextFieldModelNG::SetShowCounter(frameNode, open);
+    TextFieldModelNG::SetCounterType(frameNode, thresholdPercentage);
+    TextFieldModelNG::SetShowCounterBorder(frameNode, highlightBorder);
+}
+
+void ResetTextAreaShowCounterOptions(ArkUINodeHandle node)
+{
+    auto *frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    TextFieldModelNG::SetShowCounter(frameNode, false);
+    TextFieldModelNG::SetCounterType(frameNode, -1);
+    TextFieldModelNG::SetShowCounterBorder(frameNode, true);
+}
+
+void GetTextAreaShowCounterOptions(ArkUINodeHandle node, ArkUIShowCountOptions* options)
+{
+    auto *frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    options->open = TextFieldModelNG::GetShowCounter(frameNode);
+    options->thresholdPercentage = TextFieldModelNG::GetCounterType(frameNode);
+    options->highlightBorder = TextFieldModelNG::GetShowCounterBorder(frameNode);
+}
+void SetTextAreaDecoration(ArkUINodeHandle node, ArkUI_Int32 decoration, ArkUI_Uint32 color, ArkUI_Int32 style)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    TextFieldModelNG::SetTextDecoration(frameNode, static_cast<TextDecoration>(decoration));
+    TextFieldModelNG::SetTextDecorationColor(frameNode, Color(color));
+    TextFieldModelNG::SetTextDecorationStyle(frameNode, static_cast<TextDecorationStyle>(style));
+}
+
+void ResetTextAreaDecoration(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    TextFieldModelNG::SetTextDecoration(frameNode, DEFAULT_TEXT_DECORATION);
+    TextFieldModelNG::SetTextDecorationColor(frameNode, DEFAULT_DECORATION_COLOR);
+    TextFieldModelNG::SetTextDecorationStyle(frameNode, DEFAULT_DECORATION_STYLE);
+}
+
+void SetTextAreaLetterSpacing(ArkUINodeHandle node, ArkUI_Float32 value, ArkUI_Int32 unit)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    TextFieldModelNG::SetLetterSpacing(frameNode, CalcDimension(value, (DimensionUnit)unit));
+}
+
+void ResetTextAreaLetterSpacing(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    CalcDimension value;
+    value.Reset();
+    TextFieldModelNG::SetLetterSpacing(frameNode, value);
+}
+
+void SetTextAreaLineHeight(ArkUINodeHandle node, ArkUI_Float32 value, ArkUI_Int32 unit)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    TextFieldModelNG::SetLineHeight(frameNode, CalcDimension(value, (DimensionUnit)unit));
+}
+
+void ResetTextAreaLineHeight(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    CalcDimension value;
+    value.Reset();
+    TextFieldModelNG::SetLineHeight(frameNode, value);
+}
+
 } // namespace
 
 namespace NodeModifier {
 const ArkUITextAreaModifier* GetTextAreaModifier()
 {
-    static const ArkUITextAreaModifier modifier = {
-        SetTextAreaStyle,
-        ResetTextAreaStyle,
-        SetTextAreaSelectionMenuHidden,
-        ResetTextAreaSelectionMenuHidden,
-        SetTextAreaMaxLines,
-        ResetTextAreaMaxLines,
-        SetTextAreaCopyOption,
-        ResetTextAreaCopyOption,
-        SetTextAreaPlaceholderColor,
-        ResetTextAreaPlaceholderColor,
-        SetTextAreaTextAlign,
-        ResetTextAreaTextAlign,
-        SetTextAreaPlaceholderFont,
-        ResetTextAreaPlaceholderFont,
-        SetTextAreaBarState,
-        ResetTextAreaBarState,
-        SetTextAreaEnableKeyboardOnFocus,
-        ResetTextAreaEnableKeyboardOnFocus,
-        SetTextAreaFontFamily,
-        ResetTextAreaFontFamily,
-        SetTextAreaShowCounter,
-        ResetTextAreaShowCounter,
-        SetTextAreaCaretColor,
-        ResetTextAreaCaretColor,
-        SetTextAreaMaxLength,
-        ResetTextAreaMaxLength,
-        SetTextAreaFontColor,
-        ResetTextAreaFontColor,
-        SetTextAreaFontStyle,
-        ResetTextAreaFontStyle,
-        SetTextAreaFontWeight,
-        ResetTextAreaFontWeight,
-        SetTextAreaFontSize,
-        ResetTextAreaFontSize,
-        SetCounterType,
-        SetTextAreaPlaceholderString,
-        SetTextAreaTextString,
-        StopTextAreaTextEditing,
-        SetTextAreaFontWeightStr,
-        SetTextAreaPlaceholderFontEnum,
-        GetTextAreaPlaceholder,
-        GetTextAreaText,
-        GetTextAreaCaretColor,
-        GetTextAreaMaxLength,
-        GetTextAreaPlaceholderColor,
-        GetTextAreaPlaceholderFont,
-        GetTextAreaEditing,
-    };
+    static const ArkUITextAreaModifier modifier = { SetTextAreaStyle, ResetTextAreaStyle,
+        SetTextAreaSelectionMenuHidden, ResetTextAreaSelectionMenuHidden, SetTextAreaMaxLines, ResetTextAreaMaxLines,
+        SetTextAreaCopyOption, ResetTextAreaCopyOption, SetTextAreaPlaceholderColor, ResetTextAreaPlaceholderColor,
+        SetTextAreaTextAlign, ResetTextAreaTextAlign, SetTextAreaPlaceholderFont, ResetTextAreaPlaceholderFont,
+        SetTextAreaBarState, ResetTextAreaBarState, SetTextAreaEnableKeyboardOnFocus,
+        ResetTextAreaEnableKeyboardOnFocus, SetTextAreaFontFamily, ResetTextAreaFontFamily, SetTextAreaShowCounter,
+        ResetTextAreaShowCounter, SetTextAreaCaretColor, ResetTextAreaCaretColor, SetTextAreaMaxLength,
+        ResetTextAreaMaxLength, SetTextAreaFontColor, ResetTextAreaFontColor, SetTextAreaFontStyle,
+        ResetTextAreaFontStyle, SetTextAreaFontWeight, ResetTextAreaFontWeight, SetTextAreaFontSize,
+        ResetTextAreaFontSize, SetCounterType, SetTextAreaPlaceholderString, SetTextAreaTextString,
+        StopTextAreaTextEditing, SetTextAreaFontWeightStr, SetTextAreaPlaceholderFontEnum, GetTextAreaPlaceholder,
+        GetTextAreaText, GetTextAreaCaretColor, GetTextAreaMaxLength, GetTextAreaPlaceholderColor,
+        GetTextAreaPlaceholderFont, GetTextAreaEditing, SetTextAreaBackgroundColor, ResetTextAreaBackgroundColor,
+        SetTextAreaType, ResetTextAreaType, GetTextAreaType, GetTextAreaTextAlign, SetTextAreaShowCounterOptions,
+        ResetTextAreaShowCounterOptions, GetTextAreaShowCounterOptions, SetTextAreaDecoration,
+        ResetTextAreaDecoration, SetTextAreaLetterSpacing, ResetTextAreaLetterSpacing, SetTextAreaLineHeight,
+        ResetTextAreaLineHeight };
     return &modifier;
 }
 
@@ -574,6 +671,37 @@ void SetOnTextAreaChange(ArkUINodeHandle node, void* extraParam)
         SendArkUIAsyncEvent(&event);
     };
     TextFieldModelNG::SetOnChange(frameNode, std::move(onChange));
+}
+
+void SetOnTextAreaPaste(ArkUINodeHandle node, void* extraParam)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto onPaste = [node, extraParam](const std::string& str, NG::TextCommonEvent& commonEvent) {
+        ArkUINodeEvent event;
+        event.kind = TEXT_INPUT;
+        event.extraParam = reinterpret_cast<intptr_t>(extraParam);
+        event.textInputEvent.subKind = ON_TEXTAREA_PASTE;
+        event.textInputEvent.nativeStringPtr = reinterpret_cast<intptr_t>(str.c_str());
+        SendArkUIAsyncEvent(&event);
+    };
+    TextFieldModelNG::SetOnPasteWithEvent(frameNode, std::move(onPaste));
+}
+
+void SetOnTextAreaSelectionChange(ArkUINodeHandle node, void* extraParam)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto onSelectionChange = [node, extraParam](int start, int end) {
+        ArkUINodeEvent event;
+        event.kind = TEXT_INPUT;
+        event.extraParam = reinterpret_cast<intptr_t>(extraParam);
+        event.textInputEvent.subKind = ON_TEXTAREA_TEXT_SELECTION_CHANGE;
+        event.componentAsyncEvent.data[0].i32 = static_cast<int>(start);
+        event.componentAsyncEvent.data[1].i32 = static_cast<int>(end);
+        SendArkUIAsyncEvent(&event);
+    };
+    TextFieldModelNG::SetOnTextSelectionChange(frameNode, std::move(onSelectionChange));
 }
 } // namespace NodeModifier
 } // namespace OHOS::Ace::NG

@@ -60,6 +60,7 @@ private:
 
     void ComputeInnerLayoutParam(LayoutConstraintF& innerLayout);
     double GetMaxWidthBasedOnGridType(const RefPtr<GridColumnInfo>& info, GridSizeType type, DeviceType deviceType);
+    int32_t GetDeviceColumns(GridSizeType type, DeviceType deviceType);
 
     OffsetF ComputeChildPosition(
         const SizeF& childSize, const RefPtr<DialogLayoutProperty>& prop, const SizeF& slefSize);
@@ -78,6 +79,10 @@ private:
     OffsetF AdjustChildPosition(
         OffsetF& topLeftPoint, const OffsetF& dialogOffset, const SizeF& childSize, bool needAvoidKeyboard) const;
 
+    SizeF UpdateHeightWithSafeArea(SizeF size);
+    void GetDialogWidth(double& width);
+    void SetDialogSize(
+        const RefPtr<DialogLayoutProperty>& dialogProp, const RefPtr<LayoutWrapper>& layoutWrapper, SizeF selfSize);
     void UpdateSafeArea();
 
     RectF touchRegion_;
@@ -87,6 +92,9 @@ private:
 
     int32_t gridCount_ = -1;
     int32_t subWindowId_ = -1;
+    CalcDimension width_ = Dimension(-1);
+    CalcDimension height_ = Dimension(-1);
+    double widthMax_ = 0;
     DimensionOffset dialogOffset_;
     DialogAlignment alignment_ = DialogAlignment::DEFAULT;
     TouchingBoundaryType touchingBoundaryFlag_ = TouchingBoundaryType::NotTouchBoundary;

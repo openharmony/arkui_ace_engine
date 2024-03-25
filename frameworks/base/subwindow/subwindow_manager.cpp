@@ -87,8 +87,19 @@ int32_t SubwindowManager::GetParentContainerId(int32_t containerId)
     if (result != parentContainerMap_.end()) {
         return result->second;
     } else {
-        return 0;
+        return -1;
     }
+}
+
+int32_t SubwindowManager::GetSubContainerId(int32_t parentContainerId)
+{
+    std::lock_guard<std::mutex> lock(parentMutex_);
+    for (auto it = parentContainerMap_.begin(); it != parentContainerMap_.end(); it++) {
+        if (it->second == parentContainerId) {
+            return it->first;
+        }
+    }
+    return -1;
 }
 
 void SubwindowManager::AddSubwindow(int32_t instanceId, RefPtr<Subwindow> subwindow)
@@ -459,7 +470,20 @@ RefPtr<NG::FrameNode> SubwindowManager::ShowDialogNG(
     }
     return subwindow->ShowDialogNG(dialogProps, std::move(buildFunc));
 }
-
+RefPtr<NG::FrameNode> SubwindowManager::ShowDialogNGWithNode(const DialogProperties& dialogProps,
+    const RefPtr<NG::UINode>& customNode)
+{
+    TAG_LOGD(AceLogTag::ACE_SUB_WINDOW, "show dialog ng enter");
+    auto containerId = Container::CurrentId();
+    auto subwindow = GetSubwindow(containerId);
+    if (!subwindow) {
+        subwindow = Subwindow::CreateSubwindow(containerId);
+        CHECK_NULL_RETURN(subwindow, nullptr);
+        subwindow->InitContainer();
+        AddSubwindow(containerId, subwindow);
+    }
+    return subwindow->ShowDialogNGWithNode(dialogProps, customNode);
+}
 void SubwindowManager::CloseDialogNG(const RefPtr<NG::FrameNode>& dialogNode)
 {
     TAG_LOGD(AceLogTag::ACE_SUB_WINDOW, "close dialog ng enter");
@@ -560,8 +584,8 @@ RefPtr<Subwindow> SubwindowManager::GetOrCreateSubWindow()
     return subwindow;
 }
 
-void SubwindowManager::ShowToast(
-    const std::string& message, int32_t duration, const std::string& bottom, const NG::ToastShowMode& showMode)
+void SubwindowManager::ShowToast(const std::string& message, int32_t duration, const std::string& bottom,
+    const NG::ToastShowMode& showMode, int32_t alignment, std::optional<DimensionOffset> offset)
 {
     TAG_LOGD(AceLogTag::ACE_SUB_WINDOW, "show toast enter");
     auto containerId = Container::CurrentId();
@@ -570,13 +594,13 @@ void SubwindowManager::ShowToast(
         auto subwindow = GetOrCreateSubWindow();
         CHECK_NULL_VOID(subwindow);
         TAG_LOGD(AceLogTag::ACE_SUB_WINDOW, "before show toast");
-        subwindow->ShowToast(message, duration, bottom, showMode);
+        subwindow->ShowToast(message, duration, bottom, showMode, alignment,  offset);
     } else {
         // for ability
         auto taskExecutor = Container::CurrentTaskExecutor();
         CHECK_NULL_VOID(taskExecutor);
         taskExecutor->PostTask(
-            [containerId, message, duration, bottom, showMode] {
+            [containerId, message, duration, bottom, showMode, alignment,  offset] {
                 auto manager = SubwindowManager::GetInstance();
                 CHECK_NULL_VOID(manager);
                 auto subwindow = manager->GetSubwindow(containerId);
@@ -587,7 +611,7 @@ void SubwindowManager::ShowToast(
                     manager->AddSubwindow(containerId, subwindow);
                 }
                 TAG_LOGD(AceLogTag::ACE_SUB_WINDOW, "before show toast : %{public}d", containerId);
-                subwindow->ShowToast(message, duration, bottom, showMode);
+                subwindow->ShowToast(message, duration, bottom, showMode, alignment,  offset);
             },
             TaskExecutor::TaskType::PLATFORM);
     }

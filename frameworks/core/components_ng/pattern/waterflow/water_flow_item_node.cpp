@@ -16,6 +16,7 @@
 #include "core/components_ng/pattern/waterflow/water_flow_item_node.h"
 
 #include "core/components_ng/pattern/pattern.h"
+#include "core/components_ng/pattern/waterflow/water_flow_pattern.h"
 
 namespace OHOS::Ace::NG {
 RefPtr<FrameNode> WaterFlowItemNode::GetOrCreateFlowItem(
@@ -32,14 +33,19 @@ RefPtr<FrameNode> WaterFlowItemNode::GetOrCreateFlowItem(
     return node;
 }
 
-bool WaterFlowItemNode::RequestParentDirty()
+bool WaterFlowItemNode::RequestParentDirty(bool /* childExpansiveAndMark */)
 {
     auto parent = GetAncestorNodeOfFrame();
     CHECK_NULL_RETURN(parent, false);
     parent->MarkDirtyNode(PROPERTY_UPDATE_BY_CHILD_REQUEST);
-    auto idx = parent->GetChildTrueIndex(Claim(this));
-    if (idx > -1) {
-        parent->ChildrenUpdatedFrom(idx);
+    auto pattern = parent->GetPattern<WaterFlowPattern>();
+    CHECK_NULL_RETURN(pattern, true);
+    // record index of dirty child, but only when using new Sectioned layout
+    if (pattern->GetSections() || SystemProperties::WaterFlowUseSegmentedLayout()) {
+        auto idx = parent->GetChildTrueIndex(Claim(this));
+        if (idx > -1) {
+            parent->ChildrenUpdatedFrom(idx);
+        }
     }
     return true;
 }

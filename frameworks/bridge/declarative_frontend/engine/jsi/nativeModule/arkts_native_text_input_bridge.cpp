@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -25,6 +25,13 @@ constexpr double DEFAULT_OPACITY = 0.2;
 constexpr double DEFAULT_FONT_SIZE = 16.0;
 constexpr Ace::FontStyle DEFAULT_FONT_STYLE = Ace::FontStyle::NORMAL;
 const std::string DEFAULT_FONT_WEIGHT = "400";
+constexpr int CALL_ARG_0 = 0;
+constexpr int CALL_ARG_1 = 1;
+constexpr int CALL_ARG_2 = 2;
+constexpr int CALL_ARG_3 = 3;
+constexpr int32_t ARG_GROUP_LENGTH = 4;
+constexpr TextDecorationStyle DEFAULT_DECORATION_STYLE = TextDecorationStyle::SOLID;
+
 ArkUINativeModuleValue TextInputBridge::SetCaretColor(ArkUIRuntimeCallInfo *runtimeCallInfo)
 {
     EcmaVM *vm = runtimeCallInfo->GetVM();
@@ -785,6 +792,159 @@ ArkUINativeModuleValue TextInputBridge::ResetFontFamily(ArkUIRuntimeCallInfo *ru
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     GetArkUINodeModifiers()->getTextInputModifier()->resetTextInputFontFamily(nativeNode);
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue TextInputBridge::SetUnderlineColor(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM *vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    Local<JSValueRef> underlineColorArg = runtimeCallInfo->GetCallArgRef(1);  // 1: underlineColor value
+    Local<JSValueRef> normalArg = runtimeCallInfo->GetCallArgRef(2);  // 2: normal value
+    Local<JSValueRef> typingArg = runtimeCallInfo->GetCallArgRef(3);   // 3: typing value
+    Local<JSValueRef> errorArg = runtimeCallInfo->GetCallArgRef(4); // 4: error value
+    Local<JSValueRef> disableArg = runtimeCallInfo->GetCallArgRef(5); // 5: disable value
+    
+    Color underlineColor;
+    if (!underlineColorArg->IsUndefined() && ArkTSUtils::ParseJsColorAlpha(vm, underlineColorArg, underlineColor)) {
+        GetArkUINodeModifiers()->getTextInputModifier()->setTextInputNormalUnderlineColor(
+            nativeNode, underlineColor.GetValue());
+    } else if (!normalArg->IsUndefined() || !typingArg->IsUndefined() ||
+         !errorArg->IsUndefined() || !disableArg->IsUndefined()) {
+        UserUnderlineColor userColor = UserUnderlineColor();
+        Color typingColor;
+        if (ArkTSUtils::ParseJsColorAlpha(vm, typingArg, typingColor)) {
+            userColor.typing = typingColor;
+        }
+        Color normalColor;
+        if (ArkTSUtils::ParseJsColorAlpha(vm, normalArg, normalColor)) {
+            userColor.normal = normalColor;
+        }
+        Color errorColor;
+        if (ArkTSUtils::ParseJsColorAlpha(vm, errorArg, errorColor)) {
+            userColor.error = errorColor;
+        }
+        Color disableColor;
+        if (ArkTSUtils::ParseJsColorAlpha(vm, disableArg, disableColor)) {
+            userColor.disable = disableColor;
+        }
+        uint32_t size = ARG_GROUP_LENGTH;
+        ArkUI_Float32 values[size];
+        values[CALL_ARG_0] = userColor.typing->GetValue();
+        values[CALL_ARG_1] = userColor.normal->GetValue();
+        values[CALL_ARG_2] = userColor.error->GetValue();
+        values[CALL_ARG_3] = userColor.disable->GetValue();
+        GetArkUINodeModifiers()->getTextInputModifier()->setTextInputUserUnderlineColor(nativeNode, values, size);
+    } else {
+        GetArkUINodeModifiers()->getTextInputModifier()->resetTextInputUserUnderlineColor(nativeNode);
+    }
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue TextInputBridge::SetDecoration(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
+    Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(1); // 1: textInputDecoration value
+    Local<JSValueRef> thirdArg = runtimeCallInfo->GetCallArgRef(2);  // 2: color value
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    auto container = Container::Current();
+    CHECK_NULL_RETURN(container, panda::JSValueRef::Undefined(vm));
+    auto pipelineContext = container->GetPipelineContext();
+    CHECK_NULL_RETURN(pipelineContext, panda::JSValueRef::Undefined(vm));
+    auto themeManager = pipelineContext->GetThemeManager();
+    CHECK_NULL_RETURN(themeManager, panda::JSValueRef::Undefined(vm));
+    auto theme = themeManager->GetTheme<TextFieldTheme>();
+    CHECK_NULL_RETURN(theme, panda::JSValueRef::Undefined(vm));
+    Color color = theme->GetTextStyle().GetTextDecorationColor();
+    int32_t textInputDecoration = static_cast<int32_t>(theme->GetTextStyle().GetTextDecoration());
+    if (secondArg->IsInt()) {
+        textInputDecoration = secondArg->Int32Value(vm);
+    }
+    ArkTSUtils::ParseJsColorAlpha(vm, thirdArg, color, Color::BLACK);
+    int32_t textDecorationStyle = static_cast<int32_t>(DEFAULT_DECORATION_STYLE);
+    GetArkUINodeModifiers()->getTextInputModifier()->setTextInputDecoration(
+        nativeNode, textInputDecoration, color.GetValue(), textDecorationStyle);
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue TextInputBridge::ResetDecoration(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    GetArkUINodeModifiers()->getTextInputModifier()->resetTextInputDecoration(nativeNode);
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue TextInputBridge::SetLetterSpacing(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    Local<JSValueRef> valueArg = runtimeCallInfo->GetCallArgRef(1);
+    CalcDimension value;
+    if (!ArkTSUtils::ParseJsDimensionNG(vm, valueArg, value, DimensionUnit::FP, false)) {
+        GetArkUINodeModifiers()->getTextInputModifier()->resetTextInputLetterSpacing(nativeNode);
+    } else {
+        GetArkUINodeModifiers()->getTextInputModifier()->setTextInputLetterSpacing(
+            nativeNode, value.Value(), static_cast<int>(value.Unit()));
+    }
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue TextInputBridge::ResetUnderlineColor(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM *vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    GetArkUINodeModifiers()->getTextInputModifier()->resetTextInputUserUnderlineColor(nativeNode);
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue TextInputBridge::ResetLetterSpacing(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    GetArkUINodeModifiers()->getTextInputModifier()->resetTextInputLetterSpacing(nativeNode);
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue TextInputBridge::SetLineHeight(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    Local<JSValueRef> valueArg = runtimeCallInfo->GetCallArgRef(1);
+    CalcDimension value;
+    if (!ArkTSUtils::ParseJsDimensionNG(vm, valueArg, value, DimensionUnit::FP, true)) {
+        GetArkUINodeModifiers()->getTextInputModifier()->resetTextInputLineHeight(nativeNode);
+    } else {
+        if (value.IsNegative()) {
+            value.Reset();
+        }
+        GetArkUINodeModifiers()->getTextInputModifier()->setTextInputLineHeight(
+            nativeNode, value.Value(), static_cast<int>(value.Unit()));
+    }
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue TextInputBridge::ResetLineHeight(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    GetArkUINodeModifiers()->getTextInputModifier()->resetTextInputLineHeight(nativeNode);
     return panda::JSValueRef::Undefined(vm);
 }
 }

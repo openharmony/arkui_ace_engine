@@ -31,7 +31,7 @@ public:
     static void Constructor(const JSCallbackInfo& args);
     static void Destructor(JSTextEditableController* scroller);
     void CaretPosition(int32_t caretPosition);
-    void SetTextSelection(int32_t selectionStart, int32_t selectionEnd);
+    void SetTextSelection(const JSCallbackInfo& info);
     void StopEditing();
     void GetTextContentRect(const JSCallbackInfo& info);
     void GetTextContentLinesNum(const JSCallbackInfo& info);

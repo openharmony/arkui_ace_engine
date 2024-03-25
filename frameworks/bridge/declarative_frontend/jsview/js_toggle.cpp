@@ -71,6 +71,7 @@ void JSToggle::JSBind(BindingTarget globalObj)
     JSClass<JSToggle>::StaticMethod("backgroundColor", &JSToggle::SetBackgroundColor);
     JSClass<JSToggle>::StaticMethod("hoverEffect", &JSToggle::JsHoverEffect);
     JSClass<JSToggle>::StaticMethod("pop", &JSToggle::Pop);
+    JSClass<JSToggle>::StaticMethod("switchStyle", &JSToggle::SwitchStyle);
 
     JSClass<JSToggle>::StaticMethod("onTouch", &JSInteractableView::JsOnTouch);
     JSClass<JSToggle>::StaticMethod("onClick", &JSInteractableView::JsOnClick);
@@ -87,7 +88,7 @@ void ParseToggleIsOnObject(const JSCallbackInfo& info, const JSRef<JSVal>& chang
     CHECK_NULL_VOID(changeEventVal->IsFunction());
 
     auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(changeEventVal));
-    WeakPtr<NG::FrameNode> targetNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    WeakPtr<NG::FrameNode> targetNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
     auto onChangeEvent = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc), node = targetNode](
                              bool isOn) {
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
@@ -126,7 +127,7 @@ void JSToggle::Create(const JSCallbackInfo& info)
     } else {
         isOn = tempIsOn->IsBoolean() ? tempIsOn->ToBoolean() : false;
     }
-
+    TAG_LOGD(AceLogTag::ACE_SELECT_COMPONENT, "toggle create type %{public}d isOn %{public}d", toggleTypeInt, isOn);
     ToggleModel::GetInstance()->Create(NG::ToggleType(toggleTypeInt), isOn);
     if (!changeEventVal->IsUndefined() && changeEventVal->IsFunction()) {
         ParseToggleIsOnObject(info, changeEventVal);
@@ -226,7 +227,7 @@ void JSToggle::OnChange(const JSCallbackInfo& args)
         return;
     }
     auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(args[0]));
-    WeakPtr<NG::FrameNode> targetNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    WeakPtr<NG::FrameNode> targetNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
     auto onChange = [execCtx = args.GetExecutionContext(), func = std::move(jsFunc), node = targetNode](bool isOn) {
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
         ACE_SCORING_EVENT("Toggle.onChange");
@@ -406,5 +407,52 @@ void JSToggle::JsHoverEffect(const JSCallbackInfo& info)
 void JSToggle::Pop()
 {
     ToggleModel::GetInstance()->Pop();
+}
+
+void JSToggle::SwitchStyle(const JSCallbackInfo& info)
+{
+    if ((info.Length() < 1) || !info[0]->IsObject()) {
+        return;
+    }
+    JSRef<JSObject> jsObj = JSRef<JSObject>::Cast(info[0]);
+
+    CalcDimension pointRadius;
+    if (jsObj->HasProperty("pointRadius") && ParseJsDimensionVp(jsObj->GetProperty("pointRadius"), pointRadius) &&
+        !pointRadius.IsNegative()) {
+        ToggleModel::GetInstance()->SetPointRadius(pointRadius);
+    } else {
+        ToggleModel::GetInstance()->ResetPointRadius();
+    }
+
+    Color unselectedColor;
+    if (jsObj->HasProperty("unselectedColor") &&
+        ParseJsColor(jsObj->GetProperty("unselectedColor"), unselectedColor)) {
+        ToggleModel::GetInstance()->SetUnselectedColor(unselectedColor);
+    } else {
+        auto theme = GetTheme<SwitchTheme>();
+        if (theme) {
+            unselectedColor = theme->GetInactiveColor();
+        }
+        ToggleModel::GetInstance()->SetUnselectedColor(unselectedColor);
+    }
+
+    Color pointColor;
+    if (jsObj->HasProperty("pointColor") && ParseJsColor(jsObj->GetProperty("pointColor"), pointColor)) {
+        ToggleModel::GetInstance()->SetSwitchPointColor(pointColor);
+    } else {
+        auto theme = GetTheme<SwitchTheme>();
+        if (theme) {
+            pointColor = theme->GetPointColor();
+        }
+        ToggleModel::GetInstance()->SetSwitchPointColor(pointColor);
+    }
+
+    CalcDimension trackRadius;
+    if (jsObj->HasProperty("trackBorderRadius") &&
+        ParseJsDimensionVp(jsObj->GetProperty("trackBorderRadius"), trackRadius) && !trackRadius.IsNegative()) {
+        ToggleModel::GetInstance()->SetTrackBorderRadius(trackRadius);
+    } else {
+        ToggleModel::GetInstance()->ResetTrackBorderRadius();
+    }
 }
 } // namespace OHOS::Ace::Framework

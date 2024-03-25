@@ -92,7 +92,7 @@ void TabsTestNg::Create(const std::function<void(TabsModelNG)>& callback, BarPos
     if (callback) {
         callback(model);
     }
-    auto tabNode = AceType::DynamicCast<TabsNode>(ViewStackProcessor::GetInstance()->GetMainElementNode());
+    auto tabNode = AceType::DynamicCast<TabsNode>(ViewStackProcessor::GetInstance()->GetMainFrameNode());
     auto tabBarNode = AceType::DynamicCast<FrameNode>(tabNode->GetTabBar());
     tabBarNode->GetOrCreateFocusHub();
     model.Pop();
@@ -440,6 +440,8 @@ HWTEST_F(TabsTestNg, TabContentModelSetLabelStyle001, TestSize.Level1)
     EXPECT_EQ(tabContentPattern->GetLabelStyle().fontWeight, std::nullopt);
     EXPECT_EQ(tabContentPattern->GetLabelStyle().fontFamily, std::nullopt);
     EXPECT_EQ(tabContentPattern->GetLabelStyle().fontStyle, std::nullopt);
+    EXPECT_EQ(tabContentPattern->GetLabelStyle().unselectedColor, std::nullopt);
+    EXPECT_EQ(tabContentPattern->GetLabelStyle().selectedColor, std::nullopt);
 }
 
 /**
@@ -462,6 +464,8 @@ HWTEST_F(TabsTestNg, TabContentModelSetLabelStyle002, TestSize.Level1)
     labelStyle.fontFamily = { "unknown" };
     std::vector<std::string> fontVect = { "" };
     labelStyle.fontStyle = Ace::FontStyle::NORMAL;
+    labelStyle.unselectedColor = Color::WHITE;
+    labelStyle.selectedColor = Color::WHITE;
     tabContentPattern->SetLabelStyle(labelStyle);
     EXPECT_EQ(tabContentPattern->GetLabelStyle().textOverflow, labelStyle.textOverflow);
     EXPECT_EQ(tabContentPattern->GetLabelStyle().maxLines, labelStyle.maxLines);
@@ -472,6 +476,40 @@ HWTEST_F(TabsTestNg, TabContentModelSetLabelStyle002, TestSize.Level1)
     EXPECT_EQ(tabContentPattern->GetLabelStyle().fontWeight, labelStyle.fontWeight);
     EXPECT_EQ(tabContentPattern->GetLabelStyle().fontFamily, labelStyle.fontFamily);
     EXPECT_EQ(tabContentPattern->GetLabelStyle().fontStyle, labelStyle.fontStyle);
+    EXPECT_EQ(tabContentPattern->GetLabelStyle().unselectedColor, labelStyle.unselectedColor);
+    EXPECT_EQ(tabContentPattern->GetLabelStyle().selectedColor, labelStyle.selectedColor);
+}
+
+/**
+ * @tc.name: TabContentModelSetIconStyle001
+ * @tc.desc: test SetIconStyle
+ * @tc.type: FUNC
+ */
+HWTEST_F(TabsTestNg, TabContentModelSetIconStyle001, TestSize.Level1)
+{
+    CreateWithItem([](TabsModelNG model) {});
+    auto tabContentPattern = GetChildPattern<TabContentPattern>(swiperNode_, 0);
+    IconStyle iconStyle;
+    tabContentPattern->SetIconStyle(iconStyle);
+    EXPECT_EQ(tabContentPattern->GetIconStyle().unselectedColor, std::nullopt);
+    EXPECT_EQ(tabContentPattern->GetIconStyle().selectedColor, std::nullopt);
+}
+
+/**
+ * @tc.name: TabContentModelSetIconStyle002
+ * @tc.desc: test SetIconStyle
+ * @tc.type: FUNC
+ */
+HWTEST_F(TabsTestNg, TabContentModelSetIconStyle002, TestSize.Level1)
+{
+    CreateWithItem([](TabsModelNG model) {});
+    auto tabContentPattern = GetChildPattern<TabContentPattern>(swiperNode_, 0);
+    IconStyle iconStyle;
+    iconStyle.unselectedColor = Color::WHITE;
+    iconStyle.selectedColor = Color::WHITE;
+    tabContentPattern->SetIconStyle(iconStyle);
+    EXPECT_EQ(tabContentPattern->GetIconStyle().unselectedColor, iconStyle.unselectedColor);
+    EXPECT_EQ(tabContentPattern->GetIconStyle().selectedColor, iconStyle.selectedColor);
 }
 
 /**
@@ -1475,6 +1513,10 @@ HWTEST_F(TabsTestNg, TabBarPatternMaskAnimationFinish002, TestSize.Level1)
      * @tc.steps: step2. call MaskAnimationFinish function.
      * @tc.expected: step2. expect The function is run ok.
      */
+    IconStyle iconStyle;
+    iconStyle.unselectedColor = Color::WHITE;
+    iconStyle.selectedColor = Color::WHITE;
+    tabBarPattern_->SetIconStyle(iconStyle, 0);
     tabBarPattern_->MaskAnimationFinish(tabBarNode_, 0, false);
     EXPECT_NE(tabBarNode_->GetChildAtIndex(0), nullptr);
     tabBarPattern_->MaskAnimationFinish(tabBarNode_, 1, true);
@@ -1508,19 +1550,13 @@ HWTEST_F(TabsTestNg, TabBarPatternChangeMask001, TestSize.Level1)
     auto tabBarGeometryNode = tabBarNode_->GetGeometryNode();
     auto tabBarOffset = tabBarGeometryNode->GetMarginFrameOffset();
 
-    auto mockRenderContext1 = AceType::MakeRefPtr<MockRenderContext>();
     auto maskNode1 = AceType::DynamicCast<FrameNode>(
         tabBarNode_->GetChildAtIndex(tabBarNode_->GetChildren().size() - TEST_SELECTED_MASK_COUNT));
     auto imageNode1 = AceType::DynamicCast<FrameNode>(maskNode1->GetChildren().front());
-    imageNode1->renderContext_ = mockRenderContext1;
-    EXPECT_CALL(*mockRenderContext1, SetVisible(_)).Times(1);
 
-    auto mockRenderContext2 = AceType::MakeRefPtr<MockRenderContext>();
     auto maskNode2 = AceType::DynamicCast<FrameNode>(
         tabBarNode_->GetChildAtIndex(tabBarNode_->GetChildren().size() - TEST_SELECTED_MASK_COUNT + 1));
     auto imageNode2 = AceType::DynamicCast<FrameNode>(maskNode2->GetChildren().front());
-    imageNode2->renderContext_ = mockRenderContext2;
-    EXPECT_CALL(*mockRenderContext2, SetVisible(_)).Times(1);
 
     tabBarPattern_->ChangeMask(TEST_TAB_BAR_INDEX, 1.0f, tabBarOffset, 1.0f, TEST_MASK_MIDDLE_RADIUS_RATIO, true);
     tabBarPattern_->ChangeMask(TEST_TAB_BAR_INDEX, 1.0f, tabBarOffset, 0.99f, TEST_MASK_MIDDLE_RADIUS_RATIO, false);
@@ -1966,6 +2002,26 @@ HWTEST_F(TabsTestNg, TabsModelSetTabBarWidth001, TestSize.Level1)
 }
 
 /**
+ * @tc.name: TabsModelSetWidthAuto001
+ * @tc.desc: test SetWidthAuto and SetHeightAuto
+ * @tc.type: FUNC
+ */
+HWTEST_F(TabsTestNg, TabsModelSetWidthAuto001, TestSize.Level1)
+{
+ /**
+  * @tc.steps: step1. Test function SetWidthAuto and SetHeightAuto When isAuto is true.
+  * @tc.expected: Related functions run ok.
+  */
+    CreateWithItem([](TabsModelNG model) {
+        model.SetWidthAuto(true);
+        model.SetHeightAuto(true);
+    });
+    auto tabsLayoutProperty = layoutProperty_;
+    EXPECT_TRUE(tabsLayoutProperty->GetWidthAutoValue(false));
+    EXPECT_TRUE(tabsLayoutProperty->GetHeightAutoValue(false));
+}
+
+/**
  * @tc.name: TabsModelSetAnimationDuration001
  * @tc.desc: test SetAnimationDuration
  * @tc.type: FUNC
@@ -2187,6 +2243,17 @@ HWTEST_F(TabsTestNg, TabBarPatternGetBottomTabBarImageSizeAndOffset001, TestSize
      * @tc.expected: Related function runs ok.
      */
     int32_t maskIndex = 0;
+    for (int i = 0; i <= 1; i++) {
+        tabBarPattern_->GetBottomTabBarImageSizeAndOffset(selectedIndexes, maskIndex, selectedImageSize,
+            unselectedImageSize, originalSelectedMaskOffset, originalUnselectedMaskOffset);
+        maskIndex = 1;
+    }
+
+    IconStyle iconStyle;
+    iconStyle.unselectedColor = Color::WHITE;
+    iconStyle.selectedColor = Color::WHITE;
+    tabBarPattern_->SetIconStyle(iconStyle, 0);
+    maskIndex = 0;
     for (int i = 0; i <= 1; i++) {
         tabBarPattern_->GetBottomTabBarImageSizeAndOffset(selectedIndexes, maskIndex, selectedImageSize,
             unselectedImageSize, originalSelectedMaskOffset, originalUnselectedMaskOffset);
@@ -2941,6 +3008,14 @@ HWTEST_F(TabsTestNg, TabBarPatternUpdateTextColorAndFontWeight001, TestSize.Leve
     int32_t index = 0;
     tabBarPattern_->UpdateTextColorAndFontWeight(index);
     tabBarPattern_->UpdateImageColor(index);
+
+    IconStyle iconStyle;
+    iconStyle.unselectedColor = Color::WHITE;
+    iconStyle.selectedColor = Color::WHITE;
+    tabBarPattern_->SetIconStyle(iconStyle, 0);
+    index = 0;
+    tabBarPattern_->UpdateTextColorAndFontWeight(index);
+    tabBarPattern_->UpdateImageColor(index);
 }
 
 /**
@@ -3331,19 +3406,13 @@ HWTEST_F(TabsTestNg, TabBarPatternPlayMaskAnimation001, TestSize.Level1)
     OffsetF originalUnselectedMaskOffset(0.1f, 0.2f);
     int32_t unselectedIndex = 1;
 
-    auto mockRenderContext1 = AceType::MakeRefPtr<MockRenderContext>();
     auto maskNode1 = AceType::DynamicCast<FrameNode>(
         tabBarNode_->GetChildAtIndex(tabBarNode_->GetChildren().size() - TEST_SELECTED_MASK_COUNT));
     auto imageNode1 = AceType::DynamicCast<FrameNode>(maskNode1->GetChildren().front());
-    imageNode1->renderContext_ = mockRenderContext1;
-    EXPECT_CALL(*mockRenderContext1, SetVisible(_)).Times(1);
 
-    auto mockRenderContext2 = AceType::MakeRefPtr<MockRenderContext>();
     auto maskNode2 = AceType::DynamicCast<FrameNode>(
         tabBarNode_->GetChildAtIndex(tabBarNode_->GetChildren().size() - TEST_SELECTED_MASK_COUNT + 1));
     auto imageNode2 = AceType::DynamicCast<FrameNode>(maskNode2->GetChildren().front());
-    imageNode2->renderContext_ = mockRenderContext2;
-    EXPECT_CALL(*mockRenderContext2, SetVisible(_)).Times(1);
 
     tabBarPattern_->PlayMaskAnimation(selectedImageSize, originalSelectedMaskOffset, selectedIndex, unselectedImageSize,
         originalUnselectedMaskOffset, unselectedIndex);
@@ -4025,10 +4094,6 @@ HWTEST_F(TabsTestNg, TabBarLayoutAlgorithmLayoutMask004, TestSize.Level1)
      * @tc.steps: step4. call LayoutMask function.
      * @tc.expected: step4. expect The function is run ok.
      */
-    auto mockRenderContext = AceType::MakeRefPtr<MockRenderContext>();
-    imageNode->renderContext_ = mockRenderContext;
-    EXPECT_CALL(*mockRenderContext, SetVisible(_)).Times(1);
-
     tabBarLayoutAlgorithm->LayoutMask(&layoutWrapper, childOffsetDelta);
     EXPECT_EQ(tabBarLayoutProperty_->GetSelectedMask().value_or(-1), 0);
     EXPECT_EQ(tabBarLayoutProperty_->GetUnselectedMask().value_or(-1), 1);
@@ -7214,5 +7279,26 @@ HWTEST_F(TabsTestNg, SetOnContentWillChangeTest005, TestSize.Level1)
     frameNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE); // for update swiper
     FlushLayoutTask(frameNode_);
     EXPECT_EQ(isShow, 9);
+}
+
+/**
+ * @tc.name: SetCustomStyleNodeTest001
+ * @tc.desc: test the node can be saved in the pattern
+ * @tc.type: FUNC
+ */
+HWTEST_F(TabsTestNg, SetCustomStyleNodeTest001, TestSize.Level1)
+{
+    auto frameNode = FrameNode::CreateFrameNode(
+        V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(frameNode, nullptr);
+    Create([=](TabsModelNG model) {
+        CreateSingleItem([=](TabContentModelNG tabContentModel) {
+            tabContentModel.SetCustomStyleNode(frameNode);
+        }, 0);
+    });
+    auto tabContentFrameNode = AceType::DynamicCast<TabContentNode>(GetChildFrameNode(swiperNode_, 0));
+    auto tabContentPattern = tabContentFrameNode->GetPattern<TabContentPattern>();
+    ASSERT_NE(tabContentPattern, nullptr);
+    EXPECT_TRUE(tabContentPattern->HasSubTabBarStyleNode());
 }
 } // namespace OHOS::Ace::NG

@@ -21,6 +21,7 @@
 #include "core/components/common/properties/motion_path_evaluator.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/layout/layout_property.h"
+#include "core/components_ng/pattern/stage/page_pattern.h"
 #include "core/components_ng/property/property.h"
 
 namespace OHOS::Ace::NG {
@@ -191,7 +192,7 @@ bool SharedTransitionExchange::CreateSizeAnimation(const RefPtr<FrameNode>& src,
         return true;
     }
     const auto& magicProperty = src->GetLayoutProperty()->GetMagicItemProperty();
-    auto initAspectRatio = magicProperty ? magicProperty->GetAspectRatio() : std::nullopt;
+    auto initAspectRatio = magicProperty.GetAspectRatio();
     auto initSize = src->GetLayoutProperty()->GetCalcLayoutConstraint()
                         ? src->GetLayoutProperty()->GetCalcLayoutConstraint()->selfIdealSize
                         : std::nullopt;
@@ -252,10 +253,9 @@ void SharedTransitionExchange::DestRequestDefaultFocus()
     CHECK_NULL_VOID(dest);
     auto page = dest->GetPageNode();
     CHECK_NULL_VOID(page);
-    auto pageFocusHub = page->GetFocusHub();
-    CHECK_NULL_VOID(pageFocusHub);
-    pageFocusHub->SetParentFocusable(true);
-    pageFocusHub->RequestFocusWithDefaultFocusFirstly();
+    auto pagePattern = page->GetPattern<PagePattern>();
+    CHECK_NULL_VOID(pagePattern);
+    pagePattern->FocusViewShow();
 }
 
 SharedTransitionStatic::SharedTransitionStatic(

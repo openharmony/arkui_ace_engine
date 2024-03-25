@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -17,11 +17,11 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_WATERFLOW_WATER_FLOW_ACCESSIBILITY_PROPERTY_H
 
 #include "base/utils/utils.h"
-#include "core/components_ng/property/accessibility_property.h"
+#include "core/components_ng/pattern/scrollable/scrollable_accessibility_property.h"
 
 namespace OHOS::Ace::NG {
-class WaterFlowAccessibilityProperty : public AccessibilityProperty {
-    DECLARE_ACE_TYPE(WaterFlowAccessibilityProperty, AccessibilityProperty);
+class WaterFlowAccessibilityProperty : public ScrollableAccessibilityProperty {
+    DECLARE_ACE_TYPE(WaterFlowAccessibilityProperty, ScrollableAccessibilityProperty);
 
 public:
     WaterFlowAccessibilityProperty() = default;

@@ -56,7 +56,7 @@ public:
 
     void SetParagraph(RefPtr<Paragraph> paragraph)
     {
-        paragraph_ = paragraph;
+        paragraph_ = std::move(paragraph);
     }
 
     void SetPrintOffset(const OffsetF& paintOffset)

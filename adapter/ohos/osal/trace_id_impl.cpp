@@ -21,10 +21,7 @@ namespace OHOS::Ace {
 
 class TraceIdImpl : public TraceId {
 public:
-    TraceIdImpl()
-    {
-        traceId_ = std::make_unique<OHOS::HiviewDFX::HiTraceId>(OHOS::HiviewDFX::HiTraceChain::GetId());
-    }
+    TraceIdImpl() : traceId_(std::make_unique<OHOS::HiviewDFX::HiTraceId>(OHOS::HiviewDFX::HiTraceChain::GetId())) {}
 
     ~TraceIdImpl() = default;
 

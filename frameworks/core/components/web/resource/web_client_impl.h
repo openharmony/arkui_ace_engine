@@ -161,6 +161,13 @@ public:
         const std::string &realm) override;
     bool OnSslErrorRequestByJS(std::shared_ptr<NWeb::NWebJSSslErrorResult> result,
         OHOS::NWeb::SslError error) override;
+    bool OnAllSslErrorRequestByJS(std::shared_ptr<NWeb::NWebJSAllSslErrorResult> result,
+        OHOS::NWeb::SslError error,
+        const std::string& url,
+        const std::string& originalUrl,
+        const std::string& referrer,
+        bool isFatalError,
+        bool isMainFrame) override;
     bool OnSslSelectCertRequestByJS(
         std::shared_ptr<NWeb::NWebJSSslSelectCertResult> result,
         const std::string& host,
@@ -201,6 +208,8 @@ public:
                            std::shared_ptr<NWeb::NWebSelectPopupMenuCallback> callback) override;
     void OnAudioStateChanged(bool playing) override;
     void OnFirstContentfulPaint(int64_t navigationStartTick, int64_t firstContentfulPaintMs) override;
+    void OnFirstMeaningfulPaint(std::shared_ptr<NWeb::NWebFirstMeaningfulPaintDetails> details) override;
+    void OnLargestContentfulPaint(std::shared_ptr<NWeb::NWebLargestContentfulPaintDetails> details) override;
     void OnSafeBrowsingCheckResult(int threat_type) override;
     void OnCompleteSwapWithNewSize() override;
     void OnResizeNotWork() override;

@@ -118,16 +118,14 @@ RefPtr<IconTheme> IconTheme::Builder::Build(const RefPtr<ThemeConstants>& themeC
     if (!themeConstants) {
         return theme;
     }
-    ParsePattern(themeConstants->GetThemeStyle(), theme);
+    ParsePattern(themeConstants, theme);
     return theme;
 }
 
-void IconTheme::Builder::ParsePattern(const RefPtr<ThemeStyle>& themeStyle, const RefPtr<IconTheme>& theme) const
+void IconTheme::Builder::ParsePattern(
+    const RefPtr<ThemeConstants>& themeConstants, const RefPtr<IconTheme>& theme) const
 {
-    if (!themeStyle) {
-        return;
-    }
-    theme->pattern_ = themeStyle->GetAttr<RefPtr<ThemeStyle>>(THEME_PATTERN_ICON, nullptr);
+    theme->pattern_ = themeConstants->GetPatternByName(THEME_PATTERN_ICON);
 }
 
 std::string IconTheme::GetIconPath(const InternalResource::ResourceId& resourceId) const

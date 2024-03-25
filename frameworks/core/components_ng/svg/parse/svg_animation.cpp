@@ -92,8 +92,9 @@ void SvgAnimation::UpdateAttr()
 
 CalcMode SvgAnimation::ConvertCalcMode(const std::string& val)
 {
-    if (CALC_MODE_MAP.find(val) != CALC_MODE_MAP.end()) {
-        return CALC_MODE_MAP.find(val)->second;
+    auto it = CALC_MODE_MAP.find(val);
+    if (it != CALC_MODE_MAP.end()) {
+        return it->second;
     }
     // CalcMode linear by default
     return CalcMode::LINEAR;

@@ -32,6 +32,8 @@ struct SwiperItemInfo {
     float endPos = 0.0f;
     RefPtr<FrameNode> node;
     OffsetF finalOffset;
+    CancelableCallback<void()> task;
+    bool isFinishAnimation = false;
 };
 
 class ACE_EXPORT SwiperLayoutAlgorithm : public LayoutAlgorithm {
@@ -261,10 +263,22 @@ public:
         return isNeedUpdateCapture_;
     }
 
+    void SetItemsPositionInAnimation(const PositionMap& itemPositionInAnimation)
+    {
+        itemPositionInAnimation_ = itemPositionInAnimation;
+    }
+
+    PositionMap&& GetItemsPositionInAnimation()
+    {
+        return std::move(itemPositionInAnimation_);
+    }
+
 private:
     void MeasureSwiper(LayoutWrapper* layoutWrapper, const LayoutConstraintF& layoutConstraint, Axis axis);
-    void MeasureCustomAnimation(LayoutWrapper* layoutWrapper);
+    void MeasureTabsCustomAnimation(LayoutWrapper* layoutWrapper);
+    void MeasureSwiperCustomAnimation(LayoutWrapper* layoutWrapper, const LayoutConstraintF& layoutConstraint);
     void LayoutCustomAnimation(LayoutWrapper* layoutWrapper) const;
+    void LayoutItem(LayoutWrapper* layoutWrapper, Axis axis, OffsetF offset, std::pair<int32_t, SwiperItemInfo> pos);
     void SetInactive(
         LayoutWrapper* layoutWrapper, float startMainPos, float endMainPos, std::optional<int32_t> targetIndex);
 
@@ -292,6 +306,7 @@ private:
 
     PositionMap itemPosition_;
     PositionMap prevItemPosition_;
+    PositionMap itemPositionInAnimation_;
     float currentOffset_ = 0.0f;
     float currentDelta_ = 0.0f;
     float startMainPos_ = 0.0f;

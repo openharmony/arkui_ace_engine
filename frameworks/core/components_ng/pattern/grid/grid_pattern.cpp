@@ -22,6 +22,7 @@
 #include "base/utils/utils.h"
 #include "core/common/container.h"
 #include "core/components/scroll/scroll_controller_base.h"
+#include "core/components_ng/base/observer_handler.h"
 #include "core/components_ng/pattern/grid/grid_adaptive/grid_adaptive_layout_algorithm.h"
 #include "core/components_ng/pattern/grid/grid_item_layout_property.h"
 #include "core/components_ng/pattern/grid/grid_item_pattern.h"
@@ -77,7 +78,9 @@ RefPtr<LayoutAlgorithm> GridPattern::CreateLayoutAlgorithm()
     if (!gridLayoutProperty->GetLayoutOptions().has_value()) {
         result = MakeRefPtr<GridScrollLayoutAlgorithm>(gridLayoutInfo_, crossCount, mainCount);
     } else if (SystemProperties::GetGridIrregularLayoutEnabled()) {
-        return MakeRefPtr<GridIrregularLayoutAlgorithm>(gridLayoutInfo_, CanOverScroll(GetScrollSource()));
+        auto algo = MakeRefPtr<GridIrregularLayoutAlgorithm>(gridLayoutInfo_, CanOverScroll(GetScrollSource()));
+        algo->SetEnableSkip(ScrollablePattern::AnimateRunning());
+        return algo;
     } else {
         result = MakeRefPtr<GridScrollWithOptionsLayoutAlgorithm>(gridLayoutInfo_, crossCount, mainCount);
     }
@@ -165,7 +168,6 @@ void GridPattern::OnModifyDone()
             return grid->GetMainContentSize();
         });
     }
-
     Register2DragDropManager();
     if (IsNeedInitClickEventRecorder()) {
         Pattern::InitClickEventRecorder();
@@ -264,6 +266,8 @@ bool GridPattern::IsItemSelected(const GestureEvent& info)
 
 void GridPattern::FireOnScrollStart()
 {
+    UIObserverHandler::GetInstance().NotifyScrollEventStateChange(AceType::WeakClaim(this),
+        ScrollEventType::SCROLL_START);
     PerfMonitor::GetPerfMonitor()->Start(PerfConstants::APP_LIST_FLING, PerfActionType::FIRST_MOVE, "");
     if (GetScrollAbort()) {
         return;
@@ -348,7 +352,6 @@ bool GridPattern::UpdateCurrentOffset(float offset, int32_t source)
     FireAndCleanScrollingListener();
     // When finger moves down, offset is positive.
     // When finger moves up, offset is negative.
-    gridLayoutInfo_.originOffset_ = offset;
     auto itemsHeight = gridLayoutInfo_.GetTotalHeightOfItemsInView(GetMainGap());
     if (gridLayoutInfo_.offsetEnd_) {
         auto overScroll = gridLayoutInfo_.currentOffset_ - (GetMainContentSize() - itemsHeight);
@@ -1237,16 +1240,19 @@ bool GridPattern::HandleDirectionKey(KeyCode code)
     return false;
 }
 
-void GridPattern::ScrollPage(bool reverse)
+void GridPattern::ScrollPage(bool reverse, bool smooth)
 {
-    StopAnimate();
-    if (!isConfigScrollable_) {
+    float distance = reverse ? GetMainContentSize() : -GetMainContentSize();
+    if (smooth) {
+        float position = -currentHeight_ + distance;
+        ScrollablePattern::AnimateTo(-position, -1, nullptr, true);
         return;
-    }
-    if (!reverse) {
-        UpdateCurrentOffset(-GetMainContentSize(), SCROLL_FROM_JUMP);
     } else {
-        UpdateCurrentOffset(GetMainContentSize(), SCROLL_FROM_JUMP);
+        if (!isConfigScrollable_) {
+            return;
+        }
+        StopAnimate();
+        UpdateCurrentOffset(distance, SCROLL_FROM_JUMP);
     }
     // AccessibilityEventType::SCROLL_END
 }
@@ -1814,6 +1820,17 @@ void GridPattern::StopAnimate()
 {
     ScrollablePattern::StopAnimate();
     isSmoothScrolling_ = false;
+}
+
+bool GridPattern::IsPredictOutOfRange(int32_t index) const
+{
+    CHECK_NULL_RETURN(gridLayoutInfo_.reachEnd_, false);
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, true);
+    auto gridLayoutProperty = host->GetLayoutProperty<GridLayoutProperty>();
+    CHECK_NULL_RETURN(gridLayoutProperty, true);
+    auto cacheCount = gridLayoutProperty->GetCachedCountValue(0) * gridLayoutInfo_.crossCount_;
+    return index < gridLayoutInfo_.startIndex_ - cacheCount || index > gridLayoutInfo_.endIndex_ + cacheCount;
 }
 
 } // namespace OHOS::Ace::NG

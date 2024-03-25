@@ -161,7 +161,7 @@ public:
         return refereeNG_;
     }
 
-    void DispatchKeyboardShortcut(const KeyEvent& event);
+    bool DispatchKeyboardShortcut(const KeyEvent& event);
 
     void AddKeyboardShortcutNode(const WeakPtr<NG::FrameNode>& node);
 
@@ -236,6 +236,14 @@ public:
         return innerEventWin_;
     }
 
+    void SetIsKeyConsumed(bool value)
+    {
+        // Once consumed, isKeyConsumed_ keeps true
+        if (!isKeyConsumed_ && value) {
+            isKeyConsumed_ = true;
+        }
+    }
+
 private:
     void SetHittedFrameNode(const std::list<RefPtr<NG::NGGestureRecognizer>>& touchTestResults);
     void CleanGestureEventHub();
@@ -263,6 +271,7 @@ private:
     bool inSelectedRect_ = false;
     bool isDragging_ = false;
     bool isLastMoveBeforeUp_ = false;
+    bool isKeyConsumed_ = false;
     RefPtr<GestureReferee> referee_;
     RefPtr<NG::GestureReferee> refereeNG_;
     RefPtr<NG::GestureReferee> postEventRefereeNG_;

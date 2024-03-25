@@ -36,6 +36,18 @@ struct ListItemGroupPaintInfo {
     int32_t totalItemCount = 0;
 };
 
+enum ListItemGroupArea {
+    NONE_AREA,
+    IN_LIST_ITEM_AREA,
+    IN_HEADER_AREA,
+    IN_FOOTER_AREA
+};
+
+struct VisibleContentInfo {
+    int32_t area = -1;
+    int32_t indexInGroup = -1;
+};
+
 class ACE_EXPORT ListItemGroupPattern : public Pattern {
     DECLARE_ACE_TYPE(ListItemGroupPattern, Pattern);
 
@@ -172,13 +184,15 @@ public:
 
     void SetItemPressed(bool isPressed, int32_t id)
     {
-        for (auto& child : itemPosition_) {
-            if (child.second.id == id) {
-                child.second.isPressed = isPressed;
-                break;
-            }
+        if (isPressed) {
+            pressedItem_.emplace(id);
+        } else {
+            pressedItem_.erase(id);
         }
     }
+
+    VisibleContentInfo GetStartListItemIndex();
+    VisibleContentInfo GetEndListItemIndex();
 
 private:
     bool IsNeedInitClickEventRecorder() const override
@@ -205,6 +219,7 @@ private:
     float_t footerMainSize_ = 0.0f;
 
     std::optional<LayoutedItemInfo> layoutedItemInfo_;
+    std::set<int32_t> pressedItem_;
     bool layouted_ = false;
 
     ListItemGroupLayoutAlgorithm::PositionMap itemPosition_;
@@ -212,6 +227,8 @@ private:
     Axis axis_ = Axis::VERTICAL;
     int32_t lanes_ = 1;
     float laneGutter_ = 0.0f;
+    float startHeaderPos_ = 0.0f;
+    float endFooterPos_ = 0.0f;
     ACE_DISALLOW_COPY_AND_MOVE(ListItemGroupPattern);
 };
 } // namespace OHOS::Ace::NG

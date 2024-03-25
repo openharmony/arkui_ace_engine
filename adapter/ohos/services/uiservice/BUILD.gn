@@ -102,4 +102,5 @@ ohos_shared_library("uiservice") {
   part_name = ace_engine_part
   subsystem_name = ace_engine_subsystem
   configs = [ "$ace_root:ace_coverage_config" ]
+  external_deps = [ "hilog:libhilog" ]
 }

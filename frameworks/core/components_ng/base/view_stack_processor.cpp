@@ -25,6 +25,9 @@
 #include "core/components_v2/inspector/inspector_constants.h"
 
 namespace OHOS::Ace::NG {
+namespace {
+const RefPtr<UINode> INVALID_NODE = nullptr;
+}
 thread_local std::unique_ptr<ViewStackProcessor> ViewStackProcessor::instance = nullptr;
 
 ViewStackProcessor* ViewStackProcessor::GetInstance()
@@ -37,15 +40,16 @@ ViewStackProcessor* ViewStackProcessor::GetInstance()
 
 ViewStackProcessor::ViewStackProcessor() = default;
 
-RefPtr<FrameNode> ViewStackProcessor::GetMainFrameNode() const
+FrameNode* ViewStackProcessor::GetMainFrameNode() const
 {
-    return AceType::DynamicCast<FrameNode>(GetMainElementNode());
+    auto uiNode = GetMainElementNode();
+    return static_cast<FrameNode*>(Referenced::RawPtr(uiNode));
 }
 
-RefPtr<UINode> ViewStackProcessor::GetMainElementNode() const
+const RefPtr<UINode>& ViewStackProcessor::GetMainElementNode() const
 {
     if (elementsStack_.empty()) {
-        return nullptr;
+        return INVALID_NODE;
     }
     return elementsStack_.top();
 }

@@ -94,6 +94,12 @@ bool DatePickerPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& di
 
 void DatePickerPattern::OnModifyDone()
 {
+    if (isFiredDateChange_ && !isForceUpdate_) {
+        isFiredDateChange_ = false;
+        return;
+    }
+
+    isForceUpdate_ = false;
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     InitDisabled();
@@ -120,8 +126,6 @@ void DatePickerPattern::OnModifyDone()
     if (focusHub) {
         InitOnKeyEvent(focusHub);
     }
-    isFirstUpdate_ = false;
-    isContentUpdateOnly_ = false;
 }
 
 void DatePickerPattern::InitDisabled()
@@ -481,9 +485,9 @@ void DatePickerPattern::FlushColumn()
     yearColumnPattern->SetShowCount(GetShowCount());
     monthColumnPattern->SetShowCount(GetShowCount());
     dayColumnPattern->SetShowCount(GetShowCount());
-    yearColumnPattern->FlushCurrentOptions(false, isContentUpdateOnly_);
-    monthColumnPattern->FlushCurrentOptions(false, isContentUpdateOnly_);
-    dayColumnPattern->FlushCurrentOptions(false, isContentUpdateOnly_);
+    yearColumnPattern->FlushCurrentOptions();
+    monthColumnPattern->FlushCurrentOptions();
+    dayColumnPattern->FlushCurrentOptions();
 }
 
 void DatePickerPattern::FlushMonthDaysColumn()
@@ -528,8 +532,8 @@ void DatePickerPattern::FlushMonthDaysColumn()
 
     monthDaysColumnPattern->SetShowCount(GetShowCount());
     yearColumnPattern->SetShowCount(GetShowCount());
-    monthDaysColumnPattern->FlushCurrentOptions(false, isContentUpdateOnly_);
-    yearColumnPattern->FlushCurrentOptions(false, isContentUpdateOnly_);
+    monthDaysColumnPattern->FlushCurrentOptions();
+    yearColumnPattern->FlushCurrentOptions();
 }
 
 void DatePickerPattern::FireChangeEvent(bool refresh)
@@ -541,6 +545,7 @@ void DatePickerPattern::FireChangeEvent(bool refresh)
         auto info = std::make_shared<DatePickerChangeEvent>(str);
         datePickerEventHub->FireChangeEvent(info.get());
         datePickerEventHub->FireDialogChangeEvent(str);
+        firedDateStr_ = str;
     }
 }
 
@@ -1902,12 +1907,15 @@ const std::string& DatePickerPattern::GetYear(uint32_t year)
         return empty_;
     }
     auto index = year - 1900;
-    if (years_.find(index) == years_.end()) {
+    auto it = years_.find(index);
+    if (it == years_.end()) {
         DateTime date;
         date.year = year;
-        years_[index] = Localization::GetInstance()->FormatDateTime(date, "y");
+        auto& dateYear = years_[index];
+        dateYear = Localization::GetInstance()->FormatDateTime(date, "y");
+        return dateYear;
     }
-    return years_[index]; // index in [0, 200]
+    return it->second; // index in [0, 200]
 }
 
 const std::string& DatePickerPattern::GetSolarMonth(uint32_t month)
@@ -1917,16 +1925,19 @@ const std::string& DatePickerPattern::GetSolarMonth(uint32_t month)
         return empty_;
     }
     auto index = month - 1;
-    if (solarMonths_.find(index) == solarMonths_.end()) {
+    auto it = solarMonths_.find(index);
+    if (it == solarMonths_.end()) {
+        auto& dateMonth = solarMonths_[index];
         if (index < localizedMonths_.size()) {
-            solarMonths_[index] = localizedMonths_[index];
+            dateMonth = localizedMonths_[index];
         } else {
             DateTime date;
             date.month = month - 1; // W3C's month start from 0 to 11
-            solarMonths_[index] = Localization::GetInstance()->FormatDateTime(date, "M");
+            dateMonth = Localization::GetInstance()->FormatDateTime(date, "M");
         }
+        return dateMonth;
     }
-    return solarMonths_[index]; // index in [0,11]
+    return it->second; // index in [0,11]
 }
 
 const std::string& DatePickerPattern::GetSolarDay(uint32_t day)
@@ -1936,12 +1947,15 @@ const std::string& DatePickerPattern::GetSolarDay(uint32_t day)
         return empty_;
     }
     auto index = day - 1;
-    if (solarDays_.find(index) == solarDays_.end()) {
+    auto it = solarDays_.find(index);
+    if (it == solarDays_.end()) {
+        auto& dateDay = solarDays_[index];
         DateTime date;
         date.day = day;
-        solarDays_[index] = Localization::GetInstance()->FormatDateTime(date, "d");
+        dateDay = Localization::GetInstance()->FormatDateTime(date, "d");
+        return dateDay;
     }
-    return solarDays_[index]; // index in [0,30]
+    return it->second; // index in [0,30]
 }
 
 const std::string& DatePickerPattern::GetLunarMonth(uint32_t month, bool isLeap)
@@ -1951,10 +1965,13 @@ const std::string& DatePickerPattern::GetLunarMonth(uint32_t month, bool isLeap)
     if (!(1 <= index && index <= 24)) {             // lunar month need in [1,24]
         return empty_;
     }
-    if (lunarMonths_.find(index - 1) == lunarMonths_.end()) {
-        lunarMonths_[index - 1] = Localization::GetInstance()->GetLunarMonth(month, isLeap);
+    auto it = lunarMonths_.find(index - 1);
+    if (it == lunarMonths_.end()) {
+        auto& dateMonth = lunarMonths_[index - 1];
+        dateMonth = Localization::GetInstance()->GetLunarMonth(month, isLeap);
+        return dateMonth;
     }
-    return lunarMonths_[index - 1]; // index in [0,23]
+    return it->second; // index in [0,23]
 }
 
 const std::string& DatePickerPattern::GetLunarDay(uint32_t day)
@@ -1964,10 +1981,13 @@ const std::string& DatePickerPattern::GetLunarDay(uint32_t day)
         return empty_;
     }
     auto index = day - 1;
-    if (lunarDays_.find(index) == lunarDays_.end()) {
-        lunarDays_[index] = Localization::GetInstance()->GetLunarDay(day);
+    auto it = lunarDays_.find(index);
+    if (it == lunarDays_.end()) {
+        auto& dateDay = lunarDays_[index];
+        dateDay = Localization::GetInstance()->GetLunarDay(day);
+        return dateDay;
     }
-    return lunarDays_[index]; // index in [0,29]
+    return it->second; // index in [0,29]
 }
 
 const std::string DatePickerPattern::GetFormatString(PickerDateF date)

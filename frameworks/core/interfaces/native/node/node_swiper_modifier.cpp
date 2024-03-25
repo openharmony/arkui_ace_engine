@@ -18,9 +18,11 @@
 
 #include "base/geometry/axis.h"
 #include "base/log/log_wrapper.h"
+#include "base/memory/type_info_base.h"
 #include "base/utils/string_utils.h"
 #include "bridge/common/utils/utils.h"
 #include "core/animation/curve.h"
+#include "core/components/swiper/swiper_component.h"
 #include "core/components/swiper/swiper_indicator_theme.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/swiper/swiper_model_ng.h"
@@ -73,6 +75,12 @@ constexpr int32_t DOT_INDICATOR_TOP = 9;
 constexpr int32_t DOT_INDICATOR_RIGHT = 10;
 constexpr int32_t DOT_INDICATOR_BOTTOM = 11;
 constexpr int32_t DOT_INDICATOR_INFO_SIZE = 11;
+constexpr int32_t NUM_0 = 0;
+constexpr int32_t NUM_1 = 1;
+constexpr int32_t NUM_2 = 2;
+constexpr int32_t NUM_3 = 3;
+constexpr int32_t NUM_4 = 4;
+constexpr float ANIMATION_INFO_DEFAULT = 0.0f;
 constexpr float ARROW_SIZE_COEFFICIENT = 0.75f;
 const int32_t ERROR_INT_CODE = -1;
 
@@ -768,6 +776,13 @@ ArkUI_Int32 GetSwiperShowDisplayArrow(ArkUINodeHandle node)
     CHECK_NULL_RETURN(frameNode, ERROR_INT_CODE);
     return static_cast<ArkUI_Int32>(SwiperModelNG::GetShowDisplayArrow(frameNode));
 }
+
+ArkUI_Int32 GetSwiperEffectMode(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, ERROR_INT_CODE);
+    return static_cast<ArkUI_Int32>(SwiperModelNG::GetEffectMode(frameNode));
+}
 } // namespace
 
 namespace NodeModifier {
@@ -782,8 +797,81 @@ const ArkUISwiperModifier* GetSwiperModifier()
         SetSwiperIndex, ResetSwiperIndex, SetSwiperIndicator, ResetSwiperIndicator, SetSwiperDuration,
         ResetSwiperDuration, SetSwiperEnabled, ResetSwiperEnabled, GetSwiperLoop, GetSwiperAutoPlay, GetSwiperIndex,
         GetSwiperVertical, GetSwiperDuration, GetSwiperDisplayCount, GetSwiperInterval, GetSwiperCurve,
-        GetSwiperDisableSwipe, GetSwiperItemSpace, GetSwiperShowIndicator, GetSwiperShowDisplayArrow };
+        GetSwiperDisableSwipe, GetSwiperItemSpace, GetSwiperShowIndicator, GetSwiperShowDisplayArrow,
+        GetSwiperEffectMode };
     return &modifier;
+}
+
+void SetSwiperChange(ArkUINodeHandle node, void* extraParam)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto onEvent = [node, extraParam](const BaseEventInfo* info) {
+        const auto* swiperInfo = TypeInfoHelper::DynamicCast<SwiperChangeEvent>(info);
+        if (!swiperInfo) {
+            LOGE("Swiper onChange callback execute failed.");
+            return;
+        }
+        int32_t index = swiperInfo->GetIndex();
+        ArkUINodeEvent event;
+        event.kind = COMPONENT_ASYNC_EVENT;
+        event.extraParam = reinterpret_cast<intptr_t>(extraParam);
+        event.componentAsyncEvent.subKind = ON_SWIPER_CHANGE;
+        event.componentAsyncEvent.data[NUM_0].i32 = index;
+        SendArkUIAsyncEvent(&event);
+    };
+    SwiperModelNG::SetOnChange(frameNode, std::move(onEvent));
+}
+
+void SetSwiperAnimationStart(ArkUINodeHandle node, void* extraParam)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto onEvent = [node, extraParam](int32_t index, int32_t targetIndex, const AnimationCallbackInfo& info) {
+        ArkUINodeEvent event;
+        event.kind = COMPONENT_ASYNC_EVENT;
+        event.extraParam = reinterpret_cast<intptr_t>(extraParam);
+        event.componentAsyncEvent.subKind = ON_SWIPER_ANIMATION_START;
+        event.componentAsyncEvent.data[NUM_0].i32 = index;
+        event.componentAsyncEvent.data[NUM_1].i32 = targetIndex;
+        event.componentAsyncEvent.data[NUM_2].f32 = info.currentOffset.value_or(ANIMATION_INFO_DEFAULT);
+        event.componentAsyncEvent.data[NUM_3].f32 = info.targetOffset.value_or(ANIMATION_INFO_DEFAULT);
+        event.componentAsyncEvent.data[NUM_4].f32 = info.velocity.value_or(ANIMATION_INFO_DEFAULT);
+        SendArkUIAsyncEvent(&event);
+    };
+    SwiperModelNG::SetOnAnimationStart(frameNode, std::move(onEvent));
+}
+
+void SetSwiperAnimationEnd(ArkUINodeHandle node, void* extraParam)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto onEvent = [node, extraParam](int32_t index, const AnimationCallbackInfo& info) {
+        ArkUINodeEvent event;
+        event.kind = COMPONENT_ASYNC_EVENT;
+        event.extraParam = reinterpret_cast<intptr_t>(extraParam);
+        event.componentAsyncEvent.subKind = ON_SWIPER_ANIMATION_END;
+        event.componentAsyncEvent.data[NUM_0].i32 = index;
+        event.componentAsyncEvent.data[NUM_1].f32 = info.currentOffset.value_or(ANIMATION_INFO_DEFAULT);
+        SendArkUIAsyncEvent(&event);
+    };
+    SwiperModelNG::SetOnAnimationEnd(frameNode, std::move(onEvent));
+}
+
+void SetSwiperGestureSwipe(ArkUINodeHandle node, void* extraParam)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto onEvent = [node, extraParam](int32_t index, const AnimationCallbackInfo& info) {
+        ArkUINodeEvent event;
+        event.kind = COMPONENT_ASYNC_EVENT;
+        event.extraParam = reinterpret_cast<intptr_t>(extraParam);
+        event.componentAsyncEvent.subKind = ON_SWIPER_GESTURE_SWIPE;
+        event.componentAsyncEvent.data[NUM_0].i32 = index;
+        event.componentAsyncEvent.data[NUM_1].f32 = info.currentOffset.value_or(ANIMATION_INFO_DEFAULT);
+        SendArkUIAsyncEvent(&event);
+    };
+    SwiperModelNG::SetOnGestureSwipe(frameNode, std::move(onEvent));
 }
 } // namespace NodeModifier
 } // namespace OHOS::Ace::NG

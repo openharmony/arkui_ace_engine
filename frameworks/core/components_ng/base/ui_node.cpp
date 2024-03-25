@@ -36,8 +36,8 @@ namespace OHOS::Ace::NG {
 
 thread_local int64_t UINode::currentAccessibilityId_ = 0;
 
-UINode::UINode(const std::string& tag, int32_t nodeId, int32_t instanceId, bool isRoot)
-    : tag_(tag), nodeId_(nodeId), accessibilityId_(currentAccessibilityId_++), isRoot_(isRoot), instanceId_(instanceId)
+UINode::UINode(const std::string& tag, int32_t nodeId, bool isRoot)
+    : tag_(tag), nodeId_(nodeId), accessibilityId_(currentAccessibilityId_++), isRoot_(isRoot)
 {
     if (AceChecker::IsPerformanceCheckEnabled()) {
         auto pos = EngineHelper::GetPositionOnJsCode();
@@ -54,9 +54,7 @@ UINode::UINode(const std::string& tag, int32_t nodeId, int32_t instanceId, bool 
         distributedUI->AddNewNode(nodeId_);
     } while (false);
 #endif
-    if (instanceId_ == -1) {
-        instanceId_ = Container::CurrentId();
-    }
+    instanceId_ = Container::CurrentId();
     nodeStatus_ = ViewStackProcessor::GetInstance()->IsBuilderNode() ? NodeStatus::BUILDER_NODE_OFF_MAINTREE
                                                                      : NodeStatus::NORMAL_NODE;
 }
@@ -120,6 +118,29 @@ void UINode::AddChildAfter(const RefPtr<UINode>& child, const RefPtr<UINode>& si
     auto siblingNodeIter = std::find(children_.begin(), children_.end(), siblingNode);
     if (siblingNodeIter != children_.end()) {
         DoAddChild(++siblingNodeIter, child, false);
+        return;
+    }
+    it = children_.begin();
+    std::advance(it, -1);
+    DoAddChild(it, child, false);
+}
+
+void UINode::AddChildBefore(const RefPtr<UINode>& child, const RefPtr<UINode>& siblingNode)
+{
+    CHECK_NULL_VOID(child);
+    CHECK_NULL_VOID(siblingNode);
+    auto it = std::find(children_.begin(), children_.end(), child);
+    if (it != children_.end()) {
+        LOGW("Child node already exists. Existing child nodeId %{public}d, add %{public}s child nodeId nodeId "
+             "%{public}d",
+            (*it)->GetId(), child->GetTag().c_str(), child->GetId());
+        return;
+    }
+    // remove from disappearing children
+    RemoveDisappearingChild(child);
+    auto siblingNodeIter = std::find(children_.begin(), children_.end(), siblingNode);
+    if (siblingNodeIter != children_.end()) {
+        DoAddChild(siblingNodeIter, child, false);
         return;
     }
     it = children_.begin();
@@ -229,7 +250,9 @@ void UINode::Clean(bool cleanDirectly, bool allowTransition)
         }
         ++index;
     }
-    children_.clear();
+    if (tag_ != V2::JS_IF_ELSE_ETS_TAG) {
+        children_.clear();
+    }
     MarkNeedSyncRenderTree(true);
 }
 
@@ -440,10 +463,10 @@ void UINode::AdjustParentLayoutFlag(PropertyChangeFlag& flag)
     }
 }
 
-void UINode::MarkDirtyNode(PropertyChangeFlag extraFlag)
+void UINode::MarkDirtyNode(PropertyChangeFlag extraFlag, bool childExpansiveAndMark)
 {
     for (const auto& child : GetChildren()) {
-        child->MarkDirtyNode(extraFlag);
+        child->MarkDirtyNode(extraFlag, childExpansiveAndMark);
     }
 }
 
@@ -723,6 +746,8 @@ bool UINode::RenderCustomChild(int64_t deadline)
 
 void UINode::Build(std::shared_ptr<std::list<ExtraInfo>> extraInfos)
 {
+    ACE_LAYOUT_SCOPED_TRACE("Build[%s][self:%d][parent:%d][key:%s]", GetTag().c_str(), GetId(),
+        GetParent() ? GetParent()->GetId() : 0, GetInspectorIdValue("").c_str());
     for (const auto& child : GetChildren()) {
         if (InstanceOf<CustomNode>(child)) {
             auto custom = DynamicCast<CustomNode>(child);
@@ -779,7 +804,7 @@ void UINode::SetJSViewActive(bool active)
     }
 }
 
-void UINode::OnVisibleChange(bool isVisible)
+void UINode::TryVisibleChangeOnDescendant(bool isVisible)
 {
     UpdateChildrenVisible(isVisible);
 }
@@ -787,15 +812,7 @@ void UINode::OnVisibleChange(bool isVisible)
 void UINode::UpdateChildrenVisible(bool isVisible) const
 {
     for (const auto& child : GetChildren()) {
-        if (InstanceOf<FrameNode>(child)) {
-            auto childLayoutProperty = DynamicCast<FrameNode>(child)->GetLayoutProperty();
-            if (childLayoutProperty &&
-                childLayoutProperty->GetVisibilityValue(VisibleType::VISIBLE) != VisibleType::VISIBLE) {
-                // child is invisible, no need to update visible state.
-                continue;
-            }
-        }
-        child->OnVisibleChange(isVisible);
+        child->TryVisibleChangeOnDescendant(isVisible);
     }
 }
 
@@ -971,12 +988,12 @@ RefPtr<UINode> UINode::GetDisappearingChildById(const std::string& id) const
     return nullptr;
 }
 
-RefPtr<UINode> UINode::GetFrameChildByIndex(uint32_t index, bool needBuild)
+RefPtr<UINode> UINode::GetFrameChildByIndex(uint32_t index, bool needBuild, bool isCache)
 {
     for (const auto& child : GetChildren()) {
         uint32_t count = static_cast<uint32_t>(child->FrameCount());
         if (count > index) {
-            return child->GetFrameChildByIndex(index, needBuild);
+            return child->GetFrameChildByIndex(index, needBuild, isCache);
         }
         index -= count;
     }
@@ -1069,10 +1086,16 @@ void UINode::UpdateNodeStatus(NodeStatus nodeStatus)
 
 // Collects  all the child elements of "children" in a recursive manner
 // Fills the "removedElmtId" list with the collected child elements
-void UINode::CollectRemovedChildren(const std::list<RefPtr<UINode>>& children, std::list<int32_t>& removedElmtId)
+void UINode::CollectRemovedChildren(const std::list<RefPtr<UINode>>& children,
+    std::list<int32_t>& removedElmtId, bool isEntry)
 {
     for (auto const& child : children) {
-        CollectRemovedChild(child, removedElmtId);
+        if (!child->IsDisappearing()) {
+            CollectRemovedChild(child, removedElmtId);
+        }
+    }
+    if (isEntry) {
+        children_.clear();
     }
 }
 
@@ -1080,9 +1103,10 @@ void UINode::CollectRemovedChild(const RefPtr<UINode>& child, std::list<int32_t>
 {
     removedElmtId.emplace_back(child->GetId());
     // Fetch all the child elementIDs recursively
-    if (child->GetTag() != V2::JS_VIEW_ETS_TAG) {
+    if (child->GetTag() != V2::JS_VIEW_ETS_TAG && child->GetNodeStatus() != NodeStatus::NORMAL_NODE) {
         // add CustomNode but do not recurse into its children
-        CollectRemovedChildren(child->GetChildren(), removedElmtId);
+        // add node create by BuilderNode do not recurse into its children
+        CollectRemovedChildren(child->GetChildren(), removedElmtId, false);
     }
 }
 

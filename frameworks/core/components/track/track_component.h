@@ -29,6 +29,7 @@ namespace OHOS::Ace {
 enum class SliderMode {
     OUTSET, // block on track, track is thin
     INSET,  // block inside track, track is rough
+    NONE,   // no block slider
     CAPSULE, // capsule slider.
 };
 

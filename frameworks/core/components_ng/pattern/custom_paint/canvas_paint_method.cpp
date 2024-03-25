@@ -36,6 +36,7 @@
 #include "core/components_ng/render/adapter/rosen_render_context.h"
 #include "core/components_ng/render/drawing.h"
 #include "core/image/sk_image_cache.h"
+#include "core/common/font_manager.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -96,6 +97,10 @@ void CanvasPaintMethod::UpdateContentModifier(PaintWrapper* paintWrapper)
     if (lastLayoutSize_ != frameSize) {
         lastLayoutSize_.SetSizeT(frameSize);
     }
+    auto fontManager = context->GetFontManager();
+    if (fontManager && rsRecordingCanvas_) {
+        rsRecordingCanvas_->SetIsCustomTextType(fontManager->IsDefaultFontChanged());
+    }
 #ifndef USE_ROSEN_DRAWING
     if (!skCanvas_) {
         return;
@@ -108,6 +113,10 @@ void CanvasPaintMethod::UpdateContentModifier(PaintWrapper* paintWrapper)
 
     if (tasks_.empty()) {
         return;
+    }
+
+    if (onModifierUpdate_) {
+        onModifierUpdate_();
     }
 
 #ifndef USE_ROSEN_DRAWING

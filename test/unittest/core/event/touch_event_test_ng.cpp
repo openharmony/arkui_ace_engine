@@ -21,6 +21,7 @@
 #include "gtest/gtest.h"
 #define private public
 #define protected public
+
 #include "core/components_ng/event/event_hub.h"
 #include "core/components_ng/event/touch_event.h"
 #include "core/components_v2/inspector/inspector_constants.h"
@@ -394,21 +395,28 @@ HWTEST_F(TouchEventTestNg, TriggerTouchCallBack001, TestSize.Level1)
     TouchEventFunc&& callback_1 = std::forward<TouchEventFunc>(callback);
 
     /**
-     * @tc.steps: step4. onTouchEventCallback_ assignment and call TriggerTouchCallBack.
+     * @tc.steps: step4. commonTouchEventCallback_ assignment is not nullptr.
+     * @tc.expected: Execute function return value is true.
+     */
+    touchEventActuator->commonTouchEventCallback_ = AceType::MakeRefPtr<TouchEventImpl>(std::move(callback_1));
+    EXPECT_TRUE(touchEventActuator->TriggerTouchCallBack(touchEvent));
+
+    /**
+     * @tc.steps: step5. onTouchEventCallback_ assignment and call TriggerTouchCallBack.
      * @tc.expected: Execute function return value is true.
      */
     touchEventActuator->onTouchEventCallback_ = AceType::MakeRefPtr<TouchEventImpl>(std::move(callback_1));
     EXPECT_TRUE(touchEventActuator->TriggerTouchCallBack(touchEvent));
 
     /**
-     * @tc.steps: step5. userCallback_ assignment and call TriggerTouchCallBack.
+     * @tc.steps: step6. userCallback_ assignment and call TriggerTouchCallBack.
      * @tc.expected: Execute function return value is true.
      */
     touchEventActuator->userCallback_ = AceType::MakeRefPtr<TouchEventImpl>(std::move(callback_1));
     EXPECT_TRUE(touchEventActuator->TriggerTouchCallBack(touchEvent));
 
     /**
-     * @tc.steps: step6. isInterpolated assignment and call TriggerTouchCallBack.
+     * @tc.steps: step7. isInterpolated assignment and call TriggerTouchCallBack.
      * @tc.expected: Execute function return value is true.
      */
     auto touchEventImp = AceType::MakeRefPtr<TouchEventImpl>(std::move(callback));
@@ -417,7 +425,7 @@ HWTEST_F(TouchEventTestNg, TriggerTouchCallBack001, TestSize.Level1)
     EXPECT_TRUE(touchEventActuator->TriggerTouchCallBack(touchEvent));
 
     /**
-     * @tc.steps: step7. create TouchEvent object and call TriggerTouchCallBack.
+     * @tc.steps: step8. create TouchEvent object and call TriggerTouchCallBack.
      * @tc.expected: Execute function return value is true.
      */
     TouchEvent touchEvent_2;
@@ -427,7 +435,7 @@ HWTEST_F(TouchEventTestNg, TriggerTouchCallBack001, TestSize.Level1)
     EXPECT_TRUE(touchEventActuator->TriggerTouchCallBack(touchEvent_3));
 
     /**
-     * @tc.steps: step8. create TouchEvent object and call isFlushTouchEventsEnd_ assignment.
+     * @tc.steps: step9. create TouchEvent object and call isFlushTouchEventsEnd_ assignment.
      * @tc.expected: Execute function return value is true.
      */
     TouchEvent touchEvent_4;

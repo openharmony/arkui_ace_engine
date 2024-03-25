@@ -36,6 +36,7 @@ void ViewContextModelNG::closeAnimation(const AnimationOption& option, bool need
 void ViewContextModelNG::openAnimation(const AnimationOption& option)
 {
     NG::ViewStackProcessor::GetInstance()->SetImplicitAnimationOption(option);
+    NG::ViewStackProcessor::GetInstance()->FlushImplicitAnimation();
 
     auto container = Container::Current();
     CHECK_NULL_VOID(container);

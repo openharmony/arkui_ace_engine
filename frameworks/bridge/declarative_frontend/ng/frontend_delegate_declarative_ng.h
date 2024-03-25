@@ -47,7 +47,8 @@ public:
     }
     std::string GetContentInfo() override;
     // JSFrontend delegate NG functions.
-    void RunPage(const std::string& url, const std::string& params, const std::string& profile);
+    void RunPage(const std::string& url, const std::string& params,
+        const std::string& profile, bool isNamedRouter = false);
     void RunPage(const std::shared_ptr<std::vector<uint8_t>>& content,
         const std::string& params, const std::string& profile);
     void OnConfigurationUpdated(const std::string& data);
@@ -134,7 +135,8 @@ public:
     double MeasureText(const MeasureContext& context) override;
     Size MeasureTextSize(const MeasureContext& context) override;
     void ShowToast(const std::string& message, int32_t duration, const std::string& bottom,
-        const NG::ToastShowMode& showMode = NG::ToastShowMode::DEFAULT) override;
+        const NG::ToastShowMode& showMode = NG::ToastShowMode::DEFAULT, int32_t alignment = -1,
+        std::optional<DimensionOffset> offset = std::nullopt) override;
     void ShowDialog(const std::string& title, const std::string& message, const std::vector<ButtonInfo>& buttons,
         bool autoCancel, std::function<void(int32_t, int32_t)>&& callback,
         const std::set<std::string>& callbacks) override;

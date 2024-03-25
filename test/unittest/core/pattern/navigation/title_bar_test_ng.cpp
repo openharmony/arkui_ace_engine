@@ -885,4 +885,88 @@ HWTEST_F(TitleBarTestNg, TitleBarPatternUpdateTitleBarByCoordScrollTest032, Test
     titleBarPattern_->overDragOffset_ = 0.00001f;
     titleBarPattern_->SetTitleStyleByCoordScrollOffset(offset);
 }
+
+/**
+ * @tc.name: TitleBarPatternTest033
+ * @tc.desc: Test OnColorConfigurationUpdate function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TitleBarTestNg, TitleBarPatternTest033, TestSize.Level1)
+{
+    InitTitleBarTestNg();
+    auto backButton = FrameNode::CreateFrameNode("BackButton", 33, AceType::MakeRefPtr<TitleBarPattern>());
+    ASSERT_NE(backButton, nullptr);
+    frameNode_->SetBackButton(backButton);
+    titleBarPattern_->OnColorConfigurationUpdate();
+}
+
+/**
+ * @tc.name: TitleBarPatternTest034
+ * @tc.desc: Test OnColorConfigurationUpdate function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TitleBarTestNg, TitleBarPatternTest034, TestSize.Level1)
+{
+    InitTitleBarTestNg();
+    auto backButton = FrameNode::CreateFrameNode("Navigator", 33, AceType::MakeRefPtr<TitleBarPattern>());
+    ASSERT_NE(backButton, nullptr);
+    frameNode_->SetBackButton(backButton);
+    titleBarPattern_->OnColorConfigurationUpdate();
+}
+
+/**
+ * @tc.name: TitleBarPatternTest035
+ * @tc.desc: Test SetDefaultSubtitleOpacity function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TitleBarTestNg, TitleBarPatternTest035, TestSize.Level1)
+{
+    InitTitleBarTestNg();
+    auto subtitle = FrameNode::CreateFrameNode("Navigator", 33, AceType::MakeRefPtr<TitleBarPattern>());
+    ASSERT_NE(subtitle, nullptr);
+    frameNode_->SetSubtitle(subtitle);
+    titleBarPattern_->SetDefaultSubtitleOpacity();
+}
+
+/**
+ * @tc.name: TitleBarPatternTest036
+ * @tc.desc: Test SetDefaultSubtitleOpacity function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TitleBarTestNg, TitleBarPatternTest036, TestSize.Level1)
+{
+    InitTitleBarTestNg();
+    auto subtitle = FrameNode::CreateFrameNode("Navigator", 33, AceType::MakeRefPtr<TitleBarPattern>());
+    ASSERT_NE(subtitle, nullptr);
+    frameNode_->SetSubtitle(subtitle);
+    titleBarPattern_->defaultTitleBarHeight_ = 0.3f;
+    titleBarPattern_->SetDefaultSubtitleOpacity();
+}
+
+/**
+ * @tc.name: TitleBarPatternTest037
+ * @tc.desc: Test SetTempSubTitleOffsetY function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TitleBarTestNg, TitleBarPatternTest037, TestSize.Level1)
+{
+    InitTitleBarTestNg();
+    titleBarPattern_->tempTitleOffsetY_ = 0.3;
+    titleBarPattern_->SetTempSubTitleOffsetY();
+    EXPECT_EQ(titleBarPattern_->tempSubTitleOffsetY_, RET_VALUE);
+}
+
+/**
+ * @tc.name: TitleBarPatternTest038
+ * @tc.desc: Test SetMaxTitleBarHeight function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TitleBarTestNg, TitleBarPatternTest038, TestSize.Level1)
+{
+    InitTitleBarTestNg();
+    auto subtitle = FrameNode::CreateFrameNode("Navigator", 33, AceType::MakeRefPtr<TitleBarPattern>());
+    ASSERT_NE(subtitle, nullptr);
+    frameNode_->SetSubtitle(subtitle);
+    titleBarPattern_->SetMaxTitleBarHeight();
+}
 } // namespace OHOS::Ace::NG

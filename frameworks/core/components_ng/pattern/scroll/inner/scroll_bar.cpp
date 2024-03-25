@@ -27,6 +27,8 @@ namespace OHOS::Ace::NG {
 namespace {
 constexpr int32_t BAR_DISAPPRAE_DELAY_DURATION = 2000; // 2000ms
 constexpr double BAR_ADAPT_EPSLION = 1.0;
+constexpr int32_t LONG_PRESS_PAGE_INTERVAL_MS = 100;
+constexpr int32_t LONG_PRESS_TIME_THRESHOLD_MS = 500;
 } // namespace
 
 ScrollBar::ScrollBar()
@@ -43,7 +45,7 @@ ScrollBar::ScrollBar(DisplayMode displayMode, ShapeMode shapeMode, PositionMode 
 
 void ScrollBar::InitTheme()
 {
-    auto pipelineContext = PipelineContext::GetCurrentContext();
+    auto pipelineContext = PipelineContext::GetCurrentContextSafely();
     CHECK_NULL_VOID(pipelineContext);
     auto theme = pipelineContext->GetTheme<ScrollBarTheme>();
     CHECK_NULL_VOID(theme);
@@ -81,6 +83,24 @@ bool ScrollBar::InBarRectRegion(const Point& point) const
         return barRect_.IsInRegion(point);
     }
     return false;
+}
+
+BarDirection ScrollBar::CheckBarDirection(const Point& point)
+{
+    if (!InBarRectRegion(point)) {
+        return BarDirection::BAR_NONE;
+    }
+    auto touchRegion = GetTouchRegion();
+    auto pointOffset = OffsetF(point.GetX(), point.GetY());
+    auto scrollBarTopOffset = OffsetF(touchRegion.Left(), touchRegion.Top());
+    auto scrollBarBottomOffset = OffsetF(touchRegion.Right(), touchRegion.Bottom());
+    if (pointOffset.GetMainOffset(axis_) < scrollBarTopOffset.GetMainOffset(axis_)) {
+        return BarDirection::PAGE_UP;
+    } else if (pointOffset.GetMainOffset(axis_) > scrollBarBottomOffset.GetMainOffset(axis_)) {
+        return BarDirection::PAGE_DOWN;
+    } else {
+        return BarDirection::BAR_NONE;
+    }
 }
 
 void ScrollBar::FlushBarWidth()
@@ -358,6 +378,7 @@ void ScrollBar::SetGestureEvent()
                 scrollBar->SetPressed(false);
                 scrollBar->MarkNeedRender();
             }
+            scrollBar->locationInfo_ = info.GetTouches().front().GetLocalLocation();
         });
     }
     if (!panRecognizer_) {
@@ -378,6 +399,11 @@ void ScrollBar::SetMouseEvent()
         bool inHoverRegion = scrollBar->InBarHoverRegion(point);
         if (inBarRegion) {
             scrollBar->PlayScrollBarAppearAnimation();
+            if (info.GetButton() == MouseButton::LEFT_BUTTON && info.GetAction() == MouseAction::PRESS) {
+                scrollBar->isMousePressed_ = true;
+            } else if (info.GetButton() != MouseButton::LEFT_BUTTON) {
+                scrollBar->isMousePressed_ = false;
+            }
         } else if (!scrollBar->IsPressed()) {
             scrollBar->ScheduleDisappearDelayTask();
         }
@@ -394,6 +420,9 @@ void ScrollBar::SetMouseEvent()
             }
         }
     });
+    if (!longPressRecognizer_) {
+        InitLongPressEvent();
+    }
 }
 
 void ScrollBar::SetHoverEvent()
@@ -624,5 +653,72 @@ void ScrollBar::ScheduleDisappearDelayTask()
         });
         taskExecutor->PostDelayedTask(disappearDelayTask_, TaskExecutor::TaskType::UI, BAR_DISAPPRAE_DELAY_DURATION);
     }
+}
+
+void ScrollBar::OnCollectLongPressTarget(const OffsetF& coordinateOffset, const GetEventTargetImpl& getEventTargetImpl,
+    TouchTestResult& result, const RefPtr<FrameNode>& frameNode, const RefPtr<TargetComponent>& targetComponent)
+{
+    if (longPressRecognizer_ && isScrollable_) {
+        longPressRecognizer_->SetCoordinateOffset(Offset(coordinateOffset.GetX(), coordinateOffset.GetY()));
+        longPressRecognizer_->SetGetEventTargetImpl(getEventTargetImpl);
+        longPressRecognizer_->SetNodeId(frameNode->GetId());
+        longPressRecognizer_->AttachFrameNode(frameNode);
+        longPressRecognizer_->SetTargetComponent(targetComponent);
+        longPressRecognizer_->SetIsSystemGesture(true);
+        result.emplace_front(longPressRecognizer_);
+    }
+}
+
+void ScrollBar::InitLongPressEvent()
+{
+    longPressRecognizer_ = AceType::MakeRefPtr<LongPressRecognizer>(LONG_PRESS_TIME_THRESHOLD_MS, 1, false, false);
+    longPressRecognizer_->SetOnAction([weakBar = AceType::WeakClaim(this)](const GestureEvent& info) {
+        auto scrollBar = weakBar.Upgrade();
+        if (scrollBar) {
+            scrollBar->HandleLongPress(true);
+        }
+    });
+}
+
+void ScrollBar::HandleLongPress(bool smooth)
+{
+    Point point(locationInfo_.GetX(), locationInfo_.GetY());
+    bool reverse = false;
+    if (AnalysisUpOrDown(point, reverse) && isMousePressed_) {
+        scrollPageCallback_(reverse, smooth);
+        ScheduleCaretLongPress();
+    }
+}
+
+bool ScrollBar::AnalysisUpOrDown(Point point, bool& reverse)
+{
+    switch (CheckBarDirection(point)) {
+        case BarDirection::BAR_NONE:
+            return false;
+        case BarDirection::PAGE_UP:
+            reverse = true;
+            return true;
+        case BarDirection::PAGE_DOWN:
+            reverse = false;
+            return true;
+    }
+}
+
+void ScrollBar::ScheduleCaretLongPress()
+{
+    auto context = OHOS::Ace::PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(context);
+    if (!context->GetTaskExecutor()) {
+        return;
+    }
+    auto taskExecutor = context->GetTaskExecutor();
+    CHECK_NULL_VOID(taskExecutor);
+    taskExecutor->PostDelayedTask(
+        [weak = WeakClaim(this)]() {
+            auto pattern = weak.Upgrade();
+            CHECK_NULL_VOID(pattern);
+            pattern->HandleLongPress(true);
+        },
+        TaskExecutor::TaskType::UI, LONG_PRESS_PAGE_INTERVAL_MS);
 }
 } // namespace OHOS::Ace::NG

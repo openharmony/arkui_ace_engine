@@ -126,6 +126,11 @@ void SpanModelNG::SetTextShadow(const std::vector<Shadow>& value)
     ACE_UPDATE_SPAN_PROPERTY(TextShadow, value, PropertyInfo::TEXTSHADOW);
 }
 
+void SpanModelNG::SetTextShadow(UINode* uiNode, const std::vector<Shadow>& value)
+{
+    ACE_UPDATE_NODE_SPAN_PROPERTY(TextShadow, value, PropertyInfo::TEXTSHADOW, uiNode);
+}
+
 void SpanModelNG::SetLetterSpacing(const Dimension& value)
 {
     ACE_UPDATE_SPAN_PROPERTY(LetterSpacing, value, PropertyInfo::LETTERSPACE);
@@ -140,6 +145,11 @@ void SpanModelNG::SetOnClick(std::function<void(const BaseEventInfo* info)>&& cl
 {
     auto clickFunc = [func = std::move(click)](GestureEvent& info) { func(&info); };
     ACE_UPDATE_SPAN_PROPERTY(OnClickEvent, std::move(clickFunc), PropertyInfo::NONE);
+}
+
+void SpanModelNG::SetOnClick(UINode* uiNode, GestureEventFunc&& click)
+{
+    ACE_UPDATE_NODE_SPAN_PROPERTY(OnClickEvent, std::move(click), PropertyInfo::NONE, uiNode);
 }
 
 void SpanModelNG::ClearOnClick()
@@ -271,6 +281,13 @@ void SpanModelNG::SetTextBackgroundStyle(const TextBackgroundStyle& style)
     baseSpan->SetTextBackgroundStyle(style);
 }
 
+void SpanModelNG::SetTextBackgroundStyle(UINode* uiNode, const TextBackgroundStyle& style)
+{
+    auto spanNode = AceType::DynamicCast<SpanNode>(uiNode);
+    CHECK_NULL_VOID(spanNode);
+    spanNode->SetTextBackgroundStyle(style);
+}
+
 std::string SpanModelNG::GetContent(UINode* uiNode)
 {
     auto spanNode = AceType::DynamicCast<SpanNode>(uiNode);
@@ -353,5 +370,21 @@ Dimension SpanModelNG::GetLetterSpacing(UINode* uiNode)
     auto spanNode = AceType::DynamicCast<SpanNode>(uiNode);
     CHECK_NULL_RETURN(spanNode, defaultLetterSpacing);
     return spanNode->GetLetterSpacing().value_or(defaultLetterSpacing);
+}
+
+TextBackgroundStyle SpanModelNG::GetSpanTextBackgroundStyle(UINode* uiNode)
+{
+    TextBackgroundStyle backgroundStyle;
+    auto spanNode = AceType::DynamicCast<SpanNode>(uiNode);
+    CHECK_NULL_RETURN(spanNode, backgroundStyle);
+    return spanNode->GetTextBackgroundStyle().value_or(backgroundStyle);
+}
+
+std::vector<Shadow> SpanModelNG::GetTextShadow(UINode* uiNode)
+{
+    std::vector<Shadow> defaultShadow;
+    auto spanNode = AceType::DynamicCast<SpanNode>(uiNode);
+    CHECK_NULL_RETURN(uiNode, defaultShadow);
+    return spanNode->GetTextShadow().value_or(defaultShadow);
 }
 } // namespace OHOS::Ace::NG

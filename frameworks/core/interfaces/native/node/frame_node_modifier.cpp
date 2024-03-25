@@ -25,7 +25,7 @@ ArkUI_Bool IsModifiable(ArkUINodeHandle node)
     CHECK_NULL_RETURN(currentNode, false);
     auto* frameNode = AceType::DynamicCast<UINode>(currentNode);
     CHECK_NULL_RETURN(frameNode, false);
-    return frameNode->GetTag() == "FrameNode";
+    return frameNode->GetTag() == "CustomFrameNode";
 }
 
 RefPtr<FrameNode> GetParentNode(UINode* node)
@@ -35,7 +35,9 @@ RefPtr<FrameNode> GetParentNode(UINode* node)
     while (parent != nullptr && !AceType::InstanceOf<FrameNode>(parent)) {
         parent = parent->GetParent();
     }
-    return AceType::DynamicCast<FrameNode>(parent);
+    return (parent == nullptr || parent->GetTag() == "page" || parent->GetTag() == "stage")
+               ? nullptr
+               : AceType::DynamicCast<FrameNode>(parent);
 }
 
 ArkUI_Bool AppendChildInFrameNode(ArkUINodeHandle node, ArkUINodeHandle child)
@@ -87,7 +89,7 @@ void ClearChildrenInFrameNode(ArkUINodeHandle node)
     currentNode->MarkNeedFrameFlushDirty(NG::PROPERTY_UPDATE_MEASURE);
 }
 
-ArkUI_Uint32 GetChildrenNumber(ArkUINodeHandle node)
+ArkUI_Uint32 GetChildrenCount(ArkUINodeHandle node)
 {
     auto* currentNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_RETURN(currentNode, 0);
@@ -166,13 +168,11 @@ ArkUI_Float32* GetPositionToParent(ArkUINodeHandle node)
 {
     auto* currentNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_RETURN(currentNode, nullptr);
-    auto geometryNode = currentNode->GetGeometryNode();
-    CHECK_NULL_RETURN(geometryNode, nullptr);
-    auto frameRect = geometryNode->GetFrameRect();
-    auto offset = frameRect.GetOffset();
+    auto currFrameRect = currentNode->GetRectWithRender();
+    auto offset = currFrameRect.GetOffset();
     ArkUI_Float32* ret = new ArkUI_Float32[2];
-    ret[0] = offset.GetX();
-    ret[1] = offset.GetY();
+    ret[0] = PipelineBase::Px2VpWithCurrentDensity(offset.GetX());
+    ret[1] = PipelineBase::Px2VpWithCurrentDensity(offset.GetY());
     return ret;
 }
 
@@ -180,10 +180,10 @@ ArkUI_Float32* GetPositionToWindow(ArkUINodeHandle node)
 {
     auto* currentNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_RETURN(currentNode, nullptr);
-    auto offset = currentNode->GetTransformRelativeOffset();
+    auto offset = currentNode->GetOffsetRelativeToWindow();
     ArkUI_Float32* ret = new ArkUI_Float32[2];
-    ret[0] = offset.GetX();
-    ret[1] = offset.GetY();
+    ret[0] = PipelineBase::Px2VpWithCurrentDensity(offset.GetX());
+    ret[1] = PipelineBase::Px2VpWithCurrentDensity(offset.GetY());
     return ret;
 }
 
@@ -203,10 +203,9 @@ namespace NodeModifier {
 const ArkUIFrameNodeModifier* GetFrameNodeModifier()
 {
     static const ArkUIFrameNodeModifier modifier = { IsModifiable, AppendChildInFrameNode, InsertChildAfterInFrameNode,
-        RemoveChildInFrameNode, ClearChildrenInFrameNode, GetChildrenNumber, GetChild, GetFirst, GetNextSibling,
+        RemoveChildInFrameNode, ClearChildrenInFrameNode, GetChildrenCount, GetChild, GetFirst, GetNextSibling,
         GetPreviousSibling, GetParent, GetIdByNodePtr, GetPositionToParent, GetPositionToWindow,
         GetFrameNodeById, GetFrameNodeByKey };
-
     return &modifier;
 }
 } // namespace NodeModifier

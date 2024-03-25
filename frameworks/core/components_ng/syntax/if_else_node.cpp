@@ -82,8 +82,8 @@ void IfElseNode::SetBranchId(int32_t value, std::list<int32_t>& removedElmtId)
         // collect elmtIds of all children and their children up to CustomNode object
         // these will be removed, but possibly with a delay if their is an animation
         // list of elmtIds is sent back to calling TS ViewPU.ifElseBranchUpdateFunction()
-        CollectRemovedChildren(GetChildren(), removedElmtId);
         Clean(false, true);
+        CollectRemovedChildren(GetChildren(), removedElmtId, true);
         branchId_ = value;
     }
 }

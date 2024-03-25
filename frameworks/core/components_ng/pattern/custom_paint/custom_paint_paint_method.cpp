@@ -47,7 +47,6 @@
 #include "core/image/image_provider.h"
 #include "core/image/sk_image_cache.h"
 #include "core/pipeline/base/rosen_render_context.h"
-#include "core/common/font_manager.h"
 
 #ifdef ENABLE_ROSEN_BACKEND
 #include "pipeline/rs_recording_canvas.h"
@@ -159,17 +158,6 @@ void CustomPaintPaintMethod::UpdateRecordingCanvas(float width, float height)
     rsRecordingCanvas_ = std::make_shared<RSRecordingCanvas>(width, height);
     rsCanvas_ = std::static_pointer_cast<RSCanvas>(rsRecordingCanvas_);
     contentModifier_->UpdateCanvas(rsRecordingCanvas_);
-    auto context = context_.Upgrade();
-    CHECK_NULL_VOID(context);
-    auto fontManager = context->GetFontManager();
-    CHECK_NULL_VOID(fontManager);
-    if (fontManager->IsDefaultFontChanged()) {
-        CHECK_NULL_VOID(rsRecordingCanvas_);
-        rsRecordingCanvas_->SetIsCustomTextType(true);
-    } else {
-        CHECK_NULL_VOID(rsRecordingCanvas_);
-        rsRecordingCanvas_->SetIsCustomTextType(false);
-    }
 #endif
 }
 
@@ -426,7 +414,7 @@ void CustomPaintPaintMethod::UpdatePaintShader(const Ace::Pattern& pattern, RSPe
     CHECK_NULL_VOID(pixelMap);
     auto rsBitmapFormat = Ace::ImageProvider::MakeRSBitmapFormatFromPixelMap(pixelMap);
     auto rsBitmap = std::make_shared<RSBitmap>();
-    rsBitmap->Build(pixelMap->GetWidth(), pixelMap->GetHeight(), rsBitmapFormat);
+    rsBitmap->Build(pixelMap->GetWidth(), pixelMap->GetHeight(), rsBitmapFormat, pixelMap->GetRowStride());
     rsBitmap->SetPixels(const_cast<void*>(reinterpret_cast<const void*>(pixelMap->GetPixels())));
     auto image = std::make_shared<RSImage>();
     CHECK_NULL_VOID(image->BuildFromBitmap(*rsBitmap));

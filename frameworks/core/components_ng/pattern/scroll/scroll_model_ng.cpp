@@ -160,7 +160,7 @@ void ScrollModelNG::SetOnScrollFrameBegin(OnScrollFrameBeginEvent&& event)
 void ScrollModelNG::SetOnScroll(NG::ScrollEvent&& event)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
-    SetOnScroll(AceType::RawPtr(frameNode), std::move(event));
+    SetOnScroll(frameNode, std::move(event));
 }
 
 void ScrollModelNG::SetOnWillScroll(NG::ScrollEventWithState&& event)
@@ -368,18 +368,14 @@ void ScrollModelNG::SetScrollBarColor(const Color& color)
 
 int32_t ScrollModelNG::GetEdgeEffect(FrameNode* frameNode)
 {
-    CHECK_NULL_RETURN(frameNode, 0.0f);
-    auto pattern = frameNode->GetPattern<ScrollPattern>();
-    CHECK_NULL_RETURN(pattern, 0.0f);
-    return pattern->GetScrollEdgeEffect();
+    CHECK_NULL_RETURN(frameNode, 0);
+    return ScrollableModelNG::GetEdgeEffect(frameNode);
 }
 
 int32_t ScrollModelNG::GetEdgeEffectAlways(FrameNode* frameNode)
 {
     CHECK_NULL_RETURN(frameNode, 0.0f);
-    auto pattern = frameNode->GetPattern<ScrollPattern>();
-    CHECK_NULL_RETURN(pattern, 0.0f);
-    return pattern->GetAlwaysEnabled();
+    return ScrollableModelNG::GetAlwaysEnabled(frameNode);
 }
 
 void ScrollModelNG::SetEdgeEffect(EdgeEffect edgeEffect, bool alwaysEnabled)

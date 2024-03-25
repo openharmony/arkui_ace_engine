@@ -20,10 +20,9 @@
 #include "base/geometry/rect.h"
 #include "base/image/pixel_map.h"
 #include "base/memory/ace_type.h"
+#include "core/common/udmf/unified_data.h"
 #include "core/event/ace_events.h"
 #include "core/gestures/velocity.h"
-
-#include "core/common/udmf/unified_data.h"
 
 namespace OHOS::Ace {
 
@@ -56,6 +55,17 @@ enum class DragRet {
     ENABLE_DROP,
     DISABLE_DROP,
 };
+
+enum class PreDragStatus {
+    ACTION_DETECTING_STATUS = 0,
+    READY_TO_TRIGGER_DRAG_ACTION,
+    PREVIEW_LIFT_STARTED,
+    PREVIEW_LIFT_FINISHED,
+    PREVIEW_LANDING_STARTED,
+    PREVIEW_LANDING_FINISHED,
+    ACTION_CANCELED_BEFORE_DRAG,
+};
+
 enum class DragBehavior {
     UNKNOWN = -1,
     COPY = 0,
@@ -199,7 +209,7 @@ public:
         return dragBehavior_;
     }
 
-    void SetUdKey(const std::string udKey)
+    void SetUdKey(const std::string& udKey)
     {
         udKey_ = udKey;
     }
@@ -236,6 +246,16 @@ public:
         return velocity_;
     }
 
+    void SetSourceTool(SourceTool sourceTool)
+    {
+        sourceTool_ = sourceTool;
+    }
+
+    SourceTool GetSourceTool() const
+    {
+        return sourceTool_;
+    }
+
 private:
     RefPtr<PasteData> pasteData_;
     double screenX_ = 0.0;
@@ -247,6 +267,7 @@ private:
     std::map<std::string, int64_t> summary_;
     std::string udKey_ = "";
     DragRet dragRet_ = DragRet::DRAG_DEFAULT;
+    SourceTool sourceTool_ = { SourceTool::UNKNOWN };
     Rect previewRect_;
     bool useCustomAnimation_ = false;
     bool isGetDataSuccess_ = false;

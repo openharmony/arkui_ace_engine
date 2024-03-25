@@ -365,6 +365,7 @@ void SideBarContainerPattern::OnModifyDone()
     OnUpdateShowSideBar(layoutProperty);
     OnUpdateShowControlButton(layoutProperty, host);
     OnUpdateShowDivider(layoutProperty, host);
+    UpdateControlButtonIcon();
 
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);

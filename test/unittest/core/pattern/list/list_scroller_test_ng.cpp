@@ -142,6 +142,7 @@ HWTEST_F(ListScrollerTestNg, ScrollToIndex005, TestSize.Level1)
     pattern_->ScrollTo(ITEM_HEIGHT * 8);
     FlushLayoutTask(frameNode_);
     EXPECT_EQ(pattern_->GetTotalOffset(), ITEM_HEIGHT * 8);
+    EXPECT_EQ(accessibilityProperty_->GetScrollOffSet(), pattern_->GetTotalOffset());
     EXPECT_FALSE(pattern_->IsAtTop());
     EXPECT_FALSE(pattern_->IsAtBottom());
     int32_t index = 0;
@@ -662,9 +663,9 @@ HWTEST_F(ListScrollerTestNg, PositionController001, TestSize.Level1)
     /**
      * @tc.steps: step3. Test ScrollPage
      */
-    controller->ScrollPage(false, true);
+    controller->ScrollPage(false, false);
     EXPECT_TRUE(IsEqualTotalOffset(ITEM_HEIGHT * VIEW_LINE_NUMBER));
-    controller->ScrollPage(true, true);
+    controller->ScrollPage(true, false);
     EXPECT_TRUE(IsEqualTotalOffset(0));
 
     /**
@@ -743,9 +744,9 @@ HWTEST_F(ListScrollerTestNg, PositionController002, TestSize.Level1)
     /**
      * @tc.steps: step3. Test ScrollPage
      */
-    controller->ScrollPage(false, true);
+    controller->ScrollPage(false, false);
     EXPECT_TRUE(IsEqualTotalOffset(ITEM_WIDTH * VIEW_LINE_NUMBER));
-    controller->ScrollPage(true, true);
+    controller->ScrollPage(true, false);
     EXPECT_TRUE(IsEqualTotalOffset(0));
 
     /**
@@ -797,7 +798,7 @@ HWTEST_F(ListScrollerTestNg, PositionController003, TestSize.Level1)
      */
     controller->ScrollToEdge(ScrollEdgeType::SCROLL_BOTTOM, true);
     EXPECT_TRUE(IsEqualTotalOffset(0));
-    controller->ScrollPage(false, true);
+    controller->ScrollPage(false, false);
     EXPECT_TRUE(IsEqualTotalOffset(0));
     EXPECT_FALSE(controller->AnimateTo(Dimension(1), 0, nullptr, false));
 }
@@ -1762,14 +1763,19 @@ HWTEST_F(ListScrollerTestNg, PostListItemPressStyleTask_scroll001, TestSize.Leve
     CreateWithItem([](ListModelNG model) {
         model.SetDivider(ITEM_DIVIDER);
     });
+    int cur = 0;
+    for (auto& child : pattern_->itemPosition_) {
+        child.second.id += cur;
+        cur++;
+    }
 
     auto listItemNode = GetChildFrameNode(frameNode_, 0);
     auto listItemNodeId = listItemNode->GetId();
-    auto stateStyleMgr = AceType::DynamicCast<StateStyleManager>(listItemNode);
+    auto stateStyleMgr = AceType::MakeRefPtr<StateStyleManager>(listItemNode);
     stateStyleMgr->PostListItemPressStyleTask(UI_STATE_PRESSED);
     RefPtr<NodePaintMethod> paint = pattern_->CreateNodePaintMethod();
     RefPtr<ListPaintMethod> listPaint = AceType::DynamicCast<ListPaintMethod>(paint);
-    for (auto child : pattern_->itemPosition_) {
+    for (auto child : listPaint->itemPosition_) {
         if (child.second.id == listItemNodeId) {
             EXPECT_TRUE(child.second.isPressed);
         }
@@ -1778,7 +1784,7 @@ HWTEST_F(ListScrollerTestNg, PostListItemPressStyleTask_scroll001, TestSize.Leve
     stateStyleMgr->PostListItemPressStyleTask(UI_STATE_NORMAL);
     paint = pattern_->CreateNodePaintMethod();
     listPaint = AceType::DynamicCast<ListPaintMethod>(paint);
-    for (auto child : pattern_->itemPosition_) {
+    for (auto child : listPaint->itemPosition_) {
         if (child.second.id == listItemNodeId) {
             EXPECT_FALSE(child.second.isPressed);
         }
@@ -1799,16 +1805,21 @@ HWTEST_F(ListScrollerTestNg, PostListItemPressStyleTask_scroll002, TestSize.Leve
         model.SetDivider(ITEM_DIVIDER);
         CreateGroup(TOTAL_LINE_NUMBER, Axis::VERTICAL);
     });
-
     auto groupFrameNode = GetChildFrameNode(frameNode_, 0);
+    auto groupPattern = groupFrameNode->GetPattern<ListItemGroupPattern>();
+    int cur = 0;
+    for (auto& child : groupPattern->itemPosition_) {
+        child.second.id += cur;
+        cur++;
+    }
+
     auto listItemNode = GetChildFrameNode(groupFrameNode, 0);
     auto listItemNodeId = listItemNode->GetId();
-    auto stateStyleMgr = AceType::DynamicCast<StateStyleManager>(listItemNode);
+    auto stateStyleMgr = AceType::MakeRefPtr<StateStyleManager>(listItemNode);
     stateStyleMgr->PostListItemPressStyleTask(UI_STATE_PRESSED);
-    auto groupPattern = groupFrameNode->GetPattern<ListItemGroupPattern>();
     RefPtr<NodePaintMethod> paint = groupPattern->CreateNodePaintMethod();
     RefPtr<ListItemGroupPaintMethod> groupPaint = AceType::DynamicCast<ListItemGroupPaintMethod>(paint);
-    for (auto child : pattern_->itemPosition_) {
+    for (auto child : groupPaint->itemPosition_) {
         if (child.second.id == listItemNodeId) {
             EXPECT_TRUE(child.second.isPressed);
         }
@@ -1817,7 +1828,7 @@ HWTEST_F(ListScrollerTestNg, PostListItemPressStyleTask_scroll002, TestSize.Leve
     stateStyleMgr->PostListItemPressStyleTask(UI_STATE_NORMAL);
     paint = groupPattern->CreateNodePaintMethod();
     groupPaint = AceType::DynamicCast<ListItemGroupPaintMethod>(paint);
-    for (auto child : pattern_->itemPosition_) {
+    for (auto child : groupPaint->itemPosition_) {
         if (child.second.id == listItemNodeId) {
             EXPECT_FALSE(child.second.isPressed);
         }

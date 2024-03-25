@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -25,11 +25,12 @@
 namespace OHOS::Ace::NG {
 class MockNestableScrollContainer : public NestableScrollContainer {
     DECLARE_ACE_TYPE(MockNestableScrollContainer, NestableScrollContainer);
+
 public:
     MOCK_METHOD(OHOS::Ace::Axis, GetAxis, (), (const, override));
-    MOCK_METHOD(ScrollResult, HandleScroll, (float, int32_t, NestedState), (override));
+    MOCK_METHOD(ScrollResult, HandleScroll, (float, int32_t, NestedState, float), (override));
     MOCK_METHOD(bool, HandleScrollVelocity, (float), (override));
-    MOCK_METHOD(void, OnScrollStartRecursive, (float), (override));
+    MOCK_METHOD(void, OnScrollStartRecursive, (float, float), (override));
     MOCK_METHOD(void, OnScrollEndRecursive, (const std::optional<float>&), (override));
 };
 } // namespace OHOS::Ace::NG

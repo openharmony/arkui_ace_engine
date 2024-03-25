@@ -537,7 +537,9 @@ void PipelineContext::IsCloseSCBKeyboard()
 {
     auto container = Container::Current();
     CHECK_NULL_VOID(container);
-    if (container->IsKeyboard()) {
+    auto manager = DynamicCast<TextFieldManagerNG>(textFieldManager_);
+    CHECK_NULL_VOID(manager);
+    if (container->IsKeyboard() || !manager->HasKeyboard()) {
         TAG_LOGI(AceLogTag::ACE_KEYBOARD, "focus in keyboard.");
         return;
     }
@@ -602,6 +604,7 @@ void PipelineContext::FlushVsync(uint64_t nanoTimestamp, uint32_t frameCount)
 
     taskScheduler_->StartRecordFrameInfo(GetCurrentFrameInfo(recvTime, nanoTimestamp));
     taskScheduler_->FlushTask();
+    UIObserverHandler::GetInstance().HandleLayoutDoneCallBack();
     taskScheduler_->FinishRecordFrameInfo();
     FlushAnimationClosure();
     TryCallNextFrameLayoutCallback();
@@ -626,8 +629,10 @@ void PipelineContext::FlushVsync(uint64_t nanoTimestamp, uint32_t frameCount)
         dragWindowVisibleCallback_ = nullptr;
     }
     FlushMessages();
+    UIObserverHandler::GetInstance().HandleDrawCommandSendCallBack();
     InspectDrew();
     if (!isFormRender_ && onShow_ && onFocus_) {
+        FlushFocusView();
         FlushFocus();
     }
     // Close input method in the SCB window.
@@ -741,18 +746,6 @@ void PipelineContext::FlushFocus()
     ACE_FUNCTION_TRACK();
     ACE_FUNCTION_TRACE();
 
-    auto defaultFocusNode = dirtyDefaultFocusNode_.Upgrade();
-    if (!defaultFocusNode) {
-        dirtyDefaultFocusNode_.Reset();
-    } else {
-        auto focusNodeHub = defaultFocusNode->GetFocusHub();
-        if (focusNodeHub) {
-            RequestDefaultFocus(focusNodeHub);
-        }
-        dirtyFocusNode_.Reset();
-        dirtyFocusScope_.Reset();
-        dirtyDefaultFocusNode_.Reset();
-    }
     auto requestFocusNode = dirtyRequestFocusNode_.Upgrade();
     if (!requestFocusNode) {
         dirtyRequestFocusNode_.Reset();
@@ -764,7 +757,6 @@ void PipelineContext::FlushFocus()
         }
         dirtyFocusNode_.Reset();
         dirtyFocusScope_.Reset();
-        dirtyDefaultFocusNode_.Reset();
         dirtyRequestFocusNode_.Reset();
         return;
     }
@@ -780,7 +772,6 @@ void PipelineContext::FlushFocus()
         }
         dirtyFocusNode_.Reset();
         dirtyFocusScope_.Reset();
-        dirtyDefaultFocusNode_.Reset();
         dirtyRequestFocusNode_.Reset();
         return;
     }
@@ -795,16 +786,21 @@ void PipelineContext::FlushFocus()
         }
         dirtyFocusNode_.Reset();
         dirtyFocusScope_.Reset();
-        dirtyDefaultFocusNode_.Reset();
         dirtyRequestFocusNode_.Reset();
         return;
     }
-    auto rootFocusHub = rootNode_ ? rootNode_->GetFocusHub() : nullptr;
-    if (rootFocusHub && !rootFocusHub->IsCurrentFocus()) {
-        auto curMainView = FocusHub::GetCurrentMainView();
-        if (curMainView && curMainView->GetIsViewHasFocused()) {
-            rootFocusHub->RequestFocusImmediately();
-        }
+}
+
+void PipelineContext::FlushFocusView()
+{
+    CHECK_NULL_VOID(focusManager_);
+    auto lastFocusView = (focusManager_->GetLastFocusView()).Upgrade();
+    CHECK_NULL_VOID(lastFocusView);
+    auto lastFocusViewHub = lastFocusView->GetFocusHub();
+    CHECK_NULL_VOID(lastFocusViewHub);
+    if (lastFocusView && (!lastFocusViewHub->IsCurrentFocus() || !lastFocusView->GetIsViewHasFocused()) &&
+        lastFocusViewHub->IsFocusableNode()) {
+        lastFocusView->RequestDefaultFocus();
     }
 }
 
@@ -945,13 +941,18 @@ void PipelineContext::SetupRootElement()
 #ifdef WINDOW_SCENE_SUPPORTED
     uiExtensionManager_ = MakeRefPtr<UIExtensionManager>();
 #endif
+    accessibilityManagerNG_ = MakeRefPtr<AccessibilityManagerNG>();
     stageManager_ = MakeRefPtr<StageManager>(stageNode);
     overlayManager_ = MakeRefPtr<OverlayManager>(
         DynamicCast<FrameNode>(installationFree_ ? stageNode->GetParent()->GetParent() : stageNode->GetParent()));
     fullScreenManager_ = MakeRefPtr<FullScreenManager>(rootNode_);
     selectOverlayManager_ = MakeRefPtr<SelectOverlayManager>(rootNode_);
+    if (!privacySensitiveManager_) {
+        privacySensitiveManager_ = MakeRefPtr<PrivacySensitiveManager>();
+    }
     postEventManager_ = MakeRefPtr<PostEventManager>();
     dragDropManager_ = MakeRefPtr<DragDropManager>();
+    focusManager_ = MakeRefPtr<FocusManager>();
     sharedTransitionManager_ = MakeRefPtr<SharedOverlayManager>(
         DynamicCast<FrameNode>(installationFree_ ? stageNode->GetParent()->GetParent() : stageNode->GetParent()));
 
@@ -1002,13 +1003,20 @@ void PipelineContext::SetupSubRootElement()
 #ifdef WINDOW_SCENE_SUPPORTED
     uiExtensionManager_ = MakeRefPtr<UIExtensionManager>();
 #endif
+    accessibilityManagerNG_ = MakeRefPtr<AccessibilityManagerNG>();
     // the subwindow for overlay not need stage
     stageManager_ = MakeRefPtr<StageManager>(nullptr);
     overlayManager_ = MakeRefPtr<OverlayManager>(rootNode_);
     fullScreenManager_ = MakeRefPtr<FullScreenManager>(rootNode_);
     selectOverlayManager_ = MakeRefPtr<SelectOverlayManager>(rootNode_);
     dragDropManager_ = MakeRefPtr<DragDropManager>();
+    focusManager_ = MakeRefPtr<FocusManager>();
     postEventManager_ = MakeRefPtr<PostEventManager>();
+}
+
+RefPtr<AccessibilityManagerNG> PipelineContext::GetAccessibilityManagerNG()
+{
+    return accessibilityManagerNG_;
 }
 
 const RefPtr<StageManager>& PipelineContext::GetStageManager()
@@ -1019,6 +1027,11 @@ const RefPtr<StageManager>& PipelineContext::GetStageManager()
 const RefPtr<DragDropManager>& PipelineContext::GetDragDropManager()
 {
     return dragDropManager_;
+}
+
+const RefPtr<FocusManager>& PipelineContext::GetFocusManager() const
+{
+    return focusManager_;
 }
 
 const RefPtr<SelectOverlayManager>& PipelineContext::GetSelectOverlayManager()
@@ -1321,7 +1334,7 @@ void PipelineContext::UpdateSizeChangeReason(
 {
 #ifdef WINDOW_SCENE_SUPPORTED
     CHECK_NULL_VOID(uiExtensionManager_);
-    uiExtensionManager_->OnSizeChanged(type, rsTransaction);
+    uiExtensionManager_->NotifySizeChangeReason(type, rsTransaction);
 #endif
 }
 
@@ -1740,7 +1753,8 @@ void PipelineContext::OnTouchEvent(const TouchEvent& point, const RefPtr<FrameNo
     auto oriPoint = point;
     auto scalePoint = point.CreateScalePoint(GetViewScale());
     ResSchedReport::GetInstance().OnTouchEvent(scalePoint.type);
-    if (scalePoint.type != TouchType::MOVE && scalePoint.type != TouchType::PULL_MOVE) {
+    if (scalePoint.type != TouchType::MOVE && scalePoint.type != TouchType::PULL_MOVE &&
+        scalePoint.type != TouchType::HOVER_MOVE) {
         eventManager_->GetEventTreeRecord().AddTouchPoint(scalePoint);
         TAG_LOGI(AceLogTag::ACE_INPUTTRACKING,
             "TouchEvent Process in ace_container: "
@@ -1827,6 +1841,12 @@ void PipelineContext::OnTouchEvent(const TouchEvent& point, const RefPtr<FrameNo
         return;
     }
 
+    // Currently, SetupRootElement is executed later than InitializeCallback in AceContainer.
+    // We need to check whether accessibilityManagerNG_ is created.
+    if (accessibilityManagerNG_ != nullptr) {
+        accessibilityManagerNG_->HandleAccessibilityHoverEvent(node, scalePoint);
+    }
+
     if (scalePoint.type == TouchType::MOVE) {
         if (!eventManager_->GetInnerFlag()) {
             auto mockPoint = point;
@@ -1899,11 +1919,16 @@ void PipelineContext::CompensateTouchMoveEvent(const TouchEvent& event)
         auto lastEventIter = idToTouchPoints_.find(event.id);
         if (lastEventIter != idToTouchPoints_.end()) {
             auto iter = lastDispatchTime_.find(lastEventIter->first);
-            if (static_cast<uint64_t>(iter != lastDispatchTime_.end() &&
-                                        lastEventIter->second.time.time_since_epoch().count()) > iter->second) {
-                eventManager_->SetLastMoveBeforeUp(event.sourceType == SourceType::MOUSE);
-                eventManager_->DispatchTouchEvent(lastEventIter->second);
-                eventManager_->SetLastMoveBeforeUp(false);
+            if (iter != lastDispatchTime_.end()) {
+                ACE_SCOPED_TRACE("CompensateTouchMoveEvent last move event time: %s last dispatch time: %s",
+                    std::to_string(static_cast<uint64_t>(lastEventIter->second.time.time_since_epoch().count()))
+                        .c_str(),
+                    std::to_string(iter->second).c_str());
+                if (static_cast<uint64_t>(lastEventIter->second.time.time_since_epoch().count()) > iter->second) {
+                    eventManager_->SetLastMoveBeforeUp(event.sourceType == SourceType::MOUSE);
+                    eventManager_->DispatchTouchEvent(lastEventIter->second);
+                    eventManager_->SetLastMoveBeforeUp(false);
+                }
             }
         }
     }
@@ -2034,10 +2059,20 @@ bool PipelineContext::OnDumpInfo(const std::vector<std::string>& params) const
         if (rootNode_->GetFocusHub()) {
             rootNode_->GetFocusHub()->DumpFocusTree(0);
         }
+    } else if (params[0] == "-focuswindowscene") {
+        auto windowSceneNode = GetFocusedWindowSceneNode();
+        auto windowSceneFocusHub = windowSceneNode ? windowSceneNode->GetFocusHub() : nullptr;
+        if (windowSceneFocusHub) {
+            windowSceneFocusHub->DumpFocusTree(0);
+        }
+    } else if (params[0] == "-focusmanager") {
+        if (focusManager_) {
+            focusManager_->DumpFocusManager();
+        }
     } else if (params[0] == "-accessibility" || params[0] == "-inspector") {
         auto accessibilityManager = GetAccessibilityManager();
         if (accessibilityManager) {
-            accessibilityManager->OnDumpInfo(params);
+            accessibilityManager->OnDumpInfoNG(params, windowId_);
         }
     } else if (params[0] == "-rotation" && params.size() >= 2) {
     } else if (params[0] == "-animationscale" && params.size() >= 2) {
@@ -2158,8 +2193,9 @@ void PipelineContext::FlushTouchEvents()
         std::list<TouchEvent> touchPoints;
         for (const auto& iter : idToTouchPoints) {
             lastDispatchTime_[iter.first] = GetVsyncTime();
-            if (newIdTouchPoints.find(iter.first) != newIdTouchPoints.end()) {
-                touchPoints.emplace_back(newIdTouchPoints[iter.first]);
+            auto it = newIdTouchPoints.find(iter.first);
+            if (it != newIdTouchPoints.end()) {
+                touchPoints.emplace_back(it->second);
             } else {
                 touchPoints.emplace_back(iter.second);
             }
@@ -2230,6 +2266,7 @@ void PipelineContext::OnMouseEvent(const MouseEvent& event, const RefPtr<FrameNo
     eventManager_->DispatchMouseEventNG(scaleEvent);
     eventManager_->DispatchMouseHoverEventNG(scaleEvent);
     eventManager_->DispatchMouseHoverAnimationNG(scaleEvent);
+    accessibilityManagerNG_->HandleAccessibilityHoverEvent(node, scaleEvent);
     RequestFrame();
 }
 
@@ -2272,13 +2309,48 @@ bool PipelineContext::ChangeMouseStyle(int32_t nodeId, MouseFormat format)
     return mouseStyle->ChangePointerStyle(GetWindowId(), format);
 }
 
+bool PipelineContext::TriggerKeyEventDispatch(const KeyEvent& event)
+{
+    auto curFocusView = focusManager_ ? focusManager_->GetLastFocusView().Upgrade() : nullptr;
+    auto curEntryFocusView = curFocusView ? curFocusView->GetEntryFocusView() : nullptr;
+    auto curEntryFocusViewFrame = curEntryFocusView ? curEntryFocusView->GetFrameNode() : nullptr;
+    if (event.isPreIme) {
+        return eventManager_->DispatchKeyEventNG(event, curEntryFocusViewFrame);
+    }
+
+    auto isKeyTabDown = event.action == KeyAction::DOWN && event.IsKey({ KeyCode::KEY_TAB });
+    auto isViewRootScopeFocused = curFocusView ? curFocusView->GetIsViewRootScopeFocused() : true;
+    isTabJustTriggerOnKeyEvent_ = false;
+    if (isKeyTabDown && isViewRootScopeFocused && curFocusView) {
+        // Current focused on the view root scope. Tab key used to extend focus.
+        // If return true. This tab key will just trigger onKeyEvent process.
+        isTabJustTriggerOnKeyEvent_ = curFocusView->TriggerFocusMove();
+    }
+
+    // Tab key set focus state from inactive to active.
+    // If return true. This tab key will just trigger onKeyEvent process.
+    bool isHandleFocusActive = isKeyTabDown && SetIsFocusActive(true);
+    isTabJustTriggerOnKeyEvent_ = isTabJustTriggerOnKeyEvent_ || isHandleFocusActive;
+    if (eventManager_->DispatchTabIndexEventNG(event, curEntryFocusViewFrame)) {
+        return true;
+    }
+    return eventManager_->DispatchKeyEventNG(event, curEntryFocusViewFrame);
+}
+
 bool PipelineContext::OnKeyEvent(const KeyEvent& event)
 {
-    eventManager_->SetPressedKeyCodes(event.pressedCodes);
     CHECK_NULL_RETURN(eventManager_, false);
-    if (event.action == KeyAction::DOWN) {
-        eventManager_->DispatchKeyboardShortcut(event);
+    eventManager_->SetPressedKeyCodes(event.pressedCodes);
+
+    // onKeyPreIme
+    if (event.isPreIme) {
+        if (TriggerKeyEventDispatch(event)) {
+            return true;
+        }
+        return eventManager_->DispatchKeyboardShortcut(event);
     }
+
+    // process drag cancel
     if (event.code == KeyCode::KEY_ESCAPE) {
         auto manager = GetDragDropManager();
         if (manager && manager->IsMsdpDragging()) {
@@ -2289,69 +2361,22 @@ bool PipelineContext::OnKeyEvent(const KeyEvent& event)
         }
     }
 
-    auto isKeyTabDown = event.action == KeyAction::DOWN && event.IsKey({ KeyCode::KEY_TAB });
-    auto curMainView = FocusHub::GetCurrentMainView();
-    auto isViewRootScopeFocused = curMainView ? curMainView->GetIsViewRootScopeFocused() : true;
-    isTabJustTriggerOnKeyEvent_ = false;
-    if (isKeyTabDown && isViewRootScopeFocused && curMainView) {
-        // Current focused on the view root scope. Tab key used to extend focus.
-        // If return true. This tab key will just trigger onKeyEvent process.
-        isTabJustTriggerOnKeyEvent_ = curMainView->HandleFocusOnMainView();
+    // OnKeyEvent
+    if (TriggerKeyEventDispatch(event)) {
+        return true;
     }
 
-    // Tab key set focus state from inactive to active.
-    // If return true. This tab key will just trigger onKeyEvent process.
-    bool isHandleFocusActive = isKeyTabDown && SetIsFocusActive(true);
-    isTabJustTriggerOnKeyEvent_ = isTabJustTriggerOnKeyEvent_ || isHandleFocusActive;
-
-    auto curMainViewFrameNode = curMainView ? curMainView->GetFrameNode() : nullptr;
-    if (!eventManager_->DispatchTabIndexEventNG(event, curMainViewFrameNode)) {
-        auto result = eventManager_->DispatchKeyEventNG(event, rootNode_);
-        if (!result && event.code == KeyCode::KEY_ESCAPE && event.action == KeyAction::DOWN) {
-            CHECK_NULL_RETURN(overlayManager_, false);
-            auto currentContainer = Container::Current();
-            if (currentContainer->IsSubContainer() || currentContainer->IsDialogContainer()) {
-                return overlayManager_->RemoveOverlayInSubwindow();
-            } else {
-                return overlayManager_->RemoveOverlay(false);
-            }
+    // process exit overlay
+    if (event.code == KeyCode::KEY_ESCAPE && event.action == KeyAction::DOWN) {
+        CHECK_NULL_RETURN(overlayManager_, false);
+        auto currentContainer = Container::Current();
+        if (currentContainer->IsSubContainer() || currentContainer->IsDialogContainer()) {
+            return overlayManager_->RemoveOverlayInSubwindow();
         } else {
-            return result;
+            return overlayManager_->RemoveOverlay(false);
         }
     }
-    return true;
-}
-
-bool PipelineContext::RequestDefaultFocus(const RefPtr<FocusHub>& mainView)
-{
-    if (!mainView || mainView->GetFocusType() != FocusType::SCOPE) {
-        return false;
-    }
-    mainView->SetIsViewHasFocused(true);
-    auto viewRootScope = mainView->GetMainViewRootScope();
-    auto defaultFocusNode = mainView->GetChildFocusNodeByType(FocusNodeType::DEFAULT);
-    if (!mainView->IsDefaultHasFocused() && defaultFocusNode && defaultFocusNode->IsFocusableWholePath()) {
-        mainView->SetIsViewRootScopeFocused(viewRootScope, false);
-        auto ret = defaultFocusNode->RequestFocusImmediately();
-        mainView->SetIsDefaultHasFocused(true);
-        TAG_LOGI(AceLogTag::ACE_FOCUS,
-            "Target view's default focus is %{public}s/%{public}d. Request default focus return: %{public}d.",
-            defaultFocusNode->GetFrameName().c_str(), defaultFocusNode->GetFrameId(), ret);
-        return ret;
-    }
-    if (mainView->GetIsViewRootScopeFocused() && viewRootScope) {
-        mainView->SetIsViewRootScopeFocused(viewRootScope, true);
-        auto ret = viewRootScope->RequestFocusImmediately();
-        TAG_LOGI(AceLogTag::ACE_FOCUS,
-            "Target view has no default focus. Request focus on view root: %{public}s/%{public}d return: %{public}d.",
-            viewRootScope->GetFrameName().c_str(), viewRootScope->GetFrameId(), ret);
-        return ret;
-    }
-    mainView->SetIsViewRootScopeFocused(viewRootScope, false);
-    auto ret = mainView->RequestFocusImmediately();
-    TAG_LOGI(AceLogTag::ACE_FOCUS,
-        "Target view's default focus has been focused. Request view focus return: %{public}d.", ret);
-    return ret;
+    return false;
 }
 
 bool PipelineContext::RequestFocus(const std::string& targetNodeId)
@@ -2379,14 +2404,6 @@ void PipelineContext::AddDirtyFocus(const RefPtr<FrameNode>& node)
     } else {
         dirtyFocusScope_ = WeakClaim(RawPtr(node));
     }
-    RequestFrame();
-}
-
-void PipelineContext::AddDirtyDefaultFocus(const RefPtr<FrameNode>& node)
-{
-    CHECK_RUN_ON(UI);
-    CHECK_NULL_VOID(node);
-    dirtyDefaultFocusNode_ = WeakPtr<FrameNode>(node);
     RequestFrame();
 }
 
@@ -2507,7 +2524,6 @@ void PipelineContext::RemoveFormVisibleChangeNode(int32_t nodeId)
 
 void PipelineContext::HandleFormVisibleChangeEvent(bool isVisible)
 {
-    auto nodes = FrameNode::GetNodesById(onFormVisibleChangeNodeIds_);
     for (auto& pair : onFormVisibleChangeEvents_) {
         if (pair.second) {
             pair.second(isVisible);
@@ -2518,11 +2534,13 @@ void PipelineContext::HandleFormVisibleChangeEvent(bool isVisible)
 void PipelineContext::AddOnAreaChangeNode(int32_t nodeId)
 {
     onAreaChangeNodeIds_.emplace(nodeId);
+    isOnAreaChangeNodesCacheVaild_ = false;
 }
 
 void PipelineContext::RemoveOnAreaChangeNode(int32_t nodeId)
 {
     onAreaChangeNodeIds_.erase(nodeId);
+    isOnAreaChangeNodesCacheVaild_ = false;
 }
 
 void PipelineContext::HandleOnAreaChangeEvent(uint64_t nanoTimestamp)
@@ -2531,8 +2549,14 @@ void PipelineContext::HandleOnAreaChangeEvent(uint64_t nanoTimestamp)
     if (onAreaChangeNodeIds_.empty()) {
         return;
     }
-    auto nodes = FrameNode::GetNodesById(onAreaChangeNodeIds_);
-    for (auto&& frameNode : nodes) {
+    if (!isOnAreaChangeNodesCacheVaild_) {
+        onAreaChangeNodesCache_ = FrameNode::GetNodesPtrById(onAreaChangeNodeIds_);
+        isOnAreaChangeNodesCacheVaild_ = true;
+    }
+    for (auto && frameNode : onAreaChangeNodesCache_) {
+        if (!frameNode) {
+            continue;
+        }
         frameNode->TriggerOnAreaChangeCallback(nanoTimestamp);
     }
     UpdateFormLinkInfos();
@@ -2595,14 +2619,18 @@ void PipelineContext::WindowFocus(bool isFocus)
         NotifyPopupDismiss();
     } else {
         TAG_LOGI(AceLogTag::ACE_FOCUS, "Window id: %{public}d get focus.", windowId_);
-        auto rootFocusHub = rootNode_ ? rootNode_->GetFocusHub() : nullptr;
-        auto curMainView = FocusHub::GetCurrentMainView();
-        if (curMainView && curMainView->GetIsViewHasFocused() && rootFocusHub && !rootFocusHub->IsCurrentFocus()) {
-            rootFocusHub->RequestFocusImmediately();
+        auto curFocusView = focusManager_ ? focusManager_->GetLastFocusView().Upgrade() : nullptr;
+        auto curFocusViewHub = curFocusView ? curFocusView->GetFocusHub() : nullptr;
+        if (!curFocusViewHub) {
+            TAG_LOGW(AceLogTag::ACE_FOCUS, "Current focus view can not found!");
+        } else if (curFocusView->GetIsViewHasFocused() && !curFocusViewHub->IsCurrentFocus()) {
+            TAG_LOGI(AceLogTag::ACE_FOCUS, "Request focus on current focus view: %{public}s/%{public}d",
+                curFocusView->GetFrameName().c_str(), curFocusView->GetFrameId());
+            curFocusViewHub->RequestFocusImmediately();
         }
         if (focusWindowId_.has_value()) {
-            if (curMainView) {
-                curMainView->HandleFocusOnMainView();
+            if (curFocusView) {
+                curFocusView->TriggerFocusMove();
             }
         }
         if (focusOnNodeCallback_) {
@@ -2743,10 +2771,12 @@ void PipelineContext::Destroy()
     scheduleTasks_.clear();
     dirtyNodes_.clear();
     rootNode_.Reset();
+    accessibilityManagerNG_.Reset();
     stageManager_.Reset();
     overlayManager_.Reset();
     sharedTransitionManager_.Reset();
     dragDropManager_.Reset();
+    focusManager_.Reset();
     selectOverlayManager_.Reset();
     fullScreenManager_.Reset();
     touchEvents_.clear();
@@ -2757,7 +2787,6 @@ void PipelineContext::Destroy()
     dirtyFocusNode_.Reset();
     dirtyFocusScope_.Reset();
     needRenderNode_.clear();
-    dirtyDefaultFocusNode_.Reset();
     dirtyRequestFocusNode_.Reset();
     if (textFieldManager_->GetImeShow()) {
         FocusHub::CloseKeyboard();
@@ -2953,6 +2982,7 @@ void PipelineContext::OnDragEvent(const PointerEvent& pointerEvent, DragEventAct
     if (action == DragEventAction::DRAG_EVENT_START) {
         manager->RequireSummary();
         manager->SetDragCursorStyleCore(DragCursorStyleCore::DEFAULT);
+        TAG_LOGI(AceLogTag::ACE_DRAG, "start drag, current windowId is %{public}d", container->GetWindowId());
     }
     extraInfo = manager->GetExtraInfo();
     if (action == DragEventAction::DRAG_EVENT_END) {

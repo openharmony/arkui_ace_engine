@@ -128,6 +128,7 @@ void PipelineContext::SetupRootElement()
     fullScreenManager_ = MakeRefPtr<FullScreenManager>(rootNode_);
     selectOverlayManager_ = MakeRefPtr<SelectOverlayManager>(rootNode_);
     dragDropManager_ = MakeRefPtr<DragDropManager>();
+    focusManager_ = MakeRefPtr<FocusManager>();
     sharedTransitionManager_ = MakeRefPtr<SharedOverlayManager>(rootNode_);
 }
 
@@ -264,6 +265,11 @@ const RefPtr<DragDropManager>& PipelineContext::GetDragDropManager()
     return dragDropManager_;
 }
 
+const RefPtr<FocusManager>& PipelineContext::GetFocusManager() const
+{
+    return focusManager_;
+}
+
 const RefPtr<StageManager>& PipelineContext::GetStageManager()
 {
     return stageManager_;
@@ -311,8 +317,6 @@ bool PipelineContext::OnBackPressed()
 void PipelineContext::AddDirtyFocus(const RefPtr<FrameNode>& node) {}
 
 void PipelineContext::AddDirtyPropertyNode(const RefPtr<FrameNode>& dirty) {}
-
-void PipelineContext::AddDirtyDefaultFocus(const RefPtr<FrameNode>& node) {}
 
 void PipelineContext::AddDirtyRequestFocus(const RefPtr<FrameNode>& node) {}
 
@@ -505,6 +509,19 @@ bool PipelineContext::PrintVsyncInfoIfNeed() const
 const SerializedGesture& PipelineContext::GetSerializedGesture() const
 {
     return serializedGesture_;
+}
+
+void PipelineContext::FlushFocusView()
+{
+    CHECK_NULL_VOID(focusManager_);
+    auto lastFocusView = (focusManager_->GetLastFocusView()).Upgrade();
+    CHECK_NULL_VOID(lastFocusView);
+    auto lastFocusViewHub = lastFocusView->GetFocusHub();
+    CHECK_NULL_VOID(lastFocusViewHub);
+    if (lastFocusView && (!lastFocusViewHub->IsCurrentFocus() || !lastFocusView->GetIsViewHasFocused()) &&
+        lastFocusViewHub->IsFocusableNode()) {
+        lastFocusView->RequestDefaultFocus();
+    }
 }
 
 } // namespace OHOS::Ace::NG

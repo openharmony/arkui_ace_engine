@@ -20,11 +20,11 @@
 #include "core/components_ng/pattern/ui_extension/ui_extension_pattern.h"
 
 namespace OHOS::Ace::NG {
-RefPtr<SessionWrapper> SessionWrapperFactory::CreateSessionWrapper(SessionTye sessionType,
+RefPtr<SessionWrapper> SessionWrapperFactory::CreateSessionWrapper(SessionType sessionType,
     const WeakPtr<UIExtensionPattern>& hostPattern, int32_t instanceId, bool isTransferringCaller)
 {
-    if (sessionType == SessionTye::UI_EXTENSION_ABILITY) {
-        return AceType::MakeRefPtr<SessionWrapperImpl>(hostPattern, instanceId, isTransferringCaller);
+    if (sessionType == SessionType::UI_EXTENSION_ABILITY || sessionType == SessionType::EMBEDDED_UI_EXTENSION) {
+        return AceType::MakeRefPtr<SessionWrapperImpl>(hostPattern, instanceId, isTransferringCaller, sessionType);
     }
     return nullptr;
 }

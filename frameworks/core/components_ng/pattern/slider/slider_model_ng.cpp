@@ -72,7 +72,7 @@ void SliderModelNG::SetBlockColor(const Color& value)
 {
     ACE_UPDATE_PAINT_PROPERTY(SliderPaintProperty, BlockColor, value);
 }
-void SliderModelNG::SetTrackBackgroundColor(const Color& value)
+void SliderModelNG::SetTrackBackgroundColor(const Gradient& value)
 {
     ACE_UPDATE_PAINT_PROPERTY(SliderPaintProperty, TrackBackgroundColor, value);
 }
@@ -113,8 +113,14 @@ void SliderModelNG::SetThickness(const Dimension& value)
         auto theme = pipeline->GetTheme<SliderTheme>();
         CHECK_NULL_VOID(theme);
         auto sliderMode = layoutProperty->GetSliderModeValue(SliderModel::SliderMode::OUTSET);
-        auto themeTrackThickness = sliderMode == SliderModel::SliderMode::OUTSET ? theme->GetOutsetTrackThickness()
-                                                                                 : theme->GetInsetTrackThickness();
+        Dimension themeTrackThickness;
+        if (sliderMode == SliderModel::SliderMode::OUTSET) {
+            themeTrackThickness = theme->GetOutsetTrackThickness();
+        } else if (sliderMode == SliderModel::SliderMode::INSET) {
+            themeTrackThickness = theme->GetInsetTrackThickness();
+        } else {
+            themeTrackThickness = theme->GetNoneTrackThickness();
+        }
         ACE_UPDATE_LAYOUT_PROPERTY(SliderLayoutProperty, Thickness, themeTrackThickness);
     } else {
         ACE_UPDATE_LAYOUT_PROPERTY(SliderLayoutProperty, Thickness, value);
@@ -135,6 +141,10 @@ void SliderModelNG::SetStepColor(const Color& value)
 void SliderModelNG::SetTrackBorderRadius(const Dimension& value)
 {
     ACE_UPDATE_PAINT_PROPERTY(SliderPaintProperty, TrackBorderRadius, value);
+}
+void SliderModelNG::SetSelectedBorderRadius(const Dimension& value)
+{
+    ACE_UPDATE_PAINT_PROPERTY(SliderPaintProperty, SelectedBorderRadius, value);
 }
 void SliderModelNG::SetBlockSize(const Dimension& width, const Dimension& height)
 {
@@ -217,6 +227,11 @@ void SliderModelNG::ResetTrackBorderRadius()
     ACE_RESET_PAINT_PROPERTY_WITH_FLAG(SliderPaintProperty, TrackBorderRadius, PROPERTY_UPDATE_RENDER);
 }
 
+void SliderModelNG::ResetSelectedBorderRadius()
+{
+    ACE_RESET_PAINT_PROPERTY_WITH_FLAG(SliderPaintProperty, SelectedBorderRadius, PROPERTY_UPDATE_RENDER);
+}
+
 void SliderModelNG::ResetBlockSize()
 {
     ACE_RESET_LAYOUT_PROPERTY_WITH_FLAG(SliderLayoutProperty, BlockSize, PROPERTY_UPDATE_MEASURE);
@@ -265,8 +280,14 @@ void SliderModelNG::SetThickness(FrameNode* frameNode, const Dimension& value)
         auto theme = pipeline->GetTheme<SliderTheme>();
         CHECK_NULL_VOID(theme);
         auto sliderMode = layoutProperty->GetSliderModeValue(SliderModel::SliderMode::OUTSET);
-        auto themeTrackThickness = sliderMode == SliderModel::SliderMode::OUTSET ? theme->GetOutsetTrackThickness()
-                                                                                 : theme->GetInsetTrackThickness();
+        Dimension themeTrackThickness;
+        if (sliderMode == SliderModel::SliderMode::OUTSET) {
+            themeTrackThickness = theme->GetOutsetTrackThickness();
+        } else if (sliderMode == SliderModel::SliderMode::INSET) {
+            themeTrackThickness = theme->GetInsetTrackThickness();
+        } else {
+            themeTrackThickness = theme->GetNoneTrackThickness();
+        }
         ACE_UPDATE_NODE_LAYOUT_PROPERTY(SliderLayoutProperty, Thickness, themeTrackThickness, frameNode);
     } else {
         ACE_UPDATE_NODE_LAYOUT_PROPERTY(SliderLayoutProperty, Thickness, value, frameNode);
@@ -327,7 +348,7 @@ void SliderModelNG::SetBlockColor(FrameNode* frameNode, const Color& value)
 {
     ACE_UPDATE_NODE_PAINT_PROPERTY(SliderPaintProperty, BlockColor, value, frameNode);
 }
-void SliderModelNG::SetTrackBackgroundColor(FrameNode* frameNode, const Color& value)
+void SliderModelNG::SetTrackBackgroundColor(FrameNode* frameNode, const Gradient& value)
 {
     ACE_UPDATE_NODE_PAINT_PROPERTY(SliderPaintProperty, TrackBackgroundColor, value, frameNode);
 }
@@ -468,11 +489,12 @@ Color SliderModelNG::GetBlockColor(FrameNode* frameNode)
     return value;
 }
 
-Color SliderModelNG::GetTrackBackgroundColor(FrameNode* frameNode)
+Gradient SliderModelNG::GetTrackBackgroundColor(FrameNode* frameNode)
 {
-    Color value;
+    Gradient value;
     ACE_GET_NODE_PAINT_PROPERTY_WITH_DEFAULT_VALUE(
-        SliderPaintProperty, TrackBackgroundColor, value, frameNode, Color(TRACK_COLOR));
+        SliderPaintProperty, TrackBackgroundColor, value, frameNode,
+        SliderModelNG::CreateSolidGradient(Color(TRACK_COLOR)));
     return value;
 }
 
@@ -566,4 +588,19 @@ RefPtr<BasicShape> SliderModelNG::GetBlockShape(FrameNode* frameNode)
     ACE_GET_NODE_PAINT_PROPERTY_WITH_DEFAULT_VALUE(SliderPaintProperty, BlockShape, value, frameNode, value);
     return value;
 }
+
+Gradient SliderModelNG::CreateSolidGradient(Color value)
+{
+    Gradient gradient;
+    GradientColor gradientColorBegin;
+    gradientColorBegin.SetLinearColor(LinearColor(value));
+    gradientColorBegin.SetDimension(Dimension(0.0f));
+    gradient.AddColor(gradientColorBegin);
+    OHOS::Ace::NG::GradientColor gradientColorEnd;
+    gradientColorEnd.SetLinearColor(LinearColor(value));
+    gradientColorEnd.SetDimension(Dimension(1.0f));
+    gradient.AddColor(gradientColorEnd);
+    return gradient;
+}
+
 } // namespace OHOS::Ace::NG

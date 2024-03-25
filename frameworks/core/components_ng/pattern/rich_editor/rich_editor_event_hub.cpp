@@ -113,6 +113,36 @@ void RichEditorAbstractSpanResult::SetFontColor(const std::string& fontColor)
     fontColor_ = fontColor;
 }
 
+void RichEditorAbstractSpanResult::SetTextStyle(TextStyleResult textStyle)
+{
+    textStyle_ = textStyle;
+}
+
+TextStyleResult RichEditorAbstractSpanResult::GetTextStyle() const
+{
+    return textStyle_;
+}
+
+void RichEditorAbstractSpanResult::SetLineHeight(double lineHeight)
+{
+    lineHeight_ = lineHeight;
+}
+
+double RichEditorAbstractSpanResult::GetLineHeight() const
+{
+    return lineHeight_;
+}
+
+void RichEditorAbstractSpanResult::SetLetterspacing(double letterSpacing)
+{
+    letterSpacing_ = letterSpacing;
+}
+
+double RichEditorAbstractSpanResult::GetLetterspacing() const
+{
+    return letterSpacing_;
+}
+
 const std::string& RichEditorAbstractSpanResult::GetFontColor() const
 {
     return fontColor_;
@@ -340,5 +370,17 @@ std::string RichEditorEventHub::GetDragExtraParams(const std::string& extraInfo,
         json->Put("extraInfo", extraInfo.c_str());
     }
     return json->ToString();
+}
+
+void RichEditorEventHub::SetOnEditingChange(std::function<void(const bool&)>&& func)
+{
+    onEditingChange_ = std::move(func);
+}
+
+void RichEditorEventHub::FireOnEditingChange(bool isEditing)
+{
+    if (onEditingChange_) {
+        onEditingChange_(isEditing);
+    }
 }
 } // namespace OHOS::Ace::NG

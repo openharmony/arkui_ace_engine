@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -87,6 +87,8 @@ public:
         bool useNewPipeline = false);
 
     ~AceContainer() override;
+
+    bool UpdatePopupUIExtension(const RefPtr<NG::FrameNode>& node) override;
 
     void Initialize() override;
 
@@ -523,7 +525,7 @@ public:
     bool GetCurPointerEventInfo(int32_t pointerId, int32_t& globalX, int32_t& globalY, int32_t& sourceType,
         StopDragCallback&& stopDragCallback) override;
 
-    bool RequestAutoFill(const RefPtr<NG::FrameNode>& node, AceAutoFillType autoFillType) override;
+    bool RequestAutoFill(const RefPtr<NG::FrameNode>& node, AceAutoFillType autoFillType, bool& isPopup) override;
     bool RequestAutoSave(const RefPtr<NG::FrameNode>& node) override;
     std::shared_ptr<NavigationController> GetNavigationController(const std::string& navigationId) override;
 
@@ -546,6 +548,39 @@ public:
     bool NotifyExecuteAction(
         int64_t elementId, const std::map<std::string, std::string>& actionArguments,
         int32_t action, int64_t offset);
+
+    void HandleAccessibilityHoverEvent(float pointX, float pointY, int32_t sourceType,
+        int32_t eventType, int64_t timeMs);
+
+    void SetUIExtensionSubWindow(bool isUIExtensionSubWindow)
+    {
+        isUIExtensionSubWindow_ = isUIExtensionSubWindow;
+    }
+
+    bool IsUIExtensionSubWindow()
+    {
+        return isUIExtensionSubWindow_;
+    }
+
+    void SetUIExtensionAbilityProcess(bool isUIExtensionAbilityProcess)
+    {
+        isUIExtensionAbilityProcess_ = isUIExtensionAbilityProcess;
+    }
+
+    bool IsUIExtensionAbilityProcess()
+    {
+        return isUIExtensionAbilityProcess_;
+    }
+
+    void SetUIExtensionAbilityHost(bool isUIExtensionAbilityHost)
+    {
+        isUIExtensionAbilityHost_ = isUIExtensionAbilityHost;
+    }
+
+    bool IsUIExtensionAbilityHost()
+    {
+        return isUIExtensionAbilityHost_;
+    }
 
 private:
     virtual bool MaybeRelease() override;
@@ -599,6 +634,9 @@ private:
     bool isFormRender_ = false;
     int32_t parentId_ = 0;
     bool useStageModel_ = false;
+    bool isUIExtensionSubWindow_ = false;
+    bool isUIExtensionAbilityProcess_ = false;
+    bool isUIExtensionAbilityHost_ = false;
 
     DeviceOrientation orientation_ = DeviceOrientation::ORIENTATION_UNDEFINED;
 

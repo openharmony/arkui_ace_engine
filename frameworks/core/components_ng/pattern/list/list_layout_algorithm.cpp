@@ -61,6 +61,9 @@ void ListLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     auto listLayoutProperty = AceType::DynamicCast<ListLayoutProperty>(layoutWrapper->GetLayoutProperty());
     CHECK_NULL_VOID(listLayoutProperty);
 
+    // Pre-recycle
+    ScrollableUtils::RecycleItemsOutOfBoundary(axis_, -currentDelta_, GetStartIndex(), GetEndIndex(), layoutWrapper);
+
     const auto& layoutConstraint = listLayoutProperty->GetLayoutConstraint().value();
 
     // calculate idealSize and set FrameSize
@@ -77,6 +80,8 @@ void ListLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     contentEndOffset_ += expandHeight;
     // expand contentSize
     contentConstraint.MinusPadding(std::nullopt, std::nullopt, std::nullopt, -expandHeight);
+    auto&& safeAreaOpts = listLayoutProperty->GetSafeAreaExpandOpts();
+    expandSafeArea_ = safeAreaOpts && safeAreaOpts->Expansive();
 
     auto contentIdealSize = CreateIdealSize(
         contentConstraint, axis_, listLayoutProperty->GetMeasureType(MeasureType::MATCH_PARENT_CROSS_AXIS));
@@ -170,7 +175,7 @@ void ListLayoutAlgorithm::SetCacheCount(LayoutWrapper* layoutWrapper, int32_t ca
 
 bool ListLayoutAlgorithm::CheckNeedMeasure(const RefPtr<LayoutWrapper>& layoutWrapper) const
 {
-    if (layoutWrapper->CheckNeedForceMeasureAndLayout()) {
+    if (expandSafeArea_ || layoutWrapper->CheckNeedForceMeasureAndLayout()) {
         return true;
     }
     auto geometryNode = layoutWrapper->GetGeometryNode();
@@ -616,11 +621,11 @@ void ListLayoutAlgorithm::UpdateSnapCenterContentOffset(LayoutWrapper* layoutWra
         float itemHeight = 0.0f;
         if (GetStartIndex() == 0) {
             itemHeight = itemPosition_.begin()->second.endPos - itemPosition_.begin()->second.startPos;
-            contentStartOffset_ = (contentMainSize_ - itemHeight) / 2.0f;
+            contentStartOffset_ = std::max((contentMainSize_ - itemHeight) / 2.0f, 0.0f);
         }
         if (GetEndIndex() == totalItemCount_ - 1) {
             itemHeight = itemPosition_.rbegin()->second.endPos - itemPosition_.rbegin()->second.startPos;
-            contentEndOffset_ = (contentMainSize_ - itemHeight) / 2.0f;
+            contentEndOffset_ = std::max((contentMainSize_ - itemHeight) / 2.0f, 0.0f);
         }
     }
 }
@@ -1218,7 +1223,7 @@ void ListLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
         pos.second.startPos -= currentOffset_;
         pos.second.endPos -= currentOffset_;
         LayoutItem(wrapper, pos.first, pos.second, startIndex, crossSize);
-        if (wrapper->CheckNeedForceMeasureAndLayout()) {
+        if (expandSafeArea_ || wrapper->CheckNeedForceMeasureAndLayout()) {
             wrapper->Layout();
         } else {
             SyncGeometry(wrapper);
@@ -1467,7 +1472,7 @@ std::list<int32_t> ListLayoutAlgorithm::LayoutCachedItem(LayoutWrapper* layoutWr
     auto currPos = itemPosition_.rbegin()->second.endPos + spaceWidth_;
     for (int32_t i = 0; i < cacheCount && currIndex + i < totalItemCount_; i++) {
         int32_t index = currIndex + i;
-        auto wrapper = layoutWrapper->GetChildByIndex(index);
+        auto wrapper = layoutWrapper->GetChildByIndex(index, true);
         if (!wrapper || CheckNeedMeasure(wrapper)) {
             predictBuildList.emplace_back(index);
             continue;
@@ -1488,7 +1493,7 @@ std::list<int32_t> ListLayoutAlgorithm::LayoutCachedItem(LayoutWrapper* layoutWr
     currPos = itemPosition_.begin()->second.startPos - spaceWidth_;
     for (int32_t i = 0; i < cacheCount && currIndex - i >= 0; i++) {
         int32_t index = currIndex - i;
-        auto wrapper = layoutWrapper->GetChildByIndex(index);
+        auto wrapper = layoutWrapper->GetChildByIndex(index, true);
         if (!wrapper || CheckNeedMeasure(wrapper)) {
             predictBuildList.emplace_back(index);
             continue;
@@ -1549,7 +1554,7 @@ void ListLayoutAlgorithm::PostIdleTask(RefPtr<FrameNode> frameNode, const ListPr
             if (GetSysTimestamp() > deadline) {
                 break;
             }
-            auto wrapper = frameNode->GetOrCreateChildByIndex(*it, false);
+            auto wrapper = frameNode->GetOrCreateChildByIndex(*it, false, true);
             if (wrapper && wrapper->GetHostNode() && !wrapper->GetHostNode()->RenderCustomChild(deadline)) {
                 break;
             }

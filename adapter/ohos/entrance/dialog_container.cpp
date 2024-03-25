@@ -449,7 +449,7 @@ void DialogContainer::ShowToast(
             DialogContainer::HideWindow(instanceId);
         }
     });
-    delegate->ShowToast(message, duration, bottom, NG::ToastShowMode::DEFAULT);
+    delegate->ShowToast(message, duration, bottom, NG::ToastShowMode::DEFAULT, -1, std::nullopt);
 }
 
 void DialogContainer::ShowDialog(int32_t instanceId, const std::string& title, const std::string& message,

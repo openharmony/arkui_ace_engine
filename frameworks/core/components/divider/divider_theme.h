@@ -38,11 +38,7 @@ public:
             if (!themeConstants) {
                 return theme;
             }
-            auto themeStyle = themeConstants->GetThemeStyle();
-            if (!themeStyle) {
-                return theme;
-            }
-            auto pattern = themeStyle->GetAttr<RefPtr<ThemeStyle>>(THEME_PATTERN_DIVIDER, nullptr);
+            RefPtr<ThemeStyle> pattern = themeConstants->GetPatternByName(THEME_PATTERN_DIVIDER);
             if (pattern) {
                 theme->color_ = pattern->GetAttr<Color>("divider_color", Color::BLACK);
                 theme->stokeWidth_ = pattern->GetAttr<Dimension>("divider_stroke_width", 1.0_vp);

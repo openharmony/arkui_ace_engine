@@ -55,7 +55,7 @@ class ACE_EXPORT ListLayoutAlgorithm : public LayoutAlgorithm {
 
 public:
     using PositionMap = std::map<int32_t, ListItemInfo>;
-    static const int32_t LAST_ITEM = -1;
+    static constexpr int32_t LAST_ITEM = -1;
 
     ListLayoutAlgorithm() = default;
 
@@ -417,6 +417,7 @@ private:
     bool forwardFeature_ = false;
     bool backwardFeature_ = false;
     bool isNeedCheckOffset_ = false;
+    bool expandSafeArea_ = false;
 
     int32_t totalItemCount_ = 0;
 

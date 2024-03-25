@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -101,6 +101,28 @@ struct NestedScrollOptions {
     {
         return forward ? this->forward != NestedScrollMode::SELF_ONLY : backward != NestedScrollMode::SELF_ONLY;
     }
+
+    bool operator==(const NestedScrollOptions& other) const
+    {
+        return forward == other.forward && backward == other.backward;
+    }
+
+    bool operator!=(const NestedScrollOptions& other) const
+    {
+        return !(*this == other);
+    }
+
+    std::string ToString() const
+    {
+        return "NestedScrollOptions forward: " + std::to_string(static_cast<int32_t>(forward)) +
+               ", backward: " + std::to_string(static_cast<int32_t>(backward));
+    }
+};
+
+struct ListItemIndex {
+    int32_t index = -1;
+    int32_t area = -1;
+    int32_t indexInGroup = -1;
 };
 
 constexpr int32_t SCROLL_FROM_NONE = 0;
@@ -128,6 +150,7 @@ using OnScrollStartEvent = std::function<void()>;
 using OnScrollStopEvent = std::function<void()>;
 using OnReachEvent = std::function<void()>;
 using OnScrollIndexEvent = std::function<void(int32_t, int32_t, int32_t)>;
+using OnScrollVisibleContentChangeEvent = std::function<void(ListItemIndex, ListItemIndex)>;
 
 using ScrollPositionCallback = std::function<bool(double, int32_t source)>;
 using ScrollEndCallback = std::function<void()>;
@@ -135,6 +158,7 @@ using CalePredictSnapOffsetCallback =
                 std::function<std::optional<float>(float delta, float dragDistance, float velocity)>;
 using StartScrollSnapMotionCallback = std::function<void(float scrollSnapDelta, float scrollSnapVelocity)>;
 using ScrollBarFRCallback = std::function<void(double velocity, NG::SceneStatus sceneStatus)>;
+using ScrollPageCallback = std::function<void(bool, bool smooth)>;
 } // namespace OHOS::Ace
 
 #endif

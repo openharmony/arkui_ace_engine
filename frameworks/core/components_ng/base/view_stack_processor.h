@@ -38,7 +38,7 @@
 #define ACE_UPDATE_NODE_LAYOUT_PROPERTY(target, name, value, frameNode)         \
     do {                                                                        \
         CHECK_NULL_VOID(frameNode);                                             \
-        auto cast##target = frameNode->GetLayoutProperty<target>();             \
+        auto cast##target = frameNode->GetLayoutPropertyPtr<target>();          \
         if (cast##target) {                                                     \
             cast##target->Update##name(value);                                  \
         }                                                                       \
@@ -46,7 +46,7 @@
 
 #define ACE_GET_NODE_LAYOUT_PROPERTY(target, name, value, frameNode)            \
     do {                                                                        \
-        auto cast##target = frameNode->GetLayoutProperty<target>();             \
+        auto cast##target = frameNode->GetLayoutPropertyPtr<target>();          \
         if (cast##target) {                                                     \
             value = cast##target->Get##name##Value();                           \
         }                                                                       \
@@ -54,7 +54,7 @@
 
 #define ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(target, name, value, frameNode, defaultValue)   \
     do {                                                                                                \
-        auto cast##target = frameNode->GetLayoutProperty<target>();                                     \
+        auto cast##target = frameNode->GetLayoutPropertyPtr<target>();                                  \
         if (cast##target) {                                                                             \
             value = cast##target->Get##name##Value(defaultValue);                                       \
         }                                                                                               \
@@ -68,7 +68,7 @@
 #define ACE_UPDATE_NODE_PAINT_PROPERTY(target, name, value, frameNode)          \
     do {                                                                        \
         CHECK_NULL_VOID(frameNode);                                             \
-        auto cast##target = frameNode->GetPaintProperty<target>();              \
+        auto cast##target = frameNode->GetPaintPropertyPtr<target>();           \
         if (cast##target) {                                                     \
             cast##target->Update##name(value);                                  \
         }                                                                       \
@@ -76,7 +76,7 @@
 
 #define ACE_GET_NODE_PAINT_PROPERTY(target, name, value, frameNode)             \
     do {                                                                        \
-        auto cast##target = frameNode->GetPaintProperty<target>();              \
+        auto cast##target = frameNode->GetPaintPropertyPtr<target>();           \
         if (cast##target) {                                                     \
             value = cast##target->Get##name##Value();                           \
         }                                                                       \
@@ -84,7 +84,7 @@
 
 #define ACE_GET_NODE_PAINT_PROPERTY_WITH_DEFAULT_VALUE(target, name, value, frameNode, defaultValue) \
     do {                                                                                             \
-        auto cast##target = frameNode->GetPaintProperty<target>();                                   \
+        auto cast##target = frameNode->GetPaintPropertyPtr<target>();                                \
         if (cast##target) {                                                                          \
             value = cast##target->Get##name##Value(defaultValue);                                    \
         }                                                                                            \
@@ -112,7 +112,7 @@
 #define ACE_RESET_NODE_LAYOUT_PROPERTY(target, name, frameNode)                 \
     do {                                                                        \
         CHECK_NULL_VOID(frameNode);                                             \
-        auto cast##target = frameNode->GetLayoutProperty<target>();             \
+        auto cast##target = frameNode->GetLayoutPropertyPtr<target>();          \
         CHECK_NULL_VOID(cast##target);                                          \
         cast##target->Reset##name();                                            \
     } while (false)
@@ -125,7 +125,7 @@
 #define ACE_RESET_NODE_LAYOUT_PROPERTY_WITH_FLAG(target, name, changeFlag, frameNode)      \
     do {                                                                                   \
         CHECK_NULL_VOID(frameNode);                                                        \
-        auto cast##target = frameNode->GetLayoutProperty<target>();                        \
+        auto cast##target = frameNode->GetLayoutPropertyPtr<target>();                     \
         CHECK_NULL_VOID(cast##target);                                                     \
         if (cast##target->Has##name()) {                                                   \
             cast##target->Reset##name();                                                   \
@@ -141,7 +141,7 @@
 #define ACE_RESET_NODE_PAINT_PROPERTY(target, name, frameNode)                  \
     do {                                                                        \
         CHECK_NULL_VOID(frameNode);                                             \
-        auto cast##target = frameNode->GetPaintProperty<target>();              \
+        auto cast##target = frameNode->GetPaintPropertyPtr<target>();           \
         CHECK_NULL_VOID(cast##target);                                          \
         cast##target->Reset##name();                                            \
     } while (false)
@@ -154,7 +154,7 @@
 #define ACE_RESET_NODE_PAINT_PROPERTY_WITH_FLAG(target, name, changeFlag, frameNode)      \
     do {                                                                                  \
         CHECK_NULL_VOID(frameNode);                                                       \
-        auto cast##target = frameNode->GetPaintProperty<target>();                        \
+        auto cast##target = frameNode->GetPaintPropertyPtr<target>();                     \
         CHECK_NULL_VOID(cast##target);                                                    \
         cast##target->Reset##name();                                                      \
         cast##target->UpdatePropertyChangeFlag(changeFlag);                               \
@@ -168,7 +168,7 @@
 #define ACE_RESET_NODE_RENDER_CONTEXT(target, name, frameNode)                  \
     do {                                                                        \
         CHECK_NULL_VOID(frameNode);                                             \
-        auto cast##target = frameNode->GetRenderContext();                      \
+        const auto& cast##target = frameNode->GetRenderContext();               \
         CHECK_NULL_VOID(cast##target);                                          \
         cast##target->Reset##name();                                            \
     } while (false)
@@ -245,12 +245,12 @@ public:
         }
         return frameNode->GetFocusHub();
     }
+    
+    ACE_FORCE_EXPORT FrameNode* GetMainFrameNode() const;
 
-    ACE_FORCE_EXPORT RefPtr<FrameNode> GetMainFrameNode() const;
-
-    // Get main component include composed component created by js view.
-    RefPtr<UINode> GetMainElementNode() const;
-
+   // Get main component include composed component created by js view.
+    const RefPtr<UINode>& GetMainElementNode() const;
+    
     // create wrappingComponentsMap and the component to map and then Push
     // the map to the render component stack.
     ACE_FORCE_EXPORT void Push(const RefPtr<UINode>& element, bool isCustomView = false);

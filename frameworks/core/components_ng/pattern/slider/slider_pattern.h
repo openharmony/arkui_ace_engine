@@ -132,12 +132,11 @@ public:
     void OnVisibleChange(bool isVisible) override;
 
 private:
-    void OnAttachToFrameNode() override;
-    void OnDetachFromFrameNode(FrameNode* frameNode) override;
     void OnModifyDone() override;
+    void CalcSliderValue();
     void CancelExceptionValue(float& min, float& max, float& step);
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, bool skipMeasure, bool skipLayout) override;
-
+    bool UpdateParameters();
     void CreateParagraphFunc();
     void CreateParagraphAndLayout(
         const TextStyle& textStyle, const std::string& content, const LayoutConstraintF& contentConstraint);
@@ -172,13 +171,12 @@ private:
     void InitOnKeyEvent(const RefPtr<FocusHub>& focusHub);
     void GetInnerFocusPaintRect(RoundRect& paintRect);
     void GetOutsetInnerFocusPaintRect(RoundRect& paintRect);
-    void GetInsetInnerFocusPaintRect(RoundRect& paintRect);
+    void GetInsetAndNoneInnerFocusPaintRect(RoundRect& paintRect);
     bool OnKeyEvent(const KeyEvent& event);
     void PaintFocusState();
     bool MoveStep(int32_t stepCount);
 
     bool IsSliderVisible();
-    void RegisterVisibleAreaChange();
     void OnWindowHide() override;
     void OnWindowShow() override;
     void StartAnimation();
@@ -213,8 +211,6 @@ private:
     bool axisFlag_ = false; // Wheel operation flag
     bool focusFlag_ = false;
     bool panMoveFlag_ = false;
-    bool hasVisibleChangeRegistered_ = false;
-    bool isVisibleArea_ = true;
     bool isVisible_ = true;
     bool isShow_ = true;
     int32_t fingerId_ = -1;

@@ -24,6 +24,7 @@
 #include "core/components/popup/popup_theme.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/event/focus_hub.h"
+#include "core/components_ng/manager/focus/focus_view.h"
 #include "core/components_ng/pattern/bubble//bubble_event_hub.h"
 #include "core/components_ng/pattern/bubble/bubble_layout_algorithm.h"
 #include "core/components_ng/pattern/bubble/bubble_layout_property.h"
@@ -45,8 +46,9 @@ enum class DismissReason {
     TOUCH_OUTSIDE,
     CLOSE_BUTTON,
 };
-class BubblePattern : public PopupBasePattern {
-    DECLARE_ACE_TYPE(BubblePattern, PopupBasePattern);
+
+class BubblePattern : public PopupBasePattern, public FocusView {
+    DECLARE_ACE_TYPE(BubblePattern, PopupBasePattern, FocusView);
 
 public:
     BubblePattern() = default;
@@ -110,13 +112,27 @@ public:
         return { FocusType::SCOPE, true };
     }
 
+    std::list<int32_t> GetRouteOfFirstScope() override
+    {
+        return { 0, 0, 0 };
+    }
+
     void OnWindowHide() override;
     void OnWindowSizeChanged(int32_t width, int32_t height, WindowSizeChangeReason type) override;
+    void StartEnteringTransitionEffects(const RefPtr<FrameNode>& popupNode, const std::function<void()>& finish);
+    void StartExitingTransitionEffects(const RefPtr<FrameNode>& popupNode, const std::function<void()>& finish);
     void StartEnteringAnimation(std::function<void()> finish);
     void StartExitingAnimation(std::function<void()> finish);
     bool IsOnShow();
     bool IsExiting();
     void OnColorConfigurationUpdate() override;
+    void UpdateBubbleText();
+    void UpdateText(const RefPtr<UINode>& node, const RefPtr<PopupTheme>& popupTheme);
+
+    void SetMessageColor(bool isSetMessageColor)
+    {
+        isSetMessageColor_ = isSetMessageColor;
+    }
 
     void SetMessageNode(RefPtr<FrameNode> messageNode)
     {
@@ -170,6 +186,16 @@ public:
             onWillDismiss_(reason);
         }
     }
+    void SetHasTransition(bool hasTransition)
+    {
+        hasTransition_ = hasTransition;
+    }
+
+    bool GetHasTransition() const
+    {
+        return hasTransition_;
+    }
+
 protected:
     void OnDetachFromFrameNode(FrameNode* frameNode) override;
 
@@ -211,7 +237,7 @@ private:
     bool mouseEventInitFlag_ = false;
     bool touchEventInitFlag_ = false;
     bool isHover_ = false;
-    bool interactiveDismiss_ = false;
+    bool interactiveDismiss_ = true;
     std::function<void(int32_t)> onWillDismiss_;
     OffsetF childOffset_;
     OffsetF arrowPosition_;
@@ -224,6 +250,8 @@ private:
     float arrowHeight_ = Dimension(8.0_vp).ConvertToPx();
 
     bool showArrow_ = false;
+    ColorMode colorMode_ = ColorMode::COLOR_MODE_UNDEFINED;
+    bool isSetMessageColor_ = false;
 
     TransitionStatus transitionStatus_ = TransitionStatus::INVISIABLE;
 
@@ -239,6 +267,8 @@ private:
     std::string clipPath_;
     RefPtr<FrameNode> clipFrameNode_;
     ACE_DISALLOW_COPY_AND_MOVE(BubblePattern);
+
+    bool hasTransition_ = false;
 };
 } // namespace OHOS::Ace::NG
 

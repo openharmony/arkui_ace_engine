@@ -19,13 +19,20 @@
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
 #include "core/common/ace_application_info.h"
+#include "core/components_ng/manager/focus/focus_view.h"
 #include "core/components_ng/pattern/overlay/modal_presentation_layout_algorithm.h"
 #include "core/components_ng/pattern/overlay/modal_style.h"
 #include "core/components_ng/pattern/overlay/popup_base_pattern.h"
 
 namespace OHOS::Ace::NG {
-class ACE_EXPORT ModalPresentationPattern : public PopupBasePattern {
-    DECLARE_ACE_TYPE(ModalPresentationPattern, PopupBasePattern);
+enum class ContentCoverDismissReason {
+    BACK_PRESSED = 0,
+    TOUCH_OUTSIDE,
+    CLOSE_BUTTON,
+};
+
+class ACE_EXPORT ModalPresentationPattern : public PopupBasePattern, public FocusView {
+    DECLARE_ACE_TYPE(ModalPresentationPattern, PopupBasePattern, FocusView);
 
 public:
     ModalPresentationPattern(int32_t targetId, ModalTransition type, std::function<void(const std::string&)>&& callback)
@@ -64,6 +71,38 @@ public:
             callback_(value);
         }
     }
+
+    void SetHasTransitionEffect(const bool hasTransitionEffect)
+    {
+        hasTransitionEffect_ = hasTransitionEffect;
+    }
+
+    bool HasTransitionEffect() const
+    {
+        return hasTransitionEffect_;
+    }
+
+    void UpdateOnWillDismiss(const std::function<void(int32_t)>&& onWillDismiss) //todo
+    {
+        onWillDismiss_ = std::move(onWillDismiss);
+    }
+
+    bool HasOnWillDismiss() const
+    {
+        if (onWillDismiss_) {
+            return true;
+        }
+        return false;
+    }
+
+    void CallOnWillDismiss(const int32_t reason)
+    {
+        if (onWillDismiss_) {
+            onWillDismiss_(reason);
+        }
+    }
+
+    void ModalInteractiveDismiss();
 
     void UpdateOnDisappear(std::function<void()>&& onDisappear) {
         onDisappear_ = std::move(onDisappear);
@@ -106,6 +145,11 @@ public:
         return { FocusType::SCOPE, true };
     }
 
+    std::list<int32_t> GetRouteOfFirstScope() override
+    {
+        return { 0 };
+    }
+
     bool IsExecuteOnDisappear() const
     {
         return isExecuteOnDisappear_;
@@ -145,6 +189,8 @@ private:
     bool isUIExtension_ = false;
     int32_t targetId_ = -1;
     ModalTransition type_ = ModalTransition::DEFAULT;
+    bool hasTransitionEffect_ = false;
+    std::function<void(const int32_t& info)> onWillDismiss_;
     std::function<void(const std::string&)> callback_;
     std::function<void()> onDisappear_;
     std::function<void()> onWillDisappear_;

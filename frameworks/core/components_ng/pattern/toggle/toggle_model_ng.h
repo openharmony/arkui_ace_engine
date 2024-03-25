@@ -35,6 +35,11 @@ public:
     void SetResponseRegion(const std::vector<DimensionRect>& responseRegion) override;
     void SetHoverEffect(HoverEffectType hoverEffect) override;
     void Pop() override;
+    void SetPointRadius(const Dimension& switchPointRadius) override;
+    void ResetPointRadius() override;
+    void SetUnselectedColor(const Color& unselectedColor) override;
+    void SetTrackBorderRadius(const Dimension& borderRadius) override;
+    void ResetTrackBorderRadius() override;
     static RefPtr<FrameNode> CreateFrameNode(int32_t nodeId, ToggleType toggleType, bool isOn);
     static void SetSelectedColor(FrameNode* frameNode, const std::optional<Color>& selectedColor);
     static void SetSwitchPointColor(FrameNode* frameNode, const Color& switchPointColor);
@@ -44,10 +49,11 @@ public:
     static void SetResponseRegion(FrameNode* frameNode, const std::vector<DimensionRect>& responseRegion);
     static void SetPadding(FrameNode* frameNode, const NG::PaddingPropertyF& args, const NG::PaddingProperty& newArgs);
     static void SetHoverEffect(FrameNode* frameNode, HoverEffectType hoverEffect);
+    static void SetSwitchIsOn(FrameNode* frameNode, bool isOn);
 
     static Color GetSelectedColor(FrameNode* frameNode);
     static Color GetSwitchPointColor(FrameNode* frameNode);
-
+    static bool GetSwitchIsOn(FrameNode* frameNode);
 private:
     static void CreateCheckbox(int32_t nodeId);
     static void CreateSwitch(int32_t nodeId);
