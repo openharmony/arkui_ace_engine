@@ -4903,9 +4903,8 @@ void TextFieldPattern::SetSelectionFlag(
             ProcessOverlay(true, true);
             UpdateSelectMenuVisibility(true);
         } else if (options.value().menuPolicy == MenuPolicy::NEVER) {
-            SetIsSingleHandle(!IsSelected());
             UpdateSelectMenuVisibility(false);
-            ProcessOverlay(true, true, false);
+            CloseSelectOverlay(true);
         }
     }
     auto host = GetHost();
