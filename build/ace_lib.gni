@@ -109,6 +109,9 @@ template("ace_bridge_engine") {
     assert(defined(platform) && (platform == "ohos" || platform == "ohos_ng"),
            "Only ohos need separated engine lib")
 
+    if (use_hilog) {
+      external_deps = [ "hilog:libhilog" ]
+    }
     if (build_type == "engine") {
       if (use_js_debug) {
         deps += [ "$ace_root/frameworks/bridge/js_frontend/engine:js_engine_${engine_name}_debug_$platform" ]

@@ -296,8 +296,7 @@ void PageRouterManager::BackWithTarget(const RouterPageInfo& target)
 void PageRouterManager::BackToIndexWithTarget(int32_t index, const std::string& params)
 {
     CHECK_RUN_ON(JS);
-    if (index > pageRouterStack_.size() || index <= 0) {
-        LOGE("The index is less than or equal to zero or exceeds the maximum length of the page stack");
+    if (!CheckIndexValid(index)) {
         return;
     }
     if (inRouterOpt_) {
@@ -481,8 +480,7 @@ int32_t PageRouterManager::GetStackSize() const
 RouterPageInfo PageRouterManager::GetPageInfoByIndex(int32_t index, const std::string& params)
 {
     RouterPageInfo target;
-    if (index > pageRouterStack_.size() || index <= 0) {
-        LOGE("The index is less than or equal to zero or exceeds the maximum length of the page stack");
+    if (!CheckIndexValid(index)) {
         return target;
     }
     std::string url;
@@ -538,11 +536,10 @@ void PageRouterManager::GetState(int32_t& index, std::string& name, std::string&
     }
 }
 
-void PageRouterManager::GetStateByIndex(int32_t& index, std::string& name, std::string& path, std::string& params)
+void PageRouterManager::GetStateByIndex(int32_t index, std::string& name, std::string& path, std::string& params)
 {
     CHECK_RUN_ON(JS);
-    if (index > pageRouterStack_.size() || index <= 0) {
-        LOGE("The index is less than or equal to zero or exceeds the maximum length of the page stack");
+    if (!CheckIndexValid(index)) {
         return;
     }
 
@@ -1223,7 +1220,7 @@ void PageRouterManager::MovePageToFront(int32_t index, const RefPtr<FrameNode>& 
             pageInfo->ReplacePageParams(tempParam);
         }
     }
-    
+
     // update index in pageInfo
     for (auto iter = last; iter != pageRouterStack_.end(); ++iter, ++index) {
         auto pageNode = iter->Upgrade();
@@ -1431,5 +1428,14 @@ void PageRouterManager::DealReplacePage(const RouterPageInfo& info)
         }
     }
     LoadPage(GenerateNextPageId(), info, false, false);
+}
+
+bool PageRouterManager::CheckIndexValid(int32_t index) const
+{
+    if (index > static_cast<int32_t>(pageRouterStack_.size()) || index <= 0) {
+        LOGW("The index is less than or equal to zero or exceeds the maximum length of the page stack");
+        return false;
+    }
+    return true;
 }
 } // namespace OHOS::Ace::NG
