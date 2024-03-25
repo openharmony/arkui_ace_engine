@@ -199,13 +199,21 @@ ArkUINodeHandle GetFrameNodeByKey(ArkUI_CharPtr key)
     return reinterpret_cast<ArkUINodeHandle>(OHOS::Ace::AceType::RawPtr(node));
 }
 
+void PropertyUpdate(ArkUINodeHandle node)
+{
+    auto* uiNode = reinterpret_cast<UINode*>(node);
+    if (uiNode) {
+        uiNode->MarkDirtyNode(PROPERTY_UPDATE_DIFF);
+    }
+}
+
 namespace NodeModifier {
 const ArkUIFrameNodeModifier* GetFrameNodeModifier()
 {
     static const ArkUIFrameNodeModifier modifier = { IsModifiable, AppendChildInFrameNode, InsertChildAfterInFrameNode,
         RemoveChildInFrameNode, ClearChildrenInFrameNode, GetChildrenCount, GetChild, GetFirst, GetNextSibling,
         GetPreviousSibling, GetParent, GetIdByNodePtr, GetPositionToParent, GetPositionToWindow,
-        GetFrameNodeById, GetFrameNodeByKey };
+        GetFrameNodeById, GetFrameNodeByKey, PropertyUpdate };
     return &modifier;
 }
 } // namespace NodeModifier
