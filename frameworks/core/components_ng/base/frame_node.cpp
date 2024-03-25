@@ -2965,6 +2965,9 @@ void FrameNode::Measure(const std::optional<LayoutConstraintF>& parentConstraint
             layoutAlgorithm_->SetSkipMeasure();
             return;
         }
+    } else {
+        contentConstraintChanges_.UpdateFlags(contentConstraint, layoutProperty_->GetContentLayoutConstraint());
+        constraintChanges_.UpdateFlags(preConstraint, layoutProperty_->GetLayoutConstraint());
     }
 
     auto size = layoutAlgorithm_->MeasureContent(layoutProperty_->CreateContentConstraint(), this);

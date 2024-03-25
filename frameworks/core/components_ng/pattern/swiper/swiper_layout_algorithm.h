@@ -178,6 +178,11 @@ public:
         return mainSizeIsMeasured_;
     }
 
+    void SetCurrentIndex(int32_t currentIndex)
+    {
+        currentIndex_ = currentIndex;
+    }
+
     int32_t GetCurrentIndex() const
     {
         return currentIndex_;
