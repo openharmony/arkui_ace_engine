@@ -341,7 +341,6 @@ void TextPattern::UpdateSelectorOnHandleMove(const OffsetF& localOffset, float h
 
 void TextPattern::OnHandleMoveDone(const RectF& handleRect, bool isFirstHandle)
 {
-    textResponseType_ = TextResponseType::LONG_PRESS;
     UpdateSelectionSpanType(std::min(textSelector_.baseOffset, textSelector_.destinationOffset),
         std::max(textSelector_.baseOffset, textSelector_.destinationOffset));
     CalculateHandleOffsetAndShowOverlay();
