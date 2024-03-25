@@ -2452,6 +2452,7 @@ class ArkComponent {
         }
         if (safeAreaType) {
           safeAreaType += '|';
+          safeAreaType += param.toString();
         }
         else {
           safeAreaType += param.toString();
@@ -2468,6 +2469,7 @@ class ArkComponent {
         }
         if (safeAreaEdge) {
           safeAreaEdge += '|';
+          safeAreaEdge += param.toString();
         }
         else {
           safeAreaEdge += param.toString();
