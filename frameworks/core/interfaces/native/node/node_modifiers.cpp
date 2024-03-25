@@ -81,6 +81,7 @@
 #include "core/interfaces/native/node/rich_editor_modifier.h"
 #include "core/interfaces/native/node/row_modifier.h"
 #include "core/interfaces/native/node/row_split_modifier.h"
+#include "core/interfaces/native/node/scroller_modifier.h"
 #include "core/interfaces/native/node/search_modifier.h"
 #include "core/interfaces/native/node/select_modifier.h"
 #include "core/interfaces/native/node/shape_modifier.h"
@@ -207,7 +208,7 @@ const ArkUINodeModifiers impl = {
 #endif
     NodeModifier::GetFlexModifier, // FlexModifier
     nullptr, // ScrollBarModifier
-    nullptr, // ScrollerModifier
+    NodeModifier::GetScrollerModifier,
     nullptr, // TabContentModifier
     nullptr, // TabsControllerModifier
     nullptr, // SwiperControllerModifier

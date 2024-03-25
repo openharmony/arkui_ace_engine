@@ -520,6 +520,11 @@ struct ArkUIBlendModeOptions {
     ArkUI_Int32 blendApplyType;
 };
 
+struct ArkUIScrollerAnimationType {
+    ArkUI_Float32 duration;
+    ArkUI_Int32 curve;
+};
+
 enum ArkUINodeType {
     ARKUI_TEXT = 1,
     ARKUI_SPAN,
@@ -755,6 +760,13 @@ enum ArkUISwipeGestureDirection {
     ArkUI_SWIPE_GESTURE_DIRECTION_HORIZONTAL = 1,
     ArkUI_SWIPE_GESTURE_DIRECTION_VERTICAL = 2,
     ArkUI_SWIPE_GESTURE_DIRECTION_ALL = 3,
+};
+
+enum ArkUIScrollAlign {
+    SCROLL_ALIGN_START = 0,
+    SCROLL_ALIGN_CENTER,
+    SCROLL_ALIGN_END,
+    SCROLL_ALIGN_AUTO,
 };
 
 enum ArkUIAPICustomOp { MEASURE = 1, LAYOUT = 2, DRAW = 3 };
@@ -2016,9 +2028,12 @@ struct ArkUIScrollBarModifier {
 struct ArkUIScrollerModifier {
     ArkUINodeHandle (*getScroller)(ArkUINodeHandle node, ArkUINodeHandle proxy);
     ArkUINodeHandle (*getScrollerProxy)(ArkUINodeHandle node);
-    void (*setScrollToIndex)(ArkUINodeHandle node, ArkUI_Int32 value);
+    void (*scrollToIndex)(ArkUINodeHandle node, ArkUI_Int32 value, ArkUI_Bool smooth,
+        ArkUIScrollAlign align);
     void (*scrollBy)(ArkUINodeHandle node, ArkUI_Float32* values, ArkUI_Int32* units);
     void (*getCurrentOffset)(ArkUINodeHandle node, ArkUI_Float32* out);
+    void (*scrollTo)(ArkUINodeHandle node, ArkUI_Float32* xOffsetArray, ArkUI_Float32* yOffsetArray,
+        ArkUI_Bool animation, const struct ArkUIScrollerAnimationType* animationType);
 };
 
 struct ArkUITabsModifier {
