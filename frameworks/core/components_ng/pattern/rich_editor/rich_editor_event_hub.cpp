@@ -371,4 +371,16 @@ std::string RichEditorEventHub::GetDragExtraParams(const std::string& extraInfo,
     }
     return json->ToString();
 }
+
+void RichEditorEventHub::SetOnEditingChange(std::function<void(const bool&)>&& func)
+{
+    onEditingChange_ = std::move(func);
+}
+
+void RichEditorEventHub::FireOnEditingChange(bool isEditing)
+{
+    if (onEditingChange_) {
+        onEditingChange_(isEditing);
+    }
+}
 } // namespace OHOS::Ace::NG

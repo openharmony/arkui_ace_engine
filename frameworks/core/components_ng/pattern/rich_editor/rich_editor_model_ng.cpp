@@ -232,4 +232,11 @@ void RichEditorModelNG::SetCaretColor(FrameNode* frameNode, const Color& color)
     CHECK_NULL_VOID(pattern);
     pattern->SetCaretColor(color);
 }
+
+void RichEditorModelNG::SetOnEditingChange(std::function<void(const bool&)>&& func)
+{
+    auto eventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<RichEditorEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnEditingChange(std::move(func));
+}
 } // namespace OHOS::Ace::NG

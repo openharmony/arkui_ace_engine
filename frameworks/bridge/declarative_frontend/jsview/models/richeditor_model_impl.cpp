@@ -59,4 +59,6 @@ void RichEditorModelImpl::SetTextDetectConfig(const std::string& value,
 void RichEditorModelImpl::SetSelectedBackgroundColor(const Color& selectedColor) {}
 
 void RichEditorModelImpl::SetCaretColor(const Color& color) {}
+
+void RichEditorModelImpl::SetOnEditingChange(std::function<void(const bool&)>&& func) {}
 } // namespace OHOS::Ace::Framework

@@ -347,6 +347,15 @@ void JSRichEditor::SetOnSelect(const JSCallbackInfo& args)
     NG::RichEditorModelNG::GetInstance()->SetOnSelect(std::move(onSelect));
 }
 
+void JSRichEditor::SetOnEditingChange(const JSCallbackInfo& args)
+{
+    if (!args[0]->IsFunction()) {
+        return;
+    }
+    JsEventCallback<void(bool)> callback(args.GetExecutionContext(), JSRef<JSFunc>::Cast(args[0]));
+    NG::RichEditorModelNG::GetInstance()->SetOnEditingChange(std::move(callback));
+}
+
 JSRef<JSVal> JSRichEditor::CreateJSSelectionRange(const SelectionRangeInfo& selectRange)
 {
     JSRef<JSObject> selectionRangeObject = JSRef<JSObject>::New();
@@ -859,6 +868,7 @@ void JSRichEditor::JSBind(BindingTarget globalObj)
     JSClass<JSRichEditor>::StaticMethod("placeholder", &JSRichEditor::SetPlaceholder);
     JSClass<JSRichEditor>::StaticMethod("caretColor", &JSRichEditor::SetCaretColor);
     JSClass<JSRichEditor>::StaticMethod("selectedBackgroundColor", &JSRichEditor::SetSelectedBackgroundColor);
+    JSClass<JSRichEditor>::StaticMethod("onEditingChange", &JSRichEditor::SetOnEditingChange);
     JSClass<JSRichEditor>::InheritAndBind<JSViewAbstract>(globalObj);
 }
 
@@ -1533,6 +1543,17 @@ void JSRichEditorController::GetSelection(const JSCallbackInfo& args)
     }
 }
 
+void JSRichEditorController::IsEditing(const JSCallbackInfo& args)
+{
+    ContainerScope scope(instanceId_ < 0 ? Container::CurrentId() : instanceId_);
+    auto controller = controllerWeak_.Upgrade();
+    if (controller) {
+        bool value = controller->IsEditing();
+        auto runtime = std::static_pointer_cast<ArkJSRuntime>(JsiDeclarativeEngineInstance::GetCurrentRuntime());
+        args.SetReturnValue(JsiRef<JsiValue>::Make(panda::BooleanRef::New(runtime->GetEcmaVm(), value)));
+    }
+}
+
 void JSRichEditorController::JSBind(BindingTarget globalObj)
 {
     JSClass<JSRichEditorController>::Declare("RichEditorController");
@@ -1552,6 +1573,7 @@ void JSRichEditorController::JSBind(BindingTarget globalObj)
     JSClass<JSRichEditorController>::CustomMethod("deleteSpans", &JSRichEditorController::DeleteSpans);
     JSClass<JSRichEditorController>::CustomMethod("setSelection", &JSRichEditorController::SetSelection);
     JSClass<JSRichEditorController>::CustomMethod("getSelection", &JSRichEditorController::GetSelection);
+    JSClass<JSRichEditorController>::CustomMethod("isEditing", &JSRichEditorController::IsEditing);
     JSClass<JSRichEditorController>::Method("closeSelectionMenu", &JSRichEditorController::CloseSelectionMenu);
     JSClass<JSRichEditorController>::Bind(
         globalObj, JSRichEditorController::Constructor, JSRichEditorController::Destructor);

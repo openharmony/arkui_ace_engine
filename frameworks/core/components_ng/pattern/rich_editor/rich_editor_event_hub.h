@@ -214,7 +214,8 @@ public:
     void SetOnDeleteComplete(std::function<void()>&& func);
     void FireOnDeleteComplete();
     std::string GetDragExtraParams(const std::string& extraInfo, const Point& point, DragEventType type) override;
-
+    void SetOnEditingChange(std::function<void(const bool&)> && func);
+    void FireOnEditingChange(bool isEditing);
     void SetOnSelect(std::function<void(const BaseEventInfo*)>&& func)
     {
         onSelect_ = std::move(func);
@@ -266,6 +267,7 @@ private:
     std::function<void(const RichEditorAbstractSpanResult&)> onIMEIputComplete_;
     std::function<bool(const RichEditorDeleteValue&)> aboutToDelete_;
     std::function<void()> onDeleteComplete_;
+    std::function<void(const bool&)> onEditingChange_;
     ACE_DISALLOW_COPY_AND_MOVE(RichEditorEventHub);
 };
 } // namespace OHOS::Ace::NG

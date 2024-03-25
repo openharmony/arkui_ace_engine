@@ -249,6 +249,7 @@ public:
     int32_t AddPlaceholderSpan(const RefPtr<UINode>& customNode, const SpanOptionBase& options);
     void HandleSelectOverlayWithOptions(const SelectionOptions& options);
     void SetSelection(int32_t start, int32_t end, const std::optional<SelectionOptions>& options = std::nullopt);
+    bool IsEditing();
     void OnHandleMoveDone(const RectF& handleRect, bool isFirstHandle) override;
     std::u16string GetLeftTextOfCursor(int32_t number) override;
     std::u16string GetRightTextOfCursor(int32_t number) override;
@@ -648,6 +649,7 @@ private:
     void RedoDrag(const OperationRecord& record);
     void HandleOnDragInsertValueOperation(const std::string& insertValue);
     void HandleOnDragInsertValue(const std::string& str);
+    void HandleOnEditChanged(bool isEditing);
 
 #if defined(ENABLE_STANDARD_INPUT)
     sptr<OHOS::MiscServices::OnTextChangedListener> richEditTextChangeListener_;
@@ -727,6 +729,7 @@ private:
     SelectionRangeInfo lastSelectionRange_{-1, -1};
     bool isDragSponsor_ = false;
     std::pair<int32_t, int32_t> dragRange_ { 0, 0 };
+    bool isEditing_ = false;
     ACE_DISALLOW_COPY_AND_MOVE(RichEditorPattern);
 };
 } // namespace OHOS::Ace::NG

@@ -41,6 +41,7 @@ public:
     void SetTextDetectConfig(const std::string& value, std::function<void(const std::string&)>&& onResult) override;
     void SetSelectedBackgroundColor(const Color& selectedColor) override;
     void SetCaretColor(const Color& color) override;
+    void SetOnEditingChange(std::function<void(const bool&)>&& func) override;
 
     static void SetTextDetectEnable(FrameNode* frameNode, bool value);
     static void SetCopyOption(FrameNode* frameNode, CopyOptions& copyOptions);
