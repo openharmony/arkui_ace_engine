@@ -5037,6 +5037,7 @@ RefPtr<NodePaintMethod> RichEditorPattern::CreateNodePaintMethod()
 
 int32_t RichEditorPattern::GetHandleIndex(const Offset& offset) const
 {
+    CHECK_NULL_RETURN(!isShowPlaceholder_, 0);
     return paragraphs_.GetIndex(Offset(offset.GetX() + contentRect_.GetX() - richTextRect_.GetX(),
         offset.GetY() + contentRect_.GetY() - richTextRect_.GetY()));
 }
