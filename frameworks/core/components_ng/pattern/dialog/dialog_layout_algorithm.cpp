@@ -71,7 +71,7 @@ void DialogLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     auto dialogProp = AceType::DynamicCast<DialogLayoutProperty>(layoutWrapper->GetLayoutProperty());
     customSize_ = dialogProp->GetUseCustomStyle().value_or(false);
     gridCount_ = dialogProp->GetGridCount().value_or(-1);
-    width_ = dialogProp->GetWidth().value_or(Dimension(0, DimensionUnit::VP));
+    width_ = dialogProp->GetWidth().value_or(Dimension(-1));
     UpdateSafeArea();
     const auto& layoutConstraint = dialogProp->GetLayoutConstraint();
     const auto& parentIdealSize = layoutConstraint->parentIdealSize;
@@ -405,7 +405,7 @@ void DialogLayoutAlgorithm::SetDialogSize(
 {
     if (!customSize_) {
         double heightValue = 0.0f;
-        height_ = dialogProp->GetHeight().value_or(Dimension(0, DimensionUnit::VP));
+        height_ = dialogProp->GetHeight().value_or(Dimension(-1));
         auto context = PipelineContext::GetCurrentContext();
         CHECK_NULL_VOID(context);
         auto manager = context->GetSafeAreaManager();
