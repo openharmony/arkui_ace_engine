@@ -76,7 +76,7 @@ void GaugeModifier::UpdateValue()
     AnimationUtils::Animate(option, [&]() { value_->Set(end_); });
 }
 
-void GaugeModifier::initProperty()
+void GaugeModifier::InitProperty()
 {
     auto pattern = DynamicCast<GaugePattern>(pattern_.Upgrade());
     CHECK_NULL_VOID(pattern);
@@ -129,7 +129,7 @@ void GaugeModifier::initProperty()
     }
 }
 
-void GaugeModifier::updateProperty(RefPtr<GaugePaintProperty>& paintProperty)
+void GaugeModifier::UpdateProperty(RefPtr<GaugePaintProperty>& paintProperty)
 {
     startAngle_->Set(paintProperty->GetStartAngleValue(DEFAULT_START_DEGREE));
     endAngle_->Set(paintProperty->GetEndAngleValue(DEFAULT_END_DEGREE));

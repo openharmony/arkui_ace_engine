@@ -56,7 +56,7 @@ class GaugeModifier : public ContentModifier {
 public:
     GaugeModifier(const WeakPtr<OHOS::Ace::NG::Pattern>& pattern): pattern_(pattern)
     {
-        initProperty();
+        InitProperty();
         AttachProperty(min_);
         AttachProperty(max_);
         AttachProperty(startAngle_);
@@ -82,8 +82,8 @@ public:
     float end_ = 0.0f;
 
 private:
-    void initProperty();
-    void updateProperty(RefPtr<GaugePaintProperty>& paintProperty);
+    void InitProperty();
+    void UpdateProperty(RefPtr<GaugePaintProperty>& paintProperty);
     
     void PaintCircularAndIndicator(RSCanvas& canvas);
     void PaintDraw(RSCanvas& canvas, RefPtr<GaugePaintProperty>& paintProperty,
