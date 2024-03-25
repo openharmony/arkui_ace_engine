@@ -123,44 +123,9 @@ void JSBaseNode::CreateRenderNode(const JSCallbackInfo& info)
         auto jsFunc = JSRef<JSFunc>::Cast(jsDrawFunc);
         RefPtr<JsFunction> jsDraw = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(renderNode), jsFunc);
         auto pattern = frameNode->GetPattern<NG::RenderNodePattern>();
-        pattern->SetDrawCallback(
-            [func = std::move(jsDraw), execCtx = info.GetExecutionContext(), vm](NG::DrawingContext& context) -> void {
-                JAVASCRIPT_EXECUTION_SCOPE(execCtx);
-
-                JSRef<JSObjTemplate> objectTemplate = JSRef<JSObjTemplate>::New();
-                objectTemplate->SetInternalFieldCount(1);
-                JSRef<JSObject> contextObj = objectTemplate->NewInstance();
-                JSRef<JSObject> sizeObj = objectTemplate->NewInstance();
-                sizeObj->SetProperty<float>("height", PipelineBase::Px2VpWithCurrentDensity(context.height));
-                sizeObj->SetProperty<float>("width", PipelineBase::Px2VpWithCurrentDensity(context.width));
-                contextObj->SetPropertyObject("size", sizeObj);
-
-                auto engine = EngineHelper::GetCurrentEngine();
-                CHECK_NULL_VOID(engine);
-                NativeEngine* nativeEngine = engine->GetNativeEngine();
-                napi_env env = reinterpret_cast<napi_env>(nativeEngine);
-                ScopeRAII scope(env);
-
-                auto jsCanvas =
-                    OHOS::Rosen::Drawing::JsCanvas::CreateJsCanvas(env, &context.canvas, context.width, context.height);
-                JsiRef<JsiValue> jsCanvasVal = JsConverter::ConvertNapiValueToJsVal(jsCanvas);
-                contextObj->SetPropertyObject("canvas", jsCanvasVal);
-
-                auto jsVal = JSRef<JSVal>::Cast(contextObj);
-                panda::Local<JsiValue> value = jsVal.Get().GetLocalHandle();
-                JSValueWrapper valueWrapper = value;
-                napi_value nativeValue = nativeEngine->ValueToNapiValue(valueWrapper);
-
-                napi_wrap(
-                    env, nativeValue, &context.canvas, [](napi_env, void*, void*) {}, nullptr, nullptr);
-
-                JSRef<JSVal> result = func->ExecuteJS(1, &jsVal);
-                OHOS::Rosen::Drawing::JsCanvas* unwrapCanvas = nullptr;
-                napi_unwrap(env, jsCanvas, reinterpret_cast<void**>(&unwrapCanvas));
-                if (unwrapCanvas) {
-                    unwrapCanvas->ResetCanvas();
-                }
-            });
+        auto execCtx = info.GetExecutionContext();
+        auto drawCallback = GetDrawCallback(jsDraw, execCtx);
+        pattern->SetDrawCallback(std::move(drawCallback));
     }
     info.SetReturnValue(JSRef<JSVal>::Make(panda::NativePointerRef::New(vm, ptr)));
 }
@@ -368,6 +333,54 @@ void JSBaseNode::UpdateEnd(const JSCallbackInfo& info)
         viewNode_->SetParentLayoutConstraint(size_.ConvertToSizeT());
     }
     scopedViewStackProcessor_ = nullptr;
+}
+
+std::function<void(NG::DrawingContext& context)> JSBaseNode::GetDrawCallback(
+    const RefPtr<JsFunction>& jsDraw, const JSExecutionContext& execCtx)
+{
+    std::function<void(NG::DrawingContext & context)> drawCallback = [func = std::move(jsDraw), execCtx](
+                                                                         NG::DrawingContext& context) -> void {
+        JAVASCRIPT_EXECUTION_SCOPE(execCtx);
+
+        JSRef<JSObjTemplate> objectTemplate = JSRef<JSObjTemplate>::New();
+        objectTemplate->SetInternalFieldCount(1);
+        JSRef<JSObject> contextObj = objectTemplate->NewInstance();
+        JSRef<JSObject> sizeObj = objectTemplate->NewInstance();
+        sizeObj->SetProperty<float>("height", PipelineBase::Px2VpWithCurrentDensity(context.height));
+        sizeObj->SetProperty<float>("width", PipelineBase::Px2VpWithCurrentDensity(context.width));
+        contextObj->SetPropertyObject("size", sizeObj);
+
+        auto engine = EngineHelper::GetCurrentEngine();
+        CHECK_NULL_VOID(engine);
+        NativeEngine* nativeEngine = engine->GetNativeEngine();
+        napi_env env = reinterpret_cast<napi_env>(nativeEngine);
+        ScopeRAII scope(env);
+
+        auto jsCanvas = OHOS::Rosen::Drawing::JsCanvas::CreateJsCanvas(env, &context.canvas);
+        OHOS::Rosen::Drawing::JsCanvas* unwrapCanvas = nullptr;
+        napi_unwrap(env, jsCanvas, reinterpret_cast<void**>(&unwrapCanvas));
+        if (unwrapCanvas) {
+            unwrapCanvas->SaveCanvas();
+            unwrapCanvas->ClipCanvas(context.width, context.height);
+        }
+        JsiRef<JsiValue> jsCanvasVal = JsConverter::ConvertNapiValueToJsVal(jsCanvas);
+        contextObj->SetPropertyObject("canvas", jsCanvasVal);
+
+        auto jsVal = JSRef<JSVal>::Cast(contextObj);
+        panda::Local<JsiValue> value = jsVal.Get().GetLocalHandle();
+        JSValueWrapper valueWrapper = value;
+        napi_value nativeValue = nativeEngine->ValueToNapiValue(valueWrapper);
+
+        napi_wrap(
+            env, nativeValue, &context.canvas, [](napi_env, void*, void*) {}, nullptr, nullptr);
+
+        JSRef<JSVal> result = func->ExecuteJS(1, &jsVal);
+        if (unwrapCanvas) {
+            unwrapCanvas->RestoreCanvas();
+            unwrapCanvas->ResetCanvas();
+        }
+    };
+    return drawCallback;
 }
 
 void JSBaseNode::JSBind(BindingTarget globalObj)

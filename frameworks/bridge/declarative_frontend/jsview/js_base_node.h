@@ -38,6 +38,8 @@ public:
     static void JSBind(BindingTarget globalObj);
     static void ConstructorCallback(const JSCallbackInfo& info);
     static void DestructorCallback(JSBaseNode* node);
+    static std::function<void(NG::DrawingContext& context)> GetDrawCallback(
+        const RefPtr<JsFunction>& jsDraw, const JSExecutionContext& execCtx);
     void FinishUpdateFunc(const JSCallbackInfo& info);
     void Create(const JSCallbackInfo& info);
     void BuildNode(const JSCallbackInfo& info);

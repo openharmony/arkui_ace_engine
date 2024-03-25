@@ -57,6 +57,7 @@
 #include "bridge/declarative_frontend/engine/js_ref_ptr.h"
 #include "bridge/declarative_frontend/engine/js_types.h"
 #include "bridge/declarative_frontend/jsview/js_animatable_arithmetic.h"
+#include "bridge/declarative_frontend/jsview/js_base_node.h"
 #include "bridge/declarative_frontend/jsview/js_grid_container.h"
 #include "bridge/declarative_frontend/jsview/js_shape_abstract.h"
 #include "bridge/declarative_frontend/jsview/js_utils.h"
@@ -7196,31 +7197,7 @@ void JSViewAbstract::JsDrawModifier(const JSCallbackInfo& info)
         auto jsDrawFunc = AceType::MakeRefPtr<JsFunction>(
             JSRef<JSObject>(jsDrawModifier), JSRef<JSFunc>::Cast(drawMethod));
         
-        return [execCtx, func = std::move(jsDrawFunc)](
-            NG::DrawingContext& context) {
-                JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
-
-                JSRef<JSObjTemplate> objectTemplate = JSRef<JSObjTemplate>::New();
-                objectTemplate->SetInternalFieldCount(1);
-                JSRef<JSObject> contextObj = objectTemplate->NewInstance();
-                JSRef<JSObject> sizeObj = objectTemplate->NewInstance();
-                sizeObj->SetProperty<float>("width", PipelineBase::Px2VpWithCurrentDensity(context.width));
-                sizeObj->SetProperty<float>("height", PipelineBase::Px2VpWithCurrentDensity(context.height));
-                contextObj->SetPropertyObject("size", sizeObj);
-
-                auto engine = EngineHelper::GetCurrentEngine();
-                CHECK_NULL_VOID(engine);
-                NativeEngine* nativeEngine = engine->GetNativeEngine();
-                napi_env env = reinterpret_cast<napi_env>(nativeEngine);
-                ScopeRAII scope(env);
-
-                auto jsCanvas = OHOS::Rosen::Drawing::JsCanvas::CreateJsCanvas(
-                    env, &context.canvas, context.width, context.height);
-                JsiRef<JsiValue> jsCanvasVal = JsConverter::ConvertNapiValueToJsVal(jsCanvas);
-                contextObj->SetPropertyObject("canvas", jsCanvasVal);
-                auto jsVal = JSRef<JSVal>::Cast(contextObj);
-                func->ExecuteJS(1, &jsVal);
-            };
+        return JSBaseNode::GetDrawCallback(jsDrawFunc, execCtx);
     };
 
     drawModifier->jsDrawBehindFunc = getDrawModifierFunc("drawBehind");
