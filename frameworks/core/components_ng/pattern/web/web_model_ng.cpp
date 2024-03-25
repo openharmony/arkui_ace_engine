@@ -465,9 +465,11 @@ void WebModelNG::SetOverScrollMode(OverScrollMode mode)
 
 void WebModelNG::SetCopyOptionMode(CopyOptions mode)
 {
+#ifndef CROSS_PLATFORM
     auto webPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPattern>();
     CHECK_NULL_VOID(webPattern);
     webPattern->UpdateCopyOptionMode(static_cast<int32_t>(mode));
+#endif
 }
 
 void WebModelNG::SetOverviewModeAccessEnabled(bool isOverviewModeAccessEnabled)
@@ -883,17 +885,21 @@ void WebModelNG::SetVerticalScrollBarAccessEnabled(bool isVerticalScrollBarAcces
 
 void WebModelNG::SetNativeEmbedModeEnabled(bool isEmbedModeEnabled)
 {
+#ifndef CROSS_PLATFORM
     auto webPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPattern>();
     CHECK_NULL_VOID(webPattern);
     webPattern->UpdateNativeEmbedModeEnabled(isEmbedModeEnabled);
+#endif
 }
 
 void WebModelNG::RegisterNativeEmbedRule(const std::string& tag, const std::string& type)
 {
+#ifndef CROSS_PLATFORM
     auto webPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPattern>();
     CHECK_NULL_VOID(webPattern);
     webPattern->UpdateNativeEmbedRuleTag(tag);
     webPattern->UpdateNativeEmbedRuleType(type);
+#endif
 }
 
 void WebModelNG::SetOnControllerAttached(std::function<void()>&& callback)
@@ -997,9 +1003,11 @@ void WebModelNG::JavaScriptOnDocumentEnd(const ScriptItems& scriptItems)
 
 void WebModelNG::SetPermissionClipboard(std::function<void(const std::shared_ptr<BaseEventInfo>&)>&& jsCallback)
 {
+#ifndef CROSS_PLATFORM
     auto webPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPattern>();
     CHECK_NULL_VOID(webPattern);
     
     webPattern->SetPermissionClipboardCallback(std::move(jsCallback));
+#endif
 }
 } // namespace OHOS::Ace::NG

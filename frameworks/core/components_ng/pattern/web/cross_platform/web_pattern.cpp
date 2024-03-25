@@ -1177,7 +1177,7 @@ void WebPattern::OnOverScrollModeUpdate(int mode)
 }
 
 
-void WebPattern::UpdateRelativeOffset();
+void WebPattern::UpdateRelativeOffset()
 {
     // cross platform is not support now;
 }
