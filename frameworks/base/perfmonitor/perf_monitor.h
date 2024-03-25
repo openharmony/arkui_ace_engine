@@ -154,6 +154,10 @@ private:
     bool isBackgroundApp {false};
     bool isExclusionWindow {false};
     int64_t startAppTime {0};
+    // filter common discarded frames in white list
+    bool isExceptAnimator {false};
+    bool IsSceneIdInSceneWhiteList(const std::string& sceneId);
+    void CheckTimeOutOfExceptAnimatorStatus(const std::string& sceneId);
     bool IsExclusionFrame();
     void CheckInStartAppStatus();
     void CheckExclusionWindow(const std::string& windowName);
