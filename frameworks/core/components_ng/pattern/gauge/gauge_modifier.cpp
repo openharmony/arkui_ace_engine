@@ -55,7 +55,7 @@ void GaugeModifier::UpdateValue()
     CHECK_NULL_VOID(pattern);
     auto paintProperty = pattern->GetPaintProperty<GaugePaintProperty>();
     CHECK_NULL_VOID(paintProperty);
-    updateProperty(paintProperty);
+    UpdateProperty(paintProperty);
     float value = paintProperty->GetValueValue();
     float max = paintProperty->GetMaxValue();
     float min = paintProperty->GetMinValue();
