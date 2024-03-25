@@ -457,6 +457,8 @@ public:
         return layoutMode_;
     }
     void OnRootLayerChanged(int width, int height);
+    void ReleaseResizeHold();
+    bool GetPendingSizeStatus();
     int GetRootLayerWidth() const
     {
         return rootLayerWidth_;
@@ -679,8 +681,7 @@ private:
     std::shared_ptr<FullScreenEnterEvent> fullScreenExitHandler_ = nullptr;
     bool needOnFocus_ = false;
     Size drawSize_;
-    Size lastSyncRenderSize_;
-    int64_t lastTimeStamp_ = 0;
+    Size rootLayerChangeSize_;
     Size drawSizeCache_;
     bool needUpdateWeb_ = true;
     bool isFocus_ = false;
