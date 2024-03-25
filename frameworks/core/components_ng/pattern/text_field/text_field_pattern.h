@@ -1248,6 +1248,7 @@ private:
 
     bool ResetObscureTickCountDown();
 
+    bool IsOnUnitByPosition(const Offset& globalOffset);
     bool IsTouchAtLeftOffset(float currentOffsetX);
     void FilterExistText();
     void CreateErrorParagraph(const std::string& content);
