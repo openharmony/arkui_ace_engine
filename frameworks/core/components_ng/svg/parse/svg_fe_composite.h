@@ -16,9 +16,7 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_SVG_PARSE_SVG_FE_COMPOSITE_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_SVG_PARSE_SVG_FE_COMPOSITE_H
 
-#include "core/components/declaration/svg/svg_fe_composite_declaration.h"
-#include "core/components_ng/render/drawing.h"
-#include "core/components_ng/svg/parse/svg_fe.h"
+#include "frameworks/core/components_ng/svg/parse/svg_fe.h"
 
 namespace OHOS::Ace::NG {
 
@@ -30,9 +28,13 @@ public:
     ~SvgFeComposite() override = default;
     static RefPtr<SvgNode> Create();
 
-    void OnAsImageFilter(std::shared_ptr<RSImageFilter>& imageFilter, const ColorInterpolationType& srcColor,
-        ColorInterpolationType& currentColor) const override;
-    RSBlendMode BlendModeForOperator(FeOperatorType op) const;
+#ifndef USE_ROSEN_DRAWING
+    void OnAsImageFilter(sk_sp<SkImageFilter>& imageFilter,
+        const ColorInterpolationType& srcColor, ColorInterpolationType& currentColor) const override;
+#else
+    void OnAsImageFilter(std::shared_ptr<RSImageFilter>& imageFilter,
+        const ColorInterpolationType& srcColor, ColorInterpolationType& currentColor) const override;
+#endif
 };
 
 } // namespace OHOS::Ace::NG

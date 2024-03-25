@@ -34,14 +34,25 @@ SvgFeGaussianBlur::SvgFeGaussianBlur() : SvgFe()
     declaration_->InitializeStyle();
 }
 
+#ifndef USE_ROSEN_DRAWING
+void SvgFeGaussianBlur::OnAsImageFilter(sk_sp<SkImageFilter>& imageFilter, const ColorInterpolationType& srcColor,
+    ColorInterpolationType& currentColor) const
+#else
 void SvgFeGaussianBlur::OnAsImageFilter(std::shared_ptr<RSImageFilter>& imageFilter,
     const ColorInterpolationType& srcColor, ColorInterpolationType& currentColor) const
+#endif
 {
     auto declaration = AceType::DynamicCast<SvgFeGaussianBlurDeclaration>(declaration_);
     CHECK_NULL_VOID(declaration);
     imageFilter = MakeImageFilter(declaration->GetIn(), imageFilter);
+#ifndef USE_ROSEN_DRAWING
+
+    imageFilter =
+        SkImageFilters::Blur(declaration->GetStdDeviation(), declaration->GetStdDeviation(), imageFilter, nullptr);
+#else
     imageFilter = RSRecordingImageFilter::CreateBlurImageFilter(
-        declaration->GetStdDeviationX(), declaration->GetStdDeviationY(), RSTileMode::DECAL, imageFilter);
+        declaration->GetStdDeviation(), declaration->GetStdDeviation(), RSTileMode::DECAL, imageFilter);
+#endif
     ConverImageFilterColor(imageFilter, srcColor, currentColor);
 }
 

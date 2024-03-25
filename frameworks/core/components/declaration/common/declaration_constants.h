@@ -16,8 +16,6 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_DECLARATION_COMMON_DECLARATION_CONSTANTS_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_DECLARATION_COMMON_DECLARATION_CONSTANTS_H
 
-#include <memory>
-
 #include "core/components/declaration/badge/badge_declaration.h"
 #include "core/components/declaration/button/button_declaration.h"
 #include "core/components/declaration/clock/clock_declaration.h"
@@ -39,7 +37,7 @@
 #include "core/components/declaration/svg/svg_circle_declaration.h"
 #include "core/components/declaration/svg/svg_declaration.h"
 #include "core/components/declaration/svg/svg_ellipse_declaration.h"
-#include "core/components/declaration/svg/svg_fe_blend_declaration.h"
+#include "core/components/declaration/svg/svg_filter_declaration.h"
 #include "core/components/declaration/svg/svg_fe_colormatrix_declaration.h"
 #include "core/components/declaration/svg/svg_fe_composite_declaration.h"
 #include "core/components/declaration/svg/svg_fe_flood_declaration.h"
@@ -48,7 +46,6 @@
 #include "core/components/declaration/svg/svg_fe_merge_declaration.h"
 #include "core/components/declaration/svg/svg_fe_merge_node_declaration.h"
 #include "core/components/declaration/svg/svg_fe_offset_declaration.h"
-#include "core/components/declaration/svg/svg_filter_declaration.h"
 #include "core/components/declaration/svg/svg_gradient_declaration.h"
 #include "core/components/declaration/svg/svg_line_declaration.h"
 #include "core/components/declaration/svg/svg_mask_declaration.h"
@@ -211,7 +208,6 @@ public:
     static const std::shared_ptr<SvgFeGaussianBlurAttribute> DEFAULT_SVG_FE_GAUSSIAN_BLUR_ATTR;
     static const std::shared_ptr<SvgFeMergeAttribute> DEFAULT_SVG_FE_MERGE_ATTR;
     static const std::shared_ptr<SvgFeMergeNodeAttribute> DEFAULT_SVG_FE_MERGE_NODE_ATTR;
-    static const std::shared_ptr<SvgFeBlendAttribute> DEFAULT_SVG_FE_BLEND_ATTR;
 
     // default value of image_animator
     static const std::shared_ptr<ImageAnimatorAttribute> DEFAULT_IMAGE_ANIMATOR_ATTR;

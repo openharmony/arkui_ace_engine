@@ -16,9 +16,6 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_DECLARATION_SVG_SVG_FE_GAUSSIANBLUR_DECLARATION_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_DECLARATION_SVG_SVG_FE_GAUSSIANBLUR_DECLARATION_H
 
-#include <vector>
-
-#include "base/utils/utils.h"
 #include "core/components/declaration/svg/svg_fe_declaration.h"
 
 namespace OHOS::Ace {
@@ -30,8 +27,7 @@ enum class FeEdgeMode {
 };
 
 struct SvgFeGaussianBlurAttribute : SvgFeAttribute {
-    double stdDeviationX = 0.0;
-    double stdDeviationY = 0.0;
+    double stdDeviation = 0.0;
     FeEdgeMode edgeMode = FeEdgeMode::EDGE_DUPLICATE;
 };
 
@@ -43,14 +39,10 @@ public:
     ~SvgFeGaussianBlurDeclaration() override = default;
     void InitializeStyle() override;
 
-    void SetStdDeviation(const std::vector<double>& stdDeviation)
+    void SetStdDeviation(double stdDeviation)
     {
-        if (stdDeviation.empty() || stdDeviation.size() > 2) {
-            return;
-        }
         auto& attribute = MaybeResetAttribute<SvgFeGaussianBlurAttribute>(AttributeTag::SPECIALIZED_ATTR);
-        attribute.stdDeviationX = stdDeviation[0];
-        attribute.stdDeviationY = stdDeviation.size() > 1 ? stdDeviation[1] : stdDeviation[0];
+        attribute.stdDeviation = stdDeviation;
     }
 
     void SetEdgeMode(const std::string& edgeMode)
@@ -67,16 +59,10 @@ public:
         }
     }
 
-    double GetStdDeviationX() const
+    double GetStdDeviation() const
     {
         auto& attribute = static_cast<SvgFeGaussianBlurAttribute&>(GetAttribute(AttributeTag::SPECIALIZED_ATTR));
-        return attribute.stdDeviationX;
-    }
-
-    double GetStdDeviationY() const
-    {
-        auto& attribute = static_cast<SvgFeGaussianBlurAttribute&>(GetAttribute(AttributeTag::SPECIALIZED_ATTR));
-        return attribute.stdDeviationY;
+        return attribute.stdDeviation;
     }
 
     const FeEdgeMode& GetEdgeMode() const

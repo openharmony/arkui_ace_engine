@@ -349,7 +349,7 @@ RefPtr<SvgDom> ParseTestNg::ParseFeGaussianblur(const std::string& svgLabel)
     EXPECT_NE(svgFeGaussiaBlur, nullptr);
     auto feDeclaration = AceType::DynamicCast<SvgFeGaussianBlurDeclaration>(svgFeGaussiaBlur->declaration_);
     EXPECT_NE(feDeclaration, nullptr);
-    EXPECT_FLOAT_EQ(feDeclaration->GetStdDeviationX(), STD_DEVIATION);
+    EXPECT_FLOAT_EQ(feDeclaration->GetStdDeviation(), STD_DEVIATION);
     EXPECT_EQ(feDeclaration->GetEdgeMode(), FeEdgeMode::EDGE_DUPLICATE);
     return svgDom;
 }
@@ -1087,7 +1087,7 @@ HWTEST_F(ParseTestNg, ParseFeColorMatrixTest001, TestSize.Level1)
     EXPECT_NE(svgFeColorMatrix, nullptr);
     auto feColorDeclaration = AceType::DynamicCast<SvgFeColorMatrixDeclaration>(svgFeColorMatrix->declaration_);
     EXPECT_NE(feColorDeclaration, nullptr);
-    EXPECT_EQ(feColorDeclaration->GetType(), SvgFeColorMatrixType::Matrix);
+    EXPECT_STREQ(feColorDeclaration->GetType().c_str(), TYPE.c_str());
     EXPECT_STREQ(feColorDeclaration->GetValues().c_str(), VALUE.c_str());
     Testing::MockCanvas rSCanvas;
     CallBack(rSCanvas);

@@ -238,8 +238,6 @@ const std::shared_ptr<SvgFeMergeAttribute> DeclarationConstants::DEFAULT_SVG_FE_
     std::make_shared<SvgFeMergeAttribute>();
 const std::shared_ptr<SvgFeMergeNodeAttribute> DeclarationConstants::DEFAULT_SVG_FE_MERGE_NODE_ATTR =
     std::make_shared<SvgFeMergeNodeAttribute>();
-const std::shared_ptr<SvgFeBlendAttribute> DeclarationConstants::DEFAULT_SVG_FE_BLEND_ATTR =
-    std::make_shared<SvgFeBlendAttribute>();
 
 // default value of image_animator
 const std::shared_ptr<ImageAnimatorAttribute> DeclarationConstants::DEFAULT_IMAGE_ANIMATOR_ATTR =

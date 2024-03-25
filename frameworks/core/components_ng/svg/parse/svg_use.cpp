@@ -32,40 +32,32 @@ RefPtr<SvgNode> SvgUse::Create()
     return AceType::MakeRefPtr<SvgUse>();
 }
 
+#ifndef USE_ROSEN_DRAWING
+SkPath SvgUse::AsPath(const Size& viewPort) const
+#else
 RSRecordingPath SvgUse::AsPath(const Size& viewPort) const
+#endif
 {
     auto svgContext = svgContext_.Upgrade();
+#ifndef USE_ROSEN_DRAWING
+    CHECK_NULL_RETURN(svgContext, SkPath());
+#else
     CHECK_NULL_RETURN(svgContext, RSRecordingPath());
+#endif
     if (declaration_->GetHref().empty()) {
         LOGE("href is empty");
         return {};
     }
     auto refSvgNode = svgContext->GetSvgNodeById(declaration_->GetHref());
+#ifndef USE_ROSEN_DRAWING
+    CHECK_NULL_RETURN(refSvgNode, SkPath());
+#else
     CHECK_NULL_RETURN(refSvgNode, RSRecordingPath());
+#endif
 
     AttributeScope scope(refSvgNode);
     refSvgNode->Inherit(declaration_);
     return refSvgNode->AsPath(viewPort);
-}
-
-void SvgUse::OnDraw(RSCanvas& canvas, const Size& layout, const std::optional<Color>& color)
-{
-    auto svgContext = svgContext_.Upgrade();
-    CHECK_NULL_VOID(svgContext);
-    if (declaration_->GetHref().empty()) {
-        return;
-    }
-    auto refSvgNode = svgContext->GetSvgNodeById(declaration_->GetHref());
-    CHECK_NULL_VOID(refSvgNode);
-
-    auto declaration = AceType::DynamicCast<SvgDeclaration>(declaration_);
-    if (declaration->GetX().Value() != 0 || declaration->GetY().Value() != 0) {
-        canvas.Translate(declaration->GetX().Value(), declaration->GetY().Value());
-    }
-    AttributeScope scope(refSvgNode);
-    refSvgNode->Inherit(declaration);
-
-    refSvgNode->Draw(canvas, layout, color);
 }
 
 SvgUse::AttributeScope::AttributeScope(const RefPtr<SvgNode>& node) : node_(node)

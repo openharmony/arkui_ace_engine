@@ -236,11 +236,6 @@ void SvgNode::OnClipPath(RSCanvas& canvas, const Size& viewPort)
 
 void SvgNode::OnFilter(RSCanvas& canvas, const Size& viewPort)
 {
-    auto svgContext = svgContext_.Upgrade();
-    CHECK_NULL_VOID(svgContext);
-    auto refFilter = svgContext->GetSvgNodeById(hrefFilterId_);
-    CHECK_NULL_VOID(refFilter);
-    refFilter->Draw(canvas, viewPort, std::nullopt);
     return;
 }
 

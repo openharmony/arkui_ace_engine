@@ -28,11 +28,6 @@ public:
     ~SvgFeColorMatrix() override = default;
     static RefPtr<SvgNode> Create();
 
-    void MakeMatrix(const std::string& values);
-    void MakeSaturate(const std::string& values);
-    void MakeHueRotate(const std::string& values);
-    void MakeLuminanceToAlpha();
-
     void OnInitStyle() override;
 
 #ifndef USE_ROSEN_DRAWING
@@ -44,13 +39,7 @@ public:
 #endif
 
 private:
-    // default matrix, don't change the RGBA in origin image
-    std::vector<float> matrix_ = {
-        1, 0, 0, 0, 0,
-        0, 1, 0, 0, 0,
-        0, 0, 1, 0, 0,
-        0, 0, 0, 1, 0
-    }; // 5 * 4 matrix
+    float matrix_[20] = {}; // 5 * 4 matrix
 };
 
 } // namespace OHOS::Ace::NG

@@ -19,7 +19,6 @@
 #include <memory>
 
 #include "testing_color.h"
-#include "testing_enums.h"
 #include "testing_filter.h"
 #include "testing_path_effect.h"
 #include "testing_shader_effect.h"

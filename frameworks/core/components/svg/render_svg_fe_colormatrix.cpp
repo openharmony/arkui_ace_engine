@@ -31,6 +31,7 @@ void RenderSvgFeColorMatrix::Update(const RefPtr<Component>& component)
 
     auto& declaration = feComponent->GetDeclaration();
     if (declaration) {
+        type_ = declaration->GetType();
         values_ = declaration->GetValues();
         if (memset_s(matrix_, sizeof(matrix_), 0, sizeof(matrix_)) != EOK) {
             return;

@@ -18,8 +18,6 @@
 #include "include/core/SkClipOp.h"
 
 #include "base/utils/utils.h"
-#include "core/components_ng/svg/parse/svg_fe_blend.h"
-#include "core/components_ng/svg/parse/svg_fe_flood.h"
 #include "core/components_ng/svg/svg_context.h"
 #include "frameworks/core/components_ng/render/adapter/image_painter_utils.h"
 #include "frameworks/core/components_ng/render/drawing.h"
@@ -61,10 +59,8 @@ static const LinearMapNode<RefPtr<SvgNode> (*)()> TAG_FACTORIES[] = {
     { "clipPath", []() -> RefPtr<SvgNode> { return SvgClipPath::Create(); } },
     { "defs", []() -> RefPtr<SvgNode> { return SvgDefs::Create(); } },
     { "ellipse", []() -> RefPtr<SvgNode> { return SvgEllipse::Create(); } },
-    { "feBlend", []() -> RefPtr<SvgNode> { return SvgFeBlend::Create(); } },
     { "feColorMatrix", []() -> RefPtr<SvgNode> { return SvgFeColorMatrix::Create(); } },
     { "feComposite", []() -> RefPtr<SvgNode> { return SvgFeComposite::Create(); } },
-    { "feFlood", []() -> RefPtr<SvgNode> { return SvgFeFlood::Create(); } },
     { "feGaussianBlur", []() -> RefPtr<SvgNode> { return SvgFeGaussianBlur::Create(); } },
     { "feOffset", []() -> RefPtr<SvgNode> { return SvgFeOffset::Create(); } },
     { "filter", []() -> RefPtr<SvgNode> { return SvgFilter::Create(); } },

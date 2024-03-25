@@ -18,8 +18,7 @@
 
 #include <memory>
 
-#include "testing_color_filter.h"
-#include "testing_enums.h"
+#include "test/mock/core/rosen/testing_color_filter.h"
 #include "testing_shader_effect.h"
 
 namespace OHOS::Ace::Testing {
@@ -59,17 +58,6 @@ public:
 
     static std::shared_ptr<TestingImageFilter> CreateOffsetImageFilter(
         scalar dx, scalar dy, std::shared_ptr<TestingImageFilter> input)
-    {
-        return std::make_shared<TestingImageFilter>();
-    }
-
-    static std::shared_ptr<TestingImageFilter> CreateBlendImageFilter(BlendMode mode,
-        std::shared_ptr<TestingImageFilter> background, std::shared_ptr<TestingImageFilter> foreground = nullptr)
-    {
-        return std::make_shared<TestingImageFilter>();
-    }
-
-    static std::shared_ptr<TestingImageFilter> CreateShaderImageFilter(std::shared_ptr<TestingShaderEffect> shader)
     {
         return std::make_shared<TestingImageFilter>();
     }

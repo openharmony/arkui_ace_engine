@@ -20,25 +20,6 @@
 
 namespace OHOS::Ace {
 
-enum {
-    R_Scale = 0,
-    G_Scale = 6,
-    B_Scale = 12,
-    A_Scale = 18,
-
-    R_Trans = 4,
-    G_Trans = 9,
-    B_Trans = 14,
-    A_Trans = 19,
-};
-
-enum class SvgFeColorMatrixType {
-    Matrix,
-    Saturate,
-    HueRotate,
-    LuminanceToAlpha,
-};
-
 struct SvgAttribute : SvgBaseAttribute {
     Rect viewBox;
     Dimension x;

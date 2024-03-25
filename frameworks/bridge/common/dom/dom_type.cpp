@@ -1240,7 +1240,6 @@ const char DOM_SVG_XLINK_HREF[] = "xlink:href";
 const char DOM_SVG_CLIP_RULE[] = "clipRule";
 const char DOM_SVG_FE_IN[] = "in";
 const char DOM_SVG_FE_IN2[] = "in2";
-const char DOM_SVG_FE_MODE[] = "mode";
 const char DOM_SVG_FE_RESULT[] = "result";
 const char DOM_SVG_FE_COLOR_INTERPOLATION_FILTERS[] = "color-interpolation-filters";
 const char DOM_SVG_FE_TYPE[] = "type";
