@@ -280,12 +280,44 @@ private:
     std::shared_ptr<OHOS::NWeb::NWebAccessRequest> request_;
 };
 
+class NWebScreenCaptureConfigImpl : public OHOS::NWeb::NWebScreenCaptureConfig {
+public:
+    NWebScreenCaptureConfigImpl() = default;
+    ~NWebScreenCaptureConfigImpl() = default;
+
+    int32_t GetMode() override
+    {
+        return mode_;
+    }
+
+    void SetMode(int32_t mode)
+    {
+        mode_ = mode;
+    }
+
+    int32_t GetSourceId() override
+    {
+        return source_id_;
+    }
+
+    void SetSourceId(int32_t source_id)
+    {
+        source_id_ = source_id;
+    }
+
+private:
+    int32_t mode_ = 0;
+    int32_t source_id_ = -1;
+};
+
 class WebScreenCaptureRequestOhos : public WebScreenCaptureRequest {
     DECLARE_ACE_TYPE(WebScreenCaptureRequestOhos, WebScreenCaptureRequest)
 
 public:
     WebScreenCaptureRequestOhos(const std::shared_ptr<OHOS::NWeb::NWebScreenCaptureAccessRequest>& request)
-        : request_(request) {}
+        : request_(request) {
+        config_ = std::make_shared<NWebScreenCaptureConfigImpl>();
+    }
 
     void Deny() const override;
 
@@ -300,7 +332,7 @@ public:
 private:
     std::shared_ptr<OHOS::NWeb::NWebScreenCaptureAccessRequest> request_;
 
-    OHOS::NWeb::NWebScreenCaptureConfig config_;
+    std::shared_ptr<NWebScreenCaptureConfigImpl> config_;
 };
 
 class WebWindowNewHandlerOhos : public WebWindowNewHandler {
@@ -389,6 +421,32 @@ class WebPattern;
 }; // namespace NG
 
 class RenderWeb;
+
+class NWebDragEventImpl : public OHOS::NWeb::NWebDragEvent {
+public:
+    NWebDragEventImpl(double x, double y, NWeb::DragAction action) : x_(x), y_(y), action_(action) {}
+    ~NWebDragEventImpl() = default;
+
+    double GetX() override
+    {
+        return x_;
+    }
+
+    double GetY() override
+    {
+        return y_;
+    }
+
+    NWeb::DragAction GetAction() override
+    {
+        return action_;
+    }
+
+private:
+    double x_ = 0.0;
+    double y_ = 0.0;
+    NWeb::DragAction action_ = NWeb::DragAction::DRAG_START;
+};
 
 class NWebTouchPointInfoImpl : public OHOS::NWeb::NWebTouchPointInfo {
 public:
@@ -638,7 +696,7 @@ public:
     void OnCompleteSwapWithNewSize();
     void OnResizeNotWork();
     void OnDateTimeChooserPopup(
-        const NWeb::DateTimeChooser& chooser,
+        std::shared_ptr<OHOS::NWeb::NWebDateTimeChooser> chooser,
         const std::vector<std::shared_ptr<OHOS::NWeb::NWebDateTimeSuggestion>>& suggestions,
         std::shared_ptr<OHOS::NWeb::NWebDateTimeChooserCallback> callback);
     void OnDateTimeChooserClose();
@@ -698,7 +756,7 @@ public:
     void OnFirstMeaningfulPaint(std::shared_ptr<OHOS::NWeb::NWebFirstMeaningfulPaintDetails> details);
     void OnLargestContentfulPaint(std::shared_ptr<OHOS::NWeb::NWebLargestContentfulPaintDetails> details);
     void OnSafeBrowsingCheckResult(int threat_type);
-    void OnGetTouchHandleHotZone(OHOS::NWeb::TouchHandleHotZone& hotZone);
+    void OnGetTouchHandleHotZone(std::shared_ptr<OHOS::NWeb::NWebTouchHandleHotZone> hotZone);
     void OnOverScroll(float xOffset, float yOffset);
     void OnOverScrollFlingVelocity(float xVelocity, float yVelocity, bool isFling);
     void OnScrollState(bool scrollState);
