@@ -227,6 +227,7 @@ public:
     void ClearChildren() override;
     void SetBounds(float positionX, float positionY, float width, float height) override;
     void OnTransformTranslateUpdate(const TranslateOptions& value) override;
+    Vector3F MarshallTranslate(const TranslateOptions& translate);
     bool DoTextureExport(uint64_t surfaceId) override;
     bool StopTextureExport() override;
 
@@ -344,6 +345,8 @@ public:
     void SetOvalMask(const RectF& rect, const ShapeMaskProperty& property) override;
     void SetCommandPathMask(const std::string& commands, const ShapeMaskProperty& property) override;
     void ResetSurface() override;
+    void SavePaintRect(bool isRound = true, uint8_t flag = 0) override;
+    void SyncPartialRsProperties() override;
 
 private:
     void OnBackgroundImageUpdate(const ImageSourceInfo& src) override;
@@ -591,6 +594,8 @@ private:
     bool isTouchUpFinished_ = true;
 
     bool useContentRectForRSFrame_;
+
+    RectF paintRect_;
 
     std::shared_ptr<Rosen::RSTextureExport> rsTextureExport_;
 

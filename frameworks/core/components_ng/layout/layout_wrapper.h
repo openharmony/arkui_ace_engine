@@ -145,6 +145,9 @@ protected:
     void OffsetNodeToSafeArea();
     // keyboard avoidance is done by offsetting, to expand into keyboard area, reverse the offset.
     void ExpandIntoKeyboard();
+    void RestoreExpansiveChildren();
+    void RestoreExpansiveChild(const RefPtr<UINode>& node);
+    bool CheckValidSafeArea();
 
     WeakPtr<FrameNode> hostNode_;
 

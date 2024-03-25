@@ -127,10 +127,11 @@ public:
 
     virtual void MarkModifyDone();
 
-    void MarkDirtyNode(PropertyChangeFlag extraFlag = PROPERTY_UPDATE_NORMAL) override;
-
     void MarkDirtyNode(
-        bool isMeasureBoundary, bool isRenderBoundary, PropertyChangeFlag extraFlag = PROPERTY_UPDATE_NORMAL);
+        PropertyChangeFlag extraFlag = PROPERTY_UPDATE_NORMAL, bool childExpansiveAndMark = false) override;
+
+    void MarkDirtyNode(bool isMeasureBoundary, bool isRenderBoundary,
+        PropertyChangeFlag extraFlag = PROPERTY_UPDATE_NORMAL, bool childExpansiveAndMark = false);
 
     void ProcessPropertyDiff()
     {
@@ -575,8 +576,17 @@ public:
         return GetTag();
     }
 
-    bool HasTransitionRunning();
     bool SelfOrParentExpansive();
+    bool SelfExpansive();
+    bool ParentExpansive();
+    void SetNeedRestoreSafeArea(bool needRestore)
+    {
+        needRestoreSafeArea_ = needRestore;
+    }
+    bool NeedRestoreSafeArea()
+    {
+        return needRestoreSafeArea_;
+    }
 
     bool IsActive() const override
     {
@@ -595,17 +605,12 @@ public:
     void SetCacheCount(
         int32_t cacheCount = 0, const std::optional<LayoutConstraintF>& itemConstraint = std::nullopt) override;
 
-    void SyncGeometryNode();
+    void SyncGeometryNode(bool needSyncRsNode);
     RefPtr<UINode> GetFrameChildByIndex(uint32_t index, bool needBuild) override;
     bool CheckNeedForceMeasureAndLayout() override;
 
     bool SetParentLayoutConstraint(const SizeF& size) const override;
-    void ForceSyncGeometryNode()
-    {
-        CHECK_NULL_VOID(renderContext_);
-        oldGeometryNode_.Reset();
-        renderContext_->SyncGeometryProperties(RawPtr(geometryNode_));
-    }
+    void ForceSyncGeometryNode();
 
     template<typename T>
     RefPtr<T> FindFocusChildNodeOfClass()
@@ -729,6 +734,7 @@ private:
     void GeometryNodeToJsonValue(std::unique_ptr<JsonValue>& json) const;
 
     bool GetTouchable() const;
+    bool OnLayoutFinish(bool& needSyncRsNode);
 
     void ProcessAllVisibleCallback(
         std::unordered_map<double, VisibleCallbackInfo>& visibleAreaCallbacks, double currentVisibleRatio);
@@ -825,6 +831,7 @@ private:
 
     bool isRestoreInfoUsed_ = false;
     bool checkboxFlag_ = false;
+    bool needRestoreSafeArea_ = true;
 
     RefPtr<FrameNode> overlayNode_;
 
