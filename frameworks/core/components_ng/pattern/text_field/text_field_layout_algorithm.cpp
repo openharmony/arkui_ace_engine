@@ -600,6 +600,9 @@ void TextFieldLayoutAlgorithm::CreateParagraph(const TextStyle& textStyle, const
         if (splitStr.empty()) {
             continue;
         }
+        if (style->GetMaxLines() == 1) {
+            std::replace(splitStr.begin(), splitStr.end(), '\n', ' ');
+        }
         auto& style = textStyles[i];
         paragraph_->PushStyle(style);
         StringUtils::TransformStrCase(splitStr, static_cast<int32_t>(style.GetTextCase()));

@@ -1683,7 +1683,7 @@ void TextFieldPattern::InitDragDropCallBack()
                 newDragValue == pattern->dragValue_ &&
                 paintProperty->GetInputStyleValue(InputStyle::DEFAULT) != InputStyle::INLINE) {
                 pattern->ShowSelectAfterDragEvent();
-                auto focusHub = host->GetOrCreateFocusHub();
+                auto focusHub = pattern->GetFocusHub();
                 CHECK_NULL_VOID(focusHub);
                 focusHub->RequestFocusImmediately();
             }
