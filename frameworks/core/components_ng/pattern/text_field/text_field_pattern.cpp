@@ -1223,6 +1223,9 @@ void TextFieldPattern::HandleOnPaste()
         }
         std::wstring pasteData = StringUtils::ToWstring(data);
         auto originLength = static_cast<int32_t>(textfield->contentController_->GetWideText().length());
+        if (textfield->OverCounter(originLength)) {
+            return;
+        }
         textfield->contentController_->ReplaceSelectedValue(start, end, StringUtils::ToString(pasteData));
         auto caretMoveLength =
             static_cast<int32_t>(textfield->contentController_->GetWideText().length()) - originLength;
@@ -2193,7 +2196,10 @@ void TextFieldPattern::ProcessCounter()
             lastDiffBorderWidth_.SetBorderWidth(OVER_COUNT_BORDER_WIDTH);
             setBorderFlag_ = false;
         }
-        HandleCounterBorder();
+        if (layoutProperty->GetShowHighlightBorderValue(true) &&
+            layoutProperty->GetSetCounterValue(DEFAULT_MODE) == DEFAULT_MODE) {
+            HandleCounterBorder();
+        }
     } else {
         isTextInput_ = true;
     }
@@ -2612,6 +2618,7 @@ void TextFieldPattern::ProcessOverlay(bool isUpdateMenu, bool animation, bool is
         isSingleHandle_ = true;
         selectController_->UpdateCaretIndex(selectController_->GetFirstHandleIndex());
         selectController_->UpdateCaretOffset();
+        selectController_->MoveCaretToContentRect(GetCaretIndex());
     } else if (!isSingleHandle_) {
         auto rects = GetTextBoxes();
         if (!rects.empty() && NearEqual(rects.size(), 1) && NearZero(rects[0].Width())) {
@@ -3600,27 +3607,14 @@ void TextFieldPattern::InsertValue(const std::string& insertValue)
     focusIndex_ = FocuseIndex::TEXT;
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto maxlength = GetMaxLength();
     auto originLength = static_cast<int32_t>(contentController_->GetWideText().length());
-    auto pattern = host->GetPattern<TextFieldPattern>();
-    CHECK_NULL_VOID(pattern);
     auto textFieldLayoutProperty = host->GetLayoutProperty<TextFieldLayoutProperty>();
     CHECK_NULL_VOID(textFieldLayoutProperty);
     auto inputValue = textFieldLayoutProperty->GetSetCounterValue(DEFAULT_MODE);
-    auto pipeline = PipelineBase::GetCurrentContext();
-    CHECK_NULL_VOID(pipeline);
-    auto theme = pipeline->GetTheme<TextFieldTheme>();
-    CHECK_NULL_VOID(theme);
     if (inputValue == DEFAULT_MODE) {
         originLength = originLength + ONE_CHARACTER;
     }
-    bool noDeleteOperation = deleteBackwardOperations_.empty() && deleteForwardOperations_.empty();
-    if (!IsShowPasswordIcon() && originLength == static_cast<int32_t>(maxlength) && noDeleteOperation &&
-        !IsSelected() && textFieldLayoutProperty->GetShowCounterValue(false) && inputValue != DEFAULT_MODE &&
-        inputValue != ILLEGAL_VALUE && !IsNormalInlineState()) {
-        counterChange_ = true;
-        UpdateOverCounterColor();
-        UltralimitShake();
+    if (OverCounter(originLength)) {
         return;
     }
     inputOperations_.emplace(InputOperation::INSERT);
@@ -3628,6 +3622,24 @@ void TextFieldPattern::InsertValue(const std::string& insertValue)
     CloseSelectOverlay(true);
     ScrollToSafeArea();
     host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_PARENT);
+}
+
+bool TextFieldPattern::OverCounter(int32_t originLength)
+{
+    auto textFieldLayoutProperty = GetTextFieldLayoutProperty();
+    CHECK_NULL_RETURN(textFieldLayoutProperty, false);
+    auto inputValue = textFieldLayoutProperty->GetSetCounterValue(DEFAULT_MODE);
+    auto maxlength = GetMaxLength();
+    bool noDeleteOperation = deleteBackwardOperations_.empty() && deleteForwardOperations_.empty();
+    if (!IsShowPasswordIcon() && originLength == static_cast<int32_t>(maxlength) && noDeleteOperation &&
+        !IsSelected() && textFieldLayoutProperty->GetShowCounterValue(false) && inputValue != DEFAULT_MODE &&
+        inputValue != ILLEGAL_VALUE && !IsNormalInlineState()) {
+        counterChange_ = true;
+        UpdateOverCounterColor();
+        UltralimitShake();
+        return true;
+    }
+    return false;
 }
 
 void TextFieldPattern::HandleInputCounterBorder(int32_t& textLength, uint32_t& maxLength)
@@ -3661,7 +3673,6 @@ void TextFieldPattern::UpdateOverCounterColor()
     CHECK_NULL_VOID(textLayoutProperty);
     auto showBorder = textFieldLayoutProperty->GetShowHighlightBorderValue(true);
     TextStyle countTextStyle = theme->GetOverCountTextStyle();
-    countTextStyle = theme->GetOverCountTextStyle();
     countTextStyle.SetTextColor(theme->GetOverCounterColor());
     textLayoutProperty->UpdateTextColor(countTextStyle.GetTextColor());
     auto host = counterNode->GetHostNode();

@@ -216,6 +216,7 @@ public:
     void UpdateCounterMargin();
     void CleanCounterNode();
     void UltralimitShake();
+    bool OverCounter(int32_t originLength);
     void HandleInputCounterBorder(int32_t& textLength, uint32_t& maxLength);
     void UpdateCounterBorderStyle(int32_t& textLength, uint32_t& maxLength);
     void UpdateAreaBorderStyle(BorderWidthProperty& currentBorderWidth, BorderWidthProperty& overCountBorderWidth,
