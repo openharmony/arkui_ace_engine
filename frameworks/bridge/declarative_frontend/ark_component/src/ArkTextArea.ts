@@ -376,6 +376,23 @@ class TextAreaShowCounterModifier extends ModifierWithKey<ArkTextAreaShowCounter
   }
 }
 
+class TextAreaFontFeatureModifier extends ModifierWithKey<FontFeature> {
+  constructor(value: FontFeature) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('textAreaFontFeature');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().textArea.resetFontFeature(node);
+    } else {
+      getUINativeModule().textArea.setFontFeature(node, this.value!);
+    }
+  }
+  checkObjectDiff(): boolean {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+
 class ArkTextAreaComponent extends ArkComponent implements CommonMethod<TextAreaAttribute> {
   constructor(nativePtr: KNode) {
     super(nativePtr);
@@ -479,6 +496,10 @@ class ArkTextAreaComponent extends ArkComponent implements CommonMethod<TextArea
   }
   maxLines(value: number): TextAreaAttribute {
     modifierWithKey(this._modifiersWithKeys, TextAreaMaxLinesModifier.identity, TextAreaMaxLinesModifier, value);
+    return this;
+  }
+  fontFeature(value: FontFeature): TextAreaAttribute {
+    modifierWithKey(this._modifiersWithKeys, TextAreaFontFeatureModifier.identity, TextAreaFontFeatureModifier, value);
     return this;
   }
   customKeyboard(value: CustomBuilder): TextAreaAttribute {

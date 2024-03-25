@@ -25,6 +25,7 @@
 #include "core/interfaces/arkoala/arkoala_api.h"
 #include "core/pipeline/base/element_register.h"
 #include "core/interfaces/native/node/node_api.h"
+#include "core/components/common/properties/text_style_parser.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -633,6 +634,20 @@ void ResetTextAreaLineHeight(ArkUINodeHandle node)
     TextFieldModelNG::SetLineHeight(frameNode, value);
 }
 
+void SetTextAreaFontFeature(ArkUINodeHandle node, ArkUI_CharPtr value)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    std::string strValue = value;
+    TextFieldModelNG::SetFontFeature(frameNode, ParseFontFeatureSettings(strValue));
+}
+
+void ResetTextAreaFontFeature(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    std::string strValue = "";
+    TextFieldModelNG::SetFontFeature(frameNode, ParseFontFeatureSettings(strValue));
+}
 } // namespace
 
 namespace NodeModifier {
@@ -654,7 +669,7 @@ const ArkUITextAreaModifier* GetTextAreaModifier()
         SetTextAreaType, ResetTextAreaType, GetTextAreaType, GetTextAreaTextAlign, SetTextAreaShowCounterOptions,
         ResetTextAreaShowCounterOptions, GetTextAreaShowCounterOptions, SetTextAreaDecoration,
         ResetTextAreaDecoration, SetTextAreaLetterSpacing, ResetTextAreaLetterSpacing, SetTextAreaLineHeight,
-        ResetTextAreaLineHeight };
+        ResetTextAreaLineHeight, SetTextAreaFontFeature, ResetTextAreaFontFeature };
     return &modifier;
 }
 

@@ -29,6 +29,7 @@
 #include "core/components/search/search_theme.h"
 #include "core/components_ng/pattern/search/search_model_ng.h"
 #include "core/components_ng/pattern/text_field/text_field_model_ng.h"
+#include "core/components/common/properties/text_style_parser.h"
 
 namespace OHOS::Ace {
 
@@ -108,6 +109,7 @@ void JSSearch::JSBind(BindingTarget globalObj)
     JSClass<JSSearch>::StaticMethod("decoration", &JSSearch::SetDecoration);
     JSClass<JSSearch>::StaticMethod("letterSpacing", &JSSearch::SetLetterSpacing);
     JSClass<JSSearch>::StaticMethod("lineHeight", &JSSearch::SetLineHeight);
+    JSClass<JSSearch>::StaticMethod("fontFeature", &JSSearch::SetFontFeature);
     JSClass<JSSearch>::StaticMethod("id", &JSSearch::SetId);
     JSClass<JSSearch>::StaticMethod("key", &JSSearch::SetKey);
     JSClass<JSSearch>::InheritAndBind<JSViewAbstract>(globalObj);
@@ -120,6 +122,19 @@ void ParseSearchValueObject(const JSCallbackInfo& info, const JSRef<JSVal>& chan
     JsEventCallback<void(const std::string&)> onChangeEvent(
         info.GetExecutionContext(), JSRef<JSFunc>::Cast(changeEventVal));
     SearchModel::GetInstance()->SetOnChangeEvent(std::move(onChangeEvent));
+}
+
+void JSSearch::SetFontFeature(const JSCallbackInfo& info)
+{
+    if (info.Length() < 1) {
+        return;
+    }
+    if (!info[0]->IsString()) {
+        return;
+    }
+
+    std::string fontFeatureSettings = info[0]->ToString();
+    SearchModel::GetInstance()->SetFontFeature(ParseFontFeatureSettings(fontFeatureSettings));
 }
 
 void JSSearch::Create(const JSCallbackInfo& info)

@@ -5767,6 +5767,22 @@ class SearchFontColorModifier extends ModifierWithKey {
   }
 }
 SearchFontColorModifier.identity = Symbol('searchFontColor');
+class SearchFontFeatureModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().search.resetFontFeature(node);
+    } else {
+      getUINativeModule().search.setFontFeature(node, this.value);
+    }
+  }
+  checkObjectDiff() {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+SearchFontColorModifier.identity = Symbol('searchFontFeature');
 class SearchCopyOptionModifier extends ModifierWithKey {
   constructor(value) {
     super(value);
@@ -6051,6 +6067,10 @@ class ArkSearchComponent extends ArkComponent {
   }
   fontColor(value) {
     modifierWithKey(this._modifiersWithKeys, SearchFontColorModifier.identity, SearchFontColorModifier, value);
+    return this;
+  }
+  fontFeature(value) {
+    modifierWithKey(this._modifiersWithKeys, SearchFontFeatureModifier.identity, SearchFontFeatureModifier, value);
     return this;
   }
   placeholderColor(value) {
@@ -7229,6 +7249,23 @@ class TextWordBreakModifier extends ModifierWithKey {
 }
 TextWordBreakModifier.identity = Symbol('textWordBreak');
 
+class TextFontFeatureModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().text.resetFontFeature(node);
+    } else {
+      getUINativeModule().text.setFontFeature(node, this.value);
+    }
+  }
+  checkObjectDiff() {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+TextWordBreakModifier.identity = Symbol('textFontFeature');
+
 class TextEllipsisModeModifier extends ModifierWithKey {
   constructor(value) {
     super(value);
@@ -7687,6 +7724,10 @@ class ArkTextComponent extends ArkComponent {
     modifierWithKey(this._modifiersWithKeys, TextWordBreakModifier.identity, TextWordBreakModifier, value);
     return this;
   }
+  fontFeature(value) {
+    modifierWithKey(this._modifiersWithKeys, TextFontFeatureModifier.identity, TextFontFeatureModifier, value);
+    return this;
+  }
   onCopy(callback) {
     throw new Error('Method not implemented.');
   }
@@ -7948,6 +7989,22 @@ class TextAreaFontFamilyModifier extends ModifierWithKey {
   }
 }
 TextAreaFontFamilyModifier.identity = Symbol('textAreaFontFamily');
+class TextAreaFontFeatureModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().textArea.resetFontFeature(node);
+    } else {
+      getUINativeModule().textArea.setFontFeature(node, this.value);
+    }
+  }
+  checkObjectDiff() {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+TextAreaFontFamilyModifier.identity = Symbol('textAreaFontFeature');
 class TextAreaCaretColorModifier extends ModifierWithKey {
   constructor(value) {
     super(value);
@@ -8116,6 +8173,10 @@ class ArkTextAreaComponent extends ArkComponent {
   }
   fontFamily(value) {
     modifierWithKey(this._modifiersWithKeys, TextAreaFontFamilyModifier.identity, TextAreaFontFamilyModifier, value);
+    return this;
+  }
+  fontFeature(value) {
+    modifierWithKey(this._modifiersWithKeys, TextAreaFontFeatureModifier.identity, TextAreaFontFeatureModifier, value);
     return this;
   }
   inputFilter(value, error) {
@@ -8509,6 +8570,22 @@ class TextInputShowUnderlineModifier extends ModifierWithKey {
   }
 }
 TextInputShowUnderlineModifier.identity = Symbol('textInputShowUnderLine');
+class TextInputFontFeatureModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().textInput.resetFontFeature(node);
+    } else {
+      getUINativeModule().textInput.setFontFeature(node, this.value);
+    }
+  }
+  checkObjectDiff() {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+TextInputShowUnderlineModifier.identity = Symbol('textInputFontFeature');
 class TextInputShowErrorModifier extends ModifierWithKey {
   constructor(value) {
     super(value);
@@ -8893,6 +8970,10 @@ class ArkTextInputComponent extends ArkComponent {
   }
   showUnderline(value) {
     modifierWithKey(this._modifiersWithKeys, TextInputShowUnderlineModifier.identity, TextInputShowUnderlineModifier, value);
+    return this;
+  }
+  fontFeature(value) {
+    modifierWithKey(this._modifiersWithKeys, TextInputFontFeatureModifier.identity, TextInputFontFeatureModifier, value);
     return this;
   }
   selectionMenuHidden(value) {

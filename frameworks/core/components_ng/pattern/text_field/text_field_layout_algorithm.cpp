@@ -748,6 +748,9 @@ void TextFieldLayoutAlgorithm::UpdateTextStyleMore(const RefPtr<FrameNode>& fram
     if (layoutProperty->HasLineHeight()) {
         textStyle.SetLineHeight(layoutProperty->GetLineHeight().value());
     }
+    if (layoutProperty->HasFontFeature()) {
+        textStyle.SetFontFeatures(layoutProperty->GetFontFeature().value());
+    }
 }
 
 void TextFieldLayoutAlgorithm::UpdatePlaceholderTextStyleMore(const RefPtr<FrameNode>& frameNode,

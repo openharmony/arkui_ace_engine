@@ -136,6 +136,16 @@ void TextFieldModelNG::SetUserUnderlineColor(UserUnderlineColor userColor)
     pattern->SetUserUnderlineColor(userColor);
 }
 
+void TextFieldModelNG::SetFontFeature(const FONT_FEATURES_MAP& value)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(TextFieldLayoutProperty, FontFeature, value);
+}
+
+void TextFieldModelNG::SetFontFeature(FrameNode* frameNode, const FONT_FEATURES_MAP& value)
+{
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, FontFeature, value, frameNode);
+}
+
 void TextFieldModelNG::SetNormalUnderlineColor(const Color& normalColor)
 {
     auto pattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<TextFieldPattern>();
