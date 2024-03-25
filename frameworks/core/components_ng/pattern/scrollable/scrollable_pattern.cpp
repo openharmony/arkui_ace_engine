@@ -43,7 +43,6 @@ constexpr uint32_t MILLOS_PER_NANO_SECONDS = 1000 * 1000 * 1000;
 constexpr uint64_t MIN_DIFF_VSYNC = 1000 * 1000; // min is 1ms
 constexpr uint32_t MAX_VSYNC_DIFF_TIME = 100 * 1000 * 1000; //max 100ms
 constexpr float SPRING_ACCURACY = 0.1;
-constexpr int32_t LONG_PRESS_PAGE_INTERVAL_MS = 100;
 const std::string SCROLLABLE_DRAG_SCENE = "scrollable_drag_scene";
 const std::string SCROLL_BAR_DRAG_SCENE = "scrollBar_drag_scene";
 const std::string SCROLLABLE_MOTION_SCENE = "scrollable_motion_scene";
@@ -614,6 +613,7 @@ void ScrollablePattern::RegisterScrollBarEventTask()
     scrollBar_->SetGestureEvent();
     scrollBar_->SetMouseEvent();
     scrollBar_->SetHoverEvent();
+    scrollBar_->SetAxis(axis_);
     scrollBar_->SetMarkNeedRenderFunc([weak = AceType::WeakClaim(AceType::RawPtr(host))]() {
         auto host = weak.Upgrade();
         CHECK_NULL_VOID(host);
@@ -644,6 +644,12 @@ void ScrollablePattern::RegisterScrollBarEventTask()
         pattern->StartScrollSnapMotion(scrollSnapDelta, scrollSnapVelocity);
     };
     scrollBar_->SetStartScrollSnapMotionCallback(std::move(startScrollSnapMotionCallback));
+    auto scrollPageCallback = [weak = WeakClaim(this)](bool reverse, bool smooth) {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        pattern->ScrollPage(reverse, smooth);
+    };
+    scrollBar_->SetScrollPageCallback(std::move(scrollPageCallback));
 
     gestureHub->AddTouchEvent(scrollBar_->GetTouchEvent());
     inputHub->AddOnMouseEvent(scrollBar_->GetMouseEvent());
@@ -666,6 +672,21 @@ void ScrollablePattern::RegisterScrollBarEventTask()
             CHECK_NULL_VOID(scrollBar);
             scrollBar->OnCollectTouchTarget(coordinateOffset, getEventTargetImpl, result, frameNode, targetComponent);
         });
+    scrollableEvent_->SetBarCollectLongPressTargetCallback(
+        [weak = AceType::WeakClaim(AceType::RawPtr(scrollBar_))](const OffsetF& coordinateOffset,
+            const GetEventTargetImpl& getEventTargetImpl, TouchTestResult& result, const RefPtr<FrameNode>& frameNode,
+            const RefPtr<TargetComponent>& targetComponent) {
+            auto scrollBar = weak.Upgrade();
+            CHECK_NULL_VOID(scrollBar);
+            scrollBar->OnCollectLongPressTarget(
+                coordinateOffset, getEventTargetImpl, result, frameNode, targetComponent);
+        });
+    scrollableEvent_->SetInBarRectRegionCallback(
+        [weak = AceType::WeakClaim(AceType::RawPtr(scrollBar_))](const PointF& point, SourceType source) {
+            auto scrollBar = weak.Upgrade();
+            CHECK_NULL_RETURN(scrollBar, false);
+            return scrollBar->InBarRectRegion(Point(point.GetX(), point.GetY()));
+        });
 
     auto dragFRCSceneCallback = [weak = WeakClaim(this)](double velocity, SceneStatus sceneStatus) {
         auto pattern = weak.Upgrade();
@@ -673,6 +694,7 @@ void ScrollablePattern::RegisterScrollBarEventTask()
         return pattern->NotifyFRCSceneInfo(SCROLL_BAR_DRAG_SCENE, velocity, sceneStatus);
     };
     scrollBar_->SetDragFRCSceneCallback(std::move(dragFRCSceneCallback));
+    InitScrollBarMouseEvent();
 }
 
 void ScrollablePattern::SetScrollBar(DisplayMode displayMode)
@@ -684,9 +706,6 @@ void ScrollablePattern::SetScrollBar(DisplayMode displayMode)
             auto gestureHub = GetGestureHub();
             if (gestureHub) {
                 gestureHub->RemoveTouchEvent(scrollBar_->GetTouchEvent());
-                gestureHub->RemoveClickEvent(scrollBar_->GetClickEvent());
-                gestureHub->RemoveLongPressEvent(scrollBar_->GetLongPressEvent());
-                gestureHub->RemoveTouchEvent(scrollBar_->GetScrollBarTouchEvent());
             }
             scrollBar_.Reset();
             if (scrollBarOverlayModifier_) {
@@ -719,9 +738,6 @@ void ScrollablePattern::SetScrollBar(DisplayMode displayMode)
         scrollBar_->ScheduleDisappearDelayTask();
     }
     UpdateBorderRadius();
-    InitScrollBarClickEvent();
-    InitScrollBarTouchEvent();
-    InitScrollBarLongPressEvent();
 }
 
 void ScrollablePattern::UpdateBorderRadius()
@@ -2365,7 +2381,6 @@ void ScrollablePattern::AddHotZoneSenceInterface(SceneStatus scene)
 
 void ScrollablePattern::InitScrollBarClickEvent()
 {
-    CHECK_NULL_VOID(!scrollBar_->GetClickEvent());
     auto gesture = GetHost()->GetOrCreateGestureEventHub();
     auto clickCallback = [weak = WeakClaim(this)](GestureEvent& info) {
         auto pattern = weak.Upgrade();
@@ -2385,97 +2400,9 @@ void ScrollablePattern::HandleClickEvent(GestureEvent& info)
     CHECK_NULL_VOID(GetScrollBar());
     Point point(localLocation.GetX(), localLocation.GetY());
     bool reverse = false;
-    if (AnalysisUpOrDown(point, reverse)) {
+    if (scrollBar_->AnalysisUpOrDown(point, reverse) && isMousePressed_) {
         ScrollPage(reverse, true);
     }
-}
-
-void ScrollablePattern::InitScrollBarLongPressEvent()
-{
-    CHECK_NULL_VOID(!scrollBar_->GetLongPressEvent());
-    auto gesture = GetHost()->GetOrCreateGestureEventHub();
-    auto longPressCallback = [weak = WeakClaim(this)](GestureEvent& info) {
-        auto pattern = weak.Upgrade();
-        CHECK_NULL_VOID(pattern);
-        pattern->HandleLongPress(true);
-    };
-    auto scrollBarLongPressEvent = scrollBar_->GetLongPressEvent();
-    scrollBarLongPressEvent = MakeRefPtr<LongPressEvent>(std::move(longPressCallback));
-    gesture->SetLongPressEvent(scrollBarLongPressEvent);
-}
-
-void ScrollablePattern::HandleLongPress(bool smooth)
-{
-    Point point(locationInfo_.GetX(), locationInfo_.GetY());
-    CHECK_NULL_VOID(GetScrollBar());
-    bool reverse = false;
-    if (AnalysisUpOrDown(point, reverse) && isMousePressed_) {
-        ScrollPage(reverse, smooth);
-        StartLongPressEventTimer();
-    }
-}
-
-void ScrollablePattern::ScheduleCaretLongPress()
-{
-    auto context = OHOS::Ace::PipelineContext::GetCurrentContext();
-    CHECK_NULL_VOID(context);
-    if (!context->GetTaskExecutor()) {
-        return;
-    }
-    auto taskExecutor = context->GetTaskExecutor();
-    CHECK_NULL_VOID(taskExecutor);
-    taskExecutor->PostDelayedTask(
-        [weak = WeakClaim(this)]() {
-            auto pattern = weak.Upgrade();
-            CHECK_NULL_VOID(pattern);
-            pattern->HandleLongPress(true);
-        },
-        TaskExecutor::TaskType::UI, LONG_PRESS_PAGE_INTERVAL_MS);
-}
-
-void ScrollablePattern::StartLongPressEventTimer()
-{
-    auto tmpHost = GetHost();
-    CHECK_NULL_VOID(tmpHost);
-    tmpHost->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
-    ScheduleCaretLongPress();
-}
-
-void ScrollablePattern::InitScrollBarTouchEvent()
-{
-    CHECK_NULL_VOID(!scrollBar_->GetScrollBarTouchEvent());
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    auto gesture = host->GetOrCreateGestureEventHub();
-    CHECK_NULL_VOID(gesture);
-
-    auto touchCallback = [weak = WeakClaim(this)](const TouchEventInfo& info) {
-        auto pattern = weak.Upgrade();
-        CHECK_NULL_VOID(pattern);
-        if (info.GetTouches().front().GetTouchType() == TouchType::DOWN) {
-            pattern->OnTouchDown();
-        }
-        if (info.GetTouches().front().GetTouchType() == TouchType::UP ||
-            info.GetTouches().front().GetTouchType() == TouchType::CANCEL) {
-            pattern->OnTouchUp();
-        }
-        pattern->locationInfo_ = info.GetTouches().front().GetLocalLocation();
-    };
-    auto scrollBarTouchEvent = scrollBar_->GetScrollBarTouchEvent();
-    scrollBarTouchEvent = MakeRefPtr<TouchEventImpl>(std::move(touchCallback));
-    gesture->AddTouchEvent(scrollBarTouchEvent);
-}
-
-void ScrollablePattern::OnTouchUp()
-{
-    isMousePressed_ = false;
-    return;
-}
-
-void ScrollablePattern::OnTouchDown()
-{
-    isMousePressed_ = true;
-    return;
 }
 
 void ScrollablePattern::ScrollPage(bool reverse, bool smooth)
@@ -2486,18 +2413,25 @@ void ScrollablePattern::ScrollPage(bool reverse, bool smooth)
     return;
 }
 
-bool ScrollablePattern::AnalysisUpOrDown(Point point, bool& reverse)
+void ScrollablePattern::InitScrollBarMouseEvent()
 {
-    switch (GetScrollBar()->CheckBarDirection(point, axis_)) {
-        case BarDirection::BAR_NONE:
-            return false;
-        case BarDirection::PAGE_UP:
-            reverse = true;
-            return true;
-        case BarDirection::PAGE_DOWN:
-            reverse = false;
-            return true;
-    }
+    CHECK_NULL_VOID(!mouseEvent_);
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto inputHub = GetInputHub();
+    CHECK_NULL_VOID(inputHub);
+    auto mouseTask = [weak = WeakClaim(this)](MouseInfo& info) {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        if (info.GetButton() == MouseButton::LEFT_BUTTON && info.GetAction() == MouseAction::PRESS) {
+            pattern->isMousePressed_ = true;
+            pattern->InitScrollBarClickEvent();
+        } else if (info.GetButton() != MouseButton::LEFT_BUTTON) {
+            pattern->isMousePressed_ = false;
+        }
+    };
+    mouseEvent_ = MakeRefPtr<InputEvent>(std::move(mouseTask));
+    inputHub->AddOnMouseEvent(mouseEvent_);
 }
 
 void ScrollablePattern::PrintOffsetLog(AceLogTag tag, int32_t id, double finalOffset)

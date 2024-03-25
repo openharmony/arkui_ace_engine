@@ -663,9 +663,9 @@ HWTEST_F(ListScrollerTestNg, PositionController001, TestSize.Level1)
     /**
      * @tc.steps: step3. Test ScrollPage
      */
-    controller->ScrollPage(false, true);
+    controller->ScrollPage(false, false);
     EXPECT_TRUE(IsEqualTotalOffset(ITEM_HEIGHT * VIEW_LINE_NUMBER));
-    controller->ScrollPage(true, true);
+    controller->ScrollPage(true, false);
     EXPECT_TRUE(IsEqualTotalOffset(0));
 
     /**
@@ -744,9 +744,9 @@ HWTEST_F(ListScrollerTestNg, PositionController002, TestSize.Level1)
     /**
      * @tc.steps: step3. Test ScrollPage
      */
-    controller->ScrollPage(false, true);
+    controller->ScrollPage(false, false);
     EXPECT_TRUE(IsEqualTotalOffset(ITEM_WIDTH * VIEW_LINE_NUMBER));
-    controller->ScrollPage(true, true);
+    controller->ScrollPage(true, false);
     EXPECT_TRUE(IsEqualTotalOffset(0));
 
     /**
@@ -798,7 +798,7 @@ HWTEST_F(ListScrollerTestNg, PositionController003, TestSize.Level1)
      */
     controller->ScrollToEdge(ScrollEdgeType::SCROLL_BOTTOM, true);
     EXPECT_TRUE(IsEqualTotalOffset(0));
-    controller->ScrollPage(false, true);
+    controller->ScrollPage(false, false);
     EXPECT_TRUE(IsEqualTotalOffset(0));
     EXPECT_FALSE(controller->AnimateTo(Dimension(1), 0, nullptr, false));
 }
