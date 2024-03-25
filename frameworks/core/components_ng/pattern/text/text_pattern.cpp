@@ -49,6 +49,7 @@
 #include "core/components_ng/pattern/text/text_layout_property.h"
 #include "core/components_ng/pattern/text_drag/text_drag_pattern.h"
 #include "core/components_ng/property/property.h"
+#include "core/event/ace_events.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -327,14 +328,13 @@ void TextPattern::OnHandleMove(const RectF& handleRect, bool isFirstHandle)
 void TextPattern::UpdateSelectorOnHandleMove(const OffsetF& localOffset, float handleHeight, bool isFirstHandle)
 {
     if (isFirstHandle) {
-        auto start = GetHandleIndex(Offset(localOffset.GetX(),
-            localOffset.GetY() + (selectOverlayProxy_->IsHandleReverse() ? handleHeight : 0)));
+        auto start = GetHandleIndex(Offset(
+            localOffset.GetX(), localOffset.GetY() + (selectOverlayProxy_->IsHandleReverse() ? handleHeight : 0)));
         HandleSelectionChange(start, textSelector_.destinationOffset);
     } else {
         auto end = GetHandleIndex(Offset(localOffset.GetX(),
-            localOffset.GetY() + (selectOverlayProxy_->IsHandleReverse() || NearEqual(localOffset.GetY(), 0)
-                                         ? 0
-                                         : handleHeight)));
+            localOffset.GetY() +
+                (selectOverlayProxy_->IsHandleReverse() || NearEqual(localOffset.GetY(), 0) ? 0 : handleHeight)));
         HandleSelectionChange(textSelector_.baseOffset, end);
     }
 }
@@ -1451,8 +1451,10 @@ void TextPattern::OnDragEnd(const RefPtr<Ace::DragEvent>& event)
     if (event && event->GetResult() != DragRet::DRAG_SUCCESS) {
         HandleSelectionChange(recoverStart_, recoverEnd_);
         isShowMenu_ = false;
-        CalculateHandleOffsetAndShowOverlay();
-        ShowSelectOverlay(textSelector_.firstHandle, textSelector_.secondHandle, false, false, false);
+        if (GetCurrentDragTool() == SourceTool::FINGER) {
+            CalculateHandleOffsetAndShowOverlay();
+            ShowSelectOverlay(textSelector_.firstHandle, textSelector_.secondHandle, false, false, false);
+        }
     }
     host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
 }
@@ -1471,8 +1473,10 @@ void TextPattern::OnDragEndNoChild(const RefPtr<Ace::DragEvent>& event)
         if (event && event->GetResult() != DragRet::DRAG_SUCCESS) {
             HandleSelectionChange(recoverStart_, recoverEnd_);
             isShowMenu_ = false;
-            CalculateHandleOffsetAndShowOverlay();
-            ShowSelectOverlay(textSelector_.firstHandle, textSelector_.secondHandle, false, false, false);
+            if (GetCurrentDragTool() == SourceTool::FINGER) {
+                CalculateHandleOffsetAndShowOverlay();
+                ShowSelectOverlay(textSelector_.firstHandle, textSelector_.secondHandle, false, false, false);
+            }
         }
         auto layoutProperty = host->GetLayoutProperty<TextLayoutProperty>();
         host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
@@ -1507,11 +1511,11 @@ void TextPattern::InitDragEvent()
         CHECK_NULL_RETURN(pattern, itemInfo);
         auto eventHub = pattern->GetEventHub<EventHub>();
         CHECK_NULL_RETURN(eventHub, itemInfo);
+        pattern->SetCurrentDragTool(event->GetSourceTool());
         if (pattern->spans_.empty() || pattern->isSpanStringMode_) {
             return pattern->OnDragStartNoChild(event, extraParams);
-        } else {
-            return pattern->OnDragStart(event, extraParams);
         }
+        return pattern->OnDragStart(event, extraParams);
     };
     eventHub->SetDefaultOnDragStart(std::move(onDragStart));
     auto onDragMove = [weakPtr = WeakClaim(this)](

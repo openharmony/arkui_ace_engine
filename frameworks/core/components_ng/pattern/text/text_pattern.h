@@ -47,6 +47,7 @@
 #include "core/components_ng/pattern/text_drag/text_drag_base.h"
 #include "core/components_ng/pattern/text_field/text_selector.h"
 #include "core/components_ng/property/property.h"
+#include "core/event/ace_events.h"
 #include "core/pipeline_ng/ui_task_scheduler.h"
 
 namespace OHOS::Ace::NG {
@@ -629,6 +630,15 @@ private:
     bool IsLineBreakOrEndOfParagraph(int32_t pos) const;
     void ToJsonValue(std::unique_ptr<JsonValue>& json) const override;
     // to check if drag is in progress
+    void SetCurrentDragTool(SourceTool tool)
+    {
+        lastDragTool_ = tool;
+    }
+
+    SourceTool GetCurrentDragTool() const
+    {
+        return lastDragTool_;
+    }
 
     void AddUdmfTxtPreProcessor(const ResultObject src, ResultObject& result, bool isAppend);
 
@@ -655,6 +665,7 @@ private:
     RefPtr<DragWindow> dragWindow_;
     RefPtr<DragDropProxy> dragDropProxy_;
     std::optional<int32_t> surfaceChangedCallbackId_;
+    SourceTool lastDragTool_;
     std::optional<int32_t> surfacePositionChangedCallbackId_;
     int32_t dragRecordSize_ = -1;
     std::optional<TextResponseType> textResponseType_;

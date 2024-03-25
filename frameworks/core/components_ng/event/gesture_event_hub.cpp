@@ -230,7 +230,7 @@ void GestureEventHub::ProcessTouchTestHierarchy(const OffsetF& coordinateOffset,
         if (recognizerGroup) {
             recognizerGroup->SetRecognizerInfoRecursively(offset, host, targetComponent, getEventTargetImpl);
         }
-        
+
         recognizer->AttachFrameNode(WeakPtr<FrameNode>(host));
         recognizer->SetTargetComponent(targetComponent);
         recognizer->SetCoordinateOffset(offset);
@@ -686,6 +686,7 @@ void GestureEventHub::HandleOnDragStart(const GestureEvent& info)
     }
     event->SetScreenX(info.GetScreenLocation().GetX());
     event->SetScreenY(info.GetScreenLocation().GetY());
+    event->SetSourceTool(info.GetSourceTool());
 
     auto frameTag = frameNode->GetTag();
     auto hostPattern = frameNode->GetPattern<TextDragBase>();
@@ -1354,7 +1355,7 @@ void GestureEventHub::CopyEvent(const RefPtr<GestureEventHub>& gestureEventHub)
         touchEventActuator_ = MakeRefPtr<TouchEventActuator>();
         touchEventActuator_->CopyTouchEvent(originalTouchEventActuator);
     }
-    
+
     auto originalClickEventActuator = gestureEventHub->clickEventActuator_;
     if (originalClickEventActuator) {
         clickEventActuator_ = MakeRefPtr<ClickEventActuator>(WeakClaim(this));
