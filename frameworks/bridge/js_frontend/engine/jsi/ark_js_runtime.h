@@ -100,6 +100,9 @@ public:
     void DestroyHeapProfiler() override;
     bool ExecuteModuleBuffer(const uint8_t *data, int32_t size, const std::string &filename, bool needUpdate = false);
 
+    int32_t LoadDestinationFile(const std::string& bundleName, const std::string& moduleName,
+        const std::string& pageSourceFile, bool isSingleton);
+
     const EcmaVM* GetEcmaVm() const
     {
         return GetThreadVm() ? GetThreadVm() : vm_;

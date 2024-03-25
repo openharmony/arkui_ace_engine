@@ -318,6 +318,31 @@ panda::Local<panda::JSValueRef> JsRegisterNamedRoute(panda::JsiRuntimeCallInfo* 
     return panda::JSValueRef::Undefined(vm);
 }
 
+panda::Local<panda::JSValueRef> JsNavigationRegister(panda::JsiRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM *vm = runtimeCallInfo->GetVM();
+    auto argsNum = runtimeCallInfo->GetArgsNumber();
+    const uint8_t maxArgSize = 2;
+    if (argsNum != maxArgSize) {
+        TAG_LOGE(AceLogTag::ACE_NAVIGATION, "builder param is invalid: argsNum: %{public}d", argsNum);
+        return panda::JSValueRef::Undefined(vm);
+    }
+    Local<JSValueRef> nameProp = runtimeCallInfo->GetCallArgRef(0);
+    if (!nameProp->IsString()) {
+        TAG_LOGE(AceLogTag::ACE_NAVIGATION, "name is invalid");
+        return panda::JSValueRef::Undefined(vm);
+    }
+    std::string name = nameProp->ToString(vm)->ToString();
+    Local<JSValueRef> builderProp = runtimeCallInfo->GetCallArgRef(1);
+    if (!builderProp->IsObject()) {
+        TAG_LOGE(AceLogTag::ACE_NAVIGATION, "get builder object failed: %{public}s", name.c_str());
+        return panda::JSValueRef::Undefined(vm);
+    }
+    JsiDeclarativeEngine::AddToNavigationBuilderMap(name,
+        panda::Global<panda::ObjectRef>(vm, Local<panda::ObjectRef>(builderProp)));
+    return panda::JSValueRef::Undefined(vm);
+}
+
 panda::Local<panda::JSValueRef> JSPostCardAction(panda::JsiRuntimeCallInfo* runtimeCallInfo)
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
@@ -1347,6 +1372,8 @@ void JsRegisterViews(BindingTarget globalObj, void* nativeEngine)
     globalObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "focusControl"), focusControlObj);
     globalObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "registerNamedRoute"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), JsRegisterNamedRoute));
+    globalObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "NavigationBuilderRegister"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), JsNavigationRegister));
     globalObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "getArkUINativeModule"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), NG::ArkUINativeModule::GetArkUINativeModule));
     globalObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "loadCustomTitleBar"),

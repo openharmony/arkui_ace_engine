@@ -91,8 +91,9 @@ public:
     bool GetDisableAnimation() const override;
     std::vector<std::string> GetAllPathName() override;
     std::vector<int32_t> GetRemoveArray() override;
-    RefPtr<NG::UINode> CreateNodeByIndex(int32_t index) override;
-    RefPtr<NG::UINode> CreateNodeByRouteInfo(const RefPtr<NG::RouteInfo>& routeInfo) override;
+    RefPtr<NG::UINode> CreateNodeByIndex(int32_t index, const WeakPtr<NG::UINode>& node) override;
+    RefPtr<NG::UINode> CreateNodeByRouteInfo(const RefPtr<NG::RouteInfo>& routeInfo,
+        const WeakPtr<NG::UINode>& node) override;
     void SetJSExecutionContext(const JSExecutionContext& context);
     std::string GetRouteParam() const override;
     void OnAttachToParent(RefPtr<NG::NavigationStack> parent) override;
@@ -103,6 +104,7 @@ public:
         void FireNavigationInterception(bool isBefore, const RefPtr<NG::NavDestinationContext>& from,
         const RefPtr<NG::NavDestinationContext>& to, NG::NavigationOperation operation, bool isAnimated) override;
     void FireNavigationModeChange(NG::NavigationMode mode) override;
+    JSRef<JSVal> GetParamByIndex(int32_t index) const;
 
 protected:
     JSRef<JSObject> dataSourceObj_;
@@ -112,7 +114,6 @@ protected:
 
 private:
     std::string GetNameByIndex(int32_t index);
-    JSRef<JSVal> GetParamByIndex(int32_t index) const;
     JSRef<JSVal> GetOnPopByIndex(int32_t index) const;
     bool GetNavDestinationNodeInUINode(RefPtr<NG::UINode> node, RefPtr<NG::NavDestinationGroupNode>& desNode);
     int32_t GetSize() const;
@@ -122,6 +123,8 @@ private:
     static void UpdateOnStateChangedCallback(JSRef<JSObject> obj, std::function<void()> callback);
     static void UpdateCheckNavDestinationExistsFunc(JSRef<JSObject> obj,
         std::function<int32_t(JSRef<JSObject>)> checkFunc);
+    int32_t LoadCurrentDestinationBuilder(const std::string& name, const JSRef<JSVal>& param,
+        const WeakPtr<NG::UINode>& customNode);
     bool GetFlagByIndex(int32_t index) const;
     void SaveNodeToPreBuildList(const std::string& name, const JSRef<JSVal>& param, RefPtr<NG::UINode>& node);
     RefPtr<NG::UINode> GetNodeFromPreBuildList(const std::string& name, const JSRef<JSVal>& param);
@@ -129,6 +132,7 @@ private:
 
 private:
     std::vector<NavPathInfoUINode> preBuildNodeList_;
+    JSRef<JSObject> thisObj_;
 };
 } // namespace OHOS::Ace::Framework
 
