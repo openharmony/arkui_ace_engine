@@ -67,7 +67,6 @@ void ScrollPattern::OnModifyDone()
     }
     if (!GetScrollableEvent()) {
         AddScrollEvent();
-        RegisterScrollEventTask();
     }
     SetEdgeEffect();
     SetScrollBar(paintProperty->GetScrollBarProperty());
@@ -76,14 +75,6 @@ void ScrollPattern::OnModifyDone()
         host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
     }
     Register2DragDropManager();
-}
-
-void ScrollPattern::RegisterScrollEventTask()
-{
-    auto eventHub = GetHost()->GetEventHub<ScrollEventHub>();
-    CHECK_NULL_VOID(eventHub);
-    auto scrollFrameBeginEvent = eventHub->GetOnScrollFrameBegin();
-    SetScrollFrameBeginCallback(scrollFrameBeginEvent);
 }
 
 bool ScrollPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config)

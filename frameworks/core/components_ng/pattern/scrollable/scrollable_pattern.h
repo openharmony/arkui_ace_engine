@@ -221,13 +221,6 @@ public:
         scrollable->ProcessScrollSnapSpringMotion(scrollSnapDelta, scrollSnapVelocity);
     }
 
-    void SetScrollFrameBeginCallback(const ScrollFrameBeginCallback& scrollFrameBeginCallback)
-    {
-        // Previous: Set to Scrollable and called in HandleScroll
-        // Now: HandleScroll moved to base class, directly store and call scrollFrameBeginCallback_ here
-        scrollFrameBeginCallback_ = scrollFrameBeginCallback;
-    }
-
     bool IsScrollableSpringEffect() const
     {
         CHECK_NULL_RETURN(scrollEffect_, false);
@@ -615,7 +608,6 @@ private:
     bool HandleScrollImpl(float offset, int32_t source);
     void NotifyMoved(bool value);
 
-    ScrollFrameBeginCallback scrollFrameBeginCallback_;
     /*
      *  End of NestableScrollContainer implementations
      *******************************************************************************/
