@@ -16,7 +16,7 @@
 class Font {
     /**
      * Construct new instance of Font.
-     * initialzie with instanceId.
+     * initialize with instanceId.
      * @param instanceId obtained on the c++ side.
      * @since 10
      */
@@ -48,7 +48,7 @@ class Font {
 class MediaQuery {
     /**
      * Construct new instance of MediaQuery.
-     * initialzie with instanceId.
+     * initialize with instanceId.
      * @param instanceId obtained on the c++ side.
      * @since 10
      */
@@ -169,7 +169,7 @@ class MeasureUtils {
 class UIContext {
     /**
      * Construct new instance of UIContext.
-     * initialzie with instanceId.
+     * initialize with instanceId.
      * @param instanceId obtained on the c++ side.
      * @since 10
      */
@@ -221,6 +221,12 @@ class UIContext {
         }
         return this.componentUtils_;
     }
+
+    getOverlay() {
+        this.overlay_ = new Overlay(this.instanceId_);
+        return this.overlay_;
+    }
+
     animateTo(value, event) {
         __JSScopeUtil__.syncInstanceId(this.instanceId_);
         Context.animateTo(value, event);
@@ -347,7 +353,7 @@ class UIContext {
 class FocusController {
     /**
      * Construct new instance of FocusController.
-     * initialzie with instanceId.
+     * initialize with instanceId.
      * @param instanceId obtained on the c++ side.
      * @since 12
      */
@@ -372,7 +378,7 @@ class FocusController {
 class ComponentUtils {
     /**
      * Construct new instance of ComponentUtils.
-     * initialzie with instanceId.
+     * initialize with instanceId.
      * @param instanceId obtained on the c++ side.
      * @since 10
      */
@@ -391,7 +397,7 @@ class ComponentUtils {
 class Router {
     /**
      * Construct new instance of Font.
-     * initialzie with instanceId.
+     * initialize with instanceId.
      * @param instanceId obtained on the c++ side.
      * @since 10
      */
@@ -547,7 +553,7 @@ class Router {
 class PromptAction {
     /**
      * Construct new instance of PromptAction.
-     * initialzie with instanceId.
+     * initialize with instanceId.
      * @param instanceId obtained on the c++ side.
      * @since 10
      */
@@ -592,7 +598,7 @@ class PromptAction {
 class AtomicServiceBar {
     /**
      * Construct new instance of AtomicServiceBar.
-     * initialzie with instanceId.
+     * initialize with instanceId.
      * @param instanceId obtained on the c++ side.
      * @since 11
      */
@@ -632,6 +638,54 @@ class AtomicServiceBar {
     }
 }
 
+class Overlay {
+    /**
+     * Construct new instance of Overlay.
+     * initialize with instanceId.
+     * @param instanceId obtained on the c++ side.
+     * @since 12
+     */
+    constructor(instanceId) {
+        this.instanceId_ = instanceId;
+        this.ohos_overlay = globalThis.requireNapi('overlay');
+    }
+
+    addComponentContent(content) {
+        __JSScopeUtil__.syncInstanceId(this.instanceId_);
+        this.ohos_overlay.addFrameNode(content.getFrameNode());
+        __JSScopeUtil__.restoreInstanceId();
+    }
+
+    removeComponentContent(content) {
+        __JSScopeUtil__.syncInstanceId(this.instanceId_);
+        this.ohos_overlay.removeFrameNode(content.getFrameNode());
+        __JSScopeUtil__.restoreInstanceId();
+    }
+
+    showComponentContent(content) {
+        __JSScopeUtil__.syncInstanceId(this.instanceId_);
+        this.ohos_overlay.showNode(content.getFrameNode());
+        __JSScopeUtil__.restoreInstanceId();
+    }
+
+    hideComponentContent(content) {
+        __JSScopeUtil__.syncInstanceId(this.instanceId_);
+        this.ohos_overlay.hideNode(content.getFrameNode());
+        __JSScopeUtil__.restoreInstanceId();
+    }
+
+    show() {
+        __JSScopeUtil__.syncInstanceId(this.instanceId_);
+        this.ohos_overlay.show();
+        __JSScopeUtil__.restoreInstanceId();
+    }
+
+    hide() {
+        __JSScopeUtil__.syncInstanceId(this.instanceId_);
+        this.ohos_overlay.hide();
+        __JSScopeUtil__.restoreInstanceId();
+    }
+}
 /**
  * Get UIContext instance.
  * @param instanceId obtained on the c++ side.
