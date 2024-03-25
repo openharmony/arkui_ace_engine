@@ -29,6 +29,7 @@
 #include "base/geometry/ng/rect_t.h"
 #include "base/geometry/offset.h"
 #include "base/log/dump_log.h"
+#include "base/log/ace_trace.h"
 #include "base/log/log_wrapper.h"
 #include "base/memory/ace_type.h"
 #include "base/utils/string_utils.h"
@@ -183,6 +184,7 @@ void RichEditorPattern::HandleEnabled()
 
 void RichEditorPattern::BeforeCreateLayoutWrapper()
 {
+    ACE_SCOPED_TRACE("RichEditorBeforeCreateLayoutWrapper");
     TextPattern::PreCreateLayoutWrapper();
 }
 
@@ -291,7 +293,8 @@ int32_t RichEditorPattern::AddImageSpan(const ImageSpanOptions& options, bool is
 {
     auto host = GetHost();
     CHECK_NULL_RETURN(host, -1);
-
+    TAG_LOGD(AceLogTag::ACE_RICH_TEXT, "options=%{public}s", options.ToString().c_str());
+    TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "isPaste=%{public}d, index=%{public}d", isPaste, index);
     auto imageNode = ImageSpanNode::GetOrCreateSpanNode(V2::IMAGE_ETS_TAG,
         ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<ImagePattern>(); });
     auto imageLayoutProperty = imageNode->GetLayoutProperty<ImageLayoutProperty>();
@@ -406,6 +409,8 @@ int32_t RichEditorPattern::AddPlaceholderSpan(const RefPtr<UINode>& customNode, 
     CHECK_NULL_RETURN(customNode, 0);
     auto host = GetHost();
     CHECK_NULL_RETURN(host, 0);
+    TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "AddPlaceholderSpan");
+    TAG_LOGD(AceLogTag::ACE_RICH_TEXT, "options=%{public}s", options.ToString().c_str());
     auto placeholderSpanNode = PlaceholderSpanNode::GetOrCreateSpanNode(V2::PLACEHOLDER_SPAN_ETS_TAG,
         ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<PlaceholderSpanPattern>(); });
     CHECK_NULL_RETURN(placeholderSpanNode, 0);
@@ -467,6 +472,8 @@ void RichEditorPattern::SetSelfAndChildDraggableFalse(const RefPtr<UINode>& cust
 
 int32_t RichEditorPattern::AddTextSpan(const TextSpanOptions& options, bool isPaste, int32_t index)
 {
+    TAG_LOGD(AceLogTag::ACE_RICH_TEXT, "options=%{public}s", options.ToString().c_str());
+    TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "isPaste=%{public}d, index=%{public}d", isPaste, index);
     OperationRecord record;
     record.beforeCaretPosition = options.offset.value_or(static_cast<int32_t>(GetTextContentLength()));
     record.addText = options.value;
@@ -566,6 +573,8 @@ int32_t RichEditorPattern::AddTextSpanOperation(
 
 int32_t RichEditorPattern::AddSymbolSpan(const SymbolSpanOptions& options, bool isPaste, int32_t index)
 {
+    TAG_LOGD(AceLogTag::ACE_RICH_TEXT, "options=%{public}s", options.ToString().c_str());
+    TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "isPaste=%{public}d, index=%{public}d", isPaste, index);
     OperationRecord record;
     record.beforeCaretPosition = options.offset.value_or(static_cast<int32_t>(GetTextContentLength()));
     record.addText = " ";
@@ -995,6 +1004,7 @@ bool RichEditorPattern::SetCaretOffset(int32_t caretPosition)
 {
     bool success = false;
     success = SetCaretPosition(caretPosition);
+    TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "caretPosition=%{public}d, success=%{public}d", caretPosition, success);
     auto host = GetHost();
     CHECK_NULL_RETURN(host, false);
     auto focusHub = host->GetOrCreateFocusHub();
@@ -1065,6 +1075,9 @@ bool RichEditorPattern::SetCaretPosition(int32_t pos)
     ResetLastClickOffset();
     if (pos == correctPos) {
         FireOnSelectionChange(correctPos);
+        if (caretPosition_ != correctPos) {
+            TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "caret:%{public}d->%{public}d", caretPosition_, correctPos);
+        }
         caretPosition_ = correctPos;
         UpdateCaretInfoToController();
         return true;
@@ -1121,6 +1134,8 @@ bool RichEditorPattern::GetCaretVisible() const
 
 void RichEditorPattern::SetUpdateSpanStyle(struct UpdateSpanStyle updateSpanStyle)
 {
+    TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "SetUpdateSpanStyle");
+    TAG_LOGD(AceLogTag::ACE_RICH_TEXT, "updateSpanStyle=%{public}s", updateSpanStyle.ToString().c_str());
     updateSpanStyle_ = updateSpanStyle;
 }
 
@@ -1277,7 +1292,9 @@ bool RichEditorPattern::SymbolSpanUpdateStyle(
 void RichEditorPattern::UpdateSpanStyle(
     int32_t start, int32_t end, const TextStyle& textStyle, const ImageSpanAttribute& imageStyle)
 {
-    TAG_LOGD(AceLogTag::ACE_RICH_TEXT, "range=[%{public}d, %{public}d]", start, end);
+    TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "range=[%{public}d,%{public}d]", start, end);
+    TAG_LOGD(AceLogTag::ACE_RICH_TEXT, "textStyle=%{public}s, imageStyle=%{public}s",
+        textStyle.ToString().c_str(), imageStyle.ToString().c_str());
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     int32_t spanStart = 0;
@@ -1326,7 +1343,6 @@ void RichEditorPattern::UpdateSpanStyle(
 
     // Custom menus do not actively close.
     if (!SelectOverlayIsOn() || selectOverlayProxy_->GetSelectOverlayMangerInfo().menuInfo.menuBuilder == nullptr) {
-        TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "CloseSelectOverlay");
         CloseSelectOverlay();
     }
 }
@@ -1439,6 +1455,8 @@ std::vector<RefPtr<SpanNode>> RichEditorPattern::GetParagraphNodes(int32_t start
 
 void RichEditorPattern::UpdateParagraphStyle(int32_t start, int32_t end, const struct UpdateParagraphStyle& style)
 {
+    TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "range=[%{public}d,%{public}d]", start, end);
+    TAG_LOGD(AceLogTag::ACE_RICH_TEXT, "style=%{public}s", style.ToString().c_str());
     auto spanNodes = GetParagraphNodes(start, end);
     for (const auto& spanNode : spanNodes) {
         if (style.textAlign.has_value()) {
@@ -1483,6 +1501,7 @@ void RichEditorPattern::StartTwinkling()
     caretTwinklingTask_.Cancel();
     // Fire on selecion change when caret invisible -> visible
     if (!caretTwinkling_) {
+        TAG_LOGD(AceLogTag::ACE_RICH_TEXT, "StartTwinkling");
         caretTwinkling_ = true;
         FireOnSelectionChange(caretPosition_, caretPosition_);
     }
@@ -1503,6 +1522,9 @@ void RichEditorPattern::OnCaretTwinkling()
 
 void RichEditorPattern::StopTwinkling()
 {
+    if (caretTwinkling_) {
+        TAG_LOGD(AceLogTag::ACE_RICH_TEXT, "StopTwinkling");
+    }
     caretTwinkling_ = false;
     caretTwinklingTask_.Cancel();
     if (caretVisible_) {
@@ -1538,7 +1560,7 @@ void RichEditorPattern::HandleClickEvent(GestureEvent& info)
 
 void RichEditorPattern::HandleSingleClickEvent(OHOS::Ace::GestureEvent& info)
 {
-    TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "in handleSingleClickEvent");
+    TAG_LOGD(AceLogTag::ACE_RICH_TEXT, "handleSingleClick");
     hasClicked_ = true;
     lastClickTimeStamp_ = info.GetTimeStamp();
     if (info.GetSourceDevice() != SourceType::MOUSE && SelectOverlayIsOn() &&
@@ -1632,7 +1654,7 @@ void RichEditorPattern::MoveCaretAndStartFocus(const Offset& textOffset)
 
 void RichEditorPattern::HandleDoubleClickEvent(OHOS::Ace::GestureEvent& info)
 {
-    TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "in double HandleDoubleClickEvent,use mouse:%{public}d", info.GetSourceDevice());
+    TAG_LOGD(AceLogTag::ACE_RICH_TEXT, "HandleDoubleClickEvent");
     caretUpdateType_ = CaretUpdateType::DOUBLE_CLICK;
     HandleDoubleClickOrLongPress(info);
     caretUpdateType_ = CaretUpdateType::NONE;
@@ -1641,6 +1663,7 @@ void RichEditorPattern::HandleDoubleClickEvent(OHOS::Ace::GestureEvent& info)
 bool RichEditorPattern::HandleUserGestureEvent(
     GestureEvent& info, std::function<bool(RefPtr<SpanItem> item, GestureEvent& info)>&& gestureFunc)
 {
+    TAG_LOGD(AceLogTag::ACE_RICH_TEXT, "HandleUserGestureEvent");
     RectF textContentRect = contentRect_;
     textContentRect.SetTop(contentRect_.GetY() - std::min(baselineOffset_, 0.0f));
     textContentRect.SetHeight(contentRect_.Height() - std::max(baselineOffset_, 0.0f));
@@ -1760,6 +1783,7 @@ void RichEditorPattern::InitClickEvent(const RefPtr<GestureEventHub>& gestureHub
 {
     CHECK_NULL_VOID(!clickEventInitialized_);
     auto clickCallback = [weak = WeakClaim(this)](GestureEvent& info) {
+        TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "click callback, sourceType=%{public}d", info.GetSourceDevice());
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
         pattern->sourceType_ = info.GetSourceDevice();
@@ -1774,14 +1798,14 @@ void RichEditorPattern::InitFocusEvent(const RefPtr<FocusHub>& focusHub)
 {
     CHECK_NULL_VOID(!focusEventInitialized_);
     auto focusTask = [weak = WeakClaim(this)]() {
-        TAG_LOGD(AceLogTag::ACE_RICH_TEXT, "rich editor in focus");
+        TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "rich editor in focus");
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
         pattern->HandleFocusEvent();
     };
     focusHub->SetOnFocusInternal(focusTask);
     auto blurTask = [weak = WeakClaim(this)]() {
-        TAG_LOGD(AceLogTag::ACE_RICH_TEXT, "rich editor in blur");
+        TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "rich editor in blur");
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
         pattern->HandleBlurEvent();
@@ -1803,8 +1827,9 @@ bool RichEditorPattern::CheckBlurReason()
     auto curFocusHub = host->GetFocusHub();
     CHECK_NULL_RETURN(curFocusHub, false);
     auto curBlurReason = curFocusHub->GetBlurReason();
+    TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "curBlurReason=%{public}d", curBlurReason);
     if (curBlurReason == BlurReason::FRAME_DESTROY) {
-        TAG_LOGI(AceLogTag::ACE_KEYBOARD, "TextFieldPattern CheckBlurReason, Close Keyboard.");
+        TAG_LOGI(AceLogTag::ACE_KEYBOARD, "Close Keyboard.");
         return true;
     }
     return false;
@@ -1812,6 +1837,7 @@ bool RichEditorPattern::CheckBlurReason()
 
 void RichEditorPattern::HandleBlurEvent()
 {
+    TAG_LOGD(AceLogTag::ACE_RICH_TEXT, "HandleBlurEvent");
     isLongPress_ = false;
     if (textDetectEnable_) {
         if (CanStartAITask()) {
@@ -1834,6 +1860,7 @@ void RichEditorPattern::HandleBlurEvent()
 
 void RichEditorPattern::HandleFocusEvent()
 {
+    TAG_LOGD(AceLogTag::ACE_RICH_TEXT, "HandleFocusEvent");
     auto host = GetHost();
     if (host && textDetectEnable_ && !dataDetectorAdapter_->aiSpanMap_.empty()) {
         host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
@@ -1861,6 +1888,7 @@ void RichEditorPattern::UseHostToUpdateTextFieldManager()
 
 void RichEditorPattern::OnVisibleChange(bool isVisible)
 {
+    TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "isVisible=%{public}d", isVisible);
     TextPattern::OnVisibleChange(isVisible);
     StopTwinkling();
     CloseKeyboard(true);
@@ -1874,7 +1902,7 @@ bool RichEditorPattern::CloseKeyboard(bool forceClose)
         if (customKeyboardBuilder_ && isCustomKeyboardAttached_) {
             return CloseCustomKeyboard();
         }
-        TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "Request close soft keyboard.");
+        TAG_LOGD(AceLogTag::ACE_RICH_TEXT, "Request close soft keyboard.");
 #if defined(ENABLE_STANDARD_INPUT)
 #if defined(OHOS_STANDARD_SYSTEM) && !defined(PREVIEW)
         if (!imeAttached_) {
@@ -1988,7 +2016,7 @@ void RichEditorPattern::HandleLongPress(GestureEvent& info)
     if (!focusHub->IsFocusable()) {
         return;
     }
-    TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "handle long press!");
+    TAG_LOGD(AceLogTag::ACE_RICH_TEXT, "HandleLongPress");
     caretUpdateType_ = CaretUpdateType::LONG_PRESSED;
     selectionMenuOffsetClick_ = OffsetF(
         static_cast<float>(info.GetGlobalLocation().GetX()), static_cast<float>(info.GetGlobalLocation().GetY()));
@@ -1998,6 +2026,7 @@ void RichEditorPattern::HandleLongPress(GestureEvent& info)
 
 void RichEditorPattern::HandleDoubleClickOrLongPress(GestureEvent& info)
 {
+    TAG_LOGD(AceLogTag::ACE_RICH_TEXT, "caretUpdateType=%{public}d", caretUpdateType_);
     if (caretUpdateType_ == CaretUpdateType::LONG_PRESSED) {
         HandleUserLongPressEvent(info);
     }
@@ -2060,6 +2089,7 @@ bool RichEditorPattern::HandleUserLongPressEvent(GestureEvent& info)
 
 void RichEditorPattern::HandleMenuCallbackOnSelectAll()
 {
+    TAG_LOGD(AceLogTag::ACE_RICH_TEXT, "HandleMenuCallbackOnSelectAll");
     auto textSize = static_cast<int32_t>(GetWideText().length()) + placeholderCount_;
     textSelector_.Update(0, textSize);
     CalculateHandleOffsetAndShowOverlay();
@@ -2088,6 +2118,7 @@ void RichEditorPattern::InitLongPressEvent(const RefPtr<GestureEventHub>& gestur
 {
     CHECK_NULL_VOID(!longPressEvent_);
     auto longPressCallback = [weak = WeakClaim(this)](GestureEvent& info) {
+        TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "long press callback");
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
         pattern->sourceType_ = info.GetSourceDevice();
@@ -2279,6 +2310,7 @@ void RichEditorPattern::UpdateEditingValue(const std::shared_ptr<TextEditingValu
 
 void RichEditorPattern::PerformAction(TextInputAction action, bool forceCloseKeyboard)
 {
+    TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "action=%{public}d, forceCloseKeyboard=%{public}d", action, forceCloseKeyboard);
     InsertValue("\n");
 }
 
@@ -2314,6 +2346,7 @@ void RichEditorPattern::InitMouseEvent()
 
 void RichEditorPattern::OnHover(bool isHover)
 {
+    TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "isHover=%{public}d", isHover);
     auto frame = GetHost();
     CHECK_NULL_VOID(frame);
     auto frameId = frame->GetId();
@@ -2376,7 +2409,7 @@ bool RichEditorPattern::EnableStandardInput(bool needShowSoftKeyboard)
     CHECK_NULL_RETURN(inputMethod, false);
     auto miscTextConfig = GetMiscTextConfig();
     CHECK_NULL_RETURN(miscTextConfig.has_value(), false);
-    TAG_LOGI(
+    TAG_LOGD(
         AceLogTag::ACE_RICH_TEXT, "RequestKeyboard set calling window id is : %{public}u", miscTextConfig->windowId);
     MiscServices::TextConfig textconfig = miscTextConfig.value();
 #ifdef WINDOW_SCENE_SUPPORTED
@@ -2478,8 +2511,10 @@ void RichEditorPattern::OnColorConfigurationUpdate()
     CHECK_NULL_VOID(theme);
     auto textLayoutProperty = GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_VOID(textLayoutProperty);
-    textLayoutProperty->UpdateTextColor(theme->GetTextStyle().GetTextColor());
-    textLayoutProperty->UpdateTextDecorationColor(theme->GetTextStyle().GetTextColor());
+    const Color& themeTextColor = theme->GetTextStyle().GetTextColor();
+    TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "themeTextColor=%{public}s", themeTextColor.ToString().c_str());
+    textLayoutProperty->UpdateTextColor(themeTextColor);
+    textLayoutProperty->UpdateTextDecorationColor(themeTextColor);
     for (auto span : spans) {
         auto spanNode = DynamicCast<SpanNode>(span);
         if (!spanNode) {
@@ -2518,10 +2553,9 @@ void RichEditorPattern::UpdateCaretInfoToController()
     MiscServices::InputMethodController::GetInstance()->OnCursorUpdate(cursorInfo);
     MiscServices::InputMethodController::GetInstance()->OnSelectionChange(
         StringUtils::Str8ToStr16(text), textSelector_.GetStart(), textSelector_.GetEnd());
-    TAG_LOGI(AceLogTag::ACE_RICH_TEXT,
-        "Caret position update, left %{public}f, top %{public}f, width %{public}f, height %{public}f; textSelector_ "
-        "Start "
-        "%{public}d, end %{public}d",
+    TAG_LOGD(AceLogTag::ACE_RICH_TEXT,
+        "Caret update, pos=[%{public}.2f,%{public}.2f], size=[%{public}.2f,%{public}.2f], "
+        "textSelector=[%{public}d,%{public}d]",
         cursorInfo.left, cursorInfo.top, cursorInfo.width, cursorInfo.height, textSelector_.GetStart(),
         textSelector_.GetEnd());
 #else
@@ -2886,6 +2920,7 @@ void RichEditorPattern::AfterInsertValue(
 
 bool RichEditorPattern::AfterIMEInsertValue(const RefPtr<SpanNode>& spanNode, int32_t insertValueLength, bool isCreate)
 {
+    ACE_SCOPED_TRACE("RichEditorAfterIMEInsertValue");
     auto host = GetHost();
     CHECK_NULL_RETURN(host, false);
     auto eventHub = GetEventHub<RichEditorEventHub>();
@@ -3004,6 +3039,7 @@ void RichEditorPattern::HandleOnDelete(bool backward)
 
 void RichEditorPattern::DeleteBackward(int32_t length)
 {
+    TAG_LOGD(AceLogTag::ACE_RICH_TEXT, "length=%{public}d", length);
     OperationRecord record;
     record.beforeCaretPosition = caretPosition_;
     std::wstring deleteText = DeleteBackwardOperation(length);
@@ -3068,6 +3104,7 @@ std::wstring RichEditorPattern::DeleteBackwardOperation(int32_t length)
 
 void RichEditorPattern::DeleteForward(int32_t length)
 {
+    TAG_LOGD(AceLogTag::ACE_RICH_TEXT, "length=%{public}d", length);
     OperationRecord record;
     record.beforeCaretPosition = caretPosition_;
     std::wstring deleteText = DeleteForwardOperation(length);
@@ -3132,7 +3169,7 @@ bool RichEditorPattern::OnBackPressed()
 {
     auto tmpHost = GetHost();
     CHECK_NULL_RETURN(tmpHost, false);
-    TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "RichEditor %{public}d receives back press event", tmpHost->GetId());
+    TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "RichEditor %{public}d receives back press event", tmpHost->GetId());
     if (SelectOverlayIsOn()) {
         CloseSelectOverlay();
         textSelector_.Update(textSelector_.destinationOffset);
@@ -3494,6 +3531,7 @@ int32_t RichEditorPattern::GetParagraphEndPosition(int32_t caretPosition)
 
 void RichEditorPattern::HandleOnSelectAll()
 {
+    TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "HandleOnSelectAll");
     CloseSelectOverlay();
     auto host = GetHost();
     CHECK_NULL_VOID(host);
@@ -3531,6 +3569,7 @@ int32_t RichEditorPattern::CaretPositionSelectEmoji(CaretMoveIntent direction)
 
 void RichEditorPattern::HandleSelect(CaretMoveIntent direction)
 {
+    TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "direction=%{public}d", direction);
     CloseSelectOverlay();
     auto host = GetHost();
     CHECK_NULL_VOID(host);
@@ -3615,6 +3654,7 @@ bool RichEditorPattern::HandleOnEscape()
 
 void RichEditorPattern::HandleOnUndoAction()
 {
+    TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "HandleOnUndoAction");
     if (operationRecords_.empty()) {
         return;
     }
@@ -3648,6 +3688,7 @@ void RichEditorPattern::HandleOnUndoAction()
 
 void RichEditorPattern::HandleOnRedoAction()
 {
+    TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "HandleOnRedoAction");
     if (redoOperationRecords_.empty()) {
         return;
     }
@@ -3864,6 +3905,9 @@ int32_t RichEditorPattern::DeleteValueSetTextSpan(
 void RichEditorPattern::DeleteByDeleteValueInfo(const RichEditorDeleteValue& info)
 {
     auto deleteSpans = info.GetRichEditorDeleteSpans();
+    if (deleteSpans.empty()) {
+        return;
+    }
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     std::list<RefPtr<UINode>> deleteNode;
@@ -3918,6 +3962,7 @@ bool RichEditorPattern::OnKeyEvent(const KeyEvent& keyEvent)
 
 void RichEditorPattern::CursorMove(CaretMoveIntent direction)
 {
+    TAG_LOGD(AceLogTag::ACE_RICH_TEXT, "direction=%{public}d", direction);
     switch (direction) {
         case CaretMoveIntent::Left:
             CursorMoveLeft();
@@ -4286,6 +4331,8 @@ void RichEditorPattern::HandleMouseEvent(const MouseInfo& info)
 
 void RichEditorPattern::OnHandleMoveDone(const RectF& handleRect, bool isFirstHandle)
 {
+    TAG_LOGD(AceLogTag::ACE_RICH_TEXT, "handleRect=%{public}s, isFirstHandle=%{public}d",
+        handleRect.ToString().c_str(), isFirstHandle);
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto selectStart = std::min(textSelector_.baseOffset, textSelector_.destinationOffset);
@@ -4352,6 +4399,9 @@ void RichEditorPattern::CopySelectionMenuParams(SelectOverlayInfo& selectInfo, T
 void RichEditorPattern::ShowSelectOverlay(const RectF& firstHandle, const RectF& secondHandle, bool isCopyAll,
     TextResponseType responseType, bool handleReverse)
 {
+    TAG_LOGD(AceLogTag::ACE_RICH_TEXT, "firstHandle=%{public}s, secondHandle=%{public}s, isCopyAll=%{public}d,"
+        "responseType=%{public}d, handleReverse=%{public}d",
+        firstHandle.ToString().c_str(), secondHandle.ToString().c_str(), isCopyAll, responseType, handleReverse);
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
     showSelect_ = true;
@@ -4381,6 +4431,7 @@ void RichEditorPattern::ShowSelectOverlay(const RectF& firstHandle, const RectF&
             pattern->OnHandleMove(handleRect, isFirst);
         };
         selectInfo.onHandleMoveDone = [weak](const RectF& handleRect, bool isFirst) {
+            TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "onHandleMoveDone callback");
             auto pattern = weak.Upgrade();
             CHECK_NULL_VOID(pattern);
             pattern->OnHandleMoveDone(handleRect, isFirst);
@@ -4390,6 +4441,7 @@ void RichEditorPattern::ShowSelectOverlay(const RectF& firstHandle, const RectF&
         CHECK_NULL_VOID(host);
 
         selectInfo.menuCallback.onCopy = [weak, usingMouse]() {
+            TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "menu onCopy");
             auto pattern = weak.Upgrade();
             CHECK_NULL_VOID(pattern);
             pattern->HandleOnCopy();
@@ -4403,18 +4455,21 @@ void RichEditorPattern::ShowSelectOverlay(const RectF& firstHandle, const RectF&
         };
 
         selectInfo.menuCallback.onCut = [weak]() {
+            TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "menu onCut");
             auto pattern = weak.Upgrade();
             CHECK_NULL_VOID(pattern);
             pattern->HandleOnCut();
         };
 
         selectInfo.menuCallback.onPaste = [weak]() {
+            TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "menu onPaste");
             auto pattern = weak.Upgrade();
             CHECK_NULL_VOID(pattern);
             pattern->HandleOnPaste();
             pattern->CloseSelectOverlay();
         };
         selectInfo.menuCallback.onSelectAll = [weak, usingMouse]() {
+            TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "menu onSelectAll");
             auto pattern = weak.Upgrade();
             CHECK_NULL_VOID(pattern);
             pattern->isMousePressed_ = usingMouse;
@@ -4429,6 +4484,7 @@ void RichEditorPattern::ShowSelectOverlay(const RectF& firstHandle, const RectF&
 
         if (pattern->GetTextDetectEnable() && !pattern->HasFocus()) {
             selectInfo.onClose = [weak](bool closedByGlobalEvent) {
+                TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "menu onClose");
                 auto pattern = weak.Upgrade();
                 CHECK_NULL_VOID(pattern);
                 if (closedByGlobalEvent) {
@@ -4481,6 +4537,8 @@ void RichEditorPattern::CheckEditorTypeChange()
 void RichEditorPattern::HandleOnCopy(bool isUsingExternalKeyboard)
 {
     CHECK_NULL_VOID(clipboard_);
+    TAG_LOGD(AceLogTag::ACE_RICH_TEXT,
+        "isUsingExternalKeyboard=%{public}d, copyOption=%{public}d", isUsingExternalKeyboard, copyOption_);
     if (copyOption_ == CopyOptions::None) {
         return;
     }
@@ -4520,6 +4578,7 @@ void RichEditorPattern::HandleOnCopy(bool isUsingExternalKeyboard)
 
 void RichEditorPattern::ResetAfterPaste()
 {
+    TAG_LOGD(AceLogTag::ACE_RICH_TEXT, "ResetAfterPaste");
     OperationRecord record;
     record.beforeCaretPosition = caretPosition_ + moveLength_;
     auto pasteStr = GetPasteStr();
@@ -4550,6 +4609,7 @@ void RichEditorPattern::HandleOnPaste()
     CHECK_NULL_VOID(eventHub);
     TextCommonEvent event;
     eventHub->FireOnPaste(event);
+    TAG_LOGD(AceLogTag::ACE_RICH_TEXT, "HandleOnPaste, preventDefault=%{public}d", event.IsPreventDefault());
     if (event.IsPreventDefault()) {
         CloseSelectOverlay();
         ResetSelection();
@@ -4558,6 +4618,7 @@ void RichEditorPattern::HandleOnPaste()
     }
     CHECK_NULL_VOID(clipboard_);
     auto pasteCallback = [weak = WeakClaim(this)](const std::string& data) {
+        TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "pasteCallback callback");
         auto richEditor = weak.Upgrade();
         CHECK_NULL_VOID(richEditor);
         if (data.empty()) {
@@ -4657,6 +4718,8 @@ void RichEditorPattern::SetCaretSpanIndex(int32_t index)
 
 void RichEditorPattern::HandleOnCut()
 {
+    TAG_LOGD(AceLogTag::ACE_RICH_TEXT, "copyOption=%{public}d, textSelector_.IsValid()=%{public}d",
+        copyOption_, textSelector_.IsValid());
     if (copyOption_ == CopyOptions::None) {
         return;
     }
@@ -4787,6 +4850,10 @@ void RichEditorPattern::CloseSelectionMenu()
 
 void RichEditorPattern::CloseSelectOverlay()
 {
+    if (!selectOverlayProxy_ || selectOverlayProxy_->IsClosed()) {
+        return;
+    }
+    TAG_LOGD(AceLogTag::ACE_RICH_TEXT, "CloseSelectOverlay");
     TextPattern::CloseSelectOverlay(true);
 }
 
@@ -4837,6 +4904,7 @@ bool RichEditorPattern::IsSingleHandle()
 
 void RichEditorPattern::ResetSelection()
 {
+    TAG_LOGD(AceLogTag::ACE_RICH_TEXT, "ResetSelection");
     bool selectNothing = textSelector_.SelectNothing();
     textSelector_.Update(-1, -1);
     if (!selectNothing) {
@@ -4991,7 +5059,9 @@ void RichEditorPattern::HandleSelectOverlayWithOptions(const SelectionOptions& o
 
 void RichEditorPattern::SetSelection(int32_t start, int32_t end, const std::optional<SelectionOptions>& options)
 {
-    CHECK_NULL_VOID(HasFocus());
+    bool hasFocus = HasFocus();
+    TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "range=[%{public}d,%{public}d], hasFocus=%{public}d", start, end, hasFocus);
+    CHECK_NULL_VOID(hasFocus);
     bool changeSelected = false;
     if (start > end) {
         changeSelected = textSelector_.IsValid();
@@ -5688,7 +5758,7 @@ std::string RichEditorPattern::GetPositionSpansText(int32_t position, int32_t& s
     start = std::clamp(start, 0, GetTextContentLength());
     end = std::clamp(end, 0, GetTextContentLength());
 
-    TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "get span pos:%{public}d-start:%{public}d-end:%{public}d", position, start, end);
+    TAG_LOGD(AceLogTag::ACE_RICH_TEXT, "caret=%{public}d, range=[%{public}d,%{public}d]", position, start, end);
 
     // get all the spans between start and end, then filter the valid text
     auto infos = GetSpansInfo(start, end, GetSpansMethod::ONSELECT);
@@ -5718,7 +5788,7 @@ std::string RichEditorPattern::GetPositionSpansText(int32_t position, int32_t& s
         }
     }
 
-    TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "get spans text ret spanStart:%{public}d", startSpan);
+    TAG_LOGD(AceLogTag::ACE_RICH_TEXT, "get spans text ret spanStart:%{public}d", startSpan);
     return sstream.str();
 }
 
