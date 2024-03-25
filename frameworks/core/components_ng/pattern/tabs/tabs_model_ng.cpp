@@ -612,9 +612,7 @@ void TabsModelNG::SetClipEdge(bool clipEdge)
 {
     auto tabsNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(tabsNode);
-    auto tabsRenderContext = tabsNode->GetRenderContext();
-    CHECK_NULL_VOID(tabsRenderContext);
-    tabsRenderContext->UpdateClipEdge(clipEdge);
+    ViewAbstract::SetClipEdge(clipEdge);
     auto tabsChildren = tabsNode->GetChildren();
     for (const auto& child : tabsChildren) {
         auto childFrameNode = AceType::DynamicCast<FrameNode>(child);
@@ -913,9 +911,7 @@ void TabsModelNG::SetOnCustomAnimation(TabsCustomAnimationEvent&& onCustomAnimat
 void TabsModelNG::SetClipEdge(FrameNode* frameNode, bool clipEdge)
 {
     CHECK_NULL_VOID(frameNode);
-    auto tabsRenderContext = frameNode->GetRenderContext();
-    CHECK_NULL_VOID(tabsRenderContext);
-    tabsRenderContext->UpdateClipEdge(clipEdge);
+    ViewAbstract::SetClipEdge(frameNode, clipEdge);
     auto tabsChildren = frameNode->GetChildren();
     for (const auto& child : tabsChildren) {
         auto childFrameNode = AceType::DynamicCast<FrameNode>(child);
