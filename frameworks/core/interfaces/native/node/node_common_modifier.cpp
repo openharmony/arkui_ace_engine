@@ -2789,16 +2789,17 @@ void SetExpandSafeArea(ArkUINodeHandle node, ArkUI_CharPtr typeStr, ArkUI_CharPt
     std::string edges;
     while ((pos = safeAreaTypeStr.find(delimiter)) != std::string::npos) {
         type = safeAreaTypeStr.substr(0, pos);
-        safeAreaType |= StringUtils::StringToUint(type);
+        safeAreaType |= (1 << StringUtils::StringToUint(type));
         safeAreaTypeStr.erase(0, pos + delimiter.length());
     }
-    safeAreaType |= StringUtils::StringToUint(safeAreaTypeStr);
+    safeAreaType |= (1 << StringUtils::StringToUint(safeAreaTypeStr));
+    pos = 0;
     while ((pos = safeAreaEdgeStr.find(delimiter)) != std::string::npos) {
         edges = safeAreaEdgeStr.substr(0, pos);
-        safeAreaEdge |= StringUtils::StringToUint(edges);
+        safeAreaEdge |= (1 << StringUtils::StringToUint(edges));
         safeAreaEdgeStr.erase(0, pos + delimiter.length());
     }
-    safeAreaEdge |= StringUtils::StringToUint(safeAreaEdgeStr);
+    safeAreaEdge |= (1 << StringUtils::StringToUint(safeAreaEdgeStr));
     opts.type = safeAreaType;
     opts.edges = safeAreaEdge;
     ViewAbstract::UpdateSafeAreaExpandOpts(frameNode, opts);
