@@ -282,7 +282,8 @@ HWTEST_F(SliderTestNg, SliderTestNg002, TestSize.Level1)
     EXPECT_EQ(sliderPaintProperty->GetReverse(), BOOL_VAULE);
     EXPECT_EQ(sliderPaintProperty->GetDirection(), TEST_AXIS);
     EXPECT_EQ(sliderPaintProperty->GetBlockColor(), TEST_COLOR);
-    EXPECT_EQ(sliderPaintProperty->GetTrackBackgroundColor(), SliderModelNG::CreateSolidGradient(TEST_COLOR));
+    EXPECT_EQ(true, sliderPaintProperty->GetTrackBackgroundColor().has_value());
+    EXPECT_EQ(sliderPaintProperty->GetTrackBackgroundColor().value(), SliderModelNG::CreateSolidGradient(TEST_COLOR));
     EXPECT_EQ(sliderPaintProperty->GetSelectColor(), TEST_COLOR);
     EXPECT_EQ(sliderPaintProperty->GetShowSteps(), BOOL_VAULE);
 }
@@ -3342,6 +3343,62 @@ HWTEST_F(SliderTestNg, SliderContentModifierTest020, TestSize.Level1)
     EXPECT_EQ(gradientColors[0].GetDimension(), gradientColors2[0].GetDimension());
     EXPECT_EQ(gradientColors[1].GetDimension(), gradientColors2[1].GetDimension());
     EXPECT_EQ(gradientColors[2].GetDimension(), gradientColors2[2].GetDimension());
+}
+
+/**
+ * @tc.name: SliderContentModifierTest021
+ * @tc.desc: TEST default track background color
+ * @tc.type: FUNC
+ */
+HWTEST_F(SliderTestNg, SliderContentModifierTest021, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step0. Mock track background default value
+     */
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
+    auto sliderTheme = AceType::MakeRefPtr<SliderTheme>();
+    sliderTheme->trackBgColor_ = Color::RED;
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(sliderTheme));
+
+    /**
+     * @tc.steps: step1. create frameNode and sliderContentModifier.
+     */
+    SliderModelNG sliderModelNG;
+    sliderModelNG.Create(VALUE, STEP, MIN, MAX);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    EXPECT_NE(frameNode, nullptr);
+
+    RefPtr<SliderPattern> sliderPattern = AceType::MakeRefPtr<SliderPattern>();
+    ASSERT_NE(sliderPattern, nullptr);
+    sliderPattern->AttachToFrameNode(frameNode);
+
+    auto geometryNode = frameNode->GetGeometryNode();
+    ASSERT_NE(geometryNode, nullptr);
+    geometryNode->SetContentSize(SizeF(MAX_WIDTH, MAX_HEIGHT));
+
+    ASSERT_NE(sliderPattern->CreateNodePaintMethod(), nullptr);
+    ASSERT_NE(sliderPattern->sliderContentModifier_, nullptr);
+
+    Gradient gradient = sliderPattern->sliderContentModifier_->trackBackgroundColor_->Get().GetGradient();
+    std::vector<GradientColor> gradientColors = gradient.GetColors();
+
+    Gradient defaultGradient;
+    GradientColor gradientColor1;
+    gradientColor1.SetLinearColor(LinearColor(Color::RED));
+    gradientColor1.SetDimension(Dimension(0.0));
+    defaultGradient.AddColor(gradientColor1);
+    GradientColor gradientColor2;
+    gradientColor2.SetLinearColor(LinearColor(Color::RED));
+    gradientColor2.SetDimension(Dimension(1.0));
+    defaultGradient.AddColor(gradientColor2);
+    std::vector<GradientColor> defaultGradientColors = defaultGradient.GetColors();
+
+    EXPECT_EQ(defaultGradientColors.size(), gradientColors.size());
+    EXPECT_EQ(defaultGradientColors[0].GetLinearColor(), gradientColors[0].GetLinearColor());
+    EXPECT_EQ(defaultGradientColors[1].GetLinearColor(), gradientColors[1].GetLinearColor());
+    EXPECT_EQ(defaultGradientColors[0].GetDimension(), gradientColors[0].GetDimension());
+    EXPECT_EQ(defaultGradientColors[1].GetDimension(), gradientColors[1].GetDimension());
 }
 
 /**
