@@ -2526,7 +2526,7 @@ void TextFieldPattern::HandleLongPress(GestureEvent& info)
     CHECK_NULL_VOID(!IsDragging());
     auto focusHub = GetFocusHub();
     CHECK_NULL_VOID(focusHub);
-    if (!focusHub->IsFocusable()) {
+    if (!focusHub->IsFocusable() || IsOnUnitByPosition(info.GetGlobalLocation())) {
         return;
     }
     isTouchCaret_ = false;
@@ -2568,6 +2568,19 @@ void TextFieldPattern::HandleLongPress(GestureEvent& info)
         UpdateSelectMenuVisibility(true);
     }
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+}
+
+bool TextFieldPattern::IsOnUnitByPosition(const Offset& globalOffset)
+{
+    if (!IsShowUnit()) {
+        return false;
+    }
+    auto unitArea = AceType::DynamicCast<UnitResponseArea>(responseArea_);
+    CHECK_NULL_RETURN(unitArea, false);
+    auto frameNode = unitArea->GetFrameNode();
+    CHECK_NULL_RETURN(frameNode, false);
+    return frameNode->GetGeometryNode()->GetFrameRect().IsInRegion(
+        { globalOffset.GetX() - GetTextPaintOffset().GetX(), globalOffset.GetY() - GetTextPaintOffset().GetY() });
 }
 
 bool TextFieldPattern::IsMouseOverScrollBar(const GestureEvent& info)
