@@ -2505,4 +2505,50 @@ void ScrollablePattern::PrintOffsetLog(AceLogTag tag, int32_t id, double finalOf
             id, scrollSource_, finalOffset);
     }
 }
+
+void ScrollablePattern::ScrollAtFixedVelocity(float velocity)
+{
+    if (AnimateRunning()) {
+        StopAnimate();
+    }
+
+    if (!animator_) {
+        animator_ = CREATE_ANIMATOR(PipelineBase::GetCurrentContext());
+        animator_->AddStopListener([weak = AceType::WeakClaim(this)]() {
+            auto pattern = weak.Upgrade();
+            CHECK_NULL_VOID(pattern);
+            pattern->OnAnimateStop();
+        });
+    }
+
+    if (!fixedVelocityMotion_) {
+        fixedVelocityMotion_ = AceType::MakeRefPtr<VelocityMotion>(
+            [weak = WeakClaim(this)](float offset) -> bool {
+                auto pattern = weak.Upgrade();
+                CHECK_NULL_RETURN(pattern, true);
+                if (LessNotEqual(offset, 0) && pattern->IsAtBottom()) {
+                    // Stop scrolling when reach the bottom
+                    pattern->fixedVelocityMotion_->Init();
+                    return true;
+                } else if (GreatNotEqual(offset, 0) && pattern->IsAtTop()) {
+                    // Stop scrolling when reach the top
+                    pattern->fixedVelocityMotion_->Init();
+                    return true;
+                }
+                return false;
+            });
+        fixedVelocityMotion_->AddListener([weakScroll = AceType::WeakClaim(this)](double offset) {
+            auto pattern = weakScroll.Upgrade();
+            CHECK_NULL_VOID(pattern);
+            pattern->UpdateCurrentOffset(offset, SCROLL_FROM_AXIS);
+        });
+        fixedVelocityMotion_->SetVelocity(velocity);
+    } else {
+        fixedVelocityMotion_->Init();
+        fixedVelocityMotion_->SetVelocity(velocity);
+    }
+
+    animator_->PlayMotion(fixedVelocityMotion_);
+    FireOnScrollStart();
+}
 } // namespace OHOS::Ace::NG
