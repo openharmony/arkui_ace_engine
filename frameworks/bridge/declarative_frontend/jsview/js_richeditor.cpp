@@ -1172,7 +1172,7 @@ void JSRichEditorController::AddImageSpan(const JSCallbackInfo& args)
         JSRef<JSVal> offset = imageObject->GetProperty("offset");
         int32_t imageOffset = 0;
         if (!offset->IsNull() && JSContainerBase::ParseJsInt32(offset, imageOffset)) {
-            options.offset = imageOffset;
+            options.offset = imageOffset > 0 ? imageOffset : 0;
         }
         auto imageStyleObj = imageObject->GetProperty("imageStyle");
         JSRef<JSObject> imageAttribute = JSRef<JSObject>::Cast(imageStyleObj);
@@ -1273,7 +1273,7 @@ void JSRichEditorController::AddTextSpan(const JSCallbackInfo& args)
         JSRef<JSVal> offset = spanObject->GetProperty("offset");
         int32_t spanOffset = 0;
         if (!offset->IsNull() && JSContainerBase::ParseJsInt32(offset, spanOffset)) {
-            options.offset = spanOffset;
+            options.offset = spanOffset > 0 ? spanOffset : 0;
         }
         auto styleObj = spanObject->GetProperty("style");
         JSRef<JSObject> styleObject = JSRef<JSObject>::Cast(styleObj);
@@ -1329,7 +1329,7 @@ void JSRichEditorController::AddSymbolSpan(const JSCallbackInfo& args)
         JSRef<JSVal> offset = spanObject->GetProperty("offset");
         int32_t spanOffset = 0;
         if (!offset->IsNull() && JSContainerBase::ParseJsInt32(offset, spanOffset)) {
-            options.offset = spanOffset;
+            options.offset = spanOffset > 0 ? spanOffset : 0;
         }
         auto styleObj = spanObject->GetProperty("style");
         JSRef<JSObject> styleObject = JSRef<JSObject>::Cast(styleObj);
@@ -1469,7 +1469,9 @@ void JSRichEditorController::ParseOptions(const JSCallbackInfo& args, SpanOption
     JSRef<JSVal> offset = placeholderOptionObject->GetProperty("offset");
     int32_t placeholderOffset = 0;
     if (!offset->IsNull() && JSContainerBase::ParseJsInt32(offset, placeholderOffset)) {
-        placeholderSpan.offset = placeholderOffset >= 0 ? placeholderOffset : Infinity<int32_t>();
+        if (placeholderOffset >= 0) {
+            placeholderSpan.offset = placeholderOffset;
+        }
     }
 }
 
