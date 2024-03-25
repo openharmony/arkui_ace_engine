@@ -443,6 +443,16 @@ public:
 
     void ModalPageLostFocus(const RefPtr<FrameNode>& node);
 
+    void SetCustomKeyboardOption(bool supportAvoidance)
+    {
+        keyboardAvoidance_ = supportAvoidance;
+    }
+    
+    void SupportCustomKeyboardAvoidance(RefPtr<RenderContext> context, AnimationOption option,
+        RefPtr<FrameNode> customKeyboard);
+
+    void SetCustomKeybroadHeight(float customHeight = 0.0);
+	
     void SetFilterActive(bool actived)
     {
         hasFilterActived = actived;
@@ -584,7 +594,7 @@ private:
     bool isProhibitBack_ = false;
 
     std::unordered_map<int32_t, WeakPtr<FrameNode>> uiExtNodes_;
-
+    bool keyboardAvoidance_ = false;
     ACE_DISALLOW_COPY_AND_MOVE(OverlayManager);
 
     bool hasFilterActived {false};

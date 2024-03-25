@@ -89,7 +89,7 @@ public:
     void SetPadding(NG::PaddingProperty& newPadding, Edge oldPadding, bool tmp) override;
     void SetHoverEffect(HoverEffectType hoverEffect) override;
     void SetSelectionMenuHidden(bool contextMenuHidden) override;
-    void SetCustomKeyboard(const std::function<void()>&& buildFunc) override;
+    void SetCustomKeyboard(const std::function<void()>&& buildFunc, bool supportAvoidance = false) override;
     void SetPasswordRules(const std::string& passwordRules) override;
     void SetEnableAutoFill(bool enableAutoFill) override;
     void SetCleanNodeStyle(CleanNodeStyle cleanNodeStyle) override;

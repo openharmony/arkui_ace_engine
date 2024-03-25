@@ -620,7 +620,7 @@ void SearchModelNG::SetOnPaste(std::function<void(const std::string&)>&& func)
     eventHub->SetOnPaste(std::move(searchPasteFunc));
 }
 
-void SearchModelNG::SetCustomKeyboard(const std::function<void()>&& buildFunc)
+void SearchModelNG::SetCustomKeyboard(const std::function<void()>&& buildFunc, bool supportAvoidance)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
@@ -629,6 +629,7 @@ void SearchModelNG::SetCustomKeyboard(const std::function<void()>&& buildFunc)
     auto textFieldPattern = textFieldChild->GetPattern<TextFieldPattern>();
     if (textFieldPattern) {
         textFieldPattern->SetCustomKeyboard(std::move(buildFunc));
+        textFieldPattern->SetCustomKeyboardOption(supportAvoidance);
     }
 }
 

@@ -699,9 +699,17 @@ void JSSearch::SetCustomKeyboard(const JSCallbackInfo& info)
     if (info.Length() < 1 || !info[0]->IsObject()) {
         return;
     }
+    bool supportAvoidance = false;
+    if (info.Length() == 2 && info[1]->IsObject()) {  //  2 here refers to the number of parameters
+        auto paramObject = JSRef<JSObject>::Cast(info[1]);
+        auto isSupportAvoidance = paramObject->GetProperty("supportAvoidance");
+        if (!isSupportAvoidance->IsNull() && isSupportAvoidance->IsBoolean()) {
+            supportAvoidance = isSupportAvoidance->ToBoolean();
+        }
+    }
     std::function<void()> buildFunc;
     if (JSTextField::ParseJsCustomKeyboardBuilder(info, 0, buildFunc)) {
-        SearchModel::GetInstance()->SetCustomKeyboard(std::move(buildFunc));
+        SearchModel::GetInstance()->SetCustomKeyboard(std::move(buildFunc), supportAvoidance);
     }
 }
 

@@ -995,6 +995,7 @@ public:
     bool CheckAutoSave() override;
     void OnColorConfigurationUpdate() override;
     bool NeedPaintSelect();
+    void SetCustomKeyboardOption(bool supportAvoidance);
 
     void SetIsCustomFont(bool isCustomFont)
     {
@@ -1473,6 +1474,7 @@ private:
     bool isKeyboardClosedByUser_ = false;
     bool lockRecord_ = false;
     bool isFillRequestFinish_ = false;
+    bool keyboardAvoidance_ = false;
     bool hasMousePressed_ = false;
 };
 } // namespace OHOS::Ace::NG

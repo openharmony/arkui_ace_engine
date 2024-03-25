@@ -278,7 +278,7 @@ public:
     virtual void SetOnChangeEvent(std::function<void(const std::string&)>&& func) = 0;
     virtual void SetFocusableAndFocusNode() {};
     virtual void SetSelectionMenuHidden(bool contextMenuHidden) = 0;
-    virtual void SetCustomKeyboard(const std::function<void()>&& buildFunc) = 0;
+    virtual void SetCustomKeyboard(const std::function<void()>&& buildFunc, bool supportAvoidance = false) = 0;
     virtual void SetCounterType(int32_t value) {};
     virtual void SetShowCounterBorder(bool value) {};
     virtual void SetCleanNodeStyle(CleanNodeStyle cleanNodeStyle) = 0;
