@@ -1974,7 +1974,6 @@ bool FocusHub::UpdateFocusView()
     }
     auto curFocusView = FocusView::GetCurrentFocusView();
     if (focusView && focusView->IsFocusViewLegal() && focusView != curFocusView) {
-        focusView->SetIsViewRootScopeFocused(false);
         focusView->FocusViewShow();
     }
     return true;
