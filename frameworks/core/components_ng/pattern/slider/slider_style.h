@@ -45,6 +45,7 @@ struct SliderPaintStyle {
     ACE_DEFINE_PROPERTY_GROUP_ITEM(BlockBorderWidth, Dimension)
     ACE_DEFINE_PROPERTY_GROUP_ITEM(StepColor, Color)
     ACE_DEFINE_PROPERTY_GROUP_ITEM(TrackBorderRadius, Dimension)
+    ACE_DEFINE_PROPERTY_GROUP_ITEM(SelectedBorderRadius, Dimension)
     ACE_DEFINE_PROPERTY_GROUP_ITEM(BlockSize, SizeT<Dimension>)
     ACE_DEFINE_PROPERTY_GROUP_ITEM(BlockType, SliderModel::BlockStyleType)
     ACE_DEFINE_PROPERTY_GROUP_ITEM(BlockImage, std::string)
