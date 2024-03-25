@@ -916,8 +916,12 @@ void RichEditorPattern::CopyTextSpanLineStyle(
         target->AddPropertyInfo(PropertyInfo::TEXTSHADOW);
     }
 
-    if (needLeadingMargin && source->HasLeadingMargin()) {
-        target->UpdateLeadingMargin(source->GetLeadingMarginValue({}));
+    if (source->HasLeadingMargin()) {
+        auto leadingMargin = source->GetLeadingMarginValue({});
+        if (!needLeadingMargin) {
+            leadingMargin.pixmap.Reset();
+        }
+        target->UpdateLeadingMargin(leadingMargin);
         target->AddPropertyInfo(PropertyInfo::LEADING_MARGIN);
     }
 
