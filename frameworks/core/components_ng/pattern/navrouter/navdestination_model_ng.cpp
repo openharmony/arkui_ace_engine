@@ -395,6 +395,13 @@ RefPtr<AceType> NavDestinationModelNG::CreateEmpty()
     Create();
     auto uiNode = ViewStackProcessor::GetInstance()->Finish();
     uiNode->SetRemoveSilently(true);
+    auto navigationNode = AceType::DynamicCast<NavDestinationGroupNode>(uiNode);
+    CHECK_NULL_RETURN(navigationNode, uiNode);
+    auto pattern = navigationNode->GetPattern<NavDestinationPattern>();
+    auto context = AceType::MakeRefPtr<NavDestinationContext>();
+    CHECK_NULL_RETURN(context, uiNode);
+    context->SetIsEmpty(true);
+    pattern->SetNavDestinationContext(context);
     return uiNode;
 }
 
