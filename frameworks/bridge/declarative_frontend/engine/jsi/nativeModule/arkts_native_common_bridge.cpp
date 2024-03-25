@@ -3220,8 +3220,6 @@ ArkUINativeModuleValue CommonBridge::SetFocusable(ArkUIRuntimeCallInfo* runtimeC
     if (secondArg->IsBoolean()) {
         bool focusable = secondArg->ToBoolean(vm)->Value();
         GetArkUINodeModifiers()->getCommonModifier()->setFocusable(nativeNode, focusable);
-    } else {
-        GetArkUINodeModifiers()->getCommonModifier()->resetFocusable(nativeNode);
     }
     return panda::JSValueRef::Undefined(vm);
 }
