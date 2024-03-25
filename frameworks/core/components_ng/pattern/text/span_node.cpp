@@ -448,7 +448,7 @@ void SpanItem::UpdateContentTextStyle(
         return;
     }
     auto displayText = content;
-    auto textCase = fontStyle ? fontStyle->GetTextCase().value_or(TextCase::NORMAL) : TextCase::NORMAL;
+    auto textCase = textStyle.has_value() ? textStyle->GetTextCase() : TextCase::NORMAL;
     StringUtils::TransformStrCase(displayText, static_cast<int32_t>(textCase));
     if (textStyle.has_value()) {
         builder->PushStyle(textStyle.value());

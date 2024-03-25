@@ -3383,8 +3383,8 @@ std::optional<MiscServices::TextConfig> TextFieldPattern::GetMiscTextConfig() co
     double positionY = (tmpHost->GetPaintRectOffset() - pipeline->GetRootRect().GetOffset()).GetY() + windowRect.Top();
     double height = frameRect_.Height();
     auto offset = AVOID_OFFSET.ConvertToPx();
-    height =
-        selectController_->GetCaretRect().Bottom() + windowRect.Top() + GetTextPaintOffset().GetY() + offset - positionY;
+    height = selectController_->GetCaretRect().Bottom() + windowRect.Top() +
+             GetTextPaintOffset().GetY() + offset - positionY;
 
     if (IsNormalInlineState()) {
         auto safeBoundary = theme->GetInlineBorderWidth().ConvertToPx() * 2;
