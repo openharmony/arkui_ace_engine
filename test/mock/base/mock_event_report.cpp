@@ -61,4 +61,7 @@ void EventReport::SendEventInner(const EventInfo& eventInfo) {}
 void EventReport::ReportDoubleClickTitle(int32_t stateChange) {}
 
 void EventReport::ReportClickTitleMaximizeMenu(int32_t maxMenuItem, int32_t stateChange) {}
+
+void EventReport::PerformanceEventReport(PerformanceExecpType type, const std::string& pageUrl,
+    const std::string& msg) {}
 } // namespace OHOS::Ace
