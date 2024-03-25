@@ -20,6 +20,7 @@
 #include "core/components_ng/pattern/rich_editor/rich_editor_theme.h"
 #include "core/components_ng/pattern/text/text_layout_algorithm.h"
 #include "core/components_ng/render/paragraph.h"
+#include "base/log/ace_trace.h"
 
 namespace OHOS::Ace::NG {
 RichEditorLayoutAlgorithm::RichEditorLayoutAlgorithm(std::list<RefPtr<SpanItem>> spans, ParagraphManager* paragraphs)
@@ -91,6 +92,7 @@ void RichEditorLayoutAlgorithm::CopySpanStyle(RefPtr<SpanItem> source, RefPtr<Sp
 std::optional<SizeF> RichEditorLayoutAlgorithm::MeasureContent(
     const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper)
 {
+    ACE_SCOPED_TRACE("RichEditorMeasureContent");
     pManager_->Reset();
     SetPlaceholder(layoutWrapper);
     if (spans_.empty()) {
@@ -108,6 +110,7 @@ std::optional<SizeF> RichEditorLayoutAlgorithm::MeasureContent(
     float textHeight = 0.0f;
     for (auto&& group : spans_) {
         // layout each paragraph
+        ACE_SCOPED_TRACE("LayoutEachParagraph");
         SetSpans(group);
         SetParagraph(nullptr);
         auto size = TextLayoutAlgorithm::MeasureContent(contentConstraint, layoutWrapper);
