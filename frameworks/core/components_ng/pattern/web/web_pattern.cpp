@@ -2739,6 +2739,8 @@ void WebPattern::UpdateLocale()
 
 void WebPattern::OnWindowShow()
 {
+    TAG_LOGD(AceLogTag::ACE_WEB, "WebPattern::OnWindowShow");
+    delegate_->OnRenderToForeground();
     if (isWindowShow_ || !isVisible_) {
         return;
     }
@@ -2750,6 +2752,8 @@ void WebPattern::OnWindowShow()
 
 void WebPattern::OnWindowHide()
 {
+    TAG_LOGD(AceLogTag::ACE_WEB, "WebPattern::OnWindowHide");
+    delegate_->OnRenderToBackground();
     if (!isWindowShow_ || !isVisible_) {
         return;
     }
