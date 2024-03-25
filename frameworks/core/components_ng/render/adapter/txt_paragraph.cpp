@@ -455,7 +455,7 @@ bool TxtParagraph::ComputeOffsetForCaretUpstream(int32_t extent, CaretMetricsF& 
 #else
     double caretStart = isLtr ? textBox.rect.GetRight() : textBox.rect.GetLeft();
 #endif
-    double offsetX = std::min(caretStart, paragraph_->GetMaxWidth());
+    float offsetX = std::min(static_cast<float>(caretStart), GetLongestLine());
     result.offset.SetX(offsetX);
 #ifndef USE_GRAPHIC_TEXT_GINE
     result.offset.SetY(textBox.rect.fTop);

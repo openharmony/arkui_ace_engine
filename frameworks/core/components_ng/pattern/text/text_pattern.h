@@ -152,9 +152,18 @@ public:
 
     void GetGlobalOffset(Offset& offset);
 
-    const RectF& GetTextContentRect() const override
+    RectF GetTextContentRect() const override
     {
-        return contentRect_;
+        auto textRect = contentRect_;
+        auto host = GetHost();
+        CHECK_NULL_RETURN(host, textRect);
+        auto renderContext = host->GetRenderContext();
+        CHECK_NULL_RETURN(renderContext, textRect);
+        if (!renderContext->GetClipEdge().value_or(true) && paragraph_ &&
+            LessNotEqual(textRect.Width(), paragraph_->GetLongestLine())) {
+            textRect.SetWidth(paragraph_->GetLongestLine());
+        }
+        return textRect;
     }
 
     float GetBaselineOffset() const
