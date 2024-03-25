@@ -2044,11 +2044,24 @@ bool TextPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, c
     baselineOffset_ = textLayoutAlgorithm->GetBaselineOffset();
     contentOffset_ = dirty->GetGeometryNode()->GetContentOffset();
     textStyle_ = textLayoutAlgorithm->GetTextStyle();
-    if (textSelector_.IsValid() && !isMousePressed_) {
-        CalculateHandleOffsetAndShowOverlay();
-        ShowSelectOverlay(textSelector_.firstHandle, textSelector_.secondHandle, true);
-    }
+    ProcessOverlayAfterLayout();
     return true;
+}
+
+void TextPattern::ProcessOverlayAfterLayout()
+{
+    if (processOverlayDelayTask_) {
+        processOverlayDelayTask_();
+        processOverlayDelayTask_ = nullptr;
+    } else if (selectOverlayProxy_ && !selectOverlayProxy_->IsClosed()) {
+        CalculateHandleOffsetAndShowOverlay();
+        SelectHandleInfo firstHandleInfo = { .paintRect = textSelector_.firstHandle };
+        CheckHandles(firstHandleInfo);
+        SelectHandleInfo secondHandleInfo = { .paintRect = textSelector_.secondHandle };
+        CheckHandles(secondHandleInfo);
+        selectOverlayProxy_->SetSelectInfo(GetSelectedText(textSelector_.GetTextStart(), textSelector_.GetTextEnd()));
+        selectOverlayProxy_->UpdateFirstAndSecondHandleInfo(firstHandleInfo, secondHandleInfo);
+    }
 }
 
 void TextPattern::PreCreateLayoutWrapper()
@@ -2288,7 +2301,19 @@ void TextPattern::HandleSurfaceChanged(int32_t newWidth, int32_t newHeight, int3
         return;
     }
     CHECK_NULL_VOID(selectOverlayProxy_);
-    selectOverlayProxy_->ShowOrHiddenMenu(true);
+    CHECK_NULL_VOID(!selectOverlayProxy_->IsClosed());
+    auto isUsingMouse = selectOverlayProxy_->GetSelectOverlayMangerInfo().isUsingMouse;
+    if (isUsingMouse) {
+        CloseSelectOverlay(false);
+    } else {
+        processOverlayDelayTask_ = [weak = WeakClaim(this)]() {
+            auto pattern = weak.Upgrade();
+            CHECK_NULL_VOID(pattern);
+            pattern->CalculateHandleOffsetAndShowOverlay();
+            pattern->ShowSelectOverlay(pattern->GetTextSelector().firstHandle, pattern->GetTextSelector().secondHandle);
+            pattern->selectOverlayProxy_->ShowOrHiddenMenu(true);
+        };
+    }
 }
 
 void TextPattern::InitSurfacePositionChangedCallback()

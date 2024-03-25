@@ -650,6 +650,7 @@ private:
     }
 
     void AddUdmfTxtPreProcessor(const ResultObject src, ResultObject& result, bool isAppend);
+    void ProcessOverlayAfterLayout();
 
     bool isMeasureBoundary_ = false;
     bool isMousePressed_ = false;
@@ -682,6 +683,7 @@ private:
     TextSpanType oldSelectedType_ = TextSpanType::NONE;
     mutable std::list<RefPtr<UINode>> childNodes_;
     bool isShowMenu_ = true;
+    std::function<void()> processOverlayDelayTask_;
     ACE_DISALLOW_COPY_AND_MOVE(TextPattern);
 };
 } // namespace OHOS::Ace::NG
