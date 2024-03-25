@@ -3184,6 +3184,7 @@ struct ArkUIFrameNodeModifier {
     ArkUI_Float32* (*getPositionToWindow)(ArkUINodeHandle node);
     ArkUINodeHandle (*getFrameNodeById)(ArkUI_Int32 nodeId);
     ArkUINodeHandle (*getFrameNodeByKey)(ArkUI_CharPtr key);
+    void (*propertyUpdate)(ArkUINodeHandle node);
 };
 
 struct ArkUIAnimation {
