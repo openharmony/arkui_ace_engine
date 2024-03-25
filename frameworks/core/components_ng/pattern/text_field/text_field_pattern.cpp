@@ -6462,8 +6462,9 @@ bool TextFieldPattern::IsShowUnit() const
 {
     auto layoutProperty = GetLayoutProperty<TextFieldLayoutProperty>();
     CHECK_NULL_RETURN(layoutProperty, false);
+    auto typeValue = layoutProperty->GetTextInputTypeValue(TextInputType::UNSPECIFIED);
     return layoutProperty->GetShowUnderlineValue(false) &&
-           layoutProperty->GetTextInputTypeValue(TextInputType::UNSPECIFIED) == TextInputType::UNSPECIFIED;
+           (typeValue == TextInputType::UNSPECIFIED || typeValue == TextInputType::TEXT);
 }
 
 bool TextFieldPattern::IsShowPasswordIcon() const
