@@ -611,7 +611,9 @@ void UIContentImpl::RunFormPage()
     Platform::AceContainer::RunPage(instanceId_, startUrl_, "", false);
     auto distributedUI = std::make_shared<NG::DistributedUI>();
     uiManager_ = std::make_unique<DistributedUIManager>(instanceId_, distributedUI);
-    Platform::AceContainer::GetContainer(instanceId_)->SetDistributedUI(distributedUI);
+    auto container = Platform::AceContainer::GetContainer(instanceId_);
+    CHECK_NULL_VOID(container);
+    container->SetDistributedUI(distributedUI);
 }
 
 UIContentErrorCode UIContentImpl::Initialize(OHOS::Rosen::Window* window, const std::string& url, napi_value storage)
