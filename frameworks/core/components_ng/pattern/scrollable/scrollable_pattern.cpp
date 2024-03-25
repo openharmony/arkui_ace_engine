@@ -160,10 +160,12 @@ void ScrollablePattern::ProcessNavBarReactOnEnd()
 
 bool ScrollablePattern::OnScrollPosition(double& offset, int32_t source)
 {
+    auto isSearchRefresh = GetIsSearchRefresh();
     if (needLinked_) {
         auto isAtTop = (IsAtTop() && Positive(offset));
         auto refreshCoordinateMode = RefreshCoordinationMode::UNKNOWN;
-        if (!AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
+        if (!AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE) ||
+            !isSearchRefresh) {
             refreshCoordinateMode = CoordinateWithRefresh(offset, source, isAtTop);
         }
         auto navigationInCoordination = CoordinateWithNavigation(offset, source, isAtTop);
@@ -175,9 +177,7 @@ bool ScrollablePattern::OnScrollPosition(double& offset, int32_t source)
     }
 
     if (source == SCROLL_FROM_START) {
-        if (!GetIsFixedNestedScrollMode()) {
-            SetParentScrollable();
-        }
+        SetParentScrollable();
         StopScrollBarAnimatorByProxy();
         AbortScrollAnimator();
     } else if (!AnimateStoped()) {
