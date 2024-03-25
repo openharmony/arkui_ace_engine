@@ -1642,6 +1642,34 @@ bool RichEditorPattern::HandleUserGestureEvent(
     return false;
 }
 
+void RichEditorPattern::HandleOnlyImageSelected(const Offset& globalOffset)
+{
+    Offset offset;
+    if (usingMouseRightButton_) {
+        auto textRect = GetTextRect();
+        textRect.SetTop(textRect.GetY() - std::min(baselineOffset_, 0.0f));
+        textRect.SetHeight(textRect.Height() - std::max(baselineOffset_, 0.0f));
+        offset = Offset(textRect.GetX(), textRect.GetY());
+    } else {
+        auto host = GetHost();
+        CHECK_NULL_VOID(host);
+        auto offsetF = host->GetPaintRectOffset();
+        offset = Offset(offsetF.GetX(), offsetF.GetY());
+    }
+    auto textOffset = globalOffset - offset;
+    int32_t currentPosition = paragraphs_.GetIndex(textOffset);
+    currentPosition = std::min(currentPosition, GetTextContentLength());
+    int32_t nextPosition = currentPosition + GetGraphemeClusterLength(GetWideText(), currentPosition);
+    nextPosition = std::min(nextPosition, GetTextContentLength());
+    AdjustPlaceholderSelection(currentPosition, nextPosition, textOffset);
+    auto textSelectInfo = GetSpansInfo(currentPosition, nextPosition, GetSpansMethod::ONSELECT);
+    auto results = textSelectInfo.GetSelection().resultObjects;
+    if (results.size() == 1 && results.front().type == SelectSpanType::TYPEIMAGE && !isOnlyImageDrag_) {
+        textSelector_.Update(currentPosition, nextPosition);
+        isOnlyImageDrag_ = true;
+    }
+}
+
 bool RichEditorPattern::ClickAISpan(const PointF& textOffset, const AISpan& aiSpan)
 {
     auto calculateHandleFunc = [weak = WeakClaim(this)]() {
@@ -2117,6 +2145,7 @@ void RichEditorPattern::OnDragStartAndEnd()
         ContainerScope scope(scopeId);
         auto pattern = weakPtr.Upgrade();
         CHECK_NULL_VOID(pattern);
+        pattern->isOnlyImageDrag_ = false;
         pattern->isDragSponsor_ = false;
         pattern->dragRange_ = { 0, 0 };
         pattern->showSelect_ = true;
@@ -4057,6 +4086,7 @@ void RichEditorPattern::HandleMouseLeftButtonMove(const MouseInfo& info)
 void RichEditorPattern::HandleMouseLeftButtonPress(const MouseInfo& info)
 {
     isMousePressed_ = true;
+    HandleOnlyImageSelected(info.GetGlobalLocation());
     if (IsScrollBarPressed(info) || BetweenSelectedPosition(info.GetGlobalLocation())) {
         blockPress_ = true;
         return;
@@ -4097,7 +4127,7 @@ void RichEditorPattern::HandleMouseLeftButtonRelease(const MouseInfo& info)
     isMouseSelect_ = false;
     isMousePressed_ = false;
     isFirstMouseSelect_ = true;
-
+    isOnlyImageDrag_ = false;
     if (dataDetectorAdapter_->pressedByLeftMouse_ && oldMouseStatus != MouseStatus::MOVE && !IsDragging()) {
         dataDetectorAdapter_->ResponseBestMatchItem(dataDetectorAdapter_->clickedAISpan_);
         dataDetectorAdapter_->pressedByLeftMouse_ = false;
