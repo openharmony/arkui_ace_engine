@@ -1334,4 +1334,29 @@ int32_t TextFieldModelNG::GetTextSelectionIndex(FrameNode* frameNode, bool isEnd
     }
     return selectController->GetStartIndex();
 }
+
+void TextFieldModelNG::SetTextDecoration(FrameNode* frameNode, TextDecoration value)
+{
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, TextDecoration, value, frameNode);
+}
+
+void TextFieldModelNG::SetTextDecorationColor(FrameNode* frameNode, const Color& value)
+{
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, TextDecorationColor, value, frameNode);
+}
+
+void TextFieldModelNG::SetTextDecorationStyle(FrameNode* frameNode, TextDecorationStyle value)
+{
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, TextDecorationStyle, value, frameNode);
+}
+
+void TextFieldModelNG::SetLetterSpacing(FrameNode* frameNode, const Dimension& value)
+{
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, LetterSpacing, value, frameNode);
+}
+
+void TextFieldModelNG::SetLineHeight(FrameNode* frameNode, const Dimension& value)
+{
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, LineHeight, value, frameNode);
+}
 } // namespace OHOS::Ace::NG
