@@ -52,8 +52,12 @@ ArkUINativeModuleValue RefreshBridege::SetPullToRefresh(ArkUIRuntimeCallInfo* ru
     Local<JSValueRef> nodeArg = runtimeCallInfo->GetCallArgRef(CALL_ARG_0);
     Local<JSValueRef> valueArg = runtimeCallInfo->GetCallArgRef(CALL_ARG_1);
     auto nativeNode = nodePtr(nodeArg->ToNativePointer(vm)->Value());
-    bool value = valueArg->ToBoolean(vm)->Value();
-    GetArkUINodeModifiers()->getRefreshModifier()->setPullToRefresh(nativeNode, value);
+    if (valueArg->IsBoolean()) {
+        bool value = valueArg->ToBoolean(vm)->Value();
+        GetArkUINodeModifiers()->getRefreshModifier()->setPullToRefresh(nativeNode, value);
+    } else {
+        GetArkUINodeModifiers()->getRefreshModifier()->resetPullToRefresh(nativeNode);
+    }
     return panda::JSValueRef::Undefined(vm);
 }
 ArkUINativeModuleValue RefreshBridege::ResetPullToRefresh(ArkUIRuntimeCallInfo* runtimeCallInfo)
