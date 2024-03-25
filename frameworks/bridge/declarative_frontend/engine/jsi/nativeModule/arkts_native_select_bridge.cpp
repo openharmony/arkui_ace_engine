@@ -68,8 +68,11 @@ ArkUINativeModuleValue SelectBridge::SetSelected(ArkUIRuntimeCallInfo* runtimeCa
     Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(1);
     auto nativeNode = nodePtr(nodeArg->ToNativePointer(vm)->Value());
     int32_t value = 0;
-    ArkTSUtils::ParseJsInteger(vm, secondArg, value);
-    GetArkUINodeModifiers()->getSelectModifier()->setSelected(nativeNode, value);
+    if (ArkTSUtils::ParseJsIntegerWithResource(vm, secondArg, value)) {
+        GetArkUINodeModifiers()->getSelectModifier()->setSelected(nativeNode, value);
+    } else {
+        GetArkUINodeModifiers()->getSelectModifier()->resetSelected(nativeNode);
+    }
     return panda::JSValueRef::Undefined(vm);
 }
 
