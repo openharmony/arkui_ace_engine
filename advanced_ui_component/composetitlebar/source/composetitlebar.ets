@@ -198,11 +198,13 @@ struct CollapsibleMenuSection {
   }
 
   aboutToAppear() {
-    this.menuItems?.forEach((item, index) => {
-      if (item.isEnabled && this.firstFocusableIndex == -1 && index > CollapsibleMenuSection.maxCountOfVisibleItems - 2) {
-        this.firstFocusableIndex = this.index * 1000 + index + 1
-      }
-    })
+    if (this.menuItems) {
+      this.menuItems.forEach((item, index) => {
+        if (item.isEnabled && this.firstFocusableIndex == -1 && index > CollapsibleMenuSection.maxCountOfVisibleItems - 2) {
+          this.firstFocusableIndex = this.index * 1000 + index + 1
+        }
+      })
+    }
   }
 
   build() {
@@ -409,7 +411,11 @@ struct ImageMenuItem {
         this.isOnClick = false
       }
     })
-    .onClick(() => this.item?.isEnabled && this.item?.action && this.item?.action())
+    .onClick(() => {
+      if (this.item) {
+        return this.item.isEnabled && this.item.action?.()
+      }
+    })
   }
 }
 

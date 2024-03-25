@@ -51,10 +51,10 @@ const PUBLIC_BACK = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAMAAAADACAY' 
   'ELMRv7/PsnHKEAMkcw6fgEkDmCNUcngMwRvHFsngRnfWJcL/9tRyaAgxrB+ZijO9ymH7MUs+m4yjLmCBozEXMr5nr1+9We1' +
   'ZgXMXccDwAAAAAAAAAAAAAAAAAAAAAAwO5+AfVgtqHKRnawAAAAAElFTkSuQmCC';
 class ComposeTitleBar extends ViewPU {
-  constructor(l, k, m, b = -1, n = undefined, o) {
-    super(l, m, b, o);
-    if (typeof n === "function") {
-      this.paramsGenerator_ = n;
+  constructor(k, j, l, b = -1, m = undefined, n) {
+    super(k, l, b, n);
+    if (typeof m === "function") {
+      this.paramsGenerator_ = m;
     }
     this.item = null;
     this.title = '';
@@ -62,33 +62,33 @@ class ComposeTitleBar extends ViewPU {
     this.menuItems = undefined;
     this.__titleMaxWidth = new ObservedPropertySimplePU(0, this, "titleMaxWidth");
     this.__backActive = new ObservedPropertySimplePU(false, this, "backActive");
-    this.setInitiallyProvidedValue(k);
+    this.setInitiallyProvidedValue(j);
   }
-  setInitiallyProvidedValue(k) {
-    if (k.item !== undefined) {
-      this.item = k.item;
+  setInitiallyProvidedValue(j) {
+    if (j.item !== undefined) {
+      this.item = j.item;
     }
-    if (k.title !== undefined) {
-      this.title = k.title;
+    if (j.title !== undefined) {
+      this.title = j.title;
     }
-    if (k.subtitle !== undefined) {
-      this.subtitle = k.subtitle;
+    if (j.subtitle !== undefined) {
+      this.subtitle = j.subtitle;
     }
-    if (k.menuItems !== undefined) {
-      this.menuItems = k.menuItems;
+    if (j.menuItems !== undefined) {
+      this.menuItems = j.menuItems;
     }
-    if (k.titleMaxWidth !== undefined) {
-      this.titleMaxWidth = k.titleMaxWidth;
+    if (j.titleMaxWidth !== undefined) {
+      this.titleMaxWidth = j.titleMaxWidth;
     }
-    if (k.backActive !== undefined) {
-      this.backActive = k.backActive;
+    if (j.backActive !== undefined) {
+      this.backActive = j.backActive;
     }
   }
-  updateStateVars(k) {
+  updateStateVars(j) {
   }
-  purgeVariableDependenciesOnElmtId(j) {
-    this.__titleMaxWidth.purgeDependencyOnElmtId(j);
-    this.__backActive.purgeDependencyOnElmtId(j);
+  purgeVariableDependenciesOnElmtId(i) {
+    this.__titleMaxWidth.purgeDependencyOnElmtId(i);
+    this.__backActive.purgeDependencyOnElmtId(i);
   }
   aboutToBeDeleted() {
     this.__titleMaxWidth.aboutToBeDeleted();
@@ -99,14 +99,14 @@ class ComposeTitleBar extends ViewPU {
   get titleMaxWidth() {
     return this.__titleMaxWidth.get();
   }
-  set titleMaxWidth(i) {
-    this.__titleMaxWidth.set(i);
+  set titleMaxWidth(h) {
+    this.__titleMaxWidth.set(h);
   }
   get backActive() {
     return this.__backActive.get();
   }
-  set backActive(i) {
-    this.__backActive.set(i);
+  set backActive(h) {
+    this.__backActive.set(h);
   }
   initialRender() {
     this.observeComponentCreation((b, c) => {
@@ -118,18 +118,18 @@ class ComposeTitleBar extends ViewPU {
       Flex.width('100%');
       Flex.height(ComposeTitleBar.totalHeight);
       Flex.backgroundColor({ "id": -1, "type": 10001, params: ['sys.color.ohos_id_color_background'], "bundleName": "", "moduleName": "" });
-      Flex.onAreaChange((u, i) => {
-        let v = Number(i.width);
+      Flex.onAreaChange((t, h) => {
+        let u = Number(h.width);
         if (this.menuItems !== undefined) {
-          let w = this.menuItems.length;
-          if (w >= CollapsibleMenuSection.maxCountOfVisibleItems) {
-            v = v - ImageMenuItem.imageHotZoneWidth * CollapsibleMenuSection.maxCountOfVisibleItems;
+          let v = this.menuItems.length;
+          if (v >= CollapsibleMenuSection.maxCountOfVisibleItems) {
+            u = u - ImageMenuItem.imageHotZoneWidth * CollapsibleMenuSection.maxCountOfVisibleItems;
           }
-          else if (w > 0) {
-            v = v - ImageMenuItem.imageHotZoneWidth * w;
+          else if (v > 0) {
+            u = u - ImageMenuItem.imageHotZoneWidth * v;
           }
         }
-        this.titleMaxWidth = v;
+        this.titleMaxWidth = u;
         this.titleMaxWidth -= ComposeTitleBar.leftPadding;
         this.titleMaxWidth -= ImageMenuItem.imageHotZoneWidth;
         if (this.item !== undefined) {
@@ -167,7 +167,7 @@ class ComposeTitleBar extends ViewPU {
       this.observeComponentCreation((b, c) => {
         ViewStackProcessor.StartGetAccessRecordingFor(b);
         if (c) {
-          let n = () => {
+          let m = () => {
             return {
               item: {
                 value: { "id": -1, "type": 20000, params: ['sys.media.ohos_ic_back'], "bundleName": "", "moduleName": "" },
@@ -181,7 +181,7 @@ class ComposeTitleBar extends ViewPU {
             value: { "id": -1, "type": 20000, params: ['sys.media.ohos_ic_back'], "bundleName": "", "moduleName": "" },
             isEnabled: true,
             action: () => this.backActive = true
-          }, index: -1 }, undefined, b, n, { page: "library/src/main/ets/components/mainpage/MainPage.ets", line: 89 }));
+          }, index: -1 }, undefined, b, m, { page: "library/src/main/ets/components/mainpage/MainPage.ets", line: 89 }));
         }
         else {
           this.updateStateVarsOfChildByElmtId(b, {});
@@ -328,13 +328,13 @@ class ComposeTitleBar extends ViewPU {
             this.observeComponentCreation((b, c) => {
               ViewStackProcessor.StartGetAccessRecordingFor(b);
               if (c) {
-                let n = () => {
+                let m = () => {
                   return {
                     menuItems: this.menuItems,
                     index: 1 + ComposeTitleBar.instanceCount++
                   };
                 };
-                ViewPU.create(new CollapsibleMenuSection(this, { menuItems: this.menuItems, index: 1 + ComposeTitleBar.instanceCount++ }, undefined, b, n, { page: "library/src/main/ets/components/mainpage/MainPage.ets", line: 139 }));
+                ViewPU.create(new CollapsibleMenuSection(this, { menuItems: this.menuItems, index: 1 + ComposeTitleBar.instanceCount++ }, undefined, b, m, { page: "library/src/main/ets/components/mainpage/MainPage.ets", line: 139 }));
               }
               else {
                 this.updateStateVarsOfChildByElmtId(b, {});
@@ -368,10 +368,10 @@ ComposeTitleBar.portraitImageLeftPadding = 4;
 ComposeTitleBar.portraitImageRightPadding = 16;
 ComposeTitleBar.instanceCount = 0;
 class CollapsibleMenuSection extends ViewPU {
-  constructor(l, k, m, b = -1, n = undefined, o) {
-    super(l, m, b, o);
-    if (typeof n === "function") {
-      this.paramsGenerator_ = n;
+  constructor(k, j, l, b = -1, m = undefined, n) {
+    super(k, l, b, n);
+    if (typeof m === "function") {
+      this.paramsGenerator_ = m;
     }
     this.menuItems = undefined;
     this.index = 0;
@@ -380,38 +380,38 @@ class CollapsibleMenuSection extends ViewPU {
     this.__isMoreIconOnFocus = new ObservedPropertySimplePU(false, this, "isMoreIconOnFocus");
     this.__isMoreIconOnHover = new ObservedPropertySimplePU(false, this, "isMoreIconOnHover");
     this.__isMoreIconOnClick = new ObservedPropertySimplePU(false, this, "isMoreIconOnClick");
-    this.setInitiallyProvidedValue(k);
+    this.setInitiallyProvidedValue(j);
   }
-  setInitiallyProvidedValue(k) {
-    if (k.menuItems !== undefined) {
-      this.menuItems = k.menuItems;
+  setInitiallyProvidedValue(j) {
+    if (j.menuItems !== undefined) {
+      this.menuItems = j.menuItems;
     }
-    if (k.index !== undefined) {
-      this.index = k.index;
+    if (j.index !== undefined) {
+      this.index = j.index;
     }
-    if (k.firstFocusableIndex !== undefined) {
-      this.firstFocusableIndex = k.firstFocusableIndex;
+    if (j.firstFocusableIndex !== undefined) {
+      this.firstFocusableIndex = j.firstFocusableIndex;
     }
-    if (k.isPopupShown !== undefined) {
-      this.isPopupShown = k.isPopupShown;
+    if (j.isPopupShown !== undefined) {
+      this.isPopupShown = j.isPopupShown;
     }
-    if (k.isMoreIconOnFocus !== undefined) {
-      this.isMoreIconOnFocus = k.isMoreIconOnFocus;
+    if (j.isMoreIconOnFocus !== undefined) {
+      this.isMoreIconOnFocus = j.isMoreIconOnFocus;
     }
-    if (k.isMoreIconOnHover !== undefined) {
-      this.isMoreIconOnHover = k.isMoreIconOnHover;
+    if (j.isMoreIconOnHover !== undefined) {
+      this.isMoreIconOnHover = j.isMoreIconOnHover;
     }
-    if (k.isMoreIconOnClick !== undefined) {
-      this.isMoreIconOnClick = k.isMoreIconOnClick;
+    if (j.isMoreIconOnClick !== undefined) {
+      this.isMoreIconOnClick = j.isMoreIconOnClick;
     }
   }
-  updateStateVars(k) {
+  updateStateVars(j) {
   }
-  purgeVariableDependenciesOnElmtId(j) {
-    this.__isPopupShown.purgeDependencyOnElmtId(j);
-    this.__isMoreIconOnFocus.purgeDependencyOnElmtId(j);
-    this.__isMoreIconOnHover.purgeDependencyOnElmtId(j);
-    this.__isMoreIconOnClick.purgeDependencyOnElmtId(j);
+  purgeVariableDependenciesOnElmtId(i) {
+    this.__isPopupShown.purgeDependencyOnElmtId(i);
+    this.__isMoreIconOnFocus.purgeDependencyOnElmtId(i);
+    this.__isMoreIconOnHover.purgeDependencyOnElmtId(i);
+    this.__isMoreIconOnClick.purgeDependencyOnElmtId(i);
   }
   aboutToBeDeleted() {
     this.__isPopupShown.aboutToBeDeleted();
@@ -424,26 +424,26 @@ class CollapsibleMenuSection extends ViewPU {
   get isPopupShown() {
     return this.__isPopupShown.get();
   }
-  set isPopupShown(i) {
-    this.__isPopupShown.set(i);
+  set isPopupShown(h) {
+    this.__isPopupShown.set(h);
   }
   get isMoreIconOnFocus() {
     return this.__isMoreIconOnFocus.get();
   }
-  set isMoreIconOnFocus(i) {
-    this.__isMoreIconOnFocus.set(i);
+  set isMoreIconOnFocus(h) {
+    this.__isMoreIconOnFocus.set(h);
   }
   get isMoreIconOnHover() {
     return this.__isMoreIconOnHover.get();
   }
-  set isMoreIconOnHover(i) {
-    this.__isMoreIconOnHover.set(i);
+  set isMoreIconOnHover(h) {
+    this.__isMoreIconOnHover.set(h);
   }
   get isMoreIconOnClick() {
     return this.__isMoreIconOnClick.get();
   }
-  set isMoreIconOnClick(i) {
-    this.__isMoreIconOnClick.set(i);
+  set isMoreIconOnClick(h) {
+    this.__isMoreIconOnClick.set(h);
   }
   getMoreIconFgColor() {
     return this.isMoreIconOnClick
@@ -461,12 +461,13 @@ class CollapsibleMenuSection extends ViewPU {
     }
   }
   aboutToAppear() {
-    var d;
-    (d = this.menuItems) === null || d === void 0 ? void 0 : d.forEach((s, r) => {
-      if (s.isEnabled && this.firstFocusableIndex == -1 && r > CollapsibleMenuSection.maxCountOfVisibleItems - 2) {
-        this.firstFocusableIndex = this.index * 1000 + r + 1;
-      }
-    });
+    if (this.menuItems) {
+      this.menuItems.forEach((r, q) => {
+        if (r.isEnabled && this.firstFocusableIndex == -1 && q > CollapsibleMenuSection.maxCountOfVisibleItems - 2) {
+          this.firstFocusableIndex = this.index * 1000 + q + 1;
+        }
+      });
+    }
   }
   initialRender() {
     this.observeComponentCreation((b, c) => {
@@ -501,19 +502,19 @@ class CollapsibleMenuSection extends ViewPU {
                 this.observeComponentCreation((b, c) => {
                   ViewStackProcessor.StartGetAccessRecordingFor(b);
                   ForEach.create();
-                  const p = (q, r) => {
-                    const s = q;
+                  const o = (p, q) => {
+                    const r = p;
                     {
                       this.observeComponentCreation((b, c) => {
                         ViewStackProcessor.StartGetAccessRecordingFor(b);
                         if (c) {
-                          let n = () => {
+                          let m = () => {
                             return {
-                              item: s,
-                              index: this.index * 1000 + r + 1
+                              item: r,
+                              index: this.index * 1000 + q + 1
                             };
                           };
-                          ViewPU.create(new ImageMenuItem(this, { item: s, index: this.index * 1000 + r + 1 }, undefined, b, n, { page: "library/src/main/ets/components/mainpage/MainPage.ets", line: 214 }));
+                          ViewPU.create(new ImageMenuItem(this, { item: r, index: this.index * 1000 + q + 1 }, undefined, b, m, { page: "library/src/main/ets/components/mainpage/MainPage.ets", line: 216 }));
                         }
                         else {
                           this.updateStateVarsOfChildByElmtId(b, {});
@@ -522,7 +523,7 @@ class CollapsibleMenuSection extends ViewPU {
                       });
                     }
                   };
-                  this.forEachUpdateFunction(b, this.menuItems, p, undefined, true, false);
+                  this.forEachUpdateFunction(b, this.menuItems, o, undefined, true, false);
                   if (!c) {
                     ForEach.pop();
                   }
@@ -536,19 +537,19 @@ class CollapsibleMenuSection extends ViewPU {
                 this.observeComponentCreation((b, c) => {
                   ViewStackProcessor.StartGetAccessRecordingFor(b);
                   ForEach.create();
-                  const p = (q, r) => {
-                    const s = q;
+                  const o = (p, q) => {
+                    const r = p;
                     {
                       this.observeComponentCreation((b, c) => {
                         ViewStackProcessor.StartGetAccessRecordingFor(b);
                         if (c) {
-                          let n = () => {
+                          let m = () => {
                             return {
-                              item: s,
-                              index: this.index * 1000 + r + 1
+                              item: r,
+                              index: this.index * 1000 + q + 1
                             };
                           };
-                          ViewPU.create(new ImageMenuItem(this, { item: s, index: this.index * 1000 + r + 1 }, undefined, b, n, { page: "library/src/main/ets/components/mainpage/MainPage.ets", line: 218 }));
+                          ViewPU.create(new ImageMenuItem(this, { item: r, index: this.index * 1000 + q + 1 }, undefined, b, m, { page: "library/src/main/ets/components/mainpage/MainPage.ets", line: 220 }));
                         }
                         else {
                           this.updateStateVarsOfChildByElmtId(b, {});
@@ -557,7 +558,7 @@ class CollapsibleMenuSection extends ViewPU {
                       });
                     }
                   };
-                  this.forEachUpdateFunction(b, this.menuItems.slice(0, CollapsibleMenuSection.maxCountOfVisibleItems - 1), p, undefined, true, false);
+                  this.forEachUpdateFunction(b, this.menuItems.slice(0, CollapsibleMenuSection.maxCountOfVisibleItems - 1), o, undefined, true, false);
                   if (!c) {
                     ForEach.pop();
                   }
@@ -588,23 +589,23 @@ class CollapsibleMenuSection extends ViewPU {
                   ViewStackProcessor.visualState();
                   Row.onFocus(() => this.isMoreIconOnFocus = true);
                   Row.onBlur(() => this.isMoreIconOnFocus = false);
-                  Row.onHover((h) => this.isMoreIconOnHover = h);
-                  Row.onKeyEvent((g) => {
-                    if (g.keyCode !== KeyCode.KEYCODE_ENTER && g.keyCode !== KeyCode.KEYCODE_SPACE) {
+                  Row.onHover((g) => this.isMoreIconOnHover = g);
+                  Row.onKeyEvent((f) => {
+                    if (f.keyCode !== KeyCode.KEYCODE_ENTER && f.keyCode !== KeyCode.KEYCODE_SPACE) {
                       return;
                     }
-                    if (g.type === KeyType.Down) {
+                    if (f.type === KeyType.Down) {
                       this.isMoreIconOnClick = true;
                     }
-                    if (g.type === KeyType.Up) {
+                    if (f.type === KeyType.Up) {
                       this.isMoreIconOnClick = false;
                     }
                   });
-                  Row.onTouch((g) => {
-                    if (g.type === TouchType.Down) {
+                  Row.onTouch((f) => {
+                    if (f.type === TouchType.Down) {
                       this.isMoreIconOnClick = true;
                     }
-                    if (g.type === TouchType.Up) {
+                    if (f.type === TouchType.Up) {
                       this.isMoreIconOnClick = false;
                     }
                   });
@@ -614,9 +615,9 @@ class CollapsibleMenuSection extends ViewPU {
                     placement: Placement.Bottom,
                     popupColor: Color.White,
                     enableArrow: false,
-                    onStateChange: (t) => {
-                      this.isPopupShown = t.isVisible;
-                      if (!t.isVisible) {
+                    onStateChange: (s) => {
+                      this.isPopupShown = s.isVisible;
+                      if (!s.isVisible) {
                         this.isMoreIconOnClick = false;
                       }
                     }
@@ -661,7 +662,7 @@ class CollapsibleMenuSection extends ViewPU {
     Row.pop();
     Column.pop();
   }
-  popupBuilder(l = null) {
+  popupBuilder(k = null) {
     this.observeComponentCreation((b, c) => {
       ViewStackProcessor.StartGetAccessRecordingFor(b);
       Column.create();
@@ -683,19 +684,19 @@ class CollapsibleMenuSection extends ViewPU {
           this.observeComponentCreation((b, c) => {
             ViewStackProcessor.StartGetAccessRecordingFor(b);
             ForEach.create();
-            const p = (q, r) => {
-              const s = q;
+            const o = (p, q) => {
+              const r = p;
               {
                 this.observeComponentCreation((b, c) => {
                   ViewStackProcessor.StartGetAccessRecordingFor(b);
                   if (c) {
-                    let n = () => {
+                    let m = () => {
                       return {
-                        item: s,
-                        index: this.index * 1000 + CollapsibleMenuSection.maxCountOfVisibleItems + r
+                        item: r,
+                        index: this.index * 1000 + CollapsibleMenuSection.maxCountOfVisibleItems + q
                       };
                     };
-                    ViewPU.create(new ImageMenuItem(this, { item: s, index: this.index * 1000 + CollapsibleMenuSection.maxCountOfVisibleItems + r }, undefined, b, n, { page: "library/src/main/ets/components/mainpage/MainPage.ets", line: 298 }));
+                    ViewPU.create(new ImageMenuItem(this, { item: r, index: this.index * 1000 + CollapsibleMenuSection.maxCountOfVisibleItems + q }, undefined, b, m, { page: "library/src/main/ets/components/mainpage/MainPage.ets", line: 300 }));
                   }
                   else {
                     this.updateStateVarsOfChildByElmtId(b, {});
@@ -704,7 +705,7 @@ class CollapsibleMenuSection extends ViewPU {
                 });
               }
             };
-            this.forEachUpdateFunction(b, this.menuItems.slice(CollapsibleMenuSection.maxCountOfVisibleItems - 1, this.menuItems.length), p, undefined, true, false);
+            this.forEachUpdateFunction(b, this.menuItems.slice(CollapsibleMenuSection.maxCountOfVisibleItems - 1, this.menuItems.length), o, undefined, true, false);
             if (!c) {
               ForEach.pop();
             }
@@ -733,41 +734,41 @@ CollapsibleMenuSection.maxCountOfVisibleItems = 3;
 CollapsibleMenuSection.focusPadding = 4;
 CollapsibleMenuSection.marginsNum = 2;
 class ImageMenuItem extends ViewPU {
-  constructor(l, k, m, b = -1, n = undefined, o) {
-    super(l, m, b, o);
-    if (typeof n === "function") {
-      this.paramsGenerator_ = n;
+  constructor(k, j, l, b = -1, m = undefined, n) {
+    super(k, l, b, n);
+    if (typeof m === "function") {
+      this.paramsGenerator_ = m;
     }
     this.item = null;
     this.index = 0;
     this.__isOnFocus = new ObservedPropertySimplePU(false, this, "isOnFocus");
     this.__isOnHover = new ObservedPropertySimplePU(false, this, "isOnHover");
     this.__isOnClick = new ObservedPropertySimplePU(false, this, "isOnClick");
-    this.setInitiallyProvidedValue(k);
+    this.setInitiallyProvidedValue(j);
   }
-  setInitiallyProvidedValue(k) {
-    if (k.item !== undefined) {
-      this.item = k.item;
+  setInitiallyProvidedValue(j) {
+    if (j.item !== undefined) {
+      this.item = j.item;
     }
-    if (k.index !== undefined) {
-      this.index = k.index;
+    if (j.index !== undefined) {
+      this.index = j.index;
     }
-    if (k.isOnFocus !== undefined) {
-      this.isOnFocus = k.isOnFocus;
+    if (j.isOnFocus !== undefined) {
+      this.isOnFocus = j.isOnFocus;
     }
-    if (k.isOnHover !== undefined) {
-      this.isOnHover = k.isOnHover;
+    if (j.isOnHover !== undefined) {
+      this.isOnHover = j.isOnHover;
     }
-    if (k.isOnClick !== undefined) {
-      this.isOnClick = k.isOnClick;
+    if (j.isOnClick !== undefined) {
+      this.isOnClick = j.isOnClick;
     }
   }
-  updateStateVars(k) {
+  updateStateVars(j) {
   }
-  purgeVariableDependenciesOnElmtId(j) {
-    this.__isOnFocus.purgeDependencyOnElmtId(j);
-    this.__isOnHover.purgeDependencyOnElmtId(j);
-    this.__isOnClick.purgeDependencyOnElmtId(j);
+  purgeVariableDependenciesOnElmtId(i) {
+    this.__isOnFocus.purgeDependencyOnElmtId(i);
+    this.__isOnHover.purgeDependencyOnElmtId(i);
+    this.__isOnClick.purgeDependencyOnElmtId(i);
   }
   aboutToBeDeleted() {
     this.__isOnFocus.aboutToBeDeleted();
@@ -779,20 +780,20 @@ class ImageMenuItem extends ViewPU {
   get isOnFocus() {
     return this.__isOnFocus.get();
   }
-  set isOnFocus(i) {
-    this.__isOnFocus.set(i);
+  set isOnFocus(h) {
+    this.__isOnFocus.set(h);
   }
   get isOnHover() {
     return this.__isOnHover.get();
   }
-  set isOnHover(i) {
-    this.__isOnHover.set(i);
+  set isOnHover(h) {
+    this.__isOnHover.set(h);
   }
   get isOnClick() {
     return this.__isOnClick.get();
   }
-  set isOnClick(i) {
-    this.__isOnClick.set(i);
+  set isOnClick(h) {
+    this.__isOnClick.set(h);
   }
   getFgColor() {
     return this.isOnClick
@@ -842,41 +843,46 @@ class ImageMenuItem extends ViewPU {
         this.isOnFocus = true;
       });
       Row.onBlur(() => this.isOnFocus = false);
-      Row.onHover((h) => {
+      Row.onHover((g) => {
         var d;
         if (!((d = this.item) === null || d === void 0 ? void 0 : d.isEnabled)) {
           return;
         }
-        this.isOnHover = h;
+        this.isOnHover = g;
       });
-      Row.onKeyEvent((g) => {
+      Row.onKeyEvent((f) => {
         var d;
         if (!((d = this.item) === null || d === void 0 ? void 0 : d.isEnabled)) {
           return;
         }
-        if (g.keyCode !== KeyCode.KEYCODE_ENTER && g.keyCode !== KeyCode.KEYCODE_SPACE) {
+        if (f.keyCode !== KeyCode.KEYCODE_ENTER && f.keyCode !== KeyCode.KEYCODE_SPACE) {
           return;
         }
-        if (g.type === KeyType.Down) {
+        if (f.type === KeyType.Down) {
           this.isOnClick = true;
         }
-        if (g.type === KeyType.Up) {
+        if (f.type === KeyType.Up) {
           this.isOnClick = false;
         }
       });
-      Row.onTouch((g) => {
+      Row.onTouch((f) => {
         var d;
         if (!((d = this.item) === null || d === void 0 ? void 0 : d.isEnabled)) {
           return;
         }
-        if (g.type === TouchType.Down) {
+        if (f.type === TouchType.Down) {
           this.isOnClick = true;
         }
-        if (g.type === TouchType.Up) {
+        if (f.type === TouchType.Up) {
           this.isOnClick = false;
         }
       });
-      Row.onClick(() => { var d, e, f; return ((d = this.item) === null || d === void 0 ? void 0 : d.isEnabled) && ((e = this.item) === null || e === void 0 ? void 0 : e.action) && ((f = this.item) === null || f === void 0 ? void 0 : f.action()); });
+      Row.onClick(() => {
+        var d, e;
+        if (this.item) {
+          return this.item.isEnabled && ((e = (d = this.item).action) === null || e === void 0 ? void 0 : e.call(d));
+        }
+      });
       if (!c) {
         Row.pop();
       }
