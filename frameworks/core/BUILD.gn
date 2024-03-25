@@ -226,6 +226,9 @@ template("ace_core_source_set") {
       "common/recorder/event_recorder.cpp",
       "common/recorder/exposure_processor.cpp",
       "common/recorder/node_data_cache.cpp",
+
+      # text
+      "text/text_emoji_processor.cpp",
     ]
 
     if (platform == "ohos" || platform == "ohos_ng") {
@@ -794,6 +797,9 @@ template("ace_core_ng_source_set") {
       "common/recorder/event_recorder.cpp",
       "common/recorder/exposure_processor.cpp",
       "common/recorder/node_data_cache.cpp",
+
+      # text
+      "text/text_emoji_processor.cpp",
     ]
     include_dirs = []
     if (is_arkui_x) {

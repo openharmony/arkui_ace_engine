@@ -52,6 +52,7 @@ config("ace_unittest_config") {
     "$ace_root",
     "$ace_root/frameworks",
     "$root_out_dir/arkui/framework",
+    "//third_party/icu/icu4c/source/common",
   ]
 
   cflags_cc = [
@@ -404,12 +405,14 @@ ohos_source_set("ace_core_extra") {
     "$ace_root/frameworks/core/gestures/drag_event.cpp",
     "$ace_root/frameworks/core/gestures/velocity_tracker.cpp",
     "$ace_root/frameworks/core/pipeline/base/constants.cpp",
+    "$ace_root/frameworks/core/text/text_emoji_processor.cpp",
     "$ace_root/test/mock/core/common/mock_icon_theme.cpp",
   ]
 
   deps = [
     "$ace_root/frameworks/core/components/theme:build_theme_code",
     "//third_party/googletest:gtest_main",
+    "//third_party/icu/icu4c:static_icuuc",
   ]
   configs = [ ":ace_unittest_config" ]
 }

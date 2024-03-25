@@ -20,6 +20,7 @@
 
 #include "base/utils/string_utils.h"
 #include "base/utils/utils.h"
+#include "core/text/text_emoji_processor.h"
 #include "core/components_ng/pattern/text/typed_text.h"
 #include "core/components_ng/pattern/text_field/text_field_pattern.h"
 
@@ -329,11 +330,13 @@ bool ContentController::FilterWithEvent(const std::string& filter, std::string& 
 
 void ContentController::erase(int32_t startIndex, int32_t length)
 {
-    if (EraseEmoji()) {
-        return;
-    }
     auto wideText = GetWideText().erase(startIndex, length);
     content_ = StringUtils::ToString(wideText);
+}
+
+int32_t ContentController::Delete(int32_t startIndex, int32_t length, bool isBackward)
+{
+    return TextEmojiProcessor::Delete(startIndex, length, content_, isBackward);
 }
 
 std::string ContentController::GetValueBeforeIndex(int32_t index)
@@ -355,20 +358,4 @@ std::string ContentController::GetSelectedLimitValue(int32_t& index, int32_t& st
     return GetSelectedValue(startIndex, endIndex);
 }
 
-bool ContentController::EraseEmoji()
-{
-    bool emojiFlag = false;
-    uint32_t startIndex = 0;
-    uint32_t endIndex = 0;
-    while (startIndex < content_.length()) {
-        auto unicode = TypedText::GetUTF8Next(content_.c_str(), startIndex, endIndex);
-        if (TypedText::IsEmoji(unicode)) {
-            content_.erase(startIndex, endIndex - startIndex);
-            emojiFlag = true;
-            continue;
-        }
-        startIndex = endIndex;
-    }
-    return emojiFlag;
-}
 } // namespace OHOS::Ace::NG
