@@ -184,7 +184,7 @@ private:
     std::optional<float> DimensionConvertToPx(const Dimension& value) const;
     Dimension ConvertPxToPercent(float value) const;
     void UpdateDividerShadow() const;
-    void SetSideBarActive(bool isActive) const;
+    void SetSideBarActive(bool isActive, bool onlyJsActive) const;
 
     RefPtr<InputEvent> hoverEvent_;
     RefPtr<ClickEvent> controlButtonClickEvent_;
