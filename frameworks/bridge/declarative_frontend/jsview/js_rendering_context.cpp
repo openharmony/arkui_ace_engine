@@ -310,24 +310,24 @@ void ReturnPromise(const JSCallbackInfo& info, napi_value result)
 void JSRenderingContext::JsStartImageAnalyzer(const JSCallbackInfo& info)
 {
     ContainerScope scope(instanceId_);
-    napi_value promise = nullptr;
-    if (info.Length() < 1 || !info[0]->IsObject()) {
-        ReturnPromise(info, promise);
-        return;
-    }
     auto engine = EngineHelper::GetCurrentEngine();
     CHECK_NULL_VOID(engine);
     NativeEngine* nativeEngine = engine->GetNativeEngine();
     auto env = reinterpret_cast<napi_env>(nativeEngine);
-    ScopeRAII scopeRaii(env);
-
-    panda::Local<JsiValue> value = info[0].Get().GetLocalHandle();
-    JSValueWrapper valueWrapper = value;
-    napi_value configNativeValue = nativeEngine->ValueToNapiValue(valueWrapper);
 
     auto asyncCtx = std::make_shared<CanvasAsyncCxt>();
     asyncCtx->env = env;
+    napi_value promise = nullptr;
     napi_create_promise(env, &asyncCtx->deferred, &promise);
+    if (info.Length() < 1 || !info[0]->IsObject()) {
+        ReturnPromise(info, promise);
+        return;
+    }
+
+    ScopeRAII scopeRaii(env);
+    panda::Local<JsiValue> value = info[0].Get().GetLocalHandle();
+    JSValueWrapper valueWrapper = value;
+    napi_value configNativeValue = nativeEngine->ValueToNapiValue(valueWrapper);
     if (isImageAnalyzing_) {
         napi_value result = CreateErrorValue(env, ERROR_CODE_AI_ANALYSIS_IS_ONGOING);
         napi_reject_deferred(env, asyncCtx->deferred, result);
