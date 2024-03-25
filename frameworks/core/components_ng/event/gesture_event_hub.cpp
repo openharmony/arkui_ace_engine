@@ -543,9 +543,7 @@ OffsetF GestureEventHub::GetPixelMapOffset(
         result.SetX(size.Width() * PIXELMAP_WIDTH_RATE);
         result.SetY(PIXELMAP_DRAG_DEFAULT_HEIGHT);
     } else {
-        auto coordinateX = frameNodeOffset_.GetX() > SystemProperties::GetDevicePhysicalWidth()
-                               ? frameNodeOffset_.GetX() - SystemProperties::GetDevicePhysicalWidth()
-                               : frameNodeOffset_.GetX();
+        auto coordinateX = frameNodeOffset_.GetX();
         auto coordinateY = frameNodeOffset_.GetY();
         auto differentScale = (NearZero(frameNodeSize_.Width()) || NearZero(size.Width()))
                                   ? 1.0f
@@ -716,8 +714,8 @@ void GestureEventHub::HandleOnDragStart(const GestureEvent& info)
     CHECK_NULL_VOID(dragDropManager);
     dragDropManager->SetDraggingPointer(info.GetPointerId());
     dragDropManager->SetDraggingPressedState(true);
-    if (dragDropInfo.inspectorId != "") {
-        auto dragPreviewPixelMap = DragEventActuator::GetPreviewPixelMap(dragDropInfo.inspectorId, frameNode);
+    if (dragPreviewInfo.inspectorId != "") {
+        auto dragPreviewPixelMap = DragEventActuator::GetPreviewPixelMap(dragPreviewInfo.inspectorId, frameNode);
         CHECK_NULL_VOID(dragPreviewPixelMap);
         dragDropInfo.pixelMap = dragPreviewPixelMap;
         OnDragStart(info, pipeline, frameNode, dragDropInfo, event);
@@ -806,6 +804,9 @@ void GestureEventHub::OnDragStart(const GestureEvent& info, const RefPtr<Pipelin
 
     std::map<std::string, int64_t> summary;
     ret = UdmfClient::GetInstance()->GetSummary(udKey, summary);
+    if (ret != 0) {
+        TAG_LOGI(AceLogTag::ACE_DRAG, "UDMF get summary failed, return value is %{public}d", ret);
+    }
     dragDropManager->SetSummaryMap(summary);
     RefPtr<PixelMap> pixelMap;
     if (dragDropInfo.pixelMap != nullptr) {
@@ -880,6 +881,16 @@ void GestureEventHub::OnDragStart(const GestureEvent& info, const RefPtr<Pipelin
     DragDataCore dragData { { shadowInfo }, {}, udKey, extraInfoLimited, arkExtraInfoJson->ToString(),
         static_cast<int32_t>(info.GetSourceDevice()), recordsSize, info.GetPointerId(), info.GetScreenLocation().GetX(),
         info.GetScreenLocation().GetY(), info.GetTargetDisplayId(), windowId, true, false, summary };
+    std::string summarys;
+    for (const auto& [udkey, recordSize] : summary) {
+        std::string str = udkey + "-" + std::to_string(recordSize) + ";";
+        summarys += str;
+    }
+    TAG_LOGI(AceLogTag::ACE_DRAG,
+        "Start drag, pixelMap width %{public}d height %{public}d, udkey %{public}s, recordsSize %{public}d, "
+        "pointerId %{public}d, displayId %{public}d, windowId %{public}d, summary %{public}s",
+        width, height, udKey.c_str(), recordsSize, info.GetPointerId(), info.GetTargetDisplayId(), windowId,
+        summarys.c_str());
     ret = InteractionInterface::GetInstance()->StartDrag(dragData, GetDragCallback(pipeline, eventHub));
     if (ret != 0) {
         if (dragDropManager->IsNeedScaleDragPreview()) {
@@ -1246,6 +1257,7 @@ OnDragCallbackCore GestureEventHub::GetDragCallback(const RefPtr<PipelineBase>& 
                 dragDropManager->SetDraggingPointer(-1);
                 dragDropManager->SetDraggingPressedState(false);
                 dragDropManager->ResetDragPreviewInfo();
+                dragDropManager->HideDragPreviewOverlay();
                 auto ret = InteractionInterface::GetInstance()->UnRegisterCoordinationListener();
                 if (ret != 0) {
                     TAG_LOGW(AceLogTag::ACE_DRAG, "Unregister coordination listener failed, error is %{public}d", ret);
@@ -1467,5 +1479,15 @@ void GestureEventHub::SetJSFrameNodeOnTouchEvent(TouchEventFunc&& touchEventFunc
         touchEventActuator_ = MakeRefPtr<TouchEventActuator>();
     }
     touchEventActuator_->SetJSFrameNodeOnTouchEvent(std::move(touchEventFunc));
+}
+
+void GestureEventHub::SetDragForbiddenForcely(bool isDragForbidden)
+{
+    isDragForbidden_ = isDragForbidden;
+}
+
+bool GestureEventHub::IsDragForbidden()
+{
+    return isDragForbidden_;
 }
 } // namespace OHOS::Ace::NG

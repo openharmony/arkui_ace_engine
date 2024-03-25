@@ -115,7 +115,7 @@ void ParseButtonObj(
 
     auto actionValue = objInner->GetProperty("action");
     if (actionValue->IsFunction()) {
-        WeakPtr<NG::FrameNode> frameNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+        auto frameNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
         auto actionFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(actionValue));
         auto eventFunc = [execCtx = args.GetExecutionContext(), func = std::move(actionFunc), property,
                             node = frameNode]() {
@@ -204,7 +204,7 @@ void JSAlertDialog::Show(const JSCallbackInfo& args)
         // Parse cancel.
         auto cancelValue = obj->GetProperty("cancel");
         if (cancelValue->IsFunction()) {
-            WeakPtr<NG::FrameNode> frameNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+            auto frameNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
             auto cancelFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(cancelValue));
             auto eventFunc = [execCtx = args.GetExecutionContext(), func = std::move(cancelFunc), node = frameNode]() {
                 JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
@@ -307,6 +307,8 @@ void JSAlertDialog::Show(const JSCallbackInfo& args)
                 properties.backgroundBlurStyle = blurStyle;
             }
         }
+        // Parse transition.
+        properties.transitionEffect = ParseJsTransitionEffect(args);
         JSViewAbstract::SetDialogProperties(obj, properties);
         AlertDialogModel::GetInstance()->SetShowDialog(properties);
     }

@@ -222,8 +222,9 @@ void FindBacktrackPath(
         { "pt-ST", "pt-PT" },
         { "pt-TL", "pt-PT" },
     };
-    if (LOCALE_PARENTS.find(localeTag) != LOCALE_PARENTS.end()) {
-        std::string curTag = LOCALE_PARENTS.find(localeTag)->second;
+    auto iter = LOCALE_PARENTS.find(localeTag);
+    if (iter != LOCALE_PARENTS.end()) {
+        std::string curTag = iter->second;
         backtrackPath.emplace_back(curTag);
         FindBacktrackPath(localeConfig, backtrackPath, curTag);
     } else {
@@ -260,8 +261,9 @@ bool IsOnBacktrackingPath(const std::string& bestConfigTag, const std::string& c
     }
     // Check if candidate and best are on the default area of device's backtracking path.
     for (auto& path : backtrackPath) {
-        if (DEFAULT_LANG.find(path) != DEFAULT_LANG.end()) {
-            std::string curTag = DEFAULT_LANG.find(path)->second;
+        auto iter = DEFAULT_LANG.find(path);
+        if (iter != DEFAULT_LANG.end()) {
+            std::string curTag = iter->second;
             if (bestConfigTag == curTag) {
                 return false;
             } else if (candidateConfigTag == curTag) {
@@ -325,8 +327,9 @@ bool IsLocaleConfigMoreSpecified(const AceResConfig& bestLocaleConfig, const Ace
     // Neither best nor candidate on the device's backtracking path, check if they are the default locale of the device.
     if (candidateConfigIndex == bestConfigIndex && candidateConfigIndex == -1) {
         std::string deviceTagWithScript = deviceLocaleConfig.language_ + "-" + deviceLocaleConfig.script_;
-        if (DEFAULT_LANG.find(deviceTagWithScript) != DEFAULT_LANG.end()) {
-            std::string defaultTag = DEFAULT_LANG.find(deviceTagWithScript)->second;
+        auto iter = DEFAULT_LANG.find(deviceTagWithScript);
+        if (iter != DEFAULT_LANG.end()) {
+            std::string defaultTag = iter->second;
             std::string defaultRegion = defaultTag.substr(defaultTag.find('-') + 1);
             if (candidateLocaleConfig.region_ == defaultRegion) {
                 return true;

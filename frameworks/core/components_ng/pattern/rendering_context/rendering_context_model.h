@@ -31,6 +31,8 @@ public:
     virtual void GetHeight(RefPtr<AceType>& canvasPattern, double& height) = 0;
     virtual void SetTransferFromImageBitmap(RefPtr<AceType>& canvasPattern,
         RefPtr<AceType> offscreenCPattern) = 0;
+    virtual void StartImageAnalyzer(RefPtr<AceType>& canvasPattern, void* config, onAnalyzedCallback& onAnalyzed) {};
+    virtual void StopImageAnalyzer(RefPtr<AceType>& canvasPattern) {};
 
 private:
     static std::unique_ptr<RenderingContextModel> instance_;

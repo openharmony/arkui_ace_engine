@@ -16,9 +16,11 @@
 #include "core/components_ng/pattern/custom_paint/custom_paint_pattern.h"
 
 #include "drawing/engine_adapter/skia_adapter/skia_canvas.h"
+#include "interfaces/inner_api/ace/ai/image_analyzer.h"
 
 #include "base/utils/utils.h"
 #include "core/common/ace_application_info.h"
+#include "core/common/ai/image_analyzer_manager.h"
 #include "core/common/container.h"
 #include "core/components_ng/pattern/custom_paint/canvas_paint_method.h"
 #include "core/components_ng/pattern/custom_paint/offscreen_canvas_pattern.h"
@@ -30,6 +32,13 @@ namespace {} // namespace
 
 namespace OHOS::Ace::NG {
 class RosenRenderContext;
+CustomPaintPattern::~CustomPaintPattern()
+{
+    if (IsSupportImageAnalyzerFeature()) {
+        ReleaseImageAnalyzer();
+    }
+}
+
 void CustomPaintPattern::OnAttachToFrameNode()
 {
     auto host = GetHost();
@@ -83,6 +92,10 @@ bool CustomPaintPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& d
         } else {
             isCanvasInit_ = false;
         }
+    }
+
+    if (IsSupportImageAnalyzerFeature() && imageAnalyzerManager_) {
+        imageAnalyzerManager_->UpdateAnalyzerUIConfig(geometryNode);
     }
 
     if (!isCanvasInit_) {
@@ -957,6 +970,101 @@ void CustomPaintPattern::OnPixelRoundFinish(const SizeF& pixelGridRoundSize)
 {
     CHECK_NULL_VOID(paintMethod_);
     paintMethod_->UpdateRecordingCanvas(pixelGridRoundSize.Width(), pixelGridRoundSize.Height());
+}
+
+void CustomPaintPattern::EnableAnalyzer(bool enable)
+{
+    isEnableAnalyzer_ = enable;
+    if (!isEnableAnalyzer_) {
+        DestroyAnalyzerOverlay();
+        return;
+    }
+
+    if (imageAnalyzerManager_) {
+        return;
+    }
+
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    imageAnalyzerManager_ = std::make_shared<ImageAnalyzerManager>(host, ImageAnalyzerHolder::CANVAS);
+    CHECK_NULL_VOID(imageAnalyzerManager_);
+
+    CHECK_NULL_VOID(paintMethod_);
+    paintMethod_->SetOnModifierUpdateFunc([weak = WeakClaim(this)] () -> void {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        pattern->DestroyAnalyzerOverlay();
+    });
+}
+
+void CustomPaintPattern::StartImageAnalyzer(void* config, onAnalyzedCallback& onAnalyzed)
+{
+    if (!IsSupportImageAnalyzerFeature()) {
+        CHECK_NULL_VOID(onAnalyzed);
+        (onAnalyzed.value())(ImageAnalyzerState::UNSUPPORTED);
+        return;
+    }
+
+    CHECK_NULL_VOID(imageAnalyzerManager_);
+    imageAnalyzerManager_->SetImageAnalyzerConfig(config);
+    imageAnalyzerManager_->SetImageAnalyzerCallback(onAnalyzed);
+
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto context = host->GetContext();
+    CHECK_NULL_VOID(context);
+    auto uiTaskExecutor = SingleTaskExecutor::Make(context->GetTaskExecutor(), TaskExecutor::TaskType::UI);
+    uiTaskExecutor.PostTask([weak = WeakClaim(this)] {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        pattern->CreateAnalyzerOverlay();
+    });
+}
+
+void CustomPaintPattern::StopImageAnalyzer()
+{
+    DestroyAnalyzerOverlay();
+}
+
+bool CustomPaintPattern::IsSupportImageAnalyzerFeature()
+{
+    return isEnableAnalyzer_ && imageAnalyzerManager_ && imageAnalyzerManager_->IsSupportImageAnalyzerFeature();
+}
+
+void CustomPaintPattern::CreateAnalyzerOverlay()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto context = host->GetRenderContext();
+    CHECK_NULL_VOID(context);
+    auto pixelMap = context->GetThumbnailPixelMap();
+    CHECK_NULL_VOID(pixelMap);
+    if (IsSupportImageAnalyzerFeature()) {
+        CHECK_NULL_VOID(imageAnalyzerManager_);
+        imageAnalyzerManager_->CreateAnalyzerOverlay(pixelMap);
+    }
+}
+
+void CustomPaintPattern::UpdateAnalyzerOverlay()
+{
+    auto context = GetHost()->GetRenderContext();
+    CHECK_NULL_VOID(context);
+    auto pixelMap = context->GetThumbnailPixelMap();
+    CHECK_NULL_VOID(pixelMap);
+    CHECK_NULL_VOID(imageAnalyzerManager_);
+    imageAnalyzerManager_->UpdateAnalyzerOverlay(pixelMap);
+}
+
+void CustomPaintPattern::DestroyAnalyzerOverlay()
+{
+    CHECK_NULL_VOID(imageAnalyzerManager_);
+    imageAnalyzerManager_->DestroyAnalyzerOverlay();
+}
+
+void CustomPaintPattern::ReleaseImageAnalyzer()
+{
+    CHECK_NULL_VOID(imageAnalyzerManager_);
+    imageAnalyzerManager_->ReleaseImageAnalyzer();
 }
 
 void CustomPaintPattern::DumpAdvanceInfo()

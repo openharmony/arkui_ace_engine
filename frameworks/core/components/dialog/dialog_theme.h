@@ -53,18 +53,18 @@ public:
                 return theme;
             }
             // init theme from global data
-            ParseNewPattern(themeConstants->GetThemeStyle(), theme);
-            ParsePattern(themeConstants->GetThemeStyle(), theme);
+            ParseNewPattern(themeConstants, theme);
+            ParsePattern(themeConstants, theme);
             return theme;
         }
 
-        void ParsePattern(const RefPtr<ThemeStyle>& themeStyle, const RefPtr<DialogTheme>& theme) const
+        void ParsePattern(const RefPtr<ThemeConstants>& themeConstants, const RefPtr<DialogTheme>& theme) const
         {
+            auto themeStyle = themeConstants->GetThemeStyle();
             if (!themeStyle) {
-                LOGI("dialog theme style is null");
                 return;
             }
-            auto dialogPattern = themeStyle->GetAttr<RefPtr<ThemeStyle>>(THEME_PATTERN_DIALOG, nullptr);
+            RefPtr<ThemeStyle> dialogPattern = themeConstants->GetPatternByName(THEME_PATTERN_DIALOG);
             if (!dialogPattern) {
                 return;
             }
@@ -151,13 +151,9 @@ public:
             theme->contentMinFontSize_ = themeStyle->GetAttr<Dimension>("content_text_font_size_min", 16.0_vp);
         }
 
-        void ParseNewPattern(const RefPtr<ThemeStyle>& themeStyle, const RefPtr<DialogTheme>& theme) const
+        void ParseNewPattern(const RefPtr<ThemeConstants>& themeConstants, const RefPtr<DialogTheme>& theme) const
         {
-            if (!themeStyle) {
-                LOGI("dialog theme style is null");
-                return;
-            }
-            auto dialogPattern = themeStyle->GetAttr<RefPtr<ThemeStyle>>(THEME_PATTERN_DIALOG, nullptr);
+            RefPtr<ThemeStyle> dialogPattern = themeConstants->GetPatternByName(THEME_PATTERN_DIALOG);
             if (!dialogPattern) {
                 return;
             }

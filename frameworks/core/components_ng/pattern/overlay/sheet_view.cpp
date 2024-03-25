@@ -184,6 +184,7 @@ RefPtr<FrameNode> SheetView::CreateScrollNode()
     auto pattern = scroll->GetPattern<ScrollablePattern>();
     CHECK_NULL_RETURN(pattern, nullptr);
     pattern->SetEdgeEffect(EdgeEffect::SPRING, false);
+    pattern->SetScrollToSafeAreaHelper(false);
     props->UpdateAlignment(Alignment::TOP_CENTER);
     scroll->MarkModifyDone();
     return scroll;

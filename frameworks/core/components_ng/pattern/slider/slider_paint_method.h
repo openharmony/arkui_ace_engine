@@ -64,6 +64,7 @@ public:
     void UpdateOverlayModifier(PaintWrapper* paintWrapper) override;
 
 private:
+    void UpdateBorderRadius(RefPtr<SliderPaintProperty>& paintProperty);
     RefPtr<SliderContentModifier> sliderContentModifier_;
     SliderContentModifier::Parameters parameters_;
 

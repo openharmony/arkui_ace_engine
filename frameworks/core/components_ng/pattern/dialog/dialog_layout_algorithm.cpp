@@ -264,6 +264,11 @@ double DialogLayoutAlgorithm::GetMaxWidthBasedOnGridType(
         return info->GetWidth(std::min(gridCount_, parentColumns));
     }
 
+    return info->GetWidth(std::min(GetDeviceColumns(type, deviceType), parentColumns));
+}
+
+int32_t DialogLayoutAlgorithm::GetDeviceColumns(GridSizeType type, DeviceType deviceType)
+{
     int32_t deviceColumns;
     if (deviceType == DeviceType::WATCH) {
         if (type == GridSizeType::SM) {
@@ -289,16 +294,19 @@ double DialogLayoutAlgorithm::GetMaxWidthBasedOnGridType(
         } else {
             deviceColumns = 8;
         }
+    } else if (deviceType == DeviceType::TABLET && type == GridSizeType::MD &&
+               Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
+        deviceColumns = 5;
     } else {
         if (type == GridSizeType::SM) {
             deviceColumns = 2;
-        } else if (type == GridSizeType::MD && deviceType != DeviceType::TABLET) {
+        } else if (type == GridSizeType::MD) {
             deviceColumns = 3;
         } else {
             deviceColumns = 4;
         }
     }
-    return info->GetWidth(std::min(deviceColumns, parentColumns));
+    return deviceColumns;
 }
 
 void DialogLayoutAlgorithm::GetDialogWidth(double& width)
@@ -500,7 +508,9 @@ OffsetF DialogLayoutAlgorithm::ComputeChildPosition(
         ConvertToPx(CalcLength(dialogOffset_.GetY()), layoutConstraint->scaleProperty, selfSize.Height());
     OffsetF dialogOffset = OffsetF(dialogOffsetX.value_or(0.0), dialogOffsetY.value_or(0.0));
     auto maxSize = layoutConstraint->maxSize;
-    maxSize.MinusHeight(safeAreaInsets_.bottom_.Length());
+    if (!customSize_) {
+        maxSize.MinusHeight(safeAreaInsets_.bottom_.Length());
+    }
     if (!SetAlignmentSwitch(maxSize, childSize, topLeftPoint)) {
         topLeftPoint = OffsetF(maxSize.Width() - childSize.Width(), maxSize.Height() - childSize.Height()) / HALF;
     }
@@ -623,6 +633,7 @@ void DialogLayoutAlgorithm::UpdateSafeArea()
     if (container->IsSubContainer()) {
         currentId = SubwindowManager::GetInstance()->GetParentContainerId(Container::CurrentId());
         container = AceEngine::Get().GetContainer(currentId);
+        CHECK_NULL_VOID(container);
         ContainerScope scope(currentId);
     }
     auto pipelineContext = container->GetPipelineContext();

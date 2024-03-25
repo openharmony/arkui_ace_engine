@@ -73,6 +73,18 @@ void NavDestinationGroupNode::DeleteChildFromGroup(int32_t slot)
 
 void NavDestinationGroupNode::OnAttachToMainTree(bool recursive)
 {
+    RefPtr<UINode> node = WeakClaim<UINode>(this).Upgrade();
+    while (node) {
+        if (node->GetTag() == V2::NAVIGATION_VIEW_ETS_TAG) {
+            break;
+        }
+        node = node->GetParent();
+    }
+    if (node) {
+        auto pattern = AceType::DynamicCast<NavDestinationPattern>(GetPattern());
+        pattern->SetNavigationNode(node);
+    }
+
     if (!UseOffscreenProcess()) {
         ProcessShallowBuilder();
     }

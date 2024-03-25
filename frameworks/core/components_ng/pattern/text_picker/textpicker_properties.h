@@ -38,10 +38,10 @@ struct ItemDivider final {
 struct DividerInfo {
     float startMargin = 0.0f;
     float endMargin = 0.0f;
-    float dividerHeight = 0.0f;
     float dividerWidth = 0.0f;
     float dividerLength = 0.0f;
     float dividerMargin = 0.0f;
+    double dividerHeight = 0.0f;
     Color dividerColor = Color::TRANSPARENT;
 };
 } // namespace OHOS::Ace

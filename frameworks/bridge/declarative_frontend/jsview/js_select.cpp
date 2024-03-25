@@ -119,6 +119,7 @@ void JSSelect::JSBind(BindingTarget globalObj)
     JSClass<JSSelect>::StaticMethod("optionWidthFitTrigger", &JSSelect::SetOptionWidthFitTrigger, opt);
     JSClass<JSSelect>::StaticMethod("menuBackgroundColor", &JSSelect::SetMenuBackgroundColor, opt);
     JSClass<JSSelect>::StaticMethod("menuBackgroundBlurStyle", &JSSelect::SetMenuBackgroundBlurStyle, opt);
+    JSClass<JSSelect>::StaticMethod("controlSize", &JSSelect::SetControlSize);
 
     JSClass<JSSelect>::StaticMethod("onClick", &JSInteractableView::JsOnClick);
     JSClass<JSSelect>::StaticMethod("onTouch", &JSInteractableView::JsOnTouch);
@@ -134,7 +135,7 @@ void ParseSelectedObject(const JSCallbackInfo& info, const JSRef<JSVal>& changeE
     CHECK_NULL_VOID(changeEventVal->IsFunction());
 
     auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(changeEventVal));
-    WeakPtr<NG::FrameNode> targetNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    WeakPtr<NG::FrameNode> targetNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
     auto onSelect = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc), node = targetNode](int32_t index) {
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
         ACE_SCORING_EVENT("Select.SelectChangeEvent");
@@ -162,6 +163,7 @@ void JSSelect::Selected(const JSCallbackInfo& info)
     if (info.Length() > 1 && info[1]->IsFunction()) {
         ParseSelectedObject(info, info[1]);
     }
+    TAG_LOGD(AceLogTag::ACE_SELECT_COMPONENT, "set selected index %{public}d", value);
     SelectModel::GetInstance()->SetSelected(value);
 }
 
@@ -170,7 +172,7 @@ void ParseValueObject(const JSCallbackInfo& info, const JSRef<JSVal>& changeEven
     CHECK_NULL_VOID(changeEventVal->IsFunction());
 
     auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(changeEventVal));
-    WeakPtr<NG::FrameNode> targetNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    WeakPtr<NG::FrameNode> targetNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
     auto onSelect = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc), node = targetNode](
                         const std::string& value) {
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
@@ -196,23 +198,34 @@ void JSSelect::Value(const JSCallbackInfo& info)
     if (info.Length() > 1 && info[1]->IsFunction()) {
         ParseValueObject(info, info[1]);
     }
+    TAG_LOGD(AceLogTag::ACE_SELECT_COMPONENT, "set select value %{public}s", value.c_str());
     SelectModel::GetInstance()->SetValue(value);
+}
+
+void ResetFont(void)
+{
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto selectTheme = pipeline->GetTheme<SelectTheme>();
+    CHECK_NULL_VOID(selectTheme);
+    auto textTheme = pipeline->GetTheme<TextTheme>();
+    CHECK_NULL_VOID(textTheme);
+    if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
+        SelectModel::GetInstance()->SetFontSize(selectTheme->GetFontSize());
+    } else {
+        auto controlSize = SelectModel::GetInstance()->GetControlSize();
+        SelectModel::GetInstance()->SetFontSize(selectTheme->GetFontSize(controlSize));
+    }
+    SelectModel::GetInstance()->SetFontWeight(FontWeight::MEDIUM);
+    SelectModel::GetInstance()->SetFontFamily(textTheme->GetTextStyle().GetFontFamilies());
+    SelectModel::GetInstance()->SetItalicFontStyle(textTheme->GetTextStyle().GetFontStyle());
+    return;
 }
 
 void JSSelect::Font(const JSCallbackInfo& info)
 {
     if (info[0]->IsUndefined() || info[0]->IsNull()) {
-        auto pipeline = PipelineBase::GetCurrentContext();
-        CHECK_NULL_VOID(pipeline);
-        auto selectTheme = pipeline->GetTheme<SelectTheme>();
-        CHECK_NULL_VOID(selectTheme);
-        auto textTheme = pipeline->GetTheme<TextTheme>();
-        CHECK_NULL_VOID(textTheme);
-        SelectModel::GetInstance()->SetFontSize(selectTheme->GetFontSize());
-        SelectModel::GetInstance()->SetFontWeight(FontWeight::MEDIUM);
-        SelectModel::GetInstance()->SetFontFamily(textTheme->GetTextStyle().GetFontFamilies());
-        SelectModel::GetInstance()->SetItalicFontStyle(textTheme->GetTextStyle().GetFontStyle());
-        return;
+        ResetFont();
     }
 
     if (!info[0]->IsObject()) {
@@ -463,7 +476,7 @@ void JSSelect::OptionFontColor(const JSCallbackInfo& info)
             return;
         }
     }
-
+    TAG_LOGD(AceLogTag::ACE_SELECT_COMPONENT, "set option font color %{public}s", textColor.ColorToString().c_str());
     SelectModel::GetInstance()->SetOptionFontColor(textColor);
 }
 
@@ -473,11 +486,12 @@ void JSSelect::OnSelected(const JSCallbackInfo& info)
         return;
     }
     auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(info[0]));
-    WeakPtr<NG::FrameNode> targetNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    WeakPtr<NG::FrameNode> targetNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
     auto onSelect = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc), node = targetNode](
                         int32_t index, const std::string& value) {
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
         ACE_SCORING_EVENT("Select.onSelect");
+        TAG_LOGD(AceLogTag::ACE_SELECT_COMPONENT, "fire change event %{public}d %{public}s", index, value.c_str());
         PipelineContext::SetCallBackNode(node);
         JSRef<JSVal> params[2];
         params[0] = JSRef<JSVal>::Make(ToJSValue(index));
@@ -486,51 +500,6 @@ void JSSelect::OnSelected(const JSCallbackInfo& info)
     };
     SelectModel::GetInstance()->SetOnSelect(std::move(onSelect));
     info.ReturnSelf();
-}
-
-bool CheckJSCallbackInfo(
-    const std::string& callerName, const JSCallbackInfo& info, std::vector<JSCallbackInfoType>& infoTypes)
-{
-    if (info.Length() < 1) {
-        return false;
-    }
-    bool typeVerified = false;
-    std::string unrecognizedType;
-    for (const auto& infoType : infoTypes) {
-        switch (infoType) {
-            case JSCallbackInfoType::STRING:
-                if (info[0]->IsString()) {
-                    typeVerified = true;
-                } else {
-                    unrecognizedType += "string|";
-                }
-                break;
-            case JSCallbackInfoType::NUMBER:
-                if (info[0]->IsNumber()) {
-                    typeVerified = true;
-                } else {
-                    unrecognizedType += "number|";
-                }
-                break;
-            case JSCallbackInfoType::OBJECT:
-                if (info[0]->IsObject()) {
-                    typeVerified = true;
-                } else {
-                    unrecognizedType += "object|";
-                }
-                break;
-            case JSCallbackInfoType::FUNCTION:
-                if (info[0]->IsFunction()) {
-                    typeVerified = true;
-                } else {
-                    unrecognizedType += "Function|";
-                }
-                break;
-            default:
-                break;
-        }
-    }
-    return typeVerified || infoTypes.size() == 0;
 }
 
 void JSSelect::JsSize(const JSCallbackInfo& info)
@@ -687,6 +656,7 @@ void JSSelect::SetMenuAlign(const JSCallbackInfo& info)
         }
     } else {
         menuAlignObj.alignType = static_cast<MenuAlignType>(info[0]->ToNumber<int32_t>());
+        TAG_LOGD(AceLogTag::ACE_SELECT_COMPONENT, "set alignType %{public}d", menuAlignObj.alignType);
     }
 
     if (info.Length() > 1) {
@@ -704,6 +674,7 @@ void JSSelect::SetMenuAlign(const JSCallbackInfo& info)
         CalcDimension dy;
         auto dyValue = offsetObj->GetProperty("dy");
         ParseJsDimensionVp(dyValue, dy);
+        TAG_LOGD(AceLogTag::ACE_SELECT_COMPONENT, "set offset dx %{public}f dy %{public}f", dx.Value(), dy.Value());
         menuAlignObj.offset = DimensionOffset(dx, dy);
     }
 
@@ -724,7 +695,6 @@ void JSSelect::SetOptionWidth(const JSCallbackInfo& info)
 {
     CalcDimension value;
     if (info[0]->IsUndefined() || info[0]->IsNull()) {
-        LOGE("OptionWidth is null or undefined");
         SelectModel::GetInstance()->SetHasOptionWidth(false);
         SelectModel::GetInstance()->SetOptionWidth(value);
         return;
@@ -736,7 +706,6 @@ void JSSelect::SetOptionWidth(const JSCallbackInfo& info)
         } else if (modeFlag.compare("fit_trigger") == 0) {
             SelectModel::GetInstance()->SetOptionWidthFitTrigger(true);
         } else if (IsPercentStr(modeFlag)) {
-            LOGE("OptionWidth is percentage");
             return;
         } else {
             ParseJsDimensionVpNG(info[0], value);
@@ -758,35 +727,22 @@ void JSSelect::SetOptionWidth(const JSCallbackInfo& info)
 void JSSelect::SetOptionHeight(const JSCallbackInfo& info)
 {
     CalcDimension value;
-    if (info[0]->IsUndefined()) {
-        LOGE("OptionHeight is undefined");
-        return;
-    } else if (info[0]->IsNull()) {
-        LOGE("OptionHeight is null");
+    if (info[0]->IsUndefined()|| info[0]->IsNull()) {
         return;
     } else if (info[0]->IsString()) {
         std::string modeFlag = info[0]->ToString();
         if (IsPercentStr(modeFlag)) {
-            LOGE("OptionHeight is a percentage");
             return;
         } else {
             ParseJsDimensionVpNG(info[0], value);
-            if (value.IsNegative()) {
-                LOGE("OptionHeight is negative");
-                return;
-            } else if (NEAR_ZERO(value.Value())) {
-                LOGE("OptionHeight is zero");
+            if (value.IsNonPositive()) {
                 return;
             }
             SelectModel::GetInstance()->SetOptionHeight(value);
         }
     } else {
         ParseJsDimensionVpNG(info[0], value);
-        if (value.IsNegative()) {
-            LOGE("OptionHeight is negative");
-            return;
-        } else if (NEAR_ZERO(value.Value())) {
-            LOGE("OptionHeight is zero");
+        if (value.IsNonPositive()) {
             return;
         }
         SelectModel::GetInstance()->SetOptionHeight(value);
@@ -816,7 +772,8 @@ void JSSelect::SetMenuBackgroundColor(const JSCallbackInfo& info)
             return;
         }
     }
-
+    TAG_LOGD(AceLogTag::ACE_SELECT_COMPONENT, "set menu background color %{public}s",
+        menuBackgroundColor.ColorToString().c_str());
     SelectModel::GetInstance()->SetMenuBackgroundColor(menuBackgroundColor);
 }
 
@@ -832,8 +789,25 @@ void JSSelect::SetMenuBackgroundBlurStyle(const JSCallbackInfo& info)
         if (blurStyle >= static_cast<int>(BlurStyle::NO_MATERIAL) &&
             blurStyle <= static_cast<int>(BlurStyle::COMPONENT_ULTRA_THICK)) {
             styleOption.blurStyle = static_cast<BlurStyle>(blurStyle);
+            TAG_LOGD(AceLogTag::ACE_SELECT_COMPONENT, "set menu blurStyle %{public}d", blurStyle);
             SelectModel::GetInstance()->SetMenuBackgroundBlurStyle(styleOption);
         }
+    }
+}
+
+void JSSelect::SetControlSize(const JSCallbackInfo& info)
+{
+    if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
+        return;
+    }
+    if (info.Length() < 1) {
+        return;
+    }
+    if (info[0]->IsNumber()) {
+        auto controlSize = static_cast<ControlSize>(info[0]->ToNumber<int32_t>());
+        SelectModel::GetInstance()->SetControlSize(controlSize);
+    } else {
+        LOGE("JSSelect::SetControlSize Is not Number.");
     }
 }
 } // namespace OHOS::Ace::Framework

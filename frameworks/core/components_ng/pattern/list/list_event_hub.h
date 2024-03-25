@@ -52,6 +52,16 @@ public:
         return onScrollIndexEvent_;
     }
 
+    void SetOnScrollVisibleContentChange(OnScrollVisibleContentChangeEvent&& onScrollVisibleContentChange)
+    {
+        OnScrollVisibleContentChangeEvent_ = std::move(onScrollVisibleContentChange);
+    }
+
+    const OnScrollVisibleContentChangeEvent& GetOnScrollVisibleContentChange() const
+    {
+        return OnScrollVisibleContentChangeEvent_;
+    }
+
     void SetOnItemMove(OnItemMoveEvent&& onItemMove)
     {
         onItemMoveEvent_ = std::move(onItemMove);
@@ -178,6 +188,7 @@ public:
 
     void InitItemDragEvent(const RefPtr<GestureEventHub>& gestureHub);
     void HandleOnItemDragStart(const GestureEvent& info);
+    void OnItemDragStart(const GestureEvent& info, const DragDropInfo& dragDropInfo);
     void HandleOnItemDragUpdate(const GestureEvent& info);
     void HandleOnItemDragEnd(const GestureEvent& info);
     void HandleOnItemDragCancel();
@@ -187,6 +198,7 @@ private:
 
     OnScrollBeginEvent onScrollBeginEvent_;
     OnScrollIndexEvent onScrollIndexEvent_;
+    OnScrollVisibleContentChangeEvent OnScrollVisibleContentChangeEvent_;
     OnItemMoveEvent onItemMoveEvent_;
     OnItemDragStartFunc onItemDragStartEvent_;
     OnItemDragEnterFunc onItemDragEnterEvent_;

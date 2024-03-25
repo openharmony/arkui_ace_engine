@@ -55,6 +55,8 @@ public:
     virtual void ClearPopupNG() = 0;
     virtual RefPtr<NG::FrameNode> ShowDialogNG(
         const DialogProperties& dialogProps, std::function<void()>&& buildFunc) = 0;
+    virtual RefPtr<NG::FrameNode> ShowDialogNGWithNode(
+        const DialogProperties& dialogProps, const RefPtr<NG::UINode>& customNode) = 0;
     virtual void CloseDialogNG(const RefPtr<NG::FrameNode>& dialogNode) = 0;
     virtual void OpenCustomDialogNG(const DialogProperties& dialogProps, std::function<void(int32_t)>&& callback) = 0;
     virtual void CloseCustomDialogNG(int32_t dialogId) = 0;
@@ -93,8 +95,8 @@ public:
     }
 
     virtual void ClearToast() = 0;
-    virtual void ShowToast(
-        const std::string& message, int32_t duration, const std::string& bottom, const NG::ToastShowMode& showMode) = 0;
+    virtual void ShowToast(const std::string& message, int32_t duration, const std::string& bottom,
+        const NG::ToastShowMode& showMode, int32_t alignment, std::optional<DimensionOffset> offset) = 0;
     virtual void ShowDialog(const std::string& title, const std::string& message,
         const std::vector<ButtonInfo>& buttons, bool autoCancel, std::function<void(int32_t, int32_t)>&& callback,
         const std::set<std::string>& callbacks) = 0;

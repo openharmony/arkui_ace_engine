@@ -17,6 +17,7 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_SHAPE_CIRCLE_MODEL_NG_H
 
 #include "base/utils/macros.h"
+#include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/shape/circle_model.h"
 
 namespace OHOS::Ace::NG {
@@ -24,6 +25,7 @@ namespace OHOS::Ace::NG {
 class ACE_EXPORT CircleModelNG : public OHOS::Ace::CircleModel {
 public:
     void Create() override;
+    static RefPtr<FrameNode> CreateFrameNode(int32_t nodeId);
 };
 
 } // namespace OHOS::Ace::NG

@@ -40,6 +40,11 @@ public:
         return name_;
     }
 
+    virtual napi_value GetParamObj() const
+    {
+        return nullptr;
+    }
+
 protected:
     std::string name_;
 };
@@ -70,7 +75,40 @@ public:
         return navigationStack_;
     }
 
+    int32_t GetIndex() const
+    {
+        return index_;
+    }
+
+    void SetIndex(int32_t index)
+    {
+        index_ = index;
+    }
+
+    uint64_t GetNavDestinationId() const
+    {
+        return navDestinationId_;
+    }
+
+    void SetNavDestinationId(uint64_t id)
+    {
+        navDestinationId_ = id;
+    }
+
+    void SetIsEmpty(bool isEmpty)
+    {
+        isEmpty_ = isEmpty;
+    }
+
+    bool GetIsEmpty() const
+    {
+        return isEmpty_;
+    }
+
 protected:
+    int32_t index_ = -1;
+    uint64_t navDestinationId_ = 0;
+    bool isEmpty_ = false;
     RefPtr<NavPathInfo> pathInfo_;
     WeakPtr<NavigationStack> navigationStack_;
 };

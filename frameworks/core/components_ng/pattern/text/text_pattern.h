@@ -33,6 +33,7 @@
 #include "core/components_ng/pattern/rich_editor/paragraph_manager.h"
 #include "core/components_ng/pattern/rich_editor/selection_info.h"
 #include "core/components_ng/pattern/scrollable/scrollable_pattern.h"
+#include "core/components_ng/pattern/text/span/span_object.h"
 #include "core/components_ng/pattern/text/span_node.h"
 #include "core/components_ng/pattern/text/text_accessibility_property.h"
 #include "core/components_ng/pattern/text/text_base.h"
@@ -57,8 +58,8 @@ struct SpanNodeInfo {
     RefPtr<UINode> containerSpanNode;
 };
 // TextPattern is the base class for text render node to perform paint text.
-class TextPattern : public virtual Pattern, public TextDragBase, public TextBase {
-    DECLARE_ACE_TYPE(TextPattern, Pattern, TextDragBase, TextBase);
+class TextPattern : public virtual Pattern, public TextDragBase, public TextBase, public SpanWatcher {
+    DECLARE_ACE_TYPE(TextPattern, Pattern, TextDragBase, TextBase, SpanWatcher);
 
 public:
     TextPattern() = default;
@@ -99,10 +100,7 @@ public:
     {
         auto host = GetHost();
         CHECK_NULL_RETURN(host, false);
-        if (host->GetTag() == V2::SYMBOL_ETS_TAG) {
-            return true;
-        }
-        return false;
+        return host->GetTag() == V2::SYMBOL_ETS_TAG;
     }
 
     bool DefaultSupportDrag() override
@@ -309,6 +307,7 @@ public:
     virtual std::function<void(Offset)> GetThumbnailCallback();
     std::list<ResultObject> dragResultObjects_;
     std::list<ResultObject> recoverDragResultObjects_;
+    std::vector<RefPtr<SpanItem>> dragSpanItems_;
     void OnDragEnd(const RefPtr<Ace::DragEvent>& event);
     void OnDragEndNoChild(const RefPtr<Ace::DragEvent>& event);
     void CloseOperate();
@@ -496,6 +495,21 @@ public:
     }
     bool CheckClickedOnSpanOrText(RectF textContentRect, const Offset& localLocation);
 
+    // style string
+    void SetSpanItemChildren(const std::list<RefPtr<SpanItem>>& spans)
+    {
+        spans_ = spans;
+    }
+    void SetSpanStringMode(bool isSpanStringMode)
+    {
+        isSpanStringMode_ = isSpanStringMode;
+    }
+    bool GetSpanStringMode() const
+    {
+        return isSpanStringMode_;
+    }
+    void UpdateSpanItems(const std::list<RefPtr<SpanItem>>& spanItems) override;
+
 protected:
     void OnAttachToFrameNode() override;
     void OnDetachFromFrameNode(FrameNode* node) override;
@@ -528,6 +542,7 @@ protected:
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
     bool IsSelectAll();
     virtual int32_t GetHandleIndex(const Offset& offset) const;
+    virtual void UpdateSelectorOnHandleMove(const OffsetF& localOffset, float handleHeight, bool isFirstHandle);
     std::wstring GetWideText() const;
     std::string GetSelectedText(int32_t start, int32_t end) const;
     void CalcCaretMetricsByPosition(
@@ -578,6 +593,8 @@ protected:
     bool textDetectEnable_ = false;
     RefPtr<DataDetectorAdapter> dataDetectorAdapter_ = MakeRefPtr<DataDetectorAdapter>();
 
+    OffsetF parentGlobalOffset_;
+
 private:
     void HandleOnCopy();
     void InitLongPressEvent(const RefPtr<GestureEventHub>& gestureHub);
@@ -613,6 +630,8 @@ private:
     void ToJsonValue(std::unique_ptr<JsonValue>& json) const override;
     // to check if drag is in progress
 
+    void AddUdmfTxtPreProcessor(const ResultObject src, ResultObject& result, bool isAppend);
+
     bool isMeasureBoundary_ = false;
     bool isMousePressed_ = false;
     bool leftMousePressed_ = false;
@@ -620,6 +639,7 @@ private:
     bool blockPress_ = false;
     bool hasClicked_ = false;
     bool isDoubleClick_ = false;
+    bool isSpanStringMode_ = false;
     int32_t clickedSpanPosition_ = -1;
     TimeStamp lastClickTimeStamp_;
 
@@ -631,7 +651,6 @@ private:
 
     OffsetF mouseReleaseOffset_;
     OffsetF contentOffset_;
-    OffsetF parentGlobalOffset_;
     GestureEventFunc onClick_;
     RefPtr<DragWindow> dragWindow_;
     RefPtr<DragDropProxy> dragDropProxy_;

@@ -23,7 +23,7 @@ class ISlideUpdateCallback {
 public:
     ISlideUpdateCallback() = default;
     virtual ~ISlideUpdateCallback() = default;
-    virtual void OnSlideUpdate(const SizeF& frameSize) = 0;
+    virtual void OnSlideUpdate() = 0;
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_WEB_I_SLIDE_UPDATE_CALLBACK_H

@@ -90,7 +90,7 @@ public:
 
     void OnAnimateStop() override;
 
-    void ScrollPage(bool reverse);
+    void ScrollPage(bool reverse, bool smooth = false) override;
 
     void ScrollToIndex(int32_t index, bool smooth = false, ScrollAlign align = ScrollAlign::START) override;
 

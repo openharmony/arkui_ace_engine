@@ -83,9 +83,16 @@ public:
         listContentModifier_ = modify;
     }
 
-    void SetItemsPosition(const PositionMap& positionMap)
+    void SetItemsPosition(const PositionMap& positionMap, const std::set<int32_t>& pressedItem)
     {
         itemPosition_ = positionMap;
+        if (!pressedItem.empty()) {
+            for (auto& child : itemPosition_) {
+                if (pressedItem.find(child.second.id) != pressedItem.end()) {
+                    child.second.isPressed = true;
+                }
+            }
+        }
     }
 
     void SetLaneGutter(float laneGutter)

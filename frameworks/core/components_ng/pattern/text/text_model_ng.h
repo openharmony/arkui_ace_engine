@@ -27,6 +27,7 @@ namespace OHOS::Ace::NG {
 class ACE_EXPORT TextModelNG : public TextModel {
 public:
     void Create(const std::string& content) override;
+    void Create(const RefPtr<SpanStringBase>& spanString) override;
     void SetFont(const Font& value) override;
     void SetFontSize(const Dimension& value) override;
     void SetTextColor(const Color& value) override;
@@ -124,6 +125,8 @@ public:
     static Color GetFontColor(FrameNode* frameNode);
     static Dimension GetTextBaselineOffset(FrameNode* frameNode);
     static std::vector<Shadow> GetTextShadow(FrameNode* frameNode);
+    static Ace::WordBreak GetWordBreak(FrameNode* frameNode);
+    static EllipsisMode GetEllipsisMode(FrameNode* frameNode);
 };
 } // namespace OHOS::Ace::NG
 

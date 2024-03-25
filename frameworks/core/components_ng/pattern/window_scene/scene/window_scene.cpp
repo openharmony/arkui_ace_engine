@@ -156,7 +156,6 @@ void WindowScene::RegisterFocusCallback()
             auto focusHub = host->GetFocusHub();
             CHECK_NULL_VOID(focusHub);
             focusHub->SetParentFocusable(true);
-            focusHub->RequestFocusWithDefaultFocusFirstly();
         },
             TaskExecutor::TaskType::UI);
     };

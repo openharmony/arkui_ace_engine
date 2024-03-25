@@ -22,39 +22,52 @@
 #include <vector>
 
 #include "base/memory/referenced.h"
-#include "core/components_ng/pattern/text/span/span_objects.h"
+#include "core/components_ng/pattern/text/span/span_object.h"
 #include "core/components_ng/pattern/text/text_model.h"
 
 namespace OHOS::Ace {
 
+enum class SpanStringOperation {
+    REPLACE = 0,
+    INSERT,
+    REMOVE
+};
+
 class ACE_EXPORT SpanString : public SpanStringBase {
-    DECLARE_ACE_TYPE(SpanString, AceType);
+    DECLARE_ACE_TYPE(SpanString, SpanStringBase);
 
 public:
-    SpanString(const SpanString& other);
     explicit SpanString(const std::string& text);
     SpanString(const std::string& text, std::vector<RefPtr<SpanBase>>& spans);
-    std::string GetString() const;
+    ~SpanString() override;
+    const std::string& GetString() const;
     std::wstring GetWideString();
     int32_t GetLength() const;
     void SetString(const std::string& text);
-    const std::map<SpanType, std::list<RefPtr<SpanBase>>>& GetSpansMap() const;
+    const std::unordered_map<SpanType, std::list<RefPtr<SpanBase>>>& GetSpansMap() const;
     bool IsEqualToSpanString(const RefPtr<SpanString>& other) const;
     RefPtr<SpanString> GetSubSpanString(int32_t start, int32_t length) const;
     std::vector<RefPtr<SpanBase>> GetSpans(int32_t start, int32_t length) const;
     std::vector<RefPtr<SpanBase>> GetSpans(int32_t start, int32_t length, SpanType spanType) const;
     int32_t GetIndex(const std::string& subString) const;
     bool operator==(const SpanString& other) const;
-    SpanString& operator=(const SpanString& other);
     void AddSpanWatcher(const WeakPtr<SpanWatcher>& watcher);
     void NotifySpanWatcher();
     const std::list<RefPtr<NG::SpanItem>>& GetSpanItems() const;
-    static RefPtr<NG::SpanItem> GetDefaultSpanItem(const std::string& text);
+    void AddSpan(const RefPtr<SpanBase>& span);
+    bool CheckRange(int32_t start, int32_t length, bool allowLengthZero = false) const;
 
 protected:
     RefPtr<SpanBase> GetSpan(int32_t start, int32_t length, SpanType spanType) const;
+    std::list<RefPtr<SpanBase>> GetSubSpanList(
+        int32_t start, int32_t length, const std::list<RefPtr<SpanBase>>& spans) const;
     void BindWithSpans(std::vector<RefPtr<SpanBase>> spans);
-    bool CheckRange(int32_t start, int32_t length, bool allowLengthZero = false) const;
+    void MergeIntervals(std::list<RefPtr<SpanBase>>& spans);
+    void SplitInterval(std::list<RefPtr<SpanBase>>& spans, std::pair<int32_t, int32_t> interval);
+    void ApplyToSpans(const RefPtr<SpanBase>& span, std::pair<int32_t, int32_t> interval, SpanOperation operation);
+    void SortSpans(std::list<RefPtr<SpanBase>>& spans);
+    bool CanMerge(const RefPtr<SpanBase>& a, const RefPtr<SpanBase>& b);
+    static RefPtr<NG::SpanItem> GetDefaultSpanItem(const std::string& text);
 
     std::string text_;
     std::unordered_map<SpanType, std::list<RefPtr<SpanBase>>> spansMap_;

@@ -100,9 +100,13 @@ RefPtr<FrameNode> DialogView::CreateDialogNode(
     pattern->BuildChild(param);
     pattern->SetOnWillDismiss(param.onWillDismiss);
 
-    // set open and close animation
-    pattern->SetOpenAnimation(param.openAnimation);
-    pattern->SetCloseAnimation(param.closeAnimation);
+    if (param.transitionEffect != nullptr) {
+        dialogContext->UpdateChainedTransition(param.transitionEffect);
+    } else {
+        // set open and close animation
+        pattern->SetOpenAnimation(param.openAnimation);
+        pattern->SetCloseAnimation(param.closeAnimation);
+    }
 
     pattern->SetDialogProperties(param);
 

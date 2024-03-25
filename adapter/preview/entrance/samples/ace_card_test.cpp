@@ -66,7 +66,8 @@ const std::string pageProfile = "form_config";
 const std::string jsCardUrl = "widget/pages/index/index";
 const std::string eTSCardUrl = "./ets/widget/pages/card.ets";
 
-auto&& renderCallback = [](const void*, const size_t bufferSize, const int32_t width, const int32_t height) -> bool {
+auto&& renderCallback = [](
+    const void*, const size_t bufferSize, const int32_t width, const int32_t height, const uint64_t) -> bool {
     LOGI("OnRender: bufferSize = %{public}zu, [width, height] = [%{public}d, %{public}d]", bufferSize, width, height);
     return true;
 };

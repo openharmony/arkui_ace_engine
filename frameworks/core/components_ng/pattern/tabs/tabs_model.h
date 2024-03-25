@@ -119,6 +119,8 @@ public:
     virtual void SetTabBarMode(TabBarMode tabBarMode) = 0;
     virtual void SetTabBarWidth(const Dimension& tabBarWidth) = 0;
     virtual void SetTabBarHeight(const Dimension& tabBarHeight) = 0;
+    virtual void SetWidthAuto(bool isAuto) = 0;
+    virtual void SetHeightAuto(bool isAuto) = 0;
     virtual void SetBarAdaptiveHeight(bool barAdaptiveHeight) = 0;
     virtual void SetIsVertical(bool isVertical) = 0;
     virtual void SetScrollable(bool scrollable) = 0;

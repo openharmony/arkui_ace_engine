@@ -66,6 +66,8 @@ public:
     void SetHasOptionWidth(bool haveOptionWidth) override;
     void SetMenuBackgroundColor(const Color& color) override;
     void SetMenuBackgroundBlurStyle(const BlurStyleOption& blurStyle) override;
+    void SetControlSize(const std::optional<ControlSize>& controlSize) override {}
+    ControlSize GetControlSize() override { return ControlSize{}; }
 };
 } // namespace OHOS::Ace::Framework
 #endif // FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_MODELS_SELECT_MODEL_IMPL_H

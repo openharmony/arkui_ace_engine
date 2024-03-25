@@ -56,6 +56,7 @@ public:
 
     void FireOnShownEvent(const std::string& name, const std::string& param) const
     {
+        TAG_LOGI(AceLogTag::ACE_NAVIGATION, "%{public}s lifecycle chang to shown state.", name_.c_str());
         UIObserverHandler::GetInstance().NotifyNavigationStateChange(GetNavDestinationPattern(),
                                                                      NavDestinationState::ON_SHOWN);
         if (onShownEvent_) {
@@ -85,6 +86,7 @@ public:
 
     void FireOnHiddenEvent(const std::string& name) const
     {
+        TAG_LOGI(AceLogTag::ACE_NAVIGATION, "%{public}s lifecycle chang to hidden state.", name_.c_str());
         UIObserverHandler::GetInstance().NotifyNavigationStateChange(GetNavDestinationPattern(),
                                                                      NavDestinationState::ON_HIDDEN);
         if (onHiddenEvent_) {
@@ -116,10 +118,36 @@ public:
 
     bool FireOnBackPressedEvent()
     {
+        UIObserverHandler::GetInstance().NotifyNavigationStateChange(GetNavDestinationPattern(),
+                                                                     NavDestinationState::ON_BACKPRESS);
         if (onBackPressedEvent_) {
             return onBackPressedEvent_();
         }
         return false;
+    }
+
+    void FireOnAppear() override
+    {
+        TAG_LOGI(AceLogTag::ACE_NAVIGATION, "%{public}s lifecycle change to appear state", name_.c_str());
+        UIObserverHandler::GetInstance().NotifyNavigationStateChange(GetNavDestinationPattern(),
+                                                                     NavDestinationState::ON_APPEAR);
+        if (onAppear_) {
+            auto onAppear = onAppear_;
+            onAppear();
+        }
+
+        if (onJSFrameNodeAppear_) {
+            auto onJSFrameNodeAppear = onJSFrameNodeAppear_;
+            onJSFrameNodeAppear();
+        }
+    }
+
+    void FireOnDisappear() override
+    {
+        TAG_LOGI(AceLogTag::ACE_NAVIGATION, "%{public}s lifecycle chang to disappear state.", name_.c_str());
+        UIObserverHandler::GetInstance().NotifyNavigationStateChange(GetNavDestinationPattern(),
+                                                                     NavDestinationState::ON_DISAPPEAR);
+        EventHub::FireOnDisappear();
     }
 
     void SetOnReady(const std::function<void(RefPtr<NavDestinationContext>)>& onReady)
@@ -144,6 +172,11 @@ public:
         onHiddenChange_ = std::move(onHiddenChange);
     }
 
+    void SetName(const std::string& name)
+    {
+        name_ = name;
+    }
+
 private:
     WeakPtr<AceType> GetNavDestinationPattern() const
     {
@@ -158,7 +191,7 @@ private:
     std::function<bool()> onBackPressedEvent_;
     std::function<void(RefPtr<NavDestinationContext>)> onReadyEvent_;
     std::function<void(bool)> onHiddenChange_;
-
+    std::string name_;
     bool isActivated_ = false;
 };
 } // namespace OHOS::Ace::NG

@@ -57,19 +57,23 @@ typedef struct {
 } ArkUI_AnyNativeAPI;
 
 /**
- * @brief Defines the native API set type.
+ * @brief Defines the native API types.
  *
  * @since 12
  */
 typedef enum {
-    /** API type related to UI components. */
+    /** API related to UI components. */
     ARKUI_NATIVE_NODE,
+    /** API related to dialog boxes. */
+    ARKUI_NATIVE_DIALOG,
+     /** API type related to UI gesture system. */
+    ARKUI_NATIVE_GESTURE,
 } ArkUI_NativeAPIVariantKind;
 
 /**
  * @brief Defines the version information supported by the ARKUI_NATIVE_NODE type.
  *
- * @since 12 
+ * @since 12
  */
 typedef enum {
     /** The ARKUI_NATIVE_NODE type supports the structure {@link ArkUI_NativeNodeAPI_1} of version 1. */

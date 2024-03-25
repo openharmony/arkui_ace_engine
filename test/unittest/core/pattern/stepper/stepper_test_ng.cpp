@@ -468,7 +468,7 @@ HWTEST_F(StepperTestNg, StepperPatternCreateArrowlessRightButtonNode001, TestSiz
     frameNode->AddChild(swiperNode);
     swiperNode->AddChild(stepperItemNode);
     stepperPattern->CreateArrowlessRightButtonNode(
-        INDEX, Localization::GetInstance()->GetEntryLetters("stepper.start"));
+        INDEX, false, Localization::GetInstance()->GetEntryLetters("stepper.start"));
     auto hostNode = AceType::DynamicCast<StepperNode>(stepperPattern->GetHost());
     ASSERT_NE(hostNode, nullptr);
     auto buttonId = hostNode->GetRightButtonId();
@@ -1181,7 +1181,7 @@ HWTEST_F(StepperTestNg, StepperAccessibilityPropertyGetCollectionItemCounts001, 
 {
     InitStepperTestNg();
 
-    EXPECT_EQ(stepperAccessibilityProperty_->GetCollectionItemCounts(), STEPPER_ERROR);
+    EXPECT_EQ(stepperAccessibilityProperty_->GetCollectionItemCounts(), 0);
 
     for (int i = 0; i < INDEX_NUM; i++) {
         auto indicatorNode = FrameNode::GetOrCreateFrameNode(V2::SWIPER_INDICATOR_ETS_TAG,

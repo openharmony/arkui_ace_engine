@@ -16,6 +16,7 @@
 #include "gtest/gtest.h"
 
 #define private public
+#define protected public
 #include "base/geometry/ng/offset_t.h"
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
@@ -65,6 +66,8 @@ constexpr int32_t NUM_ALT_VALUE = 4;
 
 const std::string RESULT_SUCCESS_ONE = "sucess1";
 const std::string RESULT_SUCCESS_TWO = "sucess2";
+
+int32_t flag = 0;
 } // namespace
 
 class EventHubTestNg : public testing::Test {
@@ -769,5 +772,146 @@ HWTEST_F(EventHubTestNg, EventHubTest005, TestSize.Level1)
     eventHub->stateStyleMgr_ = nullptr;
     eventHub->SetSupportedStates(UI_STATE_PRESSED);
     EXPECT_TRUE(eventHub->stateStyleMgr_);
+}
+
+/**
+ * @tc.name: EventHubFrameNodeTest001
+ * @tc.desc: test ClearJSFrameNodeOnDisappear
+ * @tc.type: FUNC
+ */
+HWTEST_F(EventHubTestNg, EventHubFrameNodeTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create EventHub.
+     * @tc.expected: eventHub is not null.
+     */
+    auto eventHub = AceType::MakeRefPtr<EventHub>();
+    EXPECT_NE(eventHub, nullptr);
+
+    /**
+     * @tc.steps: step2. Call ClearJSFrameNodeOnDisappear with onJSFrameNodeDisappear_ is nullptr.
+     * @tc.expected: eventHub->onJSFrameNodeDisappear_ is nullptr.
+     */
+    eventHub->onJSFrameNodeDisappear_ = nullptr;
+    eventHub->ClearJSFrameNodeOnDisappear();
+    EXPECT_EQ(eventHub->onJSFrameNodeDisappear_, nullptr);
+
+    /**
+     * @tc.steps: step3. Call ClearJSFrameNodeOnDisappear with onJSFrameNodeDisappear_ is not nullptr.
+     * @tc.expected: flag is equal 1.
+     */
+    std::function<void()> flagFunc = []() { ++flag; };
+    eventHub->SetJSFrameNodeOnDisappear(std::move(flagFunc));
+    EXPECT_NE(eventHub->onJSFrameNodeDisappear_, nullptr);
+    eventHub->ClearJSFrameNodeOnDisappear();
+    EXPECT_EQ(eventHub->onJSFrameNodeDisappear_, nullptr);
+}
+
+/**
+ * @tc.name: EventHubFrameNodeTest002
+ * @tc.desc: test ClearJSFrameNodeOnAppear
+ * @tc.type: FUNC
+ */
+HWTEST_F(EventHubTestNg, EventHubFrameNodeTest002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create EventHub.
+     * @tc.expected: eventHub is not null.
+     */
+    auto eventHub = AceType::MakeRefPtr<EventHub>();
+    EXPECT_NE(eventHub, nullptr);
+
+    /**
+     * @tc.steps: step2. Call ClearJSFrameNodeOnAppear with onJSFrameNodeAppear_ is nullptr.
+     * @tc.expected: eventHub->onJSFrameNodeAppear_ is nullptr.
+     */
+    eventHub->onJSFrameNodeAppear_ = nullptr;
+    eventHub->ClearJSFrameNodeOnAppear();
+    EXPECT_EQ(eventHub->onJSFrameNodeAppear_, nullptr);
+
+    /**
+     * @tc.steps: step3. Call ClearJSFrameNodeOnAppear with onJSFrameNodeDisappear_ is not nullptr.
+     * @tc.expected:onJSFrameNodeAppear_ is nullptr.
+     */
+    std::function<void()> flagFunc = []() { ++flag; };
+    eventHub->SetJSFrameNodeOnAppear(std::move(flagFunc));
+    EXPECT_NE(eventHub->onJSFrameNodeAppear_, nullptr);
+    eventHub->ClearJSFrameNodeOnAppear();
+    EXPECT_EQ(eventHub->onJSFrameNodeAppear_, nullptr);
+}
+
+/**
+ * @tc.name: EventHubFrameNodeTest003
+ * @tc.desc: test FireOnAppear
+ * @tc.type: FUNC
+ */
+HWTEST_F(EventHubTestNg, EventHubFrameNodeTest003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create EventHub.
+     * @tc.expected: eventHub is not null.
+     */
+    auto eventHub = AceType::MakeRefPtr<EventHub>();
+    EXPECT_NE(eventHub, nullptr);
+
+    /**
+     * @tc.steps: step2. Call FireOnAppear with onAppear_ and onJSFrameNodeAppear_ are both nullptr.
+     * @tc.expected: flag is equal 0.
+     */
+    eventHub->onAppear_ = nullptr;
+    eventHub->onJSFrameNodeAppear_ = nullptr;
+    eventHub->FireOnAppear();
+    EXPECT_EQ(flag, 0);
+
+    /**
+     * @tc.steps: step3. Call FireOnAppear with onAppear_  is nullptr and onJSFrameNodeAppear_ are is not nullptr.
+     * @tc.expected: onJSFrameNodeAppear_ is not nullptr.
+     */
+    std::function<void()> flagFunc = []() { ++flag; };
+    eventHub->SetJSFrameNodeOnAppear(std::move(flagFunc));
+    eventHub->FireOnAppear();
+    EXPECT_NE(eventHub->onJSFrameNodeAppear_, nullptr);
+
+    /**
+     * @tc.steps: step4. Call FireOnAppear with onAppear_  is and onJSFrameNodeAppear_ are both not nullptr.
+     * @tc.expected: onAppear_ is nullptr.
+     */
+    eventHub->SetOnAppear(std::move(flagFunc));
+    eventHub->FireOnAppear();
+    EXPECT_EQ(eventHub->onAppear_, nullptr);
+}
+
+/**
+ * @tc.name: EventHubFrameNodeTest004
+ * @tc.desc: test FireOnDisappear
+ * @tc.type: FUNC
+ */
+HWTEST_F(EventHubTestNg, EventHubFrameNodeTest004, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create EventHub.
+     * @tc.expected: eventHub is not null.
+     */
+    auto eventHub = AceType::MakeRefPtr<EventHub>();
+    EXPECT_NE(eventHub, nullptr);
+
+    /**
+     * @tc.steps: step2. Call FireOnDisappear with onAppear_ and onJSFrameNodeAppear_ are both nullptr.
+     * @tc.expected: flag is equal 0.
+     */
+    eventHub->onDisappear_ = nullptr;
+    eventHub->onJSFrameNodeDisappear_ = nullptr;
+    eventHub->FireOnDisappear();
+    EXPECT_EQ(flag, 0);
+
+    /**
+     * @tc.steps: step3. Call FireOnDisappear with onAppear_  is and onJSFrameNodeAppear_ are both not nullptr.
+     * @tc.expected: flag is equal 2.
+     */
+    std::function<void()> flagFunc = []() { flag++; };
+    eventHub->onDisappear_ = flagFunc;
+    eventHub->onJSFrameNodeDisappear_ = flagFunc;
+    eventHub->FireOnDisappear();
+    EXPECT_EQ(flag, 2);
 }
 } // namespace OHOS::Ace::NG

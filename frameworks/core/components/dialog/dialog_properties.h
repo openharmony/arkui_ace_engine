@@ -23,6 +23,7 @@
 #include "core/components/common/properties/shadow.h"
 #include "core/components_ng/event/click_event.h"
 #include "core/components_ng/property/border_property.h"
+#include "core/components_ng/property/transition_property.h"
 #include "core/event/ace_event_handler.h"
 #include "core/pipeline/base/component.h"
 
@@ -207,6 +208,7 @@ struct DialogProperties {
 
     WeakPtr<NG::UINode> windowScene;
     std::optional<DimensionRect> maskRect;
+    RefPtr<NG::ChainedTransitionEffect> transitionEffect = nullptr; // Used for AlertDialog and ActionSheet transition
 };
 
 struct PromptDialogAttr {

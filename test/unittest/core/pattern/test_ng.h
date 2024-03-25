@@ -46,7 +46,7 @@ class TestNG : public testing::Test {
 public:
     static void SetUpTestSuite();
     static void TearDownTestSuite();
-    void FlushLayoutTask(const RefPtr<FrameNode>& frameNode);
+    RefPtr<PaintWrapper> FlushLayoutTask(const RefPtr<FrameNode>& frameNode);
     uint64_t GetActions(const RefPtr<AccessibilityProperty>& accessibilityProperty);
     TouchEventInfo CreateTouchEventInfo(TouchType touchType, Offset location);
 

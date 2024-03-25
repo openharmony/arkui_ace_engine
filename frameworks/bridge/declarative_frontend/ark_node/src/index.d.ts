@@ -105,16 +105,23 @@ declare interface AttributeModifier<T> { }
 
 declare class ArkComponent {
   nativePtr: NodePtr;
+  _modifiersWithKeys: FrameNodeAttributeMap;
   constructor(nativePtr: NodePtr);
-  applyModifierPatch(): void;
-}
-
-declare class CommonModifier extends ArkComponent implements AttributeModifier<CommonAttribute> {
-  constructor();
-  applyNormalAttribute(instance: CommonAttribute): void;
 }
 
 declare class UICommonEvent {
-  public _nodePtr: NodePtr;
+  private _nodePtr: NodePtr;
+  private _instanceId: number;
   constructor(nodePtr: NodePtr);
+  setInstanceId(instanceId: number): void;
+  setNodePtr(nodePtr: NodePtr): void;
+}
+
+declare class ModifierWithKey<T extends number | string | boolean | object> {
+  stageValue?: T;
+  value?: T;
+  constructor(value: T);
+  applyStage(node: NodePtr): boolean;
+  applyPeer(node: NodePtr, reset: boolean): void;
+  checkObjectDiff(): boolean;
 }

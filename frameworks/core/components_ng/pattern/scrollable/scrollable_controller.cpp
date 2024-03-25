@@ -77,6 +77,17 @@ void ScrollableController::ScrollBy(double pixelX, double pixelY, bool /* smooth
     pattern->UpdateCurrentOffset(static_cast<float>(-offset), SCROLL_FROM_JUMP);
 }
 
+void ScrollableController::ScrollToEdge(ScrollEdgeType scrollEdgeType, float velocity)
+{
+    auto pattern = scroll_.Upgrade();
+    CHECK_NULL_VOID(pattern);
+    if (scrollEdgeType == ScrollEdgeType::SCROLL_TOP) {
+        pattern->ScrollAtFixedVelocity(velocity);
+    } else if (scrollEdgeType == ScrollEdgeType::SCROLL_BOTTOM) {
+        pattern->ScrollAtFixedVelocity(-velocity);
+    }
+}
+
 void ScrollableController::ScrollToEdge(ScrollEdgeType scrollEdgeType, bool smooth)
 {
     auto pattern = scroll_.Upgrade();
@@ -86,16 +97,28 @@ void ScrollableController::ScrollToEdge(ScrollEdgeType scrollEdgeType, bool smoo
     }
 }
 
-void ScrollableController::ScrollPage(bool reverse, bool /* smooth */)
+void ScrollableController::Fling(double flingVelocity)
+{
+    auto pattern = scroll_.Upgrade();
+    CHECK_NULL_VOID(pattern);
+    pattern->Fling(flingVelocity);
+}
+
+void ScrollableController::ScrollPage(bool reverse, bool smooth)
 {
     auto pattern = scroll_.Upgrade();
     CHECK_NULL_VOID(pattern);
     if (pattern->GetAxis() == Axis::NONE) {
         return;
     }
-    pattern->StopAnimate();
     auto offset = reverse ? pattern->GetMainContentSize() : -pattern->GetMainContentSize();
-    pattern->UpdateCurrentOffset(offset, SCROLL_FROM_JUMP);
+    if (smooth) {
+        auto position = pattern->GetTotalOffset() - offset;
+        pattern->AnimateTo(position, -1, nullptr, true);
+    } else {
+        pattern->StopAnimate();
+        pattern->UpdateCurrentOffset(offset, SCROLL_FROM_JUMP);
+    }
 }
 
 bool ScrollableController::IsAtEnd() const

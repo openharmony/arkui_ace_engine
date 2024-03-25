@@ -137,16 +137,17 @@ void DialogPattern::HandleClick(const GestureEvent& info)
         auto&& clickPosition = info.GetGlobalLocation();
         if (!contentRect.IsInRegion(
                 PointF(clickPosition.GetX() - globalOffset.GetX(), clickPosition.GetY() - globalOffset.GetY()))) {
+            auto pipeline = PipelineContext::GetCurrentContext();
+            CHECK_NULL_VOID(pipeline);
+            auto overlayManager = pipeline->GetOverlayManager();
+            CHECK_NULL_VOID(overlayManager);
             if (this->ShouldDismiss()) {
+                overlayManager->SetDismissDialogId(host->GetId());
                 this->CallOnWillDismiss(static_cast<int32_t>(DialogDismissReason::DIALOG_TOUCH_OUTSIDE));
                 TAG_LOGI(AceLogTag::ACE_DIALOG, "Dialog Should Dismiss");
                 return;
             }
             PopDialog(-1);
-            auto pipeline = PipelineContext::GetCurrentContext();
-            CHECK_NULL_VOID(pipeline);
-            auto overlayManager = pipeline->GetOverlayManager();
-            CHECK_NULL_VOID(overlayManager);
             if (overlayManager->isMaskNode(GetHost()->GetId())) {
                 overlayManager->PopModalDialog(GetHost()->GetId());
             }
@@ -988,9 +989,11 @@ void DialogPattern::OnColorConfigurationUpdate()
     CHECK_NULL_VOID(context);
     auto dialogTheme = context->GetTheme<DialogTheme>();
     CHECK_NULL_VOID(dialogTheme);
+    dialogTheme_ = dialogTheme;
     UpdateWrapperBackgroundStyle(host, dialogTheme);
     CHECK_NULL_VOID(buttonContainer_);
     int32_t btnIndex = 0;
+    isFirstDefaultFocus_ = true;
     for (const auto& buttonNode : buttonContainer_->GetChildren()) {
         if (buttonNode->GetTag() != V2::BUTTON_ETS_TAG) {
             continue;
@@ -1000,18 +1003,21 @@ void DialogPattern::OnColorConfigurationUpdate()
         auto pattern = buttonFrameNode->GetPattern<ButtonPattern>();
         CHECK_NULL_VOID(pattern);
         pattern->SetSkipColorConfigurationUpdate();
+        // parse button text color and background color
+        std::string textColorStr;
+        std::optional<Color> bgColor;
+        ParseButtonFontColorAndBgColor(dialogProperties_.buttons[btnIndex], textColorStr, bgColor);
+        // update background color
+        auto renderContext = buttonFrameNode->GetRenderContext();
+        CHECK_NULL_VOID(renderContext);
+        renderContext->UpdateBackgroundColor(bgColor.value());
         auto buttonTextNode = DynamicCast<FrameNode>(buttonFrameNode->GetFirstChild());
         CHECK_NULL_VOID(buttonTextNode);
         auto buttonTextLayoutProperty = buttonTextNode->GetLayoutProperty<TextLayoutProperty>();
         CHECK_NULL_VOID(buttonTextLayoutProperty);
-        auto textColorStr = dialogProperties_.buttons[btnIndex].textColor;
-        if (!textColorStr.empty()) {
-            Color textColor;
-            Color::ParseColorString(textColorStr, textColor);
-            buttonTextLayoutProperty->UpdateTextColor(textColor);
-        } else {
-            buttonTextLayoutProperty->UpdateTextColor(dialogTheme->GetButtonDefaultFontColor());
-        }
+        Color textColor;
+        Color::ParseColorString(textColorStr, textColor);
+        buttonTextLayoutProperty->UpdateTextColor(textColor);
         buttonTextNode->MarkModifyDone();
         buttonTextNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
         ++btnIndex;

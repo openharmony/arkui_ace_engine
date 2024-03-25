@@ -26,6 +26,7 @@
 #include "base/memory/ace_type.h"
 #include "base/utils/noncopyable.h"
 #include "base/utils/utils.h"
+#include "core/components/common/layout/position_param.h"
 #include "core/components/common/properties/alignment.h"
 #include "core/components/common/properties/border_image.h"
 #include "core/components_ng/base/modifier.h"
@@ -461,9 +462,19 @@ public:
         ViewAbstract::SetPosition({ x, y });
     }
 
+    void SetPositionEdges(const EdgesParam& value) override
+    {
+        ViewAbstract::SetPositionEdges(value);
+    }
+
     void SetOffset(const Dimension& x, const Dimension& y) override
     {
         ViewAbstract::SetOffset({ x, y });
+    }
+
+    void SetOffsetEdges(const EdgesParam& value) override
+    {
+        ViewAbstract::SetOffsetEdges(value);
     }
 
     void MarkAnchor(const Dimension& x, const Dimension& y) override
@@ -502,6 +513,11 @@ public:
         ViewAbstract::SetTransition(transitionOptions);
     }
 
+    void CleanTransition() override
+    {
+        ViewAbstract::CleanTransition();
+    }
+
     void SetChainedTransition(const RefPtr<NG::ChainedTransitionEffect>& effect, bool passThrough = false) override
     {
         ViewAbstract::SetChainedTransition(effect);
@@ -525,7 +541,7 @@ public:
                 overlayNode = AceType::DynamicCast<FrameNode>(buildNodeFunc());
                 CHECK_NULL_VOID(overlayNode);
                 frameNode->SetOverlayNode(overlayNode);
-                overlayNode->SetParent(AceType::WeakClaim(AceType::RawPtr(frameNode)));
+                overlayNode->SetParent(AceType::WeakClaim(frameNode));
                 overlayNode->SetActive(true);
             } else {
                 overlayNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
@@ -780,6 +796,13 @@ public:
         ViewAbstract::SetOnKeyEvent(std::move(onKeyCallback));
     }
 
+    void SetOnKeyPreIme(OnKeyPreImeFunc&& onKeyCallback) override
+    {
+        auto focusHub = ViewStackProcessor::GetInstance()->GetOrCreateMainFrameNodeFocusHub();
+        CHECK_NULL_VOID(focusHub);
+        focusHub->SetOnKeyPreImeCallback(std::move(onKeyCallback));
+    }
+
     void SetOnMouse(OnMouseEventFunc&& onMouseEventFunc) override
     {
         ViewAbstract::SetOnMouse(std::move(onMouseEventFunc));
@@ -1014,10 +1037,15 @@ public:
         ViewAbstract::SetObscured(reasons);
     }
 
+    void SetPrivacySensitive(bool flag) override
+    {
+        ViewAbstract::SetPrivacySensitive(flag);
+    }
+
     void BindPopup(const RefPtr<PopupParam>& param, const RefPtr<AceType>& customNode) override
     {
         auto targetNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
-        ViewAbstract::BindPopup(param, targetNode, AceType::DynamicCast<UINode>(customNode));
+        ViewAbstract::BindPopup(param, AceType::Claim(targetNode), AceType::DynamicCast<UINode>(customNode));
     }
 
     void DismissDialog() override
@@ -1044,13 +1072,14 @@ public:
     void BindContentCover(bool isShow, std::function<void(const std::string&)>&& callback,
         std::function<void()>&& buildFunc, NG::ModalStyle& modalStyle, std::function<void()>&& onAppear,
         std::function<void()>&& onDisappear, std::function<void()>&& onWillAppear,
-        std::function<void()>&& onWillDisappear) override;
+        std::function<void()>&& onWillDisappear, const NG::ContentCoverParam& contentCoverParam) override;
 
     void BindSheet(bool isShow, std::function<void(const std::string&)>&& callback, std::function<void()>&& buildFunc,
         std::function<void()>&& titleBuildFunc, NG::SheetStyle& sheetStyle, std::function<void()>&& onAppear,
         std::function<void()>&& onDisappear, std::function<void()>&& shouldDismiss,
         std::function<void()>&& onWillAppear, std::function<void()>&& onWillDisappear) override;
     void DismissSheet() override;
+    void DismissContentCover() override;
 
     void SetAccessibilityGroup(bool accessible) override;
     void SetAccessibilityText(const std::string& text) override;
@@ -1081,6 +1110,13 @@ public:
     void DisableOnKeyEvent() override
     {
         ViewAbstract::DisableOnKeyEvent();
+    }
+
+    void DisableOnKeyPreIme() override
+    {
+        auto focusHub = ViewStackProcessor::GetInstance()->GetOrCreateMainFrameNodeFocusHub();
+        CHECK_NULL_VOID(focusHub);
+        focusHub->ClearOnKeyPreIme();
     }
 
     void DisableOnHover() override

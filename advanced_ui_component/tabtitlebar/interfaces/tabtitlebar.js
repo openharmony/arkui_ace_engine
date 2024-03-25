@@ -27,8 +27,8 @@ const PUBLIC_MORE = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAMAAAADACAYAA
 export class TabTitleBar extends ViewPU {
   constructor(e, t, o, i = -1) {
     super(e, o, i);
-    this.tabItems = void 0;
-    this.menuItems = void 0;
+    this.tabItems = [];
+    this.menuItems = [];
     this.swiperContent = void 0;
     this.__tabWidth = new ObservedPropertySimplePU(0, this, "tabWidth");
     this.__currentIndex = new ObservedPropertySimplePU(0, this, "currentIndex");
@@ -95,7 +95,7 @@ export class TabTitleBar extends ViewPU {
       Canvas.width(TabTitleBar.gradientMaskWidth);
       Canvas.height(TabTitleBar.totalHeight);
       Canvas.onReady((() => {
-        var n = e.createLinearGradient(t, o, i, s);
+        let n = e.createLinearGradient(t, o, i, s);
         n.addColorStop(0, "#ffffffff");
         n.addColorStop(1, "#00ffffff");
         e.fillStyle = n;
@@ -359,8 +359,8 @@ __decorate([], TabTitleBar.prototype, "GradientMask", null);
 class CollapsibleMenuSection extends ViewPU {
   constructor(e, t, o, i = -1) {
     super(e, o, i);
-    this.menuItems = void 0;
-    this.index = void 0;
+    this.menuItems = [];
+    this.index = 0;
     this.firstFocusableIndex = -1;
     this.__isPopupShown = new ObservedPropertySimplePU(!1, this, "isPopupShown");
     this.__isMoreIconOnFocus = new ObservedPropertySimplePU(!1, this, "isMoreIconOnFocus");
@@ -640,9 +640,9 @@ __decorate([], CollapsibleMenuSection.prototype, "popupBuilder", null);
 class TabContentItem extends ViewPU {
   constructor(e, t, o, i = -1) {
     super(e, o, i);
-    this.item = void 0;
-    this.index = void 0;
-    this.maxIndex = void 0;
+    this.item = { title: '' };
+    this.index = 0;
+    this.maxIndex = 0;
     this.onCustomClick = void 0;
     this.onImageComplete = void 0;
     this.__currentIndex = new SynchedPropertySimpleOneWayPU(t.currentIndex, this, "currentIndex");
@@ -920,9 +920,9 @@ class TabContentItem extends ViewPU {
           Image.focusable(!0);
           Image.onComplete((e => {
             if (this.onImageComplete) {
-              this.imageWidth = px2vp(e.width);
-              this.imageHeight = px2vp(e.height);
-              this.onImageComplete(px2vp(e.componentWidth) + TabContentItem.paddingLeft + TabContentItem.paddingRight)
+              this.imageWidth = px2vp(e === null || e === void 0 ? void 0 : e.width);
+              this.imageHeight = px2vp(e === null || e === void 0 ? void 0 : e.height);
+              this.onImageComplete(px2vp(e === null || e === void 0 ? void 0 : e.componentWidth) + TabContentItem.paddingLeft + TabContentItem.paddingRight)
             }
           }));
           Image.onError((e => {
@@ -990,8 +990,8 @@ TabContentItem.marginFirst = 16;
 class ImageMenuItem extends ViewPU {
   constructor(e, t, o, i = -1) {
     super(e, o, i);
-    this.item = void 0;
-    this.index = void 0;
+    this.item = { value: ''};
+    this.index = 0;
     this.__isOnFocus = new ObservedPropertySimplePU(!1, this, "isOnFocus");
     this.__isOnHover = new ObservedPropertySimplePU(!1, this, "isOnHover");
     this.__isOnClick = new ObservedPropertySimplePU(!1, this, "isOnClick");

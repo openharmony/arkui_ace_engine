@@ -1245,6 +1245,7 @@ ACE_EXPORT extern const char DOM_SVG_XLINK_HREF[];
 ACE_EXPORT extern const char DOM_SVG_CLIP_RULE[];
 ACE_EXPORT extern const char DOM_SVG_FE_IN[];
 ACE_EXPORT extern const char DOM_SVG_FE_IN2[];
+ACE_EXPORT extern const char DOM_SVG_FE_MODE[];
 ACE_EXPORT extern const char DOM_SVG_FE_RESULT[];
 ACE_EXPORT extern const char DOM_SVG_FE_COLOR_INTERPOLATION_FILTERS[];
 ACE_EXPORT extern const char DOM_SVG_FE_TYPE[];

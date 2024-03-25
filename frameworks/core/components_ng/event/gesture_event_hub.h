@@ -160,6 +160,23 @@ public:
         recreateGesture_ = true;
     }
 
+    // call by CAPI do distinguish with AddGesture called by ARKUI;
+    void AttachGesture(const RefPtr<NG::Gesture>& gesture)
+    {
+        gestures_.emplace_back(gesture);
+        backupGestures_.emplace_back(gesture);
+        recreateGesture_ = true;
+        OnModifyDone();
+    }
+
+    void RemoveGesture(const RefPtr<NG::Gesture>& gesture)
+    {
+        gestures_.remove(gesture);
+        backupGestures_.remove(gesture);
+        recreateGesture_ = true;
+        OnModifyDone();
+    }
+
     void AddScrollableEvent(const RefPtr<ScrollableEvent>& scrollableEvent)
     {
         if (!scrollableActuator_) {
@@ -248,7 +265,7 @@ public:
 
      // Set by JS FrameNode.
     void SetJSFrameNodeOnClick(GestureEventFunc&& clickEvent);
-    
+
     void SetOnGestureJudgeBegin(GestureJudgeFunc&& gestureJudgeFunc);
 
     void SetOnTouchIntercept(TouchInterceptFunc&& touchInterceptFunc);
@@ -283,6 +300,14 @@ public:
             return;
         }
         clickEventActuator_->RemoveClickEvent(clickEvent);
+    }
+
+    void RemoveLongPressEvent(const RefPtr<LongPressEvent>& longPressEvent)
+    {
+        if (!longPressEventActuator_) {
+            return;
+        }
+        longPressEventActuator_->RemoveLongPressEvent(longPressEvent);
     }
 
     bool IsClickEventsEmpty() const
@@ -461,6 +486,10 @@ public:
             dragEventActuator_->SetThumbnailCallback(std::move(callback));
         }
     }
+
+    bool IsDragForbidden();
+
+    void SetDragForbiddenForcely(bool isDragForbidden);
 
     bool GetTextDraggable() const
     {
@@ -644,6 +673,7 @@ private:
     TouchInterceptFunc touchInterceptFunc_;
 
     MenuPreviewMode previewMode_ = MenuPreviewMode::NONE;
+    bool isDragForbidden_ = false;
     bool textDraggable_ = false;
     bool isTextDraggable_ = false;
     bool monopolizeEvents_ = false;

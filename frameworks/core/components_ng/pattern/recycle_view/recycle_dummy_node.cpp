@@ -28,7 +28,7 @@ RefPtr<RecycleDummyNode> RecycleDummyNode::CreateRecycleDummyNode(int32_t nodeId
     return node;
 }
 
-RefPtr<AceType> RecycleDummyNode::WrapRecycleDummyNode(RefPtr<AceType>& customNode)
+RefPtr<AceType> RecycleDummyNode::WrapRecycleDummyNode(const RefPtr<AceType>& customNode)
 {
     auto node = CreateRecycleDummyNode();
     auto uiNode = AceType::DynamicCast<UINode>(customNode);

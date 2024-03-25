@@ -581,6 +581,7 @@ struct KeyEvent final {
     SourceType sourceType { SourceType::NONE };
     KeyIntention keyIntention { KeyIntention::INTENTION_UNKNOWN };
     bool enableCapsLock = false;
+    bool isPreIme = false;
     std::vector<uint8_t> enhanceData;
     std::shared_ptr<MMI::KeyEvent> rawKeyEvent;
     std::string msg = "";
@@ -647,10 +648,12 @@ enum class BlurReason : int32_t {
     FOCUS_SWITCH = 0,
     WINDOW_BLUR = 1,
     FRAME_DESTROY = 2,
+    VIEW_SWITCH = 3,
 };
 
 using OnKeyEventFunc = std::function<bool(const KeyEvent&)>;
 using OnKeyCallbackFunc = std::function<void(KeyEventInfo&)>;
+using OnKeyPreImeFunc = std::function<bool(KeyEventInfo&)>;
 using OnFocusFunc = std::function<void()>;
 using OnClearFocusStateFunc = std::function<void()>;
 using OnPaintFocusStateFunc = std::function<bool()>;

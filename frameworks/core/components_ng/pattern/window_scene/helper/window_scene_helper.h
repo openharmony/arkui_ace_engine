@@ -55,7 +55,7 @@ public:
     static void InjectPointerEvent(RefPtr<FrameNode> node,
         const std::shared_ptr<OHOS::MMI::PointerEvent>& pointerEvent);
 
-    static void InjectKeyEvent(const std::shared_ptr<OHOS::MMI::KeyEvent>& keyEvent);
+    static bool InjectKeyEvent(const std::shared_ptr<OHOS::MMI::KeyEvent>& keyEvent, bool isPreIme = false);
 
     static bool GetNeedKeyboardOnFocusFlag(const RefPtr<FrameNode> frameNode);
 };

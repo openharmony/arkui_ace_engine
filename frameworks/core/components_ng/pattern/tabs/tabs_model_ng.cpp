@@ -234,6 +234,20 @@ void TabsModelNG::SetTabBarHeight(const Dimension& tabBarHeight)
     tabBarLayoutProperty->UpdateTabBarHeight(tabBarHeight);
 }
 
+void TabsModelNG::SetWidthAuto(bool isAuto)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    ACE_UPDATE_LAYOUT_PROPERTY(TabsLayoutProperty, WidthAuto, isAuto);
+}
+
+void TabsModelNG::SetHeightAuto(bool isAuto)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    ACE_UPDATE_LAYOUT_PROPERTY(TabsLayoutProperty, HeightAuto, isAuto);
+}
+
 void TabsModelNG::SetBarAdaptiveHeight(bool barAdaptiveHeight)
 {
     auto tabBarLayoutProperty = GetTabBarLayoutProperty();
@@ -598,9 +612,7 @@ void TabsModelNG::SetClipEdge(bool clipEdge)
 {
     auto tabsNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(tabsNode);
-    auto tabsRenderContext = tabsNode->GetRenderContext();
-    CHECK_NULL_VOID(tabsRenderContext);
-    tabsRenderContext->UpdateClipEdge(clipEdge);
+    ViewAbstract::SetClipEdge(clipEdge);
     auto tabsChildren = tabsNode->GetChildren();
     for (const auto& child : tabsChildren) {
         auto childFrameNode = AceType::DynamicCast<FrameNode>(child);
@@ -893,15 +905,13 @@ void TabsModelNG::SetOnCustomAnimation(TabsCustomAnimationEvent&& onCustomAnimat
     CHECK_NULL_VOID(swiperNode);
     auto swiperPattern = swiperNode->GetPattern<SwiperPattern>();
     CHECK_NULL_VOID(swiperPattern);
-    swiperPattern->SetCustomContentTransition(std::move(onCustomAnimation));
+    swiperPattern->SetTabsCustomContentTransition(std::move(onCustomAnimation));
 }
 
 void TabsModelNG::SetClipEdge(FrameNode* frameNode, bool clipEdge)
 {
     CHECK_NULL_VOID(frameNode);
-    auto tabsRenderContext = frameNode->GetRenderContext();
-    CHECK_NULL_VOID(tabsRenderContext);
-    tabsRenderContext->UpdateClipEdge(clipEdge);
+    ViewAbstract::SetClipEdge(frameNode, clipEdge);
     auto tabsChildren = frameNode->GetChildren();
     for (const auto& child : tabsChildren) {
         auto childFrameNode = AceType::DynamicCast<FrameNode>(child);

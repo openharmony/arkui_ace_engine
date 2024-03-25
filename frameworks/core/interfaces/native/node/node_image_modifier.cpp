@@ -47,6 +47,7 @@ constexpr int32_t IMAGE_CONTENT_OFFSET_X_INDEX = 5;
 constexpr int32_t IMAGE_CONTENT_OFFSET_Y_INDEX = 6;
 constexpr int32_t IMAGE_CONTENT_WIDTH_INDEX = 7;
 constexpr int32_t IMAGE_CONTENT_HEIGHT_INDEX = 8;
+constexpr uint32_t MAX_COLOR_FILTER_SIZE = 20;
 std::string g_strValue;
 
 void SetImageSrc(ArkUINodeHandle node, const char* value)
@@ -146,6 +147,14 @@ void ResetRenderMode(ArkUINodeHandle node)
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     ImageModelNG::SetImageRenderMode(frameNode, ImageRenderMode::ORIGINAL);
+}
+
+int32_t GetRenderMode(ArkUINodeHandle node)
+{
+    int32_t defaultRenderMode = static_cast<int32_t>(ImageRenderMode::ORIGINAL);
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, defaultRenderMode);
+    return static_cast<int32_t>(ImageModelNG::GetImageRenderMode(frameNode));
 }
 
 void SetSyncLoad(ArkUINodeHandle node, ArkUI_Bool syncLoadValue)
@@ -311,19 +320,17 @@ void SetColorFilter(ArkUINodeHandle node, const ArkUI_Float32* array, int length
     ImageModelNG::SetColorFilterMatrix(frameNode, std::vector<float>(array, array + length));
 }
 
-ArkUIFilterColorType GetColorFilter(ArkUINodeHandle node)
+void GetColorFilter(ArkUINodeHandle node, ArkUIFilterColorType* colorFilter)
 {
-    ArkUIFilterColorType colorFilter = { nullptr, 0 };
+    CHECK_NULL_VOID(colorFilter);
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
-    CHECK_NULL_RETURN(frameNode, colorFilter);
+    CHECK_NULL_VOID(frameNode);
     auto filterFloatArray = ImageModelNG::GetColorFilter(frameNode);
-    std::vector<int32_t> filterArray;
-    for (size_t i = 0; i < filterFloatArray.size(); i++) {
-        filterArray.emplace_back(static_cast<int32_t>(filterFloatArray[i]));
+    colorFilter->filterSize = filterFloatArray.size() < MAX_COLOR_FILTER_SIZE ? filterFloatArray.size() :
+        MAX_COLOR_FILTER_SIZE;
+    for (size_t i = 0; i < colorFilter->filterSize && i < MAX_COLOR_FILTER_SIZE; i++) {
+        *(colorFilter->filterArray+i) = filterFloatArray[i];
     }
-    colorFilter.filterArray = filterArray.size() > 0 ? &filterArray[0] : nullptr;
-    colorFilter.filterSize = filterArray.size();
-    return colorFilter;
 }
 
 void ResetColorFilter(ArkUINodeHandle node)
@@ -390,6 +397,13 @@ void ResetImageDraggable(ArkUINodeHandle node)
     ImageModelNG::SetDraggable(frameNode, DEFAULT_DRAGGABLE);
 }
 
+int32_t GetImageDraggable(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, DEFAULT_DRAGGABLE);
+    return ImageModelNG::GetDraggable(frameNode);
+}
+
 /**
  * @param values radius values
  * value[0] : radius value for TopLeft，value[1] : radius value for TopRight
@@ -446,6 +460,8 @@ void ResetEdgeAntialiasing(ArkUINodeHandle node)
     CHECK_NULL_VOID(frameNode);
     ImageModelNG::SetSmoothEdge(frameNode, DEFAULT_IMAGE_EDGE_ANTIALIASING);
 }
+
+
 } // namespace
 
 namespace NodeModifier {
@@ -459,7 +475,8 @@ const ArkUIImageModifier* GetImageModifier()
         ResetImageSyncLoad, SetImageObjectFit, ResetImageObjectFit, SetImageFitOriginalSize, ResetImageFitOriginalSize,
         SetImageDraggable, ResetImageDraggable, SetImageBorderRadius, ResetImageBorderRadius, SetImageBorder,
         ResetImageBorder, SetImageOpacity, ResetImageOpacity, SetEdgeAntialiasing, ResetEdgeAntialiasing, GetImageSrc,
-        GetAutoResize, GetObjectRepeat, GetObjectFit, GetImageInterpolation, GetColorFilter, GetAlt };
+        GetAutoResize, GetObjectRepeat, GetObjectFit, GetImageInterpolation, GetColorFilter, GetAlt,
+        GetImageDraggable, GetRenderMode };
     return &modifier;
 }
 

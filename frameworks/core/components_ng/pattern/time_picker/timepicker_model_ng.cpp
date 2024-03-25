@@ -225,6 +225,7 @@ void TimePickerModelNG::SetHour24(bool isUseMilitaryTime)
     CHECK_NULL_VOID(frameNode);
     auto timePickerRowPattern = frameNode->GetPattern<TimePickerRowPattern>();
     timePickerRowPattern->ClearOptionsHour();
+    timePickerRowPattern->SetHour24(isUseMilitaryTime);
 }
 
 void TimePickerModelNG::SetWheelModeEnabled(bool wheelModeEnabled)
@@ -526,6 +527,7 @@ void TimePickerModelNG::SetHour24(FrameNode* frameNode, bool isUseMilitaryTime)
     CHECK_NULL_VOID(frameNode);
     auto timePickerRowPattern = frameNode->GetPattern<TimePickerRowPattern>();
     timePickerRowPattern->ClearOptionsHour();
+    timePickerRowPattern->SetHour24(isUseMilitaryTime);
 }
 
 PickerTextStyle TimePickerModelNG::getDisappearTextStyle(FrameNode* frameNode)

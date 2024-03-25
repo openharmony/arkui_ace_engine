@@ -45,6 +45,7 @@ const FontWeight FONT_WEIGHT_CONVERT_MAP[] = {
 };
 constexpr Dimension ERROR_TEXT_UNDERLINE_MARGIN = 8.0_vp;
 constexpr Dimension ERROR_TEXT_CAPSULE_MARGIN = 8.0_vp;
+constexpr float ROUND_VALUE = 0.5f;
 
 inline FontWeight ConvertFontWeight(FontWeight fontWeight)
 {
@@ -165,6 +166,7 @@ void TextFieldContentModifier::SetDefaultAnimatablePropertyValue()
     SetDefaultTextColor(textStyle);
     SetDefaultFontStyle(textStyle);
     SetDefaultTextOverflow(textStyle);
+    SetDefaultTextDecoration(textStyle);
 }
 
 void TextFieldContentModifier::SetDefaultPropertyValue()
@@ -254,6 +256,16 @@ void TextFieldContentModifier::SetDefaultTextOverflow(const TextStyle& textStyle
     AttachProperty(textOverflow_);
 }
 
+void TextFieldContentModifier::SetDefaultTextDecoration(const TextStyle& textStyle)
+{
+    textDecoration_ = textStyle.GetTextDecoration();
+    textDecorationStyle_ = textStyle.GetTextDecorationStyle();
+    textDecorationColor_ = textStyle.GetTextDecorationColor();
+    textDecorationColorAlpha_ = MakeRefPtr<AnimatablePropertyFloat>(
+        textDecoration_ == TextDecoration::NONE ? 0.0f : textDecorationColor_->GetAlpha());
+    AttachProperty(textDecorationColorAlpha_);
+}
+
 void TextFieldContentModifier::ModifyTextStyle(TextStyle& textStyle)
 {
     if (fontSize_.has_value() && fontSizeFloat_) {
@@ -265,6 +277,7 @@ void TextFieldContentModifier::ModifyTextStyle(TextStyle& textStyle)
     if (textColor_.has_value() && animatableTextColor_) {
         textStyle.SetTextColor(Color(animatableTextColor_->Get().GetValue()));
     }
+    ModifyDecorationInTextStyle(textStyle);
 }
 
 void TextFieldContentModifier::SetFontFamilies(const std::vector<std::string>& value)
@@ -433,6 +446,7 @@ bool TextFieldContentModifier::NeedMeasureUpdate(PropertyChangeFlag& flag)
         textColor_->GetValue() != animatableTextColor_->Get().GetValue()) {
         flag |= PROPERTY_UPDATE_MEASURE_SELF;
     }
+    UpdateTextDecorationMeasureFlag(flag);
     flag &= (PROPERTY_UPDATE_MEASURE | PROPERTY_UPDATE_MEASURE_SELF | PROPERTY_UPDATE_MEASURE_SELF_AND_PARENT);
     return flag;
 }
@@ -457,6 +471,71 @@ void TextFieldContentModifier::ProcessErrorParagraph(DrawingContext& context, fl
         }
         errorParagraph->Layout(textFrameRect.Width() - padding);
         errorParagraph->Paint(canvas, offset.GetX(), textFrameRect.Bottom() - textFrameRect.Top() + errorMargin);
+    }
+}
+
+void TextFieldContentModifier::SetTextDecoration(const TextDecoration& value)
+{
+    auto oldTextDecoration = textDecoration_.value_or(TextDecoration::NONE);
+    if (oldTextDecoration == value) {
+        return;
+    }
+
+    textDecorationAnimatable_ = (oldTextDecoration == TextDecoration::NONE && value == TextDecoration::UNDERLINE) ||
+                                (oldTextDecoration == TextDecoration::UNDERLINE && value == TextDecoration::NONE);
+
+    textDecoration_ = value;
+    CHECK_NULL_VOID(textDecorationColorAlpha_);
+
+    oldColorAlpha_ = textDecorationColorAlpha_->Get();
+    if (textDecoration_ == TextDecoration::NONE) {
+        textDecorationColorAlpha_->Set(0.0f);
+    } else {
+        textDecorationColorAlpha_->Set(static_cast<float>(textDecorationColor_.value().GetAlpha()));
+    }
+}
+
+void TextFieldContentModifier::SetTextDecorationStyle(const TextDecorationStyle value)
+{
+    textDecorationStyle_ = value;
+}
+
+void TextFieldContentModifier::SetTextDecorationColor(const Color& value)
+{
+    textDecorationColor_ = value;
+}
+
+void TextFieldContentModifier::ModifyDecorationInTextStyle(TextStyle& textStyle)
+{
+    if (textDecoration_.has_value() && textDecorationColor_.has_value() && textDecorationColorAlpha_) {
+        if (textDecorationAnimatable_) {
+            uint8_t alpha = static_cast<int>(std::floor(textDecorationColorAlpha_->Get() + ROUND_VALUE));
+            if (alpha == 0) {
+                textStyle.SetTextDecoration(TextDecoration::NONE);
+                textStyle.SetTextDecorationColor(textDecorationColor_.value());
+            } else {
+                textStyle.SetTextDecoration(TextDecoration::UNDERLINE);
+                textStyle.SetTextDecorationColor(Color(textDecorationColor_.value()).ChangeAlpha(alpha));
+            }
+        } else {
+            textStyle.SetTextDecoration(textDecoration_.value());
+            textStyle.SetTextDecorationColor(textDecorationColor_.value());
+        }
+    }
+    if (textDecorationStyle_.has_value()) {
+        textStyle.SetTextDecorationStyle(textDecorationStyle_.value());
+    }
+}
+
+void TextFieldContentModifier::UpdateTextDecorationMeasureFlag(PropertyChangeFlag& flag)
+{
+    if (textDecoration_.has_value() && textDecorationColor_.has_value() && textDecorationColorAlpha_) {
+        uint8_t alpha = static_cast<int>(std::floor(textDecorationColorAlpha_->Get() + ROUND_VALUE));
+        if (textDecoration_.value() == TextDecoration::UNDERLINE && alpha != textDecorationColor_.value().GetAlpha()) {
+            flag |= PROPERTY_UPDATE_MEASURE;
+        } else if (textDecoration_.value() == TextDecoration::NONE && alpha != 0.0) {
+            flag |= PROPERTY_UPDATE_MEASURE;
+        }
     }
 }
 } // namespace OHOS::Ace::NG

@@ -46,13 +46,11 @@ class ObserveV3 {
   // bindId: UINode elmtId or watchId, depending on what is being observed
   private bindId_: number = UINodeRegisterProxy.notRecordingDependencies;
 
-  // Map bindId to ViewPU/MonitorV3
-  // FIXME use Map<number, ViewPU | MonitorV3>
+  // Map bindId to WeakRef<ViewPU> | MonitorV3
   private id2cmp_: { number: object } = {} as { number: object }
 
-  // Map bindId -> Set 0f view model object
+  // Map bindId -> Set of @observed class objects
   // reverse dependency map for quickly removing all dependencies of a bindId
-  // FIXME: string typing: Map<number, Set<Object>>
   private id2targets_: { number: object } = {} as { number: object }
 
   // queued up Set of bindId
@@ -90,13 +88,13 @@ class ObserveV3 {
     this.bindId_ = id;
     if (cmp != null) {
       this.clearBinding(id);
-      this.id2cmp_[id] = cmp;
+      this.id2cmp_[id] = (cmp instanceof ViewPU) ? new WeakRef(cmp) : cmp;
     }
   }
 
   // clear any previously created dependency view model object to elmtId
   // find these view model objects with the reverse map id2targets_
-  private clearBinding(id: number): void {
+  public clearBinding(id: number): void {
     this.id2targets_[id]?.forEach((target) => {
       for (let key in target[ObserveV3.SYMBOL_REFS]) {
         if (id in target[ObserveV3.SYMBOL_REFS][key]) {
@@ -282,10 +280,10 @@ class ObserveV3 {
   }
 
   private notifyDirtyElmtIdsToOwningViews() : void {
-    let view : ViewPU | undefined;
+    let view : WeakRef<ViewPU> | undefined;
     stateMgmtConsole.debug(`notifyDirtyElmtIdsToOwningViews ${JSON.stringify(Array.from(this.elmtIdsChanged_))} ...`);
     this.elmtIdsChanged_.forEach((elmtId) => {
-      if ((view = this.id2cmp_[elmtId]) && (view instanceof ViewPU)) {
+      if ((view = this.id2cmp_[elmtId]?.deref()) && (view instanceof ViewPU)) {
         // FIXME Review: uiNodeNeedUpdateV3 just copies elmtIds to another set
         // waits for FlushBuild to call rerender call updateDirtyElements
         // to actually render the UINodes. Could we call ViewPU.UpdateElement 

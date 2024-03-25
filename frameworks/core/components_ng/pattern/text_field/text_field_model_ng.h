@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,6 +16,7 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_TEXT_FIELD_TEXT_FIELD_MODEL_NG_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_TEXT_FIELD_TEXT_FIELD_MODEL_NG_H
 
+#include "core/components_ng/pattern/text_field/text_content_type.h"
 #include "core/components_ng/pattern/text_field/text_field_model.h"
 
 namespace OHOS::Ace::NG {
@@ -34,6 +35,7 @@ public:
     void RequestKeyboardOnFocus(bool needToRequest) override;
     void SetWidthAuto(bool isAuto) override;
     void SetType(TextInputType value) override;
+    void SetContentType(const TextContentType& value) override;
     void SetPlaceholderColor(const Color& value) override;
     void SetPlaceholderFont(const Font& value) override;
     void SetEnterKeyType(TextInputAction value) override;
@@ -47,6 +49,7 @@ public:
     void SetFontSize(const Dimension& value) override;
     void SetFontWeight(FontWeight value) override;
     void SetTextColor(const Color& value) override;
+    void SetWordBreak(Ace::WordBreak value) override;
     void SetFontStyle(Ace::FontStyle value) override;
     void SetFontFamily(const std::vector<std::string>& value) override;
     void SetInputFilter(const std::string& value, const std::function<void(const std::string&)>& onError) override;
@@ -96,6 +99,16 @@ public:
     void SetCancelIconColor(const Color& iconColor) override;
     void SetIsShowCancelButton(bool isShowCancelButton) override;
     void SetSelectAllValue(bool isSetSelectAllValue) override;
+    void SetLetterSpacing(const Dimension& value) override;
+    void SetLineHeight(const Dimension& value) override;
+    void SetTextDecoration(Ace::TextDecoration value) override;
+    void SetTextDecorationColor(const Color& value) override;
+    void SetTextDecorationStyle(Ace::TextDecorationStyle value) override;
+    static void SetTextDecoration(FrameNode* frameNode, TextDecoration value);
+    static void SetTextDecorationColor(FrameNode* frameNode, const Color& value);
+    static void SetTextDecorationStyle(FrameNode* frameNode, TextDecorationStyle value);
+    static void SetLetterSpacing(FrameNode* frameNode, const Dimension& value);
+    static void SetLineHeight(FrameNode* frameNode, const Dimension& value);
     static RefPtr<FrameNode> CreateFrameNode(int32_t nodeId, const std::optional<std::string>& placeholder,
         const std::optional<std::string>& value, bool isTextArea);
     static void SetInputStyle(FrameNode* frameNode, InputStyle value);
@@ -106,6 +119,7 @@ public:
     static void SetSelectedBackgroundColor(FrameNode* frameNode, const Color& value);
     static void SetMaxViewLines(FrameNode* frameNode, uint32_t value);
     static void SetType(FrameNode* frameNode, TextInputType value);
+    static void SetContentType(const FrameNode* frameNode, const TextContentType& value);
     static void SetCopyOption(FrameNode* frameNode, CopyOptions copyOption);
     static void SetShowPasswordIcon(FrameNode* frameNode, bool value);
     static void SetTextAlign(FrameNode* frameNode, TextAlign value);
@@ -130,6 +144,7 @@ public:
     static void SetShowError(FrameNode* frameNode, const std::string& errorText, bool visible);
     static void SetCounterType(FrameNode* frameNode, int32_t value);
     static void SetOnChange(FrameNode* frameNode, std::function<void(const std::string&)>&& func);
+    static void SetOnTextSelectionChange(FrameNode* frameNode, std::function<void(int32_t, int32_t)>&& func);
     static void SetTextFieldText(FrameNode* frameNode, const std::string& value);
     static void SetTextFieldPlaceHolder(FrameNode* frameNode, const std::string& placeholder);
     static void StopTextFieldEditing(FrameNode* frameNode);
@@ -142,6 +157,7 @@ public:
     static void SetCancelIconSize(FrameNode* frameNode, const CalcDimension& iconSize);
     static void SetCanacelIconSrc(FrameNode* frameNode, const std::string& iconSrc);
     static void SetCancelIconColor(FrameNode* frameNode, const Color& iconColor);
+    static void SetBackgroundColor(FrameNode* frameNode, const Color& color);
     static std::string GetPlaceholderText(FrameNode* frameNode);
     static std::string GetTextFieldText(FrameNode* frameNode);
     static Color GetCaretColor(FrameNode* frameNode);
@@ -166,6 +182,13 @@ public:
     static FontWeight GetFontWeight(FrameNode* frameNode);
     static Dimension GetFontSize(FrameNode* frameNode);
     static CleanNodeStyle GetCleanNodeStyle(FrameNode* frameNode);
+    static void SetShowCounterBorder(FrameNode* frameNode, bool value);
+    static bool GetShowCounter(FrameNode* frameNode);
+    static int GetCounterType(FrameNode* frameNode);
+    static bool GetShowCounterBorder(FrameNode* frameNode);
+    static void SetTextSelection(FrameNode* frameNode, int32_t start, int32_t end);
+    static int32_t GetTextSelectionIndex(FrameNode* frameNode, bool isEnd);
+
 private:
     void AddDragFrameNodeToManager() const;
     void SetDraggable(bool draggable);

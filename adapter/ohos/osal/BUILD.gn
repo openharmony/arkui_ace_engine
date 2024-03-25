@@ -69,6 +69,7 @@ template("ace_osal_ohos_source_set") {
       "frame_report.cpp",
       "image_analyzer_adapter_impl.cpp",
       "image_analyzer_loader.cpp",
+      "image_analyzer_manager.cpp",
       "image_analyzer_mgr.cpp",
       "layout_inspector.cpp",
       "log_wrapper.cpp",

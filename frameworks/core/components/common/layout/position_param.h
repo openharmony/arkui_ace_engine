@@ -16,8 +16,13 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_BASE_LAYOUT_POSITION_PARAM_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_BASE_LAYOUT_POSITION_PARAM_H
 
+#include <optional>
+
 #include "base/geometry/animatable_dimension.h"
+#include "base/geometry/calc_dimension.h"
+#include "base/geometry/dimension.h"
 #include "core/components/common/layout/constants.h"
+#include "core/pipeline/base/constants.h"
 
 namespace OHOS::Ace {
 
@@ -31,6 +36,51 @@ struct PositionParam {
     std::pair<AnimatableDimension, bool> bottom = { AnimatableDimension(0.0, DimensionUnit::PX), false };
     std::pair<Dimension, Dimension> anchor = {0.0_px, 0.0_px};
     PositionType type = PositionType::PTRELATIVE;
+};
+
+struct EdgesParam {
+    std::optional<Dimension> top;
+    std::optional<Dimension> left;
+    std::optional<Dimension> bottom;
+    std::optional<Dimension> right;
+
+    EdgesParam() = default;
+
+    void SetTop(const CalcDimension& top)
+    {
+        this->top = top;
+    }
+
+    void SetLeft(const CalcDimension& left)
+    {
+        this->left = left;
+    }
+
+    void SetBottom(const CalcDimension& bottom)
+    {
+        this->bottom = bottom;
+    }
+
+    void SetRight(const CalcDimension& right)
+    {
+        this->right = right;
+    }
+
+    bool operator==(const EdgesParam& rhs) const
+    {
+        return ((this->top == rhs.top) && (this->left == rhs.left) && (this->bottom == rhs.bottom) &&
+                (this->right == rhs.right));
+    }
+
+    std::string ToString() const
+    {
+        std::string str;
+        str.append("top: [").append(top.has_value() ? top->ToString() : "NA").append("]");
+        str.append("left: [").append(left.has_value() ? left->ToString() : "NA").append("]");
+        str.append("right: [").append(right.has_value() ? right->ToString() : "NA").append("]");
+        str.append("bottom: [").append(bottom.has_value() ? bottom->ToString() : "NA").append("]");
+        return str;
+    }
 };
 
 enum class AlignDirection {

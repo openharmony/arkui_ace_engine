@@ -254,6 +254,16 @@ void TextPickerModelNG::SetDefaultPickerItemHeight(const Dimension& value)
     ACE_UPDATE_LAYOUT_PROPERTY(TextPickerLayoutProperty, DefaultPickerItemHeight, value);
 }
 
+void TextPickerModelNG::SetGradientHeight(const Dimension& value)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto textPickerPattern = frameNode->GetPattern<TextPickerPattern>();
+    CHECK_NULL_VOID(textPickerPattern);
+    textPickerPattern->SetGradientHeight(value);
+    ACE_UPDATE_LAYOUT_PROPERTY(TextPickerLayoutProperty, GradientHeight, value);
+}
+
 void TextPickerModelNG::SetCanLoop(const bool value)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(TextPickerLayoutProperty, CanLoop, value);
@@ -390,7 +400,7 @@ void TextPickerModelNG::SetUnCascadeColumns(const std::vector<NG::TextCascadePic
             auto layoutProperty = stackNode->GetLayoutProperty<LayoutProperty>();
             layoutProperty->UpdateAlignment(Alignment::CENTER);
             columnNode->GetLayoutProperty<LayoutProperty>()->UpdatePixelRound(PIXEL_ROUND);
-            stackNode->MountToParent(frameNode);
+            stackNode->MountToParent(AceType::Claim(frameNode));
         }
     }
 
@@ -430,7 +440,7 @@ void TextPickerModelNG::SetCascadeColumns(const std::vector<NG::TextCascadePicke
             auto layoutProperty = stackNode->GetLayoutProperty<LayoutProperty>();
             layoutProperty->UpdateAlignment(Alignment::CENTER);
             columnNode->GetLayoutProperty<LayoutProperty>()->UpdatePixelRound(PIXEL_ROUND);
-            stackNode->MountToParent(frameNode);
+            stackNode->MountToParent(AceType::Claim<NG::FrameNode>(frameNode));
         }
     }
 
@@ -1030,12 +1040,17 @@ void TextPickerModelNG::SetDivider(const ItemDivider& divider)
     auto textPickerPattern = frameNode->GetPattern<TextPickerPattern>();
     CHECK_NULL_VOID(textPickerPattern);
     textPickerPattern->SetDivider(divider);
+    textPickerPattern->SetCustomDividerFlag(true);
     ACE_UPDATE_LAYOUT_PROPERTY(TextPickerLayoutProperty, Divider, divider);
 }
 
 void TextPickerModelNG::SetDivider(FrameNode* frameNode, const ItemDivider& divider)
 {
     CHECK_NULL_VOID(frameNode);
+    auto textPickerPattern = frameNode->GetPattern<TextPickerPattern>();
+    CHECK_NULL_VOID(textPickerPattern);
+    textPickerPattern->SetDivider(divider);
+    textPickerPattern->SetCustomDividerFlag(true);
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextPickerLayoutProperty, Divider, divider, frameNode);
 }
 } // namespace OHOS::Ace::NG

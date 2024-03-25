@@ -99,6 +99,10 @@ public:
         edgeEffect_ = edgeEffect;
     }
     void SetSpace(float space, float maxSpace, float minSpace);
+    float GetSpace() const
+    {
+        return space_;
+    }
     void SetOverDrag(bool isOverDrag);
 
     static constexpr float DEFAULT_CONDUCTIVITY = 0.7f;

@@ -115,6 +115,11 @@ class ArkSelectComponent extends ArkComponent implements SelectAttribute {
       this._modifiersWithKeys, MenuAlignModifier.identity, MenuAlignModifier, menuAlign);
     return this;
   }
+  controlSize(controlSize: ControlSize): this {
+    modifierWithKey(
+      this._modifiersWithKeys, ControlSizeModifier.identity, ControlSizeModifier, controlSize);
+    return this;
+  }
 }
 
 class FontModifier extends ModifierWithKey<Font> {
@@ -211,6 +216,25 @@ class MenuAlignModifier extends ModifierWithKey<ArkMenuAlignType> {
     } else {
       return stageValue !== value;
     }
+  }
+}
+
+
+class ControlSizeModifier extends ModifierWithKey<ControlSize> {
+  constructor(value: ControlSize) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('controlSize');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().select.resetControlSize(node);
+    } else {
+      getUINativeModule().select.setControlSize(node, this.value);
+    }
+  }
+
+  checkObjectDiff(): boolean {
+    return this.stageValue !== this.value;
   }
 }
 

@@ -521,10 +521,14 @@ void AnimationUtil::AddAnimatable(const T& value, double time, AnimatableType ty
 {
     auto animatable = AceType::MakeRefPtr<AnimatableData<T>>(value);
     animatable->SetTimePoint(time);
-    if (propAnimationMap_.find(type) == propAnimationMap_.end()) {
-        propAnimationMap_[type] = AceType::MakeRefPtr<PropertyAnimation>(type);
+    auto it = propAnimationMap_.find(type);
+    if (it == propAnimationMap_.end()) {
+        auto animation = AceType::MakeRefPtr<PropertyAnimation>(type);
+        animation->AddAnimatable(animatable);
+        propAnimationMap_.emplace(type, animation);
+        return;
     }
-    propAnimationMap_[type]->AddAnimatable(animatable);
+    it->second->AddAnimatable(animatable);
 }
 
 RefPtr<ThemeConstants> AnimationUtil::GetThemeConstants() const

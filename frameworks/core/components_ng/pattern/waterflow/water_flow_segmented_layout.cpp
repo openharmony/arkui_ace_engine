@@ -128,7 +128,7 @@ float PrepareJump(WaterFlowLayoutInfo& info)
     info.jumpIndex_ = info.startIndex_;
     info.align_ = ScrollAlign::START;
     float itemOffset = (info.itemInfos_.size() <= static_cast<size_t>(info.startIndex_))
-                           ? 0.0f
+                           ? info.storedOffset_
                            : info.currentOffset_ + info.itemInfos_[info.startIndex_].mainOffset;
 
     info.startIndex_ = 0;

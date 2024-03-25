@@ -155,8 +155,8 @@ public:
     // ----------------
     // system.prompt
     // ----------------
-    virtual void ShowToast(
-        const std::string& message, int32_t duration, const std::string& bottom, const NG::ToastShowMode& showMode) = 0;
+    virtual void ShowToast(const std::string& message, int32_t duration, const std::string& bottom,
+        const NG::ToastShowMode& showMode, int32_t alignment, std::optional<DimensionOffset> offset) = 0;
     virtual void SetToastStopListenerCallback(std::function<void()>&& stopCallback) {};
     virtual void ShowDialog(const std::string& title, const std::string& message,
         const std::vector<ButtonInfo>& buttons, bool autoCancel, std::function<void(int32_t, int32_t)>&& callback,

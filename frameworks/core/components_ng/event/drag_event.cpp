@@ -133,11 +133,14 @@ void DragEventActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset, co
     auto dragDropManager = pipeline->GetDragDropManager();
     CHECK_NULL_VOID(dragDropManager);
     dragDropManager->SetPrepareDragFrameNode(nullptr);
-    if (dragDropManager->IsDragging() || dragDropManager->IsMsdpDragging() ||
-        (!frameNode->IsDraggable() && frameNode->IsCustomerSet())) {
+    if (dragDropManager->IsDragging() || dragDropManager->IsMsdpDragging()) {
         TAG_LOGI(AceLogTag::ACE_DRAG, "No need to collect drag gestures result, dragging is %{public}d,"
-            "MSDP dragging is %{public}d, frameNode draggable is %{public}d, custom set is %{public}d",
-            dragDropManager->IsDragging(), dragDropManager->IsMsdpDragging(),
+            "MSDP dragging is %{public}d", dragDropManager->IsDragging(), dragDropManager->IsMsdpDragging());
+        return;
+    }
+    if (gestureHub->IsDragForbidden() || (!frameNode->IsDraggable() && frameNode->IsCustomerSet())) {
+        TAG_LOGI(AceLogTag::ACE_DRAG, "No need to collect drag gestures result, drag forbidden set is %{public}d,"
+            "frameNode draggable is %{public}d, custom set is %{public}d", gestureHub->IsDragForbidden(),
             frameNode->IsDraggable(), frameNode->IsCustomerSet());
         return;
     }
@@ -726,6 +729,15 @@ RefPtr<PixelMap> DragEventActuator::GetPreviewPixelMapByInspectorId(const std::s
 
     // Retrieve the frame node using the inspector's ID.
     auto dragPreviewFrameNode = Inspector::GetFrameNodeByKey(inspectorId);
+    CHECK_NULL_RETURN(dragPreviewFrameNode, nullptr);
+
+    auto layoutProperty = dragPreviewFrameNode->GetLayoutProperty();
+    CHECK_NULL_RETURN(layoutProperty, nullptr);
+
+    auto visibility = layoutProperty->GetVisibilityValue(VisibleType::VISIBLE);
+    if (visibility == VisibleType::INVISIBLE || visibility == VisibleType::GONE) {
+        return nullptr;
+    }
 
     // Take a screenshot of the frame node and return it as a PixelMap.
     return GetScreenShotPixelMap(dragPreviewFrameNode);

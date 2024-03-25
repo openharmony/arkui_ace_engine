@@ -24,6 +24,7 @@
 #include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
 #include "core/components_ng/pattern/navigation/title_bar_node.h"
 #include "core/components_ng/pattern/navigation/title_bar_pattern.h"
+#include "core/components_ng/pattern/navrouter/navdestination_group_node.h"
 #include "core/components_ng/pattern/navrouter/navdestination_layout_property.h"
 #include "core/components_ng/pattern/navrouter/navdestination_pattern.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
@@ -70,11 +71,11 @@ bool NavDestinationModelNG::ParseCommonTitle(
             auto theme = NavigationGetTheme();
             textLayoutProperty->UpdateMaxLines(hasSubTitle ? 1 : 2);
             textLayoutProperty->UpdateContent(title);
+            textLayoutProperty->UpdateTextColor(theme->GetTitleColor());
             //max title font size should be 20.0 vp, because of backbutton
             textLayoutProperty->UpdateAdaptMaxFontSize(theme->GetTitleFontSizeMin());
             //min title font size should be 14.0 vp
             textLayoutProperty->UpdateAdaptMinFontSize(MIN_ADAPT_TITLE_FONT_SIZE);
-            textLayoutProperty->UpdateFontSize(theme->GetTitleFontSizeMin());
             textLayoutProperty->UpdateFontWeight(FontWeight::MEDIUM);
             textLayoutProperty->UpdateTextOverflow(TextOverflow::ELLIPSIS);
             titleBarNode->SetTitle(mainTitle);
@@ -394,6 +395,13 @@ RefPtr<AceType> NavDestinationModelNG::CreateEmpty()
     Create();
     auto uiNode = ViewStackProcessor::GetInstance()->Finish();
     uiNode->SetRemoveSilently(true);
+    auto navigationNode = AceType::DynamicCast<NavDestinationGroupNode>(uiNode);
+    CHECK_NULL_RETURN(navigationNode, uiNode);
+    auto pattern = navigationNode->GetPattern<NavDestinationPattern>();
+    auto context = AceType::MakeRefPtr<NavDestinationContext>();
+    CHECK_NULL_RETURN(context, uiNode);
+    context->SetIsEmpty(true);
+    pattern->SetNavDestinationContext(context);
     return uiNode;
 }
 
@@ -408,5 +416,55 @@ void NavDestinationModelNG::SetNavDestinationMode(NavDestinationMode mode)
     auto navDestination = AceType::DynamicCast<NavDestinationGroupNode>(frameNode);
     CHECK_NULL_VOID(navDestination);
     navDestination->SetNavDestinationMode(mode);
+}
+
+void NavDestinationModelNG::SetMenuItems(std::vector<NG::BarItem>&& menuItems)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    auto navDestinationGroupNode = AceType::DynamicCast<NavDestinationGroupNode>(frameNode);
+    CHECK_NULL_VOID(navDestinationGroupNode);
+    auto titleBarNode = AceType::DynamicCast<TitleBarNode>(navDestinationGroupNode->GetTitleBarNode());
+    CHECK_NULL_VOID(titleBarNode);
+    // if previous menu is custom, just remove it and create new menu, otherwise update old menu
+    if (titleBarNode->GetPrevMenuIsCustom().value_or(false)) {
+        titleBarNode->UpdateMenuNodeOperation(ChildNodeOperation::REPLACE);
+    } else {
+        if (titleBarNode->GetMenu()) {
+            titleBarNode->UpdateMenuNodeOperation(ChildNodeOperation::REPLACE);
+        } else {
+            titleBarNode->UpdateMenuNodeOperation(ChildNodeOperation::ADD);
+        }
+    }
+    auto titleBarPattern = titleBarNode->GetPattern<TitleBarPattern>();
+    CHECK_NULL_VOID(titleBarPattern);
+    titleBarPattern->SetTitleBarMenuItems(menuItems);
+    titleBarPattern->SetMenuNodeId(ElementRegister::GetInstance()->MakeUniqueId());
+    titleBarNode->UpdatePrevMenuIsCustom(false);
+}
+
+void NavDestinationModelNG::SetCustomMenu(const RefPtr<AceType>& customNode)
+{
+    auto customMenu = AceType::DynamicCast<NG::UINode>(customNode);
+    CHECK_NULL_VOID(customMenu);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    auto navDestinationGroupNode = AceType::DynamicCast<NavDestinationGroupNode>(frameNode);
+    CHECK_NULL_VOID(navDestinationGroupNode);
+    auto titleBarNode = AceType::DynamicCast<TitleBarNode>(navDestinationGroupNode->GetTitleBarNode());
+    CHECK_NULL_VOID(titleBarNode);
+    // if previous menu exists, remove it if their ids are not the same
+    // if previous node is not custom, their ids must not be the same
+    if (titleBarNode->GetMenu()) {
+        if (customMenu->GetId() == titleBarNode->GetMenu()->GetId()) {
+            titleBarNode->UpdateMenuNodeOperation(ChildNodeOperation::NONE);
+            return;
+        }
+        titleBarNode->SetMenu(customMenu);
+        titleBarNode->UpdatePrevMenuIsCustom(true);
+        titleBarNode->UpdateMenuNodeOperation(ChildNodeOperation::REPLACE);
+        return;
+    }
+    titleBarNode->SetMenu(customMenu);
+    titleBarNode->UpdatePrevMenuIsCustom(true);
+    titleBarNode->UpdateMenuNodeOperation(ChildNodeOperation::ADD);
 }
 } // namespace OHOS::Ace::NG

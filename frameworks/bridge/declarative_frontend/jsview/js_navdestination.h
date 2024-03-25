@@ -34,6 +34,7 @@ public:
     static void SetOnReady(const JSCallbackInfo& info);
     static void SetMode(const JSCallbackInfo& info);
     static void JSBind(BindingTarget globalObj);
+    static void SetMenus(const JSCallbackInfo& info);
 
 private:
     JSWeak<JSFunc> jsShownFunc_;

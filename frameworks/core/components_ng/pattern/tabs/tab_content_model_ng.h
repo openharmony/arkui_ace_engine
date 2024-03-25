@@ -43,6 +43,7 @@ public:
     void SetBoard(const BoardStyle& board) override;
     void SetSelectedMode(SelectedMode selectedMode) override;
     void SetLabelStyle(const LabelStyle& labelStyle) override;
+    void SetIconStyle(const IconStyle& iconStyle) override;
     void SetPadding(const NG::PaddingProperty& padding) override;
     void SetLayoutMode(LayoutMode layoutMode) override;
     void SetVerticalAlign(FlexAlign verticalAlign) override;
@@ -54,6 +55,7 @@ public:
     static RefPtr<TabsNode> FindTabsNode(const RefPtr<UINode>& tabContent);
     void SetOnWillShow(std::function<void()>&& onWillShow) override;
     void SetOnWillHide(std::function<void()>&& onWillHide) override;
+    void SetCustomStyleNode(const RefPtr<NG::FrameNode>& customStyleNode) override;
 
 private:
     static void UpdateLabelStyle(const LabelStyle& labelStyle, RefPtr<TextLayoutProperty> textLayoutProperty);

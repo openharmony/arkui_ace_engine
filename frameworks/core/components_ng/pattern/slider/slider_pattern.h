@@ -133,9 +133,10 @@ public:
 
 private:
     void OnModifyDone() override;
+    void CalcSliderValue();
     void CancelExceptionValue(float& min, float& max, float& step);
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, bool skipMeasure, bool skipLayout) override;
-
+    bool UpdateParameters();
     void CreateParagraphFunc();
     void CreateParagraphAndLayout(
         const TextStyle& textStyle, const std::string& content, const LayoutConstraintF& contentConstraint);
@@ -170,7 +171,7 @@ private:
     void InitOnKeyEvent(const RefPtr<FocusHub>& focusHub);
     void GetInnerFocusPaintRect(RoundRect& paintRect);
     void GetOutsetInnerFocusPaintRect(RoundRect& paintRect);
-    void GetInsetInnerFocusPaintRect(RoundRect& paintRect);
+    void GetInsetAndNoneInnerFocusPaintRect(RoundRect& paintRect);
     bool OnKeyEvent(const KeyEvent& event);
     void PaintFocusState();
     bool MoveStep(int32_t stepCount);

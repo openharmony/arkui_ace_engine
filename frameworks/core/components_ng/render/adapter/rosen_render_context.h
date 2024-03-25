@@ -32,6 +32,7 @@
 #include "base/geometry/ng/offset_t.h"
 #include "base/geometry/ng/rect_t.h"
 #include "base/utils/noncopyable.h"
+#include "core/components/common/layout/position_param.h"
 #include "core/components/common/properties/color.h"
 #include "core/components_ng/event/event_hub.h"
 #include "core/components_ng/image_provider/image_loading_context.h"
@@ -182,6 +183,7 @@ public:
     void OnPixelStretchEffectUpdate(const PixStretchEffectOption& option) override;
     void OnLightUpEffectUpdate(double radio) override;
     void OnParticleOptionArrayUpdate(const std::list<ParticleOption>& optionList) override;
+    void OnClickEffectLevelUpdate(const ClickEffectInfo& info) override;
 
     Rosen::SHADOW_COLOR_STRATEGY ToShadowColorStrategy(ShadowColorStrategy shadowColorStrategy);
     void OnBackShadowUpdate(const Shadow& shadow) override;
@@ -192,6 +194,7 @@ public:
     void OnTransformMatrixUpdate(const Matrix4& matrix) override;
 
     void UpdateTransition(const TransitionOptions& options) override;
+    void CleanTransition() override;
     void UpdateChainedTransition(const RefPtr<NG::ChainedTransitionEffect>& effect) override;
     bool HasAppearingTransition() const
     {
@@ -204,12 +207,12 @@ public:
     void OnNodeAppear(bool recursive) override;
     void OnNodeDisappear(bool recursive) override;
     void SetTransitionOutCallback(std::function<void()>&& callback) override;
+    void SetTransitionInCallback(std::function<void()>&& callback) override;
     void ClipWithRect(const RectF& rectF) override;
     void ClipWithRRect(const RectF& rectF, const RadiusF& radiusF) override;
 
     bool TriggerPageTransition(PageTransitionType type, const std::function<void()>& onFinish) override;
-    void MaskAnimation(const RefPtr<RenderContext>& transitionOutNodeContext,
-        const Color& initialBackgroundColor, const Color& backgroundColor);
+    void MaskAnimation(const Color& initialBackgroundColor, const Color& backgroundColor);
 
     void SetSharedTranslate(float xTranslate, float yTranslate) override;
     void ResetSharedTranslate() override;
@@ -223,6 +226,8 @@ public:
         const std::unique_ptr<TransitionOptions>& options, const SizeF& frameSize = SizeF());
 
     static float ConvertDimensionToScaleBySize(const Dimension& dimension, float size);
+
+    static SizeF GetPercentReference(const RefPtr<FrameNode>& frameNode);
 
     void FlushContentModifier(const RefPtr<Modifier>& modifier) override;
     void FlushOverlayModifier(const RefPtr<Modifier>& modifier) override;
@@ -275,6 +280,7 @@ public:
     void UpdateMouseSelectWithRect(const RectF& rect, const Color& fillColor, const Color& strokeColor) override;
 
     void OnPositionUpdate(const OffsetT<Dimension>& value) override;
+    void OnPositionEdgesUpdate(const EdgesParam& value) override;
     void OnZIndexUpdate(int32_t value) override;
     void DumpInfo() override;
     void DumpAdvanceInfo() override;
@@ -383,6 +389,7 @@ private:
     void OnTransformRotateUpdate(const Vector5F& value) override;
 
     void OnOffsetUpdate(const OffsetT<Dimension>& value) override;
+    void OnOffsetEdgesUpdate(const EdgesParam& value) override;
     void OnAnchorUpdate(const OffsetT<Dimension>& value) override;
 
     void OnClipShapeUpdate(const RefPtr<BasicShape>& basicShape) override;
@@ -488,6 +495,10 @@ private:
     void GetPaddingOfFirstFrameNodeParent(Dimension& parentPaddingLeft, Dimension& parentPaddingTop);
     void CombineMarginAndPosition(Dimension& resultX, Dimension& resultY, const Dimension& parentPaddingLeft,
         const Dimension& parentPaddingTop, float widthPercentReference, float heightPercentReference);
+    OffsetF GetRectOffsetWithOffsetEdges(
+        const EdgesParam& offsetEdges, float widthPercentReference, float heightPercentReference);
+    OffsetF GetRectOffsetWithPositionEdges(
+        const EdgesParam& positionEdges, float widthPercentReference, float heightPercentReference);
 
     void InitEventClickEffect();
     RefPtr<Curve> UpdatePlayAnimationValue(const ClickEffectLevel& level, float& scaleValue);
@@ -562,6 +573,7 @@ private:
 
     RefPtr<RosenTransitionEffect> transitionEffect_;
     std::function<void()> transitionOutCallback_;
+    std::function<void()> transitionInCallback_;
     std::shared_ptr<DebugBoundaryModifier> debugBoundaryModifier_;
     std::shared_ptr<BackgroundModifier> backgroundModifier_;
     std::shared_ptr<BorderImageModifier> borderImageModifier_;

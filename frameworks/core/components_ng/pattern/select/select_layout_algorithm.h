@@ -16,6 +16,7 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_SELECT_SELECT_LAYOUT_ALGORITHM_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_SELECT_SELECT_LAYOUT_ALGORITHM_H
 
+#include "core/components/select/select_theme.h"
 #include "core/components_ng/layout/layout_algorithm.h"
 #include "core/components_ng/layout/layout_wrapper.h"
 
@@ -32,6 +33,8 @@ public:
 
 private:
     SizeF MeasureAndGetSize(const RefPtr<LayoutWrapper>& childLayoutWrapper, const LayoutConstraintF& constraint);
+    void MeasureAndGetTextSize(double fontSize, SizeF& textSize, bool& isTextMin);
+    float MeasureAndGetDefaultHeight(RefPtr<LayoutProperty> layoutProps, RefPtr<SelectTheme> theme);
 
     ACE_DISALLOW_COPY_AND_MOVE(SelectLayoutAlgorithm);
 };

@@ -31,6 +31,7 @@
 #include "core/components_ng/event/gesture_event_hub.h"
 #include "core/components_ng/pattern/pattern.h"
 #include "core/components_ng/pattern/ui_extension/session_wrapper.h"
+#include "core/components_ng/pattern/ui_extension/accessibility_session_adapter_ui_extension.h"
 #include "core/event/mouse_event.h"
 #include "core/event/touch_event.h"
 
@@ -81,6 +82,7 @@ public:
 
     RefPtr<LayoutAlgorithm> CreateLayoutAlgorithm() override;
     FocusPattern GetFocusPattern() const override;
+    RefPtr<AccessibilitySessionAdapter> GetAccessibilitySessionAdapter() override;
 
     void UpdateWant(const RefPtr<OHOS::Ace::WantWrap>& wantWrap);
     void UpdateWant(const AAFwk::Want& want);
@@ -123,8 +125,8 @@ public:
     void FireOnReleaseCallback(int32_t releaseCode);
     void SetOnResultCallback(const std::function<void(int32_t, const AAFwk::Want&)>&& callback);
     void FireOnResultCallback(int32_t code, const AAFwk::Want& want);
-    void SetOnTerminatedCallback(const std::function<void(std::optional<int32_t>, const RefPtr<WantWrap>&)>&& callback);
-    void FireOnTerminatedCallback(std::optional<int32_t> code, const RefPtr<WantWrap>& wantWrap);
+    void SetOnTerminatedCallback(const std::function<void(int32_t, const RefPtr<WantWrap>&)>&& callback);
+    void FireOnTerminatedCallback(int32_t code, const RefPtr<WantWrap>& wantWrap);
     void SetOnReceiveCallback(const std::function<void(const AAFwk::WantParams&)>&& callback);
     void FireOnReceiveCallback(const AAFwk::WantParams& params);
     void SetOnErrorCallback(
@@ -196,8 +198,8 @@ private:
     void HandleTouchEvent(const TouchEventInfo& info);
     void HandleMouseEvent(const MouseInfo& info);
     void HandleHoverEvent(bool isHover);
-    void DispatchKeyEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent);
-    bool DispatchKeyEventSync(const std::shared_ptr<MMI::KeyEvent>& keyEvent);
+    void DispatchKeyEvent(const KeyEvent& event);
+    bool DispatchKeyEventSync(const KeyEvent& event);
     void DispatchFocusActiveEvent(bool isFocusActive);
     void DispatchFocusState(bool focusState);
     void DispatchPointerEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent);
@@ -215,7 +217,7 @@ private:
     std::function<void(const RefPtr<UIExtensionProxy>&)> onRemoteReadyCallback_;
     std::function<void(int32_t)> onReleaseCallback_;
     std::function<void(int32_t, const AAFwk::Want&)> onResultCallback_;
-    std::function<void(std::optional<int32_t>, const RefPtr<WantWrap>&)> onTerminatedCallback_;
+    std::function<void(int32_t, const RefPtr<WantWrap>&)> onTerminatedCallback_;
     std::function<void(const AAFwk::WantParams&)> onReceiveCallback_;
     std::function<void(int32_t code, const std::string& name, const std::string& message)> onErrorCallback_;
     std::list<std::function<void(const RefPtr<UIExtensionProxy>&)>> onSyncOnCallbackList_;
@@ -225,6 +227,7 @@ private:
     RefPtr<OHOS::Ace::WantWrap> curWant_;
     RefPtr<FrameNode> contentNode_;
     RefPtr<SessionWrapper> sessionWrapper_;
+    RefPtr<AccessibilitySessionAdapterUIExtension> accessibilitySessionAdapter_;
     ErrorMsg lastError_;
     int32_t instanceId_ = Container::CurrentId();
     AbilityState state_ = AbilityState::NONE;

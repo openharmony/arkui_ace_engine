@@ -53,6 +53,7 @@ public:
     void SetOnDownloadStart(std::function<void(const BaseEventInfo* info)>&& jsCallback) override;
     void SetOnHttpAuthRequest(std::function<bool(const BaseEventInfo* info)>&& jsCallback) override;
     void SetOnSslErrorRequest(std::function<bool(const BaseEventInfo* info)>&& jsCallback) override;
+    void SetOnAllSslErrorRequest(std::function<bool(const BaseEventInfo* info)>&& jsCallback) override;
     void SetOnSslSelectCertRequest(std::function<bool(const BaseEventInfo* info)>&& jsCallback) override;
     void SetMediaPlayGestureAccess(bool isNeedGestureAccess) override;
     void SetOnKeyEvent(std::function<void(KeyEventInfo& keyEventInfo)>&& jsCallback) override;
@@ -164,6 +165,7 @@ public:
     void SetNativeEmbedGestureEventId(std::function<void(const BaseEventInfo* info)>&& jsCallback) override;
     void SetLayoutMode(WebLayoutMode mode) override;
     void SetNestedScroll(const NestedScrollOptions& nestedOpt) override;
+    void SetMetaViewport(bool enabled) override;
     void JavaScriptOnDocumentStart(const ScriptItems& scriptItems) override;
     void JavaScriptOnDocumentEnd(const ScriptItems& scriptItems) override;
     
@@ -171,6 +173,8 @@ public:
     void SetIntelligentTrackingPreventionResultId(
         std::function<void(const std::shared_ptr<BaseEventInfo>& info)>&&
             intelligentTrackingPreventionResultId) override;
+    void SetTextAutosizing(bool isTextAutosizing) override;
+    void SetNativeVideoPlayerConfig(bool enable, bool shouldOverlay) override;
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_WEB_WEB_MODEL_NG_H

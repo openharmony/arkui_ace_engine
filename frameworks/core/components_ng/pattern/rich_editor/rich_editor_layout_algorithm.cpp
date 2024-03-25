@@ -119,7 +119,7 @@ std::optional<SizeF> RichEditorLayoutAlgorithm::MeasureContent(
     if (!res.IsPositive()) {
         return std::nullopt;
     }
-    richTextRect_.SetSize(SizeF(res.Width(), textHeight));
+    UpdateRichTextRect(res, textHeight, layoutWrapper);
     auto contentHeight = res.Height();
     if (contentConstraint.selfIdealSize.Height().has_value()) {
         contentHeight = std::min(contentHeight, contentConstraint.selfIdealSize.Height().value());
@@ -127,6 +127,20 @@ std::optional<SizeF> RichEditorLayoutAlgorithm::MeasureContent(
         contentHeight = std::min(contentHeight, contentConstraint.maxSize.Height());
     }
     return SizeF(res.Width(), contentHeight);
+}
+
+void RichEditorLayoutAlgorithm::UpdateRichTextRect(
+    const SizeF& res, const float& textHeight, LayoutWrapper* layoutWrapper)
+{
+    auto host = layoutWrapper->GetHostNode();
+    CHECK_NULL_VOID(host);
+    auto pattern = host->GetPattern<RichEditorPattern>();
+    CHECK_NULL_VOID(pattern);
+    if (pattern->IsShowPlaceholder()) {
+        richTextRect_.SetSize(SizeF(0.0f, 0.0f));
+    } else {
+        richTextRect_.SetSize(SizeF(res.Width(), textHeight));
+    }
 }
 
 void RichEditorLayoutAlgorithm::SetPlaceholder(LayoutWrapper* layoutWrapper)
@@ -216,6 +230,9 @@ ParagraphStyle RichEditorLayoutAlgorithm::GetParagraphStyle(
     CHECK_NULL_RETURN(lineStyle, style);
     if (lineStyle->propTextAlign) {
         style.align = *(lineStyle->propTextAlign);
+    }
+    if (lineStyle->propWordBreak) {
+        style.wordBreak = *(lineStyle->propWordBreak);
     }
     if (lineStyle->propTextIndent) {
         style.leadingMargin = std::make_optional<LeadingMargin>();

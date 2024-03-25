@@ -45,17 +45,17 @@ public:
                 themeConstants->GetDimension(THEME_TEXTFIELD_PADDING_VERTICAL),
                 themeConstants->GetDimension(THEME_TEXTFIELD_PADDING_HORIZONTAL),
                 themeConstants->GetDimension(THEME_TEXTFIELD_PADDING_VERTICAL));
-            ParsePattern(themeConstants->GetThemeStyle(), theme);
+            ParsePattern(themeConstants, theme);
             return theme;
         }
 
     private:
-        void ParsePattern(const RefPtr<ThemeStyle>& themeStyle, const RefPtr<RichEditorTheme>& theme) const
+        void ParsePattern(const RefPtr<ThemeConstants>& themeConstants, const RefPtr<RichEditorTheme>& theme) const
         {
-            if (!themeStyle || !theme) {
+            if (!theme) {
                 return;
             }
-            auto pattern = themeStyle->GetAttr<RefPtr<ThemeStyle>>(THEME_PATTERN_RICH_EDITOR, nullptr);
+            RefPtr<ThemeStyle> pattern = themeConstants->GetPatternByName(THEME_PATTERN_RICH_EDITOR);
             if (!pattern) {
                 return;
             }
@@ -64,6 +64,8 @@ public:
             theme->defaultCaretHeight_ = pattern->GetAttr<Dimension>("default_caret_height", 18.5_vp);
             theme->disabledAlpha_ = static_cast<float>(pattern->GetAttr<double>("text_color_disabled_alpha", 0.0));
             theme->placeholderColor_ = pattern->GetAttr<Color>("tips_text_color", Color(0x99000000));
+            theme->caretColor_ = pattern->GetAttr<Color>("caret_color", Color(0xff007dff));
+            theme->selectedBackgroundColor_ = pattern->GetAttr<Color>("selected_background_color", Color(0xff007dff));
         }
     };
 
@@ -104,6 +106,16 @@ public:
         return placeholderColor_;
     }
 
+    const Color GetCaretColor()
+    {
+        return caretColor_;
+    }
+
+    const Color GetSelectedBackgroundColor()
+    {
+        return selectedBackgroundColor_;
+    }
+
 protected:
     RichEditorTheme() = default;
 
@@ -118,6 +130,8 @@ private:
     Dimension insertCursorOffset_ = 8.0_vp;
 
     Color placeholderColor_ = Color(0x99000000);
+    Color caretColor_ = Color(0xff007dff);
+    Color selectedBackgroundColor_ = Color(0xff007dff);
 };
 } // namespace OHOS::Ace::NG
 

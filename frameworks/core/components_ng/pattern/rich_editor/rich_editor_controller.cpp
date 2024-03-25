@@ -125,11 +125,12 @@ SelectionInfo RichEditorController::GetSelectionSpansInfo()
     return value;
 }
 
-void RichEditorController::SetSelection(int32_t selectionStart, int32_t selectionEnd)
+void RichEditorController::SetSelection(
+    int32_t selectionStart, int32_t selectionEnd, const std::optional<SelectionOptions>& options)
 {
     auto richEditorPattern = pattern_.Upgrade();
     if (richEditorPattern) {
-        richEditorPattern->SetSelection(selectionStart, selectionEnd);
+        richEditorPattern->SetSelection(selectionStart, selectionEnd, options);
     }
 }
 

@@ -64,13 +64,21 @@ void SetPullToRefresh(ArkUINodeHandle node, ArkUI_Bool value)
 
 void ResetPullToRefresh(ArkUINodeHandle node) {}
 
+void SetRefreshContent(ArkUINodeHandle node, ArkUINodeHandle content)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto contentNode = reinterpret_cast<FrameNode*>(content);
+    CHECK_NULL_VOID(contentNode);
+    RefreshModelNG::SetCustomBuilder(frameNode, contentNode);
+}
 } // namespace
 namespace NodeModifier {
 
 const ArkUIRefreshModifier* GetRefreshModifier()
 {
     static const ArkUIRefreshModifier modifier = { SetRefreshing, GetRefreshing, SetRefreshOffset, ResetRefreshOffset,
-        SetPullToRefresh, ResetPullToRefresh };
+        SetPullToRefresh, ResetPullToRefresh, SetRefreshContent };
     return &modifier;
 }
 

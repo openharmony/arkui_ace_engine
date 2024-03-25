@@ -311,9 +311,49 @@ void JSTabContent::SetLabelStyle(const JSRef<JSVal>& info, bool isSubTabStyle)
         if (!font->IsNull() && font->IsObject()) {
             GetFontContent(font, labelStyle, isSubTabStyle);
         }
+
+        GetLabelUnselectedContent(obj->GetProperty("unselectedColor"), labelStyle);
+
+        GetLabelSelectedContent(obj->GetProperty("selectedColor"), labelStyle);
     }
     CompleteParameters(labelStyle, isSubTabStyle);
     TabContentModel::GetInstance()->SetLabelStyle(labelStyle);
+}
+
+void JSTabContent::SetIconStyle(const JSRef<JSVal>& info)
+{
+    IconStyle iconStyle;
+    if (info->IsObject()) {
+        JSRef<JSObject> obj = JSRef<JSObject>::Cast(info);
+        Color unselectedColor;
+        JSRef<JSVal> unselectedColorValue = obj->GetProperty("unselectedColor");
+        if (ConvertFromJSValue(unselectedColorValue, unselectedColor)) {
+            iconStyle.unselectedColor = unselectedColor;
+        }
+
+        Color selectedColor;
+        JSRef<JSVal> selectedColorValue = obj->GetProperty("selectedColor");
+        if (ConvertFromJSValue(selectedColorValue, selectedColor)) {
+            iconStyle.selectedColor = selectedColor;
+        }
+    }
+    TabContentModel::GetInstance()->SetIconStyle(iconStyle);
+}
+
+void JSTabContent::GetLabelUnselectedContent(const JSRef<JSVal> unselectedColorValue, LabelStyle& labelStyle)
+{
+    Color unselectedColor;
+    if (ConvertFromJSValue(unselectedColorValue, unselectedColor)) {
+        labelStyle.unselectedColor = unselectedColor;
+    }
+}
+
+void JSTabContent::GetLabelSelectedContent(const JSRef<JSVal> selectedColorValue, LabelStyle& labelStyle)
+{
+    Color selectedColor;
+    if (ConvertFromJSValue(selectedColorValue, selectedColor)) {
+        labelStyle.selectedColor = selectedColor;
+    }
 }
 
 void JSTabContent::SetPadding(const JSRef<JSVal>& info, bool isSubTabStyle)
@@ -417,9 +457,30 @@ void JSTabContent::CompleteParameters(LabelStyle& labelStyle, bool isSubTabStyle
     }
 }
 
+void SetBuilderNode(const JSRef<JSObject>& paramObject)
+{
+    JSRef<JSVal> contentParam = paramObject->GetProperty("content");
+    if (!contentParam->IsObject()) {
+        return;
+    }
+    auto contentObject = JSRef<JSObject>::Cast(contentParam);
+    JSRef<JSVal> nodeptr = contentObject->GetProperty("nodePtr_");
+    if (nodeptr.IsEmpty()) {
+        return;
+    }
+    const auto* vm = nodeptr->GetEcmaVM();
+    auto* node = nodeptr->GetLocalHandle()->ToNativePointer(vm)->Value();
+    auto* frameNode = reinterpret_cast<NG::FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    RefPtr<NG::FrameNode> refPtrFrameNode = AceType::Claim(frameNode);
+    TabContentModel::GetInstance()->SetCustomStyleNode(refPtrFrameNode);
+}
+
 void JSTabContent::SetSubTabBarStyle(const JSRef<JSObject>& paramObject)
 {
     JSRef<JSVal> contentParam = paramObject->GetProperty("content");
+    SetBuilderNode(paramObject);
+
     auto isContentEmpty = contentParam->IsEmpty() || contentParam->IsUndefined() || contentParam->IsNull();
     if (isContentEmpty) {
         LOGW("The content param is empty");
@@ -513,6 +574,8 @@ void JSTabContent::SetBottomTabBarStyle(const JSRef<JSObject>& paramObject)
     JSRef<JSVal> labelStyleParam = paramObject->GetProperty("labelStyle");
     SetLabelStyle(labelStyleParam, false);
 
+    SetIconStyle(paramObject->GetProperty("iconStyle"));
+
     JSRef<JSVal> idParam = paramObject->GetProperty("id");
     SetId(idParam);
 
@@ -526,7 +589,7 @@ void JSTabContent::SetOnWillShow(const JSCallbackInfo& info)
         return;
     }
     auto willShowHandler = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(info[0]));
-    WeakPtr<NG::FrameNode> frameNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    WeakPtr<NG::FrameNode> frameNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
     auto onWillShow = [executionContext = info.GetExecutionContext(), func = std::move(willShowHandler)]() {
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(executionContext);
         ACE_SCORING_EVENT("TabContent.onWillShow");
@@ -541,7 +604,7 @@ void JSTabContent::SetOnWillHide(const JSCallbackInfo& info)
         return;
     }
     auto willHideHandler = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(info[0]));
-    WeakPtr<NG::FrameNode> frameNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    WeakPtr<NG::FrameNode> frameNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
     auto onWillHide = [executionContext = info.GetExecutionContext(), func = std::move(willHideHandler)]() {
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(executionContext);
         ACE_SCORING_EVENT("TabContent.onWillHide");

@@ -44,7 +44,7 @@ static inline RefPtr<FrameNode> GetSecCompChildNode(RefPtr<FrameNode>& parent, c
 
 static inline RefPtr<FrameNode> GetCurSecCompChildNode(const std::string& tag)
 {
-    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    auto frameNode = AceType::Claim(ViewStackProcessor::GetInstance()->GetMainFrameNode());
     CHECK_NULL_RETURN(frameNode, nullptr);
     return GetSecCompChildNode(frameNode, tag);
 }
@@ -54,7 +54,7 @@ class SecurityComponentPattern : public Pattern {
 
 public:
     SecurityComponentPattern() {};
-    ~SecurityComponentPattern() override = default;
+    ~SecurityComponentPattern() override;
 
     RefPtr<LayoutProperty> CreateLayoutProperty() override
     {
@@ -107,6 +107,8 @@ private:
     void UpdateButtonProperty(RefPtr<FrameNode>& scNode, RefPtr<FrameNode>& buttonNode);
 #ifdef SECURITY_COMPONENT_ENABLE
     void RegisterSecurityComponentAsync();
+    void RegisterSecurityComponent();
+    void RegisterSecurityComponentRetry();
     void UnregisterSecurityComponent();
     int32_t ReportSecurityComponentClickEvent(GestureEvent& event);
     int32_t ReportSecurityComponentClickEvent(const KeyEvent& event);

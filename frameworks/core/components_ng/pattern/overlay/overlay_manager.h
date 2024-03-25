@@ -31,6 +31,8 @@
 #include "core/components_ng/animation/geometry_transition.h"
 #include "core/components_ng/base/ui_node.h"
 #include "core/components_ng/pattern/calendar_picker/calendar_type_define.h"
+#include "core/components_ng/pattern/overlay/content_cover_param.h"
+#include "core/components_ng/pattern/overlay/modal_presentation_pattern.h"
 #include "core/components_ng/pattern/overlay/modal_style.h"
 #include "core/components_ng/pattern/overlay/sheet_style.h"
 #include "core/components_ng/pattern/picker/datepicker_event_hub.h"
@@ -78,11 +80,14 @@ public:
     void HidePopup(int32_t targetId, const PopupInfo& popupInfo);
     RefPtr<FrameNode> HidePopupWithoutAnimation(int32_t targetId, const PopupInfo& popupInfo);
     void ShowPopup(int32_t targetId, const PopupInfo& popupInfo,
-        const std::function<void(int32_t)>&& onWillDismiss = nullptr, bool interactiveDismiss = false);
+        const std::function<void(int32_t)>&& onWillDismiss = nullptr, bool interactiveDismiss = true);
     void ErasePopup(int32_t targetId);
     void HideAllPopups();
     void HideCustomPopups();
     void SetPopupHotAreas(RefPtr<FrameNode> popupNode);
+    void ShowPopupAnimation(const RefPtr<FrameNode>& popupNode);
+    void ShowPopupAnimationNG(const RefPtr<FrameNode>& popupNode);
+    void HidePopupAnimation(const RefPtr<FrameNode>& popupNode, const std::function<void()>& finish);
 
     PopupInfo GetPopupInfo(int32_t targetId) const
     {
@@ -105,6 +110,16 @@ public:
         }
     }
 
+    void SetDismissDialogId(int32_t id)
+    {
+        dismissDialogId_ = id;
+    }
+
+    int32_t GetDismissDialogId() const
+    {
+        return dismissDialogId_;
+    }
+
     void ShowMenu(int32_t targetId, const NG::OffsetF& offset, RefPtr<FrameNode> menu = nullptr);
     void HideMenu(const RefPtr<FrameNode>& menu, int32_t targetId, bool isMenuOnTouch = false);
     void DeleteMenu(int32_t targetId);
@@ -121,16 +136,20 @@ public:
     void ClearToastInSubwindow();
     void ClearToast();
     void ShowToast(const std::string& message, int32_t duration, const std::string& bottom, bool isRightToLeft,
-        const ToastShowMode& showMode = ToastShowMode::DEFAULT);
+        const ToastShowMode& showMode = ToastShowMode::DEFAULT, int32_t alignment = -1,
+        std::optional<DimensionOffset> offset = std::nullopt);
 
     std::unordered_map<int32_t, RefPtr<FrameNode>> GetDialogMap()
     {
         return dialogMap_;
     };
     RefPtr<FrameNode> GetDialog(int32_t dialogId);
+    RefPtr<FrameNode> SetDialogMask(const DialogProperties& dialogProps);
     // customNode only used by customDialog, pass in nullptr if not customDialog
     RefPtr<FrameNode> ShowDialog(
         const DialogProperties& dialogProps, std::function<void()>&& buildFunc, bool isRightToLeft = false);
+    RefPtr<FrameNode> ShowDialogWithNode(
+        const DialogProperties& dialogProps, const RefPtr<NG::UINode>& customNode, bool isRightToLeft = false);
     void ShowCustomDialog(const RefPtr<FrameNode>& customNode);
     void ShowDateDialog(const DialogProperties& dialogProps, const DatePickerSettingData& settingData,
         std::map<std::string, NG::DialogEvent> dialogEvent,
@@ -339,7 +358,13 @@ public:
     void BindContentCover(bool isShow, std::function<void(const std::string&)>&& callback,
         std::function<RefPtr<UINode>()>&& buildNodeFunc, NG::ModalStyle& modalStyle, std::function<void()>&& onAppear,
         std::function<void()>&& onDisappear, std::function<void()>&& onWillAppear,
-        std::function<void()>&& onWillDisappear, const RefPtr<FrameNode>& targetNode, int32_t sessionId = 0);
+        std::function<void()>&& onWillDisappear, const NG::ContentCoverParam& contentCoverParam,
+        const RefPtr<FrameNode>& targetNode, int32_t sessionId = 0);
+    void OnBindContentCover(bool isShow, std::function<void(const std::string&)>&& callback,
+        std::function<RefPtr<UINode>()>&& buildNodeFunc, NG::ModalStyle& modalStyle, std::function<void()>&& onAppear,
+        std::function<void()>&& onDisappear, std::function<void()>&& onWillAppear,
+        std::function<void()>&& onWillDisappear, const NG::ContentCoverParam& contentCoverParam,
+        const RefPtr<FrameNode>& targetNode, int32_t sessionId = 0);
     void BindSheet(bool isShow, std::function<void(const std::string&)>&& callback,
         std::function<RefPtr<UINode>()>&& buildNodeFunc, std::function<RefPtr<UINode>()>&& buildTitleNodeFunc,
         NG::SheetStyle& sheetStyle, std::function<void()>&& onAppear, std::function<void()>&& onDisappear,
@@ -353,6 +378,7 @@ public:
     void CloseSheet(int32_t targetId);
 
     void DismissSheet();
+    void DismissContentCover();
 
     void SetDismissTargetId(int32_t targetId)
     {
@@ -365,7 +391,12 @@ public:
 
     RefPtr<FrameNode> GetSheetMask(const RefPtr<FrameNode>& sheetNode);
 
-    void DeleteModal(int32_t targetId);
+    RefPtr<FrameNode> GetModal(int32_t targetId);
+    void RemoveModal(int32_t targetId);
+    void DeleteModal(int32_t targetId, bool needOnWillDisappear = true);
+    void PopTopModalNode();
+
+    void DeleteModalNode(int32_t targetId, RefPtr<FrameNode>& modalNode, bool isModal, bool needOnWillDisappear);
 
     void RemoveSheetMask(RefPtr<FrameNode>& sheetNode, RefPtr<UINode>& rootNode);
 
@@ -457,9 +488,13 @@ private:
 
     void OpenDialogAnimation(const RefPtr<FrameNode>& node);
     void CloseDialogAnimation(const RefPtr<FrameNode>& node);
+    void SetDialogTransitionEffect(const RefPtr<FrameNode>& node);
+    void CloseDialogMatchTransition(const RefPtr<FrameNode>& node);
     void SetContainerButtonEnable(bool isEnabled);
 
     void SaveLastModalNode();
+    void PlayTransitionEffectIn(const RefPtr<FrameNode>& topModalNode);
+    void PlayTransitionEffectOut(const RefPtr<FrameNode>& topModalNode);
     void PlayDefaultModalTransition(const RefPtr<FrameNode>& modalNode, bool isTransitionIn);
     void DefaultModalTransition(bool isTransitionIn);
     void PlayAlphaModalTransition(const RefPtr<FrameNode>& modalNode, bool isTransitionIn);
@@ -481,7 +516,7 @@ private:
     void PlayBubbleStyleSheetTransition(RefPtr<FrameNode> sheetNode, bool isTransitionIn);
     void CheckReturnFocus(RefPtr<FrameNode> node);
     void MountPopup(int32_t targetId, const PopupInfo& popupInfo,
-        const std::function<void(int32_t)>&& onWillDismiss = nullptr, bool interactiveDismiss = false);
+        const std::function<void(int32_t)>&& onWillDismiss = nullptr, bool interactiveDismiss = true);
 
     int32_t GetPopupIdByNode(const RefPtr<FrameNode>& overlay);
     bool PopupInteractiveDismiss(const RefPtr<FrameNode>& overlay);
@@ -493,6 +528,20 @@ private:
         AnimationOption option, float showHeight);
     void PlayDefaultModalOut(const RefPtr<FrameNode>& modalNode, const RefPtr<RenderContext>& context,
         AnimationOption option, float showHeight);
+    void OpenToastAnimation(const RefPtr<FrameNode>& toastNode, int32_t duration);
+    void OnShowMenuAnimationFinished(const WeakPtr<FrameNode> menuWK, const WeakPtr<OverlayManager> weak,
+        int32_t instanceId);
+    void OnPopMenuAnimationFinished(const WeakPtr<FrameNode> menuWK, const WeakPtr<UINode> rootWeak,
+        const WeakPtr<OverlayManager> weak, int32_t instanceId);
+    void UpdateMenuVisibility(const RefPtr<FrameNode>& menu);
+
+    bool CheckTopModalNode(const RefPtr<FrameNode>& topModalNode, int32_t targetId);
+    void HandleModalShow(std::function<void(const std::string&)>&& callback,
+        std::function<RefPtr<UINode>()>&& buildNodeFunc, NG::ModalStyle& modalStyle, std::function<void()>&& onAppear,
+        std::function<void()>&& onDisappear, std::function<void()>&& onWillDisappear, const RefPtr<UINode> rootNode,
+        const NG::ContentCoverParam& contentCoverParam, int32_t targetId,
+        std::optional<ModalTransition> modalTransition);
+    void HandleModalPop(std::function<void()>&& onWillDisappear, const RefPtr<UINode> rootNode, int32_t targetId);
 
     // Key: target Id, Value: PopupInfo
     std::unordered_map<int32_t, NG::PopupInfo> popupMap_;
@@ -509,6 +558,7 @@ private:
     WeakPtr<UINode> rootNodeWeak_;
     int32_t dialogCount_ = 0;
     int32_t dismissTargetId_ = 0;
+    int32_t dismissDialogId_ = 0;
     std::unordered_map<int32_t, int32_t> maskNodeIdMap_;
     int32_t subWindowId_;
     bool hasPixelMap_ { false };

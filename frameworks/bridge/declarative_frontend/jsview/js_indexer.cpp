@@ -383,11 +383,6 @@ void JSIndexer::SetPopupSelectedColor(const JSCallbackInfo& args)
         return;
     }
     IndexerModel::GetInstance()->SetPopupSelectedColor(PaseColor(args));
-    CalcDimension popupHorizontalSpace(-1.0);
-    if (args.Length() > 1) {
-        ParseJsDimensionVp(args[1], popupHorizontalSpace);
-    }
-    IndexerModel::GetInstance()->SetPopupHorizontalSpace(popupHorizontalSpace);
 }
 
 void JSIndexer::SetPopupUnselectedColor(const JSCallbackInfo& args)

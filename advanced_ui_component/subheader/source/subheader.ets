@@ -14,6 +14,9 @@
  */
 
 import { KeyCode } from '@ohos.multimodalInput.keyCode';
+import hilog from '@ohos.hilog';
+import resourceManager from '@ohos.resourceManager';
+import { BusinessError } from '@ohos.base';
 
 const IMAGE_WIDTH_NUM: number = 16;
 const IMAGE_HEIGHT_NUM: number = 24;
@@ -21,7 +24,7 @@ const BUTTON_SIZE: number = 32;
 const SINGLE_LINE_HEIGHT: number = 56;
 const DOUBLE_LINE_HEIGHT: number = 72;
 const BUTTON_HEIGHT: number = 28;
-const IMAGE_WIDTH: number = 12;
+const ARROW_WIDTH: number = 12;
 const BORDER_WIDTH: number = 2;
 const DIVIDEND_NUM: number = 3;
 const DIVIDEND_NUM_TWO: number = 2;
@@ -41,42 +44,42 @@ export enum OperationType {
 }
 
 export declare class OperationOption {
-  value: ResourceStr;
-  action?: () => void;
+  public value: ResourceStr;
+  public action?: () => void;
 }
 
 export declare class SelectOptions {
-  options: Array<SelectOption>;
-  selected?: number;
-  value?: string;
-  onSelect?: (index: number, value?: string) => void;
+  public options: Array<SelectOption>;
+  public selected?: number;
+  public value?: string;
+  public onSelect?: (index: number, value?: string) => void;
 }
 
 export declare class SymbolOptions {
-  fontSize?: Length;
-  fontColor?: Array<ResourceColor>;
-  fontWeight?: number | FontWeight | string;
-  effectStrategy?: SymbolEffectStrategy;
-  renderingStrategy?: SymbolRenderingStrategy;
+  public fontSize?: Length;
+  public fontColor?: Array<ResourceColor>;
+  public fontWeight?: number | FontWeight | string;
+  public effectStrategy?: SymbolEffectStrategy;
+  public renderingStrategy?: SymbolRenderingStrategy;
 }
 
 class IconOptions {
-  icon?: Resource;
-  symbolicIconOption?: SymbolOptions | null;
+  public icon?: Resource;
+  public symbolicIconOption?: SymbolOptions | null;
 }
 
 class ContentIconOption {
-  content?: ResourceStr;
-  subContent?: ResourceStr;
-  iconOptions?: IconOptions;
-  action?: () => void;
+  public content?: ResourceStr;
+  public subContent?: ResourceStr;
+  public iconOptions?: IconOptions;
+  public action?: () => void;
 }
 
 class FontStyle {
-  maxLines: number = 0;
-  fontWeight: number = 0;
-  fontColor?: ResourceColor;
-  alignment?: Alignment;
+  public maxLines: number = 0;
+  public fontWeight: number = 0;
+  public fontColor?: ResourceColor;
+  public alignment?: Alignment;
 }
 
 @Styles
@@ -151,11 +154,15 @@ export struct SubHeader {
   @State textArrowBgColor: Resource = $r('sys.color.ohos_id_color_sub_background_transparent');
   @State buttonBgColor: Resource = $r('sys.color.ohos_id_color_sub_background_transparent');
   @State flexWidth: number = 0;
-  @State textArrowWidth: number = 0;
   @State textArrowFocus: boolean = false;
   @State buttonFocus: boolean = false;
-  @State arrowWidth: number = 0;
-  @State buttonWidth: number = 0;
+  @State textArrowStyleWidth: number = 0;
+  @State textArrowStyleHeight: number = 0;
+  @State buttonStyleWidth: number = 0;
+  @State buttonStyleHeight: number = 0;
+  @State iconTextStyleWidth: number = 0;
+  @State iconTextWidth: number = 0;
+  @State iconWidth: number = 0;
   focusBorderWidth: number = BORDER_WIDTH;
   @State flexAlign: FlexAlign = FlexAlign.SpaceBetween;
 
@@ -169,13 +176,13 @@ export struct SubHeader {
       let flexWidth: number = Number(parseInt(newValue.width.toString(), DEFAULT_VALUE));
       this.flexWidth = flexWidth;
     })
-    .height(this.isDuplicateLine ? DOUBLE_LINE_HEIGHT : SINGLE_LINE_HEIGHT)
+    .constraintSize({ minHeight: this.isDuplicateLine ? DOUBLE_LINE_HEIGHT : SINGLE_LINE_HEIGHT })
   }
 
   @Builder
   leftArea(): void {
     if (this.secondaryTitle && this.icon) {
-      this.IconSecondTitleStyle({
+      this.IconSecondaryTitleStyle({
         content: this.secondaryTitle,
         iconOptions: {
           icon: this.icon,
@@ -213,29 +220,37 @@ export struct SubHeader {
   }
 
   @Builder
-  IconSecondTitleStyle($$: ContentIconOption): void {
+  IconSecondaryTitleStyle($$: ContentIconOption): void {
     Row() {
-      if (Util.isSymbolicResource($$.iconOptions?.icon)) {
-        SymbolGlyph($$.iconOptions?.icon)
-          .focusable(true)
-          .fontSize($$.iconOptions?.symbolicIconOption?.fontSize ?? IMAGE_WIDTH_NUM)
-          .fontColor($$.iconOptions?.symbolicIconOption?.fontColor ?? [$r('sys.color.icon_secondary')])
-          .fontWeight($$.iconOptions?.symbolicIconOption?.fontWeight)
-          .renderingStrategy($$.iconOptions?.symbolicIconOption?.renderingStrategy)
-          .effectStrategy($$.iconOptions?.symbolicIconOption?.effectStrategy)
-          .margin({ right: $r('sys.float.padding_level4') })
-      } else {
-        Image($$.iconOptions?.icon)
-          .width(IMAGE_WIDTH_NUM)
-          .height(IMAGE_WIDTH_NUM)
-          .margin({ right: $r('sys.float.padding_level4') })
+      Row() {
+        if (Util.isSymbolResource($$.iconOptions?.icon)) {
+          SymbolGlyph($$.iconOptions?.icon)
+            .focusable(true)
+            .fontSize($$.iconOptions?.symbolicIconOption?.fontSize ?? IMAGE_WIDTH_NUM)
+            .fontColor($$.iconOptions?.symbolicIconOption?.fontColor ?? [$r('sys.color.icon_secondary')])
+            .fontWeight($$.iconOptions?.symbolicIconOption?.fontWeight)
+            .renderingStrategy($$.iconOptions?.symbolicIconOption?.renderingStrategy)
+            .effectStrategy($$.iconOptions?.symbolicIconOption?.effectStrategy)
+            .margin({ right: $r('sys.float.padding_level4') })
+        } else {
+          Image($$.iconOptions?.icon)
+            .width(IMAGE_WIDTH_NUM)
+            .height(IMAGE_WIDTH_NUM)
+            .margin({ right: $r('sys.float.padding_level4') })
+        }
       }
+      .onAreaChange((oldValue: Area, newValue: Area) => {
+        this.iconWidth = Number(newValue.width);
+        this.updateMaxIconTextWidth();
+      })
+
       Text($$.content)
         .secondaryTitleStyles({
           maxLines: DOUBLE_LINE_NUM,
           fontWeight: FontWeight.Medium,
           alignment: Alignment.Start,
         })
+        .width(this.iconTextWidth)
     }
     .width(this.flexWidth / DIVIDEND_NUM * DIVIDEND_NUM_TWO)
     .commonListPadding()
@@ -244,6 +259,10 @@ export struct SubHeader {
       this.isDuplicateLine = false;
       this.changeFlexAlign(FlexAlign.SpaceBetween);
     })
+    .onAreaChange((oldValue: Area, newValue: Area) => {
+      this.iconTextStyleWidth = Number(newValue.width);
+      this.updateMaxIconTextWidth();
+    })
   }
 
   @Builder
@@ -251,7 +270,7 @@ export struct SubHeader {
     Column() {
       Text($$.content)
         .primaryTitleStyles({
-          fontWeight: FontWeight.Medium,
+          fontWeight: FontWeight.Bold,
           maxLines: SINGLE_LINE_NUM,
           alignment: Alignment.Start,
         })
@@ -284,6 +303,7 @@ export struct SubHeader {
           fontWeight: FontWeight.Medium,
           alignment: Alignment.Start,
         })
+        .width('100%')
         .onAppear(() => {
           this.isDuplicateLine = false;
           this.changeFlexAlign(FlexAlign.SpaceBetween);
@@ -328,10 +348,11 @@ export struct SubHeader {
     Column() {
       Text($$.content)
         .primaryTitleStyles({
-          fontWeight: FontWeight.Medium,
+          fontWeight: FontWeight.Bold,
           maxLines: DOUBLE_LINE_NUM,
           alignment: Alignment.Start,
         })
+        .width('100%')
         .onAppear(() => {
           this.isDuplicateLine = false;
           this.changeFlexAlign(FlexAlign.SpaceBetween);
@@ -359,14 +380,14 @@ export struct SubHeader {
           }
           .backgroundColor(this.buttonBgColor)
           .focusable(true)
-          .height(BUTTON_HEIGHT)
+          .constraintSize({ minHeight: BUTTON_HEIGHT })
           .justifyContent(FlexAlign.End)
           .borderRadius($r('sys.float.corner_radius_level4'))
           .stateStyles({
             focused: {
               .border({
                 radius: $r('sys.float.corner_radius_level4'),
-                width: this.buttonWidth,
+                width: this.buttonStyleWidth,
                 color: $r('sys.color.interactive_focus'),
                 style: BorderStyle.Solid,
               })
@@ -408,14 +429,14 @@ export struct SubHeader {
             }
           })
           .onAreaChange((oldValue: Area, newValue: Area) => {
-            let flexWidth = Number(parseInt(newValue.width.toString(), DEFAULT_VALUE));
-            this.buttonWidth = flexWidth;
+            this.buttonStyleWidth = Number(newValue.width);
+            this.buttonStyleHeight = Number(newValue.height);
           })
 
           if (this.buttonFocus) {
             Row()
-              .height(BUTTON_HEIGHT)
-              .width(this.buttonWidth)
+              .height(this.buttonStyleHeight)
+              .width(this.buttonStyleWidth)
               .hitTestBehavior(HitTestMode.None)
               .border({
                 width: $r('sys.float.outline_extra_larger'),
@@ -439,7 +460,7 @@ export struct SubHeader {
   @Builder
   IconGroupStyle(operationItem: Array<OperationOption>): void {
     Row() {
-      ForEach(this.operationItem, (item: OperationOption, index?: number) => {
+      ForEach(operationItem, (item: OperationOption, index?: number) => {
         if (Util.isResourceType(item.value)) {
           if (index === INDEX_ZERO) {
             SingleIconStyle({
@@ -477,7 +498,7 @@ export struct SubHeader {
     .focusable(true)
     .margin({
       left: $r('sys.float.padding_level4'),
-      right: $r('sys.float.margin_right'),
+      right: $r('sys.float.padding_level6'),
     })
   }
 
@@ -486,32 +507,30 @@ export struct SubHeader {
     Row() {
       Stack() {
         Row() {
-          Row() {
-            if (textArrow) {
-              Text(textArrow.value)
-                .secondaryTitleStyles({
-                  maxLines: SINGLE_LINE_NUM,
-                  fontWeight: FontWeight.Regular,
-                  alignment: Alignment.End,
-                })
-                .margin({
-                  right: $r('sys.float.padding_level2'),
-                })
-                .focusable(true)
-            }
-            Image($r('sys.media.ohos_ic_public_arrow_right'))
-              .fillColor($r('sys.color.ohos_id_color_tertiary'))
-              .width(IMAGE_WIDTH)
-              .height(IMAGE_HEIGHT_NUM)
+          if (textArrow) {
+            Text(textArrow.value)
+              .secondaryTitleStyles({
+                maxLines: SINGLE_LINE_NUM,
+                fontWeight: FontWeight.Regular,
+                alignment: Alignment.End,
+              })
+              .margin({
+                right: $r('sys.float.padding_level2'),
+              })
               .focusable(true)
-              .draggable(false)
+              .constraintSize({ maxWidth: this.getMaxArrowTextWidth() })
           }
+          Image($r('sys.media.ohos_ic_public_arrow_right'))
+            .fillColor($r('sys.color.ohos_id_color_tertiary'))
+            .width(ARROW_WIDTH)
+            .height(IMAGE_HEIGHT_NUM)
+            .focusable(true)
+            .draggable(false)
         }
         .borderRadius($r('sys.float.corner_radius_level4'))
         .focusable(true)
         .backgroundColor(this.textArrowBgColor)
-        .height(BUTTON_SIZE)
-        .justifyContent(FlexAlign.End)
+        .constraintSize({ minHeight: BUTTON_SIZE })
         .onFocus(() => {
           this.textArrowFocus = true;
         })
@@ -520,7 +539,7 @@ export struct SubHeader {
         })
         .padding({
           left: $r('sys.float.padding_level2'),
-          right: $r('sys.float.padding_level2'),
+          right: $r('sys.float.padding_level4'),
           top: $r('sys.float.padding_level2'),
           bottom: $r('sys.float.padding_level2'),
         })
@@ -550,45 +569,46 @@ export struct SubHeader {
           }
         })
         .onAreaChange((oldValue: Area, newValue: Area) => {
-          this.arrowWidth = Number(parseInt(newValue.width.toString(), DEFAULT_VALUE));
-        })
-        .stateStyles({
-          focused: {
-            .border({
-              radius: $r('sys.float.corner_radius_level4'),
-              width: this.arrowWidth,
-              color: $r('sys.color.interactive_focus'),
-              style: BorderStyle.Solid,
-            })
-            .backgroundColor($r('sys.color.interactive_focus'))
-          },
-          pressed: pressedStyle,
-          disabled: disabledStyle,
+          this.textArrowStyleWidth = Number(newValue.width);
+          this.textArrowStyleHeight = Number(newValue.height);
         })
 
-        if (this.textArrowFocus) {
-          Row()
-            .height(BUTTON_SIZE)
-            .width(this.arrowWidth)
-            .hitTestBehavior(HitTestMode.None)
-            .border({
-              width: $r('sys.float.outline_extra_larger'),
-              color: $r('sys.color.interactive_focus'),
-            })
-            .borderRadius($r('sys.float.corner_radius_level4'))
-        }
+        Row()
+          .height(this.textArrowStyleHeight)
+          .width(this.textArrowStyleWidth)
+          .hitTestBehavior(HitTestMode.None)
+          .border({
+            radius: $r('sys.float.corner_radius_level4'),
+            width: $r('sys.float.outline_extra_larger'),
+            color: $r('sys.color.interactive_focus'),
+          })
+          .stateStyles({
+            focused: {
+              .border({
+                radius: $r('sys.float.corner_radius_level4'),
+                width: $r('sys.float.outline_extra_larger'),
+                color: $r('sys.color.interactive_focus'),
+              })
+              .backgroundColor($r('sys.color.interactive_focus'))
+            },
+            pressed: pressedStyle,
+            disabled: disabledStyle,
+            normal: {
+              .border({
+                radius: $r('sys.float.corner_radius_level4'),
+                width: $r('sys.float.border_none'),
+                color: $r('sys.color.ohos_id_color_focused_outline_transparent'),
+              })
+            }
+          })
       }
-      .focusable(true)
     }
     .focusable(true)
-    .onAreaChange((oldValue: Area, newValue: Area) => {
-      this.textArrowWidth = Number(parseInt(newValue.width.toString(), DEFAULT_VALUE));
-    })
     .width(this.flexWidth / DIVIDEND_NUM)
     .justifyContent(FlexAlign.End)
     .margin({
       left: $r('sys.float.padding_level4'),
-      right: $r('sys.float.margin_right'),
+      right: $r('sys.float.padding_level4'),
     })
   }
 
@@ -625,6 +645,20 @@ export struct SubHeader {
     });
   }
 
+  private getMaxArrowTextWidth(): number {
+    // OperationType.TEXT_ARROW,文字最大宽度 = 整体宽度 减去 箭头宽度和间距
+    return this.textArrowStyleWidth - getNumberByResource('padding_level2') - getNumberByResource('padding_level2') -
+    getNumberByResource('padding_level4') - ARROW_WIDTH;
+  }
+
+  private updateMaxIconTextWidth(): void {
+    // 文字最大宽度 = 整体宽度 减去 icon宽度和间距
+    this.iconTextWidth = this.iconTextStyleWidth - getNumberByResource('padding_level6') - this.iconWidth -
+    getNumberByResource('padding_level6');
+    hilog.debug(122, 'tytyty ', `this.iconTextMaxWidth : ${this.iconTextWidth}`);
+
+  }
+
   private changeFlexAlign(flex: FlexAlign): void {
     if (this.flexAlign === flex) {
       return;
@@ -643,21 +677,7 @@ struct SingleIconStyle {
   build() {
     if (this.item && this.item.iconOptions) {
       Row() {
-        if (Util.isSymbolicResource(this.item.iconOptions.icon)) {
-          SymbolGlyph(this.item.iconOptions?.icon)
-            .focusable(true)
-            .fontSize(this.item.iconOptions?.symbolicIconOption?.fontSize ?? IMAGE_HEIGHT_NUM)
-            .fontColor(this.item.iconOptions?.symbolicIconOption?.fontColor ?? [$r('sys.color.icon_primary')])
-            .fontWeight(this.item.iconOptions?.symbolicIconOption?.fontWeight)
-            .renderingStrategy(this.item.iconOptions?.symbolicIconOption?.renderingStrategy)
-            .effectStrategy(this.item.iconOptions?.symbolicIconOption?.effectStrategy)
-        } else {
-          Image(this.item?.iconOptions?.icon)
-            .fillColor($r('sys.color.icon_primary'))
-            .width(IMAGE_HEIGHT_NUM)
-            .height(IMAGE_HEIGHT_NUM)
-            .focusable(true)
-        }
+        this.IconZone();
       }
       .focusable(true)
       .width(BUTTON_SIZE)
@@ -708,10 +728,36 @@ struct SingleIconStyle {
       })
     }
   }
+
+  @Builder
+  IconZone(): void {
+    if (this.item && this.item.iconOptions) {
+      if (Util.isSymbolResource(this.item.iconOptions.icon)) {
+        SymbolGlyph(this.item.iconOptions?.icon)
+          .focusable(true)
+          .fontSize(this.item.iconOptions?.symbolicIconOption?.fontSize ?? IMAGE_HEIGHT_NUM)
+          .fontColor(this.item.iconOptions?.symbolicIconOption?.fontColor ?? [$r('sys.color.icon_primary')])
+          .fontWeight(this.item.iconOptions?.symbolicIconOption?.fontWeight)
+          .renderingStrategy(this.item.iconOptions?.symbolicIconOption?.renderingStrategy)
+          .effectStrategy(this.item.iconOptions?.symbolicIconOption?.effectStrategy)
+      } else {
+        Image(this.item?.iconOptions?.icon)
+          .fillColor($r('sys.color.icon_primary'))
+          .width(IMAGE_HEIGHT_NUM)
+          .height(IMAGE_HEIGHT_NUM)
+          .focusable(true)
+      }
+    }
+  }
 }
 
 class Util {
-  public static isSymbolicResource(resourceStr: ResourceStr | Resource | undefined): boolean {
+  /**
+   * 是否symbol资源
+   * @param resourceStr  资源
+   * @returns true：symbol资源；false:非symbol资源
+   */
+  public static isSymbolResource(resourceStr: ResourceStr | undefined): boolean {
     if (!Util.isResourceType(resourceStr)) {
       return false;
     }
@@ -719,6 +765,11 @@ class Util {
     return resource.type === RESOURCE_TYPE_SYMBOL;
   }
 
+  /**
+   * 是否Resource类型
+   * @param resource 资源
+   * @returns true：Resource类型；false:非Resource类型
+   */
   public static isResourceType(resource: ResourceStr | Resource | undefined): boolean {
     if (!resource) {
       return false;
@@ -727,5 +778,22 @@ class Util {
       return false;
     }
     return true;
+  }
+}
+
+/**
+ * get resource size
+ *
+ * @param resourceName resource name
+ * @returns resource size
+ */
+function getNumberByResource(resourceName: string): number {
+  try {
+    return resourceManager.getSystemResourceManager().getNumberByName(resourceName);
+  } catch (error) {
+    let code: number = (error as BusinessError).code;
+    let message: string = (error as BusinessError).message;
+    hilog.error(0x3900, 'Ace', `CustomContentDialog getNumberByResource error, code: ${code}, message: ${message}`);
+    return 0;
   }
 }

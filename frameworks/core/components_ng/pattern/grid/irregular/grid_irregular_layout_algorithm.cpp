@@ -388,10 +388,11 @@ void GridIrregularLayoutAlgorithm::LayoutChildren(float mainOffset)
             }
         }
         // add mainGap below the item
-        if (info.lineHeightMap_.find(r) == info.lineHeightMap_.end()) {
+        auto iter = info.lineHeightMap_.find(r);
+        if (iter == info.lineHeightMap_.end()) {
             continue;
         }
-        mainOffset += info.lineHeightMap_.at(r) + mainGap_;
+        mainOffset += iter->second + mainGap_;
     }
 }
 
@@ -508,8 +509,9 @@ void GridIrregularLayoutAlgorithm::PrepareLineHeight(float mainSize, int32_t& ju
 namespace {
 void AddLineHeight(float& height, int32_t curLine, int32_t startLine, const std::map<int32_t, float>& lineHeights)
 {
-    if (lineHeights.find(curLine) != lineHeights.end()) {
-        height += lineHeights.at(curLine);
+    auto iter = lineHeights.find(curLine);
+    if (iter != lineHeights.end()) {
+        height += iter->second;
     } else {
         // estimation
         height += height / std::abs(curLine - startLine);

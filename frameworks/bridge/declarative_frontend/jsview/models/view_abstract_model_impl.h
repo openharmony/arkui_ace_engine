@@ -209,6 +209,7 @@ public:
     void SetKeyboardShortcut(const std::string& value, const std::vector<ModifierKey>& keys,
         std::function<void()>&& onKeyboardShortcutAction) override {};
     void SetObscured(const std::vector<ObscuredReasons>& reasons) override {};
+    void SetPrivacySensitive(bool flag) override {};
     void SetMonopolizeEvents(bool monopolizeEvents) override {};
 
     // Disable event.
@@ -235,13 +236,15 @@ public:
     void BindContentCover(bool isShow, std::function<void(const std::string&)>&& callback,
         std::function<void()>&& buildFunc, NG::ModalStyle& modalStyle, std::function<void()>&& onAppear,
         std::function<void()>&& onDisappear, std::function<void()>&& onWillAppear,
-        std::function<void()>&& onWillDisappear) override {}
+        std::function<void()>&& onWillDisappear, const NG::ContentCoverParam& contentCoverParam) override
+    {}
     void BindSheet(bool isShow, std::function<void(const std::string&)>&& callback,
         std::function<void()>&& buildFunc, std::function<void()>&& titleBuildFunc, NG::SheetStyle& sheetStyle,
         std::function<void()>&& onAppear, std::function<void()>&& onDisappear,
         std::function<void()>&& shouldDismiss, std::function<void()>&& onWillAppear,
         std::function<void()>&& onWillDisappear) override {}
     void DismissSheet() override {}
+    void DismissContentCover() override {}
 
     void SetAccessibilityGroup(bool accessible) override;
     void SetAccessibilityText(const std::string& text) override;

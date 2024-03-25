@@ -47,7 +47,7 @@ public:
     bool NotifyFocusStateSync(bool focusState) override;
     bool NotifyBackPressedSync() override;
     bool NotifyPointerEventSync(const std::shared_ptr<OHOS::MMI::PointerEvent>& pointerEvent) override;
-    bool NotifyKeyEventSync(const std::shared_ptr<OHOS::MMI::KeyEvent>& keyEvent) override;
+    bool NotifyKeyEventSync(const std::shared_ptr<OHOS::MMI::KeyEvent>& keyEvent, bool isPreIme) override;
     bool NotifyAxisEventSync(const std::shared_ptr<OHOS::MMI::AxisEvent>& axisEvent) override;
 
     // Asynchronous interface for event notify
@@ -81,6 +81,8 @@ public:
         Accessibility::AccessibilityElementInfo& output) override;
     void FocusMoveSearch(int64_t elementId, int32_t direction, int64_t baseParent,
         Accessibility::AccessibilityElementInfo& output) override;
+    void TransferAccessibilityHoverEvent(float pointX, float pointY, int32_t sourceType, int32_t eventType,
+        int64_t timeMs) override;
 
     // The interface to control the display area and the avoid area
     std::shared_ptr<Rosen::RSSurfaceNode> GetSurfaceNode() const override;

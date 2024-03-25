@@ -533,6 +533,11 @@ HWTEST_F(TextFieldModifyTest, DoCallback003, TestSize.Level1)
     KeyEvent keyEvent;
     pattern_->GetFocusHub()->onKeyEventsInternal_[OnKeyEventType::DEFAULT].operator()(keyEvent);
 
+    auto paintProperty = frameNode_->GetPaintProperty<TextFieldPaintProperty>();
+    paintProperty->UpdateInputStyle(InputStyle::INLINE);
+    frameNode_->MarkModifyDone();
+    pattern_->OnModifyDone();
+    pattern_->UpdateScrollBarOffset();
     FlushLayoutTask(frameNode_);
     GetFocus();
     MouseInfo mouseInfo;
@@ -551,12 +556,17 @@ HWTEST_F(TextFieldModifyTest, DoCallback004, TestSize.Level1)
      * @tc.steps: step1. create node.
      */
     CreateTextField(DEFAULT_TEXT);
+    GetFocus();
 
     /**
      * @tc.steps: step2. callback the HandleLongPress in OnModifyDone.
      * @tc.expected: Check if return true.
      */
     TouchEventInfo touchEventInfo("onTouch");
+    TouchLocationInfo touchLocationInfo(0);
+    touchLocationInfo.touchType_ = TouchType::DOWN;
+    touchLocationInfo.localLocation_ = Offset(0.0f, 0.0f);
+    touchEventInfo.AddTouchLocationInfo(std::move(touchLocationInfo));
 
     /**
      * @tc.steps: step3. mock doubleClick.
@@ -590,7 +600,7 @@ HWTEST_F(TextFieldModifyTest, DoCallback005, TestSize.Level1)
      * @tc.steps: step3. mock drag start.
      */
     pattern_->OnDragStart().operator()(dragEvent, "");
-    EXPECT_TRUE(pattern_->cursorVisible_);
+    EXPECT_TRUE(pattern_->showSelect_);
 }
 
 /**
@@ -617,8 +627,8 @@ HWTEST_F(TextFieldModifyTest, DoCallback006, TestSize.Level1)
      * @tc.steps: step3. mock show Select After DragEvent.
      */
     pattern_->processOverlayDelayTask_.operator()();
-    EXPECT_EQ(pattern_->selectController_->GetFirstHandleRect(),
-        RectF(0.0f, 0.0f, 0.0f, 0.0f));
+    EXPECT_EQ(pattern_->dragTextStart_, 0);
+    EXPECT_EQ(pattern_->selectController_->GetFirstHandleIndex(), 0);
 }
 
 /**
@@ -767,8 +777,7 @@ HWTEST_F(TextFieldModifyTest, OnVirtualKeyboardAreaChanged001, TestSize.Level1)
      */
     FlushLayoutTask(frameNode_);
     pattern_->OnVirtualKeyboardAreaChanged();
-    EXPECT_EQ(pattern_->selectController_->
-        firstHandleInfo_.rect, RectF(0.0f, 0.0f, 0.0f, 0.0f));
+    EXPECT_EQ(pattern_->selectController_->GetFirstHandleIndex(), 0);
 }
 
 /**
@@ -1339,5 +1348,52 @@ HWTEST_F(TextFieldModifyTest, OnColorConfigurationUpdate001, TestSize.Level1)
      */
     pattern_->OnColorConfigurationUpdate();
     EXPECT_TRUE(pattern_->colorModeChange_);
+}
+
+/**
+ * @tc.name: UpdateOverlayModifier001
+ * @tc.desc: Test textfield update overlay modifier.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldModifyTest, UpdateOverlayModifier001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Initialize text input.
+     */
+    CreateTextField(DEFAULT_TEXT);
+
+    /**
+     * @tc.steps: step2. set cursor color and call UpdateContentModifier
+     * tc.expected: step2. selected color equals cursor color.
+     */
+    WeakPtr<RenderContext> renderContext;
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    ASSERT_NE(geometryNode, nullptr);
+    auto paintProperty = frameNode_->GetPaintProperty<TextFieldPaintProperty>();
+    ASSERT_NE(paintProperty, nullptr);
+    PaintWrapper* paintWrapper = new PaintWrapper(renderContext, geometryNode, paintProperty);
+    ASSERT_NE(paintWrapper, nullptr);
+
+    auto paintMethod = AceType::DynamicCast<TextFieldPaintMethod>(pattern_->CreateNodePaintMethod());
+    EXPECT_NE(paintMethod, nullptr);
+    auto overlayModifier = paintMethod->textFieldOverlayModifier_;
+    ASSERT_NE(overlayModifier, nullptr);
+
+    paintProperty->ResetSelectedBackgroundColor();
+    EXPECT_FALSE(paintProperty->HasSelectedBackgroundColor());
+    Color cursorColor = Color::RED;
+    double defaultOpacity = 0.2;
+    auto expectedSelectedColor = cursorColor.ChangeOpacity(defaultOpacity);
+    paintProperty->UpdateCursorColor(cursorColor);
+    paintMethod->UpdateOverlayModifier(paintWrapper);
+    EXPECT_TRUE(overlayModifier->selectedColor_->Get().ToColor() == expectedSelectedColor);
+
+    /**
+     * @tc.steps: step3. set select background color and call UpdateContentModifier
+     * tc.expected: step3. selected color equals setting select background.
+     */
+    paintProperty->UpdateSelectedBackgroundColor(Color::BLUE);
+    paintMethod->UpdateOverlayModifier(paintWrapper);
+    EXPECT_TRUE(overlayModifier->selectedColor_->Get().ToColor() == Color::BLUE);
 }
 } // namespace OHOS::Ace::NG

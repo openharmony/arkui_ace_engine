@@ -59,6 +59,7 @@ void JSEmbeddedComponent::JSBind(BindingTarget globalObj)
     JSClass<JSEmbeddedComponent>::StaticMethod("flexBasis", &JSEmbeddedComponent::JsFlexBasis);
     JSClass<JSEmbeddedComponent>::StaticMethod("flexGrow", &JSEmbeddedComponent::JsFlexGrow);
     JSClass<JSEmbeddedComponent>::StaticMethod("flexShrink", &JSEmbeddedComponent::JsFlexShrink);
+    JSClass<JSEmbeddedComponent>::StaticMethod("opacity", &JSEmbeddedComponent::JsOpacity);
     JSClass<JSEmbeddedComponent>::InheritAndBind<JSViewAbstract>(globalObj);
 }
 
@@ -87,11 +88,11 @@ void JSEmbeddedComponent::OnTerminated(const JSCallbackInfo& info)
     if (!info[0]->IsFunction()) {
         return;
     }
-    WeakPtr<NG::FrameNode> frameNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    WeakPtr<NG::FrameNode> frameNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
     auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(info[0]));
     auto instanceId = ContainerScope::CurrentId();
     auto onTerminated = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc), instanceId, node = frameNode](
-                            std::optional<int32_t> code, const RefPtr<WantWrap>& wantWrap) {
+                            int32_t code, const RefPtr<WantWrap>& wantWrap) {
         ContainerScope scope(instanceId);
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
         ACE_SCORING_EVENT("EmbeddedComponent.onTerminated");
@@ -102,12 +103,8 @@ void JSEmbeddedComponent::OnTerminated(const JSCallbackInfo& info)
         CHECK_NULL_VOID(engine);
         NativeEngine* nativeEngine = engine->GetNativeEngine();
         CHECK_NULL_VOID(nativeEngine);
-        if (!code.has_value()) {
-            func->ExecuteJS();
-            return;
-        }
         JSRef<JSObject> obj = JSRef<JSObject>::New();
-        obj->SetProperty<int32_t>("code", code.value());
+        obj->SetProperty<int32_t>("code", code);
         if (wantWrap) {
             auto nativeWant =
                 WantWrap::ConvertToNativeValue(wantWrap->GetWant(), reinterpret_cast<napi_env>(nativeEngine));
@@ -125,7 +122,7 @@ void JSEmbeddedComponent::OnError(const JSCallbackInfo& info)
     if (!info[0]->IsFunction()) {
         return;
     }
-    WeakPtr<NG::FrameNode> frameNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    WeakPtr<NG::FrameNode> frameNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
     auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(info[0]));
     auto instanceId = ContainerScope::CurrentId();
     auto onError = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc), instanceId, node = frameNode](
@@ -151,7 +148,11 @@ void JSEmbeddedComponent::JsWidth(const JSCallbackInfo& info)
     if (info[0]->IsUndefined()) {
         return;
     }
-    JSViewAbstract::JsWidth(info);
+
+    CalcDimension value;
+    if (JSViewAbstract::ParseJsDimensionVpNG(info[0], value)) {
+        ViewAbstractModel::GetInstance()->SetWidth(value);
+    }
 }
 
 void JSEmbeddedComponent::JsHeight(const JSCallbackInfo& info)
@@ -159,6 +160,10 @@ void JSEmbeddedComponent::JsHeight(const JSCallbackInfo& info)
     if (info[0]->IsUndefined()) {
         return;
     }
-    JSViewAbstract::JsHeight(info);
+
+    CalcDimension value;
+    if (JSViewAbstract::ParseJsDimensionVpNG(info[0], value)) {
+        ViewAbstractModel::GetInstance()->SetHeight(value);
+    }
 }
 } // namespace OHOS::Ace::Framework

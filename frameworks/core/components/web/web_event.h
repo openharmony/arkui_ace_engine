@@ -493,6 +493,82 @@ private:
     int32_t error_;
 };
 
+class ACE_EXPORT AllSslErrorResult : public AceType {
+    DECLARE_ACE_TYPE(AllSslErrorResult, AceType)
+
+public:
+    AllSslErrorResult() = default;
+    ~AllSslErrorResult() = default;
+    virtual void HandleConfirm() = 0;
+    virtual void HandleCancel() = 0;
+};
+
+class ACE_EXPORT WebAllSslErrorEvent : public BaseEventInfo {
+    DECLARE_RELATIONSHIP_OF_CLASSES(WebAllSslErrorEvent, BaseEventInfo);
+
+public:
+    WebAllSslErrorEvent(const RefPtr<AllSslErrorResult>& result,
+                        int32_t error,
+                        const std::string& url,
+                        const std::string& originalUrl,
+                        const std::string& referrer,
+                        bool isFatalError,
+                        bool isMainFrame
+    )
+        : BaseEventInfo("WebAllSslErrorEvent"), result_(result),
+                                                error_(error),
+                                                url_(url),
+                                                originalUrl_(originalUrl),
+                                                referrer_(referrer),
+                                                isFatalError_(isFatalError),
+                                                isMainFrame_(isMainFrame) {}
+    ~WebAllSslErrorEvent() = default;
+
+    const RefPtr<AllSslErrorResult>& GetResult() const
+    {
+        return result_;
+    }
+
+    int32_t GetError() const
+    {
+        return error_;
+    }
+
+    std::string GetUrl() const
+    {
+        return url_;
+    }
+
+    std::string GetOriginalUrl() const
+    {
+        return originalUrl_;
+    }
+
+    std::string GetReferrer() const
+    {
+        return referrer_;
+    }
+
+    bool GetIsFatalError() const
+    {
+        return isFatalError_;
+    }
+
+    bool GetIsMainFrame() const
+    {
+        return isMainFrame_;
+    }
+
+private:
+    RefPtr<AllSslErrorResult> result_;
+    int32_t error_;
+    const std::string& url_;
+    const std::string& originalUrl_;
+    const std::string& referrer_;
+    bool isFatalError_;
+    bool isMainFrame_;
+};
+
 class ACE_EXPORT SslSelectCertResult : public AceType {
     DECLARE_ACE_TYPE(SslSelectCertResult, AceType)
 public:
@@ -1644,6 +1720,8 @@ struct EmbedInfo final {
     std::string tag = "";
     int32_t width = 0;
     int32_t height = 0;
+    int32_t x = 0;
+    int32_t y = 0;
     std::map<std::string, std::string> params;
 };
 

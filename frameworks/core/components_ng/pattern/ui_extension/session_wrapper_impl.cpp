@@ -234,13 +234,22 @@ void SessionWrapperImpl::CreateSession(const AAFwk::Want& want, bool isAsyncModa
     auto container = Platform::AceContainer::GetContainer(instanceId_);
     CHECK_NULL_VOID(container);
     auto wantPtr = std::make_shared<Want>(want);
-    if (sessionType_ == SessionType::UI_EXTENSION_ABILITY &&
-        wantPtr->GetStringParam(UI_EXTENSION_TYPE_KEY) == EMBEDDED_UI) {
-        UIEXT_LOGE("The UIExtensionComponent is not allowed to start the EmbeddedUIExtensionAbility.");
-        return;
+    if (sessionType_ == SessionType::UI_EXTENSION_ABILITY) {
+        if (wantPtr->GetStringParam(UI_EXTENSION_TYPE_KEY) == EMBEDDED_UI) {
+            UIEXT_LOGE("The UIExtensionComponent is not allowed to start the EmbeddedUIExtensionAbility.");
+            return;
+        }
+        if ((container->IsUIExtensionAbilityHost() && container->IsUIExtensionSubWindow())) {
+            UIEXT_LOGE("The UIExtensionComponent does not allow nested pulling of another.");
+            auto pattern = hostPattern_.Upgrade();
+            CHECK_NULL_VOID(pattern);
+            pattern->FireOnErrorCallback(ERROR_CODE_UIEXTENSION_FORBID_CASCADE, PULL_FAIL_NAME, PULL_FAIL_MESSAGE);
+            return;
+        }
     }
     if (sessionType_ == SessionType::EMBEDDED_UI_EXTENSION) {
-        if (container->IsUIExtensionWindow()) {
+        if ((container->IsUIExtensionWindow()) ||
+            (container->IsUIExtensionAbilityProcess() && container->IsUIExtensionSubWindow())) {
             UIEXT_LOGE("The EmbeddedComponent does not allow nested pulling of another.");
             auto pattern = hostPattern_.Upgrade();
             CHECK_NULL_VOID(pattern);
@@ -315,11 +324,11 @@ bool SessionWrapperImpl::NotifyPointerEventSync(const std::shared_ptr<OHOS::MMI:
     return false;
 }
 
-bool SessionWrapperImpl::NotifyKeyEventSync(const std::shared_ptr<OHOS::MMI::KeyEvent>& keyEvent)
+bool SessionWrapperImpl::NotifyKeyEventSync(const std::shared_ptr<OHOS::MMI::KeyEvent>& keyEvent, bool isPreIme)
 {
     CHECK_NULL_RETURN(session_, false);
     bool isConsumed = false;
-    session_->TransferKeyEventForConsumed(keyEvent, isConsumed);
+    session_->TransferKeyEventForConsumed(keyEvent, isConsumed, isPreIme);
     UIEXT_LOGD("The key evnet is notified to the provider and %{public}s consumed.", isConsumed ? "is" : "is not");
     return isConsumed;
 }
@@ -429,7 +438,7 @@ void SessionWrapperImpl::OnDisconnect(bool isAbnormal)
                 pattern->FireOnErrorCallback(
                     ERROR_CODE_UIEXTENSION_EXITED_ABNORMALLY, EXIT_ABNORMALLY_NAME, EXIT_ABNORMALLY_MESSAGE);
             } else {
-                pattern->FireOnTerminatedCallback(std::nullopt, nullptr);
+                pattern->FireOnTerminatedCallback(0, nullptr);
             }
         },
         TaskExecutor::TaskType::UI);
@@ -482,7 +491,14 @@ void SessionWrapperImpl::FocusMoveSearch(
     CHECK_NULL_VOID(session_);
     session_->TransferFocusMoveSearch(elementId, direction, baseParent, output);
 }
-/************************************************ Begin: The interface about the accessibility ************************/
+
+void SessionWrapperImpl::TransferAccessibilityHoverEvent(float pointX, float pointY, int32_t sourceType,
+    int32_t eventType, int64_t timeMs)
+{
+    CHECK_NULL_VOID(session_);
+    session_->TransferAccessibilityHoverEvent(pointX, pointY, sourceType, eventType, timeMs);
+}
+/************************************************ End: The interface about the accessibility **************************/
 
 /***************************** Begin: The interface to control the display area and the avoid area ********************/
 std::shared_ptr<Rosen::RSSurfaceNode> SessionWrapperImpl::GetSurfaceNode() const

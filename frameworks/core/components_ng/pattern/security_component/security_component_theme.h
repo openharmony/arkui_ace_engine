@@ -44,7 +44,7 @@ public:
                 LOGE("Build SecurityComponentTheme error, themeConstants is null!");
                 return theme;
             }
-            ParsePattern(themeConstants->GetThemeStyle(), theme);
+            ParsePattern(themeConstants, theme);
             return theme;
         }
     };
@@ -220,13 +220,10 @@ private:
             securityComponentPattern->GetAttr<std::string>("description_continue_to_receive", ""));
     }
 
-    static void ParsePattern(const RefPtr<ThemeStyle>& themeStyle, const RefPtr<SecurityComponentTheme>& theme)
+    static void ParsePattern(const RefPtr<ThemeConstants>& themeConstants, const RefPtr<SecurityComponentTheme>& theme)
     {
-        if (!themeStyle) {
-            return;
-        }
-        auto securityComponentPattern =
-            themeStyle->GetAttr<RefPtr<ThemeStyle>>(THEME_PATTERN_SECURITY_COMPONENT, nullptr);
+        RefPtr<ThemeStyle> securityComponentPattern =
+            themeConstants->GetPatternByName(THEME_PATTERN_SECURITY_COMPONENT);
         if (!securityComponentPattern) {
             return;
         }

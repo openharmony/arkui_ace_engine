@@ -121,6 +121,7 @@ enum class NavToolbarItemStatus {
 struct BarItem {
     std::optional<std::string> text;
     std::optional<std::string> icon;
+    std::optional<bool> isEnabled;
     std::function<void()> action;
     NavToolbarItemStatus status;
     std::optional<std::string> activeIcon;
@@ -188,6 +189,13 @@ enum class NavigationOperation {
     PUSH = 1,
     POP,
     REPLACE,
+};
+
+enum NavDestinationLifecycle {
+    ON_APPEAR,
+    ON_SHOW,
+    ON_HIDE,
+    ON_DISAPPEAR
 };
 
 struct NavContentInfo {

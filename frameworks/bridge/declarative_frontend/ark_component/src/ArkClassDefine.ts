@@ -374,6 +374,28 @@ class ArkScrollEdgeEffect {
   }
 }
 
+class ArkBlurOptions{
+  value: number;
+  options?: BlurOptions | undefined;
+  constructor() {
+    this.value = undefined;
+    this.options = undefined;
+  }
+}
+
+class InvertOptions{
+  high: number;
+  low: number;
+  threshold: number;
+  thresholdRange: number;
+  constructor() {
+    this.high = undefined;
+    this.low = undefined;
+    this.threshold = undefined;
+    this.thresholdRange = undefined;
+  }
+}
+
 class ArkMenuAlignType {
   alignType: number | MenuAlignType;
   dx: Length;
@@ -1095,5 +1117,19 @@ class ArkScrollSnapOptions {
       && (this.snapPagination === another.snapPagination)
       && (this.enableSnapToStart === another.enableSnapToStart)
       && (this.enableSnapToEnd === another.enableSnapToEnd));
+  }
+}
+
+class ArkGeometryTransition {
+  id: string | undefined;
+  options: GeometryTransitionOptions | undefined;
+  
+  constructor() {
+    this.id = undefined;
+    this.options = undefined;   
+  }
+
+  isEqual(another: ArkGeometryTransition): boolean {
+    return (this.id === another.id && this.options === another.options);
   }
 }
