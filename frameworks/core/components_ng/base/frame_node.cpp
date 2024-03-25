@@ -2989,7 +2989,7 @@ bool FrameNode::OnLayoutFinish(bool& needSyncRsNode)
         }
         needSyncRsNode = false;
     }
-    renderContext_->SaveNotSyncedRect(true, layoutProperty_->GetPixelRound());
+    renderContext_->SavePaintRect(true, layoutProperty_->GetPixelRound());
     renderContext_->SyncPartialRsProperties();
     DirtySwapConfig config { frameSizeChange, frameOffsetChange, contentSizeChange, contentOffsetChange };
     // check if need to paint content.
@@ -3547,7 +3547,7 @@ void FrameNode::ForceSyncGeometryNode()
 {
     CHECK_NULL_VOID(renderContext_);
     oldGeometryNode_.Reset();
-    renderContext_->UpdateNotSyncedRect(GetGeometryNode()->GetFrameRect());
+    renderContext_->SavePaintRect();
     renderContext_->SyncGeometryProperties(RawPtr(geometryNode_));
 }
 

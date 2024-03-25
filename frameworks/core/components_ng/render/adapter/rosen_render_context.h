@@ -350,10 +350,8 @@ public:
     void ResetSurface() override;
     void PaintDebugBoundary(bool flag) override;
     void UpdateRenderGroup(bool isRenderGroup, bool isForced, bool includeProperty) override;
-    void SaveNotSyncedRect(bool isRound = true, uint8_t flag = 0) override;
+    void SavePaintRect(bool isRound = true, uint8_t flag = 0) override;
     void SyncPartialRsProperties() override;
-    void UpdateNotSyncedRect(RectF rect) override;
-    RectF GetNotSyncedRect() override;
 
 private:
     void OnBackgroundImageUpdate(const ImageSourceInfo& src) override;
@@ -606,7 +604,7 @@ private:
 
     bool useContentRectForRSFrame_;
 
-    RectF notSyncedRect_;
+    RectF paintRect_;
 
     std::shared_ptr<Rosen::RSTextureExport> rsTextureExport_;
 

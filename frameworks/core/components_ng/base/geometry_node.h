@@ -306,7 +306,7 @@ public:
         return previousState_;
     }
     void Restore();
-    void RestoreCache();
+    bool RestoreCache();
     void Save();
 
     void ToJsonValue(std::unique_ptr<JsonValue>& json) const;

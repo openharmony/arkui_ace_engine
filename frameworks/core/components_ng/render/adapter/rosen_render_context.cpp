@@ -473,8 +473,8 @@ void RosenRenderContext::SyncGeometryProperties(GeometryNode* /*geometryNode*/, 
     CHECK_NULL_VOID(rsNode_);
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    SyncGeometryProperties(notSyncedRect_);
-    host->OnPixelRoundFinish(notSyncedRect_.GetSize());
+    SyncGeometryProperties(paintRect_);
+    host->OnPixelRoundFinish(paintRect_.GetSize());
 }
 
 void RosenRenderContext::SyncGeometryProperties(const RectF& paintRect)
@@ -1766,7 +1766,7 @@ void RosenRenderContext::GetPointWithTransform(PointF& point)
 
 RectF RosenRenderContext::GetPaintRectWithoutTransform()
 {
-    return notSyncedRect_;
+    return paintRect_;
 }
 
 void RosenRenderContext::UpdateTranslateInXY(const OffsetF& offset)
@@ -2599,13 +2599,10 @@ void RosenRenderContext::SetPositionToRSNode()
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(rsNode_);
     auto rect = AdjustPaintRect();
-    auto nodeContext = frameNode->GetRenderContext();
-    if (nodeContext) {
-        nodeContext->UpdateNotSyncedRect(rect);
-    }
     if (!rect.GetSize().IsPositive()) {
         return;
     }
+    paintRect_ = rect;
     rsNode_->SetBounds(rect.GetX(), rect.GetY(), rect.Width(), rect.Height());
     if (useContentRectForRSFrame_) {
         SetContentRectToFrame(rect);
@@ -4028,7 +4025,7 @@ void RosenRenderContext::ClearChildren()
 void RosenRenderContext::SetBounds(float positionX, float positionY, float width, float height)
 {
     CHECK_NULL_VOID(rsNode_);
-    notSyncedRect_ = RectF(positionX, positionY, width, height);
+    paintRect_ = RectF(positionX, positionY, width, height);
     rsNode_->SetBounds(positionX, positionY, width, height);
 }
 
@@ -5049,11 +5046,11 @@ void RosenRenderContext::ResetSurface()
     rsCanvasDrawingNode->ResetSurface();
 }
 
-void RosenRenderContext::SaveNotSyncedRect(bool isRound, uint8_t flag)
+void RosenRenderContext::SavePaintRect(bool isRound, uint8_t flag)
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto geometryNode = host->GetGeometryNode();
+    const auto& geometryNode = host->GetGeometryNode();
     CHECK_NULL_VOID(geometryNode);
     AdjustPaintRect();
     if (isRound && flag == 0) {
@@ -5061,15 +5058,15 @@ void RosenRenderContext::SaveNotSyncedRect(bool isRound, uint8_t flag)
     } else {
         RoundToPixelGrid(isRound, flag);
     }
-    notSyncedRect_ = RectF(geometryNode->GetPixelGridRoundOffset(), geometryNode->GetPixelGridRoundSize());
+    paintRect_ = RectF(geometryNode->GetPixelGridRoundOffset(), geometryNode->GetPixelGridRoundSize());
 }
 
 void RosenRenderContext::SyncPartialRsProperties()
 {
     if (propTransform_ && propTransform_->HasTransformCenter()) {
         auto vec = propTransform_->GetTransformCenterValue();
-        float xPivot = ConvertDimensionToScaleBySize(vec.GetX(), notSyncedRect_.Width());
-        float yPivot = ConvertDimensionToScaleBySize(vec.GetY(), notSyncedRect_.Height());
+        float xPivot = ConvertDimensionToScaleBySize(vec.GetX(), paintRect_.Width());
+        float yPivot = ConvertDimensionToScaleBySize(vec.GetY(), paintRect_.Height());
         if (vec.GetZ().has_value()) {
             float zPivot = static_cast<float>(vec.GetZ().value().ConvertToVp());
             SetPivot(xPivot, yPivot, zPivot);
@@ -5082,15 +5079,5 @@ void RosenRenderContext::SyncPartialRsProperties()
         // if translate unit is percent, it is related with frameSize
         OnTransformTranslateUpdate(propTransform_->GetTransformTranslateValue());
     }
-}
-
-void RosenRenderContext::UpdateNotSyncedRect(RectF rect)
-{
-    notSyncedRect_ = rect;
-}
-
-RectF RosenRenderContext::GetNotSyncedRect()
-{
-    return notSyncedRect_;
 }
 } // namespace OHOS::Ace::NG
