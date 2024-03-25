@@ -53,6 +53,7 @@ constexpr int32_t ERROR_CODE_NATIVE_IMPL_TYPE_NOT_SUPPORTED = 106102;
 // AI error for Canvas,XComponent
 constexpr int32_t ERROR_CODE_AI_ANALYSIS_UNSUPPORTED = 110001;
 constexpr int32_t ERROR_CODE_AI_ANALYSIS_IS_ONGOING = 110002;
+constexpr int32_t ERROR_CODE_AI_ANALYSIS_IS_STOPPED = 110003;
 
 // Drag event error code
 constexpr int32_t ERROR_CODE_DRAG_DATA_NOT_FOUND = 190001; // GetData failed, data not found.
