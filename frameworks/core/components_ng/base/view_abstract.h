@@ -589,6 +589,7 @@ public:
     static MarginProperty GetMargin(FrameNode* frameNode);
     static TranslateOptions GetTranslate(FrameNode* frameNode);
     static float GetAspectRatio(FrameNode* frameNode);
+    static BlendApplyType GetBlendApplyType(FrameNode* frameNode);    
 private:
     static void AddDragFrameNodeToManager();
 };

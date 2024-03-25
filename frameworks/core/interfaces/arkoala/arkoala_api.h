@@ -660,6 +660,16 @@ struct ArkUITextBackgroundStyleOptions {
     ArkUI_Float32 bottomRight;
 };
 
+struct ArkUIWaterFlowNestedScrollOptions {
+    ArkUI_Int32 scrollForward;
+    ArkUI_Int32 scrollBackward;
+};
+
+struct ArkUIBlendModeOptions {
+    ArkUI_Int32 blendMode;
+    ArkUI_Int32 blendApplyType;
+};
+
 enum ArkUINodeType {
     ARKUI_TEXT = 1,
     ARKUI_SPAN,
@@ -700,6 +710,7 @@ enum ArkUINodeType {
     ARKUI_GRID_ITEM,
     ARKUI_CUSTOM,
     ARKUI_WATER_FLOW,
+    ARKUI_FLOW_ITEM
 };
 
 enum ArkUIEventCategory {
@@ -787,6 +798,7 @@ enum ArkUIEventSubKind {
     ON_DATE_PICKER_DATE_CHANGE = ARKUI_MAX_EVENT_NUM * ARKUI_DATE_PICKER,
     ON_TIME_PICKER_CHANGE = ARKUI_MAX_EVENT_NUM * ARKUI_TIME_PICKER,
     ON_CALENDAR_PICKER_CHANGE = ARKUI_MAX_EVENT_NUM * ARKUI_CALENDAR_PICKER,
+    ON_WILL_SCROLL = ARKUI_MAX_EVENT_NUM * ARKUI_WATER_FLOW,
 };
 
 enum ArkUIAPIGestureAsyncEventSubKind {
@@ -1270,7 +1282,7 @@ struct ArkUICommonModifier {
     ArkUI_Int32 (*getRadialGradient)(
         ArkUINodeHandle node, ArkUI_Float32* values, ArkUI_Uint32* colors, ArkUI_Float32* stops);
     void (*getMask)(ArkUINodeHandle node, ArkUIMaskOptions* options);
-    ArkUI_Int32 (*getBlendMode)(ArkUINodeHandle node);
+    void (*getBlendMode)(ArkUINodeHandle node, ArkUIBlendModeOptions* options);
     ArkUI_Int32 (*getDirection)(ArkUINodeHandle node);
     ArkUI_Int32 (*getAlignSelf)(ArkUINodeHandle node);
     ArkUITransformCenterType (*getTransformCenter)(ArkUINodeHandle node);
@@ -2357,6 +2369,11 @@ struct ArkUIWaterFlowModifier {
     void (*setWaterFlowFriction)(ArkUINodeHandle node, ArkUI_Float32 friction);
     void (*resetWaterFlowFriction)(ArkUINodeHandle node);
     ArkUI_Int32 (*getLayoutDirection)(ArkUINodeHandle node);
+    ArkUI_CharPtr (*getColumnsTemplate)(ArkUINodeHandle node);
+    ArkUI_CharPtr (*getRowsTemplate)(ArkUINodeHandle node);
+    ArkUI_Float32 (*getColumnsGap)(ArkUINodeHandle node);
+    ArkUI_Float32 (*getRowsGap)(ArkUINodeHandle node);
+    void (*getWaterFlowNestedScroll)(ArkUINodeHandle node, ArkUI_Int32* value);
 };
 
 struct ArkUIMenuItemModifier {

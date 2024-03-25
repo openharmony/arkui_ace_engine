@@ -75,6 +75,11 @@ public:
     static void SetNestedScroll(FrameNode* frameNode, const NestedScrollOptions& nestedOpt);
     static void SetFriction(FrameNode* frameNode, double friction);
     static FlexDirection GetLayoutDirection(FrameNode* frameNode);
+    static std::string GetColumnsTemplate(FrameNode* frameNode);
+    static std::string GetRowsTemplate(FrameNode* frameNode);
+    static float GetColumnsGap(FrameNode* frameNode);
+    static float GetRowsGap(FrameNode* frameNode);
+    static NestedScrollOptions GetNestedScroll(FrameNode* frameNode);
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_WATERFLOW_WATER_FLOW_MODEL_NG_H

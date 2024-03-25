@@ -4177,6 +4177,7 @@ void SetBlendMode(ArkUINodeHandle node, int32_t blendMode, ArkUI_Int32 blendAppl
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     ViewAbstract::SetBlendMode(frameNode, static_cast<BlendMode>(blendMode));
+    ViewAbstract::SetBlendApplyType(frameNode, static_cast<BlendApplyType>(blendApplyTypeValue));
 }
 
 void ResetBlendMode(ArkUINodeHandle node)
@@ -4184,6 +4185,7 @@ void ResetBlendMode(ArkUINodeHandle node)
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     ViewAbstract::SetBlendMode(frameNode, BlendMode::NONE);
+    ViewAbstract::SetBlendApplyType(frameNode, BlendApplyType::FAST);
 }
 
 void SetConstraintSize(ArkUINodeHandle node, const ArkUI_Float32* values, const ArkUI_Int32* units)
@@ -4427,12 +4429,12 @@ void GetMask(ArkUINodeHandle node, ArkUIMaskOptions* options)
     }
 }
 
-ArkUI_Int32 GetBlendMode(ArkUINodeHandle node)
+void GetBlendMode(ArkUINodeHandle node, ArkUIBlendModeOptions* options)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
-    CHECK_NULL_RETURN(frameNode, ERROR_INT_CODE);
-    int blendMode = static_cast<ArkUI_Int32>(ViewAbstract::GetBlendMode(frameNode));
-    return blendMode;
+    CHECK_NULL_VOID(frameNode);
+    options->blendMode = static_cast<ArkUI_Int32>(ViewAbstract::GetBlendMode(frameNode));
+    options->blendApplyType = static_cast<ArkUI_Int32>(ViewAbstract::GetBlendApplyType(frameNode));
 }
 
 ArkUI_Int32 GetDirection(ArkUINodeHandle node)

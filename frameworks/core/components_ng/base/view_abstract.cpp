@@ -3722,4 +3722,12 @@ void ViewAbstract::ClearJSFrameNodeOnMouse(FrameNode* frameNode)
     CHECK_NULL_VOID(eventHub);
     eventHub->ClearJSFrameNodeOnMouse();
 }
+
+BlendApplyType ViewAbstract::GetBlendApplyType(FrameNode* frameNode)
+{
+    BlendApplyType value = BlendApplyType::FAST;
+    auto target = frameNode->GetRenderContext();
+    CHECK_NULL_RETURN(target, value);
+    return target->GetBackBlendApplyTypeValue(value);
+}
 } // namespace OHOS::Ace::NG
