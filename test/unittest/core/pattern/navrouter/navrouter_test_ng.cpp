@@ -1815,6 +1815,8 @@ HWTEST_F(NavrouterTestNg, NavrouterTestNg0036, TestSize.Level1)
      */
     auto backButton = FrameNode::CreateFrameNode("BackButton", 33, AceType::MakeRefPtr<ImagePattern>());
     auto navigationStack = AceType::MakeRefPtr<NavigationStack>();
+    RefPtr<UINode> navDestinationNode;
+    int32_t lastIndex;
     /**
      * @tc.steps: step2. call get function.
      * @tc.expected: navigationStack->navPathList_.empty() is true.
@@ -1824,7 +1826,7 @@ HWTEST_F(NavrouterTestNg, NavrouterTestNg0036, TestSize.Level1)
     ASSERT_TRUE(navigationStack->navPathList_.empty());
     navigationStack->Get();
     ASSERT_TRUE(navigationStack->navPathList_.empty());
-    navigationStack->Get("test");
+    navigationStack->Get("test", navDestinationNode, lastIndex);
     ASSERT_TRUE(navigationStack->navPathList_.empty());
     navigationStack->GetPre("test", backButton);
     ASSERT_TRUE(navigationStack->navPathList_.empty());
@@ -1836,7 +1838,7 @@ HWTEST_F(NavrouterTestNg, NavrouterTestNg0036, TestSize.Level1)
     navigationStack->navPathList_.push_back({ "test1", backButton });
     navigationStack->GetPre("test", backButton);
     navigationStack->GetPre("test2", backButton);
-    navigationStack->Get("test3");
+    navigationStack->Get("test3", navDestinationNode, lastIndex);
     navigationStack->GetAllPathName();
     navigationStack->navPathList_.clear();
     /**

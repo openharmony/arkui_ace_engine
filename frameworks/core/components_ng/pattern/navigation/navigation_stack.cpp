@@ -103,7 +103,7 @@ void NavigationStack::Add(
     // for the old page: keep the UINode, and keep in the stack
     auto index = FindIndex(name, navDestinationNode, true);
     if (index != NOT_EXIST) {
-        TAG_LOGW(AceLogTag::ACE_NAVIGATION, "This navigation destination node already exists");
+        TAG_LOGI(AceLogTag::ACE_NAVIGATION, "This navigation destination node already exists");
         Remove(name, navDestinationNode);
     }
     navPathList_.emplace_back(std::make_pair(name, navDestinationNode));
@@ -196,32 +196,48 @@ RefPtr<UINode> NavigationStack::Get()
     return navPathList_[top].second;
 }
 
-RefPtr<UINode> NavigationStack::Get(const std::string& name)
+bool NavigationStack::Get(const std::string& name, RefPtr<UINode>& navDestinationNode, int32_t& index)
 {
     // from bottom to top
     if (navPathList_.empty()) {
-        return nullptr;
+        navDestinationNode = nullptr;
+        index = NOT_EXIST;
+        return false;
     }
+    int32_t curIndex = 0;
     for (auto it = navPathList_.begin(); it != navPathList_.end(); ++it) {
         if ((*it).first == name) {
-            return (*it).second;
+            navDestinationNode = (*it).second;
+            index = curIndex;
+            return true;
         }
+        curIndex++;
     }
-    return nullptr;
+    navDestinationNode = nullptr;
+    index = NOT_EXIST;
+    return false;
 }
 
-RefPtr<UINode> NavigationStack::GetFromPreBackup(const std::string& name)
+bool NavigationStack::GetFromPreBackup(const std::string& name, RefPtr<UINode>& navDestinationNode, int32_t& index)
 {
     // from bottom to top
     if (preNavPathList_.empty()) {
-        return nullptr;
+        navDestinationNode = nullptr;
+        index = NOT_EXIST;
+        return false;
     }
+    int32_t curIndex = 0;
     for (auto it = preNavPathList_.begin(); it != preNavPathList_.end(); ++it) {
         if ((*it).first == name) {
-            return (*it).second;
+            navDestinationNode =  (*it).second;
+            index = curIndex;
+            return true;
         }
+        curIndex++;
     }
-    return nullptr;
+    navDestinationNode = nullptr;
+    index = NOT_EXIST;
+    return false;
 }
 
 RefPtr<UINode> NavigationStack::GetPre(const std::string& name, const RefPtr<UINode>& navDestinationNode)
@@ -274,6 +290,8 @@ void NavigationStack::UpdateRemovedNavPathList()
     for (int32_t i = static_cast<int32_t>(removeArray.size()) - 1; i >= 0; --i) {
         auto index = removeArray[i];
         if (index >= 0 && index < navPathListSize) {
+            TAG_LOGD(AceLogTag::ACE_NAVIGATION, "navigation stack remove node, index: %{public}d, name: %{public}s",
+                index, navPathList_[index].first.c_str());
             navPathList_.erase(iter + index);
         }
     }

@@ -128,7 +128,10 @@ public:
 
     RefPtr<UINode> GetNavDestinationNode(const std::string& name)
     {
-        return navigationStack_->Get(name);
+        RefPtr<UINode> uiNode;
+        int32_t index;
+        navigationStack_->Get(name, uiNode, index);
+        return uiNode;
     }
 
     RefPtr<UINode> GetNavDestinationNode()
