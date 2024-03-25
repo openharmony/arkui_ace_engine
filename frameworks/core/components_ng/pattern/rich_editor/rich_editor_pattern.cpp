@@ -2538,6 +2538,11 @@ bool RichEditorPattern::HasConnection() const
 #endif
 }
 
+void RichEditorPattern::SetCustomKeyboardOption(bool supportAvoidance)
+{
+    keyboardAvoidance_ = supportAvoidance;
+}
+
 bool RichEditorPattern::RequestCustomKeyboard()
 {
 #if defined(ENABLE_STANDARD_INPUT)
@@ -2564,6 +2569,7 @@ bool RichEditorPattern::RequestCustomKeyboard()
     CHECK_NULL_RETURN(pipeline, false);
     auto overlayManager = pipeline->GetOverlayManager();
     CHECK_NULL_RETURN(overlayManager, false);
+    overlayManager->SetCustomKeyboardOption(keyboardAvoidance_);
     overlayManager->BindKeyboard(customKeyboardBuilder_, frameNode->GetId());
     isCustomKeyboardAttached_ = true;
     keyboardOverlay_ = overlayManager;

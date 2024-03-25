@@ -31,7 +31,7 @@ public:
     void SetOnIMEInputComplete(std::function<void(const RichEditorAbstractSpanResult&)>&& func) override;
     void SetAboutToDelete(std::function<bool(const RichEditorDeleteValue&)>&& func) override;
     void SetOnDeleteComplete(std::function<void()>&& func) override;
-    void SetCustomKeyboard(std::function<void()>&& func) override;
+    void SetCustomKeyboard(std::function<void()>&& func, bool supportAvoidance) override;
     void SetCopyOption(CopyOptions& copyOptions) override;
     void BindSelectionMenu(TextSpanType& editorType, TextResponseType& responseType,
         std::function<void()>& buildFunc, SelectMenuParam& menuParam) override;

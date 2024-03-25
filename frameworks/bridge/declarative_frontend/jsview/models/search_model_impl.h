@@ -63,7 +63,7 @@ public:
     void SetOnPasteWithEvent(std::function<void(const std::string&, NG::TextCommonEvent&)>&& func) override {};
     void SetOnChangeEvent(std::function<void(const std::string&)>&& onChangeEvent) override {};
     void SetSelectionMenuHidden(bool selectionMenuHidden) override {};
-    void SetCustomKeyboard(const std::function<void ()> &&buildFunc) override {};
+    void SetCustomKeyboard(const std::function<void ()> &&buildFunc, bool supportAvoidance = false) override {};
     void SetSearchEnterKeyType(TextInputAction value) override {};
     void SetMaxLength(uint32_t value) override {};
     void ResetMaxLength() override {};

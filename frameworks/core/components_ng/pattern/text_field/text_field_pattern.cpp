@@ -3480,6 +3480,11 @@ bool TextFieldPattern::CloseKeyboard(bool forceClose, bool isStopTwinkling)
     return false;
 }
 
+void TextFieldPattern::SetCustomKeyboardOption(bool supportAvoidance)
+{
+    keyboardAvoidance_ = supportAvoidance;
+}
+
 bool TextFieldPattern::RequestCustomKeyboard()
 {
 #if defined(ENABLE_STANDARD_INPUT)
@@ -3505,6 +3510,7 @@ bool TextFieldPattern::RequestCustomKeyboard()
     CHECK_NULL_RETURN(pipeline, false);
     auto overlayManager = pipeline->GetOverlayManager();
     CHECK_NULL_RETURN(overlayManager, false);
+    overlayManager->SetCustomKeyboardOption(keyboardAvoidance_);
     overlayManager->BindKeyboard(customKeyboardBuilder_, frameNode->GetId());
     isCustomKeyboardAttached_ = true;
     keyboardOverlay_ = overlayManager;

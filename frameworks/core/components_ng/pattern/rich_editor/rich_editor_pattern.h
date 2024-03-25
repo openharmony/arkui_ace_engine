@@ -477,6 +477,8 @@ public:
 
     Color GetSelectedBackgroundColor();
 
+    void SetCustomKeyboardOption(bool supportAvoidance);
+
 protected:
     bool CanStartAITask() override;
 
@@ -731,6 +733,7 @@ private:
     std::pair<int32_t, int32_t> dragRange_ { 0, 0 };
     bool isEditing_ = false;
     ACE_DISALLOW_COPY_AND_MOVE(RichEditorPattern);
+    bool keyboardAvoidance_ = false;
 };
 } // namespace OHOS::Ace::NG
 

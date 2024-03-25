@@ -345,7 +345,7 @@ public:
     virtual void SetOnIMEInputComplete(std::function<void(const NG::RichEditorAbstractSpanResult&)>&& func) = 0;
     virtual void SetAboutToDelete(std::function<bool(const NG::RichEditorDeleteValue&)>&& func) = 0;
     virtual void SetOnDeleteComplete(std::function<void()>&& func) = 0;
-    virtual void SetCustomKeyboard(std::function<void()>&& func) = 0;
+    virtual void SetCustomKeyboard(std::function<void()>&& func, bool supportAvoidance = false) = 0;
     virtual void SetCopyOption(CopyOptions& copyOptions) = 0;
     virtual void BindSelectionMenu(NG::TextSpanType& editorType, NG::TextResponseType& responseType,
         std::function<void()>& buildFunc, NG::SelectMenuParam& menuParam) = 0;

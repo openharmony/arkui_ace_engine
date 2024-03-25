@@ -28,7 +28,7 @@ class ACE_EXPORT RichEditorModelImpl : public RichEditorModel {
     void SetOnIMEInputComplete(std::function<void(const NG::RichEditorAbstractSpanResult&)>&& func) override;
     void SetAboutToDelete(std::function<bool(const NG::RichEditorDeleteValue&)>&& func) override;
     void SetOnDeleteComplete(std::function<void()>&& func) override;
-    void SetCustomKeyboard(std::function<void()>&& func) override;
+    void SetCustomKeyboard(std::function<void()>&& func, bool supportAvoidance = false) override;
     void SetCopyOption(CopyOptions& copyOptions) override;
     void BindSelectionMenu(NG::TextSpanType& editorType, NG::TextResponseType& responseType,
         std::function<void()>& buildFunc, NG::SelectMenuParam& menuParam) override;

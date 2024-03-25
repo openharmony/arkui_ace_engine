@@ -116,13 +116,14 @@ void RichEditorModelNG::SetOnDeleteComplete(std::function<void()>&& func)
     eventHub->SetOnDeleteComplete(std::move(func));
 }
 
-void RichEditorModelNG::SetCustomKeyboard(std::function<void()>&& func)
+void RichEditorModelNG::SetCustomKeyboard(std::function<void()>&& func, bool supportAvoidance)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
     auto pattern = frameNode->GetPattern<RichEditorPattern>();
     if (pattern) {
         pattern->SetCustomKeyboard(std::move(func));
+        pattern->SetCustomKeyboardOption(supportAvoidance);
     }
 }
 

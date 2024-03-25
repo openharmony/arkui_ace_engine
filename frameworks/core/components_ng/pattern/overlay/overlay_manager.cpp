@@ -3648,6 +3648,34 @@ RefPtr<FrameNode> OverlayManager::GetSheetMask(const RefPtr<FrameNode>& sheetNod
     return sheetChildFrameNode;
 }
 
+void OverlayManager::SetCustomKeybroadHeight(float customHeight)
+{
+    if (!keyboardAvoidance_) {
+        return;
+    }
+    auto pipeline = PipelineBase::GetCurrentContext();
+    Rect keyboardRect = Rect(0.0f, 0.0f, 0.0f, customHeight);
+    CHECK_NULL_VOID(pipeline);
+    pipeline->OnVirtualKeyboardAreaChange(keyboardRect);
+}
+
+void OverlayManager::SupportCustomKeyboardAvoidance(RefPtr<RenderContext> context, AnimationOption option,
+    RefPtr<FrameNode> customKeyboard)
+{
+    option.SetOnFinishEvent([weak = WeakClaim(this), customKeyboard] {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        auto customHeight = customKeyboard->GetGeometryNode()->GetFrameSize().Height();
+        pattern->SetCustomKeybroadHeight(customHeight);
+    });
+
+    AnimationUtils::Animate(option, [context]() {
+    if (context) {
+        context->OnTransformTranslateUpdate({ 0.0f, 0.0f, 0.0f });
+    }
+    }, option.GetOnFinishEvent());
+}
+
 void OverlayManager::PlayKeyboardTransition(RefPtr<FrameNode> customKeyboard, bool isTransitionIn)
 {
     CHECK_NULL_VOID(customKeyboard);
@@ -3673,11 +3701,7 @@ void OverlayManager::PlayKeyboardTransition(RefPtr<FrameNode> customKeyboard, bo
     auto keyboardHeight = customKeyboard->GetGeometryNode()->GetFrameSize().Height();
     if (isTransitionIn) {
         context->OnTransformTranslateUpdate({ 0.0f, pageHeight, 0.0f });
-        AnimationUtils::Animate(option, [context]() {
-            if (context) {
-                context->OnTransformTranslateUpdate({ 0.0f, 0.0f, 0.0f });
-            }
-        });
+        SupportCustomKeyboardAvoidance(context, option, customKeyboard);
     } else {
         context->UpdateOpacity(1.0);
         option.SetOnFinishEvent([customKeyboard] {
@@ -3724,6 +3748,7 @@ void OverlayManager::CloseKeyboard(int32_t targetId)
     CHECK_NULL_VOID(pattern);
     customKeyboardMap_.erase(pattern->GetTargetId());
     PlayKeyboardTransition(customKeyboard, false);
+    SetCustomKeybroadHeight();
 }
 
 void OverlayManager::DestroyKeyboard()
@@ -3739,6 +3764,7 @@ void OverlayManager::DestroyKeyboard()
         it = customKeyboardMap_.erase(it);
     }
     rootNode->MarkDirtyNode(PROPERTY_UPDATE_BY_CHILD_REQUEST);
+    SetCustomKeybroadHeight();
 }
 
 // This function will be used in SceneBoard Thread only.

@@ -455,9 +455,17 @@ void JSRichEditor::SetCustomKeyboard(const JSCallbackInfo& args)
     if (!args[0]->IsObject()) {
         return;
     }
+    bool supportAvoidance = false;
+    if (args.Length() == 2 && args[1]->IsObject()) {  //  2 here refers to the number of parameters
+        auto paramObject = JSRef<JSObject>::Cast(args[1]);
+        auto isSupportAvoidance = paramObject->GetProperty("supportAvoidance");
+        if (!isSupportAvoidance->IsNull() && isSupportAvoidance->IsBoolean()) {
+            supportAvoidance = isSupportAvoidance->ToBoolean();
+        }
+    }
     std::function<void()> buildFunc;
     if (JSTextField::ParseJsCustomKeyboardBuilder(args, 0, buildFunc)) {
-        RichEditorModel::GetInstance()->SetCustomKeyboard(std::move(buildFunc));
+        RichEditorModel::GetInstance()->SetCustomKeyboard(std::move(buildFunc), supportAvoidance);
     }
 }
 
