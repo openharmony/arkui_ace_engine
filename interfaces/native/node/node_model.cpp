@@ -122,6 +122,8 @@ struct ExtraData {
     std::unordered_map<int64_t, InnerEventExtraParam*> eventMap;
 };
 
+std::set<ArkUI_NodeHandle> g_nodeSet;
+
 ArkUI_NodeHandle CreateNode(ArkUI_NodeType type)
 {
     static const ArkUINodeType nodes[] = { ARKUI_TEXT, ARKUI_SPAN, ARKUI_IMAGE_SPAN, ARKUI_IMAGE, ARKUI_TOGGLE,
@@ -144,7 +146,9 @@ ArkUI_NodeHandle CreateNode(ArkUI_NodeType type)
         return nullptr;
     }
     impl->getBasicAPI()->markDirty(uiNode, ARKUI_DIRTY_FLAG_ATTRIBUTE_DIFF);
-    return new ArkUI_Node({ type, uiNode });
+    auto node = new ArkUI_Node({ type, uiNode });
+    g_nodeSet.emplace(node);
+    return node;
 }
 
 void DisposeNode(ArkUI_NodeHandle nativePtr)
@@ -153,6 +157,7 @@ void DisposeNode(ArkUI_NodeHandle nativePtr)
     // already check in entry point.
     auto* impl = GetFullImpl();
     impl->getBasicAPI()->disposeNode(nativePtr->uiNodeHandle);
+    g_nodeSet.erase(nativePtr);
     delete nativePtr;
 }
 
@@ -235,7 +240,7 @@ const ArkUI_AttributeItem* GetAttribute(ArkUI_NodeHandle node, ArkUI_NodeAttribu
 
 int32_t RegisterNodeEvent(ArkUI_NodeHandle nodePtr, ArkUI_NodeEventType eventType, int32_t eventId)
 {
-    auto originEventType = ConvertOriginEventType(eventType);
+    auto originEventType = ConvertOriginEventType(eventType, nodePtr->type);
     if (originEventType < 0) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "event is not supported %{public}d", eventType);
         return ERROR_CODE_NATIVE_IMPL_TYPE_NOT_SUPPORTED;
@@ -298,6 +303,9 @@ void HandleInnerNodeEvent(ArkUINodeEvent* innerEvent)
     }
     ArkUI_NodeEvent event;
     auto* nodePtr = reinterpret_cast<ArkUI_NodeHandle>(innerEvent->extraParam);
+    if (g_nodeSet.count(nodePtr) == 0) {
+        return;
+    }
     if (!nodePtr->extraData) {
         return;
     }

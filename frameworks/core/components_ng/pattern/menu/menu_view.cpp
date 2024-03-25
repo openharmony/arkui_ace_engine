@@ -545,9 +545,16 @@ RefPtr<FrameNode> MenuView::Create(const RefPtr<UINode>& customNode, int32_t tar
 void MenuView::UpdateMenuPaintProperty(
     const RefPtr<FrameNode>& menuNode, const MenuParam& menuParam, const MenuType& type)
 {
-    if (!(type == MenuType::CONTEXT_MENU)) {
-        return;
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
+        if (!(type == MenuType::CONTEXT_MENU || type == MenuType::MENU)) {
+            return;
+        }
+    } else {
+        if (!(type == MenuType::CONTEXT_MENU)) {
+            return;
+        }
     }
+
     auto paintProperty = menuNode->GetPaintProperty<MenuPaintProperty>();
     CHECK_NULL_VOID(paintProperty);
     paintProperty->UpdateEnableArrow(menuParam.enableArrow.value_or(false));

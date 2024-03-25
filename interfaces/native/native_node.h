@@ -343,7 +343,7 @@ typedef enum {
      * Format of the return value {@link ArkUI_AttributeItem}:\n
      * .value[0].f32: start angle of the linear gradient. \n
      * .value[1].i32: direction of the linear gradient. It does not take effect when <b>angle</b> is set. \n
-     * .value[0].i32: whether the colors are repeated. \n
+     * .value[2].i32: whether the colors are repeated. \n
      * .object: array of color stops, each of which consists of a color and its stop position.
      * Invalid colors are automatically skipped. \n
      * colors: colors of the color stops. \n
@@ -986,14 +986,11 @@ typedef enum {
      * .value[5].f32: height of the path.\n
      * .string: command for drawing the path.\n
      * 5. Progress:\n
-     * .value[0].u32 fill color, in 0xARGB format. \n
-     * .value[1].u32: stroke color, in 0xARGB format. \n
-     * .value[2].f32: stroke width, in vp. \n
-     * .value[3].i32: mask type. The parameter type is {@link ArkUI_MaskType}.
+     * .value[0].i32: mask type. The parameter type is {@link ArkUI_MaskType}.
      * The value is <b>ARKUI_MASK_TYPE_PROSGRESS</b> for the progress shape.\n
-     * .value[4].f32: current value of the progress indicator.\n
-     * .value[5].f32: maximum value of the progress indicator.\n
-     * .value[6].u32: color of the progress indicator.\n
+     * .value[1].f32: current value of the progress indicator.\n
+     * .value[2].f32: maximum value of the progress indicator.\n
+     * .value[3].u32: color of the progress indicator.\n
      * \n
      * Format of the return value {@link ArkUI_AttributeItem}, which supports five types of shapes:\n
      * 1. Rectangle:\n
@@ -1497,10 +1494,10 @@ typedef enum {
      * @brief Defines the text overflow attribute, which can be set, reset, and obtained as required through APIs.
      *
      * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
-     * .value[0].i32: display mode when the text is too long. \n
+     * .value[0].i32: display mode when the text is too long {@link ArkUI_TextOverflow}. \n
      * \n
      * Format of the return value {@link ArkUI_AttributeItem}:\n
-     * .value[0].i32: display mode when the text is too long. \n
+     * .value[0].i32: display mode when the text is too long {@link ArkUI_TextOverflow}. \n
      *
      */
     NODE_TEXT_OVERFLOW,

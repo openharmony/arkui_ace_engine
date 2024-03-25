@@ -23,6 +23,7 @@
 #include "core/animation/select_motion.h"
 #include "core/animation/spring_curve.h"
 #include "core/animation/bezier_variable_velocity_motion.h"
+#include "core/animation/velocity_motion.h"
 #include "core/components_ng/base/frame_scene_status.h"
 #include "core/components_ng/event/drag_event.h"
 #include "core/components_ng/pattern/navigation/nav_bar_pattern.h"
@@ -413,6 +414,11 @@ public:
         edgeEffectAlwaysEnabled_ = alwaysEnabled;
     }
 
+    EdgeEffect GetEdgeEffect()
+    {
+        return edgeEffect_;
+    }
+
     bool GetAlwaysEnabled() const
     {
         return edgeEffectAlwaysEnabled_;
@@ -496,6 +502,9 @@ public:
     {
         return isScrollToSafeAreaHelper_;
     }
+
+    void ScrollAtFixedVelocity(float velocity);
+
 protected:
     void OnDetachFromFrameNode(FrameNode* frameNode) override;
     virtual DisplayMode GetDefaultScrollBarDisplayMode() const
@@ -722,6 +731,7 @@ private:
     RefPtr<Animator> hotzoneAnimator_;
     float lastHonezoneOffsetPct_ = 0.0f;
     RefPtr<BezierVariableVelocityMotion> velocityMotion_;
+    RefPtr<VelocityMotion> fixedVelocityMotion_;
     void UnRegister2DragDropManager();
     float IsInHotZone(const PointF& point);
     void HotZoneScroll(const float offset);

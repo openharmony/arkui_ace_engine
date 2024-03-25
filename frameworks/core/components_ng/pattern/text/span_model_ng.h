@@ -41,6 +41,7 @@ public:
     // TODO: add extra event for span.
     void SetOnClick(std::function<void(const BaseEventInfo* info)>&& click) override;
     void ClearOnClick() override;
+    
 
     static RefPtr<SpanNode> CreateSpanNode(int32_t nodeId, const std::string& content);
     static void InitSpan(UINode* uiNode, const std::string& content);
@@ -73,6 +74,7 @@ public:
     static TextBackgroundStyle GetSpanTextBackgroundStyle(UINode* uiNode);
     static void SetTextShadow(UINode* uiNode, const std::vector<Shadow>& value);
     static std::vector<Shadow> GetTextShadow(UINode* uiNode);
+    static void SetOnClick(UINode* uiNode, GestureEventFunc&& click);
 };
 } // namespace OHOS::Ace::NG
 

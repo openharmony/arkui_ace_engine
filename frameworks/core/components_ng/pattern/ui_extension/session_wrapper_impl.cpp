@@ -438,7 +438,7 @@ void SessionWrapperImpl::OnDisconnect(bool isAbnormal)
                 pattern->FireOnErrorCallback(
                     ERROR_CODE_UIEXTENSION_EXITED_ABNORMALLY, EXIT_ABNORMALLY_NAME, EXIT_ABNORMALLY_MESSAGE);
             } else {
-                pattern->FireOnTerminatedCallback(std::nullopt, nullptr);
+                pattern->FireOnTerminatedCallback(0, nullptr);
             }
         },
         TaskExecutor::TaskType::UI);
@@ -491,7 +491,14 @@ void SessionWrapperImpl::FocusMoveSearch(
     CHECK_NULL_VOID(session_);
     session_->TransferFocusMoveSearch(elementId, direction, baseParent, output);
 }
-/************************************************ Begin: The interface about the accessibility ************************/
+
+void SessionWrapperImpl::TransferAccessibilityHoverEvent(float pointX, float pointY, int32_t sourceType,
+    int32_t eventType, int64_t timeMs)
+{
+    CHECK_NULL_VOID(session_);
+    session_->TransferAccessibilityHoverEvent(pointX, pointY, sourceType, eventType, timeMs);
+}
+/************************************************ End: The interface about the accessibility **************************/
 
 /***************************** Begin: The interface to control the display area and the avoid area ********************/
 std::shared_ptr<Rosen::RSSurfaceNode> SessionWrapperImpl::GetSurfaceNode() const

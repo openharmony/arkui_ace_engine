@@ -331,6 +331,15 @@ public:
     {
         return customDividerFlag_;
     }
+    void SetGradientHeight(const Dimension& value)
+    {
+        value_ = value;
+    }
+
+    Dimension GetGradientHeight()
+    {
+        return value_;
+    }
 private:
     void OnModifyDone() override;
     void OnAttachToFrameNode() override;
@@ -393,6 +402,7 @@ private:
     std::optional<std::string> firedSelectsStr_;
     ItemDivider divider_;
     bool customDividerFlag_ = false;
+    Dimension value_;
 };
 } // namespace OHOS::Ace::NG
 

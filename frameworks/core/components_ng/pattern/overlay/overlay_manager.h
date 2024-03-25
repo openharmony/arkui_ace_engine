@@ -144,6 +144,7 @@ public:
         return dialogMap_;
     };
     RefPtr<FrameNode> GetDialog(int32_t dialogId);
+    RefPtr<FrameNode> SetDialogMask(const DialogProperties& dialogProps);
     // customNode only used by customDialog, pass in nullptr if not customDialog
     RefPtr<FrameNode> ShowDialog(
         const DialogProperties& dialogProps, std::function<void()>&& buildFunc, bool isRightToLeft = false);

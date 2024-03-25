@@ -80,9 +80,10 @@ void NavDestinationGroupNode::OnAttachToMainTree(bool recursive)
         }
         node = node->GetParent();
     }
-    CHECK_NULL_VOID(node);
-    auto pattern = AceType::DynamicCast<NavDestinationPattern>(GetPattern());
-    pattern->SetNavigationNode(node);
+    if (node) {
+        auto pattern = AceType::DynamicCast<NavDestinationPattern>(GetPattern());
+        pattern->SetNavigationNode(node);
+    }
 
     if (!UseOffscreenProcess()) {
         ProcessShallowBuilder();

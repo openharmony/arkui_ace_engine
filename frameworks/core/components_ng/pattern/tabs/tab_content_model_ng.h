@@ -55,6 +55,7 @@ public:
     static RefPtr<TabsNode> FindTabsNode(const RefPtr<UINode>& tabContent);
     void SetOnWillShow(std::function<void()>&& onWillShow) override;
     void SetOnWillHide(std::function<void()>&& onWillHide) override;
+    void SetCustomStyleNode(const RefPtr<NG::FrameNode>& customStyleNode) override;
 
 private:
     static void UpdateLabelStyle(const LabelStyle& labelStyle, RefPtr<TextLayoutProperty> textLayoutProperty);

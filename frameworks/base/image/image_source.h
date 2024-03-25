@@ -39,6 +39,7 @@ public:
     virtual RefPtr<PixelMap> CreatePixelMap(uint32_t index, const Size& size) = 0;
     virtual RefPtr<PixelMap> CreatePixelMap() = 0;
     virtual Size GetImageSize() = 0;
+    virtual uint32_t GetFrameCount() = 0;
 };
 } // namespace OHOS::Ace
 

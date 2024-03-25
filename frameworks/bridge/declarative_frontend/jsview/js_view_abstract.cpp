@@ -1648,15 +1648,9 @@ RefPtr<NG::ChainedTransitionEffect> JSViewAbstract::ParseJsTransitionEffect(cons
 
 void JSViewAbstract::JsTransition(const JSCallbackInfo& info)
 {
-    if (info.Length() > 1) {
-        return;
-    }
-    if (info.Length() == 0) {
-        ViewAbstractModel::GetInstance()->SetTransition(
-            NG::TransitionOptions::GetDefaultTransition(TransitionType::ALL));
-        return;
-    }
-    if (!info[0]->IsObject()) {
+    if (info.Length() != 1 || !info[0]->IsObject()) {
+        ViewAbstractModel::GetInstance()->CleanTransition();
+        ViewAbstractModel::GetInstance()->SetChainedTransition(nullptr);
         return;
     }
     auto obj = JSRef<JSObject>::Cast(info[0]);
@@ -2265,6 +2259,7 @@ void JSViewAbstract::JsDisplayPriority(const JSCallbackInfo& info)
 {
     double value = 0.0;
     if (!ParseJsDouble(info[0], value)) {
+        ViewAbstractModel::GetInstance()->SetDisplayIndex(0);
         return;
     }
     ViewAbstractModel::GetInstance()->SetDisplayIndex(static_cast<int32_t>(value));
@@ -3885,12 +3880,9 @@ void JSViewAbstract::JsBlur(const JSCallbackInfo& info)
 void JSViewAbstract::JsColorBlend(const JSCallbackInfo& info)
 {
     Color colorBlend;
-    if (info[0]->IsUndefined()) {
+    if (info[0]->IsUndefined() || !ParseJsColor(info[0], colorBlend)) {
         colorBlend = Color::TRANSPARENT;
         SetColorBlend(colorBlend);
-        return;
-    }
-    if (!ParseJsColor(info[0], colorBlend)) {
         return;
     }
     SetColorBlend(colorBlend);
@@ -3913,21 +3905,19 @@ void JSViewAbstract::JsUseShadowBatching(const JSCallbackInfo& info)
 
 void JSViewAbstract::JsBackdropBlur(const JSCallbackInfo& info)
 {
-    if (info.Length() == 0) {
-        return;
-    }
     double blur = 0.0;
-    if (!ParseJsDouble(info[0], blur)) {
+    BlurOption blurOption;
+    if (info.Length() == 0 || !ParseJsDouble(info[0], blur)) {
+        CalcDimension dimensionRadius(blur, DimensionUnit::PX);
+        ViewAbstractModel::GetInstance()->SetBackdropBlur(dimensionRadius, blurOption);
         return;
     }
-    BlurOption blurOption;
+    CalcDimension dimensionRadius(blur, DimensionUnit::PX);
     if (info.Length() > 1 && info[1]->IsObject()) {
         JSRef<JSObject> jsBlurOption = JSRef<JSObject>::Cast(info[1]);
         ParseBlurOption(jsBlurOption, blurOption);
     }
-    CalcDimension dimensionRadius(blur, DimensionUnit::PX);
     ViewAbstractModel::GetInstance()->SetBackdropBlur(dimensionRadius, blurOption);
-
     info.SetReturnValue(info.This());
 }
 
@@ -7638,7 +7628,11 @@ bool JSViewAbstract::ParseShadowProps(const JSRef<JSVal>& jsValue, Shadow& shado
     } else if (ParseJsColor(jsObj->GetProperty("color"), color)) {
         shadow.SetColor(color);
     }
-    auto type = jsObj->GetPropertyValue<int32_t>("type", static_cast<int32_t>(ShadowType::COLOR));
+    int32_t type = static_cast<int32_t>(ShadowType::COLOR);
+    JSViewAbstract::ParseJsInt32(jsObj->GetProperty("type"), type);
+    if (type != static_cast<int32_t>(ShadowType::BLUR)) {
+        type = static_cast<int32_t>(ShadowType::COLOR);
+    }
     type = std::clamp(type, static_cast<int32_t>(ShadowType::COLOR), static_cast<int32_t>(ShadowType::BLUR));
     shadow.SetShadowType(static_cast<ShadowType>(type));
     bool isFilled = jsObj->GetPropertyValue<bool>("fill", false);

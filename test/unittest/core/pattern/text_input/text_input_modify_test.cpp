@@ -1349,4 +1349,51 @@ HWTEST_F(TextFieldModifyTest, OnColorConfigurationUpdate001, TestSize.Level1)
     pattern_->OnColorConfigurationUpdate();
     EXPECT_TRUE(pattern_->colorModeChange_);
 }
+
+/**
+ * @tc.name: UpdateOverlayModifier001
+ * @tc.desc: Test textfield update overlay modifier.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldModifyTest, UpdateOverlayModifier001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Initialize text input.
+     */
+    CreateTextField(DEFAULT_TEXT);
+
+    /**
+     * @tc.steps: step2. set cursor color and call UpdateContentModifier
+     * tc.expected: step2. selected color equals cursor color.
+     */
+    WeakPtr<RenderContext> renderContext;
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    ASSERT_NE(geometryNode, nullptr);
+    auto paintProperty = frameNode_->GetPaintProperty<TextFieldPaintProperty>();
+    ASSERT_NE(paintProperty, nullptr);
+    PaintWrapper* paintWrapper = new PaintWrapper(renderContext, geometryNode, paintProperty);
+    ASSERT_NE(paintWrapper, nullptr);
+
+    auto paintMethod = AceType::DynamicCast<TextFieldPaintMethod>(pattern_->CreateNodePaintMethod());
+    EXPECT_NE(paintMethod, nullptr);
+    auto overlayModifier = paintMethod->textFieldOverlayModifier_;
+    ASSERT_NE(overlayModifier, nullptr);
+
+    paintProperty->ResetSelectedBackgroundColor();
+    EXPECT_FALSE(paintProperty->HasSelectedBackgroundColor());
+    Color cursorColor = Color::RED;
+    double defaultOpacity = 0.2;
+    auto expectedSelectedColor = cursorColor.ChangeOpacity(defaultOpacity);
+    paintProperty->UpdateCursorColor(cursorColor);
+    paintMethod->UpdateOverlayModifier(paintWrapper);
+    EXPECT_TRUE(overlayModifier->selectedColor_->Get().ToColor() == expectedSelectedColor);
+
+    /**
+     * @tc.steps: step3. set select background color and call UpdateContentModifier
+     * tc.expected: step3. selected color equals setting select background.
+     */
+    paintProperty->UpdateSelectedBackgroundColor(Color::BLUE);
+    paintMethod->UpdateOverlayModifier(paintWrapper);
+    EXPECT_TRUE(overlayModifier->selectedColor_->Get().ToColor() == Color::BLUE);
+}
 } // namespace OHOS::Ace::NG

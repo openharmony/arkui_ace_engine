@@ -39,6 +39,7 @@
 #include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/base/view_abstract_model_ng.h"
 #include "core/components_ng/pattern/shape/shape_abstract_model_ng.h"
+#include "core/components_ng/pattern/text/span_model_ng.h"
 #include "core/components_ng/property/transition_property.h"
 #include "core/image/image_source_info.h"
 #include "core/interfaces/arkoala/arkoala_api.h"
@@ -1006,7 +1007,8 @@ void ResetAlign(ArkUINodeHandle node)
     ViewAbstract::SetAlign(frameNode, Alignment::CENTER);
 }
 
-void SetBackdropBlur(ArkUINodeHandle node, ArkUI_Float32 value)
+void SetBackdropBlur(
+    ArkUINodeHandle node, ArkUI_Float32 value, const ArkUI_Float32* blurValues, ArkUI_Int32 blurValuesSize)
 {
     ArkUI_Float32 blur = 0.0f;
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -1014,8 +1016,10 @@ void SetBackdropBlur(ArkUINodeHandle node, ArkUI_Float32 value)
     if (value > 0) {
         blur = value;
     }
+    BlurOption blurOption;
+    blurOption.grayscale.assign(blurValues, blurValues + blurValuesSize);
     CalcDimension dimensionRadius(blur, DimensionUnit::PX);
-    ViewAbstract::SetBackdropBlur(frameNode, dimensionRadius);
+    ViewAbstract::SetBackdropBlur(frameNode, dimensionRadius, blurOption);
 }
 
 void ResetBackdropBlur(ArkUINodeHandle node)
@@ -1023,8 +1027,9 @@ void ResetBackdropBlur(ArkUINodeHandle node)
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     double blur = 0.0;
+    BlurOption option;
     CalcDimension dimensionRadius(blur, DimensionUnit::PX);
-    ViewAbstract::SetBackdropBlur(frameNode, dimensionRadius);
+    ViewAbstract::SetBackdropBlur(frameNode, dimensionRadius, option);
 }
 
 void SetHueRotate(ArkUINodeHandle node, ArkUI_Float32 deg)
@@ -1046,11 +1051,21 @@ void ResetHueRotate(ArkUINodeHandle node)
     ViewAbstract::SetHueRotate(frameNode, deg);
 }
 
-void SetInvert(ArkUINodeHandle node, ArkUI_Float32 invert)
+void SetInvert(ArkUINodeHandle node, ArkUI_Float32* invert, ArkUI_Int32 length)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    InvertVariant invertVariant = static_cast<float>(invert);
+    InvertVariant invertVariant;
+    if (length == NUM_4) {
+        InvertOption option;
+        option.low_ = invert[NUM_0];
+        option.high_ = invert[NUM_1];
+        option.threshold_ = invert[NUM_2];
+        option.thresholdRange_ = invert[NUM_3];
+        invertVariant = option;
+    } else {
+        invertVariant = invert[NUM_0];
+    }
     ViewAbstract::SetInvert(frameNode, invertVariant);
 }
 
@@ -1175,16 +1190,18 @@ void ResetBrightness(ArkUINodeHandle node)
     ViewAbstract::SetBrightness(frameNode, value);
 }
 
-void SetBlur(ArkUINodeHandle node, ArkUI_Float32 value)
+void SetBlur(ArkUINodeHandle node, ArkUI_Float32 value, const ArkUI_Float32* blurValues, ArkUI_Int32 blurValuesSize)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     ArkUI_Float32 blur = 0.0f;
+    BlurOption blurOption;
+    blurOption.grayscale.assign(blurValues, blurValues + blurValuesSize);
     if (value > 0) {
         blur = value;
     }
     CalcDimension dimensionBlur(blur, DimensionUnit::PX);
-    ViewAbstract::SetFrontBlur(frameNode, dimensionBlur);
+    ViewAbstract::SetFrontBlur(frameNode, dimensionBlur, blurOption);
 }
 
 void ResetBlur(ArkUINodeHandle node)
@@ -1192,8 +1209,9 @@ void ResetBlur(ArkUINodeHandle node)
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     double blur = 0.0;
+    BlurOption option;
     CalcDimension dimensionBlur(blur, DimensionUnit::PX);
-    ViewAbstract::SetFrontBlur(frameNode, dimensionBlur);
+    ViewAbstract::SetFrontBlur(frameNode, dimensionBlur, option);
 }
 
 /**
@@ -1354,7 +1372,7 @@ void SetOverlay(ArkUINodeHandle node, ArkUI_CharPtr text, const ArkUI_Float32* o
             }
         }
     } else {
-        overlay.align = Alignment::CENTER;
+        overlay.align = Alignment::TOP_LEFT;
         overlay.x = CalcDimension(0);
         overlay.y = CalcDimension(0);
     }
@@ -2803,11 +2821,9 @@ void SetFlexBasis(ArkUINodeHandle node, const struct ArkUIStringAndFloat* flexBa
     Dimension result;
     if (flexBasisValue->valueStr != nullptr) {
         result = StringUtils::StringToDimensionWithUnit(std::string(flexBasisValue->valueStr), DimensionUnit::VP);
-        if (Container::LessThanAPIVersion(PlatformVersion::VERSION_TEN)) {
-            // flexbasis don't support percent case.
-            if (result.Unit() == DimensionUnit::PERCENT) {
-                result.SetUnit(DimensionUnit::AUTO);
-            }
+        // flexbasis don't support percent case.
+        if (result.Unit() == DimensionUnit::PERCENT) {
+            result.SetUnit(DimensionUnit::AUTO);
         }
     } else {
         result = Dimension(flexBasisValue->value, DimensionUnit::VP);
@@ -3832,6 +3848,8 @@ void SetMaskShape(ArkUINodeHandle node, ArkUI_CharPtr type, ArkUI_Uint32 fill, A
         shape->SetWidth(width);
         shape->SetHeight(height);
         shape->SetColor(Color(fill));
+        shape->SetStrokeColor(stroke);
+        shape->SetStrokeWidth(strokeWidth);
         ViewAbstract::SetMask(frameNode, shape);
     } else if (shapeType == "ellipse") {
         auto shape = AceType::MakeRefPtr<Ellipse>();
@@ -4151,14 +4169,16 @@ void SetBlendMode(ArkUINodeHandle node, int32_t blendMode, ArkUI_Int32 blendAppl
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    ViewAbstract::SetBlendMode(frameNode, static_cast<BlendMode>(blendMode));
+    ViewAbstractModelNG::SetBlendMode(frameNode, static_cast<OHOS::Ace::BlendMode>(blendMode));
+    ViewAbstractModelNG::SetBlendApplyType(frameNode, static_cast<OHOS::Ace::BlendApplyType>(blendApplyTypeValue));
 }
 
 void ResetBlendMode(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    ViewAbstract::SetBlendMode(frameNode, BlendMode::NONE);
+    ViewAbstractModelNG::SetBlendMode(frameNode, OHOS::Ace::BlendMode::NONE);
+    ViewAbstractModelNG::SetBlendApplyType(frameNode, OHOS::Ace::BlendApplyType::FAST);
 }
 
 void SetMonopolizeEvents(ArkUINodeHandle node, ArkUI_Bool value)
@@ -4396,30 +4416,18 @@ void GetMask(ArkUINodeHandle node, ArkUIMaskOptions* options)
     CHECK_NULL_VOID(frameNode);
     auto basicShape = ViewAbstract::GetMask(frameNode);
     options->type = static_cast<ArkUI_Int32>(basicShape->GetBasicShapeType());
+    options->fill = basicShape->GetColor().GetValue();
+    options->strockColor = basicShape->GetStrokeColor();
+    options->strockWidth = basicShape->GetStrokeWidth();
+    options->width = basicShape->GetWidth().Value();
+    options->height = basicShape->GetHeight().Value();
     if (basicShape->GetBasicShapeType() == BasicShapeType::PATH) {
         auto path = AceType::DynamicCast<Path>(basicShape);
         options->commands = path->GetValue().c_str();
-        options->color = basicShape->GetColor().GetValue();
-        options->strockColor = basicShape->GetStrokeColor();
-        options->strockWidth = basicShape->GetStrokeWidth();
-        options->width = basicShape->GetWidth().Value();
-        options->height = basicShape->GetHeight().Value();
     } else if (basicShape->GetBasicShapeType() == BasicShapeType::RECT) {
         auto shapeRect = AceType::DynamicCast<ShapeRect>(basicShape);
-        options->color = basicShape->GetColor().GetValue();
-        options->strockColor = basicShape->GetStrokeColor();
-        options->strockWidth = basicShape->GetStrokeWidth();
-        options->width = basicShape->GetWidth().Value();
-        options->height = basicShape->GetHeight().Value();
         options->radiusWidth = shapeRect->GetTopLeftRadius().GetX().Value();
         options->radiusHeight = shapeRect->GetTopLeftRadius().GetY().Value();
-    } else if (basicShape->GetBasicShapeType() == BasicShapeType::CIRCLE ||
-               basicShape->GetBasicShapeType() == BasicShapeType::ELLIPSE) {
-        options->color = basicShape->GetColor().GetValue();
-        options->strockColor = basicShape->GetStrokeColor();
-        options->strockWidth = basicShape->GetStrokeWidth();
-        options->width = basicShape->GetWidth().Value();
-        options->height = basicShape->GetHeight().Value();
     } else {
         auto process = ViewAbstract::GetMaskProgress(frameNode);
         options->value = process->GetValue();
@@ -4814,9 +4822,9 @@ void SetOnAreaChange(ArkUINodeHandle node, void* extraParam)
 
 void SetOnClick(ArkUINodeHandle node, void* extraParam)
 {
-    auto* frameNode = reinterpret_cast<FrameNode*>(node);
-    CHECK_NULL_VOID(frameNode);
-    int32_t nodeId = frameNode->GetId();
+    auto* uiNode = reinterpret_cast<UINode*>(node);
+    CHECK_NULL_VOID(uiNode);
+    int32_t nodeId = uiNode->GetId();
     auto onEvent = [nodeId, extraParam](GestureEvent& info) {
         ArkUINodeEvent event;
         event.kind = COMPONENT_ASYNC_EVENT;
@@ -4846,7 +4854,12 @@ void SetOnClick(ArkUINodeHandle node, void* extraParam)
 
         SendArkUIAsyncEvent(&event);
     };
-    ViewAbstract::SetOnClick(frameNode, std::move(onEvent));
+    if (uiNode->GetTag() == "Span") {
+        SpanModelNG::SetOnClick(uiNode, std::move(onEvent));
+    } else {
+        auto* frameNode = reinterpret_cast<FrameNode*>(node);
+        ViewAbstract::SetOnClick(frameNode, std::move(onEvent));
+    }
 }
 
 void SetOnTouch(ArkUINodeHandle node, void* extraParam)

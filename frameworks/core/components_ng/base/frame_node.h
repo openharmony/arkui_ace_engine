@@ -406,7 +406,8 @@ public:
     void OnAttachToMainTree(bool recursive) override;
     void OnAttachToBuilderNode(NodeStatus nodeStatus) override;
 
-    void OnVisibleChange(bool isVisible) override;
+    void TryVisibleChangeOnDescendant(bool isVisible) override;
+    void NotifyVisibleChange(bool isVisible);
 
     void PushDestroyCallback(std::function<void()>&& callback)
     {
@@ -569,6 +570,7 @@ public:
     std::string ProvideRestoreInfo();
 
     static std::vector<RefPtr<FrameNode>> GetNodesById(const std::unordered_set<int32_t>& set);
+    static std::vector<FrameNode*> GetNodesPtrById(const std::unordered_set<int32_t>& set);
 
     double GetPreviewScaleVal() const;
 

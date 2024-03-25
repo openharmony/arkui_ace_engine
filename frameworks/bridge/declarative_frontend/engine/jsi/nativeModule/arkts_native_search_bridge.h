@@ -49,6 +49,8 @@ public:
     static ArkUINativeModuleValue ResetSearchEnterKeyType(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue SetSearchHeight(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue ResetSearchHeight(ArkUIRuntimeCallInfo* runtimeCallInfo);
+    static ArkUINativeModuleValue SetSearchInspectorId(ArkUIRuntimeCallInfo* runtimeCallInfo);
+    static ArkUINativeModuleValue ResetSearchInspectorId(ArkUIRuntimeCallInfo* runtimeCallInfo);
 };
 }
 

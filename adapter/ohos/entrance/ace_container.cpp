@@ -464,6 +464,11 @@ bool AceContainer::OnBackPressed(int32_t instanceId)
     if (subwindow) {
         LOGI("subwindow consumed backpressed event");
         if (subwindow->GetShown()) {
+            auto subContainerId = SubwindowManager::GetInstance()->GetSubContainerId(instanceId);
+            if (subContainerId < 0) {
+                return false;
+            }
+            ContainerScope scope(subContainerId);
             auto overlayManager = subwindow->GetOverlayManager();
             CHECK_NULL_RETURN(overlayManager, false);
             return overlayManager->RemoveOverlayInSubwindow();
@@ -1030,9 +1035,6 @@ UIContentErrorCode AceContainer::RunPage(
     CHECK_NULL_RETURN(front, UIContentErrorCode::NULL_POINTER);
     if (isNamedRouter) {
         return front->RunPageByNamedRouter(content);
-    }
-    if (content.substr(0, strlen(BUNDLE_TAG)) == BUNDLE_TAG) {
-        return UIContentErrorCode::INVALID_URL;
     }
 
     return front->RunPage(content, params);
@@ -2516,6 +2518,27 @@ bool AceContainer::NotifyExecuteAction(
         },
         TaskExecutor::TaskType::UI, 1500);
     return IsExecuted;
+}
+
+void AceContainer::HandleAccessibilityHoverEvent(float pointX, float pointY, int32_t sourceType,
+    int32_t eventType, int64_t timeMs)
+{
+    CHECK_NULL_VOID(taskExecutor_);
+    taskExecutor_->PostTask(
+        [weak = WeakClaim(this), pointX, pointY, sourceType, eventType, timeMs] {
+            auto container = weak.Upgrade();
+            CHECK_NULL_VOID(container);
+            ContainerScope scope(container->GetInstanceId());
+            auto pipelineContext = container->GetPipelineContext();
+            auto ngPipeline = AceType::DynamicCast<NG::PipelineContext>(pipelineContext);
+            CHECK_NULL_VOID(ngPipeline);
+            auto root = ngPipeline->GetRootElement();
+            CHECK_NULL_VOID(root);
+            auto accessibilityManagerNG = ngPipeline->GetAccessibilityManagerNG();
+            CHECK_NULL_VOID(accessibilityManagerNG);
+            accessibilityManagerNG->HandleAccessibilityHoverEvent(root, pointX, pointY, sourceType, eventType, timeMs);
+        },
+        TaskExecutor::TaskType::UI);
 }
 
 extern "C" ACE_FORCE_EXPORT void OHOS_ACE_HotReloadPage()

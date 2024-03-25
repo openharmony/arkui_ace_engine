@@ -44,6 +44,7 @@ public:
     void AddParentContainerId(int32_t containerId, int32_t parentContainerId);
     void RemoveParentContainerId(int32_t containerId);
     int32_t GetParentContainerId(int32_t containerId);
+    int32_t GetSubContainerId(int32_t parentContainerId);
 
     void AddSubwindow(int32_t instanceId, RefPtr<Subwindow>);
     void RemoveSubwindow(int32_t instanceId);

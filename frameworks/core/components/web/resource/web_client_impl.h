@@ -161,6 +161,13 @@ public:
         const std::string &realm) override;
     bool OnSslErrorRequestByJS(std::shared_ptr<NWeb::NWebJSSslErrorResult> result,
         OHOS::NWeb::SslError error) override;
+    bool OnAllSslErrorRequestByJS(std::shared_ptr<NWeb::NWebJSAllSslErrorResult> result,
+        OHOS::NWeb::SslError error,
+        const std::string& url,
+        const std::string& originalUrl,
+        const std::string& referrer,
+        bool isFatalError,
+        bool isMainFrame) override;
     bool OnSslSelectCertRequestByJS(
         std::shared_ptr<NWeb::NWebJSSslSelectCertResult> result,
         const std::string& host,

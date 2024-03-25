@@ -295,6 +295,7 @@ HWTEST_F(TextFiledAttrsTest, LayoutProperty001, TestSize.Level1)
         model.SetShowUnderline(true);
         model.SetSelectAllValue(true);
         model.SetShowCounterBorder(true);
+        model.SetWordBreak(WordBreak::BREAK_ALL);
     });
 
     /**
@@ -319,6 +320,7 @@ HWTEST_F(TextFiledAttrsTest, LayoutProperty001, TestSize.Level1)
     EXPECT_EQ(json->GetString("caretPosition"), "");
     EXPECT_TRUE(json->GetBool("showUnderline"));
     EXPECT_TRUE(json->GetBool("selectAll"));
+    EXPECT_EQ(json->GetString("wordBreak"), "break-all");
 }
 
 /**
@@ -3647,6 +3649,43 @@ HWTEST_F(TextFieldUXTest, testTextAlign001, TestSize.Level1)
 }
 
 /**
+ * @tc.name: testWordBreak001
+ * @tc.desc: test testInput text WordBreak
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldUXTest, testWordBreak001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: Create Text filed node
+     * @tc.expected: style is Inline
+     */
+    CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) {
+        model.SetInputStyle(DEFAULT_INPUT_STYLE);
+    });
+
+    /**
+     * @tc.step: step2. Set wordBreak BREAK_ALL
+     */
+    layoutProperty_->UpdateWordBreak(WordBreak::NORMAL);
+    frameNode_->MarkModifyDone();
+    EXPECT_EQ(layoutProperty_->GetWordBreak(), WordBreak::NORMAL);
+
+    /**
+     * @tc.step: step2. Set wordBreak BREAK_ALL
+     */
+    layoutProperty_->UpdateWordBreak(WordBreak::BREAK_ALL);
+    frameNode_->MarkModifyDone();
+    EXPECT_EQ(layoutProperty_->GetWordBreak(), WordBreak::BREAK_ALL);
+
+    /**
+     * @tc.step: step2. Set wordBreak BREAK_ALL
+     */
+    layoutProperty_->UpdateWordBreak(WordBreak::BREAK_WORD);
+    frameNode_->MarkModifyDone();
+    EXPECT_EQ(layoutProperty_->GetWordBreak(), WordBreak::BREAK_WORD);
+}
+
+/**
  * @tc.name: testShowUnderline001
  * @tc.desc: test testInput showUnderline
  * @tc.type: FUNC
@@ -4152,5 +4191,107 @@ HWTEST_F(TextFieldUXTest, HandleOnUndoAction001, TestSize.Level1)
     pattern_->UpdateEditingValueToRecord();
     pattern_->HandleOnUndoAction();
     EXPECT_EQ(pattern_->selectController_->GetCaretIndex(), 0);
+}
+
+/**
+ * @tc.name: TextInputToJsonValue001
+ * @tc.desc: test attrs on ToJsonValue
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldUXTest, TextInputToJsonValue001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: Create Text filed node with default attrs
+     */
+    CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) {
+        model.SetTextDecoration(TextDecoration::LINE_THROUGH);
+        model.SetTextDecorationColor(Color::BLUE);
+        model.SetTextDecorationStyle(TextDecorationStyle::DOTTED);
+        model.SetLetterSpacing(1.0_px);
+        model.SetLineHeight(2.0_px);
+    });
+
+    /**
+     * @tc.expected: Check if all set properties are displayed in the corresponding JSON
+     */
+    auto json = JsonUtil::Create(true);
+    layoutProperty_->ToJsonValue(json);
+    EXPECT_TRUE(json->Contains("decoration"));
+    EXPECT_TRUE(json->Contains("letterSpacing"));
+    EXPECT_TRUE(json->Contains("lineHeight"));
+}
+
+/**
+ * @tc.name: TextInputLetterSpacing001
+ * @tc.desc: test TextInput letterSpacing
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldUXTest, TextInputLetterSpacing001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: Create Text filed node with set letterSpacing 1.0_fp
+     * @tc.expected: letterSpacing is 1.0_fp
+     */
+    CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) {
+        model.SetLetterSpacing(1.0_fp);
+    });
+
+    /**
+     * @tc.step: step2. test letterSpacing
+     */
+    EXPECT_EQ(layoutProperty_->GetLetterSpacing(), 1.0_fp);
+}
+
+/**
+ * @tc.name: TextInputLineHeight001
+ * @tc.desc: test TextInput lineHeight
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldUXTest, TextInputLineHeight001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: Create Text filed node with set lineHeight 2.0_fp
+     * @tc.expected: lineHeight is 2.0_fp
+     */
+    CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) {
+        model.SetLineHeight(2.0_fp);
+    });
+
+    /**
+     * @tc.step: step2. test maxLength
+     */
+    EXPECT_EQ(layoutProperty_->GetLineHeight(), 2.0_fp);
+}
+
+/**
+ * @tc.name: TextInputTextDecoration001
+ * @tc.desc: test TextInput decoration
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldUXTest, TextInputTextDecoration001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: Create Text filed node with set decoration(LINE_THROUGH, BLUE, DOTTED)
+     * @tc.expected: maxLength is decoration(LINE_THROUGH, BLUE, DOTTED)
+     */
+    CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) {
+        model.SetTextDecoration(TextDecoration::LINE_THROUGH);
+        model.SetTextDecorationColor(Color::BLUE);
+        model.SetTextDecorationStyle(TextDecorationStyle::DOTTED);
+    });
+    TextEditingValue value;
+    TextSelection selection;
+    value.text = "1234567890";
+    selection.baseOffset = value.text.length();
+    value.selection = selection;
+    pattern_->UpdateEditingValue(std::make_shared<TextEditingValue>(value));
+    FlushLayoutTask(frameNode_);
+
+    /**
+     * @tc.step: step2. test decoration
+     */
+    EXPECT_EQ(layoutProperty_->GetTextDecoration(), TextDecoration::LINE_THROUGH);
+    EXPECT_EQ(layoutProperty_->GetTextDecorationColor(), Color::BLUE);
+    EXPECT_EQ(layoutProperty_->GetTextDecorationStyle(), TextDecorationStyle::DOTTED);
 }
 } // namespace OHOS::Ace::NG

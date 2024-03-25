@@ -35,6 +35,7 @@ public:
     static void JsFlexBasis(const JSCallbackInfo& /* info */) {};
     static void JsFlexGrow(const JSCallbackInfo& /* info */) {};
     static void JsFlexShrink(const JSCallbackInfo& /* info */) {};
+    static void JsOpacity(const JSCallbackInfo& /* info */) {};
 };
 
 } // namespace OHOS::Ace::Framework

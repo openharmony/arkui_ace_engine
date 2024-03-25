@@ -87,8 +87,19 @@ int32_t SubwindowManager::GetParentContainerId(int32_t containerId)
     if (result != parentContainerMap_.end()) {
         return result->second;
     } else {
-        return 0;
+        return -1;
     }
+}
+
+int32_t SubwindowManager::GetSubContainerId(int32_t parentContainerId)
+{
+    std::lock_guard<std::mutex> lock(parentMutex_);
+    for (auto it = parentContainerMap_.begin(); it != parentContainerMap_.end(); it++) {
+        if (it->second == parentContainerId) {
+            return it->first;
+        }
+    }
+    return -1;
 }
 
 void SubwindowManager::AddSubwindow(int32_t instanceId, RefPtr<Subwindow> subwindow)

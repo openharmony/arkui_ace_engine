@@ -537,7 +537,9 @@ void PipelineContext::IsCloseSCBKeyboard()
 {
     auto container = Container::Current();
     CHECK_NULL_VOID(container);
-    if (container->IsKeyboard()) {
+    auto manager = DynamicCast<TextFieldManagerNG>(textFieldManager_);
+    CHECK_NULL_VOID(manager);
+    if (container->IsKeyboard() || !manager->HasKeyboard()) {
         TAG_LOGI(AceLogTag::ACE_KEYBOARD, "focus in keyboard.");
         return;
     }
@@ -2522,7 +2524,6 @@ void PipelineContext::RemoveFormVisibleChangeNode(int32_t nodeId)
 
 void PipelineContext::HandleFormVisibleChangeEvent(bool isVisible)
 {
-    auto nodes = FrameNode::GetNodesById(onFormVisibleChangeNodeIds_);
     for (auto& pair : onFormVisibleChangeEvents_) {
         if (pair.second) {
             pair.second(isVisible);
@@ -2533,11 +2534,13 @@ void PipelineContext::HandleFormVisibleChangeEvent(bool isVisible)
 void PipelineContext::AddOnAreaChangeNode(int32_t nodeId)
 {
     onAreaChangeNodeIds_.emplace(nodeId);
+    isOnAreaChangeNodesCacheVaild_ = false;
 }
 
 void PipelineContext::RemoveOnAreaChangeNode(int32_t nodeId)
 {
     onAreaChangeNodeIds_.erase(nodeId);
+    isOnAreaChangeNodesCacheVaild_ = false;
 }
 
 void PipelineContext::HandleOnAreaChangeEvent(uint64_t nanoTimestamp)
@@ -2546,8 +2549,14 @@ void PipelineContext::HandleOnAreaChangeEvent(uint64_t nanoTimestamp)
     if (onAreaChangeNodeIds_.empty()) {
         return;
     }
-    auto nodes = FrameNode::GetNodesById(onAreaChangeNodeIds_);
-    for (auto&& frameNode : nodes) {
+    if (!isOnAreaChangeNodesCacheVaild_) {
+        onAreaChangeNodesCache_ = FrameNode::GetNodesPtrById(onAreaChangeNodeIds_);
+        isOnAreaChangeNodesCacheVaild_ = true;
+    }
+    for (auto && frameNode : onAreaChangeNodesCache_) {
+        if (!frameNode) {
+            continue;
+        }
         frameNode->TriggerOnAreaChangeCallback(nanoTimestamp);
     }
     UpdateFormLinkInfos();

@@ -562,11 +562,6 @@ void TextFieldModelNG::SetShowCounter(bool value)
     auto pattern = frameNode->GetPattern<TextFieldPattern>();
     CHECK_NULL_VOID(pattern);
     pattern->SetCounterState(false);
-    if (value) {
-        pattern->AddCounterNode();
-    } else {
-        pattern->CleanCounterNode();
-    }
     ACE_UPDATE_LAYOUT_PROPERTY(TextFieldLayoutProperty, ShowCounter, value);
 }
 
@@ -1015,13 +1010,6 @@ void TextFieldModelNG::SetSelectionMenuHidden(FrameNode* frameNode, bool selecti
 void TextFieldModelNG::SetShowCounter(FrameNode* frameNode, bool value)
 {
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, ShowCounter, value, frameNode);
-    auto pattern = frameNode->GetPattern<TextFieldPattern>();
-    CHECK_NULL_VOID(pattern);
-    if (value) {
-        pattern->AddCounterNode();
-    } else {
-        pattern->CleanCounterNode();
-    }
 }
 
 void TextFieldModelNG::SetShowError(FrameNode* frameNode, const std::string& errorText, bool visible)

@@ -1507,7 +1507,7 @@ void TextPattern::InitDragEvent()
         CHECK_NULL_RETURN(pattern, itemInfo);
         auto eventHub = pattern->GetEventHub<EventHub>();
         CHECK_NULL_RETURN(eventHub, itemInfo);
-        if (pattern->spans_.empty()) {
+        if (pattern->spans_.empty() || pattern->isSpanStringMode_) {
             return pattern->OnDragStartNoChild(event, extraParams);
         } else {
             return pattern->OnDragStart(event, extraParams);
@@ -1877,7 +1877,7 @@ void TextPattern::OnModifyDone()
         auto obscuredReasons = renderContext->GetObscured().value_or(std::vector<ObscuredReasons>());
         bool ifHaveObscured = std::any_of(obscuredReasons.begin(), obscuredReasons.end(),
             [](const auto& reason) { return reason == ObscuredReasons::PLACEHOLDER; });
-        if (ifHaveObscured) {
+        if (ifHaveObscured && !isSpanStringMode_) {
             CloseSelectOverlay();
             ResetSelection();
             copyOption_ = CopyOptions::None;
@@ -2036,6 +2036,10 @@ bool TextPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, c
     baselineOffset_ = textLayoutAlgorithm->GetBaselineOffset();
     contentOffset_ = dirty->GetGeometryNode()->GetContentOffset();
     textStyle_ = textLayoutAlgorithm->GetTextStyle();
+    if (textSelector_.IsValid() && !isMousePressed_) {
+        CalculateHandleOffsetAndShowOverlay();
+        ShowSelectOverlay(textSelector_.firstHandle, textSelector_.secondHandle, true);
+    }
     return true;
 }
 
@@ -2129,11 +2133,17 @@ void TextPattern::BeforeCreateLayoutWrapper()
     } else {
         auto host = GetHost();
         CHECK_NULL_VOID(host);
-        for (const auto& child : host->GetChildren()) {
-            host->RemoveChild(child);
-        }
+        textForDisplay_.clear();
+        host->Clean();
         for (const auto& span : spans_) {
             textForDisplay_ += span->content;
+        }
+        if (dataDetectorAdapter_->textForAI_ != textForDisplay_) {
+            dataDetectorAdapter_->textForAI_ = textForDisplay_;
+            dataDetectorAdapter_->aiDetectInitialized_ = false;
+        }
+        if (CanStartAITask() && !dataDetectorAdapter_->aiDetectInitialized_) {
+            dataDetectorAdapter_->StartAITask();
         }
         // mark content dirty
         if (contentMod_) {
@@ -2886,7 +2896,6 @@ void TextPattern::UpdateSpanItems(const std::list<RefPtr<SpanItem>>& spanItems)
     spans_ = spanItems;
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    CloseSelectOverlay();
     host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
 }
 } // namespace OHOS::Ace::NG

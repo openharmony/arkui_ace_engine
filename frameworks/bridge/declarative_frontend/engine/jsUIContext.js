@@ -311,7 +311,7 @@ class UIContext {
         return this.measureUtils_;
     }
 
-    getAbilityContext() {
+    getHostContext() {
         __JSScopeUtil__.syncInstanceId(this.instanceId_);
         let context = getContext();
         __JSScopeUtil__.restoreInstanceId();

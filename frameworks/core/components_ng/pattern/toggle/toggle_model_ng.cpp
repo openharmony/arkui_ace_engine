@@ -434,6 +434,31 @@ void ToggleModelNG::Pop()
     ViewStackProcessor::GetInstance()->PopContainer();
 }
 
+void ToggleModelNG::SetPointRadius(const Dimension& switchPointRadius)
+{
+    ACE_UPDATE_PAINT_PROPERTY(SwitchPaintProperty, PointRadius, switchPointRadius);
+}
+
+void ToggleModelNG::ResetPointRadius()
+{
+    ACE_RESET_PAINT_PROPERTY_WITH_FLAG(SwitchPaintProperty, PointRadius, PROPERTY_UPDATE_RENDER);
+}
+
+void ToggleModelNG::SetUnselectedColor(const Color& unselectedColor)
+{
+    ACE_UPDATE_PAINT_PROPERTY(SwitchPaintProperty, UnselectedColor, unselectedColor);
+}
+
+void ToggleModelNG::SetTrackBorderRadius(const Dimension& borderRadius)
+{
+    ACE_UPDATE_PAINT_PROPERTY(SwitchPaintProperty, TrackBorderRadius, borderRadius);
+}
+
+void ToggleModelNG::ResetTrackBorderRadius()
+{
+    ACE_RESET_PAINT_PROPERTY_WITH_FLAG(SwitchPaintProperty, TrackBorderRadius, PROPERTY_UPDATE_RENDER);
+}
+
 void ToggleModelNG::SetSelectedColor(FrameNode* frameNode, const std::optional<Color>& selectedColor)
 {
     CHECK_NULL_VOID(frameNode);

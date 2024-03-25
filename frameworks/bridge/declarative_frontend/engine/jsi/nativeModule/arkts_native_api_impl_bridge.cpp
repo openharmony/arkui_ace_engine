@@ -859,6 +859,10 @@ ArkUINativeModuleValue ArkUINativeModule::GetArkUINativeModule(ArkUIRuntimeCallI
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), SearchBridge::SetSearchHeight));
     search->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetSearchHeight"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), SearchBridge::ResetSearchHeight));
+    search->Set(vm, panda::StringRef::NewFromUtf8(vm, "setSearchInspectorId"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), SearchBridge::SetSearchInspectorId));
+    search->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetSearchInspectorId"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), SearchBridge::ResetSearchInspectorId));
     object->Set(vm, panda::StringRef::NewFromUtf8(vm, "search"), search);
 
     auto stack = panda::ObjectRef::New(vm);
@@ -1420,6 +1424,10 @@ void ArkUINativeModule::RegisterTextpickerAttributes(Local<panda::ObjectRef> obj
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextPickerBridge::ResetDefaultPickerItemHeight));
     textpicker->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetBackgroundColor"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextPickerBridge::ResetBackgroundColor));
+    textpicker->Set(vm, panda::StringRef::NewFromUtf8(vm, "setDivider"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextPickerBridge::SetDivider));
+    textpicker->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetDivider"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextPickerBridge::ResetDivider));
     object->Set(vm, panda::StringRef::NewFromUtf8(vm, "textpicker"), textpicker);
 }
 

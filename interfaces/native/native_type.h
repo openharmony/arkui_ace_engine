@@ -1249,6 +1249,8 @@ typedef enum {
     ARKUI_LINEAR_GRADIENT_DIRECTION_RIGHT_BOTTOM,
     /** No gradient. */
     ARKUI_LINEAR_GRADIENT_DIRECTION_NONE,
+    /** 自定义渐变方向. */
+    ARKUI_LINEAR_GRADIENT_DIRECTION_CUSTOM,
 } ArkUI_LinearGradientDirection;
 
 /**

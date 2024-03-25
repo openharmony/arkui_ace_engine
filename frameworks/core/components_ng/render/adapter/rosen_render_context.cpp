@@ -3636,6 +3636,12 @@ void RosenRenderContext::UpdateTransition(const TransitionOptions& options)
     }
 }
 
+void RosenRenderContext::CleanTransition()
+{
+    propTransitionDisappearing_.reset();
+    propTransitionDisappearing_.reset();
+}
+
 std::shared_ptr<Rosen::RSTransitionEffect> RosenRenderContext::GetRSTransitionWithoutType(
     const std::unique_ptr<TransitionOptions>& options, const SizeF& frameSize)
 {
@@ -4109,6 +4115,7 @@ void RosenRenderContext::PaintOverlayText()
             overlayRect = std::make_shared<Rosen::RectF>(overlayOffset.GetX(), overlayOffset.GetY(),
                 std::max(paragraphSize.Width(), paintRect.Width()),
                 std::max(paragraphSize.Height(), paintRect.Height()));
+            rsNode_->SetIsCustomTextType(modifier_->IsCustomFont());
             rsNode_->SetDrawRegion(overlayRect);
         } else {
             modifier_ = std::make_shared<OverlayTextModifier>();
@@ -4119,6 +4126,7 @@ void RosenRenderContext::PaintOverlayText()
             overlayRect = std::make_shared<Rosen::RectF>(overlayOffset.GetX(), overlayOffset.GetY(),
                 std::max(paragraphSize.Width(), paintRect.Width()),
                 std::max(paragraphSize.Height(), paintRect.Height()));
+            rsNode_->SetIsCustomTextType(modifier_->IsCustomFont());
             rsNode_->SetDrawRegion(overlayRect);
         }
     }

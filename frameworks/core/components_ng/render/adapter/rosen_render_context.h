@@ -194,6 +194,7 @@ public:
     void OnTransformMatrixUpdate(const Matrix4& matrix) override;
 
     void UpdateTransition(const TransitionOptions& options) override;
+    void CleanTransition() override;
     void UpdateChainedTransition(const RefPtr<NG::ChainedTransitionEffect>& effect) override;
     bool HasAppearingTransition() const
     {

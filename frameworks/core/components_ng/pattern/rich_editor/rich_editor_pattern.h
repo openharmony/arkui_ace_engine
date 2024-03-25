@@ -209,6 +209,7 @@ public:
     int32_t GetRightWordPosition(int32_t caretPosition);
     int32_t GetParagraphBeginPosition(int32_t caretPosition);
     int32_t GetParagraphEndPosition(int32_t caretPosition);
+    int32_t CaretPositionSelectEmoji(CaretMoveIntent direction);
     void HandleSelect(CaretMoveIntent direction) override;
     bool SetCaretPosition(int32_t pos);
     int32_t GetCaretPosition();
@@ -633,8 +634,7 @@ private:
     void AdjustPlaceholderSelection(int32_t& start, int32_t& end, const Offset& pos);
     bool AdjustWordSelection(int32_t& start, int32_t& end);
     bool IsClickBoundary(const int32_t position);
-    bool EraseEmoji();
-    bool EraseEmoji(const RefPtr<SpanItem>& spanItem);
+    std::pair<bool, bool> CaretPositionIsEmoji(int32_t& emojiLength);
     void InsertValueInSpanOffset(const TextInsertValueInfo& info, std::wstring& text, const std::wstring& insertValue);
     void SetSelfAndChildDraggableFalse(const RefPtr<UINode>& customNode);
 

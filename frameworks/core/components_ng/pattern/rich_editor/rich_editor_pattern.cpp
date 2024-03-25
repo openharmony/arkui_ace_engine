@@ -897,6 +897,11 @@ void RichEditorPattern::CopyTextSpanFontStyle(RefPtr<SpanNode>& source, RefPtr<S
         target->AddPropertyInfo(PropertyInfo::TEXTCASE);
     }
 
+    if (source->HasLineHeight()) {
+        target->UpdateLineHeight(source->GetLineHeightValue(Dimension()));
+        target->AddPropertyInfo(PropertyInfo::LINEHEIGHT);
+    }
+
     if (source->HasLetterSpacing()) {
         target->UpdateLetterSpacing(source->GetLetterSpacingValue(Dimension()));
         target->AddPropertyInfo(PropertyInfo::LETTERSPACE);
@@ -906,19 +911,9 @@ void RichEditorPattern::CopyTextSpanFontStyle(RefPtr<SpanNode>& source, RefPtr<S
 void RichEditorPattern::CopyTextSpanLineStyle(
     RefPtr<SpanNode>& source, RefPtr<SpanNode>& target, bool needLeadingMargin)
 {
-    if (source->HasLineHeight()) {
-        target->UpdateLineHeight(source->GetLineHeightValue(Dimension()));
-        target->AddPropertyInfo(PropertyInfo::LINEHEIGHT);
-    }
-
     if (source->HasTextShadow()) {
         target->UpdateTextShadow(source->GetTextShadowValue({Shadow()}));
         target->AddPropertyInfo(PropertyInfo::TEXTSHADOW);
-    }
-
-    if (source->HasLetterSpacing()) {
-        target->UpdateLetterSpacing(source->GetLetterSpacingValue(Dimension()));
-        target->AddPropertyInfo(PropertyInfo::LETTERSPACE);
     }
 
     if (needLeadingMargin && source->HasLeadingMargin()) {
@@ -1817,8 +1812,8 @@ bool RichEditorPattern::CheckBlurReason()
 
 void RichEditorPattern::HandleBlurEvent()
 {
+    isLongPress_ = false;
     if (textDetectEnable_) {
-        isLongPress_ = false;
         if (CanStartAITask()) {
             dataDetectorAdapter_->StartAITask();
         }
@@ -2960,53 +2955,36 @@ void RichEditorPattern::FireOnDeleteComplete(const RichEditorDeleteValue& info)
     }
 }
 
-bool RichEditorPattern::EraseEmoji(const RefPtr<SpanItem>& spanItem)
+std::pair<bool, bool> RichEditorPattern::CaretPositionIsEmoji(int32_t& emojiLength)
 {
-    CHECK_NULL_RETURN(spanItem, false);
-    auto& content = spanItem->content;
-    bool eraseSuccess = false;
     uint32_t start = 0;
     uint32_t end = 0;
+    uint32_t characterLength = 0;
+    constexpr uint32_t EMOJI_CHARACTER_LENGTH = 2; //single emoji length
+    bool caretPositionBackwardIsEmoji = false;
+    bool caretPositionForwardIsEmoji = false;
+    std::stringstream ss;
+    for (auto iter = spans_.cbegin(); iter != spans_.cend(); iter++) {
+        ss << (*iter)->content;
+    }
+    auto content = ss.str();
     while (start < content.length()) {
         auto unicode = TypedText::GetUTF8Next(content.c_str(), start, end);
         if (TypedText::IsEmoji(unicode)) {
-            content.erase(start, end - start);
-            eraseSuccess = true;
-            continue;
+            emojiLength = (end - start) / EMOJI_CHARACTER_LENGTH;
+            if (characterLength == static_cast<uint32_t>(caretPosition_)) {
+                caretPositionForwardIsEmoji = true;
+            }
+            characterLength += EMOJI_CHARACTER_LENGTH;
+            if (characterLength == static_cast<uint32_t>(caretPosition_)) {
+                caretPositionBackwardIsEmoji = true;
+            }
+        } else {
+            characterLength++;
         }
         start = end;
     }
-    return eraseSuccess;
-}
-
-bool RichEditorPattern::EraseEmoji()
-{
-    auto host = GetHost();
-    CHECK_NULL_RETURN(host, false);
-    std::set<int32_t, std::greater<int32_t>> deleteNodes;
-    bool eraseSuccess = false;
-    for (auto i = 0; i < static_cast<int32_t>(host->GetChildren().size()); ++i) {
-        RefPtr<UINode> uiNode = host->GetChildAtIndex(i);
-        auto spanNode = DynamicCast<SpanNode>(uiNode);
-        if (!spanNode || spanNode->GetTag() != V2::SPAN_ETS_TAG) {
-            continue;
-        }
-        const auto& spanItem = spanNode->GetSpanItem();
-        eraseSuccess |= EraseEmoji(spanItem);
-        if (spanItem && spanItem->content.empty()) {
-            deleteNodes.emplace(i);
-        }
-    }
-    for (auto index : deleteNodes) {
-        host->RemoveChildAtIndex(index);
-    }
-    if (eraseSuccess) {
-        UpdateSpanPosition();
-        SetCaretPosition(std::clamp(caretPosition_, 0, static_cast<int32_t>(GetTextContentLength())));
-        host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
-        OnModifyDone();
-    }
-    return eraseSuccess;
+    return std::make_pair(caretPositionBackwardIsEmoji, caretPositionForwardIsEmoji);
 }
 
 void RichEditorPattern::HandleOnDelete(bool backward)
@@ -3028,9 +3006,6 @@ void RichEditorPattern::HandleOnDelete(bool backward)
 
 void RichEditorPattern::DeleteBackward(int32_t length)
 {
-    if (EraseEmoji()) {
-        return;
-    }
     OperationRecord record;
     record.beforeCaretPosition = caretPosition_;
     std::wstring deleteText = DeleteBackwardOperation(length);
@@ -3044,6 +3019,8 @@ void RichEditorPattern::DeleteBackward(int32_t length)
 
 std::wstring RichEditorPattern::DeleteBackwardOperation(int32_t length)
 {
+    int32_t emojiLength = 0;
+    auto [caretPositionBackwardIsEmoji, caretPositionForwardIsEmoji] = CaretPositionIsEmoji(emojiLength);
     if (textSelector_.IsValid()) {
         if (!textSelector_.StartEqualToDest()) {
             length = textSelector_.GetTextEnd() - textSelector_.GetTextStart();
@@ -3051,6 +3028,8 @@ std::wstring RichEditorPattern::DeleteBackwardOperation(int32_t length)
         caretPosition_ = textSelector_.GetTextEnd();
         CloseSelectOverlay();
         ResetSelection();
+    } else if (caretPositionBackwardIsEmoji) {
+        length = emojiLength;
     }
     std::wstringstream wss;
     for (auto iter = spans_.cbegin(); iter != spans_.cend(); iter++) {
@@ -3091,9 +3070,6 @@ std::wstring RichEditorPattern::DeleteBackwardOperation(int32_t length)
 
 void RichEditorPattern::DeleteForward(int32_t length)
 {
-    if (EraseEmoji()) {
-        return;
-    }
     OperationRecord record;
     record.beforeCaretPosition = caretPosition_;
     std::wstring deleteText = DeleteForwardOperation(length);
@@ -3107,11 +3083,15 @@ void RichEditorPattern::DeleteForward(int32_t length)
 
 std::wstring RichEditorPattern::DeleteForwardOperation(int32_t length)
 {
+    int32_t emojiLength = 0;
+    auto [caretPositionBackwardIsEmoji, caretPositionForwardIsEmoji] = CaretPositionIsEmoji(emojiLength);
     if (textSelector_.IsValid()) {
         length = textSelector_.GetTextEnd() - textSelector_.GetTextStart();
         caretPosition_ = textSelector_.GetTextStart();
         CloseSelectOverlay();
         ResetSelection();
+    } else if (caretPositionForwardIsEmoji) {
+        length = emojiLength;
     }
     std::wstringstream wss;
     for (auto iter = spans_.cbegin(); iter != spans_.cend(); iter++) {
@@ -3189,7 +3169,14 @@ bool RichEditorPattern::CursorMoveLeft()
 {
     CloseSelectOverlay();
     ResetSelection();
-    auto caretPosition = std::clamp((caretPosition_ - 1), 0, static_cast<int32_t>(GetTextContentLength()));
+    int32_t emojiLength = 0;
+    int32_t caretPosition = caretPosition_;
+    auto [caretPositionBackwardIsEmoji, caretPositionForwardIsEmoji] = CaretPositionIsEmoji(emojiLength);
+    if (caretPositionBackwardIsEmoji) {
+        caretPosition = std::clamp((caretPosition_ - emojiLength), 0, static_cast<int32_t>(GetTextContentLength()));
+    } else {
+        caretPosition = std::clamp((caretPosition_ - 1), 0, static_cast<int32_t>(GetTextContentLength()));
+    }
     if (caretPosition_ == caretPosition) {
         return false;
     }
@@ -3206,7 +3193,14 @@ bool RichEditorPattern::CursorMoveRight()
 {
     CloseSelectOverlay();
     ResetSelection();
-    auto caretPosition = std::clamp((caretPosition_ + 1), 0, static_cast<int32_t>(GetTextContentLength()));
+    int32_t emojiLength = 0;
+    int32_t caretPosition = caretPosition_;
+    auto [caretPositionBackwardIsEmoji, caretPositionForwardIsEmoji] = CaretPositionIsEmoji(emojiLength);
+    if (caretPositionForwardIsEmoji) {
+        caretPosition = std::clamp((caretPosition_ + emojiLength), 0, static_cast<int32_t>(GetTextContentLength()));
+    } else {
+        caretPosition = std::clamp((caretPosition_ + 1), 0, static_cast<int32_t>(GetTextContentLength()));
+    }
     if (caretPosition_ == caretPosition) {
         return false;
     }
@@ -3514,6 +3508,29 @@ void RichEditorPattern::HandleOnSelectAll()
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
+int32_t RichEditorPattern::CaretPositionSelectEmoji(CaretMoveIntent direction)
+{
+    int32_t newPos = caretPosition_;
+    int32_t emojiLength = 0;
+    auto [caretPositionBackwardIsEmoji, caretPositionForwardIsEmoji] = CaretPositionIsEmoji(emojiLength);
+    if (direction == CaretMoveIntent::Left) {
+        if (caretPositionBackwardIsEmoji) {
+            newPos = caretPosition_ - emojiLength;
+        } else {
+            newPos = caretPosition_ - 1;
+        }
+        return newPos;
+    }
+    if (direction == CaretMoveIntent::Right) {
+        if (caretPositionForwardIsEmoji) {
+            newPos = caretPosition_ + emojiLength;
+        } else {
+            newPos = caretPosition_ + 1;
+        }
+    }
+    return newPos;
+}
+
 void RichEditorPattern::HandleSelect(CaretMoveIntent direction)
 {
     CloseSelectOverlay();
@@ -3526,10 +3543,10 @@ void RichEditorPattern::HandleSelect(CaretMoveIntent direction)
     }
     switch (direction) {
         case CaretMoveIntent::Left:
-            newPos = caretPosition_ - 1;
+            newPos = CaretPositionSelectEmoji(CaretMoveIntent::Left);
             break;
         case CaretMoveIntent::Right:
-            newPos = caretPosition_ + 1;
+            newPos = CaretPositionSelectEmoji(CaretMoveIntent::Right);
             break;
         case CaretMoveIntent::Up: {
             float caretHeight = 0.0f;

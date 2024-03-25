@@ -92,6 +92,7 @@ public:
     static void SetCancelButtonStyle(FrameNode* frameNode, CancelButtonStyle style);
     static void SetHeight(FrameNode* frameNode, const Dimension& height);
     static void SetSearchEnterKeyType(FrameNode* frameNode, TextInputAction value);
+    static void SetId(FrameNode* frameNode, const std::string& key);
 private:
     void CreateTextField(const RefPtr<SearchNode>& parentNode,
         const std::optional<std::string>& placeholder, const std::optional<std::string>& value, bool hasTextFieldNode);

@@ -26,10 +26,10 @@
 extern "C" {
 #endif
 
-#define ARKUI_FULL_API_VERSION 80
+#define ARKUI_FULL_API_VERSION 81
 // When changing ARKUI_BASIC_API_VERSION, ARKUI_FULL_API_VERSION must be
 // increased as well.
-#define ARKUI_NODE_API_VERSION 80
+#define ARKUI_NODE_API_VERSION 81
 
 #define ARKUI_BASIC_API_VERSION 6
 #define ARKUI_EXTENDED_API_VERSION 6
@@ -736,6 +736,7 @@ enum ArkUIEventSubKind {
     ON_LIST_SCROLL_INDEX,
     ON_LIST_SCROLL_START,
     ON_LIST_SCROLL_STOP,
+    ON_LIST_SCROLL_FRAME_BEGIN,
 
     ON_TOGGLE_CHANGE = ARKUI_MAX_EVENT_NUM * ARKUI_TOGGLE,
 
@@ -1010,11 +1011,12 @@ struct ArkUICommonModifier {
     void (*resetOpacity)(ArkUINodeHandle node);
     void (*setAlign)(ArkUINodeHandle node, ArkUI_Int32 align);
     void (*resetAlign)(ArkUINodeHandle node);
-    void (*setBackdropBlur)(ArkUINodeHandle node, ArkUI_Float32 value);
+    void (*setBackdropBlur)(
+        ArkUINodeHandle node, ArkUI_Float32 value, const ArkUI_Float32* blurValues, ArkUI_Int32 blurValuesSize);
     void (*resetBackdropBlur)(ArkUINodeHandle node);
     void (*setHueRotate)(ArkUINodeHandle node, ArkUI_Float32 deg);
     void (*resetHueRotate)(ArkUINodeHandle node);
-    void (*setInvert)(ArkUINodeHandle node, ArkUI_Float32 invert);
+    void (*setInvert)(ArkUINodeHandle node, ArkUI_Float32* invert, ArkUI_Int32 length);
     void (*resetInvert)(ArkUINodeHandle node);
     void (*setSepia)(ArkUINodeHandle node, ArkUI_Float32 sepia);
     void (*resetSepia)(ArkUINodeHandle node);
@@ -1028,7 +1030,8 @@ struct ArkUICommonModifier {
     void (*resetContrast)(ArkUINodeHandle node);
     void (*setBrightness)(ArkUINodeHandle node, ArkUI_Float32 brightness);
     void (*resetBrightness)(ArkUINodeHandle node);
-    void (*setBlur)(ArkUINodeHandle node, ArkUI_Float32 value);
+    void (*setBlur)(
+        ArkUINodeHandle node, ArkUI_Float32 value, const ArkUI_Float32* blurValues, ArkUI_Int32 blurValuesSize);
     void (*resetBlur)(ArkUINodeHandle node);
     void (*setLinearGradient)(ArkUINodeHandle node, const ArkUI_Float32* values, ArkUI_Int32 valuesLength,
         const ArkUIInt32orFloat32* colors, ArkUI_Int32 colorsLength);
@@ -1562,7 +1565,7 @@ struct ArkUIImageModifier {
     ArkUI_Int32 (*getObjectRepeat)(ArkUINodeHandle node);
     ArkUI_Int32 (*getObjectFit)(ArkUINodeHandle node);
     ArkUI_Int32 (*getImageInterpolation)(ArkUINodeHandle node);
-    ArkUIFilterColorType (*getColorFilter)(ArkUINodeHandle node);
+    void (*getColorFilter)(ArkUINodeHandle node, ArkUIFilterColorType* colorFilter);
     ArkUI_CharPtr (*getAlt)(ArkUINodeHandle node);
     ArkUI_Int32 (*getImageDraggable)(ArkUINodeHandle node);
     ArkUI_Int32 (*getRenderMode)(ArkUINodeHandle node);
@@ -1974,7 +1977,7 @@ struct ArkUIGestureModifier {
     void (*dispose)(ArkUIGesture* recognizer);
     // gesture event will received in common async event queue.
     void (*registerGestureEvent)(ArkUIGesture* gesture, ArkUI_Uint32 actionTypeMask, void* extraParam);
-    void (*addGestureToNode)(ArkUINodeHandle node, ArkUIGesture* gesture, ArkUI_Int32 priorityNum, ArkUI_Uint32 mask);
+    void (*addGestureToNode)(ArkUINodeHandle node, ArkUIGesture* gesture, ArkUI_Int32 priorityNum, ArkUI_Int32 mask);
     void (*removeGestureFromNode)(ArkUINodeHandle node, ArkUIGesture* recognizer);
 };
 
@@ -2658,6 +2661,8 @@ struct ArkUISearchModifier {
     void (*resetSearchEnterKeyType)(ArkUINodeHandle node);
     void (*setSearchHeight)(ArkUINodeHandle node, ArkUI_Float32 heightValue, ArkUI_Int32 heightUnit);
     void (*resetSearchHeight)(ArkUINodeHandle node);
+    void (*setSearchInspectorId)(ArkUINodeHandle node, ArkUI_CharPtr key);
+    void (*resetSearchInspectorId)(ArkUINodeHandle node);
 };
 
 struct ArkUISearchControllerModifier {
@@ -2714,6 +2719,9 @@ struct ArkUITextPickerModifier {
     void (*setTextPickerRangeStr)(ArkUINodeHandle node, ArkUI_CharPtr rangeStr, ArkUI_Bool isSingleRange);
     ArkUI_CharPtr (*getTextPickerValue)(ArkUINodeHandle node);
     void (*setTextPickerValue)(ArkUINodeHandle node, ArkUI_CharPtr valueStr);
+    void (*setTextPickerDivider)(ArkUINodeHandle node, ArkUI_Uint32 color, const ArkUI_Float32* values,
+        const ArkUI_Int32* units, ArkUI_Int32 length);
+    void (*resetTextPickerDivider)(ArkUINodeHandle node);
 };
 
 struct ArkUITextTimerModifier {

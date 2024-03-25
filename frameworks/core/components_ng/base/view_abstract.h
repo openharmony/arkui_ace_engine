@@ -308,6 +308,7 @@ public:
     static void SetDebugLine(const std::string &line);
     // transition
     static void SetTransition(const TransitionOptions &options);
+    static void CleanTransition();
     static void SetChainedTransition(const RefPtr<NG::ChainedTransitionEffect> &effect);
     // sharedTransition
     static void SetSharedTransition(const std::string &shareId, const std::shared_ptr<SharedTransitionOption> &option);
@@ -399,7 +400,7 @@ public:
     static void SetOpacity(FrameNode* frameNode, double opacity);
     static void SetZIndex(FrameNode* frameNode, int32_t value);
     static void SetAlign(FrameNode* frameNode, Alignment alignment);
-    static void SetBackdropBlur(FrameNode* frameNode, const Dimension& radius);
+    static void SetBackdropBlur(FrameNode* frameNode, const Dimension& radius, const BlurOption &blurOption);
     static void SetInvert(FrameNode* frameNode, const InvertVariant& invert);
     static void SetSepia(FrameNode* frameNode, const Dimension& sepia);
     static void SetSaturate(FrameNode* frameNode, const Dimension& saturate);
@@ -407,7 +408,7 @@ public:
     static void SetGrayScale(FrameNode* frameNode, const Dimension& grayScale);
     static void SetContrast(FrameNode* frameNode, const Dimension& contrast);
     static void SetBrightness(FrameNode* frameNode, const Dimension& brightness);
-    static void SetFrontBlur(FrameNode* frameNode, const Dimension& radius);
+    static void SetFrontBlur(FrameNode* frameNode, const Dimension& radius, const BlurOption &blurOption);
     static void SetHueRotate(FrameNode* frameNode, float hueRotate);
     static void SetLinearGradient(FrameNode* frameNode, const NG::Gradient& gradient);
     static void SetSweepGradient(FrameNode* frameNode, const NG::Gradient& gradient);

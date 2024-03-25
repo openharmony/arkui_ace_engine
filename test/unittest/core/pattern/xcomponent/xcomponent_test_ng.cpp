@@ -1735,11 +1735,11 @@ HWTEST_F(XComponentTestNg, XComponentExtSurfaceCallbackClient026, TestSize.Level
 }
 
 /**
- * @tc.name: XComponentSurfaceTestTypeSurface
+ * @tc.name: XComponentSurfaceTest
  * @tc.desc: Test SurfaceHide/SurfaceShow callback
  * @tc.type: FUNC
  */
-HWTEST_F(XComponentTestNg, XComponentSurfaceTestTypeSurface, TestSize.Level1)
+HWTEST_F(XComponentTestNg, XComponentSurfaceTest, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. set type = XCOMPONENT_SURFACE_TYPE and call CreateXComponentNode
@@ -1796,8 +1796,8 @@ HWTEST_F(XComponentTestNg, XComponentSurfaceTestTypeSurface, TestSize.Level1)
      * @tc.steps: step5. call OnWindowHide and OnWindowShoww when the pre-judgment of the function is not satisfied
      * @tc.expected: callback will be triggered only once
      */
-    bool initConditions[2] = { false, true };
-    bool typeConditions[2] = { false, true };
+    bool initConditions[2] = { true, false };
+    bool typeConditions[2] = { true, false };
     EXPECT_CALL(*AceType::DynamicCast<MockRenderSurface>(pattern->renderSurface_), releaseSurfaceBuffers())
         .WillOnce(Return());
     for (bool initCondition : initConditions) {
