@@ -555,6 +555,24 @@ class TextInputFontFamilyModifier extends ModifierWithKey<ResourceStr> {
     return !isBaseOrResourceEqual(this.stageValue, this.value);
   }
 }
+
+class TextInputFontFeatureModifier extends ModifierWithKey<FontFeature> {
+  constructor(value: FontFeature) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('textInputFontFeature');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().textInput.resetFontFeature(node);
+    } else {
+      getUINativeModule().textInput.setFontFeature(node, this.value!);
+    }
+  }
+  checkObjectDiff(): boolean {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+
 class ArkTextInputComponent extends ArkComponent implements CommonMethod<TextInputAttribute> {
   constructor(nativePtr: KNode) {
     super(nativePtr);
@@ -739,6 +757,10 @@ class ArkTextInputComponent extends ArkComponent implements CommonMethod<TextInp
   }
   maxLines(value: number): TextInputAttribute {
     modifierWithKey(this._modifiersWithKeys, TextInputMaxLinesModifier.identity, TextInputMaxLinesModifier, value);
+    return this;
+  }
+  fontFeature(value: FontFeature): TextInputAttribute {
+    modifierWithKey(this._modifiersWithKeys, TextInputFontFeatureModifier.identity, TextInputFontFeatureModifier, value);
     return this;
   }
   customKeyboard(event: () => void): TextInputAttribute {

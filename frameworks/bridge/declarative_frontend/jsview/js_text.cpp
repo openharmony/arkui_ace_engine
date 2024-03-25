@@ -43,6 +43,7 @@
 #include "core/components_ng/pattern/text/text_model_ng.h"
 #include "core/event/ace_event_handler.h"
 #include "core/pipeline/pipeline_base.h"
+#include "core/components/common/properties/text_style_parser.h"
 
 namespace OHOS::Ace {
 
@@ -786,6 +787,19 @@ void JSText::JsClip(const JSCallbackInfo& info)
     }
 }
 
+void JSText::SetFontFeature(const JSCallbackInfo& info)
+{
+    if (info.Length() < 1) {
+        return;
+    }
+    if (!info[0]->IsString()) {
+        return;
+    }
+
+    std::string fontFeatureSettings = info[0]->ToString();
+    TextModel::GetInstance()->SetFontFeature(ParseFontFeatureSettings(fontFeatureSettings));
+}
+
 void JSText::JSBind(BindingTarget globalObj)
 {
     JSClass<JSText>::Declare("Text");
@@ -839,6 +853,7 @@ void JSText::JSBind(BindingTarget globalObj)
     JSClass<JSText>::StaticMethod("bindSelectionMenu", &JSText::BindSelectionMenu);
     JSClass<JSText>::StaticMethod("onTextSelectionChange", &JSText::SetOnTextSelectionChange);
     JSClass<JSText>::StaticMethod("clip", &JSText::JsClip);
+    JSClass<JSText>::StaticMethod("fontFeature", &JSText::SetFontFeature);
     JSClass<JSText>::InheritAndBind<JSContainerBase>(globalObj);
 }
 

@@ -26,10 +26,10 @@
 extern "C" {
 #endif
 
-#define ARKUI_FULL_API_VERSION 81
+#define ARKUI_FULL_API_VERSION 82
 // When changing ARKUI_BASIC_API_VERSION, ARKUI_FULL_API_VERSION must be
 // increased as well.
-#define ARKUI_NODE_API_VERSION 81
+#define ARKUI_NODE_API_VERSION 82
 
 #define ARKUI_BASIC_API_VERSION 6
 #define ARKUI_EXTENDED_API_VERSION 6
@@ -1472,6 +1472,8 @@ struct ArkUITextModifier {
     void (*getTextShadows)(ArkUINodeHandle node, ArkUITextShadowStruct* textShadow, ArkUI_Uint32 size);
     ArkUI_Int32 (*getTextWordBreak)(ArkUINodeHandle node);
     ArkUI_Int32 (*getTextEllipsisMode)(ArkUINodeHandle node);
+    void (*setTextFontFeature)(ArkUINodeHandle node, ArkUI_CharPtr value);
+    void (*resetTextFontFeature)(ArkUINodeHandle node);
 };
 
 struct ArkUIButtonModifier {
@@ -2149,6 +2151,8 @@ struct ArkUITextAreaModifier {
     void (*resetTextAreaLetterSpacing)(ArkUINodeHandle node);
     void (*setTextAreaLineHeight)(ArkUINodeHandle node, ArkUI_Float32 value, ArkUI_Int32 unit);
     void (*resetTextAreaLineHeight)(ArkUINodeHandle node);
+    void (*setTextAreaFontFeature)(ArkUINodeHandle node, ArkUI_CharPtr value);
+    void (*resetTextAreaFontFeature)(ArkUINodeHandle node);
 };
 
 struct ArkUITextInputModifier {
@@ -2246,6 +2250,8 @@ struct ArkUITextInputModifier {
     void (*resetTextInputLetterSpacing)(ArkUINodeHandle node);
     void (*setTextInputLineHeight)(ArkUINodeHandle node, ArkUI_Float32 value, ArkUI_Int32 unit);
     void (*resetTextInputLineHeight)(ArkUINodeHandle node);
+    void (*setTextInputFontFeature)(ArkUINodeHandle node, ArkUI_CharPtr value);
+    void (*resetTextInputFontFeature)(ArkUINodeHandle node);
 };
 
 struct ArkUIWebModifier {
@@ -2681,6 +2687,8 @@ struct ArkUISearchModifier {
     void (*resetSearchLetterSpacing)(ArkUINodeHandle node);
     void (*setSearchLineHeight)(ArkUINodeHandle node, ArkUI_Float32 value, ArkUI_Int32 unit);
     void (*resetSearchLineHeight)(ArkUINodeHandle node);
+    void (*setSearchFontFeature)(ArkUINodeHandle node, ArkUI_CharPtr value);
+    void (*resetSearchFontFeature)(ArkUINodeHandle node);
 };
 
 struct ArkUISearchControllerModifier {

@@ -355,6 +355,23 @@ class SearchLineHeightModifier extends ModifierWithKey<number | string | Resourc
   }
 }
 
+class SearchFontFeatureModifier extends ModifierWithKey<FontFeature> {
+  constructor(value: FontFeature) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('searchFontFeature');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().search.resetFontFeature(node);
+    } else {
+      getUINativeModule().search.setFontFeature(node, this.value!);
+    }
+  }
+  checkObjectDiff(): boolean {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+
 class ArkSearchComponent extends ArkComponent implements CommonMethod<SearchAttribute> {
   constructor(nativePtr: KNode) {
     super(nativePtr);
@@ -456,6 +473,10 @@ class ArkSearchComponent extends ArkComponent implements CommonMethod<SearchAttr
   enterKeyType(value: EnterKeyType): SearchAttribute {
     modifierWithKey(this._modifiersWithKeys, SearchEnterKeyTypeModifier.identity,
       SearchEnterKeyTypeModifier, value);
+    return this;
+  }
+  fontFeature(value: FontFeature): SearchAttribute {
+    modifierWithKey(this._modifiersWithKeys, SearchFontFeatureModifier.identity, SearchFontFeatureModifier, value);
     return this;
   }
   height(value: Length): this {

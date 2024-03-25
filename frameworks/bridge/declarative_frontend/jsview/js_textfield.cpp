@@ -44,6 +44,7 @@
 #include "core/components_ng/pattern/text_field/text_field_model.h"
 #include "core/components_ng/pattern/text_field/text_field_model_ng.h"
 #include "core/pipeline/pipeline_base.h"
+#include "core/components/common/properties/text_style_parser.h"
 
 namespace OHOS::Ace {
 
@@ -1397,5 +1398,18 @@ void JSTextField::SetLineHeight(const JSCallbackInfo& info)
         value.Reset();
     }
     TextFieldModel::GetInstance()->SetLineHeight(value);
+}
+
+void JSTextField::SetFontFeature(const JSCallbackInfo& info)
+{
+    if (info.Length() < 1) {
+        return;
+    }
+    if (!info[0]->IsString()) {
+        return;
+    }
+
+    std::string fontFeatureSettings = info[0]->ToString();
+    TextFieldModel::GetInstance()->SetFontFeature(ParseFontFeatureSettings(fontFeatureSettings));
 }
 } // namespace OHOS::Ace::Framework

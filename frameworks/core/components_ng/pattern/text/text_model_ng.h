@@ -72,6 +72,7 @@ public:
     void SetOnTextSelectionChange(std::function<void(int32_t, int32_t)>&& func) override;
     RefPtr<TextControllerBase> GetTextController() override;
     void SetClipEdge() override;
+    void SetFontFeature(const FONT_FEATURES_MAP& value) override;
     static RefPtr<FrameNode> CreateFrameNode(int32_t nodeId, const std::string& content);
     static void InitText(FrameNode* frameNode, std::string& value);
     static void SetFontWeight(FrameNode* frameNode, Ace::FontWeight value);
@@ -100,7 +101,7 @@ public:
     static void SetWordBreak(FrameNode* frameNode, WordBreak value);
     static void SetEllipsisMode(FrameNode* frameNode, EllipsisMode value);
     static void SetTextDetectEnable(FrameNode* frameNode, bool value);
-
+    static void SetFontFeature(FrameNode* frameNode, const FONT_FEATURES_MAP& value);
     static std::vector<std::string> GetFontFamily(FrameNode* frameNode);
     static CopyOptions GetCopyOption(FrameNode* frameNode);
     static TextHeightAdaptivePolicy GetHeightAdaptivePolicy(FrameNode* frameNode);

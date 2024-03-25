@@ -27,6 +27,7 @@
 #include "core/components/text_field/textfield_theme.h"
 #include "core/interfaces/native/node/node_api.h"
 #include "core/components_ng/pattern/text_field/text_field_event_hub.h"
+#include "core/components/common/properties/text_style_parser.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -906,6 +907,20 @@ void ResetTextInputLineHeight(ArkUINodeHandle node)
     TextFieldModelNG::SetLineHeight(frameNode, value);
 }
 
+void SetTextInputFontFeature(ArkUINodeHandle node, ArkUI_CharPtr value)
+{
+    auto *frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    std::string strValue = value;
+    TextFieldModelNG::SetFontFeature(frameNode, ParseFontFeatureSettings(strValue));
+}
+
+void ResetTextInputFontFeature(ArkUINodeHandle node)
+{
+    auto *frameNode = reinterpret_cast<FrameNode *>(node);
+    std::string strValue = "";
+    TextFieldModelNG::SetFontFeature(frameNode, ParseFontFeatureSettings(strValue));
+}
 } // namespace
 
 namespace NodeModifier {
@@ -936,7 +951,7 @@ const ArkUITextInputModifier* GetTextInputModifier()
         ResetTextInputBackgroundColor, SetTextInputNormalUnderlineColor, SetTextInputUserUnderlineColor,
         ResetTextInputUserUnderlineColor, SetTextInputTextSelection, GetTextInputTextSelectionIndex,
         SetTextInputDecoration, ResetTextInputDecoration, SetTextInputLetterSpacing, ResetTextInputLetterSpacing,
-        SetTextInputLineHeight, ResetTextInputLineHeight };
+        SetTextInputLineHeight, ResetTextInputLineHeight, SetTextInputFontFeature, ResetTextInputFontFeature };
     return &modifier;
 }
 

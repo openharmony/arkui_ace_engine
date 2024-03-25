@@ -104,6 +104,7 @@ public:
     void SetTextDecoration(Ace::TextDecoration value) override;
     void SetTextDecorationColor(const Color& value) override;
     void SetTextDecorationStyle(Ace::TextDecorationStyle value) override;
+    void SetFontFeature(const FONT_FEATURES_MAP& value) override;
     static void SetTextDecoration(FrameNode* frameNode, TextDecoration value);
     static void SetTextDecorationColor(FrameNode* frameNode, const Color& value);
     static void SetTextDecorationStyle(FrameNode* frameNode, TextDecorationStyle value);
@@ -188,6 +189,7 @@ public:
     static bool GetShowCounterBorder(FrameNode* frameNode);
     static void SetTextSelection(FrameNode* frameNode, int32_t start, int32_t end);
     static int32_t GetTextSelectionIndex(FrameNode* frameNode, bool isEnd);
+    static void SetFontFeature(FrameNode* frameNode, const FONT_FEATURES_MAP& value);
 
 private:
     void AddDragFrameNodeToManager() const;

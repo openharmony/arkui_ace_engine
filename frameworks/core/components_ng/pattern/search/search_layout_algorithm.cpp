@@ -133,6 +133,7 @@ void SearchLayoutAlgorithm::TextFieldMeasure(LayoutWrapper* layoutWrapper)
     auto textFieldGeometryNode = textFieldWrapper->GetGeometryNode();
     CHECK_NULL_VOID(textFieldGeometryNode);
 
+    UpdateFontFeature(layoutWrapper);
     auto buttonWidth = searchButtonSizeMeasure_.Width();
     auto cancelButtonWidth = cancelBtnSizeMeasure_.Width();
     auto iconRenderWidth =
@@ -171,6 +172,19 @@ void SearchLayoutAlgorithm::TextFieldMeasure(LayoutWrapper* layoutWrapper)
     textFieldSizeMeasure_ = textFieldGeometryNode->GetFrameSize();
 }
 
+void SearchLayoutAlgorithm::UpdateFontFeature(LayoutWrapper* layoutWrapper)
+{
+    auto layoutProperty = AceType::DynamicCast<SearchLayoutProperty>(layoutWrapper->GetLayoutProperty());
+    CHECK_NULL_VOID(layoutProperty);
+    auto textFieldWrapper = layoutWrapper->GetOrCreateChildByIndex(TEXTFIELD_INDEX);
+    CHECK_NULL_VOID(textFieldWrapper);
+
+    auto textFieldLayoutProperty = AceType::DynamicCast<TextFieldLayoutProperty>(textFieldWrapper->GetLayoutProperty());
+    CHECK_NULL_VOID(textFieldLayoutProperty);
+    if (layoutProperty->HasFontFeature()) {
+        textFieldLayoutProperty->UpdateFontFeature(layoutProperty->GetFontFeature().value());
+    }
+}
 void SearchLayoutAlgorithm::SetTextFieldLayoutConstraintHeight(LayoutConstraintF& contentConstraint,
     double textFieldHeight, LayoutWrapper* layoutWrapper)
 {

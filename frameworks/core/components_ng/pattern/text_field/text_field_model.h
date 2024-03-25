@@ -297,6 +297,7 @@ public:
     virtual void SetTextDecoration(Ace::TextDecoration value) {};
     virtual void SetTextDecorationColor(const Color& value) {};
     virtual void SetTextDecorationStyle(Ace::TextDecorationStyle value) {};
+    virtual void SetFontFeature(const std::unordered_map<std::string, int32_t>& value) = 0;
 
 private:
     static std::unique_ptr<TextFieldModel> instance_;
