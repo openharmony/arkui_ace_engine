@@ -1625,6 +1625,7 @@ void RichEditorPattern::MoveCaretAndStartFocus(const Offset& textOffset)
             if (overlayMod_) {
                 RequestKeyboard(false, true, true);
             }
+            HandleOnEditChanged(true);
         }
     }
     UseHostToUpdateTextFieldManager();
@@ -1830,6 +1831,7 @@ void RichEditorPattern::HandleBlurEvent()
         ResetSelection();
     }
     lastSelectionRange_.reset();
+    HandleOnEditChanged(false);
 }
 
 void RichEditorPattern::HandleFocusEvent()
@@ -1847,6 +1849,7 @@ void RichEditorPattern::HandleFocusEvent()
         TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "Handle Focus Event, Request keyboard.");
         RequestKeyboard(false, true, true);
     }
+    HandleOnEditChanged(true);
 }
 
 void RichEditorPattern::UseHostToUpdateTextFieldManager()
@@ -2044,6 +2047,7 @@ void RichEditorPattern::HandleDoubleClickOrLongPress(GestureEvent& info)
     } else {
         StopTwinkling();
     }
+    HandleOnEditChanged(true);
 }
 
 bool RichEditorPattern::HandleUserLongPressEvent(GestureEvent& info)
@@ -4157,6 +4161,9 @@ void RichEditorPattern::HandleMouseLeftButtonRelease(const MouseInfo& info)
         selectionMenuOffsetClick_ = OffsetF(offsetX, offsetY);
         ShowSelectOverlay(RectF(), RectF(), false, TextResponseType::SELECTED_BY_MOUSE);
     }
+    if (HasFocus()) {
+        HandleOnEditChanged(true);
+    }
 }
 
 void RichEditorPattern::HandleMouseLeftButton(const MouseInfo& info)
@@ -6163,5 +6170,23 @@ void RichEditorPattern::HandleOnDragInsertValue(const std::string& insertValue)
     record.afterCaretPosition = record.beforeCaretPosition + length;
     record.deleteCaretPostion = dragRange_.first;
     AddOperationRecord(record);
+}
+
+bool RichEditorPattern::IsEditing()
+{
+    return isEditing_;
+}
+
+void RichEditorPattern::HandleOnEditChanged(bool isEditing)
+{
+    if (isEditing_ == isEditing) {
+        return;
+    }
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto eventHub = host->GetEventHub<RichEditorEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    isEditing_ = isEditing;
+    eventHub->FireOnEditingChange(isEditing);
 }
 } // namespace OHOS::Ace::NG

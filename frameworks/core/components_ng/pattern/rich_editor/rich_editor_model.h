@@ -208,6 +208,7 @@ public:
     virtual SelectionInfo GetSelectionSpansInfo() = 0;
     virtual void SetSelection(int32_t selectionStart, int32_t selectionEnd,
         const std::optional<SelectionOptions>& options = std::nullopt) = 0;
+    virtual bool IsEditing() = 0;
 };
 
 class ACE_EXPORT RichEditorModel {
@@ -233,6 +234,7 @@ public:
     virtual void SetTextDetectConfig(const std::string& value, std::function<void(const std::string&)>&& onResult) = 0;
     virtual void SetSelectedBackgroundColor(const Color& selectedColor) = 0;
     virtual void SetCaretColor(const Color& color) = 0;
+    virtual void SetOnEditingChange(std::function<void(const bool&)>&& func) = 0;
 private:
     static std::unique_ptr<RichEditorModel> instance_;
     static std::mutex mutex_;
