@@ -242,7 +242,7 @@ public:
     int32_t AddImageSpan(const ImageSpanOptions& options, bool isPaste = false, int32_t index = -1);
     int32_t AddTextSpan(const TextSpanOptions& options, bool isPaste = false, int32_t index = -1);
     int32_t AddTextSpanOperation(const TextSpanOptions& options, bool isPaste = false, int32_t index = -1,
-        bool needLeadingMargin = false, bool updateCaretOPosition = true);
+        bool needLeadingMargin = false, bool updateCaretPosition = true);
     int32_t AddSymbolSpan(const SymbolSpanOptions& options, bool isPaste = false, int32_t index = -1);
     int32_t AddSymbolSpanOperation(const SymbolSpanOptions& options, bool isPaste = false, int32_t index = -1);
     void AddSpanItem(const RefPtr<SpanItem>& item, int32_t offset);
@@ -643,9 +643,11 @@ private:
     bool IsTouchInFrameArea(const PointF& touchPoint);
     void HandleOnDragDrop(const RefPtr<OHOS::Ace::DragEvent>& event);
     void DeleteForward(int32_t currentPosition, int32_t length);
-    void DragDropTextOperation(const std::string& insertValue);
+    void HandleOnDragDropTextOperation(const std::string& insertValue);
     void UndoDrag(const OperationRecord& record);
     void RedoDrag(const OperationRecord& record);
+    void HandleOnDragInsertValueOperation(const std::string& insertValue);
+    void HandleOnDragInsertValue(const std::string& str);
 
 #if defined(ENABLE_STANDARD_INPUT)
     sptr<OHOS::MiscServices::OnTextChangedListener> richEditTextChangeListener_;
@@ -724,7 +726,7 @@ private:
     bool isTouchCaret_ = false;
     SelectionRangeInfo lastSelectionRange_{-1, -1};
     bool isDragSponsor_ = false;
-    int32_t dragPosition_ = 0;
+    std::pair<int32_t, int32_t> dragRange_ { 0, 0 };
     ACE_DISALLOW_COPY_AND_MOVE(RichEditorPattern);
 };
 } // namespace OHOS::Ace::NG

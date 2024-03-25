@@ -3989,7 +3989,7 @@ HWTEST_F(RichEditorTestNg, RichEditorDragTest003, TestSize.Level1)
 
 /**
  * @tc.name: RichEditorDragTest004
- * @tc.desc: test the drag of RichEditor with developer's DragDropTextOperation function
+ * @tc.desc: test the drag of RichEditor with developer's HandleOnDragDropTextOperation function
  * @tc.type: FUNC
  */
 HWTEST_F(RichEditorTestNg, RichEditorDragTest004, TestSize.Level1)
@@ -4017,12 +4017,12 @@ HWTEST_F(RichEditorTestNg, RichEditorDragTest004, TestSize.Level1)
     options.style = style;
     auto index = controller->AddTextSpan(options);
     EXPECT_EQ(index, 0);
-    pattern->dragPosition_ = 0;
+    pattern->dragRange_.first = 0;
     pattern->caretPosition_ = options.value.length();
-    pattern->DragDropTextOperation(INIT_VALUE_1);
-    pattern->dragPosition_ = options.value.length();
+    pattern->HandleOnDragDropTextOperation(INIT_VALUE_1);
+    pattern->dragRange_.first = options.value.length();
     pattern->caretPosition_ = 0;
-    pattern->DragDropTextOperation(INIT_VALUE_1);
+    pattern->HandleOnDragDropTextOperation(INIT_VALUE_1);
     EXPECT_EQ(pattern->status_, Status::NONE);
     while (!ViewStackProcessor::GetInstance()->elementsStack_.empty()) {
         ViewStackProcessor::GetInstance()->elementsStack_.pop();
