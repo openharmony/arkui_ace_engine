@@ -274,12 +274,14 @@ export struct SubHeader {
           maxLines: SINGLE_LINE_NUM,
           alignment: Alignment.Start,
         })
+        .width('100%')
       Text($$.subContent)
         .secondaryTitleStyles({
           maxLines: SINGLE_LINE_NUM,
           fontWeight: FontWeight.Regular,
           alignment: Alignment.Start,
         })
+        .width('100%')
         .margin({
           top: $r('sys.float.padding_level1'),
         })

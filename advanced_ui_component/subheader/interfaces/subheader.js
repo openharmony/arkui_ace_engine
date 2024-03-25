@@ -642,6 +642,7 @@ export class SubHeader extends ViewPU {
         maxLines: SINGLE_LINE_NUM,
         alignment: Alignment.Start,
       });
+      Text.width('100%');
     }, Text);
     Text.pop();
     this.observeComponentCreation2((u8, v8) => {
@@ -651,6 +652,7 @@ export class SubHeader extends ViewPU {
         fontWeight: FontWeight.Regular,
         alignment: Alignment.Start,
       });
+      Text.width('100%');
       Text.margin({
         top: { id: -1, type: 10002, params: ['sys.float.padding_level1'], bundleName: '', moduleName: '' },
       });
