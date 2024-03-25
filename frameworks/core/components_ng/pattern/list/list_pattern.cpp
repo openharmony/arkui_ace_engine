@@ -568,23 +568,11 @@ bool ListPattern::NeedScrollSnapAlignEffect() const
 
 bool ListPattern::IsAtTop() const
 {
-    if (IsScrollSnapAlignCenter() && !itemPosition_.empty()) {
-        float startItemHeight = itemPosition_.begin()->second.endPos - itemPosition_.begin()->second.startPos;
-        return (startIndex_ == 0) && GreatOrEqual(startMainPos_ - currentDelta_ + GetChainDelta(0),
-                                         contentMainSize_ / 2.0f - startItemHeight / 2.0f);
-    }
-
     return (startIndex_ == 0) && NonNegative(startMainPos_ - currentDelta_ + GetChainDelta(0) - contentStartOffset_);
 }
 
 bool ListPattern::IsAtBottom() const
 {
-    if (IsScrollSnapAlignCenter() && !itemPosition_.empty()) {
-        float endItemHeight = itemPosition_.rbegin()->second.endPos - itemPosition_.rbegin()->second.startPos;
-        return (endIndex_ == maxListItemIndex_) && LessOrEqual(endMainPos_ - currentDelta_ + GetChainDelta(endIndex_),
-                                                       contentMainSize_ / 2.0f + endItemHeight / 2.0f);
-    }
-
     return endIndex_ == maxListItemIndex_ &&
            LessOrEqual(endMainPos_ - currentDelta_ + GetChainDelta(endIndex_), contentMainSize_ - contentEndOffset_);
 }
@@ -1741,11 +1729,11 @@ void ListPattern::SetChainAnimation()
         chainAnimation_.Reset();
         return;
     }
-    if (!chainAnimation_) {
-        auto space = listLayoutProperty->GetSpace().value_or(CHAIN_INTERVAL_DEFAULT).ConvertToPx();
-        if (Negative(space)) {
-            space = CHAIN_INTERVAL_DEFAULT.ConvertToPx();
-        }
+    auto space = listLayoutProperty->GetSpace().value_or(CHAIN_INTERVAL_DEFAULT).ConvertToPx();
+    if (Negative(space)) {
+        space = CHAIN_INTERVAL_DEFAULT.ConvertToPx();
+    }
+    if (!chainAnimation_ || (chainAnimation_ && space != chainAnimation_->GetSpace())) {
         springProperty_ =
             AceType::MakeRefPtr<SpringProperty>(CHAIN_SPRING_MASS, CHAIN_SPRING_STIFFNESS, CHAIN_SPRING_DAMPING);
         if (chainAnimationOptions_.has_value()) {
