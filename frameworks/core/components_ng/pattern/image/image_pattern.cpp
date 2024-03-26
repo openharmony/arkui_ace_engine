@@ -1042,6 +1042,7 @@ bool ImagePattern::IsSupportImageAnalyzerFeature()
 
 void ImagePattern::CreateAnalyzerOverlay()
 {
+    CHECK_NULL_VOID(image_);
     auto pixelMap = image_->GetPixelMap();
     CHECK_NULL_VOID(pixelMap);
     if (IsSupportImageAnalyzerFeature()) {
