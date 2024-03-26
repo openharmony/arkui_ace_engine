@@ -958,6 +958,14 @@ void WebClientImpl::OnRootLayerChanged(int width, int height)
     delegate->OnRootLayerChanged(width, height);
 }
 
+void WebClientImpl::ReleaseResizeHold()
+{
+    ContainerScope scope(instanceId_);
+    auto delegate = webDelegate_.Upgrade();
+    CHECK_NULL_VOID(delegate);
+    delegate->ReleaseResizeHold();
+}
+
 bool WebClientImpl::FilterScrollEvent(const float x, const float y, const float xVelocity, const float yVelocity)
 {
     ContainerScope scope(instanceId_);

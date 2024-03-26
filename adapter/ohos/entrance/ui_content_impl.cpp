@@ -1802,6 +1802,9 @@ bool UIContentImpl::ProcessBackPressed()
         instanceId_);
     auto container = AceEngine::Get().GetContainer(instanceId_);
     CHECK_NULL_RETURN(container, false);
+    if (container->IsUIExtensionWindow() && !container->WindowIsShow()) {
+        return false;
+    }
     auto taskExecutor = container->GetTaskExecutor();
     CHECK_NULL_RETURN(taskExecutor, false);
     auto pipeline = AceType::DynamicCast<NG::PipelineContext>(container->GetPipelineContext());

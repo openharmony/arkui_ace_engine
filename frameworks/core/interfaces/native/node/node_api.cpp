@@ -22,6 +22,7 @@
 #include "base/utils/macros.h"
 #include "base/utils/utils.h"
 #include "core/components_ng/base/frame_node.h"
+#include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/base/ui_node.h"
 #include "core/interfaces/arkoala/arkoala_api.h"
 #include "core/interfaces/native/node/calendar_picker_modifier.h"
@@ -128,6 +129,13 @@ ArkUINodeHandle CreateNode(ArkUINodeType type, int peerId, ArkUI_Int32 flags)
 {
     auto* node = reinterpret_cast<ArkUINodeHandle>(ViewModel::CreateNode(type, peerId));
     return node;
+}
+
+ArkUINodeHandle GetNodeByViewStack()
+{
+    auto node = ViewStackProcessor::GetInstance()->Finish();
+    node->IncRefCount();
+    return reinterpret_cast<ArkUINodeHandle>(AceType::RawPtr(node));
 }
 
 void DisposeNode(ArkUINodeHandle node)
@@ -664,6 +672,7 @@ const ArkUIBasicAPI* GetBasicAPI()
     /* clang-format off */
     static const ArkUIBasicAPI basicImpl = {
         CreateNode,
+        GetNodeByViewStack,
         DisposeNode,
         nullptr,
         nullptr,

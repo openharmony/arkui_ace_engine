@@ -225,6 +225,7 @@ public:
     void OnOverScrollFlingEnd() override;
     void OnScrollState(bool scrollState) override;
     void OnRootLayerChanged(int width, int height) override;
+    void ReleaseResizeHold() override;
     bool FilterScrollEvent(const float x, const float y, const float xVelocity, const float yVelocity) override;
     void OnNativeEmbedLifecycleChange(std::shared_ptr<NWeb::NWebNativeEmbedDataInfo> dataInfo) override;
     void OnNativeEmbedGestureEvent(std::shared_ptr<NWeb::NWebNativeEmbedTouchEvent> event) override;

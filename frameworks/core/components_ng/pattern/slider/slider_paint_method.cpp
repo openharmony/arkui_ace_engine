@@ -48,6 +48,9 @@ void SliderPaintMethod::UpdateContentModifier(PaintWrapper* paintWrapper)
     auto stepColor = paintProperty->GetStepColorValue(sliderTheme->GetMarkerColor());
     sliderContentModifier_->SetStepColor(stepColor);
     sliderContentModifier_->SetShowSteps(paintProperty->GetShowStepsValue(false));
+    sliderContentModifier_->SetSliderInteractionMode(
+        paintProperty->GetSliderInteractionModeValue(SliderModelNG::SliderInteraction::SLIDE_AND_CLICK));
+    sliderContentModifier_->SetMinResponsiveDistance(paintProperty->GetMinResponsiveDistanceValue(0.0f));
     auto blockSize = parameters_.blockSize;
     if (paintProperty->GetSliderModeValue(SliderModelNG::SliderMode::OUTSET) != SliderModelNG::SliderMode::OUTSET) {
         blockSize = SizeF(std::min(blockSize.Width(), parameters_.trackThickness),

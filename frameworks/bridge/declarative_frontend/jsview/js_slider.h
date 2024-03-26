@@ -34,6 +34,11 @@ enum class SliderChangeMode {
     END,
 };
 
+enum class SliderInteraction {
+    SLIDE_AND_CLICK = 0,
+    SLIDE_ONLY,
+};
+
 class JSSlider : public JSViewAbstract {
 public:
     static void Create(const JSCallbackInfo& info);
@@ -44,8 +49,10 @@ public:
     static void SetSelectedColor(const JSCallbackInfo& info);
     static void SetMinLabel(const JSCallbackInfo& info);
     static void SetMaxLabel(const JSCallbackInfo& info);
+    static void SetMinResponsiveDistance(const JSCallbackInfo& info);
     static void SetShowSteps(const JSCallbackInfo& info);
     static void SetShowTips(const JSCallbackInfo& info);
+    static void SetSliderInteractionMode(const JSCallbackInfo& info);
     static void SetBlockBorderColor(const JSCallbackInfo& info);
     static void SetBlockBorderWidth(const JSCallbackInfo& info);
     static void SetStepColor(const JSCallbackInfo& info);

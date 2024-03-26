@@ -73,7 +73,7 @@ public:
 
     void UpdateNestedModeForChildren(const NestedScrollOptions& childNestedScroll);
 
-    void SetNestedScroll(const NestedScrollOptions& nestedScroll);
+    void SetNestedScroll(const NestedScrollOptions& nestedScroll, bool isFixedNestedScrollMode = false);
 
     const NestedScrollOptions GetNestedScroll() const
     {
@@ -102,6 +102,16 @@ public:
         parent_ = parent;
     }
 
+    void SetIsSearchRefresh(bool isSearchRefresh)
+    {
+        isSearchRefresh_ = isSearchRefresh;
+    }
+
+    bool GetIsSearchRefresh() const
+    {
+        return isSearchRefresh_;
+    }
+
 protected:
     /**
      * @brief Helper function. Searches for the parent NestableScrollContainer of the current instance.
@@ -122,6 +132,7 @@ private:
     };
 
     bool isFixedNestedScrollMode_ = false;
+    bool isSearchRefresh_ = true;
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_SCROLLABLE_NESTABLE_SCROLL_CONTAINER_H

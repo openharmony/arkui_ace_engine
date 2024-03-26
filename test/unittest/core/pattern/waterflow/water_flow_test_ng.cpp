@@ -1584,7 +1584,7 @@ HWTEST_F(WaterFlowTestNg, WaterFlowPattern_OnDirtyLayoutWrapperSwap001, TestSize
      */
     CreateWithItem([](WaterFlowModelNG model) {});
     pattern_->SetPositionController(nullptr);
-    pattern_->InitScrollableEvent();
+    pattern_->AddScrollEvent();
     EXPECT_NE(pattern_->scrollableEvent_, nullptr);
     pattern_->OnModifyDone();
     EXPECT_FALSE(pattern_->CanOverScroll(SCROLL_FROM_UPDATE));

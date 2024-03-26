@@ -1705,6 +1705,12 @@ var SliderBlockType;
   SliderBlockType[SliderBlockType["SHAPE"] = 2] = "SHAPE";
 })(SliderBlockType || (SliderBlockType = {}));
 
+var SliderInteraction;
+(function (SliderInteraction) {
+  SliderInteraction[SliderInteraction["SLIDE_AND_CLICK"] = 0] = "SLIDE_AND_CLICK";
+  SliderInteraction[SliderInteraction["SLIDE_ONLY"] = 1] = "SLIDE_ONLY";
+})(SliderInteraction || (SliderInteraction = {}));
+
 var TitleStyle;
 (function (TitleStyle) {
   TitleStyle[TitleStyle["ListMode"] = 0] = "ListMode";
