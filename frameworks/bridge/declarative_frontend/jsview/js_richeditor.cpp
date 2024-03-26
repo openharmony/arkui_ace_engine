@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -37,6 +37,7 @@
 #include "bridge/declarative_frontend/jsview/js_view_common_def.h"
 #include "bridge/declarative_frontend/jsview/models/richeditor_model_impl.h"
 #include "core/common/resource/resource_object.h"
+#include "core/components/common/properties/text_style_parser.h"
 #include "core/components/text/text_theme.h"
 #include "core/components_ng/base/view_stack_model.h"
 #include "core/components_ng/pattern/rich_editor/rich_editor_model.h"
@@ -169,6 +170,7 @@ JSRef<JSObject> JSRichEditor::CreateJSTextStyleResult(const TextStyleResult& tex
 {
     JSRef<JSObject> textStyleObj = JSRef<JSObject>::New();
     textStyleObj->SetProperty<std::string>("fontColor", textStyleResult.fontColor);
+    textStyleObj->SetProperty<NG::FONT_FEATURES_MAP>("fontFeature", textStyleResult.fontFeature);
     textStyleObj->SetProperty<double>("fontSize", textStyleResult.fontSize);
     textStyleObj->SetProperty<int32_t>("fontStyle", textStyleResult.fontStyle);
     textStyleObj->SetProperty<double>("lineHeight", textStyleResult.lineHeight);
@@ -205,6 +207,7 @@ JSRef<JSObject> JSRichEditor::CreateJSSymbolSpanStyleResult(const SymbolSpanStyl
 {
     JSRef<JSObject> symbolSpanStyleObj = JSRef<JSObject>::New();
     symbolSpanStyleObj->SetProperty<std::string>("fontColor", symbolSpanStyle.symbolColor);
+    symbolSpanStyleObj->SetProperty<NG::FONT_FEATURES_MAP>("fontFeature", symbolSpanStyle.fontFeature);
     symbolSpanStyleObj->SetProperty<double>("fontSize", symbolSpanStyle.fontSize);
     symbolSpanStyleObj->SetProperty<double>("lineHeight", symbolSpanStyle.lineHeight);
     symbolSpanStyleObj->SetProperty<double>("letterSpacing", symbolSpanStyle.letterSpacing);
@@ -495,6 +498,7 @@ JSRef<JSVal> JSRichEditor::CreateJsOnIMEInputComplete(const NG::RichEditorAbstra
     decorationObj->SetProperty<TextDecoration>("type", textSpanResult.GetTextDecoration());
     decorationObj->SetProperty<std::string>("color", textSpanResult.GetColor());
     textStyleObj->SetProperty<std::string>("fontColor", textSpanResult.GetFontColor());
+    textStyleObj->SetProperty<NG::FONT_FEATURES_MAP>("fontFeature", textSpanResult.GetFontFeatures());
     textStyleObj->SetProperty<double>("fontSize", textSpanResult.GetFontSize());
     textStyleObj->SetProperty<double>("lineHeight", textSpanResult.GetTextStyle().lineHeight);
     textStyleObj->SetProperty<double>("letterSpacing", textSpanResult.GetTextStyle().letterSpacing);
@@ -567,6 +571,7 @@ void JSRichEditor::CreateTextStyleObj(JSRef<JSObject>& textStyleObj, const NG::R
     decorationObj->SetProperty<int32_t>("type", (int32_t)(spanResult.GetTextDecoration()));
     decorationObj->SetProperty<std::string>("color", spanResult.GetColor());
     textStyleObj->SetProperty<std::string>("fontColor", spanResult.GetFontColor());
+    textStyleObj->SetProperty<NG::FONT_FEATURES_MAP>("fontFeature", spanResult.GetFontFeatures());
     textStyleObj->SetProperty<double>("fontSize", spanResult.GetFontSize());
     textStyleObj->SetProperty<double>("lineHeight", spanResult.GetTextStyle().lineHeight);
     textStyleObj->SetProperty<double>("letterSpacing", spanResult.GetTextStyle().letterSpacing);
@@ -966,6 +971,18 @@ void JSRichEditorController::ParseJsLineHeightLetterSpacingTextStyle(const JSRef
     }
 }
 
+void JSRichEditorController::ParseJsFontFeatureTextStyle(const JSRef<JSObject>& styleObject,
+    TextStyle& style, struct UpdateSpanStyle& updateSpanStyle)
+{
+    JSRef<JSVal> fontFeature = styleObject->GetProperty("fontFeature");
+    std::string feature;
+    if (!fontFeature->IsNull() && JSContainerBase::ParseJsString(fontFeature, feature)) {
+        NG::FONT_FEATURES_MAP fontFeatures = ParseFontFeatureSettings(feature);
+        updateSpanStyle.updateFontFeature = fontFeatures;
+        style.SetFontFeatures(fontFeatures);
+    }
+}
+
 void JSRichEditorController::ParseJsTextStyle(
     const JSRef<JSObject>& styleObject, TextStyle& style, struct UpdateSpanStyle& updateSpanStyle)
 {
@@ -991,6 +1008,7 @@ void JSRichEditorController::ParseJsTextStyle(
         style.SetFontSize(size);
     }
     ParseJsLineHeightLetterSpacingTextStyle(styleObject, style, updateSpanStyle);
+    ParseJsFontFeatureTextStyle(styleObject, style, updateSpanStyle);
     JSRef<JSVal> fontStyle = styleObject->GetProperty("fontStyle");
     if (!fontStyle->IsNull() && fontStyle->IsNumber()) {
         updateSpanStyle.updateItalicFontStyle = static_cast<FontStyle>(fontStyle->ToNumber<int32_t>());
@@ -1041,6 +1059,7 @@ void JSRichEditorController::ParseJsSymbolSpanStyle(
         style.SetFontSize(size);
     }
     ParseJsLineHeightLetterSpacingTextStyle(styleObject, style, updateSpanStyle, true);
+    ParseJsFontFeatureTextStyle(styleObject, style, updateSpanStyle);
     JSRef<JSVal> fontWeight = styleObject->GetProperty("fontWeight");
     std::string weight;
     if (!fontWeight->IsNull() && (fontWeight->IsNumber() || JSContainerBase::ParseJsString(fontWeight, weight))) {
@@ -1817,6 +1836,9 @@ JSRef<JSObject> JSRichEditorController::CreateTypingStyleResult(const struct Upd
     }
     if (typingStyle.updateTextColor.has_value()) {
         tyingStyleObj->SetProperty<std::string>("fontColor", typingStyle.updateTextColor.value().ColorToString());
+    }
+    if (typingStyle.updateFontFeature.has_value()) {
+        tyingStyleObj->SetProperty<NG::FONT_FEATURES_MAP>("fontFeature", typingStyle.updateFontFeature.value());
     }
     if (typingStyle.updateItalicFontStyle.has_value()) {
         tyingStyleObj->SetProperty<int32_t>(

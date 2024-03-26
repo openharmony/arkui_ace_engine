@@ -669,4 +669,18 @@ void ContainerSpanNode::ToJsonValue(std::unique_ptr<JsonValue>& json) const
 {
     TextBackgroundStyle::ToJsonValue(json, GetTextBackgroundStyle());
 }
+
+std::set<PropertyInfo> SpanNode::CalculateInheritPropertyInfo()
+{
+    std::set<PropertyInfo> inheritPropertyInfo;
+    const std::set<PropertyInfo> propertyInfoContainer = { PropertyInfo::FONTSIZE, PropertyInfo::FONTCOLOR,
+        PropertyInfo::FONTSTYLE, PropertyInfo::FONTWEIGHT, PropertyInfo::FONTFAMILY, PropertyInfo::TEXTDECORATION,
+        PropertyInfo::TEXTCASE, PropertyInfo::LETTERSPACE, PropertyInfo::LINEHEIGHT, PropertyInfo::TEXT_ALIGN,
+        PropertyInfo::LEADING_MARGIN, PropertyInfo::TEXTSHADOW, PropertyInfo::SYMBOL_COLOR,
+        PropertyInfo::SYMBOL_RENDERING_STRATEGY, PropertyInfo::SYMBOL_EFFECT_STRATEGY, PropertyInfo::WORD_BREAK,
+        PropertyInfo::FONTFEATURE };
+    set_difference(propertyInfoContainer.begin(), propertyInfoContainer.end(), propertyInfo_.begin(),
+        propertyInfo_.end(), inserter(inheritPropertyInfo, inheritPropertyInfo.begin()));
+    return inheritPropertyInfo;
+}
 } // namespace OHOS::Ace::NG
