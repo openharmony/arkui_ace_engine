@@ -23,7 +23,6 @@
 #include "base/geometry/ng/point_t.h"
 #include "base/geometry/ng/size_t.h"
 #include "base/memory/ace_type.h"
-#include "core/components_ng/pattern/scrollable/scrollable.h"
 #include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/base/view_abstract_model_ng.h"
 #include "core/components_ng/base/view_stack_processor.h"
@@ -33,6 +32,7 @@
 #include "core/components_ng/pattern/scroll_bar/scroll_bar_layout_algorithm.h"
 #include "core/components_ng/pattern/scroll_bar/scroll_bar_model_ng.h"
 #include "core/components_ng/pattern/scroll_bar/scroll_bar_pattern.h"
+#include "core/components_ng/pattern/scrollable/scrollable.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 
 using namespace testing;
@@ -1197,5 +1197,209 @@ HWTEST_F(ScrollBarTestNg, ScrollBarTest019, TestSize.Level1)
     scrollBarProxy->NotifySnapScroll(10.0f, 10.0f, 1.0f, 1.0f);
     EXPECT_EQ(scrollSnapDelta, -10.0);
     EXPECT_EQ(scrollSnapVelocity, 10.0);
+}
+
+/**
+ * @tc.name: HandleClickScroll001
+ * @tc.desc: Test scrolling when clicking on the scroll bar
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollBarTestNg, HandleClickScroll001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create CreateScrollBar , GestureEvent and ScrollBarProxy.
+     * @tc.expected: create CreateScrollBar , GestureEvent and ScrollBarProxy created successfully.
+     */
+    LayoutConstraintF layoutConstraint;
+    layoutConstraint.maxSize = CONTAINER_SIZE;
+    layoutConstraint.selfIdealSize.SetSize(SCROLL_BAR_SELF_SIZE);
+    CreateScrollBar(true, false, static_cast<int>(Axis::VERTICAL), static_cast<int>(DisplayMode::ON), layoutConstraint);
+    pattern_->scrollBarProxy_ = AceType::MakeRefPtr<ScrollBarProxy>();
+    auto scrollBarProxy = pattern_->scrollBarProxy_;
+    GestureEvent info;
+    info.SetLocalLocation(Offset(1.0f, 1.0f));
+    pattern_->InitClickEvent();
+    const RectF& rect = RectF(0.0f, 10.0f, 30.0f, 50.0f);
+    const SizeF& size = SizeF(10.0f, 20.0f);
+    auto scrollBar = pattern_->GetHost();
+    scrollBar->GetGeometryNode()->SetFrameSize(size);
+    pattern_->SetChildRect(rect);
+    // /**
+    //  * @tc.steps: step2. Test HandleClickEvent.
+    //  * @tc.expect: reverse is FALSE.
+    //  */
+    pattern_->isMousePressed_ = true;
+    auto reverse = false;
+    auto smooth = false;
+    auto scrollPageFunction = [&reverse, &smooth](bool parameter1, bool parameter2) {
+        reverse = parameter1;
+        smooth = parameter2;
+    };
+    auto scrollPattern1 = AceType::MakeRefPtr<ScrollPattern>();
+    EXPECT_NE(scrollPattern1, nullptr);
+    auto* scrollRaw1 = AceType::RawPtr(scrollPattern1);
+    EXPECT_NE(scrollRaw1, nullptr);
+    scrollBarProxy->RegisterScrollableNode({ AceType::WeakClaim(scrollRaw1), nullptr, nullptr, nullptr, nullptr,
+        nullptr, nullptr, std::move(scrollPageFunction) });
+    EXPECT_EQ(scrollBarProxy->scrollableNodes_.size(), 1);
+    // /**
+    //  * @tc.steps: step2. Test HandleClickEvent.
+    //  * @tc.expect: reverse is TRUE or FALSE.
+    //  */
+    pattern_->HandleClickEvent(info);
+    EXPECT_TRUE(reverse);
+    GestureEvent info1;
+    info1.SetLocalLocation(Offset(1.0f, 70.0f));
+    pattern_->HandleClickEvent(info1);
+    EXPECT_FALSE(reverse);
+    GestureEvent info2;
+    info2.SetLocalLocation(Offset(1.0f, 35.0f));
+    pattern_->HandleClickEvent(info2);
+    EXPECT_FALSE(reverse);
+}
+
+/**
+ * @tc.name: HandleLongPressScroll001
+ * @tc.desc: Test long press and hold scrolling when clicking on the scroll bar
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollBarTestNg, HandleLongPressScroll001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create CreateScrollBar and ScrollBarProxy.
+     * @tc.expected: create CreateScrollBar and ScrollBarProxy created successfully.
+     */
+    LayoutConstraintF layoutConstraint;
+    layoutConstraint.maxSize = CONTAINER_SIZE;
+    layoutConstraint.selfIdealSize.SetSize(SCROLL_BAR_SELF_SIZE);
+    CreateScrollBar(true, false, static_cast<int>(Axis::VERTICAL), static_cast<int>(DisplayMode::ON), layoutConstraint);
+    pattern_->scrollBarProxy_ = AceType::MakeRefPtr<ScrollBarProxy>();
+    auto scrollBarProxy = pattern_->scrollBarProxy_;
+    pattern_->InitLongPressEvent();
+    pattern_->locationInfo_ = Offset(1.0f, 1.0f);
+    const RectF& rect = RectF(0.0f, 10.0f, 30.0f, 50.0f);
+    const SizeF& size = SizeF(10.0f, 100.0f);
+    auto scrollBar = pattern_->GetHost();
+    scrollBar->GetGeometryNode()->SetFrameSize(size);
+    pattern_->SetChildRect(rect);
+    pattern_->isMousePressed_ = true;
+    auto reverse = false;
+    auto smooth = false;
+    auto scrollPageFunction = [this, &reverse, &smooth](bool parameter1, bool parameter2) {
+        reverse = parameter1;
+        smooth = parameter2;
+        pattern_->isMousePressed_ = false;
+    };
+    auto scrollPattern1 = AceType::MakeRefPtr<ScrollPattern>();
+    EXPECT_NE(scrollPattern1, nullptr);
+    auto* scrollRaw1 = AceType::RawPtr(scrollPattern1);
+    EXPECT_NE(scrollRaw1, nullptr);
+    scrollBarProxy->RegisterScrollableNode({ AceType::WeakClaim(scrollRaw1), nullptr, nullptr, nullptr, nullptr,
+        nullptr, nullptr, std::move(scrollPageFunction) });
+    EXPECT_EQ(scrollBarProxy->scrollableNodes_.size(), 1);
+    // /**
+    //  * @tc.steps: step2. Test HandleClickEvent.
+    //  * @tc.expect: reverse equal to TRUE or FALSE.
+    //  */
+    pattern_->HandleLongPress(true);
+    EXPECT_TRUE(reverse);
+    pattern_->locationInfo_ = Offset(1.0f, 70.0f);
+    pattern_->isMousePressed_ = true;
+    pattern_->scrollingUp_ = false;
+    pattern_->scrollingDown_ = false;
+    pattern_->HandleLongPress(true);
+    EXPECT_FALSE(reverse);
+    pattern_->locationInfo_ = Offset(1.0f, 35.0f);
+    pattern_->isMousePressed_ = true;
+    pattern_->scrollingUp_ = false;
+    pattern_->scrollingDown_ = false;
+    pattern_->HandleLongPress(true);
+    EXPECT_FALSE(reverse);
+}
+
+/**
+ * @tc.name: InitMouseEvent001
+ * @tc.desc: Test mouse event callback
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollBarTestNg, InitMouseEvent001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create CreateScrollBar and MouseInfo.
+     * @tc.expected: create CreateScrollBar and MouseInfo created successfully.
+     */
+    LayoutConstraintF layoutConstraint;
+    layoutConstraint.maxSize = CONTAINER_SIZE;
+    layoutConstraint.selfIdealSize.SetSize(SCROLL_BAR_SELF_SIZE);
+    CreateScrollBar(true, false, static_cast<int>(Axis::VERTICAL), static_cast<int>(DisplayMode::ON), layoutConstraint);
+    // /**
+    //  * @tc.steps: step2. Test HandleMouseEvent.
+    //  * @tc.expect: isMousePressed_ is FALSE.
+    //  */
+    pattern_->InitMouseEvent();
+    MouseInfo info;
+    info.SetAction(MouseAction::PRESS);
+    info.SetButton(MouseButton::LEFT_BUTTON);
+    auto& inputEvents = pattern_->GetEventHub<EventHub>()->GetInputEventHub()->mouseEventActuator_->inputEvents_;
+    EXPECT_EQ(inputEvents.size(), 1);
+    for (const auto& callback : inputEvents) {
+        if (callback) {
+            (*callback)(info);
+        }
+    }
+    EXPECT_TRUE(pattern_->isMousePressed_);
+    MouseInfo info1;
+    info1.SetAction(MouseAction::RELEASE);
+    info1.SetButton(MouseButton::LEFT_BUTTON);
+    for (const auto& callback : inputEvents) {
+        if (callback) {
+            (*callback)(info1);
+        }
+    }
+    EXPECT_FALSE(pattern_->isMousePressed_);
+}
+
+/**
+ * @tc.name: BarCollectLongPressTarget001
+ * @tc.desc: Test OnCollectLongPressTarget of ScrollBarPattern.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollBarTestNg, BarCollectLongPressTarget001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create scrollBar and initialize related properties.
+     */
+    LayoutConstraintF layoutConstraint;
+    layoutConstraint.maxSize = CONTAINER_SIZE;
+    layoutConstraint.selfIdealSize.SetSize(SCROLL_BAR_SELF_SIZE);
+    CreateScrollBar(true, true, -1, -1, layoutConstraint);
+
+    /**
+     * @tc.steps: step2. Verify the OnCollectLongPressTarget function of ScrollBarPattern.
+     * @tc.expected: step2. Compare the value with expected value.
+     */
+    const RectF& rect = pattern_->childRect_;
+    PointF localPoint = PointF(rect.Width() + rect.GetX(), rect.Height() + rect.GetY());
+    const SourceType source = SourceType::TOUCH;
+    OffsetF coordinateOffset;
+    GetEventTargetImpl getEventTargetImpl;
+    TouchTestResult result;
+    const int32_t size = result.size();
+    EXPECT_EQ(pattern_->scrollableEvent_->InBarRectRegion(localPoint, source), true);
+    auto frameNode = AceType::MakeRefPtr<FrameNode>(V2::LIST_ETS_TAG, -1, AceType::MakeRefPtr<Pattern>());
+    pattern_->scrollableEvent_->BarCollectLongPressTarget(
+        coordinateOffset, getEventTargetImpl, result, frameNode, nullptr);
+    EXPECT_FLOAT_EQ(pattern_->longPressRecognizer_->GetCoordinateOffset().GetX(), coordinateOffset.GetX());
+    EXPECT_FLOAT_EQ(pattern_->longPressRecognizer_->GetCoordinateOffset().GetY(), coordinateOffset.GetY());
+    EXPECT_EQ(result.size(), size + 1);
+
+    localPoint.SetX(localPoint.GetX() + 1);
+    localPoint.SetY(localPoint.GetY() + 1);
+    EXPECT_EQ(pattern_->scrollableEvent_->InBarRectRegion(localPoint, source), true);
+
+    pattern_->longPressRecognizer_ = nullptr;
+    pattern_->scrollableEvent_->BarCollectLongPressTarget(
+        coordinateOffset, getEventTargetImpl, result, frameNode, nullptr);
+    EXPECT_EQ(result.size(), size + 1);
 }
 } // namespace OHOS::Ace::NG
