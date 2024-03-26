@@ -15,7 +15,7 @@
 
 import { KeyCode } from '@ohos.multimodalInput.keyCode'
 
-export declare class SelectTitleBarMenuItem {
+export interface SelectTitleBarMenuItem {
   value: ResourceStr;
   isEnabled?: boolean;
   action?: () => void;
