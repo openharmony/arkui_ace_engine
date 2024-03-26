@@ -15,7 +15,7 @@
 
 import { KeyCode } from '@ohos.multimodalInput.keyCode'
 
-export declare class ComposeTitleBarMenuItem {
+export declare interface ComposeTitleBarMenuItem {
   value: ResourceStr
   isEnabled: boolean
   action?: () => void
