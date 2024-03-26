@@ -1597,11 +1597,7 @@ class FocusableModifier extends ModifierWithKey<boolean> {
   }
   static identity: Symbol = Symbol('focusable');
   applyPeer(node: KNode, reset: boolean): void {
-    if (reset) {
-      getUINativeModule().common.resetFocusable(node);
-    } else {
-      getUINativeModule().common.setFocusable(node, this.value);
-    }
+    getUINativeModule().common.setFocusable(node, this.value);
   }
 }
 

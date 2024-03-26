@@ -1539,12 +1539,7 @@ class FocusableModifier extends ModifierWithKey {
     super(value);
   }
   applyPeer(node, reset) {
-    if (reset) {
-      getUINativeModule().common.resetFocusable(node);
-    }
-    else {
-      getUINativeModule().common.setFocusable(node, this.value);
-    }
+    getUINativeModule().common.setFocusable(node, this.value);
   }
 }
 FocusableModifier.identity = Symbol('focusable');
