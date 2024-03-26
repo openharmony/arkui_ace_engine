@@ -2074,7 +2074,7 @@ void JSViewAbstract::JsOverlay(const JSCallbackInfo& info)
 {
     if (info.Length() > 0 && (info[0]->IsUndefined())) {
         ViewAbstractModel::GetInstance()->SetOverlay(
-            "", nullptr, Alignment::TOP_LEFT, CalcDimension(0), CalcDimension(0));
+            "", nullptr, Alignment::TOP_LEFT, CalcDimension(0), CalcDimension(0), NG::OverlayType::RESET);
         return;
     }
 
@@ -2110,7 +2110,7 @@ void JSViewAbstract::JsOverlay(const JSCallbackInfo& info)
 
     if (info[0]->IsString()) {
         std::string text = info[0]->ToString();
-        ViewAbstractModel::GetInstance()->SetOverlay(text, nullptr, align, offsetX, offsetY);
+        ViewAbstractModel::GetInstance()->SetOverlay(text, nullptr, align, offsetX, offsetY, NG::OverlayType::TEXT);
     } else if (info[0]->IsObject()) {
         JSRef<JSObject> menuObj = JSRef<JSObject>::Cast(info[0]);
         auto builder = menuObj->GetProperty("builder");
@@ -2126,7 +2126,8 @@ void JSViewAbstract::JsOverlay(const JSCallbackInfo& info)
             PipelineContext::SetCallBackNode(node);
             func->Execute();
         };
-        ViewAbstractModel::GetInstance()->SetOverlay("", std::move(buildFunc), align, offsetX, offsetY);
+        ViewAbstractModel::GetInstance()->SetOverlay("", std::move(buildFunc), align, offsetX,
+            offsetY, NG::OverlayType::BUILDER);
     }
 }
 

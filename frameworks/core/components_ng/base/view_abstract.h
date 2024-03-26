@@ -74,6 +74,12 @@ enum class ContextMenuRegisterType : char {
     CUSTOM_TYPE = 1,
 };
 
+enum class OverlayType {
+    BUILDER = 0,
+    TEXT = 1,
+    RESET = 2,
+};
+
 struct MenuParam {
     std::string title;
     OffsetF positionOffset;
@@ -320,6 +326,9 @@ public:
     static void SetMask(const RefPtr<BasicShape> &basicShape);
     // overlay
     static void SetOverlay(const NG::OverlayOptions &overlay);
+    static void SetOverlayBuilder(std::function<void()>&& buildFunc,
+        const std::optional<Alignment>& align, const std::optional<Dimension>& offsetX,
+        const std::optional<Dimension>& offsetY);
     // motionPath
     static void SetMotionPath(const MotionPathOption &motionPath);
     // progress mask
