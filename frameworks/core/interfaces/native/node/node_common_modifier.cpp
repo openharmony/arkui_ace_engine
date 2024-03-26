@@ -1594,7 +1594,7 @@ ArkUIBlurStyleOptionType GetBackgroundBlurStyle(ArkUINodeHandle node)
     styleOptionType.blurStyle = static_cast<int32_t>(renderContext->GetBackBlurStyle()->blurStyle);
     styleOptionType.colorMode = static_cast<int32_t>(renderContext->GetBackBlurStyle()->colorMode);
     styleOptionType.adaptiveColor = static_cast<int32_t>(renderContext->GetBackBlurStyle()->adaptiveColor);
-    styleOptionType.scale = static_cast<int32_t>(renderContext->GetBackBlurStyle()->scale);
+    styleOptionType.scale = renderContext->GetBackBlurStyle()->scale;
     return styleOptionType;
 }
 
@@ -1742,8 +1742,8 @@ ArkUIImageSizeType GetBackgroundImageSize(ArkUINodeHandle node)
     CHECK_NULL_RETURN(renderContext->GetBackground(), imageSizeType);
     auto imageSize = renderContext->GetBackground()->GetBackgroundImageSize();
     CHECK_NULL_RETURN(imageSize, imageSizeType);
-    imageSizeType.xValue = Dimension(imageSize->GetSizeValueX(), DimensionUnit::PX).ConvertToVp();
-    imageSizeType.yValue = Dimension(imageSize->GetSizeValueY(), DimensionUnit::PX).ConvertToVp();
+    imageSizeType.xValue = imageSize->GetSizeValueX();
+    imageSizeType.yValue = imageSize->GetSizeValueY();
     imageSizeType.xType = static_cast<int32_t>(imageSize->GetSizeTypeX());
     imageSizeType.yType = static_cast<int32_t>(imageSize->GetSizeTypeY());
     return imageSizeType;

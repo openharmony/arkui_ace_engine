@@ -195,6 +195,7 @@ constexpr int32_t IMAGE_SIZE_TYPE_CONTAIN_INDEX = 0;
 constexpr int32_t IMAGE_SIZE_TYPE_COVER_INDEX = 1;
 constexpr int32_t IMAGE_SIZE_TYPE_AUTO_INDEX = 2;
 constexpr int32_t IMAGE_SIZE_TYPE_LENGTH_INDEX = 3;
+constexpr int32_t ERROR_CODE = -1;
 const std::string EMPTY_STR = "";
 const std::vector<std::string> ACCESSIBILITY_LEVEL_VECTOR = { "auto", "yes", "no", "no-hide-descendants" };
 std::map<std::string, int32_t> ACCESSIBILITY_LEVEL_MAP = { { "auto", 0 }, { "yes", 1 }, { "no", 2 },
@@ -5303,7 +5304,11 @@ int32_t SetDatePickerDisappearTextStyle(ArkUI_NodeHandle node, const ArkUI_Attri
         return ERROR_CODE_PARAM_INVALID;
     }
 
-    ArkUI_Uint32 color = StringToColorInt(params[NUM_0].c_str());
+    ArkUI_Uint32 color = StringToColorInt(params[NUM_0].c_str(), ERROR_CODE);
+    int size = StringToInt(params[NUM_1].c_str(), ERROR_CODE);
+    if (color == ERROR_CODE || size == ERROR_CODE) {
+        return ERROR_CODE_PARAM_INVALID;
+    }
     auto style = StringToEnumInt(params[NUM_4].c_str(), FONT_STYLES, NUM_0);
     std::string fontInfo = params[NUM_1] + '|' + params[NUM_2] + '|' + params[NUM_3];
 
@@ -5340,7 +5345,11 @@ int32_t SetDatePickerTextStyle(ArkUI_NodeHandle node, const ArkUI_AttributeItem*
         return ERROR_CODE_PARAM_INVALID;
     }
 
-    ArkUI_Uint32 color = StringToColorInt(params[NUM_0].c_str());
+    ArkUI_Uint32 color = StringToColorInt(params[NUM_0].c_str(), ERROR_CODE);
+    int size = StringToInt(params[NUM_1].c_str(), ERROR_CODE);
+    if (color == ERROR_CODE || size == ERROR_CODE) {
+        return ERROR_CODE_PARAM_INVALID;
+    }
     auto style = StringToEnumInt(params[NUM_4].c_str(), FONT_STYLES, NUM_0);
     std::string fontInfo = params[NUM_1] + '|' + params[NUM_2] + '|' + params[NUM_3];
 
@@ -5377,7 +5386,11 @@ int32_t SetDatePickerSelectedTextStyle(ArkUI_NodeHandle node, const ArkUI_Attrib
         return ERROR_CODE_PARAM_INVALID;
     }
 
-    ArkUI_Uint32 color = StringToColorInt(params[NUM_0].c_str());
+    ArkUI_Uint32 color = StringToColorInt(params[NUM_0].c_str(), ERROR_CODE);
+    int size = StringToInt(params[NUM_1].c_str(), ERROR_CODE);
+    if (color == ERROR_CODE || size == ERROR_CODE) {
+        return ERROR_CODE_PARAM_INVALID;
+    }
     auto style = StringToEnumInt(params[NUM_4].c_str(), FONT_STYLES, NUM_0);
     std::string fontInfo = params[NUM_1] + '|' + params[NUM_2] + '|' + params[NUM_3];
 
@@ -5480,7 +5493,11 @@ int32_t SetTimePickerDisappearTextStyle(ArkUI_NodeHandle node, const ArkUI_Attri
         return ERROR_CODE_PARAM_INVALID;
     }
 
-    ArkUI_Uint32 color = StringToColorInt(params[NUM_0].c_str());
+    ArkUI_Uint32 color = StringToColorInt(params[NUM_0].c_str(), ERROR_CODE);
+    int size = StringToInt(params[NUM_1].c_str(), ERROR_CODE);
+    if (color == ERROR_CODE || size == ERROR_CODE) {
+        return ERROR_CODE_PARAM_INVALID;
+    }
     auto style = StringToEnumInt(params[NUM_4].c_str(), FONT_STYLES, NUM_0);
     std::string fontInfo = params[NUM_1] + '|' + params[NUM_2] + '|' + params[NUM_3];
 
@@ -5518,7 +5535,11 @@ int32_t SetTimePickerTextStyle(ArkUI_NodeHandle node, const ArkUI_AttributeItem*
         return ERROR_CODE_PARAM_INVALID;
     }
 
-    ArkUI_Uint32 color = StringToColorInt(params[NUM_0].c_str());
+    ArkUI_Uint32 color = StringToColorInt(params[NUM_0].c_str(), ERROR_CODE);
+    int size = StringToInt(params[NUM_1].c_str(), ERROR_CODE);
+    if (color == ERROR_CODE || size == ERROR_CODE) {
+        return ERROR_CODE_PARAM_INVALID;
+    }
     auto style = StringToEnumInt(params[NUM_4].c_str(), FONT_STYLES, NUM_0);
     std::string fontInfo = params[NUM_1] + '|' + params[NUM_2] + '|' + params[NUM_3];
 
@@ -5556,7 +5577,11 @@ int32_t SetTimePickerSelectedTextStyle(ArkUI_NodeHandle node, const ArkUI_Attrib
         return ERROR_CODE_PARAM_INVALID;
     }
 
-    ArkUI_Uint32 color = StringToColorInt(params[NUM_0].c_str());
+    ArkUI_Uint32 color = StringToColorInt(params[NUM_0].c_str(), ERROR_CODE);
+    int size = StringToInt(params[NUM_1].c_str(), ERROR_CODE);
+    if (color == ERROR_CODE || size == ERROR_CODE) {
+        return ERROR_CODE_PARAM_INVALID;
+    }
     auto style = StringToEnumInt(params[NUM_4].c_str(), FONT_STYLES, NUM_0);
     std::string fontInfo = params[NUM_1] + '|' + params[NUM_2] + '|' + params[NUM_3];
 
@@ -5595,7 +5620,11 @@ int32_t SetTextPickerDisappearTextStyle(ArkUI_NodeHandle node, const ArkUI_Attri
         return ERROR_CODE_PARAM_INVALID;
     }
 
-    ArkUI_Uint32 color = StringToColorInt(params[NUM_0].c_str());
+    ArkUI_Uint32 color = StringToColorInt(params[NUM_0].c_str(), ERROR_CODE);
+    int size = StringToInt(params[NUM_1].c_str(), ERROR_CODE);
+    if (color == ERROR_CODE || size == ERROR_CODE) {
+        return ERROR_CODE_PARAM_INVALID;
+    }
     auto style = StringToEnumInt(params[NUM_4].c_str(), FONT_STYLES, NUM_0);
     std::string fontInfo = params[NUM_1] + '|' + params[NUM_2] + '|' + params[NUM_3];
 
@@ -5633,7 +5662,11 @@ int32_t SetTextPickerTextStyle(ArkUI_NodeHandle node, const ArkUI_AttributeItem*
         return ERROR_CODE_PARAM_INVALID;
     }
 
-    ArkUI_Uint32 color = StringToColorInt(params[NUM_0].c_str());
+    ArkUI_Uint32 color = StringToColorInt(params[NUM_0].c_str(), ERROR_CODE);
+    int size = StringToInt(params[NUM_1].c_str(), ERROR_CODE);
+    if (color == ERROR_CODE || size == ERROR_CODE) {
+        return ERROR_CODE_PARAM_INVALID;
+    }
     auto style = StringToEnumInt(params[NUM_4].c_str(), FONT_STYLES, NUM_0);
     std::string fontInfo = params[NUM_1] + '|' + params[NUM_2] + '|' + params[NUM_3];
 
@@ -5671,7 +5704,11 @@ int32_t SetTextPickerSelectedTextStyle(ArkUI_NodeHandle node, const ArkUI_Attrib
         return ERROR_CODE_PARAM_INVALID;
     }
 
-    ArkUI_Uint32 color = StringToColorInt(params[NUM_0].c_str());
+    ArkUI_Uint32 color = StringToColorInt(params[NUM_0].c_str(), ERROR_CODE);
+    int size = StringToInt(params[NUM_1].c_str(), ERROR_CODE);
+    if (color == ERROR_CODE || size == ERROR_CODE) {
+        return ERROR_CODE_PARAM_INVALID;
+    }
     auto style = StringToEnumInt(params[NUM_4].c_str(), FONT_STYLES, NUM_0);
     std::string fontInfo = params[NUM_1] + '|' + params[NUM_2] + '|' + params[NUM_3];
 
