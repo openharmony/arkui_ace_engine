@@ -889,11 +889,6 @@ bool ListPattern::OnScrollCallback(float offset, int32_t source)
 void ListPattern::InitScrollableEvent()
 {
     AddScrollEvent();
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    auto listEventHub = host->GetEventHub<ListEventHub>();
-    auto onScrollFrameBegin = listEventHub->GetOnScrollFrameBegin();
-    SetScrollFrameBeginCallback(onScrollFrameBegin);
     auto scrollableEvent = GetScrollableEvent();
     CHECK_NULL_VOID(scrollableEvent);
     scrollableTouchEvent_ = scrollableEvent->GetScrollable();

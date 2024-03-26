@@ -1895,12 +1895,15 @@ bool ScrollablePattern::HandleOverScroll(float velocity)
 void ScrollablePattern::ExecuteScrollFrameBegin(float& mainDelta, ScrollState state)
 {
     auto context = PipelineContext::GetCurrentContextSafely();
-    if (!context || !scrollFrameBeginCallback_) {
+    auto eventHub = GetEventHub<ScrollableEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    auto scrollFrameBeginCallback = eventHub->GetOnScrollFrameBegin();
+    if (!context || !scrollFrameBeginCallback) {
         return;
     }
 
     auto offset = Dimension(mainDelta / context->GetDipScale(), DimensionUnit::VP);
-    auto scrollRes = scrollFrameBeginCallback_(-offset, state);
+    auto scrollRes = scrollFrameBeginCallback(-offset, state);
     mainDelta = -context->NormalizeToPx(scrollRes.offset);
 }
 
