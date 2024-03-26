@@ -249,7 +249,8 @@ int32_t UIDisplaySync::SearchMatchedRate(int32_t vsyncRate, int32_t iterCount)
         return iterCount / vsyncRate;
     }
 
-    if (iterCount == 0) {
+    if (iterCount == 0 || data_->rateRange_->IsZero() || !data_->rateRange_->IsValid() ||
+        (data_->rateRange_->preferred_ > vsyncRate)) {
         return vsyncRate;
     }
 
