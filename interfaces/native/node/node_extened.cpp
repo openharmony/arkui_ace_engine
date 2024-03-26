@@ -41,12 +41,12 @@ struct ExtraCustomData {
 
 void NodeAddExtraData(ArkUI_NodeHandle node, ArkUI_NodeCustomEventType eventType, int32_t targetId, void* userData)
 {
-    if (!node->extraData) {
-        node->extraData = new ExtraCustomData();
+    if (!node->extraCustomData) {
+        node->extraCustomData = new ExtraCustomData();
     }
 
-    auto* extraData = reinterpret_cast<ExtraCustomData*>(node->extraData);
-    auto& eventMap = extraData->eventMap;
+    auto* extraCustomData = reinterpret_cast<ExtraCustomData*>(node->extraCustomData);
+    auto& eventMap = extraCustomData->eventMap;
 
     auto it = eventMap.find(eventType);
     if (it != eventMap.end()) {
@@ -91,8 +91,8 @@ int32_t RegisterNodeCustomEvent(ArkUI_NodeHandle node, ArkUI_NodeCustomEventType
 
 void NodeRemoveExtraData(ArkUI_NodeHandle node, ArkUI_NodeCustomEventType eventType)
 {
-    auto* extraData = reinterpret_cast<ExtraCustomData*>(node->extraData);
-    auto& eventMap = extraData->eventMap;
+    auto* extraCustomData = reinterpret_cast<ExtraCustomData*>(node->extraCustomData);
+    auto& eventMap = extraCustomData->eventMap;
     auto innerEventExtraParam = eventMap.find(eventType);
     if (innerEventExtraParam == eventMap.end()) {
         return;
@@ -100,14 +100,14 @@ void NodeRemoveExtraData(ArkUI_NodeHandle node, ArkUI_NodeCustomEventType eventT
     delete innerEventExtraParam->second;
     eventMap.erase(innerEventExtraParam);
     if (eventMap.empty()) {
-        delete extraData;
-        node->extraData = nullptr;
+        delete extraCustomData;
+        node->extraCustomData = nullptr;
     }
 }
 
 void UnregisterNodeCustomEvent(ArkUI_NodeHandle node, ArkUI_NodeCustomEventType eventType)
 {
-    if (!node->extraData) {
+    if (!node->extraCustomData) {
         return;
     }
     auto* impl = GetFullImpl();
@@ -149,15 +149,15 @@ void RegisterNodeCustomReceiver(void (*eventReceiver)(ArkUI_NodeCustomEvent* eve
         auto innerReceiver = [](ArkUICustomNodeEvent* origin) {
             if (g_customEventReceiver) {
                 auto* nodePtr = reinterpret_cast<ArkUI_NodeHandle>(origin->extraParam);
-                if (!nodePtr->extraData) {
+                if (!nodePtr->extraCustomData) {
                     return;
                 }
 
-                auto* extraData = reinterpret_cast<ExtraCustomData*>(nodePtr->extraData);
+                auto* extraCustomData = reinterpret_cast<ExtraCustomData*>(nodePtr->extraCustomData);
                 ArkUI_NodeCustomEventType eventType = static_cast<ArkUI_NodeCustomEventType>(origin->kind);
 
-                auto innerEventExtraParam = extraData->eventMap.find(eventType);
-                if (innerEventExtraParam == extraData->eventMap.end()) {
+                auto innerEventExtraParam = extraCustomData->eventMap.find(eventType);
+                if (innerEventExtraParam == extraCustomData->eventMap.end()) {
                     return;
                 }
                 ArkUI_NodeCustomEvent event;
