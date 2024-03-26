@@ -200,11 +200,6 @@ void DynamicComponentRendererImpl::UpdateViewportConfig(const ViewportConfig& co
     Rosen::WindowSizeChangeReason reason, const std::shared_ptr<Rosen::RSTransaction>& rsTransaction)
 {
     CHECK_NULL_VOID(uiContent_);
-    ViewportConfig vpConfig;
-    vpConfig.SetDensity(config.Density());
-    vpConfig.SetPosition(config.Left(), config.Top());
-    vpConfig.SetOrientation(config.Orientation());
-
     int32_t width = config.Width();
     int32_t height = config.Height();
     contentSize_.SetWidth(width);
@@ -222,6 +217,10 @@ void DynamicComponentRendererImpl::UpdateViewportConfig(const ViewportConfig& co
                 width, height, uiContent_->GetInstanceId());
         }
     }
+    ViewportConfig vpConfig;
+    vpConfig.SetDensity(config.Density());
+    vpConfig.SetPosition(config.Left(), config.Top());
+    vpConfig.SetOrientation(config.Orientation());
     vpConfig.SetSize(width, height);
 
     auto task = [weak = WeakClaim(this), vpConfig, reason, rsTransaction]() {
