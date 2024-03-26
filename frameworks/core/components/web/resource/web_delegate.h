@@ -657,6 +657,8 @@ public:
     std::string GetUrl();
     void UpdateLocale();
     void SetDrawRect(int32_t x, int32_t y, int32_t width, int32_t height);
+    void ReleaseResizeHold();
+    bool GetPendingSizeStatus();
     void OnInactive();
     void OnActive();
     void OnWebviewHide();

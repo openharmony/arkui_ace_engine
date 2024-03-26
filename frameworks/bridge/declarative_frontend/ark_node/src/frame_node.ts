@@ -213,7 +213,7 @@ class FrameNode {
     if (!flag) {
       throw { message: 'The FrameNode is not modifiable.', code: 100021 };
     }
-    this._childList.set(sibling.nodeId_,sibling);
+    this._childList.set(child.nodeId_,child);
   }
   removeChild(node: FrameNode): void {
     this.checkType();

@@ -369,13 +369,13 @@ HWTEST_F(BubbleTestNg, PanelPatternTest003, TestSize.Level1)
      */
     bubbleHub->FireChangeEvent(false);
     auto jsonFalse = JsonUtil::Create(true);
-    jsonFalse->Put("isVisible", true);
-    EXPECT_EQ(stateChange, jsonFalse->GetValue("isVisible")->ToString());
+    jsonFalse->Put("isVisible", false);
+    EXPECT_EQ(stateChange, jsonFalse->ToString());
 
     bubbleHub->FireChangeEvent(true);
     auto jsonTrue = JsonUtil::Create(true);
     jsonTrue->Put("isVisible", true);
-    EXPECT_EQ(stateChange, jsonTrue->GetValue("isVisible")->ToString());
+    EXPECT_EQ(stateChange, jsonTrue->ToString());
 }
 
 /**

@@ -199,10 +199,16 @@ private:
     void OnIsFocusActiveUpdate(bool isFocusActive);
     void AddIsFocusActiveUpdateEvent();
     void RemoveIsFocusActiveUpdateEvent();
+    bool isMinResponseExceed(const std::optional<Offset>& localLocation);
 
     Axis direction_ = Axis::HORIZONTAL;
     enum SliderChangeMode { Begin = 0, Moving = 1, End = 2, Click = 3 };
     float value_ = 0.0f;
+    float minResponse_ = 0.0f;
+    float minResponseStartValue_ = value_;
+    bool isMinResponseExceedFlag_ = false;
+    SourceType eventSourceDevice_ = SourceType::NONE;
+    Offset eventLocalLocation_ {};
     bool showTips_ = false;
     bool hotFlag_ = false; // whether the mouse is hovering over the slider
     bool valueChangeFlag_ = false;
@@ -213,6 +219,8 @@ private:
     bool panMoveFlag_ = false;
     bool isVisible_ = true;
     bool isShow_ = true;
+    SliderModelNG::SliderInteraction sliderInteractionMode_ = SliderModelNG::SliderInteraction::SLIDE_AND_CLICK;
+    bool allowDragEvents_ = true;
     int32_t fingerId_ = -1;
 
     float stepRatio_ = 1.0f / 100.0f;

@@ -57,6 +57,7 @@ HWTEST_F(FrameRateRangeTest, RateChangedTest, TestSize.Level1)
 HWTEST_F(FrameRateRangeTest, NodeRateTest, TestSize.Level1)
 {
     int32_t nodeId = 1;
+    int32_t nodeId2 = 2;
     int32_t rate1 = 60;
     int32_t rate2 = 120;
     FrameRateManager frameRageManager;
@@ -65,10 +66,18 @@ HWTEST_F(FrameRateRangeTest, NodeRateTest, TestSize.Level1)
     EXPECT_EQ(true, frameRageManager.IsRateChanged());
 
     frameRageManager.SetIsRateChanged(false);
+    frameRageManager.AddNodeRate(nodeId, rate2);
+    EXPECT_EQ(false, frameRageManager.IsRateChanged());
+
+    frameRageManager.SetIsRateChanged(false);
+    frameRageManager.UpdateNodeRate(nodeId2, rate2);
+    EXPECT_EQ(false, frameRageManager.IsRateChanged());
     frameRageManager.UpdateNodeRate(nodeId, rate2);
     EXPECT_EQ(true, frameRageManager.IsRateChanged());
 
     frameRageManager.SetIsRateChanged(false);
+    frameRageManager.RemoveNodeRate(nodeId2);
+    EXPECT_EQ(false, frameRageManager.IsRateChanged());
     frameRageManager.RemoveNodeRate(nodeId);
     EXPECT_EQ(true, frameRageManager.IsRateChanged());
 }
@@ -85,10 +94,23 @@ HWTEST_F(FrameRateRangeTest, GetDisplaySyncRate, TestSize.Level1)
     int32_t displaySyncRate = 90;
     int32_t animateRate = 60;
     FrameRateManager frameRageManager;
+    EXPECT_EQ(0, frameRageManager.GetExpectedRate());
     EXPECT_EQ(0, frameRageManager.GetDisplaySyncRate());
     frameRageManager.SetDisplaySyncRate(displaySyncRate);
     EXPECT_EQ(displaySyncRate, frameRageManager.GetDisplaySyncRate());
+    EXPECT_EQ(true, frameRageManager.IsRateChanged());
+
+    frameRageManager.SetIsRateChanged(false);
+    frameRageManager.SetDisplaySyncRate(displaySyncRate);
+    EXPECT_EQ(false, frameRageManager.IsRateChanged());
+
+    frameRageManager.SetIsRateChanged(false);
     frameRageManager.SetAnimateRate(animateRate);
+    EXPECT_EQ(true, frameRageManager.IsRateChanged());
+    frameRageManager.SetIsRateChanged(false);
+    frameRageManager.SetAnimateRate(animateRate);
+    EXPECT_EQ(false, frameRageManager.IsRateChanged());
+
     frameRageManager.AddNodeRate(nodeId, rate);
     EXPECT_EQ(rate, frameRageManager.GetExpectedRate());
 }
