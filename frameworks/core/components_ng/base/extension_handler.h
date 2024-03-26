@@ -38,6 +38,8 @@ struct ExtensionLayoutConstraint {
     static ExtensionLayoutConstraint Create(const LayoutConstraintF& layoutConstraintF);
 };
 
+class FrameNode;
+
 class ACE_EXPORT ExtensionHandler : public virtual AceType {
     DECLARE_ACE_TYPE(ExtensionHandler, AceType);
 
@@ -80,14 +82,8 @@ public:
         innerOverlayDrawImpl_ = std::move(impl);
     }
 
-    void InvalidateRender()
-    {
-        if (invalidateRender_) {
-            invalidateRender_();
-        }
-        needRender_  = true;
-    }
-
+    void InvalidateRender();
+    
     void SetInvalidateRenderImpl(std::function<void()>&& impl)
     {
         invalidateRender_ = std::move(impl);
@@ -113,6 +109,11 @@ public:
         return drawModifier_;
     }
 
+    void AttachFrameNode(FrameNode* node)
+    {
+        node_ = node;
+    }
+
 protected:
     virtual void OnMeasure(const ExtensionLayoutConstraint& layoutConstraint);
     virtual void OnLayout(int32_t width, int32_t height, int32_t positionX, int32_t positionY);
@@ -130,6 +131,7 @@ private:
     bool needRender_  = true;
 
     RefPtr<NG::DrawModifier> drawModifier_;
+    FrameNode* node_;
 };
 
 } // namespace OHOS::Ace::NG

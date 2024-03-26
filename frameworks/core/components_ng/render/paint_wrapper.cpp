@@ -71,6 +71,9 @@ void PaintWrapper::FlushRender()
         DynamicCast<ContentModifier>(nodePaintImpl_ ? nodePaintImpl_->GetContentModifier(this) : nullptr);
     if (contentModifier) {
         nodePaintImpl_->UpdateContentModifier(this);
+        if (extensionHandler_) {
+            extensionHandler_->InvalidateRender();
+        }
     }
 
     auto overlayModifier = nodePaintImpl_ ? nodePaintImpl_->GetOverlayModifier(this) : nullptr;
@@ -111,9 +114,9 @@ void PaintWrapper::FlushRender()
             });
         if (!overlayModifier) {
             if (overlayDraw) {
-                extensionHandler_->SetInnerForegroundDrawImpl(
-                    [foregroundDraw = std::move(foregroundDraw)](
-                        DrawingContext& context) { foregroundDraw(context.canvas); });
+                extensionHandler_->SetInnerOverlayDrawImpl(
+                    [overlayDraw = std::move(overlayDraw)](
+                        DrawingContext& context) { overlayDraw(context.canvas); });
             }
             renderContext->FlushOverlayDrawFunction(
                 [extensionHandler = RawPtr(extensionHandler_), width, height](RSCanvas& canvas) {

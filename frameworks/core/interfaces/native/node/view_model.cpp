@@ -60,13 +60,6 @@
 
 namespace OHOS::Ace::NG::ViewModel {
 
-constexpr int NUM_0 = 0;
-constexpr int NUM_1 = 1;
-constexpr int NUM_2 = 2;
-constexpr int NUM_3 = 3;
-constexpr int NUM_4 = 4;
-constexpr int NUM_5 = 5;
-
 ArkUIAPICallbackMethod* callbacks = nullptr;
 
 void* createTextNode(ArkUI_Int32 nodeId)
@@ -504,18 +497,26 @@ ArkUI_Int32 MeasureNode(ArkUIVMContext context, ArkUINodeHandle nodePtr, ArkUI_F
     auto* frameNode = AceType::DynamicCast<FrameNode>(reinterpret_cast<UINode*>(nodePtr));
     if (frameNode) {
         std::optional<LayoutConstraintF> constraint = std::make_optional<LayoutConstraintF>();
-        constraint->minSize.SetWidth(data[NUM_0]);
-        constraint->minSize.SetHeight(data[NUM_1]);
-        constraint->maxSize.SetWidth(data[NUM_2]);
-        constraint->maxSize.SetHeight(data[NUM_3]);
-        if (data[NUM_0] == data[NUM_2]) {
-            constraint->selfIdealSize.SetWidth(data[NUM_0]);
+        //minWidth
+        constraint->minSize.SetWidth(data[0]);
+        //minHeight
+        constraint->minSize.SetHeight(data[1]);
+        //maxWidth
+        constraint->maxSize.SetWidth(data[2]);
+        //maxHeight
+        constraint->maxSize.SetHeight(data[3]);
+        //minWidth == maxWidth
+        if (data[0] == data[2]) {
+            constraint->selfIdealSize.SetWidth(data[0]);
         }
-        if (data[NUM_1] == data[NUM_3]) {
-            constraint->selfIdealSize.SetHeight(data[NUM_0]);
+        //minHeight == maxHeight
+        if (data[1] == data[3]) {
+            constraint->selfIdealSize.SetHeight(data[0]);
         }
-        constraint->percentReference.SetWidth(data[NUM_4]);
-        constraint->percentReference.SetHeight(data[NUM_5]);
+        //percentReferenceWidth
+        constraint->percentReference.SetWidth(data[4]);
+        //percentReferenceHeight
+        constraint->percentReference.SetHeight(data[5]);
         frameNode->Measure(constraint);
     }
     return 0;

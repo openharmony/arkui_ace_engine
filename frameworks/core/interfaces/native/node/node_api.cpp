@@ -45,13 +45,6 @@
 
 namespace OHOS::Ace::NG {
 
-constexpr int NUM_0 = 0;
-constexpr int NUM_1 = 1;
-constexpr int NUM_2 = 2;
-constexpr int NUM_3 = 3;
-constexpr int NUM_4 = 4;
-constexpr int NUM_5 = 5;
-
 ArkUI_Int64 GetUIState(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -651,12 +644,18 @@ void GetLayoutConstraint(ArkUINodeHandle node, ArkUI_Int32* value)
     CHECK_NULL_VOID(frameNode);
     auto layoutConstraint = frameNode->GetLayoutProperty()->GetContentLayoutConstraint();
     if (layoutConstraint.has_value()) {
-        value[NUM_0] = static_cast<ArkUI_Int32>(layoutConstraint.value().minSize.Width());
-        value[NUM_1] = static_cast<ArkUI_Int32>(layoutConstraint.value().minSize.Height());
-        value[NUM_2] = static_cast<ArkUI_Int32>(layoutConstraint.value().maxSize.Width());
-        value[NUM_3] = static_cast<ArkUI_Int32>(layoutConstraint.value().maxSize.Height());
-        value[NUM_4] = static_cast<ArkUI_Int32>(layoutConstraint.value().percentReference.Width());
-        value[NUM_5] = static_cast<ArkUI_Int32>(layoutConstraint.value().percentReference.Height());
+        //min
+        value[0] = static_cast<ArkUI_Int32>(layoutConstraint.value().minSize.Width());
+        //min
+        value[1] = static_cast<ArkUI_Int32>(layoutConstraint.value().minSize.Height());
+        //.max
+        value[2] = static_cast<ArkUI_Int32>(layoutConstraint.value().maxSize.Width());
+        //.max
+        value[3] = static_cast<ArkUI_Int32>(layoutConstraint.value().maxSize.Height());
+        //percentReference
+        value[4] = static_cast<ArkUI_Int32>(layoutConstraint.value().percentReference.Width());
+        //percentReference
+        value[5] = static_cast<ArkUI_Int32>(layoutConstraint.value().percentReference.Height());
     }
 }
 

@@ -199,8 +199,6 @@ public:
 
     void SetOnSizeChangeCallback(OnSizeChangedFunc&& callback);
 
-    void SetJSFrameNodeOnSizeChangeCallback(OnSizeChangedFunc&& callback);
-
     void TriggerOnSizeChangeCallback();
 
     void SetGeometryNode(const RefPtr<GeometryNode>& node);
@@ -409,8 +407,7 @@ public:
     void OnAttachToMainTree(bool recursive) override;
     void OnAttachToBuilderNode(NodeStatus nodeStatus) override;
 
-    void TryVisibleChangeOnDescendant(bool isVisible) override;
-    void NotifyVisibleChange(bool isVisible);
+    void OnVisibleChange(bool isVisible) override;
 
     void PushDestroyCallback(std::function<void()>&& callback)
     {
@@ -522,6 +519,7 @@ public:
     {
         if (!extensionHandler_) {
             extensionHandler_ = MakeRefPtr<ExtensionHandler>();
+            extensionHandler_->AttachFrameNode(this);
         }
         extensionHandler_->SetDrawModifier(drawModifier);
     }
@@ -572,7 +570,6 @@ public:
     std::string ProvideRestoreInfo();
 
     static std::vector<RefPtr<FrameNode>> GetNodesById(const std::unordered_set<int32_t>& set);
-    static std::vector<FrameNode*> GetNodesPtrById(const std::unordered_set<int32_t>& set);
 
     double GetPreviewScaleVal() const;
 
@@ -753,6 +750,7 @@ public:
     void SetExtensionHandler(const RefPtr<ExtensionHandler>& handler)
     {
         extensionHandler_ = handler;
+        extensionHandler_->AttachFrameNode(this);
     }
 
     void NotifyFillRequestSuccess(RefPtr<PageNodeInfoWrap> nodeWrap, AceAutoFillType autoFillType);

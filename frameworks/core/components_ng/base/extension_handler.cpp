@@ -15,6 +15,8 @@
 
 #include "core/components_ng/base/extension_handler.h"
 
+#include "core/components_ng/base/frame_node.h"
+
 namespace OHOS::Ace::NG {
 
 ExtensionLayoutConstraint ExtensionLayoutConstraint::Create(const LayoutConstraintF& layoutConstraintF)
@@ -137,6 +139,18 @@ void ExtensionHandler::OnDraw(DrawingContext& context)
 void ExtensionHandler::OnOverlayDraw(DrawingContext& context)
 {
     InnerOverlayDraw(context);
+}
+
+void ExtensionHandler::InvalidateRender()
+{
+    if (invalidateRender_) {
+        invalidateRender_();
+    } else {
+        if (node_) {
+            node_->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+        }
+    }
+    needRender_ = true;
 }
 
 } // namespace OHOS::Ace::NG
