@@ -194,7 +194,6 @@ float TitleBarLayoutAlgorithm::WidthAfterAvoidMenubar(const RefPtr<TitleBarNode>
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_RETURN(pipeline, afterAvoidWidth);
     if (!pipeline->GetInstallationFree()) {
-        LOGI("xhq:: not install free");
         return afterAvoidWidth;
     }
     

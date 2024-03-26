@@ -30,6 +30,7 @@ public:
  */
 HWTEST_F(SwiperControllerTestNg, ShowNext001, TestSize.Level1)
 {
+    EXPECT_CALL(*MockPipelineContext::pipeline_, FlushUITasks).Times(15);
     /**
      * @tc.steps: step1. SetIndex:3
      */
@@ -162,6 +163,7 @@ HWTEST_F(SwiperControllerTestNg, ShowNext004, TestSize.Level1)
  */
 HWTEST_F(SwiperControllerTestNg, ShowPrevious001, TestSize.Level1)
 {
+    EXPECT_CALL(*MockPipelineContext::pipeline_, FlushUITasks).Times(18);
     CreateWithItem([](SwiperModelNG model) {});
 
     /**
@@ -298,6 +300,7 @@ HWTEST_F(SwiperControllerTestNg, FinishAnimation001, TestSize.Level1)
  */
 HWTEST_F(SwiperControllerTestNg, ChangeIndex001, TestSize.Level1)
 {
+    EXPECT_CALL(*MockPipelineContext::pipeline_, FlushUITasks).Times(2);
     CreateWithItem([](SwiperModelNG model) {});
 
     /**

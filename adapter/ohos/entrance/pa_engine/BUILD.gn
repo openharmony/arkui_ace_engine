@@ -50,9 +50,10 @@ template("pa_backend") {
       "safwk:system_ability_fwk",
     ]
 
-    sources = [ "pa_backend.cpp" ]
-
-    sources += [ "engine/common/js_backend_engine_loader.cpp" ]
+    sources = [
+      "engine/common/js_backend_engine_loader.cpp",
+      "pa_backend.cpp",
+    ]
   }
 }
 

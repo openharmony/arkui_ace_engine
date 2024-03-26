@@ -136,6 +136,16 @@ void TextFieldModelNG::SetUserUnderlineColor(UserUnderlineColor userColor)
     pattern->SetUserUnderlineColor(userColor);
 }
 
+void TextFieldModelNG::SetFontFeature(const FONT_FEATURES_MAP& value)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(TextFieldLayoutProperty, FontFeature, value);
+}
+
+void TextFieldModelNG::SetFontFeature(FrameNode* frameNode, const FONT_FEATURES_MAP& value)
+{
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, FontFeature, value, frameNode);
+}
+
 void TextFieldModelNG::SetNormalUnderlineColor(const Color& normalColor)
 {
     auto pattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<TextFieldPattern>();
@@ -562,11 +572,6 @@ void TextFieldModelNG::SetShowCounter(bool value)
     auto pattern = frameNode->GetPattern<TextFieldPattern>();
     CHECK_NULL_VOID(pattern);
     pattern->SetCounterState(false);
-    if (value) {
-        pattern->AddCounterNode();
-    } else {
-        pattern->CleanCounterNode();
-    }
     ACE_UPDATE_LAYOUT_PROPERTY(TextFieldLayoutProperty, ShowCounter, value);
 }
 
@@ -701,13 +706,14 @@ void TextFieldModelNG::SetSelectionMenuHidden(bool selectionMenuHidden)
     ACE_UPDATE_LAYOUT_PROPERTY(TextFieldLayoutProperty, SelectionMenuHidden, selectionMenuHidden);
 }
 
-void TextFieldModelNG::SetCustomKeyboard(const std::function<void()>&& buildFunc)
+void TextFieldModelNG::SetCustomKeyboard(const std::function<void()>&& buildFunc, bool supportAvoidance)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
     auto pattern = frameNode->GetPattern<TextFieldPattern>();
     if (pattern) {
         pattern->SetCustomKeyboard(std::move(buildFunc));
+        pattern->SetCustomKeyboardOption(supportAvoidance);
     }
 }
 
@@ -1015,13 +1021,6 @@ void TextFieldModelNG::SetSelectionMenuHidden(FrameNode* frameNode, bool selecti
 void TextFieldModelNG::SetShowCounter(FrameNode* frameNode, bool value)
 {
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, ShowCounter, value, frameNode);
-    auto pattern = frameNode->GetPattern<TextFieldPattern>();
-    CHECK_NULL_VOID(pattern);
-    if (value) {
-        pattern->AddCounterNode();
-    } else {
-        pattern->CleanCounterNode();
-    }
 }
 
 void TextFieldModelNG::SetShowError(FrameNode* frameNode, const std::string& errorText, bool visible)
@@ -1345,5 +1344,30 @@ int32_t TextFieldModelNG::GetTextSelectionIndex(FrameNode* frameNode, bool isEnd
         return selectController->GetEndIndex();
     }
     return selectController->GetStartIndex();
+}
+
+void TextFieldModelNG::SetTextDecoration(FrameNode* frameNode, TextDecoration value)
+{
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, TextDecoration, value, frameNode);
+}
+
+void TextFieldModelNG::SetTextDecorationColor(FrameNode* frameNode, const Color& value)
+{
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, TextDecorationColor, value, frameNode);
+}
+
+void TextFieldModelNG::SetTextDecorationStyle(FrameNode* frameNode, TextDecorationStyle value)
+{
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, TextDecorationStyle, value, frameNode);
+}
+
+void TextFieldModelNG::SetLetterSpacing(FrameNode* frameNode, const Dimension& value)
+{
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, LetterSpacing, value, frameNode);
+}
+
+void TextFieldModelNG::SetLineHeight(FrameNode* frameNode, const Dimension& value)
+{
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, LineHeight, value, frameNode);
 }
 } // namespace OHOS::Ace::NG

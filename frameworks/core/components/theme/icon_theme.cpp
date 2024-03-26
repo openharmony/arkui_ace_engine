@@ -107,8 +107,7 @@ static std::unordered_map<InternalResource::ResourceId, std::string> RESOURCE_IC
     { InternalResource::ResourceId::IC_WINDOW_MIN, "ic_window_min" },
     { InternalResource::ResourceId::IC_WINDOW_RESTORES, "ic_window_restores" },
     { InternalResource::ResourceId::IC_BOTTOMSHEET_CLOSE_SVG, "ic_bottomsheet_close" },
-    { InternalResource::ResourceId::IC_CANCEL_SVG, "ic_public_cancel" },
-    { InternalResource::ResourceId::MOON_PROGRESS_FG_CIRCLE_SHADOW, "moon_progress_fg_circle_shadow" }
+    { InternalResource::ResourceId::IC_CANCEL_SVG, "ic_public_cancel" }
 };
 }
 

@@ -20,6 +20,7 @@ config("ui_extension_config") {
 
 build_component_ng("ui_extension_pattern_ng") {
   sources = [
+    "accessibility_session_adapter_ui_extension.cpp",
     "modal_ui_extension_proxy_impl.cpp",
     "session_wrapper_factory.cpp",
     "session_wrapper_impl.cpp",

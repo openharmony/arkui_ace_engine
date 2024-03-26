@@ -78,6 +78,7 @@ class FrameNodeModifier extends ArkComponent {
         return;
       }
       value.applyStage(this.nativePtr);
+      getUINativeModule().frameNode.propertyUpdate(this.nativePtr);
     })
   }
   setNodePtr(nodePtr: NodePtr): void {

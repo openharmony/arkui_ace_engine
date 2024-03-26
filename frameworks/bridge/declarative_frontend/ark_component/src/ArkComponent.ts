@@ -222,10 +222,10 @@ class BorderWidthModifier extends ModifierWithKey<Length | EdgeWidths> {
         getUINativeModule().common.setBorderWidth(node, this.value, this.value, this.value, this.value);
       } else {
         getUINativeModule().common.setBorderWidth(node,
-          (this.value as EdgeWidths).left,
-          (this.value as EdgeWidths).right,
           (this.value as EdgeWidths).top,
-          (this.value as EdgeWidths).bottom);
+          (this.value as EdgeWidths).right,
+          (this.value as EdgeWidths).bottom,
+          (this.value as EdgeWidths).left);
       }
     }
   }
@@ -328,9 +328,9 @@ class BorderColorModifier extends ModifierWithKey<ResourceColor | EdgeColors> {
       if (valueType === 'number' || valueType === 'string' || isResource(this.value)) {
         getUINativeModule().common.setBorderColor(node, this.value, this.value, this.value, this.value);
       } else {
-        getUINativeModule().common.setBorderColor(node, (this.value as EdgeColors).left,
-          (this.value as EdgeColors).right, (this.value as EdgeColors).top,
-          (this.value as EdgeColors).bottom);
+        getUINativeModule().common.setBorderColor(node, (this.value as EdgeColors).top,
+          (this.value as EdgeColors).right, (this.value as EdgeColors).bottom,
+          (this.value as EdgeColors).left);
       }
 
     }
@@ -2502,6 +2502,7 @@ class ArkComponent implements CommonMethod<CommonAttribute> {
         }
         if (safeAreaType) {
           safeAreaType += '|';
+          safeAreaType += param.toString();
         } else {
           safeAreaType += param.toString();
         }
@@ -2517,6 +2518,7 @@ class ArkComponent implements CommonMethod<CommonAttribute> {
         }
         if (safeAreaEdge) {
           safeAreaEdge += '|';
+          safeAreaEdge += param.toString();
         } else {
           safeAreaEdge += param.toString();
         }
@@ -3526,30 +3528,33 @@ class UICommonEvent {
     this._nodePtr = nodePtr;
   }
   setOnClick(callback: (event?: ClickEvent) => void): void {
-    getUINativeModule().frameNode.setOnClick(this._nodePtr, callback);
+    getUINativeModule().frameNode.setOnClick(this._nodePtr, callback, this._instanceId);
   }
   setOnTouch(callback: (event?: TouchEvent) => void): void {
-    getUINativeModule().frameNode.setOnTouch(this._nodePtr, callback);
+    getUINativeModule().frameNode.setOnTouch(this._nodePtr, callback, this._instanceId);
   }
   setOnAppear(callback: () => void): void {
-    getUINativeModule().frameNode.setOnAppear(this._nodePtr, callback);
+    getUINativeModule().frameNode.setOnAppear(this._nodePtr, callback, this._instanceId);
   }
   setOnDisappear(callback: () => void): void {
-    getUINativeModule().frameNode.setOnDisappear(this._nodePtr, callback);
+    getUINativeModule().frameNode.setOnDisappear(this._nodePtr, callback, this._instanceId);
   }
   setOnKeyEvent(callback: (event?: KeyEvent) => void): void {
-    getUINativeModule().frameNode.setOnKeyEvent(this._nodePtr, callback);
+    getUINativeModule().frameNode.setOnKeyEvent(this._nodePtr, callback, this._instanceId);
   }
   setOnFocus(callback: () => void): void {
-    getUINativeModule().frameNode.setOnFocus(this._nodePtr, callback);
+    getUINativeModule().frameNode.setOnFocus(this._nodePtr, callback, this._instanceId);
   }
   setOnBlur(callback: () => void): void {
-    getUINativeModule().frameNode.setOnBlur(this._nodePtr, callback);
+    getUINativeModule().frameNode.setOnBlur(this._nodePtr, callback, this._instanceId);
   }
   setOnHover(callback: (isHover?: boolean, event?: HoverEvent) => void): void {
-    getUINativeModule().frameNode.setOnHover(this._nodePtr, callback);
+    getUINativeModule().frameNode.setOnHover(this._nodePtr, callback, this._instanceId);
   }
   setOnMouse(callback: (event?: MouseEvent) => void): void {
-    getUINativeModule().frameNode.setOnMouse(this._nodePtr, callback);
+    getUINativeModule().frameNode.setOnMouse(this._nodePtr, callback, this._instanceId);
+  }
+  setOnSizeChange(callback: SizeChangeCallback): void {
+    getUINativeModule().frameNode.setOnSizeChange(this._nodePtr, callback, this._instanceId);
   }
 }

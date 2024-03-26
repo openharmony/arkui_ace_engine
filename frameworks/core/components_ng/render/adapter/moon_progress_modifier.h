@@ -17,8 +17,6 @@
 
 #include "core/components/common/properties/color.h"
 #include "core/components_ng/base/modifier.h"
-#include "core/components_ng/image_provider/image_loading_context.h"
-#include "core/components_ng/render/adapter/pixelmap_image.h"
 
 namespace OHOS::Ace::NG {
 class MoonProgressModifier : public OverlayModifier {
@@ -43,10 +41,6 @@ public:
 private:
     void PaintSquareMoon(RSCanvas& canvas) const;
     void PaintSquareMoonShadow(RSCanvas& canvas, RSBrush& brush) const;
-    void InitImage();
-    void OnImageDataReady();
-    void OnImageLoadSuccess();
-    void OnImageLoadFail(const std::string& errorMsg);
 
     // Animatable
     RefPtr<AnimatablePropertyColor> maskColor_;
@@ -56,8 +50,6 @@ private:
     // No animatable
     RefPtr<PropertyFloat> maxValue_;
     RefPtr<PropertyBool> enableBreathe_;
-    RefPtr<ImageLoadingContext> loadingCtx_;
-    RefPtr<PixelMapImage> canvasImage_;
     // Others
     float bigRadius_ = .0f;
     float smallRadius_ = .0f;

@@ -54,23 +54,16 @@
 
 static constexpr OHOS::HiviewDFX::HiLogLabel LOG_LABEL = {LOG_CORE, FR_LOG_DOMAIN, FR_LOG_TAG};
 
-#define __FR_FILENAME__ (__builtin_strrchr(__FILE__, '/') ? __builtin_strrchr(__FILE__, '/') + 1 : __FILE__)
+#define FR_FILENAME (__builtin_strrchr(__FILE__, '/') ? __builtin_strrchr(__FILE__, '/') + 1 : __FILE__)
+#define PRINT_HILOG(level, fmt, ...) \
+    HILOG_IMPL(LOG_CORE, LOG_##level, FR_LOG_DOMAIN, FR_LOG_TAG, "[%{public}s(%{public}s:%{public}d)]" fmt, \
+        FR_FILENAME, __FUNCTION__, __LINE__, ##__VA_ARGS__)
 
-#define HILOG_FATAL(fmt, ...)            \
-    (void)OHOS::HiviewDFX::HiLog::Fatal( \
-        LOG_LABEL, "[%{public}s(%{public}s:%{public}d)]" fmt, __FR_FILENAME__, __FUNCTION__, __LINE__, ##__VA_ARGS__)
-#define HILOG_ERROR(fmt, ...)            \
-    (void)OHOS::HiviewDFX::HiLog::Error( \
-        LOG_LABEL, "[%{public}s(%{public}s:%{public}d)]" fmt, __FR_FILENAME__, __FUNCTION__, __LINE__, ##__VA_ARGS__)
-#define HILOG_WARN(fmt, ...)            \
-    (void)OHOS::HiviewDFX::HiLog::Warn( \
-        LOG_LABEL, "[%{public}s(%{public}s:%{public}d)]" fmt, __FR_FILENAME__, __FUNCTION__, __LINE__, ##__VA_ARGS__)
-#define HILOG_INFO(fmt, ...)            \
-    (void)OHOS::HiviewDFX::HiLog::Info( \
-        LOG_LABEL, "[%{public}s(%{public}s:%{public}d)]" fmt, __FR_FILENAME__, __FUNCTION__, __LINE__, ##__VA_ARGS__)
-#define HILOG_DEBUG(fmt, ...)            \
-    (void)OHOS::HiviewDFX::HiLog::Debug( \
-        LOG_LABEL, "[%{public}s(%{public}s:%{public}d)]" fmt, __FR_FILENAME__, __FUNCTION__, __LINE__, ##__VA_ARGS__)
+#define HILOG_FATAL(fmt, ...) PRINT_HILOG(FATAL, fmt, ##__VA_ARGS__)
+#define HILOG_ERROR(fmt, ...) PRINT_HILOG(ERROR, fmt, ##__VA_ARGS__)
+#define HILOG_WARN(fmt, ...) PRINT_HILOG(WARN, fmt, ##__VA_ARGS__)
+#define HILOG_INFO(fmt, ...) PRINT_HILOG(INFO, fmt, ##__VA_ARGS__)
+#define HILOG_DEBUG(fmt, ...) PRINT_HILOG(DEBUG, fmt, ##__VA_ARGS__)
 #else
 
 #define HILOG_FATAL(...)

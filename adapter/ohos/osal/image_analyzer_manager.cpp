@@ -13,17 +13,19 @@
  * limitations under the License.
  */
 
+#include "core/common/ai/image_analyzer_manager.h"
+
+#include "interfaces/inner_api/ace/ai/image_analyzer.h"
+#include "js_native_api_types.h"
+
 #include "base/image/pixel_map.h"
 #include "base/utils/utils.h"
-#include "core/common/ai/image_analyzer_manager.h"
 #include "core/common/ai/image_analyzer_adapter.h"
 #include "core/common/ai/image_analyzer_mgr.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/image/image_pattern.h"
 #include "core/components_ng/pattern/image/image_render_property.h"
 #include "core/components_ng/property/measure_property.h"
-#include "interfaces/inner_api/ace/ai/image_analyzer.h"
-#include "js_native_api_types.h"
 
 namespace OHOS::Ace {
 
@@ -35,11 +37,8 @@ ImageAnalyzerManager::ImageAnalyzerManager(const RefPtr<NG::FrameNode>& frameNod
 
 void ImageAnalyzerManager::CreateAnalyzerOverlay(const RefPtr<OHOS::Ace::PixelMap>& pixelMap)
 {
-    if (isAnalyzerOverlayBuild_) {
-        return;
-    }
-
     CHECK_NULL_VOID(pixelMap);
+    CHECK_NULL_VOID(imageAnalyzerAdapter_);
     auto pixelmapNapiVal = imageAnalyzerAdapter_->ConvertPixmapNapi(pixelMap);
 
     if (holder_ == ImageAnalyzerHolder::CANVAS) {
@@ -52,7 +51,7 @@ void ImageAnalyzerManager::CreateAnalyzerOverlay(const RefPtr<OHOS::Ace::PixelMa
         NG::ScopedViewStackProcessor builderViewStackProcessor;
         auto analyzerConfig = imageAnalyzerAdapter_->GetImageAnalyzerConfig();
         ImageAnalyzerMgr::GetInstance().BuildNodeFunc(
-            pixelmapNapiVal,  analyzerConfig,  &analyzerUIConfig_,  &overlayData_);
+            pixelmapNapiVal, analyzerConfig, &analyzerUIConfig_, &overlayData_);
         customNode = NG::ViewStackProcessor::GetInstance()->Finish();
     }
     auto overlayNode = AceType::DynamicCast<NG::FrameNode>(customNode);
@@ -73,9 +72,11 @@ void ImageAnalyzerManager::CreateAnalyzerOverlay(const RefPtr<OHOS::Ace::PixelMa
     CHECK_NULL_VOID(focusHub);
     focusHub->SetFocusable(false);
     overlayNode->MarkDirtyNode(NG::PROPERTY_UPDATE_MEASURE);
+
     isAnalyzerOverlayBuild_ = true;
     CHECK_NULL_VOID(analyzerUIConfig_.onAnalyzed);
-    (analyzerUIConfig_.onAnalyzed.value())(true);
+    (analyzerUIConfig_.onAnalyzed.value())(ImageAnalyzerState::FINISHED);
+    analyzerUIConfig_.onAnalyzed = std::nullopt;
 }
 
 void ImageAnalyzerManager::UpdateAnalyzerOverlay(const RefPtr<OHOS::Ace::PixelMap>& pixelMap)
@@ -98,13 +99,13 @@ void ImageAnalyzerManager::UpdateAnalyzerOverlay(const RefPtr<OHOS::Ace::PixelMa
         analyzerUIConfig_.contentHeight = pixelMap->GetHeight();
     }
 
+    CHECK_NULL_VOID(imageAnalyzerAdapter_);
     auto pixelmapNapiVal = imageAnalyzerAdapter_->ConvertPixmapNapi(pixelMap);
     auto overlayNode = frameNode_->GetOverlayNode();
+    CHECK_NULL_VOID(overlayNode);
     auto analyzerConfig = imageAnalyzerAdapter_->GetImageAnalyzerConfig();
     ImageAnalyzerMgr::GetInstance().UpdateImage(&overlayData_, pixelmapNapiVal, analyzerConfig, &analyzerUIConfig_);
     overlayNode->MarkDirtyNode(NG::PROPERTY_UPDATE_MEASURE);
-    CHECK_NULL_VOID(analyzerUIConfig_.onAnalyzed);
-    (analyzerUIConfig_.onAnalyzed.value())(true);
 }
 
 void ImageAnalyzerManager::DestroyAnalyzerOverlay()
@@ -116,7 +117,11 @@ void ImageAnalyzerManager::DestroyAnalyzerOverlay()
     auto overlayNode = frameNode_->GetOverlayNode();
     CHECK_NULL_VOID(overlayNode);
     frameNode_->SetOverlayNode(RefPtr<NG::FrameNode>());
+
     isAnalyzerOverlayBuild_ = false;
+    CHECK_NULL_VOID(analyzerUIConfig_.onAnalyzed);
+    (analyzerUIConfig_.onAnalyzed.value())(ImageAnalyzerState::STOPPED);
+    analyzerUIConfig_.onAnalyzed = std::nullopt;
 }
 
 bool ImageAnalyzerManager::IsSupportImageAnalyzerFeature()
@@ -150,7 +155,7 @@ bool ImageAnalyzerManager::IsSupportImageAnalyzerFeature()
     return ImageAnalyzerMgr::GetInstance().IsImageAnalyzerSupported();
 }
 
-bool ImageAnalyzerManager::isOverlayCreated()
+bool ImageAnalyzerManager::IsOverlayCreated()
 {
     return isAnalyzerOverlayBuild_;
 }
@@ -172,7 +177,7 @@ void ImageAnalyzerManager::UpdateAnalyzerOverlayLayout()
 
     auto renderContext = overlayNode->GetRenderContext();
     if (renderContext) {
-        renderContext->SetRenderFrameOffset({-padding.Offset().GetX(), -padding.Offset().GetY()});
+        renderContext->SetRenderFrameOffset({ -padding.Offset().GetX(), -padding.Offset().GetY() });
     }
 }
 
@@ -225,6 +230,7 @@ void ImageAnalyzerManager::UpdateAnalyzerUIConfig(const RefPtr<NG::GeometryNode>
 
 void ImageAnalyzerManager::SetImageAnalyzerConfig(void* config)
 {
+    CHECK_NULL_VOID(imageAnalyzerAdapter_);
     imageAnalyzerAdapter_->SetImageAnalyzerConfig(config);
     auto analyzerConfig = imageAnalyzerAdapter_->GetImageAnalyzerConfig();
     if (isAnalyzerOverlayBuild_) {

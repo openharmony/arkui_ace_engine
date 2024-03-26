@@ -49,6 +49,7 @@
 #include "core/components_ng/pattern/text/text_layout_property.h"
 #include "core/components_ng/pattern/text_drag/text_drag_pattern.h"
 #include "core/components_ng/property/property.h"
+#include "core/event/ace_events.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -299,16 +300,20 @@ void TextPattern::OnHandleMove(const RectF& handleRect, bool isFirstHandle)
 
     auto localOffset = handleRect.GetOffset();
 
-    if (localOffset.GetX() < textContentGlobalOffset.GetX()) {
-        localOffset.SetX(textContentGlobalOffset.GetX());
-    } else if (GreatOrEqual(localOffset.GetX(), textContentGlobalOffset.GetX() + contentRect_.Width())) {
-        localOffset.SetX(textContentGlobalOffset.GetX() + contentRect_.Width());
-    }
+    auto renderContext = host->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    if (renderContext->GetClipEdge().value_or(true)) {
+        if (localOffset.GetX() < textContentGlobalOffset.GetX()) {
+            localOffset.SetX(textContentGlobalOffset.GetX());
+        } else if (GreatOrEqual(localOffset.GetX(), textContentGlobalOffset.GetX() + contentRect_.Width())) {
+            localOffset.SetX(textContentGlobalOffset.GetX() + contentRect_.Width());
+        }
 
-    if (localOffset.GetY() < textContentGlobalOffset.GetY()) {
-        localOffset.SetY(textContentGlobalOffset.GetY());
-    } else if (GreatNotEqual(localOffset.GetY(), textContentGlobalOffset.GetY() + contentRect_.Height())) {
-        localOffset.SetY(textContentGlobalOffset.GetY() + contentRect_.Height());
+        if (localOffset.GetY() < textContentGlobalOffset.GetY()) {
+            localOffset.SetY(textContentGlobalOffset.GetY());
+        } else if (GreatNotEqual(localOffset.GetY(), textContentGlobalOffset.GetY() + contentRect_.Height())) {
+            localOffset.SetY(textContentGlobalOffset.GetY() + contentRect_.Height());
+        }
     }
 
     localOffset -= textPaintOffset;
@@ -327,21 +332,19 @@ void TextPattern::OnHandleMove(const RectF& handleRect, bool isFirstHandle)
 void TextPattern::UpdateSelectorOnHandleMove(const OffsetF& localOffset, float handleHeight, bool isFirstHandle)
 {
     if (isFirstHandle) {
-        auto start = GetHandleIndex(Offset(localOffset.GetX(),
-            localOffset.GetY() + (selectOverlayProxy_->IsHandleReverse() ? handleHeight : 0)));
+        auto start = GetHandleIndex(Offset(
+            localOffset.GetX(), localOffset.GetY() + (selectOverlayProxy_->IsHandleReverse() ? handleHeight : 0)));
         HandleSelectionChange(start, textSelector_.destinationOffset);
     } else {
         auto end = GetHandleIndex(Offset(localOffset.GetX(),
-            localOffset.GetY() + (selectOverlayProxy_->IsHandleReverse() || NearEqual(localOffset.GetY(), 0)
-                                         ? 0
-                                         : handleHeight)));
+            localOffset.GetY() +
+                (selectOverlayProxy_->IsHandleReverse() || NearEqual(localOffset.GetY(), 0) ? 0 : handleHeight)));
         HandleSelectionChange(textSelector_.baseOffset, end);
     }
 }
 
 void TextPattern::OnHandleMoveDone(const RectF& handleRect, bool isFirstHandle)
 {
-    textResponseType_ = TextResponseType::LONG_PRESS;
     UpdateSelectionSpanType(std::min(textSelector_.baseOffset, textSelector_.destinationOffset),
         std::max(textSelector_.baseOffset, textSelector_.destinationOffset));
     CalculateHandleOffsetAndShowOverlay();
@@ -1451,8 +1454,10 @@ void TextPattern::OnDragEnd(const RefPtr<Ace::DragEvent>& event)
     if (event && event->GetResult() != DragRet::DRAG_SUCCESS) {
         HandleSelectionChange(recoverStart_, recoverEnd_);
         isShowMenu_ = false;
-        CalculateHandleOffsetAndShowOverlay();
-        ShowSelectOverlay(textSelector_.firstHandle, textSelector_.secondHandle, false, false, false);
+        if (GetCurrentDragTool() == SourceTool::FINGER) {
+            CalculateHandleOffsetAndShowOverlay();
+            ShowSelectOverlay(textSelector_.firstHandle, textSelector_.secondHandle, false, false, false);
+        }
     }
     host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
 }
@@ -1471,8 +1476,10 @@ void TextPattern::OnDragEndNoChild(const RefPtr<Ace::DragEvent>& event)
         if (event && event->GetResult() != DragRet::DRAG_SUCCESS) {
             HandleSelectionChange(recoverStart_, recoverEnd_);
             isShowMenu_ = false;
-            CalculateHandleOffsetAndShowOverlay();
-            ShowSelectOverlay(textSelector_.firstHandle, textSelector_.secondHandle, false, false, false);
+            if (GetCurrentDragTool() == SourceTool::FINGER) {
+                CalculateHandleOffsetAndShowOverlay();
+                ShowSelectOverlay(textSelector_.firstHandle, textSelector_.secondHandle, false, false, false);
+            }
         }
         auto layoutProperty = host->GetLayoutProperty<TextLayoutProperty>();
         host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
@@ -1507,11 +1514,11 @@ void TextPattern::InitDragEvent()
         CHECK_NULL_RETURN(pattern, itemInfo);
         auto eventHub = pattern->GetEventHub<EventHub>();
         CHECK_NULL_RETURN(eventHub, itemInfo);
-        if (pattern->spans_.empty()) {
+        pattern->SetCurrentDragTool(event->GetSourceTool());
+        if (pattern->spans_.empty() || pattern->isSpanStringMode_) {
             return pattern->OnDragStartNoChild(event, extraParams);
-        } else {
-            return pattern->OnDragStart(event, extraParams);
         }
+        return pattern->OnDragStart(event, extraParams);
     };
     eventHub->SetDefaultOnDragStart(std::move(onDragStart));
     auto onDragMove = [weakPtr = WeakClaim(this)](
@@ -1877,7 +1884,7 @@ void TextPattern::OnModifyDone()
         auto obscuredReasons = renderContext->GetObscured().value_or(std::vector<ObscuredReasons>());
         bool ifHaveObscured = std::any_of(obscuredReasons.begin(), obscuredReasons.end(),
             [](const auto& reason) { return reason == ObscuredReasons::PLACEHOLDER; });
-        if (ifHaveObscured) {
+        if (ifHaveObscured && !isSpanStringMode_) {
             CloseSelectOverlay();
             ResetSelection();
             copyOption_ = CopyOptions::None;
@@ -2036,7 +2043,24 @@ bool TextPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, c
     baselineOffset_ = textLayoutAlgorithm->GetBaselineOffset();
     contentOffset_ = dirty->GetGeometryNode()->GetContentOffset();
     textStyle_ = textLayoutAlgorithm->GetTextStyle();
+    ProcessOverlayAfterLayout();
     return true;
+}
+
+void TextPattern::ProcessOverlayAfterLayout()
+{
+    if (processOverlayDelayTask_) {
+        processOverlayDelayTask_();
+        processOverlayDelayTask_ = nullptr;
+    } else if (selectOverlayProxy_ && !selectOverlayProxy_->IsClosed()) {
+        CalculateHandleOffsetAndShowOverlay();
+        SelectHandleInfo firstHandleInfo = { .paintRect = textSelector_.firstHandle };
+        CheckHandles(firstHandleInfo);
+        SelectHandleInfo secondHandleInfo = { .paintRect = textSelector_.secondHandle };
+        CheckHandles(secondHandleInfo);
+        selectOverlayProxy_->SetSelectInfo(GetSelectedText(textSelector_.GetTextStart(), textSelector_.GetTextEnd()));
+        selectOverlayProxy_->UpdateFirstAndSecondHandleInfo(firstHandleInfo, secondHandleInfo);
+    }
 }
 
 void TextPattern::PreCreateLayoutWrapper()
@@ -2129,11 +2153,17 @@ void TextPattern::BeforeCreateLayoutWrapper()
     } else {
         auto host = GetHost();
         CHECK_NULL_VOID(host);
-        for (const auto& child : host->GetChildren()) {
-            host->RemoveChild(child);
-        }
+        textForDisplay_.clear();
+        host->Clean();
         for (const auto& span : spans_) {
             textForDisplay_ += span->content;
+        }
+        if (dataDetectorAdapter_->textForAI_ != textForDisplay_) {
+            dataDetectorAdapter_->textForAI_ = textForDisplay_;
+            dataDetectorAdapter_->aiDetectInitialized_ = false;
+        }
+        if (CanStartAITask() && !dataDetectorAdapter_->aiDetectInitialized_) {
+            dataDetectorAdapter_->StartAITask();
         }
         // mark content dirty
         if (contentMod_) {
@@ -2270,7 +2300,19 @@ void TextPattern::HandleSurfaceChanged(int32_t newWidth, int32_t newHeight, int3
         return;
     }
     CHECK_NULL_VOID(selectOverlayProxy_);
-    selectOverlayProxy_->ShowOrHiddenMenu(true);
+    CHECK_NULL_VOID(!selectOverlayProxy_->IsClosed());
+    auto isUsingMouse = selectOverlayProxy_->GetSelectOverlayMangerInfo().isUsingMouse;
+    if (isUsingMouse) {
+        CloseSelectOverlay(false);
+    } else {
+        processOverlayDelayTask_ = [weak = WeakClaim(this)]() {
+            auto pattern = weak.Upgrade();
+            CHECK_NULL_VOID(pattern);
+            pattern->CalculateHandleOffsetAndShowOverlay();
+            pattern->ShowSelectOverlay(pattern->GetTextSelector().firstHandle, pattern->GetTextSelector().secondHandle);
+            pattern->selectOverlayProxy_->ShowOrHiddenMenu(true);
+        };
+    }
 }
 
 void TextPattern::InitSurfacePositionChangedCallback()
@@ -2886,7 +2928,6 @@ void TextPattern::UpdateSpanItems(const std::list<RefPtr<SpanItem>>& spanItems)
     spans_ = spanItems;
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    CloseSelectOverlay();
     host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
 }
 } // namespace OHOS::Ace::NG

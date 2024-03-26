@@ -209,6 +209,7 @@ public:
     int32_t GetRightWordPosition(int32_t caretPosition);
     int32_t GetParagraphBeginPosition(int32_t caretPosition);
     int32_t GetParagraphEndPosition(int32_t caretPosition);
+    int32_t CaretPositionSelectEmoji(CaretMoveIntent direction);
     void HandleSelect(CaretMoveIntent direction) override;
     bool SetCaretPosition(int32_t pos);
     int32_t GetCaretPosition();
@@ -241,13 +242,14 @@ public:
     int32_t AddImageSpan(const ImageSpanOptions& options, bool isPaste = false, int32_t index = -1);
     int32_t AddTextSpan(const TextSpanOptions& options, bool isPaste = false, int32_t index = -1);
     int32_t AddTextSpanOperation(const TextSpanOptions& options, bool isPaste = false, int32_t index = -1,
-        bool needLeadingMargin = false, bool updateCaretOPosition = true);
+        bool needLeadingMargin = false, bool updateCaretPosition = true);
     int32_t AddSymbolSpan(const SymbolSpanOptions& options, bool isPaste = false, int32_t index = -1);
     int32_t AddSymbolSpanOperation(const SymbolSpanOptions& options, bool isPaste = false, int32_t index = -1);
     void AddSpanItem(const RefPtr<SpanItem>& item, int32_t offset);
     int32_t AddPlaceholderSpan(const RefPtr<UINode>& customNode, const SpanOptionBase& options);
     void HandleSelectOverlayWithOptions(const SelectionOptions& options);
     void SetSelection(int32_t start, int32_t end, const std::optional<SelectionOptions>& options = std::nullopt);
+    bool IsEditing();
     void OnHandleMoveDone(const RectF& handleRect, bool isFirstHandle) override;
     std::u16string GetLeftTextOfCursor(int32_t number) override;
     std::u16string GetRightTextOfCursor(int32_t number) override;
@@ -475,6 +477,8 @@ public:
 
     Color GetSelectedBackgroundColor();
 
+    void SetCustomKeyboardOption(bool supportAvoidance);
+
 protected:
     bool CanStartAITask() override;
 
@@ -498,7 +502,7 @@ private:
     bool HandleUserLongPressEvent(GestureEvent& info);
     bool HandleUserGestureEvent(
         GestureEvent& info, std::function<bool(RefPtr<SpanItem> item, GestureEvent& info)>&& gestureFunc);
-    void CalcCaretInfoByClick(GestureEvent& info);
+    void CalcCaretInfoByClick(const Offset& touchOffset);
     void HandleEnabled();
     void InitMouseEvent();
     void ScheduleCaretTwinkling();
@@ -633,8 +637,7 @@ private:
     void AdjustPlaceholderSelection(int32_t& start, int32_t& end, const Offset& pos);
     bool AdjustWordSelection(int32_t& start, int32_t& end);
     bool IsClickBoundary(const int32_t position);
-    bool EraseEmoji();
-    bool EraseEmoji(const RefPtr<SpanItem>& spanItem);
+    std::pair<bool, bool> CaretPositionIsEmoji(int32_t& emojiLength);
     void InsertValueInSpanOffset(const TextInsertValueInfo& info, std::wstring& text, const std::wstring& insertValue);
     void SetSelfAndChildDraggableFalse(const RefPtr<UINode>& customNode);
 
@@ -643,9 +646,12 @@ private:
     bool IsTouchInFrameArea(const PointF& touchPoint);
     void HandleOnDragDrop(const RefPtr<OHOS::Ace::DragEvent>& event);
     void DeleteForward(int32_t currentPosition, int32_t length);
-    void DragDropTextOperation(const std::string& insertValue);
+    void HandleOnDragDropTextOperation(const std::string& insertValue);
     void UndoDrag(const OperationRecord& record);
     void RedoDrag(const OperationRecord& record);
+    void HandleOnDragInsertValueOperation(const std::string& insertValue);
+    void HandleOnDragInsertValue(const std::string& str);
+    void HandleOnEditChanged(bool isEditing);
 
 #if defined(ENABLE_STANDARD_INPUT)
     sptr<OHOS::MiscServices::OnTextChangedListener> richEditTextChangeListener_;
@@ -724,8 +730,10 @@ private:
     bool isTouchCaret_ = false;
     SelectionRangeInfo lastSelectionRange_{-1, -1};
     bool isDragSponsor_ = false;
-    int32_t dragPosition_ = 0;
+    std::pair<int32_t, int32_t> dragRange_ { 0, 0 };
+    bool isEditing_ = false;
     ACE_DISALLOW_COPY_AND_MOVE(RichEditorPattern);
+    bool keyboardAvoidance_ = false;
 };
 } // namespace OHOS::Ace::NG
 

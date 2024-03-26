@@ -79,13 +79,13 @@ void SwiperTestNg::Create(const std::function<void(SwiperModelNG)>& callback)
     FlushLayoutTask(frameNode_);
 }
 
-void SwiperTestNg::CreateWithItem(const std::function<void(SwiperModelNG)>& callback)
+void SwiperTestNg::CreateWithItem(const std::function<void(SwiperModelNG)>& callback, int32_t itemNumber)
 {
-    Create([callback](SwiperModelNG model) {
+    Create([callback, itemNumber](SwiperModelNG model) {
         if (callback) {
             callback(model);
         }
-        CreateItem();
+        CreateItem(itemNumber);
     });
 }
 
@@ -138,6 +138,7 @@ HWTEST_F(SwiperTestNg, SwiperEvent001, TestSize.Level1)
  */
 HWTEST_F(SwiperTestNg, SwiperEvent002, TestSize.Level1)
 {
+    EXPECT_CALL(*MockPipelineContext::pipeline_, FlushUITasks).Times(8);
     CreateWithItem([](SwiperModelNG model) {});
     auto gestureEventHub = AceType::MakeRefPtr<GestureEventHub>(AceType::WeakClaim(AceType::RawPtr(eventHub_)));
 
@@ -497,6 +498,7 @@ HWTEST_F(SwiperTestNg, SwiperInit002, TestSize.Level1)
  */
 HWTEST_F(SwiperTestNg, SwiperFunc001, TestSize.Level1)
 {
+    EXPECT_CALL(*MockPipelineContext::pipeline_, FlushUITasks).Times(2);
     CreateWithItem([](SwiperModelNG model) {});
     KeyEvent event = KeyEvent();
     event.action = KeyAction::CLICK;
@@ -1339,6 +1341,7 @@ HWTEST_F(SwiperTestNg, SwiperPatternHandleTouchUp003, TestSize.Level1)
  */
 HWTEST_F(SwiperTestNg, SwiperPatternStopAnimationOnScrollStart001, TestSize.Level1)
 {
+    EXPECT_CALL(*MockPipelineContext::pipeline_, FlushUITasks).Times(1);
     CreateWithItem([](SwiperModelNG model) {});
     /**
      * @tc.steps: step1. Set usePropertyAnimation_ To be true
@@ -1356,6 +1359,7 @@ HWTEST_F(SwiperTestNg, SwiperPatternStopAnimationOnScrollStart001, TestSize.Leve
  */
 HWTEST_F(SwiperTestNg, SwiperPatternHandleDragEnd006, TestSize.Level1)
 {
+    EXPECT_CALL(*MockPipelineContext::pipeline_, FlushUITasks).Times(1);
     CreateWithItem([](SwiperModelNG model) {});
     EXPECT_NE(frameNode_->GetLayoutProperty<SwiperLayoutProperty>(), nullptr);
     layoutProperty_->UpdateLoop(false);
@@ -1456,6 +1460,7 @@ HWTEST_F(SwiperTestNg, SwiperIndicatorOnModifyDone001, TestSize.Level1)
  */
 HWTEST_F(SwiperTestNg, SwiperIndicatorHandleClick001, TestSize.Level1)
 {
+    EXPECT_CALL(*MockPipelineContext::pipeline_, FlushUITasks).Times(1);
     CreateWithItem([](SwiperModelNG model) {
         model.SetDirection(Axis::VERTICAL);
     });
@@ -2765,6 +2770,7 @@ HWTEST_F(SwiperTestNg, SwiperIndicatorHandleClick002, TestSize.Level1)
  */
 HWTEST_F(SwiperTestNg, SwiperIndicatorHandleClick003, TestSize.Level1)
 {
+    EXPECT_CALL(*MockPipelineContext::pipeline_, FlushUITasks).Times(1);
     CreateWithItem([](SwiperModelNG model) {
         model.SetDirection(Axis::VERTICAL);
     });
@@ -3610,6 +3616,7 @@ HWTEST_F(SwiperTestNg, SwiperPatternGetLoopIndex001, TestSize.Level1)
  */
 HWTEST_F(SwiperTestNg, SwiperPatternOnDirtyLayoutWrapperSwap001, TestSize.Level1)
 {
+    EXPECT_CALL(*MockPipelineContext::pipeline_, FlushUITasks).Times(3);
     CreateWithItem([](SwiperModelNG model) {
         model.SetDisplayArrow(true); // show arrow
         model.SetHoverShow(false);
@@ -3703,6 +3710,7 @@ HWTEST_F(SwiperTestNg, SwiperPatternOnDirtyLayoutWrapperSwap001, TestSize.Level1
  */
 HWTEST_F(SwiperTestNg, SwiperPatternSwipeTo001, TestSize.Level1)
 {
+    EXPECT_CALL(*MockPipelineContext::pipeline_, FlushUITasks).Times(2);
     CreateWithItem([](SwiperModelNG model) {
         model.SetDisplayArrow(true); // show arrow
         model.SetHoverShow(false);
@@ -3778,6 +3786,7 @@ HWTEST_F(SwiperTestNg, SwiperPatternSwipeTo001, TestSize.Level1)
  */
 HWTEST_F(SwiperTestNg, SwiperPatternShowNext001, TestSize.Level1)
 {
+    EXPECT_CALL(*MockPipelineContext::pipeline_, FlushUITasks).Times(12);
     CreateWithItem([](SwiperModelNG model) {
         model.SetDisplayArrow(true); // show arrow
         model.SetHoverShow(false);
@@ -3854,6 +3863,7 @@ HWTEST_F(SwiperTestNg, SwiperPatternShowNext001, TestSize.Level1)
  */
 HWTEST_F(SwiperTestNg, SwiperPatternShowPrevious001, TestSize.Level1)
 {
+    EXPECT_CALL(*MockPipelineContext::pipeline_, FlushUITasks).Times(75);
     CreateWithItem([](SwiperModelNG model) {});
     layoutProperty_->UpdateShowIndicator(false);
     pattern_->currentIndex_ = 0;

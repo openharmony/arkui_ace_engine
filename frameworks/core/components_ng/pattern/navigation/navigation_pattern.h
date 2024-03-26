@@ -128,7 +128,10 @@ public:
 
     RefPtr<UINode> GetNavDestinationNode(const std::string& name)
     {
-        return navigationStack_->Get(name);
+        RefPtr<UINode> uiNode;
+        int32_t index;
+        navigationStack_->Get(name, uiNode, index);
+        return uiNode;
     }
 
     RefPtr<UINode> GetNavDestinationNode()
@@ -343,6 +346,7 @@ public:
 
     void NotifyDestinationLifecycle(const RefPtr<UINode>& destinationNode,
         NavDestinationLifecycle lifecycle, bool isNavigationChanged);
+    void AbortAnimation(RefPtr<NavigationGroupNode>& hostNode);
 
 private:
     void CheckTopNavPathChange(const std::optional<std::pair<std::string, RefPtr<UINode>>>& preTopNavPath,

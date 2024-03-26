@@ -52,6 +52,8 @@ constexpr char PULL_FAIL_NAME[] = "extension_pulling_up_fail";
 constexpr char PULL_FAIL_MESSAGE[] = "pulling another embedded component failed, not allowed to cascade.";
 constexpr char EXIT_ABNORMALLY_NAME[] = "extension_exit_abnormally";
 constexpr char EXIT_ABNORMALLY_MESSAGE[] = "the extension ability exited abnormally, please check AMS log.";
+constexpr char LIFECYCLE_TIMEOUT_NAME[] = "extension_lifecycle_timeout";
+constexpr char LIFECYCLE_TIMEOUT_MESSAGE[] = "the lifecycle of extension ability is timeout, please check AMS log.";
 // Defines the want parameter to control the soft-keyboard area change of the provider.
 constexpr char OCCUPIED_AREA_CHANGE_KEY[] = "ability.want.params.IsNotifyOccupiedAreaChange";
 // Set the UIExtension type of the EmbeddedComponent.
@@ -89,6 +91,13 @@ public:
         auto sessionWrapper = sessionWrapper_.Upgrade();
         CHECK_NULL_VOID(sessionWrapper);
         sessionWrapper->OnDisconnect(true);
+    }
+
+    void OnExtensionTimeout(int32_t errorCode) override
+    {
+        auto sessionWrapper = sessionWrapper_.Upgrade();
+        CHECK_NULL_VOID(sessionWrapper);
+        sessionWrapper->OnExtensionTimeout(errorCode);
     }
 
     void OnAccessibilityEvent(const Accessibility::AccessibilityEventInfo& info, int64_t uiExtensionOffset) override
@@ -411,7 +420,7 @@ void SessionWrapperImpl::NotifyDestroy()
 void SessionWrapperImpl::NotifyConfigurationUpdate() {}
 /************************************************ End: The lifecycle interface ****************************************/
 
-/************************* Begin: The interface to control the display area and the avoid area ************************/
+/************************************************ Begin: The interface for responsing provider ************************/
 void SessionWrapperImpl::OnConnect()
 {
     taskExecutor_->PostTask(
@@ -444,6 +453,18 @@ void SessionWrapperImpl::OnDisconnect(bool isAbnormal)
         TaskExecutor::TaskType::UI);
 }
 
+void SessionWrapperImpl::OnExtensionTimeout(int32_t errorCode)
+{
+    taskExecutor_->PostTask(
+        [weak = hostPattern_]() {
+            auto pattern = weak.Upgrade();
+            CHECK_NULL_VOID(pattern);
+            pattern->FireOnErrorCallback(
+                ERROR_CODE_UIEXTENSION_LIFECYCLE_TIMEOUT, LIFECYCLE_TIMEOUT_NAME, LIFECYCLE_TIMEOUT_MESSAGE);
+        },
+        TaskExecutor::TaskType::UI);
+}
+
 void SessionWrapperImpl::OnAccessibilityEvent(const Accessibility::AccessibilityEventInfo& info, int64_t offset)
 {
     taskExecutor_->PostTask(
@@ -454,7 +475,7 @@ void SessionWrapperImpl::OnAccessibilityEvent(const Accessibility::Accessibility
         },
         TaskExecutor::TaskType::UI);
 }
-/*************************** End: The interface to control the display area and the avoid area ************************/
+/************************************************** End: The interface for responsing provider ************************/
 
 /************************************************ Begin: The interface about the accessibility ************************/
 bool SessionWrapperImpl::TransferExecuteAction(
@@ -491,7 +512,14 @@ void SessionWrapperImpl::FocusMoveSearch(
     CHECK_NULL_VOID(session_);
     session_->TransferFocusMoveSearch(elementId, direction, baseParent, output);
 }
-/************************************************ Begin: The interface about the accessibility ************************/
+
+void SessionWrapperImpl::TransferAccessibilityHoverEvent(float pointX, float pointY, int32_t sourceType,
+    int32_t eventType, int64_t timeMs)
+{
+    CHECK_NULL_VOID(session_);
+    session_->TransferAccessibilityHoverEvent(pointX, pointY, sourceType, eventType, timeMs);
+}
+/************************************************ End: The interface about the accessibility **************************/
 
 /***************************** Begin: The interface to control the display area and the avoid area ********************/
 std::shared_ptr<Rosen::RSSurfaceNode> SessionWrapperImpl::GetSurfaceNode() const

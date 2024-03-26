@@ -20,10 +20,9 @@
 #include "base/geometry/rect.h"
 #include "base/image/pixel_map.h"
 #include "base/memory/ace_type.h"
+#include "core/common/udmf/unified_data.h"
 #include "core/event/ace_events.h"
 #include "core/gestures/velocity.h"
-
-#include "core/common/udmf/unified_data.h"
 
 namespace OHOS::Ace {
 
@@ -247,6 +246,16 @@ public:
         return velocity_;
     }
 
+    void SetSourceTool(SourceTool sourceTool)
+    {
+        sourceTool_ = sourceTool;
+    }
+
+    SourceTool GetSourceTool() const
+    {
+        return sourceTool_;
+    }
+
 private:
     RefPtr<PasteData> pasteData_;
     double screenX_ = 0.0;
@@ -258,6 +267,7 @@ private:
     std::map<std::string, int64_t> summary_;
     std::string udKey_ = "";
     DragRet dragRet_ = DragRet::DRAG_DEFAULT;
+    SourceTool sourceTool_ = { SourceTool::UNKNOWN };
     Rect previewRect_;
     bool useCustomAnimation_ = false;
     bool isGetDataSuccess_ = false;

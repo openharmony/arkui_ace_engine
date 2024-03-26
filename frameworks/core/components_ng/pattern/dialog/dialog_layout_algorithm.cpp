@@ -71,7 +71,7 @@ void DialogLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     auto dialogProp = AceType::DynamicCast<DialogLayoutProperty>(layoutWrapper->GetLayoutProperty());
     customSize_ = dialogProp->GetUseCustomStyle().value_or(false);
     gridCount_ = dialogProp->GetGridCount().value_or(-1);
-    width_ = dialogProp->GetWidth().value_or(Dimension(-1));
+    width_ = dialogProp->GetWidth().value_or(Dimension(0, DimensionUnit::VP));
     UpdateSafeArea();
     const auto& layoutConstraint = dialogProp->GetLayoutConstraint();
     const auto& parentIdealSize = layoutConstraint->parentIdealSize;
@@ -315,7 +315,7 @@ void DialogLayoutAlgorithm::GetDialogWidth(double& width)
     if (width_.Unit() == DimensionUnit::PERCENT) {
         width = width_.ConvertToPxWithSize(widthMax_);
     } else {
-        width = width_.Value();
+        width = width_.ConvertToPx();
     }
     if (width > widthMax_) {
         width = widthMax_;
@@ -395,8 +395,6 @@ void DialogLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
             DimensionRect(Dimension(childSize.Width()), Dimension(childSize.Height()), DimensionOffset(topLeftPoint_)),
             frameNode);
     }
-    topLeftPoint_.SetX(std::max(topLeftPoint_.GetX(), 0.0f));
-    topLeftPoint_.SetY(std::max(topLeftPoint_.GetY(), 0.0f));
     child->GetGeometryNode()->SetMarginFrameOffset(topLeftPoint_);
     child->Layout();
     SetSubWindowHotarea(dialogProp, childSize, selfSize, frameNode->GetId());
@@ -407,7 +405,7 @@ void DialogLayoutAlgorithm::SetDialogSize(
 {
     if (!customSize_) {
         double heightValue = 0.0f;
-        height_ = dialogProp->GetHeight().value_or(Dimension(-1));
+        height_ = dialogProp->GetHeight().value_or(Dimension(0, DimensionUnit::VP));
         auto context = PipelineContext::GetCurrentContext();
         CHECK_NULL_VOID(context);
         auto manager = context->GetSafeAreaManager();
@@ -417,7 +415,7 @@ void DialogLayoutAlgorithm::SetDialogSize(
         if (height_.Unit() == DimensionUnit::PERCENT) {
             heightValue = height_.ConvertToPxWithSize(height);
         } else {
-            heightValue = height_.Value();
+            heightValue = height_.ConvertToPx();
         }
         if (heightValue > height) {
             heightValue = height;
@@ -510,12 +508,12 @@ OffsetF DialogLayoutAlgorithm::ComputeChildPosition(
         ConvertToPx(CalcLength(dialogOffset_.GetY()), layoutConstraint->scaleProperty, selfSize.Height());
     OffsetF dialogOffset = OffsetF(dialogOffsetX.value_or(0.0), dialogOffsetY.value_or(0.0));
     auto maxSize = layoutConstraint->maxSize;
-    maxSize.MinusHeight(safeAreaInsets_.bottom_.Length());
+    if (!customSize_) {
+        maxSize.MinusHeight(safeAreaInsets_.bottom_.Length());
+    }
     if (!SetAlignmentSwitch(maxSize, childSize, topLeftPoint)) {
         topLeftPoint = OffsetF(maxSize.Width() - childSize.Width(), maxSize.Height() - childSize.Height()) / HALF;
     }
-    topLeftPoint.SetX(std::max(topLeftPoint.GetX(), 0.0f));
-    topLeftPoint.SetY(std::max(topLeftPoint.GetY(), 0.0f));
     const auto& expandSafeAreaOpts = prop->GetSafeAreaExpandOpts();
     bool needAvoidKeyboard = true;
     if (expandSafeAreaOpts && (expandSafeAreaOpts->type | SAFE_AREA_TYPE_KEYBOARD)) {
@@ -635,6 +633,7 @@ void DialogLayoutAlgorithm::UpdateSafeArea()
     if (container->IsSubContainer()) {
         currentId = SubwindowManager::GetInstance()->GetParentContainerId(Container::CurrentId());
         container = AceEngine::Get().GetContainer(currentId);
+        CHECK_NULL_VOID(container);
         ContainerScope scope(currentId);
     }
     auto pipelineContext = container->GetPipelineContext();

@@ -513,6 +513,11 @@ public:
         ViewAbstract::SetTransition(transitionOptions);
     }
 
+    void CleanTransition() override
+    {
+        ViewAbstract::CleanTransition();
+    }
+
     void SetChainedTransition(const RefPtr<NG::ChainedTransitionEffect>& effect, bool passThrough = false) override
     {
         ViewAbstract::SetChainedTransition(effect);

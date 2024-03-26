@@ -21,10 +21,8 @@
 #include "base/utils/utils.h"
 #include "core/common/container.h"
 #include "core/common/container_scope.h"
-#include "core/components/theme/icon_theme.h"
 #include "core/components_ng/render/animation_utils.h"
 #include "core/components_ng/render/drawing_prop_convertor.h"
-#include "core/image/image_source_info.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
@@ -44,7 +42,7 @@ const float EPSLION = 1e-5;
 const float DEFAULT_MAXVALUE = 100.0f;
 const bool DEFAULT_ENABLE_BREATHE = true;
 constexpr float INITIAL_OPACITY = 0.0f;
-constexpr int32_t PICTURE_DURATION = 1500;
+constexpr int32_t PICTURE_DURATION = 750;
 } // namespace
 
 MoonProgressModifier::MoonProgressModifier()
@@ -67,9 +65,6 @@ void MoonProgressModifier::onDraw(DrawingContext& context)
 {
     frameSize_.SetWidth(context.width);
     frameSize_.SetHeight(context.height);
-    if (!canvasImage_ && Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TWELVE)) {
-        InitImage();
-    }
     SetBigRadius();
     PaintSquareMoon(context.canvas);
 }
@@ -170,10 +165,11 @@ void MoonProgressModifier::StartPictureAnimate() const
     option.SetDelay(0);
     option.SetCurve(Curves::SHARP);
     option.SetIteration(-1);
+    option.SetAnimationDirection(AnimationDirection::ALTERNATE);
     AnimationUtils::Animate(option, [weak = AceType::WeakClaim(AceType::RawPtr(opacity_))]() {
         auto opacity = weak.Upgrade();
         CHECK_NULL_VOID(opacity);
-        opacity->Set(2.0f);
+        opacity->Set(1.0f);
     });
 }
 
@@ -194,14 +190,15 @@ void MoonProgressModifier::SetBigRadius()
 
 void MoonProgressModifier::PaintSquareMoon(RSCanvas& canvas) const
 {
-    static int32_t totalDegree = 1;
     PointF centerPt = PointF(frameSize_.Width() / INT32_TWO, frameSize_.Height() / INT32_TWO);
     RSBrush brush;
-    double angle = (value_->Get() / maxValue_->Get()) * totalDegree;
+    double angle = value_->Get() / maxValue_->Get();
 #ifndef USE_ROSEN_DRAWING
     RSPath path;
+    RSPath clipPath;
 #else
     RSRecordingPath path;
+    RSRecordingPath clipPath;
 #endif
     brush.SetAntiAlias(true);
     brush.SetColor(ToRSColor((maskColor_->Get())));
@@ -209,30 +206,33 @@ void MoonProgressModifier::PaintSquareMoon(RSCanvas& canvas) const
     path.SetFillStyle(RSPathFillType::EVENTODD);
     path.AddCircle(centerPt.GetX(), centerPt.GetY(), bigRadius_, RSPathDirection::CW_DIRECTION);
     if (NearZero(std::abs(ratio_->Get() - INITIAL_RATIO), EPSLION)) {
-        path.AddArc(
-            { centerPt.GetX() - smallRadius_, centerPt.GetY() - smallRadius_,
-            centerPt.GetX() + smallRadius_, centerPt.GetY() + smallRadius_ }, ANGLE_90, ANGLE_180);
-        if (angle <= FLOAT_ZERO_FIVE) {
-            double progressOffset = smallRadius_ - smallRadius_ * angle / FLOAT_ZERO_FIVE;
-            path.MoveTo(centerPt.GetX(), centerPt.GetY() - smallRadius_);
-            // startAngle:270  sweepAngle:-180
-            path.AddArc(
-                { centerPt.GetX() - progressOffset, centerPt.GetY() - smallRadius_,
-                centerPt.GetX() + progressOffset, centerPt.GetY() + smallRadius_ }, ANGLE_270, -ANGLE_180);
-            canvas.DrawPath(path);
+        if (LessOrEqual(angle, FLOAT_ONE_ZERO)) {
+            path.AddArc({ centerPt.GetX() - smallRadius_, centerPt.GetY() - smallRadius_,
+                            centerPt.GetX() + smallRadius_, centerPt.GetY() + smallRadius_ },
+                ANGLE_90, ANGLE_180);
+            if (LessOrEqual(angle, FLOAT_ZERO_FIVE)) {
+                double progressOffset = smallRadius_ - smallRadius_ * angle / FLOAT_ZERO_FIVE;
+                path.MoveTo(centerPt.GetX(), centerPt.GetY() - smallRadius_);
+                // startAngle:270  sweepAngle:-180
+                path.AddArc({ centerPt.GetX() - progressOffset, centerPt.GetY() - smallRadius_,
+                                centerPt.GetX() + progressOffset, centerPt.GetY() + smallRadius_ },
+                    ANGLE_270, -ANGLE_180);
+            } else {
+                double progressOffset = smallRadius_ * (angle - FLOAT_ZERO_FIVE) / FLOAT_ZERO_FIVE;
+                path.MoveTo(centerPt.GetX(), centerPt.GetY() - smallRadius_);
+                // startAngle:270  sweepAngle:180
+                path.AddArc({ centerPt.GetX() - progressOffset, centerPt.GetY() - smallRadius_,
+                                centerPt.GetX() + progressOffset, centerPt.GetY() + smallRadius_ },
+                    ANGLE_270, ANGLE_180);
+            }
         } else {
-            double progressOffset = smallRadius_ * (angle - FLOAT_ZERO_FIVE) / FLOAT_ZERO_FIVE;
-            path.MoveTo(centerPt.GetX(), centerPt.GetY() - smallRadius_);
-            // startAngle:270  sweepAngle:180
-            path.AddArc(
-                { centerPt.GetX() - progressOffset, centerPt.GetY() - smallRadius_,
-                centerPt.GetX() + progressOffset, centerPt.GetY() + smallRadius_ }, ANGLE_270, ANGLE_180);
-            canvas.DrawPath(path);
+            clipPath.AddCircle(centerPt.GetX(), centerPt.GetY(), smallRadius_, RSPathDirection::CW_DIRECTION);
+            canvas.ClipPath(clipPath, RSClipOp::DIFFERENCE, true);
         }
+        canvas.DrawPath(path);
     } else {
-        path.MoveTo(centerPt.GetX(), centerPt.GetY() -  smallRadius_ * ratio_->Get());
-        path.AddCircle(centerPt.GetX(), centerPt.GetY(), smallRadius_ * ratio_->Get(),
-            RSPathDirection::CW_DIRECTION);
+        path.MoveTo(centerPt.GetX(), centerPt.GetY() - smallRadius_ * ratio_->Get());
+        path.AddCircle(centerPt.GetX(), centerPt.GetY(), smallRadius_ * ratio_->Get(), RSPathDirection::CW_DIRECTION);
         canvas.DrawPath(path);
     }
     canvas.DetachBrush();
@@ -244,79 +244,26 @@ void MoonProgressModifier::PaintSquareMoon(RSCanvas& canvas) const
 
 void MoonProgressModifier::PaintSquareMoonShadow(RSCanvas& canvas, RSBrush& brush) const
 {
-    CHECK_NULL_VOID(canvasImage_);
-
-    float opacity = 0.0f;
-    if (GreatNotEqual(opacity_->Get(), 1.0f)) {
-        opacity = 2.0f - opacity_->Get();
-    } else {
-        opacity = opacity_->Get();
-    }
-    brush.SetAlphaF(opacity);
+    Color color = Color::WHITE.ChangeOpacity(opacity_->Get());
+    brush.SetColor(ToRSColor(color));
+    auto radius = (std::min(frameSize_.Width() / INT32_TWO, frameSize_.Height() / INT32_TWO));
+    RSFilter filter;
+#ifndef USE_ROSEN_DRAWING
+    RSPath path;
+    filter.SetImageFilter(
+        RSImageFilter::CreateBlurImageFilter(radius - smallRadius_, radius - smallRadius_, RSTileMode::DECAL, nullptr));
+#else
+    RSRecordingPath path;
+    filter.SetImageFilter(RSRecordingImageFilter::CreateBlurImageFilter(
+        radius - smallRadius_, radius - smallRadius_, RSTileMode::DECAL, nullptr));
+#endif
+    brush.SetFilter(filter);
     canvas.AttachBrush(brush);
-
-    auto config = canvasImage_->GetPaintConfig();
-    auto shortLength = (std::min(frameSize_.Width(), frameSize_.Height()));
-    auto longLength = (std::max(frameSize_.Width(), frameSize_.Height()));
-    if (NonPositive(longLength)) {
-        return;
-    }
-    auto scale = shortLength / longLength;
-    config.scaleX_ = scale;
-    config.scaleY_ = scale;
-    canvasImage_->SetPaintConfig(config);
-    OffsetF offset = OffsetF((longLength - shortLength) * FLOAT_ZERO_FIVE * (frameSize_.Width() / longLength),
-        (longLength - shortLength) * FLOAT_ZERO_FIVE * (frameSize_.Height() / longLength));
-    canvas.Save();
-    canvas.Translate(offset.GetX(), offset.GetY());
-    canvasImage_->DrawToRSCanvasWithBrush(canvas, brush, ToRSRect(config.srcRect_), ToRSRect(config.dstRect_));
+    PointF centerPt = PointF(frameSize_.Width() / INT32_TWO, frameSize_.Height() / INT32_TWO);
+    path.AddCircle(centerPt.GetX(), centerPt.GetY(), smallRadius_, RSPathDirection::CW_DIRECTION);
+    canvas.ClipPath(path, RSClipOp::DIFFERENCE, true);
+    canvas.DrawPath(path);
+    canvas.DetachBrush();
     canvas.Restore();
-}
-
-void MoonProgressModifier::InitImage()
-{
-    auto pipeline = PipelineBase::GetCurrentContext();
-    CHECK_NULL_VOID(pipeline);
-    auto iconPath =
-        pipeline->GetTheme<IconTheme>()->GetIconPath(InternalResource::ResourceId::MOON_PROGRESS_FG_CIRCLE_SHADOW);
-    ImageSourceInfo sourceInfo;
-    sourceInfo.SetSrc(iconPath);
-    auto dataReadyCallback = [moonProgressModifier = this](const ImageSourceInfo& sourceInfo) {
-        CHECK_NULL_VOID(moonProgressModifier);
-        moonProgressModifier->OnImageDataReady();
-    };
-    auto loadSuccessCallback = [moonProgressModifier = this](const ImageSourceInfo& sourceInfo) {
-        CHECK_NULL_VOID(moonProgressModifier);
-        moonProgressModifier->OnImageLoadSuccess();
-    };
-    auto loadFailCallback = [moonProgressModifier = this](
-                                const ImageSourceInfo& sourceInfo, const std::string& errorMsg) {
-        CHECK_NULL_VOID(moonProgressModifier);
-        moonProgressModifier->OnImageLoadFail(errorMsg);
-    };
-    LoadNotifier loadNotifier(dataReadyCallback, loadSuccessCallback, loadFailCallback);
-    loadingCtx_ = AceType::MakeRefPtr<ImageLoadingContext>(sourceInfo, std::move(loadNotifier), true);
-    loadingCtx_->LoadImageData();
-}
-
-void MoonProgressModifier::OnImageDataReady()
-{
-    CHECK_NULL_VOID(loadingCtx_);
-    loadingCtx_->MakeCanvasImageIfNeed(loadingCtx_->GetImageSize(), true, ImageFit::NONE);
-}
-
-void MoonProgressModifier::OnImageLoadSuccess()
-{
-    CHECK_NULL_VOID(loadingCtx_);
-    ImagePaintConfig config;
-    config.srcRect_ = loadingCtx_->GetSrcRect();
-    config.dstRect_ = loadingCtx_->GetDstRect();
-    canvasImage_ = DynamicCast<PixelMapImage>(loadingCtx_->MoveCanvasImage());
-    canvasImage_->SetPaintConfig(config);
-}
-
-void MoonProgressModifier::OnImageLoadFail(const std::string& errorMsg)
-{
-    canvasImage_ = nullptr;
 }
 } // namespace OHOS::Ace::NG

@@ -107,6 +107,7 @@ HWTEST_F(SwiperAttrTestNg, AttrAutoPlay001, TestSize.Level1)
  */
 HWTEST_F(SwiperAttrTestNg, AttrAutoPlay002, TestSize.Level1)
 {
+    EXPECT_CALL(*MockPipelineContext::pipeline_, FlushUITasks).Times(1);
     /**
      * @tc.cases: Set autoPlay to true
      * @tc.expected: AutoPlay is true
@@ -122,6 +123,7 @@ HWTEST_F(SwiperAttrTestNg, AttrAutoPlay002, TestSize.Level1)
  */
 HWTEST_F(SwiperAttrTestNg, AttrAutoPlay003, TestSize.Level1)
 {
+    EXPECT_CALL(*MockPipelineContext::pipeline_, FlushUITasks).Times(1);
     /**
      * @tc.cases: Set autoPlay to true, set autoPlayInterval to 4000
      * @tc.expected: AutoPlayInterval is 4000
@@ -140,6 +142,7 @@ HWTEST_F(SwiperAttrTestNg, AttrAutoPlay003, TestSize.Level1)
  */
 HWTEST_F(SwiperAttrTestNg, AttrAutoPlay004, TestSize.Level1)
 {
+    EXPECT_CALL(*MockPipelineContext::pipeline_, FlushUITasks).Times(1);
     /**
      * @tc.cases: Set autoPlay to true, set loop to false
      * @tc.expected: Loop is false

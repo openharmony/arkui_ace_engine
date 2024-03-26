@@ -89,6 +89,22 @@ bool ArkTSUtils::ParseJsColorAlpha(const EcmaVM* vm, const Local<JSValueRef>& va
     return false;
 }
 
+bool ArkTSUtils::ParseJsColorAlpha(
+    const EcmaVM* vm, const Local<JSValueRef>& value, Color& result, const Color& defaultColor)
+{
+    if (!value->IsNumber() && !value->IsString() && !value->IsObject()) {
+        return false;
+    }
+    if (value->IsNumber()) {
+        result = Color(ColorAlphaAdapt(value->Uint32Value(vm)));
+        return true;
+    }
+    if (value->IsString()) {
+        return Color::ParseColorString(value->ToString(vm)->ToString(), result, defaultColor);
+    }
+    return ParseJsColorFromResource(vm, value, result);
+}
+
 std::string ToString(const EcmaVM* vm,  Local<JSValueRef>& jsVal)
 {
     panda::LocalScope scope(vm);

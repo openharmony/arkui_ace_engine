@@ -133,7 +133,7 @@ void registerGestureEvent(ArkUIGesture* gesture, ArkUI_Uint32 actionTypeMask, vo
     }
 }
 
-void addGestureToNode(ArkUINodeHandle node, ArkUIGesture* gesture, ArkUI_Int32 priorityNum, ArkUI_Uint32 mask)
+void addGestureToNode(ArkUINodeHandle node, ArkUIGesture* gesture, ArkUI_Int32 priorityNum, ArkUI_Int32 mask)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     auto gestureHub = frameNode->GetOrCreateGestureEventHub();

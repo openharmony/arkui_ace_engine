@@ -99,6 +99,7 @@ public:
     // The interface for responsing provider
     virtual void OnConnect() = 0;
     virtual void OnDisconnect(bool isAbnormal) = 0;
+    virtual void OnExtensionTimeout(int32_t errorCode) = 0;
     virtual void OnAccessibilityEvent(const Accessibility::AccessibilityEventInfo& info, int64_t offset) = 0;
 
     // The interface about the accessibility
@@ -112,6 +113,8 @@ public:
         int64_t elementId, int32_t focusType, int64_t baseParent, Accessibility::AccessibilityElementInfo& output) = 0;
     virtual void FocusMoveSearch(
         int64_t elementId, int32_t direction, int64_t baseParent, Accessibility::AccessibilityElementInfo& output) = 0;
+    virtual void TransferAccessibilityHoverEvent(float pointX, float pointY, int32_t sourceType, int32_t eventType,
+        int64_t timeMs) = 0;
 
     // The interface to control the display area and the avoid area
     virtual std::shared_ptr<Rosen::RSSurfaceNode> GetSurfaceNode() const = 0;

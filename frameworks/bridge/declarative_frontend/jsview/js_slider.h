@@ -24,6 +24,7 @@ namespace OHOS::Ace::Framework {
 enum class SliderStyle {
     OUTSET = 0,
     INSET,
+    NONE,
     CAPSULE,
 };
 
@@ -49,6 +50,7 @@ public:
     static void SetBlockBorderWidth(const JSCallbackInfo& info);
     static void SetStepColor(const JSCallbackInfo& info);
     static void SetTrackBorderRadius(const JSCallbackInfo& info);
+    static void SetSelectedBorderRadius(const JSCallbackInfo& info);
     static void SetBlockSize(const JSCallbackInfo& info);
     static void SetBlockStyle(const JSCallbackInfo& info);
     static void SetStepSize(const JSCallbackInfo& info);

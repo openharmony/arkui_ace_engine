@@ -39,7 +39,7 @@ void RichEditorModelImpl::SetAboutToDelete(std::function<bool(const NG::RichEdit
 
 void RichEditorModelImpl::SetOnDeleteComplete(std::function<void()>&& func) {}
 
-void RichEditorModelImpl::SetCustomKeyboard(std::function<void()>&& func) {}
+void RichEditorModelImpl::SetCustomKeyboard(std::function<void()>&& func, bool supportAvoidance) {}
 
 void RichEditorModelImpl::SetCopyOption(CopyOptions& copyOptions) {}
 
@@ -59,4 +59,6 @@ void RichEditorModelImpl::SetTextDetectConfig(const std::string& value,
 void RichEditorModelImpl::SetSelectedBackgroundColor(const Color& selectedColor) {}
 
 void RichEditorModelImpl::SetCaretColor(const Color& color) {}
+
+void RichEditorModelImpl::SetOnEditingChange(std::function<void(const bool&)>&& func) {}
 } // namespace OHOS::Ace::Framework

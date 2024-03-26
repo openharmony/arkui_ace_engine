@@ -4834,6 +4834,38 @@ HWTEST_F(TextPickerTestNg, TextPickerModelTest002, TestSize.Level1)
     EXPECT_EQ(multiOptions.size(), 1);
 }
 
+
+/**
+ * @tc.name: TextPickerModelTest003
+ * @tc.desc: Test SetDivider
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextPickerTestNg, TextPickerModelTest003, TestSize.Level1)
+{
+    /**
+     * @tc.step: step1. create textpicker framenode and textPickerLayoutProperty.
+     */
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
+    TextPickerModelNG::GetInstance()->Create(theme, TEXT);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    ASSERT_NE(frameNode, nullptr);
+    frameNode->MarkModifyDone();
+    auto textPickerLayoutProperty = frameNode->GetLayoutProperty<TextPickerLayoutProperty>();
+    ASSERT_NE(textPickerLayoutProperty, nullptr);
+    auto textPickerPattern = frameNode->GetPattern<TextPickerPattern>();
+    ASSERT_NE(textPickerPattern, nullptr);
+    /**
+     * test method SetDefaultPickerItemHeight.
+     */
+    ItemDivider divider;
+    divider.color = Color::TRANSPARENT;
+    divider.strokeWidth = 10.0_vp;
+    divider.startMargin = 10.0_vp;
+    divider.endMargin = 10.0_vp;
+    TextPickerModelNG::GetInstance()->SetDivider(divider);
+    EXPECT_EQ(textPickerLayoutProperty->GetDivider(), divider);
+}
+
 /**
  * @tc.name: TextPickerModelNGSetColumns004
  * @tc.desc: Test SetCascadeColumns.

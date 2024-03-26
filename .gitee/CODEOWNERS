@@ -330,6 +330,9 @@ frameworks/core/components_ng/components.gni  @sunfei2021
 [Test source]
 test/mock/  @chenjiafeng-openharmony
 test/unittest/  @chenjiafeng-openharmony
+test/unittest/core/pattern/grid/ @zhoutianer
+test/unittest/core/pattern/swiper/ @zhoutianer
+test/unittest/core/pattern/waterflow/ @zhoutianer
 
 [Native Node Module]
 frameworks/core/interfaces/arkoala/ @nikolay-igotti

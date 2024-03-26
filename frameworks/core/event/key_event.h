@@ -585,6 +585,18 @@ struct KeyEvent final {
     std::vector<uint8_t> enhanceData;
     std::shared_ptr<MMI::KeyEvent> rawKeyEvent;
     std::string msg = "";
+
+    std::string ToString() const
+    {
+        std::stringstream ss;
+        ss << "code=" << static_cast<int32_t>(code) << ", ";
+        ss << "action=" << static_cast<int32_t>(action) << ", ";
+        ss << "pressedCodes=[";
+        std::for_each(pressedCodes.begin(), pressedCodes.end(),
+            [&ss](const KeyCode& code) { ss << static_cast<int32_t>(code) << ", "; });
+        ss << "]";
+        return ss.str();
+    }
 };
 
 class ACE_EXPORT KeyEventInfo : public BaseEventInfo {

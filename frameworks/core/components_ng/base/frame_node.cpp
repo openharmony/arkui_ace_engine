@@ -903,10 +903,20 @@ void FrameNode::OnConfigurationUpdate(const ConfigurationChange& configurationCh
     }
 }
 
-void FrameNode::OnVisibleChange(bool isVisible)
+void FrameNode::NotifyVisibleChange(bool isVisible)
 {
     pattern_->OnVisibleChange(isVisible);
     UpdateChildrenVisible(isVisible);
+}
+
+void FrameNode::TryVisibleChangeOnDescendant(bool isVisible)
+{
+    auto layoutProperty = GetLayoutProperty();
+    if (layoutProperty &&
+        layoutProperty->GetVisibilityValue(VisibleType::VISIBLE) != VisibleType::VISIBLE) {
+        return;
+    }
+    NotifyVisibleChange(isVisible);
 }
 
 void FrameNode::OnDetachFromMainTree(bool recursive)
@@ -1068,15 +1078,7 @@ void FrameNode::TriggerOnAreaChangeCallback(uint64_t nanoTimestamp)
     }
     if ((eventHub_->HasOnAreaChanged() || eventHub_->HasInnerOnAreaChanged()) && lastFrameRect_ &&
         lastParentOffsetToWindow_) {
-        auto currFrameRect = geometryNode_->GetFrameRect();
-        if (renderContext_ && renderContext_->GetPositionProperty()) {
-            if (renderContext_->GetPositionProperty()->HasPosition()) {
-                auto renderPosition = ContextPositionConvertToPX(
-                    renderContext_, layoutProperty_->GetLayoutConstraint()->percentReference);
-                currFrameRect.SetOffset(
-                    { static_cast<float>(renderPosition.first), static_cast<float>(renderPosition.second) });
-            }
-        }
+        auto currFrameRect = GetRectWithRender();
         auto currParentOffsetToWindow = CalculateOffsetRelativeToWindow(nanoTimestamp) - currFrameRect.GetOffset();
         if (currFrameRect != *lastFrameRect_ || currParentOffsetToWindow != *lastParentOffsetToWindow_) {
             if (eventHub_->HasInnerOnAreaChanged()) {
@@ -1100,6 +1102,15 @@ void FrameNode::SetOnSizeChangeCallback(OnSizeChangedFunc&& callback)
         lastFrameNodeRect_ = std::make_unique<RectF>();
     }
     eventHub_->SetOnSizeChanged(std::move(callback));
+}
+
+
+void FrameNode::SetJSFrameNodeOnSizeChangeCallback(OnSizeChangedFunc&& callback)
+{
+    if (!lastFrameNodeRect_) {
+        lastFrameNodeRect_ = std::make_unique<RectF>();
+    }
+    eventHub_->SetJSFrameNodeOnSizeChangeCallback(std::move(callback));
 }
 
 RectF FrameNode::GetRectWithRender()
@@ -1130,6 +1141,7 @@ void FrameNode::TriggerOnSizeChangeCallback()
             }
             onSizeChangeDumpInfos.emplace_back(dumpInfo);
             eventHub_->FireOnSizeChanged(*lastFrameNodeRect_, currFrameRect);
+            eventHub_->FireJSFrameNodeOnSizeChanged(*lastFrameNodeRect_, currFrameRect);
             *lastFrameNodeRect_ = currFrameRect;
         }
     }
@@ -1603,8 +1615,9 @@ RefPtr<FrameNode> FrameNode::GetAncestorNodeOfFrame(bool checkBoundary) const
     }
     auto parent = GetParent();
     while (parent) {
-        if (InstanceOf<FrameNode>(parent)) {
-            return DynamicCast<FrameNode>(parent);
+        auto parentFrame = DynamicCast<FrameNode>(parent);
+        if (parentFrame) {
+            return parentFrame;
         }
         parent = parent->GetParent();
     }
@@ -2471,7 +2484,7 @@ void FrameNode::OnAccessibilityEvent(
         event.type = eventType;
         event.windowContentChangeTypes = windowsContentChangeType;
         event.nodeId = GetAccessibilityId();
-        auto pipeline = PipelineContext::GetCurrentContext();
+        auto pipeline = GetContext();
         CHECK_NULL_VOID(pipeline);
         pipeline->SendEventToAccessibility(event);
     }
@@ -2486,7 +2499,7 @@ void FrameNode::OnAccessibilityEvent(
         event.nodeId = GetAccessibilityId();
         event.beforeText = beforeText;
         event.latestContent = latestContent;
-        auto pipeline = PipelineContext::GetCurrentContext();
+        auto pipeline = GetContext();
         CHECK_NULL_VOID(pipeline);
         pipeline->SendEventToAccessibility(event);
     }
@@ -2705,6 +2718,19 @@ std::vector<RefPtr<FrameNode>> FrameNode::GetNodesById(const std::unordered_set<
     return nodes;
 }
 
+std::vector<FrameNode*> FrameNode::GetNodesPtrById(const std::unordered_set<int32_t>& set)
+{
+    std::vector<FrameNode*> nodes;
+    for (auto nodeId : set) {
+        NG::FrameNode* frameNode = ElementRegister::GetInstance()->GetFrameNodePtrById(nodeId);
+        if (!frameNode) {
+            continue;
+        }
+        nodes.emplace_back(frameNode);
+    }
+    return nodes;
+}
+
 double FrameNode::GetPreviewScaleVal() const
 {
     double scale = 1.0;
@@ -2872,7 +2898,7 @@ void FrameNode::Measure(const std::optional<LayoutConstraintF>& parentConstraint
 {
     ACE_LAYOUT_SCOPED_TRACE("Measure[%s][self:%d][parent:%d][key:%s]", GetTag().c_str(),
         GetId(), GetParent() ? GetParent()->GetId() : 0, GetInspectorIdValue("").c_str());
-    
+
     if (SelfOrParentExpansive() && needRestoreSafeArea_) {
         RestoreGeoState();
         needRestoreSafeArea_ = false;
@@ -2928,6 +2954,9 @@ void FrameNode::Measure(const std::optional<LayoutConstraintF>& parentConstraint
             layoutAlgorithm_->SetSkipMeasure();
             return;
         }
+    } else {
+        contentConstraintChanges_.UpdateFlags(contentConstraint, layoutProperty_->GetContentLayoutConstraint());
+        constraintChanges_.UpdateFlags(preConstraint, layoutProperty_->GetLayoutConstraint());
     }
 
     GetPercentSensitive();

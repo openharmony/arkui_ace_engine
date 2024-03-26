@@ -84,6 +84,7 @@ public:
         return true;
     }
     virtual void ScrollBy(double pixelX, double pixelY, bool smooth) {}
+    virtual void ScrollToEdge(ScrollEdgeType scrollEdgeType, float velocity) {}
     virtual void ScrollToEdge(ScrollEdgeType scrollEdgeType, bool smooth) {}
     virtual void Fling(double flingVelocity) {}
     virtual void ScrollPage(bool reverse, bool smooth) {}

@@ -282,32 +282,50 @@ void NavigationPattern::UpdateNavPathList()
     auto replaceValue = navigationStack_->GetReplaceValue();
     for (size_t i = 0; i < pathNames.size(); ++i) {
         auto pathName = pathNames[i];
-        RefPtr<UINode> uiNode = navigationStack_->Get(pathName);
+        RefPtr<UINode> uiNode;
+        int32_t lastIndex;
+        auto isFinded = navigationStack_->Get(pathName, uiNode, lastIndex);
         auto isSameWithLast = (i == pathNames.size() - 1) && (replaceValue == 1);
-        if (uiNode) {
+        if (isFinded) {
             navigationStack_->RemoveInNavPathList(pathName, uiNode);
             navigationStack_->RemoveInPreNavPathList(pathName, uiNode);
             if (isSameWithLast) {
+                TAG_LOGD(AceLogTag::ACE_NAVIGATION, "same with last in list, navigation stack create new node, "
+                    "index: %{public}d, name: %{public}s.", static_cast<int32_t>(i), pathName.c_str());
                 uiNode = GenerateUINodeByIndex(static_cast<int32_t>(i));
+            } else {
+                TAG_LOGD(AceLogTag::ACE_NAVIGATION, "find in list, navigation stack reserve node, "
+                    "old index: %{public}d, new index: %{public}d, name: %{public}s.",
+                    lastIndex, static_cast<int32_t>(i), pathName.c_str());
             }
             navPathList.emplace_back(std::make_pair(pathName, uiNode));
             continue;
         }
-        uiNode = navigationStack_->GetFromPreBackup(pathName);
-        if (uiNode) {
+        isFinded = navigationStack_->GetFromPreBackup(pathName, uiNode, lastIndex);
+        if (isFinded) {
             navigationStack_->RemoveInPreNavPathList(pathName, uiNode);
             if (isSameWithLast) {
+                TAG_LOGD(AceLogTag::ACE_NAVIGATION, "same with last in backup list, navigation stack create new node, "
+                    "index: %{public}d, name: %{public}s.", static_cast<int32_t>(i), pathName.c_str());
                 uiNode = GenerateUINodeByIndex(static_cast<int32_t>(i));
+            } else {
+                TAG_LOGD(AceLogTag::ACE_NAVIGATION, "find in backup list, navigation stack reserve node, "
+                    "old index: %{public}d, new index: %{public}d, name: %{public}s.",
+                    lastIndex, static_cast<int32_t>(i), pathName.c_str());
             }
             navPathList.emplace_back(std::make_pair(pathName, uiNode));
             continue;
         }
         uiNode = navigationStack_->GetFromCacheNode(cacheNodes, pathName);
         if (uiNode) {
+            TAG_LOGD(AceLogTag::ACE_NAVIGATION, "find in cached node, navigation stack reserve node, "
+                "index: %{public}d, name: %{public}s.", static_cast<int32_t>(i), pathName.c_str());
             navPathList.emplace_back(std::make_pair(pathName, uiNode));
             navigationStack_->RemoveCacheNode(cacheNodes, pathName, uiNode);
             continue;
         }
+        TAG_LOGD(AceLogTag::ACE_NAVIGATION, "find in nowhere, navigation stack create new node, "
+            "index: %{public}d, name: %{public}s.", static_cast<int32_t>(i), pathName.c_str());
         uiNode = GenerateUINodeByIndex(static_cast<int32_t>(i));
         navPathList.emplace_back(std::make_pair(pathName, uiNode));
     }
@@ -753,6 +771,9 @@ bool NavigationPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& di
     }
     auto hostNode = AceType::DynamicCast<NavigationGroupNode>(GetHost());
     CHECK_NULL_RETURN(hostNode, false);
+    if (navigationModeChange_) {
+        AbortAnimation(hostNode);
+    }
     auto context = PipelineContext::GetCurrentContext();
     if (context) {
         context->GetTaskExecutor()->PostTask(
@@ -824,6 +845,29 @@ bool NavigationPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& di
     AddDividerHotZoneRect();
     ifNeedInit_ = false;
     return false;
+}
+
+void NavigationPattern::AbortAnimation(RefPtr<NavigationGroupNode>& hostNode)
+{
+    TAG_LOGD(AceLogTag::ACE_NAVIGATION, "Aborting navigation animations");
+    if (!hostNode->GetPushAnimations().empty()) {
+        auto pushAnimations = hostNode->GetPushAnimations();
+        for (const auto& animation : pushAnimations) {
+            if (animation) {
+                AnimationUtils::StopAnimation(animation);
+            }
+        }
+    }
+    if (!hostNode->GetPopAnimations().empty()) {
+        auto popAnimations = hostNode->GetPopAnimations();
+        for (const auto& animation : popAnimations) {
+            if (animation) {
+                AnimationUtils::StopAnimation(animation);
+            }
+        }
+    }
+    hostNode->CleanPushAnimations();
+    hostNode->CleanPopAnimations();
 }
 
 void NavigationPattern::UpdateContextRect(

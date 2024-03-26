@@ -7727,6 +7727,8 @@ const ArkUI_AttributeItem* GetObjectFit(ArkUI_NodeHandle node)
     auto it = std::find(OBJECT_FIT_ARRAY.begin(), OBJECT_FIT_ARRAY.end(), resultValue);
     if (it != OBJECT_FIT_ARRAY.end()) {
         g_numberValues[0].i32 = std::distance(OBJECT_FIT_ARRAY.begin(), it);
+    } else {
+        g_numberValues[0].i32 = static_cast<int32_t>(ARKUI_OBJECT_FIT_COVER);
     }
     g_attributeItem.size = REQUIRED_ONE_PARAM;
     return &g_attributeItem;
@@ -7753,11 +7755,13 @@ const ArkUI_AttributeItem* GetObjectRepeat(ArkUI_NodeHandle node)
 const ArkUI_AttributeItem* GetColorFilter(ArkUI_NodeHandle node)
 {
     auto fullImpl = GetFullImpl();
-    auto colorFilter = fullImpl->getNodeModifiers()->getImageModifier()->getColorFilter(node->uiNodeHandle);
-    for (size_t i = 0; i < colorFilter.filterSize; i++) {
-        g_numberValues[i].f32 = colorFilter.filterArray[i];
+    g_attributeItem.size = REQUIRED_TWENTY_PARAM;
+    for (size_t i = 0; i < REQUIRED_TWENTY_PARAM; i++) {
+        g_numberValues[i].f32 = 0;
     }
-    g_attributeItem.size = colorFilter.filterSize;
+    ArkUIFilterColorType colorFilterType = { .filterArray = &g_numberValues[0].f32,
+        .filterSize = REQUIRED_TWENTY_PARAM };
+    fullImpl->getNodeModifiers()->getImageModifier()->getColorFilter(node->uiNodeHandle, &colorFilterType);
     return &g_attributeItem;
 }
 

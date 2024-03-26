@@ -611,7 +611,9 @@ void UIContentImpl::RunFormPage()
     Platform::AceContainer::RunPage(instanceId_, startUrl_, "", false);
     auto distributedUI = std::make_shared<NG::DistributedUI>();
     uiManager_ = std::make_unique<DistributedUIManager>(instanceId_, distributedUI);
-    Platform::AceContainer::GetContainer(instanceId_)->SetDistributedUI(distributedUI);
+    auto container = Platform::AceContainer::GetContainer(instanceId_);
+    CHECK_NULL_VOID(container);
+    container->SetDistributedUI(distributedUI);
 }
 
 UIContentErrorCode UIContentImpl::Initialize(OHOS::Rosen::Window* window, const std::string& url, napi_value storage)
@@ -1280,6 +1282,12 @@ UIContentErrorCode UIContentImpl::CommonInitialize(
         }
         SystemProperties::SetDeviceAccess(
             resConfig->GetInputDevice() == Global::Resource::InputDevice::INPUTDEVICE_POINTINGDEVICE);
+        LOGI("[%{public}s][%{public}s][%{public}d]: Set SystemProperties language: %{public}s, colorMode: %{public}s, "
+             "deviceAccess: %{public}d",
+            bundleName_.c_str(), moduleName_.c_str(), instanceId_,
+            AceApplicationInfo::GetInstance().GetLanguage().c_str(),
+            SystemProperties::GetColorMode() == ColorMode::DARK ? "dark" : "light",
+            SystemProperties::GetDeviceAccess());
     }
 
     auto abilityContext = OHOS::AbilityRuntime::Context::ConvertTo<OHOS::AbilityRuntime::AbilityContext>(context);
@@ -2592,6 +2600,17 @@ bool UIContentImpl::NotifyExecuteAction(
     auto container = Platform::AceContainer::GetContainer(instanceId_);
     CHECK_NULL_RETURN(container, false);
     return container->NotifyExecuteAction(elementId, actionArguments, action, offset);
+}
+
+void UIContentImpl::HandleAccessibilityHoverEvent(float pointX, float pointY, int32_t sourceType,
+    int32_t eventType, int64_t timeMs)
+{
+    auto container = Platform::AceContainer::GetContainer(instanceId_);
+    CHECK_NULL_VOID(container);
+    TAG_LOGI(AceLogTag::ACE_ACCESSIBILITY, "HandleAccessibilityHoverEvent Point:[%{public}f, %{public}f] "
+        "source:%{public}d type:%{public}d time:%{public}" PRId64,
+        pointX, pointY, sourceType, eventType, timeMs);
+    container->HandleAccessibilityHoverEvent(pointX, pointY, sourceType, eventType, timeMs);
 }
 
 std::string UIContentImpl::RecycleForm()

@@ -148,6 +148,13 @@ public:
         }
     }
 
+    void SetSelectedBorderRadius(float selectedBorderRadius)
+    {
+        if (selectedBorderRadius_) {
+            selectedBorderRadius_->Set(selectedBorderRadius);
+        }
+    }
+
     void SetStepSize(float stepSize)
     {
         if (stepSize_) {
@@ -242,6 +249,7 @@ public:
     }
 
     void UpdateContentDirtyRect(const SizeF& frameSize);
+
 private:
     void InitializeShapeProperty();
     RSRect GetTrackRect();
@@ -277,6 +285,7 @@ private:
     RefPtr<AnimatablePropertyColor> boardColor_;
 
     RefPtr<AnimatablePropertyFloat> trackBorderRadius_;
+    RefPtr<AnimatablePropertyFloat> selectedBorderRadius_;
     RefPtr<AnimatablePropertyFloat> stepSize_;
     RefPtr<AnimatablePropertyColor> stepColor_;
     RefPtr<AnimatablePropertySizeF> blockSize_;

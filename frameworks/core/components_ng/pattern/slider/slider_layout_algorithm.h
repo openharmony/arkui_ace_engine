@@ -53,7 +53,9 @@ public:
 private:
     void CalculateBlockOffset(
         LayoutWrapper* layoutWrapper, const RectF& contentRect, float selectOffset, Axis axis, bool reverse);
-    SizeF CalculateHotSize(const SizeF& blockSize, float themeBlockHotSize);
+    SizeF CalculateHotSize(LayoutWrapper* layoutWrapper, const SizeF& blockSize, float themeBlockHotSize);
+    void GetStyleThemeValue(LayoutWrapper* layoutWrapper, Dimension& themeTrackThickness, Dimension& themeBlockSize,
+        Dimension& hotBlockShadowWidth, Dimension& themeBlockHotSize);
 
 private:
     float trackThickness_ = 0.0f;

@@ -84,6 +84,7 @@ HWTEST_F(SwiperCommonTestNg, HandleTouchEvent002, TestSize.Level1)
  */
 HWTEST_F(SwiperCommonTestNg, HandleTouchEvent003, TestSize.Level1)
 {
+    EXPECT_CALL(*MockPipelineContext::pipeline_, FlushUITasks).Times(3);
     /**
      * @tc.steps: step1. Swipe to item(index:1), set animation to true
      * @tc.expected: When touch up, will trigger UpdateAnimationProperty and stop animation
@@ -196,6 +197,7 @@ HWTEST_F(SwiperCommonTestNg, HandleTouchEvent006, TestSize.Level1)
  */
 HWTEST_F(SwiperCommonTestNg, Event001, TestSize.Level1)
 {
+    EXPECT_CALL(*MockPipelineContext::pipeline_, FlushUITasks).Times(8);
     int32_t currentIndex = 0;
     auto onChange = [&currentIndex](const BaseEventInfo* info) {
         const auto* swiperInfo = TypeInfoHelper::DynamicCast<SwiperChangeEvent>(info);
@@ -303,6 +305,7 @@ HWTEST_F(SwiperCommonTestNg, AccessibilityProperty002, TestSize.Level1)
  */
 HWTEST_F(SwiperCommonTestNg, AccessibilityProperty003, TestSize.Level1)
 {
+    EXPECT_CALL(*MockPipelineContext::pipeline_, FlushUITasks).Times(3);
     /**
      * @tc.steps: step1. Set loop to false
      */
@@ -395,6 +398,7 @@ HWTEST_F(SwiperCommonTestNg, AccessibilityProperty006, TestSize.Level1)
  */
 HWTEST_F(SwiperTestNg, PerformActionTest001, TestSize.Level1)
 {
+    EXPECT_CALL(*MockPipelineContext::pipeline_, FlushUITasks).Times(5);
     /**
      * @tc.steps: step1. Scrollable swiper
      */

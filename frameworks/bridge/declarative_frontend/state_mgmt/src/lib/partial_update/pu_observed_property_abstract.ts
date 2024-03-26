@@ -64,9 +64,17 @@ implements ISinglePropertyChangeSubscriber<T>, IMultiPropertiesChangeSubscriber,
     this.owningView_ = undefined;
   }
 
+  private decoratorInfo_: string = "";
+
+  public setDecoratorInfo(decorate: string) {
+    this.decoratorInfo_ = decorate;
+  }
+
   // dump info about variable decorator to string
-  // e.g. @State/Provide, @Link/Consume, etc.
-  public abstract debugInfoDecorator() : string;
+  // e.g. @State, @Link, etc.
+  public debugInfoDecorator() : string {
+    return this.decoratorInfo_;
+  }
 
   // dump basic info about this variable to a string, non-recursive, no subscriber info
   public debugInfo() : string {

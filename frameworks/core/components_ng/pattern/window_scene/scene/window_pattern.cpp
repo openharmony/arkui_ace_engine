@@ -74,6 +74,8 @@ public:
 
     void OnExtensionDied() override {}
 
+    void OnExtensionTimeout(int32_t errorCode) override {}
+
     void OnAccessibilityEvent(const Accessibility::AccessibilityEventInfo& info,
         int64_t uiExtensionIdLevelVec) override {};
 

@@ -173,6 +173,18 @@ void JSScroller::ScrollEdge(const JSCallbackInfo& args)
     }
     ScrollEdgeType edgeType = EDGE_TYPE_TABLE[static_cast<int32_t>(edge)];
     ContainerScope scope(instanceId_);
+
+    if (args.Length() > 1 && args[1]->IsObject()) {
+        auto obj = JSRef<JSObject>::Cast(args[1]);
+        float velocity = 0.0f;
+        if (ConvertFromJSValue(obj->GetProperty("velocity"), velocity)) {
+            if (velocity > 0) {
+                velocity = Dimension(velocity, DimensionUnit::VP).ConvertToPx();
+                scrollController->ScrollToEdge(edgeType, velocity);
+                return;
+            }
+        }
+    }
     scrollController->ScrollToEdge(edgeType, true);
 }
 

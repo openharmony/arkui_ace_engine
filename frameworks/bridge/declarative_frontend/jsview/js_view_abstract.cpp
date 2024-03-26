@@ -1648,15 +1648,9 @@ RefPtr<NG::ChainedTransitionEffect> JSViewAbstract::ParseJsTransitionEffect(cons
 
 void JSViewAbstract::JsTransition(const JSCallbackInfo& info)
 {
-    if (info.Length() > 1) {
-        return;
-    }
-    if (info.Length() == 0) {
-        ViewAbstractModel::GetInstance()->SetTransition(
-            NG::TransitionOptions::GetDefaultTransition(TransitionType::ALL));
-        return;
-    }
-    if (!info[0]->IsObject()) {
+    if (info.Length() != 1 || !info[0]->IsObject()) {
+        ViewAbstractModel::GetInstance()->CleanTransition();
+        ViewAbstractModel::GetInstance()->SetChainedTransition(nullptr);
         return;
     }
     auto obj = JSRef<JSObject>::Cast(info[0]);
@@ -3886,12 +3880,9 @@ void JSViewAbstract::JsBlur(const JSCallbackInfo& info)
 void JSViewAbstract::JsColorBlend(const JSCallbackInfo& info)
 {
     Color colorBlend;
-    if (info[0]->IsUndefined()) {
+    if (info[0]->IsUndefined() || !ParseJsColor(info[0], colorBlend)) {
         colorBlend = Color::TRANSPARENT;
         SetColorBlend(colorBlend);
-        return;
-    }
-    if (!ParseJsColor(info[0], colorBlend)) {
         return;
     }
     SetColorBlend(colorBlend);
@@ -3914,21 +3905,19 @@ void JSViewAbstract::JsUseShadowBatching(const JSCallbackInfo& info)
 
 void JSViewAbstract::JsBackdropBlur(const JSCallbackInfo& info)
 {
-    if (info.Length() == 0) {
-        return;
-    }
     double blur = 0.0;
-    if (!ParseJsDouble(info[0], blur)) {
+    BlurOption blurOption;
+    if (info.Length() == 0 || !ParseJsDouble(info[0], blur)) {
+        CalcDimension dimensionRadius(blur, DimensionUnit::PX);
+        ViewAbstractModel::GetInstance()->SetBackdropBlur(dimensionRadius, blurOption);
         return;
     }
-    BlurOption blurOption;
+    CalcDimension dimensionRadius(blur, DimensionUnit::PX);
     if (info.Length() > 1 && info[1]->IsObject()) {
         JSRef<JSObject> jsBlurOption = JSRef<JSObject>::Cast(info[1]);
         ParseBlurOption(jsBlurOption, blurOption);
     }
-    CalcDimension dimensionRadius(blur, DimensionUnit::PX);
     ViewAbstractModel::GetInstance()->SetBackdropBlur(dimensionRadius, blurOption);
-
     info.SetReturnValue(info.This());
 }
 
@@ -4114,10 +4103,10 @@ bool JSViewAbstract::ParseJsDimensionNG(
     }
     if (jsValue->IsString()) {
         auto value = jsValue->ToString();
-        if (value.back() == '%' && !isSupportPercent) {
+        if (!isSupportPercent && value.back() == '%') {
             return false;
         }
-        return StringUtils::StringToCalcDimensionNG(jsValue->ToString(), result, false, defaultUnit);
+        return StringUtils::StringToCalcDimensionNG(value, result, false, defaultUnit);
     }
     if (jsValue->IsObject()) {
         JSRef<JSObject> jsObj = JSRef<JSObject>::Cast(jsValue);
