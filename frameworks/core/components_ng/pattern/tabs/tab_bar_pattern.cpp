@@ -1305,6 +1305,42 @@ void TabBarPattern::PlayPressAnimation(int32_t index, const Color& pressColor, A
     });
 }
 
+void TabBarPattern::OnTabBarIndexChange(int32_t index)
+{
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    pipeline->AddAfterRenderTask([weak = WeakClaim(this), index]() {
+        auto tabBarPattern = weak.Upgrade();
+        CHECK_NULL_VOID(tabBarPattern);
+        auto tabBarNode = tabBarPattern->GetHost();
+        CHECK_NULL_VOID(tabBarNode);
+        tabBarPattern->ResetIndicatorAnimationState();
+        auto tabBarLayoutProperty = tabBarPattern->GetLayoutProperty<TabBarLayoutProperty>();
+        CHECK_NULL_VOID(tabBarLayoutProperty);
+        if (!tabBarPattern->IsMaskAnimationByCreate()) {
+            tabBarPattern->HandleBottomTabBarChange(index);
+        }
+        tabBarPattern->SetMaskAnimationByCreate(false);
+        tabBarPattern->SetIndicator(index);
+        tabBarPattern->UpdateIndicator(index);
+        tabBarPattern->UpdateTextColorAndFontWeight(index);
+        if (tabBarLayoutProperty->GetTabBarMode().value_or(TabBarMode::FIXED) == TabBarMode::SCROLLABLE) {
+            if (tabBarPattern->GetTabBarStyle() == TabBarStyle::SUBTABBATSTYLE &&
+                tabBarLayoutProperty->GetAxisValue(Axis::HORIZONTAL) == Axis::HORIZONTAL) {
+                if (!tabBarPattern->GetChangeByClick()) {
+                    tabBarPattern->PlayTabBarTranslateAnimation(index);
+                    tabBarNode->MarkDirtyNode(PROPERTY_UPDATE_LAYOUT);
+                } else {
+                    tabBarPattern->SetChangeByClick(false);
+                }
+            } else {
+                tabBarNode->MarkDirtyNode(PROPERTY_UPDATE_LAYOUT);
+            }
+        }
+    });
+    pipeline->RequestFrame();
+}
+
 void TabBarPattern::UpdateCurrentOffset(float offset)
 {
     auto host = GetHost();
