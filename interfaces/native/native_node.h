@@ -4189,29 +4189,29 @@ typedef enum {
 } ArkUI_NodeDirtyFlag;
 
 /**
- * @brief 定义自定义组件事件类型。
+ * @brief Defines the custom component event type.
  *
  * @since 12
  */
 typedef enum {
-    /** measure 类型。*/
-    ARKUI_CUSTOM_NODE_EVENT_ON_MEASURE = 1 << 0,
-    /** layout 类型。*/
-    ARKUI_CUSTOM_NODE_EVENT_ON_LAYOUT = 1 << 1,
-    /** draw 类型。*/
-    ARKUI_CUSTOM_NODE_EVENT_ON_DRAW = 1 << 2,
-    /** foreground 类型。*/
-    ARKUI_CUSTOM_NODE_EVENT_ON_FOREGROUND_DRAW = 1 << 3,
-    /** overlay 类型。*/
-    ARKUI_CUSTOM_NODE_EVENT_ON_OVERLAY_DRAW = 1 << 4,
+    /** Measure type. */
+    ARKUI_NODE_CUSTOM_EVENT_ON_MEASURE = 1 << 0,
+    /** Layout type. */
+    ARKUI_NODE_CUSTOM_EVENT_ON_LAYOUT = 1 << 1,
+    /** Draw type. */
+    ARKUI_NODE_CUSTOM_EVENT_ON_DRAW = 1 << 2,
+    /** Foreground type. */
+    ARKUI_NODE_CUSTOM_EVENT_ON_FOREGROUND_DRAW = 1 << 3,
+    /** Overlay type. */
+    ARKUI_NODE_CUSTOM_EVENT_ON_OVERLAY_DRAW = 1 << 4,
 } ArkUI_NodeCustomEventType;
 
 /**
- * @brief 定义自定义组件事件的通用结构类型。
+ * @brief Defines the general structure of a custom component event.
  *
  * @since 12
  */
-struct ArkUI_NodeCustomEvent;
+typedef struct ArkUI_NodeCustomEvent ArkUI_NodeCustomEvent;
 
 /**
  * @brief Declares a collection of native node APIs provided by ArkUI.
@@ -4403,243 +4403,248 @@ typedef struct {
     void (*markDirty)(ArkUI_NodeHandle node, ArkUI_NodeDirtyFlag dirtyFlag);
 
     /**
-     * @brief 获取子节点的个数。
+     * @brief Obtains the number of subnodes.
      *
-     * 当组件已经挂载在窗口上显示时，必须在主线程上调用。
+     * When the component is being displayed, this API must be called in the main thread.
      *
-     * @param node 目标节点对象。
-     * @return 0 - 成功。
-     *         401 - 函数参数异常。
+     * @param node Indicates the target node.
+     * @return Returns 0 if success.
+     * Returns 401 if a parameter exception occurs.
      */
     uint32_t (*getTotalChildCount)(ArkUI_NodeHandle node);
 
     /**
-     * @brief 获取子节点。
+     * @brief Obtains a subnode.
      *
-     * 当组件已经挂载在窗口上显示时，必须在主线程上调用。
+     * When the component is being displayed, this API must be called in the main thread.
      *
-     * @param node 目标节点对象。
-     * @param position 子组件的位置。
-     * @return 返回组件的指针，如果没有返回NULL
+     * @param node Indicates the target node.
+     * @param position Indicates the position of the subnode.
+     * @return Returns the pointer to the subnode if the subnode exists; returns <b>NULL</b> otherwise.
      */
     ArkUI_NodeHandle (*getChildAt)(ArkUI_NodeHandle node, int32_t position);
 
     /**
-     * @brief 获取第一个子节点。
+     * @brief Obtains the first subnode.
      *
-     * 当组件已经挂载在窗口上显示时，必须在主线程上调用。
+     * When the component is being displayed, this API must be called in the main thread.
      *
-     * @param node 目标节点对象。
-     * @return 返回组件的指针，如果没有返回NULL
+     * @param node Indicates the target node.
+     * @return Returns the pointer to the subnode if the subnode exists; returns <b>NULL</b> otherwise.
      */
     ArkUI_NodeHandle (*getFirstChild)(ArkUI_NodeHandle node);
 
     /**
-     * @brief 获取最后一个子节点。
+     * @brief Obtains the last subnode.
      *
-     * 当组件已经挂载在窗口上显示时，必须在主线程上调用。
+     * When the component is being displayed, this API must be called in the main thread.
      *
-     * @param node 目标节点对象。
-     * @return 返回组件的指针，如果没有返回NULL
+     * @param node Indicates the target node.
+     * @return Returns the pointer to the subnode if the subnode exists; returns <b>NULL</b> otherwise.
      */
     ArkUI_NodeHandle (*getLastChild)(ArkUI_NodeHandle node);
 
     /**
-     * @brief 获取上一个兄弟节点。
+     * @brief Obtains the previous sibling node.
      *
-     * 当组件已经挂载在窗口上显示时，必须在主线程上调用。
+     * When the component is being displayed, this API must be called in the main thread.
      *
-     * @param node 目标节点对象。
-     * @return 返回组件的指针，如果没有返回NULL
+     * @param node Indicates the target node.
+     * @return Returns the pointer to the sibling node if the node exists; returns <b>NULL</b> otherwise.
      */
     ArkUI_NodeHandle (*getPreviousSibling)(ArkUI_NodeHandle node);
 
     /**
-     * @brief 获取下一个兄弟节点。
+     * @brief Obtains the next sibling node.
      *
-     * 当组件已经挂载在窗口上显示时，必须在主线程上调用。
+     * When the component is being displayed, this API must be called in the main thread.
      *
-     * @param node 目标节点对象。
-     * @return 返回组件的指针，如果没有返回NULL
+     * @param node Indicates the target node.
+     * @return Returns the pointer to the sibling node if the node exists; returns <b>NULL</b> otherwise.
      */
     ArkUI_NodeHandle (*getNextSibling)(ArkUI_NodeHandle node);
 
     /**
-     * @brief 注册自定义节点事件函数。事件触发时通过registerNodeCustomEventReceiver注册的自定义事件入口函数返回。
+     * @brief Registers a custom event for a node. When the event is triggered, the value is returned through the entry
+     * function registered by <b>registerNodeCustomEventReceiver.</b>
      *
-     * 当组件已经挂载在窗口上显示时，必须在主线程上调用。
+     * When the component is being displayed, this API must be called in the main thread.
      *
-     * @param node 需要注册事件的节点对象。
-     * @param eventType 需要注册的事件类型。
-     * @param targetId 自定义事件ID，当事件触发时在回调参数<@link ArkUI_NodeCustomEvent>中携带回来。
-     * @param userData 自定义事件参数，当事件触发时在回调参数<@link ArkUI_NodeCustomEvent>中携带回来。
-     * @return 0 - 成功。
-     *         401 - 函数参数异常。
-     *         106102 - 系统中未找到Native接口的动态实现库。
+     * @param node Indicates the target node.
+     * @param eventType Indicates the type of event to register.
+     * @param targetId Indicates the custom event ID, which is passed in the callback of <@link ArkUI_NodeCustomEvent>
+     *        when the event is triggered.
+     * @param userData Indicates the custom event parameter, which is passed in the callback of
+     *        <@link ArkUI_NodeCustomEvent> when the event is triggered.
+     * @return Returns 0 if success.
+     * Returns 401 if a parameter exception occurs.
+     * Returns 106102 if the dynamic implementation library of the native API was not found.
      */
     int32_t (*registerNodeCustomEvent)(
         ArkUI_NodeHandle node, ArkUI_NodeCustomEventType eventType, int32_t targetId, void* userData);
 
     /**
-     * @brief 反注册自定义节点事件函数。
+     * @brief Unregisters a custom event for a node.
      *
-     * 当组件已经挂载在窗口上显示时，必须在主线程上调用。
+     * When the component is being displayed, this API must be called in the main thread.
      *
-     * @param node 需要反注册事件的节点对象。
-     * @param eventType 需要反注册的事件类型。
+     * @param node Indicates the target node.
+     * @param eventType Indicates the type of event to unregister.
      */
     void (*unregisterNodeCustomEvent)(ArkUI_NodeHandle node, ArkUI_NodeCustomEventType eventType);
 
     /**
-     * @brief 注册自定义节点事件回调统一入口函数。
+     * @brief Registers a unified entry function for custom node event callbacks.
      *
-     * ArkUI框架会统一收集过程中产生的自定义组件事件并通过注册的registerNodeCustomEventReceiver函数回调给开发者。\n
-     * 重复调用时会覆盖前一次注册的函数。
+     * The ArkUI framework collects custom component events generated during the process and calls back the events
+     * through the registered <b>registerNodeCustomEventReceiver</b>. \n
+     * A new call to this API will overwrite the previously registered event receiver.
      *
-     * @param eventReceiver 事件回调统一入口函数。
+     * @param eventReceiver Indicates the event receiver to register.
      */
     void (*registerNodeCustomEventReceiver)(void (*eventReceiver)(ArkUI_NodeCustomEvent* event));
 
     /**
-     * @brief 反注册自定义节点事件回调统一入口函数。
+     * @brief Unregisters the unified entry function for custom node event callbacks.
      *
-     * 当组件已经挂载在窗口上显示时，必须在主线程上调用。
+     * When the component is being displayed, this API must be called in the main thread.
      *
      */
-    void (*unRegisterNodeCustomEventReceiver)();
+    void (*unregisterNodeCustomEventReceiver)();
 
     /**
-     * @brief 在测算回调函数中设置组件的测算完成后的宽和高。
+     * @brief Sets the width and height for a component after the measurement.
      *
-     * 当组件已经挂载在窗口上显示时，必须在主线程上调用。
+     * When the component is being displayed, this API must be called in the main thread.
      *
-     * @param node 目标节点对象。
-     * @param width 设置的宽。
-     * @param height 设置的高。
-     * @return 0 - 成功。
-     *         401 - 函数参数异常。
+     * @param node Indicates the target node.
+     * @param width Indicates the width.
+     * @param height Indicates the height.
+     * @return Returns 0 if success.
+     * Returns 401 if a parameter exception occurs.
      */
     int32_t (*setMeasuredSize)(ArkUI_NodeHandle node, int32_t width, int32_t height);
 
     /**
-     * @brief 在布局回调函数中设置组件的位置。
+     * @brief Sets the position for a component..
      *
-     * 当组件已经挂载在窗口上显示时，必须在主线程上调用。
+     * When the component is being displayed, this API must be called in the main thread.
      *
-     * @param node 目标节点对象。
-     * @param positionX x轴坐标。
-     * @param positionY y轴坐标。
-     * @return 0 - 成功。
-     *         401 - 函数参数异常。
+     * @param node Indicates the target node.
+     * @param positionX Indicates the X coordinate.
+     * @param positionY Indicates the Y coordinate.
+     * @return Returns 0 if success.
+     * Returns 401 if a parameter exception occurs.
      */
     int32_t (*setLayoutPosition)(ArkUI_NodeHandle node, int32_t positionX, int32_t positionY);
     
     /**
-     * @brief 获取组件测算完成后的宽高尺寸。
+     * @brief Obtains the width and height of a component after measurement.
      *
-     * 当组件已经挂载在窗口上显示时，必须在主线程上调用。
+     * When the component is being displayed, this API must be called in the main thread.
      *
-     * @param node 目标节点对象。
-     * @return ArkUI_IntSize 组件的宽高。
+     * @param node Indicates the target node.
+     * @return Returns the width and height of the component.
      */
     ArkUI_IntSize (*getMeasuredSize)(ArkUI_NodeHandle node);
 
     /**
-     * @brief 获取组件布局完成后的位置。
+     * @brief Obtains the position of a component after the layout is complete.
      *
-     * 当组件已经挂载在窗口上显示时，必须在主线程上调用。
+     * When the component is being displayed, this API must be called in the main thread.
      *
-     * @param node 目标节点对象。
-     * @return ArkUI_IntOffset 组件的位置。
+     * @param node Indicates the target node.
+     * @return Returns the position of the component.
      */
     ArkUI_IntOffset (*getLayoutPosition)(ArkUI_NodeHandle node);
 
     /**
-     * @brief 对特定组件进行测算，可以通过getMeasuredSize接口获取测算后的大小。
+     * @brief Measures a node. You can use the <b>getMeasuredSize</b> API to obtain the size after the measurement.
      *
-     * 当组件已经挂载在窗口上显示时，必须在主线程上调用。
+     * When the component is being displayed, this API must be called in the main thread.
      *
-     * @param node 目标节点对象。
-     * @param Constraint 约束尺寸。
-     * @return 0 - 成功。
-     *         401 - 函数参数异常。
+     * @param node Indicates the target node.
+     * @param Constraint Indicates the size constraint.
+     * @return Returns 0 if success.
+     * Returns 401 if a parameter exception occurs.
      */
     int32_t (*measureNode)(ArkUI_NodeHandle node, ArkUI_LayoutConstraint* Constraint);
 
     /**
-     * @brief 对特定组件进行布局并传递该组件相对父组件的期望位置。
+     * @brief Lays outs a component and passes the expected position of the component relative to its parent component.
      *
-     * 当组件已经挂载在窗口上显示时，必须在主线程上调用。
+     * When the component is being displayed, this API must be called in the main thread.
      *
-     * @param node 目标节点对象。
-     * @param positionX x轴坐标。
-     * @param positionY y轴坐标。
-     * @return 0 - 成功。
-     *         401 - 函数参数异常。
+     * @param node Indicates the target node.
+     * @param positionX Indicates the X coordinate.
+     * @param positionY Indicates the Y coordinate.
+     * @return Returns 0 if success.
+     * Returns 401 if a parameter exception occurs.
      */
     int32_t (*layoutNode)(ArkUI_NodeHandle node, int32_t positionX, int32_t positionY);
 } ArkUI_NativeNodeAPI_1;
 
 
 /**
-* @brief 通过自定义组件事件获取测算过程中的约束尺寸。
+* @brief Obtains the size constraint for measurement through a custom component event.
 *
-* @param event 自定义组件事件。
-* @return  约束尺寸指针。
+* @param event Indicates the pointer to the custom component event.
+* @return Returns the pointer to the size constraint.
 * @since 12
 */
 ArkUI_LayoutConstraint* OH_ArkUI_NodeCustomEvent_GetLayoutConstraintInMeasure(ArkUI_NodeCustomEvent* event);
 
 /**
-* @brief 通过自定义组件事件获取在布局阶段期望自身相对父组件的位置。
+* @brief Obtains the expected position of a component relative to its parent component in the layout phase through a
+* custom component event.
 *
-* @param event 自定义组件事件。
-* @return  期望自身相对父组件的位置。
+* @param event Indicates the pointer to the custom component event.
+* @return Returns the expected position relative to the parent component.
 * @since 12
 */
 ArkUI_IntOffset OH_ArkUI_NodeCustomEvent_GetPositionInLayout(ArkUI_NodeCustomEvent* event);
 
 /**
-* @brief 通过自定义组件事件获取绘制上下文。
+* @brief Obtains the drawing context through a custom component event.
 *
-* @param event 自定义组件事件。
-* @return  绘制上下文。
+* @param event Indicates the pointer to the custom component event.
+* @return Returns the drawing context.
 * @since 12
 */
 ArkUI_DrawContext* OH_ArkUI_NodeCustomEvent_GetDrawContextInDraw(ArkUI_NodeCustomEvent* event);
 
 /**
-* @brief 通过自定义组件事件获取自定义事件ID。
+* @brief Obtains the ID of a custom component event.
 *
-* @param event 自定义组件事件。
-* @return  自定义事件ID。
+* @param event Indicates the pointer to the custom component event.
+* @return Returns the ID of the custom component event.
 * @since 12
 */
 int32_t OH_ArkUI_NodeCustomEvent_GetEventTargetId(ArkUI_NodeCustomEvent* event);
 
 /**
-* @brief 通过自定义组件事件获取自定义事件参数。
+* @brief Obtains custom event parameters through a custom component event.
 *
-* @param event 自定义组件事件。
-* @return  自定义事件参数。
+* @param event Indicates the pointer to the custom component event.
+* @return Returns the custom event parameters.
 * @since 12
 */
 void* OH_ArkUI_NodeCustomEvent_GetUserData(ArkUI_NodeCustomEvent* event);
 
 /**
-* @brief 通过自定义组件事件获取组件对象。
+* @brief Obtains a component object through a custom component event.
 *
-* @param event 自定义组件事件。
-* @return  组件对象。
+* @param event Indicates the pointer to the custom component event.
+* @return Returns the component object.
 * @since 12
 */
 ArkUI_NodeHandle OH_ArkUI_NodeCustomEvent_GetNodeHandle(ArkUI_NodeCustomEvent* event);
 
 /**
-* @brief 通过自定义组件事件获取事件类型。
+* @brief Obtains the event type through a custom component event.
 *
-* @param event 自定义组件事件。
-* @return  组件自定义事件类型。
+* @param event Indicates the pointer to the custom component event.
+* @return Returns the type of the custom component event.
 * @since 12
 */
 ArkUI_NodeCustomEventType OH_ArkUI_NodeCustomEvent_GetEventType(ArkUI_NodeCustomEvent* event);

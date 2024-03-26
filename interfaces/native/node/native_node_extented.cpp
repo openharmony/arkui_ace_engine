@@ -64,7 +64,7 @@ ArkUI_LayoutConstraint* OH_ArkUI_NodeCustomEvent_GetLayoutConstraintInMeasure(Ar
 
 ArkUI_IntOffset OH_ArkUI_NodeCustomEvent_GetPositionInLayout(ArkUI_NodeCustomEvent* event)
 {
-    ArkUI_IntOffset intOffset;
+    static ArkUI_IntOffset intOffset;
     intOffset.x = event->componentAsyncEvent.data[NUM_0].i32;
     intOffset.y = event->componentAsyncEvent.data[NUM_1].i32;
     return intOffset;
@@ -72,10 +72,11 @@ ArkUI_IntOffset OH_ArkUI_NodeCustomEvent_GetPositionInLayout(ArkUI_NodeCustomEve
 
 ArkUI_DrawContext* OH_ArkUI_NodeCustomEvent_GetDrawContextInDraw(ArkUI_NodeCustomEvent* event)
 {
-    ArkUI_DrawContext drawContext;
-    drawContext.width = event->componentAsyncEvent.data[NUM_2].i32;
-    drawContext.height = event->componentAsyncEvent.data[NUM_3].i32;
-    return &drawContext;
+    ArkUI_DrawContext* drawContext = new ArkUI_DrawContext();
+    drawContext->width = event->componentAsyncEvent.data[NUM_2].i32;
+    drawContext->height = event->componentAsyncEvent.data[NUM_3].i32;
+    drawContext->canvas = event->canvas;
+    return drawContext;
 }
 
 int32_t OH_ArkUI_NodeCustomEvent_GetEventTargetId(ArkUI_NodeCustomEvent* event)
@@ -149,13 +150,13 @@ void OH_ArkUI_LayoutConstraint_SetPercentReferenceHeight(ArkUI_LayoutConstraint*
     constraint->percentReferHeight = value;
 }
 
-void* OH_ArkUI_DrawContext_GetDrawingCanvas(ArkUI_DrawContext* context)
+void* OH_ArkUI_DrawContext_GetCanvas(ArkUI_DrawContext* context)
 {
     return context->canvas;
 }
 ArkUI_IntSize OH_ArkUI_DrawContext_GetSize(ArkUI_DrawContext* context)
 {
-    ArkUI_IntSize intSize;
+    static ArkUI_IntSize intSize;
     intSize.width = context->width;
     intSize.height = context->height;
     return intSize;
