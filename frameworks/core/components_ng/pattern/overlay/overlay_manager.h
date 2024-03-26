@@ -249,15 +249,9 @@ public:
         return pixmapColumnNodeWeak_.Upgrade();
     }
 
-    RefPtr<FrameNode> GetPixelMapContentNode() const
-    {
-        auto column = pixmapColumnNodeWeak_.Upgrade();
-        if (!column) {
-            return nullptr;
-        }
-        auto imageNode = AceType::DynamicCast<FrameNode>(column->GetFirstChild());
-        return imageNode;
-    }
+    RefPtr<FrameNode> GetPixelMapContentNode() const;
+
+    RefPtr<FrameNode> GetPixelMapBadgeNode() const;
 
     bool GetHasFilter()
     {
@@ -471,6 +465,9 @@ public:
     {
         return gatherNodeChildrenInfo_;
     }
+    void RemoveMenuBadgeNode(const RefPtr<FrameNode>& menuWrapperNode);
+    void RemovePreviewBadgeNode();
+
 private:
     void PopToast(int32_t targetId);
 

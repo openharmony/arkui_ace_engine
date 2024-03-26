@@ -37,6 +37,7 @@
 #include "core/components_ng/pattern/image/image_pattern.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
 #include "core/components_ng/pattern/text/text_base.h"
+#include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/components_ng/pattern/text_drag/text_drag_base.h"
 #include "core/components_ng/pattern/text_drag/text_drag_pattern.h"
 #include "core/components_ng/pattern/grid/grid_item_pattern.h"
@@ -70,6 +71,8 @@ constexpr float SPRING_RESPONSE = 0.416f;
 constexpr float SPRING_DAMPING_FRACTION = 0.73f;
 constexpr Dimension PIXELMAP_BORDER_RADIUS = 16.0_vp;
 constexpr float DEFAULT_ANIMATION_SCALE = 0.95f;
+constexpr Dimension BADGE_RELATIVE_OFFSET = 8.0_vp;
+constexpr Dimension BADGE_DEFAULT_SIZE = 24.0_vp;
 #if defined(PIXEL_MAP_SUPPORTED)
 constexpr int32_t CREATE_PIXELMAP_TIME = 80;
 #endif
@@ -194,6 +197,7 @@ void DragEventActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset, co
 
         if (info.GetSourceDevice() == SourceType::MOUSE) {
             frameNode->MarkModifyDone();
+            dragDropManager->SetIsShowBadgeAnimation(true);
             auto pattern = frameNode->GetPattern<TextBase>();
             if (gestureHub->GetTextDraggable() && pattern) {
                 if (!pattern->IsSelected() || pattern->GetMouseStatus() == MouseStatus::MOVE) {
@@ -351,6 +355,11 @@ void DragEventActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset, co
         auto actuator = weak.Upgrade();
         CHECK_NULL_VOID(actuator);
         actuator->SetIsNotInPreviewState(true);
+        auto pipelineContext = PipelineContext::GetCurrentContext();
+        CHECK_NULL_VOID(pipelineContext);
+        auto dragDropManager = pipelineContext->GetDragDropManager();
+        CHECK_NULL_VOID(dragDropManager);
+        dragDropManager->SetIsShowBadgeAnimation(true);
         auto gestureHub = actuator->gestureEventHub_.Upgrade();
         CHECK_NULL_VOID(gestureHub);
         auto frameNode = gestureHub->GetFrameNode();
@@ -417,6 +426,7 @@ void DragEventActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset, co
         if (gestureHub->GetPreviewMode() == MenuPreviewMode::NONE) {
             if (actuator->IsNeedGather()) {
                 DragAnimationHelper::PlayGatherAnimation(imageNode, manager);
+                actuator->ShowPreviewBadgeAnimation(actuator, manager);
             }
             AnimationOption option;
             option.SetDuration(PIXELMAP_ANIMATION_TIME);
@@ -700,7 +710,7 @@ void DragEventActuator::SetPreviewDefaultAnimateProperty(const RefPtr<FrameNode>
 }
 
 void DragEventActuator::MountPixelMap(const RefPtr<OverlayManager>& manager, const RefPtr<GestureEventHub>& gestureHub,
-    const RefPtr<FrameNode>& imageNode)
+    const RefPtr<FrameNode>& imageNode, const RefPtr<FrameNode>& textNode)
 {
     CHECK_NULL_VOID(manager);
     CHECK_NULL_VOID(imageNode);
@@ -711,6 +721,9 @@ void DragEventActuator::MountPixelMap(const RefPtr<OverlayManager>& manager, con
     auto hub = columnNode->GetOrCreateGestureEventHub();
     CHECK_NULL_VOID(hub);
     hub->SetPixelMap(gestureHub->GetPixelMap());
+    if (textNode) {
+        columnNode->AddChild(textNode);
+    }
     auto container = Container::Current();
     if (container && container->IsScenceBoardWindow()) {
         auto frameNode = gestureHub->GetFrameNode();
@@ -921,6 +934,7 @@ void DragEventActuator::HidePixelMap(bool startDrag, double x, double y, bool sh
     CHECK_NULL_VOID(pipelineContext);
     auto manager = pipelineContext->GetOverlayManager();
     CHECK_NULL_VOID(manager);
+    manager->RemovePreviewBadgeNode();
     if (!startDrag) {
         manager->RemoveGatherNodeWithAnimation();
     }
@@ -1334,6 +1348,7 @@ RefPtr<FrameNode> DragEventActuator::CreateImageNode(const RefPtr<FrameNode>& fr
     imageNode->SetDragPreviewOptions(frameNode->GetDragPreviewOption());
     auto renderProps = imageNode->GetPaintProperty<ImageRenderProperty>();
     renderProps->UpdateImageInterpolation(ImageInterpolation::HIGH);
+    renderProps->UpdateNeedBorderRadius(false);
     auto props = imageNode->GetLayoutProperty<ImageLayoutProperty>();
     props->UpdateAutoResize(false);
     props->UpdateImageSourceInfo(ImageSourceInfo(pixelMap));
@@ -1349,6 +1364,7 @@ RefPtr<FrameNode> DragEventActuator::CreateImageNode(const RefPtr<FrameNode>& fr
     BorderRadiusProperty borderRadius;
     borderRadius.SetRadius(0.0_vp);
     imageContext->UpdateBorderRadius(borderRadius);
+    imageContext->UpdateClipEdge(true);
     ClickEffectInfo clickEffectInfo;
     clickEffectInfo.level = ClickEffectLevel::LIGHT;
     clickEffectInfo.scaleNumber = SCALE_NUMBER;
@@ -1509,7 +1525,10 @@ bool DragEventActuator::IsNeedGather()
 {
     auto fatherNode = itemFatherNode_.Upgrade();
     CHECK_NULL_RETURN(fatherNode, false);
-    if (!isSelectedItemNode_) {
+    auto scrollPattern = fatherNode->GetPattern<ScrollablePattern>();
+    CHECK_NULL_RETURN(scrollPattern, false);
+    auto children = scrollPattern->GetVisibleSelectedItems();
+    if (!isSelectedItemNode_ || children.size() <= 1) {
         return false;
     }
     return true;
@@ -1581,5 +1600,56 @@ RefPtr<FrameNode> DragEventActuator::GetFrameNode()
     CHECK_NULL_RETURN(gestureHub, nullptr);
     auto frameNode = gestureHub->GetFrameNode();
     return frameNode;
+}
+
+void DragEventActuator::ShowPreviewBadgeAnimation(
+    const RefPtr<DragEventActuator>& actuator, const RefPtr<OverlayManager>& manager)
+{
+    auto gestureEventHub = actuator->gestureEventHub_.Upgrade();
+    CHECK_NULL_VOID(gestureEventHub);
+    auto frameNode = gestureEventHub->GetFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto childInfo = manager->GetGatherNodeChildrenInfo();
+    auto childSize = childInfo.size() + 1;
+    auto textNode = CreateBadgeTextNode(frameNode, childSize, PIXELMAP_DRAG_SCALE_MULTIPLE, true);
+    CHECK_NULL_VOID(textNode);
+    auto column = manager->GetPixelMapNode();
+    CHECK_NULL_VOID(column);
+    column->AddChild(textNode);
+
+    DragAnimationHelper::ShowBadgeAnimation(textNode);
+}
+
+RefPtr<FrameNode> DragEventActuator::CreateBadgeTextNode(
+    const RefPtr<FrameNode>& frameNode, int32_t childSize, float previewScale, bool isUsePixelMapOffset)
+{
+    if (childSize <= 1) {
+        return nullptr;
+    }
+    CHECK_NULL_RETURN(frameNode, nullptr);
+    auto textNode = FrameNode::GetOrCreateFrameNode(V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        []() { return AceType::MakeRefPtr<TextPattern>(); });
+    CHECK_NULL_RETURN(textNode, nullptr);
+    auto badgeLength = std::to_string(childSize).size();
+    DragAnimationHelper::UpdateBadgeLayoutAndRenderContext(textNode, badgeLength, childSize);
+
+    auto textRenderContext = textNode->GetRenderContext();
+    CHECK_NULL_RETURN(textRenderContext, nullptr);
+    auto pixelMap = frameNode->GetPixelMap();
+    CHECK_NULL_RETURN(pixelMap, nullptr);
+    auto width = pixelMap->GetWidth();
+    auto height = pixelMap->GetHeight();
+    auto offset = isUsePixelMapOffset ? GetFloatImageOffset(frameNode, pixelMap) : frameNode->GetOffsetInScreen();
+    double textOffsetX = offset.GetX() + width * (previewScale + 1) / 2 -
+        BADGE_DEFAULT_SIZE.ConvertToPx() + (BADGE_RELATIVE_OFFSET.ConvertToPx() * badgeLength);
+    double textOffsetY = offset.GetY() - height * (previewScale - 1) / 2 - BADGE_RELATIVE_OFFSET.ConvertToPx();
+    textRenderContext->UpdatePosition(OffsetT<Dimension>(Dimension(textOffsetX), Dimension(textOffsetY)));
+    textNode->MarkDirtyNode(NG::PROPERTY_UPDATE_MEASURE);
+    textNode->MarkModifyDone();
+    textNode->SetLayoutDirtyMarked(true);
+    textNode->SetActive(true);
+    textNode->CreateLayoutTask();
+    FlushSyncGeometryNodeTasks();
+    return textNode;
 }
 } // namespace OHOS::Ace::NG

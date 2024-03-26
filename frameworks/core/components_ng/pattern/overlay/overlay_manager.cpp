@@ -678,6 +678,7 @@ void OverlayManager::PopMenuAnimation(const RefPtr<FrameNode>& menu, bool showPr
 
     ResetLowerNodeFocusable(menu);
     ResetContextMenuDragHideFinished();
+    RemoveMenuBadgeNode(menu);
 
     auto menuNode = AceType::DynamicCast<FrameNode>(menu->GetChildAtIndex(0));
     CHECK_NULL_VOID(menuNode);
@@ -730,6 +731,7 @@ void OverlayManager::ClearMenuAnimation(const RefPtr<FrameNode>& menu, bool show
 {
     TAG_LOGD(AceLogTag::ACE_OVERLAY, "clear menu animation enter");
     ResetLowerNodeFocusable(menu);
+    RemoveMenuBadgeNode(menu);
     AnimationOption option;
     option.SetCurve(Curves::FAST_OUT_SLOW_IN);
     option.SetDuration(MENU_ANIMATION_DURATION);
@@ -4252,6 +4254,7 @@ void OverlayManager::MountGatherNodeToRootNode(const RefPtr<FrameNode>& frameNod
     CHECK_NULL_VOID(rootNode);
     frameNode->MountToParent(rootNode);
     frameNode->OnMountToParentDone();
+    rootNode->MarkDirtyNode(PROPERTY_UPDATE_BY_CHILD_REQUEST);
     gatherNodeWeak_ = frameNode;
     hasGatherNode_ = true;
     gatherNodeChildrenInfo_ = gatherNodeChildrenInfo;
@@ -4326,5 +4329,45 @@ void OverlayManager::RemoveGatherNodeWithAnimation()
             }
         },
         option.GetOnFinishEvent());
+}
+
+RefPtr<FrameNode> OverlayManager::GetPixelMapContentNode() const
+{
+    auto column = pixmapColumnNodeWeak_.Upgrade();
+    CHECK_NULL_RETURN(column, nullptr);
+    auto imageNode = AceType::DynamicCast<FrameNode>(column->GetFirstChild());
+    return imageNode;
+}
+
+RefPtr<FrameNode> OverlayManager::GetPixelMapBadgeNode() const
+{
+    auto column = pixmapColumnNodeWeak_.Upgrade();
+    CHECK_NULL_RETURN(column, nullptr);
+    auto textNode = AceType::DynamicCast<FrameNode>(column->GetLastChild());
+    CHECK_NULL_RETURN(textNode, nullptr);
+    return textNode;
+}
+
+void OverlayManager::RemoveMenuBadgeNode(const RefPtr<FrameNode>& menuWrapperNode)
+{
+    CHECK_NULL_VOID(menuWrapperNode);
+    auto pattern = menuWrapperNode->GetPattern<MenuWrapperPattern>();
+    CHECK_NULL_VOID(pattern);
+    auto badgeNode = pattern->GetBadgeNode();
+    CHECK_NULL_VOID(badgeNode);
+    menuWrapperNode->RemoveChild(badgeNode);
+    menuWrapperNode->RebuildRenderContextTree();
+    menuWrapperNode->MarkDirtyNode(PROPERTY_UPDATE_BY_CHILD_REQUEST);
+}
+
+void OverlayManager::RemovePreviewBadgeNode()
+{
+    auto columnNode = pixmapColumnNodeWeak_.Upgrade();
+    CHECK_NULL_VOID(columnNode);
+    auto textNode = AceType::DynamicCast<FrameNode>(columnNode->GetChildAtIndex(1));
+    CHECK_NULL_VOID(textNode);
+    columnNode->RemoveChild(textNode);
+    columnNode->RebuildRenderContextTree();
+    columnNode->MarkDirtyNode(PROPERTY_UPDATE_BY_CHILD_REQUEST);
 }
 } // namespace OHOS::Ace::NG

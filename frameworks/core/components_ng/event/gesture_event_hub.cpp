@@ -40,6 +40,7 @@
 #include "core/components_ng/gestures/recognizers/pinch_recognizer.h"
 #include "core/components_ng/gestures/recognizers/rotation_recognizer.h"
 #include "core/components_ng/gestures/recognizers/swipe_recognizer.h"
+#include "core/components_ng/manager/drag_drop/utils/drag_animation_helper.h"
 #include "core/components_ng/pattern/text_drag/text_drag_base.h"
 #include "core/components_ng/pattern/scrollable/scrollable_pattern.h"
 #include "core/components_ng/pattern/image/image_layout_property.h"
@@ -843,6 +844,7 @@ void GestureEventHub::OnDragStart(const GestureEvent& info, const RefPtr<Pipelin
     auto windowScale = dragDropManager->GetWindowScale();
     bool isSwitchToSubWindow = false;
     RefPtr<FrameNode> imageNode = nullptr;
+    RefPtr<FrameNode> textNode = nullptr;
     RefPtr<OverlayManager> subWindowOverlayManager = nullptr;
     if (IsNeedSwitchToSubWindow()) {
         imageNode = overlayManager->GetPixelMapContentNode();
@@ -858,9 +860,16 @@ void GestureEventHub::OnDragStart(const GestureEvent& info, const RefPtr<Pipelin
             }
         }
         CHECK_NULL_VOID(imageNode);
+        float previewScale = DEFALUT_DRAG_PPIXELMAP_SCALE;
         if (IsPixelMapNeedScale()) {
-            scale = static_cast<float>(imageNode->GetPreviewScaleVal()) * windowScale;
+            previewScale = static_cast<float>(imageNode->GetPreviewScaleVal());
+            scale = previewScale * windowScale;
         }
+        auto childSize = GetSelectItemSize();
+        if (childSize > 1) {
+            recordsSize = childSize;
+        }
+        textNode = DragEventActuator::CreateBadgeTextNode(frameNode, childSize, previewScale, false);
         auto window = SubwindowManager::GetInstance()->ShowPreviewNG();
         if (window) {
             subWindowOverlayManager = window->GetOverlayManager();
@@ -925,8 +934,9 @@ void GestureEventHub::OnDragStart(const GestureEvent& info, const RefPtr<Pipelin
         auto gatherNode = DragEventActuator::GetOrCreateGatherNode(overlayManager,
             dragEventActuator_, gatherNodeChildrenInfo);
         DragEventActuator::MountGatherNode(subWindowOverlayManager, frameNode, gatherNode, gatherNodeChildrenInfo);
-        DragEventActuator::MountPixelMap(subWindowOverlayManager, eventHub->GetGestureEventHub(), imageNode);
+        DragEventActuator::MountPixelMap(subWindowOverlayManager, eventHub->GetGestureEventHub(), imageNode, textNode);
         pipeline->FlushSyncGeometryNodeTasks();
+        DragAnimationHelper::ShowBadgeAnimation(textNode);
         dragDropManager->DoDragStartAnimation(subWindowOverlayManager, info);
     }
     if (info.GetInputEventType() == InputEventType::MOUSE_BUTTON && IsNeedSwitchToSubWindow()) {
@@ -1605,5 +1615,19 @@ void GestureEventHub::SetNotMouseDragGatherPixelMaps()
             break;
         }
     }
+}
+
+int32_t GestureEventHub::GetSelectItemSize()
+{
+    CHECK_NULL_RETURN(dragEventActuator_, 0);
+    if (!dragEventActuator_->IsNeedGather()) {
+        return 0;
+    }
+    auto fatherNode = dragEventActuator_->GetItemFatherNode();
+    CHECK_NULL_RETURN(fatherNode, 0);
+    auto scrollPattern = fatherNode->GetPattern<ScrollablePattern>();
+    CHECK_NULL_RETURN(scrollPattern, 0);
+    auto children = scrollPattern->GetVisibleSelectedItems();
+    return children.size();
 }
 } // namespace OHOS::Ace::NG

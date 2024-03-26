@@ -875,7 +875,7 @@ HWTEST_F(DragEventTestNg, DragEventTestNg009, TestSize.Level1)
     auto pipeline = PipelineContext::GetCurrentContext();
     auto overlayManager = pipeline->GetOverlayManager();
     EXPECT_NE(overlayManager, nullptr);
-    dragEventActuator->MountPixelMap(overlayManager, gestureHub, imageNode);
+    dragEventActuator->MountPixelMap(overlayManager, gestureHub, imageNode, nullptr);
     EXPECT_EQ(overlayManager->hasPixelMap_, true);
     /**
      * @tc.steps: step4. Invoke SetPreviewDefaultAnimateProperty function.

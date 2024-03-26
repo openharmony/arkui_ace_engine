@@ -1270,8 +1270,10 @@ bool DragDropManager::GetDragPreviewInfo(const RefPtr<OverlayManager>& overlayMa
         return false;
     }
     auto imageNode = overlayManager->GetPixelMapContentNode();
-    if (!imageNode) {
-        return false;
+    CHECK_NULL_RETURN(imageNode, false);
+    auto badgeNode = overlayManager->GetPixelMapBadgeNode();
+    if (badgeNode) {
+        dragPreviewInfo.textNode = badgeNode;
     }
     double maxWidth = GridSystemManager::GetInstance().GetMaxWidthWithColumnType(GridColumnType::DRAG_PANEL);
     auto width = imageNode->GetGeometryNode()->GetFrameRect().Width();
@@ -1379,9 +1381,13 @@ void DragDropManager::DoDragMoveAnimate(const PointerEvent& pointerEvent)
     CHECK_NULL_VOID(renderContext);
     AnimationUtils::Animate(
         option,
-        [renderContext, localPoint = newOffset, overlayManager, gatherNodeCenter]() {
+        [renderContext, localPoint = newOffset, info = info_, overlayManager, gatherNodeCenter]() {
             renderContext->UpdateTransformTranslate({ localPoint.GetX(), localPoint.GetY(), 0.0f });
             UpdateGatherNodeAttr(overlayManager, gatherNodeCenter, -1.0f);
+            CHECK_NULL_VOID(info.textNode);
+            auto textRenderContext = info.textNode->GetRenderContext();
+            CHECK_NULL_VOID(textRenderContext);
+            textRenderContext->UpdateTransformTranslate({ localPoint.GetX(), localPoint.GetY(), 0.0f });
         },
         option.GetOnFinishEvent());
 }
@@ -1422,12 +1428,17 @@ void DragDropManager::DoDragStartAnimation(const RefPtr<OverlayManager>& overlay
         }
     });
     auto renderContext = info_.imageNode->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
     AnimationUtils::Animate(
         option,
-        [renderContext, scale = info_.scale, newOffset, overlayManager, gatherNodeCenter]() {
-            renderContext->UpdateTransformScale({ scale, scale });
+        [renderContext, info = info_, newOffset, overlayManager, gatherNodeCenter]() {
+            renderContext->UpdateTransformScale({ info.scale, info.scale });
             renderContext->UpdateTransformTranslate({ newOffset.GetX(), newOffset.GetY(), 0.0f });
-            UpdateGatherNodeAttr(overlayManager, gatherNodeCenter, scale);
+            UpdateGatherNodeAttr(overlayManager, gatherNodeCenter, info.scale);
+            CHECK_NULL_VOID(info.textNode);
+            auto textRenderContext = info.textNode->GetRenderContext();
+            CHECK_NULL_VOID(textRenderContext);
+            textRenderContext->UpdateTransformTranslate({ newOffset.GetX(), newOffset.GetY(), 0.0f });
         },
         option.GetOnFinishEvent());
 }
