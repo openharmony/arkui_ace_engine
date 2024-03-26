@@ -22,6 +22,8 @@ namespace OHOS::Ace::NG::ViewModel {
 
 void* CreateNode(ArkUINodeType tag, ArkUI_Int32 nodeId);
 
+ArkUI_CharPtr GetName(void* nativePtr);
+
 void DisposeNode(void* nativePtr);
 
 void AddChild(void* parentNode, void* childNode);
