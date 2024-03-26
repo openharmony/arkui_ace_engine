@@ -1128,7 +1128,8 @@ class ForegroundBlurStyleModifier extends ModifierWithKey<ArkForegroundBlurStyle
       getUINativeModule().common.resetForegroundBlurStyle(node);
     } else {
       getUINativeModule().common.setForegroundBlurStyle(node,
-        this.value.blurStyle, this.value.colorMode, this.value.adaptiveColor, this.value.scale);
+        this.value.blurStyle, this.value.colorMode, this.value.adaptiveColor, this.value.scale,
+          this.value.blurOptions?.grayscale);
     }
   }
 
@@ -1136,7 +1137,8 @@ class ForegroundBlurStyleModifier extends ModifierWithKey<ArkForegroundBlurStyle
     return !((this.stageValue as ArkForegroundBlurStyle).blurStyle === (this.value as ArkForegroundBlurStyle).blurStyle &&
       (this.stageValue as ArkForegroundBlurStyle).colorMode === (this.value as ArkForegroundBlurStyle).colorMode &&
       (this.stageValue as ArkForegroundBlurStyle).adaptiveColor === (this.value as ArkForegroundBlurStyle).adaptiveColor &&
-      (this.stageValue as ArkForegroundBlurStyle).scale === (this.value as ArkForegroundBlurStyle).scale);
+      (this.stageValue as ArkForegroundBlurStyle).scale === (this.value as ArkForegroundBlurStyle).scale &&
+      (this.stageValue as ArkForegroundBlurStyle).blurOptions === (this.value as ArkForegroundBlurStyle).blurOptions);
   }
 }
 
@@ -1208,7 +1210,8 @@ class BackgroundBlurStyleModifier extends ModifierWithKey<ArkBackgroundBlurStyle
       getUINativeModule().common.resetBackgroundBlurStyle(node);
     } else {
       getUINativeModule().common.setBackgroundBlurStyle(node,
-        this.value.blurStyle, this.value.colorMode, this.value.adaptiveColor, this.value.scale);
+        this.value.blurStyle, this.value.colorMode, this.value.adaptiveColor, this.value.scale,
+          this.value.blurOptions?.grayscale);
     }
   }
 }
@@ -2682,6 +2685,7 @@ class ArkComponent implements CommonMethod<CommonAttribute> {
       arkBackgroundBlurStyle.colorMode = options.colorMode;
       arkBackgroundBlurStyle.adaptiveColor = options.adaptiveColor;
       arkBackgroundBlurStyle.scale = options.scale;
+      arkBackgroundBlurStyle.blurOptions = options.blurOptions;
     }
     modifierWithKey(this._modifiersWithKeys, BackgroundBlurStyleModifier.identity,
       BackgroundBlurStyleModifier, arkBackgroundBlurStyle);
@@ -2700,6 +2704,7 @@ class ArkComponent implements CommonMethod<CommonAttribute> {
       arkForegroundBlurStyle.colorMode = options.colorMode;
       arkForegroundBlurStyle.adaptiveColor = options.adaptiveColor;
       arkForegroundBlurStyle.scale = options.scale;
+      arkForegroundBlurStyle.blurOptions = options.blurOptions;
     }
     modifierWithKey(this._modifiersWithKeys, ForegroundBlurStyleModifier.identity,
       ForegroundBlurStyleModifier, arkForegroundBlurStyle);
