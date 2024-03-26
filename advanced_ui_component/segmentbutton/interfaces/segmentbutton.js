@@ -511,7 +511,7 @@ class SelectItem extends ViewPU {
                         x: this.zoomScaleArray[this.selectedIndexes[0]],
                         y: this.zoomScaleArray[this.selectedIndexes[0]]
                     });
-                    Stack.shadow(ShadowStyle.OUTER_DEFAULT_MD);
+                    Stack.shadow(ShadowStyle.OUTER_DEFAULT_XS);
                     e || Stack.pop();
                     ViewStackProcessor.StopGetAccessRecording()
                 }));
