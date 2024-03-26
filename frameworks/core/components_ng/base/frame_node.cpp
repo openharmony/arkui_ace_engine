@@ -1308,12 +1308,12 @@ void FrameNode::CreateLayoutTask(bool forceUseMainThread)
     SetSkipSyncGeometryNode(false);
     {
         ACE_SCOPED_TRACE("CreateTaskMeasure[%s][self:%d][parent:%d]", GetTag().c_str(), GetId(),
-            GetParent() ? GetParent()->GetId() : 0);
+            GetAncestorNodeOfFrame() ? GetAncestorNodeOfFrame()->GetId() : 0);
         Measure(GetLayoutConstraint());
     }
     {
         ACE_SCOPED_TRACE("CreateTaskLayout[%s][self:%d][parent:%d]", GetTag().c_str(), GetId(),
-            GetParent() ? GetParent()->GetId() : 0);
+            GetAncestorNodeOfFrame() ? GetAncestorNodeOfFrame()->GetId() : 0);
         Layout();
     }
     SetRootMeasureNode(false);
@@ -2897,7 +2897,7 @@ void FrameNode::UpdatePercentSensitive()
 void FrameNode::Measure(const std::optional<LayoutConstraintF>& parentConstraint)
 {
     ACE_LAYOUT_SCOPED_TRACE("Measure[%s][self:%d][parent:%d][key:%s]", GetTag().c_str(),
-        GetId(), GetParent() ? GetParent()->GetId() : 0, GetInspectorIdValue("").c_str());
+        GetId(), GetAncestorNodeOfFrame() ? GetAncestorNodeOfFrame()->GetId() : 0, GetInspectorIdValue("").c_str());
 
     if (SelfOrParentExpansive() && needRestoreSafeArea_) {
         RestoreGeoState();
@@ -3002,7 +3002,7 @@ void FrameNode::Measure(const std::optional<LayoutConstraintF>& parentConstraint
 void FrameNode::Layout()
 {
     ACE_LAYOUT_SCOPED_TRACE("Layout[%s][self:%d][parent:%d][key:%s]", GetTag().c_str(),
-        GetId(), GetParent() ? GetParent()->GetId() : 0, GetInspectorIdValue("").c_str());
+        GetId(), GetAncestorNodeOfFrame() ? GetAncestorNodeOfFrame()->GetId() : 0, GetInspectorIdValue("").c_str());
     if (SelfOrParentExpansive()) {
         if (IsRootMeasureNode() && !needRestoreSafeArea_ && SelfExpansive()) {
             GetGeometryNode()->RestoreCache();
