@@ -132,6 +132,11 @@ struct SafeAreaExpandOpts {
         return type == other.type && edges == other.edges;
     }
 
+    bool ExpansiveToMark() const
+    {
+        return (edges & SAFE_AREA_EDGE_START) || (edges & SAFE_AREA_EDGE_TOP) || (edges & SAFE_AREA_EDGE_BOTTOM);
+    }
+
     bool operator!=(const SafeAreaExpandOpts& other) const
     {
         return !(*this == other);

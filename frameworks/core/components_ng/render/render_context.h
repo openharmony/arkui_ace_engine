@@ -283,6 +283,9 @@ public:
         return {};
     }
 
+    virtual void SavePaintRect(bool isRound = true, uint8_t flag = 0) {}
+    virtual void SyncPartialRsProperties() {}
+
     virtual std::pair<RectF, bool> GetPaintRectWithTranslate()
     {
         return {};

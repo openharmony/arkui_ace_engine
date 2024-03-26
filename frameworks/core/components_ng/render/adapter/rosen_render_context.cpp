@@ -436,18 +436,13 @@ void RosenRenderContext::SetFrameWithoutAnimation(const RectF& paintRect)
         [&]() { rsNode_->SetFrame(paintRect.GetX(), paintRect.GetY(), paintRect.Width(), paintRect.Height()); });
 }
 
-void RosenRenderContext::SyncGeometryProperties(GeometryNode* /*geometryNode*/, bool isRound, uint8_t flag)
+void RosenRenderContext::SyncGeometryProperties(GeometryNode* /*geometryNode*/, bool /* isRound */, uint8_t /* flag */)
 {
     CHECK_NULL_VOID(rsNode_);
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto geometryNode = host->GetGeometryNode();
-    CHECK_NULL_VOID(geometryNode);
-    auto paintRect = AdjustPaintRect();
-    RoundToPixelGrid(isRound, flag);
-    paintRect.SetRect(geometryNode->GetPixelGridRoundOffset(), geometryNode->GetPixelGridRoundSize());
-    SyncGeometryProperties(paintRect);
-    host->OnPixelRoundFinish(geometryNode->GetPixelGridRoundSize());
+    SyncGeometryProperties(paintRect_);
+    host->OnPixelRoundFinish(paintRect_.GetSize());
 }
 
 void RosenRenderContext::SyncGeometryProperties(const RectF& paintRect)
@@ -479,22 +474,7 @@ void RosenRenderContext::SyncGeometryProperties(const RectF& paintRect)
         firstTransitionIn_ = false;
     }
 
-    if (propTransform_ && propTransform_->HasTransformCenter()) {
-        auto vec = propTransform_->GetTransformCenterValue();
-        float xPivot = ConvertDimensionToScaleBySize(vec.GetX(), paintRect.Width());
-        float yPivot = ConvertDimensionToScaleBySize(vec.GetY(), paintRect.Height());
-        if (vec.GetZ().has_value()) {
-            float zPivot = static_cast<float>(vec.GetZ().value().ConvertToVp());
-            SetPivot(xPivot, yPivot, zPivot);
-        } else {
-            SetPivot(xPivot, yPivot);
-        }
-    }
-
-    if (propTransform_ && propTransform_->HasTransformTranslate()) {
-        // if translate unit is percent, it is related with frameSize
-        OnTransformTranslateUpdate(propTransform_->GetTransformTranslateValue());
-    }
+    SyncPartialRsProperties();
 
     if (propPointLight_ && propPointLight_->HasLightPosition()) {
         // if lightPosition unit is percent, it is related with frameSize
@@ -1400,16 +1380,15 @@ void RosenRenderContext::OnTransformScaleUpdate(const VectorF& scale)
     RequestNextFrame();
 }
 
-void RosenRenderContext::OnTransformTranslateUpdate(const TranslateOptions& translate)
+Vector3F RosenRenderContext::MarshallTranslate(const TranslateOptions& translate)
 {
-    CHECK_NULL_VOID(rsNode_);
     float xValue = 0.0f;
     float yValue = 0.0f;
     if (translate.x.Unit() == DimensionUnit::PERCENT || translate.y.Unit() == DimensionUnit::PERCENT) {
         auto rect = GetPaintRectWithoutTransform();
         if (rect.IsEmpty()) {
             // size is not determined yet
-            return;
+            return Vector3F();
         }
         xValue = translate.x.ConvertToPxWithSize(rect.Width());
         yValue = translate.y.ConvertToPxWithSize(rect.Height());
@@ -1419,7 +1398,14 @@ void RosenRenderContext::OnTransformTranslateUpdate(const TranslateOptions& tran
     }
     // translateZ doesn't support percentage
     float zValue = translate.z.ConvertToPx();
-    rsNode_->SetTranslate(xValue, yValue, zValue);
+    return Vector3F(xValue, yValue, zValue);
+}
+
+void RosenRenderContext::OnTransformTranslateUpdate(const TranslateOptions& translate)
+{
+    CHECK_NULL_VOID(rsNode_);
+    auto translateVec = MarshallTranslate(translate);
+    rsNode_->SetTranslate(translateVec.x, translateVec.y, translateVec.z);
     ElementRegister::GetInstance()->ReSyncGeometryTransition(GetHost());
     RequestNextFrame();
 }
@@ -1702,11 +1688,7 @@ void RosenRenderContext::GetPointWithTransform(PointF& point)
 
 RectF RosenRenderContext::GetPaintRectWithoutTransform()
 {
-    RectF rect;
-    CHECK_NULL_RETURN(rsNode_, rect);
-    auto paintRectVector = rsNode_->GetStagingProperties().GetBounds();
-    rect.SetRect(paintRectVector[0], paintRectVector[1], paintRectVector[2], paintRectVector[3]);
-    return rect;
+    return paintRect_;
 }
 
 void RosenRenderContext::UpdateTranslateInXY(const OffsetF& offset)
@@ -2478,14 +2460,11 @@ void RosenRenderContext::SetPositionToRSNode()
     auto frameNode = GetHost();
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(rsNode_);
-    const auto& size = frameNode->GetGeometryNode()->GetFrameSize();
-    if (!size.IsPositive()) {
-        return;
-    }
     auto rect = AdjustPaintRect();
     if (!rect.GetSize().IsPositive()) {
         return;
     }
+    paintRect_ = rect;
     rsNode_->SetBounds(rect.GetX(), rect.GetY(), rect.Width(), rect.Height());
     if (useContentRectForRSFrame_) {
         SetContentRectToFrame(rect);
@@ -3899,6 +3878,7 @@ void RosenRenderContext::ClearChildren()
 void RosenRenderContext::SetBounds(float positionX, float positionY, float width, float height)
 {
     CHECK_NULL_VOID(rsNode_);
+    paintRect_ = RectF(positionX, positionY, width, height);
     rsNode_->SetBounds(positionX, positionY, width, height);
 }
 
@@ -4905,5 +4885,36 @@ void RosenRenderContext::ResetSurface()
     auto rsCanvasDrawingNode = Rosen::RSNode::ReinterpretCast<Rosen::RSCanvasDrawingNode>(rsNode_);
     CHECK_NULL_VOID(rsCanvasDrawingNode);
     rsCanvasDrawingNode->ResetSurface();
+}
+
+void RosenRenderContext::SavePaintRect(bool isRound, uint8_t flag)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    const auto& geometryNode = host->GetGeometryNode();
+    CHECK_NULL_VOID(geometryNode);
+    AdjustPaintRect();
+    RoundToPixelGrid(isRound, flag);
+    paintRect_ = RectF(geometryNode->GetPixelGridRoundOffset(), geometryNode->GetPixelGridRoundSize());
+}
+
+void RosenRenderContext::SyncPartialRsProperties()
+{
+    if (propTransform_ && propTransform_->HasTransformCenter()) {
+        auto vec = propTransform_->GetTransformCenterValue();
+        float xPivot = ConvertDimensionToScaleBySize(vec.GetX(), paintRect_.Width());
+        float yPivot = ConvertDimensionToScaleBySize(vec.GetY(), paintRect_.Height());
+        if (vec.GetZ().has_value()) {
+            float zPivot = static_cast<float>(vec.GetZ().value().ConvertToVp());
+            SetPivot(xPivot, yPivot, zPivot);
+        } else {
+            SetPivot(xPivot, yPivot);
+        }
+    }
+
+    if (propTransform_ && propTransform_->HasTransformTranslate()) {
+        // if translate unit is percent, it is related with frameSize
+        OnTransformTranslateUpdate(propTransform_->GetTransformTranslateValue());
+    }
 }
 } // namespace OHOS::Ace::NG

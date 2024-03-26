@@ -94,6 +94,7 @@ void UITaskScheduler::ExpandSafeArea()
 
 void UITaskScheduler::FlushSyncGeometryNodeTasks()
 {
+    ExpandSafeArea();
     auto tasks = std::move(syncGeometryNodeTasks_);
     for (auto& task : tasks) {
         if (task) {
@@ -109,7 +110,6 @@ void UITaskScheduler::FlushLayoutTask(bool forceUseMainThread)
     if (dirtyLayoutNodes_.empty()) {
         return;
     }
-    RestoreGeoState();
     if (isLayouting_) {
         LOGF("you are already in flushing layout!");
         abort();
@@ -141,7 +141,6 @@ void UITaskScheduler::FlushLayoutTask(bool forceUseMainThread)
             frameInfo_->AddTaskInfo(node->GetTag(), node->GetId(), time, FrameInfo::TaskType::LAYOUT);
         }
     }
-    ExpandSafeArea();
     FlushSyncGeometryNodeTasks();
 #ifdef FFRT_EXISTS
     if (is64BitSystem_) {

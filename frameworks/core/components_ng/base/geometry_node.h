@@ -306,6 +306,7 @@ public:
         return previousState_;
     }
     void Restore();
+    bool RestoreCache();
     void Save();
 
     void ToJsonValue(std::unique_ptr<JsonValue>& json) const;
@@ -327,6 +328,7 @@ private:
 
     // save node's state before SafeArea expansion
     std::unique_ptr<RectF> previousState_;
+    std::unique_ptr<RectF> restoreCache_;
 
     OffsetF parentGlobalOffset_;
     OffsetF parentAbsoluteOffset_;
