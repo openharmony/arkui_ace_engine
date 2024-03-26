@@ -259,7 +259,8 @@ int32_t MeasureNode(ArkUI_NodeHandle node, ArkUI_LayoutConstraint* constraint)
 int32_t LayoutNode(ArkUI_NodeHandle node, int32_t positionX, int32_t positionY)
 {
     auto* impl = GetFullImpl();
-    float data[NUM_2];
+    //layout data size
+    float data[2];
     //positionX
     data[0] = positionX;
     //positionY
