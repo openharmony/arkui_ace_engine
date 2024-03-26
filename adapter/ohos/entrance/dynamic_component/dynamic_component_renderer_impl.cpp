@@ -217,11 +217,9 @@ void DynamicComponentRendererImpl::UpdateViewportConfig(const ViewportConfig& co
                 width, height, uiContent_->GetInstanceId());
         }
     }
-    ViewportConfig vpConfig;
-    vpConfig.SetDensity(config.Density());
+    ViewportConfig vpConfig(width, height, config.Density());
     vpConfig.SetPosition(config.Left(), config.Top());
     vpConfig.SetOrientation(config.Orientation());
-    vpConfig.SetSize(width, height);
 
     auto task = [weak = WeakClaim(this), vpConfig, reason, rsTransaction]() {
         auto renderer = weak.Upgrade();
