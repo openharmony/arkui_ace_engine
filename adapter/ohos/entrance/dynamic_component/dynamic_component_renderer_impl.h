@@ -64,7 +64,6 @@ private:
     int32_t hostInstanceId_ = -1;
 
     SizeF contentSize_;
-    bool adaptive_ = false;
 
     ACE_DISALLOW_COPY_AND_MOVE(DynamicComponentRendererImpl);
 };
