@@ -19,6 +19,7 @@
 #include "node/node_model.h"
 #include "node/gesture_impl.h"
 
+#include "node_extened.h"
 #include "base/log/log_wrapper.h"
 
 namespace {
@@ -43,6 +44,22 @@ ArkUI_NativeNodeAPI_1 nodeImpl_1 = {
     OHOS::Ace::NodeModel::RegisterOnEvent,
     OHOS::Ace::NodeModel::UnregisterOnEvent,
     OHOS::Ace::NodeModel::MarkDirty,
+    OHOS::Ace::NodeModel::GetTotalChildCount,
+    OHOS::Ace::NodeModel::GetChildAt,
+    OHOS::Ace::NodeModel::GetFirstChild,
+    OHOS::Ace::NodeModel::GetLastChild,
+    OHOS::Ace::NodeModel::GetPreviousSibling,
+    OHOS::Ace::NodeModel::GetNextSibling,
+    OHOS::Ace::NodeModel::RegisterNodeCustomEvent,
+    OHOS::Ace::NodeModel::UnregisterNodeCustomEvent,
+    OHOS::Ace::NodeModel::RegisterNodeCustomReceiver,
+    OHOS::Ace::NodeModel::UnregisterNodeCustomEventReceiver,
+    OHOS::Ace::NodeModel::SetMeasuredSize,
+    OHOS::Ace::NodeModel::SetLayoutPosition,
+    OHOS::Ace::NodeModel::GetMeasuredSize,
+    OHOS::Ace::NodeModel::GetLayoutPosition,
+    OHOS::Ace::NodeModel::MeasureNode,
+    OHOS::Ace::NodeModel::LayoutNode,
 };
 
 ArkUI_NativeDialogAPI_1 dialogImpl_1 = {

@@ -21,7 +21,7 @@
 #include "node/gesture_impl.h"
 #include "node/node_model.h"
 #include "securec.h"
-
+#include "node_extened.h"
 #include "base/log/log_wrapper.h"
 #include "core/interfaces/arkoala/arkoala_api.h"
 
@@ -305,6 +305,16 @@ void HandleInnerEvent(ArkUINodeEvent* innerEvent)
             OHOS::Ace::NodeModel::HandleInnerNodeEvent(innerEvent);
         }
     }
+}
+
+bool ConvertCustomEvent(ArkUICustomNodeEvent* origin, ArkUI_NodeCustomEvent* event)
+{
+    if (memcpy_sp(event->componentAsyncEvent.data, MAX_COMPONENT_EVENT_ARG_NUM * sizeof(ArkUI_NumberValue),
+        origin->componentAsyncEvent.data, MAX_COMPONENT_EVENT_ARG_NUM * sizeof(ArkUI_NumberValue)) != 0) {
+        TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "fail to convert Custom origin event data");
+        return false;
+    }
+    return true;
 }
 
 }; // namespace OHOS::Ace::NodeModel
