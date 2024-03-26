@@ -574,6 +574,11 @@ protected:
 
     void Register2DragDropManager();
 
+    bool StopExpandMark() override
+    {
+        return true;
+    }
+
 private:
     virtual void OnScrollEndCallback() {};
 
