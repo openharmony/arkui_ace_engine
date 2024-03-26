@@ -85,6 +85,9 @@ public:
         int32_t deleteCaretPostion;
     };
 
+    ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(TextInputAction, TextInputAction)
+    TextInputAction GetDefaultTextInputAction() const;
+    
     // RichEditor needs softkeyboard, override function.
     bool NeedSoftKeyboard() const override
     {
@@ -187,10 +190,6 @@ public:
     void ClearOperationRecords();
     void ClearRedoOperationRecords();
     void AddOperationRecord(const OperationRecord& record);
-    void HandleOnEnter() override
-    {
-        PerformAction(TextInputAction::NEW_LINE, false);
-    }
     bool HandleOnEscape() override;
     void HandleOnUndoAction() override;
     void HandleOnRedoAction() override;
@@ -478,7 +477,13 @@ public:
     Color GetSelectedBackgroundColor();
 
     void SetCustomKeyboardOption(bool supportAvoidance);
+    void StopEditing();
+    void ResetKeyboardIfNeed();
 
+    void HandleOnEnter() override
+    {
+        PerformAction(GetTextInputActionValue(GetDefaultTextInputAction()), false);
+    }
 protected:
     bool CanStartAITask() override;
 
@@ -652,6 +657,7 @@ private:
     void HandleOnDragInsertValueOperation(const std::string& insertValue);
     void HandleOnDragInsertValue(const std::string& str);
     void HandleOnEditChanged(bool isEditing);
+    void OnTextInputActionUpdate(TextInputAction value);
 
 #if defined(ENABLE_STANDARD_INPUT)
     sptr<OHOS::MiscServices::OnTextChangedListener> richEditTextChangeListener_;
@@ -732,6 +738,11 @@ private:
     bool isDragSponsor_ = false;
     std::pair<int32_t, int32_t> dragRange_ { 0, 0 };
     bool isEditing_ = false;
+    int32_t dragPosition_ = 0;
+    // Action when "enter" pressed.
+    TextInputAction action_ = TextInputAction::NEW_LINE;
+    // What the keyboard appears.
+    TextInputType keyboard_ = TextInputType::UNSPECIFIED;
     ACE_DISALLOW_COPY_AND_MOVE(RichEditorPattern);
     bool keyboardAvoidance_ = false;
 };

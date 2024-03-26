@@ -47,6 +47,8 @@ public:
     static void SetCopyOption(FrameNode* frameNode, CopyOptions& copyOptions);
     static void SetCaretColor(FrameNode* frameNode, const Color& color);
     static void SetSelectedBackgroundColor(FrameNode* frameNode, const Color& selectedColor);
+    void SetEnterKeyType(TextInputAction value) override;
+    void SetOnSubmit(std::function<void(int32_t, NG::TextFieldCommonEvent&)>&& func) override;
 
 private:
     void SetDraggable(bool draggable);

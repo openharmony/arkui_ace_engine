@@ -125,6 +125,7 @@ void RichEditorPattern::OnModifyDone()
     copyOption_ = layoutProperty->GetCopyOption().value_or(CopyOptions::Distributed);
     auto context = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(context);
+    ResetKeyboardIfNeed();
     context->AddOnAreaChangeNode(host->GetId());
     if (!clipboard_ && context) {
         clipboard_ = ClipboardProxy::GetInstance()->GetClipboard(context->GetTaskExecutor());
@@ -2268,12 +2269,6 @@ void RichEditorPattern::UpdateEditingValue(const std::shared_ptr<TextEditingValu
     InsertValue(value->text);
 }
 
-void RichEditorPattern::PerformAction(TextInputAction action, bool forceCloseKeyboard)
-{
-    TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "action=%{public}d, forceCloseKeyboard=%{public}d", action, forceCloseKeyboard);
-    InsertValue("\n");
-}
-
 void RichEditorPattern::InitMouseEvent()
 {
     CHECK_NULL_VOID(!mouseEventInitialized_);
@@ -2358,7 +2353,8 @@ bool RichEditorPattern::EnableStandardInput(bool needShowSoftKeyboard)
     auto context = PipelineContext::GetCurrentContext();
     CHECK_NULL_RETURN(context, false);
     MiscServices::Configuration configuration;
-    configuration.SetEnterKeyType(static_cast<MiscServices::EnterKeyType>(static_cast<int32_t>(TextInputAction::DONE)));
+    configuration.SetEnterKeyType(static_cast<MiscServices::EnterKeyType>(
+        static_cast<int32_t>(GetTextInputActionValue(GetDefaultTextInputAction()))));
     configuration.SetTextInputType(
         static_cast<MiscServices::TextInputType>(static_cast<int32_t>(TextInputType::UNSPECIFIED)));
     MiscServices::InputMethodController::GetInstance()->OnConfigurationChange(configuration);
@@ -2414,7 +2410,7 @@ std::optional<MiscServices::TextConfig> RichEditorPattern::GetMiscTextConfig()
         .width = CARET_WIDTH,
         .height = caretHeight };
     MiscServices::InputAttribute inputAttribute = { .inputPattern = (int32_t)TextInputType::UNSPECIFIED,
-        .enterKeyType = (int32_t)TextInputAction::DONE };
+        .enterKeyType = (int32_t)GetTextInputActionValue(GetDefaultTextInputAction()) };
     MiscServices::TextConfig textConfig = { .inputAttribute = inputAttribute,
         .cursorInfo = cursorInfo,
         .range = { .start = textSelector_.GetStart(), .end = textSelector_.GetEnd() },
@@ -6222,5 +6218,82 @@ void RichEditorPattern::HandleOnEditChanged(bool isEditing)
     CHECK_NULL_VOID(eventHub);
     isEditing_ = isEditing;
     eventHub->FireOnEditingChange(isEditing);
+}
+
+void RichEditorPattern::ResetKeyboardIfNeed()
+{
+    bool needToResetKeyboard = false;
+    auto currentAction = GetTextInputActionValue(GetDefaultTextInputAction());
+    // When the enter key type changes, the keyboard needs to be reset.
+    if (action_ != TextInputAction::UNSPECIFIED) {
+        needToResetKeyboard = action_ != currentAction;
+    }
+    action_ = currentAction;
+#if defined(OHOS_STANDARD_SYSTEM) && !defined(PREVIEW)
+    if (needToResetKeyboard) {
+        // if keyboard attached or keyboard is shown, pull up keyboard again
+        if (imeShown_ || isCustomKeyboardAttached_) {
+            if (HasFocus()) {
+                RequestKeyboard(false, true, true);
+            }
+            return;
+        }
+#if defined(ENABLE_STANDARD_INPUT)
+        auto inputMethod = MiscServices::InputMethodController::GetInstance();
+        CHECK_NULL_VOID(inputMethod);
+        MiscServices::Configuration config;
+        config.SetEnterKeyType(static_cast<MiscServices::EnterKeyType>(action_));
+        config.SetTextInputType(static_cast<MiscServices::TextInputType>(keyboard_));
+        inputMethod->OnConfigurationChange(config);
+#endif
+    }
+#else
+    if (needToResetKeyboard && HasConnection()) {
+        CloseKeyboard(true);
+        RequestKeyboard(false, true, true);
+    }
+#endif
+}
+
+void RichEditorPattern::OnTextInputActionUpdate(TextInputAction value) {}
+
+void RichEditorPattern::PerformAction(TextInputAction action, bool forceCloseKeyboard)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    // When the Enter key is triggered, perform a line feed operation.
+    // It will not exit the editing state, nor will it trigger the Enter key type callback.
+    if (action == TextInputAction::NEW_LINE) {
+        InsertValue("\n");
+        return;
+    }
+    // Enter key type callback
+    TextFieldCommonEvent event;
+    auto eventHub = host->GetEventHub<RichEditorEventHub>();
+    eventHub->FireOnSubmit(static_cast<int32_t>(action), event);
+    // If the developer wants to keep editing, editing will not stop
+    if (event.IsKeepEditable()) {
+        return;
+    }
+    // Exit the editing state
+    StopEditing();
+}
+
+void RichEditorPattern::StopEditing()
+{
+    if (!HasFocus()) {
+        return;
+    }
+
+    // The selection status disappears, the cursor is hidden, and the soft keyboard is exited
+    HandleBlurEvent();
+    // In order to avoid the physical keyboard being able to type, you need to make sure that you lose focus
+    FocusHub::LostFocusToViewRoot();
+}
+
+TextInputAction RichEditorPattern::GetDefaultTextInputAction() const
+{
+    // As with TextInput, it is a line break by default
+    return TextInputAction::NEW_LINE;
 }
 } // namespace OHOS::Ace::NG

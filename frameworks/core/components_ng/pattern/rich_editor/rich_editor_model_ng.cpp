@@ -240,4 +240,22 @@ void RichEditorModelNG::SetOnEditingChange(std::function<void(const bool&)>&& fu
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnEditingChange(std::move(func));
 }
+
+void RichEditorModelNG ::SetEnterKeyType(TextInputAction action)
+{
+    TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "SetEnterKeyType=%{public}d", action);
+    auto pattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<RichEditorPattern>();
+    CHECK_NULL_VOID(pattern);
+    if (action == TextInputAction::UNSPECIFIED) {
+        action = TextInputAction::NEW_LINE;
+    }
+    pattern->UpdateTextInputAction(action);
+}
+
+void RichEditorModelNG::SetOnSubmit(std::function<void(int32_t, NG::TextFieldCommonEvent&)>&& func)
+{
+    auto eventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<RichEditorEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnSubmit(std::move(func));
+}
 } // namespace OHOS::Ace::NG
