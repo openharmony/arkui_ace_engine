@@ -60,6 +60,9 @@ SliderContentModifier::SliderContentModifier(const Parameters& parameters,
     sliderMode_ = AceType::MakeRefPtr<PropertyInt>(static_cast<int>(SliderModelNG::SliderMode::OUTSET));
     directionAxis_ = AceType::MakeRefPtr<PropertyInt>(static_cast<int>(Axis::HORIZONTAL));
     isShowStep_ = AceType::MakeRefPtr<PropertyBool>(false);
+    sliderInteractionMode_ =
+        AceType::MakeRefPtr<PropertyInt>(static_cast<int>(SliderModelNG::SliderInteraction::SLIDE_AND_CLICK));
+    minResponse_ = AceType::MakeRefPtr<PropertyFloat>(0.0f);
     blockType_ = AceType::MakeRefPtr<PropertyInt>(static_cast<int>(SliderModelNG::BlockStyleType::DEFAULT));
     // others
     UpdateData(parameters);
@@ -87,6 +90,8 @@ SliderContentModifier::SliderContentModifier(const Parameters& parameters,
     AttachProperty(sliderMode_);
     AttachProperty(directionAxis_);
     AttachProperty(isShowStep_);
+    AttachProperty(sliderInteractionMode_);
+    AttachProperty(minResponse_);
     AttachProperty(blockType_);
 
     InitializeShapeProperty();

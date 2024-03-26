@@ -44,6 +44,11 @@ public:
         SHAPE,
     };
 
+    enum class SliderInteraction {
+        SLIDE_AND_CLICK,
+        SLIDE_ONLY,
+    };
+
     static SliderModel* GetInstance();
     virtual ~SliderModel() = default;
 
@@ -57,6 +62,7 @@ public:
     virtual void SetSelectColor(const Color& value) = 0;
     virtual void SetMinLabel(float value) = 0;
     virtual void SetMaxLabel(float value) = 0;
+    virtual void SetMinResponsiveDistance(float value) {};
     virtual void SetShowSteps(bool value) = 0;
     virtual void SetShowTips(bool value, const std::optional<std::string>& content) = 0;
     virtual void SetThickness(const Dimension& value) = 0;
@@ -71,6 +77,7 @@ public:
         const std::string& value, const std::string& bundleName, const std::string& moduleName) = 0;
     virtual void SetBlockShape(const RefPtr<BasicShape>& value) = 0;
     virtual void SetStepSize(const Dimension& value) = 0;
+    virtual void SetSliderInteractionMode(SliderInteraction mode) {};
     virtual void SetOnChange(std::function<void(float, int32_t)>&& eventOnChange) = 0;
     virtual void SetOnChangeEvent(std::function<void(float)>&& onChangeEvent) = 0;
 
@@ -84,6 +91,8 @@ public:
     virtual void ResetBlockImage() = 0;
     virtual void ResetBlockShape() = 0;
     virtual void ResetStepSize() = 0;
+    virtual void ResetSliderInteractionMode() = 0;
+    virtual void ResetMinResponsiveDistance() = 0;
 
 private:
     static std::unique_ptr<SliderModel> instance_;
