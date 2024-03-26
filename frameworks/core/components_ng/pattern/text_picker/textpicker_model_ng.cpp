@@ -1053,4 +1053,13 @@ void TextPickerModelNG::SetDivider(FrameNode* frameNode, const ItemDivider& divi
     textPickerPattern->SetCustomDividerFlag(true);
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextPickerLayoutProperty, Divider, divider, frameNode);
 }
+
+void TextPickerModelNG::SetGradientHeight(FrameNode* frameNode, const Dimension& value)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto textPickerPattern = frameNode->GetPattern<TextPickerPattern>();
+    CHECK_NULL_VOID(textPickerPattern);
+    textPickerPattern->SetGradientHeight(value);
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextPickerLayoutProperty, GradientHeight, value, frameNode);
+}
 } // namespace OHOS::Ace::NG

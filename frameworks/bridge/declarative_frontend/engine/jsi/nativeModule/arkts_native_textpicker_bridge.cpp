@@ -415,4 +415,36 @@ ArkUINativeModuleValue TextPickerBridge::ResetDivider(ArkUIRuntimeCallInfo* runt
     GetArkUINodeModifiers()->getTextPickerModifier()->resetTextPickerDivider(nativeNode);
     return panda::JSValueRef::Undefined(vm);
 }
+
+ArkUINativeModuleValue TextPickerBridge::SetGradientHeight(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> nodeArg = runtimeCallInfo->GetCallArgRef(0);
+    Local<JSValueRef> itemHeightValue = runtimeCallInfo->GetCallArgRef(1);
+    auto nativeNode = nodePtr(nodeArg->ToNativePointer(vm)->Value());
+    auto context = reinterpret_cast<FrameNode*>(nativeNode)->GetContext();
+    auto themeManager = context->GetThemeManager();
+    CHECK_NULL_RETURN(themeManager, panda::NativePointerRef::New(vm, nullptr));
+    auto pickerTheme = themeManager->GetTheme<PickerTheme>();
+    CHECK_NULL_RETURN(pickerTheme, panda::NativePointerRef::New(vm, nullptr));
+    CalcDimension height;
+    if (ArkTSUtils::ParseJsDimensionVpNG(vm, itemHeightValue, height, true)) {
+        GetArkUINodeModifiers()->getTextPickerModifier()->setTextPickerGradientHeight(
+            nativeNode, height.Value(), static_cast<int32_t>(height.Unit()));
+    } else {
+        GetArkUINodeModifiers()->getTextPickerModifier()->resetTextPickerGradientHeight(nativeNode);
+    }
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue TextPickerBridge::ResetGradientHeight(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> nodeArg = runtimeCallInfo->GetCallArgRef(0);
+    auto nativeNode = nodePtr(nodeArg->ToNativePointer(vm)->Value());
+    GetArkUINodeModifiers()->getTextPickerModifier()->resetTextPickerGradientHeight(nativeNode);
+    return panda::JSValueRef::Undefined(vm);
+}
 } // namespace OHOS::Ace::NG
