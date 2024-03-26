@@ -844,6 +844,7 @@ bool SwiperPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty,
             OnIndexChange();
         }
         jumpIndex_.reset();
+        pauseTargetIndex_.reset();
         auto delayTime = GetInterval() - GetDuration();
         delayTime = std::clamp(delayTime, 0, delayTime);
         if (NeedAutoPlay() && isUserFinish_) {
