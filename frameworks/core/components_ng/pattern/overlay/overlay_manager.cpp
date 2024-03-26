@@ -2534,23 +2534,9 @@ void OverlayManager::BindContentCover(bool isShow, std::function<void(const std:
     std::function<void()>&& onDisappear, std::function<void()>&& onWillAppear, std::function<void()>&& onWillDisappear,
     const NG::ContentCoverParam& contentCoverParam, const RefPtr<FrameNode>& targetNode, int32_t sessionId)
 {
-    auto pipeline = PipelineContext::GetCurrentContext();
-    CHECK_NULL_VOID(pipeline);
-    auto bindModalTask = [weak = AceType::WeakClaim(this), isShow, callback = std::move(callback),
-                             buildNodeFunc = std::move(buildNodeFunc), modalStyle, onAppear = std::move(onAppear),
-                             onDisappear = std::move(onDisappear), onWillAppear = std::move(onWillAppear),
-                             onWillDisappear = std::move(onWillDisappear), contentCoverParam,
-                             targetNode, sessionId]() mutable {
-        auto overlay = weak.Upgrade();
-        CHECK_NULL_VOID(overlay);
-        overlay->OnBindContentCover(isShow, std::move(callback), std::move(buildNodeFunc), modalStyle,
-            std::move(onAppear), std::move(onDisappear), std::move(onWillAppear), std::move(onWillDisappear),
-            contentCoverParam, targetNode, sessionId);
-        auto pipeline = PipelineContext::GetCurrentContext();
-        CHECK_NULL_VOID(pipeline);
-        pipeline->FlushUITasks();
-    };
-    pipeline->AddAnimationClosure(bindModalTask);
+    return OnBindContentCover(isShow, std::move(callback), std::move(buildNodeFunc), modalStyle,
+        std::move(onAppear), std::move(onDisappear), std::move(onWillAppear), std::move(onWillDisappear),
+        contentCoverParam, targetNode, sessionId);
 }
 
 void OverlayManager::OnBindContentCover(bool isShow, std::function<void(const std::string&)>&& callback,
