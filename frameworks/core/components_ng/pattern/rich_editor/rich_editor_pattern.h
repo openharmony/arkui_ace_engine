@@ -94,7 +94,7 @@ public:
         return true;
     }
 
-    bool CheckBlurReason();
+    BlurReason GetBlurReason();
 
     uint32_t GetSCBSystemWindowId();
 
