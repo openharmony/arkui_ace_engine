@@ -2902,7 +2902,6 @@ void WebPattern::OnScrollStartRecursive(std::vector<float> positions)
     }
     isFirstFlingScrollVelocity_ = true;
     isNeedUpdateScrollAxis_ = true;
-    isNeedUpdateFilterScrolAxis_ = true;
     isScrollStarted_ = true;
 }
 
@@ -2931,11 +2930,8 @@ void WebPattern::OnScrollEndRecursive(const std::optional<float>& velocity)
 void WebPattern::OnOverScrollFlingVelocity(float xVelocity, float yVelocity, bool isFling)
 {
     if (isNeedUpdateScrollAxis_) {
-        expectedScrollAxis_ = GetAxis();
-        if (parentsMap_.size() > 1) {
-            expectedScrollAxis_ = (abs(xVelocity) > abs(yVelocity)) ? Axis::HORIZONTAL : Axis::VERTICAL;
-        }
-        isNeedUpdateScrollAxis_ = false;
+        TAG_LOGE(AceLogTag::ACE_WEB, "WebPattern::OnOverScrollFlingVelocity scrollAxis has not been updated");
+        return;
     }
     float velocity = (expectedScrollAxis_ == Axis::HORIZONTAL) ? xVelocity : yVelocity;
     OnOverScrollFlingVelocityHandler(velocity, isFling);
@@ -3056,24 +3052,27 @@ void WebPattern::ReleaseResizeHold()
 }
 bool WebPattern::FilterScrollEvent(const float x, const float y, const float xVelocity, const float yVelocity)
 {
-    if (isNeedUpdateFilterScrolAxis_) {
-        expectedFilterScrollAxis_ = GetAxis();
+    if (isNeedUpdateScrollAxis_) {
+        expectedScrollAxis_ = GetAxis();
         if (parentsMap_.size() > 1) {
-            expectedFilterScrollAxis_ = (x != 0 || y != 0)
+            expectedScrollAxis_ = (x != 0 || y != 0)
                 ? (abs(x) > abs(y) ? Axis::HORIZONTAL : Axis::VERTICAL)
                 : (abs(xVelocity) > abs(yVelocity) ? Axis::HORIZONTAL : Axis::VERTICAL);
         }
-        isNeedUpdateFilterScrolAxis_ = false;
+        isNeedUpdateScrollAxis_ = false;
+        TAG_LOGI(AceLogTag::ACE_WEB,"WebPattern::FilterScrollEvent updateScrollAxis, x=%{public}f, y=%{public}f, "
+            "vx=%{public}f, vy=%{public}f, scrolAxis=%{public}d",
+            x, y, xVelocity, yVelocity, static_cast<int32_t>(expectedScrollAxis_));
     }
-    float offset = expectedFilterScrollAxis_ == Axis::HORIZONTAL ? x : y;
-    float velocity = expectedFilterScrollAxis_ == Axis::HORIZONTAL ? xVelocity : yVelocity;
+    float offset = expectedScrollAxis_ == Axis::HORIZONTAL ? x : y;
+    float velocity = expectedScrollAxis_ == Axis::HORIZONTAL ? xVelocity : yVelocity;
     bool isConsumed = offset != 0 ? FilterScrollEventHandleOffset(offset) : FilterScrollEventHandlevVlocity(velocity);
     return isConsumed;
 }
 
 bool WebPattern::FilterScrollEventHandleOffset(const float offset)
 {
-    auto it = parentsMap_.find(expectedFilterScrollAxis_);
+    auto it = parentsMap_.find(expectedScrollAxis_);
     CHECK_EQUAL_RETURN(it, parentsMap_.end(), false);
     auto parent = it->second;
     auto nestedScroll = GetNestedScroll();
@@ -3086,8 +3085,8 @@ bool WebPattern::FilterScrollEventHandleOffset(const float offset)
         CHECK_NULL_RETURN(defaultDisplay, false);
         auto ratio = defaultDisplay->GetVirtualPixelRatio();
         if (ratio > 0) {
-            expectedFilterScrollAxis_ == Axis::HORIZONTAL ? delegate_->ScrollBy(-result.remain / ratio, 0)
-                                                          : delegate_->ScrollBy(0, -result.remain / ratio);
+            expectedScrollAxis_ == Axis::HORIZONTAL ? delegate_->ScrollBy(-result.remain / ratio, 0)
+                                                    : delegate_->ScrollBy(0, -result.remain / ratio);
         }
         CHECK_NULL_RETURN(!NearZero(result.remain), true);
         UpdateFlingReachEdgeState(offset, false);
@@ -3102,7 +3101,7 @@ bool WebPattern::FilterScrollEventHandleOffset(const float offset)
 
 bool WebPattern::FilterScrollEventHandlevVlocity(const float velocity)
 {
-    auto it = parentsMap_.find(expectedFilterScrollAxis_);
+    auto it = parentsMap_.find(expectedScrollAxis_);
     CHECK_EQUAL_RETURN(it, parentsMap_.end(), false);
     auto parent = it->second;
     auto nestedScroll = GetNestedScroll();
