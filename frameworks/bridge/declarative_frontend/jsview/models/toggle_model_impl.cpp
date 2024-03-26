@@ -201,9 +201,4 @@ void ToggleModelImpl::SetPadding(const NG::PaddingPropertyF& args, const NG::Pad
         checkableComponent->SetHorizontalPadding(Dimension(args.left.value(), DimensionUnit::VP));
     }
 }
-
-void ToggleModelImpl::Pop()
-{
-    ViewStackProcessor::GetInstance()->Pop();
-}
 } // namespace OHOS::Ace::Framework

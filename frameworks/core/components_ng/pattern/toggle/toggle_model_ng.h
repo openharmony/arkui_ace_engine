@@ -34,7 +34,6 @@ public:
     void OnChangeEvent(ChangeEvent&& onChangeEvent) override;
     void SetResponseRegion(const std::vector<DimensionRect>& responseRegion) override;
     void SetHoverEffect(HoverEffectType hoverEffect) override;
-    void Pop() override;
     void SetPointRadius(const Dimension& switchPointRadius) override;
     void ResetPointRadius() override;
     void SetUnselectedColor(const Color& unselectedColor) override;
@@ -54,16 +53,19 @@ public:
     static Color GetSelectedColor(FrameNode* frameNode);
     static Color GetSwitchPointColor(FrameNode* frameNode);
     static bool GetSwitchIsOn(FrameNode* frameNode);
+
 private:
-    static void CreateCheckbox(int32_t nodeId);
-    static void CreateSwitch(int32_t nodeId);
-    static void CreateButton(int32_t nodeId);
+    static void ReCreateFrameNode(
+        const RefPtr<FrameNode>& childFrameNode, int32_t nodeId, ToggleType toggleType, bool isOn);
     static RefPtr<FrameNode> CreateCheckboxFrameNode(int32_t nodeId, bool isOn);
     static RefPtr<FrameNode> CreateSwitchFrameNode(int32_t nodeId, bool isOn);
     static RefPtr<FrameNode> CreateButtonFrameNode(int32_t nodeId, bool isOn);
     static void AddNewChild(const RefPtr<UINode>& parentFrame, int32_t nodeId, int32_t index);
     static int32_t RemoveNode(const RefPtr<FrameNode>& childFrameNode, int32_t nodeId);
-    static void SetSwitchSelected(RefPtr<FrameNode>& childFrameNode, bool isOn);
+    static void UpdateSwitchIsOn(const RefPtr<FrameNode>& frameNode, bool isOn);
+    static void UpdateCheckboxIsOn(const RefPtr<FrameNode>& frameNode, bool isOn);
+    static void UpdateToggleButtonIsOn(const RefPtr<FrameNode>& frameNode, bool isOn);
+    static void ReplaceAllChild(const RefPtr<FrameNode>& oldFrameNode);
 };
 
 } // namespace OHOS::Ace::NG
