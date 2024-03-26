@@ -264,6 +264,7 @@ RefPtr<UINode> LazyForEachNode::GetFrameChildByIndex(uint32_t index, bool needBu
     }
     if (isCache) {
         child.second->SetParent(WeakClaim(this));
+        child.second->SetJSViewActive(false);
         return child.second->GetFrameChildByIndex(0, needBuild);
     }
     if (isActive_) {
