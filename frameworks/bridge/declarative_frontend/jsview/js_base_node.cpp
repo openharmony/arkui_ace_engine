@@ -65,7 +65,7 @@ void JSBaseNode::BuildNode(const JSCallbackInfo& info)
     // If the node is a UINode, amount it to a BuilderProxyNode.
     // Let the returned node be a FrameNode.
     auto flag = AceType::InstanceOf<NG::FrameNode>(newNode);
-    if (!flag) {
+    if (!flag && newNode) {
         auto nodeId = ElementRegister::GetInstance()->MakeUniqueId();
         auto proxyNode = NG::FrameNode::GetOrCreateFrameNode(
             "BuilderProxyNode", nodeId, []() { return AceType::MakeRefPtr<NG::StackPattern>(); });
