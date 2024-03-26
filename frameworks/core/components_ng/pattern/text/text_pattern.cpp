@@ -2499,13 +2499,13 @@ void TextPattern::ProcessBoundRectByTextMarquee(RectF& rect)
     auto relativeSelfLeftOffsetX =
         std::max(-1 * host->GetOffsetRelativeToWindow().GetX(), rect.GetOffset().GetX() - paragraph_->GetTextWidth());
     rect.SetLeft(relativeSelfLeftOffsetX);
-    rect.SetWidth(frameSize.Width() + paragraph_->GetTextWidth() - relativeSelfLeftOffsetX);
+    rect.SetWidth(frameSize.Width() + paragraph_->GetTextWidth() - relativeSelfLeftOffsetX); 
 }
 
 RefPtr<NodePaintMethod> TextPattern::CreateNodePaintMethod()
 {
     if (!contentMod_) {
-        contentMod_ = MakeRefPtr<TextContentModifier>(textStyle_);
+        contentMod_ = MakeRefPtr<TextContentModifier>(textStyle_,WeakClaim(this));
     }
     if (!overlayMod_) {
         overlayMod_ = MakeRefPtr<TextOverlayModifier>();
@@ -2673,6 +2673,15 @@ void TextPattern::FireOnSelectionChange(int32_t start, int32_t end)
     auto eventHub = host->GetEventHub<TextEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->FireOnSelectionChange(start, end);
+}
+
+void TextPattern::FireOnMarqueeStateChange(const TextMarqueeState &state)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto eventHub = host->GetEventHub<TextEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->FireOnMarqueeStateChange(static_cast<int32_t>(state));
 }
 
 void TextPattern::HandleSelectionChange(int32_t start, int32_t end)

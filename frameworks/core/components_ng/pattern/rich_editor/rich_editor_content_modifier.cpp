@@ -20,7 +20,7 @@
 namespace OHOS::Ace::NG {
 RichEditorContentModifier::RichEditorContentModifier(const std::optional<TextStyle>& textStyle,
     const ParagraphManager* pManager, const WeakPtr<OHOS::Ace::NG::Pattern>& pattern)
-    : TextContentModifier(textStyle), pManager_(pManager), pattern_(pattern)
+    : TextContentModifier(textStyle,pattern), pManager_(pManager), pattern_(pattern)
 {
     auto richEditorPattern = AceType::DynamicCast<RichEditorPattern>(pattern_.Upgrade());
     CHECK_NULL_VOID(richEditorPattern);

@@ -16,16 +16,18 @@
 #include "core/components_ng/pattern/text/text_content_modifier.h"
 
 #include "base/utils/utils.h"
+#include "core/components_ng/pattern/text/text_layout_property.h"
+#include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/components_ng/render/drawing.h"
 #include "core/components_v2/inspector/utils.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
 namespace {
+constexpr double DEFAULT_MARQUEE_SCROLL_DELAY = 85.0; // Delay time between each jump.
 constexpr float RACE_MOVE_PERCENT_MIN = 0.0f;
 constexpr float RACE_MOVE_PERCENT_MAX = 100.0f;
 constexpr float RACE_TEMPO = 0.2f;
-constexpr uint32_t RACE_DURATION = 2000;
 constexpr float RACE_SPACE_WIDTH = 48.0f;
 constexpr float ROUND_VALUE = 0.5f;
 constexpr uint32_t POINT_COUNT = 4;
@@ -54,7 +56,7 @@ inline FontWeight ConvertFontWeight(FontWeight fontWeight)
 }
 } // namespace
 
-TextContentModifier::TextContentModifier(const std::optional<TextStyle>& textStyle)
+TextContentModifier::TextContentModifier(const std::optional<TextStyle>& textStyle,const WeakPtr<Pattern>& pattern):pattern_(pattern)
 {
     contentChange_ = MakeRefPtr<PropertyInt>(0);
     AttachProperty(contentChange_);
@@ -260,7 +262,7 @@ void TextContentModifier::onDraw(DrawingContext& drawingContext)
             }
         } else {
             // Racing
-            float textRacePercent = GetTextRacePercent();
+            float textRacePercent = marqueeDirection_ == MarqueeDirection::LEFT? GetTextRacePercent() : RACE_MOVE_PERCENT_MAX - GetTextRacePercent();
             if (clip_ && clip_->Get()) {
                 canvas.ClipRect(RSRect(0, 0, drawingContext.width, drawingContext.height), RSClipOp::INTERSECT);
             }
@@ -598,29 +600,113 @@ void TextContentModifier::SetContentSize(SizeF& value)
     contentSize_->Set(value);
 }
 
-void TextContentModifier::StartTextRace()
+void TextContentModifier::StartTextRace(const double &step,const int32_t &loop,const MarqueeDirection &direction,
+    const int32_t &delay,const bool &isBounce)
 {
-    if (textRacing_) {
-        return;
-    }
+    if(!isBounce){
+        if (textRacing_ && NearEqual(step,marqueeStep_) && 
+        (loop == marqueeLoop_) && (direction == marqueeDirection_) && (delay == marqueeDelay_)) {
+            return;
+        }
 
-    textRacing_ = true;
+        if(textRacing_){
+            StopTextRace();
+        }
 
-    textRaceSpaceWidth_ = RACE_SPACE_WIDTH;
-    auto pipeline = PipelineContext::GetCurrentContext();
-    if (pipeline) {
-        textRaceSpaceWidth_ *= pipeline->GetDipScale();
+        TAG_LOGE(AceLogTag::ACE_TEXT, "StartTextRace step: %{public}lf", step);
+        TAG_LOGE(AceLogTag::ACE_TEXT, "StartTextRace loop: %{public}d", loop);
+        TAG_LOGE(AceLogTag::ACE_TEXT, "StartTextRace delay: %{public}d", delay);
+
+        marqueeStep_ = step;
+
+        if(loop == marqueeLoop_){
+            marqueeLoop_ = loop;
+        }
+        
+        if(direction != marqueeDirection_){
+            marqueeDirection_ = direction;
+        }
+
+        if(delay != marqueeDelay_){
+            marqueeDelay_ = delay;
+        }
+
+        if(marqueeLoop_ > 0 && marqueeCount_ >= marqueeLoop_){
+            return;
+        }
+
+        CHECK_NULL_VOID(paragraph_);
+        marqueeDuration_ = static_cast<int32_t>(std::abs(paragraph_->GetTextWidth()) * DEFAULT_MARQUEE_SCROLL_DELAY / marqueeStep_);
+        if(marqueeDuration_ <= 0){
+            return;
+        }
+
+        TAG_LOGE(AceLogTag::ACE_TEXT, "StartTextRace duration: %{public}d", marqueeDuration_);
+
+        textRacing_ = true;
+
+        textRaceSpaceWidth_ = RACE_SPACE_WIDTH;
+        auto pipeline = PipelineContext::GetCurrentContext();
+        if (pipeline) {
+            textRaceSpaceWidth_ *= pipeline->GetDipScale();
+        }
+
+        auto textPattern = DynamicCast<TextPattern>(pattern_.Upgrade());
+        CHECK_NULL_VOID(textPattern);
+        textPattern->FireOnMarqueeStateChange(TextMarqueeState::START);
+        TAG_LOGE(AceLogTag::ACE_TEXT, "StartTextRace START");
     }
 
     AnimationOption option = AnimationOption();
     RefPtr<Curve> curve = MakeRefPtr<LinearCurve>();
-    option.SetDuration(RACE_DURATION);
-    option.SetDelay(0);
+    option.SetDuration(marqueeDuration_);
+    option.SetDelay(isBounce? marqueeDelay_ : 0);
     option.SetCurve(curve);
-    option.SetIteration(-1);
+    option.SetIteration(1);
     option.SetTempo(RACE_TEMPO);
-    raceAnimation_ = AnimationUtils::StartAnimation(option, [&]() { racePercentFloat_->Set(RACE_MOVE_PERCENT_MAX); });
+
+    TAG_LOGE(AceLogTag::ACE_TEXT, "StartTextRace START EVER");
+    marqueeAnimationId_++;
+    raceAnimation_ = AnimationUtils::StartAnimation(
+        option, 
+        [&]() { racePercentFloat_->Set(RACE_MOVE_PERCENT_MAX); },
+        [weak = AceType::WeakClaim(this),marqueeAnimationId = marqueeAnimationId_,id = Container::CurrentId()](){
+            TAG_LOGE(AceLogTag::ACE_TEXT, "StartTextRace animation callback");
+            ContainerScope scope(id);
+            auto taskExecutor = Container::CurrentTaskExecutor();
+            CHECK_NULL_VOID(taskExecutor);
+
+            auto onFinish = [weak]() {
+                auto modifier = weak.Upgrade();
+                CHECK_NULL_VOID(modifier);
+
+                auto textPattern = DynamicCast<TextPattern>(modifier->pattern_.Upgrade());
+                CHECK_NULL_VOID(textPattern);
+
+                if (marqueeAnimationId != modifier->marqueeAnimationId_) {
+                    return;
+                }
+
+                if(modifier->marqueeLoop_ > 0 && ++modifier->marqueeCount_ >= modifier->marqueeLoop_){
+                    textPattern->FireOnMarqueeStateChange(TextMarqueeState::FINISH);
+                    TAG_LOGE(AceLogTag::ACE_TEXT, "StartTextRace FINISH");
+                }else{
+                    textPattern->FireOnMarqueeStateChange(TextMarqueeState::BOUNCE);
+                    TAG_LOGE(AceLogTag::ACE_TEXT, "StartTextRace BOUNCE");
+                    modifier->StartTextRace(modifier->marqueeStep_,modifier->marqueeLoop_,modifier->marqueeDirection_,modifier->marqueeDelay_,true);
+                }
+            };
+            if (taskExecutor->WillRunOnCurrentThread(TaskExecutor::TaskType::UI)) {
+                TAG_LOGE(AceLogTag::ACE_TEXT, "StartTextRace current thread restart");
+                onFinish();
+                return;
+            }
+
+            TAG_LOGE(AceLogTag::ACE_TEXT, "StartTextRace other thread restart");
+            taskExecutor->PostTask([onFinish]() {onFinish();}, TaskExecutor::TaskType::UI);
+        });
 }
+
 
 void TextContentModifier::StopTextRace()
 {

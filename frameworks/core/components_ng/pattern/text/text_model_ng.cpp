@@ -549,26 +549,21 @@ void TextModelNG::SetMarqueeOptions(const std::optional<bool>& start, const std:
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
-
     if (start.has_value()) {
         ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextLayoutProperty, TextMarqueeStart, start.value(), frameNode);
-    } 
-    
+    }
     if (step.has_value()) {
         ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextLayoutProperty, TextMarqueeStep, step.value(), frameNode);
     } 
-
     if (loop.has_value()) {
         ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextLayoutProperty, TextMarqueeLoop, loop.value(), frameNode);
     } 
-
     if (direction.has_value()) {
         ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextLayoutProperty, TextMarqueeDirection, direction.value(), frameNode);
     } 
-
      if (delay.has_value()) {
         ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextLayoutProperty, TextMarqueeDelay, delay.value(), frameNode);
-    } 
+    }
 }
 
 void TextModelNG::SetOnMarqueeStateChange(std::function<void(const int32_t)>&& func)

@@ -956,8 +956,11 @@ void JSText::SetMarqueeOptions(const JSCallbackInfo& info) {
     }
 
     auto paramObject = JSRef<JSObject>::Cast(info[0]);
-    auto start = paramObject->GetProperty("start");
-    std::optional<bool> startOpt = start->IsBoolean() ? start->ToBoolean() : false;
+    auto getStart = paramObject->GetProperty("start");
+    std::optional<bool> startOpt;
+    if (getStart->IsBoolean()){
+        startOpt = getStart->ToBoolean();
+    }
 
     auto getLoop = paramObject->GetProperty("loop");
     std::optional<int32_t> loopOpt;
@@ -973,12 +976,12 @@ void JSText::SetMarqueeOptions(const JSCallbackInfo& info) {
         loopOpt = loop;
     }
 
-    auto step = paramObject->GetProperty("step");
+    auto getStep = paramObject->GetProperty("step");
     std::optional<double> stepOpt;
-    if (step->IsNumber()) {
-        auto stepDouble = step->ToNumber<double>();
-        if (GreatNotEqual(stepDouble, 0.0)) {
-            stepOpt = Dimension(stepDouble, DimensionUnit::VP).ConvertToPx();
+    if (getStep->IsNumber()) {
+        auto step = getStep->ToNumber<double>();
+        if (GreatNotEqual(step, 0.0)) {
+            stepOpt = Dimension(step, DimensionUnit::VP).ConvertToPx();
         }
     }
 
@@ -997,12 +1000,9 @@ void JSText::SetMarqueeOptions(const JSCallbackInfo& info) {
     }
 
     auto getFromStart = paramObject->GetProperty("fromStart");
-    bool fromStart = getFromStart->IsBoolean() ? getFromStart->ToBoolean() : true;
     std::optional<MarqueeDirection> directionOpt;
-    if (fromStart) {
-        directionOpt = MarqueeDirection::LEFT;
-    } else {
-        directionOpt = MarqueeDirection::RIGHT;
+    if(getFromStart->IsBoolean()){
+        directionOpt = getFromStart->ToBoolean()? MarqueeDirection::LEFT : MarqueeDirection::RIGHT;
     }
 
     TextModel::GetInstance()->SetMarqueeOptions(startOpt, stepOpt, loopOpt, delayOpt, directionOpt);
@@ -1016,7 +1016,7 @@ void JSText::SetOnMarqueeStateChange(const JSCallbackInfo& info) {
     auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(info[0]));
     WeakPtr<NG::FrameNode> targetNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
     auto onMarqueeStateChange = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc), node = targetNode](
-                             const int32_t& value) {
+                             int32_t value) {
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
         ACE_SCORING_EVENT("Text.onMarqueeStateChange");
         PipelineContext::SetCallBackNode(node);

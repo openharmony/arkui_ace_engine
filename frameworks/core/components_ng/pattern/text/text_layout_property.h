@@ -26,18 +26,12 @@
 #include "core/components_v2/inspector/utils.h"
 
 namespace OHOS::Ace::NG {
-
 struct TextMarqueeOptions {
     ACE_DEFINE_PROPERTY_GROUP_ITEM(TextMarqueeStart, bool);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(TextMarqueeStep, double);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(TextMarqueeLoop, int32_t);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(TextMarqueeDirection, MarqueeDirection);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(TextMarqueeDelay, int32_t);
-};
-enum class TextMarqueeState {
-    START = 0,
-    BOUNCE,
-    FINISH,
 };
 
 class ACE_EXPORT TextLayoutProperty : public LayoutProperty {

@@ -18,6 +18,11 @@
 #include "core/components_ng/pattern/text/text_pattern.h"
 
 namespace OHOS::Ace::NG {
+    
+namespace {
+constexpr Dimension DEFAULT_MARQUEE_STEP_VP = 6.0_vp;
+} // namespace
+
 TextPaintMethod::TextPaintMethod(const WeakPtr<Pattern>& pattern, float baselineOffset,
     RefPtr<TextContentModifier> textContentModifier, RefPtr<TextOverlayModifier> textOverlayModifier)
     : pattern_(pattern), baselineOffset_(baselineOffset),
@@ -71,8 +76,13 @@ void TextPaintMethod::UpdateContentModifier(PaintWrapper* paintWrapper)
 
     auto textOverflow = layoutProperty->GetTextOverflow();
     if (textOverflow.has_value() && textOverflow.value() == TextOverflow::MARQUEE) {
-        if (paragraph->GetTextWidth() > paintWrapper->GetContentSize().Width()) {
-            textContentModifier_->StartTextRace();
+        auto start = layoutProperty->GetTextMarqueeStart().value_or(true);
+        if (paragraph->GetTextWidth() > paintWrapper->GetContentSize().Width() && start) {
+            auto step = layoutProperty->GetTextMarqueeStep().value_or(DEFAULT_MARQUEE_STEP_VP.ConvertToPx());
+            auto loop = layoutProperty->GetTextMarqueeLoop().value_or(-1);
+            auto direction = layoutProperty->GetTextMarqueeDirection().value_or(MarqueeDirection::LEFT);
+            auto delay = layoutProperty->GetTextMarqueeDelay().value_or(0);
+            textContentModifier_->StartTextRace(step,loop,direction,delay);
         } else {
             textContentModifier_->StopTextRace();
         }

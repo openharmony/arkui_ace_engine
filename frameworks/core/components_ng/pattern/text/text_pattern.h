@@ -628,6 +628,7 @@ protected:
 
     OffsetF parentGlobalOffset_;
 
+    friend class TextContentModifier;
 private:
     void InitLongPressEvent(const RefPtr<GestureEventHub>& gestureHub);
     void HandleMouseEvent(const MouseInfo& info);
@@ -646,6 +647,7 @@ private:
     RefPtr<RenderContext> GetRenderContext();
     void ProcessBoundRectByTextShadow(RectF& rect);
     void FireOnSelectionChange(int32_t start, int32_t end);
+    void FireOnMarqueeStateChange(const TextMarqueeState &state);
     void HandleMouseLeftButton(const MouseInfo& info, const Offset& textOffset);
     void HandleMouseRightButton(const MouseInfo& info, const Offset& textOffset);
     void HandleMouseLeftPressAction(const MouseInfo& info, const Offset& textOffset);
