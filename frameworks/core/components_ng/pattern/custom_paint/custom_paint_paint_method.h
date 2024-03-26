@@ -57,6 +57,11 @@ enum class FilterType {
     HUE_ROTATE
 };
 
+struct FilterProperty {
+    FilterType filterType_;
+    std::string filterParam_;
+};
+
 // BT.709
 constexpr float LUMR = 0.2126f;
 constexpr float LUMG = 0.7152f;
@@ -390,7 +395,7 @@ protected:
     void SetColorFilter(float matrix[20], RSPen* pen, RSBrush* brush);
 #endif
 
-    bool GetFilterType(FilterType& filterType, std::string& filterParam);
+    bool GetFilterType(std::vector<FilterProperty>& filters);
     bool IsPercentStr(std::string& percentStr);
     double PxStrToDouble(const std::string& str);
     double BlurStrToDouble(const std::string& str);
@@ -413,6 +418,8 @@ protected:
     void ClearPaintImage(RSPen* pen, RSBrush* brush);
 #endif
     float PercentStrToFloat(const std::string& percentStr);
+    bool CheckFilterProperty(FilterType filterType, const std::string& filterParam);
+    bool ParseFilter(std::string& filter, std::vector<FilterProperty>& filters);
     FilterType FilterStrToFilterType(const std::string& filterStr);
     bool HasImageShadow() const;
 
@@ -514,6 +521,7 @@ protected:
     };
     static const LinearMapNode<void (*)(std::shared_ptr<RSImage>&, std::shared_ptr<RSShaderEffect>&, RSMatrix&)>
         staticPattern[];
+    std::vector<FilterProperty> lastFilters_;
 };
 } // namespace OHOS::Ace::NG
 

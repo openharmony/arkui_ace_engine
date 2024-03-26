@@ -30,6 +30,11 @@ enum class MonitorTag {
     STATIC_API,
 };
 
+enum class MonitorStatus {
+    IDLE = 0,
+    RUNNING,
+};
+
 #define COMPONENT_CREATION_DURATION() ScopedMonitor scopedMonitor(MonitorTag::COMPONENT_CREATION)
 #define COMPONENT_LIFECYCLE_DURATION() ScopedMonitor scopedMonitor(MonitorTag::COMPONENT_LIFECYCLE)
 #define COMPONENT_UPDATE_DURATION() ScopedMonitor scopedMonitor(MonitorTag::COMPONENT_UPDATE)
@@ -55,18 +60,19 @@ public:
     void StartPerf();
     void FinishPerf();
     void RecordTimeSlice(MonitorTag tag, int64_t duration);
-    void RecordPropertyUpdate();
     void RecordNodeNum(uint64_t num);
+    void SetRecordingStatus(MonitorTag tag, MonitorStatus status);
 
 private:
     void InitPerfMonitor();
     void ClearPerfMonitor();
     void FlushPerfMonitor();
     std::map<MonitorTag, int64_t> timeSlice_;
-    uint64_t property_;
-    uint64_t node_num_;
+    uint64_t propertyNum_;
+    uint64_t nodeNum_;
     TimePoint begin_;
     TimePoint end_;
+    uint64_t monitorStatus_;
 };
 } // namespace OHOS::Ace
 

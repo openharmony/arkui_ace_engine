@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -20,7 +20,7 @@
 #include "core/components/picker/picker_base_component.h"
 #include "core/components_ng/pattern/text_picker/textpicker_event_hub.h"
 #include "core/components_ng/pattern/text_picker/textpicker_model.h"
-
+#include "core/components_ng/pattern/text_picker/textpicker_properties.h"
 namespace OHOS::Ace::NG {
 class ACE_EXPORT TextPickerModelNG : public TextPickerModel {
 public:
@@ -29,6 +29,7 @@ public:
     void SetRange(const std::vector<NG::RangeContent>& value) override;
     void SetValue(const std::string& value) override;
     void SetDefaultPickerItemHeight(const Dimension& value) override;
+    void SetGradientHeight(const Dimension& value) override;
     void SetCanLoop(const bool value) override;
     void SetDefaultAttributes(const RefPtr<PickerTheme>& pickerTheme) override;
     void SetDisappearTextStyle(const RefPtr<PickerTheme>& pickerTheme, const NG::PickerTextStyle& value) override;
@@ -82,6 +83,7 @@ public:
     bool GetMultiOptions(std::vector<NG::TextCascadePickerOptions>& options) override;
     void SetOnValueChangeEvent(TextCascadeValueChangeEvent&& onChange) override;
     void SetOnSelectedChangeEvent(TextCascadeSelectedChangeEvent&& onChange) override;
+    void SetDivider(const ItemDivider& divider) override;
 
     static void SetCanLoop(FrameNode* frameNode, const bool value);
     static void SetSelected(FrameNode* frameNode, uint32_t value);
@@ -112,6 +114,7 @@ public:
     static int32_t getTextPickerSelectedIndex(FrameNode* frameNode);
     static std::string getTextPickerValue(FrameNode* frameNode);
     static std::string getTextPickerRange(FrameNode* frameNode);
+    static void SetDivider(FrameNode* frameNode, const ItemDivider& divider);
     static int32_t isSingleRange()
     {
         return isSingleRange_;

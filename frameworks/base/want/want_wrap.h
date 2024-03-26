@@ -47,6 +47,7 @@ public:
     virtual void SetWantParamsFromWantWrap(void* want) = 0;
     virtual void SetWantParam(const std::map<std::string, std::string>& params) = 0;
     virtual std::string ToString() const = 0;
+    virtual const OHOS::AAFwk::Want& GetWant() const = 0;
 };
 
 } // namespace OHOS::Ace

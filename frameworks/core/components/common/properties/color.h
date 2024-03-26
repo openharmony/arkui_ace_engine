@@ -64,6 +64,8 @@ public:
     static Color FromString(std::string colorStr, uint32_t maskAlpha = COLOR_ALPHA_MASK,
         Color defaultColor = Color::BLACK);
     static bool ParseColorString(std::string colorStr, Color& color, uint32_t maskAlpha = COLOR_ALPHA_MASK);
+    static bool ParseColorString(const std::string& colorStr, Color& color, const Color& defaultColor,
+        uint32_t maskAlpha = COLOR_ALPHA_MASK);
     // Return the linear transition color from startColor to endColor.
     static const Color LineColorTransition(const Color& startColor, const Color& endColor, double percent);
 
@@ -135,6 +137,15 @@ public:
 
     static Color ColorFromString(const std::string& str);
 
+    std::string ToString() const
+    {
+        return "[ARGB]("
+            + std::to_string(colorValue_.argb.alpha) + ", "
+            + std::to_string(colorValue_.argb.red) + ", "
+            + std::to_string(colorValue_.argb.green) + ", "
+            + std::to_string(colorValue_.argb.blue) + ")";
+    }
+
 private:
     constexpr explicit Color(ColorParam colorValue) : colorValue_(colorValue) {}
 
@@ -149,6 +160,7 @@ private:
     static bool MatchColorWithRGBA(const std::string& colorStr, Color& color);
     static bool MatchColorSpecialString(const std::string& colorStr, Color& color);
     static bool ParseUintColorString(const std::string& colorStr, Color& color);
+    static bool ParseUintColorString(const std::string& colorStr, Color& color, const Color& defaultColor);
     static bool IsRGBValid(int value);
     static bool IsOpacityValid(double value);
 

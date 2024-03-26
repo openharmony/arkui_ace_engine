@@ -35,6 +35,11 @@ public:
         return false;
     }
 
+    bool IsSupportDrawModifier() const override
+    {
+        return false;
+    }
+
     std::optional<RenderContext::ContextParam> GetContextParam() const override
     {
         return RenderContext::ContextParam { RenderContext::ContextType::EFFECT};

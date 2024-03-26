@@ -16,6 +16,7 @@
 #include "core/components_ng/pattern/text_field/on_text_changed_listener_impl.h"
 
 #include "base/input_manager/input_manager.h"
+#include "base/log/ace_trace.h"
 #include "base/memory/ace_type.h"
 #include "core/common/container.h"
 #include "core/common/container_scope.h"
@@ -23,19 +24,17 @@
 #include "core/components_ng/pattern/text_field/text_field_manager.h"
 #include "core/event/key_event.h"
 #include "core/pipeline/pipeline_base.h"
+
 namespace OHOS::Ace::NG {
 
 void OnTextChangedListenerImpl::InsertText(const std::u16string& text)
 {
-    if (SystemProperties::GetDebugEnabled()) {
-        TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "[OnTextChangedListenerImpl] insert value %{public}s",
-            StringUtils::Str16ToStr8(text).c_str());
-    }
     if (text.empty()) {
         TAG_LOGW(AceLogTag::ACE_TEXT_FIELD, "the text is null");
         return;
     }
     auto task = [textFieldPattern = pattern_, text] {
+        ACE_SCOPED_TRACE("InsertText");
         auto client = textFieldPattern.Upgrade();
         CHECK_NULL_VOID(client);
         ContainerScope scope(client->GetInstanceId());
@@ -46,7 +45,7 @@ void OnTextChangedListenerImpl::InsertText(const std::u16string& text)
 
 void OnTextChangedListenerImpl::DeleteBackward(int32_t length)
 {
-    TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "[OnTextChangedListenerImpl] DeleteBackward length: %{public}d", length);
+    TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "DeleteBackward length: %{public}d", length);
     if (length <= 0) {
         TAG_LOGW(AceLogTag::ACE_TEXT_FIELD, "Delete nothing.");
         return;
@@ -63,7 +62,7 @@ void OnTextChangedListenerImpl::DeleteBackward(int32_t length)
 
 void OnTextChangedListenerImpl::DeleteForward(int32_t length)
 {
-    TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "[OnTextChangedListenerImpl] DeleteForward length: %{public}d", length);
+    TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "DeleteForward length: %{public}d", length);
     if (length <= 0) {
         TAG_LOGW(AceLogTag::ACE_TEXT_FIELD, "Delete nothing.");
         return;
@@ -80,7 +79,7 @@ void OnTextChangedListenerImpl::DeleteForward(int32_t length)
 
 void OnTextChangedListenerImpl::SetKeyboardStatus(bool status)
 {
-    TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "[OnTextChangedListenerImpl] SetKeyboardStatus status: %{public}d", status);
+    TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "SetKeyboardStatus status: %{public}d", status);
     auto task = [textField = pattern_, status] {
         auto client = textField.Upgrade();
         CHECK_NULL_VOID(client);
@@ -92,7 +91,7 @@ void OnTextChangedListenerImpl::SetKeyboardStatus(bool status)
 
 std::u16string OnTextChangedListenerImpl::GetLeftTextOfCursor(int32_t number)
 {
-    TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "[OnTextChangedListenerImpl] GetLeftTextOfCursor status: %{public}d", number);
+    ACE_SCOPED_TRACE("GetLeftTextOfCursor[%d]", number);
     std::u16string leftResult;
     auto task = [textField = pattern_, &leftResult, number] {
         auto client = textField.Upgrade();
@@ -106,7 +105,7 @@ std::u16string OnTextChangedListenerImpl::GetLeftTextOfCursor(int32_t number)
 
 std::u16string OnTextChangedListenerImpl::GetRightTextOfCursor(int32_t number)
 {
-    TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "[OnTextChangedListenerImpl] GetRightTextOfCursor status: %{public}d", number);
+    ACE_SCOPED_TRACE("GetRightTextOfCursor[%d]", number);
     std::u16string rightResult;
     auto task = [textField = pattern_, &rightResult, number] {
         auto client = textField.Upgrade();
@@ -120,7 +119,7 @@ std::u16string OnTextChangedListenerImpl::GetRightTextOfCursor(int32_t number)
 
 int32_t OnTextChangedListenerImpl::GetTextIndexAtCursor()
 {
-    TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "[OnTextChangedListenerImpl] GetTextIndexAtCursor");
+    ACE_SCOPED_TRACE("GetTextIndexAtCursor");
     int32_t index = 0;
     auto task = [textField = pattern_, &index] {
         auto client = textField.Upgrade();
@@ -136,8 +135,7 @@ void OnTextChangedListenerImpl::SendKeyEventFromInputMethod(const MiscServices::
 
 void OnTextChangedListenerImpl::SendKeyboardStatus(const MiscServices::KeyboardStatus& keyboardStatus)
 {
-    TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "[OnTextChangedListenerImpl] SendKeyboardStatus status: %{public}d",
-        static_cast<int>(keyboardStatus));
+    TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "SendKeyboardStatus status: %{public}d", static_cast<int>(keyboardStatus));
     // this keyboard status means shown or hidden but attachment is not closed, should be distinguished from
     // imeAttached_
     HandleKeyboardStatus(keyboardStatus);
@@ -150,19 +148,19 @@ void OnTextChangedListenerImpl::SendFunctionKey(const MiscServices::FunctionKey&
 
 void OnTextChangedListenerImpl::HandleKeyboardStatus(MiscServices::KeyboardStatus status)
 {
-    TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "[OnTextChangedListenerImpl] HandleKeyboardStatus status: %{public}d", status);
+    TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "HandleKeyboardStatus status: %{public}d", status);
     SetKeyboardStatus(status == MiscServices::KeyboardStatus::SHOW);
 }
 
 void OnTextChangedListenerImpl::HandleFunctionKey(MiscServices::FunctionKey functionKey)
 {
-    TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "[OnTextChangedListenerImpl] Handle function key %{public}d",
+    TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "Handle function key %{public}d",
         static_cast<int32_t>(functionKey.GetEnterKeyType()));
     auto task = [textField = pattern_, functionKey] {
         auto client = textField.Upgrade();
         CHECK_NULL_VOID(client);
         ContainerScope scope(client->GetInstanceId());
-        TextInputAction action = static_cast<TextInputAction>(functionKey.GetEnterKeyType());
+        auto action = static_cast<TextInputAction>(functionKey.GetEnterKeyType());
         switch (action) {
             case TextInputAction::DONE:
             case TextInputAction::NEXT:
@@ -183,8 +181,7 @@ void OnTextChangedListenerImpl::HandleFunctionKey(MiscServices::FunctionKey func
 
 void OnTextChangedListenerImpl::MoveCursor(MiscServices::Direction direction)
 {
-    TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "[OnTextChangedListenerImpl] move cursor direction %{public}d",
-        static_cast<int32_t>(direction));
+    TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "move cursor direction %{public}d", static_cast<int32_t>(direction));
     auto task = [textField = pattern_, direction] {
         auto client = textField.Upgrade();
         CHECK_NULL_VOID(client);
@@ -213,8 +210,7 @@ void OnTextChangedListenerImpl::MoveCursor(MiscServices::Direction direction)
 
 void OnTextChangedListenerImpl::HandleSetSelection(int32_t start, int32_t end)
 {
-    TAG_LOGI(AceLogTag::ACE_TEXT_FIELD,
-        "[OnTextChangedListenerImpl] HandleSetSelection, start %{public}d, end %{public}d", start, end);
+    TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "HandleSetSelection, start %{public}d, end %{public}d", start, end);
     auto task = [textField = pattern_, start, end] {
         auto client = textField.Upgrade();
         if (!client) {
@@ -228,7 +224,7 @@ void OnTextChangedListenerImpl::HandleSetSelection(int32_t start, int32_t end)
 
 void OnTextChangedListenerImpl::HandleExtendAction(int32_t action)
 {
-    TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "[OnTextChangedListenerImpl] HandleExtendAction %{public}d", action);
+    TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "HandleExtendAction %{public}d", action);
     auto task = [textField = pattern_, action] {
         auto client = textField.Upgrade();
         if (!client) {
@@ -242,9 +238,8 @@ void OnTextChangedListenerImpl::HandleExtendAction(int32_t action)
 
 void OnTextChangedListenerImpl::HandleSelect(int32_t keyCode, int32_t cursorMoveSkip)
 {
-    TAG_LOGI(AceLogTag::ACE_TEXT_FIELD,
-        "[OnTextChangedListenerImpl] HandleSelect, keycode %{public}d, cursor move skip %{public}d(ignored)", keyCode,
-        cursorMoveSkip);
+    TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "HandleSelect, keycode %{public}d, cursor move skip %{public}d(ignored)",
+        keyCode, cursorMoveSkip);
     auto task = [textField = pattern_, keyCode, cursorMoveSkip] {
         auto client = textField.Upgrade();
         if (!client) {
@@ -310,8 +305,7 @@ void OnTextChangedListenerImpl::NotifyPanelStatusInfo(const MiscServices::PanelS
     MiscServices::Trigger triggerFrom = info.trigger;
     if (!isHardKeyboardConnected && panelType == MiscServices::PanelType::SOFT_KEYBOARD && !panelVisible &&
         triggerFrom == MiscServices::Trigger::IME_APP) {
-        TAG_LOGI(AceLogTag::ACE_TEXT_FIELD,
-            "[OnTextChangedListenerImpl] NotifyPanelStatusInfo soft keyboard is closed by user.");
+        TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "NotifyPanelStatusInfo soft keyboard is closed by user.");
         auto task = [textField = pattern_] {
             auto client = textField.Upgrade();
             CHECK_NULL_VOID(client);

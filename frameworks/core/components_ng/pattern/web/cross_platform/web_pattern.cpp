@@ -1176,6 +1176,10 @@ void WebPattern::OnOverScrollModeUpdate(int mode)
    // cross platform is not support now;
 }
 
+void WebPattern::OnTextAutosizingUpdate(bool isTextAutosizing)
+{
+   // cross platform is not support now;
+}
 
 void WebPattern::UpdateRelativeOffset();
 {
@@ -1187,17 +1191,17 @@ void WebPattern::InitSlideUpdateListener()
     // cross platform is not support now;
 }
 
-void WebPattern::UpdateSlideOffset(SizeF frameSize)
+void WebPattern::UpdateSlideOffset()
 {
    // cross platform is not support now;
 }
 
-void WebPattern::CalculateHorizontalDrawRect(SizeF frameSize)
+void WebPattern::CalculateHorizontalDrawRect()
 {
    // cross platform is not support now;
 }
 
-void WebPattern::CalculateVerticalDrawRect(SizeF frameSize)
+void WebPattern::CalculateVerticalDrawRect()
 {
     // cross platform is not support now;
 }
@@ -1219,6 +1223,11 @@ RefPtr<NodePaintMethod> WebPattern::CreateNodePaintMethod()
 }
 
 void WebPattern::OnDefaultTextEncodingFormatUpdate(const std::string& value)
+{
+    // cross platform is not support now;
+}
+
+void WebPattern::OnMetaViewportUpdate(bool value)
 {
     // cross platform is not support now;
 }

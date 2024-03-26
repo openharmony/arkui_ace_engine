@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,6 +15,10 @@
 
 #include "core/components_ng/pattern/scrollable/nestable_scroll_container.h"
 
+#include "core/common/container.h"
+#include "core/components_ng/pattern/refresh/refresh_pattern.h"
+#include "core/components_ng/pattern/scrollable/scrollable_pattern.h"
+
 namespace OHOS::Ace::NG {
 RefPtr<NestableScrollContainer> NestableScrollContainer::SearchParent()
 {
@@ -29,11 +33,56 @@ RefPtr<NestableScrollContainer> NestableScrollContainer::SearchParent()
         if (!pattern) {
             continue;
         }
+        if ((!AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE) ||
+                !isSearchRefresh_) &&
+            InstanceOf<RefreshPattern>(pattern)) {
+            continue;
+        }
         if (pattern->GetAxis() != GetAxis()) {
             continue;
         }
         return pattern;
     }
     return nullptr;
+}
+
+void NestableScrollContainer::UpdateNestedModeForChildren(const NestedScrollOptions& childNestedScroll)
+{
+    if (!childNestedScroll_) {
+        childNestedScroll_ = std::make_unique<NestedScrollOptions>();
+    }
+    if (*childNestedScroll_ != childNestedScroll) {
+        *childNestedScroll_ = childNestedScroll;
+    }
+}
+
+void NestableScrollContainer::SetNestedScroll(const NestedScrollOptions& nestedScroll, bool isFixedNestedScrollMode)
+{
+    if (!isFixedNestedScrollMode && AceType::InstanceOf<ScrollablePattern>(this)) {
+        if (nestedScroll.NeedParent()) {
+            isSearchRefresh_ = false;
+        } else {
+            isSearchRefresh_ = true;
+        }
+    }
+    SetIsFixedNestedScrollMode(isFixedNestedScrollMode);
+    nestedScroll_ = nestedScroll;
+}
+
+void NestableScrollContainer::SetParentScrollable()
+{
+    parent_ = SearchParent();
+    auto parent = parent_.Upgrade();
+    CHECK_NULL_VOID(parent);
+    if (!isFixedNestedScrollMode_) {
+        auto && childNestedMode = parent->GetNestedModeForChildren();
+        auto selfNestedScrollMode = nestedScroll_;
+        if (childNestedMode) {
+            SetNestedScroll(*childNestedMode, true);
+        }
+        if (AceType::InstanceOf<RefreshPattern>(parent)) {
+            parent->SetNestedScroll(selfNestedScrollMode);
+        }
+    }
 }
 } // namespace OHOS::Ace::NG

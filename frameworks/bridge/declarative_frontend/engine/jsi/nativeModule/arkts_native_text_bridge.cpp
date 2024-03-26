@@ -233,7 +233,7 @@ ArkUINativeModuleValue TextBridge::SetLineHeight(ArkUIRuntimeCallInfo* runtimeCa
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
     Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(NUM_1);
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
-    CalcDimension lineHeight(0.0, DimensionUnit::PX);
+    CalcDimension lineHeight(0.0, DEFAULT_SPAN_FONT_UNIT);
     if (!ArkTSUtils::ParseJsDimensionFp(vm, secondArg, lineHeight)) {
         lineHeight.Reset();
     }
@@ -608,18 +608,13 @@ ArkUINativeModuleValue TextBridge::SetTextIndent(ArkUIRuntimeCallInfo* runtimeCa
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
     Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(NUM_1);
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
-    struct ArkUIStringAndFloat textIndentStruct = { 0.0, nullptr };
-    std::string str;
-    if (secondArg->IsNumber()) {
-        textIndentStruct.value = secondArg->ToNumber(vm)->Value();
-        GetArkUINodeModifiers()->getTextModifier()->setTextIndent(nativeNode, &textIndentStruct);
-    } else if (secondArg->IsString()) {
-        str = secondArg->ToString(vm)->ToString();
-        textIndentStruct.valueStr = str.c_str();
-        GetArkUINodeModifiers()->getTextModifier()->setTextIndent(nativeNode, &textIndentStruct);
-    } else {
-        GetArkUINodeModifiers()->getTextModifier()->resetTextIndent(nativeNode);
+    CalcDimension indent;
+    if (!ArkTSUtils::ParseJsDimensionFp(vm, secondArg, indent) || indent.IsNegative()) {
+        indent.Reset();
     }
+    
+    GetArkUINodeModifiers()->getTextModifier()->setTextIndent(
+        nativeNode, indent.Value(), static_cast<int8_t>(indent.Unit()));
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -640,18 +635,13 @@ ArkUINativeModuleValue TextBridge::SetBaselineOffset(ArkUIRuntimeCallInfo* runti
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
     Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(NUM_1);
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
-    struct ArkUIStringAndFloat offset = { 0.0, nullptr };
-    std::string str;
-    if (secondArg->IsNumber()) {
-        offset.value = secondArg->ToNumber(vm)->Value();
-        GetArkUINodeModifiers()->getTextModifier()->setTextBaselineOffset(nativeNode, &offset);
-    } else if (secondArg->IsString()) {
-        str = secondArg->ToString(vm)->ToString();
-        offset.valueStr = str.c_str();
-        GetArkUINodeModifiers()->getTextModifier()->setTextBaselineOffset(nativeNode, &offset);
-    } else {
-        GetArkUINodeModifiers()->getTextModifier()->resetTextBaselineOffset(nativeNode);
+    CalcDimension baselineOffset;
+    if (!ArkTSUtils::ParseJsDimensionFp(vm, secondArg, baselineOffset, false) || baselineOffset.IsNegative()) {
+        baselineOffset.Reset();
     }
+
+    GetArkUINodeModifiers()->getTextModifier()->setTextBaselineOffset(
+        nativeNode, baselineOffset.Value(), static_cast<int8_t>(baselineOffset.Unit()));
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -672,18 +662,13 @@ ArkUINativeModuleValue TextBridge::SetLetterSpacing(ArkUIRuntimeCallInfo* runtim
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
     Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(NUM_1);
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
-
-    struct ArkUIStringAndFloat letterSpacing = { 0.0, nullptr };
-    std::string str;
-    if (secondArg->IsNumber()) {
-        letterSpacing.value = secondArg->ToNumber(vm)->Value();
-    } else if (secondArg->IsString()) {
-        str = secondArg->ToString(vm)->ToString();
-        letterSpacing.valueStr = str.c_str();
-    } else {
-        return panda::JSValueRef::Undefined(vm);
+    CalcDimension letterSpacing;
+    if (!ArkTSUtils::ParseJsDimensionFp(vm, secondArg, letterSpacing, false) || letterSpacing.IsNegative()) {
+        letterSpacing.Reset();
     }
-    GetArkUINodeModifiers()->getTextModifier()->setTextLetterSpacing(nativeNode, &letterSpacing);
+
+    GetArkUINodeModifiers()->getTextModifier()->setTextLetterSpacing(
+        nativeNode, letterSpacing.Value(), static_cast<int8_t>(letterSpacing.Unit()));
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -714,9 +699,7 @@ ArkUINativeModuleValue TextBridge::SetFont(ArkUIRuntimeCallInfo* runtimeCallInfo
         fontSize.SetUnit(DEFAULT_SPAN_FONT_UNIT);
     }
     if (sizeArg->IsUndefined() || fontSize.IsNegative() || fontSize.Unit() == DimensionUnit::PERCENT) {
-        auto pipelineContext = PipelineContext::GetCurrentContext();
-        CHECK_NULL_RETURN(pipelineContext, panda::JSValueRef::Undefined(vm));
-        auto theme = pipelineContext->GetTheme<TextTheme>();
+        auto theme = ArkTSUtils::GetTheme<TextTheme>();
         CHECK_NULL_RETURN(theme, panda::JSValueRef::Undefined(vm));
         auto size = theme->GetTextStyle().GetFontSize();
         fontInfo.fontSizeNumber = size.Value();
@@ -817,6 +800,59 @@ ArkUINativeModuleValue TextBridge::ResetEllipsisMode(ArkUIRuntimeCallInfo* runti
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     GetArkUINodeModifiers()->getTextModifier()->resetEllipsisMode(nativeNode);
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue TextBridge::SetEnableDataDetector(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
+    Local<JSValueRef> enableDataDetectorArg = runtimeCallInfo->GetCallArgRef(NUM_1);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    if (enableDataDetectorArg->IsNull() || enableDataDetectorArg->IsUndefined() ||
+        !enableDataDetectorArg->IsBoolean()) {
+        GetArkUINodeModifiers()->getTextModifier()->resetEnableDataDetector(nativeNode);
+        return panda::JSValueRef::Undefined(vm);
+    }
+    uint32_t enableDataDetector = enableDataDetectorArg->Uint32Value(vm);
+    GetArkUINodeModifiers()->getTextModifier()->setEnableDataDetector(nativeNode, enableDataDetector);
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue TextBridge::ResetEnableDataDetector(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    GetArkUINodeModifiers()->getTextModifier()->resetEnableDataDetector(nativeNode);
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue TextBridge::SetFontFeature(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
+    Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(NUM_1);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    if (secondArg->IsString()) {
+        auto value = secondArg->ToString(vm)->ToString();
+        GetArkUINodeModifiers()->getTextModifier()->setTextFontFeature(nativeNode, value.c_str());
+    } else {
+        GetArkUINodeModifiers()->getTextModifier()->resetTextFontFeature(nativeNode);
+    }
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue TextBridge::ResetFontFeature(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    GetArkUINodeModifiers()->getTextModifier()->resetTextFontFeature(nativeNode);
     return panda::JSValueRef::Undefined(vm);
 }
 } // namespace OHOS::Ace::NG

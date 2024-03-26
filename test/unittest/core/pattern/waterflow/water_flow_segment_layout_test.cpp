@@ -1498,6 +1498,7 @@ HWTEST_F(WaterFlowSegmentTest, Delete002, TestSize.Level1)
 
     UpdateCurrentOffset(-400.0f);
     EXPECT_EQ(info.startIndex_, 3);
+    EXPECT_EQ(info.storedOffset_, -95.0f);
 
     secObj->ChangeData(0, 2, {});
     for (int i = 0; i < 7; ++i) {
@@ -1509,9 +1510,10 @@ HWTEST_F(WaterFlowSegmentTest, Delete002, TestSize.Level1)
     EXPECT_EQ(secObj->GetSectionInfo().size(), 1);
     EXPECT_EQ(secObj->GetSectionInfo()[0].itemsCount, 30);
 
-    EXPECT_EQ(info.currentOffset_, -311.0f);
+    EXPECT_EQ(info.currentOffset_, -406.0f);
+    EXPECT_EQ(info.storedOffset_, -95.0f);
     EXPECT_EQ(info.startIndex_, 3);
-    EXPECT_EQ(info.endIndex_, 8);
+    EXPECT_EQ(info.endIndex_, 9);
     EXPECT_EQ(info.segmentStartPos_.size(), 1);
     EXPECT_EQ(info.segmentStartPos_[0], 5.0f);
     EXPECT_EQ(info.itemInfos_[3].mainOffset, 311.0f);
@@ -1575,6 +1577,40 @@ HWTEST_F(WaterFlowSegmentTest, Replace001, TestSize.Level1)
     EXPECT_EQ(info.currentOffset_, -507.0f);
     EXPECT_EQ(info.startIndex_, 4);
     EXPECT_EQ(info.endIndex_, 13);
+}
+
+/**
+ * @tc.name: Replace002
+ * @tc.desc: Layout WaterFlow and then replace sections.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WaterFlowSegmentTest, Replace002, TestSize.Level1)
+{
+    Create(
+        [](WaterFlowModelNG model) {
+            ViewAbstract::SetWidth(CalcLength(400.0f));
+            ViewAbstract::SetHeight(CalcLength(600.f));
+            CreateItem(37);
+        },
+        false);
+    auto secObj = pattern_->GetOrCreateWaterFlowSections();
+    secObj->ChangeData(0, 0, SECTION_7);
+    MockPipelineContext::GetCurrent()->FlushBuildFinishCallbacks();
+    FlushLayoutTask(frameNode_);
+    auto& info = pattern_->layoutInfo_;
+
+    UpdateCurrentOffset(-300.0f);
+    EXPECT_EQ(info.startIndex_, 2);
+    EXPECT_EQ(info.storedOffset_, -95);
+
+    // relative offset to the first item should remain constant
+    secObj->ChangeData(0, 3, SECTION_7);
+    MockPipelineContext::GetCurrent()->FlushBuildFinishCallbacks();
+    FlushLayoutTask(frameNode_);
+    
+    EXPECT_EQ(info.currentOffset_, -300.0f);
+    EXPECT_EQ(info.startIndex_, 2);
+    EXPECT_EQ(info.storedOffset_, -95);
 }
 
 /**

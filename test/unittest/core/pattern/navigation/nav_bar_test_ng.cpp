@@ -122,11 +122,9 @@ void NavBarTestNg::InitializationParameters(TestParameters& testParameters)
     ASSERT_NE(testParameters.pipeline, nullptr);
     testParameters.pipeline->SetThemeManager(themeManager);
     testParameters.theme = AceType::MakeRefPtr<NavigationBarTheme>();
-    std::cout << "navBarTest 3" << std::endl;
     ASSERT_NE(testParameters.theme, nullptr);
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(testParameters.theme));
     auto selectTheme = AceType::MakeRefPtr<SelectTheme>();
-    std::cout << "navBarTest 4" << std::endl;
     ASSERT_NE(selectTheme, nullptr);
     EXPECT_CALL(*themeManager, GetTheme(SelectTheme::TypeId())).WillRepeatedly(Return(selectTheme));
 
@@ -1435,7 +1433,10 @@ HWTEST_F(NavBarTestNg, NavigationStack001, TestSize.Level1)
     auto navigationStack = std::make_shared<NavigationStack>();
     EXPECT_NE(navigationStack, nullptr);
     std::string name = "pageOne";
-    EXPECT_EQ(navigationStack->GetFromPreBackup(name), nullptr);
+    RefPtr<UINode> navDestinationNode;
+    int32_t lastIndex;
+    navigationStack->GetFromPreBackup(name, navDestinationNode, lastIndex);
+    EXPECT_EQ(navDestinationNode, nullptr);
 }
 
 /**
@@ -1453,7 +1454,10 @@ HWTEST_F(NavBarTestNg, NavigationStack002, TestSize.Level1)
     navPathList.emplace_back(std::make_pair("pageThree", frameNode));
     navigationStack->SetNavPathList(navPathList);
     std::string name = "pageOne";
-    EXPECT_EQ(navigationStack->GetFromPreBackup(name), nullptr);
+    RefPtr<UINode> navDestinationNode;
+    int32_t lastIndex;
+    navigationStack->GetFromPreBackup(name, navDestinationNode, lastIndex);
+    EXPECT_EQ(navDestinationNode, nullptr);
 }
 
 /**

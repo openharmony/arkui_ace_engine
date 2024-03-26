@@ -23,6 +23,7 @@
 #include "frameworks/core/components/common/layout/constants.h"
 #include "frameworks/core/components/common/properties/text_style.h"
 #include "frameworks/core/components_ng/pattern/text/text_model_ng.h"
+#include "core/components/common/properties/text_style_parser.h"
 
 namespace OHOS::Ace::NG {
 constexpr Dimension DEFAULT_LINE_HEIGHT = Dimension(0.0, DimensionUnit::PX);
@@ -46,8 +47,8 @@ const std::vector<OHOS::Ace::TextAlign> TEXT_ALIGNS = { OHOS::Ace::TextAlign::ST
     OHOS::Ace::TextAlign::END, OHOS::Ace::TextAlign::JUSTIFY, OHOS::Ace::TextAlign::LEFT, OHOS::Ace::TextAlign::RIGHT };
 const std::vector<TextHeightAdaptivePolicy> HEIGHT_ADAPTIVE_POLICY = { TextHeightAdaptivePolicy::MAX_LINES_FIRST,
     TextHeightAdaptivePolicy::MIN_FONT_SIZE_FIRST, TextHeightAdaptivePolicy::LAYOUT_CONSTRAINT_FIRST };
-const std::vector<WordBreak> WORD_BREAK_TYPES = { WordBreak::NORMAL, WordBreak::BREAK_ALL, WordBreak::BREAK_WORD };
 const std::vector<EllipsisMode> ELLIPSIS_MODALS = { EllipsisMode::HEAD, EllipsisMode::MIDDLE, EllipsisMode::TAIL };
+constexpr bool DEFAULT_ENABLE_TEXT_DETECTOR = false;
 
 std::map<TextHeightAdaptivePolicy, int> TEXT_HEIGHT_ADAPTIVE_POLICY_MAP = { { TextHeightAdaptivePolicy::MAX_LINES_FIRST,
                                                                                 0 },
@@ -156,9 +157,7 @@ void ResetFontColor(ArkUINodeHandle node)
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     Color textColor;
-    auto pipelineContext = PipelineBase::GetCurrentContext();
-    CHECK_NULL_VOID(pipelineContext);
-    auto theme = pipelineContext->GetTheme<TextTheme>();
+    auto theme = GetTheme<TextTheme>();
     CHECK_NULL_VOID(theme);
     textColor = theme->GetTextStyle().GetTextColor();
     TextModelNG::SetTextColor(frameNode, textColor);
@@ -179,9 +178,7 @@ void SetFontSize(ArkUINodeHandle node, ArkUI_Float32 fontSize, ArkUI_Int32 unit)
 
     if (fontSize < 0 || unitEnum < OHOS::Ace::DimensionUnit::PX || unitEnum > OHOS::Ace::DimensionUnit::CALC ||
         unitEnum == OHOS::Ace::DimensionUnit::PERCENT) {
-        auto pipelineContext = PipelineBase::GetCurrentContext();
-        CHECK_NULL_VOID(pipelineContext);
-        auto theme = pipelineContext->GetTheme<TextTheme>();
+        auto theme = GetTheme<TextTheme>();
         CHECK_NULL_VOID(theme);
         CalcDimension fontSize = theme->GetTextStyle().GetFontSize();
         TextModelNG::SetFontSize(frameNode, fontSize);
@@ -194,9 +191,7 @@ void ResetFontSize(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    auto pipelineContext = PipelineBase::GetCurrentContext();
-    CHECK_NULL_VOID(pipelineContext);
-    auto theme = pipelineContext->GetTheme<TextTheme>();
+    auto theme = GetTheme<TextTheme>();
     CHECK_NULL_VOID(theme);
     CalcDimension fontSize = theme->GetTextStyle().GetFontSize();
     TextModelNG::SetFontSize(frameNode, fontSize);
@@ -469,17 +464,11 @@ void ResetTextHeightAdaptivePolicy(ArkUINodeHandle node)
     TextModelNG::SetHeightAdaptivePolicy(frameNode, TextHeightAdaptivePolicy::MAX_LINES_FIRST);
 }
 
-void SetTextTextIndent(ArkUINodeHandle node, const struct ArkUIStringAndFloat* textIndentStruct)
+void SetTextTextIndent(ArkUINodeHandle node, ArkUI_Float32 number, ArkUI_Int32 unit)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    CalcDimension result;
-    if (textIndentStruct->valueStr != nullptr) {
-        result = StringUtils::StringToCalcDimension(textIndentStruct->valueStr, true, DimensionUnit::FP);
-    } else {
-        result = CalcDimension(textIndentStruct->value, DimensionUnit::FP);
-    }
-    TextModelNG::SetTextIndent(frameNode, result);
+    TextModelNG::SetTextIndent(frameNode, Dimension(number, static_cast<DimensionUnit>(unit)));
 }
 
 float GetTextTextIndent(ArkUINodeHandle node)
@@ -496,15 +485,11 @@ void ResetTextTextIndent(ArkUINodeHandle node)
     TextModelNG::SetTextIndent(frameNode, CalcDimension(0, DimensionUnit::FP));
 }
 
-void SetTextBaselineOffset(ArkUINodeHandle node, const struct ArkUIStringAndFloat* offset)
+void SetTextBaselineOffset(ArkUINodeHandle node, ArkUI_Float32 number, ArkUI_Int32 unit)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    CalcDimension result(offset->value, DimensionUnit::FP);
-    if (offset->valueStr != nullptr) {
-        result = StringUtils::StringToCalcDimension(offset->valueStr, false, DimensionUnit::FP);
-    }
-    TextModelNG::SetBaselineOffset(frameNode, result);
+    TextModelNG::SetBaselineOffset(frameNode, Dimension(number, static_cast<DimensionUnit>(unit)));
 }
 
 void ResetTextBaselineOffset(ArkUINodeHandle node)
@@ -521,24 +506,11 @@ ArkUI_Float32 GetTextBaselineOffset(ArkUINodeHandle node)
     return TextModelNG::GetTextBaselineOffset(frameNode).ConvertToVp();
 }
 
-void SetTextLetterSpacing(ArkUINodeHandle node, const struct ArkUIStringAndFloat* letterSpacingStruct)
+void SetTextLetterSpacing(ArkUINodeHandle node, ArkUI_Float32 number, ArkUI_Int32 unit)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-
-    CalcDimension letterSpacing;
-    if (letterSpacingStruct->valueStr != nullptr) {
-        if (std::string(letterSpacingStruct->valueStr).back() == '%') {
-            TextModelNG::SetLetterSpacing(frameNode, letterSpacing);
-            return;
-        } else {
-            letterSpacing = StringUtils::StringToCalcDimension(
-                std::string(letterSpacingStruct->valueStr), false, DimensionUnit::FP);
-        }
-    } else {
-        letterSpacing = CalcDimension(letterSpacingStruct->value, DimensionUnit::FP);
-    }
-    TextModelNG::SetLetterSpacing(frameNode, letterSpacing);
+    TextModelNG::SetLetterSpacing(frameNode, Dimension(number, static_cast<DimensionUnit>(unit)));
 }
 
 ArkUI_Float32 GetTextLetterSpacing(ArkUINodeHandle node)
@@ -622,6 +594,20 @@ void ResetEllipsisMode(ArkUINodeHandle node)
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     TextModelNG::SetEllipsisMode(frameNode, ELLIPSIS_MODALS[2]); // 2 is the default value of EllipsisMode::TAIL
+}
+
+void SetTextDetectEnable(ArkUINodeHandle node, ArkUI_Uint32 value)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    TextModelNG::SetTextDetectEnable(frameNode, static_cast<bool>(value));
+}
+
+void ResetTextDetectEnable(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    TextModelNG::SetTextDetectEnable(frameNode, DEFAULT_ENABLE_TEXT_DETECTOR);
 }
 
 ArkUI_CharPtr GetFontFamily(ArkUINodeHandle node)
@@ -721,6 +707,36 @@ ArkUI_Int32 GetItalicFontStyle(ArkUINodeHandle node)
     CHECK_NULL_RETURN(frameNode, ERROR_INT_CODE);
     return static_cast<ArkUI_Int32>(TextModelNG::GetItalicFontStyle(frameNode));
 }
+
+ArkUI_Int32 GetTextWordBreak(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, ERROR_INT_CODE);
+    return static_cast<ArkUI_Int32>(TextModelNG::GetWordBreak(frameNode));
+}
+
+ArkUI_Int32 GetTextEllipsisMode(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, ERROR_INT_CODE);
+    return static_cast<ArkUI_Int32>(TextModelNG::GetEllipsisMode(frameNode));
+}
+
+void SetTextFontFeature(ArkUINodeHandle node, ArkUI_CharPtr value)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    std::string strValue = value;
+    TextModelNG::SetFontFeature(frameNode, ParseFontFeatureSettings(strValue));
+}
+
+void ResetTextFontFeature(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    std::string strValue = "";
+    TextModelNG::SetFontFeature(frameNode, ParseFontFeatureSettings(strValue));
+}
 } // namespace
 
 namespace NodeModifier {
@@ -784,6 +800,8 @@ const ArkUITextModifier* GetTextModifier()
         GetItalicFontStyle,
         SetEllipsisMode,
         ResetEllipsisMode,
+        SetTextDetectEnable,
+        ResetTextDetectEnable,
         GetTextContent,
         GetTextLineHeight,
         GetTextDecoration,
@@ -797,6 +815,10 @@ const ArkUITextModifier* GetTextModifier()
         GetTextBaselineOffset,
         GetTextShadowCount,
         GetTextShadow,
+        GetTextWordBreak,
+        GetTextEllipsisMode,
+        SetTextFontFeature,
+        ResetTextFontFeature
     };
 
     return &modifier;

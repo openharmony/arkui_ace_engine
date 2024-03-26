@@ -40,16 +40,13 @@ public:
                 return theme;
             }
             theme = AceType::Claim(new CardTheme());
-            ParsePattern(themeConstants->GetThemeStyle(), theme);
+            ParsePattern(themeConstants, theme);
             return theme;
         }
 
-        void ParsePattern(const RefPtr<ThemeStyle>& themeStyle, const RefPtr<CardTheme>& theme) const
+        void ParsePattern(const RefPtr<ThemeConstants>& themeConstants, const RefPtr<CardTheme>& theme) const
         {
-            if (!themeStyle) {
-                return;
-            }
-            auto pattern = themeStyle->GetAttr<RefPtr<ThemeStyle>>(THEME_PATTERN_CARD, nullptr);
+            RefPtr<ThemeStyle> pattern = themeConstants->GetPatternByName(THEME_PATTERN_CARD);
             if (!pattern) {
                 LOGW("find pattern of card fail");
                 return;

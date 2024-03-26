@@ -105,6 +105,13 @@ struct LabelStyle {
     std::optional<Ace::FontWeight> fontWeight;
     std::optional<std::vector<std::string>> fontFamily;
     std::optional<Ace::FontStyle> fontStyle;
+    std::optional<Color> unselectedColor;
+    std::optional<Color> selectedColor;
+};
+
+struct IconStyle {
+    std::optional<Color> unselectedColor;
+    std::optional<Color> selectedColor;
 };
 
 class TabContentModel {
@@ -122,6 +129,7 @@ public:
     virtual void SetBoard(const BoardStyle& board) = 0;
     virtual void SetSelectedMode(SelectedMode selectedMode) = 0;
     virtual void SetLabelStyle(const LabelStyle& labelStyle) = 0;
+    virtual void SetIconStyle(const IconStyle& iconStyle)  {}
     virtual void SetPadding(const NG::PaddingProperty& padding) = 0;
     virtual void SetLayoutMode(LayoutMode layoutMode) = 0;
     virtual void SetVerticalAlign(FlexAlign verticalAlign) = 0;
@@ -129,6 +137,7 @@ public:
     virtual void SetId(const std::string& id) = 0;
     virtual void SetOnWillShow(std::function<void()>&& onWillShow) {}
     virtual void SetOnWillHide(std::function<void()>&& onWillHide) {}
+    virtual void SetCustomStyleNode(const RefPtr<NG::FrameNode>& customStyleNode) {}
 
 private:
     static std::unique_ptr<TabContentModel> instance_;

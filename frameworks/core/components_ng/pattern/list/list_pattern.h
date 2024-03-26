@@ -147,7 +147,7 @@ public:
     void ScrollToItemInGroup(int32_t index, int32_t indexInGroup, bool smooth = false,
         ScrollAlign align = ScrollAlign::START);
     bool CheckTargetValid(int32_t index, int32_t indexInGroup);
-    bool ScrollPage(bool reverse);
+    void ScrollPage(bool reverse, bool smooth = false) override;
     void ScrollBy(float offset);
     bool AnimateToTarget(int32_t index, std::optional<int32_t> indexInGroup, ScrollAlign align);
     Offset GetCurrentOffset() const;
@@ -159,6 +159,9 @@ public:
         return contentMainSize_;
     };
 
+    void UpdatePosMapStart(float delta);
+    void UpdatePosMapEnd();
+    void CalculateCurrentOffset(float delta);
     void UpdateScrollBarOffset() override;
     // chain animation
     void SetChainAnimation();
@@ -234,15 +237,19 @@ public:
 
     void SetItemPressed(bool isPressed, int32_t id)
     {
-        for (auto& child : itemPosition_) {
-            if (child.second.id == id) {
-                child.second.isPressed = isPressed;
-                break;
-            }
+        if (isPressed) {
+            pressedItem_.emplace(id);
+        } else {
+            pressedItem_.erase(id);
         }
     }
 
 private:
+    struct PositionInfo {
+        float mainPos;
+        float mainSize;
+    };
+
     bool IsNeedInitClickEventRecorder() const override
     {
         return true;
@@ -304,6 +311,8 @@ private:
     void RefreshLanesItemRange();
     void UpdateListDirectionInCardStyle();
     void UpdateFrameSizeToWeb();
+    bool UpdateStartListItemIndex();
+    bool UpdateEndListItemIndex();
     RefPtr<ListContentModifier> listContentModifier_;
     std::vector<std::shared_ptr<ISlideUpdateCallback>> listenerVector_;
 
@@ -338,8 +347,10 @@ private:
     bool isNeedCheckOffset_ = false;
 
     ListLayoutAlgorithm::PositionMap itemPosition_;
+    std::map<int32_t, PositionInfo> posMap_;
 
     std::map<int32_t, int32_t> lanesItemRange_;
+    std::set<int32_t> pressedItem_;
     int32_t lanes_ = 1;
     float laneGutter_ = 0.0f;
     // chain animation
@@ -359,11 +370,15 @@ private:
     RefPtr<Scrollable> scrollableTouchEvent_;
 
     bool isScrollEnd_ = false;
+    bool needReEstimateOffset_ = false;
     std::optional<ListPredictLayoutParam> predictLayoutParam_;
 
     bool isNeedToUpdateListDirection_ = false;
 
     bool endIndexChanged_ = false;
+
+    ListItemIndex startInfo_ = {-1, -1, -1};
+    ListItemIndex endInfo_ = {-1, -1, -1};
 };
 } // namespace OHOS::Ace::NG
 

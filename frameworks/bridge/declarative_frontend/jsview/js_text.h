@@ -75,6 +75,7 @@ public:
     static void ParseMenuParam(
         const JSCallbackInfo& info, const JSRef<JSObject>& menuOptions, NG::SelectMenuParam& menuParam);
     static void JsClip(const JSCallbackInfo& info);
+    static void SetFontFeature(const JSCallbackInfo &info);
 
 private:
     static RefPtr<TextComponentV2> GetComponent();

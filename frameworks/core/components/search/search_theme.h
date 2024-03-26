@@ -47,17 +47,17 @@ public:
             if (!themeConstants) {
                 return theme;
             }
-            ParsePattern(themeConstants->GetThemeStyle(), theme);
+            ParsePattern(themeConstants, theme);
             return theme;
         }
 
     private:
-        void ParsePattern(const RefPtr<ThemeStyle>& themeStyle, const RefPtr<SearchTheme>& theme) const
+        void ParsePattern(const RefPtr<ThemeConstants>& themeConstants, const RefPtr<SearchTheme>& theme) const
         {
-            if (!themeStyle || !theme) {
+            if (!theme) {
                 return;
             }
-            auto pattern = themeStyle->GetAttr<RefPtr<ThemeStyle>>(THEME_PATTERN_SEARCH, nullptr);
+            RefPtr<ThemeStyle> pattern = themeConstants->GetPatternByName(THEME_PATTERN_SEARCH);
             if (!pattern) {
                 LOGW("find pattern of search fail");
                 return;
@@ -234,6 +234,11 @@ public:
         return cancelButtonStyle_;
     }
 
+    TextStyle GetTextStyle() const
+    {
+        return textStyle_;
+    }
+
 protected:
     SearchTheme() = default;
 
@@ -266,6 +271,7 @@ private:
     Color searchButtonTextColor_;
     Color searchIconColor_;
     CancelButtonStyle cancelButtonStyle_ = CancelButtonStyle::INPUT;
+    TextStyle textStyle_;
 };
 
 } // namespace OHOS::Ace

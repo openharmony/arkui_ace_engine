@@ -114,8 +114,8 @@ public:
         const RefPtr<RouteInfo>& routeInfo = nullptr);
     void UpdateRemovedNavPathList();
     RefPtr<UINode> Get();
-    RefPtr<UINode> Get(const std::string& name);
-    RefPtr<UINode> GetFromPreBackup(const std::string& name);
+    bool Get(const std::string& name, RefPtr<UINode>& navDestinationNode, int32_t& index);
+    bool GetFromPreBackup(const std::string& name, RefPtr<UINode>& navDestinationNode, int32_t& index);
     RefPtr<UINode> GetPre(const std::string& name, const RefPtr<UINode>& navDestinationNode);
     virtual bool IsEmpty();
     virtual std::vector<std::string> GetAllPathName();

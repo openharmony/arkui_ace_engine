@@ -85,8 +85,7 @@ public:
 
     static void ProcessOffscreenNode(const RefPtr<FrameNode>& node);
     // avoid use creator function, use CreateFrameNode
-    FrameNode(const std::string& tag, int32_t nodeId, const RefPtr<Pattern>& pattern, int32_t instanceId = -1,
-        bool isRoot = false);
+    FrameNode(const std::string& tag, int32_t nodeId, const RefPtr<Pattern>& pattern, bool isRoot = false);
 
     ~FrameNode() override;
 
@@ -128,10 +127,11 @@ public:
 
     virtual void MarkModifyDone();
 
-    void MarkDirtyNode(PropertyChangeFlag extraFlag = PROPERTY_UPDATE_NORMAL) override;
-
     void MarkDirtyNode(
-        bool isMeasureBoundary, bool isRenderBoundary, PropertyChangeFlag extraFlag = PROPERTY_UPDATE_NORMAL);
+        PropertyChangeFlag extraFlag = PROPERTY_UPDATE_NORMAL, bool childExpansiveAndMark = false) override;
+
+    void MarkDirtyNode(bool isMeasureBoundary, bool isRenderBoundary,
+        PropertyChangeFlag extraFlag = PROPERTY_UPDATE_NORMAL, bool childExpansiveAndMark = false);
 
     void ProcessPropertyDiff()
     {
@@ -198,6 +198,8 @@ public:
 
     void SetOnSizeChangeCallback(OnSizeChangedFunc&& callback);
 
+    void SetJSFrameNodeOnSizeChangeCallback(OnSizeChangedFunc&& callback);
+
     void TriggerOnSizeChangeCallback();
 
     void SetGeometryNode(const RefPtr<GeometryNode>& node);
@@ -208,6 +210,12 @@ public:
     }
 
     const RefPtr<Pattern>& GetPattern() const;
+
+    template<typename T>
+    T* GetPatternPtr() const
+    {
+        return reinterpret_cast<T*>(RawPtr(pattern_));
+    }
 
     template<typename T>
     RefPtr<T> GetPattern() const
@@ -222,9 +230,21 @@ public:
     }
 
     template<typename T>
+    T* GetLayoutPropertyPtr() const
+    {
+        return reinterpret_cast<T*>(RawPtr(layoutProperty_));
+    }
+
+    template<typename T>
     RefPtr<T> GetLayoutProperty() const
     {
         return DynamicCast<T>(layoutProperty_);
+    }
+
+    template<typename T>
+    T* GetPaintPropertyPtr() const
+    {
+        return reinterpret_cast<T*>(RawPtr(paintProperty_));
     }
 
     template<typename T>
@@ -298,6 +318,18 @@ public:
     {
         return layoutProperty_->GetVisibility().value_or(VisibleType::VISIBLE) == VisibleType::VISIBLE;
     }
+
+    bool IsPrivacySensitive() const
+    {
+        return isPrivacySensitive_;
+    }
+
+    void SetPrivacySensitive(bool flag)
+    {
+        isPrivacySensitive_ = flag;
+    }
+
+    void ChangeSensitiveStyle(bool isSensitive);
 
     void ToJsonValue(std::unique_ptr<JsonValue>& json) const override;
 
@@ -376,7 +408,8 @@ public:
     void OnAttachToMainTree(bool recursive) override;
     void OnAttachToBuilderNode(NodeStatus nodeStatus) override;
 
-    void OnVisibleChange(bool isVisible) override;
+    void TryVisibleChangeOnDescendant(bool isVisible) override;
+    void NotifyVisibleChange(bool isVisible);
 
     void PushDestroyCallback(std::function<void()>&& callback)
     {
@@ -404,7 +437,8 @@ public:
     bool HasPositionProp() const
     {
         CHECK_NULL_RETURN(renderContext_, false);
-        return renderContext_->HasPosition() || renderContext_->HasOffset() || renderContext_->HasAnchor();
+        return renderContext_->HasPosition() || renderContext_->HasOffset() || renderContext_->HasPositionEdges() ||
+               renderContext_->HasOffsetEdges() || renderContext_->HasAnchor();
     }
 
     // The function is only used for fast preview.
@@ -492,6 +526,8 @@ public:
         }
     }
 
+    bool IsSupportDrawModifier();
+
     void SetDragPreview(const NG::DragDropInfo& info)
     {
         dragPreviewInfo_ = info;
@@ -536,6 +572,7 @@ public:
     std::string ProvideRestoreInfo();
 
     static std::vector<RefPtr<FrameNode>> GetNodesById(const std::unordered_set<int32_t>& set);
+    static std::vector<FrameNode*> GetNodesPtrById(const std::unordered_set<int32_t>& set);
 
     double GetPreviewScaleVal() const;
 
@@ -589,8 +626,9 @@ public:
         return layoutProperty_;
     }
 
-    RefPtr<LayoutWrapper> GetOrCreateChildByIndex(uint32_t index, bool addToRenderTree = true) override;
-    RefPtr<LayoutWrapper> GetChildByIndex(uint32_t index) override;
+    RefPtr<LayoutWrapper> GetOrCreateChildByIndex(
+        uint32_t index, bool addToRenderTree = true, bool isCache = false) override;
+    RefPtr<LayoutWrapper> GetChildByIndex(uint32_t index, bool isCache = false) override;
     /**
      * @brief Get the index of Child among all FrameNode children of [this].
      * Handles intermediate SyntaxNodes like LazyForEach.
@@ -606,6 +644,7 @@ public:
     void DoRemoveChildInRenderTree(uint32_t index, bool isAll) override;
     void SetActiveChildRange(int32_t start, int32_t end) override;
     void DoSetActiveChildRange(int32_t start, int32_t end) override;
+    void RecycleItemsByIndex(int32_t start, int32_t end) override;
     const std::string& GetHostTag() const override
     {
         return GetTag();
@@ -630,9 +669,14 @@ public:
 
     void SetActive(bool active = true) override;
 
+    bool GetBypass() const
+    {
+        return bypass_;
+    }
+
     bool IsOutOfLayout() const override
     {
-        return renderContext_->HasPosition();
+        return renderContext_->HasPosition() || renderContext_->HasPositionEdges();
     }
 
     bool SkipMeasureContent() const override;
@@ -641,7 +685,7 @@ public:
         int32_t cacheCount = 0, const std::optional<LayoutConstraintF>& itemConstraint = std::nullopt) override;
 
     void SyncGeometryNode(bool needSyncRsNode);
-    RefPtr<UINode> GetFrameChildByIndex(uint32_t index, bool needBuild) override;
+    RefPtr<UINode> GetFrameChildByIndex(uint32_t index, bool needBuild, bool isCache = false) override;
     bool CheckNeedForceMeasureAndLayout() override;
 
     bool SetParentLayoutConstraint(const SizeF& size) const override;
@@ -730,6 +774,7 @@ public:
     OffsetF CalculateCachedTransformRelativeOffset(uint64_t nanoTimestamp);
 
     void PaintDebugBoundary(bool flag) override;
+    RectF GetRectWithRender();
 
 private:
     void MarkNeedRender(bool isRenderBoundary);
@@ -744,7 +789,7 @@ private:
      *
      * @return true if Parent is successfully marked dirty.
      */
-    virtual bool RequestParentDirty();
+    virtual bool RequestParentDirty(bool childExpansiveAndMark = false);
 
     void UpdateChildrenLayoutWrapper(const RefPtr<LayoutWrapperNode>& self, bool forceMeasure, bool forceLayout);
     void AdjustLayoutWrapperTree(const RefPtr<LayoutWrapperNode>& parent, bool forceMeasure, bool forceLayout) override;
@@ -767,6 +812,7 @@ private:
 
     // dump self info.
     void DumpInfo() override;
+    void DumpDragInfo();
     void DumpOverlayInfo();
     void DumpCommonInfo();
     void DumpSafeAreaInfo();
@@ -850,6 +896,7 @@ private:
     bool isRenderDirtyMarked_ = false;
     bool isMeasureBoundary_ = false;
     bool hasPendingRequest_ = false;
+    bool isPrivacySensitive_ = false;
 
     // for container, this flag controls only the last child in touch area is consuming event.
     bool exclusiveEventForChild_ = false;

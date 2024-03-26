@@ -28,6 +28,7 @@
 #include "base/utils/noncopyable.h"
 #include "core/animation/page_transition_common.h"
 #include "core/components/common/layout/constants.h"
+#include "core/components/common/layout/position_param.h"
 #include "core/components/common/properties/color.h"
 #include "core/components/common/properties/shared_transition_option.h"
 #include "core/components_ng/base/modifier.h"
@@ -261,6 +262,7 @@ public:
     virtual void OnTransformScaleUpdate(const VectorF& value) {}
     virtual void OnTransformCenterUpdate(const DimensionOffset& value) {}
     virtual void OnOffsetUpdate(const OffsetT<Dimension>& value) {}
+    virtual void OnOffsetEdgesUpdate(const EdgesParam& value) {}
 
     // used in arkts_native_render_node_modifier set property directly to rsNode
     virtual void SetRotation(float rotationX, float rotationY, float rotationZ) {}
@@ -275,7 +277,7 @@ public:
     virtual void SetFrame(float positionX, float positionY, float width, float height) {}
     virtual void SetOpacity(float opacity) {}
     virtual void SetTranslate(float translateX, float translateY, float translateZ) {}
-
+    virtual void CleanTransition() {}
     virtual void SetRectMask(const RectF& rect, const ShapeMaskProperty& property) {}
     virtual void SetCircleMask(const Circle& circle, const ShapeMaskProperty& property) {}
     virtual void SetRoundRectMask(const RoundRect& roundRect, const ShapeMaskProperty& property) {}
@@ -334,6 +336,8 @@ public:
     virtual void UpdateTranslateInXY(const OffsetF& offset) {}
 
     virtual void SetTransitionOutCallback(std::function<void()>&& callback) {}
+
+    virtual void SetTransitionInCallback(std::function<void()>&& callback) {}
 
     virtual void ToJsonValue(std::unique_ptr<JsonValue>& json) const;
 
@@ -399,6 +403,7 @@ public:
     virtual void UpdateMouseSelectWithRect(const RectF& rect, const Color& fillColor, const Color& strokeColor) {}
 
     virtual void OnPositionUpdate(const OffsetT<Dimension>& value) {}
+    virtual void OnPositionEdgesUpdate(const EdgesParam& value) {}
     virtual void OnZIndexUpdate(int32_t value) {}
 
     virtual void OnBackgroundColorUpdate(const Color& value) {}
@@ -521,6 +526,8 @@ public:
     ACE_DEFINE_PROPERTY_GROUP(PositionProperty, RenderPositionProperty);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(PositionProperty, Position, OffsetT<Dimension>);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(PositionProperty, Offset, OffsetT<Dimension>);
+    ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(PositionProperty, PositionEdges, EdgesParam);
+    ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(PositionProperty, OffsetEdges, EdgesParam);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(PositionProperty, Anchor, OffsetT<Dimension>);
 
     // zIndex

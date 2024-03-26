@@ -523,7 +523,7 @@ JSViewPartialUpdate::~JSViewPartialUpdate()
 
 RefPtr<AceType> JSViewPartialUpdate::CreateViewNode(bool isTitleNode)
 {
-    auto updateViewIdFunc = [weak = AceType::WeakClaim(this)](const std::string viewId) {
+    auto updateViewIdFunc = [weak = AceType::WeakClaim(this)](const std::string& viewId) {
         auto jsView = weak.Upgrade();
         CHECK_NULL_VOID(jsView);
         jsView->viewId_ = viewId;

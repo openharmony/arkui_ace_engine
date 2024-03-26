@@ -92,7 +92,7 @@ void JSTabs::SetOnChange(const JSCallbackInfo& info)
 
     auto changeHandler = AceType::MakeRefPtr<JsEventFunction<TabContentChangeEvent, 1>>(
         JSRef<JSFunc>::Cast(info[0]), TabContentChangeEventToJSValue);
-    WeakPtr<NG::FrameNode> targetNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    WeakPtr<NG::FrameNode> targetNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
     auto onChange = [executionContext = info.GetExecutionContext(), func = std::move(changeHandler), node = targetNode](
                         const BaseEventInfo* info) {
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(executionContext);
@@ -116,7 +116,7 @@ void JSTabs::SetOnTabBarClick(const JSCallbackInfo& info)
 
     auto changeHandler = AceType::MakeRefPtr<JsEventFunction<TabContentChangeEvent, 1>>(
         JSRef<JSFunc>::Cast(info[0]), TabContentChangeEventToJSValue);
-    WeakPtr<NG::FrameNode> targetNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    WeakPtr<NG::FrameNode> targetNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
     auto onTabBarClick = [executionContext = info.GetExecutionContext(), func = std::move(changeHandler),
                              node = targetNode](const BaseEventInfo* info) {
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(executionContext);
@@ -186,7 +186,7 @@ void ParseTabsIndexObject(const JSCallbackInfo& info, const JSRef<JSVal>& change
     CHECK_NULL_VOID(changeEventVal->IsFunction());
 
     auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(changeEventVal));
-    WeakPtr<NG::FrameNode> targetNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    WeakPtr<NG::FrameNode> targetNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
     auto onChangeEvent = [executionContext = info.GetExecutionContext(), func = std::move(jsFunc), node = targetNode](
                              const BaseEventInfo* info) {
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(executionContext);
@@ -348,6 +348,42 @@ void JSTabs::SetBarHeight(const JSCallbackInfo& info)
     }
     TabsModel::GetInstance()->SetBarAdaptiveHeight(adaptiveHeight);
     TabsModel::GetInstance()->SetTabBarHeight(height);
+}
+
+void JSTabs::SetWidth(const JSCallbackInfo& info)
+{
+    JSViewAbstract::JsWidth(info);
+    if (info.Length() < 1) {
+        return;
+    }
+    if (info[0]->IsString() && info[0]->ToString().empty()) {
+        return;
+    }
+    if (info[0]->IsString() && info[0]->ToString() == "auto") {
+        ViewAbstractModel::GetInstance()->ClearWidthOrHeight(true);
+        TabsModel::GetInstance()->SetWidthAuto(true);
+        return;
+    }
+
+    TabsModel::GetInstance()->SetWidthAuto(false);
+}
+
+void JSTabs::SetHeight(const JSCallbackInfo& info)
+{
+    JSViewAbstract::JsHeight(info);
+    if (info.Length() < 1) {
+        return;
+    }
+    if (info[0]->IsString() && info[0]->ToString().empty()) {
+        return;
+    }
+    if (info[0]->IsString() && info[0]->ToString() == "auto") {
+        ViewAbstractModel::GetInstance()->ClearWidthOrHeight(false);
+        TabsModel::GetInstance()->SetHeightAuto(true);
+        return;
+    }
+
+    TabsModel::GetInstance()->SetHeightAuto(false);
 }
 
 void JSTabs::SetIndex(int32_t index)
@@ -596,6 +632,8 @@ void JSTabs::JSBind(BindingTarget globalObj)
     JSClass<JSTabs>::StaticMethod("barMode", &JSTabs::SetBarMode);
     JSClass<JSTabs>::StaticMethod("barWidth", &JSTabs::SetBarWidth);
     JSClass<JSTabs>::StaticMethod("barHeight", &JSTabs::SetBarHeight);
+    JSClass<JSTabs>::StaticMethod("width", &JSTabs::SetWidth);
+    JSClass<JSTabs>::StaticMethod("height", &JSTabs::SetHeight);
     JSClass<JSTabs>::StaticMethod("index", &JSTabs::SetIndex);
     JSClass<JSTabs>::StaticMethod("animationDuration", &JSTabs::SetAnimationDuration);
     JSClass<JSTabs>::StaticMethod("divider", &JSTabs::SetDivider);

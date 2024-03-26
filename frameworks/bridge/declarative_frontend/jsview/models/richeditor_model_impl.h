@@ -28,7 +28,7 @@ class ACE_EXPORT RichEditorModelImpl : public RichEditorModel {
     void SetOnIMEInputComplete(std::function<void(const NG::RichEditorAbstractSpanResult&)>&& func) override;
     void SetAboutToDelete(std::function<bool(const NG::RichEditorDeleteValue&)>&& func) override;
     void SetOnDeleteComplete(std::function<void()>&& func) override;
-    void SetCustomKeyboard(std::function<void()>&& func) override;
+    void SetCustomKeyboard(std::function<void()>&& func, bool supportAvoidance = false) override;
     void SetCopyOption(CopyOptions& copyOptions) override;
     void BindSelectionMenu(NG::TextSpanType& editorType, NG::TextResponseType& responseType,
         std::function<void()>& buildFunc, NG::SelectMenuParam& menuParam) override;
@@ -36,6 +36,9 @@ class ACE_EXPORT RichEditorModelImpl : public RichEditorModel {
     void SetPlaceholder(PlaceholderOptions& options) override;
     void SetTextDetectEnable(bool value) override;
     void SetTextDetectConfig(const std::string& value, std::function<void(const std::string&)>&& onResult) override;
+    void SetSelectedBackgroundColor(const Color& selectedColor) override;
+    void SetCaretColor(const Color& color) override;
+    void SetOnEditingChange(std::function<void(const bool&)>&& func) override;
 };
 } // namespace OHOS::Ace::Framework
 

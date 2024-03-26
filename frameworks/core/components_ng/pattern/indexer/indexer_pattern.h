@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -70,7 +70,7 @@ public:
 
     RefPtr<LayoutAlgorithm> CreateLayoutAlgorithm() override
     {
-        auto indexerLayoutAlgorithm = MakeRefPtr<IndexerLayoutAlgorithm>(itemCount_);
+        auto indexerLayoutAlgorithm = MakeRefPtr<IndexerLayoutAlgorithm>(static_cast<int32_t>(fullArrayValue_.size()));
         return indexerLayoutAlgorithm;
     }
 
@@ -123,10 +123,12 @@ private:
     void InitInputEvent();
     void InitCurrentInputEvent();
     void InitChildInputEvent();
+    void InitPopupInputEvent();
     void InitOnKeyEvent();
     bool OnKeyEvent(const KeyEvent& event);
     void OnHover(bool isHover);
     void OnChildHover(int32_t index, bool isHover);
+    void OnPopupHover(bool isHover);
     void ResetStatus();
     void OnKeyEventDisapear();
     void UpdateBubbleListItem(std::vector<std::string>& currentListData, const RefPtr<FrameNode>& parentNode,
@@ -185,6 +187,7 @@ private:
     bool isTouch_ = false;
     bool isHover_ = false;
     bool isPopup_ = false;
+    bool isPopupHover_ = false;
 
      // the array of displayed items, ths second param in the pair
      // indicates whether the item should be hidden and displayed as dot

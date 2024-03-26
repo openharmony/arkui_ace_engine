@@ -317,7 +317,6 @@ RefPtr<NG::UINode> JSNavigationStack::CreateNodeByRouteInfo(const RefPtr<NG::Rou
         }
         return node;
     }
-    TAG_LOGI(AceLogTag::ACE_NAVIGATION, "can't find navDestination by route info, create empty node");
     return DynamicCast<NG::UINode>(NavDestinationModel::GetInstance()->CreateEmpty());
 }
 
@@ -615,7 +614,7 @@ void JSNavigationStack::ClearPreBuildNodeList()
 int32_t JSNavigationStack::CheckNavDestinationExists(const JSRef<JSObject>& navPathInfo)
 {
     if (navDestBuilderFunc_->IsEmpty()) {
-        TAG_LOGE(AceLogTag::ACE_NAVIGATION, "navDestBuilderFunc_ is empty.");
+        TAG_LOGW(AceLogTag::ACE_NAVIGATION, "navDestBuilderFunc_ is empty.");
         return ERROR_CODE_BUILDER_FUNCTION_NOT_REGISTERED;
     }
 
@@ -684,17 +683,23 @@ void JSNavigationStack::FireNavigationInterception(bool isBefore, const RefPtr<N
     }
     const uint8_t argsNum = 4;
     JSRef<JSVal> params[argsNum];
-    auto preDestination = AceType::DynamicCast<JSNavDestinationContext>(from);
-    if (preDestination) {
-        params[0] = preDestination->CreateJSObject();
+    auto preDestination = AceType::DynamicCast<NG::NavDestinationContext>(from);
+    if (!preDestination) {
+        params[0] = JSRef<JSVal>::Make(ToJSValue("navBar"));
+    } else if (preDestination->GetIsEmpty()) {
+        params[0] = JSRef<JSObject>::New();
     } else {
-        params[0] = JSRef<JSVal>::Make(ToJSValue("NavBar"));
+        auto context = AceType::DynamicCast<JSNavDestinationContext>(from);
+        params[0] = context->CreateJSObject();
     }
-    auto topDestination = AceType::DynamicCast<JSNavDestinationContext>(to);
-    if (topDestination) {
-        params[1] = topDestination->CreateJSObject();
+    auto topDestination = AceType::DynamicCast<NG::NavDestinationContext>(to);
+    if (!topDestination) {
+        params[1] = JSRef<JSVal>::Make(ToJSValue("navBar"));
+    } else if (topDestination->GetIsEmpty()) {
+        params[1] = JSRef<JSObject>::New();
     } else {
-        params[1] = JSRef<JSVal>::Make(ToJSValue("NavBar"));
+        auto context = AceType::DynamicCast<JSNavDestinationContext>(to);
+        params[1] = context->CreateJSObject();
     }
     const uint8_t operationIndex = 2;
     params[operationIndex] = JSRef<JSVal>::Make(ToJSValue(static_cast<int32_t>(operation)));

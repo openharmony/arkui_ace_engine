@@ -198,6 +198,7 @@ private:
     void InitClickEvent();
     void HandleClickEvent(GestureEvent& info);
     uint32_t GetMaxLength() const;
+    std::string SearchTypeToString() const;
     std::string searchButton_;
     SizeF searchSize_;
     OffsetF searchOffset_;

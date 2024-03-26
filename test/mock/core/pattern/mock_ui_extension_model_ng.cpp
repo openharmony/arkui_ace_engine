@@ -15,6 +15,7 @@
 
 #include "base/want/want_wrap.h"
 #include "core/components_ng/base/frame_node.h"
+#include "core/components_ng/pattern/ui_extension/session_wrapper.h"
 #include "core/components_ng/pattern/ui_extension/ui_extension_model_ng.h"
 
 namespace OHOS::Ace::NG {
@@ -27,7 +28,7 @@ RefPtr<FrameNode> UIExtensionModelNG::Create(const std::string& bundleName, cons
 
 void UIExtensionModelNG::Create(const RefPtr<OHOS::Ace::WantWrap>& wantWrap, bool transferringCaller) {}
 
-void UIExtensionModelNG::Create(const RefPtr<OHOS::Ace::WantWrap>& wantWrap, int32_t embeddedType) {}
+void UIExtensionModelNG::Create(const RefPtr<OHOS::Ace::WantWrap>& wantWrap, SessionType sessionType) {}
 
 void UIExtensionModelNG::Create() {}
 

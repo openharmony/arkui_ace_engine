@@ -184,6 +184,17 @@ public:
         return dragEndPosition_ - dragStartPosition_;
     }
 
+    void InitClickEvent();
+    void HandleClickEvent(GestureEvent& info);
+    void InitLongPressEvent();
+    void HandleLongPress(bool smooth);
+    void InitMouseEvent();
+    bool IsInScrollBar();
+    void ScheduleCaretLongPress();
+    void StartLongPressEventTimer();
+    void OnCollectLongPressTarget(const OffsetF& coordinateOffset, const GetEventTargetImpl& getEventTargetImpl,
+        TouchTestResult& result, const RefPtr<FrameNode>& frameNode, const RefPtr<TargetComponent>& targetComponent);
+
 private:
     void OnModifyDone() override;
     void OnAttachToFrameNode() override;
@@ -222,6 +233,14 @@ private:
     uint8_t opacity_ = UINT8_MAX;
     CancelableCallback<void()> disapplearDelayTask_;
     std::shared_ptr<AnimationUtils::Animation> disappearAnimation_;
+    bool isMousePressed_ = false;
+    RefPtr<ClickEvent> clickListener_;
+    RefPtr<LongPressRecognizer> longPressRecognizer_;
+    RefPtr<InputEvent> mouseEvent_;
+    Offset locationInfo_;
+    //Determine whether the current scroll direction is scrolling upwards or downwards
+    bool scrollingUp_ = false;
+    bool scrollingDown_ = false;
 };
 
 } // namespace OHOS::Ace::NG

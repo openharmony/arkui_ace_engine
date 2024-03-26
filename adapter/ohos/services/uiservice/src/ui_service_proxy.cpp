@@ -38,7 +38,7 @@ void UIServiceProxy::OnPushCallBack(const AAFwk::Want& want, const std::string& 
     OHOS::MessageOption option(MessageOption::TF_ASYNC);
 
     if (!dataParcel.WriteInterfaceToken(UIServiceProxy::GetDescriptor())) {
-        HILOG_WARN("%{public}s dataParcel.WriteInterfaceToken(GetDescriptor()) return false",
+        LOGW("%{public}s dataParcel.WriteInterfaceToken(GetDescriptor()) return false",
             __func__);
         return;
     }
@@ -59,10 +59,10 @@ void UIServiceProxy::OnPushCallBack(const AAFwk::Want& want, const std::string& 
     }
     int32_t result = remote->SendRequest(IUIService::UI_SERVICE_PUSH_CALL_BACK, dataParcel, reply, option);
     if (result == ERR_NONE) {
-        HILOG_INFO("%{public}s SendRequest ok, retval is %d", __func__, reply.ReadInt32());
+        LOGI("%{public}s SendRequest ok, retval is %d", __func__, reply.ReadInt32());
         return;
     } else {
-        HILOG_WARN("%{public}s SendRequest error, result=%{public}d", __func__, result);
+        LOGW("%{public}s SendRequest error, result=%{public}d", __func__, result);
         return;
     }
 }
@@ -79,7 +79,7 @@ void UIServiceProxy::OnRequestCallBack(const AAFwk::Want& want, const std::strin
     OHOS::MessageOption option(MessageOption::TF_ASYNC);
 
     if (!dataParcel.WriteInterfaceToken(UIServiceProxy::GetDescriptor())) {
-        HILOG_WARN("%{public}s dataParcel.WriteInterfaceToken(GetDescriptor()) return false",
+        LOGW("%{public}s dataParcel.WriteInterfaceToken(GetDescriptor()) return false",
             __func__);
         return;
     }
@@ -94,10 +94,10 @@ void UIServiceProxy::OnRequestCallBack(const AAFwk::Want& want, const std::strin
     }
     int32_t result = remote->SendRequest(IUIService::UI_SERVICE_REQUEST_CALL_BACK, dataParcel, reply, option);
     if (result == ERR_NONE) {
-        HILOG_INFO("%{public}s SendRequest ok, retval is %d", __func__, reply.ReadInt32());
+        LOGI("%{public}s SendRequest ok, retval is %d", __func__, reply.ReadInt32());
         return;
     } else {
-        HILOG_WARN("%{public}s SendRequest error, result=%{public}d", __func__, result);
+        LOGW("%{public}s SendRequest error, result=%{public}d", __func__, result);
         return;
     }
 }
@@ -115,7 +115,7 @@ void UIServiceProxy::OnReturnRequest(
     OHOS::MessageOption option(MessageOption::TF_ASYNC);
 
     if (!dataParcel.WriteInterfaceToken(UIServiceProxy::GetDescriptor())) {
-        HILOG_WARN("%{public}s dataParcel.WriteInterfaceToken(GetDescriptor()) return false",
+        LOGW("%{public}s dataParcel.WriteInterfaceToken(GetDescriptor()) return false",
             __func__);
         return;
     }
@@ -133,10 +133,10 @@ void UIServiceProxy::OnReturnRequest(
     }
     int32_t result = remote->SendRequest(IUIService::UI_SERVICE_RETURN_REQUEST, dataParcel, reply, option);
     if (result == ERR_NONE) {
-        HILOG_INFO("%{public}s SendRequest ok, retval is %d", __func__, reply.ReadInt32());
+        LOGI("%{public}s SendRequest ok, retval is %d", __func__, reply.ReadInt32());
         return;
     } else {
-        HILOG_WARN("%{public}s SendRequest error, result=%{public}d", __func__, result);
+        LOGW("%{public}s SendRequest error, result=%{public}d", __func__, result);
         return;
     }
 }

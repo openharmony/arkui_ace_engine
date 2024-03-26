@@ -265,9 +265,7 @@ void FlexLayoutAlgorithm::TravelChildrenFlexProps(LayoutWrapper* layoutWrapper, 
         int32_t childDisplayPriority = 1;
         float childLayoutWeight = 0.0f;
         if (!childGone) {
-            if (childMagicItemProperty) {
-                childLayoutWeight = childMagicItemProperty->GetLayoutWeight().value_or(0.0f);
-            }
+            childLayoutWeight = childMagicItemProperty.GetLayoutWeight().value_or(0.0f);
             if (childFlexItemProperty) {
                 childDisplayPriority = childFlexItemProperty->GetDisplayIndex().value_or(1);
                 if (!childrenHasAlignSelfBaseLine_ &&
@@ -338,9 +336,7 @@ void FlexLayoutAlgorithm::MeasureAndCleanMagicNodes(
                     float childLayoutWeight = 0.0f;
                     const auto& childMagicItemProperty =
                         childLayoutWrapper->GetLayoutProperty()->GetMagicItemProperty();
-                    if (childMagicItemProperty) {
-                        childLayoutWeight = childMagicItemProperty->GetLayoutWeight().value_or(0.0f);
-                    }
+                    childLayoutWeight = childMagicItemProperty.GetLayoutWeight().value_or(0.0f);
                     if (LessOrEqual(childLayoutWeight, 0.0f)) {
                         if (child.layoutWrapper && child.layoutWrapper->GetHostNode() &&
                             child.layoutWrapper->GetHostNode()->GetLayoutProperty() &&
@@ -394,9 +390,7 @@ void FlexLayoutAlgorithm::MeasureAndCleanMagicNodes(
                 auto& childConstraint = child.layoutConstraint;
                 float childLayoutWeight = 0.0f;
                 const auto& childMagicItemProperty = childLayoutWrapper->GetLayoutProperty()->GetMagicItemProperty();
-                if (childMagicItemProperty) {
-                    childLayoutWeight = childMagicItemProperty->GetLayoutWeight().value_or(0.0f);
-                }
+                childLayoutWeight = childMagicItemProperty.GetLayoutWeight().value_or(0.0f);
                 if (LessOrEqual(childLayoutWeight, 0.0)) {
                     continue;
                 }
@@ -438,9 +432,7 @@ void FlexLayoutAlgorithm::MeasureAndCleanMagicNodes(
                 }
                 float childLayoutWeight = 0.0f;
                 const auto& childMagicItemProperty = childLayoutWrapper->GetLayoutProperty()->GetMagicItemProperty();
-                if (childMagicItemProperty) {
-                    childLayoutWeight = childMagicItemProperty->GetLayoutWeight().value_or(0.0f);
-                }
+                childLayoutWeight = childMagicItemProperty.GetLayoutWeight().value_or(0.0f);
                 secondaryMeasureList_.emplace_back(child);
                 if (LessOrEqual(childLayoutWeight, 0.0)) {
                     continue;

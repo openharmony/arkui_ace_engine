@@ -149,6 +149,24 @@ Color Color::FromString(std::string colorStr, uint32_t maskAlpha, Color defaultC
     return defaultColor;
 }
 
+bool Color::ParseColorString(const std::string& colorStr, Color& color, const Color& defaultColor, uint32_t maskAlpha)
+{
+    if (colorStr.empty()) {
+        return false;
+    }
+
+    // Remove all " ".
+    std::string tmpColorStr = colorStr;
+    tmpColorStr.erase(std::remove(tmpColorStr.begin(), tmpColorStr.end(), ' '), tmpColorStr.end());
+
+    return (MatchColorWithMagic(tmpColorStr, maskAlpha, color) ||
+        MatchColorWithMagicMini(tmpColorStr, maskAlpha, color) ||
+        MatchColorWithRGB(tmpColorStr, color) ||
+        MatchColorWithRGBA(tmpColorStr, color) ||
+        MatchColorSpecialString(tmpColorStr, color) ||
+        ParseUintColorString(tmpColorStr, color, defaultColor));
+}
+
 bool Color::ParseColorString(std::string colorStr, Color& color, uint32_t maskAlpha)
 {
     if (colorStr.empty()) {
@@ -481,6 +499,21 @@ bool Color::MatchColorSpecialString(const std::string& colorStr, Color& color)
     int64_t colorIndex = BinarySearchFindIndex(colorTable, ArraySize(colorTable), colorStr.c_str());
     if (colorIndex != -1) {
         color = colorTable[colorIndex].value;
+        return true;
+    }
+
+    return false;
+}
+
+bool Color::ParseUintColorString(const std::string& colorStr, Color& color, const Color& defaultColor)
+{
+    auto uint32Color = StringUtils::StringToUintCheck(colorStr, defaultColor.GetValue());
+    if (uint32Color > 0) {
+        if (uint32Color >> COLOR_ALPHA_OFFSET == 0) {
+            color = Color(uint32Color).ChangeAlpha(MAX_ALPHA);
+        } else {
+            color = Color(uint32Color);
+        }
         return true;
     }
 

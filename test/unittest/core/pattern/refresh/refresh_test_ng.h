@@ -37,6 +37,10 @@
 #include "core/components_ng/pattern/refresh/refresh_layout_property.h"
 #include "core/components_ng/pattern/refresh/refresh_model_ng.h"
 #include "core/components_ng/pattern/refresh/refresh_pattern.h"
+#include "core/components_ng/pattern/scroll/scroll_model_ng.h"
+#include "core/components_ng/pattern/scroll/scroll_pattern.h"
+#include "core/components_ng/pattern/swiper/swiper_model_ng.h"
+#include "core/components_ng/pattern/swiper/swiper_pattern.h"
 #include "core/components_ng/pattern/text/text_model_ng.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "frameworks/core/components_ng/pattern/loading_progress/loading_progress_paint_property.h"
@@ -65,11 +69,18 @@ public:
     void GetInstance();
 
     void Create(const std::function<void(RefreshModelNG)>& callback = nullptr);
+    void CreateRefresh(const std::function<void(RefreshModelNG)>& callback = nullptr);
+    void CreateNestedSwiper();
+    void CreateScroll();
     static RefPtr<FrameNode> CreateCustomNode();
     void VersionElevenHandleDragEnd(float speed, float targetOffsetY);
 
     RefPtr<FrameNode> frameNode_;
+    RefPtr<FrameNode> swiper_;
+    RefPtr<FrameNode> scroll_;
     RefPtr<RefreshPattern> pattern_;
+    RefPtr<SwiperPattern> swiperPattern_;
+    RefPtr<ScrollPattern> scrollPattern_;
     RefPtr<RefreshEventHub> eventHub_;
     RefPtr<RefreshLayoutProperty> layoutProperty_;
     RefPtr<RefreshAccessibilityProperty> accessibilityProperty_;

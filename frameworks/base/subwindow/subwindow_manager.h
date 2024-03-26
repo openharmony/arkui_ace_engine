@@ -44,6 +44,7 @@ public:
     void AddParentContainerId(int32_t containerId, int32_t parentContainerId);
     void RemoveParentContainerId(int32_t containerId);
     int32_t GetParentContainerId(int32_t containerId);
+    int32_t GetSubContainerId(int32_t parentContainerId);
 
     void AddSubwindow(int32_t instanceId, RefPtr<Subwindow>);
     void RemoveSubwindow(int32_t instanceId);
@@ -78,6 +79,8 @@ public:
     void ClearMenuNG(int32_t instanceId = -1, int32_t targetId = -1, bool inWindow = true, bool showAnimation = false);
     void ClearPopupInSubwindow(int32_t instanceId = -1);
     RefPtr<NG::FrameNode> ShowDialogNG(const DialogProperties& dialogProps, std::function<void()>&& buildFunc);
+    RefPtr<NG::FrameNode> ShowDialogNGWithNode(const DialogProperties& dialogProps,
+        const RefPtr<NG::UINode>& customNode);
     void CloseDialogNG(const RefPtr<NG::FrameNode>& dialogNode);
     void OpenCustomDialogNG(const DialogProperties& dialogProps, std::function<void(int32_t)>&& callback);
     void CloseCustomDialogNG(int32_t dialogId);
@@ -104,8 +107,8 @@ public:
     void DeleteHotAreas(int32_t subwindowid, int32_t overlayid);
 
     void ClearToastInSubwindow();
-    void ShowToast(
-        const std::string& message, int32_t duration, const std::string& bottom, const NG::ToastShowMode& showMode);
+    void ShowToast(const std::string& message, int32_t duration, const std::string& bottom,
+        const NG::ToastShowMode& showMode, int32_t alignment, std::optional<DimensionOffset> offset);
     void ShowDialog(const std::string& title, const std::string& message, const std::vector<ButtonInfo>& buttons,
         bool autoCancel, std::function<void(int32_t, int32_t)>&& napiCallback,
         const std::set<std::string>& dialogCallbacks);

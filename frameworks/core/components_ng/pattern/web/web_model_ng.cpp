@@ -45,6 +45,10 @@ void WebModelNG::Create(const std::string& src, const RefPtr<WebController>& web
 
     auto webPattern = frameNode->GetPattern<WebPattern>();
     CHECK_NULL_VOID(webPattern);
+    webPattern->SetNestedScroll(NestedScrollOptions({
+            .forward = NestedScrollMode::SELF_FIRST,
+            .backward = NestedScrollMode::SELF_FIRST,
+        }));
     webPattern->SetWebSrc(src);
     webPattern->SetWebController(webController);
     webPattern->SetRenderMode(renderMode);
@@ -70,6 +74,10 @@ void WebModelNG::Create(const std::string& src, std::function<void(int32_t)>&& s
     stack->Push(frameNode);
     auto webPattern = frameNode->GetPattern<WebPattern>();
     CHECK_NULL_VOID(webPattern);
+    webPattern->SetNestedScroll(NestedScrollOptions({
+            .forward = NestedScrollMode::SELF_FIRST,
+            .backward = NestedScrollMode::SELF_FIRST,
+        }));
     webPattern->SetWebSrc(src);
     webPattern->SetPopup(popup);
     webPattern->SetSetWebIdCallback(std::move(setWebIdCallback));
@@ -230,6 +238,15 @@ void WebModelNG::SetOnSslErrorRequest(std::function<bool(const BaseEventInfo* in
     auto webEventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<WebEventHub>();
     CHECK_NULL_VOID(webEventHub);
     webEventHub->SetOnSslErrorRequestEvent(std::move(uiCallback));
+}
+
+void WebModelNG::SetOnAllSslErrorRequest(std::function<bool(const BaseEventInfo* info)>&& jsCallback)
+{
+    auto func = jsCallback;
+    auto uiCallback = [func](const std::shared_ptr<BaseEventInfo>& info) -> bool { return func(info.get()); };
+    auto webEventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<WebEventHub>();
+    CHECK_NULL_VOID(webEventHub);
+    webEventHub->SetOnAllSslErrorRequestEvent(std::move(uiCallback));
 }
 
 void WebModelNG::SetOnSslSelectCertRequest(std::function<bool(const BaseEventInfo* info)>&& jsCallback)
@@ -795,6 +812,22 @@ void WebModelNG::SetFirstContentfulPaintId(
     webEventHub->SetOnFirstContentfulPaintEvent(std::move(firstContentfulPaintId));
 }
 
+void WebModelNG::SetFirstMeaningfulPaintId(
+    std::function<void(const std::shared_ptr<BaseEventInfo>& info)>&& firstMeaningfulPaintId)
+{
+    auto webEventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<WebEventHub>();
+    CHECK_NULL_VOID(webEventHub);
+    webEventHub->SetOnFirstMeaningfulPaintEvent(std::move(firstMeaningfulPaintId));
+}
+
+void WebModelNG::SetLargestContentfulPaintId(
+    std::function<void(const std::shared_ptr<BaseEventInfo>& info)>&& largestContentfulPaintId)
+{
+    auto webEventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<WebEventHub>();
+    CHECK_NULL_VOID(webEventHub);
+    webEventHub->SetOnLargestContentfulPaintEvent(std::move(largestContentfulPaintId));
+}
+
 void WebModelNG::SetNavigationEntryCommittedId(
     std::function<void(const std::shared_ptr<BaseEventInfo>& info)>&& navigationEntryCommittedId)
 {
@@ -900,7 +933,7 @@ void WebModelNG::AddDragFrameNodeToManager()
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
 
-    dragDropManager->AddDragFrameNode(frameNode->GetId(), frameNode);
+    dragDropManager->AddDragFrameNode(frameNode->GetId(), AceType::WeakClaim(frameNode));
 }
 
 void WebModelNG::SetAudioResumeInterval(int32_t resumeInterval)
@@ -957,6 +990,13 @@ void WebModelNG::SetNestedScroll(const NestedScrollOptions& nestedOpt)
     webPattern->SetNestedScroll(nestedOpt);
 }
 
+void WebModelNG::SetMetaViewport(bool enabled)
+{
+    auto webPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPattern>();
+    CHECK_NULL_VOID(webPattern);
+    webPattern->UpdateMetaViewport(enabled);
+}
+
 void WebModelNG::JavaScriptOnDocumentStart(const ScriptItems& scriptItems)
 {
     auto webPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPattern>();
@@ -977,5 +1017,20 @@ void WebModelNG::SetPermissionClipboard(std::function<void(const std::shared_ptr
     CHECK_NULL_VOID(webPattern);
     
     webPattern->SetPermissionClipboardCallback(std::move(jsCallback));
+}
+
+void WebModelNG::SetTextAutosizing(bool isTextAutosizing)
+{
+    auto webPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPattern>();
+    CHECK_NULL_VOID(webPattern);
+    webPattern->UpdateTextAutosizing(isTextAutosizing);
+}
+
+void WebModelNG::SetNativeVideoPlayerConfig(bool enable, bool shouldOverlay)
+{
+    auto webPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPattern>();
+    CHECK_NULL_VOID(webPattern);
+
+    webPattern->UpdateNativeVideoPlayerConfig(std::make_tuple(enable, shouldOverlay));
 }
 } // namespace OHOS::Ace::NG

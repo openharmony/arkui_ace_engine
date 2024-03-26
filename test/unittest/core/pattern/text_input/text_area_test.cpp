@@ -509,6 +509,121 @@ HWTEST_F(TextFieldUXTest, InitSurfaceChangedCallback001, TestSize.Level1)
 }
 
 /**
+ * @tc.name: TextAreaLetterSpacing001
+ * @tc.desc: test TextArea letterSpacing.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldUXTest, TextAreaLetterSpacing001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: Create Text filed node with default text and placeholder
+     */
+    CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) {
+        model.SetLetterSpacing(1.0_fp);
+    });
+
+    /**
+     * @tc.expected: Current caret position is end of text
+     */
+    GetFocus();
+
+    /**
+     * @tc.steps: set TextInputAction NEW_LINE and call PerformAction
+     * @tc.expected: text will wrap
+     */
+    auto paintProperty = frameNode_->GetPaintProperty<TextFieldPaintProperty>();
+    paintProperty->UpdateInputStyle(InputStyle::INLINE);
+    frameNode_->MarkModifyDone();
+    pattern_->OnModifyDone();
+    auto textInputAction = pattern_->GetDefaultTextInputAction();
+    EXPECT_EQ(textInputAction, TextInputAction::NEW_LINE);
+    pattern_->focusIndex_ = FocuseIndex::TEXT;
+    EXPECT_TRUE(pattern_->IsTextArea());
+    EXPECT_TRUE(pattern_->GetInputFilter() != "\n");
+    pattern_->PerformAction(textInputAction, false);
+
+    EXPECT_EQ(layoutProperty_->GetLetterSpacing(), 1.0_fp);
+}
+
+/**
+ * @tc.name: TextAreaLineHeight001
+ * @tc.desc: test TextArea lineHeight.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldUXTest, TextAreaLineHeight001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: Create Text filed node with default text and placeholder
+     */
+    CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) {
+        model.SetLineHeight(2.0_fp);
+    });
+
+    /**
+     * @tc.expected: Current caret position is end of text
+     */
+    GetFocus();
+
+    /**
+     * @tc.steps: set TextInputAction NEW_LINE and call PerformAction
+     * @tc.expected: text will wrap
+     */
+    auto paintProperty = frameNode_->GetPaintProperty<TextFieldPaintProperty>();
+    paintProperty->UpdateInputStyle(InputStyle::INLINE);
+    frameNode_->MarkModifyDone();
+    pattern_->OnModifyDone();
+    auto textInputAction = pattern_->GetDefaultTextInputAction();
+    EXPECT_EQ(textInputAction, TextInputAction::NEW_LINE);
+    pattern_->focusIndex_ = FocuseIndex::TEXT;
+    EXPECT_TRUE(pattern_->IsTextArea());
+    EXPECT_TRUE(pattern_->GetInputFilter() != "\n");
+    pattern_->PerformAction(textInputAction, false);
+
+    EXPECT_EQ(layoutProperty_->GetLineHeight(), 2.0_fp);
+}
+
+/**
+ * @tc.name: TextAreaTextDecoration001
+ * @tc.desc: test TextArea decoration001.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldUXTest, TextAreaTextDecoration001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: Create Text filed node with default text and placeholder
+     */
+    CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) {
+        model.SetTextDecoration(TextDecoration::LINE_THROUGH);
+        model.SetTextDecorationColor(Color::BLUE);
+        model.SetTextDecorationStyle(TextDecorationStyle::DOTTED);
+    });
+
+    /**
+     * @tc.expected: Current caret position is end of text
+     */
+    GetFocus();
+
+    /**
+     * @tc.steps: set TextInputAction NEW_LINE and call PerformAction
+     * @tc.expected: text will wrap
+     */
+    auto paintProperty = frameNode_->GetPaintProperty<TextFieldPaintProperty>();
+    paintProperty->UpdateInputStyle(InputStyle::INLINE);
+    frameNode_->MarkModifyDone();
+    pattern_->OnModifyDone();
+    auto textInputAction = pattern_->GetDefaultTextInputAction();
+    EXPECT_EQ(textInputAction, TextInputAction::NEW_LINE);
+    pattern_->focusIndex_ = FocuseIndex::TEXT;
+    EXPECT_TRUE(pattern_->IsTextArea());
+    EXPECT_TRUE(pattern_->GetInputFilter() != "\n");
+    pattern_->PerformAction(textInputAction, false);
+
+    EXPECT_EQ(layoutProperty_->GetTextDecoration(), TextDecoration::LINE_THROUGH);
+    EXPECT_EQ(layoutProperty_->GetTextDecorationColor(), Color::BLUE);
+    EXPECT_EQ(layoutProperty_->GetTextDecorationStyle(), TextDecorationStyle::DOTTED);
+}
+
+/**
  * @tc.name: InitSurfacePositionChangedCallback001
  * @tc.desc: Test init syrface Position change and callback.
  * @tc.type: FUNC
@@ -555,5 +670,282 @@ HWTEST_F(TextFieldUXTest, OnHandleMove004, TestSize.Level1)
     pattern_->isSingleHandle_ = false;
     RectF handleRect;
     pattern_->OnHandleMove(handleRect, true);
+}
+
+
+/**
+ * @tc.name: HandleSelect001
+ * @tc.desc: Test the caret move upAndDown
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldUXTest, HandleSelect001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: steps1. Initialize text input and Move the handles and then do handle selection.
+     */
+    int32_t start = 5;
+    int32_t end = 10;
+    CreateTextField(DEFAULT_TEXT, DEFAULT_PLACE_HOLDER);
+
+    /**
+     * @tc.steps: Move the handles and selection up.
+     *            Verify the selection data.
+     */
+    EXPECT_TRUE(pattern_->IsTextArea());
+    pattern_->HandleSetSelection(start, end, false);
+    pattern_->HandleSelect(CaretMoveIntent::Up);
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(pattern_->selectController_->GetFirstHandleInfo().index, start);
+    EXPECT_EQ(pattern_->selectController_->GetSecondHandleInfo().index, 0);
+
+    /**
+     * @tc.steps: Move the handles and selection down.
+     *            Verify the selection data.
+     */
+    EXPECT_TRUE(pattern_->IsTextArea());
+    pattern_->HandleSetSelection(start, end, false);
+    pattern_->HandleSelect(CaretMoveIntent::Down);
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(pattern_->selectController_->GetFirstHandleInfo().index, start);
+    EXPECT_EQ(pattern_->selectController_->GetSecondHandleInfo().index, 26);
+}
+
+/**
+ * @tc.name: HandleSelect002
+ * @tc.desc: Test the caret move right
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldUXTest, HandleSelect002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Initialize text input.
+     */
+    CreateTextField(DEFAULT_TEXT);
+
+    /**
+     * @tc.steps: Move the handles and selection Right.
+     *            Verify the selection data.
+     */
+    pattern_->HandleSelect(CaretMoveIntent::Right);
+    EXPECT_EQ(pattern_->selectController_->GetFirstHandleInfo().index, 26);
+    EXPECT_EQ(pattern_->selectController_->GetSecondHandleInfo().index, 26);
+}
+
+/**
+ * @tc.name: SetSelectionFlag001
+ * @tc.desc: Test SetSelectionFlag
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldUXTest, SetSelectionFlag001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Initialize text input.
+     */
+    auto start = 5;
+    auto end = 5;
+    CreateTextField(DEFAULT_TEXT);
+    pattern_->SetSelectionFlag(start, end);
+
+    /**
+     * @tc.steps: set start = end, Verify the caret position.
+     */
+    GetFocus();
+    pattern_->SetSelectionFlag(start, end);
+    EXPECT_EQ(pattern_->selectController_->GetCaretIndex(), 5);
+    
+    /**
+     * @tc.steps: set start != end, Verify the caret position.
+     */
+    GetFocus();
+    end = 10;
+    pattern_->SetSelectionFlag(start, end);
+    EXPECT_EQ(pattern_->selectController_->GetFirstHandleInfo().index, 5);
+    EXPECT_EQ(pattern_->selectController_->GetSecondHandleInfo().index, 10);
+}
+
+/**
+ * @tc.name: SelectTextShowMenu001
+ * @tc.desc: Test show menu after SetTextSelection()
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldUXTest, SelectTextShowMenu001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Initialize text input and get focus
+     */
+    CreateTextField(DEFAULT_TEXT);
+    GetFocus();
+
+    /**
+     * @tc.steps: step2. Set menuPolicy to be MenuPolicy::ALWAYS
+     */
+    SelectionOptions options;
+    options.menuPolicy = MenuPolicy::ALWAYS;
+    pattern_->SetSelectionFlag(0, DEFAULT_TEXT.length(), options);
+
+    /**
+     * @tc.steps: step3. Test menu open or close
+     * @tc.expected: text menu is open
+     */
+    auto ret = pattern_->GetSelectOverlayProxy()->IsMenuShow();
+    EXPECT_TRUE(ret);
+
+    /**
+     * @tc.steps: step4. Press esc
+     */
+    KeyEvent event;
+    event.code = KeyCode::KEY_ESCAPE;
+    pattern_->OnKeyEvent(event);
+
+    /**
+     * @tc.steps: step5. Set menuPolicy to be MenuPolicy::NEVER
+     */
+    options.menuPolicy = MenuPolicy::NEVER;
+    pattern_->SetSelectionFlag(0, DEFAULT_TEXT.length(), options);
+
+    /**
+     * @tc.steps: step6. Test menu open or close
+     * @tc.expected: text menu is close
+     */
+    ret = pattern_->GetSelectOverlayProxy()->IsMenuShow();
+    EXPECT_FALSE(ret);
+
+    /**
+     * @tc.steps: step7. Press esc
+     */
+    event.code = KeyCode::KEY_ESCAPE;
+    pattern_->OnKeyEvent(event);
+
+    /**
+     * @tc.steps: step8. Set menuPolicy to be MenuPolicy::DEFAULT
+     */
+    options.menuPolicy = MenuPolicy::DEFAULT;
+    pattern_->SetSelectionFlag(0, DEFAULT_TEXT.length(), options);
+
+    /**
+     * @tc.steps: step9. Test menu open or close
+     * @tc.expected: text menu is close
+     */
+    ret = pattern_->GetSelectOverlayProxy()->IsMenuShow();
+    EXPECT_FALSE(ret);
+}
+
+/**
+ * @tc.name: OnBackPressed001
+ * @tc.desc: Test OnBackPressed
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldUXTest, OnBackPressed001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Initialize text input.
+     */
+    CreateTextField(DEFAULT_TEXT);
+
+    /**
+     * @tc.steps: call OnBackPressed.
+     */
+    pattern_->HandleSetSelection(5, 10, false);
+    EXPECT_FALSE(pattern_->OnBackPressed());
+}
+
+/**
+ * @tc.name: TextInputTypeToString001
+ * @tc.desc: Test TextInputTypeToString
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldUXTest, TextInputTypeToString001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Initialize show number icon text input.
+     */
+    CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) {
+        model.SetType(TextInputType::NUMBER);
+    });
+
+    /**
+     * @tc.steps: step2. Call TextInputTypeToString.
+     */
+    EXPECT_EQ(pattern_->TextInputTypeToString(), "TextAreaType.NUMBER");
+}
+
+/**
+ * @tc.name: TextInputTypeToString002
+ * @tc.desc: Test TextInputTypeToString
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldUXTest, TextInputTypeToString002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Initialize show number icon text input.
+     */
+    CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) {
+        model.SetType(TextInputType::EMAIL_ADDRESS);
+    });
+
+    /**
+     * @tc.steps: step2. Call TextInputTypeToString.
+     */
+    EXPECT_EQ(pattern_->TextInputTypeToString(), "TextAreaType.EMAIL");
+}
+
+/**
+ * @tc.name: TextInputTypeToString003
+ * @tc.desc: Test TextInputTypeToString
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldUXTest, TextInputTypeToString003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Initialize show number icon text input.
+     */
+    CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) {
+        model.SetType(TextInputType::VISIBLE_PASSWORD);
+    });
+
+    /**
+     * @tc.steps: step2. Call TextInputTypeToString.
+     */
+    EXPECT_EQ(pattern_->TextInputTypeToString(), "InputType.Password");
+}
+
+/**
+ * @tc.name: TextInputTypeToString004
+ * @tc.desc: Test TextInputTypeToString
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldUXTest, TextInputTypeToString004, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Initialize show number icon text input.
+     */
+    CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) {
+        model.SetType(TextInputType::USER_NAME);
+    });
+
+    /**
+     * @tc.steps: step2. Call TextInputTypeToString.
+     */
+    EXPECT_EQ(pattern_->TextInputTypeToString(), "InputType.USER_NAME");
+}
+
+/**
+ * @tc.name: TextInputTypeToString005
+ * @tc.desc: Test TextInputTypeToString
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldUXTest, TextInputTypeToString005, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Initialize show number icon text input.
+     */
+    CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) {
+        model.SetType(TextInputType::NEW_PASSWORD);
+    });
+
+    /**
+     * @tc.steps: step2. Call TextInputTypeToString.
+     */
+    EXPECT_EQ(pattern_->TextInputTypeToString(), "InputType.NEW_PASSWORD");
 }
 }

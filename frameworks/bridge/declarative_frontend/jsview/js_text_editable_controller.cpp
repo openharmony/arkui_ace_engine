@@ -13,7 +13,9 @@
  * limitations under the License.
  */
 
+#include "frameworks/bridge/declarative_frontend/jsview/js_container_base.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_text_editable_controller.h"
+#include "frameworks/core/components_ng/pattern/text_field/text_field_model.h"
 
 namespace OHOS::Ace::Framework {
 
@@ -21,7 +23,7 @@ void JSTextEditableController::JSBind(BindingTarget globalObj)
 {
     JSClass<JSTextEditableController>::Method("caretPosition", &JSTextEditableController::CaretPosition);
     JSClass<JSTextEditableController>::CustomMethod("getCaretOffset", &JSTextEditableController::GetCaretOffset);
-    JSClass<JSTextEditableController>::Method("setTextSelection", &JSTextEditableController::SetTextSelection);
+    JSClass<JSTextEditableController>::CustomMethod("setTextSelection", &JSTextEditableController::SetTextSelection);
     JSClass<JSTextEditableController>::CustomMethod(
         "getTextContentRect", &JSTextEditableController::GetTextContentRect);
     JSClass<JSTextEditableController>::CustomMethod(
@@ -55,11 +57,34 @@ void JSTextEditableController::CaretPosition(int32_t caretPosition)
     }
 }
 
-void JSTextEditableController::SetTextSelection(int32_t selectionStart, int32_t selectionEnd)
+void JSTextEditableController::SetTextSelection(const JSCallbackInfo& info)
 {
+    if (info.Length() < 2) { /* 2:args number */
+        return;
+    }
     auto controller = controllerWeak_.Upgrade();
     if (controller) {
-        controller->SetTextSelection(selectionStart, selectionEnd);
+        const auto& start = info[0];
+        const auto& end = info[1];
+        std::optional<SelectionOptions> options = std::nullopt;
+        if (!start->IsNumber() || !end->IsNumber()) {
+            TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "SetTextSelection: The selectionStart or selectionEnd is NULL");
+        }
+        int32_t selectionStart = start->ToNumber<int32_t>();
+        int32_t selectionEnd = end->ToNumber<int32_t>();
+
+        if (info.Length() == 3) { /* 3:args number */
+            SelectionOptions optionTemp;
+            TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "SetTextSelection: The selectionOption is set");
+            JSRef<JSObject> optionsObj = JSRef<JSObject>::Cast(info[2]); /* 2:args number */
+            JSRef<JSVal> menuPolicy = optionsObj->GetProperty("menuPolicy");
+            int32_t tempPolicy = 0;
+            if (!menuPolicy->IsNull() && JSContainerBase::ParseJsInt32(menuPolicy, tempPolicy)) {
+                optionTemp.menuPolicy = static_cast<MenuPolicy>(tempPolicy);
+                options = optionTemp;
+            }
+        }
+        controller->SetTextSelection(selectionStart, selectionEnd, options);
     } else {
         TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "SetTextSelection: The JSTextEditableController is NULL");
     }

@@ -263,6 +263,7 @@ static napi_value JSReset(napi_env env, napi_callback_info info)
         NapiThrow(env, "Internal error. Animator is null in AnimatorResult.", ERROR_CODE_INTERNAL_ERROR);
         return nullptr;
     }
+    TAG_LOGI(AceLogTag::ACE_ANIMATION, "JsAnimator: JSReset, id:%{public}d ", animator->GetId());
     animator->ClearInterpolators();
     animator->ResetIsReverse();
     animatorResult->ApplyOption();
@@ -338,7 +339,8 @@ static napi_value JSPlay(napi_env env, napi_callback_info info)
             return nullptr;
         }
     }
-    TAG_LOGI(AceLogTag::ACE_ANIMATION, "JsAnimator: JSPlay, id:%{public}d", animator->GetId());
+    TAG_LOGI(AceLogTag::ACE_ANIMATION, "JsAnimator: JsPlay, id:%{public}d, %{public}s",
+        animator->GetId(), animatorResult->GetAnimatorOption()->ToString().c_str());
     if (animatorResult->GetMotion()) {
         animator->PlayMotion(animatorResult->GetMotion());
     } else {
@@ -356,6 +358,7 @@ static napi_value JSFinish(napi_env env, napi_callback_info info)
     if (!animator) {
         return nullptr;
     }
+    TAG_LOGI(AceLogTag::ACE_ANIMATION, "JsAnimator: JSFinish, id:%{public}d ", animator->GetId());
     animator->Finish();
     napi_value result = nullptr;
     napi_get_null(env, &result);
@@ -368,6 +371,7 @@ static napi_value JSPause(napi_env env, napi_callback_info info)
     if (!animator) {
         return nullptr;
     }
+    TAG_LOGI(AceLogTag::ACE_ANIMATION, "JsAnimator: JSPause, id:%{public}d ", animator->GetId());
     animator->Pause();
     napi_value result;
     napi_get_null(env, &result);
@@ -380,6 +384,7 @@ static napi_value JSCancel(napi_env env, napi_callback_info info)
     if (!animator) {
         return nullptr;
     }
+    TAG_LOGI(AceLogTag::ACE_ANIMATION, "JsAnimator: JSCancel, id:%{public}d ", animator->GetId());
     animator->Cancel();
     napi_value result;
     napi_get_null(env, &result);
@@ -410,10 +415,84 @@ static napi_value JSReverse(napi_env env, napi_callback_info info)
             return nullptr;
         }
     }
+    TAG_LOGI(AceLogTag::ACE_ANIMATION, "JsAnimator: JSReverse, id:%{public}d ", animator->GetId());
     animator->Reverse();
     napi_value result;
     napi_get_null(env, &result);
     return result;
+}
+
+static bool ParseJsValue(napi_env env, napi_value jsObject, const std::string& name, int32_t& data)
+{
+    napi_value value = nullptr;
+    napi_get_named_property(env, jsObject, name.c_str(), &value);
+    napi_valuetype type = napi_undefined;
+    napi_typeof(env, value, &type);
+    if (type == napi_number) {
+        napi_get_value_int32(env, value, &data);
+        return true;
+    } else {
+        return false;
+    }
+    return true;
+}
+
+static napi_value ParseExpectedFrameRateRange(napi_env env, napi_callback_info info, FrameRateRange& frameRateRange)
+{
+    size_t argc = 1;
+    napi_value argv[1];
+    napi_value thisVar = nullptr;
+    napi_get_cb_info(env, info, &argc, argv, &thisVar, nullptr);
+    if (argc != 1) {
+        NapiThrow(env, "The number of parameters is incorrect.", ERROR_CODE_PARAM_INVALID);
+        return nullptr;
+    }
+
+    napi_value& nativeObj = argv[0];
+    if (nativeObj == nullptr) {
+        NapiThrow(env, "The nativeObj is nullptr.", ERROR_CODE_PARAM_INVALID);
+        return nullptr;
+    }
+
+    int32_t minFPS = 0;
+    int32_t maxFPS = 0;
+    int32_t expectedFPS = 0;
+    ParseJsValue(env, nativeObj, "min", minFPS);
+    ParseJsValue(env, nativeObj, "max", maxFPS);
+    ParseJsValue(env, nativeObj, "expected", expectedFPS);
+
+    frameRateRange.Set(minFPS, maxFPS, expectedFPS);
+    if (!frameRateRange.IsValid()) {
+        NapiThrow(env, "ExpectedFrameRateRange Error", ERROR_CODE_PARAM_INVALID);
+        return nullptr;
+    }
+    return nullptr;
+}
+
+static napi_value JSSetExpectedFrameRateRange(napi_env env, napi_callback_info info)
+{
+    auto animatorResult = GetAnimatorResult(env, info);
+    if (!animatorResult) {
+        TAG_LOGW(AceLogTag::ACE_ANIMATION, "JsAnimator: cannot find animator when call SetExpectedFrameRateRange");
+        return nullptr;
+    }
+    auto animator = animatorResult->GetAnimator();
+    if (!animator) {
+        TAG_LOGW(AceLogTag::ACE_ANIMATION, "JsAnimator: no animator is created when call SetExpectedFrameRateRange");
+        return nullptr;
+    }
+    TAG_LOGI(AceLogTag::ACE_ANIMATION, "JsAnimator: JSSetExpectedFrameRateRange, id:%{public}d", animator->GetId());
+    if (!animator->HasScheduler()) {
+        auto result = animator->AttachSchedulerOnContainer();
+        if (!result) {
+            TAG_LOGW(AceLogTag::ACE_ANIMATION, "JsAnimator: SetExpectedFrameRateRange failed");
+            return nullptr;
+        }
+    }
+    FrameRateRange frameRateRange;
+    ParseExpectedFrameRateRange(env, info, frameRateRange);
+    animator->SetExpectedFrameRateRange(frameRateRange);
+    return nullptr;
 }
 
 static napi_value SetOnframe(napi_env env, napi_callback_info info)
@@ -679,6 +758,7 @@ static napi_value JSCreate(napi_env env, napi_callback_info info)
         DECLARE_NAPI_FUNCTION("pause", JSPause),
         DECLARE_NAPI_FUNCTION("cancel", JSCancel),
         DECLARE_NAPI_FUNCTION("reverse", JSReverse),
+        DECLARE_NAPI_FUNCTION("setExpectedFrameRateRange", JSSetExpectedFrameRateRange),
         DECLARE_NAPI_SETTER("onframe", SetOnframe),
         DECLARE_NAPI_SETTER("onfinish", SetOnfinish),
         DECLARE_NAPI_SETTER("oncancel", SetOncancel),

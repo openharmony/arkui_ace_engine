@@ -16,8 +16,11 @@
 #include "ui_observer_listener.h"
 
 namespace OHOS::Ace::Napi {
-void UIObserverListener::OnNavigationStateChange(
-    const std::string& navigationId, const std::string& navDestinationName, NG::NavDestinationState navState)
+namespace {
+constexpr char NAV_BAR[] = "navBar";
+}
+
+void UIObserverListener::OnNavigationStateChange(const NG::NavDestinationInfo& info)
 {
     if (!env_ || !callback_) {
         TAG_LOGW(AceLogTag::ACE_OBSERVER,
@@ -26,18 +29,7 @@ void UIObserverListener::OnNavigationStateChange(
     }
     napi_value callback = nullptr;
     napi_get_reference_value(env_, callback_, &callback);
-    napi_value objValue = nullptr;
-    napi_create_object(env_, &objValue);
-    napi_value id = nullptr;
-    napi_value name = nullptr;
-    napi_value state = nullptr;
-    napi_create_string_utf8(env_, navigationId.c_str(), navigationId.length(), &id);
-    napi_create_string_utf8(env_, navDestinationName.c_str(), navDestinationName.length(), &name);
-    napi_create_int32(env_, static_cast<int32_t>(navState), &state);
-    napi_set_named_property(env_, objValue, "navigationId", id);
-    napi_set_named_property(env_, objValue, "name", name);
-    napi_set_named_property(env_, objValue, "state", state);
-    napi_value argv[] = { objValue };
+    napi_value argv[] = { CreateNavDestinationInfoObj(info) };
     napi_call_function(env_, nullptr, callback, 1, argv, nullptr);
 }
 
@@ -112,6 +104,81 @@ void UIObserverListener::OnDensityChange(double density)
     napi_set_named_property(env_, objValue, "density", napiDensity);
     napi_value argv[] = { objValue };
     napi_call_function(env_, nullptr, callback, 1, argv, nullptr);
+}
+
+void UIObserverListener::OnDrawOrLayout()
+{
+    if (!env_ || !callback_) {
+        return;
+    }
+    napi_value callback = nullptr;
+    napi_get_reference_value(env_, callback_, &callback);
+    napi_value objValue = nullptr;
+    napi_create_object(env_, &objValue);
+    napi_value argv[] = { objValue };
+    napi_call_function(env_, nullptr, callback, 1, argv, nullptr);
+}
+
+void UIObserverListener::OnNavDestinationSwitch(const NG::NavDestinationSwitchInfo& switchInfo)
+{
+    if (!env_ || !callback_) {
+        TAG_LOGW(AceLogTag::ACE_OBSERVER,
+            "Handle navDestination switch failed, runtime or callback function invalid!");
+        return;
+    }
+
+    napi_value callback = nullptr;
+    napi_get_reference_value(env_, callback_, &callback);
+    napi_value argv[] = { CreateNavDestinationSwitchInfoObj(switchInfo) };
+    napi_call_function(env_, nullptr, callback, 1, argv, nullptr);
+}
+
+napi_value UIObserverListener::CreateNavDestinationSwitchInfoObj(const NG::NavDestinationSwitchInfo& switchInfo)
+{
+    napi_value objValue = nullptr;
+    napi_create_object(env_, &objValue);
+    napi_value napiOperation = nullptr;
+    napi_value napiFrom = nullptr;
+    if (switchInfo.from.has_value()) {
+        napiFrom = CreateNavDestinationInfoObj(switchInfo.from.value());
+    } else {
+        napi_create_string_utf8(env_, NAV_BAR, NAPI_AUTO_LENGTH, &napiFrom);
+    }
+    napi_value napiTo = nullptr;
+    if (switchInfo.to.has_value()) {
+        napiTo = CreateNavDestinationInfoObj(switchInfo.to.value());
+    } else {
+        napi_create_string_utf8(env_, NAV_BAR, NAPI_AUTO_LENGTH, &napiTo);
+    }
+    napi_create_int32(env_, static_cast<int32_t>(switchInfo.operation), &napiOperation);
+    napi_set_named_property(env_, objValue, "context", switchInfo.context);
+    napi_set_named_property(env_, objValue, "from", napiFrom);
+    napi_set_named_property(env_, objValue, "to", napiTo);
+    napi_set_named_property(env_, objValue, "operation", napiOperation);
+    return objValue;
+}
+
+napi_value UIObserverListener::CreateNavDestinationInfoObj(const NG::NavDestinationInfo& info)
+{
+    napi_value objValue = nullptr;
+    napi_create_object(env_, &objValue);
+    napi_value napiNavId = nullptr;
+    napi_value napiName = nullptr;
+    napi_value napiState = nullptr;
+    napi_value napiIdx = nullptr;
+    napi_value napiNavDesId = nullptr;
+    napi_create_string_utf8(env_, info.navigationId.c_str(), info.navigationId.length(), &napiNavId);
+    napi_create_string_utf8(env_, info.name.c_str(), info.name.length(), &napiName);
+    napi_create_int32(env_, static_cast<int32_t>(info.state), &napiState);
+    napi_create_int32(env_, info.index, &napiIdx);
+    napi_create_string_utf8(env_, info.navDestinationId.c_str(), info.navDestinationId.length(), &napiNavDesId);
+    napi_set_named_property(env_, objValue, "navigationId", napiNavId);
+    napi_set_named_property(env_, objValue, "name", napiName);
+    napi_set_named_property(env_, objValue, "state", napiState);
+    napi_set_named_property(env_, objValue, "index", napiIdx);
+    napi_set_named_property(env_, objValue, "param", info.param);
+    napi_set_named_property(env_, objValue, "navDestinationId", napiNavDesId);
+    return objValue;
 }
 
 napi_value UIObserverListener::GetNapiCallback()

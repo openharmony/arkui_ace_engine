@@ -218,28 +218,33 @@ void LazyForEachNode::MarkNeedSyncRenderTree(bool needRebuild)
     }
 }
 
-RefPtr<UINode> LazyForEachNode::GetFrameChildByIndex(uint32_t index, bool needBuild)
+RefPtr<UINode> LazyForEachNode::GetFrameChildByIndex(uint32_t index, bool needBuild, bool isCache)
 {
-    if (index < static_cast<uint32_t>(FrameCount())) {
-        auto child = builder_->GetChildByIndex(index, needBuild);
-        if (child.second) {
-            if (isActive_) {
-                child.second->SetJSViewActive(true);
-            }
-            if (child.second->GetDepth() != GetDepth() + 1) {
-                child.second->SetDepth(GetDepth() + 1);
-            }
-            MarkNeedSyncRenderTree();
-            children_.clear();
-            child.second->SetParent(WeakClaim(this));
-            if (IsOnMainTree()) {
-                child.second->AttachToMainTree();
-            }
-            PostIdleTask();
-            return child.second->GetFrameChildByIndex(0, needBuild);
-        }
+    if (index >= static_cast<uint32_t>(FrameCount())) {
+        return nullptr;
     }
-    return nullptr;
+    auto child = builder_->GetChildByIndex(index, needBuild, isCache);
+    if (!child.second) {
+        return nullptr;
+    }
+    if (isCache) {
+        child.second->SetParent(WeakClaim(this));
+        return child.second->GetFrameChildByIndex(0, needBuild);
+    }
+    if (isActive_) {
+        child.second->SetJSViewActive(true);
+    }
+    if (child.second->GetDepth() != GetDepth() + 1) {
+        child.second->SetDepth(GetDepth() + 1);
+    }
+    MarkNeedSyncRenderTree();
+    children_.clear();
+    child.second->SetParent(WeakClaim(this));
+    if (IsOnMainTree()) {
+        child.second->AttachToMainTree();
+    }
+    PostIdleTask();
+    return child.second->GetFrameChildByIndex(0, needBuild);
 }
 
 int32_t LazyForEachNode::GetIndexByUINode(const RefPtr<UINode>& uiNode) const
@@ -288,10 +293,11 @@ void LazyForEachNode::DoSetActiveChildRange(int32_t start, int32_t end)
     if (!builder_) {
         return;
     }
-    children_.clear();
-    builder_->SetActiveChildRange(start, end);
-    MarkNeedSyncRenderTree();
-    PostIdleTask();
+    if (builder_->SetActiveChildRange(start, end)) {
+        children_.clear();
+        MarkNeedSyncRenderTree();
+        PostIdleTask();
+    }
 }
 
 const std::list<RefPtr<UINode>>& LazyForEachNode::GetChildren() const

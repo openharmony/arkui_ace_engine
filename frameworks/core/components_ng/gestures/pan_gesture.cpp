@@ -23,7 +23,7 @@ namespace OHOS::Ace::NG {
 
 RefPtr<NGGestureRecognizer> PanGesture::CreateRecognizer()
 {
-    auto context = PipelineContext::GetCurrentContext();
+    auto context = PipelineContext::GetCurrentContextSafely();
     CHECK_NULL_RETURN(context, nullptr);
 
     RefPtr<PanRecognizer> panRecognizer;

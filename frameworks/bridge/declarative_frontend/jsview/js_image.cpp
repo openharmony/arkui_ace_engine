@@ -202,7 +202,7 @@ void JSImage::OnFinish(const JSCallbackInfo& info)
         return;
     }
     RefPtr<JsFunction> jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(tmpInfo));
-    WeakPtr<NG::FrameNode> targetNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    WeakPtr<NG::FrameNode> targetNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
     auto onFinish = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc), node = targetNode]() {
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
         ACE_SCORING_EVENT("Image.onFinish");
@@ -364,13 +364,22 @@ void JSImage::SetImageFill(const JSCallbackInfo& info)
     ImageModel::GetInstance()->SetImageFill(color);
 }
 
-void JSImage::SetImageRenderMode(int32_t imageRenderMode)
+void JSImage::SetImageRenderMode(const JSCallbackInfo& info)
 {
-    auto renderMode = static_cast<ImageRenderMode>(imageRenderMode);
-    if (renderMode < ImageRenderMode::ORIGINAL || renderMode > ImageRenderMode::TEMPLATE) {
-        renderMode = ImageRenderMode::ORIGINAL;
+    if (info.Length() < 1) {
+        ImageModel::GetInstance()->SetImageRenderMode(ImageRenderMode::ORIGINAL);
+        return;
     }
-    ImageModel::GetInstance()->SetImageRenderMode(renderMode);
+    auto jsImageRenderMode = info[0];
+    if (jsImageRenderMode->IsNumber()) {
+        auto renderMode = static_cast<ImageRenderMode>(jsImageRenderMode->ToNumber<int32_t>());
+        if (renderMode < ImageRenderMode::ORIGINAL || renderMode > ImageRenderMode::TEMPLATE) {
+            renderMode = ImageRenderMode::ORIGINAL;
+        }
+        ImageModel::GetInstance()->SetImageRenderMode(renderMode);
+    } else {
+        ImageModel::GetInstance()->SetImageRenderMode(ImageRenderMode::ORIGINAL);
+    }
 }
 
 void JSImage::SetImageInterpolation(int32_t imageInterpolation)
@@ -603,7 +612,7 @@ void JSImage::JsOnDragStart(const JSCallbackInfo& info)
         return;
     }
     RefPtr<JsDragFunction> jsOnDragStartFunc = AceType::MakeRefPtr<JsDragFunction>(JSRef<JSFunc>::Cast(info[0]));
-    WeakPtr<NG::FrameNode> frameNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    WeakPtr<NG::FrameNode> frameNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
     auto onDragStartId = [execCtx = info.GetExecutionContext(), func = std::move(jsOnDragStartFunc), node = frameNode](
                              const RefPtr<DragEvent>& info, const std::string& extraParams) -> NG::DragDropBaseInfo {
         NG::DragDropBaseInfo itemInfo;

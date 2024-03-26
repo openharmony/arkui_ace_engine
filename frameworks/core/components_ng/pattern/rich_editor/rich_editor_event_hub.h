@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -91,8 +91,16 @@ public:
     const std::string& GetValue() const;
     void SetFontColor(const std::string& fontColor);
     const std::string& GetFontColor() const;
+    void SetFontFeature(const FONT_FEATURES_MAP& fontFeature);
+    const FONT_FEATURES_MAP& GetFontFeatures() const;
     void SetFontSize(double fontSize);
     double GetFontSize() const;
+    void SetLineHeight(double lineHeight);
+    double GetLineHeight() const;
+    void SetLetterspacing(double letterSpacing);
+    double GetLetterspacing() const;
+    void SetTextStyle(TextStyleResult textStyle);
+    TextStyleResult GetTextStyle() const;
     void SetFontWeight(int32_t fontWeigth);
     int32_t GetFontWeight() const;
     void SetFontFamily(const std::string& fontFamily);
@@ -114,6 +122,22 @@ public:
     void SetImageFit(ImageFit objectFit);
     ImageFit GetObjectFit() const;
 
+    void SetBorderRadius(const std::string& borderRadius)
+    {
+        borderRadius_ = borderRadius;
+    }
+    const std::string& GetBorderRadius() const
+    {
+        return borderRadius_;
+    }
+    void SetMargin(const std::string& margin)
+    {
+        margin_ = margin;
+    }
+    const std::string& GetMargin() const
+    {
+        return margin_;
+    }
     void SetFontStyle(OHOS::Ace::FontStyle fontStyle)
     {
         fontStyle_ = fontStyle;
@@ -125,6 +149,9 @@ public:
     }
 
 private:
+    TextStyleResult textStyle_;
+    double lineHeight_ = 0.0;
+    double letterSpacing_ = 0.0;
     int32_t spanIndex_ = 0;
     int32_t spanRangeStart_ = 0;
     int32_t spanRangeEnd_ = 0;
@@ -133,6 +160,7 @@ private:
     int32_t eraseLength_ = 0;
     std::string value_;
     std::string fontColor_;
+    FONT_FEATURES_MAP fontFeature_;
     double fontSize_ = 0.0;
     OHOS::Ace::FontStyle fontStyle_;
     int32_t fontWeigth_ = 0;
@@ -145,6 +173,8 @@ private:
     int32_t height_ = 0;
     VerticalAlign verticalAlign_;
     ImageFit objectFit_;
+    std::string borderRadius_;
+    std::string margin_;
 };
 
 enum class RichEditorDeleteDirection { BACKWARD = 0, FORWARD };
@@ -187,7 +217,8 @@ public:
     void SetOnDeleteComplete(std::function<void()>&& func);
     void FireOnDeleteComplete();
     std::string GetDragExtraParams(const std::string& extraInfo, const Point& point, DragEventType type) override;
-
+    void SetOnEditingChange(std::function<void(const bool&)> && func);
+    void FireOnEditingChange(bool isEditing);
     void SetOnSelect(std::function<void(const BaseEventInfo*)>&& func)
     {
         onSelect_ = std::move(func);
@@ -239,6 +270,7 @@ private:
     std::function<void(const RichEditorAbstractSpanResult&)> onIMEIputComplete_;
     std::function<bool(const RichEditorDeleteValue&)> aboutToDelete_;
     std::function<void()> onDeleteComplete_;
+    std::function<void(const bool&)> onEditingChange_;
     ACE_DISALLOW_COPY_AND_MOVE(RichEditorEventHub);
 };
 } // namespace OHOS::Ace::NG

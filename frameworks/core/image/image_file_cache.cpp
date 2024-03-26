@@ -205,14 +205,23 @@ void ImageFileCache::WriteCacheFile(
 bool ImageFileCache::ConvertToAstcAndWriteToFile(const void* const data, size_t size, const std::string& fileCacheKey,
     size_t& astcSize)
 {
-    auto astcFilePath = ConstructCacheFilePath(fileCacheKey + ASTC_SUFFIX);
-
     RefPtr<ImageSource> imageSource = ImageSource::Create(static_cast<const uint8_t*>(data), size);
+    if (imageSource->GetFrameCount() != 1) {
+        TAG_LOGI(AceLogTag::ACE_IMAGE, "Image frame count is not 1, will not convert to astc. %{public}s",
+            fileCacheKey.c_str());
+        return false;
+    }
     RefPtr<ImagePacker> imagePacker = ImagePacker::Create();
     PackOption option;
     option.format = CONVERT_ASTC_FORMAT;
     auto pixelMap = imageSource->CreatePixelMap({-1, -1});
+    if (pixelMap == nullptr) {
+        TAG_LOGW(AceLogTag::ACE_IMAGE, "Get pixel map failed, will not convert to astc. %{public}s",
+            fileCacheKey.c_str());
+        return false;
+    }
 
+    auto astcFilePath = ConstructCacheFilePath(fileCacheKey + ASTC_SUFFIX);
     imagePacker->StartPacking(astcFilePath, option);
     imagePacker->AddImage(*pixelMap);
     int64_t packedSize = 0;

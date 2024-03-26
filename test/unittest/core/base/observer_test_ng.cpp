@@ -23,11 +23,13 @@
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/observer_handler.h"
 #include "core/components_ng/base/ui_node.h"
+#include "core/components_ng/pattern/scroll/scroll_pattern.h"
 #include "core/components_ng/pattern/navigation/navigation_pattern.h"
 #include "core/components_ng/pattern/navrouter/navdestination_layout_property.h"
 #include "core/components_ng/pattern/navrouter/navdestination_model_ng.h"
 #include "core/components_ng/pattern/navrouter/navdestination_pattern.h"
 #include "core/components_v2/inspector/inspector_constants.h"
+#include "test/mock/core/common/mock_container.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -36,9 +38,19 @@ namespace OHOS::Ace::NG {
 
 class ObserverTestNg : public testing::Test {
 public:
-    static void SetUpTestCase() {}
-    static void TearDownTestCase() {}
+    static void SetUpTestCase();
+    static void TearDownTestCase();
 };
+
+void ObserverTestNg::SetUpTestCase()
+{
+    MockContainer::SetUp();
+}
+
+void ObserverTestNg::TearDownTestCase()
+{
+    MockContainer::TearDown();
+}
 
 /**
  * @tc.name: ObserverTestNg001
@@ -74,7 +86,14 @@ HWTEST_F(ObserverTestNg, ObserverTestNg002, TestSize.Level1)
     navigation->GetPattern<NavigationPattern>()->navigationStack_ = AceType::MakeRefPtr<NavigationStack>();
     auto contentNode = NavDestinationGroupNode::GetOrCreateGroupNode(
         V2::NAVDESTINATION_VIEW_ETS_TAG, 22, []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
+    auto pathInfo = AceType::MakeRefPtr<NavPathInfo>();
+    ASSERT_NE(pathInfo, nullptr);
+    auto context = AceType::MakeRefPtr<NavDestinationContext>();
+    ASSERT_NE(context, nullptr);
+    context->SetNavPathInfo(pathInfo);
+
     auto pattern = contentNode->GetPattern<NavDestinationPattern>();
+    pattern->SetNavDestinationContext(context);
     pattern->name_ = "test_name";
     pattern->isOnShow_ = true;
     pattern->navigationNode_ = AceType::WeakClaim(Referenced::RawPtr(navigation));
@@ -88,8 +107,59 @@ HWTEST_F(ObserverTestNg, ObserverTestNg002, TestSize.Level1)
     ASSERT_EQ(pattern->GetNavigationNode(), navigation);
 
     info = UIObserverHandler::GetInstance().GetNavigationState(contentNode);
+    ASSERT_NE(info, nullptr);
     ASSERT_EQ(info->name, "test_name");
     ASSERT_EQ(info->navigationId, "");
     ASSERT_EQ(info->state, NavDestinationState::ON_SHOWN);
+}
+
+/**
+ * @tc.name: ObserverTestNg003
+ * @tc.desc: Test the operation of Observer
+ * @tc.type: FUNC
+ */
+HWTEST_F(ObserverTestNg, ObserverTestNg003, TestSize.Level1)
+{
+    auto frameNode = FrameNode::GetOrCreateFrameNode(
+        V2::SCROLL_ETS_TAG, 12, []() { return AceType::MakeRefPtr<ScrollPattern>(); });
+    auto pattern = frameNode->GetPattern<ScrollablePattern>();
+    UIObserverHandler::GetInstance().NotifyScrollEventStateChange(AceType::WeakClaim(Referenced::RawPtr(pattern)),
+                                                                 ScrollEventType::SCROLL_START);
+    ASSERT_EQ(UIObserverHandler::GetInstance().scrollEventHandleFunc_, nullptr);
+}
+
+/**
+ * @tc.name: ObserverTestNg004
+ * @tc.desc: Test the operation of Observer
+ * @tc.type: FUNC
+ */
+HWTEST_F(ObserverTestNg, ObserverTestNg004, TestSize.Level1)
+{
+    auto frameNode = FrameNode::GetOrCreateFrameNode(
+        V2::SCROLL_ETS_TAG, 12, []() { return AceType::MakeRefPtr<ScrollPattern>(); });
+    auto pattern = frameNode->GetPattern<ScrollablePattern>();
+    double offset = 0.0f;
+    pattern->UpdateCurrentOffset(offset, SCROLL_FROM_AXIS);
+
+    auto info = UIObserverHandler::GetInstance().GetScrollEventState(frameNode);
+    ASSERT_EQ(info->id, std::to_string(frameNode->GetId()));
+    ASSERT_EQ(info->scrollEvent, ScrollEventType::SCROLL_START);
+    ASSERT_EQ(info->offset, offset);
+}
+
+/**
+ * @tc.name: ObserverTestNg005
+ * @tc.desc: Test the operation of Observer
+ * @tc.type: FUNC
+ */
+HWTEST_F(ObserverTestNg, ObserverTestNg005, TestSize.Level1)
+{
+    double testDensity = 0.;
+    UIObserverHandler::DensityHandleFunc densityHandleFunc = [&testDensity](AbilityContextInfo& context,
+                                                                 double density) -> void { testDensity = density; };
+    UIObserverHandler::GetInstance().densityHandleFunc_ = densityHandleFunc;
+    double targetDensity = 3.5;
+    UIObserverHandler::GetInstance().NotifyDensityChange(targetDensity);
+    EXPECT_EQ(testDensity, targetDensity);
 }
 }

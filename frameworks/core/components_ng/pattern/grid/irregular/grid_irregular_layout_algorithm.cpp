@@ -198,6 +198,15 @@ void UpdateStartInfo(GridLayoutInfo& info, const GridLayoutRangeSolver::Starting
     const auto row = info.gridMatrix_.find(res.row);
     info.startIndex_ = (row != info.gridMatrix_.end()) ? row->second.at(0) : 0;
 }
+
+float GetPrevHeight(const GridLayoutInfo& info, float mainGap)
+{
+    float height = 0.0f;
+    for (int32_t i = info.startMainLineIndex_; i <= info.endMainLineIndex_; ++i) {
+        height += info.lineHeightMap_.at(i) + mainGap;
+    }
+    return height;
+}
 } // namespace
 
 void GridIrregularLayoutAlgorithm::MeasureForward(float mainSize)
@@ -207,11 +216,23 @@ void GridIrregularLayoutAlgorithm::MeasureForward(float mainSize)
     auto res = solver.FindStartingRow(mainGap_);
     UpdateStartInfo(info, res);
 
-    GridIrregularFiller filler(&gridLayoutInfo_, wrapper_);
-    auto fillRes = filler.Fill({ crossLens_, crossGap_, mainGap_ }, mainSize - res.pos, res.row);
-    info.endMainLineIndex_ = fillRes.endMainLineIndex;
-    info.endIndex_ = fillRes.endIndex;
+    if (info.endIndex_ == -1) {
+        info.endMainLineIndex_ = -1;
+    }
+    float targetLen = mainSize - info.currentOffset_;
+    float heightToFill = targetLen - GetPrevHeight(info, mainGap_);
+    if (Positive(heightToFill)) {
+        GridIrregularFiller filler(&gridLayoutInfo_, wrapper_);
+        auto fillRes = filler.Fill({ crossLens_, crossGap_, mainGap_ }, heightToFill, info.endMainLineIndex_ + 1);
+        info.endMainLineIndex_ = fillRes.endMainLineIndex;
+        info.endIndex_ = fillRes.endIndex;
+    } else {
+        auto [endMainLineIdx, endIdx] = solver.SolveForwardForEndIdx(mainGap_, targetLen, info.startMainLineIndex_);
+        info.endMainLineIndex_ = endMainLineIdx;
+        info.endIndex_ = endIdx;
+    }
 
+    // adjust offset
     if (!overScroll_ && info.endIndex_ == info.childrenCount_ - 1) {
         float overDis = mainSize - info.contentEndPadding_ - (info.GetTotalHeightOfItemsInView(mainGap_) + res.pos);
         if (LessOrEqual(overDis, 0.0f)) {
@@ -367,10 +388,11 @@ void GridIrregularLayoutAlgorithm::LayoutChildren(float mainOffset)
             }
         }
         // add mainGap below the item
-        if (info.lineHeightMap_.find(r) == info.lineHeightMap_.end()) {
+        auto iter = info.lineHeightMap_.find(r);
+        if (iter == info.lineHeightMap_.end()) {
             continue;
         }
-        mainOffset += info.lineHeightMap_.at(r) + mainGap_;
+        mainOffset += iter->second + mainGap_;
     }
 }
 
@@ -487,8 +509,9 @@ void GridIrregularLayoutAlgorithm::PrepareLineHeight(float mainSize, int32_t& ju
 namespace {
 void AddLineHeight(float& height, int32_t curLine, int32_t startLine, const std::map<int32_t, float>& lineHeights)
 {
-    if (lineHeights.find(curLine) != lineHeights.end()) {
-        height += lineHeights.at(curLine);
+    auto iter = lineHeights.find(curLine);
+    if (iter != lineHeights.end()) {
+        height += iter->second;
     } else {
         // estimation
         height += height / std::abs(curLine - startLine);

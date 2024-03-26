@@ -90,7 +90,7 @@ public:
 
     void OnAnimateStop() override;
 
-    void ScrollPage(bool reverse);
+    void ScrollPage(bool reverse, bool smooth = false) override;
 
     void ScrollToIndex(int32_t index, bool smooth = false, ScrollAlign align = ScrollAlign::START) override;
 
@@ -132,7 +132,6 @@ private:
     }
     void OnModifyDone() override;
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
-    void InitScrollableEvent();
     void CheckScrollable();
     bool IsOutOfBoundary(bool useCurrentDelta = true) override;
     void SetEdgeEffectCallback(const RefPtr<ScrollEdgeEffect>& scrollEffect) override;

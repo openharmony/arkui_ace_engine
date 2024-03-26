@@ -95,7 +95,7 @@ double Dimension::ConvertToVp() const
         return value_;
     }
 
-    auto pipeline = PipelineBase::GetCurrentContext();
+    auto pipeline = PipelineBase::GetCurrentContextSafely();
     CHECK_NULL_RETURN(pipeline, 0.0);
     if (unit_ == DimensionUnit::NONE) {
         return value_ / pipeline->GetDipScale();
@@ -121,7 +121,7 @@ double Dimension::ConvertToPx() const
         return value_;
     }
 
-    auto pipeline = PipelineBase::GetCurrentContext();
+    auto pipeline = PipelineBase::GetCurrentContextSafely();
     CHECK_NULL_RETURN(pipeline, 0.0);
     if (unit_ == DimensionUnit::VP) {
         return value_ * pipeline->GetDipScale();

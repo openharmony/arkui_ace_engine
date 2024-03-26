@@ -16,12 +16,13 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_DECLARATION_SVG_SVG_FE_COLORMATRIX_DECLARATION_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_DECLARATION_SVG_SVG_FE_COLORMATRIX_DECLARATION_H
 
+#include "core/components/declaration/svg/svg_declaration.h"
 #include "core/components/declaration/svg/svg_fe_declaration.h"
 
 namespace OHOS::Ace {
 
 struct SvgFeColorMatrixAttribute : SvgFeAttribute {
-    std::string type;
+    SvgFeColorMatrixType type = SvgFeColorMatrixType::Matrix;
     std::string values;
 };
 
@@ -33,10 +34,22 @@ public:
     ~SvgFeColorMatrixDeclaration() override = default;
     void InitializeStyle() override;
 
+    SvgFeColorMatrixType GetColorMatrixType(const std::string& type)
+    {
+        if (type == "saturate") {
+            return SvgFeColorMatrixType::Saturate;
+        } else if (type == "hueRotate") {
+            return SvgFeColorMatrixType::HueRotate;
+        } else if (type == "luminanceToAlpha") {
+            return SvgFeColorMatrixType::LuminanceToAlpha;
+        }
+        return SvgFeColorMatrixType::Matrix;
+    }
+
     void SetType(const std::string& type)
     {
         auto& attribute = MaybeResetAttribute<SvgFeColorMatrixAttribute>(AttributeTag::SPECIALIZED_ATTR);
-        attribute.type = type;
+        attribute.type = GetColorMatrixType(type);
     }
 
     void SetValues(const std::string& values)
@@ -45,7 +58,7 @@ public:
         attribute.values = values;
     }
 
-    const std::string& GetType() const
+    SvgFeColorMatrixType GetType() const
     {
         auto& attribute = static_cast<SvgFeColorMatrixAttribute&>(GetAttribute(AttributeTag::SPECIALIZED_ATTR));
         return attribute.type;

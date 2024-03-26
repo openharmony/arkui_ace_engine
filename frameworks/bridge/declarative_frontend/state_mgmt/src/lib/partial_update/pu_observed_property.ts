@@ -33,6 +33,7 @@ class ObservedPropertyPU<T> extends ObservedPropertyAbstractPU<T>
     super(owningView, propertyName);
    
     this.setValueInternal(localInitValue);
+    this.setDecoratorInfo("@State");
   }
 
   aboutToBeDeleted(unsubscribeMe?: IPropertySubscriber) {
@@ -40,12 +41,6 @@ class ObservedPropertyPU<T> extends ObservedPropertyAbstractPU<T>
     this.removeSubscriber(unsubscribeMe);
     super.aboutToBeDeleted();
   }
-
-  
-  public debugInfoDecorator() : string {
-    return `@State/@Provide (class ObservedPropertyPU)`;
-  }
-
 
   /**
    * Called by a SynchedPropertyObjectTwoWayPU (@Link, @Consume) that uses this as sync peer when it has changed
@@ -133,7 +128,7 @@ class ObservedPropertyPU<T> extends ObservedPropertyAbstractPU<T>
     this.recordPropertyDependentUpdate();
     if (this.shouldInstallTrackedObjectReadCb) {
       stateMgmtConsole.propertyAccess(`${this.debugInfo()}: get: @Track optimised mode. Will install read cb func if value is an object`);
-      ObservedObject.registerPropertyReadCb(this.wrappedValue_, this.onOptimisedObjectPropertyRead.bind(this));
+      ObservedObject.registerPropertyReadCb(this.wrappedValue_, this.onOptimisedObjectPropertyRead, this);
     } else {
       stateMgmtConsole.propertyAccess(`${this.debugInfo()}: get: compatibility mode. `);
     }
@@ -156,8 +151,8 @@ class ObservedPropertyPU<T> extends ObservedPropertyAbstractPU<T>
     const oldValue = this.wrappedValue_;
     if (this.setValueInternal(newValue)) {
       TrackedObject.notifyObjectValueAssignment(/* old value */ oldValue, /* new value */ this.wrappedValue_,
-        this.notifyPropertyHasChangedPU.bind(this),
-        this.notifyTrackedObjectPropertyHasChanged.bind(this));
+        this.notifyPropertyHasChangedPU,
+        this.notifyTrackedObjectPropertyHasChanged, this);
     }
   }
 

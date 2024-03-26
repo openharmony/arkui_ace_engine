@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -79,6 +79,10 @@ public:
     }
 
     virtual void DestroyView() {}
+    virtual bool UpdatePopupUIExtension(const RefPtr<NG::FrameNode>& node)
+    {
+        return false;
+    }
 
     // Get the instance id of this container
     virtual int32_t GetInstanceId() const = 0;
@@ -422,7 +426,7 @@ public:
         return false;
     }
 
-    virtual bool RequestAutoFill(const RefPtr<NG::FrameNode>& node, AceAutoFillType autoFillType)
+    virtual bool RequestAutoFill(const RefPtr<NG::FrameNode>& node, AceAutoFillType autoFillType, bool &isPopup)
     {
         return false;
     }
@@ -451,12 +455,12 @@ public:
 
     static bool LessThanAPITargetVersion(PlatformVersion version)
     {
-        return AceApplicationInfo::GetInstance().GetApiTargetVersion() < static_cast<int32_t>(version);
+        return (AceApplicationInfo::GetInstance().GetApiTargetVersion() % 1000) < static_cast<int32_t>(version);
     }
 
     static bool GreatOrEqualAPITargetVersion(PlatformVersion version)
     {
-        return AceApplicationInfo::GetInstance().GetApiTargetVersion() >= static_cast<int32_t>(version);
+        return (AceApplicationInfo::GetInstance().GetApiTargetVersion() % 1000) >= static_cast<int32_t>(version);
     }
 
     void SetAppBar(const RefPtr<NG::AppBarView>& appBar)

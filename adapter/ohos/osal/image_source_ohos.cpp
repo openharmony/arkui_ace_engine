@@ -127,4 +127,15 @@ ImageSource::Size ImageSourceOhos::GetImageSize()
     }
     return { info.size.width, info.size.height };
 }
+
+uint32_t ImageSourceOhos::GetFrameCount()
+{
+    uint32_t errorCode;
+    auto frameCount = imageSource_->GetFrameCount(errorCode);
+    if (errorCode != Media::SUCCESS) {
+        TAG_LOGW(AceLogTag::ACE_IMAGE, "Get image frame count failed, errorCode = %{public}u", errorCode);
+        return 0;
+    }
+    return frameCount;
+}
 } // namespace OHOS::Ace

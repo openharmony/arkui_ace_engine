@@ -64,7 +64,12 @@ public:
 
     float GetTempTitleBarHeight() const
     {
-        return tempTitleBarHeight_;
+        return static_cast<float>(tempTitleBarHeight_.ConvertToPx());
+    }
+
+    void SetTempTitleBarHeightVp(float value)
+    {
+        tempTitleBarHeight_.SetValue(Dimension(value).ConvertToVp());
     }
 
     float GetDefaultTitleBarHeight() const
@@ -121,7 +126,7 @@ public:
 
     float GetCurrentOffset()
     {
-        return tempTitleBarHeight_ - defaultTitleBarHeight_;
+        return GetTempTitleBarHeight() - defaultTitleBarHeight_;
     }
 
     void SetOverDragOffset(float overDragOffset)
@@ -136,45 +141,45 @@ public:
 
     bool IsTitleDraggedDown() const
     {
-        if (NearZero(tempTitleBarHeight_)) {
+        if (NearZero(tempTitleBarHeight_.Value())) {
             return true;
         }
-        return GreatNotEqual(tempTitleBarHeight_, static_cast<float>(SINGLE_LINE_TITLEBAR_HEIGHT.ConvertToPx()));
+        return GreatNotEqual(GetTempTitleBarHeight(), static_cast<float>(SINGLE_LINE_TITLEBAR_HEIGHT.ConvertToPx()));
     }
 
     bool IsTitleFullStatus() const
     {
-        if (NearZero(tempTitleBarHeight_)) {
+        if (NearZero(tempTitleBarHeight_.Value())) {
             return true;
         }
         GetMaxTitleBarHeight();
-        return GreatOrEqual(tempTitleBarHeight_, maxTitleBarHeight_);
+        return GreatOrEqual(GetTempTitleBarHeight(), maxTitleBarHeight_);
     }
 
     bool IsMinTitle() const
     {
-        if (NearZero(tempTitleBarHeight_)) {
+        if (NearZero(tempTitleBarHeight_.Value())) {
             return true;
         }
         GetMaxTitleBarHeight();
-        return LessOrEqual(tempTitleBarHeight_, maxTitleBarHeight_);
+        return LessOrEqual(GetTempTitleBarHeight(), maxTitleBarHeight_);
     }
 
     bool IsCurrentMinTitle() const
     {
-        if (NearZero(tempTitleBarHeight_)) {
+        if (NearZero(tempTitleBarHeight_.Value())) {
             return true;
         }
-        return LessOrEqual(tempTitleBarHeight_, static_cast<float>(SINGLE_LINE_TITLEBAR_HEIGHT.ConvertToPx()));
+        return LessOrEqual(GetTempTitleBarHeight(), static_cast<float>(SINGLE_LINE_TITLEBAR_HEIGHT.ConvertToPx()));
     }
 
     bool IsCurrentMaxTitle() const
     {
-        if (NearZero(tempTitleBarHeight_)) {
+        if (NearZero(tempTitleBarHeight_.Value())) {
             return false;
         }
         GetMaxTitleBarHeight();
-        return GreatOrEqual(tempTitleBarHeight_, maxTitleBarHeight_);
+        return GreatOrEqual(GetTempTitleBarHeight(), maxTitleBarHeight_);
     }
 
     bool IsFreeTitleUpdated() const
@@ -212,6 +217,40 @@ public:
         isTitleChanged_ = isTitleChanged;
     }
 
+    void SetTitleBarMenuItems(const std::vector<NG::BarItem>& menuItems)
+    {
+        titleBarMenuItems_ = menuItems;
+    }
+
+    const std::vector<NG::BarItem>& GetTitleBarMenuItems() const
+    {
+        return titleBarMenuItems_;
+    }
+
+    int32_t GetMenuNodeId() const
+    {
+        return menuNodeId_.value();
+    }
+
+    void SetMenuNodeId(const int32_t menuNodeId)
+    {
+        menuNodeId_ = menuNodeId;
+    }
+
+    bool HasMenuNodeId() const
+    {
+        return menuNodeId_.has_value();
+    }
+
+    int32_t GetMaxMenuNum() const
+    {
+        return maxMenuNums_;
+    }
+
+    void SetMaxMenuNum(int32_t maxMenu)
+    {
+        maxMenuNums_ = maxMenu;
+    }
     void OnCoordScrollStart();
     float OnCoordScrollUpdate(float offset);
     void OnCoordScrollEnd();
@@ -223,13 +262,15 @@ private:
 
     void ClearDragState();
     float GetSubtitleOpacity();
-    float GetFontSize(float offset);
+    Dimension GetFontSize(float offset);
     float GetMappedOffset(float offset);
     void SpringAnimation(float startPos, float endPos);
     void UpdateScaleByDragOverDragOffset(float overDragOffset);
     void AnimateTo(float offset);
 
     void OnAttachToFrameNode() override;
+    void OnDetachFromFrameNode(FrameNode* frameNode) override;
+    void OnWindowSizeChanged(int32_t width, int32_t height, WindowSizeChangeReason type) override;
 
     void HandleDragStart(const GestureEvent& info);
     void HandleDragUpdate(const GestureEvent& info);
@@ -248,6 +289,7 @@ private:
     void UpdateSubTitleOpacity(const double &value);
     void UpdateTitleModeChange();
     void MountTitle(const RefPtr<TitleBarNode>& hostNode);
+    void MountMenu(const RefPtr<TitleBarNode>& hostNode);
 
     void UpdateTitleBarByCoordScroll(float offset);
     void SetTitleStyleByCoordScrollOffset(float offset);
@@ -259,13 +301,13 @@ private:
     RefPtr<SpringMotion> springMotion_;
     RefPtr<Animator> springController_;
     RefPtr<Animator> animator_;
-    std::optional<float> fontSize_;
+    std::optional<Dimension> fontSize_ = 0.0_fp;
     std::optional<float> opacity_;
 
     float overDragOffset_ = 0.0f;
     float maxTitleBarHeight_ = 0.0f;
     float defaultTitleBarHeight_ = 0.0f;
-    float tempTitleBarHeight_ = 0.0f;
+    Dimension tempTitleBarHeight_ = 0.0_vp;
     float minTitleOffsetY_ = 0.0f;
     float maxTitleOffsetY_ = 0.0f;
     // ratio of titleOffsetY difference and titleBarHeight difference
@@ -304,6 +346,10 @@ private:
     float currentTitleBarHeight_ = 0.0f;
 
     NavigationTitlebarOptions options_;
+
+    std::vector<NG::BarItem> titleBarMenuItems_;
+    std::optional<int32_t> menuNodeId_;
+    int32_t maxMenuNums_ = -1;
 };
 
 } // namespace OHOS::Ace::NG

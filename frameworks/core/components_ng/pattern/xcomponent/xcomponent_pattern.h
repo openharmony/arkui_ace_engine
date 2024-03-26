@@ -309,6 +309,7 @@ private:
     bool DoTextureExport();
     bool StopTextureExport();
     void InitializeRenderContext();
+    void SetSurfaceNodeToGraphic();
 
 #if defined(VIDEO_TEXTURE_SUPPORTED) && defined(XCOMPONENT_SUPPORTED)
     void RegisterRenderContextCallBack();

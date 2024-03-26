@@ -138,7 +138,7 @@ void PagePattern::ProcessHideState()
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     host->SetActive(false);
-    host->OnVisibleChange(false);
+    host->NotifyVisibleChange(false);
     host->GetLayoutProperty()->UpdateVisibility(VisibleType::INVISIBLE);
     auto parent = host->GetAncestorNodeOfFrame();
     CHECK_NULL_VOID(parent);
@@ -151,7 +151,7 @@ void PagePattern::ProcessShowState()
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     host->SetActive(true);
-    host->OnVisibleChange(true);
+    host->NotifyVisibleChange(true);
     host->GetLayoutProperty()->UpdateVisibility(VisibleType::VISIBLE);
     auto parent = host->GetAncestorNodeOfFrame();
     CHECK_NULL_VOID(parent);

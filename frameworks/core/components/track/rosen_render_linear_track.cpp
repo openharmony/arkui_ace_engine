@@ -462,9 +462,9 @@ void RosenRenderLinearTrack::PaintBackgroundTrack(SkCanvas* canvas, const Offset
 #else
 void RosenRenderLinearTrack::PaintBackgroundTrack(RSCanvas* canvas, const Offset& offset, double trackHeight) const
 {
-    RSPen railPen;
-    railPen.SetAntiAlias(true);
-    railPen.SetColor(GetBackgroundColor().GetValue());
+    RSBrush railBrush;
+    railBrush.SetAntiAlias(true);
+    railBrush.SetColor(GetBackgroundColor().GetValue());
     RSRoundRect rrect;
     if (direction_ == Axis::VERTICAL) {
         rrect = RSRoundRect(
@@ -476,9 +476,9 @@ void RosenRenderLinearTrack::PaintBackgroundTrack(RSCanvas* canvas, const Offset
             trackHeight * HALF, trackHeight * HALF);
     }
 
-    canvas->AttachPen(railPen);
+    canvas->AttachBrush(railBrush);
     canvas->DrawRoundRect(rrect);
-    canvas->DetachPen();
+    canvas->DetachBrush();
 }
 #endif
 

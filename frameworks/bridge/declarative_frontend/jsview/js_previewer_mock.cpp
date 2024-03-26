@@ -45,7 +45,7 @@ PreviewMockModel* PreviewMockModel::GetInstance()
 
 namespace OHOS::Ace::Framework {
 
-void CreateMockComponent(const std::string inspectorTag)
+void CreateMockComponent(const std::string& inspectorTag)
 {
     OHOS::Ace::PreviewMockModel::GetInstance()->Create(inspectorTag);
 }
@@ -448,10 +448,6 @@ void JSVideo::JSBind(BindingTarget globalObj)
     JSClass<JSVideo>::StaticMethod("onAppear", &JSVideo::Mock);
     JSClass<JSVideo>::StaticMethod("onDisAppear", &JSVideo::Mock);
     JSClass<JSVideo>::StaticMethod("remoteMessage", &JSVideo::Mock);
-
-    // override method
-    JSClass<JSVideo>::StaticMethod("opacity", &JSVideo::Mock);
-    JSClass<JSVideo>::StaticMethod("transition", &JSVideo::Mock);
     JSClass<JSVideo>::InheritAndBind<JSViewAbstract>(globalObj);
 }
 

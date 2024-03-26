@@ -22,9 +22,9 @@
 
 namespace OHOS::Ace::NG {
 namespace {
-constexpr bool IS_CLOSE_EFFECT = false;
+constexpr bool IS_CLOSE_EFFECT = true;
 constexpr double DEFAULT_STROKE_WIDTH = 24.0;
-constexpr double DEFAULT_RADIUS = 5.0;
+constexpr double DEFAULT_RADIUS = 20.0;
 constexpr double DEFAULT_OFFSET_X = 5.0;
 constexpr double DEFAULT_OFFSET_Y = 5.0;
 const std::string DEFAULT_TRACK_BACKGROUND = "#08182431";

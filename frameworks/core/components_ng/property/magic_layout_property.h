@@ -44,6 +44,12 @@ struct MagicItemProperty {
             json->Put("aspectRatio", round(static_cast<double>(propAspectRatio.value_or(0.0)) * 100) / 100);
         }
     }
+
+    inline void Reset()
+    {
+        propLayoutWeight.reset();
+        propAspectRatio.reset();
+    }
 };
 } // namespace OHOS::Ace::NG
 

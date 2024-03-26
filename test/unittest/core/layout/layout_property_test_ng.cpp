@@ -59,7 +59,6 @@ const auto FRAME_NODE_ROOT = FrameNode::CreateFrameNode("root", 1, AceType::Make
 const auto FRAME_NODE_TEST = FrameNode::CreateFrameNode("test", 0, AceType::MakeRefPtr<Pattern>(), true);
 
 const CalcSize CALC_SIZE = { CalcLength(WIDTH), CalcLength(HEIGHT) };
-MagicItemProperty magicItemProperty;
 
 LayoutConstraintF layoutConstraintF = {
     .minSize = { 1, 1 },
@@ -84,7 +83,6 @@ void MakeProperty(RefPtr<LayoutProperty> layoutProperty)
 {
     layoutProperty->calcLayoutConstraint_ = std::make_unique<MeasureProperty>();
     layoutProperty->positionProperty_ = std::make_unique<PositionProperty>();
-    layoutProperty->magicItemProperty_ = std::make_unique<MagicItemProperty>();
     layoutProperty->flexItemProperty_ = std::make_unique<FlexItemProperty>();
     layoutProperty->borderWidth_ = std::make_unique<BorderWidthProperty>();
     layoutProperty->gridProperty_ = std::make_unique<GridProperty>();
@@ -280,8 +278,7 @@ HWTEST_F(LayoutPropertyTestNg, UpdateLayoutConstraint001, TestSize.Level1)
     constraint.minSize = CALC_SIZE;
     constraint.selfIdealSize = CALC_SIZE;
     layoutProperty->calcLayoutConstraint_ = std::make_unique<MeasureProperty>(constraint);
-    magicItemProperty.UpdateAspectRatio(1.0);
-    layoutProperty->magicItemProperty_ = std::make_unique<MagicItemProperty>(magicItemProperty);
+    layoutProperty->magicItemProperty_.UpdateAspectRatio(1.0);
     layoutProperty->measureType_ = MeasureType::MATCH_PARENT;
     layoutProperty->UpdateLayoutConstraint(std::move(layoutConstraintF));
     EXPECT_EQ(layoutProperty->calcLayoutConstraint_->maxSize.value(), CALC_SIZE);
@@ -349,8 +346,7 @@ HWTEST_F(LayoutPropertyTestNg, CheckAspectRatio001, TestSize.Level1)
      * @tc.steps2: push AspectRatio is 1.0
      * @tc.expected: Return expected results.
      */
-    magicItemProperty.UpdateAspectRatio(1.0);
-    layoutProperty->magicItemProperty_ = std::make_unique<MagicItemProperty>(magicItemProperty);
+    layoutProperty->magicItemProperty_.UpdateAspectRatio(1.0);
     layoutProperty->CheckAspectRatio();
     EXPECT_EQ(layoutProperty->layoutConstraint_->selfIdealSize.Width(), std::nullopt);
     EXPECT_EQ(layoutProperty->layoutConstraint_->selfIdealSize.Height(), std::nullopt);
@@ -388,8 +384,7 @@ HWTEST_F(LayoutPropertyTestNg, CheckAspectRatio002, TestSize.Level1)
      */
     constraintF.selfIdealSize.SetHeight(HEIGHT_OPT);
     layoutProperty->layoutConstraint_ = constraintF;
-    magicItemProperty.UpdateAspectRatio(0.5);
-    layoutProperty->magicItemProperty_ = std::make_unique<MagicItemProperty>(magicItemProperty);
+    layoutProperty->magicItemProperty_.UpdateAspectRatio(0.5);
     layoutProperty->CheckAspectRatio();
 
     EXPECT_EQ(layoutProperty->layoutConstraint_->selfIdealSize.Width(), 2.5);
@@ -402,8 +397,7 @@ HWTEST_F(LayoutPropertyTestNg, CheckAspectRatio002, TestSize.Level1)
      */
     constraintF.maxSize = { 1, 2 };
     layoutProperty->layoutConstraint_ = constraintF;
-    magicItemProperty.UpdateAspectRatio(1.0);
-    layoutProperty->magicItemProperty_ = std::make_unique<MagicItemProperty>(magicItemProperty);
+    layoutProperty->magicItemProperty_.UpdateAspectRatio(1.0);
     layoutProperty->CheckAspectRatio();
 
     EXPECT_EQ(layoutProperty->layoutConstraint_->selfIdealSize.Width(), 1);
@@ -437,7 +431,7 @@ HWTEST_F(LayoutPropertyTestNg, BuildGridProperty001, TestSize.Level1)
      */
     layoutProperty->gridProperty_ = std::make_unique<GridProperty>();
     FRAME_NODE_ROOT->SetParent(FRAME_NODE_TEST);
-    FRAME_NODE_ROOT->OnVisibleChange(true);
+    FRAME_NODE_ROOT->NotifyVisibleChange(true);
     layoutProperty->BuildGridProperty(FRAME_NODE_ROOT);
     auto result = FRAME_NODE_ROOT->GetAncestorNodeOfFrame();
     ASSERT_NE(result, nullptr);
@@ -1209,7 +1203,6 @@ HWTEST_F(LayoutPropertyTestNg, GetAspectRatio001, TestSize.Level1)
     /**
      * @tc.steps2: set magicItemProperty_ is null.
      */
-    layoutProperty->magicItemProperty_ = nullptr;
 
     /**
      * @tc.steps4: call GetAspectRatio.
@@ -1234,8 +1227,7 @@ HWTEST_F(LayoutPropertyTestNg, UpdateAspectRatio001, TestSize.Level1)
     /**
      * @tc.steps2: create magicItemProperty_.
      */
-    layoutProperty->magicItemProperty_ = std::make_unique<MagicItemProperty>();
-    layoutProperty->magicItemProperty_->propAspectRatio = 1.0f;
+    layoutProperty->magicItemProperty_.propAspectRatio = 1.0f;
 
     /**
      * @tc.steps3: call UpdateAspectRatio.
@@ -1281,7 +1273,6 @@ HWTEST_F(LayoutPropertyTestNg, ResetAspectRatio001, TestSize.Level1)
     /**
      * @tc.steps2: create magicItemProperty_.
      */
-    layoutProperty->magicItemProperty_ = std::make_unique<MagicItemProperty>();
 
     /**
      * @tc.steps3: call ResetAspectRatio.
@@ -1289,12 +1280,12 @@ HWTEST_F(LayoutPropertyTestNg, ResetAspectRatio001, TestSize.Level1)
      */
     layoutProperty->ResetAspectRatio();
     EXPECT_EQ(layoutProperty->propertyChangeFlag_, PROPERTY_UPDATE_NORMAL);
-    EXPECT_FALSE(layoutProperty->magicItemProperty_->propAspectRatio.has_value());
+    EXPECT_FALSE(layoutProperty->magicItemProperty_.propAspectRatio.has_value());
 
     /**
      * @tc.steps4: create propAspectRatio.
      */
-    layoutProperty->magicItemProperty_->propAspectRatio = 1.0f;
+    layoutProperty->magicItemProperty_.propAspectRatio = 1.0f;
 
     /**
      * @tc.steps5: call ResetAspectRatio.
@@ -1302,7 +1293,7 @@ HWTEST_F(LayoutPropertyTestNg, ResetAspectRatio001, TestSize.Level1)
      */
     layoutProperty->ResetAspectRatio();
     EXPECT_EQ(layoutProperty->propertyChangeFlag_, PROPERTY_UPDATE_MEASURE);
-    EXPECT_FALSE(layoutProperty->magicItemProperty_->propAspectRatio.has_value());
+    EXPECT_FALSE(layoutProperty->magicItemProperty_.propAspectRatio.has_value());
 }
 
 /**

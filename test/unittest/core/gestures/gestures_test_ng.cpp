@@ -3943,7 +3943,7 @@ HWTEST_F(GesturesTestNg, ParallelRecognizerTest001, TestSize.Level1)
      * @tc.expected: step3. result equals.
      */
     parallelRecognizer.OnRejected();
-    EXPECT_EQ(parallelRecognizer.refereeState_, RefereeState::FAIL);
+    EXPECT_EQ(parallelRecognizer.refereeState_, RefereeState::SUCCEED);
 
     /**
      * @tc.steps: step4. call OnPending function and compare result.

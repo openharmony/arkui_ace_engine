@@ -54,11 +54,7 @@ public:
             theme->secondaryMiniResourceId_ = themeConstants->GetResourceId(THEME_RATING_RESOURCE_ID_MINI_HALF);
             theme->backgroundMiniResourceId_ = themeConstants->GetResourceId(THEME_RATING_RESOURCE_ID_MINI_OFF);
 
-            auto themeStyle = themeConstants->GetThemeStyle();
-            if (!themeStyle) {
-                return theme;
-            }
-            auto pattern = themeStyle->GetAttr<RefPtr<ThemeStyle>>(THEME_PATTERN_RATING, nullptr);
+            RefPtr<ThemeStyle> pattern = themeConstants->GetPatternByName(THEME_PATTERN_RATING);
             if (pattern) {
                 theme->starNum_ = static_cast<int32_t>(pattern->GetAttr<double>("rating_start_num", 0.0));
                 theme->ratingScore_ = pattern->GetAttr<double>("rating_score", 0.0);

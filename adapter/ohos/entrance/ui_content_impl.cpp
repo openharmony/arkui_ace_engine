@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -73,6 +73,7 @@
 #include "core/common/modal_ui_extension.h"
 #include "core/common/recorder/event_recorder.h"
 #include "core/common/resource/resource_manager.h"
+#include "core/components/theme/shadow_theme.h"
 #include "core/components_ng/base/inspector.h"
 #include "core/components_ng/base/view_abstract.h"
 #include "core/image/image_file_cache.h"
@@ -127,6 +128,7 @@ const std::string SUBWINDOW_PREFIX = "ARK_APP_SUBWINDOW_";
 const std::string SUBWINDOW_TOAST_DIALOG_PREFIX = "ARK_APP_SUBWINDOW_TOAST_DIALOG_";
 const char ENABLE_DEBUG_BOUNDARY_KEY[] = "persist.ace.debug.boundary.enabled";
 const char ENABLE_TRACE_LAYOUT_KEY[] = "persist.ace.trace.layout.enabled";
+const char ENABLE_TRACE_INPUTEVENT_KEY[] = "persist.ace.trace.inputEvent.enabled";
 const char ENABLE_SECURITY_DEVELOPERMODE_KEY[] = "const.security.developermode.state";
 const char ENABLE_DEBUG_STATEMGR_KEY[] = "persist.ace.debug.statemgr.enabled";
 const int32_t REQUEST_CODE = -1;
@@ -584,6 +586,9 @@ UIContentErrorCode UIContentImpl::InitializeInner(
     auto distributedUI = std::make_shared<NG::DistributedUI>();
     uiManager_ = std::make_unique<DistributedUIManager>(instanceId_, distributedUI);
     Platform::AceContainer::GetContainer(instanceId_)->SetDistributedUI(distributedUI);
+    Platform::AceContainer::GetContainer(instanceId_)->SetUIExtensionSubWindow(isUIExtensionSubWindow_);
+    Platform::AceContainer::GetContainer(instanceId_)->SetUIExtensionAbilityProcess(isUIExtensionAbilityProcess_);
+    Platform::AceContainer::GetContainer(instanceId_)->SetUIExtensionAbilityHost(isUIExtensionAbilityHost_);
     return errorCode;
 }
 
@@ -606,7 +611,9 @@ void UIContentImpl::RunFormPage()
     Platform::AceContainer::RunPage(instanceId_, startUrl_, "", false);
     auto distributedUI = std::make_shared<NG::DistributedUI>();
     uiManager_ = std::make_unique<DistributedUIManager>(instanceId_, distributedUI);
-    Platform::AceContainer::GetContainer(instanceId_)->SetDistributedUI(distributedUI);
+    auto container = Platform::AceContainer::GetContainer(instanceId_);
+    CHECK_NULL_VOID(container);
+    container->SetDistributedUI(distributedUI);
 }
 
 UIContentErrorCode UIContentImpl::Initialize(OHOS::Rosen::Window* window, const std::string& url, napi_value storage)
@@ -633,6 +640,9 @@ UIContentErrorCode UIContentImpl::Initialize(
     auto distributedUI = std::make_shared<NG::DistributedUI>();
     uiManager_ = std::make_unique<DistributedUIManager>(instanceId_, distributedUI);
     Platform::AceContainer::GetContainer(instanceId_)->SetDistributedUI(distributedUI);
+    Platform::AceContainer::GetContainer(instanceId_)->SetUIExtensionSubWindow(isUIExtensionSubWindow_);
+    Platform::AceContainer::GetContainer(instanceId_)->SetUIExtensionAbilityProcess(isUIExtensionAbilityProcess_);
+    Platform::AceContainer::GetContainer(instanceId_)->SetUIExtensionAbilityHost(isUIExtensionAbilityHost_);
     return errorCode;
 }
 
@@ -1198,6 +1208,7 @@ UIContentErrorCode UIContentImpl::CommonInitialize(
     auto useNewPipe =
         AceNewPipeJudgement::QueryAceNewPipeEnabledStage(AceApplicationInfo::GetInstance().GetPackageName(),
             apiCompatibleVersion, apiTargetVersion, apiReleaseType, closeArkTSPartialUpdate);
+    AceApplicationInfo::GetInstance().SetIsUseNewPipeline(useNewPipe);
     LOGI("[%{public}s][%{public}s][%{public}d]: UIContent: apiCompatibleVersion: %{public}d, apiTargetVersion: "
          "%{public}d, and apiReleaseType: %{public}s, "
          "useNewPipe: %{public}d",
@@ -1271,6 +1282,12 @@ UIContentErrorCode UIContentImpl::CommonInitialize(
         }
         SystemProperties::SetDeviceAccess(
             resConfig->GetInputDevice() == Global::Resource::InputDevice::INPUTDEVICE_POINTINGDEVICE);
+        LOGI("[%{public}s][%{public}s][%{public}d]: Set SystemProperties language: %{public}s, colorMode: %{public}s, "
+             "deviceAccess: %{public}d",
+            bundleName_.c_str(), moduleName_.c_str(), instanceId_,
+            AceApplicationInfo::GetInstance().GetLanguage().c_str(),
+            SystemProperties::GetColorMode() == ColorMode::DARK ? "dark" : "light",
+            SystemProperties::GetDeviceAccess());
     }
 
     auto abilityContext = OHOS::AbilityRuntime::Context::ConvertTo<OHOS::AbilityRuntime::AbilityContext>(context);
@@ -1691,6 +1708,8 @@ void UIContentImpl::Destroy()
     SystemProperties::RemoveWatchSystemParameter(
         ENABLE_TRACE_LAYOUT_KEY, this, EnableSystemParameterTraceLayoutCallback);
     SystemProperties::RemoveWatchSystemParameter(
+        ENABLE_TRACE_INPUTEVENT_KEY, this, EnableSystemParameterTraceInputEventCallback);
+    SystemProperties::RemoveWatchSystemParameter(
         ENABLE_SECURITY_DEVELOPERMODE_KEY, this, EnableSystemParameterSecurityDevelopermodeCallback);
     SystemProperties::RemoveWatchSystemParameter(
         ENABLE_DEBUG_STATEMGR_KEY, this, EnableSystemParameterDebugStatemgrCallback);
@@ -1783,6 +1802,9 @@ bool UIContentImpl::ProcessBackPressed()
         instanceId_);
     auto container = AceEngine::Get().GetContainer(instanceId_);
     CHECK_NULL_RETURN(container, false);
+    if (container->IsUIExtensionWindow() && !container->WindowIsShow()) {
+        return false;
+    }
     auto taskExecutor = container->GetTaskExecutor();
     CHECK_NULL_RETURN(taskExecutor, false);
     auto pipeline = AceType::DynamicCast<NG::PipelineContext>(container->GetPipelineContext());
@@ -1848,7 +1870,7 @@ bool UIContentImpl::ProcessPointerEventWithCallback(
     return true;
 }
 
-bool UIContentImpl::ProcessKeyEvent(const std::shared_ptr<OHOS::MMI::KeyEvent>& touchEvent)
+bool UIContentImpl::ProcessKeyEvent(const std::shared_ptr<OHOS::MMI::KeyEvent>& touchEvent, bool isPreIme)
 {
     TAG_LOGD(AceLogTag::ACE_INPUTTRACKING,
         "KeyEvent Process to ui_content, eventInfo: id:%{public}d, "
@@ -1858,7 +1880,7 @@ bool UIContentImpl::ProcessKeyEvent(const std::shared_ptr<OHOS::MMI::KeyEvent>& 
     auto container = AceEngine::Get().GetContainer(instanceId_);
     CHECK_NULL_RETURN(container, false);
     auto* aceView = static_cast<Platform::AceViewOhos*>(container->GetView());
-    return Platform::AceViewOhos::DispatchKeyEvent(aceView, touchEvent);
+    return Platform::AceViewOhos::DispatchKeyEvent(aceView, touchEvent, isPreIme);
 }
 
 bool UIContentImpl::ProcessAxisEvent(const std::shared_ptr<OHOS::MMI::AxisEvent>& axisEvent)
@@ -2473,7 +2495,7 @@ bool UIContentImpl::CheckNeedAutoSave()
     return needAutoSave;
 }
 
-bool UIContentImpl::DumpViewData(AbilityBase::ViewData& viewData)
+bool UIContentImpl::DumpViewData(AbilityBase::ViewData& viewData, AbilityBase::AutoFillType& type)
 {
     auto container = Platform::AceContainer::GetContainer(instanceId_);
     CHECK_NULL_RETURN(container, false);
@@ -2491,7 +2513,7 @@ bool UIContentImpl::DumpViewData(AbilityBase::ViewData& viewData)
             viewData = viewDataWrapOhos->GetViewData();
         },
         TaskExecutor::TaskType::UI);
-
+    type = ViewDataWrap::ViewDataToType(viewData);
     TAG_LOGI(AceLogTag::ACE_AUTO_FILL, "UIContentImpl DumpViewData, ret is %{public}d", ret);
     return ret;
 }
@@ -2583,6 +2605,17 @@ bool UIContentImpl::NotifyExecuteAction(
     return container->NotifyExecuteAction(elementId, actionArguments, action, offset);
 }
 
+void UIContentImpl::HandleAccessibilityHoverEvent(float pointX, float pointY, int32_t sourceType,
+    int32_t eventType, int64_t timeMs)
+{
+    auto container = Platform::AceContainer::GetContainer(instanceId_);
+    CHECK_NULL_VOID(container);
+    TAG_LOGI(AceLogTag::ACE_ACCESSIBILITY, "HandleAccessibilityHoverEvent Point:[%{public}f, %{public}f] "
+        "source:%{public}d type:%{public}d time:%{public}" PRId64,
+        pointX, pointY, sourceType, eventType, timeMs);
+    container->HandleAccessibilityHoverEvent(pointX, pointY, sourceType, eventType, timeMs);
+}
+
 std::string UIContentImpl::RecycleForm()
 {
     auto container = Platform::AceContainer::GetContainer(instanceId_);
@@ -2626,7 +2659,7 @@ RefPtr<PopupParam> UIContentImpl::CreateCustomPopupParam(bool isShow, const Cust
     popupParam->SetIsShow(isShow);
     popupParam->SetUseCustomComponent(true);
     popupParam->SetShowInSubWindow(config.isShowInSubWindow);
-
+    popupParam->SetShadow(GetPopupShadow());
     if (config.isAutoCancel.has_value()) {
         popupParam->SetHasAction(!config.isAutoCancel.value());
     }
@@ -2671,6 +2704,19 @@ RefPtr<PopupParam> UIContentImpl::CreateCustomPopupParam(bool isShow, const Cust
     return popupParam;
 }
 
+Shadow UIContentImpl::GetPopupShadow()
+{
+    Shadow shadow;
+    auto colorMode = SystemProperties::GetColorMode();
+    auto container = Container::Current();
+    CHECK_NULL_RETURN(container, shadow);
+    auto pipelineContext = container->GetPipelineContext();
+    CHECK_NULL_RETURN(pipelineContext, shadow);
+    auto shadowTheme = pipelineContext->GetTheme<ShadowTheme>();
+    CHECK_NULL_RETURN(shadowTheme, shadow);
+    return shadowTheme->GetShadow(ShadowStyle::OuterDefaultMD, colorMode);
+}
+
 void UIContentImpl::OnPopupStateChange(
     const std::string& event, const CustomPopupUIExtensionConfig& config, int32_t nodeId)
 {
@@ -2703,18 +2749,29 @@ int32_t UIContentImpl::CreateCustomPopupUIExtension(
     int32_t nodeId = 0;
     taskExecutor->PostSyncTask(
         [want, &nodeId, callbacks = callbacks, config = config, this]() {
-            if (config.inspectorId.empty()) {
+            int32_t nodeIdLabel = -1;
+            RefPtr<NG::FrameNode> targetNode = nullptr;
+            if (config.nodeId > -1) {
+                nodeIdLabel = config.nodeId;
+                targetNode = ElementRegister::GetInstance()->GetSpecificItemById<NG::FrameNode>(nodeIdLabel);
+                CHECK_NULL_VOID(targetNode);
+            } else if (!config.inspectorId.empty()) {
+                targetNode = NG::Inspector::GetFrameNodeByKey(config.inspectorId);
+                CHECK_NULL_VOID(targetNode);
+                nodeIdLabel = targetNode->GetId();
+            } else {
+                CHECK_NULL_VOID(targetNode);
+            }
+            if (customPopupConfigMap_.find(nodeIdLabel) != customPopupConfigMap_.end()) {
+                LOGW("Nodeid=%{public}d has unclosed popup, cannot create new", nodeIdLabel);
                 return;
             }
-            auto targetNode = NG::Inspector::GetFrameNodeByKey(config.inspectorId);
-            CHECK_NULL_VOID(targetNode);
-            if (customPopupConfigMap_.find(targetNode->GetId()) != customPopupConfigMap_.end()) {
-                LOGW("Nodeid=%{public}d has unclosed popup, cannot create new", targetNode->GetId());
-                return;
-            }
-
             auto popupParam = CreateCustomPopupParam(true, config);
             auto uiExtNode = ModalUIExtension::Create(want, callbacks);
+            auto focusHub = uiExtNode->GetFocusHub();
+            if (focusHub) {
+                focusHub->SetFocusable(config.isFocusable);
+            }
             if (config.targetSize.has_value()) {
                 auto layoutProperty = uiExtNode->GetLayoutProperty();
                 CHECK_NULL_VOID(layoutProperty);
@@ -2725,7 +2782,7 @@ int32_t UIContentImpl::CreateCustomPopupUIExtension(
                 layoutProperty->UpdateUserDefinedIdealSize(NG::CalcSize(width, height));
             }
             uiExtNode->MarkModifyDone();
-            nodeId = targetNode->GetId();
+            nodeId = nodeIdLabel;
             popupParam->SetOnStateChange(
                 [config, nodeId, this](const std::string& event) { this->OnPopupStateChange(event, config, nodeId); });
 
@@ -2836,6 +2893,20 @@ void UIContentImpl::SubscribeContainerModalButtonsRectChange(
     pipeline->SubscribeContainerModalButtonsRectChange(std::move(wrapFunc));
 }
 
+void UIContentImpl::ChangeSensitiveNodes(bool isSensitive)
+{
+    auto container = Platform::AceContainer::GetContainer(instanceId_);
+    CHECK_NULL_VOID(container);
+    ContainerScope scope(instanceId_);
+    LOGI("UIContentImpl::ChangeSensitiveNodes");
+    auto pipeline = container->GetPipelineContext();
+    CHECK_NULL_VOID(pipeline);
+    auto taskExecutor = container->GetTaskExecutor();
+    CHECK_NULL_VOID(taskExecutor);
+    taskExecutor->PostTask(
+        [pipeline, isSensitive]() { pipeline->ChangeSensitiveNodes(isSensitive); }, TaskExecutor::TaskType::UI);
+}
+
 void UIContentImpl::UpdateTransform(const OHOS::Rosen::Transform& transform)
 {
     LOGI("[%{public}s][%{public}s][%{public}d]: UIContentImpl: UpdateTransform, window scale is %{public}f",
@@ -2852,25 +2923,23 @@ void UIContentImpl::UpdateTransform(const OHOS::Rosen::Transform& transform)
 
 void UIContentImpl::RenderLayoutBoundary(bool isDebugBoundary)
 {
-    ContainerScope scope(instanceId_);
-    auto taskExecutor = Container::CurrentTaskExecutor();
-    CHECK_NULL_VOID(taskExecutor);
-    taskExecutor->PostTask(
-        [isDebugBoundary]() {
-            auto pipeline = NG::PipelineContext::GetCurrentContext();
-            CHECK_NULL_VOID(pipeline);
-            auto rootNode = pipeline->GetRootElement();
-            CHECK_NULL_VOID(rootNode);
-            rootNode->PaintDebugBoundaryTreeAll(isDebugBoundary);
-            pipeline->RequestFrame();
-        },
-        TaskExecutor::TaskType::UI);
+    auto container = AceEngine::Get().GetContainer(instanceId_);
+    CHECK_NULL_VOID(container);
+    CHECK_NULL_VOID(renderBoundaryManager_);
+    renderBoundaryManager_->PostTaskRenderBoundary(isDebugBoundary, container);
 }
 
 void UIContentImpl::EnableSystemParameterTraceLayoutCallback(const char* key, const char* value, void* context)
 {
     if (strcmp(value, "true") == 0 || strcmp(value, "false") == 0) {
         SystemProperties::SetLayoutTraceEnabled(strcmp(value, "true") == 0);
+    }
+}
+
+void UIContentImpl::EnableSystemParameterTraceInputEventCallback(const char* key, const char* value, void* context)
+{
+    if (strcmp(value, "true") == 0 || strcmp(value, "false") == 0) {
+        SystemProperties::SetInputEventTraceEnabled(strcmp(value, "true") == 0);
     }
 }
 
@@ -2900,6 +2969,8 @@ void UIContentImpl::EnableSystemParameterDebugBoundaryCallback(const char* key, 
 void UIContentImpl::AddWatchSystemParameter()
 {
     SystemProperties::AddWatchSystemParameter(ENABLE_TRACE_LAYOUT_KEY, this, EnableSystemParameterTraceLayoutCallback);
+    SystemProperties::AddWatchSystemParameter(
+        ENABLE_TRACE_INPUTEVENT_KEY, this, EnableSystemParameterTraceInputEventCallback);
     SystemProperties::AddWatchSystemParameter(
         ENABLE_SECURITY_DEVELOPERMODE_KEY, this, EnableSystemParameterSecurityDevelopermodeCallback);
     SystemProperties::AddWatchSystemParameter(

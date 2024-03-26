@@ -171,6 +171,9 @@ void RenderWeb::Update(const RefPtr<Component>& component)
         delegate_->UpdatePinchSmoothModeEnabled(web->GetPinchSmoothModeEnabled());
         delegate_->UpdateMultiWindowAccess(web->GetMultiWindowAccessEnabled());
         delegate_->UpdateAllowWindowOpenMethod(web->GetAllowWindowOpenMethod());
+        delegate_->UpdateNativeVideoPlayerConfig(
+            std::get<0>(web->GetNativeVideoPlayerConfig()),
+            std::get<1>(web->GetNativeVideoPlayerConfig()));
         auto userAgent = web->GetUserAgent();
         if (!userAgent.empty()) {
             delegate_->UpdateUserAgent(userAgent);
@@ -1307,12 +1310,18 @@ void RenderWeb::OnSelectPopupMenu(
         callback->Cancel();
     });
 
-    OHOS::NWeb::SelectMenuBound bounds = params->GetSelectMenuBound();
-    Offset leftTop = { bounds.x + GetGlobalOffset().GetX(),
-                       bounds.y + GetGlobalOffset().GetY() };
-    Offset rightBottom = { bounds.x + GetGlobalOffset().GetX() + bounds.width,
-                           bounds.y + GetGlobalOffset().GetY() + bounds.height };
-    popup_->ShowDialog(stackElement, leftTop, rightBottom, false);
+    std::shared_ptr<OHOS::NWeb::NWebSelectMenuBound> bound = params->GetSelectMenuBound();
+    if (bound) {
+        Offset leftTop = { bound->GetX() + GetGlobalOffset().GetX(),
+                           bound->GetY() + GetGlobalOffset().GetY() };
+        Offset rightBottom = { bound->GetX() + GetGlobalOffset().GetX() + bound->GetWidth(),
+                               bound->GetY() + GetGlobalOffset().GetY() + bound->GetHeight() };
+        popup_->ShowDialog(stackElement, leftTop, rightBottom, false);
+    } else {
+        Offset leftTop = { GetGlobalOffset().GetX(), GetGlobalOffset().GetY() };
+        Offset rightBottom = { GetGlobalOffset().GetX(), GetGlobalOffset().GetY() };
+        popup_->ShowDialog(stackElement, leftTop, rightBottom, false);
+    }
 }
 #endif
 } // namespace OHOS::Ace

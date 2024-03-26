@@ -18,6 +18,7 @@
 #include "ui_observer_listener.h"
 
 #include <map>
+#include <optional>
 #include <string>
 
 #include "interfaces/napi/kits/utils/napi_utils.h"
@@ -36,15 +37,21 @@ namespace {
     void* data;                    \
     napi_get_cb_info(env, info, &argc, argv, &thisVar, &data)
 
-static constexpr uint32_t PARAM_SZIE_ONE = 1;
-static constexpr uint32_t PARAM_SZIE_TWO = 2;
-static constexpr uint32_t PARAM_SZIE_THREE = 3;
+static constexpr uint32_t PARAM_SIZE_ONE = 1;
+static constexpr uint32_t PARAM_SIZE_TWO = 2;
+static constexpr uint32_t PARAM_SIZE_THREE = 3;
+static constexpr uint32_t PARAM_SIZE_FOUR = 4;
 
-static constexpr uint32_t PARAM_SECOND = 1;
-static constexpr uint32_t PARAM_THIRD = 2;
+static constexpr size_t PARAM_INDEX_ZERO = 0;
+static constexpr size_t PARAM_INDEX_ONE = 1;
+static constexpr size_t PARAM_INDEX_TWO = 2;
+static constexpr size_t PARAM_INDEX_THREE = 3;
 
 static constexpr uint32_t ON_SHOWN = 0;
 static constexpr uint32_t ON_HIDDEN = 1;
+static constexpr uint32_t ON_APPEAR = 2;
+static constexpr uint32_t ON_DISAPPEAR = 3;
+static constexpr uint32_t ON_BACKPRESS = 100;
 
 static constexpr uint32_t SCROLL_START = 0;
 static constexpr uint32_t SCROLL_STOP = 1;
@@ -59,6 +66,9 @@ constexpr char NAVDESTINATION_UPDATE[] = "navDestinationUpdate";
 constexpr char ROUTERPAGE_UPDATE[] = "routerPageUpdate";
 constexpr char SCROLL_EVENT[] = "scrollEvent";
 constexpr char DENSITY_UPDATE[] = "densityUpdate";
+constexpr char LAYOUT_DONE[] = "didLayout";
+constexpr char DRAW_COMMAND_SEND[] = "willDraw";
+constexpr char NAVDESTINATION_SWITCH[] = "navDestinationSwitch";
 
 bool IsUIAbilityContext(napi_env env, napi_value context)
 {
@@ -96,24 +106,14 @@ bool MatchValueType(napi_env env, napi_value value, napi_valuetype targetType)
 
 bool ParseStringFromNapi(napi_env env, napi_value val, std::string& str)
 {
-    if (!val || !MatchValueType(env, val, napi_string)) {
-        return false;
-    }
-    size_t len = 0;
-    napi_get_value_string_utf8(env, val, nullptr, 0, &len);
-    std::unique_ptr<char[]> result = std::make_unique<char[]>(len + 1);
-    napi_get_value_string_utf8(env, val, result.get(), len + 1, &len);
-    str = result.get();
-    return true;
+    napi_valuetype type;
+    return GetNapiString(env, val, str, type);
 }
 
 bool ParseNavigationId(napi_env env, napi_value obj, std::string& navigationStr)
 {
     napi_value navigationId = nullptr;
     napi_get_named_property(env, obj, "navigationId", &navigationId);
-    if (!MatchValueType(env, navigationId, napi_string)) {
-        return false;
-    }
     return ParseStringFromNapi(env, navigationId, navigationStr);
 }
 
@@ -126,21 +126,201 @@ bool ParseScrollId(napi_env env, napi_value obj, std::string& result)
     }
     return ParseStringFromNapi(env, resultId, result);
 }
+
+bool IsNavDestSwitchOptions(napi_env env, napi_value obj, std::string& navigationId)
+{
+    if (!MatchValueType(env, obj, napi_object)) {
+        return false;
+    }
+    napi_value navId = nullptr;
+    napi_get_named_property(env, obj, "navigationId", &navId);
+    return ParseStringFromNapi(env, navId, navigationId);
+}
+
+struct NavDestinationSwitchParams {
+    bool isUIContext = true;
+    std::optional<std::string> navigationId;
+    napi_value callback = nullptr;
+    napi_value abilityUIContext = nullptr;
+    int32_t uiContextInstanceId = 0;
+};
+
+bool ParseNavDestSwitchRegisterParams(napi_env env, napi_callback_info info, NavDestinationSwitchParams& params)
+{
+    GET_PARAMS(env, info, PARAM_SIZE_FOUR);
+
+    auto& secondArg = argv[PARAM_INDEX_ONE];
+    auto& thirdArg = argv[PARAM_INDEX_TWO];
+    auto& fourthArg = argv[PARAM_INDEX_THREE];
+    std::string navigationId;
+    if (argc == PARAM_SIZE_TWO && MatchValueType(env, secondArg, napi_function)) {
+        // js code: UIObserver.on('navDestinationSwitch', callback)
+        params.callback = secondArg;
+    } else if (argc == PARAM_SIZE_THREE && MatchValueType(env, secondArg, napi_object) &&
+        MatchValueType(env, thirdArg, napi_function)) {
+        if (IsNavDestSwitchOptions(env, secondArg, navigationId)) {
+            // js code: UIObserver.on('navDestinationSwitch', { navigationId: navId }, callback)
+            params.navigationId = navigationId;
+        } else if (IsUIAbilityContext(env, secondArg)) {
+            // js code: observer.on('navDestinationSwitch', AbilityUIContext, callback)
+            params.isUIContext = false;
+            params.abilityUIContext = secondArg;
+        } else {
+            // js code: observer.on('navDestinationSwitch', UIContext, callback)
+            params.uiContextInstanceId = GetUIContextInstanceId(env, secondArg);
+        }
+        params.callback = thirdArg;
+    } else if (argc == PARAM_SIZE_FOUR && MatchValueType(env, secondArg, napi_object) &&
+        IsNavDestSwitchOptions(env, thirdArg, navigationId) &&
+        MatchValueType(env, fourthArg, napi_function)) {
+        if (IsUIAbilityContext(env, secondArg)) {
+            // js code: observer.on('navDestinationSwitch', AbilityUIContext, { navigationId: navId }, callback)
+            params.isUIContext = false;
+            params.abilityUIContext = secondArg;
+        } else {
+            // js code: observer.on('navDestinationSwitch', UIContext, { navigationId: navId }, callback)
+            params.uiContextInstanceId = GetUIContextInstanceId(env, secondArg);
+        }
+        params.navigationId = navigationId;
+        params.callback = fourthArg;
+    } else {
+        return false;
+    }
+
+    return true;
+}
+
+bool ParseNavDestSwitchUnRegisterParams(
+    napi_env env, napi_value secondArg, NavDestinationSwitchParams& params)
+{
+    std::string navigationId;
+    if (MatchValueType(env, secondArg, napi_function)) {
+        // js code: UIObserver.off('navDestinationSwitch', callback)
+        params.callback = secondArg;
+    } else if (IsNavDestSwitchOptions(env, secondArg, navigationId)) {
+        // js code: UIObserver.off('navDestinationSwitch', { navigationId: navId })
+        params.navigationId = navigationId;
+    } else if (MatchValueType(env, secondArg, napi_object)) {
+        if (IsUIAbilityContext(env, secondArg)) {
+            // js code: observer.off('navDestinationSwitch', AbilityUIContext)
+            params.isUIContext = false;
+            params.abilityUIContext = secondArg;
+        } else {
+            // js code: observer.off('navDestinationSwitch', UIContext)
+            params.uiContextInstanceId = GetUIContextInstanceId(env, secondArg);
+        }
+    } else {
+        return false;
+    }
+
+    return true;
+}
+
+bool ParseNavDestSwitchUnRegisterParams(
+    napi_env env, napi_value secondArg, napi_value thirdArg, NavDestinationSwitchParams& params)
+{
+    std::string navigationId;
+    if (MatchValueType(env, thirdArg, napi_function)) {
+        params.callback = thirdArg;
+        if (IsNavDestSwitchOptions(env, secondArg, navigationId)) {
+            // js code: UIObserver.off('navDestinationSwitch', { navigationId: navId }, callback)
+            params.navigationId = navigationId;
+        } else if (MatchValueType(env, secondArg, napi_object)) {
+            if (IsUIAbilityContext(env, secondArg)) {
+                // js code: observer.off('navDestinationSwitch', AbilityUIContext, callback)
+                params.isUIContext = false;
+                params.abilityUIContext = secondArg;
+            } else {
+                // js code: observer.off('navDestinationSwitch', UIContext, callback)
+                params.uiContextInstanceId = GetUIContextInstanceId(env, secondArg);
+            }
+        } else {
+            return false;
+        }
+    } else if (MatchValueType(env, secondArg, napi_object) &&
+        IsNavDestSwitchOptions(env, thirdArg, navigationId)) {
+        if (IsUIAbilityContext(env, secondArg)) {
+            // js code: observer.off('navDestinationSwitch', AbilityUIContext, { navigationId: navId })
+            params.isUIContext = false;
+            params.abilityUIContext = secondArg;
+        } else {
+            // js code: observer.off('navDestinationSwitch', UIContext, { navigationId: navId })
+            params.uiContextInstanceId = GetUIContextInstanceId(env, secondArg);
+        }
+        params.navigationId = navigationId;
+    } else {
+        return false;
+    }
+
+    return true;
+}
+
+bool ParseNavDestSwitchUnRegisterParams(
+    napi_env env, napi_value secondArg, napi_value thirdArg,
+    napi_value fourthArg, NavDestinationSwitchParams& params)
+{
+    std::string navigationId;
+    auto& context = secondArg;
+    auto& options = thirdArg;
+    auto& callback = fourthArg;
+    if (MatchValueType(env, context, napi_object) &&
+        IsNavDestSwitchOptions(env, options, navigationId) &&
+        MatchValueType(env, callback, napi_function)) {
+        if (IsUIAbilityContext(env, context)) {
+            // js code: observer.off('navDestinationSwitch', AbilityUIContext, { navigationId: navId }, callback)
+            params.isUIContext = false;
+            params.abilityUIContext = context;
+        } else {
+            // js code: observer.off('navDestinationSwitch', UIContext, { navigationId: navId }, callback)
+            params.uiContextInstanceId = GetUIContextInstanceId(env, context);
+        }
+        params.navigationId = navigationId;
+        params.callback = callback;
+        return true;
+    }
+
+    return false;
+}
+
+bool ParseNavDestSwitchUnRegisterParams(
+    napi_env env, napi_callback_info info, NavDestinationSwitchParams& params)
+{
+    GET_PARAMS(env, info, PARAM_SIZE_FOUR);
+
+    if (argc == PARAM_SIZE_TWO) {
+        return ParseNavDestSwitchUnRegisterParams(env, argv[PARAM_INDEX_ONE], params);
+    } else if (argc == PARAM_SIZE_THREE) {
+        return ParseNavDestSwitchUnRegisterParams(env, argv[PARAM_INDEX_ONE], argv[PARAM_INDEX_TWO], params);
+    } else if (argc == PARAM_SIZE_FOUR) {
+        return ParseNavDestSwitchUnRegisterParams(
+            env, argv[PARAM_INDEX_ONE], argv[PARAM_INDEX_TWO], argv[PARAM_INDEX_THREE], params);
+    } else if (argc != PARAM_SIZE_ONE) {
+        return false;
+    }
+
+    return true;
+}
 } // namespace
 
 ObserverProcess::ObserverProcess()
 {
-    registerProcess_ = {
+    registerProcessMap_ = {
         { NAVDESTINATION_UPDATE, &ObserverProcess::ProcessNavigationRegister },
         { SCROLL_EVENT, &ObserverProcess::ProcessScrollEventRegister },
         { ROUTERPAGE_UPDATE, &ObserverProcess::ProcessRouterPageRegister },
         { DENSITY_UPDATE, &ObserverProcess::ProcessDensityRegister },
+        { LAYOUT_DONE, &ObserverProcess::ProcessLayoutDoneRegister },
+        { DRAW_COMMAND_SEND, &ObserverProcess::ProcessDrawCommandSendRegister },
+        { NAVDESTINATION_SWITCH, &ObserverProcess::ProcessNavDestinationSwitchRegister },
     };
-    unregisterProcess_ = {
+    unregisterProcessMap_ = {
         { NAVDESTINATION_UPDATE, &ObserverProcess::ProcessNavigationUnRegister },
         { SCROLL_EVENT, &ObserverProcess::ProcessScrollEventUnRegister },
         { ROUTERPAGE_UPDATE, &ObserverProcess::ProcessRouterPageUnRegister },
         { DENSITY_UPDATE, &ObserverProcess::ProcessDensityUnRegister },
+        { LAYOUT_DONE, &ObserverProcess::ProcessLayoutDoneUnRegister },
+        { DRAW_COMMAND_SEND, &ObserverProcess::ProcessDrawCommandSendUnRegister},
+        { NAVDESTINATION_SWITCH, &ObserverProcess::ProcessNavDestinationSwitchUnRegister },
     };
 }
 
@@ -152,41 +332,48 @@ ObserverProcess& ObserverProcess::GetInstance()
 
 napi_value ObserverProcess::ProcessRegister(napi_env env, napi_callback_info info)
 {
-    GET_PARAMS(env, info, 3);
-    NAPI_ASSERT(env, (argc >= 2 && thisVar != nullptr), "Invalid arguments");
+    GET_PARAMS(env, info, PARAM_SIZE_THREE);
+    NAPI_ASSERT(env, (argc >= PARAM_SIZE_TWO && thisVar != nullptr), "Invalid arguments");
     std::string type;
-    napi_value result = nullptr;
-    if (!ParseStringFromNapi(env, argv[0], type)) {
-        return result;
+    if (!ParseStringFromNapi(env, argv[PARAM_INDEX_ZERO], type)) {
+        return nullptr;
     }
-    return (this->*registerProcess_[type])(env, info);
+    auto it = registerProcessMap_.find(type);
+    if (it == registerProcessMap_.end()) {
+        return nullptr;
+    }
+    return (this->*(it->second))(env, info);
 }
 
 napi_value ObserverProcess::ProcessUnRegister(napi_env env, napi_callback_info info)
 {
-    GET_PARAMS(env, info, 3);
-    NAPI_ASSERT(env, (argc >= 1 && thisVar != nullptr), "Invalid arguments");
+    GET_PARAMS(env, info, PARAM_SIZE_THREE);
+    NAPI_ASSERT(env, (argc >= PARAM_SIZE_ONE && thisVar != nullptr), "Invalid arguments");
     std::string type;
-    if (!ParseStringFromNapi(env, argv[0], type)) {
-        napi_value result = nullptr;
-        return result;
+    if (!ParseStringFromNapi(env, argv[PARAM_INDEX_ZERO], type)) {
+        return nullptr;
     }
-    return (this->*unregisterProcess_[type])(env, info);
+    auto it = unregisterProcessMap_.find(type);
+    if (it == unregisterProcessMap_.end()) {
+        return nullptr;
+    }
+    return (this->*(it->second))(env, info);
 }
 
 napi_value ObserverProcess::ProcessNavigationRegister(napi_env env, napi_callback_info info)
 {
-    GET_PARAMS(env, info, 3);
+    GET_PARAMS(env, info, PARAM_SIZE_THREE);
 
-    if (argc == 2 && MatchValueType(env, argv[1], napi_function)) {
-        auto listener = std::make_shared<UIObserverListener>(env, argv[1]);
+    if (argc == PARAM_SIZE_TWO && MatchValueType(env, argv[PARAM_INDEX_ONE], napi_function)) {
+        auto listener = std::make_shared<UIObserverListener>(env, argv[PARAM_INDEX_ONE]);
         UIObserver::RegisterNavigationCallback(listener);
     }
 
-    if (argc == 3 && MatchValueType(env, argv[1], napi_object) && MatchValueType(env, argv[2], napi_function)) {
+    if (argc == PARAM_SIZE_THREE && MatchValueType(env, argv[PARAM_INDEX_ONE], napi_object) &&
+        MatchValueType(env, argv[PARAM_INDEX_TWO], napi_function)) {
         std::string id;
-        if (ParseNavigationId(env, argv[1], id)) {
-            auto listener = std::make_shared<UIObserverListener>(env, argv[2]);
+        if (ParseNavigationId(env, argv[PARAM_INDEX_ONE], id)) {
+            auto listener = std::make_shared<UIObserverListener>(env, argv[PARAM_INDEX_TWO]);
             UIObserver::RegisterNavigationCallback(id, listener);
         }
     }
@@ -197,27 +384,28 @@ napi_value ObserverProcess::ProcessNavigationRegister(napi_env env, napi_callbac
 
 napi_value ObserverProcess::ProcessNavigationUnRegister(napi_env env, napi_callback_info info)
 {
-    GET_PARAMS(env, info, 3);
+    GET_PARAMS(env, info, PARAM_SIZE_THREE);
 
-    if (argc == 1) {
+    if (argc == PARAM_SIZE_ONE) {
         UIObserver::UnRegisterNavigationCallback(nullptr);
     }
 
-    if (argc == 2 && MatchValueType(env, argv[1], napi_function)) {
-        UIObserver::UnRegisterNavigationCallback(argv[1]);
+    if (argc == PARAM_SIZE_TWO && MatchValueType(env, argv[PARAM_INDEX_ONE], napi_function)) {
+        UIObserver::UnRegisterNavigationCallback(argv[PARAM_INDEX_ONE]);
     }
 
-    if (argc == 2 && MatchValueType(env, argv[1], napi_object)) {
+    if (argc == PARAM_SIZE_TWO && MatchValueType(env, argv[PARAM_INDEX_ONE], napi_object)) {
         std::string id;
-        if (ParseNavigationId(env, argv[1], id)) {
+        if (ParseNavigationId(env, argv[PARAM_INDEX_ONE], id)) {
             UIObserver::UnRegisterNavigationCallback(id, nullptr);
         }
     }
 
-    if (argc == 3 && MatchValueType(env, argv[1], napi_object) && MatchValueType(env, argv[2], napi_function)) {
+    if (argc == PARAM_SIZE_THREE && MatchValueType(env, argv[PARAM_INDEX_ONE], napi_object) &&
+        MatchValueType(env, argv[PARAM_INDEX_TWO], napi_function)) {
         std::string id;
-        if (ParseNavigationId(env, argv[1], id)) {
-            UIObserver::UnRegisterNavigationCallback(id, argv[2]);
+        if (ParseNavigationId(env, argv[PARAM_INDEX_ONE], id)) {
+            UIObserver::UnRegisterNavigationCallback(id, argv[PARAM_INDEX_TWO]);
         }
     }
 
@@ -227,18 +415,18 @@ napi_value ObserverProcess::ProcessNavigationUnRegister(napi_env env, napi_callb
 
 napi_value ObserverProcess::ProcessScrollEventRegister(napi_env env, napi_callback_info info)
 {
-    GET_PARAMS(env, info, PARAM_SZIE_THREE);
+    GET_PARAMS(env, info, PARAM_SIZE_THREE);
 
-    if (argc == PARAM_SZIE_TWO && MatchValueType(env, argv[PARAM_SECOND], napi_function)) {
-        auto listener = std::make_shared<UIObserverListener>(env, argv[PARAM_SECOND]);
+    if (argc == PARAM_SIZE_TWO && MatchValueType(env, argv[PARAM_INDEX_ONE], napi_function)) {
+        auto listener = std::make_shared<UIObserverListener>(env, argv[PARAM_INDEX_ONE]);
         UIObserver::RegisterScrollEventCallback(listener);
     }
 
-    if (argc == PARAM_SZIE_THREE && MatchValueType(env, argv[PARAM_SECOND], napi_object)
-        && MatchValueType(env, argv[PARAM_THIRD], napi_function)) {
+    if (argc == PARAM_SIZE_THREE && MatchValueType(env, argv[PARAM_INDEX_ONE], napi_object)
+        && MatchValueType(env, argv[PARAM_INDEX_TWO], napi_function)) {
         std::string id;
-        if (ParseScrollId(env, argv[PARAM_SECOND], id)) {
-            auto listener = std::make_shared<UIObserverListener>(env, argv[PARAM_THIRD]);
+        if (ParseScrollId(env, argv[PARAM_INDEX_ONE], id)) {
+            auto listener = std::make_shared<UIObserverListener>(env, argv[PARAM_INDEX_TWO]);
             UIObserver::RegisterScrollEventCallback(id, listener);
         }
     }
@@ -249,28 +437,28 @@ napi_value ObserverProcess::ProcessScrollEventRegister(napi_env env, napi_callba
 
 napi_value ObserverProcess::ProcessScrollEventUnRegister(napi_env env, napi_callback_info info)
 {
-    GET_PARAMS(env, info, PARAM_SZIE_THREE);
+    GET_PARAMS(env, info, PARAM_SIZE_THREE);
 
-    if (argc == PARAM_SZIE_ONE) {
+    if (argc == PARAM_SIZE_ONE) {
         UIObserver::UnRegisterScrollEventCallback(nullptr);
     }
 
-    if (argc == PARAM_SZIE_TWO && MatchValueType(env, argv[PARAM_SECOND], napi_function)) {
-        UIObserver::UnRegisterScrollEventCallback(argv[PARAM_SECOND]);
+    if (argc == PARAM_SIZE_TWO && MatchValueType(env, argv[PARAM_INDEX_ONE], napi_function)) {
+        UIObserver::UnRegisterScrollEventCallback(argv[PARAM_INDEX_ONE]);
     }
 
-    if (argc == PARAM_SZIE_TWO && MatchValueType(env, argv[PARAM_SECOND], napi_object)) {
+    if (argc == PARAM_SIZE_TWO && MatchValueType(env, argv[PARAM_INDEX_ONE], napi_object)) {
         std::string id;
-        if (ParseScrollId(env, argv[PARAM_SECOND], id)) {
+        if (ParseScrollId(env, argv[PARAM_INDEX_ONE], id)) {
             UIObserver::UnRegisterScrollEventCallback(id, nullptr);
         }
     }
 
-    if (argc == PARAM_SZIE_THREE && MatchValueType(env, argv[PARAM_SECOND], napi_object)
-        && MatchValueType(env, argv[PARAM_THIRD], napi_function)) {
+    if (argc == PARAM_SIZE_THREE && MatchValueType(env, argv[PARAM_INDEX_ONE], napi_object)
+        && MatchValueType(env, argv[PARAM_INDEX_TWO], napi_function)) {
         std::string id;
-        if (ParseScrollId(env, argv[PARAM_SECOND], id)) {
-            UIObserver::UnRegisterScrollEventCallback(id, argv[PARAM_THIRD]);
+        if (ParseScrollId(env, argv[PARAM_INDEX_ONE], id)) {
+            UIObserver::UnRegisterScrollEventCallback(id, argv[PARAM_INDEX_TWO]);
         }
     }
 
@@ -280,17 +468,18 @@ napi_value ObserverProcess::ProcessScrollEventUnRegister(napi_env env, napi_call
 
 napi_value ObserverProcess::ProcessRouterPageRegister(napi_env env, napi_callback_info info)
 {
-    GET_PARAMS(env, info, 3);
+    GET_PARAMS(env, info, PARAM_SIZE_THREE);
 
-    if (argc == 2 && MatchValueType(env, argv[1], napi_function)) {
-        auto listener = std::make_shared<UIObserverListener>(env, argv[1]);
+    if (argc == PARAM_SIZE_TWO && MatchValueType(env, argv[PARAM_INDEX_ONE], napi_function)) {
+        auto listener = std::make_shared<UIObserverListener>(env, argv[PARAM_INDEX_ONE]);
         UIObserver::RegisterRouterPageCallback(0, listener);
     }
 
-    if (argc == 3 && MatchValueType(env, argv[1], napi_object) && MatchValueType(env, argv[2], napi_function)) {
-        auto context = argv[1];
+    if (argc == PARAM_SIZE_THREE && MatchValueType(env, argv[PARAM_INDEX_ONE], napi_object) &&
+        MatchValueType(env, argv[PARAM_INDEX_TWO], napi_function)) {
+        auto context = argv[PARAM_INDEX_ONE];
         if (context) {
-            auto listener = std::make_shared<UIObserverListener>(env, argv[2]);
+            auto listener = std::make_shared<UIObserverListener>(env, argv[PARAM_INDEX_TWO]);
             if (IsUIAbilityContext(env, context)) {
                 UIObserver::RegisterRouterPageCallback(env, context, listener);
             } else {
@@ -306,18 +495,18 @@ napi_value ObserverProcess::ProcessRouterPageRegister(napi_env env, napi_callbac
 
 napi_value ObserverProcess::ProcessRouterPageUnRegister(napi_env env, napi_callback_info info)
 {
-    GET_PARAMS(env, info, 3);
+    GET_PARAMS(env, info, PARAM_SIZE_THREE);
 
-    if (argc == 1) {
+    if (argc == PARAM_SIZE_ONE) {
         UIObserver::UnRegisterRouterPageCallback(0, nullptr);
     }
 
-    if (argc == 2 && MatchValueType(env, argv[1], napi_function)) {
-        UIObserver::UnRegisterRouterPageCallback(0, argv[1]);
+    if (argc == PARAM_SIZE_TWO && MatchValueType(env, argv[PARAM_INDEX_ONE], napi_function)) {
+        UIObserver::UnRegisterRouterPageCallback(0, argv[PARAM_INDEX_ONE]);
     }
 
-    if (argc == 2 && MatchValueType(env, argv[1], napi_object)) {
-        napi_value context = argv[1];
+    if (argc == PARAM_SIZE_TWO && MatchValueType(env, argv[PARAM_INDEX_ONE], napi_object)) {
+        napi_value context = argv[PARAM_INDEX_ONE];
         if (context) {
             if (IsUIAbilityContext(env, context)) {
                 UIObserver::UnRegisterRouterPageCallback(env, context, nullptr);
@@ -328,14 +517,15 @@ napi_value ObserverProcess::ProcessRouterPageUnRegister(napi_env env, napi_callb
         }
     }
 
-    if (argc == 3 && MatchValueType(env, argv[1], napi_object) && MatchValueType(env, argv[2], napi_function)) {
-        napi_value context = argv[1];
+    if (argc == PARAM_SIZE_THREE && MatchValueType(env, argv[PARAM_INDEX_ONE], napi_object) &&
+        MatchValueType(env, argv[PARAM_INDEX_TWO], napi_function)) {
+        napi_value context = argv[PARAM_INDEX_ONE];
         if (context) {
             if (IsUIAbilityContext(env, context)) {
-                UIObserver::UnRegisterRouterPageCallback(env, context, argv[2]);
+                UIObserver::UnRegisterRouterPageCallback(env, context, argv[PARAM_INDEX_TWO]);
             } else {
                 auto uiContextInstanceId = GetUIContextInstanceId(env, context);
-                UIObserver::UnRegisterRouterPageCallback(uiContextInstanceId, argv[2]);
+                UIObserver::UnRegisterRouterPageCallback(uiContextInstanceId, argv[PARAM_INDEX_TWO]);
             }
         }
     }
@@ -346,18 +536,19 @@ napi_value ObserverProcess::ProcessRouterPageUnRegister(napi_env env, napi_callb
 
 napi_value ObserverProcess::ProcessDensityRegister(napi_env env, napi_callback_info info)
 {
-    GET_PARAMS(env, info, 3);
+    GET_PARAMS(env, info, PARAM_SIZE_THREE);
 
-    if (argc == 2 && MatchValueType(env, argv[1], napi_function)) {
-        auto listener = std::make_shared<UIObserverListener>(env, argv[1]);
+    if (argc == PARAM_SIZE_TWO && MatchValueType(env, argv[PARAM_INDEX_ONE], napi_function)) {
+        auto listener = std::make_shared<UIObserverListener>(env, argv[PARAM_INDEX_ONE]);
         int32_t instanceId = ContainerScope::CurrentId();
         UIObserver::RegisterDensityCallback(instanceId, listener);
     }
 
-    if (argc == 3 && MatchValueType(env, argv[1], napi_object) && MatchValueType(env, argv[2], napi_function)) {
-        auto context = argv[1];
+    if (argc == PARAM_SIZE_THREE && MatchValueType(env, argv[PARAM_INDEX_ONE], napi_object) &&
+        MatchValueType(env, argv[PARAM_INDEX_TWO], napi_function)) {
+        auto context = argv[PARAM_INDEX_ONE];
         if (context) {
-            auto listener = std::make_shared<UIObserverListener>(env, argv[2]);
+            auto listener = std::make_shared<UIObserverListener>(env, argv[PARAM_INDEX_TWO]);
             auto uiContextInstanceId = GetUIContextInstanceId(env, context);
             UIObserver::RegisterDensityCallback(uiContextInstanceId, listener);
         }
@@ -369,36 +560,182 @@ napi_value ObserverProcess::ProcessDensityRegister(napi_env env, napi_callback_i
 
 napi_value ObserverProcess::ProcessDensityUnRegister(napi_env env, napi_callback_info info)
 {
-    GET_PARAMS(env, info, 3);
+    GET_PARAMS(env, info, PARAM_SIZE_THREE);
 
-    if (argc == 1) {
+    if (argc == PARAM_SIZE_ONE) {
         int32_t instanceId = ContainerScope::CurrentId();
         UIObserver::UnRegisterDensityCallback(instanceId, nullptr);
     }
 
-    if (argc == 2 && MatchValueType(env, argv[1], napi_object)) {
-        napi_value context = argv[1];
+    if (argc == PARAM_SIZE_TWO && MatchValueType(env, argv[PARAM_INDEX_ONE], napi_object)) {
+        napi_value context = argv[PARAM_INDEX_ONE];
         if (context) {
             auto uiContextInstanceId = GetUIContextInstanceId(env, context);
             UIObserver::UnRegisterDensityCallback(uiContextInstanceId, nullptr);
         }
     }
 
+    if (argc == PARAM_SIZE_TWO && MatchValueType(env, argv[PARAM_INDEX_ONE], napi_function)) {
+        int32_t instanceId = ContainerScope::CurrentId();
+        UIObserver::UnRegisterDensityCallback(instanceId, argv[PARAM_INDEX_ONE]);
+    }
+
+    if (argc == PARAM_SIZE_THREE && MatchValueType(env, argv[PARAM_INDEX_ONE], napi_object) &&
+        MatchValueType(env, argv[PARAM_INDEX_TWO], napi_function)) {
+        napi_value context = argv[PARAM_INDEX_ONE];
+        if (context) {
+            auto uiContextInstanceId = GetUIContextInstanceId(env, context);
+            UIObserver::UnRegisterDensityCallback(uiContextInstanceId, argv[PARAM_INDEX_TWO]);
+        }
+    }
+
+    napi_value result = nullptr;
+    return result;
+}
+
+napi_value ObserverProcess::ProcessDrawCommandSendRegister(napi_env env, napi_callback_info info)
+{
+    GET_PARAMS(env, info, 3);
+
+    if (argc == 2 && MatchValueType(env, argv[1], napi_function)) {
+        auto listener = std::make_shared<UIObserverListener>(env, argv[1]);
+        int32_t instanceId = ContainerScope::CurrentId();
+        UIObserver::RegisterDrawCallback(instanceId, listener);
+    }
+    if (argc == 3 && MatchValueType(env, argv[1], napi_object) && MatchValueType(env, argv[2], napi_function)) {
+        auto context = argv[1];
+        if (context) {
+            auto listener = std::make_shared<UIObserverListener>(env, argv[2]);
+            auto uiContextInstanceId = GetUIContextInstanceId(env, context);
+            UIObserver::RegisterDrawCallback(uiContextInstanceId, listener);
+        }
+    }
+    napi_value result = nullptr;
+    return result;
+}
+
+napi_value ObserverProcess::ProcessDrawCommandSendUnRegister(napi_env env, napi_callback_info info)
+{
+    GET_PARAMS(env, info, 3);
+
+    if (argc == 1) {
+        int32_t instanceId = ContainerScope::CurrentId();
+        UIObserver::UnRegisterDrawCallback(instanceId, nullptr);
+    }
+
+    if (argc == 2 && MatchValueType(env, argv[1], napi_object)) {
+        napi_value context = argv[1];
+        if (context) {
+            auto uiContextInstanceId = GetUIContextInstanceId(env, context);
+            UIObserver::UnRegisterDrawCallback(uiContextInstanceId, nullptr);
+        }
+    }
+
     if (argc == 2 && MatchValueType(env, argv[1], napi_function)) {
         int32_t instanceId = ContainerScope::CurrentId();
-        UIObserver::UnRegisterDensityCallback(instanceId, argv[1]);
+        UIObserver::UnRegisterDrawCallback(instanceId, argv[1]);
     }
 
     if (argc == 3 && MatchValueType(env, argv[1], napi_object) && MatchValueType(env, argv[2], napi_function)) {
         napi_value context = argv[1];
         if (context) {
             auto uiContextInstanceId = GetUIContextInstanceId(env, context);
-            UIObserver::UnRegisterDensityCallback(uiContextInstanceId, argv[2]);
+            UIObserver::UnRegisterDrawCallback(uiContextInstanceId, argv[2]);
         }
     }
 
     napi_value result = nullptr;
     return result;
+}
+
+napi_value ObserverProcess::ProcessLayoutDoneRegister(napi_env env, napi_callback_info info)
+{
+    GET_PARAMS(env, info, 3);
+
+    if (argc == 2 && MatchValueType(env, argv[1], napi_function)) {
+        auto listener = std::make_shared<UIObserverListener>(env, argv[1]);
+        int32_t instanceId = ContainerScope::CurrentId();
+        UIObserver::RegisterLayoutCallback(instanceId, listener);
+    }
+    if (argc == 3 && MatchValueType(env, argv[1], napi_object) && MatchValueType(env, argv[2], napi_function)) {
+        auto context = argv[1];
+        if (context) {
+            auto listener = std::make_shared<UIObserverListener>(env, argv[2]);
+            auto uiContextInstanceId = GetUIContextInstanceId(env, context);
+            UIObserver::RegisterLayoutCallback(uiContextInstanceId, listener);
+        }
+    }
+    napi_value result = nullptr;
+    return result;
+}
+
+napi_value ObserverProcess::ProcessLayoutDoneUnRegister(napi_env env, napi_callback_info info)
+{
+    GET_PARAMS(env, info, 3);
+
+    if (argc == 1) {
+        int32_t instanceId = ContainerScope::CurrentId();
+        UIObserver::UnRegisterLayoutCallback(instanceId, nullptr);
+    }
+
+    if (argc == 2 && MatchValueType(env, argv[1], napi_object)) {
+        napi_value context = argv[1];
+        if (context) {
+            auto uiContextInstanceId = GetUIContextInstanceId(env, context);
+            UIObserver::UnRegisterLayoutCallback(uiContextInstanceId, nullptr);
+        }
+    }
+
+    if (argc == 2 && MatchValueType(env, argv[1], napi_function)) {
+        int32_t instanceId = ContainerScope::CurrentId();
+        UIObserver::UnRegisterLayoutCallback(instanceId, argv[1]);
+    }
+
+    if (argc == 3 && MatchValueType(env, argv[1], napi_object) && MatchValueType(env, argv[2], napi_function)) {
+        napi_value context = argv[1];
+        if (context) {
+            auto uiContextInstanceId = GetUIContextInstanceId(env, context);
+            UIObserver::UnRegisterLayoutCallback(uiContextInstanceId, argv[2]);
+        }
+    }
+
+    napi_value result = nullptr;
+    return result;
+}
+
+napi_value ObserverProcess::ProcessNavDestinationSwitchRegister(napi_env env, napi_callback_info info)
+{
+    NavDestinationSwitchParams params;
+    if (!ParseNavDestSwitchRegisterParams(env, info, params)) {
+        return nullptr;
+    }
+
+    auto listener = std::make_shared<UIObserverListener>(env, params.callback);
+    if (params.isUIContext) {
+        UIObserver::RegisterNavDestinationSwitchCallback(params.uiContextInstanceId, params.navigationId, listener);
+    } else {
+        UIObserver::RegisterNavDestinationSwitchCallback(env, params.abilityUIContext, params.navigationId, listener);
+    }
+
+    return nullptr;
+}
+
+napi_value ObserverProcess::ProcessNavDestinationSwitchUnRegister(napi_env env, napi_callback_info info)
+{
+    NavDestinationSwitchParams params;
+    if (!ParseNavDestSwitchUnRegisterParams(env, info, params)) {
+        return nullptr;
+    }
+
+    if (params.isUIContext) {
+        UIObserver::UnRegisterNavDestinationSwitchCallback(
+            params.uiContextInstanceId, params.navigationId, params.callback);
+    } else {
+        UIObserver::UnRegisterNavDestinationSwitchCallback(
+            env, params.abilityUIContext, params.navigationId, params.callback);
+    }
+
+    return nullptr;
 }
 
 napi_value ObserverOn(napi_env env, napi_callback_info info)
@@ -417,6 +754,9 @@ static napi_value UIObserverExport(napi_env env, napi_value exports)
     NG::UIObserverHandler::GetInstance().SetHandleScrollEventChangeFunc(&UIObserver::HandleScrollEventStateChange);
     NG::UIObserverHandler::GetInstance().SetHandleRouterPageChangeFunc(&UIObserver::HandleRouterPageStateChange);
     NG::UIObserverHandler::GetInstance().SetHandleDensityChangeFunc(&UIObserver::HandleDensityChange);
+    NG::UIObserverHandler::GetInstance().SetLayoutDoneHandleFunc(&UIObserver::HandLayoutDoneChange);
+    NG::UIObserverHandler::GetInstance().SetDrawCommandSendHandleFunc(&UIObserver::HandDrawCommandSendChange);
+    NG::UIObserverHandler::GetInstance().SetHandleNavDestinationSwitchFunc(&UIObserver::HandleNavDestinationSwitch);
     napi_value navDestinationState = nullptr;
     napi_create_object(env, &navDestinationState);
     napi_value prop = nullptr;
@@ -424,6 +764,12 @@ static napi_value UIObserverExport(napi_env env, napi_value exports)
     napi_set_named_property(env, navDestinationState, "ON_SHOWN", prop);
     napi_create_uint32(env, ON_HIDDEN, &prop);
     napi_set_named_property(env, navDestinationState, "ON_HIDDEN", prop);
+    napi_create_uint32(env, ON_APPEAR, &prop);
+    napi_set_named_property(env, navDestinationState, "ON_APPEAR", prop);
+    napi_create_uint32(env, ON_DISAPPEAR, &prop);
+    napi_set_named_property(env, navDestinationState, "ON_DISAPPEAR", prop);
+    napi_create_uint32(env, ON_BACKPRESS, &prop);
+    napi_set_named_property(env, navDestinationState, "ON_BACKPRESS", prop);
 
     napi_value scrollEventType = nullptr;
     napi_create_object(env, &scrollEventType);

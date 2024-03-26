@@ -103,6 +103,28 @@ public:
         }
     }
 
+    void ClearJSFrameNodeCallback()
+    {
+        if (userJSFrameNodeCallback_) {
+            userJSFrameNodeCallback_.Reset();
+        }
+    }
+
+    void ReplaceJSFrameNodeInputEvent(OnMouseEventFunc&& callback)
+    {
+        if (userJSFrameNodeCallback_) {
+            userJSFrameNodeCallback_.Reset();
+        }
+        userJSFrameNodeCallback_ = MakeRefPtr<InputEvent>(std::move(callback));
+    }
+    void ReplaceJSFrameNodeInputEvent(OnHoverFunc&& callback)
+    {
+        if (userJSFrameNodeCallback_) {
+            userJSFrameNodeCallback_.Reset();
+        }
+        userJSFrameNodeCallback_ = MakeRefPtr<InputEvent>(std::move(callback));
+    }
+
     void ReplaceInputEvent(OnMouseEventFunc&& callback)
     {
         if (userCallback_) {
@@ -162,6 +184,7 @@ private:
     RefPtr<AxisEventTarget> axisEventTarget_;
     std::list<RefPtr<InputEvent>> inputEvents_;
     RefPtr<InputEvent> userCallback_;
+    RefPtr<InputEvent> userJSFrameNodeCallback_;
 };
 
 } // namespace OHOS::Ace::NG

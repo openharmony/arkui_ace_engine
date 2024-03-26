@@ -188,6 +188,15 @@ void SetTouchEventType(int32_t orgAction, TouchEvent& event)
             event.type = TouchType::PULL_OUT_WINDOW;
             event.pullType = TouchType::PULL_OUT_WINDOW;
             return;
+        case OHOS::MMI::PointerEvent::POINTER_ACTION_HOVER_ENTER:
+            event.type = TouchType::HOVER_ENTER;
+            return;
+        case OHOS::MMI::PointerEvent::POINTER_ACTION_HOVER_MOVE:
+            event.type = TouchType::HOVER_MOVE;
+            return;
+        case OHOS::MMI::PointerEvent::POINTER_ACTION_HOVER_EXIT:
+            event.type = TouchType::HOVER_EXIT;
+            return;
         default:
             LOGW("unknown type");
             return;

@@ -196,7 +196,7 @@ void WaterFlowPattern::OnModifyDone()
     // SetAxis for scroll event
     SetAxis(layoutProperty->GetAxis());
     if (!GetScrollableEvent()) {
-        InitScrollableEvent();
+        AddScrollEvent();
     }
     SetEdgeEffect();
 
@@ -316,17 +316,6 @@ void WaterFlowPattern::CheckScrollable()
     }
 }
 
-void WaterFlowPattern::InitScrollableEvent()
-{
-    AddScrollEvent();
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    auto eventHub = host->GetEventHub<WaterFlowEventHub>();
-    CHECK_NULL_VOID(eventHub);
-    auto scrollFrameBeginEvent = eventHub->GetOnScrollFrameBegin();
-    SetScrollFrameBeginCallback(scrollFrameBeginEvent);
-}
-
 bool WaterFlowPattern::UpdateStartIndex(int32_t index)
 {
     auto host = GetHost();
@@ -373,7 +362,7 @@ void WaterFlowPattern::SetAccessibilityAction()
     });
 }
 
-void WaterFlowPattern::ScrollPage(bool reverse)
+void WaterFlowPattern::ScrollPage(bool reverse, bool smooth)
 {
     CHECK_NULL_VOID(IsScrollable());
 
@@ -386,9 +375,13 @@ void WaterFlowPattern::ScrollPage(bool reverse)
     auto geometryNode = host->GetGeometryNode();
     CHECK_NULL_VOID(geometryNode);
     auto mainContentSize = geometryNode->GetPaddingSize().MainSize(axis);
-
-    UpdateCurrentOffset(reverse ? mainContentSize : -mainContentSize, SCROLL_FROM_JUMP);
-
+    if (smooth) {
+        float distance = reverse ? mainContentSize : -mainContentSize;
+        float position = layoutInfo_.currentOffset_ + distance;
+        AnimateTo(-position, -1, nullptr, true);
+    } else {
+        UpdateCurrentOffset(reverse ? mainContentSize : -mainContentSize, SCROLL_FROM_JUMP);
+    }
     // AccessibilityEventType::SCROLL_END
 }
 

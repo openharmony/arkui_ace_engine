@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -51,6 +51,7 @@
 #include "core/components_ng/pattern/text_drag/text_drag_base.h"
 #include "core/components_ng/pattern/text_field/content_controller.h"
 #include "core/components_ng/pattern/text_field/text_editing_value_ng.h"
+#include "core/components_ng/pattern/text_field/text_content_type.h"
 #include "core/components_ng/pattern/text_field/text_field_accessibility_property.h"
 #include "core/components_ng/pattern/text_field/text_field_controller.h"
 #include "core/components_ng/pattern/text_field/text_field_event_hub.h"
@@ -215,6 +216,7 @@ public:
     void UpdateCounterMargin();
     void CleanCounterNode();
     void UltralimitShake();
+    bool OverCounter(int32_t originLength);
     void HandleInputCounterBorder(int32_t& textLength, uint32_t& maxLength);
     void UpdateCounterBorderStyle(int32_t& textLength, uint32_t& maxLength);
     void UpdateAreaBorderStyle(BorderWidthProperty& currentBorderWidth, BorderWidthProperty& overCountBorderWidth,
@@ -617,7 +619,8 @@ public:
     }
 
     void ProcessInnerPadding();
-    void OnCursorMoveDone(TextAffinity textAffinity = TextAffinity::UPSTREAM);
+    void OnCursorMoveDone(
+        TextAffinity textAffinity = TextAffinity::UPSTREAM, std::optional<Offset> offset = std::nullopt);
     bool IsDisabled();
     bool AllowCopy();
 
@@ -692,7 +695,7 @@ public:
         return parentGlobalOffset_;
     }
 
-    const RectF& GetTextContentRect() const override
+    RectF GetTextContentRect() const override
     {
         return contentRect_;
     }
@@ -764,6 +767,7 @@ public:
     // xts
     std::string TextInputTypeToString() const;
     std::string TextInputActionToString() const;
+    std::string TextContentTypeToString() const;
     std::string GetPlaceholderFont() const;
     RefPtr<TextFieldTheme> GetTheme() const;
     std::string GetTextColor() const;
@@ -785,7 +789,8 @@ public:
     bool GetErrorTextState() const;
     std::string GetShowPasswordIconString() const;
     int32_t GetNakedCharPosition() const;
-    void SetSelectionFlag(int32_t selectionStart, int32_t selectionEnd);
+    void SetSelectionFlag(int32_t selectionStart, int32_t selectionEnd,
+        const std::optional<SelectionOptions>& options = std::nullopt);
     void HandleBlurEvent();
     void HandleFocusEvent();
     bool OnBackPressed() override;
@@ -863,6 +868,21 @@ public:
         underlineColor_ = underlineColor;
     }
 
+    void SetNormalUnderlineColor(const Color& normalColor)
+    {
+        userUnderlineColor_.normal = normalColor;
+    }
+
+    void SetUserUnderlineColor(UserUnderlineColor userUnderlineColor)
+    {
+        userUnderlineColor_ = userUnderlineColor;
+    }
+
+    UserUnderlineColor GetUserUnderlineColor()
+    {
+        return userUnderlineColor_;
+    }
+
     void SetUnderlineWidth(Dimension underlineWidth)
     {
         underlineWidth_ = underlineWidth;
@@ -924,6 +944,16 @@ public:
         return inlineState_.frameRect.Width();
     }
 
+    void SetFillRequestFinish(bool success)
+    {
+        isFillRequestFinish_ = success;
+    }
+
+    bool IsFillRequestFinish()
+    {
+        return isFillRequestFinish_;
+    }
+
     bool IsNormalInlineState() const;
     bool IsUnspecifiedOrTextType() const;
     void TextIsEmptyRect(RectF& rect);
@@ -939,6 +969,7 @@ public:
             CloseCustomKeyboard();
             customKeyboardBuilder_ = keyboardBuilder; // refresh current keyboard
             RequestKeyboard(false, true, true);
+            StartTwinkling();
             return;
         }
         if (!customKeyboardBuilder_ && keyboardBuilder) {
@@ -948,6 +979,7 @@ public:
                 CloseKeyboard(true);
                 customKeyboardBuilder_ = keyboardBuilder; // refresh current keyboard
                 RequestKeyboard(false, true, true);
+                StartTwinkling();
                 return;
             }
 #endif
@@ -963,6 +995,7 @@ public:
     bool CheckAutoSave() override;
     void OnColorConfigurationUpdate() override;
     bool NeedPaintSelect();
+    void SetCustomKeyboardOption(bool supportAvoidance);
 
     void SetIsCustomFont(bool isCustomFont)
     {
@@ -1096,6 +1129,8 @@ public:
     void CleanNodeResponseKeyEvent();
 
     void OnVirtualKeyboardAreaChanged() override;
+    void ScrollPage(bool reverse, bool smooth = false) override;
+    void InitScrollBarClickEvent() override {}
 
 protected:
     virtual void InitDragEvent();
@@ -1162,6 +1197,7 @@ private:
 
     void AfterSelection();
 
+    void AutoFillValueChanged();
     void FireEventHubOnChange(const std::string& text);
     // The return value represents whether the editor content has change.
     bool FireOnTextChangeEvent();
@@ -1213,6 +1249,7 @@ private:
 
     bool ResetObscureTickCountDown();
 
+    bool IsOnUnitByPosition(const Offset& globalOffset);
     bool IsTouchAtLeftOffset(float currentOffsetX);
     void FilterExistText();
     void CreateErrorParagraph(const std::string& content);
@@ -1238,6 +1275,8 @@ private:
     void PasswordResponseKeyEvent();
     void UnitResponseKeyEvent();
     void ProcNormalInlineStateInBlurEvent();
+    bool IsMouseOverScrollBar(const GestureEvent& info);
+    
 #if defined(ENABLE_STANDARD_INPUT)
     std::optional<MiscServices::TextConfig> GetMiscTextConfig() const;
 #endif
@@ -1252,7 +1291,7 @@ private:
     bool HasInputOperation();
     AceAutoFillType ConvertToAceAutoFillType(TextInputType type);
     bool CheckAutoFill();
-    bool ProcessAutoFill();
+    bool ProcessAutoFill(bool& isPopup);
     void ScrollToSafeArea() const override;
     void RecordSubmitEvent() const;
     void UpdateCancelNode();
@@ -1263,6 +1302,17 @@ private:
     void UpdateBlurReason();
     RectF GetSelectArea();
     void UpdateOverlaySelectArea();
+    AceAutoFillType TextContentTypeToAceAutoFillType(const TextContentType& type);
+    bool CheckAutoFillType(const AceAutoFillType& aceAutoFillAllType);
+    AceAutoFillType GetAutoFillType();
+    bool IsAutoFillPasswordType(const AceAutoFillType& autoFillType);
+    void DoProcessAutoFill();
+    void KeyboardContentTypeToInputType();
+    void ProcessScroll();
+    void ProcessCounter();
+    RefPtr<TextFieldLayoutProperty> GetTextFieldLayoutProperty();
+    void ProcessOverlayAfterLayout(bool isGlobalAreaChange);
+    void HandleParentGlobalOffsetChange();
 
     RectF frameRect_;
     RectF textRect_;
@@ -1337,6 +1387,7 @@ private:
     float countHeight_ = 0.0f;
     Dimension underlineWidth_ = 1.0_px;
     Color underlineColor_;
+    UserUnderlineColor userUnderlineColor_ = UserUnderlineColor();
     bool scrollBarVisible_ = false;
     bool isCounterIdealheight_ = false;
     float maxFrameOffsetY_ = 0.0f;
@@ -1357,6 +1408,7 @@ private:
 
     int32_t dragTextStart_ = 0;
     int32_t dragTextEnd_ = 0;
+    std::string dragValue_;
     RefPtr<FrameNode> dragNode_;
     DragStatus dragStatus_ = DragStatus::NONE; // The status of the dragged initiator
     DragStatus dragRecipientStatus_ = DragStatus::NONE; // Drag the recipient's state
@@ -1424,6 +1476,9 @@ private:
     Offset clickLocation_;
     bool isKeyboardClosedByUser_ = false;
     bool lockRecord_ = false;
+    bool isFillRequestFinish_ = false;
+    bool keyboardAvoidance_ = false;
+    bool hasMousePressed_ = false;
 };
 } // namespace OHOS::Ace::NG
 

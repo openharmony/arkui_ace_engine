@@ -193,7 +193,7 @@ struct MouseEvent final {
             .size = 0.0,
             .isPressed = (type == TouchType::DOWN) };
         TouchEvent event;
-        event.SetId(id)
+        event.SetId(pointId)
             .SetX(x)
             .SetY(y)
             .SetScreenX(screenX)

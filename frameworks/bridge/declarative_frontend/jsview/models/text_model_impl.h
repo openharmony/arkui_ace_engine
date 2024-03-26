@@ -26,6 +26,7 @@ namespace OHOS::Ace::Framework {
 class ACE_EXPORT TextModelImpl : public TextModel {
 public:
     void Create(const std::string& content) override;
+    void Create(const RefPtr<SpanStringBase>& spanString) override {}
     void SetFont(const Font& value) override;
     void SetFontSize(const Dimension& value) override;
     void SetTextColor(const Color& value) override;
@@ -61,6 +62,7 @@ public:
     void SetOnCopy(std::function<void(const std::string&)>&& func) override {};
     void SetEllipsisMode(EllipsisMode modal) override {};
     void SetClipEdge() override {};
+    void SetFontFeature(const std::unordered_map<std::string, int32_t>& value) override {};
 
     void SetOnDragStart(NG::OnDragStartFunc&& onDragStart) override;
     void SetOnDragEnter(NG::OnDragDropFunc&& onDragEnter) override;

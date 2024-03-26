@@ -39,6 +39,9 @@ public:
     // app swiper scroll
     static constexpr char APP_SWIPER_SCROLL[] = "APP_SWIPER_SCROLL";
 
+    // app tab switch
+    static constexpr char APP_TAB_SWITCH[] = "APP_TAB_SWITCH";
+
     // volume bar show
     static constexpr char VOLUME_BAR_SHOW[] = "VOLUME_BAR_SHOW";
 
@@ -80,6 +83,21 @@ public:
 
     // another app jamps back to A app
     static constexpr char APP_TRANSITION_FROM_OTHER_APP[] = "APP_TRANSITION_FROM_OTHER_APP";
+
+    // mutitask scroll
+    static constexpr char SNAP_RECENT_ANI[] = "SNAP_RECENT_ANI";
+
+    // start app from dock
+    static constexpr char LAUNCHER_APP_LAUNCH_FROM_DOCK[] = "LAUNCHER_APP_LAUNCH_FROM_DOCK";
+
+    // start app from misson
+    static constexpr char LAUNCHER_APP_LAUNCH_FROM_MISSON[] = "LAUNCHER_APP_LAUNCH_FROM_MISSON";
+
+    // app exit from back to home
+    static constexpr char LAUNCHER_APP_BACK_TO_HOME[] = "LAUNCHER_APP_BACK_TO_HOME";
+
+    // app exit from multitasking
+    static constexpr char EXIT_RECENT_2_HOME_ANI[] = "EXIT_RECENT_2_HOME_ANI";
 };
 } // namespace OHOS::Ace
 #endif // ARKUI_PERF_SCENE_ID_H

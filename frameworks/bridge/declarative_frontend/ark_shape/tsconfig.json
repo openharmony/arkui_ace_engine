@@ -1,0 +1,24 @@
+{
+    "include": [
+        "src/interfaces.d.ts",
+    ],
+    "files": [
+        "src/RectShape.ts",
+        "src/CircleShape.ts",
+        "src/PathShape.ts",
+        "src/EllipseShape.ts",
+    ],
+    "compilerOptions": {
+        "module": "none",
+        "target": "ES2016",
+        "outDir": "../engine/",
+        "outFile": "../engine/jsShape.js",
+        "rootDir": "./src/",
+        "declaration": false,
+        "noEmitOnError": true,
+        "experimentalDecorators": true,
+        "lib": [
+            "ES2016"
+        ],
+    }
+}

@@ -397,6 +397,7 @@ void AceAbility::SurfaceChanged(
     // to the new window after the window is modified.
     auto context = container->GetPipelineContext();
     CHECK_NULL_VOID(context);
+    context->SetDisplayWindowRectInfo(Rect(Offset(0, 0), Size(width, height)));
     SystemProperties::InitDeviceInfo(
         width, height, orientation == DeviceOrientation::PORTRAIT ? 0 : 1, resolution, runArgs_.isRound);
     DeviceConfig deviceConfig = runArgs_.deviceConfig;

@@ -44,11 +44,7 @@ public:
                 return theme;
             }
 
-            auto themeStyle = themeConstants->GetThemeStyle();
-            if (!themeStyle) {
-                return theme;
-            }
-            auto pattern = themeStyle->GetAttr<RefPtr<ThemeStyle>>(THEME_PATTERN_CLOCK, nullptr);
+            RefPtr<ThemeStyle> pattern = themeConstants->GetPatternByName(THEME_PATTERN_CLOCK);
             if (!pattern) {
                 LOGW("find pattern of clock fail");
                 return theme;

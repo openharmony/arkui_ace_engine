@@ -44,8 +44,8 @@ enum class RouterPageState {
 };
 
 // PagePattern is the base class for page root render node.
-class ACE_EXPORT PagePattern : public ContentRootPattern {
-    DECLARE_ACE_TYPE(PagePattern, ContentRootPattern);
+class ACE_EXPORT PagePattern : public ContentRootPattern, public FocusView {
+    DECLARE_ACE_TYPE(PagePattern, ContentRootPattern, FocusView);
 
 public:
     explicit PagePattern(const RefPtr<PageInfo>& pageInfo) : pageInfo_(pageInfo) {}
@@ -121,6 +121,11 @@ public:
     FocusPattern GetFocusPattern() const override
     {
         return { FocusType::SCOPE, true };
+    }
+
+    std::list<int32_t> GetRouteOfFirstScope() override
+    {
+        return { 0 };
     }
 
     const SharedTransitionMap& GetSharedTransitionMap() const

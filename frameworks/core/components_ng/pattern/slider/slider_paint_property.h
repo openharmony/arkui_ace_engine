@@ -44,6 +44,35 @@ public:
         ResetSliderTipStyle();
     }
 
+    std::string ToJsonTrackBackgroundColor() const
+    {
+        Gradient colors;
+        if (HasTrackBackgroundColor()) {
+            colors = GetTrackBackgroundColor().value();
+            return GradientToJson(colors);
+        }
+        auto pipeline = PipelineBase::GetCurrentContext();
+        CHECK_NULL_RETURN(pipeline, "");
+        auto theme = pipeline->GetTheme<SliderTheme>();
+        CHECK_NULL_RETURN(theme, "");
+
+        colors = SliderModelNG::CreateSolidGradient(theme->GetTrackBgColor());
+        return GradientToJson(colors);
+    }
+
+    std::string GradientToJson(Gradient colors) const
+    {
+        auto jsonArray = JsonUtil::CreateArray(true);
+        for (size_t index = 0; index < colors.GetColors().size(); ++index) {
+            auto gradientColor = colors.GetColors()[index];
+            auto gradientColorJson = JsonUtil::Create(true);
+            gradientColorJson->Put("color", gradientColor.GetLinearColor().ToColor().ColorToString().c_str());
+            gradientColorJson->Put("offset", std::to_string(gradientColor.GetDimension().Value()).c_str());
+            jsonArray->Put(std::to_string(index).c_str(), gradientColorJson);
+        }
+        return jsonArray->ToString();
+    }
+
     void ToJsonValue(std::unique_ptr<JsonValue>& json) const override
     {
         auto pipeline = PipelineBase::GetCurrentContext();
@@ -61,7 +90,7 @@ public:
             (GetDirection().value_or(Axis::HORIZONTAL)) == Axis::VERTICAL ? "Axis.Vertical" : "Axis.Horizontal");
         json->Put("constructor", jsonConstructor);
         json->Put("blockColor", GetBlockColor().value_or(theme->GetBlockColor()).ColorToString().c_str());
-        json->Put("trackColor", GetTrackBackgroundColor().value_or(theme->GetTrackBgColor()).ColorToString().c_str());
+        json->Put("trackColor", ToJsonTrackBackgroundColor().c_str());
         json->Put("selectedColor", GetSelectColor().value_or(theme->GetTrackSelectedColor()).ColorToString().c_str());
         json->Put("showSteps", GetShowSteps().value_or(false) ? "true" : "false");
         json->Put("showTips", GetShowTips().value_or(false) ? "true" : "false");
@@ -70,6 +99,9 @@ public:
         json->Put("stepColor", GetStepColorValue(theme->GetMarkerColor()).ColorToString().c_str());
         if (GetTrackBorderRadius().has_value()) {
             json->Put("trackBorderRadius", GetTrackBorderRadius().value().ToString().c_str());
+        }
+        if (GetSelectedBorderRadius().has_value()) {
+            json->Put("selectedBorderRadius", GetSelectedBorderRadius().value().ToString().c_str());
         }
         static const std::array<std::string, 3> SLIDER_BLOCK_TYPE_TO_STRING = {
             "BlockStyleType.DEFAULT",
@@ -83,6 +115,15 @@ public:
         if (GetCustomContent().has_value()) {
             json->Put("content", GetCustomContent().value().c_str());
         }
+        static const std::array<std::string, 2> SLIDER_INTERACTION_MODE_TO_STRING = {
+            "SliderInteraction.SLIDE_AND_CLICK",
+            "SliderInteraction.SLIDE_ONLY",
+        };
+        json->Put("sliderInteractionMode",
+            SLIDER_INTERACTION_MODE_TO_STRING
+                .at(static_cast<int>(GetSliderInteractionModeValue(SliderModelNG::SliderInteraction::SLIDE_AND_CLICK)))
+                .c_str());
+        json->Put("minResponsiveDistance", std::to_string(GetMinResponsiveDistance().value_or(0.0f)).c_str());
     }
 
     SizeF GetBlockSizeValue(const SizeF& defaultValue)
@@ -102,16 +143,20 @@ public:
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(SliderPaintStyle, Min, float, PROPERTY_UPDATE_RENDER)
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(SliderPaintStyle, Max, float, PROPERTY_UPDATE_RENDER)
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(SliderPaintStyle, Step, float, PROPERTY_UPDATE_RENDER)
+    ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(SliderPaintStyle, MinResponsiveDistance, float, PROPERTY_UPDATE_RENDER)
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(SliderPaintStyle, Reverse, bool, PROPERTY_UPDATE_RENDER)
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(SliderPaintStyle, Direction, Axis, PROPERTY_UPDATE_RENDER)
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(SliderPaintStyle, BlockColor, Color, PROPERTY_UPDATE_RENDER)
-    ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(SliderPaintStyle, TrackBackgroundColor, Color, PROPERTY_UPDATE_RENDER)
+    ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(SliderPaintStyle, TrackBackgroundColor, Gradient, PROPERTY_UPDATE_RENDER)
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(SliderPaintStyle, SelectColor, Color, PROPERTY_UPDATE_RENDER)
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(SliderPaintStyle, ShowSteps, bool, PROPERTY_UPDATE_RENDER)
+    ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(
+        SliderPaintStyle, SliderInteractionMode, SliderModel::SliderInteraction, PROPERTY_UPDATE_RENDER)
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(SliderPaintStyle, BlockBorderColor, Color, PROPERTY_UPDATE_RENDER)
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(SliderPaintStyle, BlockBorderWidth, Dimension, PROPERTY_UPDATE_RENDER)
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(SliderPaintStyle, StepColor, Color, PROPERTY_UPDATE_RENDER)
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(SliderPaintStyle, TrackBorderRadius, Dimension, PROPERTY_UPDATE_RENDER)
+    ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(SliderPaintStyle, SelectedBorderRadius, Dimension, PROPERTY_UPDATE_RENDER)
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(
         SliderPaintStyle, BlockType, SliderModel::BlockStyleType, PROPERTY_UPDATE_RENDER)
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(SliderPaintStyle, BlockImage, std::string, PROPERTY_UPDATE_RENDER)

@@ -348,7 +348,7 @@ var TextDecorationStyle;
   TextDecorationStyle[TextDecorationStyle["DOTTED"] = 2] = "DOTTED";
   TextDecorationStyle[TextDecorationStyle["DASHED"] = 3] = "DASHED";
   TextDecorationStyle[TextDecorationStyle["WAVY"] = 4] = "WAVY";
-})(TextDecorationStyle || (TextDecorationStyle= {}));
+})(TextDecorationStyle || (TextDecorationStyle = {}));
 
 var TextDecorationType;
 (function (TextDecorationType) {
@@ -641,7 +641,7 @@ var FormDimension;
   FormDimension["Dimension_4_4"] = 4;
   FormDimension["Dimension_2_1"] = 5;
   FormDimension["DIMENSION_1_1"] = 6;
-  FormDimension["DIMENSION_4_6"] = 7;
+  FormDimension["DIMENSION_6_4"] = 7;
 })(FormDimension || (FormDimension = {}));
 
 let FormRenderingMode;
@@ -870,6 +870,7 @@ var SearchType;
   SearchType[SearchType["NUMBER"] = 2] = "NUMBER";
   SearchType[SearchType["PHONE_NUMBER"] = 3] = "PHONE_NUMBER";
   SearchType[SearchType["EMAIL"] = 5] = "EMAIL";
+  SearchType[SearchType["NUMBER_DECIMAL"] = 12] = "NUMBER_DECIMAL";
 })(SearchType || (SearchType = {}));
 
 var TextAreaType;
@@ -878,6 +879,7 @@ var TextAreaType;
   TextAreaType[TextAreaType["NUMBER"] = 2] = "NUMBER";
   TextAreaType[TextAreaType["PHONE_NUMBER"] = 3] = "PHONE_NUMBER";
   TextAreaType[TextAreaType["EMAIL"] = 5] = "EMAIL";
+  TextAreaType[TextAreaType["NUMBER_DECIMAL"] = 12] = "NUMBER_DECIMAL";
 })(TextAreaType || (TextAreaType = {}));
 
 var EnterKeyType;
@@ -933,13 +935,13 @@ var TitleHeight;
 })(TitleHeight || (TitleHeight = {}));
 
 var NavDestinationMode;
-(function(NavDestinationMode) {
+(function (NavDestinationMode) {
   NavDestinationMode[NavDestinationMode["STANDARD"] = 0] = "STANDARD";
   NavDestinationMode[NavDestinationMode["DIALOG"] = 1] = "DIALOG";
 }(NavDestinationMode || (NavDestinationMode = {})));
 
 let NavigationOperation;
-(function(NavigationOperation) {
+(function (NavigationOperation) {
   NavigationOperation[NavigationOperation.PUSH = 1] = "PUSH";
   NavigationOperation[NavigationOperation.POP = 2] = "POP";
   NavigationOperation[NavigationOperation.REPLACE = 3] = "REPLACE";
@@ -1385,6 +1387,33 @@ var FunctionKey;
   FunctionKey[FunctionKey["F12"] = 12] = "F12";
 })(FunctionKey || (FunctionKey = {}));
 
+var ContentType;
+(function (ContentType) {
+  ContentType[ContentType['USER_NAME'] = 0] = 'USER_NAME';
+  ContentType[ContentType['PASSWORD'] = 1] = 'PASSWORD';
+  ContentType[ContentType['NEW_PASSWORD'] = 2] = 'NEW_PASSWORD';
+  ContentType[ContentType['FULL_STREET_ADDRESS'] = 3] = 'FULL_STREET_ADDRESS';
+  ContentType[ContentType['HOUSE_NUMBER'] = 4] = 'HOUSE_NUMBER';
+  ContentType[ContentType['DISTRICT_ADDRESS'] = 5] = 'DISTRICT_ADDRESS';
+  ContentType[ContentType['CITY_ADDRESS'] = 6] = 'CITY_ADDRESS';
+  ContentType[ContentType['PROVINCE_ADDRESS'] = 7] = 'PROVINCE_ADDRESS';
+  ContentType[ContentType['COUNTRY_ADDRESS'] = 8] = 'COUNTRY_ADDRESS';
+  ContentType[ContentType['PERSON_FULL_NAME'] = 9] = 'PERSON_FULL_NAME';
+  ContentType[ContentType['PERSON_LAST_NAME'] = 10] = 'PERSON_LAST_NAME';
+  ContentType[ContentType['PERSON_FIRST_NAME'] = 11] = 'PERSON_FIRST_NAME';
+  ContentType[ContentType['PHONE_NUMBER'] = 12] = 'PHONE_NUMBER';
+  ContentType[ContentType['PHONE_COUNTRY_CODE'] = 13] = 'PHONE_COUNTRY_CODE';
+  ContentType[ContentType['FULL_PHONE_NUMBER'] = 14] = 'FULL_PHONE_NUMBER';
+  ContentType[ContentType['EMAIL_ADDRESS'] = 15] = 'EMAIL_ADDRESS';
+  ContentType[ContentType['BANK_CARD_NUMBER'] = 16] = 'BANK_CARD_NUMBER';
+  ContentType[ContentType['ID_CARD_NUMBER'] = 17] = 'ID_CARD_NUMBER';
+  ContentType[ContentType['PRECISE_TIME'] = 18] = 'PRECISE_TIME';
+  ContentType[ContentType['HOUR_AND_MINUTE'] = 19] = 'HOUR_AND_MINUTE';
+  ContentType[ContentType['DATE'] = 20] = 'DATE';
+  ContentType[ContentType['MONTH'] = 21] = 'MONTH';
+  ContentType[ContentType['YEAR'] = 22] = 'YEAR';
+})(ContentType || (ContentType = {}));
+
 var GestureJudgeResult;
 (function (GestureJudgeResult) {
   GestureJudgeResult[GestureJudgeResult["CONTINUE"] = 0] = "CONTINUE";
@@ -1393,17 +1422,17 @@ var GestureJudgeResult;
 
 var GestureControl;
 (function (GestureControl) {
-    let GestureType;
-    (function (GestureType) {
-        GestureType[GestureType["TAP_GESTURE"] = 0] = "TAP_GESTURE";
-        GestureType[GestureType["LONG_PRESS_GESTURE"] = 1] = "LONG_PRESS_GESTURE";
-        GestureType[GestureType["PAN_GESTURE"] = 2] = "PAN_GESTURE";
-        GestureType[GestureType["PINCH_GESTURE"] = 3] = "PINCH_GESTURE";
-        GestureType[GestureType["SWIPE_GESTURE"] = 4] = "SWIPE_GESTURE";
-        GestureType[GestureType["ROTATION_GESTURE"] = 5] = "ROTATION_GESTURE";
-        GestureType[GestureType["DRAG"] = 6] = "DRAG";
-        GestureType[GestureType["CLICK"] = 7] = "CLICK";
-    })(GestureType = GestureControl.GestureType || (GestureControl.GestureType = {}));
+  let GestureType;
+  (function (GestureType) {
+    GestureType[GestureType["TAP_GESTURE"] = 0] = "TAP_GESTURE";
+    GestureType[GestureType["LONG_PRESS_GESTURE"] = 1] = "LONG_PRESS_GESTURE";
+    GestureType[GestureType["PAN_GESTURE"] = 2] = "PAN_GESTURE";
+    GestureType[GestureType["PINCH_GESTURE"] = 3] = "PINCH_GESTURE";
+    GestureType[GestureType["SWIPE_GESTURE"] = 4] = "SWIPE_GESTURE";
+    GestureType[GestureType["ROTATION_GESTURE"] = 5] = "ROTATION_GESTURE";
+    GestureType[GestureType["DRAG"] = 6] = "DRAG";
+    GestureType[GestureType["CLICK"] = 7] = "CLICK";
+  })(GestureType = GestureControl.GestureType || (GestureControl.GestureType = {}));
 })(GestureControl || (GestureControl = {}));
 
 class SubTabBarStyle {
@@ -1441,7 +1470,7 @@ class SubTabBarStyle {
 }
 
 class DrawModifier {
-  invalidate() {}
+  invalidate() { }
 }
 
 class ProgressMask {
@@ -1499,6 +1528,10 @@ class BottomTabBarStyle {
   }
   id(arg) {
     this.id = arg;
+    return this;
+  }
+  iconStyle(arg) {
+    this.iconStyle = arg;
     return this;
   }
 }
@@ -1672,6 +1705,12 @@ var SliderBlockType;
   SliderBlockType[SliderBlockType["SHAPE"] = 2] = "SHAPE";
 })(SliderBlockType || (SliderBlockType = {}));
 
+var SliderInteraction;
+(function (SliderInteraction) {
+  SliderInteraction[SliderInteraction["SLIDE_AND_CLICK"] = 0] = "SLIDE_AND_CLICK";
+  SliderInteraction[SliderInteraction["SLIDE_ONLY"] = 1] = "SLIDE_ONLY";
+})(SliderInteraction || (SliderInteraction = {}));
+
 var TitleStyle;
 (function (TitleStyle) {
   TitleStyle[TitleStyle["ListMode"] = 0] = "ListMode";
@@ -1802,7 +1841,7 @@ class NavPathStack {
     let promise = this.nativeStack?.onPushDestination(info);
     if (!promise) {
       this.pathArray.pop();
-      return new Promise((resolve, reject)=>{
+      return new Promise((resolve, reject) => {
         reject({ message: 'Internal error.', code: 100001 });
       })
     }
@@ -1833,7 +1872,7 @@ class NavPathStack {
     let promise = this.nativeStack?.onPushDestination(info);
     if (!promise) {
       this.pathArray.pop();
-      promise = new Promise((resolve, reject)=>{
+      promise = new Promise((resolve, reject) => {
         reject({ message: 'Internal error.', code: 100001 });
       })
     }
@@ -2006,7 +2045,7 @@ class NavPathStack {
     let tempArray = this.pathArray.slice(0);
     this.removeArray = [];
     this.pathArray = [];
-    for (let index = 0 ; index < tempArray.length ; index++) {
+    for (let index = 0; index < tempArray.length; index++) {
       if (tempArray[index] && !indexes.includes(index)) {
         this.pathArray.push(tempArray[index]);
       } else {
@@ -2590,12 +2629,12 @@ var ImageAnalyzerType;
 })(ImageAnalyzerType || (ImageAnalyzerType = {}));
 
 function wrapBuilder(builder) {
-    return new WrappedBuilder(builder);
+  return new WrappedBuilder(builder);
 }
 class WrappedBuilder {
-    constructor(builder) {
-        this.builder = builder;
-    }
+  constructor(builder) {
+    this.builder = builder;
+  }
 }
 
 let TextSpanType;
@@ -2626,7 +2665,37 @@ let RenderMode;
 })(RenderMode || (RenderMode = {}));
 
 let ButtonRole;
-(function (ButtonRole){
+(function (ButtonRole) {
   ButtonRole['NORMAL'] = 0;
   ButtonRole['ERROR'] = 1;
 })(ButtonRole || (ButtonRole = {}));
+
+let MenuPolicy;
+(function (MenuPolicy) {
+  MenuPolicy['DEFAULT'] = 0;
+  MenuPolicy['NEVER'] = 1;
+  MenuPolicy['ALWAYS'] = 2;
+})(MenuPolicy || (MenuPolicy = {}));
+
+let PreDragStatus;
+(function (PreDragStatus) {
+  PreDragStatus['ACTION_DETECTING_STATUS'] = 0;
+  PreDragStatus['READY_TO_TRIGGER_DRAG_ACTION'] = 1;
+  PreDragStatus['PREVIEW_LIFT_STARTED'] = 2;
+  PreDragStatus['PREVIEW_LIFT_FINISHED'] = 3;
+  PreDragStatus['PREVIEW_LANDING_STARTED'] = 4;
+  PreDragStatus['PREVIEW_LANDING_FINISHED'] = 5;
+  PreDragStatus['ACTION_CANCELED_BEFORE_DRAG'] = 6;
+})(PreDragStatus || (PreDragStatus = {}));
+
+var StyledStringKey;
+(function (StyledStringKey) {
+  StyledStringKey[StyledStringKey["FONT"] = 0] = "FONT";
+  StyledStringKey[StyledStringKey["DECORATION"] = 1] = "DECORATION";
+  StyledStringKey[StyledStringKey["BASELINE_OFFSET"] = 2] = "BASELINE_OFFSET";
+  StyledStringKey[StyledStringKey["LETTER_SPACING"] = 3] = "LETTER_SPACING";
+  StyledStringKey[StyledStringKey["TEXT_SHADOW"] = 4] = "TEXT_SHADOW";
+  StyledStringKey[StyledStringKey["PARAGRAPH_STYLE"] = 5] = "PARAGRAPH_STYLE";
+  StyledStringKey[StyledStringKey["BACKGROUND_COLOR"] = 6] = "BACKGROUND_COLOR";
+  StyledStringKey[StyledStringKey["GESTURE"] = 7] = "GESTURE";
+})(StyledStringKey || (StyledStringKey = {}));

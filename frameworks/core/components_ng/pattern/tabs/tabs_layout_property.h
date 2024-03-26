@@ -46,6 +46,8 @@ public:
         value->propBarHeight_ = CloneBarHeight();
         value->propIndex_ = CloneIndex();
         value->propBarOverlap_ = CloneBarOverlap();
+        value->propWidthAuto_ = CloneWidthAuto();
+        value->propHeightAuto_ = CloneHeightAuto();
         return value;
     }
 
@@ -115,6 +117,8 @@ public:
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(BarHeight, Dimension, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(Index, int32_t, PROPERTY_UPDATE_NORMAL);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(BarOverlap, bool, PROPERTY_UPDATE_MEASURE);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(WidthAuto, bool, PROPERTY_UPDATE_MEASURE);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(HeightAuto, bool, PROPERTY_UPDATE_MEASURE);
 };
 
 } // namespace OHOS::Ace::NG

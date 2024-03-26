@@ -15,9 +15,25 @@
 
 #include "core/components/declaration/svg/svg_fe_gaussianblur_declaration.h"
 
+#include <vector>
+
+#include "base/utils/string_utils.h"
 #include "core/components/declaration/common/declaration_constants.h"
 
 namespace OHOS::Ace {
+
+std::vector<double> ParseVecDouble(const std::string& value)
+{
+    if (value.empty()) {
+        return {};
+    }
+    std::vector<double> parsedValues;
+    StringUtils::StringSplitter(value, ' ', parsedValues);
+    if (parsedValues.empty()) {
+        StringUtils::StringSplitter(value, ',', parsedValues);
+    }
+    return parsedValues;
+}
 
 using namespace Framework;
 
@@ -36,12 +52,10 @@ bool SvgFeGaussianBlurDeclaration::SetSpecializedValue(const std::pair<std::stri
 {
     static const LinearMapNode<void (*)(const std::string&, SvgFeGaussianBlurDeclaration&)> attrs[] = {
         { DOM_SVG_FE_EDGE_MODE,
-            [](const std::string& val, SvgFeGaussianBlurDeclaration& declaration) {
-                declaration.SetEdgeMode(val);
-            } },
+            [](const std::string& val, SvgFeGaussianBlurDeclaration& declaration) { declaration.SetEdgeMode(val); } },
         { DOM_SVG_FE_STD_DEVIATION,
             [](const std::string& val, SvgFeGaussianBlurDeclaration& declaration) {
-                declaration.SetStdDeviation(declaration.ParseDouble(val));
+                declaration.SetStdDeviation(ParseVecDouble(val));
             } },
     };
     std::string key = attr.first;

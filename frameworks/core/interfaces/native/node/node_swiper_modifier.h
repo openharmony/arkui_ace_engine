@@ -18,5 +18,9 @@
 #include "core/interfaces/native/node/node_api.h"
 
 namespace OHOS::Ace::NG::NodeModifier {
-    const ArkUISwiperModifier* GetSwiperModifier();
+const ArkUISwiperModifier* GetSwiperModifier();
+void SetSwiperChange(ArkUINodeHandle node, void* extraParam);
+void SetSwiperAnimationStart(ArkUINodeHandle node, void* extraParam);
+void SetSwiperAnimationEnd(ArkUINodeHandle node, void* extraParam);
+void SetSwiperGestureSwipe(ArkUINodeHandle node, void* extraParam);
 } // namespace OHOS::Ace::NG::NodeModifier

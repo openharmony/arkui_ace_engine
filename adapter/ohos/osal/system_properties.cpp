@@ -44,6 +44,7 @@ constexpr char PROPERTY_DEVICE_TYPE_TABLET[] = "tablet";
 constexpr char PROPERTY_DEVICE_TYPE_TWOINONE[] = "2in1";
 constexpr char PROPERTY_DEVICE_TYPE_WATCH[] = "watch";
 constexpr char PROPERTY_DEVICE_TYPE_CAR[] = "car";
+constexpr char PROPERTY_DEVICE_TYPE_WEARABLE[] = "wearable";
 constexpr char ENABLE_DEBUG_AUTOUI_KEY[] = "persist.ace.debug.autoui.enabled";
 constexpr char ENABLE_DEBUG_BOUNDARY_KEY[] = "persist.ace.debug.boundary.enabled";
 constexpr char ENABLE_DOWNLOAD_BY_NETSTACK_KEY[] = "persist.ace.download.netstack.enabled";
@@ -287,10 +288,11 @@ bool IsAcePerformanceMonitorEnabled()
 
 bool SystemProperties::traceEnabled_ = IsTraceEnabled();
 bool SystemProperties::svgTraceEnable_ = IsSvgTraceEnabled();
-bool SystemProperties::layoutTraceEnable_ = IsLayoutTraceEnabled() && IsDeveloperModeOn();
-bool SystemProperties::traceInputEventEnable_ = IsTraceInputEventEnabled() && IsDeveloperModeOn();
+bool SystemProperties::developerModeOn_ = IsDeveloperModeOn();
+bool SystemProperties::layoutTraceEnable_ = IsLayoutTraceEnabled() && developerModeOn_;
+bool SystemProperties::traceInputEventEnable_ = IsTraceInputEventEnabled() && developerModeOn_;
 bool SystemProperties::stateManagerEnable_ = IsStateManagerEnable();
-bool SystemProperties::buildTraceEnable_ = IsBuildTraceEnabled() && IsDeveloperModeOn();
+bool SystemProperties::buildTraceEnable_ = IsBuildTraceEnabled() && developerModeOn_;
 bool SystemProperties::accessibilityEnabled_ = IsAccessibilityEnabled();
 bool SystemProperties::isRound_ = false;
 bool SystemProperties::isDeviceAccess_ = false;
@@ -316,7 +318,7 @@ LongScreenType SystemProperties::LongScreen_ { LongScreenType::NOT_LONG };
 bool SystemProperties::unZipHap_ = true;
 ACE_WEAK_SYM bool SystemProperties::rosenBackendEnabled_ = IsRosenBackendEnabled();
 ACE_WEAK_SYM bool SystemProperties::isHookModeEnabled_ = IsHookModeEnabled();
-bool SystemProperties::debugBoundaryEnabled_ = IsDebugBoundaryEnabled();
+bool SystemProperties::debugBoundaryEnabled_ = IsDebugBoundaryEnabled() && developerModeOn_;
 bool SystemProperties::debugAutoUIEnabled_ = IsDebugAutoUIEnabled();
 bool SystemProperties::downloadByNetworkEnabled_ = IsDownloadByNetworkDisabled();
 bool SystemProperties::debugOffsetLogEnabled_ = IsDebugOffsetLogEnabled();
@@ -419,6 +421,8 @@ void SystemProperties::InitDeviceTypeBySystemProperty()
         deviceType_ = DeviceType::TABLET;
     } else if (deviceProp == PROPERTY_DEVICE_TYPE_TWOINONE) {
         deviceType_ = DeviceType::TWO_IN_ONE;
+    } else if (deviceProp == PROPERTY_DEVICE_TYPE_WEARABLE) {
+        deviceType_ = DeviceType::WEARABLE;
     } else {
         deviceType_ = DeviceType::PHONE;
     }
@@ -445,10 +449,10 @@ void SystemProperties::InitDeviceInfo(
     debugEnabled_ = IsDebugEnabled();
     traceEnabled_ = IsTraceEnabled();
     svgTraceEnable_ = IsSvgTraceEnabled();
-    layoutTraceEnable_ = IsLayoutTraceEnabled() && IsDeveloperModeOn();
-    traceInputEventEnable_ = IsTraceInputEventEnabled() && IsDeveloperModeOn();
+    layoutTraceEnable_ = IsLayoutTraceEnabled() && developerModeOn_;
+    traceInputEventEnable_ = IsTraceInputEventEnabled() && developerModeOn_;
     stateManagerEnable_ = IsStateManagerEnable();
-    buildTraceEnable_ = IsBuildTraceEnabled() && IsDeveloperModeOn();
+    buildTraceEnable_ = IsBuildTraceEnabled() && developerModeOn_;
     accessibilityEnabled_ = IsAccessibilityEnabled();
     rosenBackendEnabled_ = IsRosenBackendEnabled();
     isHookModeEnabled_ = IsHookModeEnabled();
@@ -657,7 +661,12 @@ float SystemProperties::GetDefaultResolution()
 
 void SystemProperties::SetLayoutTraceEnabled(bool layoutTraceEnable)
 {
-    layoutTraceEnable_ = layoutTraceEnable && IsDeveloperModeOn();
+    layoutTraceEnable_ = layoutTraceEnable && developerModeOn_;
+}
+
+void SystemProperties::SetInputEventTraceEnabled(bool inputEventTraceEnable)
+{
+    traceInputEventEnable_ = inputEventTraceEnable && IsDeveloperModeOn();
 }
 
 void SystemProperties::SetSecurityDevelopermodeLayoutTraceEnabled(bool layoutTraceEnable)
@@ -667,6 +676,6 @@ void SystemProperties::SetSecurityDevelopermodeLayoutTraceEnabled(bool layoutTra
 
 void SystemProperties::SetDebugBoundaryEnabled(bool debugBoundaryEnabled)
 {
-    debugBoundaryEnabled_ = debugBoundaryEnabled && IsDeveloperModeOn();
+    debugBoundaryEnabled_ = debugBoundaryEnabled && developerModeOn_;
 }
 } // namespace OHOS::Ace

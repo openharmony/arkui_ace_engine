@@ -94,7 +94,7 @@ void JSDataChangeListener::JSBind(BindingTarget globalObj)
         globalObj, &JSDataChangeListener::Constructor, &JSDataChangeListener::Destructor);
 }
 
-RefPtr<JSLazyForEachActuator> CreateActuator(const std::string viewId)
+RefPtr<JSLazyForEachActuator> CreateActuator(const std::string& viewId)
 {
 #ifdef NG_BUILD
     return AceType::MakeRefPtr<JSLazyForEachBuilder>();

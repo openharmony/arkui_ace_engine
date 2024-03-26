@@ -15,13 +15,13 @@ group("core_pattern_unittest") {
   testonly = true
   deps = [
     "animator:animator_test_ng",
+    "app_bar:app_bar_test_ng",
     "badge:badge_test_ng",
     "blank:blank_test_ng",
     "bubble:bubble_test_ng",
     "button:button_test_ng",
     "calendar:calendar_test_ng",
     "calendar_picker:calendar_picker_test_ng",
-    "canvas_renderer:canvas_renderer_test_ng",
     "checkbox:checkbox_test_ng",
     "checkboxgroup:checkboxgroup_test_ng",
     "common_view:common_view_test_ng",

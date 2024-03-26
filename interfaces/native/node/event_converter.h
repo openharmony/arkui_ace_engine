@@ -16,18 +16,21 @@
 #pragma once
 
 #include "native_node.h"
+#include "native_type.h"
 
 #include "core/interfaces/arkoala/arkoala_api.h"
 
 namespace OHOS::Ace::NodeModel {
 
 // for error info, use int instead of ArkUINodeEventType
-ArkUI_Int32 ConvertOriginEventType(ArkUI_NodeEventType type);
+ArkUI_Int32 ConvertOriginEventType(ArkUI_NodeEventType type, int32_t nodeType);
 ArkUI_Int32 ConvertToNodeEventType(ArkUIEventSubKind type);
 bool IsStringEvent(ArkUI_Int32 type);
 bool IsTouchEvent(ArkUI_Int32 type);
 
 bool ConvertEvent(ArkUINodeEvent* origin, ArkUI_NodeEvent* event);
 bool ConvertEventResult(ArkUI_NodeEvent* event, ArkUINodeEvent* origin);
+
+void HandleInnerEvent(ArkUINodeEvent* innerEvent);
 
 }; // namespace OHOS::Ace::NodeModel

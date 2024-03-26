@@ -379,8 +379,9 @@ void SubwindowOhos::HideWindow()
     if (!rootNode->GetChildren().empty() &&
         !(rootNode->GetChildren().size() == 1 && rootNode->GetLastChild()->GetTag() == V2::KEYBOARD_ETS_TAG)) {
         auto lastChildId = rootNode->GetLastChild()->GetId();
-        if (hotAreasMap_.find(lastChildId) != hotAreasMap_.end()) {
-            auto hotAreaRect = hotAreasMap_[lastChildId];
+        auto iter = hotAreasMap_.find(lastChildId);
+        if (iter != hotAreasMap_.end()) {
+            auto hotAreaRect = iter->second;
             OHOS::Rosen::WMError ret = window_->SetTouchHotAreas(hotAreaRect);
             if (ret != OHOS::Rosen::WMError::WM_OK) {
                 TAG_LOGW(AceLogTag::ACE_SUB_WINDOW, "Set hot areas failed with errCode: %{public}d",
@@ -400,9 +401,9 @@ void SubwindowOhos::HideWindow()
         CHECK_NULL_VOID(rootNode);
         if (!rootNode->GetChildren().empty() &&
             !(rootNode->GetChildren().size() == 1 && rootNode->GetLastChild()->GetTag() == V2::KEYBOARD_ETS_TAG)) {
-            auto lastChildId = rootNode->GetLastChild()->GetId();
-            if (hotAreasMap_.find(lastChildId) != hotAreasMap_.end()) {
-                auto hotAreaRect = hotAreasMap_[lastChildId];
+            auto it = hotAreasMap_.find(rootNode->GetLastChild()->GetId());
+            if (it != hotAreasMap_.end()) {
+                auto hotAreaRect = it->second;
                 OHOS::Rosen::WMError ret = window_->SetTouchHotAreas(hotAreaRect);
                 if (ret != OHOS::Rosen::WMError::WM_OK) {
                     TAG_LOGW(AceLogTag::ACE_SUB_WINDOW, "Set hot areas failed with errCode: %{public}d",
@@ -578,7 +579,6 @@ void SubwindowOhos::HideMenuNG(const RefPtr<NG::FrameNode>& menu, int32_t target
     HidePixelMap(false, 0, 0, false);
     HideFilter();
 }
-
 
 void SubwindowOhos::UpdateHideMenuOffsetNG(const NG::OffsetF& offset)
 {
@@ -797,6 +797,40 @@ RefPtr<NG::FrameNode> SubwindowOhos::ShowDialogNG(
     return dialog;
 }
 
+RefPtr<NG::FrameNode> SubwindowOhos::ShowDialogNGWithNode(const DialogProperties& dialogProps,
+    const RefPtr<NG::UINode>& customNode)
+{
+    TAG_LOGD(AceLogTag::ACE_SUB_WINDOW, "show dialog ng enter");
+    auto aceContainer = Platform::AceContainer::GetContainer(childContainerId_);
+    CHECK_NULL_RETURN(aceContainer, nullptr);
+    auto context = DynamicCast<NG::PipelineContext>(aceContainer->GetPipelineContext());
+    CHECK_NULL_RETURN(context, nullptr);
+    auto overlay = context->GetOverlayManager();
+    CHECK_NULL_RETURN(overlay, nullptr);
+    std::map<int32_t, RefPtr<NG::FrameNode>> DialogMap(overlay->GetDialogMap().begin(), overlay->GetDialogMap().end());
+    int dialogMapSize = static_cast<int>(DialogMap.size());
+    if (dialogMapSize == 0) {
+        auto parentAceContainer = Platform::AceContainer::GetContainer(parentContainerId_);
+        CHECK_NULL_RETURN(parentAceContainer, nullptr);
+        auto parentcontext = DynamicCast<NG::PipelineContext>(parentAceContainer->GetPipelineContext());
+        CHECK_NULL_RETURN(parentcontext, nullptr);
+        auto parentOverlay = parentcontext->GetOverlayManager();
+        CHECK_NULL_RETURN(parentOverlay, nullptr);
+        parentOverlay->SetSubWindowId(SubwindowManager::GetInstance()->GetDialogSubwindowInstanceId(GetSubwindowId()));
+    }
+    SubwindowManager::GetInstance()->SetDialogSubWindowId(
+        SubwindowManager::GetInstance()->GetDialogSubwindowInstanceId(GetSubwindowId()));
+    ShowWindow();
+    window_->SetFullScreen(true);
+    window_->SetTouchable(true);
+    ResizeWindow();
+    ContainerScope scope(childContainerId_);
+    auto dialog = overlay->ShowDialogWithNode(dialogProps, customNode);
+    CHECK_NULL_RETURN(dialog, nullptr);
+    haveDialog_ = true;
+    return dialog;
+}
+
 void SubwindowOhos::CloseDialogNG(const RefPtr<NG::FrameNode>& dialogNode)
 {
     TAG_LOGD(AceLogTag::ACE_SUB_WINDOW, "close dialog ng enter");
@@ -991,8 +1025,8 @@ void SubwindowOhos::ClearToast()
     HideWindow();
 }
 
-void SubwindowOhos::ShowToastForAbility(
-    const std::string& message, int32_t duration, const std::string& bottom, const NG::ToastShowMode& showMode)
+void SubwindowOhos::ShowToastForAbility(const std::string& message, int32_t duration, const std::string& bottom,
+    const NG::ToastShowMode& showMode, int32_t alignment, std::optional<DimensionOffset> offset)
 {
     TAG_LOGD(AceLogTag::ACE_SUB_WINDOW, "show toast for ability enter, containerId : %{public}d", childContainerId_);
     SubwindowManager::GetInstance()->SetCurrentSubwindow(AceType::Claim(this));
@@ -1017,11 +1051,11 @@ void SubwindowOhos::ShowToastForAbility(
         ResizeWindow();
         window_->SetTouchable(false);
     }
-    delegate->ShowToast(message, duration, bottom, showMode);
+    delegate->ShowToast(message, duration, bottom, showMode, alignment, offset);
 }
 
-void SubwindowOhos::ShowToastForService(
-    const std::string& message, int32_t duration, const std::string& bottom, const NG::ToastShowMode& showMode)
+void SubwindowOhos::ShowToastForService(const std::string& message, int32_t duration, const std::string& bottom,
+    const NG::ToastShowMode& showMode, int32_t alignment, std::optional<DimensionOffset> offset)
 {
     TAG_LOGD(AceLogTag::ACE_SUB_WINDOW, "show toast for Service enter");
     bool ret = CreateEventRunner();
@@ -1074,14 +1108,14 @@ void SubwindowOhos::ShowToastForService(
     }
 }
 
-void SubwindowOhos::ShowToast(
-    const std::string& message, int32_t duration, const std::string& bottom, const NG::ToastShowMode& showMode)
+void SubwindowOhos::ShowToast(const std::string& message, int32_t duration, const std::string& bottom,
+    const NG::ToastShowMode& showMode, int32_t alignment, std::optional<DimensionOffset> offset)
 {
     TAG_LOGD(AceLogTag::ACE_SUB_WINDOW, "show toast enter");
     if (parentContainerId_ >= MIN_PA_SERVICE_ID || parentContainerId_ < 0) {
-        ShowToastForService(message, duration, bottom, showMode);
+        ShowToastForService(message, duration, bottom, showMode, alignment, offset);
     } else {
-        ShowToastForAbility(message, duration, bottom, showMode);
+        ShowToastForAbility(message, duration, bottom, showMode, alignment, offset);
     }
 }
 

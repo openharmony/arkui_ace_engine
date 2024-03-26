@@ -45,6 +45,11 @@ public:
         isFirstShow_ = true;
     }
 
+    void SetHasPreviewTransitionEffect(bool hasPreviewTransitionEffect)
+    {
+        hasPreviewTransitionEffect_ = hasPreviewTransitionEffect;
+    }
+
     RefPtr<FrameNode> GetMenuWrapper() const;
 
 private:
@@ -53,7 +58,7 @@ private:
     void InitPanEvent(const RefPtr<GestureEventHub>& gestureHub);
     void HandleDragEnd(float offsetX, float offsetY, float velocity);
     bool isFirstShow_ = false;
-
+    bool hasPreviewTransitionEffect_ = false;
     ACE_DISALLOW_COPY_AND_MOVE(MenuPreviewPattern);
 };
 } // namespace OHOS::Ace::NG

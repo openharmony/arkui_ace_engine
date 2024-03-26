@@ -70,7 +70,7 @@ void TextFieldManagerNG::ScrollToSafeAreaHelper(
     auto scrollableNode = FindScrollableOfFocusedTextField(frameNode);
     CHECK_NULL_VOID(scrollableNode);
     auto scrollPattern = scrollableNode->GetPattern<ScrollablePattern>();
-    CHECK_NULL_VOID(scrollPattern);
+    CHECK_NULL_VOID(scrollPattern && scrollPattern->IsScrollToSafeAreaHelper());
     if (scrollPattern->GetAxis() == Axis::HORIZONTAL) {
         return;
     }

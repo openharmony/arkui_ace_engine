@@ -48,4 +48,13 @@ void CanvasModelNG::SetOnReady(std::function<void()>&& onReady)
     auto onReadyEvent = [func]() { func(); };
     eventHub->SetOnReady(std::move(onReadyEvent));
 }
+
+void CanvasModelNG::EnableAnalyzer(bool enable)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<CustomPaintPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->EnableAnalyzer(enable);
+}
 } // namespace OHOS::Ace::NG

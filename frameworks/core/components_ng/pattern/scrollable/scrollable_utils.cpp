@@ -16,21 +16,7 @@
 #include "core/components_ng/syntax/lazy_for_each_node.h"
 #include "core/pipeline_ng/pipeline_context.h"
 namespace OHOS::Ace::NG {
-float ScrollableUtils::CheckHeightExpansion(const RefPtr<LayoutProperty>& layoutProps, Axis axis)
-{
-    float expandHeight = 0.0f;
-    auto&& safeAreaOpts = layoutProps->GetSafeAreaExpandOpts();
-    bool canExpand = axis == Axis::VERTICAL && safeAreaOpts && (safeAreaOpts->edges & SAFE_AREA_EDGE_BOTTOM) &&
-                     (safeAreaOpts->type & SAFE_AREA_TYPE_SYSTEM);
-    if (canExpand) {
-        auto pipeline = PipelineContext::GetCurrentContext();
-        CHECK_NULL_RETURN(pipeline, {});
-        auto safeArea = pipeline->GetSafeArea();
-        expandHeight = safeArea.bottom_.Length();
-    }
-    return expandHeight;
-}
-
+namespace {
 std::vector<RefPtr<LazyForEachNode>> GetLazyForEachNodes(RefPtr<FrameNode>& host)
 {
     std::vector<RefPtr<LazyForEachNode>> lazyNodes;
@@ -107,11 +93,29 @@ int32_t GetScrollUpOrLeftItemIndex(Axis axis, float offset, int32_t start, int32
     return outIndex;
 }
 
-void RecycleItemsByIndex(int32_t start, int32_t end, std::vector<RefPtr<LazyForEachNode>>& lazyNodes)
+void RecycleItemsByIndex(int32_t start, int32_t end,
+                         std::vector<RefPtr<LazyForEachNode>>& lazyNodes, LayoutWrapper* wrapper)
 {
+    wrapper->RecycleItemsByIndex(start, end);
     for (const auto& node : lazyNodes) {
         node->RecycleItems(start, end);
     }
+}
+} // namespace
+
+float ScrollableUtils::CheckHeightExpansion(const RefPtr<LayoutProperty>& layoutProps, Axis axis)
+{
+    float expandHeight = 0.0f;
+    auto&& safeAreaOpts = layoutProps->GetSafeAreaExpandOpts();
+    bool canExpand = axis == Axis::VERTICAL && safeAreaOpts && (safeAreaOpts->edges & SAFE_AREA_EDGE_BOTTOM) &&
+                     (safeAreaOpts->type & SAFE_AREA_TYPE_SYSTEM);
+    if (canExpand) {
+        auto pipeline = PipelineContext::GetCurrentContext();
+        CHECK_NULL_RETURN(pipeline, {});
+        auto safeArea = pipeline->GetSafeArea();
+        expandHeight = safeArea.bottom_.Length();
+    }
+    return expandHeight;
 }
 
 void ScrollableUtils::RecycleItemsOutOfBoundary(
@@ -134,13 +138,13 @@ void ScrollableUtils::RecycleItemsOutOfBoundary(
         if (inIndex >= end) {
             return;
         }
-        RecycleItemsByIndex(inIndex + 1, end + 1, lazyNodes);
+        RecycleItemsByIndex(inIndex + 1, end + 1, lazyNodes, wrapper);
     } else {
         int32_t outIndex = GetScrollUpOrLeftItemIndex(axis, offset, start, end, host);
         if (outIndex <= start) {
             return;
         }
-        RecycleItemsByIndex(start, outIndex, lazyNodes);
+        RecycleItemsByIndex(start, outIndex, lazyNodes, wrapper);
     }
 }
 

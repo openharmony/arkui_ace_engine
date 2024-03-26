@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -26,6 +26,7 @@
 #include "core/event/ace_events.h"
 #include "core/event/axis_event.h"
 namespace OHOS::Ace {
+using FONT_FEATURES_MAP = std::unordered_map<std::string, int32_t>;
 enum GetSpansMethod : int32_t {
     GETSPANS,
     ONSELECT,
@@ -59,7 +60,10 @@ struct SpanPosition {
 
 struct SymbolSpanStyle {
     double fontSize = 0.0;
+    double lineHeight = 0.0;
+    double letterSpacing = 0.0;
     std::string symbolColor;
+    FONT_FEATURES_MAP fontFeature;
     int32_t fontWeight = 0;
     uint32_t renderingStrategy;
     uint32_t effectStrategy;
@@ -68,12 +72,16 @@ struct SymbolSpanStyle {
 struct TextStyleResult {
     std::string fontColor;
     double fontSize = 0.0;
+    double lineHeight = 0.0;
+    double letterSpacing = 0.0;
     int32_t fontStyle = 0;
     int32_t fontWeight = 0;
+    FONT_FEATURES_MAP fontFeature;
     std::string fontFamily;
     int32_t decorationType = 0;
     std::string decorationColor;
     int32_t textAlign = 0;
+    int32_t wordBreak = static_cast<int32_t>(WordBreak::BREAK_WORD);
     float leadingMarginSize[2] = { 0.0, 0.0 };
 };
 
@@ -166,6 +174,7 @@ struct ParagraphInfo {
     RefPtr<PixelMap> leadingMarginPixmap;
     float leadingMarginSize[2] = { 0.0, 0.0 };
     int32_t textAlign = 0;
+    int32_t wordBreak = static_cast<int32_t>(WordBreak::BREAK_WORD);
 
     std::pair<int32_t, int32_t> range;
 };

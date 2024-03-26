@@ -350,7 +350,7 @@ void GridLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
             if (!childWrapper) {
                 break;
             }
-            childOffset = itemsPosition_.at(index);
+            childOffset = childPosition->second;
             childWrapper->GetGeometryNode()->SetMarginFrameOffset(padding.Offset() + childOffset);
             childWrapper->Layout();
         }

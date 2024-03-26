@@ -139,6 +139,32 @@ class UIObserver {
     }
 }
 
+class MeasureUtils {
+    /**
+     * Construct new instance of MeasureUtils.
+     * initialize with instanceId.
+     * @param instanceId obtained on the c++ side.
+     * @since 12
+     */
+    constructor(instanceId) {
+        this.instanceId_ = instanceId;
+        this.ohos_measureUtils = globalThis.requireNapi('measure');
+    }
+
+    measureText(options) {
+        __JSScopeUtil__.syncInstanceId(this.instanceId_);
+        let number = this.ohos_measureUtils.measureText(options);
+        __JSScopeUtil__.restoreInstanceId();
+        return number;
+    }
+
+    measureTextSize(options) {
+        __JSScopeUtil__.syncInstanceId(this.instanceId_);
+        let sizeOption = this.ohos_measureUtils.measureTextSize(options);
+        __JSScopeUtil__.restoreInstanceId();
+        return sizeOption;
+    }
+}
 
 class UIContext {
     /**
@@ -272,6 +298,31 @@ class UIContext {
         __JSScopeUtil__.syncInstanceId(this.instanceId_);
         Context.keyframeAnimateTo(param, keyframes);
         __JSScopeUtil__.restoreInstanceId();
+    }
+
+    animateToImmediately(param, event) {
+        __JSScopeUtil__.syncInstanceId(this.instanceId_);
+        Context.animateToImmediately(param, event);
+        __JSScopeUtil__.restoreInstanceId();
+    }
+
+    getMeasureUtils() {
+        this.measureUtils_ = new MeasureUtils(this.instanceId_);
+        return this.measureUtils_;
+    }
+
+    getHostContext() {
+        __JSScopeUtil__.syncInstanceId(this.instanceId_);
+        let context = getContext();
+        __JSScopeUtil__.restoreInstanceId();
+        return context;
+    }
+
+    getSharedLocalStorage() {
+        __JSScopeUtil__.syncInstanceId(this.instanceId_);
+        let localStorage = NativeLocalStorage.GetShared();
+        __JSScopeUtil__.restoreInstanceId();
+        return localStorage;
     }
 
     getFrameNodeById(id) {

@@ -62,7 +62,7 @@ void ParseRefreshingObject(const JSCallbackInfo& info, const JSRef<JSObject>& re
     CHECK_NULL_VOID(changeEventVal->IsFunction());
 
     auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(changeEventVal));
-    WeakPtr<NG::FrameNode> targetNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    WeakPtr<NG::FrameNode> targetNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
     auto changeEvent = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc), node = targetNode](
                            const std::string& param) {
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
@@ -78,9 +78,13 @@ void ParseRefreshingObject(const JSCallbackInfo& info, const JSRef<JSObject>& re
     RefreshModel::GetInstance()->SetChangeEvent(std::move(changeEvent));
 }
 
-void JSRefresh::SetPullToRefresh(bool value)
+void JSRefresh::SetPullToRefresh(const JSCallbackInfo& info)
 {
-    RefreshModel::GetInstance()->SetPullToRefresh(value);
+    bool pullToRefresh = true;
+    if (info[0]->IsBoolean()) {
+        pullToRefresh = info[0]->ToBoolean();
+    }
+    RefreshModel::GetInstance()->SetPullToRefresh(pullToRefresh);
 }
 
 void JSRefresh::JSBind(BindingTarget globalObj)
@@ -185,7 +189,7 @@ void JSRefresh::OnStateChange(const JSCallbackInfo& args)
         return;
     }
     auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(args[0]));
-    WeakPtr<NG::FrameNode> targetNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    WeakPtr<NG::FrameNode> targetNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
     auto onStateChange = [execCtx = args.GetExecutionContext(), func = std::move(jsFunc), node = targetNode](
                              const int32_t& value) {
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
@@ -203,7 +207,7 @@ void JSRefresh::OnRefreshing(const JSCallbackInfo& args)
         return;
     }
     auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(args[0]));
-    WeakPtr<NG::FrameNode> targetNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    WeakPtr<NG::FrameNode> targetNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
     auto onRefreshing = [execCtx = args.GetExecutionContext(), func = std::move(jsFunc), node = targetNode]() {
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
         ACE_SCORING_EVENT("Refresh.OnRefreshing");

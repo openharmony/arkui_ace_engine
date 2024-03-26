@@ -159,7 +159,7 @@ public:
 
     bool OutBoundaryCallback() override;
 
-    void ScrollPage(bool reverse);
+    void ScrollPage(bool reverse, bool smooth = false) override;
 
     bool UpdateStartIndex(int32_t index);
 
@@ -220,6 +220,9 @@ public:
     std::vector<RefPtr<FrameNode>> GetVisibleSelectedItems() override;
 
     void StopAnimate() override;
+
+    bool IsPredictOutOfRange(int32_t index) const;
+
 private:
     float GetEndOffset();
     float GetMainGap() const;
@@ -259,7 +262,6 @@ private:
     void OnScrollEndCallback() override;
 
     void FireOnScrollStart() override;
-    void InitScrollableEvent();
 
     int32_t CalcIntersectAreaInTargetDirectionShadow(GridItemIndexInfo itemIndexInfo, bool isFindInMainAxis);
     double GetNearestDistanceFromChildToCurFocusItemInMainAxis(int32_t targetIndex, GridItemIndexInfo itemIndexInfo);

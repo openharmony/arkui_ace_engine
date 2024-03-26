@@ -41,7 +41,7 @@ struct OnPluginUvWorkData {
 class AceJSPluginRequestParam {
 public:
     AceJSPluginRequestParam(
-        const AAFwk::Want& want, const std::string name, const std::string data, const std::string jsonPath)
+        const AAFwk::Want& want, const std::string& name, const std::string& data, const std::string& jsonPath)
         : want_(want), name_(name), data_(data), jsonPath_(jsonPath)
     {}
     ~AceJSPluginRequestParam() = default;

@@ -154,7 +154,7 @@ RefPtr<OHOS::Ace::WantWrap> CreateWantWrapFromNapiValue(JSRef<JSVal> obj)
 
 #endif
 
-// When the api version >= 10, it is disable event version.
+// When the api version >= 11, it is disable event version.
 bool IsDisableEventVersion()
 {
     return Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN);

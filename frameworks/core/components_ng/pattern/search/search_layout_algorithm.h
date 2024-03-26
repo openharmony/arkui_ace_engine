@@ -46,7 +46,9 @@ private:
     void CalcChildrenHotZone(LayoutWrapper* layoutWrapper);
     double CalcSearchWidth(const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper);
     double CalcSearchHeight(const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper);
-
+    void SetTextFieldLayoutConstraintHeight(LayoutConstraintF& contentConstraint, double textFieldHeight,
+        LayoutWrapper* layoutWrapper);
+    void UpdateFontFeature(LayoutWrapper* layoutWrapper);
     // children frame size
     SizeF searchIconSizeMeasure_;
     SizeF cancelIconSizeMeasure_;

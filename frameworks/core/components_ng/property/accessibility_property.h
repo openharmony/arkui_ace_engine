@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -38,6 +38,8 @@ using ActionClearSelectionImpl = ActionNoParam;
 using ActionMoveTextImpl = std::function<void(int32_t moveUnit, bool forward)>;
 
 class FrameNode;
+using AccessibilityHoverTestPath = std::vector<RefPtr<FrameNode>>;
+
 class ACE_EXPORT AccessibilityProperty : public virtual AceType {
     DECLARE_ACE_TYPE(AccessibilityProperty, AceType);
 
@@ -356,16 +358,6 @@ public:
         accessibilityDescription_ = accessibilityDescription;
     }
 
-    void SetAccessibilityLevel(const std::string& accessibilityLevel)
-    {
-        if (accessibilityLevel == "auto" || accessibilityLevel == "yes" || accessibilityLevel == "no" ||
-            accessibilityLevel == "no-hide-descendants") {
-            accessibilityLevel_ = accessibilityLevel;
-        } else {
-            accessibilityLevel_ = "auto";
-        }
-    }
-
     bool IsAccessibilityGroup() const
     {
         return accessibilityGroup_;
@@ -381,20 +373,104 @@ public:
         return accessibilityVirtualNode_;
     }
 
+    bool HasAccessibilityVirtualNode() const
+    {
+        return accessibilityVirtualNode_ != nullptr;
+    }
+
     std::string GetAccessibilityText(bool isParentGroup = false);
 
-    std::string GetAccessibilityDescription()
+    std::string GetPlainAccessibilityText() const
+    {
+        return accessibilityText_.value_or("");
+    }
+
+    std::string GetAccessibilityDescription() const
     {
         return accessibilityDescription_.value_or("");
     }
 
-    virtual std::string GetAccessibilityLevel()
+    class Level {
+    public:
+        inline static const std::string AUTO = "auto";
+        inline static const std::string YES = "yes";
+        inline static const std::string NO = "no";
+        inline static const std::string NO_HIDE_DESCENDANTS = "no-hide-descendants";
+    };
+
+    virtual std::string GetAccessibilityLevel() const
     {
         if (!accessibilityLevel_.has_value()) {
-            return "yes";
+            return Level::AUTO;
         }
-        accessibilityLevel_ = accessibilityLevel_ == "auto" ? "yes" : accessibilityLevel_;
         return accessibilityLevel_.value();
+    }
+
+    void SetAccessibilityLevel(const std::string& accessibilityLevel)
+    {
+        if (accessibilityLevel == Level::YES ||
+            accessibilityLevel == Level::NO ||
+            accessibilityLevel == Level::NO_HIDE_DESCENDANTS) {
+            accessibilityLevel_ = accessibilityLevel;
+        } else {
+            accessibilityLevel_ = Level::AUTO;
+        }
+    }
+
+
+    struct HoverTestDebugTraceInfo {
+        std::vector<std::unique_ptr<JsonValue>> trace;
+    };
+
+
+    /*
+    * Get path from root to node which hit the hoverPoint.
+    * return: path contains nodes whose border cover the hoverPoint.
+    */
+    static AccessibilityHoverTestPath HoverTest(
+        const PointF& point,
+        const RefPtr<FrameNode>& root,
+        std::unique_ptr<HoverTestDebugTraceInfo>& debugInfo
+    );
+
+    /*
+    * Judge whether a node can be accessibility focused.
+    * return: if node is accessibility focusable, return true.
+    * param: {node} should be not-null
+    */
+    static bool IsAccessibilityFocusable(const RefPtr<FrameNode>& node);
+
+    /*
+    * param: {node}, {info} should be not-null
+    */
+    static bool IsAccessibilityFocusableDebug(const RefPtr<FrameNode>& node, std::unique_ptr<JsonValue>& info);
+
+private:
+    // node should be not-null
+    static bool HoverTestRecursive(
+        const PointF& parentPoint,
+        const RefPtr<FrameNode>& node,
+        AccessibilityHoverTestPath& path,
+        std::unique_ptr<HoverTestDebugTraceInfo>& debugInfo
+    );
+
+    static std::unique_ptr<JsonValue> CreateNodeSearchInfo(const RefPtr<FrameNode>& node, const PointF& parentPoint);
+
+    /*
+    * Get whether node and its children should be searched.
+    * return: first: node itself should be searched.
+    *         second: children of node should be searched.
+    * param: {node} should be not-null
+    */
+    static std::pair<bool, bool> GetSearchStrategy(const RefPtr<FrameNode>& node);
+
+    bool HasAccessibilityTextOrDescription() const;
+
+    bool HasAction() const;
+
+    virtual float GetScrollOffSet()
+    {
+        return 0.0f;
     }
 
 protected:

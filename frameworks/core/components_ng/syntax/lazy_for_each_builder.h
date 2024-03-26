@@ -52,7 +52,7 @@ public:
         return OnGetTotalCount();
     }
 
-    std::pair<std::string, RefPtr<UINode>> GetChildByIndex(int32_t index, bool needBuild);
+    std::pair<std::string, RefPtr<UINode>> GetChildByIndex(int32_t index, bool needBuild, bool isCache = false);
 
     void ExpandChildrenOnInitial()
     {
@@ -165,12 +165,17 @@ public:
         }
     }
 
-    void SetActiveChildRange(int32_t start, int32_t end)
+    bool SetActiveChildRange(int32_t start, int32_t end)
     {
+        bool needBuild = false;
         for (auto& [index, node] : cachedItems_) {
             if ((start <= end && start <= index && end >= index) ||
                 (start > end && (index <= end || index >= start))) {
                 if (node.second) {
+                    auto frameNode = AceType::DynamicCast<FrameNode>(node.second->GetFrameChildByIndex(0, true));
+                    if (frameNode) {
+                        frameNode->SetActive(true);
+                    }
                     continue;
                 }
                 auto keyIter = expiringItem_.find(node.first);
@@ -182,6 +187,7 @@ public:
                         frameNode->SetActive(true);
                     }
                 }
+                needBuild = true;
                 continue;
             }
             if (!node.second) {
@@ -191,8 +197,13 @@ public:
             if (frameNode) {
                 frameNode->SetActive(false);
             }
-            expiringItem_.try_emplace(node.first, LazyForEachCacheChild(index, std::move(node.second)));
+            auto pair = expiringItem_.try_emplace(node.first, LazyForEachCacheChild(index, std::move(node.second)));
+            if (!pair.second) {
+                TAG_LOGW(AceLogTag::ACE_LAZY_FOREACH, "Use repeat key for index: %{public}d", index);
+            }
+            needBuild = true;
         }
+        return needBuild;
     }
 
     void SetFlagForGeneratedItem(PropertyChangeFlag propertyChangeFlag)
@@ -447,6 +458,22 @@ public:
         }
         for (const auto& node : expiringItem_) {
             node.second.second->SetJSViewActive(active);
+        }
+    }
+
+    void PaintDebugBoundaryTreeAll(bool flag)
+    {
+        for (const auto& node : cachedItems_) {
+            if (node.second.second == nullptr) {
+                continue;
+            }
+            node.second.second->PaintDebugBoundaryTreeAll(flag);
+        }
+        for (const auto& node : expiringItem_) {
+            if (node.second.second == nullptr) {
+                continue;
+            }
+            node.second.second->PaintDebugBoundaryTreeAll(flag);
         }
     }
 

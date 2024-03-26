@@ -68,6 +68,11 @@ public:
         return true;
     }
 
+    bool IsSupportDrawModifier() const override
+    {
+        return false;
+    }
+
     void UpdateMuted(bool muted)
     {
         muted_ = muted;

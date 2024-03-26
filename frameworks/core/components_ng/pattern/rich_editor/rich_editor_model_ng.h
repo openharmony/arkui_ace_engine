@@ -31,7 +31,7 @@ public:
     void SetOnIMEInputComplete(std::function<void(const RichEditorAbstractSpanResult&)>&& func) override;
     void SetAboutToDelete(std::function<bool(const RichEditorDeleteValue&)>&& func) override;
     void SetOnDeleteComplete(std::function<void()>&& func) override;
-    void SetCustomKeyboard(std::function<void()>&& func) override;
+    void SetCustomKeyboard(std::function<void()>&& func, bool supportAvoidance) override;
     void SetCopyOption(CopyOptions& copyOptions) override;
     void BindSelectionMenu(TextSpanType& editorType, TextResponseType& responseType,
         std::function<void()>& buildFunc, SelectMenuParam& menuParam) override;
@@ -39,8 +39,14 @@ public:
     void SetPlaceholder(PlaceholderOptions& options) override;
     void SetTextDetectEnable(bool value) override;
     void SetTextDetectConfig(const std::string& value, std::function<void(const std::string&)>&& onResult) override;
+    void SetSelectedBackgroundColor(const Color& selectedColor) override;
+    void SetCaretColor(const Color& color) override;
+    void SetOnEditingChange(std::function<void(const bool&)>&& func) override;
 
+    static void SetTextDetectEnable(FrameNode* frameNode, bool value);
     static void SetCopyOption(FrameNode* frameNode, CopyOptions& copyOptions);
+    static void SetCaretColor(FrameNode* frameNode, const Color& color);
+    static void SetSelectedBackgroundColor(FrameNode* frameNode, const Color& selectedColor);
 
 private:
     void SetDraggable(bool draggable);
