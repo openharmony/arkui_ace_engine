@@ -45,6 +45,7 @@
 #include "core/components_ng/property/property.h"
 #include "core/components_ng/render/render_surface.h"
 #include "core/components_ng/pattern/scroll/scroll_pattern.h"
+#include "core/components_ng/gestures/pinch_gesture.h"
 
 namespace OHOS::Ace {
 class WebDelegateObserver;
@@ -570,6 +571,8 @@ private:
     void InitSlideUpdateListener();
     void CalculateHorizontalDrawRect();
     void CalculateVerticalDrawRect();
+    void InitPinchEvent(const RefPtr<GestureEventHub>& gestureHub);
+    void HandleScaleGestureChange(const GestureEvent& event);
 
     NG::DragDropInfo HandleOnDragStart(const RefPtr<OHOS::Ace::DragEvent>& info);
     void HandleOnDragEnter(const RefPtr<OHOS::Ace::DragEvent>& info);
@@ -732,6 +735,8 @@ private:
     std::vector<TouchEventInfo> touchEventInfoList_ {};
     bool isParentReachEdge_ = false;
     ReachEdge isFlingReachEdge_ = { false, false };
+    RefPtr<PinchGesture> pinchGesture_ = nullptr;
+    double pinchValue_ = 1.0;
 };
 } // namespace OHOS::Ace::NG
 
