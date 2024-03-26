@@ -119,6 +119,7 @@ public:
     static void CreateItemWithSize(
         int32_t itemNumber, SizeT<Dimension> itemSize, V2::ListItemStyle listItemStyle = V2::ListItemStyle::NONE);
     static void CreateGroup(int32_t groupNumber, Axis axis = Axis::VERTICAL);
+    static void CreateGroupWithItem(int32_t groupNumber, Axis axis = Axis::VERTICAL);
     static void CreateGroupWithSetting(int32_t groupNumber, Axis axis, V2::ListItemGroupStyle listItemGroupStyle,
         int32_t itemNumber = GROUP_LINE_NUMBER);
     static void CreateItemWithSwipe(
