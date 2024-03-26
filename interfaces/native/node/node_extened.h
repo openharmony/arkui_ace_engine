@@ -24,7 +24,7 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
-struct ArkUI_LayoutConstraint{
+struct ArkUI_LayoutConstraint {
     /** 元素最小宽度。 */
     int32_t minWidth;
     /** 元素最小高度。 */
@@ -90,7 +90,8 @@ struct ArkUI_NodeCustomEvent {
 namespace OHOS::Ace::NodeModel {
 
 void NodeAddExtraData(ArkUI_NodeHandle node, ArkUI_NodeCustomEventType eventType, int32_t targetId, void* userData);
-int32_t RegisterNodeCustomEvent(ArkUI_NodeHandle node, ArkUI_NodeCustomEventType eventType, int32_t targetId, void* userData);
+int32_t RegisterNodeCustomEvent(
+    ArkUI_NodeHandle node, ArkUI_NodeCustomEventType eventType, int32_t targetId, void* userData);
 void NodeRemoveExtraData(ArkUI_NodeHandle node, ArkUI_NodeCustomEventType eventType);
 void UnregisterNodeCustomEvent(ArkUI_NodeHandle node, ArkUI_NodeCustomEventType eventType);
 void RegisterNodeCustomReceiver(void (*eventReceiver)(ArkUI_NodeCustomEvent* event));
