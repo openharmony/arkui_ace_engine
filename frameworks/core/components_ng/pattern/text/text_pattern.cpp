@@ -1979,6 +1979,11 @@ void TextPattern::ActSetSelection(int32_t start, int32_t end)
     }
     HandleSelectionChange(start, end);
     CalculateHandleOffsetAndShowOverlay();
+    if (textSelector_.firstHandle == textSelector_.secondHandle) {
+        ResetSelection();
+        CloseSelectOverlay();
+        return;
+    }
     ShowSelectOverlay(textSelector_.firstHandle, textSelector_.secondHandle);
     auto host = GetHost();
     CHECK_NULL_VOID(host);
