@@ -258,4 +258,32 @@ void RichEditorModelNG::SetOnSubmit(std::function<void(int32_t, NG::TextFieldCom
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnSubmit(std::move(func));
 }
+
+void RichEditorModelNG::SetOnWillChange(std::function<bool(const RichEditorChangeValue&)>&& func)
+{
+    auto eventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<RichEditorEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnWillChange(std::move(func));
+}
+
+void RichEditorModelNG::SetOnDidChange(std::function<void(const std::list<RichEditorAbstractSpanResult>&)>&& func)
+{
+    auto eventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<RichEditorEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnDidChange(std::move(func));
+}
+
+void RichEditorModelNG::SetOnCut(std::function<void(NG::TextCommonEvent&)>&& func)
+{
+    auto eventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<RichEditorEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnCut(std::move(func));
+}
+
+void RichEditorModelNG::SetOnCopy(std::function<void(NG::TextCommonEvent&)>&& func)
+{
+    auto eventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<RichEditorEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnCopy(std::move(func));
+}
 } // namespace OHOS::Ace::NG

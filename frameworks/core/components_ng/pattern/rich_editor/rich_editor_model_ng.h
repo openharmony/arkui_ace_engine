@@ -42,6 +42,10 @@ public:
     void SetSelectedBackgroundColor(const Color& selectedColor) override;
     void SetCaretColor(const Color& color) override;
     void SetOnEditingChange(std::function<void(const bool&)>&& func) override;
+    void SetOnWillChange(std::function<bool(const RichEditorChangeValue&)>&& func) override;
+    void SetOnDidChange(std::function<void(const std::list<RichEditorAbstractSpanResult>&)>&& func) override;
+    void SetOnCut(std::function<void(NG::TextCommonEvent&)>&& func) override;
+    void SetOnCopy(std::function<void(NG::TextCommonEvent&)>&& func) override;
 
     static void SetTextDetectEnable(FrameNode* frameNode, bool value);
     static void SetCopyOption(FrameNode* frameNode, CopyOptions& copyOptions);
