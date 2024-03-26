@@ -1461,6 +1461,45 @@ HWTEST_F(LazyForEachSyntaxTestNg, LazyForEachSyntaxOnDataAddedTest001, TestSize.
 }
 
 /**
+ * @tc.name: LazyForEachSyntaxOnDataAddedTest002
+ * @tc.desc: Create LazyForEach.
+ * @tc.type: FUNC
+ */
+HWTEST_F(LazyForEachSyntaxTestNg, LazyForEachSyntaxOnDataAddedTest002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create Text and push it to view stack processor.
+     * @tc.expected: Make Text as LazyForEach parent.
+     */
+    auto frameNode = CreateNode(V2::TEXT_ETS_TAG);
+
+    /**
+     * @tc.steps: step2. Invoke lazyForEach Create function.
+     * @tc.expected: Create LazyForEachNode and can be pop from ViewStackProcessor.
+     */
+    LazyForEachModelNG lazyForEach;
+    const RefPtr<LazyForEachActuator> mockLazyForEachActuator =
+        AceType::MakeRefPtr<OHOS::Ace::Framework::MockLazyForEachBuilder>();
+    lazyForEach.Create(mockLazyForEachActuator);
+    auto lazyForEachBuilder = AceType::DynamicCast<LazyForEachBuilder>(mockLazyForEachActuator);
+
+    for (auto iter : LAZY_FOR_EACH_NODE_IDS_INT) {
+        lazyForEachBuilder->GetChildByIndex(iter.value_or(0), true);
+    }
+    std::list<V2::Operation> DataOperations;
+    V2::Operation operation1 = {.type = "add", .index = INDEX_0};
+    DataOperations.push_back(operation1);
+    lazyForEachBuilder->OnDatasetChange(DataOperations);
+    V2::Operation operation2 = {.type = "change", .index = INDEX_1};
+    DataOperations.clear();
+    DataOperations.push_back(operation2);
+    lazyForEachBuilder->OnDatasetChange(DataOperations);
+    DataOperations.clear();
+    DataOperations.push_back(operation1);
+    lazyForEachBuilder->OnDatasetChange(DataOperations);
+}
+
+/**
  * @tc.name: LazyForEachSyntaxOnDataBulkAddedTest001
  * @tc.desc: Create LazyForEach.
  * @tc.type: FUNC
