@@ -67,6 +67,7 @@ using namespace testing::ext;
 namespace OHOS::Ace::NG {
 namespace {
 const std::string FONT_CONTEXT = "start";
+const std::string TITLE_BAR_NODE_MENU = "menu";
 } // namespace
 
 class NavrouterTestNg : public testing::Test {
@@ -3448,6 +3449,106 @@ HWTEST_F(NavrouterTestNg, SetTitleHeight001, TestSize.Level1)
     isValid = false;
     EXPECT_FALSE(isValid);
     navDestinationModel.SetTitleHeight(NG::DOUBLE_LINE_TITLEBAR_HEIGHT, isValid);
+}
+
+/**
+ * @tc.name: SetMenuItems001
+ * @tc.desc: Test SetMenuItems function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavrouterTestNg, SetMenuItems001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. initialize parameters.
+     */
+    MockPipelineContextGetTheme();
+    NavDestinationModelNG navDestinationModel;
+    navDestinationModel.Create();
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    auto navDestinationGroupNode = AceType::DynamicCast<NavDestinationGroupNode>(frameNode);
+    ASSERT_NE(navDestinationGroupNode, nullptr);
+    auto titleBarNode = AceType::DynamicCast<TitleBarNode>(navDestinationGroupNode->GetTitleBarNode());
+    ASSERT_NE(titleBarNode, nullptr);
+    auto titleBarLayoutProperty = titleBarNode->GetLayoutProperty<TitleBarLayoutProperty>();
+    ASSERT_NE(titleBarLayoutProperty, nullptr);
+
+    NG::BarItem bar;
+    std::vector<NG::BarItem> barItems;
+    barItems.push_back(bar);
+
+    /**
+     * @tc.steps: step2. Call SetMenuItems when UpdatePrevMenuIsCustom is true.
+     */
+    titleBarNode->UpdatePrevMenuIsCustom(true);
+    navDestinationModel.SetMenuItems(std::move(barItems));
+    EXPECT_FALSE(titleBarNode->GetPrevMenuIsCustomValue(false));
+    EXPECT_EQ(titleBarNode->GetMenuNodeOperationValue(), ChildNodeOperation::REPLACE);
+
+    /**
+     * @tc.steps: step3. Call SetMenuItems when UpdatePrevMenuIsCustom is false.
+     * and titleBarNode has no menu
+     */
+    titleBarNode->UpdatePrevMenuIsCustom(false);
+    navDestinationModel.SetMenuItems(std::move(barItems));
+    EXPECT_FALSE(titleBarNode->GetPrevMenuIsCustomValue(false));
+    EXPECT_EQ(titleBarNode->GetMenuNodeOperationValue(), ChildNodeOperation::ADD);
+
+    /**
+     * @tc.steps: step4. Call SetMenuItems when UpdatePrevMenuIsCustom is false
+     * and titleBarNode has menu
+     */
+    titleBarNode->UpdatePrevMenuIsCustom(false);
+    auto nodeId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto menuNode = AceType::MakeRefPtr<FrameNode>(TITLE_BAR_NODE_MENU, nodeId, AceType::MakeRefPtr<Pattern>());
+    ASSERT_NE(menuNode, nullptr);
+    titleBarNode->SetMenu(menuNode);
+    navDestinationModel.SetMenuItems(std::move(barItems));
+    EXPECT_FALSE(titleBarNode->GetPrevMenuIsCustomValue(false));
+    EXPECT_EQ(titleBarNode->GetMenuNodeOperationValue(), ChildNodeOperation::REPLACE);
+}
+
+/**
+ * @tc.name: SetCustomMenu001
+ * @tc.desc: Test SetCustomMenu function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavrouterTestNg, SetCustomMenu001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. initialize parameters.
+     */
+    MockPipelineContextGetTheme();
+    NavDestinationModelNG navDestinationModel;
+    navDestinationModel.Create();
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    auto navDestinationGroupNode = AceType::DynamicCast<NavDestinationGroupNode>(frameNode);
+    ASSERT_NE(navDestinationGroupNode, nullptr);
+    auto titleBarNode = AceType::DynamicCast<TitleBarNode>(navDestinationGroupNode->GetTitleBarNode());
+    ASSERT_NE(titleBarNode, nullptr);
+    auto titleBarLayoutProperty = titleBarNode->GetLayoutProperty<TitleBarLayoutProperty>();
+    ASSERT_NE(titleBarLayoutProperty, nullptr);
+
+    RefPtr<AceType> customNode = ViewStackProcessor::GetInstance()->GetMainElementNode();
+    ASSERT_NE(customNode, nullptr);
+
+    /**
+     * @tc.steps: step2. Call SetCustomMenu when previous node is not custom.
+     */
+    navDestinationModel.SetCustomMenu(customNode);
+    EXPECT_TRUE(titleBarNode->GetPrevMenuIsCustomValue(false));
+    EXPECT_EQ(titleBarNode->GetMenuNodeOperationValue(), ChildNodeOperation::ADD);
+
+    auto menuNode = AceType::MakeRefPtr<FrameNode>(TITLE_BAR_NODE_MENU, 33, AceType::MakeRefPtr<Pattern>());
+    ASSERT_NE(menuNode, nullptr);
+    titleBarNode->SetMenu(menuNode);
+
+    /**
+     * @tc.steps: step3. Call SetMenuItems when previous menu exists.
+     */
+    titleBarNode->SetMenu(menuNode);
+    navDestinationModel.SetCustomMenu(customNode);
+    EXPECT_TRUE(titleBarNode->GetPrevMenuIsCustomValue(false));
+    EXPECT_EQ(titleBarNode->GetMenuNodeOperationValue(), ChildNodeOperation::REPLACE);
 }
 
 /**
