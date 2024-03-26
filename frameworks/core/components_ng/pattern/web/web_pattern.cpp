@@ -145,12 +145,6 @@ std::string ParseTextJsonValue(const std::string& textJson)
     }
     return "";
 }
-
-template<class T>
-int64_t GetSteadyTimestamp()
-{
-    return std::chrono::duration_cast<T>(std::chrono::steady_clock::now().time_since_epoch()).count();
-}
 } // namespace
 
 constexpr int32_t SINGLE_CLICK_NUM = 1;
@@ -167,7 +161,6 @@ const std::string DEFAULT_WEB_TEXT_ENCODING_FORMAT = "UTF-8";
 constexpr int32_t SYNC_SURFACE_QUEUE_SIZE = 8;
 constexpr int32_t ASYNC_SURFACE_QUEUE_SIZE = 3;
 constexpr uint32_t DEBUG_DRAGMOVEID_TIMER = 30;
-constexpr int64_t SYNC_RENDER_DELAY_TIME = 100000000;
 // web feature params
 constexpr char VISIBLE_ACTIVE_ENABLE[] = "persist.web.visible_active_enable";
 constexpr char MEMORY_LEVEL_ENABEL[] = "persist.web.memory_level_enable";
@@ -1209,18 +1202,6 @@ void WebPattern::UpdateLayoutAfterKerboardShow(int32_t width, int32_t height, do
 
 void WebPattern::OnAreaChangedInner()
 {
-    if ((renderMode_ == RenderMode::SYNC_RENDER) && (lastSyncRenderSize_ != drawSize_)) {
-        lastSyncRenderSize_ = drawSize_;
-        int64_t now = GetSteadyTimestamp<std::chrono::nanoseconds>();
-        if (now - lastTimeStamp_ < SYNC_RENDER_DELAY_TIME) {
-            return;
-        }
-        lastTimeStamp_ = now;
-        auto offset = Offset(GetCoordinatePoint()->GetX(), GetCoordinatePoint()->GetY());
-        TAG_LOGD(AceLogTag::ACE_WEB, "OnAreaChangedInner size is %{public}s", drawSize_.ToString().c_str());
-        delegate_->SetBoundsOrResize(drawSize_, offset);
-        return;
-    }
     auto offset = OffsetF(GetCoordinatePoint()->GetX(), GetCoordinatePoint()->GetY());
     if (webOffset_ == offset) {
         return;
@@ -3059,13 +3040,20 @@ void WebPattern::OnRootLayerChanged(int width, int height)
     if (layoutMode_ != WebLayoutMode::FIT_CONTENT) {
         return;
     }
-    auto frameNode = GetHost();
-    CHECK_NULL_VOID(frameNode);
-    auto newRect = Size(width, height);
-    drawSize_.SetSize(newRect);
-    frameNode->MarkDirtyNode(PROPERTY_UPDATE_LAYOUT | PROPERTY_UPDATE_MEASURE_SELF_AND_PARENT);
+    rootLayerChangeSize_ = Size(width, height);
+    if (GetPendingSizeStatus()) {
+        return;
+    }
+    ReleaseResizeHold();
 }
 
+void WebPattern::ReleaseResizeHold()
+{
+    drawSize_.SetSize(rootLayerChangeSize_);
+    auto frameNode = GetHost();
+    CHECK_NULL_VOID(frameNode);
+    frameNode->MarkDirtyNode(PROPERTY_UPDATE_LAYOUT | PROPERTY_UPDATE_MEASURE_SELF_AND_PARENT);
+}
 bool WebPattern::FilterScrollEvent(const float x, const float y, const float xVelocity, const float yVelocity)
 {
     if (isNeedUpdateFilterScrolAxis_) {
@@ -3273,6 +3261,14 @@ void WebPattern::SetDrawRect(int32_t x, int32_t y, int32_t width, int32_t height
     drawRectHeight_ = height;
     CHECK_NULL_VOID(delegate_);
     delegate_->SetDrawRect(x, y, width, height);
+}
+
+bool WebPattern::GetPendingSizeStatus()
+{
+    if (delegate_) {
+        return delegate_->GetPendingSizeStatus();
+    }
+    return false;
 }
 
 RefPtr<NodePaintMethod> WebPattern::CreateNodePaintMethod()

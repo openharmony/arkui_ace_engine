@@ -5378,6 +5378,15 @@ void WebDelegate::SetDrawRect(int32_t x, int32_t y, int32_t width, int32_t heigh
         nweb_->SetDrawRect(x, y, width, height);
     }
 }
+
+bool WebDelegate::GetPendingSizeStatus()
+{
+    ACE_DCHECK(nweb_ != nullptr);
+    if (nweb_) {
+        return nweb_->GetPendingSizeStatus();
+    }
+    return false;
+}
 #endif
 
 std::string WebDelegate::GetUrlStringParam(const std::string& param, const std::string& name) const
@@ -5925,6 +5934,13 @@ void WebDelegate::OnRootLayerChanged(int width, int height)
     auto webPattern = webPattern_.Upgrade();
     CHECK_NULL_VOID(webPattern);
     webPattern->OnRootLayerChanged(width, height);
+}
+
+void WebDelegate::ReleaseResizeHold()
+{
+    auto webPattern = webPattern_.Upgrade();
+    CHECK_NULL_VOID(webPattern);
+    webPattern->ReleaseResizeHold();
 }
 
 void WebDelegate::SetVirtualKeyBoardArg(int32_t width, int32_t height, double keyboard)
