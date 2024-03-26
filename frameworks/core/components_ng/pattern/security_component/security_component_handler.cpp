@@ -308,13 +308,8 @@ bool SecurityComponentHandler::CheckParentNodesEffect(RefPtr<FrameNode>& node)
 
 void SecurityComponentHandler::GetVisibleRect(RefPtr<FrameNode>& node, RectF& visibleRect)
 {
-    auto parentFrame = AceType::DynamicCast<FrameNode>(node);
-    if (!parentFrame) {
-        LOGW("Parent %{public}s get frame failed", node->GetTag().c_str());
-        return;
-    }
-    RectF parentRect = parentFrame->GetRenderContext()->GetPaintRectWithTransform();
-    parentRect.SetOffset(parentFrame->GetOffsetRelativeToWindow());
+    RectF parentRect = node->GetRenderContext()->GetPaintRectWithTransform();
+    parentRect.SetOffset(node->GetOffsetRelativeToWindow());
     visibleRect = visibleRect.Constrain(parentRect);
 }
 
@@ -349,10 +344,6 @@ bool SecurityComponentHandler::InitBaseInfo(OHOS::Security::SecurityComponent::S
     buttonInfo.textIconSpace_ =
         layoutProperty->GetTextIconSpace().value_or(theme->GetTextIconSpace()).ConvertToVp();
 
-    auto container = AceType::DynamicCast<Platform::AceContainer>(Container::Current());
-    CHECK_NULL_RETURN(container, false);
-    buttonInfo.windowId_ = static_cast<int32_t>(container->GetWindowId());
-
     if (!GetDisplayOffset(node, buttonInfo.rect_.x_, buttonInfo.rect_.y_)) {
         LOGW("Get display offset failed");
         return false;
@@ -367,7 +358,9 @@ bool SecurityComponentHandler::InitBaseInfo(OHOS::Security::SecurityComponent::S
     auto rect = render->GetPaintRectWithTransform();
     buttonInfo.rect_.width_ = rect.Width();
     buttonInfo.rect_.height_ = rect.Height();
-
+    auto container = AceType::DynamicCast<Platform::AceContainer>(Container::Current());
+    CHECK_NULL_RETURN(container, false);
+    buttonInfo.windowId_ = static_cast<int32_t>(container->GetWindowId());
     return true;
 }
 
