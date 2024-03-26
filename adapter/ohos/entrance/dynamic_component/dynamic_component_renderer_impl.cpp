@@ -200,7 +200,6 @@ void DynamicComponentRendererImpl::UpdateViewportConfig(const ViewportConfig& co
     Rosen::WindowSizeChangeReason reason, const std::shared_ptr<Rosen::RSTransaction>& rsTransaction)
 {
     CHECK_NULL_VOID(uiContent_);
-
     ViewportConfig vpConfig;
     vpConfig.SetDensity(config.Density());
     vpConfig.SetPosition(config.Left(), config.Top());
