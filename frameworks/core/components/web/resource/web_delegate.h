@@ -670,6 +670,7 @@ public:
     void OnSearchResultReceive(int activeMatchOrdinal, int numberOfMatches, bool isDoneCounting);
     bool OnDragAndDropData(const void* data, size_t len, int width, int height);
     bool OnDragAndDropDataUdmf(std::shared_ptr<OHOS::NWeb::NWebDragData> dragData);
+    void OnTooltip(const std::string& tooltip);
     std::shared_ptr<OHOS::NWeb::NWebDragData> GetOrCreateDragData();
     bool IsImageDrag();
     std::shared_ptr<OHOS::NWeb::NWebDragData> dragData_ = nullptr;
