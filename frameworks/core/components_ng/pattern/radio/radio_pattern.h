@@ -120,6 +120,11 @@ public:
         showHoverEffect_ = showHoverEffect;
     }
 
+    void SetBuilder(const std::function<void()>&& builder)
+    {
+        builder_ = std::move(builder);
+    }
+
     FocusPattern GetFocusPattern() const override;
 
     void UpdateUncheckStatus(const RefPtr<FrameNode>& frameNode);
@@ -149,6 +154,12 @@ private:
     void InitTouchEvent();
     void InitMouseEvent();
     void OnClick();
+    CalcSize GetChildContentSize();
+    void InitializeParam(
+        Dimension& defaultWidth, Dimension& defaultHeight, Dimension& horizontalPadding, Dimension& verticalPadding);
+    void LoadBuilder();
+    void SetBuilderState();
+    void UpdateIndicatorType();
     void UpdateState();
     void UpdateGroupCheckStatus(const RefPtr<FrameNode>& frameNode, const RefPtr<FrameNode>& pageNode, bool check);
     void OnTouchDown();
@@ -165,10 +176,16 @@ private:
     void SetAccessibilityAction();
     void UpdateSelectStatus(bool isSelected);
 
+    void ImageNodeCreate();
+    void startEnterAnimation();
+    void startExitAnimation();
+    ImageSourceInfo GetImageSourceInfoFromTheme(int32_t RadioIndicator);
+    void UpdateInternalResource(ImageSourceInfo& sourceInfo);
     RefPtr<ClickEvent> clickListener_;
     RefPtr<TouchEventImpl> touchListener_;
     RefPtr<InputEvent> mouseEvent_;
 
+    std::function<void()> builder_;
     bool isFirstCreated_ = true;
     bool preCheck_ = false;
     std::optional<std::string> preValue_;
