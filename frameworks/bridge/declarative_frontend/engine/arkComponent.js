@@ -10967,6 +10967,10 @@ class ArkToggleComponent extends ArkComponent {
     modifierWithKey(this._modifiersWithKeys, ToggleHoverEffectModifier.identity, ToggleHoverEffectModifier, value);
     return this;
   }
+  switchStyle(value) {
+    modifierWithKey(this._modifiersWithKeys, ToggleSwitchStyleModifier.identity, ToggleSwitchStyleModifier, value);
+    return this;
+  }
 }
 class ToggleSelectedColorModifier extends ModifierWithKey {
   constructor(value) {
@@ -11154,6 +11158,37 @@ class ToggleHoverEffectModifier extends ModifierWithKey {
   }
 }
 ToggleHoverEffectModifier.identity = Symbol('toggleHoverEffect');
+class ToggleSwitchStyleModifier extends ModifierWithKey {
+    constructor(value) {
+        super(value);
+    }
+    applyPeer(node, reset) {
+        if (reset) {
+            getUINativeModule().toggle.resetSwitchStyle(node);
+        }
+        else {
+            getUINativeModule().toggle.setSwitchStyle(node, this.value.pointRadius, this.value.unselectedColor, this.value.pointColor, this.value.trackBorderRadius);
+        }
+    }
+    checkObjectDiff() {
+        if (!isResource(this.stageValue) && !isResource(this.value)) {
+            return !(this.stageValue.pointRadius === this.value.pointRadius &&
+                this.stageValue.unselectedColor === this.value.unselectedColor &&
+                this.stageValue.pointColor === this.value.pointColor &&
+                this.stageValue.trackBorderRadius === this.value.trackBorderRadius);
+        }
+        else if (isResource(this.stageValue) && isResource(this.value)){
+          return !(isResourceEqual(this.stageValue.pointRadius, this.value.pointRadius) && 
+          isResourceEqual(this.stageValue.unselectedColor, this.value.unselectedColor) && 
+          isResourceEqual(this.stageValue.pointColor, this.value.pointColor) &&
+          isResourceEqual(this.stageValue.trackBorderRadius, this.value.trackBorderRadius));
+        }
+        else {
+            return true;
+        }
+    }
+}
+ToggleSwitchStyleModifier.identity = Symbol('toggleSwitchStyle');
 // @ts-ignore
 if (globalThis.Toggle !== undefined) {
   globalThis.Toggle.attributeModifier = function (modifier) {
