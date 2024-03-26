@@ -1311,6 +1311,8 @@ private:
     void ProcessScroll();
     void ProcessCounter();
     RefPtr<TextFieldLayoutProperty> GetTextFieldLayoutProperty();
+    void ProcessOverlayAfterLayout(bool isGlobalAreaChange);
+    void HandleParentGlobalOffsetChange();
 
     RectF frameRect_;
     RectF textRect_;
