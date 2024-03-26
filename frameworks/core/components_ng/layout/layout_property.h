@@ -288,7 +288,7 @@ public:
         isOverlayNode_ = isOverlayNode;
     }
 
-    bool IsOverlayNode()
+    bool IsOverlayNode() const
     {
         return isOverlayNode_;
     }

@@ -34,6 +34,7 @@ ohos_unittest("ace_engine_special_test") {
     "$ace_root/frameworks/core/components/common/properties/alignment.cpp",
     "$ace_root/frameworks/core/components/common/properties/color.cpp",
     "$ace_root/frameworks/core/components_ng/animation/geometry_transition.cpp",
+    "$ace_root/frameworks/core/components_ng/base/extension_handler.cpp",
     "$ace_root/frameworks/core/components_ng/base/frame_node.cpp",
     "$ace_root/frameworks/core/components_ng/base/geometry_node.cpp",
     "$ace_root/frameworks/core/components_ng/base/modifier.cpp",

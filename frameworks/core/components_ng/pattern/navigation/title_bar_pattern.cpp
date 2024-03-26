@@ -16,6 +16,7 @@
 #include "core/components_ng/pattern/navigation/title_bar_pattern.h"
 
 #include "core/animation/spring_curve.h"
+#include "core/common/ace_application_info.h"
 #include "core/common/container.h"
 #include "core/components_ng/pattern/image/image_layout_property.h"
 #include "core/components_ng/pattern/image/image_render_property.h"
@@ -152,11 +153,15 @@ void MountSubTitle(const RefPtr<TitleBarNode>& hostNode)
     auto titleLayoutProperty = subtitleNode->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_VOID(titleLayoutProperty);
 
+    auto theme = NavigationGetTheme();
+    CHECK_NULL_VOID(theme);
+    auto subTitleSize = theme->GetSubTitleFontSize();
+    if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
+        subTitleSize = theme->GetSubTitleFontSizeS();
+    }
     if (titleBarLayoutProperty->GetTitleModeValue(NavigationTitleMode::FREE) == NavigationTitleMode::MINI) {
-        auto theme = NavigationGetTheme();
-        CHECK_NULL_VOID(theme);
         titleLayoutProperty->UpdateAdaptMinFontSize(MIN_ADAPT_SUBTITLE_FONT_SIZE);
-        titleLayoutProperty->UpdateAdaptMaxFontSize(theme->GetSubTitleFontSize());
+        titleLayoutProperty->UpdateAdaptMaxFontSize(subTitleSize);
         titleLayoutProperty->UpdateHeightAdaptivePolicy(TextHeightAdaptivePolicy::MIN_FONT_SIZE_FIRST);
     }
 
@@ -179,6 +184,9 @@ void TitleBarPattern::InitTitleParam()
     fontSize_.reset();
     opacity_.reset();
     isFreeTitleUpdated_ = false;
+    auto theme = NavigationGetTheme();
+    CHECK_NULL_VOID(theme);
+    titleSpaceVertical_ = theme->GetTitleSpaceVertical();
 }
 
 bool TitleBarPattern::IsHidden()
@@ -213,6 +221,12 @@ void TitleBarPattern::MountTitle(const RefPtr<TitleBarNode>& hostNode)
     auto currentFontSize = titleLayoutProperty->GetFontSizeValue(Dimension(0));
     auto currentMaxLine = titleLayoutProperty->GetMaxLinesValue(0);
     auto titleMode = titleBarLayoutProperty->GetTitleModeValue(NavigationTitleMode::FREE);
+    auto titleFontSize = theme->GetTitleFontSizeBig();
+    auto maxFontSize = theme->GetTitleFontSizeBig();
+    if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
+        titleFontSize = theme->GetMainTitleFontSizeL();
+        maxFontSize = theme->GetMainTitleFontSizeL();
+    }
     if (titleMode == NavigationTitleMode::MINI) {
         if (titleBarLayoutProperty->HasHideBackButton() && titleBarLayoutProperty->GetHideBackButtonValue()) {
             titleLayoutProperty->UpdateFontSize(theme->GetTitleFontSize());
@@ -223,16 +237,16 @@ void TitleBarPattern::MountTitle(const RefPtr<TitleBarNode>& hostNode)
         }
         UpdateSubTitleOpacity(1.0);
     } else if (titleMode == NavigationTitleMode::FULL) {
-        titleLayoutProperty->UpdateFontSize(theme->GetTitleFontSizeBig());
-        titleLayoutProperty->UpdateAdaptMaxFontSize(theme->GetTitleFontSizeBig());
+        titleLayoutProperty->UpdateFontSize(titleFontSize);
+        titleLayoutProperty->UpdateAdaptMaxFontSize(maxFontSize);
         UpdateSubTitleOpacity(1.0);
     } else {
         if (fontSize_.has_value()) {
             titleLayoutProperty->UpdateFontSize(fontSize_.value());
             titleLayoutProperty->UpdateAdaptMaxFontSize(fontSize_.value());
         } else {
-            titleLayoutProperty->UpdateFontSize(theme->GetTitleFontSizeBig());
-            titleLayoutProperty->UpdateAdaptMaxFontSize(theme->GetTitleFontSizeBig());
+            titleLayoutProperty->UpdateFontSize(titleFontSize);
+            titleLayoutProperty->UpdateAdaptMaxFontSize(maxFontSize);
         }
         if (opacity_.has_value()) {
             UpdateSubTitleOpacity(opacity_.value());
@@ -252,7 +266,7 @@ void TitleBarPattern::MountTitle(const RefPtr<TitleBarNode>& hostNode)
     titleNode->MarkModifyDone();
 }
 
-void TitleBarPattern::MountMenu(const RefPtr<TitleBarNode>& hostNode)
+void TitleBarPattern::MountMenu(const RefPtr<TitleBarNode>& hostNode, bool isWindowSizeChange)
 {
     auto titleBarLayoutProperty = hostNode->GetLayoutProperty<TitleBarLayoutProperty>();
     CHECK_NULL_VOID(titleBarLayoutProperty);
@@ -261,19 +275,22 @@ void TitleBarPattern::MountMenu(const RefPtr<TitleBarNode>& hostNode)
         return;
     }
     if (hostNode->GetMenuNodeOperationValue(ChildNodeOperation::NONE) == ChildNodeOperation::REPLACE) {
-        hostNode->RemoveChild(hostNode->GetMenu());
+        hostNode->RemoveChild(hostNode->GetPrevMenu());
         hostNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     }
     if (hostNode->GetPrevMenuIsCustomValue(false)) {
         if (hostNode->GetMenuNodeOperationValue(ChildNodeOperation::NONE) == ChildNodeOperation::NONE) {
             return;
         }
-        hostNode->SetMenu(hostNode->GetMenu());
+        hostNode->SetPrevMenu(hostNode->GetMenu());
         hostNode->AddChild(hostNode->GetMenu());
         hostNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     } else {
         auto titleBarMenuItems = GetTitleBarMenuItems();
         if (HasMenuNodeId()) {
+            if (hostNode->GetChildIndexById(GetMenuNodeId()) > -1 && !isWindowSizeChange) {
+                return;
+            }
             auto navDesNode = AceType::DynamicCast<NavDestinationGroupNode>(hostNode->GetParent());
             CHECK_NULL_VOID(navDesNode);
             auto hub = navDesNode->GetEventHub<EventHub>();
@@ -283,6 +300,7 @@ void TitleBarPattern::MountMenu(const RefPtr<TitleBarNode>& hostNode)
                 NavigationTitleUtil::CreateMenuItems(GetMenuNodeId(), titleBarMenuItems, hostNode, isButtonEnabled);
             CHECK_NULL_VOID(menuNode);
             hostNode->SetMenu(menuNode);
+            hostNode->SetPrevMenu(menuNode);
             hostNode->AddChild(hostNode->GetMenu());
             hostNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
         }
@@ -436,18 +454,24 @@ Dimension TitleBarPattern::GetFontSize(float offset)
     auto titleBarHeight = defaultTitleBarHeight_ + offset;
     auto theme = NavigationGetTheme();
     CHECK_NULL_RETURN(theme, Dimension(0.0f, DimensionUnit::FP));
-    auto titleFontSizeDiff = theme->GetTitleFontSizeBig() - theme->GetTitleFontSize();
+    Dimension titleL = theme->GetTitleFontSizeBig();
+    Dimension titleM = theme->GetTitleFontSize();
+    if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
+        titleL = theme->GetMainTitleFontSizeL();
+        titleM = theme->GetMainTitleFontSizeM();
+    }
+    auto titleFontSizeDiff = titleL - titleM;
     auto titleBarHeightDiff = maxTitleBarHeight_ - static_cast<float>(SINGLE_LINE_TITLEBAR_HEIGHT.ConvertToPx());
     if (!NearZero(titleBarHeightDiff)) {
         fontSizeRatio_ = titleFontSizeDiff.Value() / titleBarHeightDiff;
     }
-    auto tempFontSize = theme->GetTitleFontSize().Value() +
+    auto tempFontSize = titleM.Value() +
         (titleBarHeight - static_cast<float>(SINGLE_LINE_TITLEBAR_HEIGHT.ConvertToPx())) * fontSizeRatio_;
-    if (GreatNotEqual(tempFontSize, theme->GetTitleFontSizeBig().Value())) {
-        tempFontSize = theme->GetTitleFontSizeBig().Value();
+    if (GreatNotEqual(tempFontSize, titleL.Value())) {
+        tempFontSize = titleL.Value();
     }
-    if (LessNotEqual(tempFontSize, theme->GetTitleFontSize().Value())) {
-        tempFontSize = theme->GetTitleFontSize().Value();
+    if (LessNotEqual(tempFontSize, titleM.Value())) {
+        tempFontSize = titleM.Value();
     }
     return Dimension(tempFontSize, DimensionUnit::FP);
 }
@@ -610,7 +634,12 @@ void TitleBarPattern::SetTempTitleOffsetY()
 
 void TitleBarPattern::SetTempSubTitleOffsetY()
 {
-    tempSubTitleOffsetY_ = tempTitleOffsetY_ + GetTitleHeight();
+    if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
+        tempSubTitleOffsetY_ = tempTitleOffsetY_ + GetTitleHeight() +
+            static_cast<float>(titleSpaceVertical_.ConvertToPx());
+    } else {
+        tempSubTitleOffsetY_ = tempTitleOffsetY_ + GetTitleHeight();
+    }
     if (tempTitleOffsetY_ < minTitleOffsetY_) {
         tempSubTitleOffsetY_ = minTitleOffsetY_;
     }
@@ -1010,7 +1039,7 @@ void TitleBarPattern::OnWindowSizeChanged(int32_t width, int32_t height, WindowS
             break;
         }
         maxMenuNums_ = targetNum;
-        MountMenu(titleBarNode);
+        MountMenu(titleBarNode, true);
         titleBarNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_CHILD);
     } while (0);
     bool isTitleMenuNodeShow = false;

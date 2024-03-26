@@ -15,6 +15,8 @@
 
 #include "core/components_ng/base/frame_node.h"
 
+#include <cstdint>
+
 #include "base/geometry/dimension.h"
 #include "base/geometry/ng/point_t.h"
 #include "base/log/ace_trace.h"
@@ -33,6 +35,7 @@
 #include "core/common/recorder/node_data_cache.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components/common/layout/grid_system_manager.h"
+#include "core/components_ng/base/extension_handler.h"
 #include "core/components_ng/base/frame_scene_status.h"
 #include "core/components_ng/base/inspector.h"
 #include "core/components_ng/base/ui_node.h"
@@ -464,7 +467,7 @@ void FrameNode::ProcessOffscreenNode(const RefPtr<FrameNode>& node)
     auto paintProperty = node->GetPaintProperty<PaintProperty>();
     auto wrapper = node->CreatePaintWrapper();
     if (wrapper != nullptr) {
-        wrapper->FlushRender(node->drawModifier_);
+        wrapper->FlushRender();
     }
     paintProperty->CleanDirty();
     CHECK_NULL_VOID(pipeline);
@@ -1326,7 +1329,7 @@ std::optional<UITask> FrameNode::CreateRenderTask(bool forceUseMainThread)
     auto task = [weak = WeakClaim(this), wrapper, paintProperty = paintProperty_]() {
         auto self = weak.Upgrade();
         ACE_SCOPED_TRACE("FrameNode[%s][id:%d]::RenderTask", self->GetTag().c_str(), self->GetId());
-        wrapper->FlushRender(self->drawModifier_);
+        wrapper->FlushRender();
         paintProperty->CleanDirty();
 
         if (self->GetInspectorId()) {
@@ -1487,7 +1490,7 @@ RefPtr<ContentModifier> FrameNode::GetContentModifier()
     auto wrapper = CreatePaintWrapper();
     CHECK_NULL_RETURN(wrapper, nullptr);
     auto paintMethod = pattern_->CreateNodePaintMethod();
-    if (!paintMethod && drawModifier_) {
+    if (!paintMethod  || extensionHandler_ || renderContext_->GetAccessibilityFocus().value_or(false)) {
         paintMethod = pattern_->CreateDefaultNodePaintMethod();
     }
     CHECK_NULL_RETURN(paintMethod, nullptr);
@@ -1500,20 +1503,14 @@ RefPtr<PaintWrapper> FrameNode::CreatePaintWrapper()
     pattern_->BeforeCreatePaintWrapper();
     isRenderDirtyMarked_ = false;
     auto paintMethod = pattern_->CreateNodePaintMethod();
-    if (!paintMethod && drawModifier_) {
-        paintMethod = pattern_->CreateDefaultNodePaintMethod();
-    }
-    // It is necessary to copy the layoutProperty property to prevent the paintProperty_ property from being
-    // modified during the paint process, resulting in the problem of judging whether the front-end setting value
-    // changes the next time js is executed.
-    if (paintMethod) {
-        auto paintWrapper = MakeRefPtr<PaintWrapper>(renderContext_, geometryNode_->Clone(), paintProperty_->Clone());
+    if (paintMethod || extensionHandler_ || renderContext_->GetAccessibilityFocus().value_or(false)) {
+        // It is necessary to copy the layoutProperty property to prevent the paintProperty_ property from being
+        // modified during the paint process, resulting in the problem of judging whether the front-end setting value
+        // changes the next time js is executed.
+
+        auto paintWrapper = MakeRefPtr<PaintWrapper>(
+            renderContext_, geometryNode_->Clone(), paintProperty_->Clone(), extensionHandler_);
         paintWrapper->SetNodePaintMethod(paintMethod);
-        return paintWrapper;
-    }
-    if (renderContext_->GetAccessibilityFocus().value_or(false)) {
-        auto paintWrapper = MakeRefPtr<PaintWrapper>(renderContext_, geometryNode_->Clone(), paintProperty_->Clone());
-        paintWrapper->SetNodePaintMethod(MakeRefPtr<NodePaintMethod>());
         return paintWrapper;
     }
     return nullptr;
@@ -2962,12 +2959,27 @@ void FrameNode::Measure(const std::optional<LayoutConstraintF>& parentConstraint
         constraintChanges_.UpdateFlags(preConstraint, layoutProperty_->GetLayoutConstraint());
     }
 
-    auto size = layoutAlgorithm_->MeasureContent(layoutProperty_->CreateContentConstraint(), this);
-    if (size.has_value()) {
-        geometryNode_->SetContentSize(size.value());
-    }
     GetPercentSensitive();
-    layoutAlgorithm_->Measure(this);
+
+    if (extensionHandler_ && !extensionHandler_->HasDrawModifier()) {
+        auto extensionLayoutConstraint =
+            ExtensionLayoutConstraint::Create(GetLayoutProperty()->GetLayoutConstraint().value());
+        extensionHandler_->SetInnerMeasureImpl([this](const ExtensionLayoutConstraint&) {
+            auto size = layoutAlgorithm_->MeasureContent(layoutProperty_->CreateContentConstraint(), this);
+            if (size.has_value()) {
+                geometryNode_->SetContentSize(size.value());
+            }
+            layoutAlgorithm_->Measure(this);
+        });
+        extensionHandler_->Measure(extensionLayoutConstraint);
+    } else {
+        auto size = layoutAlgorithm_->MeasureContent(layoutProperty_->CreateContentConstraint(), this);
+        if (size.has_value()) {
+            geometryNode_->SetContentSize(size.value());
+        }
+        layoutAlgorithm_->Measure(this);
+    }
+
     if (overlayNode_) {
         overlayNode_->Measure(layoutProperty_->CreateChildConstraint());
     }
@@ -3022,7 +3034,16 @@ void FrameNode::Layout()
             }
             layoutProperty_->UpdateContentConstraint();
         }
-        GetLayoutAlgorithm()->Layout(this);
+
+        if (extensionHandler_ && !extensionHandler_->HasDrawModifier()) {
+            extensionHandler_->SetInnerLayoutImpl(
+                [this](int32_t, int32_t, int32_t, int32_t) { GetLayoutAlgorithm()->Layout(this); });
+            const auto& rect = geometryNode_->GetFrameRect();
+            extensionHandler_->Layout(rect.Width(), rect.Height(), rect.GetX(), rect.GetY());
+        } else {
+            GetLayoutAlgorithm()->Layout(this);
+        }
+
         if (overlayNode_) {
             LayoutOverlay();
         }
@@ -3138,7 +3159,8 @@ bool FrameNode::OnLayoutFinish(bool& needSyncRsNode)
     auto needRerender = pattern_->OnDirtyLayoutWrapperSwap(Claim(this), config);
     needRerender =
         needRerender || pattern_->OnDirtyLayoutWrapperSwap(Claim(this), config.skipMeasure, config.skipLayout);
-    if (needRerender || drawModifier_ || CheckNeedRender(paintProperty_->GetPropertyChangeFlag())) {
+    if (needRerender || (extensionHandler_ && extensionHandler_->NeedRender()) ||
+        CheckNeedRender(paintProperty_->GetPropertyChangeFlag())) {
         MarkDirtyNode(true, true, PROPERTY_UPDATE_RENDER);
     }
     layoutAlgorithm_.Reset();

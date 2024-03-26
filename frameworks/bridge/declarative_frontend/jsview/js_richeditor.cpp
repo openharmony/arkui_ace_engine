@@ -853,6 +853,64 @@ void JSRichEditor::SetSelectedBackgroundColor(const JSCallbackInfo& info)
     RichEditorModel::GetInstance()->SetSelectedBackgroundColor(selectedColor);
 }
 
+void JSRichEditor::SetEnterKeyType(const JSCallbackInfo& info)
+{
+    if (info.Length() < 1) {
+        return;
+    }
+    auto action = info[0];
+    if (action->IsUndefined()) {
+        RichEditorModel::GetInstance()->SetEnterKeyType(TextInputAction::UNSPECIFIED);
+        return;
+    }
+    if (!action->IsNumber()) {
+        return;
+    }
+    TextInputAction textInputAction = CastToTextInputAction(action->ToNumber<int32_t>());
+    RichEditorModel::GetInstance()->SetEnterKeyType(textInputAction);
+}
+
+Local<JSValueRef> JSRichEditor::JsKeepEditableState(panda::JsiRuntimeCallInfo* info)
+{
+    Local<JSValueRef> thisObj = info->GetThisRef();
+    auto eventInfo =
+        static_cast<NG::TextFieldCommonEvent*>(panda::Local<panda::ObjectRef>(thisObj)->GetNativePointerField(0));
+    if (eventInfo) {
+        eventInfo->SetKeepEditable(true);
+    }
+    return JSValueRef::Undefined(info->GetVM());
+}
+
+void JSRichEditor::CreateJsRichEditorCommonEvent(const JSCallbackInfo& info)
+{
+    auto jsTextFunc =
+        AceType::MakeRefPtr<JsCommonEventFunction<NG::TextFieldCommonEvent, 2>>(JSRef<JSFunc>::Cast(info[0]));
+    WeakPtr<NG::FrameNode> targetNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    auto callback = [execCtx = info.GetExecutionContext(), func = std::move(jsTextFunc), node = targetNode](
+                        int32_t key, NG::TextFieldCommonEvent& event) {
+        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+        ACE_SCORING_EVENT("onSubmit");
+        PipelineContext::SetCallBackNode(node);
+        JSRef<JSObjTemplate> objectTemplate = JSRef<JSObjTemplate>::New();
+        objectTemplate->SetInternalFieldCount(2);
+        JSRef<JSObject> object = objectTemplate->NewInstance();
+        object->SetProperty<std::string>("text", event.GetText());
+        object->SetPropertyObject("keepEditableState", JSRef<JSFunc>::New<FunctionCallback>(JsKeepEditableState));
+        object->Wrap<NG::TextFieldCommonEvent>(&event);
+        JSRef<JSVal> keyEvent = JSRef<JSVal>::Make(ToJSValue(key));
+        JSRef<JSVal> dataObject = JSRef<JSVal>::Cast(object);
+        JSRef<JSVal> param[2] = { keyEvent, dataObject };
+        func->Execute(param);
+    };
+    RichEditorModel::GetInstance()->SetOnSubmit(std::move(callback));
+}
+
+void JSRichEditor::SetOnSubmit(const JSCallbackInfo& info)
+{
+    CHECK_NULL_VOID(info[0]->IsFunction());
+    CreateJsRichEditorCommonEvent(info);
+}
+
 void JSRichEditor::JSBind(BindingTarget globalObj)
 {
     JSClass<JSRichEditor>::Declare("RichEditor");
@@ -882,6 +940,8 @@ void JSRichEditor::JSBind(BindingTarget globalObj)
     JSClass<JSRichEditor>::StaticMethod("caretColor", &JSRichEditor::SetCaretColor);
     JSClass<JSRichEditor>::StaticMethod("selectedBackgroundColor", &JSRichEditor::SetSelectedBackgroundColor);
     JSClass<JSRichEditor>::StaticMethod("onEditingChange", &JSRichEditor::SetOnEditingChange);
+    JSClass<JSRichEditor>::StaticMethod("enterKeyType", &JSRichEditor::SetEnterKeyType);
+    JSClass<JSRichEditor>::StaticMethod("onSubmit", &JSRichEditor::SetOnSubmit);
     JSClass<JSRichEditor>::InheritAndBind<JSViewAbstract>(globalObj);
 }
 
@@ -1601,6 +1661,7 @@ void JSRichEditorController::JSBind(BindingTarget globalObj)
     JSClass<JSRichEditorController>::CustomMethod("setSelection", &JSRichEditorController::SetSelection);
     JSClass<JSRichEditorController>::CustomMethod("getSelection", &JSRichEditorController::GetSelection);
     JSClass<JSRichEditorController>::CustomMethod("isEditing", &JSRichEditorController::IsEditing);
+    JSClass<JSRichEditorController>::Method("stopEditing", &JSRichEditorController::StopEditing);
     JSClass<JSRichEditorController>::Method("closeSelectionMenu", &JSRichEditorController::CloseSelectionMenu);
     JSClass<JSRichEditorController>::Bind(
         globalObj, JSRichEditorController::Constructor, JSRichEditorController::Destructor);
@@ -1904,5 +1965,13 @@ JSRef<JSVal> JSRichEditorController::CreateJSParagraphsInfo(const std::vector<Pa
         array->SetValueAt(i, obj);
     }
     return JSRef<JSVal>::Cast(array);
+}
+
+void JSRichEditorController::StopEditing()
+{
+    auto controller = controllerWeak_.Upgrade();
+    if (controller) {
+        controller->StopEditing();
+    }
 }
 } // namespace OHOS::Ace::Framework
