@@ -59,6 +59,10 @@ public:
     static void SetCaretColor(const JSCallbackInfo& info);
     static void SetSelectedBackgroundColor(const JSCallbackInfo& info);
     static void SetOnEditingChange(const JSCallbackInfo& args);
+    static void SetEnterKeyType(const JSCallbackInfo& info);
+    static void CreateJsRichEditorCommonEvent(const JSCallbackInfo& info);
+    static void SetOnSubmit(const JSCallbackInfo& info);
+    static Local<JSValueRef> JsKeepEditableState(panda::JsiRuntimeCallInfo* info);
 private:
     static void CreateTextStyleObj(JSRef<JSObject>& textStyleObj, const NG::RichEditorAbstractSpanResult& spanResult);
     static void CreateImageStyleObj(JSRef<JSObject>& imageStyleObj, JSRef<JSObject>& spanResultObj,
@@ -125,6 +129,7 @@ public:
     {
         instanceId_ = id;
     }
+    void StopEditing();
 
 private:
     int32_t instanceId_ = INSTANCE_ID_UNDEFINED;

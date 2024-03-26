@@ -18,7 +18,7 @@
 
 #include "core/components_ng/event/event_hub.h"
 #include "core/components_ng/pattern/rich_editor/selection_info.h"
-
+#include "core/components_ng/pattern/text_field/text_field_event_hub.h"
 namespace OHOS::Ace::NG {
 class TextInsertValueInfo {
 public:
@@ -260,6 +260,18 @@ public:
         }
     }
 
+    void SetOnSubmit(std::function<void(int32_t, NG::TextFieldCommonEvent&)>&& func)
+    {
+        onSubmit_ = std::move(func);
+    }
+
+    void FireOnSubmit(int32_t value, NG::TextFieldCommonEvent& event)
+    {
+        if (onSubmit_) {
+            onSubmit_(value, event);
+        }
+    }
+
 private:
     long long timestamp_ = 0;
     std::function<void(NG::TextCommonEvent&)> onPaste_;
@@ -271,6 +283,7 @@ private:
     std::function<bool(const RichEditorDeleteValue&)> aboutToDelete_;
     std::function<void()> onDeleteComplete_;
     std::function<void(const bool&)> onEditingChange_;
+    std::function<void(int32_t, NG::TextFieldCommonEvent&)> onSubmit_;
     ACE_DISALLOW_COPY_AND_MOVE(RichEditorEventHub);
 };
 } // namespace OHOS::Ace::NG
