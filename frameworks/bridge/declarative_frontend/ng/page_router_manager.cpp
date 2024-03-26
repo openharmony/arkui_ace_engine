@@ -90,6 +90,7 @@ void PageRouterManager::RunPage(const std::string& url, const std::string& param
         auto instanceId = container->GetInstanceId();
         auto taskExecutor = container->GetTaskExecutor();
         CHECK_NULL_VOID(taskExecutor);
+        info.errorCallback = [](const std::string& errorMsg, int32_t errorCode) {};
         auto callback = [weak = AceType::WeakClaim(this), info, taskExecutor, instanceId]() {
             ContainerScope scope(instanceId);
             auto pageRouterManager = weak.Upgrade();
