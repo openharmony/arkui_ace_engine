@@ -2675,4 +2675,18 @@ HWTEST_F(FrameNodeTestNg, OnTouchInterceptTest001, TestSize.Level1)
         EXPECT_EQ(mode, HitTestMode::HTMBLOCK);
     }
 }
+
+/**
+ * @tc.name: FrameNodeTestNg0040
+ * @tc.desc: Test frame node method
+ * @tc.type: FUNC
+ */
+HWTEST_F(FrameNodeTestNg, FrameNodeTestNg0040, TestSize.Level1)
+{
+    auto frameNode = FrameNode::CreateFrameNode("main", 1, AceType::MakeRefPtr<Pattern>(), true);
+    std::set<std::string> allowDropSet;
+    frameNode->SetAllowDrop(allowDropSet);
+    std::set<std::string> allowDrop = frameNode->GetAllowDrop();
+    EXPECT_TRUE(allowDrop.empty());
+}
 } // namespace OHOS::Ace::NG
