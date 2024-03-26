@@ -685,17 +685,12 @@ public:
     void SetCacheCount(
         int32_t cacheCount = 0, const std::optional<LayoutConstraintF>& itemConstraint = std::nullopt) override;
 
-    void SyncGeometryNode(bool needSkipSync = false);
+    void SyncGeometryNode(bool needSyncRsNode);
     RefPtr<UINode> GetFrameChildByIndex(uint32_t index, bool needBuild, bool isCache = false) override;
     bool CheckNeedForceMeasureAndLayout() override;
 
     bool SetParentLayoutConstraint(const SizeF& size) const override;
-    void ForceSyncGeometryNode()
-    {
-        CHECK_NULL_VOID(renderContext_);
-        oldGeometryNode_.Reset();
-        renderContext_->SyncGeometryProperties(RawPtr(geometryNode_));
-    }
+    void ForceSyncGeometryNode();
 
     template<typename T>
     RefPtr<T> FindFocusChildNodeOfClass()
@@ -844,6 +839,7 @@ private:
     void GeometryNodeToJsonValue(std::unique_ptr<JsonValue>& json) const;
 
     bool GetTouchable() const;
+    bool OnLayoutFinish(bool& needSyncRsNode);
 
     void ProcessAllVisibleCallback(const std::vector<double>& visibleAreaUserRatios,
         VisibleCallbackInfo& visibleAreaUserCallback, double currentVisibleRatio, double lastVisibleRatio);
