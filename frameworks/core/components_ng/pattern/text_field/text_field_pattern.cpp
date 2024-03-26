@@ -1196,6 +1196,15 @@ void TextFieldPattern::HandleOnCopy(bool isUsingExternalKeyboard)
     eventHub->FireOnCopy(value);
 }
 
+bool TextFieldPattern::IsShowHandle()
+{
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_RETURN(pipeline, false);
+    auto theme = pipeline->GetTheme<TextFieldTheme>();
+    CHECK_NULL_RETURN(theme, false);
+    return !theme->IsTextFieldShowHandle();
+}
+
 void TextFieldPattern::HandleOnPaste()
 {
     TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "HandleOnPaste");
@@ -4930,9 +4939,14 @@ void TextFieldPattern::SetSelectionFlag(
 
     if (options.has_value()) {
         if (options.value().menuPolicy == MenuPolicy::ALWAYS) {
-            SetIsSingleHandle(!IsSelected());
-            ProcessOverlay(true, true);
-            UpdateSelectMenuVisibility(true);
+            if (IsShowHandle()) {
+                SetIsSingleHandle(!IsSelected());
+                ProcessOverlay(true, true);
+                UpdateSelectMenuVisibility(true);
+            } else {
+                UpdateSelectMenuVisibility(false);
+                CloseSelectOverlay(true);
+            }
         } else if (options.value().menuPolicy == MenuPolicy::NEVER) {
             UpdateSelectMenuVisibility(false);
             CloseSelectOverlay(true);
