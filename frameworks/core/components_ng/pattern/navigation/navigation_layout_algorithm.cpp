@@ -502,6 +502,16 @@ void NavigationLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     float navBarWidth = LayoutNavBar(layoutWrapper, hostNode, navigationLayoutProperty, navBarPosition, navBarOffset);
     float dividerWidth = LayoutDivider(layoutWrapper, hostNode, navigationLayoutProperty, navBarWidth, navBarPosition);
     LayoutContent(layoutWrapper, hostNode, navigationLayoutProperty, navBarWidth, dividerWidth, navBarPosition);
+
+    auto&& opts = navigationLayoutProperty->GetSafeAreaExpandOpts();
+    if (opts && opts->Expansive()) {
+        auto geometryNode = hostNode->GetGeometryNode();
+        CHECK_NULL_VOID(geometryNode);
+        TAG_LOGD(AceLogTag::ACE_NAVIGATION,
+            "Navigation id is %d{public}, frameRect is %{public}s, top is %{public}f, left is %{public}f",
+            hostNode->GetId(), geometryNode->GetFrameRect().ToString().c_str(),
+            hostNode->GetOffsetRelativeToWindow().GetY(), hostNode->GetOffsetRelativeToWindow().GetX());
+    }
 }
 
 void NavigationLayoutAlgorithm::SetNavigationHeight(LayoutWrapper* layoutWrapper, SizeF& size)
