@@ -30,37 +30,29 @@
 
 namespace OHOS::Ace::NodeModel {
 
-constexpr int NUM_0 = 0;
-constexpr int NUM_1 = 1;
-constexpr int NUM_2 = 2;
-constexpr int NUM_3 = 3;
-constexpr int NUM_4 = 4;
-constexpr int NUM_5 = 5;
-constexpr int NUM_6 = 6;
-
-struct InnerEventExtraParam {
+struct InnerCustomExtraParam  {
     int32_t targetId;
     void* userData;
 };
 
-struct ExtraData {
-    std::unordered_map<int64_t, InnerEventExtraParam*> eventMap;
+struct ExtraCustomData {
+    std::unordered_map<int64_t, InnerCustomExtraParam*> eventMap;
 };
 
 void NodeAddExtraData(ArkUI_NodeHandle node, ArkUI_NodeCustomEventType eventType, int32_t targetId, void* userData)
 {
     if (!node->extraData) {
-        node->extraData = new ExtraData();
+        node->extraData = new ExtraCustomData();
     }
 
-    auto* extraData = reinterpret_cast<ExtraData*>(node->extraData);
+    auto* extraData = reinterpret_cast<ExtraCustomData*>(node->extraData);
     auto& eventMap = extraData->eventMap;
 
     auto it = eventMap.find(eventType);
     if (it != eventMap.end()) {
         it->second->targetId = targetId;
     } else {
-        auto eventExtraParam = new InnerEventExtraParam({ targetId, userData });
+        auto eventExtraParam = new InnerCustomExtraParam({ targetId, userData });
         eventMap.emplace(eventType, eventExtraParam);
     }
 }
@@ -99,7 +91,7 @@ int32_t RegisterNodeCustomEvent(ArkUI_NodeHandle node, ArkUI_NodeCustomEventType
 
 void NodeRemoveExtraData(ArkUI_NodeHandle node, ArkUI_NodeCustomEventType eventType)
 {
-    auto* extraData = reinterpret_cast<ExtraData*>(node->extraData);
+    auto* extraData = reinterpret_cast<ExtraCustomData*>(node->extraData);
     auto& eventMap = extraData->eventMap;
     auto innerEventExtraParam = eventMap.find(eventType);
     if (innerEventExtraParam == eventMap.end()) {
@@ -161,7 +153,7 @@ void RegisterNodeCustomReceiver(void (*eventReceiver)(ArkUI_NodeCustomEvent* eve
                     return;
                 }
 
-                auto* extraData = reinterpret_cast<ExtraData*>(nodePtr->extraData);
+                auto* extraData = reinterpret_cast<ExtraCustomData*>(nodePtr->extraData);
                 ArkUI_NodeCustomEventType eventType = static_cast<ArkUI_NodeCustomEventType>(origin->kind);
 
                 auto innerEventExtraParam = extraData->eventMap.find(eventType);
@@ -207,14 +199,21 @@ int32_t SetLayoutPosition(ArkUI_NodeHandle node, int32_t positionX, int32_t posi
 int32_t GetLayoutConstraint(ArkUI_NodeHandle node, ArkUI_LayoutConstraint* layoutConstraint)
 {
     auto* impl = GetFullImpl();
-    ArkUI_Int32 data[NUM_6];
+    // data size
+    ArkUI_Int32 data[6];
     impl->getExtendedAPI()->getLayoutConstraint(node->uiNodeHandle, data);
-    layoutConstraint->minWidth = data[NUM_0];
-    layoutConstraint->minHeight = data[NUM_1];
-    layoutConstraint->maxWidth = data[NUM_2];
-    layoutConstraint->maxHeight = data[NUM_3];
-    layoutConstraint->percentReferWidth = data[NUM_4];
-    layoutConstraint->percentReferHeight = data[NUM_5];
+    //minWidth
+    layoutConstraint->minWidth = data[0];
+    //minHeight
+    layoutConstraint->minHeight = data[1];
+    //maxWidth
+    layoutConstraint->maxWidth = data[2];
+    //maxHeight
+    layoutConstraint->maxHeight = data[3];
+    //percentReferWidth
+    layoutConstraint->percentReferWidth = data[4];
+    //percentReferHeight
+    layoutConstraint->percentReferHeight = data[5];
     return ERROR_CODE_NO_ERROR;
 }
 
@@ -239,13 +238,20 @@ ArkUI_IntOffset GetLayoutPosition(ArkUI_NodeHandle node)
 int32_t MeasureNode(ArkUI_NodeHandle node, ArkUI_LayoutConstraint* constraint)
 {
     auto* impl = GetFullImpl();
-    ArkUI_Float32 data[NUM_6];
-    data[NUM_0] = static_cast<ArkUI_Float32>(constraint->minWidth);
-    data[NUM_1] = static_cast<ArkUI_Float32>(constraint->minHeight);
-    data[NUM_2] = static_cast<ArkUI_Float32>(constraint->maxWidth);
-    data[NUM_3] = static_cast<ArkUI_Float32>(constraint->maxHeight);
-    data[NUM_4] = static_cast<ArkUI_Float32>(constraint->percentReferWidth);
-    data[NUM_5] = static_cast<ArkUI_Float32>(constraint->percentReferHeight);
+    // data size
+    ArkUI_Float32 data[6];
+    //minWidth
+    data[0] = static_cast<ArkUI_Float32>(constraint->minWidth);
+    //minHeight
+    data[1] = static_cast<ArkUI_Float32>(constraint->minHeight);
+    //maxWidth
+    data[2] = static_cast<ArkUI_Float32>(constraint->maxWidth);
+    //maxHeight
+    data[3] = static_cast<ArkUI_Float32>(constraint->maxHeight);
+    //percentReferWidth
+    data[4] = static_cast<ArkUI_Float32>(constraint->percentReferWidth);
+    //percentReferHeight
+    data[5] = static_cast<ArkUI_Float32>(constraint->percentReferHeight);
     impl->getExtendedAPI()->measureNode(nullptr, node->uiNodeHandle, data);
     return ERROR_CODE_NO_ERROR;
 }
@@ -254,8 +260,10 @@ int32_t LayoutNode(ArkUI_NodeHandle node, int32_t positionX, int32_t positionY)
 {
     auto* impl = GetFullImpl();
     float data[NUM_2];
-    data[NUM_0] = positionX;
-    data[NUM_1] = positionY;
+    //positionX
+    data[0] = positionX;
+    //positionY
+    data[1] = positionY;
     impl->getExtendedAPI()->layoutNode(nullptr, node->uiNodeHandle, data);
     return ERROR_CODE_NO_ERROR;
 }
