@@ -1407,6 +1407,8 @@ struct ArkUITextModifier {
     void (*resetTextAlign)(ArkUINodeHandle node);
     void (*setFontColor)(ArkUINodeHandle node, ArkUI_Uint32 color);
     void (*resetFontColor)(ArkUINodeHandle node);
+    void (*setTextForegroundColor)(ArkUINodeHandle node, ArkUI_Bool isColor, ArkUI_Uint32 color);
+    void (*resetTextForegroundColor)(ArkUINodeHandle node);
     void (*setFontSize)(ArkUINodeHandle node, ArkUI_Float32 value, ArkUI_Int32 unit);
     void (*resetFontSize)(ArkUINodeHandle node);
     void (*setTextLineHeight)(ArkUINodeHandle node, ArkUI_Float32 number, ArkUI_Int32 unit);
