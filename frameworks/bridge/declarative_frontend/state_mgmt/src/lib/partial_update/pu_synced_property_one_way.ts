@@ -106,6 +106,7 @@ class SynchedPropertyOneWayPU<C> extends ObservedPropertyAbstractPU<C>
     if (this.source_ != undefined) {
       this.resetLocalValue(this.source_.get(), /* needCopyObject */ true);
     }
+    this.setDecoratorInfo("@Prop");
     stateMgmtConsole.debug(`${this.debugInfo()}: constructor: done!`);
   }
 
@@ -125,10 +126,6 @@ class SynchedPropertyOneWayPU<C> extends ObservedPropertyAbstractPU<C>
       this.source_ = undefined;
     }
     super.aboutToBeDeleted();
-  }
-
-  public debugInfoDecorator(): string {
-    return `@Prop (class SynchedPropertyOneWayPU)`;
   }
 
   // sync peer can be 

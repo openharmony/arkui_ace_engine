@@ -23,6 +23,7 @@
 #include "core/animation/select_motion.h"
 #include "core/animation/spring_curve.h"
 #include "core/animation/bezier_variable_velocity_motion.h"
+#include "core/animation/velocity_motion.h"
 #include "core/components_ng/base/frame_scene_status.h"
 #include "core/components_ng/event/drag_event.h"
 #include "core/components_ng/pattern/navigation/nav_bar_pattern.h"
@@ -219,13 +220,6 @@ public:
         auto scrollable = scrollableEvent_->GetScrollable();
         CHECK_NULL_VOID(scrollable);
         scrollable->ProcessScrollSnapSpringMotion(scrollSnapDelta, scrollSnapVelocity);
-    }
-
-    void SetScrollFrameBeginCallback(const ScrollFrameBeginCallback& scrollFrameBeginCallback)
-    {
-        // Previous: Set to Scrollable and called in HandleScroll
-        // Now: HandleScroll moved to base class, directly store and call scrollFrameBeginCallback_ here
-        scrollFrameBeginCallback_ = scrollFrameBeginCallback;
     }
 
     bool IsScrollableSpringEffect() const
@@ -478,18 +472,10 @@ public:
         auto canScroll = scrollableEvent_->GetEnable();
         animateCanOverScroll_ = canScroll && animateCanOverScroll;
     }
-
     virtual void InitScrollBarClickEvent();
     void HandleClickEvent(GestureEvent& info);
-    virtual void InitScrollBarLongPressEvent();
-    void HandleLongPress(bool smooth);
-    virtual void InitScrollBarTouchEvent();
-    void OnTouchUp();
-    void OnTouchDown();
-    void ScheduleCaretLongPress();
-    void StartLongPressEventTimer();
+    void InitScrollBarMouseEvent();
     virtual void ScrollPage(bool reverse, bool smooth = false);
-    bool AnalysisUpOrDown(Point point, bool& reverse);
     void PrintOffsetLog(AceLogTag tag, int32_t id, double finalOffset);
 
     void SetScrollToSafeAreaHelper(bool isScrollToSafeAreaHelper)
@@ -501,6 +487,9 @@ public:
     {
         return isScrollToSafeAreaHelper_;
     }
+
+    void ScrollAtFixedVelocity(float velocity);
+
 protected:
     void OnDetachFromFrameNode(FrameNode* frameNode) override;
     virtual DisplayMode GetDefaultScrollBarDisplayMode() const
@@ -644,7 +633,6 @@ private:
     bool HandleScrollImpl(float offset, int32_t source);
     void NotifyMoved(bool value);
 
-    ScrollFrameBeginCallback scrollFrameBeginCallback_;
     /*
      *  End of NestableScrollContainer implementations
      *******************************************************************************/
@@ -727,6 +715,7 @@ private:
     RefPtr<Animator> hotzoneAnimator_;
     float lastHonezoneOffsetPct_ = 0.0f;
     RefPtr<BezierVariableVelocityMotion> velocityMotion_;
+    RefPtr<VelocityMotion> fixedVelocityMotion_;
     void UnRegister2DragDropManager();
     float IsInHotZone(const PointF& point);
     void HotZoneScroll(const float offset);
@@ -736,8 +725,8 @@ private:
     void HandleLeaveHotzoneEvent();
     bool isVertical() const;
     void AddHotZoneSenceInterface(SceneStatus scene);
+    RefPtr<InputEvent> mouseEvent_;
     bool isMousePressed_ = false;
-    Offset locationInfo_;
 };
 } // namespace OHOS::Ace::NG
 

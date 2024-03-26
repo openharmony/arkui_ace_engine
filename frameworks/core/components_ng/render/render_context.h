@@ -277,7 +277,7 @@ public:
     virtual void SetFrame(float positionX, float positionY, float width, float height) {}
     virtual void SetOpacity(float opacity) {}
     virtual void SetTranslate(float translateX, float translateY, float translateZ) {}
-
+    virtual void CleanTransition() {}
     virtual void SetRectMask(const RectF& rect, const ShapeMaskProperty& property) {}
     virtual void SetCircleMask(const Circle& circle, const ShapeMaskProperty& property) {}
     virtual void SetRoundRectMask(const RoundRect& roundRect, const ShapeMaskProperty& property) {}

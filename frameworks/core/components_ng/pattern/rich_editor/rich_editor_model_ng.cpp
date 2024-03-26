@@ -116,13 +116,14 @@ void RichEditorModelNG::SetOnDeleteComplete(std::function<void()>&& func)
     eventHub->SetOnDeleteComplete(std::move(func));
 }
 
-void RichEditorModelNG::SetCustomKeyboard(std::function<void()>&& func)
+void RichEditorModelNG::SetCustomKeyboard(std::function<void()>&& func, bool supportAvoidance)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
     auto pattern = frameNode->GetPattern<RichEditorPattern>();
     if (pattern) {
         pattern->SetCustomKeyboard(std::move(func));
+        pattern->SetCustomKeyboardOption(supportAvoidance);
     }
 }
 
@@ -231,5 +232,12 @@ void RichEditorModelNG::SetCaretColor(FrameNode* frameNode, const Color& color)
     auto pattern = frameNode->GetPattern<RichEditorPattern>();
     CHECK_NULL_VOID(pattern);
     pattern->SetCaretColor(color);
+}
+
+void RichEditorModelNG::SetOnEditingChange(std::function<void(const bool&)>&& func)
+{
+    auto eventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<RichEditorEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnEditingChange(std::move(func));
 }
 } // namespace OHOS::Ace::NG

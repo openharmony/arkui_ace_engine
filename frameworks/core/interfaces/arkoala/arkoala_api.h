@@ -26,12 +26,12 @@
 extern "C" {
 #endif
 
-#define ARKUI_FULL_API_VERSION 80
+#define ARKUI_FULL_API_VERSION 83
 // When changing ARKUI_BASIC_API_VERSION, ARKUI_FULL_API_VERSION must be
 // increased as well.
-#define ARKUI_NODE_API_VERSION 80
+#define ARKUI_NODE_API_VERSION 83
 
-#define ARKUI_BASIC_API_VERSION 6
+#define ARKUI_BASIC_API_VERSION 7
 #define ARKUI_EXTENDED_API_VERSION 6
 #define ARKUI_NODE_GRAPHICS_API_VERSION 5
 #define ARKUI_NODE_MODIFIERS_API_VERSION 6
@@ -1472,6 +1472,8 @@ struct ArkUITextModifier {
     void (*getTextShadows)(ArkUINodeHandle node, ArkUITextShadowStruct* textShadow, ArkUI_Uint32 size);
     ArkUI_Int32 (*getTextWordBreak)(ArkUINodeHandle node);
     ArkUI_Int32 (*getTextEllipsisMode)(ArkUINodeHandle node);
+    void (*setTextFontFeature)(ArkUINodeHandle node, ArkUI_CharPtr value);
+    void (*resetTextFontFeature)(ArkUINodeHandle node);
 };
 
 struct ArkUIButtonModifier {
@@ -1565,7 +1567,7 @@ struct ArkUIImageModifier {
     ArkUI_Int32 (*getObjectRepeat)(ArkUINodeHandle node);
     ArkUI_Int32 (*getObjectFit)(ArkUINodeHandle node);
     ArkUI_Int32 (*getImageInterpolation)(ArkUINodeHandle node);
-    ArkUIFilterColorType (*getColorFilter)(ArkUINodeHandle node);
+    void (*getColorFilter)(ArkUINodeHandle node, ArkUIFilterColorType* colorFilter);
     ArkUI_CharPtr (*getAlt)(ArkUINodeHandle node);
     ArkUI_Int32 (*getImageDraggable)(ArkUINodeHandle node);
     ArkUI_Int32 (*getRenderMode)(ArkUINodeHandle node);
@@ -1977,7 +1979,7 @@ struct ArkUIGestureModifier {
     void (*dispose)(ArkUIGesture* recognizer);
     // gesture event will received in common async event queue.
     void (*registerGestureEvent)(ArkUIGesture* gesture, ArkUI_Uint32 actionTypeMask, void* extraParam);
-    void (*addGestureToNode)(ArkUINodeHandle node, ArkUIGesture* gesture, ArkUI_Int32 priorityNum, ArkUI_Uint32 mask);
+    void (*addGestureToNode)(ArkUINodeHandle node, ArkUIGesture* gesture, ArkUI_Int32 priorityNum, ArkUI_Int32 mask);
     void (*removeGestureFromNode)(ArkUINodeHandle node, ArkUIGesture* recognizer);
 };
 
@@ -2143,6 +2145,14 @@ struct ArkUITextAreaModifier {
         ArkUINodeHandle node, ArkUI_Int32 open, ArkUI_Int32 thresholdPercentage, ArkUI_Int32 highlightBorder);
     void (*resetTextAreaShowCounterOptions)(ArkUINodeHandle node);
     void (*getTextAreaShowCounterOptions)(ArkUINodeHandle node, ArkUIShowCountOptions* options);
+    void (*setTextAreaDecoration)(ArkUINodeHandle node, ArkUI_Int32 decoration, ArkUI_Uint32 color, ArkUI_Int32 style);
+    void (*resetTextAreaDecoration)(ArkUINodeHandle node);
+    void (*setTextAreaLetterSpacing)(ArkUINodeHandle node, ArkUI_Float32 value, ArkUI_Int32 unit);
+    void (*resetTextAreaLetterSpacing)(ArkUINodeHandle node);
+    void (*setTextAreaLineHeight)(ArkUINodeHandle node, ArkUI_Float32 value, ArkUI_Int32 unit);
+    void (*resetTextAreaLineHeight)(ArkUINodeHandle node);
+    void (*setTextAreaFontFeature)(ArkUINodeHandle node, ArkUI_CharPtr value);
+    void (*resetTextAreaFontFeature)(ArkUINodeHandle node);
 };
 
 struct ArkUITextInputModifier {
@@ -2234,6 +2244,14 @@ struct ArkUITextInputModifier {
     void (*resetTextInputUserUnderlineColor)(ArkUINodeHandle node);
     void (*setTextInputTextSelection)(ArkUINodeHandle node, ArkUI_Int32 start, ArkUI_Int32 end);
     ArkUI_Int32 (*getTextInputTextSelectionIndex)(ArkUINodeHandle node, ArkUI_Bool isEnd);
+    void (*setTextInputDecoration)(ArkUINodeHandle node, ArkUI_Int32 decoration, ArkUI_Uint32 color, ArkUI_Int32 style);
+    void (*resetTextInputDecoration)(ArkUINodeHandle node);
+    void (*setTextInputLetterSpacing)(ArkUINodeHandle node, ArkUI_Float32 value, ArkUI_Int32 unit);
+    void (*resetTextInputLetterSpacing)(ArkUINodeHandle node);
+    void (*setTextInputLineHeight)(ArkUINodeHandle node, ArkUI_Float32 value, ArkUI_Int32 unit);
+    void (*resetTextInputLineHeight)(ArkUINodeHandle node);
+    void (*setTextInputFontFeature)(ArkUINodeHandle node, ArkUI_CharPtr value);
+    void (*resetTextInputFontFeature)(ArkUINodeHandle node);
 };
 
 struct ArkUIWebModifier {
@@ -2661,6 +2679,16 @@ struct ArkUISearchModifier {
     void (*resetSearchEnterKeyType)(ArkUINodeHandle node);
     void (*setSearchHeight)(ArkUINodeHandle node, ArkUI_Float32 heightValue, ArkUI_Int32 heightUnit);
     void (*resetSearchHeight)(ArkUINodeHandle node);
+    void (*setSearchInspectorId)(ArkUINodeHandle node, ArkUI_CharPtr key);
+    void (*resetSearchInspectorId)(ArkUINodeHandle node);
+    void (*setSearchDecoration)(ArkUINodeHandle node, ArkUI_Int32 decoration, ArkUI_Uint32 color, ArkUI_Int32 style);
+    void (*resetSearchDecoration)(ArkUINodeHandle node);
+    void (*setSearchLetterSpacing)(ArkUINodeHandle node, ArkUI_Float32 value, ArkUI_Int32 unit);
+    void (*resetSearchLetterSpacing)(ArkUINodeHandle node);
+    void (*setSearchLineHeight)(ArkUINodeHandle node, ArkUI_Float32 value, ArkUI_Int32 unit);
+    void (*resetSearchLineHeight)(ArkUINodeHandle node);
+    void (*setSearchFontFeature)(ArkUINodeHandle node, ArkUI_CharPtr value);
+    void (*resetSearchFontFeature)(ArkUINodeHandle node);
 };
 
 struct ArkUISearchControllerModifier {
@@ -2717,6 +2745,9 @@ struct ArkUITextPickerModifier {
     void (*setTextPickerRangeStr)(ArkUINodeHandle node, ArkUI_CharPtr rangeStr, ArkUI_Bool isSingleRange);
     ArkUI_CharPtr (*getTextPickerValue)(ArkUINodeHandle node);
     void (*setTextPickerValue)(ArkUINodeHandle node, ArkUI_CharPtr valueStr);
+    void (*setTextPickerDivider)(ArkUINodeHandle node, ArkUI_Uint32 color, const ArkUI_Float32* values,
+        const ArkUI_Int32* units, ArkUI_Int32 length);
+    void (*resetTextPickerDivider)(ArkUINodeHandle node);
 };
 
 struct ArkUITextTimerModifier {
@@ -3153,6 +3184,7 @@ struct ArkUIFrameNodeModifier {
     ArkUI_Float32* (*getPositionToWindow)(ArkUINodeHandle node);
     ArkUINodeHandle (*getFrameNodeById)(ArkUI_Int32 nodeId);
     ArkUINodeHandle (*getFrameNodeByKey)(ArkUI_CharPtr key);
+    void (*propertyUpdate)(ArkUINodeHandle node);
 };
 
 struct ArkUIAnimation {
@@ -3340,6 +3372,7 @@ typedef enum {
 struct ArkUIBasicAPI {
     /// Tree operations.
     ArkUINodeHandle (*createNode)(ArkUINodeType type, ArkUI_Int32 id, ArkUI_Int32 flags);
+    ArkUINodeHandle (*getNodeByViewStack)();
     void (*disposeNode)(ArkUINodeHandle node);
     // Returned pointer is valid only till node is alive.
     ArkUI_CharPtr (*getName)(ArkUINodeHandle node);

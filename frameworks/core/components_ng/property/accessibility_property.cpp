@@ -196,10 +196,6 @@ bool AccessibilityProperty::HoverTestRecursive(
     if (!node->IsVisible()) {
         return false;
     }
-    auto eventHub = node->GetEventHub<EventHub>();
-    if (!eventHub->IsEnabled()) {
-        return false;
-    }
 
     auto [shouldSearchSelf, shouldSearchChildren] = AccessibilityProperty::GetSearchStrategy(node);
 
@@ -286,6 +282,11 @@ std::pair<bool, bool> AccessibilityProperty::GetSearchStrategy(const RefPtr<Fram
                 }
             }
         }
+        auto eventHub = node->GetEventHub<EventHub>();
+        if (!eventHub->IsEnabled()) {
+            shouldSearchChildren = false;
+            // Fall through to update `shouldSearchSelf`
+        }
         HitTestMode hitTestMode = node->GetHitTestMode();
         UpdateSearchStrategyByHitTestMode(hitTestMode, shouldSearchSelf, shouldSearchChildren);
     } while (0);
@@ -344,6 +345,7 @@ bool AccessibilityProperty::IsAccessibilityFocusableDebug(const RefPtr<FrameNode
     }
 
     auto eventHub = node->GetEventHub<EventHub>();
+    info->Put("enabled", eventHub->IsEnabled());
     auto gestureEventHub = eventHub->GetGestureEventHub();
     if (gestureEventHub != nullptr) {
         info->Put("clickable", gestureEventHub->IsAccessibilityClickable());
@@ -381,6 +383,10 @@ bool AccessibilityProperty::IsAccessibilityFocusable(const RefPtr<FrameNode>& no
         }
 
         auto eventHub = node->GetEventHub<EventHub>();
+        if (!eventHub->IsEnabled()) {
+            focusable = true;
+            break;
+        }
         auto gestureEventHub = eventHub->GetGestureEventHub();
         if (gestureEventHub != nullptr) {
             if (gestureEventHub->IsAccessibilityClickable() ||

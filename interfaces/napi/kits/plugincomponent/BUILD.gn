@@ -33,6 +33,9 @@ ohos_shared_library("plugincomponent") {
     "js_plugin_want.cpp",
   ]
 
+  defines = [ "OHOS_PLATFORM" ]
+  sources += [ "$ace_root/adapter/ohos/osal/log_wrapper.cpp" ]
+
   deps = [ "$ace_root/build:libace_compatible" ]
 
   external_deps = [
@@ -42,6 +45,7 @@ ohos_shared_library("plugincomponent") {
     "access_token:libtokenid_sdk",
     "bundle_framework:appexecfwk_core",
     "c_utils:utils",
+    "hilog:libhilog",
     "ipc:ipc_core",
     "napi:ace_napi",
   ]

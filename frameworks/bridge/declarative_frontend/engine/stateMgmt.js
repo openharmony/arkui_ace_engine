@@ -3754,6 +3754,7 @@ class ObservedPropertyAbstractPU extends ObservedPropertyAbstract {
         // note value may change for union type variables when switching an object from one class to another.
         this.shouldInstallTrackedObjectReadCb = false;
         this.dependentElmtIdsByProperty_ = new PropertyDependencies();
+        this.decoratorInfo_ = "";
         Object.defineProperty(this, 'owningView_', { writable: true, enumerable: false });
         Object.defineProperty(this, 'subscriberRefs_', { writable: true, enumerable: false, value: new Set() });
         if (subscriber) {
@@ -3770,6 +3771,14 @@ class ObservedPropertyAbstractPU extends ObservedPropertyAbstract {
         super.aboutToBeDeleted();
         this.subscriberRefs_.clear();
         this.owningView_ = undefined;
+    }
+    setDecoratorInfo(decorate) {
+        this.decoratorInfo_ = decorate;
+    }
+    // dump info about variable decorator to string
+    // e.g. @State, @Link, etc.
+    debugInfoDecorator() {
+        return this.decoratorInfo_;
     }
     // dump basic info about this variable to a string, non-recursive, no subscriber info
     debugInfo() {
@@ -4237,14 +4246,12 @@ class ObservedPropertyPU extends ObservedPropertyAbstractPU {
     constructor(localInitValue, owningView, propertyName) {
         super(owningView, propertyName);
         this.setValueInternal(localInitValue);
+        this.setDecoratorInfo("@State");
     }
     aboutToBeDeleted(unsubscribeMe) {
         this.unsubscribeWrappedObject();
         this.removeSubscriber(unsubscribeMe);
         super.aboutToBeDeleted();
-    }
-    debugInfoDecorator() {
-        return `@State/@Provide (class ObservedPropertyPU)`;
     }
     /**
      * Called by a SynchedPropertyObjectTwoWayPU (@Link, @Consume) that uses this as sync peer when it has changed
@@ -4468,6 +4475,7 @@ class SynchedPropertyOneWayPU extends ObservedPropertyAbstractPU {
         if (this.source_ != undefined) {
             this.resetLocalValue(this.source_.get(), /* needCopyObject */ true);
         }
+        this.setDecoratorInfo("@Prop");
         
     }
     /*
@@ -4484,9 +4492,6 @@ class SynchedPropertyOneWayPU extends ObservedPropertyAbstractPU {
             this.source_ = undefined;
         }
         super.aboutToBeDeleted();
-    }
-    debugInfoDecorator() {
-        return `@Prop (class SynchedPropertyOneWayPU)`;
     }
     // sync peer can be 
     // 1. the embedded ObservedPropertyPU, followed by a reset when the owning ViewPU received a local update in parent 
@@ -4839,6 +4844,7 @@ class SynchedPropertyTwoWayPU extends ObservedPropertyAbstractPU {
         else {
             throw new SyntaxError(`${this.debugInfo()}: constructor: source variable in parent/ancestor @Component must be defined. Application error!`);
         }
+        this.setDecoratorInfo("@Link");
     }
     /*
     like a destructor, need to call this before deleting
@@ -4852,9 +4858,6 @@ class SynchedPropertyTwoWayPU extends ObservedPropertyAbstractPU {
             ObservedObject.removeOwningProperty(this.source_.getUnmonitored(), this);
         }
         super.aboutToBeDeleted();
-    }
-    debugInfoDecorator() {
-        return `@Link/@Consume (class SynchedPropertyTwoWayPU)`;
     }
     isStorageLinkProp() {
         return (this.source_ && this.source_ instanceof ObservedPropertyAbstract && (!(this.source_ instanceof ObservedPropertyAbstractPU)));
@@ -4993,6 +4996,7 @@ class SynchedPropertyNestedObjectPU extends ObservedPropertyAbstractPU {
         this.obsObject_ = obsObject;
         this.createSourceDependency(obsObject);
         this.setValueInternal(obsObject);
+        this.setDecoratorInfo("@ObjectLink");
     }
     /*
     like a destructor, need to call this before deleting
@@ -5640,7 +5644,6 @@ class ViewPU extends NativeViewPartialUpdate {
             
         }
         else {
-            const componentName = entry.getComponentName();
             
             this.isRenderInProgress = true;
             
@@ -5837,6 +5840,7 @@ class ViewPU extends NativeViewPartialUpdate {
         if (!allowOverride && this.findProvide(providedPropName)) {
             throw new ReferenceError(`${this.constructor.name}: duplicate @Provide property with name ${providedPropName}. Property with this name is provided by one of the ancestor Views already. @Provide override not allowed.`);
         }
+        store.setDecoratorInfo("@Provide");
         this.providedVars_.set(providedPropName, store);
     }
     /*
@@ -5865,6 +5869,7 @@ class ViewPU extends NativeViewPartialUpdate {
         }
         const factory = (source) => {
             const result = new SynchedPropertyTwoWayPU(source, this, consumeVarName);
+            result.setDecoratorInfo("@Consume");
             
             return result;
         };
@@ -6267,24 +6272,28 @@ class ViewPU extends NativeViewPartialUpdate {
         const appStorageLink = AppStorage.__createSync(storagePropName, defaultValue, (source) => (source === undefined)
             ? undefined
             : new SynchedPropertyTwoWayPU(source, this, viewVariableName));
+        appStorageLink.setDecoratorInfo("@StorageLink");
         return appStorageLink;
     }
     createStorageProp(storagePropName, defaultValue, viewVariableName) {
         const appStorageProp = AppStorage.__createSync(storagePropName, defaultValue, (source) => (source === undefined)
             ? undefined
             : new SynchedPropertyOneWayPU(source, this, viewVariableName));
+        appStorageProp.setDecoratorInfo("@StorageProp");
         return appStorageProp;
     }
     createLocalStorageLink(storagePropName, defaultValue, viewVariableName) {
         const localStorageLink = this.localStorage_.__createSync(storagePropName, defaultValue, (source) => (source === undefined)
             ? undefined
             : new SynchedPropertyTwoWayPU(source, this, viewVariableName));
+        localStorageLink.setDecoratorInfo("@LocalStorageLink");
         return localStorageLink;
     }
     createLocalStorageProp(storagePropName, defaultValue, viewVariableName) {
         const localStorageProp = this.localStorage_.__createSync(storagePropName, defaultValue, (source) => (source === undefined)
             ? undefined
             : new SynchedPropertyObjectOneWayPU(source, this, viewVariableName));
+        localStorageProp.setDecoratorInfo("@LocalStorageProp");
         return localStorageProp;
     }
     createOrGetNode(elmtId, builder) {
@@ -6449,7 +6458,12 @@ class ViewPU extends NativeViewPartialUpdate {
     debugInfoUpdateFuncByElmtIdInternal(counter, depth = 0, recursive = false) {
         let retVaL = `\n${"  ".repeat(depth)}|--${this.constructor.name}[${this.id__()}]: {`;
         this.updateFuncByElmtId.forEach((value, key, map) => {
-            retVaL += `\n${"  ".repeat(depth + 2)}${value.getComponentName()}[${key}]`;
+            var _a;
+            let componentName = value.getComponentName();
+            if (componentName === "unspecified UINode") {
+                componentName = (_a = this.getChildById(key)) === null || _a === void 0 ? void 0 : _a.constructor.name;
+            }
+            retVaL += `\n${"  ".repeat(depth + 2)}${componentName}[${key}]`;
         });
         counter.total += this.updateFuncByElmtId.size;
         retVaL += `\n${"  ".repeat(depth + 1)}}[${this.updateFuncByElmtId.size}]`;
@@ -7239,7 +7253,7 @@ ObserveV3.arraySetMapProxy = {
  * part of SDK
  * @from 12
  */
-const track = (target, propertyKey) => {
+const Trace = (target, propertyKey) => {
     ConfigureStateMgmt.instance.intentUsingV3(`@track`, propertyKey);
     return trackInternal(target, propertyKey);
 };
@@ -7272,7 +7286,7 @@ const trackInternal = (target, propertyKey) => {
     // used by IsObservedObjectV3
     (_a = target[_b = ObserveV3.V3_DECO_META]) !== null && _a !== void 0 ? _a : (target[_b] = {});
 }; // track
-function observed(BaseClass) {
+function ObservedV2(BaseClass) {
     ConfigureStateMgmt.instance.intentUsingV3(`@observed`, BaseClass === null || BaseClass === void 0 ? void 0 : BaseClass.name);
     // prevent @Track inside @observed class
     if (BaseClass.prototype && Reflect.has(BaseClass.prototype, TrackedObject.___IS_TRACKED_OPTIMISED)) {

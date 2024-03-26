@@ -713,7 +713,6 @@ class ImageMenuItem extends ViewPU {
                         Image.focusable(false);
                         Image.enabled(this.item.isEnabled);
                         Image.objectFit(ImageFit.Cover);
-                        Image.onClick(() => this.item.isEnabled && this.item.action && this.item.action());
                     }, Image);
                     this.observeComponentCreation2((n5, o5) => {
                         Button.createWithLabel({ type: ButtonType.Circle });
@@ -740,6 +739,45 @@ class ImageMenuItem extends ViewPU {
                             width: EditableTitleBar.commonZero,
                         });
                         ViewStackProcessor.visualState();
+                        Button.onFocus(() => {
+                            if (!this.item.isEnabled) {
+                                return;
+                            }
+                            this.isOnFocus = true;
+                        });
+                        Button.onBlur(() => this.isOnFocus = false);
+                        Button.onHover((b5) => {
+                            if (!this.item.isEnabled) {
+                                return;
+                            }
+                            this.isOnHover = b5;
+                        });
+                        Button.onKeyEvent((c5) => {
+                            if (!this.item.isEnabled) {
+                                return;
+                            }
+                            if (c5.keyCode !== KeyCode.KEYCODE_ENTER && c5.keyCode !== KeyCode.KEYCODE_SPACE) {
+                                return;
+                            }
+                            if (c5.type === KeyType.Down) {
+                                this.isOnClick = true;
+                            }
+                            if (c5.type === KeyType.Up) {
+                                this.isOnClick = false;
+                            }
+                        });
+                        Button.onTouch((d5) => {
+                            if (!this.item.isEnabled) {
+                                return;
+                            }
+                            if (d5.type === TouchType.Down) {
+                                this.isOnClick = true;
+                            }
+                            if (d5.type === TouchType.Up) {
+                                this.isOnClick = false;
+                            }
+                        });
+                        Button.onClick(() => this.item.isEnabled && this.item.action && this.item.action());
                     }, Button);
                     Button.pop();
                     Stack.pop();

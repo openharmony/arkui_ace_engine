@@ -44,7 +44,9 @@ std::string ContentController::PreprocessString(int32_t startIndex, int32_t endI
     CHECK_NULL_RETURN(textField, value);
     auto property = textField->GetLayoutProperty<TextFieldLayoutProperty>();
     auto selectValue = GetSelectedValue(startIndex, endIndex);
-    if (property->GetTextInputType().has_value() &&
+    bool hasInputFilter =
+        property->GetInputFilter().has_value() && !property->GetInputFilter().value().empty() && !content_.empty();
+    if (!hasInputFilter && property->GetTextInputType().has_value() &&
         (property->GetTextInputType().value() == TextInputType::NUMBER_DECIMAL ||
             property->GetTextInputType().value() == TextInputType::EMAIL_ADDRESS)) {
         char specialChar = property->GetTextInputType().value() == TextInputType::NUMBER_DECIMAL ? '.' : '@';

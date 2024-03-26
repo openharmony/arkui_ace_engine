@@ -552,7 +552,8 @@ void SearchPattern::OnClickButtonAndImage()
     CHECK_NULL_VOID(textFieldPattern);
     auto text = textFieldPattern->GetTextValue();
     searchEventHub->UpdateSubmitEvent(text);
-    textFieldPattern->CloseKeyboard(true);
+    // close keyboard and select background color
+    textFieldPattern->StopEditing();
 }
 
 void SearchPattern::OnClickCancelButton()

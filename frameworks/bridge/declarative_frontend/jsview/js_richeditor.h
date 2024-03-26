@@ -58,6 +58,7 @@ public:
     static JSRef<JSObject> CreateParagraphStyleResult(const ParagraphInfo& info);
     static void SetCaretColor(const JSCallbackInfo& info);
     static void SetSelectedBackgroundColor(const JSCallbackInfo& info);
+    static void SetOnEditingChange(const JSCallbackInfo& args);
 private:
     static void CreateTextStyleObj(JSRef<JSObject>& textStyleObj, const NG::RichEditorAbstractSpanResult& spanResult);
     static void CreateImageStyleObj(JSRef<JSObject>& imageStyleObj, JSRef<JSObject>& spanResultObj,
@@ -117,6 +118,7 @@ public:
     void CloseSelectionMenu();
     void SetSelection(const JSCallbackInfo& args);
     void GetSelection(const JSCallbackInfo& args);
+    void IsEditing(const JSCallbackInfo& args);
     void SetInstanceId(int32_t id)
     {
         instanceId_ = id;

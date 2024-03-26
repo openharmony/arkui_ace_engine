@@ -457,6 +457,7 @@ class FrameNodeModifier extends ArkComponent {
                 return;
             }
             value.applyStage(this.nativePtr);
+            getUINativeModule().frameNode.propertyUpdate(this.nativePtr);
         });
     }
     setNodePtr(nodePtr) {
@@ -578,7 +579,7 @@ class FrameNode {
         if (!flag) {
             throw { message: 'The FrameNode is not modifiable.', code: 100021 };
         }
-        this._childList.set(sibling.nodeId_, sibling);
+        this._childList.set(child.nodeId_, child);
     }
     removeChild(node) {
         this.checkType();

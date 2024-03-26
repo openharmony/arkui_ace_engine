@@ -804,7 +804,7 @@ void UINode::SetJSViewActive(bool active)
     }
 }
 
-void UINode::OnVisibleChange(bool isVisible)
+void UINode::TryVisibleChangeOnDescendant(bool isVisible)
 {
     UpdateChildrenVisible(isVisible);
 }
@@ -812,15 +812,7 @@ void UINode::OnVisibleChange(bool isVisible)
 void UINode::UpdateChildrenVisible(bool isVisible) const
 {
     for (const auto& child : GetChildren()) {
-        if (InstanceOf<FrameNode>(child)) {
-            auto childLayoutProperty = DynamicCast<FrameNode>(child)->GetLayoutProperty();
-            if (childLayoutProperty &&
-                childLayoutProperty->GetVisibilityValue(VisibleType::VISIBLE) != VisibleType::VISIBLE) {
-                // child is invisible, no need to update visible state.
-                continue;
-            }
-        }
-        child->OnVisibleChange(isVisible);
+        child->TryVisibleChangeOnDescendant(isVisible);
     }
 }
 
@@ -1111,8 +1103,9 @@ void UINode::CollectRemovedChild(const RefPtr<UINode>& child, std::list<int32_t>
 {
     removedElmtId.emplace_back(child->GetId());
     // Fetch all the child elementIDs recursively
-    if (child->GetTag() != V2::JS_VIEW_ETS_TAG) {
+    if (child->GetTag() != V2::JS_VIEW_ETS_TAG && child->GetNodeStatus() != NodeStatus::NORMAL_NODE) {
         // add CustomNode but do not recurse into its children
+        // add node create by BuilderNode do not recurse into its children
         CollectRemovedChildren(child->GetChildren(), removedElmtId, false);
     }
 }

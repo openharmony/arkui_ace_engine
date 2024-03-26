@@ -216,6 +216,7 @@ public:
     void UpdateCounterMargin();
     void CleanCounterNode();
     void UltralimitShake();
+    bool OverCounter(int32_t originLength);
     void HandleInputCounterBorder(int32_t& textLength, uint32_t& maxLength);
     void UpdateCounterBorderStyle(int32_t& textLength, uint32_t& maxLength);
     void UpdateAreaBorderStyle(BorderWidthProperty& currentBorderWidth, BorderWidthProperty& overCountBorderWidth,
@@ -694,7 +695,7 @@ public:
         return parentGlobalOffset_;
     }
 
-    const RectF& GetTextContentRect() const override
+    RectF GetTextContentRect() const override
     {
         return contentRect_;
     }
@@ -994,6 +995,7 @@ public:
     bool CheckAutoSave() override;
     void OnColorConfigurationUpdate() override;
     bool NeedPaintSelect();
+    void SetCustomKeyboardOption(bool supportAvoidance);
 
     void SetIsCustomFont(bool isCustomFont)
     {
@@ -1128,12 +1130,7 @@ public:
 
     void OnVirtualKeyboardAreaChanged() override;
     void ScrollPage(bool reverse, bool smooth = false) override;
-    void LongScrollPage();
-    void ScheduleCaretLongPress();
-    void StartLongPressEventTimer();
     void InitScrollBarClickEvent() override {}
-    void InitScrollBarLongPressEvent() override {}
-    void InitScrollBarTouchEvent() override {}
 
 protected:
     virtual void InitDragEvent();
@@ -1252,6 +1249,7 @@ private:
 
     bool ResetObscureTickCountDown();
 
+    bool IsOnUnitByPosition(const Offset& globalOffset);
     bool IsTouchAtLeftOffset(float currentOffsetX);
     void FilterExistText();
     void CreateErrorParagraph(const std::string& content);
@@ -1278,7 +1276,6 @@ private:
     void UnitResponseKeyEvent();
     void ProcNormalInlineStateInBlurEvent();
     bool IsMouseOverScrollBar(const GestureEvent& info);
-    bool IsLongMouseOverScrollBar(GestureEvent& info);
     
 #if defined(ENABLE_STANDARD_INPUT)
     std::optional<MiscServices::TextConfig> GetMiscTextConfig() const;
@@ -1311,6 +1308,11 @@ private:
     bool IsAutoFillPasswordType(const AceAutoFillType& autoFillType);
     void DoProcessAutoFill();
     void KeyboardContentTypeToInputType();
+    void ProcessScroll();
+    void ProcessCounter();
+    RefPtr<TextFieldLayoutProperty> GetTextFieldLayoutProperty();
+    void ProcessOverlayAfterLayout(bool isGlobalAreaChange);
+    void HandleParentGlobalOffsetChange();
 
     RectF frameRect_;
     RectF textRect_;
@@ -1474,10 +1476,9 @@ private:
     Offset clickLocation_;
     bool isKeyboardClosedByUser_ = false;
     bool lockRecord_ = false;
-    bool hasMousePressed_ = false;
-    bool isLongPressPage_ = false;
-    Offset locationInfo_;
     bool isFillRequestFinish_ = false;
+    bool keyboardAvoidance_ = false;
+    bool hasMousePressed_ = false;
 };
 } // namespace OHOS::Ace::NG
 

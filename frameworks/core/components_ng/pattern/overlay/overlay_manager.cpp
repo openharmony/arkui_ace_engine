@@ -1637,6 +1637,16 @@ void OverlayManager::BeforeShowDialog(const RefPtr<FrameNode>& node)
     dialogMap_[node->GetId()] = node;
 }
 
+RefPtr<FrameNode> OverlayManager::SetDialogMask(const DialogProperties& dialogProps)
+{
+    DialogProperties Maskarg;
+    Maskarg.isMask = true;
+    Maskarg.autoCancel = dialogProps.autoCancel;
+    Maskarg.onWillDismiss = dialogProps.onWillDismiss;
+    Maskarg.maskColor = dialogProps.maskColor;
+    return ShowDialog(Maskarg, nullptr, false);
+}
+
 RefPtr<FrameNode> OverlayManager::ShowDialog(
     const DialogProperties& dialogProps, std::function<void()>&& buildFunc, bool isRightToLeft)
 {
@@ -1966,6 +1976,7 @@ void OverlayManager::CloseDialogInner(const RefPtr<FrameNode>& dialogNode)
     if (container->IsSubContainer()) {
         currentId = SubwindowManager::GetInstance()->GetParentContainerId(Container::CurrentId());
         container = AceEngine::Get().GetContainer(currentId);
+        CHECK_NULL_VOID(container);
     }
     ContainerScope scope(currentId);
     auto pipelineContext = container->GetPipelineContext();
@@ -1992,7 +2003,7 @@ void OverlayManager::CloseDialogInner(const RefPtr<FrameNode>& dialogNode)
     CallOnHideDialogCallback();
 }
 
-bool OverlayManager::RemoveDialog(const RefPtr<FrameNode>& overlay, bool isBackPressed)
+bool OverlayManager::RemoveDialog(const RefPtr<FrameNode>& overlay, bool isBackPressed, bool isPageRouter)
 {
     TAG_LOGD(AceLogTag::ACE_OVERLAY, "remove dialog enter");
     if (overlay->IsRemoving()) {
@@ -2002,7 +2013,7 @@ bool OverlayManager::RemoveDialog(const RefPtr<FrameNode>& overlay, bool isBackP
         return true;
     }
     auto hub = overlay->GetEventHub<DialogEventHub>();
-    if (hub) {
+    if (!isPageRouter && hub) {
         hub->FireCancelEvent();
     }
     CloseDialog(overlay);
@@ -2100,7 +2111,7 @@ bool OverlayManager::RemoveOverlay(bool isBackPressed, bool isPageRouter)
             }
         }
         if (InstanceOf<DialogPattern>(pattern)) {
-            if (isPageRouter) {
+            if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE) && isPageRouter) {
                 return false;
             }
             auto dialogPattern = DynamicCast<DialogPattern>(pattern);
@@ -2111,7 +2122,7 @@ bool OverlayManager::RemoveOverlay(bool isBackPressed, bool isPageRouter)
                 TAG_LOGI(AceLogTag::ACE_OVERLAY, "Dialog Should Dismiss");
                 return true;
             }
-            return RemoveDialog(overlay, isBackPressed);
+            return RemoveDialog(overlay, isBackPressed, isPageRouter);
         }
         if (InstanceOf<BubblePattern>(pattern)) {
             return RemoveBubble(overlay);
@@ -2369,6 +2380,13 @@ bool OverlayManager::RemovePopupInSubwindow(const RefPtr<Pattern>& pattern, cons
     }
     auto popupPattern = DynamicCast<BubblePattern>(pattern);
     overlay->GetEventHub<BubbleEventHub>()->FireChangeEvent(false);
+    auto container = Container::Current();
+    auto currentId = Container::CurrentId();
+    CHECK_NULL_RETURN(container, false);
+    if (container->IsSubContainer()) {
+        currentId = SubwindowManager::GetInstance()->GetParentContainerId(Container::CurrentId());
+    }
+    ContainerScope scope(currentId);
     for (const auto& popup : popupMap_) {
         auto targetId = popup.first;
         auto popupInfo = popup.second;
@@ -2377,7 +2395,7 @@ bool OverlayManager::RemovePopupInSubwindow(const RefPtr<Pattern>& pattern, cons
             rootNode->RemoveChild(overlay);
             rootNode->MarkDirtyNode(PROPERTY_UPDATE_BY_CHILD_REQUEST);
             if (rootNode->GetChildren().empty()) {
-                auto subwindow = SubwindowManager::GetInstance()->GetSubwindow(popupPattern->GetContainerId());
+                auto subwindow = SubwindowManager::GetInstance()->GetSubwindow(currentId);
                 CHECK_NULL_RETURN(subwindow, false);
                 subwindow->DeletePopupHotAreas(overlay->GetId());
                 subwindow->HideSubWindowNG();
@@ -3214,10 +3232,12 @@ void OverlayManager::PlaySheetTransition(
             auto context = sheetNode->GetRenderContext();
             CHECK_NULL_VOID(context);
             context->UpdateRenderGroup(false, true, true);
+            auto pattern = sheetNode->GetPattern<SheetPresentationPattern>();
             if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE) &&
                 isFirst) {
-                sheetNode->GetPattern<SheetPresentationPattern>()->OnAppear();
+                pattern->OnAppear();
             }
+            pattern->AvoidAiBar();
         });
         sheetParent->GetEventHub<EventHub>()->GetOrCreateGestureEventHub()->SetHitTestMode(HitTestMode::HTMDEFAULT);
         AnimationUtils::Animate(
@@ -3635,6 +3655,34 @@ RefPtr<FrameNode> OverlayManager::GetSheetMask(const RefPtr<FrameNode>& sheetNod
     return sheetChildFrameNode;
 }
 
+void OverlayManager::SetCustomKeybroadHeight(float customHeight)
+{
+    if (!keyboardAvoidance_) {
+        return;
+    }
+    auto pipeline = PipelineBase::GetCurrentContext();
+    Rect keyboardRect = Rect(0.0f, 0.0f, 0.0f, customHeight);
+    CHECK_NULL_VOID(pipeline);
+    pipeline->OnVirtualKeyboardAreaChange(keyboardRect);
+}
+
+void OverlayManager::SupportCustomKeyboardAvoidance(RefPtr<RenderContext> context, AnimationOption option,
+    RefPtr<FrameNode> customKeyboard)
+{
+    option.SetOnFinishEvent([weak = WeakClaim(this), customKeyboard] {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        auto customHeight = customKeyboard->GetGeometryNode()->GetFrameSize().Height();
+        pattern->SetCustomKeybroadHeight(customHeight);
+    });
+
+    AnimationUtils::Animate(option, [context]() {
+    if (context) {
+        context->OnTransformTranslateUpdate({ 0.0f, 0.0f, 0.0f });
+    }
+    }, option.GetOnFinishEvent());
+}
+
 void OverlayManager::PlayKeyboardTransition(RefPtr<FrameNode> customKeyboard, bool isTransitionIn)
 {
     CHECK_NULL_VOID(customKeyboard);
@@ -3660,11 +3708,7 @@ void OverlayManager::PlayKeyboardTransition(RefPtr<FrameNode> customKeyboard, bo
     auto keyboardHeight = customKeyboard->GetGeometryNode()->GetFrameSize().Height();
     if (isTransitionIn) {
         context->OnTransformTranslateUpdate({ 0.0f, pageHeight, 0.0f });
-        AnimationUtils::Animate(option, [context]() {
-            if (context) {
-                context->OnTransformTranslateUpdate({ 0.0f, 0.0f, 0.0f });
-            }
-        });
+        SupportCustomKeyboardAvoidance(context, option, customKeyboard);
     } else {
         context->UpdateOpacity(1.0);
         option.SetOnFinishEvent([customKeyboard] {
@@ -3711,6 +3755,7 @@ void OverlayManager::CloseKeyboard(int32_t targetId)
     CHECK_NULL_VOID(pattern);
     customKeyboardMap_.erase(pattern->GetTargetId());
     PlayKeyboardTransition(customKeyboard, false);
+    SetCustomKeybroadHeight();
 }
 
 void OverlayManager::DestroyKeyboard()
@@ -3726,6 +3771,7 @@ void OverlayManager::DestroyKeyboard()
         it = customKeyboardMap_.erase(it);
     }
     rootNode->MarkDirtyNode(PROPERTY_UPDATE_BY_CHILD_REQUEST);
+    SetCustomKeybroadHeight();
 }
 
 // This function will be used in SceneBoard Thread only.

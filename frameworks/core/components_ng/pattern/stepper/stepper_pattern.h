@@ -129,7 +129,6 @@ private:
     int32_t maxIndex_ = 0;
     std::shared_ptr<ChangeEvent> swiperChangeEvent_;
     ACE_DISALLOW_COPY_AND_MOVE(StepperPattern);
-    bool isRightLabelDisable_ = false;
     bool isLoadingButton_ = false;
     RefPtr<FocusHub> leftFocusHub_ = nullptr;
 };

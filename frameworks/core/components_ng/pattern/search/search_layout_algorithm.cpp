@@ -18,6 +18,7 @@
 #include <algorithm>
 
 #include "base/utils/utils.h"
+#include "core/common/ace_application_info.h"
 #include "core/components/search/search_theme.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components_ng/layout/layout_algorithm.h"
@@ -133,6 +134,7 @@ void SearchLayoutAlgorithm::TextFieldMeasure(LayoutWrapper* layoutWrapper)
     auto textFieldGeometryNode = textFieldWrapper->GetGeometryNode();
     CHECK_NULL_VOID(textFieldGeometryNode);
 
+    UpdateFontFeature(layoutWrapper);
     auto buttonWidth = searchButtonSizeMeasure_.Width();
     auto cancelButtonWidth = cancelBtnSizeMeasure_.Width();
     auto iconRenderWidth =
@@ -148,7 +150,7 @@ void SearchLayoutAlgorithm::TextFieldMeasure(LayoutWrapper* layoutWrapper)
     float rightPadding = padding.right.value_or(0.0f);
     auto textFieldWidth = searchWidthMax - searchTheme->GetSearchIconLeftSpace().ConvertToPx() - iconRenderWidth -
                           searchTheme->GetSearchIconRightSpace().ConvertToPx() - leftPadding - rightPadding;
-    if (Container::LessThanAPIVersion(PlatformVersion::VERSION_TEN)) {
+    if (!AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TEN)) {
         textFieldWidth = searchWidthMax - searchTheme->GetSearchIconLeftSpace().ConvertToPx() - iconRenderWidth -
                          searchTheme->GetSearchIconRightSpace().ConvertToPx();
     }
@@ -161,9 +163,7 @@ void SearchLayoutAlgorithm::TextFieldMeasure(LayoutWrapper* layoutWrapper)
     if (style != CancelButtonStyle::INVISIBLE) {
         textFieldWidth = textFieldWidth - cancelButtonWidth;
     }
-    auto themeHeight = searchTheme->GetHeight().ConvertToPx();
-    auto searchHeight = CalcSearchHeight(constraint.value(), layoutWrapper);
-    auto textFieldHeight = std::min(themeHeight, searchHeight - 0.0f);
+    auto textFieldHeight = CalcSearchHeight(constraint.value(), layoutWrapper);
     auto childLayoutConstraint = layoutProperty->CreateChildConstraint();
     childLayoutConstraint.selfIdealSize.SetWidth(textFieldWidth);
     SetTextFieldLayoutConstraintHeight(childLayoutConstraint, textFieldHeight, layoutWrapper);
@@ -171,6 +171,19 @@ void SearchLayoutAlgorithm::TextFieldMeasure(LayoutWrapper* layoutWrapper)
     textFieldSizeMeasure_ = textFieldGeometryNode->GetFrameSize();
 }
 
+void SearchLayoutAlgorithm::UpdateFontFeature(LayoutWrapper* layoutWrapper)
+{
+    auto layoutProperty = AceType::DynamicCast<SearchLayoutProperty>(layoutWrapper->GetLayoutProperty());
+    CHECK_NULL_VOID(layoutProperty);
+    auto textFieldWrapper = layoutWrapper->GetOrCreateChildByIndex(TEXTFIELD_INDEX);
+    CHECK_NULL_VOID(textFieldWrapper);
+
+    auto textFieldLayoutProperty = AceType::DynamicCast<TextFieldLayoutProperty>(textFieldWrapper->GetLayoutProperty());
+    CHECK_NULL_VOID(textFieldLayoutProperty);
+    if (layoutProperty->HasFontFeature()) {
+        textFieldLayoutProperty->UpdateFontFeature(layoutProperty->GetFontFeature().value());
+    }
+}
 void SearchLayoutAlgorithm::SetTextFieldLayoutConstraintHeight(LayoutConstraintF& contentConstraint,
     double textFieldHeight, LayoutWrapper* layoutWrapper)
 {

@@ -89,7 +89,7 @@ public:
     void SetPadding(NG::PaddingProperty& newPadding, Edge oldPadding, bool tmp) override;
     void SetHoverEffect(HoverEffectType hoverEffect) override;
     void SetSelectionMenuHidden(bool contextMenuHidden) override;
-    void SetCustomKeyboard(const std::function<void()>&& buildFunc) override;
+    void SetCustomKeyboard(const std::function<void()>&& buildFunc, bool supportAvoidance = false) override;
     void SetPasswordRules(const std::string& passwordRules) override;
     void SetEnableAutoFill(bool enableAutoFill) override;
     void SetCleanNodeStyle(CleanNodeStyle cleanNodeStyle) override;
@@ -104,6 +104,12 @@ public:
     void SetTextDecoration(Ace::TextDecoration value) override;
     void SetTextDecorationColor(const Color& value) override;
     void SetTextDecorationStyle(Ace::TextDecorationStyle value) override;
+    void SetFontFeature(const FONT_FEATURES_MAP& value) override;
+    static void SetTextDecoration(FrameNode* frameNode, TextDecoration value);
+    static void SetTextDecorationColor(FrameNode* frameNode, const Color& value);
+    static void SetTextDecorationStyle(FrameNode* frameNode, TextDecorationStyle value);
+    static void SetLetterSpacing(FrameNode* frameNode, const Dimension& value);
+    static void SetLineHeight(FrameNode* frameNode, const Dimension& value);
     static RefPtr<FrameNode> CreateFrameNode(int32_t nodeId, const std::optional<std::string>& placeholder,
         const std::optional<std::string>& value, bool isTextArea);
     static void SetInputStyle(FrameNode* frameNode, InputStyle value);
@@ -183,6 +189,7 @@ public:
     static bool GetShowCounterBorder(FrameNode* frameNode);
     static void SetTextSelection(FrameNode* frameNode, int32_t start, int32_t end);
     static int32_t GetTextSelectionIndex(FrameNode* frameNode, bool isEnd);
+    static void SetFontFeature(FrameNode* frameNode, const FONT_FEATURES_MAP& value);
 
 private:
     void AddDragFrameNodeToManager() const;

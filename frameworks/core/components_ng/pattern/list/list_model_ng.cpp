@@ -281,6 +281,15 @@ void ListModelNG::SetOnScrollIndex(OnScrollIndexEvent&& onScrollIndex)
     eventHub->SetOnScrollIndex(std::move(onScrollIndex));
 }
 
+void ListModelNG::SetOnScrollVisibleContentChange(OnScrollVisibleContentChangeEvent&& onScrollVisibleContentChange)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetEventHub<ListEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnScrollVisibleContentChange(std::move(onScrollVisibleContentChange));
+}
+
 void ListModelNG::SetOnReachStart(OnReachEvent&& onReachStart)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();

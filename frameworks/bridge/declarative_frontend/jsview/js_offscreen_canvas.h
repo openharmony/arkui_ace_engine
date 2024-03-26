@@ -146,19 +146,6 @@ public:
         return height_;
     }
 
-    RefPtr<PipelineBase> GetContext() const
-    {
-        if (instanceId_ == -1) {
-            return nullptr;
-        }
-        auto container = AceEngine::Get().GetContainer(instanceId_);
-        if (container == nullptr) {
-            return nullptr;
-        }
-        auto context = container->GetPipelineContext();
-        return context;
-    }
-
     void SetDetachStatus(bool isDetached)
     {
         isDetached_ = isDetached;
@@ -172,6 +159,11 @@ public:
     bool IsGetContext() const
     {
         return isGetContext_;
+    }
+
+    void SetOffscreenPattern(const RefPtr<NG::OffscreenCanvasPattern>& offscreenPattern)
+    {
+        offscreenCanvasPattern_ = offscreenPattern;
     }
 
     enum class ContextType {
@@ -191,7 +183,6 @@ private:
     RefPtr<JSRenderingContextSettings> offscreenCanvasSettings_;
     double width_ = 0.0f;
     double height_ = 0.0f;
-    int32_t instanceId_ = INSTANCE_ID_UNDEFINED;
     ContextType contextType_;
     bool isGetContext_ = false;
     bool isDetached_ = false;

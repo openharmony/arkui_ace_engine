@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -34,7 +34,7 @@ using namespace OHOS::Ace::Framework;
 namespace OHOS::Ace::NG {
 namespace {
 constexpr uint32_t COLOR_ALPHA_VALUE = 0xFF000000;
-constexpr uint32_t ALIGNMENT_CENTER = 4;
+constexpr uint32_t ALIGNMENT_TOP_LEFT = 0;
 constexpr float DEFAULT_PROGRESS_TOTAL = 100.0f;
 constexpr int NUM_0 = 0;
 constexpr int NUM_1 = 1;
@@ -868,7 +868,7 @@ void ParseOuterBorderColor(
     Local<JSValueRef> rightArg = runtimeCallInfo->GetCallArgRef(argsIndex + NUM_1);
     Local<JSValueRef> topArg = runtimeCallInfo->GetCallArgRef(argsIndex + NUM_2);
     Local<JSValueRef> bottomArg = runtimeCallInfo->GetCallArgRef(argsIndex + NUM_3);
-    
+
     std::optional<Color> leftColor;
     std::optional<Color> rightColor;
     std::optional<Color> topColor;
@@ -2316,7 +2316,7 @@ ArkUINativeModuleValue CommonBridge::SetOverlay(ArkUIRuntimeCallInfo* runtimeCal
     if (valueArg->IsString()) {
         text = valueArg->ToString(vm)->ToString();
     }
-    int32_t align = ALIGNMENT_CENTER;
+    int32_t align = ALIGNMENT_TOP_LEFT;
     auto hasAlign = ArkTSUtils::ParseJsInteger(vm, alignArg, align);
     std::optional<CalcDimension> offsetX = CalcDimension(0);
     std::optional<CalcDimension> offsetY = CalcDimension(0);
@@ -2548,7 +2548,7 @@ ArkUINativeModuleValue CommonBridge::SetBorder(ArkUIRuntimeCallInfo* runtimeCall
     std::vector<uint32_t> colorAndStyleOptions;
     ParseOuterBorderColor(runtimeCallInfo, vm, colorAndStyleOptions, NUM_5);  // Border Color args start index
     ParseOuterBorderStyle(runtimeCallInfo, vm, colorAndStyleOptions, NUM_13); // Border Styel args start index
-    
+
     GetArkUINodeModifiers()->getCommonModifier()->setBorder(
         nativeNode, options.data(), options.size(), colorAndStyleOptions.data(), colorAndStyleOptions.size());
     return panda::JSValueRef::Undefined(vm);
@@ -2798,7 +2798,7 @@ ArkUINativeModuleValue CommonBridge::SetScale(ArkUIRuntimeCallInfo *runtimeCallI
 
         ArkUI_Float32 values[SIZE_OF_FIVE];
         int units[SIZE_OF_TWO];
-        
+
         values[NUM_0] = static_cast<ArkUI_Float32>(scaleX);
         values[NUM_1] = static_cast<ArkUI_Float32>(scaleY);
         values[NUM_2] = static_cast<ArkUI_Float32>(scaleZ);
@@ -3220,8 +3220,6 @@ ArkUINativeModuleValue CommonBridge::SetFocusable(ArkUIRuntimeCallInfo* runtimeC
     if (secondArg->IsBoolean()) {
         bool focusable = secondArg->ToBoolean(vm)->Value();
         GetArkUINodeModifiers()->getCommonModifier()->setFocusable(nativeNode, focusable);
-    } else {
-        GetArkUINodeModifiers()->getCommonModifier()->resetFocusable(nativeNode);
     }
     return panda::JSValueRef::Undefined(vm);
 }
@@ -3966,10 +3964,10 @@ ArkUINativeModuleValue CommonBridge::SetAlignRules(ArkUIRuntimeCallInfo* runtime
     Local<JSValueRef> centerArg = runtimeCallInfo->GetCallArgRef(NUM_5);
     Local<JSValueRef> bottomArg = runtimeCallInfo->GetCallArgRef(NUM_6);
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
-    
+
     auto anchors = std::make_unique<std::string []>(ALIGN_RULES_NUM);
     auto direction = std::make_unique<ArkUI_Int32 []>(ALIGN_RULES_NUM);
-    for (int i = 0; i < ALIGN_RULES_NUM; i++) {
+    for (int32_t i = 0; i < ALIGN_RULES_NUM; i++) {
         anchors[i] = "";
         direction[i] = ALIGN_DIRECTION_DEFAULT;
     }
@@ -3985,7 +3983,7 @@ ArkUINativeModuleValue CommonBridge::SetAlignRules(ArkUIRuntimeCallInfo* runtime
         return panda::JSValueRef::Undefined(vm);
     }
     auto realAnchors = std::make_unique<char* []>(ALIGN_RULES_NUM);
-    for (int i = 0; i < ALIGN_RULES_NUM; i++) {
+    for (int32_t i = 0; i < ALIGN_RULES_NUM; i++) {
         realAnchors[i] = const_cast<char*>(anchors[i].c_str());
     }
     GetArkUINodeModifiers()->getCommonModifier()->setAlignRules(nativeNode, realAnchors.get(), direction.get(),
@@ -4047,11 +4045,16 @@ ArkUINativeModuleValue CommonBridge::SetAllowDrop(ArkUIRuntimeCallInfo* runtimeC
         return panda::JSValueRef::Undefined(vm);
     }
     Local<panda::ArrayRef> allowDropArray = static_cast<Local<panda::ArrayRef>>(secondArg);
-    std::vector<std::string> keepStr;
+    auto length = allowDropArray->Length(vm);
+    if (length <= 0) {
+        GetArkUINodeModifiers()->getCommonModifier()->resetAllowDrop(nativeNode);
+        return panda::JSValueRef::Undefined(vm);
+    }
+    std::vector<std::string> keepStr(length);
     std::vector<const char*> strList;
-    for (size_t i = 0; i < allowDropArray->Length(vm); i++) {
+    for (size_t i = 0; i < length; i++) {
         Local<JSValueRef> objValue = allowDropArray->GetValueAt(vm, secondArg, i);
-        keepStr.push_back(objValue->ToString(vm)->ToString());
+        keepStr[i] = objValue->ToString(vm)->ToString();
         strList.push_back(keepStr[i].c_str());
     }
     GetArkUINodeModifiers()->getCommonModifier()->setAllowDrop(nativeNode, strList.data(), strList.size());
@@ -4357,6 +4360,12 @@ ArkUINativeModuleValue CommonBridge::ResetTransition(ArkUIRuntimeCallInfo* runti
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Framework::JsiCallbackInfo info = Framework::JsiCallbackInfo(runtimeCallInfo);
+    if (!info[1]->IsObject()) {
+        ViewAbstractModel::GetInstance()->CleanTransition();
+        ViewAbstractModel::GetInstance()->SetChainedTransition(nullptr);
+        return panda::JSValueRef::Undefined(vm);
+    }
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     auto* frameNode = reinterpret_cast<FrameNode*>(nativeNode);
@@ -4390,6 +4399,11 @@ ArkUINativeModuleValue CommonBridge::ResetTransitionPassThrough(ArkUIRuntimeCall
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Framework::JsiCallbackInfo info = Framework::JsiCallbackInfo(runtimeCallInfo);
+    if (!info[1]->IsObject()) {
+        ViewAbstractModel::GetInstance()->CleanTransition();
+        ViewAbstractModel::GetInstance()->SetChainedTransition(nullptr);
+    }
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -4790,7 +4804,7 @@ ArkUINativeModuleValue CommonBridge::SetClickEffect(ArkUIRuntimeCallInfo* runtim
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     Local<JSValueRef> levelArg = runtimeCallInfo->GetCallArgRef(NUM_1);
     Local<JSValueRef> scaleArg = runtimeCallInfo->GetCallArgRef(NUM_2);
-    
+
     int32_t clickEffectLevelValue = 0;
     if (levelArg->IsNumber()) {
         clickEffectLevelValue = levelArg->Int32Value(vm);

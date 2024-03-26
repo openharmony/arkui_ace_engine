@@ -1773,6 +1773,19 @@ void ViewAbstract::SetTransition(const TransitionOptions &options)
     ACE_UPDATE_RENDER_CONTEXT(Transition, options);
 }
 
+void ViewAbstract::CleanTransition()
+{
+    if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
+        return;
+    }
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto target = frameNode->GetRenderContext();
+    if (target) {
+        target->CleanTransition();
+    }
+}
+
 void ViewAbstract::SetChainedTransition(const RefPtr<NG::ChainedTransitionEffect> &effect)
 {
     if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
@@ -2125,9 +2138,14 @@ void ViewAbstract::SetForegroundColor(const Color &color)
     if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
         return;
     }
-    ACE_UPDATE_RENDER_CONTEXT(ForegroundColor, color);
-    ACE_RESET_RENDER_CONTEXT(RenderContext, ForegroundColorStrategy);
-    ACE_UPDATE_RENDER_CONTEXT(ForegroundColorFlag, true);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    auto renderContext = frameNode->GetRenderContext();
+    if (renderContext->GetForegroundColorStrategy().has_value()) {
+        renderContext->UpdateForegroundColorStrategy(ForegroundColorStrategy::NONE);
+        renderContext->ResetForegroundColorStrategy();
+    }
+    renderContext->UpdateForegroundColor(color);
+    renderContext->UpdateForegroundColorFlag(true);
 }
 
 void ViewAbstract::SetForegroundColorStrategy(const ForegroundColorStrategy &strategy)
@@ -2468,9 +2486,13 @@ void ViewAbstract::SetUseEffect(FrameNode* frameNode, bool useEffect)
 
 void ViewAbstract::SetForegroundColor(FrameNode* frameNode, const Color& color)
 {
-    ACE_UPDATE_NODE_RENDER_CONTEXT(ForegroundColor, color, frameNode);
-    ACE_RESET_NODE_RENDER_CONTEXT(RenderContext, ForegroundColorStrategy, frameNode);
-    ACE_UPDATE_NODE_RENDER_CONTEXT(ForegroundColorFlag, true, frameNode);
+    auto renderContext = frameNode->GetRenderContext();
+    if (renderContext->GetForegroundColorStrategy().has_value()) {
+        renderContext->UpdateForegroundColorStrategy(ForegroundColorStrategy::NONE);
+        renderContext->ResetForegroundColorStrategy();
+    }
+    renderContext->UpdateForegroundColor(color);
+    renderContext->UpdateForegroundColorFlag(true);
 }
 
 void ViewAbstract::SetForegroundColorStrategy(FrameNode* frameNode, const ForegroundColorStrategy& strategy)
@@ -3735,5 +3757,19 @@ void ViewAbstract::ClearJSFrameNodeOnMouse(FrameNode* frameNode)
     auto eventHub = frameNode->GetOrCreateInputEventHub();
     CHECK_NULL_VOID(eventHub);
     eventHub->ClearJSFrameNodeOnMouse();
+}
+void ViewAbstract::SetJSFrameNodeOnSizeChange(
+    FrameNode* frameNode, std::function<void(const RectF& oldRect, const RectF& rect)>&& onSizeChanged)
+{
+    CHECK_NULL_VOID(frameNode);
+    frameNode->SetJSFrameNodeOnSizeChangeCallback(std::move(onSizeChanged));
+}
+
+void ViewAbstract::ClearJSFrameNodeOnSizeChange(FrameNode* frameNode)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetEventHub<NG::EventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->ClearJSFrameNodeOnSizeChange();
 }
 } // namespace OHOS::Ace::NG

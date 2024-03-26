@@ -585,7 +585,7 @@ void ImagePattern::OnModifyDone()
 
     UpdateGestureAndDragWhenModify();
 
-    if (imageAnalyzerManager_ && imageAnalyzerManager_->isOverlayCreated()) {
+    if (imageAnalyzerManager_ && imageAnalyzerManager_->IsOverlayCreated()) {
         if (!IsSupportImageAnalyzerFeature()) {
             DestroyAnalyzerOverlay();
         } else {
@@ -1132,21 +1132,28 @@ bool ImagePattern::IsSupportImageAnalyzerFeature()
 
 void ImagePattern::CreateAnalyzerOverlay()
 {
+    CHECK_NULL_VOID(imageAnalyzerManager_);
+    if (!IsSupportImageAnalyzerFeature() || imageAnalyzerManager_->IsOverlayCreated()) {
+        return;
+    }
+
+    CHECK_NULL_VOID(image_);
     auto pixelMap = image_->GetPixelMap();
     CHECK_NULL_VOID(pixelMap);
-    if (IsSupportImageAnalyzerFeature()) {
-        CHECK_NULL_VOID(imageAnalyzerManager_);
-        imageAnalyzerManager_->CreateAnalyzerOverlay(pixelMap);
-    }
+    imageAnalyzerManager_->CreateAnalyzerOverlay(pixelMap);
 }
 
 void ImagePattern::UpdateAnalyzerOverlay()
 {
+    CHECK_NULL_VOID(imageAnalyzerManager_);
+    if (!IsSupportImageAnalyzerFeature() || !imageAnalyzerManager_->IsOverlayCreated()) {
+        return;
+    }
+
+    CHECK_NULL_VOID(image_);
     auto pixelMap = image_->GetPixelMap();
     CHECK_NULL_VOID(pixelMap);
-    if (IsSupportImageAnalyzerFeature()) {
-        imageAnalyzerManager_->UpdateAnalyzerOverlay(pixelMap);
-    }
+    imageAnalyzerManager_->UpdateAnalyzerOverlay(pixelMap);
 }
 
 void ImagePattern::UpdateAnalyzerOverlayLayout()

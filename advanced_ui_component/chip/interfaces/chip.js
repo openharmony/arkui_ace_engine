@@ -828,7 +828,7 @@ export class ChipComponent extends ViewPU {
     }
 
     getChipActive() {
-        return this.chipActivated || this.chipActivated === void (0);
+        return this.chipActivated;
     }
 
     getChipNodeOpacity() {

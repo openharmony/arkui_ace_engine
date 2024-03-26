@@ -118,8 +118,6 @@ void NavDestinationPattern::UpdateBackgroundColorIfNeeded(RefPtr<NavDestinationG
         return;
     }
     renderContext->UpdateBackgroundColor(theme->GetBackgroundColor());
-    TAG_LOGI(AceLogTag::ACE_NAVIGATION, "Set default background color: %{public}s",
-        renderContext->GetBackgroundColor()->ColorToString().c_str());
 }
 
 void NavDestinationPattern::UpdateTitlebarVisibility(RefPtr<NavDestinationGroupNode>& hostNode)

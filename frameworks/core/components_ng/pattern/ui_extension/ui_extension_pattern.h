@@ -31,6 +31,7 @@
 #include "core/components_ng/event/gesture_event_hub.h"
 #include "core/components_ng/pattern/pattern.h"
 #include "core/components_ng/pattern/ui_extension/session_wrapper.h"
+#include "core/components_ng/pattern/ui_extension/accessibility_session_adapter_ui_extension.h"
 #include "core/event/mouse_event.h"
 #include "core/event/touch_event.h"
 
@@ -81,6 +82,7 @@ public:
 
     RefPtr<LayoutAlgorithm> CreateLayoutAlgorithm() override;
     FocusPattern GetFocusPattern() const override;
+    RefPtr<AccessibilitySessionAdapter> GetAccessibilitySessionAdapter() override;
 
     void UpdateWant(const RefPtr<OHOS::Ace::WantWrap>& wantWrap);
     void UpdateWant(const AAFwk::Want& want);
@@ -225,6 +227,7 @@ private:
     RefPtr<OHOS::Ace::WantWrap> curWant_;
     RefPtr<FrameNode> contentNode_;
     RefPtr<SessionWrapper> sessionWrapper_;
+    RefPtr<AccessibilitySessionAdapterUIExtension> accessibilitySessionAdapter_;
     ErrorMsg lastError_;
     int32_t instanceId_ = Container::CurrentId();
     AbilityState state_ = AbilityState::NONE;

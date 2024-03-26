@@ -811,11 +811,11 @@ HWTEST_F(GridScrollerTestNg, PositionController002, TestSize.Level1)
      * @tc.expected: Verify currentOffset.
      */
     FlushLayoutTask(frameNode_);
-    controller->ScrollPage(false, true);
+    controller->ScrollPage(false, false);
     EXPECT_TRUE(IsEqual(controller->GetCurrentOffset(), Offset(0, GRID_HEIGHT)));
 
     // scroll to previous page
-    controller->ScrollPage(true, true);
+    controller->ScrollPage(true, false);
     EXPECT_EQ(controller->GetCurrentOffset(), Offset(0, 0));
 
     /**
@@ -892,7 +892,7 @@ HWTEST_F(GridScrollerTestNg, PositionController004, TestSize.Level1)
     });
     pattern_->SetAxis(Axis::NONE);
     auto controller = pattern_->positionController_;
-    controller->ScrollPage(true, true);
+    controller->ScrollPage(true, false);
     controller->GetCurrentOffset();
     EXPECT_EQ(pattern_->GetGridLayoutInfo().currentOffset_, 0);
 }
@@ -916,7 +916,7 @@ HWTEST_F(GridScrollerTestNg, PositionController005, TestSize.Level1)
     EXPECT_FALSE(pattern_->isConfigScrollable_);
 
     auto controller = pattern_->positionController_;
-    controller->ScrollPage(true, true);
+    controller->ScrollPage(true, false);
     EXPECT_EQ(pattern_->GetGridLayoutInfo().currentOffset_, 0);
 }
 

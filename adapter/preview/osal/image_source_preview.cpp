@@ -66,4 +66,9 @@ ImageSource::Size ImageSourcePreview::GetImageSize()
 {
     return {};
 }
+
+uint32_t ImageSourcePreview::GetFrameCount()
+{
+    return 0;
+}
 } // namespace OHOS::Ace

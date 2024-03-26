@@ -26,6 +26,7 @@
 #include "core/pipeline/base/element_register.h"
 #include "core/components_ng/base/view_abstract.h"
 #include "core/components/common/properties/alignment.h"
+#include "core/components/common/properties/text_style_parser.h"
 
 namespace OHOS::Ace::NG {
 constexpr uint32_t DEFAULT_SEARCH_COLOR = 0x99182431;
@@ -36,6 +37,9 @@ const bool DEFAULT_SELECTION_MENU_HIDDEN = false;
 constexpr CancelButtonStyle DEFAULT_CANCEL_BUTTON_STYLE = CancelButtonStyle::INPUT;
 constexpr Dimension THEME_SEARCH_FONT_SIZE = Dimension(16.0, DimensionUnit::FP);
 constexpr Color THEME_SEARCH_TEXT_COLOR = Color(0xe5000000);
+constexpr TextDecoration DEFAULT_TEXT_DECORATION = TextDecoration::NONE;
+constexpr Color DEFAULT_DECORATION_COLOR = Color(0xff000000);
+constexpr TextDecorationStyle DEFAULT_DECORATION_STYLE = TextDecorationStyle::SOLID;
 
 void SetSearchTextFont(ArkUINodeHandle node, const struct ArkUIFontStruct* value)
 {
@@ -276,6 +280,84 @@ void ResetSearchHeight(ArkUINodeHandle node)
     ViewAbstract::ClearWidthOrHeight(frameNode, false);
 }
 
+void SetSearchInspectorId(ArkUINodeHandle node, ArkUI_CharPtr key)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    SearchModelNG::SetId(frameNode, key);
+}
+
+void ResetSearchInspectorId(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    SearchModelNG::SetId(frameNode, "");
+}
+
+void SetSearchDecoration(ArkUINodeHandle node, ArkUI_Int32 decoration, ArkUI_Uint32 color, ArkUI_Int32 style)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    SearchModelNG::SetTextDecoration(frameNode, static_cast<TextDecoration>(decoration));
+    SearchModelNG::SetTextDecorationColor(frameNode, Color(color));
+    SearchModelNG::SetTextDecorationStyle(frameNode, static_cast<TextDecorationStyle>(style));
+}
+
+void ResetSearchDecoration(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    SearchModelNG::SetTextDecoration(frameNode, DEFAULT_TEXT_DECORATION);
+    SearchModelNG::SetTextDecorationColor(frameNode, DEFAULT_DECORATION_COLOR);
+    SearchModelNG::SetTextDecorationStyle(frameNode, DEFAULT_DECORATION_STYLE);
+}
+
+void SetSearchLetterSpacing(ArkUINodeHandle node, ArkUI_Float32 value, ArkUI_Int32 unit)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    SearchModelNG::SetLetterSpacing(frameNode, CalcDimension(value, (DimensionUnit)unit));
+}
+
+void ResetSearchLetterSpacing(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    CalcDimension value;
+    value.Reset();
+    SearchModelNG::SetLetterSpacing(frameNode, value);
+}
+void SetSearchLineHeight(ArkUINodeHandle node, ArkUI_Float32 value, ArkUI_Int32 unit)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    SearchModelNG::SetLineHeight(frameNode, CalcDimension(value, (DimensionUnit)unit));
+}
+void ResetSearchLineHeight(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    CalcDimension value;
+    value.Reset();
+    SearchModelNG::SetLineHeight(frameNode, value);
+}
+
+void SetSearchFontFeature(ArkUINodeHandle node, ArkUI_CharPtr value)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    std::string strValue = value;
+    SearchModelNG::SetFontFeature(frameNode, ParseFontFeatureSettings(strValue));
+}
+
+void ResetSearchFontFeature(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    std::string strValue = "";
+    SearchModelNG::SetFontFeature(frameNode, ParseFontFeatureSettings(strValue));
+}
+
 namespace NodeModifier {
 const ArkUISearchModifier* GetSearchModifier()
 {
@@ -285,7 +367,10 @@ const ArkUISearchModifier* GetSearchModifier()
         ResetSearchCancelButton, SetSearchEnableKeyboardOnFocus, ResetSearchEnableKeyboardOnFocus,
         SetSearchPlaceholderFont, ResetSearchPlaceholderFont, SetSearchSearchIcon, ResetSearchSearchIcon,
         SetSearchSearchButton, ResetSearchSearchButton, SetSearchFontColor, ResetSearchFontColor, SetSearchCopyOption,
-        ResetSearchCopyOption, SetSearchEnterKeyType, ResetSearchEnterKeyType, SetSearchHeight, ResetSearchHeight };
+        ResetSearchCopyOption, SetSearchEnterKeyType, ResetSearchEnterKeyType, SetSearchHeight, ResetSearchHeight,
+        SetSearchInspectorId, ResetSearchInspectorId, SetSearchDecoration, ResetSearchDecoration,
+        SetSearchLetterSpacing, ResetSearchLetterSpacing, SetSearchLineHeight, ResetSearchLineHeight,
+        SetSearchFontFeature, ResetSearchFontFeature };
     return &modifier;
 }
 }

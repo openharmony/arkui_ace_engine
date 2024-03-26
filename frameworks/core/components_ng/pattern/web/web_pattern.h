@@ -408,7 +408,7 @@ public:
     void OnSelectPopupMenu(std::shared_ptr<OHOS::NWeb::NWebSelectPopupMenuParam> params,
         std::shared_ptr<OHOS::NWeb::NWebSelectPopupMenuCallback> callback);
     void OnDateTimeChooserPopup(
-        const NWeb::DateTimeChooser& chooser,
+        std::shared_ptr<OHOS::NWeb::NWebDateTimeChooser> chooser,
         const std::vector<std::shared_ptr<OHOS::NWeb::NWebDateTimeSuggestion>>& suggestions,
         std::shared_ptr<NWeb::NWebDateTimeChooserCallback> callback);
     void OnDateTimeChooserClose();
@@ -457,6 +457,8 @@ public:
         return layoutMode_;
     }
     void OnRootLayerChanged(int width, int height);
+    void ReleaseResizeHold();
+    bool GetPendingSizeStatus();
     int GetRootLayerWidth() const
     {
         return rootLayerWidth_;
@@ -620,7 +622,7 @@ private:
     void RegisterSelectPopupCallback(RefPtr<FrameNode>& menu,
         std::shared_ptr<OHOS::NWeb::NWebSelectPopupMenuCallback> callback,
         std::shared_ptr<OHOS::NWeb::NWebSelectPopupMenuParam> params);
-    OffsetF GetSelectPopupPostion(const OHOS::NWeb::SelectMenuBound& bounds);
+    OffsetF GetSelectPopupPostion(std::shared_ptr<OHOS::NWeb::NWebSelectMenuBound> bound);
     void SetSelfAsParentOfWebCoreNode(std::shared_ptr<OHOS::NWeb::NWebAccessibilityNodeInfo> info) const;
 
     struct TouchInfo {
@@ -633,13 +635,13 @@ private:
     void UpdateBackgroundColorRightNow(int32_t color);
     void UpdateContentOffset(const RefPtr<LayoutWrapper>& dirty);
     DialogProperties GetDialogProperties(const RefPtr<DialogTheme>& theme);
-    bool ShowDateTimeDialog(const NWeb::DateTimeChooser& chooser,
+    bool ShowDateTimeDialog(std::shared_ptr<OHOS::NWeb::NWebDateTimeChooser> chooser,
         const std::vector<std::shared_ptr<OHOS::NWeb::NWebDateTimeSuggestion>>& suggestions,
         std::shared_ptr<NWeb::NWebDateTimeChooserCallback> callback);
-    bool ShowTimeDialog(const NWeb::DateTimeChooser& chooser,
+    bool ShowTimeDialog(std::shared_ptr<OHOS::NWeb::NWebDateTimeChooser> chooser,
         const std::vector<std::shared_ptr<OHOS::NWeb::NWebDateTimeSuggestion>>& suggestions,
         std::shared_ptr<NWeb::NWebDateTimeChooserCallback> callback);
-    bool ShowDateTimeSuggestionDialog(const NWeb::DateTimeChooser& chooser,
+    bool ShowDateTimeSuggestionDialog(std::shared_ptr<OHOS::NWeb::NWebDateTimeChooser> chooser,
         const std::vector<std::shared_ptr<OHOS::NWeb::NWebDateTimeSuggestion>>& suggestions,
         std::shared_ptr<NWeb::NWebDateTimeChooserCallback> callback);
     void PostTaskToUI(const std::function<void()>&& task) const;
@@ -679,8 +681,7 @@ private:
     std::shared_ptr<FullScreenEnterEvent> fullScreenExitHandler_ = nullptr;
     bool needOnFocus_ = false;
     Size drawSize_;
-    Size lastSyncRenderSize_;
-    int64_t lastTimeStamp_ = 0;
+    Size rootLayerChangeSize_;
     Size drawSizeCache_;
     bool needUpdateWeb_ = true;
     bool isFocus_ = false;

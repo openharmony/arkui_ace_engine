@@ -21,6 +21,7 @@ namespace {} // namespace
 
 class SwiperLayoutTestNg : public SwiperTestNg {
 public:
+    void CheckItems(int32_t start, int32_t end, float prevMargin, float itemWidth);
 };
 
 /**
@@ -209,5 +210,134 @@ HWTEST_F(SwiperLayoutTestNg, Arrow004, TestSize.Level1)
         model.SetArrowStyle(swiperArrowParameters);
     });
     EXPECT_TRUE(IsEqual(GetChildRect(frameNode_, 6), RectF(224.f, 768.f, 32.f, 32.f)));
+}
+
+void SwiperLayoutTestNg::CheckItems(int32_t start, int32_t end, float prevMargin, float itemWidth)
+{
+    float offset = prevMargin - itemWidth;
+    float startPos = -itemWidth;
+    for (int i = start; i <= end; ++i) {
+        EXPECT_EQ(pattern_->itemPosition_.at(i).startPos, startPos);
+        EXPECT_EQ(pattern_->itemPosition_.at(i).endPos, startPos + itemWidth);
+        EXPECT_EQ(GetChildOffset(frameNode_, i).GetX(), offset);
+        startPos += itemWidth;
+        offset += itemWidth;
+    }
+}
+
+/**
+ * @tc.name: SwiperChangeWidth001
+ * @tc.desc: Test Swiper changing width and re-layout
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperLayoutTestNg, SwiperChangeWidth001, TestSize.Level1)
+{
+    CreateWithItem(
+        [](SwiperModelNG model) {
+            model.SetDirection(Axis::HORIZONTAL);
+            model.SetDisplayCount(3);
+            model.SetPreviousMargin(Dimension(20));
+            model.SetNextMargin(Dimension(20));
+        },
+        5);
+    EXPECT_EQ(pattern_->itemPosition_.size(), 4);
+
+    pattern_->SwipeToWithoutAnimation(1);
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(pattern_->currentIndex_, 1);
+    const float itemWidth1 = (SWIPER_WIDTH - 2 * 20.0f) / 3.0f;
+    CheckItems(0, 3, 20.0f, itemWidth1);
+
+    layoutProperty_->UpdateUserDefinedIdealSize(CalcSize(CalcLength(1000.0f), CalcLength(300.0f)));
+    frameNode_->MarkModifyDone();
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(frameNode_->GetGeometryNode()->GetFrameSize().Width(), 1000.0f);
+    const float itemWidth2 = (1000.0f - 2 * 20.0f) / 3.0f;
+    CheckItems(0, 3, 20.0f, itemWidth2);
+}
+
+/**
+ * @tc.name: SwiperChangeWidth002
+ * @tc.desc: Test Swiper's parent changing width and re-layout
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperLayoutTestNg, SwiperChangeWidth002, TestSize.Level1)
+{
+    CreateWithItem(
+        [](SwiperModelNG model) {
+            model.SetDirection(Axis::HORIZONTAL);
+            model.SetDisplayCount(3);
+            model.SetPreviousMargin(Dimension(20));
+            model.SetNextMargin(Dimension(20));
+        },
+        5);
+    layoutProperty_->ClearUserDefinedIdealSize(true, true);
+
+    auto parent = FrameNode::CreateFrameNode("parent", -1, AceType::MakeRefPtr<LinearLayoutPattern>(false));
+    parent->layoutProperty_->UpdateUserDefinedIdealSize(CalcSize(CalcLength(400.0f), CalcLength(300.0f)));
+    frameNode_->MountToParent(parent);
+
+    FlushLayoutTask(parent);
+
+    pattern_->SwipeToWithoutAnimation(1);
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(pattern_->currentIndex_, 1);
+
+    const float itemWidth1 = (400.0f - 2 * 20.0f) / 3.0f;
+    CheckItems(0, 3, 20.0f, itemWidth1);
+
+    parent->layoutProperty_->UpdateUserDefinedIdealSize(CalcSize(CalcLength(800.0f), CalcLength(300.0f)));
+    FlushLayoutTask(parent);
+    EXPECT_EQ(frameNode_->GetGeometryNode()->GetFrameSize().Width(), 800.0f);
+    const float itemWidth2 = (800.0f - 2 * 20.0f) / 3.0f;
+    CheckItems(0, 3, 20.0f, itemWidth2);
+}
+
+/**
+ * @tc.name: SwiperFlex001
+ * @tc.desc: Test Swiper with Flex parent and layout
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperLayoutTestNg, SwiperFlex001, TestSize.Level1)
+{
+    CreateWithItem(
+        [](SwiperModelNG model) {
+            model.SetDirection(Axis::HORIZONTAL);
+            model.SetDisplayCount(1);
+        },
+        5);
+    layoutProperty_->UpdateFlexGrow(2.0f);
+    layoutProperty_->UpdateFlexShrink(1.0f);
+    layoutProperty_->ClearUserDefinedIdealSize(true, true);
+
+    auto parent = FrameNode::CreateFrameNode("parent", -1, AceType::MakeRefPtr<LinearLayoutPattern>(false));
+    parent->layoutProperty_->UpdateUserDefinedIdealSize(CalcSize(CalcLength(500.0f), CalcLength(300.0f)));
+    frameNode_->MountToParent(parent);
+    // sibling node
+    auto sibling = FrameNode::CreateFrameNode("sibling", -1, AceType::MakeRefPtr<LinearLayoutPattern>(true));
+    sibling->layoutProperty_->UpdateUserDefinedIdealSize(CalcSize(CalcLength(100.0f), CalcLength(300.0f)));
+    sibling->MountToParent(parent);
+    parent->MarkModifyDone();
+
+    FlushLayoutTask(parent);
+    EXPECT_EQ(GetChildSize(frameNode_, 0).Width(), 400.0f);
+    EXPECT_EQ(pattern_->itemPosition_.size(), 1);
+
+    EXPECT_CALL(*MockPipelineContext::pipeline_, FlushUITasks).Times(3);
+    // ----currently doesn't work because Animation callbacks run synchronously
+    // WillRepeatedly([]() { FlushLayoutTask(parent) })
+
+    pattern_->ShowNext();
+    FlushLayoutTask(parent);
+    EXPECT_EQ(pattern_->currentIndex_, 1);
+    EXPECT_EQ(pattern_->itemPosition_.at(1).startPos, 400.0f);
+    EXPECT_EQ(GetChildOffset(frameNode_, 1).GetX(), 400.0f);
+    EXPECT_TRUE(GetChildFrameNode(frameNode_, 1)->IsActive());
+
+    // because FlushUITasks are not run, have to manually trigger offset update
+    pattern_->UpdateCurrentOffset(-400.0f);
+    FlushLayoutTask(parent);
+    EXPECT_EQ(pattern_->itemPosition_.size(), 1);
+    EXPECT_EQ(GetChildOffset(frameNode_, 1).GetX(), 0.0f);
 }
 } // namespace OHOS::Ace::NG

@@ -144,6 +144,7 @@ public:
         return dialogMap_;
     };
     RefPtr<FrameNode> GetDialog(int32_t dialogId);
+    RefPtr<FrameNode> SetDialogMask(const DialogProperties& dialogProps);
     // customNode only used by customDialog, pass in nullptr if not customDialog
     RefPtr<FrameNode> ShowDialog(
         const DialogProperties& dialogProps, std::function<void()>&& buildFunc, bool isRightToLeft = false);
@@ -211,7 +212,7 @@ public:
      *   @return    true if popup was removed, false if no overlay exists
      */
     bool RemoveOverlay(bool isBackPressed, bool isPageRouter = false);
-    bool RemoveDialog(const RefPtr<FrameNode>& overlay, bool isBackPressed);
+    bool RemoveDialog(const RefPtr<FrameNode>& overlay, bool isBackPressed, bool isPageRouter = false);
     bool RemoveBubble(const RefPtr<FrameNode>& overlay);
     bool RemoveMenu(const RefPtr<FrameNode>& overlay);
     bool RemoveModalInOverlay();
@@ -442,6 +443,16 @@ public:
 
     void ModalPageLostFocus(const RefPtr<FrameNode>& node);
 
+    void SetCustomKeyboardOption(bool supportAvoidance)
+    {
+        keyboardAvoidance_ = supportAvoidance;
+    }
+    
+    void SupportCustomKeyboardAvoidance(RefPtr<RenderContext> context, AnimationOption option,
+        RefPtr<FrameNode> customKeyboard);
+
+    void SetCustomKeybroadHeight(float customHeight = 0.0);
+	
     void SetFilterActive(bool actived)
     {
         hasFilterActived = actived;
@@ -583,7 +594,7 @@ private:
     bool isProhibitBack_ = false;
 
     std::unordered_map<int32_t, WeakPtr<FrameNode>> uiExtNodes_;
-
+    bool keyboardAvoidance_ = false;
     ACE_DISALLOW_COPY_AND_MOVE(OverlayManager);
 
     bool hasFilterActived {false};

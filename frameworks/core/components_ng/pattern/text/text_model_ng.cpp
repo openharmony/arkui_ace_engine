@@ -533,6 +533,16 @@ void TextModelNG::SetClipEdge()
     frameNode->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
+void TextModelNG::SetFontFeature(const FONT_FEATURES_MAP& value)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(TextLayoutProperty, FontFeature, value);
+}
+
+void TextModelNG::SetFontFeature(FrameNode* frameNode, const FONT_FEATURES_MAP& value)
+{
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextLayoutProperty, FontFeature, value, frameNode);
+}
+
 std::string TextModelNG::GetContent(FrameNode* frameNode)
 {
     CHECK_NULL_RETURN(frameNode, "");

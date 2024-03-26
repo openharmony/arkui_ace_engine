@@ -337,6 +337,9 @@ public:
     {
         return false;
     }
+
+    virtual void HandleAccessibilityHoverEvent(float pointX, float pointY, int32_t sourceType,
+        int32_t eventType, int64_t timeMs) {}
 #endif
 
     /**

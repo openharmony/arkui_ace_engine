@@ -116,7 +116,6 @@ bool SheetPresentationPattern::OnDirtyLayoutWrapperSwap(
     UpdateDragBarStatus();
     UpdateCloseIconStatus();
     UpdateSheetTitle();
-    AvoidAiBar();
     UpdateInteractive();
     ClipSheetNode();
     CheckBuilderChange();
@@ -183,6 +182,7 @@ void SheetPresentationPattern::AvoidAiBar()
     auto inset = pipeline->GetSafeArea();
     auto layoutProperty = scrollNode->GetLayoutProperty<ScrollLayoutProperty>();
     layoutProperty->UpdateScrollContentEndOffset(inset.bottom_.Length());
+    host->MarkDirtyNode(PROPERTY_UPDATE_LAYOUT);
 }
 
 bool SheetPresentationPattern::IsScrollable() const
@@ -589,9 +589,11 @@ void SheetPresentationPattern::SheetTransition(bool isTransitionIn, float dragVe
         if (isTransitionIn) {
             if (!pattern->GetAnimationBreak()) {
                 pattern->SetAnimationProcess(false);
+                pattern->ChangeSheetPage(pattern->height_);
             } else {
                 pattern->isAnimationBreak_ = false;
             }
+            pattern->AvoidAiBar();
         } else {
             pattern->SetAnimationProcess(false);
             auto context = PipelineContext::GetCurrentContext();

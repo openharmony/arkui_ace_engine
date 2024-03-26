@@ -15,6 +15,8 @@
 
 #include "frameworks/bridge/declarative_frontend/style_string/js_span_object.h"
 
+#include "core/components/text/text_theme.h"
+#include "core/components/text_field/textfield_theme.h"
 #include "frameworks/bridge/common/utils/utils.h"
 #include "frameworks/bridge/declarative_frontend/engine/functions/js_function.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_view_abstract.h"
@@ -58,6 +60,12 @@ RefPtr<FontSpan> JSFontSpan::ParseJsFontSpan(const JSRef<JSObject>& obj)
     JSRef<JSVal> colorObj = JSRef<JSVal>::Cast(obj->GetProperty("fontColor"));
     if (!colorObj->IsNull() && JSViewAbstract::ParseJsColor(colorObj, color)) {
         font.fontColor = color;
+    } else {
+        auto context = PipelineBase::GetCurrentContextSafely();
+        CHECK_NULL_RETURN(context, AceType::MakeRefPtr<FontSpan>(font));
+        auto theme = context->GetTheme<TextTheme>();
+        CHECK_NULL_RETURN(theme, AceType::MakeRefPtr<FontSpan>(font));
+        font.fontColor = theme->GetTextStyle().GetTextColor();
     }
     return AceType::MakeRefPtr<FontSpan>(font);
 }

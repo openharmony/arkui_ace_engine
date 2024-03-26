@@ -49,6 +49,7 @@ public:
     static void ItemDeleteCallback(const JSCallbackInfo& args);
     static void ItemMoveCallback(const JSCallbackInfo& args);
     static void ScrollIndexCallback(const JSCallbackInfo& args);
+    static void ScrollVisibleContentChangeCallback(const JSCallbackInfo& args);
     static void ScrollBeginCallback(const JSCallbackInfo& args);
     static void ScrollFrameBeginCallback(const JSCallbackInfo& args);
 
@@ -78,6 +79,7 @@ public:
     static void ItemDragMoveCallback(const JSCallbackInfo& info);
     static void ItemDragLeaveCallback(const JSCallbackInfo& info);
     static void ItemDropCallback(const JSCallbackInfo& info);
+    static void SetListItemIndex(JSRef<JSObject> listItemInfo, ListItemIndex indexInfo);
 };
 
 } // namespace OHOS::Ace::Framework

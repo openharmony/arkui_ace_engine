@@ -1494,10 +1494,10 @@ typedef enum {
      * @brief Defines the text overflow attribute, which can be set, reset, and obtained as required through APIs.
      *
      * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
-     * .value[0].i32: display mode when the text is too long. \n
+     * .value[0].i32: display mode when the text is too long {@link ArkUI_TextOverflow}. \n
      * \n
      * Format of the return value {@link ArkUI_AttributeItem}:\n
-     * .value[0].i32: display mode when the text is too long. \n
+     * .value[0].i32: display mode when the text is too long {@link ArkUI_TextOverflow}. \n
      *
      */
     NODE_TEXT_OVERFLOW,
