@@ -828,6 +828,7 @@ public:
     void HandleOnCut() override;
     void HandleOnCameraInput();
     void StripNextLine(std::wstring& data);
+    bool IsShowHandle();
     bool OnKeyEvent(const KeyEvent& event);
     int32_t GetLineCount() const;
     TextInputType GetKeyboard()
