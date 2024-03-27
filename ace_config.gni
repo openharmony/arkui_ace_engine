@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2024 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -19,12 +19,6 @@ import("//build/test.gni")
 declare_args() {
   # ace debug flag, enable debug features: like dcheck, thread-checker, mem-monitor...
   enable_ace_debug = false
-
-  # only available when 'enable_ace_debug' set to 'true', show the LOGD infos.
-  enable_ace_debug_log = true
-
-  # only available when 'enable_ace_debug' set to 'true', show the private logs.
-  enable_ace_private_log = true
 
   # show the instance id in logs.
   enable_ace_instance_log = true
@@ -69,10 +63,14 @@ use_ios = "${current_os}_${current_cpu}" == "ios_x64" ||
           "${current_os}_${current_cpu}" == "ios_arm64"
 use_linux = "${current_os}_${current_cpu}" == "linux_x64"
 
+use_hilog = is_mingw || is_mac || is_linux || is_ohos || is_ohos_standard_system
+
 # Config path
 ace_root = "//foundation/arkui/ace_engine"
+hilog_root = "//base/hiviewdfx/hilog"
 ace_napi_frameworks = "//foundation/arkui/ace_engine/frameworks"
 ace_napi = "//foundation/arkui/napi"
+arkui_root = "//foundation/arkui"
 ace_graphic = "//foundation/graphic/graphic_2d"
 ace_hitrace = "//base/hiviewdfx/hitrace"
 c_utils_root = "//commonlibrary/c_utils"
@@ -156,6 +154,10 @@ ace_ivi_defines = [ "IVI_PRODUCT" ]
 
 ace_common_defines = [ "ACE_LOG_TAG=\"Ace\"" ]
 
+if (use_hilog) {
+  ace_common_defines += [ "USE_HILOG" ]
+}
+
 if (enable_glfw_window) {
   ace_common_defines += [ "USE_GLFW_WINDOW" ]
 }
@@ -166,12 +168,6 @@ if (use_clang_coverage) {
 
 if (enable_ace_debug) {
   ace_common_defines += [ "ACE_DEBUG" ]
-  if (enable_ace_debug_log) {
-    ace_common_defines += [ "ACE_DEBUG_LOG" ]
-  }
-  if (enable_ace_private_log) {
-    ace_common_defines += [ "ACE_PRIVATE_LOG" ]
-  }
 }
 
 if (enable_ace_instance_log) {
@@ -236,14 +232,6 @@ if (!defined(global_parts_info) ||
   ace_common_defines += [ "SECURITY_COMPONENT_ENABLE" ]
 } else {
   security_component_enable = false
-}
-
-if (defined(global_parts_info) &&
-    defined(global_parts_info.resourceschedule_ffrt)) {
-  ace_common_defines += [ "FFRT_EXISTS" ]
-  resourceschedule_ffrt_support = true
-} else {
-  resourceschedule_ffrt_support = false
 }
 
 ace_platforms = []

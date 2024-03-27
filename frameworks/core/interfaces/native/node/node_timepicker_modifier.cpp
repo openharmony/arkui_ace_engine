@@ -172,6 +172,9 @@ ArkUI_CharPtr GetTimepickerSelectedTextStyle(ArkUINodeHandle node)
     PickerTextStyle pickerTextStyle = TimePickerModelNG::getSelectedTextStyle(frameNode);
     std::vector<std::string> fontFamilies = pickerTextStyle.fontFamily.value_or(std::vector<std::string>());
     std::string families;
+    if (fontFamilies.size() == 0) {
+        fontFamilies.emplace_back("HarmonyOS Sans");
+    }
     //set index start
     int index = 0;
     for (auto& family : fontFamilies) {
@@ -181,11 +184,11 @@ ArkUI_CharPtr GetTimepickerSelectedTextStyle(ArkUINodeHandle node)
         }
         index++;
     }
-    g_strValue = pickerTextStyle.textColor->ColorToString() + ",";
-    g_strValue = g_strValue + pickerTextStyle.fontSize->ToString() + ",";
+    g_strValue = pickerTextStyle.textColor->ColorToString() + ";";
+    g_strValue = g_strValue + pickerTextStyle.fontSize->ToString() + ";";
     g_strValue =
-        g_strValue + std::to_string(static_cast<int>(pickerTextStyle.fontWeight.value_or(FontWeight::W100))) + ",";
-    g_strValue = g_strValue + families + ",";
+        g_strValue + std::to_string(static_cast<int>(pickerTextStyle.fontWeight.value_or(FontWeight::W100))) + ";";
+    g_strValue = g_strValue + families + ";";
     g_strValue =
         g_strValue + std::to_string(static_cast<int>(pickerTextStyle.fontStyle.value_or(OHOS::Ace::FontStyle::NORMAL)));
     return g_strValue.c_str();
@@ -198,6 +201,9 @@ ArkUI_CharPtr GetTimepickerTextStyle(ArkUINodeHandle node)
     PickerTextStyle pickerTextStyle = TimePickerModelNG::getNormalTextStyle(frameNode);
     std::vector<std::string> fontFamilies = pickerTextStyle.fontFamily.value_or(std::vector<std::string>());
     std::string families;
+    if (fontFamilies.size() == 0) {
+        fontFamilies.emplace_back("HarmonyOS Sans");
+    }
     //set index start
     int index = 0;
     for (auto& family : fontFamilies) {
@@ -207,11 +213,11 @@ ArkUI_CharPtr GetTimepickerTextStyle(ArkUINodeHandle node)
         }
         index++;
     }
-    g_strValue = pickerTextStyle.textColor->ColorToString() + ",";
-    g_strValue = g_strValue + pickerTextStyle.fontSize->ToString() + ",";
+    g_strValue = pickerTextStyle.textColor->ColorToString() + ";";
+    g_strValue = g_strValue + pickerTextStyle.fontSize->ToString() + ";";
     g_strValue =
-        g_strValue + std::to_string(static_cast<int>(pickerTextStyle.fontWeight.value_or(FontWeight::W100))) + ",";
-    g_strValue = g_strValue + families + ",";
+        g_strValue + std::to_string(static_cast<int>(pickerTextStyle.fontWeight.value_or(FontWeight::W100))) + ";";
+    g_strValue = g_strValue + families + ";";
     g_strValue =
         g_strValue + std::to_string(static_cast<int>(pickerTextStyle.fontStyle.value_or(OHOS::Ace::FontStyle::NORMAL)));
     return g_strValue.c_str();
@@ -224,6 +230,9 @@ ArkUI_CharPtr GetTimepickerDisappearTextStyle(ArkUINodeHandle node)
     PickerTextStyle pickerTextStyle = TimePickerModelNG::getDisappearTextStyle(frameNode);
     std::vector<std::string> fontFamilies = pickerTextStyle.fontFamily.value_or(std::vector<std::string>());
     std::string families;
+    if (fontFamilies.size() == 0) {
+        fontFamilies.emplace_back("HarmonyOS Sans");
+    }
     //set index start
     int index = 0;
     for (auto& family : fontFamilies) {
@@ -233,11 +242,11 @@ ArkUI_CharPtr GetTimepickerDisappearTextStyle(ArkUINodeHandle node)
         }
         index++;
     }
-    g_strValue = pickerTextStyle.textColor->ColorToString() + ",";
-    g_strValue = g_strValue + pickerTextStyle.fontSize->ToString() + ",";
+    g_strValue = pickerTextStyle.textColor->ColorToString() + ";";
+    g_strValue = g_strValue + pickerTextStyle.fontSize->ToString() + ";";
     g_strValue =
-        g_strValue + std::to_string(static_cast<int>(pickerTextStyle.fontWeight.value_or(FontWeight::W100))) + ",";
-    g_strValue = g_strValue + families + ",";
+        g_strValue + std::to_string(static_cast<int>(pickerTextStyle.fontWeight.value_or(FontWeight::W100))) + ";";
+    g_strValue = g_strValue + families + ";";
     g_strValue =
         g_strValue + std::to_string(static_cast<int>(pickerTextStyle.fontStyle.value_or(OHOS::Ace::FontStyle::NORMAL)));
     return g_strValue.c_str();

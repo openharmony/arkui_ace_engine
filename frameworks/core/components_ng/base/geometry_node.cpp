@@ -76,11 +76,12 @@ void GeometryNode::Restore()
     previousState_ = nullptr;
 }
 
-void GeometryNode::RestoreCache()
+bool GeometryNode::RestoreCache()
 {
-    CHECK_NULL_VOID(restoreCache_);
+    CHECK_NULL_RETURN(restoreCache_, false);
     frame_.rect_ = *restoreCache_;
     restoreCache_ = nullptr;
+    return true;
 }
 
 void GeometryNode::Save()

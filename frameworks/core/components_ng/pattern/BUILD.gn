@@ -368,6 +368,7 @@ build_component_ng("pattern_ng") {
     "select/select_layout_algorithm.cpp",
     "select/select_model_ng.cpp",
     "select/select_pattern.cpp",
+    "select_content_overlay/select_content_overlay_pattern.cpp",
     "select_overlay/magnifier_controller.cpp",
     "select_overlay/magnifier_painter.cpp",
     "select_overlay/select_overlay_content_modifier.cpp",

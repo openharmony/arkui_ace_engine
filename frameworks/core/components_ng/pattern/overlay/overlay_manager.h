@@ -212,7 +212,7 @@ public:
      *   @return    true if popup was removed, false if no overlay exists
      */
     bool RemoveOverlay(bool isBackPressed, bool isPageRouter = false);
-    bool RemoveDialog(const RefPtr<FrameNode>& overlay, bool isBackPressed);
+    bool RemoveDialog(const RefPtr<FrameNode>& overlay, bool isBackPressed, bool isPageRouter = false);
     bool RemoveBubble(const RefPtr<FrameNode>& overlay);
     bool RemoveMenu(const RefPtr<FrameNode>& overlay);
     bool RemoveModalInOverlay();
@@ -402,7 +402,6 @@ public:
 
     void BindKeyboard(const std::function<void()>& keyboardBuilder, int32_t targetId);
     void CloseKeyboard(int32_t targetId);
-    void DestroyKeyboard();
 
     RefPtr<UINode> FindWindowScene(RefPtr<FrameNode> targetNode);
 
@@ -442,6 +441,16 @@ public:
     }
 
     void ModalPageLostFocus(const RefPtr<FrameNode>& node);
+
+    void SetCustomKeyboardOption(bool supportAvoidance)
+    {
+        keyboardAvoidance_ = supportAvoidance;
+    }
+
+    void SupportCustomKeyboardAvoidance(RefPtr<RenderContext> context, AnimationOption option,
+        RefPtr<FrameNode> customKeyboard);
+
+    void SetCustomKeybroadHeight(float customHeight = 0.0);
 
     void SetFilterActive(bool actived)
     {
@@ -584,7 +593,7 @@ private:
     bool isProhibitBack_ = false;
 
     std::unordered_map<int32_t, WeakPtr<FrameNode>> uiExtNodes_;
-
+    bool keyboardAvoidance_ = false;
     ACE_DISALLOW_COPY_AND_MOVE(OverlayManager);
 
     bool hasFilterActived {false};

@@ -130,6 +130,64 @@ ArkUINativeModuleValue ToggleBridge::ResetSwitchPointColor(ArkUIRuntimeCallInfo*
     return panda::JSValueRef::Undefined(vm);
 }
 
+ArkUINativeModuleValue ToggleBridge::SetSwitchStyle(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    Local<JSValueRef> pointRadiusArg = runtimeCallInfo->GetCallArgRef(INDEX_ARGUMENT_1);
+    Local<JSValueRef> unselectedColorArg = runtimeCallInfo->GetCallArgRef(INDEX_ARGUMENT_2);
+    Local<JSValueRef> pointColorArg = runtimeCallInfo->GetCallArgRef(INDEX_ARGUMENT_3);
+    Local<JSValueRef> trackRadiusArg = runtimeCallInfo->GetCallArgRef(INDEX_ARGUMENT_4);
+    CalcDimension pointRadius;
+    if (!pointRadiusArg->IsUndefined() &&
+        ArkTSUtils::ParseJsDimensionNG(vm, pointRadiusArg, pointRadius, DimensionUnit::VP) &&
+        !pointRadius.IsNegative()) {
+        GetArkUINodeModifiers()->getToggleModifier()->setTogglePointRadius(
+            nativeNode, pointRadius.Value(), static_cast<int>(pointRadius.Unit()));
+    } else {
+        GetArkUINodeModifiers()->getToggleModifier()->resetTogglePointRadius(nativeNode);
+    }
+    Color unselectedColor;
+    if (unselectedColorArg->IsNull() || unselectedColorArg->IsUndefined() ||
+        !ArkTSUtils::ParseJsColorAlpha(vm, unselectedColorArg, unselectedColor)) {
+        GetArkUINodeModifiers()->getToggleModifier()->resetToggleUnselectedColor(nativeNode);
+    } else {
+        GetArkUINodeModifiers()->getToggleModifier()->setToggleUnselectedColor(nativeNode, unselectedColor.GetValue());
+    }
+    Color pointColor;
+    if (pointColorArg->IsNull() || pointColorArg->IsUndefined() ||
+        !ArkTSUtils::ParseJsColorAlpha(vm, pointColorArg, pointColor)) {
+        GetArkUINodeModifiers()->getToggleModifier()->resetToggleSwitchPointColor(nativeNode);
+    } else {
+        GetArkUINodeModifiers()->getToggleModifier()->setToggleSwitchPointColor(nativeNode, pointColor.GetValue());
+    }
+    CalcDimension trackRadius;
+    if (!trackRadiusArg->IsUndefined() &&
+        ArkTSUtils::ParseJsDimensionNG(vm, trackRadiusArg, trackRadius, DimensionUnit::VP) &&
+        !trackRadius.IsNegative()) {
+        GetArkUINodeModifiers()->getToggleModifier()->setToggleTrackBorderRadius(
+            nativeNode, trackRadius.Value(), static_cast<int>(trackRadius.Unit()));
+    } else {
+        GetArkUINodeModifiers()->getToggleModifier()->resetToggleTrackBorderRadius(nativeNode);
+    }
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue ToggleBridge::ResetSwitchStyle(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    GetArkUINodeModifiers()->getToggleModifier()->resetTogglePointRadius(nativeNode);
+    GetArkUINodeModifiers()->getToggleModifier()->resetToggleUnselectedColor(nativeNode);
+    GetArkUINodeModifiers()->getToggleModifier()->resetToggleSwitchPointColor(nativeNode);
+    GetArkUINodeModifiers()->getToggleModifier()->resetToggleTrackBorderRadius(nativeNode);
+    return panda::JSValueRef::Undefined(vm);
+}
+
 ArkUINativeModuleValue ToggleBridge::SetHeight(ArkUIRuntimeCallInfo* runtimeCallInfo)
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();

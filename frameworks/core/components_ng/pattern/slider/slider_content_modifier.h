@@ -176,6 +176,20 @@ public:
         }
     }
 
+    void SetSliderInteractionMode(SliderModelNG::SliderInteraction mode)
+    {
+        if (sliderInteractionMode_) {
+            sliderInteractionMode_->Set(static_cast<int>(mode));
+        }
+    }
+
+    void SetMinResponsiveDistance(float minResponse)
+    {
+        if (minResponse_) {
+            minResponse_->Set(minResponse);
+        }
+    }
+
     void SetBlockType(SliderModelNG::BlockStyleType type)
     {
         if (blockType_) {
@@ -309,6 +323,8 @@ private:
     RefPtr<PropertyInt> sliderMode_;
     RefPtr<PropertyInt> directionAxis_;
     RefPtr<PropertyBool> isShowStep_;
+    RefPtr<PropertyInt> sliderInteractionMode_;
+    RefPtr<PropertyFloat> minResponse_;
     RefPtr<PropertyInt> blockType_;
 
     // others

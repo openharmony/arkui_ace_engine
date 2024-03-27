@@ -28,7 +28,7 @@ public:
     void SetReverse(bool value) override;
     void SetBlockColor(const Color& value) override;
     void SetTrackBackgroundColor(const Color& value) override;
-    void SetTrackBackgroundColor(const NG::Gradient& value) override {};
+    void SetTrackBackgroundColor(const NG::Gradient& value, bool isResourceColor = false) override {};
     void SetSelectColor(const Color& value) override;
     void SetMinLabel(float value) override;
     void SetMaxLabel(float value) override;
@@ -58,6 +58,8 @@ public:
     void ResetBlockImage() override {};
     void ResetBlockShape() override {};
     void ResetStepSize() override {};
+    void ResetSliderInteractionMode() override {};
+    void ResetMinResponsiveDistance() override {};
 };
 
 } // namespace OHOS::Ace::Framework

@@ -29,7 +29,7 @@ class OffscreenCanvasPaintMethod : public CustomPaintPaintMethod {
     DECLARE_ACE_TYPE(OffscreenCanvasPaintMethod, CustomPaintPaintMethod)
 public:
     OffscreenCanvasPaintMethod() = default;
-    OffscreenCanvasPaintMethod(const WeakPtr<PipelineBase> context, int32_t width, int32_t height);
+    OffscreenCanvasPaintMethod(int32_t width, int32_t height);
     ~OffscreenCanvasPaintMethod() override = default;
 
     void DrawImage(PaintWrapper* paintWrapper, const Ace::CanvasImage& canvasImage, double width, double height);

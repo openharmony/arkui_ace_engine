@@ -28,7 +28,7 @@ const struct ArkUINodeModifiers* GetArkUINodeModifiers();
 // use internal, not for export.
 const struct ArkUIFullNodeAPI* GetArkUIFullNodeAPI();
 void SendArkUIAsyncEvent(struct ArkUINodeEvent* event);
-
+void SendArkUIAsyncCustomEvent(struct ArkUICustomNodeEvent* event);
 #ifdef __cplusplus
 };
 #endif

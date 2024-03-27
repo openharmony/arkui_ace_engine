@@ -20,9 +20,9 @@
 #include "base/geometry/dimension.h"
 #include "base/log/log_wrapper.h"
 #include "base/utils/utils.h"
+#include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_common_bridge.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_utils.h"
 #include "bridge/declarative_frontend/jsview/models/swiper_model_impl.h"
-#include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_common_bridge.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -146,6 +146,21 @@ ArkUINativeModuleValue SwiperBridge::ResetSwiperDisplayCount(ArkUIRuntimeCallInf
     GetArkUINodeModifiers()->getSwiperModifier()->resetSwiperDisplayCount(nativeNode);
     return panda::JSValueRef::Undefined(vm);
 }
+std::string GetDimensionUnitString(DimensionUnit unit)
+{
+    switch (unit) {
+        case DimensionUnit::VP:
+            return "vp";
+        case DimensionUnit::PX:
+            return "px";
+        case DimensionUnit::FP:
+            return "fp";
+        case DimensionUnit::CALC:
+            return "calc";
+        default:
+            return "px";
+    }
+}
 ArkUINativeModuleValue SwiperBridge::SetSwiperDisplayArrow(ArkUIRuntimeCallInfo* runtimeCallInfo)
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
@@ -173,11 +188,13 @@ ArkUINativeModuleValue SwiperBridge::SetSwiperDisplayArrow(ArkUIRuntimeCallInfo*
     Color color;
     std::string backgroundSizeStr =
         ArkTSUtils::ParseJsDimension(vm, backgroundSize, lengthValue, DimensionUnit::VP, false)
-            ? std::to_string(lengthValue.Value()) + "vp" : "-";
+            ? std::to_string(lengthValue.Value()) + GetDimensionUnitString(lengthValue.Unit())
+            : "-";
     std::string backgroundColorStr =
         ArkTSUtils::ParseJsColorAlpha(vm, backgroundColor, color) ? std::to_string(color.GetValue()) : "-";
     std::string arrowSizeStr = ArkTSUtils::ParseJsDimensionNG(vm, arrowSize, lengthValue, DimensionUnit::VP, false)
-                                   ? std::to_string(lengthValue.Value()) + "vp" : "-";
+                                   ? std::to_string(lengthValue.Value()) + GetDimensionUnitString(lengthValue.Unit())
+                                   : "-";
     std::string arrowColorStr =
         ArkTSUtils::ParseJsColorAlpha(vm, arrowColor, color) ? std::to_string(color.GetValue()) : "-";
     std::string isHoverShowStr = "2";
@@ -471,8 +488,10 @@ std::string GetStringByValueRef(const EcmaVM* vm, const Local<JSValueRef>& jsVal
     }
     CalcDimension calc;
     result = ArkTSUtils::ParseJsDimension(vm, jsValue, calc, DimensionUnit::VP, true)
-        ? (calc.Unit() == DimensionUnit::PERCENT ? (std::to_string(calc.Value() * DEFAULT_PERCENT_VALUE) + "%")
-                                                 : (std::to_string(calc.Value()) + "vp")) : "0.0_vp";
+                 ? (calc.Unit() == DimensionUnit::PERCENT
+                           ? (std::to_string(calc.Value() * DEFAULT_PERCENT_VALUE) + "%")
+                           : (std::to_string(calc.Value()) + GetDimensionUnitString(calc.Unit())))
+                 : "0.0_vp";
     return result;
 }
 std::string GetSwiperDotIndicator(ArkUIRuntimeCallInfo* runtimeCallInfo, EcmaVM* vm)
@@ -490,15 +509,19 @@ std::string GetSwiperDotIndicator(ArkUIRuntimeCallInfo* runtimeCallInfo, EcmaVM*
     Local<JSValueRef> bottomArg = runtimeCallInfo->GetCallArgRef(DOT_INDICATOR_BOTTOM);
     CalcDimension calc;
     std::string itemWidth = ArkTSUtils::ParseJsDimension(vm, itemWidthArg, calc, DimensionUnit::VP, false)
-                                ? std::to_string(calc.Value()) + "vp" : "-";
+                                ? std::to_string(calc.Value()) + GetDimensionUnitString(calc.Unit())
+                                : "-";
     std::string itemHeight = ArkTSUtils::ParseJsDimension(vm, itemHeightArg, calc, DimensionUnit::VP, false)
-                                 ? std::to_string(calc.Value()) + "vp" : "-";
+                                 ? std::to_string(calc.Value()) + GetDimensionUnitString(calc.Unit())
+                                 : "-";
     std::string selectedItemWidth =
         ArkTSUtils::ParseJsDimension(vm, selectedItemWidthArg, calc, DimensionUnit::VP, false)
-            ? std::to_string(calc.Value()) + "vp" : "-";
+            ? std::to_string(calc.Value()) + GetDimensionUnitString(calc.Unit())
+            : "-";
     std::string selectedItemHeight =
         ArkTSUtils::ParseJsDimension(vm, selectedItemHeightArg, calc, DimensionUnit::VP, false)
-            ? std::to_string(calc.Value()) + "vp" : "-";
+            ? std::to_string(calc.Value()) + GetDimensionUnitString(calc.Unit())
+            : "-";
     std::string mask = "2";
     if (!maskArg->IsUndefined()) {
         mask = maskArg->ToBoolean(vm)->Value() ? "1" : "0";
@@ -536,12 +559,14 @@ std::string GetSwiperDigitIndicator(ArkUIRuntimeCallInfo* runtimeCallInfo, EcmaV
         ArkTSUtils::ParseJsColorAlpha(vm, fontColorArg, color) ? std::to_string(color.GetValue()) : "-";
     std::string selectedFontColor =
         ArkTSUtils::ParseJsColorAlpha(vm, selectedFontColorArg, color) ? std::to_string(color.GetValue()) : "-";
-    std::string digitFontSize = ArkTSUtils::ParseJsDimension(vm, digitFontSizeArg, calc, DimensionUnit::VP, false)
-                                    ? std::to_string(calc.Value()) + "vp" : "-";
+    std::string digitFontSize = ArkTSUtils::ParseJsDimension(vm, digitFontSizeArg, calc, DimensionUnit::FP, false)
+                                    ? std::to_string(calc.Value()) + GetDimensionUnitString(calc.Unit())
+                                    : "-";
     std::string digitFontWeight = digitFontWeightArg->ToString(vm)->ToString();
     std::string selectedDigitFontSize =
-        ArkTSUtils::ParseJsDimension(vm, selectedDigitFontSizeArg, calc, DimensionUnit::VP, false)
-            ? std::to_string(calc.Value()) + "vp" : "-";
+        ArkTSUtils::ParseJsDimension(vm, selectedDigitFontSizeArg, calc, DimensionUnit::FP, false)
+            ? std::to_string(calc.Value()) + GetDimensionUnitString(calc.Unit())
+            : "-";
     std::string selectedDigitFontWeight = selectedDigitFontWeightArg->ToString(vm)->ToString();
     std::string left = GetStringByValueRef(vm, leftArg);
     std::string top = GetStringByValueRef(vm, topArg);

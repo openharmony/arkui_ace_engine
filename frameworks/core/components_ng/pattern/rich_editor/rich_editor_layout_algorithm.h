@@ -75,6 +75,8 @@ private:
         }
         return ss.str();
     }
+    void CopySpanStyle(RefPtr<SpanItem> source, RefPtr<SpanItem> target);
+    void AppendNewLineSpan();
 
     std::vector<std::list<RefPtr<SpanItem>>> spans_;
     std::list<RefPtr<SpanItem>> allSpans_;

@@ -78,6 +78,24 @@ namespace {
 
 namespace {
     constexpr float MAX_ROTATE = 360.0f;
+class TestNode : public UINode {
+    DECLARE_ACE_TYPE(TestNode, UINode);
+
+    public:
+        static RefPtr<TestNode> CreateTestNode(int32_t nodeId)
+        {
+            auto node = MakeRefPtr<TestNode>(nodeId);
+            return node;
+        }
+
+        bool IsAtomicNode() const override
+        {
+            return true;
+        }
+
+        explicit TestNode(int32_t nodeId) : UINode("TestNode", nodeId) {}
+        ~TestNode() override = default;
+    };
 }
 
 class SecurityComponentModelTestNg : public testing::Test {
@@ -136,6 +154,8 @@ void SecurityComponentModelTestNg::InitDefaultTheme(RefPtr<SecurityComponentThem
 void SecurityComponentModelTestNg::SetUpTestCase()
 {
     MockPipelineContext::SetUp();
+    MockContainer::SetUp();
+    MockContainer::Current()->pipelineContext_ = PipelineBase::GetCurrentContext();
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
     MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
     auto scTheme = AceType::MakeRefPtr<SecurityComponentTheme>();
@@ -146,6 +166,7 @@ void SecurityComponentModelTestNg::SetUpTestCase()
 void SecurityComponentModelTestNg::TearDownTestCase()
 {
     MockPipelineContext::TearDown();
+    MockContainer::TearDown();
 }
 
 RefPtr<FrameNode> SecurityComponentModelTestNg::CreateSecurityComponent(int32_t text, int32_t icon,
@@ -1640,6 +1661,11 @@ HWTEST_F(SecurityComponentModelTestNg, SecurityComponentHandlerTest001, TestSize
     ASSERT_EQ(SecurityComponentHandler::UnregisterSecurityComponent(invalidId), -1);
     ASSERT_EQ(SecurityComponentHandler::ReportSecurityComponentClickEvent(invalidId, frameNode, info), -1);
     ASSERT_EQ(SecurityComponentHandler::ReportSecurityComponentClickEvent(noExistId, invalidFrameNode, info), -1);
+
+    KeyEvent key;
+    ASSERT_EQ(SecurityComponentHandler::ReportSecurityComponentClickEvent(noExistId, invalidFrameNode, key), -1);
+    key.enhanceData = { 0 };
+    ASSERT_EQ(SecurityComponentHandler::ReportSecurityComponentClickEvent(noExistId, invalidFrameNode, key), -1);
 }
 
 /**
@@ -1848,6 +1874,10 @@ HWTEST_F(SecurityComponentModelTestNg, SecurityComponentCheckParentNodesEffectTe
     auto renderContext = parentFrameNode->GetRenderContext();
     ASSERT_NE(renderContext, nullptr);
     renderContext->UpdateClipEdge(true);
+    ASSERT_TRUE(SecurityComponentHandler::CheckParentNodesEffect(childFrameNode));
+
+    OffsetF invalidOffset(-100.0, -100.0);
+    childFrameNode->geometryNode_->SetFrameOffset(invalidOffset);
     ASSERT_TRUE(SecurityComponentHandler::CheckParentNodesEffect(childFrameNode));
 }
 
@@ -2126,6 +2156,59 @@ HWTEST_F(SecurityComponentModelTestNg, SecurityComponentCheckParentNodesEffectTe
     ASSERT_EQ(renderContext->GetOpacity().value(), 1.0f);
     renderContext->UpdateOpacity(2);
     ASSERT_TRUE(SecurityComponentHandler::CheckParentNodesEffect(childFrameNode));
+
+    parentFrameNode->tag_ = V2::MENU_WRAPPER_ETS_TAG;
+    ASSERT_FALSE(SecurityComponentHandler::CheckParentNodesEffect(childFrameNode));
+
+    // parent is not FrameNode
+    RefPtr<TestNode> unFrameNode = AceType::MakeRefPtr<TestNode>(0);
+    unFrameNode->AddChild(childFrameNode);
+    ASSERT_FALSE(SecurityComponentHandler::CheckParentNodesEffect(childFrameNode));
+}
+
+/**
+ * @tc.name: SecurityComponentCalculateCurrentVisibleRatio001
+ * @tc.desc: Test security component CalculateCurrentVisibleRatio
+ * @tc.type: FUNC
+ * @tc.author:
+ */
+HWTEST_F(SecurityComponentModelTestNg, SecurityComponentCalculateCurrentVisibleRatio001, TestSize.Level1)
+{
+    RectF invalidRect(-1.0, -1.0, -1.0, -1.0);
+    RectF validRect(1.0, 1.0, 1.0, 1.0);
+    ASSERT_EQ(SecurityComponentHandler::CalculateCurrentVisibleRatio(invalidRect, validRect), 0.0);
+    ASSERT_EQ(SecurityComponentHandler::CalculateCurrentVisibleRatio(validRect, invalidRect), 0.0);
+}
+
+/**
+ * @tc.name: SecurityComponentInitChildInfo001
+ * @tc.desc: Test security component InitChildInfo
+ * @tc.type: FUNC
+ * @tc.author:
+ */
+HWTEST_F(SecurityComponentModelTestNg, SecurityComponentInitChildInfo001, TestSize.Level1)
+{
+    RefPtr<SecurityComponentPattern> pattern =
+        AceType::MakeRefPtr<SecurityComponentPattern>();
+    RefPtr<FrameNode> node = AceType::MakeRefPtr<FrameNode>(V2::LOCATION_BUTTON_ETS_TAG, 1, pattern, false);
+    OHOS::Security::SecurityComponent::SecCompBase buttonInfo;
+    ASSERT_FALSE(SecurityComponentHandler::InitChildInfo(buttonInfo, node));
+}
+
+/**
+ * @tc.name: SecurityComponentInitButtonInfo001
+ * @tc.desc: Test security component InitButtonInfo
+ * @tc.type: FUNC
+ * @tc.author:
+ */
+HWTEST_F(SecurityComponentModelTestNg, SecurityComponentInitButtonInfo001, TestSize.Level1)
+{
+    RefPtr<SecurityComponentPattern> pattern =
+        AceType::MakeRefPtr<SecurityComponentPattern>();
+    RefPtr<FrameNode> node = AceType::MakeRefPtr<FrameNode>(V2::MENU_WRAPPER_ETS_TAG, 1, pattern, false);
+    std::string compInfo;
+    Security::SecurityComponent::SecCompType type;
+    ASSERT_FALSE(SecurityComponentHandler::InitButtonInfo(compInfo, node, type));
 }
 
 /**
@@ -2456,7 +2539,13 @@ HWTEST_F(SecurityComponentModelTestNg, SecurityComponentPatternInitOnTouchEvent0
         BUTTON_TYPE_NULL, V2::LOCATION_BUTTON_ETS_TAG);
     pattern.InitOnTouch(frameNode);
     auto gestureHub = frameNode->GetOrCreateGestureEventHub();
+
+    TouchLocationInfo locationInfo(0);
+    locationInfo.SetTouchType(TouchType::DOWN);
+    Offset offset(1.0, 1.0);
+    locationInfo.SetLocalLocation(offset);
     TouchEventInfo touch("");
+    touch.AddTouchLocationInfo(std::move(locationInfo));
     ASSERT_TRUE(gestureHub->touchEventActuator_ != nullptr);
     ASSERT_TRUE(gestureHub->touchEventActuator_->touchEvents_.size() > 0);
     auto impl = gestureHub->touchEventActuator_->touchEvents_.front()->callback_;

@@ -448,7 +448,7 @@ void SpanItem::UpdateContentTextStyle(
         return;
     }
     auto displayText = content;
-    auto textCase = fontStyle ? fontStyle->GetTextCase().value_or(TextCase::NORMAL) : TextCase::NORMAL;
+    auto textCase = textStyle.has_value() ? textStyle->GetTextCase() : TextCase::NORMAL;
     StringUtils::TransformStrCase(displayText, static_cast<int32_t>(textCase));
     if (textStyle.has_value()) {
         builder->PushStyle(textStyle.value());
@@ -668,5 +668,19 @@ void BaseSpan::SetTextBackgroundStyle(const TextBackgroundStyle& style)
 void ContainerSpanNode::ToJsonValue(std::unique_ptr<JsonValue>& json) const
 {
     TextBackgroundStyle::ToJsonValue(json, GetTextBackgroundStyle());
+}
+
+std::set<PropertyInfo> SpanNode::CalculateInheritPropertyInfo()
+{
+    std::set<PropertyInfo> inheritPropertyInfo;
+    const std::set<PropertyInfo> propertyInfoContainer = { PropertyInfo::FONTSIZE, PropertyInfo::FONTCOLOR,
+        PropertyInfo::FONTSTYLE, PropertyInfo::FONTWEIGHT, PropertyInfo::FONTFAMILY, PropertyInfo::TEXTDECORATION,
+        PropertyInfo::TEXTCASE, PropertyInfo::LETTERSPACE, PropertyInfo::LINEHEIGHT, PropertyInfo::TEXT_ALIGN,
+        PropertyInfo::LEADING_MARGIN, PropertyInfo::TEXTSHADOW, PropertyInfo::SYMBOL_COLOR,
+        PropertyInfo::SYMBOL_RENDERING_STRATEGY, PropertyInfo::SYMBOL_EFFECT_STRATEGY, PropertyInfo::WORD_BREAK,
+        PropertyInfo::FONTFEATURE };
+    set_difference(propertyInfoContainer.begin(), propertyInfoContainer.end(), propertyInfo_.begin(),
+        propertyInfo_.end(), inserter(inheritPropertyInfo, inheritPropertyInfo.begin()));
+    return inheritPropertyInfo;
 }
 } // namespace OHOS::Ace::NG

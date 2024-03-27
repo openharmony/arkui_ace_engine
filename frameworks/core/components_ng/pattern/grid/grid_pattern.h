@@ -262,7 +262,6 @@ private:
     void OnScrollEndCallback() override;
 
     void FireOnScrollStart() override;
-    void InitScrollableEvent();
 
     int32_t CalcIntersectAreaInTargetDirectionShadow(GridItemIndexInfo itemIndexInfo, bool isFindInMainAxis);
     double GetNearestDistanceFromChildToCurFocusItemInMainAxis(int32_t targetIndex, GridItemIndexInfo itemIndexInfo);

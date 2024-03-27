@@ -77,6 +77,16 @@ public:
         return menu_;
     }
 
+    void SetPrevMenu(const RefPtr<UINode>& prevMenu)
+    {
+        prevMenu_ = prevMenu;
+    }
+
+    const RefPtr<UINode>& GetPrevMenu() const
+    {
+        return prevMenu_;
+    }
+
     void SetMoreMenuNode(const RefPtr<UINode>& moreMenuNode)
     {
         moreMenuNode_ = moreMenuNode;
@@ -108,6 +118,7 @@ private:
     RefPtr<UINode> title_;
     RefPtr<UINode> subtitle_;
     RefPtr<UINode> menu_;
+    RefPtr<UINode> prevMenu_;
     RefPtr<UINode> moreMenuNode_;
     bool isTitleMenuNodeShowing_ = false;
 };

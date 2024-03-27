@@ -22,8 +22,10 @@
 #include <optional>
 #include <vector>
 
+#include "base/geometry/ng/rect_t.h"
 #include "base/memory/ace_type.h"
 #include "base/utils/utils.h"
+#include "core/components/common/properties/animation_option.h"
 #include "core/components_ng/animation/gradient_arithmetic.h"
 #include "core/components_ng/base/linear_vector.h"
 #include "core/components_ng/render/canvas_image.h"
@@ -46,6 +48,9 @@ enum class PropertyUnit {
 };
 
 namespace OHOS::Ace::NG {
+
+class ExtensionHandler;
+
 class ACE_FORCE_EXPORT Modifier : public virtual AceType {
     DECLARE_ACE_TYPE(Modifier, AceType);
 
@@ -90,9 +95,9 @@ public:
     DECLARE_ACE_TYPE(DrawModifier, AceType);
 
 public:
-    DrawModifierFunc jsDrawBehindFunc;
-    DrawModifierFunc jsDrawContentFunc;
-    DrawModifierFunc jsDrawFrontFunc;
+    DrawModifierFunc drawBehindFunc;
+    DrawModifierFunc drawContentFunc;
+    DrawModifierFunc drawFrontFunc;
 };
 
 template<typename T>
@@ -240,22 +245,8 @@ public:
     };
     ~ContentModifier() override = default;
     virtual void onDraw(DrawingContext& Context) = 0;
-    void Draw(DrawingContext& Context)
-    {
-        if (drawModifier_ && drawModifier_->jsDrawBehindFunc) {
-            drawModifier_->jsDrawBehindFunc(Context);
-        }
 
-        if (drawModifier_ && drawModifier_->jsDrawContentFunc) {
-            drawModifier_->jsDrawContentFunc(Context);
-        } else {
-            onDraw(Context);
-        }
-
-        if (drawModifier_ && drawModifier_->jsDrawFrontFunc) {
-            drawModifier_->jsDrawFrontFunc(Context);
-        }
-    }
+    void Draw(DrawingContext& Context);
 
     void AttachProperty(const RefPtr<PropertyBase>& prop)
     {
@@ -282,28 +273,25 @@ public:
         isCustomFont_ = isCustomFont;
     }
 
-    bool GetIsCustomFont()
+    bool GetIsCustomFont() const
     {
         return isCustomFont_;
     }
 
-    void SetDrawModifier(const RefPtr<NG::DrawModifier>& drawModifier)
-    {
-        drawModifier_ = drawModifier;
-    }
-
     void SetContentChange()
     {
-        CHECK_NULL_VOID(changeCount_);
         changeCount_->Set(changeCount_->Get() + 1);
     }
+
+    void SetExtensionHandler(ExtensionHandler* extensionHandler);
 
 private:
     std::vector<RefPtr<PropertyBase>> attachedProperties_;
     std::optional<RectF> rect_;
     bool isCustomFont_ = false;
-    RefPtr<NG::DrawModifier> drawModifier_;
     RefPtr<PropertyInt> changeCount_; // use to trigger rerendering
+    ExtensionHandler* extensionHandler_ = nullptr;
+
     ACE_DISALLOW_COPY_AND_MOVE(ContentModifier);
 };
 

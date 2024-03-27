@@ -143,6 +143,7 @@ RefPtr<LayoutAlgorithm> SwiperPattern::CreateLayoutAlgorithm()
     } else if (targetIndex_) {
         swiperLayoutAlgorithm->SetTargetIndex(targetIndex_.value());
     }
+    swiperLayoutAlgorithm->SetCurrentIndex(currentIndex_);
     swiperLayoutAlgorithm->SetContentCrossSize(contentCrossSize_);
     swiperLayoutAlgorithm->SetMainSizeIsMeasured(mainSizeIsMeasured_);
     swiperLayoutAlgorithm->SetContentMainSize(contentMainSize_);
@@ -843,6 +844,7 @@ bool SwiperPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty,
             OnIndexChange();
         }
         jumpIndex_.reset();
+        pauseTargetIndex_.reset();
         auto delayTime = GetInterval() - GetDuration();
         delayTime = std::clamp(delayTime, 0, delayTime);
         if (NeedAutoPlay() && isUserFinish_) {
@@ -880,7 +882,6 @@ bool SwiperPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty,
                     stopAutoPlay = true;
                     autoLinearReachBoundary = true;
                 }
-
                 context->AddAfterLayoutTask([weak = WeakClaim(this), targetPos, velocity = velocity_.value_or(0.0f),
                                                 nextIndex, stopAutoPlay]() {
                     auto swiper = weak.Upgrade();

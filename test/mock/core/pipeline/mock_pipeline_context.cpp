@@ -557,6 +557,11 @@ RefPtr<ImageCache> PipelineBase::GetImageCache() const
     return nullptr;
 }
 
+void PipelineBase::OnVirtualKeyboardAreaChange(Rect keyboardArea,
+    const std::shared_ptr<Rosen::RSTransaction>& rsTransaction) {}
+void PipelineBase::OnVirtualKeyboardAreaChange(Rect keyboardArea, double positionY, double height,
+    const std::shared_ptr<Rosen::RSTransaction>& rsTransaction) {}
+
 void PipelineBase::OnVsyncEvent(uint64_t nanoTimestamp, uint32_t frameCount) {}
 
 void PipelineBase::SendEventToAccessibility(const AccessibilityEvent& accessibilityEvent) {}

@@ -99,6 +99,7 @@ public:
     // The interface for responsing provider
     virtual void OnConnect() = 0;
     virtual void OnDisconnect(bool isAbnormal) = 0;
+    virtual void OnExtensionTimeout(int32_t errorCode) = 0;
     virtual void OnAccessibilityEvent(const Accessibility::AccessibilityEventInfo& info, int64_t offset) = 0;
 
     // The interface about the accessibility

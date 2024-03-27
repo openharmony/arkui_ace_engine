@@ -183,6 +183,22 @@ void ResetColors(ArkUINodeHandle node)
     GaugeModelNG::SetColors(frameNode, inputColor, weights);
 }
 
+void SortColorStopByOffset(std::vector<NG::ColorStopArray>& colors)
+{
+    for (auto& colorStopArray : colors) {
+        std::sort(colorStopArray.begin(), colorStopArray.end(),
+            [](const std::pair<Color, Dimension>& left, const std::pair<Color, Dimension>& right) {
+                return left.second.Value() < right.second.Value();
+            });
+
+        auto iter = std::unique(colorStopArray.begin(), colorStopArray.end(),
+            [](const std::pair<Color, Dimension>& left, const std::pair<Color, Dimension>& right) {
+                return left.second.Value() == right.second.Value();
+            });
+        colorStopArray.erase(iter, colorStopArray.end());
+    }
+}
+
 void SetGradientColors(ArkUINodeHandle node, const struct ArkUIGradientType* gradient, uint32_t weightLength)
 {
     CHECK_NULL_VOID(gradient->gradientLength);
@@ -212,6 +228,7 @@ void SetGradientColors(ArkUINodeHandle node, const struct ArkUIGradientType* gra
         colors.at(i) = colorStop;
     }
     GaugeType type = static_cast<GaugeType>(gradient->type);
+    SortColorStopByOffset(colors);
     GaugeModelNG::SetGradientColors(frameNode, colors, weight, type);
 }
 
