@@ -14,6 +14,7 @@
  */
 
 #include "core/interfaces/native/node/node_gesture_modifier.h"
+#include "core/components_ng/gestures/long_press_gesture.h"
 #include "core/components_ng/pattern/gesture/gesture_model_ng.h"
 #include "core/components_ng/gestures/pan_gesture.h"
 #include "core/components_ng/base/frame_node.h"
@@ -55,6 +56,20 @@ ArkUIGesture* createPanGesture(ArkUI_Int32 fingers, ArkUI_Int32 direction, ArkUI
     auto panGestureObject = AceType::MakeRefPtr<PanGesture>(fingers, panDirection, distance);
     panGestureObject->IncRefCount();
     return reinterpret_cast<ArkUIGesture*>(AceType::RawPtr(panGestureObject));
+}
+
+ArkUIGesture* createTapGesture(ArkUI_Int32 count, ArkUI_Int32 fingers)
+{
+    auto tapGestureObject = AceType::MakeRefPtr<TapGesture>(count, fingers);
+    tapGestureObject->IncRefCount();
+    return reinterpret_cast<ArkUIGesture*>(AceType::RawPtr(tapGestureObject));
+}
+
+ArkUIGesture* createLongPressGesture(ArkUI_Int32 fingers, bool repeat, ArkUI_Int32 duration)
+{
+    auto longPressGestureObject = AceType::MakeRefPtr<LongPressGesture>(fingers, repeat, duration);
+    longPressGestureObject->IncRefCount();
+    return reinterpret_cast<ArkUIGesture*>(AceType::RawPtr(longPressGestureObject));
 }
 
 void dispose(ArkUIGesture* recognizer)
@@ -168,6 +183,8 @@ namespace NodeModifier {
 const ArkUIGestureModifier* GetGestureModifier()
 {
     static const ArkUIGestureModifier modifier = {
+        createTapGesture,
+        createLongPressGesture,
         createPanGesture,
         dispose,
         registerGestureEvent,

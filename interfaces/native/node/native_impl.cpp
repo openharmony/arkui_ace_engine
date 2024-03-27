@@ -85,8 +85,8 @@ ArkUI_NativeDialogAPI_1 dialogImpl_1 = {
 constexpr int32_t CURRENT_NATIVE_GESTURE_API_VERSION = 1;
 ArkUI_NativeGestureAPI_1 gestureImpl_1 = {
     CURRENT_NATIVE_GESTURE_API_VERSION,
-    nullptr,
-    nullptr,
+    OHOS::Ace::GestureModel::CreateTapGesture,
+    OHOS::Ace::GestureModel::CreateLongPressGesture,
     OHOS::Ace::GestureModel::CreatePanGesture,
     nullptr,
     nullptr,
