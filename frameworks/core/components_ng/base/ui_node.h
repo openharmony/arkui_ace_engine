@@ -83,6 +83,7 @@ public:
         bool addDefaultTransition = false);
     RefPtr<FrameNode> GetFocusParent() const;
     RefPtr<FocusHub> GetFirstFocusHubChild() const;
+    void GetChildrenFocusHub(std::list<RefPtr<FocusHub>>& focusNodes);
     void GetFocusChildren(std::list<RefPtr<FrameNode>>& children) const;
     void Clean(bool cleanDirectly = false, bool allowTransition = false);
     void RemoveChildAtIndex(int32_t index);

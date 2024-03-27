@@ -273,7 +273,7 @@ public:
 
     RefPtr<FocusHub> GetOrCreateFocusHub() const;
 
-    RefPtr<FocusHub> GetFocusHub() const
+    const RefPtr<FocusHub>& GetFocusHub() const
     {
         return eventHub_->GetFocusHub();
     }
