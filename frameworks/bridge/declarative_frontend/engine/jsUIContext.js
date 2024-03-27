@@ -222,9 +222,9 @@ class UIContext {
         return this.componentUtils_;
     }
 
-    getOverlay() {
-        this.overlay_ = new Overlay(this.instanceId_);
-        return this.overlay_;
+    getOverlayManager() {
+        this.overlayManager_ = new OverlayManager(this.instanceId_);
+        return this.overlayManager_;
     }
 
     animateTo(value, event) {
@@ -638,7 +638,7 @@ class AtomicServiceBar {
     }
 }
 
-class Overlay {
+class OverlayManager {
     /**
      * Construct new instance of Overlay.
      * initialize with instanceId.
@@ -647,42 +647,46 @@ class Overlay {
      */
     constructor(instanceId) {
         this.instanceId_ = instanceId;
-        this.ohos_overlay = globalThis.requireNapi('overlay');
+        this.ohos_overlayManager = globalThis.requireNapi('overlay');
     }
 
-    addComponentContent(content) {
+    addComponentContent(content, index) {
         __JSScopeUtil__.syncInstanceId(this.instanceId_);
-        this.ohos_overlay.addFrameNode(content.getFrameNode());
+        if (typeof index !== 'undefined') {
+            this.ohos_overlayManager.addFrameNode(content.getFrameNode(), index);
+        } else {
+            this.ohos_overlayManager.addFrameNode(content.getFrameNode());
+        }
         __JSScopeUtil__.restoreInstanceId();
     }
 
     removeComponentContent(content) {
         __JSScopeUtil__.syncInstanceId(this.instanceId_);
-        this.ohos_overlay.removeFrameNode(content.getFrameNode());
+        this.ohos_overlayManager.removeFrameNode(content.getFrameNode());
         __JSScopeUtil__.restoreInstanceId();
     }
 
     showComponentContent(content) {
         __JSScopeUtil__.syncInstanceId(this.instanceId_);
-        this.ohos_overlay.showNode(content.getFrameNode());
+        this.ohos_overlayManager.showNode(content.getFrameNode());
         __JSScopeUtil__.restoreInstanceId();
     }
 
     hideComponentContent(content) {
         __JSScopeUtil__.syncInstanceId(this.instanceId_);
-        this.ohos_overlay.hideNode(content.getFrameNode());
+        this.ohos_overlayManager.hideNode(content.getFrameNode());
         __JSScopeUtil__.restoreInstanceId();
     }
 
-    show() {
+    showAllComponentContent() {
         __JSScopeUtil__.syncInstanceId(this.instanceId_);
-        this.ohos_overlay.show();
+        this.ohos_overlayManager.showAllFrameNodes();
         __JSScopeUtil__.restoreInstanceId();
     }
 
-    hide() {
+    hideAllComponentContent() {
         __JSScopeUtil__.syncInstanceId(this.instanceId_);
-        this.ohos_overlay.hide();
+        this.ohos_overlayManager.hideAllFrameNodes();
         __JSScopeUtil__.restoreInstanceId();
     }
 }

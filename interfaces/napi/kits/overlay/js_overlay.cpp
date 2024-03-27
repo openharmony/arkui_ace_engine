@@ -25,14 +25,14 @@ namespace OHOS::Ace::Napi {
 static NG::FrameNode* ParseFrameNode(napi_env env, napi_callback_info info)
 {
     size_t argc = 1;
-    napi_value argv = nullptr;
+    napi_value argv[2] = { nullptr };
     napi_value thisVar = nullptr;
     void* data = nullptr;
-    NAPI_CALL(env, napi_get_cb_info(env, info, &argc, &argv, &thisVar, &data));
-    NAPI_ASSERT(env, argc == 1, "requires 1 paramter");
+    NAPI_CALL(env, napi_get_cb_info(env, info, &argc, argv, &thisVar, &data));
+    NAPI_ASSERT(env, argc >= 1, "wrong number of argument\n");
 
     napi_value nodePtr = nullptr;
-    NAPI_CALL(env, napi_get_named_property(env, argv, "nodePtr_", &nodePtr));
+    NAPI_CALL(env, napi_get_named_property(env, argv[0], "nodePtr_", &nodePtr));
     napi_valuetype valueType = napi_undefined;
     napi_typeof(env, nodePtr, &valueType);
     NG::UINode* uiNode = nullptr;
@@ -47,12 +47,30 @@ static napi_value JSAddFrameNode(napi_env env, napi_callback_info info)
 {
     NG::FrameNode* frameNode = ParseFrameNode(env, info);
     CHECK_NULL_RETURN(frameNode, nullptr);
+    size_t argc = 2;
+    napi_value argv[2] = { nullptr };
+    napi_value thisVar = nullptr;
+    void* data = nullptr;
+    NAPI_CALL(env, napi_get_cb_info(env, info, &argc, argv, &thisVar, &data));
     auto delegate = EngineHelper::GetCurrentDelegateSafely();
     if (!delegate) {
         NapiThrow(env, "UI execution context not found.", ERROR_CODE_INTERNAL_ERROR);
         return nullptr;
     }
-    delegate->AddFrameNodeToOverlay(AceType::Claim(frameNode));
+    if (argc == 1) {
+        delegate->AddFrameNodeToOverlay(AceType::Claim(frameNode));
+    } else {
+        napi_valuetype valueType = napi_undefined;
+        napi_typeof(env, argv[1], &valueType);
+        if (valueType == napi_number) {
+            int32_t index = 0;
+            napi_get_value_int32(env, argv[1], &index);
+            delegate->AddFrameNodeToOverlay(AceType::Claim(frameNode), index);
+        } else {
+            NapiThrow(env, "the second paramter is not number.", ERROR_CODE_PARAM_INVALID);
+            return nullptr;
+        }
+    }
     return nullptr;
 }
 
@@ -95,7 +113,7 @@ static napi_value JSHideNode(napi_env env, napi_callback_info info)
     return nullptr;
 }
 
-static napi_value JSShow(napi_env env, napi_callback_info info)
+static napi_value JSShowAllFrameNodes(napi_env env, napi_callback_info info)
 {
     auto delegate = EngineHelper::GetCurrentDelegateSafely();
     if (!delegate) {
@@ -106,7 +124,7 @@ static napi_value JSShow(napi_env env, napi_callback_info info)
     return nullptr;
 }
 
-static napi_value JSHide(napi_env env, napi_callback_info info)
+static napi_value JSHideAllFrameNodes(napi_env env, napi_callback_info info)
 {
     auto delegate = EngineHelper::GetCurrentDelegateSafely();
     if (!delegate) {
@@ -117,25 +135,26 @@ static napi_value JSHide(napi_env env, napi_callback_info info)
     return nullptr;
 }
 
-static napi_value OverlayExport(napi_env env, napi_value exports)
+static napi_value OverlayManagerExport(napi_env env, napi_value exports)
 {
-    napi_property_descriptor overlayDesc[] = {
+    napi_property_descriptor overlayManagerDesc[] = {
         DECLARE_NAPI_FUNCTION("addFrameNode", JSAddFrameNode),
         DECLARE_NAPI_FUNCTION("removeFrameNode", JSRemoveFrameNode),
         DECLARE_NAPI_FUNCTION("showNode", JSShowNode),
         DECLARE_NAPI_FUNCTION("hideNode", JSHideNode),
-        DECLARE_NAPI_FUNCTION("show", JSShow),
-        DECLARE_NAPI_FUNCTION("hide", JSHide)
+        DECLARE_NAPI_FUNCTION("showAllFrameNodes", JSShowAllFrameNodes),
+        DECLARE_NAPI_FUNCTION("hideAllFrameNodes", JSHideAllFrameNodes)
     };
-    NAPI_CALL(env, napi_define_properties(env, exports, sizeof(overlayDesc) / sizeof(overlayDesc[0]), overlayDesc));
+    NAPI_CALL(env, napi_define_properties(
+        env, exports, sizeof(overlayManagerDesc) / sizeof(overlayManagerDesc[0]), overlayManagerDesc));
     return exports;
 }
 
-static napi_module overlayModule = {
+static napi_module overlayManagerModule = {
     .nm_version = 1,
     .nm_flags = 0,
     .nm_filename = nullptr,
-    .nm_register_func = OverlayExport,
+    .nm_register_func = OverlayManagerExport,
     .nm_modname = "overlay",
     .nm_priv = ((void*)0),
     .reserved = { 0 },
@@ -143,6 +162,6 @@ static napi_module overlayModule = {
 
 extern "C" __attribute__((constructor)) void OverlayRegister()
 {
-    napi_module_register(&overlayModule);
+    napi_module_register(&overlayManagerModule);
 }
 } // namespace OHOS::Ace::Napi

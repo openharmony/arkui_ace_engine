@@ -4217,18 +4217,40 @@ void OverlayManager::CreateOverlayNode()
     rootNode->AddChildAfter(overlayNode_, stageNode);
 }
 
-void OverlayManager::AddFrameNodeToOverlay(const RefPtr<NG::FrameNode>& node)
+void OverlayManager::AddFrameNodeToOverlay(const RefPtr<NG::FrameNode>& node, std::optional<int32_t> index)
 {
     TAG_LOGD(AceLogTag::ACE_OVERLAY, "add FrameNode to the overlay node enter");
     CHECK_NULL_VOID(node);
-    if (frameNodeSetOnOverlay_.find(node->GetId()) != frameNodeSetOnOverlay_.end()) {
-        TAG_LOGW(AceLogTag::ACE_OVERLAY, "the node already exists in the overlay");
-        return;
+    int32_t level = -1;
+    if (index.has_value() && index.value() >= 0) {
+        level = index.value();
+    }
+    if (frameNodeMapOnOverlay_.find(node->GetId()) != frameNodeMapOnOverlay_.end()) {
+        overlayNode_->RemoveChild(node);
+        frameNodeMapOnOverlay_.erase(node->GetId());
     }
     CreateOverlayNode();
     CHECK_NULL_VOID(overlayNode_);
-    overlayNode_->AddChild(node);
-    frameNodeSetOnOverlay_.insert(node->GetId());
+    const auto& children = overlayNode_->GetChildren();
+    if (children.empty() || level < frameNodeMapOnOverlay_[overlayNode_->GetFirstChild()->GetId()]) {
+        overlayNode_->AddChild(node, 0);
+    } else if (level == -1 || level >= frameNodeMapOnOverlay_[overlayNode_->GetLastChild()->GetId()]) {
+        overlayNode_->AddChild(node);
+    } else {
+        for (auto it = children.rbegin(); it != children.rend(); ++it) {
+            auto childLevel = frameNodeMapOnOverlay_[(*it)->GetId()];
+            if (childLevel >= 0 && childLevel <= level) {
+                auto beforeNode = DynamicCast<FrameNode>(*it);
+                CHECK_NULL_VOID(beforeNode);
+                overlayNode_->AddChildAfter(node, beforeNode);
+            }
+        }
+    }
+
+    frameNodeMapOnOverlay_[node->GetId()] = level;
+    auto focusHub = node->GetFocusHub();
+    CHECK_NULL_VOID(focusHub);
+    focusHub->RequestFocus();
     overlayNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_CHILD);
 }
 
@@ -4236,19 +4258,19 @@ void OverlayManager::RemoveFrameNodeOnOverlay(const RefPtr<NG::FrameNode>& node)
 {
     TAG_LOGD(AceLogTag::ACE_OVERLAY, "delete the FrameNode on the overlay node enter");
     CHECK_NULL_VOID(node);
-    if (frameNodeSetOnOverlay_.find(node->GetId()) == frameNodeSetOnOverlay_.end()) {
+    if (frameNodeMapOnOverlay_.find(node->GetId()) == frameNodeMapOnOverlay_.end()) {
         TAG_LOGW(AceLogTag::ACE_OVERLAY, "the node does not exist in the overlay");
         return;
     }
     CHECK_NULL_VOID(overlayNode_);
     overlayNode_->RemoveChild(node);
-    frameNodeSetOnOverlay_.erase(node->GetId());
+    frameNodeMapOnOverlay_.erase(node->GetId());
     if (overlayNode_->GetChildren().empty()) {
         auto rootNode = rootNodeWeak_.Upgrade();
         CHECK_NULL_VOID(rootNode);
         rootNode->RemoveChild(overlayNode_);
         overlayNode_.Reset();
-        frameNodeSetOnOverlay_.clear();
+        frameNodeMapOnOverlay_.clear();
         rootNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_CHILD);
         return;
     }
@@ -4262,7 +4284,13 @@ void OverlayManager::ShowNodeOnOverlay(const RefPtr<NG::FrameNode>& node)
     CHECK_NULL_VOID(overlayNode_);
     auto layoutProperty = node->GetLayoutProperty();
     CHECK_NULL_VOID(layoutProperty);
+    if (layoutProperty->GetVisibility().has_value() && layoutProperty->GetVisibilityValue() == VisibleType::VISIBLE) {
+        return;
+    }
     layoutProperty->UpdateVisibility(VisibleType::VISIBLE);
+    auto focusHub = node->GetFocusHub();
+    CHECK_NULL_VOID(focusHub);
+    focusHub->RequestFocus();
     node->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_CHILD);
 }
 
@@ -4273,6 +4301,9 @@ void OverlayManager::HideNodeOnOverlay(const RefPtr<NG::FrameNode>& node)
     CHECK_NULL_VOID(overlayNode_);
     auto layoutProperty = node->GetLayoutProperty();
     CHECK_NULL_VOID(layoutProperty);
+    if (layoutProperty->GetVisibility().has_value() && layoutProperty->GetVisibilityValue() == VisibleType::GONE) {
+        return;
+    }
     layoutProperty->UpdateVisibility(VisibleType::GONE);
     node->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_CHILD);
 }

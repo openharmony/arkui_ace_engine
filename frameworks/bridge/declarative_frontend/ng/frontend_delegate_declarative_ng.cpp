@@ -1036,12 +1036,13 @@ void FrontendDelegateDeclarativeNG::CreateSnapshot(
 #endif
 }
 
-void FrontendDelegateDeclarativeNG::AddFrameNodeToOverlay(const RefPtr<NG::FrameNode>& node)
+void FrontendDelegateDeclarativeNG::AddFrameNodeToOverlay(
+    const RefPtr<NG::FrameNode>& node, std::optional<int32_t> index)
 {
-    auto task = [node, containerId = Container::CurrentId()](const RefPtr<NG::OverlayManager>& overlayManager) {
+    auto task = [node, index, containerId = Container::CurrentId()](const RefPtr<NG::OverlayManager>& overlayManager) {
         CHECK_NULL_VOID(overlayManager);
         ContainerScope scope(containerId);
-        overlayManager->AddFrameNodeToOverlay(node);
+        overlayManager->AddFrameNodeToOverlay(node, index);
     };
     MainWindowOverlay(std::move(task));
 }

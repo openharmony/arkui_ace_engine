@@ -88,7 +88,7 @@ void LayoutWrapper::RestoreGeoState()
 void LayoutWrapper::AvoidKeyboard(bool isFocusOnPage)
 {
     // apply keyboard avoidance on Page
-    if (GetHostTag() == V2::PAGE_ETS_TAG) {
+    if (GetHostTag() == V2::PAGE_ETS_TAG || GetHostTag() == V2::OVERLAY_ETS_TAG) {
         auto pipeline = PipelineContext::GetCurrentContext();
         CHECK_NULL_VOID(pipeline);
         auto manager = pipeline->GetSafeAreaManager();
