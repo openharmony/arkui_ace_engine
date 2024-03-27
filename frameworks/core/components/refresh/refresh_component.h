@@ -52,6 +52,8 @@ public:
 
     ACE_DEFINE_COMPONENT_EVENT(OnRefreshing, void());
 
+    ACE_DEFINE_COMPONENT_EVENT(OnOffsetChange, void(float));
+
     void SetIndicatorOffset(const Dimension& indicatorOffset)
     {
         if (GreatOrEqual(indicatorOffset.Value(), 0.0)) {

@@ -27,6 +27,7 @@ public:
     static void JSBind(BindingTarget globalObj);
     static void OnStateChange(const JSCallbackInfo& args);
     static void OnRefreshing(const JSCallbackInfo& args);
+    static void OnOffsetChange(const JSCallbackInfo& args);
     static void ParsFrictionData(const JsiRef<JsiValue>& value);
 
 private:
