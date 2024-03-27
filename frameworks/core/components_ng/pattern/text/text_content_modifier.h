@@ -31,7 +31,7 @@ class TextContentModifier : public ContentModifier {
     DECLARE_ACE_TYPE(TextContentModifier, ContentModifier)
 
 public:
-    explicit TextContentModifier(const std::optional<TextStyle>& textStyle,const WeakPtr<Pattern>& pattern = nullptr);
+    explicit TextContentModifier(const std::optional<TextStyle>& textStyle, const WeakPtr<Pattern>& pattern = nullptr);
     ~TextContentModifier() override = default;
 
     void onDraw(DrawingContext& drawingContext) override;
@@ -52,7 +52,7 @@ public:
 
     void ModifyTextStyle(TextStyle& textStyle);
 
-    void StartTextRace(const double &step,const int32_t &loop,const MarqueeDirection &direction,const int32_t &delay,const bool &isBounce = false);
+    void StartTextRace(const double& step, const int32_t& loop, const MarqueeDirection& direction, const int32_t& delay, const bool& isBounce = false);
     void StopTextRace();
 
     void SetParagraph(RefPtr<Paragraph> paragraph)
@@ -172,7 +172,7 @@ private:
     std::shared_ptr<AnimationUtils::Animation> raceAnimation_;
 
     RefPtr<PropertyOffsetF> contentOffset_;
-    RefPtr<PropertySizeF> contentSize_; 
+    RefPtr<PropertySizeF> contentSize_;
     RefPtr<PropertyInt> contentChange_;
     RefPtr<PropertyBool> clip_;
     RefPtr<PropertyString> fontFamilyString_;

@@ -56,7 +56,7 @@ inline FontWeight ConvertFontWeight(FontWeight fontWeight)
 }
 } // namespace
 
-TextContentModifier::TextContentModifier(const std::optional<TextStyle>& textStyle,const WeakPtr<Pattern>& pattern):pattern_(pattern)
+TextContentModifier::TextContentModifier(const std::optional<TextStyle>& textStyle, const WeakPtr<Pattern>& pattern):pattern_(pattern)
 {
     contentChange_ = MakeRefPtr<PropertyInt>(0);
     AttachProperty(contentChange_);
@@ -600,12 +600,17 @@ void TextContentModifier::SetContentSize(SizeF& value)
     contentSize_->Set(value);
 }
 
-void TextContentModifier::StartTextRace(const double &step,const int32_t &loop,const MarqueeDirection &direction,
-    const int32_t &delay,const bool &isBounce)
+void TextContentModifier::StartTextRace(const double& step, const int32_t& loop, const MarqueeDirection& direction, const int32_t& delay, const bool& isBounce)
 {
     if(!isBounce){
-        if (textRacing_ && NearEqual(step,marqueeStep_) && 
-        (loop == marqueeLoop_) && (direction == marqueeDirection_) && (delay == marqueeDelay_)) {
+        CHECK_NULL_VOID(paragraph_);
+        int32_t duration = static_cast<int32_t>(std::abs(paragraph_->GetTextWidth()) * DEFAULT_MARQUEE_SCROLL_DELAY / step);
+        if(duration <= 0){
+            return;
+        }
+
+        if (textRacing_ && NearEqual(step,marqueeStep_) && (loop == marqueeLoop_) && 
+           (direction == marqueeDirection_) && (delay == marqueeDelay_) && (duration == marqueeDuration_)) {
             return;
         }
 
@@ -618,26 +623,12 @@ void TextContentModifier::StartTextRace(const double &step,const int32_t &loop,c
         TAG_LOGE(AceLogTag::ACE_TEXT, "StartTextRace delay: %{public}d", delay);
 
         marqueeStep_ = step;
-
-        if(loop == marqueeLoop_){
-            marqueeLoop_ = loop;
-        }
-        
-        if(direction != marqueeDirection_){
-            marqueeDirection_ = direction;
-        }
-
-        if(delay != marqueeDelay_){
-            marqueeDelay_ = delay;
-        }
+        marqueeDuration_ = duration;
+        marqueeDirection_ = direction;
+        marqueeDelay_ = delay;
+        marqueeLoop_ = loop;
 
         if(marqueeLoop_ > 0 && marqueeCount_ >= marqueeLoop_){
-            return;
-        }
-
-        CHECK_NULL_VOID(paragraph_);
-        marqueeDuration_ = static_cast<int32_t>(std::abs(paragraph_->GetTextWidth()) * DEFAULT_MARQUEE_SCROLL_DELAY / marqueeStep_);
-        if(marqueeDuration_ <= 0){
             return;
         }
 
@@ -701,7 +692,6 @@ void TextContentModifier::StartTextRace(const double &step,const int32_t &loop,c
                 onFinish();
                 return;
             }
-
             TAG_LOGE(AceLogTag::ACE_TEXT, "StartTextRace other thread restart");
             taskExecutor->PostTask([onFinish]() {onFinish();}, TaskExecutor::TaskType::UI);
         });

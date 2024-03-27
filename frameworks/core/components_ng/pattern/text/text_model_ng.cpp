@@ -561,7 +561,7 @@ void TextModelNG::SetMarqueeOptions(const std::optional<bool>& start, const std:
     if (direction.has_value()) {
         ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextLayoutProperty, TextMarqueeDirection, direction.value(), frameNode);
     } 
-     if (delay.has_value()) {
+    if (delay.has_value()) {
         ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextLayoutProperty, TextMarqueeDelay, delay.value(), frameNode);
     }
 }
