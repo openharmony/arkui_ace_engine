@@ -32,7 +32,7 @@ class ACE_EXPORT SubContainer : public virtual AceType {
     DECLARE_ACE_TYPE(SubContainer, AceType);
 
 public:
-    using OnFormAcquiredCallback = std::function<void(const size_t)>;
+    using OnFormAcquiredCallback = std::function<void(const int64_t)>;
     using OnFormLoadCallback = std::function<void()>;
     using OnFormVisibleCallback = std::function<void()>;
 

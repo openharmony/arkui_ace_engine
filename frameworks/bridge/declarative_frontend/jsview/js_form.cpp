@@ -73,33 +73,37 @@ void JSForm::Create(const JSCallbackInfo& info)
     JSRef<JSVal> temporary = obj->GetProperty("temporary");
     JSRef<JSVal> wantValue = obj->GetProperty("want");
     JSRef<JSVal> renderingMode = obj->GetProperty("renderingMode");
-    RequestFormInfo fomInfo;
+    RequestFormInfo formInfo;
     if (id->IsString()) {
-        if (!StringUtils::IsNumber(id->ToString())
-            || (id->ToString() != "0" && StringUtils::StringToLongInt(id->ToString().c_str()) == 0)) {
+        if (!StringUtils::IsNumber(id->ToString())) {
             LOGE("Invalid form id : %{public}s", id->ToString().c_str());
             return;
         }
-        fomInfo.id = StringUtils::StringToLongInt(id->ToString().c_str());
+        int64_t inputFormId = StringUtils::StringToLongInt(id->ToString().c_str(), -1);
+        if (inputFormId == -1) {
+            LOGE("StringToLongInt failed : %{public}s", id->ToString().c_str());
+            return;
+        }
+        formInfo.id = inputFormId;
     }
     if (id->IsNumber()) {
-        fomInfo.id = id->ToNumber<int64_t>();
+        formInfo.id = id->ToNumber<int64_t>();
     }
-    fomInfo.cardName = name->ToString();
-    fomInfo.bundleName = bundle->ToString();
-    fomInfo.abilityName = ability->ToString();
-    fomInfo.moduleName = module->ToString();
+    formInfo.cardName = name->ToString();
+    formInfo.bundleName = bundle->ToString();
+    formInfo.abilityName = ability->ToString();
+    formInfo.moduleName = module->ToString();
     if (!dimension->IsNull() && !dimension->IsEmpty()) {
-        fomInfo.dimension = dimension->ToNumber<int32_t>();
+        formInfo.dimension = dimension->ToNumber<int32_t>();
     }
-    fomInfo.temporary = temporary->ToBoolean();
+    formInfo.temporary = temporary->ToBoolean();
     if (!wantValue->IsNull() && wantValue->IsObject()) {
-        fomInfo.wantWrap = CreateWantWrapFromNapiValue(wantValue);
+        formInfo.wantWrap = CreateWantWrapFromNapiValue(wantValue);
     }
     if (!renderingMode->IsNull() && !renderingMode->IsEmpty()) {
-        fomInfo.renderingMode = renderingMode->ToNumber<int32_t>();
+        formInfo.renderingMode = renderingMode->ToNumber<int32_t>();
     }
-    FormModel::GetInstance()->Create(fomInfo);
+    FormModel::GetInstance()->Create(formInfo);
 }
 
 void JSForm::SetSize(const JSCallbackInfo& info)

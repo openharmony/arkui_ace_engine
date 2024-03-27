@@ -176,13 +176,13 @@ inline int32_t StringToInt(const std::string& value)
     }
 }
 
-inline int64_t StringToLongInt(const std::string& value)
+inline int64_t StringToLongInt(const std::string& value, int64_t defaultErr = 0)
 {
     errno = 0;
     char* pEnd = nullptr;
     int64_t result = std::strtoll(value.c_str(), &pEnd, 10);
     if (pEnd == value.c_str() || errno == ERANGE) {
-        return 0;
+        return defaultErr;
     } else {
         return result;
     }
