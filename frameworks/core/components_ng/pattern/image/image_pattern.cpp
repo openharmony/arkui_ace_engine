@@ -1073,8 +1073,18 @@ void ImagePattern::OnIconConfigurationUpdate()
     OnConfigurationUpdate();
 }
 
+void ImagePattern::ClearImageCache()
+{
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto imageCache = pipeline->GetImageCache();
+    CHECK_NULL_VOID(imageCache);
+    imageCache->Clear();
+}
+
 void ImagePattern::OnConfigurationUpdate()
 {
+    ClearImageCache();
     CHECK_NULL_VOID(loadingCtx_);
 
     auto imageLayoutProperty = GetLayoutProperty<ImageLayoutProperty>();
