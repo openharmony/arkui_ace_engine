@@ -450,7 +450,6 @@ public:
         keyboardShortcut_.emplace_back(keyboardShortcut);
     }
 
-    
     void ClearSingleKeyboardShortcut()
     {
         if (keyboardShortcut_.size() == 1) {
