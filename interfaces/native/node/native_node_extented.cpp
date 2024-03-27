@@ -29,13 +29,13 @@ constexpr int NUM_5 = 5;
 
 ArkUI_LayoutConstraint* OH_ArkUI_LayoutConstraint_Create()
 {
-    ArkUI_LayoutConstraint* layoutConstraint = new ArkUI_LayoutConstraint {0, 0, 0, 0, 0, 0};
+    ArkUI_LayoutConstraint* layoutConstraint = new ArkUI_LayoutConstraint { 0, 0, 0, 0, 0, 0 };
     return layoutConstraint;
 }
 
 ArkUI_LayoutConstraint* OH_ArkUI_LayoutConstraint_Copy(const ArkUI_LayoutConstraint* constraint)
 {
-    ArkUI_LayoutConstraint* layoutConstraint = new ArkUI_LayoutConstraint {0, 0, 0, 0, 0, 0};;
+    ArkUI_LayoutConstraint* layoutConstraint = new ArkUI_LayoutConstraint{ 0, 0, 0, 0, 0, 0 };
     CHECK_NULL_RETURN(constraint, nullptr);
     layoutConstraint->minWidth = constraint->minWidth;
     layoutConstraint->maxWidth = constraint->maxWidth;
