@@ -1167,6 +1167,8 @@ bool WebPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, co
     auto offset = Offset(GetCoordinatePoint()->GetX(), GetCoordinatePoint()->GetY());
     delegate_->SetBoundsOrResize(drawSize_, offset);
     if (isOfflineMode_) {
+        TAG_LOGE(AceLogTag::ACE_WEB,
+        "OnDirtyLayoutWrapperSwap; WebPattern is Offline Mode, WebId:%{public}d", GetWebId());
         isOfflineMode_ = false;
         OnWindowShow();
     }
@@ -2739,11 +2741,11 @@ void WebPattern::UpdateLocale()
 
 void WebPattern::OnWindowShow()
 {
-    TAG_LOGD(AceLogTag::ACE_WEB, "WebPattern::OnWindowShow");
     delegate_->OnRenderToForeground();
     if (isWindowShow_ || !isVisible_) {
         return;
     }
+    TAG_LOGD(AceLogTag::ACE_WEB, "WebPattern::OnWindowShow");
 
     CHECK_NULL_VOID(delegate_);
     delegate_->ShowWebView();
@@ -2752,11 +2754,11 @@ void WebPattern::OnWindowShow()
 
 void WebPattern::OnWindowHide()
 {
-    TAG_LOGD(AceLogTag::ACE_WEB, "WebPattern::OnWindowHide");
     delegate_->OnRenderToBackground();
     if (!isWindowShow_ || !isVisible_) {
         return;
     }
+    TAG_LOGD(AceLogTag::ACE_WEB, "WebPattern::OnWindowHide");
 
     CHECK_NULL_VOID(delegate_);
     delegate_->HideWebView();
@@ -2807,6 +2809,7 @@ void WebPattern::OnInActive()
     if (!isActive_) {
         return;
     }
+    TAG_LOGD(AceLogTag::ACE_WEB, "WebPattern::OnInActive");
 
     CHECK_NULL_VOID(delegate_);
     delegate_->OnInactive();
@@ -2818,6 +2821,7 @@ void WebPattern::OnActive()
     if (isActive_) {
         return;
     }
+    TAG_LOGD(AceLogTag::ACE_WEB, "WebPattern::OnActive");
 
     CHECK_NULL_VOID(delegate_);
     delegate_->OnActive();
@@ -2826,6 +2830,8 @@ void WebPattern::OnActive()
 
 void WebPattern::OnVisibleAreaChange(bool isVisible)
 {
+    TAG_LOGD(AceLogTag::ACE_WEB, "WebPattern::OnVisibleAreaChange webId:%{public}d, 
+    isVisible:%{public}d, old_isVisible:%{public}d", GetWebId(), isVisible, isVisible_);
     if (isVisible_ == isVisible) {
         return;
     }
