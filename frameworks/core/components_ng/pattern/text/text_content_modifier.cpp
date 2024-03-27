@@ -618,10 +618,6 @@ void TextContentModifier::StartTextRace(const double& step, const int32_t& loop,
             StopTextRace();
         }
 
-        TAG_LOGE(AceLogTag::ACE_TEXT, "StartTextRace step: %{public}lf", step);
-        TAG_LOGE(AceLogTag::ACE_TEXT, "StartTextRace loop: %{public}d", loop);
-        TAG_LOGE(AceLogTag::ACE_TEXT, "StartTextRace delay: %{public}d", delay);
-
         marqueeStep_ = step;
         marqueeDuration_ = duration;
         marqueeDirection_ = direction;
@@ -632,6 +628,9 @@ void TextContentModifier::StartTextRace(const double& step, const int32_t& loop,
             return;
         }
 
+        TAG_LOGE(AceLogTag::ACE_TEXT, "StartTextRace step: %{public}lf", marqueeStep_);
+        TAG_LOGE(AceLogTag::ACE_TEXT, "StartTextRace loop: %{public}d", marqueeLoop_);
+        TAG_LOGE(AceLogTag::ACE_TEXT, "StartTextRace delay: %{public}d", marqueeDelay_);
         TAG_LOGE(AceLogTag::ACE_TEXT, "StartTextRace duration: %{public}d", marqueeDuration_);
 
         textRacing_ = true;
@@ -645,7 +644,9 @@ void TextContentModifier::StartTextRace(const double& step, const int32_t& loop,
         auto textPattern = DynamicCast<TextPattern>(pattern_.Upgrade());
         CHECK_NULL_VOID(textPattern);
         textPattern->FireOnMarqueeStateChange(TextMarqueeState::START);
-        TAG_LOGE(AceLogTag::ACE_TEXT, "StartTextRace START");
+        TAG_LOGE(AceLogTag::ACE_TEXT, "StartTextRace START INIT");
+    }else{
+        TAG_LOGE(AceLogTag::ACE_TEXT, "StartTextRace START Bounce");
     }
 
     AnimationOption option = AnimationOption();
@@ -656,47 +657,56 @@ void TextContentModifier::StartTextRace(const double& step, const int32_t& loop,
     option.SetIteration(1);
     option.SetTempo(RACE_TEMPO);
 
-    TAG_LOGE(AceLogTag::ACE_TEXT, "StartTextRace START EVER");
     marqueeAnimationId_++;
     raceAnimation_ = AnimationUtils::StartAnimation(
         option, 
         [&]() { racePercentFloat_->Set(RACE_MOVE_PERCENT_MAX); },
-        [weak = AceType::WeakClaim(this),marqueeAnimationId = marqueeAnimationId_,id = Container::CurrentId()](){
-            TAG_LOGE(AceLogTag::ACE_TEXT, "StartTextRace animation callback");
+        [weak = AceType::WeakClaim(this), marqueeAnimationId = marqueeAnimationId_, id = Container::CurrentId()](){
+            auto modifier = weak.Upgrade();
+            CHECK_NULL_VOID(modifier);
+            TAG_LOGE(AceLogTag::ACE_TEXT, "StartTextRace start marqueeCount_: %{public}d",modifier->marqueeCount_);
+
             ContainerScope scope(id);
             auto taskExecutor = Container::CurrentTaskExecutor();
             CHECK_NULL_VOID(taskExecutor);
 
-            auto onFinish = [weak]() {
+            auto onFinish = [weak, marqueeAnimationId]() {
                 auto modifier = weak.Upgrade();
                 CHECK_NULL_VOID(modifier);
-
+                TAG_LOGE(AceLogTag::ACE_TEXT, "StartTextRace finish marqueeCount_: %{public}d",modifier->marqueeCount_);
+                modifier->marqueeCount_++;
+                modifier->racePercentFloat_->Set(RACE_MOVE_PERCENT_MIN);
+                
                 auto textPattern = DynamicCast<TextPattern>(modifier->pattern_.Upgrade());
                 CHECK_NULL_VOID(textPattern);
 
                 if (marqueeAnimationId != modifier->marqueeAnimationId_) {
+                    TAG_LOGE(AceLogTag::ACE_TEXT, "StartTextRace ANIMATION NOSAME");
                     return;
                 }
 
-                if(modifier->marqueeLoop_ > 0 && ++modifier->marqueeCount_ >= modifier->marqueeLoop_){
-                    textPattern->FireOnMarqueeStateChange(TextMarqueeState::FINISH);
+                TAG_LOGE(AceLogTag::ACE_TEXT, "StartTextRace marqueeLoop_: %{public}d", modifier->marqueeLoop_);
+                TAG_LOGE(AceLogTag::ACE_TEXT, "StartTextRace marqueeCount_: %{public}d", modifier->marqueeCount_);
+                
+                if(modifier->marqueeLoop_ > 0 && modifier->marqueeCount_ >= modifier->marqueeLoop_){
                     TAG_LOGE(AceLogTag::ACE_TEXT, "StartTextRace FINISH");
+                    textPattern->FireOnMarqueeStateChange(TextMarqueeState::FINISH);
                 }else{
-                    textPattern->FireOnMarqueeStateChange(TextMarqueeState::BOUNCE);
                     TAG_LOGE(AceLogTag::ACE_TEXT, "StartTextRace BOUNCE");
-                    modifier->StartTextRace(modifier->marqueeStep_,modifier->marqueeLoop_,modifier->marqueeDirection_,modifier->marqueeDelay_,true);
+                    textPattern->FireOnMarqueeStateChange(TextMarqueeState::BOUNCE);
+                    modifier->StartTextRace(modifier->marqueeStep_, modifier->marqueeLoop_, modifier->marqueeDirection_, modifier->marqueeDelay_, true);
                 }
             };
+
             if (taskExecutor->WillRunOnCurrentThread(TaskExecutor::TaskType::UI)) {
                 TAG_LOGE(AceLogTag::ACE_TEXT, "StartTextRace current thread restart");
                 onFinish();
-                return;
+            }else{
+                TAG_LOGE(AceLogTag::ACE_TEXT, "StartTextRace other thread restart");
+                taskExecutor->PostTask([onFinish]() {onFinish();}, TaskExecutor::TaskType::UI);
             }
-            TAG_LOGE(AceLogTag::ACE_TEXT, "StartTextRace other thread restart");
-            taskExecutor->PostTask([onFinish]() {onFinish();}, TaskExecutor::TaskType::UI);
         });
 }
-
 
 void TextContentModifier::StopTextRace()
 {
