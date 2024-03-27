@@ -261,9 +261,9 @@ void NavigationPattern::UpdateNavPathList()
         auto pathName = pathNames[i];
         RefPtr<UINode> uiNode;
         int32_t lastIndex;
-        auto isFinded = navigationStack_->Get(pathName, uiNode, lastIndex);
+        navigationStack_->Get(pathName, uiNode, lastIndex);
         auto isSameWithLast = (i == pathNames.size() - 1) && (replaceValue == 1);
-        if (isFinded) {
+        if (uiNode) {
             navigationStack_->RemoveInNavPathList(pathName, uiNode);
             navigationStack_->RemoveInPreNavPathList(pathName, uiNode);
             if (isSameWithLast) {
@@ -278,8 +278,8 @@ void NavigationPattern::UpdateNavPathList()
             navPathList.emplace_back(std::make_pair(pathName, uiNode));
             continue;
         }
-        isFinded = navigationStack_->GetFromPreBackup(pathName, uiNode, lastIndex);
-        if (isFinded) {
+        navigationStack_->GetFromPreBackup(pathName, uiNode, lastIndex);
+        if (uiNode) {
             navigationStack_->RemoveInPreNavPathList(pathName, uiNode);
             if (isSameWithLast) {
                 TAG_LOGD(AceLogTag::ACE_NAVIGATION, "same with last in backup list, navigation stack create new node, "
