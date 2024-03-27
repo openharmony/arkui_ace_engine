@@ -315,7 +315,7 @@ void VideoPattern::RegisterMediaPlayerEvent()
     mediaPlayer_->RegisterMediaPlayerEvent(
         positionUpdatedEvent, stateChangedEvent, errorEvent, resolutionChangeEvent, startRenderFrameEvent);
 
-#ifdef VIDEO_TEXTURE_SUPPORTED
+#ifdef RENDER_EXTRACT_SUPPORTED
     auto&& textureRefreshEvent = [videoPattern, uiTaskExecutor](int32_t instanceId, int64_t textureId) {
         uiTaskExecutor.PostSyncTask([&videoPattern, instanceId, textureId] {
             auto video = videoPattern.Upgrade();
@@ -332,7 +332,7 @@ void VideoPattern::RegisterMediaPlayerEvent()
 #endif
 }
 
-#ifdef VIDEO_TEXTURE_SUPPORTED
+#ifdef RENDER_EXTRACT_SUPPORTED
 void* VideoPattern::GetNativeWindow(int32_t instanceId, int64_t textureId)
 {
     auto container = AceEngine::Get().GetContainer(instanceId);
@@ -727,8 +727,17 @@ void VideoPattern::OnAttachToFrameNode()
     CHECK_NULL_VOID(host);
     auto renderContext = host->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
+
+#ifdef RENDER_EXTRACT_SUPPORTED
+    CHECK_NULL_VOID(renderSurface_);
+    auto contextType = renderSurface_->IsTexture() ?
+        RenderContext::ContextType::HARDWARE_TEXTURE : RenderContext::ContextType::HARDWARE_SURFACE;
+    static RenderContext::ContextParam param = { contextType, "MediaPlayerSurface",
+                                                 RenderContext::PatternType::VIDEO };
+#else
     static RenderContext::ContextParam param = { RenderContext::ContextType::HARDWARE_SURFACE, "MediaPlayerSurface",
                                                  RenderContext::PatternType::VIDEO };
+#endif
     renderContextForMediaPlayer_->InitContext(false, param);
 
     if (SystemProperties::GetExtSurfaceEnabled()) {
@@ -750,7 +759,7 @@ void VideoPattern::OnDetachFromMainTree()
 
 void VideoPattern::RegisterRenderContextCallBack()
 {
-#ifndef VIDEO_TEXTURE_SUPPORTED
+#ifndef RENDER_EXTRACT_SUPPORTED
     auto isFullScreen = IsFullScreen();
     if (!isFullScreen) {
         auto OnAreaChangedCallBack = [weak = WeakClaim(this)](float x, float y, float w, float h) mutable {
@@ -1006,7 +1015,7 @@ bool VideoPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, 
 
 void VideoPattern::OnAreaChangedInner()
 {
-#ifndef VIDEO_TEXTURE_SUPPORTED
+#ifndef RENDER_EXTRACT_SUPPORTED
     auto isFullScreen = IsFullScreen();
     if (SystemProperties::GetExtSurfaceEnabled() && isFullScreen) {
 #else

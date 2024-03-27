@@ -234,7 +234,7 @@ public:
 
     RefPtr<VideoPattern> GetTargetVideoPattern();
 
-#ifdef VIDEO_TEXTURE_SUPPORTED
+#ifdef RENDER_EXTRACT_SUPPORTED
     void OnTextureRefresh(void* surface);
 #endif
 
@@ -248,7 +248,7 @@ protected:
 
     int32_t instanceId_;
 
-#if defined(VIDEO_TEXTURE_SUPPORTED) && defined(ENABLE_ROSEN_BACKEND)
+#if defined(RENDER_EXTRACT_SUPPORTED) && defined(ENABLE_ROSEN_BACKEND)
     WeakPtr<RenderSurface> renderSurfaceWeakPtr_;
     WeakPtr<RenderContext> renderContextForMediaPlayerWeakPtr_;
 #endif
@@ -314,7 +314,7 @@ private:
         }
     }
 
-#ifdef VIDEO_TEXTURE_SUPPORTED
+#ifdef RENDER_EXTRACT_SUPPORTED
     void* GetNativeWindow(int32_t instanceId, int64_t textureId);
 #endif
 

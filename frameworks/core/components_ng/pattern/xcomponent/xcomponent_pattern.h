@@ -311,7 +311,8 @@ private:
     void InitializeRenderContext();
     void SetSurfaceNodeToGraphic();
 
-#if defined(VIDEO_TEXTURE_SUPPORTED) && defined(XCOMPONENT_SUPPORTED)
+#ifdef RENDER_EXTRACT_SUPPORTED
+    RenderSurface::RenderSurfaceType CovertToRenderSurfaceType(const XComponentType& hostType);
     void RegisterRenderContextCallBack();
     void RequestFocus();
 #endif
