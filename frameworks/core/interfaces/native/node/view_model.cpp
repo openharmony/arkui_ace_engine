@@ -572,4 +572,10 @@ void* GetAttachNodePtr(ArkUINodeHandle nodePtr)
     return frameNode->GetExternalData();
 }
 
+ArkUI_Bool IsBuilderNode(void* nodePtr)
+{
+    CHECK_NULL_RETURN(nodePtr, false);
+    auto* node = reinterpret_cast<UINode*>(nodePtr);
+    return static_cast<ArkUI_Int32>(node->GetNodeStatus()) != 0 ;
+}
 } // namespace OHOS::Ace::NG::ViewModel
