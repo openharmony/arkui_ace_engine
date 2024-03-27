@@ -3195,7 +3195,7 @@ void OverlayManager::PlaySheetTransition(
     context->UpdateRenderGroup(true, true, true);
     auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
     CHECK_NULL_VOID(sheetPattern);
-    auto sheetMaxHeight = sheetPattern->GetSheetMaxHeight();
+    auto sheetMaxHeight = sheetPattern->GetPageHeight();
     auto sheetParent = DynamicCast<FrameNode>(sheetNode->GetParent());
     CHECK_NULL_VOID(sheetParent);
     if (isTransitionIn) {
@@ -3389,7 +3389,7 @@ void OverlayManager::ComputeSheetOffset(NG::SheetStyle& sheetStyle, RefPtr<Frame
 {
     auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
     CHECK_NULL_VOID(sheetPattern);
-    auto sheetMaxHeight = sheetPattern->GetSheetMaxHeight();
+    auto sheetMaxHeight = sheetPattern->GetPageHeightWithoutOffset();
     auto largeHeight = sheetMaxHeight - SHEET_BLANK_MINI_HEIGHT.ConvertToPx();
     auto geometryNode = sheetNode->GetGeometryNode();
     CHECK_NULL_VOID(geometryNode);
@@ -3423,12 +3423,11 @@ void OverlayManager::ComputeSingleGearSheetOffset(NG::SheetStyle& sheetStyle, Re
 {
     auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
     CHECK_NULL_VOID(sheetPattern);
-    auto sheetMaxHeight = sheetPattern->GetSheetMaxHeight();
+    auto sheetMaxHeight = sheetPattern->GetPageHeightWithoutOffset();
     auto context = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(context);
-    auto manager = context->GetSafeAreaManager();
-    CHECK_NULL_VOID(manager);
-    auto statusBarHeight = manager->GetSystemSafeArea().top_.Length();
+    auto safeAreaInsets = context->GetSafeAreaWithoutProcess();
+    auto statusBarHeight = safeAreaInsets.top_.Length();
     auto largeHeight = sheetMaxHeight - SHEET_BLANK_MINI_HEIGHT.ConvertToPx() - statusBarHeight;
     if (sheetStyle.sheetMode.has_value()) {
         if (sheetStyle.sheetMode == SheetMode::MEDIUM) {
@@ -3465,12 +3464,11 @@ void OverlayManager::ComputeDetentsSheetOffset(NG::SheetStyle& sheetStyle, RefPt
 {
     auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
     CHECK_NULL_VOID(sheetPattern);
-    auto sheetMaxHeight = sheetPattern->GetSheetMaxHeight();
+    auto sheetMaxHeight = sheetPattern->GetPageHeightWithoutOffset();
     auto context = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(context);
-    auto manager = context->GetSafeAreaManager();
-    CHECK_NULL_VOID(manager);
-    auto statusBarHeight = manager->GetSystemSafeArea().top_.Length();
+    auto safeAreaInsets = context->GetSafeAreaWithoutProcess();
+    auto statusBarHeight = safeAreaInsets.top_.Length();
     auto largeHeight = sheetMaxHeight - SHEET_BLANK_MINI_HEIGHT.ConvertToPx() - statusBarHeight;
     auto selection = sheetStyle.detents[0];
     if (selection.sheetMode.has_value()) {
@@ -4356,6 +4354,36 @@ void OverlayManager::MarkDirty(PropertyChangeFlag flag)
             }
         }
     }
+}
+
+void OverlayManager::MarkDirtyOverlay()
+{
+    auto root = rootNodeWeak_.Upgrade();
+    CHECK_NULL_VOID(root);
+    auto child = root->GetLastChild();
+    CHECK_NULL_VOID(child);
+    // sheetPage Node will MarkDirty when VirtualKeyboard Height Changes
+    auto sheetParent = DynamicCast<FrameNode>(child);
+    if (sheetParent && sheetParent->GetTag() == V2::SHEET_WRAPPER_TAG) {
+        auto sheet = sheetParent->GetChildAtIndex(0);
+        if (sheet) {
+            sheet->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+        }
+    }
+}
+
+bool OverlayManager::CheckPageNeedAvoidKeyboard() const
+{
+    auto root = rootNodeWeak_.Upgrade();
+    CHECK_NULL_RETURN(root, true);
+    auto child = root->GetLastChild();
+    CHECK_NULL_RETURN(child, true);
+    // page will not avoid keyboard when lastChild is sheet
+    if (child->GetTag() != V2::SHEET_WRAPPER_TAG) {
+        return true;
+    }
+    auto frameNode = DynamicCast<FrameNode>(child);
+    return !(frameNode && frameNode->GetFocusHub() && frameNode->GetFocusHub()->IsCurrentFocus());
 }
 
 float OverlayManager::GetRootHeight() const

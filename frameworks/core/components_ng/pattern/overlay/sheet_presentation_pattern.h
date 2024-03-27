@@ -219,9 +219,7 @@ public:
 
     void SetCurrentHeightToOverlay(float height)
     {
-        auto context = PipelineContext::GetCurrentContext();
-        CHECK_NULL_VOID(context);
-        auto overlayManager = context->GetOverlayManager();
+        auto overlayManager = GetOverlayManager();
         CHECK_NULL_VOID(overlayManager);
         overlayManager->SetSheetHeight(height);
     }
@@ -334,9 +332,21 @@ public:
         return isAnimationProcess_;
     }
 
-    float GetSheetMaxHeight()
+    float GetPageHeightWithoutOffset() const
     {
         return pageHeight_;
+    }
+
+    float GetPageHeight()
+    {
+        auto parentOffsetY = GetRootOffsetYToWindow();
+        return pageHeight_ - parentOffsetY;
+    }
+
+    float GetSheetMaxHeight()
+    {
+        // pageHeight - statusBarHeight
+        return sheetMaxHeight_;
     }
 
     float GetSheetMaxWidth()
@@ -381,6 +391,10 @@ public:
         }
         return height_;
     }
+
+    RefPtr<OverlayManager> GetOverlayManager();
+    RefPtr<FrameNode> GetOverlayRoot();
+    float GetRootOffsetYToWindow();
 
     bool IsAvoidingKeyboard() const
     {

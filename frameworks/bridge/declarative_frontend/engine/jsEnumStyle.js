@@ -1370,6 +1370,12 @@ var SheetType;
   SheetType[SheetType["POPUP"] = 2] = "POPUP";
 })(SheetType || (SheetType = {}));
 
+var SheetMode;
+(function (SheetMode) {
+  SheetMode[SheetMode["OVERLAY"] = 0] = "OVERLAY";
+  SheetMode[SheetMode["EMBEDDED"] = 1] = "EMBEDDED";
+})(SheetMode || (SheetMode = {}));
+
 var FunctionKey;
 (function (FunctionKey) {
   FunctionKey[FunctionKey["ESC"] = 0] = "ESC";

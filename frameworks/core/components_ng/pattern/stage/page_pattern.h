@@ -191,6 +191,20 @@ public:
         onHiddenChange_ = std::move(onHiddenChange);
     }
 
+    void CreateOverlayManager(bool isShow)
+    {
+        if (!overlayManager_ && isShow) {
+            overlayManager_ = MakeRefPtr<OverlayManager>(GetHost());
+        }
+    }
+
+    const RefPtr<OverlayManager>& GetOverlayManager()
+    {
+        return overlayManager_;
+    }
+
+    bool RemoveOverlay();
+    void MarkDirtyOverlay();
 private:
     void OnAttachToFrameNode() override;
     void BeforeCreateLayoutWrapper() override;
@@ -211,6 +225,7 @@ private:
     }
 
     RefPtr<PageInfo> pageInfo_;
+    RefPtr<OverlayManager> overlayManager_;
 
     std::function<void()> onPageShow_;
     std::function<void()> onPageHide_;

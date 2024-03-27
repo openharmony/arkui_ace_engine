@@ -556,6 +556,25 @@ public:
         return (flag & nodeFlag_) == flag;
     }
 
+    void SetPageLevelNodeId(int32_t pageLevelId)
+    {
+        pageLevelId_ = pageLevelId;
+    }
+
+    int32_t GetPageLevelNodeId() const
+    {
+        return pageLevelId_;
+    }
+
+    void SetPageLevelToNav(bool isLevelNavDest)
+    {
+        isLevelNavDest_ = isLevelNavDest;
+    }
+
+    bool PageLevelIsNavDestination() const
+    {
+        return isLevelNavDest_;
+    }
 protected:
     std::list<RefPtr<UINode>>& ModifyChildren()
     {
@@ -625,6 +644,8 @@ private:
     int32_t nodeId_ = 0;
     int64_t accessibilityId_ = -1;
     int32_t layoutPriority_ = 0;
+    int32_t pageLevelId_ = 0; // host is Page or NavDestination
+    bool isLevelNavDest_ = false;
     bool isRoot_ = false;
     bool onMainTree_ = false;
     bool removeSilently_ = true;
