@@ -1172,6 +1172,7 @@ void OverlayManager::HidePopup(int32_t targetId, const PopupInfo& popupInfo)
         AccessibilityEventType::CHANGE, WindowsContentChangeTypes::CONTENT_CHANGE_TYPE_SUBTREE);
     RemoveEventColumn();
     RemovePixelMapAnimation(false, 0, 0);
+    RemoveGatherNodeWithAnimation();
     RemoveFilter();
 }
 
@@ -1462,8 +1463,10 @@ void OverlayManager::HideMenu(const RefPtr<FrameNode>& menu, int32_t targetId, b
     RemoveEventColumn();
     if (isMenuOnTouch) {
         RemovePixelMap();
+        RemoveGatherNode();
     } else {
         RemovePixelMapAnimation(false, 0, 0);
+        RemoveGatherNodeWithAnimation();
     }
     RemoveFilterAnimation();
 }
@@ -1580,15 +1583,6 @@ void OverlayManager::CleanMenuInSubWindow(int32_t targetId)
         rootNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
         menuWrapperPattern->SetMenuStatus(MenuStatus::HIDE);
         break;
-    }
-
-    for (const auto& child : rootNode->GetChildren()) {
-        auto node = DynamicCast<FrameNode>(child);
-        if (node && node->GetTag() == V2::COLUMN_ETS_TAG) {
-            rootNode->RemoveChild(node);
-            rootNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
-            break;
-        }
     }
 }
 
@@ -3903,7 +3897,7 @@ void OverlayManager::RemovePixelMapAnimation(bool startDrag, double x, double y)
         auto dragDropManager = pipeline->GetDragDropManager();
         CHECK_NULL_VOID(dragDropManager);
         DragEventActuator::ExecutePreDragAction(PreDragStatus::PREVIEW_LANDING_FINISHED);
-        if (!dragDropManager->IsNeedScaleDragPreview()) {
+        if (!dragDropManager->IsNeedDisplayInSubwindow()) {
             InteractionInterface::GetInstance()->SetDragWindowVisible(true);
         }
         auto overlayManager = AceType::Claim(this);
@@ -4228,4 +4222,109 @@ float OverlayManager::GetRootHeight() const
 }
 
 void OverlayManager::CheckReturnFocus(RefPtr<FrameNode> node) {}
+
+bool OverlayManager::isMaskNode(int32_t maskId)
+{
+    for (auto it = maskNodeIdMap_.begin(); it != maskNodeIdMap_.end(); it++) {
+        if (it->second == maskId) {
+            return true;
+        }
+    }
+    return false;
+}
+
+int32_t OverlayManager::GetMaskNodeIdWithDialogId(int32_t dialogId)
+{
+    int32_t maskNodeId = -1;
+    for (auto it = maskNodeIdMap_.begin(); it != maskNodeIdMap_.end(); it++) {
+        if (it->first == dialogId) {
+            maskNodeId = it->second;
+            break;
+        }
+    }
+    return maskNodeId;
+}
+
+void OverlayManager::MountGatherNodeToRootNode(const RefPtr<FrameNode>& frameNode,
+    std::vector<GatherNodeChildInfo>& gatherNodeChildrenInfo)
+{
+    auto rootNode = rootNodeWeak_.Upgrade();
+    CHECK_NULL_VOID(rootNode);
+    frameNode->MountToParent(rootNode);
+    frameNode->OnMountToParentDone();
+    gatherNodeWeak_ = frameNode;
+    hasGatherNode_ = true;
+    gatherNodeChildrenInfo_ = gatherNodeChildrenInfo;
+}
+
+void OverlayManager::MountGatherNodeToWindowScene(const RefPtr<FrameNode>& frameNode,
+    std::vector<GatherNodeChildInfo>& gatherNodeChildrenInfo, const RefPtr<UINode>& windowScene)
+{
+    CHECK_NULL_VOID(windowScene);
+    frameNode->MountToParent(windowScene);
+    frameNode->OnMountToParentDone();
+    windowScene->MarkDirtyNode(PROPERTY_UPDATE_BY_CHILD_REQUEST);
+    gatherNodeWeak_ = frameNode;
+    hasGatherNode_ = true;
+    gatherNodeChildrenInfo_ = gatherNodeChildrenInfo;
+}
+
+void OverlayManager::RemoveGatherNode()
+{
+    if (!hasGatherNode_) {
+        return;
+    }
+    auto frameNode = gatherNodeWeak_.Upgrade();
+    CHECK_NULL_VOID(frameNode);
+    auto rootNode = frameNode->GetParent();
+    CHECK_NULL_VOID(rootNode);
+    rootNode->RemoveChild(frameNode);
+    rootNode->RebuildRenderContextTree();
+    rootNode->MarkDirtyNode(PROPERTY_UPDATE_BY_CHILD_REQUEST);
+    hasGatherNode_ = false;
+    gatherNodeWeak_ = nullptr;
+    gatherNodeChildrenInfo_.clear();
+}
+
+void OverlayManager::RemoveGatherNodeWithAnimation()
+{
+    if (!hasGatherNode_) {
+        return;
+    }
+    AnimationOption option;
+    option.SetDuration(PIXELMAP_ANIMATION_DURATION);
+    option.SetCurve(Curves::SHARP);
+
+    option.SetOnFinishEvent([weak = gatherNodeWeak_] {
+        auto frameNode = weak.Upgrade();
+        CHECK_NULL_VOID(frameNode);
+        auto rootNode = frameNode->GetParent();
+        CHECK_NULL_VOID(rootNode);
+        rootNode->RemoveChild(frameNode);
+        rootNode->RebuildRenderContextTree();
+        rootNode->MarkDirtyNode(PROPERTY_UPDATE_BY_CHILD_REQUEST);
+    });
+    gatherNodeWeak_ = nullptr;
+    hasGatherNode_ = false;
+    AnimationUtils::Animate(
+        option,
+        [gatherNodeChildrenInfo = gatherNodeChildrenInfo_]() mutable {
+            for (const auto& child : gatherNodeChildrenInfo) {
+                auto imageNode = child.imageNode.Upgrade();
+                CHECK_NULL_VOID(imageNode);
+                auto imageContext = imageNode->GetRenderContext();
+                CHECK_NULL_VOID(imageContext);
+                imageContext->UpdatePosition(OffsetT<Dimension>(Dimension(child.offset.GetX()),
+                    Dimension(child.offset.GetY())));
+                imageContext->UpdateTransformScale({ 1.0f, 1.0f });
+                Vector5F rotate = Vector5F(0.0f, 0.0f, 1.0f, 0.0f, 0.0f);
+                imageContext->UpdateTransformRotate(rotate);
+                imageContext->UpdateOpacity(1.0);
+                BorderRadiusProperty borderRadius;
+                borderRadius.SetRadius(0.0_vp);
+                imageContext->UpdateBorderRadius(borderRadius);
+            }
+        },
+        option.GetOnFinishEvent());
+}
 } // namespace OHOS::Ace::NG
