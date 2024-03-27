@@ -68,6 +68,14 @@ struct AutoScrollParam {
     Offset eventOffset;
     bool isFirstRun_ = true;
 };
+enum class RecordType {
+    DEL_FORWARD = 0,
+    DEL_BACKWARD = 1,
+    INSERT = 2,
+    UNDO = 3,
+    REDO = 4,
+    DRAG = 5
+};
 
 class RichEditorPattern : public TextPattern, public ScrollablePattern, public TextInputClient {
     DECLARE_ACE_TYPE(RichEditorPattern, TextPattern, ScrollablePattern, TextInputClient);
@@ -263,6 +271,7 @@ public:
     void CreateHandles() override;
     void HandleMenuCallbackOnSelectAll();
     void HandleOnSelectAll() override;
+    void OnCopyOperation(bool isUsingExternalKeyboard = false);
     void HandleOnCopy(bool isUsingExternalKeyboard = false) override;
     bool JudgeDraggable(GestureEvent& info);
     void CalculateCaretOffsetAndHeight(OffsetF& caretOffset, float& caretHeight);
@@ -606,6 +615,27 @@ private:
     RefPtr<SpanNode> InsertValueToBeforeSpan(RefPtr<SpanNode>& spanNodeBefore, const std::string& insertValue);
     void SetCaretSpanIndex(int32_t index);
     bool HasSameTypingStyle(const RefPtr<SpanNode>& spanNode);
+
+    void GetReplacedSpan(RichEditorChangeValue& changeValue, int32_t& innerPosition, const std::string& insertValue,
+        int32_t textIndex, std::optional<TextStyle> style, bool isCreate = false, bool fixDel = true);
+    void GetReplacedSpanFission(RichEditorChangeValue& changeValue, int32_t& innerPosition, std::string& content,
+        int32_t startSpanIndex, int32_t offsetInSpan, std::optional<TextStyle> style);
+    void CreateSpanResult(RichEditorChangeValue& changeValue, int32_t& innerPosition, int32_t spanIndex,
+        int32_t offsetInSpan, int32_t endInSpan, std::string content, std::optional<TextStyle> style);
+    void SetTextStyleToRet(RichEditorAbstractSpanResult& retInfo, const TextStyle& textStyle);
+    void CalcInsertValueObj(TextInsertValueInfo& info, int textIndex, bool isCreate = false);
+    void GetDeletedSpan(RichEditorChangeValue& changeValue, int32_t& innerPosition, int32_t length,
+        RichEditorDeleteDirection direction = RichEditorDeleteDirection::FORWARD);
+    RefPtr<SpanItem> GetDelPartiallySpanItem(
+        RichEditorChangeValue& changeValue, std::string& originalStr, int32_t& originalPos);
+    void FixMoveDownChange(RichEditorChangeValue& changeValue, int32_t delLength);
+    bool BeforeChangeText(
+        RichEditorChangeValue& changeValue, const OperationRecord& record, RecordType type, int32_t delLength = 0);
+    void BeforeUndo(RichEditorChangeValue& changeValue, int32_t& innerPosition, const OperationRecord& record);
+    void BeforeRedo(RichEditorChangeValue& changeValue, int32_t& innerPosition, const OperationRecord& record);
+    void BeforeDrag(RichEditorChangeValue& changeValue, int32_t& innerPosition, const OperationRecord& record);
+    bool BeforeChangeText(RichEditorChangeValue& changeValue, const TextSpanOptions& options);
+    void AfterChangeText(RichEditorChangeValue& changeValue);
 
     // add for scroll.
     void UpdateChildrenOffset();
