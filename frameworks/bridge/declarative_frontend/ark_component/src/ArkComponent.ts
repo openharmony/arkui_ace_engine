@@ -22,13 +22,20 @@ function getUINativeModule(): any {
   return arkUINativeModule;
 }
 
+enum ModifierType {
+  ORIGIN = 0,
+  STATE = 1
+}
+
+type AttributeModifierWithKey = ModifierWithKey<number | string | boolean | object>;
+
 const UI_STATE_NORMAL = 0;
 const UI_STATE_PRESSED = 1;
 const UI_STATE_FOCUSED = 1 << 1;
 const UI_STATE_DISABLED = 1 << 2;
 const UI_STATE_SELECTED = 1 << 3;
 
-function applyUIAttributes(modifier: AttributeModifier<CommonAttribute>, nativeNode: KNode, component: ArkComponent): void {
+function applyUIAttributesInit(modifier: AttributeModifier<CommonAttribute>, nativeNode: KNode): void {
   let state = 0;
   if (modifier.applyPressedAttribute !== undefined) {
     state |= UI_STATE_PRESSED;
@@ -44,6 +51,10 @@ function applyUIAttributes(modifier: AttributeModifier<CommonAttribute>, nativeN
   }
 
   getUINativeModule().setSupportedUIState(nativeNode, state);
+}
+
+function applyUIAttributes(modifier: AttributeModifier<CommonAttribute>, nativeNode: KNode, component: ArkComponent): void {
+  applyUIAttributesInit(modifier, nativeNode);
   const currentUIState = getUINativeModule().getUIState(nativeNode);
 
   if (modifier.applyNormalAttribute !== undefined) {
@@ -2401,7 +2412,7 @@ function modifier<T extends number | string | boolean | Equable, M extends Modif
 }
 
 function modifierWithKey<T extends number | string | boolean | object, M extends ModifierWithKey<T>>(
-  modifiers: Map<Symbol, ModifierWithKey<number | string | boolean | object>>,
+  modifiers: Map<Symbol, AttributeModifierWithKey>,
   identity: Symbol,
   modifierClass: new (value: T) => M,
   value: T
@@ -2417,24 +2428,40 @@ function modifierWithKey<T extends number | string | boolean | object, M extends
 
 class ArkComponent implements CommonMethod<CommonAttribute> {
   _modifiers: Map<Symbol, Modifier<number | string | boolean | Equable>>;
-  _modifiersWithKeys: Map<Symbol, ModifierWithKey<number | string | boolean | object>>;
+  _modifiersWithKeys: Map<Symbol, AttributeModifierWithKey>;
   _changed: boolean;
   nativePtr: KNode;
+  _weakPtr: JsPointerClass;
+  _classType: ModifierType | undefined;
+  _nativePtrChanged: boolean;
 
-  constructor(nativePtr: KNode) {
+  constructor(nativePtr: KNode, classType?: ModifierType) {
     this._modifiers = new Map();
     this._modifiersWithKeys = new Map();
     this.nativePtr = nativePtr;
     this._changed = false;
+    this._classType = classType;
+    if (classType === ModifierType.STATE) {
+      this._weakPtr = getUINativeModule().nativeUtils.createNativeWeakRef(nativePtr);
+    }
+    this._nativePtrChanged = true;
   }
 
-  cleanStageValue(){
+  cleanStageValue(): void {
     if (!this._modifiersWithKeys){
       return;
     }
     this._modifiersWithKeys.forEach((value, key) => {
         value.stageValue = undefined;
     });
+  }
+
+  applyStateUpdatePtr(instance: ArkComponent): void {
+    if (this.nativePtr !== instance.nativePtr) {
+      this.nativePtr = instance.nativePtr;
+      this._nativePtrChanged = true;
+      this._weakPtr = getUINativeModule().nativeUtils.createNativeWeakRef(instance.nativePtr);
+    }
   }
 
   applyModifierPatch(): void {
@@ -3557,5 +3584,35 @@ class UICommonEvent {
   }
   setOnSizeChange(callback: SizeChangeCallback): void {
     getUINativeModule().frameNode.setOnSizeChange(this._nodePtr, callback, this._instanceId);
+  }
+}
+
+function attributeModifierFunc<T>(modifier: AttributeModifier<T>,
+  componentBuilder: (nativePtr: KNode) => ArkComponent,
+  modifierBuilder: (nativePtr: KNode, classType: ModifierType, modifierJS: ModifierJS) => ArkComponent)
+{
+  const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
+  let nativeNode = getUINativeModule().getFrameNodeById(elmtId);
+  let component = this.createOrGetNode(elmtId, () => {
+    return componentBuilder(nativeNode);
+  });
+  if (modifier.isAttributeUpdater === true) {
+    let modifierJS = globalThis.requireNapi('arkui.modifier');
+    if (modifier.modifierState === modifierJS.AttributeUpdater.StateEnum.INIT) {
+      modifier.modifierState = modifierJS.AttributeUpdater.StateEnum.UPDATE;
+      modifier.attribute = modifierBuilder(nativeNode, ModifierType.STATE, modifierJS);
+      modifierJS.ModifierUtils.applySetOnChange(modifier.attribute);
+      modifier.initializeModifier(modifier.attribute);
+      applyUIAttributesInit(modifier, nativeNode, component);
+      component.applyModifierPatch();
+    } else {
+      modifier.attribute.applyStateUpdatePtr(component);
+      modifier.attribute.applyNormalAttribute(component);
+      applyUIAttributes(modifier, nativeNode, component);
+      component.applyModifierPatch();
+    }
+  } else {
+    applyUIAttributes(modifier, nativeNode, component);
+    component.applyModifierPatch();
   }
 }

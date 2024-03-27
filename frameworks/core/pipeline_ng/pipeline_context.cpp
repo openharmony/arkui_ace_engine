@@ -580,6 +580,15 @@ void PipelineContext::IsCloseSCBKeyboard()
 #endif
 }
 
+void PipelineContext::FlushOnceVsyncTask()
+{
+    if (onceVsyncListener_ != nullptr) {
+        ACE_SCOPED_TRACE("arkoala build");
+        onceVsyncListener_();
+        onceVsyncListener_ = nullptr;
+    }
+}
+
 void PipelineContext::FlushVsync(uint64_t nanoTimestamp, uint32_t frameCount)
 {
     CHECK_RUN_ON(UI);
@@ -857,6 +866,7 @@ void PipelineContext::FlushBuild()
         ACE_SCOPED_TRACE("arkoala build");
         vsyncListener_();
     }
+    FlushOnceVsyncTask();
     isRebuildFinished_ = false;
     FlushDirtyNodeUpdate();
     isRebuildFinished_ = true;

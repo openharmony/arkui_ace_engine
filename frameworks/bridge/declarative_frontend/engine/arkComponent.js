@@ -21,12 +21,17 @@ function getUINativeModule() {
   }
   return arkUINativeModule;
 }
+var ModifierType;
+(function (ModifierType) {
+    ModifierType[ModifierType["ORIGIN"] = 0] = "ORIGIN";
+    ModifierType[ModifierType["STATE"] = 1] = "STATE";
+})(ModifierType || (ModifierType = {}));
 const UI_STATE_NORMAL = 0;
 const UI_STATE_PRESSED = 1;
 const UI_STATE_FOCUSED = 1 << 1;
 const UI_STATE_DISABLED = 1 << 2;
 const UI_STATE_SELECTED = 1 << 3;
-function applyUIAttributes(modifier, nativeNode, component) {
+function applyUIAttributesInit(modifier, nativeNode) {
   let state = 0;
   if (modifier.applyPressedAttribute !== undefined) {
     state |= UI_STATE_PRESSED;
@@ -41,6 +46,9 @@ function applyUIAttributes(modifier, nativeNode, component) {
     state |= UI_STATE_SELECTED;
   }
   getUINativeModule().setSupportedUIState(nativeNode, state);
+}
+function applyUIAttributes(modifier, nativeNode, component) {
+  applyUIAttributesInit(modifier, nativeNode);
   const currentUIState = getUINativeModule().getUIState(nativeNode);
   if (modifier.applyNormalAttribute !== undefined) {
     modifier.applyNormalAttribute(component);
@@ -2374,11 +2382,16 @@ function modifierWithKey(modifiers, identity, modifierClass, value) {
   }
 }
 class ArkComponent {
-  constructor(nativePtr) {
+  constructor(nativePtr, classType) {
     this._modifiers = new Map();
     this._modifiersWithKeys = new Map();
     this.nativePtr = nativePtr;
     this._changed = false;
+    this._classType = classType;
+    if (classType === ModifierType.STATE) {
+      this._weakPtr = getUINativeModule().nativeUtils.createNativeWeakRef(nativePtr);
+    }
+    this._nativePtrChanged = true;
   }
   cleanStageValue(){
     if (!this._modifiersWithKeys){
@@ -2387,6 +2400,13 @@ class ArkComponent {
     this._modifiersWithKeys.forEach((value, key) => {
         value.stageValue = undefined;
     });
+  }
+  applyStateUpdatePtr(instance) {
+    if (this.nativePtr !== instance.nativePtr) {
+      this.nativePtr = instance.nativePtr;
+      this._nativePtrChanged = true;
+      this._weakPtr = getUINativeModule().nativeUtils.createNativeWeakRef(instance.nativePtr);
+    }
   }
   applyModifierPatch() {
     let expiringItems = [];
@@ -3388,6 +3408,33 @@ class UICommonEvent {
   }
   setOnSizeChange(callback) {
     getUINativeModule().frameNode.setOnSizeChange(this._nodePtr, callback, this._instanceId);
+  }
+}
+
+function attributeModifierFunc(modifier, componentBuilder, modifierBuilder) {
+  const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
+  let nativeNode = getUINativeModule().getFrameNodeById(elmtId);
+  let component = this.createOrGetNode(elmtId, () => {
+    return componentBuilder(nativeNode);
+  });
+  if (modifier.isAttributeUpdater === true) {
+    let modifierJS = globalThis.requireNapi('arkui.modifier');
+    if (modifier.modifierState === modifierJS.AttributeUpdater.StateEnum.INIT) {
+      modifier.modifierState = modifierJS.AttributeUpdater.StateEnum.UPDATE;
+      modifier.attribute = modifierBuilder(nativeNode, ModifierType.STATE, modifierJS);
+      modifierJS.ModifierUtils.applySetOnChange(modifier.attribute);
+      modifier.initializeModifier(modifier.attribute);
+      applyUIAttributesInit(modifier, nativeNode, component);
+      component.applyModifierPatch();
+    } else {
+      modifier.attribute.applyStateUpdatePtr(component);
+      modifier.attribute.applyNormalAttribute(component);
+      applyUIAttributes(modifier, nativeNode, component);
+      component.applyModifierPatch();
+    }
+  } else {
+    applyUIAttributes(modifier, nativeNode, component);
+    component.applyModifierPatch();
   }
 }
 
@@ -7058,8 +7105,8 @@ if (globalThis.SideBarContainer !== undefined) {
 
 /// <reference path='./import.ts' />
 class ArkStackComponent extends ArkComponent {
-  constructor(nativePtr) {
-    super(nativePtr);
+  constructor(nativePtr, classType) {
+    super(nativePtr, classType);
   }
   onGestureJudgeBegin(callback) {
     throw new Error('Method not implemented.');
@@ -7093,13 +7140,11 @@ StackAlignContentModifier.identity = Symbol('stackAlignContent');
 // @ts-ignore
 if (globalThis.Stack !== undefined) {
   globalThis.Stack.attributeModifier = function (modifier) {
-    const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
-    let nativeNode = getUINativeModule().getFrameNodeById(elmtId);
-    let component = this.createOrGetNode(elmtId, () => {
-      return new ArkStackComponent(nativeNode);
+    attributeModifierFunc.call(this, modifier, (nativePtr) => {
+      return new ArkStackComponent(nativePtr);
+    }, (nativePtr, classType, modifierJS) => {
+      return new modifierJS.StackModifier(nativePtr, classType);
     });
-    applyUIAttributes(modifier, nativeNode, component);
-    component.applyModifierPatch();
   };
 }
 
@@ -7633,8 +7678,8 @@ class TextClipModifier extends ModifierWithKey {
 }
 TextClipModifier.identity = Symbol('textClip');
 class ArkTextComponent extends ArkComponent {
-  constructor(nativePtr) {
-    super(nativePtr);
+  constructor(nativePtr, classType) {
+    super(nativePtr, classType);
   }
   enableDataDetector(value) {
     modifierWithKey(this._modifiersWithKeys, TextEnableDataDetectorModifier.identity, TextEnableDataDetectorModifier, value);
@@ -7768,13 +7813,11 @@ class ArkTextComponent extends ArkComponent {
 // @ts-ignore
 if (globalThis.Text !== undefined) {
   globalThis.Text.attributeModifier = function (modifier) {
-    const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
-    let nativeNode = getUINativeModule().getFrameNodeById(elmtId);
-    let component = this.createOrGetNode(elmtId, () => {
-      return new ArkTextComponent(nativeNode);
+    attributeModifierFunc.call(this, modifier, (nativePtr) => {
+      return new ArkTextComponent(nativePtr);
+    }, (nativePtr, classType, modifierJS) => {
+      return new modifierJS.TextModifier(nativePtr, classType);
     });
-    applyUIAttributes(modifier, nativeNode, component);
-    component.applyModifierPatch();
   };
 }
 
@@ -10049,8 +10092,8 @@ const FontWeightMap = {
   900: '900',
 };
 class ArkButtonComponent extends ArkComponent {
-  constructor(nativePtr) {
-    super(nativePtr);
+  constructor(nativePtr, classType) {
+    super(nativePtr, classType);
   }
   onGestureJudgeBegin(callback) {
     throw new Error('Method not implemented.');
@@ -10496,13 +10539,11 @@ ButtonSizeModifier.identity = Symbol('buttonSize');
 // @ts-ignore
 if (globalThis.Button !== undefined) {
   globalThis.Button.attributeModifier = function (modifier) {
-    const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
-    let nativeNode = getUINativeModule().getFrameNodeById(elmtId);
-    let component = this.createOrGetNode(elmtId, () => {
-      return new ArkButtonComponent(nativeNode);
+    attributeModifierFunc.call(this, modifier, (nativePtr) => {
+      return new ArkButtonComponent(nativePtr);
+    }, (nativePtr, classType, modifierJS) => {
+      return new modifierJS.ButtonModifier(nativePtr, classType);
     });
-    applyUIAttributes(modifier, nativeNode, component);
-    component.applyModifierPatch();
   };
 }
 
@@ -12416,7 +12457,7 @@ class ArkSliderComponent extends ArkComponent {
     throw new Error('Method not implemented.');
   }
   showSteps(value) {
-    modifierWithKey(this._modifiersWithKeys, ShowStepsModifier.identity, ShowStepsModifier, value);
+    modifier(this._modifiers, ShowStepsModifier, value);
     return this;
   }
   showTips(value, content) {
@@ -19697,8 +19738,8 @@ if (globalThis.WaterFlow !== undefined) {
 
 /// <reference path='./import.ts' />
 class ArkCommonShapeComponent extends ArkComponent {
-  constructor(nativePtr) {
-    super(nativePtr);
+  constructor(nativePtr, classType) {
+    super(nativePtr, classType);
   }
   viewPort(value) {
     throw new Error('Method not implemented.');
@@ -19994,13 +20035,11 @@ class ArkCircleComponent extends ArkCommonShapeComponent {
 // @ts-ignore
 if (globalThis.Circle !== undefined) {
   globalThis.Circle.attributeModifier = function (modifier) {
-    const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
-    let nativeNode = getUINativeModule().getFrameNodeById(elmtId);
-    let component = this.createOrGetNode(elmtId, () => {
-      return new ArkCircleComponent(nativeNode);
+    attributeModifierFunc.call(this, modifier, (nativePtr) => {
+      return new ArkCircleComponent(nativePtr);
+    }, (nativePtr, classType, modifierJS) => {
+      return new modifierJS.CircleModifier(nativePtr, classType);
     });
-    applyUIAttributes(modifier, nativeNode, component);
-    component.applyModifierPatch();
   };
 }
 
@@ -20292,8 +20331,8 @@ class RectRadiusModifier extends ModifierWithKey {
 }
 RectRadiusModifier.identity = Symbol('rectRadius');
 class ArkRectComponent extends ArkCommonShapeComponent {
-  constructor(nativePtr) {
-    super(nativePtr);
+  constructor(nativePtr, classType) {
+    super(nativePtr, classType);
   }
   radiusWidth(value) {
     modifierWithKey(this._modifiersWithKeys, RectRadiusWidthModifier.identity, RectRadiusWidthModifier, value);
@@ -20311,13 +20350,11 @@ class ArkRectComponent extends ArkCommonShapeComponent {
 // @ts-ignore
 if (globalThis.Rect !== undefined) {
   globalThis.Rect.attributeModifier = function (modifier) {
-    const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
-    let nativeNode = getUINativeModule().getFrameNodeById(elmtId);
-    let component = this.createOrGetNode(elmtId, () => {
-      return new ArkRectComponent(nativeNode);
+    attributeModifierFunc.call(this, modifier, (nativePtr) => {
+      return new ArkRectComponent(nativePtr);
+    }, (nativePtr, classType, modifierJS) => {
+      return new modifierJS.RectModifier(nativePtr, classType);
     });
-    applyUIAttributes(modifier, nativeNode, component);
-    component.applyModifierPatch();
   };
 }
 
