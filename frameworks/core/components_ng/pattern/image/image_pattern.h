@@ -235,6 +235,7 @@ private:
     void OnDirectionConfigurationUpdate() override;
     void OnIconConfigurationUpdate() override;
     void OnConfigurationUpdate();
+    void ClearImageCache();
     void LoadImage(const ImageSourceInfo& src);
     void LoadAltImage(const ImageSourceInfo& altImageSourceInfo);
 

@@ -27,6 +27,7 @@ build_component_ng("manager_ng") {
     "navigation_dump/navigation_dump_manager.cpp",
     "post_event/post_event_manager.cpp",
     "safe_area/safe_area_manager.cpp",
+    "select_content_overlay/select_content_overlay_manager.cpp",
     "select_overlay/select_overlay_client.cpp",
     "select_overlay/select_overlay_manager.cpp",
     "select_overlay/select_overlay_proxy.cpp",

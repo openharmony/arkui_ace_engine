@@ -124,6 +124,8 @@ public:
         IC_SEARCH_SVG,
         IC_BOTTOMSHEET_CLOSE_SVG,
         IC_CANCEL_SVG,
+        RADIO_TICK_SVG,
+        RADIO_DOT_SVG,
         SVG_END = 20000,
 
         // 20001 - 30000 is reserved for i18n resource.

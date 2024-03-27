@@ -22,6 +22,7 @@
 #include <string>
 
 #include "base/log/log_wrapper.h"
+#include "base/subwindow/subwindow_manager.h"
 
 #ifdef ENABLE_ROSEN_BACKEND
 #include "render_service_client/core/transaction/rs_transaction.h"
@@ -798,7 +799,7 @@ void PipelineContext::FlushFocusView()
     CHECK_NULL_VOID(lastFocusView);
     auto lastFocusViewHub = lastFocusView->GetFocusHub();
     CHECK_NULL_VOID(lastFocusViewHub);
-    if (lastFocusView && (!lastFocusViewHub->IsCurrentFocus() || !lastFocusView->GetIsViewHasFocused()) &&
+    if (lastFocusView && (!lastFocusView->IsRootScopeCurrentFocus() || !lastFocusView->GetIsViewHasFocused()) &&
         lastFocusViewHub->IsFocusableNode()) {
         lastFocusView->RequestDefaultFocus();
     }
@@ -1387,6 +1388,7 @@ void PipelineContext::SyncSafeArea(bool onKeyboard)
         page->MarkDirtyNode(onKeyboard && !safeAreaManager_->KeyboardSafeAreaEnabled() ? PROPERTY_UPDATE_LAYOUT
                                                                                        : PROPERTY_UPDATE_MEASURE);
     }
+    SubwindowManager::GetInstance()->MarkDirtyDialogSafeArea();
     if (overlayManager_) {
         overlayManager_->MarkDirty(PROPERTY_UPDATE_MEASURE);
     }

@@ -72,6 +72,15 @@ std::optional<SizeF> CheckBoxLayoutAlgorithm::MeasureContent(
     return size;
 }
 
+void CheckBoxLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
+{
+    // Checkbox does not have child nodes. If a child is added to a toggle, then hide the child.
+    for (const auto& child : layoutWrapper->GetAllChildrenWithBuild()) {
+        child->GetGeometryNode()->SetFrameSize(SizeF());
+    }
+    PerformMeasureSelf(layoutWrapper);
+}
+
 void CheckBoxLayoutAlgorithm::InitializeParam()
 {
     auto pipeline = PipelineBase::GetCurrentContext();

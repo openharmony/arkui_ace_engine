@@ -497,6 +497,16 @@ public:
         attachToMainTreeTasks_.emplace_back(std::move(func));
     }
 
+    void* GetExternalData() const
+    {
+        return externalData_;
+    }
+
+    void SetExternalData(void* externalData)
+    {
+        externalData_ = externalData;
+    }
+
     // --------------------------------------------------------------------------------
 
     virtual void DoRemoveChildInRenderTree(uint32_t index, bool isAll = false);
@@ -624,6 +634,7 @@ private:
 
     std::string debugLine_;
     std::string viewId_;
+    void* externalData_ = nullptr;
 
     friend class RosenRenderContext;
     ACE_DISALLOW_COPY_AND_MOVE(UINode);

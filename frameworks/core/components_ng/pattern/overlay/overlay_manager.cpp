@@ -984,6 +984,11 @@ void OverlayManager::HidePopupAnimation(const RefPtr<FrameNode>& popupNode, cons
 void OverlayManager::ShowPopup(int32_t targetId, const PopupInfo& popupInfo,
     const std::function<void(int32_t)>&& onWillDismiss, bool interactiveDismiss)
 {
+    if (!UpdatePopupMap(targetId, popupInfo)) {
+        TAG_LOGE(AceLogTag::ACE_OVERLAY, "failed to update popup map, tag:%{public}s",
+            popupInfo.target.Upgrade()->GetTag().c_str());
+        return;
+    }
     auto rootNode = rootNodeWeak_.Upgrade();
     CHECK_NULL_VOID(rootNode);
     auto frameNode = AceType::DynamicCast<FrameNode>(rootNode);
@@ -1018,11 +1023,6 @@ bool OverlayManager::UpdatePopupMap(int32_t targetId, const PopupInfo& popupInfo
 void OverlayManager::MountPopup(int32_t targetId, const PopupInfo& popupInfo,
     const std::function<void(int32_t)>&& onWillDismiss, bool interactiveDismiss)
 {
-    if (!UpdatePopupMap(targetId, popupInfo)) {
-        TAG_LOGE(AceLogTag::ACE_OVERLAY, "failed to update popup map, tag:%{public}s",
-            popupInfo.target.Upgrade()->GetTag().c_str());
-        return;
-    }
     auto popupNode = popupInfo.popupNode;
     CHECK_NULL_VOID(popupNode);
     auto layoutProp = popupNode->GetLayoutProperty<BubbleLayoutProperty>();
@@ -2092,7 +2092,6 @@ bool OverlayManager::RemoveOverlay(bool isBackPressed, bool isPageRouter)
     auto rootNode = rootNodeWeak_.Upgrade();
     CHECK_NULL_RETURN(rootNode, true);
     RemoveIndexerPopup();
-    DestroyKeyboard();
     if (rootNode->GetChildren().size() > 1) {
         // stage node is at index 0, remove overlay at last
         auto overlay = DynamicCast<FrameNode>(rootNode->GetLastChild());
@@ -2152,9 +2151,11 @@ bool OverlayManager::RemoveOverlay(bool isBackPressed, bool isPageRouter)
                 return RemoveModalInOverlay();
             }
         }
-        rootNode->RemoveChild(overlay);
-        rootNode->MarkDirtyNode(PROPERTY_UPDATE_BY_CHILD_REQUEST);
-        return true;
+        if (!InstanceOf<KeyboardPattern>(pattern)) {
+            rootNode->RemoveChild(overlay);
+            rootNode->MarkDirtyNode(PROPERTY_UPDATE_BY_CHILD_REQUEST);
+            return true;
+        }
     }
     return false;
 }
@@ -2541,23 +2542,9 @@ void OverlayManager::BindContentCover(bool isShow, std::function<void(const std:
     std::function<void()>&& onDisappear, std::function<void()>&& onWillAppear, std::function<void()>&& onWillDisappear,
     const NG::ContentCoverParam& contentCoverParam, const RefPtr<FrameNode>& targetNode, int32_t sessionId)
 {
-    auto pipeline = PipelineContext::GetCurrentContext();
-    CHECK_NULL_VOID(pipeline);
-    auto bindModalTask = [weak = AceType::WeakClaim(this), isShow, callback = std::move(callback),
-                             buildNodeFunc = std::move(buildNodeFunc), modalStyle, onAppear = std::move(onAppear),
-                             onDisappear = std::move(onDisappear), onWillAppear = std::move(onWillAppear),
-                             onWillDisappear = std::move(onWillDisappear), contentCoverParam,
-                             targetNode, sessionId]() mutable {
-        auto overlay = weak.Upgrade();
-        CHECK_NULL_VOID(overlay);
-        overlay->OnBindContentCover(isShow, std::move(callback), std::move(buildNodeFunc), modalStyle,
-            std::move(onAppear), std::move(onDisappear), std::move(onWillAppear), std::move(onWillDisappear),
-            contentCoverParam, targetNode, sessionId);
-        auto pipeline = PipelineContext::GetCurrentContext();
-        CHECK_NULL_VOID(pipeline);
-        pipeline->FlushUITasks();
-    };
-    pipeline->AddAnimationClosure(bindModalTask);
+    return OnBindContentCover(isShow, std::move(callback), std::move(buildNodeFunc), modalStyle,
+        std::move(onAppear), std::move(onDisappear), std::move(onWillAppear), std::move(onWillDisappear),
+        contentCoverParam, targetNode, sessionId);
 }
 
 void OverlayManager::OnBindContentCover(bool isShow, std::function<void(const std::string&)>&& callback,
@@ -3755,22 +3742,6 @@ void OverlayManager::CloseKeyboard(int32_t targetId)
     CHECK_NULL_VOID(pattern);
     customKeyboardMap_.erase(pattern->GetTargetId());
     PlayKeyboardTransition(customKeyboard, false);
-    SetCustomKeybroadHeight();
-}
-
-void OverlayManager::DestroyKeyboard()
-{
-    auto rootNode = rootNodeWeak_.Upgrade();
-    CHECK_NULL_VOID(rootNode);
-    if (customKeyboardMap_.empty()) {
-        return;
-    }
-    for (auto it = customKeyboardMap_.begin(); it != customKeyboardMap_.end();) {
-        auto keyboard = it->second;
-        rootNode->RemoveChild(keyboard);
-        it = customKeyboardMap_.erase(it);
-    }
-    rootNode->MarkDirtyNode(PROPERTY_UPDATE_BY_CHILD_REQUEST);
     SetCustomKeybroadHeight();
 }
 

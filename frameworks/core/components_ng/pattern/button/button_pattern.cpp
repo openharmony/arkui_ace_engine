@@ -34,18 +34,18 @@ constexpr int32_t MOUSE_HOVER_DURATION = 250;
 constexpr int32_t TYPE_TOUCH = 0;
 constexpr int32_t TYPE_HOVER = 1;
 constexpr int32_t TYPE_CANCEL = 2;
+} // namespace
 
-Color GetColorFromType(const RefPtr<ButtonTheme>& theme, const int32_t& type)
+Color ButtonPattern::GetColorFromType(const RefPtr<ButtonTheme>& theme, const int32_t& type)
 {
     if (type == TYPE_TOUCH) {
-        return theme->GetClickedColor();
+        return blendClickColor_.value_or(theme->GetClickedColor());
     } else if (type == TYPE_HOVER) {
-        return theme->GetHoverColor();
+        return blendHoverColor_.value_or(theme->GetHoverColor());
     } else {
         return Color::TRANSPARENT;
     }
 }
-} // namespace
 
 void ButtonPattern::OnAttachToFrameNode()
 {

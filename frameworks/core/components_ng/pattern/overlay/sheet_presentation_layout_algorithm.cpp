@@ -70,7 +70,7 @@ void SheetPresentationLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
         }
         auto scrollNode = layoutWrapper->GetChildByIndex(1);
         CHECK_NULL_VOID(scrollNode);
-        childConstraint.selfIdealSize = OptionalSizeF(childConstraint.maxSize);
+        childConstraint.selfIdealSize.SetWidth(childConstraint.maxSize.Width());
         scrollNode->Measure(childConstraint);
         if ((sheetType_ == SheetType::SHEET_CENTER || sheetType_ == SheetType::SHEET_POPUP)
             && (sheetStyle_.sheetMode.value_or(SheetMode::LARGE) == SheetMode::AUTO)) {

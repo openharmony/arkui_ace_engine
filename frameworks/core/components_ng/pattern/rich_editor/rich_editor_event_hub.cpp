@@ -308,6 +308,26 @@ const std::list<RichEditorAbstractSpanResult>& RichEditorDeleteValue::GetRichEdi
     return richEditorDeleteSpans_;
 }
 
+void RichEditorChangeValue::SetRichEditorOriginalSpans(const RichEditorAbstractSpanResult& span)
+{
+    originalSpans_.emplace_back(span);
+}
+
+const std::list<RichEditorAbstractSpanResult>& RichEditorChangeValue::GetRichEditorOriginalSpans() const
+{
+    return originalSpans_;
+}
+
+void RichEditorChangeValue::SetRichEditorReplacedSpans(const RichEditorAbstractSpanResult& span)
+{
+    replacedSpans_.emplace_back(span);
+}
+
+const std::list<RichEditorAbstractSpanResult>& RichEditorChangeValue::GetRichEditorReplacedSpans() const
+{
+    return replacedSpans_;
+}
+
 void RichEditorEventHub::SetOnReady(std::function<void()>&& func)
 {
     onReady_ = std::move(func);
@@ -391,6 +411,60 @@ void RichEditorEventHub::FireOnEditingChange(bool isEditing)
 {
     if (onEditingChange_) {
         onEditingChange_(isEditing);
+    }
+}
+
+void RichEditorEventHub::SetOnWillChange(std::function<bool(const RichEditorChangeValue&)>&& func)
+{
+    onWillChange_ = std::move(func);
+}
+
+bool RichEditorEventHub::FireOnWillChange(const RichEditorChangeValue& info)
+{
+    return onWillChange_ ? onWillChange_(info) : true;
+}
+
+bool RichEditorEventHub::HasOnWillChange() const
+{
+    return static_cast<bool>(onWillChange_);
+}
+
+void RichEditorEventHub::SetOnDidChange(std::function<void(const std::list<RichEditorAbstractSpanResult>&)>&& func)
+{
+    onDidChange_ = std::move(func);
+}
+
+void RichEditorEventHub::FireOnDidChange(const std::list<RichEditorAbstractSpanResult>& info)
+{
+    onDidChange_(info);
+}
+
+bool RichEditorEventHub::HasOnDidChange() const
+{
+    return static_cast<bool>(onDidChange_);
+}
+
+void RichEditorEventHub::SetOnCut(std::function<void(NG::TextCommonEvent&)>&& func)
+{
+    onCut_ = std::move(func);
+}
+
+void RichEditorEventHub::FireOnCut(NG::TextCommonEvent& value)
+{
+    if (onCut_) {
+        onCut_(value);
+    }
+}
+
+void RichEditorEventHub::SetOnCopy(std::function<void(NG::TextCommonEvent&)>&& func)
+{
+    onCopy_ = std::move(func);
+}
+
+void RichEditorEventHub::FireOnCopy(NG::TextCommonEvent& value)
+{
+    if (onCopy_) {
+        onCopy_(value);
     }
 }
 } // namespace OHOS::Ace::NG

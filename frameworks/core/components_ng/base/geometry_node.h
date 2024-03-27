@@ -107,14 +107,32 @@ public:
         frame_.rect_.SetSize(size);
     }
 
-    void SetFrameHeight(const float heigth)
-    {
-        frame_.rect_.SetHeight(heigth);
-    }
-
-    void SetFrameWidth(const float width)
+    void SetFrameWidth(int32_t width)
     {
         frame_.rect_.SetWidth(width);
+    }
+
+    void SetFrameHeight(int32_t height)
+    {
+        frame_.rect_.SetHeight(height);
+    }
+
+    void SetMarginFrameOffsetX(int32_t offsetX)
+    {
+        float offset = offsetX;
+        if (margin_) {
+            offset += margin_->left.value_or(0);
+        }
+        frame_.rect_.SetLeft(offset);
+    }
+
+    void SetMarginFrameOffsetY(int32_t offsetY)
+    {
+        float offset = offsetY;
+        if (margin_) {
+            offset += margin_->top.value_or(0);
+        }
+        frame_.rect_.SetTop(offset);
     }
 
     SizeF GetPaddingSize() const
@@ -316,7 +334,7 @@ public:
         return previousState_;
     }
     void Restore();
-    void RestoreCache();
+    bool RestoreCache();
     void Save();
 
     void ToJsonValue(std::unique_ptr<JsonValue>& json) const;

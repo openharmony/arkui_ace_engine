@@ -1539,12 +1539,7 @@ class FocusableModifier extends ModifierWithKey {
     super(value);
   }
   applyPeer(node, reset) {
-    if (reset) {
-      getUINativeModule().common.resetFocusable(node);
-    }
-    else {
-      getUINativeModule().common.setFocusable(node, this.value);
-    }
+    getUINativeModule().common.setFocusable(node, this.value);
   }
 }
 FocusableModifier.identity = Symbol('focusable');
@@ -10994,6 +10989,10 @@ class ArkToggleComponent extends ArkComponent {
     modifierWithKey(this._modifiersWithKeys, ToggleHoverEffectModifier.identity, ToggleHoverEffectModifier, value);
     return this;
   }
+  switchStyle(value) {
+    modifierWithKey(this._modifiersWithKeys, ToggleSwitchStyleModifier.identity, ToggleSwitchStyleModifier, value);
+    return this;
+  }
 }
 class ToggleSelectedColorModifier extends ModifierWithKey {
   constructor(value) {
@@ -11181,6 +11180,37 @@ class ToggleHoverEffectModifier extends ModifierWithKey {
   }
 }
 ToggleHoverEffectModifier.identity = Symbol('toggleHoverEffect');
+class ToggleSwitchStyleModifier extends ModifierWithKey {
+    constructor(value) {
+        super(value);
+    }
+    applyPeer(node, reset) {
+        if (reset) {
+            getUINativeModule().toggle.resetSwitchStyle(node);
+        }
+        else {
+            getUINativeModule().toggle.setSwitchStyle(node, this.value.pointRadius, this.value.unselectedColor, this.value.pointColor, this.value.trackBorderRadius);
+        }
+    }
+    checkObjectDiff() {
+        if (!isResource(this.stageValue) && !isResource(this.value)) {
+            return !(this.stageValue.pointRadius === this.value.pointRadius &&
+                this.stageValue.unselectedColor === this.value.unselectedColor &&
+                this.stageValue.pointColor === this.value.pointColor &&
+                this.stageValue.trackBorderRadius === this.value.trackBorderRadius);
+        }
+        else if (isResource(this.stageValue) && isResource(this.value)){
+          return !(isResourceEqual(this.stageValue.pointRadius, this.value.pointRadius) && 
+          isResourceEqual(this.stageValue.unselectedColor, this.value.unselectedColor) && 
+          isResourceEqual(this.stageValue.pointColor, this.value.pointColor) &&
+          isResourceEqual(this.stageValue.trackBorderRadius, this.value.trackBorderRadius));
+        }
+        else {
+            return true;
+        }
+    }
+}
+ToggleSwitchStyleModifier.identity = Symbol('toggleSwitchStyle');
 // @ts-ignore
 if (globalThis.Toggle !== undefined) {
   globalThis.Toggle.attributeModifier = function (modifier) {
@@ -18985,6 +19015,14 @@ class ArkTabsComponent extends ArkComponent {
     modifierWithKey(this._modifiersWithKeys, TabClipModifier.identity, TabClipModifier, value);
     return this;
   }
+  width(value) {
+    modifierWithKey(this._modifiersWithKeys, TabWidthModifier.identity, TabWidthModifier, value);
+    return this;
+  }
+  height(value) {
+    modifierWithKey(this._modifiersWithKeys, TabHeightModifier.identity, TabHeightModifier, value);
+    return this;
+  }
 }
 class BarGridAlignModifier extends ModifierWithKey {
   constructor(value) {
@@ -19240,6 +19278,34 @@ class TabClipModifier extends ModifierWithKey {
   }
 }
 TabClipModifier.identity = Symbol('tabclip');
+class TabWidthModifier extends ModifierWithKey {
+    constructor(value) {
+        super(value);
+    }
+    applyPeer(node, reset) {
+        if (reset) {
+            getUINativeModule().tabs.resetTabWidth(node);
+        }
+        else {
+            getUINativeModule().tabs.setTabWidth(node, this.value);
+        }
+    }
+}
+TabWidthModifier.identity = Symbol('tabWidth');
+class TabHeightModifier extends ModifierWithKey {
+    constructor(value) {
+        super(value);
+    }
+    applyPeer(node, reset) {
+        if (reset) {
+            getUINativeModule().tabs.resetTabHeight(node);
+        }
+        else {
+            getUINativeModule().tabs.setTabHeight(node, this.value);
+        }
+    }
+}
+TabHeightModifier.identity = Symbol('tabHeight');
 // @ts-ignore
 if (globalThis.Tabs !== undefined) {
   globalThis.Tabs.attributeModifier = function (modifier) {

@@ -301,7 +301,7 @@ shared_ptr<JsValue> ArkJSRuntime::NewFunction(RegisterFunctionType func)
     LocalScope scope(vm_);
     auto data = new PandaFunctionData(shared_from_this(), func);
     return std::make_shared<ArkJSValue>(shared_from_this(),
-        FunctionRef::New(vm_, FunctionCallback, FunctionDeleter, data));
+        FunctionRef::NewConcurrent(vm_, FunctionCallback, FunctionDeleter, data));
 }
 
 shared_ptr<JsValue> ArkJSRuntime::NewNativePointer(void* ptr)

@@ -45,6 +45,7 @@ public:
     void SetSelection(int32_t selectionStart, int32_t selectionEnd,
         const std::optional<SelectionOptions>& options = std::nullopt) override;
     bool IsEditing() override;
+    void StopEditing() override;
 
 private:
     WeakPtr<RichEditorPattern> pattern_;
