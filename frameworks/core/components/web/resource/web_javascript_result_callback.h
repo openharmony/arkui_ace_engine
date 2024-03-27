@@ -34,7 +34,7 @@ public:
     std::shared_ptr<NWebValue> GetJavaScriptResult(std::vector<std::shared_ptr<NWebValue>> args,
         const std::string& method, const std::string& object_name, int32_t routing_id, int32_t object_id) override;
 
-    std::shared_ptr<NWebValue> GetJavaScriptResult(std::vector<std::shared_ptr<NWebValue>> args,
+    std::shared_ptr<NWebValue> GetJavaScriptResultFlowbuf(std::vector<std::shared_ptr<NWebValue>> args,
         const std::string& method, const std::string& object_name,
         int fd, int32_t routing_id, int32_t object_id) override;
 
