@@ -536,10 +536,7 @@ OffsetF GestureEventHub::GetPixelMapOffset(
     auto frameNode = GetFrameNode();
     CHECK_NULL_RETURN(frameNode, result);
     auto frameTag = frameNode->GetTag();
-    if (frameTag == V2::WEB_ETS_TAG) {
-        result.SetX(size.Width() * PIXELMAP_WIDTH_RATE);
-        result.SetY(size.Height() * PIXELMAP_HEIGHT_RATE);
-    } else if (needScale) {
+    if (needScale) {
         result.SetX(size.Width() * PIXELMAP_WIDTH_RATE);
         result.SetY(PIXELMAP_DRAG_DEFAULT_HEIGHT);
     } else {
