@@ -17,9 +17,10 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_GESTURES_RECOGNIZERS_PAN_RECOGNIZER_H
 
 #include <map>
+
 #include "core/components_ng/event/drag_event.h"
-#include "core/components_ng/gestures/recognizers/multi_fingers_recognizer.h"
 #include "core/components_ng/gestures/pan_gesture.h"
+#include "core/components_ng/gestures/recognizers/multi_fingers_recognizer.h"
 
 namespace OHOS::Ace::NG {
 
@@ -92,6 +93,20 @@ public:
     }
 
 private:
+    class PanVelocity {
+    public:
+        Velocity GetVelocity();
+        double GetMainAxisVelocity();
+        void UpdateTouchPoint(int32_t id, const TouchEvent& event, bool end);
+        void Reset(int32_t id);
+        void SetDirection(int32_t directionType);
+
+    private:
+        int32_t GetFastestTracker(std::function<double(VelocityTracker&)>&& func);
+        std::map<int32_t, VelocityTracker> trackerMap_;
+        Axis axis_ = Axis::FREE;
+    };
+
     enum class GestureAcceptResult {
         ACCEPT,
         REJECT,
@@ -136,7 +151,7 @@ private:
     std::map<int32_t, Offset> touchPointsDistance_;
     Offset delta_;
     double mainDelta_ = 0.0;
-    VelocityTracker velocityTracker_;
+    PanVelocity panVelocity_;
     TimeStamp time_;
 
     Point globalPoint_;
