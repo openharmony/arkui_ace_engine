@@ -1168,7 +1168,7 @@ bool WebPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, co
     delegate_->SetBoundsOrResize(drawSize_, offset);
     if (isOfflineMode_) {
         TAG_LOGE(AceLogTag::ACE_WEB,
-        "OnDirtyLayoutWrapperSwap; WebPattern is Offline Mode, WebId:%{public}d", GetWebId());
+            "OnDirtyLayoutWrapperSwap; WebPattern is Offline Mode, WebId:%{public}d", GetWebId());
         isOfflineMode_ = false;
         OnWindowShow();
     }
@@ -2830,8 +2830,9 @@ void WebPattern::OnActive()
 
 void WebPattern::OnVisibleAreaChange(bool isVisible)
 {
-    TAG_LOGD(AceLogTag::ACE_WEB, "WebPattern::OnVisibleAreaChange webId:%{public}d, 
-    isVisible:%{public}d, old_isVisible:%{public}d", GetWebId(), isVisible, isVisible_);
+    TAG_LOGD(AceLogTag::ACE_WEB,
+        "WebPattern::OnVisibleAreaChange webId:%{public}d, isVisible:%{public}d, old_isVisible:%{public}d",
+        GetWebId(), isVisible, isVisible_);
     if (isVisible_ == isVisible) {
         return;
     }
