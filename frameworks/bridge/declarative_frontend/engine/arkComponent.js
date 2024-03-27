@@ -7133,6 +7133,23 @@ class FontColorModifier extends ModifierWithKey {
   }
 }
 FontColorModifier.identity = Symbol('textFontColor');
+class TextForegroundColorModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().text.resetTextForegroundColor(node);
+    }
+    else {
+      getUINativeModule().text.setTextForegroundColor(node, this.value);
+    }
+  }
+  checkObjectDiff() {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+TextForegroundColorModifier.identity = Symbol('textForegroundColor');
 class FontSizeModifier extends ModifierWithKey {
   constructor(value) {
     super(value);
@@ -7735,6 +7752,11 @@ class ArkTextComponent extends ArkComponent {
   }
   clip(value) {
     modifierWithKey(this._modifiersWithKeys, TextClipModifier.identity, TextClipModifier, value);
+    return this;
+  }
+  foregroundColor(value) {
+    modifierWithKey(
+      this._modifiersWithKeys, TextForegroundColorModifier.identity, TextForegroundColorModifier, value);
     return this;
   }
 }

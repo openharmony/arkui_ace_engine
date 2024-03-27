@@ -169,6 +169,20 @@ void JSText::SetFontWeight(const std::string& value)
     TextModel::GetInstance()->SetFontWeight(ConvertStrToFontWeight(value));
 }
 
+void JSText::SetForegroundColor(const JSCallbackInfo& info)
+{
+    if (info.Length() < 1) {
+        return;
+    }
+    ForegroundColorStrategy strategy;
+    if (ParseJsColorStrategy(info[0], strategy)) {
+        TextModel::GetInstance()->SetTextColor(Color::FOREGROUND);
+        ViewAbstractModel::GetInstance()->SetForegroundColorStrategy(strategy);
+        return;
+    }
+    SetTextColor(info);
+}
+
 void JSText::SetTextColor(const JSCallbackInfo& info)
 {
     if (info.Length() < 1) {
@@ -878,6 +892,7 @@ void JSText::JSBind(BindingTarget globalObj)
     JSClass<JSText>::StaticMethod("onTextSelectionChange", &JSText::SetOnTextSelectionChange);
     JSClass<JSText>::StaticMethod("clip", &JSText::JsClip);
     JSClass<JSText>::StaticMethod("fontFeature", &JSText::SetFontFeature);
+    JSClass<JSText>::StaticMethod("foregroundColor", &JSText::SetForegroundColor);
     JSClass<JSText>::InheritAndBind<JSContainerBase>(globalObj);
 }
 
