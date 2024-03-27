@@ -181,6 +181,31 @@ void ButtonLayoutAlgorithm::PerformMeasureSelf(LayoutWrapper* layoutWrapper)
         auto bottomPadding = padding.bottom.value_or(0.0);
         auto buttonTheme = PipelineBase::GetCurrentContext()->GetTheme<ButtonTheme>();
         CHECK_NULL_VOID(buttonTheme);
+
+        if(buttonLayoutProperty->GetButtonStyle().value_or(ButtonStyleMode::EMPHASIZE) == ButtonStyleMode::TEXT) {
+            if(buttonLayoutProperty->GetControlSize().value_or(ControlSize::NORMAL) == ControlSize::SMALL
+                || buttonLayoutProperty->GetControlSize().value_or(ControlSize::NORMAL) == ControlSize::NORMAL) {
+                padding.left = buttonTheme->GetPaddingText().ConvertToPx();
+                padding.right = buttonTheme->GetPaddingText().ConvertToPx();
+            }
+            PaddingProperty defaultPadding = { CalcLength(padding.left.value_or(0)), CalcLength(padding.right.value_or(0)),
+            CalcLength(padding.top.value_or(0)), CalcLength(padding.bottom.value_or(0)) };
+            layoutWrapper->GetLayoutProperty()->UpdatePadding(defaultPadding);
+        }
+        else {
+            if(buttonLayoutProperty->GetControlSize().value_or(ControlSize::NORMAL) == ControlSize::SMALL) {
+                padding.left = buttonTheme->GetPadding(ControlSize::SMALL).Left().ConvertToPx();
+                padding.right = buttonTheme->GetPadding(ControlSize::SMALL).Right().ConvertToPx();
+            }
+            else {
+                padding.left = buttonTheme->GetPadding(ControlSize::NORMAL).Left().ConvertToPx();
+                padding.right = buttonTheme->GetPadding(ControlSize::NORMAL).Right().ConvertToPx();
+            }
+            PaddingProperty defaultPadding = { CalcLength(padding.left.value_or(0)), CalcLength(padding.right.value_or(0)),
+            CalcLength(padding.top.value_or(0)), CalcLength(padding.bottom.value_or(0)) };
+            layoutWrapper->GetLayoutProperty()->UpdatePadding(defaultPadding);
+        }
+
         auto defaultHeight = GetDefaultHeight(layoutWrapper);
         if (buttonLayoutProperty->GetType().value_or(ButtonType::CAPSULE) == ButtonType::CIRCLE) {
             HandleLabelCircleButtonFrameSize(layoutConstraint, frameSize, defaultHeight);

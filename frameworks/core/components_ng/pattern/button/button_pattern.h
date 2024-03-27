@@ -314,8 +314,13 @@ protected:
     void OnTouchUp();
     void HandleHoverEvent(bool isHover);
     void HandleBackgroundColor();
+    void HandleBorderColor();
+    void HandleBorderWidth();
     void HandleEnabled();
     void InitButtonLabel();
+    void InitFocusEvent();
+    void HandleFocusEvent();
+    void HandleBlurEvent();
     void AnimateTouchAndHover(RefPtr<RenderContext>& renderContext, int32_t typeFrom, int32_t typeTo, int32_t duration,
         const RefPtr<Curve>& curve);
     Color clickedColor_;
@@ -345,6 +350,7 @@ private:
     bool isColorUpdateFlag_ = false;
     SizeF preFrameSize_;
     ACE_DISALLOW_COPY_AND_MOVE(ButtonPattern);
+    bool focusEventInitialized_ = false;
 };
 } // namespace OHOS::Ace::NG
 
