@@ -78,12 +78,6 @@ void CustomNode::Render()
     }
     {
         FireRecycleRenderFunc();
-        if (recycleRenderFunc_) {
-            if (SystemProperties::GetDeveloperModeOn()) {
-                PaintDebugBoundaryTreeAll(SystemProperties::GetDebugBoundaryEnabled());
-            }
-            recycleRenderFunc_ = nullptr;
-        }
     }
     needMarkParent_ = needMarkParentBak;
 }

@@ -2519,6 +2519,9 @@ void FrameNode::OnReuse()
 {
     pattern_->OnReuse();
     UINode::OnReuse();
+    if (SystemProperties::GetDeveloperModeOn()) {
+        PaintDebugBoundary(SystemProperties::GetDebugBoundaryEnabled());
+    }
 }
 
 bool FrameNode::MarkRemoving()

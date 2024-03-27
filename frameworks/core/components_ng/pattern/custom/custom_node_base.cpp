@@ -73,6 +73,7 @@ void CustomNodeBase::FireRecycleRenderFunc()
             recycleRenderFunc_();
         }
         AceType::DynamicCast<UINode>(Claim(this))->OnReuse();
+        recycleRenderFunc_ = nullptr;
     }
 }
 
