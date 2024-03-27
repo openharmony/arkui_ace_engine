@@ -546,6 +546,8 @@ private:
     Matrix4 GetMatrix();
     bool IsUniRenderEnabled() override;
     void AddFrameNodeInfoToRsNode();
+    // Use rect to update the drawRegion rect at index.
+    void UpdateDrawRegion(uint32_t index, const std::shared_ptr<Rosen::RectF>& rect);
 
     std::shared_ptr<Rosen::RSNode> CreateHardwareSurface(
         const std::optional<ContextParam>& param, bool isUseExtSurface, bool isTextureExportNode);
@@ -569,6 +571,7 @@ private:
     int appearingTransitionCount_ = 0;
     int disappearingTransitionCount_ = 0;
     int sandBoxCount_ = 0;
+    static constexpr uint32_t DRAW_REGION_RECT_COUNT = 6;
     std::map<std::string, RefPtr<ImageLoadingContext>> particleImageContextMap_;
     std::map<std::string, RefPtr<CanvasImage>> particleImageMap_;
     Color blendColor_ = Color::TRANSPARENT;
@@ -591,6 +594,7 @@ private:
     std::unique_ptr<SharedTransitionModifier> sharedTransitionModifier_;
     std::shared_ptr<OverlayTextModifier> modifier_ = nullptr;
     std::shared_ptr<GradientStyleModifier> gradientStyleModifier_;
+    std::shared_ptr<Rosen::RectF> drawRegionRects_[DRAW_REGION_RECT_COUNT] = { nullptr };
 
     // translate modifiers for developer
     std::shared_ptr<Rosen::RSTranslateModifier> translateXY_;
