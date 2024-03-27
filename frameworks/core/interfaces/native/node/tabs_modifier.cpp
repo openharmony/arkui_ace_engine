@@ -19,6 +19,7 @@
 #include "core/components/tab_bar/tab_theme.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/view_abstract.h"
+#include "core/components_ng/base/view_abstract_model_ng.h"
 #include "core/components_ng/pattern/tabs/tabs_model.h"
 #include "core/components_ng/pattern/tabs/tabs_model_ng.h"
 #include "core/pipeline/base/element_register.h"
@@ -275,6 +276,36 @@ void ResetTabClip(ArkUINodeHandle node)
     TabsModelNG::SetClipEdge(frameNode, false);
 }
 
+void SetTabWidthAuto(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ViewAbstractModelNG::ClearWidthOrHeight(frameNode, true);
+    TabsModelNG::SetWidthAuto(frameNode, true);
+}
+
+void ResetTabWidthAuto(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    TabsModelNG::SetWidthAuto(frameNode, false);
+}
+
+void SetTabHeightAuto(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ViewAbstractModelNG::ClearWidthOrHeight(frameNode, false);
+    TabsModelNG::SetHeightAuto(frameNode, true);
+}
+
+void ResetTabHeightAuto(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    TabsModelNG::SetHeightAuto(frameNode, false);
+}
+
 namespace NodeModifier {
 const ArkUITabsModifier* GetTabsModifier()
 {
@@ -309,6 +340,10 @@ const ArkUITabsModifier* GetTabsModifier()
         ResetAnimationDuration,
         SetTabClip,
         ResetTabClip,
+        SetTabWidthAuto,
+        ResetTabWidthAuto,
+        SetTabHeightAuto,
+        ResetTabHeightAuto,
     };
 
     return &modifier;

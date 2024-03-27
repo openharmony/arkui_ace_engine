@@ -1971,6 +1971,10 @@ struct ArkUITabsModifier {
     void (*resetAnimationDuration)(ArkUINodeHandle node);
     void (*setTabClip)(ArkUINodeHandle node, ArkUI_Bool clipEdge);
     void (*resetTabClip)(ArkUINodeHandle node);
+    void (*setTabWidthAuto)(ArkUINodeHandle node);
+    void (*resetTabWidthAuto)(ArkUINodeHandle node);
+    void (*setTabHeightAuto)(ArkUINodeHandle node);
+    void (*resetTabHeightAuto)(ArkUINodeHandle node);
 };
 
 struct ArkUIStepperItemModifier {
