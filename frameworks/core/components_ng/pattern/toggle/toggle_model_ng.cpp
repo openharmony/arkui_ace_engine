@@ -26,7 +26,7 @@
 #include "core/components_ng/pattern/button/toggle_button_model_ng.h"
 #include "core/components_ng/pattern/button/toggle_button_pattern.h"
 #include "core/components_ng/pattern/checkbox/checkbox_model_ng.h"
-#include "core/components_ng/pattern/checkbox/checkbox_pattern.h"
+#include "core/components_ng/pattern/checkbox/toggle_checkbox_pattern.h"
 #include "core/components_ng/pattern/toggle/switch_paint_property.h"
 #include "core/components_ng/pattern/toggle/switch_pattern.h"
 #include "core/components_v2/inspector/inspector_constants.h"
@@ -44,143 +44,55 @@ void ToggleModelNG::Create(NG::ToggleType toggleType, bool isOn)
     ACE_LAYOUT_SCOPED_TRACE("Create[%s][self:%d]", V2::TOGGLE_ETS_TAG, nodeId);
     auto childFrameNode = FrameNode::GetFrameNode(V2::TOGGLE_ETS_TAG, nodeId);
     if (!childFrameNode) {
-        switch (toggleType) {
-            case ToggleType::CHECKBOX: {
-                CheckBoxModelNG checkBoxModelNG;
-                CreateCheckbox(nodeId);
-                checkBoxModelNG.SetSelect(isOn);
-                break;
-            }
-            case ToggleType::SWITCH: {
-                CreateSwitch(nodeId);
-                SetSwitchSelected(childFrameNode, isOn);
-                ACE_UPDATE_PAINT_PROPERTY(SwitchPaintProperty, IsOn, isOn);
-                break;
-            }
-            case ToggleType::BUTTON: {
-                CreateButton(nodeId);
-                ToggleButtonModelNG::SetIsOn(isOn);
-                break;
-            }
-            default:
-                break;
-        }
+        auto frameNode = CreateFrameNode(nodeId, toggleType, isOn);
+        stack->Push(frameNode);
         return;
     }
     auto pattern = childFrameNode->GetPattern();
-    if (AceType::InstanceOf<CheckBoxPattern>(pattern)) {
-        if (toggleType == ToggleType::CHECKBOX) {
-            stack->Push(childFrameNode);
-            CheckBoxModelNG checkBoxModelNG;
-            checkBoxModelNG.SetSelect(isOn);
-            return;
-        }
-        if (toggleType == ToggleType::SWITCH) {
-            auto parentFrame = childFrameNode->GetParent();
-            CHECK_NULL_VOID(parentFrame);
-            auto index = RemoveNode(childFrameNode, nodeId);
-            childFrameNode->SetUndefinedNodeId();
-            CreateSwitch(nodeId);
-            SetSwitchSelected(childFrameNode, isOn);
-            ACE_UPDATE_PAINT_PROPERTY(SwitchPaintProperty, IsOn, isOn);
-            AddNewChild(parentFrame, nodeId, index);
-            return;
-        }
-        auto parentFrame = childFrameNode->GetParent();
-        CHECK_NULL_VOID(parentFrame);
-        auto index = RemoveNode(childFrameNode, nodeId);
-        childFrameNode->SetUndefinedNodeId();
-        CreateButton(nodeId);
-        ToggleButtonModelNG::SetIsOn(isOn);
-        AddNewChild(parentFrame, nodeId, index);
-        return;
-    }
-    if (AceType::InstanceOf<SwitchPattern>(pattern)) {
-        if (toggleType == ToggleType::SWITCH) {
-            SetSwitchSelected(childFrameNode, isOn);
-            stack->Push(childFrameNode);
-            ACE_UPDATE_PAINT_PROPERTY(SwitchPaintProperty, IsOn, isOn);
-            return;
-        }
-        if (toggleType == ToggleType::CHECKBOX) {
-            auto parentFrame = childFrameNode->GetParent();
-            CHECK_NULL_VOID(parentFrame);
-            auto index = RemoveNode(childFrameNode, nodeId);
-            childFrameNode->SetUndefinedNodeId();
-            CheckBoxModelNG checkBoxModelNG;
-            CreateCheckbox(nodeId);
-            checkBoxModelNG.SetSelect(isOn);
-            AddNewChild(parentFrame, nodeId, index);
-            return;
-        }
-        auto parentFrame = childFrameNode->GetParent();
-        CHECK_NULL_VOID(parentFrame);
-        auto index = RemoveNode(childFrameNode, nodeId);
-        childFrameNode->SetUndefinedNodeId();
-        CreateButton(nodeId);
-        ToggleButtonModelNG::SetIsOn(isOn);
-        AddNewChild(parentFrame, nodeId, index);
-        return;
-    }
-    if (AceType::InstanceOf<ToggleButtonPattern>(pattern)) {
-        if (toggleType == ToggleType::BUTTON) {
-            stack->Push(childFrameNode);
-            ToggleButtonModelNG::SetIsOn(isOn);
-            return;
-        }
-        if (toggleType == ToggleType::CHECKBOX) {
-            auto parentFrame = childFrameNode->GetParent();
-            CHECK_NULL_VOID(parentFrame);
-            auto index = RemoveNode(childFrameNode, nodeId);
-            childFrameNode->SetUndefinedNodeId();
-            CheckBoxModelNG checkBoxModelNG;
-            CreateCheckbox(nodeId);
-            checkBoxModelNG.SetSelect(isOn);
-            AddNewChild(parentFrame, nodeId, index);
-            return;
-        }
-        auto parentFrame = childFrameNode->GetParent();
-        CHECK_NULL_VOID(parentFrame);
-        auto index = RemoveNode(childFrameNode, nodeId);
-        childFrameNode->SetUndefinedNodeId();
-        CreateSwitch(nodeId);
-        SetSwitchSelected(childFrameNode, isOn);
-        ACE_UPDATE_PAINT_PROPERTY(SwitchPaintProperty, IsOn, isOn);
-        AddNewChild(parentFrame, nodeId, index);
+    if (AceType::InstanceOf<SwitchPattern>(pattern) && toggleType == ToggleType::SWITCH) {
+        UpdateSwitchIsOn(childFrameNode, isOn);
+        stack->Push(childFrameNode);
+    } else if (AceType::InstanceOf<ToggleCheckBoxPattern>(pattern) && toggleType == ToggleType::CHECKBOX) {
+        UpdateCheckboxIsOn(childFrameNode, isOn);
+        stack->Push(childFrameNode);
+    } else if (AceType::InstanceOf<ToggleButtonPattern>(pattern) && toggleType == ToggleType::BUTTON) {
+        UpdateToggleButtonIsOn(childFrameNode, isOn);
+        stack->Push(childFrameNode);
+    } else {
+        ReCreateFrameNode(childFrameNode, nodeId, toggleType, isOn);
     }
 }
+
+void ToggleModelNG::ReCreateFrameNode(
+    const RefPtr<FrameNode>& childFrameNode, int32_t nodeId, ToggleType toggleType, bool isOn)
+{
+    auto parentFrame = childFrameNode->GetParent();
+    CHECK_NULL_VOID(parentFrame);
+    auto index = RemoveNode(childFrameNode, nodeId);
+    childFrameNode->SetUndefinedNodeId();
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto frameNode = CreateFrameNode(nodeId, toggleType, isOn);
+    stack->Push(frameNode);
+    ReplaceAllChild(childFrameNode);
+    AddNewChild(parentFrame, nodeId, index);
+}
+
 RefPtr<FrameNode> ToggleModelNG::CreateFrameNode(int32_t nodeId, ToggleType toggleType, bool isOn)
 {
-    RefPtr<FrameNode> frameNode = nullptr;
     switch (toggleType) {
         case ToggleType::CHECKBOX: {
-            frameNode = CreateCheckboxFrameNode(nodeId, isOn);
-            break;
+            return CreateCheckboxFrameNode(nodeId, isOn);
         }
         case ToggleType::SWITCH: {
-            frameNode = CreateSwitchFrameNode(nodeId, isOn);
-            break;
+            return CreateSwitchFrameNode(nodeId, isOn);
         }
         case ToggleType::BUTTON: {
-            frameNode = CreateButtonFrameNode(nodeId, isOn);
-            break;
+            return CreateButtonFrameNode(nodeId, isOn);
         }
-        default:
-            break;
+        default: {
+            return CreateSwitchFrameNode(nodeId, isOn);
+        }
     }
-    return frameNode;
-}
-void ToggleModelNG::SetSwitchSelected(RefPtr<FrameNode>& childFrameNode, bool isOn)
-{
-    if (!childFrameNode) {
-        auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
-        CHECK_NULL_VOID(frameNode);
-        childFrameNode = frameNode;
-    }
-    auto eventHub = childFrameNode->GetEventHub<SwitchEventHub>();
-    CHECK_NULL_VOID(eventHub);
-    TAG_LOGD(AceLogTag::ACE_SELECT_COMPONENT, "switch mouse event %{public}d", isOn);
-    eventHub->SetCurrentUIState(UI_STATE_SELECTED, isOn);
 }
 
 void ToggleModelNG::SetSelectedColor(const std::optional<Color>& selectedColor)
@@ -194,7 +106,7 @@ void ToggleModelNG::SetSelectedColor(const std::optional<Color>& selectedColor)
         color = selectedColor.value();
     }
 
-    auto checkboxPattern = stack->GetMainFrameNodePattern<CheckBoxPattern>();
+    auto checkboxPattern = stack->GetMainFrameNodePattern<ToggleCheckBoxPattern>();
     if (checkboxPattern) {
         if (!selectedColor.has_value()) {
             auto theme = pipeline->GetTheme<CheckboxTheme>();
@@ -234,7 +146,7 @@ void ToggleModelNG::OnChange(ChangeEvent&& onChange)
     CHECK_NULL_VOID(stack);
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
-    auto checkboxPattern = stack->GetMainFrameNodePattern<CheckBoxPattern>();
+    auto checkboxPattern = stack->GetMainFrameNodePattern<ToggleCheckBoxPattern>();
     if (checkboxPattern) {
         auto eventHub = frameNode->GetEventHub<CheckBoxEventHub>();
         CHECK_NULL_VOID(eventHub);
@@ -256,7 +168,7 @@ void ToggleModelNG::OnChange(ChangeEvent&& onChange)
 void ToggleModelNG::OnChange(FrameNode* frameNode, ChangeEvent&& onChange)
 {
     CHECK_NULL_VOID(frameNode);
-    auto checkboxPattern = AceType::DynamicCast<CheckBoxPattern>(frameNode->GetPattern());
+    auto checkboxPattern = AceType::DynamicCast<ToggleCheckBoxPattern>(frameNode->GetPattern());
     if (checkboxPattern) {
         auto eventHub = frameNode->GetEventHub<CheckBoxEventHub>();
         CHECK_NULL_VOID(eventHub);
@@ -301,55 +213,38 @@ void ToggleModelNG::SetPadding(const NG::PaddingPropertyF& /*args*/, const NG::P
 }
 RefPtr<FrameNode> ToggleModelNG::CreateCheckboxFrameNode(int32_t nodeId, bool isOn)
 {
-    auto frameNode = FrameNode::CreateFrameNode(V2::CHECKBOX_ETS_TAG, nodeId, AceType::MakeRefPtr<CheckBoxPattern>());
-    CHECK_NULL_RETURN(frameNode, nullptr);
-    CheckBoxModelNG checkBoxModelNG;
-    checkBoxModelNG.SetSelect(isOn);
+    auto frameNode =
+        FrameNode::CreateFrameNode(V2::CHECKBOX_ETS_TAG, nodeId, AceType::MakeRefPtr<ToggleCheckBoxPattern>());
+    UpdateCheckboxIsOn(frameNode, isOn);
     return frameNode;
 }
 
 RefPtr<FrameNode> ToggleModelNG::CreateSwitchFrameNode(int32_t nodeId, bool isOn)
 {
     auto frameNode = FrameNode::CreateFrameNode(V2::TOGGLE_ETS_TAG, nodeId, AceType::MakeRefPtr<SwitchPattern>());
-    CHECK_NULL_RETURN(frameNode, nullptr);
-    auto eventHub = frameNode->GetEventHub<SwitchEventHub>();
-    CHECK_NULL_RETURN(eventHub, nullptr);
-    eventHub->SetCurrentUIState(UI_STATE_SELECTED, isOn);
-    auto paintProperty = frameNode->GetPaintProperty<SwitchPaintProperty>();
-    CHECK_NULL_RETURN(paintProperty, nullptr);
-    paintProperty->UpdateIsOn(isOn);
+    UpdateSwitchIsOn(frameNode, isOn);
     return frameNode;
 }
 
 RefPtr<FrameNode> ToggleModelNG::CreateButtonFrameNode(int32_t nodeId, bool isOn)
 {
     auto frameNode = FrameNode::CreateFrameNode(V2::TOGGLE_ETS_TAG, nodeId, AceType::MakeRefPtr<ToggleButtonPattern>());
-    CHECK_NULL_RETURN(frameNode, nullptr);
-    ToggleButtonModelNG::SetIsOn(isOn);
+    UpdateToggleButtonIsOn(frameNode, isOn);
     return frameNode;
 }
-void ToggleModelNG::CreateCheckbox(int32_t nodeId)
-{
-    auto* stack = ViewStackProcessor::GetInstance();
-    auto frameNode = FrameNode::GetOrCreateFrameNode(
-        V2::CHECKBOX_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<CheckBoxPattern>(); });
-    stack->Push(frameNode);
-}
 
-void ToggleModelNG::CreateSwitch(int32_t nodeId)
+void ToggleModelNG::ReplaceAllChild(const RefPtr<FrameNode>& oldFrameNode)
 {
-    auto* stack = ViewStackProcessor::GetInstance();
-    auto frameNode = FrameNode::GetOrCreateFrameNode(
-        V2::TOGGLE_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<SwitchPattern>(); });
-    stack->Push(frameNode);
-}
-
-void ToggleModelNG::CreateButton(int32_t nodeId)
-{
-    auto* stack = ViewStackProcessor::GetInstance();
-    auto frameNode = FrameNode::GetOrCreateFrameNode(
-        V2::TOGGLE_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<ToggleButtonPattern>(); });
-    stack->Push(frameNode);
+    auto currentNode = ViewStackProcessor::GetInstance()->GetMainElementNode();
+    CHECK_NULL_VOID(currentNode);
+    const auto& children = oldFrameNode->GetChildren();
+    for (const auto& child : children) {
+        if (!child) {
+            continue;
+        }
+        child->MountToParent(currentNode);
+    }
+    oldFrameNode->RemoveAllChildInRenderTree();
 }
 
 void ToggleModelNG::AddNewChild(const RefPtr<UINode>& parentFrame, int32_t nodeId, int32_t index)
@@ -373,7 +268,7 @@ void ToggleModelNG::OnChangeEvent(ChangeEvent&& onChangeEvent)
     CHECK_NULL_VOID(stack);
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
-    auto checkboxPattern = stack->GetMainFrameNodePattern<CheckBoxPattern>();
+    auto checkboxPattern = stack->GetMainFrameNodePattern<ToggleCheckBoxPattern>();
     if (checkboxPattern) {
         auto eventHub = frameNode->GetEventHub<CheckBoxEventHub>();
         CHECK_NULL_VOID(eventHub);
@@ -414,24 +309,6 @@ void ToggleModelNG::SetHoverEffect(HoverEffectType hoverEffect)
         return;
     }
     NG::ViewAbstract::SetHoverEffect(hoverEffect);
-}
-
-void ToggleModelNG::Pop()
-{
-    // button is a container but switch or checkbox is not, container should pop container
-    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
-    CHECK_NULL_VOID(frameNode);
-    auto switchPattern = frameNode->GetPattern<SwitchPattern>();
-    if (switchPattern) {
-        ViewStackProcessor::GetInstance()->Pop();
-        return;
-    }
-    auto checkboxPattern = frameNode->GetPattern<CheckBoxPattern>();
-    if (checkboxPattern) {
-        ViewStackProcessor::GetInstance()->Pop();
-        return;
-    }
-    ViewStackProcessor::GetInstance()->PopContainer();
 }
 
 void ToggleModelNG::SetPointRadius(const Dimension& switchPointRadius)
@@ -497,7 +374,7 @@ void ToggleModelNG::SetSelectedColor(FrameNode* frameNode, const std::optional<C
         color = selectedColor.value();
     }
 
-    auto checkboxPattern = AceType::DynamicCast<CheckBoxPattern>(frameNode->GetPattern());
+    auto checkboxPattern = AceType::DynamicCast<ToggleCheckBoxPattern>(frameNode->GetPattern());
     if (checkboxPattern) {
         if (!selectedColor.has_value()) {
             auto theme = pipeline->GetTheme<CheckboxTheme>();
@@ -595,6 +472,34 @@ void ToggleModelNG::SetSwitchIsOn(FrameNode* frameNode, bool isOn)
     CHECK_NULL_VOID(eventHub);
     eventHub->SetCurrentUIState(UI_STATE_SELECTED, isOn);
     ACE_UPDATE_NODE_PAINT_PROPERTY(SwitchPaintProperty, IsOn, isOn, frameNode);
+}
+
+void ToggleModelNG::UpdateSwitchIsOn(const RefPtr<FrameNode>& frameNode, bool isOn)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetEventHub<SwitchEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    TAG_LOGD(AceLogTag::ACE_SELECT_COMPONENT, "switch mouse event %{public}d", isOn);
+    eventHub->SetCurrentUIState(UI_STATE_SELECTED, isOn);
+    ACE_UPDATE_NODE_PAINT_PROPERTY(SwitchPaintProperty, IsOn, isOn, frameNode);
+}
+
+void ToggleModelNG::UpdateCheckboxIsOn(const RefPtr<FrameNode>& frameNode, bool isOn)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetEventHub<CheckBoxEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetCurrentUIState(UI_STATE_SELECTED, isOn);
+    ACE_UPDATE_NODE_PAINT_PROPERTY(CheckBoxPaintProperty, CheckBoxSelect, isOn, frameNode);
+}
+
+void ToggleModelNG::UpdateToggleButtonIsOn(const RefPtr<FrameNode>& frameNode, bool isOn)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetEventHub<ToggleButtonEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetCurrentUIState(UI_STATE_SELECTED, isOn);
+    ACE_UPDATE_NODE_PAINT_PROPERTY(ToggleButtonPaintProperty, IsOn, isOn, frameNode);
 }
 
 bool ToggleModelNG::GetSwitchIsOn(FrameNode* frameNode)

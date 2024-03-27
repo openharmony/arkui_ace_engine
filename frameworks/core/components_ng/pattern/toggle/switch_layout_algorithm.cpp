@@ -74,4 +74,12 @@ std::optional<SizeF> SwitchLayoutAlgorithm::MeasureContent(
     return SizeF(width, height);
 }
 
+void SwitchLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
+{
+    // switch does not have child nodes. If a child is added to a toggle, then hide the child.
+    for (const auto& child : layoutWrapper->GetAllChildrenWithBuild()) {
+        child->GetGeometryNode()->SetFrameSize(SizeF());
+    }
+    PerformMeasureSelf(layoutWrapper);
+}
 } // namespace OHOS::Ace::NG
