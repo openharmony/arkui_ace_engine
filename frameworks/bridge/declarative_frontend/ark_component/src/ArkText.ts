@@ -49,24 +49,6 @@ class FontColorModifier extends ModifierWithKey<ResourceColor> {
   }
 }
 
-class TextForegroundColorModifier extends ModifierWithKey<ResourceColor | ColoringStrategy> {
-  constructor(value: ResourceColor | ColoringStrategy) {
-    super(value);
-  }
-  static identity: Symbol = Symbol('textForegroundColor');
-  applyPeer(node: KNode, reset: boolean): void {
-    if (reset) {
-      getUINativeModule().text.resetTextForegroundColor(node);
-    } else {
-      getUINativeModule().text.setTextForegroundColor(node, this.value);
-    }
-  }
-
-  checkObjectDiff(): boolean {
-    return !isBaseOrResourceEqual(this.stageValue, this.value);
-  }
-}
-
 class FontSizeModifier extends ModifierWithKey<number | string | Resource> {
   constructor(value: number | string | Resource) {
     super(value);
@@ -664,11 +646,6 @@ class ArkTextComponent extends ArkComponent implements TextAttribute {
   }
   clip(value: boolean | CircleAttribute | EllipseAttribute | PathAttribute | RectAttribute): this {
     modifierWithKey(this._modifiersWithKeys, TextClipModifier.identity, TextClipModifier, value);
-    return this;
-  }
-  foregroundColor(value: ResourceColor | ColoringStrategy) {
-    modifierWithKey(
-      this._modifiersWithKeys, TextForegroundColorModifier.identity, TextForegroundColorModifier, value);
     return this;
   }
 }
