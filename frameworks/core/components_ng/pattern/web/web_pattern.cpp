@@ -41,6 +41,7 @@
 #include "core/components_ng/pattern/overlay/overlay_manager.h"
 #include "core/components_ng/pattern/refresh/refresh_pattern.h"
 #include "core/components_ng/pattern/swiper/swiper_pattern.h"
+#include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/components_ng/pattern/web/web_event_hub.h"
 #include "core/event/key_event.h"
 #include "core/event/touch_event.h"
@@ -154,6 +155,11 @@ constexpr double DEFAULT_DBCLICK_OFFSET = 2.0;
 constexpr double DEFAULT_AXIS_RATIO = -0.06;
 constexpr double DEFAULT_WEB_WIDTH = 100.0;
 constexpr double DEFAULT_WEB_HEIGHT = 80.0;
+constexpr Dimension TOOLTIP_BORDER_WIDTH = 1.0_vp;
+constexpr Dimension TOOLTIP_FONT_SIZE = 10.0_vp;
+constexpr Dimension TOOLTIP_PADDING = 8.0_vp;
+constexpr float TOOLTIP_MAX_PORTION = 0.35f;
+constexpr float TOOLTIP_MARGIN = 10.0f;
 constexpr uint32_t ADJUST_WEB_DRAW_LENGTH = 3000;
 constexpr int32_t FIT_CONTENT_LIMIT_LENGTH = 8000;
 const std::string PATTERN_TYPE_WEB = "WEBPATTERN";
@@ -442,6 +448,11 @@ void WebPattern::WebOnMouseEvent(const MouseInfo& info)
     if (!HandleDoubleClickEvent(info)) {
         delegate_->OnMouseEvent(
             localLocation.GetX(), localLocation.GetY(), info.GetButton(), info.GetAction(), SINGLE_CLICK_NUM);
+    }
+
+    if (info.GetAction() == MouseAction::MOVE) {
+        mouseHoveredX_ = localLocation.GetX();
+        mouseHoveredY_ = localLocation.GetY();
     }
 }
 
@@ -2394,6 +2405,80 @@ std::shared_ptr<OHOS::Media::PixelMap> WebPattern::CreatePixelMapFromString(cons
     CHECK_NULL_RETURN(pixelMap, nullptr);
 
     return pixelMap;
+}
+
+void WebPattern::OnTooltip(const std::string& tooltip)
+{
+    auto pipeline = PipelineContext::GetMainPipelineContext();
+    CHECK_NULL_VOID(pipeline);
+    auto overlayManager = pipeline->GetOverlayManager();
+    CHECK_NULL_VOID(overlayManager);
+
+    if (tooltipTextId_ == -1) {
+        tooltipTextId_ = ElementRegister::GetInstance()->MakeUniqueId();
+    }
+    if (tooltip == "") {
+        overlayManager->RemoveIndexerPopupById(tooltipTextId_);
+        tooltipEnabled_ = false;
+        return;
+    }
+    if (tooltipEnabled_ || mouseHoveredX_ < 0 || mouseHoveredY_ < 0) {
+        return;
+    }
+    tooltipEnabled_ = true;
+    auto textNode = FrameNode::GetOrCreateFrameNode(V2::TEXT_ETS_TAG, tooltipTextId_,
+        []() { return AceType::MakeRefPtr<TextPattern>(); });
+    CHECK_NULL_VOID(textNode);
+
+    auto textRenderContext = textNode->GetRenderContext();
+    CHECK_NULL_VOID(textRenderContext);
+    auto textLayoutProperty = textNode->GetLayoutProperty<TextLayoutProperty>();
+    CHECK_NULL_VOID(textLayoutProperty);
+    textLayoutProperty->UpdateContent(tooltip);
+
+    BorderWidthProperty borderWidth;
+    borderWidth.SetBorderWidth(TOOLTIP_BORDER_WIDTH);
+    textLayoutProperty->UpdateBorderWidth(borderWidth);
+    textLayoutProperty->UpdateFontSize(TOOLTIP_FONT_SIZE);
+    textLayoutProperty->UpdatePadding({ CalcLength(TOOLTIP_PADDING),
+        CalcLength(TOOLTIP_PADDING), CalcLength(TOOLTIP_PADDING), CalcLength(TOOLTIP_PADDING) });
+    textLayoutProperty->UpdateCalcMaxSize(CalcSize(CalcLength(Dimension(
+        pipeline->GetCurrentRootWidth() * TOOLTIP_MAX_PORTION)), std::nullopt));
+    textRenderContext->UpdateBackgroundColor(Color::WHITE);
+
+    MarginProperty textMargin;
+    CalculateToolTipMargin(textNode, textMargin);
+    textLayoutProperty->UpdateMargin(textMargin);
+    
+    BorderColorProperty borderColor;
+    borderColor.SetColor(Color::BLACK);
+    textRenderContext->UpdateBorderColor(borderColor);
+    overlayManager->ShowIndexerPopup(tooltipTextId_, textNode);
+}
+
+void WebPattern::CalculateToolTipMargin(RefPtr<FrameNode>& textNode, MarginProperty& textMargin)
+{
+    auto textLayoutWrapper = textNode->CreateLayoutWrapper(true);
+    CHECK_NULL_VOID(textLayoutWrapper);
+    textLayoutWrapper->Measure(std::nullopt);
+    auto textGeometryNode = textLayoutWrapper->GetGeometryNode();
+    CHECK_NULL_VOID(textGeometryNode);
+    auto textWidth = textGeometryNode->GetMarginFrameSize().Width();
+    auto textHeight = textGeometryNode->GetMarginFrameSize().Height();
+
+    auto offset = GetCoordinatePoint().value_or(OffsetF());
+    auto marginX = offset.GetX() + mouseHoveredX_ + TOOLTIP_MARGIN;
+    auto marginY = offset.GetY() + mouseHoveredY_ + TOOLTIP_MARGIN;
+    auto pipeline = PipelineContext::GetMainPipelineContext();
+    CHECK_NULL_VOID(pipeline);
+    if (GreatNotEqual(marginX + textWidth, pipeline->GetCurrentRootWidth())) {
+        marginX = pipeline->GetCurrentRootWidth() - textWidth;
+    }
+    if (GreatNotEqual(marginY + textHeight, pipeline->GetCurrentRootHeight())) {
+        marginY = pipeline->GetCurrentRootHeight() - textHeight;
+    }
+    textMargin.left = CalcLength(Dimension(marginX));
+    textMargin.top = CalcLength(Dimension(marginY));
 }
 
 void WebPattern::OnSelectPopupMenu(std::shared_ptr<OHOS::NWeb::NWebSelectPopupMenuParam> params,
