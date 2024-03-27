@@ -180,12 +180,7 @@ void RefreshModelImpl::SetOnRefreshing(std::function<void()>&& refreshing)
     component->SetOnRefreshing(std::move(refreshing));
 }
 
-void RefreshModelImpl::SetOnOffsetChange(std::function<void(const float)>&& offsetChange)
-{
-    auto component = GetComponent();
-    CHECK_NULL_VOID(component);
-    component->SetOnOffsetChange(std::move(offsetChange));
-}
+void RefreshModelImpl::SetOnOffsetChange(std::function<void(const float)>&& offsetChange) {}
 
 void RefreshModelImpl::SetChangeEvent(std::function<void(const std::string)>&& changeEvent)
 {
