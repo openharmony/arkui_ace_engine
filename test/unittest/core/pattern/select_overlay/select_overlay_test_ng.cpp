@@ -1701,8 +1701,6 @@ HWTEST_F(SelectOverlayTestNg, UpdateContentModifier004, TestSize.Level1)
     ASSERT_NE(paintWrapper, nullptr);
     RefPtr<NodePaintMethod> paintMethod = pattern->CreateNodePaintMethod();
     EXPECT_NE(paintMethod, nullptr);
-    paintMethod = pattern->CreateNodePaintMethod();
-    EXPECT_NE(paintMethod, nullptr);
     auto selectOverlayPaintMethod = AceType::DynamicCast<SelectOverlayPaintMethod>(paintMethod);
     EXPECT_NE(selectOverlayPaintMethod, nullptr);
     /**
@@ -1710,6 +1708,9 @@ HWTEST_F(SelectOverlayTestNg, UpdateContentModifier004, TestSize.Level1)
      * @tc.expected: handleColor equals theme handleColor.
      */
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<TextOverlayTheme>()));
+    int32_t settingApiVersion = 12;
+    int32_t backupApiVersion = AceApplicationInfo::GetInstance().GetApiTargetVersion();
+    AceApplicationInfo::GetInstance().SetApiTargetVersion(settingApiVersion);
     selectOverlayPaintMethod->UpdateContentModifier(paintWrapper);
     auto contentModifier = pattern->selectOverlayContentModifier_;
     ASSERT_NE(contentModifier, nullptr);
@@ -1723,6 +1724,7 @@ HWTEST_F(SelectOverlayTestNg, UpdateContentModifier004, TestSize.Level1)
     selectOverlayPaintMethod->info_.handlerColor = Color::RED;
     selectOverlayPaintMethod->UpdateContentModifier(paintWrapper);
     EXPECT_TRUE(contentModifier->handleColor_->Get() == Color::RED);
+    AceApplicationInfo::GetInstance().SetApiTargetVersion(backupApiVersion);
 }
 
 /**
