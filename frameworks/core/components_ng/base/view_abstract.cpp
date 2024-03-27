@@ -2426,7 +2426,7 @@ void ViewAbstract::SetBorderImageGradient(FrameNode* frameNode, const NG::Gradie
 
 void ViewAbstract::SetForegroundBlurStyle(FrameNode* frameNode, const BlurStyleOption& fgBlurStyle)
 {
-    const auto& target = frameNode->GetRenderContext();
+    const auto target = frameNode->GetRenderContext();
     if (target) {
         target->UpdateFrontBlurStyle(fgBlurStyle);
         if (target->GetFrontBlurRadius().has_value()) {

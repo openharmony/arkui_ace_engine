@@ -1462,11 +1462,14 @@ void SetBorderImageGradient(ArkUINodeHandle node, const ArkUIInt32orFloat32* val
     ViewAbstract::SetBorderImageGradient(frameNode, gradient);
 }
 
-void SetForegroundBlurStyle(
-    ArkUINodeHandle node, ArkUI_Int32 blurStyle, ArkUI_Int32 colorMode, ArkUI_Int32 adaptiveColor, ArkUI_Float32 scale)
+void SetForegroundBlurStyle(ArkUINodeHandle node, ArkUI_Int32* intArray, ArkUI_Float32 scale,
+    const ArkUI_Float32* blurValues, ArkUI_Int32 blurValuesSize)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
+    ArkUI_Int32 blurStyle = intArray[NUM_0];
+    ArkUI_Int32 colorMode = intArray[NUM_1];
+    ArkUI_Int32 adaptiveColor = intArray[NUM_2];
     BlurStyleOption fgBlurStyle;
     if (blurStyle >= 0) {
         if (blurStyle >= static_cast<int>(BlurStyle::NO_MATERIAL) &&
@@ -1474,7 +1477,7 @@ void SetForegroundBlurStyle(
             fgBlurStyle.blurStyle = static_cast<BlurStyle>(blurStyle);
         }
     }
-    bool isHasOptions = !((colorMode < 0) && (adaptiveColor < 0) && (scale < 0));
+    bool isHasOptions = !((colorMode < 0) && (adaptiveColor < 0) && (scale < 0) && (blurValuesSize == 0));
     if (isHasOptions) {
         if (colorMode >= static_cast<int32_t>(ThemeColorMode::SYSTEM) &&
             colorMode <= static_cast<int32_t>(ThemeColorMode::DARK)) {
@@ -1487,6 +1490,9 @@ void SetForegroundBlurStyle(
         if (scale >= 0) {
             fgBlurStyle.scale = std::clamp(scale, 0.0f, 1.0f);
         }
+        BlurOption blurOption;
+        blurOption.grayscale.assign(blurValues, blurValues + blurValuesSize);
+        fgBlurStyle.blurOption = blurOption;
     }
     ViewAbstract::SetForegroundBlurStyle(frameNode, fgBlurStyle);
 }
@@ -1557,11 +1563,14 @@ void ResetLinearGradientBlur(ArkUINodeHandle node)
     ViewAbstract::SetLinearGradientBlur(frameNode, blurPara);
 }
 
-void SetBackgroundBlurStyle(
-    ArkUINodeHandle node, ArkUI_Int32 blurStyle, ArkUI_Int32 colorMode, ArkUI_Int32 adaptiveColor, ArkUI_Float32 scale)
+void SetBackgroundBlurStyle(ArkUINodeHandle node, ArkUI_Int32* intArray, ArkUI_Float32 scale,
+    const ArkUI_Float32* blurValues, ArkUI_Int32 blurValuesSize)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
+    ArkUI_Int32 blurStyle = intArray[NUM_0];
+    ArkUI_Int32 colorMode = intArray[NUM_1];
+    ArkUI_Int32 adaptiveColor = intArray[NUM_2];
     BlurStyleOption bgBlurStyle;
     if (blurStyle >= 0) {
         if (blurStyle >= static_cast<int>(BlurStyle::NO_MATERIAL) &&
@@ -1569,7 +1578,7 @@ void SetBackgroundBlurStyle(
             bgBlurStyle.blurStyle = static_cast<BlurStyle>(blurStyle);
         }
     }
-    bool isHasOptions = !((colorMode < 0) && (adaptiveColor < 0) && (scale < 0));
+    bool isHasOptions = !((colorMode < 0) && (adaptiveColor < 0) && (scale < 0) && (blurValuesSize == 0));
     if (isHasOptions) {
         if (colorMode >= static_cast<int32_t>(ThemeColorMode::SYSTEM) &&
             colorMode <= static_cast<int32_t>(ThemeColorMode::DARK)) {
@@ -1580,6 +1589,9 @@ void SetBackgroundBlurStyle(
             bgBlurStyle.adaptiveColor = static_cast<AdaptiveColor>(adaptiveColor);
         }
         bgBlurStyle.scale = std::clamp(scale, 0.0f, 1.0f);
+        BlurOption blurOption;
+        blurOption.grayscale.assign(blurValues, blurValues + blurValuesSize);
+        bgBlurStyle.blurOption = blurOption;
     }
     ViewAbstract::SetBackgroundBlurStyle(frameNode, bgBlurStyle);
 }

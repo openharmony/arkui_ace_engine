@@ -2407,27 +2407,34 @@ ArkUINativeModuleValue CommonBridge::SetForegroundBlurStyle(ArkUIRuntimeCallInfo
     auto colorModeArg = runtimeCallInfo->GetCallArgRef(NUM_2);
     auto adaptiveColorArg = runtimeCallInfo->GetCallArgRef(NUM_3);
     auto scaleArg = runtimeCallInfo->GetCallArgRef(NUM_4);
+    auto blurOptionsArg = runtimeCallInfo->GetCallArgRef(NUM_5);
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     int32_t blurStyle = -1;
     if (blurStyleArg->IsNumber()) {
         blurStyle = blurStyleArg->Int32Value(vm);
     }
-    bool isHasOptions = !(colorModeArg->IsUndefined() && adaptiveColorArg->IsUndefined() && scaleArg->IsUndefined());
-    int32_t colorMode = -1;
-    int32_t adaptiveColor = -1;
-    double scale = -1.0;
+    bool isHasOptions = !(colorModeArg->IsUndefined() && adaptiveColorArg->IsUndefined() && scaleArg->IsUndefined() &&
+                          blurOptionsArg->IsUndefined());
+    int32_t colorMode = static_cast<int32_t>(ThemeColorMode::SYSTEM);
+    int32_t adaptiveColor = static_cast<int32_t>(AdaptiveColor::DEFAULT);
+    double scale = 1.0;
+    BlurOption blurOption;
     if (isHasOptions) {
-        colorMode = static_cast<int32_t>(ThemeColorMode::SYSTEM);
         ParseJsInt32(vm, colorModeArg, colorMode);
-        adaptiveColor = static_cast<int32_t>(AdaptiveColor::DEFAULT);
         ParseJsInt32(vm, adaptiveColorArg, adaptiveColor);
-        scale = 1.0;
         if (scaleArg->IsNumber()) {
             scale = scaleArg->ToNumber(vm)->Value();
         }
+        if (blurOptionsArg->IsArray(vm)) {
+            ParseBlurOption(vm, blurOptionsArg, blurOption);
+        }
     }
-    GetArkUINodeModifiers()->getCommonModifier()->setForegroundBlurStyle(nativeNode, blurStyle, colorMode,
-        adaptiveColor, scale);
+    int32_t intArray[NUM_3];
+    intArray[NUM_0] = blurStyle;
+    intArray[NUM_1] = colorMode;
+    intArray[NUM_2] = adaptiveColor;
+    GetArkUINodeModifiers()->getCommonModifier()->setForegroundBlurStyle(
+        nativeNode, intArray, scale, blurOption.grayscale.data(), blurOption.grayscale.size());
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -2495,15 +2502,18 @@ ArkUINativeModuleValue CommonBridge::SetBackgroundBlurStyle(ArkUIRuntimeCallInfo
     auto colorModeArg = runtimeCallInfo->GetCallArgRef(NUM_2);
     auto adaptiveColorArg = runtimeCallInfo->GetCallArgRef(NUM_3);
     auto scaleArg = runtimeCallInfo->GetCallArgRef(NUM_4);
+    auto blurOptionsArg = runtimeCallInfo->GetCallArgRef(NUM_5);
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     int32_t blurStyle = -1;
     if (blurStyleArg->IsNumber()) {
         blurStyle = blurStyleArg->Int32Value(vm);
     }
-    bool isHasOptions = !(colorModeArg->IsUndefined() && adaptiveColorArg->IsUndefined() && scaleArg->IsUndefined());
+    bool isHasOptions = !(colorModeArg->IsUndefined() && adaptiveColorArg->IsUndefined() && scaleArg->IsUndefined() &&
+                          blurOptionsArg->IsUndefined());
     int32_t colorMode = -1;
     int32_t adaptiveColor = -1;
     double scale = -1.0;
+    BlurOption blurOption;
     if (isHasOptions) {
         colorMode = static_cast<int32_t>(ThemeColorMode::SYSTEM);
         ParseJsInt32(vm, colorModeArg, colorMode);
@@ -2513,9 +2523,16 @@ ArkUINativeModuleValue CommonBridge::SetBackgroundBlurStyle(ArkUIRuntimeCallInfo
         if (scaleArg->IsNumber()) {
             scale = scaleArg->ToNumber(vm)->Value();
         }
+        if (blurOptionsArg->IsArray(vm)) {
+            ParseBlurOption(vm, blurOptionsArg, blurOption);
+        }
     }
-    GetArkUINodeModifiers()->getCommonModifier()->setBackgroundBlurStyle(nativeNode, blurStyle, colorMode,
-        adaptiveColor, scale);
+    int32_t intArray[NUM_3];
+    intArray[NUM_0] = blurStyle;
+    intArray[NUM_1] = colorMode;
+    intArray[NUM_2] = adaptiveColor;
+    GetArkUINodeModifiers()->getCommonModifier()->setBackgroundBlurStyle(
+        nativeNode, intArray, scale, blurOption.grayscale.data(), blurOption.grayscale.size());
     return panda::JSValueRef::Undefined(vm);
 }
 

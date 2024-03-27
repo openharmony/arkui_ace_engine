@@ -1068,14 +1068,16 @@ class ForegroundBlurStyleModifier extends ModifierWithKey {
       getUINativeModule().common.resetForegroundBlurStyle(node);
     }
     else {
-      getUINativeModule().common.setForegroundBlurStyle(node, this.value.blurStyle, this.value.colorMode, this.value.adaptiveColor, this.value.scale);
+      getUINativeModule().common.setForegroundBlurStyle(node, this.value.blurStyle, this.value.colorMode, this.value.adaptiveColor, this.value.scale,
+        (_a = this.value.blurOptions) === null || _a === void 0 ? void 0 : _a.grayscale);
     }
   }
   checkObjectDiff() {
     return !(this.stageValue.blurStyle === this.value.blurStyle &&
       this.stageValue.colorMode === this.value.colorMode &&
       this.stageValue.adaptiveColor === this.value.adaptiveColor &&
-      this.stageValue.scale === this.value.scale);
+      this.stageValue.scale === this.value.scale &&
+      this.stageValue.blurOptions === this.value.blurOptions);
   }
 }
 ForegroundBlurStyleModifier.identity = Symbol('foregroundBlurStyle');
@@ -1150,7 +1152,8 @@ class BackgroundBlurStyleModifier extends ModifierWithKey {
       getUINativeModule().common.resetBackgroundBlurStyle(node);
     }
     else {
-      getUINativeModule().common.setBackgroundBlurStyle(node, this.value.blurStyle, this.value.colorMode, this.value.adaptiveColor, this.value.scale);
+      getUINativeModule().common.setBackgroundBlurStyle(node, this.value.blurStyle, this.value.colorMode, this.value.adaptiveColor, this.value.scale,
+        (_a = this.value.blurOptions) === null || _a === void 0 ? void 0 : _a.grayscale);
     }
   }
 }
@@ -2615,6 +2618,7 @@ class ArkComponent {
       arkBackgroundBlurStyle.colorMode = options.colorMode;
       arkBackgroundBlurStyle.adaptiveColor = options.adaptiveColor;
       arkBackgroundBlurStyle.scale = options.scale;
+      arkBackgroundBlurStyle.blurOptions = options.blurOptions;
     }
     modifierWithKey(this._modifiersWithKeys, BackgroundBlurStyleModifier.identity, BackgroundBlurStyleModifier, arkBackgroundBlurStyle);
     return this;
@@ -2630,6 +2634,7 @@ class ArkComponent {
       arkForegroundBlurStyle.colorMode = options.colorMode;
       arkForegroundBlurStyle.adaptiveColor = options.adaptiveColor;
       arkForegroundBlurStyle.scale = options.scale;
+      arkForegroundBlurStyle.blurOptions = options.blurOptions;
     }
     modifierWithKey(this._modifiersWithKeys, ForegroundBlurStyleModifier.identity, ForegroundBlurStyleModifier, arkForegroundBlurStyle);
     return this;
@@ -9388,12 +9393,14 @@ class ArkForegroundBlurStyle {
     this.colorMode = undefined;
     this.adaptiveColor = undefined;
     this.scale = undefined;
+    this.blurOptions = undefined;
   }
   isEqual(another) {
     return (this.blurStyle === another.blurStyle &&
       this.colorMode === another.colorMode &&
       this.adaptiveColor === another.adaptiveColor &&
-      this.scale === another.scale);
+      this.scale === another.scale &&
+      this.blurOptions === another.blurOptions);
   }
 }
 class ArkLinearGradientBlur {
@@ -9529,12 +9536,14 @@ class ArkBackgroundBlurStyle {
     this.colorMode = undefined;
     this.adaptiveColor = undefined;
     this.scale = undefined;
+    this.blurOptions = undefined;
   }
   isEqual(another) {
     return (this.blurStyle === another.blurStyle &&
       this.colorMode === another.colorMode &&
       this.adaptiveColor === another.adaptiveColor &&
-      this.scale === another.scale);
+      this.scale === another.scale &&
+      this.blurOptions === another.blurOptions);
   }
 }
 class ArkBorder {
