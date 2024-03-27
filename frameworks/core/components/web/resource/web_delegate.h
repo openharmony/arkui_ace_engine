@@ -568,6 +568,8 @@ public:
     void InitWebViewWithWindow();
     void ShowWebView();
     void HideWebView();
+    void OnRenderToBackground();
+    void OnRenderToForeground();
     void Resize(const double& width, const double& height, bool isKeyboard = false);
     int32_t GetRosenWindowId()
     {
