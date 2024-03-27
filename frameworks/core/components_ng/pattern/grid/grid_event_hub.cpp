@@ -311,17 +311,16 @@ bool GridEventHub::FireOnItemDrop(const ItemDragInfo& dragInfo, int32_t itemInde
         pattern->ClearDragState();
     }
 
-    auto gridDropSuccess = false;
-    if (onItemDrop_) {
-        onItemDrop_(dragInfo, itemIndex, insertIndex, isSuccess);
-        gridDropSuccess = true;
-    }
-
     if (draggingItem_) {
         draggingItem_->GetLayoutProperty()->UpdateVisibility(VisibleType::VISIBLE);
     }
+    if (onItemDrop_) {
+        onItemDrop_(dragInfo, itemIndex, insertIndex, isSuccess);
+        host->ChildrenUpdatedFrom(0);
+        return true;
+    }
     host->ChildrenUpdatedFrom(0);
-    return gridDropSuccess;
+    return false;
 }
 
 void GridEventHub::FireOnItemDragMove(const ItemDragInfo& dragInfo, int32_t itemIndex, int32_t insertIndex) const
