@@ -699,7 +699,7 @@ abstract class ViewPU extends NativeViewPartialUpdate
     }
 
     let cb = this.watchedProps.get(varName)
-    if (cb) {
+    if (cb && typeof cb === "function") {
       stateMgmtConsole.debug(`   ... calling @Watch function`);
       cb.call(this, varName);
     }
