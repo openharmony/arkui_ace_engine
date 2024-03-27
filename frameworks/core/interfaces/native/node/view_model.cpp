@@ -524,6 +524,7 @@ ArkUI_Int32 MeasureNode(ArkUIVMContext context, ArkUINodeHandle nodePtr, ArkUI_F
         constraint->percentReference.SetWidth(data[4]);
         //percentReferenceHeight
         constraint->percentReference.SetHeight(data[5]);
+        frameNode->SetActive(true);
         frameNode->Measure(constraint);
     }
     return 0;
