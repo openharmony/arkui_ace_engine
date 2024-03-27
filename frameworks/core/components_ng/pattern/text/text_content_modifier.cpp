@@ -628,6 +628,7 @@ void TextContentModifier::StartTextRace(const double& step, const int32_t& loop,
             return;
         }
 
+        TAG_LOGE(AceLogTag::ACE_TEXT, "StartTextRace end: %{public}lf", paragraph_->GetTextWidth());
         TAG_LOGE(AceLogTag::ACE_TEXT, "StartTextRace step: %{public}lf", marqueeStep_);
         TAG_LOGE(AceLogTag::ACE_TEXT, "StartTextRace loop: %{public}d", marqueeLoop_);
         TAG_LOGE(AceLogTag::ACE_TEXT, "StartTextRace delay: %{public}d", marqueeDelay_);
@@ -660,7 +661,12 @@ void TextContentModifier::StartTextRace(const double& step, const int32_t& loop,
     marqueeAnimationId_++;
     raceAnimation_ = AnimationUtils::StartAnimation(
         option, 
-        [&]() { racePercentFloat_->Set(RACE_MOVE_PERCENT_MAX); },
+        [weak = AceType::WeakClaim(this)]() {
+            TAG_LOGE(AceLogTag::ACE_TEXT, "StartTextRace ANIMATION PROPERTY CALLBACK");
+            auto modifier = weak.Upgrade();
+            CHECK_NULL_VOID(modifier);
+            modifier->racePercentFloat_->Set(RACE_MOVE_PERCENT_MAX);
+            },
         [weak = AceType::WeakClaim(this), marqueeAnimationId = marqueeAnimationId_, id = Container::CurrentId()](){
             auto modifier = weak.Upgrade();
             CHECK_NULL_VOID(modifier);
@@ -674,9 +680,9 @@ void TextContentModifier::StartTextRace(const double& step, const int32_t& loop,
                 auto modifier = weak.Upgrade();
                 CHECK_NULL_VOID(modifier);
                 TAG_LOGE(AceLogTag::ACE_TEXT, "StartTextRace finish marqueeCount_: %{public}d",modifier->marqueeCount_);
-                modifier->marqueeCount_++;
                 modifier->racePercentFloat_->Set(RACE_MOVE_PERCENT_MIN);
-                
+                modifier->marqueeCount_++;
+
                 auto textPattern = DynamicCast<TextPattern>(modifier->pattern_.Upgrade());
                 CHECK_NULL_VOID(textPattern);
 
