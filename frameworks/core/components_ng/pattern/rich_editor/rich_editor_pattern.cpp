@@ -1827,19 +1827,13 @@ void RichEditorPattern::InitFocusEvent(const RefPtr<FocusHub>& focusHub)
     focusHub->SetOnKeyEventInternal(std::move(keyTask));
 }
 
-bool RichEditorPattern::CheckBlurReason()
+BlurReason RichEditorPattern::GetBlurReason()
 {
     auto host = GetHost();
-    CHECK_NULL_RETURN(host, false);
+    CHECK_NULL_RETURN(host, BlurReason::FOCUS_SWITCH);
     auto curFocusHub = host->GetFocusHub();
-    CHECK_NULL_RETURN(curFocusHub, false);
-    auto curBlurReason = curFocusHub->GetBlurReason();
-    TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "curBlurReason=%{public}d", curBlurReason);
-    if (curBlurReason == BlurReason::FRAME_DESTROY) {
-        TAG_LOGI(AceLogTag::ACE_KEYBOARD, "Close Keyboard.");
-        return true;
-    }
-    return false;
+    CHECK_NULL_RETURN(curFocusHub, BlurReason::FOCUS_SWITCH);
+    return curFocusHub->GetBlurReason();
 }
 
 void RichEditorPattern::HandleBlurEvent()
@@ -1852,8 +1846,9 @@ void RichEditorPattern::HandleBlurEvent()
         }
     }
     StopTwinkling();
+    auto reason = GetBlurReason();
     // The pattern handles blurevent, Need to close the softkeyboard first.
-    if ((customKeyboardBuilder_ && isCustomKeyboardAttached_) || CheckBlurReason()) {
+    if ((customKeyboardBuilder_ && isCustomKeyboardAttached_) || reason == BlurReason::FRAME_DESTROY) {
         TAG_LOGI(AceLogTag::ACE_KEYBOARD, "RichEditor Blur, Close Keyboard.");
         CloseKeyboard(true);
     }
@@ -1862,7 +1857,9 @@ void RichEditorPattern::HandleBlurEvent()
         CloseSelectOverlay();
         ResetSelection();
     }
-    lastSelectionRange_.reset();
+    if (reason != BlurReason::WINDOW_BLUR) {
+        lastSelectionRange_.reset();
+    }
     HandleOnEditChanged(false);
 }
 
