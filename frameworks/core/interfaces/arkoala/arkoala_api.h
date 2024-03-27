@@ -3366,6 +3366,7 @@ struct ArkUIBasicAPI {
     void (*markDirty)(ArkUINodeHandle nodePtr, ArkUI_Uint32 dirtyFlag);
     // ContainerScope
     void (*containerScopeBind)();
+    ArkUI_Bool (*IsBuilderNode)(ArkUINodeHandle node);
 };
 
 struct ArkUIDialogAPI {

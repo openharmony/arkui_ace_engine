@@ -46,4 +46,6 @@ ArkUI_Int32 LayoutNode(ArkUIVMContext context, ArkUINodeHandle nodePtr, ArkUI_Fl
 
 ArkUI_Int32 DrawNode(ArkUIVMContext context, ArkUINodeHandle nodePtr, ArkUI_Float32* data);
 
+ArkUI_Bool IsBuilderNode(void* nodePtr);
+
 } // namespace OHOS::Ace::NG::ViewModel

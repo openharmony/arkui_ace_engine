@@ -124,6 +124,12 @@ void InsertChildAfter(ArkUINodeHandle parent, ArkUINodeHandle child, ArkUINodeHa
     ViewModel::InsertChildAfter(parent, child, sibling);
 }
 
+ArkUI_Bool IsBuilderNode(ArkUINodeHandle node)
+{
+   return ViewModel::IsBuilderNode(node);
+}
+
+
 typedef void (*ComponentAsyncEventHandler)(ArkUINodeHandle node, void* extraParam);
 
 /**
@@ -524,6 +530,7 @@ const ArkUIBasicAPI* GetBasicAPI()
         ApplyModifierFinish,
         MarkDirty,
         ContainerScopeBind,
+        IsBuilderNode,
     };
     /* clang-format on */
 

@@ -2206,7 +2206,6 @@ void ResetMask(ArkUI_NodeHandle node)
 
 const ArkUI_AttributeItem* GetMask(ArkUI_NodeHandle node)
 {
-    LOGI("yuancheng—style-type");
     ArkUIMaskOptions options;
     GetFullImpl()->getNodeModifiers()->getCommonModifier()->getMask(node->uiNodeHandle, &options);
     if (static_cast<ArkUI_Int32>(options.type) == static_cast<ArkUI_Int32>(BasicShapeType::RECT)) {
