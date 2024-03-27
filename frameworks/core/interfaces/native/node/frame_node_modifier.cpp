@@ -113,12 +113,12 @@ ArkUINodeHandle GetChild(ArkUINodeHandle node, ArkUI_Int32 index)
 ArkUINodeHandle GetFirst(ArkUINodeHandle node)
 {
     auto* currentNode = reinterpret_cast<FrameNode*>(node);
-    CHECK_NULL_RETURN(currentNode, nullptr);
     auto* frameNode = AceType::DynamicCast<FrameNode>(currentNode);
     CHECK_NULL_RETURN(frameNode, nullptr);
     frameNode->GetAllChildrenWithBuild(false);
     auto child = frameNode->GetChildByIndex(0);
     auto childNode = AceType::DynamicCast<FrameNode>(child);
+    CHECK_NULL_RETURN(currentNode, nullptr);
     return reinterpret_cast<ArkUINodeHandle>(OHOS::Ace::AceType::RawPtr(childNode));
 }
 

@@ -60,7 +60,7 @@ public:
     }
 
     void SetExtraParam(ArkUI_Int32 type, void* extraParam);
-    void* GetExtraParam(ArkUI_Int32 type);
+    ArkUI_Int64 GetExtraParam(ArkUI_Int32 type);
     void EraseExtraParam(ArkUI_Int32 type);
 
 protected:

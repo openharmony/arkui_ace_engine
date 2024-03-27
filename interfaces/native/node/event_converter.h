@@ -32,6 +32,5 @@ bool ConvertEvent(ArkUINodeEvent* origin, ArkUI_NodeEvent* event);
 bool ConvertEventResult(ArkUI_NodeEvent* event, ArkUINodeEvent* origin);
 
 void HandleInnerEvent(ArkUINodeEvent* innerEvent);
-bool ConvertCustomEvent(ArkUICustomNodeEvent* origin, ArkUI_NodeCustomEvent* event);
 
 }; // namespace OHOS::Ace::NodeModel

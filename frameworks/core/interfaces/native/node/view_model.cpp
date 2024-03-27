@@ -534,6 +534,9 @@ ArkUI_Int32 LayoutNode(ArkUIVMContext context, ArkUINodeHandle nodePtr, ArkUI_Fl
     // call frameNode layout.
     auto* frameNode = AceType::DynamicCast<FrameNode>(reinterpret_cast<UINode*>(nodePtr));
     if (frameNode) {
+        frameNode->SetActive(true);
+        frameNode->GetGeometryNode()->SetMarginFrameOffsetX(data[0]);
+        frameNode->GetGeometryNode()->SetMarginFrameOffsetY(data[1]);
         frameNode->Layout();
     }
     return 0;
@@ -544,6 +547,7 @@ ArkUI_Int32 DrawNode(ArkUIVMContext context, ArkUINodeHandle nodePtr, ArkUI_Floa
     // rsnode draw by data, no need to directly call.
     auto* frameNode = AceType::DynamicCast<FrameNode>(reinterpret_cast<UINode*>(nodePtr));
     if (frameNode) {
+        frameNode->SetActive(true);
         auto task = frameNode->CreateRenderTask();
         if (task) {
             (*task)();

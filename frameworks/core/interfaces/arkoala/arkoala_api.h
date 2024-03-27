@@ -980,17 +980,11 @@ struct ArkUIShowCountOptions {
     ArkUI_Bool highlightBorder;
 };
 
-struct ArkUICustomNodeAsyncEvent {
-    ArkUIEventCallbackArg data[ARKUI_ASYNC_EVENT_ARGS_COUNT];
-};
-
 struct ArkUICustomNodeEvent {
     ArkUI_Int32 kind;
-    void* extraParam;
-    union {
-        ArkUICustomNodeAsyncEvent componentAsyncEvent;
-    };
-    void* canvas;
+    ArkUI_Int64 extraParam;
+    ArkUI_Int64 canvas;
+    ArkUI_Int32 data[8];
 };
 
 struct ArkUICommonModifier {

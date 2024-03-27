@@ -85,13 +85,13 @@ void ExtensionCompanionNode::SetExtraParam(ArkUI_Int32 type, void* extraParam)
     }
 }
 
-void* ExtensionCompanionNode::GetExtraParam(ArkUI_Int32 type)
+ArkUI_Int64 ExtensionCompanionNode::GetExtraParam(ArkUI_Int32 type)
 {
     auto it = extraParamMap_.find(type);
     if (it != extraParamMap_.end()) {
-        return it->second;
+        return reinterpret_cast<ArkUI_Int64>(it->second);
     }
-    return nullptr;
+    return reinterpret_cast<ArkUI_Int64>(nullptr);
 }
 
 void ExtensionCompanionNode::EraseExtraParam(ArkUI_Int32 type)
@@ -113,12 +113,12 @@ void ExtensionCompanionNode::OnMeasure(const ExtensionLayoutConstraint& layoutCo
         ArkUICustomNodeEvent event;
         event.kind = ArkUIAPINodeFlags::CUSTOM_MEASURE;
         event.extraParam = GetExtraParam(static_cast<ArkUI_Int32>(ArkUIAPINodeFlags::CUSTOM_MEASURE));
-        event.componentAsyncEvent.data[NUM_0].i32 = layoutConstraint.minWidth;
-        event.componentAsyncEvent.data[NUM_1].i32 = layoutConstraint.maxWidth;
-        event.componentAsyncEvent.data[NUM_2].i32 = layoutConstraint.minHeight;
-        event.componentAsyncEvent.data[NUM_3].i32 = layoutConstraint.maxHeight;
-        event.componentAsyncEvent.data[NUM_4].i32 = layoutConstraint.parentIdealWidth;
-        event.componentAsyncEvent.data[NUM_5].i32 = layoutConstraint.parentIdealHeight;
+        event.data[NUM_0] = layoutConstraint.minWidth;
+        event.data[NUM_1] = layoutConstraint.maxWidth;
+        event.data[NUM_2] = layoutConstraint.minHeight;
+        event.data[NUM_3] = layoutConstraint.maxHeight;
+        event.data[NUM_4] = layoutConstraint.parentIdealWidth;
+        event.data[NUM_5] = layoutConstraint.parentIdealHeight;
         SendArkUIAsyncCustomEvent(&event);
     } else {
         // call origin measure.
@@ -132,10 +132,10 @@ void ExtensionCompanionNode::OnLayout(int32_t width, int32_t height, int32_t pos
         ArkUICustomNodeEvent event;
         event.kind = ArkUIAPINodeFlags::CUSTOM_LAYOUT;
         event.extraParam = GetExtraParam(static_cast<ArkUI_Int32>(ArkUIAPINodeFlags::CUSTOM_LAYOUT));
-        event.componentAsyncEvent.data[NUM_0].i32 = positionX;
-        event.componentAsyncEvent.data[NUM_1].i32 = positionY;
-        event.componentAsyncEvent.data[NUM_2].i32 = width;
-        event.componentAsyncEvent.data[NUM_3].i32 = height;
+        event.data[NUM_0] = positionX;
+        event.data[NUM_1] = positionY;
+        event.data[NUM_2] = width;
+        event.data[NUM_3] = height;
         SendArkUIAsyncCustomEvent(&event);
     } else {
         InnerLayout(width, height, positionX, positionY);
@@ -150,12 +150,12 @@ void ExtensionCompanionNode::OnDraw(DrawingContext& context)
         ArkUICustomNodeEvent event;
         event.kind = ArkUIAPINodeFlags::CUSTOM_DRAW;
         event.extraParam = GetExtraParam(static_cast<ArkUI_Int32>(ArkUIAPINodeFlags::CUSTOM_DRAW));
-        event.componentAsyncEvent.data[NUM_0].i32 = (ArkUI_Int32)(canvas & 0xffffffff);
-        event.componentAsyncEvent.data[NUM_1].i32 =
+        event.data[NUM_0] = (ArkUI_Int32)(canvas & 0xffffffff);
+        event.data[NUM_1] =
             (ArkUI_Int32)((static_cast<uint64_t>(canvas) >> NUM_32) & 0xffffffff);
-        event.componentAsyncEvent.data[NUM_2].i32 = context.width;
-        event.componentAsyncEvent.data[NUM_3].i32 = context.height;
-        event.canvas = &context.canvas;
+        event.data[NUM_2] = context.width;
+        event.data[NUM_3] = context.height;
+        event.canvas = reinterpret_cast<intptr_t>(&context.canvas);
         SendArkUIAsyncCustomEvent(&event);
     } else {
         InnerDraw(context);
@@ -170,12 +170,12 @@ void ExtensionCompanionNode::OnForegroundDraw(DrawingContext& context)
         ArkUICustomNodeEvent event;
         event.kind = ArkUIAPINodeFlags::CUSTOM_FOREGROUND_DRAW;
         event.extraParam = GetExtraParam(static_cast<ArkUI_Int32>(ArkUIAPINodeFlags::CUSTOM_FOREGROUND_DRAW));
-        event.componentAsyncEvent.data[NUM_0].i32 = (ArkUI_Int32)(canvas & 0xffffffff);
-        event.componentAsyncEvent.data[NUM_1].i32 =
+        event.data[NUM_0] = (ArkUI_Int32)(canvas & 0xffffffff);
+        event.data[NUM_1] =
             (ArkUI_Int32)((static_cast<uint64_t>(canvas) >> NUM_32) & 0xffffffff);
-        event.componentAsyncEvent.data[NUM_2].i32 = context.width;
-        event.componentAsyncEvent.data[NUM_3].i32 = context.height;
-        event.canvas = &context.canvas;
+        event.data[NUM_2] = context.width;
+        event.data[NUM_3] = context.height;
+        event.canvas = reinterpret_cast<intptr_t>(&context.canvas);
         SendArkUIAsyncCustomEvent(&event);
     } else {
         InnerForegroundDraw(context);
@@ -190,12 +190,12 @@ void ExtensionCompanionNode::OnOverlayDraw(DrawingContext& context)
         ArkUICustomNodeEvent event;
         event.kind = ArkUIAPINodeFlags::CUSTOM_OVERLAY_DRAW;
         event.extraParam = GetExtraParam(static_cast<ArkUI_Int32>(ArkUIAPINodeFlags::CUSTOM_OVERLAY_DRAW));
-        event.componentAsyncEvent.data[NUM_0].i32 = (ArkUI_Int32)(canvas & 0xffffffff);
-        event.componentAsyncEvent.data[NUM_1].i32 =
+        event.data[NUM_0] = (ArkUI_Int32)(canvas & 0xffffffff);
+        event.data[NUM_1] =
             (ArkUI_Int32)((static_cast<uint64_t>(canvas) >> NUM_32) & 0xffffffff);
-        event.componentAsyncEvent.data[NUM_2].i32 = context.width;
-        event.componentAsyncEvent.data[NUM_3].i32 = context.height;
-        event.canvas = &context.canvas;
+        event.data[NUM_2] = context.width;
+        event.data[NUM_3] = context.height;
+        event.canvas = reinterpret_cast<intptr_t>(&context.canvas);
         SendArkUIAsyncCustomEvent(&event);
     } else {
         InnerOverlayDraw(context);
