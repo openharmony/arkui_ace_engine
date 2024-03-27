@@ -513,6 +513,11 @@ public:
         ViewAbstract::SetTransition(transitionOptions);
     }
 
+    void CleanTransition() override
+    {
+        ViewAbstract::CleanTransition();
+    }
+
     void SetChainedTransition(const RefPtr<NG::ChainedTransitionEffect>& effect, bool passThrough = false) override
     {
         ViewAbstract::SetChainedTransition(effect);
@@ -791,6 +796,13 @@ public:
         ViewAbstract::SetOnKeyEvent(std::move(onKeyCallback));
     }
 
+    void SetOnKeyPreIme(OnKeyPreImeFunc&& onKeyCallback) override
+    {
+        auto focusHub = ViewStackProcessor::GetInstance()->GetOrCreateMainFrameNodeFocusHub();
+        CHECK_NULL_VOID(focusHub);
+        focusHub->SetOnKeyPreImeCallback(std::move(onKeyCallback));
+    }
+
     void SetOnMouse(OnMouseEventFunc&& onMouseEventFunc) override
     {
         ViewAbstract::SetOnMouse(std::move(onMouseEventFunc));
@@ -1025,6 +1037,11 @@ public:
         ViewAbstract::SetObscured(reasons);
     }
 
+    void SetPrivacySensitive(bool flag) override
+    {
+        ViewAbstract::SetPrivacySensitive(flag);
+    }
+
     void BindPopup(const RefPtr<PopupParam>& param, const RefPtr<AceType>& customNode) override
     {
         auto targetNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
@@ -1055,13 +1072,14 @@ public:
     void BindContentCover(bool isShow, std::function<void(const std::string&)>&& callback,
         std::function<void()>&& buildFunc, NG::ModalStyle& modalStyle, std::function<void()>&& onAppear,
         std::function<void()>&& onDisappear, std::function<void()>&& onWillAppear,
-        std::function<void()>&& onWillDisappear) override;
+        std::function<void()>&& onWillDisappear, const NG::ContentCoverParam& contentCoverParam) override;
 
     void BindSheet(bool isShow, std::function<void(const std::string&)>&& callback, std::function<void()>&& buildFunc,
         std::function<void()>&& titleBuildFunc, NG::SheetStyle& sheetStyle, std::function<void()>&& onAppear,
         std::function<void()>&& onDisappear, std::function<void()>&& shouldDismiss,
         std::function<void()>&& onWillAppear, std::function<void()>&& onWillDisappear) override;
     void DismissSheet() override;
+    void DismissContentCover() override;
 
     void SetAccessibilityGroup(bool accessible) override;
     void SetAccessibilityText(const std::string& text) override;
@@ -1092,6 +1110,13 @@ public:
     void DisableOnKeyEvent() override
     {
         ViewAbstract::DisableOnKeyEvent();
+    }
+
+    void DisableOnKeyPreIme() override
+    {
+        auto focusHub = ViewStackProcessor::GetInstance()->GetOrCreateMainFrameNodeFocusHub();
+        CHECK_NULL_VOID(focusHub);
+        focusHub->ClearOnKeyPreIme();
     }
 
     void DisableOnHover() override
@@ -1181,6 +1206,11 @@ public:
         const std::vector<ModifierKey>& keys, std::function<void()>&& onKeyboardShortcutAction)
     {
         ViewAbstract::SetKeyboardShortcut(frameNode, value, keys, std::move(onKeyboardShortcutAction));
+    }
+
+    static void ClearWidthOrHeight(FrameNode* frameNode, bool isWidth)
+    {
+        ViewAbstract::ClearWidthOrHeight(frameNode, isWidth);
     }
 
     static bool GetAccessibilityGroup(FrameNode* frameNode);

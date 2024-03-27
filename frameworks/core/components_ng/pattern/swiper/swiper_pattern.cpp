@@ -133,12 +133,17 @@ RefPtr<LayoutAlgorithm> SwiperPattern::CreateLayoutAlgorithm()
         swiperLayoutAlgorithm->SetNeedUnmountIndexs(needUnmountIndexs_);
         return swiperLayoutAlgorithm;
     }
+    if (SupportSwiperCustomAnimation()) {
+        swiperLayoutAlgorithm->SetNeedUnmountIndexs(needUnmountIndexs_);
+        swiperLayoutAlgorithm->SetItemsPositionInAnimation(itemPositionInAnimation_);
+    }
 
     if (jumpIndex_) {
         swiperLayoutAlgorithm->SetJumpIndex(jumpIndex_.value());
     } else if (targetIndex_) {
         swiperLayoutAlgorithm->SetTargetIndex(targetIndex_.value());
     }
+    swiperLayoutAlgorithm->SetCurrentIndex(currentIndex_);
     swiperLayoutAlgorithm->SetContentCrossSize(contentCrossSize_);
     swiperLayoutAlgorithm->SetMainSizeIsMeasured(mainSizeIsMeasured_);
     swiperLayoutAlgorithm->SetContentMainSize(contentMainSize_);
@@ -258,6 +263,10 @@ void SwiperPattern::InitCapture()
     }
     if (hasCachedCapture_ && !hasCachedCapture) {
         RemoveAllCaptureNode();
+    }
+    if (SupportSwiperCustomAnimation() && hasCachedCapture) {
+        needUnmountIndexs_.clear();
+        itemPositionInAnimation_.clear();
     }
     hasCachedCapture_ = hasCachedCapture;
 }
@@ -791,6 +800,11 @@ bool SwiperPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty,
         needUnmountIndexs_ = swiperLayoutAlgorithm->GetNeedUnmountIndexs();
         return false;
     }
+    if (SupportSwiperCustomAnimation()) {
+        needUnmountIndexs_ = swiperLayoutAlgorithm->GetNeedUnmountIndexs();
+        itemPositionInAnimation_ = swiperLayoutAlgorithm->GetItemsPositionInAnimation();
+        FireContentDidScrollEvent();
+    }
 
     autoLinearReachBoundary = false;
     bool isJump = false;
@@ -830,6 +844,7 @@ bool SwiperPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty,
             OnIndexChange();
         }
         jumpIndex_.reset();
+        pauseTargetIndex_.reset();
         auto delayTime = GetInterval() - GetDuration();
         delayTime = std::clamp(delayTime, 0, delayTime);
         if (NeedAutoPlay() && isUserFinish_) {
@@ -848,7 +863,7 @@ bool SwiperPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty,
                                      : targetIndexValue + GetDisplayCount() - 1;
             bool isNeedPlayTranslateAnimation =
                 translateAnimationIsRunning_ || itemPosition_.find(lastItemIndex) == itemPosition_.end();
-            if (context && !isNeedPlayTranslateAnimation) {
+            if (context && !isNeedPlayTranslateAnimation && !SupportSwiperCustomAnimation()) {
                 // displayCount is auto, loop is false, if the content width less than windows size
                 // need offset to keep right aligned
                 bool isNeedOffset = (GetLoopIndex(iter->first) == TotalCount() - 1)
@@ -867,7 +882,6 @@ bool SwiperPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty,
                     stopAutoPlay = true;
                     autoLinearReachBoundary = true;
                 }
-
                 context->AddAfterLayoutTask([weak = WeakClaim(this), targetPos, velocity = velocity_.value_or(0.0f),
                                                 nextIndex, stopAutoPlay]() {
                     auto swiper = weak.Upgrade();
@@ -996,6 +1010,200 @@ void SwiperPattern::FireGestureSwipeEvent(int32_t currentIndex, const AnimationC
     auto swiperEventHub = GetEventHub<SwiperEventHub>();
     CHECK_NULL_VOID(swiperEventHub);
     swiperEventHub->FireGestureSwipeEvent(currentIndex, info);
+}
+
+void SwiperPattern::HandleSwiperCustomAnimation(float offset)
+{
+    if (!SupportSwiperCustomAnimation()) {
+        return;
+    }
+    if (itemPosition_.empty()) {
+        needUnmountIndexs_.clear();
+        itemPositionInAnimation_.clear();
+        return;
+    }
+    if (NearZero(offset)) {
+        return;
+    }
+
+    if (itemPositionInAnimation_.empty()) {
+        for (auto& item : itemPosition_) {
+            UpdateItemInfoInCustomAnimation(item.first, item.second.startPos, item.second.endPos);
+        }
+    }
+    indexsInAnimation_.clear();
+    CalculateAndUpdateItemInfo(offset);
+
+    SwiperLayoutAlgorithm::PositionMap itemsAnimationFinished;
+    for (auto& item : itemPositionInAnimation_) {
+        if (indexsInAnimation_.find(item.first) == indexsInAnimation_.end() &&
+            needUnmountIndexs_.find(item.first) == needUnmountIndexs_.end()) {
+            indexsInAnimation_.insert(item.first);
+            needUnmountIndexs_.insert(item.first);
+            item.second.startPos += offset;
+            item.second.endPos += offset;
+            itemsAnimationFinished.insert(item);
+        }
+    }
+    for (auto& item : itemsAnimationFinished) {
+        OnSwiperCustomAnimationFinish(item);
+    }
+
+    FireSwiperCustomAnimationEvent();
+}
+
+void SwiperPattern::CalculateAndUpdateItemInfo(float offset)
+{
+    auto prevMargin = GetPrevMargin();
+    auto nextMargin = GetNextMargin();
+    auto visibleSize = CalculateVisibleSize();
+    auto itemSpace = GetItemSpace();
+    auto isLoop = IsLoop();
+    auto displayCount = GetDisplayCount();
+    auto swipeByGroup = IsSwipeByGroup();
+
+    for (auto& item : itemPosition_) {
+        auto index = item.first;
+        auto startPos = item.second.startPos + offset;
+        auto endPos = item.second.endPos + offset;
+        auto itemPosDiff = endPos - startPos + itemSpace;
+        auto pageStartIndex = swipeByGroup ? SwiperUtils::ComputePageIndex(index, displayCount) : index;
+        auto pageEndIndex = swipeByGroup ? SwiperUtils::ComputePageEndIndex(index, displayCount) : index;
+        auto pageStartPos = swipeByGroup ? startPos - itemPosDiff * (index - pageStartIndex) : startPos;
+        auto pageEndPos = swipeByGroup ? endPos + itemPosDiff * (pageEndIndex - index) : endPos;
+
+        if (LessOrEqual(pageEndPos, NearZero(prevMargin) ? 0.0f : - prevMargin - itemSpace)) {
+            continue;
+        }
+        if (GreatOrEqual(pageStartPos, NearZero(nextMargin) ? visibleSize : visibleSize + nextMargin + itemSpace)) {
+            continue;
+        }
+
+        if (GreatNotEqual(startPos - itemSpace, NearZero(prevMargin) ? 0.0f : - prevMargin - itemSpace) &&
+            itemPosition_.find(index - 1) == itemPosition_.end() && (isLoop || index > 0)) {
+            pageStartIndex = swipeByGroup ? SwiperUtils::ComputePageIndex(index - 1, displayCount) : index - 1;
+        }
+        if (LessNotEqual(endPos + itemSpace, NearZero(nextMargin) ? visibleSize :
+            visibleSize + nextMargin + itemSpace) && itemPosition_.find(index + 1) == itemPosition_.end() &&
+            (isLoop || index < RealTotalCount() - 1)) {
+            pageEndIndex = swipeByGroup ? SwiperUtils::ComputePageEndIndex(index + 1, displayCount) : index + 1;
+        }
+        auto currentIndex = index - 1;
+        while (currentIndex >= pageStartIndex && itemPosition_.find(currentIndex) == itemPosition_.end()) {
+            UpdateItemInfoInCustomAnimation(currentIndex, startPos - itemPosDiff * (index - currentIndex),
+                endPos - itemPosDiff * (index - currentIndex));
+            currentIndex--;
+        }
+        currentIndex = index + 1;
+        while (currentIndex <= pageEndIndex && itemPosition_.find(currentIndex) == itemPosition_.end()) {
+            UpdateItemInfoInCustomAnimation(currentIndex, startPos + itemPosDiff * (currentIndex - index),
+                endPos + itemPosDiff * (currentIndex - index));
+            currentIndex++;
+        }
+        UpdateItemInfoInCustomAnimation(index, startPos, endPos);
+    }
+}
+
+void SwiperPattern::UpdateItemInfoInCustomAnimation(int32_t index, float startPos, float endPos)
+{
+    index = GetLoopIndex(index);
+    if (IsSwipeByGroup() && index >= RealTotalCount()) {
+        return;
+    }
+    indexsInAnimation_.insert(index);
+    needUnmountIndexs_.erase(index);
+    auto itemInAnimation = itemPositionInAnimation_.find(index);
+    if (itemInAnimation == itemPositionInAnimation_.end()) {
+        itemPositionInAnimation_[index] = {startPos, endPos, nullptr};
+    } else {
+        itemInAnimation->second.startPos = startPos;
+        itemInAnimation->second.endPos = endPos;
+        if (itemInAnimation->second.task) {
+            itemInAnimation->second.task.Cancel();
+        }
+    }
+}
+
+void SwiperPattern::FireSwiperCustomAnimationEvent()
+{
+    CHECK_NULL_VOID(onSwiperCustomContentTransition_);
+    auto transition = onSwiperCustomContentTransition_->transition;
+    CHECK_NULL_VOID(transition);
+
+    auto selectedIndex = GetCurrentIndex();
+    for (auto& item : itemPositionInAnimation_) {
+        if (indexsInAnimation_.find(item.first) == indexsInAnimation_.end()) {
+            continue;
+        }
+        auto offset = Dimension(item.second.startPos, DimensionUnit::PX).ConvertToVp();
+        auto mainAxisLength = Dimension(item.second.endPos - item.second.startPos, DimensionUnit::PX).ConvertToVp();
+        if (NonPositive(mainAxisLength)) {
+            continue;
+        }
+        auto position = offset / mainAxisLength;
+        auto proxy = AceType::MakeRefPtr<SwiperContentTransitionProxy>();
+        proxy->SetSelectedIndex(selectedIndex);
+        proxy->SetIndex(item.first);
+        proxy->SetPosition(position);
+        proxy->SetMainAxisLength(mainAxisLength);
+        proxy->SetFinishTransitionEvent([weak = WeakClaim(this), &item]() {
+            auto swiper = weak.Upgrade();
+            CHECK_NULL_VOID(swiper);
+            item.second.isFinishAnimation = true;
+            swiper->OnSwiperCustomAnimationFinish(item);
+        });
+        transition(proxy);
+    }
+}
+
+void SwiperPattern::FireContentDidScrollEvent()
+{
+    if (indexsInAnimation_.empty()) {
+        return;
+    }
+
+    CHECK_NULL_VOID(onContentDidScroll_);
+    auto event = *onContentDidScroll_;
+    auto selectedIndex = GetCurrentIndex();
+    for (auto& item : itemPositionInAnimation_) {
+        if (indexsInAnimation_.find(item.first) == indexsInAnimation_.end()) {
+            continue;
+        }
+        auto offset = Dimension(item.second.startPos, DimensionUnit::PX).ConvertToVp();
+        auto mainAxisLength = Dimension(item.second.endPos - item.second.startPos, DimensionUnit::PX).ConvertToVp();
+        if (NonPositive(mainAxisLength)) {
+            continue;
+        }
+        auto position = offset / mainAxisLength;
+        event(selectedIndex, item.first, position, mainAxisLength);
+    }
+    indexsInAnimation_.clear();
+}
+
+void SwiperPattern::OnSwiperCustomAnimationFinish(std::pair<int32_t, SwiperItemInfo> item)
+{
+    if (needUnmountIndexs_.find(item.first) == needUnmountIndexs_.end()) {
+        return;
+    }
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto taskExecutor = pipeline->GetTaskExecutor();
+    CHECK_NULL_VOID(taskExecutor);
+    if (item.second.task) {
+        item.second.task.Cancel();
+    }
+    item.second.task.Reset([weak = AceType::WeakClaim(this), index = item.first] {
+        auto swiper = weak.Upgrade();
+        CHECK_NULL_VOID(swiper);
+        swiper->needUnmountIndexs_.erase(index);
+        swiper->itemPositionInAnimation_.erase(index);
+        swiper->MarkDirtyNodeSelf();
+    });
+    int32_t timeout = 0;
+    if (onSwiperCustomContentTransition_ && !item.second.isFinishAnimation) {
+        timeout = onSwiperCustomContentTransition_->timeout;
+    }
+    taskExecutor->PostDelayedTask(item.second.task, TaskExecutor::TaskType::UI, timeout);
 }
 
 void SwiperPattern::SwipeToWithoutAnimation(int32_t index)
@@ -1760,12 +1968,13 @@ void SwiperPattern::UpdateCurrentOffset(float offset)
     }
     currentDelta_ = currentDelta_ - offset;
     currentIndexOffset_ += offset;
-    if (isDragging_) {
+    if (isDragging_ || childScrolling_) {
         AnimationCallbackInfo callbackInfo;
         callbackInfo.currentOffset =
             GetCustomPropertyOffset() + Dimension(currentIndexOffset_, DimensionUnit::PX).ConvertToVp();
         FireGestureSwipeEvent(GetLoopIndex(gestureSwipeIndex_), callbackInfo);
     }
+    HandleSwiperCustomAnimation(offset);
     MarkDirtyNodeSelf();
 }
 
@@ -1785,6 +1994,9 @@ bool SwiperPattern::CheckOverScroll(float offset)
         case EdgeEffect::NONE:
             if (IsOutOfBoundary(offset)) {
                 currentDelta_ = currentDelta_ - offset;
+                auto realOffset = IsOutOfStart(offset) ? - itemPosition_.begin()->second.startPos :
+                    CalculateVisibleSize() - itemPosition_.rbegin()->second.endPos;
+                HandleSwiperCustomAnimation(realOffset);
                 MarkDirtyNodeSelf();
                 return true;
             }
@@ -1815,6 +2027,7 @@ bool SwiperPattern::SpringOverScroll(float offset)
     callbackInfo.currentOffset =
         GetCustomPropertyOffset() + Dimension(currentIndexOffset_, DimensionUnit::PX).ConvertToVp();
     FireGestureSwipeEvent(GetLoopIndex(gestureSwipeIndex_), callbackInfo);
+    HandleSwiperCustomAnimation(friction * offset);
     MarkDirtyNodeSelf();
     return true;
 }
@@ -1826,6 +2039,9 @@ bool SwiperPattern::FadeOverScroll(float offset)
                                (itemPosition_.rbegin()->first == TotalCount() - 1 && offset > 0.0f);
         if (!IsVisibleChildrenSizeLessThanSwiper() && !onlyUpdateFadeOffset) {
             currentDelta_ = currentDelta_ - offset;
+            auto realOffset = IsOutOfStart(offset) ? - itemPosition_.begin()->second.startPos :
+                CalculateVisibleSize() - itemPosition_.rbegin()->second.endPos;
+            HandleSwiperCustomAnimation(realOffset);
         }
         auto host = GetHost();
         CHECK_NULL_RETURN(host, false);
@@ -2957,14 +3173,6 @@ float SwiperPattern::CalculateVisibleSize() const
     auto prevMargin = GetPrevMargin();
     auto nextMargin = GetNextMargin();
     auto itemSpace = GetItemSpace();
-    auto host = GetHost();
-    CHECK_NULL_RETURN(host, 0.0f);
-    auto geometryNode = host->GetGeometryNode();
-    CHECK_NULL_RETURN(geometryNode, 0.0);
-    auto mainSize = geometryNode->GetFrameSize().MainSize(GetDirection());
-    if (itemSpace > mainSize) {
-        itemSpace = 0.0f;
-    }
     if (prevMargin != 0.0f) {
         if (nextMargin != 0.0f) {
             return contentMainSize_ - prevMargin - nextMargin - 2 * itemSpace;
@@ -2985,9 +3193,17 @@ float SwiperPattern::GetItemSpace() const
     if (swiperLayoutProperty->IgnoreItemSpace()) {
         return 0.0f;
     }
-    return ConvertToPx(swiperLayoutProperty->GetItemSpace().value_or(0.0_vp),
-        swiperLayoutProperty->GetLayoutConstraint()->scaleProperty, 0.0f)
-        .value_or(0.0f);
+    auto itemSpace = ConvertToPx(swiperLayoutProperty->GetItemSpace().value_or(0.0_vp),
+        swiperLayoutProperty->GetLayoutConstraint()->scaleProperty, 0.0f).value_or(0.0f);
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, 0.0f);
+    auto geometryNode = host->GetGeometryNode();
+    CHECK_NULL_RETURN(geometryNode, 0.0f);
+    auto mainSize = geometryNode->GetFrameSize().MainSize(GetDirection());
+    if (itemSpace > mainSize) {
+        itemSpace = 0.0f;
+    }
+    return itemSpace;
 }
 
 float SwiperPattern::GetPrevMargin() const
@@ -3708,14 +3924,6 @@ bool SwiperPattern::IsVisibleChildrenSizeLessThanSwiper()
         auto prevMargin = GetPrevMargin();
         auto nextMargin = GetNextMargin();
         auto itemSpace = GetItemSpace();
-        auto host = GetHost();
-        CHECK_NULL_RETURN(host, true);
-        auto geometryNode = host->GetGeometryNode();
-        CHECK_NULL_RETURN(geometryNode, true);
-        auto mainSize = geometryNode->GetFrameSize().MainSize(GetDirection());
-        if (itemSpace > mainSize) {
-            itemSpace = 0.0f;
-        }
         auto prevMarginMontage = Positive(prevMargin) ? prevMargin + itemSpace : 0.0f;
         auto nextMarginMontage = Positive(nextMargin) ? nextMargin + itemSpace : 0.0f;
 
@@ -4186,11 +4394,11 @@ bool SwiperPattern::HandleScrollVelocity(float velocity)
 ScrollResult SwiperPattern::HandleScroll(float offset, int32_t source, NestedState state, float velocity)
 {
     if (IsDisableSwipe()) {
-        return { offset, false };
+        return { offset, true };
     }
     if (source == SCROLL_FROM_ANIMATION && AnimationRunning()) {
         // deny conflicting animation from child
-        return { offset, false };
+        return { offset, true };
     }
     // mouse scroll triggers showNext / showPrev instead of updating offset
     if (source == SCROLL_FROM_AXIS) {
@@ -4570,9 +4778,9 @@ void SwiperPattern::OnCustomContentTransition(int32_t toIndex)
 
 void SwiperPattern::TriggerCustomContentTransitionEvent(int32_t fromIndex, int32_t toIndex)
 {
-    CHECK_NULL_VOID(onCustomContentTransition_);
+    CHECK_NULL_VOID(onTabsCustomContentTransition_);
 
-    auto tabContentAnimatedTransition = (*onCustomContentTransition_)(fromIndex, toIndex);
+    auto tabContentAnimatedTransition = (*onTabsCustomContentTransition_)(fromIndex, toIndex);
     auto transition = tabContentAnimatedTransition.transition;
 
     if (!transition) {

@@ -116,7 +116,6 @@ bool SheetPresentationPattern::OnDirtyLayoutWrapperSwap(
     UpdateDragBarStatus();
     UpdateCloseIconStatus();
     UpdateSheetTitle();
-    AvoidAiBar();
     UpdateInteractive();
     ClipSheetNode();
     CheckBuilderChange();
@@ -157,8 +156,6 @@ void SheetPresentationPattern::CheckBuilderChange()
         CHECK_NULL_VOID(layoutProperty);
         auto sheetStyle = layoutProperty->GetSheetStyleValue();
         if (sheetStyle.sheetMode == SheetMode::AUTO) {
-            auto height = sheetPattern->GetFitContentHeight();
-            sheetPattern->HandleFitContontChange(height);
             sheetNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
         }
     };
@@ -185,6 +182,7 @@ void SheetPresentationPattern::AvoidAiBar()
     auto inset = pipeline->GetSafeArea();
     auto layoutProperty = scrollNode->GetLayoutProperty<ScrollLayoutProperty>();
     layoutProperty->UpdateScrollContentEndOffset(inset.bottom_.Length());
+    host->MarkDirtyNode(PROPERTY_UPDATE_LAYOUT);
 }
 
 bool SheetPresentationPattern::IsScrollable() const
@@ -305,10 +303,11 @@ void SheetPresentationPattern::HandleDragUpdate(const GestureEvent& info)
     if (detentSize <= 0) {
         return;
     }
+    auto height = height_ + sheetHeightUp_;
     auto maxDetentSize = sheetDetentHeight_[detentSize - 1];
-    if (GreatNotEqual((height_ - currentOffset_), maxDetentSize)) {
+    if (GreatNotEqual((height - currentOffset_), maxDetentSize)) {
         if (LessNotEqual(mainDelta, 0)) {
-            auto friction = CalculateFriction((height_ - currentOffset_) / sheetMaxHeight_);
+            auto friction = CalculateFriction((height - currentOffset_) / sheetMaxHeight_);
             mainDelta = mainDelta * friction;
         }
     }
@@ -316,12 +315,12 @@ void SheetPresentationPattern::HandleDragUpdate(const GestureEvent& info)
     if (NearEqual(currentOffset_, tempOffset)) {
         return;
     }
-    auto offset = pageHeight_ - height_ + currentOffset_;
+    auto offset = pageHeight_ - height + currentOffset_;
     if (LessOrEqual(offset, (pageHeight_ - sheetMaxHeight_))) {
         offset = pageHeight_ - sheetMaxHeight_;
-        currentOffset_ = height_ - sheetMaxHeight_;
+        currentOffset_ = height - sheetMaxHeight_;
     }
-    ProcessColumnRect(height_ - currentOffset_);
+    ProcessColumnRect(height - currentOffset_);
     auto renderContext = host->GetRenderContext();
     renderContext->UpdateTransformTranslate({ 0.0f, offset, 0.0f });
 }
@@ -330,13 +329,14 @@ void SheetPresentationPattern::HandleDragEnd(float dragVelocity)
 {
     SetIsDragging(false);
     auto sheetDetentsSize = sheetDetentHeight_.size();
-    if ((sheetDetentsSize == 0) || (GetSheetType() == SheetType::SHEET_POPUP) || IsAvoidingKeyboard()) {
+    if ((sheetDetentsSize == 0) || (GetSheetType() == SheetType::SHEET_POPUP)) {
         return;
     }
     float upHeight = 0.0f;
     float downHeight = 0.0f;
+    auto height = height_ + sheetHeightUp_;
     auto currentSheetHeight =
-        GreatNotEqual((height_ - currentOffset_), sheetMaxHeight_) ? sheetMaxHeight_ : (height_ - currentOffset_);
+        GreatNotEqual((height - currentOffset_), sheetMaxHeight_) ? sheetMaxHeight_ : (height - currentOffset_);
     auto lowerIter = std::lower_bound(sheetDetentHeight_.begin(), sheetDetentHeight_.end(), currentSheetHeight);
     auto upperIter = std::upper_bound(sheetDetentHeight_.begin(), sheetDetentHeight_.end(), currentSheetHeight);
     if (lowerIter == sheetDetentHeight_.end()) {
@@ -361,13 +361,12 @@ void SheetPresentationPattern::HandleDragEnd(float dragVelocity)
                 SheetInteractiveDismiss(true, std::abs(dragVelocity));
             } else {
                 ChangeSheetHeight(downHeight);
-                ChangeScrollHeight(height_);
+                ChangeSheetPage(height);
                 SheetTransition(true, std::abs(dragVelocity));
             }
         } else if (LessNotEqual(std::abs(currentSheetHeight - upHeight), std::abs(currentSheetHeight - downHeight))) {
             ChangeSheetHeight(upHeight);
-            ChangeScrollHeight(height_);
-            ProcessColumnRect(height_);
+            ChangeSheetPage(height);
             SheetTransition(true, std::abs(dragVelocity));
         }
     } else {
@@ -376,18 +375,26 @@ void SheetPresentationPattern::HandleDragEnd(float dragVelocity)
                 SheetInteractiveDismiss(true, std::abs(dragVelocity));
             } else {
                 ChangeSheetHeight(downHeight);
-                ChangeScrollHeight(height_);
+                ChangeSheetPage(height);
                 SheetTransition(true, std::abs(dragVelocity));
             }
         } else {
             ChangeSheetHeight(upHeight);
             if (!NearEqual(upHeight, downHeight)) {
-                ChangeScrollHeight(height_);
-                ProcessColumnRect(height_);
+                ChangeSheetPage(height);
             }
             SheetTransition(true, std::abs(dragVelocity));
         }
     }
+}
+
+void SheetPresentationPattern::ChangeSheetPage(float height)
+{
+    if (IsAvoidingKeyboard()) {
+        return;
+    }
+    ChangeScrollHeight(height);
+    ProcessColumnRect(height);
 }
 
 void SheetPresentationPattern::OnCoordScrollStart()
@@ -401,7 +408,7 @@ void SheetPresentationPattern::OnCoordScrollStart()
 
 bool SheetPresentationPattern::OnCoordScrollUpdate(float scrollOffset)
 {
-    if (!GetShowState() || !IsScrollable() || IsAvoidingKeyboard()) {
+    if (!GetShowState() || !IsScrollable()) {
         return false;
     }
 
@@ -410,20 +417,20 @@ bool SheetPresentationPattern::OnCoordScrollUpdate(float scrollOffset)
     if ((sheetType == SheetType::SHEET_POPUP) || (sheetDetentsSize == 0)) {
         return false;
     }
-
+    auto height = height_ + sheetHeightUp_;
     if ((NearZero(currentOffset_)) && (LessNotEqual(scrollOffset, 0.0f)) &&
-        (GreatOrEqual(height_, sheetDetentHeight_[sheetDetentsSize - 1]))) {
+        (GreatOrEqual(height, sheetDetentHeight_[sheetDetentsSize - 1]))) {
         return false;
     }
     auto host = GetHost();
     CHECK_NULL_RETURN(host, false);
     currentOffset_ = currentOffset_ + scrollOffset;
-    auto offset = pageHeight_ - height_ + currentOffset_;
+    auto offset = pageHeight_ - height + currentOffset_;
     if (offset <= (pageHeight_ - sheetMaxHeight_)) {
         offset = pageHeight_ - sheetMaxHeight_;
-        currentOffset_ = height_ - sheetMaxHeight_;
+        currentOffset_ = height - sheetMaxHeight_;
     }
-    ProcessColumnRect(height_ - currentOffset_);
+    ProcessColumnRect(height - currentOffset_);
     auto renderContext = host->GetRenderContext();
     renderContext->UpdateTransformTranslate({ 0.0f, offset, 0.0f });
     return true;
@@ -491,6 +498,7 @@ void SheetPresentationPattern::AvoidSafeArea()
     keyboardHeight_ = manager->GetKeyboardInset().Length();
     CHECK_NULL_VOID(host->GetFocusHub()->IsCurrentFocus());
     auto heightUp = GetSheetHeightChange();
+    sheetHeightUp_ = heightUp;
     TAG_LOGD(AceLogTag::ACE_OVERLAY, "To avoid Keyboard, sheet will go up %{public}f.", heightUp);
     auto offset = pageHeight_ - height_ - heightUp;
     auto renderContext = host->GetRenderContext();
@@ -500,6 +508,7 @@ void SheetPresentationPattern::AvoidSafeArea()
             ScrollTo(.0f);
             renderContext->UpdateTransformTranslate({ 0.0f, offset, 0.0f });
         } else {
+            sheetHeightUp_ = pageHeight_ - (SHEET_BLANK_MINI_HEIGHT.ConvertToPx() + statusBarHeight_) - height_;
             // Otherwise, sheet is necessary to raise and trigger scroll scrolling
             // sheet is raised to the top first
             renderContext->UpdateTransformTranslate(
@@ -563,7 +572,7 @@ void SheetPresentationPattern::SheetTransition(bool isTransitionIn, float dragVe
         dragVelocity / SHEET_VELOCITY_THRESHOLD, CURVE_MASS, CURVE_STIFFNESS, CURVE_DAMPING);
     option.SetCurve(curve);
     option.SetFillMode(FillMode::FORWARDS);
-    auto offset = pageHeight_ - height_;
+    auto offset = pageHeight_ - (height_ + sheetHeightUp_);
     if (!isTransitionIn) {
         auto pipelineContext = PipelineContext::GetCurrentContext();
         CHECK_NULL_VOID(pipelineContext);
@@ -580,9 +589,11 @@ void SheetPresentationPattern::SheetTransition(bool isTransitionIn, float dragVe
         if (isTransitionIn) {
             if (!pattern->GetAnimationBreak()) {
                 pattern->SetAnimationProcess(false);
+                pattern->ChangeSheetPage(pattern->height_);
             } else {
                 pattern->isAnimationBreak_ = false;
             }
+            pattern->AvoidAiBar();
         } else {
             pattern->SetAnimationProcess(false);
             auto context = PipelineContext::GetCurrentContext();
@@ -929,8 +940,7 @@ void SheetPresentationPattern::HandleFitContontChange(float height)
 {
     if ((NearEqual(height_, sheetFitContentHeight_)) && (!NearEqual(height, sheetFitContentHeight_))) {
         ChangeSheetHeight(height);
-        ProcessColumnRect(height_);
-        ChangeScrollHeight(height_);
+        ChangeSheetPage(height_);
         SheetTransition(true);
     }
     sheetFitContentHeight_ = height;
@@ -1373,7 +1383,7 @@ float SheetPresentationPattern::GetFitContentHeight()
     auto builderNode = DynamicCast<FrameNode>(scrollNode->GetChildAtIndex(0));
     CHECK_NULL_RETURN(builderNode, 0.0f);
     auto builderGeometryNode = builderNode->GetGeometryNode();
-    return builderGeometryNode->GetFrameSize().Height() + titleGeometryNode->GetFrameSize().Height();
+    return builderGeometryNode->GetMarginFrameSize().Height() + titleGeometryNode->GetFrameSize().Height();
 }
 void SheetPresentationPattern::ProcessColumnRect(float height)
 {

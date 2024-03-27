@@ -17,6 +17,7 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_WEB_WEB_COMPONENT_H
 
 #include <string>
+#include <tuple>
 #include <utility>
 
 #include "base/geometry/size.h"
@@ -632,6 +633,16 @@ public:
         isNativeEmbedMode_ = isEnabled;
     }
 
+    const std::tuple<bool, bool>& GetNativeVideoPlayerConfig() const
+    {
+        return native_video_player_config_;
+    }
+
+    void SetNativeVideoPlayerConfig(bool enable, bool shouldOverlay)
+    {
+        native_video_player_config_ = std::make_tuple(enable, shouldOverlay);
+    }
+
     void RegisterNativeEmbedRule(const std::string& tag, const std::string& type)
     {
         tag_ = tag;
@@ -721,6 +732,23 @@ public:
             return;
         }
         onSslErrorRequestImpl_ = std::move(onSslErrorRequestImpl);
+    }
+
+    using OnAllSslErrorRequestImpl = std::function<bool(const BaseEventInfo* info)>;
+    bool OnAllSslErrorRequest(const BaseEventInfo* info) const
+    {
+        if (onAllSslErrorRequestImpl_) {
+            return onAllSslErrorRequestImpl_(info);
+        }
+        return false;
+    }
+
+    void SetOnAllSslErrorRequestImpl(OnAllSslErrorRequestImpl && onAllSslErrorRequestImpl)
+    {
+        if (onAllSslErrorRequestImpl == nullptr) {
+            return;
+        }
+        onAllSslErrorRequestImpl_ = std::move(onAllSslErrorRequestImpl);
     }
 
     using OnSslSelectCertRequestImpl = std::function<bool(const BaseEventInfo* info)>;
@@ -1050,6 +1078,7 @@ private:
     OnOverrideUrlLoadingImpl onOverrideUrlLoadingImpl_;
     OnHttpAuthRequestImpl onHttpAuthRequestImpl_;
     OnSslErrorRequestImpl onSslErrorRequestImpl_;
+    OnAllSslErrorRequestImpl onAllSslErrorRequestImpl_;
     OnSslSelectCertRequestImpl onSslSelectCertRequestImpl_;
     OnContextMenuImpl onContextMenuImpl_;
     OnContextMenuHideImpl onContextMenuHideImpl_;
@@ -1100,6 +1129,7 @@ private:
     int32_t parentNWebId_ = -1;
     OverScrollMode OverScrollMode_ = OverScrollMode::NEVER;
     CopyOptions CopyOptionMode_ = CopyOptions::Distributed;
+    std::tuple<bool, bool> native_video_player_config_{false, false};
 };
 
 } // namespace OHOS::Ace

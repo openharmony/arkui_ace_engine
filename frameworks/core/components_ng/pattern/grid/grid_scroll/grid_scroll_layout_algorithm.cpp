@@ -40,6 +40,10 @@ void GridScrollLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     auto gridLayoutProperty = AceType::DynamicCast<GridLayoutProperty>(layoutWrapper->GetLayoutProperty());
     CHECK_NULL_VOID(gridLayoutProperty);
 
+    // Pre-recycle
+    ScrollableUtils::RecycleItemsOutOfBoundary(gridLayoutInfo_.axis_, gridLayoutInfo_.currentOffset_,
+                                               gridLayoutInfo_.startIndex_, gridLayoutInfo_.endIndex_, layoutWrapper);
+
     // Step1: Decide size of Grid
     Axis axis = gridLayoutInfo_.axis_;
     auto idealSize = CreateIdealSize(
@@ -194,7 +198,6 @@ void GridScrollLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     childFrameOffset_ = OffsetF(padding.left.value_or(0.0f), padding.top.value_or(0.0f));
     childFrameOffset_ += gridLayoutProperty->IsVertical() ? OffsetF(0.0f, gridLayoutInfo_.currentOffset_)
                                                           : OffsetF(gridLayoutInfo_.currentOffset_, 0.0f);
-    layoutWrapper->RemoveAllChildInRenderTree();
     float prevLineHeight = 0.0f;
     int32_t startIndex = -1;
     int32_t endIndex = -1;
@@ -239,8 +242,8 @@ void GridScrollLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
             if (!wrapper) {
                 continue;
             }
-            startIndex = startIndex == -1 ? itemIdex : startIndex;
-            endIndex = itemIdex;
+            startIndex = startIndex == -1 ? itemIdex : std::min(startIndex, itemIdex);
+            endIndex = std::max(itemIdex, endIndex);
             auto frSize = itemsCrossSize_.at(iter->first);
             SizeF blockSize = gridLayoutProperty->IsVertical() ? SizeF(frSize, lineHeight) : SizeF(lineHeight, frSize);
             auto translate = OffsetF(0.0f, 0.0f);

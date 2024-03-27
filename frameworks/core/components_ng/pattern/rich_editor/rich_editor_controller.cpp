@@ -163,4 +163,19 @@ std::vector<ParagraphInfo> RichEditorController::GetParagraphsInfo(int32_t start
     CHECK_NULL_RETURN(pattern, {});
     return pattern->GetParagraphInfo(start, end);
 }
+
+bool RichEditorController::IsEditing()
+{
+    auto richEditorPattern = pattern_.Upgrade();
+    CHECK_NULL_RETURN(richEditorPattern, false);
+    return richEditorPattern->IsEditing();
+}
+
+void RichEditorController::StopEditing()
+{
+    auto richEditorPattern = pattern_.Upgrade();
+    if (richEditorPattern) {
+        richEditorPattern->StopEditing();
+    }
+}
 } // namespace OHOS::Ace::NG

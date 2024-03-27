@@ -38,6 +38,7 @@
 #include "core/components_ng/pattern/swiper/swiper_model.h"
 #include "core/components_ng/pattern/swiper/swiper_paint_method.h"
 #include "core/components_ng/pattern/swiper/swiper_paint_property.h"
+#include "core/components_ng/pattern/swiper/swiper_utils.h"
 #include "core/components_ng/pattern/tabs/tab_content_transition_proxy.h"
 #include "core/components_v2/inspector/utils.h"
 
@@ -541,6 +542,7 @@ public:
     RefPtr<Curve> GetCurveIncludeMotion();
     void OnCustomContentTransition(int32_t toIndex);
     void OnCustomAnimationFinish(int32_t fromIndex, int32_t toIndex, bool hasOnChanged);
+    void OnSwiperCustomAnimationFinish(std::pair<int32_t, SwiperItemInfo> item);
 
     void SetCustomAnimationToIndex(int32_t toIndex)
     {
@@ -552,15 +554,35 @@ public:
         return customAnimationToIndex_;
     }
 
-    void SetCustomContentTransition(std::function<TabContentAnimatedTransition(int32_t, int32_t)>&& event)
+    void SetTabsCustomContentTransition(std::function<TabContentAnimatedTransition(int32_t, int32_t)>&& event)
     {
-        onCustomContentTransition_ =
+        onTabsCustomContentTransition_ =
             std::make_shared<std::function<TabContentAnimatedTransition(int32_t, int32_t)>>(event);
     }
 
-    CustomContentTransitionPtr GetCustomContentTransition() const
+    CustomContentTransitionPtr GetTabsCustomContentTransition() const
     {
-        return onCustomContentTransition_;
+        return onTabsCustomContentTransition_;
+    }
+
+    void SetSwiperCustomContentTransition(SwiperContentAnimatedTransition& transition)
+    {
+        onSwiperCustomContentTransition_ = std::make_shared<SwiperContentAnimatedTransition>(transition);
+    }
+
+    std::shared_ptr<SwiperContentAnimatedTransition> GetSwiperCustomContentTransition() const
+    {
+        return onSwiperCustomContentTransition_;
+    }
+
+    void SetOnContentDidScroll(ContentDidScrollEvent&& onContentDidScroll)
+    {
+        onContentDidScroll_ = std::make_shared<ContentDidScrollEvent>(onContentDidScroll);
+    }
+
+    std::shared_ptr<ContentDidScrollEvent> GetOnContentDidScroll() const
+    {
+        return onContentDidScroll_;
     }
 
     void SetSwiperEventCallback(bool disableSwipe);
@@ -669,6 +691,11 @@ private:
     void FireAnimationStartEvent(int32_t currentIndex, int32_t nextIndex, const AnimationCallbackInfo& info) const;
     void FireAnimationEndEvent(int32_t currentIndex, const AnimationCallbackInfo& info) const;
     void FireGestureSwipeEvent(int32_t currentIndex, const AnimationCallbackInfo& info) const;
+    void FireSwiperCustomAnimationEvent();
+    void FireContentDidScrollEvent();
+    void HandleSwiperCustomAnimation(float offset);
+    void CalculateAndUpdateItemInfo(float offset);
+    void UpdateItemInfoInCustomAnimation(int32_t index, float startPos, float endPos);
 
     float GetItemSpace() const;
     float GetPrevMargin() const;
@@ -865,6 +892,13 @@ private:
     void CreateCaptureCallback(int32_t targetIndex, int32_t captureId, bool forceUpdate);
     void UpdateCaptureSource(std::shared_ptr<Media::PixelMap> pixelMap, int32_t captureId, int32_t targetIndex);
 
+    bool SupportSwiperCustomAnimation()
+    {
+        auto swiperLayoutProperty = GetLayoutProperty<SwiperLayoutProperty>();
+        return (onSwiperCustomContentTransition_ || onContentDidScroll_) &&
+            !hasCachedCapture_ && SwiperUtils::IsStretch(swiperLayoutProperty);
+    }
+
     RefPtr<PanEvent> panEvent_;
     RefPtr<TouchEventImpl> touchEvent_;
     RefPtr<InputEvent> hoverEvent_;
@@ -998,7 +1032,9 @@ private:
     std::vector<RefPtr<ScrollingListener>> scrollingListener_;
     FinishCallbackType finishCallbackType_ = FinishCallbackType::REMOVED;
 
-    CustomContentTransitionPtr onCustomContentTransition_;
+    CustomContentTransitionPtr onTabsCustomContentTransition_;
+    std::shared_ptr<SwiperContentAnimatedTransition> onSwiperCustomContentTransition_;
+    std::shared_ptr<ContentDidScrollEvent> onContentDidScroll_;
     std::set<int32_t> indexsInAnimation_;
     std::set<int32_t> needUnmountIndexs_;
     std::optional<int32_t> customAnimationToIndex_;

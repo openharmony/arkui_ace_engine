@@ -58,6 +58,11 @@ public:
         return *this;
     }
 
+    std::string ToString() const
+    {
+        return calcvalue_.empty() ? Dimension::ToString() : calcvalue_ + "calc";
+    }
+
 private:
     std::string calcvalue_ = "";
 };

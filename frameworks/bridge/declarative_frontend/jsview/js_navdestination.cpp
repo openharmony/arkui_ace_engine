@@ -140,7 +140,6 @@ void JSNavDestination::SetTitle(const JSCallbackInfo& info)
             NavDestinationModel::GetInstance()->SetCustomTitle(customNode);
         }
     } else {
-        TAG_LOGI(AceLogTag::ACE_NAVIGATION, "SetTitle is undefined");
         NavDestinationModel::GetInstance()->ParseCommonTitle(false, false, "", "");
     }
 }
@@ -249,6 +248,34 @@ void JSNavDestination::SetMode(const JSCallbackInfo& info)
     NavDestinationModel::GetInstance()->SetNavDestinationMode(static_cast<NG::NavDestinationMode>(mode));
 }
 
+void JSNavDestination::SetMenus(const JSCallbackInfo& info)
+{
+    if (info.Length() < 1) {
+        return;
+    }
+
+    if (info[0]->IsUndefined() || info[0]->IsArray()) {
+        std::vector<NG::BarItem> menuItems;
+        if (info[0]->IsUndefined()) {
+            menuItems = {};
+        } else {
+            JSNavigation::ParseBarItems(info, JSRef<JSArray>::Cast(info[0]), menuItems);
+        }
+        NavDestinationModel::GetInstance()->SetMenuItems(std::move(menuItems));
+        return;
+    } else if (info[0]->IsObject()) {
+        auto builderObject = JSRef<JSObject>::Cast(info[0])->GetProperty("builder");
+        if (builderObject->IsFunction()) {
+            ViewStackModel::GetInstance()->NewScope();
+            JsFunction jsBuilderFunc(info.This(), JSRef<JSObject>::Cast(builderObject));
+            ACE_SCORING_EVENT("NavDestiNation.menu.builder");
+            jsBuilderFunc.Execute();
+            auto customNode = ViewStackModel::GetInstance()->Finish();
+            NavDestinationModel::GetInstance()->SetCustomMenu(customNode);
+        }
+    }
+}
+
 void JSNavDestination::JSBind(BindingTarget globalObj)
 {
     JSClass<JSNavDestination>::Declare("NavDestination");
@@ -265,6 +292,7 @@ void JSNavDestination::JSBind(BindingTarget globalObj)
     JSClass<JSNavDestination>::StaticMethod("onTouch", &JSInteractableView::JsOnTouch);
     JSClass<JSNavDestination>::StaticMethod("id", &JSViewAbstract::JsId);
     JSClass<JSNavDestination>::StaticMethod("mode", &JSNavDestination::SetMode);
+    JSClass<JSNavDestination>::StaticMethod("menus", &JSNavDestination::SetMenus);
     JSClass<JSNavDestination>::InheritAndBind<JSContainerBase>(globalObj);
 }
 

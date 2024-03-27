@@ -980,6 +980,8 @@ void BubbleLayoutAlgorithm::UpdateTouchRegion()
             }
             break;
         default:
+            topLeft = childOffset_;
+            bottomRight = OffsetF(childSize_.Width(), targetSpace_.ConvertToPx() + childSize_.Height());
             break;
     }
     touchRegion_ = RectF(topLeft, topLeft + bottomRight);

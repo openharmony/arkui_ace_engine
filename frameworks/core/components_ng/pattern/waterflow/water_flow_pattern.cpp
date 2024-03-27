@@ -196,7 +196,7 @@ void WaterFlowPattern::OnModifyDone()
     // SetAxis for scroll event
     SetAxis(layoutProperty->GetAxis());
     if (!GetScrollableEvent()) {
-        InitScrollableEvent();
+        AddScrollEvent();
     }
     SetEdgeEffect();
 
@@ -314,17 +314,6 @@ void WaterFlowPattern::CheckScrollable()
     if (!layoutProperty->GetScrollEnabled().value_or(IsScrollable())) {
         SetScrollEnable(false);
     }
-}
-
-void WaterFlowPattern::InitScrollableEvent()
-{
-    AddScrollEvent();
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    auto eventHub = host->GetEventHub<WaterFlowEventHub>();
-    CHECK_NULL_VOID(eventHub);
-    auto scrollFrameBeginEvent = eventHub->GetOnScrollFrameBegin();
-    SetScrollFrameBeginCallback(scrollFrameBeginEvent);
 }
 
 bool WaterFlowPattern::UpdateStartIndex(int32_t index)

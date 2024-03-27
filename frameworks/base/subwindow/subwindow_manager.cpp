@@ -87,8 +87,19 @@ int32_t SubwindowManager::GetParentContainerId(int32_t containerId)
     if (result != parentContainerMap_.end()) {
         return result->second;
     } else {
-        return 0;
+        return -1;
     }
+}
+
+int32_t SubwindowManager::GetSubContainerId(int32_t parentContainerId)
+{
+    std::lock_guard<std::mutex> lock(parentMutex_);
+    for (auto it = parentContainerMap_.begin(); it != parentContainerMap_.end(); it++) {
+        if (it->second == parentContainerId) {
+            return it->first;
+        }
+    }
+    return -1;
 }
 
 void SubwindowManager::AddSubwindow(int32_t instanceId, RefPtr<Subwindow> subwindow)
@@ -281,19 +292,11 @@ void SubwindowManager::ShowPopupNG(int32_t targetId, const NG::PopupInfo& popupI
     CHECK_NULL_VOID(manager);
     auto subwindow = manager->GetSubwindow(containerId);
     if (!subwindow) {
-        auto taskExecutor = Container::CurrentTaskExecutor();
-        CHECK_NULL_VOID(taskExecutor);
-        taskExecutor->PostTask(
-            [containerId, targetId, popupInfo, manager] {
-                auto subwindow = Subwindow::CreateSubwindow(containerId);
-                subwindow->InitContainer();
-                manager->AddSubwindow(containerId, subwindow);
-                subwindow->ShowPopupNG(targetId, popupInfo);
-            },
-            TaskExecutor::TaskType::PLATFORM);
-    } else {
-        subwindow->ShowPopupNG(targetId, popupInfo);
+        subwindow = Subwindow::CreateSubwindow(containerId);
+        subwindow->InitContainer();
+        manager->AddSubwindow(containerId, subwindow);
     }
+    subwindow->ShowPopupNG(targetId, popupInfo);
 }
 
 void SubwindowManager::HidePopupNG(int32_t targetId, int32_t instanceId)
@@ -459,9 +462,8 @@ RefPtr<NG::FrameNode> SubwindowManager::ShowDialogNG(
     }
     return subwindow->ShowDialogNG(dialogProps, std::move(buildFunc));
 }
-
-RefPtr<NG::FrameNode> SubwindowManager::ShowDialogNGWithNode(
-    const DialogProperties& dialogProps, const RefPtr<NG::UINode>& customNode)
+RefPtr<NG::FrameNode> SubwindowManager::ShowDialogNGWithNode(const DialogProperties& dialogProps,
+    const RefPtr<NG::UINode>& customNode)
 {
     TAG_LOGD(AceLogTag::ACE_SUB_WINDOW, "show dialog ng enter");
     auto containerId = Container::CurrentId();
@@ -474,7 +476,6 @@ RefPtr<NG::FrameNode> SubwindowManager::ShowDialogNGWithNode(
     }
     return subwindow->ShowDialogNGWithNode(dialogProps, customNode);
 }
-
 void SubwindowManager::CloseDialogNG(const RefPtr<NG::FrameNode>& dialogNode)
 {
     TAG_LOGD(AceLogTag::ACE_SUB_WINDOW, "close dialog ng enter");
@@ -820,5 +821,16 @@ void SubwindowManager::ResizeWindowForFoldStatus(int32_t parentContainerId)
         return;
     }
     subwindow->ResizeWindowForFoldStatus(parentContainerId);
+}
+
+
+void SubwindowManager::MarkDirtyDialogSafeArea()
+{
+    auto containerId = Container::CurrentId();
+    auto manager = SubwindowManager::GetInstance();
+    CHECK_NULL_VOID(manager);
+    auto subwindow = manager->GetSubwindow(containerId);
+    CHECK_NULL_VOID(subwindow);
+    subwindow->MarkDirtyDialogSafeArea();
 }
 } // namespace OHOS::Ace

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -21,6 +21,7 @@
 
 namespace OHOS::AbilityBase {
 struct ViewData;
+enum class AutoFillType;
 } // namespace OHOS::AbilityBase
 
 namespace OHOS::Ace {
@@ -30,6 +31,7 @@ class ACE_EXPORT ViewDataWrap : public AceType {
 public:
     static RefPtr<ViewDataWrap> CreateViewDataWrap();
     static RefPtr<ViewDataWrap> CreateViewDataWrap(const AbilityBase::ViewData& viewData);
+    static AbilityBase::AutoFillType ViewDataToType(const AbilityBase::ViewData& viewData);
 
     virtual void SetBundleName(const std::string& bundleName) {}
     virtual const std::string& GetBundleName() const = 0;
@@ -45,6 +47,9 @@ public:
 
     virtual void AddPageNodeInfoWrap(RefPtr<PageNodeInfoWrap> pageNodeInfoWrap) {}
     virtual const std::vector<RefPtr<PageNodeInfoWrap>>& GetPageNodeInfoWraps() = 0;
+
+    virtual void SetPageRect(const NG::RectF& rect) {}
+    virtual const NG::RectF& GetPageRect() const = 0;
 };
 } // namespace OHOS::Ace
 #endif // FOUNDATION_ACE_FRAMEWORKS_BASE_VIEW_DATA_WRAP_H

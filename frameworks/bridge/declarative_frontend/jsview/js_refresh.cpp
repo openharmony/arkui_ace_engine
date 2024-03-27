@@ -78,9 +78,13 @@ void ParseRefreshingObject(const JSCallbackInfo& info, const JSRef<JSObject>& re
     RefreshModel::GetInstance()->SetChangeEvent(std::move(changeEvent));
 }
 
-void JSRefresh::SetPullToRefresh(bool value)
+void JSRefresh::SetPullToRefresh(const JSCallbackInfo& info)
 {
-    RefreshModel::GetInstance()->SetPullToRefresh(value);
+    bool pullToRefresh = true;
+    if (info[0]->IsBoolean()) {
+        pullToRefresh = info[0]->ToBoolean();
+    }
+    RefreshModel::GetInstance()->SetPullToRefresh(pullToRefresh);
 }
 
 void JSRefresh::JSBind(BindingTarget globalObj)

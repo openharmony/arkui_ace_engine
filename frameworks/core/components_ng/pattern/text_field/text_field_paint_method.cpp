@@ -207,7 +207,7 @@ void TextFieldPaintMethod::UpdateSelectedBackGroundColor(
 {
     CHECK_NULL_VOID(paintProperty);
     CHECK_NULL_VOID(theme);
-    if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
+    if (!AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
         auto selectedColor = paintProperty->GetSelectedBackgroundColorValue(theme->GetSelectedColor());
         textFieldOverlayModifier_->SetSelectedBackGroundColor(selectedColor);
     } else {

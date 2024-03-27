@@ -56,7 +56,12 @@ Rect SubwindowManager::GetParentWindowRect()
 
 int32_t SubwindowManager::GetParentContainerId(int32_t containerId)
 {
-    return 0;
+    return -1;
+}
+
+int32_t SubwindowManager::GetSubContainerId(int32_t parentContainerId)
+{
+    return -1;
 }
 
 const RefPtr<Subwindow> SubwindowManager::GetSubwindow(int32_t instanceId)
@@ -65,4 +70,6 @@ const RefPtr<Subwindow> SubwindowManager::GetSubwindow(int32_t instanceId)
 }
 
 void SubwindowManager::ResizeWindowForFoldStatus(int32_t parentContainerId) {}
+
+void SubwindowManager::MarkDirtyDialogSafeArea() {}
 } // namespace OHOS::Ace

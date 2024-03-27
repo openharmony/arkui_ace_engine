@@ -16,6 +16,7 @@ import("//foundation/arkui/ace_engine/test/unittest/ace_unittest.gni")
 ace_unittest("text_test_ng") {
   type = "new"
   sources = [
+    "span_string_test_ng.cpp",
     "span_test_ng.cpp",
     "text_test_ng.cpp",
   ]

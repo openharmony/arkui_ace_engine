@@ -217,10 +217,17 @@ bool FocusHub::RequestFocusImmediately(bool isJudgeRootTree)
 
     auto parent = GetParentFocusHub();
     if (parent) {
-        auto curFocusView = FocusView::GetCurrentFocusView();
-        auto viewRootScope = curFocusView ? curFocusView->GetViewRootScope() : nullptr;
-        if (viewRootScope && parent == viewRootScope) {
-            curFocusView->SetIsViewRootScopeFocused(false);
+        auto focusManager = context->GetFocusManager();
+        if (focusManager) {
+            auto weakFocusViewList = focusManager->GetWeakFocusViewList();
+            for (const auto& weakFocusView : weakFocusViewList) {
+                auto focusView = weakFocusView.Upgrade();
+                auto viewRootScope = focusView ? focusView->GetViewRootScope() : nullptr;
+                if (parent == viewRootScope) {
+                    focusView->SetIsViewRootScopeFocused(false);
+                    break;
+                }
+            }
         }
         parent->SwitchFocus(AceType::Claim(this));
     }
@@ -403,17 +410,12 @@ void FocusHub::SetEnabled(bool enabled)
 
 bool FocusHub::IsShow() const
 {
-    auto frameNode = GetFrameNode();
-    CHECK_NULL_RETURN(frameNode, true);
-    bool curIsVisible = frameNode->IsVisible();
-    auto parent = frameNode->GetParent();
-    while (parent) {
-        auto parentFrame = AceType::DynamicCast<FrameNode>(parent);
-        if (parentFrame && !parentFrame->IsVisible()) {
+    bool curIsVisible = true;
+    for (RefPtr<UINode> node = GetFrameNode(); curIsVisible && node; node = node->GetParent()) {
+        auto frameNode = AceType::DynamicCast<FrameNode>(node);
+        if (frameNode && !frameNode->IsVisible()) {
             curIsVisible = false;
-            break;
         }
-        parent = parent->GetParent();
     }
     return curIsVisible;
 }
@@ -452,11 +454,11 @@ void FocusHub::SetIsFocusOnTouch(bool isFocusOnTouch)
     if (!focusCallbackEvents_) {
         focusCallbackEvents_ = MakeRefPtr<FocusCallbackEvents>();
     }
-    if (focusCallbackEvents_->IsFocusOnTouch().has_value() &&
-        focusCallbackEvents_->IsFocusOnTouch().value() == isFocusOnTouch) {
+    if (focusCallbackEvents_->isFocusOnTouch_.has_value() &&
+        focusCallbackEvents_->isFocusOnTouch_.value() == isFocusOnTouch) {
         return;
     }
-    focusCallbackEvents_->SetIsFocusOnTouch(isFocusOnTouch);
+    focusCallbackEvents_->isFocusOnTouch_ = isFocusOnTouch;
 
     auto frameNode = GetFrameNode();
     CHECK_NULL_VOID(frameNode);
@@ -480,21 +482,6 @@ void FocusHub::SetIsFocusOnTouch(bool isFocusOnTouch)
         focusOnTouchListener_ = MakeRefPtr<TouchEventImpl>(std::move(touchCallback));
     }
     gesture->AddTouchEvent(focusOnTouchListener_);
-}
-
-void FocusHub::SetIsDefaultFocus(bool isDefaultFocus)
-{
-    if (!focusCallbackEvents_) {
-        focusCallbackEvents_ = MakeRefPtr<FocusCallbackEvents>();
-    }
-    focusCallbackEvents_->SetIsDefaultFocus(isDefaultFocus);
-}
-void FocusHub::SetIsDefaultGroupFocus(bool isDefaultGroupFocus)
-{
-    if (!focusCallbackEvents_) {
-        focusCallbackEvents_ = MakeRefPtr<FocusCallbackEvents>();
-    }
-    focusCallbackEvents_->SetIsDefaultGroupFocus(isDefaultGroupFocus);
 }
 
 void FocusHub::RefreshFocus()
@@ -535,13 +522,41 @@ bool FocusHub::OnKeyEvent(const KeyEvent& keyEvent)
     return false;
 }
 
+bool FocusHub::OnKeyPreIme(KeyEventInfo& info, const KeyEvent& keyEvent)
+{
+    auto onKeyPreIme = GetOnKeyPreIme();
+    if (onKeyPreIme) {
+        bool retPreIme = onKeyPreIme(info);
+        auto pipeline = PipelineContext::GetCurrentContext();
+        auto eventManager = pipeline->GetEventManager();
+        if (eventManager) {
+            eventManager->SetIsKeyConsumed(retPreIme);
+        }
+        return info.IsStopPropagation();
+    } else if (GetFrameName() == V2::UI_EXTENSION_COMPONENT_ETS_TAG) {
+        return ProcessOnKeyEventInternal(keyEvent);
+    } else {
+        return false;
+    }
+}
+
 bool FocusHub::OnKeyEventNode(const KeyEvent& keyEvent)
 {
     ACE_DCHECK(IsCurrentFocus());
 
-    auto retInternal = false;
     auto pipeline = PipelineContext::GetCurrentContext();
+    auto info = KeyEventInfo(keyEvent);
+    if (pipeline &&
+        (pipeline->IsKeyInPressed(KeyCode::KEY_META_LEFT) || pipeline->IsKeyInPressed(KeyCode::KEY_META_RIGHT))) {
+        info.SetMetaKey(1);
+    }
+
+    if (keyEvent.isPreIme) {
+        return OnKeyPreIme(info, keyEvent);
+    }
+
     bool isBypassInner = keyEvent.IsKey({ KeyCode::KEY_TAB }) && pipeline && pipeline->IsTabJustTriggerOnKeyEvent();
+    auto retInternal = false;
     if (!isBypassInner && !onKeyEventsInternal_.empty()) {
         retInternal = ProcessOnKeyEventInternal(keyEvent);
         TAG_LOGI(AceLogTag::ACE_FOCUS,
@@ -549,16 +564,12 @@ bool FocusHub::OnKeyEventNode(const KeyEvent& keyEvent)
             GetFrameName().c_str(), GetFrameId(), keyEvent.code, keyEvent.action, retInternal);
     }
 
-    auto info = KeyEventInfo(keyEvent);
-    if (pipeline &&
-        (pipeline->IsKeyInPressed(KeyCode::KEY_META_LEFT) || pipeline->IsKeyInPressed(KeyCode::KEY_META_RIGHT))) {
-        info.SetMetaKey(1);
-    }
     auto retCallback = false;
     auto onKeyEventCallback = GetOnKeyCallback();
     if (onKeyEventCallback) {
         onKeyEventCallback(info);
         retCallback = info.IsStopPropagation();
+        auto eventManager = pipeline->GetEventManager();
         TAG_LOGI(AceLogTag::ACE_FOCUS,
             "OnKeyEventUser: Node %{public}s/%{public}d handle KeyEvent(%{public}d, %{public}d) return: %{public}d",
             GetFrameName().c_str(), GetFrameId(), keyEvent.code, keyEvent.action, retCallback);
@@ -620,7 +631,7 @@ bool FocusHub::OnKeyEventScope(const KeyEvent& keyEvent)
     }
     if (keyEvent.IsKey({ KeyCode::KEY_TAB }) && pipeline->IsTabJustTriggerOnKeyEvent()) {
         ScrollToLastFocusIndex();
-        return false;
+        return true;
     }
 
     ScrollToLastFocusIndex();
@@ -1967,7 +1978,6 @@ bool FocusHub::UpdateFocusView()
     }
     auto curFocusView = FocusView::GetCurrentFocusView();
     if (focusView && focusView->IsFocusViewLegal() && focusView != curFocusView) {
-        focusView->SetIsViewRootScopeFocused(false);
         focusView->FocusViewShow();
     }
     return true;

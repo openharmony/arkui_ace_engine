@@ -108,9 +108,11 @@ class SubscribableHandler {
   static readonly UNSUBSCRIBE = Symbol("_____unsubscribe__")
   static readonly COUNT_SUBSCRIBERS = Symbol("____count_subscribers__")
   static readonly SET_ONREAD_CB = Symbol("_____set_onread_cb__");
+  static readonly RAW_THIS = Symbol("_____raw_this");
 
   private owningProperties_: Set<number>;
   private readCbFunc_?: PropertyReadCbFunc;
+  private obSelf_?: ObservedPropertyAbstractPU<any>;
 
   constructor(owningProperty: IPropertySubscriber) {
     this.owningProperties_ = new Set<number>();
@@ -160,6 +162,7 @@ class SubscribableHandler {
       // PU code path
       if ('onTrackedObjectPropertyCompatModeHasChangedPU' in owningProperty) {
         (owningProperty as unknown as ObservedObjectEventsPUReceiver<any>).onTrackedObjectPropertyCompatModeHasChangedPU(this, propName);
+        return;
       }
 
       // FU code path
@@ -207,10 +210,10 @@ class SubscribableHandler {
       default:
         const result = Reflect.get(target, property, receiver);
         let propertyStr : string = String(property);
-        if (this.readCbFunc_ && typeof result !== 'function') {
+        if (this.readCbFunc_ && typeof result !== 'function' && this.obSelf_ != undefined) {
           let isTracked = this.isPropertyTracked(target, propertyStr);
           stateMgmtConsole.debug(`SubscribableHandler: get ObservedObject property '${isTracked ? "@Track " : ""}${propertyStr}' notifying read.`);
-          this.readCbFunc_(receiver, propertyStr, isTracked);
+          this.readCbFunc_.call(this.obSelf_, receiver, propertyStr, isTracked);
         } else {
           // result is function or in compatibility mode (in compat mode cbFunc will never be set)
           stateMgmtConsole.debug(`SubscribableHandler: get ObservedObject property '${propertyStr}' not notifying read.`);
@@ -236,6 +239,10 @@ class SubscribableHandler {
         // assignment obsObj[SubscribableHandler.SET_ONREAD_CB] = readCallbackFunc
         stateMgmtConsole.debug(`SubscribableHandler: setReadingProperty: ${TrackedObject.isCompatibilityMode(target) ? 'not used in compatibility mode' : newValue ? 'set new cb function' : 'unset cb function'}.`);
         this.readCbFunc_ = TrackedObject.isCompatibilityMode(target) ? undefined : (newValue as (PropertyReadCbFunc | undefined));
+        return true;
+        break;
+      case SubscribableHandler.RAW_THIS:
+        this.obSelf_ = TrackedObject.isCompatibilityMode(target) ? undefined : newValue;
         return true;
         break;
       default:
@@ -538,11 +545,12 @@ class ObservedObject<T extends Object> extends ExtendableProxy {
   /*
     set or unset callback function to be called when a property has been called
   */
-  public static registerPropertyReadCb(obj: Object, readPropCb: PropertyReadCbFunc): boolean {
+  public static registerPropertyReadCb(obj: Object, readPropCb: PropertyReadCbFunc, obSelf: ObservedPropertyAbstractPU<any>): boolean {
     if (!ObservedObject.IsObservedObject(obj)) {
       return false;
     }
     obj[SubscribableHandler.SET_ONREAD_CB] = readPropCb;
+    obj[SubscribableHandler.RAW_THIS] = obSelf;
     return true;
   }
 
@@ -551,6 +559,7 @@ class ObservedObject<T extends Object> extends ExtendableProxy {
       return false;
     }
     obj[SubscribableHandler.SET_ONREAD_CB] = undefined;
+    obj[SubscribableHandler.RAW_THIS] = undefined;
     return true;
   }
 

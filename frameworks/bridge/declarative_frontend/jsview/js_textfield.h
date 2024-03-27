@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -33,6 +33,7 @@ public:
     static void CreateTextInput(const JSCallbackInfo& info);
     static void CreateTextArea(const JSCallbackInfo& info);
     static void SetType(const JSCallbackInfo& info);
+    static void SetContentType(const JSCallbackInfo& info);
     static void SetPlaceholderColor(const JSCallbackInfo& info);
     static void SetPlaceholderFont(const JSCallbackInfo& info);
     static void SetEnterKeyType(const JSCallbackInfo& info);
@@ -85,6 +86,7 @@ public:
     static void SetShowError(const JSCallbackInfo& info);
     static void SetBarState(const JSCallbackInfo& info);
     static void SetMaxLines(const JSCallbackInfo& info);
+    static void SetWordBreak(const JSCallbackInfo& info);
 
     static void SetShowUnderline(const JSCallbackInfo& info);
     static void SetUnderlineColor(const JSCallbackInfo& info);
@@ -103,6 +105,7 @@ public:
     static void SetDecoration(const JSCallbackInfo& info);
     static void SetLetterSpacing(const JSCallbackInfo& info);
     static void SetLineHeight(const JSCallbackInfo& info);
+    static void SetFontFeature(const JSCallbackInfo& info);
 };
 
 } // namespace OHOS::Ace::Framework

@@ -146,7 +146,7 @@ export struct SubHeader {
   iconSymbolOptions?: SymbolOptions | null = null;
   @Prop primaryTitle: string | null = null;
   @Prop secondaryTitle: string | null = null;
-  @Prop select: SelectOptions | null = null;
+  select: SelectOptions | null = null;
   @Prop operationType: OperationType = OperationType.BUTTON;
   operationItem: Array<OperationOption> | null = null;
   operationSymbolOptions?: Array<SymbolOptions> | null = null;
@@ -270,16 +270,18 @@ export struct SubHeader {
     Column() {
       Text($$.content)
         .primaryTitleStyles({
-          fontWeight: FontWeight.Medium,
+          fontWeight: FontWeight.Bold,
           maxLines: SINGLE_LINE_NUM,
           alignment: Alignment.Start,
         })
+        .width('100%')
       Text($$.subContent)
         .secondaryTitleStyles({
           maxLines: SINGLE_LINE_NUM,
           fontWeight: FontWeight.Regular,
           alignment: Alignment.Start,
         })
+        .width('100%')
         .margin({
           top: $r('sys.float.padding_level1'),
         })
@@ -348,7 +350,7 @@ export struct SubHeader {
     Column() {
       Text($$.content)
         .primaryTitleStyles({
-          fontWeight: FontWeight.Medium,
+          fontWeight: FontWeight.Bold,
           maxLines: DOUBLE_LINE_NUM,
           alignment: Alignment.Start,
         })
@@ -655,8 +657,6 @@ export struct SubHeader {
     // 文字最大宽度 = 整体宽度 减去 icon宽度和间距
     this.iconTextWidth = this.iconTextStyleWidth - getNumberByResource('padding_level6') - this.iconWidth -
     getNumberByResource('padding_level6');
-    hilog.debug(122, 'tytyty ', `this.iconTextMaxWidth : ${this.iconTextWidth}`);
-
   }
 
   private changeFlexAlign(flex: FlexAlign): void {

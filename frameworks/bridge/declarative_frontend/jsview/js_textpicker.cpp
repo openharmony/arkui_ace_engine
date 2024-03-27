@@ -106,6 +106,7 @@ void JSTextPicker::JSBind(BindingTarget globalObj)
     JSClass<JSTextPicker>::StaticMethod("onCancel", &JSTextPicker::OnCancel);
     JSClass<JSTextPicker>::StaticMethod("onChange", &JSTextPicker::OnChange);
     JSClass<JSTextPicker>::StaticMethod("backgroundColor", &JSTextPicker::PickerBackgroundColor);
+    JSClass<JSTextPicker>::StaticMethod("gradientHeight", &JSTextPicker::SetGradientHeight);
     JSClass<JSTextPicker>::StaticMethod("onClick", &JSInteractableView::JsOnClick);
     JSClass<JSTextPicker>::StaticMethod("onTouch", &JSInteractableView::JsOnTouch);
     JSClass<JSTextPicker>::StaticMethod("onKeyEvent", &JSInteractableView::JsOnKey);
@@ -805,6 +806,32 @@ void JSTextPicker::SetDefaultPickerItemHeight(const JSCallbackInfo& info)
     }
     TextPickerModel::GetInstance()->SetDefaultPickerItemHeight(height);
 }
+
+void JSTextPicker::SetGradientHeight(const JSCallbackInfo& info)
+{
+    CalcDimension height;
+    auto pickerTheme = GetTheme<PickerTheme>();
+    if (info[0]->IsNull() || info[0]->IsUndefined()) {
+        if (pickerTheme) {
+            height = pickerTheme->GetGradientHeight();
+        } else {
+            height = 0.0_vp;
+        }
+    }
+    if (info.Length() >= 1) {
+        ConvertFromJSValueNG(info[0], height);
+        if ((height.Unit() == DimensionUnit::PERCENT) &&
+            ((height.Value() > 1.0f) || (height.Value() < 0.0f))) {
+            if (pickerTheme) {
+                height = pickerTheme->GetGradientHeight();
+            } else {
+                height = 0.0_vp;
+            }
+        }
+    }
+    TextPickerModel::GetInstance()->SetGradientHeight(height);
+}
+
 void JSTextPicker::SetCanLoop(const JSCallbackInfo& info)
 {
     bool value = true;
@@ -1002,11 +1029,21 @@ void JSTextPicker::SetDivider(const JSCallbackInfo& info)
     NG::ItemDivider divider;
     if (info.Length() >= 1 && info[0]->IsObject()) {
         auto pickerTheme = GetTheme<PickerTheme>();
+        // Set default strokeWidth and color
+        if (pickerTheme) {
+            divider.strokeWidth = pickerTheme->GetDividerThickness();
+            divider.color = pickerTheme->GetDividerColor();
+        }
         JSRef<JSObject> obj = JSRef<JSObject>::Cast(info[0]);
         bool needReset = obj->GetProperty("strokeWidth")->IsString() &&
             !std::regex_match(obj->GetProperty("strokeWidth")->ToString(), DIMENSION_REGEX);
-        if (needReset || !ConvertFromJSValue(obj->GetProperty("strokeWidth"), divider.strokeWidth)) {
-            divider.strokeWidth = 0.0_vp;
+        if (needReset || !ConvertFromJSValue(obj->GetProperty("strokeWidth"), divider.strokeWidth) ||
+            divider.strokeWidth.ConvertToPx() < 0) {
+            if (pickerTheme) {
+                divider.strokeWidth = pickerTheme->GetDividerThickness();
+            } else {
+                divider.strokeWidth = 0.0_vp;
+            }
         }
         if (!ConvertFromJSValue(obj->GetProperty("color"), divider.color)) {
             // Failed to get color from param, using default color defined in theme
@@ -1029,7 +1066,6 @@ void JSTextPicker::SetDivider(const JSCallbackInfo& info)
         }
     }
     TextPickerModel::GetInstance()->SetDivider(divider);
-    info.ReturnSelf();
 }
 
 void JSTextPicker::OnAccept(const JSCallbackInfo& info) {}

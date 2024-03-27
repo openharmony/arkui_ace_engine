@@ -46,7 +46,6 @@ public:
     MOCK_METHOD3(ClearMenuNG, void(int32_t targetId, bool inWindow, bool showAnimation));
     MOCK_METHOD2(
         ShowDialogNG, RefPtr<NG::FrameNode>(const DialogProperties& dialogProps, std::function<void()>&& buildFunc));
-    MOCK_METHOD0(ShowDialogNGPrepare, void());
     MOCK_METHOD2(ShowDialogNGWithNode, RefPtr<NG::FrameNode>(const DialogProperties&, const RefPtr<NG::UINode>&));
     MOCK_METHOD1(CloseDialogNG, void(const RefPtr<NG::FrameNode>& dialogNode));
     MOCK_METHOD0(HideSubWindowNG, void());
@@ -76,6 +75,7 @@ public:
     MOCK_METHOD1(CloseCustomDialogNG, void(int32_t dialogId));
     MOCK_METHOD0(ResizeWindowForFoldStatus, void());
     MOCK_METHOD1(ResizeWindowForFoldStatus, void(int32_t parentContainerId));
+    MOCK_METHOD0(MarkDirtyDialogSafeArea, void());
 };
 } // namespace OHOS::Ace
 #endif // FOUNDATION_ACE_TEST_MOCK_BASE_MOCK_SUBWINDOW_H

@@ -29,11 +29,8 @@ public:
 
     static RefPtr<SvgNode> Create();
 
-#ifndef USE_ROSEN_DRAWING
-    SkPath AsPath(const Size& viewPort) const override;
-#else
     RSRecordingPath AsPath(const Size& viewPort) const override;
-#endif
+    void OnDraw(RSCanvas& canvas, const Size& layout, const std::optional<Color>& color) override;
 
 private:
     // saves the current attributes of the svg node, and restores them when the scope exits.

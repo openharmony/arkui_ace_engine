@@ -733,17 +733,17 @@ void XComponentPattern::HandleTouchEvent(const TouchEventInfo& info)
     if (touchInfoList.empty()) {
         return;
     }
-    const auto& locationInfo = touchInfoList.front();
-    const auto& screenOffset = locationInfo.GetGlobalLocation();
-    const auto& localOffset = locationInfo.GetLocalLocation();
-    touchEventPoint_.id = locationInfo.GetFingerId();
+    const auto& touchInfo = touchInfoList.front();
+    const auto& screenOffset = touchInfo.GetGlobalLocation();
+    const auto& localOffset = touchInfo.GetLocalLocation();
+    touchEventPoint_.id = touchInfo.GetFingerId();
     touchEventPoint_.screenX = static_cast<float>(screenOffset.GetX());
     touchEventPoint_.screenY = static_cast<float>(screenOffset.GetY());
     touchEventPoint_.x = static_cast<float>(localOffset.GetX());
     touchEventPoint_.y = static_cast<float>(localOffset.GetY());
-    touchEventPoint_.size = locationInfo.GetSize();
-    touchEventPoint_.force = locationInfo.GetForce();
-    touchEventPoint_.deviceId = locationInfo.GetTouchDeviceId();
+    touchEventPoint_.size = touchInfo.GetSize();
+    touchEventPoint_.force = touchInfo.GetForce();
+    touchEventPoint_.deviceId = touchInfo.GetTouchDeviceId();
     const auto timeStamp = info.GetTimeStamp().time_since_epoch().count();
     touchEventPoint_.timeStamp = timeStamp;
     auto touchType = touchInfoList.front().GetTouchType();
@@ -766,6 +766,8 @@ void XComponentPattern::HandleTouchEvent(const TouchEventInfo& info)
 
     if (nativeXComponent_ && nativeXComponentImpl_) {
         nativeXComponentImpl_->SetHistoricalPoint(SetHistoryPoint(info.GetHistory()));
+        nativeXComponentImpl_->SetCurrentSourceType(
+            { touchInfo.GetFingerId(), ConvertNativeXComponentEventSourceType(info.GetSourceDevice()) });
     }
     NativeXComponentDispatchTouchEvent(touchEventPoint_, nativeXComponentTouchPoints_);
 

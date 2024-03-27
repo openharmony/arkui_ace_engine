@@ -347,6 +347,15 @@ class FrameNodeFinalizationRegisterProxy {
 }
 FrameNodeFinalizationRegisterProxy.instance_ = new FrameNodeFinalizationRegisterProxy();
 FrameNodeFinalizationRegisterProxy.ElementIdToOwningFrameNode_ = new Map();
+FrameNodeFinalizationRegisterProxy.FrameNodeInMainTree_ = new Map();
+globalThis.__AttachToMainTree__ = function __AttachToMainTree__(nodeId) {
+    if (FrameNodeFinalizationRegisterProxy.ElementIdToOwningFrameNode_.has(nodeId)) {
+        FrameNodeFinalizationRegisterProxy.FrameNodeInMainTree_.set(nodeId, FrameNodeFinalizationRegisterProxy.ElementIdToOwningFrameNode_.get(nodeId).deref());
+    }
+};
+globalThis.__DetachToMainTree__ = function __DetachToMainTree__(nodeId) {
+    FrameNodeFinalizationRegisterProxy.FrameNodeInMainTree_.delete(nodeId);
+};
 /*
  * Copyright (c) 2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -361,17 +370,18 @@ FrameNodeFinalizationRegisterProxy.ElementIdToOwningFrameNode_ = new Map();
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+class __InternalField__ {
+    constructor() {
+        this._value = -1;
+    }
+}
 class NodeController {
     constructor() {
-        this.nodeContainerId_ = -1;
+        this._nodeContainerId = new __InternalField__();
     }
-    aboutToResize(size) { }
-    aboutToAppear() { }
-    aboutToDisappear() { }
-    onTouchEvent(event) { }
     rebuild() {
-        if (this.nodeContainerId_ >= 0) {
-            getUINativeModule().nodeContainer.rebuild(this.nodeContainerId_);
+        if (this._nodeContainerId != undefined && this._nodeContainerId !== null && this._nodeContainerId._value >= 0) {
+            getUINativeModule().nodeContainer.rebuild(this._nodeContainerId._value);
         }
     }
 }
@@ -447,6 +457,7 @@ class FrameNodeModifier extends ArkComponent {
                 return;
             }
             value.applyStage(this.nativePtr);
+            getUINativeModule().frameNode.propertyUpdate(this.nativePtr);
         });
     }
     setNodePtr(nodePtr) {
@@ -457,6 +468,7 @@ class FrameNode {
     constructor(uiContext, type) {
         this.uiContext_ = uiContext;
         this.nodeId_ = -1;
+        this._childList = new Map();
         if (type === 'BuilderNode' || type === 'ArkTsNode') {
             this.renderNode_ = new RenderNode('BuilderNode');
             this.type_ = type;
@@ -547,6 +559,7 @@ class FrameNode {
         if (!flag) {
             throw { message: 'The FrameNode is not modifiable.', code: 100021 };
         }
+        this._childList.set(node.nodeId_, node);
     }
     insertChildAfter(child, sibling) {
         this.checkType();
@@ -566,6 +579,7 @@ class FrameNode {
         if (!flag) {
             throw { message: 'The FrameNode is not modifiable.', code: 100021 };
         }
+        this._childList.set(child.nodeId_, child);
     }
     removeChild(node) {
         this.checkType();
@@ -573,10 +587,12 @@ class FrameNode {
             return;
         }
         getUINativeModule().frameNode.removeChild(this.nodePtr_, node.nodePtr_);
+        this._childList.delete(node.nodeId_);
     }
     clearChildren() {
         this.checkType();
         getUINativeModule().frameNode.clearChildren(this.nodePtr_);
+        this._childList.clear();
     }
     getChild(index) {
         const nodePtr = getUINativeModule().frameNode.getChild(this.nodePtr_, index);
@@ -986,7 +1002,7 @@ class RenderNode {
             return;
         }
         this.childrenList.push(node);
-        node.parentRenderNode = this;
+        node.parentRenderNode = new WeakRef(this);
         getUINativeModule().renderNode.appendChild(this.nodePtr, node.nodePtr);
     }
     insertChildAfter(child, sibling) {
@@ -997,7 +1013,7 @@ class RenderNode {
         if (indexOfNode !== -1) {
             return;
         }
-        child.parentRenderNode = this;
+        child.parentRenderNode = new WeakRef(this);
         let indexOfSibling = this.childrenList.findIndex(element => element === sibling);
         if (indexOfSibling === -1) {
             sibling === null;
@@ -1044,23 +1060,31 @@ class RenderNode {
         if (this.parentRenderNode === undefined || this.parentRenderNode === null) {
             return null;
         }
-        let siblingList = this.parentRenderNode.childrenList;
+        let parent = this.parentRenderNode.deref();
+        if (parent === undefined || parent === null) {
+            return null;
+        }
+        let siblingList = parent.childrenList;
         const index = siblingList.findIndex(element => element === this);
         if (index === -1) {
             return null;
         }
-        return this.parentRenderNode.getChild(index + 1);
+        return parent.getChild(index + 1);
     }
     getPreviousSibling() {
         if (this.parentRenderNode === undefined || this.parentRenderNode === null) {
             return null;
         }
-        let siblingList = this.parentRenderNode.childrenList;
+        let parent = this.parentRenderNode.deref();
+        if (parent === undefined || parent === null) {
+            return null;
+        }
+        let siblingList = parent.childrenList;
         const index = siblingList.findIndex(element => element === this);
         if (index === -1) {
             return null;
         }
-        return this.parentRenderNode.getChild(index - 1);
+        return parent.getChild(index - 1);
     }
     setNodePtr(nodePtr) {
         this.nodePtr = nodePtr;

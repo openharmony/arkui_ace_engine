@@ -103,6 +103,9 @@ public:
 void CheckBoxGroupTestNG::SetUpTestCase()
 {
     MockPipelineContext::SetUp();
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<CheckboxTheme>()));
     RefPtr<FrameNode> stageNode = AceType::MakeRefPtr<FrameNode>("STAGE", -1, AceType::MakeRefPtr<Pattern>());
     auto stageManager = AceType::MakeRefPtr<StageManager>(stageNode);
     MockPipelineContext::GetCurrent()->stageManager_ = stageManager;
@@ -121,6 +124,167 @@ CheckBoxGroupModifier::Parameters CheckBoxGroupCreateDefModifierParam()
         SHADOW_WIDTH_FORUPDATE, UIStatus::UNSELECTED, CheckBoxGroupPaintProperty::SelectStatus::NONE };
 
     return parameters;
+}
+
+/**
+ * @tc.name: OnModifyDone001
+ * @tc.desc: Test CheckBoxGroup OnModifyDone001.
+ * @tc.type: FUNC
+ */
+HWTEST_F(CheckBoxGroupTestNG, OnModifyDone001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Init CheckBoxGroup node
+     */
+    CheckBoxGroupModelNG checkBoxGroupModelNG;
+    checkBoxGroupModelNG.Create(std::optional<string>());
+    
+    /**
+     * @tc.steps: step2. call the OnModifyDone function of the checkboxgroup pattern
+     * @tc.expected: the margin property meetings expectations
+     */
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<CheckBoxGroupPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto layoutProperty = frameNode->GetLayoutProperty();
+    ASSERT_NE(layoutProperty, nullptr);
+    EXPECT_TRUE(layoutProperty->GetMarginProperty());
+    pattern->OnModifyDone();
+    EXPECT_TRUE(layoutProperty->GetMarginProperty());
+    pattern->OnModifyDone();
+    EXPECT_TRUE(layoutProperty->GetMarginProperty());
+}
+
+/**
+ * @tc.name: UpdateUIStatus001.
+ * @tc.desc: Test CheckBoxGroup UpdateUIStatus001.
+ * @tc.type: FUNC
+ */
+HWTEST_F(CheckBoxGroupTestNG, UpdateUIStatus001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Init CheckBoxGroup node.
+     */
+    CheckBoxGroupModelNG checkBoxGroupModelNG;
+    checkBoxGroupModelNG.Create(std::optional<string>());
+    
+    /**
+     * @tc.steps: step2. call the UpdateUIStatus function of the checkboxgroup pattern.
+     * @tc.expected: the UpdateUIStatus meetings expectations.
+     */
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<CheckBoxGroupPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto paintProperty = frameNode->GetPaintProperty<CheckBoxGroupPaintProperty>();
+    ASSERT_NE(paintProperty, nullptr);
+    paintProperty->SetSelectStatus(CheckBoxGroupPaintProperty::SelectStatus::PART);
+    pattern->UpdateUIStatus(false);
+    EXPECT_EQ(pattern->uiStatus_, UIStatus::PART_TO_OFF);
+    pattern->UpdateUIStatus(true);
+    EXPECT_EQ(pattern->uiStatus_, UIStatus::PART_TO_ON);
+    paintProperty->SetSelectStatus(CheckBoxGroupPaintProperty::SelectStatus::ALL);
+    pattern->UpdateUIStatus(false);
+    EXPECT_EQ(pattern->uiStatus_, UIStatus::ON_TO_OFF);
+    pattern->UpdateUIStatus(true);
+    EXPECT_EQ(pattern->uiStatus_, UIStatus::OFF_TO_ON);
+}
+
+/**
+ * @tc.name: OnAfterModifyDone001
+ * @tc.desc: Test CheckBoxGroup OnAfterModifyDone001.
+ * @tc.type: FUNC
+ */
+HWTEST_F(CheckBoxGroupTestNG, OnAfterModifyDone001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Init CheckBoxGroup node.
+     */
+    CheckBoxGroupModelNG checkBoxGroupModelNG;
+    checkBoxGroupModelNG.Create(std::optional<string>());
+    
+    /**
+     * @tc.steps: step2. call the OnAfterModifyDone function of the checkboxgroup pattern.
+     * @tc.expected: the inspectorId property meetings expectations.
+     */
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<CheckBoxGroupPattern>();
+    ASSERT_NE(pattern, nullptr);
+    pattern->OnAfterModifyDone();
+    auto inspectorId = frameNode->GetInspectorId().value_or("");
+    EXPECT_TRUE(inspectorId.empty());
+    frameNode->UpdateInspectorId("test");
+    pattern->OnAfterModifyDone();
+    EXPECT_FALSE(frameNode->GetInspectorIdValue().empty());
+    auto paintProperty = frameNode->GetPaintProperty<CheckBoxGroupPaintProperty>();
+    ASSERT_NE(paintProperty, nullptr);
+    pattern->initSelected_ = true;
+    pattern->OnAfterModifyDone();
+    EXPECT_TRUE(pattern->initSelected_);
+}
+
+/**
+ * @tc.name: UpdateGroupCheckStatus001
+ * @tc.desc: Test CheckBoxGroup UpdateGroupCheckStatus001.
+ * @tc.type: FUNC
+ */
+HWTEST_F(CheckBoxGroupTestNG, UpdateGroupCheckStatus001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Init CheckBoxGroup node.
+     */
+    CheckBoxGroupModelNG checkBoxGroupModelNG;
+    checkBoxGroupModelNG.Create(std::optional<string>());
+    
+    /**
+     * @tc.steps: step2. call the OnAfterModifyDone function of the checkboxgroup pattern.
+     * @tc.expected: the initSelected_ property meetings expectations.
+     */
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<CheckBoxGroupPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto paintProperty = frameNode->GetPaintProperty<CheckBoxGroupPaintProperty>();
+    ASSERT_NE(paintProperty, nullptr);
+    bool select = true;
+    pattern->UpdateGroupCheckStatus(frameNode, select);
+    select = false;
+    pattern->UpdateGroupCheckStatus(frameNode, select);
+}
+
+/**
+ * @tc.name: InitOnKeyEvent001
+ * @tc.desc: Test checkboxgroup clickCallback of InitOnKeyEvent001.
+ * @tc.type: FUNC
+ */
+HWTEST_F(CheckBoxGroupTestNG, InitOnKeyEvent001, TestSize.Level1)
+{
+    CheckBoxGroupModelNG checkBoxGroupModelNG;
+    checkBoxGroupModelNG.Create(std::optional<string>());
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    EXPECT_NE(frameNode, nullptr);
+    frameNode->MarkModifyDone();
+
+    auto eventHub = frameNode->GetFocusHub();
+    ASSERT_NE(eventHub, nullptr);
+
+    /**
+     * test event.action != KeyAction::DOWN
+     */
+    KeyEvent keyEventOne(KeyCode::KEY_A, KeyAction::UP);
+    eventHub->ProcessOnKeyEventInternal(keyEventOne);
+    /**
+     * test event.action == KeyAction::DOWN and event.code != KeyCode::KEY_ENTER
+     */
+    KeyEvent keyEventTwo(KeyCode::KEY_A, KeyAction::DOWN);
+    eventHub->ProcessOnKeyEventInternal(keyEventTwo);
+    /**
+     * test event.action == KeyAction::DOWN and event.code == KeyCode::KEY_ENTER
+     */
+    KeyEvent keyEventThr(KeyCode::KEY_ENTER, KeyAction::DOWN);
+    eventHub->ProcessOnKeyEventInternal(keyEventThr);
 }
 
 /**

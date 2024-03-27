@@ -115,6 +115,10 @@ void CanvasPaintMethod::UpdateContentModifier(PaintWrapper* paintWrapper)
         return;
     }
 
+    if (onModifierUpdate_) {
+        onModifierUpdate_();
+    }
+
 #ifndef USE_ROSEN_DRAWING
     skCanvas_->scale(viewScale, viewScale);
 #else

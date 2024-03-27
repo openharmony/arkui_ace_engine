@@ -93,12 +93,13 @@ void JSSpanString::IsEqualToSpanString(const JSCallbackInfo& info)
 
 void JSSpanString::GetSubSpanString(const JSCallbackInfo& info)
 {
-    if (info.Length() < 1 || !info[0]->IsNumber()) {
+    if (info.Length() < 1 || !info[0]->IsNumber() || (info.Length() == 2 && !info[1]->IsNumber())) {
+        JSException::Throw(ERROR_CODE_PARAM_INVALID, "%s", "Input parameter check failed.");
         return;
     }
     auto start = info[0]->ToNumber<int32_t>();
     auto length = spanString_->GetLength() - start;
-    if (info.Length() == 2 && info[1]->IsNumber()) {
+    if (info.Length() == 2) {
         length = info[1]->ToNumber<int32_t>();
     }
     if (!CheckParameters(start, length)) {
@@ -114,7 +115,9 @@ void JSSpanString::GetSubSpanString(const JSCallbackInfo& info)
 
 void JSSpanString::GetSpans(const JSCallbackInfo& info)
 {
-    if (info.Length() < 2 || !info[0]->IsNumber() || !info[1]->IsNumber()) {
+    if (info.Length() < 2 || !info[0]->IsNumber() || !info[1]->IsNumber() ||
+        (info.Length() == 3 && !info[2]->IsNumber())) {
+        JSException::Throw(ERROR_CODE_PARAM_INVALID, "%s", "Input parameter check failed.");
         return;
     }
     auto start = info[0]->ToNumber<int32_t>();
@@ -124,17 +127,12 @@ void JSSpanString::GetSpans(const JSCallbackInfo& info)
     }
     std::vector<RefPtr<SpanBase>> spans;
     if (info.Length() >= 3) {
-        auto spanTypeObj = info[2];
-        if (spanTypeObj->IsNumber()) {
-            auto spanType = spanTypeObj->ToNumber<int32_t>();
-            if (!CheckSpanType(spanType)) {
-                return;
-            }
-            SpanType type = static_cast<SpanType>(spanType);
-            spans = spanString_->GetSpans(start, length, type);
-        } else {
-            JSException::Throw(ERROR_CODE_PARAM_INVALID, "%s", "Input span type check failed.");
+        auto spanType = info[2]->ToNumber<int32_t>();
+        if (!CheckSpanType(spanType)) {
+            return;
         }
+        SpanType type = static_cast<SpanType>(spanType);
+        spans = spanString_->GetSpans(start, length, type);
     } else {
         spans = spanString_->GetSpans(start, length);
     }
@@ -230,12 +228,12 @@ std::vector<RefPtr<SpanBase>> JSSpanString::ParseJsSpanBaseVector(JSRef<JSObject
         int32_t start = 0;
         if (!startProperty->IsNull() && startProperty->IsNumber()) {
             start = startProperty->ToNumber<int32_t>();
-            start = start < 0 ? 0 : start;
+            start = start < 0 || start >= maxLength ? 0 : start;
         }
         int32_t length = maxLength - start;
         if (!lengthProperty->IsNull() && lengthProperty->IsNumber()) {
             length = lengthProperty->ToNumber<int32_t>();
-            length = length > maxLength - start ? maxLength - start : length;
+            length = length > maxLength - start || length <= 0 ? maxLength - start : length;
         }
         auto styleKey = valueObj->GetProperty("styledKey");
         if (styleKey->IsNull() || !styleKey->IsNumber()) {
@@ -281,7 +279,6 @@ void JSMutableSpanString::Constructor(const JSCallbackInfo& args)
         auto spanBases = JSSpanString::ParseJsSpanBaseVector(args[1], StringUtils::ToWstring(data).length());
         spanString = AceType::MakeRefPtr<MutableSpanString>(data, spanBases);
     }
-    LOGE("jyj string value %s", data.c_str());
     jsSpanString->SetController(spanString);
     jsSpanString->SetMutableController(spanString);
     args.SetReturnValue(Referenced::RawPtr(jsSpanString));
@@ -320,6 +317,7 @@ void JSMutableSpanString::JSBind(BindingTarget globalObj)
 void JSMutableSpanString::ReplaceString(const JSCallbackInfo& info)
 {
     if (info.Length() != 3 || !info[0]->IsNumber() || !info[1]->IsNumber() || !info[2]->IsString()) {
+        JSException::Throw(ERROR_CODE_PARAM_INVALID, "%s", "Input parameter check failed.");
         return;
     }
     int32_t start = info[0]->ToNumber<int32_t>();
@@ -336,6 +334,7 @@ void JSMutableSpanString::ReplaceString(const JSCallbackInfo& info)
 void JSMutableSpanString::InsertString(const JSCallbackInfo& info)
 {
     if (info.Length() != 2 || !info[0]->IsNumber() || !info[1]->IsString()) {
+        JSException::Throw(ERROR_CODE_PARAM_INVALID, "%s", "Input parameter check failed.");
         return;
     }
     auto start = info[0]->ToNumber<int32_t>();
@@ -354,6 +353,7 @@ void JSMutableSpanString::InsertString(const JSCallbackInfo& info)
 void JSMutableSpanString::RemoveString(const JSCallbackInfo& info)
 {
     if (info.Length() != 2 || !info[0]->IsNumber() || !info[1]->IsNumber()) {
+        JSException::Throw(ERROR_CODE_PARAM_INVALID, "%s", "Input parameter check failed.");
         return;
     }
     auto start = info[0]->ToNumber<int32_t>();
@@ -369,6 +369,7 @@ void JSMutableSpanString::RemoveString(const JSCallbackInfo& info)
 void JSMutableSpanString::ReplaceSpan(const JSCallbackInfo& info)
 {
     if (info.Length() != 1 || !info[0]->IsObject()) {
+        JSException::Throw(ERROR_CODE_PARAM_INVALID, "%s", "Input parameter check failed.");
         return;
     }
     auto paramObject = JSRef<JSObject>::Cast(info[0]);
@@ -377,15 +378,21 @@ void JSMutableSpanString::ReplaceSpan(const JSCallbackInfo& info)
     auto styleKeyObj = paramObject->GetProperty("styledKey");
     auto styleValueObj = paramObject->GetProperty("styledValue");
     if (!startObj->IsNumber() || !lengthObj->IsNumber() || !styleKeyObj->IsNumber() || !styleValueObj->IsObject()) {
+        JSException::Throw(ERROR_CODE_PARAM_INVALID, "%s", "Input parameter check failed.");
         return;
     }
     auto spanType = styleKeyObj->ToNumber<int32_t>();
-    CheckSpanType(spanType);
+    if (!CheckSpanType(spanType)) {
+        return;
+    }
     auto start = startObj->ToNumber<int32_t>();
     auto length = lengthObj->ToNumber<int32_t>();
     SpanType type = static_cast<SpanType>(spanType);
     auto spanBase = ParseJsSpanBase(start, length, type, JSRef<JSObject>::Cast(styleValueObj));
-    CHECK_NULL_VOID(spanBase);
+    if (!spanBase) {
+        JSException::Throw(ERROR_CODE_PARAM_INVALID, "%s", "Input parameter check failed.");
+        return;
+    }
     auto controller = GetMutableController().Upgrade();
     CHECK_NULL_VOID(controller);
     if (!CheckParameters(start, length)) {
@@ -397,6 +404,7 @@ void JSMutableSpanString::ReplaceSpan(const JSCallbackInfo& info)
 void JSMutableSpanString::AddSpan(const JSCallbackInfo& info)
 {
     if (info.Length() != 1 || !info[0]->IsObject()) {
+        JSException::Throw(ERROR_CODE_PARAM_INVALID, "%s", "Input parameter check failed.");
         return;
     }
     auto paramObject = JSRef<JSObject>::Cast(info[0]);
@@ -405,6 +413,7 @@ void JSMutableSpanString::AddSpan(const JSCallbackInfo& info)
     auto styleKeyObj = paramObject->GetProperty("styledKey");
     auto styleValueObj = paramObject->GetProperty("styledValue");
     if (!startObj->IsNumber() || !lengthObj->IsNumber() || !styleKeyObj->IsNumber() || !styleValueObj->IsObject()) {
+        JSException::Throw(ERROR_CODE_PARAM_INVALID, "%s", "Input parameter check failed.");
         return;
     }
     auto spanType = styleKeyObj->ToNumber<int32_t>();
@@ -415,7 +424,10 @@ void JSMutableSpanString::AddSpan(const JSCallbackInfo& info)
     auto length = lengthObj->ToNumber<int32_t>();
     SpanType type = static_cast<SpanType>(spanType);
     auto spanBase = ParseJsSpanBase(start, length, type, JSRef<JSObject>::Cast(styleValueObj));
-    CHECK_NULL_VOID(spanBase);
+    if (!spanBase) {
+        JSException::Throw(ERROR_CODE_PARAM_INVALID, "%s", "Input parameter check failed.");
+        return;
+    }
     auto controller = GetMutableController().Upgrade();
     CHECK_NULL_VOID(controller);
     if (!CheckParameters(start, length)) {
@@ -427,6 +439,7 @@ void JSMutableSpanString::AddSpan(const JSCallbackInfo& info)
 void JSMutableSpanString::RemoveSpan(const JSCallbackInfo& info)
 {
     if (info.Length() != 3 || !info[0]->IsNumber() || !info[1]->IsNumber() || !info[2]->IsNumber()) {
+        JSException::Throw(ERROR_CODE_PARAM_INVALID, "%s", "Input parameter check failed.");
         return;
     }
     auto start = info[0]->ToNumber<int32_t>();
@@ -447,6 +460,7 @@ void JSMutableSpanString::RemoveSpan(const JSCallbackInfo& info)
 void JSMutableSpanString::RemoveSpans(const JSCallbackInfo& info)
 {
     if (info.Length() != 2 || !info[0]->IsNumber() || !info[1]->IsNumber()) {
+        JSException::Throw(ERROR_CODE_PARAM_INVALID, "%s", "Input parameter check failed.");
         return;
     }
     auto controller = GetMutableController().Upgrade();
@@ -469,12 +483,16 @@ void JSMutableSpanString::ClearAllSpans()
 void JSMutableSpanString::ReplaceSpanString(const JSCallbackInfo& info)
 {
     if (info.Length() != 3 || !info[0]->IsNumber() || !info[1]->IsNumber() || !info[2]->IsObject()) {
+        JSException::Throw(ERROR_CODE_PARAM_INVALID, "%s", "Input parameter check failed.");
         return;
     }
     auto start = info[0]->ToNumber<int32_t>();
     auto length = info[1]->ToNumber<int32_t>();
     auto* spanString = JSRef<JSObject>::Cast(info[2])->Unwrap<JSSpanString>();
-    CHECK_NULL_VOID(spanString);
+    if (!spanString) {
+        JSException::Throw(ERROR_CODE_PARAM_INVALID, "%s", "Input parameter check failed.");
+        return;
+    }
     auto spanStringController = spanString->GetController();
     CHECK_NULL_VOID(spanStringController);
     auto controller = GetMutableController().Upgrade();
@@ -488,18 +506,22 @@ void JSMutableSpanString::ReplaceSpanString(const JSCallbackInfo& info)
 void JSMutableSpanString::InsertSpanString(const JSCallbackInfo& info)
 {
     if (info.Length() != 2 || !info[0]->IsNumber() || !info[1]->IsObject()) {
+        JSException::Throw(ERROR_CODE_PARAM_INVALID, "%s", "Input parameter check failed.");
         return;
     }
     auto start = info[0]->ToNumber<int32_t>();
     auto* spanString = JSRef<JSObject>::Cast(info[1])->Unwrap<JSSpanString>();
-    CHECK_NULL_VOID(spanString);
+    if (!spanString) {
+        JSException::Throw(ERROR_CODE_PARAM_INVALID, "%s", "Input parameter check failed.");
+        return;
+    }
     auto spanStringController = spanString->GetController();
     CHECK_NULL_VOID(spanStringController);
     auto controller = GetMutableController().Upgrade();
     CHECK_NULL_VOID(controller);
     // The input parameter must not cross the boundary.
     auto characterLength = controller->GetLength();
-    if (start < 0 || start >= characterLength) {
+    if (start < 0 || start > characterLength) {
         JSException::Throw(ERROR_CODE_PARAM_INVALID, "%s", "Input parameter check failed.");
         return;
     }
@@ -509,10 +531,14 @@ void JSMutableSpanString::InsertSpanString(const JSCallbackInfo& info)
 void JSMutableSpanString::AppendSpanString(const JSCallbackInfo& info)
 {
     if (info.Length() != 1 || !info[0]->IsObject()) {
+        JSException::Throw(ERROR_CODE_PARAM_INVALID, "%s", "Input parameter check failed.");
         return;
     }
     auto* spanString = JSRef<JSObject>::Cast(info[0])->Unwrap<JSSpanString>();
-    CHECK_NULL_VOID(spanString);
+    if (!spanString) {
+        JSException::Throw(ERROR_CODE_PARAM_INVALID, "%s", "Input parameter check failed.");
+        return;
+    }
     auto spanStringController = spanString->GetController();
     CHECK_NULL_VOID(spanStringController);
     auto controller = GetMutableController().Upgrade();

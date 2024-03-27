@@ -353,7 +353,7 @@ RefPtr<SpanBase> SpanString::GetSpan(int32_t start, int32_t length, SpanType spa
 
 bool SpanString::operator==(const SpanString& other) const
 {
-    if (text_ != other.text_ && spansMap_.size() != other.spansMap_.size()) {
+    if (text_ != other.text_ || spansMap_.size() != other.spansMap_.size()) {
         return false;
     }
     for (const auto& map : spansMap_) {

@@ -127,14 +127,17 @@ public:
     static void ParseSheetDetentHeight(const JSRef<JSVal>& args, NG::SheetHeight& detent);
     static bool ParseSheetBackgroundBlurStyle(const JSRef<JSVal>& args, BlurStyleOption& blurStyleOptions);
     static void ParseSheetCallback(const JSRef<JSObject>& paramObj, std::function<void()>& onAppear,
-        std::function<void()>& onDisappear, std::function<void()>& onWillAppear, std::function<void()>& onWillDisappear,
-        std::function<void()>& shouldDismiss);
+        std::function<void()>& onDisappear, std::function<void()>& shouldDismiss, std::function<void()>& onWillAppear,
+        std::function<void()>& onWillDisappear);
     static void ParseSheetTitle(const JSRef<JSObject>& paramObj, NG::SheetStyle& sheetStyle,
         std::function<void()>& titleBuilderFunction);
     static panda::Local<panda::JSValueRef> JsDismissSheet(panda::JsiRuntimeCallInfo* runtimeCallInfo);
+    static panda::Local<panda::JSValueRef> JsDismissContentCover(panda::JsiRuntimeCallInfo* runtimeCallInfo);
+    static void ParseModalTransitonEffect(
+        const JSRef<JSObject>& paramObj, NG::ContentCoverParam& contentCoverParam, const JSExecutionContext& context);
     static void ParseOverlayCallback(const JSRef<JSObject>& paramObj, std::function<void()>& onAppear,
-        std::function<void()>& onDisappear, std::function<void()>& onWillAppear,
-        std::function<void()>& onWillDisappear);
+        std::function<void()>& onDisappear, std::function<void()>& onWillAppear, std::function<void()>& onWillDisappear,
+        std::function<void(const int32_t& info)>& onWillDismiss);
     static void JsBorderColor(const JSCallbackInfo& info);
     static void ParseBorderColor(const JSRef<JSVal>& args);
     static void JsPadding(const JSCallbackInfo& info);
@@ -313,7 +316,10 @@ public:
     static void JsHueRotate(const JSCallbackInfo& info);
 
     static void JsClip(const JSCallbackInfo& info);
+    static void JsClipShape(const JSCallbackInfo& info);
+
     static void JsMask(const JSCallbackInfo& info);
+    static void JsMaskShape(const JSCallbackInfo& info);
 
     static void JsKey(const std::string& key);
     static void JsId(const JSCallbackInfo& info);
@@ -333,6 +339,7 @@ public:
     static void JsKeyboardShortcut(const JSCallbackInfo& info);
 
     static void JsObscured(const JSCallbackInfo& info);
+    static void JsPrivacySensitive(const JSCallbackInfo& info);
 
     static void JsAccessibilityGroup(bool accessible);
     static void JsAccessibilityText(const std::string& text);
@@ -468,50 +475,23 @@ public:
 
     static std::string GetFunctionKeyName(FunctionKey functionkey)
     {
-        switch (functionkey) {
-            case FunctionKey::ESC:
-                return "ESC";
-                break;
-            case FunctionKey::F1:
-                return "F1";
-                break;
-            case FunctionKey::F2:
-                return "F2";
-                break;
-            case FunctionKey::F3:
-                return "F3";
-                break;
-            case FunctionKey::F4:
-                return "F4";
-                break;
-            case FunctionKey::F5:
-                return "F5";
-                break;
-            case FunctionKey::F6:
-                return "F6";
-                break;
-            case FunctionKey::F7:
-                return "F7";
-                break;
-            case FunctionKey::F8:
-                return "F8";
-                break;
-            case FunctionKey::F9:
-                return "F9";
-                break;
-            case FunctionKey::F10:
-                return "F10";
-                break;
-            case FunctionKey::F11:
-                return "F11";
-                break;
-            case FunctionKey::F12:
-                return "F12";
-                break;
-            default:
-                return "";
-                break;
-        }
+        std::map<FunctionKey, std::string> keyNameMap {
+            {FunctionKey::ESC, "ESC"},
+            {FunctionKey::F1, "F1"},
+            {FunctionKey::F2, "F2"},
+            {FunctionKey::F3, "F3"},
+            {FunctionKey::F4, "F4"},
+            {FunctionKey::F5, "F5"},
+            {FunctionKey::F6, "F6"},
+            {FunctionKey::F7, "F7"},
+            {FunctionKey::F8, "F8"},
+            {FunctionKey::F9, "F9"},
+            {FunctionKey::F10, "F10"},
+            {FunctionKey::F11, "F11"},
+            {FunctionKey::F12, "F12"}
+        };
+        auto result = keyNameMap.find(functionkey);
+        return (result != keyNameMap.end()) ? result->second : std::string();
     }
 
     static bool CheckColor(const JSRef<JSVal>& jsValue, Color& result, const char* componentName, const char* propName);

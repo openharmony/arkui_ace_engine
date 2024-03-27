@@ -73,6 +73,7 @@ public:
     void AddChild(const RefPtr<UINode>& child, int32_t slot = DEFAULT_NODE_SLOT, bool silently = false,
         bool addDefaultTransition = false);
     void AddChildAfter(const RefPtr<UINode>& child, const RefPtr<UINode>& siblingNode);
+    void AddChildBefore(const RefPtr<UINode>& child, const RefPtr<UINode>& siblingNode);
 
     std::list<RefPtr<UINode>>::iterator RemoveChild(const RefPtr<UINode>& child, bool allowTransition = false);
     int32_t RemoveChildAndReturnIndex(const RefPtr<UINode>& child);
@@ -312,7 +313,7 @@ public:
 
     virtual void SetJSViewActive(bool active);
 
-    virtual void OnVisibleChange(bool isVisible);
+    virtual void TryVisibleChangeOnDescendant(bool isVisible);
 
     // call by recycle framework.
     virtual void OnRecycle();
@@ -496,6 +497,16 @@ public:
         attachToMainTreeTasks_.emplace_back(std::move(func));
     }
 
+    void* GetExternalData() const
+    {
+        return externalData_;
+    }
+
+    void SetExternalData(void* externalData)
+    {
+        externalData_ = externalData;
+    }
+
     // --------------------------------------------------------------------------------
 
     virtual void DoRemoveChildInRenderTree(uint32_t index, bool isAll = false);
@@ -532,7 +543,17 @@ public:
 
     virtual void SetNodeIndexOffset(int32_t start, int32_t count) {}
 
-    void PaintDebugBoundaryTreeAll(bool flag);
+    virtual void PaintDebugBoundaryTreeAll(bool flag);
+
+    void AddFlag(uint32_t flag)
+    {
+        nodeFlag_ |= flag;
+    }
+
+    bool IsNodeHasFlag(uint32_t flag) const
+    {
+        return (flag & nodeFlag_) == flag;
+    }
 
 protected:
     std::list<RefPtr<UINode>>& ModifyChildren()
@@ -580,7 +601,8 @@ protected:
     // update visible change signal to children
     void UpdateChildrenVisible(bool isVisible) const;
 
-    void CollectRemovedChildren(const std::list<RefPtr<UINode>>& children, std::list<int32_t>& removedElmtId);
+    void CollectRemovedChildren(const std::list<RefPtr<UINode>>& children,
+        std::list<int32_t>& removedElmtId, bool isEntry);
     void CollectRemovedChild(const RefPtr<UINode>& child, std::list<int32_t>& removedElmtId);
 
     bool needCallChildrenUpdate_ = true;
@@ -611,6 +633,7 @@ private:
     NodeStatus nodeStatus_ = NodeStatus::NORMAL_NODE;
     RefPtr<ExportTextureInfo> exportTextureInfo_;
     int32_t instanceId_ = -1;
+    uint32_t nodeFlag_ { 0 };
 
     int32_t childrenUpdatedFrom_ = -1;
     static thread_local int64_t currentAccessibilityId_;
@@ -622,6 +645,7 @@ private:
 
     std::string debugLine_;
     std::string viewId_;
+    void* externalData_ = nullptr;
 
     friend class RosenRenderContext;
     ACE_DISALLOW_COPY_AND_MOVE(UINode);

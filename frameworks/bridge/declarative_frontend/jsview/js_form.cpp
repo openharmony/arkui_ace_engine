@@ -16,9 +16,10 @@
 #include "frameworks/bridge/declarative_frontend/jsview/js_form.h"
 
 #include "base/geometry/dimension.h"
-#include "base/log/log_wrapper.h"
 #include "base/geometry/ng/size_t.h"
 #include "base/log/ace_scoring_log.h"
+#include "base/log/log_wrapper.h"
+#include "base/utils/string_utils.h"
 #include "bridge/declarative_frontend/jsview/models/form_model_impl.h"
 #include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/pattern/form/form_model_ng.h"
@@ -73,7 +74,17 @@ void JSForm::Create(const JSCallbackInfo& info)
     JSRef<JSVal> wantValue = obj->GetProperty("want");
     JSRef<JSVal> renderingMode = obj->GetProperty("renderingMode");
     RequestFormInfo fomInfo;
-    fomInfo.id = id->ToNumber<int32_t>();
+    if (id->IsString()) {
+        if (!StringUtils::IsNumber(id->ToString())
+            || (id->ToString() != "0" && StringUtils::StringToLongInt(id->ToString().c_str()) == 0)) {
+            LOGE("Invalid form id : %{public}s", id->ToString().c_str());
+            return;
+        }
+        fomInfo.id = StringUtils::StringToLongInt(id->ToString().c_str());
+    }
+    if (id->IsNumber()) {
+        fomInfo.id = id->ToNumber<int64_t>();
+    }
     fomInfo.cardName = name->ToString();
     fomInfo.bundleName = bundle->ToString();
     fomInfo.abilityName = ability->ToString();
@@ -164,7 +175,7 @@ void JSForm::JsOnAcquired(const JSCallbackInfo& info)
         auto onAcquired = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc)](const std::string& param) {
             JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
             ACE_SCORING_EVENT("Form.onAcquired");
-            std::vector<std::string> keys = { "id" };
+            std::vector<std::string> keys = { "id", "idString" };
             func->Execute(keys, param);
         };
         FormModel::GetInstance()->SetOnAcquired(std::move(onAcquired));
@@ -192,7 +203,7 @@ void JSForm::JsOnUninstall(const JSCallbackInfo& info)
         auto onUninstall = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc)](const std::string& param) {
             JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
             ACE_SCORING_EVENT("Form.onUninstall");
-            std::vector<std::string> keys = { "id" };
+            std::vector<std::string> keys = { "id", "idString" };
             func->Execute(keys, param);
         };
         FormModel::GetInstance()->SetOnUninstall(std::move(onUninstall));

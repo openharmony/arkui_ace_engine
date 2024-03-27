@@ -171,8 +171,14 @@ bool StageManager::PushPage(const RefPtr<FrameNode>& node, bool needHideLast, bo
     if (needTransition) {
         pipeline->FlushPipelineImmediately();
     }
+    RefPtr<UINode> hidePageNode;
+    auto isNewLifecycle = AceApplicationInfo::GetInstance()
+        .GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE);
     if (!children.empty() && needHideLast) {
-        FirePageHide(children.back(), needTransition ? PageTransitionType::EXIT_PUSH : PageTransitionType::NONE);
+        hidePageNode = children.back();
+        if (!isNewLifecycle) {
+            FirePageHide(hidePageNode, needTransition ? PageTransitionType::EXIT_PUSH : PageTransitionType::NONE);
+        }
         outPageNode = AceType::DynamicCast<FrameNode>(children.back());
     }
     auto rect = stageNode_->GetGeometryNode()->GetFrameRect();
@@ -180,8 +186,12 @@ bool StageManager::PushPage(const RefPtr<FrameNode>& node, bool needHideLast, bo
     node->GetRenderContext()->SyncGeometryProperties(rect);
     // mount to parent and mark build render tree.
     node->MountToParent(stageNode_);
-    // then build the total child.
+    // then build the total child. Build will trigger page create and onAboutToAppear
     node->Build(nullptr);
+    // fire new lifecycle
+    if (hidePageNode && needHideLast && isNewLifecycle) {
+        FirePageHide(hidePageNode, needTransition ? PageTransitionType::EXIT_PUSH : PageTransitionType::NONE);
+    }
     stageNode_->RebuildRenderContextTree();
     FirePageShow(node, needTransition ? PageTransitionType::ENTER_PUSH : PageTransitionType::NONE);
 

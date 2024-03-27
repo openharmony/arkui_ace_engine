@@ -92,6 +92,11 @@ public:
                 nextMargin = 0.0;
                 itemSpaceCount = CaculateDisplayItemSpaceCount(property, prevMargin, nextMargin);
                 childCalcIdealLength = (length - itemSpace * itemSpaceCount) / displayCount;
+                if (LessNotEqual(childCalcIdealLength, 0.0)) {
+                    childCalcIdealLength = length / displayCount;
+                } else {
+                    property->ResetIgnoreItemSpace();
+                }
             }
             axis == Axis::HORIZONTAL ? childSelfIdealSize.SetWidth(childCalcIdealLength)
                                      : childSelfIdealSize.SetHeight(childCalcIdealLength);

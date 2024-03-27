@@ -322,6 +322,24 @@ public:
         return divider_;
     }
 
+    void SetCustomDividerFlag(bool customDividerFlag)
+    {
+        customDividerFlag_ = customDividerFlag;
+    }
+
+    bool GetCustomDividerFlag()
+    {
+        return customDividerFlag_;
+    }
+    void SetGradientHeight(const Dimension& value)
+    {
+        value_ = value;
+    }
+
+    Dimension GetGradientHeight()
+    {
+        return value_;
+    }
 private:
     void OnModifyDone() override;
     void OnAttachToFrameNode() override;
@@ -383,6 +401,8 @@ private:
     bool isFiredSelectsChange_ = false;
     std::optional<std::string> firedSelectsStr_;
     ItemDivider divider_;
+    bool customDividerFlag_ = false;
+    Dimension value_;
 };
 } // namespace OHOS::Ace::NG
 

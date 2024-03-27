@@ -91,7 +91,7 @@ HWTEST_F(SwiperAttrTestNg, AttrIndex004, TestSize.Level1)
 HWTEST_F(SwiperAttrTestNg, AttrAutoPlay001, TestSize.Level1)
 {
     /**
-     * @tc.cases: Do not set value
+     * @tc.steps: step1. Do not set value
      * @tc.expected: AutoPlay is false, interval is default, isLoop is true
      */
     CreateWithItem([](SwiperModelNG model) {});
@@ -107,6 +107,7 @@ HWTEST_F(SwiperAttrTestNg, AttrAutoPlay001, TestSize.Level1)
  */
 HWTEST_F(SwiperAttrTestNg, AttrAutoPlay002, TestSize.Level1)
 {
+    EXPECT_CALL(*MockPipelineContext::pipeline_, FlushUITasks).Times(1);
     /**
      * @tc.cases: Set autoPlay to true
      * @tc.expected: AutoPlay is true
@@ -122,6 +123,7 @@ HWTEST_F(SwiperAttrTestNg, AttrAutoPlay002, TestSize.Level1)
  */
 HWTEST_F(SwiperAttrTestNg, AttrAutoPlay003, TestSize.Level1)
 {
+    EXPECT_CALL(*MockPipelineContext::pipeline_, FlushUITasks).Times(1);
     /**
      * @tc.cases: Set autoPlay to true, set autoPlayInterval to 4000
      * @tc.expected: AutoPlayInterval is 4000
@@ -140,6 +142,7 @@ HWTEST_F(SwiperAttrTestNg, AttrAutoPlay003, TestSize.Level1)
  */
 HWTEST_F(SwiperAttrTestNg, AttrAutoPlay004, TestSize.Level1)
 {
+    EXPECT_CALL(*MockPipelineContext::pipeline_, FlushUITasks).Times(1);
     /**
      * @tc.cases: Set autoPlay to true, set loop to false
      * @tc.expected: Loop is false
@@ -705,6 +708,39 @@ HWTEST_F(SwiperAttrTestNg, AttrMargin004, TestSize.Level1)
     EXPECT_EQ(pattern_->GetPrevMargin(), 0.f);
 }
 
+/**
+ * @tc.name: AttrMargin005
+ * @tc.desc: Test property about Margin
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperAttrTestNg, AttrMargin005, TestSize.Level1)
+{
+    /**
+     * @tc.cases: Only set nextMargin
+     */
+    CreateWithItem([](SwiperModelNG model) {
+        model.SetNextMargin(Dimension(10.f));
+    });
+    EXPECT_EQ(pattern_->GetNextMargin(), 10.f);
+    EXPECT_EQ(pattern_->GetPrevMargin(), 0.f);
+}
+
+/**
+ * @tc.name: AttrMargin006
+ * @tc.desc: Test property about Margin
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperAttrTestNg, AttrMargin006, TestSize.Level1)
+{
+    /**
+     * @tc.cases: Only set preMargin
+     */
+    CreateWithItem([](SwiperModelNG model) {
+        model.SetPreviousMargin(Dimension(5.f));
+    });
+    EXPECT_EQ(pattern_->GetNextMargin(), 0.f);
+    EXPECT_EQ(pattern_->GetPrevMargin(), 5.f);
+}
 /**
  * @tc.name: AttrNestedScroll001
  * @tc.desc: Test property about NestedScroll

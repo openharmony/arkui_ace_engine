@@ -26,7 +26,7 @@ enum class ToggleType {
     BUTTON,
 };
 
-class JSToggle : public JSViewAbstract, public JSInteractableView {
+class JSToggle : public JSContainerBase {
 public:
     static void JSBind(BindingTarget globalObj);
     static void Create(const JSCallbackInfo& info);
@@ -42,7 +42,7 @@ public:
     static void SwitchPointColor(const JSCallbackInfo& info);
     static void SetBackgroundColor(const JSCallbackInfo& info);
     static void JsHoverEffect(const JSCallbackInfo& info);
-    static void Pop();
+    static void SwitchStyle(const JSCallbackInfo& info);
     static NG::PaddingPropertyF GetOldPadding(const JSCallbackInfo& info);
     static NG::PaddingProperty GetNewPadding(const JSCallbackInfo& info);
     static NG::PaddingProperty GetPadding(const std::optional<CalcDimension>& top,

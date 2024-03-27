@@ -285,7 +285,6 @@ struct GridLayoutInfo {
     bool hasBigItem_;
 
     bool offsetUpdated_ = false;
-    float originOffset_ = 0.0f;
     std::optional<int32_t> targetIndex_;
 
 private:

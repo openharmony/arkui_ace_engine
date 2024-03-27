@@ -132,9 +132,7 @@ void JSMenu::SetWidth(const JSCallbackInfo& info)
         return;
     }
     CalcDimension width;
-    if (!ParseJsDimensionVp(info[0], width)) {
-        return;
-    }
+    ParseJsDimensionVp(info[0], width);
     MenuModel::GetInstance()->SetWidth(width);
 }
 

@@ -83,23 +83,7 @@ const PUBLIC_OK = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAMAAAADACAYAAAB
   'CibU/M3Sy7nzdlgnf51ndxbrbXj4BjCmEPXX76/Y2Cz8DNNP9+l91f3Sf8e92AQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA' +
   'AAAAAzKZwK1uX4kZ6mnAAAAAElFTkSuQmCC';
 
-const PUBLIC_BACK = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAMAAAADACAY' +
-  'AAABS3GwHAAAAIGNIUk0AAHomAACAhAAA+gAAAIDoAAB1MAAA6mAAADqYAAAXcJy6UTwAAAAEZ0FNQQAAsY58+1GTAAAAA' +
-  'XNSR0IArs4c6QAAAAZiS0dEAP8A/wD/oL2nkwAAAAlwSFlzAAAOxAAADsQBlSsOGwAAA8VJREFUeNrt3LFLlHEYwPFXz0G' +
-  'iIZpEoikkwsFRIiK3gqCigxIC/4Kmhv6OoChouaGoqKCgCKducGh0cDAIamhwiCaHCIeelztpUszee/vl8/nAM3Vd8nufr' +
-  '+fddVYVAAAAAAAAAAAAAAAAAAAAAABQijFH0KhrMd2Y2ZitmNWYRzHLjkYAB9lUzMOYizv8eS/mZsymoypLxxE0svzvY07' +
-  'vcpu5mOmY145LAAdx+U/u4bZzwx+JPjq2cow7glaWf1vXsQkg6/JvPwoggJTLjwDSL/8nRyiAzN/5nzpGAWRd/n7MM0cpg' +
-  'IzLvx6z6CjL453gdpZ/IWbDcQrA8iMAy48ALD8CsPwIwPIjAMuPACw/ArD8CMDyIwDLjwAsPwKw/AjA8iMAy48ALD8CsPw' +
-  'IwPIjAMuPACw/ArD85A3A8pM2AMtP2gAsP2kDsPykDcDykzYAy0/aACw/aQOw/KQNwPKTNgDLT9oALD9pA7D8pA3A8pM2A' +
-  'MtP2gAsP2kDsPykDcDykzYAy0/aACw/aQOw/KQNwPKTNgDLT9oALD9pA7D8pA3A8pM2AMtP2gAsP2kDsPykDcDykzYAy0/' +
-  'aACw/aQOw/KQNwPLz3xlv6H4mYp5YfrI+AizF9BwnI/AlZi3mbsxy03feaeh+HsQcc60YgSMxMzE3YmZj3sX8LOlHoPoLn' +
-  'HedaEE35n5pzwF856dN9SPBpZICmHRNaNnlkgL46nrQsvmSAqhftlx1TWjR4ZICqPVcE1q0XloA96rBa7XQhl5pAWzFXKm' +
-  '8i8vo9WMeN3VnnQa/sO8xL2POxEy7Toxo+RdjNpu6w1F9HuBqNXi99lw1eKMM9utHzIeYV8MftbccCQAAAAAAsBdt/XLc+s' +
-  'Py9W+MmPqL+1iJuVA1+C4gdFr6d77FvK0GH2nb739lPR5zNuZ51eBnQhFAJQIEIAIEIAIEIAIEIAIEIAIEIAIEIAIEIAIE' +
-  'IAIEIAIEIAIEIAIEIAIEIAIEIAIEIAIEIAIEIAIEIAIEIAIEIAIEIAIEIAIEIAIEIAIEIAIEIAIEIAIEIAIEIAIEIAIEIAI' +
-  'EIAIEIAIEIAIEIAIEIAIEIAIEIAIEIAIEIAIEIAIEIAIEIAIEIAIE8M8jmBlGgABSRnAqZiXms+MUQNYIDnkUKMu4I/gj6z' +
-  'ELMRv7/PsnHKEAMkcw6fgEkDmCNUcngMwRvHFsngRnfWJcL/9tRyaAgxrB+ZijO9ymH7MUs+m4yjLmCBozEXMr5nr1+9We1' +
-  'ZgXMXccDwAAAAAAAAAAAAAAAAAAAAAAwO5+AfVgtqHKRnawAAAAAElFTkSuQmCC';
+const PUBLIC_BACK = $r('sys.media.ohos_ic_compnent_titlebar_back');
 
 @Component
 export struct EditableTitleBar {
@@ -175,21 +159,23 @@ export struct EditableTitleBar {
           }
           .justifyContent(FlexAlign.Start)
 
-          Row() {
-            Text(this.subtitle)
-              .visibility(this.subtitle ? Visibility.Visible : Visibility.None)
-              .fontSize($r('sys.float.titlebar_subheader_size'))
-              .fontColor($r('sys.color.titlebar_subheader_color'))
-              .maxLines(1)
-              .fontWeight(FontWeight.Regular)
-              .textAlign(TextAlign.Start)
-              .textOverflow({ overflow: TextOverflow.Ellipsis })
-              .constraintSize({ maxWidth: this.titleMaxWidth })
+          if (this.subtitle) {
+            Row() {
+              Text(this.subtitle)
+                .fontSize($r('sys.float.titlebar_subheader_size'))
+                .fontColor($r('sys.color.titlebar_subheader_color'))
+                .maxLines(1)
+                .fontWeight(FontWeight.Regular)
+                .textAlign(TextAlign.Start)
+                .textOverflow({ overflow: TextOverflow.Ellipsis })
+                .constraintSize({ maxWidth: this.titleMaxWidth })
+            }
+            .margin({
+              top: $r('sys.float.padding_level0')
+            })
+            .justifyContent(FlexAlign.Start)
           }
-          .margin({
-            top: this.subtitle ? $r('sys.float.padding_level1') : $r('sys.float.padding_level0')
-          })
-          .justifyContent(FlexAlign.Start)
+
         }
         .justifyContent(FlexAlign.Start)
         .margin({
@@ -211,10 +197,13 @@ export struct EditableTitleBar {
       left: EditableTitleBar.leftPadding,
       right: EditableTitleBar.rightPadding,
     })
-    .backgroundColor(this.options.backgroundBlurStyle ? this.options.backgroundColor
-      : EditableTitleBar.noneColor)
-    .backgroundBlurStyle(this.options.backgroundBlurStyle)
-    .expandSafeArea(this.options.safeAreaTypes, this.options.safeAreaEdges)
+    .backgroundColor(this.options.backgroundColor ? this.options.backgroundColor :
+      EditableTitleBar.noneColor)
+    .backgroundBlurStyle(
+      this.options.backgroundBlurStyle ? this.options.backgroundBlurStyle : BlurStyle.NONE)
+    .expandSafeArea(
+      this.options.safeAreaTypes ? this.options.safeAreaTypes : [SafeAreaType.SYSTEM],
+      this.options.safeAreaEdges ? this.options.safeAreaEdges : [SafeAreaEdge.TOP])
     .onAreaChange((_oldValue: Area, newValue: Area) => {
       let maxCountOfExtraItems = EditableTitleBar.commonZero;
       if (this.isSaveIconRequired) {
@@ -229,7 +218,7 @@ export struct EditableTitleBar {
       } else {
         EditableTitleBar.countOfImageItem = EditableTitleBar.commonZero;
       }
-      let nValue = Number(newValue.width)
+      let nValue = Number(newValue.width);
       nValue = nValue - EditableTitleBar.leftPadding -
         EditableTitleBar.rightPadding - EditableTitleBar.titlePadding;
       nValue = nValue - ImageMenuItem.imageHotZoneWidth;
@@ -326,6 +315,7 @@ struct ImageMenuItem {
         Image(this.item.value)
           .width($r('sys.float.titlebar_icon_width'))
           .height($r('sys.float.titlebar_icon_height'))
+          .fillColor($r('sys.color.titlebar_icon_color'))
           .focusable(this.item.isEnabled)
           .enabled(this.item.isEnabled)
       }
@@ -333,8 +323,8 @@ struct ImageMenuItem {
       .height(ImageMenuItem.imageHotZoneWidth)
       .borderRadius($r('sys.float.titlebar_icon_background_shape'))
       .margin({
-        left: this.attribute === ItemType.LeftIcon ? EditableTitleBar.commonZero
-          : ImageMenuItem.iconBackgroundSpaceHorizontal,
+        left: this.attribute === ItemType.LeftIcon ? EditableTitleBar.commonZero :
+          ImageMenuItem.iconBackgroundSpaceHorizontal,
       })
       .focusable(this.item.isEnabled)
       .enabled(this.item.isEnabled)
@@ -406,17 +396,15 @@ struct ImageMenuItem {
         Image(this.item.value)
           .width(ImageMenuItem.imageHotZoneWidth)
           .height(ImageMenuItem.imageHotZoneHeight)
-          .borderRadius($r('sys.float.titlebar_icon_background_shape'))
+          .borderRadius($r('sys.float.corner_radius_level10'))
           .focusable(false)
           .enabled(this.item.isEnabled)
           .objectFit(ImageFit.Cover)
-          .onClick(() => this.item.isEnabled && this.item.action && this.item.action())
 
-        Button()
+        Button({ type: ButtonType.Circle })
           .width(ImageMenuItem.imageHotZoneWidth)
           .height(ImageMenuItem.imageHotZoneHeight)
           .backgroundColor(EditableTitleBar.noneColor)
-          .borderRadius($r('sys.float.titlebar_icon_background_shape'))
           .focusable(this.item.isEnabled)
           .enabled(this.item.isEnabled)
           .stateStyles({
@@ -441,6 +429,45 @@ struct ImageMenuItem {
               })
             }
           })
+        .onFocus(() => {
+          if (!this.item.isEnabled) {
+            return;
+          }
+          this.isOnFocus = true;
+        })
+        .onBlur(() => this.isOnFocus = false)
+        .onHover((isOn) => {
+          if (!this.item.isEnabled) {
+            return;
+          }
+          this.isOnHover = isOn;
+        })
+        .onKeyEvent((event) => {
+          if (!this.item.isEnabled) {
+            return;
+          }
+          if (event.keyCode !== KeyCode.KEYCODE_ENTER && event.keyCode !== KeyCode.KEYCODE_SPACE) {
+            return;
+          }
+          if (event.type === KeyType.Down) {
+            this.isOnClick = true;
+          }
+          if (event.type === KeyType.Up) {
+            this.isOnClick = false;
+          }
+        })
+        .onTouch((event) => {
+          if (!this.item.isEnabled) {
+            return;
+          }
+          if (event.type === TouchType.Down) {
+            this.isOnClick = true;
+          }
+          if (event.type === TouchType.Up) {
+            this.isOnClick = false;
+          }
+        })
+        .onClick(() => this.item.isEnabled && this.item.action && this.item.action())
       }.margin({
         left: ImageMenuItem.iconBackgroundSpaceHorizontal,
       })

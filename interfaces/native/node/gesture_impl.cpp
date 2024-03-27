@@ -95,6 +95,9 @@ float OH_ArkUI_PanGesture_GetOffsetY(const ArkUI_GestureEvent* event)
 
 namespace OHOS::Ace::GestureModel {
 
+constexpr int32_t DEFAULT_PAN_FINGERS = 1;
+constexpr int32_t MAX_PAN_FINGERS = 10;
+
 struct GestureInnerData {
     void (*targetReceiver)(ArkUI_GestureEvent* event, void* extraParam);
     void* extraParam;
@@ -102,8 +105,14 @@ struct GestureInnerData {
 
 ArkUI_GestureRecognizer* CreatePanGesture(int32_t fingersNum, ArkUI_GestureDirectionMask mask, double distanceNum)
 {
+    int32_t fingers = DEFAULT_PAN_FINGERS;
+    if (fingersNum < DEFAULT_PAN_FINGERS || fingersNum > MAX_PAN_FINGERS) {
+        fingers = DEFAULT_PAN_FINGERS;
+    } else {
+        fingers = fingersNum;
+    }
     auto* gesture = OHOS::Ace::NodeModel::GetFullImpl()->getNodeModifiers()->getGestureModifier()->createPanGesture(
-        fingersNum, mask, distanceNum);
+        fingers, mask, distanceNum);
     return new ArkUI_GestureRecognizer{ PAN_GESTURE, gesture, nullptr };
 }
 
@@ -134,6 +143,18 @@ int32_t AddGestureToNode(ArkUI_NodeHandle node, ArkUI_GestureRecognizer* recogni
     OHOS::Ace::NodeModel::GetFullImpl()->getNodeModifiers()->getGestureModifier()->addGestureToNode(
         node->uiNodeHandle, recognizer->gesture, priorityNum, mask);
     return 0;
+}
+
+int32_t RemoveGestureFromNode(ArkUI_NodeHandle node, ArkUI_GestureRecognizer* recognizer)
+{
+    OHOS::Ace::NodeModel::GetFullImpl()->getNodeModifiers()->getGestureModifier()->removeGestureFromNode(
+        node->uiNodeHandle, recognizer->gesture);
+    return 0;
+}
+
+ArkUI_GestureRecognizerType GetGestureType(ArkUI_GestureRecognizer* recognizer)
+{
+    return static_cast<ArkUI_GestureRecognizerType>(recognizer->type);
 }
 
 void HandleGestureEvent(ArkUINodeEvent* event)

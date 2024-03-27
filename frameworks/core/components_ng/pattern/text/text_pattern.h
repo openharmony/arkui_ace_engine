@@ -47,6 +47,7 @@
 #include "core/components_ng/pattern/text_drag/text_drag_base.h"
 #include "core/components_ng/pattern/text_field/text_selector.h"
 #include "core/components_ng/property/property.h"
+#include "core/event/ace_events.h"
 #include "core/pipeline_ng/ui_task_scheduler.h"
 
 namespace OHOS::Ace::NG {
@@ -151,9 +152,18 @@ public:
 
     void GetGlobalOffset(Offset& offset);
 
-    const RectF& GetTextContentRect() const override
+    RectF GetTextContentRect() const override
     {
-        return contentRect_;
+        auto textRect = contentRect_;
+        auto host = GetHost();
+        CHECK_NULL_RETURN(host, textRect);
+        auto renderContext = host->GetRenderContext();
+        CHECK_NULL_RETURN(renderContext, textRect);
+        if (!renderContext->GetClipEdge().value_or(true) && paragraph_ &&
+            LessNotEqual(textRect.Width(), paragraph_->GetLongestLine())) {
+            textRect.SetWidth(paragraph_->GetLongestLine());
+        }
+        return textRect;
     }
 
     float GetBaselineOffset() const
@@ -542,6 +552,7 @@ protected:
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
     bool IsSelectAll();
     virtual int32_t GetHandleIndex(const Offset& offset) const;
+    virtual void UpdateSelectorOnHandleMove(const OffsetF& localOffset, float handleHeight, bool isFirstHandle);
     std::wstring GetWideText() const;
     std::string GetSelectedText(int32_t start, int32_t end) const;
     void CalcCaretMetricsByPosition(
@@ -627,8 +638,19 @@ private:
 
     bool IsLineBreakOrEndOfParagraph(int32_t pos) const;
     void ToJsonValue(std::unique_ptr<JsonValue>& json) const override;
-    void InheritParentProperties(const RefPtr<SpanItem>& spanItem);
     // to check if drag is in progress
+    void SetCurrentDragTool(SourceTool tool)
+    {
+        lastDragTool_ = tool;
+    }
+
+    SourceTool GetCurrentDragTool() const
+    {
+        return lastDragTool_;
+    }
+
+    void AddUdmfTxtPreProcessor(const ResultObject src, ResultObject& result, bool isAppend);
+    void ProcessOverlayAfterLayout();
 
     bool isMeasureBoundary_ = false;
     bool isMousePressed_ = false;
@@ -653,6 +675,7 @@ private:
     RefPtr<DragWindow> dragWindow_;
     RefPtr<DragDropProxy> dragDropProxy_;
     std::optional<int32_t> surfaceChangedCallbackId_;
+    SourceTool lastDragTool_;
     std::optional<int32_t> surfacePositionChangedCallbackId_;
     int32_t dragRecordSize_ = -1;
     std::optional<TextResponseType> textResponseType_;
@@ -660,6 +683,7 @@ private:
     TextSpanType oldSelectedType_ = TextSpanType::NONE;
     mutable std::list<RefPtr<UINode>> childNodes_;
     bool isShowMenu_ = true;
+    std::function<void()> processOverlayDelayTask_;
     ACE_DISALLOW_COPY_AND_MOVE(TextPattern);
 };
 } // namespace OHOS::Ace::NG

@@ -539,6 +539,9 @@ bool PipelineBase::Animate(const AnimationOption& option, const RefPtr<Curve>& c
 
 std::function<void()> PipelineBase::GetWrappedAnimationCallback(const std::function<void()>& finishCallback)
 {
+    if (!IsFormRender() && !finishCallback) {
+        return nullptr;
+    }
     auto finishPtr = std::make_shared<std::function<void()>>(finishCallback);
     finishFunctions_.emplace(finishPtr);
     auto wrapFinishCallback = [weak = AceType::WeakClaim(this),

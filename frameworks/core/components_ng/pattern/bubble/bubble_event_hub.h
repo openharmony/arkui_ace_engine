@@ -41,21 +41,11 @@ public:
 
     void FireChangeEvent(bool isVisible)
     {
-        auto context = PipelineContext::GetCurrentContext();
-        CHECK_NULL_VOID(context);
-        auto taskExecutor = context->GetTaskExecutor();
-        CHECK_NULL_VOID(taskExecutor);
-        taskExecutor->PostTask(
-            [weak = WeakClaim(this), isVisible]() {
-                auto bubbleEvent = weak.Upgrade();
-                CHECK_NULL_VOID(bubbleEvent);
-                if (bubbleEvent->changeEvent_) {
-                    auto json = JsonUtil::Create(true);
-                    json->Put("isVisible", isVisible);
-                    bubbleEvent->changeEvent_(json->ToString());
-                }
-            },
-            TaskExecutor::TaskType::UI);
+        if (changeEvent_) {
+            auto json = JsonUtil::Create(true);
+            json->Put("isVisible", isVisible);
+            changeEvent_(json->ToString());
+        }
     }
 
 private:

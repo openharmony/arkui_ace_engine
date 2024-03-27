@@ -61,6 +61,9 @@ void ListLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     auto listLayoutProperty = AceType::DynamicCast<ListLayoutProperty>(layoutWrapper->GetLayoutProperty());
     CHECK_NULL_VOID(listLayoutProperty);
 
+    // Pre-recycle
+    ScrollableUtils::RecycleItemsOutOfBoundary(axis_, -currentDelta_, GetStartIndex(), GetEndIndex(), layoutWrapper);
+
     const auto& layoutConstraint = listLayoutProperty->GetLayoutConstraint().value();
 
     // calculate idealSize and set FrameSize
@@ -618,11 +621,11 @@ void ListLayoutAlgorithm::UpdateSnapCenterContentOffset(LayoutWrapper* layoutWra
         float itemHeight = 0.0f;
         if (GetStartIndex() == 0) {
             itemHeight = itemPosition_.begin()->second.endPos - itemPosition_.begin()->second.startPos;
-            contentStartOffset_ = (contentMainSize_ - itemHeight) / 2.0f;
+            contentStartOffset_ = std::max((contentMainSize_ - itemHeight) / 2.0f, 0.0f);
         }
         if (GetEndIndex() == totalItemCount_ - 1) {
             itemHeight = itemPosition_.rbegin()->second.endPos - itemPosition_.rbegin()->second.startPos;
-            contentEndOffset_ = (contentMainSize_ - itemHeight) / 2.0f;
+            contentEndOffset_ = std::max((contentMainSize_ - itemHeight) / 2.0f, 0.0f);
         }
     }
 }
@@ -706,9 +709,7 @@ void ListLayoutAlgorithm::MeasureList(LayoutWrapper* layoutWrapper)
             jumpIndex_ = totalItemCount_ - 1;
             scrollAlign_ = ScrollAlign::END;
         }
-        if (overScrollFeature_) {
-            UpdateSnapCenterContentOffset(layoutWrapper);
-        }
+        UpdateSnapCenterContentOffset(layoutWrapper);
         if (IsScrollSnapAlignCenter(layoutWrapper)) {
             midIndex = GetMidIndex(layoutWrapper, true);
             midItemMidPos = (itemPosition_[midIndex].startPos + itemPosition_[midIndex].endPos) / 2.0f -

@@ -33,14 +33,25 @@ bool JudgeTrackness(Axis direction, float blockDiameter, float trackThickness, f
 }
 } // namespace
 
-SizeF SliderLayoutAlgorithm::CalculateHotSize(const SizeF& blockSize, float themeBlockHotSize)
+SizeF SliderLayoutAlgorithm::CalculateHotSize(
+    LayoutWrapper* layoutWrapper, const SizeF& blockSize, float themeBlockHotSize)
 {
+    auto frameNode = layoutWrapper->GetHostNode();
+    CHECK_NULL_RETURN(frameNode, SizeF());
+    auto sliderLayoutProperty = DynamicCast<SliderLayoutProperty>(layoutWrapper->GetLayoutProperty());
+    CHECK_NULL_RETURN(sliderLayoutProperty, SizeF());
+    auto sliderMode = sliderLayoutProperty->GetSliderMode().value_or(SliderModel::SliderMode::OUTSET);
     SizeF blockHotSize = blockSize;
-    if (LessNotEqual(blockHotSize.Width(), themeBlockHotSize)) {
-        blockHotSize.SetWidth(themeBlockHotSize);
-    }
-    if (LessNotEqual(blockHotSize.Height(), themeBlockHotSize)) {
-        blockHotSize.SetHeight(themeBlockHotSize);
+    if (sliderMode == SliderModel::SliderMode::NONE) {
+        auto hotSize = std::max(themeBlockHotSize, trackThickness_);
+        blockHotSize = SizeF(hotSize, hotSize);
+    } else {
+        if (LessNotEqual(blockHotSize.Width(), themeBlockHotSize)) {
+            blockHotSize.SetWidth(themeBlockHotSize);
+        }
+        if (LessNotEqual(blockHotSize.Height(), themeBlockHotSize)) {
+            blockHotSize.SetHeight(themeBlockHotSize);
+        }
     }
     return blockHotSize;
 }
@@ -59,7 +70,6 @@ std::optional<SizeF> SliderLayoutAlgorithm::MeasureContent(
 
     float width = contentConstraint.selfIdealSize.Width().value_or(contentConstraint.maxSize.Width());
     float height = contentConstraint.selfIdealSize.Height().value_or(contentConstraint.maxSize.Height());
-
     Axis direction = sliderLayoutProperty->GetDirection().value_or(Axis::HORIZONTAL);
     if (direction == Axis::HORIZONTAL && GreaterOrEqualToInfinity(width)) {
         width = static_cast<float>(theme->GetLayoutMaxLength().ConvertToPx());
@@ -67,9 +77,12 @@ std::optional<SizeF> SliderLayoutAlgorithm::MeasureContent(
     if (direction == Axis::VERTICAL && GreaterOrEqualToInfinity(height)) {
         height = static_cast<float>(theme->GetLayoutMaxLength().ConvertToPx());
     }
-    auto sliderMode = sliderLayoutProperty->GetSliderMode().value_or(SliderModel::SliderMode::OUTSET);
-    Dimension themeTrackThickness = sliderMode == SliderModel::SliderMode::OUTSET ? theme->GetOutsetTrackThickness()
-                                                                                  : theme->GetInsetTrackThickness();
+
+    Dimension themeTrackThickness;
+    Dimension themeBlockSize;
+    Dimension hotBlockShadowWidth;
+    Dimension themeBlockHotSize;
+    GetStyleThemeValue(layoutWrapper, themeTrackThickness, themeBlockSize, hotBlockShadowWidth, themeBlockHotSize);
     auto thickness = sliderLayoutProperty->GetThickness().value_or(themeTrackThickness);
     trackThickness_ =
         static_cast<float>(thickness.Unit() == DimensionUnit::PERCENT
@@ -77,8 +90,6 @@ std::optional<SizeF> SliderLayoutAlgorithm::MeasureContent(
                                : thickness.ConvertToPx());
     // this scaleValue ensure that the size ratio of the block and trackThickness is consistent
     float scaleValue = trackThickness_ / static_cast<float>(themeTrackThickness.ConvertToPx());
-    Dimension themeBlockSize =
-        sliderMode == SliderModel::SliderMode::OUTSET ? theme->GetOutsetBlockSize() : theme->GetInsetBlockSize();
     auto blockDiameter = scaleValue * static_cast<float>(themeBlockSize.ConvertToPx());
     // trackThickness and blockDiameter will get from theme when they are greater than slider component height or width
     if (JudgeTrackness(direction, blockDiameter, trackThickness_, width, height)) {
@@ -87,12 +98,7 @@ std::optional<SizeF> SliderLayoutAlgorithm::MeasureContent(
         blockDiameter = static_cast<float>(themeBlockSize.ConvertToPx());
     }
     blockSize_ = sliderLayoutProperty->GetBlockSizeValue(SizeF(blockDiameter, blockDiameter));
-    Dimension themeBlockHotSize =
-        sliderMode == SliderModel::SliderMode::OUTSET ? theme->GetOutsetBlockHotSize() : theme->GetInsetBlockHotSize();
-    Dimension hotBlockShadowWidth = sliderMode == SliderModel::SliderMode::OUTSET ?
-                                        theme->GetOutsetHotBlockShadowWidth() :
-                                        theme->GetInsetHotBlockShadowWidth();
-    blockHotSize_ = CalculateHotSize(blockSize_, themeBlockHotSize.ConvertToPx());
+    blockHotSize_ = CalculateHotSize(layoutWrapper, blockSize_, static_cast<float>(themeBlockHotSize.ConvertToPx()));
     auto blockWidth = direction == Axis::HORIZONTAL ? blockSize_.Height() : blockSize_.Width();
     auto sliderWidth = static_cast<float>(theme->GetMeasureContentDefaultWidth().ConvertToPx());
     sliderWidth = std::max(sliderWidth, trackThickness_);
@@ -101,6 +107,36 @@ std::optional<SizeF> SliderLayoutAlgorithm::MeasureContent(
     sliderWidth = std::clamp(sliderWidth, 0.0f, direction == Axis::HORIZONTAL ? height : width);
     float sliderLength = direction == Axis::HORIZONTAL ? width : height;
     return direction == Axis::HORIZONTAL ? SizeF(sliderLength, sliderWidth) : SizeF(sliderWidth, sliderLength);
+}
+
+void SliderLayoutAlgorithm::GetStyleThemeValue(LayoutWrapper* layoutWrapper, Dimension& themeTrackThickness,
+    Dimension& themeBlockSize, Dimension& hotBlockShadowWidth, Dimension& themeBlockHotSize)
+{
+    auto frameNode = layoutWrapper->GetHostNode();
+    CHECK_NULL_VOID(frameNode);
+    auto sliderLayoutProperty = DynamicCast<SliderLayoutProperty>(layoutWrapper->GetLayoutProperty());
+    CHECK_NULL_VOID(sliderLayoutProperty);
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto theme = pipeline->GetTheme<SliderTheme>();
+    CHECK_NULL_VOID(theme);
+    auto sliderMode = sliderLayoutProperty->GetSliderMode().value_or(SliderModel::SliderMode::OUTSET);
+    if (sliderMode == SliderModel::SliderMode::OUTSET) {
+        themeTrackThickness = theme->GetOutsetTrackThickness();
+        themeBlockSize = theme->GetOutsetBlockSize();
+        hotBlockShadowWidth = theme->GetOutsetHotBlockShadowWidth();
+        themeBlockHotSize = theme->GetOutsetBlockHotSize();
+    } else if (sliderMode == SliderModel::SliderMode::INSET) {
+        themeTrackThickness = theme->GetInsetTrackThickness();
+        themeBlockSize = theme->GetInsetBlockSize();
+        hotBlockShadowWidth = theme->GetInsetHotBlockShadowWidth();
+        themeBlockHotSize = theme->GetInsetBlockHotSize();
+    } else {
+        themeTrackThickness = theme->GetNoneTrackThickness();
+        themeBlockSize = Dimension(0);
+        hotBlockShadowWidth = Dimension(0);
+        themeBlockHotSize = theme->GetNoneBlockHotSize();
+    }
 }
 
 void SliderLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)

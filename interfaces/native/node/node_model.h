@@ -30,6 +30,7 @@ struct ArkUI_Node {
     int32_t type;
     ArkUINodeHandle uiNodeHandle = nullptr;
     void* extraData = nullptr;
+    void* extraCustomData = nullptr;
 };
 
 constexpr int BASIC_COMPONENT_NUM = 18;
@@ -49,6 +50,8 @@ void DisposeNode(ArkUI_NodeHandle nativePtr);
 int32_t AddChild(ArkUI_NodeHandle parentNode, ArkUI_NodeHandle childNode);
 int32_t RemoveChild(ArkUI_NodeHandle parentNode, ArkUI_NodeHandle childNode);
 int32_t InsertChildAfter(ArkUI_NodeHandle parentNode, ArkUI_NodeHandle childNode, ArkUI_NodeHandle siblingNode);
+int32_t InsertChildBefore(ArkUI_NodeHandle parentNode, ArkUI_NodeHandle childNode, ArkUI_NodeHandle siblingNode);
+int32_t InsertChildAt(ArkUI_NodeHandle parentNode, ArkUI_NodeHandle childNode, int32_t position);
 
 // deprecated.
 [[deprecated]] void SetAttribute(ArkUI_NodeHandle node, ArkUI_NodeAttributeType attribute, const char* value);

@@ -601,7 +601,7 @@ HWTEST_F(FocusHubTestNg, FocusHubTestNg0014, TestSize.Level1)
     bool flagCbk2 = false;
     focusHub->onFocusInternal_ = [&flagCbk1]() { flagCbk1 = !flagCbk1; };
     focusHub->focusCallbackEvents_ = AceType::MakeRefPtr<FocusCallbackEvents>();
-    focusHub->focusCallbackEvents_->SetOnFocusCallback([&flagCbk2]() { flagCbk2 = !flagCbk2; });
+    focusHub->SetOnFocusCallback([&flagCbk2]() { flagCbk2 = !flagCbk2; });
     focusHub->OnFocus();
     EXPECT_TRUE(flagCbk1);
     EXPECT_TRUE(flagCbk2);
@@ -1141,7 +1141,7 @@ HWTEST_F(FocusHubTestNg, FocusHubSetIsFocusOnTouch001, TestSize.Level1)
      * @tc.expected: when touchEvents has been set, return.
      */
     focusHub->SetIsFocusOnTouch(true);
-    EXPECT_TRUE(focusHub->focusCallbackEvents_->IsFocusOnTouch().value());
+    EXPECT_TRUE(focusHub->IsFocusOnTouch().value());
 
     /**
      * @tc.steps4: test SetIsFocusOnTouch.
@@ -1154,7 +1154,7 @@ HWTEST_F(FocusHubTestNg, FocusHubSetIsFocusOnTouch001, TestSize.Level1)
      * @tc.steps5: test SetIsFocusOnTouch.
      * @tc.expected: set focusOnTouchListener_ success.
      */
-    focusHub->focusCallbackEvents_->SetIsFocusOnTouch(false);
+    focusHub->SetIsFocusOnTouch(false);
     focusHub->focusOnTouchListener_ = nullptr;
     focusHub->SetIsFocusOnTouch(true);
     EXPECT_TRUE(focusHub->focusOnTouchListener_);
@@ -2321,7 +2321,7 @@ HWTEST_F(FocusHubTestNg, FocusHubTestNg0055, TestSize.Level1)
     EXPECT_FALSE(focusHub->OnKeyEventScope(keyEvent));
     keyEvent.pressedCodes.emplace_back(KeyCode::KEY_SHIFT_LEFT);
     keyEvent.pressedCodes.emplace_back(KeyCode::KEY_TAB);
-    EXPECT_FALSE(focusHub->OnKeyEventScope(keyEvent));
+    EXPECT_TRUE(focusHub->OnKeyEventScope(keyEvent));
 }
 
 /**

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -162,6 +162,11 @@ void JSNavigation::ParseBarItems(
         auto itemIconObject = itemObject->GetProperty("icon");
         if (itemIconObject->IsString()) {
             toolBarItem.icon = itemIconObject->ToString();
+        }
+
+        auto itemEnabledObject = itemObject->GetProperty("isEnabled");
+        if (itemEnabledObject->IsBoolean()) {
+            toolBarItem.isEnabled = itemEnabledObject->ToBoolean();
         }
 
         auto itemActionValue = itemObject->GetProperty("action");
@@ -378,7 +383,6 @@ void JSNavigation::SetTitle(const JSCallbackInfo& info)
             NavigationModel::GetInstance()->SetCustomTitle(customNode);
         }
     } else {
-        TAG_LOGI(AceLogTag::ACE_NAVIGATION, "SetTitle is undefined");
         NavigationModel::GetInstance()->ParseCommonTitle(false, false, "", "");
         return;
     }

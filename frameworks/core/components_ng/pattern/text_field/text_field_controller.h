@@ -41,7 +41,8 @@ public:
     void CaretPosition(int32_t caretPosition) override;
     int32_t GetCaretIndex() override;
     NG::OffsetF GetCaretPosition() override;
-    void SetTextSelection(int32_t selectionStart, int32_t selectionEnd) override;
+    void SetTextSelection(int32_t selectionStart, int32_t selectionEnd,
+        const std::optional<SelectionOptions>& options = std::nullopt) override;
     Rect GetTextContentRect() override;
     int32_t GetTextContentLinesNum() override;
     void StopEditing() override;

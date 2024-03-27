@@ -293,6 +293,16 @@ public:
         return preDragStatus_;
     }
 
+    void ResetPullMoveReceivedForCurrentDrag(bool isPullMoveReceivedForCurrentDrag = false)
+    {
+        isPullMoveReceivedForCurrentDrag_ = isPullMoveReceivedForCurrentDrag;
+    }
+
+    bool IsPullMoveReceivedForCurrentDrag() const
+    {
+        return isPullMoveReceivedForCurrentDrag_;
+    }
+
 private:
     double CalcDragPreviewDistanceWithPoint(
         const OHOS::Ace::Dimension& preserverHeight, int32_t x, int32_t y, const DragPreviewInfo& info);
@@ -313,6 +323,7 @@ private:
     void ClearVelocityInfo();
     void UpdateVelocityTrackerPoint(const Point& point, bool isEnd = false);
     void PrintDragFrameNode(const Point& point, const RefPtr<FrameNode>& dragFrameNode);
+    void PrintGridDragFrameNode(const float globalX, const float globalY, const RefPtr<FrameNode>& dragFrameNode);
     void FireOnDragEventWithDragType(const RefPtr<EventHub>& eventHub, DragEventType type,
         RefPtr<OHOS::Ace::DragEvent>& event, const std::string& extraParams);
     void NotifyDragFrameNode(
@@ -352,6 +363,7 @@ private:
     bool isWindowConsumed_ = false;
     bool isDragWindowShow_ = false;
     bool hasNotifiedTransformation_ = false;
+    bool isPullMoveReceivedForCurrentDrag_ = false;
     VelocityTracker velocityTracker_;
     DragDropMgrState dragDropState_ = DragDropMgrState::IDLE;
     PreDragStatus preDragStatus_ = PreDragStatus::ACTION_DETECTING_STATUS;

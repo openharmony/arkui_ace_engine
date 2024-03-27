@@ -16,6 +16,10 @@
 #include "ui_observer_listener.h"
 
 namespace OHOS::Ace::Napi {
+namespace {
+constexpr char NAV_BAR[] = "navBar";
+}
+
 void UIObserverListener::OnNavigationStateChange(const NG::NavDestinationInfo& info)
 {
     if (!env_ || !callback_) {
@@ -113,6 +117,45 @@ void UIObserverListener::OnDrawOrLayout()
     napi_create_object(env_, &objValue);
     napi_value argv[] = { objValue };
     napi_call_function(env_, nullptr, callback, 1, argv, nullptr);
+}
+
+void UIObserverListener::OnNavDestinationSwitch(const NG::NavDestinationSwitchInfo& switchInfo)
+{
+    if (!env_ || !callback_) {
+        TAG_LOGW(AceLogTag::ACE_OBSERVER,
+            "Handle navDestination switch failed, runtime or callback function invalid!");
+        return;
+    }
+
+    napi_value callback = nullptr;
+    napi_get_reference_value(env_, callback_, &callback);
+    napi_value argv[] = { CreateNavDestinationSwitchInfoObj(switchInfo) };
+    napi_call_function(env_, nullptr, callback, 1, argv, nullptr);
+}
+
+napi_value UIObserverListener::CreateNavDestinationSwitchInfoObj(const NG::NavDestinationSwitchInfo& switchInfo)
+{
+    napi_value objValue = nullptr;
+    napi_create_object(env_, &objValue);
+    napi_value napiOperation = nullptr;
+    napi_value napiFrom = nullptr;
+    if (switchInfo.from.has_value()) {
+        napiFrom = CreateNavDestinationInfoObj(switchInfo.from.value());
+    } else {
+        napi_create_string_utf8(env_, NAV_BAR, NAPI_AUTO_LENGTH, &napiFrom);
+    }
+    napi_value napiTo = nullptr;
+    if (switchInfo.to.has_value()) {
+        napiTo = CreateNavDestinationInfoObj(switchInfo.to.value());
+    } else {
+        napi_create_string_utf8(env_, NAV_BAR, NAPI_AUTO_LENGTH, &napiTo);
+    }
+    napi_create_int32(env_, static_cast<int32_t>(switchInfo.operation), &napiOperation);
+    napi_set_named_property(env_, objValue, "context", switchInfo.context);
+    napi_set_named_property(env_, objValue, "from", napiFrom);
+    napi_set_named_property(env_, objValue, "to", napiTo);
+    napi_set_named_property(env_, objValue, "operation", napiOperation);
+    return objValue;
 }
 
 napi_value UIObserverListener::CreateNavDestinationInfoObj(const NG::NavDestinationInfo& info)

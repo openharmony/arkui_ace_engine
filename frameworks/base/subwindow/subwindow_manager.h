@@ -44,6 +44,7 @@ public:
     void AddParentContainerId(int32_t containerId, int32_t parentContainerId);
     void RemoveParentContainerId(int32_t containerId);
     int32_t GetParentContainerId(int32_t containerId);
+    int32_t GetSubContainerId(int32_t parentContainerId);
 
     void AddSubwindow(int32_t instanceId, RefPtr<Subwindow>);
     void RemoveSubwindow(int32_t instanceId);
@@ -78,8 +79,8 @@ public:
     void ClearMenuNG(int32_t instanceId = -1, int32_t targetId = -1, bool inWindow = true, bool showAnimation = false);
     void ClearPopupInSubwindow(int32_t instanceId = -1);
     RefPtr<NG::FrameNode> ShowDialogNG(const DialogProperties& dialogProps, std::function<void()>&& buildFunc);
-    RefPtr<NG::FrameNode> ShowDialogNGWithNode(
-    const DialogProperties& dialogProps, const RefPtr<NG::UINode>& customNode);
+    RefPtr<NG::FrameNode> ShowDialogNGWithNode(const DialogProperties& dialogProps,
+        const RefPtr<NG::UINode>& customNode);
     void CloseDialogNG(const RefPtr<NG::FrameNode>& dialogNode);
     void OpenCustomDialogNG(const DialogProperties& dialogProps, std::function<void(int32_t)>&& callback);
     void CloseCustomDialogNG(int32_t dialogId);
@@ -122,6 +123,7 @@ public:
 
     bool GetShown();
     void ResizeWindowForFoldStatus(int32_t parentContainerId);
+    void MarkDirtyDialogSafeArea();
 private:
     RefPtr<Subwindow> GetOrCreateSubWindow();
 

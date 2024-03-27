@@ -26,6 +26,7 @@ constexpr int32_t BAR_DISAPPEAR_FRAME_RATE = 20;
 constexpr int32_t BAR_DISAPPEAR_MIN_FRAME_RATE = 0;
 constexpr int32_t BAR_DISAPPEAR_MAX_FRAME_RATE = 90;
 constexpr int32_t LONG_PRESS_PAGE_INTERVAL_MS = 100;
+constexpr int32_t LONG_PRESS_TIME_THRESHOLD_MS = 500;
 } // namespace
 
 void ScrollBarPattern::OnAttachToFrameNode()
@@ -109,13 +110,30 @@ void ScrollBarPattern::OnModifyDone()
             CHECK_NULL_VOID(scrollBar);
             scrollBar->OnCollectTouchTarget(coordinateOffset, getEventTargetImpl, result, frameNode, targetComponent);
         });
+    scrollableEvent_->SetBarCollectLongPressTargetCallback(
+        [weak = AceType::WeakClaim(this)](const OffsetF& coordinateOffset, const GetEventTargetImpl& getEventTargetImpl,
+            TouchTestResult& result, const RefPtr<FrameNode>& frameNode,
+            const RefPtr<TargetComponent>& targetComponent) {
+            auto scrollBar = weak.Upgrade();
+            CHECK_NULL_VOID(scrollBar);
+            scrollBar->OnCollectLongPressTarget(
+                coordinateOffset, getEventTargetImpl, result, frameNode, targetComponent);
+        });
+    scrollableEvent_->SetInBarRectRegionCallback(
+        [weak = AceType::WeakClaim(this)](const PointF& point, SourceType source) {
+            auto scrollBar = weak.Upgrade();
+            CHECK_NULL_RETURN(scrollBar, false);
+            return scrollBar->IsInScrollBar();
+        });
     gestureHub->AddScrollableEvent(scrollableEvent_);
     SetAccessibilityAction();
+    InitMouseEvent();
     InitClickEvent();
-    InitTouchEvent();
-    InitLongPressEvent();
     if (!panRecognizer_) {
         InitPanRecognizer();
+    }
+    if (!longPressRecognizer_) {
+        InitLongPressEvent();
     }
 }
 
@@ -421,14 +439,32 @@ void ScrollBarPattern::OnCollectTouchTarget(const OffsetF& coordinateOffset,
     }
 }
 
+void ScrollBarPattern::OnCollectLongPressTarget(const OffsetF& coordinateOffset,
+    const GetEventTargetImpl& getEventTargetImpl, TouchTestResult& result, const RefPtr<FrameNode>& frameNode,
+    const RefPtr<TargetComponent>& targetComponent)
+{
+    if (longPressRecognizer_) {
+        longPressRecognizer_->SetCoordinateOffset(Offset(coordinateOffset.GetX(), coordinateOffset.GetY()));
+        longPressRecognizer_->SetGetEventTargetImpl(getEventTargetImpl);
+        longPressRecognizer_->SetNodeId(frameNode->GetId());
+        longPressRecognizer_->AttachFrameNode(frameNode);
+        longPressRecognizer_->SetTargetComponent(targetComponent);
+        longPressRecognizer_->SetIsSystemGesture(true);
+        result.emplace_front(longPressRecognizer_);
+    }
+}
+
 void ScrollBarPattern::InitClickEvent()
 {
     CHECK_NULL_VOID(!clickListener_);
     auto gesture = GetHost()->GetOrCreateGestureEventHub();
+    CHECK_NULL_VOID(gesture);
     auto clickCallback = [weak = WeakClaim(this)](GestureEvent& info) {
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
-        pattern->HandleClickEvent(info);
+        if (pattern->isMousePressed_) {
+            pattern->HandleClickEvent(info);
+        }
     };
     clickListener_ = MakeRefPtr<ClickEvent>(std::move(clickCallback));
     gesture->AddClickEvent(clickListener_);
@@ -451,15 +487,13 @@ void ScrollBarPattern::HandleClickEvent(GestureEvent& info)
 
 void ScrollBarPattern::InitLongPressEvent()
 {
-    CHECK_NULL_VOID(!longPressEvent_);
-    auto gesture = GetHost()->GetOrCreateGestureEventHub();
-    auto longPressCallback = [weak = WeakClaim(this)](GestureEvent& info) {
-        auto pattern = weak.Upgrade();
-        CHECK_NULL_VOID(pattern);
-        pattern->HandleLongPress(true);
-    };
-    longPressEvent_ = MakeRefPtr<LongPressEvent>(std::move(longPressCallback));
-    gesture->SetLongPressEvent(longPressEvent_);
+    longPressRecognizer_ = AceType::MakeRefPtr<LongPressRecognizer>(LONG_PRESS_TIME_THRESHOLD_MS, 1, false, false);
+    longPressRecognizer_->SetOnAction([weakBar = AceType::WeakClaim(this)](const GestureEvent& info) {
+        auto scrollBar = weakBar.Upgrade();
+        if (scrollBar) {
+            scrollBar->HandleLongPress(true);
+        }
+    });
 }
 
 void ScrollBarPattern::HandleLongPress(bool smooth)
@@ -519,38 +553,26 @@ void ScrollBarPattern::StartLongPressEventTimer()
     ScheduleCaretLongPress();
 }
 
-void ScrollBarPattern::InitTouchEvent()
+void ScrollBarPattern::InitMouseEvent()
 {
-    CHECK_NULL_VOID(!touchListener_);
+    CHECK_NULL_VOID(!mouseEvent_);
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto gesture = host->GetOrCreateGestureEventHub();
-    CHECK_NULL_VOID(gesture);
-    auto touchCallback = [weak = WeakClaim(this)](const TouchEventInfo& info) {
+    auto inputHub = host->GetOrCreateInputEventHub();
+    CHECK_NULL_VOID(inputHub);
+    auto mouseCallback = [weak = WeakClaim(this)](MouseInfo& info) {
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
-        if (info.GetTouches().front().GetTouchType() == TouchType::DOWN) {
-            pattern->OnTouchDown();
+        if (info.GetButton() == MouseButton::LEFT_BUTTON && info.GetAction() == MouseAction::PRESS) {
+            pattern->isMousePressed_ = true;
+        } else {
+            pattern->isMousePressed_ = false;
+            pattern->scrollingUp_ = false;
+            pattern->scrollingDown_ = false;
         }
-        if (info.GetTouches().front().GetTouchType() == TouchType::UP ||
-            info.GetTouches().front().GetTouchType() == TouchType::CANCEL) {
-            pattern->OnTouchUp();
-        }
-        pattern->locationInfo_ = info.GetTouches().front().GetLocalLocation();
+        pattern->locationInfo_ = info.GetLocalLocation();
     };
-    touchListener_ = MakeRefPtr<TouchEventImpl>(std::move(touchCallback));
-    gesture->AddTouchEvent(touchListener_);
-}
-
-void ScrollBarPattern::OnTouchUp()
-{
-    isMousePressed_ = false;
-    scrollingUp_ = false;
-    scrollingDown_ = false;
-}
-
-void ScrollBarPattern::OnTouchDown()
-{
-    isMousePressed_ = true;
+    mouseEvent_ = MakeRefPtr<InputEvent>(std::move(mouseCallback));
+    inputHub->AddOnMouseEvent(mouseEvent_);
 }
 } // namespace OHOS::Ace::NG

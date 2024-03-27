@@ -108,6 +108,8 @@ void RosenRenderSurface::InitSurface()
             if (producerSurface_ == nullptr) {
                 return;
             }
+            auto defaultUsage = producerSurface_->GetDefaultUsage();
+            producerSurface_->SetDefaultUsage(defaultUsage | BUFFER_USAGE_MEM_DMA);
             if (drawBufferListener_ == nullptr) {
                 drawBufferListener_ = new DrawBufferListener(WeakClaim(this));
             }
@@ -116,6 +118,8 @@ void RosenRenderSurface::InitSurface()
             auto surfaceNode = OHOS::Rosen::RSBaseNode::ReinterpretCast<OHOS::Rosen::RSSurfaceNode>(rsNode);
             CHECK_NULL_VOID(surfaceNode);
             producerSurface_ = surfaceNode->GetSurface();
+            auto defaultUsage = producerSurface_->GetDefaultUsage();
+            producerSurface_->SetDefaultUsage(defaultUsage | BUFFER_USAGE_MEM_DMA | BUFFER_USAGE_HW_COMPOSER);
         }
     }
     RegisterSurface();

@@ -40,6 +40,7 @@ public:
         value->propSearchIconUDSize_ = CloneSearchIconUDSize();
         value->propCaretUDWidth_ = CloneCaretUDWidth();
         value->propSearchButtonFontSize_ = CloneSearchButtonFontSize();
+        value->propFontFeature_ = CloneFontFeature();
         return value;
     }
 
@@ -52,6 +53,7 @@ public:
         ResetSearchIconUDSize();
         ResetCaretUDWidth();
         ResetSearchButtonFontSize();
+        ResetFontFeature();
     }
 
     void ToJsonValue(std::unique_ptr<JsonValue>& json) const override
@@ -66,6 +68,7 @@ public:
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(SearchIconUDSize, Dimension, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(CaretUDWidth, Dimension, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(SearchButtonFontSize, Dimension, PROPERTY_UPDATE_MEASURE);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(FontFeature, FONT_FEATURES_MAP, PROPERTY_UPDATE_MEASURE);
 };
 
 } // namespace OHOS::Ace::NG

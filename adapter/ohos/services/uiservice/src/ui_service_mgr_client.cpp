@@ -49,7 +49,7 @@ ErrCode UIServiceMgrClient::RegisterCallBack(const AAFwk::Want& want, const sptr
     if (remoteObject_ == nullptr) {
         ErrCode err = Connect();
         if (err != ERR_OK) {
-            HILOG_WARN("%{private}s:fail to connect UIMgrService", __func__);
+            LOGW("%{private}s:fail to connect UIMgrService", __func__);
             return UI_SERVICE_NOT_CONNECTED;
         }
     }
@@ -62,7 +62,7 @@ ErrCode UIServiceMgrClient::UnregisterCallBack(const AAFwk::Want& want)
     if (remoteObject_ == nullptr) {
         ErrCode err = Connect();
         if (err != ERR_OK) {
-            HILOG_WARN("%{private}s:fail to connect UIMgrService", __func__);
+            LOGW("%{private}s:fail to connect UIMgrService", __func__);
             return UI_SERVICE_NOT_CONNECTED;
         }
     }
@@ -76,7 +76,7 @@ ErrCode UIServiceMgrClient::Push(const AAFwk::Want& want, const std::string& nam
     if (remoteObject_ == nullptr) {
         ErrCode err = Connect();
         if (err != ERR_OK) {
-            HILOG_WARN("%{private}s:fail to connect UIMgrService", __func__);
+            LOGW("%{private}s:fail to connect UIMgrService", __func__);
             return UI_SERVICE_NOT_CONNECTED;
         }
     }
@@ -89,7 +89,7 @@ ErrCode UIServiceMgrClient::Request(const AAFwk::Want& want, const std::string& 
     if (remoteObject_ == nullptr) {
         ErrCode err = Connect();
         if (err != ERR_OK) {
-            HILOG_WARN("%{private}s:fail to connect UIMgrService", __func__);
+            LOGW("%{private}s:fail to connect UIMgrService", __func__);
             return UI_SERVICE_NOT_CONNECTED;
         }
     }
@@ -103,7 +103,7 @@ ErrCode UIServiceMgrClient::ReturnRequest(const AAFwk::Want& want, const std::st
     if (remoteObject_ == nullptr) {
         ErrCode err = Connect();
         if (err != ERR_OK) {
-            HILOG_WARN("%{private}s:fail to connect UIMgrService", __func__);
+            LOGW("%{private}s:fail to connect UIMgrService", __func__);
             return UI_SERVICE_NOT_CONNECTED;
         }
     }
@@ -147,12 +147,12 @@ ErrCode UIServiceMgrClient::Connect()
     }
     sptr<ISystemAbilityManager> systemManager = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
     if (systemManager == nullptr) {
-        HILOG_WARN("%{private}s:fail to get Registry", __func__);
+        LOGW("%{private}s:fail to get Registry", __func__);
         return GET_UI_SERVICE_FAILED;
     }
     remoteObject_ = systemManager->GetSystemAbility(UI_MGR_SERVICE_SA_ID);
     if (remoteObject_ == nullptr) {
-        HILOG_WARN("%{private}s:fail to connect UIMgrService", __func__);
+        LOGW("%{private}s:fail to connect UIMgrService", __func__);
         return GET_UI_SERVICE_FAILED;
     }
     return ERR_OK;

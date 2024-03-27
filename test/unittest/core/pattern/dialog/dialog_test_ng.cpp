@@ -19,6 +19,7 @@
 #define protected public
 #include "test/mock/core/common/mock_theme_manager.h"
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
+#include "core/common/recorder/event_recorder.h"
 
 #include "core/components/button/button_theme.h"
 #include "core/components/dialog/dialog_properties.h"
@@ -51,6 +52,9 @@ const double_t WIDTH_D = 80.0;
 const double_t WIDTH_E = 112.0;
 const double_t DIVISOR = 2.0;
 const Dimension DIMENSION_RADIUS(10.0, DimensionUnit::PX);
+constexpr int BUTTONINDEX_TEST_1 = 1;
+constexpr int BUTTONINDEX_TEST_2 = -1;
+constexpr int BUTTONINDEX_TEST_3 = -2;
 } // namespace
 
 class MockDialogTheme : public DialogTheme, public ButtonTheme {
@@ -1273,5 +1277,278 @@ HWTEST_F(DialogPatternTestNg, DialogPatternTest013, TestSize.Level1)
     EXPECT_EQ(dialogRender->GetBorderRadius().value(), borderRadius);
     EXPECT_EQ(dialogRender->GetBorderColor().value(), borderColor);
     EXPECT_EQ(dialogRender->GetBorderStyle().value(), borderStyle);
+}
+/**
+ * @tc.name: DialogLayoutAlgorithm001
+ * @tc.desc: Test DialogLayoutAlgorithm::ComputeInnerLayoutParam function
+ * @tc.type: FUNC
+ */
+HWTEST_F(DialogPatternTestNg, DialogLayoutAlgorithm001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create DialogLayoutAlgorithm instance.
+     */
+    MockPipelineContext::GetCurrent()->SetMinPlatformVersion(static_cast<int32_t>(PlatformVersion::VERSION_ELEVEN));
+    SystemProperties::SetDeviceType(DeviceType::CAR);
+    auto customNode = FrameNode::CreateFrameNode(V2::BLANK_ETS_TAG, 100, AceType::MakeRefPtr<Pattern>());
+    ASSERT_NE(customNode, nullptr);
+    auto childLayoutWrapper = AceType::MakeRefPtr<LayoutWrapperNode>(
+        customNode, customNode->GetGeometryNode(), customNode->GetLayoutProperty());
+    ASSERT_NE(childLayoutWrapper, nullptr);
+    DialogProperties param {
+        .type = DialogType::ACTION_SHEET,
+        .title = "dialog test",
+        .content = "dialog content test",
+        .sheetsInfo = sheetItems,
+        .isShowInSubWindow = true,
+        .offset = DimensionOffset(Dimension(10.0), Dimension(10.0)),
+    };
+    param.maskColor = Color::BLACK;
+    param.type = DialogType::ACTION_SHEET;
+    auto dialogWithCustom = DialogView::CreateDialogNode(param, customNode);
+    ASSERT_NE(dialogWithCustom, nullptr);
+    auto property = dialogWithCustom->GetLayoutProperty<DialogLayoutProperty>();
+    DialogLayoutAlgorithm dialogLayoutAlgorithm;
+    auto layoutWrapper = AceType::MakeRefPtr<LayoutWrapperNode>(
+        dialogWithCustom, dialogWithCustom->GetGeometryNode(), dialogWithCustom->GetLayoutProperty());
+    layoutWrapper->AppendChild(childLayoutWrapper);
+    /**
+        * @tc.steps: step3. test DialogLayoutAlgorithm's Measure function.
+        * @tc.expected: dialogLayoutAlgorithm.alignment_ equal to DialogAlignment::DEFAULT.
+        */
+    dialogLayoutAlgorithm.Measure(layoutWrapper.rawPtr_);
+    dialogLayoutAlgorithm.expandDisplay_ = true;
+    dialogLayoutAlgorithm.Layout(layoutWrapper.rawPtr_);
+    EXPECT_EQ(dialogLayoutAlgorithm.topLeftPoint_.GetX(), 10.0);
+    EXPECT_EQ(dialogLayoutAlgorithm.topLeftPoint_.GetY(), 10.0);
+}
+/**
+ * @tc.name: DialogLayoutAlgorithm002
+ * @tc.desc: Test DialogLayoutAlgorithm::ComputeInnerLayoutParam function
+ * @tc.type: FUNC
+ */
+HWTEST_F(DialogPatternTestNg, DialogLayoutAlgorithm002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create DialogLayoutAlgorithm instance.
+     */
+    MockPipelineContext::GetCurrent()->SetMinPlatformVersion(static_cast<int32_t>(PlatformVersion::VERSION_ELEVEN));
+    SystemProperties::SetDeviceType(DeviceType::PHONE);
+    SystemProperties::orientation_ = DeviceOrientation::LANDSCAPE;
+    auto customNode = FrameNode::CreateFrameNode(V2::BLANK_ETS_TAG, 100, AceType::MakeRefPtr<Pattern>());
+    ASSERT_NE(customNode, nullptr);
+    auto childLayoutWrapper = AceType::MakeRefPtr<LayoutWrapperNode>(
+        customNode, customNode->GetGeometryNode(), customNode->GetLayoutProperty());
+    ASSERT_NE(childLayoutWrapper, nullptr);
+    DialogProperties param {
+        .type = DialogType::ACTION_SHEET,
+        .title = "dialog test",
+        .content = "dialog content test",
+        .sheetsInfo = sheetItems,
+        .isShowInSubWindow = false,
+        .offset = DimensionOffset(Dimension(10.0), Dimension(10.0)),
+    };
+    param.maskColor = Color::BLACK;
+    param.type = DialogType::ACTION_SHEET;
+    auto dialogWithCustom = DialogView::CreateDialogNode(param, customNode);
+    ASSERT_NE(dialogWithCustom, nullptr);
+    auto property = dialogWithCustom->GetLayoutProperty<DialogLayoutProperty>();
+    DialogLayoutAlgorithm dialogLayoutAlgorithm;
+    auto layoutWrapper = AceType::MakeRefPtr<LayoutWrapperNode>(
+        dialogWithCustom, dialogWithCustom->GetGeometryNode(), dialogWithCustom->GetLayoutProperty());
+    layoutWrapper->AppendChild(childLayoutWrapper);
+    /**
+        * @tc.steps: step3. test DialogLayoutAlgorithm's Measure function.
+        * @tc.expected: dialogLayoutAlgorithm.alignment_ equal to DialogAlignment::DEFAULT.
+        */
+    dialogLayoutAlgorithm.Measure(layoutWrapper.rawPtr_);
+    dialogLayoutAlgorithm.Layout(layoutWrapper.rawPtr_);
+    EXPECT_FALSE(property->GetIsScenceBoardDialog().value_or(false));
+}
+/**
+ * @tc.name: DialogPatternTest014
+ * @tc.desc: fullfill DialogPattern function branch
+ * @tc.type: FUNC
+ */
+HWTEST_F(DialogPatternTestNg, DialogPatternTest014, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create GestureEvent and DialogProperties.
+     * @tc.expected: the GestureEvent and DialogProperties created successfully.
+     */
+    GestureEvent info;
+    Offset globalLocation(10, 6);
+    OffsetF translate(10, 5);
+    DialogProperties param;
+    param.autoCancel = true;
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<DialogTheme>()));
+    /**
+     * @tc.steps: step2. create dialog node.
+     * @tc.expected: the dialog node created successfully.
+     */
+    auto child = FrameNode::GetOrCreateFrameNode(
+        V2::CUSTOM_DIALOG_COMPONENT_TAG, 0, []() { return AceType::MakeRefPtr<DialogPattern>(nullptr, nullptr); });
+    auto Dialog = DialogView::CreateDialogNode(param, child);
+    EXPECT_TRUE(Dialog);
+    ASSERT_NE(Dialog, nullptr);
+    child->GetGeometryNode()->SetMarginFrameOffset(translate);
+    EXPECT_EQ(Dialog->TotalChildCount(), 1);
+    /**
+     * @tc.steps: step3. create dialogPattern.
+     * @tc.expected: the dialogPattern created successfully.
+     */
+    auto dialogPattern = Dialog->GetPattern<DialogPattern>();
+    EXPECT_TRUE(dialogPattern);
+    ASSERT_NE(dialogPattern, nullptr);
+    info.SetGlobalLocation(globalLocation);
+    info.SetSourceDevice(SourceType::KEYBOARD);
+    dialogPattern->HandleClick(info);
+    EXPECT_EQ(info.GetSourceDevice(), SourceType::KEYBOARD);
+}
+/**
+ * @tc.name: DialogPatternTest015
+ * @tc.desc: fullfill DialogPattern function branch
+ * @tc.type: FUNC
+ */
+HWTEST_F(DialogPatternTestNg, DialogPatternTest015, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create GestureEvent and DialogProperties.
+     * @tc.expected: the GestureEvent and DialogProperties created successfully.
+     */
+    GestureEvent info;
+    Offset globalLocation(10, 6);
+    OffsetF translate(10, 5);
+    DialogProperties param;
+    param.autoCancel = true;
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<DialogTheme>()));
+    /**
+     * @tc.steps: step2. create dialog node.
+     * @tc.expected: the dialog node created successfully.
+     */
+    auto child = FrameNode::GetOrCreateFrameNode(
+        V2::CUSTOM_DIALOG_COMPONENT_TAG, 0, []() { return AceType::MakeRefPtr<DialogPattern>(nullptr, nullptr); });
+    auto Dialog = DialogView::CreateDialogNode(param, child);
+    EXPECT_TRUE(Dialog);
+    ASSERT_NE(Dialog, nullptr);
+    child->GetGeometryNode()->SetMarginFrameOffset(translate);
+    EXPECT_EQ(Dialog->TotalChildCount(), 1);
+    /**
+     * @tc.steps: step3. create dialogPattern.
+     * @tc.expected: the dialogPattern created successfully.
+     */
+    auto dialogPattern = Dialog->GetPattern<DialogPattern>();
+    EXPECT_TRUE(dialogPattern);
+    ASSERT_NE(dialogPattern, nullptr);
+    info.SetGlobalLocation(globalLocation);
+    auto overlayManager = AceType::MakeRefPtr<OverlayManager>(Dialog);
+    CHECK_NULL_VOID(overlayManager);
+
+    auto host = dialogPattern->GetHost();
+    host->isRemoving_ = true;
+    dialogPattern->HandleClick(info);
+}
+/**
+ * @tc.name: DialogPatternTest016
+ * @tc.desc: fullfill DialogPattern function branch
+ * @tc.type: FUNC
+ */
+HWTEST_F(DialogPatternTestNg, DialogPatternTest016, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create GestureEvent and DialogProperties.
+     * @tc.expected: the GestureEvent and DialogProperties created successfully.
+     */
+    GestureEvent info;
+    Offset globalLocation(10, 6);
+    OffsetF translate(10, 5);
+    DialogProperties param;
+    param.autoCancel = true;
+    param.buttons = btnItems;
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<DialogTheme>()));
+    /**
+     * @tc.steps: step2. create dialog node.
+     * @tc.expected: the dialog node created successfully.
+     */
+    auto child = FrameNode::GetOrCreateFrameNode(
+        V2::CUSTOM_DIALOG_COMPONENT_TAG, 0, []() { return AceType::MakeRefPtr<DialogPattern>(nullptr, nullptr); });
+    auto Dialog = DialogView::CreateDialogNode(param, child);
+    EXPECT_TRUE(Dialog);
+    ASSERT_NE(Dialog, nullptr);
+    child->GetGeometryNode()->SetMarginFrameOffset(translate);
+    EXPECT_EQ(Dialog->TotalChildCount(), 1);
+    /**
+     * @tc.steps: step3. create dialogPattern.
+     * @tc.expected: the dialogPattern created successfully.
+     */
+    auto dialogPattern = Dialog->GetPattern<DialogPattern>();
+    EXPECT_TRUE(dialogPattern);
+    ASSERT_NE(dialogPattern, nullptr);
+    info.SetGlobalLocation(globalLocation);
+    auto overlayManager = AceType::MakeRefPtr<OverlayManager>(Dialog);
+    CHECK_NULL_VOID(overlayManager);
+    Recorder::EventRecorder::Get().eventSwitch_.componentEnable = true;
+    Recorder::EventRecorder::Get().componentEnable_ = true;
+    dialogPattern->RecordEvent(BUTTONINDEX_TEST_1);
+    EXPECT_EQ(dialogPattern->dialogProperties_.buttons.at(BUTTONINDEX_TEST_1).text, "second button");
+}
+/**
+ * @tc.name: DialogPatternTest017
+ * @tc.desc: fullfill DialogPattern function branch
+ * @tc.type: FUNC
+ */
+HWTEST_F(DialogPatternTestNg, DialogPatternTest017, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create GestureEvent and DialogProperties.
+     * @tc.expected: the GestureEvent and DialogProperties created successfully.
+     */
+    GestureEvent info;
+    Offset globalLocation(10, 6);
+    OffsetF translate(10, 5);
+    DialogProperties param;
+    param.autoCancel = true;
+    param.buttons = btnItems;
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<DialogTheme>()));
+    /**
+     * @tc.steps: step2. create dialog node.
+     * @tc.expected: the dialog node created successfully.
+     */
+    auto child = FrameNode::GetOrCreateFrameNode(
+        V2::CUSTOM_DIALOG_COMPONENT_TAG, 0, []() { return AceType::MakeRefPtr<DialogPattern>(nullptr, nullptr); });
+    auto Dialog = DialogView::CreateDialogNode(param, child);
+    EXPECT_TRUE(Dialog);
+    ASSERT_NE(Dialog, nullptr);
+    child->GetGeometryNode()->SetMarginFrameOffset(translate);
+    EXPECT_EQ(Dialog->TotalChildCount(), 1);
+    /**
+     * @tc.steps: step3. create dialogPattern.
+     * @tc.expected: the dialogPattern created successfully.
+     */
+    Recorder::EventParamsBuilder builderTest1;
+    builderTest1.SetEventType(Recorder::EventType::DIALOG_CANCEL);
+    Recorder::EventParamsBuilder builderTest2;
+    builderTest2.SetEventType(Recorder::EventType::DIALOG_ACTION);
+    auto dialogPattern = Dialog->GetPattern<DialogPattern>();
+    ASSERT_NE(dialogPattern, nullptr);
+    ASSERT_NE(dialogPattern, nullptr);
+    info.SetGlobalLocation(globalLocation);
+    auto overlayManager = AceType::MakeRefPtr<OverlayManager>(Dialog);
+    CHECK_NULL_VOID(overlayManager);
+    Recorder::EventRecorder::Get().eventSwitch_.componentEnable = true;
+    Recorder::EventRecorder::Get().componentEnable_ = true;
+    dialogPattern->RecordEvent(BUTTONINDEX_TEST_2);
+    EXPECT_EQ(builderTest1.GetEventType(), Recorder::EventType::DIALOG_CANCEL);
+
+    dialogPattern->RecordEvent(BUTTONINDEX_TEST_3);
+    EXPECT_EQ(builderTest2.GetEventType(), Recorder::EventType::DIALOG_ACTION);
 }
 } // namespace OHOS::Ace::NG

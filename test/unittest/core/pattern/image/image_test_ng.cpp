@@ -1553,7 +1553,7 @@ HWTEST_F(ImageTestNg, ImageLayoutFunction001, TestSize.Level1)
      */
     EXPECT_EQ(pattern->loadingCtx_->imageFit_, ImageFit::COVER);
     EXPECT_EQ(pattern->loadingCtx_->autoResize_, true);
-    EXPECT_EQ(pattern->loadingCtx_->dstSize_, SizeF(WIDTH, HEIGHT));
+    EXPECT_EQ(pattern->loadingCtx_->dstSize_, SizeF(0, 0));
 }
 
 /**

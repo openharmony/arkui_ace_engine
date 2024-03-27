@@ -37,6 +37,7 @@ public:
         auto value = MakeRefPtr<TextPickerLayoutProperty>();
         value->LayoutProperty::UpdateLayoutProperty(DynamicCast<LayoutProperty>(this));
         value->propDefaultPickerItemHeight_ = CloneDefaultPickerItemHeight();
+        value->propGradientHeight_ = CloneGradientHeight();
         value->propSelected_ = CloneSelected();
         value->propValue_ = CloneValue();
         value->propSelecteds_ = CloneSelecteds();
@@ -54,6 +55,7 @@ public:
     {
         LinearLayoutProperty::Reset();
         ResetDefaultPickerItemHeight();
+        ResetGradientHeight();
         ResetSelected();
         ResetValue();
         ResetSelecteds();
@@ -71,6 +73,7 @@ public:
         LayoutProperty::ToJsonValue(json);
 
         json->Put("defaultPickerItemHeight", GetDefaultPickerItemHeightValue(Dimension(0)).ToString().c_str());
+        json->Put("gradientHeight", GetGradientHeightValue(Dimension(0)).ToString().c_str());
         json->Put("selected", std::to_string(GetSelectedValue(0)).c_str());
         json->Put("value", GetValueValue("").c_str());
         if (propDivider_.has_value()) {
@@ -139,6 +142,7 @@ public:
     }
 
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(DefaultPickerItemHeight, Dimension, PROPERTY_UPDATE_MEASURE);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(GradientHeight, Dimension, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(CanLoop, bool, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(Selected, uint32_t, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(Value, std::string, PROPERTY_UPDATE_MEASURE);

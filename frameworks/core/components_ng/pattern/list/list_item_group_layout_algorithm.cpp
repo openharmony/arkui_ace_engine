@@ -859,6 +859,7 @@ void ListItemGroupLayoutAlgorithm::LayoutHeaderFooter(LayoutWrapper* layoutWrapp
             headerPos = std::max(headerPos, stickyPos);
         }
         LayoutIndex(wrapper, paddingOffset, crossSize, headerPos);
+        startHeaderPos_ = startHeaderPos_ > mainPos ? mainPos : startHeaderPos_;
     }
 
     if (footerIndex_ >= 0) {
@@ -878,6 +879,7 @@ void ListItemGroupLayoutAlgorithm::LayoutHeaderFooter(LayoutWrapper* layoutWrapp
             }
         }
         LayoutIndex(wrapper, paddingOffset, crossSize, endPos);
+        endFooterPos_ = mainPos + totalMainSize_ - footerMainSize_ - listMainSize;
     }
 }
 

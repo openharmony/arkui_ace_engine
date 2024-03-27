@@ -32,6 +32,9 @@ namespace OHOS::Ace::NG {
 enum class NavDestinationState {
     ON_SHOWN = 0,
     ON_HIDDEN = 1,
+    ON_APPEAR = 2,
+    ON_DISAPPEAR = 3,
+    ON_BACKPRESS = 100,
 };
 
 struct NavDestinationInfo {
@@ -123,8 +126,7 @@ public:
         AbilityContextInfo&, napi_value, int32_t, const std::string&, const std::string&, RouterPageState);
     using DrawCommandSendHandleFunc = void (*)();
     using LayoutDoneHandleFunc = void (*)();
-    using NavDestinationSwitchHandleFunc = void (*)(
-        const AbilityContextInfo&, NavDestinationSwitchInfo&);
+    using NavDestinationSwitchHandleFunc = std::function<void(const AbilityContextInfo&, NavDestinationSwitchInfo&)>;
     void SetHandleNavigationChangeFunc(NavigationHandleFunc func);
     void SetHandleScrollEventChangeFunc(ScrollEventHandleFunc func);
     void SetHandleRouterPageChangeFunc(RouterPageHandleFunc func);
@@ -142,7 +144,7 @@ private:
     LayoutDoneHandleFunc layoutDoneHandleFunc_ = nullptr;
     DrawCommandSendHandleFunc drawCommandSendHandleFunc_ = nullptr;
     DensityHandleFunc densityHandleFunc_;
-    NavDestinationSwitchHandleFunc navDestinationSwitchHandleFunc_ = nullptr;
+    NavDestinationSwitchHandleFunc navDestinationSwitchHandleFunc_;
 
     napi_value GetUIContextValue();
 };
