@@ -28,6 +28,7 @@ WebAccessibilityNode::WebAccessibilityNode(const RefPtr<WebPattern>& webPattern)
             pageId_ = webNode->GetPageId();
         }
     }
+    AddFlag(NodeFlag::WEB_CORE_TAG);
 }
 
 RefPtr<FrameNode> WebAccessibilityNode::GetWebNode() const

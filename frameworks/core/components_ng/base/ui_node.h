@@ -545,6 +545,16 @@ public:
 
     virtual void PaintDebugBoundaryTreeAll(bool flag);
 
+    void AddFlag(uint32_t flag)
+    {
+        nodeFlag_ |= flag;
+    }
+
+    bool IsNodeHasFlag(uint32_t flag) const
+    {
+        return (flag & nodeFlag_) == flag;
+    }
+
 protected:
     std::list<RefPtr<UINode>>& ModifyChildren()
     {
@@ -623,6 +633,7 @@ private:
     NodeStatus nodeStatus_ = NodeStatus::NORMAL_NODE;
     RefPtr<ExportTextureInfo> exportTextureInfo_;
     int32_t instanceId_ = -1;
+    uint32_t nodeFlag_ { 0 };
 
     int32_t childrenUpdatedFrom_ = -1;
     static thread_local int64_t currentAccessibilityId_;

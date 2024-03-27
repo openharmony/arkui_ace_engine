@@ -15,9 +15,11 @@
 
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_WEB_WEB_ACCESSIBILITY_NODE_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_WEB_WEB_ACCESSIBILITY_NODE_H
+
 #include "base/memory/referenced.h"
 #include "base/web/webview/ohos_nweb/include/nweb_accessibility_node_info.h"
 #include "core/components_ng/base/frame_node.h"
+#include "core/components_ng/base/node_flag.h"
 #include "core/components_ng/property/property.h"
 
 namespace OHOS::Ace::NG {
