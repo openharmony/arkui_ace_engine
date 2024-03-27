@@ -2179,6 +2179,10 @@ void JSViewAbstract::SetVisibility(const JSCallbackInfo& info)
         visible = info[0]->ToNumber<int32_t>();
     }
 
+    if (visible < static_cast<int32_t>(VisibleType::VISIBLE) || visible > static_cast<int32_t>(VisibleType::GONE)) {
+        visible = 0;
+    }
+
     if (info.Length() > 1 && info[1]->IsFunction()) {
         RefPtr<JsFunction> jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(info[1]));
         auto targetNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
