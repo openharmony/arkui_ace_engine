@@ -149,7 +149,13 @@ void LayoutWrapper::ExpandSafeArea(bool isFocusOnPage)
     if (!selfExpansive && !host->NeedRestoreSafeArea()) {
         // if safeArea switch from valid to not valid, keep node restored and return
         // otherwise if node restored, meaning expansive parent did not adjust child or so on, restore cache
-        if (CheckValidSafeArea()) {
+        const auto& geometryTransition = GetLayoutProperty()->GetGeometryTransition();
+        auto pipeline = PipelineContext::GetCurrentContext();
+        CHECK_NULL_VOID(pipeline);
+        auto safeAreaManager = pipeline->GetSafeAreaManager();
+        CHECK_NULL_VOID(safeAreaManager);
+        if (!(host->GetId() == safeAreaManager->GetRootMeasureNodeId() && geometryTransition != nullptr) &&
+            CheckValidSafeArea()) {
             GetGeometryNode()->RestoreCache();
         }
         return;
