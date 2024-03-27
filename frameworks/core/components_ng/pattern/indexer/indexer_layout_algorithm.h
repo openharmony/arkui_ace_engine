@@ -48,6 +48,8 @@ public:
 private:
     void InitializeIndexer(LayoutWrapper* layoutWrapper);
     OffsetT<Dimension> GetPositionOfPopupNode(const RefPtr<IndexerLayoutProperty>& layoutProperty, float indexerWidth);
+    float GetMaxItemWidth(LayoutWrapper* layoutWrapper);
+    void MeasurePopup(LayoutWrapper* layoutWrapper, uint32_t childCount);
     std::vector<std::string> arrayValue_;
     uint32_t popupSize_ = 0;
     int32_t itemCount_ = 0;

@@ -73,6 +73,7 @@ void IndexerLayoutProperty::ToJsonValue(std::unique_ptr<JsonValue>& json) const
     json->Put("autoCollapse", propAutoCollapse_.value_or(false) ? "true" : "false");
     json->Put("popupHorizontalSpace", propPopupHorizontalSpace_.value_or(
         Dimension(NG::INDEXER_BUBBLE_INVALID_SPACE, DimensionUnit::VP)).ToString().c_str());
+    json->Put("adaptiveWidth", propAdaptiveWidth_.value_or(false) ? "true" : "false");
 }
 
 std::unique_ptr<JsonValue> IndexerLayoutProperty::ToJsonObjectValue(const TextStyle& textStyle)

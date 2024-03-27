@@ -69,6 +69,7 @@ public:
     virtual void SetIndexerBorderRadius(const Dimension& radius) {};
     virtual void SetPopupBackgroundBlurStyle(const BlurStyleOption& indexerBlurStyle) {};
     virtual void SetPopupTitleBackground(const std::optional<Color>& color) {};
+    virtual void SetAdaptiveWidth(bool state) {};
 
 private:
     static std::unique_ptr<IndexerModel> instance_;

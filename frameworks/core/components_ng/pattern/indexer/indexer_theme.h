@@ -98,6 +98,8 @@ inline constexpr double GRADIENT_COVER_HEIGHT = 16.0;
 inline constexpr uint32_t INDEXER_BUBBLE_MAXSIZE_COLLAPSED_API_TWELVE = 3; // 2 items + 1 letter
 inline constexpr float INDEXER_PADDING_TOP_API_TWELVE = 4.0f;
 inline constexpr uint32_t POPUP_TITLE_BG_COLOR_SINGLE = 0x00ffffff;
+inline constexpr float INDEXER_ZERO_WIDTH = 0.0f;
+inline constexpr int32_t INDEXER_COLLAPSE_WAIT_DURATION = 1;
 
 enum class AlignStyle {
     LEFT = 0,
