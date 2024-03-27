@@ -2297,7 +2297,7 @@ void PipelineContext::FlushMouseEvent()
     eventManager_->DispatchMouseHoverAnimationNG(scaleEvent);
 }
 
-bool PipelineContext::ChangeMouseStyle(int32_t nodeId, MouseFormat format)
+bool PipelineContext::ChangeMouseStyle(int32_t nodeId, MouseFormat format, int32_t windowId)
 {
     auto window = GetWindow();
     if (window && window->IsUserSetCursor()) {
@@ -2308,6 +2308,9 @@ bool PipelineContext::ChangeMouseStyle(int32_t nodeId, MouseFormat format)
     }
     auto mouseStyle = MouseStyle::CreateMouseStyle();
     CHECK_NULL_RETURN(mouseStyle, false);
+    if (windowId) {
+        return mouseStyle->ChangePointerStyle(windowId, format);
+    }
     return mouseStyle->ChangePointerStyle(GetWindowId(), format);
 }
 

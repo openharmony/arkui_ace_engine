@@ -386,7 +386,7 @@ void PipelineContext::RemoveFormVisibleChangeNode(int32_t nodeId) {}
 void PipelineContext::HandleVisibleAreaChangeEvent() {}
 void PipelineContext::HandleFormVisibleChangeEvent(bool isVisible) {}
 
-bool PipelineContext::ChangeMouseStyle(int32_t nodeId, MouseFormat format)
+bool PipelineContext::ChangeMouseStyle(int32_t nodeId, MouseFormat format, int32_t windowId)
 {
     return true;
 }
