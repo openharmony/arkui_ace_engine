@@ -271,7 +271,7 @@ const ArkUI_UIInputEvent* OH_ArkUI_GestureEvent_GetRawInputEvent(const ArkUI_Ges
 * @return 长按手势定时触发次数。
 * @since 12
 */
-int32_t OH_ArkUI_LongPress_GetRepeatNum(const ArkUI_GestureEvent* event);
+int32_t OH_ArkUI_LongPress_GetRepeatCount(const ArkUI_GestureEvent* event);
 
 /**
 * @brief 滑动手势返回手势主方向速度。

@@ -1990,6 +1990,8 @@ struct ArkUITabsControllerModifier {
 struct ArkUIGesture;
 
 struct ArkUIGestureModifier {
+    ArkUIGesture* (*createTapGesture)(ArkUI_Int32 count, ArkUI_Int32 fingers);
+    ArkUIGesture* (*createLongPressGesture)(ArkUI_Int32 fingers, bool repeat, ArkUI_Int32 duration);
     ArkUIGesture* (*createPanGesture)(ArkUI_Int32 fingers, ArkUI_Int32 direction, ArkUI_Float64 distance);
     void (*dispose)(ArkUIGesture* recognizer);
     // gesture event will received in common async event queue.
