@@ -402,7 +402,6 @@ public:
 
     void BindKeyboard(const std::function<void()>& keyboardBuilder, int32_t targetId);
     void CloseKeyboard(int32_t targetId);
-    void DestroyKeyboard();
 
     RefPtr<UINode> FindWindowScene(RefPtr<FrameNode> targetNode);
 
@@ -447,12 +446,12 @@ public:
     {
         keyboardAvoidance_ = supportAvoidance;
     }
-    
+
     void SupportCustomKeyboardAvoidance(RefPtr<RenderContext> context, AnimationOption option,
         RefPtr<FrameNode> customKeyboard);
 
     void SetCustomKeybroadHeight(float customHeight = 0.0);
-	
+
     void SetFilterActive(bool actived)
     {
         hasFilterActived = actived;

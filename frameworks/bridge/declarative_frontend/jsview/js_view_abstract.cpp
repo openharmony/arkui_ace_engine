@@ -7195,7 +7195,7 @@ void JSViewAbstract::JsDrawModifier(const JSCallbackInfo& info)
 
         auto jsDrawFunc = AceType::MakeRefPtr<JsFunction>(
             JSRef<JSObject>(jsDrawModifier), JSRef<JSFunc>::Cast(drawMethod));
-        
+
         return [execCtx, func = std::move(jsDrawFunc)](
             NG::DrawingContext& context) {
                 JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
