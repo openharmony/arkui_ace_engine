@@ -73,14 +73,6 @@ void CustomNodeBase::FireRecycleRenderFunc()
             recycleRenderFunc_();
         }
         AceType::DynamicCast<UINode>(Claim(this))->OnReuse();
-        recycleRenderFunc_ = nullptr;
-        if (SystemProperties::GetDeveloperModeOn()) {
-            auto pipeline = PipelineContext::GetCurrentContext();
-            CHECK_NULL_VOID(pipeline);
-            auto rootNode = pipeline->GetRootElement();
-            CHECK_NULL_VOID(rootNode);
-            rootNode->PaintDebugBoundaryTreeAll(SystemProperties::GetDebugBoundaryEnabled());
-        }
     }
 }
 

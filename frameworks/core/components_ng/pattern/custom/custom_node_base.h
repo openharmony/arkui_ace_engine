@@ -196,6 +196,7 @@ public:
 protected:
     std::string jsViewName_;
     ExtraInfo extraInfo_;
+    std::function<void()> recycleRenderFunc_;
 
 private:
     std::function<void()> updateFunc_;
@@ -206,7 +207,6 @@ private:
     std::function<void()> completeReloadFunc_;
     std::function<void(int32_t)> forceNodeUpdateFunc_;
     std::function<void(RefPtr<CustomNodeBase>)> recycleCustomNodeFunc_;
-    std::function<void()> recycleRenderFunc_;
     std::function<void(bool)> setActiveFunc_;
     std::function<void(const std::vector<std::string>&)> onDumpInfoFunc_;
     bool needRebuild_ = false;
