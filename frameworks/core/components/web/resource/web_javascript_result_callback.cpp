@@ -182,7 +182,7 @@ std::shared_ptr<NWebValue> WebJavaScriptResultCallBack::GetJavaScriptResult(
     return GetWebViewValue(result);
 }
 
-std::shared_ptr<NWebValue> WebJavaScriptResultCallBack::GetJavaScriptResult(
+std::shared_ptr<NWebValue> WebJavaScriptResultCallBack::GetJavaScriptResultFlowbuf(
     std::vector<std::shared_ptr<NWebValue>> args, const std::string& method, const std::string& object_name,
     int fd, int32_t routing_id, int32_t object_id)
 {
