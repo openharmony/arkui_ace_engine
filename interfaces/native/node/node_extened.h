@@ -69,17 +69,10 @@ struct ArkUI_DrawContext {
  * @since 12
  */
 struct ArkUI_NodeCustomEvent {
-    /** 类型。*/
-    int32_t kind;
-    /** 自定义事件ID。*/
     int32_t targetId;
-    /** 自定义组件。*/
     ArkUI_NodeHandle node;
-     /** 自定义组件事件使用数字类型回调参数。*/
-    ArkUI_CustomNodeAsyncEvent componentAsyncEvent;
-    /** 自定义组件绘制指针。*/
-    void* canvas;
-    /** 自定义事件参数。*/
+    ArkUICustomNodeEvent* event;
+    ArkUI_LayoutConstraint constraint;
     void* userData;
 };
 

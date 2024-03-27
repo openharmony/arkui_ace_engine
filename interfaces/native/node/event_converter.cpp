@@ -307,14 +307,4 @@ void HandleInnerEvent(ArkUINodeEvent* innerEvent)
     }
 }
 
-bool ConvertCustomEvent(ArkUICustomNodeEvent* origin, ArkUI_NodeCustomEvent* event)
-{
-    if (memcpy_sp(event->componentAsyncEvent.data, MAX_COMPONENT_EVENT_ARG_NUM * sizeof(ArkUI_NumberValue),
-        origin->componentAsyncEvent.data, MAX_COMPONENT_EVENT_ARG_NUM * sizeof(ArkUI_NumberValue)) != 0) {
-        TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "fail to convert Custom origin event data");
-        return false;
-    }
-    return true;
-}
-
 }; // namespace OHOS::Ace::NodeModel
