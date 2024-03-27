@@ -607,6 +607,71 @@ HWTEST_F(MenuTestNg, MenuWrapperPatternTestNg008, TestSize.Level1)
 }
 
 /**
+ * @tc.name: MenuWrapperPatternTestNg009
+ * @tc.desc: test MenuWrapperPattern::CheckAndShowAnimation function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuTestNg, MenuWrapperPatternTestNg009, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create wrapper and child menu
+     */
+    auto wrapperNode =
+        FrameNode::CreateFrameNode(V2::MENU_WRAPPER_ETS_TAG, 1, AceType::MakeRefPtr<MenuWrapperPattern>(1));
+    auto mainMenu =
+        FrameNode::CreateFrameNode(V2::MENU_ETS_TAG, 2, AceType::MakeRefPtr<MenuPattern>(1, TEXT_TAG, MenuType::MENU));
+
+    mainMenu->MountToParent(wrapperNode);
+    auto wrapperPattern = wrapperNode->GetPattern<MenuWrapperPattern>();
+    ASSERT_NE(wrapperPattern, nullptr);
+    /**
+     * @tc.steps: step2. execute CheckAndShowAnimation
+     * @tc.expected: property is set as expected
+     */
+    wrapperPattern->isFirstShow_ = false;
+    wrapperPattern->CheckAndShowAnimation();
+    wrapperPattern->isFirstShow_ = true;
+    EXPECT_TRUE(wrapperPattern->isFirstShow_);
+    wrapperPattern->CheckAndShowAnimation();
+    EXPECT_FALSE(wrapperPattern->isFirstShow_);
+}
+
+/**
+ * @tc.name: MenuWrapperPatternTestNg010
+ * @tc.desc: test MenuWrapperPattern::GetAnimationOffset function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuTestNg, MenuWrapperPatternTestNg010, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create wrapper and child menu
+     */
+    auto wrapperNode =
+        FrameNode::CreateFrameNode(V2::MENU_WRAPPER_ETS_TAG, 1, AceType::MakeRefPtr<MenuWrapperPattern>(1));
+    auto mainMenu =
+        FrameNode::CreateFrameNode(V2::MENU_ETS_TAG, 2, AceType::MakeRefPtr<MenuPattern>(1, TEXT_TAG, MenuType::MENU));
+
+    auto prop = AceType::MakeRefPtr<MenuLayoutProperty>();
+    mainMenu->SetLayoutProperty(prop);
+    mainMenu->MountToParent(wrapperNode);
+    auto wrapperPattern = wrapperNode->GetPattern<MenuWrapperPattern>();
+    ASSERT_NE(wrapperPattern, nullptr);
+    /**
+     * @tc.steps: step2. execute GetAnimationOffset
+     * @tc.expected: property is set as expected
+     */
+    wrapperPattern->menuPlacement_ = Placement::LEFT;
+    wrapperPattern->GetAnimationOffset();
+    EXPECT_EQ(wrapperPattern->menuPlacement_, Placement::LEFT);
+    wrapperPattern->menuPlacement_ = Placement::RIGHT;
+    wrapperPattern->GetAnimationOffset();
+    EXPECT_EQ(wrapperPattern->menuPlacement_, Placement::RIGHT);
+    wrapperPattern->menuPlacement_ = Placement::TOP;
+    wrapperPattern->GetAnimationOffset();
+    EXPECT_EQ(wrapperPattern->menuPlacement_, Placement::TOP);
+}
+
+/**
  * @tc.name: MenuPatternTestNg001
  * @tc.desc: Verify RegisterOnTouch.
  * @tc.type: FUNC
@@ -2930,6 +2995,141 @@ HWTEST_F(MenuTestNg, CustomMenuItemPattern001, TestSize.Level1)
     auto touch = itemNode->GetOrCreateGestureEventHub()->touchEventActuator_;
     ASSERT_TRUE(touch);
     ASSERT_FALSE(touch->touchEvents_.empty());
+}
+
+/**
+ * @tc.name: CustomMenuItemPattern002
+ * @tc.desc: Test CustomMenuItem OnTouch
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuTestNg, CustomMenuItemPattern002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create menuItem.
+     */
+    MenuItemModelNG model;
+    auto customNode = FrameNode::CreateFrameNode("", -1, AceType::MakeRefPtr<Pattern>());
+    model.Create(customNode);
+    auto itemNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_TRUE(itemNode);
+    auto pattern = itemNode->GetPattern<CustomMenuItemPattern>();
+    ASSERT_TRUE(pattern);
+
+    pattern->lastTouchOffset_ = nullptr;
+    /**
+     * @tc.steps: step2. execute OnTouch
+     * @tc.expected: result as expected
+     */
+    // execute touch down event
+    TouchEventInfo info(MENU_TOUCH_EVENT_TYPE);
+    TouchLocationInfo locationInfo(TARGET_ID);
+    Offset location(1, 1);
+    locationInfo.SetTouchType(TouchType::DOWN);
+    locationInfo.SetLocalLocation(location);
+    info.touches_.emplace_back(locationInfo);
+    pattern->OnTouch(info);
+    EXPECT_EQ(info.touches_.size(), 1);
+
+    info.touches_.pop_front();
+    locationInfo.SetTouchType(TouchType::UP);
+    info.touches_.emplace_back(locationInfo);
+    pattern->OnTouch(info);
+    EXPECT_EQ(info.touches_.size(), 1);
+
+    pattern->lastTouchOffset_ = std::make_unique<Offset>(Offset(1, 0));
+    info.touches_.pop_front();
+    locationInfo.SetTouchType(TouchType::UP);
+    info.touches_.emplace_back(locationInfo);
+    pattern->OnTouch(info);
+    EXPECT_EQ(info.touches_.size(), 1);
+
+    info.touches_.pop_front();
+    locationInfo.SetTouchType(TouchType::CANCEL);
+    info.touches_.emplace_back(locationInfo);
+    pattern->OnTouch(info);
+    EXPECT_EQ(info.touches_.size(), 1);
+}
+
+/**
+ * @tc.name: CustomMenuItemPattern003
+ * @tc.desc: Test CustomMenuItem OnKeyEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuTestNg, CustomMenuItemPattern003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create menuItem.
+     */
+    MenuItemModelNG model;
+    auto customNode = FrameNode::CreateFrameNode("", -1, AceType::MakeRefPtr<Pattern>());
+    model.Create(customNode);
+    auto itemNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_TRUE(itemNode);
+    auto pattern = itemNode->GetPattern<CustomMenuItemPattern>();
+    ASSERT_TRUE(pattern);
+
+    /**
+     * @tc.steps: step2. execute OnKeyEvent
+     * @tc.expected: result as expected
+     */
+    KeyEvent keyEvent(KeyCode::KEY_ESCAPE, KeyAction::DOWN);
+    auto ret = pattern->OnKeyEvent(keyEvent);
+    EXPECT_FALSE(ret);
+
+    keyEvent.code = KeyCode::KEY_ENTER;
+    ret = pattern->OnKeyEvent(keyEvent);
+    EXPECT_TRUE(ret);
+
+    keyEvent.action = KeyAction::UP;
+    ret = pattern->OnKeyEvent(keyEvent);
+    EXPECT_FALSE(ret);
+}
+
+/**
+ * @tc.name: MenuItemLayoutAlgorithm001
+ * @tc.desc: Test MenuItemLayoutAlgorithm Measure
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuTestNg, MenuItemLayoutAlgorithm001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create menuItem.
+     */
+    auto wrapperNode =
+        FrameNode::CreateFrameNode(V2::MENU_WRAPPER_ETS_TAG, 1, AceType::MakeRefPtr<MenuWrapperPattern>(1));
+    auto mainMenu = FrameNode::CreateFrameNode(
+        V2::MENU_ETS_TAG, 2, AceType::MakeRefPtr<MenuPattern>(1, TEXT_TAG, MenuType::CONTEXT_MENU));
+    auto subMenu = FrameNode::CreateFrameNode(
+        V2::MENU_ETS_TAG, 3, AceType::MakeRefPtr<MenuPattern>(1, TEXT_TAG, MenuType::SUB_MENU));
+    auto menuItemNode = FrameNode::CreateFrameNode(V2::MENU_ITEM_ETS_TAG, 4, AceType::MakeRefPtr<MenuItemPattern>());
+    auto leftNode = FrameNode::CreateFrameNode("", -1, AceType::MakeRefPtr<Pattern>());
+    auto rightNode = FrameNode::CreateFrameNode("", -1, AceType::MakeRefPtr<Pattern>());
+    menuItemNode->AddChild(leftNode);
+    menuItemNode->AddChild(rightNode);
+    menuItemNode->MountToParent(mainMenu);
+    mainMenu->MountToParent(wrapperNode);
+    subMenu->MountToParent(wrapperNode);
+    auto menuItemPattern = menuItemNode->GetPattern<MenuItemPattern>();
+    ASSERT_NE(menuItemPattern, nullptr);
+    auto algorithm = AceType::DynamicCast<MenuItemLayoutAlgorithm>(menuItemPattern->CreateLayoutAlgorithm());
+    ASSERT_NE(algorithm, nullptr);
+    auto props = menuItemNode->GetLayoutProperty();
+    ASSERT_NE(props, nullptr);
+    SizeF value(MENU_ITEM_SIZE_WIDTH, MENU_ITEM_SIZE_HEIGHT);
+    props->UpdateMarginSelfIdealSize(value);
+    props->UpdateContentConstraint();
+
+    /**
+     * @tc.steps: step2. execute Measure
+     * @tc.expected: prop is set as expected
+     */
+    algorithm->Measure(AceType::RawPtr(menuItemNode));
+    algorithm->Layout(AceType::RawPtr(menuItemNode));
+
+    props->UpdateUserDefinedIdealSize(
+        CalcSize(CalcLength(MENU_ITEM_SIZE_WIDTH), CalcLength(MENU_ITEM_SIZE_HEIGHT)));
+    algorithm->Measure(AceType::RawPtr(menuItemNode));
+    EXPECT_TRUE(props->calcLayoutConstraint_->selfIdealSize.has_value());
 }
 
 /**
