@@ -118,6 +118,8 @@ public:
         return sections_;
     }
     RefPtr<WaterFlowSections> GetOrCreateWaterFlowSections();
+    void ResetSections();
+
     /**
      * @brief Callback function when Sections data has changed.
      *
