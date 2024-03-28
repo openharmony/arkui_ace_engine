@@ -144,6 +144,10 @@ void LayoutWrapper::ExpandSafeArea(bool isFocusOnPage)
 {
     auto host = GetHostNode();
     CHECK_NULL_VOID(host);
+    auto parent = host->GetAncestorNodeOfFrame();
+    if (parent && parent->GetPattern<ScrollablePattern>()) {
+        return;
+    }
     auto&& opts = GetLayoutProperty()->GetSafeAreaExpandOpts();
     auto selfExpansive = host->SelfExpansive();
     if (!selfExpansive && !host->NeedRestoreSafeArea()) {
@@ -160,10 +164,6 @@ void LayoutWrapper::ExpandSafeArea(bool isFocusOnPage)
         return;
     }
     CHECK_NULL_VOID(selfExpansive);
-    auto parent = host->GetAncestorNodeOfFrame();
-    if (parent && parent->GetPattern<ScrollablePattern>()) {
-        return;
-    }
 
     if ((opts->edges & SAFE_AREA_EDGE_BOTTOM) && (opts->type & SAFE_AREA_TYPE_KEYBOARD) && isFocusOnPage) {
         ExpandIntoKeyboard();
