@@ -618,6 +618,10 @@ bool FocusHub::OnKeyEventScope(const KeyEvent& keyEvent)
         return true;
     }
 
+    if (keyEvent.isPreIme) {
+        return false;
+    }
+
     if (keyEvent.action != KeyAction::DOWN) {
         return false;
     }
