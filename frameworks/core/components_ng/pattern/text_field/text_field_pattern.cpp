@@ -2521,6 +2521,15 @@ void TextFieldPattern::UpdateCaretPositionWithClamp(const int32_t& pos)
         std::clamp(pos, 0, static_cast<int32_t>(contentController_->GetWideText().length())));
 }
 
+void TextFieldPattern::ProcessOverlay(const OverlayRequest& request)
+{
+    auto newRequest = request;
+    auto needAvoid = CaretAvoidSoftKeyboard();
+    // Avoid menu that appear and then close immediately.
+    newRequest.menuIsShow = newRequest.menuIsShow && !needAvoid;
+    selectOverlay_->ProcessOverlay(newRequest);
+}
+
 void TextFieldPattern::DelayProcessOverlay(const OverlayRequest& request)
 {
     processOverlayDelayTask_ = [weak = WeakClaim(this), request]() {
@@ -6208,7 +6217,7 @@ void TextFieldPattern::OnVirtualKeyboardAreaChanged()
 {
     CHECK_NULL_VOID(SelectOverlayIsOn());
     selectController_->CalculateHandleOffset();
-    ProcessOverlay({ .menuIsShow = false });
+    selectOverlay_->ProcessOverlayOnAreaChanged({ .menuIsShow = false });
 }
 
 void TextFieldPattern::PasswordResponseKeyEvent()
@@ -6482,5 +6491,14 @@ void TextFieldPattern::SetThemeAttr()
     } else {
         layoutProperty->UpdateTextColor(paintProperty->GetTextColorFlagByUserValue());
     }
+}
+
+const Dimension& TextFieldPattern::GetAvoidSoftKeyboardOffset() const
+{
+    auto textfieldTheme = GetTheme();
+    if (!textfieldTheme) {
+        return TextBase::GetAvoidSoftKeyboardOffset();
+    }
+    return textfieldTheme->GetAvoidKeyboardOffset();
 }
 } // namespace OHOS::Ace::NG

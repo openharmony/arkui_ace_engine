@@ -716,8 +716,8 @@ void PipelineBase::OnVirtualKeyboardAreaChange(Rect keyboardArea,
     OnVirtualKeyboardHeightChange(keyboardHeight, rsTransaction, safeHeight, supportAvoidance);
 }
 
-void PipelineBase::OnVirtualKeyboardAreaChange(
-    Rect keyboardArea, double positionY, double height, const std::shared_ptr<Rosen::RSTransaction>& rsTransaction)
+void PipelineBase::OnVirtualKeyboardAreaChange(Rect keyboardArea, double positionY, double height,
+    const std::shared_ptr<Rosen::RSTransaction>& rsTransaction, bool forceChange)
 {
     auto currentContainer = Container::Current();
     if (currentContainer && !currentContainer->IsSubContainer()) {
@@ -731,7 +731,7 @@ void PipelineBase::OnVirtualKeyboardAreaChange(
     if (NotifyVirtualKeyBoard(rootWidth_, rootHeight_, keyboardHeight)) {
         return;
     }
-    OnVirtualKeyboardHeightChange(keyboardHeight, positionY, height, rsTransaction);
+    OnVirtualKeyboardHeightChange(keyboardHeight, positionY, height, rsTransaction, forceChange);
 }
 
 void PipelineBase::OnFoldStatusChanged(FoldStatus foldStatus)
