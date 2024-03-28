@@ -315,7 +315,7 @@ void DialogLayoutAlgorithm::GetDialogWidth(double& width)
     if (width_.Unit() == DimensionUnit::PERCENT) {
         width = width_.ConvertToPxWithSize(widthMax_);
     } else {
-        width = width_.Value();
+        width = width_.ConvertToPx();
     }
     if (width > widthMax_) {
         width = widthMax_;
@@ -415,7 +415,7 @@ void DialogLayoutAlgorithm::SetDialogSize(
         if (height_.Unit() == DimensionUnit::PERCENT) {
             heightValue = height_.ConvertToPxWithSize(height);
         } else {
-            heightValue = height_.Value();
+            heightValue = height_.ConvertToPx();
         }
         if (heightValue > height) {
             heightValue = height;
@@ -508,7 +508,9 @@ OffsetF DialogLayoutAlgorithm::ComputeChildPosition(
         ConvertToPx(CalcLength(dialogOffset_.GetY()), layoutConstraint->scaleProperty, selfSize.Height());
     OffsetF dialogOffset = OffsetF(dialogOffsetX.value_or(0.0), dialogOffsetY.value_or(0.0));
     auto maxSize = layoutConstraint->maxSize;
-    maxSize.MinusHeight(safeAreaInsets_.bottom_.Length());
+    if (!customSize_) {
+        maxSize.MinusHeight(safeAreaInsets_.bottom_.Length());
+    }
     if (!SetAlignmentSwitch(maxSize, childSize, topLeftPoint)) {
         topLeftPoint = OffsetF(maxSize.Width() - childSize.Width(), maxSize.Height() - childSize.Height()) / HALF;
     }
@@ -631,6 +633,7 @@ void DialogLayoutAlgorithm::UpdateSafeArea()
     if (container->IsSubContainer()) {
         currentId = SubwindowManager::GetInstance()->GetParentContainerId(Container::CurrentId());
         container = AceEngine::Get().GetContainer(currentId);
+        CHECK_NULL_VOID(container);
         ContainerScope scope(currentId);
     }
     auto pipelineContext = container->GetPipelineContext();

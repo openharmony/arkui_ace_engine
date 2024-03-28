@@ -118,8 +118,6 @@ void NavDestinationPattern::UpdateBackgroundColorIfNeeded(RefPtr<NavDestinationG
         return;
     }
     renderContext->UpdateBackgroundColor(theme->GetBackgroundColor());
-    TAG_LOGI(AceLogTag::ACE_NAVIGATION, "Set default background color: %{public}s",
-        renderContext->GetBackgroundColor()->ColorToString().c_str());
 }
 
 void NavDestinationPattern::UpdateTitlebarVisibility(RefPtr<NavDestinationGroupNode>& hostNode)
@@ -229,19 +227,6 @@ void NavDestinationPattern::OnAttachToFrameNode()
         SafeAreaExpandOpts opts = {.type = SAFE_AREA_TYPE_SYSTEM, .edges = SAFE_AREA_EDGE_ALL};
         host->GetLayoutProperty()->UpdateSafeAreaExpandOpts(opts);
     }
-}
-
-void NavDestinationPattern::OnAttachToMainTree()
-{
-    RefPtr<UINode> node = DynamicCast<UINode>(GetHost());
-    while (node) {
-        if (node->GetTag() == V2::NAVIGATION_VIEW_ETS_TAG) {
-            break;
-        }
-        node = node->GetParent();
-    }
-    CHECK_NULL_VOID(node);
-    navigationNode_ = AceType::WeakClaim(RawPtr(node));
 }
 
 void NavDestinationPattern::DumpInfo()

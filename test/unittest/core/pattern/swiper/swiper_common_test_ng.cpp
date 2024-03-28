@@ -18,11 +18,7 @@
 
 namespace OHOS::Ace::NG {
 
-namespace {
-const SwiperArrowParameters ARROW_PARAMETERS = {
-    true, true, Dimension(24.f), Color::BLACK, Dimension(18.f), Color::FromString("#182431")
-};
-} // namespace
+namespace {} // namespace
 
 class SwiperCommonTestNg : public SwiperTestNg {
 public:
@@ -88,8 +84,16 @@ HWTEST_F(SwiperCommonTestNg, HandleTouchEvent002, TestSize.Level1)
  */
 HWTEST_F(SwiperCommonTestNg, HandleTouchEvent003, TestSize.Level1)
 {
+    /**
+     * @tc.steps: step1. Swipe to item(index:1), set animation to true
+     * @tc.expected: When touch up, will trigger UpdateAnimationProperty and stop animation
+     */
     CreateWithItem([](SwiperModelNG model) {});
+    controller_->ShowNext();
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(pattern_->GetCurrentIndex(), 1);
     pattern_->springAnimationIsRunning_ = true;
+    pattern_->childScrolling_ = true;
 
     /**
      * @tc.steps: step1. Touch down a location
@@ -98,6 +102,7 @@ HWTEST_F(SwiperCommonTestNg, HandleTouchEvent003, TestSize.Level1)
     pattern_->HandleTouchEvent(CreateTouchEventInfo(TouchType::DOWN, Offset()));
     EXPECT_TRUE(pattern_->isTouchDown_);
     EXPECT_FALSE(pattern_->springAnimationIsRunning_);
+    EXPECT_FALSE(pattern_->childScrolling_);
 
     /**
      * @tc.steps: step2. Touch up
@@ -106,6 +111,7 @@ HWTEST_F(SwiperCommonTestNg, HandleTouchEvent003, TestSize.Level1)
     pattern_->HandleTouchEvent(CreateTouchEventInfo(TouchType::UP, Offset()));
     EXPECT_FALSE(pattern_->isTouchDown_);
     EXPECT_TRUE(pattern_->springAnimationIsRunning_);
+    EXPECT_TRUE(pattern_->moveDirection_);
 }
 
 /**
@@ -163,40 +169,24 @@ HWTEST_F(SwiperCommonTestNg, HandleTouchEvent005, TestSize.Level1)
 }
 
 /**
- * @tc.name: SwiperController001
- * @tc.desc: Test SwiperController func
+ * @tc.name: HandleTouchEvent006
+ * @tc.desc: When touch down on indicatorNode area, but no indicatorNode, the animation will stop
  * @tc.type: FUNC
  */
-HWTEST_F(SwiperCommonTestNg, SwiperController001, TestSize.Level1)
+HWTEST_F(SwiperCommonTestNg, HandleTouchEvent006, TestSize.Level1)
 {
     CreateWithItem([](SwiperModelNG model) {
-        model.SetDuration(0.f); // for SwipeToWithoutAnimation
+        model.SetShowIndicator(false); // not show indicator
     });
-    RefPtr<SwiperController> controller = pattern_->GetSwiperController();
-    EXPECT_EQ(pattern_->GetCurrentShownIndex(), 0);
+    pattern_->translateAnimationIsRunning_ = true;
 
     /**
-     * @tc.steps: step1. Call ShowNext
-     * @tc.expected: Show next page
-     */
-    controller->ShowNext();
-    FlushLayoutTask(frameNode_);
-    EXPECT_EQ(pattern_->GetCurrentShownIndex(), 1);
-    
-    /**
-     * @tc.steps: step2. Call ShowPrevious
-     * @tc.expected: Show previous page
-     */
-    controller->ShowPrevious();
-    FlushLayoutTask(frameNode_);
-    EXPECT_EQ(pattern_->GetCurrentShownIndex(), 0);
-    
-    /**
-     * @tc.steps: step3. Call FinishAnimation
+     * @tc.steps: step1. Touch down on indicatorNode area
      * @tc.expected: Animation stoped
      */
-    controller->FinishAnimation();
-    EXPECT_TRUE(pattern_->isUserFinish_);
+    pattern_->HandleTouchEvent(CreateTouchEventInfo(TouchType::DOWN, Offset(SWIPER_WIDTH / 2, SWIPER_HEIGHT)));
+    EXPECT_TRUE(pattern_->isTouchDown_);
+    EXPECT_FALSE(pattern_->translateAnimationIsRunning_);
 }
 
 /**
@@ -214,13 +204,12 @@ HWTEST_F(SwiperCommonTestNg, Event001, TestSize.Level1)
     CreateWithItem([=](SwiperModelNG model) {
         model.SetOnChange(std::move(onChange));
     });
-    RefPtr<SwiperController> controller = pattern_->GetSwiperController();
 
     /**
      * @tc.steps: step1. Show next page
      * @tc.expected: currentIndex change to 1
      */
-    controller->ShowNext();
+    controller_->ShowNext();
     FlushLayoutTask(frameNode_);
     EXPECT_EQ(currentIndex, 1);
 
@@ -228,7 +217,7 @@ HWTEST_F(SwiperCommonTestNg, Event001, TestSize.Level1)
      * @tc.steps: step2. Show previous page
      * @tc.expected: currentIndex change to 0
      */
-    controller->ShowPrevious();
+    controller_->ShowPrevious();
     FlushLayoutTask(frameNode_);
     EXPECT_EQ(currentIndex, 0);
 }
@@ -253,13 +242,12 @@ HWTEST_F(SwiperCommonTestNg, Event002, TestSize.Level1)
         model.SetOnAnimationStart(std::move(onAnimationStart));
         model.SetOnAnimationEnd(std::move(onAnimationEnd));
     });
-    RefPtr<SwiperController> controller = pattern_->GetSwiperController();
 
     /**
      * @tc.steps: step1. Show next page
      * @tc.expected: Animation event will be called
      */
-    controller->ShowNext();
+    controller_->ShowNext();
     FlushLayoutTask(frameNode_);
     EXPECT_TRUE(isAnimationStart);
     EXPECT_TRUE(isAnimationEnd);
@@ -326,8 +314,7 @@ HWTEST_F(SwiperCommonTestNg, AccessibilityProperty003, TestSize.Level1)
      * @tc.steps: step2. Show next page, Current is second(middle) page
      * @tc.expected: ACTION_SCROLL_FORWARD ACTION_SCROLL_BACKWARD
      */
-    RefPtr<SwiperController> controller = pattern_->GetSwiperController();
-    controller->ShowNext();
+    controller_->ShowNext();
     FlushLayoutTask(frameNode_);
     accessibilityProperty_->ResetSupportAction();
     uint64_t exptectActions = 0;
@@ -354,12 +341,7 @@ HWTEST_F(SwiperCommonTestNg, AccessibilityProperty004, TestSize.Level1)
      * @tc.steps: step2. Show last page, Current is last page
      * @tc.expected: ACTION_SCROLL_BACKWARD
      */
-    RefPtr<SwiperController> controller = pattern_->GetSwiperController();
-    controller->ShowNext(); // call three times to last page
-    FlushLayoutTask(frameNode_);
-    controller->ShowNext();
-    FlushLayoutTask(frameNode_);
-    controller->ShowNext();
+    controller_->SwipeToWithoutAnimation(3);
     FlushLayoutTask(frameNode_);
     accessibilityProperty_->ResetSupportAction();
     uint64_t exptectActions = 0;
@@ -404,6 +386,69 @@ HWTEST_F(SwiperCommonTestNg, AccessibilityProperty006, TestSize.Level1)
     accessibilityProperty_->ResetSupportAction(); // call SetSpecificSupportAction
     uint64_t exptectActions = 0;
     EXPECT_EQ(GetActions(accessibilityProperty_), exptectActions);
+}
+
+/**
+ * @tc.name: PerformActionTest001
+ * @tc.desc: Swiper AccessibilityProperty PerformAction test ScrollForward and ScrollBackward.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperCommonTestNg, PerformActionTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Scrollable swiper
+     */
+    CreateWithItem([](SwiperModelNG model) {});
+    EXPECT_TRUE(accessibilityProperty_->IsScrollable());
+
+    /**
+     * @tc.steps: step2. call ActActionScrollForward
+     * @tc.expected: ShowNext is triggered
+     */
+    accessibilityProperty_->ActActionScrollForward();
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(pattern_->GetCurrentShownIndex(), 1);
+
+    /**
+     * @tc.steps: step3. call ActActionScrollBackward
+     * @tc.expected: ShowPrevious is triggered
+     */
+    accessibilityProperty_->ActActionScrollBackward();
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(pattern_->GetCurrentShownIndex(), 0);
+}
+
+/**
+ * @tc.name: PerformActionTest002
+ * @tc.desc: Swiper AccessibilityProperty PerformAction test ScrollForward and ScrollBackward.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperCommonTestNg, PerformActionTest002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. UnScrollable swiper
+     */
+    Create([](SwiperModelNG model) {
+        model.SetLoop(false);
+        CreateItem(1);
+    });
+    EXPECT_FALSE(accessibilityProperty_->IsScrollable());
+
+    /**
+     * @tc.steps: step2. call ActActionScrollForward
+     * @tc.expected: ShowNext is not triggered
+     */
+    accessibilityProperty_->ActActionScrollForward();
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(pattern_->GetCurrentShownIndex(), 0);
+
+    /**
+     * @tc.steps: step3. call ActActionScrollBackward
+     * @tc.expected: ShowPrevious is not triggered
+     */
+    accessibilityProperty_->ActActionScrollBackward();
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(pattern_->GetCurrentShownIndex(), 0);
 }
 
 /**
@@ -533,8 +578,7 @@ HWTEST_F(SwiperCommonTestNg, FocusStep003, TestSize.Level1)
     /**
      * @tc.cases: LoopIndex is middle item(index:1)
      */
-    RefPtr<SwiperController> controller = pattern_->GetSwiperController();
-    controller->SwipeToWithoutAnimation(1);
+    controller_->SwipeToWithoutAnimation(1);
     FlushLayoutTask(frameNode_);
     EXPECT_EQ(pattern_->GetCurrentShownIndex(), 1);
     EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::UP, indicatorNode, leftArrowNode));
@@ -549,7 +593,7 @@ HWTEST_F(SwiperCommonTestNg, FocusStep003, TestSize.Level1)
     /**
      * @tc.cases: LoopIndex is last item(index:3)
      */
-    controller->SwipeToWithoutAnimation(3);
+    controller_->SwipeToWithoutAnimation(3);
     FlushLayoutTask(frameNode_);
     EXPECT_EQ(pattern_->GetCurrentShownIndex(), 3);
     EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::UP, indicatorNode, leftArrowNode));
@@ -591,8 +635,7 @@ HWTEST_F(SwiperCommonTestNg, FocusStep004, TestSize.Level1)
     /**
      * @tc.cases: LoopIndex is middle item(index:1)
      */
-    RefPtr<SwiperController> controller = pattern_->GetSwiperController();
-    controller->SwipeToWithoutAnimation(1);
+    controller_->SwipeToWithoutAnimation(1);
     FlushLayoutTask(frameNode_);
     EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::UP, leftArrowNode, nullptr));
     EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::DOWN, leftArrowNode, rightArrowNode));
@@ -603,7 +646,7 @@ HWTEST_F(SwiperCommonTestNg, FocusStep004, TestSize.Level1)
     /**
      * @tc.cases: LoopIndex is last item(index:3)
      */
-    controller->SwipeToWithoutAnimation(3);
+    controller_->SwipeToWithoutAnimation(3);
     FlushLayoutTask(frameNode_);
     EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::UP, leftArrowNode, nullptr));
     EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::DOWN, leftArrowNode, nullptr));
@@ -656,5 +699,259 @@ HWTEST_F(SwiperCommonTestNg, FocusStep006, TestSize.Level1)
      */
     EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::UP, rightArrowNode, leftArrowNode));
     EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::DOWN, rightArrowNode, nullptr));
+}
+
+/**
+ * @tc.name: SwiperPattern001
+ * @tc.desc: Swiper Paint Property.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperCommonTestNg, SwiperPattern001, TestSize.Level1)
+{
+    CreateWithItem([](SwiperModelNG model) {});
+
+    /**
+     * @tc.steps: step1. Test DumpAdvanceInfo function.
+     * @tc.expected: SwiperIndicatorType::DOT.
+     */
+    pattern_->lastSwiperIndicatorType_ = SwiperIndicatorType::DOT;
+    pattern_->DumpAdvanceInfo();
+    EXPECT_EQ(pattern_->lastSwiperIndicatorType_, SwiperIndicatorType::DOT);
+
+    /**
+     * @tc.steps: step2. Test DumpAdvanceInfo function.
+     * @tc.expected: SwiperIndicatorType::DIGIT.
+     */
+    pattern_->lastSwiperIndicatorType_ = SwiperIndicatorType::DIGIT;
+    pattern_->DumpAdvanceInfo();
+    EXPECT_EQ(pattern_->lastSwiperIndicatorType_, SwiperIndicatorType::DIGIT);
+
+    /**
+     * @tc.steps: step3. Test DumpAdvanceInfo function.
+     * @tc.expected: PanDirection::NONE.
+     */
+    pattern_->panDirection_.type = PanDirection::NONE;
+    pattern_->DumpAdvanceInfo();
+    EXPECT_EQ(pattern_->panDirection_.type, PanDirection::NONE);
+
+    pattern_->panDirection_.type = PanDirection::LEFT;
+    pattern_->DumpAdvanceInfo();
+    EXPECT_EQ(pattern_->panDirection_.type, PanDirection::LEFT);
+
+    pattern_->panDirection_.type = PanDirection::RIGHT;
+    pattern_->DumpAdvanceInfo();
+    EXPECT_EQ(pattern_->panDirection_.type, PanDirection::RIGHT);
+
+    pattern_->panDirection_.type = PanDirection::HORIZONTAL;
+    pattern_->DumpAdvanceInfo();
+    EXPECT_EQ(pattern_->panDirection_.type, PanDirection::HORIZONTAL);
+
+    pattern_->panDirection_.type = PanDirection::UP;
+    pattern_->DumpAdvanceInfo();
+    EXPECT_EQ(pattern_->panDirection_.type, PanDirection::UP);
+
+    pattern_->panDirection_.type = PanDirection::DOWN;
+    pattern_->DumpAdvanceInfo();
+    EXPECT_EQ(pattern_->panDirection_.type, PanDirection::DOWN);
+
+    pattern_->panDirection_.type = PanDirection::VERTICAL;
+    pattern_->DumpAdvanceInfo();
+    EXPECT_EQ(pattern_->panDirection_.type, PanDirection::VERTICAL);
+
+    pattern_->panDirection_.type = PanDirection::ALL;
+    pattern_->DumpAdvanceInfo();
+    EXPECT_EQ(pattern_->panDirection_.type, PanDirection::ALL);
+}
+
+/**
+ * @tc.name: SwiperPattern002
+ * @tc.desc: Swiper Paint Property.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperCommonTestNg, SwiperPattern002, TestSize.Level1)
+{
+    CreateWithItem([](SwiperModelNG model) {});
+
+    pattern_->direction_ = Axis::NONE;
+    pattern_->DumpAdvanceInfo();
+    EXPECT_EQ(pattern_->direction_, Axis::NONE);
+
+    pattern_->direction_ = Axis::HORIZONTAL;
+    pattern_->DumpAdvanceInfo();
+    EXPECT_EQ(pattern_->direction_, Axis::HORIZONTAL);
+
+    pattern_->direction_ = Axis::FREE;
+    pattern_->DumpAdvanceInfo();
+    EXPECT_EQ(pattern_->direction_, Axis::FREE);
+
+    pattern_->direction_ = Axis::VERTICAL;
+    pattern_->DumpAdvanceInfo();
+    ASSERT_EQ(pattern_->direction_, Axis::VERTICAL);
+}
+
+/**
+ * @tc.name: SwiperFlushFocus001
+ * @tc.desc: Swiper FlushFocus.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperCommonTestNg, SwiperFlushFocus001, TestSize.Level1)
+{
+    CreateWithItem([](SwiperModelNG model) {});
+
+    /**
+     * @tc.steps: step2. Create curShowFrameNode, addChild to frameNode.
+     */
+    auto curShowFrame = AceType::MakeRefPtr<FrameNode>(V2::ROW_ETS_TAG, -1, AceType::MakeRefPtr<Pattern>());
+    auto child = AceType::MakeRefPtr<FrameNode>(V2::BUTTON_ETS_TAG, -1, AceType::MakeRefPtr<SwiperPattern>());
+    auto child2 = AceType::MakeRefPtr<FrameNode>(V2::BUTTON_ETS_TAG, -1, AceType::MakeRefPtr<SwiperPattern>());
+    child->GetOrCreateFocusHub();
+    child2->GetOrCreateFocusHub();
+    curShowFrame->AddChild(child);
+    frameNode_->AddChild(child2);
+
+    eventHub_->AttachHost(frameNode_);
+    auto focusHub = AceType::MakeRefPtr<FocusHub>(eventHub_);
+
+    /**
+     * @tc.steps: step3. test FlushFocus with IsShowIndicator() is false.
+     * @tc.expected: curShowFrame->GetFirstFocusHubChild()->lastWeakFocusNode_ is not null.
+     */
+    layoutProperty_->UpdateShowIndicator(false);
+    pattern_->isLastIndicatorFocused_ = true;
+    EXPECT_FALSE(pattern_->IsShowIndicator());
+    pattern_->FlushFocus(curShowFrame);
+    EXPECT_FALSE(curShowFrame->GetFirstFocusHubChild()->currentFocus_);
+    pattern_->isLastIndicatorFocused_ = false;
+    pattern_->FlushFocus(curShowFrame);
+    EXPECT_EQ(pattern_->lastWeakShowNode_, AceType::WeakClaim(AceType::RawPtr(curShowFrame)));
+
+    /**
+     * @tc.steps: step4. test FlushFocus with IsShowIndicator() is true and hasLeftButton and hasRightButton.
+     * @tc.expected: curShowFrame->GetFirstFocusHubChild()->currentFocus_ is false.
+     */
+    layoutProperty_->UpdateShowIndicator(true);
+    pattern_->GetLeftButtonId();
+    pattern_->GetRightButtonId();
+    EXPECT_TRUE(layoutProperty_->GetShowIndicatorValue(true));
+    EXPECT_TRUE(pattern_->IsShowIndicator());
+    focusHub->currentFocus_ = true;
+    pattern_->FlushFocus(curShowFrame);
+    EXPECT_FALSE(curShowFrame->GetFirstFocusHubChild()->currentFocus_);
+    pattern_->isLastIndicatorFocused_ = false;
+    pattern_->FlushFocus(curShowFrame);
+}
+
+/**
+ * @tc.name: SwiperPatternOnVisibleChange003
+ * @tc.desc: OnVisibleChange
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperCommonTestNg, SwiperPatternOnVisibleChange003, TestSize.Level1)
+{
+    CreateWithItem([](SwiperModelNG model) {});
+    pattern_->isWindowShow_ = false;
+
+    /**
+     * @tc.cases: call OnVisibleChange.
+     * @tc.expected: Related function runs ok.
+     */
+    pattern_->isInit_ = true;
+    pattern_->OnVisibleChange(true);
+    EXPECT_TRUE(pattern_->isInit_);
+}
+
+/**
+ * @tc.name: SwiperDistributedTest001
+ * @tc.desc: Test the distributed capability of Swiper
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperCommonTestNg, SwiperDistributedTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create frameNode and get pattern_.
+     */
+    CreateWithItem([](SwiperModelNG model) {});
+
+    /**
+     * @tc.steps: step2. Set Index.
+     * @tc.expected: Function ProvideRestoreInfo is called.
+     */
+    layoutProperty_->UpdateIndex(1);
+    std::string ret = pattern_->ProvideRestoreInfo();
+    EXPECT_TRUE(ret == R"({"Index":1})");
+
+    /**
+     * @tc.steps: step3. Function OnRestoreInfo is called.
+     * @tc.expected: Passing invalid & valid JSON format.
+     */
+    std::string restoreInfo_ = R"({"Index":1})";
+    pattern_->OnRestoreInfo(restoreInfo_);
+    EXPECT_EQ(layoutProperty_->GetIndexValue(0), 1);
+    restoreInfo_ = R"({"Index":0})";
+    pattern_->OnRestoreInfo(restoreInfo_);
+    EXPECT_EQ(layoutProperty_->GetIndexValue(0), 0);
+    restoreInfo_ = "invalid_json_string";
+    pattern_->OnRestoreInfo(restoreInfo_);
+    EXPECT_EQ(layoutProperty_->GetIndexValue(0), 0);
+}
+
+/**
+ * @tc.name: SwiperPatternGetLoopIndex001
+ * @tc.desc: GetLoopIndex
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperCommonTestNg, SwiperPatternGetLoopIndex001, TestSize.Level1)
+{
+    CreateWithItem([](SwiperModelNG model) {
+        model.SetDisplayArrow(true); // show arrow
+        model.SetHoverShow(false);
+        model.SetArrowStyle(ARROW_PARAMETERS);
+    });
+
+    /**
+     * @tc.steps: step3. call GetLoopIndex.
+     * @tc.expected: Related function runs ok.
+     */
+    int32_t originalIndex = -1;
+    pattern_->GetLoopIndex(originalIndex);
+}
+
+/**
+ * @tc.name: SwiperFlushFocus002
+ * @tc.desc: Swiper FlushFocus.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperCommonTestNg, SwiperFlushFocus002, TestSize.Level1)
+{
+    CreateWithItem([](SwiperModelNG model) {});
+    eventHub_->AttachHost(frameNode_);
+    auto focusHub = AceType::MakeRefPtr<FocusHub>(eventHub_);
+    focusHub->currentFocus_ = true;
+    focusHub->currentFocus_ = true;
+
+    /**
+     * @tc.steps: step2. Create curShowFrameNode, addChild to frameNode.
+     */
+    auto curShowFrame = AceType::MakeRefPtr<FrameNode>(V2::ROW_ETS_TAG, -1, AceType::MakeRefPtr<Pattern>());
+    auto child = AceType::MakeRefPtr<FrameNode>(V2::BUTTON_ETS_TAG, -1, AceType::MakeRefPtr<SwiperPattern>());
+    auto child1 = AceType::MakeRefPtr<FrameNode>(V2::BUTTON_ETS_TAG, -1, AceType::MakeRefPtr<SwiperPattern>());
+    child->GetOrCreateFocusHub();
+    child1->GetOrCreateFocusHub();
+    curShowFrame->AddChild(child);
+    frameNode_->AddChild(child1);
+    auto eventHub1 = AceType::MakeRefPtr<EventHub>();
+    eventHub1->AttachHost(child);
+    auto focusHub1 = AceType::MakeRefPtr<FocusHub>(eventHub1);
+    auto eventHub2 = AceType::MakeRefPtr<EventHub>();
+    eventHub2->AttachHost(child1);
+    auto focusHub2 = AceType::MakeRefPtr<FocusHub>(eventHub2);
+
+    /**
+     * @tc.steps: step3. test FlushFocus with IsShowIndicator() is true.
+     * @tc.expected: the related function runs ok.
+     */
+    layoutProperty_->UpdateShowIndicator(true);
+    pattern_->isLastIndicatorFocused_ = true;
+    pattern_->FlushFocus(curShowFrame);
 }
 } // namespace OHOS::Ace::NG

@@ -198,7 +198,7 @@ class SpanFontWeightModifier extends ModifierWithKey<string> {
 }
 
 class ArkSpanComponent implements CommonMethod<SpanAttribute> {
-  _modifiersWithKeys: Map<Symbol, ModifierWithKey<number | string | boolean | object>>;
+  _modifiersWithKeys: Map<Symbol, AttributeModifierWithKey>;
   nativePtr: KNode;
 
   constructor(nativePtr: KNode) {

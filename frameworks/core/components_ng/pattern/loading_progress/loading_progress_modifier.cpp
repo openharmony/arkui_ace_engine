@@ -427,7 +427,7 @@ void LoadingProgressModifier::StartRecycle()
         isLoading_ = true;
         date_->Set(0.0f);
         AnimationOption option = AnimationOption();
-        RefPtr<Curve> curve = AceType::MakeRefPtr<CubicCurve>(0.25f, 0.15f, 0.32f, 0.48f);
+        RefPtr<Curve> curve = AceType::MakeRefPtr<CubicCurve>(0.25f, 0.30f, 0.50f, 0.14f);
         option.SetDuration(isVisible_ ? LOADING_DURATION : 0);
         option.SetDelay(0);
         option.SetCurve(curve);

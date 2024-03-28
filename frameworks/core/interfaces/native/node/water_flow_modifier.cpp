@@ -24,9 +24,8 @@ constexpr ArkUI_Float64 FRICTION_DEFAULT = -1.0;
 constexpr ArkUI_Float64 DIMENSION_DEFAULT = 0.0;
 const int32_t ERROR_INT_CODE = -1;
 const float ERROR_FLOAT_CODE = -1.0f;
-}
-
 std::string g_strValue;
+} // namespace
 
 void ResetColumnsTemplate(ArkUINodeHandle node)
 {

@@ -20,6 +20,7 @@
 #include "base/memory/referenced.h"
 #include "base/utils/utils.h"
 #include "core/components/common/properties/placement.h"
+#include "core/components_ng/manager/drag_drop/utils/drag_animation_helper.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/base/view_stack_processor.h"
@@ -274,6 +275,17 @@ void ShowPixelMapAnimation(const RefPtr<FrameNode>& imageNode, const RefPtr<Fram
     ShowBorderRadiusAndShadowAnimation(menuTheme, imageContext);
 }
 
+void ShowGatherAnimation(const RefPtr<FrameNode>& imageNode)
+{
+    auto mainPipeline = PipelineContext::GetMainPipelineContext();
+    CHECK_NULL_VOID(mainPipeline);
+    auto manager = mainPipeline->GetOverlayManager();
+    CHECK_NULL_VOID(manager);
+    mainPipeline->AddAfterRenderTask([imageNode, manager]() {
+        DragAnimationHelper::PlayGatherAnimation(imageNode, manager);
+    });
+}
+
 void HandleDragEnd(float offsetX, float offsetY, float velocity, const RefPtr<FrameNode>& menuWrapper)
 {
     if ((LessOrEqual(std::abs(offsetY), std::abs(offsetX)) || LessOrEqual(offsetY, 0.0f)) &&
@@ -343,6 +355,7 @@ void SetPixelMap(const RefPtr<FrameNode>& target, const RefPtr<FrameNode>& menuN
         layoutProperty->UpdateVisibility(VisibleType::VISIBLE, true);
     } else {
         ShowPixelMapAnimation(imageNode, menuNode);
+        ShowGatherAnimation(imageNode);
     }
 }
 
@@ -545,9 +558,16 @@ RefPtr<FrameNode> MenuView::Create(const RefPtr<UINode>& customNode, int32_t tar
 void MenuView::UpdateMenuPaintProperty(
     const RefPtr<FrameNode>& menuNode, const MenuParam& menuParam, const MenuType& type)
 {
-    if (!(type == MenuType::CONTEXT_MENU)) {
-        return;
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
+        if (!(type == MenuType::CONTEXT_MENU || type == MenuType::MENU)) {
+            return;
+        }
+    } else {
+        if (!(type == MenuType::CONTEXT_MENU)) {
+            return;
+        }
     }
+
     auto paintProperty = menuNode->GetPaintProperty<MenuPaintProperty>();
     CHECK_NULL_VOID(paintProperty);
     paintProperty->UpdateEnableArrow(menuParam.enableArrow.value_or(false));

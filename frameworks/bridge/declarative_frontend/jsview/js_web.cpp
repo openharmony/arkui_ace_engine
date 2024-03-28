@@ -306,6 +306,53 @@ private:
     RefPtr<SslErrorResult> result_;
 };
 
+class JSWebAllSslError : public Referenced {
+public:
+    static void JSBind(BindingTarget globalObj)
+    {
+        JSClass<JSWebAllSslError>::Declare("WebAllSslErrorResult");
+        JSClass<JSWebAllSslError>::CustomMethod("handleConfirm", &JSWebAllSslError::HandleConfirm);
+        JSClass<JSWebAllSslError>::CustomMethod("handleCancel", &JSWebAllSslError::HandleCancel);
+        JSClass<JSWebAllSslError>::Bind(globalObj, &JSWebAllSslError::Constructor, &JSWebAllSslError::Destructor);
+    }
+
+    void SetResult(const RefPtr<AllSslErrorResult>& result)
+    {
+        result_ = result;
+    }
+
+    void HandleConfirm(const JSCallbackInfo& args)
+    {
+        if (result_) {
+            result_->HandleConfirm();
+        }
+    }
+
+    void HandleCancel(const JSCallbackInfo& args)
+    {
+        if (result_) {
+            result_->HandleCancel();
+        }
+    }
+
+private:
+    static void Constructor(const JSCallbackInfo& args)
+    {
+        auto jsWebAllSslError = Referenced::MakeRefPtr<JSWebAllSslError>();
+        jsWebAllSslError->IncRefCount();
+        args.SetReturnValue(Referenced::RawPtr(jsWebAllSslError));
+    }
+
+    static void Destructor(JSWebAllSslError* jsWebAllSslError)
+    {
+        if (jsWebAllSslError != nullptr) {
+            jsWebAllSslError->DecRefCount();
+        }
+    }
+
+    RefPtr<AllSslErrorResult> result_;
+};
+
 class JSWebSslSelectCert : public Referenced {
 public:
     static void JSBind(BindingTarget globalObj)
@@ -655,6 +702,51 @@ private:
     }
 
     RefPtr<WebScreenCaptureRequest> request_;
+};
+
+class JSNativeEmbedGestureRequest : public Referenced {
+public:
+    static void JSBind(BindingTarget globalObj)
+    {
+        JSClass<JSNativeEmbedGestureRequest>::Declare("NativeEmbedGesture");
+        JSClass<JSNativeEmbedGestureRequest>::CustomMethod(
+            "setGestureEventResult", &JSNativeEmbedGestureRequest::SetGestureEventResult);
+        JSClass<JSNativeEmbedGestureRequest>::Bind(
+            globalObj, &JSNativeEmbedGestureRequest::Constructor, &JSNativeEmbedGestureRequest::Destructor);
+    }
+
+    void SetResult(const RefPtr<GestureEventResult>& result)
+    {
+        eventResult_ = result;
+    }
+
+    void SetGestureEventResult(const JSCallbackInfo& args)
+    {
+        if (eventResult_) {
+            bool result = true;
+            if (args.Length() == 1 && args[0]->IsBoolean()) {
+                result = args[0]->ToBoolean();
+                eventResult_->SetGestureEventResult(result);
+            }
+        }
+    }
+
+private:
+    static void Constructor(const JSCallbackInfo& args)
+    {
+        auto jSNativeEmbedGestureRequest = Referenced::MakeRefPtr<JSNativeEmbedGestureRequest>();
+        jSNativeEmbedGestureRequest->IncRefCount();
+        args.SetReturnValue(Referenced::RawPtr(jSNativeEmbedGestureRequest));
+    }
+
+    static void Destructor(JSNativeEmbedGestureRequest* jSNativeEmbedGestureRequest)
+    {
+        if (jSNativeEmbedGestureRequest != nullptr) {
+            jSNativeEmbedGestureRequest->DecRefCount();
+        }
+    }
+
+    RefPtr<GestureEventResult> eventResult_;
 };
 
 class JSWebWindowNewHandler : public Referenced {
@@ -1626,6 +1718,7 @@ void JSWeb::JSBind(BindingTarget globalObj)
     JSClass<JSWeb>::StaticMethod("onHttpAuthRequest", &JSWeb::OnHttpAuthRequest);
     JSClass<JSWeb>::StaticMethod("onSslErrorReceive", &JSWeb::OnSslErrRequest);
     JSClass<JSWeb>::StaticMethod("onSslErrorEventReceive", &JSWeb::OnSslErrorRequest);
+    JSClass<JSWeb>::StaticMethod("onSslErrorEvent", &JSWeb::OnAllSslErrorRequest);
     JSClass<JSWeb>::StaticMethod("onClientAuthenticationRequest", &JSWeb::OnSslSelectCertRequest);
     JSClass<JSWeb>::StaticMethod("onPermissionRequest", &JSWeb::OnPermissionRequest);
     JSClass<JSWeb>::StaticMethod("onContextMenuShow", &JSWeb::OnContextMenuShow);
@@ -1685,10 +1778,12 @@ void JSWeb::JSBind(BindingTarget globalObj)
     JSClass<JSWeb>::StaticMethod("onScreenCaptureRequest", &JSWeb::OnScreenCaptureRequest);
     JSClass<JSWeb>::StaticMethod("layoutMode", &JSWeb::SetLayoutMode);
     JSClass<JSWeb>::StaticMethod("nestedScroll", &JSWeb::SetNestedScroll);
+    JSClass<JSWeb>::StaticMethod("metaViewport", &JSWeb::SetMetaViewport);
     JSClass<JSWeb>::StaticMethod("javaScriptOnDocumentStart", &JSWeb::JavaScriptOnDocumentStart);
     JSClass<JSWeb>::StaticMethod("javaScriptOnDocumentEnd", &JSWeb::JavaScriptOnDocumentEnd);
     JSClass<JSWeb>::StaticMethod("onOverrideUrlLoading", &JSWeb::OnOverrideUrlLoading);
     JSClass<JSWeb>::StaticMethod("textAutosizing", &JSWeb::TextAutosizing);
+    JSClass<JSWeb>::StaticMethod("enableNativeVideoPlayer", &JSWeb::EnableNativeVideoPlayer);
     JSClass<JSWeb>::InheritAndBind<JSViewAbstract>(globalObj);
     JSWebDialog::JSBind(globalObj);
     JSWebGeolocation::JSBind(globalObj);
@@ -1701,6 +1796,7 @@ void JSWeb::JSBind(BindingTarget globalObj)
     JSFullScreenExitHandler::JSBind(globalObj);
     JSWebHttpAuth::JSBind(globalObj);
     JSWebSslError::JSBind(globalObj);
+    JSWebAllSslError::JSBind(globalObj);
     JSWebSslSelectCert::JSBind(globalObj);
     JSWebPermissionRequest::JSBind(globalObj);
     JSContextMenuParam::JSBind(globalObj);
@@ -1708,6 +1804,7 @@ void JSWeb::JSBind(BindingTarget globalObj)
     JSWebWindowNewHandler::JSBind(globalObj);
     JSDataResubmitted::JSBind(globalObj);
     JSScreenCaptureRequest::JSBind(globalObj);
+    JSNativeEmbedGestureRequest::JSBind(globalObj);
 }
 
 JSRef<JSVal> LoadWebConsoleLogEventToJSValue(const LoadWebConsoleLogEvent& eventInfo)
@@ -1872,6 +1969,25 @@ JSRef<JSVal> WebSslErrorEventToJSValue(const WebSslErrorEvent& eventInfo)
     jsWebSslError->SetResult(eventInfo.GetResult());
     obj->SetPropertyObject("handler", resultObj);
     obj->SetProperty("error", eventInfo.GetError());
+    return JSRef<JSVal>::Cast(obj);
+}
+
+JSRef<JSVal> WebAllSslErrorEventToJSValue(const WebAllSslErrorEvent& eventInfo)
+{
+    JSRef<JSObject> obj = JSRef<JSObject>::New();
+    JSRef<JSObject> resultObj = JSClass<JSWebAllSslError>::NewInstance();
+    auto jsWebAllSslError = Referenced::Claim(resultObj->Unwrap<JSWebAllSslError>());
+    if (!jsWebAllSslError) {
+        return JSRef<JSVal>::Cast(obj);
+    }
+    jsWebAllSslError->SetResult(eventInfo.GetResult());
+    obj->SetPropertyObject("handler", resultObj);
+    obj->SetProperty("error", eventInfo.GetError());
+    obj->SetProperty("url", eventInfo.GetUrl());
+    obj->SetProperty("originalUrl", eventInfo.GetOriginalUrl());
+    obj->SetProperty("referrer", eventInfo.GetReferrer());
+    obj->SetProperty("isFatalError", eventInfo.GetIsFatalError());
+    obj->SetProperty("isMainFrame", eventInfo.GetIsMainFrame());
     return JSRef<JSVal>::Cast(obj);
 }
 
@@ -2042,6 +2158,7 @@ void JSWeb::Create(const JSCallbackInfo& info)
 
     } else {
         auto* jsWebController = controller->Unwrap<JSWebController>();
+        CHECK_NULL_VOID(jsWebController);
         WebModel::GetInstance()->Create(dstSrc.value(),
             jsWebController->GetController(), renderMode, incognitoMode);
     }
@@ -2401,6 +2518,29 @@ void JSWeb::OnSslErrorRequest(const JSCallbackInfo& args)
         return true;
     };
     WebModel::GetInstance()->SetOnSslErrorRequest(jsCallback);
+}
+
+void JSWeb::OnAllSslErrorRequest(const JSCallbackInfo& args)
+{
+    if (args.Length() < 1 || !args[0]->IsFunction()) {
+        return;
+    }
+    WeakPtr<NG::FrameNode> frameNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    auto jsFunc = AceType::MakeRefPtr<JsEventFunction<WebAllSslErrorEvent, 1>>(
+        JSRef<JSFunc>::Cast(args[0]), WebAllSslErrorEventToJSValue);
+    auto instanceId = Container::CurrentId();
+    auto jsCallback = [execCtx = args.GetExecutionContext(), func = std::move(jsFunc), instanceId, node = frameNode](
+                          const BaseEventInfo* info) -> bool {
+        ContainerScope scope(instanceId);
+        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx, false);
+        auto pipelineContext = PipelineContext::GetCurrentContext();
+        CHECK_NULL_RETURN(pipelineContext, false);
+        pipelineContext->UpdateCurrentActiveNode(node);
+        auto* eventInfo = TypeInfoHelper::DynamicCast<WebAllSslErrorEvent>(info);
+        func->Execute(*eventInfo);
+        return true;
+    };
+    WebModel::GetInstance()->SetOnAllSslErrorRequest(jsCallback);
 }
 
 void JSWeb::OnSslSelectCertRequest(const JSCallbackInfo& args)
@@ -4063,7 +4203,7 @@ JSRef<JSVal> EmbedLifecycleChangeToJSValue(const NativeEmbedDataInfo& eventInfo)
     JSRef<JSObject> positionObj = objectTemplate->NewInstance();
     positionObj->SetProperty("x", eventInfo.GetEmebdInfo().x);
     positionObj->SetProperty("y", eventInfo.GetEmebdInfo().y);
-    requestObj->SetProperty("position", positionObj);
+    requestObj->SetPropertyObject("position", positionObj);
 
     auto params = eventInfo.GetEmebdInfo().params;
     JSRef<JSObject> paramsObj = objectTemplate->NewInstance();
@@ -4159,6 +4299,10 @@ JSRef<JSVal> NativeEmbeadTouchToJSValue(const NativeEmbeadTouchInfo& eventInfo)
     eventObj->SetPropertyObject("touches", touchArr);
     eventObj->SetPropertyObject("changedTouches", changeTouchArr);
     obj->SetPropertyObject("touchEvent", eventObj);
+    JSRef<JSObject> requestObj = JSClass<JSNativeEmbedGestureRequest>::NewInstance();
+    auto requestEvent = Referenced::Claim(requestObj->Unwrap<JSNativeEmbedGestureRequest>());
+    requestEvent->SetResult(eventInfo.GetResult());
+    obj->SetPropertyObject("result", requestObj);
     return JSRef<JSVal>::Cast(obj);
 }
 
@@ -4255,6 +4399,15 @@ void JSWeb::SetNestedScroll(const JSCallbackInfo& args)
     nestedOpt.backward = static_cast<NestedScrollMode>(backward);
     WebModel::GetInstance()->SetNestedScroll(nestedOpt);
     args.ReturnSelf();
+}
+
+void JSWeb::SetMetaViewport(const JSCallbackInfo& args)
+{
+    if (args.Length() < 1 || !args[0]->IsBoolean()) {
+        return;
+    }
+    bool enabled = args[0]->ToBoolean();
+    WebModel::GetInstance()->SetMetaViewport(enabled);
 }
 
 void JSWeb::ParseScriptItems(const JSCallbackInfo& args, ScriptItems& scriptItems)
@@ -4365,4 +4518,28 @@ void JSWeb::TextAutosizing(const JSCallbackInfo& args)
     bool isTextAutosizing = args[0]->ToBoolean();
     WebModel::GetInstance()->SetTextAutosizing(isTextAutosizing);
 }
+
+void JSWeb::EnableNativeVideoPlayer(const JSCallbackInfo& args)
+{
+    if (args.Length() < 1 || !args[0]->IsObject()) {
+        return;
+    }
+    auto paramObject = JSRef<JSObject>::Cast(args[0]);
+    std::optional<bool> enable;
+    std::optional<bool> shouldOverlay;
+    JSRef<JSVal> enableJsValue = paramObject->GetProperty("enable");
+    if (enableJsValue->IsBoolean()) {
+        enable = enableJsValue->ToBoolean();
+    }
+    JSRef<JSVal> shouldOverlayJsValue = paramObject->GetProperty("shouldOverlay");
+    if (shouldOverlayJsValue->IsBoolean()) {
+        shouldOverlay = shouldOverlayJsValue->ToBoolean();
+    }
+    if (!enable || !shouldOverlay) {
+        // invalid NativeVideoPlayerConfig
+        return;
+    }
+    WebModel::GetInstance()->SetNativeVideoPlayerConfig(*enable, *shouldOverlay);
+}
+
 } // namespace OHOS::Ace::Framework

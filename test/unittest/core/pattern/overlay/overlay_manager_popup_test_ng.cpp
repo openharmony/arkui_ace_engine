@@ -150,25 +150,25 @@ HWTEST_F(OverlayManagerPopupTestNg, PopupTest002, TestSize.Level1)
     auto targetId2 = targetNodes[1]->GetId();
     rootNode->isLayoutComplete_ = true;
 
-    overlayManager->ShowPopup(targetId1, popups[0], nullptr, false);
+    overlayManager->ShowPopup(targetId1, popups[0], nullptr, true);
     EXPECT_TRUE(overlayManager->popupMap_[targetId1].isCurrentOnShow);
     auto rootUINode = overlayManager->GetRootNode().Upgrade();
     ASSERT_NE(rootUINode, nullptr);
     auto overlay = AceType::DynamicCast<NG::FrameNode>(rootUINode->GetLastChild());
     ASSERT_NE(overlay, nullptr);
-    EXPECT_FALSE(overlay->GetPattern<BubblePattern>()->GetInteractiveDismiss());
+    EXPECT_TRUE(overlay->GetPattern<BubblePattern>()->GetInteractiveDismiss());
     EXPECT_FALSE(overlayManager->PopupInteractiveDismiss(overlay));
     EXPECT_EQ(overlayManager->GetPopupIdByNode(overlay), targetId1);
     overlayManager->HideAllPopups();
     EXPECT_FALSE(overlayManager->popupMap_[targetId1].isCurrentOnShow);
 
-    overlayManager->ShowPopup(targetId2, popups[1], nullptr, true);
+    overlayManager->ShowPopup(targetId2, popups[1], nullptr, false);
     EXPECT_TRUE(overlayManager->popupMap_[targetId2].isCurrentOnShow);
     rootUINode = overlayManager->GetRootNode().Upgrade();
     ASSERT_NE(rootUINode, nullptr);
     overlay = AceType::DynamicCast<NG::FrameNode>(rootUINode->GetLastChild());
     ASSERT_NE(overlay, nullptr);
-    EXPECT_TRUE(overlay->GetPattern<BubblePattern>()->GetInteractiveDismiss());
+    EXPECT_FALSE(overlay->GetPattern<BubblePattern>()->GetInteractiveDismiss());
     EXPECT_TRUE(overlayManager->PopupInteractiveDismiss(overlay));
     EXPECT_EQ(overlayManager->GetPopupIdByNode(overlay), targetId2);
     overlayManager->HideAllPopups();

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -227,23 +227,15 @@ void IndexerPattern::CollapseArrayValue()
         maxItemsCount = static_cast<int32_t>(height / itemSize);
     }
     int32_t fullArraySize = static_cast<int32_t>(fullArrayValue_.size());
-    if (fullArraySize - sharpItemCount_ <= INDEXER_NINE_CHARACTERS_CHECK) {
+    if (maxItemsCount >= fullArraySize || fullArraySize - sharpItemCount_ <= INDEXER_NINE_CHARACTERS_CHECK) {
         if (lastCollapsingMode_ != IndexerCollapsingMode::NONE) {
             lastCollapsingMode_ = IndexerCollapsingMode::NONE;
             BuildFullArrayValue();
         }
     } else if (fullArraySize - sharpItemCount_ <= INDEXER_THIRTEEN_CHARACTERS_CHECK) {
-        // check if maximum items count greater or equal full array size
-        if (maxItemsCount >= fullArraySize) {
-            if (lastCollapsingMode_ != IndexerCollapsingMode::NONE) {
-                lastCollapsingMode_ = IndexerCollapsingMode::NONE;
-                BuildFullArrayValue();
-            }
-        } else {
-            if (lastCollapsingMode_ != IndexerCollapsingMode::FIVE) {
-                lastCollapsingMode_ = IndexerCollapsingMode::FIVE;
-                ApplyFivePlusOneMode(fullArraySize);
-            }
+        if (lastCollapsingMode_ != IndexerCollapsingMode::FIVE) {
+            lastCollapsingMode_ = IndexerCollapsingMode::FIVE;
+            ApplyFivePlusOneMode(fullArraySize);
         }
     } else {
         // 13 here is count of visible items in 7 + 1 mode (i.e. 7 characters 6 dots and # item if exists)
@@ -395,6 +387,17 @@ void IndexerPattern::OnChildHover(int32_t index, bool isHover)
     ApplyIndexChanged(true, childHoverIndex_ >= 0 && childHoverIndex_ < itemCount_);
 }
 
+void IndexerPattern::OnPopupHover(bool isHover)
+{
+    isPopupHover_ = isHover;
+    if (isHover) {
+        delayTask_.Cancel();
+        StartBubbleAppearAnimation();
+    } else {
+        StartDelayTask(INDEXER_BUBBLE_ENTER_DURATION + INDEXER_BUBBLE_WAIT_DURATION);
+    }
+}
+
 void IndexerPattern::InitInputEvent()
 {
     if (isInputEventRegisted_) {
@@ -435,6 +438,19 @@ void IndexerPattern::InitChildInputEvent()
         auto childInputEventHub = child->GetOrCreateInputEventHub();
         childInputEventHub->AddOnHoverEvent(childOnHoverEvent);
     };
+}
+
+void IndexerPattern::InitPopupInputEvent()
+{
+    CHECK_NULL_VOID(popupNode_);
+    auto popupHoverCallback = [weak = WeakClaim(this)](bool isHovered) {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        pattern->OnPopupHover(isHovered);
+    };
+    auto popupOnHoverEvent = MakeRefPtr<InputEvent>(popupHoverCallback);
+    auto popupInputEventHub = popupNode_->GetOrCreateInputEventHub();
+    popupInputEventHub->AddOnHoverEvent(popupOnHoverEvent);
 }
 
 void IndexerPattern::OnTouchDown(const TouchEventInfo& info)
@@ -769,6 +785,7 @@ void IndexerPattern::ShowBubble()
     if (!popupNode_) {
         popupNode_ = CreatePopupNode();
         AddPopupTouchListener(popupNode_);
+        InitPopupInputEvent();
         UpdatePopupOpacity(0.0f);
     }
     if (!layoutProperty->GetIsPopupValue(false)) {
@@ -776,8 +793,8 @@ void IndexerPattern::ShowBubble()
         layoutProperty->UpdateIsPopup(true);
     }
     UpdateBubbleView();
-    StartBubbleAppearAnimation();
     delayTask_.Cancel();
+    StartBubbleAppearAnimation();
     if (!isTouch_) {
         StartDelayTask(INDEXER_BUBBLE_ENTER_DURATION + INDEXER_BUBBLE_WAIT_DURATION);
     }
@@ -1429,7 +1446,9 @@ void IndexerPattern::AddPopupTouchListener(RefPtr<FrameNode> popupNode)
             indexerPattern->OnPopupTouchDown(info);
         } else if (touchType == TouchType::UP || touchType == TouchType::CANCEL) {
             indexerPattern->isTouch_ = false;
-            indexerPattern->StartDelayTask();
+            if (!indexerPattern->isPopupHover_) {
+                indexerPattern->StartDelayTask();
+            }
         }
     };
     gesture->AddTouchEvent(MakeRefPtr<TouchEventImpl>(std::move(touchCallback)));

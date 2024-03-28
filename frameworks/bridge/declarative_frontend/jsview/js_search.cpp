@@ -29,6 +29,7 @@
 #include "core/components/search/search_theme.h"
 #include "core/components_ng/pattern/search/search_model_ng.h"
 #include "core/components_ng/pattern/text_field/text_field_model_ng.h"
+#include "core/components/common/properties/text_style_parser.h"
 
 namespace OHOS::Ace {
 
@@ -102,11 +103,15 @@ void JSSearch::JSBind(BindingTarget globalObj)
     JSClass<JSSearch>::StaticMethod("textMenuOptions", &JSSearch::JsMenuOptionsExtension);
     JSClass<JSSearch>::StaticMethod("selectionMenuHidden", &JSSearch::SetSelectionMenuHidden);
     JSClass<JSSearch>::StaticMethod("customKeyboard", &JSSearch::SetCustomKeyboard);
+    JSClass<JSSearch>::StaticMethod("enterKeyType", &JSSearch::SetEnterKeyType);
     JSClass<JSSearch>::StaticMethod("maxLength", &JSSearch::SetMaxLength);
     JSClass<JSSearch>::StaticMethod("type", &JSSearch::SetType);
     JSClass<JSSearch>::StaticMethod("decoration", &JSSearch::SetDecoration);
     JSClass<JSSearch>::StaticMethod("letterSpacing", &JSSearch::SetLetterSpacing);
     JSClass<JSSearch>::StaticMethod("lineHeight", &JSSearch::SetLineHeight);
+    JSClass<JSSearch>::StaticMethod("fontFeature", &JSSearch::SetFontFeature);
+    JSClass<JSSearch>::StaticMethod("id", &JSSearch::SetId);
+    JSClass<JSSearch>::StaticMethod("key", &JSSearch::SetKey);
     JSClass<JSSearch>::InheritAndBind<JSViewAbstract>(globalObj);
 }
 
@@ -117,6 +122,19 @@ void ParseSearchValueObject(const JSCallbackInfo& info, const JSRef<JSVal>& chan
     JsEventCallback<void(const std::string&)> onChangeEvent(
         info.GetExecutionContext(), JSRef<JSFunc>::Cast(changeEventVal));
     SearchModel::GetInstance()->SetOnChangeEvent(std::move(onChangeEvent));
+}
+
+void JSSearch::SetFontFeature(const JSCallbackInfo& info)
+{
+    if (info.Length() < 1) {
+        return;
+    }
+    if (!info[0]->IsString()) {
+        return;
+    }
+
+    std::string fontFeatureSettings = info[0]->ToString();
+    SearchModel::GetInstance()->SetFontFeature(ParseFontFeatureSettings(fontFeatureSettings));
 }
 
 void JSSearch::Create(const JSCallbackInfo& info)
@@ -180,6 +198,23 @@ void JSSearch::SetEnableKeyboardOnFocus(const JSCallbackInfo& info)
         return;
     }
     SearchModel::GetInstance()->RequestKeyboardOnFocus(info[0]->ToBoolean());
+}
+
+void JSSearch::SetId(const JSCallbackInfo& info)
+{
+    JSViewAbstract::JsId(info);
+    JSRef<JSVal> arg = info[0];
+    std::string id;
+    if (arg->IsString()) {
+        id = arg->ToString();
+    }
+    SearchModel::GetInstance()->UpdateInspectorId(id);
+}
+
+void JSSearch::SetKey(const std::string& key)
+{
+    JSViewAbstract::JsKey(key);
+    SearchModel::GetInstance()->UpdateInspectorId(key);
 }
 
 void JSSearch::SetSearchButton(const JSCallbackInfo& info)
@@ -679,9 +714,17 @@ void JSSearch::SetCustomKeyboard(const JSCallbackInfo& info)
     if (info.Length() < 1 || !info[0]->IsObject()) {
         return;
     }
+    bool supportAvoidance = false;
+    if (info.Length() == 2 && info[1]->IsObject()) {  //  2 here refers to the number of parameters
+        auto paramObject = JSRef<JSObject>::Cast(info[1]);
+        auto isSupportAvoidance = paramObject->GetProperty("supportAvoidance");
+        if (!isSupportAvoidance->IsNull() && isSupportAvoidance->IsBoolean()) {
+            supportAvoidance = isSupportAvoidance->ToBoolean();
+        }
+    }
     std::function<void()> buildFunc;
     if (JSTextField::ParseJsCustomKeyboardBuilder(info, 0, buildFunc)) {
-        SearchModel::GetInstance()->SetCustomKeyboard(std::move(buildFunc));
+        SearchModel::GetInstance()->SetCustomKeyboard(std::move(buildFunc), supportAvoidance);
     }
 }
 
@@ -705,6 +748,22 @@ void JSSearchController::JSBind(BindingTarget globalObj)
 {
     JSClass<JSTextEditableController>::Declare("SearchController");
     JSTextEditableController::JSBind(globalObj);
+}
+
+void JSSearch::SetEnterKeyType(const JSCallbackInfo& info)
+{
+    if (info.Length() < 1) {
+        return;
+    }
+    if (info[0]->IsUndefined()) {
+        SearchModel::GetInstance()->SetSearchEnterKeyType(TextInputAction::SEARCH);
+        return;
+    }
+    if (!info[0]->IsNumber()) {
+        return;
+    }
+    TextInputAction textInputAction = CastToTextInputAction(info[0]->ToNumber<int32_t>());
+    SearchModel::GetInstance()->SetSearchEnterKeyType(textInputAction);
 }
 
 void JSSearch::SetMaxLength(const JSCallbackInfo& info)

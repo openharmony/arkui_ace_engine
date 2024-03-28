@@ -11,6 +11,7 @@
         "src/calendar_picker_modifier.ts",
         "src/checkbox_modifier.ts",
         "src/checkboxgroup_modifier.ts",
+        "src/circle_modifier.ts",
         "src/column_modifier.ts",
         "src/column_split_modifier.ts",
         "src/counter_modifier.ts",

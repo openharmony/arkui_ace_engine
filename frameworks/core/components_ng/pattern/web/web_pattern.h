@@ -18,6 +18,7 @@
 
 #include <optional>
 #include <string>
+#include <tuple>
 #include <utility>
 
 #include "base/memory/referenced.h"
@@ -372,10 +373,13 @@ public:
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, ScrollBarColor, std::string);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, OverScrollMode, int32_t);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, CopyOptionMode, int32_t);
+    ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, MetaViewport, bool);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, NativeEmbedModeEnabled, bool);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, NativeEmbedRuleTag, std::string);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, NativeEmbedRuleType, std::string);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, TextAutosizing, bool);
+    using NativeVideoPlayerConfigType = std::tuple<bool, bool>;
+    ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, NativeVideoPlayerConfig, NativeVideoPlayerConfigType);
 
     void RequestFullScreen();
     void ExitFullScreen();
@@ -404,7 +408,7 @@ public:
     void OnSelectPopupMenu(std::shared_ptr<OHOS::NWeb::NWebSelectPopupMenuParam> params,
         std::shared_ptr<OHOS::NWeb::NWebSelectPopupMenuCallback> callback);
     void OnDateTimeChooserPopup(
-        const NWeb::DateTimeChooser& chooser,
+        std::shared_ptr<OHOS::NWeb::NWebDateTimeChooser> chooser,
         const std::vector<std::shared_ptr<OHOS::NWeb::NWebDateTimeSuggestion>>& suggestions,
         std::shared_ptr<NWeb::NWebDateTimeChooserCallback> callback);
     void OnDateTimeChooserClose();
@@ -453,6 +457,8 @@ public:
         return layoutMode_;
     }
     void OnRootLayerChanged(int width, int height);
+    void ReleaseResizeHold();
+    bool GetPendingSizeStatus();
     int GetRootLayerWidth() const
     {
         return rootLayerWidth_;
@@ -467,6 +473,7 @@ public:
     RefPtr<WebAccessibilityNode> GetAccessibilityNodeByFocusMove(int64_t accessibilityId, int32_t direction);
     void ExecuteAction(int64_t accessibilityId, AceAction action) const;
     void SetAccessibilityState(bool state);
+    void OnTooltip(const std::string& tooltip);
     bool IsRootNeedExportTexture();
 
 private:
@@ -531,10 +538,12 @@ private:
     void OnScrollBarColorUpdate(const std::string& value);
     void OnOverScrollModeUpdate(const int32_t value);
     void OnCopyOptionModeUpdate(const int32_t value);
+    void OnMetaViewportUpdate(bool value);
     void OnNativeEmbedModeEnabledUpdate(bool value);
     void OnNativeEmbedRuleTagUpdate(const std::string& tag);
     void OnNativeEmbedRuleTypeUpdate(const std::string& type);
     void OnTextAutosizingUpdate(bool isTextAutosizing);
+    void OnNativeVideoPlayerConfigUpdate(const std::tuple<bool, bool>& config);
     int GetWebId();
 
     void InitEvent();
@@ -614,7 +623,7 @@ private:
     void RegisterSelectPopupCallback(RefPtr<FrameNode>& menu,
         std::shared_ptr<OHOS::NWeb::NWebSelectPopupMenuCallback> callback,
         std::shared_ptr<OHOS::NWeb::NWebSelectPopupMenuParam> params);
-    OffsetF GetSelectPopupPostion(const OHOS::NWeb::SelectMenuBound& bounds);
+    OffsetF GetSelectPopupPostion(std::shared_ptr<OHOS::NWeb::NWebSelectMenuBound> bound);
     void SetSelfAsParentOfWebCoreNode(std::shared_ptr<OHOS::NWeb::NWebAccessibilityNodeInfo> info) const;
 
     struct TouchInfo {
@@ -627,13 +636,13 @@ private:
     void UpdateBackgroundColorRightNow(int32_t color);
     void UpdateContentOffset(const RefPtr<LayoutWrapper>& dirty);
     DialogProperties GetDialogProperties(const RefPtr<DialogTheme>& theme);
-    bool ShowDateTimeDialog(const NWeb::DateTimeChooser& chooser,
+    bool ShowDateTimeDialog(std::shared_ptr<OHOS::NWeb::NWebDateTimeChooser> chooser,
         const std::vector<std::shared_ptr<OHOS::NWeb::NWebDateTimeSuggestion>>& suggestions,
         std::shared_ptr<NWeb::NWebDateTimeChooserCallback> callback);
-    bool ShowTimeDialog(const NWeb::DateTimeChooser& chooser,
+    bool ShowTimeDialog(std::shared_ptr<OHOS::NWeb::NWebDateTimeChooser> chooser,
         const std::vector<std::shared_ptr<OHOS::NWeb::NWebDateTimeSuggestion>>& suggestions,
         std::shared_ptr<NWeb::NWebDateTimeChooserCallback> callback);
-    bool ShowDateTimeSuggestionDialog(const NWeb::DateTimeChooser& chooser,
+    bool ShowDateTimeSuggestionDialog(std::shared_ptr<OHOS::NWeb::NWebDateTimeChooser> chooser,
         const std::vector<std::shared_ptr<OHOS::NWeb::NWebDateTimeSuggestion>>& suggestions,
         std::shared_ptr<NWeb::NWebDateTimeChooserCallback> callback);
     void PostTaskToUI(const std::function<void()>&& task) const;
@@ -642,6 +651,7 @@ private:
     bool FilterScrollEventHandleOffset(const float offset);
     bool FilterScrollEventHandlevVlocity(const float velocity);
     void UpdateFlingReachEdgeState(const float value, bool status);
+    void CalculateToolTipMargin(RefPtr<FrameNode>& textNode, MarginProperty& textMargin);
     void RegisterVisibleAreaChangeCallback();
 
     std::optional<std::string> webSrc_;
@@ -673,8 +683,7 @@ private:
     std::shared_ptr<FullScreenEnterEvent> fullScreenExitHandler_ = nullptr;
     bool needOnFocus_ = false;
     Size drawSize_;
-    Size lastSyncRenderSize_;
-    int64_t lastTimeStamp_ = 0;
+    Size rootLayerChangeSize_;
     Size drawSizeCache_;
     bool needUpdateWeb_ = true;
     bool isFocus_ = false;
@@ -692,6 +701,10 @@ private:
     bool selectPopupMenuShowing_ = false;
     bool isCurrentStartHandleDragging_ = false;
     bool isPopup_ = false;
+    int32_t tooltipTextId_ = -1;
+    bool tooltipEnabled_ = false;
+    int32_t mouseHoveredX_ = -1;
+    int32_t mouseHoveredY_ = -1;
     int32_t parentNWebId_ = -1;
     bool isInWindowDrag_ = false;
     bool isWaiting_ = false;
@@ -704,13 +717,12 @@ private:
     OffsetF relativeOffsetOfScroll_;
     bool isFirstFlingScrollVelocity_ = true;
     bool isNeedUpdateScrollAxis_ = true;
-    bool isNeedUpdateFilterScrolAxis_ = true;
+    bool isScrollStarted_ = false;
     WebLayoutMode layoutMode_ = WebLayoutMode::NONE;
     bool scrollState_ = false;
     Axis axis_ = Axis::FREE;
     Axis syncAxis_ = Axis::NONE;
     Axis expectedScrollAxis_ = Axis::FREE;
-    Axis expectedFilterScrollAxis_ = Axis::FREE;
     int32_t rootLayerWidth_ = 0;
     int32_t rootLayerHeight_ = 0;
     int32_t drawRectWidth_ = 0;
@@ -718,7 +730,6 @@ private:
     std::unordered_map<Axis, WeakPtr<NestableScrollContainer>> parentsMap_;
     RefPtr<WebDelegate> delegate_;
     RefPtr<WebDelegateObserver> observer_;
-    std::set<OHOS::Ace::KeyCode> KeyCodeSet_;
     std::optional<ScriptItems> onDocumentStartScriptItems_;
     std::optional<ScriptItems> onDocumentEndScriptItems_;
     bool isOfflineMode_ = false;

@@ -275,7 +275,7 @@ public:
 private:
     ViewStackProcessor();
 
-#ifdef ACE_DEBUG_LOG
+#ifdef ACE_DEBUG
     // Dump view stack comtent
     void DumpStack();
 #endif

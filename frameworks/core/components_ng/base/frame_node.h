@@ -33,6 +33,7 @@
 #include "core/common/recorder/exposure_processor.h"
 #include "core/common/resource/resource_configuration.h"
 #include "core/components/common/layout/constants.h"
+#include "core/components_ng/base/extension_handler.h"
 #include "core/components_ng/base/frame_scene_status.h"
 #include "core/components_ng/base/geometry_node.h"
 #include "core/components_ng/base/modifier.h"
@@ -198,6 +199,9 @@ public:
 
     void SetOnSizeChangeCallback(OnSizeChangedFunc&& callback);
 
+    void SetJSFrameNodeOnSizeChangeCallback(OnSizeChangedFunc&& callback);
+
+
     void TriggerOnSizeChangeCallback();
 
     void SetGeometryNode(const RefPtr<GeometryNode>& node);
@@ -269,7 +273,7 @@ public:
 
     RefPtr<FocusHub> GetOrCreateFocusHub() const;
 
-    RefPtr<FocusHub> GetFocusHub() const
+    const RefPtr<FocusHub>& GetFocusHub() const
     {
         return eventHub_->GetFocusHub();
     }
@@ -316,6 +320,18 @@ public:
     {
         return layoutProperty_->GetVisibility().value_or(VisibleType::VISIBLE) == VisibleType::VISIBLE;
     }
+
+    bool IsPrivacySensitive() const
+    {
+        return isPrivacySensitive_;
+    }
+
+    void SetPrivacySensitive(bool flag)
+    {
+        isPrivacySensitive_ = flag;
+    }
+
+    void ChangeSensitiveStyle(bool isSensitive);
 
     void ToJsonValue(std::unique_ptr<JsonValue>& json) const override;
 
@@ -394,8 +410,8 @@ public:
     void OnAttachToMainTree(bool recursive) override;
     void OnAttachToBuilderNode(NodeStatus nodeStatus) override;
 
-    void OnVisibleChange(bool isVisible) override;
-
+    void TryVisibleChangeOnDescendant(bool isVisible) override;
+    void NotifyVisibleChange(bool isVisible);
     void PushDestroyCallback(std::function<void()>&& callback)
     {
         destroyCallbacks_.emplace_back(callback);
@@ -504,11 +520,11 @@ public:
 
     void SetDrawModifier(const RefPtr<NG::DrawModifier>& drawModifier)
     {
-        drawModifier_ = drawModifier;
-        auto contentModifier = GetContentModifier();
-        if (contentModifier) {
-            contentModifier->SetDrawModifier(drawModifier);
+        if (!extensionHandler_) {
+            extensionHandler_ = MakeRefPtr<ExtensionHandler>();
+            extensionHandler_->AttachFrameNode(this);
         }
+        extensionHandler_->SetDrawModifier(drawModifier);
     }
 
     bool IsSupportDrawModifier();
@@ -557,6 +573,7 @@ public:
     std::string ProvideRestoreInfo();
 
     static std::vector<RefPtr<FrameNode>> GetNodesById(const std::unordered_set<int32_t>& set);
+    static std::vector<FrameNode*> GetNodesPtrById(const std::unordered_set<int32_t>& set);
 
     double GetPreviewScaleVal() const;
 
@@ -628,6 +645,7 @@ public:
     void DoRemoveChildInRenderTree(uint32_t index, bool isAll) override;
     void SetActiveChildRange(int32_t start, int32_t end) override;
     void DoSetActiveChildRange(int32_t start, int32_t end) override;
+    void RecycleItemsByIndex(int32_t start, int32_t end) override;
     const std::string& GetHostTag() const override
     {
         return GetTag();
@@ -667,17 +685,12 @@ public:
     void SetCacheCount(
         int32_t cacheCount = 0, const std::optional<LayoutConstraintF>& itemConstraint = std::nullopt) override;
 
-    void SyncGeometryNode(bool needSkipSync = false);
+    void SyncGeometryNode(bool needSyncRsNode);
     RefPtr<UINode> GetFrameChildByIndex(uint32_t index, bool needBuild, bool isCache = false) override;
     bool CheckNeedForceMeasureAndLayout() override;
 
     bool SetParentLayoutConstraint(const SizeF& size) const override;
-    void ForceSyncGeometryNode()
-    {
-        CHECK_NULL_VOID(renderContext_);
-        oldGeometryNode_.Reset();
-        renderContext_->SyncGeometryProperties(RawPtr(geometryNode_));
-    }
+    void ForceSyncGeometryNode();
 
     template<typename T>
     RefPtr<T> FindFocusChildNodeOfClass()
@@ -727,6 +740,18 @@ public:
     RefPtr<FrameNode> GetPageNode();
     RefPtr<FrameNode> GetNodeContainer();
     RefPtr<ContentModifier> GetContentModifier();
+    
+    ExtensionHandler* GetExtensionHandler() const
+    {
+        return RawPtr(extensionHandler_);
+    }
+
+    void SetExtensionHandler(const RefPtr<ExtensionHandler>& handler)
+    {
+        extensionHandler_ = handler;
+        extensionHandler_->AttachFrameNode(this);
+    }
+
     void NotifyFillRequestSuccess(RefPtr<PageNodeInfoWrap> nodeWrap, AceAutoFillType autoFillType);
     void NotifyFillRequestFailed(int32_t errCode);
 
@@ -800,6 +825,7 @@ private:
 
     // dump self info.
     void DumpInfo() override;
+    void DumpDragInfo();
     void DumpOverlayInfo();
     void DumpCommonInfo();
     void DumpSafeAreaInfo();
@@ -813,6 +839,7 @@ private:
     void GeometryNodeToJsonValue(std::unique_ptr<JsonValue>& json) const;
 
     bool GetTouchable() const;
+    bool OnLayoutFinish(bool& needSyncRsNode);
 
     void ProcessAllVisibleCallback(const std::vector<double>& visibleAreaUserRatios,
         VisibleCallbackInfo& visibleAreaUserCallback, double currentVisibleRatio, double lastVisibleRatio);
@@ -860,6 +887,8 @@ private:
     RefPtr<EventHub> eventHub_;
     RefPtr<Pattern> pattern_;
 
+    RefPtr<ExtensionHandler> extensionHandler_;
+
     RefPtr<FrameNode> backgroundNode_;
     std::function<RefPtr<UINode>()> builderFunc_;
     std::unique_ptr<RectF> lastFrameRect_;
@@ -882,6 +911,7 @@ private:
     bool isRenderDirtyMarked_ = false;
     bool isMeasureBoundary_ = false;
     bool hasPendingRequest_ = false;
+    bool isPrivacySensitive_ = false;
 
     // for container, this flag controls only the last child in touch area is consuming event.
     bool exclusiveEventForChild_ = false;
@@ -913,7 +943,6 @@ private:
     bool needRestoreSafeArea_ = true;
 
     RefPtr<FrameNode> overlayNode_;
-    RefPtr<NG::DrawModifier> drawModifier_;
 
     std::unordered_map<std::string, int32_t> sceneRateMap_;
 

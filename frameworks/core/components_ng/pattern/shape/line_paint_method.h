@@ -48,6 +48,11 @@ public:
         if (!linePaintProperty->GetStartPoint() || !linePaintProperty->GetEndPoint()) {
             return nullptr;
         }
+        const auto& geometryNode = paintWrapper->GetGeometryNode();
+        const auto& contentSize = geometryNode->GetContentSize();
+        if (!contentSize.IsPositive()) {
+            return nullptr;
+        }
         auto offset = paintWrapper->GetContentOffset();
         return [linePaintProperty, offset, paintWrapper](RSCanvas& canvas) {
                     LinePainter::DrawLine(canvas, *linePaintProperty, offset);

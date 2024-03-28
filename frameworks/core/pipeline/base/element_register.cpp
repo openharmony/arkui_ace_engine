@@ -124,6 +124,15 @@ RefPtr<NG::UINode> ElementRegister::GetUINodeById(ElementIdType elementId)
     return iter == itemMap_.end() ? nullptr : AceType::DynamicCast<NG::UINode>(iter->second).Upgrade();
 }
 
+NG::FrameNode* ElementRegister::GetFrameNodePtrById(ElementIdType elementId)
+{
+    if (elementId == ElementRegister::UndefinedElementId) {
+        return nullptr;
+    }
+    auto iter = itemMap_.find(elementId);
+    return iter == itemMap_.end() ? nullptr : AceType::DynamicCast<NG::FrameNode>(iter->second.GetRawPtr());
+}
+
 bool ElementRegister::AddUINode(const RefPtr<NG::UINode>& node)
 {
     if (!node || (node->GetId() == ElementRegister::UndefinedElementId)) {

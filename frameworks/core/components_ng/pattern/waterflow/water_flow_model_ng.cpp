@@ -14,6 +14,7 @@
  */
 
 #include "core/components_ng/pattern/waterflow/water_flow_model_ng.h"
+
 #include <string>
 
 #include "base/geometry/dimension.h"

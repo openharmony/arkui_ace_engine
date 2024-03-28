@@ -36,6 +36,7 @@
 #include "core/components_ng/manager/frame_rate/frame_rate_manager.h"
 #include "core/components_ng/manager/full_screen/full_screen_manager.h"
 #include "core/components_ng/manager/post_event/post_event_manager.h"
+#include "core/components_ng/manager/privacy_sensitive/privacy_sensitive_manager.h"
 #include "core/components_ng/manager/safe_area/safe_area_manager.h"
 #include "core/components_ng/manager/navigation_dump/navigation_dump_manager.h"
 #include "core/components_ng/manager/select_overlay/select_overlay_manager.h"
@@ -266,6 +267,8 @@ public:
         dragWindowVisibleCallback_ = std::move(task);
     }
 
+    void FlushOnceVsyncTask();
+
     void FlushDirtyNodeUpdate();
 
     void SetRootRect(double width, double height, double offset) override;
@@ -324,10 +327,7 @@ public:
 
     const RefPtr<DragDropManager>& GetDragDropManager();
 
-    const RefPtr<FocusManager>& GetFocusManager()
-    {
-        return focusManager_;
-    }
+    const RefPtr<FocusManager>& GetFocusManager() const;
 
     const RefPtr<FrameRateManager>& GetFrameRateManager()
     {
@@ -645,9 +645,24 @@ public:
         vsyncListener_ = std::move(vsync);
     }
 
+    void SetOnceVsyncListener(VsyncCallbackFun vsync)
+    {
+        onceVsyncListener_ = std::move(vsync);
+    }
+
     const RefPtr<NavigationDumpManager>& GetNavigationDumpManager() const
     {
         return navigationDumpMgr_;
+    }
+
+    RefPtr<PrivacySensitiveManager> GetPrivacySensitiveManager() const
+    {
+        return privacySensitiveManager_;
+    }
+
+    void ChangeSensitiveNodes(bool flag) override
+    {
+        privacySensitiveManager_->TriggerFrameNodesSensitive(flag);
     }
 
 protected:
@@ -686,6 +701,8 @@ private:
     void ProcessDelayTasks();
 
     void InspectDrew();
+
+    bool TriggerKeyEventDispatch(const KeyEvent& event);
 
     void FlushBuildFinishCallbacks();
 
@@ -772,6 +789,8 @@ private:
     FoldStatusChangedCallbackMap foldStatusChangedCallbackMap_;
     FoldDisplayModeChangedCallbackMap foldDisplayModeChangedCallbackMap_;
 
+    bool isOnAreaChangeNodesCacheVaild_ = false;
+    std::vector<FrameNode*> onAreaChangeNodesCache_;
     std::unordered_set<int32_t> onAreaChangeNodeIds_;
     std::unordered_set<int32_t> onVisibleAreaChangeNodeIds_;
     std::unordered_set<int32_t> onFormVisibleChangeNodeIds_;
@@ -791,6 +810,7 @@ private:
 #endif
     RefPtr<SafeAreaManager> safeAreaManager_ = MakeRefPtr<SafeAreaManager>();
     RefPtr<FrameRateManager> frameRateManager_ = MakeRefPtr<FrameRateManager>();
+    RefPtr<PrivacySensitiveManager> privacySensitiveManager_ = MakeRefPtr<PrivacySensitiveManager>();
     Rect displayAvailableRect_;
     std::unordered_map<size_t, TouchTestResult> touchTestResults_;
     WeakPtr<FrameNode> dirtyFocusNode_;
@@ -845,6 +865,7 @@ private:
     std::unordered_map<int32_t, uint64_t> lastDispatchTime_;
 
     VsyncCallbackFun vsyncListener_;
+    VsyncCallbackFun onceVsyncListener_;
     ACE_DISALLOW_COPY_AND_MOVE(PipelineContext);
 
     int32_t preNodeId_ = -1;

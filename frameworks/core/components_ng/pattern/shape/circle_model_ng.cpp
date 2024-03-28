@@ -18,7 +18,6 @@
 
 #include "core/components_ng/pattern/shape/circle_model_ng.h"
 
-#include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/shape/circle_pattern.h"
 #include "core/components_v2/inspector/inspector_constants.h"
@@ -33,6 +32,11 @@ void CircleModelNG::Create()
     auto frameNode = FrameNode::GetOrCreateFrameNode(
         V2::CIRCLE_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<CirclePattern>(); });
     stack->Push(frameNode);
+}
+
+RefPtr<FrameNode> CircleModelNG::CreateFrameNode(int32_t nodeId)
+{
+    return FrameNode::CreateFrameNode(V2::CIRCLE_ETS_TAG, nodeId, AceType::MakeRefPtr<CirclePattern>());
 }
 
 } // namespace OHOS::Ace::NG

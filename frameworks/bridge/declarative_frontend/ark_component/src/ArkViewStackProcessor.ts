@@ -16,3 +16,15 @@
 class ViewStackProcessor {
     static GetElmtIdToAccountFor(): void {}
 }
+
+declare class JsPointerClass {
+    invalid(): boolean;
+}
+
+declare class ModifierJS {
+    ButtonModifier(nativePtr: KNode, classType: ModifierType) {}
+    CircleModifier(nativePtr: KNode, classType: ModifierType) {}
+    RectModifier(nativePtr: KNode, classType: ModifierType) {}
+    StackModifier(nativePtr: KNode, classType: ModifierType) {}
+    TextModifier(nativePtr: KNode, classType: ModifierType) {}
+}

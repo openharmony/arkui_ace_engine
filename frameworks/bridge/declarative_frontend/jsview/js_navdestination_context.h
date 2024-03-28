@@ -63,17 +63,32 @@ private:
     JSRef<JSVal> onPop_;
 };
 
-class JSNavDestinationContext : public NG::NavDestinationContext {
-    DECLARE_ACE_TYPE(JSNavDestinationContext, NG::NavDestinationContext)
+class JSNavDestinationContext : public Referenced {
 public:
+
+    static void JSBind(BindingTarget target);
     JSNavDestinationContext() = default;
     ~JSNavDestinationContext() = default;
 
-    JSRef<JSObject> CreateJSObject();
+    void SetPathStack(const JSCallbackInfo& info);
+
+    void GetPathStack(const JSCallbackInfo& info);
+
+    void SetPathInfo(const JSCallbackInfo& info);
+
+    void GetPathInfo(const JSCallbackInfo& info);
+
+    void GetRouteInfo(const JSCallbackInfo& info);
+
+    void SetNavDestinationContext(const RefPtr<NG::NavDestinationContext> context)
+    {
+        context_ = context;
+    }
 
 private:
-    JSRef<JSObject> CreateJSNavPathInfo() const;
-    JSRef<JSObject> CreateJSNavPathStack() const;
+    static void Constructor(const JSCallbackInfo &info);
+    static void Destructor(JSNavDestinationContext* context);
+    RefPtr<NG::NavDestinationContext> context_;
 };
 } // namespace OHOS::Ace::Framework
 

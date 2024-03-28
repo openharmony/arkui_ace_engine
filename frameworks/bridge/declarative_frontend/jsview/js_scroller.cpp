@@ -67,6 +67,7 @@ void JSScroller::JSBind(BindingTarget globalObj)
     JSClass<JSScroller>::Declare("Scroller");
     JSClass<JSScroller>::CustomMethod("scrollTo", &JSScroller::ScrollTo);
     JSClass<JSScroller>::CustomMethod("scrollEdge", &JSScroller::ScrollEdge);
+    JSClass<JSScroller>::CustomMethod("fling", &JSScroller::Fling);
     JSClass<JSScroller>::CustomMethod("scrollPage", &JSScroller::ScrollPage);
     JSClass<JSScroller>::CustomMethod("currentOffset", &JSScroller::CurrentOffset);
     JSClass<JSScroller>::CustomMethod("scrollToIndex", &JSScroller::ScrollToIndex);
@@ -172,7 +173,41 @@ void JSScroller::ScrollEdge(const JSCallbackInfo& args)
     }
     ScrollEdgeType edgeType = EDGE_TYPE_TABLE[static_cast<int32_t>(edge)];
     ContainerScope scope(instanceId_);
+
+    if (args.Length() > 1 && args[1]->IsObject()) {
+        auto obj = JSRef<JSObject>::Cast(args[1]);
+        float velocity = 0.0f;
+        if (ConvertFromJSValue(obj->GetProperty("velocity"), velocity)) {
+            if (velocity > 0) {
+                velocity = Dimension(velocity, DimensionUnit::VP).ConvertToPx();
+                scrollController->ScrollToEdge(edgeType, velocity);
+                return;
+            }
+        }
+    }
     scrollController->ScrollToEdge(edgeType, true);
+}
+
+void JSScroller::Fling(const JSCallbackInfo& args)
+{
+    auto scrollController = controllerWeak_.Upgrade();
+    if (!scrollController) {
+        JSException::Throw(ERROR_CODE_NAMED_ROUTE_ERROR, "%s", "Controller not bound to component.");
+        return;
+    }
+    double flingVelocity = 0.0;
+    if (args[0]->IsNumber()) {
+        flingVelocity = args[0]->ToNumber<double>();
+        if (NearZero(flingVelocity)) {
+            return;
+        }
+        flingVelocity = Dimension(flingVelocity, DimensionUnit::VP).ConvertToPx();
+    } else {
+        JSException::Throw(ERROR_CODE_PARAM_INVALID, "%s", "The parameter check failed.");
+        return;
+    }
+    ContainerScope scope(instanceId_);
+    scrollController->Fling(flingVelocity);
 }
 
 void JSScroller::ScrollToIndex(const JSCallbackInfo& args)

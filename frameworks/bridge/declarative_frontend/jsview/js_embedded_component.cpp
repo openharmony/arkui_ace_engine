@@ -59,6 +59,7 @@ void JSEmbeddedComponent::JSBind(BindingTarget globalObj)
     JSClass<JSEmbeddedComponent>::StaticMethod("flexBasis", &JSEmbeddedComponent::JsFlexBasis);
     JSClass<JSEmbeddedComponent>::StaticMethod("flexGrow", &JSEmbeddedComponent::JsFlexGrow);
     JSClass<JSEmbeddedComponent>::StaticMethod("flexShrink", &JSEmbeddedComponent::JsFlexShrink);
+    JSClass<JSEmbeddedComponent>::StaticMethod("opacity", &JSEmbeddedComponent::JsOpacity);
     JSClass<JSEmbeddedComponent>::InheritAndBind<JSViewAbstract>(globalObj);
 }
 
@@ -91,7 +92,7 @@ void JSEmbeddedComponent::OnTerminated(const JSCallbackInfo& info)
     auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(info[0]));
     auto instanceId = ContainerScope::CurrentId();
     auto onTerminated = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc), instanceId, node = frameNode](
-                            std::optional<int32_t> code, const RefPtr<WantWrap>& wantWrap) {
+                            int32_t code, const RefPtr<WantWrap>& wantWrap) {
         ContainerScope scope(instanceId);
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
         ACE_SCORING_EVENT("EmbeddedComponent.onTerminated");
@@ -102,12 +103,8 @@ void JSEmbeddedComponent::OnTerminated(const JSCallbackInfo& info)
         CHECK_NULL_VOID(engine);
         NativeEngine* nativeEngine = engine->GetNativeEngine();
         CHECK_NULL_VOID(nativeEngine);
-        if (!code.has_value()) {
-            func->ExecuteJS();
-            return;
-        }
         JSRef<JSObject> obj = JSRef<JSObject>::New();
-        obj->SetProperty<int32_t>("code", code.value());
+        obj->SetProperty<int32_t>("code", code);
         if (wantWrap) {
             auto nativeWant =
                 WantWrap::ConvertToNativeValue(wantWrap->GetWant(), reinterpret_cast<napi_env>(nativeEngine));

@@ -76,17 +76,17 @@ void GeometryNode::Restore()
     previousState_ = nullptr;
 }
 
-void GeometryNode::RestoreCache()
+bool GeometryNode::RestoreCache()
 {
-    CHECK_NULL_VOID(restoreCache_);
+    CHECK_NULL_RETURN(restoreCache_, false);
     frame_.rect_ = *restoreCache_;
     restoreCache_ = nullptr;
+    return true;
 }
 
 void GeometryNode::Save()
 {
     // INVARIANT: previousState_ is null when Save() is called (only allow 1 layer of save/restore)
-    CHECK_NULL_VOID(!previousState_);
     previousState_ = std::make_unique<RectF>(frame_.rect_);
 }
 } // namespace OHOS::Ace::NG

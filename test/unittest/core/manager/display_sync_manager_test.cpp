@@ -67,6 +67,7 @@ HWTEST_F(DisplaySyncManagerTestNg, DisplaySyncManagerTest001, TestSize.Level1)
      * @tc.steps: step3. Add a DisplaySync to DisplaySyncManager for management.
      */
     displaySync->AddToPipelineOnContainer();
+    EXPECT_FALSE(displaySyncManager->AddDisplaySync(displaySync));
 
     /**
      * @tc.steps: step4. Check whether DisplaySync is added to the DisplaySyncManager and whether the
@@ -81,7 +82,9 @@ HWTEST_F(DisplaySyncManagerTestNg, DisplaySyncManagerTest001, TestSize.Level1)
     /**
      * @tc.steps: step5. Remove DisplaySync from DisplaySyncManager.
      */
+    EXPECT_TRUE(displaySyncManager->RemoveDisplaySync(displaySync));
     displaySync->DelFromPipelineOnContainer();
+    EXPECT_FALSE(displaySyncManager->RemoveDisplaySync(displaySync));
 
     /**
      * @tc.steps: step6. Check whether DisplaySync is added to the DisplaySyncManager and whether the
@@ -92,6 +95,9 @@ HWTEST_F(DisplaySyncManagerTestNg, DisplaySyncManagerTest001, TestSize.Level1)
 
     bool isExisted2 = displaySyncManager->HasDisplaySync(displaySync);
     EXPECT_FALSE(isExisted2);
+
+    displaySync = nullptr;
+    EXPECT_FALSE(displaySyncManager->HasDisplaySync(displaySync));
 }
 
 /**
@@ -297,6 +303,7 @@ HWTEST_F(DisplaySyncManagerTestNg, DisplaySyncManagerTest005, TestSize.Level1)
     int64_t vsyncPeriod1 = 16666667;
     displaySyncManager->SetVsyncPeriod(vsyncPeriod1);
     EXPECT_EQ(vsyncPeriod1, displaySyncManager->GetVsyncPeriod());
+    EXPECT_FALSE(displaySyncManager->SetVsyncPeriod(vsyncPeriod1));
 
     /**
      * @tc.steps: step3. Set the valid vsync period (B) of the DisplaySyncManager currently applied.
@@ -313,6 +320,7 @@ HWTEST_F(DisplaySyncManagerTestNg, DisplaySyncManagerTest005, TestSize.Level1)
     int64_t vsyncPeriod3 = -10;
     displaySyncManager->SetVsyncPeriod(vsyncPeriod3);
     EXPECT_EQ(vsyncPeriod2, displaySyncManager->GetVsyncPeriod());
+    EXPECT_TRUE(displaySyncManager->SetVsyncPeriod(10));
 }
 
 /**
@@ -339,6 +347,7 @@ HWTEST_F(DisplaySyncManagerTestNg, DisplaySyncManagerTest006, TestSize.Level1)
     int32_t refreshRateMode1 = 1;
     displaySyncManager->SetRefreshRateMode(refreshRateMode1);
     EXPECT_EQ(refreshRateMode1, displaySyncManager->GetRefreshRateMode());
+    EXPECT_FALSE(displaySyncManager->SetRefreshRateMode(refreshRateMode1));
 
     /**
      * @tc.steps: step3. Set the valid refresh rate mode (B) of the DisplaySyncManager currently applied.
@@ -447,6 +456,8 @@ HWTEST_F(DisplaySyncManagerTestNg, DisplaySyncManagerTest008, TestSize.Level1)
     displaySync2->DelFromPipelineOnContainer();
     displaySyncManager->DispatchFunc(nanoTimestamp);
     int32_t displaySyncRate2 = displaySyncManager->GetDisplaySyncRate();
+    EXPECT_EQ(nanoTimestamp, displaySync1->GetTimestampData());
+    EXPECT_NE(nanoTimestamp, displaySync1->GetTargetTimestampData());
 
     /**
      * @tc.steps: step4. Check the decision frame rate in DisplaySyncManager.
@@ -491,15 +502,15 @@ HWTEST_F(DisplaySyncManagerTestNg, DisplaySyncManagerTest009, TestSize.Level1)
     displaySync->RegisterOnFrameWithData([](RefPtr<DisplaySyncData> data) {});
     displaySync->RegisterOnFrameWithTimestamp([](uint64_t timestamp) {});
 
+    int32_t onFrameTimes = 5;
+    for (int32_t i = 0; i < onFrameTimes; ++i) {
+        displaySync->OnFrame();
+    }
+
     /**
      * @tc.steps: step4. Unregister callback functions.
      */
     displaySync->UnregisterOnFrame();
-    EXPECT_NE(nullptr, displaySync->GetDisplaySyncData()->onFrame_);
-    EXPECT_NE(nullptr, displaySync->GetDisplaySyncData()->onFrameWithData_);
-    EXPECT_NE(nullptr, displaySync->GetDisplaySyncData()->onFrameWithTimestamp_);
-
-    displaySync->CheckShouldUnregisterOnFrame();
     EXPECT_EQ(nullptr, displaySync->GetDisplaySyncData()->onFrame_);
     EXPECT_EQ(nullptr, displaySync->GetDisplaySyncData()->onFrameWithData_);
     EXPECT_EQ(nullptr, displaySync->GetDisplaySyncData()->onFrameWithTimestamp_);
@@ -510,9 +521,62 @@ HWTEST_F(DisplaySyncManagerTestNg, DisplaySyncManagerTest009, TestSize.Level1)
     displaySync->SetRefreshRateMode(0);
     EXPECT_TRUE(displaySync->IsNonAutoRefreshRateMode());
     EXPECT_FALSE(displaySync->IsAutoRefreshRateMode());
+    EXPECT_TRUE(displaySyncManager->IsSupportSkip());
+    EXPECT_FALSE(displaySyncManager->IsNonAutoRefreshRateMode());
 
     /**
      * @tc.steps: step6. Remove the DisplaySync from DisplaySyncManager.
+     */
+    displaySync->DelFromPipelineOnContainer();
+    EXPECT_FALSE(displaySync->IsOnPipeline());
+}
+
+/**
+ * @tc.name: DisplaySyncManagerTest010
+ * @tc.desc: DisplaySync FindMatchedRefreshRate and SearchMatchedRate.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DisplaySyncManagerTestNg, DisplaySyncManagerTest010, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Get DisplaySyncManager from PipelineContext.
+     * @tc.expected: step1. Check the number of DisplaySync initially managed by the DisplaySyncManager is 0.
+     */
+    auto pipeline = PipelineContext::GetCurrentContext();
+    auto displaySyncManager = pipeline->GetOrCreateUIDisplaySyncManager();
+    int32_t initSize = 0;
+    EXPECT_EQ(initSize, displaySyncManager->GetUIDisplaySyncMap().size());
+
+    /**
+     * @tc.steps: step2. Test FindMatchedRefreshRate function of DisplaySyncManager.
+     */
+    displaySyncManager->FindAllRefreshRateFactors();
+    int32_t matchedRefreshRate1 = displaySyncManager->FindMatchedRefreshRate(65);
+    EXPECT_EQ(60, matchedRefreshRate1);
+
+    int32_t matchedRefreshRate2 = displaySyncManager->FindMatchedRefreshRate(68);
+    EXPECT_EQ(72, matchedRefreshRate2);
+
+    int32_t matchedRefreshRate3 = displaySyncManager->FindMatchedRefreshRate(121);
+    EXPECT_EQ(120, matchedRefreshRate3);
+
+    /**
+     * @tc.steps: step3. Test SearchMatchedRate function of DisplaySync.
+     */
+    RefPtr<UIDisplaySync> displaySync = AceType::MakeRefPtr<UIDisplaySync>();
+    displaySync->AddToPipelineOnContainer();
+    EXPECT_TRUE(displaySync->IsOnPipeline());
+
+    displaySync->SetExpectedFrameRateRange({0, 120, 60});
+    int32_t matchedRate1 = displaySync->SearchMatchedRate(90);
+    EXPECT_EQ(90, matchedRate1);
+
+    displaySync->SetExpectedFrameRateRange({30, 60, 60});
+    int32_t matchedRate2 = displaySync->SearchMatchedRate(90);
+    EXPECT_EQ(45, matchedRate2);
+
+    /**
+     * @tc.steps: step4. Remove the DisplaySync from DisplaySyncManager.
      */
     displaySync->DelFromPipelineOnContainer();
     EXPECT_FALSE(displaySync->IsOnPipeline());

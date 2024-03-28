@@ -45,6 +45,9 @@ public:
     static void SetScrollBarColor(FrameNode* frameNode, const std::string& value);
     static void SetMaxFlingSpeed(double max);
     static void SetOnWillScroll(FrameNode* frameNode, OnScrollEvent&& onScroll);
+
+    static int32_t GetEdgeEffect(FrameNode* frameNode);
+    static int32_t GetAlwaysEnabled(FrameNode* frameNode);
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_SCROLLABLE_SCROLLABLE_MODEL_H

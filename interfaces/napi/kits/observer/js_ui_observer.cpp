@@ -49,6 +49,9 @@ static constexpr size_t PARAM_INDEX_THREE = 3;
 
 static constexpr uint32_t ON_SHOWN = 0;
 static constexpr uint32_t ON_HIDDEN = 1;
+static constexpr uint32_t ON_APPEAR = 2;
+static constexpr uint32_t ON_DISAPPEAR = 3;
+static constexpr uint32_t ON_BACKPRESS = 100;
 
 static constexpr uint32_t SCROLL_START = 0;
 static constexpr uint32_t SCROLL_STOP = 1;
@@ -753,6 +756,7 @@ static napi_value UIObserverExport(napi_env env, napi_value exports)
     NG::UIObserverHandler::GetInstance().SetHandleDensityChangeFunc(&UIObserver::HandleDensityChange);
     NG::UIObserverHandler::GetInstance().SetLayoutDoneHandleFunc(&UIObserver::HandLayoutDoneChange);
     NG::UIObserverHandler::GetInstance().SetDrawCommandSendHandleFunc(&UIObserver::HandDrawCommandSendChange);
+    NG::UIObserverHandler::GetInstance().SetHandleNavDestinationSwitchFunc(&UIObserver::HandleNavDestinationSwitch);
     napi_value navDestinationState = nullptr;
     napi_create_object(env, &navDestinationState);
     napi_value prop = nullptr;
@@ -760,6 +764,12 @@ static napi_value UIObserverExport(napi_env env, napi_value exports)
     napi_set_named_property(env, navDestinationState, "ON_SHOWN", prop);
     napi_create_uint32(env, ON_HIDDEN, &prop);
     napi_set_named_property(env, navDestinationState, "ON_HIDDEN", prop);
+    napi_create_uint32(env, ON_APPEAR, &prop);
+    napi_set_named_property(env, navDestinationState, "ON_APPEAR", prop);
+    napi_create_uint32(env, ON_DISAPPEAR, &prop);
+    napi_set_named_property(env, navDestinationState, "ON_DISAPPEAR", prop);
+    napi_create_uint32(env, ON_BACKPRESS, &prop);
+    napi_set_named_property(env, navDestinationState, "ON_BACKPRESS", prop);
 
     napi_value scrollEventType = nullptr;
     napi_create_object(env, &scrollEventType);

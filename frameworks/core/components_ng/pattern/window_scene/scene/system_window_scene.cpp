@@ -129,14 +129,10 @@ void SystemWindowScene::RegisterEventCallback()
     };
     session_->SetNotifySystemSessionPointerEventFunc(std::move(pointerEventCallback));
 
-    auto keyEventCallback = [instanceId = instanceId_](std::shared_ptr<MMI::KeyEvent> KeyEvent) {
+    auto keyEventCallback = [instanceId = instanceId_](std::shared_ptr<MMI::KeyEvent> KeyEvent,
+        bool isPreImeEvent) -> bool {
         ContainerScope Scope(instanceId);
-        auto pipelineContext = PipelineContext::GetCurrentContext();
-        CHECK_NULL_VOID(pipelineContext);
-        pipelineContext->PostAsyncEvent([KeyEvent]() {
-            WindowSceneHelper::InjectKeyEvent(KeyEvent);
-        },
-            TaskExecutor::TaskType::UI);
+        return WindowSceneHelper::InjectKeyEvent(KeyEvent, isPreImeEvent);
     };
     session_->SetNotifySystemSessionKeyEventFunc(std::move(keyEventCallback));
 }
@@ -190,6 +186,9 @@ void SystemWindowScene::RegisterFocusCallback()
         auto frameNode = pattern ? pattern->GetHost() : nullptr;
         pipelineContext->SetFocusedWindowSceneNode(frameNode);
         pipelineContext->PostAsyncEvent([weakThis]() {
+            auto pipeline = PipelineContext::GetCurrentContext();
+            CHECK_NULL_VOID(pipeline);
+            pipeline->SetIsFocusActive(false);
             auto self = weakThis.Upgrade();
             CHECK_NULL_VOID(self);
             self->FocusViewShow();

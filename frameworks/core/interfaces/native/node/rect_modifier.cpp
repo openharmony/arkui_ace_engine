@@ -79,6 +79,8 @@ void SetRectRadiusWithValue(ArkUINodeHandle node, ArkUI_Float32 radiusValue, Ark
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
+    NG::ResetRectRadiusWidth(node);
+    NG::ResetRectRadiusHeight(node);
     RectModelNG::SetRadiusWidth(frameNode, CalcDimension(radiusValue, (DimensionUnit)radiusUnit));
     RectModelNG::SetRadiusHeight(frameNode, CalcDimension(radiusValue, (DimensionUnit)radiusUnit));
 }

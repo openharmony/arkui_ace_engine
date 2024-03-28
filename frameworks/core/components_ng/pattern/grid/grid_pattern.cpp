@@ -112,16 +112,6 @@ RefPtr<NodePaintMethod> GridPattern::CreateNodePaintMethod()
     return paint;
 }
 
-void GridPattern::InitScrollableEvent()
-{
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    auto eventHub = host->GetEventHub<GridEventHub>();
-    CHECK_NULL_VOID(eventHub);
-    auto scrollFrameBeginEvent = eventHub->GetOnScrollFrameBegin();
-    SetScrollFrameBeginCallback(scrollFrameBeginEvent);
-}
-
 void GridPattern::OnModifyDone()
 {
     auto gridLayoutProperty = GetLayoutProperty<GridLayoutProperty>();
@@ -143,7 +133,6 @@ void GridPattern::OnModifyDone()
     SetAxis(gridLayoutInfo_.axis_);
     if (!GetScrollableEvent()) {
         AddScrollEvent();
-        InitScrollableEvent();
     }
 
     SetEdgeEffect();
@@ -352,7 +341,6 @@ bool GridPattern::UpdateCurrentOffset(float offset, int32_t source)
     FireAndCleanScrollingListener();
     // When finger moves down, offset is positive.
     // When finger moves up, offset is negative.
-    gridLayoutInfo_.originOffset_ = offset;
     auto itemsHeight = gridLayoutInfo_.GetTotalHeightOfItemsInView(GetMainGap());
     if (gridLayoutInfo_.offsetEnd_) {
         auto overScroll = gridLayoutInfo_.currentOffset_ - (GetMainContentSize() - itemsHeight);

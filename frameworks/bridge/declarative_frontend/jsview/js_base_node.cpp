@@ -18,6 +18,7 @@
 #include <string>
 
 #include "canvas_napi/js_canvas.h"
+#include "jsnapi_expo.h"
 
 #include "base/geometry/dimension.h"
 #include "base/memory/ace_type.h"
@@ -29,11 +30,12 @@
 #include "bridge/declarative_frontend/engine/js_ref_ptr.h"
 #include "bridge/declarative_frontend/engine/js_types.h"
 #include "bridge/declarative_frontend/jsview/js_utils.h"
+#include "bridge/declarative_frontend/jsview/js_view_abstract.h"
 #include "bridge/js_frontend/engine/jsi/js_value.h"
-#include "core/components/common/properties/color.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/modifier.h"
 #include "core/components_ng/base/view_stack_processor.h"
+#include "core/components_ng/pattern/custom_frame_node/custom_frame_node.h"
 #include "core/components_ng/pattern/render_node/render_node_pattern.h"
 #include "core/components_ng/pattern/stack/stack_pattern.h"
 #include "core/components_ng/render/drawing_forward.h"
@@ -64,7 +66,7 @@ void JSBaseNode::BuildNode(const JSCallbackInfo& info)
     // If the node is a UINode, amount it to a BuilderProxyNode.
     // Let the returned node be a FrameNode.
     auto flag = AceType::InstanceOf<NG::FrameNode>(newNode);
-    if (!flag) {
+    if (!flag && newNode) {
         auto nodeId = ElementRegister::GetInstance()->MakeUniqueId();
         auto proxyNode = NG::FrameNode::GetOrCreateFrameNode(
             "BuilderProxyNode", nodeId, []() { return AceType::MakeRefPtr<NG::StackPattern>(); });
@@ -122,60 +124,42 @@ void JSBaseNode::CreateRenderNode(const JSCallbackInfo& info)
         auto jsFunc = JSRef<JSFunc>::Cast(jsDrawFunc);
         RefPtr<JsFunction> jsDraw = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(renderNode), jsFunc);
         auto pattern = frameNode->GetPattern<NG::RenderNodePattern>();
-        pattern->SetDrawCallback(
-            [func = std::move(jsDraw), execCtx = info.GetExecutionContext(), vm](NG::DrawingContext& context) -> void {
-                JAVASCRIPT_EXECUTION_SCOPE(execCtx);
-
-                JSRef<JSObjTemplate> objectTemplate = JSRef<JSObjTemplate>::New();
-                objectTemplate->SetInternalFieldCount(1);
-                JSRef<JSObject> contextObj = objectTemplate->NewInstance();
-                JSRef<JSObject> sizeObj = objectTemplate->NewInstance();
-                sizeObj->SetProperty<float>("height", PipelineBase::Px2VpWithCurrentDensity(context.height));
-                sizeObj->SetProperty<float>("width", PipelineBase::Px2VpWithCurrentDensity(context.width));
-                contextObj->SetPropertyObject("size", sizeObj);
-
-                auto engine = EngineHelper::GetCurrentEngine();
-                CHECK_NULL_VOID(engine);
-                NativeEngine* nativeEngine = engine->GetNativeEngine();
-                napi_env env = reinterpret_cast<napi_env>(nativeEngine);
-                ScopeRAII scope(env);
-
-                auto jsCanvas =
-                    OHOS::Rosen::Drawing::JsCanvas::CreateJsCanvas(env, &context.canvas, context.width, context.height);
-                JsiRef<JsiValue> jsCanvasVal = JsConverter::ConvertNapiValueToJsVal(jsCanvas);
-                contextObj->SetPropertyObject("canvas", jsCanvasVal);
-
-                auto jsVal = JSRef<JSVal>::Cast(contextObj);
-                panda::Local<JsiValue> value = jsVal.Get().GetLocalHandle();
-                JSValueWrapper valueWrapper = value;
-                napi_value nativeValue = nativeEngine->ValueToNapiValue(valueWrapper);
-
-                napi_wrap(
-                    env, nativeValue, &context.canvas, [](napi_env, void*, void*) {}, nullptr, nullptr);
-
-                JSRef<JSVal> result = func->ExecuteJS(1, &jsVal);
-                OHOS::Rosen::Drawing::JsCanvas* unwrapCanvas = nullptr;
-                napi_unwrap(env, jsCanvas, reinterpret_cast<void**>(&unwrapCanvas));
-                if (unwrapCanvas) {
-                    unwrapCanvas->ResetCanvas();
-                }
-            });
+        auto execCtx = info.GetExecutionContext();
+        auto drawCallback = JSViewAbstract::GetDrawCallback(jsDraw, execCtx);
+        pattern->SetDrawCallback(std::move(drawCallback));
     }
     info.SetReturnValue(JSRef<JSVal>::Make(panda::NativePointerRef::New(vm, ptr)));
 }
 
 void JSBaseNode::CreateFrameNode(const JSCallbackInfo& info)
 {
-    auto nodeId = ElementRegister::GetInstance()->MakeUniqueId();
-    std::string nodeTag = "FrameNode";
-    auto node = NG::FrameNode::GetOrCreateFrameNode(
-        nodeTag, nodeId, []() { return AceType::MakeRefPtr<NG::RenderNodePattern>(); });
-    node->SetExclusiveEventForChild(true);
-    viewNode_ = node;
-    void* ptr = AceType::RawPtr(viewNode_);
-
     EcmaVM* vm = info.GetVm();
     CHECK_NULL_VOID(vm);
+    auto nodeId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto node = NG::CustomFrameNode::GetOrCreateCustomFrameNode(nodeId);
+    node->SetExclusiveEventForChild(true);
+    auto pattern = node->GetPattern<NG::CustomFrameNodePattern>();
+    auto global = JSNApi::GetGlobalObject(vm);
+    auto funcName = panda::StringRef::NewFromUtf8(vm, "__AttachToMainTree__");
+    auto obj = global->Get(vm, funcName);
+    panda::Local<panda::FunctionRef> attachFunc = obj;
+    if (obj->IsFunction()) {
+        pattern->SetOnAttachFunc([vm, func = panda::CopyableGlobal(vm, attachFunc)](int32_t nodeId) {
+            panda::Local<panda::JSValueRef> params[] = { panda::NumberRef::New(vm, nodeId) };
+            func->Call(vm, func.ToLocal(), params, ArraySize(params));
+        });
+    }
+    funcName = panda::StringRef::NewFromUtf8(vm, "__DetachToMainTree__");
+    obj = global->Get(vm, funcName);
+    panda::Local<panda::FunctionRef> detachFunc = obj;
+    if (detachFunc->IsFunction()) {
+        pattern->SetOnDetachFunc([vm, func = panda::CopyableGlobal(vm, detachFunc)](int32_t nodeId) {
+            panda::Local<panda::JSValueRef> params[] = { panda::NumberRef::New(vm, nodeId) };
+            func->Call(vm, func.ToLocal(), params, ArraySize(params));
+        });
+    }
+    viewNode_ = node;
+    void* ptr = AceType::RawPtr(viewNode_);
     info.SetReturnValue(JSRef<JSVal>::Make(panda::NativePointerRef::New(vm, ptr)));
 }
 

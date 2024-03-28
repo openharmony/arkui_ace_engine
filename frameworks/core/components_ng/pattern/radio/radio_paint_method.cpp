@@ -14,6 +14,7 @@
  */
 #include "base/geometry/ng/offset_t.h"
 #include "base/utils/utils.h"
+#include "core/common/container.h"
 #include "core/components/checkable/checkable_theme.h"
 #include "core/components/common/properties/color.h"
 #include "core/components_ng/pattern/radio/radio_modifier.h"
@@ -31,6 +32,13 @@ constexpr float DEFAULT_POINT_SCALE = 0.5f;
 constexpr float DEFAULT_TOTAL_SCALE = 1.0f;
 constexpr float DEFAULT_SHRINK_SCALE = 0.9f;
 constexpr int32_t DEFAULT_RADIO_ANIMATION_DURATION = 300;
+constexpr float DEFAULT_OPACITY_SCALE = 1.0f;
+constexpr float DEFAULT_OPACITY_BORDER_SCALE = 0.0f;
+constexpr float DEFAULT_INTERPOLATINGSPRING_VELOCITY = 0.0f;
+constexpr float DEFAULT_INTERPOLATINGSPRING_MASS = 1.0f;
+constexpr float DEFAULT_INTERPOLATINGSPRING_STIFFNESS = 228.0f;
+constexpr float DEFAULT_INTERPOLATINGSPRING_DAMPING = 26.0f;
+constexpr int32_t DEFAULT_INDICATOR_ANIMATION_DURATION = 150;
 } // namespace
 
 RadioModifier::RadioModifier()
@@ -54,6 +62,8 @@ RadioModifier::RadioModifier()
     offset_ = AceType::MakeRefPtr<AnimatablePropertyOffsetF>(OffsetF());
     size_ = AceType::MakeRefPtr<AnimatablePropertySizeF>(SizeF());
     totalScale_ = AceType::MakeRefPtr<AnimatablePropertyFloat>(DEFAULT_TOTAL_SCALE);
+    opacityScale_ = AceType::MakeRefPtr<AnimatablePropertyFloat>(DEFAULT_OPACITY_SCALE);
+    borderOpacityScale_ = AceType::MakeRefPtr<AnimatablePropertyFloat>(DEFAULT_OPACITY_BORDER_SCALE);
     pointScale_ = AceType::MakeRefPtr<AnimatablePropertyFloat>(DEFAULT_POINT_SCALE);
     ringPointScale_ = AceType::MakeRefPtr<AnimatablePropertyFloat>(0.0f);
     animateTouchHoverColor_ = AceType::MakeRefPtr<AnimatablePropertyColor>(LinearColor(Color::TRANSPARENT));
@@ -64,6 +74,8 @@ RadioModifier::RadioModifier()
     AttachProperty(offset_);
     AttachProperty(size_);
     AttachProperty(totalScale_);
+    AttachProperty(opacityScale_);
+    AttachProperty(borderOpacityScale_);
     AttachProperty(pointScale_);
     AttachProperty(ringPointScale_);
     AttachProperty(animateTouchHoverColor_);
@@ -110,6 +122,14 @@ void RadioModifier::UpdateAnimatableProperty()
             break;
     }
 }
+void RadioModifier::UpdateTotalScaleOnAnimatable(
+    bool isCheck, const AnimationOption& delayOption, const AnimationOption& halfDurationOption)
+{
+    totalScale_->Set(DEFAULT_TOTAL_SCALE);
+    AnimationUtils::Animate(halfDurationOption, [&]() { totalScale_->Set(DEFAULT_SHRINK_SCALE); });
+    totalScale_->Set(DEFAULT_SHRINK_SCALE);
+    AnimationUtils::Animate(delayOption, [&]() { totalScale_->Set(1); });
+}
 
 void RadioModifier::UpdateIsOnAnimatableProperty(bool isCheck)
 {
@@ -149,6 +169,43 @@ void RadioModifier::UpdateIsOnAnimatableProperty(bool isCheck)
                 context->RequestFrame();
             }
         });
+}
+
+void RadioModifier::UpdateIndicatorAnimation(bool isCheck)
+{
+    auto springCurve = AceType::MakeRefPtr<InterpolatingSpring>(DEFAULT_INTERPOLATINGSPRING_VELOCITY,
+        DEFAULT_INTERPOLATINGSPRING_MASS, DEFAULT_INTERPOLATINGSPRING_STIFFNESS, DEFAULT_INTERPOLATINGSPRING_DAMPING);
+    AnimationOption halfDurationOption;
+    halfDurationOption.SetCurve(springCurve);
+    halfDurationOption.SetDuration(DEFAULT_INDICATOR_ANIMATION_DURATION);
+    AnimationOption delayOption;
+    delayOption.SetCurve(springCurve);
+    delayOption.SetDelay(DEFAULT_INDICATOR_ANIMATION_DURATION);
+    delayOption.SetDuration(DEFAULT_INDICATOR_ANIMATION_DURATION);
+    if (isOnAnimationFlag_->Get()) {
+        AnimationUtils::Animate(
+            halfDurationOption, [&]() { ringPointScale_->Set(0); }, nullptr);
+        AnimationUtils::Animate(
+            delayOption,
+            [&]() {
+                opacityScale_->Set(1);
+                borderOpacityScale_->Set(0);
+                pointScale_->Set(DEFAULT_POINT_SCALE);
+            },
+            nullptr);
+    } else {
+        AnimationUtils::Animate(
+            halfDurationOption, [&]() { pointScale_->Set(0); }, nullptr);
+        AnimationUtils::Animate(
+            delayOption,
+            [&]() {
+                opacityScale_->Set(0);
+                borderOpacityScale_->Set(1);
+                ringPointScale_->Set(1);
+            },
+            nullptr);
+    }
+    UpdateTotalScaleOnAnimatable(isCheck, delayOption, halfDurationOption);
 }
 
 void RadioModifier::SetBoardColor(LinearColor color, int32_t duratuion, const RefPtr<CubicCurve>& curve)
@@ -238,6 +295,75 @@ void RadioModifier::PaintRadio(
         canvas.AttachPen(pen);
         canvas.DrawCircle(RSPoint(centerX, centerY), outCircleRadius - borderWidth_ / CALC_RADIUS);
         canvas.DetachPen();
+    }
+}
+
+void RadioModifier::PaintUnselectedIndicator(
+    RSCanvas& canvas, float outCircleRadius, float centerX, float centerY) const
+{
+    RSPen pen;
+    RSBrush brush;
+    pen.SetAntiAlias(true);
+    pen.SetWidth(borderWidth_);
+    brush.SetAntiAlias(true);
+    auto alphaCalculate = static_cast<float>(DISABLED_ALPHA) / ENABLED_ALPHA;
+    if (!enabled_->Get()) {
+        brush.SetColor(ToRSColor(inactivePointColor_.BlendOpacity(alphaCalculate)));
+        pen.SetColor(ToRSColor(inactiveColor_->Get().BlendOpacity(alphaCalculate)));
+    } else {
+        brush.SetColor(ToRSColor(inactivePointColor_));
+        pen.SetColor(ToRSColor(inactiveColor_->Get()));
+    }
+    canvas.AttachBrush(brush);
+    canvas.DrawCircle(RSPoint(centerX, centerY), outCircleRadius - borderWidth_);
+    canvas.DetachBrush();
+    // draw border with unselected color
+    canvas.AttachPen(pen);
+    canvas.DrawCircle(RSPoint(centerX, centerY), outCircleRadius * totalScale_->Get() - borderWidth_ / CALC_RADIUS);
+    canvas.DetachPen();
+}
+
+void RadioModifier::PaintIndicator(
+    RSCanvas& canvas, bool /* checked */, const SizeF& contentSize, const OffsetF& contentOffset) const
+{
+    DrawTouchAndHoverBoard(canvas, contentSize, contentOffset);
+    float outCircleRadius = contentSize.Width() / CALC_RADIUS;
+    float centerX = contentOffset.GetX() + outCircleRadius;
+    float centerY = contentOffset.GetY() + outCircleRadius;
+    RSPen pen;
+    RSPen outPen;
+    RSBrush brush;
+    pen.SetAntiAlias(true);
+    pen.SetWidth(borderWidth_);
+    outPen.SetAntiAlias(true);
+    brush.SetAntiAlias(true);
+    if (uiStatus_->Get() == static_cast<int32_t>(UIStatus::SELECTED)) {
+        if (!enabled_->Get()) {
+            outPen.SetColor(
+                ToRSColor(activeColor_->Get().BlendOpacity(static_cast<float>(DISABLED_ALPHA) / ENABLED_ALPHA)));
+        } else {
+            outPen.SetColor(ToRSColor(activeColor_->Get().BlendOpacity(opacityScale_->Get())));
+        }
+        pen.SetColor(ToRSColor(inactiveColor_->Get().BlendOpacity(borderOpacityScale_->Get())));
+        brush.SetColor(ToRSColor(inactivePointColor_.BlendOpacity(borderOpacityScale_->Get())));
+        auto outWidth = outCircleRadius * totalScale_->Get();
+        if (outWidth < borderWidth_) {
+            outWidth = borderWidth_;
+        }
+        canvas.AttachPen(pen);
+        canvas.DrawCircle(RSPoint(centerX, centerY), outCircleRadius * totalScale_->Get() - borderWidth_ / CALC_RADIUS);
+        canvas.DetachPen();
+        outPen.SetWidth(outWidth);
+
+        canvas.AttachBrush(brush);
+        canvas.DrawCircle(RSPoint(centerX, centerY), outCircleRadius * totalScale_->Get() - borderWidth_);
+        canvas.DetachBrush();
+
+        canvas.AttachPen(outPen);
+        canvas.DrawCircle(RSPoint(centerX, centerY), outCircleRadius * totalScale_->Get() - outWidth / CALC_RADIUS);
+        canvas.DetachPen();
+    } else if (uiStatus_->Get() == static_cast<int32_t>(UIStatus::UNSELECTED)) {
+        PaintUnselectedIndicator(canvas, outCircleRadius, centerX, centerY);
     }
 }
 

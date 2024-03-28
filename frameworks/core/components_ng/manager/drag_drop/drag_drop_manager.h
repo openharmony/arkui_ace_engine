@@ -293,6 +293,42 @@ public:
         return preDragStatus_;
     }
 
+    void ResetPullMoveReceivedForCurrentDrag(bool isPullMoveReceivedForCurrentDrag = false)
+    {
+        isPullMoveReceivedForCurrentDrag_ = isPullMoveReceivedForCurrentDrag;
+    }
+
+    bool IsPullMoveReceivedForCurrentDrag() const
+    {
+        return isPullMoveReceivedForCurrentDrag_;
+    }
+
+    static void UpdateGatherNodeAttr(const RefPtr<OverlayManager>& overlayManager,
+        OffsetF gatherNodeCenter, float scale);
+    double CalcGatherNodeMaxDistanceWithPoint(const RefPtr<OverlayManager>& overlayManager, int32_t x, int32_t y);
+
+    void SetPixelMapOffset(OffsetF pixelMapOffset) {
+        pixelMapOffset_ = pixelMapOffset;
+    }
+    bool IsNeedDisplayInSubwindow();
+    void ClearGatherPixelMap()
+    {
+        gatherPixelMaps_.clear();
+    }
+
+    void GetGatherPixelMap(const RefPtr<PixelMap>& pixelMap);
+    void PushGatherPixelMap(DragDataCore& dragData, float scale);
+    bool HasGatherNode()
+    {
+        return hasGatherNode_;
+    }
+
+    void SetHasGatherNode(bool hasGatherNode)
+    {
+        hasGatherNode_ = hasGatherNode;
+    }
+
+
 private:
     double CalcDragPreviewDistanceWithPoint(
         const OHOS::Ace::Dimension& preserverHeight, int32_t x, int32_t y, const DragPreviewInfo& info);
@@ -313,6 +349,7 @@ private:
     void ClearVelocityInfo();
     void UpdateVelocityTrackerPoint(const Point& point, bool isEnd = false);
     void PrintDragFrameNode(const Point& point, const RefPtr<FrameNode>& dragFrameNode);
+    void PrintGridDragFrameNode(const float globalX, const float globalY, const RefPtr<FrameNode>& dragFrameNode);
     void FireOnDragEventWithDragType(const RefPtr<EventHub>& eventHub, DragEventType type,
         RefPtr<OHOS::Ace::DragEvent>& event, const std::string& extraParams);
     void NotifyDragFrameNode(
@@ -352,12 +389,16 @@ private:
     bool isWindowConsumed_ = false;
     bool isDragWindowShow_ = false;
     bool hasNotifiedTransformation_ = false;
+    bool isPullMoveReceivedForCurrentDrag_ = false;
     VelocityTracker velocityTracker_;
     DragDropMgrState dragDropState_ = DragDropMgrState::IDLE;
     PreDragStatus preDragStatus_ = PreDragStatus::ACTION_DETECTING_STATUS;
     Rect previewRect_ { -1, -1, -1, -1 };
     DragPreviewInfo info_;
     bool isDragFwkShow_ { false };
+    OffsetF pixelMapOffset_ {0.0f, 0.0f};
+    std::vector<RefPtr<PixelMap>> gatherPixelMaps_;
+    bool hasGatherNode_ = false;
 
     ACE_DISALLOW_COPY_AND_MOVE(DragDropManager);
 };

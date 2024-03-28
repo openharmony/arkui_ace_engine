@@ -128,6 +128,7 @@ void PipelineContext::SetupRootElement()
     fullScreenManager_ = MakeRefPtr<FullScreenManager>(rootNode_);
     selectOverlayManager_ = MakeRefPtr<SelectOverlayManager>(rootNode_);
     dragDropManager_ = MakeRefPtr<DragDropManager>();
+    focusManager_ = MakeRefPtr<FocusManager>();
     sharedTransitionManager_ = MakeRefPtr<SharedOverlayManager>(rootNode_);
 }
 
@@ -262,6 +263,11 @@ const RefPtr<SelectOverlayManager>& PipelineContext::GetSelectOverlayManager()
 const RefPtr<DragDropManager>& PipelineContext::GetDragDropManager()
 {
     return dragDropManager_;
+}
+
+const RefPtr<FocusManager>& PipelineContext::GetFocusManager() const
+{
+    return focusManager_;
 }
 
 const RefPtr<StageManager>& PipelineContext::GetStageManager()
@@ -505,6 +511,19 @@ const SerializedGesture& PipelineContext::GetSerializedGesture() const
     return serializedGesture_;
 }
 
+void PipelineContext::FlushFocusView()
+{
+    CHECK_NULL_VOID(focusManager_);
+    auto lastFocusView = (focusManager_->GetLastFocusView()).Upgrade();
+    CHECK_NULL_VOID(lastFocusView);
+    auto lastFocusViewHub = lastFocusView->GetFocusHub();
+    CHECK_NULL_VOID(lastFocusViewHub);
+    if (lastFocusView && (!lastFocusViewHub->IsCurrentFocus() || !lastFocusView->GetIsViewHasFocused()) &&
+        lastFocusViewHub->IsFocusableNode()) {
+        lastFocusView->RequestDefaultFocus();
+    }
+}
+
 } // namespace OHOS::Ace::NG
 // pipeline_context ============================================================
 
@@ -537,6 +556,11 @@ RefPtr<ImageCache> PipelineBase::GetImageCache() const
 {
     return nullptr;
 }
+
+void PipelineBase::OnVirtualKeyboardAreaChange(Rect keyboardArea,
+    const std::shared_ptr<Rosen::RSTransaction>& rsTransaction) {}
+void PipelineBase::OnVirtualKeyboardAreaChange(Rect keyboardArea, double positionY, double height,
+    const std::shared_ptr<Rosen::RSTransaction>& rsTransaction) {}
 
 void PipelineBase::OnVsyncEvent(uint64_t nanoTimestamp, uint32_t frameCount) {}
 

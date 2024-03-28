@@ -57,6 +57,7 @@ public:
         const std::string& hiddenIconStr, bool isPixelMap, RefPtr<PixelMap> pixMap);
     virtual void SetControlButtonSwitchingIconInfo(
         const std::string& switchingIconStr, bool isPixelMap, RefPtr<PixelMap> pixMap);
+    virtual void ResetControlButtonIconInfo();
     virtual void SetOnChange(std::function<void(const bool)>&& onChange);
     virtual void SetDividerStrokeWidth(const Dimension& strokeWidth);
     virtual void SetDividerColor(const Color& color);

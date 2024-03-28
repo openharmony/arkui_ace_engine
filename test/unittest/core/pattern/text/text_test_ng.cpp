@@ -630,53 +630,23 @@ HWTEST_F(TextTestNg, OnHandleMoveDone001, TestSize.Level1)
     pattern->textSelector_.Update(0, TEXT_SIZE_INT);
 
     /**
-     * @tc.steps: step2. call OnHandleMoveDone when SelectOverlayProxy is nullptr.
+     * @tc.steps: step2. call OnHandleMoveDone when SelectOverlay is off.
      * @tc.expected: the function exits normally
      */
     RectF handleRect = CONTENT_RECT;
-    pattern->OnHandleMoveDone(handleRect, true);
+    pattern->selectOverlay_->OnHandleMoveDone(handleRect, true);
     EXPECT_EQ(pattern->textSelector_.GetTextStart(), 0);
     EXPECT_EQ(pattern->textSelector_.GetTextEnd(), TEXT_SIZE_INT);
 
     /**
-     * @tc.steps: step3. construct a SelectOverlayManager
-     */
-    SelectOverlayInfo selectOverlayInfo;
-    selectOverlayInfo.singleLineHeight = NODE_ID;
-    auto root = AceType::MakeRefPtr<FrameNode>(ROOT_TAG, -1, AceType::MakeRefPtr<Pattern>(), true);
-    auto selectOverlayManager = AceType::MakeRefPtr<SelectOverlayManager>(root);
-
-    /**
-     * @tc.steps: step4. call CreateAndShowSelectOverlay
-     * @tc.expected: return the proxy which has the right SelectOverlayId
-     */
-    auto proxy = selectOverlayManager->CreateAndShowSelectOverlay(selectOverlayInfo, nullptr, false);
-    pattern->selectOverlayProxy_ = proxy;
-    EXPECT_NE(pattern->selectOverlayProxy_, nullptr);
-
-    /**
-     * @tc.steps: step5. call OnHandleMoveDone when SelectOverlayProxy is not nullptr.
+     * @tc.steps: step3. call OnHandleMoveDone when SelectOverlay is on.
      * @tc.expected: the OnHandleMoveDone function exits normally
      */
+    pattern->ShowSelectOverlay();
     bool isFirstHandle[2] = { true, false };
-    bool isShowCopyAll[2] = { true, false };
     for (int i = 0; i < 2; i++) {
-        for (int j = 0; j < 2; ++j) {
-            pattern->selectMenuInfo_.showCopyAll = isShowCopyAll[j];
-            pattern->textForDisplay_ = "abcdefghij";
-            pattern->OnHandleMoveDone(handleRect, isFirstHandle[i]);
-            if (pattern->IsSelectAll() && pattern->selectMenuInfo_.showCopyAll) {
-                EXPECT_FALSE(pattern->selectMenuInfo_.showCopyAll);
-            }
-
-            pattern->selectMenuInfo_.showCopyAll = isShowCopyAll[j];
-            pattern->textForDisplay_ = TEXT_CONTENT;
-            pattern->OnHandleMoveDone(handleRect, isFirstHandle[i]);
-            if (!pattern->IsSelectAll() && !pattern->selectMenuInfo_.showCopyAll) {
-                EXPECT_TRUE(pattern->selectMenuInfo_.showCopyAll);
-            }
-        }
-        pattern->OnHandleMoveDone(handleRect, isFirstHandle[i]);
+        pattern->textForDisplay_ = "abcdefghij";
+        pattern->selectOverlay_->OnHandleMoveDone(handleRect, isFirstHandle[i]);
         EXPECT_EQ(pattern->textSelector_.GetTextStart(), 0);
         EXPECT_EQ(pattern->textSelector_.GetTextEnd(), TEXT_SIZE_INT);
     }
@@ -691,25 +661,11 @@ HWTEST_F(TextTestNg, ShowSelectOverlay001, TestSize.Level1)
 {
     auto [frameNode, pattern] = Init();
     /**
-     * @tc.steps: step1. construct a SelectOverlayManager
+     * @tc.steps: step1. call ShowSelectOverlay
+     * @tc.expected: select overlay is on.
      */
-    SelectOverlayInfo selectOverlayInfo;
-    selectOverlayInfo.singleLineHeight = NODE_ID;
-    auto root = AceType::MakeRefPtr<FrameNode>(ROOT_TAG, -1, AceType::MakeRefPtr<Pattern>(), true);
-    auto selectOverlayManager = AceType::MakeRefPtr<SelectOverlayManager>(root);
-
-    /**
-     * @tc.steps: step2. call CreateAndShowSelectOverlay
-     * @tc.expected: return the proxy which has the right SelectOverlayId
-     */
-    pattern->selectOverlayProxy_ = AceType::MakeRefPtr<SelectOverlayProxy>(0);
-    RectF firstHandle = CONTENT_RECT;
-    RectF secondHandle = CONTENT_RECT;
-    pattern->ShowSelectOverlay(firstHandle, secondHandle);
-    EXPECT_NE(pattern->selectOverlayProxy_, nullptr);
-    pattern->selectOverlayProxy_->Close();
-    pattern->ShowSelectOverlay(firstHandle, secondHandle);
-    EXPECT_NE(pattern->selectOverlayProxy_, nullptr);
+    pattern->ShowSelectOverlay();
+    EXPECT_TRUE(pattern->selectOverlay_->SelectOverlayIsOn());
 }
 
 /**
@@ -2858,7 +2814,7 @@ HWTEST_F(TextTestNg, ShowSelectOverlay003, TestSize.Level1)
     pattern->textForDisplay_ = "test";
     pattern->textSelector_.Update(0, 20);
 
-    pattern->ShowSelectOverlay(pattern->textSelector_.firstHandle, pattern->textSelector_.secondHandle);
+    pattern->ShowSelectOverlay();
     EXPECT_NE(pattern->textSelector_.GetTextStart(), -1);
     EXPECT_NE(pattern->textSelector_.GetTextEnd(), -1);
 }
@@ -2896,7 +2852,7 @@ HWTEST_F(TextTestNg, ShowSelectOverlay004, TestSize.Level1)
      * @tc.steps: step2. call ShowSelectOverlay function
      * @tc.expected: the property of selectInfo is assigned.
      */
-    pattern->ShowSelectOverlay(pattern->textSelector_.firstHandle, pattern->textSelector_.secondHandle);
+    pattern->ShowSelectOverlay();
     EXPECT_EQ(pattern->textSelector_.GetTextStart(), 0);
     EXPECT_EQ(pattern->textSelector_.GetTextEnd(), 20);
 }
@@ -5022,7 +4978,6 @@ HWTEST_F(TextTestNg, HandleDoubleClickEvent002, TestSize.Level1)
     EXPECT_CALL(*paragraph, GetWordBoundary(_, _, _))
         .WillRepeatedly(DoAll(SetArgReferee<1>(0), SetArgReferee<2>(5), Return(true)));
 
-    EXPECT_EQ(pattern->selectOverlayProxy_, nullptr);
     pattern->isMousePressed_ = false;
     GestureEvent info;
     info.localLocation_ = Offset(0, 0);
@@ -5032,7 +4987,7 @@ HWTEST_F(TextTestNg, HandleDoubleClickEvent002, TestSize.Level1)
     EXPECT_TRUE(pattern->isDoubleClick_);
     EXPECT_EQ(pattern->textResponseType_, TextResponseType::NONE);
     EXPECT_TRUE(pattern->textSelector_.IsValid());
-    EXPECT_NE(pattern->selectOverlayProxy_, nullptr);
+    EXPECT_TRUE(pattern->selectOverlay_->SelectOverlayIsOn());
 }
 
 /**
@@ -5256,14 +5211,13 @@ HWTEST_F(TextTestNg, CloseSelectionMenu001, TestSize.Level1)
     pattern->paragraph_ = MockParagraph::GetOrCreateMockParagraph();
     pattern->textForDisplay_ = CREATE_VALUE;
     pattern->textSelector_.Update(0, 20);
+    pattern->ShowSelectOverlay();
 
-    pattern->ShowSelectOverlay(pattern->textSelector_.firstHandle, pattern->textSelector_.secondHandle);
-
-    auto isClosed = pattern->selectOverlayProxy_->IsClosed();
+    auto isClosed = !pattern->selectOverlay_->SelectOverlayIsOn();
     EXPECT_FALSE(isClosed);
     textController = pattern->GetTextController();
     textController->CloseSelectionMenu();
-    isClosed = pattern->selectOverlayProxy_->IsClosed();
+    isClosed = !pattern->selectOverlay_->SelectOverlayIsOn();
     EXPECT_TRUE(isClosed);
 }
 

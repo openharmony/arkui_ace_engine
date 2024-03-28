@@ -23,6 +23,7 @@
 #include "accessibility_system_ability_client.h"
 
 #include "adapter/ohos/entrance/ace_application_info.h"
+#include "adapter/ohos/entrance/ace_container.h"
 #include "base/log/ace_trace.h"
 #include "base/log/dump_log.h"
 #include "base/log/event_report.h"
@@ -783,16 +784,16 @@ std::vector<RefPtr<NG::FrameNode>> GetWebs(const RefPtr<NG::FrameNode>& root)
     return results;
 }
 
-RefPtr<NG::FrameNode> GetWebCoreNodeById(const RefPtr<NG::FrameNode>& frameNode, int64_t id)
+RefPtr<NG::FrameNode> GetWebCoreNodeById(const NG::FrameNode* frameNode, int64_t id)
 {
-    if (frameNode->GetTag() == V2::WEB_ETS_TAG) {
+    if (frameNode->IsNodeHasFlag(NG::NodeFlag::WEB_TAG)) {
         auto webPattern = frameNode->GetPattern<NG::WebPattern>();
         CHECK_NULL_RETURN(webPattern, nullptr);
         auto webAccessibilityNode = AceType::DynamicCast<NG::FrameNode>(webPattern->GetAccessibilityNodeById(id));
         if (webAccessibilityNode != nullptr) {
             return webAccessibilityNode;
         }
-    } else if (frameNode->GetTag() == V2::WEB_CORE_TAG) {
+    } else if (frameNode->IsNodeHasFlag(NG::NodeFlag::WEB_CORE_TAG)) {
         auto webAccessibilityNode = AceType::DynamicCast<NG::WebAccessibilityNode>(frameNode);
         CHECK_NULL_RETURN(webAccessibilityNode, nullptr);
         auto webNode = webAccessibilityNode->GetWebNode();
@@ -811,27 +812,37 @@ RefPtr<NG::FrameNode> GetWebCoreNodeById(const RefPtr<NG::FrameNode>& frameNode,
 RefPtr<NG::FrameNode> GetFramenodeByAccessibilityId(const RefPtr<NG::FrameNode>& root, int64_t id)
 {
     CHECK_NULL_RETURN(root, nullptr);
-    std::queue<RefPtr<NG::UINode>> nodes;
-    nodes.push(root);
-    RefPtr<NG::FrameNode> frameNode;
+    if (root->GetAccessibilityId() == id) {
+        return root;
+    }
+#ifdef WEB_SUPPORTED
+    auto result = GetWebCoreNodeById(Referenced::RawPtr(root), id);
+    if (result) {
+        return result;
+    }
+#endif
+    std::queue<NG::UINode*> nodes;
+    nodes.push(Referenced::RawPtr(root));
+    NG::FrameNode* frameNode = nullptr;
+
     while (!nodes.empty()) {
         auto current = nodes.front();
         nodes.pop();
-        frameNode = AceType::DynamicCast<NG::FrameNode>(current);
-        if (frameNode != nullptr) {
-            if (id == frameNode->GetAccessibilityId()) {
-                return frameNode;
-            }
-#ifdef WEB_SUPPORTED
-            auto result = GetWebCoreNodeById(frameNode, id);
-            if (result) {
-                return result;
-            }
-#endif
-        }
         const auto& children = current->GetChildren();
         for (const auto& child : children) {
-            nodes.push(child);
+            frameNode = AceType::DynamicCast<NG::FrameNode>(Referenced::RawPtr(child));
+            if (frameNode != nullptr) {
+                if (frameNode->GetAccessibilityId() == id) {
+                    return AceType::DynamicCast<NG::FrameNode>(child);
+                }
+#ifdef WEB_SUPPORTED
+                auto result = GetWebCoreNodeById(frameNode, id);
+                if (result) {
+                    return result;
+                }
+#endif
+                nodes.push(frameNode);
+            }
         }
     }
     return nullptr;
@@ -1902,10 +1913,12 @@ static void DumpCommonPropertyNG(const AccessibilityElementInfo& nodeInfo)
     DumpLog::GetInstance().AddDesc("popup supported: ", BoolToString(nodeInfo.IsPopupSupported()));
 }
 
-bool IsExtensionSendAccessibilitySyncEvent()
+bool IsExtensionSendAccessibilitySyncEvent(RefPtr<NG::PipelineContext>& pipeline)
 {
-    auto container = Container::Current();
-    return container && container->IsUIExtensionWindow();
+    CHECK_NULL_RETURN(pipeline, false);
+    auto container = Platform::AceContainer::GetContainer(pipeline->GetInstanceId());
+    CHECK_NULL_RETURN(container, false);
+    return container->IsUIExtensionWindow();
 }
 
 void GenerateAccessibilityEventInfo(const AccessibilityEvent& accessibilityEvent, AccessibilityEventInfo& eventInfo)
@@ -2034,24 +2047,12 @@ void JsAccessibilityManager::InitializeCallback()
 bool JsAccessibilityManager::SendExtensionAccessibilitySyncEvent(
     const AccessibilityEvent& accessibilityEvent, const Accessibility::AccessibilityEventInfo& eventInfo)
 {
-    if (!IsRegister()) {
-        return false;
-    }
-
-    auto client = AccessibilitySystemAbilityClient::GetInstance();
-    CHECK_NULL_RETURN(client, false);
-    bool isEnabled = false;
-    client->IsEnabled(isEnabled);
-    if (!isEnabled) {
-        return false;
-    }
 #ifdef WINDOW_SCENE_SUPPORTED
-    auto ngPipeline = NG::PipelineContext::GetCurrentContext();
+    auto ngPipeline = AceType::DynamicCast<NG::PipelineContext>(context_.Upgrade());
+    CHECK_NULL_RETURN(ngPipeline, false);
     auto uiExtensionManager = ngPipeline->GetUIExtensionManager();
     CHECK_NULL_RETURN(uiExtensionManager, false);
-    if (IsExtensionSendAccessibilitySyncEvent()) {
-        return uiExtensionManager->SendAccessibilityEventInfo(eventInfo, NG::UI_EXTENSION_UNKNOW_ID, ngPipeline);
-    }
+    return uiExtensionManager->SendAccessibilityEventInfo(eventInfo, NG::UI_EXTENSION_UNKNOW_ID, ngPipeline);
 #endif
     return false;
 }
@@ -2069,13 +2070,8 @@ bool JsAccessibilityManager::SendAccessibilitySyncEvent(
     if (!isEnabled) {
         return false;
     }
-    TAG_LOGD(AceLogTag::ACE_ACCESSIBILITY, "send accessibility event:%{public}d aid:%{public}lld",
-        eventInfo.GetEventType(), static_cast<int64_t>(eventInfo.GetAccessibilityId()));
-    const AccessibilityElementInfo& elementInfo = eventInfo.GetElementInfo();
-    TAG_LOGI(AceLogTag::ACE_ACCESSIBILITY, "The element info bundleName: %{public}s, elementId: %{public}" PRId64
-        ", componentType: %{public}s, text: %{public}s", elementInfo.GetBundleName().c_str(),
-        static_cast<int64_t>(elementInfo.GetAccessibilityId()), elementInfo.GetComponentType().c_str(),
-        elementInfo.GetContent().c_str());
+    TAG_LOGI(AceLogTag::ACE_ACCESSIBILITY, "send accessibility event:%{public}d accessibilityId:%{public}" PRId64,
+        eventInfo.GetEventType(), eventInfo.GetAccessibilityId());
     return client->SendEvent(eventInfo);
 }
 
@@ -2083,10 +2079,6 @@ bool JsAccessibilityManager::TransferAccessibilityAsyncEvent(
     const AccessibilityEventInfo& eventInfo, int64_t uiExtensionOffset)
 {
 #ifdef WINDOW_SCENE_SUPPORTED
-    if (!IsRegister()) {
-        return false;
-    }
-
     auto client = AccessibilitySystemAbilityClient::GetInstance();
     CHECK_NULL_RETURN(client, false);
     bool isEnabled = false;
@@ -2106,12 +2098,19 @@ bool JsAccessibilityManager::TransferAccessibilityAsyncEvent(
         return uiExtensionManager->SendAccessibilityEventInfo(eventInfo,
             uiExtensionOffset / NG::UI_EXTENSION_ID_FACTOR, pipeline);
     }
+    if (!IsRegister()) {
+        return false;
+    }
     AccessibilityEventInfo eventInfoNew = eventInfo;
     eventInfoNew.SetSource(uiExtensionOffset + eventInfo.GetViewId());
-#endif
-    TAG_LOGD(AceLogTag::ACE_ACCESSIBILITY, "send accessibility event:%{public}d aid:%{public}lld",
-        eventInfoNew.GetEventType(), static_cast<int64_t>(eventInfoNew.GetAccessibilityId()));
+    AccessibilityElementInfo elementInfo;
+    FillElementInfo(eventInfoNew.GetAccessibilityId(), elementInfo, pipeline, Claim(this));
+    eventInfoNew.SetElementInfo(elementInfo);
+    TAG_LOGI(AceLogTag::ACE_ACCESSIBILITY, "send accessibility event:%{public}d accessibilityId:%{public}" PRId64,
+        eventInfoNew.GetEventType(), eventInfoNew.GetAccessibilityId());
     return client->SendEvent(eventInfoNew);
+#endif
+    return false;
 }
 
 void JsAccessibilityManager::SendExtensionAccessibilityEvent(
@@ -2149,7 +2148,8 @@ void JsAccessibilityManager::SendAccessibilityAsyncEvent(const AccessibilityEven
 
     GenerateAccessibilityEventInfo(accessibilityEvent, eventInfo);
 
-    if (IsExtensionSendAccessibilitySyncEvent()) {
+    auto ngPipeline = AceType::DynamicCast<NG::PipelineContext>(context);
+    if (IsExtensionSendAccessibilitySyncEvent(ngPipeline)) {
         SendExtensionAccessibilitySyncEvent(accessibilityEvent, eventInfo);
     } else {
         context->GetTaskExecutor()->PostTask(

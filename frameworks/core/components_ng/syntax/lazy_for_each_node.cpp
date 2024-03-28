@@ -103,6 +103,7 @@ void LazyForEachNode::OnDataReloaded()
     ACE_SCOPED_TRACE("OnDataReloaded");
     children_.clear();
     if (builder_) {
+        builder_->SetUseNewInterface(false);
         builder_->OnDataReloaded();
     }
     NotifyDataCountChanged(0);
@@ -115,6 +116,7 @@ void LazyForEachNode::OnDataAdded(size_t index)
     ACE_SCOPED_TRACE("OnDataAdded");
     auto insertIndex = static_cast<int32_t>(index);
     if (builder_) {
+        builder_->SetUseNewInterface(false);
         builder_->OnDataAdded(index);
     }
     children_.clear();
@@ -128,6 +130,7 @@ void LazyForEachNode::OnDataBulkAdded(size_t index, size_t count)
     ACE_SCOPED_TRACE("OnDataBulkAdded");
     auto insertIndex = static_cast<int32_t>(index);
     if (builder_) {
+        builder_->SetUseNewInterface(false);
         builder_->OnDataBulkAdded(index, count);
     }
     children_.clear();
@@ -141,6 +144,7 @@ void LazyForEachNode::OnDataDeleted(size_t index)
     ACE_SCOPED_TRACE("OnDataDeleted");
     auto deletedIndex = static_cast<int32_t>(index);
     if (builder_) {
+        builder_->SetUseNewInterface(false);
         auto node = builder_->OnDataDeleted(index);
 
         if (node) {
@@ -163,6 +167,7 @@ void LazyForEachNode::OnDataBulkDeleted(size_t index, size_t count)
     ACE_SCOPED_TRACE("OnDataBulkDeleted");
     auto deletedIndex = static_cast<int32_t>(index);
     if (builder_) {
+        builder_->SetUseNewInterface(false);
         auto nodeList = builder_->OnDataBulkDeleted(index, count);
         for (auto& node : nodeList) {
             if (node == nullptr) {
@@ -175,7 +180,7 @@ void LazyForEachNode::OnDataBulkDeleted(size_t index, size_t count)
             }
             builder_->ProcessOffscreenNode(node, true);
         }
-        builder_->clearBulkDeletedNodes();
+        builder_->clearDeletedNodes();
     }
     children_.clear();
     NotifyDataCountChanged(deletedIndex);
@@ -186,6 +191,7 @@ void LazyForEachNode::OnDataBulkDeleted(size_t index, size_t count)
 void LazyForEachNode::OnDataChanged(size_t index)
 {
     if (builder_) {
+        builder_->SetUseNewInterface(false);
         builder_->OnDataChanged(index);
     }
     children_.clear();
@@ -196,9 +202,38 @@ void LazyForEachNode::OnDataChanged(size_t index)
 void LazyForEachNode::OnDataMoved(size_t from, size_t to)
 {
     if (builder_) {
+        builder_->SetUseNewInterface(false);
         builder_->OnDataMoved(from, to);
     }
     children_.clear();
+    MarkNeedSyncRenderTree(true);
+    MarkNeedFrameFlushDirty(PROPERTY_UPDATE_MEASURE_SELF_AND_PARENT);
+}
+
+void LazyForEachNode::OnDatasetChange(const std::list<V2::Operation>& DataOperations)
+{
+    ACE_SCOPED_TRACE("OnDatasetChange");
+    int32_t initialChangedIndex = 0;
+    if (builder_) {
+        builder_->SetUseNewInterface(true);
+        std::pair<int32_t, std::list<RefPtr<UINode>>> pair = builder_->OnDatasetChange(DataOperations);
+        initialChangedIndex = pair.first;
+        std::list<RefPtr<UINode>> nodeList_ = pair.second;
+        for (auto& node : nodeList_) {
+            if (node == nullptr) {
+                continue;
+            }
+            if (!node->OnRemoveFromParent(true)) {
+                const_cast<LazyForEachNode*>(this)->AddDisappearingChild(node);
+            } else {
+                node->DetachFromMainTree();
+            }
+            builder_->ProcessOffscreenNode(node, true);
+        }
+        builder_->clearDeletedNodes();
+    }
+    children_.clear();
+    NotifyDataCountChanged(initialChangedIndex);
     MarkNeedSyncRenderTree(true);
     MarkNeedFrameFlushDirty(PROPERTY_UPDATE_MEASURE_SELF_AND_PARENT);
 }
@@ -229,6 +264,7 @@ RefPtr<UINode> LazyForEachNode::GetFrameChildByIndex(uint32_t index, bool needBu
     }
     if (isCache) {
         child.second->SetParent(WeakClaim(this));
+        child.second->SetJSViewActive(false);
         return child.second->GetFrameChildByIndex(0, needBuild);
     }
     if (isActive_) {

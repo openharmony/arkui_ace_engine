@@ -496,7 +496,7 @@ void BubbleView::UpdateCustomPopupParam(int32_t popupId, const RefPtr<PopupParam
 
 void BubbleView::GetPopupMaxWidthAndHeight(const RefPtr<PopupParam>& param, float& popupMaxWidth, float& popupMaxHeight)
 {
-    auto pipelineContext = PipelineContext::GetMainPipelineContext();
+    auto pipelineContext = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipelineContext);
     auto windowGlobalRect = pipelineContext->GetDisplayWindowRectInfo();
     auto safeAreaManager = pipelineContext->GetSafeAreaManager();

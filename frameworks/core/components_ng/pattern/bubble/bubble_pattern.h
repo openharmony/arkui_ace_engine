@@ -237,7 +237,7 @@ private:
     bool mouseEventInitFlag_ = false;
     bool touchEventInitFlag_ = false;
     bool isHover_ = false;
-    bool interactiveDismiss_ = false;
+    bool interactiveDismiss_ = true;
     std::function<void(int32_t)> onWillDismiss_;
     OffsetF childOffset_;
     OffsetF arrowPosition_;

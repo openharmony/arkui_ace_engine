@@ -42,8 +42,8 @@ function copyImageAnimatorModifierWithKey(obj: ModifierWithKey<string | number |
   return newObj;
 }
 
-function mergeImageAnimatorMaps(stageMap: Map<Symbol, ModifierWithKey<number | string | boolean | object>>,
-  newMap: Map<Symbol, ModifierWithKey<number | string | boolean | object>>): Map<Symbol, ModifierWithKey<number | string | boolean | object>>{
+function mergeImageAnimatorMaps(stageMap: Map<Symbol, AttributeModifierWithKey>,
+  newMap: Map<Symbol, AttributeModifierWithKey>): Map<Symbol, AttributeModifierWithKey>{
   newMap.forEach((value, key) => {
     stageMap.set(key, copyImageAnimatorModifierWithKey(value));
   });
@@ -59,7 +59,7 @@ class ImageAnimatorModifier extends ArkImageAnimatorComponent implements Attribu
 
   applyNormalAttribute(instance: ImageAnimatorAttribute): void {
     let myMap = this._modifiersWithKeys as ModifierMap;
-    myMap.setOnChange(() => {
+    myMap.setOnChange((value: AttributeModifierWithKey) => {
       this._changed = !this._changed;
     });
 

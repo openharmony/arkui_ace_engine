@@ -74,6 +74,12 @@ public:
             parentView_->MarkNeedUpdate();
         }
     }
+    void OnDatasetChange(const std::list<V2::Operation>& DataOperations) override
+    {
+        if (parentView_ != nullptr) {
+            parentView_->MarkNeedUpdate();
+        }
+    }
 
 private:
     JSView* parentView_ = nullptr;

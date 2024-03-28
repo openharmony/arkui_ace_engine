@@ -195,6 +195,8 @@ private:
     void UpdateUnSelect();
     void UpdateCheckBoxGroupStatus(const RefPtr<FrameNode>& frameNode,
         std::unordered_map<std::string, std::list<WeakPtr<FrameNode>>>& checkBoxGroupMap, bool isSelected);
+    void NotifyCheckboxGroupStatusChange(
+        const RefPtr<FrameNode>& checkBoxGroupNode, std::vector<std::string> vec, bool isSameAsSelf, bool select);
     void UpdateCheckBoxGroupStatusWhenDetach(const FrameNode* frameNode,
         std::unordered_map<std::string, std::list<WeakPtr<FrameNode>>>& checkBoxGroupMap);
     void CheckBoxGroupIsTrue();
@@ -205,6 +207,10 @@ private:
     void RemoveLastHotZoneRect() const;
     void SetAccessibilityAction();
     void UpdateSelectStatus(bool isSelected);
+    void ChangeSelfStatusAndNotify(const RefPtr<CheckBoxPaintProperty>& paintProperty,
+        std::unordered_map<std::string, std::list<WeakPtr<FrameNode>>> checkBoxGroupMap);
+    void ChangeGroupStatusAndNotify(const RefPtr<FrameNode>& checkBoxGroupNode, const std::vector<std::string>& vec,
+        bool haveCheckBoxSelected, bool isAllCheckBoxSelected);
 
     std::optional<std::string> preName_;
     std::optional<std::string> preGroup_;

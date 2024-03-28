@@ -29,6 +29,7 @@ constexpr int32_t SIZE_OF_THREE = 3;
 constexpr int32_t POS_0 = 0;
 constexpr int32_t POS_1 = 1;
 constexpr int32_t POS_2 = 2;
+constexpr int32_t DEFAULT_GROUP_DIVIDER_VALUES_COUNT = 3;
 const char DEFAULT_DELIMITER = '|';
 const int32_t ERROR_INT_CODE = -1;
 std::string g_strValue;
@@ -265,6 +266,9 @@ ArkUI_CharPtr GetTextPickerSelectedTextStyle(ArkUINodeHandle node)
     PickerTextStyle pickerTextStyle = TextPickerModelNG::getSelectedTextStyle(frameNode);
     std::vector<std::string> fontFamilies = pickerTextStyle.fontFamily.value_or(std::vector<std::string>());
     std::string families;
+    if (fontFamilies.size() == 0) {
+        fontFamilies.emplace_back("HarmonyOS Sans");
+    }
     //set index start
     int index = 0;
     for (auto& family : fontFamilies) {
@@ -274,11 +278,11 @@ ArkUI_CharPtr GetTextPickerSelectedTextStyle(ArkUINodeHandle node)
         }
         index++;
     }
-    g_strValue = pickerTextStyle.textColor->ColorToString() + ",";
-    g_strValue = g_strValue + pickerTextStyle.fontSize->ToString() + ",";
+    g_strValue = pickerTextStyle.textColor->ColorToString() + ";";
+    g_strValue = g_strValue + pickerTextStyle.fontSize->ToString() + ";";
     g_strValue =
-        g_strValue + std::to_string(static_cast<int>(pickerTextStyle.fontWeight.value_or(FontWeight::W100))) + ",";
-    g_strValue = g_strValue + families + ",";
+        g_strValue + std::to_string(static_cast<int>(pickerTextStyle.fontWeight.value_or(FontWeight::W100))) + ";";
+    g_strValue = g_strValue + families + ";";
     g_strValue =
         g_strValue + std::to_string(static_cast<int>(pickerTextStyle.fontStyle.value_or(OHOS::Ace::FontStyle::NORMAL)));
     return g_strValue.c_str();
@@ -291,6 +295,9 @@ ArkUI_CharPtr GetTextPickerTextStyle(ArkUINodeHandle node)
     PickerTextStyle pickerTextStyle = TextPickerModelNG::getNormalTextStyle(frameNode);
     std::vector<std::string> fontFamilies = pickerTextStyle.fontFamily.value_or(std::vector<std::string>());
     std::string families;
+    if (fontFamilies.size() == 0) {
+        fontFamilies.emplace_back("HarmonyOS Sans");
+    }
     //set index start
     int index = 0;
     for (auto& family : fontFamilies) {
@@ -300,11 +307,11 @@ ArkUI_CharPtr GetTextPickerTextStyle(ArkUINodeHandle node)
         }
         index++;
     }
-    g_strValue = pickerTextStyle.textColor->ColorToString() + ",";
-    g_strValue = g_strValue + pickerTextStyle.fontSize->ToString() + ",";
+    g_strValue = pickerTextStyle.textColor->ColorToString() + ";";
+    g_strValue = g_strValue + pickerTextStyle.fontSize->ToString() + ";";
     g_strValue =
-        g_strValue + std::to_string(static_cast<int>(pickerTextStyle.fontWeight.value_or(FontWeight::W100))) + ",";
-    g_strValue = g_strValue + families + ",";
+        g_strValue + std::to_string(static_cast<int>(pickerTextStyle.fontWeight.value_or(FontWeight::W100))) + ";";
+    g_strValue = g_strValue + families + ";";
     g_strValue =
         g_strValue + std::to_string(static_cast<int>(pickerTextStyle.fontStyle.value_or(OHOS::Ace::FontStyle::NORMAL)));
     return g_strValue.c_str();
@@ -317,6 +324,9 @@ ArkUI_CharPtr GetTextPickerDisappearTextStyle(ArkUINodeHandle node)
     PickerTextStyle pickerTextStyle = TextPickerModelNG::getDisappearTextStyle(frameNode);
     std::vector<std::string> fontFamilies = pickerTextStyle.fontFamily.value_or(std::vector<std::string>());
     std::string families;
+    if (fontFamilies.size() == 0) {
+        fontFamilies.emplace_back("HarmonyOS Sans");
+    }
     //set index start
     int index = 0;
     for (auto& family : fontFamilies) {
@@ -326,14 +336,41 @@ ArkUI_CharPtr GetTextPickerDisappearTextStyle(ArkUINodeHandle node)
         }
         index++;
     }
-    g_strValue = pickerTextStyle.textColor->ColorToString() + ",";
-    g_strValue = g_strValue + pickerTextStyle.fontSize->ToString() + ",";
+    g_strValue = pickerTextStyle.textColor->ColorToString() + ";";
+    g_strValue = g_strValue + pickerTextStyle.fontSize->ToString() + ";";
     g_strValue =
-        g_strValue + std::to_string(static_cast<int>(pickerTextStyle.fontWeight.value_or(FontWeight::W100))) + ",";
-    g_strValue = g_strValue + families + ",";
+        g_strValue + std::to_string(static_cast<int>(pickerTextStyle.fontWeight.value_or(FontWeight::W100))) + ";";
+    g_strValue = g_strValue + families + ";";
     g_strValue =
         g_strValue + std::to_string(static_cast<int>(pickerTextStyle.fontStyle.value_or(OHOS::Ace::FontStyle::NORMAL)));
     return g_strValue.c_str();
+}
+
+void SetTextPickerDivider(ArkUINodeHandle node, ArkUI_Uint32 color, const ArkUI_Float32* values,
+    const ArkUI_Int32* units, ArkUI_Int32 length)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+
+    if (length != DEFAULT_GROUP_DIVIDER_VALUES_COUNT) {
+        return;
+    }
+
+    NG::ItemDivider divider;
+    divider.color = Color(color);
+    divider.strokeWidth = Dimension(values[POS_0], static_cast<OHOS::Ace::DimensionUnit>(units[POS_0]));
+    divider.startMargin = Dimension(values[POS_1], static_cast<OHOS::Ace::DimensionUnit>(units[POS_1]));
+    divider.endMargin = Dimension(values[POS_2], static_cast<OHOS::Ace::DimensionUnit>(units[POS_2]));
+
+    TextPickerModelNG::SetDivider(frameNode, divider);
+}
+
+void ResetTextPickerDivider(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    NG::ItemDivider divider;
+    TextPickerModelNG::SetDivider(frameNode, divider);
 }
 
 } // namespace
@@ -348,7 +385,7 @@ const ArkUITextPickerModifier* GetTextPickerModifier()
         ResetTextPickerSelectedIndex, ResetTextPickerTextStyle, ResetTextPickerSelectedTextStyle,
         ResetTextPickerDisappearTextStyle, ResetTextPickerDefaultPickerItemHeight, ResetTextPickerBackgroundColor,
         GetTextPickerRangeStr, GetTextPickerSingleRange, SetTextPickerRangeStr,
-        GetTextPickerValue, SetTextPickerValue};
+        GetTextPickerValue, SetTextPickerValue, SetTextPickerDivider, ResetTextPickerDivider};
 
     return &modifier;
 }

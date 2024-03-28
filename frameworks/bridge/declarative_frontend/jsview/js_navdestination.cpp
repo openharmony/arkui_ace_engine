@@ -80,7 +80,7 @@ void JSNavDestination::Create(const JSCallbackInfo& info)
         JAVASCRIPT_EXECUTION_SCOPE(context)
         JSRef<JSFunc>::Cast(builder)->Call(JSRef<JSObject>());
     };
-    auto ctx = AceType::MakeRefPtr<JSNavDestinationContext>();
+    auto ctx = AceType::MakeRefPtr<NG::NavDestinationContext>();
     auto navPathInfo = AceType::MakeRefPtr<JSNavPathInfo>();
     ctx->SetNavPathInfo(navPathInfo);
     NavDestinationModel::GetInstance()->Create(std::move(builderFunc), std::move(ctx));
@@ -140,7 +140,6 @@ void JSNavDestination::SetTitle(const JSCallbackInfo& info)
             NavDestinationModel::GetInstance()->SetCustomTitle(customNode);
         }
     } else {
-        TAG_LOGI(AceLogTag::ACE_NAVIGATION, "SetTitle is undefined");
         NavDestinationModel::GetInstance()->ParseCommonTitle(false, false, "", "");
     }
 }
@@ -226,12 +225,14 @@ void JSNavDestination::SetOnReady(const JSCallbackInfo& info)
     auto onReadyCallback = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(info[0]));
     auto onReady = [execCtx = info.GetExecutionContext(), func = std::move(onReadyCallback)](
                        RefPtr<NG::NavDestinationContext> context) {
-        auto jsContext = AceType::DynamicCast<JSNavDestinationContext>(context);
-        CHECK_NULL_VOID(jsContext);
+        auto jsContext = JSClass<JSNavDestinationContext>::NewInstance();
+        auto jsNavDestinationContext = Referenced::Claim(jsContext->Unwrap<JSNavDestinationContext>());
+        CHECK_NULL_VOID(jsNavDestinationContext);
+        jsNavDestinationContext->SetNavDestinationContext(context);
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
         ACE_SCORING_EVENT("NavDestination.onReady");
         JSRef<JSVal> params[1];
-        params[0] = jsContext->CreateJSObject();
+        params[0] = jsContext;
         func->ExecuteJS(1, params);
     };
     NavDestinationModel::GetInstance()->SetOnReady(std::move(onReady));
@@ -249,8 +250,37 @@ void JSNavDestination::SetMode(const JSCallbackInfo& info)
     NavDestinationModel::GetInstance()->SetNavDestinationMode(static_cast<NG::NavDestinationMode>(mode));
 }
 
+void JSNavDestination::SetMenus(const JSCallbackInfo& info)
+{
+    if (info.Length() < 1) {
+        return;
+    }
+
+    if (info[0]->IsUndefined() || info[0]->IsArray()) {
+        std::vector<NG::BarItem> menuItems;
+        if (info[0]->IsUndefined()) {
+            menuItems = {};
+        } else {
+            JSNavigation::ParseBarItems(info, JSRef<JSArray>::Cast(info[0]), menuItems);
+        }
+        NavDestinationModel::GetInstance()->SetMenuItems(std::move(menuItems));
+        return;
+    } else if (info[0]->IsObject()) {
+        auto builderObject = JSRef<JSObject>::Cast(info[0])->GetProperty("builder");
+        if (builderObject->IsFunction()) {
+            ViewStackModel::GetInstance()->NewScope();
+            JsFunction jsBuilderFunc(info.This(), JSRef<JSObject>::Cast(builderObject));
+            ACE_SCORING_EVENT("NavDestiNation.menu.builder");
+            jsBuilderFunc.Execute();
+            auto customNode = ViewStackModel::GetInstance()->Finish();
+            NavDestinationModel::GetInstance()->SetCustomMenu(customNode);
+        }
+    }
+}
+
 void JSNavDestination::JSBind(BindingTarget globalObj)
 {
+    JSNavDestinationContext::JSBind(globalObj);
     JSClass<JSNavDestination>::Declare("NavDestination");
     JSClass<JSNavDestination>::StaticMethod("create", &JSNavDestination::Create);
     JSClass<JSNavDestination>::StaticMethod("title", &JSNavDestination::SetTitle);
@@ -265,6 +295,7 @@ void JSNavDestination::JSBind(BindingTarget globalObj)
     JSClass<JSNavDestination>::StaticMethod("onTouch", &JSInteractableView::JsOnTouch);
     JSClass<JSNavDestination>::StaticMethod("id", &JSViewAbstract::JsId);
     JSClass<JSNavDestination>::StaticMethod("mode", &JSNavDestination::SetMode);
+    JSClass<JSNavDestination>::StaticMethod("menus", &JSNavDestination::SetMenus);
     JSClass<JSNavDestination>::InheritAndBind<JSContainerBase>(globalObj);
 }
 

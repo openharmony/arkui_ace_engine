@@ -95,6 +95,7 @@ constexpr Dimension NAV_HORIZONTAL_MARGIN_M = 8.0_vp;  // ohos_id_elements_margi
 constexpr Dimension MENU_ITEM_PADDING = 24.0_vp;
 constexpr Dimension MENU_ITEM_SIZE = 48.0_vp;
 constexpr Dimension BUTTON_PADDING = 12.0_vp;
+constexpr Dimension MENU_BUTTON_PADDING = 8.0_vp;
 constexpr Dimension BUTTON_RADIUS_SIZE = 5.0_vp;
 constexpr Dimension MAX_OVER_DRAG_OFFSET = 180.0_vp;
 constexpr Dimension DEFAULT_MIN_NAV_BAR_WIDTH = 240.0_vp;
@@ -121,6 +122,7 @@ enum class NavToolbarItemStatus {
 struct BarItem {
     std::optional<std::string> text;
     std::optional<std::string> icon;
+    std::optional<bool> isEnabled;
     std::function<void()> action;
     NavToolbarItemStatus status;
     std::optional<std::string> activeIcon;
@@ -188,6 +190,13 @@ enum class NavigationOperation {
     PUSH = 1,
     POP,
     REPLACE,
+};
+
+enum NavDestinationLifecycle {
+    ON_APPEAR,
+    ON_SHOW,
+    ON_HIDE,
+    ON_DISAPPEAR
 };
 
 struct NavContentInfo {

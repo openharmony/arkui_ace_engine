@@ -40,7 +40,7 @@ class ACE_EXPORT ListItemGroupPaintMethod : public NodePaintMethod {
     DECLARE_ACE_TYPE(ListItemGroupPaintMethod, NodePaintMethod)
 public:
     ListItemGroupPaintMethod(const V2::ItemDivider& divider, ListItemGroupPaintInfo listItemGroupPaintInfo,
-        ListItemGroupLayoutAlgorithm::PositionMap& itemPosition)
+        ListItemGroupLayoutAlgorithm::PositionMap& itemPosition, const std::set<int32_t>& pressedItem)
         : divider_(divider), itemPosition_(itemPosition)
     {
         vertical_ = listItemGroupPaintInfo.vertical;
@@ -48,6 +48,13 @@ public:
         spaceWidth_ = listItemGroupPaintInfo.spaceWidth;
         laneGutter_ = listItemGroupPaintInfo.laneGutter;
         totalItemCount_ = listItemGroupPaintInfo.totalItemCount;
+        if (!pressedItem.empty()) {
+            for (auto& child : itemPosition_) {
+                if (pressedItem.find(child.second.id) != pressedItem.end()) {
+                    child.second.isPressed = true;
+                }
+            }
+        }
     }
     ~ListItemGroupPaintMethod() override = default;
 

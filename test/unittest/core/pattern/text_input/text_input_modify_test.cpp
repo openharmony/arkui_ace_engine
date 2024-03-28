@@ -233,17 +233,17 @@ HWTEST_F(TextFieldModifyTest, TextinputCaretPositionOnHandleMove001, TestSize.Le
      * tc.expected: step2. Check if the value is right.
      */
     OffsetF localOffset1(1.0f, 1.0f);
-    EXPECT_EQ(pattern_->UpdateCaretPositionOnHandleMove(localOffset1), 25);
+    EXPECT_EQ(pattern_->selectOverlay_->GetCaretPositionOnHandleMove(localOffset1), 25);
 
     FlushLayoutTask(frameNode_);
     GetFocus();
     OffsetF localOffset2(720.0f, 1.0f);
-    EXPECT_EQ(pattern_->UpdateCaretPositionOnHandleMove(localOffset2), 26);
+    EXPECT_EQ(pattern_->selectOverlay_->GetCaretPositionOnHandleMove(localOffset2), 26);
 
     FlushLayoutTask(frameNode_);
     GetFocus();
     OffsetF localOffset3(30.0f, 1.0f);
-    EXPECT_EQ(pattern_->UpdateCaretPositionOnHandleMove(localOffset3), 0);
+    EXPECT_EQ(pattern_->selectOverlay_->GetCaretPositionOnHandleMove(localOffset3), 0);
 }
 
 /**
@@ -351,7 +351,7 @@ HWTEST_F(TextFieldModifyTest, HandleClickEvent001, TestSize.Level1)
      */
     pattern_->OnAfterModifyDone();
     pattern_->HandleSingleClickEvent(gestureEvent);
-    EXPECT_TRUE(pattern_->isSingleHandle_);
+    EXPECT_TRUE(pattern_->selectOverlay_->IsSingleHandle());
 }
 
 /**
@@ -376,9 +376,11 @@ HWTEST_F(TextFieldModifyTest, OnCursorTwinkling001, TestSize.Level1)
      * @tc.expected: Check if return true.
      */
     pattern_->obscureTickCountDown_ = 1;
+    GestureEvent gestureEvent;
+    pattern_->HandleSingleClickEvent(gestureEvent);
     pattern_->OnCursorTwinkling();
     pattern_->OnAfterModifyDone();
-    EXPECT_TRUE(pattern_->isSingleHandle_);
+    EXPECT_TRUE(pattern_->selectOverlay_->IsSingleHandle());
 }
 
 /**
@@ -398,15 +400,15 @@ HWTEST_F(TextFieldModifyTest, UpdateSecondHandleInfo001, TestSize.Level1)
      * @tc.steps: step2. Set secondhandle. Call function UpdateSelectOverlaySecondHandle.
      * @tc.expected: Check if return true.
      */
-    pattern_->ProcessOverlay(true, true, true);
+    pattern_->ProcessOverlay();
     pattern_->HandleSetSelection(5, 10, false);
-    pattern_->UpdateSelectOverlaySecondHandle(true);
-    EXPECT_NE(pattern_->GetSelectOverlayProxy(), nullptr);
+    pattern_->selectOverlay_->UpdateSecondHandleOffset();
+    EXPECT_NE(pattern_->selectOverlay_, nullptr);
 
-    pattern_->UpdateSelectOverlayDoubleHandle(true, true);
+    pattern_->selectOverlay_->UpdateAllHandlesOffset();
     FlushLayoutTask(frameNode_);
     GetFocus();
-    pattern_->UpdateSelectOverlayDoubleHandle(true, true);
+    pattern_->selectOverlay_->UpdateAllHandlesOffset();
     EXPECT_EQ(pattern_->selectController_->GetFirstHandleInfo().index, 5);
 }
 
@@ -422,15 +424,13 @@ HWTEST_F(TextFieldModifyTest, UpdateSecondHandleInfo002, TestSize.Level1)
      */
     CreateTextField(DEFAULT_TEXT);
     GetFocus();
-    OffsetF localOffset(1.0f, 1.0f);
-
-    /**
+                                                                  /**
      * @tc.steps: step2. Set secondhandle. Call function GetSelectHandleInfo.
      * @tc.expected: Check if return true.
      */
     pattern_->HandleSetSelection(5, 10, false);
-    pattern_->UpdateSelectOverlaySecondHandle(true);
-    EXPECT_EQ(pattern_->GetSelectHandleInfo(localOffset).paintRect, RectF(1.0f, 1.0f, 1.5f, 50.0f));
+    pattern_->selectOverlay_->UpdateSecondHandleOffset();
+    EXPECT_EQ(pattern_->selectOverlay_->GetSecondHandleInfo()->paintRect, RectF(0.0f, 0.0f, 1.5f, 0.0f));
 }
 
 /**
@@ -485,7 +485,7 @@ HWTEST_F(TextFieldModifyTest, DoCallback002, TestSize.Level1)
      * @tc.steps: step3. mock LongPress.
      */
     pattern_->longPressEvent_->operator()(gestureEvent);
-    EXPECT_FALSE(pattern_->isUsingMouse_);
+    EXPECT_FALSE(pattern_->IsUsingMouse());
     FlushLayoutTask(frameNode_);
     GetFocus();
     pattern_->HandleLongPress(gestureEvent);
@@ -533,11 +533,16 @@ HWTEST_F(TextFieldModifyTest, DoCallback003, TestSize.Level1)
     KeyEvent keyEvent;
     pattern_->GetFocusHub()->onKeyEventsInternal_[OnKeyEventType::DEFAULT].operator()(keyEvent);
 
+    auto paintProperty = frameNode_->GetPaintProperty<TextFieldPaintProperty>();
+    paintProperty->UpdateInputStyle(InputStyle::INLINE);
+    frameNode_->MarkModifyDone();
+    pattern_->OnModifyDone();
+    pattern_->UpdateScrollBarOffset();
     FlushLayoutTask(frameNode_);
     GetFocus();
     MouseInfo mouseInfo;
     pattern_->mouseEvent_->GetOnMouseEventFunc()(mouseInfo);
-    EXPECT_TRUE(pattern_->isUsingMouse_);
+    EXPECT_TRUE(pattern_->IsUsingMouse());
 }
 
 /**
@@ -551,12 +556,17 @@ HWTEST_F(TextFieldModifyTest, DoCallback004, TestSize.Level1)
      * @tc.steps: step1. create node.
      */
     CreateTextField(DEFAULT_TEXT);
+    GetFocus();
 
     /**
      * @tc.steps: step2. callback the HandleLongPress in OnModifyDone.
      * @tc.expected: Check if return true.
      */
     TouchEventInfo touchEventInfo("onTouch");
+    TouchLocationInfo touchLocationInfo(0);
+    touchLocationInfo.touchType_ = TouchType::DOWN;
+    touchLocationInfo.localLocation_ = Offset(0.0f, 0.0f);
+    touchEventInfo.AddTouchLocationInfo(std::move(touchLocationInfo));
 
     /**
      * @tc.steps: step3. mock doubleClick.
@@ -590,7 +600,7 @@ HWTEST_F(TextFieldModifyTest, DoCallback005, TestSize.Level1)
      * @tc.steps: step3. mock drag start.
      */
     pattern_->OnDragStart().operator()(dragEvent, "");
-    EXPECT_TRUE(pattern_->cursorVisible_);
+    EXPECT_TRUE(pattern_->showSelect_);
 }
 
 /**
@@ -617,8 +627,8 @@ HWTEST_F(TextFieldModifyTest, DoCallback006, TestSize.Level1)
      * @tc.steps: step3. mock show Select After DragEvent.
      */
     pattern_->processOverlayDelayTask_.operator()();
-    EXPECT_EQ(pattern_->selectController_->GetFirstHandleRect(),
-        RectF(0.0f, 0.0f, 0.0f, 0.0f));
+    EXPECT_EQ(pattern_->dragTextStart_, 0);
+    EXPECT_EQ(pattern_->selectController_->GetFirstHandleIndex(), 0);
 }
 
 /**
@@ -681,14 +691,14 @@ HWTEST_F(TextFieldModifyTest, MouseEvent001, TestSize.Level1)
     mouseInfo.SetButton(MouseButton::RIGHT_BUTTON);
     mouseInfo.SetAction(MouseAction::PRESS);
     pattern_->mouseEvent_->GetOnMouseEventFunc()(mouseInfo);
-    EXPECT_TRUE(pattern_->isUsingMouse_);
+    EXPECT_TRUE(pattern_->IsUsingMouse());
 
     FlushLayoutTask(frameNode_);
     GetFocus();
     mouseInfo.SetButton(MouseButton::LEFT_BUTTON);
     mouseInfo.SetAction(MouseAction::PRESS);
     pattern_->mouseEvent_->GetOnMouseEventFunc()(mouseInfo);
-    EXPECT_TRUE(pattern_->isUsingMouse_);
+    EXPECT_TRUE(pattern_->IsUsingMouse());
 }
 
 /**
@@ -714,14 +724,14 @@ HWTEST_F(TextFieldModifyTest, MouseEvent002, TestSize.Level1)
     mouseInfo.SetButton(MouseButton::RIGHT_BUTTON);
     mouseInfo.SetAction(MouseAction::MOVE);
     pattern_->mouseEvent_->GetOnMouseEventFunc()(mouseInfo);
-    EXPECT_TRUE(pattern_->isUsingMouse_);
+    EXPECT_TRUE(pattern_->IsUsingMouse());
 
     FlushLayoutTask(frameNode_);
     GetFocus();
     mouseInfo.SetButton(MouseButton::LEFT_BUTTON);
     mouseInfo.SetAction(MouseAction::MOVE);
     pattern_->mouseEvent_->GetOnMouseEventFunc()(mouseInfo);
-    EXPECT_TRUE(pattern_->isUsingMouse_);
+    EXPECT_TRUE(pattern_->IsUsingMouse());
 }
 
 /**
@@ -747,7 +757,7 @@ HWTEST_F(TextFieldModifyTest, MouseEvent003, TestSize.Level1)
     mouseInfo.SetButton(MouseButton::LEFT_BUTTON);
     mouseInfo.SetAction(MouseAction::RELEASE);
     pattern_->mouseEvent_->GetOnMouseEventFunc()(mouseInfo);
-    EXPECT_FALSE(pattern_->isUsingMouse_);
+    EXPECT_FALSE(pattern_->IsUsingMouse());
 }
 
 /**
@@ -767,8 +777,7 @@ HWTEST_F(TextFieldModifyTest, OnVirtualKeyboardAreaChanged001, TestSize.Level1)
      */
     FlushLayoutTask(frameNode_);
     pattern_->OnVirtualKeyboardAreaChanged();
-    EXPECT_EQ(pattern_->selectController_->
-        firstHandleInfo_.rect, RectF(0.0f, 0.0f, 0.0f, 0.0f));
+    EXPECT_EQ(pattern_->selectController_->GetFirstHandleIndex(), 0);
 }
 
 /**
@@ -819,17 +828,17 @@ HWTEST_F(TextFieldModifyTest, UpdateCaretPositionOnHandleMove001, TestSize.Level
      * tc.expected: step2. Check if the value is right.
      */
     OffsetF localOffset1(1.0f, 1.0f);
-    pattern_->UpdateCaretPositionOnHandleMove(localOffset1);
+    pattern_->selectOverlay_->GetCaretPositionOnHandleMove(localOffset1);
 
     FlushLayoutTask(frameNode_);
     GetFocus();
     OffsetF localOffset2(60.0f, 0.0f);
-    pattern_->UpdateCaretPositionOnHandleMove(localOffset2);
+    pattern_->selectOverlay_->GetCaretPositionOnHandleMove(localOffset2);
 
     FlushLayoutTask(frameNode_);
     GetFocus();
     OffsetF localOffset3(30.0f, 0.0f);
-    EXPECT_EQ(pattern_->UpdateCaretPositionOnHandleMove(localOffset3), 0);
+    EXPECT_EQ(pattern_->selectOverlay_->GetCaretPositionOnHandleMove(localOffset3), 0);
 }
 
 /**
@@ -869,12 +878,12 @@ HWTEST_F(TextFieldModifyTest, OnHandleMove001, TestSize.Level1)
     GetFocus();
 
     /**
-     * @tc.steps: step2. Create selectOverlayProxy.
+     * @tc.steps: step2. Call ProcessOverlay.
      */
-    pattern_->ProcessOverlay(true, true, true);
+    pattern_->ProcessOverlay();
 
     RectF handleRect;
-    pattern_->OnHandleMove(handleRect, false);
+    pattern_->selectOverlay_->OnHandleMove(handleRect, false);
     EXPECT_EQ(pattern_->selectController_->
         firstHandleInfo_.rect, RectF(2.0f, 2.0f, 1.5f, 0.0f));
 }
@@ -893,18 +902,18 @@ HWTEST_F(TextFieldModifyTest, OnHandleMove002, TestSize.Level1)
     GetFocus();
 
     /**
-     * @tc.steps: step2. Create selectOverlayProxy.
+     * @tc.steps: step2. Call ProcessOverlay.
      */
-    pattern_->ProcessOverlay(true, true, true);
+    pattern_->ProcessOverlay();
 
     /**
      * @tc.steps: step2. set two handle and call OnHandleMove
      * tc.expected: step2. Check if the value is created.
      */
     pattern_->HandleSetSelection(5, 10, false);
-    pattern_->isSingleHandle_ = false;
+    pattern_->SetIsSingleHandle(false);
     RectF handleRect;
-    pattern_->OnHandleMove(handleRect, false);
+    pattern_->selectOverlay_->OnHandleMove(handleRect, false);
     EXPECT_EQ(pattern_->selectController_->GetFirstHandleInfo().index, 5);
 }
 
@@ -922,17 +931,17 @@ HWTEST_F(TextFieldModifyTest, OnHandleMove003, TestSize.Level1)
     GetFocus();
 
     /**
-     * @tc.steps: step2. Create selectOverlayProxy.
+     * @tc.steps: step2. Call ProcessOverlay.
      */
-    pattern_->ProcessOverlay(true, true, true);
+    pattern_->ProcessOverlay();
 
     /**
      * @tc.steps: step2. set two handle and call OnHandleMove
      * tc.expected: step2. Check if the value is created.
      */
-    pattern_->isSingleHandle_ = false;
+    pattern_->SetIsSingleHandle(false);
     RectF handleRect;
-    pattern_->OnHandleMove(handleRect, true);
+    pattern_->selectOverlay_->OnHandleMove(handleRect, true);
     OffsetF localOffset(0.0f, 0.0f);
     EXPECT_EQ(pattern_->parentGlobalOffset_, localOffset);
 }
@@ -951,18 +960,18 @@ HWTEST_F(TextFieldModifyTest, OnHandleMove004, TestSize.Level1)
     GetFocus();
 
     /**
-     * @tc.steps: step2. Create selectOverlayProxy.
+     * @tc.steps: step2. Call ProcessOverlay.
      */
-    pattern_->ProcessOverlay(true, true, true);
+    pattern_->ProcessOverlay();
 
     /**
      * @tc.steps: step2. set two handle and call OnHandleMove
      * tc.expected: step2. Check if the value is created.
      */
-    pattern_->isSingleHandle_ = false;
+    pattern_->SetIsSingleHandle(false);
     FlushLayoutTask(frameNode_);
     RectF handleRect;
-    pattern_->OnHandleMove(handleRect, false);
+    pattern_->selectOverlay_->OnHandleMove(handleRect, false);
     EXPECT_EQ(pattern_->selectController_->GetFirstHandleInfo().index, 0);
 }
 
@@ -980,16 +989,16 @@ HWTEST_F(TextFieldModifyTest, OnHandleMoveDone001, TestSize.Level1)
     GetFocus();
 
     /**
-     * @tc.steps: step2. Create selectOverlayProxy.
+     * @tc.steps: step2. call selectoverlay ProcessOverlay.
      */
-    pattern_->ProcessOverlay(true, true, true);
+    pattern_->ProcessOverlay();
     RectF handleRect;
-    pattern_->OnHandleMove(handleRect, false);
-    pattern_->isSingleHandle_ = false;
-    pattern_->OnHandleMoveDone(handleRect, false);
+    pattern_->selectOverlay_->OnHandleMove(handleRect, false);
+    pattern_->SetIsSingleHandle(false);
+    pattern_->selectOverlay_->OnHandleMoveDone(handleRect, false);
 
-    pattern_->isSingleHandle_ = true;
-    pattern_->OnHandleMoveDone(handleRect, false);
+    pattern_->SetIsSingleHandle(true);
+    pattern_->selectOverlay_->OnHandleMoveDone(handleRect, false);
     EXPECT_EQ(pattern_->selectController_->GetFirstHandleInfo().index, 0);
 }
 
@@ -1007,13 +1016,13 @@ HWTEST_F(TextFieldModifyTest, OnHandleMoveDone002, TestSize.Level1)
     GetFocus();
 
     /**
-     * @tc.steps: step2. Create selectOverlayProxy.
+     * @tc.steps: step2. Call ProcessOverlay.
      */
-    pattern_->ProcessOverlay(true, true, true);
+    pattern_->ProcessOverlay();
     RectF handleRect;
-    pattern_->OnHandleMove(handleRect, false);
-    pattern_->isSingleHandle_ = false;
-    pattern_->OnHandleMoveDone(handleRect, false);
+    pattern_->selectOverlay_->OnHandleMove(handleRect, false);
+    pattern_->SetIsSingleHandle(false);
+    pattern_->selectOverlay_->OnHandleMoveDone(handleRect, false);
     EXPECT_EQ(pattern_->selectController_->GetFirstHandleInfo().index, 0);
 }
 
@@ -1339,5 +1348,56 @@ HWTEST_F(TextFieldModifyTest, OnColorConfigurationUpdate001, TestSize.Level1)
      */
     pattern_->OnColorConfigurationUpdate();
     EXPECT_TRUE(pattern_->colorModeChange_);
+}
+
+/**
+ * @tc.name: UpdateOverlayModifier001
+ * @tc.desc: Test textfield update overlay modifier.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldModifyTest, UpdateOverlayModifier001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Initialize text input.
+     */
+    CreateTextField(DEFAULT_TEXT);
+
+    /**
+     * @tc.steps: step2. set cursor color and call UpdateContentModifier
+     * tc.expected: step2. selected color equals cursor color.
+     */
+    WeakPtr<RenderContext> renderContext;
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    ASSERT_NE(geometryNode, nullptr);
+    auto paintProperty = frameNode_->GetPaintProperty<TextFieldPaintProperty>();
+    ASSERT_NE(paintProperty, nullptr);
+    PaintWrapper* paintWrapper = new PaintWrapper(renderContext, geometryNode, paintProperty);
+    ASSERT_NE(paintWrapper, nullptr);
+
+    auto paintMethod = AceType::DynamicCast<TextFieldPaintMethod>(pattern_->CreateNodePaintMethod());
+    EXPECT_NE(paintMethod, nullptr);
+    auto overlayModifier = paintMethod->textFieldOverlayModifier_;
+    ASSERT_NE(overlayModifier, nullptr);
+
+    paintProperty->ResetSelectedBackgroundColor();
+    EXPECT_FALSE(paintProperty->HasSelectedBackgroundColor());
+    int32_t settingApiVersion = 12;
+    int32_t backupApiVersion = AceApplicationInfo::GetInstance().GetApiTargetVersion();
+    AceApplicationInfo::GetInstance().SetApiTargetVersion(settingApiVersion);
+    Color cursorColor = Color::RED;
+    double defaultOpacity = 0.2;
+    auto expectedSelectedColor = cursorColor.ChangeOpacity(defaultOpacity);
+    paintProperty->UpdateCursorColor(cursorColor);
+    paintMethod->UpdateOverlayModifier(paintWrapper);
+    EXPECT_TRUE(overlayModifier->selectedColor_->Get().ToColor() == expectedSelectedColor);
+
+    /**
+     * @tc.steps: step3. set select background color and call UpdateContentModifier
+     * tc.expected: step3. selected color equals setting select background.
+     */
+    paintProperty->UpdateSelectedBackgroundColor(Color::BLUE);
+    paintMethod->UpdateOverlayModifier(paintWrapper);
+    EXPECT_TRUE(overlayModifier->selectedColor_->Get().ToColor() == Color::BLUE);
+    AceApplicationInfo::GetInstance().SetApiTargetVersion(backupApiVersion);
 }
 } // namespace OHOS::Ace::NG

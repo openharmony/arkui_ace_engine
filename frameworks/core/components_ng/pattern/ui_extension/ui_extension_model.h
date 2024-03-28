@@ -52,7 +52,7 @@ public:
     virtual void SetOnRemoteReady(std::function<void(const RefPtr<NG::UIExtensionProxy>&)>&& onRemoteReady);
     virtual void SetOnRelease(std::function<void(int32_t)>&& onRelease);
     virtual void SetOnResult(std::function<void(int32_t, const AAFwk::Want&)>&& onResult);
-    virtual void SetOnTerminated(std::function<void(std::optional<int32_t>, const RefPtr<WantWrap>&)>&& onTerminated);
+    virtual void SetOnTerminated(std::function<void(int32_t, const RefPtr<WantWrap>&)>&& onTerminated);
     virtual void SetOnReceive(std::function<void(const AAFwk::WantParams&)>&& onReceive);
     virtual void SetOnError(
         std::function<void(int32_t code, const std::string& name, const std::string& message)>&& onError);

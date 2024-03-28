@@ -1400,6 +1400,9 @@ HWTEST_F(ProgressTestNg, ProgressMaskPropertyTestNg001, TestSize.Level1)
     progressMaskProperty.SetColor(TEST_COLOR);
     auto progressMaskColor = progressMaskProperty.GetColor();
     EXPECT_EQ(progressMaskColor, TEST_COLOR);
+    progressMaskProperty.SetEnableBreathe(false);
+    auto progressMaskEnableBreathe = progressMaskProperty.GetEnableBreathe();
+    EXPECT_FALSE(progressMaskEnableBreathe);
 }
 
 /**

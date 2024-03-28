@@ -132,7 +132,6 @@ private:
     }
     void OnModifyDone() override;
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
-    void InitScrollableEvent();
     void CheckScrollable();
     bool IsOutOfBoundary(bool useCurrentDelta = true) override;
     void SetEdgeEffectCallback(const RefPtr<ScrollEdgeEffect>& scrollEffect) override;
@@ -147,6 +146,7 @@ private:
 
     float prevOffset_ = 0.0f;
     SizeF lastSize_;
+    WeakPtr<UINode> footer_;
 
     // clip padding of WaterFlow
     RefPtr<WaterFlowContentModifier> contentModifier_;

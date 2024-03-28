@@ -165,7 +165,7 @@ void FrontendDelegateDeclarativeNG::AttachSubPipelineContext(const RefPtr<Pipeli
 }
 
 void FrontendDelegateDeclarativeNG::RunPage(
-    const std::string& url, const std::string& params, const std::string& profile)
+    const std::string& url, const std::string& params, const std::string& profile, bool isNamedRouter)
 {
     ACE_SCOPED_TRACE("FrontendDelegateDeclarativeNG::RunPage");
 
@@ -187,11 +187,15 @@ void FrontendDelegateDeclarativeNG::RunPage(
     }
     taskExecutor_->PostTask(
         [manifestParser = manifestParser_, delegate = Claim(this),
-            weakPtr = WeakPtr<NG::PageRouterManager>(pageRouterManager_), url, params]() {
+            weakPtr = WeakPtr<NG::PageRouterManager>(pageRouterManager_), url, params, isNamedRouter]() {
             auto pageRouterManager = weakPtr.Upgrade();
             CHECK_NULL_VOID(pageRouterManager);
             pageRouterManager->SetManifestParser(manifestParser);
-            pageRouterManager->RunPage(url, params);
+            if (isNamedRouter) {
+                pageRouterManager->RunPageByNamedRouter(url, params);
+            } else {
+                pageRouterManager->RunPage(url, params);
+            }
             auto pipeline = delegate->GetPipelineContext();
             // TODO: get platform version from context, and should stored in AceApplicationInfo.
             if (manifestParser->GetMinPlatformVersion() > 0) {
@@ -1032,4 +1036,64 @@ void FrontendDelegateDeclarativeNG::CreateSnapshot(
 #endif
 }
 
+void FrontendDelegateDeclarativeNG::AddFrameNodeToOverlay(
+    const RefPtr<NG::FrameNode>& node, std::optional<int32_t> index)
+{
+    auto task = [node, index, containerId = Container::CurrentId()](const RefPtr<NG::OverlayManager>& overlayManager) {
+        CHECK_NULL_VOID(overlayManager);
+        ContainerScope scope(containerId);
+        overlayManager->AddFrameNodeToOverlay(node, index);
+    };
+    MainWindowOverlay(std::move(task));
+}
+
+void FrontendDelegateDeclarativeNG::RemoveFrameNodeOnOverlay(const RefPtr<NG::FrameNode>& node)
+{
+    auto task = [node, containerId = Container::CurrentId()](const RefPtr<NG::OverlayManager>& overlayManager) {
+        CHECK_NULL_VOID(overlayManager);
+        ContainerScope scope(containerId);
+        overlayManager->RemoveFrameNodeOnOverlay(node);
+    };
+    MainWindowOverlay(std::move(task));
+}
+
+void FrontendDelegateDeclarativeNG::ShowNodeOnOverlay(const RefPtr<NG::FrameNode>& node)
+{
+    auto task = [node, containerId = Container::CurrentId()](const RefPtr<NG::OverlayManager>& overlayManager) {
+        CHECK_NULL_VOID(overlayManager);
+        ContainerScope scope(containerId);
+        overlayManager->ShowNodeOnOverlay(node);
+    };
+    MainWindowOverlay(std::move(task));
+}
+
+void FrontendDelegateDeclarativeNG::HideNodeOnOverlay(const RefPtr<NG::FrameNode>& node)
+{
+    auto task = [node, containerId = Container::CurrentId()](const RefPtr<NG::OverlayManager>& overlayManager) {
+        CHECK_NULL_VOID(overlayManager);
+        ContainerScope scope(containerId);
+        overlayManager->HideNodeOnOverlay(node);
+    };
+    MainWindowOverlay(std::move(task));
+}
+
+void FrontendDelegateDeclarativeNG::ShowAllNodesOnOverlay()
+{
+    auto task = [containerId = Container::CurrentId()](const RefPtr<NG::OverlayManager>& overlayManager) {
+        CHECK_NULL_VOID(overlayManager);
+        ContainerScope scope(containerId);
+        overlayManager->ShowAllNodesOnOverlay();
+    };
+    MainWindowOverlay(std::move(task));
+}
+
+void FrontendDelegateDeclarativeNG::HideAllNodesOnOverlay()
+{
+    auto task = [containerId = Container::CurrentId()](const RefPtr<NG::OverlayManager>& overlayManager) {
+        CHECK_NULL_VOID(overlayManager);
+        ContainerScope scope(containerId);
+        overlayManager->HideAllNodesOnOverlay();
+    };
+    MainWindowOverlay(std::move(task));
+}
 } // namespace OHOS::Ace::Framework

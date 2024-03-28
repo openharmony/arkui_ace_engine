@@ -49,7 +49,7 @@ public:
         PointF backEnd;
         PointF circleCenter;
         Color selectColor;
-        Color trackBackgroundColor;
+        Gradient trackBackgroundColor;
         Color blockColor;
     };
 
@@ -86,11 +86,10 @@ public:
         }
     }
 
-    void SetTrackBackgroundColor(Color color)
+    void SetTrackBackgroundColor(const Gradient& color)
     {
-        if (trackBackgroundColor_) {
-            trackBackgroundColor_->Set(LinearColor(color));
-        }
+        CHECK_NULL_VOID(trackBackgroundColor_);
+        trackBackgroundColor_->Set(GradientArithmetic(color));
     }
 
     void SetSelectColor(Color color)
@@ -149,6 +148,13 @@ public:
         }
     }
 
+    void SetSelectedBorderRadius(float selectedBorderRadius)
+    {
+        if (selectedBorderRadius_) {
+            selectedBorderRadius_->Set(selectedBorderRadius);
+        }
+    }
+
     void SetStepSize(float stepSize)
     {
         if (stepSize_) {
@@ -167,6 +173,20 @@ public:
     {
         if (isShowStep_) {
             isShowStep_->Set(showSteps);
+        }
+    }
+
+    void SetSliderInteractionMode(SliderModelNG::SliderInteraction mode)
+    {
+        if (sliderInteractionMode_) {
+            sliderInteractionMode_->Set(static_cast<int>(mode));
+        }
+    }
+
+    void SetMinResponsiveDistance(float minResponse)
+    {
+        if (minResponse_) {
+            minResponse_->Set(minResponse);
         }
     }
 
@@ -243,9 +263,12 @@ public:
     }
 
     void UpdateContentDirtyRect(const SizeF& frameSize);
+
 private:
     void InitializeShapeProperty();
     RSRect GetTrackRect();
+    std::vector<GradientColor> GetTrackBackgroundColor() const;
+    Gradient SortGradientColorsByOffset(const Gradient& gradient) const;
 
     void DrawBlock(DrawingContext& context);
     void DrawBlockShape(DrawingContext& context);
@@ -270,12 +293,13 @@ private:
     RefPtr<AnimatablePropertyFloat> blockCenterX_;
     RefPtr<AnimatablePropertyFloat> blockCenterY_;
     RefPtr<AnimatablePropertyFloat> trackThickness_;
-    RefPtr<AnimatablePropertyColor> trackBackgroundColor_;
+    RefPtr<AnimatablePropertyVectorColor> trackBackgroundColor_;
     RefPtr<AnimatablePropertyColor> selectColor_;
     RefPtr<AnimatablePropertyColor> blockColor_;
     RefPtr<AnimatablePropertyColor> boardColor_;
 
     RefPtr<AnimatablePropertyFloat> trackBorderRadius_;
+    RefPtr<AnimatablePropertyFloat> selectedBorderRadius_;
     RefPtr<AnimatablePropertyFloat> stepSize_;
     RefPtr<AnimatablePropertyColor> stepColor_;
     RefPtr<AnimatablePropertySizeF> blockSize_;
@@ -299,6 +323,8 @@ private:
     RefPtr<PropertyInt> sliderMode_;
     RefPtr<PropertyInt> directionAxis_;
     RefPtr<PropertyBool> isShowStep_;
+    RefPtr<PropertyInt> sliderInteractionMode_;
+    RefPtr<PropertyFloat> minResponse_;
     RefPtr<PropertyInt> blockType_;
 
     // others

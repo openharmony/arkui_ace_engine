@@ -71,11 +71,9 @@ double GetQuality(const std::string& args, const double quality)
 }
 } // namespace
 
-OffscreenCanvasPaintMethod::OffscreenCanvasPaintMethod(
-    const WeakPtr<PipelineBase> context, int32_t width, int32_t height)
+OffscreenCanvasPaintMethod::OffscreenCanvasPaintMethod(int32_t width, int32_t height)
 {
     antiAlias_ = true;
-    context_ = context;
     matrix_.reset();
     InitBitmap(width, height);
     imageShadow_ = std::make_unique<Shadow>();
@@ -606,7 +604,7 @@ TextMetrics OffscreenCanvasPaintMethod::MeasureTextMetrics(const std::string& te
     CHECK_NULL_RETURN(fontCollection, textMetrics);
     std::unique_ptr<Rosen::TypographyCreate> builder = Rosen::TypographyCreate::Create(style, fontCollection);
     Rosen::TextStyle txtStyle;
-    ConvertTxtStyle(state.GetTextStyle(), context_, txtStyle);
+    ConvertTxtStyle(state.GetTextStyle(), txtStyle);
     txtStyle.fontSize = state.GetTextStyle().GetFontSize().Value();
     builder->PushStyle(txtStyle);
     builder->AppendText(StringUtils::Str8ToStr16(text));

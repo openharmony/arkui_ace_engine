@@ -16,6 +16,7 @@
 #include "gtest/gtest.h"
 
 #define private public
+#define protected public
 #include "base/geometry/ng/offset_t.h"
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"

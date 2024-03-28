@@ -17,6 +17,7 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_NAVIGATION_TITLE_BAR_NODE_H
 
 #include "core/components_ng/base/frame_node.h"
+#include "core/components_ng/pattern/navigation/navigation_declaration.h"
 #include "core/components_ng/property/property.h"
 
 namespace OHOS::Ace::NG {
@@ -76,16 +77,50 @@ public:
         return menu_;
     }
 
+    void SetPrevMenu(const RefPtr<UINode>& prevMenu)
+    {
+        prevMenu_ = prevMenu;
+    }
+
+    const RefPtr<UINode>& GetPrevMenu() const
+    {
+        return prevMenu_;
+    }
+
+    void SetMoreMenuNode(const RefPtr<UINode>& moreMenuNode)
+    {
+        moreMenuNode_ = moreMenuNode;
+    }
+
+    void SetIsTitleMenuNodeShowing(const bool isTitleMenuNodeShowing)
+    {
+        isTitleMenuNodeShowing_ = isTitleMenuNodeShowing;
+    }
+
+    bool IsTitleMenuNodeShowing() const
+    {
+        return isTitleMenuNodeShowing_;
+    }
     // The function is only used for fast preview.
     void FastPreviewUpdateChild(int32_t slot, const RefPtr<UINode>& newChild) override;
 
     void MarkIsInitialTitle(bool isInitialTitle);
+
+    ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(PrevMenuIsCustom, bool);
+    void OnPrevMenuIsCustomUpdate(bool value) {}
+
+    // node operation related
+    ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(MenuNodeOperation, ChildNodeOperation);
+    void OnMenuNodeOperationUpdate(ChildNodeOperation value) {}
 
 private:
     RefPtr<UINode> backButton_;
     RefPtr<UINode> title_;
     RefPtr<UINode> subtitle_;
     RefPtr<UINode> menu_;
+    RefPtr<UINode> prevMenu_;
+    RefPtr<UINode> moreMenuNode_;
+    bool isTitleMenuNodeShowing_ = false;
 };
 
 } // namespace OHOS::Ace::NG

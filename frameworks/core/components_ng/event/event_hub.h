@@ -40,6 +40,10 @@ struct KeyboardShortcut {
     std::string value;
     uint8_t keys = 0;
     std::function<void()> onKeyboardShortcutAction = nullptr;
+    bool IsEqualTrigger(const KeyboardShortcut& other)
+    {
+        return (keys == other.keys) && (value == other.value);
+    }
 };
 
 enum class DragFuncType {
@@ -153,7 +157,7 @@ public:
 
     void ClearJSFrameNodeOnAppear();
 
-    void FireOnAppear();
+    virtual void FireOnAppear();
 
     void ClearUserOnDisAppear()
     {
@@ -219,6 +223,9 @@ public:
     void FireOnSizeChanged(const RectF& oldRect, const RectF& rect);
     bool HasOnSizeChanged() const;
 
+    void SetJSFrameNodeOnSizeChangeCallback(OnSizeChangedFunc&& onSizeChanged);
+    void FireJSFrameNodeOnSizeChanged(const RectF& oldRect, const RectF& rect);
+    void ClearJSFrameNodeOnSizeChange();
     using OnDragFunc = std::function<void(const RefPtr<OHOS::Ace::DragEvent>&, const std::string&)>;
     using OnNewDragFunc = std::function<void(const RefPtr<OHOS::Ace::DragEvent>&)>;
     using OnDragStartFunc = std::function<DragDropInfo(const RefPtr<OHOS::Ace::DragEvent>&, const std::string&)>;
@@ -289,6 +296,16 @@ public:
         return onDragEnd_;
     }
 
+    bool HasOnDragEnter() const
+    {
+        return static_cast<bool>(onDragEnter_);
+    }
+
+    bool HasOnDragLeave() const
+    {
+        return static_cast<bool>(onDragLeave_);
+    }
+
     bool HasOnDragEnd() const
     {
         return static_cast<bool>(onDragEnd_);
@@ -309,6 +326,26 @@ public:
     bool HasOnDrop() const
     {
         return onDrop_ != nullptr;
+    }
+
+    bool HasCustomerOnDragEnter() const
+    {
+        return customerOnDragEnter_ != nullptr;
+    }
+
+    bool HasCustomerOnDragLeave() const
+    {
+        return customerOnDragLeave_ != nullptr;
+    }
+
+    bool HasCustomerOnDragMove() const
+    {
+        return customerOnDragMove_ != nullptr;
+    }
+
+    bool HasCustomerOnDragEnd() const
+    {
+        return customerOnDragEnd_ != nullptr;
     }
 
     bool HasCustomerOnDrop() const
@@ -397,19 +434,27 @@ public:
     void SetKeyboardShortcut(
         const std::string& value, uint8_t keys, const std::function<void()>& onKeyboardShortcutAction)
     {
-        if (value.empty() && keys == 0) {
-            if (keyboardShortcut_.size() == 1) {
-                keyboardShortcut_.clear();
-            }
-            return;
-        }
         KeyboardShortcut keyboardShortcut;
         for (auto&& ch : value) {
             keyboardShortcut.value.push_back(static_cast<char>(std::toupper(ch)));
         }
         keyboardShortcut.keys = keys;
         keyboardShortcut.onKeyboardShortcutAction = onKeyboardShortcutAction;
+
+        for (auto &shortCut: keyboardShortcut_) {
+            if (shortCut.IsEqualTrigger(keyboardShortcut)) {
+                shortCut.onKeyboardShortcutAction = onKeyboardShortcutAction;
+                return;
+            }
+        }
         keyboardShortcut_.emplace_back(keyboardShortcut);
+    }
+
+    void ClearSingleKeyboardShortcut()
+    {
+        if (keyboardShortcut_.size() == 1) {
+            keyboardShortcut_.clear();
+        }
     }
 
     std::vector<KeyboardShortcut>& GetKeyboardShortcut()
@@ -528,6 +573,8 @@ public:
 
 protected:
     virtual void OnModifyDone() {}
+    std::function<void()> onAppear_;
+    std::function<void()> onJSFrameNodeAppear_;
 
 private:
     WeakPtr<FrameNode> host_;
@@ -536,13 +583,12 @@ private:
     RefPtr<FocusHub> focusHub_;
     RefPtr<StateStyleManager> stateStyleMgr_;
 
-    std::function<void()> onAppear_;
     std::function<void()> onDisappear_;
-    std::function<void()> onJSFrameNodeAppear_;
     std::function<void()> onJSFrameNodeDisappear_;
     OnAreaChangedFunc onAreaChanged_;
     std::unordered_map<int32_t, OnAreaChangedFunc> onAreaChangedInnerCallbacks_;
     OnSizeChangedFunc onSizeChanged_;
+    OnSizeChangedFunc onJsFrameNodeSizeChanged_;
 
     OnPreDragFunc onPreDragFunc_;
     OnDragStartFunc onDragStart_;

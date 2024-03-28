@@ -13,9 +13,18 @@
  * limitations under the License.
  */
 declare type KNode = number | null;
+declare function getUINativeModule(): any;
+declare enum ModifierType {
+    ORIGIN = 0,
+    STATE = 1
+}
+declare class JsPointerClass {
+    invalid(): boolean;
+}
 interface Equable {
     isEqual(value: Equable): boolean;
 }
+declare type AttributeModifierWithKey = ModifierWithKey<number | string | boolean | object>;
 declare class Modifier<T extends number | string | boolean | Equable | Resource | object> {
     stageValue?: T;
     value?: T;
@@ -34,9 +43,12 @@ declare class ModifierWithKey<T extends number | string | boolean | object> {
 declare class ArkComponent implements CommonMethod<CommonAttribute> {
     _changed: boolean;
     _modifiers: Map<Symbol, Modifier<number | string | boolean | Equable>>;
-    _modifiersWithKeys: Map<Symbol, ModifierWithKey<number | string | boolean | object>>;
+    _modifiersWithKeys: Map<Symbol, AttributeModifierWithKey>;
     nativePtr: KNode;
-    constructor(nativePtr: KNode);
+    _weakPtr: JsPointerClass;
+    _classType: ModifierType | undefined;
+    _nativePtrChanged: boolean;
+    constructor(nativePtr: KNode, classType?: ModifierType);
     applyModifierPatch(): void;
     onGestureJudgeBegin(callback: (gestureInfo: GestureInfo, event: BaseGestureEvent) => GestureJudgeResult): this;
     outline(value: OutlineOptions): this;
@@ -445,7 +457,7 @@ declare class ArkSearchComponent extends ArkComponent implements CommonMethod<Se
     height(value: Length): this;
 }
 declare class ArkSpanComponent implements CommonMethod<SpanAttribute> {
-    _modifiersWithKeys: Map<Symbol, ModifierWithKey<number | string | boolean | object>>;
+    _modifiersWithKeys: Map<Symbol, AttributeModifierWithKey>;
     nativePtr: KNode;
     constructor(nativePtr: KNode);
     applyModifierPatch(): void;
@@ -651,13 +663,13 @@ declare class ArkSideBarContainerComponent extends ArkComponent implements SideB
     showControlButton(value: boolean): SideBarContainerAttribute;
 }
 declare class ArkStackComponent extends ArkComponent implements StackAttribute {
-    constructor(nativePtr: KNode);
+    constructor(nativePtr: KNode, classType?: ModifierType);
     onGestureJudgeBegin(callback: (gestureInfo: GestureInfo, event: BaseGestureEvent) => GestureJudgeResult): this;
     alignContent(value: Alignment): StackAttribute;
     align(value: Alignment): this;
 }
 declare class ArkTextComponent extends ArkComponent implements TextAttribute {
-    constructor(nativePtr: KNode);
+    constructor(nativePtr: KNode, classType?: ModifierType);
     enableDataDetector(enable: boolean): this;
     dataDetectorConfig(config: any): this;
     onGestureJudgeBegin(callback: (gestureInfo: GestureInfo, event: BaseGestureEvent) => GestureJudgeResult): this;
@@ -810,7 +822,7 @@ declare class ArkImageFrameInfoToArray {
     isEqual(another: ArkImageFrameInfoToArray): boolean;
 }
 declare class ArkButtonComponent extends ArkComponent implements ButtonAttribute {
-    constructor(nativePtr: KNode);
+    constructor(nativePtr: KNode, classType?: ModifierType);
     onGestureJudgeBegin(callback: (gestureInfo: GestureInfo, event: BaseGestureEvent) => GestureJudgeResult): this;
     backgroundColor(value: ResourceColor): this;
     type(value: ButtonType): this;
@@ -1405,6 +1417,15 @@ declare class ArkWebComponent extends ArkComponent implements WebAttribute {
         handler: SslErrorHandler;
         error: SslError;
     }) => void): this;
+    onSslErrorEvent(callback: (event: {
+        handler: SslErrorHandler;
+        error: SslError;
+        url: string;
+        originalUrl: string;
+        referrer: string;
+        isFatalError: boolean;
+        isMainFrame:boolean;
+    }) => void): this;
     onClientAuthenticationRequest(callback: (event: {
         handler: ClientAuthenticationHandler;
         host: string;
@@ -1469,7 +1490,7 @@ declare class ArkWebComponent extends ArkComponent implements WebAttribute {
     nestedScroll(value: NestedScrollOptions): this;
 }
 declare class ArkXComponentComponent implements CommonMethod<XComponentAttribute> {
-    _modifiersWithKeys: Map<Symbol, ModifierWithKey<number | string | boolean | object>>;
+    _modifiersWithKeys: Map<Symbol, AttributeModifierWithKey>;
     nativePtr: KNode;
     constructor(nativePtr: KNode);
     applyModifierPatch(): void;
@@ -1822,7 +1843,7 @@ declare class ArkWaterFlowComponent extends ArkComponent implements WaterFlowAtt
     clip(value: boolean | CircleAttribute | EllipseAttribute | PathAttribute | RectAttribute): this;
 }
 declare class ArkCommonShapeComponent extends ArkComponent implements CommonShapeMethod<ShapeAttribute> {
-    constructor(nativePtr: KNode);
+    constructor(nativePtr: KNode, classType?: ModifierType);
     viewPort(value: {
         x?: string | number | undefined;
         y?: string | number | undefined;
@@ -1866,7 +1887,7 @@ declare class ArkPathComponent extends ArkCommonShapeComponent implements PathAt
     commands(value: string): this;
 }
 declare class ArkRectComponent extends ArkCommonShapeComponent implements RectAttribute {
-    constructor(nativePtr: KNode);
+    constructor(nativePtr: KNode, classType?: ModifierType);
     radiusWidth(value: string | number): this;
     radiusHeight(value: string | number): this;
     radius(value: string | number | Array<any>): this;

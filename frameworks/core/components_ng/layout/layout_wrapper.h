@@ -22,14 +22,13 @@
 #include <unordered_map>
 
 #include "base/memory/referenced.h"
-#include "base/thread/cancelable_callback.h"
 #include "base/utils/macros.h"
 #include "base/utils/noncopyable.h"
 #include "core/components_ng/base/geometry_node.h"
-#include "core/components_ng/layout/box_layout_algorithm.h"
 #include "core/components_ng/layout/layout_algorithm.h"
 #include "core/components_ng/layout/layout_property.h"
 #include "core/components_ng/layout/layout_wrapper_builder.h"
+#include "core/components_ng/property/constraint_flags.h"
 #include "core/components_ng/property/geometry_property.h"
 #include "core/components_ng/property/layout_constraint.h"
 #include "core/components_ng/property/magic_layout_property.h"
@@ -65,6 +64,7 @@ public:
     virtual void RemoveChildInRenderTree(uint32_t index) = 0;
     virtual void RemoveAllChildInRenderTree() = 0;
     virtual void SetActiveChildRange(int32_t start, int32_t end) = 0;
+    virtual void RecycleItemsByIndex(int32_t start, int32_t end) = 0;
 
     RefPtr<FrameNode> GetHostNode() const;
     virtual const std::string& GetHostTag() const = 0;
@@ -115,6 +115,15 @@ public:
     {
         return isConstraintNotChanged_;
     }
+    const ConstraintFlags& GetConstraintChanges() const
+    {
+        return constraintChanges_;
+    }
+    const ConstraintFlags& GetContentChanges() const
+    {
+        return contentConstraintChanges_;
+    }
+
     virtual void SetLongPredictTask() {}
 
     static void ApplySafeArea(const SafeAreaInsets& insets, LayoutConstraintF& constraint);
@@ -151,6 +160,9 @@ protected:
     bool CheckValidSafeArea();
 
     WeakPtr<FrameNode> hostNode_;
+
+    ConstraintFlags constraintChanges_;
+    ConstraintFlags contentConstraintChanges_;
 
     bool isConstraintNotChanged_ = false;
     bool isRootNode_ = false;

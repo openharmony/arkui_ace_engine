@@ -45,7 +45,7 @@ RefPtr<PaintWrapper> TestNG::FlushLayoutTask(const RefPtr<FrameNode>& frameNode)
     auto paintProperty = frameNode->GetPaintProperty<PaintProperty>();
     auto wrapper = frameNode->CreatePaintWrapper();
     if (wrapper != nullptr) {
-        wrapper->FlushRender(frameNode->drawModifier_);
+        wrapper->FlushRender();
     }
     paintProperty->CleanDirty();
     frameNode->SetActive(false);

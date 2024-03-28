@@ -182,6 +182,13 @@ void WebModelImpl::SetOnSslErrorRequest(std::function<bool(const BaseEventInfo* 
     webComponent->SetOnSslErrorRequestImpl(std::move(jsCallback));
 }
 
+void WebModelImpl::SetOnAllSslErrorRequest(std::function<bool(const BaseEventInfo* info)>&& jsCallback)
+{
+    auto webComponent = AceType::DynamicCast<WebComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
+    CHECK_NULL_VOID(webComponent);
+    webComponent->SetOnAllSslErrorRequestImpl(std::move(jsCallback));
+}
+
 void WebModelImpl::SetOnSslSelectCertRequest(std::function<bool(const BaseEventInfo* info)>&& jsCallback)
 {
     auto webComponent = AceType::DynamicCast<WebComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
@@ -609,6 +616,13 @@ void WebModelImpl::SetOnOverrideUrlLoading(std::function<bool(const BaseEventInf
     auto webComponent = AceType::DynamicCast<WebComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
     CHECK_NULL_VOID(webComponent);
     webComponent->SetOnOverrideUrlLoading(std::move(jsCallback));
+}
+
+void WebModelImpl::SetNativeVideoPlayerConfig(bool enable, bool shouldOverlay)
+{
+    auto webComponent = AceType::DynamicCast<WebComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
+    CHECK_NULL_VOID(webComponent);
+    webComponent->SetNativeVideoPlayerConfig(enable, shouldOverlay);
 }
 
 } // namespace OHOS::Ace::Framework

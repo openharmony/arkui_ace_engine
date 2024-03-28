@@ -16,7 +16,7 @@
 class Font {
     /**
      * Construct new instance of Font.
-     * initialzie with instanceId.
+     * initialize with instanceId.
      * @param instanceId obtained on the c++ side.
      * @since 10
      */
@@ -48,7 +48,7 @@ class Font {
 class MediaQuery {
     /**
      * Construct new instance of MediaQuery.
-     * initialzie with instanceId.
+     * initialize with instanceId.
      * @param instanceId obtained on the c++ side.
      * @since 10
      */
@@ -139,11 +139,37 @@ class UIObserver {
     }
 }
 
+class MeasureUtils {
+    /**
+     * Construct new instance of MeasureUtils.
+     * initialize with instanceId.
+     * @param instanceId obtained on the c++ side.
+     * @since 12
+     */
+    constructor(instanceId) {
+        this.instanceId_ = instanceId;
+        this.ohos_measureUtils = globalThis.requireNapi('measure');
+    }
+
+    measureText(options) {
+        __JSScopeUtil__.syncInstanceId(this.instanceId_);
+        let number = this.ohos_measureUtils.measureText(options);
+        __JSScopeUtil__.restoreInstanceId();
+        return number;
+    }
+
+    measureTextSize(options) {
+        __JSScopeUtil__.syncInstanceId(this.instanceId_);
+        let sizeOption = this.ohos_measureUtils.measureTextSize(options);
+        __JSScopeUtil__.restoreInstanceId();
+        return sizeOption;
+    }
+}
 
 class UIContext {
     /**
      * Construct new instance of UIContext.
-     * initialzie with instanceId.
+     * initialize with instanceId.
      * @param instanceId obtained on the c++ side.
      * @since 10
      */
@@ -195,6 +221,12 @@ class UIContext {
         }
         return this.componentUtils_;
     }
+
+    getOverlayManager() {
+        this.overlayManager_ = new OverlayManager(this.instanceId_);
+        return this.overlayManager_;
+    }
+
     animateTo(value, event) {
         __JSScopeUtil__.syncInstanceId(this.instanceId_);
         Context.animateTo(value, event);
@@ -274,6 +306,31 @@ class UIContext {
         __JSScopeUtil__.restoreInstanceId();
     }
 
+    animateToImmediately(param, event) {
+        __JSScopeUtil__.syncInstanceId(this.instanceId_);
+        Context.animateToImmediately(param, event);
+        __JSScopeUtil__.restoreInstanceId();
+    }
+
+    getMeasureUtils() {
+        this.measureUtils_ = new MeasureUtils(this.instanceId_);
+        return this.measureUtils_;
+    }
+
+    getHostContext() {
+        __JSScopeUtil__.syncInstanceId(this.instanceId_);
+        let context = getContext();
+        __JSScopeUtil__.restoreInstanceId();
+        return context;
+    }
+
+    getSharedLocalStorage() {
+        __JSScopeUtil__.syncInstanceId(this.instanceId_);
+        let localStorage = NativeLocalStorage.GetShared();
+        __JSScopeUtil__.restoreInstanceId();
+        return localStorage;
+    }
+
     getFrameNodeById(id) {
         __JSScopeUtil__.syncInstanceId(this.instanceId_);
         let nodePtr = getUINativeModule().getFrameNodeByKey(id);
@@ -296,7 +353,7 @@ class UIContext {
 class FocusController {
     /**
      * Construct new instance of FocusController.
-     * initialzie with instanceId.
+     * initialize with instanceId.
      * @param instanceId obtained on the c++ side.
      * @since 12
      */
@@ -321,7 +378,7 @@ class FocusController {
 class ComponentUtils {
     /**
      * Construct new instance of ComponentUtils.
-     * initialzie with instanceId.
+     * initialize with instanceId.
      * @param instanceId obtained on the c++ side.
      * @since 10
      */
@@ -340,7 +397,7 @@ class ComponentUtils {
 class Router {
     /**
      * Construct new instance of Font.
-     * initialzie with instanceId.
+     * initialize with instanceId.
      * @param instanceId obtained on the c++ side.
      * @since 10
      */
@@ -496,7 +553,7 @@ class Router {
 class PromptAction {
     /**
      * Construct new instance of PromptAction.
-     * initialzie with instanceId.
+     * initialize with instanceId.
      * @param instanceId obtained on the c++ side.
      * @since 10
      */
@@ -541,7 +598,7 @@ class PromptAction {
 class AtomicServiceBar {
     /**
      * Construct new instance of AtomicServiceBar.
-     * initialzie with instanceId.
+     * initialize with instanceId.
      * @param instanceId obtained on the c++ side.
      * @since 11
      */
@@ -581,6 +638,58 @@ class AtomicServiceBar {
     }
 }
 
+class OverlayManager {
+    /**
+     * Construct new instance of Overlay.
+     * initialize with instanceId.
+     * @param instanceId obtained on the c++ side.
+     * @since 12
+     */
+    constructor(instanceId) {
+        this.instanceId_ = instanceId;
+        this.ohos_overlayManager = globalThis.requireNapi('overlay');
+    }
+
+    addComponentContent(content, index) {
+        __JSScopeUtil__.syncInstanceId(this.instanceId_);
+        if (typeof index !== 'undefined') {
+            this.ohos_overlayManager.addFrameNode(content.getFrameNode(), index);
+        } else {
+            this.ohos_overlayManager.addFrameNode(content.getFrameNode());
+        }
+        __JSScopeUtil__.restoreInstanceId();
+    }
+
+    removeComponentContent(content) {
+        __JSScopeUtil__.syncInstanceId(this.instanceId_);
+        this.ohos_overlayManager.removeFrameNode(content.getFrameNode());
+        __JSScopeUtil__.restoreInstanceId();
+    }
+
+    showComponentContent(content) {
+        __JSScopeUtil__.syncInstanceId(this.instanceId_);
+        this.ohos_overlayManager.showNode(content.getFrameNode());
+        __JSScopeUtil__.restoreInstanceId();
+    }
+
+    hideComponentContent(content) {
+        __JSScopeUtil__.syncInstanceId(this.instanceId_);
+        this.ohos_overlayManager.hideNode(content.getFrameNode());
+        __JSScopeUtil__.restoreInstanceId();
+    }
+
+    showAllComponentContent() {
+        __JSScopeUtil__.syncInstanceId(this.instanceId_);
+        this.ohos_overlayManager.showAllFrameNodes();
+        __JSScopeUtil__.restoreInstanceId();
+    }
+
+    hideAllComponentContent() {
+        __JSScopeUtil__.syncInstanceId(this.instanceId_);
+        this.ohos_overlayManager.hideAllFrameNodes();
+        __JSScopeUtil__.restoreInstanceId();
+    }
+}
 /**
  * Get UIContext instance.
  * @param instanceId obtained on the c++ side.
