@@ -241,11 +241,23 @@ void TabsModelNG::SetWidthAuto(bool isAuto)
     ACE_UPDATE_LAYOUT_PROPERTY(TabsLayoutProperty, WidthAuto, isAuto);
 }
 
+void TabsModelNG::SetWidthAuto(FrameNode* frameNode, bool isAuto)
+{
+    CHECK_NULL_VOID(frameNode);
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TabsLayoutProperty, WidthAuto, isAuto, frameNode);
+}
+
 void TabsModelNG::SetHeightAuto(bool isAuto)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
     ACE_UPDATE_LAYOUT_PROPERTY(TabsLayoutProperty, HeightAuto, isAuto);
+}
+
+void TabsModelNG::SetHeightAuto(FrameNode* frameNode, bool isAuto)
+{
+    CHECK_NULL_VOID(frameNode);
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TabsLayoutProperty, HeightAuto, isAuto, frameNode);
 }
 
 void TabsModelNG::SetBarAdaptiveHeight(bool barAdaptiveHeight)

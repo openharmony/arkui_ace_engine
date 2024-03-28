@@ -39,6 +39,11 @@ public:
 
     ~SwitchPattern() override = default;
 
+    bool IsAtomicNode() const override
+    {
+        return false;
+    }
+
     RefPtr<EventHub> CreateEventHub() override
     {
         return MakeRefPtr<SwitchEventHub>();

@@ -24,6 +24,7 @@ namespace OHOS::Ace::NG {
 using StateChangeEvent = std::function<void(const int32_t)>;
 using RefreshChangeEvent = std::function<void(const std::string)>;
 using RefreshingEvent = std::function<void()>;
+using OffsetChangeEvent = std::function<void(const float)>;
 
 class RefreshEventHub : public EventHub {
     DECLARE_ACE_TYPE(RefreshEventHub, EventHub)
@@ -67,9 +68,22 @@ public:
         }
     }
 
+    void SetOnOffsetChange(OffsetChangeEvent&& dragOffset)
+    {
+        offsetChange_ = std::move(dragOffset);
+    }
+
+    void FireOnOffsetChange(const float value) const
+    {
+        if (offsetChange_) {
+            offsetChange_(value);
+        }
+    }
+
 private:
     StateChangeEvent stateChange_;
     RefreshingEvent refreshing_;
+    OffsetChangeEvent offsetChange_;
     RefreshChangeEvent changeEvent_;
     ACE_DISALLOW_COPY_AND_MOVE(RefreshEventHub);
 };

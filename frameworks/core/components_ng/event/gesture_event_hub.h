@@ -603,6 +603,15 @@ public:
     RefPtr<UnifiedData> GetUnifiedData(const std::string& frameTag, DragDropInfo& dragDropInfo,
         const RefPtr<OHOS::Ace::DragEvent>& dragEvent);
 
+    bool IsNeedSwitchToSubWindow() const;
+    RefPtr<PixelMap> GetDragPreviewPixelMap()
+    {
+        return dragPreviewPixelMap_;
+    }
+    void SetDragGatherPixelMaps(const GestureEvent& info);
+    void SetMouseDragGatherPixelMaps();
+    void SetNotMouseDragGatherPixelMaps();
+
 private:
     void ProcessTouchTestHierarchy(const OffsetF& coordinateOffset, const TouchRestrict& touchRestrict,
         std::list<RefPtr<NGGestureRecognizer>>& innerRecognizers, TouchTestResult& finalResult, int32_t touchId,

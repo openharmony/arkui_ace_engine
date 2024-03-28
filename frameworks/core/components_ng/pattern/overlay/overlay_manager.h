@@ -64,6 +64,13 @@ struct PopupInfo {
     bool focusable = false;
 };
 
+struct GatherNodeChildInfo {
+    WeakPtr<FrameNode> imageNode;
+    OffsetF offset;
+    float width = 0.0;
+    float height = 0.0;
+};
+
 // StageManager is the base class for root render node to perform page switch.
 class ACE_EXPORT OverlayManager : public virtual AceType {
     DECLARE_ACE_TYPE(OverlayManager, AceType);
@@ -187,26 +194,9 @@ public:
     {
         maskNodeIdMap_[dialogId] = maskId;
     }
-    bool isMaskNode(int32_t maskId)
-    {
-        for (auto it = maskNodeIdMap_.begin(); it != maskNodeIdMap_.end(); it++) {
-            if (it->second == maskId) {
-                return true;
-            }
-        }
-        return false;
-    }
-    int32_t GetMaskNodeIdWithDialogId(int32_t dialogId)
-    {
-        int32_t maskNodeId = -1;
-        for (auto it = maskNodeIdMap_.begin(); it != maskNodeIdMap_.end(); it++) {
-            if (it->first == dialogId) {
-                maskNodeId = it->second;
-                break;
-            }
-        }
-        return maskNodeId;
-    }
+    bool isMaskNode(int32_t maskId);
+    int32_t GetMaskNodeIdWithDialogId(int32_t dialogId);
+
     /**  pop overlays (if any) on back press
      *
      *   @return    true if popup was removed, false if no overlay exists
@@ -369,12 +359,14 @@ public:
         std::function<RefPtr<UINode>()>&& buildNodeFunc, std::function<RefPtr<UINode>()>&& buildTitleNodeFunc,
         NG::SheetStyle& sheetStyle, std::function<void()>&& onAppear, std::function<void()>&& onDisappear,
         std::function<void()>&& shouldDismiss, std::function<void()>&& onWillAppear,
-        std::function<void()>&& onWillDisappear, const RefPtr<FrameNode>& targetNode);
+        std::function<void()>&& onWillDisappear, std::function<void(const float)>&& onHeightDidChange,
+        const RefPtr<FrameNode>& targetNode);
     void OnBindSheet(bool isShow, std::function<void(const std::string&)>&& callback,
         std::function<RefPtr<UINode>()>&& buildNodeFunc, std::function<RefPtr<UINode>()>&& buildtitleNodeFunc,
         NG::SheetStyle& sheetStyle, std::function<void()>&& onAppear, std::function<void()>&& onDisappear,
         std::function<void()>&& shouldDismiss, std::function<void()>&& onWillAppear,
-        std::function<void()>&& onWillDisappear, const RefPtr<FrameNode>& targetNode);
+        std::function<void()>&& onWillDisappear, std::function<void(const float)>&& onHeightDidChange,
+        const RefPtr<FrameNode>& targetNode);
     void CloseSheet(int32_t targetId);
 
     void DismissSheet();
@@ -402,7 +394,6 @@ public:
 
     void BindKeyboard(const std::function<void()>& keyboardBuilder, int32_t targetId);
     void CloseKeyboard(int32_t targetId);
-    void DestroyKeyboard();
 
     RefPtr<UINode> FindWindowScene(RefPtr<FrameNode> targetNode);
 
@@ -447,12 +438,12 @@ public:
     {
         keyboardAvoidance_ = supportAvoidance;
     }
-    
+
     void SupportCustomKeyboardAvoidance(RefPtr<RenderContext> context, AnimationOption option,
         RefPtr<FrameNode> customKeyboard);
 
     void SetCustomKeybroadHeight(float customHeight = 0.0);
-	
+
     void SetFilterActive(bool actived)
     {
         hasFilterActived = actived;
@@ -464,6 +455,22 @@ public:
     }
 
     void DismissPopup();
+
+    void MountGatherNodeToRootNode(const RefPtr<FrameNode>& frameNode,
+        std::vector<GatherNodeChildInfo>& gatherNodeChildrenInfo);
+    void MountGatherNodeToWindowScene(const RefPtr<FrameNode>& frameNode,
+        std::vector<GatherNodeChildInfo>& gatherNodeChildrenInfo,
+        const RefPtr<UINode>& windowScene);
+    void RemoveGatherNode();
+    void RemoveGatherNodeWithAnimation();
+    RefPtr<FrameNode> GetGatherNode() const
+    {
+        return gatherNodeWeak_.Upgrade();
+    }
+    std::vector<GatherNodeChildInfo> GetGatherNodeChildrenInfo()
+    {
+        return gatherNodeChildrenInfo_;
+    }
 private:
     void PopToast(int32_t targetId);
 
@@ -600,6 +607,10 @@ private:
     bool hasFilterActived {false};
 
     int32_t dismissPopupId_ = 0;
+
+    bool hasGatherNode_ {false};
+    WeakPtr<FrameNode> gatherNodeWeak_;
+    std::vector<GatherNodeChildInfo> gatherNodeChildrenInfo_;
 };
 } // namespace OHOS::Ace::NG
 

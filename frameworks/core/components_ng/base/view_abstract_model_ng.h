@@ -1077,7 +1077,8 @@ public:
     void BindSheet(bool isShow, std::function<void(const std::string&)>&& callback, std::function<void()>&& buildFunc,
         std::function<void()>&& titleBuildFunc, NG::SheetStyle& sheetStyle, std::function<void()>&& onAppear,
         std::function<void()>&& onDisappear, std::function<void()>&& shouldDismiss,
-        std::function<void()>&& onWillAppear, std::function<void()>&& onWillDisappear) override;
+        std::function<void()>&& onWillAppear, std::function<void()>&& onWillDisappear,
+        std::function<void(const float)>&& onHeightDidChange) override;
     void DismissSheet() override;
     void DismissContentCover() override;
 
@@ -1206,6 +1207,11 @@ public:
         const std::vector<ModifierKey>& keys, std::function<void()>&& onKeyboardShortcutAction)
     {
         ViewAbstract::SetKeyboardShortcut(frameNode, value, keys, std::move(onKeyboardShortcutAction));
+    }
+
+    static void ClearWidthOrHeight(FrameNode* frameNode, bool isWidth)
+    {
+        ViewAbstract::ClearWidthOrHeight(frameNode, isWidth);
     }
 
     static bool GetAccessibilityGroup(FrameNode* frameNode);

@@ -28,6 +28,7 @@ public:
     void SetAlignItems(FlexAlign flexAlign) override;
     void SetJustifyContent(FlexAlign flexAlign) override;
     void CreateWithWrap() override {}
+    static void SetSpace(FrameNode* frameNode, const std::optional<Dimension>& space);
     static void SetJustifyContent(FrameNode* frameNode, FlexAlign flexAlign);
     static void SetAlignItems(FrameNode* frameNode, FlexAlign flexAlign);
     static RefPtr<FrameNode> CreateFrameNode(int32_t nodeId);

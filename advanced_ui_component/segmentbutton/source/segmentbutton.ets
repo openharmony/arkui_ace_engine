@@ -370,7 +370,7 @@ struct SelectItem {
           SegmentButtonTheme.CAPSULE_SELECTED_BACKGROUND_COLOR))
         .position(this.selectedItemPosition)
         .scale({ x: this.zoomScaleArray[this.selectedIndexes[0]], y: this.zoomScaleArray[this.selectedIndexes[0]] })
-        .shadow(ShadowStyle.OUTER_DEFAULT_MD)
+        .shadow(ShadowStyle.OUTER_DEFAULT_XS)
     }
   }
 }

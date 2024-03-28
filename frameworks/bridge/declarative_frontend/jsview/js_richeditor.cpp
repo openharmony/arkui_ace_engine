@@ -449,6 +449,72 @@ void JSRichEditor::SetOnDeleteComplete(const JSCallbackInfo& args)
     RichEditorModel::GetInstance()->SetOnDeleteComplete(callback);
 }
 
+void JSRichEditor::SetOnWillChange(const JSCallbackInfo& info)
+{
+    if (!info[0]->IsFunction()) {
+        return;
+    }
+    auto jsOnWillChangeFunc = AceType::MakeRefPtr<JsEventFunction<NG::RichEditorChangeValue, 1>>(
+        JSRef<JSFunc>::Cast(info[0]), CreateJsOnWillChange);
+    auto callback = [execCtx = info.GetExecutionContext(), func = std::move(jsOnWillChangeFunc)](
+                        const NG::RichEditorChangeValue& changeValue) -> bool {
+        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx, true);
+        auto ret = func->ExecuteWithValue(changeValue);
+        if (ret->IsBoolean()) {
+            return ret->ToBoolean();
+        }
+        return true;
+    };
+    RichEditorModel::GetInstance()->SetOnWillChange(std::move(callback));
+}
+
+void JSRichEditor::SetOnDidChange(const JSCallbackInfo& info)
+{
+    if (!info[0]->IsFunction()) {
+        return;
+    }
+    auto JsEventCallback = AceType::MakeRefPtr<JsEventFunction<std::list<NG::RichEditorAbstractSpanResult>, 1>>(
+        JSRef<JSFunc>::Cast(info[0]), CreateJsOnDidChange);
+    auto callback = [execCtx = info.GetExecutionContext(), func = std::move(JsEventCallback)](
+                        const std::list<NG::RichEditorAbstractSpanResult>& textSpanResultList) {
+        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+        func->Execute(textSpanResultList);
+    };
+    RichEditorModel::GetInstance()->SetOnDidChange(callback);
+}
+
+void JSRichEditor::SetOnCut(const JSCallbackInfo& info)
+{
+    CHECK_NULL_VOID(info[0]->IsFunction());
+    auto jsTextFunc = AceType::MakeRefPtr<JsCitedEventFunction<NG::TextCommonEvent, 1>>(
+        JSRef<JSFunc>::Cast(info[0]), CreateJSTextCommonEvent);
+    WeakPtr<NG::FrameNode> targetNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    auto onCut = [execCtx = info.GetExecutionContext(), func = std::move(jsTextFunc), node = targetNode](
+                     NG::TextCommonEvent& info) {
+        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+        ACE_SCORING_EVENT("onCut");
+        PipelineContext::SetCallBackNode(node);
+        func->Execute(info);
+    };
+    RichEditorModel::GetInstance()->SetOnCut(std::move(onCut));
+}
+
+void JSRichEditor::SetOnCopy(const JSCallbackInfo& info)
+{
+    CHECK_NULL_VOID(info[0]->IsFunction());
+    auto jsTextFunc = AceType::MakeRefPtr<JsCitedEventFunction<NG::TextCommonEvent, 1>>(
+        JSRef<JSFunc>::Cast(info[0]), CreateJSTextCommonEvent);
+    WeakPtr<NG::FrameNode> targetNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    auto onCopy = [execCtx = info.GetExecutionContext(), func = std::move(jsTextFunc), node = targetNode](
+                      NG::TextCommonEvent& info) {
+        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+        ACE_SCORING_EVENT("onCopy");
+        PipelineContext::SetCallBackNode(node);
+        func->Execute(info);
+    };
+    RichEditorModel::GetInstance()->SetOnCopy(std::move(onCopy));
+}
+
 void JSRichEditor::SetCustomKeyboard(const JSCallbackInfo& args)
 {
     if (args.Length() > 0 && (args[0]->IsUndefined() || args[0]->IsNull())) {
@@ -563,6 +629,58 @@ JSRef<JSVal> JSRichEditor::CreateJsAboutToDelet(const NG::RichEditorDeleteValue&
     }
     AboutToDeletObj->SetPropertyObject("richEditorDeleteSpans", richEditorDeleteSpans);
     return JSRef<JSVal>::Cast(AboutToDeletObj);
+}
+
+void JSRichEditor::SetChangeTextSpans(
+    JSRef<JSArray>& jsArray, const std::list<NG::RichEditorAbstractSpanResult>& spanList)
+{
+    int32_t index = 0;
+    for (const auto& it : spanList) {
+        JSRef<JSObject> spanResultObj = JSRef<JSObject>::New();
+        JSRef<JSObject> spanPositionObj = JSRef<JSObject>::New();
+        JSRef<JSArray> spanRange = JSRef<JSArray>::New();
+        JSRef<JSArray> offsetInSpan = JSRef<JSArray>::New();
+        spanRange->SetValueAt(0, JSRef<JSVal>::Make(ToJSValue(it.GetSpanRangeStart())));
+        spanRange->SetValueAt(1, JSRef<JSVal>::Make(ToJSValue(it.GetSpanRangeEnd())));
+        offsetInSpan->SetValueAt(0, JSRef<JSVal>::Make(ToJSValue(it.OffsetInSpan())));
+        offsetInSpan->SetValueAt(1, JSRef<JSVal>::Make(ToJSValue(it.OffsetInSpan() + it.GetEraseLength())));
+        spanPositionObj->SetPropertyObject("spanRange", spanRange);
+        spanPositionObj->SetProperty<int32_t>("spanIndex", it.GetSpanIndex());
+        spanResultObj->SetPropertyObject("spanPosition", spanPositionObj);
+        spanResultObj->SetPropertyObject("offsetInSpan", offsetInSpan);
+        switch (it.GetType()) {
+            case NG::SpanResultType::TEXT: {
+                JSRef<JSObject> textStyleObj = JSRef<JSObject>::New();
+                CreateTextStyleObj(textStyleObj, it);
+                spanResultObj->SetProperty<std::string>("value", it.GetValue());
+                spanResultObj->SetPropertyObject("textStyle", textStyleObj);
+                spanResultObj->SetPropertyObject("paragraphStyle", CreateJSParagraphStyle(it.GetTextStyle()));
+                break;
+            }
+            default:
+                break;
+        }
+        jsArray->SetValueAt(index++, spanResultObj);
+    }
+}
+
+JSRef<JSVal> JSRichEditor::CreateJsOnWillChange(const NG::RichEditorChangeValue& changeValue)
+{
+    JSRef<JSObject> OnWillChangeObj = JSRef<JSObject>::New();
+    JSRef<JSArray> richEditorOriginalSpans = JSRef<JSArray>::New();
+    JSRef<JSArray> richEditorReplacedSpans = JSRef<JSArray>::New();
+    SetChangeTextSpans(richEditorOriginalSpans, changeValue.GetRichEditorOriginalSpans());
+    SetChangeTextSpans(richEditorReplacedSpans, changeValue.GetRichEditorReplacedSpans());
+    OnWillChangeObj->SetPropertyObject("originalSpans", richEditorOriginalSpans);
+    OnWillChangeObj->SetPropertyObject("replacedSpans", richEditorReplacedSpans);
+    return JSRef<JSVal>::Cast(OnWillChangeObj);
+}
+
+JSRef<JSVal> JSRichEditor::CreateJsOnDidChange(const std::list<NG::RichEditorAbstractSpanResult>& spanList)
+{
+    JSRef<JSArray> richEditorReplacedSpans = JSRef<JSArray>::New();
+    SetChangeTextSpans(richEditorReplacedSpans, spanList);
+    return JSRef<JSVal>::Cast(richEditorReplacedSpans);
 }
 
 void JSRichEditor::CreateTextStyleObj(JSRef<JSObject>& textStyleObj, const NG::RichEditorAbstractSpanResult& spanResult)
@@ -853,6 +971,64 @@ void JSRichEditor::SetSelectedBackgroundColor(const JSCallbackInfo& info)
     RichEditorModel::GetInstance()->SetSelectedBackgroundColor(selectedColor);
 }
 
+void JSRichEditor::SetEnterKeyType(const JSCallbackInfo& info)
+{
+    if (info.Length() < 1) {
+        return;
+    }
+    auto action = info[0];
+    if (action->IsUndefined()) {
+        RichEditorModel::GetInstance()->SetEnterKeyType(TextInputAction::UNSPECIFIED);
+        return;
+    }
+    if (!action->IsNumber()) {
+        return;
+    }
+    TextInputAction textInputAction = CastToTextInputAction(action->ToNumber<int32_t>());
+    RichEditorModel::GetInstance()->SetEnterKeyType(textInputAction);
+}
+
+Local<JSValueRef> JSRichEditor::JsKeepEditableState(panda::JsiRuntimeCallInfo* info)
+{
+    Local<JSValueRef> thisObj = info->GetThisRef();
+    auto eventInfo =
+        static_cast<NG::TextFieldCommonEvent*>(panda::Local<panda::ObjectRef>(thisObj)->GetNativePointerField(0));
+    if (eventInfo) {
+        eventInfo->SetKeepEditable(true);
+    }
+    return JSValueRef::Undefined(info->GetVM());
+}
+
+void JSRichEditor::CreateJsRichEditorCommonEvent(const JSCallbackInfo& info)
+{
+    auto jsTextFunc =
+        AceType::MakeRefPtr<JsCommonEventFunction<NG::TextFieldCommonEvent, 2>>(JSRef<JSFunc>::Cast(info[0]));
+    WeakPtr<NG::FrameNode> targetNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    auto callback = [execCtx = info.GetExecutionContext(), func = std::move(jsTextFunc), node = targetNode](
+                        int32_t key, NG::TextFieldCommonEvent& event) {
+        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+        ACE_SCORING_EVENT("onSubmit");
+        PipelineContext::SetCallBackNode(node);
+        JSRef<JSObjTemplate> objectTemplate = JSRef<JSObjTemplate>::New();
+        objectTemplate->SetInternalFieldCount(2);
+        JSRef<JSObject> object = objectTemplate->NewInstance();
+        object->SetProperty<std::string>("text", event.GetText());
+        object->SetPropertyObject("keepEditableState", JSRef<JSFunc>::New<FunctionCallback>(JsKeepEditableState));
+        object->Wrap<NG::TextFieldCommonEvent>(&event);
+        JSRef<JSVal> keyEvent = JSRef<JSVal>::Make(ToJSValue(key));
+        JSRef<JSVal> dataObject = JSRef<JSVal>::Cast(object);
+        JSRef<JSVal> param[2] = { keyEvent, dataObject };
+        func->Execute(param);
+    };
+    RichEditorModel::GetInstance()->SetOnSubmit(std::move(callback));
+}
+
+void JSRichEditor::SetOnSubmit(const JSCallbackInfo& info)
+{
+    CHECK_NULL_VOID(info[0]->IsFunction());
+    CreateJsRichEditorCommonEvent(info);
+}
+
 void JSRichEditor::JSBind(BindingTarget globalObj)
 {
     JSClass<JSRichEditor>::Declare("RichEditor");
@@ -882,6 +1058,12 @@ void JSRichEditor::JSBind(BindingTarget globalObj)
     JSClass<JSRichEditor>::StaticMethod("caretColor", &JSRichEditor::SetCaretColor);
     JSClass<JSRichEditor>::StaticMethod("selectedBackgroundColor", &JSRichEditor::SetSelectedBackgroundColor);
     JSClass<JSRichEditor>::StaticMethod("onEditingChange", &JSRichEditor::SetOnEditingChange);
+    JSClass<JSRichEditor>::StaticMethod("enterKeyType", &JSRichEditor::SetEnterKeyType);
+    JSClass<JSRichEditor>::StaticMethod("onSubmit", &JSRichEditor::SetOnSubmit);
+    JSClass<JSRichEditor>::StaticMethod("onWillChange", &JSRichEditor::SetOnWillChange);
+    JSClass<JSRichEditor>::StaticMethod("onDidChange", &JSRichEditor::SetOnDidChange);
+    JSClass<JSRichEditor>::StaticMethod("onCut", &JSRichEditor::SetOnCut);
+    JSClass<JSRichEditor>::StaticMethod("onCopy", &JSRichEditor::SetOnCopy);
     JSClass<JSRichEditor>::InheritAndBind<JSViewAbstract>(globalObj);
 }
 
@@ -1601,6 +1783,7 @@ void JSRichEditorController::JSBind(BindingTarget globalObj)
     JSClass<JSRichEditorController>::CustomMethod("setSelection", &JSRichEditorController::SetSelection);
     JSClass<JSRichEditorController>::CustomMethod("getSelection", &JSRichEditorController::GetSelection);
     JSClass<JSRichEditorController>::CustomMethod("isEditing", &JSRichEditorController::IsEditing);
+    JSClass<JSRichEditorController>::Method("stopEditing", &JSRichEditorController::StopEditing);
     JSClass<JSRichEditorController>::Method("closeSelectionMenu", &JSRichEditorController::CloseSelectionMenu);
     JSClass<JSRichEditorController>::Bind(
         globalObj, JSRichEditorController::Constructor, JSRichEditorController::Destructor);
@@ -1904,5 +2087,13 @@ JSRef<JSVal> JSRichEditorController::CreateJSParagraphsInfo(const std::vector<Pa
         array->SetValueAt(i, obj);
     }
     return JSRef<JSVal>::Cast(array);
+}
+
+void JSRichEditorController::StopEditing()
+{
+    auto controller = controllerWeak_.Upgrade();
+    if (controller) {
+        controller->StopEditing();
+    }
 }
 } // namespace OHOS::Ace::Framework

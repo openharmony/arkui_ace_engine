@@ -21,7 +21,7 @@
 #include "node/gesture_impl.h"
 #include "node/node_model.h"
 #include "securec.h"
-
+#include "node_extened.h"
 #include "base/log/log_wrapper.h"
 #include "core/interfaces/arkoala/arkoala_api.h"
 

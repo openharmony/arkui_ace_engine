@@ -82,7 +82,7 @@ public:
                 idealSize.Height().value();
             childCalcIdealLength = (length - itemSpace * itemSpaceCount -
                                         static_cast<float>(prevMargin + nextMargin)) / displayCount;
-            if (NonPositive(childCalcIdealLength)) {
+            if (LessNotEqual(childCalcIdealLength, 0.0)) {
                 // prioritize margin and displayCount, ignore itemSpace to create a positive idealLength.
                 property->MarkIgnoreItemSpace();
                 childCalcIdealLength = (length - static_cast<float>(prevMargin + nextMargin)) / displayCount;
@@ -92,7 +92,7 @@ public:
                 nextMargin = 0.0;
                 itemSpaceCount = CaculateDisplayItemSpaceCount(property, prevMargin, nextMargin);
                 childCalcIdealLength = (length - itemSpace * itemSpaceCount) / displayCount;
-                if (NonPositive(childCalcIdealLength)) {
+                if (LessNotEqual(childCalcIdealLength, 0.0)) {
                     childCalcIdealLength = length / displayCount;
                 } else {
                     property->ResetIgnoreItemSpace();

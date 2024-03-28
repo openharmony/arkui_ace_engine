@@ -61,4 +61,14 @@ void RichEditorModelImpl::SetSelectedBackgroundColor(const Color& selectedColor)
 void RichEditorModelImpl::SetCaretColor(const Color& color) {}
 
 void RichEditorModelImpl::SetOnEditingChange(std::function<void(const bool&)>&& func) {}
+void RichEditorModelImpl::SetOnSubmit(std::function<void(int32_t, NG::TextFieldCommonEvent&)>&& func) {}
+void RichEditorModelImpl::SetEnterKeyType(TextInputAction value) {}
+
+void RichEditorModelImpl::SetOnWillChange(std::function<bool(const NG::RichEditorChangeValue&)>&& func) {}
+void RichEditorModelImpl::SetOnDidChange(
+    std::function<void(const std::list<NG::RichEditorAbstractSpanResult>&)>&& func)
+{}
+void RichEditorModelImpl::SetOnCut(std::function<void(NG::TextCommonEvent&)>&& func) {}
+void RichEditorModelImpl::SetOnCopy(std::function<void(NG::TextCommonEvent&)>&& func) {}
+
 } // namespace OHOS::Ace::Framework

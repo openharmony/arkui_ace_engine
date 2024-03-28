@@ -15,24 +15,22 @@
 
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_WEB_WEB_ACCESSIBILITY_NODE_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_WEB_WEB_ACCESSIBILITY_NODE_H
+
 #include "base/memory/referenced.h"
 #include "base/web/webview/ohos_nweb/include/nweb_accessibility_node_info.h"
 #include "core/components_ng/base/frame_node.h"
+#include "core/components_ng/base/node_flag.h"
 #include "core/components_ng/property/property.h"
 
 namespace OHOS::Ace::NG {
+class WebPattern;
+
 class ACE_EXPORT WebAccessibilityNode : public FrameNode {
     DECLARE_ACE_TYPE(WebAccessibilityNode, FrameNode)
 public:
-    WebAccessibilityNode(const RefPtr<FrameNode>& webNode) : FrameNode(V2::WEB_CORE_TAG, 0, MakeRefPtr<Pattern>())
-    {
-        webNode_ = WeakPtr(webNode);
-        pageId_ = webNode->GetPageId();
-    }
-    ~WebAccessibilityNode()
-    {
-        webNode_.Reset();
-    }
+    WebAccessibilityNode(const RefPtr<WebPattern>& webPattern);
+
+    ~WebAccessibilityNode() = default;
 
     void SetAccessibilityNodeInfo(const std::shared_ptr<OHOS::NWeb::NWebAccessibilityNodeInfo>& info)
     {
@@ -420,15 +418,12 @@ public:
         return accessibilityNodeInfo_->GetIsPluralLineSupported();
     }
 
-    RefPtr<FrameNode> GetWebNode()
-    {
-        return webNode_.Upgrade();
-    }
+    RefPtr<FrameNode> GetWebNode() const;
 
 private:
     int64_t pageId_ = -1;
     std::shared_ptr<OHOS::NWeb::NWebAccessibilityNodeInfo> accessibilityNodeInfo_ = nullptr;
-    WeakPtr<FrameNode> webNode_ = nullptr;
+    WeakPtr<WebPattern> webPattern_ = nullptr;
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_WEB_WEB_ACCESSIBILITY_NODE_H

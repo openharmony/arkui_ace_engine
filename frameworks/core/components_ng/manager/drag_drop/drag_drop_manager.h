@@ -303,6 +303,32 @@ public:
         return isPullMoveReceivedForCurrentDrag_;
     }
 
+    static void UpdateGatherNodeAttr(const RefPtr<OverlayManager>& overlayManager,
+        OffsetF gatherNodeCenter, float scale);
+    double CalcGatherNodeMaxDistanceWithPoint(const RefPtr<OverlayManager>& overlayManager, int32_t x, int32_t y);
+
+    void SetPixelMapOffset(OffsetF pixelMapOffset) {
+        pixelMapOffset_ = pixelMapOffset;
+    }
+    bool IsNeedDisplayInSubwindow();
+    void ClearGatherPixelMap()
+    {
+        gatherPixelMaps_.clear();
+    }
+
+    void GetGatherPixelMap(const RefPtr<PixelMap>& pixelMap);
+    void PushGatherPixelMap(DragDataCore& dragData, float scale);
+    bool HasGatherNode()
+    {
+        return hasGatherNode_;
+    }
+
+    void SetHasGatherNode(bool hasGatherNode)
+    {
+        hasGatherNode_ = hasGatherNode;
+    }
+
+
 private:
     double CalcDragPreviewDistanceWithPoint(
         const OHOS::Ace::Dimension& preserverHeight, int32_t x, int32_t y, const DragPreviewInfo& info);
@@ -370,6 +396,9 @@ private:
     Rect previewRect_ { -1, -1, -1, -1 };
     DragPreviewInfo info_;
     bool isDragFwkShow_ { false };
+    OffsetF pixelMapOffset_ {0.0f, 0.0f};
+    std::vector<RefPtr<PixelMap>> gatherPixelMaps_;
+    bool hasGatherNode_ = false;
 
     ACE_DISALLOW_COPY_AND_MOVE(DragDropManager);
 };

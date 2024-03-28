@@ -289,7 +289,7 @@ private:
     void UpdateSubTitleOpacity(const double &value);
     void UpdateTitleModeChange();
     void MountTitle(const RefPtr<TitleBarNode>& hostNode);
-    void MountMenu(const RefPtr<TitleBarNode>& hostNode);
+    void MountMenu(const RefPtr<TitleBarNode>& hostNode, bool isWindowSizeChange = false);
 
     void UpdateTitleBarByCoordScroll(float offset);
     void SetTitleStyleByCoordScrollOffset(float offset);
@@ -307,6 +307,7 @@ private:
     float overDragOffset_ = 0.0f;
     float maxTitleBarHeight_ = 0.0f;
     float defaultTitleBarHeight_ = 0.0f;
+    Dimension titleSpaceVertical_;
     Dimension tempTitleBarHeight_ = 0.0_vp;
     float minTitleOffsetY_ = 0.0f;
     float maxTitleOffsetY_ = 0.0f;

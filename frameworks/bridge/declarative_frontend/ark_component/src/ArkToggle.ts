@@ -52,6 +52,10 @@ class ArkToggleComponent extends ArkComponent implements ToggleAttribute {
     modifierWithKey(this._modifiersWithKeys, ToggleHoverEffectModifier.identity, ToggleHoverEffectModifier, value);
     return this;
   }
+  switchStyle(value: SwitchStyle): this {
+    modifierWithKey(this._modifiersWithKeys, ToggleSwitchStyleModifier.identity, ToggleSwitchStyleModifier, value);
+    return this;
+  }
 }
 class ToggleSelectedColorModifier extends ModifierWithKey<ResourceColor> {
   constructor(value: ResourceColor) {
@@ -224,6 +228,37 @@ class ToggleHoverEffectModifier extends ModifierWithKey<HoverEffect> {
       getUINativeModule().toggle.resetHoverEffect(node);
     } else {
       getUINativeModule().toggle.setHoverEffect(node, this.value);
+    }
+  }
+}
+
+class ToggleSwitchStyleModifier extends ModifierWithKey<SwitchStyle> {
+  constructor(value: SwitchStyle) {
+    super(value);
+  }
+  static identity = Symbol('toggleSwitchStyle');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().toggle.resetSwitchStyle(node);
+    } else {
+      getUINativeModule().toggle.setSwitchStyle(node, this.value.pointRadius, this.value.unselectedColor,
+        this.value.pointColor, this.value.trackBorderRadius);
+    }
+  }
+
+  checkObjectDiff(): boolean {
+    if (!isResource(this.stageValue) && !isResource(this.value)) {
+      return !(this.stageValue.pointRadius === this.value.pointRadius &&
+        this.stageValue.unselectedColor === this.value.unselectedColor &&
+        this.stageValue.pointColor === this.value.pointColor &&
+        this.stageValue.trackBorderRadius === this.value.trackBorderRadius);
+    } else if (isResource(this.stageValue) && isResource(this.value)){
+      return !(isResourceEqual(this.stageValue.pointRadius, this.value.pointRadius) && 
+      isResourceEqual(this.stageValue.unselectedColor, this.value.unselectedColor) && 
+      isResourceEqual(this.stageValue.pointColor, this.value.pointColor) &&
+      isResourceEqual(this.stageValue.trackBorderRadius, this.value.trackBorderRadius));
+    } else {
+      return true;
     }
   }
 }

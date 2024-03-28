@@ -16,12 +16,13 @@
 /// <reference path='./import.ts' />
 class RectModifier extends ArkRectComponent implements AttributeModifier<RectAttribute> {
 
-  constructor(nativePtr: KNode) {
-    super(nativePtr);
+  constructor(nativePtr: KNode, classType: ModifierType) {
+    super(nativePtr, classType);
     this._modifiersWithKeys = new ModifierMap();
   }
 
   applyNormalAttribute(instance: RectAttribute): void {
-    applyAndMergeModifier<RectAttribute, ArkRectComponent, ArkCommonShapeComponent>(instance, this);
+    ModifierUtils.applySetOnChange(this);
+    ModifierUtils.applyAndMergeModifier<RectAttribute, ArkRectComponent, ArkComponent>(instance, this);
   }
 }

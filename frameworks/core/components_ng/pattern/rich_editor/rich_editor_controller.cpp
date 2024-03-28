@@ -170,4 +170,12 @@ bool RichEditorController::IsEditing()
     CHECK_NULL_RETURN(richEditorPattern, false);
     return richEditorPattern->IsEditing();
 }
+
+void RichEditorController::StopEditing()
+{
+    auto richEditorPattern = pattern_.Upgrade();
+    if (richEditorPattern) {
+        richEditorPattern->StopEditing();
+    }
+}
 } // namespace OHOS::Ace::NG

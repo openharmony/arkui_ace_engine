@@ -22,6 +22,7 @@
 #include <string>
 
 #include "base/log/log_wrapper.h"
+#include "base/subwindow/subwindow_manager.h"
 
 #ifdef ENABLE_ROSEN_BACKEND
 #include "render_service_client/core/transaction/rs_transaction.h"
@@ -91,6 +92,7 @@ constexpr int32_t TIME_THRESHOLD = 2 * 1000000; // 3 millisecond
 constexpr int32_t PLATFORM_VERSION_TEN = 10;
 constexpr int32_t USED_ID_FIND_FLAG = 3;                 // if args >3 , it means use id to find
 constexpr int32_t MILLISECONDS_TO_NANOSECONDS = 1000000; // Milliseconds to nanoseconds
+constexpr int32_t RESAMPLE_COORD_TIME_THRESHOLD = 20 * 1000 * 1000;
 } // namespace
 
 namespace OHOS::Ace::NG {
@@ -369,6 +371,20 @@ std::pair<float, float> PipelineContext::GetResampleCoord(const std::vector<Touc
     if (history.empty() || current.empty()) {
         return std::make_pair(0.0f, 0.0f);
     }
+    uint64_t lastTime = 0;
+    float x = 0.0f;
+    float y = 0.0f;
+    for (auto iter : current) {
+        uint64_t currentTime = static_cast<uint64_t>(iter.time.time_since_epoch().count());
+        if (lastTime < currentTime) {
+            lastTime = currentTime;
+            x = iter.x;
+            y = iter.y;
+        }
+    }
+    if (nanoTimeStamp > RESAMPLE_COORD_TIME_THRESHOLD + lastTime) {
+        return std::make_pair(x, y);
+    }
     auto historyPoint = GetAvgPoint(history, isScreen);
     auto currentPoint = GetAvgPoint(current, isScreen);
 
@@ -562,6 +578,15 @@ void PipelineContext::IsCloseSCBKeyboard()
 #else
     FocusHub::IsCloseKeyboard(curFrameNode);
 #endif
+}
+
+void PipelineContext::FlushOnceVsyncTask()
+{
+    if (onceVsyncListener_ != nullptr) {
+        ACE_SCOPED_TRACE("arkoala build");
+        onceVsyncListener_();
+        onceVsyncListener_ = nullptr;
+    }
 }
 
 void PipelineContext::FlushVsync(uint64_t nanoTimestamp, uint32_t frameCount)
@@ -798,6 +823,10 @@ void PipelineContext::FlushFocusView()
     CHECK_NULL_VOID(lastFocusView);
     auto lastFocusViewHub = lastFocusView->GetFocusHub();
     CHECK_NULL_VOID(lastFocusViewHub);
+    auto container = Container::Current();
+    if (container && container->IsUIExtensionWindow()) {
+        lastFocusView->SetIsViewRootScopeFocused(false);
+    }
     if (lastFocusView && (!lastFocusView->IsRootScopeCurrentFocus() || !lastFocusView->GetIsViewHasFocused()) &&
         lastFocusViewHub->IsFocusableNode()) {
         lastFocusView->RequestDefaultFocus();
@@ -841,6 +870,7 @@ void PipelineContext::FlushBuild()
         ACE_SCOPED_TRACE("arkoala build");
         vsyncListener_();
     }
+    FlushOnceVsyncTask();
     isRebuildFinished_ = false;
     FlushDirtyNodeUpdate();
     isRebuildFinished_ = true;
@@ -1387,6 +1417,7 @@ void PipelineContext::SyncSafeArea(bool onKeyboard)
         page->MarkDirtyNode(onKeyboard && !safeAreaManager_->KeyboardSafeAreaEnabled() ? PROPERTY_UPDATE_LAYOUT
                                                                                        : PROPERTY_UPDATE_MEASURE);
     }
+    SubwindowManager::GetInstance()->MarkDirtyDialogSafeArea();
     if (overlayManager_) {
         overlayManager_->MarkDirty(PROPERTY_UPDATE_MEASURE);
     }
@@ -2627,10 +2658,10 @@ void PipelineContext::WindowFocus(bool isFocus)
             TAG_LOGI(AceLogTag::ACE_FOCUS, "Request focus on current focus view: %{public}s/%{public}d",
                 curFocusView->GetFrameName().c_str(), curFocusView->GetFrameId());
             curFocusViewHub->RequestFocusImmediately();
-        }
-        if (focusWindowId_.has_value()) {
-            if (curFocusView) {
-                curFocusView->TriggerFocusMove();
+        } else {
+            auto container = Container::Current();
+            if (container && container->IsUIExtensionWindow()) {
+                curFocusView->RequestDefaultFocus();
             }
         }
         if (focusOnNodeCallback_) {

@@ -90,19 +90,17 @@ int32_t FocusHub::GetFrameId() const
     return frameNode ? frameNode->GetId() : -1;
 }
 
-std::list<RefPtr<FocusHub>>::iterator FocusHub::FlushChildrenFocusHub(std::list<RefPtr<FocusHub>>& focusNodes)
+void FocusHub::GetChildrenFocusHub(std::list<RefPtr<FocusHub>>& focusNodes)
 {
     focusNodes.clear();
-    std::list<RefPtr<FrameNode>> childrenNode;
     auto frameNode = GetFrameNode();
-    if (frameNode) {
-        frameNode->GetFocusChildren(childrenNode);
-    }
-    for (const auto& child : childrenNode) {
-        if (child->GetFocusHub()) {
-            focusNodes.emplace_back(child->GetFocusHub());
-        }
-    }
+    CHECK_NULL_VOID(frameNode);
+    frameNode->GetChildrenFocusHub(focusNodes);
+}
+
+std::list<RefPtr<FocusHub>>::iterator FocusHub::FlushChildrenFocusHub(std::list<RefPtr<FocusHub>>& focusNodes)
+{
+    GetChildrenFocusHub(focusNodes);
     auto lastFocusNode = lastWeakFocusNode_.Upgrade();
     if (!lastFocusNode) {
         return focusNodes.end();
@@ -161,7 +159,7 @@ void FocusHub::DumpFocusNodeTree(int32_t depth)
 void FocusHub::DumpFocusScopeTree(int32_t depth)
 {
     std::list<RefPtr<FocusHub>> focusNodes;
-    FlushChildrenFocusHub(focusNodes);
+    GetChildrenFocusHub(focusNodes);
     if (DumpLog::GetInstance().GetDumpFile()) {
         std::string information = GetFrameName();
         if (IsCurrentFocus()) {
@@ -362,7 +360,7 @@ bool FocusHub::IsFocusableScope()
         return true;
     }
     std::list<RefPtr<FocusHub>> focusNodes;
-    FlushChildrenFocusHub(focusNodes);
+    GetChildrenFocusHub(focusNodes);
     return std::any_of(focusNodes.begin(), focusNodes.end(),
         [](const RefPtr<FocusHub>& focusNode) { return focusNode->IsFocusable(); });
 }
@@ -557,6 +555,9 @@ bool FocusHub::OnKeyEventNode(const KeyEvent& keyEvent)
 
     bool isBypassInner = keyEvent.IsKey({ KeyCode::KEY_TAB }) && pipeline && pipeline->IsTabJustTriggerOnKeyEvent();
     auto retInternal = false;
+    if (GetFrameNode()->GetTag() == V2::UI_EXTENSION_COMPONENT_TAG) {
+        isBypassInner = false;
+    }
     if (!isBypassInner && !onKeyEventsInternal_.empty()) {
         retInternal = ProcessOnKeyEventInternal(keyEvent);
         TAG_LOGI(AceLogTag::ACE_FOCUS,
@@ -620,6 +621,10 @@ bool FocusHub::OnKeyEventScope(const KeyEvent& keyEvent)
         return true;
     }
 
+    if (keyEvent.isPreIme) {
+        return false;
+    }
+
     if (keyEvent.action != KeyAction::DOWN) {
         return false;
     }
@@ -631,7 +636,7 @@ bool FocusHub::OnKeyEventScope(const KeyEvent& keyEvent)
     }
     if (keyEvent.IsKey({ KeyCode::KEY_TAB }) && pipeline->IsTabJustTriggerOnKeyEvent()) {
         ScrollToLastFocusIndex();
-        return true;
+        return false;
     }
 
     ScrollToLastFocusIndex();
@@ -768,7 +773,7 @@ bool FocusHub::FocusToHeadOrTailChild(bool isHead)
     }
 
     std::list<RefPtr<FocusHub>> focusNodes;
-    FlushChildrenFocusHub(focusNodes);
+    GetChildrenFocusHub(focusNodes);
     bool canChildBeFocused = false;
     if (isHead) {
         canChildBeFocused = std::any_of(focusNodes.begin(), focusNodes.end(),
@@ -816,7 +821,7 @@ void FocusHub::SwitchFocus(const RefPtr<FocusHub>& focusNode)
         return;
     }
     std::list<RefPtr<FocusHub>> focusNodes;
-    FlushChildrenFocusHub(focusNodes);
+    GetChildrenFocusHub(focusNodes);
 
     auto focusNodeNeedBlur = lastWeakFocusNode_.Upgrade();
     lastWeakFocusNode_ = AceType::WeakClaim(AceType::RawPtr(focusNode));
@@ -902,7 +907,7 @@ bool FocusHub::TryRequestFocus(const RefPtr<FocusHub>& focusNode, const RectF& r
 bool FocusHub::CalculatePosition()
 {
     std::list<RefPtr<FocusHub>> focusNodes;
-    FlushChildrenFocusHub(focusNodes);
+    GetChildrenFocusHub(focusNodes);
     auto lastFocusNode = lastWeakFocusNode_.Upgrade();
     CHECK_NULL_RETURN(lastFocusNode, false);
 
@@ -1185,7 +1190,7 @@ void FocusHub::OnFocusScope(bool currentHasFocused)
 void FocusHub::OnBlurScope()
 {
     std::list<RefPtr<FocusHub>> focusNodes;
-    FlushChildrenFocusHub(focusNodes);
+    GetChildrenFocusHub(focusNodes);
     OnBlurNode();
     auto lastFocusNode = lastWeakFocusNode_.Upgrade();
     if (lastFocusNode) {
@@ -1275,7 +1280,7 @@ bool FocusHub::PaintAllFocusState()
         return !isFocusActiveWhenFocused_;
     }
     std::list<RefPtr<FocusHub>> focusNodes;
-    FlushChildrenFocusHub(focusNodes);
+    GetChildrenFocusHub(focusNodes);
     auto lastFocusNode = lastWeakFocusNode_.Upgrade();
     if (lastFocusNode && lastFocusNode->IsCurrentFocus() && lastFocusNode->IsFocusableNode()) {
         return lastFocusNode->PaintAllFocusState();
@@ -1338,7 +1343,7 @@ void FocusHub::ClearAllFocusState()
 {
     ClearFocusState();
     std::list<RefPtr<FocusHub>> focusNodes;
-    FlushChildrenFocusHub(focusNodes);
+    GetChildrenFocusHub(focusNodes);
     auto lastFocusNode = lastWeakFocusNode_.Upgrade();
     if (lastFocusNode) {
         lastFocusNode->ClearAllFocusState();
@@ -1352,7 +1357,7 @@ bool FocusHub::IsNeedPaintFocusState()
         return focusStyleType_ != FocusStyleType::NONE || HasFocusStateStyle();
     }
     std::list<RefPtr<FocusHub>> focusNodes;
-    FlushChildrenFocusHub(focusNodes);
+    GetChildrenFocusHub(focusNodes);
     auto lastFocusNode = GetLastWeakFocusNode().Upgrade();
     while (lastFocusNode) {
         if (!lastFocusNode->IsCurrentFocus() || !lastFocusNode->IsFocusableNode()) {
@@ -1362,7 +1367,7 @@ bool FocusHub::IsNeedPaintFocusState()
             return false;
         }
         focusNodes.clear();
-        lastFocusNode->FlushChildrenFocusHub(focusNodes);
+        lastFocusNode->GetChildrenFocusHub(focusNodes);
         lastFocusNode = lastFocusNode->GetLastWeakFocusNode().Upgrade();
     }
     return focusStyleType_ != FocusStyleType::NONE || HasFocusStateStyle();
@@ -1380,7 +1385,7 @@ bool FocusHub::AcceptFocusOfSpecifyChild(FocusStep step)
         return true;
     }
     std::list<RefPtr<FocusHub>> focusNodes;
-    FlushChildrenFocusHub(focusNodes);
+    GetChildrenFocusHub(focusNodes);
     bool canChildBeFocused = false;
     if (!focusNodes.empty()) {
         if (step == FocusStep::TAB) {
@@ -1487,7 +1492,7 @@ bool FocusHub::AcceptFocusByRectOfLastFocusFlex(const RectF& rect)
         return true;
     }
     std::list<RefPtr<FocusHub>> focusNodes;
-    FlushChildrenFocusHub(focusNodes);
+    GetChildrenFocusHub(focusNodes);
     bool canChildBeFocused = false;
     OffsetF offset;
     auto itNewFocusNode = focusNodes.end();
@@ -1554,7 +1559,7 @@ bool FocusHub::IsFocusableNodeByTab()
 bool FocusHub::IsFocusableScopeByTab()
 {
     std::list<RefPtr<FocusHub>> focusNodes;
-    FlushChildrenFocusHub(focusNodes);
+    GetChildrenFocusHub(focusNodes);
     if (!IsFocusableNodeByTab()) {
         return false;
     }
@@ -1597,7 +1602,7 @@ void FocusHub::CollectTabIndexNodes(TabIndexNodeList& tabIndexNodes)
     }
     if (GetFocusType() == FocusType::SCOPE) {
         std::list<RefPtr<FocusHub>> focusNodes;
-        FlushChildrenFocusHub(focusNodes);
+        GetChildrenFocusHub(focusNodes);
         for (auto& child : focusNodes) {
             child->CollectTabIndexNodes(tabIndexNodes);
         }
@@ -1657,7 +1662,7 @@ RefPtr<FocusHub> FocusHub::GetChildFocusNodeByType(FocusNodeType nodeType)
         return nullptr;
     }
     std::list<RefPtr<FocusHub>> focusNodes;
-    FlushChildrenFocusHub(focusNodes);
+    GetChildrenFocusHub(focusNodes);
     for (const auto& child : focusNodes) {
         if (!child) {
             continue;
@@ -1688,7 +1693,7 @@ RefPtr<FocusHub> FocusHub::GetChildFocusNodeById(const std::string& id)
     }
     if (focusType_ == FocusType::SCOPE) {
         std::list<RefPtr<FocusHub>> focusNodes;
-        FlushChildrenFocusHub(focusNodes);
+        GetChildrenFocusHub(focusNodes);
         for (const auto& child : focusNodes) {
             auto findNode = child->GetChildFocusNodeById(id);
             if (findNode) {
@@ -1708,7 +1713,7 @@ RefPtr<FocusView> FocusHub::GetFirstChildFocusView()
         return focusView;
     }
     std::list<RefPtr<FocusHub>> children;
-    FlushChildrenFocusHub(children);
+    GetChildrenFocusHub(children);
     for (auto iter = children.rbegin(); iter != children.rend(); ++iter) {
         auto childFocusHub = *iter;
         if (!childFocusHub) {
@@ -1828,7 +1833,7 @@ bool FocusHub::HandleFocusByTabIndex(const KeyEvent& event)
 bool FocusHub::HasBackwardFocusMovementInChildren()
 {
     std::list<RefPtr<FocusHub>> children;
-    FlushChildrenFocusHub(children);
+    GetChildrenFocusHub(children);
     for (const auto& child : children) {
         if (child->HasBackwardFocusMovement()) {
             return true;
@@ -1840,7 +1845,7 @@ bool FocusHub::HasBackwardFocusMovementInChildren()
 bool FocusHub::HasForwardFocusMovementInChildren()
 {
     std::list<RefPtr<FocusHub>> children;
-    FlushChildrenFocusHub(children);
+    GetChildrenFocusHub(children);
     for (const auto& child : children) {
         if (child->HasForwardFocusMovement()) {
             return true;
@@ -1852,7 +1857,7 @@ bool FocusHub::HasForwardFocusMovementInChildren()
 void FocusHub::ClearFocusMovementFlagsInChildren()
 {
     std::list<RefPtr<FocusHub>> children;
-    FlushChildrenFocusHub(children);
+    GetChildrenFocusHub(children);
     for (auto child : children) {
         child->ClearFocusMovementFlags();
         child->ClearFocusMovementFlagsInChildren();

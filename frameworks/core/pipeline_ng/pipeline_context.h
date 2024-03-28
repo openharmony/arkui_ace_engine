@@ -267,6 +267,8 @@ public:
         dragWindowVisibleCallback_ = std::move(task);
     }
 
+    void FlushOnceVsyncTask();
+
     void FlushDirtyNodeUpdate();
 
     void SetRootRect(double width, double height, double offset) override;
@@ -643,6 +645,11 @@ public:
         vsyncListener_ = std::move(vsync);
     }
 
+    void SetOnceVsyncListener(VsyncCallbackFun vsync)
+    {
+        onceVsyncListener_ = std::move(vsync);
+    }
+
     const RefPtr<NavigationDumpManager>& GetNavigationDumpManager() const
     {
         return navigationDumpMgr_;
@@ -858,6 +865,7 @@ private:
     std::unordered_map<int32_t, uint64_t> lastDispatchTime_;
 
     VsyncCallbackFun vsyncListener_;
+    VsyncCallbackFun onceVsyncListener_;
     ACE_DISALLOW_COPY_AND_MOVE(PipelineContext);
 
     int32_t preNodeId_ = -1;
