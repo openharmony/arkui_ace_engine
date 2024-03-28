@@ -748,6 +748,12 @@ enum class NodeRenderType : uint32_t {
     RENDER_TYPE_DISPLAY = 0,
     RENDER_TYPE_TEXTURE,
 };
+
+enum class MarqueeUpdateStrategy : uint32_t {
+    DEFAULT = 0,
+    PRESERVE_POSITION,
+};
+
 } // namespace OHOS::Ace
 
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_BASE_LAYOUT_CONSTANTS_H

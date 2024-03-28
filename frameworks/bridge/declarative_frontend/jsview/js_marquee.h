@@ -29,6 +29,7 @@ public:
     static void SetAllowScale(const JSCallbackInfo& info);
     static void SetFontWeight(const std::string& value);
     static void SetFontFamily(const JSCallbackInfo& info);
+    static void SetMarqueeUpdateStrategy(const std::string& value);
     static void OnStart(const JSCallbackInfo& info);
     static void OnBounce(const JSCallbackInfo& info);
     static void OnFinish(const JSCallbackInfo& info);
