@@ -1845,7 +1845,7 @@ ScrollResult ScrollablePattern::HandleScroll(float offset, int32_t source, Neste
 
 bool ScrollablePattern::HandleScrollVelocity(float velocity)
 {
-    if ((velocity > 0 && !IsAtTop()) || (velocity < 0 && !IsAtBottom())) {
+    if (!OutBoundaryCallback()) {
         // trigger scroll animation if edge not reached
         if (scrollableEvent_ && scrollableEvent_->GetScrollable()) {
             scrollableEvent_->GetScrollable()->StartScrollAnimation(0.0f, velocity);
