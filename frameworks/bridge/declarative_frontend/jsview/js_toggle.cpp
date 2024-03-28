@@ -410,8 +410,8 @@ void JSToggle::SwitchStyle(const JSCallbackInfo& info)
     JSRef<JSObject> jsObj = JSRef<JSObject>::Cast(info[0]);
 
     CalcDimension pointRadius;
-    if (jsObj->HasProperty("pointRadius") && ParseJsDimensionVp(jsObj->GetProperty("pointRadius"), pointRadius) &&
-        !pointRadius.IsNegative()) {
+    if (jsObj->HasProperty("pointRadius") &&
+        ParseJsDimensionVpNG(jsObj->GetProperty("pointRadius"), pointRadius, false) && !pointRadius.IsNegative()) {
         ToggleModel::GetInstance()->SetPointRadius(pointRadius);
     } else {
         ToggleModel::GetInstance()->ResetPointRadius();
@@ -442,7 +442,8 @@ void JSToggle::SwitchStyle(const JSCallbackInfo& info)
 
     CalcDimension trackRadius;
     if (jsObj->HasProperty("trackBorderRadius") &&
-        ParseJsDimensionVp(jsObj->GetProperty("trackBorderRadius"), trackRadius) && !trackRadius.IsNegative()) {
+        ParseJsDimensionVpNG(jsObj->GetProperty("trackBorderRadius"), trackRadius, false) &&
+        !trackRadius.IsNegative()) {
         ToggleModel::GetInstance()->SetTrackBorderRadius(trackRadius);
     } else {
         ToggleModel::GetInstance()->ResetTrackBorderRadius();
