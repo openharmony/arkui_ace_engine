@@ -17,6 +17,8 @@
 
 #define private public
 #define protected public
+#include "test/mock/base/mock_task_executor.h"
+#include "test/mock/core/common/mock_container.h"
 #include "test/mock/core/common/mock_theme_manager.h"
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
 #include "core/common/recorder/event_recorder.h"
@@ -26,6 +28,7 @@
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/dialog/dialog_event_hub.h"
 #include "core/components_ng/pattern/dialog/dialog_layout_algorithm.h"
+#include "core/components_ng/pattern/dialog/custom_dialog_controller_model_ng.h"
 #include "core/components_ng/pattern/dialog/dialog_pattern.h"
 #include "core/components_ng/pattern/dialog/dialog_view.h"
 #include "core/components_ng/pattern/overlay/overlay_manager.h"
@@ -170,12 +173,17 @@ private:
 void DialogPatternTestNg::SetUpTestCase()
 {
     MockPipelineContext::SetUp();
+    MockContainer::SetUp();
+    MockContainer::Current()->taskExecutor_ = AceType::MakeRefPtr<MockTaskExecutor>();
+    MockContainer::Current()->pipelineContext_ = MockPipelineContext::GetCurrentContext();
+    MockContainer::Current()->pipelineContext_->taskExecutor_ = MockContainer::Current()->taskExecutor_;
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
     MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
 }
 void DialogPatternTestNg::TearDownTestCase()
 {
     MockPipelineContext::TearDown();
+    MockContainer::TearDown();
 }
 void DialogPatternTestNg::SetDialogTheme()
 {
@@ -1365,6 +1373,36 @@ HWTEST_F(DialogPatternTestNg, DialogLayoutAlgorithm002, TestSize.Level1)
     dialogLayoutAlgorithm.Layout(layoutWrapper.rawPtr_);
     EXPECT_FALSE(property->GetIsScenceBoardDialog().value_or(false));
 }
+
+/**
+ * @tc.name: DialogLayoutAlgorithm003
+ * @tc.desc: Test DialogLayoutAlgorithm::Distribute function
+ * @tc.type: FUNC
+ */
+HWTEST_F(DialogPatternTestNg, DialogLayoutAlgorithm003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create DialogLayoutAlgorithm instance.
+     */
+    DialogLayoutAlgorithm algorithm;
+
+    /**
+     * @tc.steps: step2. execute Distribute
+     * @tc.expected: prop is set as expected
+     */
+    float scrollHeight = 10.0f, listHeight = 10.0f, restHeight = 4.0f;
+    algorithm.Distribute(scrollHeight, listHeight, restHeight);
+    EXPECT_EQ(scrollHeight, 2.0f);
+    scrollHeight = 10.0f, listHeight = 0.0f;
+    algorithm.Distribute(scrollHeight, listHeight, restHeight);
+    EXPECT_EQ(scrollHeight, 4.0f);
+    scrollHeight = 0.0f, listHeight = 10.0f;
+    algorithm.Distribute(scrollHeight, listHeight, restHeight);
+    EXPECT_EQ(listHeight, 4.0f);
+    scrollHeight = 0.0f, listHeight = 0.0f;
+    algorithm.Distribute(scrollHeight, listHeight, restHeight);
+    EXPECT_EQ(listHeight, 0.0f);
+}
 /**
  * @tc.name: DialogPatternTest014
  * @tc.desc: fullfill DialogPattern function branch
@@ -1550,5 +1588,79 @@ HWTEST_F(DialogPatternTestNg, DialogPatternTest017, TestSize.Level1)
 
     dialogPattern->RecordEvent(BUTTONINDEX_TEST_3);
     EXPECT_EQ(builderTest2.GetEventType(), Recorder::EventType::DIALOG_ACTION);
+}
+
+/**
+ * @tc.name: CustomDialogControllerModelNGTest001
+ * @tc.desc: Test CustomDialogControllerModelNG SetOpenDialog
+ * @tc.type: FUNC
+ */
+HWTEST_F(DialogPatternTestNg, CustomDialogControllerModelNGTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create CustomDialogControllerModelNG.
+     */
+    CustomDialogControllerModelNG controllerModel;
+    DialogProperties props{
+            .type = DialogType::ACTION_SHEET,
+            .title = "dialog test",
+            .content = "dialog content test",
+        };
+    bool pending = true, isShown = true;
+    auto controller = AceType::MakeRefPtr<AceType>();
+    std::vector<WeakPtr<AceType>> dialogs;
+    auto dialogComponent = AceType::MakeRefPtr<AceType>();
+    auto customDialog = AceType::MakeRefPtr<AceType>();
+    std::list<DialogOperation> dialogOperation;
+
+    /**
+     * @tc.steps: step2. execute SetOpenDialog and SetCloseDialog
+     * @tc.expected: prop is set as expected
+     */
+    controllerModel.SetOpenDialog(props, controller, dialogs, pending, isShown,
+        []() {}, []() {}, dialogComponent, customDialog, dialogOperation);
+    props.onStatusChanged(true);
+    props.onStatusChanged(false);
+    controllerModel.SetCloseDialog(props, controller, dialogs, pending, isShown,
+        []() {}, dialogComponent, customDialog, dialogOperation);
+
+    props.isShowInSubWindow = true;
+    props.isModal = false;
+    controllerModel.SetOpenDialog(props, controller, dialogs, pending, isShown,
+        []() {}, []() {}, dialogComponent, customDialog, dialogOperation);
+    controllerModel.SetCloseDialog(props, controller, dialogs, pending, isShown,
+        []() {}, dialogComponent, customDialog, dialogOperation);
+    EXPECT_TRUE(props.isShowInSubWindow);
+    EXPECT_FALSE(props.isModal);
+}
+
+/**
+ * @tc.name: CustomDialogControllerModelNGTest002
+ * @tc.desc: Test CustomDialogControllerModelNG SetOpenDialogWithNode
+ * @tc.type: FUNC
+ */
+HWTEST_F(DialogPatternTestNg, CustomDialogControllerModelNGTest002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create CustomDialogControllerModelNG.
+     */
+    CustomDialogControllerModelNG controllerModel;
+    DialogProperties props{
+            .type = DialogType::ACTION_SHEET,
+            .title = "dialog test",
+            .content = "dialog content test",
+        };
+
+    /**
+     * @tc.steps: step2. execute SetOpenDialogWithNode
+     * @tc.expected: prop is set as expected
+     */
+    controllerModel.SetOpenDialogWithNode(props, nullptr);
+    props.isShowInSubWindow = true;
+    controllerModel.SetOpenDialogWithNode(props, nullptr);
+    props.isModal = true;
+    props.isScenceBoardDialog = false;
+    controllerModel.SetOpenDialogWithNode(props, nullptr);
+    EXPECT_TRUE(props.isShowInSubWindow);
 }
 } // namespace OHOS::Ace::NG
