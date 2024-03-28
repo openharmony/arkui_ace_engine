@@ -94,11 +94,8 @@ void MagnifierController::CreateMagnifierChildNode()
 {
     auto pattern = pattern_.Upgrade();
     CHECK_NULL_VOID(pattern);
-    auto textFieldpattern = DynamicCast<TextFieldPattern>(pattern);
-    CHECK_NULL_VOID(textFieldpattern);
-
-    auto host = textFieldpattern->GetHost();
-    CHECK_NULL_VOID(host);
+    auto textBasePattern = DynamicCast<TextBase>(pattern);
+    CHECK_NULL_VOID(textBasePattern);
 
     auto nodeId = ElementRegister::GetInstance()->MakeUniqueId();
     ACE_SCOPED_TRACE("Create[%s][self:%d]", V2::TEXTINPUT_ETS_TAG, nodeId);

@@ -41,6 +41,9 @@
 #include "core/components_ng/pattern/scrollable/scrollable_pattern.h"
 #include "core/components_ng/pattern/text/span_node.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
+#include "core/components_ng/pattern/select_overlay/magnifier.h"
+#include "core/components_ng/pattern/select_overlay/magnifier_controller.h"
+#include "core/components_ng/pattern/text/text_base.h"
 
 #if not defined(ACE_UNITTEST)
 #if defined(ENABLE_STANDARD_INPUT)
@@ -77,8 +80,8 @@ enum class RecordType {
     DRAG = 5
 };
 
-class RichEditorPattern : public TextPattern, public ScrollablePattern, public TextInputClient {
-    DECLARE_ACE_TYPE(RichEditorPattern, TextPattern, ScrollablePattern, TextInputClient);
+class RichEditorPattern : public TextPattern, public ScrollablePattern, public TextInputClient, public Magnifier {
+    DECLARE_ACE_TYPE(RichEditorPattern, TextPattern, ScrollablePattern, TextInputClient, Magnifier);
 
 public:
     RichEditorPattern();
@@ -493,6 +496,39 @@ public:
     {
         PerformAction(GetTextInputActionValue(GetDefaultTextInputAction()), false);
     }
+
+    int32_t GetCaretIndex() const override
+    {
+        return caretPosition_;
+    }
+
+    int32_t GetContentWideTextLength() override
+    {
+        return GetTextContentLength();
+    }
+
+    OffsetF GetCaretOffset() const override
+    {
+        return GetCaretRect().GetOffset();
+    }
+
+    OffsetF GetParentGlobalOffset() const override
+    {
+        return parentGlobalOffset_;
+    }
+
+    OffsetF GetFirstHandleOffset() const override
+    {
+        return textSelector_.firstHandle.GetOffset();
+    }
+
+    OffsetF GetSecondHandleOffset() const override
+    {
+        return textSelector_.secondHandle.GetOffset();
+    }
+
+    OffsetF GetTextPaintOffset() const override;
+
 protected:
     bool CanStartAITask() override;
 

@@ -111,7 +111,10 @@ constexpr static int32_t AI_TEXT_RANGE_LEFT = 50;
 constexpr static int32_t AI_TEXT_RANGE_RIGHT = 50;
 } // namespace
 
-RichEditorPattern::RichEditorPattern() {}
+RichEditorPattern::RichEditorPattern()
+{
+    magnifierController_ = MakeRefPtr<MagnifierController>(WeakClaim(this));
+}
 
 RichEditorPattern::~RichEditorPattern()
 {
@@ -4079,6 +4082,9 @@ void RichEditorPattern::HandleTouchEvent(const TouchEventInfo& info)
         HandleTouchDown(info.GetTouches().front().GetLocalLocation());
     } else if (touchType == TouchType::UP) {
         isTouchCaret_ = false;
+        if (magnifierController_->GetShowMagnifier()) {
+            magnifierController_->UpdateShowMagnifier();
+        }
 #if defined(OHOS_STANDARD_SYSTEM) && !defined(PREVIEW)
         if (isLongPress_) {
             isLongPress_ = false;
@@ -4382,6 +4388,7 @@ void RichEditorPattern::OnHandleMoveDone(const RectF& handleRect, bool isFirstHa
     }
     CalculateHandleOffsetAndShowOverlay();
     StopAutoScroll();
+    magnifierController_->UpdateShowMagnifier();
     if (selectOverlayProxy_) {
         SelectHandleInfo handleInfo;
         if (!selectOverlayProxy_->IsSingleHandle() && textSelector_.StartEqualToDest()) {
@@ -4801,8 +4808,10 @@ void RichEditorPattern::OnHandleMove(const RectF& handleRect, bool isFirstHandle
 {
     CHECK_NULL_VOID(HasFocus());
     CHECK_NULL_VOID(SelectOverlayIsOn());
+    CHECK_NULL_VOID(!spans_.empty());
     TextPattern::OnHandleMove(handleRect, isFirstHandle);
     auto localOffset = handleRect.GetOffset() - parentGlobalOffset_;
+    magnifierController_->SetLocalOffset(localOffset);
     AutoScrollParam param = { .autoScrollEvent = AutoScrollEvent::HANDLE,
         .handleRect = handleRect,
         .isFirstHandle = isFirstHandle,
@@ -6757,5 +6766,16 @@ void RichEditorPattern::AfterChangeText(RichEditorChangeValue& changeValue)
     CHECK_NULL_VOID(eventHub->HasOnDidChange());
 
     eventHub->FireOnDidChange(changeValue.GetRichEditorReplacedSpans());
+}
+
+OffsetF RichEditorPattern::GetTextPaintOffset() const
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, OffsetF(0.0f, 0.0f));
+    auto pipeline = host->GetContext();
+    CHECK_NULL_RETURN(pipeline, OffsetF(0.0f, 0.0f));
+    auto rootOffset = pipeline->GetRootRect().GetOffset();
+    auto textPaintOffset = host->GetPaintRectOffset();
+    return textPaintOffset - rootOffset;
 }
 } // namespace OHOS::Ace::NG

@@ -591,7 +591,6 @@ protected:
     bool clickEventInitialized_ = false;
     bool touchEventInitialized_ = false;
 
-    RectF contentRect_;
     RefPtr<FrameNode> dragNode_;
     RefPtr<LongPressEvent> longPressEvent_;
     // Deprecated: Use the selectOverlay_ instead.
