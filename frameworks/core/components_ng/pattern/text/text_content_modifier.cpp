@@ -612,7 +612,7 @@ void TextContentModifier::StartTextRace(const double& step, const int32_t& loop,
         int32_t duration = static_cast<int32_t>(std::abs(paragraph_->GetTextWidth() + textRaceSpaceWidth_) * 
             DEFAULT_MARQUEE_SCROLL_DELAY / step);
 
-        if(duration <= 0){
+        if (duration <= 0) {
             return;
         }
 
@@ -621,7 +621,7 @@ void TextContentModifier::StartTextRace(const double& step, const int32_t& loop,
             return;
         }
 
-        if(textRacing_){
+        if (textRacing_) {
             StopTextRace();
         }
 
@@ -631,7 +631,7 @@ void TextContentModifier::StartTextRace(const double& step, const int32_t& loop,
         marqueeDelay_ = delay;
         marqueeLoop_ = loop;
 
-        if(marqueeLoop_ > 0 && marqueeCount_ >= marqueeLoop_){
+        if (marqueeLoop_ > 0 && marqueeCount_ >= marqueeLoop_) {
             return;
         }
 
@@ -679,9 +679,9 @@ void TextContentModifier::StartTextRace(const double& step, const int32_t& loop,
                 auto textPattern = DynamicCast<TextPattern>(modifier->pattern_.Upgrade());
                 CHECK_NULL_VOID(textPattern);
 
-                if(modifier->marqueeLoop_ > 0 && modifier->marqueeCount_ >= modifier->marqueeLoop_){
+                if (modifier->marqueeLoop_ > 0 && modifier->marqueeCount_ >= modifier->marqueeLoop_) {
                     textPattern->FireOnMarqueeStateChange(TextMarqueeState::FINISH);
-                }else{
+                } else {
                     textPattern->FireOnMarqueeStateChange(TextMarqueeState::BOUNCE);
                     modifier->StartTextRace(modifier->marqueeStep_, modifier->marqueeLoop_, modifier->marqueeDirection_, modifier->marqueeDelay_, true);
                 }
@@ -689,7 +689,7 @@ void TextContentModifier::StartTextRace(const double& step, const int32_t& loop,
 
             if (taskExecutor->WillRunOnCurrentThread(TaskExecutor::TaskType::UI)) {
                 onFinish();
-            }else{
+            } else {
                 taskExecutor->PostTask([onFinish]() {onFinish();}, TaskExecutor::TaskType::UI);
             }
         });

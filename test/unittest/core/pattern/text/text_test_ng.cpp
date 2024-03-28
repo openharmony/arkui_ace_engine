@@ -2106,7 +2106,7 @@ HWTEST_F(TextTestNg, TextContentModifier001, TestSize.Level1)
     DrawingContext context { canvas, CONTEXT_WIDTH_VALUE, CONTEXT_HEIGHT_VALUE };
     textContentModifier.SetParagraph(paragraph);
     // call onDraw function(textRacing_ = true)
-    textContentModifier.StartTextRace();
+    textContentModifier.StartTextRace(6,3,MarqueeDirection::LEFT,0);
     context.width = CONTEXT_LARGE_WIDTH_VALUE;
     textContentModifier.onDraw(context);
     // call onDraw function(textRacing_ = false)
