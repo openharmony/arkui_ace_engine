@@ -2730,7 +2730,11 @@ void TextFieldPattern::OnHover(bool isHover)
     if (isHover) {
         pipeline->SetMouseStyleHoldNode(frameId);
     } else {
-        pipeline->ChangeMouseStyle(frameId, MouseFormat::DEFAULT);
+        int32_t windowId = 0;
+#ifdef WINDOW_SCENE_SUPPORTED
+        windowId = GetSCBSystemWindowId();
+#endif
+        pipeline->ChangeMouseStyle(frameId, MouseFormat::DEFAULT, windowId);
         pipeline->FreeMouseStyleHoldNode(frameId);
     }
     isOnHover_ = isHover;
@@ -2763,17 +2767,21 @@ void TextFieldPattern::ChangeMouseState(const Offset location, const RefPtr<Pipe
                              (cleanNodeResponseArea_ ? cleanNodeResponseArea_->GetAreaRect().Width() : 0.0f);
     auto x = location.GetX();
     auto y = location.GetY();
+    int32_t windowId = 0;
+#ifdef WINDOW_SCENE_SUPPORTED
+    windowId = GetSCBSystemWindowId();
+#endif
     if (GreatNotEqual(x, 0) && LessNotEqual(x, frameRect_.Width()) && GreatNotEqual(y, 0) &&
         LessNotEqual(y, frameRect_.Height())) {
         if (GreatNotEqual(location.GetX(), frameRect_.Width() - responseAreaWidth)) {
             pipeline->SetMouseStyleHoldNode(frameId);
-            pipeline->ChangeMouseStyle(frameId, MouseFormat::DEFAULT);
+            pipeline->ChangeMouseStyle(frameId, MouseFormat::DEFAULT, windowId);
         } else {
             pipeline->SetMouseStyleHoldNode(frameId);
-            pipeline->ChangeMouseStyle(frameId, MouseFormat::TEXT_CURSOR);
+            pipeline->ChangeMouseStyle(frameId, MouseFormat::TEXT_CURSOR, windowId);
         }
     } else {
-        pipeline->ChangeMouseStyle(frameId, MouseFormat::DEFAULT);
+        pipeline->ChangeMouseStyle(frameId, MouseFormat::DEFAULT, windowId);
         pipeline->FreeMouseStyleHoldNode(frameId);
     }
 }
@@ -2790,9 +2798,13 @@ void TextFieldPattern::HandleMouseEvent(MouseInfo& info)
     selectOverlay_->SetLastSourceType(info.GetSourceDevice());
     auto scrollBar = GetScrollBar();
     Point point(info.GetLocalLocation().GetX(), info.GetLocalLocation().GetY());
+    int32_t windowId = 0;
+#ifdef WINDOW_SCENE_SUPPORTED
+    windowId = GetSCBSystemWindowId();
+#endif
     if (scrollBar && (scrollBar->IsPressed() || scrollBar->IsHover() || scrollBar->InBarRectRegion(point))) {
         pipeline->SetMouseStyleHoldNode(frameId);
-        pipeline->ChangeMouseStyle(frameId, MouseFormat::DEFAULT);
+        pipeline->ChangeMouseStyle(frameId, MouseFormat::DEFAULT, windowId);
         return;
     }
     ChangeMouseState(info.GetLocalLocation(), pipeline, frameId);

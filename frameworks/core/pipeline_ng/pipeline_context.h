@@ -397,7 +397,7 @@ public:
         return onShow_;
     }
 
-    bool ChangeMouseStyle(int32_t nodeId, MouseFormat format);
+    bool ChangeMouseStyle(int32_t nodeId, MouseFormat format, int32_t windowId = 0);
 
     bool RequestFocus(const std::string& targetNodeId) override;
     void AddDirtyFocus(const RefPtr<FrameNode>& node);
