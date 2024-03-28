@@ -4819,6 +4819,30 @@ class ImageTransitionModifier extends ModifierWithKey {
   }
 }
 ImageTransitionModifier.identity = Symbol('imageTransition');
+class ImageeResizableModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().image.resetResizable(node);
+    } else {
+      let sliceTop;
+      let sliceRight;
+      let sliceBottom;
+      let sliceLeft;
+      if (!isUndefined(this.value.slice)) {
+        let tmpSlice = this.value.slice;
+        sliceTop = tmpSlice.top;
+        sliceRight = tmpSlice.right;
+        sliceBottom = tmpSlice.bottom;
+        sliceLeft = tmpSlice.left;
+      }
+      getUINativeModule().image.setResizable(node, sliceTop, sliceRight, sliceBottom, sliceLeft);
+    }
+  }
+}
+ImageeResizableModifier.identity = Symbol('resizable');
 class ArkImageComponent extends ArkComponent {
   constructor(nativePtr) {
     super(nativePtr);
@@ -4832,6 +4856,10 @@ class ArkImageComponent extends ArkComponent {
   }
   edgeAntialiasing(value) {
     modifierWithKey(this._modifiersWithKeys, ImageeEdgeAntialiasingModifier.identity, ImageeEdgeAntialiasingModifier, value);
+    return this;
+  }
+  resizable(value) {
+    modifierWithKey(this._modifiersWithKeys, ImageeResizableModifier.identity, ImageeResizableModifier, value);
     return this;
   }
   alt(value) {
