@@ -18,7 +18,6 @@
 #include <cstdint>
 #include <string>
 #include <vector>
-
 #include "base/geometry/ng/vector.h"
 #include "base/geometry/shape.h"
 #include "base/log/log_wrapper.h"
@@ -41,6 +40,7 @@
 #include "core/components_ng/pattern/shape/shape_abstract_model_ng.h"
 #include "core/components_ng/pattern/text/span_model_ng.h"
 #include "core/components_ng/property/transition_property.h"
+#include "core/event/axis_event.h"
 #include "core/image/image_source_info.h"
 #include "core/interfaces/arkoala/arkoala_api.h"
 #include "core/interfaces/native/node/node_api.h"
@@ -92,6 +92,7 @@ constexpr float DEFAULT_BRIGHTNESS = 1.0f;
 
 const int32_t ERROR_INT_CODE = -1;
 const float ERROR_FLOAT_CODE = -1.0f;
+constexpr int32_t MAX_POINTS = 10;
 const std::vector<OHOS::Ace::RefPtr<OHOS::Ace::Curve>> CURVES = {
     OHOS::Ace::Curves::LINEAR,
     OHOS::Ace::Curves::EASE,
@@ -688,7 +689,7 @@ void ResetHeight(ArkUINodeHandle node)
  * value[0] : radius value for TopLeft，value[1] : radius value for TopRight
  * value[2] : radius value for BottomLeft，value[3] : radius value for BottomRight
  * @param units radius units
- * units[0]: radius unit for TopLeft ,units[1] : radius unit for TopRight
+ * units[0]: radius unit for TopLeft, units[1] : radius unit for TopRight
  * units[2]: radius unit for BottomLeft, units[3] : radius unit for TopRight
  */
 void SetBorderRadius(ArkUINodeHandle node, const ArkUI_Float32* values, const ArkUI_Int32* units, ArkUI_Int32 length)
@@ -720,7 +721,7 @@ void ResetBorderRadius(ArkUINodeHandle node)
  * value[0] : BorderWidth value for left，value[1] : BorderWidth value for right
  * value[2] : BorderWidth value for top，value[3] : BorderWidth value for bottom
  * @param units radius units
- * units[0]: BorderWidth unit for left ,units[1] : BorderWidth unit for right
+ * units[0]: BorderWidth unit for left, units[1] : BorderWidth unit for right
  * units[2]: BorderWidth unit for top, units[3] : BorderWidth unit for bottom
  */
 void SetBorderWidth(ArkUINodeHandle node, const ArkUI_Float32* values, const ArkUI_Int32* units, ArkUI_Int32 length)
@@ -4871,6 +4872,20 @@ void SetOnClick(ArkUINodeHandle node, void* extraParam)
     }
 }
 
+void ConvertTouchLocationInfoToPoint(const TouchLocationInfo& locationInfo, ArkUITouchPoint& touchPoint)
+{
+    const OHOS::Ace::Offset& globalLocation = locationInfo.GetGlobalLocation();
+    const OHOS::Ace::Offset& localLocation = locationInfo.GetLocalLocation();
+    const OHOS::Ace::Offset& screenLocation = locationInfo.GetScreenLocation();
+    touchPoint.id = locationInfo.GetFingerId();
+    touchPoint.nodeX = PipelineBase::Px2VpWithCurrentDensity(localLocation.GetX());
+    touchPoint.nodeY = PipelineBase::Px2VpWithCurrentDensity(localLocation.GetY());
+    touchPoint.windowX = PipelineBase::Px2VpWithCurrentDensity(globalLocation.GetX());
+    touchPoint.windowY = PipelineBase::Px2VpWithCurrentDensity(globalLocation.GetY());
+    touchPoint.screenX = PipelineBase::Px2VpWithCurrentDensity(screenLocation.GetX());
+    touchPoint.screenY = PipelineBase::Px2VpWithCurrentDensity(screenLocation.GetY());
+}
+
 void SetOnTouch(ArkUINodeHandle node, void* extraParam)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -4885,41 +4900,29 @@ void SetOnTouch(ArkUINodeHandle node, void* extraParam)
         const std::list<TouchLocationInfo>& changeTouch = eventInfo.GetChangedTouches();
         if (changeTouch.size() > 0) {
             TouchLocationInfo front = changeTouch.front();
-            event.touchEvent.action = static_cast<ArkUITouchEventAction>(front.GetTouchType());
-            const OHOS::Ace::Offset& globalLocation = front.GetGlobalLocation();
-            const OHOS::Ace::Offset& localLocation = front.GetLocalLocation();
-            const OHOS::Ace::Offset& screenLocation = front.GetScreenLocation();
-            event.touchEvent.actionTouch.id = front.GetFingerId();
-            event.touchEvent.actionTouch.nodeX = PipelineBase::Px2VpWithCurrentDensity(localLocation.GetX());
-            event.touchEvent.actionTouch.nodeY = PipelineBase::Px2VpWithCurrentDensity(localLocation.GetY());
-            event.touchEvent.actionTouch.windowX = PipelineBase::Px2VpWithCurrentDensity(globalLocation.GetX());
-            event.touchEvent.actionTouch.windowY = PipelineBase::Px2VpWithCurrentDensity(globalLocation.GetY());
-            event.touchEvent.actionTouch.screenX = PipelineBase::Px2VpWithCurrentDensity(screenLocation.GetX());
-            event.touchEvent.actionTouch.screenY = PipelineBase::Px2VpWithCurrentDensity(screenLocation.GetY());
+            event.touchEvent.action = static_cast<int32_t>(front.GetTouchType());
+            ConvertTouchLocationInfoToPoint(front, event.touchEvent.actionTouchPoint);
         }
-        event.touchEvent.timeStamp = static_cast<double>(eventInfo.GetTimeStamp().time_since_epoch().count());
-        event.touchEvent.sourceType = static_cast<ArkUISourceType>(eventInfo.GetSourceDevice());
-
-        auto getTouchPoints = [](ArkUITouchPoint** points) -> ArkUI_Int32 {
-            const std::list<TouchLocationInfo>& touchList = globalEventInfo.GetTouches();
-            int index = 0;
-            *points = new ArkUITouchPoint[touchList.size()];
-            for (const auto& touchInfo : touchList) {
-                const OHOS::Ace::Offset& globalLocation = touchInfo.GetGlobalLocation();
-                const OHOS::Ace::Offset& localLocation = touchInfo.GetLocalLocation();
-                const OHOS::Ace::Offset& screenLocation = touchInfo.GetScreenLocation();
-                (*points)[index].id = touchInfo.GetFingerId();
-                (*points)[index].nodeX = PipelineBase::Px2VpWithCurrentDensity(localLocation.GetX());
-                (*points)[index].nodeY = PipelineBase::Px2VpWithCurrentDensity(localLocation.GetY());
-                (*points)[index].windowX = PipelineBase::Px2VpWithCurrentDensity(globalLocation.GetX());
-                (*points)[index].windowY = PipelineBase::Px2VpWithCurrentDensity(globalLocation.GetY());
-                (*points)[index].screenX = PipelineBase::Px2VpWithCurrentDensity(screenLocation.GetX());
-                (*points)[index].screenY = PipelineBase::Px2VpWithCurrentDensity(screenLocation.GetY());
-                index++;
+        event.touchEvent.timeStamp = eventInfo.GetTimeStamp().time_since_epoch().count();
+        event.touchEvent.sourceType = static_cast<int32_t>(eventInfo.GetSourceDevice());
+        std::array<ArkUITouchPoint, MAX_POINTS> touchPoints;
+        if (!eventInfo.GetTouches().empty()) {
+            size_t index = 0;
+            for (auto& touchLocationInfo: eventInfo.GetTouches()) {
+                if (index >= MAX_POINTS) {
+                    break;
+                }
+                ConvertTouchLocationInfoToPoint(touchLocationInfo, touchPoints[index++]);
             }
-            return index;
-        };
-        event.touchEvent.getTouches = std::move(getTouchPoints);
+            event.touchEvent.touchPointes = &touchPoints[0];
+            event.touchEvent.touchPointSize = eventInfo.GetTouches().size() < MAX_POINTS ?
+            eventInfo.GetTouches().size() : MAX_POINTS;
+        } else {
+            event.touchEvent.touchPointes = nullptr;
+            event.touchEvent.touchPointSize = 0;
+        }
+        event.touchEvent.historyEvents = nullptr;
+        event.touchEvent.historySize = 0;
         SendArkUIAsyncEvent(&event);
     };
     ViewAbstract::SetOnTouch(frameNode, std::move(onEvent));

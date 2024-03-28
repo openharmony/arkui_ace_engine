@@ -86,172 +86,28 @@ struct ArkUICornerRadius {
 
 typedef struct _ArkUIDialog* ArkUIDialogHandle;
 
-/**
- * ToolType
- */
-enum TouchEventToolType {
-    /**
-     * UNKNOWN
-     */
-    TOOL_TYPE_UNKNOWN = 0,
-
-    /**
-     * Finger
-     */
-    TOOL_TYPE_FINGER = 1,
-
-    /**
-     * Pen
-     *
-     */
-    TOOL_TYPE_PEN = 2,
-};
-
-/**
- * SourceType
- *
- */
-enum ArkUISourceType {
-    SOURCE_TYPE_UNKNOWN = 0,
-    /**
-     * Touchscreen
-     */
-    SOURCE_TYPE_TOUCH_SCREEN = 1,
-
-    /**
-     * Stylus
-     */
-    SOURCE_TYPE_PEN = 2,
-
-    /**
-     * TouchPad
-     */
-    SOURCE_TYPE_TOUCH_PAD = 3
-};
 
 struct ArkUITouchPoint {
-    /**
-     * Pointer identifier
-     */
     ArkUI_Int32 id;
-
-    /**
-     * Time stamp when touch is pressed
-     */
     ArkUI_Int64 pressedTime;
-
-    /**
-     * X coordinate of the touch position on the screen
-     *
-     */
-    ArkUI_Int32 screenX;
-
-    /**
-     * Y coordinate of the touch position on the screen
-     *
-     */
-    ArkUI_Int32 screenY;
-
-    /**
-     * X coordinate of the touch position in the window
-     *
-     */
-    ArkUI_Int32 windowX;
-
-    /**
-     * Y coordinate of the touch position in the window
-     *
-     */
-    ArkUI_Int32 windowY;
-
-    /**
-     * X coordinate of the touch position in the node
-     *
-     */
-    ArkUI_Int32 nodeX;
-
-    /**
-     * Y coordinate of the touch position in the node
-     *
-     */
-    ArkUI_Int32 nodeY;
-
-    /**
-     * Pressure value. The value range is [0.0, 1.0]. The value 0.0 indicates that the pressure is not supported.
-     *
-     */
-    double pressure;
-
-    /**
-     * Width of the contact area when touch is pressed
-     *
-     */
-    ArkUI_Int32 contactAreaWidth;
-
-    /**
-     * Height of the contact area when touch is pressed
-     *
-     */
-    ArkUI_Int32 contactAreaHeight;
-
-    /**
-     * Angle relative to the YZ plane. The value range is [-90, 90]. A positive value indicates a rightward tilt.
-     *
-     */
-    double tiltX;
-
-    /**
-     * Angle relative to the XZ plane. The value range is [-90, 90]. A positive value indicates a downward tilt.
-     */
-    double tiltY;
-
-    /**
-     * Center point X of the tool area
-     */
-    ArkUI_Int32 toolX;
-
-    /**
-     * Center point Y of the tool area
-     *
-     */
-    ArkUI_Int32 toolY;
-
-    /**
-     * Width of the tool area
-     *
-     */
-    ArkUI_Int32 toolWidth;
-
-    /**
-     * Height of the tool area
-     *
-     */
-    ArkUI_Int32 toolHeight;
-
-    /**
-     * X coordinate of the input device
-     *
-     */
-    ArkUI_Int32 rawX;
-
-    /**
-     * Y coordinate of the input device
-     *
-     */
-    ArkUI_Int32 rawY;
-
-    /**
-     * Tool type
-     *
-     */
-    TouchEventToolType toolType;
-};
-
-enum ArkUITouchEventAction {
-    ACTION_DOWN = 0,
-    ACTION_UP,
-    ACTION_MOVE,
-    ACTION_CANCEL,
+    ArkUI_Float32 screenX;
+    ArkUI_Float32 screenY;
+    ArkUI_Float32 windowX;
+    ArkUI_Float32 windowY;
+    ArkUI_Float32 nodeX;
+    ArkUI_Float32 nodeY;
+    ArkUI_Float64 pressure;
+    ArkUI_Float32 contactAreaWidth;
+    ArkUI_Float32 contactAreaHeight;
+    ArkUI_Float64 tiltX;
+    ArkUI_Float64 tiltY;
+    ArkUI_Float32 toolX;
+    ArkUI_Float32 toolY;
+    ArkUI_Float32 toolWidth;
+    ArkUI_Float32 toolHeight;
+    ArkUI_Float32 rawX;
+    ArkUI_Float32 rawY;
+    ArkUI_Int32 toolType;
 };
 
 /**
@@ -273,48 +129,25 @@ typedef enum {
     ARKUI_GESTURE_EVENT_ACTION_CANCEL = 0x08,
 } ArkUIGestureEventActionType;
 
-
-struct ArkUIHistoricalTouchPoint {
-    /**
-     * Touch action
-     */
-    ArkUITouchEventAction action;
-    /** Time stamp of the historical event. */
+struct ArkUIHistoryTouchEvent {
+    ArkUI_Int32 action;
+    ArkUI_Int32 sourceType;
     ArkUI_Int64 timeStamp;
-    /** touch point info of the historical event. */
-    ArkUITouchPoint actionTouch;
-    ArkUISourceType sourceType;
+    ArkUITouchPoint actionTouchPoint;
+    ArkUITouchPoint* touchPointes;
+    ArkUI_Uint32 touchPointSize;
 };
 
 struct ArkUITouchEvent {
-    /**
-     * Touch action
-     *
-     */
-    ArkUITouchEventAction action;
-
+    ArkUI_Int32  action;
     /** Time stamp of the current event. */
     ArkUI_Int64 timeStamp;
-
-    /**
-     * curent action touch point info.
-     */
-    ArkUITouchPoint actionTouch;
-
-    /**
-     * @brief Returns information about all screen touch points when this event occurs.
-     *
-     */
-    ArkUI_Int32 (*getTouches)(ArkUITouchPoint** points);
-
-    /**
-     * @brief Returns the historical point information in this event.
-     * These are the movements that occurred between this event and the previous event.
-     *
-     */
-    ArkUI_Int32 (*getHistoricalPoints)(ArkUIHistoricalTouchPoint** historicalPoints);
-
-    ArkUISourceType sourceType;
+    ArkUITouchPoint actionTouchPoint;
+    ArkUITouchPoint* touchPointes;
+    ArkUI_Uint32 touchPointSize;
+    ArkUIHistoryTouchEvent* historyEvents;
+    ArkUI_Uint32 historySize;
+    ArkUI_Int32 sourceType;
 
     /**
      * @brief Prevents events from bubbling further to the parent node for processing.
@@ -883,6 +716,7 @@ struct ArkUIAPIEventMultiPointer {
 };
 
 struct ArkUIAPIEventTextInput {
+    // used by c-api, should be the first place.
     ArkUI_Int64 nativeStringPtr;
     ArkUI_Int32 subKind; // ArkUIEventSubKind actually
 };
@@ -899,8 +733,9 @@ struct ArkUIAPIEventCallback {
 #define ARKUI_ASYNC_EVENT_ARGS_COUNT 12
 
 struct ArkUINodeAsyncEvent {
-    ArkUI_Int32 subKind; // ArkUIEventSubKind actually
+    // used by c-api, should be the first place.
     ArkUIEventCallbackArg data[ARKUI_ASYNC_EVENT_ARGS_COUNT];
+    ArkUI_Int32 subKind; // ArkUIEventSubKind actually
 };
 
 struct ArkUIAPIEventGestureAsyncEvent {
