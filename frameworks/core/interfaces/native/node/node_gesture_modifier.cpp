@@ -17,6 +17,9 @@
 #include "core/components_ng/gestures/long_press_gesture.h"
 #include "core/components_ng/pattern/gesture/gesture_model_ng.h"
 #include "core/components_ng/gestures/pan_gesture.h"
+#include "core/components_ng/gestures/pinch_gesture.h"
+#include "core/components_ng/gestures/rotation_gesture.h"
+#include "core/components_ng/gestures/swipe_gesture.h"
 #include "core/components_ng/base/frame_node.h"
 
 namespace OHOS::Ace::NG {
@@ -72,6 +75,34 @@ ArkUIGesture* createLongPressGesture(ArkUI_Int32 fingers, bool repeat, ArkUI_Int
     return reinterpret_cast<ArkUIGesture*>(AceType::RawPtr(longPressGestureObject));
 }
 
+ArkUIGesture* createPinchGesture(ArkUI_Int32 fingers, ArkUI_Float64 distance)
+{
+    auto pinchGestureObject = AceType::MakeRefPtr<PinchGesture>(fingers, distance);
+    pinchGestureObject->IncRefCount();
+    return reinterpret_cast<ArkUIGesture*>(AceType::RawPtr(pinchGestureObject));
+}
+
+ArkUIGesture* createRotationGesture(ArkUI_Int32 fingers, ArkUI_Float64 angle)
+{
+    auto rotationGestureObject = AceType::MakeRefPtr<RotationGesture>(fingers, angle);
+    rotationGestureObject->IncRefCount();
+    return reinterpret_cast<ArkUIGesture*>(AceType::RawPtr(rotationGestureObject));
+}
+
+ArkUIGesture* createSwipeGesture(ArkUI_Int32 fingers, ArkUI_Int32 directions, ArkUI_Float64 speed)
+{
+    SwipeDirection swipeDirection{SwipeDirection::NONE};
+    if (directions & ArkUI_GESTURE_DIRECTION_HORIZONTAL) {
+        swipeDirection.type = SwipeDirection::HORIZONTAL;
+    }
+    if (directions & ArkUI_GESTURE_DIRECTION_VERTICAL) {
+        swipeDirection.type = SwipeDirection::VERTICAL;
+    }
+    auto swipeGestureObject = AceType::MakeRefPtr<SwipeGesture>(fingers, swipeDirection, speed);
+    swipeGestureObject->IncRefCount();
+    return reinterpret_cast<ArkUIGesture*>(AceType::RawPtr(swipeGestureObject));
+}
+
 void dispose(ArkUIGesture* recognizer)
 {
     Gesture* gestureRef = reinterpret_cast<Gesture*>(recognizer);
@@ -87,6 +118,10 @@ ArkUIAPIEventGestureAsyncEvent getGestureEvent(GestureEvent& info)
     ret.velocity = info.GetVelocity().GetVelocityValue();
     ret.x = info.GetOffsetX();
     ret.y = info.GetOffsetY();
+    ret.angle = info.GetAngle();
+    ret.scale = info.GetScale();
+    ret.pinchCenterX = info.GetPinchCenter().GetX();
+    ret.pinchCenterY = info.GetPinchCenter().GetY();
     return ret;
 }
 
@@ -186,6 +221,9 @@ const ArkUIGestureModifier* GetGestureModifier()
         createTapGesture,
         createLongPressGesture,
         createPanGesture,
+        createPinchGesture,
+        createRotationGesture,
+        createSwipeGesture,
         dispose,
         registerGestureEvent,
         addGestureToNode,
