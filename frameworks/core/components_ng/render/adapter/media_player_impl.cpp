@@ -21,7 +21,7 @@
 #include "core/common/container.h"
 #include "core/components/video/video_utils.h"
 #include "core/components_ng/render/adapter/render_surface_impl.h"
-#ifdef VIDEO_TEXTURE_SUPPORTED
+#ifdef RENDER_EXTRACT_SUPPORTED
 #include "core/components_ng/render/adapter/render_texture_impl.h"
 #endif
 #include "core/pipeline_ng/pipeline_context.h"
@@ -148,7 +148,7 @@ bool MediaPlayerImpl::SetSource(const std::string& src)
 void MediaPlayerImpl::SetRenderSurface(const RefPtr<RenderSurface>& renderSurface)
 {
     renderSurface_ = renderSurface;
-#ifdef VIDEO_TEXTURE_SUPPORTED
+#ifdef RENDER_EXTRACT_SUPPORTED
     if (renderSurface ->IsTexture()) {
         auto surfaceImpl = AceType::DynamicCast<RenderTextureImpl>(renderSurface);
         surfaceImpl->SetExtSurfaceCallback(AceType::Claim(this));
@@ -216,7 +216,7 @@ int32_t MediaPlayerImpl::SetSurface()
     CHECK_NULL_RETURN(player_, -1);
     auto renderSurface = renderSurface_.Upgrade();
     CHECK_NULL_RETURN(renderSurface, -1);
-#ifdef VIDEO_TEXTURE_SUPPORTED
+#ifdef RENDER_EXTRACT_SUPPORTED
     if (renderSurface ->IsTexture()) {
         auto textureImpl = AceType::DynamicCast<RenderTextureImpl>(renderSurface);
         CHECK_NULL_RETURN(textureImpl, -1);
