@@ -352,10 +352,9 @@ public:
 
     void RemoveWindowSizeChangeCallback(int32_t nodeId);
 
-    void AddNavigationStateCallback(
-        int32_t pageId, int32_t nodeId, const std::function<void()>& callback, bool isOnShow);
+    void AddNavigationNode(int32_t pageId, WeakPtr<UINode> navigationNode);
 
-    void RemoveNavigationStateCallback(int32_t pageId, int32_t nodeId);
+    void RemoveNavigationNode(int32_t pageId, int32_t nodeId);
 
     void FirePageChanged(int32_t pageId, bool isOnShow);
 
@@ -794,8 +793,6 @@ private:
     std::unordered_set<int32_t> onAreaChangeNodeIds_;
     std::unordered_set<int32_t> onVisibleAreaChangeNodeIds_;
     std::unordered_set<int32_t> onFormVisibleChangeNodeIds_;
-    std::unordered_map<int32_t, std::list<std::pair<int32_t, std::function<void()>>>> pageIdOnShowMap_;
-    std::unordered_map<int32_t, std::list<std::pair<int32_t, std::function<void()>>>> pageIdOnHideMap_;
 
     RefPtr<AccessibilityManagerNG> accessibilityManagerNG_;
     RefPtr<StageManager> stageManager_;
@@ -848,7 +845,7 @@ private:
 
     std::unordered_map<int32_t, WeakPtr<FrameNode>> storeNode_;
     std::unordered_map<int32_t, std::string> restoreNodeInfo_;
-
+    std::unordered_map<int32_t, std::vector<WeakPtr<UINode>>> pageToNavigationNodes_;
     std::unordered_map<int32_t, std::vector<TouchEvent>> historyPointsById_;
 
     std::list<FrameInfo> dumpFrameInfos_;

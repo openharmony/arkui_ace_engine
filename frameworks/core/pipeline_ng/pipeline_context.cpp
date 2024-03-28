@@ -2904,48 +2904,20 @@ void PipelineContext::RemoveWindowSizeChangeCallback(int32_t nodeId)
     onWindowSizeChangeCallbacks_.remove(nodeId);
 }
 
-void PipelineContext::AddNavigationStateCallback(
-    int32_t pageId, int32_t nodeId, const std::function<void()>& callback, bool isOnShow)
+void PipelineContext::AddNavigationNode(int32_t pageId, WeakPtr<UINode> navigationNode)
 {
     CHECK_RUN_ON(UI);
-    if (isOnShow) {
-        auto it = pageIdOnShowMap_.find(pageId);
-        if (it != pageIdOnShowMap_.end()) {
-            it->second.push_back({nodeId, callback});
-        } else {
-            std::list<std::pair<int32_t, std::function<void()>>> callbacks;
-            callbacks.push_back({nodeId, callback});
-            pageIdOnShowMap_[pageId] = std::move(callbacks);
-        }
-    } else {
-        auto it = pageIdOnHideMap_.find(pageId);
-        if (it != pageIdOnHideMap_.end()) {
-            it->second.push_back({nodeId, callback});
-        } else {
-            std::list<std::pair<int32_t, std::function<void()>>> callbacks;
-            callbacks.push_back({nodeId, callback});
-            pageIdOnHideMap_[pageId] = std::move(callbacks);
-        }
-    }
+    pageToNavigationNodes_[pageId].push_back(navigationNode);
 }
 
-void PipelineContext::RemoveNavigationStateCallback(int32_t pageId, int32_t nodeId)
+void PipelineContext::RemoveNavigationNode(int32_t pageId, int32_t nodeId)
 {
     CHECK_RUN_ON(UI);
-    auto it = pageIdOnShowMap_.find(pageId);
-    if (it != pageIdOnShowMap_.end() && !it->second.empty()) {
+    auto it = pageToNavigationNodes_.find(pageId);
+    if (it != pageToNavigationNodes_.end() && !it->second.empty()) {
         for (auto iter = it->second.begin(); iter != it->second.end();) {
-            if (iter->first == nodeId) {
-                iter = it->second.erase(iter);
-            } else {
-                iter++;
-            }
-        }
-    }
-    it = pageIdOnHideMap_.find(pageId);
-    if (it != pageIdOnHideMap_.end() && !it->second.empty()) {
-        for (auto iter = it->second.begin(); iter != it->second.end();) {
-            if (iter->first == nodeId) {
+            auto navigationNode = AceType::DynamicCast<NavigationGroupNode>((*iter).Upgrade());
+            if (navigationNode && navigationNode->GetId() == nodeId) {
                 iter = it->second.erase(iter);
             } else {
                 iter++;
@@ -2957,20 +2929,8 @@ void PipelineContext::RemoveNavigationStateCallback(int32_t pageId, int32_t node
 void PipelineContext::FirePageChanged(int32_t pageId, bool isOnShow)
 {
     CHECK_RUN_ON(UI);
-    if (isOnShow) {
-        auto it = pageIdOnShowMap_.find(pageId);
-        if (it != pageIdOnShowMap_.end() && !it->second.empty()) {
-            for (auto [nodeId, callback] : it->second) {
-                callback();
-            }
-        }
-    } else {
-        auto it = pageIdOnHideMap_.find(pageId);
-        if (it != pageIdOnHideMap_.end() && !it->second.empty()) {
-            for (auto [nodeId, callback] : it->second) {
-                callback();
-            }
-        }
+    for (auto navigationNode : pageToNavigationNodes_[pageId]) {
+        NavigationPattern::FireNavigationChange(navigationNode.Upgrade(), isOnShow, true);
     }
 }
 
