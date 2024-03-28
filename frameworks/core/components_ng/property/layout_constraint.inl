@@ -179,6 +179,17 @@ void LayoutConstraintT<T>::MinusPadding(const std::optional<T>& left, const std:
 }
 
 template<typename T>
+void LayoutConstraintT<T>::MinusPaddingToNonNegativeSize(const std::optional<T>& left, const std::optional<T>& right,
+    const std::optional<T>& top, const std::optional<T>& bottom)
+{
+    minSize.MinusPaddingToNonNegative(left, right, top, bottom);
+    maxSize.MinusPaddingToNonNegative(left, right, top, bottom);
+    parentIdealSize.MinusPadding(left, right, top, bottom);
+    selfIdealSize.MinusPadding(left, right, top, bottom);
+    percentReference.MinusPaddingToNonNegative(left, right, top, bottom);
+}
+
+template<typename T>
 std::string LayoutConstraintT<T>::ToString() const
 {
     std::string str;
