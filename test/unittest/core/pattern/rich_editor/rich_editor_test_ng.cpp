@@ -4541,4 +4541,174 @@ HWTEST_F(RichEditorTestNg, SelectedBackgroundColorTest001, TestSize.Level1)
     auto selectedBackgroundColorResult = Color::RED.ChangeOpacity(DEFAILT_OPACITY);
     EXPECT_EQ(patternSelectedBackgroundColor, selectedBackgroundColorResult);
 }
+
+/**
+ * @tc.name: HandleOnEditChanged001
+ * @tc.desc: test Get focus edit status is true
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorTestNg, HandleOnEditChanged001, TestSize.Level1)
+{
+    /* *
+     * @tc.steps: step1. get richEditor richEditorPattern
+     */
+    ASSERT_NE(richEditorNode_, nullptr);
+
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+
+    /* *
+     * @tc.steps: step2. Setting Callback Function
+     */
+    RichEditorModelNG richEditorModel;
+    richEditorModel.Create();
+    richEditorModel.SetOnEditingChange([](bool value) {});
+
+    /* *
+     * @tc.steps: step3. Get the focus to trigger the callback function and modify the editing status
+     */
+    auto richEditorController = richEditorPattern->GetRichEditorController();
+    ASSERT_NE(richEditorController, nullptr);
+
+    richEditorPattern->HandleFocusEvent();
+    EXPECT_TRUE(richEditorController->IsEditing());
+}
+
+/**
+ * @tc.name: HandleOnEditChanged002
+ * @tc.desc: test Lose focus edit status is true
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorTestNg, HandleOnEditChanged002, TestSize.Level1)
+{
+    /* *
+     * @tc.steps: step1. get richEditor richEditorPattern
+     */
+    ASSERT_NE(richEditorNode_, nullptr);
+
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+
+    /* *
+     * @tc.steps: step2. Setting Callback Function
+     */
+    RichEditorModelNG richEditorModel;
+    richEditorModel.Create();
+    richEditorModel.SetOnEditingChange([](bool value) {});
+
+    /* *
+     * @tc.steps: step3. Lose the focus to trigger the callback function and modify the editing status
+     */
+    auto richEditorController = richEditorPattern->GetRichEditorController();
+    ASSERT_NE(richEditorController, nullptr);
+
+    richEditorPattern->HandleBlurEvent();
+    EXPECT_FALSE(richEditorController->IsEditing());
+}
+
+/**
+ * @tc.name: HandleOnEditChanged003
+ * @tc.desc: test Long press edit status is true
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorTestNg, HandleOnEditChanged003, TestSize.Level1)
+{
+    /* *
+     * @tc.steps: step1. get richEditor richEditorPattern
+     */
+    ASSERT_NE(richEditorNode_, nullptr);
+
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+
+    /* *
+     * @tc.steps: step2. Setting Callback Function
+     */
+    auto richEditorController = richEditorPattern->GetRichEditorController();
+    ASSERT_NE(richEditorController, nullptr);
+
+    GestureEvent info;
+    richEditorPattern->HandleDoubleClickOrLongPress(info);
+    EXPECT_TRUE(richEditorController->IsEditing());
+
+    RichEditorModelNG richEditorModel;
+    richEditorModel.Create();
+    richEditorModel.SetOnEditingChange([](bool value) {});
+
+    /* *
+     * @tc.steps: step3. Long press to trigger the callback function and modify the editing status
+     */
+
+    richEditorPattern->HandleDoubleClickOrLongPress(info);
+    EXPECT_TRUE(richEditorController->IsEditing());
+}
+
+/**
+ * @tc.name: HandleOnEditChanged004
+ * @tc.desc: test Click on edit status is true
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorTestNg, HandleOnEditChanged004, TestSize.Level1)
+{
+    /* *
+     * @tc.steps: step1. get richEditor richEditorPattern
+     */
+    ASSERT_NE(richEditorNode_, nullptr);
+
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+
+    /* *
+     * @tc.steps: step2. Setting Callback Function
+     */
+    RichEditorModelNG richEditorModel;
+    richEditorModel.Create();
+    richEditorModel.SetOnEditingChange([](bool value) {});
+
+    /* *
+     * @tc.steps: step3. Click on to trigger the callback function and modify the editing status
+     */
+    auto richEditorController = richEditorPattern->GetRichEditorController();
+    ASSERT_NE(richEditorController, nullptr);
+
+    GestureEvent info;
+    info.SetSourceDevice(SourceType::MOUSE);
+    richEditorPattern->HandleSingleClickEvent(info);
+    EXPECT_TRUE(richEditorController->IsEditing());
+}
+
+/**
+ * @tc.name: HandleOnEditChanged005
+ * @tc.desc: test mouse release while dragging edit status is true
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorTestNg, HandleOnEditChanged005, TestSize.Level1)
+{
+    /* *
+     * @tc.steps: step1. get richEditor richEditorPattern
+     */
+    ASSERT_NE(richEditorNode_, nullptr);
+
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+
+    /* *
+     * @tc.steps: step2. Setting Callback Function
+     */
+    RichEditorModelNG richEditorModel;
+    richEditorModel.Create();
+    richEditorModel.SetOnEditingChange([](bool value) {});
+
+    /* *
+     * @tc.steps: step3. mouse release while dragging to trigger the callback function and modify the editing status
+     */
+    auto richEditorController = richEditorPattern->GetRichEditorController();
+    ASSERT_NE(richEditorController, nullptr);
+
+    MouseInfo info;
+    auto focusHub = richEditorPattern->GetHost()->GetOrCreateFocusHub();
+    focusHub->currentFocus_ = true;
+    richEditorPattern->HandleMouseLeftButtonRelease(info);
+    EXPECT_TRUE(richEditorController->IsEditing());
+}
 } // namespace OHOS::Ace::NG
