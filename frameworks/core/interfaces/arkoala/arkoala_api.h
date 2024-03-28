@@ -896,10 +896,10 @@ struct ArkUIAPIEventGestureAsyncEvent {
     ArkUI_Int32 repeat;
     ArkUI_Float32 x;
     ArkUI_Float32 y;
-    ArkUI_Int32 angle;
-    ArkUI_Int32 scale;
-    ArkUI_Int32 pinchCenterX;
-    ArkUI_Int32 pinchCenterY;
+    ArkUI_Float32 angle;
+    ArkUI_Float32 scale;
+    ArkUI_Float32 pinchCenterX;
+    ArkUI_Float32 pinchCenterY;
     ArkUI_Int32 speed;
     ArkUI_Int32 timestamp;
     ArkUI_Int32 source;
@@ -1997,6 +1997,9 @@ struct ArkUIGestureModifier {
     ArkUIGesture* (*createTapGesture)(ArkUI_Int32 count, ArkUI_Int32 fingers);
     ArkUIGesture* (*createLongPressGesture)(ArkUI_Int32 fingers, bool repeat, ArkUI_Int32 duration);
     ArkUIGesture* (*createPanGesture)(ArkUI_Int32 fingers, ArkUI_Int32 direction, ArkUI_Float64 distance);
+    ArkUIGesture* (*createPinchGesture)(ArkUI_Int32 fingers, ArkUI_Float64 distance);
+    ArkUIGesture* (*createRotationGesture)(ArkUI_Int32 fingers, ArkUI_Float64 angle);
+    ArkUIGesture* (*createSwipeGesture)(ArkUI_Int32 fingers, ArkUI_Int32 directions, ArkUI_Float64 speed);
     void (*dispose)(ArkUIGesture* recognizer);
     // gesture event will received in common async event queue.
     void (*registerGestureEvent)(ArkUIGesture* gesture, ArkUI_Uint32 actionTypeMask, void* extraParam);
