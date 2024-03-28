@@ -2687,7 +2687,8 @@ HWTEST_F(TextFieldUXTest, onDraw001, TestSize.Level1)
     /**
      * @tc.steps: step7. When handle move done
      */
-    pattern_->OnHandleMoveDone(handleRect, true);
+    pattern_->ProcessOverlay();
+    pattern_->selectOverlay_->OnHandleMoveDone(handleRect, true);
 
     /**
      * @tc.steps: step8. Test magnifier open or close
@@ -2698,11 +2699,11 @@ HWTEST_F(TextFieldUXTest, onDraw001, TestSize.Level1)
 }
 
 /**
- * @tc.name: ShowMenu001
- * @tc.desc: Test close menu after ShowMenu()
+ * @tc.name: HandleOnShowMenu001
+ * @tc.desc: Test close menu after HandleOnShowMenu()
  * @tc.type: FUNC
  */
-HWTEST_F(TextFieldUXTest, ShowMenu001, TestSize.Level1)
+HWTEST_F(TextFieldUXTest, HandleOnShowMenu001, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. Initialize text input and get focus
@@ -2711,70 +2712,66 @@ HWTEST_F(TextFieldUXTest, ShowMenu001, TestSize.Level1)
     GetFocus();
 
     /**
-     * @tc.steps: step2. Create selectOverlayProxy
+     * @tc.steps: step2. Do HandleOnShowMenu()
      */
-    pattern_->ProcessOverlay(true, true, true);
+    pattern_->HandleOnShowMenu();
 
     /**
-     * @tc.steps: step3. Do ShowMenu()
-     */
-    pattern_->ShowMenu();
-
-    /**
-     * @tc.steps: step4. Press esc
+     * @tc.steps: step3. Press esc
      */
     KeyEvent event;
     event.code = KeyCode::KEY_ESCAPE;
+    event.action = KeyAction::DOWN;
     pattern_->OnKeyEvent(event);
 
     /**
-     * @tc.steps: step5. Test menu open or close
+     * @tc.steps: step4. Test menu open or close
      * @tc.expected: text menu is close
      */
-    auto ret = pattern_->GetSelectOverlayProxy()->IsMenuShow();
-    EXPECT_TRUE(ret);
-
-    /**
-     * @tc.steps: step6. Show menu when select all value
-     */
-    pattern_->HandleOnSelectAll(true);
-    pattern_->ShowMenu();
-
-    /**
-     * @tc.steps: step7. Select all value again
-     */
-    pattern_->HandleOnSelectAll(true);
-
-    /**
-     * @tc.steps: step8. Test menu open or close
-     * @tc.expected: text menu is close
-     */
-    ret = pattern_->GetSelectOverlayProxy()->IsMenuShow();
+    auto ret = pattern_->selectOverlay_->IsCurrentMenuVisibile();
     EXPECT_FALSE(ret);
 
     /**
-     * @tc.steps: step9. emulate Press shift + F10 key event
+     * @tc.steps: step5. Show menu when select all value
+     */
+    pattern_->HandleOnSelectAll(true);
+    pattern_->HandleOnShowMenu();
+
+    /**
+     * @tc.steps: step6. Select all value again
+     */
+    pattern_->HandleOnSelectAll(true);
+
+    /**
+     * @tc.steps: step7. Test menu open or close
+     * @tc.expected: text menu is close
+     */
+    ret = pattern_->selectOverlay_->IsCurrentMenuVisibile();
+    EXPECT_FALSE(ret);
+
+    /**
+     * @tc.steps: step8. emulate Press shift + F10 key event
      */
     event.code = KeyCode::KEY_F10;
     event.pressedCodes.emplace_back(KeyCode::KEY_SHIFT_LEFT);
     event.pressedCodes.emplace_back(KeyCode::KEY_F10);
 
     /**
-     * @tc.steps: step10. call OnKeyEvent
+     * @tc.steps: step9. call OnKeyEvent
      */
     ret = pattern_->OnKeyEvent(event);
-    EXPECT_FALSE(ret);
+    EXPECT_TRUE(ret);
 
     /**
-     * @tc.steps: step11. Inset value
+     * @tc.steps: step10. Inset value
      */
     pattern_->InsertValue("abc");
 
     /**
-     * @tc.steps: step12. Test menu open or close
+     * @tc.steps: step11. Test menu open or close
      * @tc.expected: text menu is close
      */
-    ret = pattern_->GetSelectOverlayProxy()->IsMenuShow();
+    ret = pattern_->selectOverlay_->IsCurrentMenuVisibile();
     EXPECT_FALSE(ret);
 }
 
@@ -2979,9 +2976,9 @@ HWTEST_F(TextFieldControllerTest, TextFieldPatternOnTextInputScroll001, TestSize
     pattern_->contentRect_.x_ = 20.0f;
     pattern_->contentRect_.width_ = 100.0f;
     pattern_->OnTextInputScroll(-1000.0f);
-    pattern_->isSingleHandle_ = false;
+    pattern_->SetIsSingleHandle(false);
     pattern_->OnTextInputScroll(0.0f);
-    pattern_->isSingleHandle_ = true;
+    pattern_->SetIsSingleHandle(true);
     pattern_->OnTextInputScroll(0.0f);
     EXPECT_EQ(pattern_->selectController_->GetCaretRect().GetX(), -90.0f);
     EXPECT_EQ(pattern_->textRect_.GetOffset(), OffsetF(pattern_->currentOffset_, pattern_->textRect_.GetY()));
@@ -4093,9 +4090,9 @@ HWTEST_F(TextFieldUXTest, HandleOnEscape001, TestSize.Level1)
     GetFocus();
 
     /**
-     * @tc.steps: step2. Create selectOverlayProxy
+     * @tc.steps: step2. Call ProcessOverlay
      */
-    pattern_->ProcessOverlay(true, true, true);
+    pattern_->ProcessOverlay();
 
 
     /**
