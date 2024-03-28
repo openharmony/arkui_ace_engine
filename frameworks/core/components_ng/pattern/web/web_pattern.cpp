@@ -167,6 +167,8 @@ const std::string DEFAULT_WEB_TEXT_ENCODING_FORMAT = "UTF-8";
 constexpr int32_t SYNC_SURFACE_QUEUE_SIZE = 8;
 constexpr int32_t ASYNC_SURFACE_QUEUE_SIZE = 3;
 constexpr uint32_t DEBUG_DRAGMOVEID_TIMER = 30;
+int64_t last_height_ = 0L;
+int64_t last_width_ = 0L;
 // web feature params
 constexpr char VISIBLE_ACTIVE_ENABLE[] = "persist.web.visible_active_enable";
 constexpr char MEMORY_LEVEL_ENABEL[] = "persist.web.memory_level_enable";
@@ -1734,6 +1736,7 @@ void WebPattern::OnModifyDone()
         if (accessibilityState_) {
             delegate_->SetAccessibilityState(true);
         }
+        delegate_->UpdateSmoothDragResizeEnabled(GetSmoothDragResizeEnabledValue(false));
     }
 
     // Initialize events such as keyboard, focus, etc.
@@ -2823,7 +2826,42 @@ void WebPattern::OnWindowHide()
     isWindowShow_ = false;
 }
 
-void WebPattern::OnWindowSizeChanged(int32_t width, int32_t height, WindowSizeChangeReason type) {}
+void WebPattern::OnWindowSizeChanged(int32_t width, int32_t height, WindowSizeChangeReason type) {
+    switch (type) {
+        case WindowSizeChangeReason::DRAG_START:
+        case WindowSizeChangeReason::DRAG:
+        case WindowSizeChangeReason::DRAG_END: {
+            WindowDrag(width, height);
+            break;
+        }
+        default:
+            break;
+    }
+}
+
+void WebPattern::WindowDrag(int32_t width, int32_t height) {
+    bool isSmoothDragResizeEnabled = delegate_->GetIsSmoothDragResizeEnabled();
+    if (!isSmoothDragResizeEnabled) {
+        return;
+    }
+    if (last_height_ == 0 && last_width_ == 0) {
+        last_height_ = height;
+        last_width_ = width;
+    }
+    double pre_height = height - last_height_;
+    double pre_width = width - last_width_;
+
+    delegate_->DragResize(width, height, pre_height, pre_width);
+    last_height_ = height;
+    last_width_ = width;
+}
+
+void WebPattern::OnSmoothDragResizeEnabledUpdate(bool value)
+{
+    if (delegate_) {
+        delegate_->UpdateSmoothDragResizeEnabled(value);
+    }
+}
 
 void WebPattern::OnCompleteSwapWithNewSize()
 {

@@ -111,6 +111,7 @@ public:
     void SetNativeEmbedGestureEventId(std::function<void(const BaseEventInfo* info)>&& jsCallback) override;
     void SetOnOverrideUrlLoading(std::function<bool(const BaseEventInfo* info)>&& jsCallback) override;
     void SetNativeVideoPlayerConfig(bool enable, bool shouldOverlay) override;
+    void SetSmoothDragResizeEnabled(bool isSmoothDragResizeEnabled) override;
 };
 } // namespace OHOS::Ace::Framework
 #endif // FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_MODELS_WEB_MODEL_IMPL_H

@@ -1690,6 +1690,7 @@ void JSWeb::JSBind(BindingTarget globalObj)
     JSClass<JSWeb>::StaticMethod("imageAccess", &JSWeb::ImageAccessEnabled);
     JSClass<JSWeb>::StaticMethod("mixedMode", &JSWeb::MixedMode);
     JSClass<JSWeb>::StaticMethod("enableNativeEmbedMode", &JSWeb::EnableNativeEmbedMode);
+    JSClass<JSWeb>::StaticMethod("enableSmoothDragResize", &JSWeb::EnableSmoothDragResize);
     JSClass<JSWeb>::StaticMethod("registerNativeEmbedRule", &JSWeb::RegisterNativeEmbedRule);
     JSClass<JSWeb>::StaticMethod("zoomAccess", &JSWeb::ZoomAccessEnabled);
     JSClass<JSWeb>::StaticMethod("geolocationAccess", &JSWeb::GeolocationAccessEnabled);
@@ -2945,6 +2946,11 @@ void JSWeb::EnableNativeEmbedMode(bool isEmbedModeEnabled)
 void JSWeb::RegisterNativeEmbedRule(const std::string& tag, const std::string& type)
 {
     WebModel::GetInstance()->RegisterNativeEmbedRule(tag, type);
+}
+
+void JSWeb::EnableSmoothDragResize(bool isSmoothDragResizeEnabled)
+{
+    WebModel::GetInstance()->SetSmoothDragResizeEnabled(isSmoothDragResizeEnabled);
 }
 
 void JSWeb::GeolocationAccessEnabled(bool isGeolocationAccessEnabled)

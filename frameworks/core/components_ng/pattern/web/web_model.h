@@ -173,6 +173,7 @@ public:
     virtual void SetOnOverrideUrlLoading(std::function<bool(const BaseEventInfo* info)>&& jsCallback) = 0;
     virtual void SetTextAutosizing(bool isTextAutosizing) {};
     virtual void SetNativeVideoPlayerConfig(bool enable, bool shouldOverlay) = 0;
+    virtual void SetSmoothDragResizeEnabled(bool isSmoothDragResizeEnabled) = 0;
 private:
     static std::unique_ptr<WebModel> instance_;
     static std::mutex mutex_;
