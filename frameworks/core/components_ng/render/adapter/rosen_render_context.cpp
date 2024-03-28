@@ -2134,7 +2134,7 @@ void RosenRenderContext::BdImagePaintTask(RSCanvas& canvas)
     CHECK_NULL_VOID(layoutProps);
     const auto& widthProp = layoutProps->GetBorderWidthProperty();
 
-    auto pipeline = host->GetContext();
+    auto pipeline = host->GetContextRefPtr();
     CHECK_NULL_VOID(pipeline);
     auto dipScale = pipeline->GetDipScale();
 

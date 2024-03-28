@@ -126,6 +126,15 @@ RefPtr<PipelineContext> PipelineContext::GetCurrentContextSafely()
     return DynamicCast<PipelineContext>(currentContainer->GetPipelineContext());
 }
 
+PipelineContext* PipelineContext::GetCurrentContextPtrSafely()
+{
+    auto currentContainer = Container::CurrentSafely();
+    CHECK_NULL_RETURN(currentContainer, nullptr);
+    const auto& base = currentContainer->GetPipelineContext();
+    CHECK_NULL_RETURN(base, nullptr);
+    return DynamicCast<PipelineContext>(RawPtr(base));
+}
+
 RefPtr<PipelineContext> PipelineContext::GetMainPipelineContext()
 {
     auto pipeline = PipelineBase::GetMainPipelineContext();

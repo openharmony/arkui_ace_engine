@@ -95,7 +95,7 @@ void TabBarPattern::InitSurfaceChangedCallback()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto pipeline = host->GetContext();
+    auto pipeline = host->GetContextRefPtr();
     CHECK_NULL_VOID(pipeline);
     if (!HasSurfaceChangedCallback()) {
         auto callbackId = pipeline->RegisterSurfaceChangedCallback(
@@ -196,7 +196,7 @@ void TabBarPattern::InitScrollable(const RefPtr<GestureEventHub>& gestureHub)
     scrollableEvent_ = MakeRefPtr<ScrollableEvent>(axis);
     auto scrollable = MakeRefPtr<Scrollable>(task, axis);
     scrollable->SetNodeId(host->GetAccessibilityId());
-    scrollable->Initialize(host->GetContext());
+    scrollable->Initialize(host->GetContextRefPtr());
     scrollableEvent_->SetScrollable(scrollable);
     gestureHub->AddScrollableEvent(scrollableEvent_);
     scrollableEvent_->GetScrollable()->SetEdgeEffect(EdgeEffect::SPRING);

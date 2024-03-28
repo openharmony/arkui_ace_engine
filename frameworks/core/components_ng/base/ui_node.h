@@ -65,6 +65,9 @@ public:
     // In ets UI compiler, the atomic node does not Add Pop function, only have Create function.
     virtual bool IsAtomicNode() const = 0;
 
+    void AttachContext(PipelineContext* context, bool recursive = false);
+    void DetachContext(bool recursive = false);
+
     virtual int32_t FrameCount() const;
 
     virtual RefPtr<LayoutWrapperNode> CreateLayoutWrapper(bool forceMeasure = false, bool forceLayout = false);
@@ -89,7 +92,8 @@ public:
     void RemoveChildAtIndex(int32_t index);
     RefPtr<UINode> GetChildAtIndex(int32_t index) const;
     int32_t GetChildIndex(const RefPtr<UINode>& child) const;
-    void AttachToMainTree(bool recursive = false);
+    [[deprecated]] void AttachToMainTree(bool recursive = false);
+    void AttachToMainTree(bool recursive, PipelineContext* context);
     void DetachFromMainTree(bool recursive = false);
     void UpdateConfigurationUpdate(const ConfigurationChange& configurationChange);
     virtual void OnConfigurationUpdate(const ConfigurationChange& configurationChange) {}
@@ -149,7 +153,10 @@ public:
     }
     // Tree operation end.
 
-    static RefPtr<PipelineContext> GetContext();
+    // performance.
+    PipelineContext* GetContext();
+
+    RefPtr<PipelineContext> GetContextRefPtr();
 
     // When FrameNode creates a layout task, the corresponding LayoutWrapper tree is created, and UINode needs to update
     // the corresponding LayoutWrapper tree node at this time like add self wrapper to wrapper tree.
@@ -619,7 +626,7 @@ private:
     std::unique_ptr<PerformanceCheckNode> nodeInfo_;
     WeakPtr<UINode> parent_;
     std::string tag_ = "UINode";
-    int32_t depth_ = 0;
+    int32_t depth_ = INT32_MAX;
     int32_t hostRootId_ = 0;
     int32_t hostPageId_ = 0;
     int32_t nodeId_ = 0;
@@ -647,6 +654,8 @@ private:
     std::string debugLine_;
     std::string viewId_;
     void* externalData_ = nullptr;
+
+    PipelineContext* context_ = nullptr;
 
     friend class RosenRenderContext;
     ACE_DISALLOW_COPY_AND_MOVE(UINode);

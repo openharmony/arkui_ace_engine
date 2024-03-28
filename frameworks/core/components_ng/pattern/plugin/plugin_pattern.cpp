@@ -116,7 +116,7 @@ bool PluginPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty,
     loadFialState_ = false;
     CreatePluginSubContainer();
     if (pluginManagerBridge_) {
-        pluginManagerBridge_->AddPlugin(host->GetContext(), info);
+        pluginManagerBridge_->AddPlugin(host->GetContextRefPtr(), info);
     }
     return false;
 }
@@ -126,7 +126,7 @@ void PluginPattern::InitPluginManagerDelegate()
     CHECK_NULL_VOID(!pluginManagerBridge_);
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto context = host->GetContext();
+    auto context = host->GetContextRefPtr();
     CHECK_NULL_VOID(context);
     pluginManagerBridge_ = AceType::MakeRefPtr<PluginManagerDelegate>(context);
     int32_t instanceID = context->GetInstanceId();
@@ -181,7 +181,7 @@ void PluginPattern::CreatePluginSubContainer()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto context = host->GetContext();
+    auto context = host->GetContextRefPtr();
     CHECK_NULL_VOID(context);
     auto layoutProperty = host->GetLayoutProperty<PluginLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);

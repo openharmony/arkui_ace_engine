@@ -1257,7 +1257,7 @@ HWTEST_F(CalendarTestNg, CalendarLayoutAlgorithmTest001, TestSize.Level1)
         V2::CALENDAR_ETS_TAG, stack->ClaimNodeId(), []() { return AceType::MakeRefPtr<CalendarMonthPattern>(); });
     auto layoutWrapper = AceType::MakeRefPtr<LayoutWrapperNode>(
         frameNode, AceType::MakeRefPtr<GeometryNode>(), AceType::MakeRefPtr<LayoutProperty>());
-    auto pipeline = frameNode->GetContext();
+    auto pipeline = frameNode->GetContextRefPtr();
     ASSERT_NE(pipeline, nullptr);
     pipeline->rootWidth_ = OFFSET_X;
     pipeline->rootHeight_ = OFFSET_Y;
