@@ -357,6 +357,11 @@ int SystemProperties::GetArkProperties()
     return system::GetIntParameter<int>("persist.ark.properties", -1);
 }
 
+std::string SystemProperties::GetMemConfigProperty()
+{
+    return system::GetParameter("persist.ark.mem_config_property", "");
+}
+
 std::string SystemProperties::GetArkBundleName()
 {
     return system::GetParameter("persist.ark.arkbundlename", "");

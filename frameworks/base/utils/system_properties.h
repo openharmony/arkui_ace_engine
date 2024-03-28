@@ -352,6 +352,8 @@ public:
 
     static int GetArkProperties();
 
+    static std::string GetMemConfigProperty();
+
     static std::string GetArkBundleName();
 
     static size_t GetGcThreadNum();
