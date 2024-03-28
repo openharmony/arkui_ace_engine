@@ -249,6 +249,14 @@
     },
     {
         "first_introduced": "12",
+        "name": "OH_ArkUI_LayoutConstraint_GetMinWidth"
+    },
+    {
+        "first_introduced": "12",
+        "name": "OH_ArkUI_LayoutConstraint_GetMaxHeight"
+    },
+    {
+        "first_introduced": "12",
         "name": "OH_ArkUI_LayoutConstraint_GetMinHeight"
     },
     {
