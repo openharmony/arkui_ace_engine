@@ -1591,6 +1591,8 @@ struct ArkUIColumnModifier {
     void (*resetColumnAlignItems)(ArkUINodeHandle node);
     ArkUI_Int32 (*getColumnJustifyContent)(ArkUINodeHandle node);
     ArkUI_Int32 (*getColumnAlignItems)(ArkUINodeHandle node);
+    void (*setColumnSpace)(ArkUINodeHandle node, ArkUI_Float32 value, ArkUI_Int32 unit);
+    void (*resetColumnSpace)(ArkUINodeHandle node);
 };
 
 struct ArkUIRowModifier {
@@ -1600,6 +1602,8 @@ struct ArkUIRowModifier {
     void (*resetRowAlignItems)(ArkUINodeHandle node);
     ArkUI_Int32 (*getRowJustifyContent)(ArkUINodeHandle node);
     ArkUI_Int32 (*getRowAlignItems)(ArkUINodeHandle node);
+    void (*setRowSpace)(ArkUINodeHandle node, ArkUI_Float32 value, ArkUI_Int32 unit);
+    void (*resetRowSpace)(ArkUINodeHandle node);
 };
 
 struct ArkUIDividerModifier {

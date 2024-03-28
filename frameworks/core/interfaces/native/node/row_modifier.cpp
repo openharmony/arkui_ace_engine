@@ -65,11 +65,30 @@ ArkUI_Int32 GetRowAlignItems(ArkUINodeHandle node)
     return static_cast<ArkUI_Int32>(RowModelNG::GetAlignItems(frameNode));
 }
 
+void SetRowSpace(ArkUINodeHandle node, ArkUI_Float32 value, ArkUI_Int32 unit)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    const auto space = CalcDimension(value, static_cast<OHOS::Ace::DimensionUnit>(unit));
+    RowModelNG::SetSpace(frameNode, space);
+}
+
+void ResetRowSpace(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    const auto space = CalcDimension(0.0, DimensionUnit::PX);
+    RowModelNG::SetSpace(frameNode, space);
+}
+
 namespace NodeModifier {
 const ArkUIRowModifier* GetRowModifier()
 {
-    static const ArkUIRowModifier modifier = { SetRowJustifyContent, ResetRowJustifyContent, SetRowAlignItems,
-        ResetRowAlignItems, GetRowJustifyContent, GetRowAlignItems };
+    static const ArkUIRowModifier modifier = {
+        SetRowJustifyContent, ResetRowJustifyContent, SetRowAlignItems,
+        ResetRowAlignItems, GetRowJustifyContent, GetRowAlignItems,
+        SetRowSpace, ResetRowSpace,
+    };
     return &modifier;
 }
 }
