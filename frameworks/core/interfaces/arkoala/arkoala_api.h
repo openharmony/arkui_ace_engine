@@ -1660,6 +1660,8 @@ struct ArkUIListModifier {
     ArkUI_Float32 (*getListSpace)(ArkUINodeHandle node);
     void (*setListSpace)(ArkUINodeHandle node, ArkUI_Float32 space);
     void (*resetListSpace)(ArkUINodeHandle node);
+    void (*setFadingEdge)(ArkUINodeHandle node, ArkUI_Bool fadingEdge);
+    void (*resetFadingEdge)(ArkUINodeHandle node);
 };
 
 struct ArkUIListItemGroupModifier {

@@ -644,6 +644,11 @@ void JSList::ScrollFrameBeginCallback(const JSCallbackInfo& args)
     }
 }
 
+void JSList::SetFadingEdge(bool fadingEdge)
+{
+    ListModel::GetInstance()->SetFadingEdge(fadingEdge);
+}
+
 void JSList::JSBind(BindingTarget globalObj)
 {
     JSClass<JSList>::Declare("List");
@@ -698,6 +703,7 @@ void JSList::JSBind(BindingTarget globalObj)
     JSClass<JSList>::StaticMethod("onItemDragLeave", &JSList::ItemDragLeaveCallback);
     JSClass<JSList>::StaticMethod("onItemDrop", &JSList::ItemDropCallback);
     JSClass<JSList>::StaticMethod("remoteMessage", &JSInteractableView::JsCommonRemoteMessage);
+    JSClass<JSList>::StaticMethod("fadingEdge", &JSList::SetFadingEdge);
 
     JSClass<JSList>::InheritAndBind<JSScrollableBase>(globalObj);
 }

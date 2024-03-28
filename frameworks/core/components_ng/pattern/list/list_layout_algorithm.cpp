@@ -43,7 +43,14 @@
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
-
+namespace {
+    GradientColor CreatePercentGradientColor(float percent, Color color)
+    {
+        NG::GradientColor gredient = GradientColor(color);
+        gredient.SetDimension(CalcDimension(percent * 100.0, DimensionUnit::PERCENT));
+        return gredient;
+    }
+}//namespace
 void ListLayoutAlgorithm::UpdateListItemConstraint(
     Axis axis, const OptionalSizeF& selfIdealSize, LayoutConstraintF& contentConstraint)
 {
@@ -166,6 +173,15 @@ void ListLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
 
     // set list cache info.
     SetCacheCount(layoutWrapper, listLayoutProperty->GetCachedCountValue(1));
+
+    auto listNode = layoutWrapper->GetHostNode();
+    CHECK_NULL_VOID(listNode);
+    auto overlayNode = listNode->GetOverlayNode();
+    CHECK_NULL_VOID(overlayNode);
+    if (GetStartPosition() < startMainPos_ || GetEndPosition() > endMainPos_ ) {
+        TAG_LOGE(AceLogTag::ACE_TEXT, "list->OverFlow->true");
+        InitGradient(32.0, overlayNode, listNode);
+    }
 }
 
 void ListLayoutAlgorithm::SetCacheCount(LayoutWrapper* layoutWrapper, int32_t cacheCount)
@@ -1696,5 +1712,36 @@ void ListLayoutAlgorithm::OnItemPositionAddOrUpdate(LayoutWrapper* layoutWrapper
     if (!NearEqual(predictSnapEndPos, predictSnapEndPos_.value())) {
         predictSnapEndPos_ = predictSnapEndPos;
     }
+}
+void ListLayoutAlgorithm::InitGradient(const float& gradientPercent, const RefPtr<FrameNode> overlayGeometryNode, const RefPtr<FrameNode> listNode)
+{
+    auto overlayRenderContext = overlayGeometryNode->GetRenderContext();
+    auto listRenderContext = listNode->GetRenderContext();
+    CHECK_NULL_VOID(overlayRenderContext);
+    CHECK_NULL_VOID(listRenderContext);
+
+    auto percentFading = CalcDimension(gradientPercent, DimensionUnit::VP).ConvertToPx() / abs(endMainPos_ - startMainPos_);
+
+    NG::Gradient gradient;
+    gradient.CreateGradientWithType(NG::GradientType::LINEAR);
+    if (GetStartPosition() < startMainPos_) {
+        gradient.AddColor(CreatePercentGradientColor(0, Color::TRANSPARENT));
+        gradient.AddColor(CreatePercentGradientColor(percentFading, Color::WHITE));
+    }
+    if (GetEndPosition() > endMainPos_) {
+        gradient.AddColor(CreatePercentGradientColor(1 - percentFading,  Color::WHITE));
+        gradient.AddColor(CreatePercentGradientColor(1,  Color::TRANSPARENT));
+    }
+    if (axis_ == Axis::HORIZONTAL) {
+        gradient.GetLinearGradient()->angle = CalcDimension(90, DimensionUnit::PX);
+    }
+
+    listRenderContext->UpdateBackBlendMode(BlendMode::SRC_OVER);
+    listRenderContext->UpdateBackBlendApplyType(BlendApplyType::OFFSCREEN);
+
+    overlayRenderContext->UpdateZIndex(INT32_MAX);
+    overlayRenderContext->UpdateLinearGradient(gradient);
+    overlayRenderContext->UpdateBackBlendMode(BlendMode::DST_IN);
+    overlayRenderContext->UpdateBackBlendApplyType(BlendApplyType::OFFSCREEN);
 }
 } // namespace OHOS::Ace::NG

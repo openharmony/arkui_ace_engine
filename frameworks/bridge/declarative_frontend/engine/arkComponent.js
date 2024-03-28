@@ -17658,6 +17658,20 @@ class ListClipModifier extends ModifierWithKey {
   }
 }
 ListClipModifier.identity = Symbol('listClip');
+class ListFadingEdgeModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().list.resetFadingEdge(node);
+    }
+    else {
+      getUINativeModule().list.setFadingEdge(node, this.value);
+    }
+  }
+}
+ListFadingEdgeModifier.identity = Symbol('fadingEdge');
 class ArkListComponent extends ArkComponent {
   constructor(nativePtr) {
     super(nativePtr);
@@ -17795,6 +17809,10 @@ class ArkListComponent extends ArkComponent {
   }
   onScrollFrameBegin(event) {
     throw new Error('Method not implemented.');
+  }
+  fadingEdge(value) {
+    modifierWithKey(this._modifiersWithKeys, ListFadingEdgeModifier.identity, ListFadingEdgeModifier, value);
+    return this;
   }
 }
 // @ts-ignore

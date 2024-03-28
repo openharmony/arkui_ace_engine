@@ -70,6 +70,7 @@ public:
     void SetOnItemDragLeave(OnItemDragLeaveFunc&& onItemDragLeave) override;
     void SetOnItemDragMove(OnItemDragMoveFunc&& onItemDragMove) override;
     void SetOnItemDrop(OnItemDropFunc&& onItemDrop) override;
+    void SetFadingEdge(bool fadingEdge) override {};
 
     DisplayMode GetDisplayMode() const override
     {

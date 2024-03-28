@@ -46,6 +46,8 @@ public:
     ListPattern() : ScrollablePattern(EdgeEffect::SPRING, false) {}
     ~ListPattern() override = default;
 
+    void CreateAnalyzerOverlay(const RefPtr<FrameNode> listNode/*, const OptionalSizeF& newSize*/);
+
     RefPtr<NodePaintMethod> CreateNodePaintMethod() override;
 
     RefPtr<LayoutProperty> CreateLayoutProperty() override

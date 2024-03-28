@@ -41,6 +41,7 @@
 #include "core/components_ng/property/measure_utils.h"
 #include "core/components_ng/property/property.h"
 #include "core/components_v2/inspector/inspector_constants.h"
+#include "core/components/list/list_theme.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -90,6 +91,15 @@ void ListPattern::OnModifyDone()
     SetAccessibilityAction();
     if (IsNeedInitClickEventRecorder()) {
         Pattern::InitClickEventRecorder();
+    }
+    auto conlist = PipelineBase::GetCurrentContextSafely();
+    CHECK_NULL_VOID(conlist);
+    auto listTheme = conlist->GetTheme<ListTheme>();
+    CHECK_NULL_VOID(listTheme);
+    auto listThemeFadingEdge=listTheme->GetFadingEdge();
+    auto fadingEdge = listLayoutProperty->GetFadingEdge().value_or(listThemeFadingEdge);
+    if (fadingEdge) {
+        CreateAnalyzerOverlay(host);
     }
 }
 
@@ -293,6 +303,34 @@ float ListPattern::CalculateTargetPos(float startPos, float endPos)
         }
     }
     return 0.0f;
+}
+
+// 新增浮层overlay节点
+void ListPattern::CreateAnalyzerOverlay(const RefPtr<FrameNode> listNode/*, const OptionalSizeF& newSize*/)
+{
+    auto builderFunc = []() -> RefPtr<UINode> {
+    auto uiNode = FrameNode::GetOrCreateFrameNode(V2::STACK_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId()
+        , []() { return AceType::MakeRefPtr<LinearLayoutPattern>(true); });
+        return uiNode;
+    };
+    auto overlayNode = AceType::DynamicCast<FrameNode>(builderFunc());
+    CHECK_NULL_VOID(overlayNode);
+    listNode->SetOverlayNode(overlayNode);
+    overlayNode->SetParent(AceType::WeakClaim(AceType::RawPtr(listNode)));
+    overlayNode->SetActive(true);
+    overlayNode->SetHitTestMode(HitTestMode::HTMTRANSPARENT);
+    auto overlayProperty = AceType::DynamicCast<LayoutProperty>(overlayNode->GetLayoutProperty());
+    CHECK_NULL_VOID(overlayProperty);
+    overlayProperty->SetIsOverlayNode(true);
+    overlayProperty->UpdateMeasureType(MeasureType::MATCH_PARENT);
+    overlayProperty->UpdateAlignment(Alignment::CENTER);
+    auto overlayOffsetX = std::make_optional<Dimension>(Dimension::FromString("0px"));
+    auto overlayOffsetY = std::make_optional<Dimension>(Dimension::FromString("0px"));
+    overlayProperty->SetOverlayOffset(overlayOffsetX, overlayOffsetY);
+    auto focusHub = overlayNode->GetOrCreateFocusHub();
+    CHECK_NULL_VOID(focusHub);
+    focusHub->SetFocusable(false);
+    overlayNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
 }
 
 RefPtr<NodePaintMethod> ListPattern::CreateNodePaintMethod()
