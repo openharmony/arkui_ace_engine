@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_menu_bridge.h"
+
 #include "frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_utils.h"
 
 namespace OHOS::Ace::NG {
@@ -101,44 +102,53 @@ ArkUINativeModuleValue MenuBridge::ResetFont(ArkUIRuntimeCallInfo* runtimeCallIn
     return panda::JSValueRef::Undefined(vm);
 }
 
-ArkUINativeModuleValue MenuBridge::SetRadius(ArkUIRuntimeCallInfo* runtimeCallInfo)
+bool MenuBridge::ParseRadius(EcmaVM* vm, ArkUIRuntimeCallInfo* runtimeCallInfo, ArkUINodeHandle nativeNode,
+    std::vector<ArkUI_Float32>& radiusValues, std::vector<int32_t>& radiusUnits)
 {
-    EcmaVM* vm = runtimeCallInfo->GetVM();
-    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
-    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
-    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     Local<JSValueRef> topLeftArgs = runtimeCallInfo->GetCallArgRef(1);     // 1: index of top left value
     Local<JSValueRef> topRightArgs = runtimeCallInfo->GetCallArgRef(2);    // 2: index of top right value
     Local<JSValueRef> bottomLeftArgs = runtimeCallInfo->GetCallArgRef(3);  // 3: index of bottom left value
     Local<JSValueRef> bottomRightArgs = runtimeCallInfo->GetCallArgRef(4); // 4: index of bottom right value
+    Local<JSValueRef> isObjectArgs = runtimeCallInfo->GetCallArgRef(5);    // 5: check is object radius
     if (topLeftArgs->IsUndefined() && topRightArgs->IsUndefined() && bottomLeftArgs->IsUndefined() &&
         bottomRightArgs->IsUndefined()) {
         GetArkUINodeModifiers()->getMenuModifier()->resetRadius(nativeNode);
-        return panda::JSValueRef::Undefined(vm);
+        return false;
     }
 
     CalcDimension topLeft;
     CalcDimension topRight;
     CalcDimension bottomLeft;
     CalcDimension bottomRight;
-    if (!ArkTSUtils::ParseJsDimensionVpNG(vm, topLeftArgs, topLeft, true)) {
-        topLeft = CalcDimension(0.0, DimensionUnit::VP);
-    }
+    if (isObjectArgs->IsBoolean() && !isObjectArgs->ToBoolean(vm)->Value()) {
+        if (!ArkTSUtils::ParseJsDimensionVpNG(vm, topLeftArgs, topLeft, true)) {
+            GetArkUINodeModifiers()->getMenuModifier()->resetRadius(nativeNode);
+            return false;
+        }
+        if (LessNotEqual(topLeft.Value(), 0.0)) {
+            GetArkUINodeModifiers()->getMenuModifier()->resetRadius(nativeNode);
+            return false;
+        }
+        topRight = topLeft;
+        bottomLeft = topLeft;
+        bottomRight = topLeft;
+    } else {
+        if (!ArkTSUtils::ParseJsDimensionVpNG(vm, topLeftArgs, topLeft, true)) {
+            topLeft = CalcDimension(0.0, DimensionUnit::VP);
+        }
 
-    if (!ArkTSUtils::ParseJsDimensionVpNG(vm, topRightArgs, topRight, true)) {
-        topRight = CalcDimension(0.0, DimensionUnit::VP);
-    }
+        if (!ArkTSUtils::ParseJsDimensionVpNG(vm, topRightArgs, topRight, true)) {
+            topRight = CalcDimension(0.0, DimensionUnit::VP);
+        }
 
-    if (!ArkTSUtils::ParseJsDimensionVpNG(vm, bottomLeftArgs, bottomLeft, true)) {
-        bottomLeft = CalcDimension(0.0, DimensionUnit::VP);
-    }
+        if (!ArkTSUtils::ParseJsDimensionVpNG(vm, bottomLeftArgs, bottomLeft, true)) {
+            bottomLeft = CalcDimension(0.0, DimensionUnit::VP);
+        }
 
-    if (!ArkTSUtils::ParseJsDimensionVpNG(vm, bottomRightArgs, bottomRight, true)) {
-        bottomRight = CalcDimension(0.0, DimensionUnit::VP);
+        if (!ArkTSUtils::ParseJsDimensionVpNG(vm, bottomRightArgs, bottomRight, true)) {
+            bottomRight = CalcDimension(0.0, DimensionUnit::VP);
+        }
     }
-
-    std::vector<ArkUI_Float32> radiusValues;
-    std::vector<int32_t> radiusUnits;
     radiusUnits.push_back(static_cast<int32_t>(topLeft.Unit()));
     radiusUnits.push_back(static_cast<int32_t>(topRight.Unit()));
     radiusUnits.push_back(static_cast<int32_t>(bottomLeft.Unit()));
@@ -147,6 +157,20 @@ ArkUINativeModuleValue MenuBridge::SetRadius(ArkUIRuntimeCallInfo* runtimeCallIn
     radiusValues.push_back(topRight.Value());
     radiusValues.push_back(bottomLeft.Value());
     radiusValues.push_back(bottomRight.Value());
+    return true;
+}
+
+ArkUINativeModuleValue MenuBridge::SetRadius(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    std::vector<ArkUI_Float32> radiusValues;
+    std::vector<int32_t> radiusUnits;
+    if (!ParseRadius(vm, runtimeCallInfo, nativeNode, radiusValues, radiusUnits)) {
+        return panda::JSValueRef::Undefined(vm);
+    }
     GetArkUINodeModifiers()->getMenuModifier()->setRadius(nativeNode, radiusValues.data(), radiusUnits.data());
     return panda::JSValueRef::Undefined(vm);
 }

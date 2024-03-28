@@ -174,13 +174,19 @@ void JSMenu::SetRadius(const JSCallbackInfo& info)
         return;
     }
     CalcDimension radius;
-    ParseJsDimensionVp(info[0], radius);
-
-    if (LessNotEqual(radius.Value(), 0.0)) {
-        return;
+    if (info[0]->IsObject()) {
+        HandleDifferentRadius(info[0]);
+    } else {
+        if (!ParseJsDimensionVpNG(info[0], radius)) {
+            MenuModel::GetInstance()->ResetBorderRadius();
+            return;
+        }
+        if (LessNotEqual(radius.Value(), 0.0)) {
+            MenuModel::GetInstance()->ResetBorderRadius();
+            return;
+        }
+        MenuModel::GetInstance()->SetBorderRadius(radius);
     }
-    MenuModel::GetInstance()->SetBorderRadius(radius);
-    HandleDifferentRadius(info[0]);
 }
 
 void JSMenu::JSBind(BindingTarget globalObj)

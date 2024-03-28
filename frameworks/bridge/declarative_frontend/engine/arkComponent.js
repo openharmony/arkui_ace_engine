@@ -15584,10 +15584,10 @@ class RadiusModifier extends ModifierWithKey {
     }
     else {
       if (isNumber(this.value) || isString(this.value) || isResource(this.value)) {
-        getUINativeModule().menu.setRadius(node, this.value, this.value, this.value, this.value);
+        getUINativeModule().menu.setRadius(node, this.value, this.value, this.value, this.value, false);
       }
       else {
-        getUINativeModule().menu.setRadius(node, this.value.topLeft, this.value.topRight, this.value.bottomLeft, this.value.bottomRight);
+        getUINativeModule().menu.setRadius(node, this.value.topLeft, this.value.topRight, this.value.bottomLeft, this.value.bottomRight, true);
       }
     }
   }
