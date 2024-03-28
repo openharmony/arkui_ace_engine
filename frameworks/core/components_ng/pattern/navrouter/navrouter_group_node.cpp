@@ -170,7 +170,6 @@ void NavRouterGroupNode::AddNavDestinationToNavigation()
         WeakPtr<NavigationStack> stack = navigationPattern->GetNavigationStack();
         navDestinationPattern->SetNavigationStack(stack);
         name = navDestinationPattern->GetName();
-        navigationPattern->RemoveIfNeeded(name, navDestination);
         navigationPattern->AddNavDestinationNode(name, navDestination, navRouteMode);
     }
 

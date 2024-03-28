@@ -223,33 +223,34 @@ std::vector<std::string> JSNavigationStack::GetAllPathName()
     return pathNames;
 }
 
-std::vector<int32_t> JSNavigationStack::GetRemoveArray()
+std::vector<int32_t> JSNavigationStack::GetAllPathIndex()
 {
     if (dataSourceObj_->IsEmpty()) {
         return {};
     }
-    auto func = JSRef<JSFunc>::Cast(dataSourceObj_->GetProperty("getRemoveArray"));
+    auto func = JSRef<JSFunc>::Cast(dataSourceObj_->GetProperty("getAllPathIndex"));
     auto array = JSRef<JSArray>::Cast(func->Call(dataSourceObj_));
     if (array->IsEmpty()) {
         return {};
     }
-    std::vector<int32_t> removeArrays;
+    std::vector<int32_t> pathIndex;
     for (size_t i = 0; i < array->Length(); i++) {
         auto value = array->GetValueAt(i);
         if (value->IsNumber()) {
-            removeArrays.emplace_back(value->ToNumber<int32_t>());
+            pathIndex.emplace_back(value->ToNumber<int32_t>());
         }
     }
 
-    return removeArrays;
+    return pathIndex;
 }
 
-void JSNavigationStack::ClearRemoveArray()
+void JSNavigationStack::InitNavPathIndex()
 {
     if (dataSourceObj_->IsEmpty()) {
         return;
     }
-    auto func = JSRef<JSFunc>::Cast(dataSourceObj_->GetProperty("clearRemoveArray"));
+
+    auto func = JSRef<JSFunc>::Cast(dataSourceObj_->GetProperty("initNavPathIndex"));
     func->Call(dataSourceObj_);
 }
 
