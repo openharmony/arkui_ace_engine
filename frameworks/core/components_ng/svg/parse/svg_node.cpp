@@ -20,6 +20,7 @@
 #include "include/utils/SkParsePath.h"
 
 #include "base/utils/utils.h"
+#include "core/common/ace_application_info.h"
 #include "core/components/common/painter/rosen_svg_painter.h"
 #include "core/components/common/properties/decoration.h"
 #include "core/components_ng/render/drawing.h"
@@ -236,6 +237,9 @@ void SvgNode::OnClipPath(RSCanvas& canvas, const Size& viewPort)
 
 void SvgNode::OnFilter(RSCanvas& canvas, const Size& viewPort)
 {
+    if (!AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
+        return;
+    }
     auto svgContext = svgContext_.Upgrade();
     CHECK_NULL_VOID(svgContext);
     auto refFilter = svgContext->GetSvgNodeById(hrefFilterId_);
