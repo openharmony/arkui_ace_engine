@@ -471,6 +471,14 @@ public:
     {
         return gatherNodeChildrenInfo_;
     }
+
+    void CreateOverlayNode();
+    void AddFrameNodeToOverlay(const RefPtr<NG::FrameNode>& node, std::optional<int32_t> index = std::nullopt);
+    void RemoveFrameNodeOnOverlay(const RefPtr<NG::FrameNode>& node);
+    void ShowNodeOnOverlay(const RefPtr<NG::FrameNode>& node);
+    void HideNodeOnOverlay(const RefPtr<NG::FrameNode>& node);
+    void ShowAllNodesOnOverlay();
+    void HideAllNodesOnOverlay();
 private:
     void PopToast(int32_t targetId);
 
@@ -560,6 +568,9 @@ private:
         std::optional<ModalTransition> modalTransition);
     void HandleModalPop(std::function<void()>&& onWillDisappear, const RefPtr<UINode> rootNode, int32_t targetId);
 
+    RefPtr<FrameNode> overlayNode_;
+    // Key: frameNode Id, Value: index
+    std::unordered_map<int32_t, int32_t> frameNodeMapOnOverlay_;
     // Key: target Id, Value: PopupInfo
     std::unordered_map<int32_t, NG::PopupInfo> popupMap_;
     // K: target frameNode ID, V: menuNode

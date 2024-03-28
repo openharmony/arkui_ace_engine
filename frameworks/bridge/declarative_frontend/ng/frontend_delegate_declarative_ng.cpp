@@ -1036,4 +1036,64 @@ void FrontendDelegateDeclarativeNG::CreateSnapshot(
 #endif
 }
 
+void FrontendDelegateDeclarativeNG::AddFrameNodeToOverlay(
+    const RefPtr<NG::FrameNode>& node, std::optional<int32_t> index)
+{
+    auto task = [node, index, containerId = Container::CurrentId()](const RefPtr<NG::OverlayManager>& overlayManager) {
+        CHECK_NULL_VOID(overlayManager);
+        ContainerScope scope(containerId);
+        overlayManager->AddFrameNodeToOverlay(node, index);
+    };
+    MainWindowOverlay(std::move(task));
+}
+
+void FrontendDelegateDeclarativeNG::RemoveFrameNodeOnOverlay(const RefPtr<NG::FrameNode>& node)
+{
+    auto task = [node, containerId = Container::CurrentId()](const RefPtr<NG::OverlayManager>& overlayManager) {
+        CHECK_NULL_VOID(overlayManager);
+        ContainerScope scope(containerId);
+        overlayManager->RemoveFrameNodeOnOverlay(node);
+    };
+    MainWindowOverlay(std::move(task));
+}
+
+void FrontendDelegateDeclarativeNG::ShowNodeOnOverlay(const RefPtr<NG::FrameNode>& node)
+{
+    auto task = [node, containerId = Container::CurrentId()](const RefPtr<NG::OverlayManager>& overlayManager) {
+        CHECK_NULL_VOID(overlayManager);
+        ContainerScope scope(containerId);
+        overlayManager->ShowNodeOnOverlay(node);
+    };
+    MainWindowOverlay(std::move(task));
+}
+
+void FrontendDelegateDeclarativeNG::HideNodeOnOverlay(const RefPtr<NG::FrameNode>& node)
+{
+    auto task = [node, containerId = Container::CurrentId()](const RefPtr<NG::OverlayManager>& overlayManager) {
+        CHECK_NULL_VOID(overlayManager);
+        ContainerScope scope(containerId);
+        overlayManager->HideNodeOnOverlay(node);
+    };
+    MainWindowOverlay(std::move(task));
+}
+
+void FrontendDelegateDeclarativeNG::ShowAllNodesOnOverlay()
+{
+    auto task = [containerId = Container::CurrentId()](const RefPtr<NG::OverlayManager>& overlayManager) {
+        CHECK_NULL_VOID(overlayManager);
+        ContainerScope scope(containerId);
+        overlayManager->ShowAllNodesOnOverlay();
+    };
+    MainWindowOverlay(std::move(task));
+}
+
+void FrontendDelegateDeclarativeNG::HideAllNodesOnOverlay()
+{
+    auto task = [containerId = Container::CurrentId()](const RefPtr<NG::OverlayManager>& overlayManager) {
+        CHECK_NULL_VOID(overlayManager);
+        ContainerScope scope(containerId);
+        overlayManager->HideAllNodesOnOverlay();
+    };
+    MainWindowOverlay(std::move(task));
+}
 } // namespace OHOS::Ace::Framework
