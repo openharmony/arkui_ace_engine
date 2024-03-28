@@ -33,6 +33,52 @@ constexpr int32_t SIZE_OF_FOUR = 4; // Border Radius array size
 const std::vector<float> DEFAULT_COLOR_FILTER_MATRIX = {
     1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0
 };
+
+void ParseResizableCalcDimensions(ArkUIRuntimeCallInfo* runtimeCallInfo, uint32_t offset, uint32_t count,
+    std::vector<std::optional<CalcDimension>>& results, const CalcDimension& defValue)
+{
+    auto end = offset + count;
+    auto argsNumber = runtimeCallInfo->GetArgsNumber();
+    if (end > argsNumber) {
+        return;
+    }
+    CalcDimension defaultDimension(defValue);
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    for (uint32_t index = offset; index < end; index++) {
+        auto arg = runtimeCallInfo->GetCallArgRef(index);
+        std::optional<CalcDimension> optCalcDimension;
+        CalcDimension dimension(defValue);
+        if (ArkTSUtils::ParseJsDimensionVp(vm, arg, dimension, false)) {
+            optCalcDimension = dimension;
+        } else {
+            optCalcDimension = defaultDimension;
+        }
+        results.push_back(optCalcDimension);
+    }
+}
+
+void PushDimensionsToVector(std::vector<ArkUIStringAndFloat>& results,
+    const std::vector<std::optional<CalcDimension>>& optDimensions)
+{
+    for (uint32_t index = 0; index < optDimensions.size(); index++) {
+        auto optDimension = optDimensions[index];
+        auto hasValue = optDimension.has_value();
+        DimensionUnit unit = DimensionUnit::PX;
+        ArkUIStringAndFloat value = { 0.0, nullptr };
+        if (hasValue) {
+            unit = optDimension.value().Unit();
+            if (unit == DimensionUnit::CALC) {
+                value.valueStr = optDimension.value().CalcValue().c_str();
+            } else {
+                value.value = optDimension.value().Value();
+            }
+        }
+        results.push_back(ArkUIStringAndFloat { static_cast<double>(hasValue), nullptr });
+        results.push_back(value);
+        results.push_back(ArkUIStringAndFloat { static_cast<double>(unit), nullptr });
+    }
+}
+
 ArkUINativeModuleValue ImageBridge::SetCopyOption(ArkUIRuntimeCallInfo* runtimeCallInfo)
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
@@ -134,6 +180,32 @@ ArkUINativeModuleValue ImageBridge::ResetEdgeAntialiasing(ArkUIRuntimeCallInfo* 
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     GetArkUINodeModifiers()->getImageModifier()->resetEdgeAntialiasing(nativeNode);
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue ImageBridge::SetResizable(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(INDEX_0);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+
+    std::vector<ArkUIStringAndFloat> options;
+    std::vector<std::optional<CalcDimension>> sliceDimensions;
+    ParseResizableCalcDimensions(runtimeCallInfo, INDEX_1, INDEX_4, sliceDimensions, CalcDimension(0.0));
+    PushDimensionsToVector(options, sliceDimensions);
+
+    GetArkUINodeModifiers()->getImageModifier()->setResizable(nativeNode, options.data());
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue ImageBridge::ResetResizable(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    GetArkUINodeModifiers()->getImageModifier()->resetResizable(nativeNode);
     return panda::JSValueRef::Undefined(vm);
 }
 
