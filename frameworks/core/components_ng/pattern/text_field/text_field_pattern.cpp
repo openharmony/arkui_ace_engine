@@ -2057,7 +2057,7 @@ void TextFieldPattern::ScheduleCursorTwinkling()
 
 void TextFieldPattern::StartTwinkling()
 {
-    if (isTransparent_) {
+    if (isTransparent_ || !HasFocus()) {
         return;
     }
     // Ignore the result because all ops are called on this same thread (ACE UI).
@@ -3880,14 +3880,11 @@ bool TextFieldPattern::CursorMoveUpOperation()
 {
     CHECK_NULL_RETURN(IsTextArea(), false);
     auto originCaretPosition = selectController_->GetCaretIndex();
-    auto offsetX = selectController_->GetCaretRect().GetX() - contentRect_.GetX();
-    auto offsetY = selectController_->GetCaretRect().GetY() - textRect_.GetY();
+    auto offsetX = selectController_->GetCaretRect().GetX();
     // multiply by 0.5f to convert to the grapheme center point of the previous line.
-    float verticalOffset = offsetY - PreferredLineHeight() * 0.5f;
-    selectController_->UpdateCaretIndex(
-        static_cast<int32_t>(paragraph_->GetGlyphIndexByCoordinate(Offset(offsetX, verticalOffset))));
+    auto offsetY = selectController_->GetCaretRect().GetY() - PreferredLineHeight() * 0.5f;
     std::optional<Offset> offset;
-    offset.emplace(Offset(offsetX, verticalOffset));
+    offset.emplace(Offset(offsetX, offsetY));
     OnCursorMoveDone(TextAffinity::DOWNSTREAM, offset);
     return originCaretPosition != selectController_->GetCaretIndex();
 }
@@ -3906,14 +3903,11 @@ bool TextFieldPattern::CursorMoveDownOperation()
 {
     CHECK_NULL_RETURN(IsTextArea(), false);
     auto originCaretPosition = selectController_->GetCaretIndex();
-    auto offsetX = selectController_->GetCaretRect().GetX() - contentRect_.GetX();
-    auto offsetY = selectController_->GetCaretRect().GetY() - textRect_.GetY();
+    auto offsetX = selectController_->GetCaretRect().GetX();
     // multiply by 1.5f to convert to the grapheme center point of the next line.
-    float verticalOffset = offsetY + PreferredLineHeight() * 1.5f;
-    selectController_->UpdateCaretIndex(
-        static_cast<int32_t>(paragraph_->GetGlyphIndexByCoordinate(Offset(offsetX, verticalOffset))));
+    auto offsetY = selectController_->GetCaretRect().GetY() + PreferredLineHeight() * 1.5f;
     std::optional<Offset> offset;
-    offset.emplace(Offset(offsetX, verticalOffset));
+    offset.emplace(Offset(offsetX, offsetY));
     OnCursorMoveDone(TextAffinity::DOWNSTREAM, offset);
     return originCaretPosition != selectController_->GetCaretIndex();
 }
