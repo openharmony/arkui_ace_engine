@@ -20,7 +20,7 @@
 namespace OHOS::Ace::NG {
     
 namespace {
-constexpr Dimension DEFAULT_MARQUEE_STEP_VP = 6.0_vp;
+constexpr Dimension DEFAULT_MARQUEE_STEP_VP = 4.0_vp;
 } // namespace
 
 TextPaintMethod::TextPaintMethod(const WeakPtr<Pattern>& pattern, float baselineOffset,

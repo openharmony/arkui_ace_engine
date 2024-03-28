@@ -2687,6 +2687,13 @@ let TextResponseType;
   TextResponseType[TextResponseType['SELECT'] = 2] = 'SELECT';
 })(TextResponseType || (TextResponseType = {}));
 
+let MarqueeState;
+(function (MarqueeState) {
+  MarqueeState[MarqueeState['START'] = 0] = 'START';
+  MarqueeState[MarqueeState['BOUNCE'] = 1] = 'BOUNCE';
+  MarqueeState[MarqueeState['FINISH'] = 2] = 'FINISH';
+})(MarqueeState || (MarqueeState = {}));
+
 let NativeEmbedStatus;
 (function (NativeEmbedStatus) {
   NativeEmbedStatus['CREATE'] = 0;

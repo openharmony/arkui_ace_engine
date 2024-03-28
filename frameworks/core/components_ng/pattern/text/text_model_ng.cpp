@@ -566,7 +566,7 @@ void TextModelNG::SetMarqueeOptions(const std::optional<bool>& start, const std:
     }
 }
 
-void TextModelNG::SetOnMarqueeStateChange(std::function<void(const int32_t)>&& func)
+void TextModelNG::SetOnMarqueeStateChange(std::function<void(int32_t)>&& func)
 {
     auto eventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<TextEventHub>();
     CHECK_NULL_VOID(eventHub);

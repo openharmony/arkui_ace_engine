@@ -65,7 +65,7 @@ public:
     void SetFontFeature(const std::unordered_map<std::string, int32_t>& value) override {};
     void SetMarqueeOptions(const std::optional<bool>& start, const std::optional<double>& step, const std::optional<int32_t>& loop, 
         const std::optional<int32_t>& delay, const std::optional<MarqueeDirection>& direction) override {};
-    void SetOnMarqueeStateChange(std::function<void(const int32_t)>&& func) override {};
+    void SetOnMarqueeStateChange(std::function<void(int32_t)>&& func) override {};
     void SetOnDragStart(NG::OnDragStartFunc&& onDragStart) override;
     void SetOnDragEnter(NG::OnDragDropFunc&& onDragEnter) override;
     void SetOnDragMove(NG::OnDragDropFunc&& onDragMove) override;

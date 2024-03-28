@@ -107,7 +107,7 @@ public:
     virtual void SetMarqueeOptions(const std::optional<bool>& start, const std::optional<double>& step,
         const std::optional<int32_t>& loop, const std::optional<int32_t>& delay,
         const std::optional<MarqueeDirection>& direction) = 0;
-    virtual void SetOnMarqueeStateChange(std::function<void(const int32_t)>&& func) = 0;
+    virtual void SetOnMarqueeStateChange(std::function<void(int32_t)>&& func) = 0;
 
 private:
     static std::unique_ptr<TextModel> instance_;
