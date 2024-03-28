@@ -174,9 +174,8 @@ void NavDestinationLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
         auto geometryNode = hostNode->GetGeometryNode();
         CHECK_NULL_VOID(geometryNode);
         TAG_LOGD(AceLogTag::ACE_NAVIGATION,
-            "Navdestination id is %d{public}, frameRect is %{public}s, top is %{public}f, left is %{public}f",
-            hostNode->GetId(), geometryNode->GetFrameRect().ToString().c_str(),
-            hostNode->GetOffsetRelativeToWindow().GetY(), hostNode->GetOffsetRelativeToWindow().GetX());
+            "Navdestination id is %d{public}, frameRect is %{public}s",
+            hostNode->GetId(), geometryNode->GetFrameRect().ToString().c_str());
     }
 }
 
