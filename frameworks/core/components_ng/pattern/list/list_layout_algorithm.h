@@ -392,7 +392,8 @@ private:
     bool IsUniformHeightProbably();
     float CalculatePredictSnapEndPositionByIndex(uint32_t index, V2::ScrollSnapAlign scrollSnapAlign);
     void UpdateSnapCenterContentOffset(LayoutWrapper* layoutWrapper);
-    void InitGradient(const float& gradientPercent, const RefPtr<FrameNode> overlayGeometryNode, const RefPtr<FrameNode> listNode);
+    void UpdateFadingEdge(LayoutWrapper* layoutWrapper);
+    void InitGradient(const RefPtr<FrameNode> overlayGeometryNode, const RefPtr<FrameNode> listNode);
 
     std::optional<int32_t> jumpIndex_;
     std::optional<int32_t> jumpIndexInGroup_;
@@ -419,6 +420,7 @@ private:
     bool backwardFeature_ = false;
     bool isNeedCheckOffset_ = false;
     bool expandSafeArea_ = false;
+    bool isFadingEdgeUpdate_ = true;
 
     int32_t totalItemCount_ = 0;
 

@@ -96,9 +96,10 @@ void ListPattern::OnModifyDone()
     CHECK_NULL_VOID(conlist);
     auto listTheme = conlist->GetTheme<ListTheme>();
     CHECK_NULL_VOID(listTheme);
-    auto listThemeFadingEdge=listTheme->GetFadingEdge();
+    auto listThemeFadingEdge = listTheme->GetFadingEdge();
     auto fadingEdge = listLayoutProperty->GetFadingEdge().value_or(listThemeFadingEdge);
-    if (fadingEdge) {
+    auto overlayNode = host->GetOverlayNode();
+    if (!overlayNode && fadingEdge) {
         CreateAnalyzerOverlay(host);
     }
 }
@@ -305,12 +306,13 @@ float ListPattern::CalculateTargetPos(float startPos, float endPos)
     return 0.0f;
 }
 
-// 新增浮层overlay节点
-void ListPattern::CreateAnalyzerOverlay(const RefPtr<FrameNode> listNode/*, const OptionalSizeF& newSize*/)
+void ListPattern::CreateAnalyzerOverlay(const RefPtr<FrameNode> listNode)
 {
     auto builderFunc = []() -> RefPtr<UINode> {
-    auto uiNode = FrameNode::GetOrCreateFrameNode(V2::STACK_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId()
-        , []() { return AceType::MakeRefPtr<LinearLayoutPattern>(true); });
+        auto uiNode = FrameNode::GetOrCreateFrameNode(V2::STACK_ETS_TAG,
+            ElementRegister::GetInstance()->MakeUniqueId(), []() {
+                return AceType::MakeRefPtr<LinearLayoutPattern>(true);
+            });
         return uiNode;
     };
     auto overlayNode = AceType::DynamicCast<FrameNode>(builderFunc());

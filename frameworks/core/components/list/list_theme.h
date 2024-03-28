@@ -62,12 +62,8 @@ public:
             theme->chainIntensity_ = pattern->GetAttr<double>("chain_intensity", 0.3f);
             theme->chainStiffness_ = pattern->GetAttr<double>("chain_stiffness", 228.0f);
             theme->chainDamping_ = pattern->GetAttr<double>("chain_damping", 30.0f);
-            if (SystemProperties::GetDeviceType() == DeviceType::TV) {
-                theme->fadingEdge_ = true;
-            } else {
-                std::string fadingEdge = pattern->GetAttr<std::string>("list_fadeout_enable", "");
-                theme->fadingEdge_ = (fadingEdge == "true");
-            }
+            std::string fadingEdge = pattern->GetAttr<std::string>("list_fadeout_enable", "");
+            theme->fadingEdge_ = (fadingEdge == "true");
         }
     };
 
