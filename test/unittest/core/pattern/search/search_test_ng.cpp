@@ -50,6 +50,7 @@
 #include "test/mock/core/common/mock_theme_manager.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
+#include "core/components/common/properties/text_style_parser.h"
 #undef protected
 #undef private
 
@@ -72,6 +73,7 @@ constexpr int32_t BUTTON_INDEX = 4;
 const std::string EMPTY_VALUE;
 const std::string PLACEHOLDER = "DEFAULT PLACEHOLDER";
 const std::string SEARCH_SVG = "resource:///ohos_search.svg";
+const std::unordered_map<std::string, int32_t> FONT_FEATURE_VALUE = ParseFontFeatureSettings("\"ss01\" 1");
 } // namespace
 
 class SearchTestNg : public testing::Test {
@@ -3105,5 +3107,25 @@ HWTEST_F(SearchTestNg, TextDecoration001, TestSize.Level1)
     EXPECT_EQ(textFieldLayoutProperty->GetTextDecoration(), Ace::TextDecoration::UNDERLINE);
     EXPECT_EQ(textFieldLayoutProperty->GetTextDecorationColor(), Color::BLUE);
     EXPECT_EQ(textFieldLayoutProperty->GetTextDecorationStyle(), Ace::TextDecorationStyle::DASHED);
+}
+
+/**
+ * @tc.name: UpdateFontFeature
+ * @tc.desc: test fontFeature
+ * @tc.type: FUNC
+ */
+HWTEST_F(SearchTestNg, SetProperty004, TestSize.Level1)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto layoutProperty = frameNode->GetLayoutProperty<SearchLayoutProperty>();
+    SearchModelNG searchModelInstance;
+    layoutProperty->UpdateFontFeature(ParseFontFeatureSettings("\"ss01\" 0"));
+    searchModelInstance.SetFontFeature(FONT_FEATURE_VALUE);
+    EXPECT_EQ(layoutProperty->GetFontFeature(), FONT_FEATURE_VALUE);
+
+    layoutProperty->UpdateFontFeature(ParseFontFeatureSettings("\"ss01\" 0"));
+    SearchModelNG::SetFontFeature(frameNode, FONT_FEATURE_VALUE);
+    EXPECT_EQ(layoutProperty->GetFontFeature(), FONT_FEATURE_VALUE);
 }
 } // namespace OHOS::Ace::NG
