@@ -691,7 +691,10 @@ void JSNavigationStack::FireNavigationInterception(bool isBefore, const RefPtr<N
     } else if (preDestination->GetIsEmpty()) {
         params[0] = JSRef<JSObject>::New();
     } else {
-        params[0] = JSClass<JSNavDestinationContext>::NewInstance();
+        JSRef<JSObject> preObj = JSClass<JSNavDestinationContext>::NewInstance();
+        auto preProxy = Referenced::Claim(preObj->Unwrap<JSNavDestinationContext>());
+        preProxy->SetNavDestinationContext(from);
+        params[0] = preObj;
     }
     auto topDestination = AceType::DynamicCast<NG::NavDestinationContext>(to);
     if (!topDestination) {
@@ -699,7 +702,10 @@ void JSNavigationStack::FireNavigationInterception(bool isBefore, const RefPtr<N
     } else if (topDestination->GetIsEmpty()) {
         params[1] = JSRef<JSObject>::New();
     } else {
-        params[1] = JSClass<JSNavDestinationContext>::NewInstance();
+        JSRef<JSObject> topObj = JSClass<JSNavDestinationContext>::NewInstance();
+        auto topProxy = Referenced::Claim(topObj->Unwrap<JSNavDestinationContext>());
+        topProxy->SetNavDestinationContext(to);
+        params[1] = topObj;
     }
     const uint8_t operationIndex = 2;
     params[operationIndex] = JSRef<JSVal>::Make(ToJSValue(static_cast<int32_t>(operation)));
