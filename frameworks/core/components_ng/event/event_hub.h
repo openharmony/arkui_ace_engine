@@ -223,6 +223,9 @@ public:
     void FireOnSizeChanged(const RectF& oldRect, const RectF& rect);
     bool HasOnSizeChanged() const;
 
+    void SetJSFrameNodeOnSizeChangeCallback(OnSizeChangedFunc&& onSizeChanged);
+    void FireJSFrameNodeOnSizeChanged(const RectF& oldRect, const RectF& rect);
+    void ClearJSFrameNodeOnSizeChange();
     using OnDragFunc = std::function<void(const RefPtr<OHOS::Ace::DragEvent>&, const std::string&)>;
     using OnNewDragFunc = std::function<void(const RefPtr<OHOS::Ace::DragEvent>&)>;
     using OnDragStartFunc = std::function<DragDropInfo(const RefPtr<OHOS::Ace::DragEvent>&, const std::string&)>;
@@ -447,7 +450,6 @@ public:
         keyboardShortcut_.emplace_back(keyboardShortcut);
     }
 
-    
     void ClearSingleKeyboardShortcut()
     {
         if (keyboardShortcut_.size() == 1) {
@@ -586,6 +588,7 @@ private:
     OnAreaChangedFunc onAreaChanged_;
     std::unordered_map<int32_t, OnAreaChangedFunc> onAreaChangedInnerCallbacks_;
     OnSizeChangedFunc onSizeChanged_;
+    OnSizeChangedFunc onJsFrameNodeSizeChanged_;
 
     OnPreDragFunc onPreDragFunc_;
     OnDragStartFunc onDragStart_;

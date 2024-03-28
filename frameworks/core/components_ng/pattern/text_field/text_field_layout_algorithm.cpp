@@ -605,6 +605,9 @@ void TextFieldLayoutAlgorithm::CreateParagraph(const TextStyle& textStyle, const
         if (splitStr.empty()) {
             continue;
         }
+        if (style->GetMaxLines() == 1) {
+            std::replace(splitStr.begin(), splitStr.end(), '\n', ' ');
+        }
         auto& style = textStyles[i];
         paragraph_->PushStyle(style);
         StringUtils::TransformStrCase(splitStr, static_cast<int32_t>(style.GetTextCase()));
@@ -744,6 +747,9 @@ void TextFieldLayoutAlgorithm::UpdateTextStyleMore(const RefPtr<FrameNode>& fram
     }
     if (layoutProperty->HasLineHeight()) {
         textStyle.SetLineHeight(layoutProperty->GetLineHeight().value());
+    }
+    if (layoutProperty->HasFontFeature()) {
+        textStyle.SetFontFeatures(layoutProperty->GetFontFeature().value());
     }
 }
 

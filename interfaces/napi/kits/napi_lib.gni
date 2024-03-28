@@ -28,6 +28,7 @@ common_napi_libs = [
   "grid",
   "measure",
   "mediaquery",
+  "overlay",
   "prompt",
   "promptaction",
   "router",

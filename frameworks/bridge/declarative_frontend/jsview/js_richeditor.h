@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -37,6 +37,10 @@ public:
     static JSRef<JSVal> CreateJsAboutToIMEInputObj(const NG::RichEditorInsertValue& insertValue);
     static JSRef<JSVal> CreateJsOnIMEInputComplete(const NG::RichEditorAbstractSpanResult& textSpanResult);
     static JSRef<JSVal> CreateJsAboutToDelet(const NG::RichEditorDeleteValue& deleteValue);
+    static void SetChangeTextSpans(
+        JSRef<JSArray>& jsArray, const std::list<NG::RichEditorAbstractSpanResult>& spanList);
+    static JSRef<JSVal> CreateJsOnWillChange(const NG::RichEditorChangeValue& changeValue);
+    static JSRef<JSVal> CreateJsOnDidChange(const std::list<NG::RichEditorAbstractSpanResult>& spanList);
     static void JsClip(const JSCallbackInfo& info);
     static void JsFocusable(const JSCallbackInfo& info);
     static void SetCopyOptions(const JSCallbackInfo& info);
@@ -45,6 +49,10 @@ public:
     static void SetPlaceholder(const JSCallbackInfo& info);
     static void JsEnableDataDetector(const JSCallbackInfo& info);
     static void JsDataDetectorConfig(const JSCallbackInfo& info);
+    static void SetOnWillChange(const JSCallbackInfo& info);
+    static void SetOnDidChange(const JSCallbackInfo& info);
+    static void SetOnCut(const JSCallbackInfo& info);
+    static void SetOnCopy(const JSCallbackInfo& info);
     static JSRef<JSVal> CreateJSTextCommonEvent(NG::TextCommonEvent& event);
     static JSRef<JSObject> CreateJSSpanResultObject(const ResultObject& resultObject);
     static JSRef<JSVal> CreateJSSelection(const SelectionInfo& selectInfo);
@@ -59,6 +67,10 @@ public:
     static void SetCaretColor(const JSCallbackInfo& info);
     static void SetSelectedBackgroundColor(const JSCallbackInfo& info);
     static void SetOnEditingChange(const JSCallbackInfo& args);
+    static void SetEnterKeyType(const JSCallbackInfo& info);
+    static void CreateJsRichEditorCommonEvent(const JSCallbackInfo& info);
+    static void SetOnSubmit(const JSCallbackInfo& info);
+    static Local<JSValueRef> JsKeepEditableState(panda::JsiRuntimeCallInfo* info);
 private:
     static void CreateTextStyleObj(JSRef<JSObject>& textStyleObj, const NG::RichEditorAbstractSpanResult& spanResult);
     static void CreateImageStyleObj(JSRef<JSObject>& imageStyleObj, JSRef<JSObject>& spanResultObj,
@@ -104,6 +116,8 @@ public:
         const JSRef<JSObject>& styleObject, TextStyle& style, struct UpdateSpanStyle& updateSpanStyle);
     void ParseJsLineHeightLetterSpacingTextStyle(const JSRef<JSObject>& styleObject, TextStyle& style,
         struct UpdateSpanStyle& updateSpanStyle, bool isSupportPercent = true);
+    void ParseJsFontFeatureTextStyle(const JSRef<JSObject>& styleObject, TextStyle& style,
+        struct UpdateSpanStyle& updateSpanStyle);
     void ParseJsSymbolSpanStyle(
         const JSRef<JSObject>& styleObject, TextStyle& style, struct UpdateSpanStyle& updateSpanStyle);
     ImageSpanOptions CreateJsImageOptions(const JSCallbackInfo& args);
@@ -123,6 +137,7 @@ public:
     {
         instanceId_ = id;
     }
+    void StopEditing();
 
 private:
     int32_t instanceId_ = INSTANCE_ID_UNDEFINED;

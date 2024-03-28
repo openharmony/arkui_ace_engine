@@ -66,6 +66,7 @@ void JSSlider::JSBind(BindingTarget globalObj)
     JSClass<JSSlider>::StaticMethod("selectedColor", &JSSlider::SetSelectedColor);
     JSClass<JSSlider>::StaticMethod("minLabel", &JSSlider::SetMinLabel);
     JSClass<JSSlider>::StaticMethod("maxLabel", &JSSlider::SetMaxLabel);
+    JSClass<JSSlider>::StaticMethod("minResponsiveDistance", &JSSlider::SetMinResponsiveDistance);
     JSClass<JSSlider>::StaticMethod("showSteps", &JSSlider::SetShowSteps);
     JSClass<JSSlider>::StaticMethod("showTips", &JSSlider::SetShowTips);
     JSClass<JSSlider>::StaticMethod("blockBorderColor", &JSSlider::SetBlockBorderColor);
@@ -76,6 +77,7 @@ void JSSlider::JSBind(BindingTarget globalObj)
     JSClass<JSSlider>::StaticMethod("blockSize", &JSSlider::SetBlockSize);
     JSClass<JSSlider>::StaticMethod("blockStyle", &JSSlider::SetBlockStyle);
     JSClass<JSSlider>::StaticMethod("stepSize", &JSSlider::SetStepSize);
+    JSClass<JSSlider>::StaticMethod("sliderInteractionMode", &JSSlider::SetSliderInteractionMode);
     JSClass<JSSlider>::StaticMethod("onChange", &JSSlider::OnChange);
     JSClass<JSSlider>::StaticMethod("onAppear", &JSInteractableView::JsOnAppear);
     JSClass<JSSlider>::StaticMethod("onDisAppear", &JSInteractableView::JsOnDisAppear);
@@ -238,6 +240,7 @@ void JSSlider::SetTrackColor(const JSCallbackInfo& info)
         return;
     }
     NG::Gradient gradient;
+    bool isResourceColor = false;
     if (!ConvertGradientColor(info[0], gradient)) {
         Color colorVal;
         if (info[0]->IsNull() || info[0]->IsUndefined() || !ParseJsColor(info[0], colorVal)) {
@@ -245,12 +248,13 @@ void JSSlider::SetTrackColor(const JSCallbackInfo& info)
             CHECK_NULL_VOID(theme);
             colorVal = theme->GetTrackBgColor();
         }
+        isResourceColor = true;
         gradient = NG::SliderModelNG::CreateSolidGradient(colorVal);
         // Set track color to Framework::SliderModelImpl. Need to backward compatibility with old pipeline.
         SliderModel::GetInstance()->SetTrackBackgroundColor(colorVal);
     }
     // Set track gradient color to NG::SliderModelNG
-    SliderModel::GetInstance()->SetTrackBackgroundColor(gradient);
+    SliderModel::GetInstance()->SetTrackBackgroundColor(gradient, isResourceColor);
 }
 
 bool JSSlider::ConvertGradientColor(const JsiRef<JsiValue>& param, NG::Gradient& gradient)
@@ -314,6 +318,22 @@ void JSSlider::SetMaxLabel(const JSCallbackInfo& info)
     SliderModel::GetInstance()->SetMaxLabel(info[0]->ToNumber<float>());
 }
 
+void JSSlider::SetMinResponsiveDistance(const JSCallbackInfo& info)
+{
+    if (info.Length() < 1) {
+        SliderModel::GetInstance()->ResetMinResponsiveDistance();
+        return;
+    }
+    float value = 0.0f;
+    if (info[0]->IsString() || info[0]->IsNumber()) {
+        value = info[0]->ToNumber<float>();
+        value = std::isfinite(value) ? value : 0.0f;
+        SliderModel::GetInstance()->SetMinResponsiveDistance(value);
+    } else {
+        SliderModel::GetInstance()->ResetMinResponsiveDistance();
+    }
+}
+
 void JSSlider::SetShowSteps(const JSCallbackInfo& info)
 {
     if (info.Length() < 1) {
@@ -324,6 +344,24 @@ void JSSlider::SetShowSteps(const JSCallbackInfo& info)
         showSteps = info[0]->ToBoolean();
     }
     SliderModel::GetInstance()->SetShowSteps(showSteps);
+}
+
+void JSSlider::SetSliderInteractionMode(const JSCallbackInfo& info)
+{
+    if (info.Length() < 1) {
+        SliderModel::GetInstance()->ResetSliderInteractionMode();
+        return;
+    }
+
+    if (!info[0]->IsNull() && info[0]->IsNumber()) {
+        auto mode = static_cast<SliderInteraction>(info[0]->ToNumber<int32_t>());
+        auto sliderInteractionMode = mode == SliderInteraction::SLIDE_ONLY
+                                         ? SliderModel::SliderInteraction::SLIDE_ONLY
+                                         : SliderModel::SliderInteraction::SLIDE_AND_CLICK;
+        SliderModel::GetInstance()->SetSliderInteractionMode(sliderInteractionMode);
+    } else {
+        SliderModel::GetInstance()->ResetSliderInteractionMode();
+    }
 }
 
 void JSSlider::SetShowTips(const JSCallbackInfo& info)

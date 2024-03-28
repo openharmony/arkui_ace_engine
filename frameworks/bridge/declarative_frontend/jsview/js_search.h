@@ -62,6 +62,7 @@ public:
     static void SetDecoration(const JSCallbackInfo& info);
     static void SetLetterSpacing(const JSCallbackInfo& info);
     static void SetLineHeight(const JSCallbackInfo& info);
+    static void SetFontFeature(const JSCallbackInfo& info);
     static void SetId(const JSCallbackInfo& info);
     static void SetKey(const std::string& key);
     static JSRef<JSVal> CreateJSTextCommonEvent(NG::TextCommonEvent& event);

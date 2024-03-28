@@ -25,6 +25,7 @@
 #include "core/interfaces/arkoala/arkoala_api.h"
 #include "core/pipeline/base/element_register.h"
 #include "core/interfaces/native/node/node_api.h"
+#include "core/components/common/properties/text_style_parser.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -633,6 +634,20 @@ void ResetTextAreaLineHeight(ArkUINodeHandle node)
     TextFieldModelNG::SetLineHeight(frameNode, value);
 }
 
+void SetTextAreaFontFeature(ArkUINodeHandle node, ArkUI_CharPtr value)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    std::string strValue = value;
+    TextFieldModelNG::SetFontFeature(frameNode, ParseFontFeatureSettings(strValue));
+}
+
+void ResetTextAreaFontFeature(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    std::string strValue = "";
+    TextFieldModelNG::SetFontFeature(frameNode, ParseFontFeatureSettings(strValue));
+}
 } // namespace
 
 namespace NodeModifier {
@@ -654,7 +669,7 @@ const ArkUITextAreaModifier* GetTextAreaModifier()
         SetTextAreaType, ResetTextAreaType, GetTextAreaType, GetTextAreaTextAlign, SetTextAreaShowCounterOptions,
         ResetTextAreaShowCounterOptions, GetTextAreaShowCounterOptions, SetTextAreaDecoration,
         ResetTextAreaDecoration, SetTextAreaLetterSpacing, ResetTextAreaLetterSpacing, SetTextAreaLineHeight,
-        ResetTextAreaLineHeight };
+        ResetTextAreaLineHeight, SetTextAreaFontFeature, ResetTextAreaFontFeature };
     return &modifier;
 }
 
@@ -694,9 +709,9 @@ void SetOnTextAreaSelectionChange(ArkUINodeHandle node, void* extraParam)
     CHECK_NULL_VOID(frameNode);
     auto onSelectionChange = [node, extraParam](int start, int end) {
         ArkUINodeEvent event;
-        event.kind = TEXT_INPUT;
+        event.kind = COMPONENT_ASYNC_EVENT;
         event.extraParam = reinterpret_cast<intptr_t>(extraParam);
-        event.textInputEvent.subKind = ON_TEXTAREA_TEXT_SELECTION_CHANGE;
+        event.componentAsyncEvent.subKind = ON_TEXTAREA_TEXT_SELECTION_CHANGE;
         event.componentAsyncEvent.data[0].i32 = static_cast<int>(start);
         event.componentAsyncEvent.data[1].i32 = static_cast<int>(end);
         SendArkUIAsyncEvent(&event);

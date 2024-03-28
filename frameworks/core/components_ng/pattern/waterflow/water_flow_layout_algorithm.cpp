@@ -279,6 +279,7 @@ void WaterFlowLayoutAlgorithm::FillViewport(float mainSize, LayoutWrapper* layou
     auto layoutProperty = AceType::DynamicCast<WaterFlowLayoutProperty>(layoutWrapper->GetLayoutProperty());
     auto currentIndex = layoutInfo_.startIndex_;
     auto position = GetItemPosition(currentIndex);
+    bool fill = false;
     while (LessNotEqual(position.startMainPos + layoutInfo_.currentOffset_, mainSize) || layoutInfo_.jumpIndex_ >= 0) {
         auto itemWrapper = layoutWrapper->GetOrCreateChildByIndex(GetChildIndexWithFooter(currentIndex));
         if (!itemWrapper) {
@@ -309,8 +310,9 @@ void WaterFlowLayoutAlgorithm::FillViewport(float mainSize, LayoutWrapper* layou
             layoutInfo_.itemStart_ = false;
         }
         position = GetItemPosition(++currentIndex);
+        fill = true;
     }
-    layoutInfo_.endIndex_ = currentIndex - 1;
+    layoutInfo_.endIndex_ = !fill ? currentIndex : currentIndex - 1;
 
     layoutInfo_.itemEnd_ = GetChildIndexWithFooter(currentIndex) == layoutInfo_.childrenCount_;
     if (layoutInfo_.itemEnd_) {

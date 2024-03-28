@@ -943,6 +943,44 @@ HWTEST_F(RichEditorTestNg, RichEditorDelete003, TestSize.Level1)
 }
 
 /**
+ * @tc.name: RichEditorDeleteForwardEmoji
+ * @tc.desc: test DeleteForward Emoji And Emoji Selected
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorTestNg, RichEditorDeleteForwardEmoji, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    AddSpan("😄3😄😄");
+    richEditorPattern->caretPosition_ = 2;
+    richEditorPattern->textSelector_ = TextSelector(2, 5);
+    richEditorPattern->DeleteForward(1);
+    ASSERT_EQ(richEditorPattern->caretPosition_, 2);
+    richEditorPattern->DeleteForward(1);
+    ASSERT_EQ(richEditorPattern->caretPosition_, 2);
+}
+
+/**
+ * @tc.name: RichEditorDeleteBackwardEmoji
+ * @tc.desc: test DeleteBackward Emoji And Emoji Selected
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorTestNg, RichEditorDeleteBackwardEmoji, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    AddSpan("😄3😄😄");
+    richEditorPattern->caretPosition_ = 2;
+    richEditorPattern->textSelector_ = TextSelector(2, 5);
+    richEditorPattern->DeleteBackward(1);
+    ASSERT_EQ(richEditorPattern->caretPosition_, 2);
+    richEditorPattern->DeleteBackward(1);
+    ASSERT_EQ(richEditorPattern->caretPosition_, 0);
+}
+
+/**
  * @tc.name: RichEditorController001
  * @tc.desc: test add image span
  * @tc.type: FUNC

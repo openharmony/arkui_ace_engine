@@ -95,8 +95,8 @@ public:
         json->Put("buttonDirection", DialogButtonDirectionUtils::ConvertDialogButtonDirectionToString(
                                          propDialogButtonDirection_.value_or(DialogButtonDirection::AUTO))
                                          .c_str());
-        json->Put("width", propWidth_.value_or(CalcDimension(Dimension(-1))).Value());
-        json->Put("height", propHeight_.value_or(CalcDimension(Dimension(-1))).Value());
+        json->Put("width", propWidth_.value_or(Dimension(0, DimensionUnit::VP)).ToString().c_str());
+        json->Put("height", propHeight_.value_or(Dimension(0, DimensionUnit::VP)).ToString().c_str());
     }
 
 private:

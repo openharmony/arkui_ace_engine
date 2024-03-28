@@ -378,7 +378,6 @@ void ScrollBar::SetGestureEvent()
                 scrollBar->SetPressed(false);
                 scrollBar->MarkNeedRender();
             }
-            scrollBar->locationInfo_ = info.GetTouches().front().GetLocalLocation();
         });
     }
     if (!panRecognizer_) {
@@ -401,7 +400,7 @@ void ScrollBar::SetMouseEvent()
             scrollBar->PlayScrollBarAppearAnimation();
             if (info.GetButton() == MouseButton::LEFT_BUTTON && info.GetAction() == MouseAction::PRESS) {
                 scrollBar->isMousePressed_ = true;
-            } else if (info.GetButton() != MouseButton::LEFT_BUTTON) {
+            } else {
                 scrollBar->isMousePressed_ = false;
             }
         } else if (!scrollBar->IsPressed()) {
@@ -419,6 +418,7 @@ void ScrollBar::SetMouseEvent()
                 scrollBar->PlayScrollBarShrinkAnimation();
             }
         }
+        scrollBar->locationInfo_ = info.GetLocalLocation();
     });
     if (!longPressRecognizer_) {
         InitLongPressEvent();

@@ -19,6 +19,7 @@
 #include "core/components_ng/pattern/menu/menu_pattern.h"
 #include "core/components_ng/pattern/menu/menu_theme.h"
 #include "core/components_ng/pattern/menu/wrapper/menu_wrapper_pattern.h"
+#include "core/components_ng/manager/drag_drop/utils/drag_animation_helper.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -67,6 +68,17 @@ void ShowScaleAnimation(
             }
         },
         scaleOption.GetOnFinishEvent());
+}
+
+void ShowGatherAnimation(const RefPtr<FrameNode>& imageNode)
+{
+    auto mainPipeline = PipelineContext::GetMainPipelineContext();
+    CHECK_NULL_VOID(mainPipeline);
+    auto manager = mainPipeline->GetOverlayManager();
+    CHECK_NULL_VOID(manager);
+    mainPipeline->AddAfterRenderTask([imageNode, manager]() {
+        DragAnimationHelper::PlayGatherAnimation(imageNode, manager);
+    });
 }
 } // namespace
 void MenuPreviewPattern::OnModifyDone()
@@ -124,6 +136,7 @@ bool MenuPreviewPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& d
         auto menuWrapper = GetMenuWrapper();
         auto menuPattern = GetMenuPattern(menuWrapper);
         ShowScaleAnimation(context, menuTheme, menuPattern);
+        ShowGatherAnimation(host);
     }
     isFirstShow_ = false;
     return false;

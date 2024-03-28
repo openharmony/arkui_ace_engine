@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -68,6 +68,14 @@ struct AutoScrollParam {
     Offset eventOffset;
     bool isFirstRun_ = true;
 };
+enum class RecordType {
+    DEL_FORWARD = 0,
+    DEL_BACKWARD = 1,
+    INSERT = 2,
+    UNDO = 3,
+    REDO = 4,
+    DRAG = 5
+};
 
 class RichEditorPattern : public TextPattern, public ScrollablePattern, public TextInputClient {
     DECLARE_ACE_TYPE(RichEditorPattern, TextPattern, ScrollablePattern, TextInputClient);
@@ -85,13 +93,16 @@ public:
         int32_t deleteCaretPostion;
     };
 
+    ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(TextInputAction, TextInputAction)
+    TextInputAction GetDefaultTextInputAction() const;
+    
     // RichEditor needs softkeyboard, override function.
     bool NeedSoftKeyboard() const override
     {
         return true;
     }
 
-    bool CheckBlurReason();
+    BlurReason GetBlurReason();
 
     uint32_t GetSCBSystemWindowId();
 
@@ -187,10 +198,6 @@ public:
     void ClearOperationRecords();
     void ClearRedoOperationRecords();
     void AddOperationRecord(const OperationRecord& record);
-    void HandleOnEnter() override
-    {
-        PerformAction(TextInputAction::NEW_LINE, false);
-    }
     bool HandleOnEscape() override;
     void HandleOnUndoAction() override;
     void HandleOnRedoAction() override;
@@ -264,6 +271,7 @@ public:
     void CreateHandles() override;
     void HandleMenuCallbackOnSelectAll();
     void HandleOnSelectAll() override;
+    void OnCopyOperation(bool isUsingExternalKeyboard = false);
     void HandleOnCopy(bool isUsingExternalKeyboard = false) override;
     bool JudgeDraggable(GestureEvent& info);
     void CalculateCaretOffsetAndHeight(OffsetF& caretOffset, float& caretHeight);
@@ -477,6 +485,14 @@ public:
 
     Color GetSelectedBackgroundColor();
 
+    void SetCustomKeyboardOption(bool supportAvoidance);
+    void StopEditing();
+    void ResetKeyboardIfNeed();
+
+    void HandleOnEnter() override
+    {
+        PerformAction(GetTextInputActionValue(GetDefaultTextInputAction()), false);
+    }
 protected:
     bool CanStartAITask() override;
 
@@ -500,6 +516,7 @@ private:
     bool HandleUserLongPressEvent(GestureEvent& info);
     bool HandleUserGestureEvent(
         GestureEvent& info, std::function<bool(RefPtr<SpanItem> item, GestureEvent& info)>&& gestureFunc);
+    void HandleOnlyImageSelected(const Offset& globalOffset);
     void CalcCaretInfoByClick(const Offset& touchOffset);
     void HandleEnabled();
     void InitMouseEvent();
@@ -507,6 +524,8 @@ private:
     void OnCaretTwinkling();
     void StartTwinkling();
     void StopTwinkling();
+    void UpdateFontFeatureTextStyle(
+        RefPtr<SpanNode>& spanNode, struct UpdateSpanStyle& updateSpanStyle, TextStyle& textStyle);
     void UpdateTextStyle(RefPtr<SpanNode>& spanNode, struct UpdateSpanStyle updateSpanStyle, TextStyle textStyle);
     void UpdateSymbolStyle(RefPtr<SpanNode>& spanNode, struct UpdateSpanStyle updateSpanStyle, TextStyle textStyle);
     void UpdateImageStyle(RefPtr<FrameNode>& imageNode, const ImageSpanAttribute& imageStyle);
@@ -597,6 +616,27 @@ private:
     void SetCaretSpanIndex(int32_t index);
     bool HasSameTypingStyle(const RefPtr<SpanNode>& spanNode);
 
+    void GetReplacedSpan(RichEditorChangeValue& changeValue, int32_t& innerPosition, const std::string& insertValue,
+        int32_t textIndex, std::optional<TextStyle> style, bool isCreate = false, bool fixDel = true);
+    void GetReplacedSpanFission(RichEditorChangeValue& changeValue, int32_t& innerPosition, std::string& content,
+        int32_t startSpanIndex, int32_t offsetInSpan, std::optional<TextStyle> style);
+    void CreateSpanResult(RichEditorChangeValue& changeValue, int32_t& innerPosition, int32_t spanIndex,
+        int32_t offsetInSpan, int32_t endInSpan, std::string content, std::optional<TextStyle> style);
+    void SetTextStyleToRet(RichEditorAbstractSpanResult& retInfo, const TextStyle& textStyle);
+    void CalcInsertValueObj(TextInsertValueInfo& info, int textIndex, bool isCreate = false);
+    void GetDeletedSpan(RichEditorChangeValue& changeValue, int32_t& innerPosition, int32_t length,
+        RichEditorDeleteDirection direction = RichEditorDeleteDirection::FORWARD);
+    RefPtr<SpanItem> GetDelPartiallySpanItem(
+        RichEditorChangeValue& changeValue, std::string& originalStr, int32_t& originalPos);
+    void FixMoveDownChange(RichEditorChangeValue& changeValue, int32_t delLength);
+    bool BeforeChangeText(
+        RichEditorChangeValue& changeValue, const OperationRecord& record, RecordType type, int32_t delLength = 0);
+    void BeforeUndo(RichEditorChangeValue& changeValue, int32_t& innerPosition, const OperationRecord& record);
+    void BeforeRedo(RichEditorChangeValue& changeValue, int32_t& innerPosition, const OperationRecord& record);
+    void BeforeDrag(RichEditorChangeValue& changeValue, int32_t& innerPosition, const OperationRecord& record);
+    bool BeforeChangeText(RichEditorChangeValue& changeValue, const TextSpanOptions& options);
+    void AfterChangeText(RichEditorChangeValue& changeValue);
+
     // add for scroll.
     void UpdateChildrenOffset();
     void MoveFirstHandle(float offset);
@@ -650,6 +690,7 @@ private:
     void HandleOnDragInsertValueOperation(const std::string& insertValue);
     void HandleOnDragInsertValue(const std::string& str);
     void HandleOnEditChanged(bool isEditing);
+    void OnTextInputActionUpdate(TextInputAction value);
 
 #if defined(ENABLE_STANDARD_INPUT)
     sptr<OHOS::MiscServices::OnTextChangedListener> richEditTextChangeListener_;
@@ -723,6 +764,7 @@ private:
     TimeStamp lastAiPosTimeStamp_;
     bool adjusted_ = false;
     bool isShowMenu_ = true;
+    bool isOnlyImageDrag_ = false;
     bool isShowPlaceholder_ = false;
     bool isSingleHandle_ = false;
     bool isTouchCaret_ = false;
@@ -730,7 +772,13 @@ private:
     bool isDragSponsor_ = false;
     std::pair<int32_t, int32_t> dragRange_ { 0, 0 };
     bool isEditing_ = false;
+    int32_t dragPosition_ = 0;
+    // Action when "enter" pressed.
+    TextInputAction action_ = TextInputAction::NEW_LINE;
+    // What the keyboard appears.
+    TextInputType keyboard_ = TextInputType::UNSPECIFIED;
     ACE_DISALLOW_COPY_AND_MOVE(RichEditorPattern);
+    bool keyboardAvoidance_ = false;
 };
 } // namespace OHOS::Ace::NG
 

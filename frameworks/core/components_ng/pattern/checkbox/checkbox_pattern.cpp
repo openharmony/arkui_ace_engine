@@ -377,6 +377,14 @@ void CheckBoxPattern::UpdateState()
         SetPrePageId(pageNode->GetId());
     }
     SetPreGroup(group);
+    ChangeSelfStatusAndNotify(paintProperty, checkBoxGroupMap);
+}
+
+void CheckBoxPattern::ChangeSelfStatusAndNotify(const RefPtr<CheckBoxPaintProperty>& paintProperty,
+    std::unordered_map<std::string, std::list<WeakPtr<FrameNode>>> checkBoxGroupMap)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
     bool isSelected = false;
     if (paintProperty->HasCheckBoxSelect()) {
         isSelected = paintProperty->GetCheckBoxSelectValue();
@@ -509,6 +517,12 @@ void CheckBoxPattern::UpdateCheckBoxGroupStatusWhenDetach(const FrameNode* check
             isAllCheckBoxSelected = false;
         }
     }
+    ChangeGroupStatusAndNotify(checkBoxGroupNode, vec, haveCheckBoxSelected, isAllCheckBoxSelected);
+}
+
+void CheckBoxPattern::ChangeGroupStatusAndNotify(const RefPtr<FrameNode>& checkBoxGroupNode,
+    const std::vector<std::string>& vec, bool haveCheckBoxSelected, bool isAllCheckBoxSelected)
+{
     CHECK_NULL_VOID(checkBoxGroupNode);
     auto groupPaintProperty = checkBoxGroupNode->GetPaintProperty<CheckBoxGroupPaintProperty>();
     CHECK_NULL_VOID(groupPaintProperty);

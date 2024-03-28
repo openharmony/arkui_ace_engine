@@ -512,15 +512,20 @@ struct KeyEvent final {
         }
         return false;
     }
+ 
+    bool IsExactlyKey(const std::vector<KeyCode>& expectCodes) const
+    {
+        return (expectCodes.size() != pressedCodes.size()) ? false : IsKey(expectCodes);
+    }
 
-    bool IsKey(std::vector<KeyCode> expectCodes) const
+    bool IsKey(const std::vector<KeyCode>& expectCodes) const
     {
         if (expectCodes.size() > pressedCodes.size() || pressedCodes.empty()) {
             return false;
         }
-        auto curExpectCode = expectCodes.rbegin();
-        auto curPressedCode = pressedCodes.rbegin();
-        while (curExpectCode != expectCodes.rend()) {
+        auto curExpectCode = expectCodes.crbegin();
+        auto curPressedCode = pressedCodes.crbegin();
+        while (curExpectCode != expectCodes.crend()) {
             if (*curExpectCode != *curPressedCode) {
                 return false;
             }
@@ -585,6 +590,18 @@ struct KeyEvent final {
     std::vector<uint8_t> enhanceData;
     std::shared_ptr<MMI::KeyEvent> rawKeyEvent;
     std::string msg = "";
+
+    std::string ToString() const
+    {
+        std::stringstream ss;
+        ss << "code=" << static_cast<int32_t>(code) << ", ";
+        ss << "action=" << static_cast<int32_t>(action) << ", ";
+        ss << "pressedCodes=[";
+        std::for_each(pressedCodes.begin(), pressedCodes.end(),
+            [&ss](const KeyCode& code) { ss << static_cast<int32_t>(code) << ", "; });
+        ss << "]";
+        return ss.str();
+    }
 };
 
 class ACE_EXPORT KeyEventInfo : public BaseEventInfo {

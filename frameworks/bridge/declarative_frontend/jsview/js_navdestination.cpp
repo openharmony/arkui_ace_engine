@@ -140,7 +140,6 @@ void JSNavDestination::SetTitle(const JSCallbackInfo& info)
             NavDestinationModel::GetInstance()->SetCustomTitle(customNode);
         }
     } else {
-        TAG_LOGI(AceLogTag::ACE_NAVIGATION, "SetTitle is undefined");
         NavDestinationModel::GetInstance()->ParseCommonTitle(false, false, "", "");
     }
 }
@@ -264,7 +263,6 @@ void JSNavDestination::SetMenus(const JSCallbackInfo& info)
         }
         NavDestinationModel::GetInstance()->SetMenuItems(std::move(menuItems));
         return;
-
     } else if (info[0]->IsObject()) {
         auto builderObject = JSRef<JSObject>::Cast(info[0])->GetProperty("builder");
         if (builderObject->IsFunction()) {

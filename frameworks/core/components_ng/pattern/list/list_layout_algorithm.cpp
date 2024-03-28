@@ -709,9 +709,7 @@ void ListLayoutAlgorithm::MeasureList(LayoutWrapper* layoutWrapper)
             jumpIndex_ = totalItemCount_ - 1;
             scrollAlign_ = ScrollAlign::END;
         }
-        if (overScrollFeature_) {
-            UpdateSnapCenterContentOffset(layoutWrapper);
-        }
+        UpdateSnapCenterContentOffset(layoutWrapper);
         if (IsScrollSnapAlignCenter(layoutWrapper)) {
             midIndex = GetMidIndex(layoutWrapper, true);
             midItemMidPos = (itemPosition_[midIndex].startPos + itemPosition_[midIndex].endPos) / 2.0f -

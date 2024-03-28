@@ -1439,7 +1439,7 @@ bool TriggerKeyboardShortcut(const KeyEvent& event, const std::vector<NG::Keyboa
             // Handle the keys order problem.
             do {
                 keyCode.emplace_back(event.code);
-                if (!event.IsKey(keyCode)) {
+                if (!event.IsExactlyKey(keyCode)) {
                     keyCode.pop_back();
                     std::next_permutation(keyCode.begin(), keyCode.end());
                     continue;

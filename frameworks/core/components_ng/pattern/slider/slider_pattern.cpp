@@ -64,6 +64,9 @@ void SliderPattern::OnModifyDone()
     auto sliderPaintProperty = host->GetPaintProperty<SliderPaintProperty>();
     CHECK_NULL_VOID(sliderPaintProperty);
     showTips_ = sliderPaintProperty->GetShowTips().value_or(false);
+    sliderInteractionMode_ =
+        sliderPaintProperty->GetSliderInteractionModeValue(SliderModelNG::SliderInteraction::SLIDE_AND_CLICK);
+    minResponse_ = sliderPaintProperty->GetMinResponsiveDistance().value_or(0.0f);
     UpdateCircleCenterOffset();
     UpdateBlock();
     InitClickEvent(gestureHub);
@@ -256,9 +259,11 @@ bool SliderPattern::AtPanArea(const Offset& offset, const SourceType& sourceType
     auto sliderLayoutProperty = GetLayoutProperty<SliderLayoutProperty>();
     CHECK_NULL_RETURN(sliderLayoutProperty, false);
     auto sliderMode = sliderLayoutProperty->GetSliderMode().value_or(SliderModel::SliderMode::OUTSET);
-    if (sliderPaintProperty->GetBlockTypeValue(SliderModelNG::BlockStyleType::DEFAULT) !=
-            SliderModelNG::BlockStyleType::DEFAULT ||
-        sliderMode == SliderModel::SliderMode::NONE) {
+    if (sliderPaintProperty->GetSliderInteractionModeValue(SliderModelNG::SliderInteraction::SLIDE_AND_CLICK) ==
+        SliderModelNG::SliderInteraction::SLIDE_AND_CLICK &&
+        (sliderPaintProperty->GetBlockTypeValue(SliderModelNG::BlockStyleType::DEFAULT) !=
+        SliderModelNG::BlockStyleType::DEFAULT ||
+        sliderMode == SliderModel::SliderMode::NONE)) {
         return false;
     }
     bool flag = false;
@@ -290,7 +295,8 @@ void SliderPattern::HandleTouchEvent(const TouchEventInfo& info)
         fingerId_ = touchInfo.GetFingerId();
         axisFlag_ = false;
         // when Touch Down area is at Pan Area, value is unchanged.
-        if (!AtPanArea(touchInfo.GetLocalLocation(), info.GetSourceDevice())) {
+        allowDragEvents_ = sliderInteractionMode_ != SliderModelNG::SliderInteraction::SLIDE_ONLY;
+        if (allowDragEvents_ && !AtPanArea(touchInfo.GetLocalLocation(), info.GetSourceDevice())) {
             UpdateValueByLocalLocation(touchInfo.GetLocalLocation());
         }
         if (showTips_) {
@@ -325,6 +331,7 @@ void SliderPattern::InitializeBubble()
     CHECK_NULL_VOID(pipeline);
     auto sliderTheme = pipeline->GetTheme<SliderTheme>();
     CHECK_NULL_VOID(sliderTheme);
+    valueRatio_ = std::clamp(valueRatio_, 0.0f, 1.0f);
     std::string content = std::to_string(static_cast<int>(std::round(valueRatio_ * 100.0f))) + '%';
     auto sliderPaintProperty = GetPaintProperty<SliderPaintProperty>();
     sliderPaintProperty->UpdatePadding(sliderTheme->GetTipTextPadding());
@@ -336,11 +343,19 @@ void SliderPattern::InitializeBubble()
 
 void SliderPattern::HandlingGestureStart(const GestureEvent& info)
 {
+    eventSourceDevice_ = info.GetSourceDevice();
+    eventLocalLocation_ = info.GetLocalLocation();
+    allowDragEvents_ = (sliderInteractionMode_ != SliderModelNG::SliderInteraction::SLIDE_ONLY ||
+                        AtPanArea(eventLocalLocation_, eventSourceDevice_));
     if (info.GetInputEventType() != InputEventType::AXIS) {
-        UpdateValueByLocalLocation(info.GetLocalLocation());
-        UpdateBubble();
+        minResponseStartValue_ = value_;
+        isMinResponseExceedFlag_ = false;
+        if (allowDragEvents_ && isMinResponseExceed(eventLocalLocation_)) {
+            UpdateValueByLocalLocation(eventLocalLocation_);
+            UpdateBubble();
+        }
     }
-    panMoveFlag_ = true;
+    panMoveFlag_ = allowDragEvents_;
     UpdateMarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
@@ -372,20 +387,27 @@ void SliderPattern::HandlingGestureEvent(const GestureEvent& info)
         }
     } else {
         auto fingerList = info.GetFingerList();
+        panMoveFlag_ = false;
         if (fingerList.size() > 0) {
             for (auto fingerInfo : fingerList) {
                 if (fingerInfo.fingerId_ == fingerId_) {
-                    UpdateValueByLocalLocation(fingerInfo.localLocation_);
-                    UpdateBubble();
+                    if (allowDragEvents_ && isMinResponseExceed(fingerInfo.localLocation_)) {
+                        UpdateValueByLocalLocation(fingerInfo.localLocation_);
+                        UpdateBubble();
+                        panMoveFlag_ = true;
+                        UpdateMarkDirtyNode(PROPERTY_UPDATE_RENDER);
+                    }
                 }
             }
         } else {
-            UpdateValueByLocalLocation(info.GetLocalLocation());
-            UpdateBubble();
+            if (allowDragEvents_ && isMinResponseExceed(info.GetLocalLocation())) {
+                UpdateValueByLocalLocation(info.GetLocalLocation());
+                UpdateBubble();
+                panMoveFlag_ = true;
+                UpdateMarkDirtyNode(PROPERTY_UPDATE_RENDER);
+            }
         }
     }
-    panMoveFlag_ = true;
-    UpdateMarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
 void SliderPattern::HandledGestureEvent()
@@ -411,6 +433,43 @@ OffsetF SliderPattern::CalculateGlobalSafeOffset()
     return overlayGlobalOffset;
 }
 
+bool SliderPattern::isMinResponseExceed(const std::optional<Offset>& localLocation)
+{
+    if (isMinResponseExceedFlag_) {
+        return true;
+    }
+    if (LessOrEqual(minResponse_, 0.0f)) {
+        isMinResponseExceedFlag_ = true;
+        return true;
+    }
+    CHECK_NULL_RETURN(allowDragEvents_, false);
+    CHECK_NULL_RETURN(localLocation.has_value(), false);
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, false);
+    auto sliderLayoutProperty = host->GetLayoutProperty<SliderLayoutProperty>();
+    CHECK_NULL_RETURN(sliderLayoutProperty, false);
+    auto sliderPaintProperty = host->GetPaintProperty<SliderPaintProperty>();
+    CHECK_NULL_RETURN(sliderPaintProperty, false);
+    const auto& content = GetHost()->GetGeometryNode()->GetContent();
+    CHECK_NULL_RETURN(content, false);
+    auto contentOffset = content->GetRect().GetOffset();
+    float length = sliderLayoutProperty->GetDirection().value_or(Axis::HORIZONTAL) == Axis::HORIZONTAL
+                       ? static_cast<float>(localLocation->GetX() - contentOffset.GetX())
+                       : static_cast<float>(localLocation->GetY() - contentOffset.GetY());
+    float touchLength =
+        GetReverseValue(sliderLayoutProperty) ? borderBlank_ + sliderLength_ - length : length - borderBlank_;
+    float min = sliderPaintProperty->GetMin().value_or(SLIDER_MIN);
+    float max = sliderPaintProperty->GetMax().value_or(SLIDER_MAX);
+    CHECK_NULL_RETURN(GreatNotEqual(sliderLength_, 0.0f), false);
+    float valueRatio = touchLength / sliderLength_;
+    float value = valueRatio * (max - min) + min;
+    if (GreatOrEqual(std::abs(minResponseStartValue_ - value), minResponse_)) {
+        isMinResponseExceedFlag_ = true;
+        return true;
+    }
+    return false;
+}
+
 void SliderPattern::UpdateValueByLocalLocation(const std::optional<Offset>& localLocation)
 {
     CHECK_NULL_VOID(localLocation.has_value());
@@ -428,15 +487,16 @@ void SliderPattern::UpdateValueByLocalLocation(const std::optional<Offset>& loca
                        : static_cast<float>(localLocation->GetY() - contentOffset.GetY());
     float touchLength =
         GetReverseValue(sliderLayoutProperty) ? borderBlank_ + sliderLength_ - length : length - borderBlank_;
-    float min = sliderPaintProperty->GetMin().value_or(0.0f);
-    float max = sliderPaintProperty->GetMax().value_or(100.0f);
+    float min = sliderPaintProperty->GetMin().value_or(SLIDER_MIN);
+    float max = sliderPaintProperty->GetMax().value_or(SLIDER_MAX);
     touchLength = std::clamp(touchLength, 0.0f, sliderLength_);
     CHECK_NULL_VOID(sliderLength_ != 0);
     valueRatio_ = touchLength / sliderLength_;
     CHECK_NULL_VOID(stepRatio_ != 0);
     valueRatio_ = NearEqual(valueRatio_, 1) ? 1 : std::round(valueRatio_ / stepRatio_) * stepRatio_;
+
     float oldValue = value_;
-    value_ = valueRatio_ * (max - min) + min;
+    value_ = std::clamp(valueRatio_ * (max - min) + min, min, max);
     sliderPaintProperty->UpdateValue(value_);
     valueChangeFlag_ = !NearEqual(oldValue, value_);
     UpdateCircleCenterOffset();
@@ -449,6 +509,7 @@ void SliderPattern::UpdateTipsValue()
     CHECK_NULL_VOID(bubbleFlag_);
     auto frameNode = GetHost();
     CHECK_NULL_VOID(frameNode);
+    valueRatio_ = std::clamp(valueRatio_, 0.0f, 1.0f);
     std::string content = std::to_string(static_cast<int>(std::round(valueRatio_ * 100.0f))) + '%';
     frameNode->GetPaintProperty<SliderPaintProperty>()->UpdateContent(content);
 }
@@ -736,8 +797,8 @@ bool SliderPattern::MoveStep(int32_t stepCount)
     auto sliderPaintProperty = host->GetPaintProperty<SliderPaintProperty>();
     CHECK_NULL_RETURN(sliderPaintProperty, false);
     float step = sliderPaintProperty->GetStep().value_or(1.0f);
-    float min = sliderPaintProperty->GetMin().value_or(0.0f);
-    float max = sliderPaintProperty->GetMax().value_or(100.0f);
+    float min = sliderPaintProperty->GetMin().value_or(SLIDER_MIN);
+    float max = sliderPaintProperty->GetMax().value_or(SLIDER_MAX);
     if (NearZero(step)) {
         return false;
     }

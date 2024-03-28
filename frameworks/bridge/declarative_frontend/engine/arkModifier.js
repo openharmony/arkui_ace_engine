@@ -12,13 +12,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-/// <reference path='./import.ts' />
+
 function applyAndMergeModifier(instance, modifier) {
   let myMap = modifier._modifiersWithKeys;
-  myMap.setOnChange(() => {
+  myMap.setOnChange((value) => {
     modifier._changed = !modifier._changed;
   });
-  // @ts-ignore
   let component = instance;
   mergeMaps(component._modifiersWithKeys, modifier._modifiersWithKeys);
 }
@@ -35,6 +34,66 @@ function mergeMaps(stageMap, newMap) {
   });
   return stageMap;
 }
+class ModifierUtils {
+  static copyModifierWithKey(obj) {
+    let newObj = { ...obj };
+    newObj.applyStage = obj === null || obj === void 0 ? void 0 : obj.applyStage;
+    newObj.applyPeer = obj === null || obj === void 0 ? void 0 : obj.applyPeer;
+    newObj.checkObjectDiff = obj === null || obj === void 0 ? void 0 : obj.checkObjectDiff;
+    return newObj;
+  }
+  static mergeMaps(stageMap, newMap) {
+    newMap.forEach((value, key) => {
+      stageMap.set(key, copyModifierWithKey(value));
+    });
+    return stageMap;
+  }
+  static applyAndMergeModifier(instance, modifier) {
+    let component = instance;
+    mergeMaps(component._modifiersWithKeys, modifier._modifiersWithKeys);
+  }
+  static applySetOnChange(modifier) {
+    let myMap = modifier._modifiersWithKeys;
+    if (modifier._classType === ModifierType.STATE) {
+      myMap.setOnChange((value) => {
+        this.putDirtyModifier(modifier, value);
+      });
+    }
+    else {
+      myMap.setOnChange((value) => {
+        modifier._changed = !modifier._changed;
+      });
+    }
+  }
+  static putDirtyModifier(arkModifier, attributeModifierWithKey) {
+    attributeModifierWithKey.value = attributeModifierWithKey.stageValue;
+    if (!arkModifier._weakPtr.invalid()) {
+      attributeModifierWithKey.applyPeer(arkModifier.nativePtr, (attributeModifierWithKey.stageValue === undefined || attributeModifierWithKey.stageValue === null));
+    }
+    this.dirtyComponentSet.add(arkModifier);
+    if (!this.dirtyFlag) {
+      this.dirtyFlag = true;
+      this.requestFrame();
+    }
+  }
+  static requestFrame() {
+    getUINativeModule().frameNode.registerFrameCallback(() => {
+      this.dirtyComponentSet.forEach(item => {
+        if (item._nativePtrChanged && !item._weakPtr.invalid()) {
+          item._modifiersWithKeys.forEach((value, key) => {
+            value.applyPeer(item.nativePtr, false);
+          })
+          item._nativePtrChanged = false;
+        }
+        getUINativeModule().frameNode.markDirty(item.nativePtr, 0b100);
+      });
+      this.dirtyComponentSet.clear();
+      this.dirtyFlag = false;
+    });
+  }
+}
+ModifierUtils.dirtyComponentSet = new Set();
+ModifierUtils.dirtyFlag = false;
 class ModifierMap {
   constructor() {
     this.map_ = new Map();
@@ -57,7 +116,7 @@ class ModifierMap {
   set(key, value) {
     const _a = this.changeCallback;
     this.map_.set(key, value);
-    _a === null || _a === void 0 ? void 0 : _a.call(this);
+    _a === null || _a === void 0 ? void 0 : _a.call(this, value);
     return this;
   }
   get size() {
@@ -79,18 +138,50 @@ class ModifierMap {
     return 'ModifierMapTag';
   }
   setOnChange(callback) {
-    if (this.changeCallback === undefined) {
-      this.changeCallback = callback;
-    }
+    this.changeCallback = callback;
   }
 }
+class AttributeUpdater {
+  constructor() {
+    this._state = AttributeUpdater.StateEnum.INIT;
+    this._attribute = null;
+    this._isAttributeUpdater = true;
+  }
+  get isAttributeUpdater() {
+    return this._isAttributeUpdater;
+  }
+  get attribute() {
+    return this._attribute;
+  }
+  set attribute(value) {
+    if (!this._attribute && value) {
+      this._attribute = value;
+    }
+  }
+  get modifierState() {
+    return this._state;
+  }
+  set modifierState(value) {
+    this._state = value;
+  }
+  initializeModifier(instance) { }
+}
+AttributeUpdater.StateEnum = {
+  INIT: 0,
+  UPDATE: 1
+};
 class CommonModifier extends ArkComponent {
-  constructor(nativePtr) {
+  constructor(classType, nativePtr) {
     super(nativePtr);
     this._modifiersWithKeys = new ModifierMap();
+    this._classType = classType;
+    if (classType === modifierType.STATE) {
+      this._weakPtr = getUINativeModule().nativeUtils.createNativeWeakRef(nativePtr);
+    }
   }
   applyNormalAttribute(instance) {
-    applyAndMergeModifier(instance, this);
+    ModifierUtils.applySetOnChange(this);
+    ModifierUtils.applyAndMergeModifier(instance, this);
   }
 }
 class AlphabetIndexerModifier extends ArkAlphabetIndexerComponent {
@@ -112,12 +203,13 @@ class BlankModifier extends ArkBlankComponent {
   }
 }
 class ButtonModifier extends ArkButtonComponent {
-  constructor(nativePtr) {
-    super(nativePtr);
+  constructor(nativePtr, classType) {
+    super(nativePtr, classType);
     this._modifiersWithKeys = new ModifierMap();
   }
   applyNormalAttribute(instance) {
-    applyAndMergeModifier(instance, this);
+    ModifierUtils.applySetOnChange(this);
+    ModifierUtils.applyAndMergeModifier(instance, this);
   }
 }
 class CalendarPickerModifier extends ArkCalendarPickerComponent {
@@ -145,6 +237,16 @@ class CheckboxGroupModifier extends ArkCheckboxGroupComponent {
   }
   applyNormalAttribute(instance) {
     applyAndMergeModifier(instance, this);
+  }
+}
+class CircleModifier extends ArkCircleComponent {
+  constructor(nativePtr, classType) {
+    super(nativePtr, classType);
+    this._modifiersWithKeys = new ModifierMap();
+  }
+  applyNormalAttribute(instance) {
+    ModifierUtils.applySetOnChange(this);
+    ModifierUtils.applyAndMergeModifier(instance, this);
   }
 }
 class ColumnModifier extends ArkColumnComponent {
@@ -290,7 +392,7 @@ class ImageAnimatorModifier extends ArkImageAnimatorComponent {
   }
   applyNormalAttribute(instance) {
     let myMap = this._modifiersWithKeys;
-    myMap.setOnChange(() => {
+    myMap.setOnChange((value) => {
       this._changed = !this._changed;
     });
     let component = instance;
@@ -505,12 +607,13 @@ class RatingModifier extends ArkRatingComponent {
   }
 }
 class RectModifier extends ArkRectComponent {
-  constructor(nativePtr) {
-    super(nativePtr);
+  constructor(nativePtr, classType) {
+    super(nativePtr, classType);
     this._modifiersWithKeys = new ModifierMap();
   }
   applyNormalAttribute(instance) {
-    applyAndMergeModifier(instance, this);
+    ModifierUtils.applySetOnChange(this);
+    ModifierUtils.applyAndMergeModifier(instance, this);
   }
 }
 class RichEditorModifier extends ArkRichEditorComponent {
@@ -610,12 +713,13 @@ class SpanModifier extends ArkSpanComponent {
   }
 }
 class StackModifier extends ArkStackComponent {
-  constructor(nativePtr) {
-    super(nativePtr);
+  constructor(nativePtr, classType) {
+    super(nativePtr, classType);
     this._modifiersWithKeys = new ModifierMap();
   }
   applyNormalAttribute(instance) {
-    applyAndMergeModifier(instance, this);
+    ModifierUtils.applySetOnChange(this);
+    ModifierUtils.applyAndMergeModifier(instance, this);
   }
 }
 class StepperItemModifier extends ArkStepperItemComponent {
@@ -655,12 +759,13 @@ class TextAreaModifier extends ArkTextAreaComponent {
   }
 }
 class TextModifier extends ArkTextComponent {
-  constructor(nativePtr) {
-    super(nativePtr);
+  constructor(nativePtr, classType) {
+    super(nativePtr, classType);
     this._modifiersWithKeys = new ModifierMap();
   }
   applyNormalAttribute(instance) {
-    applyAndMergeModifier(instance, this);
+    ModifierUtils.applySetOnChange(this);
+    ModifierUtils.applyAndMergeModifier(instance, this);
   }
 }
 class TextClockModifier extends ArkTextClockComponent {
@@ -736,7 +841,7 @@ class WaterFlowModifier extends ArkWaterFlowComponent {
   }
 }
 
-export default { CommonModifier, AlphabetIndexerModifier, BlankModifier, ButtonModifier, CalendarPickerModifier, CheckboxModifier, CheckboxGroupModifier,
+export default { CommonModifier, AlphabetIndexerModifier, BlankModifier, ButtonModifier, CalendarPickerModifier, CheckboxModifier, CheckboxGroupModifier, CircleModifier,
   ColumnModifier, ColumnSplitModifier, CounterModifier, DataPanelModifier, DatePickerModifier, DividerModifier, FormComponentModifier, GaugeModifier,
   GridModifier, GridColModifier, GridItemModifier, GridRowModifier, HyperlinkModifier, ImageAnimatorModifier, ImageModifier, ImageSpanModifier, LineModifier,
   ListModifier, ListItemModifier, ListItemGroupModifier, LoadingProgressModifier, MarqueeModifier, MenuModifier, MenuItemModifier, NavDestinationModifier,
@@ -744,4 +849,4 @@ export default { CommonModifier, AlphabetIndexerModifier, BlankModifier, ButtonM
   ProgressModifier, QRCodeModifier, RadioModifier, RatingModifier, RectModifier, RichEditorModifier, RowModifier, RowSplitModifier, ScrollModifier,
   SearchModifier, SelectModifier, ShapeModifier, SideBarContainerModifier, SliderModifier, SpanModifier, StackModifier, StepperItemModifier, SwiperModifier,
   TabsModifier, TextAreaModifier, TextModifier, TextClockModifier, TextInputModifier, TextPickerModifier, TextTimerModifier, TimePickerModifier, ToggleModifier,
-  VideoModifier, WaterFlowModifier };
+  VideoModifier, WaterFlowModifier, ModifierUtils, AttributeUpdater };

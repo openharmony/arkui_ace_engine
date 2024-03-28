@@ -153,10 +153,10 @@ std::shared_ptr<RSPath> TextDragPattern::GenerateClipPath()
     auto selectPosition = GetSelectPosition();
     float startX = selectPosition.startX_;
     float startY = selectPosition.startY_;
-    float endX = selectPosition.endX_;
-    float endY = selectPosition.endY_;
     float textStart = GetTextRect().GetX();
     float textEnd = textStart + GetTextRect().Width();
+    float endX = selectPosition.endX_;
+    float endY = selectPosition.endY_;
     auto lineHeight = GetLineHeight();
     if (OneLineSelected()) {
         path->MoveTo(startX, endY);
@@ -165,6 +165,7 @@ std::shared_ptr<RSPath> TextDragPattern::GenerateClipPath()
         path->LineTo(startX, endY + lineHeight);
         path->LineTo(startX, endY);
     } else {
+        endX = std::min(selectPosition.endX_, textEnd);
         path->MoveTo(startX, startY);
         path->LineTo(textEnd, startY);
         path->LineTo(textEnd, endY);

@@ -128,7 +128,10 @@ public:
 
     RefPtr<UINode> GetNavDestinationNode(const std::string& name)
     {
-        return navigationStack_->Get(name);
+        RefPtr<UINode> uiNode;
+        int32_t index;
+        navigationStack_->Get(name, uiNode, index);
+        return uiNode;
     }
 
     RefPtr<UINode> GetNavDestinationNode()
@@ -345,6 +348,16 @@ public:
         NavDestinationLifecycle lifecycle, bool isNavigationChanged);
     void AbortAnimation(RefPtr<NavigationGroupNode>& hostNode);
 
+    void SetParentCustomNode(const RefPtr<UINode>& parentNode)
+    {
+        parentNode_ = parentNode;
+    }
+
+    WeakPtr<UINode> GetParentCustomNode() const
+    {
+        return parentNode_;
+    }
+
 private:
     void CheckTopNavPathChange(const std::optional<std::pair<std::string, RefPtr<UINode>>>& preTopNavPath,
         const std::optional<std::pair<std::string, RefPtr<UINode>>>& newTopNavPath);
@@ -425,6 +438,7 @@ private:
     bool needSyncWithJsStack_ = false;
     std::optional<std::pair<std::string, RefPtr<UINode>>> preTopNavPath_;
     RefPtr<NavDestinationContext> preContext_;
+    WeakPtr<UINode> parentNode_;
     int32_t preStackSize_ = 0;
 };
 

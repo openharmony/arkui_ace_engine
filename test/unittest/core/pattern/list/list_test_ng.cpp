@@ -202,6 +202,17 @@ void ListTestNg::CreateGroup(int32_t groupNumber, Axis axis)
     }
 }
 
+void ListTestNg::CreateGroupWithItem(int32_t groupNumber, Axis axis)
+{
+    for (int32_t index = 0; index < groupNumber; index++) {
+        if (index & 1) {
+            CreateItem(1, axis);
+        } else {
+            CreateGroup(1, axis);
+        }
+    }
+}
+
 void ListTestNg::CreateItemWithSwipe(
     std::function<void()> startAction, std::function<void()> endAction, V2::SwipeEdgeEffect effect)
 {

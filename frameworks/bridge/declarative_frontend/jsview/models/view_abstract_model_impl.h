@@ -238,11 +238,12 @@ public:
         std::function<void()>&& onDisappear, std::function<void()>&& onWillAppear,
         std::function<void()>&& onWillDisappear, const NG::ContentCoverParam& contentCoverParam) override
     {}
-    void BindSheet(bool isShow, std::function<void(const std::string&)>&& callback,
-        std::function<void()>&& buildFunc, std::function<void()>&& titleBuildFunc, NG::SheetStyle& sheetStyle,
-        std::function<void()>&& onAppear, std::function<void()>&& onDisappear,
-        std::function<void()>&& shouldDismiss, std::function<void()>&& onWillAppear,
-        std::function<void()>&& onWillDisappear) override {}
+    void BindSheet(bool isShow, std::function<void(const std::string&)>&& callback, std::function<void()>&& buildFunc,
+        std::function<void()>&& titleBuildFunc, NG::SheetStyle& sheetStyle, std::function<void()>&& onAppear,
+        std::function<void()>&& onDisappear, std::function<void()>&& shouldDismiss,
+        std::function<void()>&& onWillAppear, std::function<void()>&& onWillDisappear,
+        std::function<void(const float)>&& onHeightDidChange) override
+    {}
     void DismissSheet() override {}
     void DismissContentCover() override {}
 

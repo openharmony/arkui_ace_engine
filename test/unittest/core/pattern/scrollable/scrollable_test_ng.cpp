@@ -1918,4 +1918,34 @@ HWTEST_F(ScrollableTestNg, NeedSplitScroll001, TestSize.Level1)
     scrollPn->refreshCoordination_ = AceType::MakeRefPtr<RefreshCoordination>(scrollableNode);
     EXPECT_FALSE(scrollPn->NeedSplitScroll(overScrollOffset, SCROLL_FROM_UPDATE));
 }
+
+/**
+ * @tc.name: Fling001
+ * @tc.desc: Test nested Fling
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollableTestNg, Fling001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Initialize ScrollablePattern type pointer
+     * @tc.expected: Pointer is not nullptr
+     */
+    auto scrollPn = scroll_->GetPattern<PartiallyMockedScrollable>();
+    EXPECT_TRUE(scrollPn);
+    
+    /**
+     * @tc.steps: step2. Call the Fling method and the flingVelocity is 3000
+     * @tc.expected: The values of finalPosition_ and finalPosition are the same
+     */
+    float correctVelocity = 3000.0f;
+    float friction = 0.6f;
+    float frictionScale = -4.2f;
+    float finalPosition = correctVelocity / (friction * -frictionScale);
+    auto scrollableEvent = scrollPn->GetScrollableEvent();
+    auto scrollable = scrollableEvent->GetScrollable();
+    scrollable->SetFriction(friction);
+    scrollPn->Fling(correctVelocity);
+    float finalPosition_= scrollable->finalPosition_;
+    EXPECT_EQ(finalPosition_, finalPosition);
+}
 } // namespace OHOS::Ace::NG

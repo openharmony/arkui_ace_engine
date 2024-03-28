@@ -111,24 +111,24 @@ public:
         return color_;
     }
 
-    void SetStrokeColor(uint32_t strockColor)
+    void SetStrokeColor(uint32_t strokeColor)
     {
-        strockColor_ = strockColor;
+        strokeColor_ = strokeColor;
     }
 
     uint32_t GetStrokeColor() const
     {
-        return strockColor_;
+        return strokeColor_;
     }
 
-    void SetStrokeWidth(float strockWidth)
+    void SetStrokeWidth(float strokeWidth)
     {
-        strockWidth_ = strockWidth;
+        strokeWidth_ = strokeWidth;
     }
 
     float GetStrokeWidth() const
     {
-        return strockWidth_;
+        return strokeWidth_;
     }
 
     bool operator==(const BasicShape& other) const
@@ -156,8 +156,8 @@ protected:
     DimensionOffset offset_;
     DimensionOffset position_;
     Color color_;
-    uint32_t strockColor_;
-    float strockWidth_;
+    uint32_t strokeColor_;
+    float strokeWidth_;
 };
 
 // inset(<top> <right> <bottom> <left> round <top-radius> <right-radius> <bottom-radius> <left-radius>)

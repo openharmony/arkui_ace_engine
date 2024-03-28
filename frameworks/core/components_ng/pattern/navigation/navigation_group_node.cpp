@@ -951,6 +951,18 @@ void NavigationGroupNode::OnAttachToMainTree(bool recursive)
         pattern->AttachNavigationStackToParent();
         pattern->AddToDumpManager();
     }
+    auto parent = GetParent();
+    while (parent) {
+        if (parent->GetTag() == V2::JS_VIEW_ETS_TAG) {
+            break;
+        }
+        parent = parent->GetParent();
+    }
+    if (!parent) {
+        TAG_LOGE(AceLogTag::ACE_NAVIGATION, "parent custom node is nullptr");
+        return;
+    }
+    pattern->SetParentCustomNode(parent);
 }
 
 void NavigationGroupNode::FireHideNodeChange(NavDestinationLifecycle lifecycle)

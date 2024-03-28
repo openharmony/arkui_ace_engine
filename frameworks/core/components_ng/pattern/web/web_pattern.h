@@ -457,6 +457,8 @@ public:
         return layoutMode_;
     }
     void OnRootLayerChanged(int width, int height);
+    void ReleaseResizeHold();
+    bool GetPendingSizeStatus();
     int GetRootLayerWidth() const
     {
         return rootLayerWidth_;
@@ -471,6 +473,7 @@ public:
     RefPtr<WebAccessibilityNode> GetAccessibilityNodeByFocusMove(int64_t accessibilityId, int32_t direction);
     void ExecuteAction(int64_t accessibilityId, AceAction action) const;
     void SetAccessibilityState(bool state);
+    void OnTooltip(const std::string& tooltip);
     bool IsRootNeedExportTexture();
 
 private:
@@ -648,6 +651,7 @@ private:
     bool FilterScrollEventHandleOffset(const float offset);
     bool FilterScrollEventHandlevVlocity(const float velocity);
     void UpdateFlingReachEdgeState(const float value, bool status);
+    void CalculateToolTipMargin(RefPtr<FrameNode>& textNode, MarginProperty& textMargin);
     void RegisterVisibleAreaChangeCallback();
 
     std::optional<std::string> webSrc_;
@@ -679,8 +683,7 @@ private:
     std::shared_ptr<FullScreenEnterEvent> fullScreenExitHandler_ = nullptr;
     bool needOnFocus_ = false;
     Size drawSize_;
-    Size lastSyncRenderSize_;
-    int64_t lastTimeStamp_ = 0;
+    Size rootLayerChangeSize_;
     Size drawSizeCache_;
     bool needUpdateWeb_ = true;
     bool isFocus_ = false;
@@ -698,6 +701,10 @@ private:
     bool selectPopupMenuShowing_ = false;
     bool isCurrentStartHandleDragging_ = false;
     bool isPopup_ = false;
+    int32_t tooltipTextId_ = -1;
+    bool tooltipEnabled_ = false;
+    int32_t mouseHoveredX_ = -1;
+    int32_t mouseHoveredY_ = -1;
     int32_t parentNWebId_ = -1;
     bool isInWindowDrag_ = false;
     bool isWaiting_ = false;
@@ -710,14 +717,12 @@ private:
     OffsetF relativeOffsetOfScroll_;
     bool isFirstFlingScrollVelocity_ = true;
     bool isNeedUpdateScrollAxis_ = true;
-    bool isNeedUpdateFilterScrolAxis_ = true;
     bool isScrollStarted_ = false;
     WebLayoutMode layoutMode_ = WebLayoutMode::NONE;
     bool scrollState_ = false;
     Axis axis_ = Axis::FREE;
     Axis syncAxis_ = Axis::NONE;
     Axis expectedScrollAxis_ = Axis::FREE;
-    Axis expectedFilterScrollAxis_ = Axis::FREE;
     int32_t rootLayerWidth_ = 0;
     int32_t rootLayerHeight_ = 0;
     int32_t drawRectWidth_ = 0;
@@ -725,7 +730,6 @@ private:
     std::unordered_map<Axis, WeakPtr<NestableScrollContainer>> parentsMap_;
     RefPtr<WebDelegate> delegate_;
     RefPtr<WebDelegateObserver> observer_;
-    std::set<OHOS::Ace::KeyCode> KeyCodeSet_;
     std::optional<ScriptItems> onDocumentStartScriptItems_;
     std::optional<ScriptItems> onDocumentEndScriptItems_;
     bool isOfflineMode_ = false;

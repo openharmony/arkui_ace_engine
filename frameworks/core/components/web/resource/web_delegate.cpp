@@ -3755,6 +3755,47 @@ void WebDelegate::OnWebviewShow()
         TaskExecutor::TaskType::PLATFORM);
 }
 
+void WebDelegate::OnRenderToForeground()
+{
+    TAG_LOGD(AceLogTag::ACE_WEB, "WebDelegate::OnRenderToForeground");
+    auto context = context_.Upgrade();
+    if (!context) {
+        return;
+    }
+    context->GetTaskExecutor()->PostTask(
+        [weak = WeakClaim(this)]() {
+            auto delegate = weak.Upgrade();
+            if (!delegate) {
+                return;
+            }
+            if (delegate->nweb_) {
+                TAG_LOGD(AceLogTag::ACE_WEB, "delegate->nweb_->OnRenderToForeground");
+                delegate->nweb_->OnRenderToForeground();
+            }
+        },
+        TaskExecutor::TaskType::PLATFORM);
+}
+
+void WebDelegate::OnRenderToBackground()
+{
+    TAG_LOGD(AceLogTag::ACE_WEB, "WebDelegate::OnRenderToBackground");
+    auto context = context_.Upgrade();
+    if (!context) {
+        return;
+    }
+    context->GetTaskExecutor()->PostTask(
+        [weak = WeakClaim(this)]() {
+            auto delegate = weak.Upgrade();
+            if (!delegate) {
+                return;
+            }
+            if (delegate->nweb_) {
+                TAG_LOGD(AceLogTag::ACE_WEB, "delegate->nweb_->OnRenderToBackground");
+                delegate->nweb_->OnRenderToBackground();
+            }
+        },
+        TaskExecutor::TaskType::PLATFORM);
+}
 void WebDelegate::SetShouldFrameSubmissionBeforeDraw(bool should)
 {
     auto context = context_.Upgrade();
@@ -4643,6 +4684,13 @@ RefPtr<WebResponse> WebDelegate::OnInterceptRequest(const std::shared_ptr<BaseEv
     return result;
 }
 
+void WebDelegate::OnTooltip(const std::string& tooltip)
+{
+    auto webPattern = webPattern_.Upgrade();
+    CHECK_NULL_VOID(webPattern);
+    webPattern->OnTooltip(tooltip);
+}
+
 void WebDelegate::OnRequestFocus()
 {
     if (onRequestFocusV2_) {
@@ -5378,6 +5426,15 @@ void WebDelegate::SetDrawRect(int32_t x, int32_t y, int32_t width, int32_t heigh
         nweb_->SetDrawRect(x, y, width, height);
     }
 }
+
+bool WebDelegate::GetPendingSizeStatus()
+{
+    ACE_DCHECK(nweb_ != nullptr);
+    if (nweb_) {
+        return nweb_->GetPendingSizeStatus();
+    }
+    return false;
+}
 #endif
 
 std::string WebDelegate::GetUrlStringParam(const std::string& param, const std::string& name) const
@@ -5927,6 +5984,13 @@ void WebDelegate::OnRootLayerChanged(int width, int height)
     webPattern->OnRootLayerChanged(width, height);
 }
 
+void WebDelegate::ReleaseResizeHold()
+{
+    auto webPattern = webPattern_.Upgrade();
+    CHECK_NULL_VOID(webPattern);
+    webPattern->ReleaseResizeHold();
+}
+
 void WebDelegate::SetVirtualKeyBoardArg(int32_t width, int32_t height, double keyboard)
 {
     if (nweb_) {
@@ -5953,6 +6017,12 @@ void WebDelegate::ScrollBy(float deltaX, float deltaY)
 {
     CHECK_NULL_VOID(nweb_);
     nweb_->ScrollBy(deltaX, deltaY);
+}
+
+void WebDelegate::ScrollByRefScreen(float deltaX, float deltaY, float vx, float vy)
+{
+    CHECK_NULL_VOID(nweb_);
+    nweb_->ScrollByRefScreen(deltaX, deltaY, vx, vy);
 }
 
 void WebDelegate::SetJavaScriptItems(const ScriptItems& scriptItems, const ScriptItemType& type)

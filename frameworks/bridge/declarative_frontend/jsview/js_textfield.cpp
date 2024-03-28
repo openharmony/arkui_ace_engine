@@ -44,6 +44,7 @@
 #include "core/components_ng/pattern/text_field/text_field_model.h"
 #include "core/components_ng/pattern/text_field/text_field_model_ng.h"
 #include "core/pipeline/pipeline_base.h"
+#include "core/components/common/properties/text_style_parser.h"
 
 namespace OHOS::Ace {
 
@@ -1238,9 +1239,17 @@ void JSTextField::SetCustomKeyboard(const JSCallbackInfo& info)
     if (info.Length() < 1 || !info[0]->IsObject()) {
         return;
     }
+    bool supportAvoidance = false;
+    if (info.Length() == 2 && info[1]->IsObject()) {  //  2 here refers to the number of parameters
+        auto paramObject = JSRef<JSObject>::Cast(info[1]);
+        auto isSupportAvoidance = paramObject->GetProperty("supportAvoidance");
+        if (!isSupportAvoidance->IsNull() && isSupportAvoidance->IsBoolean()) {
+            supportAvoidance = isSupportAvoidance->ToBoolean();
+        }
+    }
     std::function<void()> buildFunc;
     if (ParseJsCustomKeyboardBuilder(info, 0, buildFunc)) {
-        TextFieldModel::GetInstance()->SetCustomKeyboard(std::move(buildFunc));
+        TextFieldModel::GetInstance()->SetCustomKeyboard(std::move(buildFunc), supportAvoidance);
     }
 }
 
@@ -1397,5 +1406,18 @@ void JSTextField::SetLineHeight(const JSCallbackInfo& info)
         value.Reset();
     }
     TextFieldModel::GetInstance()->SetLineHeight(value);
+}
+
+void JSTextField::SetFontFeature(const JSCallbackInfo& info)
+{
+    if (info.Length() < 1) {
+        return;
+    }
+    if (!info[0]->IsString()) {
+        return;
+    }
+
+    std::string fontFeatureSettings = info[0]->ToString();
+    TextFieldModel::GetInstance()->SetFontFeature(ParseFontFeatureSettings(fontFeatureSettings));
 }
 } // namespace OHOS::Ace::Framework

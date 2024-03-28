@@ -27,6 +27,7 @@
 #include "core/components/text_field/textfield_theme.h"
 #include "core/interfaces/native/node/node_api.h"
 #include "core/components_ng/pattern/text_field/text_field_event_hub.h"
+#include "core/components/common/properties/text_style_parser.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -591,7 +592,7 @@ void SetTextInputCancelButton(ArkUINodeHandle node, ArkUI_Int32 style, const str
     TextFieldModelNG::SetCancelIconColor(frameNode, iconColor);
 }
 
-void ResetTextInputCancelButton(ArkUINodeHandle node)
+void resetTextInputCancelButton(ArkUINodeHandle node)
 {
     auto *frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -742,7 +743,7 @@ ArkUI_Float32 GetTextInputCancelIconSize(ArkUINodeHandle node)
     return TextFieldModelNG::GetCancelIconSize(frameNode).Value();
 }
 
-ArkUI_CharPtr GetTextInputTextCanacelIconSrc(ArkUINodeHandle node)
+ArkUI_CharPtr getTextInputTextCancelIconSrc(ArkUINodeHandle node)
 {
     auto *frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_RETURN(frameNode, "");
@@ -750,7 +751,7 @@ ArkUI_CharPtr GetTextInputTextCanacelIconSrc(ArkUINodeHandle node)
     return g_strValue.c_str();
 }
 
-ArkUI_Uint32 GetTextInputTextCanacelIconColor(ArkUINodeHandle node)
+ArkUI_Uint32 getTextInputTextCancelIconColor(ArkUINodeHandle node)
 {
     auto *frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_RETURN(frameNode, ERROR_UINT_CODE);
@@ -906,6 +907,20 @@ void ResetTextInputLineHeight(ArkUINodeHandle node)
     TextFieldModelNG::SetLineHeight(frameNode, value);
 }
 
+void SetTextInputFontFeature(ArkUINodeHandle node, ArkUI_CharPtr value)
+{
+    auto *frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    std::string strValue = value;
+    TextFieldModelNG::SetFontFeature(frameNode, ParseFontFeatureSettings(strValue));
+}
+
+void ResetTextInputFontFeature(ArkUINodeHandle node)
+{
+    auto *frameNode = reinterpret_cast<FrameNode *>(node);
+    std::string strValue = "";
+    TextFieldModelNG::SetFontFeature(frameNode, ParseFontFeatureSettings(strValue));
+}
 } // namespace
 
 namespace NodeModifier {
@@ -925,18 +940,18 @@ const ArkUITextInputModifier* GetTextInputModifier()
         SetTextInputShowError, ResetTextInputShowError, SetTextInputPlaceholderFont, ResetTextInputPlaceholderFont,
         SetTextInputFontColor, ResetTextInputFontColor, SetTextInputFontStyle, ResetTextInputFontStyle,
         SetTextInputFontFamily, ResetTextInputFontFamily, SetTextInputPlaceholderString, SetTextInputTextString,
-        SetTextInputFontWeightStr, StopTextInputTextEditing, SetTextInputCancelButton, ResetTextInputCancelButton,
+        SetTextInputFontWeightStr, StopTextInputTextEditing, SetTextInputCancelButton, resetTextInputCancelButton,
         GetTextInputPlaceholder, GetTextInputText, GetTextInputCaretColor, GetTextInputCaretStyle,
         GetTextInputShowUnderline, GetTextInputMaxLength, GetTextInputEnterKeyType, GetTextInputPlaceholderColor,
         GetTextInputPlaceholderFont, GetTextInputRequestKeyboardOnFocus, GetTextInputType,
         GetTextInputSelectedBackgroundColor, GetTextInputShowPasswordIcon, GetTextInputEditing,
-        GetTextInputShowCancelButton, GetTextInputCancelIconSize, GetTextInputTextCanacelIconSrc,
-        GetTextInputTextCanacelIconColor, GetTextInputTextAlign, GetTextInputFontColor, GetTextInputFontStyle,
+        GetTextInputShowCancelButton, GetTextInputCancelIconSize, getTextInputTextCancelIconSrc,
+        getTextInputTextCancelIconColor, GetTextInputTextAlign, GetTextInputFontColor, GetTextInputFontStyle,
         GetTextInputFontWeight, GetTextInputFontSize, GetTextInputCancelButtonStyle, SetTextInputBackgroundColor,
         ResetTextInputBackgroundColor, SetTextInputNormalUnderlineColor, SetTextInputUserUnderlineColor,
         ResetTextInputUserUnderlineColor, SetTextInputTextSelection, GetTextInputTextSelectionIndex,
         SetTextInputDecoration, ResetTextInputDecoration, SetTextInputLetterSpacing, ResetTextInputLetterSpacing,
-        SetTextInputLineHeight, ResetTextInputLineHeight };
+        SetTextInputLineHeight, ResetTextInputLineHeight, SetTextInputFontFeature, ResetTextInputFontFeature };
     return &modifier;
 }
 
@@ -1006,9 +1021,9 @@ void SetOnTextInputSelectionChange(ArkUINodeHandle node, void* extraParam)
     CHECK_NULL_VOID(frameNode);
     auto onSelectionChange = [node, extraParam](int32_t start, int32_t end) {
         ArkUINodeEvent event;
-        event.kind = TEXT_INPUT;
+        event.kind = COMPONENT_ASYNC_EVENT;
         event.extraParam = reinterpret_cast<intptr_t>(extraParam);
-        event.textInputEvent.subKind = ON_TEXT_INPUT_TEXT_SELECTION_CHANGE;
+        event.componentAsyncEvent.subKind = ON_TEXT_INPUT_TEXT_SELECTION_CHANGE;
         event.componentAsyncEvent.data[0].i32 = static_cast<int>(start);
         event.componentAsyncEvent.data[1].i32 = static_cast<int>(end);
         SendArkUIAsyncEvent(&event);
