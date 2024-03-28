@@ -16,12 +16,13 @@
 /// <reference path='./import.ts' />
 class ListItemGroupModifier extends ArkListItemGroupComponent implements AttributeModifier<ListItemGroupAttribute> {
 
-  constructor(nativePtr: KNode) {
-    super(nativePtr);
+  constructor(nativePtr: KNode, classType: ModifierType) {
+    super(nativePtr, classType);
     this._modifiersWithKeys = new ModifierMap();
   }
 
   applyNormalAttribute(instance: ListItemGroupAttribute): void {
-    applyAndMergeModifier<ListItemGroupAttribute, ArkListItemGroupComponent, ArkComponent>(instance, this);
+    ModifierUtils.applySetOnChange(this);
+    ModifierUtils.applyAndMergeModifier<ListItemGroupAttribute, ArkListItemGroupComponent, ArkComponent>(instance, this);
   }
 }

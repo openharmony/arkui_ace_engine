@@ -16,8 +16,8 @@
 /// <reference path='./import.ts' />
 
 class ArkUIExtensionComponentComponent extends ArkComponent implements UIExtensionComponentAttribute {
-  constructor(nativePtr: KNode) {
-    super(nativePtr);
+  constructor(nativePtr: KNode, classType?: ModifierType) {
+    super(nativePtr, classType);
   }
   onRemoteReady(callback: any): UIExtensionComponentAttribute {
     throw new Error('Method not implemented.');
@@ -37,12 +37,10 @@ class ArkUIExtensionComponentComponent extends ArkComponent implements UIExtensi
 }
 
 // @ts-ignore
-globalThis.UIExtensionComponent.attributeModifier = function (modifier) {
-  const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
-  let nativeNode = globalThis.getArkUINativeModule().getFrameNodeById(elmtId);
-  let component = this.createOrGetNode(elmtId, () => {
-    return new ArkUIExtensionComponentComponent(nativeNode);
+globalThis.UIExtensionComponent.attributeModifier = function (modifier: ArkComponent) {
+  attributeModifierFunc.call(this, modifier, (nativePtr: KNode) => {
+    return new ArkUIExtensionComponentComponent(nativePtr);
+  }, (nativePtr: KNode, classType: ModifierType, modifierJS: ModifierJS) => {
+    return new modifierJS.CommonModifier(nativePtr, classType);
   });
-  applyUIAttributes(modifier, nativeNode, component);
-  component.applyModifierPatch();
 };

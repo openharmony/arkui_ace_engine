@@ -176,8 +176,8 @@ class FrictionModifier extends ModifierWithKey<number | Resource> {
 }
 
 class ArkWaterFlowComponent extends ArkComponent implements WaterFlowAttribute {
-  constructor(nativePtr: KNode) {
-    super(nativePtr);
+  constructor(nativePtr: KNode, classType?: ModifierType) {
+    super(nativePtr, classType);
   }
   columnsTemplate(value: string): this {
     modifierWithKey(this._modifiersWithKeys, ColumnsTemplateModifier.identity, ColumnsTemplateModifier, value);
@@ -254,12 +254,10 @@ class ArkWaterFlowComponent extends ArkComponent implements WaterFlowAttribute {
 }
 
 // @ts-ignore
-globalThis.WaterFlow.attributeModifier = function (modifier) {
-  const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
-  let nativeNode = getUINativeModule().getFrameNodeById(elmtId);
-  let component = this.createOrGetNode(elmtId, () => {
-    return new ArkWaterFlowComponent(nativeNode);
+globalThis.WaterFlow.attributeModifier = function (modifier: ArkComponent) {
+  attributeModifierFunc.call(this, modifier, (nativePtr: KNode) => {
+    return new ArkWaterFlowComponent(nativePtr);
+  }, (nativePtr: KNode, classType: ModifierType, modifierJS: ModifierJS) => {
+    return new modifierJS.WaterFlowModifier(nativePtr, classType);
   });
-  applyUIAttributes(modifier, nativeNode, component);
-  component.applyModifierPatch();
 };

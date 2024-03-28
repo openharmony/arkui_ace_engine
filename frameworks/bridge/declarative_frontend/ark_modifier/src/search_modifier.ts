@@ -16,12 +16,13 @@
 /// <reference path='./import.ts' />
 class SearchModifier extends ArkSearchComponent implements AttributeModifier<SearchAttribute> {
 
-  constructor(nativePtr: KNode) {
-    super(nativePtr);
+  constructor(nativePtr: KNode, classType: ModifierType) {
+    super(nativePtr, classType);
     this._modifiersWithKeys = new ModifierMap();
   }
 
   applyNormalAttribute(instance: SearchAttribute): void {
-    applyAndMergeModifier<SearchAttribute, ArkSearchComponent, ArkComponent>(instance, this);
+    ModifierUtils.applySetOnChange(this);
+    ModifierUtils.applyAndMergeModifier<SearchAttribute, ArkSearchComponent, ArkComponent>(instance, this);
   }
 }

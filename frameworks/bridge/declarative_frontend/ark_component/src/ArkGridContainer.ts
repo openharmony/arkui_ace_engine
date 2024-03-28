@@ -15,8 +15,8 @@
 
 /// <reference path='./import.ts' />
 class ArkGridContainerComponent extends ArkComponent implements ColumnAttribute {
-  constructor(nativePtr: KNode) {
-    super(nativePtr);
+  constructor(nativePtr: KNode, classType?: ModifierType) {
+    super(nativePtr, classType);
   }
   alignItems(value: HorizontalAlign): ColumnAttribute {
     throw new Error('Method not implemented.');
@@ -29,13 +29,10 @@ class ArkGridContainerComponent extends ArkComponent implements ColumnAttribute 
   }
 }
 // @ts-ignore
-globalThis.GridContainer.attributeModifier = function (modifier) {
-  const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
-  let nativeNode = getUINativeModule().getFrameNodeById(elmtId);
-
-  let component = this.createOrGetNode(elmtId, () => {
-    return new ArkGridContainerComponent(nativeNode);
+globalThis.GridContainer.attributeModifier = function (modifier: ArkComponent) {
+  attributeModifierFunc.call(this, modifier, (nativePtr: KNode) => {
+    return new ArkGridContainerComponent(nativePtr);
+  }, (nativePtr: KNode, classType: ModifierType, modifierJS: ModifierJS) => {
+    return new modifierJS.CommonModifier(nativePtr, classType);
   });
-  applyUIAttributes(modifier, nativeNode, component);
-  component.applyModifierPatch();
 };

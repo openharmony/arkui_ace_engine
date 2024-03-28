@@ -394,8 +394,8 @@ class TextAreaFontFeatureModifier extends ModifierWithKey<FontFeature> {
 }
 
 class ArkTextAreaComponent extends ArkComponent implements CommonMethod<TextAreaAttribute> {
-  constructor(nativePtr: KNode) {
-    super(nativePtr);
+  constructor(nativePtr: KNode, classType?: ModifierType) {
+    super(nativePtr, classType);
   }
   type(value: TextAreaType): TextAreaAttribute {
     throw new Error('Method not implemented.');
@@ -519,13 +519,10 @@ class ArkTextAreaComponent extends ArkComponent implements CommonMethod<TextArea
   }
 }
 // @ts-ignore
-globalThis.TextArea.attributeModifier = function (modifier) {
-  const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
-  let nativeNode = getUINativeModule().getFrameNodeById(elmtId);
-
-  let component = this.createOrGetNode(elmtId, () => {
-    return new ArkTextAreaComponent(nativeNode);
+globalThis.TextArea.attributeModifier = function (modifier: ArkComponent) {
+  attributeModifierFunc.call(this, modifier, (nativePtr: KNode) => {
+    return new ArkTextAreaComponent(nativePtr);
+  }, (nativePtr: KNode, classType: ModifierType, modifierJS: ModifierJS) => {
+    return new modifierJS.TextAreaModifier(nativePtr, classType);
   });
-  applyUIAttributes(modifier, nativeNode, component);
-  component.applyModifierPatch();
 };

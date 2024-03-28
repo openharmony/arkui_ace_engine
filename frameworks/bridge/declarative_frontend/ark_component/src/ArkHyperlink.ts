@@ -16,8 +16,8 @@
 /// <reference path='./import.ts' />
 
 class ArkHyperlinkComponent extends ArkComponent implements HyperlinkAttribute {
-  constructor(nativePtr: KNode) {
-    super(nativePtr);
+  constructor(nativePtr: KNode, classType?: ModifierType) {
+    super(nativePtr, classType);
   }
   color(value: ResourceColor): this {
     modifierWithKey(this._modifiersWithKeys, HyperlinkColorModifier.identity, HyperlinkColorModifier, value);
@@ -62,12 +62,10 @@ class HyperlinkDraggableModifier extends ModifierWithKey<boolean> {
 }
 
 // @ts-ignore
-globalThis.Hyperlink.attributeModifier = function (modifier) {
-  const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
-  let nativeNode = getUINativeModule().getFrameNodeById(elmtId);
-  let component = this.createOrGetNode(elmtId, () => {
-    return new ArkHyperlinkComponent(nativeNode);
+globalThis.Hyperlink.attributeModifier = function (modifier: ArkComponent) {
+  attributeModifierFunc.call(this, modifier, (nativePtr: KNode) => {
+    return new ArkHyperlinkComponent(nativePtr);
+  }, (nativePtr: KNode, classType: ModifierType, modifierJS: ModifierJS) => {
+    return new modifierJS.HyperlinkModifier(nativePtr, classType);
   });
-  applyUIAttributes(modifier, nativeNode, component);
-  component.applyModifierPatch();
 };

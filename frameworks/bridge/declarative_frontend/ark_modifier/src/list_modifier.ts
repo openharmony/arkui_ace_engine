@@ -16,12 +16,13 @@
 /// <reference path='./import.ts' />
 class ListModifier extends ArkListComponent implements AttributeModifier<ListAttribute> {
 
-  constructor(nativePtr: KNode) {
-    super(nativePtr);
+  constructor(nativePtr: KNode, classType: ModifierType) {
+    super(nativePtr, classType);
     this._modifiersWithKeys = new ModifierMap();
   }
 
   applyNormalAttribute(instance: ListAttribute): void {
-    applyAndMergeModifier<ListAttribute, ArkListComponent, ArkComponent>(instance, this);
+    ModifierUtils.applySetOnChange(this);
+    ModifierUtils.applyAndMergeModifier<ListAttribute, ArkListComponent, ArkComponent>(instance, this);
   }
 }

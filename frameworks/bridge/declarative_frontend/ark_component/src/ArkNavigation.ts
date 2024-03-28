@@ -24,8 +24,8 @@ const NAVIGATION_TITLE_MODE_DEFAULT = 0;
 const DEFAULT_UNIT = 'vp';
 
 class ArkNavigationComponent extends ArkComponent implements NavigationAttribute {
-  constructor(nativePtr: KNode) {
-    super(nativePtr);
+  constructor(nativePtr: KNode, classType?: ModifierType) {
+    super(nativePtr, classType);
   }
   navBarWidth(value: Length): NavigationAttribute {
     modifierWithKey(this._modifiersWithKeys, NavBarWidthModifier.identity, NavBarWidthModifier, value);
@@ -297,12 +297,10 @@ class HideNavBarModifier extends ModifierWithKey<boolean> {
 }
 
 // @ts-ignore
-globalThis.Navigation.attributeModifier = function (modifier) {
-  const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
-  let nativeNode = getUINativeModule().getFrameNodeById(elmtId);
-  let component = this.createOrGetNode(elmtId, () => {
-    return new ArkNavigationComponent(nativeNode);
+globalThis.Navigation.attributeModifier = function (modifier: ArkComponent) {
+  attributeModifierFunc.call(this, modifier, (nativePtr: KNode) => {
+    return new ArkNavigationComponent(nativePtr);
+  }, (nativePtr: KNode, classType: ModifierType, modifierJS: ModifierJS) => {
+    return new modifierJS.NavigationModifier(nativePtr, classType);
   });
-  applyUIAttributes(modifier, nativeNode, component);
-  component.applyModifierPatch();
 };

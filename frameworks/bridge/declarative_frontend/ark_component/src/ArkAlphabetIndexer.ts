@@ -15,8 +15,8 @@
 
 /// <reference path='./import.ts' />
 class ArkAlphabetIndexerComponent extends ArkComponent implements AlphabetIndexerAttribute {
-  constructor(nativePtr: KNode) {
-    super(nativePtr);
+  constructor(nativePtr: KNode, classType?: ModifierType) {
+    super(nativePtr, classType);
   }
   onSelected(callback: (index: number) => void): this {
     throw new Error('Method not implemented.');
@@ -119,14 +119,12 @@ class ArkAlphabetIndexerComponent extends ArkComponent implements AlphabetIndexe
   }
 }
 // @ts-ignore
-globalThis.AlphabetIndexer.attributeModifier = function (modifier) {
-  const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
-  let nativeNode = getUINativeModule().getFrameNodeById(elmtId);
-  let component = this.createOrGetNode(elmtId, () => {
-    return new ArkAlphabetIndexerComponent(nativeNode);
+globalThis.AlphabetIndexer.attributeModifier = function (modifier: ArkComponent) {
+  attributeModifierFunc.call(this, modifier, (nativePtr: KNode) => {
+    return new ArkAlphabetIndexerComponent(nativePtr);
+  }, (nativePtr: KNode, classType: ModifierType, modifierJS: ModifierJS) => {
+    return new modifierJS.AlphabetIndexerModifier(nativePtr, classType);
   });
-  applyUIAttributes(modifier, nativeNode, component);
-  component.applyModifierPatch();
 };
 
 class PopupItemFontModifier extends ModifierWithKey<Font> {

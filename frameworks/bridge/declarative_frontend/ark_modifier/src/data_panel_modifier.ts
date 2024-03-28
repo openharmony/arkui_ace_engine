@@ -16,12 +16,13 @@
 /// <reference path='./import.ts' />
 class DataPanelModifier extends ArkDataPanelComponent implements AttributeModifier<DataPanelAttribute> {
 
-  constructor(nativePtr: KNode) {
-    super(nativePtr);
+  constructor(nativePtr: KNode, classType: ModifierType) {
+    super(nativePtr, classType);
     this._modifiersWithKeys = new ModifierMap();
   }
 
   applyNormalAttribute(instance: DataPanelAttribute): void {
-    applyAndMergeModifier<DataPanelAttribute, ArkDataPanelComponent, ArkComponent>(instance, this);
+    ModifierUtils.applySetOnChange(this);
+    ModifierUtils.applyAndMergeModifier<DataPanelAttribute, ArkDataPanelComponent, ArkComponent>(instance, this);
   }
 }

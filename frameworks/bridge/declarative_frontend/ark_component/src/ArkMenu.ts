@@ -112,8 +112,8 @@ class MenuWidthModifier extends ModifierWithKey<Length> {
 }
 
 class ArkMenuComponent extends ArkComponent implements MenuAttribute {
-  constructor(nativePtr: KNode) {
-    super(nativePtr);
+  constructor(nativePtr: KNode, classType?: ModifierType) {
+    super(nativePtr, classType);
   }
   width(value: Length): this {
     modifierWithKey(this._modifiersWithKeys, MenuWidthModifier.identity, MenuWidthModifier, value);
@@ -137,12 +137,10 @@ class ArkMenuComponent extends ArkComponent implements MenuAttribute {
 }
 
 // @ts-ignore
-globalThis.Menu.attributeModifier = function (modifier) {
-  const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
-  let nativeNode = getUINativeModule().getFrameNodeById(elmtId);
-  let component = this.createOrGetNode(elmtId, () => {
-    return new ArkMenuComponent(nativeNode);
+globalThis.Menu.attributeModifier = function (modifier: ArkComponent) {
+  attributeModifierFunc.call(this, modifier, (nativePtr: KNode) => {
+    return new ArkMenuComponent(nativePtr);
+  }, (nativePtr: KNode, classType: ModifierType, modifierJS: ModifierJS) => {
+    return new modifierJS.MenuModifier(nativePtr, classType);
   });
-  applyUIAttributes(modifier, nativeNode, component);
-  component.applyModifierPatch();
 };

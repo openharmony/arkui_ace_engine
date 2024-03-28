@@ -15,8 +15,8 @@
 
 /// <reference path='./import.ts' />
 class ArkProgressComponent extends ArkComponent implements ProgressAttribute {
-  constructor(nativePtr: KNode) {
-    super(nativePtr);
+  constructor(nativePtr: KNode, classType?: ModifierType) {
+    super(nativePtr, classType);
   }
   value(value: number): ProgressAttribute<keyof ProgressStyleMap, LinearStyleOptions |
   ProgressStyleOptions | RingStyleOptions | EclipseStyleOptions | ScaleRingStyleOptions |
@@ -130,12 +130,10 @@ class ProgressBackgroundColorModifier extends ModifierWithKey<ResourceColor> {
 }
 
 // @ts-ignore
-globalThis.Progress.attributeModifier = function (modifier) {
-  const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
-  let nativeNode = getUINativeModule().getFrameNodeById(elmtId);
-  let component = this.createOrGetNode(elmtId, () => {
-    return new ArkProgressComponent(nativeNode);
+globalThis.Progress.attributeModifier = function (modifier: ArkComponent) {
+  attributeModifierFunc.call(this, modifier, (nativePtr: KNode) => {
+    return new ArkProgressComponent(nativePtr);
+  }, (nativePtr: KNode, classType: ModifierType, modifierJS: ModifierJS) => {
+    return new modifierJS.ProgressModifier(nativePtr, classType);
   });
-  applyUIAttributes(modifier, nativeNode, component);
-  component.applyModifierPatch();
 };

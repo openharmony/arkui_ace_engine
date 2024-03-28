@@ -141,8 +141,8 @@ class CheckboxGroupHeightModifier extends ModifierWithKey<Length> {
 }
 
 class ArkCheckboxGroupComponent extends ArkComponent implements CheckboxGroupAttribute {
-  constructor(nativePtr: KNode) {
-    super(nativePtr);
+  constructor(nativePtr: KNode, classType?: ModifierType) {
+    super(nativePtr, classType);
   }
   selectAll(value: boolean): this {
     modifierWithKey(this._modifiersWithKeys, CheckboxGroupSelectAllModifier.identity, CheckboxGroupSelectAllModifier, value);
@@ -180,13 +180,10 @@ class ArkCheckboxGroupComponent extends ArkComponent implements CheckboxGroupAtt
   }
 }
 // @ts-ignore
-globalThis.CheckboxGroup.attributeModifier = function (modifier) {
-  const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
-  let nativeNode = getUINativeModule().getFrameNodeById(elmtId);
-  let component = this.createOrGetNode(elmtId, () => {
-    return new ArkCheckboxGroupComponent(nativeNode);
+globalThis.CheckboxGroup.attributeModifier = function (modifier: ArkComponent) {
+  attributeModifierFunc.call(this, modifier, (nativePtr: KNode) => {
+    return new ArkCheckboxGroupComponent(nativePtr);
+  }, (nativePtr: KNode, classType: ModifierType, modifierJS: ModifierJS) => {
+    return new modifierJS.CheckboxGroupModifier(nativePtr, classType);
   });
-  applyUIAttributes(modifier, nativeNode, component);
-  component.applyModifierPatch();
 };
-

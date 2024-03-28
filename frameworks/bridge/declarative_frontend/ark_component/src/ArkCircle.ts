@@ -15,6 +15,9 @@
 
 /// <reference path='./import.ts' />
 class ArkCircleComponent extends ArkCommonShapeComponent implements CircleAttribute {
+  constructor(nativePtr: KNode, classType?: ModifierType) {
+    super(nativePtr, classType);
+  }
 }
 
 // @ts-ignore

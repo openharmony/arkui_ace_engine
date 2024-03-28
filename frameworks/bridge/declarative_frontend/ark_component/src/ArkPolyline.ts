@@ -17,8 +17,8 @@
 /// <reference path='./ArkCommonShape.ts' />
 const ARRAY_LENGTH = 2;
 class ArkPolylineComponent extends ArkCommonShapeComponent implements PolylineAttribute {
-  constructor(nativePtr: KNode) {
-    super(nativePtr);
+  constructor(nativePtr: KNode, classType?: ModifierType) {
+    super(nativePtr, classType);
   }
   points(value: Array<any>): this {
     modifierWithKey(this._modifiersWithKeys, PolylinePointsModifier.identity, PolylinePointsModifier, value);
@@ -66,12 +66,10 @@ class PolylinePointsModifier extends ModifierWithKey<Array<any>> {
 }
 
 // @ts-ignore
-globalThis.Polyline.attributeModifier = function (modifier) {
-  const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
-  let nativeNode = getUINativeModule().getFrameNodeById(elmtId);
-  let component = this.createOrGetNode(elmtId, () => {
-    return new ArkPolylineComponent(nativeNode);
+globalThis.Polyline.attributeModifier = function (modifier: ArkComponent) {
+  attributeModifierFunc.call(this, modifier, (nativePtr: KNode) => {
+    return new ArkPolylineComponent(nativePtr);
+  }, (nativePtr: KNode, classType: ModifierType, modifierJS: ModifierJS) => {
+    return new modifierJS.PolylineModifier(nativePtr, classType);
   });
-  applyUIAttributes(modifier, nativeNode, component);
-  component.applyModifierPatch();
 };
