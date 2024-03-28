@@ -2827,7 +2827,6 @@ void WebDelegate::Resize(const double& width, const double& height, bool isKeybo
 
 void WebDelegate::DragResize(const double& width, const double& height,
                              const double& pre_height, const double& pre_width) {
-    TAG_LOGI(AceLogTag::ACE_WEB, "------ web_delegate dragResize ------");
     if (width <= 0 || height <= 0) {
         return;
     }
