@@ -44,6 +44,11 @@ public:
         return false;
     }
 
+    bool StopExpandMark() override
+    {
+        return true;
+    }
+
     RefPtr<LayoutProperty> CreateLayoutProperty() override
     {
         return MakeRefPtr<ScrollLayoutProperty>();
