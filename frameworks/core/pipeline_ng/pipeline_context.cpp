@@ -823,6 +823,10 @@ void PipelineContext::FlushFocusView()
     CHECK_NULL_VOID(lastFocusView);
     auto lastFocusViewHub = lastFocusView->GetFocusHub();
     CHECK_NULL_VOID(lastFocusViewHub);
+    auto container = Container::Current();
+    if (container && container->IsUIExtensionWindow()) {
+        lastFocusView->SetIsViewRootScopeFocused(false);
+    }
     if (lastFocusView && (!lastFocusView->IsRootScopeCurrentFocus() || !lastFocusView->GetIsViewHasFocused()) &&
         lastFocusViewHub->IsFocusableNode()) {
         lastFocusView->RequestDefaultFocus();
@@ -2654,10 +2658,10 @@ void PipelineContext::WindowFocus(bool isFocus)
             TAG_LOGI(AceLogTag::ACE_FOCUS, "Request focus on current focus view: %{public}s/%{public}d",
                 curFocusView->GetFrameName().c_str(), curFocusView->GetFrameId());
             curFocusViewHub->RequestFocusImmediately();
-        }
-        if (focusWindowId_.has_value()) {
-            if (curFocusView) {
-                curFocusView->TriggerFocusMove();
+        } else {
+            auto container = Container::Current();
+            if (container && container->IsUIExtensionWindow()) {
+                curFocusView->RequestDefaultFocus();
             }
         }
         if (focusOnNodeCallback_) {
