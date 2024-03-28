@@ -309,6 +309,10 @@ public:
 
     static void FireNavigationStateChange(const RefPtr<UINode>& node, bool isShow);
 
+    static void FireNavigationChange(const RefPtr<UINode>& node, bool isShow, bool isFirst);
+
+    static void FireNavigationInner(const RefPtr<UINode>& node, bool isShow);
+
     static void FireNavigationLifecycleChange(const RefPtr<UINode>& node, NavDestinationLifecycle lifecycle);
 
     // type: will_show + on_show, will_hide + on_hide, hide, show, willShow, willHide

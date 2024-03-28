@@ -411,10 +411,9 @@ void PipelineContext::AddWindowSizeChangeCallback(int32_t nodeId) {}
 
 void PipelineContext::RemoveWindowSizeChangeCallback(int32_t nodeId) {}
 
-void PipelineContext::AddNavigationStateCallback(
-    int32_t pageId, int32_t nodeId, const std::function<void()>& callback, bool isOnShow) {}
+void PipelineContext::AddNavigationNode(int32_t pageId, WeakPtr<UINode> navigationNode) {}
 
-void PipelineContext::RemoveNavigationStateCallback(int32_t pageId, int32_t nodeId) {}
+void PipelineContext::RemoveNavigationNode(int32_t pageId, int32_t nodeId) {}
 void PipelineContext::FirePageChanged(int32_t pageId, bool isOnShow) {}
 void PipelineContext::UpdateSystemSafeArea(const SafeAreaInsets& systemSafeArea) {};
 void PipelineContext::UpdateCutoutSafeArea(const SafeAreaInsets& cutoutSafeArea) {};
