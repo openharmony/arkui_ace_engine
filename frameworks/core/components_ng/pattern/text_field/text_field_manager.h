@@ -49,12 +49,18 @@ public:
 
     void SetOnFocusTextField(const WeakPtr<Pattern>& onFocusTextField)
     {
+        const auto& pattern = onFocusTextField.Upgrade();
+        if (pattern && pattern->GetHost()) {
+            onFocusTextFieldId = pattern->GetHost()->GetId();
+        }
         onFocusTextField_ = onFocusTextField;
     }
 
     void ScrollTextFieldToSafeArea();
 
     void ClearOnFocusTextField();
+
+    void ClearOnFocusTextField(int32_t id);
 
     bool ResetSlidingPanelParentHeight();
 
@@ -112,6 +118,7 @@ private:
     Offset position_;
     float height_ = 0.0f;
     WeakPtr<Pattern> onFocusTextField_;
+    int32_t onFocusTextFieldId = -1;
 };
 
 } // namespace OHOS::Ace::NG

@@ -1016,7 +1016,7 @@ void TextFieldPattern::HandleBlurEvent()
     UpdateBlurReason();
     auto textFieldManager = DynamicCast<TextFieldManagerNG>(context->GetTextFieldManager());
     if (textFieldManager) {
-        textFieldManager->ClearOnFocusTextField();
+        textFieldManager->ClearOnFocusTextField(host->GetId());
     }
     auto layoutProperty = GetLayoutProperty<TextFieldLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
@@ -2638,7 +2638,7 @@ void TextFieldPattern::OnDetachFromFrameNode(FrameNode* node)
     }
     auto textFieldManager = DynamicCast<TextFieldManagerNG>(pipeline->GetTextFieldManager());
     if (textFieldManager) {
-        textFieldManager->ClearOnFocusTextField();
+        textFieldManager->ClearOnFocusTextField(node->GetId());
     }
     auto frameNode = WeakClaim(node);
     pipeline->RemoveFontNodeNG(frameNode);
