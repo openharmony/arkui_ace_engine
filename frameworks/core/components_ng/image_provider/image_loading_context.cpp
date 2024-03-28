@@ -54,11 +54,13 @@ RefPtr<ImageData> QueryDataFromCache(const ImageSourceInfo& src, bool& dataHit)
     std::shared_ptr<RSData> rsData = nullptr;
     rsData = ImageLoader::QueryImageDataFromImageCache(src);
     if (rsData) {
+        TAG_LOGD(AceLogTag::ACE_IMAGE, "%{public}s hit the memory Cache.", src.GetSrc().c_str());
         dataHit = true;
         return AceType::MakeRefPtr<NG::DrawingImageData>(rsData);
     }
     auto drawingData = ImageLoader::LoadDataFromCachedFile(src.GetSrc());
     if (drawingData) {
+        TAG_LOGD(AceLogTag::ACE_IMAGE, "%{public}s hit the disk Cache.", src.GetSrc().c_str());
         auto data = std::make_shared<RSData>();
         data->BuildWithCopy(drawingData->GetData(), drawingData->GetSize());
         return AceType::MakeRefPtr<NG::DrawingImageData>(data);
@@ -152,6 +154,8 @@ void ImageLoadingContext::OnDataLoading()
 {
     if (!src_.GetIsConfigurationChange()) {
         if (auto obj = ImageProvider::QueryImageObjectFromCache(src_); obj) {
+            TAG_LOGD(AceLogTag::ACE_IMAGE, "%{public}s Hit the Cache, not need Create imageObject.",
+                src_.GetSrc().c_str());
             DataReadyCallback(obj);
             return;
         }
@@ -206,6 +210,7 @@ bool ImageLoadingContext::Downloadable()
 void ImageLoadingContext::DownloadImage()
 {
     if (NotifyReadyIfCacheHit()) {
+        TAG_LOGD(AceLogTag::ACE_IMAGE, "%{public}s hit the Cache, not need DownLoad.", src_.GetSrc().c_str());
         return;
     }
     PerformDownload();
@@ -213,6 +218,7 @@ void ImageLoadingContext::DownloadImage()
 
 void ImageLoadingContext::PerformDownload()
 {
+    ACE_SCOPED_TRACE("PerformDownload %s", src_.GetSrc().c_str());
     DownloadCallback downloadCallback;
     downloadCallback.successCallback = [weak = AceType::WeakClaim(this)](
                                            const std::string&& imageData, bool async, int32_t instanceId) {
@@ -240,7 +246,8 @@ void ImageLoadingContext::PerformDownload()
 
 void ImageLoadingContext::DownloadImageSuccess(const std::string& imageData)
 {
-    TAG_LOGI(AceLogTag::ACE_IMAGE, "Download image successfully, ImageData length=%{public}zu", imageData.size());
+    TAG_LOGI(AceLogTag::ACE_IMAGE, "Download image successfully, srcInfo = %{public}s, ImageData length=%{public}zu",
+        GetSrc().ToString().c_str(), imageData.size());
     auto data = ImageData::MakeFromDataWithCopy(imageData.data(), imageData.size());
     if (!Positive(imageData.size())) {
         FailCallback("The length of imageData from netStack is not positive");
