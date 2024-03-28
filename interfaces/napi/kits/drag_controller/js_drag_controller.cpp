@@ -56,6 +56,7 @@ namespace {
 constexpr float PIXELMAP_WIDTH_RATE = -0.5f;
 constexpr float PIXELMAP_HEIGHT_RATE = -0.2f;
 constexpr size_t STR_BUFFER_SIZE = 1024;
+constexpr int32_t PARAMETER_NUM = 2;
 
 constexpr int32_t argCount3 = 3;
 
@@ -455,19 +456,23 @@ void CallBackForJs(DragControllerAsyncCtx* asyncCtx, napi_value result)
         asyncCtx->dragAction->OnNapiCallback(result);
         if (asyncCtx->deferred != nullptr) {
             napi_resolve_deferred(asyncCtx->env, asyncCtx->deferred, nullptr);
-            asyncCtx->deferred = nullptr;
         }
     } else {
+        napi_value resultVal[PARAMETER_NUM] = { nullptr };
+        napi_get_undefined(asyncCtx->env, &resultVal[0]);
+        napi_get_undefined(asyncCtx->env, &resultVal[1]);
+        resultVal[1] = result;
         if (asyncCtx->callbackRef) {
             napi_value ret = nullptr;
             napi_value napiCallback = nullptr;
             napi_get_reference_value(asyncCtx->env, asyncCtx->callbackRef, &napiCallback);
-            napi_call_function(asyncCtx->env, nullptr, napiCallback, 1, &result, &ret);
+            napi_call_function(asyncCtx->env, nullptr, napiCallback, PARAMETER_NUM, resultVal, &ret);
             napi_delete_reference(asyncCtx->env, asyncCtx->callbackRef);
         } else {
-            napi_resolve_deferred(asyncCtx->env, asyncCtx->deferred, result);
+            napi_resolve_deferred(asyncCtx->env, asyncCtx->deferred, resultVal[1]);
         }
     }
+    asyncCtx->deferred = nullptr;
     asyncCtx->hasHandle = false;
 }
 
@@ -889,27 +894,26 @@ bool ParseDragItemInfoParam(DragControllerAsyncCtx* asyncCtx, std::string& errMs
     } else {
         void* pixmapPtrAddr = pixelMapNapiEntry(asyncCtx->env, pixelMapValue);
         if (pixmapPtrAddr == nullptr) {
-            TAG_LOGW(AceLogTag::ACE_DRAG, "the pixelMap parsed from the first argument is null");
+            napi_get_named_property(asyncCtx->env, asyncCtx->argv[0], "builder", &(asyncCtx->customBuilder));
+            napi_typeof(asyncCtx->env, asyncCtx->customBuilder, &valueType);
+            if (valueType != napi_function) {
+                errMsg = "The first parameter is not a pixelMap or customBuilder.";
+                return false;
+            }
         } else {
             asyncCtx->pixelMap = *(reinterpret_cast<std::shared_ptr<Media::PixelMap>*>(pixmapPtrAddr));
         }
     }
 
-    napi_get_named_property(asyncCtx->env, asyncCtx->argv[0], "builder", &(asyncCtx->customBuilder));
-    napi_typeof(asyncCtx->env, asyncCtx->customBuilder, &valueType);
-    if (valueType != napi_function) {
-        errMsg = "The type of customBuilder of the first parameter is incorrect.";
-        return false;
-    }
-
     napi_value extraInfoValue;
     napi_get_named_property(asyncCtx->env, asyncCtx->argv[0], "extraInfo", &extraInfoValue);
     napi_typeof(asyncCtx->env, extraInfoValue, &valueType);
-    if (valueType != napi_string) {
+    if (valueType == napi_string) {
+        GetNapiString(asyncCtx->env, extraInfoValue, asyncCtx->extraParams, valueType);
+    } else if (valueType != napi_undefined) {
         errMsg = "The type of extraInfo of the first parameter is incorrect.";
         return false;
     }
-    GetNapiString(asyncCtx->env, extraInfoValue, asyncCtx->extraParams, valueType);
     return true;
 }
 

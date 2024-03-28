@@ -18,12 +18,10 @@ class ArkCircleComponent extends ArkCommonShapeComponent implements CircleAttrib
 }
 
 // @ts-ignore
-globalThis.Circle.attributeModifier = function (modifier) {
-  const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
-  let nativeNode = getUINativeModule().getFrameNodeById(elmtId);
-  let component = this.createOrGetNode(elmtId, () => {
-    return new ArkCircleComponent(nativeNode);
+globalThis.Circle.attributeModifier = function (modifier: ArkComponent) {
+  attributeModifierFunc.call(this, modifier, (nativePtr: KNode) => {
+    return new ArkCircleComponent(nativePtr);
+  }, (nativePtr: KNode, classType: ModifierType, modifierJS: ModifierJS) => {
+    return new modifierJS.CircleModifier(nativePtr, classType);
   });
-  applyUIAttributes(modifier, nativeNode, component);
-  component.applyModifierPatch();
 };

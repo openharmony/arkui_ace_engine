@@ -18,7 +18,7 @@
 
 #include "core/components_ng/event/event_hub.h"
 #include "core/components_ng/pattern/rich_editor/selection_info.h"
-
+#include "core/components_ng/pattern/text_field/text_field_event_hub.h"
 namespace OHOS::Ace::NG {
 class TextInsertValueInfo {
 public:
@@ -200,6 +200,21 @@ private:
     std::list<RichEditorAbstractSpanResult> richEditorDeleteSpans_;
 };
 
+class RichEditorChangeValue : public BaseEventInfo {
+    DECLARE_ACE_TYPE(RichEditorChangeValue, BaseEventInfo)
+public:
+    RichEditorChangeValue() : BaseEventInfo("RichEditorChangeValue") {}
+    ~RichEditorChangeValue() = default;
+    void SetRichEditorOriginalSpans(const RichEditorAbstractSpanResult& span);
+    const std::list<RichEditorAbstractSpanResult>& GetRichEditorOriginalSpans() const;
+    void SetRichEditorReplacedSpans(const RichEditorAbstractSpanResult& span);
+    const std::list<RichEditorAbstractSpanResult>& GetRichEditorReplacedSpans() const;
+
+private:
+    std::list<RichEditorAbstractSpanResult> originalSpans_;
+    std::list<RichEditorAbstractSpanResult> replacedSpans_;
+};
+
 class RichEditorEventHub : public EventHub {
     DECLARE_ACE_TYPE(RichEditorEventHub, EventHub)
 
@@ -260,6 +275,29 @@ public:
         }
     }
 
+    void SetOnSubmit(std::function<void(int32_t, NG::TextFieldCommonEvent&)>&& func)
+    {
+        onSubmit_ = std::move(func);
+    }
+
+    void FireOnSubmit(int32_t value, NG::TextFieldCommonEvent& event)
+    {
+        if (onSubmit_) {
+            onSubmit_(value, event);
+        }
+    }
+
+    void SetOnWillChange(std::function<bool(const RichEditorChangeValue&)> && func);
+    bool FireOnWillChange(const RichEditorChangeValue& info);
+    bool HasOnWillChange() const;
+    void SetOnDidChange(std::function<void(const std::list<RichEditorAbstractSpanResult>&)> && func);
+    void FireOnDidChange(const std::list<RichEditorAbstractSpanResult>& info);
+    bool HasOnDidChange() const;
+    void SetOnCut(std::function<void(NG::TextCommonEvent&)> && func);
+    void FireOnCut(NG::TextCommonEvent& value);
+    void SetOnCopy(std::function<void(NG::TextCommonEvent&)> && func);
+    void FireOnCopy(NG::TextCommonEvent& value);
+
 private:
     long long timestamp_ = 0;
     std::function<void(NG::TextCommonEvent&)> onPaste_;
@@ -271,6 +309,11 @@ private:
     std::function<bool(const RichEditorDeleteValue&)> aboutToDelete_;
     std::function<void()> onDeleteComplete_;
     std::function<void(const bool&)> onEditingChange_;
+    std::function<void(int32_t, NG::TextFieldCommonEvent&)> onSubmit_;
+    std::function<bool(const RichEditorChangeValue&)> onWillChange_;
+    std::function<void(const std::list<RichEditorAbstractSpanResult>&)> onDidChange_;
+    std::function<void(NG::TextCommonEvent&)> onCut_;
+    std::function<void(NG::TextCommonEvent&)> onCopy_;
     ACE_DISALLOW_COPY_AND_MOVE(RichEditorEventHub);
 };
 } // namespace OHOS::Ace::NG

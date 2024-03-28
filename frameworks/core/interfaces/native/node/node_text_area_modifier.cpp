@@ -709,9 +709,9 @@ void SetOnTextAreaSelectionChange(ArkUINodeHandle node, void* extraParam)
     CHECK_NULL_VOID(frameNode);
     auto onSelectionChange = [node, extraParam](int start, int end) {
         ArkUINodeEvent event;
-        event.kind = TEXT_INPUT;
+        event.kind = COMPONENT_ASYNC_EVENT;
         event.extraParam = reinterpret_cast<intptr_t>(extraParam);
-        event.textInputEvent.subKind = ON_TEXTAREA_TEXT_SELECTION_CHANGE;
+        event.componentAsyncEvent.subKind = ON_TEXTAREA_TEXT_SELECTION_CHANGE;
         event.componentAsyncEvent.data[0].i32 = static_cast<int>(start);
         event.componentAsyncEvent.data[1].i32 = static_cast<int>(end);
         SendArkUIAsyncEvent(&event);

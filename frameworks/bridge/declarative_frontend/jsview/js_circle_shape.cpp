@@ -26,14 +26,14 @@ void JSCircleShape::ConstructorCallback(const JSCallbackInfo& info)
         JSRef<JSVal> width = params->GetProperty("width");
         CalcDimension dimWidth;
 
-        if (ParseJsDimensionVp(width, dimWidth)) {
+        if (ParseJsDimensionVpNG(width, dimWidth) && dimWidth.IsValid()) {
             circle->SetWidth(dimWidth);
         }
 
         JSRef<JSVal> height = params->GetProperty("height");
         CalcDimension dimHeight;
 
-        if (ParseJsDimensionVp(height, dimHeight)) {
+        if (ParseJsDimensionVpNG(height, dimHeight) && dimHeight.IsValid()) {
             circle->SetHeight(dimHeight);
         }
     }

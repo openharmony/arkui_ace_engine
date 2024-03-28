@@ -323,6 +323,9 @@ void SheetPresentationPattern::HandleDragUpdate(const GestureEvent& info)
     ProcessColumnRect(height - currentOffset_);
     auto renderContext = host->GetRenderContext();
     renderContext->UpdateTransformTranslate({ 0.0f, offset, 0.0f });
+    if (sheetType_ == SheetType::SHEET_BOTTOM) {
+        OnHeightDidChange(height_ - currentOffset_ + sheetHeightUp_);
+    }
 }
 
 void SheetPresentationPattern::HandleDragEnd(float dragVelocity)
@@ -337,6 +340,7 @@ void SheetPresentationPattern::HandleDragEnd(float dragVelocity)
     auto height = height_ + sheetHeightUp_;
     auto currentSheetHeight =
         GreatNotEqual((height - currentOffset_), sheetMaxHeight_) ? sheetMaxHeight_ : (height - currentOffset_);
+    start_ = currentSheetHeight;
     auto lowerIter = std::lower_bound(sheetDetentHeight_.begin(), sheetDetentHeight_.end(), currentSheetHeight);
     auto upperIter = std::upper_bound(sheetDetentHeight_.begin(), sheetDetentHeight_.end(), currentSheetHeight);
     if (lowerIter == sheetDetentHeight_.end()) {
@@ -520,6 +524,9 @@ void SheetPresentationPattern::AvoidSafeArea()
         // offset: translate endpoint, calculated from top
         renderContext->UpdateTransformTranslate({ 0.0f, offset, 0.0f });
     }
+    if (sheetType_ == SheetType::SHEET_BOTTOM) {
+        OnHeightDidChange(height_ + sheetHeightUp_);
+    }
 }
 
 float SheetPresentationPattern::GetSheetHeightChange()
@@ -561,8 +568,68 @@ float SheetPresentationPattern::GetSheetHeightChange()
     return h - maxH;
 }
 
+void SheetPresentationPattern::CreatePropertyCallback()
+{
+    if (property_) {
+        return;
+    }
+    auto propertyCallback = [weak = AceType::WeakClaim(this)](float position) {
+        auto ref = weak.Upgrade();
+        CHECK_NULL_VOID(ref);
+        ref->OnHeightDidChange(static_cast<int>(position));
+    };
+    property_ = AceType::MakeRefPtr<NodeAnimatablePropertyFloat>(0.0, std::move(propertyCallback));
+}
+
+void SheetPresentationPattern::ModifyFireSheetTransition(float dragVelocity)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto renderContext = host->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    AnimationOption option;
+    const RefPtr<InterpolatingSpring> curve = AceType::MakeRefPtr<InterpolatingSpring>(
+        dragVelocity / SHEET_VELOCITY_THRESHOLD, CURVE_MASS, CURVE_STIFFNESS, CURVE_DAMPING);
+    option.SetCurve(curve);
+    option.SetFillMode(FillMode::FORWARDS);
+    auto offset = pageHeight_ - (height_ + sheetHeightUp_);
+    CreatePropertyCallback();
+    CHECK_NULL_VOID(property_);
+    renderContext->AttachNodeAnimatableProperty(property_);
+    property_->SetPropertyUnit(PropertyUnit::PIXEL_POSITION);
+
+    auto finishCallback = [weak = AceType::WeakClaim(this)]() {
+        auto ref = weak.Upgrade();
+        CHECK_NULL_VOID(ref);
+        if (!ref->GetAnimationBreak()) {
+            ref->SetAnimationProcess(false);
+        } else {
+            ref->isAnimationBreak_ = false;
+        }
+    };
+
+    isAnimationProcess_ = true;
+
+    property_->Set(start_);
+    animation_ = AnimationUtils::StartAnimation(
+        option,
+        [weak = AceType::WeakClaim(this), renderContext, offset]() {
+            auto ref = weak.Upgrade();
+            CHECK_NULL_VOID(ref);
+            if (renderContext) {
+                renderContext->OnTransformTranslateUpdate({ 0.0f, offset, 0.0f });
+                ref->property_->Set(ref->height_ + ref->sheetHeightUp_);
+            }
+        },
+        finishCallback);
+}
+
 void SheetPresentationPattern::SheetTransition(bool isTransitionIn, float dragVelocity)
 {
+    if (HasOnHeightDidChange() && sheetType_ == SheetType::SHEET_BOTTOM && isTransitionIn) {
+        ModifyFireSheetTransition(dragVelocity);
+        return;
+    }
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto context = host->GetRenderContext();
@@ -1225,7 +1292,7 @@ void SheetPresentationPattern::TranslateTo(float height)
 
 void SheetPresentationPattern::ScrollTo(float height)
 {
-    // height = 0 or height > 0
+    // height >= 0
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto scroll = AceType::DynamicCast<FrameNode>(host->GetChildAtIndex(1));
@@ -1480,5 +1547,16 @@ void SheetPresentationPattern::DumpAdvanceInfo()
                                   ? std::to_string(static_cast<int32_t>(sheetStyle.sheetMode.value()))
                                   : "None"));
     DumpLog::GetInstance().AddDesc(std::string("detents' Size: ").append(std::to_string(sheetStyle.detents.size())));
+}
+
+void SheetPresentationPattern::FireOnHeightDidChange()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    if (sheetType_ == SheetType::SHEET_CENTER || sheetType_ == SheetType::SHEET_POPUP) {
+        OnHeightDidChange(centerHeight_);
+    } else {
+        OnHeightDidChange(height_);
+    }
 }
 } // namespace OHOS::Ace::NG

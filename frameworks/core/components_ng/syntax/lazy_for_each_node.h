@@ -73,6 +73,7 @@ public:
     void OnDataBulkDeleted(size_t index, size_t count) override;
     void OnDataChanged(size_t index) override;
     void OnDataMoved(size_t from, size_t to) override;
+    void OnDatasetChange(const std::list<V2::Operation>& DataOperations) override;
 
     void PostIdleTask(std::list<int32_t>&& items, const std::optional<LayoutConstraintF>& itemConstraint = std::nullopt,
         bool longPredictTask = false);

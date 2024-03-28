@@ -147,7 +147,7 @@ void NavRouterGroupNode::AddNavDestinationToNavigation()
         name = routeInfo->GetName();
         RefPtr<UINode> uiNode = navigationStack->GetFromCacheNode(name);
         if (uiNode == nullptr) {
-            uiNode = navigationStack->CreateNodeByRouteInfo(routeInfo);
+            uiNode = navigationStack->CreateNodeByRouteInfo(routeInfo, navigationPattern->GetParentCustomNode());
         }
 
         navigationPattern->AddNavDestinationNode(name, uiNode, navRouteMode, routeInfo);

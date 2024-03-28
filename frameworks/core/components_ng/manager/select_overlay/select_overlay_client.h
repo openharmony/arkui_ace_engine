@@ -108,7 +108,11 @@ public:
         }
     }
 
-    virtual RefPtr<FrameNode> GetClientHost() const = 0;
+    virtual RefPtr<FrameNode> GetClientHost() const
+    {
+        return nullptr;
+    }
+
     void UpdateSelectInfo(const std::string& selectInfo);
 
     void SetMenuOptionItems(std::vector<MenuOptionsParam>&& menuOptionItems)

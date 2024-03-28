@@ -369,6 +369,21 @@ void UINode::GetFocusChildren(std::list<RefPtr<FrameNode>>& children) const
     }
 }
 
+void UINode::GetChildrenFocusHub(std::list<RefPtr<FocusHub>>& focusNodes)
+{
+    for (const auto& uiChild : GetChildren()) {
+        auto frameChild = AceType::DynamicCast<FrameNode>(uiChild.GetRawPtr());
+        if (frameChild && frameChild->GetFocusType() != FocusType::DISABLE) {
+            const auto focusHub = frameChild->GetFocusHub();
+            if (focusHub) {
+                focusNodes.emplace_back(focusHub);
+            }
+        } else {
+            uiChild->GetChildrenFocusHub(focusNodes);
+        }
+    }
+}
+
 void UINode::AttachToMainTree(bool recursive)
 {
     if (onMainTree_) {

@@ -52,7 +52,8 @@ public:
 
     static void DispatchTouchEvent(AceViewOhos* view, const std::shared_ptr<MMI::PointerEvent>& pointerEvent,
         const RefPtr<OHOS::Ace::NG::FrameNode>& node = nullptr, const std::function<void()>& callback = nullptr);
-    static bool DispatchKeyEvent(AceViewOhos* view, const std::shared_ptr<MMI::KeyEvent>& keyEvent, bool isPreIme = false);
+    static bool DispatchKeyEvent(AceViewOhos* view, const std::shared_ptr<MMI::KeyEvent>& keyEvent,
+        bool isPreIme = false);
     static bool DispatchRotationEvent(AceViewOhos* view, float rotationValue);
     static void DispatchEventToPerf(const std::shared_ptr<MMI::PointerEvent>& pointerEvent);
     static void DispatchEventToPerf(const std::shared_ptr<MMI::KeyEvent>& keyEvent);

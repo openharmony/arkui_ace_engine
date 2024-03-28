@@ -267,6 +267,8 @@ public:
         const std::function<void(const std::string&, int32_t)>& errorCallback = nullptr) override;
     bool LoadPageSource(const std::shared_ptr<std::vector<uint8_t>>& content,
         const std::function<void(const std::string&, int32_t)>& errorCallback = nullptr) override;
+    int32_t LoadNavDestinationSource(const std::string& pageUrl, const std::string& bundleName,
+        const std::string& moduleName, bool isSingleton) override;
 
     bool LoadCard(const std::string& url, int64_t cardId, const std::string& entryPoint) override;
 
@@ -406,6 +408,8 @@ public:
 #endif
     static void AddToNamedRouterMap(const EcmaVM* vm, panda::Global<panda::FunctionRef> pageGenerator,
         const std::string& namedRoute, panda::Local<panda::ObjectRef> params);
+    static void AddToNavigationBuilderMap(std::string name,
+        panda::Global<panda::ObjectRef> builderFunc);
     bool LoadNamedRouterSource(const std::string& namedRoute, bool isTriggeredByJs) override;
     std::string SearchRouterRegisterMap(const std::string& pageName) override;
     bool UpdateRootComponent() override;
@@ -415,6 +419,8 @@ public:
         obj_ = obj;
     }
     bool ExecuteJs(const uint8_t* content, int32_t size) override;
+
+    panda::Global<panda::ObjectRef> GetNavigationBuilder(std::string name);
 
 private:
     bool CallAppFunc(const std::string& appFuncName);
@@ -452,6 +458,7 @@ private:
     std::string pluginBundleName_;
     std::string pluginModuleName_;
     static thread_local std::unordered_map<std::string, NamedRouterProperty> namedRouterRegisterMap_;
+    static thread_local std::unordered_map<std::string, panda::Global<panda::ObjectRef>> builderMap_;
     bool isFirstCallShow_ = true;
     static panda::Global<panda::ObjectRef> obj_;
     ACE_DISALLOW_COPY_AND_MOVE(JsiDeclarativeEngine);

@@ -83,6 +83,7 @@ public:
         bool addDefaultTransition = false);
     RefPtr<FrameNode> GetFocusParent() const;
     RefPtr<FocusHub> GetFirstFocusHubChild() const;
+    void GetChildrenFocusHub(std::list<RefPtr<FocusHub>>& focusNodes);
     void GetFocusChildren(std::list<RefPtr<FrameNode>>& children) const;
     void Clean(bool cleanDirectly = false, bool allowTransition = false);
     void RemoveChildAtIndex(int32_t index);
@@ -497,6 +498,16 @@ public:
         attachToMainTreeTasks_.emplace_back(std::move(func));
     }
 
+    void* GetExternalData() const
+    {
+        return externalData_;
+    }
+
+    void SetExternalData(void* externalData)
+    {
+        externalData_ = externalData;
+    }
+
     // --------------------------------------------------------------------------------
 
     virtual void DoRemoveChildInRenderTree(uint32_t index, bool isAll = false);
@@ -534,6 +545,16 @@ public:
     virtual void SetNodeIndexOffset(int32_t start, int32_t count) {}
 
     virtual void PaintDebugBoundaryTreeAll(bool flag);
+
+    void AddFlag(uint32_t flag)
+    {
+        nodeFlag_ |= flag;
+    }
+
+    bool IsNodeHasFlag(uint32_t flag) const
+    {
+        return (flag & nodeFlag_) == flag;
+    }
 
 protected:
     std::list<RefPtr<UINode>>& ModifyChildren()
@@ -613,6 +634,7 @@ private:
     NodeStatus nodeStatus_ = NodeStatus::NORMAL_NODE;
     RefPtr<ExportTextureInfo> exportTextureInfo_;
     int32_t instanceId_ = -1;
+    uint32_t nodeFlag_ { 0 };
 
     int32_t childrenUpdatedFrom_ = -1;
     static thread_local int64_t currentAccessibilityId_;
@@ -624,6 +646,7 @@ private:
 
     std::string debugLine_;
     std::string viewId_;
+    void* externalData_ = nullptr;
 
     friend class RosenRenderContext;
     ACE_DISALLOW_COPY_AND_MOVE(UINode);

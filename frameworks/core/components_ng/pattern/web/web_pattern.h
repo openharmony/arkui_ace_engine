@@ -473,6 +473,7 @@ public:
     RefPtr<WebAccessibilityNode> GetAccessibilityNodeByFocusMove(int64_t accessibilityId, int32_t direction);
     void ExecuteAction(int64_t accessibilityId, AceAction action) const;
     void SetAccessibilityState(bool state);
+    void OnTooltip(const std::string& tooltip);
     bool IsRootNeedExportTexture();
 
 private:
@@ -650,6 +651,7 @@ private:
     bool FilterScrollEventHandleOffset(const float offset);
     bool FilterScrollEventHandlevVlocity(const float velocity);
     void UpdateFlingReachEdgeState(const float value, bool status);
+    void CalculateToolTipMargin(RefPtr<FrameNode>& textNode, MarginProperty& textMargin);
     void RegisterVisibleAreaChangeCallback();
 
     std::optional<std::string> webSrc_;
@@ -687,6 +689,7 @@ private:
     bool isFocus_ = false;
     VkState isVirtualKeyBoardShow_ { VkState::VK_NONE };
     bool isDragging_ = false;
+    bool isDisableSlide_ = false;
     bool isW3cDragEvent_ = false;
     bool isWindowShow_ = true;
     bool isActive_ = true;
@@ -699,6 +702,10 @@ private:
     bool selectPopupMenuShowing_ = false;
     bool isCurrentStartHandleDragging_ = false;
     bool isPopup_ = false;
+    int32_t tooltipTextId_ = -1;
+    bool tooltipEnabled_ = false;
+    int32_t mouseHoveredX_ = -1;
+    int32_t mouseHoveredY_ = -1;
     int32_t parentNWebId_ = -1;
     bool isInWindowDrag_ = false;
     bool isWaiting_ = false;
@@ -724,7 +731,6 @@ private:
     std::unordered_map<Axis, WeakPtr<NestableScrollContainer>> parentsMap_;
     RefPtr<WebDelegate> delegate_;
     RefPtr<WebDelegateObserver> observer_;
-    std::set<OHOS::Ace::KeyCode> KeyCodeSet_;
     std::optional<ScriptItems> onDocumentStartScriptItems_;
     std::optional<ScriptItems> onDocumentEndScriptItems_;
     bool isOfflineMode_ = false;

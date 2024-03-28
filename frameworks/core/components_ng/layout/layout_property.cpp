@@ -255,7 +255,7 @@ void LayoutProperty::UpdateLayoutConstraint(const LayoutConstraintF& parentConst
         // TODO: add margin is negative case.
         marginResult_.reset();
         auto margin = CreateMargin();
-        if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
+        if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
             MinusPaddingToNonNegativeSize(margin, layoutConstraint_->maxSize);
             MinusPaddingToNonNegativeSize(margin, layoutConstraint_->minSize);
             MinusPaddingToNonNegativeSize(margin, layoutConstraint_->percentReference);
@@ -483,13 +483,23 @@ void LayoutProperty::UpdateContentConstraint()
     if (padding_) {
         auto paddingF = ConvertToPaddingPropertyF(
             *padding_, contentConstraint_->scaleProperty, contentConstraint_->percentReference.Width());
-        contentConstraint_->MinusPadding(paddingF.left, paddingF.right, paddingF.top, paddingF.bottom);
+        if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
+            contentConstraint_->MinusPaddingToNonNegativeSize(
+                paddingF.left, paddingF.right, paddingF.top, paddingF.bottom);
+        } else {
+            contentConstraint_->MinusPadding(paddingF.left, paddingF.right, paddingF.top, paddingF.bottom);
+        }
     }
     if (borderWidth_) {
         auto borderWidthF = ConvertToBorderWidthPropertyF(
             *borderWidth_, contentConstraint_->scaleProperty, contentConstraint_->percentReference.Width());
-        contentConstraint_->MinusPadding(
-            borderWidthF.leftDimen, borderWidthF.rightDimen, borderWidthF.topDimen, borderWidthF.bottomDimen);
+        if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
+            contentConstraint_->MinusPaddingToNonNegativeSize(
+                borderWidthF.leftDimen, borderWidthF.rightDimen, borderWidthF.topDimen, borderWidthF.bottomDimen);
+        } else {
+            contentConstraint_->MinusPadding(
+                borderWidthF.leftDimen, borderWidthF.rightDimen, borderWidthF.topDimen, borderWidthF.bottomDimen);
+        }
     }
 }
 

@@ -70,4 +70,6 @@ const RefPtr<Subwindow> SubwindowManager::GetSubwindow(int32_t instanceId)
 }
 
 void SubwindowManager::ResizeWindowForFoldStatus(int32_t parentContainerId) {}
+
+void SubwindowManager::MarkDirtyDialogSafeArea() {}
 } // namespace OHOS::Ace

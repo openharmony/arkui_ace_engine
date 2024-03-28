@@ -15,6 +15,7 @@
 
 #include "core/components_ng/pattern/web/richtext_model_ng.h"
 
+#include "core/components_ng/base/node_flag.h"
 #include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/web/web_event_hub.h"
@@ -34,6 +35,7 @@ void RichTextModelNG::Create(const std::string& webData)
     ACE_LAYOUT_SCOPED_TRACE("Create[%s][self:%d]", V2::WEB_ETS_TAG, nodeId);
     auto frameNode =
         FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
+    frameNode->AddFlag(NodeFlag::WEB_TAG);
     stack->Push(frameNode);
 
     auto webPattern = frameNode->GetPattern<WebPattern>();

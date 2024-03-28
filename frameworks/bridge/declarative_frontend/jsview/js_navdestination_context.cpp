@@ -24,6 +24,7 @@
 #include "bridge/declarative_frontend/engine/js_types.h"
 #include "bridge/declarative_frontend/jsview/js_navigation_stack.h"
 #include "bridge/declarative_frontend/jsview/js_utils.h"
+#include "frameworks/core/components_ng/pattern/navigation/navigation_route.h"
 
 namespace OHOS::Ace::Framework {
 napi_value JSNavPathInfo::GetParamObj() const
@@ -31,12 +32,16 @@ napi_value JSNavPathInfo::GetParamObj() const
     return JsConverter::ConvertJsValToNapiValue(param_);
 }
 
-JSRef<JSObject> JSNavDestinationContext::CreateJSNavPathInfo() const
+void JSNavDestinationContext::GetPathInfo(const JSCallbackInfo& info)
 {
     JSRef<JSObject> obj = JSRef<JSObject>::New();
-    CHECK_NULL_RETURN(pathInfo_, obj);
-    obj->SetProperty<std::string>("name", pathInfo_->GetName());
-    auto jsInfo = AceType::DynamicCast<JSNavPathInfo>(pathInfo_);
+    auto pathInfo = context_->GetNavPathInfo();
+    if (!pathInfo) {
+        info.SetReturnValue(obj);
+        return;
+    }
+    obj->SetProperty<std::string>("name", pathInfo->GetName());
+    auto jsInfo = AceType::DynamicCast<JSNavPathInfo>(pathInfo);
     JSRef<JSVal> param;
     JSRef<JSVal> onPop;
     if (jsInfo) {
@@ -49,29 +54,87 @@ JSRef<JSObject> JSNavDestinationContext::CreateJSNavPathInfo() const
     if (!onPop->IsEmpty()) {
         obj->SetPropertyObject("onPop", onPop);
     }
-    return obj;
+    info.SetReturnValue(obj);
 }
 
-JSRef<JSObject> JSNavDestinationContext::CreateJSNavPathStack() const
+void JSNavDestinationContext::SetPathInfo(const JSCallbackInfo& info)
+{
+    TAG_LOGI(AceLogTag::ACE_NAVIGATION, "navdestination context don't support set path stack");
+}
+
+void JSNavDestinationContext::GetPathStack(const JSCallbackInfo& info)
 {
     JSRef<JSObject> obj = JSRef<JSObject>::New();
-    auto stack = navigationStack_.Upgrade();
-    CHECK_NULL_RETURN(stack, obj);
+    auto stack = context_->GetNavigationStack().Upgrade();
+    if (!stack) {
+        info.SetReturnValue(obj);
+        return;
+    }
     auto jsStack = AceType::DynamicCast<JSNavigationStack>(stack);
-    CHECK_NULL_RETURN(jsStack, obj);
+    if (!jsStack) {
+        info.SetReturnValue(obj);
+        return;
+    }
     auto navPathStackObj = jsStack->GetDataSourceObj();
     if (navPathStackObj->IsEmpty()) {
-        return obj;
+        info.SetReturnValue(obj);
+        return;
     }
-
-    return navPathStackObj;
+    info.SetReturnValue(navPathStackObj);
 }
 
-JSRef<JSObject> JSNavDestinationContext::CreateJSObject()
+void JSNavDestinationContext::SetPathStack(const JSCallbackInfo& info)
 {
-    JSRef<JSObject> obj = JSRef<JSObject>::New();
-    obj->SetPropertyObject("pathInfo", CreateJSNavPathInfo());
-    obj->SetPropertyObject("pathStack", CreateJSNavPathStack());
-    return obj;
+    TAG_LOGI(AceLogTag::ACE_NAVIGATION, "navdestination context not support set path stack");
+}
+
+void JSNavDestinationContext::GetRouteInfo(const JSCallbackInfo& info)
+{
+    auto container = Container::Current();
+    auto navigationRoute = container->GetNavigationRoute();
+    if (!navigationRoute) {
+        return;
+    }
+    auto param = context_->GetNavPathInfo();
+    CHECK_NULL_VOID(param);
+    NG::RouteItem routeInfo;
+    if (!navigationRoute->GetRouteItem(param->GetName(), routeInfo)) {
+        return;
+    }
+    JSRef<JSObject> routeData = JSRef<JSObject>::New();
+    routeData->SetProperty<std::string>("name", param->GetName().c_str());
+    routeData->SetProperty<std::string>("pageSourceFile", routeInfo.pageSourceFile->c_str());
+    JSRef<JSObject> data = JSRef<JSObject>::New();
+    for (auto iter = routeInfo.data.begin(); iter != routeInfo.data.end(); iter++) {
+        data->SetProperty<std::string>(iter->first.c_str(), iter->second.c_str());
+    }
+    routeData->SetPropertyObject("data", data);
+    info.SetReturnValue(routeData);
+}
+
+void JSNavDestinationContext::JSBind(BindingTarget target)
+{
+    JSClass<JSNavDestinationContext>::Declare("NavDestinationContext");
+    JSClass<JSNavDestinationContext>::CustomProperty("pathInfo", &JSNavDestinationContext::GetPathInfo,
+        &JSNavDestinationContext::SetPathInfo);
+    JSClass<JSNavDestinationContext>::CustomProperty("pathStack", &JSNavDestinationContext::GetPathStack,
+        &JSNavDestinationContext::SetPathStack);
+    JSClass<JSNavDestinationContext>::CustomMethod("getConfigInRouteMap", &JSNavDestinationContext::GetRouteInfo);
+    JSClass<JSNavDestinationContext>::Bind(
+        target, &JSNavDestinationContext::Constructor, &JSNavDestinationContext::Destructor);
+}
+
+void JSNavDestinationContext::Constructor(const JSCallbackInfo& info)
+{
+    auto proxy = Referenced::MakeRefPtr<JSNavDestinationContext>();
+    proxy->IncRefCount();
+    info.SetReturnValue(Referenced::RawPtr(proxy));
+}
+
+void JSNavDestinationContext::Destructor(JSNavDestinationContext* context)
+{
+    if (context != nullptr) {
+        context->DecRefCount();
+    }
 }
 } // namespace OHOS::Ace::Framework

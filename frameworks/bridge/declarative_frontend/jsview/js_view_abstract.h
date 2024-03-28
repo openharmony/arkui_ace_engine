@@ -99,8 +99,7 @@ public:
     static void JsTransform(const JSCallbackInfo& info);
     static void SetDefaultTransform();
     static void JsTransition(const JSCallbackInfo& info);
-    static NG::TransitionOptions ParseTransition(std::unique_ptr<JsonValue>& transitionArgs);
-    static NG::TransitionOptions ParseJsTransition(const JSRef<JSVal>& transitionArgs);
+    static NG::TransitionOptions ParseJsTransition(const JSRef<JSObject>& jsObj);
     static RefPtr<NG::ChainedTransitionEffect> ParseJsTransitionEffect(const JSCallbackInfo& info);
     static void JsWidth(const JSCallbackInfo& info);
     static void JsHeight(const JSCallbackInfo& info);
@@ -122,13 +121,15 @@ public:
     static void JsBindContentCover(const JSCallbackInfo& info);
     static void ParseModalStyle(const JSRef<JSObject>& paramObj, NG::ModalStyle& modalStyle);
     static void JsBindSheet(const JSCallbackInfo& info);
+    static void ParseSheetIsShow(
+        const JSCallbackInfo& info, bool& isShow, std::function<void(const std::string&)>& callback);
     static void ParseSheetStyle(const JSRef<JSObject>& paramObj, NG::SheetStyle& sheetStyle);
     static bool ParseSheetDetents(const JSRef<JSVal>& args, std::vector<NG::SheetHeight>& sheetDetents);
     static void ParseSheetDetentHeight(const JSRef<JSVal>& args, NG::SheetHeight& detent);
     static bool ParseSheetBackgroundBlurStyle(const JSRef<JSVal>& args, BlurStyleOption& blurStyleOptions);
     static void ParseSheetCallback(const JSRef<JSObject>& paramObj, std::function<void()>& onAppear,
         std::function<void()>& onDisappear, std::function<void()>& shouldDismiss, std::function<void()>& onWillAppear,
-        std::function<void()>& onWillDisappear);
+        std::function<void()>& onWillDisappear, std::function<void(const float)>& onHeightDidChange);
     static void ParseSheetTitle(const JSRef<JSObject>& paramObj, NG::SheetStyle& sheetStyle,
         std::function<void()>& titleBuilderFunction);
     static panda::Local<panda::JSValueRef> JsDismissSheet(panda::JsiRuntimeCallInfo* runtimeCallInfo);
@@ -505,6 +506,8 @@ public:
     static bool ParseBorderStyleProps(const JSRef<JSVal>& args, NG::BorderStyleProperty& borderStyleProperty);
     static bool ParseBorderRadius(const JSRef<JSVal>& args, NG::BorderRadiusProperty& radius);
     static void SetDialogProperties(const JSRef<JSObject>& obj, DialogProperties& properties);
+    static std::function<void(NG::DrawingContext& context)> GetDrawCallback(
+        const RefPtr<JsFunction>& jsDraw, const JSExecutionContext& execCtx);
 };
 } // namespace OHOS::Ace::Framework
 #endif // JS_VIEW_ABSTRACT_H

@@ -173,6 +173,7 @@ void Animator::PlayMotion(const RefPtr<Motion>& motion)
 {
     isReverse_ = false;
     motion_ = motion;
+    status_ = Status::RUNNING; // StartInner
 }
 
 void Animator::Play()

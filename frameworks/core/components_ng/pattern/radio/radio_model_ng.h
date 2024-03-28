@@ -16,14 +16,15 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_RADIO_RADIO_MODEL_NG_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_RADIO_RADIO_MODEL_NG_H
 
-#include "core/components_ng/pattern/radio/radio_model.h"
 #include "core/components_ng/base/frame_node.h"
+#include "core/components_ng/pattern/radio/radio_model.h"
 
 namespace OHOS::Ace::NG {
 
 class ACE_EXPORT RadioModelNG : public OHOS::Ace::RadioModel {
 public:
-    void Create(const std::optional<std::string>& value, const std::optional<std::string>& group) override;
+    void Create(const std::optional<std::string>& value, const std::optional<std::string>& group,
+        const std::optional<int32_t>& indicator) override;
     void SetChecked(bool isChecked) override;
     void SetOnChange(ChangeEvent&& onChange) override;
     void SetWidth(const Dimension& width) override;
@@ -36,6 +37,8 @@ public:
     void SetResponseRegion(const std::vector<DimensionRect>& responseRegion) override;
     void SetHoverEffect(HoverEffectType hoverEffect) override;
 
+    void SetBuilder(std::function<void()>&& buildFunc) override;
+    static void SetRadioIndicator(int32_t indicator);
     static void SetChecked(FrameNode* frameNode, bool isChecked);
     static void SetCheckedBackgroundColor(FrameNode* frameNode, const Color& color);
     static void SetUncheckedBorderColor(FrameNode* frameNode, const Color& color);

@@ -25,12 +25,12 @@ void JSEllipseShape::ConstructorCallback(const JSCallbackInfo& info)
         JSRef<JSObject> params = JSRef<JSObject>::Cast(info[0]);
         JSRef<JSVal> width = params->GetProperty("width");
         CalcDimension dimWidth;
-        if (ParseJsDimensionVp(width, dimWidth)) {
+        if (ParseJsDimensionVpNG(width, dimWidth) && dimWidth.IsValid()) {
             ellipse->SetWidth(dimWidth);
         }
         JSRef<JSVal> height = params->GetProperty("height");
         CalcDimension dimHeight;
-        if (ParseJsDimensionVp(height, dimHeight)) {
+        if (ParseJsDimensionVpNG(height, dimHeight) && dimHeight.IsValid()) {
             ellipse->SetHeight(dimHeight);
         }
     }

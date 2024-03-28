@@ -20,6 +20,7 @@
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
 #include "base/utils/utils.h"
+#include "core/common/ace_application_info.h"
 #include "core/components/common/properties/alignment.h"
 #include "core/components/common/properties/color.h"
 #include "core/components/common/properties/shadow.h"
@@ -764,10 +765,16 @@ bool NavigationModelNG::ParseCommonTitle(
             V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
         auto textLayoutProperty = mainTitle->GetLayoutProperty<TextLayoutProperty>();
         auto theme = NavigationGetTheme();
+        Color mainTitleColor = theme->GetTitleColor();
+        FontWeight mainTitleWeight = FontWeight::MEDIUM;
+        if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
+            mainTitleColor = theme->GetMainTitleFontColor();
+            mainTitleWeight = FontWeight::BOLD;
+        }
         textLayoutProperty->UpdateMaxLines(hasSubTitle ? 1 : 2);
         textLayoutProperty->UpdateContent(title);
-        textLayoutProperty->UpdateTextColor(theme->GetTitleColor());
-        textLayoutProperty->UpdateFontWeight(FontWeight::MEDIUM);
+        textLayoutProperty->UpdateTextColor(mainTitleColor);
+        textLayoutProperty->UpdateFontWeight(mainTitleWeight);
         textLayoutProperty->UpdateTextOverflow(TextOverflow::ELLIPSIS);
         titleBarNode->SetTitle(mainTitle);
         titleBarNode->AddChild(mainTitle);
@@ -793,10 +800,17 @@ bool NavigationModelNG::ParseCommonTitle(
             V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
         auto textLayoutProperty = subTitle->GetLayoutProperty<TextLayoutProperty>();
         auto theme = NavigationGetTheme();
+        Color subTitleColor = theme->GetSubTitleColor();
+        auto subTitleSize = theme->GetSubTitleFontSize();
+        FontWeight subTitleWeight = FontWeight::REGULAR; // ohos_id_text_font_family_regular
+        if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
+            subTitleSize = theme->GetSubTitleFontSizeS();
+            subTitleColor = theme->GetSubTitleFontColor();
+        }
         textLayoutProperty->UpdateContent(subtitle);
-        textLayoutProperty->UpdateFontSize(theme->GetSubTitleFontSize());
-        textLayoutProperty->UpdateTextColor(theme->GetSubTitleColor());
-        textLayoutProperty->UpdateFontWeight(FontWeight::REGULAR); // ohos_id_text_font_family_regular
+        textLayoutProperty->UpdateFontSize(subTitleSize);
+        textLayoutProperty->UpdateTextColor(subTitleColor);
+        textLayoutProperty->UpdateFontWeight(subTitleWeight);
         textLayoutProperty->UpdateMaxLines(1);
         textLayoutProperty->UpdateTextOverflow(TextOverflow::ELLIPSIS);
         titleBarNode->SetSubtitle(subTitle);

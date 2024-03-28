@@ -68,6 +68,11 @@ ArkUI_GestureEventActionType OH_ArkUI_GestureEvent_GetActionType(const ArkUI_Ges
     return ret;
 }
 
+int32_t OH_ArkUI_LongPress_GetRepeatCount(const ArkUI_GestureEvent* event)
+{
+    return event->eventData.repeat;
+}
+
 float OH_ArkUI_PanGesture_GetVelocity(const ArkUI_GestureEvent* event)
 {
     return event->eventData.velocity;
@@ -93,6 +98,36 @@ float OH_ArkUI_PanGesture_GetOffsetY(const ArkUI_GestureEvent* event)
     return event->eventData.y;
 }
 
+float OH_ArkUI_SwipeGesture_GetAngle(const ArkUI_GestureEvent* event)
+{
+    return event->eventData.angle;
+}
+
+float OH_ArkUI_SwipeGesture_GetVelocity(const ArkUI_GestureEvent* event)
+{
+    return event->eventData.velocity;
+}
+
+float OH_ArkUI_RotationGesture_GetAngle(const ArkUI_GestureEvent* event)
+{
+    return event->eventData.angle;
+}
+
+float OH_ArkUI_PinchGesture_GetScale(const ArkUI_GestureEvent* event)
+{
+    return event->eventData.scale;
+}
+
+float OH_ArkUI_PinchGesture_GetCenterX(const ArkUI_GestureEvent* event)
+{
+    return event->eventData.pinchCenterX;
+}
+
+float OH_ArkUI_PinchGesture_GetCenterY(const ArkUI_GestureEvent* event)
+{
+    return event->eventData.pinchCenterY;
+}
+
 namespace OHOS::Ace::GestureModel {
 
 constexpr int32_t DEFAULT_PAN_FINGERS = 1;
@@ -102,6 +137,45 @@ struct GestureInnerData {
     void (*targetReceiver)(ArkUI_GestureEvent* event, void* extraParam);
     void* extraParam;
 };
+
+ArkUI_GestureRecognizer* CreateTapGesture(int32_t count, int32_t fingers)
+{
+    auto* gesture = OHOS::Ace::NodeModel::GetFullImpl()->getNodeModifiers()->getGestureModifier()->createTapGesture(
+        count, fingers);
+    return new ArkUI_GestureRecognizer{ TAP_GESTURE, gesture, nullptr };
+}
+
+ArkUI_GestureRecognizer* CreateLongPressGesture(int32_t fingers, bool repeatResult, int32_t duration)
+{
+    auto* gesture =
+        OHOS::Ace::NodeModel::GetFullImpl()->getNodeModifiers()->getGestureModifier()->createLongPressGesture(fingers,
+        repeatResult, duration);
+    return new ArkUI_GestureRecognizer{ LONG_PRESS_GESTURE, gesture, nullptr };
+}
+
+ArkUI_GestureRecognizer* CreatePinchGesture(int32_t fingers, double distance)
+{
+    auto* gesture =
+        OHOS::Ace::NodeModel::GetFullImpl()->getNodeModifiers()->getGestureModifier()->createPinchGesture(fingers,
+        distance);
+    return new ArkUI_GestureRecognizer{ PINCH_GESTURE, gesture, nullptr };
+}
+
+ArkUI_GestureRecognizer* CreateRotationGesture(int32_t fingers, double angle)
+{
+    auto* gesture =
+        OHOS::Ace::NodeModel::GetFullImpl()->getNodeModifiers()->getGestureModifier()->createRotationGesture(fingers,
+        angle);
+    return new ArkUI_GestureRecognizer{ ROTATION_GESTURE, gesture, nullptr };
+}
+
+ArkUI_GestureRecognizer* CreateSwipeGesture(int32_t fingers, ArkUI_GestureDirectionMask directions, double speed)
+{
+    auto* gesture =
+        OHOS::Ace::NodeModel::GetFullImpl()->getNodeModifiers()->getGestureModifier()->createSwipeGesture(fingers,
+        directions, speed);
+    return new ArkUI_GestureRecognizer{ SWIPE_GESTURE, gesture, nullptr };
+}
 
 ArkUI_GestureRecognizer* CreatePanGesture(int32_t fingersNum, ArkUI_GestureDirectionMask mask, double distanceNum)
 {

@@ -615,7 +615,7 @@ void TextFieldModelNG::SetMaxViewLines(uint32_t value)
 
 void TextFieldModelNG::SetBackgroundColor(const Color& color, bool tmp)
 {
-    Color backgroundColor;
+    Color backgroundColor = color;
     if (tmp) {
         auto pipeline = PipelineBase::GetCurrentContext();
         CHECK_NULL_VOID(pipeline);
@@ -624,11 +624,10 @@ void TextFieldModelNG::SetBackgroundColor(const Color& color, bool tmp)
         auto theme = themeManager->GetTheme<TextFieldTheme>();
         CHECK_NULL_VOID(theme);
         backgroundColor = theme->GetBgColor();
-        return;
     }
 
-    NG::ViewAbstract::SetBackgroundColor(color);
-    ACE_UPDATE_PAINT_PROPERTY(TextFieldPaintProperty, BackgroundColor, color);
+    NG::ViewAbstract::SetBackgroundColor(backgroundColor);
+    ACE_UPDATE_PAINT_PROPERTY(TextFieldPaintProperty, BackgroundColor, backgroundColor);
 }
 
 void TextFieldModelNG::SetBackgroundColor(FrameNode* frameNode, const Color& color)

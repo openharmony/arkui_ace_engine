@@ -1749,6 +1749,12 @@ var ContentTextStyle;
   ContentTextStyle[ContentTextStyle["ThreeLines"] = 2] = "ThreeLines";
 })(ContentTextStyle || (ContentTextStyle = {}));
 
+var MarqueeUpdateStrategy;
+(function (MarqueeUpdateStrategy) {
+  MarqueeUpdateStrategy["DEFAULT"] = "default";
+  MarqueeUpdateStrategy["PRESERVE_POSITION"] = "preserve_position";
+})(MarqueeUpdateStrategy || (MarqueeUpdateStrategy = {}));
+
 class NavPathInfo {
   constructor(name, param, onPop) {
     this.name = name;
@@ -2617,6 +2623,13 @@ var ButtonStyleMode;
   ButtonStyleMode["TEXTUAL"] = 2;
 })(ButtonStyleMode || (ButtonStyleMode = {}));
 
+let RadioIndicatorType;
+(function (RadioIndicatorType) {
+  RadioIndicatorType[RadioIndicatorType.TICK = 0] = "TICK";
+  RadioIndicatorType[RadioIndicatorType.DOT = 1] = "DOT";
+  RadioIndicatorType[RadioIndicatorType.CUSTOM = 2] = "CUSTOM";
+})(RadioIndicatorType  || (RadioIndicatorType  = {}));
+
 var ControlSize;
 (function (ControlSize) {
   ControlSize[ControlSize["SMALL"] = 0] = "SMALL";
@@ -2687,6 +2700,16 @@ let PreDragStatus;
   PreDragStatus['PREVIEW_LANDING_FINISHED'] = 5;
   PreDragStatus['ACTION_CANCELED_BEFORE_DRAG'] = 6;
 })(PreDragStatus || (PreDragStatus = {}));
+
+let DataOperationType;
+(function (DataOperationType) {
+  DataOperationType['ADD'] = "add";
+  DataOperationType['DELETE'] = "delete";
+  DataOperationType['CHANGE'] = "change";
+  DataOperationType['MOVE'] = "move";
+  DataOperationType['EXCHANGE'] = "exchange";
+  DataOperationType['RELOAD'] = "reload";
+})(DataOperationType || (DataOperationType = {}));
 
 var StyledStringKey;
 (function (StyledStringKey) {

@@ -720,4 +720,42 @@ ArkUINativeModuleValue FrameNodeBridge::PropertyUpdate(ArkUIRuntimeCallInfo* run
     GetArkUINodeModifiers()->getFrameNodeModifier()->propertyUpdate(nativeNode);
     return panda::JSValueRef::Undefined(vm);
 }
+
+ArkUINativeModuleValue FrameNodeBridge::RegisterFrameCallback(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::JSValueRef::Undefined(vm));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
+    CHECK_NULL_RETURN(firstArg->IsFunction(), panda::JSValueRef::Undefined(vm));
+    auto obj = firstArg->ToObject(vm);
+    auto containerId = Container::CurrentId();
+    panda::Local<panda::FunctionRef> func = obj;
+    auto getVsyncFunc = [vm, func = panda::CopyableGlobal(vm, func), containerId]() {
+        panda::LocalScope pandaScope(vm);
+        ContainerScope scope(containerId);
+        auto container = Container::Current();
+        CHECK_NULL_VOID(container);
+        auto frontend = container->GetFrontend();
+        CHECK_NULL_VOID(frontend);
+        func->Call(vm, func.ToLocal(), nullptr, 0);
+    };
+    auto pipelineContext = PipelineContext::GetCurrentContextSafely();
+    CHECK_NULL_RETURN(pipelineContext, panda::JSValueRef::Undefined(vm));
+    pipelineContext->SetOnceVsyncListener(std::move(getVsyncFunc));
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue FrameNodeBridge::MarkDirty(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::JSValueRef::Undefined(vm));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
+    CHECK_NULL_RETURN(!firstArg.IsNull(), panda::JSValueRef::Undefined(vm));
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    Local<JSValueRef> secondeArg = runtimeCallInfo->GetCallArgRef(1);
+    CHECK_NULL_RETURN(secondeArg->IsNumber(), panda::JSValueRef::Undefined(vm));
+    ArkUIDirtyFlag dirtyFlag = static_cast<ArkUIDirtyFlag>(secondeArg->ToNumber(vm)->Value());
+    GetArkUIFullNodeAPI()->getBasicAPI()->markDirty(nativeNode, dirtyFlag);
+    return panda::JSValueRef::Undefined(vm);
+}
 } // namespace OHOS::Ace::NG

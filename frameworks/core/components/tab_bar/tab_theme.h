@@ -80,6 +80,8 @@ public:
                 theme->tabContentAnimationDuration_ =
                     pattern->GetAttr<double>("tab_content_animation_duration", 0.0);
                 theme->tabBarDefaultHeight_ = pattern->GetAttr<Dimension>("tab_bar_default_height", 0.0_vp);
+                theme->bottomTabBarDefaultHeight_ =
+                    pattern->GetAttr<Dimension>("bottom_tab_bar_default_height", 0.0_vp);
                 theme->tabBarDefaultWidth_ = pattern->GetAttr<Dimension>("tab_bar_default_width", 0.0_vp);
                 theme->subTabBarMinWidth_ = pattern->GetAttr<Dimension>("sub_tab_bar_min_width", 0.0_vp);
                 theme->dividerColor_ = pattern->GetAttr<Color>("divider_color", Color::BLACK);
@@ -363,6 +365,11 @@ public:
     {
         return horizontalBottomTabMinWidth_;
     }
+    const Dimension& GetBottomTabBarDefaultWidth() const
+    {
+        return bottomTabBarDefaultHeight_;
+    }
+    
 
 protected:
     TabTheme() = default;
@@ -408,6 +415,7 @@ private:
     double subTabBarHoverToPressDuration_;
     double tabContentAnimationDuration_;
     Dimension tabBarDefaultHeight_;
+    Dimension bottomTabBarDefaultHeight_;
     Dimension tabBarDefaultWidth_;
     Dimension subTabBarMinWidth_;
     Color dividerColor_;

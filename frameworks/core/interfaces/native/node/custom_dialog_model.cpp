@@ -39,7 +39,7 @@ ArkUIDialogHandle CreateDialog()
         .offsetY = 0.0f, .isModal = true, .autoCancel = true, .maskColor = DEFAULT_MASK_COLOR, .maskRect = nullptr,
         .backgroundColor = DEFAULT_DIALOG_BACKGROUND_COLOR, .cornerRadiusRect = nullptr,
         .gridCount = -1, .enableCustomStyle = false,
-        .showInSubWindow = false, .enableCustomAnimation = false, .onWillDissmissCall = nullptr });
+        .showInSubWindow = false, .enableCustomAnimation = false, .onWillDismissCall = nullptr });
 }
 
 void DisposeDialog(ArkUIDialogHandle controllerHandler)
@@ -63,7 +63,7 @@ void DisposeDialog(ArkUIDialogHandle controllerHandler)
     if (cornerRadiusRect) {
         delete cornerRadiusRect;
     }
-    controllerHandler->onWillDissmissCall = nullptr;
+    controllerHandler->onWillDismissCall = nullptr;
     delete controllerHandler;
 }
 
@@ -121,11 +121,11 @@ void ParseDialogProperties(DialogProperties& dialogProperties, ArkUIDialogHandle
         radius.multiValued = true;
         dialogProperties.borderRadius = radius;
     }
-    if (controllerHandler->onWillDissmissCall) {
+    if (controllerHandler->onWillDismissCall) {
         dialogProperties.onWillDismiss = [controllerHandler](int32_t reason) {
                 CHECK_NULL_VOID(controllerHandler);
-                CHECK_NULL_VOID(controllerHandler->onWillDissmissCall);
-                auto executeClose = (*(controllerHandler->onWillDissmissCall))(reason);
+                CHECK_NULL_VOID(controllerHandler->onWillDismissCall);
+                auto executeClose = (*(controllerHandler->onWillDismissCall))(reason);
                 if (!executeClose) {
                     // todo
                 }
@@ -278,10 +278,10 @@ ArkUI_Int32 CloseDialog(ArkUIDialogHandle controllerHandler)
     return ERROR_CODE_NO_ERROR;
 }
 
-ArkUI_Int32 RegiesterOnWillDialogDismiss(ArkUIDialogHandle controllerHandler, bool (*eventHandler)(ArkUI_Int32))
+ArkUI_Int32 RegisterOnWillDialogDismiss(ArkUIDialogHandle controllerHandler, bool (*eventHandler)(ArkUI_Int32))
 {
     CHECK_NULL_RETURN(controllerHandler, ERROR_CODE_PARAM_INVALID);
-    controllerHandler->onWillDissmissCall = eventHandler;
+    controllerHandler->onWillDismissCall = eventHandler;
     return ERROR_CODE_NO_ERROR;
 }
 } // namespace OHOS::Ace::NG::ViewModel
