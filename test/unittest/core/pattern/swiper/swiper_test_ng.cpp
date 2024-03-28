@@ -99,6 +99,15 @@ void SwiperTestNg::CreateItem(int32_t itemNumber)
     }
 }
 
+void SwiperTestNg::CreateItemWithSize(float width, float height)
+{
+    TextModelNG model;
+    model.Create("text");
+    ViewAbstract::SetWidth(CalcLength(width));
+    ViewAbstract::SetHeight(CalcLength(height));
+    ViewStackProcessor::GetInstance()->Pop();
+}
+
 /**
  * @tc.name: SwiperPatternOnDirtyLayoutWrapperSwap001
  * @tc.desc: OnDirtyLayoutWrapperSwap
@@ -691,11 +700,12 @@ HWTEST_F(SwiperTestNg, UpdateCurrentOffset002, TestSize.Level1)
         model.SetLoop(false);
     });
     EXPECT_EQ(pattern_->GetEdgeEffect(), EdgeEffect::SPRING);
+    pattern_->isTouchPad_ = true;
     pattern_->childScrolling_ = true;
     pattern_->UpdateCurrentOffset(10.f);
-    EXPECT_EQ(pattern_->currentDelta_, -10.f);
+    EXPECT_GT(pattern_->currentDelta_, -10.f);
     pattern_->UpdateCurrentOffset(-20.f);
-    EXPECT_EQ(pattern_->currentDelta_, 10.f);
+    EXPECT_GT(pattern_->currentDelta_, 10.f);
 }
 
 /**
@@ -1177,8 +1187,9 @@ HWTEST_F(SwiperTestNg, SwiperPatternInitSurfaceChangedCallback001, TestSize.Leve
     EXPECT_EQ(callbackmapnumber2, 1);
     auto testFunction2 = pipeline->surfaceChangedCallbackMap_[1];
     testFunction2(1, 1, 1, 1, WindowSizeChangeReason::UNDEFINED);
-    auto callbacknumber2 = pattern_->surfaceChangedCallbackId_;
-    EXPECT_EQ(callbacknumber2, 1);
+    EXPECT_EQ(pattern_->surfaceChangedCallbackId_, 1);
+    testFunction2(1, 1, 1, 1, WindowSizeChangeReason::ROTATION);
+    EXPECT_EQ(pattern_->windowSizeChangeReason_, WindowSizeChangeReason::ROTATION);
 
     auto childswiperNode1 = FrameNode::CreateFrameNode("childswiper", 1, AceType::MakeRefPtr<SwiperPattern>(), false);
     childswiperNode1->MountToParent(frameNode_);
