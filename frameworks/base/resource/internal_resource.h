@@ -80,6 +80,7 @@ public:
         TV_RATE_STAR_BIG_ON_SVG,
         TV_RATE_STAR_SMALL_OFF_SVG,
         TV_RATE_STAR_SMALL_ON_SVG,
+        TITLEBAR_BACK,
         IC_BACK,
         IC_MORE,
         IC_MORE_DARK,

@@ -195,29 +195,44 @@ void NavDestinationModelNG::CreateBackButton(const RefPtr<NavDestinationGroupNod
     titleBarNode->SetBackButton(backButtonNode);
     auto backButtonLayoutProperty = backButtonNode->GetLayoutProperty<ButtonLayoutProperty>();
     CHECK_NULL_VOID(backButtonLayoutProperty);
-    backButtonLayoutProperty->UpdateUserDefinedIdealSize(
-        CalcSize(CalcLength(BACK_BUTTON_SIZE), CalcLength(BACK_BUTTON_SIZE)));
-    backButtonLayoutProperty->UpdateType(ButtonType::NORMAL);
-    backButtonLayoutProperty->UpdateBorderRadius(BorderRadiusProperty(BUTTON_RADIUS_SIZE));
-    backButtonLayoutProperty->UpdateMeasureType(MeasureType::MATCH_PARENT);
     auto renderContext = backButtonNode->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
-    renderContext->UpdateBackgroundColor(Color::TRANSPARENT);
+    auto theme = NavigationGetTheme();
+    CHECK_NULL_VOID(theme);
+    backButtonLayoutProperty->UpdateType(ButtonType::NORMAL);
+    backButtonLayoutProperty->UpdateMeasureType(MeasureType::MATCH_PARENT);
 
-    PaddingProperty padding;
-    padding.SetEdges(CalcLength(BUTTON_PADDING));
-    backButtonLayoutProperty->UpdatePadding(padding);
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
+        backButtonLayoutProperty->UpdateUserDefinedIdealSize(
+            CalcSize(CalcLength(NAV_BACK_BUTTON_SIZE), CalcLength(NAV_BACK_BUTTON_SIZE)));
+        backButtonLayoutProperty->UpdateBorderRadius(BorderRadiusProperty(theme->GetCornerRadius()));
+        PaddingProperty padding;
+        padding.SetEdges(CalcLength(MENU_BUTTON_PADDING));
+        backButtonLayoutProperty->UpdatePadding(padding);
+    } else {
+        backButtonLayoutProperty->UpdateUserDefinedIdealSize(
+            CalcSize(CalcLength(BACK_BUTTON_SIZE), CalcLength(BACK_BUTTON_SIZE)));
+        backButtonLayoutProperty->UpdateBorderRadius(BorderRadiusProperty(BUTTON_RADIUS_SIZE));
+        renderContext->UpdateBackgroundColor(Color::TRANSPARENT);
+        PaddingProperty padding;
+        padding.SetEdges(CalcLength(BUTTON_PADDING));
+        backButtonLayoutProperty->UpdatePadding(padding);
+    }
 
     auto backButtonImageNode = FrameNode::CreateFrameNode(V2::BACK_BUTTON_IMAGE_ETS_TAG,
         ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<ImagePattern>());
     CHECK_NULL_VOID(backButtonImageNode);
-    auto theme = NavigationGetTheme();
-    CHECK_NULL_VOID(theme);
+
     ImageSourceInfo imageSourceInfo;
     imageSourceInfo.SetResourceId(theme->GetBackResourceId());
     auto backButtonImageLayoutProperty = backButtonImageNode->GetLayoutProperty<ImageLayoutProperty>();
     CHECK_NULL_VOID(backButtonImageLayoutProperty);
-
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
+        auto iconWidth = theme->GetIconWidth();
+        auto iconHeight = theme->GetIconHeight();
+        backButtonImageLayoutProperty->UpdateUserDefinedIdealSize(CalcSize(CalcLength(iconWidth),
+            CalcLength(iconHeight)));
+    }
     backButtonImageLayoutProperty->UpdateImageSourceInfo(imageSourceInfo);
     backButtonImageLayoutProperty->UpdateMeasureType(MeasureType::MATCH_PARENT);
     backButtonNode->AddChild(backButtonImageNode);
