@@ -136,6 +136,12 @@ constexpr double PARENT_PAGE_OFFSET = 0.2;
 constexpr int32_t MASK_DURATION = 350;
 constexpr int32_t DEFAULT_ANIMATION_DURATION = 450;
 constexpr float REMOVE_CLIP_SIZE = 10000.0f;
+constexpr uint32_t DRAW_REGION_CONTENT_MODIFIER_INDEX = 0;
+constexpr uint32_t DRAW_REGION_OVERLAY_MODIFIER_INDEX = 1;
+constexpr uint32_t DRAW_REGION_FOCUS_MODIFIER_INDEX = 2;
+constexpr uint32_t DRAW_REGION_ACCESSIBILITY_FOCUS_MODIFIER_INDEX = 3;
+constexpr uint32_t DRAW_REGION_OVERLAY_TEXT_MODIFIER_INDEX = 4;
+constexpr uint32_t DRAW_REGION_DEBUG_BOUNDARY_MODIFIER_INDEX = 5;
 const Color MASK_COLOR = Color::FromARGB(25, 0, 0, 0);
 const Color DEFAULT_MASK_COLOR = Color::FromARGB(0, 0, 0, 0);
 const RefPtr<InterpolatingSpring> springCurve = AceType::MakeRefPtr<InterpolatingSpring>(0.0f, 1.0f, 342.0f, 37.0f);
@@ -595,17 +601,17 @@ void RosenRenderContext::PaintDebugBoundary(bool flag)
         std::shared_ptr<Rosen::RectF> drawRect =
             std::make_shared<Rosen::RectF>(marginOffset.GetX() - rect.GetX(), marginOffset.GetY() - rect.GetY(),
                 geometryNode->GetMarginFrameSize().Width(), geometryNode->GetMarginFrameSize().Height());
-        rsNode_->SetDrawRegion(drawRect);
+        UpdateDrawRegion(DRAW_REGION_DEBUG_BOUNDARY_MODIFIER_INDEX, drawRect);
+        debugBoundaryModifier_->SetCustomData(flag);
         rsNode_->AddModifier(debugBoundaryModifier_);
-    }
-    if (debugBoundaryModifier_) {
+    } else if (debugBoundaryModifier_) {
         debugBoundaryModifier_->SetPaintTask(std::move(paintTask));
         auto rect = GetPaintRectWithoutTransform();
         auto marginOffset = geometryNode->GetMarginFrameOffset();
         std::shared_ptr<Rosen::RectF> drawRect =
             std::make_shared<Rosen::RectF>(marginOffset.GetX() - rect.GetX(), marginOffset.GetY() - rect.GetY(),
                 geometryNode->GetMarginFrameSize().Width(), geometryNode->GetMarginFrameSize().Height());
-        rsNode_->SetDrawRegion(drawRect);
+        UpdateDrawRegion(DRAW_REGION_DEBUG_BOUNDARY_MODIFIER_INDEX, drawRect);
         debugBoundaryModifier_->SetCustomData(flag);
     }
 }
@@ -2922,16 +2928,18 @@ void RosenRenderContext::PaintFocusState(
             accessibilityFocusStateModifier_ = std::make_shared<FocusStateModifier>();
         }
         modifier = accessibilityFocusStateModifier_;
+        modifier->SetRoundRect(paintRect, borderWidthPx);
+        UpdateDrawRegion(DRAW_REGION_ACCESSIBILITY_FOCUS_MODIFIER_INDEX, modifier->GetOverlayRect());
     } else {
         if (!focusStateModifier_) {
             // TODO: Add property data
             focusStateModifier_ = std::make_shared<FocusStateModifier>();
         }
         modifier = focusStateModifier_;
+        modifier->SetRoundRect(paintRect, borderWidthPx);
+        UpdateDrawRegion(DRAW_REGION_FOCUS_MODIFIER_INDEX, modifier->GetOverlayRect());
     }
-    modifier->SetRoundRect(paintRect, borderWidthPx);
     modifier->SetPaintTask(std::move(paintTask));
-    rsNode_->SetDrawRegion(modifier->GetOverlayRect());
     rsNode_->AddModifier(modifier);
     RequestNextFrame();
 }
@@ -2991,7 +2999,7 @@ void RosenRenderContext::ClearFocusState()
     CHECK_NULL_VOID(context);
     CHECK_NULL_VOID(focusStateModifier_);
 
-    rsNode_->SetDrawRegion(focusStateModifier_->GetOverlayRect());
+    UpdateDrawRegion(DRAW_REGION_FOCUS_MODIFIER_INDEX, focusStateModifier_->GetOverlayRect());
     rsNode_->RemoveModifier(focusStateModifier_);
     RequestNextFrame();
 }
@@ -3025,7 +3033,7 @@ void RosenRenderContext::FlushContentModifier(const RefPtr<Modifier>& modifier)
     if (rect.has_value()) {
         std::shared_ptr<Rosen::RectF> overlayRect =
             std::make_shared<Rosen::RectF>(rect->GetX(), rect->GetY(), rect->Width(), rect->Height());
-        rsNode_->SetDrawRegion(overlayRect);
+        UpdateDrawRegion(DRAW_REGION_CONTENT_MODIFIER_INDEX, overlayRect);
     }
     rsNode_->SetIsCustomTextType(contentModifier->GetIsCustomFont());
     rsNode_->AddModifier(modifierAdapter);
@@ -3078,13 +3086,7 @@ void RosenRenderContext::FlushOverlayModifier(const RefPtr<Modifier>& modifier)
     auto rect = overlayModifier->GetBoundsRect();
     std::shared_ptr<Rosen::RectF> overlayRect =
         std::make_shared<Rosen::RectF>(rect.GetX(), rect.GetY(), rect.Width(), rect.Height());
-    if (focusStateModifier_) {
-        auto focusRect = focusStateModifier_->GetOverlayRect();
-        if (focusRect) {
-            *overlayRect = overlayRect->JoinRect(*focusRect);
-        }
-    }
-    rsNode_->SetDrawRegion(overlayRect);
+    UpdateDrawRegion(DRAW_REGION_OVERLAY_MODIFIER_INDEX, overlayRect);
     rsNode_->AddModifier(modifierAdapter);
     modifierAdapter->AttachProperties();
 }
@@ -4092,7 +4094,7 @@ void RosenRenderContext::PaintOverlayText()
                 std::max(paragraphSize.Width(), paintRect.Width()),
                 std::max(paragraphSize.Height(), paintRect.Height()));
             rsNode_->SetIsCustomTextType(modifier_->IsCustomFont());
-            rsNode_->SetDrawRegion(overlayRect);
+            UpdateDrawRegion(DRAW_REGION_OVERLAY_TEXT_MODIFIER_INDEX, overlayRect);
         } else {
             modifier_ = std::make_shared<OverlayTextModifier>();
             rsNode_->AddModifier(modifier_);
@@ -4103,7 +4105,7 @@ void RosenRenderContext::PaintOverlayText()
                 std::max(paragraphSize.Width(), paintRect.Width()),
                 std::max(paragraphSize.Height(), paintRect.Height()));
             rsNode_->SetIsCustomTextType(modifier_->IsCustomFont());
-            rsNode_->SetDrawRegion(overlayRect);
+            UpdateDrawRegion(DRAW_REGION_OVERLAY_TEXT_MODIFIER_INDEX, overlayRect);
         }
     }
 }
@@ -5306,5 +5308,30 @@ void RosenRenderContext::SyncPartialRsProperties()
         // if translate unit is percent, it is related with frameSize
         OnTransformTranslateUpdate(propTransform_->GetTransformTranslateValue());
     }
+}
+
+void RosenRenderContext::UpdateDrawRegion(uint32_t index, const std::shared_ptr<Rosen::RectF>& rect)
+{
+    if (drawRegionRects_[index] && rect && *drawRegionRects_[index] == *rect) {
+        return;
+    } else if (!drawRegionRects_[index] && !rect) {
+        return;
+    }
+    // the drawRegion of this index has changed
+    drawRegionRects_[index] = rect;
+    std::shared_ptr<Rosen::RectF> result;
+    for (size_t index = 0; index < DRAW_REGION_RECT_COUNT; ++index) {
+        if (drawRegionRects_[index]) {
+            if (result) {
+                *result = result->JoinRect(*drawRegionRects_[index]);
+            } else {
+                result = std::make_shared<Rosen::RectF>(*drawRegionRects_[index]);
+            }
+        }
+    }
+    if (!result) {
+        return;
+    }
+    rsNode_->SetDrawRegion(result);
 }
 } // namespace OHOS::Ace::NG
