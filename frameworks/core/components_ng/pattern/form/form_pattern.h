@@ -91,6 +91,11 @@ public:
         return isJsCard_;
     }
 
+    void SetObscured(bool isObscured)
+    {
+        isFormObscured_ = isObscured;
+    }
+
 private:
     void OnAttachToFrameNode() override;
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
@@ -162,6 +167,7 @@ private:
     bool shouldResponseClick_ = false;
     Offset lastTouchLocation_;
 
+    bool isFormObscured_ = false;
     bool isJsCard_ = true;
 };
 

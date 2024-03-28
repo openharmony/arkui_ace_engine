@@ -48,6 +48,7 @@ private:
     int32_t HandleSetAllowUpdate(MessageParcel &data, MessageParcel &reply);
     int32_t HandleDispatchSurfaceChangeEvent(MessageParcel &data, MessageParcel &reply);
     int32_t HandleSetVisibleChange(MessageParcel &data, MessageParcel &reply);
+    int32_t HandleSetObscured(MessageParcel &data, MessageParcel &reply);
     using FormRendererDispatcherFunc =
         int32_t (FormRendererDispatcherStub::*)(MessageParcel &data, MessageParcel &reply);
     std::map<uint32_t, FormRendererDispatcherFunc> memberFuncMap_;

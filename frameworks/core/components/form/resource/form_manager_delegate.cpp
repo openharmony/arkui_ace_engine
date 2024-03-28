@@ -138,6 +138,7 @@ void FormManagerDelegate::AddForm(const WeakPtr<PipelineBase>& context, const Re
     wantCache_.SetParam(OHOS::AppExecFwk::Constants::PARAM_FORM_HEIGHT_KEY, info.height.Value());
     wantCache_.SetParam(OHOS::AppExecFwk::Constants::FORM_COMP_ID, std::to_string(info.index));
     wantCache_.SetParam(OHOS::AppExecFwk::Constants::PARAM_FORM_BORDER_WIDTH_KEY, info.borderWidth);
+    wantCache_.SetParam(OHOS::AppExecFwk::Constants::PARAM_FORM_OBSCURED_KEY, info.obscuredMode);
     auto pipelineContext = context_.Upgrade();
     if (pipelineContext) {
         auto density = pipelineContext->GetDensity();
@@ -761,6 +762,12 @@ void FormManagerDelegate::SetVisibleChange(bool isVisible)
 {
     CHECK_NULL_VOID(formRendererDispatcher_);
     formRendererDispatcher_->SetVisibleChange(isVisible);
+}
+
+void FormManagerDelegate::SetObscured(bool isObscured)
+{
+    CHECK_NULL_VOID(formRendererDispatcher_);
+    formRendererDispatcher_->SetObscured(isObscured);
 }
 
 #ifdef OHOS_STANDARD_SYSTEM

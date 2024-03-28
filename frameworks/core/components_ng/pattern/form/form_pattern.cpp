@@ -486,6 +486,7 @@ void FormPattern::OnModifyDone()
     info.borderWidth = borderWidth;
     layoutProperty->UpdateRequestFormInfo(info);
     UpdateBackgroundColorWhenUnTrustForm();
+    info.obscuredMode = isFormObscured_;
     HandleFormComponent(info);
 }
 
@@ -506,6 +507,7 @@ bool FormPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, c
     layoutProperty->UpdateRequestFormInfo(info);
 
     UpdateBackgroundColorWhenUnTrustForm();
+    info.obscuredMode = isFormObscured_;
     HandleFormComponent(info);
     return false;
 }
@@ -576,9 +578,14 @@ void FormPattern::UpdateFormComponent(const RequestFormInfo& info)
             formManagerBridge_->SetAllowUpdate(cardInfo_.allowUpdate);
         }
     }
-
     if (cardInfo_.width != info.width || cardInfo_.height != info.height) {
         UpdateFormComponentSize(info);
+    }
+    if (cardInfo_.obscuredMode != info.obscuredMode) {
+        cardInfo_.obscuredMode = info.obscuredMode;
+        if (formManagerBridge_) {
+            formManagerBridge_->SetObscured(info.obscuredMode);
+        }
     }
     if (isLoaded_) {
         auto visible = layoutProperty->GetVisibleType().value_or(VisibleType::VISIBLE);

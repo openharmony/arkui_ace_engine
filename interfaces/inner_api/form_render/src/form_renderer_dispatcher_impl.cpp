@@ -136,5 +136,23 @@ void FormRendererDispatcherImpl::SetVisibleChange(bool isVisible)
         uiContent->ProcessFormVisibleChange(isVisible);
     });
 }
+
+void FormRendererDispatcherImpl::SetObscured(bool isObscured)
+{
+    auto handler = eventHandler_.lock();
+    if (!handler) {
+        HILOG_ERROR("eventHandler is nullptr");
+        return;
+    }
+    handler->PostTask([content = uiContent_, isObscured]() {
+        auto uiContent = content.lock();
+        if (!uiContent) {
+            HILOG_ERROR("uiContent is nullptr");
+            return;
+        }
+        HILOG_INFO("Update ChangeSensitiveNodes: %{public}s", isObscured ? "true" : "false");
+        uiContent->ChangeSensitiveNodes(isObscured);
+    });
+}
 } // namespace Ace
 } // namespace OHOS
