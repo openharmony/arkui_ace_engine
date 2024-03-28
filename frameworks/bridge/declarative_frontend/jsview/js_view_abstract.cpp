@@ -3753,9 +3753,16 @@ void JSViewAbstract::JsBlur(const JSCallbackInfo& info)
 void JSViewAbstract::JsColorBlend(const JSCallbackInfo& info)
 {
     Color colorBlend;
-    if (info[0]->IsUndefined() || !ParseJsColor(info[0], colorBlend)) {
+    if (info[0]->IsUndefined()) {
         colorBlend = Color::TRANSPARENT;
         SetColorBlend(colorBlend);
+        return;
+    }
+    if (!ParseJsColor(info[0], colorBlend)) {
+        if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
+            colorBlend = Color::TRANSPARENT;
+            SetColorBlend(colorBlend);
+        }
         return;
     }
     SetColorBlend(colorBlend);
