@@ -3072,6 +3072,13 @@ void FrameNode::Layout()
         frameNode->SyncGeometryNode(needSync);
     };
     pipeline->AddSyncGeometryNodeTask(task);
+    if (IsRootMeasureNode()) {
+        auto pipeline = PipelineContext::GetCurrentContext();
+        CHECK_NULL_VOID(pipeline);
+        auto safeAreaManager = pipeline->GetSafeAreaManager();
+        CHECK_NULL_VOID(safeAreaManager);
+        safeAreaManager->SetRootMeasureNodeId(GetId());
+    }
     // if a node has geo transition but not the root node, add task only but not flush
     // or add to expand list, self node will be added to expand list in next layout
     if (geometryTransition != nullptr && !IsRootMeasureNode()) {
