@@ -1181,11 +1181,11 @@ void TextFieldPattern::HandleOnCopy(bool isUsingExternalKeyboard)
         clipboard_->SetData(value, layoutProperty->GetCopyOptionsValue(CopyOptions::Distributed));
     }
 
-    if (!IsUsingMouse() && !isUsingExternalKeyboard) {
-        selectController_->MoveCaretToContentRect(selectController_->GetSecondHandleIndex(), TextAffinity::UPSTREAM);
-        StartTwinkling();
+    if (!isUsingExternalKeyboard) {
+        selectOverlay_->HideMenu();
+    } else {
+        CloseSelectOverlay(true);
     }
-    CloseSelectOverlay(true);
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto eventHub = host->GetEventHub<TextFieldEventHub>();
@@ -4602,17 +4602,16 @@ void TextFieldPattern::SetSelectionFlag(
         NotifyOnEditChanged(true);
     }
 
-    if (options.has_value()) {
-        if (options.value().menuPolicy == MenuPolicy::ALWAYS) {
-            if (IsShowHandle()) {
-                SetIsSingleHandle(!IsSelected());
-                ProcessOverlay({ .menuIsShow = true, .animation = true });
-            } else {
-                CloseSelectOverlay(true);
-            }
-        } else if (options.value().menuPolicy == MenuPolicy::NEVER) {
-            CloseSelectOverlay(true);
-        }
+    SetIsSingleHandle(!IsSelected());
+    selectOverlay_->SetUsingMouse(false);
+    if (!IsShowHandle()) {
+        CloseSelectOverlay(true);
+    } else if (!options.has_value() || options.value().menuPolicy == MenuPolicy::DEFAULT) {
+        ProcessOverlay({ .menuIsShow = selectOverlay_->IsCurrentMenuVisibile(), .animation = true });
+    } else if (options.value().menuPolicy == MenuPolicy::NEVER) {
+        ProcessOverlay({ .menuIsShow = false, .animation = true });
+    } else if (options.value().menuPolicy == MenuPolicy::ALWAYS) {
+        ProcessOverlay({ .menuIsShow = true, .animation = true });
     }
     auto host = GetHost();
     CHECK_NULL_VOID(host);

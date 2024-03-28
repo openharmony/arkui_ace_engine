@@ -803,7 +803,7 @@ HWTEST_F(TextInputCursorTest, OnTextChangedListenerCaretPosition008, TestSize.Le
     pattern_->HandleExtendAction(action[2]);
     pattern_->HandleExtendAction(action[3]);
     FlushLayoutTask(frameNode_);
-    EXPECT_EQ(pattern_->GetTextValue().compare("abcdefghijfghijklmnopqrstuvwxyz"), 0)
+    EXPECT_EQ(pattern_->GetTextValue().compare("abcdefghijklmnopqrstuvwxyz"), 0)
         << "Text is " + pattern_->GetTextValue();
 }
 

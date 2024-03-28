@@ -3717,8 +3717,8 @@ HWTEST_F(TextTestNg, HandleOnCopy002, TestSize.Level1)
     pattern->textForDisplay_ = "TestHandleOnCopy";
     pattern->copyOption_ = CopyOptions::InApp;
     pattern->HandleOnCopy();
-    EXPECT_EQ(pattern->textSelector_.GetTextStart(), -1);
-    EXPECT_EQ(pattern->textSelector_.GetTextEnd(), -1);
+    EXPECT_EQ(pattern->textSelector_.GetTextStart(), 0);
+    EXPECT_EQ(pattern->textSelector_.GetTextEnd(), 6);
 }
 
 /**
