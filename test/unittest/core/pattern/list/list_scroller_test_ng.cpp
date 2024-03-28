@@ -1351,6 +1351,32 @@ HWTEST_F(ListScrollerTestNg, Event006, TestSize.Level1)
 }
 
 /**
+ * @tc.name: Event007
+ * @tc.desc: Test scroll callback
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListScrollerTestNg, Event007, TestSize.Level1)
+{
+    int32_t startIndex = -1;
+    int32_t endIndex = -1;
+    auto onScrollVisibleContentChange = [&startIndex, &endIndex](
+                                 const ListItemIndex start, const ListItemIndex end) {
+        startIndex = start.index;
+        endIndex = end.index;
+    };
+    CreateWithItem([onScrollVisibleContentChange](ListModelNG model) {
+        model.SetOnScrollVisibleContentChange(onScrollVisibleContentChange); });
+
+    ScrollDown();
+    EXPECT_EQ(startIndex, 1);
+    EXPECT_EQ(endIndex, 8);
+
+    ScrollDown();
+    EXPECT_EQ(startIndex, 2);
+    EXPECT_EQ(endIndex, 9);
+}
+
+/**
  * @tc.name: Pattern002
  * @tc.desc: Test list_pattern AnimateTo function
  * @tc.type: FUNC
