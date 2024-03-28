@@ -394,9 +394,7 @@ HWTEST_F(SwiperEventTestNg, SwiperPatternHandleTouchUp003, TestSize.Level1)
      * @tc.expected: Related function runs ok.
      */
     pattern_->springAnimationIsRunning_ = false;
-    pattern_->isTouchDownSpringAnimation_ = true;
     pattern_->HandleTouchUp();
-    EXPECT_FALSE(pattern_->isTouchDownSpringAnimation_);
     EXPECT_TRUE(pattern_->springAnimationIsRunning_);
 }
 
