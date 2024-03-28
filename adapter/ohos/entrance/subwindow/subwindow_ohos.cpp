@@ -1547,6 +1547,8 @@ void SubwindowOhos::MarkDirtyDialogSafeArea()
     CHECK_NULL_VOID(context);
     auto rootNode = context->GetRootElement();
     CHECK_NULL_VOID(rootNode);
-    rootNode->GetLastChild()->MarkDirtyNode(NG::PROPERTY_UPDATE_MEASURE);
+    auto lastChild = rootNode->GetLastChild();
+    CHECK_NULL_VOID(lastChild);
+    lastChild->MarkDirtyNode(NG::PROPERTY_UPDATE_MEASURE);
 }
 } // namespace OHOS::Ace
