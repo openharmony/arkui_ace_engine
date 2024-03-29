@@ -824,6 +824,14 @@ void TextLayoutAlgorithm::SetPropertyToModifier(
     if (fontSize.has_value()) {
         modifier->SetFontSize(fontSize.value());
     }
+    auto adaptMinFontSize = layoutProperty->GetAdaptMinFontSize();
+    if (adaptMinFontSize.has_value()) {
+        modifier->SetAdaptMinFontSize(adaptMinFontSize.value());
+    }
+    auto adaptMaxFontSize = layoutProperty->GetAdaptMaxFontSize();
+    if (adaptMaxFontSize.has_value()) {
+        modifier->SetAdaptMaxFontSize(adaptMaxFontSize.value());
+    }
     auto fontWeight = layoutProperty->GetFontWeight();
     if (fontWeight.has_value()) {
         modifier->SetFontWeight(fontWeight.value());
