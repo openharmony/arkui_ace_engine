@@ -62,7 +62,12 @@ void SetPullToRefresh(ArkUINodeHandle node, ArkUI_Bool value)
     RefreshModelNG::SetPullToRefresh(frameNode, value);
 }
 
-void ResetPullToRefresh(ArkUINodeHandle node) {}
+void ResetPullToRefresh(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    RefreshModelNG::SetPullToRefresh(frameNode, true);
+}
 
 void SetRefreshContent(ArkUINodeHandle node, ArkUINodeHandle content)
 {
