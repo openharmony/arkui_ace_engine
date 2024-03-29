@@ -561,6 +561,9 @@ void RosenRenderContext::SyncGeometryProperties(const RectF& paintRect)
 
 void RosenRenderContext::PaintDebugBoundary(bool flag)
 {
+    if (!flag && !debugBoundaryModifier_) {
+        return;
+    }
     CHECK_NULL_VOID(NeedDebugBoundary());
     CHECK_NULL_VOID(rsNode_);
     auto host = GetHost();
