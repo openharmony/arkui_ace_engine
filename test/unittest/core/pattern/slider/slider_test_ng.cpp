@@ -919,21 +919,21 @@ HWTEST_F(SliderTestNg, SliderLayoutAlgorithm001, TestSize.Level1)
     sliderLayoutProperty->UpdateSliderMode(SliderModel::SliderMode::INSET);
     auto size3 = sliderLayoutAlgorithm->MeasureContent(layoutConstraintSizevalid, &layoutWrapper);
     EXPECT_NE(size3, std::nullopt);
-    EXPECT_EQ(size3.value(), SizeF(HEIGHT.ConvertToPx(), HEIGHT.ConvertToPx()));
+    EXPECT_EQ(size3.value(), SizeF(SLIDER_INSET_TRACK_THICKNRESS.ConvertToPx(), HEIGHT.ConvertToPx()));
     /**
      * @tc.cases: case4. sliderMode is INSET and direction is Axis::HORIZONTAL.
      */
     sliderLayoutProperty->UpdateDirection(Axis::HORIZONTAL);
     auto size4 = sliderLayoutAlgorithm->MeasureContent(layoutConstraintSizevalid, &layoutWrapper);
     EXPECT_NE(size4, std::nullopt);
-    EXPECT_EQ(size4.value(), SizeF(HEIGHT.ConvertToPx(), HEIGHT.ConvertToPx()));
+    EXPECT_EQ(size4.value(), SizeF(HEIGHT.ConvertToPx(), SLIDER_INSET_TRACK_THICKNRESS.ConvertToPx()));
     /**
      * @tc.cases: case5. sliderMode is NONE and direction is Axis::HORIZONTAL.
      */
     sliderLayoutProperty->UpdateSliderMode(SliderModel::SliderMode::NONE);
     auto size5 = sliderLayoutAlgorithm->MeasureContent(layoutConstraintSizevalid, &layoutWrapper);
     EXPECT_NE(size5, std::nullopt);
-    EXPECT_EQ(size5.value(), SizeF(WIDTH.ConvertToPx(), SLIDER_NONE_BLOCK_HOTSIZE.ConvertToPx()));
+    EXPECT_EQ(size5.value(), SizeF(WIDTH.ConvertToPx(), SLIDER_NONE_TRACK_THICKNRESS.ConvertToPx()));
 }
 
 /**
