@@ -182,7 +182,7 @@ RefPtr<FrameNode> CreateMenuItems(const int32_t menuNodeId, const std::vector<NG
             targetTag = menuItemNode->GetTag();
         }
         auto barMenuNode = MenuView::Create(
-            std::move(params), barItemNodeId, V2::BAR_ITEM_ETS_TAG, MenuType::NAVIGATION_MENU, menuParam);
+            std::move(params), targetId, targetTag, MenuType::NAVIGATION_MENU, menuParam);
         BuildMoreItemNodeAction(menuItemNode, barItemNode, barMenuNode, navBarNode);
         NavigationTitleUtil::InitTitleBarButtonEvent(menuItemNode, true);
 
