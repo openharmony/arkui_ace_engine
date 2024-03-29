@@ -59,6 +59,7 @@
 #include "core/event/mouse_event.h"
 #include "frameworks/base/window/drag_window.h"
 #include "frameworks/core/components_ng/pattern/root/root_pattern.h"
+#include "core/components/common/properties/text_style_parser.h"
 
 #undef private
 #undef protected
@@ -164,7 +165,7 @@ const struct TextDataDetectResult TEXT_DATA_DETECT_RESULT = { 0,
         \"location\":[{\"option\":\"导航至该位置\"},{\"option\":\"在地图中打开\"},\
         {\"option\":\"复制\"},{\"option\":\"选择文本\"}]}",
     "{\"bundlename\":\"com.XXXXXX.hmsapp.hiai\",\"abilityname\":\"EntityMenuUIExtensionAbility\"}" };
-
+const std::unordered_map<std::string, int32_t> FONT_FEATURE_VALUE = ParseFontFeatureSettings("\"ss01\" 1");
 using OnClickCallback = std::function<void(const BaseEventInfo* info)>;
 using DragDropBaseCallback = std::function<DragDropBaseInfo(const RefPtr<OHOS::Ace::DragEvent>&, const std::string&)>;
 
@@ -6341,5 +6342,29 @@ HWTEST_F(TextTestNg, SetImageSpanTextStyleTest001, TestSize.Level1)
     auto geometryNode = frameNode->GetGeometryNode();
     EXPECT_EQ(geometryNode->GetFrameRect().Width(), 240.f);
     EXPECT_EQ(geometryNode->GetFrameRect().Height(), 60.f);
+}
+
+/**
+ * @tc.name: UpdateFontFeature
+ * @tc.desc: test fontFeature.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestNg, UpdateFontFeature, TestSize.Level1)
+{
+    TextModelNG textModelNG;
+    textModelNG.Create(CREATE_VALUE);
+    auto frameNode = AceType::Claim(ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    ASSERT_NE(frameNode, nullptr);
+    RefPtr<LayoutProperty> layoutProperty = frameNode->GetLayoutProperty();
+    ASSERT_NE(layoutProperty, nullptr);
+    RefPtr<TextLayoutProperty> textLayoutProperty = AceType::DynamicCast<TextLayoutProperty>(layoutProperty);
+    ASSERT_NE(textLayoutProperty, nullptr);
+
+    textModelNG.SetFontFeature(FONT_FEATURE_VALUE);
+    EXPECT_EQ(textLayoutProperty->GetFontFeature(), FONT_FEATURE_VALUE);
+    textLayoutProperty->UpdateFontFeature(ParseFontFeatureSettings("\"ss01\" 0"));
+    auto fNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    TextModelNG::SetFontFeature(fNode, FONT_FEATURE_VALUE);
+    EXPECT_EQ(textLayoutProperty->GetFontFeature(), FONT_FEATURE_VALUE);
 }
 } // namespace OHOS::Ace::NG
