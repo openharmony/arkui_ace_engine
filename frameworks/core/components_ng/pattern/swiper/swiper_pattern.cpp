@@ -978,9 +978,6 @@ void SwiperPattern::FireChangeEvent() const
 void SwiperPattern::FireAnimationStartEvent(
     int32_t currentIndex, int32_t nextIndex, const AnimationCallbackInfo& info) const
 {
-    if (!HasTabsAncestor()) {
-        PerfMonitor::GetPerfMonitor()->Start(PerfConstants::APP_SWIPER_FLING, PerfActionType::FIRST_MOVE, "");
-    }
     auto swiperEventHub = GetEventHub<SwiperEventHub>();
     CHECK_NULL_VOID(swiperEventHub);
     swiperEventHub->FireAnimationStartEvent(currentIndex, nextIndex, info);
@@ -991,12 +988,6 @@ void SwiperPattern::FireAnimationStartEvent(
 
 void SwiperPattern::FireAnimationEndEvent(int32_t currentIndex, const AnimationCallbackInfo& info) const
 {
-    if (HasTabsAncestor()) {
-        PerfMonitor::GetPerfMonitor()->End(PerfConstants::APP_TAB_SWITCH, false);
-    } else {
-        PerfMonitor::GetPerfMonitor()->End(PerfConstants::APP_SWIPER_FLING, false);
-    }
-
     if (currentIndex == -1) {
         return;
     }
@@ -2296,7 +2287,7 @@ void SwiperPattern::HandleTouchUp()
 
 void SwiperPattern::HandleDragStart(const GestureEvent& info)
 {
-    if (!HasTabsAncestor()) {
+    if (!hasTabsAncestor_) {
         PerfMonitor::GetPerfMonitor()->Start(PerfConstants::APP_SWIPER_SCROLL, PerfActionType::FIRST_MOVE, "");
     }
     UpdateDragFRCSceneInfo(info.GetMainVelocity(), SceneStatus::START);
@@ -2374,7 +2365,7 @@ void SwiperPattern::HandleDragUpdate(const GestureEvent& info)
 
 void SwiperPattern::HandleDragEnd(double dragVelocity)
 {
-    if (!HasTabsAncestor()) {
+    if (!hasTabsAncestor_) {
         PerfMonitor::GetPerfMonitor()->End(PerfConstants::APP_SWIPER_SCROLL, false);
     }
     isTouchDown_ = false;
@@ -2642,6 +2633,9 @@ void SwiperPattern::PlayPropertyTranslateAnimation(
     }
     auto finishCallback = [weak = WeakClaim(this), offset]() {
         auto swiper = weak.Upgrade();
+        if (!swiper->hasTabsAncestor_) {
+            PerfMonitor::GetPerfMonitor()->End(PerfConstants::APP_SWIPER_FLING, false);
+        }
         CHECK_NULL_VOID(swiper);
         swiper->targetIndex_.reset();
         swiper->OnPropertyTranslateAnimationFinish(offset);
@@ -2660,6 +2654,9 @@ void SwiperPattern::PlayPropertyTranslateAnimation(
     // property callback will call immediately.
     auto propertyUpdateCallback = [swiper = WeakClaim(this), offset]() {
         auto swiperPattern = swiper.Upgrade();
+        if (!swiperPattern->hasTabsAncestor_) {
+            PerfMonitor::GetPerfMonitor()->Start(PerfConstants::APP_SWIPER_FLING, PerfActionType::FIRST_MOVE, "");
+        }
         if (!swiperPattern) {
             return;
         }
@@ -3066,6 +3063,7 @@ void SwiperPattern::PlaySpringAnimation(double dragVelocity)
     springAnimation_ = AnimationUtils::StartAnimation(
         option,
         [weak = AceType::WeakClaim(this), dragVelocity, host, delta]() {
+            PerfMonitor::GetPerfMonitor()->Start(PerfConstants::APP_LIST_FLING, PerfActionType::FIRST_MOVE, "Swiper");
             auto swiperPattern = weak.Upgrade();
             CHECK_NULL_VOID(swiperPattern);
             swiperPattern->springAnimationIsRunning_ = true;
@@ -3073,6 +3071,7 @@ void SwiperPattern::PlaySpringAnimation(double dragVelocity)
             host->UpdateAnimatablePropertyFloat(SPRING_PROPERTY_NAME, delta);
         },
         [weak = AceType::WeakClaim(this)]() {
+            PerfMonitor::GetPerfMonitor()->End(PerfConstants::APP_LIST_FLING, false);
             auto swiperPattern = weak.Upgrade();
             CHECK_NULL_VOID(swiperPattern);
             swiperPattern->springAnimationIsRunning_ = false;
@@ -5035,13 +5034,4 @@ void SwiperPattern::SetOnHiddenChangeForParent()
         navDestinationEventHub->SetOnHiddenChange(std::move(onHiddenChange));
     }
 }
-
-bool SwiperPattern::HasTabsAncestor() const
-{
-    auto host = GetHost();
-    CHECK_NULL_RETURN(host, false);
-    auto parent = host->GetAncestorNodeOfFrame();
-    return parent != nullptr && parent->GetTag() == V2::TABS_ETS_TAG;
-}
-
 } // namespace OHOS::Ace::NG

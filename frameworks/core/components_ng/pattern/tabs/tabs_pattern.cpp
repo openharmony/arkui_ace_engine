@@ -446,11 +446,7 @@ void TabsPattern::BeforeCreateLayoutWrapper()
         swiperPattern->SetOnHiddenChangeForParent();
         auto parent = tabsNode->GetAncestorNodeOfFrame();
         CHECK_NULL_VOID(parent);
-        while (parent) {
-            auto navTag = parent->GetTag();
-            if (navTag == V2::NAVDESTINATION_VIEW_ETS_TAG) {
-                break;
-            }
+        while (parent && parent->GetTag() != V2::NAVDESTINATION_VIEW_ETS_TAG) {
             parent = parent->GetAncestorNodeOfFrame();
         }
         if (!parent) {
@@ -541,5 +537,4 @@ void TabsPattern::HandleMaskAnimationByCreate(const RefPtr<FrameNode>& tabBarNod
     swiperLayoutProperty->UpdateIndex(index);
     tabsLayoutProperty->UpdateIndex(index);
 }
-
 } // namespace OHOS::Ace::NG
