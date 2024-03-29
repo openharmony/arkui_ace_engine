@@ -467,10 +467,12 @@ void JSTextField::SetWordBreak(const JSCallbackInfo& info)
         return;
     }
     if (!info[0]->IsNumber()) {
+        TextFieldModel::GetInstance()->SetWordBreak(WordBreak::BREAK_WORD);
         return;
     }
     auto index = info[0]->ToNumber<int32_t>();
     if (index < 0 || index >= static_cast<int32_t>(WORD_BREAK_TYPES.size())) {
+        TextFieldModel::GetInstance()->SetWordBreak(WordBreak::BREAK_WORD);
         return;
     }
     TextFieldModel::GetInstance()->SetWordBreak(WORD_BREAK_TYPES[index]);
