@@ -366,10 +366,13 @@ void TextFieldSelectOverlay::OnHandleMove(const RectF& handleRect, bool isFirst)
     CHECK_NULL_VOID(pattern);
     CHECK_NULL_VOID(pattern->IsOperation());
     auto localOffset = handleRect.GetOffset() - pattern->GetTextPaintOffset();
+    auto selectController = pattern->GetTextSelectController();
     if (pattern->GetMagnifierController()) {
+        auto movingCaretOffset =
+            selectController->CalcCaretOffsetByOffset(Offset(localOffset.GetX(), localOffset.GetY()));
+        pattern->SetMovingCaretOffset(movingCaretOffset);
         pattern->GetMagnifierController()->SetLocalOffset(localOffset);
     }
-    auto selectController = pattern->GetTextSelectController();
     if (IsSingleHandle()) {
         selectController->UpdateCaretInfoByOffset(Offset(localOffset.GetX(), localOffset.GetY()));
     } else {

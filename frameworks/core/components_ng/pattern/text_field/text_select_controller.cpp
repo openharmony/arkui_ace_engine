@@ -151,6 +151,20 @@ void TextSelectController::UpdateCaretInfoByOffset(const Offset& localOffset)
     }
 }
 
+OffsetF TextSelectController::CalcCaretOffsetByOffset(const Offset& localOffset)
+{
+    auto index = ConvertTouchOffsetToPosition(localOffset);
+    AdjustCursorPosition(index, localOffset);
+    if (!contentController_->IsEmpty()) {
+        CaretMetricsF caretMetrics;
+        CalcCaretMetricsByPositionNearTouchOffset(index, caretMetrics,
+            OffsetF(static_cast<float>(localOffset.GetX()), static_cast<float>(localOffset.GetY())));
+        return caretMetrics.offset;
+    } else {
+        return CalculateEmptyValueCaretRect().GetOffset();
+    }
+}
+
 int32_t TextSelectController::ConvertTouchOffsetToPosition(const Offset& localOffset, bool isSelectionPos)
 {
     CHECK_NULL_RETURN(paragraph_, 0);
