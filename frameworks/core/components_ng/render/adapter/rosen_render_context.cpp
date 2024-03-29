@@ -589,8 +589,9 @@ void RosenRenderContext::PaintDebugBoundary(bool flag)
             std::make_shared<Rosen::RectF>(marginOffset.GetX() - rect.GetX(), marginOffset.GetY() - rect.GetY(),
                 geometryNode->GetMarginFrameSize().Width(), geometryNode->GetMarginFrameSize().Height());
         UpdateDrawRegion(DRAW_REGION_DEBUG_BOUNDARY_MODIFIER_INDEX, drawRect);
-        debugBoundaryModifier_->SetCustomData(flag);
         rsNode_->AddModifier(debugBoundaryModifier_);
+        // SetCustomData(AttachProperty to rs modifier) must be called after AddModifier.
+        debugBoundaryModifier_->SetCustomData(flag);
     } else if (debugBoundaryModifier_) {
         debugBoundaryModifier_->SetPaintTask(std::move(paintTask));
         auto rect = GetPaintRectWithoutTransform();
