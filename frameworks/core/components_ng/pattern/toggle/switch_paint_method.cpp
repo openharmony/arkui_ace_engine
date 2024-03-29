@@ -122,8 +122,12 @@ void SwitchModifier::PaintSwitch(RSCanvas& canvas, const OffsetF& contentOffset,
         defaultHeight - (switchTheme->GetHeight() - switchTheme->GetHotZoneVerticalPadding() * 2).ConvertToPx();
     actualWidth_ = (pointRadius_ * NUM_TWO > height ? (width - (actualGap * NUM_TWO)) : width) + defaultWidthGap;
     actualHeight_ = (pointRadius_ * NUM_TWO > height ? pointRadius_ * NUM_TWO : height) + defaultHeightGap;
-    hoverRadius_ =
-        hoverRadius_ * height / (switchTheme->GetHeight() - switchTheme->GetHotZoneVerticalPadding() * 2).ConvertToPx();
+    if ((animateTrackRadius_->Get() < 0) && (animateTrackRadius_->Get() < 0)) {
+        hoverRadius_ = hoverRadius_ * height /
+                       (switchTheme->GetHeight() - switchTheme->GetHotZoneVerticalPadding() * NUM_TWO).ConvertToPx();
+    } else {
+        hoverRadius_ = Dimension(trackRadius, DimensionUnit::PX) * actualHeight_ / (actualHeight_ - defaultHeightGap);
+    }
 
     OffsetF hoverBoardOffset;
     hoverBoardOffset.SetX(xOffset - (actualWidth_ - width) / 2.0);
