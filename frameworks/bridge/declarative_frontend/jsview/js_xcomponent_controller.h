@@ -57,9 +57,19 @@ public:
         xcomponentController_ = xcomponentController;
     }
 
+    void SetInstanceId(int32_t id)
+    {
+        instanceId_ = id;
+    }
+
+    void StartImageAnalyzer(const JSCallbackInfo& args);
+    void StopImageAnalyzer(const JSCallbackInfo& args);
+
 private:
+    int32_t instanceId_ = INSTANCE_ID_UNDEFINED;
     std::shared_ptr<InnerXComponentController> xcomponentController_;
     JSWeak<JSVal> renderContext_;
+    bool isImageAnalyzing_ = false;
     ACE_DISALLOW_COPY_AND_MOVE(JSXComponentController);
 };
 } // namespace OHOS::Ace::Framework
