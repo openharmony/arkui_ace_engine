@@ -4330,4 +4330,20 @@ HWTEST_F(TextFieldUXTest, HandleClickEventTest001, TestSize.Level1)
     Point point2(info.localLocation_.GetX(), info.localLocation_.GetY());
     EXPECT_EQ(pattern_->scrollBar_->CheckBarDirection(point2), BarDirection::PAGE_DOWN);
 }
+
+/**
+ * @tc.name: SupportAvoidanceTest
+ * @tc.desc: test whether the custom keyboard supports the collision avoidance function
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldUXTest, SupportAvoidanceTest, TestSize.Level1)
+{
+    CreateTextField(DEFAULT_TEXT);
+    auto supportAvoidance = true;
+    pattern_->SetCustomKeyboardOption(supportAvoidance);
+    EXPECT_TRUE(pattern_->keyboardAvoidance_);
+    supportAvoidance = false;
+    pattern_->SetCustomKeyboardOption(supportAvoidance);
+    EXPECT_FALSE(pattern_->keyboardAvoidance_);
+}
 } // namespace OHOS::Ace::NG

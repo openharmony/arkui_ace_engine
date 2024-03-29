@@ -44,6 +44,7 @@
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/layout/layout_property.h"
 #include "core/components_ng/pattern/image/image_pattern.h"
+#include "core/components_ng/pattern/overlay/keyboard_view.h"
 #include "core/components_ng/pattern/pattern.h"
 #include "core/components_ng/pattern/rich_editor/rich_editor_layout_algorithm.h"
 #include "core/components_ng/pattern/rich_editor/rich_editor_model.h"
@@ -4827,5 +4828,27 @@ HWTEST_F(RichEditorTestNg, SetEnterKeyType, TestSize.Level1)
     EXPECT_EQ(richEditorPattern->GetTextInputActionValue(richEditorPattern->GetDefaultTextInputAction()),
         TextInputAction::NEW_LINE);
     ClearSpan();
+}
+
+/**
+ * @tc.name: SupportAvoidanceTest
+ * @tc.desc: test whether the custom keyboard supports the collision avoidance function
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorTestNg, SupportAvoidanceTest, TestSize.Level1)
+{
+    auto pipeline = PipelineContext::GetCurrentContext();
+    auto overlayManager = pipeline->GetOverlayManager();
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    auto supportAvoidance = true;
+    richEditorPattern->SetCustomKeyboardOption(supportAvoidance);
+    auto support = richEditorPattern->keyboardAvoidance_;
+    overlayManager->SetCustomKeyboardOption(support);
+    EXPECT_TRUE(richEditorPattern->keyboardAvoidance_);
+    supportAvoidance = false;
+    richEditorPattern->SetCustomKeyboardOption(supportAvoidance);
+    overlayManager->SetCustomKeyboardOption(support);
+    EXPECT_FALSE(richEditorPattern->keyboardAvoidance_);
 }
 } // namespace OHOS::Ace::NG

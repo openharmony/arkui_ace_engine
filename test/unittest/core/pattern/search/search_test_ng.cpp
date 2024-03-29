@@ -3128,4 +3128,28 @@ HWTEST_F(SearchTestNg, SetProperty004, TestSize.Level1)
     SearchModelNG::SetFontFeature(frameNode, FONT_FEATURE_VALUE);
     EXPECT_EQ(layoutProperty->GetFontFeature(), FONT_FEATURE_VALUE);
 }
+
+/**
+ * @tc.name: SupportAvoidanceTest
+ * @tc.desc: test whether the custom keyboard supports the collision avoidance function
+ * @tc.type: FUNC
+ */
+HWTEST_F(SearchTestNg, SupportAvoidanceTest, TestSize.Level1)
+{
+    /**
+     * @tc.step: step1. get frameNode and pattern.
+     */
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto textFieldFrameNode = AceType::DynamicCast<FrameNode>(frameNode->GetChildAtIndex(TEXTFIELD_INDEX));
+    ASSERT_NE(textFieldFrameNode, nullptr);
+    auto textFieldPattern = textFieldFrameNode->GetPattern<TextFieldPattern>();
+    ASSERT_NE(textFieldPattern, nullptr);
+    auto supportAvoidance = true;
+    textFieldPattern->SetCustomKeyboardOption(supportAvoidance);
+    EXPECT_TRUE(textFieldPattern->keyboardAvoidance_);
+    supportAvoidance = false;
+    textFieldPattern->SetCustomKeyboardOption(supportAvoidance);
+    EXPECT_FALSE(textFieldPattern->keyboardAvoidance_);
+}
 } // namespace OHOS::Ace::NG

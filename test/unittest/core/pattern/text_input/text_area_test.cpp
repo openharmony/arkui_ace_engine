@@ -947,4 +947,20 @@ HWTEST_F(TextFieldUXTest, TextInputTypeToString005, TestSize.Level1)
      */
     EXPECT_EQ(pattern_->TextInputTypeToString(), "InputType.NEW_PASSWORD");
 }
+
+/**
+ * @tc.name: AreaSupportAvoidanceTest
+ * @tc.desc: test whether the custom keyboard supports the collision avoidance function
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldUXTest, AreaSupportAvoidanceTest, TestSize.Level1)
+{
+    CreateTextField(DEFAULT_TEXT_THREE_LINE);
+    auto supportAvoidance = true;
+    pattern_->SetCustomKeyboardOption(supportAvoidance);
+    EXPECT_TRUE(pattern_->keyboardAvoidance_);
+    supportAvoidance = false;
+    pattern_->SetCustomKeyboardOption(supportAvoidance);
+    EXPECT_FALSE(pattern_->keyboardAvoidance_);
+}
 }
