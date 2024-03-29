@@ -789,6 +789,9 @@ void JSSearch::SetDecoration(const JSCallbackInfo& info)
     do {
         auto tmpInfo = info[0];
         if (!tmpInfo->IsObject()) {
+            SearchModel::GetInstance()->SetTextDecoration(TextDecoration::NONE);
+            SearchModel::GetInstance()->SetTextDecorationColor(Color::BLACK);
+            SearchModel::GetInstance()->SetTextDecorationStyle(TextDecorationStyle::SOLID);
             break;
         }
         JSRef<JSObject> obj = JSRef<JSObject>::Cast(tmpInfo);
