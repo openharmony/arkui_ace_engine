@@ -120,6 +120,7 @@ private:
     Dimension defaultPaddingStart_;
     Dimension iconSize_;
     Dimension titleFontSize_;
+    Dimension iconBackgroundWidth_;
     Dimension backButtonWidth_;
     Dimension backButtonHeight_;
     Dimension backIconWidth_;
