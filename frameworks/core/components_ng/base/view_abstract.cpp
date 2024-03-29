@@ -2926,6 +2926,15 @@ void ViewAbstract::SetTransition(FrameNode* frameNode, const TransitionOptions& 
     ACE_UPDATE_NODE_RENDER_CONTEXT(Transition, options, frameNode);
 }
 
+void ViewAbstract::CleanTransition(FrameNode* frameNode)
+{
+    CHECK_NULL_VOID(frameNode);
+    const auto& renderContext = frameNode->GetRenderContext();
+    if (renderContext) {
+        renderContext->CleanTransition();
+    }
+}
+
 void ViewAbstract::SetChainedTransition(FrameNode* frameNode, const RefPtr<NG::ChainedTransitionEffect>& effect)
 {
     ACE_UPDATE_NODE_RENDER_CONTEXT(ChainedTransition, effect, frameNode);
