@@ -655,6 +655,7 @@ private:
     void UpdateFlingReachEdgeState(const float value, bool status);
     void CalculateToolTipMargin(RefPtr<FrameNode>& textNode, MarginProperty& textMargin);
     void RegisterVisibleAreaChangeCallback();
+    bool CheckSafeAreaIsExpand();
 
     std::optional<std::string> webSrc_;
     std::optional<std::string> webData_;
