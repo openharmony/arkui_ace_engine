@@ -3926,6 +3926,7 @@ int32_t RichEditorPattern::DeleteValueSetTextSpan(
     }
     spanResult.SetColor(spanItem->GetTextStyle()->GetTextDecorationColor().ColorToString());
     spanResult.SetTextDecoration(spanItem->GetTextStyle()->GetTextDecoration());
+    spanResult.SetFontFeature(spanItem->GetTextStyle()->GetFontFeatures());
     auto host = GetHost();
     CHECK_NULL_RETURN(host, eraseLength);
     auto uiNode = host->GetChildAtIndex(spanResult.GetSpanIndex());
