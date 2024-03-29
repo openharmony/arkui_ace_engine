@@ -18,7 +18,6 @@
 
 #include <cstdint>
 #include "base/utils/string_utils.h"
-#include "core/common/ace_application_info.h"
 #include "core/components/theme/theme.h"
 #include "core/components/theme/theme_constants.h"
 #include "core/components/theme/theme_constants_defines.h"

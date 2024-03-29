@@ -72,7 +72,7 @@ void TitleBarLayoutAlgorithm::MeasureBackButton(LayoutWrapper* layoutWrapper, co
             PaddingProperty padding;
             padding.SetEdges(CalcLength(Dimension(0.0f, DimensionUnit::VP)));
             backButtonLayoutProperty->UpdatePadding(padding);
-            if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
+            if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
                 backButtonImageLayoutProperty->UpdateUserDefinedIdealSize(CalcSize(CalcLength(0.0f), CalcLength(0.0f)));
             }
             backButtonWrapper->Measure(constraint);
@@ -88,11 +88,11 @@ void TitleBarLayoutAlgorithm::MeasureBackButton(LayoutWrapper* layoutWrapper, co
             backButtonWrapper->Measure(constraint);
             return;
         }
-        if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
+        if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
             backButtonImageLayoutProperty->UpdateUserDefinedIdealSize(CalcSize(CalcLength(backIconWidth_),
                 CalcLength(backIconHeight_)));
-            constraint.selfIdealSize = OptionalSizeF(static_cast<float>(NAV_BACK_BUTTON_SIZE.ConvertToPx()),
-                static_cast<float>(NAV_BACK_BUTTON_SIZE.ConvertToPx()));
+            constraint.selfIdealSize = OptionalSizeF(static_cast<float>(iconBackgroundWidth_.ConvertToPx()),
+                static_cast<float>(iconBackgroundWidth_.ConvertToPx()));
             backButtonWrapper->Measure(constraint);
             return;
         }
@@ -142,8 +142,8 @@ float TitleBarLayoutAlgorithm::GetTitleWidth(const RefPtr<TitleBarNode>& titleBa
         float occupiedWidth = 0.0f;
         // left padding
         if (showBackButton_) {
-            if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
-                occupiedWidth += NAV_BACK_BUTTON_SIZE.ConvertToPx() + leftPadding + horizontalMargin;
+            if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
+                occupiedWidth += iconBackgroundWidth_.ConvertToPx() + leftPadding + horizontalMargin;
             } else {
                 occupiedWidth += isCustom ? (BACK_BUTTON_ICON_SIZE + BUTTON_PADDING).ConvertToPx() + leftPadding :
                     (BACK_BUTTON_ICON_SIZE).ConvertToPx() + leftPadding + horizontalMargin;
@@ -156,7 +156,7 @@ float TitleBarLayoutAlgorithm::GetTitleWidth(const RefPtr<TitleBarNode>& titleBa
             occupiedWidth += isCustom ? 0.0f : rightPadding;
         } else {
             occupiedWidth += menuWidth_;
-            if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
+            if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
                 occupiedWidth += leftPadding + horizontalMargin;
             } else {
                 if (!titleBarNode->GetPrevMenuIsCustomValue(false)) {
@@ -462,9 +462,9 @@ void TitleBarLayoutAlgorithm::LayoutBackButton(LayoutWrapper* layoutWrapper, con
             backButtonWrapper->Layout();
             return;
         }
-        if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
+        if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
             auto titleHeight = titleBarLayoutProperty->GetTitleHeightValue(SINGLE_LINE_TITLEBAR_HEIGHT);
-            auto offsetY = (titleHeight - NAV_BACK_BUTTON_SIZE) / 2;
+            auto offsetY = (titleHeight - iconBackgroundWidth_.ConvertToPx()) / 2;
             OffsetF backButtonOffset = OffsetF(static_cast<float>(
                 (maxPaddingStart_ - MENU_BUTTON_PADDING).ConvertToPx()),
                 static_cast<float>(offsetY.ConvertToPx()));

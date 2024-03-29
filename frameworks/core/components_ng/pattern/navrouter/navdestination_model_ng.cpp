@@ -185,26 +185,32 @@ void NavDestinationModelNG::CreateBackButton(const RefPtr<NavDestinationGroupNod
     navDestinationNode->AddChild(titleBarNode);
     navDestinationNode->SetTitleBarNode(titleBarNode);
 
+    auto theme = NavigationGetTheme();
+    CHECK_NULL_VOID(theme);
     int32_t backButtonNodeId = ElementRegister::GetInstance()->MakeUniqueId();
     auto backButtonNode =
         FrameNode::CreateFrameNode(V2::BACK_BUTTON_ETS_TAG, backButtonNodeId, AceType::MakeRefPtr<ButtonPattern>());
     auto buttonPattern = backButtonNode->GetPattern<ButtonPattern>();
     CHECK_NULL_VOID(buttonPattern);
     buttonPattern->SetSkipColorConfigurationUpdate();
+    buttonPattern->setComponentButtonType(ComponentButtonType::NAVIGATION);
+    if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
+        buttonPattern->SetBlendColor(theme->GetBackgroundPressedColor(), theme->GetBackgroundHoverColor());
+        buttonPattern->SetFocusBorderColor(theme->GetBackgroundFocusOutlineColor());
+        buttonPattern->SetFocusBorderWidth(theme->GetBackgroundFocusOutlineWeight());
+    }
     titleBarNode->AddChild(backButtonNode);
     titleBarNode->SetBackButton(backButtonNode);
     auto backButtonLayoutProperty = backButtonNode->GetLayoutProperty<ButtonLayoutProperty>();
     CHECK_NULL_VOID(backButtonLayoutProperty);
     auto renderContext = backButtonNode->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
-    auto theme = NavigationGetTheme();
-    CHECK_NULL_VOID(theme);
     backButtonLayoutProperty->UpdateType(ButtonType::NORMAL);
     backButtonLayoutProperty->UpdateMeasureType(MeasureType::MATCH_PARENT);
 
-    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
+    if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
         backButtonLayoutProperty->UpdateUserDefinedIdealSize(
-            CalcSize(CalcLength(NAV_BACK_BUTTON_SIZE), CalcLength(NAV_BACK_BUTTON_SIZE)));
+            CalcSize(CalcLength(theme->GetIconBackgroundWidth()), CalcLength(theme->GetIconBackgroundHeight())));
         backButtonLayoutProperty->UpdateBorderRadius(BorderRadiusProperty(theme->GetCornerRadius()));
         PaddingProperty padding;
         padding.SetEdges(CalcLength(MENU_BUTTON_PADDING));
@@ -225,12 +231,10 @@ void NavDestinationModelNG::CreateBackButton(const RefPtr<NavDestinationGroupNod
 
     ImageSourceInfo imageSourceInfo;
     imageSourceInfo.SetResourceId(theme->GetBackResourceId());
-    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
-        imageSourceInfo.SetResourceId(theme->GetBackBtnResourceId());
-    }
     auto backButtonImageLayoutProperty = backButtonImageNode->GetLayoutProperty<ImageLayoutProperty>();
     CHECK_NULL_VOID(backButtonImageLayoutProperty);
-    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
+    if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
+        imageSourceInfo.SetResourceId(theme->GetBackBtnResourceId());
         auto iconWidth = theme->GetIconWidth();
         auto iconHeight = theme->GetIconHeight();
         backButtonImageLayoutProperty->UpdateUserDefinedIdealSize(CalcSize(CalcLength(iconWidth),
