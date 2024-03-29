@@ -95,11 +95,11 @@ void ScrollablePattern::SetAxis(Axis axis)
     }
     axis_ = axis;
     if (scrollBar_) {
-        scrollBar_->SetPositionMode(axis_ == Axis::HORIZONTAL ? PositionMode::BOTTOM : PositionMode::RIGHT);
-    }
-    if (scrollBarOverlayModifier_) {
-        scrollBarOverlayModifier_->SetPositionMode(
-            axis_ == Axis::HORIZONTAL ? PositionMode::BOTTOM : PositionMode::RIGHT);
+        auto positionMode = GetPositionMode();
+        scrollBar_->SetPositionMode(positionMode);
+        if (scrollBarOverlayModifier_) {
+            scrollBarOverlayModifier_->SetPositionMode(positionMode);
+        }
     }
     auto gestureHub = GetGestureHub();
     CHECK_NULL_VOID(gestureHub);
@@ -717,17 +717,15 @@ void ScrollablePattern::SetScrollBar(DisplayMode displayMode)
     DisplayMode oldDisplayMode = DisplayMode::OFF;
     if (!scrollBar_) {
         scrollBar_ = AceType::MakeRefPtr<ScrollBar>();
-        // set the scroll bar style
-        if (GetAxis() == Axis::HORIZONTAL) {
-            scrollBar_->SetPositionMode(PositionMode::BOTTOM);
-            if (scrollBarOverlayModifier_) {
-                scrollBarOverlayModifier_->SetPositionMode(PositionMode::BOTTOM);
-            }
-        }
         RegisterScrollBarEventTask();
-        host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
     } else {
         oldDisplayMode = scrollBar_->GetDisplayMode();
+    }
+    // set the scroll bar style
+    auto positionMode = GetPositionMode();
+    scrollBar_->SetPositionMode(positionMode);
+    if (scrollBarOverlayModifier_) {
+        scrollBarOverlayModifier_->SetPositionMode(positionMode);
     }
 
     if (oldDisplayMode != displayMode) {
@@ -2443,6 +2441,22 @@ void ScrollablePattern::PrintOffsetLog(AceLogTag tag, int32_t id, double finalOf
         TAG_LOGD(tag, "Scrollable id:%{public}d, scrollSource:%{public}d, scrollOffset:%{public}f",
             id, scrollSource_, finalOffset);
     }
+}
+
+PositionMode ScrollablePattern::GetPositionMode()
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, PositionMode::RIGHT);
+    auto positionMode = PositionMode::RIGHT;
+    if (axis_ == Axis::HORIZONTAL) {
+        positionMode = PositionMode::BOTTOM;
+    } else {
+        auto isRtl = host->GetLayoutProperty()->GetNonAutoLayoutDirection() == TextDirection::RTL;
+        if (isRtl) {
+            positionMode = PositionMode::LEFT;
+        }
+    }
+    return positionMode;
 }
 
 void ScrollablePattern::ScrollAtFixedVelocity(float velocity)

@@ -123,6 +123,8 @@ public:
         return layoutDirection_.value_or(TextDirection::AUTO);
     }
 
+    TextDirection GetNonAutoLayoutDirection() const;
+
     RefPtr<GeometryTransition> GetGeometryTransition() const
     {
         return geometryTransition_.Upgrade();

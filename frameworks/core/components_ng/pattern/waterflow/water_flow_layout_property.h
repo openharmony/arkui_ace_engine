@@ -53,7 +53,9 @@ public:
     bool IsReverse() const
     {
         auto axis = propWaterflowDirection_.value_or(FlexDirection::COLUMN);
-        return axis == FlexDirection::COLUMN_REVERSE || axis == FlexDirection::ROW_REVERSE;
+        auto isRtl = GetNonAutoLayoutDirection() == TextDirection::RTL;
+        return (!isRtl && (axis == FlexDirection::COLUMN_REVERSE || axis == FlexDirection::ROW_REVERSE)) ||
+                (isRtl && (axis == FlexDirection::COLUMN_REVERSE || axis == FlexDirection::ROW));
     }
 
     ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(ColumnsTemplate, std::string);
