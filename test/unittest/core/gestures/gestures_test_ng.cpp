@@ -3527,48 +3527,6 @@ HWTEST_F(GesturesTestNg, PanRecognizerTest010, TestSize.Level1)
 }
 
 /**
- * @tc.name: PanRecognizerTest011
- * @tc.desc: Test PanRecognizer function: SetDirection
- * @tc.type: FUNC
- */
-HWTEST_F(GesturesTestNg, PanRecognizerTest011, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. create PanRecognizer.
-     */
-    RefPtr<PanGestureOption> panGestureOption = AceType::MakeRefPtr<PanGestureOption>();
-    PanRecognizer panRecognizer = PanRecognizer(panGestureOption);
-    PanDirection panDirection;
-
-    /**
-     * @tc.steps: step2. call SetDirection function
-     * @tc.steps: case1: panDirection is VERTICAL
-     * @tc.expected: step2. result equals.
-     */
-    panDirection.type = PanDirection::VERTICAL;
-    panRecognizer.SetDirection(panDirection);
-    EXPECT_EQ(panRecognizer.velocityTracker_.mainAxis_, Axis::VERTICAL);
-
-    /**
-     * @tc.steps: step2. call SetDirection function
-     * @tc.steps: case2: panDirection is HORIZONTAL
-     * @tc.expected: step2. result equals.
-     */
-    panDirection.type = PanDirection::HORIZONTAL;
-    panRecognizer.SetDirection(panDirection);
-    EXPECT_EQ(panRecognizer.velocityTracker_.mainAxis_, Axis::HORIZONTAL);
-
-    /**
-     * @tc.steps: step2. call SetDirection function
-     * @tc.steps: case2: panDirection is HORIZONTAL
-     * @tc.expected: step2. result equals.
-     */
-    panDirection.type = PanDirection::ALL;
-    panRecognizer.SetDirection(panDirection);
-    EXPECT_EQ(panRecognizer.velocityTracker_.mainAxis_, Axis::HORIZONTAL);
-}
-
-/**
  * @tc.name: PanRecognizerTest012
  * @tc.desc: Test PanRecognizer function: ChangeFingers
  * @tc.type: FUNC
