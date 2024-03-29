@@ -70,7 +70,7 @@ class ScrollScrollSnapModifier extends ModifierWithKey<ArkScrollSnapOptions> {
       let snapPagination = [];
       let isArray = true;
       if (Array.isArray(this.value.snapPagination)) {
-        for (let i = 0; i <= this.value.snapPagination.length; i++) {
+        for (let i = 0; i < this.value.snapPagination.length; i++) {
           let item = this.value.snapPagination[i];
           snapPagination.push(item);
         }
