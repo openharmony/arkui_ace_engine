@@ -2050,6 +2050,14 @@ bool PipelineContext::CheckPageFocus()
     return pageNode->GetFocusHub() && pageNode->GetFocusHub()->IsCurrentFocus();
 }
 
+bool PipelineContext::CheckOverlayFocus()
+{
+    CHECK_NULL_RETURN(overlayManager_, false);
+    auto overlayNode = overlayManager_->GetOverlayNode();
+    CHECK_NULL_RETURN(overlayNode, false);
+    return overlayNode->GetFocusHub() && overlayNode->GetFocusHub()->IsCurrentFocus();
+}
+
 void PipelineContext::NotifyFillRequestSuccess(AceAutoFillType autoFillType, RefPtr<ViewDataWrap> viewDataWrap)
 {
     CHECK_NULL_VOID(viewDataWrap);
