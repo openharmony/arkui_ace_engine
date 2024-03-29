@@ -322,10 +322,9 @@ ArkUINativeModuleValue SpanBridge::SetFont(ArkUIRuntimeCallInfo *runtimeCallInfo
     CalcDimension fontSize = theme->GetTextStyle().GetFontSize();
     if (sizeArg->IsNull() || !ArkTSUtils::ParseJsDimensionFp(vm, sizeArg, fontSize, false) || fontSize.IsNegative()) {
         fontSize = theme->GetTextStyle().GetFontSize();
-    } else {
-        fontInfo.fontSizeNumber = fontSize.Value();
-        fontInfo.fontSizeUnit = static_cast<int8_t>(fontSize.Unit());
     }
+    fontInfo.fontSizeNumber = fontSize.Value();
+    fontInfo.fontSizeUnit = static_cast<int8_t>(fontSize.Unit());
 
     std::string weight = DEFAULT_FONT_WEIGHT;
     if (!weightArg->IsNull()) {

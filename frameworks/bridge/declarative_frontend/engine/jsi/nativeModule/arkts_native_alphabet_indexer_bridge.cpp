@@ -44,9 +44,12 @@ ArkUINativeModuleValue AlphabetIndexerBridge::SetPopupItemFont(ArkUIRuntimeCallI
     Local<JSValueRef> weightArg = runtimeCallInfo->GetCallArgRef(NUM_2);
     auto nativeNode = nodePtr(nodeArg->ToNativePointer(vm)->Value());
     CalcDimension fontSize;
-    if (fontSizeArg->IsNull() || fontSizeArg->IsUndefined() ||
-        !ArkTSUtils::ParseJsDimensionFp(vm, fontSizeArg, fontSize)) {
-        fontSize = Dimension(DEFAULT_POPUPITEMFONT_SIZE, DimensionUnit::FP);
+    if (!fontSizeArg->IsNull()) {
+        CalcDimension fontSizeData;
+        if (ArkTSUtils::ParseJsDimensionFp(vm, fontSizeArg, fontSizeData) && !fontSizeData.IsNegative() &&
+            fontSizeData.Unit() != DimensionUnit::PERCENT) {
+            fontSize = fontSizeData;
+        }
     }
     std::string weight = DEFAULT_POPUP_ITEM_FONT_WEIGHT;
     if (!weightArg->IsNull() && !weightArg->IsUndefined()) {

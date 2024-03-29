@@ -93,10 +93,10 @@ void SetControlButton(ArkUINodeHandle node, const ArkUI_Float32* values, ArkUI_I
     SideBarContainerModelNG::SetControlButtonHeight(frameNode, height);
     CHECK_NULL_VOID(iconsStruct);
     if (iconsStruct->HiddenIconInfo) {
-        SideBarContainerModelNG::SetControlButtonShowIconInfo(frameNode, iconsStruct->HiddenIconInfo, false, nullptr);
+        SideBarContainerModelNG::SetControlButtonHiddenIconInfo(frameNode, iconsStruct->HiddenIconInfo, false, nullptr);
     }
     if (iconsStruct->ShowIconInfo) {
-        SideBarContainerModelNG::SetControlButtonHiddenIconInfo(frameNode, iconsStruct->ShowIconInfo, false, nullptr);
+        SideBarContainerModelNG::SetControlButtonShowIconInfo(frameNode, iconsStruct->ShowIconInfo, false, nullptr);
     }
     if (iconsStruct->SwitchingIconInfo) {
         SideBarContainerModelNG::SetControlButtonSwitchingIconInfo(
