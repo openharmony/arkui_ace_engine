@@ -53,6 +53,16 @@ public:
     static void SetMenuBackgroundColor(const JSCallbackInfo& info);
     static void SetMenuBackgroundBlurStyle(const JSCallbackInfo& info);
     static void SetControlSize(const JSCallbackInfo& info);
+
+    static void ParseFontSize(const JSRef<JSVal>& jsValue);
+    static void ParseFontWeight(const JSRef<JSVal>& jsValue);
+    static void ParseFontFamily(const JSRef<JSVal>& jsValue);
+    static void ParseFontStyle(const JSRef<JSVal>& jsValue);
+    static void ResetFontSize();
+    static void ResetFontWeight();
+    static void ResetFontFamily();
+    static void ResetFontStyle();
+    static void ResetFont();
 };
 } // namespace OHOS::Ace::Framework
 #endif

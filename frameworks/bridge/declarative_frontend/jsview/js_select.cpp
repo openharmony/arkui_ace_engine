@@ -202,66 +202,115 @@ void JSSelect::Value(const JSCallbackInfo& info)
     SelectModel::GetInstance()->SetValue(value);
 }
 
-void ResetFont(void)
+void JSSelect::Font(const JSCallbackInfo& info)
+{
+    if (!info[0]->IsObject()) {
+        ResetFont();
+        return;
+    }
+    auto param = JSRef<JSObject>::Cast(info[0]);
+    ParseFontSize(param->GetProperty("size"));
+    ParseFontWeight(param->GetProperty("weight"));
+    ParseFontFamily(param->GetProperty("family"));
+    ParseFontStyle(param->GetProperty("style"));
+}
+
+void JSSelect::ParseFontSize(const JSRef<JSVal>& jsValue)
+{
+    CHECK_NULL_VOID(jsValue->IsNull());
+    CalcDimension fontSize;
+    if (ParseJsDimensionFp(jsValue, fontSize)) {
+        SelectModel::GetInstance()->SetFontSize(fontSize);
+    } else {
+        ResetFontSize();
+    }
+}
+
+void JSSelect::ParseFontWeight(const JSRef<JSVal>& jsValue)
+{
+    CHECK_NULL_VOID(jsValue->IsNull());
+    if (jsValue->IsNumber()) {
+        auto number = jsValue->ToNumber<int32_t>();
+        if (number < 0) {
+            ResetFontWeight();
+        } else {
+            SelectModel::GetInstance()->SetFontWeight(ConvertStrToFontWeight(std::to_string(number)));
+        }
+    } else {
+        std::string weight;
+        if (ParseJsString(jsValue, weight)) {
+            SelectModel::GetInstance()->SetFontWeight(ConvertStrToFontWeight(weight));
+        } else {
+            ResetFontWeight();
+        }
+    }
+}
+
+void JSSelect::ParseFontFamily(const JSRef<JSVal>& jsValue)
+{
+    CHECK_NULL_VOID(jsValue->IsNull());
+    if (jsValue->IsString()) {
+        auto familyVal = jsValue->ToString();
+        SelectModel::GetInstance()->SetFontFamily(ConvertStrToFontFamilies(familyVal));
+    } else {
+        ResetFontFamily();
+    }
+}
+
+void JSSelect::ParseFontStyle(const JSRef<JSVal>& jsValue)
+{
+    CHECK_NULL_VOID(jsValue->IsNull());
+    if (jsValue->IsNumber()) {
+        auto styleVal = static_cast<FontStyle>(jsValue->ToNumber<int32_t>());
+        SelectModel::GetInstance()->SetItalicFontStyle(styleVal);
+    } else {
+        ResetFontStyle();
+    }
+}
+
+void JSSelect::ResetFontSize()
 {
     auto pipeline = PipelineBase::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
     auto selectTheme = pipeline->GetTheme<SelectTheme>();
     CHECK_NULL_VOID(selectTheme);
-    auto textTheme = pipeline->GetTheme<TextTheme>();
-    CHECK_NULL_VOID(textTheme);
     if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
         SelectModel::GetInstance()->SetFontSize(selectTheme->GetFontSize());
     } else {
         auto controlSize = SelectModel::GetInstance()->GetControlSize();
         SelectModel::GetInstance()->SetFontSize(selectTheme->GetFontSize(controlSize));
     }
-    SelectModel::GetInstance()->SetFontWeight(FontWeight::MEDIUM);
-    SelectModel::GetInstance()->SetFontFamily(textTheme->GetTextStyle().GetFontFamilies());
-    SelectModel::GetInstance()->SetItalicFontStyle(textTheme->GetTextStyle().GetFontStyle());
-    return;
 }
 
-void JSSelect::Font(const JSCallbackInfo& info)
+void JSSelect::ResetFontWeight()
 {
-    if (info[0]->IsUndefined() || info[0]->IsNull()) {
-        ResetFont();
-    }
+    SelectModel::GetInstance()->SetFontWeight(FontWeight::MEDIUM);
+}
 
-    if (!info[0]->IsObject()) {
-        return;
-    }
+void JSSelect::ResetFontFamily()
+{
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto textTheme = pipeline->GetTheme<TextTheme>();
+    CHECK_NULL_VOID(textTheme);
+    SelectModel::GetInstance()->SetFontFamily(textTheme->GetTextStyle().GetFontFamilies());
+}
 
-    auto param = JSRef<JSObject>::Cast(info[0]);
-    auto size = param->GetProperty("size");
-    if (!size->IsNull()) {
-        CalcDimension fontSize;
-        if (ParseJsDimensionFp(size, fontSize)) {
-            SelectModel::GetInstance()->SetFontSize(fontSize);
-        }
-    }
-    std::string weight;
-    auto fontWeight = param->GetProperty("weight");
-    if (!fontWeight->IsNull()) {
-        if (fontWeight->IsNumber()) {
-            weight = std::to_string(fontWeight->ToNumber<int32_t>());
-        } else {
-            ParseJsString(fontWeight, weight);
-        }
-        SelectModel::GetInstance()->SetFontWeight(ConvertStrToFontWeight(weight));
-    }
+void JSSelect::ResetFontStyle()
+{
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto textTheme = pipeline->GetTheme<TextTheme>();
+    CHECK_NULL_VOID(textTheme);
+    SelectModel::GetInstance()->SetItalicFontStyle(textTheme->GetTextStyle().GetFontStyle());
+}
 
-    auto family = param->GetProperty("family");
-    if (!family->IsNull() && family->IsString()) {
-        auto familyVal = family->ToString();
-        SelectModel::GetInstance()->SetFontFamily(ConvertStrToFontFamilies(familyVal));
-    }
-
-    auto style = param->GetProperty("style");
-    if (!style->IsNull() && style->IsNumber()) {
-        auto styleVal = static_cast<FontStyle>(style->ToNumber<int32_t>());
-        SelectModel::GetInstance()->SetItalicFontStyle(styleVal);
-    }
+void JSSelect::ResetFont()
+{
+    ResetFontSize();
+    ResetFontWeight();
+    ResetFontFamily();
+    ResetFontStyle();
 }
 
 void JSSelect::FontColor(const JSCallbackInfo& info)
