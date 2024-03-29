@@ -59,6 +59,9 @@ template("ace_core_components_theme_set") {
     } else {
       sources += [ "$root_out_dir/arkui/framework/core/components/theme/theme_constants_tv.cpp" ]
     }
+    if (use_hilog) {
+      external_deps = [ "hilog:libhilog" ]
+    }
   }
 }
 

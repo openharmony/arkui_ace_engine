@@ -38,6 +38,7 @@ config("ace_napi_config") {
 
   if (use_hilog) {
     include_dirs += [ "$hilog_root/interfaces/native/innerkits/include" ]
+    defines += [ "USE_HILOG" ]
   }
 
   if (is_mac) {

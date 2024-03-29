@@ -20,9 +20,21 @@ config("ace_base_i18n_config") {
 
 template("ace_base_i18n") {
   forward_variables_from(invoker, "*")
-  source_set(target_name) {
+  ohos_source_set(target_name) {
     defines += invoker.defines
     cflags_cc += invoker.cflags_cc
+    if (current_os == "ohos") {
+      sanitize = {
+        integer_overflow = true
+        boundary_sanitize = true
+        debug = ace_sanitize_debug
+      }
+    }
+    configs = [
+      ":ace_base_i18n_config",
+      "$ace_root:ace_config",
+      "//third_party/icu/icu4c:icu_config",
+    ]
     deps = [ "$ace_root/frameworks/base/resource:ace_resource" ]
 
     if (defined(config.use_external_icu) &&
@@ -37,15 +49,16 @@ template("ace_base_i18n") {
         "//third_party/icu/icu4c:shared_icuuc",
       ]
     }
-    configs += [ "//third_party/icu/icu4c:icu_config" ]
-
-    configs += [
-      ":ace_base_i18n_config",
-      "$ace_root:ace_config",
-    ]
 
     # add base source file here
     sources = [ "localization.cpp" ]
+
+    if (use_hilog) {
+      external_deps = [ "hilog:libhilog" ]
+    }
+
+    subsystem_name = ace_engine_subsystem
+    part_name = ace_engine_part
   }
 }
 

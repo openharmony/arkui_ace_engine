@@ -262,7 +262,9 @@ template("ace_core_source_set") {
     ]
 
     external_deps = []
-
+    if (use_hilog) {
+      external_deps += [ "hilog:libhilog" ]
+    }
     if (defined(config.build_for_preview) && config.build_for_preview) {
       sources -= [ "common/task_runner_adapter_impl.cpp" ]
     }

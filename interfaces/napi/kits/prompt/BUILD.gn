@@ -33,6 +33,9 @@ template("napi_prompt_static") {
     } else {
       external_deps += [ "napi:ace_napi" ]
     }
+    if (use_hilog) {
+      external_deps += [ "hilog:libhilog" ]
+    }
     if (defined(config.libace_target)) {
       deps += [ config.libace_target ]
     }

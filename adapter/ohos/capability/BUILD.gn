@@ -36,6 +36,7 @@ template("ace_capability_ohos_source_set") {
     external_deps = [
       "ability_base:want",
       "common_event_service:cesfwk_innerkits",
+      "hilog:libhilog",
       "ipc:ipc_core",
       "preferences:native_preferences",
     ]
@@ -70,7 +71,6 @@ template("ace_capability_ohos_source_set") {
         "c_utils:utils",
         "eventhandler:libeventhandler",
         "graphic_2d:librender_service_client",
-        "hilog:libhilog",
         "input:libmmi-client",
         "ipc:ipc_core",
         "napi:ace_napi",
