@@ -91,6 +91,8 @@ void TitleBarLayoutAlgorithm::MeasureBackButton(LayoutWrapper* layoutWrapper, co
         if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
             backButtonImageLayoutProperty->UpdateUserDefinedIdealSize(CalcSize(CalcLength(backIconWidth_),
                 CalcLength(backIconHeight_)));
+            padding.SetEdges(CalcLength(MENU_BUTTON_PADDING));
+            buttonLayoutProperty->UpdatePadding(padding);
             constraint.selfIdealSize = OptionalSizeF(static_cast<float>(iconBackgroundWidth_.ConvertToPx()),
                 static_cast<float>(iconBackgroundWidth_.ConvertToPx()));
             backButtonWrapper->Measure(constraint);
@@ -460,7 +462,7 @@ void TitleBarLayoutAlgorithm::LayoutBackButton(LayoutWrapper* layoutWrapper, con
         }
         if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
             auto titleHeight = titleBarLayoutProperty->GetTitleHeightValue(SINGLE_LINE_TITLEBAR_HEIGHT);
-            auto offsetY = (titleHeight - iconBackgroundWidth_.ConvertToPx()) / 2;
+            auto offsetY = (titleHeight - iconBackgroundWidth_) / 2;
             OffsetF backButtonOffset = OffsetF(static_cast<float>(
                 (maxPaddingStart_ - MENU_BUTTON_PADDING).ConvertToPx()),
                 static_cast<float>(offsetY.ConvertToPx()));
