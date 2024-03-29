@@ -178,8 +178,13 @@ void NavigationPattern::OnModifyDone()
         CHECK_NULL_VOID(inputHub);
         InitDividerMouseEvent(inputHub);
     }
-    auto&& opts = hostNode->GetLayoutProperty()->GetSafeAreaExpandOpts();
+
+    auto layoutProperty = hostNode->GetLayoutProperty();
+    CHECK_NULL_VOID(layoutProperty);
+    auto&& opts = layoutProperty->GetSafeAreaExpandOpts();
     if (opts && opts->Expansive()) {
+        TAG_LOGI(AceLogTag::ACE_NAVIGATION, "Navigation SafArea expand as %{public}s", opts->ToString().c_str());
+
         navBarNode->GetLayoutProperty()->UpdateSafeAreaExpandOpts(*opts);
         navBarNode->MarkModifyDone();
 
