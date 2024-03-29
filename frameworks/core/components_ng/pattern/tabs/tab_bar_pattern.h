@@ -176,6 +176,8 @@ public:
         indicator_ = indicator;
     }
 
+    void OnTabBarIndexChange(int32_t index);
+
     void UpdateCurrentOffset(float offset);
 
     void UpdateIndicator(int32_t indicator);
