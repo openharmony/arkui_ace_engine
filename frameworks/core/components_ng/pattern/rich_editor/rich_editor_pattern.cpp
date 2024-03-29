@@ -6189,6 +6189,19 @@ Color RichEditorPattern::GetSelectedBackgroundColor()
 
 void RichEditorPattern::HandleOnDragDrop(const RefPtr<OHOS::Ace::DragEvent>& event)
 {
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto eventHub = host->GetEventHub<RichEditorEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    TextCommonEvent textCommonEvent;
+    eventHub->FireOnPaste(textCommonEvent);
+    if (textCommonEvent.IsPreventDefault()) {
+        CloseSelectOverlay();
+        ResetSelection();
+        StartTwinkling();
+        return;
+    }
+
     auto data = event->GetData();
     CHECK_NULL_VOID(data);
 
