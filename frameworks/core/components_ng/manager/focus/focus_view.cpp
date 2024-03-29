@@ -154,7 +154,7 @@ RefPtr<FocusHub> FocusView::GetViewRootScope()
         auto iter = children.begin();
         std::advance(iter, index);
         if (iter == children.end()) {
-            TAG_LOGI(AceLogTag::ACE_FOCUS, "Index: %{public}d of %{public}s/%{public}d 's children is invalid.", index,
+            TAG_LOGD(AceLogTag::ACE_FOCUS, "Index: %{public}d of %{public}s/%{public}d 's children is invalid.", index,
                 rootScope->GetFrameName().c_str(), rootScope->GetFrameId());
             return focusViewHub;
         }
@@ -165,7 +165,10 @@ RefPtr<FocusHub> FocusView::GetViewRootScope()
     auto screenNode = pipeline ? pipeline->GetScreenNode() : nullptr;
     auto screenFocusHub = screenNode ? screenNode->GetFocusHub() : nullptr;
     if (rootScope->GetFocusType() != FocusType::SCOPE || (screenFocusHub && rootScope == screenFocusHub)) {
-        return rootScope->GetParentFocusHub();
+        rootScope = rootScope->GetParentFocusHub();
+    }
+    if (rootScope != focusViewHub) {
+        focusViewHub->SetFocusDependence(FocusDependence::AUTO);
     }
     return rootScope;
 }
