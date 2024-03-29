@@ -1761,6 +1761,15 @@ ScrollResult ScrollablePattern::HandleScrollSelfOnly(float& offset, int32_t sour
         return { 0, false };
     }
     bool canOverScroll = false;
+    if (FindSheetPattern()) {
+        if (state == NestedState::GESTURE) {
+            canOverScroll = !NearZero(overOffset) && GetEdgeEffect() != EdgeEffect::NONE;
+        } else if (GetEdgeEffect() != EdgeEffect::NONE) {
+            remainOffset = 0;
+        }
+        SetCanOverScroll(canOverScroll);
+        return { remainOffset, !NearZero(overOffset) };
+    }
     if (state == NestedState::CHILD_SCROLL) {
         offset -= overOffset;
     } else if (state == NestedState::GESTURE) {
@@ -1770,6 +1779,28 @@ ScrollResult ScrollablePattern::HandleScrollSelfOnly(float& offset, int32_t sour
     }
     SetCanOverScroll(canOverScroll);
     return { remainOffset, !NearZero(overOffset) };
+}
+
+bool ScrollablePattern::FindSheetPattern()
+{
+    if (sheetPattern_) {
+        return true;
+    }
+
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, false);
+    for (auto parent = host->GetParent(); parent != nullptr; parent = parent->GetParent()) {
+        auto frameNode = AceType::DynamicCast<FrameNode>(parent);
+        if (!frameNode) {
+            continue;
+        }
+        sheetPattern_ = frameNode->GetPattern<SheetPresentationPattern>();
+        if (!sheetPattern_) {
+            continue;
+        }
+        return false;
+    }
+    return true;
 }
 
 ScrollResult ScrollablePattern::HandleScrollParallel(float& offset, int32_t source, NestedState state)

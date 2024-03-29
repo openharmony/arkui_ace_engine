@@ -413,7 +413,7 @@ void SheetPresentationPattern::OnCoordScrollStart()
 
 bool SheetPresentationPattern::OnCoordScrollUpdate(float scrollOffset)
 {
-    if (!GetShowState() || !IsScrollable()) {
+    if (!GetShowState()) {
         return false;
     }
 

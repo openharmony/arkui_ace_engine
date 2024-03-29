@@ -627,6 +627,8 @@ private:
     ScrollResult HandleScrollSelfOnly(float& offset, int32_t source, NestedState state);
     ScrollResult HandleScrollParallel(float& offset, int32_t source, NestedState state);
 
+    bool FindSheetPattern();
+    
     void ExecuteScrollFrameBegin(float& mainDelta, ScrollState state);
 
     void SetCanOverScroll(bool val);
