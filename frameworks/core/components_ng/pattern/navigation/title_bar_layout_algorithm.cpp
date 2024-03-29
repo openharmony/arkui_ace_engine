@@ -465,7 +465,8 @@ void TitleBarLayoutAlgorithm::LayoutBackButton(LayoutWrapper* layoutWrapper, con
         if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
             auto titleHeight = titleBarLayoutProperty->GetTitleHeightValue(SINGLE_LINE_TITLEBAR_HEIGHT);
             auto offsetY = (titleHeight - NAV_BACK_BUTTON_SIZE) / 2;
-            OffsetF backButtonOffset = OffsetF(static_cast<float>((maxPaddingStart_ - MENU_BUTTON_PADDING).ConvertToPx()),
+            OffsetF backButtonOffset = OffsetF(static_cast<float>(
+                (maxPaddingStart_ - MENU_BUTTON_PADDING).ConvertToPx()),
                 static_cast<float>(offsetY.ConvertToPx()));
             geometryNode->SetMarginFrameOffset(backButtonOffset);
             backButtonWrapper->Layout();

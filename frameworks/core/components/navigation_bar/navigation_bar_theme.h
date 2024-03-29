@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -42,11 +42,8 @@ public:
                 return theme;
             }
 
-            if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
-                theme->backResourceId_ = themeConstants->GetResourceId(THEME_NAVIGATION_BAR_RESOURCE_ID_TITLEBAR_BACK);
-            } else {
-                theme->backResourceId_ = themeConstants->GetResourceId(THEME_NAVIGATION_BAR_RESOURCE_ID_BACK);
-            }
+            theme->backBtnResourceId_ = themeConstants->GetResourceId(THEME_NAVIGATION_BAR_RESOURCE_ID_TITLEBAR_BACK);
+            theme->backResourceId_ = themeConstants->GetResourceId(THEME_NAVIGATION_BAR_RESOURCE_ID_BACK);
             theme->moreResourceId_ = themeConstants->GetResourceId(THEME_NAVIGATION_BAR_RESOURCE_ID_MORE);
 
             RefPtr<ThemeStyle> pattern = themeConstants->GetPatternByName(THEME_PATTERN_NAVIGATION_BAR);
@@ -196,6 +193,10 @@ public:
     const Dimension& GetHeightEmphasize() const
     {
         return heightEmphasize_;
+    }
+    InternalResource::ResourceId GetBackBtnResourceId() const
+    {
+        return backBtnResourceId_;
     }
     InternalResource::ResourceId GetBackResourceId() const
     {
@@ -516,6 +517,7 @@ private:
     Dimension subTitleFontSize_;
     Dimension height_;
     Dimension heightEmphasize_;
+    InternalResource::ResourceId backBtnResourceId_ = InternalResource::ResourceId::NO_ID;
     InternalResource::ResourceId backResourceId_ = InternalResource::ResourceId::NO_ID;
     InternalResource::ResourceId moreResourceId_ = InternalResource::ResourceId::NO_ID;
     Dimension menuZoneSize_;

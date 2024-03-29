@@ -225,6 +225,9 @@ void NavDestinationModelNG::CreateBackButton(const RefPtr<NavDestinationGroupNod
 
     ImageSourceInfo imageSourceInfo;
     imageSourceInfo.SetResourceId(theme->GetBackResourceId());
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
+        imageSourceInfo.SetResourceId(theme->GetBackBtnResourceId());
+    }
     auto backButtonImageLayoutProperty = backButtonImageNode->GetLayoutProperty<ImageLayoutProperty>();
     CHECK_NULL_VOID(backButtonImageLayoutProperty);
     if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {

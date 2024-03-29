@@ -127,7 +127,7 @@ void NavigationTitleUtil::BuildMoreItemNodeAction(const RefPtr<FrameNode>& butto
         auto menuNode = AceType::DynamicCast<FrameNode>(menu->GetChildAtIndex(0));
         CHECK_NULL_VOID(menuNode);
 
-        overlayManager->ShowMenu(id, OffsetF(0.0,0.0), menu);
+        overlayManager->ShowMenu(id, OffsetF(0.0f, 0.0f), menu);
 
         auto titleBarNode = weakTitleBarNode.Upgrade();
         CHECK_NULL_VOID(titleBarNode);
