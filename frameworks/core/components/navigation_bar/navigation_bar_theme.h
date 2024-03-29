@@ -41,7 +41,7 @@ public:
                 return theme;
             }
 
-            theme->backBtnResourceId_ = theme->backBtnResourceId_ = InternalResource::ResourceId::TITLEBAR_BACK;
+            theme->backBtnResourceId_ = InternalResource::ResourceId::TITLEBAR_BACK;
             theme->backResourceId_ = themeConstants->GetResourceId(THEME_NAVIGATION_BAR_RESOURCE_ID_BACK);
             theme->moreResourceId_ = themeConstants->GetResourceId(THEME_NAVIGATION_BAR_RESOURCE_ID_MORE);
 
