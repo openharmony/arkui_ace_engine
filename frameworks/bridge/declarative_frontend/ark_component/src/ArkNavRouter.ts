@@ -15,8 +15,8 @@
 
 /// <reference path='./import.ts' />
 class ArkNavRouterComponent extends ArkComponent implements NavRouterAttribute {
-  constructor(nativePtr: KNode) {
-    super(nativePtr);
+  constructor(nativePtr: KNode, classType?: ModifierType) {
+    super(nativePtr, classType);
   }
   onStateChange(callback: (isActivated: boolean) => void): NavRouterAttribute {
     throw new Error('Method not implemented.');
@@ -42,12 +42,10 @@ class NavRouterModeModifier extends ModifierWithKey<number> {
 }
 
 // @ts-ignore
-globalThis.NavRouter.attributeModifier = function (modifier) {
-  const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
-  let nativeNode = getUINativeModule().getFrameNodeById(elmtId);
-  let component = this.createOrGetNode(elmtId, () => {
-    return new ArkNavRouterComponent(nativeNode);
+globalThis.NavRouter.attributeModifier = function (modifier: ArkComponent) {
+  attributeModifierFunc.call(this, modifier, (nativePtr: KNode) => {
+    return new ArkNavRouterComponent(nativePtr);
+  }, (nativePtr: KNode, classType: ModifierType, modifierJS: ModifierJS) => {
+    return new modifierJS.NavRouterModifier(nativePtr, classType);
   });
-  applyUIAttributes(modifier, nativeNode, component);
-  component.applyModifierPatch();
 };

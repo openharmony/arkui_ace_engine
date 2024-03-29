@@ -36,8 +36,8 @@ class ListItemSelectableModifier extends ModifierWithKey<boolean> {
   }
 }
 class ArkListItemComponent extends ArkComponent implements ListItemAttribute {
-  constructor(nativePtr: KNode) {
-    super(nativePtr);
+  constructor(nativePtr: KNode, classType?: ModifierType) {
+    super(nativePtr, classType);
   }
   sticky(value: Sticky): this {
     throw new Error('Method not implemented.');
@@ -62,12 +62,10 @@ class ArkListItemComponent extends ArkComponent implements ListItemAttribute {
 }
 
 // @ts-ignore
-globalThis.ListItem.attributeModifier = function (modifier) {
-  const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
-  let nativeNode = getUINativeModule().getFrameNodeById(elmtId);
-  let component = this.createOrGetNode(elmtId, () => {
-    return new ArkListItemComponent(nativeNode);
+globalThis.ListItem.attributeModifier = function (modifier: ArkComponent) {
+  attributeModifierFunc.call(this, modifier, (nativePtr: KNode) => {
+    return new ArkListItemComponent(nativePtr);
+  }, (nativePtr: KNode, classType: ModifierType, modifierJS: ModifierJS) => {
+    return new modifierJS.ListItemModifier(nativePtr, classType);
   });
-  applyUIAttributes(modifier, nativeNode, component);
-  component.applyModifierPatch();
 };

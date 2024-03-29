@@ -151,8 +151,8 @@ class PatternLockAutoResetModifier extends ModifierWithKey<boolean> {
 }
 
 class ArkPatternLockComponent extends ArkComponent implements PatternLockAttribute {
-  constructor(nativePtr: KNode) {
-    super(nativePtr);
+  constructor(nativePtr: KNode, classType?: ModifierType) {
+    super(nativePtr, classType);
   }
   sideLength(value: Length): PatternLockAttribute {
     modifierWithKey(this._modifiersWithKeys, PatternLockSideLengthModifier.identity,
@@ -202,12 +202,10 @@ class ArkPatternLockComponent extends ArkComponent implements PatternLockAttribu
   }
 }
 // @ts-ignore
-globalThis.PatternLock.attributeModifier = function (modifier) {
-  const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
-  let nativeNode = getUINativeModule().getFrameNodeById(elmtId);
-  let component = this.createOrGetNode(elmtId, () => {
-    return new ArkPatternLockComponent(nativeNode);
+globalThis.PatternLock.attributeModifier = function (modifier: ArkComponent) {
+  attributeModifierFunc.call(this, modifier, (nativePtr: KNode) => {
+    return new ArkPatternLockComponent(nativePtr);
+  }, (nativePtr: KNode, classType: ModifierType, modifierJS: ModifierJS) => {
+    return new modifierJS.PatternLockModifier(nativePtr, classType);
   });
-  applyUIAttributes(modifier, nativeNode, component);
-  component.applyModifierPatch();
 };

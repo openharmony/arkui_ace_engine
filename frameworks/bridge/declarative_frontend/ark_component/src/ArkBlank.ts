@@ -49,8 +49,8 @@ class BlankHeightModifier extends ModifierWithKey<Length> {
 }
 
 class ArkBlankComponent extends ArkComponent implements CommonMethod<BlankAttribute> {
-  constructor(nativePtr: KNode) {
-    super(nativePtr);
+  constructor(nativePtr: KNode, classType?: ModifierType) {
+    super(nativePtr, classType);
   }
   color(value: ResourceColor): BlankAttribute {
     modifierWithKey(this._modifiersWithKeys, BlankColorModifier.identity, BlankColorModifier, value);
@@ -63,12 +63,10 @@ class ArkBlankComponent extends ArkComponent implements CommonMethod<BlankAttrib
 }
 
 // @ts-ignore
-globalThis.Blank.attributeModifier = function (modifier) {
-  const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
-  let nativeNode = getUINativeModule().getFrameNodeById(elmtId);
-  let component = this.createOrGetNode(elmtId, () => {
-    return new ArkBlankComponent(nativeNode);
+globalThis.Blank.attributeModifier = function (modifier: ArkComponent) {
+  attributeModifierFunc.call(this, modifier, (nativePtr: KNode) => {
+    return new ArkBlankComponent(nativePtr);
+  }, (nativePtr: KNode, classType: ModifierType, modifierJS: ModifierJS) => {
+    return new modifierJS.BlankModifier(nativePtr, classType);
   });
-  applyUIAttributes(modifier, nativeNode, component);
-  component.applyModifierPatch();
 };

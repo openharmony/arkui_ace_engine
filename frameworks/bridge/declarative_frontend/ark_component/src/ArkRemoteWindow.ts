@@ -15,18 +15,19 @@
 
 /// <reference path='./import.ts' />
 class ArkRemoteWindowComponent extends ArkComponent implements RemoteWindowAttribute {
+  constructor(nativePtr: KNode, classType?: ModifierType) {
+    super(nativePtr, classType);
+  }
 }
 
 // @ts-ignore
 if (globalThis.RemoteWindow !== undefined) {
   // @ts-ignore
-  globalThis.RemoteWindow.attributeModifier = function (modifier) {
-    const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
-    let nativeNode = getUINativeModule().getFrameNodeById(elmtId);
-    let component = this.createOrGetNode(elmtId, () => {
-      return new ArkRemoteWindowComponent(nativeNode);
+  globalThis.RemoteWindow.attributeModifier = function (modifier: ArkComponent) {
+    attributeModifierFunc.call(this, modifier, (nativePtr: KNode) => {
+      return new ArkRemoteWindowComponent(nativePtr);
+    }, (nativePtr: KNode, classType: ModifierType, modifierJS: ModifierJS) => {
+      return new modifierJS.CommonModifier(nativePtr, classType);
     });
-    modifier.applyNormalAttribute(component);
-    component.applyModifierPatch();
   };
 }

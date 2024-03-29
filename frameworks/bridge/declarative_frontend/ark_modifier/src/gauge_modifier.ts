@@ -16,12 +16,13 @@
 /// <reference path='./import.ts' />
 class GaugeModifier extends ArkGaugeComponent implements AttributeModifier<GaugeAttribute> {
 
-  constructor(nativePtr: KNode) {
-    super(nativePtr);
+  constructor(nativePtr: KNode, classType: ModifierType) {
+    super(nativePtr, classType);
     this._modifiersWithKeys = new ModifierMap();
   }
 
   applyNormalAttribute(instance: GaugeAttribute): void {
-    applyAndMergeModifier<GaugeAttribute, ArkGaugeComponent, ArkComponent>(instance, this);
+    ModifierUtils.applySetOnChange(this);
+    ModifierUtils.applyAndMergeModifier<GaugeAttribute, ArkGaugeComponent, ArkComponent>(instance, this);
   }
 }

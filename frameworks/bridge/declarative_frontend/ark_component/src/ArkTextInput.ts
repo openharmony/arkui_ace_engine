@@ -574,8 +574,8 @@ class TextInputFontFeatureModifier extends ModifierWithKey<FontFeature> {
 }
 
 class ArkTextInputComponent extends ArkComponent implements CommonMethod<TextInputAttribute> {
-  constructor(nativePtr: KNode) {
-    super(nativePtr);
+  constructor(nativePtr: KNode, classType?: ModifierType) {
+    super(nativePtr, classType);
   }
   cancelButton(value: { style?: CancelButtonStyle, icon?: IconOptions }): TextInputAttribute {
     throw new Error('Method not implemented.');
@@ -783,12 +783,10 @@ class ArkTextInputComponent extends ArkComponent implements CommonMethod<TextInp
   }
 }
 // @ts-ignore
-globalThis.TextInput.attributeModifier = function (modifier) {
-  const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
-  let nativeNode = getUINativeModule().getFrameNodeById(elmtId);
-  let component = this.createOrGetNode(elmtId, () => {
-    return new ArkTextInputComponent(nativeNode);
+globalThis.TextInput.attributeModifier = function (modifier: ArkComponent) {
+  attributeModifierFunc.call(this, modifier, (nativePtr: KNode) => {
+    return new ArkTextInputComponent(nativePtr);
+  }, (nativePtr: KNode, classType: ModifierType, modifierJS: ModifierJS) => {
+    return new modifierJS.TextInputModifier(nativePtr, classType);
   });
-  applyUIAttributes(modifier, nativeNode, component);
-  component.applyModifierPatch();
 };

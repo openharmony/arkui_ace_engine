@@ -15,6 +15,10 @@
 
 /// <reference path='./import.ts' />
 class ArkPolygonComponent extends ArkCommonShapeComponent implements PolygonAttribute {
+  constructor(nativePtr: KNode, classType?: ModifierType) {
+    super(nativePtr, classType);
+  }
+
   points(value: Array<any>): this {
     modifierWithKey(this._modifiersWithKeys, PolygonPointsModifier.identity, PolygonPointsModifier, value);
     return this;
@@ -61,12 +65,10 @@ class PolygonPointsModifier extends ModifierWithKey<Array<any>> {
 }
 
 // @ts-ignore
-globalThis.Polygon.attributeModifier = function (modifier) {
-  const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
-  let nativeNode = getUINativeModule().getFrameNodeById(elmtId);
-  let component = this.createOrGetNode(elmtId, () => {
-    return new ArkPolygonComponent(nativeNode);
+globalThis.Polygon.attributeModifier = function (modifier: ArkComponent) {
+  attributeModifierFunc.call(this, modifier, (nativePtr: KNode) => {
+    return new ArkPolygonComponent(nativePtr);
+  }, (nativePtr: KNode, classType: ModifierType, modifierJS: ModifierJS) => {
+    return new modifierJS.PolygonModifier(nativePtr, classType);
   });
-  applyUIAttributes(modifier, nativeNode, component);
-  component.applyModifierPatch();
 };

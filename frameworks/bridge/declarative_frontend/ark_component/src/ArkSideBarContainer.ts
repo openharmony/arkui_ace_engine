@@ -206,8 +206,8 @@ class SideBarContainerDividerModifier extends ModifierWithKey<DividerStyle> {
 }
 
 class ArkSideBarContainerComponent extends ArkComponent implements SideBarContainerAttribute {
-  constructor(nativePtr: KNode) {
-    super(nativePtr);
+  constructor(nativePtr: KNode, classType?: ModifierType) {
+    super(nativePtr, classType);
   }
   onChange(callback: (value: boolean) => void): SideBarContainerAttribute {
     throw new Error('Method not implemented.');
@@ -260,13 +260,10 @@ class ArkSideBarContainerComponent extends ArkComponent implements SideBarContai
   }
 }
 // @ts-ignore
-globalThis.SideBarContainer.attributeModifier = function (modifier) {
-  const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
-  let nativeNode = getUINativeModule().getFrameNodeById(elmtId);
-
-  let component = this.createOrGetNode(elmtId, () => {
-    return new ArkSideBarContainerComponent(nativeNode);
+globalThis.SideBarContainer.attributeModifier = function (modifier: ArkComponent) {
+  attributeModifierFunc.call(this, modifier, (nativePtr: KNode) => {
+    return new ArkSideBarContainerComponent(nativePtr);
+  }, (nativePtr: KNode, classType: ModifierType, modifierJS: ModifierJS) => {
+    return new modifierJS.SideBarContainerModifier(nativePtr, classType);
   });
-  applyUIAttributes(modifier, nativeNode, component);
-  component.applyModifierPatch();
 };

@@ -15,8 +15,8 @@
 
 /// <reference path='./import.ts' />
 class ArkRichTextComponent extends ArkComponent implements CommonMethod<RichTextAttribute> {
-  constructor(nativePtr: KNode) {
-    super(nativePtr);
+  constructor(nativePtr: KNode, classType?: ModifierType) {
+    super(nativePtr, classType);
   }
   onStart(callback: () => void): RichTextAttribute {
     throw new Error('Method not implemented.');
@@ -26,13 +26,10 @@ class ArkRichTextComponent extends ArkComponent implements CommonMethod<RichText
   }
 }
 // @ts-ignore
-globalThis.RichText.attributeModifier = function (modifier) {
-  const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
-  let nativeNode = getUINativeModule().getFrameNodeById(elmtId);
-
-  let component = this.createOrGetNode(elmtId, () => {
-    return new ArkRichTextComponent(nativeNode);
+globalThis.RichText.attributeModifier = function (modifier: ArkComponent) {
+  attributeModifierFunc.call(this, modifier, (nativePtr: KNode) => {
+    return new ArkRichTextComponent(nativePtr);
+  }, (nativePtr: KNode, classType: ModifierType, modifierJS: ModifierJS) => {
+    return new modifierJS.CommonModifier(nativePtr, classType);
   });
-  applyUIAttributes(modifier, nativeNode, component);
-  component.applyModifierPatch();
 };

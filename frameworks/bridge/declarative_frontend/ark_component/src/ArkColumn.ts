@@ -49,8 +49,8 @@ class ColumnJustifyContentModifier extends ModifierWithKey<number> {
 }
 
 class ArkColumnComponent extends ArkComponent implements CommonMethod<ColumnAttribute> {
-  constructor(nativePtr: KNode) {
-    super(nativePtr);
+  constructor(nativePtr: KNode, classType?: ModifierType) {
+    super(nativePtr, classType);
   }
   alignItems(value: HorizontalAlign): ColumnAttribute {
     modifierWithKey(this._modifiersWithKeys, ColumnAlignItemsModifier.identity, ColumnAlignItemsModifier, value);
@@ -65,12 +65,10 @@ class ArkColumnComponent extends ArkComponent implements CommonMethod<ColumnAttr
   }
 }
 // @ts-ignore
-globalThis.Column.attributeModifier = function (modifier) {
-  const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
-  let nativeNode = getUINativeModule().getFrameNodeById(elmtId);
-  let component = this.createOrGetNode(elmtId, () => {
-    return new ArkColumnComponent(nativeNode);
+globalThis.Column.attributeModifier = function (modifier: ArkComponent) {
+  attributeModifierFunc.call(this, modifier, (nativePtr: KNode) => {
+    return new ArkColumnComponent(nativePtr);
+  }, (nativePtr: KNode, classType: ModifierType, modifierJS: ModifierJS) => {
+    return new modifierJS.ColumnModifier(nativePtr, classType);
   });
-  applyUIAttributes(modifier, nativeNode, component);
-  component.applyModifierPatch();
 };

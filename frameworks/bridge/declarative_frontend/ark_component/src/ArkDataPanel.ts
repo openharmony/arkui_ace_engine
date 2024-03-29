@@ -15,8 +15,8 @@
 
 /// <reference path='./import.ts' />
 class ArkDataPanelComponent extends ArkComponent implements DataPanelAttribute {
-  constructor(nativePtr: KNode) {
-    super(nativePtr);
+  constructor(nativePtr: KNode, classType?: ModifierType) {
+    super(nativePtr, classType);
   }
   closeEffect(value: boolean): this {
     modifierWithKey(this._modifiersWithKeys, DataPanelCloseEffectModifier.identity, DataPanelCloseEffectModifier, value);
@@ -115,12 +115,10 @@ class DataPanelValueColorsModifier extends ModifierWithKey<Array<ResourceColor |
   }
 }
 // @ts-ignore
-globalThis.DataPanel.attributeModifier = function (modifier) {
-  const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
-  let nativeNode = getUINativeModule().getFrameNodeById(elmtId);
-  let component = this.createOrGetNode(elmtId, () => {
-    return new ArkDataPanelComponent(nativeNode);
+globalThis.DataPanel.attributeModifier = function (modifier: ArkComponent) {
+  attributeModifierFunc.call(this, modifier, (nativePtr: KNode) => {
+    return new ArkDataPanelComponent(nativePtr);
+  }, (nativePtr: KNode, classType: ModifierType, modifierJS: ModifierJS) => {
+    return new modifierJS.DataPanelModifier(nativePtr, classType);
   });
-  applyUIAttributes(modifier, nativeNode, component);
-  component.applyModifierPatch();
 };

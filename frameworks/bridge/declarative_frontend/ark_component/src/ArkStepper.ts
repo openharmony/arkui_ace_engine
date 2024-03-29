@@ -15,8 +15,8 @@
 
 /// <reference path='./import.ts' />
 class ArkStepperComponent extends ArkComponent implements StepperAttribute {
-  constructor(nativePtr: KNode) {
-    super(nativePtr);
+  constructor(nativePtr: KNode, classType?: ModifierType) {
+    super(nativePtr, classType);
   }
   onFinish(callback: () => void): this {
     throw new Error('Method not implemented.');
@@ -36,12 +36,10 @@ class ArkStepperComponent extends ArkComponent implements StepperAttribute {
 }
 
 // @ts-ignore
-globalThis.Stepper.attributeModifier = function (modifier) {
-  const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
-  let nativeNode = getUINativeModule().getFrameNodeById(elmtId);
-  let component = this.createOrGetNode(elmtId, () => {
-    return new ArkStepperComponent(nativeNode);
+globalThis.Stepper.attributeModifier = function (modifier: ArkComponent) {
+  attributeModifierFunc.call(this, modifier, (nativePtr: KNode) => {
+    return new ArkStepperComponent(nativePtr);
+  }, (nativePtr: KNode, classType: ModifierType, modifierJS: ModifierJS) => {
+    return new modifierJS.CommonModifier(nativePtr, classType);
   });
-  applyUIAttributes(modifier, nativeNode, component);
-  component.applyModifierPatch();
 };

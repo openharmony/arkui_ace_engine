@@ -16,12 +16,13 @@
 /// <reference path='./import.ts' />
 class WaterFlowModifier extends ArkWaterFlowComponent implements AttributeModifier<WaterFlowAttribute> {
 
-  constructor(nativePtr: KNode) {
-    super(nativePtr);
+  constructor(nativePtr: KNode, classType: ModifierType) {
+    super(nativePtr, classType);
     this._modifiersWithKeys = new ModifierMap();
   }
 
   applyNormalAttribute(instance: WaterFlowAttribute): void {
-    applyAndMergeModifier<WaterFlowAttribute, ArkWaterFlowComponent, ArkComponent>(instance, this);
+    ModifierUtils.applySetOnChange(this);
+    ModifierUtils.applyAndMergeModifier<WaterFlowAttribute, ArkWaterFlowComponent, ArkComponent>(instance, this);
   }
 }

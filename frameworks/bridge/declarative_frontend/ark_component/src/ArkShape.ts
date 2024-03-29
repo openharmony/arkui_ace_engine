@@ -89,8 +89,8 @@ class ShapeWidthModifier extends ModifierWithKey<Length> {
   }
 }
 class ArkShapeComponent extends ArkCommonShapeComponent implements ShapeAttribute {
-  constructor(nativePtr: KNode) {
-    super(nativePtr);
+  constructor(nativePtr: KNode, classType?: ModifierType) {
+    super(nativePtr, classType);
   }
   viewPort(value: {
     x?: string | number | undefined;
@@ -124,12 +124,10 @@ class ArkShapeComponent extends ArkCommonShapeComponent implements ShapeAttribut
 }
 
 // @ts-ignore
-globalThis.Shape.attributeModifier = function (modifier) {
-  const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
-  let nativeNode = getUINativeModule().getFrameNodeById(elmtId);
-  let component = this.createOrGetNode(elmtId, () => {
-    return new ArkShapeComponent(nativeNode);
+globalThis.Shape.attributeModifier = function (modifier: ArkComponent) {
+  attributeModifierFunc.call(this, modifier, (nativePtr: KNode) => {
+    return new ArkShapeComponent(nativePtr);
+  }, (nativePtr: KNode, classType: ModifierType, modifierJS: ModifierJS) => {
+    return new modifierJS.ShapeModifier(nativePtr, classType);
   });
-  applyUIAttributes(modifier, nativeNode, component);
-  component.applyModifierPatch();
 };

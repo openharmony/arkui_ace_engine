@@ -83,8 +83,8 @@ class RichEditorCaretColorModifier extends ModifierWithKey<ResourceColor> {
 }
 
 class ArkRichEditorComponent extends ArkComponent implements CommonMethod<RichEditorAttribute> {
-  constructor(nativePtr: KNode) {
-    super(nativePtr);
+  constructor(nativePtr: KNode, classType?: ModifierType) {
+    super(nativePtr, classType);
   }
   enableDataDetector(value: boolean): RichEditorAttribute {
     modifierWithKey(this._modifiersWithKeys, RichEditorEnableDataDetectorModifier.identity, RichEditorEnableDataDetectorModifier, value);
@@ -140,13 +140,10 @@ class ArkRichEditorComponent extends ArkComponent implements CommonMethod<RichEd
 }
 
 // @ts-ignore
-globalThis.RichEditor.attributeModifier = function (modifier) {
-  const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
-  let nativeNode = getUINativeModule().getFrameNodeById(elmtId);
-
-  let component = this.createOrGetNode(elmtId, () => {
-    return new ArkRichEditorComponent(nativeNode);
+globalThis.RichEditor.attributeModifier = function (modifier: ArkComponent) {
+  attributeModifierFunc.call(this, modifier, (nativePtr: KNode) => {
+    return new ArkRichEditorComponent(nativePtr);
+  }, (nativePtr: KNode, classType: ModifierType, modifierJS: ModifierJS) => {
+    return new modifierJS.RichEditorModifier(nativePtr, classType);
   });
-  applyUIAttributes(modifier, nativeNode, component);
-  component.applyModifierPatch();
 };

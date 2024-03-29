@@ -16,12 +16,13 @@
 /// <reference path='./import.ts' />
 class NavDestinationModifier extends ArkNavDestinationComponent implements AttributeModifier<NavDestinationAttribute> {
 
-  constructor(nativePtr: KNode) {
-    super(nativePtr);
+  constructor(nativePtr: KNode, classType: ModifierType) {
+    super(nativePtr, classType);
     this._modifiersWithKeys = new ModifierMap();
   }
 
   applyNormalAttribute(instance: NavDestinationAttribute): void {
-    applyAndMergeModifier<NavDestinationAttribute, ArkNavDestinationComponent, ArkComponent>(instance, this);
+    ModifierUtils.applySetOnChange(this);
+    ModifierUtils.applyAndMergeModifier<NavDestinationAttribute, ArkNavDestinationComponent, ArkComponent>(instance, this);
   }
 }

@@ -47,8 +47,8 @@ class ImageSpanVerticalAlignModifier extends ModifierWithKey<number> {
   }
 }
 class ArkImageSpanComponent extends ArkComponent implements ImageSpanAttribute {
-  constructor(nativePtr: KNode) {
-    super(nativePtr);
+  constructor(nativePtr: KNode, classType?: ModifierType) {
+    super(nativePtr, classType);
   }
   objectFit(value: ImageFit): ImageSpanAttribute {
     modifierWithKey(this._modifiersWithKeys, ImageSpanObjectFitModifier.identity, ImageSpanObjectFitModifier, value);
@@ -60,13 +60,10 @@ class ArkImageSpanComponent extends ArkComponent implements ImageSpanAttribute {
   }
 }
 // @ts-ignore
-globalThis.ImageSpan.attributeModifier = function (modifier) {
-  const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
-  let nativeNode = getUINativeModule().getFrameNodeById(elmtId);
-
-  let component = this.createOrGetNode(elmtId, () => {
-    return new ArkImageSpanComponent(nativeNode);
+globalThis.ImageSpan.attributeModifier = function (modifier: ArkComponent) {
+  attributeModifierFunc.call(this, modifier, (nativePtr: KNode) => {
+    return new ArkImageSpanComponent(nativePtr);
+  }, (nativePtr: KNode, classType: ModifierType, modifierJS: ModifierJS) => {
+    return new modifierJS.ImageSpanModifier(nativePtr, classType);
   });
-  applyUIAttributes(modifier, nativeNode, component);
-  component.applyModifierPatch();
 };

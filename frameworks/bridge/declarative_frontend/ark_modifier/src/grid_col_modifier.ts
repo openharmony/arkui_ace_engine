@@ -16,12 +16,13 @@
 /// <reference path='./import.ts' />
 class GridColModifier extends ArkGridColComponent implements AttributeModifier<GridColAttribute> {
 
-  constructor(nativePtr: KNode) {
-    super(nativePtr);
+  constructor(nativePtr: KNode, classType: ModifierType) {
+    super(nativePtr, classType);
     this._modifiersWithKeys = new ModifierMap();
   }
 
   applyNormalAttribute(instance: GridColAttribute): void {
-    applyAndMergeModifier<GridColAttribute, ArkGridColComponent, ArkComponent>(instance, this);
+    ModifierUtils.applySetOnChange(this);
+    ModifierUtils.applyAndMergeModifier<GridColAttribute, ArkGridColComponent, ArkComponent>(instance, this);
   }
 }

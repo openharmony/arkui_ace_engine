@@ -592,7 +592,6 @@ void PipelineContext::IsCloseSCBKeyboard()
 void PipelineContext::FlushOnceVsyncTask()
 {
     if (onceVsyncListener_ != nullptr) {
-        ACE_SCOPED_TRACE("arkoala build");
         onceVsyncListener_();
         onceVsyncListener_ = nullptr;
     }

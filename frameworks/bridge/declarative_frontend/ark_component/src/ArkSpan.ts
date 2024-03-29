@@ -198,12 +198,24 @@ class SpanFontWeightModifier extends ModifierWithKey<string> {
 }
 
 class ArkSpanComponent implements CommonMethod<SpanAttribute> {
+  _modifiers: Map<Symbol, Modifier<number | string | boolean | Equable>>;
   _modifiersWithKeys: Map<Symbol, AttributeModifierWithKey>;
+  _changed: boolean;
   nativePtr: KNode;
+  _weakPtr: JsPointerClass;
+  _classType: ModifierType | undefined;
+  _nativePtrChanged: boolean;
 
-  constructor(nativePtr: KNode) {
+  constructor(nativePtr: KNode, classType?: ModifierType) {
+    this._modifiers = new Map();
     this._modifiersWithKeys = new Map();
     this.nativePtr = nativePtr;
+    this._changed = false;
+    this._classType = classType;
+    if (classType === ModifierType.STATE) {
+      this._weakPtr = getUINativeModule().nativeUtils.createNativeWeakRef(nativePtr);
+    }
+    this._nativePtrChanged = true;
   }
 
   cleanStageValue(): void {
@@ -213,6 +225,14 @@ class ArkSpanComponent implements CommonMethod<SpanAttribute> {
     this._modifiersWithKeys.forEach((value, key) => {
         value.stageValue = undefined;
     });
+  }
+
+  applyStateUpdatePtr(instance: ArkComponent): void {
+    if (this.nativePtr !== instance.nativePtr) {
+      this.nativePtr = instance.nativePtr;
+      this._nativePtrChanged = true;
+      this._weakPtr = getUINativeModule().nativeUtils.createNativeWeakRef(instance.nativePtr);
+    }
   }
 
   applyModifierPatch(): void {
@@ -802,13 +822,10 @@ class ArkSpanComponent implements CommonMethod<SpanAttribute> {
   }
 }
 // @ts-ignore
-globalThis.Span.attributeModifier = function (modifier) {
-  const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
-  let nativeNode = getUINativeModule().getFrameNodeById(elmtId);
-
-  let component = this.createOrGetNode(elmtId, () => {
-    return new ArkSpanComponent(nativeNode);
+globalThis.Span.attributeModifier = function (modifier: ArkComponent) {
+  attributeModifierFunc.call(this, modifier, (nativePtr: KNode) => {
+    return new ArkSpanComponent(nativePtr);
+  }, (nativePtr: KNode, classType: ModifierType, modifierJS: ModifierJS) => {
+    return new modifierJS.SpanModifier(nativePtr, classType);
   });
-  modifier.applyNormalAttribute(component);
-  component.applyModifierPatch();
 };

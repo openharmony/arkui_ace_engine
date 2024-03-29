@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -14,20 +14,15 @@
  */
 
 /// <reference path='./import.ts' />
-class ArkFlexComponent extends ArkComponent implements FlexAttribute {
-  constructor(nativePtr: KNode, classType?: ModifierType) {
+class FlexModifier extends ArkFlexComponent implements AttributeModifier<FlexAttribute> {
+
+  constructor(nativePtr: KNode, classType: ModifierType) {
     super(nativePtr, classType);
+    this._modifiersWithKeys = new ModifierMap();
   }
-  pointLight(value: PointLightStyle): this {
-    throw new Error('Method not implemented.');
+  
+  applyNormalAttribute(instance: FlexAttribute): void {
+    ModifierUtils.applySetOnChange(this);
+    ModifierUtils.applyAndMergeModifier<FlexAttribute, ArkFlexComponent, ArkComponent>(instance, this);
   }
 }
-
-// @ts-ignore
-globalThis.Flex.attributeModifier = function (modifier: ArkComponent) {
-  attributeModifierFunc.call(this, modifier, (nativePtr: KNode) => {
-    return new ArkFlexComponent(nativePtr);
-  }, (nativePtr: KNode, classType: ModifierType, modifierJS: ModifierJS) => {
-    return new modifierJS.FlexModifier(nativePtr, classType);
-  });
-};

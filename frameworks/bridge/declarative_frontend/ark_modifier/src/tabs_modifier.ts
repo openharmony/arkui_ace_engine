@@ -16,12 +16,13 @@
 /// <reference path='./import.ts' />
 class TabsModifier extends ArkTabsComponent implements AttributeModifier<TabsAttribute> {
 
-  constructor(nativePtr: KNode) {
-    super(nativePtr);
+  constructor(nativePtr: KNode, classType: ModifierType) {
+    super(nativePtr, classType);
     this._modifiersWithKeys = new ModifierMap();
   }
 
   applyNormalAttribute(instance: TabsAttribute): void {
-    applyAndMergeModifier<TabsAttribute, ArkTabsComponent, ArkComponent>(instance, this);
+    ModifierUtils.applySetOnChange(this);
+    ModifierUtils.applyAndMergeModifier<TabsAttribute, ArkTabsComponent, ArkComponent>(instance, this);
   }
 }

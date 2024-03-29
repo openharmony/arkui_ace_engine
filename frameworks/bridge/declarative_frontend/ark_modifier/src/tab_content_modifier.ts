@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -14,17 +14,16 @@
  */
 
 /// <reference path='./import.ts' />
-class ArkBadgeComponent extends ArkComponent implements BadgeAttribute {
-  constructor(nativePtr: KNode, classType?: ModifierType) {
-    super(nativePtr, classType);
-  }
-}
+class TabContentModifier extends ArkTabContentComponent implements AttributeModifier<TabContentAttribute> {
 
-// @ts-ignore
-globalThis.Badge.attributeModifier = function (modifier: ArkComponent) {
-  attributeModifierFunc.call(this, modifier, (nativePtr: KNode) => {
-    return new ArkBadgeComponent(nativePtr);
-  }, (nativePtr: KNode, classType: ModifierType, modifierJS: ModifierJS) => {
-    return new modifierJS.CommonModifier(nativePtr, classType);
-  });
-};
+    constructor(nativePtr: KNode, classType: ModifierType) {
+      super(nativePtr, classType);
+      this._modifiersWithKeys = new ModifierMap();
+    }
+    
+    applyNormalAttribute(instance: TabContentAttribute): void {
+      ModifierUtils.applySetOnChange(this);
+      ModifierUtils.applyAndMergeModifier<TabContentAttribute, ArkTabContentComponent, ArkComponent>(instance, this);
+    }
+  }
+  
