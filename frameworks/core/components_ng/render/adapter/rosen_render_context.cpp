@@ -1023,6 +1023,16 @@ Rosen::EmitterConfig RosenRenderContext::ConvertParticleEmitterOption(
     auto particleConfig = particle.GetConfig();
     auto particleCount = particle.GetCount();
     auto lifeTimeOpt = particle.GetLifeTime();
+    auto lifeTimeRangeOpt = particle.GetLifeTimeRange();
+    std::optional<int64_t> lifeTimeMin = 0;
+    std::optional<int64_t> lifeTimeMax = lifeTimeRangeOpt.value() + lifeTimeRangeOpt.value();
+    if (lifeTimeOpt.value() == -1) {
+        // when lifeTime == -1 particle life cycle is infinite
+        lifeTimeMin = -1;
+        lifeTimeMax = 0;
+    } else if (lifeTimeOpt.value() - lifeTimeRangeOpt.value() > 0) {
+        lifeTimeMin = lifeTimeOpt.value() - lifeTimeRangeOpt.value();
+    }
     auto rsPoint = pointOpt.has_value()
                        ? OHOS::Rosen::Vector2f(ConvertDimensionToPx(pointOpt.value().first, rect.Width()),
                              ConvertDimensionToPx(pointOpt.value().second, rect.Height()))
@@ -1032,7 +1042,7 @@ Rosen::EmitterConfig RosenRenderContext::ConvertParticleEmitterOption(
                                       : OHOS::Rosen::Vector2f(rect.Width(), rect.Height());
     auto shapeInt = static_cast<int32_t>(shapeOpt.value_or(ParticleEmitterShape::RECTANGLE));
     auto lifeTimeRange = OHOS::Rosen::Range<int64_t>(
-        lifeTimeOpt.value_or(PARTICLE_DEFAULT_LIFETIME), lifeTimeOpt.value_or(PARTICLE_DEFAULT_LIFETIME));
+        lifeTimeMin.value_or(PARTICLE_DEFAULT_LIFETIME), lifeTimeMax.value_or(PARTICLE_DEFAULT_LIFETIME));
     if (particleType == ParticleType::IMAGE) {
         auto imageParameter = particleConfig.GetImageParticleParameter();
         auto imageSource = imageParameter.GetImageSource();
