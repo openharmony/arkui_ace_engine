@@ -156,13 +156,9 @@ float TitleBarLayoutAlgorithm::GetTitleWidth(const RefPtr<TitleBarNode>& titleBa
             occupiedWidth += isCustom ? 0.0f : rightPadding;
         } else {
             occupiedWidth += menuWidth_;
-            if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
-                occupiedWidth += leftPadding + horizontalMargin;
-            } else {
-                if (!titleBarNode->GetPrevMenuIsCustomValue(false)) {
-                    occupiedWidth += leftPadding;
-                    occupiedWidth += isCustom ? 0.0f : horizontalMargin;
-                }
+            if (!titleBarNode->GetPrevMenuIsCustomValue(false)) {
+                occupiedWidth += leftPadding;
+                occupiedWidth += isCustom ? 0.0f : horizontalMargin;
             }
         }
         return titleBarSize.Width() < occupiedWidth ? 0.0f : titleBarSize.Width() - occupiedWidth;
