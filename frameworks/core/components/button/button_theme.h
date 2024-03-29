@@ -114,11 +114,11 @@ public:
             theme->progressDiameter_ = buttonPattern->GetAttr<Dimension>("button_progress_diameter", 0.0_vp);
             theme->innerPadding_ = buttonPattern->GetAttr<Dimension>("button_inner_padding", 0.0_vp);
             theme->borderWidthSmall_ = buttonPattern->GetAttr<Dimension>("width_border_small", 0.0_vp);
-            theme->borderColorSmall_ = buttonPattern->GetAttr<Color>("color_border_small",Color());
+            theme->borderColorSmall_ = buttonPattern->GetAttr<Color>("color_border_small", Color());
             theme->shadowNormal_ = static_cast<uint32_t>(buttonPattern->GetAttr<double>("shadow_default", 0.0));
             theme->shadowFocus_ = static_cast<uint32_t>(buttonPattern->GetAttr<double>("shadow_focus", 0.0));
             theme->scaleFocus_ =  buttonPattern->GetAttr<double>("scale_focus", 0.0);
-            theme->pddingText_ = buttonPattern->GetAttr<Dimension>("padding_text", 0.0_vp);
+            theme->paddingText_ = buttonPattern->GetAttr<Dimension>("padding_text", 0.0_vp);
             theme->textBackgroundFocus_ =  buttonPattern->GetAttr<Color>("focus_bg_text", Color());
             ParseSubStylePattern(buttonPattern, theme);
         }
@@ -139,14 +139,14 @@ public:
                 ButtonStyleMode::EMPHASIZE, buttonPattern->GetAttr<Color>("emphasize_button_text_color", Color())));
             theme->textColorMap_.insert(
                 std::pair<ButtonStyleMode, Color>(ButtonStyleMode::NORMAL, theme->normalTextColor_));
-            theme->textColorMap_.insert(
-                std::pair<ButtonStyleMode, Color>(ButtonStyleMode::TEXT, buttonPattern->GetAttr<Color>("text_button_text_color", Color())));
+            theme->textColorMap_.insert(std::pair<ButtonStyleMode, Color>(
+                ButtonStyleMode::TEXT, buttonPattern->GetAttr<Color>("text_button_text_color", Color())));
+            theme->focusTextColorMap_.insert(std::pair<ButtonStyleMode, Color>(ButtonStyleMode::EMPHASIZE,
+                buttonPattern->GetAttr<Color>("emphasize_button_text_focus_color", Color())));
             theme->focusTextColorMap_.insert(std::pair<ButtonStyleMode, Color>(
-                ButtonStyleMode::EMPHASIZE, buttonPattern->GetAttr<Color>("emphasize_button_text_focus_color", Color())));
-            theme->focusTextColorMap_.insert(
-                std::pair<ButtonStyleMode, Color>(ButtonStyleMode::NORMAL,  buttonPattern->GetAttr<Color>("normal_button_text_focus_color", Color())));
-            theme->focusTextColorMap_.insert(
-                std::pair<ButtonStyleMode, Color>(ButtonStyleMode::TEXT, buttonPattern->GetAttr<Color>("text_button_text_focus_color", Color())));
+                ButtonStyleMode::NORMAL, buttonPattern->GetAttr<Color>("normal_button_text_focus_color", Color())));
+            theme->focusTextColorMap_.insert(std::pair<ButtonStyleMode, Color>(
+                ButtonStyleMode::TEXT, buttonPattern->GetAttr<Color>("text_button_text_focus_color", Color())));
             theme->textColorByRoleMap_.insert(
                 std::pair<ButtonRole, Color>(ButtonRole::NORMAL, theme->normalTextColor_));
             theme->textColorByRoleMap_.insert(
@@ -400,16 +400,16 @@ public:
     {
         auto roleResult = textColorByRoleMap_.find(buttonRole);
         auto result = focusTextColorMap_.find(buttonStyle);
-        if (roleResult != textColorByRoleMap_.end() && result != focusTextColorMap_.end()) {
-            if (buttonRole == ButtonRole::ERROR) {
-                if (buttonStyle == ButtonStyleMode::EMPHASIZE) {
-                    return result->second;
-                }
-                return roleResult->second;
-            }
-            return result->second;
+        if (roleResult == textColorByRoleMap_.end() && result == focusTextColorMap_.end()) {
+            return normalTextColor_;
         }
-        return normalTextColor_;
+        if (buttonRole == ButtonRole::ERROR) {
+            if (buttonStyle == ButtonStyleMode::EMPHASIZE) {
+                return result->second;
+            }
+            return roleResult->second;
+        }
+        return result->second;
     }
 
     const Dimension& GetHeight(ControlSize controlSize) const
@@ -446,7 +446,7 @@ public:
 
     const Dimension& GetPaddingText() const
     {
-        return pddingText_;
+        return paddingText_;
     }
 
     const Color& GetBorderColorSmall() const
@@ -501,7 +501,7 @@ private:
     Dimension borderWidth_;
     Dimension downloadHeight_;
     Dimension borderWidthSmall_;
-    Dimension pddingText_;
+    Dimension paddingText_;
     std::unordered_map<ButtonRole, std::unordered_map<ButtonStyleMode, Color>> bgColorMap_;
     std::unordered_map<ButtonRole, Color> textColorByRoleMap_;
     std::unordered_map<ButtonStyleMode, Color> textColorMap_;

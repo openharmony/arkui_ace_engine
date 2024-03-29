@@ -318,8 +318,10 @@ protected:
     void HandleEnabled();
     void InitButtonLabel();
     void InitFocusEvent();
-    void HandleFocusEvent();
-    void HandleBlurEvent();
+    void HandleFocusEvent(RefPtr<ButtonLayoutProperty>,
+        RefPtr<RenderContext>, RefPtr<ButtonTheme>, RefPtr<TextLayoutProperty>, RefPtr<FrameNode>);
+    void HandleBlurEvent(RefPtr<ButtonLayoutProperty>,
+        RefPtr<RenderContext>, RefPtr<ButtonTheme>, RefPtr<TextLayoutProperty>, RefPtr<FrameNode>);
     void AnimateTouchAndHover(RefPtr<RenderContext>& renderContext, int32_t typeFrom, int32_t typeTo, int32_t duration,
         const RefPtr<Curve>& curve);
     Color clickedColor_;
@@ -354,6 +356,8 @@ private:
     bool focusEventInitialized_ = false;
     bool focusTextColorModify_ = false;
     bool bgColorModify_ = false;
+    bool scaleModify_ = false;
+    bool shadowModify_ = false;
 };
 } // namespace OHOS::Ace::NG
 
