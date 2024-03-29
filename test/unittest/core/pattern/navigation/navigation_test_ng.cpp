@@ -3805,7 +3805,7 @@ HWTEST_F(NavigationTestNg, NavigationInterceptionTest005, TestSize.Level1)
     EXPECT_NE(navigationPattern, nullptr);
     auto mockStack = AceType::DynamicCast<MockNavigationStack>(navigationPattern->GetNavigationStack());
     EXPECT_NE(mockStack, nullptr);
-    
+
     mockStack->SetInterceptionModeCallback([](NavigationMode mode) {
         EXPECT_EQ(mode, NavigationMode::SPLIT);
     });
@@ -5429,7 +5429,7 @@ HWTEST_F(NavigationTestNg, UpdateNavDestinationVisibility002, TestSize.Level1)
         "navDestinationNode", 201, []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
     int32_t index = 0;
     size_t destinationSize = 1;
-    
+
     EXPECT_NE(navDestinationNode->GetEventHub<NavDestinationEventHub>(), nullptr);
     EXPECT_EQ(index, static_cast<int32_t>(destinationSize) - 1);
     EXPECT_TRUE(CheckNeedMeasure(navDestinationNode->GetLayoutProperty()->GetPropertyChangeFlag()));
@@ -5460,7 +5460,7 @@ HWTEST_F(NavigationTestNg, UpdateNavDestinationVisibility003, TestSize.Level1)
     size_t destinationSize = 1;
     // Make hasChanged false
     navDestinationNode->GetLayoutProperty()->propertyChangeFlag_ = PROPERTY_UPDATE_NORMAL;
-    
+
     EXPECT_NE(navDestinationNode->GetEventHub<NavDestinationEventHub>(), nullptr);
     EXPECT_EQ(index, static_cast<int32_t>(destinationSize) - 1);
     EXPECT_FALSE(CheckNeedMeasure(navDestinationNode->GetLayoutProperty()->GetPropertyChangeFlag()));

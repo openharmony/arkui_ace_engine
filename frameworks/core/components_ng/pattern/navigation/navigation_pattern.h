@@ -112,17 +112,20 @@ public:
     // use for navRouter case
     void AddNavDestinationNode(const std::string& name, const RefPtr<UINode>& navDestinationNode)
     {
+        addByNavRouter_ = true;
         navigationStack_->Add(name, navDestinationNode);
     }
 
     void AddNavDestinationNode(const std::string& name, const RefPtr<UINode>& navDestinationNode, NavRouteMode mode)
     {
+        addByNavRouter_ = true;
         navigationStack_->Add(name, navDestinationNode, mode);
     }
 
     void AddNavDestinationNode(const std::string& name, const RefPtr<UINode>& navDestinationNode, NavRouteMode mode,
         const RefPtr<RouteInfo>& routeInfo)
     {
+        addByNavRouter_ = true;
         navigationStack_->Add(name, navDestinationNode, mode, routeInfo);
     }
 
@@ -414,6 +417,7 @@ private:
     RefPtr<DragEvent> dragEvent_;
     RefPtr<NavigationTransitionProxy> currentProxy_;
     RectF dragRect_;
+    bool addByNavRouter_ = false;
     bool ifNeedInit_ = true;
     float preNavBarWidth_ = 0.0f;
     float realNavBarWidth_ = DEFAULT_NAV_BAR_WIDTH.ConvertToPx();
