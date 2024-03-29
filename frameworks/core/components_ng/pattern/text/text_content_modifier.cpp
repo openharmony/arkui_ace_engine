@@ -70,7 +70,7 @@ TextContentModifier::TextContentModifier(const std::optional<TextStyle>& textSty
 
     racePercentFloat_ = MakeRefPtr<AnimatablePropertyFloat>(0.0f);
     AttachProperty(racePercentFloat_);
-    clip_ = MakeRefPtr<PropertyBool>(true);
+    clip_ = MakeRefPtr<PropertyBool>(false);
     AttachProperty(clip_);
     fontFamilyString_ = MakeRefPtr<PropertyString>("");
     AttachProperty(fontFamilyString_);

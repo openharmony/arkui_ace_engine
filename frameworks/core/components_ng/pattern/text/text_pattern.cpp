@@ -68,13 +68,6 @@ const std::wstring WIDE_NEWLINE = StringUtils::ToWstring(NEWLINE);
 
 void TextPattern::OnAttachToFrameNode()
 {
-    auto pipeline = PipelineContext::GetCurrentContextSafely();
-    CHECK_NULL_VOID(pipeline);
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    if (pipeline->GetMinPlatformVersion() > API_PROTEXTION_GREATER_NINE) {
-        host->GetRenderContext()->UpdateClipEdge(true);
-    }
     InitSurfaceChangedCallback();
     InitSurfacePositionChangedCallback();
     auto textLayoutProperty = GetLayoutProperty<TextLayoutProperty>();
@@ -305,7 +298,7 @@ void TextPattern::OnHandleMove(const RectF& handleRect, bool isFirstHandle)
 
     auto renderContext = host->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
-    if (renderContext->GetClipEdge().value_or(true)) {
+    if (renderContext->GetClipEdge().value_or(false)) {
         if (localOffset.GetX() < textContentGlobalOffset.GetX()) {
             localOffset.SetX(textContentGlobalOffset.GetX());
         } else if (GreatOrEqual(localOffset.GetX(), textContentGlobalOffset.GetX() + contentRect_.Width())) {
@@ -610,7 +603,7 @@ bool TextPattern::CheckClickedOnSpanOrText(RectF textContentRect, const Offset& 
     CHECK_NULL_RETURN(host, false);
     PointF textOffset = { static_cast<float>(localLocation.GetX()) - textContentRect.GetX(),
         static_cast<float>(localLocation.GetY()) - textContentRect.GetY() };
-    if (renderContext->GetClipEdge().has_value() && !renderContext->GetClipEdge().value() && overlayMod_) {
+    if (!renderContext->GetClipEdge().value_or(false) && overlayMod_) {
         textContentRect = overlayMod_->GetBoundsRect();
         textContentRect.SetTop(contentRect_.GetY() - std::min(baselineOffset_, 0.0f));
     }
@@ -2527,7 +2520,7 @@ RefPtr<NodePaintMethod> TextPattern::CreateNodePaintMethod()
     CHECK_NULL_RETURN(host, paintMethod);
     auto context = host->GetRenderContext();
     CHECK_NULL_RETURN(context, paintMethod);
-    if (context->GetClipEdge().has_value()) {
+    if (!context->GetClipEdge().value_or(false)) {
         auto geometryNode = host->GetGeometryNode();
         auto frameSize = geometryNode->GetFrameSize();
         CHECK_NULL_RETURN(paragraph_, paintMethod);
@@ -2539,8 +2532,8 @@ RefPtr<NodePaintMethod> TextPattern::CreateNodePaintMethod()
         boundsRect.SetHeight(boundsHeight);
         ProcessBoundRectByTextShadow(boundsRect);
         ProcessBoundRectByTextMarquee(boundsRect);
-        if (!context->GetClipEdge().value() && (LessNotEqual(frameSize.Width(), boundsRect.Width()) ||
-                                                   LessNotEqual(frameSize.Height(), boundsRect.Height()))) {
+        if ((LessNotEqual(frameSize.Width(), boundsRect.Width()) ||
+                LessNotEqual(frameSize.Height(), boundsRect.Height()))) {
             boundsWidth = std::max(frameSize.Width(), boundsRect.Width());
             boundsHeight = std::max(frameSize.Height(), boundsRect.Height());
             boundsRect.SetWidth(boundsWidth);
