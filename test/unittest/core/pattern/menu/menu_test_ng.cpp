@@ -7822,12 +7822,12 @@ HWTEST_F(MenuTestNg, SubMenuLayoutAlgorithmTestNg002, TestSize.Level1)
      */
     algorithm->hierarchicalParameters_ = true;
     auto selectTheme = MockPipelineContext::GetCurrent()->GetTheme<SelectTheme>();
-    selectTheme->outPadding_ = 10.0_vp;
+    selectTheme->menuMediumMargin_ = 10.0_vp;
     algorithm->InitializePaddingAPI11(wrapper);
     ASSERT_EQ(algorithm->paddingStart_, 10.0f);
     ASSERT_EQ(algorithm->paddingEnd_, 10.0f);
-    ASSERT_EQ(algorithm->paddingTop_, 10.0f);
-    ASSERT_EQ(algorithm->paddingBottom_, 10.0f);
+    ASSERT_EQ(algorithm->paddingTop_, 0.0f);
+    ASSERT_EQ(algorithm->paddingBottom_, 0.0f);
 }
 
 /**
@@ -7899,15 +7899,12 @@ HWTEST_F(MenuTestNg, SubMenuLayoutAlgorithmTestNg003, TestSize.Level1)
      */
     algorithm->hierarchicalParameters_ = false;
     auto selectTheme = MockPipelineContext::GetCurrent()->GetTheme<SelectTheme>();
-    selectTheme->maxPaddingStart_ = 10.0_vp;
-    selectTheme->maxPaddingEnd_ = 10.0_vp;
-    selectTheme->defaultPaddingTop_ = 10.0_vp;
-    selectTheme->defaultPaddingBottomFixed_ = 10.0_vp;
+    selectTheme->menuLargeMargin_ = 10.0_vp;
     algorithm->InitializePaddingAPI11(wrapper);
     ASSERT_EQ(algorithm->paddingStart_, 10.0f);
     ASSERT_EQ(algorithm->paddingEnd_, 10.0f);
-    ASSERT_EQ(algorithm->paddingTop_, 10.0f);
-    ASSERT_EQ(algorithm->paddingBottom_, 10.0f);
+    ASSERT_EQ(algorithm->paddingTop_, 0.0f);
+    ASSERT_EQ(algorithm->paddingBottom_, 0.0f);
 }
 
 /**
@@ -8216,12 +8213,12 @@ HWTEST_F(MenuTestNg, MenuLayoutAlgorithmAPI11PaddingTest1, TestSize.Level1)
      */
     algorithm->hierarchicalParameters_ = true;
     auto selectTheme = MockPipelineContext::GetCurrent()->GetTheme<SelectTheme>();
-    selectTheme->outPadding_ = 10.0_vp;
+    selectTheme->menuMediumMargin_ = 10.0_vp;
     algorithm->InitializePaddingAPI11(wrapper);
     ASSERT_EQ(algorithm->paddingStart_, 10.0f);
     ASSERT_EQ(algorithm->paddingEnd_, 10.0f);
-    ASSERT_EQ(algorithm->paddingTop_, 10.0f);
-    ASSERT_EQ(algorithm->paddingBottom_, 10.0f);
+    ASSERT_EQ(algorithm->paddingTop_, 0.0f);
+    ASSERT_EQ(algorithm->paddingBottom_, 0.0f);
 }
 /**
  * @tc.name: MenuLayoutAlgorithmAPI11PaddingTest2
@@ -8285,12 +8282,13 @@ HWTEST_F(MenuTestNg, MenuLayoutAlgorithmAPI11PaddingTest2, TestSize.Level1)
     algorithm->hierarchicalParameters_ = false;
     auto selectTheme = MockPipelineContext::GetCurrent()->GetTheme<SelectTheme>();
     selectTheme->outPadding_ = 10.0_vp;
+    selectTheme->menuLargeMargin_ = 10.0_vp;
     algorithm->InitializePaddingAPI11(wrapper);
     ASSERT_EQ(algorithm->optionPadding_, 10.0f);
-    ASSERT_EQ(algorithm->paddingStart_, static_cast<float>(theme->GetMaxPaddingStart().ConvertToPx()));
-    ASSERT_EQ(algorithm->paddingEnd_, static_cast<float>(theme->GetMaxPaddingEnd().ConvertToPx()));
-    ASSERT_EQ(algorithm->paddingTop_, static_cast<float>(theme->GetDefaultPaddingTop().ConvertToPx()));
-    ASSERT_EQ(algorithm->paddingBottom_, static_cast<float>(theme->GetDefaultPaddingBottomFixed().ConvertToPx()));
+    ASSERT_EQ(algorithm->paddingStart_, 10.0f);
+    ASSERT_EQ(algorithm->paddingEnd_, 10.0f);
+    ASSERT_EQ(algorithm->paddingTop_, 0.0f);
+    ASSERT_EQ(algorithm->paddingBottom_, 0.0f);
 }
 /**
  * @tc.name: MenuLayoutAlgorithmAvoidWithPreview
