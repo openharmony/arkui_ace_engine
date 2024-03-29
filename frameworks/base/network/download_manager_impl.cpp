@@ -45,7 +45,7 @@ namespace {
 constexpr int32_t MAXIMUM_WAITING_PERIOD = 2800;
 
 #define PRINT_LOG(level, fmt, ...) \
-    HILOG_IMPL(LOG_CORE, LOG_##level, 0xC0393A, "DownloadManager", "[%{public}s:%{public}d]" fmt, \
+    HILOG_IMPL(LOG_CORE, LOG_##level, 0xD00393A, "DownloadManager", "[%{public}s:%{public}d]" fmt, \
         __FUNCTION__, __LINE__, ##__VA_ARGS__)
 
 #define LOGE(fmt, ...) PRINT_LOG(ERROR, fmt, ##__VA_ARGS__)
@@ -138,7 +138,8 @@ public:
         auto task = session.CreateTask(httpReq);
         task->OnSuccess([successCallback = std::move(downloadCallback.successCallback), instanceId](
                             const NetStackRequest& request, const NetStackResponse& response) {
-            LOGI("Async http task of url [%{private}s] success", request.GetURL().c_str());
+            LOGI("Async http task of url [%{private}s] success, the responseCode = %d", request.GetURL().c_str(),
+                response.GetResponseCode());
             successCallback(std::move(response.GetResult()), true, instanceId);
         });
         task->OnCancel([cancelCallback = std::move(downloadCallback.cancelCallback), instanceId](
@@ -182,7 +183,8 @@ public:
         auto task = session.CreateTask(httpReq);
         std::shared_ptr<DownloadCondition> downloadCondition = std::make_shared<DownloadCondition>();
         task->OnSuccess([downloadCondition](const NetStackRequest& request, const NetStackResponse& response) {
-            LOGI("Sync Http task of url [%{private}s] success", request.GetURL().c_str());
+            LOGI("Sync http task of url [%{private}s] success, the responseCode = %d", request.GetURL().c_str(),
+                response.GetResponseCode());
             {
                 std::unique_lock<std::mutex> taskLock(downloadCondition->downloadMutex);
                 downloadCondition->downloadSuccess = true;
