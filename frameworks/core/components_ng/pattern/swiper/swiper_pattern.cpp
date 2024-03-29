@@ -1352,7 +1352,6 @@ void SwiperPattern::ShowNext()
         return;
     }
     StopAutoPlay();
-    StopTranslateAnimation();
 
     StopSpringAnimationAndFlushImmediately();
     StopFadeAnimation();
@@ -1408,7 +1407,6 @@ void SwiperPattern::ShowPrevious()
         return;
     }
     StopAutoPlay();
-    StopTranslateAnimation();
     StopSpringAnimationAndFlushImmediately();
     StopFadeAnimation();
     StopIndicatorAnimation();
@@ -1462,7 +1460,10 @@ void SwiperPattern::ChangeIndex(int32_t index, bool useAnimation)
 
 void SwiperPattern::FinishAnimation()
 {
-    StopTranslateAnimation();
+    if (translateAnimationIsRunning_) {
+        isFinishAnimation_ = true;
+        StopTranslateAnimation();
+    }
     StopSpringAnimation();
     StopFadeAnimation();
     StopIndicatorAnimation();
