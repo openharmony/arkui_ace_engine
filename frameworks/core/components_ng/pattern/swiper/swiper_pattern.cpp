@@ -273,7 +273,6 @@ void SwiperPattern::InitCapture()
 
 void SwiperPattern::OnModifyDone()
 {
-    currentOffset_ = 0.0f;
     Pattern::OnModifyDone();
     auto host = GetHost();
     CHECK_NULL_VOID(host);
@@ -416,6 +415,10 @@ void SwiperPattern::BeforeCreateLayoutWrapper()
             jumpIndex_ = 0;
         }
         targetIndex_.reset();
+        StopAutoPlay();
+        StopTranslateAnimation();
+        StopFadeAnimation();
+        StopSpringAnimation();
         if (usePropertyAnimation_) {
             StopPropertyTranslateAnimation(false, true);
             currentDelta_ = 0.0f;
