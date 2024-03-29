@@ -24,6 +24,7 @@
 namespace OHOS::Ace {
 
 constexpr int32_t ROTATION_DIVISOR = 64;
+constexpr int8_t ACTION_POINT = 1;
 
 struct alignas(8) AceActionData {
     enum class ActionType : int64_t {
@@ -48,6 +49,7 @@ struct alignas(8) AceActionData {
     double size = 0.0;
     int64_t sourceDevice = 0;
     int64_t sourceDeviceId = 0;
+    int8_t actionPoint = 0;
 };
 
 struct alignas(8) AceMouseData {
@@ -89,9 +91,10 @@ struct alignas(8) AceMouseData {
 
 void ConvertTouchEvent(const std::vector<uint8_t>& data, std::vector<TouchEvent>& events);
 
-void SetTouchEventType(AceActionData::ActionType actionType, TouchEvent& point, std::vector<TouchEvent>& events);
+void SetTouchEventType(AceActionData::ActionType actionType, int8_t actionPoint,
+                       TouchEvent& point, std::vector<TouchEvent>& events, std::vector<TouchEvent>& allEvents);
 
-void UpdateTouchEvent(std::vector<TouchEvent>& events);
+void UpdateTouchEvent(std::vector<TouchEvent>& events, std::vector<TouchEvent>& allEvents);
 
 void ConvertMouseEvent(const std::vector<uint8_t>& data, MouseEvent& events);
 
