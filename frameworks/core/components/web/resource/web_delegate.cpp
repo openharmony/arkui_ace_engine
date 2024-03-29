@@ -2826,7 +2826,8 @@ void WebDelegate::Resize(const double& width, const double& height, bool isKeybo
 
 
 void WebDelegate::DragResize(const double& width, const double& height,
-                             const double& pre_height, const double& pre_width) {
+                             const double& pre_height, const double& pre_width)
+{
     if (width <= 0 || height <= 0) {
         return;
     }
@@ -2850,12 +2851,14 @@ void WebDelegate::DragResize(const double& width, const double& height,
         TaskExecutor::TaskType::PLATFORM);
 }
 
-void WebDelegate::UpdateSmoothDragResizeEnabled(bool isSmoothDragResizeEnabled) {
+void WebDelegate::UpdateSmoothDragResizeEnabled(bool isSmoothDragResizeEnabled)
+{
     TAG_LOGI(AceLogTag::ACE_WEB, "======= web_delegate drag smooth param = %{public}d", isSmoothDragResizeEnabled);
     isSmoothDragResizeEnabled_ = isSmoothDragResizeEnabled;
 }
 
-bool WebDelegate::GetIsSmoothDragResizeEnabled() {
+bool WebDelegate::GetIsSmoothDragResizeEnabled()
+{
     return isSmoothDragResizeEnabled_;
 }
 
