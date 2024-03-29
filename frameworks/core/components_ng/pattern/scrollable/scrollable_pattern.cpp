@@ -95,11 +95,11 @@ void ScrollablePattern::SetAxis(Axis axis)
     }
     axis_ = axis;
     if (scrollBar_) {
-        scrollBar_->SetPositionMode(axis_ == Axis::HORIZONTAL ? PositionMode::BOTTOM : PositionMode::RIGHT);
-    }
-    if (scrollBarOverlayModifier_) {
-        scrollBarOverlayModifier_->SetPositionMode(
-            axis_ == Axis::HORIZONTAL ? PositionMode::BOTTOM : PositionMode::RIGHT);
+        auto positionMode = GetPositionMode();
+        scrollBar_->SetPositionMode(positionMode);
+        if (scrollBarOverlayModifier_) {
+            scrollBarOverlayModifier_->SetPositionMode(positionMode);
+        }
     }
     auto gestureHub = GetGestureHub();
     CHECK_NULL_VOID(gestureHub);
@@ -389,7 +389,7 @@ void ScrollablePattern::AddScrollEvent()
     };
     auto scrollable = MakeRefPtr<Scrollable>(std::move(scrollCallback), GetAxis());
     scrollable->SetNodeId(host->GetAccessibilityId());
-    scrollable->Initialize(host->GetContext());
+    scrollable->Initialize(host->GetContextRefPtr());
     AttachAnimatableProperty(scrollable);
 
     // move HandleScroll and HandleOverScroll to ScrollablePattern by setting callbacks to scrollable
@@ -717,17 +717,15 @@ void ScrollablePattern::SetScrollBar(DisplayMode displayMode)
     DisplayMode oldDisplayMode = DisplayMode::OFF;
     if (!scrollBar_) {
         scrollBar_ = AceType::MakeRefPtr<ScrollBar>();
-        // set the scroll bar style
-        if (GetAxis() == Axis::HORIZONTAL) {
-            scrollBar_->SetPositionMode(PositionMode::BOTTOM);
-            if (scrollBarOverlayModifier_) {
-                scrollBarOverlayModifier_->SetPositionMode(PositionMode::BOTTOM);
-            }
-        }
         RegisterScrollBarEventTask();
-        host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
     } else {
         oldDisplayMode = scrollBar_->GetDisplayMode();
+    }
+    // set the scroll bar style
+    auto positionMode = GetPositionMode();
+    scrollBar_->SetPositionMode(positionMode);
+    if (scrollBarOverlayModifier_) {
+        scrollBarOverlayModifier_->SetPositionMode(positionMode);
     }
 
     if (oldDisplayMode != displayMode) {
@@ -1845,7 +1843,7 @@ ScrollResult ScrollablePattern::HandleScroll(float offset, int32_t source, Neste
 
 bool ScrollablePattern::HandleScrollVelocity(float velocity)
 {
-    if ((velocity > 0 && !IsAtTop()) || (velocity < 0 && !IsAtBottom())) {
+    if (!OutBoundaryCallback()) {
         // trigger scroll animation if edge not reached
         if (scrollableEvent_ && scrollableEvent_->GetScrollable()) {
             scrollableEvent_->GetScrollable()->StartScrollAnimation(0.0f, velocity);
@@ -2443,6 +2441,22 @@ void ScrollablePattern::PrintOffsetLog(AceLogTag tag, int32_t id, double finalOf
         TAG_LOGD(tag, "Scrollable id:%{public}d, scrollSource:%{public}d, scrollOffset:%{public}f",
             id, scrollSource_, finalOffset);
     }
+}
+
+PositionMode ScrollablePattern::GetPositionMode()
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, PositionMode::RIGHT);
+    auto positionMode = PositionMode::RIGHT;
+    if (axis_ == Axis::HORIZONTAL) {
+        positionMode = PositionMode::BOTTOM;
+    } else {
+        auto isRtl = host->GetLayoutProperty()->GetNonAutoLayoutDirection() == TextDirection::RTL;
+        if (isRtl) {
+            positionMode = PositionMode::LEFT;
+        }
+    }
+    return positionMode;
 }
 
 void ScrollablePattern::ScrollAtFixedVelocity(float velocity)

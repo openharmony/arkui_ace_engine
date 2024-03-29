@@ -288,7 +288,7 @@ public:
         return type;
     }
 
-    static void PostTask(std::function<void()>&& task, TaskExecutor::TaskType taskType = TaskExecutor::TaskType::UI);
+    void PostIdleTask(std::function<void(int64_t deadline, bool canUseLongPredictTask)>&& task);
 
     void AddJudgeToTargetComponent(RefPtr<TargetComponent>& targetComponent);
 

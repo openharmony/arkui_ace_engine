@@ -2063,6 +2063,48 @@ void ViewAbstract::SetOverlay(const OverlayOptions &overlay)
     ACE_UPDATE_RENDER_CONTEXT(OverlayText, overlay);
 }
 
+void ViewAbstract::SetOverlayBuilder(std::function<void()>&& buildFunc,
+    const std::optional<Alignment>& align, const std::optional<Dimension>& offsetX,
+    const std::optional<Dimension>& offsetY)
+{
+    if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
+        return;
+    }
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    if (buildFunc) {
+        auto overlayNode = frameNode->GetOverlayNode();
+        if (!overlayNode) {
+            auto buildNodeFunc = [buildFunc]() -> RefPtr<UINode> {
+                ScopedViewStackProcessor builderViewStackProcessor;
+                buildFunc();
+                auto customNode = ViewStackProcessor::GetInstance()->Finish();
+                return customNode;
+            };
+            overlayNode = AceType::DynamicCast<FrameNode>(buildNodeFunc());
+            CHECK_NULL_VOID(overlayNode);
+            frameNode->SetOverlayNode(overlayNode);
+            overlayNode->SetParent(AceType::WeakClaim(frameNode));
+            overlayNode->SetActive(true);
+        }
+        overlayNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+        auto layoutProperty = AceType::DynamicCast<LayoutProperty>(overlayNode->GetLayoutProperty());
+        CHECK_NULL_VOID(layoutProperty);
+        layoutProperty->SetIsOverlayNode(true);
+        layoutProperty->UpdateMeasureType(MeasureType::MATCH_PARENT);
+        layoutProperty->UpdateAlignment(align.value_or(Alignment::TOP_LEFT));
+        layoutProperty->SetOverlayOffset(offsetX, offsetY);
+        auto renderContext = overlayNode->GetRenderContext();
+        CHECK_NULL_VOID(renderContext);
+        renderContext->UpdateZIndex(INT32_MAX);
+        auto focusHub = overlayNode->GetOrCreateFocusHub();
+        CHECK_NULL_VOID(focusHub);
+        focusHub->SetFocusable(false);
+    } else {
+        frameNode->SetOverlayNode(nullptr);
+    }
+}
+
 void ViewAbstract::SetMotionPath(const MotionPathOption &motionPath)
 {
     if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {

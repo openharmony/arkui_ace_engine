@@ -273,7 +273,6 @@ void SwiperPattern::InitCapture()
 
 void SwiperPattern::OnModifyDone()
 {
-    currentOffset_ = 0.0f;
     Pattern::OnModifyDone();
     auto host = GetHost();
     CHECK_NULL_VOID(host);
@@ -416,6 +415,10 @@ void SwiperPattern::BeforeCreateLayoutWrapper()
             jumpIndex_ = 0;
         }
         targetIndex_.reset();
+        StopAutoPlay();
+        StopTranslateAnimation();
+        StopFadeAnimation();
+        StopSpringAnimation();
         if (usePropertyAnimation_) {
             StopPropertyTranslateAnimation(false, true);
             currentDelta_ = 0.0f;
@@ -510,7 +513,7 @@ void SwiperPattern::InitSurfaceChangedCallback()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto pipeline = host->GetContext();
+    auto pipeline = host->GetContextRefPtr();
     CHECK_NULL_VOID(pipeline);
     if (!HasSurfaceChangedCallback()) {
         auto callbackId = pipeline->RegisterSurfaceChangedCallback(
@@ -1352,7 +1355,6 @@ void SwiperPattern::ShowNext()
         return;
     }
     StopAutoPlay();
-    StopTranslateAnimation();
 
     StopSpringAnimationAndFlushImmediately();
     StopFadeAnimation();
@@ -1408,7 +1410,6 @@ void SwiperPattern::ShowPrevious()
         return;
     }
     StopAutoPlay();
-    StopTranslateAnimation();
     StopSpringAnimationAndFlushImmediately();
     StopFadeAnimation();
     StopIndicatorAnimation();
@@ -1462,7 +1463,10 @@ void SwiperPattern::ChangeIndex(int32_t index, bool useAnimation)
 
 void SwiperPattern::FinishAnimation()
 {
-    StopTranslateAnimation();
+    if (translateAnimationIsRunning_) {
+        isFinishAnimation_ = true;
+        StopTranslateAnimation();
+    }
     StopSpringAnimation();
     StopFadeAnimation();
     StopIndicatorAnimation();
@@ -2257,7 +2261,6 @@ void SwiperPattern::HandleTouchDown(const TouchLocationInfo& locationInfo)
 
     AnimationUtils::PauseAnimation(springAnimation_);
     if (springAnimationIsRunning_) {
-        isTouchDownSpringAnimation_ = true;
         springAnimationIsRunning_ = false;
     }
 
@@ -2278,8 +2281,7 @@ void SwiperPattern::HandleTouchUp()
         UpdateAnimationProperty(0.0);
     }
 
-    if (!springAnimationIsRunning_ && isTouchDownSpringAnimation_) {
-        isTouchDownSpringAnimation_ = false;
+    if (!springAnimationIsRunning_) {
         springAnimationIsRunning_ = true;
         AnimationUtils::ResumeAnimation(springAnimation_);
     }
@@ -3076,7 +3078,6 @@ void SwiperPattern::PlaySpringAnimation(double dragVelocity)
             auto swiperPattern = weak.Upgrade();
             CHECK_NULL_VOID(swiperPattern);
             swiperPattern->springAnimationIsRunning_ = false;
-            swiperPattern->isTouchDownSpringAnimation_ = false;
             swiperPattern->OnSpringAndFadeAnimationFinish();
         });
 }

@@ -501,7 +501,10 @@ public:
 
     void SetReverse(bool reverse)
     {
-        isReverse_ = reverse;
+        if (isReverse_ != reverse) {
+            isReverse_ = reverse;
+            isReverseUpdate_ = true;
+        }
     }
 
     bool IsReverse()
@@ -598,6 +601,7 @@ private:
     bool isUserNormalWidth_ = false;
     bool needAdaptAnimation_ = false;
     bool isReverse_ = false;
+    bool isReverseUpdate_ = false;
 
     Offset paintOffset_;
     Size viewPortSize_;

@@ -689,6 +689,7 @@ private:
     bool isFocus_ = false;
     VkState isVirtualKeyBoardShow_ { VkState::VK_NONE };
     bool isDragging_ = false;
+    bool isDisableSlide_ = false;
     bool isW3cDragEvent_ = false;
     bool isWindowShow_ = true;
     bool isActive_ = true;

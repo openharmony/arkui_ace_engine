@@ -56,6 +56,7 @@
 #include "adapter/ohos/osal/page_url_checker_ohos.h"
 #include "adapter/ohos/osal/pixel_map_ohos.h"
 #include "adapter/ohos/osal/view_data_wrap_ohos.h"
+#include "adapter/ohos/osal/navigation_route_ohos.h"
 #include "base/geometry/rect.h"
 #include "base/i18n/localization.h"
 #include "base/log/ace_checker.h"
@@ -1439,6 +1440,7 @@ UIContentErrorCode UIContentImpl::CommonInitialize(
     container->SetToken(token);
     container->SetParentToken(parentToken_);
     container->SetPageUrlChecker(AceType::MakeRefPtr<PageUrlCheckerOhos>(context, info));
+    container->SetNavigationRoute(AceType::MakeRefPtr<NavigationRouteOhos>(context->GetBundleName()));
     // Mark the relationship between windowId and containerId, it is 1:1
     SubwindowManager::GetInstance()->AddContainerId(window->GetWindowId(), instanceId_);
     AceEngine::Get().AddContainer(instanceId_, container);

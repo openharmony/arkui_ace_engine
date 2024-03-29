@@ -382,7 +382,7 @@ FrameNode::~FrameNode()
     if (eventHub_) {
         eventHub_->ClearOnAreaChangedInnerCallbacks();
     }
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = GetContext();
     if (pipeline) {
         pipeline->RemoveOnAreaChangeNode(GetId());
         pipeline->RemoveVisibleAreaChangeNode(GetId());
@@ -507,7 +507,7 @@ void FrameNode::DumpSafeAreaInfo()
         DumpLog::GetInstance().AddDesc(layoutProperty_->GetSafeAreaInsets()->ToString());
     }
     CHECK_NULL_VOID(GetTag() == V2::PAGE_ETS_TAG);
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = GetContext();
     CHECK_NULL_VOID(pipeline);
     auto manager = pipeline->GetSafeAreaManager();
     CHECK_NULL_VOID(manager);
@@ -594,6 +594,7 @@ void FrameNode::DumpDragInfo()
         std::string("DragPreview: Has customNode: ").append(dragPreviewInfo_.customNode ? "YES" : "NO");
     dragPreviewStr.append(" Has pixelMap: ").append(dragPreviewInfo_.pixelMap ? "YES" : "NO");
     dragPreviewStr.append(" extraInfo: ").append(dragPreviewInfo_.extraInfo.c_str());
+    dragPreviewStr.append(" inspectorId: ").append(dragPreviewInfo_.inspectorId.c_str());
     DumpLog::GetInstance().AddDesc(dragPreviewStr);
     DumpLog::GetInstance().AddDesc(
         std::string("DragPreviewMode: ")
@@ -976,7 +977,7 @@ void FrameNode::SwapDirtyLayoutWrapperOnMainThread(const RefPtr<LayoutWrapper>& 
     config.skipMeasure = layoutAlgorithmWrapper->SkipMeasure() || dirty->SkipMeasureContent();
     config.skipLayout = layoutAlgorithmWrapper->SkipLayout();
     if ((config.skipMeasure == false) && (config.skipLayout == false) && GetInspectorId().has_value()) {
-        auto pipeline = PipelineContext::GetCurrentContext();
+        auto pipeline = GetContext();
         CHECK_NULL_VOID(pipeline);
         pipeline->OnLayoutCompleted(GetInspectorId()->c_str());
     }
@@ -1516,11 +1517,11 @@ RefPtr<PaintWrapper> FrameNode::CreatePaintWrapper()
     return nullptr;
 }
 
-void FrameNode::PostTask(std::function<void()>&& task, TaskExecutor::TaskType taskType)
+void FrameNode::PostIdleTask(std::function<void(int64_t deadline, bool canUseLongPredictTask)>&& task)
 {
     auto context = GetContext();
     CHECK_NULL_VOID(context);
-    context->PostAsyncEvent(std::move(task), taskType);
+    context->AddPredictTask(std::move(task));
 }
 
 void FrameNode::UpdateLayoutConstraint(const MeasureProperty& calcLayoutConstraint)
@@ -1581,6 +1582,18 @@ void FrameNode::MarkModifyDone()
     }
     eventHub_->MarkModifyDone();
     renderContext_->OnModifyDone();
+#if (defined(aarch64) || defined(x86_64))
+    pipeline->AddAfterRenderTask(
+        weak =
+            WeakPtr(pattern_) {
+                if (Recorder::IsCacheAvaliable()) {
+                    auto pattern = weak.Upgrade();
+                    CHECK_NULL_VOID(pattern);
+                    pattern->OnAfterModifyDone();
+                }
+            },
+        TaskExecutor::TaskType::UI);
+#endif
 }
 
 void FrameNode::OnMountToParentDone()
@@ -2484,7 +2497,7 @@ void FrameNode::OnAccessibilityEvent(
         event.type = eventType;
         event.windowContentChangeTypes = windowsContentChangeType;
         event.nodeId = GetAccessibilityId();
-        auto pipeline = GetContext();
+        auto pipeline = PipelineContext::GetCurrentContext();
         CHECK_NULL_VOID(pipeline);
         pipeline->SendEventToAccessibility(event);
     }
@@ -2499,7 +2512,7 @@ void FrameNode::OnAccessibilityEvent(
         event.nodeId = GetAccessibilityId();
         event.beforeText = beforeText;
         event.latestContent = latestContent;
-        auto pipeline = GetContext();
+        auto pipeline = PipelineContext::GetCurrentContext();
         CHECK_NULL_VOID(pipeline);
         pipeline->SendEventToAccessibility(event);
     }
@@ -3057,7 +3070,7 @@ void FrameNode::Layout()
         GetLayoutAlgorithm()->SetSkipLayout();
     }
 
-    auto pipeline = PipelineContext::GetCurrentContextSafely();
+    auto pipeline = GetContext();
     CHECK_NULL_VOID(pipeline);
     bool isFocusOnPage = pipeline->CheckPageFocus();
     AvoidKeyboard(isFocusOnPage);
@@ -3071,13 +3084,20 @@ void FrameNode::Layout()
         frameNode->SyncGeometryNode(needSync);
     };
     pipeline->AddSyncGeometryNodeTask(task);
+    if (IsRootMeasureNode()) {
+        auto pipeline = PipelineContext::GetCurrentContext();
+        CHECK_NULL_VOID(pipeline);
+        auto safeAreaManager = pipeline->GetSafeAreaManager();
+        CHECK_NULL_VOID(safeAreaManager);
+        safeAreaManager->SetRootMeasureNodeId(GetId());
+    }
     // if a node has geo transition but not the root node, add task only but not flush
     // or add to expand list, self node will be added to expand list in next layout
     if (geometryTransition != nullptr && !IsRootMeasureNode()) {
         return;
     }
     if (SelfOrParentExpansive()) {
-        auto pipeline = PipelineContext::GetCurrentContext();
+        auto pipeline = GetContext();
         CHECK_NULL_VOID(pipeline);
         auto safeAreaManager = pipeline->GetSafeAreaManager();
         CHECK_NULL_VOID(safeAreaManager);
@@ -3155,7 +3175,7 @@ bool FrameNode::OnLayoutFinish(bool& needSyncRsNode)
     config.skipMeasure = layoutAlgorithmWrapper->SkipMeasure();
     config.skipLayout = layoutAlgorithmWrapper->SkipLayout();
     if (!config.skipMeasure && !config.skipLayout && GetInspectorId()) {
-        auto pipeline = PipelineContext::GetCurrentContext();
+        auto pipeline = GetContext();
         CHECK_NULL_RETURN(pipeline, false);
         pipeline->OnLayoutCompleted(GetInspectorId()->c_str());
     }
@@ -3429,13 +3449,14 @@ void FrameNode::OnInspectorIdUpdate(const std::string& id)
         if (exposureProcessor_) {
             return;
         }
-        PostTask(
-            [weak = WeakClaim(this), inspectorId = id]() {
+        auto* context = GetContext();
+        if (context) {
+            context->AddAfterRenderTask([weak = WeakClaim(this), inspectorId = id]() {
                 auto host = weak.Upgrade();
                 CHECK_NULL_VOID(host);
                 host->RecordExposureIfNeed(inspectorId);
-            },
-            TaskExecutor::TaskType::UI);
+            });
+        }
     }
     auto parent = GetAncestorNodeOfFrame();
     CHECK_NULL_VOID(parent);
@@ -3451,7 +3472,7 @@ void FrameNode::RecordExposureIfNeed(const std::string& inspectorId)
     if (!exposureProcessor_->IsNeedRecord()) {
         return;
     }
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = GetContext();
     CHECK_NULL_VOID(pipeline);
     auto callback = [weak = WeakClaim(RawPtr(exposureProcessor_)), weakNode = WeakClaim(this)](
                         bool visible, double ratio) {

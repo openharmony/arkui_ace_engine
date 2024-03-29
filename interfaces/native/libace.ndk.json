@@ -137,6 +137,30 @@
     },
     {
         "first_introduced": "12",
+        "name": "OH_ArkUI_SwipeGesture_GetAngle"
+    },
+    {
+        "first_introduced": "12",
+        "name": "OH_ArkUI_SwipeGesture_GetVelocity"
+    },
+    {
+        "first_introduced": "12",
+        "name": "OH_ArkUI_RotationGesture_GetAngle"
+    },
+    {
+        "first_introduced": "12",
+        "name": "OH_ArkUI_PinchGesture_GetScale"
+    },
+    {
+        "first_introduced": "12",
+        "name": "OH_ArkUI_PinchGesture_GetCenterX"
+    },
+    {
+        "first_introduced": "12",
+        "name": "OH_ArkUI_PinchGesture_GetCenterY"
+    },
+    {
+        "first_introduced": "12",
         "name": "OH_NativeXComponent_RegisterUIInputEventCallback"
     },
     {

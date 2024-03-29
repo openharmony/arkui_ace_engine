@@ -51,6 +51,8 @@ const char ATTRS_COMMON_ZINDEX[] = "zIndex";
 const char ROOT_ETS_TAG[] = "root";
 // stage view
 const char STAGE_ETS_TAG[] = "stage";
+// overlay view
+const char OVERLAY_ETS_TAG[] = "overlay";
 // page view
 const char PAGE_ETS_TAG[] = "page";
 // container modal view (title bar)

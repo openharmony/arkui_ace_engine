@@ -562,12 +562,25 @@ void DeclarativeFrontend::InitializeFrontendDelegate(const RefPtr<TaskExecutor>&
             }
             return jsEngine->SearchRouterRegisterMap(pageName);
         };
+        auto navigationLoadCallback = [weakEngine = WeakPtr<Framework::JsEngine>(jsEngine_)](
+            const std::string bundleName, const std::string& moduleName, const std::string& pageSourceFile,
+            bool isSingleton) -> int32_t {
+            auto jsEngine = weakEngine.Upgrade();
+            if (!jsEngine) {
+                return -1;
+            }
+            return jsEngine->LoadNavDestinationSource(bundleName, moduleName, pageSourceFile, isSingleton);
+        };
         auto container = Container::Current();
         if (container) {
             auto pageUrlChecker = container->GetPageUrlChecker();
             // ArkTSCard container no SetPageUrlChecker
             if (pageUrlChecker != nullptr) {
                 pageUrlChecker->SetModuleNameCallback(std::move(moduleNamecallback));
+            }
+            auto navigationRoute = container->GetNavigationRoute();
+            if (navigationRoute) {
+                navigationRoute->SetLoadPageCallback(std::move(navigationLoadCallback));
             }
         }
     }

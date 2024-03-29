@@ -4047,10 +4047,7 @@ void SetOutline(ArkUINodeHandle node, const ArkUI_Float32* values, int32_t value
     SetOptionalBorder(borderWidth.topDimen, values, valuesSize, offset);
     SetOptionalBorder(borderWidth.bottomDimen, values, valuesSize, offset);
     borderWidth.multiValued = true;
-    if (borderWidth.leftDimen.has_value() || borderWidth.rightDimen.has_value() || borderWidth.topDimen.has_value() ||
-        borderWidth.bottomDimen.has_value()) {
-        ViewAbstract::SetOuterBorderWidth(frameNode, borderWidth);
-    }
+    ViewAbstract::SetOuterBorderWidth(frameNode, borderWidth);
 
     NG::BorderRadiusProperty borderRadius;
     SetOptionalBorder(borderRadius.radiusTopLeft, values, valuesSize, offset);
@@ -4058,10 +4055,7 @@ void SetOutline(ArkUINodeHandle node, const ArkUI_Float32* values, int32_t value
     SetOptionalBorder(borderRadius.radiusBottomLeft, values, valuesSize, offset);
     SetOptionalBorder(borderRadius.radiusBottomRight, values, valuesSize, offset);
     borderRadius.multiValued = true;
-    if (borderRadius.radiusTopLeft.has_value() || borderRadius.radiusTopRight.has_value() ||
-        borderRadius.radiusBottomLeft.has_value() || borderRadius.radiusBottomRight.has_value()) {
-        ViewAbstract::SetOuterBorderRadius(frameNode, borderRadius);
-    }
+    ViewAbstract::SetOuterBorderRadius(frameNode, borderRadius);
 
     int32_t colorAndStyleOffset = NUM_0; // offset for outline color and outline style
     NG::BorderColorProperty borderColors;

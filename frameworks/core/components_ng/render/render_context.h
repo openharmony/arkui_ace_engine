@@ -134,18 +134,27 @@ public:
 
     virtual void OnModifyDone() {}
 
-    enum class ContextType : int8_t { CANVAS, ROOT, SURFACE, EFFECT, EXTERNAL, INCREMENTAL_CANVAS, HARDWARE_SURFACE };
+    enum class ContextType : int8_t {
+        CANVAS,
+        ROOT,
+        SURFACE,
+        EFFECT,
+        EXTERNAL,
+        INCREMENTAL_CANVAS,
+        HARDWARE_SURFACE,
+#ifdef RENDER_EXTRACT_SUPPORTED
+        HARDWARE_TEXTURE,
+#endif
+    };
+
     enum class PatternType : int8_t { DEFAULT, VIDEO };
     struct ContextParam {
         ContextType type;
         std::optional<std::string> surfaceName;
         PatternType patternType = PatternType::DEFAULT;
     };
-#if defined(VIDEO_TEXTURE_SUPPORTED) && defined(XCOMPONENT_SUPPORTED)
-    virtual void InitContext(bool isRoot, const std::optional<ContextParam>& param, bool isUseExtSurface = false) {}
-#else
+
     virtual void InitContext(bool isRoot, const std::optional<ContextParam>& param) {}
-#endif
 
     virtual void SetSurfaceChangedCallBack(
         const std::function<void(float, float, float, float)>& callback) {}

@@ -129,8 +129,8 @@ public:
     virtual void ClearRemoveArray();
     virtual void UpdateReplaceValue(int32_t replaceValue) const;
     virtual int32_t GetReplaceValue() const;
-    virtual RefPtr<UINode> CreateNodeByIndex(int32_t index);
-    virtual RefPtr<UINode> CreateNodeByRouteInfo(const RefPtr<RouteInfo>& routeInfo);
+    virtual RefPtr<UINode> CreateNodeByIndex(int32_t index, const WeakPtr<UINode>& customNode);
+    virtual RefPtr<UINode> CreateNodeByRouteInfo(const RefPtr<RouteInfo>& routeInfo, const WeakPtr<UINode>& node);
     virtual bool GetDisableAnimation() const
     {
         return false;

@@ -282,8 +282,9 @@ void FocusHub::RemoveSelf(BlurReason reason)
 {
     TAG_LOGD(AceLogTag::ACE_FOCUS, "%{public}s/%{public}d remove self focus.", GetFrameName().c_str(), GetFrameId());
     auto frameNode = GetFrameNode();
+    CHECK_NULL_VOID(frameNode);
     auto focusView = frameNode ? frameNode->GetPattern<FocusView>() : nullptr;
-    auto pipeline = PipelineContext::GetCurrentContextSafely();
+    auto* pipeline = frameNode->GetContext();
     auto screenNode = pipeline ? pipeline->GetScreenNode() : nullptr;
     auto screenFocusHub = screenNode ? screenNode->GetFocusHub() : nullptr;
     auto parent = GetParentFocusHub();
@@ -525,7 +526,9 @@ bool FocusHub::OnKeyPreIme(KeyEventInfo& info, const KeyEvent& keyEvent)
     auto onKeyPreIme = GetOnKeyPreIme();
     if (onKeyPreIme) {
         bool retPreIme = onKeyPreIme(info);
-        auto pipeline = PipelineContext::GetCurrentContext();
+        auto frameNode = GetFrameNode();
+        CHECK_NULL_RETURN(frameNode, false);
+        auto* pipeline = frameNode->GetContext();
         auto eventManager = pipeline->GetEventManager();
         if (eventManager) {
             eventManager->SetIsKeyConsumed(retPreIme);
@@ -542,7 +545,9 @@ bool FocusHub::OnKeyEventNode(const KeyEvent& keyEvent)
 {
     ACE_DCHECK(IsCurrentFocus());
 
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto frameNode = GetFrameNode();
+    CHECK_NULL_RETURN(frameNode, false);
+    auto* pipeline = frameNode->GetContext();
     auto info = KeyEventInfo(keyEvent);
     if (pipeline &&
         (pipeline->IsKeyInPressed(KeyCode::KEY_META_LEFT) || pipeline->IsKeyInPressed(KeyCode::KEY_META_RIGHT))) {
@@ -629,7 +634,9 @@ bool FocusHub::OnKeyEventScope(const KeyEvent& keyEvent)
         return false;
     }
 
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto frameNode = GetFrameNode();
+    CHECK_NULL_RETURN(frameNode, false);
+    auto* pipeline = frameNode->GetContext();
     CHECK_NULL_RETURN(pipeline, false);
     if (!pipeline->GetIsFocusActive()) {
         return false;
@@ -654,7 +661,9 @@ bool FocusHub::OnKeyEventScope(const KeyEvent& keyEvent)
         case KeyCode::TV_CONTROL_RIGHT:
             return RequestNextFocus(FocusStep::RIGHT, GetRect());
         case KeyCode::KEY_TAB: {
-            auto context = NG::PipelineContext::GetCurrentContext();
+            auto frameNode = GetFrameNode();
+            CHECK_NULL_RETURN(frameNode, false);
+            auto* context = frameNode->GetContext();
             CHECK_NULL_RETURN(context, false);
             auto curFocusView = FocusView::GetCurrentFocusView();
             auto entryFocusView = curFocusView ? curFocusView->GetEntryFocusView() : nullptr;
@@ -984,7 +993,9 @@ void FocusHub::OnBlur()
     } else if (focusType_ == FocusType::SCOPE) {
         OnBlurScope();
     }
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto frameNode = GetFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto* pipeline = frameNode->GetContext();
     CHECK_NULL_VOID(pipeline);
     if (blurReason_ != BlurReason::WINDOW_BLUR) {
         pipeline->SetNeedSoftKeyboard(false);
@@ -1091,7 +1102,9 @@ void FocusHub::OnBlurNode()
     if (onBlurReasonInternal_) {
         onBlurReasonInternal_(blurReason_);
     }
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto frameNode = GetFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto* pipeline = frameNode->GetContext();
     CHECK_NULL_VOID(pipeline);
     pipeline->AddAfterLayoutTask([weak = WeakClaim(this)]() {
         auto focusHub = weak.Upgrade();
@@ -1114,8 +1127,6 @@ void FocusHub::OnBlurNode()
         rootFocusHub->ClearAllFocusState();
         rootFocusHub->PaintAllFocusState();
     }
-    auto frameNode = GetFrameNode();
-    CHECK_NULL_VOID(frameNode);
     if (frameNode->GetFocusType() == FocusType::NODE && frameNode == pipeline->GetFocusNode()) {
         pipeline->SetFocusNode(nullptr);
     }
@@ -1729,7 +1740,9 @@ RefPtr<FocusView> FocusHub::GetFirstChildFocusView()
 
 void FocusHub::HandleParentScroll() const
 {
-    auto context = PipelineContext::GetCurrentContext();
+    auto frameNode = GetFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto* context = frameNode->GetContext();
     CHECK_NULL_VOID(context);
     if (!context->GetIsFocusActive() || (focusType_ != FocusType::NODE && !isFocusUnit_)) {
         return;
@@ -1983,6 +1996,7 @@ bool FocusHub::UpdateFocusView()
     }
     auto curFocusView = FocusView::GetCurrentFocusView();
     if (focusView && focusView->IsFocusViewLegal() && focusView != curFocusView) {
+        focusView->SetIsViewRootScopeFocused(false);
         focusView->FocusViewShow();
     }
     return true;

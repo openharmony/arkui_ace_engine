@@ -472,6 +472,7 @@ void WebPattern::ResetDragAction()
     }
 
     isDragging_ = false;
+    isDisableSlide_ = false;
     // cancel drag action to avoid web kernel can't process other input event
     CHECK_NULL_VOID(delegate_);
     delegate_->HandleDragEvent(0, 0, DragAction::DRAG_CANCEL);
@@ -549,6 +550,7 @@ bool WebPattern::GenerateDragDropInfo(NG::DragDropInfo& dragDropInfo)
 NG::DragDropInfo WebPattern::HandleOnDragStart(const RefPtr<OHOS::Ace::DragEvent>& info)
 {
     isDragging_ = true;
+    isDisableSlide_ = true;
     NG::DragDropInfo dragDropInfo;
     if (GenerateDragDropInfo(dragDropInfo)) {
         auto frameNode = GetHost();
@@ -570,8 +572,7 @@ NG::DragDropInfo WebPattern::HandleOnDragStart(const RefPtr<OHOS::Ace::DragEvent
         }
         if (!linkUrl.empty()) {
             UdmfClient::GetInstance()->AddLinkRecord(aceUnifiedData, linkUrl, linkTitle);
-            TAG_LOGI(AceLogTag::ACE_WEB,
-                "DragDrop event WebEventHub HandleOnDragStart, linkUrl size:%{public}zu", linkUrl.size());
+            TAG_LOGI(AceLogTag::ACE_WEB, "web DragDrop event Start, linkUrl size:%{public}zu", linkUrl.size());
         }
         std::string fileName = delegate_->dragData_->GetImageFileName();
         if (!fileName.empty()) {
@@ -582,8 +583,7 @@ NG::DragDropInfo WebPattern::HandleOnDragStart(const RefPtr<OHOS::Ace::DragEvent
                 fullName = delegate_->tempDir_ + "/dragdrop/" + fileName;
             }
             AppFileService::ModuleFileUri::FileUri fileUri(fullName);
-            TAG_LOGI(AceLogTag::ACE_WEB,
-                "DragDrop event WebEventHub HandleOnDragStart, FileUri:%{public}s, image path:%{public}s",
+            TAG_LOGI(AceLogTag::ACE_WEB, "web DragDrop event Start, FileUri:%{public}s, image path:%{public}s",
                 fileUri.ToString().c_str(), fullName.c_str());
             std::vector<std::string> urlVec;
             std::string udmfUri = fileUri.ToString();
@@ -613,7 +613,7 @@ void WebPattern::HandleOnDropMove(const RefPtr<OHOS::Ace::DragEvent>& info)
     delegate_->OnContextMenuHide("");
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto pipelineContext = host->GetContext();
+    auto pipelineContext = host->GetContextRefPtr();
     CHECK_NULL_VOID(pipelineContext);
     auto viewScale = pipelineContext->GetViewScale();
     int32_t globalX = static_cast<int32_t>(info->GetX()) * viewScale;
@@ -666,6 +666,7 @@ void WebPattern::InitWebEventHubDragDropStart(const RefPtr<WebEventHub>& eventHu
             info->GetX(), info->GetY(), pattern->GetWebId());
         pattern->isW3cDragEvent_ = true;
         pattern->isDragging_ = true;
+        pattern->isDisableSlide_ = true;
         pattern->dropX_ = 0;
         pattern->dropY_ = 0;
         return pattern->HandleOnDragEnter(info);
@@ -847,7 +848,7 @@ void WebPattern::HandleOnDragEnter(const RefPtr<OHOS::Ace::DragEvent>& info)
 
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto pipelineContext = host->GetContext();
+    auto pipelineContext = host->GetContextRefPtr();
     CHECK_NULL_VOID(pipelineContext);
     int32_t globalX = static_cast<int32_t>(info->GetX());
     int32_t globalY = static_cast<int32_t>(info->GetY());
@@ -917,11 +918,12 @@ void WebPattern::HandleOnDragDropFile(RefPtr<UnifiedData> aceData)
 void WebPattern::HandleOnDragDrop(const RefPtr<OHOS::Ace::DragEvent>& info)
 {
     isDragging_ = false;
+    isDisableSlide_ = false;
     isW3cDragEvent_ = false;
     CHECK_NULL_VOID(delegate_);
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto pipelineContext = host->GetContext();
+    auto pipelineContext = host->GetContextRefPtr();
     CHECK_NULL_VOID(pipelineContext);
     auto viewScale = pipelineContext->GetViewScale();
     auto offset = GetCoordinatePoint();
@@ -965,10 +967,11 @@ void WebPattern::HandleOnDragLeave(int32_t x, int32_t y)
 {
     CHECK_NULL_VOID(delegate_);
     isDragging_ = false;
+    isDisableSlide_ = false;
     isW3cDragEvent_ = false;
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto pipelineContext = host->GetContext();
+    auto pipelineContext = host->GetContextRefPtr();
     CHECK_NULL_VOID(pipelineContext);
     auto viewScale = pipelineContext->GetViewScale();
     auto offset = GetCoordinatePoint();
@@ -982,12 +985,13 @@ void WebPattern::HandleDragEnd(int32_t x, int32_t y)
     CHECK_NULL_VOID(delegate_);
 
     isDragging_ = false;
+    isDisableSlide_ = false;
     isW3cDragEvent_ = false;
     ClearDragData();
 
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto pipelineContext = host->GetContext();
+    auto pipelineContext = host->GetContextRefPtr();
     CHECK_NULL_VOID(pipelineContext);
     auto viewScale = pipelineContext->GetViewScale();
     auto offset = GetCoordinatePoint();
@@ -1008,6 +1012,7 @@ void WebPattern::HandleDragCancel()
     frameNode->SetDraggable(false);
     CHECK_NULL_VOID(delegate_);
     isDragging_ = false;
+    isDisableSlide_ = false;
     isW3cDragEvent_ = false;
     ClearDragData();
     delegate_->HandleDragEvent(0, 0, DragAction::DRAG_CANCEL);
@@ -1897,6 +1902,9 @@ void WebPattern::HandleTouchDown(const TouchEventInfo& info, bool fromOverlay)
 void WebPattern::HandleTouchUp(const TouchEventInfo& info, bool fromOverlay)
 {
     CHECK_NULL_VOID(delegate_);
+    if (!isDisableSlide_) {
+        ResetDragAction();
+    }
     std::list<TouchInfo> touchInfos;
     if (!ParseTouchInfo(info, touchInfos)) {
         return;

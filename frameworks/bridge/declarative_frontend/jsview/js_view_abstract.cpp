@@ -84,6 +84,7 @@
 #include "core/components_ng/gestures/base_gesture_event.h"
 #include "core/components_ng/pattern/menu/menu_pattern.h"
 #include "core/components_ng/pattern/overlay/modal_style.h"
+#include "core/components_ng/pattern/overlay/sheet_style.h"
 #include "core/components_ng/property/safe_area_insets.h"
 #include "core/gestures/gesture_info.h"
 #include "core/image/image_source_info.h"
@@ -217,38 +218,6 @@ bool CheckJSCallbackInfo(
     return typeVerified || infoTypes.size() == 0;
 }
 
-void ParseJsonScale(std::unique_ptr<JsonValue>& argsPtrItem, float& scaleX, float& scaleY, float& scaleZ,
-    CalcDimension& centerX, CalcDimension& centerY)
-{
-    double xVal = 1.0;
-    double yVal = 1.0;
-    double zVal = 1.0;
-    if (!argsPtrItem->IsObject() && !argsPtrItem->IsNumber() && !argsPtrItem->IsString()) {
-        scaleX = static_cast<float>(xVal);
-        scaleY = static_cast<float>(yVal);
-        scaleZ = static_cast<float>(zVal);
-        CalcDimension length;
-        centerX = length;
-        centerY = length;
-        return;
-    }
-    JSViewAbstract::ParseJsonDouble(argsPtrItem->GetValue("x"), xVal);
-    JSViewAbstract::ParseJsonDouble(argsPtrItem->GetValue("y"), yVal);
-    JSViewAbstract::ParseJsonDouble(argsPtrItem->GetValue("z"), zVal);
-    scaleX = static_cast<float>(xVal);
-    scaleY = static_cast<float>(yVal);
-    scaleZ = static_cast<float>(zVal);
-    // if specify centerX
-    CalcDimension length;
-    if (JSViewAbstract::ParseJsonDimensionVp(argsPtrItem->GetValue("centerX"), length)) {
-        centerX = length;
-    }
-    // if specify centerY
-    if (JSViewAbstract::ParseJsonDimensionVp(argsPtrItem->GetValue("centerY"), length)) {
-        centerY = length;
-    }
-}
-
 void ParseJsScale(const JSRef<JSVal>& jsValue, float& scaleX, float& scaleY, float& scaleZ,
     CalcDimension& centerX, CalcDimension& centerY)
 {
@@ -277,21 +246,6 @@ void ParseJsScale(const JSRef<JSVal>& jsValue, float& scaleX, float& scaleY, flo
     JSViewAbstract::ParseJsDimensionVp(jsObj->GetProperty("centerY"), centerY);
 }
 
-void ParseJsonTranslate(std::unique_ptr<JsonValue>& argsPtrItem, CalcDimension& translateX, CalcDimension& translateY,
-    CalcDimension& translateZ)
-{
-    CalcDimension length;
-    if (JSViewAbstract::ParseJsonDimensionVp(argsPtrItem->GetValue("x"), length)) {
-        translateX = length;
-    }
-    if (JSViewAbstract::ParseJsonDimensionVp(argsPtrItem->GetValue("y"), length)) {
-        translateY = length;
-    }
-    if (JSViewAbstract::ParseJsonDimensionVp(argsPtrItem->GetValue("z"), length)) {
-        translateZ = length;
-    }
-}
-
 void ParseJsTranslate(const JSRef<JSVal>& jsValue, CalcDimension& translateX, CalcDimension& translateY,
     CalcDimension& translateZ)
 {
@@ -312,46 +266,6 @@ void GetDefaultRotateVector(double& dx, double& dy, double& dz)
     if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_NINE)) {
         dz = 1.0;
     }
-}
-
-void ParseJsonRotate(std::unique_ptr<JsonValue>& argsPtrItem, NG::RotateOptions& rotate, std::optional<float>& angle)
-{
-    // default: dx, dy, dz (0.0, 0.0, 0.0)
-    double dxVal = 0.0;
-    double dyVal = 0.0;
-    double dzVal = 0.0;
-    if (!argsPtrItem->Contains("x") && !argsPtrItem->Contains("y") && !argsPtrItem->Contains("z")) {
-        GetDefaultRotateVector(dxVal, dyVal, dzVal);
-    }
-    JSViewAbstract::ParseJsonDouble(argsPtrItem->GetValue("x"), dxVal);
-    JSViewAbstract::ParseJsonDouble(argsPtrItem->GetValue("y"), dyVal);
-    JSViewAbstract::ParseJsonDouble(argsPtrItem->GetValue("z"), dzVal);
-    rotate.xDirection = static_cast<float>(dxVal);
-    rotate.yDirection = static_cast<float>(dyVal);
-    rotate.zDirection = static_cast<float>(dzVal);
-    // if specify centerX
-    CalcDimension length;
-    if (!JSViewAbstract::ParseJsonDimensionVp(argsPtrItem->GetValue("centerX"), length, true)) {
-        length = Dimension(0.5f, DimensionUnit::PERCENT);
-    }
-    rotate.centerX = length;
-    // if specify centerY
-
-    if (!JSViewAbstract::ParseJsonDimensionVp(argsPtrItem->GetValue("centerY"), length, true)) {
-        length = Dimension(0.5f, DimensionUnit::PERCENT);
-    }
-    rotate.centerY = length;
-
-    // if specify centerZ
-    if (!JSViewAbstract::ParseJsonDimensionVp(argsPtrItem->GetValue("centerZ"), length, true)) {
-        length = Dimension(0.5f, DimensionUnit::PERCENT);
-    }
-    rotate.centerZ = length;
-    // if specify angle
-    JSViewAbstract::GetAngle("angle", argsPtrItem, angle);
-    float perspective = 0.0f;
-    JSViewAbstract::GetPerspective("perspective", argsPtrItem, perspective);
-    rotate.perspective = perspective;
 }
 
 void ParseJsRotate(const JSRef<JSVal>& jsValue, NG::RotateOptions& rotate, std::optional<float>& angle)
@@ -579,8 +493,12 @@ RefPtr<NG::ChainedTransitionEffect> ParseChainedOpacityTransition(
 {
     double opacity = 1.0;
     if (JSViewAbstract::ParseJsDouble(effectOption, opacity)) {
-        if ((LessNotEqual(opacity, 0.0)) || opacity > 1.0) {
-            opacity = 1.0;
+        if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
+            if (LessNotEqual(opacity, 0.0) || opacity > 1.0) {
+                opacity = 1.0;
+            }
+        } else {
+            opacity = std::clamp(opacity, 0.0, 1.0);
         }
         return AceType::MakeRefPtr<NG::ChainedOpacityEffect>(opacity);
     }
@@ -1529,63 +1447,9 @@ void JSViewAbstract::SetDefaultTransform()
     ViewAbstractModel::GetInstance()->SetTransformMatrix(matrix);
 }
 
-NG::TransitionOptions JSViewAbstract::ParseTransition(std::unique_ptr<JsonValue>& transitionArgs)
-{
-    bool hasEffect = false;
-    NG::TransitionOptions transitionOption;
-    transitionOption.Type = ParseTransitionType(transitionArgs->GetString("type", "All"));
-    if (transitionArgs->Contains("opacity")) {
-        double opacity = 1.0;
-        ParseJsonDouble(transitionArgs->GetValue("opacity"), opacity);
-        if (opacity > 1.0 || LessNotEqual(opacity, 0.0)) {
-            opacity = 1.0;
-        }
-        transitionOption.UpdateOpacity(static_cast<float>(opacity));
-        hasEffect = true;
-    }
-    if (transitionArgs->Contains("translate")) {
-        auto translateArgs = transitionArgs->GetObject("translate");
-        // default: x, y, z (0.0, 0.0, 0.0)
-        NG::TranslateOptions translate;
-        ParseJsonTranslate(translateArgs, translate.x, translate.y, translate.z);
-        transitionOption.UpdateTranslate(translate);
-        hasEffect = true;
-    }
-    if (transitionArgs->Contains("scale")) {
-        auto scaleArgs = transitionArgs->GetObject("scale");
-        // default: x, y, z (1.0, 1.0, 1.0), centerX, centerY 50% 50%;
-        NG::ScaleOptions scale(1.0f, 1.0f, 1.0f, 0.5_pct, 0.5_pct);
-        ParseJsonScale(scaleArgs, scale.xScale, scale.yScale, scale.zScale, scale.centerX, scale.centerY);
-        transitionOption.UpdateScale(scale);
-        hasEffect = true;
-    }
-    if (transitionArgs->Contains("rotate")) {
-        auto rotateArgs = transitionArgs->GetObject("rotate");
-        // default: dx, dy, dz (0.0, 0.0, 0.0), angle 0, centerX, centerY 50% 50%;
-        NG::RotateOptions rotate(0.0f, 0.0f, 0.0f, 0.0f, 0.5_pct, 0.5_pct);
-        std::optional<float> angle;
-        ParseJsonRotate(rotateArgs, rotate, angle);
-        if (angle.has_value()) {
-            rotate.angle = angle.value();
-            transitionOption.UpdateRotate(rotate);
-            hasEffect = true;
-        }
-    }
-    if (!hasEffect) {
-        // default transition
-        transitionOption = NG::TransitionOptions::GetDefaultTransition(transitionOption.Type);
-    }
-    return transitionOption;
-}
-
-NG::TransitionOptions JSViewAbstract::ParseJsTransition(const JSRef<JSVal>& transitionArgs)
+NG::TransitionOptions JSViewAbstract::ParseJsTransition(const JSRef<JSObject>& jsObj)
 {
     NG::TransitionOptions transitionOption;
-    if (!transitionArgs->IsObject()) {
-        return transitionOption;
-    }
-
-    JSRef<JSObject> jsObj = JSRef<JSObject>::Cast(transitionArgs);
     bool hasEffect = false;
     transitionOption.Type = ParseTransitionType(jsObj->GetPropertyValue<std::string>("type", "All"));
     if (jsObj->HasProperty("opacity")) {
@@ -1649,8 +1513,10 @@ RefPtr<NG::ChainedTransitionEffect> JSViewAbstract::ParseJsTransitionEffect(cons
 void JSViewAbstract::JsTransition(const JSCallbackInfo& info)
 {
     if (info.Length() != 1 || !info[0]->IsObject()) {
-        ViewAbstractModel::GetInstance()->CleanTransition();
-        ViewAbstractModel::GetInstance()->SetChainedTransition(nullptr);
+        if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
+            ViewAbstractModel::GetInstance()->CleanTransition();
+            ViewAbstractModel::GetInstance()->SetChainedTransition(nullptr);
+        }
         return;
     }
     auto obj = JSRef<JSObject>::Cast(info[0]);
@@ -1659,7 +1525,7 @@ void JSViewAbstract::JsTransition(const JSCallbackInfo& info)
         ViewAbstractModel::GetInstance()->SetChainedTransition(chainedEffect);
         return;
     }
-    auto options = ParseJsTransition(info[0]);
+    auto options = ParseJsTransition(obj);
     ViewAbstractModel::GetInstance()->SetTransition(options);
 }
 
@@ -2074,7 +1940,7 @@ void JSViewAbstract::JsOverlay(const JSCallbackInfo& info)
 {
     if (info.Length() > 0 && (info[0]->IsUndefined())) {
         ViewAbstractModel::GetInstance()->SetOverlay(
-            "", nullptr, Alignment::TOP_LEFT, CalcDimension(0), CalcDimension(0));
+            "", nullptr, Alignment::TOP_LEFT, CalcDimension(0), CalcDimension(0), NG::OverlayType::RESET);
         return;
     }
 
@@ -2110,7 +1976,7 @@ void JSViewAbstract::JsOverlay(const JSCallbackInfo& info)
 
     if (info[0]->IsString()) {
         std::string text = info[0]->ToString();
-        ViewAbstractModel::GetInstance()->SetOverlay(text, nullptr, align, offsetX, offsetY);
+        ViewAbstractModel::GetInstance()->SetOverlay(text, nullptr, align, offsetX, offsetY, NG::OverlayType::TEXT);
     } else if (info[0]->IsObject()) {
         JSRef<JSObject> menuObj = JSRef<JSObject>::Cast(info[0]);
         auto builder = menuObj->GetProperty("builder");
@@ -2126,7 +1992,8 @@ void JSViewAbstract::JsOverlay(const JSCallbackInfo& info)
             PipelineContext::SetCallBackNode(node);
             func->Execute();
         };
-        ViewAbstractModel::GetInstance()->SetOverlay("", std::move(buildFunc), align, offsetX, offsetY);
+        ViewAbstractModel::GetInstance()->SetOverlay("", std::move(buildFunc), align, offsetX,
+            offsetY, NG::OverlayType::BUILDER);
     }
 }
 
@@ -3163,6 +3030,8 @@ void JSViewAbstract::JsOutline(const JSCallbackInfo& info)
     auto valueOuterWidth = object->GetProperty("width");
     if (!valueOuterWidth->IsUndefined()) {
         ParseOuterBorderWidth(valueOuterWidth);
+    } else if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
+        ViewAbstractModel::GetInstance()->SetOuterBorderWidth({});
     }
 
     // use default value when undefined.
@@ -3171,6 +3040,8 @@ void JSViewAbstract::JsOutline(const JSCallbackInfo& info)
     auto valueOuterRadius = object->GetProperty("radius");
     if (!valueOuterRadius->IsUndefined()) {
         ParseOuterBorderRadius(valueOuterRadius);
+    } else if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
+        ViewAbstractModel::GetInstance()->SetOuterBorderRadius({});
     }
     // use default value when undefined.
     ParseOuterBorderStyle(object->GetProperty("style"));
@@ -3884,9 +3755,16 @@ void JSViewAbstract::JsBlur(const JSCallbackInfo& info)
 void JSViewAbstract::JsColorBlend(const JSCallbackInfo& info)
 {
     Color colorBlend;
-    if (info[0]->IsUndefined() || !ParseJsColor(info[0], colorBlend)) {
+    if (info[0]->IsUndefined()) {
         colorBlend = Color::TRANSPARENT;
         SetColorBlend(colorBlend);
+        return;
+    }
+    if (!ParseJsColor(info[0], colorBlend)) {
+        if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
+            colorBlend = Color::TRANSPARENT;
+            SetColorBlend(colorBlend);
+        }
         return;
     }
     SetColorBlend(colorBlend);
@@ -3904,17 +3782,22 @@ void JSViewAbstract::JsUseShadowBatching(const JSCallbackInfo& info)
 {
     if (info[0]->IsBoolean()) {
         ViewAbstractModel::GetInstance()->SetUseShadowBatching(info[0]->ToBoolean());
+    } else if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
+        ViewAbstractModel::GetInstance()->SetUseShadowBatching(false);
     }
 }
 
 void JSViewAbstract::JsBackdropBlur(const JSCallbackInfo& info)
 {
+    if (info.Length() == 0) {
+        return;
+    }
     double blur = 0.0;
     BlurOption blurOption;
-    if (info.Length() == 0 || !ParseJsDouble(info[0], blur)) {
-        CalcDimension dimensionRadius(blur, DimensionUnit::PX);
-        ViewAbstractModel::GetInstance()->SetBackdropBlur(dimensionRadius, blurOption);
-        return;
+    if (!ParseJsDouble(info[0], blur)) {
+        if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
+            return;
+        }
     }
     CalcDimension dimensionRadius(blur, DimensionUnit::PX);
     if (info.Length() > 1 && info[1]->IsObject()) {
@@ -6145,13 +6028,18 @@ void JSViewAbstract::JsDebugLine(const JSCallbackInfo& info)
 
 void JSViewAbstract::JsOpacityPassThrough(const JSCallbackInfo& info)
 {
-    double opacity = 0.0;
-    if (!ParseJsDouble(info[0], opacity)) {
-        return;
-    }
-
-    if ((LessNotEqual(opacity, 0.0)) || opacity > 1) {
-        opacity = 1.0;
+    double opacity = 1.0;
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
+        if (ParseJsDouble(info[0], opacity)) {
+            opacity = std::clamp(opacity, 0.0, 1.0);
+        }
+    } else {
+        if (!ParseJsDouble(info[0], opacity)) {
+            return;
+        }
+        if ((LessNotEqual(opacity, 0.0)) || opacity > 1) {
+            opacity = 1.0;
+        }
     }
 
     ViewAbstractModel::GetInstance()->SetOpacity(opacity, true);
@@ -6168,6 +6056,10 @@ void JSViewAbstract::JsTransitionPassThrough(const JSCallbackInfo& info)
         return;
     }
     if (!info[0]->IsObject()) {
+        if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
+            ViewAbstractModel::GetInstance()->CleanTransition();
+            ViewAbstractModel::GetInstance()->SetChainedTransition(nullptr);
+        }
         return;
     }
     auto obj = JSRef<JSObject>::Cast(info[0]);
@@ -6475,6 +6367,7 @@ void JSViewAbstract::JsBindSheet(const JSCallbackInfo& info)
     sheetStyle.sheetMode = NG::SheetMode::LARGE;
     sheetStyle.showDragBar = true;
     sheetStyle.showCloseIcon = true;
+    sheetStyle.showInPage = false;
     std::function<void()> onShowCallback;
     std::function<void()> onDismissCallback;
     std::function<void()> onWillShowCallback;
@@ -6507,6 +6400,11 @@ void JSViewAbstract::ParseSheetStyle(const JSRef<JSObject>& paramObj, NG::SheetS
     auto showCloseIcon = paramObj->GetProperty("showClose");
     auto type = paramObj->GetProperty("preferType");
     auto interactive = paramObj->GetProperty("enableOutsideInteractive");
+    auto showMode = paramObj->GetProperty("mode");
+
+    NG::SheetLevel sheetLevel = NG::SheetLevel::OVERLAY;
+    ParseSheetLevel(showMode, sheetLevel);
+    sheetStyle.showInPage = (sheetLevel == NG::SheetLevel::EMBEDDED);
 
     std::vector<NG::SheetHeight> detents;
     if (ParseSheetDetents(sheetDetents, detents)) {
@@ -6672,6 +6570,18 @@ bool JSViewAbstract::ParseSheetBackgroundBlurStyle(const JSRef<JSVal>& args, Blu
         return false;
     }
     return true;
+}
+
+void JSViewAbstract::ParseSheetLevel(const JSRef<JSVal>& args, NG::SheetLevel& sheetLevel)
+{
+    if (!args->IsNumber()) {
+        return;
+    }
+    auto sheetMode = args->ToNumber<int32_t>();
+    if (sheetMode >= static_cast<int>(NG::SheetLevel::OVERLAY) &&
+        sheetMode <= static_cast<int>(NG::SheetLevel::EMBEDDED)) {
+        sheetLevel = static_cast<NG::SheetLevel>(sheetMode);
+    }
 }
 
 void JSViewAbstract::ParseSheetCallback(const JSRef<JSObject>& paramObj, std::function<void()>& onAppear,
@@ -7641,7 +7551,6 @@ bool JSViewAbstract::ParseShadowProps(const JSRef<JSVal>& jsValue, Shadow& shado
     if (type != static_cast<int32_t>(ShadowType::BLUR)) {
         type = static_cast<int32_t>(ShadowType::COLOR);
     }
-    type = std::clamp(type, static_cast<int32_t>(ShadowType::COLOR), static_cast<int32_t>(ShadowType::BLUR));
     shadow.SetShadowType(static_cast<ShadowType>(type));
     bool isFilled = jsObj->GetPropertyValue<bool>("fill", false);
     shadow.SetIsFilled(isFilled);

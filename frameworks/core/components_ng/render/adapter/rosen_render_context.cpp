@@ -361,11 +361,7 @@ void RosenRenderContext::SetHostNode(const WeakPtr<FrameNode>& host)
     AddFrameNodeInfoToRsNode();
 }
 
-#if defined(VIDEO_TEXTURE_SUPPORTED) && defined(XCOMPONENT_SUPPORTED)
-void RosenRenderContext::InitContext(bool isRoot, const std::optional<ContextParam>& param, bool isUseExtSurface)
-#else
 void RosenRenderContext::InitContext(bool isRoot, const std::optional<ContextParam>& param)
-#endif
 {
     // skip if node already created
     CHECK_NULL_VOID(!rsNode_);
@@ -395,13 +391,15 @@ void RosenRenderContext::InitContext(bool isRoot, const std::optional<ContextPar
             break;
         }
         case ContextType::HARDWARE_SURFACE: {
-#if defined(VIDEO_TEXTURE_SUPPORTED) && defined(XCOMPONENT_SUPPORTED)
-            rsNode_ = CreateHardwareSurface(param, isUseExtSurface, isTextureExportNode);
-#else
-            rsNode_ = CreateHardwareSurface(param, false, isTextureExportNode);
-#endif
+            rsNode_ = CreateHardwareSurface(param, isTextureExportNode);
             break;
         }
+#ifdef RENDER_EXTRACT_SUPPORTED
+        case ContextType::HARDWARE_TEXTURE: {
+            rsNode_ = CreateHardwareTexture(param, isTextureExportNode);
+            break;
+        }
+#endif
         case ContextType::EFFECT:
             rsNode_ = Rosen::RSEffectNode::Create(false, isTextureExportNode);
             break;
@@ -418,9 +416,8 @@ void RosenRenderContext::InitContext(bool isRoot, const std::optional<ContextPar
 }
 
 std::shared_ptr<Rosen::RSNode> RosenRenderContext::CreateHardwareSurface(
-    const std::optional<ContextParam>& param, bool isUseExtSurface, bool isTextureExportNode)
+    const std::optional<ContextParam>& param, bool isTextureExportNode)
 {
-#ifndef VIDEO_TEXTURE_SUPPORTED
     Rosen::RSSurfaceNodeConfig surfaceNodeConfig = { .SurfaceNodeName = param->surfaceName.value_or(""),
         .isTextureExportNode = isTextureExportNode };
     auto surfaceNode = Rosen::RSSurfaceNode::Create(surfaceNodeConfig, false);
@@ -428,32 +425,19 @@ std::shared_ptr<Rosen::RSNode> RosenRenderContext::CreateHardwareSurface(
         surfaceNode->SetHardwareEnabled(true);
     }
     return surfaceNode;
-#else
-#ifdef XCOMPONENT_SUPPORTED
-    if (isUseExtSurface) {
-        Rosen::RSSurfaceNodeConfig surfaceNodeConfig = { .SurfaceNodeName = param->surfaceName.value_or(""),
-            .isTextureExportNode = isTextureExportNode };
-        auto surfaceNode = Rosen::RSSurfaceNode::Create(surfaceNodeConfig, false);
-        if (surfaceNode) {
-            surfaceNode->SetHardwareEnabled(true);
-        }
-        return surfaceNode;
-    } else {
-        Rosen::RSSurfaceNodeConfig surfaceNodeConfig = { .SurfaceNodeName = param->surfaceName.value_or(""),
-            .isTextureExportNode = isTextureExportNode };
-        auto surfaceNode = Rosen::RSSurfaceNode::Create(surfaceNodeConfig,
-            RSSurfaceNodeType::SURFACE_TEXTURE_NODE, false);
-        return surfaceNode;
-    }
-#else
+}
+
+#ifdef RENDER_EXTRACT_SUPPORTED
+std::shared_ptr<Rosen::RSNode> RosenRenderContext::CreateHardwareTexture(
+    const std::optional<ContextParam>& param, bool isTextureExportNode)
+{
     Rosen::RSSurfaceNodeConfig surfaceNodeConfig = { .SurfaceNodeName = param->surfaceName.value_or(""),
         .isTextureExportNode = isTextureExportNode };
     auto surfaceNode = Rosen::RSSurfaceNode::Create(surfaceNodeConfig,
         RSSurfaceNodeType::SURFACE_TEXTURE_NODE, false);
     return surfaceNode;
-#endif
-#endif
 }
+#endif
 
 void RosenRenderContext::SetSandBox(const std::optional<OffsetF>& parentPosition, bool force)
 {
@@ -2134,7 +2118,7 @@ void RosenRenderContext::BdImagePaintTask(RSCanvas& canvas)
     CHECK_NULL_VOID(layoutProps);
     const auto& widthProp = layoutProps->GetBorderWidthProperty();
 
-    auto pipeline = host->GetContext();
+    auto pipeline = host->GetContextRefPtr();
     CHECK_NULL_VOID(pipeline);
     auto dipScale = pipeline->GetDipScale();
 

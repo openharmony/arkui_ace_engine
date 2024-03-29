@@ -43,6 +43,7 @@ public:
         const EcmaVM* vm, const Local<JSValueRef>& arg, std::string* array, int32_t defaultLength);
     static bool ParseJsInteger(const EcmaVM *vm, const Local<JSValueRef> &value, int32_t &result);
     static bool ParseJsInteger(const EcmaVM *vm, const Local<JSValueRef> &value, uint32_t &result);
+    static bool ParseJsIntegerWithResource(const EcmaVM* vm, const Local<JSValueRef>& jsValue, int32_t& result);
     static bool ParseJsDouble(const EcmaVM *vm, const Local<JSValueRef> &value, double &result);
     static bool ParseAllBorder(const EcmaVM *vm, const Local<JSValueRef> &args, CalcDimension &result);
     static bool ParseAllRadius(const EcmaVM *vm, const Local<JSValueRef> &args, CalcDimension &result);

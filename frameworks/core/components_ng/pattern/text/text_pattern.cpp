@@ -1722,15 +1722,6 @@ bool TextPattern::BetweenSelectedPosition(const Offset& globalOffset)
 
 void TextPattern::OnModifyDone()
 {
-#if (defined(__aarch64__) || defined(__x86_64__))
-    FrameNode::PostTask(
-        [weak = WeakClaim(this)]() {
-            auto pattern = weak.Upgrade();
-            CHECK_NULL_VOID(pattern);
-            pattern->OnAfterModifyDone();
-        },
-        TaskExecutor::TaskType::UI);
-#endif
     auto textLayoutProperty = GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_VOID(textLayoutProperty);
     auto host = GetHost();
@@ -1854,6 +1845,11 @@ void TextPattern::ActSetSelection(int32_t start, int32_t end)
     }
     HandleSelectionChange(start, end);
     CalculateHandleOffsetAndShowOverlay();
+    if (textSelector_.firstHandle == textSelector_.secondHandle) {
+        ResetSelection();
+        CloseSelectOverlay();
+        return;
+    }
     ShowSelectOverlay();
     auto host = GetHost();
     CHECK_NULL_VOID(host);

@@ -150,6 +150,31 @@ class ImageEdgeAntialiasingModifier extends ModifierWithKey<number> {
   }
 }
 
+class ImageResizableModifier extends ModifierWithKey<ResizableOptions> {
+  constructor(value: ResizableOptions) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('resizable');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().image.resetResizable(node);
+    } else {
+      let sliceTop: Length | undefined;
+      let sliceRight: Length | undefined;
+      let sliceBottom: Length | undefined;
+      let sliceLeft: Length | undefined;
+      if (!isUndefined(this.value.slice)) {
+        let tmpSlice = this.value.slice as EdgeWidths;
+        sliceTop = tmpSlice.top;
+        sliceRight = tmpSlice.right;
+        sliceBottom = tmpSlice.bottom;
+        sliceLeft = tmpSlice.left;
+      }
+      getUINativeModule().image.setResizable(node, sliceTop, sliceRight, sliceBottom, sliceLeft);
+    }
+  }
+}
+
 class ImageInterpolationModifier extends ModifierWithKey<ImageInterpolation> {
   constructor(value: ImageInterpolation) {
     super(value);

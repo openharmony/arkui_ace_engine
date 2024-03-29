@@ -25,6 +25,7 @@
 #include "core/components_ng/layout/layout_property.h"
 #include "core/components_ng/layout/layout_wrapper_builder.h"
 #include "core/components_ng/pattern/scrollable/scrollable_pattern.h"
+#include "core/components_ng/pattern/stage/page_pattern.h"
 #include "core/components_ng/property/layout_constraint.h"
 #include "core/components_ng/property/measure_property.h"
 #include "core/components_ng/property/property.h"
@@ -85,10 +86,20 @@ void LayoutWrapper::RestoreGeoState()
     }
 }
 
+bool LayoutWrapper::CheckPageNeedAvoidKeyboard() const
+{
+    // page will not avoid keyboard when lastChild is sheet
+    auto pattern = GetHostNode()->GetPattern<PagePattern>();
+    CHECK_NULL_RETURN(pattern, true);
+    auto overlay = pattern->GetOverlayManager();
+    CHECK_NULL_RETURN(overlay, true);
+    return overlay->CheckPageNeedAvoidKeyboard();
+}
+
 void LayoutWrapper::AvoidKeyboard(bool isFocusOnPage)
 {
     // apply keyboard avoidance on Page
-    if (GetHostTag() == V2::PAGE_ETS_TAG) {
+    if ((GetHostTag() == V2::PAGE_ETS_TAG && CheckPageNeedAvoidKeyboard()) || GetHostTag() == V2::OVERLAY_ETS_TAG) {
         auto pipeline = PipelineContext::GetCurrentContext();
         CHECK_NULL_VOID(pipeline);
         auto manager = pipeline->GetSafeAreaManager();
@@ -144,12 +155,22 @@ void LayoutWrapper::ExpandSafeArea(bool isFocusOnPage)
 {
     auto host = GetHostNode();
     CHECK_NULL_VOID(host);
+    auto parent = host->GetAncestorNodeOfFrame();
+    if (parent && parent->GetPattern<ScrollablePattern>()) {
+        return;
+    }
     auto&& opts = GetLayoutProperty()->GetSafeAreaExpandOpts();
     auto selfExpansive = host->SelfExpansive();
     if (!selfExpansive && !host->NeedRestoreSafeArea()) {
         // if safeArea switch from valid to not valid, keep node restored and return
         // otherwise if node restored, meaning expansive parent did not adjust child or so on, restore cache
-        if (CheckValidSafeArea()) {
+        const auto& geometryTransition = GetLayoutProperty()->GetGeometryTransition();
+        auto pipeline = PipelineContext::GetCurrentContext();
+        CHECK_NULL_VOID(pipeline);
+        auto safeAreaManager = pipeline->GetSafeAreaManager();
+        CHECK_NULL_VOID(safeAreaManager);
+        if (!(host->GetId() == safeAreaManager->GetRootMeasureNodeId() && geometryTransition != nullptr) &&
+            CheckValidSafeArea()) {
             auto syncCasheSuccess = GetGeometryNode()->RestoreCache();
             auto renderContext = host->GetRenderContext();
             CHECK_NULL_VOID(renderContext);
@@ -160,10 +181,6 @@ void LayoutWrapper::ExpandSafeArea(bool isFocusOnPage)
         return;
     }
     CHECK_NULL_VOID(selfExpansive);
-    auto parent = host->GetAncestorNodeOfFrame();
-    if (parent && parent->GetPattern<ScrollablePattern>()) {
-        return;
-    }
 
     if ((opts->edges & SAFE_AREA_EDGE_BOTTOM) && (opts->type & SAFE_AREA_TYPE_KEYBOARD) && isFocusOnPage) {
         ExpandIntoKeyboard();

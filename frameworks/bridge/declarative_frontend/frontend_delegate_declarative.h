@@ -274,6 +274,14 @@ public:
         std::function<void(std::shared_ptr<Media::PixelMap>, int32_t, std::function<void()>)>&& callback,
         bool enableInspector) override;
 
+    void AddFrameNodeToOverlay(
+        const RefPtr<NG::FrameNode>& node, std::optional<int32_t> index = std::nullopt) override;
+    void RemoveFrameNodeOnOverlay(const RefPtr<NG::FrameNode>& node) override;
+    void ShowNodeOnOverlay(const RefPtr<NG::FrameNode>& node) override;
+    void HideNodeOnOverlay(const RefPtr<NG::FrameNode>& node) override;
+    void ShowAllNodesOnOverlay() override;
+    void HideAllNodesOnOverlay() override;
+
     void RequestAnimationFrame(const std::string& callbackId) override;
 
     void CancelAnimationFrame(const std::string& callbackId) override;

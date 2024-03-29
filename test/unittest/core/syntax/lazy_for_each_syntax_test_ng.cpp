@@ -1430,6 +1430,43 @@ HWTEST_F(LazyForEachSyntaxTestNg, LazyForEachSyntaxOnDataReloadedTest001, TestSi
 }
 
 /**
+ * @tc.name: LazyForEachSyntaxOnDataReloadedTest002
+ * @tc.desc: Create LazyForEach.
+ * @tc.type: FUNC
+ */
+HWTEST_F(LazyForEachSyntaxTestNg, LazyForEachSyntaxOnDataReloadedTest002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create Text and push it to view stack processor.
+     * @tc.expected: Make Text as LazyForEach parent.
+     */
+    auto frameNode = CreateNode(V2::TEXT_ETS_TAG);
+
+    /**
+     * @tc.steps: step2. Invoke lazyForEach Create function.
+     * @tc.expected: Create LazyForEachNode and can be pop from ViewStackProcessor.
+     */
+    LazyForEachModelNG lazyForEach;
+    const RefPtr<LazyForEachActuator> mockLazyForEachActuator =
+        AceType::MakeRefPtr<OHOS::Ace::Framework::MockLazyForEachBuilder>();
+    lazyForEach.Create(mockLazyForEachActuator);
+    auto lazyForEachBuilder = AceType::DynamicCast<LazyForEachBuilder>(mockLazyForEachActuator);
+
+    for (auto iter : LAZY_FOR_EACH_NODE_IDS_INT) {
+        lazyForEachBuilder->GetChildByIndex(iter.value_or(0), true);
+    }
+    std::list<V2::Operation> DataOperations;
+    V2::Operation operation1 = {.type = "reload"};
+    DataOperations.push_back(operation1);
+    lazyForEachBuilder->OnDatasetChange(DataOperations);
+    EXPECT_EQ(lazyForEachBuilder->OnGetTotalCount(), 0);
+    for (auto iter : LAZY_FOR_EACH_NODE_IDS_INT) {
+        lazyForEachBuilder->GetChildByIndex(iter.value_or(0), true);
+    }
+    EXPECT_EQ(lazyForEachBuilder->OnGetTotalCount(), 7);
+}
+
+/**
  * @tc.name: LazyForEachSyntaxOnDataAddedTest001
  * @tc.desc: Create LazyForEach.
  * @tc.type: FUNC
@@ -1487,16 +1524,21 @@ HWTEST_F(LazyForEachSyntaxTestNg, LazyForEachSyntaxOnDataAddedTest002, TestSize.
         lazyForEachBuilder->GetChildByIndex(iter.value_or(0), true);
     }
     std::list<V2::Operation> DataOperations;
-    V2::Operation operation1 = {.type = "add", .index = INDEX_0};
+    V2::Operation operation1 = {.type = "add", .index = INDEX_0, .count = 1};
     DataOperations.push_back(operation1);
     lazyForEachBuilder->OnDatasetChange(DataOperations);
-    V2::Operation operation2 = {.type = "change", .index = INDEX_1};
+    for (auto iter : LAZY_FOR_EACH_NODE_IDS_INT) {
+        lazyForEachBuilder->GetChildByIndex(iter.value_or(0), true);
+    }
+    EXPECT_EQ(lazyForEachBuilder->OnGetTotalCount(), 8);
     DataOperations.clear();
+    V2::Operation operation2 = {.type = "add", .index = INDEX_0, .count = 2};
     DataOperations.push_back(operation2);
     lazyForEachBuilder->OnDatasetChange(DataOperations);
-    DataOperations.clear();
-    DataOperations.push_back(operation1);
-    lazyForEachBuilder->OnDatasetChange(DataOperations);
+    for (auto iter : LAZY_FOR_EACH_NODE_IDS_INT) {
+        lazyForEachBuilder->GetChildByIndex(iter.value_or(0), true);
+    }
+    EXPECT_EQ(lazyForEachBuilder->OnGetTotalCount(), 10);
 }
 
 /**
@@ -1564,6 +1606,44 @@ HWTEST_F(LazyForEachSyntaxTestNg, LazyForEachSyntaxOnDataDeletedTest001, TestSiz
 }
 
 /**
+ * @tc.name: LazyForEachSyntaxOnDataDeletedTest002
+ * @tc.desc: Create LazyForEach.
+ * @tc.type: FUNC
+ */
+HWTEST_F(LazyForEachSyntaxTestNg, LazyForEachSyntaxOnDataDeletedTest002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create Text and push it to view stack processor.
+     * @tc.expected: Make Text as LazyForEach parent.
+     */
+    auto frameNode = CreateNode(V2::TEXT_ETS_TAG);
+
+    /**
+     * @tc.steps: step2. Invoke lazyForEach Create function.
+     * @tc.expected: Create LazyForEachNode and can be pop from ViewStackProcessor.
+     */
+    LazyForEachModelNG lazyForEach;
+    const RefPtr<LazyForEachActuator> mockLazyForEachActuator =
+        AceType::MakeRefPtr<OHOS::Ace::Framework::MockLazyForEachBuilder>();
+    lazyForEach.Create(mockLazyForEachActuator);
+    auto lazyForEachBuilder = AceType::DynamicCast<LazyForEachBuilder>(mockLazyForEachActuator);
+
+    for (auto iter : LAZY_FOR_EACH_NODE_IDS_INT) {
+        lazyForEachBuilder->GetChildByIndex(iter.value_or(0), true);
+    }
+    std::list<V2::Operation> DataOperations;
+    V2::Operation operation1 = {.type = "delete", .index = INDEX_0, .count = 1};
+    DataOperations.push_back(operation1);
+    lazyForEachBuilder->OnDatasetChange(DataOperations);
+    EXPECT_EQ(lazyForEachBuilder->OnGetTotalCount(), 6);
+    DataOperations.clear();
+    V2::Operation operation2 = {.type = "delete", .index = INDEX_0, .count = 2};
+    DataOperations.push_back(operation2);
+    lazyForEachBuilder->OnDatasetChange(DataOperations);
+    EXPECT_EQ(lazyForEachBuilder->OnGetTotalCount(), 4);
+}
+
+/**
  * @tc.name: LazyForEachSyntaxOnDataBulkDeletedTest001
  * @tc.desc: Create LazyForEach.
  * @tc.type: FUNC
@@ -1627,6 +1707,38 @@ HWTEST_F(LazyForEachSyntaxTestNg, LazyForEachSyntaxOnDataChangedTest001, TestSiz
 }
 
 /**
+ * @tc.name: LazyForEachSyntaxOnDataChangedTest002
+ * @tc.desc: Create LazyForEach.
+ * @tc.type: FUNC
+ */
+HWTEST_F(LazyForEachSyntaxTestNg, LazyForEachSyntaxOnDataChangedTest002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create Text and push it to view stack processor.
+     * @tc.expected: Make Text as LazyForEach parent.
+     */
+    auto frameNode = CreateNode(V2::TEXT_ETS_TAG);
+
+    /**
+     * @tc.steps: step2. Invoke lazyForEach Create function.
+     * @tc.expected: Create LazyForEachNode and can be pop from ViewStackProcessor.
+     */
+    LazyForEachModelNG lazyForEach;
+    const RefPtr<LazyForEachActuator> mockLazyForEachActuator =
+        AceType::MakeRefPtr<OHOS::Ace::Framework::MockLazyForEachBuilder>();
+    lazyForEach.Create(mockLazyForEachActuator);
+    auto lazyForEachBuilder = AceType::DynamicCast<LazyForEachBuilder>(mockLazyForEachActuator);
+    for (auto iter : LAZY_FOR_EACH_NODE_IDS_INT) {
+        lazyForEachBuilder->GetChildByIndex(iter.value_or(0), true);
+    }
+    std::list<V2::Operation> DataOperations;
+    V2::Operation operation1 = {.type = "change", .index = INDEX_0};
+    DataOperations.push_back(operation1);
+    lazyForEachBuilder->OnDatasetChange(DataOperations);
+    EXPECT_EQ(lazyForEachBuilder->OnGetTotalCount(), 7);
+}
+
+/**
  * @tc.name: LazyForEachSyntaxOnDataMovedTest001
  * @tc.desc: Create LazyForEach.
  * @tc.type: FUNC
@@ -1657,6 +1769,65 @@ HWTEST_F(LazyForEachSyntaxTestNg, LazyForEachSyntaxOnDataMovedTest001, TestSize.
     lazyForEachBuilder->OnDataMoved(INDEX_0, INDEX_7);
     lazyForEachBuilder->OnDataMoved(INDEX_7, INDEX_1);
     lazyForEachBuilder->OnDataMoved(INDEX_7, INDEX_EQUAL_WITH_START_INDEX_DELETED);
+}
+
+/**
+ * @tc.name: LazyForEachSyntaxOnDataMovedTest002
+ * @tc.desc: Create LazyForEach.
+ * @tc.type: FUNC
+ */
+HWTEST_F(LazyForEachSyntaxTestNg, LazyForEachSyntaxOnDataMovedTest002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create Text and push it to view stack processor.
+     * @tc.expected: Make Text as LazyForEach parent.
+     */
+    auto frameNode = CreateNode(V2::TEXT_ETS_TAG);
+
+    /**
+     * @tc.steps: step2. Invoke lazyForEach Create function.
+     * @tc.expected: Create LazyForEachNode and can be pop from ViewStackProcessor.
+     */
+    LazyForEachModelNG lazyForEach;
+    const RefPtr<LazyForEachActuator> mockLazyForEachActuator =
+        AceType::MakeRefPtr<OHOS::Ace::Framework::MockLazyForEachBuilder>();
+    lazyForEach.Create(mockLazyForEachActuator);
+    auto lazyForEachBuilder = AceType::DynamicCast<LazyForEachBuilder>(mockLazyForEachActuator);
+    for (auto iter : LAZY_FOR_EACH_NODE_IDS_INT) {
+        lazyForEachBuilder->GetChildByIndex(iter.value_or(0), true);
+    }
+    std::list<V2::Operation> DataOperations;
+    V2::Operation operation1 = {.type = "move", .coupleIndex = std::pair(0, 2)};
+    DataOperations.push_back(operation1);
+    lazyForEachBuilder->OnDatasetChange(DataOperations);
+    EXPECT_EQ(lazyForEachBuilder->OnGetTotalCount(), 7);
+}
+
+HWTEST_F(LazyForEachSyntaxTestNg, LazyForEachSyntaxOnDataExchangeTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create Text and push it to view stack processor.
+     * @tc.expected: Make Text as LazyForEach parent.
+     */
+    auto frameNode = CreateNode(V2::TEXT_ETS_TAG);
+
+    /**
+     * @tc.steps: step2. Invoke lazyForEach Create function.
+     * @tc.expected: Create LazyForEachNode and can be pop from ViewStackProcessor.
+     */
+    LazyForEachModelNG lazyForEach;
+    const RefPtr<LazyForEachActuator> mockLazyForEachActuator =
+        AceType::MakeRefPtr<OHOS::Ace::Framework::MockLazyForEachBuilder>();
+    lazyForEach.Create(mockLazyForEachActuator);
+    auto lazyForEachBuilder = AceType::DynamicCast<LazyForEachBuilder>(mockLazyForEachActuator);
+    for (auto iter : LAZY_FOR_EACH_NODE_IDS_INT) {
+        lazyForEachBuilder->GetChildByIndex(iter.value_or(0), true);
+    }
+    std::list<V2::Operation> DataOperations;
+    V2::Operation operation1 = {.type = "exchange", .coupleIndex = std::pair(1, 3)};
+    DataOperations.push_back(operation1);
+    lazyForEachBuilder->OnDatasetChange(DataOperations);
+    EXPECT_EQ(lazyForEachBuilder->OnGetTotalCount(), 7);
 }
 
 /**

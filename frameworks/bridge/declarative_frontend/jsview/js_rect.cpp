@@ -286,33 +286,61 @@ void JSRect::ObjectRadius(const JSCallbackInfo& info)
     }
 }
 
+void JSRect::ParseRectObjBelowApi12(const RefPtr<ShapeRect>& rect, const JSRef<JSObject>& obj)
+{
+    CalcDimension width;
+    CalcDimension height;
+    CalcDimension radiusWidth;
+    CalcDimension radiusHeight;
+    if (ParseJsDimensionVp(obj->GetProperty("width"), width) && width.IsValid()) {
+        rect->SetWidth(width);
+    }
+    if (ParseJsDimensionVp(obj->GetProperty("height"), height) && height.IsValid()) {
+        rect->SetHeight(height);
+    }
+    if (ParseJsDimensionVp(obj->GetProperty("radiusWidth"), radiusWidth) && radiusWidth.IsValid()) {
+        rect->SetRadiusWidth(radiusWidth);
+    }
+    if (ParseJsDimensionVp(obj->GetProperty("radiusHeight"), radiusHeight) && radiusHeight.IsValid()) {
+        rect->SetRadiusHeight(radiusHeight);
+    }
+}
+
+void JSRect::ParseRectObjAboveApi12(const RefPtr<ShapeRect>& rect, const JSRef<JSObject>& obj)
+{
+    CalcDimension width;
+    CalcDimension height;
+    CalcDimension radiusWidth;
+    CalcDimension radiusHeight;
+    if (ParseJsDimensionVpNG(obj->GetProperty("width"), width) && width.IsValid()) {
+        rect->SetWidth(width);
+    }
+    if (ParseJsDimensionVpNG(obj->GetProperty("height"), height) && height.IsValid()) {
+        rect->SetHeight(height);
+    }
+    if (ParseJsDimensionVpNG(obj->GetProperty("radiusWidth"), radiusWidth) && radiusWidth.IsValid()) {
+        rect->SetRadiusWidth(radiusWidth);
+    }
+    if (ParseJsDimensionVpNG(obj->GetProperty("radiusHeight"), radiusHeight) && radiusHeight.IsValid()) {
+        rect->SetRadiusHeight(radiusHeight);
+    }
+}
+
 void JSRect::ConstructorCallback(const JSCallbackInfo& info)
 {
     auto jsRect = AceType::MakeRefPtr<JSRect>();
     auto rect = AceType::MakeRefPtr<ShapeRect>();
     if (info.Length() > 0 && info[0]->IsObject()) {
         JSRef<JSObject> obj = JSRef<JSObject>::Cast(info[0]);
-        CalcDimension width;
-        if (ParseJsDimensionVp(obj->GetProperty("width"), width) && width.IsValid()) {
-            rect->SetWidth(width);
-        }
-        CalcDimension height;
-        if (ParseJsDimensionVp(obj->GetProperty("height"), height) && height.IsValid()) {
-            rect->SetHeight(height);
-        }
-        CalcDimension radiusWidth;
-        if (ParseJsDimensionVp(obj->GetProperty("radiusWidth"), radiusWidth) && radiusWidth.IsValid()) {
-            rect->SetRadiusWidth(radiusWidth);
-        }
-        CalcDimension radiusHeight;
-        if (ParseJsDimensionVp(obj->GetProperty("radiusHeight"), radiusHeight) && radiusHeight.IsValid()) {
-            rect->SetRadiusHeight(radiusHeight);
+        if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
+            ParseRectObjBelowApi12(rect, obj);
+        } else {
+            ParseRectObjAboveApi12(rect, obj);
         }
         JSRef<JSVal> radius = obj->GetProperty("radius");
         if (radius->IsNumber() || radius->IsString()) {
             SetRadiusWithJsVal(rect, radius);
-        }
-        if (radius->IsArray()) {
+        } else if (radius->IsArray()) {
             SetRadiusWithArrayValue(rect, radius);
         }
         info.SetReturnValue(info.This());

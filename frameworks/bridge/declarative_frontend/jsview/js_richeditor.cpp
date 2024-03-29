@@ -561,7 +561,7 @@ JSRef<JSVal> JSRichEditor::CreateJsOnIMEInputComplete(const NG::RichEditorAbstra
         1, JSRef<JSVal>::Make(ToJSValue(textSpanResult.OffsetInSpan() + textSpanResult.GetEraseLength())));
     spanPositionObj->SetPropertyObject("spanRange", spanRange);
     spanPositionObj->SetProperty<int32_t>("spanIndex", textSpanResult.GetSpanIndex());
-    decorationObj->SetProperty<TextDecoration>("type", textSpanResult.GetTextDecoration());
+    decorationObj->SetProperty<int32_t>("type", static_cast<int32_t>(textSpanResult.GetTextDecoration()));
     decorationObj->SetProperty<std::string>("color", textSpanResult.GetColor());
     textStyleObj->SetProperty<std::string>("fontColor", textSpanResult.GetFontColor());
     textStyleObj->SetProperty<NG::FONT_FEATURES_MAP>("fontFeature", textSpanResult.GetFontFeatures());

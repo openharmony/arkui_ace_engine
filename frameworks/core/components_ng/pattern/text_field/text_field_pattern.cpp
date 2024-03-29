@@ -1016,7 +1016,7 @@ void TextFieldPattern::HandleBlurEvent()
     UpdateBlurReason();
     auto textFieldManager = DynamicCast<TextFieldManagerNG>(context->GetTextFieldManager());
     if (textFieldManager) {
-        textFieldManager->ClearOnFocusTextField();
+        textFieldManager->ClearOnFocusTextField(host->GetId());
     }
     auto layoutProperty = GetLayoutProperty<TextFieldLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
@@ -2057,7 +2057,7 @@ void TextFieldPattern::ScheduleCursorTwinkling()
 
 void TextFieldPattern::StartTwinkling()
 {
-    if (isTransparent_) {
+    if (isTransparent_ || !HasFocus()) {
         return;
     }
     // Ignore the result because all ops are called on this same thread (ACE UI).
@@ -2638,7 +2638,7 @@ void TextFieldPattern::OnDetachFromFrameNode(FrameNode* node)
     }
     auto textFieldManager = DynamicCast<TextFieldManagerNG>(pipeline->GetTextFieldManager());
     if (textFieldManager) {
-        textFieldManager->ClearOnFocusTextField();
+        textFieldManager->ClearOnFocusTextField(node->GetId());
     }
     auto frameNode = WeakClaim(node);
     pipeline->RemoveFontNodeNG(frameNode);
@@ -2730,7 +2730,11 @@ void TextFieldPattern::OnHover(bool isHover)
     if (isHover) {
         pipeline->SetMouseStyleHoldNode(frameId);
     } else {
-        pipeline->ChangeMouseStyle(frameId, MouseFormat::DEFAULT);
+        int32_t windowId = 0;
+#ifdef WINDOW_SCENE_SUPPORTED
+        windowId = GetSCBSystemWindowId();
+#endif
+        pipeline->ChangeMouseStyle(frameId, MouseFormat::DEFAULT, windowId);
         pipeline->FreeMouseStyleHoldNode(frameId);
     }
     isOnHover_ = isHover;
@@ -2763,17 +2767,21 @@ void TextFieldPattern::ChangeMouseState(const Offset location, const RefPtr<Pipe
                              (cleanNodeResponseArea_ ? cleanNodeResponseArea_->GetAreaRect().Width() : 0.0f);
     auto x = location.GetX();
     auto y = location.GetY();
+    int32_t windowId = 0;
+#ifdef WINDOW_SCENE_SUPPORTED
+    windowId = GetSCBSystemWindowId();
+#endif
     if (GreatNotEqual(x, 0) && LessNotEqual(x, frameRect_.Width()) && GreatNotEqual(y, 0) &&
         LessNotEqual(y, frameRect_.Height())) {
         if (GreatNotEqual(location.GetX(), frameRect_.Width() - responseAreaWidth)) {
             pipeline->SetMouseStyleHoldNode(frameId);
-            pipeline->ChangeMouseStyle(frameId, MouseFormat::DEFAULT);
+            pipeline->ChangeMouseStyle(frameId, MouseFormat::DEFAULT, windowId);
         } else {
             pipeline->SetMouseStyleHoldNode(frameId);
-            pipeline->ChangeMouseStyle(frameId, MouseFormat::TEXT_CURSOR);
+            pipeline->ChangeMouseStyle(frameId, MouseFormat::TEXT_CURSOR, windowId);
         }
     } else {
-        pipeline->ChangeMouseStyle(frameId, MouseFormat::DEFAULT);
+        pipeline->ChangeMouseStyle(frameId, MouseFormat::DEFAULT, windowId);
         pipeline->FreeMouseStyleHoldNode(frameId);
     }
 }
@@ -2790,9 +2798,13 @@ void TextFieldPattern::HandleMouseEvent(MouseInfo& info)
     selectOverlay_->SetLastSourceType(info.GetSourceDevice());
     auto scrollBar = GetScrollBar();
     Point point(info.GetLocalLocation().GetX(), info.GetLocalLocation().GetY());
+    int32_t windowId = 0;
+#ifdef WINDOW_SCENE_SUPPORTED
+    windowId = GetSCBSystemWindowId();
+#endif
     if (scrollBar && (scrollBar->IsPressed() || scrollBar->IsHover() || scrollBar->InBarRectRegion(point))) {
         pipeline->SetMouseStyleHoldNode(frameId);
-        pipeline->ChangeMouseStyle(frameId, MouseFormat::DEFAULT);
+        pipeline->ChangeMouseStyle(frameId, MouseFormat::DEFAULT, windowId);
         return;
     }
     ChangeMouseState(info.GetLocalLocation(), pipeline, frameId);
@@ -2938,7 +2950,7 @@ void TextFieldPattern::UpdateTextFieldManager(const Offset& offset, float height
 {
     auto tmpHost = GetHost();
     CHECK_NULL_VOID(tmpHost);
-    auto context = tmpHost->GetContext();
+    auto context = tmpHost->GetContextRefPtr();
     CHECK_NULL_VOID(context);
     auto textFieldManager = DynamicCast<TextFieldManagerNG>(context->GetTextFieldManager());
     CHECK_NULL_VOID(textFieldManager);
@@ -3012,7 +3024,7 @@ bool TextFieldPattern::RequestKeyboard(bool isFocusViewChanged, bool needStartTw
 {
     auto tmpHost = GetHost();
     CHECK_NULL_RETURN(tmpHost, false);
-    auto context = tmpHost->GetContext();
+    auto context = tmpHost->GetContextRefPtr();
     CHECK_NULL_RETURN(context, false);
 
     if (needShowSoftKeyboard) {
@@ -3082,7 +3094,7 @@ std::optional<MiscServices::TextConfig> TextFieldPattern::GetMiscTextConfig() co
 {
     auto tmpHost = GetHost();
     CHECK_NULL_RETURN(tmpHost, {});
-    auto pipeline = tmpHost->GetContext();
+    auto pipeline = tmpHost->GetContextRefPtr();
     CHECK_NULL_RETURN(pipeline, {});
     auto theme = GetTheme();
     CHECK_NULL_RETURN(theme, {});
@@ -3880,14 +3892,11 @@ bool TextFieldPattern::CursorMoveUpOperation()
 {
     CHECK_NULL_RETURN(IsTextArea(), false);
     auto originCaretPosition = selectController_->GetCaretIndex();
-    auto offsetX = selectController_->GetCaretRect().GetX() - contentRect_.GetX();
-    auto offsetY = selectController_->GetCaretRect().GetY() - textRect_.GetY();
+    auto offsetX = selectController_->GetCaretRect().GetX();
     // multiply by 0.5f to convert to the grapheme center point of the previous line.
-    float verticalOffset = offsetY - PreferredLineHeight() * 0.5f;
-    selectController_->UpdateCaretIndex(
-        static_cast<int32_t>(paragraph_->GetGlyphIndexByCoordinate(Offset(offsetX, verticalOffset))));
+    auto offsetY = selectController_->GetCaretRect().GetY() - PreferredLineHeight() * 0.5f;
     std::optional<Offset> offset;
-    offset.emplace(Offset(offsetX, verticalOffset));
+    offset.emplace(Offset(offsetX, offsetY));
     OnCursorMoveDone(TextAffinity::DOWNSTREAM, offset);
     return originCaretPosition != selectController_->GetCaretIndex();
 }
@@ -3906,14 +3915,11 @@ bool TextFieldPattern::CursorMoveDownOperation()
 {
     CHECK_NULL_RETURN(IsTextArea(), false);
     auto originCaretPosition = selectController_->GetCaretIndex();
-    auto offsetX = selectController_->GetCaretRect().GetX() - contentRect_.GetX();
-    auto offsetY = selectController_->GetCaretRect().GetY() - textRect_.GetY();
+    auto offsetX = selectController_->GetCaretRect().GetX();
     // multiply by 1.5f to convert to the grapheme center point of the next line.
-    float verticalOffset = offsetY + PreferredLineHeight() * 1.5f;
-    selectController_->UpdateCaretIndex(
-        static_cast<int32_t>(paragraph_->GetGlyphIndexByCoordinate(Offset(offsetX, verticalOffset))));
+    auto offsetY = selectController_->GetCaretRect().GetY() + PreferredLineHeight() * 1.5f;
     std::optional<Offset> offset;
-    offset.emplace(Offset(offsetX, verticalOffset));
+    offset.emplace(Offset(offsetX, offsetY));
     OnCursorMoveDone(TextAffinity::DOWNSTREAM, offset);
     return originCaretPosition != selectController_->GetCaretIndex();
 }
@@ -6018,7 +6024,7 @@ OffsetF TextFieldPattern::GetTextPaintOffset() const
 {
     auto host = GetHost();
     CHECK_NULL_RETURN(host, OffsetF(0.0f, 0.0f));
-    auto pipeline = host->GetContext();
+    auto pipeline = host->GetContextRefPtr();
     CHECK_NULL_RETURN(pipeline, OffsetF(0.0f, 0.0f));
     auto rootOffset = pipeline->GetRootRect().GetOffset();
     auto textPaintOffset = host->GetPaintRectOffset();

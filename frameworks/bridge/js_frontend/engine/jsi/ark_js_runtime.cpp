@@ -423,4 +423,18 @@ Local<JSValueRef> PandaFunctionData::Callback(panda::JsiRuntimeCallInfo* info) c
     return scope.Escape(std::static_pointer_cast<ArkJSValue>(result)->GetValue(runtime));
 }
 
+int32_t ArkJSRuntime::LoadDestinationFile(const std::string& bundleName, const std::string& moduleName,
+    const std::string& pageSourceFile, bool isSingleton)
+{
+    JSExecutionScope executionScope(vm_);
+    LocalScope scope(vm_);
+    panda::TryCatch trycatch(vm_);
+    std::string module = moduleName;
+    int ret = JSNApi::ExecuteWithSingletonPatternFlag(vm_, bundleName, module, pageSourceFile, isSingleton);
+    HandleUncaughtException(trycatch);
+    if (ret != 0) {
+        TAG_LOGE(AceLogTag::ACE_NAVIGATION, "load pageSourceFile failed: %{public}d", ret);
+    }
+    return ret;
+}
 } // namespace OHOS::Ace::Framework

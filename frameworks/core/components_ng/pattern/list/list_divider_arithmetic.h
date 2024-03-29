@@ -44,20 +44,24 @@ public:
         DividerMap another = rhs->GetDividerMap();
         DividerMap one;
         for (auto child : another) {
-            if (dividermap_.find(child.first) == dividermap_.end()) {
+            if (child.second.isDelta == true && dividermap_.find(child.first) == dividermap_.end()) {
+                continue;
+            } else if (child.second.isDelta == false) {
                 auto& listDivider = one[child.first];
-                listDivider.isDelta = child.second.isDelta;
+                listDivider.isDelta = false;
                 listDivider.length = child.second.length;
                 listDivider.offset = child.second.offset;
             }
         }
         for (auto child : dividermap_) {
             auto it = another.find(child.first);
-            auto& listDivider = one[child.first];
-            if (it != another.end()) {
-                listDivider.isDelta = it->second.isDelta;
+            if (it != another.end() && it->second.isDelta == true) {
+                auto& listDivider = one[child.first];
+                listDivider.isDelta = true;
                 listDivider.length = child.second.length + it->second.length;
                 listDivider.offset = child.second.offset + it->second.offset;
+            } else if (child.second.isDelta == true && it == another.end()) {
+                continue;
             }
         }
         return MakeRefPtr<ListDividerArithmetic>(one);
@@ -74,7 +78,7 @@ public:
         for (auto child : dividermap_) {
             auto it = another.find(child.first);
             auto& listDivider = one[child.first];
-            if (it != another.end()) {
+            if (it != another.end() && it->second.isDelta == true) {
                 listDivider.isDelta = true;
                 listDivider.length = child.second.length - it->second.length;
                 listDivider.offset = child.second.offset - it->second.offset;
@@ -121,6 +125,7 @@ public:
         auto iterOne = one.begin();
         for (; iterAnother != another.end(); ++iterAnother, ++iterOne) {
             if (iterAnother->first != iterOne->first ||
+                iterAnother->second.isDelta != iterOne->second.isDelta ||
                 iterAnother->second.offset != iterOne->second.offset ||
                 iterAnother->second.length != iterOne->second.length) {
                 return false;

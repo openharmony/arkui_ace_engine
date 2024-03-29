@@ -99,7 +99,7 @@ void FormPattern::OnAttachToFrameNode()
         CHECK_NULL_VOID(pattern);
         auto host = pattern->GetHost();
         CHECK_NULL_VOID(host);
-        auto context = host->GetContext();
+        auto context = host->GetContextRefPtr();
         CHECK_NULL_VOID(context);
         auto subContainer = pattern->GetSubContainer();
         CHECK_NULL_VOID(subContainer);
@@ -554,9 +554,9 @@ void FormPattern::AddFormComponent(const RequestFormInfo& info)
     }
     if (formManagerBridge_) {
 #if OHOS_STANDARD_SYSTEM
-        formManagerBridge_->AddForm(host->GetContext(), info, formInfo);
+        formManagerBridge_->AddForm(host->GetContextRefPtr(), info, formInfo);
 #else
-        formManagerBridge_->AddForm(host->GetContext(), info);
+        formManagerBridge_->AddForm(host->GetContextRefPtr(), info);
 #endif
     }
 }
@@ -640,7 +640,7 @@ void FormPattern::InitFormManagerDelegate()
 
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto context = host->GetContext();
+    auto context = host->GetContextRefPtr();
     CHECK_NULL_VOID(context);
     formManagerBridge_ = AceType::MakeRefPtr<FormManagerDelegate>(context);
     formManagerBridge_->AddRenderDelegate();
@@ -883,7 +883,7 @@ void FormPattern::CreateCardContainer()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto context = host->GetContext();
+    auto context = host->GetContextRefPtr();
     CHECK_NULL_VOID(context);
     auto layoutProperty = host->GetLayoutProperty<FormLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);

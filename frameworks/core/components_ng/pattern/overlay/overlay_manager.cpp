@@ -2092,6 +2092,9 @@ bool OverlayManager::RemoveOverlay(bool isBackPressed, bool isPageRouter)
         // stage node is at index 0, remove overlay at last
         auto overlay = DynamicCast<FrameNode>(rootNode->GetLastChild());
         CHECK_NULL_RETURN(overlay, false);
+        if (overlay->GetTag() == V2::OVERLAY_ETS_TAG) {
+            return false;
+        }
         // close dialog with animation
         auto pattern = overlay->GetPattern();
         if (InstanceOf<ToastPattern>(pattern)) {
@@ -3194,7 +3197,7 @@ void OverlayManager::PlaySheetTransition(
     context->UpdateRenderGroup(true, true, true);
     auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
     CHECK_NULL_VOID(sheetPattern);
-    auto sheetMaxHeight = sheetPattern->GetSheetMaxHeight();
+    auto sheetMaxHeight = sheetPattern->GetPageHeight();
     auto sheetParent = DynamicCast<FrameNode>(sheetNode->GetParent());
     CHECK_NULL_VOID(sheetParent);
     if (isTransitionIn) {
@@ -3388,7 +3391,7 @@ void OverlayManager::ComputeSheetOffset(NG::SheetStyle& sheetStyle, RefPtr<Frame
 {
     auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
     CHECK_NULL_VOID(sheetPattern);
-    auto sheetMaxHeight = sheetPattern->GetSheetMaxHeight();
+    auto sheetMaxHeight = sheetPattern->GetPageHeightWithoutOffset();
     auto largeHeight = sheetMaxHeight - SHEET_BLANK_MINI_HEIGHT.ConvertToPx();
     auto geometryNode = sheetNode->GetGeometryNode();
     CHECK_NULL_VOID(geometryNode);
@@ -3422,12 +3425,11 @@ void OverlayManager::ComputeSingleGearSheetOffset(NG::SheetStyle& sheetStyle, Re
 {
     auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
     CHECK_NULL_VOID(sheetPattern);
-    auto sheetMaxHeight = sheetPattern->GetSheetMaxHeight();
+    auto sheetMaxHeight = sheetPattern->GetPageHeightWithoutOffset();
     auto context = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(context);
-    auto manager = context->GetSafeAreaManager();
-    CHECK_NULL_VOID(manager);
-    auto statusBarHeight = manager->GetSystemSafeArea().top_.Length();
+    auto safeAreaInsets = context->GetSafeAreaWithoutProcess();
+    auto statusBarHeight = safeAreaInsets.top_.Length();
     auto largeHeight = sheetMaxHeight - SHEET_BLANK_MINI_HEIGHT.ConvertToPx() - statusBarHeight;
     if (sheetStyle.sheetMode.has_value()) {
         if (sheetStyle.sheetMode == SheetMode::MEDIUM) {
@@ -3464,12 +3466,11 @@ void OverlayManager::ComputeDetentsSheetOffset(NG::SheetStyle& sheetStyle, RefPt
 {
     auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
     CHECK_NULL_VOID(sheetPattern);
-    auto sheetMaxHeight = sheetPattern->GetSheetMaxHeight();
+    auto sheetMaxHeight = sheetPattern->GetPageHeightWithoutOffset();
     auto context = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(context);
-    auto manager = context->GetSafeAreaManager();
-    CHECK_NULL_VOID(manager);
-    auto statusBarHeight = manager->GetSystemSafeArea().top_.Length();
+    auto safeAreaInsets = context->GetSafeAreaWithoutProcess();
+    auto statusBarHeight = safeAreaInsets.top_.Length();
     auto largeHeight = sheetMaxHeight - SHEET_BLANK_MINI_HEIGHT.ConvertToPx() - statusBarHeight;
     auto selection = sheetStyle.detents[0];
     if (selection.sheetMode.has_value()) {
@@ -4191,6 +4192,150 @@ bool OverlayManager::ShowUIExtensionMenu(const RefPtr<NG::FrameNode>& uiExtNode,
     return true;
 }
 
+void OverlayManager::CreateOverlayNode()
+{
+    TAG_LOGD(AceLogTag::ACE_OVERLAY, "create overlay node enter");
+    if (overlayNode_) {
+        return;
+    }
+    auto rootNode = rootNodeWeak_.Upgrade();
+    CHECK_NULL_VOID(rootNode);
+    auto pipelineContext = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipelineContext);
+    auto stageManager = pipelineContext->GetStageManager();
+    CHECK_NULL_VOID(stageManager);
+    auto stageNode = stageManager->GetStageNode();
+    CHECK_NULL_VOID(stageNode);
+    overlayNode_ = FrameNode::CreateFrameNode(
+        V2::OVERLAY_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<Pattern>());
+    CHECK_NULL_VOID(overlayNode_);
+    overlayNode_->SetHitTestMode(HitTestMode::HTMTRANSPARENT_SELF);
+    auto layoutProperty = overlayNode_->GetLayoutProperty();
+    CHECK_NULL_VOID(layoutProperty);
+    auto full = CalcLength(Dimension(1.0, DimensionUnit::PERCENT));
+    layoutProperty->UpdateUserDefinedIdealSize(CalcSize(full, full));
+    rootNode->AddChildAfter(overlayNode_, stageNode);
+}
+
+void OverlayManager::AddFrameNodeToOverlay(const RefPtr<NG::FrameNode>& node, std::optional<int32_t> index)
+{
+    TAG_LOGD(AceLogTag::ACE_OVERLAY, "add FrameNode to the overlay node enter");
+    CHECK_NULL_VOID(node);
+    int32_t level = -1;
+    if (index.has_value() && index.value() >= 0) {
+        level = index.value();
+    }
+    if (frameNodeMapOnOverlay_.find(node->GetId()) != frameNodeMapOnOverlay_.end()) {
+        overlayNode_->RemoveChild(node);
+        frameNodeMapOnOverlay_.erase(node->GetId());
+    }
+    CreateOverlayNode();
+    CHECK_NULL_VOID(overlayNode_);
+    const auto& children = overlayNode_->GetChildren();
+    if (children.empty() || level < frameNodeMapOnOverlay_[overlayNode_->GetFirstChild()->GetId()]) {
+        overlayNode_->AddChild(node, 0);
+    } else if (level == -1 || level >= frameNodeMapOnOverlay_[overlayNode_->GetLastChild()->GetId()]) {
+        overlayNode_->AddChild(node);
+    } else {
+        for (auto it = children.rbegin(); it != children.rend(); ++it) {
+            auto childLevel = frameNodeMapOnOverlay_[(*it)->GetId()];
+            if (childLevel >= 0 && childLevel <= level) {
+                auto beforeNode = DynamicCast<FrameNode>(*it);
+                CHECK_NULL_VOID(beforeNode);
+                overlayNode_->AddChildAfter(node, beforeNode);
+            }
+        }
+    }
+
+    frameNodeMapOnOverlay_[node->GetId()] = level;
+    auto focusHub = node->GetFocusHub();
+    CHECK_NULL_VOID(focusHub);
+    focusHub->RequestFocus();
+    overlayNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_CHILD);
+}
+
+void OverlayManager::RemoveFrameNodeOnOverlay(const RefPtr<NG::FrameNode>& node)
+{
+    TAG_LOGD(AceLogTag::ACE_OVERLAY, "delete the FrameNode on the overlay node enter");
+    CHECK_NULL_VOID(node);
+    if (frameNodeMapOnOverlay_.find(node->GetId()) == frameNodeMapOnOverlay_.end()) {
+        TAG_LOGW(AceLogTag::ACE_OVERLAY, "the node does not exist in the overlay");
+        return;
+    }
+    CHECK_NULL_VOID(overlayNode_);
+    overlayNode_->RemoveChild(node);
+    frameNodeMapOnOverlay_.erase(node->GetId());
+    if (overlayNode_->GetChildren().empty()) {
+        auto rootNode = rootNodeWeak_.Upgrade();
+        CHECK_NULL_VOID(rootNode);
+        rootNode->RemoveChild(overlayNode_);
+        overlayNode_.Reset();
+        frameNodeMapOnOverlay_.clear();
+        rootNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_CHILD);
+        return;
+    }
+    overlayNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_CHILD);
+}
+
+void OverlayManager::ShowNodeOnOverlay(const RefPtr<NG::FrameNode>& node)
+{
+    TAG_LOGD(AceLogTag::ACE_OVERLAY, "show the FrameNode on the overlay node enter");
+    CHECK_NULL_VOID(node);
+    CHECK_NULL_VOID(overlayNode_);
+    auto layoutProperty = node->GetLayoutProperty();
+    CHECK_NULL_VOID(layoutProperty);
+    if (layoutProperty->GetVisibility().has_value() && layoutProperty->GetVisibilityValue() == VisibleType::VISIBLE) {
+        return;
+    }
+    layoutProperty->UpdateVisibility(VisibleType::VISIBLE);
+    auto focusHub = node->GetFocusHub();
+    CHECK_NULL_VOID(focusHub);
+    focusHub->RequestFocus();
+    node->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_CHILD);
+}
+
+void OverlayManager::HideNodeOnOverlay(const RefPtr<NG::FrameNode>& node)
+{
+    TAG_LOGD(AceLogTag::ACE_OVERLAY, "hide the FrameNode on the overlay node enter");
+    CHECK_NULL_VOID(node);
+    CHECK_NULL_VOID(overlayNode_);
+    auto layoutProperty = node->GetLayoutProperty();
+    CHECK_NULL_VOID(layoutProperty);
+    if (layoutProperty->GetVisibility().has_value() && layoutProperty->GetVisibilityValue() == VisibleType::GONE) {
+        return;
+    }
+    layoutProperty->UpdateVisibility(VisibleType::GONE);
+    node->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_CHILD);
+}
+
+void OverlayManager::ShowAllNodesOnOverlay()
+{
+    TAG_LOGD(AceLogTag::ACE_OVERLAY, "show all FrameNodes on the overlay node enter");
+    CHECK_NULL_VOID(overlayNode_);
+    for (auto& child : overlayNode_->GetChildren()) {
+        auto frameNode = DynamicCast<FrameNode>(child);
+        CHECK_NULL_VOID(frameNode);
+        auto layoutProperty = frameNode->GetLayoutProperty();
+        CHECK_NULL_VOID(layoutProperty);
+        layoutProperty->UpdateVisibility(VisibleType::VISIBLE);
+    }
+    overlayNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_CHILD);
+}
+
+void OverlayManager::HideAllNodesOnOverlay()
+{
+    TAG_LOGD(AceLogTag::ACE_OVERLAY, "hide all FrameNodes on the overlay node enter");
+    CHECK_NULL_VOID(overlayNode_);
+    for (auto& child : overlayNode_->GetChildren()) {
+        auto frameNode = DynamicCast<FrameNode>(child);
+        CHECK_NULL_VOID(frameNode);
+        auto layoutProperty = frameNode->GetLayoutProperty();
+        CHECK_NULL_VOID(layoutProperty);
+        layoutProperty->UpdateVisibility(VisibleType::GONE);
+    }
+    overlayNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_CHILD);
+}
+
 void OverlayManager::MarkDirty(PropertyChangeFlag flag)
 {
     auto root = rootNodeWeak_.Upgrade();
@@ -4211,6 +4356,36 @@ void OverlayManager::MarkDirty(PropertyChangeFlag flag)
             }
         }
     }
+}
+
+void OverlayManager::MarkDirtyOverlay()
+{
+    auto root = rootNodeWeak_.Upgrade();
+    CHECK_NULL_VOID(root);
+    auto child = root->GetLastChild();
+    CHECK_NULL_VOID(child);
+    // sheetPage Node will MarkDirty when VirtualKeyboard Height Changes
+    auto sheetParent = DynamicCast<FrameNode>(child);
+    if (sheetParent && sheetParent->GetTag() == V2::SHEET_WRAPPER_TAG) {
+        auto sheet = sheetParent->GetChildAtIndex(0);
+        if (sheet) {
+            sheet->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+        }
+    }
+}
+
+bool OverlayManager::CheckPageNeedAvoidKeyboard() const
+{
+    auto root = rootNodeWeak_.Upgrade();
+    CHECK_NULL_RETURN(root, true);
+    auto child = root->GetLastChild();
+    CHECK_NULL_RETURN(child, true);
+    // page will not avoid keyboard when lastChild is sheet
+    if (child->GetTag() != V2::SHEET_WRAPPER_TAG) {
+        return true;
+    }
+    auto frameNode = DynamicCast<FrameNode>(child);
+    return !(frameNode && frameNode->GetFocusHub() && frameNode->GetFocusHub()->IsCurrentFocus());
 }
 
 float OverlayManager::GetRootHeight() const

@@ -197,6 +197,9 @@ void WaterFlowLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     auto layoutProperty = AceType::DynamicCast<WaterFlowLayoutProperty>(layoutWrapper->GetLayoutProperty());
     layoutInfo_.UpdateStartIndex();
     auto firstIndex = layoutInfo_.endIndex_;
+    auto crossSize = size.CrossSize(axis_);
+    auto layoutDirection = layoutWrapper->GetLayoutProperty()->GetNonAutoLayoutDirection();
+    auto isRtl = (layoutDirection == TextDirection::RTL) && (axis_ == Axis::VERTICAL);
     for (const auto& mainPositions : layoutInfo_.items_[0]) {
         for (const auto& item : mainPositions.second) {
             if (item.first < layoutInfo_.startIndex_ || item.first > layoutInfo_.endIndex_) {
@@ -206,6 +209,9 @@ void WaterFlowLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
             auto currentOffset = childFrameOffset;
             auto crossOffset = itemsCrossPosition_.at(mainPositions.first);
             auto mainOffset = item.second.first + layoutInfo_.currentOffset_;
+            if (isRtl) {
+                crossOffset = crossSize - crossOffset - itemsCrossSize_.at(mainPositions.first);
+            }
             if (layoutProperty->IsReverse()) {
                 mainOffset = mainSize_ - item.second.second - mainOffset;
             }

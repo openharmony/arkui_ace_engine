@@ -69,7 +69,7 @@ std::optional<SizeF> TextLayoutAlgorithm::MeasureContent(
 
     auto frameNode = layoutWrapper->GetHostNode();
     CHECK_NULL_RETURN(frameNode, std::nullopt);
-    auto pipeline = frameNode->GetContext();
+    auto pipeline = frameNode->GetContextRefPtr();
     CHECK_NULL_RETURN(pipeline, std::nullopt);
     auto textLayoutProperty = DynamicCast<TextLayoutProperty>(layoutWrapper->GetLayoutProperty());
     CHECK_NULL_RETURN(textLayoutProperty, std::nullopt);
@@ -382,7 +382,7 @@ std::string TextLayoutAlgorithm::StringOutBoundProtection(int32_t position, int3
 bool TextLayoutAlgorithm::CreateParagraph(const TextStyle& textStyle, std::string content, LayoutWrapper* layoutWrapper)
 {
     auto frameNode = layoutWrapper->GetHostNode();
-    auto pipeline = frameNode->GetContext();
+    auto pipeline = frameNode->GetContextRefPtr();
     auto pattern = frameNode->GetPattern<TextPattern>();
     auto paraStyle = GetParagraphStyle(textStyle, content, layoutWrapper);
     if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN) && spanItemChildren_.empty()) {

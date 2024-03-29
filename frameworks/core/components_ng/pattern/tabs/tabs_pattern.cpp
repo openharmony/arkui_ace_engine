@@ -74,29 +74,8 @@ void TabsPattern::SetOnChangeEvent(std::function<void(const BaseEventInfo*)>&& e
         auto tabsLayoutProperty = tabsNode->GetLayoutProperty<TabsLayoutProperty>();
         CHECK_NULL_VOID(tabsLayoutProperty);
         tabsLayoutProperty->UpdateIndex(index);
-        tabBarPattern->ResetIndicatorAnimationState();
-        auto tabBarLayoutProperty = tabBarPattern->GetLayoutProperty<TabBarLayoutProperty>();
-        CHECK_NULL_VOID(tabBarLayoutProperty);
-        if (!tabBarPattern->IsMaskAnimationByCreate()) {
-            tabBarPattern->HandleBottomTabBarChange(index);
-        }
-        tabBarPattern->SetMaskAnimationByCreate(false);
-        tabBarPattern->SetIndicator(index);
-        tabBarPattern->UpdateIndicator(index);
-        tabBarPattern->UpdateTextColorAndFontWeight(index);
-        if (tabBarLayoutProperty->GetTabBarMode().value_or(TabBarMode::FIXED) == TabBarMode::SCROLLABLE) {
-            if (tabBarPattern->GetTabBarStyle() == TabBarStyle::SUBTABBATSTYLE &&
-                tabBarLayoutProperty->GetAxisValue(Axis::HORIZONTAL) == Axis::HORIZONTAL) {
-                if (!tabBarPattern->GetChangeByClick()) {
-                    tabBarPattern->PlayTabBarTranslateAnimation(index);
-                    tabBarNode->MarkDirtyNode(PROPERTY_UPDATE_LAYOUT);
-                } else {
-                    tabBarPattern->SetChangeByClick(false);
-                }
-            } else {
-                tabBarNode->MarkDirtyNode(PROPERTY_UPDATE_LAYOUT);
-            }
-        }
+        tabBarPattern->OnTabBarIndexChange(index);
+
         /* js callback */
         if (jsEvent && tabsNode->IsOnMainTree()) {
             if (Recorder::EventRecorder::Get().IsComponentRecordEnable() && weak.Upgrade()) {

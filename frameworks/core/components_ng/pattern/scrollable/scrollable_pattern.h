@@ -490,6 +490,8 @@ public:
 
     void ScrollAtFixedVelocity(float velocity);
 
+    PositionMode GetPositionMode();
+
 protected:
     void OnDetachFromFrameNode(FrameNode* frameNode) override;
     virtual DisplayMode GetDefaultScrollBarDisplayMode() const

@@ -2108,6 +2108,10 @@ void ArkUINativeModule::RegisterImageAttributes(Local<panda::ObjectRef> object, 
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ImageBridge::SetEdgeAntialiasing));
     image->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetEdgeAntialiasing"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ImageBridge::ResetEdgeAntialiasing));
+    image->Set(vm, panda::StringRef::NewFromUtf8(vm, "setResizable"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ImageBridge::SetResizable));
+    image->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetResizable"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ImageBridge::ResetResizable));
     object->Set(vm, panda::StringRef::NewFromUtf8(vm, "image"), image);
 }
 

@@ -149,8 +149,8 @@ void XComponentPattern::Initialize(int32_t instanceId)
     if (type_ == XComponentType::SURFACE || type_ == XComponentType::TEXTURE) {
         renderContext->SetClipToFrame(true);
         renderContext->SetClipToBounds(true);
-#if defined(VIDEO_TEXTURE_SUPPORTED) && defined(XCOMPONENT_SUPPORTED)
-        renderSurface_ = RenderSurface::Create(SystemProperties::GetExtSurfaceEnabled());
+#ifdef RENDER_EXTRACT_SUPPORTED
+        renderSurface_ = RenderSurface::Create(CovertToRenderSurfaceType(type_));
 #else
         renderSurface_ = RenderSurface::Create();
 #endif
@@ -165,7 +165,7 @@ void XComponentPattern::Initialize(int32_t instanceId)
                 pipelineContext->AddOnAreaChangeNode(host->GetId());
                 extSurfaceClient_ = MakeRefPtr<XComponentExtSurfaceCallbackClient>(WeakClaim(this));
                 renderSurface_->SetExtSurfaceCallback(extSurfaceClient_);
-#if defined(VIDEO_TEXTURE_SUPPORTED) && defined(XCOMPONENT_SUPPORTED)
+#ifdef RENDER_EXTRACT_SUPPORTED
                 RegisterRenderContextCallBack();
 #endif
             }
@@ -194,16 +194,32 @@ void XComponentPattern::Initialize(int32_t instanceId)
 void XComponentPattern::InitializeRenderContext()
 {
     renderContextForSurface_ = RenderContext::Create();
-    static RenderContext::ContextParam param = { RenderContext::ContextType::HARDWARE_SURFACE, id_ + "Surface" };
-#if defined(VIDEO_TEXTURE_SUPPORTED) && defined(XCOMPONENT_SUPPORTED)
-    renderContextForSurface_->InitContext(false, param, SystemProperties::GetExtSurfaceEnabled());
+#ifdef RENDER_EXTRACT_SUPPORTED
+    auto contextType = type_ == XComponentType::TEXTURE ?
+        RenderContext::ContextType::HARDWARE_TEXTURE : RenderContext::ContextType::HARDWARE_SURFACE;
+    static RenderContext::ContextParam param = { contextType, id_ + "Surface" };
 #else
-    renderContextForSurface_->InitContext(false, param);
+    static RenderContext::ContextParam param = { RenderContext::ContextType::HARDWARE_SURFACE, id_ + "Surface" };
 #endif
+
+    renderContextForSurface_->InitContext(false, param);
+
     renderContextForSurface_->UpdateBackgroundColor(Color::BLACK);
 }
 
-#if defined(VIDEO_TEXTURE_SUPPORTED) && defined(XCOMPONENT_SUPPORTED)
+#ifdef RENDER_EXTRACT_SUPPORTED
+RenderSurface::RenderSurfaceType XComponentPattern::CovertToRenderSurfaceType(const XComponentType& hostType)
+{
+    switch (hostType) {
+        case XComponentType::SURFACE:
+            return RenderSurface::RenderSurfaceType::SURFACE;
+        case XComponentType::TEXTURE:
+            return RenderSurface::RenderSurfaceType::TEXTURE;
+        default:
+            return RenderSurface::RenderSurfaceType::UNKNOWN;
+    }
+}
+
 void XComponentPattern::RegisterRenderContextCallBack()
 {
     CHECK_NULL_VOID(renderContextForSurface_);
@@ -267,7 +283,7 @@ void XComponentPattern::OnModifyDone()
 
 void XComponentPattern::OnAreaChangedInner()
 {
-#if !(defined(VIDEO_TEXTURE_SUPPORTED) && defined(XCOMPONENT_SUPPORTED))
+#ifndef RENDER_EXTRACT_SUPPORTED
     if (SystemProperties::GetExtSurfaceEnabled()) {
         auto host = GetHost();
         CHECK_NULL_VOID(host);
@@ -341,7 +357,7 @@ void XComponentPattern::OnDetachFromFrameNode(FrameNode* frameNode)
         CHECK_NULL_VOID(eventHub);
         eventHub->FireDestroyEvent();
         eventHub->FireDetachEvent(id_);
-#if defined(VIDEO_TEXTURE_SUPPORTED) && defined(XCOMPONENT_SUPPORTED)
+#ifdef RENDER_EXTRACT_SUPPORTED
         if (renderContextForSurface_) {
             renderContextForSurface_->RemoveSurfaceChangedCallBack();
         }
@@ -410,7 +426,7 @@ bool XComponentPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& di
         }
     }
     localPosition_ = geometryNode->GetContentOffset();
-#if !(defined(VIDEO_TEXTURE_SUPPORTED) && defined(XCOMPONENT_SUPPORTED))
+#ifndef RENDER_EXTRACT_SUPPORTED
     if (SystemProperties::GetExtSurfaceEnabled()) {
         auto host = GetHost();
         CHECK_NULL_RETURN(host, false);
@@ -456,7 +472,7 @@ void XComponentPattern::NativeXComponentChange(float width, float height)
     CHECK_NULL_VOID(callback);
     CHECK_NULL_VOID(callback->OnSurfaceChanged);
     callback->OnSurfaceChanged(nativeXComponent_.get(), surface);
-#if defined(VIDEO_TEXTURE_SUPPORTED) && defined(XCOMPONENT_SUPPORTED)
+#ifdef RENDER_EXTRACT_SUPPORTED
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
@@ -521,7 +537,7 @@ void XComponentPattern::XComponentSizeInit()
     auto context = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(context);
     InitNativeWindow(initSize_.Width(), initSize_.Height());
-#if defined(VIDEO_TEXTURE_SUPPORTED) && defined(XCOMPONENT_SUPPORTED)
+#ifdef RENDER_EXTRACT_SUPPORTED
     if (xcomponentController_ && renderSurface_) {
         xcomponentController_->SetSurfaceId(renderSurface_->GetUniqueId());
     }
@@ -599,7 +615,7 @@ void XComponentPattern::InitEvent()
 
 void XComponentPattern::InitFocusEvent(const RefPtr<FocusHub>& focusHub)
 {
-#if defined(VIDEO_TEXTURE_SUPPORTED) && defined(XCOMPONENT_SUPPORTED)
+#ifdef RENDER_EXTRACT_SUPPORTED
     focusHub->SetFocusable(true);
 #endif
 
@@ -771,7 +787,7 @@ void XComponentPattern::HandleTouchEvent(const TouchEventInfo& info)
     }
     NativeXComponentDispatchTouchEvent(touchEventPoint_, nativeXComponentTouchPoints_);
 
-#if defined(VIDEO_TEXTURE_SUPPORTED) && defined(XCOMPONENT_SUPPORTED)
+#ifdef RENDER_EXTRACT_SUPPORTED
     if (touchType == TouchType::DOWN) {
         RequestFocus();
     }

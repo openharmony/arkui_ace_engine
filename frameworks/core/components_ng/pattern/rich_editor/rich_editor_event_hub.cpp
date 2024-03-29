@@ -339,7 +339,9 @@ void RichEditorEventHub::FireOnReady()
         onReady_();
         auto host = GetFrameNode();
         CHECK_NULL_VOID(host);
-        host->PostTask([host]() { host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE); });
+        auto* context = host->GetContext();
+        CHECK_NULL_VOID(context);
+        context->AddAfterRenderTask([host]() { host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE); });
     }
 }
 

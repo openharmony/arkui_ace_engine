@@ -222,7 +222,6 @@ void GestureEventHub::ProcessTouchTestHierarchy(const OffsetF& coordinateOffset,
     current = PackInnerRecognizer(offset, innerRecognizers, touchId, targetComponent);
     auto eventHub = eventHub_.Upgrade();
     auto getEventTargetImpl = eventHub ? eventHub->CreateGetEventTargetImpl() : nullptr;
-    auto context = host->GetContext();
     int32_t parallelIndex = 0;
     int32_t exclusiveIndex = 0;
     for (auto const& recognizer : gestureHierarchy_) {

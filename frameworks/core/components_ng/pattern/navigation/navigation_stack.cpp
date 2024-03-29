@@ -312,12 +312,12 @@ void NavigationStack::Clear()
 
 void NavigationStack::ClearRemoveArray() {}
 
-RefPtr<UINode> NavigationStack::CreateNodeByIndex(int32_t index)
+RefPtr<UINode> NavigationStack::CreateNodeByIndex(int32_t index, const WeakPtr<UINode>& node)
 {
     return nullptr;
 }
 
-RefPtr<UINode> NavigationStack::CreateNodeByRouteInfo(const RefPtr<RouteInfo>& routeInfo)
+RefPtr<UINode> NavigationStack::CreateNodeByRouteInfo(const RefPtr<RouteInfo>& routeInfo, const WeakPtr<UINode>& node)
 {
     return nullptr;
 }

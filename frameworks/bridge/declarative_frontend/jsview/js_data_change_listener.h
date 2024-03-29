@@ -195,6 +195,9 @@ private:
                 transferKey(value, dataOperation);
                 break;
         }
+        if (dataOperation.count < 0) {
+            return;
+        }
         DataOperations.push_back(dataOperation);
     }
 
@@ -232,7 +235,7 @@ private:
             dataOperation.key = value->GetProperty("key")->ToString();
         } else if (value->GetProperty("key")->IsArray()) {
             JSRef<JSArray> keys = JSRef<JSArray>::Cast(value->GetProperty("key"));
-            if (static_cast<size_t>(dataOperation.count) < keys->Length()) {
+            if (dataOperation.type == "add" && static_cast<size_t>(dataOperation.count) < keys->Length()) {
                 allocateMoreKeys = true;
                 return;
             }

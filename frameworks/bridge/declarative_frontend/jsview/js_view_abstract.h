@@ -99,8 +99,7 @@ public:
     static void JsTransform(const JSCallbackInfo& info);
     static void SetDefaultTransform();
     static void JsTransition(const JSCallbackInfo& info);
-    static NG::TransitionOptions ParseTransition(std::unique_ptr<JsonValue>& transitionArgs);
-    static NG::TransitionOptions ParseJsTransition(const JSRef<JSVal>& transitionArgs);
+    static NG::TransitionOptions ParseJsTransition(const JSRef<JSObject>& jsObj);
     static RefPtr<NG::ChainedTransitionEffect> ParseJsTransitionEffect(const JSCallbackInfo& info);
     static void JsWidth(const JSCallbackInfo& info);
     static void JsHeight(const JSCallbackInfo& info);
@@ -128,6 +127,7 @@ public:
     static bool ParseSheetDetents(const JSRef<JSVal>& args, std::vector<NG::SheetHeight>& sheetDetents);
     static void ParseSheetDetentHeight(const JSRef<JSVal>& args, NG::SheetHeight& detent);
     static bool ParseSheetBackgroundBlurStyle(const JSRef<JSVal>& args, BlurStyleOption& blurStyleOptions);
+    static void ParseSheetLevel(const JSRef<JSVal>& args, NG::SheetLevel& sheetLevel);
     static void ParseSheetCallback(const JSRef<JSObject>& paramObj, std::function<void()>& onAppear,
         std::function<void()>& onDisappear, std::function<void()>& shouldDismiss, std::function<void()>& onWillAppear,
         std::function<void()>& onWillDisappear, std::function<void(const float)>& onHeightDidChange);

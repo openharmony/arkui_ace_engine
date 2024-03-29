@@ -309,6 +309,10 @@ public:
 
     static void FireNavigationStateChange(const RefPtr<UINode>& node, bool isShow);
 
+    static void FireNavigationChange(const RefPtr<UINode>& node, bool isShow, bool isFirst);
+
+    static void FireNavigationInner(const RefPtr<UINode>& node, bool isShow);
+
     static void FireNavigationLifecycleChange(const RefPtr<UINode>& node, NavDestinationLifecycle lifecycle);
 
     // type: will_show + on_show, will_hide + on_hide, hide, show, willShow, willHide
@@ -347,6 +351,16 @@ public:
     void NotifyDestinationLifecycle(const RefPtr<UINode>& destinationNode,
         NavDestinationLifecycle lifecycle, bool isNavigationChanged);
     void AbortAnimation(RefPtr<NavigationGroupNode>& hostNode);
+
+    void SetParentCustomNode(const RefPtr<UINode>& parentNode)
+    {
+        parentNode_ = parentNode;
+    }
+
+    WeakPtr<UINode> GetParentCustomNode() const
+    {
+        return parentNode_;
+    }
 
 private:
     void CheckTopNavPathChange(const std::optional<std::pair<std::string, RefPtr<UINode>>>& preTopNavPath,
@@ -428,6 +442,7 @@ private:
     bool needSyncWithJsStack_ = false;
     std::optional<std::pair<std::string, RefPtr<UINode>>> preTopNavPath_;
     RefPtr<NavDestinationContext> preContext_;
+    WeakPtr<UINode> parentNode_;
     int32_t preStackSize_ = 0;
 };
 
