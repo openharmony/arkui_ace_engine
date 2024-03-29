@@ -25,6 +25,7 @@
 #include "core/components_ng/layout/layout_property.h"
 #include "core/components_ng/layout/layout_wrapper_builder.h"
 #include "core/components_ng/pattern/scrollable/scrollable_pattern.h"
+#include "core/components_ng/pattern/stage/page_pattern.h"
 #include "core/components_ng/property/layout_constraint.h"
 #include "core/components_ng/property/measure_property.h"
 #include "core/components_ng/property/property.h"
@@ -85,10 +86,20 @@ void LayoutWrapper::RestoreGeoState()
     }
 }
 
+bool LayoutWrapper::CheckPageNeedAvoidKeyboard() const
+{
+    // page will not avoid keyboard when lastChild is sheet
+    auto pattern = GetHostNode()->GetPattern<PagePattern>();
+    CHECK_NULL_RETURN(pattern, true);
+    auto overlay = pattern->GetOverlayManager();
+    CHECK_NULL_RETURN(overlay, true);
+    return overlay->CheckPageNeedAvoidKeyboard();
+}
+
 void LayoutWrapper::AvoidKeyboard(bool isFocusOnPage)
 {
     // apply keyboard avoidance on Page
-    if (GetHostTag() == V2::PAGE_ETS_TAG || GetHostTag() == V2::OVERLAY_ETS_TAG) {
+    if ((GetHostTag() == V2::PAGE_ETS_TAG && CheckPageNeedAvoidKeyboard()) || GetHostTag() == V2::OVERLAY_ETS_TAG) {
         auto pipeline = PipelineContext::GetCurrentContext();
         CHECK_NULL_VOID(pipeline);
         auto manager = pipeline->GetSafeAreaManager();

@@ -84,6 +84,7 @@
 #include "core/components_ng/gestures/base_gesture_event.h"
 #include "core/components_ng/pattern/menu/menu_pattern.h"
 #include "core/components_ng/pattern/overlay/modal_style.h"
+#include "core/components_ng/pattern/overlay/sheet_style.h"
 #include "core/components_ng/property/safe_area_insets.h"
 #include "core/gestures/gesture_info.h"
 #include "core/image/image_source_info.h"
@@ -6366,6 +6367,7 @@ void JSViewAbstract::JsBindSheet(const JSCallbackInfo& info)
     sheetStyle.sheetMode = NG::SheetMode::LARGE;
     sheetStyle.showDragBar = true;
     sheetStyle.showCloseIcon = true;
+    sheetStyle.showInPage = false;
     std::function<void()> onShowCallback;
     std::function<void()> onDismissCallback;
     std::function<void()> onWillShowCallback;
@@ -6398,6 +6400,11 @@ void JSViewAbstract::ParseSheetStyle(const JSRef<JSObject>& paramObj, NG::SheetS
     auto showCloseIcon = paramObj->GetProperty("showClose");
     auto type = paramObj->GetProperty("preferType");
     auto interactive = paramObj->GetProperty("enableOutsideInteractive");
+    auto showMode = paramObj->GetProperty("mode");
+
+    NG::SheetLevel sheetLevel = NG::SheetLevel::OVERLAY;
+    ParseSheetLevel(showMode, sheetLevel);
+    sheetStyle.showInPage = (sheetLevel == NG::SheetLevel::EMBEDDED);
 
     std::vector<NG::SheetHeight> detents;
     if (ParseSheetDetents(sheetDetents, detents)) {
@@ -6563,6 +6570,18 @@ bool JSViewAbstract::ParseSheetBackgroundBlurStyle(const JSRef<JSVal>& args, Blu
         return false;
     }
     return true;
+}
+
+void JSViewAbstract::ParseSheetLevel(const JSRef<JSVal>& args, NG::SheetLevel& sheetLevel)
+{
+    if (!args->IsNumber()) {
+        return;
+    }
+    auto sheetMode = args->ToNumber<int32_t>();
+    if (sheetMode >= static_cast<int>(NG::SheetLevel::OVERLAY) &&
+        sheetMode <= static_cast<int>(NG::SheetLevel::EMBEDDED)) {
+        sheetLevel = static_cast<NG::SheetLevel>(sheetMode);
+    }
 }
 
 void JSViewAbstract::ParseSheetCallback(const JSRef<JSObject>& paramObj, std::function<void()>& onAppear,

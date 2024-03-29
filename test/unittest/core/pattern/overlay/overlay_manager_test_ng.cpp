@@ -934,16 +934,16 @@ HWTEST_F(OverlayManagerTestNg, OnBindSheet004, TestSize.Level1)
     topSheetNode->GetGeometryNode()->SetFrameSize(setSheetSize);
     overlayManager->sheetHeight_ = 0;
     overlayManager->ComputeSheetOffset(sheetStyle, topSheetNode);
-    EXPECT_FALSE(NearEqual(overlayManager->sheetHeight_, 0));
+    EXPECT_EQ(overlayManager->sheetHeight_, 750);
 
     sheetStyle.sheetType = SheetType::SHEET_POPUP;
     layoutProperty->UpdateSheetStyle(sheetStyle);
     overlayManager->ComputeSheetOffset(sheetStyle, topSheetNode);
-    EXPECT_FALSE(NearEqual(overlayManager->sheetHeight_, 0));
+    EXPECT_EQ(overlayManager->sheetHeight_, topSheetPattern->pageHeight_);
     sheetStyle.sheetType = SheetType::SHEET_BOTTOMLANDSPACE;
     layoutProperty->UpdateSheetStyle(sheetStyle);
     overlayManager->ComputeSheetOffset(sheetStyle, topSheetNode);
-    EXPECT_FALSE(NearEqual(overlayManager->sheetHeight_, 0));
+    EXPECT_EQ(overlayManager->sheetHeight_, topSheetPattern->pageHeight_ - SHEET_BLANK_MINI_HEIGHT.ConvertToPx());
 }
 
 /**
@@ -2116,10 +2116,16 @@ HWTEST_F(OverlayManagerTestNg, TestSheetPage003, TestSize.Level1)
     auto sheetLayoutAlgorithm =
         AceType::DynamicCast<SheetPresentationLayoutAlgorithm>(sheetPattern->CreateLayoutAlgorithm());
     ASSERT_NE(sheetLayoutAlgorithm, nullptr);
-
+    auto rootNode = PipelineContext::GetCurrentContext()->GetOverlayManager()->GetRootNode().Upgrade();
+    ASSERT_NE(rootNode, nullptr);
+    auto frameNode = AceType::DynamicCast<FrameNode>(rootNode);
+    ASSERT_NE(frameNode, nullptr);
+    LayoutConstraintF layoutConstraint;
+    layoutConstraint.maxSize = SizeF(800, 2000);
+    frameNode->GetLayoutProperty()->UpdateLayoutConstraint(layoutConstraint);
     sheetNode->layoutAlgorithm_ = AceType::MakeRefPtr<LayoutAlgorithmWrapper>(sheetLayoutAlgorithm);
     sheetNode->Measure(sheetNode->GetLayoutConstraint());
-    EXPECT_EQ(sheetLayoutAlgorithm->sheetHeight_, 2000);
+    EXPECT_EQ(sheetLayoutAlgorithm->sheetHeight_, 1280);
 
     sheetLayoutAlgorithm->sheetType_ = SHEET_CENTER;
     sheetLayoutAlgorithm->sheetStyle_.sheetMode = SheetMode::AUTO;

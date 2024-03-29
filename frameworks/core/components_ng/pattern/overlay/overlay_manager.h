@@ -409,6 +409,7 @@ public:
         int32_t menuSize, const RefPtr<NG::FrameNode>& targetNode);
 
     void MarkDirty(PropertyChangeFlag flag);
+    void MarkDirtyOverlay();
     float GetRootHeight() const;
 
     void PlaySheetMaskTransition(RefPtr<FrameNode> maskNode, bool isTransitionIn, bool needTransparent = false);
@@ -479,6 +480,7 @@ public:
     void HideNodeOnOverlay(const RefPtr<NG::FrameNode>& node);
     void ShowAllNodesOnOverlay();
     void HideAllNodesOnOverlay();
+    bool CheckPageNeedAvoidKeyboard() const;
 private:
     void PopToast(int32_t targetId);
 
