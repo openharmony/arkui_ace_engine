@@ -149,7 +149,7 @@ int32_t TxtParagraph::AddPlaceholder(const PlaceholderRun& span)
 #endif
     auto position = static_cast<size_t>(placeholderCnt_) + text_.length();
     placeholderPosition_.emplace_back(position);
-    return ++placeholderCnt_;
+    return placeholderCnt_++;
 }
 
 void TxtParagraph::Build()
