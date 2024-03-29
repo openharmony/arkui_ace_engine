@@ -178,8 +178,13 @@ void NavigationPattern::OnModifyDone()
         CHECK_NULL_VOID(inputHub);
         InitDividerMouseEvent(inputHub);
     }
-    auto&& opts = hostNode->GetLayoutProperty()->GetSafeAreaExpandOpts();
+
+    auto layoutProperty = hostNode->GetLayoutProperty();
+    CHECK_NULL_VOID(layoutProperty);
+    auto&& opts = layoutProperty->GetSafeAreaExpandOpts();
     if (opts && opts->Expansive()) {
+        TAG_LOGI(AceLogTag::ACE_NAVIGATION, "Navigation SafArea expand as %{public}s", opts->ToString().c_str());
+
         navBarNode->GetLayoutProperty()->UpdateSafeAreaExpandOpts(*opts);
         navBarNode->MarkModifyDone();
 
@@ -238,44 +243,24 @@ void NavigationPattern::SyncWithJsStackIfNeeded()
 void NavigationPattern::UpdateNavPathList()
 {
     CHECK_NULL_VOID(navigationStack_);
-    navigationStack_->UpdateRemovedNavPathList(); // Delete Removed NavPathList
     auto pathNames = navigationStack_->GetAllPathName();
+    auto indexes = navigationStack_->GetAllPathIndex();
     auto cacheNodes = navigationStack_->GetAllCacheNodes();
     NavPathList navPathList;
-    auto replaceValue = navigationStack_->GetReplaceValue();
     for (size_t i = 0; i < pathNames.size(); ++i) {
         auto pathName = pathNames[i];
-        RefPtr<UINode> uiNode;
-        int32_t lastIndex;
-        navigationStack_->Get(pathName, uiNode, lastIndex);
-        auto isSameWithLast = (i == pathNames.size() - 1) && (replaceValue == 1);
-        if (uiNode) {
-            navigationStack_->RemoveInNavPathList(pathName, uiNode);
-            navigationStack_->RemoveInPreNavPathList(pathName, uiNode);
-            if (isSameWithLast) {
-                TAG_LOGD(AceLogTag::ACE_NAVIGATION, "same with last in list, navigation stack create new node, "
-                    "index: %{public}d, name: %{public}s.", static_cast<int32_t>(i), pathName.c_str());
-                uiNode = GenerateUINodeByIndex(static_cast<int32_t>(i));
-            } else {
-                TAG_LOGD(AceLogTag::ACE_NAVIGATION, "find in list, navigation stack reserve node, "
-                    "old index: %{public}d, new index: %{public}d, name: %{public}s.",
-                    lastIndex, static_cast<int32_t>(i), pathName.c_str());
-            }
-            navPathList.emplace_back(std::make_pair(pathName, uiNode));
-            continue;
+        auto index = static_cast<int32_t>(indexes[i]);
+        RefPtr<UINode> uiNode = nullptr;
+        if ((i == (navigationStack_->Size() - 1)) && addByNavRouter_) {
+            addByNavRouter_ = false;
+            uiNode = navigationStack_->Get();
+        } else {
+            uiNode = navigationStack_->Get(index);
         }
-        navigationStack_->GetFromPreBackup(pathName, uiNode, lastIndex);
         if (uiNode) {
-            navigationStack_->RemoveInPreNavPathList(pathName, uiNode);
-            if (isSameWithLast) {
-                TAG_LOGD(AceLogTag::ACE_NAVIGATION, "same with last in backup list, navigation stack create new node, "
-                    "index: %{public}d, name: %{public}s.", static_cast<int32_t>(i), pathName.c_str());
-                uiNode = GenerateUINodeByIndex(static_cast<int32_t>(i));
-            } else {
-                TAG_LOGD(AceLogTag::ACE_NAVIGATION, "find in backup list, navigation stack reserve node, "
-                    "old index: %{public}d, new index: %{public}d, name: %{public}s.",
-                    lastIndex, static_cast<int32_t>(i), pathName.c_str());
-            }
+            TAG_LOGD(AceLogTag::ACE_NAVIGATION, "find in list, navigation stack reserve node, "
+                "old index: %{public}d, index: %{public}d, name: %{public}s.",
+                index, static_cast<int32_t>(i), pathName.c_str());
             navPathList.emplace_back(std::make_pair(pathName, uiNode));
             continue;
         }
@@ -294,6 +279,7 @@ void NavigationPattern::UpdateNavPathList()
     }
     navigationStack_->ClearPreBuildNodeList();
     navigationStack_->SetNavPathList(navPathList);
+    navigationStack_->InitNavPathIndex();
 }
 
 void NavigationPattern::RefreshNavDestination()

@@ -146,6 +146,11 @@ public:
         uiStatus_ = UIStatus::UNSELECTED;
     }
 
+    RefPtr<GroupManager> GetGroupManager() const
+    {
+        return groupManager_.Upgrade();
+    }
+
     FocusPattern GetFocusPattern() const override;
     void UpdateUIStatus(bool check);
     void UpdateModifierParam(CheckBoxGroupModifier::Parameters& paintParameters);
@@ -186,6 +191,7 @@ private:
     RefPtr<TouchEventImpl> touchListener_;
     RefPtr<InputEvent> mouseEvent_;
     RefPtr<CheckBoxGroupModifier> checkBoxGroupModifier_;
+    WeakPtr<GroupManager> groupManager_;
     bool isHover_ = false;
     TouchHoverAnimationType touchHoverType_ = TouchHoverAnimationType::NONE;
     bool updateFlag_ = false;

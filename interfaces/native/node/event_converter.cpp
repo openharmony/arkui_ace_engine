@@ -111,6 +111,8 @@ ArkUI_Int32 ConvertOriginEventType(ArkUI_NodeEventType type, int32_t nodeType)
             return ON_SWIPER_ANIMATION_END;
         case NODE_SWIPER_EVENT_ON_GESTURE_SWIPE:
             return ON_SWIPER_GESTURE_SWIPE;
+        case NODE_ON_WILL_SCROLL:
+            return ON_WILL_SCROLL;
         default:
             return -1;
     }
@@ -195,6 +197,8 @@ ArkUI_Int32 ConvertToNodeEventType(ArkUIEventSubKind type)
             return NODE_SCROLL_EVENT_ON_SCROLL_START;
         case ON_LIST_SCROLL_STOP:
             return NODE_SCROLL_EVENT_ON_SCROLL_STOP;
+        case ON_WILL_SCROLL:
+            return NODE_ON_WILL_SCROLL;
         default:
             return -1;
     }

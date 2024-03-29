@@ -109,6 +109,8 @@ typedef enum {
     ARKUI_NODE_REFRESH,
     /** WaterFlow component. */
     ARKUI_NODE_WATER_FLOW,
+    /** WaterFlowItem component. */
+    ARKUI_NODE_FLOW_ITEM,
 } ArkUI_NodeType;
 
 /**
@@ -1037,12 +1039,16 @@ typedef enum {
      * This attribute can be set, reset, and obtained as required through APIs.
      *
      * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
-     * .value[0].i32: blend mode. The parameter type is {@link ArkUI_BlendMode}.
+     * .value[0].i32: blend mode. The parameter type is {@link ArkUI_BlendMode}. \n
      * The default value is <b>ARKUI_BLEND_MODE_NONE</b>. \n
+     * .value[1]?.i32: blendMode实现方式是否离屏. The parameter type is {@link ArkUI_BlendApplyType}. \n
+     * The default value is <b>ARKUI_BLEND_APPLY_TYPE_FAST</b>. \n
      * \n
      * Format of the return value {@link ArkUI_AttributeItem}:\n
      * .value[0].i32: blend mode. The parameter type is {@link ArkUI_BlendMode}.
      * The default value is <b>ARKUI_BLEND_MODE_NONE</b>. \n
+     * .value[1].i32: blendMode实现方式是否离屏. The parameter type is {@link ArkUI_BlendApplyType}. \n
+     * The default value is <b>ARKUI_BLEND_APPLY_TYPE_FAST</b>. \n
      *
      */
     NODE_BLEND_MODE,
@@ -3639,9 +3645,85 @@ typedef enum {
      *
      * 属性设置方法{@link ArkUI_AttributeItem}参数格式： \n
      * .value[0].i32 主轴方向，参数类型{@Link ArkUI_FlexDirection}。
-     *
+     * \n
+     * Format of the return value {@link ArkUI_AttributeItem}:\n
+     * .value[0].i32: 主轴方向.
      */
     NODE_WATER_FLOW_LAYOUT_DIRECTION = MAX_NODE_SCOPE_NUM * ARKUI_NODE_WATER_FLOW,
+
+    /**
+     * @brief 设置当前瀑布流组件布局列的数量.
+     *
+     * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
+     * .string: 布局列的数量.\n
+     * \n
+     * Format of the return value {@link ArkUI_AttributeItem}:\n
+     * .string: 布局列的数量.\n
+     *
+     */
+    NODE_WATER_FLOW_COLUMNS_TEMPLATE,
+
+    /**
+     * @brief 设置当前瀑布流组件布局行的数量.
+     *
+     * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
+     * .string: 布局行的数量.\n
+     * \n
+     * Format of the return value {@link ArkUI_AttributeItem}:\n
+     * .string: 布局行的数量.\n
+     *
+     */
+    NODE_WATER_FLOW_ROWS_TEMPLATE,
+
+    /**
+     * @brief 设置列与列的间距.
+     *
+     * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
+     * .value[0].f32: 列与列的间距, 单位vp.\n
+     * \n
+     * Format of the return value {@link ArkUI_AttributeItem}:\n
+     * .value[0].f32: 列与列的间距, 单位vp.\n
+     *
+     */
+    NODE_WATER_FLOW_COLUMNS_GAP,
+
+    /**
+     * @brief 设置行与行的间距.
+     *
+     * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
+     * .value[0].f32: 行与行的间距, 单位vp.\n
+     * \n
+     * Format of the return value {@link ArkUI_AttributeItem}:\n
+     * .value[0].f32: 行与行的间距, 单位vp.\n
+     *
+     */
+    NODE_WATER_FLOW_ROWS_GAP,
+
+    /**
+     * @brief 设置向前向后两个方向上的嵌套滚动模式，实现与父组件的滚动联动.
+     *
+     * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
+     * .value[0].i32: 可滚动组件往末尾端滚动时的嵌套滚动选项，参数类型{@Link ArkUI_NestedScrollMode}.\n
+     * .value[1].i32: 可滚动组件往起始端滚动时的嵌套滚动选项，参数类型{@Link ArkUI_NestedScrollMode}.\n
+     * \n
+     * Format of the return value {@link ArkUI_AttributeItem}:\n
+     * .value[0].i32: 可滚动组件往末尾端滚动时的嵌套滚动选项.\n
+     * .value[1].i32: 可滚动组件往起始端滚动时的嵌套滚动选项.\n
+     *
+     */
+    NODE_WATER_FLOW_NESTED_SCROLL,
+
+    /**
+     * @brief 设置当FlowItem分组配置信息.
+     *
+     * 属性设置方法{@link ArkUI_AttributeItem}参数格式： \n
+     * .object: 参数格式为{@ArkUI_WaterFlowSectionOption}.\n
+     * \n
+     * 属性获取方法返回值{@link ArkUI_AttributeItem}格式： \n
+     * .object: 返回值格式为{@ArkUI_WaterFlowSectionOption}.\n
+     *
+     */
+    NODE_WATER_FLOW_SECTION_OPTION,
 } ArkUI_NodeAttributeType;
 
 #define MAX_COMPONENT_EVENT_ARG_NUM 12
@@ -4127,6 +4209,17 @@ typedef enum {
      * {@link ArkUI_NodeComponentEvent} does not contain parameters:\n
      */
     NODE_REFRESH_ON_REFRESH,
+
+    /**
+     * @brief <b>ARKUI_NODE_WATER_FLOW</b>滑动前触发.
+     *
+     * When the event callback occurs, the union type in the {@link ArkUI_NodeEvent} object is
+     * {@link ArkUI_NodeComponentEvent}. \n
+     * {@link ArkUI_NodeComponentEvent} contains one parameter: \n
+     * <b>ArkUI_NodeComponentEvent.data[0].f32</b>: 每帧滚动的偏移量，List的内容向上滚动时偏移量为正，向下滚动时偏移量为负. \n
+     * <b>ArkUI_NodeComponentEvent.data[1].f32</b>: 当前滑动状态. \n
+     */
+    NODE_ON_WILL_SCROLL = MAX_NODE_SCOPE_NUM * ARKUI_NODE_WATER_FLOW,
 } ArkUI_NodeEventType;
 
 /**
@@ -4360,8 +4453,7 @@ typedef struct {
      * Returns 401 if a parameter exception occurs.
      * Returns 106102 if the dynamic implementation library of the native API was not found.
      */
-    int32_t (*registerNodeEvent)(
-        ArkUI_NodeHandle node, ArkUI_NodeEventType eventType, int32_t eventId);
+    int32_t (*registerNodeEvent)(ArkUI_NodeHandle node, ArkUI_NodeEventType eventType, int32_t eventId);
 
     /**
      * @brief Unregisters an event for the specified node.

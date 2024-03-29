@@ -362,11 +362,13 @@ void SwiperPattern::BeforeCreateLayoutWrapper()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    if (hasCachedCapture_ && host->GetChildrenUpdated() != -1) {
-        InitCapture();
-    }
-    if (host->GetChildrenUpdated() != -1 && NeedAutoPlay() && !translateTask_) {
-        StartAutoPlay();
+    if (host->GetChildrenUpdated() != -1) {
+        if (hasCachedCapture_) {
+            InitCapture();
+        }
+        if (NeedAutoPlay() && !translateTask_) {
+            StartAutoPlay();
+        }
         host->ChildrenUpdatedFrom(-1);
     }
 
@@ -501,12 +503,20 @@ void SwiperPattern::UpdateCaptureSource(
 
     auto captureNode = DynamicCast<FrameNode>(host->GetChildAtIndex(host->GetChildIndexById(captureId)));
     CHECK_NULL_VOID(captureNode);
-    auto imageLayoutProperty = captureNode->GetLayoutProperty<ImageLayoutProperty>();
-    CHECK_NULL_VOID(imageLayoutProperty);
-    imageLayoutProperty->UpdateImageSourceInfo(ImageSourceInfo(PixelMap::CreatePixelMap(&pixelMap)));
-    imageLayoutProperty->UpdateMargin(margin);
-    captureNode->MarkModifyDone();
-    captureNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+    auto piplineContext = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(piplineContext);
+    auto taskExecutor = piplineContext->GetTaskExecutor();
+    CHECK_NULL_VOID(taskExecutor);
+    taskExecutor->PostTask(
+        [captureNode, pixelMap, margin]() mutable {
+            auto imageLayoutProperty = captureNode->GetLayoutProperty<ImageLayoutProperty>();
+            CHECK_NULL_VOID(imageLayoutProperty);
+            imageLayoutProperty->UpdateImageSourceInfo(ImageSourceInfo(PixelMap::CreatePixelMap(&pixelMap)));
+            imageLayoutProperty->UpdateMargin(margin);
+            captureNode->MarkModifyDone();
+            captureNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+        },
+        TaskExecutor::TaskType::UI);
 }
 
 void SwiperPattern::InitSurfaceChangedCallback()

@@ -83,14 +83,14 @@ public:
     void RemoveIndex(int32_t index) override;
     void RemoveInvalidPage(const JSRef<JSObject>& info);
     void Clear() override;
-    void ClearRemoveArray() override;
     int32_t GetReplaceValue() const override;
     void UpdateReplaceValue(int32_t isReplace) const override;
     bool GetAnimatedValue() const override;
     void UpdateAnimatedValue(bool animated) override;
     bool GetDisableAnimation() const override;
     std::vector<std::string> GetAllPathName() override;
-    std::vector<int32_t> GetRemoveArray() override;
+    std::vector<int32_t> GetAllPathIndex() override;
+    void InitNavPathIndex() override;
     RefPtr<NG::UINode> CreateNodeByIndex(int32_t index, const WeakPtr<NG::UINode>& node) override;
     RefPtr<NG::UINode> CreateNodeByRouteInfo(const RefPtr<NG::RouteInfo>& routeInfo,
         const WeakPtr<NG::UINode>& node) override;

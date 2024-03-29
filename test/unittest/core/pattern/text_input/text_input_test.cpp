@@ -44,6 +44,7 @@
 #include "base/memory/referenced.h"
 #include "base/utils/string_utils.h"
 #include "base/utils/type_definition.h"
+#include "core/common/ace_application_info.h"
 #include "core/common/ai/data_detector_mgr.h"
 #include "core/common/ime/constant.h"
 #include "core/common/ime/text_editing_value.h"
@@ -4211,11 +4212,14 @@ HWTEST_F(TextFieldUXTest, TextInputToJsonValue001, TestSize.Level1)
     /**
      * @tc.expected: Check if all set properties are displayed in the corresponding JSON
      */
+    int32_t backupApiVersion = AceApplicationInfo::GetInstance().GetApiTargetVersion();
+    AceApplicationInfo::GetInstance().SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWELVE));
     auto json = JsonUtil::Create(true);
     layoutProperty_->ToJsonValue(json);
     EXPECT_TRUE(json->Contains("decoration"));
     EXPECT_TRUE(json->Contains("letterSpacing"));
     EXPECT_TRUE(json->Contains("lineHeight"));
+    AceApplicationInfo::GetInstance().SetApiTargetVersion(backupApiVersion);
 }
 
 /**
@@ -4290,5 +4294,40 @@ HWTEST_F(TextFieldUXTest, TextInputTextDecoration001, TestSize.Level1)
     EXPECT_EQ(layoutProperty_->GetTextDecoration(), TextDecoration::LINE_THROUGH);
     EXPECT_EQ(layoutProperty_->GetTextDecorationColor(), Color::BLUE);
     EXPECT_EQ(layoutProperty_->GetTextDecorationStyle(), TextDecorationStyle::DOTTED);
+}
+
+/**
+ * @tc.name: HandleClickEventTest001
+ * @tc.desc: test scrolling when clicking on the scroll bar
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldUXTest, HandleClickEventTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create CreateTextField , GestureEvent and ScrollBars.
+     * @tc.expected: create CreateTextField , GestureEvent and ScrollBars created successfully.
+     */
+    CreateTextField(DEFAULT_TEXT);
+    pattern_->scrollBar_ = AceType::MakeRefPtr<ScrollBar>();
+    GestureEvent info;
+    info.localLocation_ = Offset(1.0f, 110.0f);
+    pattern_->scrollBar_->barRect_ = Rect(0.0f, 0.0f, 30.0f, 500.0f);
+    pattern_->scrollBar_->touchRegion_ = Rect(10.0f, 100.0f, 30.0f, 100.0f);
+    // /**
+    //  * @tc.steps: step2. Test HandleClickEvent.
+    //  * @tc.expect: CheckBarDirection equal BarDirection's Value.
+    //  */
+    pattern_->hasMousePressed_ = true;
+    pattern_->HandleClickEvent(info);
+    Point point(info.localLocation_.GetX(), info.localLocation_.GetY());
+    EXPECT_EQ(pattern_->scrollBar_->CheckBarDirection(point), BarDirection::BAR_NONE);
+    info.localLocation_ = Offset(1.0f, 1.0f);
+    pattern_->HandleClickEvent(info);
+    Point point1(info.localLocation_.GetX(), info.localLocation_.GetY());
+    EXPECT_EQ(pattern_->scrollBar_->CheckBarDirection(point1), BarDirection::PAGE_UP);
+    info.localLocation_ = Offset(1.0f, 300.0f);
+    pattern_->HandleClickEvent(info);
+    Point point2(info.localLocation_.GetX(), info.localLocation_.GetY());
+    EXPECT_EQ(pattern_->scrollBar_->CheckBarDirection(point2), BarDirection::PAGE_DOWN);
 }
 } // namespace OHOS::Ace::NG

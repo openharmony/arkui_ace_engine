@@ -35,6 +35,7 @@
 #include "core/components_ng/pattern/overlay/modal_presentation_pattern.h"
 #include "core/components_ng/pattern/overlay/modal_style.h"
 #include "core/components_ng/pattern/overlay/sheet_style.h"
+#include "core/components_ng/pattern/overlay/group_manager.h"
 #include "core/components_ng/pattern/picker/datepicker_event_hub.h"
 #include "core/components_ng/pattern/picker/picker_type_define.h"
 #include "core/components_ng/pattern/text_picker/textpicker_event_hub.h"
@@ -422,10 +423,8 @@ public:
         sheetHeight_ = height;
     }
 
-    const WeakPtr<UINode>& GetRootNode() const
-    {
-        return rootNodeWeak_;
-    }
+    const WeakPtr<UINode>& GetRootNode() const;
+    const RefPtr<GroupManager>& GetGroupManager() const;
 
     void ModalPageLostFocus(const RefPtr<FrameNode>& node);
 
@@ -476,6 +475,7 @@ public:
     void ShowAllNodesOnOverlay();
     void HideAllNodesOnOverlay();
     bool CheckPageNeedAvoidKeyboard() const;
+
 private:
     void PopToast(int32_t targetId);
 
@@ -604,6 +604,7 @@ private:
     std::set<WeakPtr<UINode>> windowSceneSet_;
 
     RefPtr<NG::ClickEvent> sheetMaskClickEvent_;
+    RefPtr<GroupManager> groupManager_ = MakeRefPtr<GroupManager>();
 
     // native modal ui extension
     bool isProhibitBack_ = false;

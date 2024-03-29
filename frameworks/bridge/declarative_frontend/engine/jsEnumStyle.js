@@ -967,11 +967,11 @@ var MenuPreviewMode;
 })(MenuPreviewMode || (MenuPreviewMode = {}));
 
 let DismissReason;
-(function DismissReason(DismissReason) {
+(function (DismissReason) {
   DismissReason[DismissReason.PRESS_BACK = 0] = "PRESS_BACK";
   DismissReason[DismissReason.TOUCH_OUTSIDE = 1] = "TOUCH_OUTSIDE";
   DismissReason[DismissReason.CLOSE_BUTTON = 2] = "CLOSE_BUTTON";
-})(DismissReason || (DismissReason = {}))
+})(DismissReason || (DismissReason = {}));
 
 var HoverEffect;
 (function (HoverEffect) {
@@ -1766,6 +1766,7 @@ class NavPathInfo {
     this.name = name;
     this.param = param;
     this.onPop = onPop;
+    this.index = -1;
     // index that if check navdestination exists first
     this.checkNavDestinationFlag = false;
   }
@@ -1789,9 +1790,28 @@ class NavPathStack {
     this.nativeStack = undefined;
     // parent stack
     this.parentStack = undefined;
-    // Array of remove destination indexes
-    this.removeArray = [];
+    this.popArray = [];
     this.interception = undefined;
+  }
+  initNavPathIndex() {
+    this.popArray = [];
+    for (let i = 0; i < this.pathArray.length; i++) {
+      this.pathArray[i].index = i;
+    }
+  }
+  getAllPathIndex() {
+    let array = this.pathArray.flatMap(element => element.index);
+    return array;
+  }
+  findInPopArray(name) {
+    for (let i = this.popArray.length - 1; i >= 0; i--) {
+      if (name === this.popArray[i].name) {
+        let info = this.popArray.splice(i, 1);
+        this.pathArray[this.pathArray.length - 1].index = info[0].index;
+        return;
+      }
+    }
+    this.pathArray[this.pathArray.length - 1].index = -1; // add new navdestination
   }
   setNativeStack(stack) {
     this.nativeStack = stack;
@@ -1807,6 +1827,7 @@ class NavPathStack {
   }
   pushName(name, param) {
     this.pathArray.push(new NavPathInfo(name, param));
+    this.findInPopArray(name);
     this.changeFlag = this.changeFlag + 1;
     this.isReplace = 0;
     this.nativeStack?.onStateChanged();
@@ -1820,6 +1841,7 @@ class NavPathStack {
     } else {
       this.pathArray.push(new NavPathInfo(name, param, onPop));
     }
+    this.findInPopArray(name);
     this.changeFlag = this.changeFlag + 1;
     this.isReplace = 0;
     if (typeof onPop === 'boolean') {
@@ -1857,11 +1879,14 @@ class NavPathStack {
         reject({ message: 'Internal error.', code: 100001 });
       })
     }
+    this.findInPopArray(name);
     this.nativeStack?.onStateChanged();
     return promise;
   }
   pushPath(info, animated) {
     this.pathArray.push(info);
+    let name = this.pathArray[this.pathArray.length - 1].name;
+    this.findInPopArray(name);
     this.changeFlag = this.changeFlag + 1;
     this.isReplace = 0;
     if (animated === undefined) {
@@ -1888,6 +1913,8 @@ class NavPathStack {
         reject({ message: 'Internal error.', code: 100001 });
       })
     }
+    let name = this.pathArray[this.pathArray.length - 1].name;
+    this.findInPopArray(name);
     this.nativeStack?.onStateChanged();
     return promise;
   }
@@ -1896,6 +1923,7 @@ class NavPathStack {
       this.pathArray.pop();
     }
     this.pathArray.push(info);
+    this.pathArray[this.pathArray.length - 1].index = -1;
     this.isReplace = 1;
     this.changeFlag = this.changeFlag + 1;
     if (animated === undefined) {
@@ -1911,6 +1939,7 @@ class NavPathStack {
     }
     this.isReplace = 1;
     this.pathArray.push(new NavPathInfo(name, param));
+    this.pathArray[this.pathArray.length - 1].index = -1;
     this.changeFlag = this.changeFlag + 1;
     if (animated === undefined) {
       this.animated = true;
@@ -1931,6 +1960,7 @@ class NavPathStack {
     }
     let currentPathInfo = this.pathArray[this.pathArray.length - 1];
     let pathInfo = this.pathArray.pop();
+    this.popArray.push(pathInfo);
     this.changeFlag = this.changeFlag + 1;
     this.isReplace = 0;
     if (result !== undefined && typeof result !== 'boolean' && currentPathInfo.onPop !== undefined) {
@@ -2054,16 +2084,9 @@ class NavPathStack {
       return 0;
     }
     let originLength = this.pathArray.length;
-    let tempArray = this.pathArray.slice(0);
-    this.removeArray = [];
-    this.pathArray = [];
-    for (let index = 0; index < tempArray.length; index++) {
-      if (tempArray[index] && !indexes.includes(index)) {
-        this.pathArray.push(tempArray[index]);
-      } else {
-        this.removeArray.push(index);
-      }
-    }
+    this.pathArray = this.pathArray.filter((item, index) => {
+      return item && !indexes.includes(index)
+    });
     let cnt = originLength - this.pathArray.length;
     if (cnt > 0) {
       this.changeFlag = this.changeFlag + 1;
@@ -2071,12 +2094,6 @@ class NavPathStack {
       this.nativeStack?.onStateChanged();
     }
     return cnt;
-  }
-  getRemoveArray() {
-    return this.removeArray;
-  }
-  clearRemoveArray() {
-    this.removeArray = [];
   }
   removeByName(name) {
     let originLength = this.pathArray.length;
