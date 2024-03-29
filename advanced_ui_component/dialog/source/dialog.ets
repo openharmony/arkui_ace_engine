@@ -25,20 +25,20 @@ const HORIZON_BUTTON_MAX_COUNT: number = 2;
 const VERTICAL_BUTTON_MAX_COUNT: number = 4;
 const BUTTON_DEFAULT_HEIGHT: number = 40;
 const BUTTON_LAYOUT_WEIGHT: number = 1;
-const CHECKBOX_CONTAINER_HEIGHT: number = 48
-const CONTENT_MAX_LINES: number = 2
-const DIVIDER_CONTAINER_WIDTH: number = 16
-const DIVIDER_HEIGHT: number = 24
-const DIVIDER_WIDTH: number = 2
-const LOADING_PROGRESS_WIDTH: number = 40
-const LOADING_PROGRESS_HEIGHT: number = 40
-const ITEM_TEXT_SIZE: number = 14
+const CHECKBOX_CONTAINER_HEIGHT: number = 48;
+const CONTENT_MAX_LINES: number = 2;
+const DIVIDER_CONTAINER_WIDTH: number = 16;
+const DIVIDER_HEIGHT: number = 24;
+const DIVIDER_WIDTH: number = 2;
+const LOADING_PROGRESS_WIDTH: number = 40;
+const LOADING_PROGRESS_HEIGHT: number = 40;
+const ITEM_TEXT_SIZE: number = 14;
 const LOADING_MAX_LINES: number = 10;
 const LOADING_TEXT_LAYOUT_WEIGHT: number = 1;
 const LOADING_TEXT_MARGIN_LEFT: number = 12;
 const LOADING_MIN_HEIGHT: number = 48;
-const LIST_MIN_HEIGHT: number = 48
-const CHECKBOX_CONTAINER_LENGTH: number = 20
+const LIST_MIN_HEIGHT: number = 48;
+const CHECKBOX_CONTAINER_LENGTH: number = 20;
 const TEXT_MIN_HEIGHT: number = 48;
 const DEFAULT_IMAGE_SIZE: number = 64;
 
@@ -83,13 +83,13 @@ export struct TipsDialog {
         .padding({ top: $r('sys.float.padding_level8') })
         .constraintSize({
           maxHeight: `calc(100% - ${this.checkBoxHeight}vp - ${this.imageSizeHeight}vp - ${this.buttonHeight}vp)`
-        })
+        });
       }
 
       if (this.checkTips != null) {
         this.checkBoxPart(this.checkTips);
       }
-    }
+    };
   }
 
   @Builder
@@ -102,7 +102,7 @@ export struct TipsDialog {
             this.checkAction(checked);
           }
         })
-        .margin({ right: $r('sys.float.padding_level4') })
+        .margin({ right: $r('sys.float.padding_level4') });
       Text(content)
         .fontSize($r('sys.float.Body_M'))
         .fontWeight(FontWeight.Regular)
@@ -116,14 +116,14 @@ export struct TipsDialog {
           if (this.checkAction) {
             this.checkAction(this.isChecked);
           }
-        })
+        });
     }
     .padding({ top: $r('sys.float.padding_level8') })
     .constraintSize({minHeight: CHECKBOX_CONTAINER_HEIGHT})
     .width('100%')
     .onAreaChange((oldValue: Area, newValue: Area) => {
       this.checkBoxHeight = Number(newValue.height);
-    })
+    });
   }
 
   @Builder
@@ -137,7 +137,7 @@ export struct TipsDialog {
           maxWidth: '100%',
           maxHeight:
           `calc(100% - ${this.checkBoxHeight}vp - ${this.buttonHeight}vp - ${TEXT_MIN_HEIGHT}vp + ${this.marginOffset}vp)`
-        })
+        });
     }
     .width('100%')
     .constraintSize({
@@ -146,7 +146,7 @@ export struct TipsDialog {
     })
     .onAreaChange((oldValue: Area, newValue: Area) => {
       this.imageSizeHeight = Number(newValue.height);
-    })
+    });
   }
 
   @Builder
@@ -164,9 +164,9 @@ export struct TipsDialog {
               .textOverflow({ overflow: TextOverflow.Ellipsis })
               .minFontSize($r('sys.float.Body_L'))
               .maxFontSize($r('sys.float.Title_S'))
-              .width('100%')
+              .width('100%');
           }
-          .padding({ bottom: $r('sys.float.padding_level8') })
+          .padding({ bottom: $r('sys.float.padding_level8') });
         }
         if (this.content != null) {
           Row() {
@@ -179,13 +179,13 @@ export struct TipsDialog {
               .width('100%')
               .onAreaChange((oldValue: Area, newValue: Area) => {
                 this.getTextAlign(Number(newValue.width));
-              })
-          }
+              });
+          };
         }
       }
-      .margin({ right: $r('sys.float.padding_level8') })
+      .margin({ right: $r('sys.float.padding_level8') });
     }
-    .margin({ right: `${this.marginOffset}vp` })
+    .margin({ right: `${this.marginOffset}vp` });
   }
 
   aboutToAppear() {
@@ -239,7 +239,7 @@ export struct TipsDialog {
   }
 
   private initMargin(): void {
-    this.marginOffset = 0 - getNumberByResource('padding_level8')
+    this.marginOffset = 0 - getNumberByResource('padding_level8');
   }
 }
 
@@ -262,6 +262,21 @@ export struct SelectDialog{
       buttons: this.buttons,
     })
   });
+  
+  @Styles paddingContentStyle() {
+    .padding({
+      left: $r('sys.float.padding_level12'),
+      right: $r('sys.float.padding_level12'),
+      bottom: $r('sys.float.padding_level4')
+    });
+  }
+
+  @Styles paddingStyle() {
+    .padding({
+      left: $r('sys.float.padding_level6'),
+      right: $r('sys.float.padding_level6')
+    });
+  }
 
   @Builder
   buildContent() : void {
@@ -273,8 +288,8 @@ export struct SelectDialog{
               .fontSize($r('sys.float.Body_M'))
               .fontWeight(FontWeight.Regular)
               .fontColor($r('sys.color.font_primary'))
-              .textOverflow({overflow: TextOverflow.Ellipsis})
-          }.paddingContentStyle().width('100%')
+              .textOverflow({overflow: TextOverflow.Ellipsis});
+          }.paddingContentStyle().width('100%');
         }
         List({space: 1}) {
           ForEach(this.radioContent, (item: SheetInfo, index?: number) => {
@@ -286,47 +301,28 @@ export struct SelectDialog{
                       .fontSize($r('sys.float.Body_L'))
                       .fontWeight(FontWeight.Medium)
                       .fontColor($r('sys.color.font_primary'))
-                      .layoutWeight(1)
+                      .layoutWeight(1);
                     Radio({ value: 'item.title', group: 'radioGroup' })
                       .size({ width: CHECKBOX_CONTAINER_LENGTH, height: CHECKBOX_CONTAINER_LENGTH })
                       .checked(this.selectedIndex === index)
-                      .hitTestBehavior(HitTestMode.None)
+                      .hitTestBehavior(HitTestMode.None);
                   }.constraintSize({ minHeight: LIST_MIN_HEIGHT }).clip(false)
-                  .padding({ top: $r('sys.float.padding_level4'), bottom: $r('sys.float.padding_level4')
-                  }).onClick(() => {
-                    item.action && item.action()
-                    this.controller.close()
-                  })
+                  .padding({ top: $r('sys.float.padding_level4'), bottom: $r('sys.float.padding_level4') })
                 }.type(ButtonType.Normal).borderRadius($r('sys.float.corner_radius_level8'))
                 .buttonStyle(ButtonStyleMode.TEXTUAL).paddingStyle()
                 .onClick(() => {
-                  item.action && item.action()
-                  this.controller.close()
-                })
+                  item.action && item.action();
+                  this.controller.close();
+                });
                 if (index < this.radioContent.length - 1) {
-                  Divider().color($r('sys.color.comp_divider')).paddingStyle()
+                  Divider().color($r('sys.color.comp_divider')).paddingStyle();
                 }
-              }.paddingStyle()
-            }
-          })
-        }.width('100%').clip(false)
-      }
-    }.scrollBar(BarState.Auto)
-  }
-
-  @Styles paddingContentStyle() {
-    .padding({
-      left: $r('sys.float.padding_level12'),
-      right: $r('sys.float.padding_level12'),
-      bottom: $r('sys.float.padding_level4')
-    })
-  }
-
-  @Styles paddingStyle() {
-    .padding({
-      left: $r('sys.float.padding_level6'),
-      right: $r('sys.float.padding_level6')
-    })
+              }.paddingStyle();
+            };
+          });
+        }.width('100%').clip(false);
+      };
+    }.scrollBar(BarState.Auto);
   }
 
   build() {
@@ -374,7 +370,7 @@ export struct SelectDialog{
   private initButtons(): void {
     this.buttons = [];
     if (this.confirm) {
-      this.buttons.push(this.confirm)
+      this.buttons.push(this.confirm);
     }
   }
 }
@@ -509,18 +505,18 @@ export struct AlertDialog {
       Scroll() {
         Text(this.content)
           .fontSize($r('sys.float.Body_L'))
-          .fontWeight(FontWeight.Medium)
+          .fontWeight(this.getFontWeight())
           .fontColor($r('sys.color.font_primary'))
           .margin({ right: $r('sys.float.padding_level8'), })
           .width(`calc(100% - ${getNumberByResource('padding_level8')}vp)`)
           .textAlign(this.textAlign)
           .onAreaChange((oldValue: Area, newValue: Area) => {
             this.getTextAlign(Number(newValue.width));
-          })
+          });
       }
-      .width('100%')
+      .width('100%');
     }
-    .margin({ right: `${this.getMargin()}vp`, })
+    .margin({ right: `${this.getMargin()}vp`, });
   }
 
   aboutToAppear(): void {
@@ -566,6 +562,13 @@ export struct AlertDialog {
   private getMargin(): number {
     return 0 - getNumberByResource('padding_level8');
   }
+
+  private getFontWeight(): number {
+    if (this.primaryTitle || this.secondaryTitle) {
+      return FontWeight.Regular;
+    }
+    return FontWeight.Medium;
+  }
 }
 
 @CustomDialog
@@ -599,6 +602,7 @@ struct CustomDialogContentComponent {
   @BuilderParam contentBuilder: () => void = this.defaultContentBuilder;
   buttons?: ButtonOptions[];
   contentAreaPadding?: Padding;
+  keyIndex: number = 0;
 
   @Builder
   defaultContentBuilder(): void {
@@ -617,7 +621,7 @@ struct CustomDialogContentComponent {
         this.contentBuilder();
       }
       .padding(this.getContentPadding())
-      .constraintSize({ maxHeight: this.contentMaxHeight, })
+      .constraintSize({ maxHeight: this.contentMaxHeight, });
 
       // operation area
       this.buildButtons();
@@ -638,14 +642,14 @@ struct CustomDialogContentComponent {
           .maxLines(TITLE_MAX_LINES)
           .heightAdaptivePolicy(TextHeightAdaptivePolicy.MIN_FONT_SIZE_FIRST)
           .textOverflow({ overflow: TextOverflow.Ellipsis })
-          .width('100%')
+          .width('100%');
       }
-      .width('100%')
+      .width('100%');
 
       if (this.primaryTitle && this.secondaryTitle) {
         Row() {
-          Divider().margin($r('sys.float.padding_level1')).color(Color.Transparent)
-        }
+          Divider().margin($r('sys.float.padding_level1')).color(Color.Transparent);
+        };
       }
 
       Row() {
@@ -658,9 +662,9 @@ struct CustomDialogContentComponent {
           .maxLines(TITLE_MAX_LINES)
           .heightAdaptivePolicy(TextHeightAdaptivePolicy.MIN_FONT_SIZE_FIRST)
           .textOverflow({ overflow: TextOverflow.Ellipsis })
-          .width('100%')
+          .width('100%');
       }
-      .width('100%')
+      .width('100%');
     }
     .constraintSize({
       minHeight: this.getTitleAreaMinHeight(),
@@ -690,19 +694,23 @@ struct CustomDialogContentComponent {
       Button(buttonOptions.value)
         .setButtonProperties(buttonOptions, this.controller)
         .role(buttonOptions.role ?? ButtonRole.NORMAL)
+        .key(`advanced_dialog_button_${this.keyIndex++}`);
     } else if (buttonOptions.background !== undefined && buttonOptions.fontColor !== undefined) {
       Button(buttonOptions.value)
         .setButtonProperties(buttonOptions, this.controller)
         .backgroundColor(buttonOptions.background)
         .fontColor(buttonOptions.fontColor)
+        .key(`advanced_dialog_button_${this.keyIndex++}`);
     } else if (buttonOptions.background !== undefined) {
       Button(buttonOptions.value)
         .setButtonProperties(buttonOptions, this.controller)
         .backgroundColor(buttonOptions.background)
+        .key(`advanced_dialog_button_${this.keyIndex++}`);
     } else {
       Button(buttonOptions.value)
         .setButtonProperties(buttonOptions, this.controller)
         .fontColor(buttonOptions.fontColor)
+        .key(`advanced_dialog_button_${this.keyIndex++}`);
     }
   }
 
@@ -723,7 +731,7 @@ struct CustomDialogContentComponent {
             });
           this.buildSingleButton(this.buttons[HORIZON_BUTTON_MAX_COUNT - 1]);
         }
-      }
+      };
     }
   }
 
@@ -734,7 +742,7 @@ struct CustomDialogContentComponent {
         ForEach(this.buttons.slice(0, VERTICAL_BUTTON_MAX_COUNT), (item: ButtonOptions, index: number) => {
           this.buildButtonWithDivider(index);
         }, (item: ButtonOptions) => item.value.toString());
-      }
+      };
     }
   }
 
@@ -743,12 +751,12 @@ struct CustomDialogContentComponent {
     if (this.buttons && this.buttons[index]) {
       Row() {
         this.buildSingleButton(this.buttons[index]);
-      }
+      };
 
       if (index < Math.min(this.buttons.length, VERTICAL_BUTTON_MAX_COUNT) - 1) {
         Row() {
         }
-        .height($r('sys.float.alert_button_vertical_space'))
+        .height($r('sys.float.alert_button_vertical_space'));
       }
     }
   }
@@ -965,7 +973,7 @@ export struct CustomDialogComponent {
           contentAreaPadding: this.contentAreaPadding,
         });
       }
-      .attributeModifier(this.columnModifier)
+      .attributeModifier(this.columnModifier);
     }
     .onAreaChange((oldValue: Area, newValue: Area) => {
       if (!this.isFirstInit) {
@@ -1016,7 +1024,7 @@ function setButtonProperties(buttonOptions: ButtonOptions, controller?: CustomDi
     controller?.close();
   })
   .buttonStyle(buttonOptions.buttonStyle ?? getNumberByResource('alert_button_style'))
-  .layoutWeight(BUTTON_LAYOUT_WEIGHT)
+  .layoutWeight(BUTTON_LAYOUT_WEIGHT);
 }
 
 /**
@@ -1080,14 +1088,14 @@ export struct LoadingDialog {
           .fontColor($r('sys.color.font_primary'))
           .layoutWeight(LOADING_TEXT_LAYOUT_WEIGHT)
           .maxLines(LOADING_MAX_LINES)
-          .textOverflow({ overflow: TextOverflow.Ellipsis })
+          .textOverflow({ overflow: TextOverflow.Ellipsis });
         LoadingProgress()
           .color($r('sys.color.icon_secondary'))
           .width(LOADING_PROGRESS_WIDTH)
           .height(LOADING_PROGRESS_HEIGHT)
-          .margin({ left: LOADING_TEXT_MARGIN_LEFT })
+          .margin({ left: LOADING_TEXT_MARGIN_LEFT });
       }
-      .constraintSize({ minHeight: LOADING_MIN_HEIGHT })
-    }
+      .constraintSize({ minHeight: LOADING_MIN_HEIGHT });
+    };
   }
 }

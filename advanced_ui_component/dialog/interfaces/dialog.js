@@ -618,9 +618,9 @@ export class SelectDialog extends ViewPU {
             ViewStackProcessor.StartGetAccessRecordingFor(z14);
             Row.create();
             Row.padding({
-              left: { id: -1, type: 10002, params: ['sys.float.padding_level12'], bundleName: '', moduleName: '' },
-              right: { id: -1, type: 10002, params: ['sys.float.padding_level12'], bundleName: '', moduleName: '' },
-              bottom: { id: -1, type: 10002, params: ['sys.float.padding_level4'], bundleName: '', moduleName: '' }
+              left: { 'id': -1, 'type': 10002, params: ['sys.float.padding_level12'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' },
+              right: { 'id': -1, 'type': 10002, params: ['sys.float.padding_level12'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' },
+              bottom: { 'id': -1, 'type': 10002, params: ['sys.float.padding_level4'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' }
             });
             Row.width('100%');
             if (!a15) {
@@ -631,9 +631,9 @@ export class SelectDialog extends ViewPU {
           this.observeComponentCreation((x14, y14) => {
             ViewStackProcessor.StartGetAccessRecordingFor(x14);
             Text.create(this.content);
-            Text.fontSize({ id: -1, type: 10002, params: ['sys.float.Body_M'], bundleName: '', moduleName: '' });
+            Text.fontSize({ 'id': -1, 'type': 10002, params: ['sys.float.Body_M'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' });
             Text.fontWeight(FontWeight.Regular);
-            Text.fontColor({ id: -1, type: 10001, params: ['sys.color.font_primary'], bundleName: '', moduleName: '' });
+            Text.fontColor({ 'id': -1, 'type': 10001, params: ['sys.color.font_primary'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' });
             Text.textOverflow({ overflow: TextOverflow.Ellipsis });
             if (!y14) {
               Text.pop();
@@ -688,8 +688,8 @@ export class SelectDialog extends ViewPU {
               ViewStackProcessor.StartGetAccessRecordingFor(j14);
               Column.create();
               Column.padding({
-                left: { id: -1, type: 10002, params: ['sys.float.padding_level6'], bundleName: '', moduleName: '' },
-                right: { id: -1, type: 10002, params: ['sys.float.padding_level6'], bundleName: '', moduleName: '' }
+                left: { 'id': -1, 'type': 10002, params: ['sys.float.padding_level6'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' },
+                right: { 'id': -1, 'type': 10002, params: ['sys.float.padding_level6'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' }
               });
               if (!k14) {
                 Column.pop();
@@ -700,11 +700,11 @@ export class SelectDialog extends ViewPU {
               ViewStackProcessor.StartGetAccessRecordingFor(g14);
               Button.createWithChild();
               Button.type(ButtonType.Normal);
-              Button.borderRadius({ id: -1, type: 10002, params: ['sys.float.corner_radius_level8'], bundleName: '', moduleName: '' });
+              Button.borderRadius({ 'id': -1, 'type': 10002, params: ['sys.float.corner_radius_level8'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' });
               Button.buttonStyle(ButtonStyleMode.TEXTUAL);
               Button.padding({
-                left: { id: -1, type: 10002, params: ['sys.float.padding_level6'], bundleName: '', moduleName: '' },
-                right: { id: -1, type: 10002, params: ['sys.float.padding_level6'], bundleName: '', moduleName: '' }
+                left: { 'id': -1, 'type': 10002, params: ['sys.float.padding_level6'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' },
+                right: { 'id': -1, 'type': 10002, params: ['sys.float.padding_level6'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' }
               });
               Button.onClick(() => {
                 e13.action && e13.action();
@@ -721,8 +721,8 @@ export class SelectDialog extends ViewPU {
               Row.constraintSize({ minHeight: LIST_MIN_HEIGHT });
               Row.clip(false);
               Row.padding({
-                top: { id: -1, type: 10002, params: ['sys.float.padding_level4'], bundleName: '', moduleName: '' },
-                bottom: { id: -1, type: 10002, params: ['sys.float.padding_level4'], bundleName: '', moduleName: '' }
+                top: { 'id': -1, 'type': 10002, params: ['sys.float.padding_level4'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' },
+                bottom: { 'id': -1, 'type': 10002, params: ['sys.float.padding_level4'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' }
               });
               if (!f14) {
                 Row.pop();
@@ -732,9 +732,9 @@ export class SelectDialog extends ViewPU {
             this.observeComponentCreation((c14, d14) => {
               ViewStackProcessor.StartGetAccessRecordingFor(c14);
               Text.create(e13.title);
-              Text.fontSize({ id: -1, type: 10002, params: ['sys.float.Body_L'], bundleName: '', moduleName: '' });
+              Text.fontSize({ 'id': -1, 'type': 10002, params: ['sys.float.Body_L'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' });
               Text.fontWeight(FontWeight.Medium);
-              Text.fontColor({ id: -1, type: 10001, params: ['sys.color.font_primary'], bundleName: '', moduleName: '' });
+              Text.fontColor({ 'id': -1, 'type': 10001, params: ['sys.color.font_primary'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' });
               Text.layoutWeight(1);
               if (!d14) {
                 Text.pop();
@@ -763,10 +763,10 @@ export class SelectDialog extends ViewPU {
                   this.observeComponentCreation((y13, z13) => {
                     ViewStackProcessor.StartGetAccessRecordingFor(y13);
                     Divider.create();
-                    Divider.color({ id: -1, type: 10001, params: ['sys.color.comp_divider'], bundleName: '', moduleName: '' });
+                    Divider.color({ 'id': -1, 'type': 10001, params: ['sys.color.comp_divider'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' });
                     Divider.padding({
-                      left: { id: -1, type: 10002, params: ['sys.float.padding_level6'], bundleName: '', moduleName: '' },
-                      right: { id: -1, type: 10002, params: ['sys.float.padding_level6'], bundleName: '', moduleName: '' }
+                      left: { 'id': -1, 'type': 10002, params: ['sys.float.padding_level6'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' },
+                      right: { 'id': -1, 'type': 10002, params: ['sys.float.padding_level6'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' }
                     });
                     if (!z13) {
                       Divider.pop();
@@ -844,24 +844,24 @@ export class SelectDialog extends ViewPU {
   }
   initContentPadding() {
     this.contentPadding = {
-      left: { id: -1, type: 10002, params: ['sys.float.padding_level0'], bundleName: '', moduleName: '' },
-      right: { id: -1, type: 10002, params: ['sys.float.padding_level0'], bundleName: '', moduleName: '' }
+      left: { 'id': -1, 'type': 10002, params: ['sys.float.padding_level0'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' },
+      right: { 'id': -1, 'type': 10002, params: ['sys.float.padding_level0'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' }
     };
     if (!this.title && !this.confirm) {
       this.contentPadding = {
-        top: { id: -1, type: 10002, params: ['sys.float.padding_level12'], bundleName: '', moduleName: '' },
-        bottom: { id: -1, type: 10002, params: ['sys.float.padding_level12'], bundleName: '', moduleName: '' }
+        top: { 'id': -1, 'type': 10002, params: ['sys.float.padding_level12'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' },
+        bottom: { 'id': -1, 'type': 10002, params: ['sys.float.padding_level12'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' }
       };
       return;
     }
     if (!this.title) {
       this.contentPadding = {
-        top: { id: -1, type: 10002, params: ['sys.float.padding_level12'], bundleName: '', moduleName: '' }
+        top: { 'id': -1, 'type': 10002, params: ['sys.float.padding_level12'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' }
       };
     }
     else if (!this.confirm) {
       this.contentPadding = {
-        bottom: { id: -1, type: 10002, params: ['sys.float.padding_level12'], bundleName: '', moduleName: '' }
+        bottom: { 'id': -1, 'type': 10002, params: ['sys.float.padding_level12'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' }
       };
     }
   }
@@ -1325,7 +1325,7 @@ export class AlertDialog extends ViewPU {
               this.AlertDialogContentBuilder();
             },
             buttons: this.buttons,
-          }, undefined, c9, () => { }, { page: 'library/src/main/ets/components/mainpage/MainPage.ets', line: 57 });
+          }, undefined, c9, () => { }, { page: 'library/src/main/ets/components/mainpage/MainPage.ets', line: 58 });
           ViewPU.create(e9);
           let f9 = () => {
             return {
@@ -1358,7 +1358,7 @@ export class AlertDialog extends ViewPU {
     this.observeComponentCreation2((s8, t8) => {
       Text.create(this.content);
       Text.fontSize({ id: -1, type: 10002, params: ['sys.float.Body_L'], bundleName: '', moduleName: '' });
-      Text.fontWeight(FontWeight.Medium);
+      Text.fontWeight(this.getFontWeight());
       Text.fontColor({ id: -1, type: 10001, params: ['sys.color.font_primary'], bundleName: '', moduleName: '' });
       Text.margin({ right: { id: -1, type: 10002, params: ['sys.float.padding_level8'], bundleName: '', moduleName: '' }, });
       Text.width(`calc(100% - ${getNumberByResource('padding_level8')}vp)`);
@@ -1408,6 +1408,12 @@ export class AlertDialog extends ViewPU {
   }
   getMargin() {
     return 0 - getNumberByResource('padding_level8');
+  }
+  getFontWeight() {
+    if (this.primaryTitle || this.secondaryTitle) {
+      return FontWeight.Regular;
+    }
+    return FontWeight.Medium;
   }
   rerender() {
     this.updateDirtyElements();
@@ -1476,7 +1482,7 @@ export class CustomContentDialog extends ViewPU {
             },
             contentAreaPadding: this.contentAreaPadding,
             buttons: this.buttons,
-          }, undefined, u7, () => { }, { page: 'library/src/main/ets/components/mainpage/MainPage.ets', line: 143 });
+          }, undefined, u7, () => { }, { page: 'library/src/main/ets/components/mainpage/MainPage.ets', line: 151 });
           ViewPU.create(w7);
           let x7 = () => {
             return {
@@ -1514,6 +1520,7 @@ class CustomDialogContentComponent extends ViewPU {
     this.contentBuilder = this.defaultContentBuilder;
     this.buttons = undefined;
     this.contentAreaPadding = undefined;
+    this.keyIndex = 0;
     this.titleHeight = 0;
     this.__contentMaxHeight = new ObservedPropertySimplePU('', this, 'contentMaxHeight');
     this.setInitiallyProvidedValue(o7);
@@ -1537,6 +1544,9 @@ class CustomDialogContentComponent extends ViewPU {
     }
     if (m7.contentAreaPadding !== undefined) {
       this.contentAreaPadding = m7.contentAreaPadding;
+    }
+    if (m7.keyIndex !== undefined) {
+      this.keyIndex = m7.keyIndex;
     }
     if (m7.titleHeight !== undefined) {
       this.titleHeight = m7.titleHeight;
@@ -1671,6 +1681,7 @@ class CustomDialogContentComponent extends ViewPU {
             Button.createWithLabel(z4.value);
             __Button__setButtonProperties(z4, this.controller);
             Button.role(z4.role ?? ButtonRole.NORMAL);
+            Button.key(`advanced_dialog_button_${this.keyIndex++}`);
           }, Button);
           Button.pop();
         });
@@ -1682,6 +1693,7 @@ class CustomDialogContentComponent extends ViewPU {
             __Button__setButtonProperties(z4, this.controller);
             Button.backgroundColor(z4.background);
             Button.fontColor(z4.fontColor);
+            Button.key(`advanced_dialog_button_${this.keyIndex++}`);
           }, Button);
           Button.pop();
         });
@@ -1692,6 +1704,7 @@ class CustomDialogContentComponent extends ViewPU {
             Button.createWithLabel(z4.value);
             __Button__setButtonProperties(z4, this.controller);
             Button.backgroundColor(z4.background);
+            Button.key(`advanced_dialog_button_${this.keyIndex++}`);
           }, Button);
           Button.pop();
         });
@@ -1702,6 +1715,7 @@ class CustomDialogContentComponent extends ViewPU {
             Button.createWithLabel(z4.value);
             __Button__setButtonProperties(z4, this.controller);
             Button.fontColor(z4.fontColor);
+            Button.key(`advanced_dialog_button_${this.keyIndex++}`);
           }, Button);
           Button.pop();
         });
