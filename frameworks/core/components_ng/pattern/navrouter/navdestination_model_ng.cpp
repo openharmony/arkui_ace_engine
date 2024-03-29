@@ -235,6 +235,8 @@ void NavDestinationModelNG::CreateBackButton(const RefPtr<NavDestinationGroupNod
     auto backButtonImageLayoutProperty = backButtonImageNode->GetLayoutProperty<ImageLayoutProperty>();
     CHECK_NULL_VOID(backButtonImageLayoutProperty);
     if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
+        auto iconColor = theme->GetIconColor();
+        imageSourceInfo.SetFillColor(iconColor);
         imageSourceInfo.SetResourceId(theme->GetBackBtnResourceId());
         auto iconWidth = theme->GetIconWidth();
         auto iconHeight = theme->GetIconHeight();
