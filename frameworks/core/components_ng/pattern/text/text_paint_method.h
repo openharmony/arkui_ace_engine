@@ -39,7 +39,7 @@ public:
 
     RefPtr<Modifier> GetContentModifier(PaintWrapper* paintWrapper) override;
     void UpdateContentModifier(PaintWrapper* paintWrapper) override;
-
+    
     RefPtr<Modifier> GetOverlayModifier(PaintWrapper* paintWrapper) override;
     void UpdateOverlayModifier(PaintWrapper* paintWrapper) override;
 
@@ -52,7 +52,8 @@ protected:
 private:
     void UpdateParagraphAndImageSpanNodeList();
 
-private:
+    void DoStartTextRace();
+
     WeakPtr<Pattern> pattern_;
     float baselineOffset_;
 

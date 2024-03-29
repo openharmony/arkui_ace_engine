@@ -602,19 +602,21 @@ void TextContentModifier::SetContentSize(SizeF& value)
 }
 
 bool TextContentModifier::SetTextRace(const double& step, const int32_t& loop,
-        const MarqueeDirection& direction, const int32_t& delay)
+    const MarqueeDirection& direction, const int32_t& delay)
 {
-    CHECK_NULL_RETURN(paragraph_,false);
+    CHECK_NULL_RETURN(paragraph_, false);
     textRaceSpaceWidth_ = RACE_SPACE_WIDTH;
     auto pipeline = PipelineContext::GetCurrentContext();
     if (pipeline) {
         textRaceSpaceWidth_ *= pipeline->GetDipScale();
     }
-    if (!GreatNotEqual(step, 0.0)) {
-        return false;
+
+    auto duration = static_cast<int32_t>(std::abs(paragraph_->GetTextWidth() + textRaceSpaceWidth_) *
+        DEFAULT_MARQUEE_SCROLL_DELAY);
+    if (GreatNotEqual(step, 0.0)) {
+        duration = static_cast<int32_t>(duration / step);
     }
-    int32_t duration = static_cast<int32_t>(std::abs(paragraph_->GetTextWidth() + textRaceSpaceWidth_) *
-        DEFAULT_MARQUEE_SCROLL_DELAY / step);
+    
     if (duration <= 0) {
         return false;
     }
@@ -637,7 +639,7 @@ bool TextContentModifier::SetTextRace(const double& step, const int32_t& loop,
 
     textRacing_ = true;
     auto textPattern = DynamicCast<TextPattern>(pattern_.Upgrade());
-    CHECK_NULL_RETURN(textPattern,false);
+    CHECK_NULL_RETURN(textPattern, false);
     textPattern->FireOnMarqueeStateChange(TextMarqueeState::START);
 
     return true;

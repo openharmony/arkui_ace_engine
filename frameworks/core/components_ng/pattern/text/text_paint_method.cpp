@@ -46,6 +46,30 @@ void TextPaintMethod::UpdateParagraphAndImageSpanNodeList()
     textContentModifier_->SetImageSpanNodeList(textPattern->GetImageSpanNodeList());
 }
 
+void TextPaintMethod::DoStartTextRace()
+{
+    CHECK_NULL_VOID(textContentModifier_);
+
+    auto textPattern = DynamicCast<TextPattern>(pattern_.Upgrade());
+    CHECK_NULL_VOID(textPattern);
+    auto frameNode = textPattern->GetHost();
+    CHECK_NULL_VOID(frameNode);
+    auto paragraph = textPattern->GetParagraph();
+    CHECK_NULL_VOID(paragraph);
+    auto layoutProperty = frameNode->GetLayoutProperty<TextLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+
+    auto step = layoutProperty->GetTextMarqueeStep().value_or(DEFAULT_MARQUEE_STEP_VP.ConvertToPx());
+    if (GreatNotEqual(step, paragraph->GetTextWidth())) {
+        step = DEFAULT_MARQUEE_STEP_VP.ConvertToPx();
+    }
+    auto loop = layoutProperty->GetTextMarqueeLoop().value_or(-1);
+    auto direction = layoutProperty->GetTextMarqueeDirection().value_or(MarqueeDirection::LEFT);
+    auto delay = layoutProperty->GetTextMarqueeDelay().value_or(0);
+
+    textContentModifier_->StartTextRace(step, loop, direction, delay);
+}
+
 void TextPaintMethod::UpdateContentModifier(PaintWrapper* paintWrapper)
 {
     CHECK_NULL_VOID(paintWrapper);
@@ -78,11 +102,7 @@ void TextPaintMethod::UpdateContentModifier(PaintWrapper* paintWrapper)
     if (textOverflow.has_value() && textOverflow.value() == TextOverflow::MARQUEE &&
         paragraph->GetTextWidth() > paintWrapper->GetContentSize().Width() &&
         layoutProperty->GetTextMarqueeStart().value_or(true)) {
-        auto step = layoutProperty->GetTextMarqueeStep().value_or(DEFAULT_MARQUEE_STEP_VP.ConvertToPx());
-        auto loop = layoutProperty->GetTextMarqueeLoop().value_or(-1);
-        auto direction = layoutProperty->GetTextMarqueeDirection().value_or(MarqueeDirection::LEFT);
-        auto delay = layoutProperty->GetTextMarqueeDelay().value_or(0);
-        textContentModifier_->StartTextRace(step, loop, direction, delay);
+        DoStartTextRace();
     } else {
         textContentModifier_->StopTextRace();
     }
