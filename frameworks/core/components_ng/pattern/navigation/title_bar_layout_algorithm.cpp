@@ -93,8 +93,8 @@ void TitleBarLayoutAlgorithm::MeasureBackButton(LayoutWrapper* layoutWrapper, co
                 CalcLength(backIconHeight_)));
             padding.SetEdges(CalcLength(MENU_BUTTON_PADDING));
             buttonLayoutProperty->UpdatePadding(padding);
-            constraint.selfIdealSize = OptionalSizeF(static_cast<float>(iconBackgroundWidth_.ConvertToPx()),
-                static_cast<float>(iconBackgroundWidth_.ConvertToPx()));
+            constraint.selfIdealSize = OptionalSizeF(static_cast<float>(backButtonWidth_.ConvertToPx()),
+                static_cast<float>(backButtonWidth_.ConvertToPx()));
             backButtonWrapper->Measure(constraint);
             return;
         }
@@ -145,7 +145,8 @@ float TitleBarLayoutAlgorithm::GetTitleWidth(const RefPtr<TitleBarNode>& titleBa
         // left padding
         if (showBackButton_) {
             if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
-                occupiedWidth += iconBackgroundWidth_.ConvertToPx() + leftPadding + horizontalMargin;
+                occupiedWidth += isCustom ? backButtonWidth_.ConvertToPx() + leftPadding :
+                    backButtonWidth_.ConvertToPx() + leftPadding + horizontalMargin;
             } else {
                 occupiedWidth += isCustom ? (BACK_BUTTON_ICON_SIZE + BUTTON_PADDING).ConvertToPx() + leftPadding :
                     (BACK_BUTTON_ICON_SIZE).ConvertToPx() + leftPadding + horizontalMargin;
@@ -462,7 +463,7 @@ void TitleBarLayoutAlgorithm::LayoutBackButton(LayoutWrapper* layoutWrapper, con
         }
         if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
             auto titleHeight = titleBarLayoutProperty->GetTitleHeightValue(SINGLE_LINE_TITLEBAR_HEIGHT);
-            auto offsetY = (titleHeight - iconBackgroundWidth_) / 2;
+            auto offsetY = (titleHeight - backButtonHeight_) / 2;
             OffsetF backButtonOffset = OffsetF(static_cast<float>(
                 (maxPaddingStart_ - MENU_BUTTON_PADDING).ConvertToPx()),
                 static_cast<float>(offsetY.ConvertToPx()));
@@ -869,6 +870,8 @@ void TitleBarLayoutAlgorithm::InitializeTheme()
     marginRight_ = theme->GetMarginRight();
     menuCompPadding_ = theme->GetCompPadding();
     iconBackgroundWidth_ = theme->GetIconBackgroundWidth();
+    backButtonWidth_ = theme->GetBackButtonWidth();
+    backButtonHeight_ = theme->GetBackButtonHeight();
     paddingTopTwolines_ = theme->GetPaddingTopTwolines();
     titleSpaceVertical_ = theme->GetTitleSpaceVertical();
     backIconWidth_ = theme->GetIconWidth();
