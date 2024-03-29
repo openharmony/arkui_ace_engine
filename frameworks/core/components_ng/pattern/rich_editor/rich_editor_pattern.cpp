@@ -522,10 +522,7 @@ int32_t RichEditorPattern::AddTextSpanOperation(
     spanItem->hasResourceDecorationColor = options.hasResourceDecorationColor;
     AddSpanItem(spanItem, offset);
     if (options.paraStyle) {
-        int32_t start = 0;
-        int32_t end = 0;
-        spanItem->GetIndex(start, end);
-        UpdateParagraphStyle(start, end, *options.paraStyle);
+        UpdateParagraphStyle(spanNode, *options.paraStyle);
     }
     if (options.userGestureOption.onClick) {
         auto tmpClickFunc = options.userGestureOption.onClick;
@@ -1440,19 +1437,22 @@ std::vector<RefPtr<SpanNode>> RichEditorPattern::GetParagraphNodes(int32_t start
 void RichEditorPattern::UpdateParagraphStyle(int32_t start, int32_t end, const struct UpdateParagraphStyle& style)
 {
     TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "range=[%{public}d,%{public}d]", start, end);
-    TAG_LOGD(AceLogTag::ACE_RICH_TEXT, "style=%{public}s", style.ToString().c_str());
     auto spanNodes = GetParagraphNodes(start, end);
+    TAG_LOGD(AceLogTag::ACE_RICH_TEXT, "spanNode cnt=%{public}d, style=%{public}s",
+        static_cast<int32_t>(spanNodes.size()), style.ToString().c_str());
     for (const auto& spanNode : spanNodes) {
-        if (style.textAlign.has_value()) {
-            spanNode->UpdateTextAlign(*style.textAlign);
-        } else {
-            spanNode->UpdateTextAlign(TextAlign::START);
-        }
-        spanNode->UpdateWordBreak(style.wordBreak.value_or(WordBreak::BREAK_WORD));
-        if (style.leadingMargin.has_value()) {
-            spanNode->GetSpanItem()->leadingMargin = *style.leadingMargin;
-            spanNode->UpdateLeadingMargin(*style.leadingMargin);
-        }
+        UpdateParagraphStyle(spanNode, style);
+    }
+}
+
+void RichEditorPattern::UpdateParagraphStyle(RefPtr<SpanNode> spanNode, const struct UpdateParagraphStyle& style)
+{
+    CHECK_NULL_VOID(spanNode);
+    spanNode->UpdateTextAlign(style.textAlign.value_or(TextAlign::START));
+    spanNode->UpdateWordBreak(style.wordBreak.value_or(WordBreak::BREAK_WORD));
+    if (style.leadingMargin.has_value()) {
+        spanNode->GetSpanItem()->leadingMargin = *style.leadingMargin;
+        spanNode->UpdateLeadingMargin(*style.leadingMargin);
     }
 }
 
