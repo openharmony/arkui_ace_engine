@@ -4711,4 +4711,121 @@ HWTEST_F(RichEditorTestNg, HandleOnEditChanged005, TestSize.Level1)
     richEditorPattern->HandleMouseLeftButtonRelease(info);
     EXPECT_TRUE(richEditorController->IsEditing());
 }
+
+/**
+ * @tc.name: StopEditingTest
+ * @tc.desc: test StopEditing
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorTestNg, StopEditingTest, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. get richEditor controller
+     */
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    auto richEditorController = richEditorPattern->GetRichEditorController();
+    ASSERT_NE(richEditorController, nullptr);
+    auto focusHub = richEditorNode_->GetOrCreateFocusHub();
+    ASSERT_NE(focusHub, nullptr);
+
+    /**
+     * @tc.steps: step2. initalize span properties
+     */
+    TextSpanOptions options2;
+    options2.value = INIT_VALUE_1;
+
+    /**
+     * @tc.steps: step3. test add span
+     */
+    richEditorController->AddTextSpan(options2);
+    focusHub->RequestFocusImmediately();
+    EXPECT_TRUE(focusHub->IsCurrentFocus());
+    richEditorPattern->caretTwinkling_ = true;
+    richEditorController->StopEditing();
+
+    EXPECT_FALSE(richEditorPattern->caretTwinkling_);
+
+    ClearSpan();
+}
+
+/**
+ * @tc.name: OnSubmitTest
+ * @tc.desc: test OnSubmitTest
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorTestNg, OnSubmitTest, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. get richEditor controller
+     */
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    auto richEditorController = richEditorPattern->GetRichEditorController();
+    ASSERT_NE(richEditorController, nullptr);
+    auto eventHub = richEditorPattern->GetEventHub<RichEditorEventHub>();
+    ASSERT_NE(eventHub, nullptr);
+    /**
+     * @tc.steps: step2. initalize span properties
+     */
+    TextSpanOptions options2;
+    options2.value = INIT_VALUE_1;
+
+    /**
+     * @tc.steps: step3. test add span
+     */
+    richEditorController->AddTextSpan(options2);
+
+    int count = 0;
+    TextFieldCommonEvent event2;
+    auto callback = [&count, &event2](int32_t key, NG::TextFieldCommonEvent& event) {
+        event2 = event;
+        if (count > 0) {
+            event.SetKeepEditable(true);
+        }
+        count = count + 1;
+    };
+    eventHub->SetOnSubmit(std::move(callback));
+
+    TextInputAction action2 = TextInputAction::NEW_LINE;
+    bool forceCloseKeyboard = false;
+    richEditorPattern->PerformAction(action2, forceCloseKeyboard);
+    EXPECT_EQ(count, 0);
+
+    action2 = TextInputAction::DONE;
+    richEditorPattern->PerformAction(action2, forceCloseKeyboard);
+    EXPECT_EQ(count, 1);
+    richEditorPattern->PerformAction(action2, forceCloseKeyboard);
+    EXPECT_EQ(count, 2);
+    ClearSpan();
+}
+
+/**
+ * @tc.name: SetEnterKeyType
+ * @tc.desc: test SetEnterKeyType
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorTestNg, SetEnterKeyType, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. get richEditor controller
+     */
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+
+    RichEditorModelNG richEditorModel;
+    richEditorModel.Create();
+    richEditorModel.SetEnterKeyType(TextInputAction::NEW_LINE);
+    richEditorNode_->MarkModifyDone();
+    EXPECT_EQ(richEditorPattern->GetTextInputActionValue(richEditorPattern->GetDefaultTextInputAction()),
+        TextInputAction::NEW_LINE);
+    richEditorModel.SetEnterKeyType(TextInputAction::UNSPECIFIED);
+    richEditorNode_->MarkModifyDone();
+    EXPECT_EQ(richEditorPattern->GetTextInputActionValue(richEditorPattern->GetDefaultTextInputAction()),
+        TextInputAction::NEW_LINE);
+    ClearSpan();
+}
 } // namespace OHOS::Ace::NG
