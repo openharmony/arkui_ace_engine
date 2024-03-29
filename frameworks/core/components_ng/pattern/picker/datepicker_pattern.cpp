@@ -463,7 +463,8 @@ void DatePickerPattern::FlushColumn()
     CHECK_NULL_VOID(dataPickerRowLayoutProperty);
     auto lunarDate = dataPickerRowLayoutProperty->GetSelectedDate().value_or(SolarToLunar(GetSelectedDate()));
     AdjustLunarDate(lunarDate);
-    if (dataPickerRowLayoutProperty->GetLunar().value_or(false)) {
+    std::string language = Localization::GetInstance()->GetLanguage();
+    if (dataPickerRowLayoutProperty->GetLunar().value_or(false) && (strcmp(language.c_str(), "zh") == 0)) {
         LunarColumnsBuilding(lunarDate);
     } else {
         SolarColumnsBuilding(LunarToSolar(lunarDate));
@@ -517,7 +518,8 @@ void DatePickerPattern::FlushMonthDaysColumn()
     CHECK_NULL_VOID(yearDaysNode);
     auto dataPickerRowLayoutProperty = host->GetLayoutProperty<DataPickerRowLayoutProperty>();
     CHECK_NULL_VOID(dataPickerRowLayoutProperty);
-    if (dataPickerRowLayoutProperty->GetLunar().value_or(false)) {
+    std::string language = Localization::GetInstance()->GetLanguage();
+    if (dataPickerRowLayoutProperty->GetLunar().value_or(false) && (strcmp(language.c_str(), "zh") == 0)) {
         LunarMonthDaysColumnBuilding(
             dataPickerRowLayoutProperty->GetSelectedDate().value_or(SolarToLunar(GetSelectedDate())));
     } else {
