@@ -416,6 +416,11 @@ public:
         return imageFileCacheConvertAstc_;
     }
 
+    static int32_t GetImageFileCacheConvertAstcThreshold()
+    {
+        return imageFileCacheConvertAstcThreshold_;
+    }
+
     static void SetExtSurfaceEnabled(bool extSurfaceEnabled)
     {
         extSurfaceEnabled_ = extSurfaceEnabled;
@@ -532,6 +537,7 @@ private:
     static int32_t astcMax_;
     static int32_t astcPsnr_;
     static bool imageFileCacheConvertAstc_;
+    static int32_t imageFileCacheConvertAstcThreshold_;
     static bool extSurfaceEnabled_;
     static uint32_t dumpFrameCount_;
     static bool resourceDecoupling_;

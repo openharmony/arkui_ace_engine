@@ -62,6 +62,7 @@ std::shared_mutex mutex_;
 constexpr char DISABLE_ROSEN_FILE_PATH[] = "/etc/disablerosen";
 constexpr char DISABLE_WINDOW_ANIMATION_PATH[] = "/etc/disable_window_size_animation";
 #endif
+constexpr int32_t CONVERT_ASTC_THRESHOLD = 2;
 
 using RsOrientation = Rosen::DisplayOrientation;
 
@@ -257,6 +258,11 @@ bool GetImageFileCacheConvertToAstcEnabled()
     return system::GetParameter("persist.image.filecache.astc.enable", "false") == "true";
 }
 
+int32_t GetImageFileCacheConvertAstcThresholdProp()
+{
+    return system::GetIntParameter<int>("persist.image.filecache.astc.threshold", CONVERT_ASTC_THRESHOLD);
+}
+
 bool IsUseMemoryMonitor()
 {
     return (system::GetParameter("persist.ace.memorymonitor.enabled", "0") == "1");
@@ -336,6 +342,7 @@ bool SystemProperties::astcEnabled_ = GetAstcEnabled();
 int32_t SystemProperties::astcMax_ = GetAstcMaxErrorProp();
 int32_t SystemProperties::astcPsnr_ = GetAstcPsnrProp();
 bool SystemProperties::imageFileCacheConvertAstc_ = GetImageFileCacheConvertToAstcEnabled();
+int32_t SystemProperties::imageFileCacheConvertAstcThreshold_ = GetImageFileCacheConvertAstcThresholdProp();
 ACE_WEAK_SYM bool SystemProperties::extSurfaceEnabled_ = IsExtSurfaceEnabled();
 ACE_WEAK_SYM uint32_t SystemProperties::dumpFrameCount_ = GetSysDumpFrameCount();
 bool SystemProperties::enableScrollableItemPool_ = IsEnableScrollableItemPool();
