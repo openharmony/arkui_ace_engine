@@ -219,4 +219,29 @@ void JSNavPathStack::OnPushDestination(const JSCallbackInfo& info)
     context->PostAsyncEvent(asyncTask, TaskExecutor::TaskType::JS);
     ReturnPromise(info, result);
 }
+
+bool JSNavPathStack::CheckIsValid(JSValueWrapper object)
+{
+    auto engine = EngineHelper::GetCurrentEngine();
+    CHECK_NULL_RETURN(engine, false);
+    NativeEngine* nativeEngine = engine->GetNativeEngine();
+    CHECK_NULL_RETURN(nativeEngine, false);
+    auto env = reinterpret_cast<napi_env>(nativeEngine);
+
+    napi_value global;
+    napi_status ret = napi_get_global(env, &global);
+    if (ret != napi_ok) {
+        return false;
+    }
+    napi_value constructor;
+    ret = napi_get_named_property(env, global, JS_NAV_PATH_STACK_CLASS_NAME, &constructor);
+    if (ret != napi_ok) {
+        return false;
+    }
+    bool isInstance = false;
+    ScopeRAII scope(reinterpret_cast<napi_env>(nativeEngine));
+    napi_value stack = nativeEngine->ValueToNapiValue(object);
+    napi_instanceof(env, stack, constructor, &isInstance);
+    return isInstance;
+}
 } // namespace OHOS::Ace::Framework

@@ -261,11 +261,13 @@ void JSNavigation::Create(const JSCallbackInfo& info)
         if (!info[0]->IsObject()) {
             return;
         }
-        newObj = JSRef<JSObject>::Cast(info[0]);
-        auto value = newObj->GetProperty("type");
-        if (value->ToString() != "NavPathStack") {
+        // instance of NavPathStack
+        JSValueWrapper valueWrapper = info[0].Get().GetLocalHandle();
+        if (!JSNavPathStack::CheckIsValid(valueWrapper)) {
+            TAG_LOGE(AceLogTag::ACE_NAVIGATION, "current stack is not navPathStack");
             return;
         }
+        newObj = JSRef<JSObject>::Cast(info[0]);
     }
 
     NavigationModel::GetInstance()->Create();
