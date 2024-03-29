@@ -1144,19 +1144,22 @@ void SearchPattern::ToJsonValueForTextField(std::unique_ptr<JsonValue>& json) co
     json->Put("maxLength", GreatOrEqual(maxLength, Infinity<uint32_t>()) ? "INF" : std::to_string(maxLength).c_str());
     json->Put("type", SearchTypeToString().c_str());
     textFieldLayoutProperty->HasCopyOptions();
-    json->Put("letterSpacing", textFieldLayoutProperty->GetLetterSpacing().value_or(Dimension()).ToString().c_str());
-    json->Put("lineHeight", textFieldLayoutProperty->GetLineHeight().value_or(0.0_vp).ToString().c_str());
-    auto jsonDecoration = JsonUtil::Create(true);
-    std::string type = V2::ConvertWrapTextDecorationToStirng(
-        textFieldLayoutProperty->GetTextDecoration().value_or(TextDecoration::NONE));
-    jsonDecoration->Put("type", type.c_str());
-    jsonDecoration->Put("color",
-        textFieldLayoutProperty->GetTextDecorationColor().value_or(Color::BLACK).ColorToString().c_str());
-    std::string style =
-        V2::ConvertWrapTextDecorationStyleToString(
-            textFieldLayoutProperty->GetTextDecorationStyle().value_or(TextDecorationStyle::SOLID));
-    jsonDecoration->Put("style", style.c_str());
-    json->Put("decoration", jsonDecoration->ToString().c_str());
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
+        json->Put("letterSpacing",
+            textFieldLayoutProperty->GetLetterSpacing().value_or(Dimension()).ToString().c_str());
+        json->Put("lineHeight", textFieldLayoutProperty->GetLineHeight().value_or(0.0_vp).ToString().c_str());
+        auto jsonDecoration = JsonUtil::Create(true);
+        std::string type = V2::ConvertWrapTextDecorationToStirng(
+            textFieldLayoutProperty->GetTextDecoration().value_or(TextDecoration::NONE));
+        jsonDecoration->Put("type", type.c_str());
+        jsonDecoration->Put("color",
+            textFieldLayoutProperty->GetTextDecorationColor().value_or(Color::BLACK).ColorToString().c_str());
+        std::string style =
+            V2::ConvertWrapTextDecorationStyleToString(
+                textFieldLayoutProperty->GetTextDecorationStyle().value_or(TextDecorationStyle::SOLID));
+        jsonDecoration->Put("style", style.c_str());
+        json->Put("decoration", jsonDecoration->ToString().c_str());
+    }
 }
 
 std::string SearchPattern::SearchTypeToString() const

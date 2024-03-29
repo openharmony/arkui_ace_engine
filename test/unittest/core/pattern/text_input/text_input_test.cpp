@@ -44,6 +44,7 @@
 #include "base/memory/referenced.h"
 #include "base/utils/string_utils.h"
 #include "base/utils/type_definition.h"
+#include "core/common/ace_application_info.h"
 #include "core/common/ai/data_detector_mgr.h"
 #include "core/common/ime/constant.h"
 #include "core/common/ime/text_editing_value.h"
@@ -4211,11 +4212,14 @@ HWTEST_F(TextFieldUXTest, TextInputToJsonValue001, TestSize.Level1)
     /**
      * @tc.expected: Check if all set properties are displayed in the corresponding JSON
      */
+    int32_t backupApiVersion = AceApplicationInfo::GetInstance().GetApiTargetVersion();
+    AceApplicationInfo::GetInstance().SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWELVE));
     auto json = JsonUtil::Create(true);
     layoutProperty_->ToJsonValue(json);
     EXPECT_TRUE(json->Contains("decoration"));
     EXPECT_TRUE(json->Contains("letterSpacing"));
     EXPECT_TRUE(json->Contains("lineHeight"));
+    AceApplicationInfo::GetInstance().SetApiTargetVersion(backupApiVersion);
 }
 
 /**
