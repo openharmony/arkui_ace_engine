@@ -14,9 +14,11 @@
  */
 
 #include "image_converter.h"
+
+#include "drawable_descriptor_log.h"
 #ifndef PREVIEW
-#include "platform/image_native/image_type.h"
 #include "image_utils.h"
+#include "platform/image_native/image_type.h"
 #endif
 
 namespace OHOS::Ace::Napi {
@@ -136,6 +138,10 @@ std::shared_ptr<Media::PixelMap> ImageConverter::BitmapToPixelMap(
     opts.size.height = static_cast<int32_t>(bitMap->GetHeight());
     opts.editable = true;
     auto pixelMap = Media::PixelMap::Create(opts);
+    if (!pixelMap) {
+        HILOGE("PixelMap is null, bitMap's Size = (%{public}d, %{public}d)", bitMap->GetWidth(), bitMap->GetHeight());
+        return pixelMap;
+    }
     pixelMap->WritePixels(reinterpret_cast<uint8_t*>(data), opts.size.width * opts.size.height * sizeof(uint32_t));
     return pixelMap;
 }
