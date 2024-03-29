@@ -181,6 +181,7 @@ public:
     static void SetBackdropBlur(const Dimension &radius, const BlurOption &blurOption);
     static void SetLinearGradientBlur(const NG::LinearGradientBlurPara& blurPara);
     static void SetDynamicLightUp(float rate, float lightUpDegree);
+    static void SetDynamicDim(float DimDegree);
     static void SetFrontBlur(const Dimension &radius, const BlurOption &blurOption);
     static void SetBackShadow(const Shadow &shadow);
     static void SetBlendMode(BlendMode blendMode);
