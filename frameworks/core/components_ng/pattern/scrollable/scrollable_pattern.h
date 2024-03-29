@@ -386,6 +386,13 @@ public:
 
     virtual void ScrollToEdge(ScrollEdgeType scrollEdgeType, bool smooth);
 
+    virtual ScrollEdgeType GetScrollEdgeType() const
+    {
+        return ScrollEdgeType::SCROLL_NONE;
+    }
+
+    virtual void SetScrollEdgeType(ScrollEdgeType scrollEdgeType) {}
+
     virtual void Fling(double flingVelocity);
 
     void SetPositionController(RefPtr<ScrollableController> control)
