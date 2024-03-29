@@ -75,17 +75,14 @@ void TextPaintMethod::UpdateContentModifier(PaintWrapper* paintWrapper)
     CHECK_NULL_VOID(pattern);
 
     auto textOverflow = layoutProperty->GetTextOverflow();
-    if (textOverflow.has_value() && textOverflow.value() == TextOverflow::MARQUEE) {
-        auto start = layoutProperty->GetTextMarqueeStart().value_or(true);
-        if (paragraph->GetTextWidth() > paintWrapper->GetContentSize().Width() && start) {
-            auto step = layoutProperty->GetTextMarqueeStep().value_or(DEFAULT_MARQUEE_STEP_VP.ConvertToPx());
-            auto loop = layoutProperty->GetTextMarqueeLoop().value_or(-1);
-            auto direction = layoutProperty->GetTextMarqueeDirection().value_or(MarqueeDirection::LEFT);
-            auto delay = layoutProperty->GetTextMarqueeDelay().value_or(0);
-            textContentModifier_->StartTextRace(step, loop, direction, delay);
-        } else {
-            textContentModifier_->StopTextRace();
-        }
+    if (textOverflow.has_value() && textOverflow.value() == TextOverflow::MARQUEE &&
+        paragraph->GetTextWidth() > paintWrapper->GetContentSize().Width() &&
+        layoutProperty->GetTextMarqueeStart().value_or(true)) {
+        auto step = layoutProperty->GetTextMarqueeStep().value_or(DEFAULT_MARQUEE_STEP_VP.ConvertToPx());
+        auto loop = layoutProperty->GetTextMarqueeLoop().value_or(-1);
+        auto direction = layoutProperty->GetTextMarqueeDirection().value_or(MarqueeDirection::LEFT);
+        auto delay = layoutProperty->GetTextMarqueeDelay().value_or(0);
+        textContentModifier_->StartTextRace(step, loop, direction, delay);
     } else {
         textContentModifier_->StopTextRace();
     }

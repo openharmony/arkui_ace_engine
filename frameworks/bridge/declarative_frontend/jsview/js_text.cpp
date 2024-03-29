@@ -966,13 +966,9 @@ void JSText::SetMarqueeOptions(const JSCallbackInfo& info)
     auto getLoop = paramObject->GetProperty("loop");
     std::optional<int32_t> loopOpt;
     if (getLoop->IsNumber()) {
-        auto loopDouble = getLoop->ToNumber<double>();
-        int32_t loop = -1;
-        if (GreatNotEqual(loopDouble, 0.0)) {
-            loop = static_cast<int32_t>(loopDouble);
-            if (loop == std::numeric_limits<int32_t>::max() || loop < 0) {
-                loop = -1;
-            }
+        int32_t loop = static_cast<int32_t>(getLoop->ToNumber<double>());
+        if (loop == std::numeric_limits<int32_t>::max() || loop <= 0) {
+            loop = -1;
         }
         loopOpt = loop;
     }

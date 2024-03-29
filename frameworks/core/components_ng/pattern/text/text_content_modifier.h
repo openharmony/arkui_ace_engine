@@ -108,7 +108,8 @@ private:
     void AddDefaultShadow();
     void SetDefaultTextDecoration(const TextStyle& textStyle);
     void SetDefaultBaselineOffset(const TextStyle& textStyle);
-
+    bool SetTextRace(const double& step, const int32_t& loop,
+        const MarqueeDirection& direction, const int32_t& delay);
     float GetTextRacePercent();
 
     void ModifyFontSizeInTextStyle(TextStyle& textStyle);

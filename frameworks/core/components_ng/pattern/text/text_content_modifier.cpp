@@ -262,7 +262,7 @@ void TextContentModifier::onDraw(DrawingContext& drawingContext)
             }
         } else {
             // Racing
-            float textRacePercent = marqueeDirection_ == 
+            float textRacePercent = marqueeDirection_ ==
                 MarqueeDirection::LEFT? GetTextRacePercent() : RACE_MOVE_PERCENT_MAX - GetTextRacePercent();
             if (clip_ && clip_->Get()) {
                 canvas.ClipRect(RSRect(0, 0, drawingContext.width, drawingContext.height), RSClipOp::INTERSECT);
@@ -601,44 +601,53 @@ void TextContentModifier::SetContentSize(SizeF& value)
     contentSize_->Set(value);
 }
 
-void TextContentModifier::StartTextRace(const double& step,const int32_t& loop,
+bool TextContentModifier::SetTextRace(const double& step, const int32_t& loop,
+        const MarqueeDirection& direction, const int32_t& delay)
+{
+    CHECK_NULL_RETURN(paragraph_,false);
+    textRaceSpaceWidth_ = RACE_SPACE_WIDTH;
+    auto pipeline = PipelineContext::GetCurrentContext();
+    if (pipeline) {
+        textRaceSpaceWidth_ *= pipeline->GetDipScale();
+    }
+    if (!GreatNotEqual(step, 0.0)) {
+        return false;
+    }
+    int32_t duration = static_cast<int32_t>(std::abs(paragraph_->GetTextWidth() + textRaceSpaceWidth_) *
+        DEFAULT_MARQUEE_SCROLL_DELAY / step);
+    if (duration <= 0) {
+        return false;
+    }
+    if (textRacing_ && NearEqual(step, marqueeStep_) && (loop == marqueeLoop_) &&
+        (direction == marqueeDirection_) && (delay == marqueeDelay_) && (duration == marqueeDuration_)) {
+        return false;
+    }
+    if (textRacing_) {
+        StopTextRace();
+    }
+    
+    marqueeStep_ = step;
+    marqueeDuration_ = duration;
+    marqueeDirection_ = direction;
+    marqueeDelay_ = delay;
+    marqueeLoop_ = loop;
+    if (marqueeLoop_ > 0 && marqueeCount_ >= marqueeLoop_) {
+        return false;
+    }
+
+    textRacing_ = true;
+    auto textPattern = DynamicCast<TextPattern>(pattern_.Upgrade());
+    CHECK_NULL_RETURN(textPattern,false);
+    textPattern->FireOnMarqueeStateChange(TextMarqueeState::START);
+
+    return true;
+}
+
+void TextContentModifier::StartTextRace(const double& step, const int32_t& loop,
     const MarqueeDirection& direction, const int32_t& delay, const bool& isBounce)
 {
-    if (!GreatNotEqual(step, 0.0)) {
+    if (!isBounce && !SetTextRace(step, loop, direction, delay)) {
         return;
-    }
-    if (!isBounce) {
-        CHECK_NULL_VOID(paragraph_);
-        textRaceSpaceWidth_ = RACE_SPACE_WIDTH;
-        auto pipeline = PipelineContext::GetCurrentContext();
-        if (pipeline) {
-            textRaceSpaceWidth_ *= pipeline->GetDipScale();
-        }
-        int32_t duration = static_cast<int32_t>(std::abs(paragraph_->GetTextWidth() + textRaceSpaceWidth_) *
-            DEFAULT_MARQUEE_SCROLL_DELAY / step);
-        if (duration <= 0) {
-            return;
-        }
-        if (textRacing_ && NearEqual(step, marqueeStep_) && (loop == marqueeLoop_) && 
-           (direction == marqueeDirection_) && (delay == marqueeDelay_) && (duration == marqueeDuration_)) {
-            return;
-        }
-        if (textRacing_) {
-            StopTextRace();
-        }
-        
-        marqueeStep_ = step;
-        marqueeDuration_ = duration;
-        marqueeDirection_ = direction;
-        marqueeDelay_ = delay;
-        marqueeLoop_ = loop;
-        if (marqueeLoop_ > 0 && marqueeCount_ >= marqueeLoop_) {
-            return;
-        }
-        textRacing_ = true;
-        auto textPattern = DynamicCast<TextPattern>(pattern_.Upgrade());
-        CHECK_NULL_VOID(textPattern);
-        textPattern->FireOnMarqueeStateChange(TextMarqueeState::START);
     }
 
     AnimationOption option = AnimationOption();
