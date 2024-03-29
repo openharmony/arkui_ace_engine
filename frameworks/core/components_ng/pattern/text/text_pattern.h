@@ -385,6 +385,16 @@ public:
     {
         return isCustomFont_;
     }
+
+    void SetImageSpanNodeList(std::vector<WeakPtr<FrameNode>> imageNodeList)
+    {
+        imageNodeList_ = imageNodeList;
+    }
+
+    std::vector<WeakPtr<FrameNode>> GetImageSpanNodeList()
+    {
+        return imageNodeList_;
+    }
     // Deprecated: Use the TextSelectOverlay::ProcessOverlay() instead.
     // It is currently used by RichEditorPattern.
     virtual void UpdateSelectOverlayOrCreate(SelectOverlayInfo& selectInfo, bool animation = false);
@@ -695,6 +705,7 @@ private:
     bool isShowMenu_ = true;
     std::function<void()> processOverlayDelayTask_;
     RefPtr<TextSelectOverlay> selectOverlay_;
+    std::vector<WeakPtr<FrameNode>> imageNodeList_;
     ACE_DISALLOW_COPY_AND_MOVE(TextPattern);
 };
 } // namespace OHOS::Ace::NG

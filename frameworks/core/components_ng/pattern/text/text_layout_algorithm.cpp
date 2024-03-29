@@ -214,6 +214,7 @@ void TextLayoutAlgorithm::UpdateParagraph(LayoutWrapper* layoutWrapper)
     auto pattern = frameNode->GetPattern<TextPattern>();
     CHECK_NULL_VOID(pattern);
     auto aiSpanMap = pattern->GetAISpanMap();
+    std::vector<WeakPtr<FrameNode>> imageNodeList;
     for (const auto& child : spanItemChildren_) {
         if (!child) {
             continue;
@@ -246,6 +247,8 @@ void TextLayoutAlgorithm::UpdateParagraph(LayoutWrapper* layoutWrapper)
             child->content = " ";
             child->position = spanTextLength + 1;
             spanTextLength += 1;
+            auto imageNode = (*iterItems)->GetHostNode();
+            imageNodeList.emplace_back(WeakClaim(RawPtr(imageNode)));
             iterItems++;
         } else if (AceType::InstanceOf<PlaceholderSpanItem>(child)) {
             auto placeholderSpanItem = AceType::DynamicCast<PlaceholderSpanItem>(child);
@@ -288,6 +291,7 @@ void TextLayoutAlgorithm::UpdateParagraph(LayoutWrapper* layoutWrapper)
             spanTextLength += StringUtils::ToWstring(child->content).length();
         }
     }
+    pattern->SetImageSpanNodeList(imageNodeList);
 }
 
 void TextLayoutAlgorithm::UpdateParagraphForAISpan(const TextStyle& textStyle, LayoutWrapper* layoutWrapper)

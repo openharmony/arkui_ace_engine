@@ -86,6 +86,10 @@ public:
     void SetFontReady(bool value);
     void ChangeDragStatus();
 
+    void SetImageSpanNodeList(std::vector<WeakPtr<FrameNode>> imageNodeList)
+    {
+        imageNodeList_ = imageNodeList;
+    }
 protected:
     OffsetF GetPaintOffset() const
     {
@@ -120,6 +124,9 @@ private:
     void UpdateBaselineOffsetMeasureFlag(PropertyChangeFlag& flag);
 
     void DrawObscuration(DrawingContext& drawingContext);
+    void ResetImageNodeList();
+    void DrawImageNodeList(const float drawingContextWidth,
+        const float paragraph1Offset, const float paragraph2Offset);
 
     std::optional<Dimension> fontSize_;
     RefPtr<AnimatablePropertyFloat> fontSizeFloat_;
@@ -168,7 +175,7 @@ private:
     std::vector<ObscuredReasons> obscuredReasons_;
     bool ifHaveSpanItemChildren_ = false;
     std::vector<RectF> drawObscuredRects_;
-
+    std::vector<WeakPtr<FrameNode>> imageNodeList_;
     ACE_DISALLOW_COPY_AND_MOVE(TextContentModifier);
 };
 } // namespace OHOS::Ace::NG
