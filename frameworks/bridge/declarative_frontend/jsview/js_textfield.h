@@ -55,6 +55,7 @@ public:
     static void JsHeight(const JSCallbackInfo& info);
     static void JsWidth(const JSCallbackInfo& info);
     static void JsPadding(const JSCallbackInfo& info);
+    static void JsMargin(const JSCallbackInfo& info);
     static Edge GetOldPadding(const JSCallbackInfo& info);
     static NG::PaddingProperty GetNewPadding(const JSCallbackInfo& info);
     static NG::PaddingProperty SetPaddings(const std::optional<CalcDimension>& top,

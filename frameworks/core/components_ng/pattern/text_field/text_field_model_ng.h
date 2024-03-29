@@ -67,7 +67,6 @@ public:
     void SetOnPasteWithEvent(std::function<void(const std::string&, NG::TextCommonEvent&)>&& func) override;
     void SetCopyOption(CopyOptions copyOption) override;
     void SetMenuOptionItems(std::vector<MenuOptionsParam>&& menuOptionsItems) override;
-    void ProcessDefaultPadding(PaddingProperty& paddings);
     static void ProcessDefaultStyleAndBehaviors(const RefPtr<FrameNode>& frameNode);
     void ResetMaxLength() override;
     void SetForegroundColor(const Color& value) override;
@@ -88,6 +87,7 @@ public:
     void SetBackgroundColor(const Color& color, bool tmp) override;
     void SetHeight(const Dimension& value) override;
     void SetPadding(NG::PaddingProperty& newPadding, Edge oldPadding, bool tmp) override;
+    void SetMargin() override;
     void SetHoverEffect(HoverEffectType hoverEffect) override;
     void SetSelectionMenuHidden(bool contextMenuHidden) override;
     void SetCustomKeyboard(const std::function<void()>&& buildFunc, bool supportAvoidance = false) override;
@@ -106,6 +106,8 @@ public:
     void SetTextDecorationColor(const Color& value) override;
     void SetTextDecorationStyle(Ace::TextDecorationStyle value) override;
     void SetFontFeature(const FONT_FEATURES_MAP& value) override;
+    void SetBackBorder() override;
+
     static void SetTextDecoration(FrameNode* frameNode, TextDecoration value);
     static void SetTextDecorationColor(FrameNode* frameNode, const Color& value);
     static void SetTextDecorationStyle(FrameNode* frameNode, TextDecorationStyle value);

@@ -619,6 +619,12 @@ bool CheckIsIllegalString(const std::string& value)
     return (pEnd == value.c_str() || errno == ERANGE);
 }
 
+void JSTextField::JsMargin(const JSCallbackInfo& info)
+{
+    JSViewAbstract::JsMargin(info);
+    TextFieldModel::GetInstance()->SetMargin();
+}
+
 void JSTextField::JsPadding(const JSCallbackInfo& info)
 {
     if (info[0]->IsUndefined() || (info[0]->IsString() && CheckIsIllegalString(info[0]->ToString()))) {
@@ -746,23 +752,6 @@ void JSTextField::JsBorder(const JSCallbackInfo& info)
 {
     if (!info[0]->IsObject()) {
         return;
-    }
-    JSRef<JSObject> object = JSRef<JSObject>::Cast(info[0]);
-    auto valueWidth = object->GetProperty("width");
-    if (!valueWidth->IsUndefined()) {
-        ParseBorderWidth(valueWidth);
-    }
-    auto valueColor = object->GetProperty("color");
-    if (!valueColor->IsUndefined()) {
-        ParseBorderColor(valueColor);
-    }
-    auto valueRadius = object->GetProperty("radius");
-    if (!valueRadius->IsUndefined()) {
-        ParseBorderRadius(valueRadius);
-    }
-    auto valueStyle = object->GetProperty("style");
-    if (!valueStyle->IsUndefined()) {
-        ParseBorderStyle(valueStyle);
     }
     JSViewAbstract::JsBorder(info);
     TextFieldModel::GetInstance()->SetBackBorder();
