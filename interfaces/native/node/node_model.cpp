@@ -130,7 +130,7 @@ ArkUI_NodeHandle CreateNode(ArkUI_NodeType type)
         ARKUI_TOGGLE, ARKUI_LOADING_PROGRESS, ARKUI_TEXT_INPUT, ARKUI_TEXTAREA, ARKUI_BUTTON, ARKUI_PROGRESS,
         ARKUI_CHECKBOX, ARKUI_XCOMPONENT, ARKUI_DATE_PICKER, ARKUI_TIME_PICKER, ARKUI_TEXT_PICKER,
         ARKUI_CALENDAR_PICKER, ARKUI_SLIDER, ARKUI_STACK, ARKUI_SWIPER, ARKUI_SCROLL, ARKUI_LIST, ARKUI_LIST_ITEM,
-        ARKUI_LIST_ITEM_GROUP, ARKUI_COLUMN, ARKUI_ROW, ARKUI_FLEX, ARKUI_REFRESH, ARKUI_WATER_FLOW };
+        ARKUI_LIST_ITEM_GROUP, ARKUI_COLUMN, ARKUI_ROW, ARKUI_FLEX, ARKUI_REFRESH, ARKUI_WATER_FLOW, ARKUI_FLOW_ITEM };
     // already check in entry point.
     int32_t nodeType = type < MAX_NODE_SCOPE_NUM ? type : (type - MAX_NODE_SCOPE_NUM + BASIC_COMPONENT_NUM);
     auto* impl = GetFullImpl();
@@ -167,7 +167,7 @@ int32_t AddChild(ArkUI_NodeHandle parentNode, ArkUI_NodeHandle childNode)
     CHECK_NULL_RETURN(parentNode, ERROR_CODE_PARAM_INVALID);
     CHECK_NULL_RETURN(childNode, ERROR_CODE_PARAM_INVALID);
     auto* impl = GetFullImpl();
-    if (impl->getBasicAPI()->IsBuilderNode(parentNode->uiNodeHandle)) {
+    if (impl->getBasicAPI()->isBuilderNode(parentNode->uiNodeHandle)) {
         return ERROR_CODE_NATIVE_IMPL_BUILDER_NODE_ERROR;
     }
     // already check in entry point.
@@ -182,7 +182,7 @@ int32_t RemoveChild(ArkUI_NodeHandle parentNode, ArkUI_NodeHandle childNode)
     CHECK_NULL_RETURN(childNode, ERROR_CODE_PARAM_INVALID);
     // already check in entry point.
     auto* impl = GetFullImpl();
-    if (impl->getBasicAPI()->IsBuilderNode(parentNode->uiNodeHandle)) {
+    if (impl->getBasicAPI()->isBuilderNode(parentNode->uiNodeHandle)) {
         return ERROR_CODE_NATIVE_IMPL_BUILDER_NODE_ERROR;
     }
     impl->getBasicAPI()->removeChild(parentNode->uiNodeHandle, childNode->uiNodeHandle);
@@ -196,7 +196,7 @@ int32_t InsertChildAfter(ArkUI_NodeHandle parentNode, ArkUI_NodeHandle childNode
     CHECK_NULL_RETURN(childNode, ERROR_CODE_PARAM_INVALID);
     // already check in entry point.
     auto* impl = GetFullImpl();
-    if (impl->getBasicAPI()->IsBuilderNode(parentNode->uiNodeHandle)) {
+    if (impl->getBasicAPI()->isBuilderNode(parentNode->uiNodeHandle)) {
         return ERROR_CODE_NATIVE_IMPL_BUILDER_NODE_ERROR;
     }
     impl->getBasicAPI()->insertChildAfter(
@@ -211,7 +211,7 @@ int32_t InsertChildBefore(ArkUI_NodeHandle parentNode, ArkUI_NodeHandle childNod
     CHECK_NULL_RETURN(childNode, ERROR_CODE_PARAM_INVALID);
     // already check in entry point.
     auto* impl = GetFullImpl();
-    if (impl->getBasicAPI()->IsBuilderNode(parentNode->uiNodeHandle)) {
+    if (impl->getBasicAPI()->isBuilderNode(parentNode->uiNodeHandle)) {
         return ERROR_CODE_NATIVE_IMPL_BUILDER_NODE_ERROR;
     }
     impl->getBasicAPI()->insertChildBefore(
@@ -226,7 +226,7 @@ int32_t InsertChildAt(ArkUI_NodeHandle parentNode, ArkUI_NodeHandle childNode, i
     CHECK_NULL_RETURN(childNode, ERROR_CODE_PARAM_INVALID);
     // already check in entry point.
     auto* impl = GetFullImpl();
-    if (impl->getBasicAPI()->IsBuilderNode(parentNode->uiNodeHandle)) {
+    if (impl->getBasicAPI()->isBuilderNode(parentNode->uiNodeHandle)) {
         return ERROR_CODE_NATIVE_IMPL_BUILDER_NODE_ERROR;
     }
     impl->getBasicAPI()->insertChildAt(parentNode->uiNodeHandle, childNode->uiNodeHandle, position);
@@ -242,7 +242,7 @@ void SetAttribute(ArkUI_NodeHandle node, ArkUI_NodeAttributeType attribute, cons
 int32_t SetAttribute(ArkUI_NodeHandle node, ArkUI_NodeAttributeType attribute, const ArkUI_AttributeItem* value)
 {
     auto* impl = GetFullImpl();
-    if (impl->getBasicAPI()->IsBuilderNode(node->uiNodeHandle)) {
+    if (impl->getBasicAPI()->isBuilderNode(node->uiNodeHandle)) {
         return ERROR_CODE_NATIVE_IMPL_BUILDER_NODE_ERROR;
     }
     return SetNodeAttribute(node, attribute, value);
@@ -251,7 +251,7 @@ int32_t SetAttribute(ArkUI_NodeHandle node, ArkUI_NodeAttributeType attribute, c
 int32_t ResetAttribute(ArkUI_NodeHandle node, ArkUI_NodeAttributeType attribute)
 {
     auto* impl = GetFullImpl();
-    if (impl->getBasicAPI()->IsBuilderNode(node->uiNodeHandle)) {
+    if (impl->getBasicAPI()->isBuilderNode(node->uiNodeHandle)) {
         return ERROR_CODE_NATIVE_IMPL_BUILDER_NODE_ERROR;
     }
     return ResetNodeAttribute(node, attribute);
@@ -271,7 +271,7 @@ int32_t RegisterNodeEvent(ArkUI_NodeHandle nodePtr, ArkUI_NodeEventType eventTyp
     }
     // already check in entry point.
     auto* impl = GetFullImpl();
-    if (impl->getBasicAPI()->IsBuilderNode(nodePtr->uiNodeHandle)) {
+    if (impl->getBasicAPI()->isBuilderNode(nodePtr->uiNodeHandle)) {
         return ERROR_CODE_NATIVE_IMPL_BUILDER_NODE_ERROR;
     }
     auto* extraParam = new InnerEventExtraParam({eventId});
@@ -297,7 +297,7 @@ void UnregisterNodeEvent(ArkUI_NodeHandle nodePtr, ArkUI_NodeEventType eventType
     if (!nodePtr->extraData) {
         return;
     }
-    if (impl->getBasicAPI()->IsBuilderNode(nodePtr->uiNodeHandle)) {
+    if (impl->getBasicAPI()->isBuilderNode(nodePtr->uiNodeHandle)) {
         return;
     }
     auto* extraData = reinterpret_cast<ExtraData*>(nodePtr->extraData);

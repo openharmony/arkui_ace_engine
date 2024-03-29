@@ -3800,6 +3800,15 @@ void ViewAbstract::ClearJSFrameNodeOnMouse(FrameNode* frameNode)
     CHECK_NULL_VOID(eventHub);
     eventHub->ClearJSFrameNodeOnMouse();
 }
+
+BlendApplyType ViewAbstract::GetBlendApplyType(FrameNode* frameNode)
+{
+    BlendApplyType value = BlendApplyType::FAST;
+    const auto& target = frameNode->GetRenderContext();
+    CHECK_NULL_RETURN(target, value);
+    return target->GetBackBlendApplyTypeValue(value);
+}
+
 void ViewAbstract::SetJSFrameNodeOnSizeChange(
     FrameNode* frameNode, std::function<void(const RectF& oldRect, const RectF& rect)>&& onSizeChanged)
 {

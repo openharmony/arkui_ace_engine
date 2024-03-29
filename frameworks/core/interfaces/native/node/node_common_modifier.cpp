@@ -4445,12 +4445,12 @@ void GetMask(ArkUINodeHandle node, ArkUIMaskOptions* options)
     }
 }
 
-ArkUI_Int32 GetBlendMode(ArkUINodeHandle node)
+void GetBlendMode(ArkUINodeHandle node, ArkUIBlendModeOptions* options)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
-    CHECK_NULL_RETURN(frameNode, ERROR_INT_CODE);
-    int blendMode = static_cast<ArkUI_Int32>(ViewAbstract::GetBlendMode(frameNode));
-    return blendMode;
+    CHECK_NULL_VOID(frameNode);
+    options->blendMode = static_cast<ArkUI_Int32>(ViewAbstract::GetBlendMode(frameNode));
+    options->blendApplyType = static_cast<ArkUI_Int32>(ViewAbstract::GetBlendApplyType(frameNode));
 }
 
 ArkUI_Int32 GetDirection(ArkUINodeHandle node)
