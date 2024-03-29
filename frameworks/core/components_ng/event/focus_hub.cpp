@@ -560,7 +560,7 @@ bool FocusHub::OnKeyEventNode(const KeyEvent& keyEvent)
 
     bool isBypassInner = keyEvent.IsKey({ KeyCode::KEY_TAB }) && pipeline && pipeline->IsTabJustTriggerOnKeyEvent();
     auto retInternal = false;
-    if (GetFrameNode()->GetTag() == V2::UI_EXTENSION_COMPONENT_TAG) {
+    if (GetFrameNode() && GetFrameNode()->GetTag() == V2::UI_EXTENSION_COMPONENT_TAG) {
         isBypassInner = false;
     }
     if (!isBypassInner && !onKeyEventsInternal_.empty()) {
