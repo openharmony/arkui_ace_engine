@@ -2593,14 +2593,8 @@ void PipelineContext::HandleOnAreaChangeEvent(uint64_t nanoTimestamp)
     if (onAreaChangeNodeIds_.empty()) {
         return;
     }
-    if (!isOnAreaChangeNodesCacheVaild_) {
-        onAreaChangeNodesCache_ = FrameNode::GetNodesPtrById(onAreaChangeNodeIds_);
-        isOnAreaChangeNodesCacheVaild_ = true;
-    }
-    for (auto && frameNode : onAreaChangeNodesCache_) {
-        if (!frameNode) {
-            continue;
-        }
+    auto nodes = FrameNode::GetNodesById(onAreaChangeNodeIds_);
+    for (auto&& frameNode : nodes) {
         frameNode->TriggerOnAreaChangeCallback(nanoTimestamp);
     }
     UpdateFormLinkInfos();
