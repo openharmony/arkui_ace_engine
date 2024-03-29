@@ -316,6 +316,11 @@ void ToggleModelNG::SetHoverEffect(HoverEffectType hoverEffect)
     NG::ViewAbstract::SetHoverEffect(hoverEffect);
 }
 
+void ToggleModelNG::Pop()
+{
+    ViewStackProcessor::GetInstance()->PopContainer();
+}
+
 void ToggleModelNG::SetPointRadius(const Dimension& switchPointRadius)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
