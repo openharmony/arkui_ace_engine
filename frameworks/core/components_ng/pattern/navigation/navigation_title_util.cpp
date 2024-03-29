@@ -71,12 +71,14 @@ RefPtr<FrameNode> NavigationTitleUtil::CreateMenuItems(const int32_t menuNodeId,
     if (needMoreButton) {
         auto barItemNode = CreateBarItemNode(isButtonEnabled);
         CHECK_NULL_RETURN(barItemNode, nullptr);
-        MenuParam menuParam;
-        menuParam.isShowInSubWindow = false;
-        auto barMenuNode = MenuView::Create(
-            std::move(params), barItemNode->GetId(), V2::BAR_ITEM_ETS_TAG, MenuType::NAVIGATION_MENU, menuParam);
         auto menuItemNode = CreateMenuItemButton(theme);
         CHECK_NULL_RETURN(menuItemNode, nullptr);
+        MenuParam menuParam;
+        menuParam.isShowInSubWindow = false;
+        menuParam.placement = Placement::BOTTOM_RIGHT;
+        auto barMenuNode = MenuView::Create(
+            std::move(params), menuItemNode->GetId(), menuItemNode->GetTag(), MenuType::NAVIGATION_MENU, menuParam);
+
         BuildMoreItemNodeAction(menuItemNode, barItemNode, barMenuNode, titleBarNode);
         InitTitleBarButtonEvent(menuItemNode, true);
         barItemNode->MountToParent(menuItemNode);
@@ -122,30 +124,10 @@ void NavigationTitleUtil::BuildMoreItemNodeAction(const RefPtr<FrameNode>& butto
         auto menu = weakMenu.Upgrade();
         CHECK_NULL_VOID(menu);
 
-        auto barItemNode = weakBarItemNode.Upgrade();
-        CHECK_NULL_VOID(barItemNode);
-
-        auto imageNode = barItemNode->GetChildAtIndex(0);
-        CHECK_NULL_VOID(imageNode);
-
-        auto imageFrameNode = AceType::DynamicCast<FrameNode>(imageNode);
-        CHECK_NULL_VOID(imageFrameNode);
-        auto imgOffset = imageFrameNode->GetOffsetRelativeToWindow();
-        auto imageSize = imageFrameNode->GetGeometryNode()->GetFrameSize();
-
         auto menuNode = AceType::DynamicCast<FrameNode>(menu->GetChildAtIndex(0));
         CHECK_NULL_VOID(menuNode);
-        auto menuLayoutProperty = menuNode->GetLayoutProperty<MenuLayoutProperty>();
-        CHECK_NULL_VOID(menuLayoutProperty);
-        menuLayoutProperty->UpdateTargetSize(imageSize);
-        auto menuPattern = menuNode->GetPattern<MenuPattern>();
-        CHECK_NULL_VOID(menuPattern);
-        // navigation menu show like select.
-        menuPattern->SetIsSelectMenu(true);
 
-        imgOffset.SetX(imgOffset.GetX());
-        imgOffset.SetY(imgOffset.GetY() + imageSize.Height());
-        overlayManager->ShowMenu(id, imgOffset, menu);
+        overlayManager->ShowMenu(id, OffsetF(0.0f, 0.0f), menu);
 
         auto titleBarNode = weakTitleBarNode.Upgrade();
         CHECK_NULL_VOID(titleBarNode);

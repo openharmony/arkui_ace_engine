@@ -171,11 +171,18 @@ RefPtr<FrameNode> CreateMenuItems(const int32_t menuNodeId, const std::vector<NG
         CHECK_NULL_RETURN(barItemLayoutProperty, nullptr);
         barItemLayoutProperty->UpdateMeasureType(MeasureType::MATCH_PARENT);
         NavigationTitleUtil::BuildMoreIemNode(barItemNode, isButtonEnabled);
+        auto menuItemNode = NavigationTitleUtil::CreateMenuItemButton(theme);
         MenuParam menuParam;
         menuParam.isShowInSubWindow = false;
+        auto targetId = barItemNode->GetId();
+        auto targetTag = barItemNode->GetTag();
+        if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
+            menuParam.placement = Placement::BOTTOM_RIGHT;
+            targetId = menuItemNode->GetId();
+            targetTag = menuItemNode->GetTag();
+        }
         auto barMenuNode = MenuView::Create(
-            std::move(params), barItemNodeId, V2::BAR_ITEM_ETS_TAG, MenuType::NAVIGATION_MENU, menuParam);
-        auto menuItemNode = NavigationTitleUtil::CreateMenuItemButton(theme);
+            std::move(params), targetId, targetTag, MenuType::NAVIGATION_MENU, menuParam);
         BuildMoreItemNodeAction(menuItemNode, barItemNode, barMenuNode, navBarNode);
         NavigationTitleUtil::InitTitleBarButtonEvent(menuItemNode, true);
 
