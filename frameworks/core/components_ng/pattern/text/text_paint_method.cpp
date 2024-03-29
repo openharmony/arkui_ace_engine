@@ -82,7 +82,7 @@ void TextPaintMethod::UpdateContentModifier(PaintWrapper* paintWrapper)
             auto loop = layoutProperty->GetTextMarqueeLoop().value_or(-1);
             auto direction = layoutProperty->GetTextMarqueeDirection().value_or(MarqueeDirection::LEFT);
             auto delay = layoutProperty->GetTextMarqueeDelay().value_or(0);
-            textContentModifier_->StartTextRace(step,loop,direction,delay);
+            textContentModifier_->StartTextRace(step, loop, direction, delay);
         } else {
             textContentModifier_->StopTextRace();
         }

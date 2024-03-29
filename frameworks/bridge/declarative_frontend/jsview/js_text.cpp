@@ -949,7 +949,8 @@ void JSText::ParseMenuParam(
     }
 }
 
-void JSText::SetMarqueeOptions(const JSCallbackInfo& info) {
+void JSText::SetMarqueeOptions(const JSCallbackInfo& info)
+{
     if (info.Length() < 1 || !info[0]->IsObject()) {
         LOGE("SetMarqueeOptions param invalid");
         return;
@@ -958,7 +959,7 @@ void JSText::SetMarqueeOptions(const JSCallbackInfo& info) {
     auto paramObject = JSRef<JSObject>::Cast(info[0]);
     auto getStart = paramObject->GetProperty("start");
     std::optional<bool> startOpt;
-    if (getStart->IsBoolean()){
+    if (getStart->IsBoolean()) {
         startOpt = getStart->ToBoolean();
     }
 
@@ -988,8 +989,8 @@ void JSText::SetMarqueeOptions(const JSCallbackInfo& info) {
     auto delay = paramObject->GetProperty("delay");
     std::optional<int32_t> delayOpt;
     if (delay->IsNumber()) {
-       auto delayDouble = delay->ToNumber<double>();
-       int32_t delayValue = -1;
+        auto delayDouble = delay->ToNumber<double>();
+        int32_t delayValue = -1;
         if (GreatNotEqual(delayDouble, 0.0)) {
             delayValue = static_cast<int32_t>(delayDouble);
             if (delayValue == std::numeric_limits<int32_t>::max() || delayValue < 0) {
@@ -1001,14 +1002,15 @@ void JSText::SetMarqueeOptions(const JSCallbackInfo& info) {
 
     auto getFromStart = paramObject->GetProperty("fromStart");
     std::optional<MarqueeDirection> directionOpt;
-    if(getFromStart->IsBoolean()){
+    if (getFromStart->IsBoolean()) {
         directionOpt = getFromStart->ToBoolean()? MarqueeDirection::LEFT : MarqueeDirection::RIGHT;
     }
 
     TextModel::GetInstance()->SetMarqueeOptions(startOpt, stepOpt, loopOpt, delayOpt, directionOpt);
 }
 
-void JSText::SetOnMarqueeStateChange(const JSCallbackInfo& info) {
+void JSText::SetOnMarqueeStateChange(const JSCallbackInfo& info)
+{
     if (!info[0]->IsFunction()) {
         return;
     }

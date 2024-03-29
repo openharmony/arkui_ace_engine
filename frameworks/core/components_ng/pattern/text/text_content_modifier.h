@@ -52,7 +52,8 @@ public:
 
     void ModifyTextStyle(TextStyle& textStyle);
 
-    void StartTextRace(const double& step, const int32_t& loop, const MarqueeDirection& direction, const int32_t& delay, const bool& isBounce = false);
+    void StartTextRace(const double& step, const int32_t& loop,
+        const MarqueeDirection& direction, const int32_t& delay, const bool& isBounce = false);
     void StopTextRace();
 
     void SetParagraph(RefPtr<Paragraph> paragraph)
@@ -164,8 +165,8 @@ private:
     double marqueeStep_ = 1;
     int32_t marqueeLoop_ = -1;
     MarqueeDirection marqueeDirection_ = MarqueeDirection::LEFT;
-    int32_t marqueeDelay_ = 0;  
-    int32_t marqueeDuration_ = 0;  
+    int32_t marqueeDelay_ = 0;
+    int32_t marqueeDuration_ = 0;
     int32_t marqueeAnimationId_ = 0;
     
     RefPtr<AnimatablePropertyFloat> racePercentFloat_;

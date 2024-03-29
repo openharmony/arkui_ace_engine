@@ -554,7 +554,7 @@ void TextModelNG::SetMarqueeOptions(const std::optional<bool>& start, const std:
     }
     if (step.has_value()) {
         ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextLayoutProperty, TextMarqueeStep, step.value(), frameNode);
-    } 
+    }
     if (loop.has_value()) {
         ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextLayoutProperty, TextMarqueeLoop, loop.value(), frameNode);
     } 
