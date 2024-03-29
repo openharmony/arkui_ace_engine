@@ -1663,7 +1663,7 @@ HWTEST_F(ListScrollerTestNg, Pattern013, TestSize.Level1)
     EXPECT_TRUE(ScrollToIndex(1, true, ScrollAlign::AUTO, 800));
 
     /**
-     * @tc.cases: 0 > bottomOffset == topOffset 
+     * @tc.cases: 0 > bottomOffset == topOffset
      * @tc.expected: top Align
      */
     pattern_->ScrollTo(1200);
