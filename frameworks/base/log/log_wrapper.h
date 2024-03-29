@@ -184,7 +184,7 @@ enum AceLogTag : uint8_t {
     END = 256,         // Last one, do not use
 };
 
-extern const std::unordered_map<AceLogTag, const char*> g_DOMAIN_CONTENTS_MAP;
+ACE_FORCE_EXPORT extern const std::unordered_map<AceLogTag, const char*> g_DOMAIN_CONTENTS_MAP;
 
 enum class LogDomain : uint32_t {
     FRAMEWORK = 0,

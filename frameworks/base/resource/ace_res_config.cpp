@@ -22,8 +22,6 @@
 #include <utility>
 
 #include "base/i18n/localization.h"
-#include "base/log/ace_trace.h"
-#include "base/log/log.h"
 #include "base/resource/ace_res_data_struct.h"
 #include "base/resource/ace_res_key_parser.h"
 #include "base/utils/linear_map.h"
