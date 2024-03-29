@@ -140,7 +140,13 @@ public:
             theme->textColorMap_.insert(
                 std::pair<ButtonStyleMode, Color>(ButtonStyleMode::NORMAL, theme->normalTextColor_));
             theme->textColorMap_.insert(
-                std::pair<ButtonStyleMode, Color>(ButtonStyleMode::TEXT, theme->normalTextColor_));
+                std::pair<ButtonStyleMode, Color>(ButtonStyleMode::TEXT, buttonPattern->GetAttr<Color>("text_button_text_color", Color())));
+            theme->focusTextColorMap_.insert(std::pair<ButtonStyleMode, Color>(
+                ButtonStyleMode::EMPHASIZE, buttonPattern->GetAttr<Color>("emphasize_button_text_focus_color", Color())));
+            theme->focusTextColorMap_.insert(
+                std::pair<ButtonStyleMode, Color>(ButtonStyleMode::NORMAL,  buttonPattern->GetAttr<Color>("normal_button_text_focus_color", Color())));
+            theme->focusTextColorMap_.insert(
+                std::pair<ButtonStyleMode, Color>(ButtonStyleMode::TEXT, buttonPattern->GetAttr<Color>("text_button_text_focus_color", Color())));
             theme->textColorByRoleMap_.insert(
                 std::pair<ButtonRole, Color>(ButtonRole::NORMAL, theme->normalTextColor_));
             theme->textColorByRoleMap_.insert(
@@ -390,6 +396,22 @@ public:
         return normalTextColor_;
     }
 
+    const Color& GetFocusTextColor(ButtonStyleMode buttonStyle, ButtonRole buttonRole) const
+    {
+        auto roleResult = textColorByRoleMap_.find(buttonRole);
+        auto result = focusTextColorMap_.find(buttonStyle);
+        if (roleResult != textColorByRoleMap_.end() && result != focusTextColorMap_.end()) {
+            if (buttonRole == ButtonRole::ERROR) {
+                if (buttonStyle == ButtonStyleMode::EMPHASIZE) {
+                    return result->second;
+                }
+                return roleResult->second;
+            }
+            return result->second;
+        }
+        return normalTextColor_;
+    }
+
     const Dimension& GetHeight(ControlSize controlSize) const
     {
         auto result = heightMap_.find(controlSize);
@@ -486,11 +508,12 @@ private:
     std::unordered_map<ControlSize, Dimension> heightMap_;
     std::unordered_map<ControlSize, Dimension> textSizeMap_;
     std::unordered_map<ControlSize, Edge> paddingMap_;
+    std::unordered_map<ButtonStyleMode, Color> focusTextColorMap_;
     double bgDisabledAlpha_ = 1.0;
     double scaleFocus_ = 1.0;
     uint32_t textMaxLines_ = 1;
-    uint32_t shadowNormal_ = 6; // 无阴影枚举值
-    uint32_t shadowFocus_ = 6; // 无阴影枚举值
+    uint32_t shadowNormal_ = 6;  // no shadow
+    uint32_t shadowFocus_ = 6;  // no shadow
 };
 
 } // namespace OHOS::Ace

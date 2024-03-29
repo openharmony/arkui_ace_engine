@@ -314,8 +314,7 @@ protected:
     void OnTouchUp();
     void HandleHoverEvent(bool isHover);
     void HandleBackgroundColor();
-    void HandleBorderColor();
-    void HandleBorderWidth();
+    void HandleBorderColorAndWidth();
     void HandleEnabled();
     void InitButtonLabel();
     void InitFocusEvent();
@@ -335,6 +334,7 @@ private:
     Color focusBorderColor_;
     Color themeBgColor_;
     Color themeTextColor_;
+    Color borderColor_;
     bool isSetClickedColor_ = false;
     ComponentButtonType buttonType_ = ComponentButtonType::BUTTON;
 
@@ -346,11 +346,14 @@ private:
     bool isInHover_ = false;
     Offset localLocation_;
     Dimension focusBorderWidth_;
+    Dimension borderWidth_;
 
     bool isColorUpdateFlag_ = false;
     SizeF preFrameSize_;
     ACE_DISALLOW_COPY_AND_MOVE(ButtonPattern);
     bool focusEventInitialized_ = false;
+    bool focusTextColorModify_ = false;
+    bool bgColorModify_ = false;
 };
 } // namespace OHOS::Ace::NG
 
