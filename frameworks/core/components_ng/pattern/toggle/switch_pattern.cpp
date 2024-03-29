@@ -75,6 +75,13 @@ void SwitchPattern::OnModifyDone()
     CHECK_NULL_VOID(host);
     auto hub = host->GetEventHub<EventHub>();
     CHECK_NULL_VOID(hub);
+    auto enabled = hub->IsEnabled();
+    if (enabled_ != enabled) {
+        enabled_ = enabled;
+        auto paintProperty = GetPaintProperty<SwitchPaintProperty>();
+        CHECK_NULL_VOID(paintProperty);
+        paintProperty->UpdatePropertyChangeFlag(PROPERTY_UPDATE_RENDER);
+    }
     auto gestureHub = hub->GetOrCreateGestureEventHub();
     CHECK_NULL_VOID(gestureHub);
     InitPanEvent(gestureHub);
