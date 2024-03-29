@@ -126,6 +126,12 @@ void RegisterRenderNodeBorderAndMaskAttributes(Local<panda::ObjectRef> renderNod
 }
 } // namespace
 
+ArkUINativeModuleValue ArkUINativeModule::PreviewMockComponent(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    return panda::JSValueRef::Undefined(vm);
+}
+
 ArkUINativeModuleValue ArkUINativeModule::GetFrameNodeById(ArkUIRuntimeCallInfo* runtimeCallInfo)
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
@@ -1101,6 +1107,28 @@ ArkUINativeModuleValue ArkUINativeModule::GetArkUINativeModule(ArkUIRuntimeCallI
     object->Set(vm, panda::StringRef::NewFromUtf8(vm, "textArea"), textArea);
 
     auto video = panda::ObjectRef::New(vm);
+#ifdef PREVIEW
+    video->Set(vm, panda::StringRef::NewFromUtf8(vm, "setAutoPlay"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ArkUINativeModule::PreviewMockComponent));
+    video->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetAutoPlay"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ArkUINativeModule::PreviewMockComponent));
+    video->Set(vm, panda::StringRef::NewFromUtf8(vm, "setControls"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ArkUINativeModule::PreviewMockComponent));
+    video->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetControls"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ArkUINativeModule::PreviewMockComponent));
+    video->Set(vm, panda::StringRef::NewFromUtf8(vm, "setObjectFit"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ArkUINativeModule::PreviewMockComponent));
+    video->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetObjectFit"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ArkUINativeModule::PreviewMockComponent));
+    video->Set(vm, panda::StringRef::NewFromUtf8(vm, "setLoop"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ArkUINativeModule::PreviewMockComponent));
+    video->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetLoop"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ArkUINativeModule::PreviewMockComponent));
+    video->Set(vm, panda::StringRef::NewFromUtf8(vm, "setMuted"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ArkUINativeModule::PreviewMockComponent));
+    video->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetMuted"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ArkUINativeModule::PreviewMockComponent));
+#else
     video->Set(vm, panda::StringRef::NewFromUtf8(vm, "setAutoPlay"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), VideoBridge::SetAutoPlay));
     video->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetAutoPlay"),
@@ -1121,6 +1149,7 @@ ArkUINativeModuleValue ArkUINativeModule::GetArkUINativeModule(ArkUIRuntimeCallI
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), VideoBridge::SetMuted));
     video->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetMuted"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), VideoBridge::ResetMuted));
+#endif
     video->Set(vm, panda::StringRef::NewFromUtf8(vm, "setOpacity"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), VideoBridge::SetOpacity));
     video->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetOpacity"),
@@ -1399,7 +1428,7 @@ ArkUINativeModuleValue ArkUINativeModule::GetArkUINativeModule(ArkUIRuntimeCallI
     RegisterXComponentNodeAttributes(object, vm);
 #endif
 
-#ifdef FORM_SUPPORTED
+#if defined(FORM_SUPPORTED) || defined(PREVIEW)
     RegisterFormAttributes(object, vm);
 #endif
 
@@ -2558,10 +2587,32 @@ void ArkUINativeModule::RegisterHyperlinkAttributes(Local<panda::ObjectRef> obje
     object->Set(vm, panda::StringRef::NewFromUtf8(vm, "hyperlink"), hyperlink);
 }
 
-#ifdef FORM_SUPPORTED
+#if defined(FORM_SUPPORTED) || defined(PREVIEW)
 void ArkUINativeModule::RegisterFormAttributes(Local<panda::ObjectRef> object, EcmaVM* vm)
 {
     auto formComponent = panda::ObjectRef::New(vm);
+#ifdef PREVIEW
+    formComponent->Set(vm, panda::StringRef::NewFromUtf8(vm, "setVisibility"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ArkUINativeModule::PreviewMockComponent));
+    formComponent->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetVisibility"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ArkUINativeModule::PreviewMockComponent));
+    formComponent->Set(vm, panda::StringRef::NewFromUtf8(vm, "setAllowUpdate"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ArkUINativeModule::PreviewMockComponent));
+    formComponent->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetAllowUpdate"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ArkUINativeModule::PreviewMockComponent));
+    formComponent->Set(vm, panda::StringRef::NewFromUtf8(vm, "setDimension"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ArkUINativeModule::PreviewMockComponent));
+    formComponent->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetDimension"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ArkUINativeModule::PreviewMockComponent));
+    formComponent->Set(vm, panda::StringRef::NewFromUtf8(vm, "setModuleName"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ArkUINativeModule::PreviewMockComponent));
+    formComponent->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetModuleName"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ArkUINativeModule::PreviewMockComponent));
+    formComponent->Set(vm, panda::StringRef::NewFromUtf8(vm, "setSize"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ArkUINativeModule::PreviewMockComponent));
+    formComponent->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetSize"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ArkUINativeModule::PreviewMockComponent));
+#else
     formComponent->Set(vm, panda::StringRef::NewFromUtf8(vm, "setVisibility"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), FormComponentBridge::SetVisibility));
     formComponent->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetVisibility"),
@@ -2582,6 +2633,7 @@ void ArkUINativeModule::RegisterFormAttributes(Local<panda::ObjectRef> object, E
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), FormComponentBridge::SetSize));
     formComponent->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetSize"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), FormComponentBridge::ResetSize));
+#endif
     object->Set(vm, panda::StringRef::NewFromUtf8(vm, "formComponent"), formComponent);
 }
 #endif
