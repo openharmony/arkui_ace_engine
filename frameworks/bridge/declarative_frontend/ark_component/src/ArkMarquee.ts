@@ -51,6 +51,10 @@ class ArkMarqueeComponent extends ArkComponent implements MarqueeAttribute {
   onFinish(event: () => void): this {
     throw new Error('Method not implemented.');
   }
+  marqueeUpdateStrategy(value: MarqueeUpdateStrategy): this {
+    modifierWithKey(this._modifiersWithKeys, MarqueeUpdateStrategyModifier.identity, MarqueeUpdateStrategyModifier, value);
+    return this;
+  }
 }
 
 class MarqueeFontColorModifier extends ModifierWithKey<ResourceColor> {
@@ -126,6 +130,20 @@ class MarqueeFontFamilyModifier extends ModifierWithKey<string> {
       getUINativeModule().marquee.resetFontFamily(node);
     } else {
       getUINativeModule().marquee.setFontFamily(node, this.value);
+    }
+  }
+}
+
+class MarqueeUpdateStrategyModifier extends ModifierWithKey<MarqueeUpdateStrategy> {
+  constructor(value: MarqueeUpdateStrategy) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('marqueeUpdateStrategy');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().marquee.resetMarqueeUpdateStrategy(node);
+    } else {
+      getUINativeModule().marquee.setMarqueeUpdateStrategy(node, this.value);
     }
   }
 }

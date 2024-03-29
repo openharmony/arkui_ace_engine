@@ -26,10 +26,10 @@
 extern "C" {
 #endif
 
-#define ARKUI_FULL_API_VERSION 86
+#define ARKUI_FULL_API_VERSION 87
 // When changing ARKUI_BASIC_API_VERSION, ARKUI_FULL_API_VERSION must be
 // increased as well.
-#define ARKUI_NODE_API_VERSION 86
+#define ARKUI_NODE_API_VERSION 87
 
 #define ARKUI_BASIC_API_VERSION 7
 #define ARKUI_EXTENDED_API_VERSION 7
@@ -2832,6 +2832,8 @@ struct ArkUIMarqueeModifier {
     void (*resetMarqueeFontWeight)(ArkUINodeHandle node);
     void (*setMarqueeFontFamily)(ArkUINodeHandle node, ArkUI_CharPtr fontFamily);
     void (*resetMarqueeFontFamily)(ArkUINodeHandle node);
+    void (*setMarqueeUpdateStrategy)(ArkUINodeHandle node, ArkUI_Uint32 value);
+    void (*resetMarqueeUpdateStrategy)(ArkUINodeHandle node);
 };
 
 struct ArkUIDatePickerModifier {

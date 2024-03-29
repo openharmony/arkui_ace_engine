@@ -15430,6 +15430,10 @@ class ArkMarqueeComponent extends ArkComponent {
   onFinish(event) {
     throw new Error('Method not implemented.');
   }
+  marqueeUpdateStrategy(value) {
+    modifierWithKey(this._modifiersWithKeys, MarqueeUpdateStrategyModifier.identity, MarqueeUpdateStrategyModifier, value);
+    return this;
+  }
 }
 class MarqueeFontColorModifier extends ModifierWithKey {
   constructor(value) {
@@ -15510,6 +15514,20 @@ class MarqueeFontFamilyModifier extends ModifierWithKey {
   }
 }
 MarqueeFontFamilyModifier.identity = Symbol('fontFamily');
+class MarqueeUpdateStrategyModifier extends ModifierWithKey {
+    constructor(value) {
+        super(value);
+    }
+    applyPeer(node, reset) {
+        if (reset) {
+            getUINativeModule().marquee.resetMarqueeUpdateStrategy(node);
+        }
+        else {
+            getUINativeModule().marquee.setMarqueeUpdateStrategy(node, this.value);
+        }
+    }
+}
+MarqueeUpdateStrategyModifier.identity = Symbol('marqueeUpdateStrategy');
 // @ts-ignore
 if (globalThis.Marquee !== undefined) {
   globalThis.Marquee.attributeModifier = function (modifier) {
