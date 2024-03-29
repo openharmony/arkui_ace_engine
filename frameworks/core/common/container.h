@@ -317,6 +317,12 @@ public:
         return container ? container->isFRSCardContainer_ : false;
     }
 
+    static bool IsInSubContainer()
+    {
+        auto container = Current();
+        return container ? container->IsSubContainer() : false;
+    }
+
     Window* GetWindow() const
     {
         auto context = GetPipelineContext();

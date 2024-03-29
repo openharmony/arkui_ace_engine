@@ -4502,4 +4502,14 @@ void OverlayManager::RemoveGatherNodeWithAnimation()
         },
         option.GetOnFinishEvent());
 }
+
+const WeakPtr<UINode>& OverlayManager::GetRootNode() const
+{
+    return rootNodeWeak_;
+}
+
+const RefPtr<GroupManager>& OverlayManager::GetGroupManager() const
+{
+    return groupManager_;
+}
 } // namespace OHOS::Ace::NG

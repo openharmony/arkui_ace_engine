@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,39 +13,41 @@
  * limitations under the License.
  */
 
-#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_STAGE_PAGE_EVENT_HUB_H
-#define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_STAGE_PAGE_EVENT_HUB_H
+#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_OVERLAY_GROUP_MANAGER_H
+#define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_OVERLAY_GROUP_MANAGER_H
 
-#include <stdint.h>
+#include <cstdint>
 
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
 #include "core/components_ng/base/frame_node.h"
-#include "core/components_ng/event/event_hub.h"
-#include "core/components_ng/event/gesture_event_hub.h"
-#include "core/components_ng/pattern/overlay/group_manager.h"
 
 namespace OHOS::Ace::NG {
 
-class PageEventHub : public EventHub {
-    DECLARE_ACE_TYPE(PageEventHub, EventHub)
+class GroupManager : public virtual AceType {
+    DECLARE_ACE_TYPE(GroupManager, AceType)
 
 public:
-    PageEventHub() = default;
-    ~PageEventHub() override = default;
+    GroupManager() = default;
+    ~GroupManager() override = default;
 
     void AddRadioToGroup(const std::string& group, int32_t radioId);
     void RemoveRadioFromGroup(const std::string& group, int32_t radioId);
     bool HasRadioId(const std::string& group, int32_t radioId);
     void UpdateRadioGroupValue(const std::string& group, int32_t radioId);
 
-    const RefPtr<GroupManager>& GetGroupManager() const;
+    void AddCheckBoxToGroup(const std::string& group, int32_t checkBoxId);
+    void AddCheckBoxGroupToGroup(const std::string& group, int32_t checkBoxId);
+    void RemoveCheckBoxFromGroup(const std::string& group, int32_t checkBoxId);
+
+    std::unordered_map<std::string, std::list<WeakPtr<FrameNode>>> GetCheckBoxGroupMap();
+    static WeakPtr<GroupManager> GetGroupManager();
 
 private:
     std::unordered_map<std::string, std::list<int32_t>> radioGroupNotify_;
-    RefPtr<GroupManager> groupManager_ = MakeRefPtr<GroupManager>();
+    std::unordered_map<std::string, std::list<int32_t>> checkBoxGroupNotify_;
 };
 
 } // namespace OHOS::Ace::NG
 
-#endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_STAGE_PAGE_EVENT_HUB_H
+#endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_OVERLAY_GROUP_MANAGER_H
