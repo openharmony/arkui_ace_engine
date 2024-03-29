@@ -978,24 +978,6 @@ HWTEST_F(FrameNodeTestNg, FrameNodeUpdateChildrenLayoutWrapper0019, TestSize.Lev
 }
 
 /**
- * @tc.name: FrameNodeTestNg_PostTask0020
- * @tc.desc: Test frame node method
- * @tc.type: FUNC
- */
-HWTEST_F(FrameNodeTestNg, FrameNodePostTask0020, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. build a object to PostTask
-     * @tc.expected: expect taskTypeis is UI.
-     */
-    auto callback = []() { srcimages = "test"; };
-    TaskExecutor::TaskType taskType { 1 };
-
-    FRAME_NODE2->PostTask(callback, std::move(taskType));
-    EXPECT_EQ(taskType, TaskExecutor::TaskType::UI);
-}
-
-/**
  * @tc.name: FrameNodeTestNg_MarkModifyDone0021
  * @tc.desc: Test frame node method
  * @tc.type: FUNC

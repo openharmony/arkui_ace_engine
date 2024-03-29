@@ -231,7 +231,9 @@ void TextClockPattern::RegistVisibleAreaChangeCallback()
 
 void TextClockPattern::InitUpdateTimeTextCallBack()
 {
-    auto context = UINode::GetContext();
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto context = host->GetContext();
     if (context) {
         isForm_ = context->IsFormRender();
     }
@@ -290,7 +292,9 @@ void TextClockPattern::RequestUpdateForNextSecond()
         delayTime += (tempTime - MILLISECONDS_OF_SECOND);
     }
 
-    auto context = UINode::GetContext();
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto context = host->GetContext();
     CHECK_NULL_VOID(context);
     CHECK_NULL_VOID(context->GetTaskExecutor());
     delayTask_.Reset([weak = WeakClaim(this)] {

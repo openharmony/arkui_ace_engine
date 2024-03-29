@@ -389,7 +389,7 @@ void ScrollablePattern::AddScrollEvent()
     };
     auto scrollable = MakeRefPtr<Scrollable>(std::move(scrollCallback), GetAxis());
     scrollable->SetNodeId(host->GetAccessibilityId());
-    scrollable->Initialize(host->GetContext());
+    scrollable->Initialize(host->GetContextRefPtr());
     AttachAnimatableProperty(scrollable);
 
     // move HandleScroll and HandleOverScroll to ScrollablePattern by setting callbacks to scrollable

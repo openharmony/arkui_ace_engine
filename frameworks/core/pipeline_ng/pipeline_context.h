@@ -79,6 +79,8 @@ public:
 
     static RefPtr<PipelineContext> GetCurrentContextSafely();
 
+    static PipelineContext* GetCurrentContextPtrSafely();
+
     static RefPtr<PipelineContext> GetMainPipelineContext();
 
     static RefPtr<PipelineContext> GetContextByContainerId(int32_t containerId);

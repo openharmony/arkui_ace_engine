@@ -65,6 +65,12 @@ public:
         return ptr.rawPtr_;
     }
 
+    template<class T>
+    static T* UnsafeRawPtr(const WeakPtr<T>& ptr)
+    {
+        return ptr.unsafeRawPtr_;
+    }
+
     int32_t IncRefCount()
     {
         return refCounter_->IncStrongRef();

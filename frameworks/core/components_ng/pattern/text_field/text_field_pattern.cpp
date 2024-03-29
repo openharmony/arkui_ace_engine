@@ -2950,7 +2950,7 @@ void TextFieldPattern::UpdateTextFieldManager(const Offset& offset, float height
 {
     auto tmpHost = GetHost();
     CHECK_NULL_VOID(tmpHost);
-    auto context = tmpHost->GetContext();
+    auto context = tmpHost->GetContextRefPtr();
     CHECK_NULL_VOID(context);
     auto textFieldManager = DynamicCast<TextFieldManagerNG>(context->GetTextFieldManager());
     CHECK_NULL_VOID(textFieldManager);
@@ -3024,7 +3024,7 @@ bool TextFieldPattern::RequestKeyboard(bool isFocusViewChanged, bool needStartTw
 {
     auto tmpHost = GetHost();
     CHECK_NULL_RETURN(tmpHost, false);
-    auto context = tmpHost->GetContext();
+    auto context = tmpHost->GetContextRefPtr();
     CHECK_NULL_RETURN(context, false);
 
     if (needShowSoftKeyboard) {
@@ -3094,7 +3094,7 @@ std::optional<MiscServices::TextConfig> TextFieldPattern::GetMiscTextConfig() co
 {
     auto tmpHost = GetHost();
     CHECK_NULL_RETURN(tmpHost, {});
-    auto pipeline = tmpHost->GetContext();
+    auto pipeline = tmpHost->GetContextRefPtr();
     CHECK_NULL_RETURN(pipeline, {});
     auto theme = GetTheme();
     CHECK_NULL_RETURN(theme, {});
@@ -6024,7 +6024,7 @@ OffsetF TextFieldPattern::GetTextPaintOffset() const
 {
     auto host = GetHost();
     CHECK_NULL_RETURN(host, OffsetF(0.0f, 0.0f));
-    auto pipeline = host->GetContext();
+    auto pipeline = host->GetContextRefPtr();
     CHECK_NULL_RETURN(pipeline, OffsetF(0.0f, 0.0f));
     auto rootOffset = pipeline->GetRootRect().GetOffset();
     auto textPaintOffset = host->GetPaintRectOffset();

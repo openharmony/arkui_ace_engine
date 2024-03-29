@@ -1133,7 +1133,7 @@ HWTEST_F(TextTestNg, TextLayoutTest003, TestSize.Level1)
     textStyle.SetAdaptTextSize(ADAPT_MIN_FONT_SIZE_VALUE, ADAPT_MAX_FONT_SIZE_VALUE_S);
     textStyle.SetAdaptFontSizeStep(ADAPT_FONT_SIZE_STEP_VALUE);
 
-    auto pipeline = textFrameNode->GetContext();
+    auto pipeline = textFrameNode->GetContextRefPtr();
 
     /**
      * @tc.steps: step3. create textLayoutAlgorithm.
@@ -1189,7 +1189,7 @@ HWTEST_F(TextTestNg, TextLayoutTest004, TestSize.Level1)
     textStyle.SetAdaptTextSize(ADAPT_MIN_FONT_SIZE_VALUE, ADAPT_MAX_FONT_SIZE_VALUE_S);
     textStyle.SetAdaptFontSizeStep(ADAPT_FONT_SIZE_STEP_VALUE);
 
-    auto pipeline = textFrameNode->GetContext();
+    auto pipeline = textFrameNode->GetContextRefPtr();
 
     /**
      * @tc.steps: step3. create textLayoutAlgorithm.
@@ -1245,7 +1245,7 @@ HWTEST_F(TextTestNg, TextLayoutTest005, TestSize.Level1)
     textStyle.SetAdaptTextSize(ADAPT_MAX_FONT_SIZE_VALUE_S, ADAPT_MIN_FONT_SIZE_VALUE);
     textStyle.SetAdaptFontSizeStep(ADAPT_FONT_SIZE_STEP_VALUE);
 
-    auto pipeline = textFrameNode->GetContext();
+    auto pipeline = textFrameNode->GetContextRefPtr();
 
     /**
      * @tc.steps: step3. create textLayoutAlgorithm.
@@ -1857,7 +1857,7 @@ HWTEST_F(TextTestNg, TextLayoutAlgorithmTest002, TestSize.Level1)
     textLayoutAlgorithm->Measure(AccessibilityManager::RawPtr(layoutWrapper));
     textLayoutAlgorithm->Layout(AccessibilityManager::RawPtr(layoutWrapper));
     auto frameNode = layoutWrapper->GetHostNode();
-    auto pipeline = frameNode->GetContext();
+    auto pipeline = frameNode->GetContextRefPtr();
     TextStyle textStyle = CreateTextStyleUsingTheme(
         textLayoutProperty->GetFontStyle(), textLayoutProperty->GetTextLineStyle(), pipeline->GetTheme<TextTheme>());
     textPattern->contentMod_ = AceType::MakeRefPtr<TextContentModifier>(std::optional<TextStyle>(std::move(textStyle)));
@@ -2082,7 +2082,7 @@ HWTEST_F(TextTestNg, TextContentModifier001, TestSize.Level1)
      * @tc.expected: The member variable value of textContentModifier is the value set above
      */
     auto frameNode = layoutWrapper->GetHostNode();
-    auto pipeline = frameNode->GetContext();
+    auto pipeline = frameNode->GetContextRefPtr();
     TextStyle textStyle = CreateTextStyleUsingTheme(
         textLayoutProperty->GetFontStyle(), textLayoutProperty->GetTextLineStyle(), pipeline->GetTheme<TextTheme>());
     TextContentModifier textContentModifier(std::optional<TextStyle>(std::move(textStyle)));
@@ -2143,7 +2143,7 @@ HWTEST_F(TextTestNg, TextContentModifier002, TestSize.Level1)
      * @tc.expected: The member variable value of textContentModifier is the value set above
      */
     auto frameNode = layoutWrapper->GetHostNode();
-    auto pipeline = frameNode->GetContext();
+    auto pipeline = frameNode->GetContextRefPtr();
     TextStyle textStyle = CreateTextStyleUsingTheme(
         textLayoutProperty->GetFontStyle(), textLayoutProperty->GetTextLineStyle(), pipeline->GetTheme<TextTheme>());
     TextContentModifier textContentModifier(std::optional<TextStyle>(std::move(textStyle)));
@@ -2293,7 +2293,7 @@ HWTEST_F(TextTestNg, TextLayoutAlgorithmTest008, TestSize.Level1)
     ASSERT_NE(textLayoutProperty, nullptr);
 
     auto frameNode = layoutWrapper->GetHostNode();
-    auto pipeline = frameNode->GetContext();
+    auto pipeline = frameNode->GetContextRefPtr();
     TextStyle textStyle = CreateTextStyleUsingTheme(
         textLayoutProperty->GetFontStyle(), textLayoutProperty->GetTextLineStyle(), pipeline->GetTheme<TextTheme>());
     textStyle.SetAdaptFontSizeStep(ADAPT_FONT_SIZE_STEP_VALUE);
@@ -4517,7 +4517,7 @@ HWTEST_F(TextTestNg, CreateImageSpanAndLayout001, TestSize.Level1)
      * @tc.steps: step1. create frameNode and pattern and some environment for running process.
      */
     auto [frameNode, pattern] = Init();
-    auto pipeline = frameNode->GetContext();
+    auto pipeline = frameNode->GetContextRefPtr();
     TextModelNG textModelNG;
     textModelNG.Create(CREATE_VALUE);
     auto* stack = ViewStackProcessor::GetInstance();
@@ -4731,7 +4731,7 @@ HWTEST_F(TextTestNg, GetLineCount001, TestSize.Level1)
      * @tc.steps: step1. create frameNode and pattern and some environment for running process.
      */
     auto [frameNode, pattern] = Init();
-    auto pipeline = frameNode->GetContext();
+    auto pipeline = frameNode->GetContextRefPtr();
 
     /**
      * @tc.steps: step2. Create Paragraph
@@ -4759,7 +4759,7 @@ HWTEST_F(TextTestNg, GetDragUpperLeftCoordinates001, TestSize.Level1)
      * @tc.steps: step1. create frameNode and pattern and some environment for running process.
      */
     auto [frameNode, pattern] = Init();
-    auto pipeline = frameNode->GetContext();
+    auto pipeline = frameNode->GetContextRefPtr();
 
     /**
      * @tc.steps: step3. run GetDragUpperLeftCoordinates func.
@@ -4787,7 +4787,7 @@ HWTEST_F(TextTestNg, OnColorConfigurationUpdate001, TestSize.Level1)
     ASSERT_NE(textFrameNode, nullptr);
     auto textPattern = textFrameNode->GetPattern<TextPattern>();
     ASSERT_NE(textPattern, nullptr);
-    auto context = textFrameNode->GetContext();
+    auto context = textFrameNode->GetContextRefPtr();
     ASSERT_NE(context, nullptr);
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
     context->SetThemeManager(themeManager);
@@ -4814,7 +4814,7 @@ HWTEST_F(TextTestNg, GetCopyOptionString001, TestSize.Level1)
     TextModelNG textModelNG;
     textModelNG.Create(CREATE_VALUE);
     auto [frameNode, pattern] = Init();
-    auto pipeline = frameNode->GetContext();
+    auto pipeline = frameNode->GetContextRefPtr();
     auto layoutProperty = frameNode->GetLayoutProperty();
     ASSERT_NE(layoutProperty, nullptr);
     auto textLayoutProperty = AceType::DynamicCast<TextLayoutProperty>(layoutProperty);

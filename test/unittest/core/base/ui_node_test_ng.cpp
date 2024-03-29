@@ -328,8 +328,6 @@ HWTEST_F(UINodeTestNg, UINodeTestNg008, TestSize.Level1)
     ONE->UINode::RebuildRenderContextTree();
     ONE->DumpTree(0);
     EXPECT_EQ(ONE->children_.size(), 1);
-    auto pipeline = UINode::GetContext();
-    EXPECT_NE(pipeline, nullptr);
 }
 
 /**

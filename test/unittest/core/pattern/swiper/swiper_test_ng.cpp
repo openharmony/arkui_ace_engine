@@ -1120,7 +1120,7 @@ HWTEST_F(SwiperTestNg, SwiperPatternOnModifyDone002, TestSize.Level1)
 HWTEST_F(SwiperTestNg, SwiperPatternRegisterVisibleAreaChange002, TestSize.Level1)
 {
     CreateWithItem([](SwiperModelNG model) {});
-    auto pipeline = frameNode_->GetContext();
+    auto pipeline = frameNode_->GetContextRefPtr();
     auto paintProperty_ = pattern_->GetPaintProperty<SwiperPaintProperty>();
 
     /**
@@ -1159,7 +1159,7 @@ HWTEST_F(SwiperTestNg, SwiperPatternInitSurfaceChangedCallback001, TestSize.Leve
      * @tc.steps: step2. call InitSurfaceChangedCallback and then callback.
      * @tc.expected: Related function is called.
      */
-    auto pipeline = frameNode_->GetContext();
+    auto pipeline = frameNode_->GetContextRefPtr();
     pattern_->surfaceChangedCallbackId_.emplace(1);
     pattern_->InitSurfaceChangedCallback();
     pipeline->callbackId_ = 0;

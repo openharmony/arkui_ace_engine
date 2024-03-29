@@ -1698,7 +1698,9 @@ void IndexerPattern::StartBubbleAppearAnimation()
 
 void IndexerPattern::StartDelayTask(uint32_t duration)
 {
-    auto context = UINode::GetContext();
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto context = host->GetContext();
     CHECK_NULL_VOID(context);
     CHECK_NULL_VOID(context->GetTaskExecutor());
     delayTask_.Reset([weak = AceType::WeakClaim(this)] {

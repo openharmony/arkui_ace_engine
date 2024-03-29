@@ -152,7 +152,7 @@ void ResetGridScrollBarColor(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    auto context = UINode::GetContext();
+    auto* context = frameNode->GetContext();
     CHECK_NULL_VOID(context);
     auto themeManager = context->GetThemeManager();
     CHECK_NULL_VOID(themeManager);

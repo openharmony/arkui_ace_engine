@@ -224,7 +224,7 @@ float PasswordResponseArea::GetIconSize()
     CHECK_NULL_RETURN(textFieldPattern, 0.0f);
     auto tmpHost = textFieldPattern->GetHost();
     CHECK_NULL_RETURN(tmpHost, 0.0f);
-    auto pipeline = tmpHost->GetContext();
+    auto pipeline = tmpHost->GetContextRefPtr();
     CHECK_NULL_RETURN(pipeline, 0.0f);
     auto themeManager = pipeline->GetThemeManager();
     CHECK_NULL_RETURN(themeManager, 0.0f);
@@ -238,7 +238,7 @@ float PasswordResponseArea::GetIconRightOffset()
     auto textFieldPattern = hostPattern_.Upgrade();
     CHECK_NULL_RETURN(textFieldPattern, 0.0f);
     auto tmpHost = textFieldPattern->GetHost();
-    auto pipeline = tmpHost->GetContext();
+    auto pipeline = tmpHost->GetContextRefPtr();
     CHECK_NULL_RETURN(pipeline, 0.0f);
     auto themeManager = pipeline->GetThemeManager();
     CHECK_NULL_RETURN(themeManager, 0.0f);
@@ -258,7 +258,7 @@ void PasswordResponseArea::LoadImageSourceInfo()
     hideIcon_ = layoutProperty->GetHidePasswordSourceInfoValue(GetDefaultSourceInfo(true));
     auto tmpHost = textFieldPattern->GetHost();
     CHECK_NULL_VOID(tmpHost);
-    auto pipeline = tmpHost->GetContext();
+    auto pipeline = tmpHost->GetContextRefPtr();
     CHECK_NULL_VOID(pipeline);
     auto themeManager = pipeline->GetThemeManager();
     CHECK_NULL_VOID(themeManager);
@@ -464,7 +464,7 @@ void CleanNodeResponseArea::UpdateCleanNode(bool isShow)
     if (isShow) {
         auto host = textFieldPattern->GetHost();
         CHECK_NULL_VOID(host);
-        auto pipeline = host->GetContext();
+        auto pipeline = host->GetContextRefPtr();
         CHECK_NULL_VOID(pipeline);
         auto themeManager = pipeline->GetThemeManager();
         CHECK_NULL_VOID(themeManager);
