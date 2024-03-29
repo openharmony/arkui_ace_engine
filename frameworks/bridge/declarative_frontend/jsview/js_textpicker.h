@@ -111,6 +111,7 @@ private:
     static void CreateMulti(const RefPtr<PickerTheme>& theme, const std::vector<std::string>& values,
         const std::vector<uint32_t>& selectedValues, const NG::TextCascadePickerOptionsAttr& attr,
         const std::vector<NG::TextCascadePickerOptions>& options);
+    static bool CheckDividerValue(const Dimension &dimension);
 };
 
 class JSTextPickerDialog {

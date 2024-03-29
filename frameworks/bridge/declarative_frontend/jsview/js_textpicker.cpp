@@ -1024,46 +1024,53 @@ void JSTextPicker::SetSelectedIndex(const JSCallbackInfo& info)
     }
 }
 
+bool JSTextPicker::CheckDividerValue(const Dimension &dimension)
+{
+    if (dimension.Value() >= 0.0f && dimension.Unit() != DimensionUnit::PERCENT) {
+        return true;
+    }
+    return false;
+}
+
 void JSTextPicker::SetDivider(const JSCallbackInfo& info)
 {
     NG::ItemDivider divider;
+    auto pickerTheme = GetTheme<PickerTheme>();
+    Dimension defaultStrokeWidth = 0.0_vp;
+    Dimension defaultMargin = 0.0_vp;
+    Color defaultColor = Color::TRANSPARENT;
+    // Set default strokeWidth and color
+    if (pickerTheme) {
+        defaultStrokeWidth = pickerTheme->GetDividerThickness();
+        defaultColor = pickerTheme->GetDividerColor();
+        divider.strokeWidth = defaultStrokeWidth;
+        divider.color = defaultColor;
+    }
+
     if (info.Length() >= 1 && info[0]->IsObject()) {
-        auto pickerTheme = GetTheme<PickerTheme>();
-        // Set default strokeWidth and color
-        if (pickerTheme) {
-            divider.strokeWidth = pickerTheme->GetDividerThickness();
-            divider.color = pickerTheme->GetDividerColor();
-        }
         JSRef<JSObject> obj = JSRef<JSObject>::Cast(info[0]);
-        bool needReset = obj->GetProperty("strokeWidth")->IsString() &&
-            !std::regex_match(obj->GetProperty("strokeWidth")->ToString(), DIMENSION_REGEX);
-        if (needReset || !ConvertFromJSValue(obj->GetProperty("strokeWidth"), divider.strokeWidth) ||
-            divider.strokeWidth.ConvertToPx() < 0) {
-            if (pickerTheme) {
-                divider.strokeWidth = pickerTheme->GetDividerThickness();
-            } else {
-                divider.strokeWidth = 0.0_vp;
-            }
-        }
-        if (!ConvertFromJSValue(obj->GetProperty("color"), divider.color)) {
-            // Failed to get color from param, using default color defined in theme
-            if (pickerTheme) {
-                divider.color = pickerTheme->GetDividerColor();
-            } else {
-                divider.color = Color::TRANSPARENT;
-            }
+       
+        Dimension strokeWidth = defaultStrokeWidth;
+        if (ConvertFromJSValueNG(obj->GetProperty("strokeWidth"), strokeWidth) && CheckDividerValue(strokeWidth)) {
+            divider.strokeWidth = strokeWidth;
         }
         
-        needReset = obj->GetProperty("startMargin")->IsString() &&
-            !std::regex_match(obj->GetProperty("startMargin")->ToString(), DIMENSION_REGEX);
-        if (needReset || !ConvertFromJSValue(obj->GetProperty("startMargin"), divider.startMargin)) {
-            divider.startMargin = 0.0_vp;
+        Color color = defaultColor;
+        if (ConvertFromJSValue(obj->GetProperty("color"), color)) {
+            divider.color = color;
         }
-        needReset = obj->GetProperty("endMargin")->IsString() &&
-            !std::regex_match(obj->GetProperty("endMargin")->ToString(), DIMENSION_REGEX);
-        if (needReset || !ConvertFromJSValue(obj->GetProperty("endMargin"), divider.endMargin)) {
-            divider.endMargin = 0.0_vp;
+
+        Dimension startMargin = defaultMargin;
+        if (ConvertFromJSValueNG(obj->GetProperty("startMargin"), startMargin) && CheckDividerValue(startMargin)) {
+            divider.startMargin = startMargin;
         }
+
+        Dimension endMargin = defaultMargin;
+        if (ConvertFromJSValueNG(obj->GetProperty("endMargin"), endMargin) &&  CheckDividerValue(endMargin)) {
+            divider.endMargin = endMargin;
+        }
+    } else if (info.Length() >= 1 && info[0]->IsNull()) {
+        divider.strokeWidth = 0.0_vp;
     }
     TextPickerModel::GetInstance()->SetDivider(divider);
 }
