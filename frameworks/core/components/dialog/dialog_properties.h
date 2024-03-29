@@ -209,6 +209,12 @@ struct DialogProperties {
     WeakPtr<NG::UINode> windowScene;
     std::optional<DimensionRect> maskRect;
     RefPtr<NG::ChainedTransitionEffect> transitionEffect = nullptr; // Used for AlertDialog and ActionSheet transition
+
+    WeakPtr<NG::UINode> contentNode;
+    std::function<void()> onDidAppear;
+    std::function<void()> onDidDisappear;
+    std::function<void()> onWillAppear;
+    std::function<void()> onWillDisappear;
 };
 
 struct PromptDialogAttr {
@@ -231,6 +237,15 @@ struct PromptDialogAttr {
     std::optional<Shadow> shadow;
     std::optional<CalcDimension> width;
     std::optional<CalcDimension> height;
+
+    WeakPtr<NG::UINode> contentNode;
+    bool customStyle = false;
+    std::optional<Color> maskColor;
+    RefPtr<NG::ChainedTransitionEffect> transitionEffect = nullptr;
+    std::function<void()> onDidAppear;
+    std::function<void()> onDidDisappear;
+    std::function<void()> onWillAppear;
+    std::function<void()> onWillDisappear;
 };
 
 } // namespace OHOS::Ace

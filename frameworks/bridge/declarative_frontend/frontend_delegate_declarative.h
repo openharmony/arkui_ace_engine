@@ -210,6 +210,11 @@ public:
     void RemoveCustomDialog() override;
     void OpenCustomDialog(const PromptDialogAttr &dialogAttr, std::function<void(int32_t)> &&callback) override;
     void CloseCustomDialog(const int32_t dialogId) override;
+    void CloseCustomDialog(const WeakPtr<NG::UINode>& node, std::function<void(int32_t)> &&callback) override;
+    void UpdateCustomDialog(const WeakPtr<NG::UINode>& node, const PromptDialogAttr &dialogAttr,
+        std::function<void(int32_t)> &&callback) override;
+
+    RefPtr<NG::ChainedTransitionEffect> GetTransitionEffect(void* value) override;
 
     void EnableAlertBeforeBackPage(const std::string& message, std::function<void(int32_t)>&& callback) override;
 
@@ -428,6 +433,8 @@ private:
     void RecycleSinglePage();
     void ClearAlertCallback(PageInfo pageInfo);
     bool CheckIndexValid(int32_t index) const;
+
+    DialogProperties ParsePropertiesFromAttr(const PromptDialogAttr &dialogAttr);
 
     std::atomic<uint64_t> pageIdPool_ = 0;
     int32_t callbackCnt_ = 0;

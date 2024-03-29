@@ -581,6 +581,34 @@ class PromptAction {
         }
     }
 
+    openCustomDialog(content, options) {
+        __JSScopeUtil__.syncInstanceId(this.instanceId_);
+        if (arguments.length === 2) {
+            let result_ = this.ohos_prompt.openCustomDialog(content.getFrameNode(), options);
+            __JSScopeUtil__.restoreInstanceId();
+            return result_;
+        }
+        else {
+            let result_ = this.ohos_prompt.openCustomDialog(content.getFrameNode());
+            __JSScopeUtil__.restoreInstanceId();
+            return result_;
+        }
+    }
+
+    updateCustomDialog(content, options) {
+        __JSScopeUtil__.syncInstanceId(this.instanceId_);
+        let result_ = this.ohos_prompt.updateCustomDialog(content.getFrameNode(), options);
+        __JSScopeUtil__.restoreInstanceId();
+        return result_;
+    }
+
+    closeCustomDialog(content) {
+        __JSScopeUtil__.syncInstanceId(this.instanceId_);
+        let result_ = this.ohos_prompt.closeCustomDialog(content.getFrameNode());
+        __JSScopeUtil__.restoreInstanceId();
+        return result_;
+    }
+
     showActionMenu(options, callback) {
         __JSScopeUtil__.syncInstanceId(this.instanceId_);
         if (typeof callback !== 'undefined') {
