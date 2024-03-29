@@ -44,6 +44,7 @@
 #endif
 
 #include "core/common/udmf/udmf_client.h"
+const int64_t MAX_NUMBER_OF_JS = 0x20000000000000;
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -906,7 +907,7 @@ void FormPattern::CreateCardContainer()
     subContainer_->Initialize();
     subContainer_->SetNodeId(host->GetId());
 
-    subContainer_->AddFormAcquireCallback([weak = WeakClaim(this)](size_t id) {
+    subContainer_->AddFormAcquireCallback([weak = WeakClaim(this)](int64_t id) {
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
         auto host = pattern->GetHost();
@@ -1001,8 +1002,10 @@ void FormPattern::FireOnUninstallEvent(int64_t id) const
     CHECK_NULL_VOID(host);
     auto eventHub = host->GetEventHub<FormEventHub>();
     CHECK_NULL_VOID(eventHub);
+    int64_t uninstallFormId = id < MAX_NUMBER_OF_JS ? id : -1;
     auto json = JsonUtil::Create(true);
-    json->Put("id", std::to_string(id).c_str());
+    json->Put("id", std::to_string(uninstallFormId).c_str());
+    json->Put("idString", std::to_string(id).c_str());
     eventHub->FireOnUninstall(json->ToString());
 }
 
@@ -1012,8 +1015,10 @@ void FormPattern::FireOnAcquiredEvent(int64_t id) const
     CHECK_NULL_VOID(host);
     auto eventHub = host->GetEventHub<FormEventHub>();
     CHECK_NULL_VOID(eventHub);
+    int64_t onAcquireFormId = id < MAX_NUMBER_OF_JS ? id : -1;
     auto json = JsonUtil::Create(true);
-    json->Put("id", std::to_string(id).c_str());
+    json->Put("id", std::to_string(onAcquireFormId).c_str());
+    json->Put("idString", std::to_string(id).c_str());
     eventHub->FireOnAcquired(json->ToString());
 }
 
