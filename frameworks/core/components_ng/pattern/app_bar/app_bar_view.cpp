@@ -279,15 +279,17 @@ void AppBarView::BindContentCover(const RefPtr<FrameNode>& targetNode)
     }
     NG::ModalStyle modalStyle;
     modalStyle.modalTransition = NG::ModalTransition::NONE;
-    auto buildNodeFunc = [targetNode, overlayManager, &modalStyle, &stageAbilityName]() -> RefPtr<UINode> {
-        auto onRelease = [overlayManager, &modalStyle, targetNode](int32_t releaseCode) {
-            overlayManager->BindContentCover(false, nullptr, nullptr, modalStyle, nullptr, nullptr, nullptr,
-                nullptr, ContentCoverParam(), targetNode);
+    auto buildNodeFunc = [targetNode, overlayManager, modalStyle, stageAbilityName]() -> RefPtr<UINode> {
+        auto onRelease = [overlayManager, modalStyle, targetNode](int32_t releaseCode) {
+            auto style = modalStyle;
+            overlayManager->BindContentCover(false, nullptr, nullptr, style, nullptr, nullptr, nullptr, nullptr,
+                ContentCoverParam(), targetNode);
         };
-        auto onError = [overlayManager, &modalStyle, targetNode](
+        auto onError = [overlayManager, modalStyle, targetNode](
                            int32_t code, const std::string& name, const std::string& message) {
-            overlayManager->BindContentCover(false, nullptr, nullptr, modalStyle, nullptr, nullptr, nullptr,
-                nullptr, ContentCoverParam(), targetNode);
+            auto style = modalStyle;
+            overlayManager->BindContentCover(false, nullptr, nullptr, style, nullptr, nullptr, nullptr, nullptr,
+                ContentCoverParam(), targetNode);
         };
 
         // Create parameters of UIExtension.
