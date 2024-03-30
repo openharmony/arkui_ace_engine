@@ -512,6 +512,9 @@ public:
     static void SetDialogProperties(const JSRef<JSObject>& obj, DialogProperties& properties);
     static std::function<void(NG::DrawingContext& context)> GetDrawCallback(
         const RefPtr<JsFunction>& jsDraw, const JSExecutionContext& execCtx);
+
+    static RefPtr<NG::ChainedTransitionEffect> ParseNapiChainedTransition(
+        const JSRef<JSObject>& object, const JSExecutionContext& context);
 };
 } // namespace OHOS::Ace::Framework
 #endif // JS_VIEW_ABSTRACT_H

@@ -24,6 +24,7 @@ napi_value JSPromptShowToast(napi_env env, napi_callback_info info);
 napi_value JSPromptShowDialog(napi_env env, napi_callback_info info);
 napi_value JSPromptShowActionMenu(napi_env env, napi_callback_info info);
 napi_value JSPromptOpenCustomDialog(napi_env env, napi_callback_info info);
+napi_value JSPromptUpdateCustomDialog(napi_env env, napi_callback_info info);
 napi_value JSPromptCloseCustomDialog(napi_env env, napi_callback_info info);
 } // namespace OHOS::Ace::Napi
 #endif // INTERFACES_NAPI_KITS_PROMPTACTION_PROMPT_ACTION_H_
