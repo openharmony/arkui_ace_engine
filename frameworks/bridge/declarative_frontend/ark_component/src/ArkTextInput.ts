@@ -159,6 +159,23 @@ class TextInputUnderlineColorModifier extends ModifierWithKey<ResourceColor | Un
   }
 }
 
+class TextInputWordBreakModifier extends ModifierWithKey<WordBreak> {
+  constructor(value: WordBreak) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('textInputWordBreak');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().text.resetWordBreak(node);
+    } else {
+      getUINativeModule().text.setWordBreak(node, this.value!);
+    }
+  }
+  checkObjectDiff(): boolean {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+
 class TextInputShowPasswordIconModifier extends ModifierWithKey<boolean> {
   constructor(value: boolean) {
     super(value);
@@ -776,9 +793,14 @@ class ArkTextInputComponent extends ArkComponent implements CommonMethod<TextInp
   }
   lineHeight(value: number | string | Resource): this {
     modifierWithKey(this._modifiersWithKeys, TextInputLineHeightModifier.identity, TextInputLineHeightModifier, value);
+    return this;
   }
   underlineColor(value: ResourceColor | UnderlineColor | undefined): TextInputAttribute {
     modifierWithKey(this._modifiersWithKeys, TextInputUnderlineColorModifier.identity, TextInputUnderlineColorModifier, value);
+    return this;
+  }
+  wordBreak(value: WordBreak): TextInputAttribute {
+    modifierWithKey(this._modifiersWithKeys, TextInputWordBreakModifier.identity, TextInputWordBreakModifier, value);
     return this;
   }
 }

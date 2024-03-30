@@ -1369,4 +1369,9 @@ void TextFieldModelNG::SetLineHeight(FrameNode* frameNode, const Dimension& valu
 {
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, LineHeight, value, frameNode);
 }
+
+void TextFieldModelNG::TextFieldModelNG::SetWordBreak(FrameNode* frameNode, Ace::WordBreak value)
+{
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, WordBreak, value, frameNode);
+}
 } // namespace OHOS::Ace::NG

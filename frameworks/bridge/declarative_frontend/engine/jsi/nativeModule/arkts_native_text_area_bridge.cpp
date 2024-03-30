@@ -679,4 +679,30 @@ ArkUINativeModuleValue TextAreaBridge::ResetFontFeature(ArkUIRuntimeCallInfo* ru
     GetArkUINodeModifiers()->getTextAreaModifier()->resetTextAreaFontFeature(nativeNode);
     return panda::JSValueRef::Undefined(vm);
 }
+
+ArkUINativeModuleValue TextAreaBridge::SetWordBreak(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
+    Local<JSValueRef> workBreakArg = runtimeCallInfo->GetCallArgRef(NUM_1);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    if (workBreakArg->IsNull() || workBreakArg->IsUndefined() || !workBreakArg->IsNumber()) {
+        GetArkUINodeModifiers()->getTextAreaModifier()->resetTextAreaWordBreak(nativeNode);
+        return panda::JSValueRef::Undefined(vm);
+    }
+    uint32_t wordBreak = workBreakArg->Uint32Value(vm);
+    GetArkUINodeModifiers()->getTextAreaModifier()->setTextAreaWordBreak(nativeNode, wordBreak);
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue TextAreaBridge::ResetWordBreak(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    GetArkUINodeModifiers()->getTextAreaModifier()->resetTextAreaWordBreak(nativeNode);
+    return panda::JSValueRef::Undefined(vm);
+}
 } // namespace OHOS::Ace::NG

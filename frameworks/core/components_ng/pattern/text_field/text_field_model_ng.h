@@ -190,6 +190,7 @@ public:
     static void SetTextSelection(FrameNode* frameNode, int32_t start, int32_t end);
     static int32_t GetTextSelectionIndex(FrameNode* frameNode, bool isEnd);
     static void SetFontFeature(FrameNode* frameNode, const FONT_FEATURES_MAP& value);
+    static void SetWordBreak(FrameNode* frameNode, Ace::WordBreak value);
 
 private:
     void AddDragFrameNodeToManager() const;

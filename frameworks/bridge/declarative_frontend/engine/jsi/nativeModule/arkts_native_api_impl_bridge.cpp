@@ -1104,6 +1104,10 @@ ArkUINativeModuleValue ArkUINativeModule::GetArkUINativeModule(ArkUIRuntimeCallI
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextAreaBridge::SetFontFeature));
     textArea->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetFontFeature"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextAreaBridge::ResetFontFeature));
+    textArea->Set(vm, panda::StringRef::NewFromUtf8(vm, "setWordBreak"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextAreaBridge::SetWordBreak));
+    textArea->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetWordBreak"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextAreaBridge::ResetWordBreak));
     object->Set(vm, panda::StringRef::NewFromUtf8(vm, "textArea"), textArea);
 
     auto video = panda::ObjectRef::New(vm);
@@ -1358,6 +1362,10 @@ ArkUINativeModuleValue ArkUINativeModule::GetArkUINativeModule(ArkUIRuntimeCallI
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextInputBridge::SetFontFeature));
     textInput->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetFontFeature"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextInputBridge::ResetFontFeature));
+    textInput->Set(vm, panda::StringRef::NewFromUtf8(vm, "setWordBreak"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextInputBridge::SetWordBreak));
+    textInput->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetWordBreak"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextInputBridge::ResetWordBreak));
     object->Set(vm, panda::StringRef::NewFromUtf8(vm, "textInput"), textInput);
 
     auto navDestination = panda::ObjectRef::New(vm);

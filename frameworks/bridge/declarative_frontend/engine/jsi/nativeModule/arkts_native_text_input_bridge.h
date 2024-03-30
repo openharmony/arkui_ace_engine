@@ -81,6 +81,8 @@ public:
     static ArkUINativeModuleValue ResetUnderlineColor(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue SetFontFeature(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue ResetFontFeature(ArkUIRuntimeCallInfo* runtimeCallInfo);
+    static ArkUINativeModuleValue SetWordBreak(ArkUIRuntimeCallInfo* runtimeCallInfo);
+    static ArkUINativeModuleValue ResetWordBreak(ArkUIRuntimeCallInfo* runtimeCallInfo);
 };
 }
 

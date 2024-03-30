@@ -26,10 +26,10 @@
 extern "C" {
 #endif
 
-#define ARKUI_FULL_API_VERSION 86
+#define ARKUI_FULL_API_VERSION 87
 // When changing ARKUI_BASIC_API_VERSION, ARKUI_FULL_API_VERSION must be
 // increased as well.
-#define ARKUI_NODE_API_VERSION 86
+#define ARKUI_NODE_API_VERSION 87
 
 #define ARKUI_BASIC_API_VERSION 7
 #define ARKUI_EXTENDED_API_VERSION 7
@@ -2191,6 +2191,8 @@ struct ArkUITextAreaModifier {
     void (*resetTextAreaLineHeight)(ArkUINodeHandle node);
     void (*setTextAreaFontFeature)(ArkUINodeHandle node, ArkUI_CharPtr value);
     void (*resetTextAreaFontFeature)(ArkUINodeHandle node);
+    void (*setTextAreaWordBreak)(ArkUINodeHandle node, ArkUI_Uint32 wordBreak);
+    void (*resetTextAreaWordBreak)(ArkUINodeHandle node);
 };
 
 struct ArkUITextInputModifier {
@@ -2290,6 +2292,8 @@ struct ArkUITextInputModifier {
     void (*resetTextInputLineHeight)(ArkUINodeHandle node);
     void (*setTextInputFontFeature)(ArkUINodeHandle node, ArkUI_CharPtr value);
     void (*resetTextInputFontFeature)(ArkUINodeHandle node);
+    void (*setTextInputWordBreak)(ArkUINodeHandle node, ArkUI_Uint32 wordBreak);
+    void (*resetTextInputWordBreak)(ArkUINodeHandle node);
 };
 
 struct ArkUIWebModifier {

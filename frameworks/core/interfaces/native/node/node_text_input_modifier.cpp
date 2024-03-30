@@ -921,6 +921,23 @@ void ResetTextInputFontFeature(ArkUINodeHandle node)
     std::string strValue = "";
     TextFieldModelNG::SetFontFeature(frameNode, ParseFontFeatureSettings(strValue));
 }
+
+void SetTextInputWordBreak(ArkUINodeHandle node, ArkUI_Uint32 wordBreak)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    if (wordBreak < 0 || wordBreak >= WORD_BREAK_TYPES.size()) {
+        wordBreak = 2; // 2 is the default value of WordBreak::BREAK_WORD
+    }
+    TextFieldModelNG::SetWordBreak(frameNode, WORD_BREAK_TYPES[wordBreak]);
+}
+
+void ResetTextInputWordBreak(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    TextFieldModelNG::SetWordBreak(frameNode, WORD_BREAK_TYPES[2]); // 2 is the default value of WordBreak::BREAK_WORD
+}
 } // namespace
 
 namespace NodeModifier {
@@ -951,7 +968,8 @@ const ArkUITextInputModifier* GetTextInputModifier()
         ResetTextInputBackgroundColor, SetTextInputNormalUnderlineColor, SetTextInputUserUnderlineColor,
         ResetTextInputUserUnderlineColor, SetTextInputTextSelection, GetTextInputTextSelectionIndex,
         SetTextInputDecoration, ResetTextInputDecoration, SetTextInputLetterSpacing, ResetTextInputLetterSpacing,
-        SetTextInputLineHeight, ResetTextInputLineHeight, SetTextInputFontFeature, ResetTextInputFontFeature };
+        SetTextInputLineHeight, ResetTextInputLineHeight, SetTextInputFontFeature, ResetTextInputFontFeature,
+        SetTextInputWordBreak, ResetTextInputWordBreak };
     return &modifier;
 }
 
