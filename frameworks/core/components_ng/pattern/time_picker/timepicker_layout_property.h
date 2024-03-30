@@ -23,6 +23,7 @@
 #include "core/components_ng/layout/layout_property.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_property.h"
 #include "core/components_ng/pattern/text/text_styles.h"
+#include "core/components_ng/pattern/time_picker/timepicker_model_ng.h"
 #include "core/components_ng/property/property.h"
 
 namespace OHOS::Ace::NG {
@@ -83,10 +84,25 @@ public:
         selectedTextStyle->Put("color", GetSelectedColor().value_or(Color::BLACK).ColorToString().c_str());
         selectedTextStyle->Put("font", selectedFont);
         json->Put("selectedTextStyle", selectedTextStyle);
+
+        auto options = JsonUtil::Create(true);
+
+        if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
+            options->Put("hour", TimeFormat::GetHourFormat(
+                GetPrefixHourValue(0), GetIsUseMilitaryTimeValue(false)).c_str());
+            options->Put("minute", TimeFormat::GetMinuteFormat(GetPrefixMinuteValue(0)).c_str());
+            if (GetPrefixSecondValue(0) != static_cast<int32_t>(ZeroPrefixType::OFF)) {
+                options->Put("second", TimeFormat::GetSecondFormat(GetPrefixSecondValue(0)).c_str());
+            }
+            json->Put("dateTimeOptions", options);
+        }
     }
 
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(IsUseMilitaryTime, bool, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(Loop, bool, PROPERTY_UPDATE_MEASURE);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(PrefixHour, int32_t, PROPERTY_UPDATE_MEASURE);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(PrefixMinute, int32_t, PROPERTY_UPDATE_MEASURE);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(PrefixSecond, int32_t, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_GROUP(DisappearTextStyle, FontStyle);
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP_ITEM(
         DisappearTextStyle, FontSize, DisappearFontSize, Dimension, PROPERTY_UPDATE_MEASURE);
@@ -119,6 +135,7 @@ public:
         SelectedTextStyle, FontFamily, SelectedFontFamily, std::vector<std::string>, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP_ITEM(
         SelectedTextStyle, ItalicFontStyle, SelectedFontStyle, Ace::FontStyle, PROPERTY_UPDATE_MEASURE);
+
 private:
     ACE_DISALLOW_COPY_AND_MOVE(TimePickerLayoutProperty);
 };
