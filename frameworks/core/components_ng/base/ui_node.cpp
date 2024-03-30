@@ -1117,4 +1117,14 @@ void UINode::PaintDebugBoundaryTreeAll(bool flag)
         child->PaintDebugBoundaryTreeAll(flag);
     }
 }
+
+void UINode::DFSAllChild(const RefPtr<UINode>& root, std::vector<RefPtr<UINode>>& res)
+{
+    if (root->GetChildren().empty()) {
+        res.emplace_back(root);
+    }
+    for (const auto& child : root->GetChildren()) {
+        DFSAllChild(child, res);
+    }
+}
 } // namespace OHOS::Ace::NG

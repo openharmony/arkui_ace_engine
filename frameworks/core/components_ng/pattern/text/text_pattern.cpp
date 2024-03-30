@@ -1578,6 +1578,10 @@ const std::list<RefPtr<UINode>>& TextPattern::GetAllChildren() const
         if (child->GetTag() == V2::CONTAINER_SPAN_ETS_TAG) {
             auto spanChildren = child->GetChildren();
             childNodes_.insert(childNodes_.end(), spanChildren.begin(), spanChildren.end());
+        } else if (!child->GetChildren().empty()) {
+            std::vector<RefPtr<UINode>> res;
+            UINode::DFSAllChild(child, res);
+            childNodes_.insert(childNodes_.end(), res.begin(), res.end());
         } else {
             childNodes_.push_back(child);
         }

@@ -534,6 +534,7 @@ public:
     virtual void SetNodeIndexOffset(int32_t start, int32_t count) {}
 
     virtual void PaintDebugBoundaryTreeAll(bool flag);
+    static void DFSAllChild(const RefPtr<UINode>& root, std::vector<RefPtr<UINode>>& res);
 
 protected:
     std::list<RefPtr<UINode>>& ModifyChildren()
