@@ -548,6 +548,10 @@ const char UI_EXTENSION_COMPONENT_TAG[] = "UIExtensionComponent";
 const char UI_EXTENSION_SURFACE_TAG[] = "UIExtensionSurface";
 const char UI_EXTENSION_COMPONENT_ETS_TAG[] = "UIExtensionComponent";
 
+// embedded_component
+const char EMBEDDED_COMPONENT_TAG[] = "EmbeddedComponent";
+const char EMBEDDED_COMPONENT_ETS_TAG[] = "EmbeddedComponent";
+
 // LocationButton
 const char LOCATION_BUTTON_COMPONENT_TAG[] = "LocationButtonComponent";
 const char LOCATION_BUTTON_ETS_TAG[] = "LocationButton";

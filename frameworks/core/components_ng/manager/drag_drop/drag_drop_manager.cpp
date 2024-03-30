@@ -218,8 +218,9 @@ RefPtr<FrameNode> DragDropManager::FindTargetInChildNodes(
             if (!eventHub) {
                 continue;
             }
-            if (eventHub->HasOnDrop() || eventHub->HasOnItemDrop() || eventHub->HasCustomerOnDrop()
-                || V2::UI_EXTENSION_COMPONENT_ETS_TAG == parentFrameNode->GetTag()) {
+            if (eventHub->HasOnDrop() || eventHub->HasOnItemDrop() || eventHub->HasCustomerOnDrop() ||
+                V2::UI_EXTENSION_COMPONENT_ETS_TAG == parentFrameNode->GetTag() ||
+                V2::EMBEDDED_COMPONENT_ETS_TAG == parentFrameNode->GetTag()) {
                 return parentFrameNode;
             }
         }
@@ -554,7 +555,8 @@ void DragDropManager::OnDragMove(const PointerEvent& pointerEvent, const std::st
         return;
     }
 
-    if (V2::UI_EXTENSION_COMPONENT_ETS_TAG == dragFrameNode->GetTag()) {
+    if (V2::UI_EXTENSION_COMPONENT_ETS_TAG == dragFrameNode->GetTag() ||
+        V2::EMBEDDED_COMPONENT_ETS_TAG == dragFrameNode->GetTag()) {
         auto pattern = dragFrameNode->GetPattern<Pattern>();
         pattern->HandleDragEvent(pointerEvent);
         return;
@@ -630,7 +632,8 @@ void DragDropManager::OnDragEnd(const PointerEvent& pointerEvent, const std::str
         "TargetNode is %{public}s, id is %{public}s",
         container->GetWindowId(), static_cast<float>(point.GetX()), static_cast<float>(point.GetY()),
         dragFrameNode->GetTag().c_str(), dragFrameNode->GetInspectorId()->c_str());
-    if (V2::UI_EXTENSION_COMPONENT_ETS_TAG == dragFrameNode->GetTag()) {
+    if (V2::UI_EXTENSION_COMPONENT_ETS_TAG == dragFrameNode->GetTag() ||
+        V2::EMBEDDED_COMPONENT_ETS_TAG == dragFrameNode->GetTag()) {
         auto pattern = dragFrameNode->GetPattern<Pattern>();
         pattern->HandleDragEvent(pointerEvent);
         return;
