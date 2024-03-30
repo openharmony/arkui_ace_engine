@@ -4299,7 +4299,7 @@ void SwiperPattern::ResetAndUpdateIndexOnAnimationEnd(int32_t nextIndex)
         }
         do {
             auto curChildFrame = GetCurrentFrameNode(currentFocusIndex_);
-            if (!curChildFrame) {
+            if (!curChildFrame || !IsContentFocused()) {
                 break;
             }
             FlushFocus(curChildFrame);
