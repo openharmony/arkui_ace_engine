@@ -1653,6 +1653,14 @@ void ViewAbstract::SetFrontBlur(const Dimension &radius, const BlurOption &blurO
     }
 }
 
+void ViewAbstract::SetDynamicDim(float DimDegree)
+{
+    if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
+        return;
+    }
+    ACE_UPDATE_RENDER_CONTEXT(DynamicDimDegree, DimDegree);
+}
+
 void ViewAbstract::SetFrontBlur(FrameNode *frameNode, const Dimension &radius, const BlurOption &blurOption)
 {
     CHECK_NULL_VOID(frameNode);

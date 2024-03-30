@@ -348,6 +348,12 @@ class UIContext {
         }
         return this.focusController_;
     }
+
+    setDynamicDimming(id, number) {
+        __JSScopeUtil__.syncInstanceId(this.instanceId_);
+        let nodePtr = getUINativeModule().getFrameNodeByKey(id);
+        Context.setDynamicDimming(nodePtr, number);
+    }
 }
 
 class FocusController {

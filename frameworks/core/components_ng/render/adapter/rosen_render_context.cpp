@@ -3576,6 +3576,13 @@ void RosenRenderContext::OnLinearGradientBlurUpdate(const NG::LinearGradientBlur
     RequestNextFrame();
 }
 
+void RosenRenderContext::OnDynamicDimDegreeUpdate(const float degree)
+{
+    CHECK_NULL_VOID(rsNode_);
+    rsNode_->SetDynamicDimDegree(degree);
+    RequestNextFrame();
+}
+
 void RosenRenderContext::OnDynamicLightUpRateUpdate(const float rate)
 {
     CHECK_NULL_VOID(rsNode_);

@@ -651,6 +651,10 @@ public:
         ViewAbstract::SetLinearGradientBlur(blurPara);
     }
 
+    void SetDynamicDim(float DimDegree) override
+    {
+        ViewAbstract::SetDynamicDim(DimDegree);
+    }
     void SetDynamicLightUp(float rate, float lightUpDegree) override
     {
         ViewAbstract::SetDynamicLightUp(rate, lightUpDegree);

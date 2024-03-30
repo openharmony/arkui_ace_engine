@@ -196,6 +196,7 @@ public:
     virtual void SetBackdropBlur(const Dimension& radius, const BlurOption& blurOption) = 0;
     virtual void SetLinearGradientBlur(NG::LinearGradientBlurPara blurPara) = 0;
 
+    virtual void SetDynamicDim(float DimDegree) = 0;
     virtual void SetDynamicLightUp(float rate, float lightUpDegree) = 0;
 
     virtual void SetFrontBlur(const Dimension& radius, const BlurOption& blurOption) = 0;
