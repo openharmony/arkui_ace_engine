@@ -80,7 +80,7 @@ void AccessibilityProperty::GetGroupTextRecursive(bool forceGetChildren, std::st
     auto level = GetAccessibilityLevel();
     if (level == Level::AUTO || level == Level::YES) {
         auto nodeText = GetText();
-        if (!text.empty() && !nodeText.empty) {
+        if (!text.empty() && !nodeText.empty()) {
             text += ", ";
         }
         text += nodeText;
@@ -102,7 +102,7 @@ void AccessibilityProperty::GetGroupTextRecursive(bool forceGetChildren, std::st
     }
 }
 
-std::string AccessibilityProperty::GetAccessibilityText(bool isParentGroup) const
+std::string AccessibilityProperty::GetAccessibilityText() const
 {
     return accessibilityText_.value_or("");
 }
