@@ -250,7 +250,7 @@ void PanRecognizer::HandleTouchDownEvent(const AxisEvent& event)
 void PanRecognizer::HandleTouchUpEvent(const TouchEvent& event)
 {
     TAG_LOGI(AceLogTag::ACE_GESTURE, "Pan recognizer receives %{public}d touch up event", event.id);
-    if (currentFingers_ < fingers_) {
+    if (!IsActiveFinger(event.id) || (currentFingers_ < fingers_)) {
         return;
     }
     if (fingersId_.find(event.id) != fingersId_.end()) {
@@ -260,9 +260,9 @@ void PanRecognizer::HandleTouchUpEvent(const TouchEvent& event)
     lastTouchEvent_ = event;
     time_ = event.time;
 
-    if (static_cast<int32_t>(touchPoints_.size()) == fingers_) {
+    if (static_cast<int32_t>(activeFingers_.size()) == fingers_) {
         UpdateTouchPointInVelocityTracker(event, true);
-    } else if (static_cast<int32_t>(touchPoints_.size()) > fingers_) {
+    } else if (static_cast<int32_t>(activeFingers_.size()) > fingers_) {
         panVelocity_.Reset(event.id);
         UpdateTouchPointInVelocityTracker(event, true);
     }
@@ -277,7 +277,7 @@ void PanRecognizer::HandleTouchUpEvent(const TouchEvent& event)
     }
 
     if (refereeState_ == RefereeState::SUCCEED) {
-        if (currentFingers_ == fingers_) {
+        if (activeFingers_.size() == fingers_) {
             // last one to fire end.
             SendCallbackMsg(onActionEnd_);
             averageDistance_.Reset();
