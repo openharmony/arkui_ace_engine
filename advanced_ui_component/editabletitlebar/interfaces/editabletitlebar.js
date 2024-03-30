@@ -287,8 +287,8 @@ export class EditableTitleBar extends ViewPU {
             Column.create();
             Column.justifyContent(FlexAlign.Start);
             Column.padding({
-                top: { 'id': -1, 'type': 10002, params: ['sys.float.padding_level2'], 'bundleName': '', 'moduleName': '' },
-                bottom: { 'id': -1, 'type': 10002, params: ['sys.float.padding_level2'], 'bundleName': '', 'moduleName': '' },
+                top: { 'id': -1, 'type': 10002, params: ['sys.float.titlebar_padding_top'], 'bundleName': '', 'moduleName': '' },
+                bottom: { 'id': -1, 'type': 10002, params: ['sys.float.titlebar_padding_bottom'], 'bundleName': '', 'moduleName': '' },
             });
             Column.margin({
                 left: { 'id': -1, 'type': 10002, params: ['sys.float.titlebar_icon_background_space_horizontal'], 'bundleName': '', 'moduleName': '' },
@@ -587,14 +587,14 @@ class ImageMenuItem extends ViewPU {
         this.observeComponentCreation2((v4, w4) => {
             Button.createWithChild({ type: ButtonType.Normal, stateEffect: this.item.isEnabled });
             Button.width(ImageMenuItem.imageHotZoneWidth);
-            Button.height(ImageMenuItem.imageHotZoneWidth);
+            Button.height(ImageMenuItem.imageHotZoneHeight);
+            Button.focusable(this.item.isEnabled);
+            Button.enabled(this.item.isEnabled);
             Button.borderRadius({ 'id': -1, 'type': 10002, params: ['sys.float.titlebar_icon_background_shape'], 'bundleName': '', 'moduleName': '' });
             Button.margin({
                 left: this.attribute === ItemType.LeftIcon ? EditableTitleBar.commonZero :
                     ImageMenuItem.iconBackgroundSpaceHorizontal,
             });
-            Button.focusable(this.item.isEnabled);
-            Button.enabled(this.item.isEnabled);
             Button.foregroundColor(this.getFgColor());
             Button.backgroundColor({ 'id': -1, 'type': 10001, params: ['sys.color.titlebar_icon_background_color'], 'bundleName': '', 'moduleName': '' });
             ViewStackProcessor.visualState('focused');
@@ -685,25 +685,26 @@ class ImageMenuItem extends ViewPU {
             Button.createWithLabel({ type: ButtonType.Circle });
             Button.width(ImageMenuItem.imageHotZoneWidth);
             Button.height(ImageMenuItem.imageHotZoneHeight);
-            Button.backgroundColor(EditableTitleBar.noneColor);
             Button.focusable(this.item.isEnabled);
             Button.enabled(this.item.isEnabled);
-            ViewStackProcessor.visualState('focused');
+            Button.foregroundColor(this.getFgColor());
+            Button.backgroundColor(EditableTitleBar.noneColor);
+            ViewStackProcessor.visualState('pressed');
             Button.border({
                 radius: { 'id': -1, 'type': 10002, params: ['sys.float.titlebar_icon_background_shape'], 'bundleName': '', 'moduleName': '' },
-                width: { 'id': -1, 'type': 10002, params: ['sys.float.titlebar_icon_background_focus_outline_weight'], 'bundleName': '', 'moduleName': '' },
-                color: { 'id': -1, 'type': 10001, params: ['sys.color.titlebar_icon_background_focus_outline_color'], 'bundleName': '', 'moduleName': '' },
-                style: BorderStyle.Solid,
+                width: EditableTitleBar.commonZero,
             });
             ViewStackProcessor.visualState('normal');
             Button.border({
                 radius: { 'id': -1, 'type': 10002, params: ['sys.float.titlebar_icon_background_shape'], 'bundleName': '', 'moduleName': '' },
                 width: EditableTitleBar.commonZero,
             });
-            ViewStackProcessor.visualState('pressed');
+            ViewStackProcessor.visualState('focused');
             Button.border({
                 radius: { 'id': -1, 'type': 10002, params: ['sys.float.titlebar_icon_background_shape'], 'bundleName': '', 'moduleName': '' },
-                width: EditableTitleBar.commonZero,
+                width: { 'id': -1, 'type': 10002, params: ['sys.float.titlebar_icon_background_focus_outline_weight'], 'bundleName': '', 'moduleName': '' },
+                color: { 'id': -1, 'type': 10001, params: ['sys.color.titlebar_icon_background_focus_outline_color'], 'bundleName': '', 'moduleName': '' },
+                style: BorderStyle.Solid,
             });
             ViewStackProcessor.visualState();
             Button.onFocus(() => {
