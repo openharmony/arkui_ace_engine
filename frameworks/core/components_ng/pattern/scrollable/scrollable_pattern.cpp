@@ -1054,6 +1054,7 @@ void ScrollablePattern::PlaySpringAnimation(float position, float velocity, floa
             CHECK_NULL_VOID(pattern);
             pattern->NotifyFRCSceneInfo(SCROLLABLE_MULTI_TASK_SCENE, pattern->GetCurrentVelocity(),
                 SceneStatus::END);
+            pattern->SetScrollEdgeType(ScrollEdgeType::SCROLL_NONE);
     });
     NotifyFRCSceneInfo(SCROLLABLE_MULTI_TASK_SCENE, GetCurrentVelocity(), SceneStatus::START);
 }
