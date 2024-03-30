@@ -388,8 +388,10 @@ void SwiperPattern::BeforeCreateLayoutWrapper()
                 indicatorNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
             }
         }
+        StartAutoPlay();
     }
-    if (userSetCurrentIndex < 0 || userSetCurrentIndex >= RealTotalCount()) {
+    if (userSetCurrentIndex < 0 || userSetCurrentIndex >= RealTotalCount()
+        || GetDisplayCount() >= RealTotalCount()) {
         currentIndex_ = 0;
         layoutProperty->UpdateIndexWithoutMeasure(GetLoopIndex(currentIndex_));
     } else {
