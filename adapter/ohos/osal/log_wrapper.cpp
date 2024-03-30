@@ -39,7 +39,7 @@ const ::LogLevel LOG_LEVELS[] = {
     LOG_FATAL,
 };
 
-const char* APP_DOMAIN_CONTENT = "JSApp";
+constexpr char APP_DOMAIN_CONTENT[] = "JSAPP";
 
 constexpr uint32_t LOG_DOMAINS[] = {
     0xD003900,

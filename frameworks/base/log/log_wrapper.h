@@ -42,7 +42,7 @@ constexpr uint32_t APP_DOMAIN = 0xC0D0;
             ACE_FMT_PREFIX fmt, OHOS::Ace::LogWrapper::GetBriefFileName(__FILE__),                            \
             __FUNCTION__ ACE_LOG_ID_WITH_REASON, ##__VA_ARGS__)
 
-#define PRINT_APP_LOG(level, fmt, ...) HILOG_IMPL(LOG_APP, LOG_##level, APP_DOMAIN, "Ace", fmt, ##__VA_ARGS__)
+#define PRINT_APP_LOG(level, fmt, ...) HILOG_IMPL(LOG_APP, LOG_##level, APP_DOMAIN, "JSAPP", fmt, ##__VA_ARGS__)
 #else
 #define PRINT_LOG(level, tag, fmt, ...)                                                                       \
     do {                                                                                                      \
