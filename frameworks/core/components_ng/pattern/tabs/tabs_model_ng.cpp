@@ -94,6 +94,7 @@ void TabsModelNG::Create(BarPosition barPosition, int32_t index, const RefPtr<Ta
     }
     swiperPattern->SetSwiperController(controller);
     swiperPattern->SetFinishCallbackType(FinishCallbackType::LOGICALLY);
+    swiperPattern->SetHasTabsAncestor(true);
 
     auto dividerNode = FrameNode::GetOrCreateFrameNode(
         V2::DIVIDER_ETS_TAG, dividerId, []() { return AceType::MakeRefPtr<DividerPattern>(); });
