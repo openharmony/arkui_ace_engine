@@ -602,6 +602,7 @@ public:
 
     RefPtr<UnifiedData> GetUnifiedData(const std::string& frameTag, DragDropInfo& dragDropInfo,
         const RefPtr<OHOS::Ace::DragEvent>& dragEvent);
+    int32_t GetSelectItemSize();
 
     bool IsNeedSwitchToSubWindow() const;
     RefPtr<PixelMap> GetDragPreviewPixelMap()

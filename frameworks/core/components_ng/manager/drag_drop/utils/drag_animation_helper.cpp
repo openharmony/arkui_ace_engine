@@ -21,6 +21,7 @@
 #include "core/animation/animation_pub.h"
 #include "core/components_ng/render/animation_utils.h"
 #include "core/components_ng/render/render_context.h"
+#include "core/components_ng/pattern/menu/menu_theme.h"
 #include "core/components_ng/pattern/overlay/overlay_manager.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 
@@ -29,6 +30,7 @@ namespace {
     constexpr int32_t BEFORE_LIFTING_TIME = 650;
     constexpr int32_t IMAGE_SHOW_TIME = 50;
     constexpr int32_t PIXELMAP_ANIMATION_DURATION = 300;
+    constexpr int32_t BADGE_ANIMATION_DURATION = 200;
     constexpr float DEFAULT_ANIMATION_SCALE = 0.95f;
     constexpr float GATHER_SPRING_RESPONSE = 0.304f;
     constexpr float GATHER_SPRING_DAMPING_FRACTION = 0.97f;
@@ -37,6 +39,13 @@ namespace {
     constexpr float EULER_NUMBER = 2.71828f;
     constexpr float GATHER_OFFSET_RADIUS = 0.1f;
     constexpr float PIXELMAP_DRAG_SCALE_MULTIPLE = 1.05f;
+    constexpr float BADGE_FIRST_ANIMATION_SCALE = 1.2f;
+    constexpr float BADGE_SECOND_ANIMATION_SCALE = 1.0f;
+    constexpr Dimension BADGE_RELATIVE_OFFSET = 8.0_vp;
+    constexpr Dimension BADGE_DEFAULT_SIZE = 24.0_vp;
+    constexpr Dimension BADGE_TEXT_FONT_SIZE = 14.0_fp;
+    const Color BADGE_TEXT_FONT_COLOR = Color::FromString("#ffffffff");
+    const Color BADGE_BACKGROUND_COLOR = Color::FromString("#ff007dff");
 }
 
 void DragAnimationHelper::CalcDistanceBeforeLifting(bool isGrid, float& maxDistance, float& minDistance,
@@ -250,5 +259,116 @@ void DragAnimationHelper::PlayGatherAnimation(const RefPtr<FrameNode>& frameNode
             DragDropManager::UpdateGatherNodeAttr(overlayManager, gatherNodeCenter, PIXELMAP_DRAG_SCALE_MULTIPLE);
         },
         option.GetOnFinishEvent());
+}
+
+void DragAnimationHelper::ShowBadgeAnimation(const RefPtr<FrameNode>& textNode)
+{
+    auto pipelineContext = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipelineContext);
+    auto dragDropManager = pipelineContext->GetDragDropManager();
+    CHECK_NULL_VOID(dragDropManager);
+    if (!dragDropManager->IsShowBadgeAnimation()) {
+        return;
+    }
+    CHECK_NULL_VOID(textNode);
+    auto textNodeContext = textNode->GetRenderContext();
+    CHECK_NULL_VOID(textNodeContext);
+    textNodeContext->UpdateTransformScale({ 0.0f, 0.0f });
+    RefPtr<Curve> firstCubicCurve = AceType::MakeRefPtr<CubicCurve>(0.2f, 0.0f, 0.45f, 1.0f);
+    CHECK_NULL_VOID(firstCubicCurve);
+    AnimationOption textOption;
+    textOption.SetDuration(BADGE_ANIMATION_DURATION);
+    textOption.SetCurve(firstCubicCurve);
+    textOption.SetDelay(BADGE_ANIMATION_DURATION);
+    textOption.SetOnFinishEvent([textNodeContext]() {
+        RefPtr<Curve> secondCubicCurve = AceType::MakeRefPtr<CubicCurve>(0.24f, 0.0f, 0.36f, 1.0f);
+        CHECK_NULL_VOID(secondCubicCurve);
+        AnimationOption animationOption;
+        animationOption.SetDuration(BADGE_ANIMATION_DURATION);
+        animationOption.SetCurve(secondCubicCurve);
+        textNodeContext->UpdateTransformScale({ BADGE_FIRST_ANIMATION_SCALE, BADGE_FIRST_ANIMATION_SCALE });
+        AnimationUtils::Animate(
+            animationOption,
+            [textNodeContext]() mutable {
+                textNodeContext->UpdateTransformScale({ BADGE_SECOND_ANIMATION_SCALE, BADGE_SECOND_ANIMATION_SCALE });
+            },
+            animationOption.GetOnFinishEvent());
+    });
+    AnimationUtils::Animate(
+        textOption,
+        [textNodeContext]() mutable {
+            textNodeContext->UpdateTransformScale({ BADGE_FIRST_ANIMATION_SCALE, BADGE_FIRST_ANIMATION_SCALE });
+        },
+        textOption.GetOnFinishEvent());
+
+    dragDropManager->SetIsShowBadgeAnimation(false);
+}
+
+OffsetF DragAnimationHelper::CalcBadgeTextOffset(const RefPtr<MenuPattern>& menuPattern,
+    const RefPtr<FrameNode>& imageNode, const RefPtr<PipelineBase>& context, int32_t badgeLength)
+{
+    CHECK_NULL_RETURN(imageNode, OffsetF());
+    CHECK_NULL_RETURN(menuPattern, OffsetF());
+    auto offset = imageNode->GetPaintRectOffset();
+    auto width = imageNode->GetGeometryNode()->GetFrameSize().Width();
+    auto scaleAfter = menuPattern->GetPreviewAfterAnimationScale();
+    auto menuTheme = context->GetTheme<NG::MenuTheme>();
+    CHECK_NULL_RETURN(menuTheme, OffsetF());
+    auto previewAfterAnimationScale =
+        LessNotEqual(scaleAfter, 0.0) ? menuTheme->GetPreviewAfterAnimationScale() : scaleAfter;
+    double textOffsetX = offset.GetX() + width * previewAfterAnimationScale -
+        BADGE_RELATIVE_OFFSET.ConvertToPx() - (BADGE_RELATIVE_OFFSET.ConvertToPx() * badgeLength);
+    double textOffsetY = offset.GetY() - BADGE_RELATIVE_OFFSET.ConvertToPx();
+    return OffsetF(textOffsetX, textOffsetY);
+}
+
+void DragAnimationHelper::CalcBadgeTextPosition(const RefPtr<MenuPattern>& menuPattern,
+    const RefPtr<OverlayManager>& manager, const RefPtr<FrameNode>& imageNode, const RefPtr<FrameNode>& textNode)
+{
+    CHECK_NULL_VOID(manager);
+    CHECK_NULL_VOID(textNode);
+    auto childSize = manager->GetGatherNodeChildrenInfo().size() + 1;
+    auto badgeLength = std::to_string(childSize).size();
+    UpdateBadgeLayoutAndRenderContext(textNode, badgeLength, childSize);
+    auto textRenderContext = textNode->GetRenderContext();
+    CHECK_NULL_VOID(textRenderContext);
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto offset = CalcBadgeTextOffset(menuPattern, imageNode, pipeline, badgeLength);
+    textRenderContext->UpdatePosition(OffsetT<Dimension>(Dimension(offset.GetX()), Dimension(offset.GetY())));
+    textNode->MarkDirtyNode(NG::PROPERTY_UPDATE_MEASURE);
+    textNode->MarkModifyDone();
+    textNode->SetLayoutDirtyMarked(true);
+    textNode->SetActive(true);
+    textNode->CreateLayoutTask();
+    pipeline->FlushSyncGeometryNodeTasks();
+}
+
+void DragAnimationHelper::UpdateBadgeLayoutAndRenderContext(
+    const RefPtr<FrameNode>& textNode, int32_t badgeLength, int32_t childSize)
+{
+    if (childSize <= 1) {
+        return;
+    }
+    CHECK_NULL_VOID(textNode);
+    auto textLayoutProperty = textNode->GetLayoutProperty<TextLayoutProperty>();
+    CHECK_NULL_VOID(textLayoutProperty);
+    textLayoutProperty->UpdateContent(std::to_string(childSize));
+    textLayoutProperty->UpdateMaxLines(1);
+    textLayoutProperty->UpdateFontWeight(FontWeight::MEDIUM);
+    textLayoutProperty->UpdateTextColor(BADGE_TEXT_FONT_COLOR);
+    textLayoutProperty->UpdateFontSize(BADGE_TEXT_FONT_SIZE);
+    textLayoutProperty->UpdateTextAlign(TextAlign::CENTER);
+    int64_t textWidth = BADGE_DEFAULT_SIZE.ConvertToPx() + (BADGE_RELATIVE_OFFSET.ConvertToPx() * (badgeLength - 1));
+    auto textSize = CalcSize(NG::CalcLength(textWidth), NG::CalcLength(BADGE_DEFAULT_SIZE.ConvertToPx()));
+    textLayoutProperty->UpdateUserDefinedIdealSize(textSize);
+
+    auto textRenderContext = textNode->GetRenderContext();
+    CHECK_NULL_VOID(textRenderContext);
+    textRenderContext->SetVisible(true);
+    textRenderContext->UpdateBackgroundColor(BADGE_BACKGROUND_COLOR);
+    BorderRadiusProperty borderRadius;
+    borderRadius.SetRadius(BADGE_DEFAULT_SIZE);
+    textRenderContext->UpdateBorderRadius(borderRadius);
 }
 }

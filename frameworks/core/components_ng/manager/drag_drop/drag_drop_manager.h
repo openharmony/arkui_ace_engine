@@ -262,6 +262,7 @@ public:
         double maxWidth { 0.0 };
         double scale { -1.0 };
         RefPtr<FrameNode> imageNode { nullptr };
+        RefPtr<FrameNode> textNode { nullptr };
     } DragPreviewInfo;
     bool IsNeedScaleDragPreview();
     void DoDragMoveAnimate(const PointerEvent& pointerEvent);
@@ -328,6 +329,15 @@ public:
         hasGatherNode_ = hasGatherNode;
     }
 
+    void SetIsShowBadgeAnimation(bool isShowBadgeAnimation)
+    {
+        isShowBadgeAnimation_ = isShowBadgeAnimation;
+    }
+
+    bool IsShowBadgeAnimation()
+    {
+        return isShowBadgeAnimation_;
+    }
 
 private:
     double CalcDragPreviewDistanceWithPoint(
@@ -399,6 +409,7 @@ private:
     OffsetF pixelMapOffset_ {0.0f, 0.0f};
     std::vector<RefPtr<PixelMap>> gatherPixelMaps_;
     bool hasGatherNode_ = false;
+    bool isShowBadgeAnimation_ = true;
 
     ACE_DISALLOW_COPY_AND_MOVE(DragDropManager);
 };

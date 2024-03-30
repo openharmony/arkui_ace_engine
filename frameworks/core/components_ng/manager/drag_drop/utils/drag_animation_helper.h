@@ -16,6 +16,7 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_MANAGER_DRAG_DROP_UTILS_DRAG_ANIMATION_HELPER_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_MANAGER_DRAG_DROP_UTILS_DRAG_ANIMATION_HELPER_H
 #include "core/components_ng/event/drag_event.h"
+#include "core/components_ng/pattern/menu/menu_pattern.h"
 
 namespace OHOS::Ace::NG {
 
@@ -38,6 +39,13 @@ public:
     static void PlayGatherNodeOpacityAnimation(const RefPtr<OverlayManager>& overlayManager);
     static void PlayNodeResetAnimation(const RefPtr<DragEventActuator>& actuator);
     static void PlayGatherAnimation(const RefPtr<FrameNode>& frameNode, const RefPtr<OverlayManager>& overlayManager);
+    static void ShowBadgeAnimation(const RefPtr<FrameNode>& textNode);
+    static void CalcBadgeTextPosition(const RefPtr<MenuPattern>& menuPattern,
+        const RefPtr<OverlayManager>& manager, const RefPtr<FrameNode>& imageNode, const RefPtr<FrameNode>& textNode);
+    static OffsetF CalcBadgeTextOffset(const RefPtr<MenuPattern>& menuPattern, const RefPtr<FrameNode>& imageNode,
+        const RefPtr<PipelineBase>& context, int32_t badgeLength);
+    static void UpdateBadgeLayoutAndRenderContext(
+        const RefPtr<FrameNode>& textNode, int32_t badgeLength, int32_t childSize);
 };
 }
 #endif
