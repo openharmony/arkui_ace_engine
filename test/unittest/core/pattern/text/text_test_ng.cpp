@@ -2686,6 +2686,37 @@ HWTEST_F(TextTestNg, TextPatternTest004, TestSize.Level1)
 }
 
 /**
+ * @tc.name: TextPatternTest005
+ * @tc.desc: Test the SetImageSpanNodeList func of TextPattern.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestNg, TextPatternTest005, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create textFrameNode and textPattern.
+     */
+    auto textFrameNode = FrameNode::CreateFrameNode("", 0, AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(textFrameNode, nullptr);
+    auto textPattern = textFrameNode->GetPattern<TextPattern>();
+    ASSERT_NE(textPattern, nullptr);
+
+    /**
+     * @tc.steps: step2. Create imageNodeList and add imageNode into imageNodeList.
+     */
+    std::vector<WeakPtr<FrameNode>> imageNodeList;
+    auto imageNode = FrameNode::GetOrCreateFrameNode(V2::IMAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        []() { return AceType::MakeRefPtr<ImagePattern>(); });
+    imageNodeList.emplace_back(AceType::WeakClaim(AceType::RawPtr(imageNode)));
+
+    /**
+     * @tc.steps: step3. call SetImageSpanNodeList.
+     * @tc.expected: The imageNodeList_ size is equal to 1.
+     */
+    textPattern->SetImageSpanNodeList(imageNodeList);
+    EXPECT_EQ(textPattern->imageNodeList_.size(), 1);
+}
+
+/**
  * @tc.name: CreateParagraph001
  * @tc.desc: test text_pattern.h CreateNodePaintMethod function
  * @tc.type: FUNC
@@ -4333,6 +4364,51 @@ HWTEST_F(TextTestNg, TextContentModifier004, TestSize.Level1)
      */
     textContentModifier->DrawObscuration(context);
     EXPECT_EQ(textContentModifier->drawObscuredRects_, drawObscuredRects);
+}
+
+/**
+ * @tc.name: TextContentModifier005
+ * @tc.desc: test text_content_modifier.cpp SetImageSpanNodeList function
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestNg, TextContentModifier005, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create textFrameNode and textPattern.
+     */
+    auto textFrameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 0, AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(textFrameNode, nullptr);
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    ASSERT_NE(geometryNode, nullptr);
+    auto textPattern = textFrameNode->GetPattern<TextPattern>();
+    ASSERT_NE(textPattern, nullptr);
+
+    /**
+     * @tc.steps: step2. Create imageNodeList and add imageNode into imageNodeList.
+     */
+    ParagraphStyle paragraphStyle;
+    RefPtr<Paragraph> paragraph = Paragraph::Create(paragraphStyle, FontCollection::Current());
+    ASSERT_NE(paragraph, nullptr);
+    textPattern->paragraph_ = paragraph;
+    std::vector<WeakPtr<FrameNode>> imageNodeList;
+    auto imageNode = FrameNode::GetOrCreateFrameNode(V2::IMAGE_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(),
+        []() { return AceType::MakeRefPtr<ImagePattern>(); });
+    imageNodeList.emplace_back(AceType::WeakClaim(AceType::RawPtr(imageNode)));
+    textPattern->SetImageSpanNodeList(imageNodeList);
+    /**
+     * @tc.steps: step3. call CreateNodePaintMethod func.
+     * @tc.expected: The imageNodeList_ size is equal to 1.
+     */
+    auto textPaintMethod = AceType::DynamicCast<TextPaintMethod>(textPattern->CreateNodePaintMethod());
+    ASSERT_NE(textPaintMethod, nullptr);
+    RefPtr<RenderContext> renderContext = textFrameNode->GetRenderContext();
+    auto paintProperty = textPattern->CreatePaintProperty();
+    auto paintWrapper = AceType::MakeRefPtr<PaintWrapper>(renderContext, geometryNode, paintProperty);
+    textPaintMethod->UpdateContentModifier(AceType::RawPtr(paintWrapper));
+
+    ASSERT_NE(textPaintMethod->textContentModifier_, nullptr);
+    EXPECT_EQ(textPaintMethod->textContentModifier_->imageNodeList_.size(), 1);
 }
 
 /*
