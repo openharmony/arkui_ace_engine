@@ -57,7 +57,8 @@ public:
     }
 
     CanvasDrawFunction GetForegroundDrawFunction(PaintWrapper* paintWrapper) override;
-    void PaintDividerLines(RSCanvas& canvas, RectF contentRect, const DividerInfo &info);
+    void PaintDividerLines(RSCanvas& canvas, const RectF& contentRect, const DividerInfo &info,
+        bool isDefaultLine = true);
 
 private:
     double defaultPickerItemHeight_ = 0.0;
@@ -70,6 +71,7 @@ private:
     void PaintDefaultDividerLines(RSCanvas& canvas, const RectF &contentRect, double dividerHeight);
     void PaintCustomDividerLines(RSCanvas& canvas, const RectF &contentRect, const RectF &frameRect,
         const ItemDivider &divider, double dividerHeight);
+    bool SetStrokeWidth(const ItemDivider &divider, double dividerHeight, DividerInfo& info);
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_TEXT_PICKER_TEXT_PICKER_PAINT_METHOD_H
