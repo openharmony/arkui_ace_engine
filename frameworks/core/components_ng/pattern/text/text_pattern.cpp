@@ -403,8 +403,7 @@ void TextPattern::HandleOnCopy()
     if (copyOption_ != CopyOptions::None) {
         clipboard_->SetData(value, copyOption_);
     }
-    ResetSelection();
-    CloseSelectOverlay(true);
+    selectOverlay_->HideMenu();
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto eventHub = host->GetEventHub<TextEventHub>();

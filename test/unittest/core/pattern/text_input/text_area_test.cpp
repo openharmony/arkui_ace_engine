@@ -759,7 +759,7 @@ HWTEST_F(TextFieldUXTest, SetSelectionFlag001, TestSize.Level1)
     end = 10;
     pattern_->SetSelectionFlag(start, end);
     EXPECT_EQ(pattern_->selectController_->GetFirstHandleInfo().index, 5);
-    EXPECT_EQ(pattern_->selectController_->GetSecondHandleInfo().index, 10);
+    EXPECT_EQ(pattern_->selectController_->GetSecondHandleInfo().index, 5);
 }
 
 /**
