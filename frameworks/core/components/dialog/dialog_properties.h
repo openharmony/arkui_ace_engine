@@ -169,6 +169,7 @@ struct DialogProperties {
     std::function<void(const int32_t& info)> onWillDismiss; // Cancel Dismiss Callback
     std::function<void(int32_t, int32_t)> onSuccess;      // NG prompt success callback
     std::function<void(const bool)> onChange;             // onChange success callback
+    std::function<void(DialogProperties&)> onLanguageChange;    // onLanguageChange callback
     DialogAlignment alignment = DialogAlignment::DEFAULT; // Alignment of dialog.
     DimensionOffset offset;                               // Offset which base on alignment of Dialog.
     int32_t gridCount = -1;

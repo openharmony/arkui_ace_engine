@@ -63,6 +63,7 @@ public:
     static void CreateSingleDateNode(const RefPtr<FrameNode>& dateNode, uint32_t showCount);
     static RefPtr<FrameNode> CreateTimeNode(std::map<std::string, PickerTime> timePickerProperty,
         const PickerTextProperties& properties, bool useMilitaryTime);
+    static RefPtr<FrameNode> CreateLunarSwitchTextNode();
 
     static bool switchFlag_;
 
@@ -70,8 +71,8 @@ private:
     static RefPtr<FrameNode> CreateStackNode();
     static RefPtr<FrameNode> CreateColumnNode();
     static RefPtr<FrameNode> CreateButtonNode();
-    static void CreateLunarswitchNode(
-        const RefPtr<FrameNode>& contentColumn, std::function<void(const bool)>&& changeEvent, bool isLunar);
+    static void CreateLunarswitchNode(const RefPtr<FrameNode>& contentColumn, const RefPtr<FrameNode>& dateNode,
+        std::function<void(const bool)>&& changeEvent, bool isLunar);
     static void SetTitleMouseHoverEvent(const RefPtr<FrameNode>& titleRow);
     static void HandleMouseEvent(const RefPtr<FrameNode>& titleButton, bool isHover);
     static void PlayHoverAnimation(const RefPtr<FrameNode>& titleButton, const Color& color);
