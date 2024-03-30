@@ -61,6 +61,7 @@
 #include "core/components_ng/pattern/overlay/keyboard_base_pattern.h"
 #include "core/components_ng/pattern/overlay/keyboard_view.h"
 #include "core/components_ng/pattern/overlay/modal_presentation_pattern.h"
+#include "core/components_ng/pattern/overlay/overlay_container_pattern.h"
 #include "core/components_ng/pattern/overlay/popup_base_pattern.h"
 #include "core/components_ng/pattern/overlay/sheet_drag_bar_pattern.h"
 #include "core/components_ng/pattern/overlay/sheet_presentation_pattern.h"
@@ -4204,8 +4205,8 @@ void OverlayManager::CreateOverlayNode()
     CHECK_NULL_VOID(stageManager);
     auto stageNode = stageManager->GetStageNode();
     CHECK_NULL_VOID(stageNode);
-    overlayNode_ = FrameNode::CreateFrameNode(
-        V2::OVERLAY_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<Pattern>());
+    overlayNode_ = FrameNode::CreateFrameNode(V2::OVERLAY_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<OverlayContainerPattern>());
     CHECK_NULL_VOID(overlayNode_);
     overlayNode_->SetHitTestMode(HitTestMode::HTMTRANSPARENT_SELF);
     auto layoutProperty = overlayNode_->GetLayoutProperty();
@@ -4223,12 +4224,12 @@ void OverlayManager::AddFrameNodeToOverlay(const RefPtr<NG::FrameNode>& node, st
     if (index.has_value() && index.value() >= 0) {
         level = index.value();
     }
+    CreateOverlayNode();
+    CHECK_NULL_VOID(overlayNode_);
     if (frameNodeMapOnOverlay_.find(node->GetId()) != frameNodeMapOnOverlay_.end()) {
         overlayNode_->RemoveChild(node);
         frameNodeMapOnOverlay_.erase(node->GetId());
     }
-    CreateOverlayNode();
-    CHECK_NULL_VOID(overlayNode_);
     const auto& children = overlayNode_->GetChildren();
     if (children.empty() || level < frameNodeMapOnOverlay_[overlayNode_->GetFirstChild()->GetId()]) {
         overlayNode_->AddChild(node, 0);
@@ -4244,12 +4245,11 @@ void OverlayManager::AddFrameNodeToOverlay(const RefPtr<NG::FrameNode>& node, st
             }
         }
     }
-
+    overlayNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_CHILD);
     frameNodeMapOnOverlay_[node->GetId()] = level;
     auto focusHub = node->GetFocusHub();
     CHECK_NULL_VOID(focusHub);
     focusHub->RequestFocus();
-    overlayNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_CHILD);
 }
 
 void OverlayManager::RemoveFrameNodeOnOverlay(const RefPtr<NG::FrameNode>& node)
@@ -4286,10 +4286,10 @@ void OverlayManager::ShowNodeOnOverlay(const RefPtr<NG::FrameNode>& node)
         return;
     }
     layoutProperty->UpdateVisibility(VisibleType::VISIBLE);
+    node->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_CHILD);
     auto focusHub = node->GetFocusHub();
     CHECK_NULL_VOID(focusHub);
     focusHub->RequestFocus();
-    node->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_CHILD);
 }
 
 void OverlayManager::HideNodeOnOverlay(const RefPtr<NG::FrameNode>& node)
@@ -4304,6 +4304,9 @@ void OverlayManager::HideNodeOnOverlay(const RefPtr<NG::FrameNode>& node)
     }
     layoutProperty->UpdateVisibility(VisibleType::GONE);
     node->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_CHILD);
+    auto focusHub = node->GetFocusHub();
+    CHECK_NULL_VOID(focusHub);
+    focusHub->LostFocusToViewRoot();
 }
 
 void OverlayManager::ShowAllNodesOnOverlay()
@@ -4318,6 +4321,9 @@ void OverlayManager::ShowAllNodesOnOverlay()
         layoutProperty->UpdateVisibility(VisibleType::VISIBLE);
     }
     overlayNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_CHILD);
+    auto focusView = overlayNode_->GetPattern<FocusView>();
+    CHECK_NULL_VOID(focusView);
+    focusView->FocusViewShow();
 }
 
 void OverlayManager::HideAllNodesOnOverlay()
@@ -4332,6 +4338,9 @@ void OverlayManager::HideAllNodesOnOverlay()
         layoutProperty->UpdateVisibility(VisibleType::GONE);
     }
     overlayNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_CHILD);
+    auto focusView = overlayNode_->GetPattern<FocusView>();
+    CHECK_NULL_VOID(focusView);
+    focusView->FocusViewClose();
 }
 
 void OverlayManager::MarkDirty(PropertyChangeFlag flag)

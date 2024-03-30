@@ -678,13 +678,13 @@ class OverlayManager {
         __JSScopeUtil__.restoreInstanceId();
     }
 
-    showAllComponentContent() {
+    showAllComponentContents() {
         __JSScopeUtil__.syncInstanceId(this.instanceId_);
         this.ohos_overlayManager.showAllFrameNodes();
         __JSScopeUtil__.restoreInstanceId();
     }
 
-    hideAllComponentContent() {
+    hideAllComponentContents() {
         __JSScopeUtil__.syncInstanceId(this.instanceId_);
         this.ohos_overlayManager.hideAllFrameNodes();
         __JSScopeUtil__.restoreInstanceId();

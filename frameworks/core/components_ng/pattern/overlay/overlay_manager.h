@@ -479,6 +479,10 @@ public:
     void HideNodeOnOverlay(const RefPtr<NG::FrameNode>& node);
     void ShowAllNodesOnOverlay();
     void HideAllNodesOnOverlay();
+    RefPtr<FrameNode> GetOverlayNode()
+    {
+        return overlayNode_;
+    }
     bool CheckPageNeedAvoidKeyboard() const;
 
 private:

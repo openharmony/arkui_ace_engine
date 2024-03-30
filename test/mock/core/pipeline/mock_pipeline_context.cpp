@@ -248,6 +248,11 @@ bool PipelineContext::CheckPageFocus()
     return true;
 }
 
+bool PipelineContext::CheckOverlayFocus()
+{
+    return false;
+}
+
 void PipelineContext::OnDrawCompleted(const std::string& componentId) {}
 
 void PipelineContext::SetNeedRenderNode(const RefPtr<FrameNode>& node) {}
