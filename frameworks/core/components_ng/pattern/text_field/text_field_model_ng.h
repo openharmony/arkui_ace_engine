@@ -76,6 +76,7 @@ public:
     void SetShowError(const std::string& errorText, bool visible) override;
     void SetBarState(OHOS::Ace::DisplayMode value) override;
     void SetMaxViewLines(uint32_t value) override;
+    void SetNormalMaxViewLines(uint32_t value) override;
 
     void SetShowUnderline(bool showUnderLine) override;
     void SetNormalUnderlineColor(const Color& normalColor) override;
@@ -119,6 +120,7 @@ public:
     static void SetPasswordIcon(FrameNode* frameNode, const PasswordIcon& passwordIcon);
     static void SetSelectedBackgroundColor(FrameNode* frameNode, const Color& value);
     static void SetMaxViewLines(FrameNode* frameNode, uint32_t value);
+    static void SetNormalMaxViewLines(FrameNode* frameNode, uint32_t value);
     static void SetType(FrameNode* frameNode, TextInputType value);
     static void SetContentType(const FrameNode* frameNode, const TextContentType& value);
     static void SetCopyOption(FrameNode* frameNode, CopyOptions copyOption);

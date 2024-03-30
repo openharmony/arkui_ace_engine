@@ -79,6 +79,7 @@ void SetTextAreaMaxLines(ArkUINodeHandle node, ArkUI_Uint32 maxLine)
     auto *frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     TextFieldModelNG::SetMaxViewLines(frameNode, maxLine);
+    TextFieldModelNG::SetNormalMaxViewLines(frameNode, maxLine);
 }
 
 void ResetTextAreaMaxLines(ArkUINodeHandle node)
@@ -86,6 +87,7 @@ void ResetTextAreaMaxLines(ArkUINodeHandle node)
     auto *frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     TextFieldModelNG::SetMaxViewLines(frameNode, DEFAULT_MAX_VIEW_LINE);
+    TextFieldModelNG::SetNormalMaxViewLines(frameNode, Infinity<uint32_t>());
 }
 
 void SetTextAreaCopyOption(ArkUINodeHandle node, ArkUI_Int32 value)
