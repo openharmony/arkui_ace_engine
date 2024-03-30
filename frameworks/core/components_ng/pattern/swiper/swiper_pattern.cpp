@@ -874,8 +874,16 @@ bool SwiperPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty,
             auto lastItemIndex = Positive(swiperLayoutProperty->GetNextMarginValue(0.0_px).ConvertToPx())
                                      ? targetIndexValue + GetDisplayCount()
                                      : targetIndexValue + GetDisplayCount() - 1;
-            bool isNeedPlayTranslateAnimation =
-                translateAnimationIsRunning_ || itemPosition_.find(lastItemIndex) == itemPosition_.end();
+            bool isNeedBackwardTranslate = false;
+            if (IsLoop() && targetIndexValue < currentIndex_) {
+                auto firstItemIndex = Positive(swiperLayoutProperty->GetPrevMarginValue(0.0_px).ConvertToPx())
+                                          ? targetIndexValue + TotalCount() - 1
+                                          : targetIndexValue + TotalCount();
+                isNeedBackwardTranslate = itemPosition_.find(firstItemIndex) != itemPosition_.end();
+            }
+            bool isNeedPlayTranslateAnimation = translateAnimationIsRunning_ ||
+                                                itemPosition_.find(lastItemIndex) == itemPosition_.end() ||
+                                                isNeedBackwardTranslate;
             if (context && !isNeedPlayTranslateAnimation && !SupportSwiperCustomAnimation()) {
                 // displayCount is auto, loop is false, if the content width less than windows size
                 // need offset to keep right aligned
@@ -3337,12 +3345,15 @@ bool SwiperPattern::IsLoop() const
     if (hasCachedCapture_) {
         return true;
     }
-    if (TotalDisPlayCount() >= TotalCount()) {
+    auto layoutProperty = GetLayoutProperty<SwiperLayoutProperty>();
+    CHECK_NULL_RETURN(layoutProperty, true);
+    if (TotalDisPlayCount() > TotalCount() ||
+        (TotalDisPlayCount() == TotalCount() && SwiperUtils::IsStretch(layoutProperty) &&
+            (NonPositive(layoutProperty->GetPrevMarginValue(0.0_px).ConvertToPx()) ||
+                NonPositive(layoutProperty->GetNextMarginValue(0.0_px).ConvertToPx())))) {
         return false;
     }
-    auto swiperLayoutProperty = GetLayoutProperty<SwiperLayoutProperty>();
-    CHECK_NULL_RETURN(swiperLayoutProperty, true);
-    return swiperLayoutProperty->GetLoop().value_or(true);
+    return layoutProperty->GetLoop().value_or(true);
 }
 
 bool SwiperPattern::IsEnabled() const
