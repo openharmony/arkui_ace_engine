@@ -65,6 +65,7 @@ namespace OHOS::Ace::NG {
  *      |--stack
  *          |--container_modal_content(stage)
  *              |--page
+ *          |--gesture_row(row)
  *          |--dialog(when show)
  *   |--container_modal_custom_floating_title(row)
  *          |--custom_node(js)
@@ -118,6 +119,7 @@ RefPtr<FrameNode> ContainerModalViewEnhance::Create(RefPtr<FrameNode>& content)
 
     column->AddChild(BuildTitle(containerModalNode));
     stack->AddChild(content);
+    stack->AddChild(BuildGestureRow(containerModalNode));
     column->AddChild(stack);
     containerModalNode->AddChild(column);
     containerModalNode->AddChild(BuildTitle(containerModalNode, true));
@@ -159,10 +161,9 @@ void ContainerModalViewEnhance::SetTapGestureEvent(
         CHECK_NULL_VOID(containerNode);
         auto windowMode = windowManager->GetWindowMode();
         auto maximizeMode = windowManager->GetCurrentWindowMaximizeMode();
-        if (maximizeMode == MaximizeMode::MODE_AVOID_SYSTEM_BAR
-            || windowMode == WindowMode::WINDOW_MODE_FULLSCREEN
-            || windowMode == WindowMode::WINDOW_MODE_SPLIT_PRIMARY
-            || windowMode == WindowMode::WINDOW_MODE_SPLIT_SECONDARY) {
+        if (maximizeMode == MaximizeMode::MODE_AVOID_SYSTEM_BAR || windowMode == WindowMode::WINDOW_MODE_FULLSCREEN ||
+            windowMode == WindowMode::WINDOW_MODE_SPLIT_PRIMARY ||
+            windowMode == WindowMode::WINDOW_MODE_SPLIT_SECONDARY) {
             EventReport::ReportDoubleClickTitle(DOUBLE_CLICK_TO_RECOVER);
             windowManager->WindowRecover();
         } else if (windowMode == WindowMode::WINDOW_MODE_FLOATING) {
@@ -182,7 +183,6 @@ RefPtr<FrameNode> ContainerModalViewEnhance::AddControlButtons(
     CHECK_NULL_RETURN(pipeline, nullptr);
     auto windowManager = pipeline->GetWindowManager();
     CHECK_NULL_RETURN(windowManager, nullptr);
-    SetTapGestureEvent(containerNode, containerTitleRow);
 
     RefPtr<FrameNode> maximizeBtn = BuildControlButton(InternalResource::ResourceId::IC_WINDOW_MAX,
         [weak = AceType::WeakClaim(AceType::RawPtr(containerNode)),
@@ -194,10 +194,8 @@ RefPtr<FrameNode> ContainerModalViewEnhance::AddControlButtons(
             ResetHoverTimer();
             auto mode = windowManager->GetWindowMode();
             auto currentMode = windowManager->GetCurrentWindowMaximizeMode();
-            if (mode == WindowMode::WINDOW_MODE_FULLSCREEN
-                || currentMode == MaximizeMode::MODE_AVOID_SYSTEM_BAR
-                || mode == WindowMode::WINDOW_MODE_SPLIT_PRIMARY
-                || mode == WindowMode::WINDOW_MODE_SPLIT_SECONDARY) {
+            if (mode == WindowMode::WINDOW_MODE_FULLSCREEN || currentMode == MaximizeMode::MODE_AVOID_SYSTEM_BAR ||
+                mode == WindowMode::WINDOW_MODE_SPLIT_PRIMARY || mode == WindowMode::WINDOW_MODE_SPLIT_SECONDARY) {
                 windowManager->WindowRecover();
             } else {
                 windowManager->WindowMaximize(true);
@@ -330,8 +328,8 @@ RefPtr<FrameNode> ContainerModalViewEnhance::ShowMaxMenu(const RefPtr<FrameNode>
         V2::LIST_COMPONENT_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<ListPattern>());
     auto listLayoutProperty = menuList->GetLayoutProperty<ListLayoutProperty>();
     CHECK_NULL_RETURN(listLayoutProperty, nullptr);
-    listLayoutProperty->UpdateUserDefinedIdealSize(CalcSize(CalcLength(MENU_CONTAINER_WIDTH),
-        CalcLength(MENU_CONTAINER_HEIGHT)));
+    listLayoutProperty->UpdateUserDefinedIdealSize(
+        CalcSize(CalcLength(MENU_CONTAINER_WIDTH), CalcLength(MENU_CONTAINER_HEIGHT)));
     menuList->AddChild(BuildLeftSplitMenuItem());
     menuList->AddChild(BuildRightSplitMenuItem());
     auto subWindowManger = SubwindowManager::GetInstance();
@@ -494,7 +492,7 @@ RefPtr<FrameNode> ContainerModalViewEnhance::BuildMenuItemIcon(InternalResource:
     iconLayoutProperty->UpdateImageSourceInfo(sourceInfo);
     iconLayoutProperty->UpdateUserDefinedIdealSize(
         CalcSize(CalcLength(TITLE_BUTTON_SIZE), CalcLength(TITLE_BUTTON_SIZE)));
-    FrameNode *frameNode = RawPtr(icon);
+    FrameNode* frameNode = RawPtr(icon);
     ImageModelNG::SetSmoothEdge(frameNode, SMOOTH_EDGE_SIZE);
     auto render = icon->GetRenderContext();
     if (render) {
@@ -545,4 +543,18 @@ void ContainerModalViewEnhance::CalculateMenuOffset(OffsetF currentOffset)
     }
     menuOffset_ = { offsetX, offsetY };
 }
+
+RefPtr<FrameNode> ContainerModalViewEnhance::BuildGestureRow(RefPtr<FrameNode>& containerNode)
+{
+    auto gestureRow = FrameNode::CreateFrameNode(V2::ROW_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<LinearLayoutPattern>(false));
+    auto renderContext = gestureRow->GetRenderContext();
+    renderContext->UpdateBackgroundColor(Color::TRANSPARENT);
+    SetTapGestureEvent(containerNode, gestureRow);
+    auto layoutProp = gestureRow->GetLayoutProperty();
+    layoutProp->UpdateUserDefinedIdealSize(
+        CalcSize(CalcLength(1.0, DimensionUnit::PERCENT), CalcLength(CONTAINER_TITLE_HEIGHT)));
+    return gestureRow;
+}
+
 } // namespace OHOS::Ace::NG
