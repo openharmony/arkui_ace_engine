@@ -46,6 +46,36 @@ class ImageSpanVerticalAlignModifier extends ModifierWithKey<number> {
     return this.stageValue !== this.value;
   }
 }
+class ImageSpanTextBackgroundStyleModifier extends ModifierWithKey<TextBackgroundStyle> {
+  constructor(value: TextBackgroundStyle) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('imageSpanTextBackgroundStyle');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().imageSpan.resetTextBackgroundStyle(node);
+    }
+    else {
+      let textBackgroundStyle = new ArkTextBackGroundStyle();
+      if (!textBackgroundStyle.convertTextBackGroundStyleOptions(this.value)) {
+        getUINativeModule().imageSpan.resetTextBackgroundStyle(node);
+      }
+      else {
+        getUINativeModule().imageSpan.setTextBackgroundStyle(node, textBackgroundStyle.color, textBackgroundStyle.radius.topLeft, textBackgroundStyle.radius.topRight, textBackgroundStyle.radius.bottomLeft, textBackgroundStyle.radius.bottomRight);
+      }
+    }
+  }
+  checkObjectDiff(): boolean {
+    let textBackgroundStyle = new ArkTextBackGroundStyle();
+    let stageTextBackGroundStyle = new ArkTextBackGroundStyle();
+    if (!textBackgroundStyle.convertTextBackGroundStyleOptions(this.value) || !stageTextBackGroundStyle.convertTextBackGroundStyleOptions(this.stageValue)) {
+      return false;
+    }
+    else {
+      return textBackgroundStyle.checkObjectDiff(stageTextBackGroundStyle);
+    }
+  }
+}
 class ArkImageSpanComponent extends ArkComponent implements ImageSpanAttribute {
   constructor(nativePtr: KNode) {
     super(nativePtr);
@@ -56,6 +86,10 @@ class ArkImageSpanComponent extends ArkComponent implements ImageSpanAttribute {
   }
   verticalAlign(value: ImageSpanAlignment): ImageSpanAttribute {
     modifierWithKey(this._modifiersWithKeys, ImageSpanVerticalAlignModifier.identity, ImageSpanVerticalAlignModifier, value);
+    return this;
+  }
+  textBackgroundStyle(value: TextBackgroundStyle): ImageSpanAttribute {
+    modifierWithKey(this._modifiersWithKeys, ImageSpanTextBackgroundStyleModifier.identity, ImageSpanTextBackgroundStyleModifier, value);
     return this;
   }
 }
