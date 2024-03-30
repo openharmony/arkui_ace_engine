@@ -582,6 +582,9 @@ public:
     {
         return isLevelNavDest_;
     }
+
+    void GetPageNodeCountAndDepth(int32_t* count, int32_t* depth);
+    
 protected:
     std::list<RefPtr<UINode>>& ModifyChildren()
     {

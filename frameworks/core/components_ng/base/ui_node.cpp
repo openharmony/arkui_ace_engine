@@ -1181,4 +1181,20 @@ void UINode::PaintDebugBoundaryTreeAll(bool flag)
         child->PaintDebugBoundaryTreeAll(flag);
     }
 }
+
+void UINode::GetPageNodeCountAndDepth(int32_t* count, int32_t* depth)
+{
+    ACE_SCOPED_TRACE("GetPageNodeCountAndDepth");
+    auto children = GetChildren();
+    if (*depth < depth_) {
+        *depth = depth_;
+    }
+    if (InstanceOf<FrameNode>(this)) {
+        (*count)++;
+    }
+
+    for (const auto& child : children) {
+        child->GetPageNodeCountAndDepth(count, depth);
+    }
+}
 } // namespace OHOS::Ace::NG
