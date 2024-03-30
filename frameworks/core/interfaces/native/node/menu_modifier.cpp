@@ -96,8 +96,7 @@ void ResetRadius(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    OHOS::Ace::CalcDimension reset;
-    MenuModelNG::SetBorderRadius(frameNode, reset);
+    MenuModelNG::ResetBorderRadius(frameNode);
 }
 
 void SetRadius(ArkUINodeHandle node, const ArkUI_Float32* values, const int32_t* units)

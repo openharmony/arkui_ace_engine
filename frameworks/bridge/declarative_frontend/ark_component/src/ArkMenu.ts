@@ -68,13 +68,14 @@ class RadiusModifier extends ModifierWithKey<Dimension | BorderRadiuses> {
       getUINativeModule().menu.resetRadius(node);
     } else {
       if (isNumber(this.value) || isString(this.value) || isResource(this.value)) {
-        getUINativeModule().menu.setRadius(node, this.value, this.value, this.value, this.value);
+        getUINativeModule().menu.setRadius(node, this.value, this.value, this.value, this.value, false);
       } else {
         getUINativeModule().menu.setRadius(node,
           (this.value as BorderRadiuses).topLeft,
           (this.value as BorderRadiuses).topRight,
           (this.value as BorderRadiuses).bottomLeft,
-          (this.value as BorderRadiuses).bottomRight);
+          (this.value as BorderRadiuses).bottomRight,
+          true);
       }
     }
   }
