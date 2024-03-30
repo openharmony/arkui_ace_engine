@@ -17,6 +17,10 @@
 
 #define private public
 #define protected public
+#include "test/mock/core/common/mock_theme_manager.h"
+#include "test/mock/core/pipeline/mock_pipeline_context.h"
+#include "test/mock/core/rosen/mock_canvas.h"
+
 #include "core/components/checkable/checkable_theme.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/view_stack_processor.h"
@@ -25,10 +29,7 @@
 #include "core/components_ng/pattern/radio/radio_pattern.h"
 #include "core/components_ng/pattern/stage/stage_manager.h"
 #include "core/components_ng/pattern/stage/stage_pattern.h"
-#include "test/mock/core/rosen/mock_canvas.h"
-#include "test/mock/core/common/mock_theme_manager.h"
 #include "core/components_v2/inspector/inspector_constants.h"
-#include "test/mock/core/pipeline/mock_pipeline_context.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -59,6 +60,7 @@ const SizeF CONTENT_SIZE = SizeF(400.0, 500.0);
 const OffsetF CONTENT_OFFSET = OffsetF(50.0, 60.0);
 constexpr Color NORMAL_COLOR = Color(0xff0000ff);
 constexpr Color ERROR_COLOR = Color();
+constexpr int32_t INDICATOR_TYPE_TICK = 0;
 const OHOS::Ace::NG::TouchHoverAnimationType INVALID_TOUCH_HOVER_ANIMARION_TYPE = TouchHoverAnimationType(100);
 } // namespace
 
@@ -86,7 +88,7 @@ void RadioTestNg::TearDownTestSuite()
 HWTEST_F(RadioTestNg, RadioPaintPropertyTest001, TestSize.Level1)
 {
     RadioModelNG radioModelNG;
-    radioModelNG.Create(NAME, GROUP_NAME);
+    radioModelNG.Create(NAME, GROUP_NAME, INDICATOR_TYPE_TICK);
     radioModelNG.SetChecked(CHECKED);
     radioModelNG.SetWidth(WIDTH);
     radioModelNG.SetHeight(HEIGHT);
@@ -108,7 +110,7 @@ HWTEST_F(RadioTestNg, RadioPaintPropertyTest001, TestSize.Level1)
 HWTEST_F(RadioTestNg, RadioPaintPropertyTest002, TestSize.Level1)
 {
     RadioModelNG radioModelNG;
-    radioModelNG.Create(NAME, GROUP_NAME);
+    radioModelNG.Create(NAME, GROUP_NAME, INDICATOR_TYPE_TICK);
     radioModelNG.SetChecked(true);
     radioModelNG.SetCheckedBackgroundColor(NORMAL_COLOR);
     auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
@@ -118,7 +120,7 @@ HWTEST_F(RadioTestNg, RadioPaintPropertyTest002, TestSize.Level1)
     EXPECT_EQ(radioPaintProperty->GetRadioCheckedBackgroundColorValue(), NORMAL_COLOR);
 
     RadioModelNG radioModelNG2;
-    radioModelNG2.Create(NAME, GROUP_NAME);
+    radioModelNG2.Create(NAME, GROUP_NAME, INDICATOR_TYPE_TICK);
     radioModelNG2.SetChecked(true);
     radioModelNG2.SetCheckedBackgroundColor(ERROR_COLOR);
     auto frameNode2 = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
@@ -136,7 +138,7 @@ HWTEST_F(RadioTestNg, RadioPaintPropertyTest002, TestSize.Level1)
 HWTEST_F(RadioTestNg, RadioPaintPropertyTest003, TestSize.Level1)
 {
     RadioModelNG radioModelNG;
-    radioModelNG.Create(NAME, GROUP_NAME);
+    radioModelNG.Create(NAME, GROUP_NAME, INDICATOR_TYPE_TICK);
     radioModelNG.SetChecked(false);
     radioModelNG.SetUncheckedBorderColor(NORMAL_COLOR);
     auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
@@ -146,7 +148,7 @@ HWTEST_F(RadioTestNg, RadioPaintPropertyTest003, TestSize.Level1)
     EXPECT_EQ(radioPaintProperty->GetRadioUncheckedBorderColorValue(), NORMAL_COLOR);
 
     RadioModelNG radioModelNG2;
-    radioModelNG2.Create(NAME, GROUP_NAME);
+    radioModelNG2.Create(NAME, GROUP_NAME, INDICATOR_TYPE_TICK);
     radioModelNG2.SetChecked(false);
     radioModelNG2.SetUncheckedBorderColor(ERROR_COLOR);
     auto frameNode2 = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
@@ -164,7 +166,7 @@ HWTEST_F(RadioTestNg, RadioPaintPropertyTest003, TestSize.Level1)
 HWTEST_F(RadioTestNg, RadioPaintPropertyTest004, TestSize.Level1)
 {
     RadioModelNG radioModelNG;
-    radioModelNG.Create(NAME, GROUP_NAME);
+    radioModelNG.Create(NAME, GROUP_NAME, INDICATOR_TYPE_TICK);
     radioModelNG.SetChecked(true);
     radioModelNG.SetIndicatorColor(NORMAL_COLOR);
     auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
@@ -174,7 +176,7 @@ HWTEST_F(RadioTestNg, RadioPaintPropertyTest004, TestSize.Level1)
     EXPECT_EQ(radioPaintProperty->GetRadioIndicatorColorValue(), NORMAL_COLOR);
 
     RadioModelNG radioModelNG2;
-    radioModelNG2.Create(NAME, GROUP_NAME);
+    radioModelNG2.Create(NAME, GROUP_NAME, INDICATOR_TYPE_TICK);
     radioModelNG2.SetChecked(true);
     radioModelNG2.SetIndicatorColor(ERROR_COLOR);
     auto frameNode2 = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
@@ -195,7 +197,7 @@ HWTEST_F(RadioTestNg, RadioEventHubPropertyTest002, TestSize.Level1)
      * @tc.cases: case1. RadioPattern can Create without value or group.
      */
     RadioModelNG radioModelNG;
-    radioModelNG.Create(std::nullopt, std::nullopt);
+    radioModelNG.Create(std::nullopt, std::nullopt, std::nullopt);
     auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
     ASSERT_NE(frameNode, nullptr);
     auto eventHub = frameNode->GetEventHub<NG::RadioEventHub>();
@@ -206,7 +208,7 @@ HWTEST_F(RadioTestNg, RadioEventHubPropertyTest002, TestSize.Level1)
      * @tc.cases: case2. RadioPattern can Create with value and group.
      */
     RadioModelNG radioModelNG2;
-    radioModelNG2.Create(NAME, GROUP_NAME);
+    radioModelNG2.Create(NAME, GROUP_NAME, INDICATOR_TYPE_TICK);
     auto frameNode2 = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
     ASSERT_NE(frameNode, nullptr);
     auto eventHub2 = frameNode2->GetEventHub<NG::RadioEventHub>();
@@ -223,7 +225,7 @@ HWTEST_F(RadioTestNg, RadioEventHubPropertyTest002, TestSize.Level1)
 HWTEST_F(RadioTestNg, RadioEventHubPropertyTest003, TestSize.Level1)
 {
     RadioModelNG radioModelNG;
-    radioModelNG.Create(std::nullopt, GROUP_NAME);
+    radioModelNG.Create(std::nullopt, GROUP_NAME, INDICATOR_TYPE_TICK);
     auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
     ASSERT_NE(frameNode, nullptr);
     auto eventHub = frameNode->GetEventHub<NG::RadioEventHub>();
@@ -240,7 +242,7 @@ HWTEST_F(RadioTestNg, RadioEventHubPropertyTest003, TestSize.Level1)
 HWTEST_F(RadioTestNg, RadioEventHubPropertyTest004, TestSize.Level1)
 {
     RadioModelNG radioModelNG;
-    radioModelNG.Create(NAME, std::nullopt);
+    radioModelNG.Create(NAME, std::nullopt, INDICATOR_TYPE_TICK);
     auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
     ASSERT_NE(frameNode, nullptr);
     auto eventHub = frameNode->GetEventHub<NG::RadioEventHub>();
@@ -257,7 +259,7 @@ HWTEST_F(RadioTestNg, RadioEventHubPropertyTest004, TestSize.Level1)
 HWTEST_F(RadioTestNg, RadioEventTest003, TestSize.Level1)
 {
     RadioModelNG radioModelNG;
-    radioModelNG.Create(NAME, GROUP_NAME);
+    radioModelNG.Create(NAME, GROUP_NAME, INDICATOR_TYPE_TICK);
     bool isChecked = false;
     auto onChange = [&isChecked](bool select) { isChecked = select; };
     radioModelNG.SetOnChange(onChange);
@@ -284,7 +286,7 @@ HWTEST_F(RadioTestNg, RadioPatternTest004, TestSize.Level1)
     radioTheme->hotZoneVerticalPadding_ = VERTICAL_PADDING;
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(radioTheme));
     RadioModelNG radioModelNG;
-    radioModelNG.Create(NAME, GROUP_NAME);
+    radioModelNG.Create(NAME, GROUP_NAME, INDICATOR_TYPE_TICK);
     auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
     ASSERT_NE(frameNode, nullptr);
     frameNode->MarkModifyDone();
@@ -312,7 +314,7 @@ HWTEST_F(RadioTestNg, RadioPatternTest004, TestSize.Level1)
 HWTEST_F(RadioTestNg, RadioPatternTest005, TestSize.Level1)
 {
     RadioModelNG radioModelNG;
-    radioModelNG.Create(NAME, GROUP_NAME);
+    radioModelNG.Create(NAME, GROUP_NAME, INDICATOR_TYPE_TICK);
     bool isChecked = false;
     auto onChange = [&isChecked](bool select) { isChecked = select; };
     radioModelNG.SetOnChange(onChange);
@@ -333,7 +335,7 @@ HWTEST_F(RadioTestNg, RadioPatternTest005, TestSize.Level1)
 HWTEST_F(RadioTestNg, RadioPatternTest006, TestSize.Level1)
 {
     RadioModelNG radioModelNG;
-    radioModelNG.Create(NAME, GROUP_NAME);
+    radioModelNG.Create(NAME, GROUP_NAME, INDICATOR_TYPE_TICK);
     radioModelNG.SetChecked(true);
     bool isChecked = false;
     auto onChange = [&isChecked](bool select) { isChecked = select; };
@@ -367,7 +369,7 @@ HWTEST_F(RadioTestNg, RadioPatternTest007, TestSize.Level1)
     auto stageManager = pipelineContext->GetStageManager();
     CHECK_NULL_VOID(stageManager);
     RadioModelNG radioModelNG0;
-    radioModelNG0.Create(NAME, GROUP_NAME);
+    radioModelNG0.Create(NAME, GROUP_NAME, INDICATOR_TYPE_TICK);
     radioModelNG0.SetChecked(true);
     bool isChecked0 = false;
     auto onChange0 = [&isChecked0](bool select) { isChecked0 = select; };
@@ -450,7 +452,7 @@ HWTEST_F(RadioTestNg, RadioPatternTest008, TestSize.Level1)
 HWTEST_F(RadioTestNg, RadioPatternTest009, TestSize.Level1)
 {
     RadioModelNG radioModelNG;
-    radioModelNG.Create(NAME, GROUP_NAME);
+    radioModelNG.Create(NAME, GROUP_NAME, INDICATOR_TYPE_TICK);
     radioModelNG.SetChecked(true);
     auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
     ASSERT_NE(frameNode, nullptr);
@@ -470,7 +472,7 @@ HWTEST_F(RadioTestNg, RadioPatternTest009, TestSize.Level1)
 HWTEST_F(RadioTestNg, RadioPatternTest010, TestSize.Level1)
 {
     RadioModelNG radioModelNG;
-    radioModelNG.Create(NAME, GROUP_NAME);
+    radioModelNG.Create(NAME, GROUP_NAME, INDICATOR_TYPE_TICK);
     radioModelNG.SetChecked(true);
     auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
     ASSERT_NE(frameNode, nullptr);
@@ -490,7 +492,7 @@ HWTEST_F(RadioTestNg, RadioPatternTest010, TestSize.Level1)
 HWTEST_F(RadioTestNg, RadioPatternTest011, TestSize.Level1)
 {
     RadioModelNG radioModelNG;
-    radioModelNG.Create(NAME, GROUP_NAME);
+    radioModelNG.Create(NAME, GROUP_NAME, INDICATOR_TYPE_TICK);
     radioModelNG.SetChecked(true);
     auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
     ASSERT_NE(frameNode, nullptr);
@@ -510,7 +512,7 @@ HWTEST_F(RadioTestNg, RadioPatternTest011, TestSize.Level1)
 HWTEST_F(RadioTestNg, RadioPatternTest012, TestSize.Level1)
 {
     RadioModelNG radioModelNG;
-    radioModelNG.Create(NAME, GROUP_NAME);
+    radioModelNG.Create(NAME, GROUP_NAME, INDICATOR_TYPE_TICK);
     radioModelNG.SetChecked(false);
     auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
     ASSERT_NE(frameNode, nullptr);
@@ -533,7 +535,7 @@ HWTEST_F(RadioTestNg, RadioPatternTest012, TestSize.Level1)
 HWTEST_F(RadioTestNg, RadioPatternTest013, TestSize.Level1)
 {
     RadioModelNG radioModelNG;
-    radioModelNG.Create(NAME, GROUP_NAME);
+    radioModelNG.Create(NAME, GROUP_NAME, INDICATOR_TYPE_TICK);
     radioModelNG.SetChecked(true);
     auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
     ASSERT_NE(frameNode, nullptr);
@@ -556,7 +558,7 @@ HWTEST_F(RadioTestNg, RadioPatternTest013, TestSize.Level1)
 HWTEST_F(RadioTestNg, RadioPatternTest014, TestSize.Level1)
 {
     RadioModelNG radioModelNG;
-    radioModelNG.Create(NAME, GROUP_NAME);
+    radioModelNG.Create(NAME, GROUP_NAME, INDICATOR_TYPE_TICK);
     radioModelNG.SetChecked(true);
     auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
     ASSERT_NE(frameNode, nullptr);
@@ -578,7 +580,7 @@ HWTEST_F(RadioTestNg, RadioPatternTest014, TestSize.Level1)
 HWTEST_F(RadioTestNg, RadioPatternTest015, TestSize.Level1)
 {
     RadioModelNG radioModelNG;
-    radioModelNG.Create(NAME, GROUP_NAME);
+    radioModelNG.Create(NAME, GROUP_NAME, INDICATOR_TYPE_TICK);
     radioModelNG.SetChecked(true);
     auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
     ASSERT_NE(frameNode, nullptr);
@@ -602,7 +604,7 @@ HWTEST_F(RadioTestNg, RadioPatternTest015, TestSize.Level1)
 HWTEST_F(RadioTestNg, RadioPatternTest016, TestSize.Level1)
 {
     RadioModelNG radioModelNG;
-    radioModelNG.Create(NAME, GROUP_NAME);
+    radioModelNG.Create(NAME, GROUP_NAME, INDICATOR_TYPE_TICK);
     radioModelNG.SetChecked(true);
     auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
     ASSERT_NE(frameNode, nullptr);
@@ -625,7 +627,7 @@ HWTEST_F(RadioTestNg, RadioPatternTest016, TestSize.Level1)
 HWTEST_F(RadioTestNg, RadioPatternTest019, TestSize.Level1)
 {
     RadioModelNG radioModelNG;
-    radioModelNG.Create(NAME, GROUP_NAME);
+    radioModelNG.Create(NAME, GROUP_NAME, INDICATOR_TYPE_TICK);
     radioModelNG.SetChecked(true);
     auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
     ASSERT_NE(frameNode, nullptr);
@@ -651,7 +653,7 @@ HWTEST_F(RadioTestNg, RadioPatternTest019, TestSize.Level1)
 HWTEST_F(RadioTestNg, RadioPatternTest020, TestSize.Level1)
 {
     RadioModelNG radioModelNG;
-    radioModelNG.Create(NAME, GROUP_NAME);
+    radioModelNG.Create(NAME, GROUP_NAME, INDICATOR_TYPE_TICK);
     radioModelNG.SetChecked(true);
     auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
     ASSERT_NE(frameNode, nullptr);
@@ -677,7 +679,7 @@ HWTEST_F(RadioTestNg, RadioPatternTest020, TestSize.Level1)
 HWTEST_F(RadioTestNg, RadioPatternTest021, TestSize.Level1)
 {
     RadioModelNG radioModelNG;
-    radioModelNG.Create(NAME, GROUP_NAME);
+    radioModelNG.Create(NAME, GROUP_NAME, INDICATOR_TYPE_TICK);
     auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
     EXPECT_NE(frameNode, nullptr);
 
@@ -1126,7 +1128,7 @@ HWTEST_F(RadioTestNg, RadioLayoutAlgorithmTest008, TestSize.Level1)
 HWTEST_F(RadioTestNg, RadioAccessibilityPropertyTestNg001, TestSize.Level1)
 {
     RadioModelNG radioModelNG;
-    radioModelNG.Create(std::nullopt, std::nullopt);
+    radioModelNG.Create(std::nullopt, std::nullopt, std::nullopt);
     auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
     ASSERT_NE(frameNode, nullptr);
     auto accessibility = frameNode->GetAccessibilityProperty<RadioAccessibilityProperty>();
@@ -1142,7 +1144,7 @@ HWTEST_F(RadioTestNg, RadioAccessibilityPropertyTestNg001, TestSize.Level1)
 HWTEST_F(RadioTestNg, RadioAccessibilityPropertyTestNg002, TestSize.Level1)
 {
     RadioModelNG radioModelNG;
-    radioModelNG.Create(std::nullopt, std::nullopt);
+    radioModelNG.Create(std::nullopt, std::nullopt, std::nullopt);
     auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
     ASSERT_NE(frameNode, nullptr);
 
@@ -1165,7 +1167,7 @@ HWTEST_F(RadioTestNg, RadioAccessibilityPropertyTestNg002, TestSize.Level1)
 HWTEST_F(RadioTestNg, RadioAccessibilityPropertyTestNg003, TestSize.Level1)
 {
     RadioModelNG radioModelNG;
-    radioModelNG.Create(std::nullopt, std::nullopt);
+    radioModelNG.Create(std::nullopt, std::nullopt, std::nullopt);
     auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
     ASSERT_NE(frameNode, nullptr);
 
@@ -1186,7 +1188,7 @@ HWTEST_F(RadioTestNg, RadioAccessibilityPropertyTestNg003, TestSize.Level1)
 HWTEST_F(RadioTestNg, RadioPatternTest022, TestSize.Level1)
 {
     RadioModelNG radioModelNG;
-    radioModelNG.Create(NAME, GROUP_NAME);
+    radioModelNG.Create(NAME, GROUP_NAME, INDICATOR_TYPE_TICK);
     auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
     ASSERT_NE(frameNode, nullptr);
     frameNode->MarkModifyDone();
@@ -1222,7 +1224,7 @@ HWTEST_F(RadioTestNg, RadioPatternTest022, TestSize.Level1)
 HWTEST_F(RadioTestNg, RadioPatternTest023, TestSize.Level1)
 {
     RadioModelNG radioModelNG;
-    radioModelNG.Create(NAME, GROUP_NAME);
+    radioModelNG.Create(NAME, GROUP_NAME, INDICATOR_TYPE_TICK);
     auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
     ASSERT_NE(frameNode, nullptr);
     frameNode->MarkModifyDone();
@@ -1246,7 +1248,7 @@ HWTEST_F(RadioTestNg, RadioPatternTest023, TestSize.Level1)
 HWTEST_F(RadioTestNg, RadioPatternTest024, TestSize.Level1)
 {
     RadioModelNG radioModelNG;
-    radioModelNG.Create(NAME, GROUP_NAME);
+    radioModelNG.Create(NAME, GROUP_NAME, INDICATOR_TYPE_TICK);
     auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
     ASSERT_NE(frameNode, nullptr);
     frameNode->MarkModifyDone();
@@ -1289,7 +1291,7 @@ HWTEST_F(RadioTestNg, RadioPatternTest024, TestSize.Level1)
 HWTEST_F(RadioTestNg, RadioPatternTest025, TestSize.Level1)
 {
     RadioModelNG radioModelNG;
-    radioModelNG.Create(NAME, GROUP_NAME);
+    radioModelNG.Create(NAME, GROUP_NAME, INDICATOR_TYPE_TICK);
     auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
     ASSERT_NE(frameNode, nullptr);
     frameNode->MarkModifyDone();
@@ -1348,7 +1350,7 @@ HWTEST_F(RadioTestNg, RadioPatternTest025, TestSize.Level1)
 HWTEST_F(RadioTestNg, RadioPatternTest026, TestSize.Level1)
 {
     RadioModelNG radioModelNG;
-    radioModelNG.Create(NAME, GROUP_NAME);
+    radioModelNG.Create(NAME, GROUP_NAME, INDICATOR_TYPE_TICK);
     auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
     ASSERT_NE(frameNode, nullptr);
     frameNode->MarkModifyDone();
@@ -1370,7 +1372,7 @@ HWTEST_F(RadioTestNg, RadioPatternTest026, TestSize.Level1)
 HWTEST_F(RadioTestNg, RadioPatternTest027, TestSize.Level1)
 {
     RadioModelNG radioModelNG;
-    radioModelNG.Create(NAME, GROUP_NAME);
+    radioModelNG.Create(NAME, GROUP_NAME, INDICATOR_TYPE_TICK);
     auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
     ASSERT_NE(frameNode, nullptr);
     auto stageManager = AceType::MakeRefPtr<StageManager>(frameNode);
@@ -1399,7 +1401,7 @@ HWTEST_F(RadioTestNg, RadioPatternTest027, TestSize.Level1)
 HWTEST_F(RadioTestNg, RadioEventHubChangeEventTest001, TestSize.Level1)
 {
     RadioModelNG radioModelNG;
-    radioModelNG.Create(std::nullopt, std::nullopt);
+    radioModelNG.Create(std::nullopt, std::nullopt, std::nullopt);
     auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
     ASSERT_NE(frameNode, nullptr);
     auto eventHub = frameNode->GetEventHub<NG::RadioEventHub>();
@@ -1421,7 +1423,7 @@ HWTEST_F(RadioTestNg, RadioPatternTest028, TestSize.Level1)
      * @tc.steps: step1. Init Radio node
      */
     RadioModelNG radioModelNG;
-    radioModelNG.Create(NAME, GROUP_NAME);
+    radioModelNG.Create(NAME, GROUP_NAME, INDICATOR_TYPE_TICK);
     auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
     ASSERT_NE(frameNode, nullptr);
     frameNode->MarkModifyDone();
@@ -1458,7 +1460,7 @@ HWTEST_F(RadioTestNg, RadioPatternTest028, TestSize.Level1)
 HWTEST_F(RadioTestNg, RadioPatternTest029, TestSize.Level1)
 {
     RadioModelNG radioModelNG;
-    radioModelNG.Create(NAME, GROUP_NAME);
+    radioModelNG.Create(NAME, GROUP_NAME, INDICATOR_TYPE_TICK);
     radioModelNG.SetChecked(true);
     auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
     ASSERT_NE(frameNode, nullptr);

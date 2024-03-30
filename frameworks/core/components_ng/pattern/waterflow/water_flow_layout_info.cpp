@@ -327,7 +327,7 @@ int32_t WaterFlowLayoutInfo::FastSolveStartIndex() const
     auto it = std::upper_bound(endPosArray_.begin(), endPosArray_.end(), -currentOffset_,
         [](float value, const std::pair<float, int32_t>& info) { return LessNotEqual(value, info.first); });
     if (it == endPosArray_.end()) {
-        return 0;
+        return std::max(static_cast<int32_t>(itemInfos_.size()) - 1, 0);
     }
     return it->second;
 }
@@ -344,7 +344,8 @@ int32_t WaterFlowLayoutInfo::FastSolveEndIndex(float mainSize) const
     if (it == itemInfos_.end()) {
         return static_cast<int32_t>(itemInfos_.size()) - 1;
     }
-    return std::distance(itemInfos_.begin(), it) - 1;
+    int32_t res = std::distance(itemInfos_.begin(), it) - 1;
+    return std::max(res, 0);
 }
 
 void WaterFlowLayoutInfo::RecordItem(int32_t idx, const FlowItemPosition& pos, float height)

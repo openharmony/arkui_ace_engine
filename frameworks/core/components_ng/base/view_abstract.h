@@ -74,6 +74,12 @@ enum class ContextMenuRegisterType : char {
     CUSTOM_TYPE = 1,
 };
 
+enum class OverlayType {
+    BUILDER = 0,
+    TEXT = 1,
+    RESET = 2,
+};
+
 struct MenuParam {
     std::string title;
     OffsetF positionOffset;
@@ -320,6 +326,9 @@ public:
     static void SetMask(const RefPtr<BasicShape> &basicShape);
     // overlay
     static void SetOverlay(const NG::OverlayOptions &overlay);
+    static void SetOverlayBuilder(std::function<void()>&& buildFunc,
+        const std::optional<Alignment>& align, const std::optional<Dimension>& offsetX,
+        const std::optional<Dimension>& offsetY);
     // motionPath
     static void SetMotionPath(const MotionPathOption &motionPath);
     // progress mask
@@ -490,6 +499,7 @@ public:
     static void SetSharedTransition(
         FrameNode* frameNode, const std::string& shareId, const std::shared_ptr<SharedTransitionOption>& option);
     static void SetTransition(FrameNode* frameNode, const TransitionOptions& options);
+    static void CleanTransition(FrameNode* frameNode);
     static void SetChainedTransition(FrameNode* frameNode, const RefPtr<NG::ChainedTransitionEffect>& effect);
     static void SetMask(FrameNode* frameNode, const RefPtr<BasicShape>& basicShape);
     static void SetProgressMask(FrameNode* frameNode, const RefPtr<ProgressMaskProperty>& progress);
@@ -550,6 +560,8 @@ public:
     static void SetJSFrameNodeOnBlurCallback(FrameNode* frameNode, OnBlurFunc&& onBlurCallback);
     static void SetJSFrameNodeOnHover(FrameNode* frameNode, OnHoverFunc&& onHoverEventFunc);
     static void SetJSFrameNodeOnMouse(FrameNode* frameNode, OnMouseEventFunc&& onMouseEventFunc);
+    static void SetJSFrameNodeOnSizeChange(
+        FrameNode* frameNode, std::function<void(const RectF& oldRect, const RectF& rect)>&& onSizeChanged);
     static void ClearJSFrameNodeOnClick(FrameNode* frameNode);
     static void ClearJSFrameNodeOnTouch(FrameNode* frameNode);
     static void ClearJSFrameNodeOnAppear(FrameNode* frameNode);
@@ -559,6 +571,7 @@ public:
     static void ClearJSFrameNodeOnBlurCallback(FrameNode* frameNode);
     static void ClearJSFrameNodeOnHover(FrameNode* frameNode);
     static void ClearJSFrameNodeOnMouse(FrameNode* frameNode);
+    static void ClearJSFrameNodeOnSizeChange(FrameNode* frameNode);
 
     static float GetFlexGrow(FrameNode* frameNode);
     static float GetFlexShrink(FrameNode* frameNode);
@@ -591,6 +604,8 @@ public:
     static MarginProperty GetMargin(FrameNode* frameNode);
     static TranslateOptions GetTranslate(FrameNode* frameNode);
     static float GetAspectRatio(FrameNode* frameNode);
+    static BlendApplyType GetBlendApplyType(FrameNode* frameNode);
+
 private:
     static void AddDragFrameNodeToManager();
 };

@@ -112,23 +112,29 @@ public:
     // use for navRouter case
     void AddNavDestinationNode(const std::string& name, const RefPtr<UINode>& navDestinationNode)
     {
+        addByNavRouter_ = true;
         navigationStack_->Add(name, navDestinationNode);
     }
 
     void AddNavDestinationNode(const std::string& name, const RefPtr<UINode>& navDestinationNode, NavRouteMode mode)
     {
+        addByNavRouter_ = true;
         navigationStack_->Add(name, navDestinationNode, mode);
     }
 
     void AddNavDestinationNode(const std::string& name, const RefPtr<UINode>& navDestinationNode, NavRouteMode mode,
         const RefPtr<RouteInfo>& routeInfo)
     {
+        addByNavRouter_ = true;
         navigationStack_->Add(name, navDestinationNode, mode, routeInfo);
     }
 
     RefPtr<UINode> GetNavDestinationNode(const std::string& name)
     {
-        return navigationStack_->Get(name);
+        RefPtr<UINode> uiNode;
+        int32_t index;
+        navigationStack_->Get(name, uiNode, index);
+        return uiNode;
     }
 
     RefPtr<UINode> GetNavDestinationNode()
@@ -306,6 +312,10 @@ public:
 
     static void FireNavigationStateChange(const RefPtr<UINode>& node, bool isShow);
 
+    static void FireNavigationChange(const RefPtr<UINode>& node, bool isShow, bool isFirst);
+
+    static void FireNavigationInner(const RefPtr<UINode>& node, bool isShow);
+
     static void FireNavigationLifecycleChange(const RefPtr<UINode>& node, NavDestinationLifecycle lifecycle);
 
     // type: will_show + on_show, will_hide + on_hide, hide, show, willShow, willHide
@@ -344,6 +354,16 @@ public:
     void NotifyDestinationLifecycle(const RefPtr<UINode>& destinationNode,
         NavDestinationLifecycle lifecycle, bool isNavigationChanged);
     void AbortAnimation(RefPtr<NavigationGroupNode>& hostNode);
+
+    void SetParentCustomNode(const RefPtr<UINode>& parentNode)
+    {
+        parentNode_ = parentNode;
+    }
+
+    WeakPtr<UINode> GetParentCustomNode() const
+    {
+        return parentNode_;
+    }
 
 private:
     void CheckTopNavPathChange(const std::optional<std::pair<std::string, RefPtr<UINode>>>& preTopNavPath,
@@ -397,6 +417,7 @@ private:
     RefPtr<DragEvent> dragEvent_;
     RefPtr<NavigationTransitionProxy> currentProxy_;
     RectF dragRect_;
+    bool addByNavRouter_ = false;
     bool ifNeedInit_ = true;
     float preNavBarWidth_ = 0.0f;
     float realNavBarWidth_ = DEFAULT_NAV_BAR_WIDTH.ConvertToPx();
@@ -425,6 +446,7 @@ private:
     bool needSyncWithJsStack_ = false;
     std::optional<std::pair<std::string, RefPtr<UINode>>> preTopNavPath_;
     RefPtr<NavDestinationContext> preContext_;
+    WeakPtr<UINode> parentNode_;
     int32_t preStackSize_ = 0;
 };
 

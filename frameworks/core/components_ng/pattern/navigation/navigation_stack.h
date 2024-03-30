@@ -112,25 +112,25 @@ public:
         const RefPtr<RouteInfo>& routeInfo = nullptr);
     void Add(const std::string& name, const RefPtr<UINode>& navDestinationNode, NavRouteMode mode,
         const RefPtr<RouteInfo>& routeInfo = nullptr);
-    void UpdateRemovedNavPathList();
     RefPtr<UINode> Get();
-    RefPtr<UINode> Get(const std::string& name);
-    RefPtr<UINode> GetFromPreBackup(const std::string& name);
+    bool Get(const std::string& name, RefPtr<UINode>& navDestinationNode, int32_t& index);
+    bool GetFromPreBackup(const std::string& name, RefPtr<UINode>& navDestinationNode, int32_t& index);
+    RefPtr<UINode> Get(int32_t index);
     RefPtr<UINode> GetPre(const std::string& name, const RefPtr<UINode>& navDestinationNode);
     virtual bool IsEmpty();
     virtual std::vector<std::string> GetAllPathName();
-    virtual std::vector<int32_t> GetRemoveArray();
+    virtual std::vector<int32_t> GetAllPathIndex();
+    virtual void InitNavPathIndex() {}
     virtual void Pop();
     virtual void Push(const std::string& name, const RefPtr<RouteInfo>& routeInfo = nullptr);
     virtual void Push(const std::string& name, int32_t index);
     virtual void RemoveName(const std::string& name);
     virtual void RemoveIndex(int32_t index);
     virtual void Clear();
-    virtual void ClearRemoveArray();
     virtual void UpdateReplaceValue(int32_t replaceValue) const;
     virtual int32_t GetReplaceValue() const;
-    virtual RefPtr<UINode> CreateNodeByIndex(int32_t index);
-    virtual RefPtr<UINode> CreateNodeByRouteInfo(const RefPtr<RouteInfo>& routeInfo);
+    virtual RefPtr<UINode> CreateNodeByIndex(int32_t index, const WeakPtr<UINode>& customNode);
+    virtual RefPtr<UINode> CreateNodeByRouteInfo(const RefPtr<RouteInfo>& routeInfo, const WeakPtr<UINode>& node);
     virtual bool GetDisableAnimation() const
     {
         return false;

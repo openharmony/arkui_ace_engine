@@ -2158,6 +2158,7 @@ void JSWeb::Create(const JSCallbackInfo& info)
 
     } else {
         auto* jsWebController = controller->Unwrap<JSWebController>();
+        CHECK_NULL_VOID(jsWebController);
         WebModel::GetInstance()->Create(dstSrc.value(),
             jsWebController->GetController(), renderMode, incognitoMode);
     }

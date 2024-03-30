@@ -408,16 +408,14 @@ void Inspector::GetRectangleById(const std::string& key, Rectangle& rectangle)
 {
     auto frameNode = Inspector::GetFrameNodeByKey(key);
     if (!frameNode) {
-        TAG_LOGW(AceLogTag::DEFAULT,
-            "Can't find a component that id or key are %{public}s, Please check your parameters are correct",
+        LOGW("Can't find a component that id or key are %{public}s, Please check your parameters are correct",
             key.c_str());
         return;
     }
     rectangle.size = frameNode->GetGeometryNode()->GetFrameSize();
     auto context = frameNode->GetRenderContext();
     if (!context) {
-        TAG_LOGW(AceLogTag::DEFAULT,
-            "Internal error! The RenderContext returned by the component(id=%{public}s) is null",
+        LOGW("Internal error! The RenderContext returned by the component(id=%{public}s) is null",
             key.c_str());
         return;
     }

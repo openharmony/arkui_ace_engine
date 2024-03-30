@@ -24,8 +24,10 @@
 #include "core/components_ng/pattern/picker/datepicker_pattern.h"
 #include "core/components_ng/pattern/picker/picker_type_define.h"
 #include "core/components_ng/pattern/time_picker/timepicker_row_pattern.h"
+#include "core/components_ng/pattern/picker/date_time_animation_controller.h"
 
 namespace OHOS::Ace::NG {
+class DateTimeAnimationController;
 class ACE_EXPORT DatePickerDialogView {
 public:
     static RefPtr<FrameNode> Show(const DialogProperties& dialogProps, const DatePickerSettingData& settingData,
@@ -73,7 +75,31 @@ private:
     static void SetTitleMouseHoverEvent(const RefPtr<FrameNode>& titleRow);
     static void HandleMouseEvent(const RefPtr<FrameNode>& titleButton, bool isHover);
     static void PlayHoverAnimation(const RefPtr<FrameNode>& titleButton, const Color& color);
-    static void MountColumnNodeToPicker(const RefPtr<FrameNode>& columnNode, const RefPtr<FrameNode>& pickerNode);
+    static void MountColumnNodeToPicker(
+        const RefPtr<FrameNode>& columnNode, const RefPtr<FrameNode>& pickerNode, uint32_t columnWeight = 1);
+    static void UpdateTitleRowLayoutProps(const RefPtr<FrameNode>& titleRow);
+    static void SetTimeNodeColumnWeight(const RefPtr<FrameNode>& timeNode, const DatePickerSettingData& settingData);
+    static RefPtr<FrameNode> CreateAndMountDateNode(
+        const DatePickerSettingData& settingData, const RefPtr<FrameNode>& pickerStack);
+    static RefPtr<FrameNode> CreateAndMountButtonTitleNode(
+        const RefPtr<FrameNode>& dateNode, const RefPtr<FrameNode>& contentColumn);
+    static std::function<void(bool)> CreateLunarChangeEvent(const RefPtr<FrameNode>& dateNode);
+    static RefPtr<FrameNode> CreateAndMountMonthDaysNode(const DatePickerSettingData& settingData,
+        const RefPtr<FrameNode>& dateNode, const RefPtr<FrameNode>& pickerRow,
+        std::function<void(bool)> lunarChangeEvent);
+    static RefPtr<FrameNode> CreateAndMountTimeNode(const DatePickerSettingData& settingData,
+        const RefPtr<FrameNode>& monthDaysNode, const RefPtr<FrameNode>& pickerRow);
+    static std::function<void()> CreateAndSetDialogSwitchEvent(
+        const RefPtr<FrameNode>& pickerStack, const RefPtr<FrameNode>& contentColumn);
+    static void SwitchPickerPage(const RefPtr<FrameNode>& pickerStack, const RefPtr<FrameNode>& contentColumn,
+        const RefPtr<DateTimeAnimationController>& animationController);
+    static void CreateAndAddTitleClickEvent(
+        std::function<void()>& titleSwitchEvent, const RefPtr<FrameNode>& buttonTitleNode);
+    static void BuildDialogAcceptAndCancelButton(const DatePickerSettingData& settingData,
+        const RefPtr<FrameNode>& acceptNode, const RefPtr<FrameNode>& dateNode, const RefPtr<FrameNode>& dialogNode,
+        const RefPtr<FrameNode>& contentColumn, std::map<std::string, NG::DialogEvent> dialogEvent,
+        std::map<std::string, NG::DialogGestureEvent> dialogCancelEvent);
+    static void UpdateContentPadding(const RefPtr<FrameNode>& contentColumn);
 };
 } // namespace OHOS::Ace::NG
 

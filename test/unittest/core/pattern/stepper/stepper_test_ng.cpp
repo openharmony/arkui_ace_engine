@@ -526,7 +526,7 @@ HWTEST_F(StepperTestNg, StepperPatternHandleClickEvent001, TestSize.Level1)
         SWIPER_NODE_TAG, hostNode->GetSwiperId(), []() { return AceType::MakeRefPtr<SwiperPattern>(); });
     hostNode->AddChild(swiperNode);
     auto swiperPattern = swiperNode->GetPattern<SwiperPattern>();
-    swiperPattern->controller_ = CREATE_ANIMATOR(hostNode->GetContext());
+    swiperPattern->controller_ = CREATE_ANIMATOR(hostNode->GetContextRefPtr());
     auto swiperAnimationController = swiperPattern->GetController();
     ASSERT_NE(swiperAnimationController, nullptr);
     stepperPattern->HandlingLeftButtonClickEvent();
@@ -825,7 +825,7 @@ HWTEST_F(StepperTestNg, StepperPatternCreateRightButtonNode001, TestSize.Level1)
     swiperNode->AddChild(frameNode1);
     ASSERT_NE(frameNode1, nullptr);
     auto swiperPattern = swiperNode->GetPattern<SwiperPattern>();
-    swiperPattern->controller_ = CREATE_ANIMATOR(hostNode->GetContext());
+    swiperPattern->controller_ = CREATE_ANIMATOR(hostNode->GetContextRefPtr());
     auto swiperAnimationController = swiperPattern->GetController();
     ASSERT_NE(swiperAnimationController, nullptr);
     stepperPattern->HandlingLeftButtonClickEvent();
@@ -874,7 +874,7 @@ HWTEST_F(StepperTestNg, StepperPatternHandleClickEvent011, TestSize.Level1)
         SWIPER_NODE_TAG, hostNode->GetSwiperId(), []() { return AceType::MakeRefPtr<SwiperPattern>(); });
     hostNode->AddChild(swiperNode);
     auto swiperPattern = swiperNode->GetPattern<SwiperPattern>();
-    swiperPattern->controller_ = CREATE_ANIMATOR(hostNode->GetContext());
+    swiperPattern->controller_ = CREATE_ANIMATOR(hostNode->GetContextRefPtr());
     auto swiperAnimationController = swiperPattern->GetController();
     ASSERT_NE(swiperAnimationController, nullptr);
     stepperPattern->HandlingLeftButtonClickEvent();
@@ -1019,7 +1019,7 @@ HWTEST_F(StepperTestNg, StepperPatternUpdateOrCreateLeftButtonNode002, TestSize.
     swiperNode->AddChild(frameNode1);
     ASSERT_NE(frameNode1, nullptr);
     auto swiperPattern = swiperNode->GetPattern<SwiperPattern>();
-    swiperPattern->controller_ = CREATE_ANIMATOR(hostNode->GetContext());
+    swiperPattern->controller_ = CREATE_ANIMATOR(hostNode->GetContextRefPtr());
     auto swiperAnimationController = swiperPattern->GetController();
     ASSERT_NE(swiperAnimationController, nullptr);
     stepperPattern->HandlingLeftButtonClickEvent();

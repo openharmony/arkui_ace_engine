@@ -315,7 +315,7 @@ void DialogLayoutAlgorithm::GetDialogWidth(double& width)
     if (width_.Unit() == DimensionUnit::PERCENT) {
         width = width_.ConvertToPxWithSize(widthMax_);
     } else {
-        width = width_.Value();
+        width = width_.ConvertToPx();
     }
     if (width > widthMax_) {
         width = widthMax_;
@@ -415,7 +415,7 @@ void DialogLayoutAlgorithm::SetDialogSize(
         if (height_.Unit() == DimensionUnit::PERCENT) {
             heightValue = height_.ConvertToPxWithSize(height);
         } else {
-            heightValue = height_.Value();
+            heightValue = height_.ConvertToPx();
         }
         if (heightValue > height) {
             heightValue = height;

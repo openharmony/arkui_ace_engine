@@ -48,7 +48,6 @@ public:
         CONTAINER_MODAL_WINDOW_DEFOCUS_MINIMIZE,
         CONTAINER_MODAL_WINDOW_DEFOCUS_RECOVER,
         CONTAINER_MODAL_WINDOW_DEFOCUS_SPLIT_LEFT,
-        MOON_PROGRESS_FG_CIRCLE_SHADOW,
 
         // 10000 - 20000 is reserved for SVG resource.
         SVG_START = 10000,
@@ -81,6 +80,7 @@ public:
         TV_RATE_STAR_BIG_ON_SVG,
         TV_RATE_STAR_SMALL_OFF_SVG,
         TV_RATE_STAR_SMALL_ON_SVG,
+        TITLEBAR_BACK,
         IC_BACK,
         IC_MORE,
         IC_MORE_DARK,
@@ -125,6 +125,8 @@ public:
         IC_SEARCH_SVG,
         IC_BOTTOMSHEET_CLOSE_SVG,
         IC_CANCEL_SVG,
+        RADIO_TICK_SVG,
+        RADIO_DOT_SVG,
         SVG_END = 20000,
 
         // 20001 - 30000 is reserved for i18n resource.

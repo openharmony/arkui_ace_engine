@@ -74,7 +74,9 @@ public:
         const std::string& key, const std::unique_ptr<JsonValue>& jsonValue, std::optional<float>& angle);
     static void GetJsAngle(
         const std::string& key, const JSRef<JSVal>& jsValue, std::optional<float>& angle);
-    static void CheckAngle(std::optional<float>& angle);
+    static void GetJsAngleWithDefault(
+        const std::string& key, const JSRef<JSObject>& jsObj, std::optional<float>& angle, float defaultValue);
+    static inline void CheckAngle(std::optional<float>& angle);
     static void GetPerspective(const std::string& key, const std::unique_ptr<JsonValue>& jsonValue, float& perspective);
     static void GetJsPerspective(const std::string& key, const JSRef<JSVal>& jsValue, float& perspective);
     static void GetGradientColorStops(Gradient& gradient, const std::unique_ptr<JsonValue>& jsonValue);
@@ -99,8 +101,7 @@ public:
     static void JsTransform(const JSCallbackInfo& info);
     static void SetDefaultTransform();
     static void JsTransition(const JSCallbackInfo& info);
-    static NG::TransitionOptions ParseTransition(std::unique_ptr<JsonValue>& transitionArgs);
-    static NG::TransitionOptions ParseJsTransition(const JSRef<JSVal>& transitionArgs);
+    static NG::TransitionOptions ParseJsTransition(const JSRef<JSObject>& jsObj);
     static RefPtr<NG::ChainedTransitionEffect> ParseJsTransitionEffect(const JSCallbackInfo& info);
     static void JsWidth(const JSCallbackInfo& info);
     static void JsHeight(const JSCallbackInfo& info);
@@ -122,13 +123,16 @@ public:
     static void JsBindContentCover(const JSCallbackInfo& info);
     static void ParseModalStyle(const JSRef<JSObject>& paramObj, NG::ModalStyle& modalStyle);
     static void JsBindSheet(const JSCallbackInfo& info);
+    static void ParseSheetIsShow(
+        const JSCallbackInfo& info, bool& isShow, std::function<void(const std::string&)>& callback);
     static void ParseSheetStyle(const JSRef<JSObject>& paramObj, NG::SheetStyle& sheetStyle);
     static bool ParseSheetDetents(const JSRef<JSVal>& args, std::vector<NG::SheetHeight>& sheetDetents);
     static void ParseSheetDetentHeight(const JSRef<JSVal>& args, NG::SheetHeight& detent);
     static bool ParseSheetBackgroundBlurStyle(const JSRef<JSVal>& args, BlurStyleOption& blurStyleOptions);
+    static void ParseSheetLevel(const JSRef<JSVal>& args, NG::SheetLevel& sheetLevel);
     static void ParseSheetCallback(const JSRef<JSObject>& paramObj, std::function<void()>& onAppear,
         std::function<void()>& onDisappear, std::function<void()>& shouldDismiss, std::function<void()>& onWillAppear,
-        std::function<void()>& onWillDisappear);
+        std::function<void()>& onWillDisappear, std::function<void(const float)>& onHeightDidChange);
     static void ParseSheetTitle(const JSRef<JSObject>& paramObj, NG::SheetStyle& sheetStyle,
         std::function<void()>& titleBuilderFunction);
     static panda::Local<panda::JSValueRef> JsDismissSheet(panda::JsiRuntimeCallInfo* runtimeCallInfo);
@@ -303,6 +307,7 @@ public:
     static void NewJsLinearGradient(const JSCallbackInfo& info, NG::Gradient& gradient);
     static void NewJsRadialGradient(const JSCallbackInfo& info, NG::Gradient& gradient);
     static void NewJsSweepGradient(const JSCallbackInfo& info, NG::Gradient& gradient);
+    static void ParseSweepGradientPartly(const JSRef<JSObject>& obj, NG::Gradient& newGradient);
     static void JsMotionPath(const JSCallbackInfo& info);
     static void JsShadow(const JSCallbackInfo& info);
     static void JsBlendMode(const JSCallbackInfo& info);
@@ -505,6 +510,8 @@ public:
     static bool ParseBorderStyleProps(const JSRef<JSVal>& args, NG::BorderStyleProperty& borderStyleProperty);
     static bool ParseBorderRadius(const JSRef<JSVal>& args, NG::BorderRadiusProperty& radius);
     static void SetDialogProperties(const JSRef<JSObject>& obj, DialogProperties& properties);
+    static std::function<void(NG::DrawingContext& context)> GetDrawCallback(
+        const RefPtr<JsFunction>& jsDraw, const JSExecutionContext& execCtx);
 };
 } // namespace OHOS::Ace::Framework
 #endif // JS_VIEW_ABSTRACT_H

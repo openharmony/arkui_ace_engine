@@ -39,6 +39,11 @@ public:
 
     ~SwitchPattern() override = default;
 
+    bool IsAtomicNode() const override
+    {
+        return false;
+    }
+
     RefPtr<EventHub> CreateEventHub() override
     {
         return MakeRefPtr<SwitchEventHub>();
@@ -70,10 +75,7 @@ public:
         auto paintMethod = MakeRefPtr<SwitchPaintMethod>(switchModifier_);
         paintMethod->SetDirection(direction_);
         paintMethod->SetIsSelect(isOn_.value_or(false));
-        auto eventHub = host->GetEventHub<EventHub>();
-        CHECK_NULL_RETURN(eventHub, nullptr);
-        auto enabled = eventHub->IsEnabled();
-        paintMethod->SetEnabled(enabled);
+        paintMethod->SetEnabled(enabled_);
         paintMethod->SetDragOffsetX(dragOffsetX_);
         paintMethod->SetTouchHoverAnimationType(touchHoverType_);
         paintMethod->SetIsDragEvent(isDragEvent_);
@@ -173,6 +175,7 @@ private:
     bool isHover_ = false;
     bool isUserSetResponseRegion_ = false;
     bool showHoverEffect_ = true;
+    bool enabled_ = true;
 
     float width_ = 0.0f;
     float height_ = 0.0f;

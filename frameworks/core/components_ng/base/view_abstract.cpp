@@ -2063,6 +2063,48 @@ void ViewAbstract::SetOverlay(const OverlayOptions &overlay)
     ACE_UPDATE_RENDER_CONTEXT(OverlayText, overlay);
 }
 
+void ViewAbstract::SetOverlayBuilder(std::function<void()>&& buildFunc,
+    const std::optional<Alignment>& align, const std::optional<Dimension>& offsetX,
+    const std::optional<Dimension>& offsetY)
+{
+    if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
+        return;
+    }
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    if (buildFunc) {
+        auto overlayNode = frameNode->GetOverlayNode();
+        if (!overlayNode) {
+            auto buildNodeFunc = [buildFunc]() -> RefPtr<UINode> {
+                ScopedViewStackProcessor builderViewStackProcessor;
+                buildFunc();
+                auto customNode = ViewStackProcessor::GetInstance()->Finish();
+                return customNode;
+            };
+            overlayNode = AceType::DynamicCast<FrameNode>(buildNodeFunc());
+            CHECK_NULL_VOID(overlayNode);
+            frameNode->SetOverlayNode(overlayNode);
+            overlayNode->SetParent(AceType::WeakClaim(frameNode));
+            overlayNode->SetActive(true);
+        }
+        overlayNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+        auto layoutProperty = AceType::DynamicCast<LayoutProperty>(overlayNode->GetLayoutProperty());
+        CHECK_NULL_VOID(layoutProperty);
+        layoutProperty->SetIsOverlayNode(true);
+        layoutProperty->UpdateMeasureType(MeasureType::MATCH_PARENT);
+        layoutProperty->UpdateAlignment(align.value_or(Alignment::TOP_LEFT));
+        layoutProperty->SetOverlayOffset(offsetX, offsetY);
+        auto renderContext = overlayNode->GetRenderContext();
+        CHECK_NULL_VOID(renderContext);
+        renderContext->UpdateZIndex(INT32_MAX);
+        auto focusHub = overlayNode->GetOrCreateFocusHub();
+        CHECK_NULL_VOID(focusHub);
+        focusHub->SetFocusable(false);
+    } else {
+        frameNode->SetOverlayNode(nullptr);
+    }
+}
+
 void ViewAbstract::SetMotionPath(const MotionPathOption &motionPath)
 {
     if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
@@ -2426,7 +2468,7 @@ void ViewAbstract::SetBorderImageGradient(FrameNode* frameNode, const NG::Gradie
 
 void ViewAbstract::SetForegroundBlurStyle(FrameNode* frameNode, const BlurStyleOption& fgBlurStyle)
 {
-    const auto& target = frameNode->GetRenderContext();
+    const auto target = frameNode->GetRenderContext();
     if (target) {
         target->UpdateFrontBlurStyle(fgBlurStyle);
         if (target->GetFrontBlurRadius().has_value()) {
@@ -2882,6 +2924,15 @@ void ViewAbstract::SetSharedTransition(
 void ViewAbstract::SetTransition(FrameNode* frameNode, const TransitionOptions& options)
 {
     ACE_UPDATE_NODE_RENDER_CONTEXT(Transition, options, frameNode);
+}
+
+void ViewAbstract::CleanTransition(FrameNode* frameNode)
+{
+    CHECK_NULL_VOID(frameNode);
+    const auto& renderContext = frameNode->GetRenderContext();
+    if (renderContext) {
+        renderContext->CleanTransition();
+    }
 }
 
 void ViewAbstract::SetChainedTransition(FrameNode* frameNode, const RefPtr<NG::ChainedTransitionEffect>& effect)
@@ -3757,5 +3808,28 @@ void ViewAbstract::ClearJSFrameNodeOnMouse(FrameNode* frameNode)
     auto eventHub = frameNode->GetOrCreateInputEventHub();
     CHECK_NULL_VOID(eventHub);
     eventHub->ClearJSFrameNodeOnMouse();
+}
+
+BlendApplyType ViewAbstract::GetBlendApplyType(FrameNode* frameNode)
+{
+    BlendApplyType value = BlendApplyType::FAST;
+    const auto& target = frameNode->GetRenderContext();
+    CHECK_NULL_RETURN(target, value);
+    return target->GetBackBlendApplyTypeValue(value);
+}
+
+void ViewAbstract::SetJSFrameNodeOnSizeChange(
+    FrameNode* frameNode, std::function<void(const RectF& oldRect, const RectF& rect)>&& onSizeChanged)
+{
+    CHECK_NULL_VOID(frameNode);
+    frameNode->SetJSFrameNodeOnSizeChangeCallback(std::move(onSizeChanged));
+}
+
+void ViewAbstract::ClearJSFrameNodeOnSizeChange(FrameNode* frameNode)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetEventHub<NG::EventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->ClearJSFrameNodeOnSizeChange();
 }
 } // namespace OHOS::Ace::NG

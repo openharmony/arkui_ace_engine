@@ -103,6 +103,7 @@ public:
         return nullptr;
     };
     virtual void SetClipEdge() = 0;
+    virtual void SetFontFeature(const std::unordered_map<std::string, int32_t>& value) = 0;
 
 private:
     static std::unique_ptr<TextModel> instance_;

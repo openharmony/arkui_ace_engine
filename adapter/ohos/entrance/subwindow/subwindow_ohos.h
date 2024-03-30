@@ -135,6 +135,7 @@ public:
     void ResizeWindowForFoldStatus(int32_t parentContainerId) override;
     void SetPopupHotAreas(const std::vector<Rect>& rects, int32_t overlayId) override;
     void DeletePopupHotAreas(int32_t overlayId) override;
+    void MarkDirtyDialogSafeArea() override;
 private:
     RefPtr<StackElement> GetStack();
     void AddMenu(const RefPtr<Component>& newComponent);

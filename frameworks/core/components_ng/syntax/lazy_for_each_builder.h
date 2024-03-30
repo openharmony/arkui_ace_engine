@@ -38,6 +38,17 @@
 
 namespace OHOS::Ace::NG {
 
+typedef struct OperationInfo {
+    OperationInfo():node(nullptr) {}
+    int32_t changeCount;
+    std::string key;
+    RefPtr<UINode> node;
+    bool isDeleting;
+    bool isChanged;
+    bool moveIn;
+    std::vector<std::string> extraKey;
+} OperationInfo;
+
 using LazyForEachChild = std::pair<std::string, RefPtr<UINode>>;
 using LazyForEachCacheChild = std::pair<int32_t, RefPtr<UINode>>;
 
@@ -72,6 +83,33 @@ public:
     bool OnDataChanged(size_t index);
 
     bool OnDataMoved(size_t from, size_t to);
+
+    std::pair<int32_t, std::list<RefPtr<UINode>>> OnDatasetChange(std::list<V2::Operation> DataOperations);
+
+    void RepairDatasetItems(std::map<int32_t, LazyForEachChild>& cachedTemp,
+        std::map<int32_t, LazyForEachChild>& expiringTempItem_, std::map<int32_t, int32_t>& indexChangedMap);
+
+    void CollectIndexChangedCount(std::map<int32_t, int32_t>& indexChangedMap);
+
+    bool ClassifyOperation(V2::Operation& operation, int32_t& initialIndex,
+        std::map<int32_t, LazyForEachChild>& cachedTemp, std::map<int32_t, LazyForEachChild>& expiringTemp);
+
+    void OperateAdd(V2::Operation& operation, int32_t& initialIndex);
+
+    void OperateDelete(V2::Operation& operation, int32_t& initialIndex);
+
+    void OperateMove(V2::Operation& operation, int32_t& initialIndex,
+        std::map<int32_t, LazyForEachChild>& cachedTemp, std::map<int32_t, LazyForEachChild>& expiringTemp);
+
+    void OperateChange(V2::Operation& operation, int32_t& initialIndex,
+        std::map<int32_t, LazyForEachChild>& cachedTemp, std::map<int32_t, LazyForEachChild>& expiringTemp);
+
+    void OperateExchange(V2::Operation& operation, int32_t& initialIndex,
+        std::map<int32_t, LazyForEachChild>& cachedTemp, std::map<int32_t, LazyForEachChild>& expiringTemp);
+
+    void OperateReload(V2::Operation& operation, int32_t& initialIndex);
+
+    void ThrowRepeatOperationError(int32_t index);
 
     void RecycleChildByIndex(int32_t index);
 
@@ -419,9 +457,14 @@ public:
         isLoop_ = isLoop;
     }
 
-    void clearBulkDeletedNodes()
+    void clearDeletedNodes()
     {
         nodeList_.clear();
+    }
+
+    void SetUseNewInterface(bool useNewInterface)
+    {
+        useNewInterface_ = useNewInterface;
     }
 
     const std::unordered_map<std::string, LazyForEachCacheChild>& GetCachedUINodeMap()
@@ -482,6 +525,10 @@ protected:
 
     virtual LazyForEachChild OnGetChildByIndex(
         int32_t index, std::unordered_map<std::string, LazyForEachCacheChild>& cachedItems) = 0;
+    
+    virtual LazyForEachChild OnGetChildByIndexNew(int32_t index,
+        std::map<int32_t, LazyForEachChild>& cachedItems,
+        std::unordered_map<std::string, LazyForEachCacheChild>& expiringItems) = 0;
 
     virtual void OnExpandChildrenOnInitialInNG() = 0;
 
@@ -498,6 +545,15 @@ private:
     std::map<int32_t, LazyForEachChild> cachedItems_;
     std::unordered_map<std::string, LazyForEachCacheChild> expiringItem_;
     std::list<RefPtr<UINode>> nodeList_;
+    std::map<int32_t, OperationInfo> operationList_;
+    std::map<std::string, int32_t> operationTypeMap = {
+        {"add", 1},
+        {"delete", 2},
+        {"change", 3},
+        {"move", 4},
+        {"exchange", 5},
+        {"reload", 6}
+    };
 
     int32_t startIndex_ = -1;
     int32_t endIndex_ = -1;
@@ -505,6 +561,7 @@ private:
     int32_t preBuildingIndex_ = -1;
     bool needTransition = false;
     bool isLoop_ = false;
+    bool useNewInterface_ = false;
     ACE_DISALLOW_COPY_AND_MOVE(LazyForEachBuilder);
 };
 } // namespace OHOS::Ace::NG

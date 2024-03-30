@@ -13,103 +13,9 @@
  * limitations under the License.
  */
 
-#include <cstdint>
-#include <memory>
-#include <utility>
-
-#include "gtest/gtest.h"
-
-#include "base/geometry/ng/size_t.h"
-#include "base/geometry/offset.h"
-#include "base/memory/ace_type.h"
-#define private public
-#define protected public
-#include "test/mock/base/mock_task_executor.h"
-#include "test/mock/core/common/mock_container.h"
-#include "test/mock/core/common/mock_theme_manager.h"
-#include "test/mock/core/pipeline/mock_pipeline_context.h"
-#include "test/mock/core/rosen/mock_canvas.h"
-#include "test/unittest/core/pattern/test_ng.h"
-
-#include "core/animation/animator.h"
-#include "core/components/common/layout/grid_system_manager.h"
-#include "core/components/common/properties/color.h"
-#include "core/components/scroll/scroll_bar_theme.h"
-#include "core/components_ng/base/view_abstract.h"
-#include "core/components_ng/base/view_abstract_model_ng.h"
-#include "core/components_ng/base/view_stack_processor.h"
-#include "core/components_ng/layout/layout_wrapper.h"
-#include "core/components_ng/pattern/linear_layout/column_model_ng.h"
-#include "core/components_ng/pattern/linear_layout/row_model_ng.h"
-#include "core/components_ng/pattern/pattern.h"
-#include "core/components_ng/pattern/scroll/effect/scroll_fade_effect.h"
-#include "core/components_ng/pattern/scroll/scroll_model_ng.h"
-#include "core/components_ng/pattern/scroll/scroll_pattern.h"
-#include "core/components_ng/pattern/scroll/scroll_spring_effect.h"
-#include "core/components_ng/pattern/scrollable/scrollable_paint_property.h"
-#include "core/components_v2/inspector/inspector_constants.h"
-#include "core/pipeline/base/constants.h"
-
-using namespace testing;
-using namespace testing::ext;
+#include "scroll_test_ng.h"
 
 namespace OHOS::Ace::NG {
-namespace {
-constexpr float SCROLL_WIDTH = 480.f;
-constexpr float SCROLL_HEIGHT = 800.f;
-constexpr int32_t TOTAL_LINE_NUMBER = 10;
-constexpr int32_t VIEW_LINE_NUMBER = 8;
-constexpr int32_t SNAP_ITEM_NUMBER = 30;
-constexpr float DEFAULT_ACTIVE_WIDTH = 8.0f;
-constexpr float DEFAULT_INACTIVE_WIDTH = 4.0f;
-constexpr float DEFAULT_NORMAL_WIDTH = 4.0f;
-constexpr float DEFAULT_TOUCH_WIDTH = 32.0f;
-constexpr float ITEM_WIDTH = SCROLL_WIDTH / VIEW_LINE_NUMBER;
-constexpr float ITEM_HEIGHT = SCROLL_HEIGHT / VIEW_LINE_NUMBER;
-constexpr float VERTICAL_SCROLLABLE_DISTANCE = (TOTAL_LINE_NUMBER - VIEW_LINE_NUMBER) * ITEM_HEIGHT;
-constexpr float SNAP_SCROLLABLE_DISTANCE = (SNAP_ITEM_NUMBER - VIEW_LINE_NUMBER) * ITEM_HEIGHT;
-constexpr float NORMAL_WIDTH = 4.f;
-constexpr float SCROLL_PAGING_SPEED_THRESHOLD = 1200.0f;
-} // namespace
-
-class ScrollTestNg : public TestNG {
-public:
-    static void SetUpTestSuite();
-    static void TearDownTestSuite();
-    void SetUp() override;
-    void TearDown() override;
-    void GetInstance();
-    void UpdateCurrentOffset(float offset);
-
-    void Create(const std::function<void(ScrollModelNG)>& callback = nullptr);
-    void CreateWithContent(
-        const std::function<void(ScrollModelNG)>& callback = nullptr, int32_t childNumber = TOTAL_LINE_NUMBER);
-    void CreateSnapScroll(ScrollSnapAlign scrollSnapAlign, const Dimension& intervalSize,
-        const std::vector<Dimension>& snapPaginations, const std::pair<bool, bool>& enableSnapToSide);
-
-    static void CreateContent(int32_t childNumber = TOTAL_LINE_NUMBER);
-    RefPtr<FrameNode> GetContentChild(int32_t index);
-    void Touch(TouchLocationInfo locationInfo, SourceType sourceType);
-    void Touch(TouchType touchType, Offset offset, SourceType sourceType);
-    void Mouse(MouseInfo mouseInfo);
-    void Mouse(Offset moveOffset);
-    void Hover(bool isHover);
-    bool OnScrollCallback(float offset, int32_t source);
-    void ScrollToEdge(ScrollEdgeType scrollEdgeType);
-    static Axis GetAxis();
-    float GetOffset(float childNumber);
-    AssertionResult UpdateAndVerifyPosition(float offset, float expectOffset, int32_t source = SCROLL_FROM_UPDATE);
-    AssertionResult ScrollToNode(int32_t childIndex, float expectChildNumber);
-    AssertionResult IsEqualCurrentPosition(float expectOffset);
-
-    RefPtr<FrameNode> frameNode_;
-    RefPtr<ScrollPattern> pattern_;
-    RefPtr<ScrollEventHub> eventHub_;
-    RefPtr<ScrollLayoutProperty> layoutProperty_;
-    RefPtr<ScrollablePaintProperty> paintProperty_;
-    RefPtr<ScrollAccessibilityProperty> accessibilityProperty_;
-};
-
 void ScrollTestNg::SetUpTestSuite()
 {
     TestNG::SetUpTestSuite();
@@ -136,6 +42,7 @@ void ScrollTestNg::TearDown()
     layoutProperty_ = nullptr;
     paintProperty_ = nullptr;
     accessibilityProperty_ = nullptr;
+    scrollBar_ = nullptr;
 }
 
 void ScrollTestNg::GetInstance()
@@ -228,12 +135,10 @@ RefPtr<FrameNode> ScrollTestNg::GetContentChild(int32_t index)
 
 void ScrollTestNg::Touch(TouchLocationInfo locationInfo, SourceType sourceType)
 {
-    auto touchEventHub = frameNode_->GetOrCreateGestureEventHub();
-    RefPtr<TouchEventImpl> touchEventImpl = touchEventHub->touchEventActuator_->touchEvents_.back();
-    auto touchEvent = touchEventImpl->GetTouchEventCallback();
     TouchEventInfo eventInfo("touch");
     eventInfo.SetSourceDevice(sourceType);
     eventInfo.AddTouchLocationInfo(std::move(locationInfo));
+    auto touchEvent = pattern_->GetScrollBar()->touchEvent_->GetTouchEventCallback();
     touchEvent(eventInfo);
 }
 
@@ -279,6 +184,12 @@ bool ScrollTestNg::OnScrollCallback(float offset, int32_t source)
 void ScrollTestNg::ScrollToEdge(ScrollEdgeType scrollEdgeType)
 {
     pattern_->ScrollToEdge(scrollEdgeType, false);
+    FlushLayoutTask(frameNode_);
+}
+
+void ScrollTestNg::ScrollTo(float offset)
+{
+    pattern_->ScrollTo(offset);
     FlushLayoutTask(frameNode_);
 }
 
@@ -1123,6 +1034,41 @@ HWTEST_F(ScrollTestNg, ScrollBarAnimation003, TestSize.Level1)
 }
 
 /**
+ * @tc.name: ScrollBarAnimation004
+ * @tc.desc: Test onDraw
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollTestNg, ScrollBarAnimation004, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. BarWidth is 0
+     * @tc.expected: Not draw bar
+     */
+    CreateWithContent([](ScrollModelNG model) {
+        model.SetDisplayMode(static_cast<int>(DisplayMode::ON));
+        model.SetScrollBarWidth(Dimension(0.f));
+    });
+    Testing::MockCanvas canvas;
+    EXPECT_CALL(canvas, DrawRoundRect(_)).Times(0);
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    PaintWrapper paintWrapper(nullptr, geometryNode, paintProperty_);
+    auto paint = pattern_->CreateNodePaintMethod();
+    auto scrollPaint = AceType::DynamicCast<ScrollPaintMethod>(paint);
+    auto modifier = scrollPaint->GetOverlayModifier(&paintWrapper);
+    auto scrollBarOverlayModifier = AceType::DynamicCast<ScrollBarOverlayModifier>(modifier);
+    DrawingContext drawingContext = { canvas, SCROLL_WIDTH, SCROLL_HEIGHT };
+    scrollBarOverlayModifier->onDraw(drawingContext);
+
+    /**
+     * @tc.steps: step1. No scrollBar
+     * @tc.expected: Not draw bar
+     */
+    paintProperty_->UpdateScrollBarMode(DisplayMode::OFF);
+    FlushLayoutTask(frameNode_);
+    scrollBarOverlayModifier->onDraw(drawingContext);
+}
+
+/**
  * @tc.name: SpringEffect001
  * @tc.desc: Test SpringEffect
  * @tc.type: FUNC
@@ -1144,8 +1090,31 @@ HWTEST_F(ScrollTestNg, SpringEffect001, TestSize.Level1)
     pattern_->SetDirection(FlexDirection::ROW_REVERSE);
     pattern_->SetEdgeEffect(EdgeEffect::SPRING);
     springEffect->ProcessScrollOver(0.0);
+}
 
-    EXPECT_TRUE(true);
+/**
+ * @tc.name: SpringEffect002
+ * @tc.desc: Test SpringEffect
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollTestNg, SpringEffect002, TestSize.Level1)
+{
+    auto springEffect = AceType::MakeRefPtr<ScrollSpringEffect>();
+    springEffect->ProcessSpringUpdate();
+
+    CreateWithContent([](ScrollModelNG model) { model.SetEdgeEffect(EdgeEffect::SPRING, true); });
+    springEffect = AceType::DynamicCast<ScrollSpringEffect>(pattern_->GetScrollEdgeEffect());
+    auto scrollable = AceType::MakeRefPtr<Scrollable>();
+    springEffect->SetScrollable(scrollable);
+    springEffect->ProcessSpringUpdate();
+
+    scrollable->MarkAvailable(false);
+    springEffect->ProcessSpringUpdate();
+
+    pattern_->SetDirection(FlexDirection::ROW_REVERSE);
+    pattern_->SetEdgeEffect(EdgeEffect::SPRING);
+    springEffect->ProcessSpringUpdate();
+    EXPECT_TRUE(springEffect->scrollable_->isSpringAnimationStop_);
 }
 
 /**
@@ -2175,18 +2144,27 @@ HWTEST_F(ScrollTestNg, ScrollBar004, TestSize.Level1)
     scrollBar->SetShapeMode(ShapeMode::ROUND);
     EXPECT_FALSE(scrollBar->InBarTouchRegion(Point(0, 0)));
     EXPECT_FALSE(scrollBar->InBarHoverRegion(Point(0, 0)));
+    EXPECT_FALSE(scrollBar->InBarRectRegion(Point(0, 0)));
     scrollBar->FlushBarWidth();
 
     scrollBar->SetDisplayMode(DisplayMode::OFF);
     EXPECT_FALSE(scrollBar->InBarTouchRegion(Point(0, 0)));
     EXPECT_FALSE(scrollBar->InBarHoverRegion(Point(0, 0)));
+    EXPECT_FALSE(scrollBar->InBarRectRegion(Point(0, 0)));
 
     scrollBar->SetPositionMode(PositionMode::LEFT);
     scrollBar->UpdateActiveRectSize(20.f);
     EXPECT_EQ(scrollBar->touchRegion_.Height(), 20.f);
     scrollBar->UpdateActiveRectOffset(30.f);
     EXPECT_EQ(scrollBar->touchRegion_.Top(), 30.f);
+
     scrollBar->SetPositionMode(PositionMode::BOTTOM);
+    scrollBar->UpdateActiveRectSize(20.f);
+    EXPECT_EQ(scrollBar->touchRegion_.Width(), 20.f);
+    scrollBar->UpdateActiveRectOffset(30.f);
+    EXPECT_EQ(scrollBar->touchRegion_.Left(), 30.f);
+
+    scrollBar->SetPositionMode(PositionMode::RIGHT);
     scrollBar->UpdateActiveRectSize(20.f);
     EXPECT_EQ(scrollBar->touchRegion_.Width(), 20.f);
     scrollBar->UpdateActiveRectOffset(30.f);
@@ -3424,26 +3402,6 @@ HWTEST_F(ScrollTestNg, CaleSnapOffsetsByPaginations002, TestSize.Level1)
     EXPECT_TRUE(pattern_->CalePredictSnapOffset(-900.f).has_value());
     EXPECT_DOUBLE_EQ(pattern_->CalePredictSnapOffset(-900.f).value(), -900.f);
     EXPECT_FALSE(pattern_->CalePredictSnapOffset(-901.f).has_value());
-}
-
-/**
- * @tc.name: Drag001
- * @tc.desc: Test snap
- * @tc.type: FUNC
- */
-HWTEST_F(ScrollTestNg, Drag001, TestSize.Level1)
-{
-    CreateWithContent();
-    auto scrollBar = pattern_->GetScrollBar();
-    GestureEvent info;
-    scrollBar->HandleDragStart(info);
-    EXPECT_TRUE(scrollBar->isDriving_);
-    scrollBar->HandleDragUpdate(info);
-    info.SetMainVelocity(0.0);
-    scrollBar->HandleDragEnd(info);
-    EXPECT_FALSE(scrollBar->isDriving_);
-    info.SetMainVelocity(1000.0);
-    scrollBar->HandleDragEnd(info);
 }
 
 /**

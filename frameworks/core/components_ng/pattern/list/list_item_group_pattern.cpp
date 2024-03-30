@@ -118,6 +118,8 @@ bool ListItemGroupPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>&
     headerMainSize_ = layoutAlgorithm->GetHeaderMainSize();
     footerMainSize_ = layoutAlgorithm->GetFooterMainSize();
     layoutedItemInfo_ = layoutAlgorithm->GetLayoutedItemInfo();
+    startHeaderPos_ = layoutAlgorithm->GetStartHeaderPos();
+    endFooterPos_ = layoutAlgorithm->GetEndFooterPos();
     layouted_ = true;
     CheckListDirectionInCardStyle();
     auto host = GetHost();
@@ -170,5 +172,51 @@ void ListItemGroupPattern::CheckListDirectionInCardStyle()
         CHECK_NULL_VOID(listPattern);
         listPattern->SetNeedToUpdateListDirectionInCardStyle(true);
     }
+}
+
+VisibleContentInfo ListItemGroupPattern::GetStartListItemIndex()
+{
+    bool isHeader = false;
+    auto startHeaderMainSize = GetHeaderMainSize();
+    auto startFooterMainSize = GetFooterMainSize();
+    if (GetDisplayStartIndexInGroup() == 0) {
+        auto startHeaderPos = startHeaderPos_;
+        isHeader = (startHeaderPos + startHeaderMainSize) > 0 ? true : false;
+    }
+    auto startPositionSize = GetItemPosition().size();
+    auto startItemIndexInGroup = GetDisplayStartIndexInGroup();
+    auto startArea = ListItemGroupArea::IN_LIST_ITEM_AREA;
+    if (startPositionSize == 0 && startFooterMainSize > 0) {
+        startArea = ListItemGroupArea::IN_FOOTER_AREA;
+    }
+    if (startItemIndexInGroup == 0 && isHeader && startHeaderMainSize > 0) {
+        startArea = ListItemGroupArea::IN_HEADER_AREA;
+    }
+    if (startHeaderMainSize == 0 && startFooterMainSize == 0 && GetTotalItemCount() == 0) {
+        startArea = ListItemGroupArea::NONE_AREA;
+    }
+    VisibleContentInfo startInfo = {startArea, startItemIndexInGroup};
+    return startInfo;
+}
+
+VisibleContentInfo ListItemGroupPattern::GetEndListItemIndex()
+{
+    bool isFooter = endFooterPos_ < 0 ? true : false;
+    auto endHeaderMainSize = GetHeaderMainSize();
+    auto endFooterMainSize = GetFooterMainSize();
+    auto endPositionSize = GetItemPosition().size();
+    auto endItemIndexInGroup = GetDisplayEndIndexInGroup();
+    auto endArea = ListItemGroupArea::IN_LIST_ITEM_AREA;
+    if (endPositionSize == 0 && endHeaderMainSize > 0) {
+        endArea = ListItemGroupArea::IN_HEADER_AREA;
+    }
+    if (isFooter && endFooterMainSize > 0) {
+        endArea = ListItemGroupArea::IN_FOOTER_AREA;
+    }
+    if (endHeaderMainSize == 0 && endFooterMainSize == 0 && GetTotalItemCount() == 0) {
+        endArea = ListItemGroupArea::NONE_AREA;
+    }
+    VisibleContentInfo endInfo = {endArea, endItemIndexInGroup};
+    return endInfo;
 }
 } // namespace OHOS::Ace::NG

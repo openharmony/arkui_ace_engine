@@ -24,7 +24,8 @@
 
 namespace OHOS::Ace::NG {
 
-void RadioModelNG::Create(const std::optional<std::string>& value, const std::optional<std::string>& group)
+void RadioModelNG::Create(const std::optional<std::string>& value, const std::optional<std::string>& group,
+    const std::optional<int32_t>& indicator)
 {
     auto* stack = ViewStackProcessor::GetInstance();
     int32_t nodeId = stack->ClaimNodeId();
@@ -40,6 +41,23 @@ void RadioModelNG::Create(const std::optional<std::string>& value, const std::op
     if (group.has_value()) {
         eventHub->SetGroup(group.value());
     }
+    if (indicator.has_value()) {
+        SetRadioIndicator(indicator.value());
+    }
+}
+
+void RadioModelNG::SetBuilder(std::function<void()>&& buildFunc)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto radioPattern = frameNode->GetPattern<RadioPattern>();
+    CHECK_NULL_VOID(radioPattern);
+    radioPattern->SetBuilder(std::move(buildFunc));
+}
+
+void RadioModelNG::SetRadioIndicator(int32_t indicator)
+{
+    ACE_UPDATE_PAINT_PROPERTY(RadioPaintProperty, RadioIndicator, indicator);
 }
 
 void RadioModelNG::SetChecked(bool isChecked)

@@ -44,8 +44,9 @@ void JSImageSpan::SetObjectFit(const JSCallbackInfo& info)
         return;
     }
 
-    if (info[0]->IsNumber()) {
-        auto fit = static_cast<ImageFit>(info[0]->ToNumber<int32_t>());
+    JSRef<JSVal> args = info[0];
+    if (args->IsNumber()) {
+        auto fit = static_cast<ImageFit>(args->ToNumber<int32_t>());
         if (fit < ImageFit::FILL || fit > ImageFit::SCALE_DOWN) {
             fit = ImageFit::COVER;
         }

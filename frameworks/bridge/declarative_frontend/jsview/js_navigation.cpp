@@ -293,6 +293,7 @@ void JSNavigation::Create(const JSCallbackInfo& info)
             JSNavPathStack::SetNativeNavPathStack(newObj, nativeObj);
             jsStack->SetDataSourceObj(newObj);
         }
+        jsStack->SetJSExecutionContext(info.GetExecutionContext());
     };
     NavigationModel::GetInstance()->SetNavigationStackWithCreatorAndUpdater(stackCreator, stackUpdater);
 }
@@ -383,7 +384,6 @@ void JSNavigation::SetTitle(const JSCallbackInfo& info)
             NavigationModel::GetInstance()->SetCustomTitle(customNode);
         }
     } else {
-        TAG_LOGI(AceLogTag::ACE_NAVIGATION, "SetTitle is undefined");
         NavigationModel::GetInstance()->ParseCommonTitle(false, false, "", "");
         return;
     }
@@ -715,7 +715,6 @@ void JSNavigation::SetNavDestination(const JSCallbackInfo& info)
     auto navigationStack = NavigationModel::GetInstance()->GetNavigationStack();
     auto jsNavigationStack = AceType::DynamicCast<JSNavigationStack>(navigationStack);
     if (jsNavigationStack) {
-        jsNavigationStack->SetJSExecutionContext(info.GetExecutionContext());
         jsNavigationStack->SetNavDestBuilderFunc(JSRef<JSFunc>::Cast(builder));
     }
 }

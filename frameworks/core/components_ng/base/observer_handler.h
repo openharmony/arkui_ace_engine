@@ -126,8 +126,7 @@ public:
         AbilityContextInfo&, napi_value, int32_t, const std::string&, const std::string&, RouterPageState);
     using DrawCommandSendHandleFunc = void (*)();
     using LayoutDoneHandleFunc = void (*)();
-    using NavDestinationSwitchHandleFunc = void (*)(
-        const AbilityContextInfo&, NavDestinationSwitchInfo&);
+    using NavDestinationSwitchHandleFunc = std::function<void(const AbilityContextInfo&, NavDestinationSwitchInfo&)>;
     void SetHandleNavigationChangeFunc(NavigationHandleFunc func);
     void SetHandleScrollEventChangeFunc(ScrollEventHandleFunc func);
     void SetHandleRouterPageChangeFunc(RouterPageHandleFunc func);
@@ -145,7 +144,7 @@ private:
     LayoutDoneHandleFunc layoutDoneHandleFunc_ = nullptr;
     DrawCommandSendHandleFunc drawCommandSendHandleFunc_ = nullptr;
     DensityHandleFunc densityHandleFunc_;
-    NavDestinationSwitchHandleFunc navDestinationSwitchHandleFunc_ = nullptr;
+    NavDestinationSwitchHandleFunc navDestinationSwitchHandleFunc_;
 
     napi_value GetUIContextValue();
 };

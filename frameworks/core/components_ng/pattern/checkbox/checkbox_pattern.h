@@ -200,6 +200,7 @@ private:
     void UpdateCheckBoxGroupStatusWhenDetach(const FrameNode* frameNode,
         std::unordered_map<std::string, std::list<WeakPtr<FrameNode>>>& checkBoxGroupMap);
     void CheckBoxGroupIsTrue();
+    void SetPrePageIdToLastPageId();
     // Init key event
     void InitOnKeyEvent(const RefPtr<FocusHub>& focusHub);
     void GetInnerFocusPaintRect(RoundRect& paintRect);
@@ -207,6 +208,10 @@ private:
     void RemoveLastHotZoneRect() const;
     void SetAccessibilityAction();
     void UpdateSelectStatus(bool isSelected);
+    void ChangeSelfStatusAndNotify(const RefPtr<CheckBoxPaintProperty>& paintProperty,
+        std::unordered_map<std::string, std::list<WeakPtr<FrameNode>>> checkBoxGroupMap);
+    void ChangeGroupStatusAndNotify(const RefPtr<FrameNode>& checkBoxGroupNode, const std::vector<std::string>& vec,
+        bool haveCheckBoxSelected, bool isAllCheckBoxSelected);
 
     std::optional<std::string> preName_;
     std::optional<std::string> preGroup_;
@@ -230,6 +235,7 @@ private:
     TouchHoverAnimationType touchHoverType_ = TouchHoverAnimationType::NONE;
 
     RefPtr<CheckBoxModifier> checkboxModifier_;
+    WeakPtr<GroupManager> groupManager_;
 
     ACE_DISALLOW_COPY_AND_MOVE(CheckBoxPattern);
 };

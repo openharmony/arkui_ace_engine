@@ -938,6 +938,7 @@ napi_value JsiDeclarativeEngineInstance::GetContextValue()
 }
 
 thread_local std::unordered_map<std::string, NamedRouterProperty> JsiDeclarativeEngine::namedRouterRegisterMap_;
+thread_local std::unordered_map<std::string, panda::Global<panda::ObjectRef>> JsiDeclarativeEngine::builderMap_;
 panda::Global<panda::ObjectRef> JsiDeclarativeEngine::obj_;
 
 // -----------------------
@@ -1481,6 +1482,15 @@ bool JsiDeclarativeEngine::LoadPageSource(
         return false;
     }
     return true;
+}
+
+int32_t JsiDeclarativeEngine::LoadNavDestinationSource(const std::string& bundleName,
+    const std::string& moduleName, const std::string& pageSourceFile, bool isSingleton)
+{
+    auto runtime = engineInstance_->GetJsRuntime();
+    CHECK_NULL_RETURN(runtime, false);
+    auto arkRuntime = std::static_pointer_cast<ArkJSRuntime>(runtime);
+    return arkRuntime->LoadDestinationFile(bundleName, moduleName, pageSourceFile, isSingleton);
 }
 
 void JsiDeclarativeEngine::AddToNamedRouterMap(const EcmaVM* vm, panda::Global<panda::FunctionRef> pageGenerator,
@@ -2206,6 +2216,26 @@ bool JsiDeclarativeEngine::OnRestoreData(const std::string& data)
     }
     std::vector<shared_ptr<JsValue>> argv = { jsonObj };
     return CallAppFunc("onRestoreData", argv);
+}
+
+void JsiDeclarativeEngine::AddToNavigationBuilderMap(std::string name,
+    panda::Global<panda::ObjectRef> builderFunc)
+{
+    auto ret = builderMap_.insert(std::pair<std::string, panda::Global<panda::ObjectRef>>(name, builderFunc));
+    if (!ret.second) {
+        TAG_LOGW(AceLogTag::ACE_NAVIGATION, "insert builder failed, update builder: %{public}s", name.c_str());
+        builderMap_[name] = builderFunc;
+    }
+}
+
+panda::Global<panda::ObjectRef> JsiDeclarativeEngine::GetNavigationBuilder(std::string name)
+{
+    auto targetBuilder = builderMap_.find(name);
+    if (targetBuilder == builderMap_.end()) {
+        TAG_LOGI(AceLogTag::ACE_NAVIGATION, "get navDestination builder failed: %{public}s", name.c_str());
+        return panda::Global<panda::ObjectRef>();
+    }
+    return targetBuilder->second;
 }
 
 // ArkTsCard start

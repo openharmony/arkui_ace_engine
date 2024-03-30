@@ -137,6 +137,12 @@ public:
         return "";
     }
 
+    virtual int32_t LoadNavDestinationSource(const std::string& pageUrl, const std::string& bundleName,
+        const std::string& moduleName, bool isSingleton)
+    {
+        return false;
+    }
+
     virtual bool UpdateRootComponent()
     {
         return false;

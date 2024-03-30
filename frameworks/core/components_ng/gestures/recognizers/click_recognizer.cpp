@@ -278,10 +278,6 @@ void ClickRecognizer::HandleTouchUpEvent(const TouchEvent& event)
     if (refereeState_ != RefereeState::PENDING && refereeState_ != RefereeState::FAIL) {
         Adjudicate(AceType::Claim(this), GestureDisposal::PENDING);
     }
-
-    if (currentTouchPointsNum_ < fingers_ && equalsToFingers_) {
-        DeadlineTimer(fingerDeadlineTimer_, MULTI_FINGER_TIMEOUT);
-    }
 }
 
 void ClickRecognizer::HandleTouchMoveEvent(const TouchEvent& event)

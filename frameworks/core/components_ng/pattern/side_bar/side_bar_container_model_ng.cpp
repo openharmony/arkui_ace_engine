@@ -332,7 +332,12 @@ void SideBarContainerModelNG::SetMaxSideBarWidth(FrameNode* frameNode, const Dim
 
 void SideBarContainerModelNG::SetMinContentWidth(FrameNode* frameNode, const Dimension& minContentWidth)
 {
-    ACE_UPDATE_NODE_LAYOUT_PROPERTY(SideBarContainerLayoutProperty, MinContentWidth, minContentWidth, frameNode);
+    if (minContentWidth.IsNonNegative()) {
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(SideBarContainerLayoutProperty, MinContentWidth, minContentWidth, frameNode);
+    } else {
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(
+            SideBarContainerLayoutProperty, MinContentWidth, DEFAULT_MIN_CONTENT_WIDTH, frameNode);
+    }
 }
 
 void SideBarContainerModelNG::SetSideBarPosition(FrameNode* frameNode, SideBarPosition sideBarPosition)

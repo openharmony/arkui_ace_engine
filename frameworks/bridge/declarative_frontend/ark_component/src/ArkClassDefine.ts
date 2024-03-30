@@ -246,12 +246,14 @@ class ArkForegroundBlurStyle {
   colorMode: number | undefined;
   adaptiveColor: number | undefined;
   scale: number | undefined;
+  blurOptions: BlurOptions | undefined;
 
   constructor() {
     this.blurStyle = undefined;
     this.colorMode = undefined;
     this.adaptiveColor = undefined;
     this.scale = undefined;
+    this.blurOptions = undefined;
   }
 
   isEqual(another: ArkForegroundBlurStyle): boolean {
@@ -259,7 +261,8 @@ class ArkForegroundBlurStyle {
       this.blurStyle === another.blurStyle &&
       this.colorMode === another.colorMode &&
       this.adaptiveColor === another.adaptiveColor &&
-      this.scale === another.scale
+      this.scale === another.scale &&
+      this.blurOptions === another.blurOptions
     );
   }
 }
@@ -453,12 +456,14 @@ class ArkBackgroundBlurStyle {
   colorMode: number | undefined;
   adaptiveColor: number | undefined;
   scale: number | undefined;
+  blurOptions: BlurOptions | undefined;
 
   constructor() {
     this.blurStyle = undefined;
     this.colorMode = undefined;
     this.adaptiveColor = undefined;
     this.scale = undefined;
+    this.blurOptions = undefined;
   }
 
   isEqual(another: ArkBackgroundBlurStyle): boolean {
@@ -466,7 +471,8 @@ class ArkBackgroundBlurStyle {
       this.blurStyle === another.blurStyle &&
       this.colorMode === another.colorMode &&
       this.adaptiveColor === another.adaptiveColor &&
-      this.scale === another.scale
+      this.scale === another.scale &&
+      this.blurOptions === another.blurOptions
     );
   }
 }

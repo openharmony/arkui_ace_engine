@@ -852,6 +852,8 @@ public:
 
     void OnDataBulkDeleted(size_t index, size_t count) override {};
 
+    void OnDatasetChange(const std::list<V2::Operation>& DataOperations) override {};
+
     void OnDataChanged(size_t index) override
     {
         LOGI("OnDataChanged(%{public}zu)", index);

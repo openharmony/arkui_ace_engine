@@ -43,11 +43,15 @@
 namespace OHOS::Ace {
 namespace {
 constexpr int32_t MAXIMUM_WAITING_PERIOD = 2800;
-constexpr OHOS::HiviewDFX::HiLogLabel ACE_DOWNLOAD_MANAGER = { LOG_CORE, 0xC0393A, "DownloadManager" };
-#define LOGI(fmt, ...) \
-    (void)OHOS::HiviewDFX::HiLog::Info(ACE_DOWNLOAD_MANAGER, "[%{public}d]" fmt, __LINE__, ##__VA_ARGS__)
-#define LOGE(fmt, ...) \
-    (void)OHOS::HiviewDFX::HiLog::Error(ACE_DOWNLOAD_MANAGER, "[%{public}d]" fmt, __LINE__, ##__VA_ARGS__)
+
+#define PRINT_LOG(level, fmt, ...) \
+    HILOG_IMPL(LOG_CORE, LOG_##level, 0xD00393A, "DownloadManager", "[%{public}s:%{public}d]" fmt, \
+        __FUNCTION__, __LINE__, ##__VA_ARGS__)
+
+#define LOGE(fmt, ...) PRINT_LOG(ERROR, fmt, ##__VA_ARGS__)
+#define LOGW(fmt, ...) PRINT_LOG(WARN, fmt, ##__VA_ARGS__)
+#define LOGI(fmt, ...) PRINT_LOG(INFO, fmt, ##__VA_ARGS__)
+#define LOGD(fmt, ...) PRINT_LOG(DEBUG, fmt, ##__VA_ARGS__)
 } // namespace
 
 // For sync download tasks, this period may cause image not able to be loaded.
@@ -134,7 +138,8 @@ public:
         auto task = session.CreateTask(httpReq);
         task->OnSuccess([successCallback = std::move(downloadCallback.successCallback), instanceId](
                             const NetStackRequest& request, const NetStackResponse& response) {
-            LOGI("Async http task of url [%{private}s] success", request.GetURL().c_str());
+            LOGI("Async http task of url [%{private}s] success, the responseCode = %d", request.GetURL().c_str(),
+                response.GetResponseCode());
             successCallback(std::move(response.GetResult()), true, instanceId);
         });
         task->OnCancel([cancelCallback = std::move(downloadCallback.cancelCallback), instanceId](
@@ -178,7 +183,8 @@ public:
         auto task = session.CreateTask(httpReq);
         std::shared_ptr<DownloadCondition> downloadCondition = std::make_shared<DownloadCondition>();
         task->OnSuccess([downloadCondition](const NetStackRequest& request, const NetStackResponse& response) {
-            LOGI("Sync Http task of url [%{private}s] success", request.GetURL().c_str());
+            LOGI("Sync http task of url [%{private}s] success, the responseCode = %d", request.GetURL().c_str(),
+                response.GetResponseCode());
             {
                 std::unique_lock<std::mutex> taskLock(downloadCondition->downloadMutex);
                 downloadCondition->downloadSuccess = true;

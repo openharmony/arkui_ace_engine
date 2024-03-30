@@ -145,6 +145,13 @@ enum class VsyncExcepType {
 
 enum class RawEventType { WARNING, FREEZE, RECOVER };
 
+enum class PerformanceExecpType {
+    PAGE_LAYOUT_TIMEOUT = 0,
+    PAGE_NODE_OVERFLOW,
+    PAGE_DEPTH_OVERFLOW,
+    FUNCTION_TIMEOUT
+};
+
 struct EventInfo {
     std::string eventType;
     int32_t errorType = 0;
@@ -189,6 +196,8 @@ public:
     static void ReportJankFrameFiltered(JankInfo& info);
     static void ReportDoubleClickTitle(int32_t stateChange);
     static void ReportClickTitleMaximizeMenu(int32_t maxMenuItem, int32_t stateChange);
+    static void PerformanceEventReport(PerformanceExecpType type, const std::string& pageUrl,
+        const std::string& msg ="");
 
 private:
     static void SendEventInner(const EventInfo& eventInfo);

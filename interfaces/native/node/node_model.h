@@ -30,6 +30,7 @@ struct ArkUI_Node {
     int32_t type;
     ArkUINodeHandle uiNodeHandle = nullptr;
     void* extraData = nullptr;
+    void* extraCustomData = nullptr;
 };
 
 constexpr int BASIC_COMPONENT_NUM = 18;

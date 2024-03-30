@@ -248,6 +248,14 @@ public:
 
     virtual void GetUIFontConfig(FontConfigJsonInfo& fontConfigJsonInfo) {}
 
+    virtual void AddFrameNodeToOverlay(
+        const RefPtr<NG::FrameNode>& node, std::optional<int32_t> index = std::nullopt) {}
+    virtual void RemoveFrameNodeOnOverlay(const RefPtr<NG::FrameNode>& node) {}
+    virtual void ShowNodeOnOverlay(const RefPtr<NG::FrameNode>& node) {}
+    virtual void HideNodeOnOverlay(const RefPtr<NG::FrameNode>& node) {}
+    virtual void ShowAllNodesOnOverlay() {}
+    virtual void HideAllNodesOnOverlay() {}
+
     virtual SingleTaskExecutor GetAnimationJsTask() = 0;
 
     virtual SingleTaskExecutor GetUiTask() = 0;

@@ -278,7 +278,7 @@ public:
     virtual void SetOnChangeEvent(std::function<void(const std::string&)>&& func) = 0;
     virtual void SetFocusableAndFocusNode() {};
     virtual void SetSelectionMenuHidden(bool contextMenuHidden) = 0;
-    virtual void SetCustomKeyboard(const std::function<void()>&& buildFunc) = 0;
+    virtual void SetCustomKeyboard(const std::function<void()>&& buildFunc, bool supportAvoidance = false) = 0;
     virtual void SetCounterType(int32_t value) {};
     virtual void SetShowCounterBorder(bool value) {};
     virtual void SetCleanNodeStyle(CleanNodeStyle cleanNodeStyle) = 0;
@@ -297,6 +297,7 @@ public:
     virtual void SetTextDecoration(Ace::TextDecoration value) {};
     virtual void SetTextDecorationColor(const Color& value) {};
     virtual void SetTextDecorationStyle(Ace::TextDecorationStyle value) {};
+    virtual void SetFontFeature(const std::unordered_map<std::string, int32_t>& value) = 0;
 
 private:
     static std::unique_ptr<TextFieldModel> instance_;

@@ -6099,13 +6099,13 @@ class ViewPU extends NativeViewPartialUpdate {
                 this.aboutToReuse(params);
             }
         }, "aboutToReuse", this.constructor.name);
+        this.updateDirtyElements();
         this.childrenWeakrefMap_.forEach((weakRefChild) => {
             const child = weakRefChild.deref();
             if (child && !child.hasBeenRecycled_) {
                 child.aboutToReuseInternal();
             }
         });
-        this.updateDirtyElements();
         this.runReuse_ = false;
     }
     aboutToRecycleInternal() {
@@ -7253,7 +7253,7 @@ ObserveV3.arraySetMapProxy = {
  * part of SDK
  * @from 12
  */
-const track = (target, propertyKey) => {
+const Trace = (target, propertyKey) => {
     ConfigureStateMgmt.instance.intentUsingV3(`@track`, propertyKey);
     return trackInternal(target, propertyKey);
 };
@@ -7286,7 +7286,7 @@ const trackInternal = (target, propertyKey) => {
     // used by IsObservedObjectV3
     (_a = target[_b = ObserveV3.V3_DECO_META]) !== null && _a !== void 0 ? _a : (target[_b] = {});
 }; // track
-function observed(BaseClass) {
+function ObservedV2(BaseClass) {
     ConfigureStateMgmt.instance.intentUsingV3(`@observed`, BaseClass === null || BaseClass === void 0 ? void 0 : BaseClass.name);
     // prevent @Track inside @observed class
     if (BaseClass.prototype && Reflect.has(BaseClass.prototype, TrackedObject.___IS_TRACKED_OPTIMISED)) {

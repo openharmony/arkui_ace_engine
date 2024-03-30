@@ -338,6 +338,7 @@ void TextSelectController::MoveHandleToContentRect(RectF& handleRect, float boun
     }
     textFiled->SetTextRect(textRect);
     AdjustHandleAtEdge(handleRect);
+    textFiled->UpdateScrollBarOffset();
 }
 
 void TextSelectController::AdjustHandleAtEdge(RectF& handleRect) const

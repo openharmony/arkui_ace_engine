@@ -292,9 +292,30 @@ void EventHub::FireOnSizeChanged(const RectF& oldRect, const RectF& rect)
     }
 }
 
+void EventHub::SetJSFrameNodeOnSizeChangeCallback(OnSizeChangedFunc&& onSizeChanged)
+{
+    onJsFrameNodeSizeChanged_ = std::move(onSizeChanged);
+}
+
+void EventHub::FireJSFrameNodeOnSizeChanged(const RectF& oldRect, const RectF& rect)
+{
+    if (onJsFrameNodeSizeChanged_) {
+        // callback may be overwritten in its invoke so we copy it first
+        auto onSizeChanged = onJsFrameNodeSizeChanged_;
+        onSizeChanged(oldRect, rect);
+    }
+}
+
+void EventHub::ClearJSFrameNodeOnSizeChange()
+{
+    if (onJsFrameNodeSizeChanged_) {
+        onJsFrameNodeSizeChanged_ = nullptr;
+    }
+}
+
 bool EventHub::HasOnSizeChanged() const
 {
-    return static_cast<bool>(onSizeChanged_);
+    return static_cast<bool>(onSizeChanged_) || static_cast<bool>(onJsFrameNodeSizeChanged_);
 }
 
 void EventHub::ClearOnAreaChangedInnerCallbacks()

@@ -27,6 +27,7 @@ namespace OHOS::Ace::NG {
 class CanvasPaintMethod;
 class RosenRenderContext;
 using TaskFunc = std::function<void(CanvasPaintMethod&, PaintWrapper*)>;
+using OnModifierUpdateFunc = std::function<void(void)>;
 class CanvasPaintMethod : public CustomPaintPaintMethod {
     DECLARE_ACE_TYPE(CanvasPaintMethod, CustomPaintPaintMethod)
 public:
@@ -62,6 +63,11 @@ public:
     double GetHeight()
     {
         return lastLayoutSize_.Height();
+    }
+
+    void SetOnModifierUpdateFunc(OnModifierUpdateFunc&& func)
+    {
+        onModifierUpdate_ = std::move(func);
     }
 
     void CloseImageBitmap(const std::string& src);
@@ -132,6 +138,7 @@ private:
     std::list<TaskFunc> tasks_;
 
     RefPtr<Ace::ImageObject> imageObj_ = nullptr;
+    OnModifierUpdateFunc onModifierUpdate_;
 
     ACE_DISALLOW_COPY_AND_MOVE(CanvasPaintMethod);
 };

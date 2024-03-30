@@ -113,6 +113,10 @@
     },
     {
         "first_introduced": "12",
+        "name": "OH_ArkUI_LongPress_GetRepeatCount"
+    },
+    {
+        "first_introduced": "12",
         "name": "OH_ArkUI_PanGesture_GetVelocity"
     },
     {
@@ -130,6 +134,30 @@
     {
         "first_introduced": "12",
         "name": "OH_ArkUI_PanGesture_GetOffsetY"
+    },
+    {
+        "first_introduced": "12",
+        "name": "OH_ArkUI_SwipeGesture_GetAngle"
+    },
+    {
+        "first_introduced": "12",
+        "name": "OH_ArkUI_SwipeGesture_GetVelocity"
+    },
+    {
+        "first_introduced": "12",
+        "name": "OH_ArkUI_RotationGesture_GetAngle"
+    },
+    {
+        "first_introduced": "12",
+        "name": "OH_ArkUI_PinchGesture_GetScale"
+    },
+    {
+        "first_introduced": "12",
+        "name": "OH_ArkUI_PinchGesture_GetCenterX"
+    },
+    {
+        "first_introduced": "12",
+        "name": "OH_ArkUI_PinchGesture_GetCenterY"
     },
     {
         "first_introduced": "12",
@@ -202,5 +230,102 @@
     {
         "first_introduced": "12",
         "name": "OH_NativeXComponent_GetTouchEventSourceType"
+    },
+    {
+        "first_introduced": "12",
+        "name": "OH_ArkUI_LayoutConstraint_Create"
+    },
+    {
+        "first_introduced": "12",
+        "name": "OH_ArkUI_LayoutConstraint_Copy"
+    },
+    {
+        "first_introduced": "12",
+        "name": "OH_ArkUI_LayoutConstraint_Dispose"
+    },
+    {
+        "first_introduced": "12",
+        "name": "OH_ArkUI_NodeCustomEvent_GetLayoutConstraintInMeasure"
+    },
+    {
+        "first_introduced": "12",
+        "name": "OH_ArkUI_NodeCustomEvent_GetPositionInLayout"
+    },
+    {
+        "first_introduced": "12",
+        "name": "OH_ArkUI_NodeCustomEvent_GetDrawContextInDraw"
+    },
+    {
+        "first_introduced": "12",
+        "name": "OH_ArkUI_NodeCustomEvent_GetEventTargetId"
+    },
+    {
+        "first_introduced": "12",
+        "name": "OH_ArkUI_NodeCustomEvent_GetUserData"
+    },
+    {
+        "first_introduced": "12",
+        "name": "OH_ArkUI_NodeCustomEvent_GetNodeHandle"
+    },
+    {
+        "first_introduced": "12",
+        "name": "OH_ArkUI_NodeCustomEvent_GetEventType"
+    },
+    {
+        "first_introduced": "12",
+        "name": "OH_ArkUI_LayoutConstraint_GetMaxWidth"
+    },
+    {
+        "first_introduced": "12",
+        "name": "OH_ArkUI_LayoutConstraint_GetMinWidth"
+    },
+    {
+        "first_introduced": "12",
+        "name": "OH_ArkUI_LayoutConstraint_GetMaxHeight"
+    },
+    {
+        "first_introduced": "12",
+        "name": "OH_ArkUI_LayoutConstraint_GetMinHeight"
+    },
+    {
+        "first_introduced": "12",
+        "name": "OH_ArkUI_LayoutConstraint_GetPercentReferenceWidth"
+    },
+    {
+        "first_introduced": "12",
+        "name": "OH_ArkUI_LayoutConstraint_GetPercentReferenceHeight"
+    },
+    {
+        "first_introduced": "12",
+        "name": "OH_ArkUI_LayoutConstraint_SetMaxWidth"
+    },
+    {
+        "first_introduced": "12",
+        "name": "OH_ArkUI_LayoutConstraint_SetMinWidth"
+    },
+    {
+        "first_introduced": "12",
+        "name": "OH_ArkUI_LayoutConstraint_SetMaxHeight"
+    },
+    {
+        "first_introduced": "12",
+        "name": "OH_ArkUI_LayoutConstraint_SetMinHeight"
+    },
+    {
+        "first_introduced": "12",
+        "name": "OH_ArkUI_LayoutConstraint_SetPercentReferenceWidth"
+    },
+    {
+        "first_introduced": "12",
+        "name": "OH_ArkUI_LayoutConstraint_SetPercentReferenceHeight"
+    },
+    {
+        "first_introduced": "12",
+        "name": "OH_ArkUI_DrawContext_GetCanvas"
+    },
+    {
+        "first_introduced": "12",
+        "name": "OH_ArkUI_DrawContext_GetSize"
     }
+
 ]

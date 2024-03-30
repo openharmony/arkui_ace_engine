@@ -86,6 +86,18 @@ public:
 
     // mutitask scroll
     static constexpr char SNAP_RECENT_ANI[] = "SNAP_RECENT_ANI";
+
+    // start app from dock
+    static constexpr char LAUNCHER_APP_LAUNCH_FROM_DOCK[] = "LAUNCHER_APP_LAUNCH_FROM_DOCK";
+
+    // start app from misson
+    static constexpr char LAUNCHER_APP_LAUNCH_FROM_MISSON[] = "LAUNCHER_APP_LAUNCH_FROM_MISSON";
+
+    // app exit from back to home
+    static constexpr char LAUNCHER_APP_BACK_TO_HOME[] = "LAUNCHER_APP_BACK_TO_HOME";
+
+    // app exit from multitasking
+    static constexpr char EXIT_RECENT_2_HOME_ANI[] = "EXIT_RECENT_2_HOME_ANI";
 };
 } // namespace OHOS::Ace
 #endif // ARKUI_PERF_SCENE_ID_H

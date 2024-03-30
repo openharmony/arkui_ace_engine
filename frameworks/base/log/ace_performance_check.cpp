@@ -31,6 +31,7 @@
 #include "base/json/json_util.h"
 #include "base/log/ace_checker.h"
 #include "base/log/dump_log.h"
+#include "base/log/event_report.h"
 #include "base/utils/time_util.h"
 #include "base/utils/utils.h"
 #include "bridge/common/utils/engine_helper.h"
@@ -195,6 +196,14 @@ void AceScopedPerformanceCheck::RecordPageNodeCountAndDepth(
         CheckPage(codeInfo, "9901")) {
         return;
     }
+    if (pageNodeCount >= AceChecker::GetPageNodes()) {
+        std::string msg = "page node is " + std::to_string(pageNodeCount) + ",it's overflow.";
+        EventReport::PerformanceEventReport(PerformanceExecpType::PAGE_NODE_OVERFLOW, codeInfo.sources, msg);
+    }
+    if (pageDepth >= AceChecker::GetPageDepth()) {
+        std::string msg = "page depth is " + std::to_string(pageDepth) + ",it's overflow.";
+        EventReport::PerformanceEventReport(PerformanceExecpType::PAGE_DEPTH_OVERFLOW, codeInfo.sources, msg);
+    }
     auto eventTime = GetCurrentTime();
     CHECK_NULL_VOID(AcePerformanceCheck::performanceInfo_);
     auto ruleJson = AcePerformanceCheck::performanceInfo_->GetValue("9901");
@@ -231,6 +240,8 @@ void AceScopedPerformanceCheck::RecordFunctionTimeout(int64_t time, const std::s
     if (!codeInfo.sources.empty() && CheckIsRuleContainsPage("9902", codeInfo.sources)) {
         return;
     }
+    std::string msg = "Function " + functionName + " execute " + std::to_string(time) + "ms,it's timeout.";
+    EventReport::PerformanceEventReport(PerformanceExecpType::FUNCTION_TIMEOUT, codeInfo.sources, msg);
     auto eventTime = GetCurrentTime();
     CHECK_NULL_VOID(AcePerformanceCheck::performanceInfo_);
     auto ruleJson = AcePerformanceCheck::performanceInfo_->GetValue("9902");
@@ -247,6 +258,10 @@ void AceScopedPerformanceCheck::RecordVsyncTimeout(
 {
     if (vsyncTimeout < AceChecker::GetVsyncTimeout() || CheckPage(codeInfo, "9903")) {
         return;
+    }
+    if (vsyncTimeout >= AceChecker::GetVsyncTimeout()) {
+        std::string msg = "page Loading " + std::to_string(vsyncTimeout) + "ms,it's timeout.";
+        EventReport::PerformanceEventReport(PerformanceExecpType::PAGE_LAYOUT_TIMEOUT, codeInfo.sources, msg);
     }
     auto eventTime = GetCurrentTime();
     CHECK_NULL_VOID(AcePerformanceCheck::performanceInfo_);

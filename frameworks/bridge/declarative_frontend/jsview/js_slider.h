@@ -24,6 +24,7 @@ namespace OHOS::Ace::Framework {
 enum class SliderStyle {
     OUTSET = 0,
     INSET,
+    NONE,
     CAPSULE,
 };
 
@@ -31,6 +32,11 @@ enum class SliderChangeMode {
     BEGIN = 0,
     MOVING,
     END,
+};
+
+enum class SliderInteraction {
+    SLIDE_AND_CLICK = 0,
+    SLIDE_ONLY,
 };
 
 class JSSlider : public JSViewAbstract {
@@ -43,12 +49,15 @@ public:
     static void SetSelectedColor(const JSCallbackInfo& info);
     static void SetMinLabel(const JSCallbackInfo& info);
     static void SetMaxLabel(const JSCallbackInfo& info);
+    static void SetMinResponsiveDistance(const JSCallbackInfo& info);
     static void SetShowSteps(const JSCallbackInfo& info);
     static void SetShowTips(const JSCallbackInfo& info);
+    static void SetSliderInteractionMode(const JSCallbackInfo& info);
     static void SetBlockBorderColor(const JSCallbackInfo& info);
     static void SetBlockBorderWidth(const JSCallbackInfo& info);
     static void SetStepColor(const JSCallbackInfo& info);
     static void SetTrackBorderRadius(const JSCallbackInfo& info);
+    static void SetSelectedBorderRadius(const JSCallbackInfo& info);
     static void SetBlockSize(const JSCallbackInfo& info);
     static void SetBlockStyle(const JSCallbackInfo& info);
     static void SetStepSize(const JSCallbackInfo& info);

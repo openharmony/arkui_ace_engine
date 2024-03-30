@@ -212,6 +212,16 @@ public:
 
     static void SyncGeometry(RefPtr<LayoutWrapper>& wrapper);
 
+    float GetStartHeaderPos() const
+    {
+        return startHeaderPos_;
+    }
+
+    float GetEndFooterPos() const
+    {
+        return endFooterPos_;
+    }
+
 private:
     float CalculateLaneCrossOffset(float crossSize, float childCrossSize);
     void UpdateListItemConstraint(const OptionalSizeF& selfIdealSize, LayoutConstraintF& contentConstraint);
@@ -285,6 +295,8 @@ private:
     float headerMainSize_ = 0.0f;
     float footerMainSize_ = 0.0f;
     float startPos_ = 0.0f;
+    float startHeaderPos_ = 0.0f;
+    float endFooterPos_ = 0.0f;
     float prevStartPos_ = 0.0f;
     float prevEndPos_ = 0.0f;
     float endPos_ = 0.0f;

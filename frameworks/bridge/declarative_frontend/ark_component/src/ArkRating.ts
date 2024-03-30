@@ -64,8 +64,8 @@ class RatingStarStyleModifier extends ModifierWithKey<ArkStarStyle> {
 }
 
 class ArkRatingComponent extends ArkComponent implements RatingAttribute {
-  constructor(nativePtr: KNode) {
-    super(nativePtr);
+  constructor(nativePtr: KNode, classType?: ModifierType) {
+    super(nativePtr, classType);
   }
   onGestureJudgeBegin(callback: (gestureInfo: GestureInfo, event: BaseGestureEvent) => GestureJudgeResult): this {
     throw new Error('Method not implemented.');
@@ -96,12 +96,10 @@ class ArkRatingComponent extends ArkComponent implements RatingAttribute {
   }
 }
 // @ts-ignore
-globalThis.Rating.attributeModifier = function (modifier) {
-  const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
-  let nativeNode = getUINativeModule().getFrameNodeById(elmtId);
-  let component = this.createOrGetNode(elmtId, () => {
-    return new ArkRatingComponent(nativeNode);
+globalThis.Rating.attributeModifier = function (modifier: ArkComponent): void {
+  attributeModifierFunc.call(this, modifier, (nativePtr: KNode) => {
+    return new ArkRatingComponent(nativePtr);
+  }, (nativePtr: KNode, classType: ModifierType, modifierJS: ModifierJS) => {
+    return new modifierJS.RatingModifier(nativePtr, classType);
   });
-  applyUIAttributes(modifier, nativeNode, component);
-  component.applyModifierPatch();
 };

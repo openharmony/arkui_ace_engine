@@ -502,10 +502,9 @@ HWTEST_F(TextFieldUXTest, InitSurfaceChangedCallback001, TestSize.Level1)
     /**
      * @tc.steps: step4. test touch down
      */
-    pattern_->ProcessOverlay(true, true, true);
+    pattern_->ProcessOverlay();
     pattern_->HandleSurfaceChanged(0, 0, 0, 0);
     pattern_->processOverlayDelayTask_.operator()();
-    EXPECT_FALSE(pattern_->GetOriginIsMenuShow());
 }
 
 /**
@@ -658,18 +657,18 @@ HWTEST_F(TextFieldUXTest, OnHandleMove004, TestSize.Level1)
     CreateTextField(DEFAULT_TEXT);
 
     /**
-     * @tc.steps: step2. Create selectOverlayProxy.
+     * @tc.steps: step2. Call ProcessOverlay.
      */
-    pattern_->ProcessOverlay(true, true, true);
+    pattern_->ProcessOverlay();
 
     /**
      * @tc.steps: step2. set two handle and call OnHandleMove
      * tc.expected: step2. Check if the value is created.
      */
     pattern_->HandleSetSelection(5, 10, false);
-    pattern_->isSingleHandle_ = false;
+    pattern_->SetIsSingleHandle(false);
     RectF handleRect;
-    pattern_->OnHandleMove(handleRect, true);
+    pattern_->selectOverlay_->OnHandleMove(handleRect, true);
 }
 
 
@@ -760,7 +759,7 @@ HWTEST_F(TextFieldUXTest, SetSelectionFlag001, TestSize.Level1)
     end = 10;
     pattern_->SetSelectionFlag(start, end);
     EXPECT_EQ(pattern_->selectController_->GetFirstHandleInfo().index, 5);
-    EXPECT_EQ(pattern_->selectController_->GetSecondHandleInfo().index, 10);
+    EXPECT_EQ(pattern_->selectController_->GetSecondHandleInfo().index, 5);
 }
 
 /**
@@ -787,7 +786,7 @@ HWTEST_F(TextFieldUXTest, SelectTextShowMenu001, TestSize.Level1)
      * @tc.steps: step3. Test menu open or close
      * @tc.expected: text menu is open
      */
-    auto ret = pattern_->GetSelectOverlayProxy()->IsMenuShow();
+    auto ret = pattern_->selectOverlay_->IsCurrentMenuVisibile();
     EXPECT_TRUE(ret);
 
     /**
@@ -807,7 +806,7 @@ HWTEST_F(TextFieldUXTest, SelectTextShowMenu001, TestSize.Level1)
      * @tc.steps: step6. Test menu open or close
      * @tc.expected: text menu is close
      */
-    ret = pattern_->GetSelectOverlayProxy()->IsMenuShow();
+    ret = pattern_->selectOverlay_->IsCurrentMenuVisibile();
     EXPECT_FALSE(ret);
 
     /**
@@ -826,7 +825,7 @@ HWTEST_F(TextFieldUXTest, SelectTextShowMenu001, TestSize.Level1)
      * @tc.steps: step9. Test menu open or close
      * @tc.expected: text menu is close
      */
-    ret = pattern_->GetSelectOverlayProxy()->IsMenuShow();
+    ret = pattern_->selectOverlay_->IsCurrentMenuVisibile();
     EXPECT_FALSE(ret);
 }
 

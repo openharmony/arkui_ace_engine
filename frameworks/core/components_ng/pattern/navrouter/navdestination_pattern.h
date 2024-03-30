@@ -151,10 +151,10 @@ public:
     std::string GetEntryFocusViewName() override
     {
         /*
-        |-> Navigation (root focus view)
+        |-> Any FocusView (entry focus view)
           |-> NavDestination
         */
-        return V2::NAVIGATION_VIEW_ETS_TAG;
+        return ENTRY_ANY_FOCUSVIEW;
     }
 
     void SetIsOnShow(bool isOnShow)

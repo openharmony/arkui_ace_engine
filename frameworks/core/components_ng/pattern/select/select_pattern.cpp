@@ -283,7 +283,7 @@ void SelectPattern::RegisterOnPress()
     auto touchCallback = [weak = WeakClaim(this)](const TouchEventInfo& info) {
         auto pattern = weak.Upgrade();
         auto host = pattern->GetHost();
-        auto theme = host->GetContext()->GetTheme<SelectTheme>();
+        auto theme = host->GetContextRefPtr()->GetTheme<SelectTheme>();
         CHECK_NULL_VOID(pattern);
         auto touchType = info.GetTouches().front().GetTouchType();
         const auto& renderContext = host->GetRenderContext();
@@ -764,7 +764,7 @@ void SelectPattern::UpdateSelectedProps(int32_t index)
     // set newSelected props
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto pipeline = host->GetContext();
+    auto pipeline = host->GetContextRefPtr();
     CHECK_NULL_VOID(pipeline);
     auto theme = pipeline->GetTheme<SelectTheme>();
     CHECK_NULL_VOID(theme);
@@ -1113,7 +1113,7 @@ void SelectPattern::OnLanguageConfigurationUpdate()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto context = host->GetContext();
+    auto context = host->GetContextRefPtr();
     CHECK_NULL_VOID(context);
     auto taskExecutor = context->GetTaskExecutor();
     CHECK_NULL_VOID(taskExecutor);
@@ -1280,6 +1280,7 @@ void SelectPattern::ResetParams()
     CHECK_NULL_VOID(layoutProperty);
     layoutProperty->UpdateCalcMinSize(CalcSize(CalcLength(selectTheme->GetSelectMinWidth(controlSize_)),
         std::nullopt));
+    ViewAbstract::SetWidth(NG::CalcLength(selectTheme->GetSelectMinWidth(controlSize_)));
     ViewAbstract::SetHeight(NG::CalcLength(selectTheme->GetSelectDefaultHeight(controlSize_)));
     SetFontSize(selectTheme->GetFontSize(controlSize_));
     auto spinnerLayoutProperty = spinner_->GetLayoutProperty<ImageLayoutProperty>();

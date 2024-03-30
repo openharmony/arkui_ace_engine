@@ -75,6 +75,22 @@ ArkUI_Int32 GetColumnAlignItems(ArkUINodeHandle node)
     return static_cast<ArkUI_Int32>(ColumnModelNG::GetAlignItems(frameNode));
 }
 
+void SetColumnSpace(ArkUINodeHandle node, ArkUI_Float32 value, ArkUI_Int32 unit)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    const auto space = CalcDimension(value, static_cast<OHOS::Ace::DimensionUnit>(unit));
+    ColumnModelNG::SetSpace(frameNode, space);
+}
+
+void ResetColumnSpace(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    const auto space = CalcDimension(0.0, DimensionUnit::PX);
+    ColumnModelNG::SetSpace(frameNode, space);
+}
+
 namespace NodeModifier {
 const ArkUIColumnModifier* GetColumnModifier()
 {
@@ -84,7 +100,9 @@ const ArkUIColumnModifier* GetColumnModifier()
         SetColumnAlignItems,
         ResetColumnAlignItems,
         GetColumnJustifyContent,
-        GetColumnAlignItems
+        GetColumnAlignItems,
+        SetColumnSpace,
+        ResetColumnSpace,
     };
     return &modifier;
 }

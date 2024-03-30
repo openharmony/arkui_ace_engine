@@ -20,7 +20,9 @@
 #include "gtest/gtest.h"
 #include "test/mock/base/mock_system_properties.h"
 #include "test/mock/core/rosen/mock_canvas.h"
+#include "water_flow_item_maps.h"
 
+#include "base/utils/system_properties.h"
 #include "core/components/scroll/scroll_controller_base.h"
 
 #define protected public
@@ -839,6 +841,41 @@ HWTEST_F(WaterFlowTestNg, UpdateCurrentOffset002, TestSize.Level1)
 }
 
 /**
+ * @tc.name: UpdateCurrentOffset003
+ * @tc.desc: Test the firstIndex and endIndex after UpdateCurrentOffset
+ * @tc.type: FUNC
+ */
+HWTEST_F(WaterFlowTestNg, UpdateCurrentOffset003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create waterFlow
+     * @tc.steps: step2. scroll up to a remote position
+     * @tc.expected: startIndex_ = 0 endIndex_ = 0.
+     */
+    Create([](WaterFlowModelNG model) {
+        model.SetColumnsTemplate("1fr 1fr");
+        model.SetEdgeEffect(EdgeEffect::SPRING, true);
+        CreateItem(TOTAL_LINE_NUMBER * 2);
+    });
+    pattern_->SetAnimateCanOverScroll(true);
+    pattern_->UpdateCurrentOffset(10000, SCROLL_FROM_UPDATE);
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(pattern_->layoutInfo_.firstIndex_, 0);
+    EXPECT_EQ(pattern_->layoutInfo_.endIndex_, 0);
+
+    /**
+     * @tc.steps: step1. create waterFlow
+     * @tc.steps: step2. scroll down to a remote position
+     * @tc.expected: startIndex_ = TOTAL_LINE_NUMBER * 2 - 1, endIndex_ = TOTAL_LINE_NUMBER * 2 - 1.
+     */
+    pattern_->SetAnimateCanOverScroll(true);
+    pattern_->UpdateCurrentOffset(-99999, SCROLL_FROM_UPDATE);
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(pattern_->layoutInfo_.firstIndex_, 19);
+    EXPECT_EQ(pattern_->layoutInfo_.endIndex_, 19);
+}
+
+/**
  * @tc.name: PositionController001
  * @tc.desc: Test PositionController
  * @tc.type: FUNC
@@ -1490,14 +1527,14 @@ HWTEST_F(WaterFlowTestNg, WaterFlowPositionController_ScrollPage001, TestSize.Le
      * @tc.expected: function ScrollPage is called.
      */
     pattern_->SetAxis(Axis::VERTICAL);
-    controller->ScrollPage(false, true);
+    controller->ScrollPage(false, false);
     EXPECT_TRUE(IsEqualTotalOffset(WATERFLOW_HEIGHT));
     EXPECT_EQ(controller->GetCurrentOffset().GetY(), WATERFLOW_HEIGHT);
     EXPECT_EQ(accessibilityProperty_->GetScrollOffSet(), pattern_->GetTotalOffset());
     EXPECT_TRUE(controller->IsAtEnd());
 
     pattern_->SetAxis(Axis::NONE);
-    controller->ScrollPage(false, true);
+    controller->ScrollPage(false, false);
     EXPECT_TRUE(IsEqualTotalOffset(WATERFLOW_HEIGHT));
     EXPECT_EQ(controller->GetCurrentOffset().GetY(), 0);
     EXPECT_TRUE(controller->IsAtEnd());
@@ -1549,7 +1586,7 @@ HWTEST_F(WaterFlowTestNg, WaterFlowPattern_OnDirtyLayoutWrapperSwap001, TestSize
      */
     CreateWithItem([](WaterFlowModelNG model) {});
     pattern_->SetPositionController(nullptr);
-    pattern_->InitScrollableEvent();
+    pattern_->AddScrollEvent();
     EXPECT_NE(pattern_->scrollableEvent_, nullptr);
     pattern_->OnModifyDone();
     EXPECT_FALSE(pattern_->CanOverScroll(SCROLL_FROM_UPDATE));
@@ -1865,9 +1902,9 @@ HWTEST_F(WaterFlowTestNg, ScrollToIndex003, TestSize.Level1)
     FlushLayoutTask(frameNode_);
     EXPECT_FLOAT_EQ(pattern_->finalPosition_, 200.f);
 
-    pattern_->ScrollToIndex(LAST_ITEM, true);
+    pattern_->ScrollToIndex(29, true);
     FlushLayoutTask(frameNode_);
-    EXPECT_FLOAT_EQ(pattern_->finalPosition_, 200.f);
+    EXPECT_FLOAT_EQ(pattern_->finalPosition_, 2100.f);
 }
 
 /**
@@ -1981,5 +2018,51 @@ HWTEST_F(WaterFlowTestNg, OnWillScrollAndOnDidScroll002, TestSize.Level1)
     EXPECT_EQ(didScrollOffset.Value(), ITEM_HEIGHT * 5);
     EXPECT_EQ(scrollState, willScrollState);
     EXPECT_EQ(scrollState, didScrollState);
+}
+
+/**
+ * @tc.name: ResetSections001
+ * @tc.desc: Layout WaterFlow and then reset to old layout
+ * @tc.type: FUNC
+ */
+HWTEST_F(WaterFlowTestNg, ResetSections001, TestSize.Level1)
+{
+    Create(
+        [](WaterFlowModelNG model) {
+            ViewAbstract::SetWidth(CalcLength(400.0f));
+            ViewAbstract::SetHeight(CalcLength(600.f));
+            CreateItem(60);
+        },
+        false);
+    auto secObj = pattern_->GetOrCreateWaterFlowSections();
+    secObj->ChangeData(0, 0, SECTION_5);
+    MockPipelineContext::GetCurrent()->FlushBuildFinishCallbacks();
+    FlushLayoutTask(frameNode_);
+    auto& info = pattern_->layoutInfo_;
+
+    UpdateCurrentOffset(-205.0f);
+    EXPECT_EQ(info.currentOffset_, -205.0f);
+    EXPECT_EQ(info.startIndex_, 3);
+    EXPECT_EQ(info.endIndex_, 11);
+
+    // fallback to layout without sections
+    pattern_->ResetSections();
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(info.currentOffset_, -205.0f);
+    EXPECT_EQ(info.startIndex_, 1);
+    EXPECT_EQ(info.endIndex_, 5);
+    EXPECT_EQ(info.GetCrossCount(), 1);
+    if (SystemProperties::WaterFlowUseSegmentedLayout()) {
+        EXPECT_EQ(info.segmentTails_.size(), 1);
+        EXPECT_EQ(info.margins_.size(), 1);
+    } else {
+        EXPECT_TRUE(info.segmentTails_.empty());
+        EXPECT_TRUE(info.margins_.empty());
+    }
+
+    UpdateCurrentOffset(250.0f);
+    EXPECT_EQ(info.currentOffset_, 0.0f);
+    EXPECT_EQ(info.startIndex_, 0);
+    EXPECT_EQ(info.endIndex_, 3);
 }
 } // namespace OHOS::Ace::NG

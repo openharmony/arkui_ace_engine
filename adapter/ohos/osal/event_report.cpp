@@ -81,6 +81,7 @@ constexpr char SCENE_BOARD_UE_DOMAIN[] = "SCENE_BOARD_UE";
 #ifdef VSYNC_TIMEOUT_CHECK
 constexpr char EXECPTION_VSYNC[] = "VSYNC_EXCEPTION";
 #endif
+constexpr char WARNNING_PERFERMANCE[] = "PERFERMANCE_WARNNING";
 
 void StrTrim(std::string& str)
 {
@@ -224,6 +225,7 @@ void EventReport::SendFormException(FormExcepType type)
 
     SendEventInner(eventInfo);
 }
+
 #ifdef VSYNC_TIMEOUT_CHECK
 void EventReport::SendVsyncException(VsyncExcepType type)
 {
@@ -474,5 +476,17 @@ void EventReport::ReportClickTitleMaximizeMenu(int32_t maxMenuItem, int32_t stat
         CURRENTPKG, packageName,
         MAXMENUITEM, maxMenuItem,
         CHANGEDEFAULTSETTING, stateChange);
+}
+
+void EventReport::PerformanceEventReport(PerformanceExecpType type, const std::string& pageUrl, const std::string& msg)
+{
+    auto packageName = AceApplicationInfo::GetInstance().GetPackageName();
+    StrTrim(packageName);
+    HiSysEventWrite(OHOS::HiviewDFX::HiSysEvent::Domain::ACE, WARNNING_PERFERMANCE,
+        OHOS::HiviewDFX::HiSysEvent::EventType::FAULT,
+        EVENT_KEY_ERROR_TYPE, static_cast<int32_t>(type),
+        EVENT_KEY_PACKAGE_NAME, packageName,
+        EVENT_KEY_PAGE_URL, pageUrl,
+        EVENT_KEY_MESSAGE, msg);
 }
 } // namespace OHOS::Ace

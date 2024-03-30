@@ -32,6 +32,8 @@ public:
     static uint32_t ColorAlphaAdapt(uint32_t origin);
     static bool ParseJsColor(const EcmaVM* vm, const Local<JSValueRef>& value, Color& result);
     static bool ParseJsColorAlpha(const EcmaVM* vm, const Local<JSValueRef>& value, Color& result);
+    static bool ParseJsColorAlpha(
+        const EcmaVM* vm, const Local<JSValueRef>& value, Color& result, const Color& defaultColor);
     static bool ParseJsColorFromResource(const EcmaVM* vm, const Local<JSValueRef>& jsObj, Color& result);
     static bool ParseJsDimensionFromResource(
         const EcmaVM* vm, const Local<JSValueRef>& jsObj, DimensionUnit dimensionUnit, CalcDimension& result);
@@ -41,6 +43,7 @@ public:
         const EcmaVM* vm, const Local<JSValueRef>& arg, std::string* array, int32_t defaultLength);
     static bool ParseJsInteger(const EcmaVM *vm, const Local<JSValueRef> &value, int32_t &result);
     static bool ParseJsInteger(const EcmaVM *vm, const Local<JSValueRef> &value, uint32_t &result);
+    static bool ParseJsIntegerWithResource(const EcmaVM* vm, const Local<JSValueRef>& jsValue, int32_t& result);
     static bool ParseJsDouble(const EcmaVM *vm, const Local<JSValueRef> &value, double &result);
     static bool ParseAllBorder(const EcmaVM *vm, const Local<JSValueRef> &args, CalcDimension &result);
     static bool ParseAllRadius(const EcmaVM *vm, const Local<JSValueRef> &args, CalcDimension &result);

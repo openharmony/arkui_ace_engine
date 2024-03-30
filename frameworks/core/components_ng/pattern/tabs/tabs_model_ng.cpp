@@ -241,11 +241,23 @@ void TabsModelNG::SetWidthAuto(bool isAuto)
     ACE_UPDATE_LAYOUT_PROPERTY(TabsLayoutProperty, WidthAuto, isAuto);
 }
 
+void TabsModelNG::SetWidthAuto(FrameNode* frameNode, bool isAuto)
+{
+    CHECK_NULL_VOID(frameNode);
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TabsLayoutProperty, WidthAuto, isAuto, frameNode);
+}
+
 void TabsModelNG::SetHeightAuto(bool isAuto)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
     ACE_UPDATE_LAYOUT_PROPERTY(TabsLayoutProperty, HeightAuto, isAuto);
+}
+
+void TabsModelNG::SetHeightAuto(FrameNode* frameNode, bool isAuto)
+{
+    CHECK_NULL_VOID(frameNode);
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TabsLayoutProperty, HeightAuto, isAuto, frameNode);
 }
 
 void TabsModelNG::SetBarAdaptiveHeight(bool barAdaptiveHeight)
@@ -286,10 +298,6 @@ void TabsModelNG::SetIndex(int32_t index)
     auto swiperLayoutProperty = swiperNode->GetLayoutProperty<SwiperLayoutProperty>();
     CHECK_NULL_VOID(swiperLayoutProperty);
     swiperLayoutProperty->UpdateIndex(index);
-    auto tabContentNum = swiperNode->TotalChildCount();
-    if (tabContentNum == 0) {
-        return;
-    }
     auto tabBarNode = AceType::DynamicCast<FrameNode>(tabsNode->GetTabBar());
     CHECK_NULL_VOID(tabBarNode);
     auto tabBarPattern = tabBarNode->GetPattern<TabBarPattern>();
@@ -612,9 +620,7 @@ void TabsModelNG::SetClipEdge(bool clipEdge)
 {
     auto tabsNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(tabsNode);
-    auto tabsRenderContext = tabsNode->GetRenderContext();
-    CHECK_NULL_VOID(tabsRenderContext);
-    tabsRenderContext->UpdateClipEdge(clipEdge);
+    ViewAbstract::SetClipEdge(clipEdge);
     auto tabsChildren = tabsNode->GetChildren();
     for (const auto& child : tabsChildren) {
         auto childFrameNode = AceType::DynamicCast<FrameNode>(child);
@@ -913,9 +919,7 @@ void TabsModelNG::SetOnCustomAnimation(TabsCustomAnimationEvent&& onCustomAnimat
 void TabsModelNG::SetClipEdge(FrameNode* frameNode, bool clipEdge)
 {
     CHECK_NULL_VOID(frameNode);
-    auto tabsRenderContext = frameNode->GetRenderContext();
-    CHECK_NULL_VOID(tabsRenderContext);
-    tabsRenderContext->UpdateClipEdge(clipEdge);
+    ViewAbstract::SetClipEdge(frameNode, clipEdge);
     auto tabsChildren = frameNode->GetChildren();
     for (const auto& child : tabsChildren) {
         auto childFrameNode = AceType::DynamicCast<FrameNode>(child);

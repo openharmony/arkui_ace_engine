@@ -15,7 +15,7 @@
 
 import { KeyCode } from '@ohos.multimodalInput.keyCode'
 
-export declare type ComposeTitleBarMenuItem = {
+export declare interface ComposeTitleBarMenuItem {
   value: ResourceStr
   isEnabled: boolean
   action?: () => void
@@ -60,11 +60,11 @@ const PUBLIC_BACK = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAMAAAADACAY' 
   'ZgXMXccDwAAAAAAAAAAAAAAAAAAAAAAwO5+AfVgtqHKRnawAAAAAElFTkSuQmCC'
 
 @Component
-export struct ComposeTitleBar {
-  item: ComposeTitleBarMenuItem
-  title: ResourceStr
-  subtitle: ResourceStr
-  menuItems: Array<ComposeTitleBarMenuItem>
+struct ComposeTitleBar {
+  item: ComposeTitleBarMenuItem | null = null
+  title: ResourceStr = ''
+  subtitle: ResourceStr = ''
+  menuItems?: Array<ComposeTitleBarMenuItem>
 
   @State titleMaxWidth: number = 0
   @State backActive: boolean = false
@@ -93,7 +93,7 @@ export struct ComposeTitleBar {
         }, index: -1 })
 
         if (this.item !== undefined) {
-          Image(this.item.value)
+          Image(this.item?.value)
             .width(ComposeTitleBar.portraitImageSize)
             .height(ComposeTitleBar.portraitImageSize)
             .margin({
@@ -167,8 +167,8 @@ export struct ComposeTitleBar {
 
 @Component
 struct CollapsibleMenuSection {
-  menuItems: Array<ComposeTitleBarMenuItem>
-  index: number
+  menuItems?: Array<ComposeTitleBarMenuItem>
+  index: number = 0
 
   static readonly maxCountOfVisibleItems = 3
   private static readonly focusPadding = 4
@@ -198,88 +198,92 @@ struct CollapsibleMenuSection {
   }
 
   aboutToAppear() {
-    this.menuItems.forEach((item, index) => {
-      if (item.isEnabled && this.firstFocusableIndex == -1 && index > CollapsibleMenuSection.maxCountOfVisibleItems - 2) {
-        this.firstFocusableIndex = this.index * 1000 + index + 1
-      }
-    })
+    if (this.menuItems) {
+      this.menuItems.forEach((item, index) => {
+        if (item.isEnabled && this.firstFocusableIndex == -1 && index > CollapsibleMenuSection.maxCountOfVisibleItems - 2) {
+          this.firstFocusableIndex = this.index * 1000 + index + 1
+        }
+      })
+    }
   }
 
   build() {
     Column() {
       Row() {
-        if (this.menuItems.length <= CollapsibleMenuSection.maxCountOfVisibleItems) {
-          ForEach(this.menuItems, (item, index) => {
-            ImageMenuItem({ item: item, index: this.index * 1000 + index + 1 })
-          })
-        } else {
-          ForEach(this.menuItems.slice(0, CollapsibleMenuSection.maxCountOfVisibleItems - 1), (item, index) => {
-            ImageMenuItem({ item: item, index: this.index * 1000 + index + 1 })
-          })
+        if (this.menuItems) {
+          if (this.menuItems.length <= CollapsibleMenuSection.maxCountOfVisibleItems) {
+            ForEach(this.menuItems, (item: ComposeTitleBarMenuItem, index:number) => {
+              ImageMenuItem({ item: item, index: this.index * 1000 + index + 1 })
+            })
+          } else {
+            ForEach(this.menuItems.slice(0, CollapsibleMenuSection.maxCountOfVisibleItems - 1), (item:ComposeTitleBarMenuItem, index:number) => {
+              ImageMenuItem({ item: item, index: this.index * 1000 + index + 1 })
+            })
 
-          Row() {
-            Image(PUBLIC_MORE)
-              .width(ImageMenuItem.imageSize)
-              .height(ImageMenuItem.imageSize)
-              .focusable(true)
-          }
-          .width(ImageMenuItem.imageHotZoneWidth)
-          .height(ImageMenuItem.imageHotZoneWidth)
-          .borderRadius(ImageMenuItem.buttonBorderRadius)
-          .foregroundColor(this.getMoreIconFgColor())
-          .backgroundColor(this.getMoreIconBgColor())
-          .justifyContent(FlexAlign.Center)
-          .stateStyles({
-            focused: {
-              .border({
-                radius: $r('sys.float.ohos_id_corner_radius_clicked'),
-                width: ImageMenuItem.focusBorderWidth,
-                color: $r('sys.color.ohos_id_color_focused_outline'),
-                style: BorderStyle.Solid
-              })
-            },
-            normal: {
-              .border({
-                radius: $r('sys.float.ohos_id_corner_radius_clicked'),
-                width: 0
-              })
+            Row() {
+              Image(PUBLIC_MORE)
+                .width(ImageMenuItem.imageSize)
+                .height(ImageMenuItem.imageSize)
+                .focusable(true)
             }
-          })
-          .onFocus(() => this.isMoreIconOnFocus = true)
-          .onBlur(() => this.isMoreIconOnFocus = false)
-          .onHover((isOn) => this.isMoreIconOnHover = isOn)
-          .onKeyEvent((event) => {
-            if (event.keyCode !== KeyCode.KEYCODE_ENTER && event.keyCode !== KeyCode.KEYCODE_SPACE) {
-              return
-            }
-            if (event.type === KeyType.Down) {
-              this.isMoreIconOnClick = true
-            }
-            if (event.type === KeyType.Up) {
-              this.isMoreIconOnClick = false
-            }
-          })
-          .onTouch((event) => {
-            if (event.type === TouchType.Down) {
-              this.isMoreIconOnClick = true
-            }
-            if (event.type === TouchType.Up) {
-              this.isMoreIconOnClick = false
-            }
-          })
-          .onClick(() => this.isPopupShown = true)
-          .bindPopup(this.isPopupShown, {
-            builder: this.popupBuilder,
-            placement: Placement.Bottom,
-            popupColor: Color.White,
-            enableArrow: false,
-            onStateChange: (e) => {
-              this.isPopupShown = e.isVisible
-              if (!e.isVisible) {
+            .width(ImageMenuItem.imageHotZoneWidth)
+            .height(ImageMenuItem.imageHotZoneWidth)
+            .borderRadius(ImageMenuItem.buttonBorderRadius)
+            .foregroundColor(this.getMoreIconFgColor())
+            .backgroundColor(this.getMoreIconBgColor())
+            .justifyContent(FlexAlign.Center)
+            .stateStyles({
+              focused: {
+                .border({
+                  radius: $r('sys.float.ohos_id_corner_radius_clicked'),
+                  width: ImageMenuItem.focusBorderWidth,
+                  color: $r('sys.color.ohos_id_color_focused_outline'),
+                  style: BorderStyle.Solid
+                })
+              },
+              normal: {
+                .border({
+                  radius: $r('sys.float.ohos_id_corner_radius_clicked'),
+                  width: 0
+                })
+              }
+            })
+            .onFocus(() => this.isMoreIconOnFocus = true)
+            .onBlur(() => this.isMoreIconOnFocus = false)
+            .onHover((isOn) => this.isMoreIconOnHover = isOn)
+            .onKeyEvent((event) => {
+              if (event.keyCode !== KeyCode.KEYCODE_ENTER && event.keyCode !== KeyCode.KEYCODE_SPACE) {
+                return
+              }
+              if (event.type === KeyType.Down) {
+                this.isMoreIconOnClick = true
+              }
+              if (event.type === KeyType.Up) {
                 this.isMoreIconOnClick = false
               }
-            }
-          })
+            })
+            .onTouch((event) => {
+              if (event.type === TouchType.Down) {
+                this.isMoreIconOnClick = true
+              }
+              if (event.type === TouchType.Up) {
+                this.isMoreIconOnClick = false
+              }
+            })
+            .onClick(() => this.isPopupShown = true)
+            .bindPopup(this.isPopupShown, {
+              builder: this.popupBuilder,
+              placement: Placement.Bottom,
+              popupColor: Color.White,
+              enableArrow: false,
+              onStateChange: (e) => {
+                this.isPopupShown = e.isVisible
+                if (!e.isVisible) {
+                  this.isMoreIconOnClick = false
+                }
+              }
+            })
+          }
         }
       }
     }
@@ -291,9 +295,11 @@ struct CollapsibleMenuSection {
   @Builder
   popupBuilder() {
     Column() {
-      ForEach(this.menuItems.slice(CollapsibleMenuSection.maxCountOfVisibleItems - 1, this.menuItems.length), (item, index) => {
-        ImageMenuItem({ item: item, index: this.index * 1000 + CollapsibleMenuSection.maxCountOfVisibleItems + index })
-      })
+      if (this.menuItems) {
+        ForEach(this.menuItems.slice(CollapsibleMenuSection.maxCountOfVisibleItems - 1, this.menuItems.length), (item:ComposeTitleBarMenuItem, index:number) => {
+          ImageMenuItem({ item: item, index: this.index * 1000 + CollapsibleMenuSection.maxCountOfVisibleItems + index })
+        })
+      }
     }
     .width(ImageMenuItem.imageHotZoneWidth + CollapsibleMenuSection.focusPadding * CollapsibleMenuSection.marginsNum)
     .margin({ top: CollapsibleMenuSection.focusPadding, bottom: CollapsibleMenuSection.focusPadding })
@@ -305,8 +311,8 @@ struct CollapsibleMenuSection {
 
 @Component
 struct ImageMenuItem {
-  item: ComposeTitleBarMenuItem
-  index: number
+  item: ComposeTitleBarMenuItem | null = null
+  index: number = 0
 
   static readonly imageSize = 24
   static readonly imageHotZoneWidth = 48
@@ -337,10 +343,10 @@ struct ImageMenuItem {
 
   build() {
     Row() {
-      Image(this.item.value)
+      Image(this.item?.value)
         .width(ImageMenuItem.imageSize)
         .height(ImageMenuItem.imageSize)
-        .focusable(this.item.isEnabled)
+        .focusable(this.item?.isEnabled)
         .key(ImageMenuItem.focusablePrefix + this.index)
         .fillColor($r('sys.color.ohos_id_color_text_primary'))
     }
@@ -350,7 +356,7 @@ struct ImageMenuItem {
     .foregroundColor(this.getFgColor())
     .backgroundColor(this.getBgColor())
     .justifyContent(FlexAlign.Center)
-    .opacity(this.item.isEnabled ? 1 : ImageMenuItem.disabledImageOpacity)
+    .opacity(this.item?.isEnabled ? 1 : ImageMenuItem.disabledImageOpacity)
     .stateStyles({
       focused: {
         .border({
@@ -368,20 +374,20 @@ struct ImageMenuItem {
       }
     })
     .onFocus(() => {
-      if (!this.item.isEnabled) {
+      if (!this.item?.isEnabled) {
         return
       }
       this.isOnFocus = true
     })
     .onBlur(() => this.isOnFocus = false)
     .onHover((isOn) => {
-      if (!this.item.isEnabled) {
+      if (!this.item?.isEnabled) {
         return
       }
       this.isOnHover = isOn
     })
     .onKeyEvent((event) => {
-      if (!this.item.isEnabled) {
+      if (!this.item?.isEnabled) {
         return
       }
       if (event.keyCode !== KeyCode.KEYCODE_ENTER && event.keyCode !== KeyCode.KEYCODE_SPACE) {
@@ -395,7 +401,7 @@ struct ImageMenuItem {
       }
     })
     .onTouch((event) => {
-      if (!this.item.isEnabled) {
+      if (!this.item?.isEnabled) {
         return
       }
       if (event.type === TouchType.Down) {
@@ -405,8 +411,12 @@ struct ImageMenuItem {
         this.isOnClick = false
       }
     })
-    .onClick(() => this.item.isEnabled && this.item.action && this.item.action())
+    .onClick(() => {
+      if (this.item) {
+        return this.item.isEnabled && this.item.action?.()
+      }
+    })
   }
 }
 
-export default { ComposeTitleBar }
+export  { ComposeTitleBar }

@@ -30,7 +30,7 @@ frameworks/core/components_ng/render/  @yan-shuifeng @lightningHo
 frameworks/core/components_ng/render/adapter/  @yan-shuifeng @sunfei2021
 frameworks/core/components_ng/layout/  @yan-shuifeng @yangfan229
 frameworks/core/components_ng/property/  @yan-shuifeng
-frameworks/core/components_ng/syntax/  @yan-shuifeng @lightningHo
+frameworks/core/components_ng/syntax/  @yan-shuifeng @lightningHo @houhaoyu
 frameworks/core/components_ng/manager/safe_area/  @xiexiyun
 
 [Common source]
@@ -330,6 +330,9 @@ frameworks/core/components_ng/components.gni  @sunfei2021
 [Test source]
 test/mock/  @chenjiafeng-openharmony
 test/unittest/  @chenjiafeng-openharmony
+test/unittest/core/pattern/grid/ @zhoutianer
+test/unittest/core/pattern/swiper/ @zhoutianer
+test/unittest/core/pattern/waterflow/ @zhoutianer
 
 [Native Node Module]
 frameworks/core/interfaces/arkoala/ @nikolay-igotti

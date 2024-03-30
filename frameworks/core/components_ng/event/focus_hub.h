@@ -715,12 +715,14 @@ public:
         return result;
     }
 
+    void GetChildrenFocusHub(std::list<RefPtr<FocusHub>>& focusNodes);
+
     std::list<RefPtr<FocusHub>>::iterator FlushChildrenFocusHub(std::list<RefPtr<FocusHub>>& focusNodes);
 
     std::list<RefPtr<FocusHub>> GetChildren()
     {
         std::list<RefPtr<FocusHub>> focusNodes;
-        FlushChildrenFocusHub(focusNodes);
+        GetChildrenFocusHub(focusNodes);
         return focusNodes;
     }
 

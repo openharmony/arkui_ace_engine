@@ -11,6 +11,7 @@
         "src/frame_node.ts",
         "src/render_node.ts",
         "src/xcomponent_node.ts",
+        "src/component_content.ts",
     ],
     "compilerOptions": {
         "module": "none",

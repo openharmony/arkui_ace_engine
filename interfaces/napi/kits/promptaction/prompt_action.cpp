@@ -776,6 +776,9 @@ void GetNapiObjectShadow(napi_env env, const std::shared_ptr<PromptAsyncContext>
     if (valueType == napi_number) {
         napi_get_value_int32(env, typeApi, &shadowType);
     }
+    if (shadowType != static_cast<int32_t>(ShadowType::BLUR)) {
+        shadowType = static_cast<int32_t>(ShadowType::COLOR);
+    }
     shadowType =
         std::clamp(shadowType, static_cast<int32_t>(ShadowType::COLOR), static_cast<int32_t>(ShadowType::BLUR));
     shadow.SetShadowType(static_cast<ShadowType>(shadowType));

@@ -186,6 +186,9 @@ void SystemWindowScene::RegisterFocusCallback()
         auto frameNode = pattern ? pattern->GetHost() : nullptr;
         pipelineContext->SetFocusedWindowSceneNode(frameNode);
         pipelineContext->PostAsyncEvent([weakThis]() {
+            auto pipeline = PipelineContext::GetCurrentContext();
+            CHECK_NULL_VOID(pipeline);
+            pipeline->SetIsFocusActive(false);
             auto self = weakThis.Upgrade();
             CHECK_NULL_VOID(self);
             self->FocusViewShow();

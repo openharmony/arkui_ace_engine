@@ -25,6 +25,8 @@
 
 namespace OHOS::Ace::NG {
 
+const char ENTRY_ANY_FOCUSVIEW[] = "entry_any_view";
+
 class FocusView : public virtual AceType {
     DECLARE_ACE_TYPE(FocusView, AceType);
 
@@ -58,6 +60,8 @@ public:
     RefPtr<FocusView> GetEntryFocusView();
     RefPtr<FocusHub> GetViewRootScope();
     bool IsRootScopeCurrentFocus();
+    bool IsChildFocusViewOf(const RefPtr<FocusView>& parent);
+    bool HasParentFocusHub();
 
     bool RequestDefaultFocus();
     bool TriggerFocusMove();

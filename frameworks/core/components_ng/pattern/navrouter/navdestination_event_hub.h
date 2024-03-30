@@ -43,6 +43,8 @@ public:
     {
         if (isActivated_ != isActivated) {
             if (onStateChangeEvent_) {
+                TAG_LOGI(AceLogTag::ACE_NAVIGATION, "navDestination state set to %{public}s.",
+                    isActivated ? "Activated" : "Deactivated");
                 onStateChangeEvent_(isActivated);
             }
         }
@@ -121,6 +123,7 @@ public:
         UIObserverHandler::GetInstance().NotifyNavigationStateChange(GetNavDestinationPattern(),
                                                                      NavDestinationState::ON_BACKPRESS);
         if (onBackPressedEvent_) {
+            TAG_LOGI(AceLogTag::ACE_NAVIGATION, "navDestination backButton press is happening.");
             return onBackPressedEvent_();
         }
         return false;
@@ -163,6 +166,7 @@ public:
     void FireOnReady(RefPtr<NavDestinationContext> context)
     {
         if (onReadyEvent_) {
+            TAG_LOGI(AceLogTag::ACE_NAVIGATION, "navDestination context is ready.");
             onReadyEvent_(context);
         }
     }

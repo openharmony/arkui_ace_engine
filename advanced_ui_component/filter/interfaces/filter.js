@@ -13,15 +13,19 @@
  * limitations under the License.
  */
 
-var __decorate = (this && this.__decorate) || function (q18, r18, s18, t18) {
-  var u18 = arguments.length, v18 = u18 < 3 ? r18 : t18 === null ?
+let __decorate = (this && this.__decorate) || function (q18, r18, s18, t18) {
+  let u18 = arguments.length, v18 = u18 < 3 ? r18 : t18 === null ?
     t18 = Object.getOwnPropertyDescriptor(r18, s18) : t18, w18;
-  if (typeof Reflect === 'object' && typeof Reflect.decorate === 'function')
+  if (typeof Reflect === 'object' && typeof Reflect.decorate === 'function') {
     v18 = Reflect.decorate(q18, r18, s18, t18);
-  else
-    for (var x18 = q18.length - 1; x18 >= 0; x18--)
-      if (w18 = q18[x18])
+  }
+  else {
+    for (let x18 = q18.length - 1; x18 >= 0; x18--) {
+      if (w18 = q18[x18]) {
         v18 = (u18 < 3 ? w18(v18) : u18 > 3 ? w18(r18, s18, v18) : w18(r18, s18)) || v18;
+      }
+    }
+  }
   return u18 > 3 && v18 && Object.defineProperty(r18, s18, v18), v18;
 };
 if (!('finalizeConstruction' in ViewPU.prototype)) {
@@ -52,8 +56,8 @@ const TRANS_COLOR = '#00FFFFFF';
 const GRADIENT_WIDTH = 16;
 export var FilterType;
 (function (o18) {
-  o18[o18['MULTI_LINE_FILTER'] = 0] = 'MULTI_LINE_FILTER';
-  o18[o18['LIST_FILTER'] = 1] = 'LIST_FILTER';
+  o18[o18.MULTI_LINE_FILTER = 0] = 'MULTI_LINE_FILTER';
+  o18[o18.LIST_FILTER = 1] = 'LIST_FILTER';
 })(FilterType || (FilterType = {}));
 let FontWeightArray = class FontWeightArray extends Array {
 };
@@ -267,7 +271,7 @@ class ListFilterRow extends ViewPU {
         this.observeComponentCreation((p16, q16) => {
           ViewStackProcessor.StartGetAccessRecordingFor(p16);
           If.create();
-          if (p15 == 0) {
+          if (p15 === 0) {
             this.ifElseBranchUpdateFunction(0, () => {
               {
                 const t16 = (d17, e17) => {
@@ -407,8 +411,8 @@ class ListFilterRow extends ViewPU {
                 });
               }
             });
-            ListItem.margin({ left: p15 == 0 ? -TEXT_HOT_AREA_WIDTH : 0 });
-            ListItem.tabIndex(p15 == 0 ? this.rowIndex : -1);
+            ListItem.margin({ left: p15 === 0 ? -TEXT_HOT_AREA_WIDTH : 0 });
+            ListItem.tabIndex(p15 === 0 ? this.rowIndex : -1);
           };
           const u15 = (y15, z15) => {
             s15(y15, z15);
@@ -750,7 +754,7 @@ class MultiFilterRow extends ViewPU {
           Context.animateTo({
             curve: INTER_POLATING_SPRING,
           }, () => {
-            var u13;
+            let u13;
             this.twoLineModeItemNumRow.value = (u13 = this.filterRow) === null || u13 === void 0 ? void 0 : u13.options.length;
           });
           Context.animateTo({
@@ -879,14 +883,16 @@ class MultiFilterRow extends ViewPU {
       ViewStackProcessor.StopGetAccessRecording();
     });
     this.observeComponentCreation((l12, m12) => {
-      var n12, o12;
+      let n12;
+      let o12;
       ViewStackProcessor.StartGetAccessRecordingFor(l12);
       If.create();
       if (((n12 = this.filterRow) === null || n12 === void 0 ? void 0 : n12.options) &&
         ((o12 = this.filterRow) === null || o12 === void 0 ? void 0 : o12.options.length) > 0) {
         this.ifElseBranchUpdateFunction(0, () => {
           this.observeComponentCreation((s12, t12) => {
-            var u12, v12;
+            let u12;
+            let v12;
             ViewStackProcessor.StartGetAccessRecordingFor(s12);
             Text.create((u12 = this.filterRow) === null || u12 === void 0 ? void 0 : u12.options[0].toString());
             Text.height(LIST_ROW_HEIGHT);
@@ -1068,7 +1074,7 @@ class MultiFilterRow extends ViewPU {
       ViewStackProcessor.StopGetAccessRecording();
     });
     this.observeComponentCreation((e11, f11) => {
-      var g11;
+      let g11;
       ViewStackProcessor.StartGetAccessRecordingFor(e11);
       ForEach.create();
       const h11 = (j11, k11) => {
@@ -1975,7 +1981,7 @@ export class Filter extends ViewPU {
       ViewStackProcessor.StartGetAccessRecordingFor(v3);
       If.create();
       if (this.additionFilters && this.additionFilters.name && this.additionFilters.options &&
-        this.additionFilters.options.length != 0) {
+        this.additionFilters.options.length !== 0) {
         this.ifElseBranchUpdateFunction(0, () => {
           this.observeComponentCreation((u6, v6) => {
             ViewStackProcessor.StartGetAccessRecordingFor(u6);
@@ -2193,7 +2199,7 @@ export class Filter extends ViewPU {
                   ListItem.onClick(() => {
                     this.additionItemClick(w4);
                   });
-                  ListItem.tabIndex(w4 == 0 ? this.multiFilters.length : -1);
+                  ListItem.tabIndex(w4 === 0 ? this.multiFilters.length : -1);
                 };
                 const a5 = (e5, f5) => {
                   y4(e5, f5);
@@ -2672,7 +2678,7 @@ export class Filter extends ViewPU {
       List.height(PERCENT_100);
       List.edgeEffect(EdgeEffect.Spring);
       List.onScroll((e1, f1) => {
-        if (this.isFloatShowAllFilterWithoutAnimation && f1 == ScrollState.Scroll) {
+        if (this.isFloatShowAllFilterWithoutAnimation && f1 === ScrollState.Scroll) {
           this.isFloatBarShowWithoutAnimation = true;
           this.isFloatShowAllFilterWithoutAnimation = false;
           Context.animateTo({

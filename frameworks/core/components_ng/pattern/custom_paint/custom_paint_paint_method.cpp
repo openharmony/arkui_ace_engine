@@ -148,6 +148,50 @@ const LinearMapNode<void (*)(std::shared_ptr<RSImage>&, std::shared_ptr<RSShader
             } },
     };
 
+bool CustomPaintPaintMethod::CheckFilterProperty(FilterType filterType, const std::string& filterParam)
+{
+    switch (filterType) {
+        case FilterType::GRAYSCALE:
+        case FilterType::SEPIA:
+        case FilterType::SATURATE:
+        case FilterType::INVERT:
+        case FilterType::OPACITY:
+        case FilterType::BRIGHTNESS:
+        case FilterType::CONTRAST: {
+            std::regex contrastRegexExpression(R"((\d+(\.\d+)?%?)|(^$))");
+            return std::regex_match(filterParam, contrastRegexExpression);
+        }
+        case FilterType::BLUR: {
+            std::regex blurRegexExpression(R"((\d+(\.\d+)?(px|rem))|(^$))");
+            return std::regex_match(filterParam, blurRegexExpression);
+        }
+        case FilterType::HUE_ROTATE: {
+            std::regex hueRotateRegexExpression(R"((\d+(\.\d+)?(deg|grad|rad|turn))|(^$))");
+            return std::regex_match(filterParam, hueRotateRegexExpression);
+        }
+        default:
+            return false;
+    }
+}
+
+bool CustomPaintPaintMethod::ParseFilter(std::string& filter, std::vector<FilterProperty>& filters)
+{
+    filter.erase(0, filter.find_first_not_of(' '));
+    size_t index = filter.find_first_of('(');
+    if (index == std::string::npos) {
+        return false;
+    }
+    FilterType filterType = FilterStrToFilterType(filter.substr(0, index));
+    std::string filterParam = filter.substr(index + 1);
+    filterParam.erase(0, filterParam.find_first_not_of(' '));
+    filterParam.erase(filterParam.find_last_not_of(' ') + 1);
+    if (!CheckFilterProperty(filterType, filterParam)) {
+        return false;
+    }
+    filters.emplace_back(FilterProperty{filterType, filterParam});
+    return true;
+}
+
 void CustomPaintPaintMethod::UpdateRecordingCanvas(float width, float height)
 {
 #ifndef USE_ROSEN_DRAWING
@@ -2041,81 +2085,84 @@ void CustomPaintPaintMethod::SetPaintImage(SkPaint& paint)
 void CustomPaintPaintMethod::SetPaintImage(RSPen* pen, RSBrush* brush)
 #endif
 {
-    FilterType filterType;
-    std::string filterParam;
-    if (!GetFilterType(filterType, filterParam)) {
-        return;
+    std::vector<FilterProperty> filters;
+    if (GetFilterType(filters)) {
+        lastFilters_ = filters;
+    } else {
+        filters = lastFilters_;
     }
-    switch (filterType) {
-        case FilterType::NONE:
-            break;
-        case FilterType::GRAYSCALE:
+    for (FilterProperty filter : filters) {
+        switch (filter.filterType_) {
+            case FilterType::NONE:
+                break;
+            case FilterType::GRAYSCALE:
 #ifndef USE_ROSEN_DRAWING
-            SetGrayFilter(filterParam, paint);
+                SetGrayFilter(filter.filterParam_, paint);
 #else
-            SetGrayFilter(filterParam, pen, brush);
+                SetGrayFilter(filter.filterParam_, pen, brush);
 #endif
-            break;
-        case FilterType::SEPIA:
+                break;
+            case FilterType::SEPIA:
 #ifndef USE_ROSEN_DRAWING
-            SetSepiaFilter(filterParam, paint);
+                SetSepiaFilter(filter.filterParam_, paint);
 #else
-            SetSepiaFilter(filterParam, pen, brush);
+                SetSepiaFilter(filter.filterParam_, pen, brush);
 #endif
-            break;
-        case FilterType::SATURATE:
+                break;
+            case FilterType::SATURATE:
 #ifndef USE_ROSEN_DRAWING
-            SetSaturateFilter(filterParam, paint);
+                SetSaturateFilter(filter.filterParam_, paint);
 #else
-            SetSaturateFilter(filterParam, pen, brush);
+                SetSaturateFilter(filter.filterParam_, pen, brush);
 #endif
-            break;
-        case FilterType::HUE_ROTATE:
+                break;
+            case FilterType::HUE_ROTATE:
 #ifndef USE_ROSEN_DRAWING
-            SetHueRotateFilter(filterParam, paint);
+                SetHueRotateFilter(filter.filterParam_, paint);
 #else
-            SetHueRotateFilter(filterParam, pen, brush);
+                SetHueRotateFilter(filter.filterParam_, pen, brush);
 #endif
-            break;
-        case FilterType::INVERT:
+                break;
+            case FilterType::INVERT:
 #ifndef USE_ROSEN_DRAWING
-            SetInvertFilter(filterParam, paint);
+                SetInvertFilter(filter.filterParam_, paint);
 #else
-            SetInvertFilter(filterParam, pen, brush);
+                SetInvertFilter(filter.filterParam_, pen, brush);
 #endif
-            break;
-        case FilterType::OPACITY:
+                break;
+            case FilterType::OPACITY:
 #ifndef USE_ROSEN_DRAWING
-            SetOpacityFilter(filterParam, paint);
+                SetOpacityFilter(filter.filterParam_, paint);
 #else
-            SetOpacityFilter(filterParam, pen, brush);
+                SetOpacityFilter(filter.filterParam_, pen, brush);
 #endif
-            break;
-        case FilterType::BRIGHTNESS:
+                break;
+            case FilterType::BRIGHTNESS:
 #ifndef USE_ROSEN_DRAWING
-            SetBrightnessFilter(filterParam, paint);
+                SetBrightnessFilter(filter.filterParam_, paint);
 #else
-            SetBrightnessFilter(filterParam, pen, brush);
+                SetBrightnessFilter(filter.filterParam_, pen, brush);
 #endif
-            break;
-        case FilterType::CONTRAST:
+                break;
+            case FilterType::CONTRAST:
 #ifndef USE_ROSEN_DRAWING
-            SetContrastFilter(filterParam, paint);
+                SetContrastFilter(filter.filterParam_, paint);
 #else
-            SetContrastFilter(filterParam, pen, brush);
+                SetContrastFilter(filter.filterParam_, pen, brush);
 #endif
-            break;
-        case FilterType::BLUR:
+                break;
+            case FilterType::BLUR:
 #ifndef USE_ROSEN_DRAWING
-            SetBlurFilter(filterParam, paint);
+                SetBlurFilter(filter.filterParam_, paint);
 #else
-            SetBlurFilter(filterParam, pen, brush);
+                SetBlurFilter(filter.filterParam_, pen, brush);
 #endif
-            break;
-        case FilterType::DROP_SHADOW:
-            break;
-        default:
-            break;
+                break;
+            case FilterType::DROP_SHADOW:
+                break;
+            default:
+                break;
+        }
     }
 }
 
@@ -2445,20 +2492,34 @@ void CustomPaintPaintMethod::SetColorFilter(float matrix[20], RSPen* pen, RSBrus
 #endif
 }
 
-bool CustomPaintPaintMethod::GetFilterType(FilterType& filterType, std::string& filterParam)
+bool CustomPaintPaintMethod::GetFilterType(std::vector<FilterProperty>& filters)
 {
     std::string paramData = filterParam_;
-    size_t index = paramData.find("(");
-    if (index == std::string::npos) {
-        return false;
+    std::transform(paramData.begin(), paramData.end(), paramData.begin(), ::tolower);
+    paramData.erase(paramData.find_last_not_of(' ') + 1);
+    paramData.erase(0, paramData.find_first_not_of(' '));
+    if (paramData == "none") {
+        filters.emplace_back(FilterProperty{FilterType::NONE, ""});
+        return true;
     }
-    filterType = FilterStrToFilterType(paramData.substr(0, index));
-    filterParam = paramData.substr(index + 1);
-    size_t endIndex = filterParam.find(")");
-    if (endIndex != std::string::npos) {
-        filterParam.erase(endIndex, 1);
+
+    std::string filter;
+    for (auto ch : paramData) {
+        if (ch == ')') {
+            if (!ParseFilter(filter, filters)) {
+                return false;
+            }
+            filter.clear();
+        } else {
+            filter.push_back(ch);
+        }
     }
-    return true;
+    if (!filter.empty()) {
+        if (!ParseFilter(filter, filters)) {
+            return false;
+        }
+    }
+    return (filters.size() > 0);
 }
 
 bool CustomPaintPaintMethod::IsPercentStr(std::string& percent)

@@ -99,7 +99,7 @@ NavigationGroupNode::~NavigationGroupNode()
     CHECK_NULL_VOID(pagePattern);
     CHECK_NULL_VOID(pagePattern->GetPageInfo());
     int32_t pageId = pagePattern->GetPageInfo()->GetPageId();
-    context->RemoveNavigationStateCallback(pageId, GetId());
+    context->RemoveNavigationNode(pageId, GetId());
     context->DeleteNavigationNode(curId_);
 }
 
@@ -317,8 +317,7 @@ void NavigationGroupNode::SetBackButtonEvent(const RefPtr<NavDestinationGroupNod
             TAG_LOGI(AceLogTag::ACE_NAVIGATION, "set hideNavBar and stack size is no more than one");
             return false;
         }
-        const auto& children = navigation->GetContentNode()->GetChildren();
-        auto isLastChild = children.size() == 1;
+        auto isLastChild = stack->Size() == 1;
         if (isOverride) {
             result = navigation->HandleBack(navDestination, isLastChild, true);
         } else {
@@ -943,6 +942,19 @@ void NavigationGroupNode::OnDetachFromMainTree(bool recursive)
     GroupNode::OnDetachFromMainTree(recursive);
 }
 
+bool NavigationGroupNode::FindNavigationParent(const std::string& parentName)
+{
+    auto parent = GetParent();
+    while (parent) {
+        if (parent->GetTag() == parentName) {
+            return true;
+            break;
+        }
+        parent = parent->GetParent();
+    }
+    return parent != nullptr;
+}
+
 void NavigationGroupNode::OnAttachToMainTree(bool recursive)
 {
     GroupNode::OnAttachToMainTree(recursive);
@@ -951,6 +963,32 @@ void NavigationGroupNode::OnAttachToMainTree(bool recursive)
     if (pattern) {
         pattern->AttachNavigationStackToParent();
         pattern->AddToDumpManager();
+    }
+    auto parent = GetParent();
+    while (parent) {
+        if (parent->GetTag() == V2::JS_VIEW_ETS_TAG) {
+            break;
+        }
+        parent = parent->GetParent();
+    }
+    if (!parent) {
+        TAG_LOGE(AceLogTag::ACE_NAVIGATION, "parent custom node is nullptr");
+        return;
+    }
+    pattern->SetParentCustomNode(parent);
+    bool findNavdestination = FindNavigationParent(V2::NAVDESTINATION_VIEW_ETS_TAG);
+    auto pipelineContext = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipelineContext);
+    auto stageManager = pipelineContext->GetStageManager();
+    CHECK_NULL_VOID(stageManager);
+    RefPtr<FrameNode> pageNode = stageManager->GetLastPage();
+    CHECK_NULL_VOID(pageNode);
+    auto pagePattern = pageNode->GetPattern<PagePattern>();
+    CHECK_NULL_VOID(pagePattern);
+    CHECK_NULL_VOID(pagePattern->GetPageInfo());
+    int32_t pageId = pagePattern->GetPageInfo()->GetPageId();
+    if (!findNavdestination) {
+        pipelineContext->AddNavigationNode(pageId, WeakClaim(this));
     }
 }
 

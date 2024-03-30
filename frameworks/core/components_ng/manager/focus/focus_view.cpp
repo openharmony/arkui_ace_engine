@@ -91,7 +91,9 @@ void FocusView::LostViewFocus()
         AceLogTag::ACE_FOCUS, "Focus view: %{public}s/%{public}d lost focus", GetFrameName().c_str(), GetFrameId());
     auto focusViewHub = GetFocusHub();
     CHECK_NULL_VOID(focusViewHub);
-    focusViewHub->LostFocus(BlurReason::VIEW_SWITCH);
+    if (focusViewHub->IsCurrentFocus()) {
+        focusViewHub->LostFocus(BlurReason::VIEW_SWITCH);
+    }
 }
 
 RefPtr<FocusHub> FocusView::GetFocusHub()
@@ -119,18 +121,21 @@ RefPtr<FocusView> FocusView::GetEntryFocusView()
     if (entryFocusViewName.empty()) {
         return AceType::Claim(this);
     }
-    RefPtr<FocusView> result = AceType::Claim(this);
     auto focusViewHub = GetFocusHub();
     auto parentFocusHub = focusViewHub ? focusViewHub->GetParentFocusHub() : nullptr;
     while (parentFocusHub) {
         auto parentFrame = parentFocusHub->GetFrameNode();
         auto parentFocusView = parentFrame ? parentFrame->GetPattern<FocusView>() : nullptr;
-        if (parentFocusView && parentFocusView->GetFrameName() == entryFocusViewName) {
-            result = parentFocusView;
+        if (!parentFocusView) {
+            parentFocusHub = parentFocusHub->GetParentFocusHub();
+            continue;
+        }
+        if (entryFocusViewName == ENTRY_ANY_FOCUSVIEW || entryFocusViewName == parentFocusView->GetFrameName()) {
+            return parentFocusView;
         }
         parentFocusHub = parentFocusHub->GetParentFocusHub();
     }
-    return result;
+    return AceType::Claim(this);
 }
 
 RefPtr<FocusHub> FocusView::GetViewRootScope()
@@ -149,7 +154,7 @@ RefPtr<FocusHub> FocusView::GetViewRootScope()
         auto iter = children.begin();
         std::advance(iter, index);
         if (iter == children.end()) {
-            TAG_LOGI(AceLogTag::ACE_FOCUS, "Index: %{public}d of %{public}s/%{public}d 's children is invalid.", index,
+            TAG_LOGD(AceLogTag::ACE_FOCUS, "Index: %{public}d of %{public}s/%{public}d 's children is invalid.", index,
                 rootScope->GetFrameName().c_str(), rootScope->GetFrameId());
             return focusViewHub;
         }
@@ -160,7 +165,10 @@ RefPtr<FocusHub> FocusView::GetViewRootScope()
     auto screenNode = pipeline ? pipeline->GetScreenNode() : nullptr;
     auto screenFocusHub = screenNode ? screenNode->GetFocusHub() : nullptr;
     if (rootScope->GetFocusType() != FocusType::SCOPE || (screenFocusHub && rootScope == screenFocusHub)) {
-        return rootScope->GetParentFocusHub();
+        rootScope = rootScope->GetParentFocusHub();
+    }
+    if (rootScope != focusViewHub) {
+        focusViewHub->SetFocusDependence(FocusDependence::AUTO);
     }
     return rootScope;
 }
@@ -177,6 +185,32 @@ bool FocusView::IsRootScopeCurrentFocus()
 {
     auto viewRootScope = GetViewRootScope();
     return viewRootScope ? viewRootScope->IsCurrentFocus() : false;
+}
+
+bool FocusView::IsChildFocusViewOf(const RefPtr<FocusView>& parent)
+{
+    auto focusViewHub = GetFocusHub();
+    auto parentFocusHub = focusViewHub ? focusViewHub->GetParentFocusHub() : nullptr;
+    while (parentFocusHub) {
+        auto parentFrame = parentFocusHub->GetFrameNode();
+        auto parentFocusView = parentFrame ? parentFrame->GetPattern<FocusView>() : nullptr;
+        if (!parentFocusView) {
+            parentFocusHub = parentFocusHub->GetParentFocusHub();
+            continue;
+        }
+        if (parentFocusView == parent) {
+            return true;
+        }
+        parentFocusHub = parentFocusHub->GetParentFocusHub();
+    }
+    return false;
+}
+
+bool FocusView::HasParentFocusHub()
+{
+    auto focusViewHub = GetFocusHub();
+    CHECK_NULL_RETURN(focusViewHub, false);
+    return focusViewHub->GetParentFocusHub() != nullptr;
 }
 
 bool FocusView::RequestDefaultFocus()

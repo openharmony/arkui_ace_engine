@@ -42,6 +42,7 @@ ohos_unittest("plugin_pattern_test_ng") {
     "$ace_root/frameworks/core/components/plugin/resource/plugin_manager_resource.cpp",
     "$ace_root/frameworks/core/components/test/unittest/mock/ace_trace_mock.cpp",
     "$ace_root/frameworks/core/components_ng/animation/geometry_transition.cpp",
+    "$ace_root/frameworks/core/components_ng/base/extension_handler.cpp",
     "$ace_root/frameworks/core/components_ng/base/frame_node.cpp",
     "$ace_root/frameworks/core/components_ng/base/geometry_node.cpp",
     "$ace_root/frameworks/core/components_ng/base/modifier.cpp",

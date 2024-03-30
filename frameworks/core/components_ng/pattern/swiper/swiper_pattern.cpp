@@ -143,6 +143,7 @@ RefPtr<LayoutAlgorithm> SwiperPattern::CreateLayoutAlgorithm()
     } else if (targetIndex_) {
         swiperLayoutAlgorithm->SetTargetIndex(targetIndex_.value());
     }
+    swiperLayoutAlgorithm->SetCurrentIndex(currentIndex_);
     swiperLayoutAlgorithm->SetContentCrossSize(contentCrossSize_);
     swiperLayoutAlgorithm->SetMainSizeIsMeasured(mainSizeIsMeasured_);
     swiperLayoutAlgorithm->SetContentMainSize(contentMainSize_);
@@ -272,7 +273,6 @@ void SwiperPattern::InitCapture()
 
 void SwiperPattern::OnModifyDone()
 {
-    currentOffset_ = 0.0f;
     Pattern::OnModifyDone();
     auto host = GetHost();
     CHECK_NULL_VOID(host);
@@ -362,11 +362,13 @@ void SwiperPattern::BeforeCreateLayoutWrapper()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    if (hasCachedCapture_ && host->GetChildrenUpdated() != -1) {
-        InitCapture();
-    }
-    if (host->GetChildrenUpdated() != -1 && NeedAutoPlay() && !translateTask_) {
-        StartAutoPlay();
+    if (host->GetChildrenUpdated() != -1) {
+        if (hasCachedCapture_) {
+            InitCapture();
+        }
+        if (NeedAutoPlay() && !translateTask_) {
+            StartAutoPlay();
+        }
         host->ChildrenUpdatedFrom(-1);
     }
 
@@ -415,6 +417,10 @@ void SwiperPattern::BeforeCreateLayoutWrapper()
             jumpIndex_ = 0;
         }
         targetIndex_.reset();
+        StopAutoPlay();
+        StopTranslateAnimation();
+        StopFadeAnimation();
+        StopSpringAnimation();
         if (usePropertyAnimation_) {
             StopPropertyTranslateAnimation(false, true);
             currentDelta_ = 0.0f;
@@ -497,19 +503,27 @@ void SwiperPattern::UpdateCaptureSource(
 
     auto captureNode = DynamicCast<FrameNode>(host->GetChildAtIndex(host->GetChildIndexById(captureId)));
     CHECK_NULL_VOID(captureNode);
-    auto imageLayoutProperty = captureNode->GetLayoutProperty<ImageLayoutProperty>();
-    CHECK_NULL_VOID(imageLayoutProperty);
-    imageLayoutProperty->UpdateImageSourceInfo(ImageSourceInfo(PixelMap::CreatePixelMap(&pixelMap)));
-    imageLayoutProperty->UpdateMargin(margin);
-    captureNode->MarkModifyDone();
-    captureNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+    auto piplineContext = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(piplineContext);
+    auto taskExecutor = piplineContext->GetTaskExecutor();
+    CHECK_NULL_VOID(taskExecutor);
+    taskExecutor->PostTask(
+        [captureNode, pixelMap, margin]() mutable {
+            auto imageLayoutProperty = captureNode->GetLayoutProperty<ImageLayoutProperty>();
+            CHECK_NULL_VOID(imageLayoutProperty);
+            imageLayoutProperty->UpdateImageSourceInfo(ImageSourceInfo(PixelMap::CreatePixelMap(&pixelMap)));
+            imageLayoutProperty->UpdateMargin(margin);
+            captureNode->MarkModifyDone();
+            captureNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+        },
+        TaskExecutor::TaskType::UI);
 }
 
 void SwiperPattern::InitSurfaceChangedCallback()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto pipeline = host->GetContext();
+    auto pipeline = host->GetContextRefPtr();
     CHECK_NULL_VOID(pipeline);
     if (!HasSurfaceChangedCallback()) {
         auto callbackId = pipeline->RegisterSurfaceChangedCallback(
@@ -843,6 +857,7 @@ bool SwiperPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty,
             OnIndexChange();
         }
         jumpIndex_.reset();
+        pauseTargetIndex_.reset();
         auto delayTime = GetInterval() - GetDuration();
         delayTime = std::clamp(delayTime, 0, delayTime);
         if (NeedAutoPlay() && isUserFinish_) {
@@ -880,7 +895,6 @@ bool SwiperPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty,
                     stopAutoPlay = true;
                     autoLinearReachBoundary = true;
                 }
-
                 context->AddAfterLayoutTask([weak = WeakClaim(this), targetPos, velocity = velocity_.value_or(0.0f),
                                                 nextIndex, stopAutoPlay]() {
                     auto swiper = weak.Upgrade();
@@ -1351,7 +1365,6 @@ void SwiperPattern::ShowNext()
         return;
     }
     StopAutoPlay();
-    StopTranslateAnimation();
 
     StopSpringAnimationAndFlushImmediately();
     StopFadeAnimation();
@@ -1407,7 +1420,6 @@ void SwiperPattern::ShowPrevious()
         return;
     }
     StopAutoPlay();
-    StopTranslateAnimation();
     StopSpringAnimationAndFlushImmediately();
     StopFadeAnimation();
     StopIndicatorAnimation();
@@ -1461,7 +1473,10 @@ void SwiperPattern::ChangeIndex(int32_t index, bool useAnimation)
 
 void SwiperPattern::FinishAnimation()
 {
-    StopTranslateAnimation();
+    if (translateAnimationIsRunning_) {
+        isFinishAnimation_ = true;
+        StopTranslateAnimation();
+    }
     StopSpringAnimation();
     StopFadeAnimation();
     StopIndicatorAnimation();
@@ -2256,7 +2271,6 @@ void SwiperPattern::HandleTouchDown(const TouchLocationInfo& locationInfo)
 
     AnimationUtils::PauseAnimation(springAnimation_);
     if (springAnimationIsRunning_) {
-        isTouchDownSpringAnimation_ = true;
         springAnimationIsRunning_ = false;
     }
 
@@ -2277,8 +2291,7 @@ void SwiperPattern::HandleTouchUp()
         UpdateAnimationProperty(0.0);
     }
 
-    if (!springAnimationIsRunning_ && isTouchDownSpringAnimation_) {
-        isTouchDownSpringAnimation_ = false;
+    if (!springAnimationIsRunning_) {
         springAnimationIsRunning_ = true;
         AnimationUtils::ResumeAnimation(springAnimation_);
     }
@@ -3075,7 +3088,6 @@ void SwiperPattern::PlaySpringAnimation(double dragVelocity)
             auto swiperPattern = weak.Upgrade();
             CHECK_NULL_VOID(swiperPattern);
             swiperPattern->springAnimationIsRunning_ = false;
-            swiperPattern->isTouchDownSpringAnimation_ = false;
             swiperPattern->OnSpringAndFadeAnimationFinish();
         });
 }

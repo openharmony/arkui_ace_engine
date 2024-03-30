@@ -89,6 +89,22 @@ bool ArkTSUtils::ParseJsColorAlpha(const EcmaVM* vm, const Local<JSValueRef>& va
     return false;
 }
 
+bool ArkTSUtils::ParseJsColorAlpha(
+    const EcmaVM* vm, const Local<JSValueRef>& value, Color& result, const Color& defaultColor)
+{
+    if (!value->IsNumber() && !value->IsString() && !value->IsObject()) {
+        return false;
+    }
+    if (value->IsNumber()) {
+        result = Color(ColorAlphaAdapt(value->Uint32Value(vm)));
+        return true;
+    }
+    if (value->IsString()) {
+        return Color::ParseColorString(value->ToString(vm)->ToString(), result, defaultColor);
+    }
+    return ParseJsColorFromResource(vm, value, result);
+}
+
 std::string ToString(const EcmaVM* vm,  Local<JSValueRef>& jsVal)
 {
     panda::LocalScope scope(vm);
@@ -404,6 +420,53 @@ bool ArkTSUtils::ParseJsInteger(const EcmaVM *vm, const Local<JSValueRef> &value
         return true;
     }
     // resource ignore by design
+    return false;
+}
+
+bool ArkTSUtils::ParseJsIntegerWithResource(const EcmaVM* vm, const Local<JSValueRef>& jsValue, int32_t& result)
+{
+    if (!jsValue->IsNumber() && !jsValue->IsObject()) {
+        return false;
+    }
+
+    if (jsValue->IsNumber()) {
+        result = jsValue->Int32Value(vm);
+        return true;
+    }
+
+    auto jsObj = jsValue->ToObject(vm);
+    auto type = jsObj->Get(vm, panda::StringRef::NewFromUtf8(vm, "type"));
+    auto id = jsObj->Get(vm, panda::StringRef::NewFromUtf8(vm, "id"));
+    int32_t resourceType = 0;
+    if (!type->IsNumber() || !id->IsNumber()) {
+        return false;
+    }
+    resourceType = type->Int32Value(vm);
+    auto resIdNum = id->Int32Value(vm);
+
+    auto resourceObject = GetResourceObject(vm, jsValue);
+    auto resourceWrapper = CreateResourceWrapper(vm, jsValue, resourceObject);
+    CHECK_NULL_RETURN(resourceWrapper, false);
+
+    if (resIdNum == -1) {
+        if (!IsGetResourceByName(vm, jsObj)) {
+            return false;
+        }
+        auto args = jsObj->Get(vm, panda::StringRef::NewFromUtf8(vm, "params"));
+        Local<panda::ArrayRef> params = static_cast<Local<panda::ArrayRef>>(args);
+        auto param = panda::ArrayRef::GetValueAt(vm, params, 0);
+        if (resourceType == static_cast<int32_t>(ResourceType::INTEGER)) {
+            result = resourceWrapper->GetIntByName(param->ToString(vm)->ToString());
+            return true;
+        }
+        return false;
+    }
+
+    if (resourceType == static_cast<int32_t>(ResourceType::INTEGER)) {
+        result = resourceWrapper->GetInt(resIdNum);
+        return true;
+    }
+
     return false;
 }
 

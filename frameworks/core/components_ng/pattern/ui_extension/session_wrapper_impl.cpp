@@ -52,6 +52,10 @@ constexpr char PULL_FAIL_NAME[] = "extension_pulling_up_fail";
 constexpr char PULL_FAIL_MESSAGE[] = "pulling another embedded component failed, not allowed to cascade.";
 constexpr char EXIT_ABNORMALLY_NAME[] = "extension_exit_abnormally";
 constexpr char EXIT_ABNORMALLY_MESSAGE[] = "the extension ability exited abnormally, please check AMS log.";
+constexpr char LIFECYCLE_TIMEOUT_NAME[] = "extension_lifecycle_timeout";
+constexpr char LIFECYCLE_TIMEOUT_MESSAGE[] = "the lifecycle of extension ability is timeout, please check AMS log.";
+constexpr char EVENT_TIMEOUT_NAME[] = "handle_event_timeout";
+constexpr char EVENT_TIMEOUT_MESSAGE[] = "the extension ability has timed out processing the key event.";
 // Defines the want parameter to control the soft-keyboard area change of the provider.
 constexpr char OCCUPIED_AREA_CHANGE_KEY[] = "ability.want.params.IsNotifyOccupiedAreaChange";
 // Set the UIExtension type of the EmbeddedComponent.
@@ -89,6 +93,13 @@ public:
         auto sessionWrapper = sessionWrapper_.Upgrade();
         CHECK_NULL_VOID(sessionWrapper);
         sessionWrapper->OnDisconnect(true);
+    }
+
+    void OnExtensionTimeout(int32_t errorCode) override
+    {
+        auto sessionWrapper = sessionWrapper_.Upgrade();
+        CHECK_NULL_VOID(sessionWrapper);
+        sessionWrapper->OnExtensionTimeout(errorCode);
     }
 
     void OnAccessibilityEvent(const Accessibility::AccessibilityEventInfo& info, int64_t uiExtensionOffset) override
@@ -328,7 +339,13 @@ bool SessionWrapperImpl::NotifyKeyEventSync(const std::shared_ptr<OHOS::MMI::Key
 {
     CHECK_NULL_RETURN(session_, false);
     bool isConsumed = false;
-    session_->TransferKeyEventForConsumed(keyEvent, isConsumed, isPreIme);
+    bool isTimeout = false;
+    session_->TransferKeyEventForConsumed(keyEvent, isConsumed, isTimeout, isPreIme);
+    auto pattern = hostPattern_.Upgrade();
+    if (isTimeout && pattern) {
+        pattern->FireOnErrorCallback(ERROR_CODE_UIEXTENSION_EVENT_TIMEOUT, EVENT_TIMEOUT_NAME, EVENT_TIMEOUT_MESSAGE);
+        return false;
+    }
     UIEXT_LOGD("The key evnet is notified to the provider and %{public}s consumed.", isConsumed ? "is" : "is not");
     return isConsumed;
 }
@@ -411,7 +428,7 @@ void SessionWrapperImpl::NotifyDestroy()
 void SessionWrapperImpl::NotifyConfigurationUpdate() {}
 /************************************************ End: The lifecycle interface ****************************************/
 
-/************************* Begin: The interface to control the display area and the avoid area ************************/
+/************************************************ Begin: The interface for responsing provider ************************/
 void SessionWrapperImpl::OnConnect()
 {
     taskExecutor_->PostTask(
@@ -444,6 +461,18 @@ void SessionWrapperImpl::OnDisconnect(bool isAbnormal)
         TaskExecutor::TaskType::UI);
 }
 
+void SessionWrapperImpl::OnExtensionTimeout(int32_t /* errorCode */)
+{
+    taskExecutor_->PostTask(
+        [weak = hostPattern_]() {
+            auto pattern = weak.Upgrade();
+            CHECK_NULL_VOID(pattern);
+            pattern->FireOnErrorCallback(
+                ERROR_CODE_UIEXTENSION_LIFECYCLE_TIMEOUT, LIFECYCLE_TIMEOUT_NAME, LIFECYCLE_TIMEOUT_MESSAGE);
+        },
+        TaskExecutor::TaskType::UI);
+}
+
 void SessionWrapperImpl::OnAccessibilityEvent(const Accessibility::AccessibilityEventInfo& info, int64_t offset)
 {
     taskExecutor_->PostTask(
@@ -454,7 +483,7 @@ void SessionWrapperImpl::OnAccessibilityEvent(const Accessibility::Accessibility
         },
         TaskExecutor::TaskType::UI);
 }
-/*************************** End: The interface to control the display area and the avoid area ************************/
+/************************************************** End: The interface for responsing provider ************************/
 
 /************************************************ Begin: The interface about the accessibility ************************/
 bool SessionWrapperImpl::TransferExecuteAction(

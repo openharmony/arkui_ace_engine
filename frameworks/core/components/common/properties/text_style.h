@@ -551,42 +551,74 @@ public:
     {
         return textBackgroundStyle_;
     }
+
+    std::string ToString() const
+    {
+        auto jsonValue = JsonUtil::Create(true);
+        JSON_STRING_PUT_STRINGABLE(jsonValue, fontSize_);
+        JSON_STRING_PUT_STRINGABLE(jsonValue, lineHeight_);
+        JSON_STRING_PUT_STRINGABLE(jsonValue, baselineOffset_);
+        JSON_STRING_PUT_STRINGABLE(jsonValue, wordSpacing_);
+        JSON_STRING_PUT_STRINGABLE(jsonValue, textIndent_);
+        JSON_STRING_PUT_STRINGABLE(jsonValue, letterSpacing_);
+
+        JSON_STRING_PUT_INT(jsonValue, fontWeight_);
+        JSON_STRING_PUT_INT(jsonValue, fontStyle_);
+        JSON_STRING_PUT_INT(jsonValue, textBaseline_);
+        JSON_STRING_PUT_INT(jsonValue, textOverflow_);
+        JSON_STRING_PUT_INT(jsonValue, verticalAlign_);
+        JSON_STRING_PUT_INT(jsonValue, textAlign_);
+        JSON_STRING_PUT_INT(jsonValue, textDecorationStyle_);
+        JSON_STRING_PUT_INT(jsonValue, textDecoration_);
+        JSON_STRING_PUT_INT(jsonValue, whiteSpace_);
+        JSON_STRING_PUT_INT(jsonValue, wordBreak_);
+        JSON_STRING_PUT_INT(jsonValue, textCase_);
+        JSON_STRING_PUT_INT(jsonValue, ellipsisMode_);
+
+        std::stringstream ss;
+        std::for_each(renderColors_.begin(), renderColors_.end(), [&ss](const Color& c) { ss << c.ToString() << ","; });
+        jsonValue->Put("renderColors", ss.str().c_str());
+        JSON_STRING_PUT_INT(jsonValue, renderStrategy_);
+        JSON_STRING_PUT_INT(jsonValue, effectStrategy_);
+        return jsonValue->ToString();
+    }
+
 private:
     std::vector<std::string> fontFamilies_;
     std::unordered_map<std::string, int32_t> fontFeatures_;
     std::vector<Dimension> preferFontSizes_;
     std::vector<TextSizeGroup> preferTextSizeGroups_;
+    std::vector<Shadow> textShadows_;
     // use 14px for normal font size.
     Dimension fontSize_ { 14, DimensionUnit::PX };
     Dimension adaptMinFontSize_;
     Dimension adaptMaxFontSize_;
     Dimension adaptFontSizeStep_;
     Dimension lineHeight_;
-    bool hasHeightOverride_ = false;
-    FontWeight fontWeight_ { FontWeight::NORMAL };
-    FontStyle fontStyle_ { FontStyle::NORMAL };
-    TextBaseline textBaseline_ { TextBaseline::ALPHABETIC };
     Dimension baselineOffset_;
-    TextOverflow textOverflow_ { TextOverflow::CLIP };
-    VerticalAlign verticalAlign_ { VerticalAlign::NONE };
-    TextAlign textAlign_ { TextAlign::START };
-    Color textColor_ { Color::BLACK };
-    Color textDecorationColor_ { Color::BLACK };
-    TextDecorationStyle textDecorationStyle_ { TextDecorationStyle::SOLID };
-    TextDecoration textDecoration_ { TextDecoration::NONE };
-    std::vector<Shadow> textShadows_;
-    WhiteSpace whiteSpace_ { WhiteSpace::PRE };
     Dimension wordSpacing_;
     Dimension textIndent_ { 0.0f, DimensionUnit::PX };
     Dimension letterSpacing_;
+    FontWeight fontWeight_ { FontWeight::NORMAL };
+    FontStyle fontStyle_ { FontStyle::NORMAL };
+    TextBaseline textBaseline_ { TextBaseline::ALPHABETIC };
+    TextOverflow textOverflow_ { TextOverflow::CLIP };
+    VerticalAlign verticalAlign_ { VerticalAlign::NONE };
+    TextAlign textAlign_ { TextAlign::START };
+    TextDecorationStyle textDecorationStyle_ { TextDecorationStyle::SOLID };
+    TextDecoration textDecoration_ { TextDecoration::NONE };
+    WhiteSpace whiteSpace_ { WhiteSpace::PRE };
+    WordBreak wordBreak_ { WordBreak::BREAK_WORD };
+    TextCase textCase_ { TextCase::NORMAL };
+    EllipsisMode ellipsisMode_ = EllipsisMode::TAIL;
+    Color textColor_ { Color::BLACK };
+    Color textDecorationColor_ { Color::BLACK };
     uint32_t maxLines_ = UINT32_MAX;
+    bool hasHeightOverride_ = false;
     bool adaptTextSize_ = false;
     bool adaptHeight_ = false; // whether adjust text size with height.
     bool allowScale_ = true;
     bool halfLeading_ = false;
-    WordBreak wordBreak_ { WordBreak::BREAK_WORD };
-    TextCase textCase_ { TextCase::NORMAL };
-    EllipsisMode ellipsisMode_ = EllipsisMode::TAIL;
 
     // for Symbol
     std::vector<Color> renderColors_;

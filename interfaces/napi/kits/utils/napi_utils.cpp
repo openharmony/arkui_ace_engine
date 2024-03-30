@@ -594,7 +594,6 @@ std::string DimensionToString(Dimension dimension)
 bool ParseString(const ResourceInfo& info, std::string& result)
 {
     auto resourceWrapper = CreateResourceWrapper(info);
-
     if (info.type == static_cast<int>(ResourceType::PLURAL)) {
         std::string pluralResults;
         if (info.resId == UNKNOWN_RESOURCE_ID) {
@@ -636,6 +635,10 @@ bool ParseString(const ResourceInfo& info, std::string& result)
     }
     if (info.type == static_cast<int>(ResourceType::COLOR)) {
         result = resourceWrapper->GetColor(info.resId).ColorToString();
+        return true;
+    }
+    if (info.type == static_cast<int>(ResourceType::INTEGER)) {
+        result = std::to_string(resourceWrapper->GetInt(info.resId));
         return true;
     }
     return true;

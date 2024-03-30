@@ -332,7 +332,6 @@ private:
     void HandleCrashTop() const;
     void HandleCrashBottom() const;
 
-    void RegisterScrollEventTask();
     void RegisterScrollBarEventTask();
     void HandleScrollEffect();
     void ValidateOffset(int32_t source);

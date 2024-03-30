@@ -34,6 +34,7 @@ public:
     enum class SliderMode {
         OUTSET,  // block on track, track is thin
         INSET,   // block inside track, track is rough
+        NONE,    // no block
         CAPSULE, // capsule slider.
     };
 
@@ -41,6 +42,11 @@ public:
         DEFAULT,
         IMAGE,
         SHAPE,
+    };
+
+    enum class SliderInteraction {
+        SLIDE_AND_CLICK,
+        SLIDE_ONLY,
     };
 
     static SliderModel* GetInstance();
@@ -52,10 +58,11 @@ public:
     virtual void SetReverse(bool value) = 0;
     virtual void SetBlockColor(const Color& value) = 0;
     virtual void SetTrackBackgroundColor(const Color& value) = 0;
-    virtual void SetTrackBackgroundColor(const NG::Gradient& value) = 0;
+    virtual void SetTrackBackgroundColor(const NG::Gradient& value, bool isResourceColor = false) = 0;
     virtual void SetSelectColor(const Color& value) = 0;
     virtual void SetMinLabel(float value) = 0;
     virtual void SetMaxLabel(float value) = 0;
+    virtual void SetMinResponsiveDistance(float value) {};
     virtual void SetShowSteps(bool value) = 0;
     virtual void SetShowTips(bool value, const std::optional<std::string>& content) = 0;
     virtual void SetThickness(const Dimension& value) = 0;
@@ -63,12 +70,14 @@ public:
     virtual void SetBlockBorderWidth(const Dimension& value) = 0;
     virtual void SetStepColor(const Color& value) = 0;
     virtual void SetTrackBorderRadius(const Dimension& value) = 0;
+    virtual void SetSelectedBorderRadius(const Dimension& value) = 0;
     virtual void SetBlockSize(const Dimension& width, const Dimension& height) = 0;
     virtual void SetBlockType(BlockStyleType value) = 0;
     virtual void SetBlockImage(
         const std::string& value, const std::string& bundleName, const std::string& moduleName) = 0;
     virtual void SetBlockShape(const RefPtr<BasicShape>& value) = 0;
     virtual void SetStepSize(const Dimension& value) = 0;
+    virtual void SetSliderInteractionMode(SliderInteraction mode) {};
     virtual void SetOnChange(std::function<void(float, int32_t)>&& eventOnChange) = 0;
     virtual void SetOnChangeEvent(std::function<void(float)>&& onChangeEvent) = 0;
 
@@ -76,11 +85,14 @@ public:
     virtual void ResetBlockBorderWidth() = 0;
     virtual void ResetStepColor() = 0;
     virtual void ResetTrackBorderRadius() = 0;
+    virtual void ResetSelectedBorderRadius() = 0;
     virtual void ResetBlockSize() = 0;
     virtual void ResetBlockType() = 0;
     virtual void ResetBlockImage() = 0;
     virtual void ResetBlockShape() = 0;
     virtual void ResetStepSize() = 0;
+    virtual void ResetSliderInteractionMode() = 0;
+    virtual void ResetMinResponsiveDistance() = 0;
 
 private:
     static std::unique_ptr<SliderModel> instance_;

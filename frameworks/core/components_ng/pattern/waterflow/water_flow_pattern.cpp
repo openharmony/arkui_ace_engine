@@ -164,6 +164,15 @@ RefPtr<LayoutAlgorithm> WaterFlowPattern::CreateLayoutAlgorithm()
     if (sections_ || SystemProperties::WaterFlowUseSegmentedLayout()) {
         algorithm = MakeRefPtr<WaterFlowSegmentedLayout>(layoutInfo_);
     } else {
+        int32_t footerIndex = -1;
+        auto footer = footer_.Upgrade();
+        if (footer) {
+            int32_t count = footer->FrameCount();
+            if (count > 0) {
+                footerIndex = 0;
+            }
+        }
+        layoutInfo_.footerIndex_ = footerIndex;
         algorithm = MakeRefPtr<WaterFlowLayoutAlgorithm>(layoutInfo_);
     }
     algorithm->SetCanOverScroll(CanOverScroll(GetScrollSource()));
@@ -196,7 +205,7 @@ void WaterFlowPattern::OnModifyDone()
     // SetAxis for scroll event
     SetAxis(layoutProperty->GetAxis());
     if (!GetScrollableEvent()) {
-        InitScrollableEvent();
+        AddScrollEvent();
     }
     SetEdgeEffect();
 
@@ -314,17 +323,6 @@ void WaterFlowPattern::CheckScrollable()
     if (!layoutProperty->GetScrollEnabled().value_or(IsScrollable())) {
         SetScrollEnable(false);
     }
-}
-
-void WaterFlowPattern::InitScrollableEvent()
-{
-    AddScrollEvent();
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    auto eventHub = host->GetEventHub<WaterFlowEventHub>();
-    CHECK_NULL_VOID(eventHub);
-    auto scrollFrameBeginEvent = eventHub->GetOnScrollFrameBegin();
-    SetScrollFrameBeginCallback(scrollFrameBeginEvent);
 }
 
 bool WaterFlowPattern::UpdateStartIndex(int32_t index)
@@ -462,6 +460,13 @@ void WaterFlowPattern::OnSectionChanged(int32_t start)
     MarkDirtyNodeSelf();
 }
 
+void WaterFlowPattern::ResetSections()
+{
+    layoutInfo_.Reset();
+    sections_.Reset();
+    MarkDirtyNodeSelf();
+}
+
 void WaterFlowPattern::ScrollToIndex(int32_t index, bool smooth, ScrollAlign align)
 {
     SetScrollSource(SCROLL_FROM_JUMP);
@@ -568,13 +573,14 @@ void WaterFlowPattern::AddFooter(const RefPtr<NG::UINode>& footer)
     // assume this is always before other children are modified, because it's called during State update.
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    if (layoutInfo_.footerIndex_ < 0) {
+    auto prevFooter = footer_.Upgrade();
+    if (!prevFooter) {
         layoutInfo_.footerIndex_ = 0;
         host->AddChild(footer);
     } else {
-        auto oldChild = host->GetChildAtIndex(layoutInfo_.footerIndex_);
-        host->ReplaceChild(oldChild, footer);
+        host->ReplaceChild(prevFooter, footer);
     }
+    footer_ = footer;
     footer->SetActive(false);
 }
 } // namespace OHOS::Ace::NG

@@ -967,11 +967,11 @@ var MenuPreviewMode;
 })(MenuPreviewMode || (MenuPreviewMode = {}));
 
 let DismissReason;
-(function DismissReason(DismissReason) {
+(function (DismissReason) {
   DismissReason[DismissReason.PRESS_BACK = 0] = "PRESS_BACK";
   DismissReason[DismissReason.TOUCH_OUTSIDE = 1] = "TOUCH_OUTSIDE";
   DismissReason[DismissReason.CLOSE_BUTTON = 2] = "CLOSE_BUTTON";
-})(DismissReason || (DismissReason = {}))
+})(DismissReason || (DismissReason = {}));
 
 var HoverEffect;
 (function (HoverEffect) {
@@ -1370,6 +1370,12 @@ var SheetType;
   SheetType[SheetType["POPUP"] = 2] = "POPUP";
 })(SheetType || (SheetType = {}));
 
+var SheetMode;
+(function (SheetMode) {
+  SheetMode[SheetMode["OVERLAY"] = 0] = "OVERLAY";
+  SheetMode[SheetMode["EMBEDDED"] = 1] = "EMBEDDED";
+})(SheetMode || (SheetMode = {}));
+
 var FunctionKey;
 (function (FunctionKey) {
   FunctionKey[FunctionKey["ESC"] = 0] = "ESC";
@@ -1705,6 +1711,12 @@ var SliderBlockType;
   SliderBlockType[SliderBlockType["SHAPE"] = 2] = "SHAPE";
 })(SliderBlockType || (SliderBlockType = {}));
 
+var SliderInteraction;
+(function (SliderInteraction) {
+  SliderInteraction[SliderInteraction["SLIDE_AND_CLICK"] = 0] = "SLIDE_AND_CLICK";
+  SliderInteraction[SliderInteraction["SLIDE_ONLY"] = 1] = "SLIDE_ONLY";
+})(SliderInteraction || (SliderInteraction = {}));
+
 var TitleStyle;
 (function (TitleStyle) {
   TitleStyle[TitleStyle["ListMode"] = 0] = "ListMode";
@@ -1743,11 +1755,18 @@ var ContentTextStyle;
   ContentTextStyle[ContentTextStyle["ThreeLines"] = 2] = "ThreeLines";
 })(ContentTextStyle || (ContentTextStyle = {}));
 
+var MarqueeUpdateStrategy;
+(function (MarqueeUpdateStrategy) {
+  MarqueeUpdateStrategy["DEFAULT"] = "default";
+  MarqueeUpdateStrategy["PRESERVE_POSITION"] = "preserve_position";
+})(MarqueeUpdateStrategy || (MarqueeUpdateStrategy = {}));
+
 class NavPathInfo {
   constructor(name, param, onPop) {
     this.name = name;
     this.param = param;
     this.onPop = onPop;
+    this.index = -1;
     // index that if check navdestination exists first
     this.checkNavDestinationFlag = false;
   }
@@ -1771,9 +1790,28 @@ class NavPathStack {
     this.nativeStack = undefined;
     // parent stack
     this.parentStack = undefined;
-    // Array of remove destination indexes
-    this.removeArray = [];
+    this.popArray = [];
     this.interception = undefined;
+  }
+  initNavPathIndex() {
+    this.popArray = [];
+    for (let i = 0; i < this.pathArray.length; i++) {
+      this.pathArray[i].index = i;
+    }
+  }
+  getAllPathIndex() {
+    let array = this.pathArray.flatMap(element => element.index);
+    return array;
+  }
+  findInPopArray(name) {
+    for (let i = this.popArray.length - 1; i >= 0; i--) {
+      if (name === this.popArray[i].name) {
+        let info = this.popArray.splice(i, 1);
+        this.pathArray[this.pathArray.length - 1].index = info[0].index;
+        return;
+      }
+    }
+    this.pathArray[this.pathArray.length - 1].index = -1; // add new navdestination
   }
   setNativeStack(stack) {
     this.nativeStack = stack;
@@ -1789,6 +1827,7 @@ class NavPathStack {
   }
   pushName(name, param) {
     this.pathArray.push(new NavPathInfo(name, param));
+    this.findInPopArray(name);
     this.changeFlag = this.changeFlag + 1;
     this.isReplace = 0;
     this.nativeStack?.onStateChanged();
@@ -1802,6 +1841,7 @@ class NavPathStack {
     } else {
       this.pathArray.push(new NavPathInfo(name, param, onPop));
     }
+    this.findInPopArray(name);
     this.changeFlag = this.changeFlag + 1;
     this.isReplace = 0;
     if (typeof onPop === 'boolean') {
@@ -1839,11 +1879,14 @@ class NavPathStack {
         reject({ message: 'Internal error.', code: 100001 });
       })
     }
+    this.findInPopArray(name);
     this.nativeStack?.onStateChanged();
     return promise;
   }
   pushPath(info, animated) {
     this.pathArray.push(info);
+    let name = this.pathArray[this.pathArray.length - 1].name;
+    this.findInPopArray(name);
     this.changeFlag = this.changeFlag + 1;
     this.isReplace = 0;
     if (animated === undefined) {
@@ -1870,6 +1913,8 @@ class NavPathStack {
         reject({ message: 'Internal error.', code: 100001 });
       })
     }
+    let name = this.pathArray[this.pathArray.length - 1].name;
+    this.findInPopArray(name);
     this.nativeStack?.onStateChanged();
     return promise;
   }
@@ -1878,6 +1923,7 @@ class NavPathStack {
       this.pathArray.pop();
     }
     this.pathArray.push(info);
+    this.pathArray[this.pathArray.length - 1].index = -1;
     this.isReplace = 1;
     this.changeFlag = this.changeFlag + 1;
     if (animated === undefined) {
@@ -1893,6 +1939,7 @@ class NavPathStack {
     }
     this.isReplace = 1;
     this.pathArray.push(new NavPathInfo(name, param));
+    this.pathArray[this.pathArray.length - 1].index = -1;
     this.changeFlag = this.changeFlag + 1;
     if (animated === undefined) {
       this.animated = true;
@@ -1913,6 +1960,7 @@ class NavPathStack {
     }
     let currentPathInfo = this.pathArray[this.pathArray.length - 1];
     let pathInfo = this.pathArray.pop();
+    this.popArray.push(pathInfo);
     this.changeFlag = this.changeFlag + 1;
     this.isReplace = 0;
     if (result !== undefined && typeof result !== 'boolean' && currentPathInfo.onPop !== undefined) {
@@ -2036,16 +2084,9 @@ class NavPathStack {
       return 0;
     }
     let originLength = this.pathArray.length;
-    let tempArray = this.pathArray.slice(0);
-    this.removeArray = [];
-    this.pathArray = [];
-    for (let index = 0; index < tempArray.length; index++) {
-      if (tempArray[index] && !indexes.includes(index)) {
-        this.pathArray.push(tempArray[index]);
-      } else {
-        this.removeArray.push(index);
-      }
-    }
+    this.pathArray = this.pathArray.filter((item, index) => {
+      return item && !indexes.includes(index)
+    });
     let cnt = originLength - this.pathArray.length;
     if (cnt > 0) {
       this.changeFlag = this.changeFlag + 1;
@@ -2053,12 +2094,6 @@ class NavPathStack {
       this.nativeStack?.onStateChanged();
     }
     return cnt;
-  }
-  getRemoveArray() {
-    return this.removeArray;
-  }
-  clearRemoveArray() {
-    this.removeArray = [];
   }
   removeByName(name) {
     let originLength = this.pathArray.length;
@@ -2611,6 +2646,13 @@ var ButtonStyleMode;
   ButtonStyleMode["TEXTUAL"] = 2;
 })(ButtonStyleMode || (ButtonStyleMode = {}));
 
+let RadioIndicatorType;
+(function (RadioIndicatorType) {
+  RadioIndicatorType[RadioIndicatorType.TICK = 0] = "TICK";
+  RadioIndicatorType[RadioIndicatorType.DOT = 1] = "DOT";
+  RadioIndicatorType[RadioIndicatorType.CUSTOM = 2] = "CUSTOM";
+})(RadioIndicatorType  || (RadioIndicatorType  = {}));
+
 var ControlSize;
 (function (ControlSize) {
   ControlSize[ControlSize["SMALL"] = 0] = "SMALL";
@@ -2681,6 +2723,16 @@ let PreDragStatus;
   PreDragStatus['PREVIEW_LANDING_FINISHED'] = 5;
   PreDragStatus['ACTION_CANCELED_BEFORE_DRAG'] = 6;
 })(PreDragStatus || (PreDragStatus = {}));
+
+let DataOperationType;
+(function (DataOperationType) {
+  DataOperationType['ADD'] = "add";
+  DataOperationType['DELETE'] = "delete";
+  DataOperationType['CHANGE'] = "change";
+  DataOperationType['MOVE'] = "move";
+  DataOperationType['EXCHANGE'] = "exchange";
+  DataOperationType['RELOAD'] = "reload";
+})(DataOperationType || (DataOperationType = {}));
 
 var StyledStringKey;
 (function (StyledStringKey) {

@@ -163,6 +163,8 @@ public:
             theme->height_ = pattern->GetAttr<Dimension>("textinput_default_height", 24.0_vp);
             auto showPasswordDirectly = pattern->GetAttr<std::string>("show_password_directly", "0");
             theme->showPasswordDirectly_ = StringUtils::StringToInt(showPasswordDirectly);
+            auto textfield_show_handle = pattern->GetAttr<std::string>("textfield_show_handle", "0");
+            theme->textfieldShowHandle_ = StringUtils::StringToInt(textfield_show_handle);
         }
     };
 
@@ -473,6 +475,11 @@ public:
         return showPasswordDirectly_;
     }
 
+    bool IsTextFieldShowHandle() const
+    {
+        return textfieldShowHandle_;
+    }
+
 protected:
     TextFieldTheme() = default;
 
@@ -549,6 +556,7 @@ private:
     bool showEllipsis_ = true;
     bool draggable_ = false;
     bool showPasswordDirectly_ = false;
+    bool textfieldShowHandle_ = false;
     Dimension passwordTypeHeight_ = 40.0_vp;;
 };
 

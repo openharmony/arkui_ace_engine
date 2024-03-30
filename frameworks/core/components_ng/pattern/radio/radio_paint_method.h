@@ -38,6 +38,20 @@ public:
         return radioModifier_;
     }
 
+    void UpdateUIStatus(bool checked)
+    {
+        if (checked != radioModifier_->GetIsCheck()) {
+            radioModifier_->SetUIStatus(UIStatus::SELECTED);
+            if (!isFirstCreated_) {
+                if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
+                    radioModifier_->UpdateIndicatorAnimation(checked);
+                } else {
+                    radioModifier_->UpdateIsOnAnimatableProperty(checked);
+                }
+            }
+        }
+    }
+
     void UpdateContentModifier(PaintWrapper* paintWrapper) override
     {
         CHECK_NULL_VOID(radioModifier_);
@@ -69,12 +83,7 @@ public:
         radioModifier_->SetTotalScale(totalScale_);
         radioModifier_->SetPointScale(pointScale_);
         radioModifier_->SetRingPointScale(ringPointScale_);
-        if (checked != radioModifier_->GetIsCheck()) {
-            radioModifier_->SetUIStatus(UIStatus::SELECTED);
-            if (!isFirstCreated_) {
-                radioModifier_->UpdateIsOnAnimatableProperty(checked);
-            }
-        }
+        UpdateUIStatus(checked);
         radioModifier_->SetShowHoverEffect(showHoverEffect_);
         radioModifier_->SetIsCheck(checked);
         radioModifier_->SetTouchHoverAnimationType(touchHoverType_);

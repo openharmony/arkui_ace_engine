@@ -112,16 +112,6 @@ RefPtr<NodePaintMethod> GridPattern::CreateNodePaintMethod()
     return paint;
 }
 
-void GridPattern::InitScrollableEvent()
-{
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    auto eventHub = host->GetEventHub<GridEventHub>();
-    CHECK_NULL_VOID(eventHub);
-    auto scrollFrameBeginEvent = eventHub->GetOnScrollFrameBegin();
-    SetScrollFrameBeginCallback(scrollFrameBeginEvent);
-}
-
 void GridPattern::OnModifyDone()
 {
     auto gridLayoutProperty = GetLayoutProperty<GridLayoutProperty>();
@@ -143,7 +133,6 @@ void GridPattern::OnModifyDone()
     SetAxis(gridLayoutInfo_.axis_);
     if (!GetScrollableEvent()) {
         AddScrollEvent();
-        InitScrollableEvent();
     }
 
     SetEdgeEffect();

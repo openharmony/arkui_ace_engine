@@ -31,8 +31,8 @@ class GridRowAlignItemsModifier extends ModifierWithKey<number> {
   }
 }
 class ArkGridRowComponent extends ArkComponent implements CommonMethod<GridRowAttribute> {
-  constructor(nativePtr: KNode) {
-    super(nativePtr);
+  constructor(nativePtr: KNode, classType?: ModifierType) {
+    super(nativePtr, classType);
   }
   onBreakpointChange(callback: (breakpoints: string) => void): GridRowAttribute {
     throw new Error('Method not implemented.');
@@ -43,12 +43,10 @@ class ArkGridRowComponent extends ArkComponent implements CommonMethod<GridRowAt
   }
 }
 // @ts-ignore
-globalThis.GridRow.attributeModifier = function (modifier) {
-  const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
-  let nativeNode = getUINativeModule().getFrameNodeById(elmtId);
-  let component = this.createOrGetNode(elmtId, () => {
-    return new ArkGridRowComponent(nativeNode);
+globalThis.GridRow.attributeModifier = function (modifier: ArkComponent): void {
+  attributeModifierFunc.call(this, modifier, (nativePtr: KNode) => {
+    return new ArkGridRowComponent(nativePtr);
+  }, (nativePtr: KNode, classType: ModifierType, modifierJS: ModifierJS) => {
+    return new modifierJS.GridRowModifier(nativePtr, classType);
   });
-  applyUIAttributes(modifier, nativeNode, component);
-  component.applyModifierPatch();
 };

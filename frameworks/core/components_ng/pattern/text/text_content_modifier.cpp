@@ -190,6 +190,52 @@ void TextContentModifier::SetFontReady(bool value)
     }
 }
 
+void TextContentModifier::ResetImageNodeList()
+{
+    for (const auto& imageWeak : imageNodeList_) {
+        auto imageNode = imageWeak.Upgrade();
+        if (!imageNode) {
+            continue;
+        }
+        auto renderContext = imageNode->GetRenderContext();
+        if (!renderContext) {
+            continue;
+        }
+        auto geometryNode = imageNode->GetGeometryNode();
+        if (!geometryNode) {
+            continue;
+        }
+        renderContext->SetTranslate(0.0f, 0.0f, 0.0f);
+    }
+}
+
+void TextContentModifier::DrawImageNodeList(const float drawingContextWidth,
+    const float paragraph1Offset, const float paragraph2Offset)
+{
+    for (const auto& imageWeak : imageNodeList_) {
+        auto imageNode = imageWeak.Upgrade();
+        if (!imageNode) {
+            continue;
+        }
+        auto renderContext = imageNode->GetRenderContext();
+        if (!renderContext) {
+            continue;
+        }
+        auto geometryNode = imageNode->GetGeometryNode();
+        if (!geometryNode) {
+            continue;
+        }
+        auto offsetX = geometryNode->GetMarginFrameOffset().GetX();
+        if (offsetX + geometryNode->GetFrameSize().Width() + paragraph1Offset > 0) {
+            renderContext->SetTranslate(paragraph1Offset, 0.0f, 0.0f);
+        } else if (offsetX + paragraph2Offset < drawingContextWidth) {
+            renderContext->SetTranslate(paragraph2Offset, 0.0f, 0.0f);
+        } else {
+            renderContext->SetTranslate(paragraph1Offset, 0.0f, 0.0f);
+        }
+    }
+}
+
 void TextContentModifier::onDraw(DrawingContext& drawingContext)
 {
     bool ifPaintObscuration = std::any_of(obscuredReasons_.begin(), obscuredReasons_.end(),
@@ -208,8 +254,10 @@ void TextContentModifier::onDraw(DrawingContext& drawingContext)
                     contentSize.Width() + contentOffset.GetX(), contentSize.Height() + contentOffset.GetY());
                 canvas.ClipRect(clipInnerRect, RSClipOp::INTERSECT);
             }
-
             paragraph_->Paint(canvas, paintOffset_.GetX(), paintOffset_.GetY());
+            if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
+                ResetImageNodeList();
+            }
         } else {
             // Racing
             float textRacePercent = GetTextRacePercent();
@@ -224,6 +272,9 @@ void TextContentModifier::onDraw(DrawingContext& drawingContext)
             float paragraph2Offset = paragraph1Offset + paragraph_->GetTextWidth() + textRaceSpaceWidth_;
             if ((paintOffset_.GetX() + paragraph2Offset) < drawingContext.width) {
                 paragraph_->Paint(drawingContext.canvas, paintOffset_.GetX() + paragraph2Offset, paintOffset_.GetY());
+            }
+            if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
+                DrawImageNodeList(drawingContext.width, paragraph1Offset, paragraph2Offset);
             }
         }
         canvas.Restore();

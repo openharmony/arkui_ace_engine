@@ -875,7 +875,7 @@ HWTEST_F(DragEventTestNg, DragEventTestNg009, TestSize.Level1)
     auto pipeline = PipelineContext::GetCurrentContext();
     auto overlayManager = pipeline->GetOverlayManager();
     EXPECT_NE(overlayManager, nullptr);
-    dragEventActuator->MountPixelMap(overlayManager, gestureHub, imageNode);
+    dragEventActuator->MountPixelMap(overlayManager, gestureHub, imageNode, nullptr);
     EXPECT_EQ(overlayManager->hasPixelMap_, true);
     /**
      * @tc.steps: step4. Invoke SetPreviewDefaultAnimateProperty function.
@@ -904,5 +904,126 @@ HWTEST_F(DragEventTestNg, DragEventTestNg010, TestSize.Level1)
     
     EXPECT_EQ(DragEventActuator::GetPreviewPixelMap(NO_COMPONENT_ID, frameNode), nullptr);
     EXPECT_EQ(DragEventActuator::GetPreviewPixelMap(COMPONENT_ID, frameNode), nullptr);
+}
+
+/**
+ * @tc.name: DragEventExecutePreDragActionTest001
+ * @tc.desc: Create DragEventActuator and test ExecutePreDragAction function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DragEventTestNg, DragEventExecutePreDragActionTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create DragEventActuator.
+     */
+    auto eventHub = AceType::MakeRefPtr<EventHub>();
+    auto frameNode = FrameNode::CreateFrameNode(
+        V2::COLUMN_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<Pattern>());
+    eventHub->host_ = AceType::WeakClaim(AceType::RawPtr(frameNode));
+    frameNode->eventHub_ = eventHub;
+    frameNode->SetDraggable(true);
+    auto gestureEventHub = AceType::MakeRefPtr<GestureEventHub>(AceType::WeakClaim(AceType::RawPtr(eventHub)));
+    auto dragEventActuator = AceType::MakeRefPtr<DragEventActuator>(
+        AceType::WeakClaim(AceType::RawPtr(gestureEventHub)), DRAG_DIRECTION, FINGERS_NUMBER, DISTANCE);
+    /**
+     * @tc.steps: step2. Create onPreDrag function and bind to eventHub.
+     * @tc.expected: Bind onPreDrag function successful.
+     */
+    MockFunction<void(const PreDragStatus&)> mockOnPreFunction;
+    EXPECT_CALL(mockOnPreFunction, Call(PreDragStatus::ACTION_DETECTING_STATUS)).WillOnce(Return());
+    EXPECT_CALL(mockOnPreFunction, Call(PreDragStatus::READY_TO_TRIGGER_DRAG_ACTION)).WillOnce(Return());
+    EXPECT_CALL(mockOnPreFunction, Call(PreDragStatus::PREVIEW_LIFT_STARTED)).WillOnce(Return());
+    EXPECT_CALL(mockOnPreFunction, Call(PreDragStatus::PREVIEW_LANDING_STARTED)).WillOnce(Return());
+    EXPECT_CALL(mockOnPreFunction, Call(PreDragStatus::ACTION_CANCELED_BEFORE_DRAG)).WillOnce(Return());
+    std::function<void(const PreDragStatus&)> mockOnPreDragFunc = mockOnPreFunction.AsStdFunction();
+
+    auto onDragStart = [](const RefPtr<OHOS::Ace::DragEvent>& event, const std::string& extraParams) -> DragDropInfo {
+        DragDropInfo info;
+        return info;
+    };
+    eventHub->SetOnDragStart(std::move(onDragStart));
+    eventHub->SetOnPreDrag(mockOnPreDragFunc);
+    EXPECT_NE(eventHub->GetOnPreDrag(), nullptr);
+
+    /**
+     * @tc.steps: step3. Call ExecutePreDragAction Function.
+     * @tc.expected: Call function successful.
+     */
+    auto pipeline = PipelineContext::GetMainPipelineContext();
+    auto dragDropManager = pipeline->GetDragDropManager();
+    ASSERT_NE(dragDropManager, nullptr);
+    EXPECT_EQ(dragDropManager->GetPreDragStatus(), PreDragStatus::ACTION_DETECTING_STATUS);
+    DragEventActuator::ExecutePreDragAction(PreDragStatus::ACTION_DETECTING_STATUS, frameNode);
+    EXPECT_EQ(dragDropManager->GetPreDragStatus(), PreDragStatus::READY_TO_TRIGGER_DRAG_ACTION);
+    DragEventActuator::ExecutePreDragAction(PreDragStatus::READY_TO_TRIGGER_DRAG_ACTION, frameNode);
+    EXPECT_EQ(dragDropManager->GetPreDragStatus(), PreDragStatus::PREVIEW_LIFT_STARTED);
+    DragEventActuator::ExecutePreDragAction(PreDragStatus::PREVIEW_LIFT_STARTED, frameNode);
+    EXPECT_EQ(dragDropManager->GetPreDragStatus(), PreDragStatus::PREVIEW_LIFT_FINISHED);
+    DragEventActuator::ExecutePreDragAction(PreDragStatus::PREVIEW_LIFT_FINISHED, frameNode);
+    EXPECT_EQ(dragDropManager->GetPreDragStatus(), PreDragStatus::PREVIEW_LANDING_STARTED);
+    DragEventActuator::ExecutePreDragAction(PreDragStatus::PREVIEW_LANDING_STARTED, frameNode);
+    EXPECT_EQ(dragDropManager->GetPreDragStatus(), PreDragStatus::PREVIEW_LANDING_FINISHED);
+    DragEventActuator::ExecutePreDragAction(PreDragStatus::PREVIEW_LANDING_FINISHED, frameNode);
+    EXPECT_EQ(dragDropManager->GetPreDragStatus(), PreDragStatus::ACTION_CANCELED_BEFORE_DRAG);
+    DragEventActuator::ExecutePreDragAction(PreDragStatus::ACTION_CANCELED_BEFORE_DRAG, frameNode);
+    EXPECT_EQ(dragDropManager->GetPreDragStatus(), PreDragStatus::ACTION_CANCELED_BEFORE_DRAG);
+}
+
+/**
+ * @tc.name: DragEventExecutePreDragActionTest002
+ * @tc.desc: Create DragEventActuator and test ExecutePreDragAction function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DragEventTestNg, DragEventExecutePreDragActionTest002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create DragEventActuator.
+     */
+    auto eventHub = AceType::MakeRefPtr<EventHub>();
+    auto frameNode = FrameNode::CreateFrameNode(
+        V2::COLUMN_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<Pattern>());
+    eventHub->host_ = AceType::WeakClaim(AceType::RawPtr(frameNode));
+    frameNode->eventHub_ = eventHub;
+    frameNode->SetDraggable(true);
+    auto gestureEventHub = AceType::MakeRefPtr<GestureEventHub>(AceType::WeakClaim(AceType::RawPtr(eventHub)));
+    auto dragEventActuator = AceType::MakeRefPtr<DragEventActuator>(
+        AceType::WeakClaim(AceType::RawPtr(gestureEventHub)), DRAG_DIRECTION, FINGERS_NUMBER, DISTANCE);
+    auto pipeline = PipelineContext::GetMainPipelineContext();
+    auto dragDropManager = pipeline->GetDragDropManager();
+    ASSERT_NE(dragDropManager, nullptr);
+    dragDropManager->SetPrepareDragFrameNode(frameNode);
+    /**
+     * @tc.steps: step2. Create onPreDrag function and bind to eventHub.
+     * @tc.expected: Bind onPreDrag function successful.
+     */
+    MockFunction<void(const PreDragStatus&)> mockOnPreFunction;
+    EXPECT_CALL(mockOnPreFunction, Call(PreDragStatus::ACTION_DETECTING_STATUS)).WillOnce(Return());
+    EXPECT_CALL(mockOnPreFunction, Call(PreDragStatus::ACTION_CANCELED_BEFORE_DRAG)).WillOnce(Return());
+    std::function<void(const PreDragStatus&)> mockOnPreDragFunc = mockOnPreFunction.AsStdFunction();
+
+    auto onDragStart = [](const RefPtr<OHOS::Ace::DragEvent>& event, const std::string& extraParams) -> DragDropInfo {
+        DragDropInfo info;
+        return info;
+    };
+    eventHub->SetOnDragStart(std::move(onDragStart));
+    eventHub->SetOnPreDrag(mockOnPreDragFunc);
+    EXPECT_NE(eventHub->GetOnPreDrag(), nullptr);
+
+    /**
+     * @tc.steps: step3. Call ExecutePreDragAction Function with same status.
+     * @tc.expected: first call function successful, second call canceled.
+     */
+    DragEventActuator::ExecutePreDragAction(PreDragStatus::ACTION_DETECTING_STATUS);
+    DragEventActuator::ExecutePreDragAction(PreDragStatus::ACTION_DETECTING_STATUS);
+
+    /**
+     * @tc.steps: step4. Call ExecutePreDragAction Function with fail parameters.
+     * @tc.expected: not call any function.
+     */
+    gestureEventHub->SetTextDraggable(true);
+    frameNode->SetDraggable(false);
+    DragEventActuator::ExecutePreDragAction(PreDragStatus::ACTION_DETECTING_STATUS);
+    dragDropManager->ResetDragging(DragDropMgrState::DRAGGING);
+    DragEventActuator::ExecutePreDragAction(PreDragStatus::ACTION_DETECTING_STATUS);
 }
 } // namespace OHOS::Ace::NG

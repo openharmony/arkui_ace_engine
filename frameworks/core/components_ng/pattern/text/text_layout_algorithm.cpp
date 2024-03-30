@@ -69,7 +69,7 @@ std::optional<SizeF> TextLayoutAlgorithm::MeasureContent(
 
     auto frameNode = layoutWrapper->GetHostNode();
     CHECK_NULL_RETURN(frameNode, std::nullopt);
-    auto pipeline = frameNode->GetContext();
+    auto pipeline = frameNode->GetContextRefPtr();
     CHECK_NULL_RETURN(pipeline, std::nullopt);
     auto textLayoutProperty = DynamicCast<TextLayoutProperty>(layoutWrapper->GetLayoutProperty());
     CHECK_NULL_RETURN(textLayoutProperty, std::nullopt);
@@ -214,6 +214,7 @@ void TextLayoutAlgorithm::UpdateParagraph(LayoutWrapper* layoutWrapper)
     auto pattern = frameNode->GetPattern<TextPattern>();
     CHECK_NULL_VOID(pattern);
     auto aiSpanMap = pattern->GetAISpanMap();
+    std::vector<WeakPtr<FrameNode>> imageNodeList;
     for (const auto& child : spanItemChildren_) {
         if (!child) {
             continue;
@@ -246,6 +247,8 @@ void TextLayoutAlgorithm::UpdateParagraph(LayoutWrapper* layoutWrapper)
             child->content = " ";
             child->position = spanTextLength + 1;
             spanTextLength += 1;
+            auto imageNode = (*iterItems)->GetHostNode();
+            imageNodeList.emplace_back(WeakClaim(RawPtr(imageNode)));
             iterItems++;
         } else if (AceType::InstanceOf<PlaceholderSpanItem>(child)) {
             auto placeholderSpanItem = AceType::DynamicCast<PlaceholderSpanItem>(child);
@@ -288,6 +291,7 @@ void TextLayoutAlgorithm::UpdateParagraph(LayoutWrapper* layoutWrapper)
             spanTextLength += StringUtils::ToWstring(child->content).length();
         }
     }
+    pattern->SetImageSpanNodeList(imageNodeList);
 }
 
 void TextLayoutAlgorithm::UpdateParagraphForAISpan(const TextStyle& textStyle, LayoutWrapper* layoutWrapper)
@@ -382,7 +386,7 @@ std::string TextLayoutAlgorithm::StringOutBoundProtection(int32_t position, int3
 bool TextLayoutAlgorithm::CreateParagraph(const TextStyle& textStyle, std::string content, LayoutWrapper* layoutWrapper)
 {
     auto frameNode = layoutWrapper->GetHostNode();
-    auto pipeline = frameNode->GetContext();
+    auto pipeline = frameNode->GetContextRefPtr();
     auto pattern = frameNode->GetPattern<TextPattern>();
     auto paraStyle = GetParagraphStyle(textStyle, content, layoutWrapper);
     if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN) && spanItemChildren_.empty()) {

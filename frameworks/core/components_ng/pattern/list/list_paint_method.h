@@ -59,6 +59,7 @@ public:
 
     void UpdateDividerList(const DividerInfo& dividerInfo);
 
+    ListDivider HandleDividerList(int32_t index, bool lastIsGroup, int32_t laneIdx, const DividerInfo& dividerInfo);
     ListDivider HandleLastLineIndex(int32_t index, int32_t laneIdx, const DividerInfo& dividerInfo);
 
     void PaintEdgeEffect(PaintWrapper* paintWrapper, RSCanvas& canvas);

@@ -33,6 +33,13 @@ void TextFieldManagerNG::ClearOnFocusTextField()
     onFocusTextField_ = nullptr;
 }
 
+void TextFieldManagerNG::ClearOnFocusTextField(int32_t id)
+{
+    if (onFocusTextFieldId == id) {
+        onFocusTextField_ = nullptr;
+    }
+}
+
 bool TextFieldManagerNG::OnBackPressed()
 {
     auto pattern = onFocusTextField_.Upgrade();

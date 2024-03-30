@@ -16,7 +16,7 @@
 
 function applyAndMergeModifier<T, M extends ArkComponent, C extends ArkComponent>(instance: T, modifier: M): void {
   let myMap = modifier._modifiersWithKeys as ModifierMap;
-  myMap.setOnChange(() => {
+  myMap.setOnChange((value: AttributeModifierWithKey) => {
     modifier._changed = !modifier._changed;
   });
 
@@ -44,8 +44,8 @@ function copyModifierWithKey(obj: ModifierWithKey<string | number | boolean | ob
   return newObj;
 }
 
-function mergeMaps(stageMap: Map<Symbol, ModifierWithKey<number | string | boolean | object>>,
-  newMap: Map<Symbol, ModifierWithKey<number | string | boolean | object>>): Map<Symbol, ModifierWithKey<number | string | boolean | object>> {
+function mergeMaps(stageMap: Map<Symbol, AttributeModifierWithKey>,
+  newMap: Map<Symbol, AttributeModifierWithKey>): Map<Symbol, AttributeModifierWithKey> {
   newMap.forEach((value, key) => {
     stageMap.set(key, copyModifierWithKey(value));
   });
@@ -53,9 +53,95 @@ function mergeMaps(stageMap: Map<Symbol, ModifierWithKey<number | string | boole
   return stageMap;
 }
 
+class ModifierUtils {
+  static dirtyComponentSet: Set<ArkComponent | ArkSpanComponent> = new Set();
+  static dirtyFlag = false;
+
+  static copyModifierWithKey(obj: ModifierWithKey<string | number | boolean | object>): ModifierWithKey<string | number | boolean | object> {
+    let newObj: ModifierWithKey<string | number | boolean | object> = {
+      ...obj,
+      applyStage: function (node: number): boolean {
+        throw new Error('Function not implemented.');
+      },
+      applyPeer: function (node: number, reset: boolean): void {
+        throw new Error('Function not implemented.');
+      },
+      checkObjectDiff: function (): boolean {
+        throw new Error('Function not implemented.');
+      }
+    };
+    newObj.applyStage = obj?.applyStage;
+    newObj.applyPeer = obj?.applyPeer;
+    newObj.checkObjectDiff = obj?.checkObjectDiff;
+    return newObj;
+  }
+
+  static mergeMaps(stageMap: Map<Symbol, AttributeModifierWithKey>,
+    newMap: Map<Symbol, AttributeModifierWithKey>): Map<Symbol, AttributeModifierWithKey> {
+    newMap.forEach((value, key) => {
+      stageMap.set(key, copyModifierWithKey(value));
+    });
+
+    return stageMap;
+  }
+
+  static applyAndMergeModifier<T, M extends ArkComponent | ArkSpanComponent, C extends ArkComponent | ArkSpanComponent>(instance: T, modifier: M): void {
+    // @ts-ignore
+    let component: C = instance as C;
+    mergeMaps(component._modifiersWithKeys, modifier._modifiersWithKeys);
+  }
+
+  static applySetOnChange<T, M extends ArkComponent | ArkSpanComponent, C extends ArkComponent | ArkSpanComponent>(modifier: M): void {
+    let myMap = modifier._modifiersWithKeys as ModifierMap;
+    if (modifier._classType === ModifierType.STATE) {
+      myMap.setOnChange((value: AttributeModifierWithKey) => {
+        this.putDirtyModifier(modifier, value);
+      });
+    } else {
+      myMap.setOnChange((value: AttributeModifierWithKey) => {
+        modifier._changed = !modifier._changed;
+      });
+    }
+  }
+
+  static putDirtyModifier<M extends ArkComponent | ArkSpanComponent>(arkModifier: M, attributeModifierWithKey: ModifierWithKey<string | number | boolean | object>): void {
+    attributeModifierWithKey.value = attributeModifierWithKey.stageValue;
+    if (!arkModifier._weakPtr.invalid()) {
+      attributeModifierWithKey.applyPeer(arkModifier.nativePtr,
+        (attributeModifierWithKey.stageValue === undefined || attributeModifierWithKey.stageValue === null));
+    }
+    this.dirtyComponentSet.add(arkModifier);
+    if (!this.dirtyFlag) {
+      this.dirtyFlag = true;
+      this.requestFrame();
+    }
+  }
+
+  static requestFrame(): void {
+    const frameCallback = () => {
+      this.dirtyComponentSet.forEach(item => {
+        const nativePtrValid = !item._weakPtr.invalid();
+        if (item._nativePtrChanged && nativePtrValid) {
+          item._modifiersWithKeys.forEach((value, key) => {
+            value.applyPeer(item.nativePtr, false);
+          });
+          item._nativePtrChanged = false;
+        }
+        if (nativePtrValid) {
+          getUINativeModule().frameNode.markDirty(item.nativePtr, 0b100);
+        }
+      });
+      this.dirtyComponentSet.clear();
+      this.dirtyFlag = false;
+    };
+  
+    getUINativeModule().frameNode.registerFrameCallback(frameCallback);
+  }
+}
+
 class ModifierMap {
-  private map_: Map<Symbol, ModifierWithKey<number | string | boolean | object>>;
-  private changeCallback: (() => void) | undefined;
+  private map_: Map<Symbol, AttributeModifierWithKey>;
+  private changeCallback: ((value: AttributeModifierWithKey) => void) | undefined;
 
   constructor() {
     this.map_ = new Map();
@@ -69,43 +155,82 @@ class ModifierMap {
     return this.map_.delete(key);
   }
 
-  public forEach(callbackfn: (value: ModifierWithKey<number | string | boolean | object>, key: Symbol, 
-    map: Map<Symbol, ModifierWithKey<number | string | boolean | object>>) => void, thisArg?: any): void {
+  public forEach(callbackfn: (value: AttributeModifierWithKey, key: Symbol, 
+    map: Map<Symbol, AttributeModifierWithKey>) => void, thisArg?: any): void {
     this.map_.forEach(callbackfn, thisArg);
   }
-  public get(key: Symbol): ModifierWithKey<number | string | boolean | object> | undefined {
+  public get(key: Symbol): AttributeModifierWithKey | undefined {
     return this.map_.get(key);
   }
   public has(key: Symbol): boolean {
     return this.map_.has(key);
   }
-  public set(key: Symbol, value: ModifierWithKey<number | string | boolean | object>): this {
+  public set(key: Symbol, value: AttributeModifierWithKey): this {
     const _a = this.changeCallback;
     this.map_.set(key, value);
-    _a?.call(this);
+    _a?.call(this, value);
     return this;
   }
   public get size(): number {
     return this.map_.size;
   }
-  public entries(): IterableIterator<[Symbol, ModifierWithKey<number | string | boolean | object>]> {
+  public entries(): IterableIterator<[Symbol, AttributeModifierWithKey]> {
     return this.map_.entries();
   }
   public keys(): IterableIterator<Symbol> {
     return this.map_.keys();
   }
-  public values(): IterableIterator<ModifierWithKey<number | string | boolean | object>> {
+  public values(): IterableIterator<AttributeModifierWithKey> {
     return this.map_.values();
   }
-  public [Symbol.iterator](): IterableIterator<[Symbol, ModifierWithKey<number | string | boolean | object>]> {
+  public [Symbol.iterator](): IterableIterator<[Symbol, AttributeModifierWithKey]> {
     return this.map_.entries();
   }
   public get [Symbol.toStringTag](): string {
     return 'ModifierMapTag';
   }
-  public setOnChange(callback: () => void): void {
-    if (this.changeCallback === undefined) {
-      this.changeCallback = callback;
+  public setOnChange(callback: (value: AttributeModifierWithKey) => void): void {
+    this.changeCallback = callback;
+  }
+}
+
+class AttributeUpdater {
+  private _state: number;
+  private _attribute: ArkComponent;
+  private _isAttributeUpdater: boolean;
+
+  static StateEnum = {
+    INIT: 0,
+    UPDATE: 1
+  };
+
+  constructor() {
+    this._state = AttributeUpdater.StateEnum.INIT;
+    this._attribute = null;
+    this._isAttributeUpdater = true;
+  }
+
+  public get isAttributeUpdater(): boolean {
+    return this._isAttributeUpdater;
+  }
+
+  public get attribute(): ArkComponent {
+    return this._attribute;
+  }
+
+  public set attribute(value: ArkComponent) {
+    if (!this._attribute && value) {
+      this._attribute = value;
     }
   }
+
+  public get modifierState(): number {
+    return this._state;
+  }
+
+  public set modifierState(value: number) {
+    this._state = value;
+  }
+
+  initializeModifier(instance: ArkComponent): void {}
 }

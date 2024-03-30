@@ -26,6 +26,7 @@ constexpr int DEFAULT_MAXLINES = 1;
 
 void TabContentNode::OnAttachToMainTree(bool recursive)
 {
+    FrameNode::OnAttachToMainTree(recursive);
     if (!UseOffscreenProcess()) {
         ProcessTabBarItem();
     }
@@ -34,6 +35,7 @@ void TabContentNode::OnAttachToMainTree(bool recursive)
 
 void TabContentNode::OnDetachFromMainTree(bool recursive)
 {
+    FrameNode::OnDetachFromMainTree(recursive);
     auto tabs = TabContentModelNG::FindTabsNode(Referenced::Claim(this));
     CHECK_NULL_VOID(tabs);
 

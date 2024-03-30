@@ -365,6 +365,11 @@ public:
         return startDateLunar_;
     }
 
+    const PickerDate& GetStartDateSolar()
+    {
+        return startDateSolar_;
+    }
+
     void SetEndDate(const PickerDate& value)
     {
         endDateSolar_ = value;
@@ -375,6 +380,11 @@ public:
     const LunarDate& GetEndDateLunar()
     {
         return endDateLunar_;
+    }
+
+    const PickerDate& GetEndDateSolar()
+    {
+        return endDateSolar_;
     }
 
     void AdjustSolarDate(PickerDate& date, const PickerDate& start, const PickerDate& end) const

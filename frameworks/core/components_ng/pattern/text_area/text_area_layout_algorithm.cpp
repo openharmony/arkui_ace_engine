@@ -165,7 +165,8 @@ void TextAreaLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
         textRect_.SetOffset(OffsetF(0.0f, textRectOffSet.GetY()) + offsetBase);
         content->SetOffset(OffsetF(0.0f, textRectOffSet.GetY()) + offsetBase);
     } else {
-        textRect_.SetOffset(OffsetF(offsetBase.GetX(), pattern->GetTextRect().GetOffset().GetY()));
+        textRect_.SetOffset(
+            showPlaceHolder_ ? offsetBase : OffsetF(offsetBase.GetX(), pattern->GetTextRect().GetOffset().GetY()));
         content->SetOffset(offsetBase);
     }
     // CounterNode Layout.

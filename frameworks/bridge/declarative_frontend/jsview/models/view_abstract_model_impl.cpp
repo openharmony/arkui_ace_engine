@@ -748,9 +748,9 @@ void ViewAbstractModelImpl::SetTransition(const NG::TransitionOptions& transitio
     }
 }
 
-void ViewAbstractModelImpl::SetOverlay(const std::string& text, const std::function<void()>&& buildFunc,
+void ViewAbstractModelImpl::SetOverlay(const std::string& text, std::function<void()>&& buildFunc,
     const std::optional<Alignment>& align, const std::optional<Dimension>& offsetX,
-    const std::optional<Dimension>& offsetY)
+    const std::optional<Dimension>& offsetY, NG::OverlayType type)
 {
     if (buildFunc) {
         return;

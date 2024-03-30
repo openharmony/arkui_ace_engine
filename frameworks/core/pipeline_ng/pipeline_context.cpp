@@ -22,6 +22,7 @@
 #include <string>
 
 #include "base/log/log_wrapper.h"
+#include "base/subwindow/subwindow_manager.h"
 
 #ifdef ENABLE_ROSEN_BACKEND
 #include "render_service_client/core/transaction/rs_transaction.h"
@@ -91,6 +92,7 @@ constexpr int32_t TIME_THRESHOLD = 2 * 1000000; // 3 millisecond
 constexpr int32_t PLATFORM_VERSION_TEN = 10;
 constexpr int32_t USED_ID_FIND_FLAG = 3;                 // if args >3 , it means use id to find
 constexpr int32_t MILLISECONDS_TO_NANOSECONDS = 1000000; // Milliseconds to nanoseconds
+constexpr int32_t RESAMPLE_COORD_TIME_THRESHOLD = 20 * 1000 * 1000;
 } // namespace
 
 namespace OHOS::Ace::NG {
@@ -122,6 +124,15 @@ RefPtr<PipelineContext> PipelineContext::GetCurrentContextSafely()
     auto currentContainer = Container::CurrentSafely();
     CHECK_NULL_RETURN(currentContainer, nullptr);
     return DynamicCast<PipelineContext>(currentContainer->GetPipelineContext());
+}
+
+PipelineContext* PipelineContext::GetCurrentContextPtrSafely()
+{
+    auto currentContainer = Container::CurrentSafely();
+    CHECK_NULL_RETURN(currentContainer, nullptr);
+    const auto& base = currentContainer->GetPipelineContext();
+    CHECK_NULL_RETURN(base, nullptr);
+    return DynamicCast<PipelineContext>(RawPtr(base));
 }
 
 RefPtr<PipelineContext> PipelineContext::GetMainPipelineContext()
@@ -369,6 +380,20 @@ std::pair<float, float> PipelineContext::GetResampleCoord(const std::vector<Touc
     if (history.empty() || current.empty()) {
         return std::make_pair(0.0f, 0.0f);
     }
+    uint64_t lastTime = 0;
+    float x = 0.0f;
+    float y = 0.0f;
+    for (auto iter : current) {
+        uint64_t currentTime = static_cast<uint64_t>(iter.time.time_since_epoch().count());
+        if (lastTime < currentTime) {
+            lastTime = currentTime;
+            x = iter.x;
+            y = iter.y;
+        }
+    }
+    if (nanoTimeStamp > RESAMPLE_COORD_TIME_THRESHOLD + lastTime) {
+        return std::make_pair(x, y);
+    }
     auto historyPoint = GetAvgPoint(history, isScreen);
     auto currentPoint = GetAvgPoint(current, isScreen);
 
@@ -562,6 +587,14 @@ void PipelineContext::IsCloseSCBKeyboard()
 #else
     FocusHub::IsCloseKeyboard(curFrameNode);
 #endif
+}
+
+void PipelineContext::FlushOnceVsyncTask()
+{
+    if (onceVsyncListener_ != nullptr) {
+        onceVsyncListener_();
+        onceVsyncListener_ = nullptr;
+    }
 }
 
 void PipelineContext::FlushVsync(uint64_t nanoTimestamp, uint32_t frameCount)
@@ -798,7 +831,11 @@ void PipelineContext::FlushFocusView()
     CHECK_NULL_VOID(lastFocusView);
     auto lastFocusViewHub = lastFocusView->GetFocusHub();
     CHECK_NULL_VOID(lastFocusViewHub);
-    if (lastFocusView && (!lastFocusViewHub->IsCurrentFocus() || !lastFocusView->GetIsViewHasFocused()) &&
+    auto container = Container::Current();
+    if (container && container->IsUIExtensionWindow()) {
+        lastFocusView->SetIsViewRootScopeFocused(false);
+    }
+    if (lastFocusView && (!lastFocusView->IsRootScopeCurrentFocus() || !lastFocusView->GetIsViewHasFocused()) &&
         lastFocusViewHub->IsFocusableNode()) {
         lastFocusView->RequestDefaultFocus();
     }
@@ -841,6 +878,7 @@ void PipelineContext::FlushBuild()
         ACE_SCOPED_TRACE("arkoala build");
         vsyncListener_();
     }
+    FlushOnceVsyncTask();
     isRebuildFinished_ = false;
     FlushDirtyNodeUpdate();
     isRebuildFinished_ = true;
@@ -1386,7 +1424,9 @@ void PipelineContext::SyncSafeArea(bool onKeyboard)
     if (page) {
         page->MarkDirtyNode(onKeyboard && !safeAreaManager_->KeyboardSafeAreaEnabled() ? PROPERTY_UPDATE_LAYOUT
                                                                                        : PROPERTY_UPDATE_MEASURE);
+        page->GetPattern<PagePattern>()->MarkDirtyOverlay();
     }
+    SubwindowManager::GetInstance()->MarkDirtyDialogSafeArea();
     if (overlayManager_) {
         overlayManager_->MarkDirty(PROPERTY_UPDATE_MEASURE);
     }
@@ -2009,6 +2049,14 @@ bool PipelineContext::CheckPageFocus()
     return pageNode->GetFocusHub() && pageNode->GetFocusHub()->IsCurrentFocus();
 }
 
+bool PipelineContext::CheckOverlayFocus()
+{
+    CHECK_NULL_RETURN(overlayManager_, false);
+    auto overlayNode = overlayManager_->GetOverlayNode();
+    CHECK_NULL_RETURN(overlayNode, false);
+    return overlayNode->GetFocusHub() && overlayNode->GetFocusHub()->IsCurrentFocus();
+}
+
 void PipelineContext::NotifyFillRequestSuccess(AceAutoFillType autoFillType, RefPtr<ViewDataWrap> viewDataWrap)
 {
     CHECK_NULL_VOID(viewDataWrap);
@@ -2295,7 +2343,7 @@ void PipelineContext::FlushMouseEvent()
     eventManager_->DispatchMouseHoverAnimationNG(scaleEvent);
 }
 
-bool PipelineContext::ChangeMouseStyle(int32_t nodeId, MouseFormat format)
+bool PipelineContext::ChangeMouseStyle(int32_t nodeId, MouseFormat format, int32_t windowId)
 {
     auto window = GetWindow();
     if (window && window->IsUserSetCursor()) {
@@ -2306,6 +2354,9 @@ bool PipelineContext::ChangeMouseStyle(int32_t nodeId, MouseFormat format)
     }
     auto mouseStyle = MouseStyle::CreateMouseStyle();
     CHECK_NULL_RETURN(mouseStyle, false);
+    if (windowId) {
+        return mouseStyle->ChangePointerStyle(windowId, format);
+    }
     return mouseStyle->ChangePointerStyle(GetWindowId(), format);
 }
 
@@ -2549,14 +2600,8 @@ void PipelineContext::HandleOnAreaChangeEvent(uint64_t nanoTimestamp)
     if (onAreaChangeNodeIds_.empty()) {
         return;
     }
-    if (!isOnAreaChangeNodesCacheVaild_) {
-        onAreaChangeNodesCache_ = FrameNode::GetNodesPtrById(onAreaChangeNodeIds_);
-        isOnAreaChangeNodesCacheVaild_ = true;
-    }
-    for (auto && frameNode : onAreaChangeNodesCache_) {
-        if (!frameNode) {
-            continue;
-        }
+    auto nodes = FrameNode::GetNodesById(onAreaChangeNodeIds_);
+    for (auto&& frameNode : nodes) {
         frameNode->TriggerOnAreaChangeCallback(nanoTimestamp);
     }
     UpdateFormLinkInfos();
@@ -2627,10 +2672,10 @@ void PipelineContext::WindowFocus(bool isFocus)
             TAG_LOGI(AceLogTag::ACE_FOCUS, "Request focus on current focus view: %{public}s/%{public}d",
                 curFocusView->GetFrameName().c_str(), curFocusView->GetFrameId());
             curFocusViewHub->RequestFocusImmediately();
-        }
-        if (focusWindowId_.has_value()) {
-            if (curFocusView) {
-                curFocusView->TriggerFocusMove();
+        } else {
+            auto container = Container::Current();
+            if (container && container->IsUIExtensionWindow()) {
+                curFocusView->RequestDefaultFocus();
             }
         }
         if (focusOnNodeCallback_) {
@@ -2870,48 +2915,20 @@ void PipelineContext::RemoveWindowSizeChangeCallback(int32_t nodeId)
     onWindowSizeChangeCallbacks_.remove(nodeId);
 }
 
-void PipelineContext::AddNavigationStateCallback(
-    int32_t pageId, int32_t nodeId, const std::function<void()>& callback, bool isOnShow)
+void PipelineContext::AddNavigationNode(int32_t pageId, WeakPtr<UINode> navigationNode)
 {
     CHECK_RUN_ON(UI);
-    if (isOnShow) {
-        auto it = pageIdOnShowMap_.find(pageId);
-        if (it != pageIdOnShowMap_.end()) {
-            it->second.push_back({nodeId, callback});
-        } else {
-            std::list<std::pair<int32_t, std::function<void()>>> callbacks;
-            callbacks.push_back({nodeId, callback});
-            pageIdOnShowMap_[pageId] = std::move(callbacks);
-        }
-    } else {
-        auto it = pageIdOnHideMap_.find(pageId);
-        if (it != pageIdOnHideMap_.end()) {
-            it->second.push_back({nodeId, callback});
-        } else {
-            std::list<std::pair<int32_t, std::function<void()>>> callbacks;
-            callbacks.push_back({nodeId, callback});
-            pageIdOnHideMap_[pageId] = std::move(callbacks);
-        }
-    }
+    pageToNavigationNodes_[pageId].push_back(navigationNode);
 }
 
-void PipelineContext::RemoveNavigationStateCallback(int32_t pageId, int32_t nodeId)
+void PipelineContext::RemoveNavigationNode(int32_t pageId, int32_t nodeId)
 {
     CHECK_RUN_ON(UI);
-    auto it = pageIdOnShowMap_.find(pageId);
-    if (it != pageIdOnShowMap_.end() && !it->second.empty()) {
+    auto it = pageToNavigationNodes_.find(pageId);
+    if (it != pageToNavigationNodes_.end() && !it->second.empty()) {
         for (auto iter = it->second.begin(); iter != it->second.end();) {
-            if (iter->first == nodeId) {
-                iter = it->second.erase(iter);
-            } else {
-                iter++;
-            }
-        }
-    }
-    it = pageIdOnHideMap_.find(pageId);
-    if (it != pageIdOnHideMap_.end() && !it->second.empty()) {
-        for (auto iter = it->second.begin(); iter != it->second.end();) {
-            if (iter->first == nodeId) {
+            auto navigationNode = AceType::DynamicCast<NavigationGroupNode>((*iter).Upgrade());
+            if (navigationNode && navigationNode->GetId() == nodeId) {
                 iter = it->second.erase(iter);
             } else {
                 iter++;
@@ -2923,20 +2940,8 @@ void PipelineContext::RemoveNavigationStateCallback(int32_t pageId, int32_t node
 void PipelineContext::FirePageChanged(int32_t pageId, bool isOnShow)
 {
     CHECK_RUN_ON(UI);
-    if (isOnShow) {
-        auto it = pageIdOnShowMap_.find(pageId);
-        if (it != pageIdOnShowMap_.end() && !it->second.empty()) {
-            for (auto [nodeId, callback] : it->second) {
-                callback();
-            }
-        }
-    } else {
-        auto it = pageIdOnHideMap_.find(pageId);
-        if (it != pageIdOnHideMap_.end() && !it->second.empty()) {
-            for (auto [nodeId, callback] : it->second) {
-                callback();
-            }
-        }
+    for (auto navigationNode : pageToNavigationNodes_[pageId]) {
+        NavigationPattern::FireNavigationChange(navigationNode.Upgrade(), isOnShow, true);
     }
 }
 

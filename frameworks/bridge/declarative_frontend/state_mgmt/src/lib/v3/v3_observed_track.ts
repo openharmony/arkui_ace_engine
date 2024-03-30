@@ -543,7 +543,7 @@ class ObserveV3 {
  * part of SDK
  * @from 12
  */
-const track = (target: Object, propertyKey: string) => {
+const Trace = (target: Object, propertyKey: string) => {
   ConfigureStateMgmt.instance.intentUsingV3(`@track`, propertyKey);
   return trackInternal(target, propertyKey);
 }
@@ -589,7 +589,7 @@ const trackInternal = (target: any, propertyKey: string) => {
  */
 type ConstructorV3 = { new(...args: any[]): any };
 
-function observed<T extends ConstructorV3>(BaseClass: T) : ConstructorV3 {
+function ObservedV2<T extends ConstructorV3>(BaseClass: T) : ConstructorV3 {
   ConfigureStateMgmt.instance.intentUsingV3(`@observed`, BaseClass?.name);
 
   // prevent @Track inside @observed class

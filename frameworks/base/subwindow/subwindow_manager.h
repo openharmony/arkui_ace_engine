@@ -123,6 +123,7 @@ public:
 
     bool GetShown();
     void ResizeWindowForFoldStatus(int32_t parentContainerId);
+    void MarkDirtyDialogSafeArea();
 private:
     RefPtr<Subwindow> GetOrCreateSubWindow();
 

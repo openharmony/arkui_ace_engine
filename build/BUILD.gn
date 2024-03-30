@@ -95,6 +95,9 @@ config("reduce_eh_frame_config") {
 }
 
 ohos_shared_library("libace_compatible") {
+  if (use_hilog) {
+    external_deps = [ "hilog:libhilog" ]
+  }
   if (is_ohos) {
     sanitize = {
       integer_overflow = true
@@ -119,6 +122,9 @@ ohos_shared_library("libace_compatible") {
 
 if (!is_asan) {
   ohos_shared_library("libace") {
+    if (use_hilog) {
+      external_deps = [ "hilog:libhilog" ]
+    }
     if (is_ohos) {
       sanitize = {
         integer_overflow = true

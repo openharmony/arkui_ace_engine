@@ -943,6 +943,44 @@ HWTEST_F(RichEditorTestNg, RichEditorDelete003, TestSize.Level1)
 }
 
 /**
+ * @tc.name: RichEditorDeleteForwardEmoji
+ * @tc.desc: test DeleteForward Emoji And Emoji Selected
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorTestNg, RichEditorDeleteForwardEmoji, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    AddSpan("😄3😄😄");
+    richEditorPattern->caretPosition_ = 2;
+    richEditorPattern->textSelector_ = TextSelector(2, 5);
+    richEditorPattern->DeleteForward(1);
+    ASSERT_EQ(richEditorPattern->caretPosition_, 2);
+    richEditorPattern->DeleteForward(1);
+    ASSERT_EQ(richEditorPattern->caretPosition_, 2);
+}
+
+/**
+ * @tc.name: RichEditorDeleteBackwardEmoji
+ * @tc.desc: test DeleteBackward Emoji And Emoji Selected
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorTestNg, RichEditorDeleteBackwardEmoji, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    AddSpan("😄3😄😄");
+    richEditorPattern->caretPosition_ = 2;
+    richEditorPattern->textSelector_ = TextSelector(2, 5);
+    richEditorPattern->DeleteBackward(1);
+    ASSERT_EQ(richEditorPattern->caretPosition_, 2);
+    richEditorPattern->DeleteBackward(1);
+    ASSERT_EQ(richEditorPattern->caretPosition_, 0);
+}
+
+/**
  * @tc.name: RichEditorController001
  * @tc.desc: test add image span
  * @tc.type: FUNC
@@ -3989,7 +4027,7 @@ HWTEST_F(RichEditorTestNg, RichEditorDragTest003, TestSize.Level1)
 
 /**
  * @tc.name: RichEditorDragTest004
- * @tc.desc: test the drag of RichEditor with developer's DragDropTextOperation function
+ * @tc.desc: test the drag of RichEditor with developer's HandleOnDragDropTextOperation function
  * @tc.type: FUNC
  */
 HWTEST_F(RichEditorTestNg, RichEditorDragTest004, TestSize.Level1)
@@ -4017,12 +4055,12 @@ HWTEST_F(RichEditorTestNg, RichEditorDragTest004, TestSize.Level1)
     options.style = style;
     auto index = controller->AddTextSpan(options);
     EXPECT_EQ(index, 0);
-    pattern->dragPosition_ = 0;
+    pattern->dragRange_.first = 0;
     pattern->caretPosition_ = options.value.length();
-    pattern->DragDropTextOperation(INIT_VALUE_1);
-    pattern->dragPosition_ = options.value.length();
+    pattern->HandleOnDragDropTextOperation(INIT_VALUE_1);
+    pattern->dragRange_.first = options.value.length();
     pattern->caretPosition_ = 0;
-    pattern->DragDropTextOperation(INIT_VALUE_1);
+    pattern->HandleOnDragDropTextOperation(INIT_VALUE_1);
     EXPECT_EQ(pattern->status_, Status::NONE);
     while (!ViewStackProcessor::GetInstance()->elementsStack_.empty()) {
         ViewStackProcessor::GetInstance()->elementsStack_.pop();
@@ -4502,5 +4540,292 @@ HWTEST_F(RichEditorTestNg, SelectedBackgroundColorTest001, TestSize.Level1)
     patternSelectedBackgroundColor = richEditorPattern->GetSelectedBackgroundColor();
     auto selectedBackgroundColorResult = Color::RED.ChangeOpacity(DEFAILT_OPACITY);
     EXPECT_EQ(patternSelectedBackgroundColor, selectedBackgroundColorResult);
+}
+
+/**
+ * @tc.name: HandleOnEditChanged001
+ * @tc.desc: test Get focus edit status is true
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorTestNg, HandleOnEditChanged001, TestSize.Level1)
+{
+    /* *
+     * @tc.steps: step1. get richEditor richEditorPattern
+     */
+    ASSERT_NE(richEditorNode_, nullptr);
+
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+
+    /* *
+     * @tc.steps: step2. Setting Callback Function
+     */
+    RichEditorModelNG richEditorModel;
+    richEditorModel.Create();
+    richEditorModel.SetOnEditingChange([](bool value) {});
+
+    /* *
+     * @tc.steps: step3. Get the focus to trigger the callback function and modify the editing status
+     */
+    auto richEditorController = richEditorPattern->GetRichEditorController();
+    ASSERT_NE(richEditorController, nullptr);
+
+    richEditorPattern->HandleFocusEvent();
+    EXPECT_TRUE(richEditorController->IsEditing());
+}
+
+/**
+ * @tc.name: HandleOnEditChanged002
+ * @tc.desc: test Lose focus edit status is true
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorTestNg, HandleOnEditChanged002, TestSize.Level1)
+{
+    /* *
+     * @tc.steps: step1. get richEditor richEditorPattern
+     */
+    ASSERT_NE(richEditorNode_, nullptr);
+
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+
+    /* *
+     * @tc.steps: step2. Setting Callback Function
+     */
+    RichEditorModelNG richEditorModel;
+    richEditorModel.Create();
+    richEditorModel.SetOnEditingChange([](bool value) {});
+
+    /* *
+     * @tc.steps: step3. Lose the focus to trigger the callback function and modify the editing status
+     */
+    auto richEditorController = richEditorPattern->GetRichEditorController();
+    ASSERT_NE(richEditorController, nullptr);
+
+    richEditorPattern->HandleBlurEvent();
+    EXPECT_FALSE(richEditorController->IsEditing());
+}
+
+/**
+ * @tc.name: HandleOnEditChanged003
+ * @tc.desc: test Long press edit status is true
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorTestNg, HandleOnEditChanged003, TestSize.Level1)
+{
+    /* *
+     * @tc.steps: step1. get richEditor richEditorPattern
+     */
+    ASSERT_NE(richEditorNode_, nullptr);
+
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+
+    /* *
+     * @tc.steps: step2. Setting Callback Function
+     */
+    auto richEditorController = richEditorPattern->GetRichEditorController();
+    ASSERT_NE(richEditorController, nullptr);
+
+    GestureEvent info;
+    richEditorPattern->HandleDoubleClickOrLongPress(info);
+    EXPECT_TRUE(richEditorController->IsEditing());
+
+    RichEditorModelNG richEditorModel;
+    richEditorModel.Create();
+    richEditorModel.SetOnEditingChange([](bool value) {});
+
+    /* *
+     * @tc.steps: step3. Long press to trigger the callback function and modify the editing status
+     */
+
+    richEditorPattern->HandleDoubleClickOrLongPress(info);
+    EXPECT_TRUE(richEditorController->IsEditing());
+}
+
+/**
+ * @tc.name: HandleOnEditChanged004
+ * @tc.desc: test Click on edit status is true
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorTestNg, HandleOnEditChanged004, TestSize.Level1)
+{
+    /* *
+     * @tc.steps: step1. get richEditor richEditorPattern
+     */
+    ASSERT_NE(richEditorNode_, nullptr);
+
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+
+    /* *
+     * @tc.steps: step2. Setting Callback Function
+     */
+    RichEditorModelNG richEditorModel;
+    richEditorModel.Create();
+    richEditorModel.SetOnEditingChange([](bool value) {});
+
+    /* *
+     * @tc.steps: step3. Click on to trigger the callback function and modify the editing status
+     */
+    auto richEditorController = richEditorPattern->GetRichEditorController();
+    ASSERT_NE(richEditorController, nullptr);
+
+    GestureEvent info;
+    info.SetSourceDevice(SourceType::MOUSE);
+    richEditorPattern->HandleSingleClickEvent(info);
+    EXPECT_TRUE(richEditorController->IsEditing());
+}
+
+/**
+ * @tc.name: HandleOnEditChanged005
+ * @tc.desc: test mouse release while dragging edit status is true
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorTestNg, HandleOnEditChanged005, TestSize.Level1)
+{
+    /* *
+     * @tc.steps: step1. get richEditor richEditorPattern
+     */
+    ASSERT_NE(richEditorNode_, nullptr);
+
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+
+    /* *
+     * @tc.steps: step2. Setting Callback Function
+     */
+    RichEditorModelNG richEditorModel;
+    richEditorModel.Create();
+    richEditorModel.SetOnEditingChange([](bool value) {});
+
+    /* *
+     * @tc.steps: step3. mouse release while dragging to trigger the callback function and modify the editing status
+     */
+    auto richEditorController = richEditorPattern->GetRichEditorController();
+    ASSERT_NE(richEditorController, nullptr);
+
+    MouseInfo info;
+    auto focusHub = richEditorPattern->GetHost()->GetOrCreateFocusHub();
+    focusHub->currentFocus_ = true;
+    richEditorPattern->HandleMouseLeftButtonRelease(info);
+    EXPECT_TRUE(richEditorController->IsEditing());
+}
+
+/**
+ * @tc.name: StopEditingTest
+ * @tc.desc: test StopEditing
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorTestNg, StopEditingTest, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. get richEditor controller
+     */
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    auto richEditorController = richEditorPattern->GetRichEditorController();
+    ASSERT_NE(richEditorController, nullptr);
+    auto focusHub = richEditorNode_->GetOrCreateFocusHub();
+    ASSERT_NE(focusHub, nullptr);
+
+    /**
+     * @tc.steps: step2. initalize span properties
+     */
+    TextSpanOptions options2;
+    options2.value = INIT_VALUE_1;
+
+    /**
+     * @tc.steps: step3. test add span
+     */
+    richEditorController->AddTextSpan(options2);
+    focusHub->RequestFocusImmediately();
+    EXPECT_TRUE(focusHub->IsCurrentFocus());
+    richEditorPattern->caretTwinkling_ = true;
+    richEditorController->StopEditing();
+
+    EXPECT_FALSE(richEditorPattern->caretTwinkling_);
+
+    ClearSpan();
+}
+
+/**
+ * @tc.name: OnSubmitTest
+ * @tc.desc: test OnSubmitTest
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorTestNg, OnSubmitTest, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. get richEditor controller
+     */
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    auto richEditorController = richEditorPattern->GetRichEditorController();
+    ASSERT_NE(richEditorController, nullptr);
+    auto eventHub = richEditorPattern->GetEventHub<RichEditorEventHub>();
+    ASSERT_NE(eventHub, nullptr);
+    /**
+     * @tc.steps: step2. initalize span properties
+     */
+    TextSpanOptions options2;
+    options2.value = INIT_VALUE_1;
+
+    /**
+     * @tc.steps: step3. test add span
+     */
+    richEditorController->AddTextSpan(options2);
+
+    int count = 0;
+    TextFieldCommonEvent event2;
+    auto callback = [&count, &event2](int32_t key, NG::TextFieldCommonEvent& event) {
+        event2 = event;
+        if (count > 0) {
+            event.SetKeepEditable(true);
+        }
+        count = count + 1;
+    };
+    eventHub->SetOnSubmit(std::move(callback));
+
+    TextInputAction action2 = TextInputAction::NEW_LINE;
+    bool forceCloseKeyboard = false;
+    richEditorPattern->PerformAction(action2, forceCloseKeyboard);
+    EXPECT_EQ(count, 0);
+
+    action2 = TextInputAction::DONE;
+    richEditorPattern->PerformAction(action2, forceCloseKeyboard);
+    EXPECT_EQ(count, 1);
+    richEditorPattern->PerformAction(action2, forceCloseKeyboard);
+    EXPECT_EQ(count, 2);
+    ClearSpan();
+}
+
+/**
+ * @tc.name: SetEnterKeyType
+ * @tc.desc: test SetEnterKeyType
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorTestNg, SetEnterKeyType, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. get richEditor controller
+     */
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+
+    RichEditorModelNG richEditorModel;
+    richEditorModel.Create();
+    richEditorModel.SetEnterKeyType(TextInputAction::NEW_LINE);
+    richEditorNode_->MarkModifyDone();
+    EXPECT_EQ(richEditorPattern->GetTextInputActionValue(richEditorPattern->GetDefaultTextInputAction()),
+        TextInputAction::NEW_LINE);
+    richEditorModel.SetEnterKeyType(TextInputAction::UNSPECIFIED);
+    richEditorNode_->MarkModifyDone();
+    EXPECT_EQ(richEditorPattern->GetTextInputActionValue(richEditorPattern->GetDefaultTextInputAction()),
+        TextInputAction::NEW_LINE);
+    ClearSpan();
 }
 } // namespace OHOS::Ace::NG

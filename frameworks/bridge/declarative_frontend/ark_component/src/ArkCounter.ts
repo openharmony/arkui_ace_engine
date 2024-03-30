@@ -15,8 +15,8 @@
 
 /// <reference path='./import.ts' />
 class ArkCounterComponent extends ArkComponent implements CounterAttribute {
-  constructor(nativePtr: KNode) {
-    super(nativePtr);
+  constructor(nativePtr: KNode, classType?: ModifierType) {
+    super(nativePtr, classType);
   }
   onInc(event: () => void): this {
     throw new Error('Method not implemented.');
@@ -148,12 +148,10 @@ class EnableDecModifier extends ModifierWithKey<boolean> {
 }
 
 // @ts-ignore
-globalThis.Counter.attributeModifier = function (modifier) {
-  const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
-  let nativeNode = getUINativeModule().getFrameNodeById(elmtId);
-  let component = this.createOrGetNode(elmtId, () => {
-    return new ArkCounterComponent(nativeNode);
+globalThis.Counter.attributeModifier = function (modifier: ArkComponent): void {
+  attributeModifierFunc.call(this, modifier, (nativePtr: KNode) => {
+    return new ArkCounterComponent(nativePtr);
+  }, (nativePtr: KNode, classType: ModifierType, modifierJS: ModifierJS) => {
+    return new modifierJS.CounterModifier(nativePtr, classType);
   });
-  applyUIAttributes(modifier, nativeNode, component);
-  component.applyModifierPatch();
 };

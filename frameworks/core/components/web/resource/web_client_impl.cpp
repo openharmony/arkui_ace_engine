@@ -697,14 +697,17 @@ void WebClientImpl::OnTouchSelectionChanged(
         insertHandle, startSelectionHandle, endSelectionHandle);
 }
 
-bool WebClientImpl::OnDragAndDropData(const void* data, size_t len, const NWeb::ImageOptions& opt)
+bool WebClientImpl::OnDragAndDropData(const void* data, size_t len, std::shared_ptr<NWeb::NWebImageOptions> opt)
 {
     ContainerScope scope(instanceId_);
     auto delegate = webDelegate_.Upgrade();
     if (!delegate) {
         return false;
     }
-    return delegate->OnDragAndDropData(data, len, opt.width, opt.height);
+    if (opt) {
+        return delegate->OnDragAndDropData(data, len, opt->GetWidth(), opt->GetHeight());
+    }
+    return delegate->OnDragAndDropData(data, len, 0, 0);
 }
 
 bool WebClientImpl::OnDragAndDropDataUdmf(std::shared_ptr<NWeb::NWebDragData> dragData)
@@ -880,7 +883,7 @@ void WebClientImpl::OnResizeNotWork()
     delegate->OnResizeNotWork();
 }
 
-void WebClientImpl::OnGetTouchHandleHotZone(NWeb::TouchHandleHotZone& hotZone)
+void WebClientImpl::OnGetTouchHandleHotZone(std::shared_ptr<NWeb::NWebTouchHandleHotZone> hotZone)
 {
     ContainerScope scope(instanceId_);
     auto delegate = webDelegate_.Upgrade();
@@ -889,7 +892,7 @@ void WebClientImpl::OnGetTouchHandleHotZone(NWeb::TouchHandleHotZone& hotZone)
 }
 
 void WebClientImpl::OnDateTimeChooserPopup(
-    const NWeb::DateTimeChooser& chooser,
+    std::shared_ptr<NWeb::NWebDateTimeChooser> chooser,
     const std::vector<std::shared_ptr<NWeb::NWebDateTimeSuggestion>>& suggestions,
     std::shared_ptr<NWeb::NWebDateTimeChooserCallback> callback)
 {
@@ -955,6 +958,14 @@ void WebClientImpl::OnRootLayerChanged(int width, int height)
     delegate->OnRootLayerChanged(width, height);
 }
 
+void WebClientImpl::ReleaseResizeHold()
+{
+    ContainerScope scope(instanceId_);
+    auto delegate = webDelegate_.Upgrade();
+    CHECK_NULL_VOID(delegate);
+    delegate->ReleaseResizeHold();
+}
+
 bool WebClientImpl::FilterScrollEvent(const float x, const float y, const float xVelocity, const float yVelocity)
 {
     ContainerScope scope(instanceId_);
@@ -970,6 +981,14 @@ void WebClientImpl::OnIntelligentTrackingPreventionResult(
     auto delegate = webDelegate_.Upgrade();
     CHECK_NULL_VOID(delegate);
     delegate->OnIntelligentTrackingPreventionResult(websiteHost, trackerHost);
+}
+
+void WebClientImpl::OnTooltip(const std::string& tooltip)
+{
+    ContainerScope scope(instanceId_);
+    auto delegate = webDelegate_.Upgrade();
+    CHECK_NULL_VOID(delegate);
+    delegate->OnTooltip(tooltip);
 }
 
 bool WebClientImpl::OnHandleOverrideUrlLoading(std::shared_ptr<OHOS::NWeb::NWebUrlResourceRequest> request)
