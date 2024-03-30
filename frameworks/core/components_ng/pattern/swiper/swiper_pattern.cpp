@@ -3053,20 +3053,20 @@ void SwiperPattern::PlaySpringAnimation(double dragVelocity)
         return;
     }
     childScrolling_ = false;
-    auto leading = currentOffset_ + mainSize - itemPosition_.rbegin()->second.endPos;
-    auto trailing = currentOffset_ - itemPosition_.begin()->second.startPos;
+    auto leading = currentIndexOffset_ + mainSize - itemPosition_.rbegin()->second.endPos;
+    auto trailing = currentIndexOffset_ - itemPosition_.begin()->second.startPos;
     ExtentPair extentPair = ExtentPair(leading, trailing);
 
     host->CreateAnimatablePropertyFloat(SPRING_PROPERTY_NAME, 0, [weak = AceType::WeakClaim(this)](float position) {
         auto swiper = weak.Upgrade();
         CHECK_NULL_VOID(swiper);
         if (!swiper->isTouchDown_) {
-            swiper->UpdateCurrentOffset(static_cast<float>(position) - swiper->currentOffset_);
+            swiper->UpdateCurrentOffset(static_cast<float>(position) - swiper->currentIndexOffset_);
         }
     }, PropertyUnit::PIXEL_POSITION);
 
-    host->UpdateAnimatablePropertyFloat(SPRING_PROPERTY_NAME, currentOffset_);
-    auto delta = currentOffset_ < 0.0f ? extentPair.Leading() : extentPair.Trailing();
+    host->UpdateAnimatablePropertyFloat(SPRING_PROPERTY_NAME, currentIndexOffset_);
+    auto delta = currentIndexOffset_ < 0.0f ? extentPair.Leading() : extentPair.Trailing();
 
     // spring curve: (velocity: 0.0, mass: 1.0, stiffness: 228.0, damping: 30.0)
     auto springCurve = MakeRefPtr<SpringCurve>(0.0f, 1.0f, 228.0f, 30.0f);
