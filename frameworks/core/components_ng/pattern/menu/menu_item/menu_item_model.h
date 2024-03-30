@@ -24,8 +24,8 @@
 namespace OHOS::Ace {
 struct MenuItemProperties {
     std::string content;
-    std::optional<std::string> startIcon;
-    std::optional<std::string> endIcon;
+    std::optional<ImageSourceInfo> startIcon;
+    std::optional<ImageSourceInfo> endIcon;
     std::optional<std::string> labelInfo;
     std::optional<std::function<void()>> buildFunc;
 };
