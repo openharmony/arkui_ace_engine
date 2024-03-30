@@ -276,7 +276,7 @@ class RadioResponseRegionModifier extends ModifierWithKey<Array<Rectangle> | Rec
   }
 }
 // @ts-ignore
-globalThis.Radio.attributeModifier = function (modifier: ArkComponent) {
+globalThis.Radio.attributeModifier = function (modifier: ArkComponent): void {
   attributeModifierFunc.call(this, modifier, (nativePtr: KNode) => {
     return new ArkRadioComponent(nativePtr);
   }, (nativePtr: KNode, classType: ModifierType, modifierJS: ModifierJS) => {

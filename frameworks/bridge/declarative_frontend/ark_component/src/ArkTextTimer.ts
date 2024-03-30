@@ -132,7 +132,7 @@ class TextTimerFormatModifier extends ModifierWithKey<string> {
 }
 
 // @ts-ignore
-globalThis.TextTimer.attributeModifier = function (modifier: ArkComponent) {
+globalThis.TextTimer.attributeModifier = function (modifier: ArkComponent): void {
   attributeModifierFunc.call(this, modifier, (nativePtr: KNode) => {
     return new ArkTextTimerComponent(nativePtr);
   }, (nativePtr: KNode, classType: ModifierType, modifierJS: ModifierJS) => {

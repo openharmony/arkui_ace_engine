@@ -166,7 +166,7 @@ class ArkMenuItemComponent extends ArkComponent implements MenuItemAttribute {
   }
 }
 // @ts-ignore
-globalThis.MenuItem.attributeModifier = function (modifier: ArkComponent) {
+globalThis.MenuItem.attributeModifier = function (modifier: ArkComponent): void {
   attributeModifierFunc.call(this, modifier, (nativePtr: KNode) => {
     return new ArkMenuItemComponent(nativePtr);
   }, (nativePtr: KNode, classType: ModifierType, modifierJS: ModifierJS) => {

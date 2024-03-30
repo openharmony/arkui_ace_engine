@@ -24,7 +24,7 @@ class ArkFlexComponent extends ArkComponent implements FlexAttribute {
 }
 
 // @ts-ignore
-globalThis.Flex.attributeModifier = function (modifier: ArkComponent) {
+globalThis.Flex.attributeModifier = function (modifier: ArkComponent): void {
   attributeModifierFunc.call(this, modifier, (nativePtr: KNode) => {
     return new ArkFlexComponent(nativePtr);
   }, (nativePtr: KNode, classType: ModifierType, modifierJS: ModifierJS) => {

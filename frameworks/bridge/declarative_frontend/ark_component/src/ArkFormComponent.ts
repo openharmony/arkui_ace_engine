@@ -143,7 +143,7 @@ class FormComponentVisibilityModifier extends ModifierWithKey<Visibility> {
 }
 
 // @ts-ignore
-globalThis.FormComponent.attributeModifier = function (modifier: ArkComponent) {
+globalThis.FormComponent.attributeModifier = function (modifier: ArkComponent): void {
   attributeModifierFunc.call(this, modifier, (nativePtr: KNode) => {
     return new ArkFormComponentComponent(nativePtr);
   }, (nativePtr: KNode, classType: ModifierType, modifierJS: ModifierJS) => {

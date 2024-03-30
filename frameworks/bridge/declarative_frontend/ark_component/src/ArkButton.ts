@@ -490,7 +490,7 @@ class ButtonControlSizeModifier extends ModifierWithKey<ControlSize> {
 }
 
 // @ts-ignore
-globalThis.Button.attributeModifier = function (modifier: ArkComponent) {
+globalThis.Button.attributeModifier = function (modifier: ArkComponent): void {
   attributeModifierFunc.call(this, modifier, (nativePtr: KNode) => {
     return new ArkButtonComponent(nativePtr);
   }, (nativePtr: KNode, classType: ModifierType, modifierJS: ModifierJS) => {

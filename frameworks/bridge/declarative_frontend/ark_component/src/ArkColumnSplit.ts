@@ -81,7 +81,7 @@ class ArkColumnSplitComponent extends ArkComponent implements CommonMethod<Colum
   }
 }
 // @ts-ignore
-globalThis.ColumnSplit.attributeModifier = function (modifier: ArkComponent) {
+globalThis.ColumnSplit.attributeModifier = function (modifier: ArkComponent): void {
   attributeModifierFunc.call(this, modifier, (nativePtr: KNode) => {
     return new ArkColumnSplitComponent(nativePtr);
   }, (nativePtr: KNode, classType: ModifierType, modifierJS: ModifierJS) => {

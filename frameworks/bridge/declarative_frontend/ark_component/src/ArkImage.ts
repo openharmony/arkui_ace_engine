@@ -591,7 +591,7 @@ class ArkImageComponent extends ArkComponent implements ImageAttribute {
   }
 }
 // @ts-ignore
-globalThis.Image.attributeModifier = function (modifier: ArkComponent) {
+globalThis.Image.attributeModifier = function (modifier: ArkComponent): void {
   attributeModifierFunc.call(this, modifier, (nativePtr: KNode) => {
     return new ArkImageComponent(nativePtr);
   }, (nativePtr: KNode, classType: ModifierType, modifierJS: ModifierJS) => {

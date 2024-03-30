@@ -140,7 +140,7 @@ class ArkRichEditorComponent extends ArkComponent implements CommonMethod<RichEd
 }
 
 // @ts-ignore
-globalThis.RichEditor.attributeModifier = function (modifier: ArkComponent) {
+globalThis.RichEditor.attributeModifier = function (modifier: ArkComponent): void {
   attributeModifierFunc.call(this, modifier, (nativePtr: KNode) => {
     return new ArkRichEditorComponent(nativePtr);
   }, (nativePtr: KNode, classType: ModifierType, modifierJS: ModifierJS) => {

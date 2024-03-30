@@ -307,7 +307,7 @@ class ArkWebComponent extends ArkComponent implements WebAttribute {
 }
 
 // @ts-ignore
-globalThis.Web.attributeModifier = function (modifier: ArkComponent) {
+globalThis.Web.attributeModifier = function (modifier: ArkComponent): void {
   attributeModifierFunc.call(this, modifier, (nativePtr: KNode) => {
     return new ArkWebComponent(nativePtr);
   }, (nativePtr: KNode, classType: ModifierType, modifierJS: ModifierJS) => {

@@ -23,7 +23,7 @@ class ArkEffectComponentComponent extends ArkComponent implements EffectComponen
 // @ts-ignore
 if (globalThis.EffectComponent !== undefined) {
   // @ts-ignore
-  globalThis.EffectComponent.attributeModifier = function (modifier: ArkComponent) {
+  globalThis.EffectComponent.attributeModifier = function (modifier: ArkComponent): void {
     attributeModifierFunc.call(this, modifier, (nativePtr: KNode) => {
       return new ArkEffectComponentComponent(nativePtr);
     }, (nativePtr: KNode, classType: ModifierType, modifierJS: ModifierJS) => {

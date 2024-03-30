@@ -21,7 +21,7 @@ class ArkRelativeContainerComponent extends ArkComponent implements RelativeCont
 }
 
 // @ts-ignore
-globalThis.RelativeContainer.attributeModifier = function (modifier: ArkComponent) {
+globalThis.RelativeContainer.attributeModifier = function (modifier: ArkComponent): void {
   attributeModifierFunc.call(this, modifier, (nativePtr: KNode) => {
     return new ArkRelativeContainerComponent(nativePtr);
   }, (nativePtr: KNode, classType: ModifierType, modifierJS: ModifierJS) => {

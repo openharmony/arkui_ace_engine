@@ -454,7 +454,7 @@ class ArkListComponent extends ArkComponent implements ListAttribute {
 }
 
 // @ts-ignore
-globalThis.List.attributeModifier = function (modifier: ArkComponent) {
+globalThis.List.attributeModifier = function (modifier: ArkComponent): void {
   attributeModifierFunc.call(this, modifier, (nativePtr: KNode) => {
     return new ArkListComponent(nativePtr);
   }, (nativePtr: KNode, classType: ModifierType, modifierJS: ModifierJS) => {

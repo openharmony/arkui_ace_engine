@@ -294,7 +294,7 @@ class CheckboxUnselectedColorModifier extends ModifierWithKey<ResourceColor> {
 }
 
 // @ts-ignore
-globalThis.Checkbox.attributeModifier = function (modifier: ArkComponent) {
+globalThis.Checkbox.attributeModifier = function (modifier: ArkComponent): void {
   attributeModifierFunc.call(this, modifier, (nativePtr: KNode) => {
     return new ArkCheckboxComponent(nativePtr);
   }, (nativePtr: KNode, classType: ModifierType, modifierJS: ModifierJS) => {

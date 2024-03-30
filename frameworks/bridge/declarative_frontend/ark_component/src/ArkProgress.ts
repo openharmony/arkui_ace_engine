@@ -130,7 +130,7 @@ class ProgressBackgroundColorModifier extends ModifierWithKey<ResourceColor> {
 }
 
 // @ts-ignore
-globalThis.Progress.attributeModifier = function (modifier: ArkComponent) {
+globalThis.Progress.attributeModifier = function (modifier: ArkComponent): void {
   attributeModifierFunc.call(this, modifier, (nativePtr: KNode) => {
     return new ArkProgressComponent(nativePtr);
   }, (nativePtr: KNode, classType: ModifierType, modifierJS: ModifierJS) => {

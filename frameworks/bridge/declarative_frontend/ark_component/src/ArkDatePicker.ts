@@ -169,7 +169,7 @@ class DatePickerBackgroundColorModifier extends ModifierWithKey<ResourceColor> {
 }
 
 //@ts-ignore
-globalThis.DatePicker.attributeModifier = function (modifier: ArkComponent) {
+globalThis.DatePicker.attributeModifier = function (modifier: ArkComponent): void {
   attributeModifierFunc.call(this, modifier, (nativePtr: KNode) => {
     return new ArkDatePickerComponent(nativePtr);
   }, (nativePtr: KNode, classType: ModifierType, modifierJS: ModifierJS) => {

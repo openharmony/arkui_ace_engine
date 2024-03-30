@@ -42,7 +42,7 @@ class NavRouterModeModifier extends ModifierWithKey<number> {
 }
 
 // @ts-ignore
-globalThis.NavRouter.attributeModifier = function (modifier: ArkComponent) {
+globalThis.NavRouter.attributeModifier = function (modifier: ArkComponent): void {
   attributeModifierFunc.call(this, modifier, (nativePtr: KNode) => {
     return new ArkNavRouterComponent(nativePtr);
   }, (nativePtr: KNode, classType: ModifierType, modifierJS: ModifierJS) => {

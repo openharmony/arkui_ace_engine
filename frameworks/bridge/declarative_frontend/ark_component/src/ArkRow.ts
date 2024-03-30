@@ -66,7 +66,7 @@ class ArkRowComponent extends ArkComponent implements RowAttribute {
 }
 
 // @ts-ignore
-globalThis.Row.attributeModifier = function (modifier: ArkComponent) {
+globalThis.Row.attributeModifier = function (modifier: ArkComponent): void {
   attributeModifierFunc.call(this, modifier, (nativePtr: KNode) => {
     return new ArkRowComponent(nativePtr);
   }, (nativePtr: KNode, classType: ModifierType, modifierJS: ModifierJS) => {

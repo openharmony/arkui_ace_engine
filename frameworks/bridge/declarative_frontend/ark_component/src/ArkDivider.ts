@@ -100,7 +100,7 @@ class ArkDividerComponent extends ArkComponent implements DividerAttribute {
   }
 }
 // @ts-ignore
-globalThis.Divider.attributeModifier = function (modifier: ArkComponent) {
+globalThis.Divider.attributeModifier = function (modifier: ArkComponent): void {
   attributeModifierFunc.call(this, modifier, (nativePtr: KNode) => {
     return new ArkDividerComponent(nativePtr);
   }, (nativePtr: KNode, classType: ModifierType, modifierJS: ModifierJS) => {

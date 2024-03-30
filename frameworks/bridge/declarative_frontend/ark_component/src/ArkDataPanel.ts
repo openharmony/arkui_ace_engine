@@ -115,7 +115,7 @@ class DataPanelValueColorsModifier extends ModifierWithKey<Array<ResourceColor |
   }
 }
 // @ts-ignore
-globalThis.DataPanel.attributeModifier = function (modifier: ArkComponent) {
+globalThis.DataPanel.attributeModifier = function (modifier: ArkComponent): void {
   attributeModifierFunc.call(this, modifier, (nativePtr: KNode) => {
     return new ArkDataPanelComponent(nativePtr);
   }, (nativePtr: KNode, classType: ModifierType, modifierJS: ModifierJS) => {

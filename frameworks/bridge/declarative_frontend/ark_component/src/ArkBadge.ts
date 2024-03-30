@@ -21,7 +21,7 @@ class ArkBadgeComponent extends ArkComponent implements BadgeAttribute {
 }
 
 // @ts-ignore
-globalThis.Badge.attributeModifier = function (modifier: ArkComponent) {
+globalThis.Badge.attributeModifier = function (modifier: ArkComponent): void {
   attributeModifierFunc.call(this, modifier, (nativePtr: KNode) => {
     return new ArkBadgeComponent(nativePtr);
   }, (nativePtr: KNode, classType: ModifierType, modifierJS: ModifierJS) => {

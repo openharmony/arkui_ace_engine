@@ -60,7 +60,7 @@ class ArkImageSpanComponent extends ArkComponent implements ImageSpanAttribute {
   }
 }
 // @ts-ignore
-globalThis.ImageSpan.attributeModifier = function (modifier: ArkComponent) {
+globalThis.ImageSpan.attributeModifier = function (modifier: ArkComponent): void {
   attributeModifierFunc.call(this, modifier, (nativePtr: KNode) => {
     return new ArkImageSpanComponent(nativePtr);
   }, (nativePtr: KNode, classType: ModifierType, modifierJS: ModifierJS) => {

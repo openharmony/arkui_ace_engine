@@ -148,7 +148,7 @@ class EnableDecModifier extends ModifierWithKey<boolean> {
 }
 
 // @ts-ignore
-globalThis.Counter.attributeModifier = function (modifier: ArkComponent) {
+globalThis.Counter.attributeModifier = function (modifier: ArkComponent): void {
   attributeModifierFunc.call(this, modifier, (nativePtr: KNode) => {
     return new ArkCounterComponent(nativePtr);
   }, (nativePtr: KNode, classType: ModifierType, modifierJS: ModifierJS) => {

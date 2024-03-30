@@ -36,7 +36,7 @@ class ArkStepperComponent extends ArkComponent implements StepperAttribute {
 }
 
 // @ts-ignore
-globalThis.Stepper.attributeModifier = function (modifier: ArkComponent) {
+globalThis.Stepper.attributeModifier = function (modifier: ArkComponent): void {
   attributeModifierFunc.call(this, modifier, (nativePtr: KNode) => {
     return new ArkStepperComponent(nativePtr);
   }, (nativePtr: KNode, classType: ModifierType, modifierJS: ModifierJS) => {

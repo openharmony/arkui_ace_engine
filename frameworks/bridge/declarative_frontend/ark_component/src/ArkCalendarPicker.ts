@@ -216,7 +216,7 @@ class ArkCalendarPickerComponent extends ArkComponent implements CalendarPickerA
   }
 }
 // @ts-ignore
-globalThis.CalendarPicker.attributeModifier = function (modifier: ArkComponent) {
+globalThis.CalendarPicker.attributeModifier = function (modifier: ArkComponent): void {
   attributeModifierFunc.call(this, modifier, (nativePtr: KNode) => {
     return new ArkCalendarPickerComponent(nativePtr);
   }, (nativePtr: KNode, classType: ModifierType, modifierJS: ModifierJS) => {

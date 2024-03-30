@@ -63,7 +63,7 @@ class ArkBlankComponent extends ArkComponent implements CommonMethod<BlankAttrib
 }
 
 // @ts-ignore
-globalThis.Blank.attributeModifier = function (modifier: ArkComponent) {
+globalThis.Blank.attributeModifier = function (modifier: ArkComponent): void {
   attributeModifierFunc.call(this, modifier, (nativePtr: KNode) => {
     return new ArkBlankComponent(nativePtr);
   }, (nativePtr: KNode, classType: ModifierType, modifierJS: ModifierJS) => {
