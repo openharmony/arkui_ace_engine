@@ -221,14 +221,11 @@ void JSSearch::SetSearchButton(const JSCallbackInfo& info)
 {
     auto theme = GetTheme<SearchTheme>();
     CHECK_NULL_VOID(theme);
-    std::string buttonValue;
-    if (!ParseJsString(info[0], buttonValue)) {
-        return;
+    std::string buttonValue = "";
+    if (info[0]->IsString()) {
+        buttonValue = info[0]->ToString();
     }
     SearchModel::GetInstance()->SetSearchButton(buttonValue);
-    SearchModel::GetInstance()->SetSearchButtonFontSize(theme->GetFontSize());
-    SearchModel::GetInstance()->SetSearchButtonFontColor(theme->GetSearchButtonTextColor());
-
     if (info[1]->IsObject()) {
         auto param = JSRef<JSObject>::Cast(info[1]);
 
@@ -250,6 +247,9 @@ void JSSearch::SetSearchButton(const JSCallbackInfo& info)
             fontColor = theme->GetSearchButtonTextColor();
         }
         SearchModel::GetInstance()->SetSearchButtonFontColor(fontColor);
+    } else {
+        SearchModel::GetInstance()->SetSearchButtonFontSize(theme->GetFontSize());
+        SearchModel::GetInstance()->SetSearchButtonFontColor(theme->GetSearchButtonTextColor());
     }
 }
 
@@ -357,6 +357,13 @@ void JSSearch::SetIconStyle(const JSCallbackInfo& info)
     }
     SearchModel::GetInstance()->SetCancelIconSize(iconSize);
 
+    // set icon color
+    Color iconColor;
+    auto iconColorProp = iconParam->GetProperty("color");
+    if (!iconColorProp->IsUndefined() && !iconColorProp->IsNull() && ParseJsColor(iconColorProp, iconColor)) {
+        SearchModel::GetInstance()->SetCancelIconColor(iconColor);
+    }
+
     // set icon src
     std::string iconSrc;
     auto iconSrcProp = iconParam->GetProperty("src");
@@ -364,13 +371,6 @@ void JSSearch::SetIconStyle(const JSCallbackInfo& info)
         iconSrc = "";
     }
     SearchModel::GetInstance()->SetRightIconSrcPath(iconSrc);
-
-    // set icon color
-    Color iconColor;
-    auto iconColorProp = iconParam->GetProperty("color");
-    if (!iconColorProp->IsUndefined() && !iconColorProp->IsNull() && ParseJsColor(iconColorProp, iconColor)) {
-        SearchModel::GetInstance()->SetCancelIconColor(iconColor);
-    }
 }
 
 void JSSearch::SetTextColor(const JSCallbackInfo& info)
