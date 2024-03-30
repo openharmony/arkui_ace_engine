@@ -43,7 +43,7 @@ struct SvgFeAttribute : SvgBaseAttribute {
     Dimension width = Dimension(1.0, DimensionUnit::PERCENT);
     std::string result;
     FeInType in = FeInType::PRIMITIVE;
-    ColorInterpolationType colorInterpolationType = ColorInterpolationType::LINEAR_RGB;
+    ColorInterpolationType colorInterpolationType = ColorInterpolationType::SRGB;
 };
 
 class SvgFeDeclaration : public SvgBaseDeclaration {

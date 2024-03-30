@@ -29,6 +29,11 @@ static constexpr float LUM_COEFF_R = 0.2126f;
 static constexpr float LUM_COEFF_G = 0.7152f;
 static constexpr float LUM_COEFF_B = 0.0722f;
 
+inline float DegreesToRadians(float degrees)
+{
+    return (degrees) * (M_PI / 180.0f);
+}
+
 const std::vector<float> luminanceMatrix_ = {
     0, 0, 0, 0, 0,
     0, 0, 0, 0, 0,
@@ -71,12 +76,10 @@ void SvgFeColorMatrix::MakeMatrix(const std::string& value)
 
 void SvgFeColorMatrix::MakeHueRotate(const std::string& value)
 {
-    float theta = std::stof(value);
-    if (GreatNotEqual(theta, 360.0f) || LessNotEqual(theta, 0.0f)) {
-        return;
-    }
+    float theta = DegreesToRadians(std::stof(value));
     const float cosValue = cos(theta);
     const float sinValue = sin(theta);
+
     // The source of the formula is this website: https://www.w3.org/TR/SVG11/filters.html#FilterPrimitiveSubRegion
     matrix_ = {
         0.213f + cosValue*0.787f + sinValue*-0.213f,
@@ -104,9 +107,6 @@ void SvgFeColorMatrix::MakeHueRotate(const std::string& value)
 void SvgFeColorMatrix::MakeSaturate(const std::string& value)
 {
     float satValue = std::stof(value);
-    if (GreatNotEqual(satValue, 1.0f) || LessNotEqual(satValue, 0.0f)) {
-        return;
-    }
 
     const float RValue = HUE_R * (1 - satValue);
     const float GValue = HUE_G * (1 - satValue);
