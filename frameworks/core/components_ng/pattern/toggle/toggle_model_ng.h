@@ -34,6 +34,7 @@ public:
     void OnChangeEvent(ChangeEvent&& onChangeEvent) override;
     void SetResponseRegion(const std::vector<DimensionRect>& responseRegion) override;
     void SetHoverEffect(HoverEffectType hoverEffect) override;
+    void Pop() override;
     void SetPointRadius(const Dimension& switchPointRadius) override;
     void ResetPointRadius() override;
     void SetUnselectedColor(const Color& unselectedColor) override;

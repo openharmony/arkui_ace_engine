@@ -67,6 +67,7 @@ void JSToggle::JSBind(BindingTarget globalObj)
     JSClass<JSToggle>::StaticMethod("responseRegion", &JSToggle::JsResponseRegion);
     JSClass<JSToggle>::StaticMethod("size", &JSToggle::JsSize);
     JSClass<JSToggle>::StaticMethod("padding", &JSToggle::JsPadding);
+    JSClass<JSToggle>::StaticMethod("pop", &JSToggle::Pop);
     JSClass<JSToggle>::StaticMethod("switchPointColor", &JSToggle::SwitchPointColor);
     JSClass<JSToggle>::StaticMethod("backgroundColor", &JSToggle::SetBackgroundColor);
     JSClass<JSToggle>::StaticMethod("hoverEffect", &JSToggle::JsHoverEffect);
@@ -78,7 +79,7 @@ void JSToggle::JSBind(BindingTarget globalObj)
     JSClass<JSToggle>::StaticMethod("onDeleteEvent", &JSInteractableView::JsOnDelete);
     JSClass<JSToggle>::StaticMethod("onAppear", &JSInteractableView::JsOnAppear);
     JSClass<JSToggle>::StaticMethod("onDisAppear", &JSInteractableView::JsOnDisAppear);
-    JSClass<JSToggle>::InheritAndBind<JSContainerBase>(globalObj);
+    JSClass<JSToggle>::InheritAndBind<JSViewAbstract>(globalObj);
 }
 
 void ParseToggleIsOnObject(const JSCallbackInfo& info, const JSRef<JSVal>& changeEventVal)
@@ -400,6 +401,11 @@ void JSToggle::JsHoverEffect(const JSCallbackInfo& info)
     if (info.Length() > 0 && info[0]->IsNumber()) {
         ToggleModel::GetInstance()->SetHoverEffect(static_cast<HoverEffectType>(info[0]->ToNumber<int32_t>()));
     }
+}
+
+void JSToggle::Pop()
+{
+    ToggleModel::GetInstance()->Pop();
 }
 
 void JSToggle::SwitchStyle(const JSCallbackInfo& info)
