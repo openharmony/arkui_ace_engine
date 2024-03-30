@@ -237,6 +237,7 @@ export struct SubHeader {
             .width(IMAGE_WIDTH_NUM)
             .height(IMAGE_WIDTH_NUM)
             .margin({ right: $r('sys.float.padding_level4') })
+            .draggable(false)
         }
       }
       .onAreaChange((oldValue: Area, newValue: Area) => {
@@ -380,6 +381,13 @@ export struct SubHeader {
               })
               .focusable(true)
           }
+          .padding({
+            left: $r('sys.float.padding_level3'),
+            right: $r('sys.float.padding_level3'),
+          })
+          .margin({
+            bottom: $r('sys.float.padding_level2'),
+          })
           .backgroundColor(this.buttonBgColor)
           .focusable(true)
           .constraintSize({ minHeight: BUTTON_HEIGHT })
@@ -395,7 +403,13 @@ export struct SubHeader {
               })
               .backgroundColor($r('sys.color.interactive_focus'))
             },
-            pressed: pressedStyle,
+            pressed: {
+              .border({
+                radius: $r('sys.float.corner_radius_level4'),
+                color: $r('sys.color.interactive_pressed'),
+              })
+              .backgroundColor($r('sys.color.interactive_pressed'))
+            },
             disabled: disabledStyle,
           })
           .onFocus(() => {
@@ -434,25 +448,13 @@ export struct SubHeader {
             this.buttonStyleWidth = Number(newValue.width);
             this.buttonStyleHeight = Number(newValue.height);
           })
-
-          if (this.buttonFocus) {
-            Row()
-              .height(this.buttonStyleHeight)
-              .width(this.buttonStyleWidth)
-              .hitTestBehavior(HitTestMode.None)
-              .border({
-                width: $r('sys.float.outline_extra_larger'),
-                color: $r('sys.color.interactive_focus'),
-              })
-              .borderRadius($r('sys.float.corner_radius_level4'))
-          }
         }
       }
       .focusable(true)
     }
     .margin({
-      left: $r('sys.float.padding_level4'),
-      right: $r('sys.float.margin_right'),
+      left: $r('sys.float.padding_level1'),
+      right: $r('sys.float.padding_level5'),
     })
     .width(this.flexWidth / DIVIDEND_NUM)
     .justifyContent(FlexAlign.End)
@@ -746,6 +748,7 @@ struct SingleIconStyle {
           .width(IMAGE_HEIGHT_NUM)
           .height(IMAGE_HEIGHT_NUM)
           .focusable(true)
+          .draggable(false)
       }
     }
   }
