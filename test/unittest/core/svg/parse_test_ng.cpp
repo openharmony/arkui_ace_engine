@@ -331,6 +331,8 @@ const std::string FE_BLEND =
 
 constexpr float IMAGE_COMPONENT_WIDTH = 100.0f;
 constexpr float IMAGE_COMPONENT_HEIGHT = 100.0f;
+
+std::unordered_map<std::string, std::shared_ptr<RSImageFilter>> resultHash;
 } // namespace
 class ParseTestNg : public testing::Test {
 public:
@@ -1100,7 +1102,7 @@ HWTEST_F(ParseTestNg, ParseFeCompositeTest002, TestSize.Level1)
 #endif
     ColorInterpolationType colorInterpolationType = ColorInterpolationType::LINEAR_RGB;
     ColorInterpolationType srcColor = ColorInterpolationType::SRGB;
-    svgFe->GetImageFilter(imageFilter, colorInterpolationType);
+    svgFe->GetImageFilter(imageFilter, colorInterpolationType, resultHash);
     EXPECT_EQ(colorInterpolationType, ColorInterpolationType::LINEAR_RGB);
     svgFe->ConverImageFilterColor(imageFilter, srcColor, colorInterpolationType);
     EXPECT_NE(imageFilter, nullptr);
@@ -1125,7 +1127,7 @@ HWTEST_F(ParseTestNg, ParseFeCompositeTest003, TestSize.Level1)
 #endif
     ColorInterpolationType srcColor = ColorInterpolationType::SRGB;
     ColorInterpolationType colorInterPolationType = ColorInterpolationType::LINEAR_RGB;
-    colorMatrix->OnAsImageFilter(imageFilter, srcColor, colorInterPolationType);
+    colorMatrix->OnAsImageFilter(imageFilter, srcColor, colorInterPolationType, resultHash);
     EXPECT_NE(imageFilter, nullptr);
     EXPECT_EQ(colorInterPolationType, ColorInterpolationType::LINEAR_RGB);
     EXPECT_EQ(srcColor, ColorInterpolationType::SRGB);
@@ -1282,8 +1284,8 @@ HWTEST_F(ParseTestNg, ParseFeFloodAndCompositeTest001, TestSize.Level1)
     EXPECT_NE(svgFeComposite, nullptr);
     auto svgFeCompositeDeclaration = AceType::DynamicCast<SvgFeCompositeDeclaration>(svgFeComposite->declaration_);
     EXPECT_NE(svgFeCompositeDeclaration, nullptr);
-    EXPECT_EQ(svgFeCompositeDeclaration->GetIn(), FeInType::SOURCE_ALPHA);
-    EXPECT_EQ(svgFeCompositeDeclaration->GetIn2(), FeInType::SOURCE_GRAPHIC);
+    EXPECT_EQ(svgFeCompositeDeclaration->GetIn().in, FeInType::SOURCE_ALPHA);
+    EXPECT_EQ(svgFeCompositeDeclaration->GetIn2().in, FeInType::SOURCE_GRAPHIC);
     EXPECT_EQ(svgFeCompositeDeclaration->GetK1(), ONE);
     EXPECT_EQ(svgFeCompositeDeclaration->GetK2(), ZERO);
 }
@@ -1308,8 +1310,8 @@ HWTEST_F(ParseTestNg, ParseFeBlendTest001, TestSize.Level1)
     EXPECT_NE(svgFeBlend, nullptr);
     auto svgFeBlendDeclaration = AceType::DynamicCast<SvgFeBlendDeclaration>(svgFeBlend->declaration_);
     EXPECT_NE(svgFeBlendDeclaration, nullptr);
-    EXPECT_EQ(svgFeBlendDeclaration->GetIn(), FeInType::SOURCE_GRAPHIC);
-    EXPECT_EQ(svgFeBlendDeclaration->GetIn2(), FeInType::SOURCE_ALPHA);
+    EXPECT_EQ(svgFeBlendDeclaration->GetIn().in, FeInType::SOURCE_GRAPHIC);
+    EXPECT_EQ(svgFeBlendDeclaration->GetIn2().in, FeInType::SOURCE_ALPHA);
     EXPECT_EQ(svgFeBlendDeclaration->GetBlendMode(), FeBlendMode::LIGHTEN);
 }
 
@@ -1493,7 +1495,7 @@ HWTEST_F(ParseTestNg, ParseFeCompositeTest004, TestSize.Level1)
     std::shared_ptr<RSImageFilter> imageFilter = nullptr;
     ColorInterpolationType colorInterpolationType = ColorInterpolationType::SRGB;
     ColorInterpolationType srcColor = ColorInterpolationType::LINEAR_RGB;
-    svgFe->GetImageFilter(imageFilter, colorInterpolationType);
+    svgFe->GetImageFilter(imageFilter, colorInterpolationType, resultHash);
     EXPECT_EQ(colorInterpolationType, ColorInterpolationType::SRGB);
 
     /* *
@@ -1524,30 +1526,42 @@ HWTEST_F(ParseTestNg, ParseFeCompositeTest005, TestSize.Level1)
      * @tc.expected: Execute function return value not is nullptr
      */
     std::shared_ptr<RSImageFilter> imageFilter = nullptr;
-    auto value = svgFe->MakeImageFilter(FeInType::SOURCE_GRAPHIC, imageFilter);
+    FeIn in = {
+        .in = FeInType::SOURCE_GRAPHIC,
+        .id = ""
+    };
+    in.in = FeInType::SOURCE_GRAPHIC;
+    auto value = svgFe->MakeImageFilter(in, imageFilter, resultHash);
     EXPECT_EQ(value, nullptr);
 
-    value = svgFe->MakeImageFilter(FeInType::SOURCE_ALPHA, imageFilter);
+    in.in = FeInType::SOURCE_ALPHA;
+    value = svgFe->MakeImageFilter(in, imageFilter, resultHash);
     EXPECT_NE(value, nullptr);
 
-    value = svgFe->MakeImageFilter(FeInType::BACKGROUND_IMAGE, imageFilter);
+    in.in = FeInType::BACKGROUND_IMAGE;
+    value = svgFe->MakeImageFilter(in, imageFilter, resultHash);
     EXPECT_EQ(value, nullptr);
 
-    value = svgFe->MakeImageFilter(FeInType::BACKGROUND_ALPHA, imageFilter);
+    in.in = FeInType::BACKGROUND_ALPHA;
+    value = svgFe->MakeImageFilter(in, imageFilter, resultHash);
     EXPECT_EQ(value, nullptr);
 
-    value = svgFe->MakeImageFilter(FeInType::FILL_PAINT, imageFilter);
+    in.in = FeInType::FILL_PAINT;
+    value = svgFe->MakeImageFilter(in, imageFilter, resultHash);
     EXPECT_EQ(value, nullptr);
 
-    value = svgFe->MakeImageFilter(FeInType::STROKE_PAINT, imageFilter);
+    in.in = FeInType::STROKE_PAINT;
+    value = svgFe->MakeImageFilter(in, imageFilter, resultHash);
     EXPECT_EQ(value, nullptr);
 
-    value = svgFe->MakeImageFilter(FeInType::PRIMITIVE, imageFilter);
+    in.in = FeInType::PRIMITIVE;
+    value = svgFe->MakeImageFilter(in, imageFilter, resultHash);
     EXPECT_EQ(value, nullptr);
 
     // 20 = Values not in definition
     int cnt = 20;
-    value = svgFe->MakeImageFilter(static_cast<FeInType>(cnt), imageFilter);
+    in.in = static_cast<FeInType>(cnt);
+    value = svgFe->MakeImageFilter(in, imageFilter, resultHash);
     EXPECT_EQ(value, nullptr);
 }
 

@@ -73,12 +73,14 @@ void SvgFilter::OnAsPaint()
 #endif
     ColorInterpolationType currentColor = ColorInterpolationType::SRGB;
 
+    std::unordered_map<std::string, std::shared_ptr<RSImageFilter>> resultHash;
+
     for (const auto& item : children_) {
         auto nodeFe = AceType::DynamicCast<SvgFe>(item);
         if (!nodeFe) {
             continue;
         }
-        nodeFe->GetImageFilter(imageFilter, currentColor);
+        nodeFe->GetImageFilter(imageFilter, currentColor, resultHash);
     }
 
     SvgFe::ConverImageFilterColor(imageFilter, currentColor, ColorInterpolationType::SRGB);

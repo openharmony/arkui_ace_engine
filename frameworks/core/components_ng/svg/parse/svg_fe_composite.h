@@ -31,7 +31,8 @@ public:
     static RefPtr<SvgNode> Create();
 
     void OnAsImageFilter(std::shared_ptr<RSImageFilter>& imageFilter, const ColorInterpolationType& srcColor,
-        ColorInterpolationType& currentColor) const override;
+        ColorInterpolationType& currentColor,
+        std::unordered_map<std::string, std::shared_ptr<RSImageFilter>>& resultHash) const override;
     RSBlendMode BlendModeForOperator(FeOperatorType op) const;
 };
 

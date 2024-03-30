@@ -29,7 +29,7 @@ enum class FeBlendMode {
 };
 
 struct SvgFeBlendAttribute : SvgFeAttribute {
-    FeInType in2 = FeInType::PRIMITIVE;
+    FeIn in2;
     FeBlendMode blendMode = FeBlendMode::NORMAL;
 };
 
@@ -52,9 +52,11 @@ public:
             { "StrokePaint", FeInType::STROKE_PAINT },
         };
         int64_t inIndex = BinarySearchFindIndex(IN_TABLE, ArraySize(IN_TABLE), In2.c_str());
+        auto& attribute = MaybeResetAttribute<SvgFeBlendAttribute>(AttributeTag::SPECIALIZED_ATTR);
         if (inIndex != -1) {
-            auto& attribute = MaybeResetAttribute<SvgFeBlendAttribute>(AttributeTag::SPECIALIZED_ATTR);
-            attribute.in2 = IN_TABLE[inIndex].value;
+            attribute.in2.in = IN_TABLE[inIndex].value;
+        } else {
+            attribute.in2.id = In2;
         }
     }
 
@@ -80,7 +82,7 @@ public:
         return attribute.blendMode;
     }
 
-    const FeInType& GetIn2() const
+    const FeIn& GetIn2() const
     {
         auto& attribute = static_cast<SvgFeBlendAttribute&>(GetAttribute(AttributeTag::SPECIALIZED_ATTR));
         return attribute.in2;
