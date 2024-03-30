@@ -27,6 +27,9 @@
 #include "core/components_ng/manager/drag_drop/drag_drop_proxy.h"
 #include "core/gestures/velocity_tracker.h"
 
+namespace OHOS::Ace {
+class UnifiedData;
+}
 namespace OHOS::Ace::NG {
 enum class DragDropMgrState : int32_t {
     IDLE,
@@ -78,9 +81,16 @@ public:
     void OnDragStart(const Point& point, const RefPtr<FrameNode>& frameNode);
     void OnDragMove(const PointerEvent& pointerEvent, const std::string& extraInfo);
     void OnDragEnd(const PointerEvent& pointerEvent, const std::string& extraInfo);
-    void OnDragDrop(const RefPtr<FrameNode>& dragFrameNode, const Point& point);
+    void DoDropAction(const RefPtr<FrameNode>& dragFrameNode, const Point& point,
+        const RefPtr<UnifiedData>& unifiedData, const std::string& udKey);
+    void RequestDragSummaryInfoAndPrivilege();
+    RefPtr<UnifiedData> RequestUDMFDataWithUDKey(const std::string& udKey);
+    void TryGetDataBackGround(
+        const RefPtr<FrameNode>& dragFrameNode, const Point& point, const std::string& udKey, int32_t count = 0);
+    void OnDragDrop(RefPtr<OHOS::Ace::DragEvent>& event, const RefPtr<FrameNode>& dragFrameNode, const Point& point);
     void ResetDragDropStatus(const Point& point, const DragDropRet& dragDropRet, int32_t windowId);
-    bool CheckRemoteData(const RefPtr<FrameNode>& dragFrameNode, const PointerEvent& pointerEvent);
+    bool CheckRemoteData(
+        const RefPtr<FrameNode>& dragFrameNode, const PointerEvent& pointerEvent, const std::string& udKey);
     void OnDragMoveOut(const PointerEvent& pointerEvent);
     void OnTextDragEnd(float globalX, float globalY, const std::string& extraInfo);
     void onDragCancel();

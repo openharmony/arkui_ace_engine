@@ -47,6 +47,8 @@ constexpr float SECOND_PIXELMAP_ANGLE = -8.0f;
 constexpr int32_t FIRST_GATHER_PIXEL_MAP = 1;
 constexpr int32_t SECOND_GATHER_PIXEL_MAP = 2;
 constexpr float TOUCH_DRAG_PPIXELMAP_SCALE = 1.05f;
+constexpr int32_t MAX_RETRY_TIMES = 3;
+constexpr int32_t MAX_RETRY_DURATION = 800;
 } // namespace
 
 RefPtr<DragDropProxy> DragDropManager::CreateAndShowDragWindow(
@@ -635,41 +637,122 @@ void DragDropManager::OnDragEnd(const PointerEvent& pointerEvent, const std::str
         pattern->HandleDragEvent(pointerEvent);
         return;
     }
-    if (!CheckRemoteData(dragFrameNode, pointerEvent)) {
-        OnDragDrop(dragFrameNode, point);
+
+    RequestDragSummaryInfoAndPrivilege();
+    std::string udKey;
+    InteractionInterface::GetInstance()->GetUdKey(udKey);
+    if (!CheckRemoteData(dragFrameNode, pointerEvent, udKey)) {
+        auto unifiedData = RequestUDMFDataWithUDKey(udKey);
+        DoDropAction(dragFrameNode, point, unifiedData, udKey);
         return;
     }
 }
 
-bool DragDropManager::CheckRemoteData(const RefPtr<FrameNode>& dragFrameNode, const PointerEvent& pointerEvent)
+void DragDropManager::RequestDragSummaryInfoAndPrivilege()
+{
+    RequireSummary();
+    int ret = InteractionInterface::GetInstance()->AddPrivilege();
+    if (ret != 0 && SystemProperties::GetDebugEnabled()) {
+        TAG_LOGI(AceLogTag::ACE_DRAG, "Interaction AddPrivilege in DragEnd with code:%{public}d", ret);
+    }
+    ShadowOffsetData shadowOffsetData { -1, -1, -1, -1 };
+    ret = InteractionInterface::GetInstance()->GetShadowOffset(shadowOffsetData);
+    if (ret == 0) {
+        previewRect_ =
+            Rect(shadowOffsetData.offsetX, shadowOffsetData.offsetY, shadowOffsetData.width, shadowOffsetData.height);
+    } else {
+        TAG_LOGI(AceLogTag::ACE_DRAG, "Interaction GetShadowOffset in DragEnd with code:%{public}d", ret);
+    }
+}
+
+void DragDropManager::DoDropAction(const RefPtr<FrameNode>& dragFrameNode, const Point& point,
+    const RefPtr<UnifiedData>& unifiedData, const std::string& udKey)
+{
+    RefPtr<OHOS::Ace::DragEvent> event = AceType::MakeRefPtr<OHOS::Ace::DragEvent>();
+    if (!udKey.empty()) {
+        event->SetUdKey(udKey);
+    }
+    if (unifiedData == nullptr) {
+        event->SetIsGetDataSuccess(false);
+    } else {
+        event->SetData(unifiedData);
+        event->SetIsGetDataSuccess(true);
+    }
+    OnDragDrop(event, dragFrameNode, point);
+}
+
+RefPtr<UnifiedData> DragDropManager::RequestUDMFDataWithUDKey(const std::string& udKey)
+{
+    if (udKey.empty()) {
+        return nullptr;
+    }
+    RefPtr<UnifiedData> udData = UdmfClient::GetInstance()->CreateUnifiedData();
+    auto ret = UdmfClient::GetInstance()->GetData(udData, udKey);
+    if (ret != 0) {
+        return nullptr;
+    }
+    return udData;
+}
+
+void DragDropManager::TryGetDataBackGround(
+    const RefPtr<FrameNode>& dragFrameNode, const Point& point, const std::string& udKey, int32_t count)
+{
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto taskScheduler = pipeline->GetTaskExecutor();
+    CHECK_NULL_VOID(taskScheduler);
+    taskScheduler->PostTask(
+        [id = Container::CurrentId(), pipeline, dragFrameNode, point, udKey, count, weakManager = WeakClaim(this)]() {
+            ContainerScope scope(id);
+            auto dragDropManager = weakManager.Upgrade();
+            CHECK_NULL_VOID(dragDropManager);
+            auto taskScheduler = pipeline->GetTaskExecutor();
+            CHECK_NULL_VOID(taskScheduler);
+            auto result = dragDropManager->RequestUDMFDataWithUDKey(udKey);
+            if (result != nullptr || count >= MAX_RETRY_TIMES) {
+                taskScheduler->PostTask(
+                    [dragFrameNode, point, weakManager, result, udKey]() {
+                        auto dragDropManager = weakManager.Upgrade();
+                        CHECK_NULL_VOID(dragDropManager);
+                        dragDropManager->DoDropAction(dragFrameNode, point, result, udKey);
+                    },
+                    TaskExecutor::TaskType::UI);
+            } else {
+                // first temp get udmfData failed, prepare to retryGetData.
+                taskScheduler->PostDelayedTask(
+                    [dragFrameNode, point, weakManager, count, udKey]() {
+                        auto dragDropManager = weakManager.Upgrade();
+                        CHECK_NULL_VOID(dragDropManager);
+                        dragDropManager->TryGetDataBackGround(dragFrameNode, point, udKey, count + 1);
+                    },
+                    TaskExecutor::TaskType::UI, MAX_RETRY_DURATION);
+            }
+        },
+        TaskExecutor::TaskType::BACKGROUND);
+}
+
+bool DragDropManager::CheckRemoteData(
+    const RefPtr<FrameNode>& dragFrameNode, const PointerEvent& pointerEvent, const std::string& udKey)
 {
     Point point = pointerEvent.GetPoint();
-    std::string udKey;
-    InteractionInterface::GetInstance()->GetUdKey(udKey);
-    auto isRemoteData = UdmfClient::GetInstance()->GetRemoteStatus(udKey);
+    if (udKey.empty()) {
+        return false;
+    }
+    std::string remoteUdKey = udKey;
+    auto isRemoteData = UdmfClient::GetInstance()->GetRemoteStatus(remoteUdKey);
     if (isRemoteData) {
         TAG_LOGI(AceLogTag::ACE_DRAG, "Stop drag with motion drag action, target device id : %{public}d.",
             pointerEvent.deviceId);
-        auto pipeline = PipelineContext::GetCurrentContext();
-        CHECK_NULL_RETURN(pipeline, false);
-        auto taskScheduler = pipeline->GetTaskExecutor();
-        CHECK_NULL_RETURN(taskScheduler, false);
-        taskScheduler->PostTask(
-            [dragFrameNode, point, weakManager = WeakClaim(this)]() {
-                auto dragDropManager = weakManager.Upgrade();
-                CHECK_NULL_VOID(dragDropManager);
-                dragDropManager->OnDragDrop(dragFrameNode, point);
-            },
-            TaskExecutor::TaskType::UI);
+        TryGetDataBackGround(dragFrameNode, point, udKey);
     }
     return isRemoteData;
 }
 
-void DragDropManager::OnDragDrop(const RefPtr<FrameNode>& dragFrameNode, const Point& point)
+void DragDropManager::OnDragDrop(
+    RefPtr<OHOS::Ace::DragEvent>& event, const RefPtr<FrameNode>& dragFrameNode, const Point& point)
 {
     auto eventHub = dragFrameNode->GetEventHub<EventHub>();
     CHECK_NULL_VOID(eventHub);
-    RefPtr<OHOS::Ace::DragEvent> event = AceType::MakeRefPtr<OHOS::Ace::DragEvent>();
     UpdateDragEvent(event, point);
     auto extraParams = eventHub->GetDragExtraParams(extraInfo_, point, DragEventType::DROP);
     eventHub->FireCustomerOnDragFunc(DragFuncType::DRAG_DROP, event, extraParams);
@@ -1185,48 +1268,13 @@ void DragDropManager::UpdateNotifyDragEvent(
 
 void DragDropManager::UpdateDragEvent(RefPtr<OHOS::Ace::DragEvent>& event, const Point& point)
 {
-    auto pipeline = PipelineContext::GetCurrentContext();
-    CHECK_NULL_VOID(pipeline);
     event->SetX(point.GetX());
     event->SetY(point.GetY());
     event->SetScreenX(point.GetScreenX());
     event->SetScreenY(point.GetScreenY());
     event->SetVelocity(velocityTracker_.GetVelocity());
-    std::string udKey;
-    InteractionInterface::GetInstance()->GetUdKey(udKey);
-    if (udKey.empty()) {
-        event->SetIsGetDataSuccess(false);
-    } else {
-        event->SetUdKey(udKey);
-    }
-    int ret = InteractionInterface::GetInstance()->AddPrivilege();
-    if (ret != 0 && SystemProperties::GetDebugEnabled()) {
-        TAG_LOGI(AceLogTag::ACE_DRAG, "Interaction AddPrivilege in DragEnd with code:%{public}d", ret);
-    }
-    RefPtr<UnifiedData> udData = UdmfClient::GetInstance()->CreateUnifiedData();
-    ret = UdmfClient::GetInstance()->GetData(udData, udKey);
-    if (ret != 0) {
-        event->SetIsGetDataSuccess(false);
-    } else {
-        event->SetIsGetDataSuccess(true);
-    }
-    auto unifiedData = udData;
-    event->SetData(unifiedData);
-    RequireSummary();
     event->SetSummary(summaryMap_);
-    ShadowOffsetData shadowOffsetData { -1, -1, -1, -1 };
-    ret = InteractionInterface::GetInstance()->GetShadowOffset(shadowOffsetData);
-    if (ret == 0) {
-        previewRect_ = Rect(
-            point.GetX() + shadowOffsetData.offsetX,
-            point.GetY() + shadowOffsetData.offsetY,
-            shadowOffsetData.width,
-            shadowOffsetData.height);
-        event->SetPreviewRect(previewRect_);
-    } else {
-        TAG_LOGD(AceLogTag::ACE_DRAG, "Interaction GetShadowOffset in DragEnd with code:%{public}d", ret);
-        event->SetPreviewRect(previewRect_ + Offset(point.GetX(), point.GetY()));
-    }
+    event->SetPreviewRect(GetDragWindowRect(point));
 }
 
 std::string DragDropManager::GetExtraInfo()
