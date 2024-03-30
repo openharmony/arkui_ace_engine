@@ -41,11 +41,11 @@ void SvgFilter::OnInitStyle()
     y_ = declaration->GetY();
     height_ = declaration->GetHeight();
     width_ = declaration->GetWidth();
-    OnAsPaint();
 }
 
 void SvgFilter::OnDrawTraversed(RSCanvas& canvas, const Size& viewPort, const std::optional<Color>& color)
 {
+    OnAsPaint();
 }
 
 void SvgFilter::OnDrawTraversedBefore(RSCanvas& canvas, const Size& viewPort, const std::optional<Color>& color)
