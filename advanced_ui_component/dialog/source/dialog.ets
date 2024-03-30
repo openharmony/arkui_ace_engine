@@ -675,7 +675,7 @@ struct CustomDialogContentComponent {
     .onAreaChange((oldValue: Area, newValue: Area) => {
       this.titleHeight = Number(newValue.height);
       this.contentMaxHeight = `calc(100% - ${this.titleHeight}vp - ${this.getButtonsHeight()}vp)`;
-    })
+    });
   }
 
   @Builder
