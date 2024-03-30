@@ -31,7 +31,8 @@ public:
 
     RSBlendMode GetBlendMode(FeBlendMode mode) const;
     void OnAsImageFilter(std::shared_ptr<RSImageFilter>& imageFilter,
-        const ColorInterpolationType& srcColor, ColorInterpolationType& currentColor) const override;
+        const ColorInterpolationType& srcColor, ColorInterpolationType& currentColor,
+        std::unordered_map<std::string, std::shared_ptr<RSImageFilter>>& resultHash) const override;
 };
 
 } // namespace OHOS::Ace::NG

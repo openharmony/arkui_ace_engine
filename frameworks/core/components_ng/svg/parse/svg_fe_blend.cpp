@@ -50,20 +50,22 @@ RSBlendMode SvgFeBlend::GetBlendMode(FeBlendMode mode) const
 }
 
 void SvgFeBlend::OnAsImageFilter(std::shared_ptr<RSImageFilter>& imageFilter, const ColorInterpolationType& srcColor,
-    ColorInterpolationType& currentColor) const
+    ColorInterpolationType& currentColor,
+    std::unordered_map<std::string, std::shared_ptr<RSImageFilter>>& resultHash) const
 {
     auto declaration = AceType::DynamicCast<SvgFeBlendDeclaration>(declaration_);
     CHECK_NULL_VOID(declaration);
     auto blendMode = declaration->GetBlendMode();
 
-    auto backImageFilter = MakeImageFilter(declaration->GetIn2(), imageFilter);
-    auto foreImageFilter = MakeImageFilter(declaration->GetIn(), imageFilter);
+    auto backImageFilter = MakeImageFilter(declaration->GetIn2(), imageFilter, resultHash);
+    auto foreImageFilter = MakeImageFilter(declaration->GetIn(), imageFilter, resultHash);
     ConverImageFilterColor(foreImageFilter, srcColor, currentColor);
     ConverImageFilterColor(backImageFilter, srcColor, currentColor);
 
     imageFilter =
         RSRecordingImageFilter::CreateBlendImageFilter(GetBlendMode(blendMode), backImageFilter, foreImageFilter);
     ConverImageFilterColor(imageFilter, srcColor, currentColor);
+    RegisterResult(declaration->GetResult(), imageFilter, resultHash);
 }
 
 } // namespace OHOS::Ace::NG

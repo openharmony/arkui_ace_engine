@@ -36,13 +36,18 @@ enum class FeInType {
     PRIMITIVE
 };
 
+struct FeIn {
+    FeInType in = FeInType::PRIMITIVE;
+    std::string id;
+};
+
 struct SvgFeAttribute : SvgBaseAttribute {
     Dimension x = Dimension(0.0, DimensionUnit::PERCENT);
     Dimension y = Dimension(0.0, DimensionUnit::PERCENT);
     Dimension height = Dimension(1.0, DimensionUnit::PERCENT);
     Dimension width = Dimension(1.0, DimensionUnit::PERCENT);
     std::string result;
-    FeInType in = FeInType::PRIMITIVE;
+    FeIn in;
     ColorInterpolationType colorInterpolationType = ColorInterpolationType::SRGB;
 };
 
@@ -126,13 +131,15 @@ public:
             { "StrokePaint", FeInType::STROKE_PAINT },
         };
         int64_t inIndex = BinarySearchFindIndex(IN_TABLE, ArraySize(IN_TABLE), in.c_str());
+        auto& attribute = MaybeResetAttribute<SvgFeAttribute>(AttributeTag::SPECIALIZED_ATTR);
         if (inIndex != -1) {
-            auto& attribute = MaybeResetAttribute<SvgFeAttribute>(AttributeTag::SPECIALIZED_ATTR);
-            attribute.in = IN_TABLE[inIndex].value;
+            attribute.in.in = IN_TABLE[inIndex].value;
+        } else {
+            attribute.in.id = in;
         }
     }
 
-    const FeInType& GetIn() const
+    const FeIn& GetIn() const
     {
         auto& attribute = static_cast<SvgFeAttribute&>(GetAttribute(AttributeTag::SPECIALIZED_ATTR));
         return attribute.in;

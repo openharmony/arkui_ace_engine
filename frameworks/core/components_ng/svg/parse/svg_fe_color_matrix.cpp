@@ -144,11 +144,12 @@ void SvgFeColorMatrix::OnInitStyle()
 }
 
 void SvgFeColorMatrix::OnAsImageFilter(std::shared_ptr<RSImageFilter>& imageFilter,
-    const ColorInterpolationType& srcColor, ColorInterpolationType& currentColor) const
+    const ColorInterpolationType& srcColor, ColorInterpolationType& currentColor,
+    std::unordered_map<std::string, std::shared_ptr<RSImageFilter>>& resultHash) const
 {
     auto declaration = AceType::DynamicCast<SvgFeColorMatrixDeclaration>(declaration_);
     CHECK_NULL_VOID(declaration);
-    imageFilter = MakeImageFilter(declaration->GetIn(), imageFilter);
+    imageFilter = MakeImageFilter(declaration->GetIn(), imageFilter, resultHash);
 
     RSColorMatrix colorMatrix;
     colorMatrix.SetArray(matrix_.data());
@@ -157,6 +158,7 @@ void SvgFeColorMatrix::OnAsImageFilter(std::shared_ptr<RSImageFilter>& imageFilt
 
     imageFilter = RSRecordingImageFilter::CreateColorFilterImageFilter(*colorFilter, imageFilter);
     ConverImageFilterColor(imageFilter, srcColor, currentColor);
+    RegisterResult(declaration->GetResult(), imageFilter, resultHash);
 }
 
 } // namespace OHOS::Ace::NG
