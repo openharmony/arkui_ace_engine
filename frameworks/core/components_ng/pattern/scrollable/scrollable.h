@@ -411,7 +411,8 @@ public:
 
     void SetMaxFlingVelocity(double max)
     {
-        maxFlingVelocity_ = max;
+        double density = PipelineBase::GetCurrentDensity();
+        maxFlingVelocity_ = max * density;
     }
 
     void StopFrictionAnimation();

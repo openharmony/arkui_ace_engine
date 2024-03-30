@@ -45,7 +45,7 @@ namespace OHOS::Ace::NG {
 #ifndef WEARABLE_PRODUCT
 constexpr double FRICTION = 0.6;
 constexpr double NEW_FRICTION = 0.7;
-constexpr double MAX_VELOCITY = 800000.0;
+constexpr double MAX_VELOCITY = 4200.0;
 #else
 constexpr double FRICTION = 0.9;
 constexpr double MAX_VELOCITY = 5000.0;
