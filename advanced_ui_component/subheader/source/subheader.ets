@@ -18,23 +18,36 @@ import hilog from '@ohos.hilog';
 import resourceManager from '@ohos.resourceManager';
 import { BusinessError } from '@ohos.base';
 
-const IMAGE_WIDTH_NUM: number = 16;
-const IMAGE_HEIGHT_NUM: number = 24;
-const BUTTON_SIZE: number = 32;
-const SINGLE_LINE_HEIGHT: number = 56;
-const DOUBLE_LINE_HEIGHT: number = 72;
-const BUTTON_HEIGHT: number = 28;
-const ARROW_WIDTH: number = 12;
-const BORDER_WIDTH: number = 2;
 const DIVIDEND_NUM: number = 3;
-const DIVIDEND_NUM_TWO: number = 2;
-const SINGLE_LINE_NUM: number = 1;
-const DOUBLE_LINE_NUM: number = 2;
 const INDEX_ZERO: number = 0;
 const INDEX_ONE: number = 1;
 const INDEX_TWO: number = 2;
+// 行数及整体高度
+const SINGLE_LINE_NUM: number = 1;
+const DOUBLE_LINE_NUM: number = 2;
+const SINGLE_LINE_HEIGHT: number = 56;
+const DOUBLE_LINE_HEIGHT: number = 72;
+// 资源数值
+const BORDER_WIDTH: number = 2;
 const RESOURCE_TYPE_SYMBOL: number = 40000;
-const DEFAULT_VALUE: number = 0;
+// 左边尺寸常量
+const LEFT_ICON_SIZE: number = 16;
+// 右边尺寸常量
+const BUTTON_ZONE_SIZE: number = 32;
+const BUTTON_HEIGHT: number = 28;
+const ARROW_ICON_WIDTH: number = 12;
+const ARROW_ICON_HEIGHT: number = 24;
+const SINGLE_ICON_ZONE_SIZE: number = 32;
+const RIGHT_SINGLE_ICON_SIZE: number = 24;
+const MAX_ICON_GROUP_WIDTH_VALUE: number = SINGLE_ICON_ZONE_SIZE * 3 + getNumberByResource('padding_level4') * 2 +
+getNumberByResource('padding_level2') + getNumberByResource('padding_level6');
+const LOADING_SIZE: number = 24;
+// margin
+const COMMON_MARGIN_VALUE: number = getNumberByResource('margin_left') + getNumberByResource('margin_right');
+const ICON_GROUP_MARGIN_VALUE: number = getNumberByResource('padding_level2') + getNumberByResource('padding_level6');
+const TEXT_ARROW_MARGIN_VALUE: number = getNumberByResource('padding_level4') + getNumberByResource('padding_level4');
+const BUTTON_MARGIN_VALUE: number = getNumberByResource('padding_level1') + getNumberByResource('padding_level5');
+const LOADING_MARGIN_VALUE: number = getNumberByResource('padding_level4') + getNumberByResource('margin_right');
 
 export enum OperationType {
   TEXT_ARROW = 0,
@@ -150,10 +163,13 @@ export struct SubHeader {
   @Prop operationType: OperationType = OperationType.BUTTON;
   operationItem: Array<OperationOption> | null = null;
   operationSymbolOptions?: Array<SymbolOptions> | null = null;
+  // 内部变量
   @State isDuplicateLine: boolean = false;
   @State textArrowBgColor: Resource = $r('sys.color.ohos_id_color_sub_background_transparent');
   @State buttonBgColor: Resource = $r('sys.color.ohos_id_color_sub_background_transparent');
   @State flexWidth: number = 0;
+  @State rightWidth: number = 0;
+  @State leftWidth: number = 0;
   @State textArrowFocus: boolean = false;
   @State buttonFocus: boolean = false;
   @State textArrowStyleWidth: number = 0;
@@ -163,18 +179,23 @@ export struct SubHeader {
   @State iconTextStyleWidth: number = 0;
   @State iconTextWidth: number = 0;
   @State iconWidth: number = 0;
-  focusBorderWidth: number = BORDER_WIDTH;
+  @State selectedIndex: number | Resource | undefined = -1;
+  @State selectValue: ResourceStr | undefined = '';
   @State flexAlign: FlexAlign = FlexAlign.SpaceBetween;
 
   build() {
-    Flex({ justifyContent: this.flexAlign, alignItems: ItemAlign.End }) {
+    Row() {
       this.leftArea();
       this.rightArea();
     }
+    .width('100%')
+    .alignItems(VerticalAlign.Bottom)
+    .justifyContent(this.flexAlign)
     .focusable(true)
     .onAreaChange((oldValue: Area, newValue: Area) => {
-      let flexWidth: number = Number(parseInt(newValue.width.toString(), DEFAULT_VALUE));
+      let flexWidth: number = Number(newValue.width);
       this.flexWidth = flexWidth;
+      this.updateAreaWidth(false);
     })
     .constraintSize({ minHeight: this.isDuplicateLine ? DOUBLE_LINE_HEIGHT : SINGLE_LINE_HEIGHT })
   }
@@ -208,11 +229,11 @@ export struct SubHeader {
     if (this.operationType === OperationType.BUTTON && (this.operationItem && this.operationItem.length > 0)) {
       this.ButtonStyle(this.operationItem[0]);
     }
-    if (this.operationType === OperationType.ICON_GROUP && (this.operationItem && this.operationItem.length > 0)) {
-      this.IconGroupStyle(this.operationItem);
-    }
     if (this.operationType === OperationType.TEXT_ARROW && (this.operationItem && this.operationItem.length > 0)) {
       this.TextArrowStyle(this.operationItem[0]);
+    }
+    if (this.operationType === OperationType.ICON_GROUP && (this.operationItem && this.operationItem.length > 0)) {
+      this.IconGroupStyle(this.operationItem);
     }
     if (this.operationType === OperationType.LOADING) {
       this.LoadingProcessStyle();
@@ -226,7 +247,7 @@ export struct SubHeader {
         if (Util.isSymbolResource($$.iconOptions?.icon)) {
           SymbolGlyph($$.iconOptions?.icon)
             .focusable(true)
-            .fontSize($$.iconOptions?.symbolicIconOption?.fontSize ?? IMAGE_WIDTH_NUM)
+            .fontSize($$.iconOptions?.symbolicIconOption?.fontSize ?? LEFT_ICON_SIZE)
             .fontColor($$.iconOptions?.symbolicIconOption?.fontColor ?? [$r('sys.color.icon_secondary')])
             .fontWeight($$.iconOptions?.symbolicIconOption?.fontWeight)
             .renderingStrategy($$.iconOptions?.symbolicIconOption?.renderingStrategy)
@@ -234,8 +255,8 @@ export struct SubHeader {
             .margin({ right: $r('sys.float.padding_level4') })
         } else {
           Image($$.iconOptions?.icon)
-            .width(IMAGE_WIDTH_NUM)
-            .height(IMAGE_WIDTH_NUM)
+            .width(LEFT_ICON_SIZE)
+            .height(LEFT_ICON_SIZE)
             .margin({ right: $r('sys.float.padding_level4') })
             .draggable(false)
         }
@@ -253,7 +274,7 @@ export struct SubHeader {
         })
         .width(this.iconTextWidth)
     }
-    .width(this.flexWidth / DIVIDEND_NUM * DIVIDEND_NUM_TWO)
+    .width(this.leftWidth - COMMON_MARGIN_VALUE)
     .commonListPadding()
     .commonMargin()
     .onAppear(() => {
@@ -264,6 +285,14 @@ export struct SubHeader {
       this.iconTextStyleWidth = Number(newValue.width);
       this.updateMaxIconTextWidth();
     })
+  }
+
+  /**
+   * 文字最大宽度 = 整体宽度 减去 icon宽度和间距
+   */
+  private updateMaxIconTextWidth(): void {
+    this.iconTextWidth = this.iconTextStyleWidth - getNumberByResource('padding_level6') - this.iconWidth -
+    getNumberByResource('padding_level6');
   }
 
   @Builder
@@ -287,7 +316,7 @@ export struct SubHeader {
           top: $r('sys.float.padding_level1'),
         })
     }
-    .width(this.flexWidth / DIVIDEND_NUM * DIVIDEND_NUM_TWO)
+    .width(this.leftWidth - COMMON_MARGIN_VALUE)
     .commonMargin()
     .commonContentPadding()
     .alignItems(HorizontalAlign.Start)
@@ -313,7 +342,7 @@ export struct SubHeader {
         })
     }
     .alignItems(HorizontalAlign.Start)
-    .width(this.flexWidth / DIVIDEND_NUM * DIVIDEND_NUM_TWO)
+    .width(this.leftWidth - COMMON_MARGIN_VALUE)
     .commonListPadding()
     .commonMargin()
   }
@@ -322,9 +351,13 @@ export struct SubHeader {
   SelectStyle(selectParam: SelectOptions): void {
     Column() {
       Select(selectParam.options)
-        .selected(selectParam.selected)
-        .value(selectParam.value)
+        .selected(this.selectedIndex)
+        .value(this.selectValue)
         .onSelect((index: number, value?: string) => {
+          this.selectedIndex = index;
+          if (value) {
+            this.selectValue = value;
+          }
           if (selectParam.onSelect) {
             selectParam.onSelect(index, value);
           }
@@ -334,7 +367,7 @@ export struct SubHeader {
           weight: FontWeight.Medium,
         })
     }
-    .width(this.flexWidth / DIVIDEND_NUM * DIVIDEND_NUM_TWO)
+    .width(this.leftWidth - COMMON_MARGIN_VALUE)
     .alignItems(HorizontalAlign.Start)
     .margin({
       left: $r('sys.float.margin_left'),
@@ -361,7 +394,7 @@ export struct SubHeader {
           this.changeFlexAlign(FlexAlign.SpaceBetween);
         })
     }
-    .width(this.flexWidth / DIVIDEND_NUM * DIVIDEND_NUM_TWO)
+    .width(this.leftWidth - COMMON_MARGIN_VALUE)
     .alignItems(HorizontalAlign.Start)
     .commonMargin()
     .commonContentPadding()
@@ -456,54 +489,9 @@ export struct SubHeader {
       left: $r('sys.float.padding_level1'),
       right: $r('sys.float.padding_level5'),
     })
-    .width(this.flexWidth / DIVIDEND_NUM)
+    .width(this.rightWidth - BUTTON_MARGIN_VALUE)
     .justifyContent(FlexAlign.End)
     .focusable(true)
-  }
-
-  @Builder
-  IconGroupStyle(operationItem: Array<OperationOption>): void {
-    Row() {
-      ForEach(operationItem, (item: OperationOption, index?: number) => {
-        if (Util.isResourceType(item.value)) {
-          if (index === INDEX_ZERO) {
-            SingleIconStyle({
-              item: {
-                iconOptions: {
-                  icon: item.value as Resource,
-                  symbolicIconOption: this.operationSymbolOptions && this.operationSymbolOptions.length > index ?
-                  this.operationSymbolOptions[index] : null,
-                },
-                action: item.action,
-              }
-            })
-          } else if (index === INDEX_ONE || index === INDEX_TWO) {
-            SingleIconStyle({
-              item: {
-                action: item.action,
-                iconOptions: {
-                  icon: item.value as Resource,
-                  symbolicIconOption: this.operationSymbolOptions && this.operationSymbolOptions.length > index ?
-                  this.operationSymbolOptions[index] : null,
-                },
-              }
-            })
-              .margin({
-                left: $r('sys.float.padding_level4'),
-              })
-          } else {
-            // 最大支持3个ICON,此场景不支持
-          }
-        }
-      });
-    }
-    .justifyContent(FlexAlign.End)
-    .width(this.flexWidth / DIVIDEND_NUM)
-    .focusable(true)
-    .margin({
-      left: $r('sys.float.padding_level4'),
-      right: $r('sys.float.padding_level6'),
-    })
   }
 
   @Builder
@@ -520,21 +508,24 @@ export struct SubHeader {
               })
               .margin({
                 right: $r('sys.float.padding_level2'),
+                top: $r('sys.float.padding_level4'),
+                bottom: $r('sys.float.padding_level4'),
               })
               .focusable(true)
               .constraintSize({ maxWidth: this.getMaxArrowTextWidth() })
           }
           Image($r('sys.media.ohos_ic_public_arrow_right'))
             .fillColor($r('sys.color.ohos_id_color_tertiary'))
-            .width(ARROW_WIDTH)
-            .height(IMAGE_HEIGHT_NUM)
+            .width(ARROW_ICON_WIDTH)
+            .height(ARROW_ICON_HEIGHT)
             .focusable(true)
             .draggable(false)
         }
+        .alignItems(VerticalAlign.Center)
         .borderRadius($r('sys.float.corner_radius_level4'))
         .focusable(true)
         .backgroundColor(this.textArrowBgColor)
-        .constraintSize({ minHeight: BUTTON_SIZE })
+        .constraintSize({ minHeight: BUTTON_ZONE_SIZE })
         .onFocus(() => {
           this.textArrowFocus = true;
         })
@@ -544,8 +535,6 @@ export struct SubHeader {
         .padding({
           left: $r('sys.float.padding_level2'),
           right: $r('sys.float.padding_level4'),
-          top: $r('sys.float.padding_level2'),
-          bottom: $r('sys.float.padding_level2'),
         })
         .onHover((isHover: boolean) => {
           if (isHover) {
@@ -608,7 +597,7 @@ export struct SubHeader {
       }
     }
     .focusable(true)
-    .width(this.flexWidth / DIVIDEND_NUM)
+    .width(this.rightWidth - TEXT_ARROW_MARGIN_VALUE)
     .justifyContent(FlexAlign.End)
     .margin({
       left: $r('sys.float.padding_level4'),
@@ -616,12 +605,79 @@ export struct SubHeader {
     })
   }
 
+  /**
+   * OperationType.TEXT_ARROW,文字最大宽度 = 整体宽度 减去 箭头宽度和间距
+   * @returns 文字最大宽度
+   */
+  private getMaxArrowTextWidth(): number {
+    return this.rightWidth - getNumberByResource('padding_level2') * 2 - getNumberByResource('padding_level4') * 3 -
+      ARROW_ICON_WIDTH;
+  }
+
+  @Builder
+  IconGroupStyle(operationItem: Array<OperationOption>): void {
+    Row() {
+      ForEach(operationItem, (item: OperationOption, index?: number) => {
+        if (Util.isResourceType(item.value)) {
+          if (index === INDEX_ZERO) {
+            SingleIconStyle({
+              item: {
+                iconOptions: {
+                  icon: item.value as Resource,
+                  symbolicIconOption: this.operationSymbolOptions && this.operationSymbolOptions.length > index ?
+                  this.operationSymbolOptions[index] : null,
+                },
+                action: item.action,
+              }
+            })
+          } else if (index === INDEX_ONE || index === INDEX_TWO) {
+            SingleIconStyle({
+              item: {
+                action: item.action,
+                iconOptions: {
+                  icon: item.value as Resource,
+                  symbolicIconOption: this.operationSymbolOptions && this.operationSymbolOptions.length > index ?
+                  this.operationSymbolOptions[index] : null,
+                },
+              }
+            })
+              .margin({
+                left: $r('sys.float.padding_level4'),
+              })
+          } else {
+            // 最大支持3个ICON,此场景不支持
+          }
+        }
+      });
+    }
+    .justifyContent(FlexAlign.End)
+    .width(this.updateAreaWidth(true) - ICON_GROUP_MARGIN_VALUE)
+    .focusable(true)
+    .margin({
+      left: $r('sys.float.padding_level2'),
+      right: $r('sys.float.padding_level6'),
+    })
+  }
+
+  private updateAreaWidth(isIconGroupStyle: boolean): number {
+    if (this.flexWidth === 0) {
+      return 0;
+    }
+    if (isIconGroupStyle) {
+      this.rightWidth = Math.max(this.flexWidth / DIVIDEND_NUM, MAX_ICON_GROUP_WIDTH_VALUE);
+    } else {
+      this.rightWidth = this.flexWidth / DIVIDEND_NUM;
+    }
+    this.leftWidth = this.flexWidth - this.rightWidth;
+    return this.rightWidth;
+  }
+
   @Builder
   LoadingProcessStyle(): void {
     Row() {
       LoadingProgress()
-        .width(IMAGE_HEIGHT_NUM)
-        .height(IMAGE_HEIGHT_NUM)
+        .width(LOADING_SIZE)
+        .height(LOADING_SIZE)
         .color($r('sys.color.icon_secondary'))
         .focusable(true)
         .onAppear(() => {
@@ -629,7 +685,7 @@ export struct SubHeader {
         })
     }
     .focusable(true)
-    .width(this.flexWidth / DIVIDEND_NUM)
+    .width(this.rightWidth - LOADING_MARGIN_VALUE)
     .justifyContent(FlexAlign.End)
     .padding({
       top: $r('sys.float.padding_level2'),
@@ -649,16 +705,11 @@ export struct SubHeader {
     });
   }
 
-  private getMaxArrowTextWidth(): number {
-    // OperationType.TEXT_ARROW,文字最大宽度 = 整体宽度 减去 箭头宽度和间距
-    return this.textArrowStyleWidth - getNumberByResource('padding_level2') - getNumberByResource('padding_level2') -
-    getNumberByResource('padding_level4') - ARROW_WIDTH;
-  }
-
-  private updateMaxIconTextWidth(): void {
-    // 文字最大宽度 = 整体宽度 减去 icon宽度和间距
-    this.iconTextWidth = this.iconTextStyleWidth - getNumberByResource('padding_level6') - this.iconWidth -
-    getNumberByResource('padding_level6');
+  aboutToAppear(): void {
+    if (this.select) {
+      this.selectedIndex = this.select.selected;
+      this.selectValue = this.select.value;
+    }
   }
 
   private changeFlexAlign(flex: FlexAlign): void {
@@ -674,7 +725,6 @@ struct SingleIconStyle {
   @State bgColor: Resource = $r('sys.color.ohos_id_color_sub_background_transparent');
   @State isFocus: boolean = false;
   item: ContentIconOption | null = null;
-  focusBorderWidth: number = BORDER_WIDTH;
 
   build() {
     if (this.item && this.item.iconOptions) {
@@ -682,8 +732,8 @@ struct SingleIconStyle {
         this.IconZone();
       }
       .focusable(true)
-      .width(BUTTON_SIZE)
-      .height(BUTTON_SIZE)
+      .width(SINGLE_ICON_ZONE_SIZE)
+      .height(SINGLE_ICON_ZONE_SIZE)
       .margin({
         bottom: $r('sys.float.padding_level2'),
       })
@@ -694,7 +744,7 @@ struct SingleIconStyle {
         focused: {
           .border({
             radius: $r('sys.float.corner_radius_level4'),
-            width: this.focusBorderWidth,
+            width: BORDER_WIDTH,
             color: $r('sys.color.interactive_focus'),
             style: BorderStyle.Solid,
           })
@@ -737,7 +787,7 @@ struct SingleIconStyle {
       if (Util.isSymbolResource(this.item.iconOptions.icon)) {
         SymbolGlyph(this.item.iconOptions?.icon)
           .focusable(true)
-          .fontSize(this.item.iconOptions?.symbolicIconOption?.fontSize ?? IMAGE_HEIGHT_NUM)
+          .fontSize(this.item.iconOptions?.symbolicIconOption?.fontSize ?? RIGHT_SINGLE_ICON_SIZE)
           .fontColor(this.item.iconOptions?.symbolicIconOption?.fontColor ?? [$r('sys.color.icon_primary')])
           .fontWeight(this.item.iconOptions?.symbolicIconOption?.fontWeight)
           .renderingStrategy(this.item.iconOptions?.symbolicIconOption?.renderingStrategy)
@@ -745,8 +795,8 @@ struct SingleIconStyle {
       } else {
         Image(this.item?.iconOptions?.icon)
           .fillColor($r('sys.color.icon_primary'))
-          .width(IMAGE_HEIGHT_NUM)
-          .height(IMAGE_HEIGHT_NUM)
+          .width(RIGHT_SINGLE_ICON_SIZE)
+          .height(RIGHT_SINGLE_ICON_SIZE)
           .focusable(true)
           .draggable(false)
       }
