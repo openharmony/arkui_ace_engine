@@ -83,13 +83,13 @@ export struct TipsDialog {
         .padding({ top: $r('sys.float.padding_level8') })
         .constraintSize({
           maxHeight: `calc(100% - ${this.checkBoxHeight}vp - ${this.imageSizeHeight}vp - ${this.buttonHeight}vp)`
-        });
+        })
       }
 
       if (this.checkTips != null) {
         this.checkBoxPart(this.checkTips);
       }
-    };
+    }
   }
 
   @Builder
@@ -102,7 +102,7 @@ export struct TipsDialog {
             this.checkAction(checked);
           }
         })
-        .margin({ right: $r('sys.float.padding_level4') });
+        .margin({ right: $r('sys.float.padding_level4') })
       Text(content)
         .fontSize($r('sys.float.Body_M'))
         .fontWeight(FontWeight.Regular)
@@ -116,14 +116,14 @@ export struct TipsDialog {
           if (this.checkAction) {
             this.checkAction(this.isChecked);
           }
-        });
+        })
     }
     .padding({ top: $r('sys.float.padding_level8') })
     .constraintSize({minHeight: CHECKBOX_CONTAINER_HEIGHT})
     .width('100%')
     .onAreaChange((oldValue: Area, newValue: Area) => {
       this.checkBoxHeight = Number(newValue.height);
-    });
+    })
   }
 
   @Builder
@@ -137,7 +137,7 @@ export struct TipsDialog {
           maxWidth: '100%',
           maxHeight:
           `calc(100% - ${this.checkBoxHeight}vp - ${this.buttonHeight}vp - ${TEXT_MIN_HEIGHT}vp + ${this.marginOffset}vp)`
-        });
+        })
     }
     .width('100%')
     .constraintSize({
@@ -146,7 +146,7 @@ export struct TipsDialog {
     })
     .onAreaChange((oldValue: Area, newValue: Area) => {
       this.imageSizeHeight = Number(newValue.height);
-    });
+    })
   }
 
   @Builder
@@ -164,9 +164,9 @@ export struct TipsDialog {
               .textOverflow({ overflow: TextOverflow.Ellipsis })
               .minFontSize($r('sys.float.Body_L'))
               .maxFontSize($r('sys.float.Title_S'))
-              .width('100%');
+              .width('100%')
           }
-          .padding({ bottom: $r('sys.float.padding_level8') });
+          .padding({ bottom: $r('sys.float.padding_level8') })
         }
         if (this.content != null) {
           Row() {
@@ -179,13 +179,13 @@ export struct TipsDialog {
               .width('100%')
               .onAreaChange((oldValue: Area, newValue: Area) => {
                 this.getTextAlign(Number(newValue.width));
-              });
-          };
+              })
+          }
         }
       }
-      .margin({ right: $r('sys.float.padding_level8') });
+      .margin({ right: $r('sys.float.padding_level8') })
     }
-    .margin({ right: `${this.marginOffset}vp` });
+    .margin({ right: `${this.marginOffset}vp` })
   }
 
   aboutToAppear() {
@@ -268,14 +268,14 @@ export struct SelectDialog{
       left: $r('sys.float.padding_level12'),
       right: $r('sys.float.padding_level12'),
       bottom: $r('sys.float.padding_level4')
-    });
+    })
   }
 
   @Styles paddingStyle() {
     .padding({
       left: $r('sys.float.padding_level6'),
       right: $r('sys.float.padding_level6')
-    });
+    })
   }
 
   @Builder
@@ -288,8 +288,8 @@ export struct SelectDialog{
               .fontSize($r('sys.float.Body_M'))
               .fontWeight(FontWeight.Regular)
               .fontColor($r('sys.color.font_primary'))
-              .textOverflow({overflow: TextOverflow.Ellipsis});
-          }.paddingContentStyle().width('100%');
+              .textOverflow({overflow: TextOverflow.Ellipsis})
+          }.paddingContentStyle().width('100%')
         }
         List({space: 1}) {
           ForEach(this.radioContent, (item: SheetInfo, index?: number) => {
@@ -301,11 +301,11 @@ export struct SelectDialog{
                       .fontSize($r('sys.float.Body_L'))
                       .fontWeight(FontWeight.Medium)
                       .fontColor($r('sys.color.font_primary'))
-                      .layoutWeight(1);
+                      .layoutWeight(1)
                     Radio({ value: 'item.title', group: 'radioGroup' })
                       .size({ width: CHECKBOX_CONTAINER_LENGTH, height: CHECKBOX_CONTAINER_LENGTH })
                       .checked(this.selectedIndex === index)
-                      .hitTestBehavior(HitTestMode.None);
+                      .hitTestBehavior(HitTestMode.None)
                   }.constraintSize({ minHeight: LIST_MIN_HEIGHT }).clip(false)
                   .padding({ top: $r('sys.float.padding_level4'), bottom: $r('sys.float.padding_level4') })
                 }.type(ButtonType.Normal).borderRadius($r('sys.float.corner_radius_level8'))
@@ -313,16 +313,16 @@ export struct SelectDialog{
                 .onClick(() => {
                   item.action && item.action();
                   this.controller.close();
-                });
+                })
                 if (index < this.radioContent.length - 1) {
-                  Divider().color($r('sys.color.comp_divider')).paddingStyle();
+                  Divider().color($r('sys.color.comp_divider')).paddingStyle()
                 }
-              }.paddingStyle();
-            };
-          });
-        }.width('100%').clip(false);
-      };
-    }.scrollBar(BarState.Auto);
+              }.paddingStyle()
+            }
+          })
+        }.width('100%').clip(false)
+      }
+    }.scrollBar(BarState.Auto)
   }
 
   build() {
@@ -512,11 +512,11 @@ export struct AlertDialog {
           .textAlign(this.textAlign)
           .onAreaChange((oldValue: Area, newValue: Area) => {
             this.getTextAlign(Number(newValue.width));
-          });
+          })
       }
-      .width('100%');
+      .width('100%')
     }
-    .margin({ right: `${this.getMargin()}vp`, });
+    .margin({ right: `${this.getMargin()}vp`, })
   }
 
   aboutToAppear(): void {
@@ -621,7 +621,7 @@ struct CustomDialogContentComponent {
         this.contentBuilder();
       }
       .padding(this.getContentPadding())
-      .constraintSize({ maxHeight: this.contentMaxHeight, });
+      .constraintSize({ maxHeight: this.contentMaxHeight, })
 
       // operation area
       this.buildButtons();
@@ -642,14 +642,14 @@ struct CustomDialogContentComponent {
           .maxLines(TITLE_MAX_LINES)
           .heightAdaptivePolicy(TextHeightAdaptivePolicy.MIN_FONT_SIZE_FIRST)
           .textOverflow({ overflow: TextOverflow.Ellipsis })
-          .width('100%');
+          .width('100%')
       }
-      .width('100%');
+      .width('100%')
 
       if (this.primaryTitle && this.secondaryTitle) {
         Row() {
-          Divider().margin($r('sys.float.padding_level1')).color(Color.Transparent);
-        };
+          Divider().margin($r('sys.float.padding_level1')).color(Color.Transparent)
+        }
       }
 
       Row() {
@@ -662,9 +662,9 @@ struct CustomDialogContentComponent {
           .maxLines(TITLE_MAX_LINES)
           .heightAdaptivePolicy(TextHeightAdaptivePolicy.MIN_FONT_SIZE_FIRST)
           .textOverflow({ overflow: TextOverflow.Ellipsis })
-          .width('100%');
+          .width('100%')
       }
-      .width('100%');
+      .width('100%')
     }
     .constraintSize({
       minHeight: this.getTitleAreaMinHeight(),
@@ -675,7 +675,7 @@ struct CustomDialogContentComponent {
     .onAreaChange((oldValue: Area, newValue: Area) => {
       this.titleHeight = Number(newValue.height);
       this.contentMaxHeight = `calc(100% - ${this.titleHeight}vp - ${this.getButtonsHeight()}vp)`;
-    });
+    })
   }
 
   @Builder
@@ -694,23 +694,23 @@ struct CustomDialogContentComponent {
       Button(buttonOptions.value)
         .setButtonProperties(buttonOptions, this.controller)
         .role(buttonOptions.role ?? ButtonRole.NORMAL)
-        .key(`advanced_dialog_button_${this.keyIndex++}`);
+        .key(`advanced_dialog_button_${this.keyIndex++}`)
     } else if (buttonOptions.background !== undefined && buttonOptions.fontColor !== undefined) {
       Button(buttonOptions.value)
         .setButtonProperties(buttonOptions, this.controller)
         .backgroundColor(buttonOptions.background)
         .fontColor(buttonOptions.fontColor)
-        .key(`advanced_dialog_button_${this.keyIndex++}`);
+        .key(`advanced_dialog_button_${this.keyIndex++}`)
     } else if (buttonOptions.background !== undefined) {
       Button(buttonOptions.value)
         .setButtonProperties(buttonOptions, this.controller)
         .backgroundColor(buttonOptions.background)
-        .key(`advanced_dialog_button_${this.keyIndex++}`);
+        .key(`advanced_dialog_button_${this.keyIndex++}`)
     } else {
       Button(buttonOptions.value)
         .setButtonProperties(buttonOptions, this.controller)
         .fontColor(buttonOptions.fontColor)
-        .key(`advanced_dialog_button_${this.keyIndex++}`);
+        .key(`advanced_dialog_button_${this.keyIndex++}`)
     }
   }
 
@@ -731,7 +731,7 @@ struct CustomDialogContentComponent {
             });
           this.buildSingleButton(this.buttons[HORIZON_BUTTON_MAX_COUNT - 1]);
         }
-      };
+      }
     }
   }
 
@@ -742,7 +742,7 @@ struct CustomDialogContentComponent {
         ForEach(this.buttons.slice(0, VERTICAL_BUTTON_MAX_COUNT), (item: ButtonOptions, index: number) => {
           this.buildButtonWithDivider(index);
         }, (item: ButtonOptions) => item.value.toString());
-      };
+      }
     }
   }
 
@@ -751,12 +751,12 @@ struct CustomDialogContentComponent {
     if (this.buttons && this.buttons[index]) {
       Row() {
         this.buildSingleButton(this.buttons[index]);
-      };
+      }
 
       if (index < Math.min(this.buttons.length, VERTICAL_BUTTON_MAX_COUNT) - 1) {
         Row() {
         }
-        .height($r('sys.float.alert_button_vertical_space'));
+        .height($r('sys.float.alert_button_vertical_space'))
       }
     }
   }
@@ -971,9 +971,9 @@ export struct CustomDialogComponent {
           },
           buttons: this.buttons,
           contentAreaPadding: this.contentAreaPadding,
-        });
+        })
       }
-      .attributeModifier(this.columnModifier);
+      .attributeModifier(this.columnModifier)
     }
     .onAreaChange((oldValue: Area, newValue: Area) => {
       if (!this.isFirstInit) {
@@ -985,7 +985,7 @@ export struct CustomDialogComponent {
         this.columnModifier.customStyle = newValue.width >= this.screenWidth;
       }
       this.isFirstInit = false;
-    });
+    })
   }
 
   aboutToAppear(): void {
@@ -1024,7 +1024,7 @@ function setButtonProperties(buttonOptions: ButtonOptions, controller?: CustomDi
     controller?.close();
   })
   .buttonStyle(buttonOptions.buttonStyle ?? getNumberByResource('alert_button_style'))
-  .layoutWeight(BUTTON_LAYOUT_WEIGHT);
+  .layoutWeight(BUTTON_LAYOUT_WEIGHT)
 }
 
 /**
@@ -1088,14 +1088,14 @@ export struct LoadingDialog {
           .fontColor($r('sys.color.font_primary'))
           .layoutWeight(LOADING_TEXT_LAYOUT_WEIGHT)
           .maxLines(LOADING_MAX_LINES)
-          .textOverflow({ overflow: TextOverflow.Ellipsis });
+          .textOverflow({ overflow: TextOverflow.Ellipsis })
         LoadingProgress()
           .color($r('sys.color.icon_secondary'))
           .width(LOADING_PROGRESS_WIDTH)
           .height(LOADING_PROGRESS_HEIGHT)
-          .margin({ left: LOADING_TEXT_MARGIN_LEFT });
+          .margin({ left: LOADING_TEXT_MARGIN_LEFT })
       }
-      .constraintSize({ minHeight: LOADING_MIN_HEIGHT });
-    };
+      .constraintSize({ minHeight: LOADING_MIN_HEIGHT })
+    }
   }
 }
