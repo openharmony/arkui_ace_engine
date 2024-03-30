@@ -14,6 +14,7 @@
  */
 
 #include "gtest/gtest.h"
+#include "core/common/ime/text_input_action.h"
 
 #define protected public
 #define private public
@@ -3003,9 +3004,30 @@ HWTEST_F(SearchTestNg, SetProperty003, TestSize.Level1)
 
     //test SetRightIconSrcPath
     auto cancelImageLayoutProperty = imageFNode->GetLayoutProperty<ImageLayoutProperty>();
-    searchModelInstance.SetRightIconSrcPath(frameNode, PLACEHOLDER);
     searchModelInstance.SetRightIconSrcPath(frameNode, "");
     ASSERT_STREQ(cancelImageLayoutProperty->GetImageSourceInfo()->GetSrc().c_str(), "resource:///ohos_test_image.svg");
+
+    //test SetEnterKeyType
+    searchModelInstance.SetSearchEnterKeyType(frameNode, TextInputAction::NEXT);
+    auto textFieldPattern = textFieldChild->GetPattern<TextFieldPattern>();
+    EXPECT_EQ(TextInputAction::NEXT, textFieldPattern->GetTextInputActionValue(TextInputAction::UNSPECIFIED));
+}
+
+/**
+ * @tc.name: SetEnterKeyType001
+ * @tc.desc: test search set enterKeyType default value
+ * @tc.type: FUNC
+ */
+HWTEST_F(SearchTestNg, SetEnterKeyType001, TestSize.Level1)
+{
+    SearchModelNG searchModelInstance;
+    searchModelInstance.Create(EMPTY_VALUE, PLACEHOLDER, SEARCH_SVG);
+    auto fNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    FrameNode* frameNode = &(*fNode);
+    searchModelInstance.SetSearchEnterKeyType(frameNode, TextInputAction::UNSPECIFIED);
+    auto textFieldChild = AceType::DynamicCast<FrameNode>(fNode->GetChildren().front());
+    auto textFieldPattern = textFieldChild->GetPattern<TextFieldPattern>();
+    EXPECT_EQ(TextInputAction::SEARCH, textFieldPattern->GetTextInputActionValue(TextInputAction::UNSPECIFIED));
 }
 
 /**
