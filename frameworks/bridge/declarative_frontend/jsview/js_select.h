@@ -19,6 +19,11 @@
 #include "frameworks/bridge/declarative_frontend/jsview/js_view_abstract.h"
 
 namespace OHOS::Ace::Framework {
+enum class SelectFontType {
+    SELECT = 0,
+    OPTION,
+    SELECTED_OPTION,
+};
 class JSSelect : public JSViewAbstract {
 public:
     static void Create(const JSCallbackInfo& info);
@@ -54,15 +59,15 @@ public:
     static void SetMenuBackgroundBlurStyle(const JSCallbackInfo& info);
     static void SetControlSize(const JSCallbackInfo& info);
 
-    static void ParseFontSize(const JSRef<JSVal>& jsValue);
-    static void ParseFontWeight(const JSRef<JSVal>& jsValue);
-    static void ParseFontFamily(const JSRef<JSVal>& jsValue);
-    static void ParseFontStyle(const JSRef<JSVal>& jsValue);
-    static void ResetFontSize();
-    static void ResetFontWeight();
-    static void ResetFontFamily();
-    static void ResetFontStyle();
-    static void ResetFont();
+    static void ParseFontSize(const JSRef<JSVal>& jsValue, SelectFontType type);
+    static void ParseFontWeight(const JSRef<JSVal>& jsValue, SelectFontType type);
+    static void ParseFontFamily(const JSRef<JSVal>& jsValue, SelectFontType type);
+    static void ParseFontStyle(const JSRef<JSVal>& jsValue, SelectFontType type);
+    static void ResetFontSize(SelectFontType type);
+    static void ResetFontWeight(SelectFontType type);
+    static void ResetFontFamily(SelectFontType type);
+    static void ResetFontStyle(SelectFontType type);
+    static void ResetFont(SelectFontType type);
 };
 } // namespace OHOS::Ace::Framework
 #endif
