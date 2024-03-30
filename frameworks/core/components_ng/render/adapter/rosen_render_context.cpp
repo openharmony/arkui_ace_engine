@@ -4041,14 +4041,14 @@ bool RosenRenderContext::TriggerPageTransition(PageTransitionType type, const st
         auto pipeline = PipelineBase::GetCurrentContext();
         if (pipeline) {
             const int32_t nanoToMilliSeconds = 1000000;
-            const int32_t minTransitionDuration = pageTransitionDuration / 2;
+            const int32_t minTransitionDuration = DEFAULT_ANIMATION_DURATION / 2;
             const int32_t frameDelayTime = 32;
             int32_t startDelayTime =
                 static_cast<int32_t>(pipeline->GetTimeFromExternalTimer() - pipeline->GetLastTouchTime()) /
                 nanoToMilliSeconds;
             startDelayTime = std::max(0, startDelayTime);
-            int32_t delayedDuration = pageTransitionDuration > startDelayTime ? pageTransitionDuration - startDelayTime
-                                                                              : pageTransitionDuration;
+            int32_t delayedDuration = DEFAULT_ANIMATION_DURATION > startDelayTime ? DEFAULT_ANIMATION_DURATION - startDelayTime
+                                                                              : DEFAULT_ANIMATION_DURATION;
             delayedDuration = std::max(minTransitionDuration, delayedDuration - frameDelayTime);
             LOGI("Use quick push delayedDuration:%{public}d", delayedDuration);
             option.SetDuration(delayedDuration);
