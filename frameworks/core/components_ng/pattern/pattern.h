@@ -509,7 +509,7 @@ public:
             auto host = pattern->GetHost();
             CHECK_NULL_VOID(host);
             auto inspectorId = host->GetInspectorId().value_or("");
-            auto text = host->GetAccessibilityProperty<NG::AccessibilityProperty>()->GetAccessibilityText(true);
+            auto text = host->GetAccessibilityProperty<NG::AccessibilityProperty>()->GetGroupText(true);
             auto desc = host->GetAutoEventParamValue("");
             if (inspectorId.empty() && text.empty() && desc.empty()) {
                 return;
@@ -558,7 +558,7 @@ protected:
             auto host = pattern->GetHost();
             CHECK_NULL_VOID(host);
             auto inspectorId = host->GetInspectorId().value_or("");
-            auto text = host->GetAccessibilityProperty<NG::AccessibilityProperty>()->GetAccessibilityText(true);
+            auto text = host->GetAccessibilityProperty<NG::AccessibilityProperty>()->GetGroupText(true);
             auto desc = host->GetAutoEventParamValue("");
             if (inspectorId.empty() && text.empty() && desc.empty()) {
                 return;

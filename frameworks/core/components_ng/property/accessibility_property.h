@@ -48,10 +48,9 @@ public:
 
     ~AccessibilityProperty() override = default;
 
-    virtual std::string GetText() const
-    {
-        return propText_.value_or("");
-    }
+    virtual std::string GetText() const;
+
+    std::string GetGroupText(bool forceGetChildren = false) const;
 
     virtual void SetText(const std::string& text)
     {
@@ -378,12 +377,7 @@ public:
         return accessibilityVirtualNode_ != nullptr;
     }
 
-    std::string GetAccessibilityText(bool isParentGroup = false);
-
-    std::string GetPlainAccessibilityText() const
-    {
-        return accessibilityText_.value_or("");
-    }
+    std::string GetAccessibilityText() const;
 
     std::string GetAccessibilityDescription() const
     {
@@ -463,6 +457,8 @@ private:
     * param: {node} should be not-null
     */
     static std::pair<bool, bool> GetSearchStrategy(const RefPtr<FrameNode>& node);
+
+    void GetGroupTextRecursive(bool forceGetChildren, std::string& text) const;
 
     bool HasAccessibilityTextOrDescription() const;
 

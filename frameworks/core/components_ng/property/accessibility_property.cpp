@@ -58,56 +58,53 @@ std::unordered_set<AceAction> AccessibilityProperty::GetSupportAction() const
     return supportActions;
 }
 
-void GetFrameNodeChildren(const RefPtr<UINode>& uiNode, std::list<RefPtr<FrameNode>>& children)
+std::string AccessibilityProperty::GetText() const
 {
-    if (AceType::InstanceOf<FrameNode>(uiNode)) {
-        auto frameNode = AceType::DynamicCast<FrameNode>(uiNode);
-        if (!frameNode->IsInternal()) {
-            children.emplace_back(frameNode);
-            return;
+    return propText_.value_or("");
+}
+
+std::string AccessibilityProperty::GetGroupText(bool forceGetChildren) const
+{
+    std::string text;
+    GetGroupTextRecursive(forceGetChildren, text);
+    return text;
+}
+
+void AccessibilityProperty::GetGroupTextRecursive(bool forceGetChildren, std::string& text) const
+{
+    auto node = host_.Upgrade();
+    CHECK_NULL_VOID(node);
+    if (node->IsInternal()) {
+        return;
+    }
+    auto level = GetAccessibilityLevel();
+    if (level == Level::AUTO || level == Level::YES) {
+        auto nodeText = GetText();
+        if (!text.empty() && !nodeText.empty) {
+            text += ", ";
         }
-    } else {
-        for (const auto& frameChild : uiNode->GetChildren()) {
-            GetFrameNodeChildren(frameChild, children);
+        text += nodeText;
+    } else if (level == Level::NO_HIDE_DESCENDANTS) {
+        return;
+    }
+    // Do not change text if level is no
+
+    if (!(forceGetChildren || IsAccessibilityGroup())) {
+        return;
+    }
+    auto& children = node->GetFrameChildren();
+    for (auto& childWeak : children) {
+        auto child = childWeak.Upgrade();
+        if (child == nullptr) {
+            continue;
         }
+        child->GetAccessibilityProperty<AccessibilityProperty>()->GetGroupTextRecursive(true, text);
     }
 }
 
-std::string AccessibilityProperty::GetAccessibilityText(bool isParentGroup)
+std::string AccessibilityProperty::GetAccessibilityText(bool isParentGroup) const
 {
-    std::string text = "";
-    auto frameNode = host_.Upgrade();
-    CHECK_NULL_RETURN(frameNode, "");
-    auto level = GetAccessibilityLevel();
-    if (level != AccessibilityProperty::Level::AUTO &&
-        level != AccessibilityProperty::Level::YES) {
-        return text;
-    }
-    if (accessibilityText_.has_value()) {
-        text = accessibilityText_.value();
-    } else {
-        text = GetText();
-    }
-    std::list<RefPtr<FrameNode>> children;
-    if ((text.empty() && isParentGroup) || (IsAccessibilityGroup() && text.empty())) {
-        for (const auto& item : frameNode->GetChildren()) {
-            GetFrameNodeChildren(item, children);
-        }
-        for (const auto& iter : children) {
-            auto frameChild = AceType::DynamicCast<FrameNode>(iter);
-            if (frameChild) {
-                auto childText =
-                    frameChild->GetAccessibilityProperty<AccessibilityProperty>()->GetAccessibilityText(true);
-                if (!text.empty() && !childText.empty()) {
-                    text += ", ";
-                }
-                if (!childText.empty()) {
-                    text += childText;
-                }
-            }
-        }
-    }
-    return text;
+    return accessibilityText_.value_or("");
 }
 
 AccessibilityHoverTestPath AccessibilityProperty::HoverTest(
@@ -154,7 +151,7 @@ std::unique_ptr<JsonValue> AccessibilityProperty::CreateNodeSearchInfo(const Ref
         nodeInfo->Put("accessibilityLevel", accessibilityProperty->GetAccessibilityLevel().c_str());
         nodeInfo->Put("accessibilityGroup", accessibilityProperty->IsAccessibilityGroup());
         nodeInfo->Put("hasVirtualNode", accessibilityProperty->HasAccessibilityVirtualNode());
-        nodeInfo->Put("accessibilityText", accessibilityProperty->GetPlainAccessibilityText().c_str());
+        nodeInfo->Put("accessibilityText", accessibilityProperty->GetAccessibilityText().c_str());
         nodeInfo->Put("accessibilityDescription", accessibilityProperty->GetAccessibilityDescription().c_str());
     }
 
@@ -338,7 +335,7 @@ bool AccessibilityProperty::IsAccessibilityFocusableDebug(const RefPtr<FrameNode
         info->Put("accessibilityLevel", accessibilityProperty->GetAccessibilityLevel().c_str());
         info->Put("accessibilityGroup", accessibilityProperty->IsAccessibilityGroup());
         info->Put("hasVirtualNode", accessibilityProperty->HasAccessibilityVirtualNode());
-        info->Put("accessibilityText", accessibilityProperty->GetPlainAccessibilityText().c_str());
+        info->Put("accessibilityText", accessibilityProperty->GetAccessibilityText().c_str());
         info->Put("accessibilityDescription", accessibilityProperty->GetAccessibilityDescription().c_str());
         info->Put("text", accessibilityProperty->GetText().c_str());
         info->Put("hasAction", accessibilityProperty->HasAction());
