@@ -1024,6 +1024,9 @@ bool OverlayManager::UpdatePopupMap(int32_t targetId, const PopupInfo& popupInfo
 void OverlayManager::MountPopup(int32_t targetId, const PopupInfo& popupInfo,
     const std::function<void(int32_t)>&& onWillDismiss, bool interactiveDismiss)
 {
+    // TargetNode may be destroyed when MontPopup is thrown thread.
+    auto targetNode = popupInfo.target.Upgrade();
+    CHECK_NULL_VOID(targetNode);
     auto popupNode = popupInfo.popupNode;
     CHECK_NULL_VOID(popupNode);
     auto layoutProp = popupNode->GetLayoutProperty<BubbleLayoutProperty>();
