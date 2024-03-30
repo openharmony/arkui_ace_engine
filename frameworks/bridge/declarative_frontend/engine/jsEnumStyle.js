@@ -1497,7 +1497,7 @@ class ProgressMask {
     return this;
   }
 
-  enableBreathe(arg) {
+  enableBreathingAnimation(arg) {
     this.breathe = arg;
     return this;
   }
