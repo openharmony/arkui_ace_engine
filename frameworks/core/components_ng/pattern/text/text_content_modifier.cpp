@@ -613,7 +613,7 @@ bool TextContentModifier::SetTextRace(const double& step, const int32_t& loop,
 
     auto duration = static_cast<int32_t>(std::abs(paragraph_->GetTextWidth() + textRaceSpaceWidth_) *
         DEFAULT_MARQUEE_SCROLL_DELAY);
-    if (GreatNotEqual(step, 0.0)) {
+    if (step > 0) {
         duration = static_cast<int32_t>(duration / step);
     }
     
@@ -655,7 +655,7 @@ void TextContentModifier::StartTextRace(const double& step, const int32_t& loop,
     AnimationOption option = AnimationOption();
     RefPtr<Curve> curve = MakeRefPtr<LinearCurve>();
     option.SetDuration(marqueeDuration_);
-    option.SetDelay(isBounce? marqueeDelay_ : 0);
+    option.SetDelay(isBounce ? marqueeDelay_ : 0);
     option.SetCurve(curve);
     option.SetIteration(1);
 
