@@ -24,7 +24,6 @@
 #include "core/components/common/properties/color.h"
 #include "core/components_ng/pattern/pattern.h"
 #include "core/components_ng/pattern/text_picker/textpicker_properties.h"
-#include "core/components_ng/render/divider_painter.h"
 #include "core/components_ng/render/node_paint_method.h"
 namespace OHOS::Ace::NG {
 
@@ -72,6 +71,7 @@ private:
     void PaintCustomDividerLines(RSCanvas& canvas, const RectF &contentRect, const RectF &frameRect,
         const ItemDivider &divider, double dividerHeight);
     bool SetStrokeWidth(const ItemDivider &divider, double dividerHeight, DividerInfo& info);
+    void PaintLine(const OffsetF& offset, const DividerInfo &info, RSCanvas& canvas);
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_TEXT_PICKER_TEXT_PICKER_PAINT_METHOD_H

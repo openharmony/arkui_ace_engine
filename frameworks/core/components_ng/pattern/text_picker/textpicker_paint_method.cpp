@@ -19,6 +19,8 @@
 #include "core/components/picker/picker_theme.h"
 #include "core/components_ng/pattern/text_picker/textpicker_layout_property.h"
 #include "core/components_ng/pattern/text_picker/textpicker_pattern.h"
+#include "core/components_ng/render/drawing.h"
+#include "core/components_ng/render/drawing_prop_convertor.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
@@ -181,7 +183,6 @@ bool TextPickerPaintMethod::NeedPaintDividerLines(const RectF &contentRect, cons
 void TextPickerPaintMethod::PaintDividerLines(RSCanvas& canvas, const RectF& contentRect, const DividerInfo &info,
     bool isDefaultLine)
 {
-    DividerPainter dividerPainter(info.dividerWidth, info.dividerLength, false, info.dividerColor, LineCap::SQUARE);
     double upperLine = 0.0f;
     double downLine = 0.0f;
     if (isDefaultLine) {
@@ -192,9 +193,26 @@ void TextPickerPaintMethod::PaintDividerLines(RSCanvas& canvas, const RectF& con
         downLine = (contentRect.Height() + info.dividerHeight  - info.dividerWidth) / DOUBLE + contentRect.GetY();
     }
     OffsetF offset = OffsetF(info.dividerMargin, upperLine);
-    dividerPainter.DrawLine(canvas, offset);
+    PaintLine(offset, info, canvas);
     OffsetF offsetY = OffsetF(info.dividerMargin, downLine);
-    dividerPainter.DrawLine(canvas, offsetY);
+    PaintLine(offsetY, info, canvas);
+}
+
+void TextPickerPaintMethod::PaintLine(const OffsetF& offset, const DividerInfo &info, RSCanvas& canvas)
+{
+    canvas.Save();
+    RSBrush brush;
+    brush.SetColor(info.dividerColor.GetValue());
+    canvas.AttachBrush(brush);
+    
+    auto startPointX = offset.GetX();
+    auto startPointY = offset.GetY();
+    auto endPointX = offset.GetX() + info.dividerLength;
+    auto endPointY = offset.GetY() + info.dividerWidth;
+
+    canvas.DrawRect(RSRect(startPointX, startPointY, endPointX, endPointY));
+    canvas.DetachBrush();
+    canvas.Restore();
 }
 
 void TextPickerPaintMethod::PaintDisable(RSCanvas& canvas, double X, double Y)
