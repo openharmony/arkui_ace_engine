@@ -66,6 +66,7 @@ using NestableScrollCallback = std::function<ScrollResult(float, int32_t, Nested
 using DragFRCSceneCallback = std::function<void(double velocity, NG::SceneStatus sceneStatus)>;
 
 class FrameNode;
+class PipelineContext;
 
 class Scrollable : public TouchEventTarget {
     DECLARE_ACE_TYPE(Scrollable, TouchEventTarget);
@@ -80,6 +81,8 @@ public:
     static void SetFriction(double sFriction);
 
     void Initialize(const WeakPtr<PipelineBase>& context);
+
+    void Initialize(PipelineContext* context);
 
     bool IsMotionStop() const
     {

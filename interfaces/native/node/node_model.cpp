@@ -377,6 +377,9 @@ int32_t CheckEvent(ArkUI_NodeEvent* event)
 void ApplyModifierFinish(ArkUI_NodeHandle nodePtr)
 {
     // already check in entry point.
+    if (!nodePtr) {
+        return;
+    }
     auto* impl = GetFullImpl();
     impl->getBasicAPI()->applyModifierFinish(nodePtr->uiNodeHandle);
 }
@@ -384,6 +387,9 @@ void ApplyModifierFinish(ArkUI_NodeHandle nodePtr)
 void MarkDirty(ArkUI_NodeHandle nodePtr, ArkUI_NodeDirtyFlag dirtyFlag)
 {
     // spanNode inherited from UINode
+    if (!nodePtr) {
+        return;
+    }
     ArkUIDirtyFlag flag = ARKUI_DIRTY_FLAG_MEASURE;
     switch (dirtyFlag) {
         case NODE_NEED_MEASURE: {

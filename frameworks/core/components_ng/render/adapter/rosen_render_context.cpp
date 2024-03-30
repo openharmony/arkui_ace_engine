@@ -2343,7 +2343,7 @@ void RosenRenderContext::PaintBorderImageGradient()
 
 void RosenRenderContext::OnModifyDone()
 {
-    auto frameNode = GetHost();
+    auto frameNode = GetUnsafeHost();
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(rsNode_);
     if (HasClickEffectLevel()) {

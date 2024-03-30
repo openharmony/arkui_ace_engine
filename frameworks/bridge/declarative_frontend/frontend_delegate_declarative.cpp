@@ -2265,28 +2265,12 @@ void FrontendDelegateDeclarative::OnMediaQueryUpdate(bool isSynchronous)
 
 void FrontendDelegateDeclarative::OnLayoutCompleted(const std::string& componentId)
 {
-    taskExecutor_->PostTask(
-        [weak = AceType::WeakClaim(this), componentId] {
-            auto delegate = weak.Upgrade();
-            if (!delegate) {
-                return;
-            }
-            delegate->layoutInspectorCallback_(componentId);
-        },
-        TaskExecutor::TaskType::JS);
+    layoutInspectorCallback_(componentId);
 }
 
 void FrontendDelegateDeclarative::OnDrawCompleted(const std::string& componentId)
 {
-    taskExecutor_->PostTask(
-        [weak = AceType::WeakClaim(this), componentId] {
-            auto delegate = weak.Upgrade();
-            if (!delegate) {
-                return;
-            }
-            delegate->drawInspectorCallback_(componentId);
-        },
-        TaskExecutor::TaskType::JS);
+    drawInspectorCallback_(componentId);
 }
 
 void FrontendDelegateDeclarative::OnPageReady(
