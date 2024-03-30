@@ -332,31 +332,19 @@ bool ListPattern::UpdateStartListItemIndex()
     auto host = GetHost();
     CHECK_NULL_RETURN(host, false);
     auto startWrapper = host->GetOrCreateChildByIndex(startIndex_);
-    bool startIsGroup = false;
-    bool startFlagChanged = false;
-    int32_t startItemIndex = -1;
     int32_t startArea = -1;
     int32_t startItemIndexInGroup = -1;
-    if (startIndex_ != -1) {
-        startIsGroup = startWrapper->GetHostTag() == V2::LIST_ITEM_GROUP_ETS_TAG;
-    }
+    bool startFlagChanged = false;
+    bool startIsGroup = startWrapper && startWrapper->GetHostTag() == V2::LIST_ITEM_GROUP_ETS_TAG;
     if (startIsGroup) {
-        auto startPattern = AceType::DynamicCast<ListItemGroupPattern>(startWrapper->GetHostNode()->GetPattern());
+        auto startPattern = startWrapper->GetHostNode()->GetPattern<ListItemGroupPattern>();
         VisibleContentInfo startGroupInfo = startPattern->GetStartListItemIndex();
-        if (startInfo_.index == startIndex_) {
-            startFlagChanged = (startInfo_.area != startGroupInfo.area) ||
-                               (startInfo_.indexInGroup != startGroupInfo.indexInGroup);
-        } else {
-            startFlagChanged = true;
-        }
+        startFlagChanged = (startInfo_.index != startIndex_) || (startInfo_.area != startGroupInfo.area) ||
+                           (startInfo_.indexInGroup != startGroupInfo.indexInGroup);
         startArea = startGroupInfo.area;
         startItemIndexInGroup = startGroupInfo.indexInGroup;
-    } else {
-        startArea = -1;
-        startItemIndexInGroup = -1;
     }
-    startItemIndex = startIndex_;
-    startInfo_ = {startItemIndex, startArea, startItemIndexInGroup};
+    startInfo_ = {startIndex_, startArea, startItemIndexInGroup};
     return startFlagChanged;
 }
 
@@ -365,31 +353,19 @@ bool ListPattern::UpdateEndListItemIndex()
     auto host = GetHost();
     CHECK_NULL_RETURN(host, false);
     auto endWrapper = host->GetOrCreateChildByIndex(endIndex_);
-    bool endIsGroup = false;
-    bool endFlagChanged = false;
-    int32_t endItemIndex = -1;
     int32_t endArea = -1;
     int32_t endItemIndexInGroup = -1;
-    if (endIndex_ != -1) {
-        endIsGroup = endWrapper->GetHostTag() == V2::LIST_ITEM_GROUP_ETS_TAG;
-    }
+    bool endFlagChanged = false;
+    bool endIsGroup = endWrapper && endWrapper->GetHostTag() == V2::LIST_ITEM_GROUP_ETS_TAG;
     if (endIsGroup) {
-        auto endPattern = AceType::DynamicCast<ListItemGroupPattern>(endWrapper->GetHostNode()->GetPattern());
+        auto endPattern = endWrapper->GetHostNode()->GetPattern<ListItemGroupPattern>();
         VisibleContentInfo endGroupInfo = endPattern->GetEndListItemIndex();
-        if (endInfo_.index == endIndex_) {
-            endFlagChanged = (endInfo_.area != endGroupInfo.area) ||
-                             (endInfo_.indexInGroup != endGroupInfo.indexInGroup);
-        } else {
-            endFlagChanged = true;
-        }
+        endFlagChanged = (endInfo_.index != endIndex_) || (endInfo_.area != endGroupInfo.area) ||
+                         (endInfo_.indexInGroup != endGroupInfo.indexInGroup);
         endArea = endGroupInfo.area;
         endItemIndexInGroup = endGroupInfo.indexInGroup;
-    } else {
-        endArea = -1;
-        endItemIndexInGroup = -1;
     }
-    endItemIndex = endIndex_;
-    endInfo_ = {endItemIndex, endArea, endItemIndexInGroup};
+    endInfo_ = {endIndex_, endArea, endItemIndexInGroup};
     return endFlagChanged;
 }
 
