@@ -99,6 +99,9 @@ void TextFieldSelectOverlay::OnAfterSelectOverlayShow(bool isCreate)
 void TextFieldSelectOverlay::OnCloseOverlay(OptionMenuType menuType, CloseReason reason)
 {
     CloseMagnifier();
+    if (CloseReason::CLOSE_REASON_BACK_PRESSED == reason) {
+        OnResetTextSelection();
+    }
 }
 
 void TextFieldSelectOverlay::OnHandleGlobalTouchEvent(SourceType sourceType, TouchType touchType)
