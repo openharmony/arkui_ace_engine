@@ -1374,6 +1374,50 @@ HWTEST_F(ButtonTestNg, ButtonPatternTest024, TestSize.Level1)
 }
 
 /**
+ * @tc.name: ButtonPatternTest025
+ * @tc.desc: Test button setLabelStyle
+ * @tc.type: FUNC
+ */
+HWTEST_F(ButtonTestNg, ButtonPatternTest025, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create button and set button view's value.
+     */
+    ButtonModelNG buttonModelNG;
+    std::list<RefPtr<Component>> buttonChildren;
+    buttonModelNG.CreateWithLabel(createWithPara, buttonChildren);
+    auto buttonFrameNode = FrameNode::GetOrCreateFrameNode(V2::BUTTON_ETS_TAG,
+        ViewStackProcessor::GetInstance()->ClaimNodeId(), []() { return AceType::MakeRefPtr<ButtonPattern>(); });
+    ASSERT_NE(buttonFrameNode, nullptr);    
+    ButtonParameters buttonParameters;
+    buttonParameters.textOverflow = std::make_optional(TextOverflow::NONE);
+    buttonParameters.maxLines = std::make_optional(MAX_LINE_VALUE);
+    buttonParameters.minFontSize = std::make_optional(BUTTON_FONT_SIZE_VALUE);
+    buttonParameters.maxFontSize = std::make_optional(BUTTON_FONT_SIZE_VALUE);
+    buttonParameters.fontSize = std::make_optional(BUTTON_FONT_SIZE_VALUE);
+    buttonParameters.heightAdaptivePolicy = std::make_optional(TextHeightAdaptivePolicy::LAYOUT_CONSTRAINT_FIRST);
+    buttonParameters.fontWeight = std::make_optional(FontWeight::MEDIUM);
+    buttonParameters.fontFamily = std::make_optional(FONT_FAMILY_VALUE);
+    buttonParameters.fontStyle = std::make_optional(Ace::FontStyle::NORMAL);
+    ButtonModelNG::SetLabelStyle(AccessibilityManager::RawPtr(buttonFrameNode), buttonParameters);
+    /**
+     * @tc.steps: step3. ButtonModelNG setLabelStyle.
+     * @tc.expected: step3. Button properties are set successfully.
+     */
+    auto layoutProperty = buttonFrameNode->GetLayoutProperty<ButtonLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+    EXPECT_EQ(layoutProperty->GetTextOverflowValue(), TextOverflow::NONE);
+    EXPECT_EQ(layoutProperty->GetMaxLinesValue(), MAX_LINE_VALUE);
+    EXPECT_EQ(layoutProperty->GetMinFontSizeValue(), BUTTON_FONT_SIZE_VALUE);
+    EXPECT_EQ(layoutProperty->GetMaxFontSizeValue(), BUTTON_FONT_SIZE_VALUE);
+    EXPECT_EQ(layoutProperty->GetFontSizeValue(), BUTTON_FONT_SIZE_VALUE);
+    EXPECT_EQ(layoutProperty->GetHeightAdaptivePolicyValue(), TextHeightAdaptivePolicy::LAYOUT_CONSTRAINT_FIRST);
+    EXPECT_EQ(layoutProperty->GetFontWeightValue(), FontWeight::MEDIUM);
+    EXPECT_EQ(layoutProperty->GetFontFamilyValue(), FONT_FAMILY_VALUE);
+    EXPECT_EQ(layoutProperty->GetFontStyleValue(), Ace::FontStyle::NORMAL);
+}
+
+/**
  * @tc.name: OnColorConfigurationUpdate001
  * @tc.desc: Test on color configuration update
  * @tc.type: FUNC
@@ -1421,4 +1465,29 @@ HWTEST_F(ButtonTestNg, ButtonAccessibilityPropertyTest001, TestSize.Level1)
     ASSERT_NE(buttonAccessibilityProperty, nullptr);
     EXPECT_EQ(buttonAccessibilityProperty->GetText(), CREATE_VALUE);
 }
+
+/**
+ * @tc.name:SetSizePropertyTest001
+ * @tc.desc: Test button setSize property
+ * @tc.type: FUNC
+ */
+HWTEST_F(ButtonTestNg, SetSizePropertyTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create button and get frameNode.
+     */
+    ButtonModelNG buttonModelNG;
+    std::list<RefPtr<Component>> buttonChildren;
+    buttonModelNG.CreateWithLabel(createWithPara, buttonChildren);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<ButtonPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto sizeWidth = std::optional<Dimension>(Dimension(20.00, DimensionUnit::VP));
+    auto sizeHeight = std::optional<Dimension>(Dimension(20.00, DimensionUnit::VP));
+    buttonModelNG.SetSize(sizeWidth, sizeHeight);
+    EXPECT_TRUE(sizeWidth.has_value());
+    EXPECT_TRUE(sizeHeight.has_value());
+}
+
 } // namespace OHOS::Ace::NG
