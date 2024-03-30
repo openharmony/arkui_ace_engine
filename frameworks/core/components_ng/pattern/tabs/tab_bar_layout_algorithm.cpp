@@ -129,6 +129,15 @@ void TabBarLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
 
     auto frameSize = idealSize.ConvertToSizeT();
 
+    if ((axis == Axis::VERTICAL && NearZero(idealSize.ConvertToSizeT().Width())) ||
+        (axis == Axis::HORIZONTAL && NearZero(idealSize.ConvertToSizeT().Height()))) {
+        layoutWrapper->SetActive(false);
+        geometryNode->SetFrameSize(SizeF());
+        return;
+    } else {
+        layoutWrapper->SetActive(true);
+    }
+
     if (axis == Axis::HORIZONTAL) {
         ConfigHorizontal(layoutWrapper, frameSize, childCount);
     } else {
@@ -140,17 +149,6 @@ void TabBarLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     }
 
     geometryNode->SetFrameSize(idealSize.ConvertToSizeT());
-
-    auto node = layoutWrapper->GetHostNode();
-    CHECK_NULL_VOID(node);
-    auto renderContext = node->GetRenderContext();
-    CHECK_NULL_VOID(renderContext);
-    if (NearZero(idealSize.ConvertToSizeT().Width()) || NearZero(idealSize.ConvertToSizeT().Height())) {
-        renderContext->SetVisible(false);
-        return;
-    } else {
-        renderContext->SetVisible(true);
-    }
 
     auto childLayoutConstraint = layoutProperty->CreateChildConstraint();
     UpdateChildConstraint(childLayoutConstraint, layoutProperty, idealSize.ConvertToSizeT(), childCount, axis);
@@ -623,8 +621,12 @@ void TabBarLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     auto geometryNode = layoutWrapper->GetGeometryNode();
     CHECK_NULL_VOID(geometryNode);
     auto axis = GetAxis(layoutWrapper);
-    auto frameSize = geometryNode->GetPaddingSize();
+    if ((axis == Axis::VERTICAL && NearZero(geometryNode->GetFrameSize().Width())) ||
+        (axis == Axis::HORIZONTAL && NearZero(geometryNode->GetFrameSize().Height()))) {
+        return;
+    }
 
+    auto frameSize = geometryNode->GetPaddingSize();
     auto layoutProperty = AceType::DynamicCast<TabBarLayoutProperty>(layoutWrapper->GetLayoutProperty());
     CHECK_NULL_VOID(layoutProperty);
     int32_t indicator = layoutProperty->GetIndicatorValue(0);
