@@ -460,6 +460,13 @@ void WaterFlowPattern::OnSectionChanged(int32_t start)
     MarkDirtyNodeSelf();
 }
 
+void WaterFlowPattern::ResetSections()
+{
+    layoutInfo_.Reset();
+    sections_.Reset();
+    MarkDirtyNodeSelf();
+}
+
 void WaterFlowPattern::ScrollToIndex(int32_t index, bool smooth, ScrollAlign align)
 {
     SetScrollSource(SCROLL_FROM_JUMP);
