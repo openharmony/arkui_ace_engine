@@ -626,7 +626,7 @@ class SwiperEnabledModifier extends ModifierWithKey<boolean> {
 }
 
 // @ts-ignore
-globalThis.Swiper.attributeModifier = function (modifier: ArkComponent) {
+globalThis.Swiper.attributeModifier = function (modifier: ArkComponent): void {
   attributeModifierFunc.call(this, modifier, (nativePtr: KNode) => {
     return new ArkSwiperComponent(nativePtr);
   }, (nativePtr: KNode, classType: ModifierType, modifierJS: ModifierJS) => {

@@ -263,7 +263,7 @@ class ToggleSwitchStyleModifier extends ModifierWithKey<SwitchStyle> {
   }
 }
 // @ts-ignore
-globalThis.Toggle.attributeModifier = function (modifier: ArkComponent) {
+globalThis.Toggle.attributeModifier = function (modifier: ArkComponent): void {
   attributeModifierFunc.call(this, modifier, (nativePtr: KNode) => {
     return new ArkToggleComponent(nativePtr);
   }, (nativePtr: KNode, classType: ModifierType, modifierJS: ModifierJS) => {

@@ -65,7 +65,7 @@ class ArkColumnComponent extends ArkComponent implements CommonMethod<ColumnAttr
   }
 }
 // @ts-ignore
-globalThis.Column.attributeModifier = function (modifier: ArkComponent) {
+globalThis.Column.attributeModifier = function (modifier: ArkComponent): void {
   attributeModifierFunc.call(this, modifier, (nativePtr: KNode) => {
     return new ArkColumnComponent(nativePtr);
   }, (nativePtr: KNode, classType: ModifierType, modifierJS: ModifierJS) => {

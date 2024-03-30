@@ -52,7 +52,7 @@ class HideTitleBarModifier extends ModifierWithKey<boolean> {
   }
 }
 //@ts-ignore
-globalThis.NavDestination.attributeModifier = function (modifier: ArkComponent) {
+globalThis.NavDestination.attributeModifier = function (modifier: ArkComponent): void {
   attributeModifierFunc.call(this, modifier, (nativePtr: KNode) => {
     return new ArkNavDestinationComponent(nativePtr);
   }, (nativePtr: KNode, classType: ModifierType, modifierJS: ModifierJS) => {

@@ -254,7 +254,7 @@ class ArkImageAnimatorComponent extends ArkComponent implements CommonMethod<Ima
   }
 }
 // @ts-ignore
-globalThis.ImageAnimator.attributeModifier = function (modifier: ArkComponent) {
+globalThis.ImageAnimator.attributeModifier = function (modifier: ArkComponent): void {
   attributeModifierFunc.call(this, modifier, (nativePtr: KNode) => {
     return new ArkImageAnimatorComponent(nativePtr);
   }, (nativePtr: KNode, classType: ModifierType, modifierJS: ModifierJS) => {

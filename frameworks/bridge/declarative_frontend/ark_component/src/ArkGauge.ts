@@ -157,7 +157,7 @@ class GaugeTrackShadowModifier extends ModifierWithKey<GaugeShadowOptions> {
 }
 
 // @ts-ignore
-globalThis.Gauge.attributeModifier = function (modifier: ArkComponent) {
+globalThis.Gauge.attributeModifier = function (modifier: ArkComponent): void {
   attributeModifierFunc.call(this, modifier, (nativePtr: KNode) => {
     return new ArkGaugeComponent(nativePtr);
   }, (nativePtr: KNode, classType: ModifierType, modifierJS: ModifierJS) => {

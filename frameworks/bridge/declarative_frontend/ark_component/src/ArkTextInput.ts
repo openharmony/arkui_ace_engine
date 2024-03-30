@@ -783,7 +783,7 @@ class ArkTextInputComponent extends ArkComponent implements CommonMethod<TextInp
   }
 }
 // @ts-ignore
-globalThis.TextInput.attributeModifier = function (modifier: ArkComponent) {
+globalThis.TextInput.attributeModifier = function (modifier: ArkComponent): void {
   attributeModifierFunc.call(this, modifier, (nativePtr: KNode) => {
     return new ArkTextInputComponent(nativePtr);
   }, (nativePtr: KNode, classType: ModifierType, modifierJS: ModifierJS) => {

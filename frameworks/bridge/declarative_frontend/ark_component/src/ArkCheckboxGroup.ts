@@ -180,7 +180,7 @@ class ArkCheckboxGroupComponent extends ArkComponent implements CheckboxGroupAtt
   }
 }
 // @ts-ignore
-globalThis.CheckboxGroup.attributeModifier = function (modifier: ArkComponent) {
+globalThis.CheckboxGroup.attributeModifier = function (modifier: ArkComponent): void {
   attributeModifierFunc.call(this, modifier, (nativePtr: KNode) => {
     return new ArkCheckboxGroupComponent(nativePtr);
   }, (nativePtr: KNode, classType: ModifierType, modifierJS: ModifierJS) => {

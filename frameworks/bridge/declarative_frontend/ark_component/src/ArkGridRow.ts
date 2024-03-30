@@ -43,7 +43,7 @@ class ArkGridRowComponent extends ArkComponent implements CommonMethod<GridRowAt
   }
 }
 // @ts-ignore
-globalThis.GridRow.attributeModifier = function (modifier: ArkComponent) {
+globalThis.GridRow.attributeModifier = function (modifier: ArkComponent): void {
   attributeModifierFunc.call(this, modifier, (nativePtr: KNode) => {
     return new ArkGridRowComponent(nativePtr);
   }, (nativePtr: KNode, classType: ModifierType, modifierJS: ModifierJS) => {

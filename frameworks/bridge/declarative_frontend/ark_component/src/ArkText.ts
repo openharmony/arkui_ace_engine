@@ -673,7 +673,7 @@ class ArkTextComponent extends ArkComponent implements TextAttribute {
   }
 }
 // @ts-ignore
-globalThis.Text.attributeModifier = function (modifier: ArkComponent) {
+globalThis.Text.attributeModifier = function (modifier: ArkComponent): void {
   attributeModifierFunc.call(this, modifier, (nativePtr: KNode) => {
     return new ArkTextComponent(nativePtr);
   }, (nativePtr: KNode, classType: ModifierType, modifierJS: ModifierJS) => {

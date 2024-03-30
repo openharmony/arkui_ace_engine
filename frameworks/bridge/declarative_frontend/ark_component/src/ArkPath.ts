@@ -47,7 +47,7 @@ class CommandsModifier extends ModifierWithKey<string> {
 }
 
 // @ts-ignore
-globalThis.Path.attributeModifier = function (modifier: ArkComponent) {
+globalThis.Path.attributeModifier = function (modifier: ArkComponent): void {
   attributeModifierFunc.call(this, modifier, (nativePtr: KNode) => {
     return new ArkPathComponent(nativePtr);
   }, (nativePtr: KNode, classType: ModifierType, modifierJS: ModifierJS) => {

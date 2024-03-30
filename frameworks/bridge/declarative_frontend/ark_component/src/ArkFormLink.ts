@@ -21,7 +21,7 @@ class ArkFormLinkComponent extends ArkComponent implements FormLinkAttribute {
 }
 
 // @ts-ignore
-globalThis.FormLink.attributeModifier = function (modifier: ArkComponent) {
+globalThis.FormLink.attributeModifier = function (modifier: ArkComponent): void {
   attributeModifierFunc.call(this, modifier, (nativePtr: KNode) => {
     return new ArkFormLinkComponent(nativePtr);
   }, (nativePtr: KNode, classType: ModifierType, modifierJS: ModifierJS) => {

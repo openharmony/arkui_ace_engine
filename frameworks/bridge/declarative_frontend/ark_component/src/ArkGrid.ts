@@ -446,7 +446,7 @@ class GridClipModifier extends ModifierWithKey<boolean | object> {
 }
 
 // @ts-ignore
-globalThis.Grid.attributeModifier = function (modifier: ArkComponent) {
+globalThis.Grid.attributeModifier = function (modifier: ArkComponent): void {
   attributeModifierFunc.call(this, modifier, (nativePtr: KNode) => {
     return new ArkGridComponent(nativePtr);
   }, (nativePtr: KNode, classType: ModifierType, modifierJS: ModifierJS) => {

@@ -247,7 +247,7 @@ class ShowModifier extends ModifierWithKey<boolean> {
 }
 
 // @ts-ignore
-globalThis.Panel.attributeModifier = function (modifier: ArkComponent) {
+globalThis.Panel.attributeModifier = function (modifier: ArkComponent): void {
   attributeModifierFunc.call(this, modifier, (nativePtr: KNode) => {
     return new ArkPanelComponent(nativePtr);
   }, (nativePtr: KNode, classType: ModifierType, modifierJS: ModifierJS) => {

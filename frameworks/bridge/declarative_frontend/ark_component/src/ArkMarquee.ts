@@ -130,7 +130,7 @@ class MarqueeFontFamilyModifier extends ModifierWithKey<string> {
   }
 }
 // @ts-ignore
-globalThis.Marquee.attributeModifier = function (modifier: ArkComponent) {
+globalThis.Marquee.attributeModifier = function (modifier: ArkComponent): void {
   attributeModifierFunc.call(this, modifier, (nativePtr: KNode) => {
     return new ArkMarqueeComponent(nativePtr);
   }, (nativePtr: KNode, classType: ModifierType, modifierJS: ModifierJS) => {

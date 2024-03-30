@@ -24,7 +24,7 @@ class ArkCanvasComponent extends ArkComponent implements CanvasAttribute {
 }
 
 // @ts-ignore
-globalThis.Canvas.attributeModifier = function (modifier: ArkComponent) {
+globalThis.Canvas.attributeModifier = function (modifier: ArkComponent): void {
   attributeModifierFunc.call(this, modifier, (nativePtr: KNode) => {
     return new ArkCanvasComponent(nativePtr);
   }, (nativePtr: KNode, classType: ModifierType, modifierJS: ModifierJS) => {

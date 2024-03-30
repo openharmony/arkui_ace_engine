@@ -505,7 +505,7 @@ class ArkSearchComponent extends ArkComponent implements CommonMethod<SearchAttr
   }
 }
 // @ts-ignore
-globalThis.Search.attributeModifier = function (modifier: ArkComponent) {
+globalThis.Search.attributeModifier = function (modifier: ArkComponent): void {
   attributeModifierFunc.call(this, modifier, (nativePtr: KNode) => {
     return new ArkSearchComponent(nativePtr);
   }, (nativePtr: KNode, classType: ModifierType, modifierJS: ModifierJS) => {

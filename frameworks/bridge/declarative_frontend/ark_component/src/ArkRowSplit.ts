@@ -59,7 +59,7 @@ class ArkRowSplitComponent extends ArkComponent implements RowSplitAttribute {
   }
 }
 // @ts-ignore
-globalThis.RowSplit.attributeModifier = function (modifier: ArkComponent) {
+globalThis.RowSplit.attributeModifier = function (modifier: ArkComponent): void {
   attributeModifierFunc.call(this, modifier, (nativePtr: KNode) => {
     return new ArkRowSplitComponent(nativePtr);
   }, (nativePtr: KNode, classType: ModifierType, modifierJS: ModifierJS) => {

@@ -21,7 +21,7 @@ class ArkFlowItemComponent extends ArkComponent implements FlowItemAttribute {
 }
 
 // @ts-ignore
-globalThis.FlowItem.attributeModifier = function (modifier: ArkComponent) {
+globalThis.FlowItem.attributeModifier = function (modifier: ArkComponent): void {
   attributeModifierFunc.call(this, modifier, (nativePtr: KNode) => {
     return new ArkFlowItemComponent(nativePtr);
   }, (nativePtr: KNode, classType: ModifierType, modifierJS: ModifierJS) => {

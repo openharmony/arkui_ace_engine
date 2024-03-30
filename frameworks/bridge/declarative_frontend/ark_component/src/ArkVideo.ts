@@ -188,7 +188,7 @@ class ArkVideoComponent extends ArkComponent implements CommonMethod<VideoAttrib
   }
 }
 // @ts-ignore
-globalThis.Video.attributeModifier = function (modifier: ArkComponent) {
+globalThis.Video.attributeModifier = function (modifier: ArkComponent): void {
   attributeModifierFunc.call(this, modifier, (nativePtr: KNode) => {
     return new ArkVideoComponent(nativePtr);
   }, (nativePtr: KNode, classType: ModifierType, modifierJS: ModifierJS) => {

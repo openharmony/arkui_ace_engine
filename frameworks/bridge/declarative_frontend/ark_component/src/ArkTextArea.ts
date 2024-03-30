@@ -519,7 +519,7 @@ class ArkTextAreaComponent extends ArkComponent implements CommonMethod<TextArea
   }
 }
 // @ts-ignore
-globalThis.TextArea.attributeModifier = function (modifier: ArkComponent) {
+globalThis.TextArea.attributeModifier = function (modifier: ArkComponent): void {
   attributeModifierFunc.call(this, modifier, (nativePtr: KNode) => {
     return new ArkTextAreaComponent(nativePtr);
   }, (nativePtr: KNode, classType: ModifierType, modifierJS: ModifierJS) => {

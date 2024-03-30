@@ -317,7 +317,7 @@ class ArkScrollComponent extends ArkComponent implements ScrollAttribute {
   }
 }
 // @ts-ignore
-globalThis.Scroll.attributeModifier = function (modifier: ArkComponent) {
+globalThis.Scroll.attributeModifier = function (modifier: ArkComponent): void {
   attributeModifierFunc.call(this, modifier, (nativePtr: KNode) => {
     return new ArkScrollComponent(nativePtr);
   }, (nativePtr: KNode, classType: ModifierType, modifierJS: ModifierJS) => {

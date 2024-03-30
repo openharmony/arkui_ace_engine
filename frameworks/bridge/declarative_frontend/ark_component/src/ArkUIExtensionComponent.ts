@@ -37,7 +37,7 @@ class ArkUIExtensionComponentComponent extends ArkComponent implements UIExtensi
 }
 
 // @ts-ignore
-globalThis.UIExtensionComponent.attributeModifier = function (modifier: ArkComponent) {
+globalThis.UIExtensionComponent.attributeModifier = function (modifier: ArkComponent): void {
   attributeModifierFunc.call(this, modifier, (nativePtr: KNode) => {
     return new ArkUIExtensionComponentComponent(nativePtr);
   }, (nativePtr: KNode, classType: ModifierType, modifierJS: ModifierJS) => {

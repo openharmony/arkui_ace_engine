@@ -48,7 +48,7 @@ class StackAlignContentModifier extends ModifierWithKey<number> {
   }
 }
 // @ts-ignore
-globalThis.Stack.attributeModifier = function (modifier: ArkComponent) {
+globalThis.Stack.attributeModifier = function (modifier: ArkComponent): void {
   attributeModifierFunc.call(this, modifier, (nativePtr: KNode) => {
     return new ArkStackComponent(nativePtr);
   }, (nativePtr: KNode, classType: ModifierType, modifierJS: ModifierJS) => {

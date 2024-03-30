@@ -46,7 +46,7 @@ class NextLabelModifier extends ModifierWithKey<string> {
 }
 
 // @ts-ignore
-globalThis.StepperItem.attributeModifier = function (modifier: ArkComponent) {
+globalThis.StepperItem.attributeModifier = function (modifier: ArkComponent): void {
   attributeModifierFunc.call(this, modifier, (nativePtr: KNode) => {
     return new ArkStepperItemComponent(nativePtr);
   }, (nativePtr: KNode, classType: ModifierType, modifierJS: ModifierJS) => {

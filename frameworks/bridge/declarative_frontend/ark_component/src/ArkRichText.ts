@@ -26,7 +26,7 @@ class ArkRichTextComponent extends ArkComponent implements CommonMethod<RichText
   }
 }
 // @ts-ignore
-globalThis.RichText.attributeModifier = function (modifier: ArkComponent) {
+globalThis.RichText.attributeModifier = function (modifier: ArkComponent): void {
   attributeModifierFunc.call(this, modifier, (nativePtr: KNode) => {
     return new ArkRichTextComponent(nativePtr);
   }, (nativePtr: KNode, classType: ModifierType, modifierJS: ModifierJS) => {

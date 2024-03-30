@@ -46,7 +46,7 @@ class ArkListItemGroupComponent extends ArkComponent implements ListItemGroupAtt
 }
 
 // @ts-ignore
-globalThis.ListItemGroup.attributeModifier = function (modifier: ArkComponent) {
+globalThis.ListItemGroup.attributeModifier = function (modifier: ArkComponent): void {
   attributeModifierFunc.call(this, modifier, (nativePtr: KNode) => {
     return new ArkListItemGroupComponent(nativePtr);
   }, (nativePtr: KNode, classType: ModifierType, modifierJS: ModifierJS) => {
