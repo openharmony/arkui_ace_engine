@@ -13566,6 +13566,22 @@ class ArkRatingComponent extends ArkComponent {
   onChange(callback) {
     throw new Error('Method not implemented.');
   }
+  setContentModifier(modifier) {
+    this.builder = modifier.applyContent();
+    this.modifier = modifier;
+    getUINativeModule().rating.setContentModifierBuilder(this.nativePtr, this);
+  }
+  makeContentModifierNode(context, ratingConfiguration) {
+    ratingConfiguration.contentModifier = this.modifier;
+    if (isUndefined(this.ratingNode)) {
+      const xNode = globalThis.requireNapi('arkui.node');
+      this.ratingNode = new xNode.BuilderNode(context);
+      this.ratingNode.build(this.builder, ratingConfiguration);
+    } else {
+      this.ratingNode.update(ratingConfiguration);
+    }
+    return this.ratingNode.getFrameNode();
+  }
 }
 // @ts-ignore
 if (globalThis.Rating !== undefined) {
@@ -13575,6 +13591,14 @@ if (globalThis.Rating !== undefined) {
     }, (nativePtr, classType, modifierJS) => {
       return new modifierJS.RatingModifier(nativePtr, classType);
     });
+  };
+  globalThis.Rating.contentModifier = function (modifier) {
+    const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
+    let nativeNode = getUINativeModule().getFrameNodeById(elmtId);
+    let component = this.createOrGetNode(elmtId, () => {
+      return new ArkRatingComponent(nativeNode);
+    });
+    component.setContentModifier(modifier);
   };
 }
 
