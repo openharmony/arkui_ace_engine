@@ -776,8 +776,16 @@ std::optional<SizeF> TextLayoutAlgorithm::BuildTextRaceParagraph(TextStyle& text
     // create a paragraph with all text in 1 line
     textStyle.SetTextOverflow(TextOverflow::CLIP);
     textStyle.SetMaxLines(1);
-    if (!CreateParagraph(textStyle, layoutProperty->GetContent().value_or(""), layoutWrapper)) {
-        return std::nullopt;
+
+    if (!textStyle.GetAdaptTextSize()) {
+        if (!CreateParagraph(textStyle, layoutProperty->GetContent().value_or(""), layoutWrapper)) {
+            return std::nullopt;
+        }
+    } else {
+        if (!AdaptMinTextSize(
+            textStyle, layoutProperty->GetContent().value_or(""), contentConstraint, pipeline, layoutWrapper)) {
+            return std::nullopt;
+        }
     }
     if (!paragraph_) {
         return std::nullopt;
