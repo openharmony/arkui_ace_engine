@@ -366,6 +366,7 @@ void JSImage::SetImageFill(const JSCallbackInfo& info)
 void JSImage::SetImageRenderMode(const JSCallbackInfo& info)
 {
     if (info.Length() < 1) {
+        ImageModel::GetInstance()->SetImageRenderMode(ImageRenderMode::ORIGINAL);
         return;
     }
     auto jsImageRenderMode = info[0];
@@ -375,6 +376,8 @@ void JSImage::SetImageRenderMode(const JSCallbackInfo& info)
             renderMode = ImageRenderMode::ORIGINAL;
         }
         ImageModel::GetInstance()->SetImageRenderMode(renderMode);
+    } else {
+        ImageModel::GetInstance()->SetImageRenderMode(ImageRenderMode::ORIGINAL);
     }
 }
 
