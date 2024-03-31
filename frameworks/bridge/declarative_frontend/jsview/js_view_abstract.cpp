@@ -7176,6 +7176,7 @@ void JSViewAbstract::JsAllowDrop(const JSCallbackInfo& info)
 {
     std::set<std::string> allowDropSet;
     allowDropSet.clear();
+    // if info is null, it will not be able to enter the statement
     if (!info[0]->IsUndefined() && info[0]->IsArray()) {
         auto allowDropArray = JSRef<JSArray>::Cast(info[0]);
         std::string allowDrop;
