@@ -2744,6 +2744,12 @@ void UIContentImpl::OnPopupStateChange(
     popupUIExtensionRecords_.erase(nodeId);
 }
 
+void UIContentImpl::SetCustomPopupConfig(int32_t nodeId, const CustomPopupUIExtensionConfig& config, int32_t popupId)
+{
+    customPopupConfigMap_[nodeId] = config;
+    popupUIExtensionRecords_[nodeId] = popupId;
+}
+
 int32_t UIContentImpl::CreateCustomPopupUIExtension(
     const AAFwk::Want& want, const ModalUIExtensionCallbacks& callbacks, const CustomPopupUIExtensionConfig& config)
 {
@@ -2790,8 +2796,7 @@ int32_t UIContentImpl::CreateCustomPopupUIExtension(
             popupParam->SetOnStateChange(
                 [config, nodeId, this](const std::string& event) { this->OnPopupStateChange(event, config, nodeId); });
             NG::ViewAbstract::BindPopup(popupParam, targetNode, AceType::DynamicCast<NG::UINode>(uiExtNode));
-            customPopupConfigMap_[nodeId] = config;
-            popupUIExtensionRecords_[nodeId] = uiExtNode->GetId();
+            SetCustomPopupConfig(nodeId, config, uiExtNode->GetId());
         },
         TaskExecutor::TaskType::UI);
     LOGI("Create custom popup with UIExtension end, nodeId=%{public}d", nodeId);
@@ -2853,7 +2858,8 @@ void UIContentImpl::UpdateCustomPopupUIExtension(const CustomPopupUIExtensionCon
                 auto createConfig = popupConfig->second;
                 popupParam->SetShowInSubWindow(createConfig.isShowInSubWindow);
             }
-            auto targetNode = AceType::DynamicCast<NG::FrameNode>(ElementRegister::GetInstance()->GetUINodeById(targetId));
+            auto targetNode = 
+                AceType::DynamicCast<NG::FrameNode>(ElementRegister::GetInstance()->GetUINodeById(targetId));
             CHECK_NULL_VOID(targetNode);
             NG::ViewAbstract::BindPopup(popupParam, targetNode, nullptr);
         },

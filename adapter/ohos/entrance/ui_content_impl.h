@@ -251,7 +251,7 @@ public:
         const ModalUIExtensionCallbacks& callbacks, const CustomPopupUIExtensionConfig& config) override;
     void DestroyCustomPopupUIExtension(int32_t nodeId) override;
     void UpdateCustomPopupUIExtension(const CustomPopupUIExtensionConfig& config) override;
-
+    void SetCustomPopupConfig(int32_t nodeId, const CustomPopupUIExtensionConfig& config, int32_t popupId) override;
     void SetContainerModalTitleVisible(bool customTitleSettedShow, bool floatingTitleSettedShow) override;
     void SetContainerModalTitleHeight(int32_t height) override;
     int32_t GetContainerModalTitleHeight() override;
@@ -345,7 +345,7 @@ private:
     std::string formData_;
     std::map<std::string, sptr<OHOS::AppExecFwk::FormAshmem>> formImageDataMap_;
     std::unordered_map<int32_t, CustomPopupUIExtensionConfig> customPopupConfigMap_;
-    std::unordered_map<int32_t, int32_t> popupUIExtensionRecords_;  
+    std::unordered_map<int32_t, int32_t> popupUIExtensionRecords_;
     std::unique_ptr<DistributedUIManager> uiManager_;
 
     bool isDynamicRender_ = false;
