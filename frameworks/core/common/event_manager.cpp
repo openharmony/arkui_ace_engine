@@ -272,6 +272,7 @@ void EventManager::TouchTest(
     TouchTestResult hitTestResult;
     frameNode->TouchTest(point, point, point, touchRestrict, hitTestResult, event.id);
     axisTouchTestResults_[event.id] = std::move(hitTestResult);
+    LogTouchTestResultRecognizers(axisTouchTestResults_[event.id]);
 }
 
 bool EventManager::HasDifferentDirectionGesture()
