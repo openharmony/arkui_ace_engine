@@ -369,6 +369,7 @@ public:
 
     static void ParseMenuOptions(
         const JSCallbackInfo& info, const JSRef<JSArray>& jsArray, std::vector<NG::MenuOptionsParam>& items);
+    static void JsBackgroundImageResizable(const JSCallbackInfo& info);
 
     static void JsSetDragEventStrictReportingEnabled(const JSCallbackInfo& info);
 

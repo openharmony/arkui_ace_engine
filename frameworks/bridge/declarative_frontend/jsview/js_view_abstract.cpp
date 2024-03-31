@@ -166,6 +166,7 @@ const std::string SHEET_HEIGHT_FITCONTENT = "fit_content";
 const std::string BLOOM_RADIUS_SYS_RES_NAME = "sys.float.ohos_id_point_light_bloom_radius";
 const std::string BLOOM_COLOR_SYS_RES_NAME = "sys.color.ohos_id_point_light_bloom_color";
 const std::string ILLUMINATED_BORDER_WIDTH_SYS_RES_NAME = "sys.float.ohos_id_point_light_illuminated_border_width";
+const std::vector<std::string> SLICE_KEYS = { "left", "right", "top", "bottom" };
 
 constexpr Dimension ARROW_ZERO_PERCENT_VALUE = 0.0_pct;
 constexpr Dimension ARROW_HALF_PERCENT_VALUE = 0.5_pct;
@@ -8666,5 +8667,53 @@ void JSViewAbstract::JsGestureModifier(const JSCallbackInfo& info)
     auto thisObj = info.This()->GetLocalHandle();
     panda::Local<panda::JSValueRef> params[1] = { info[0]->GetLocalHandle() };
     func->Call(vm, thisObj, params, 1);
+}
+
+void JSViewAbstract::JsBackgroundImageResizable(const JSCallbackInfo& info)
+{
+    auto infoObj = info[0];
+    ImageResizableSlice sliceResult;
+    if (!infoObj->IsObject()) {
+        ViewAbstractModel::GetInstance()->SetBackgroundImageResizableSlice(sliceResult);
+        return;
+    }
+    JSRef<JSObject> resizableObject = JSRef<JSObject>::Cast(infoObj);
+    if (resizableObject->IsEmpty()) {
+        ViewAbstractModel::GetInstance()->SetBackgroundImageResizableSlice(sliceResult);
+        return;
+    }
+    auto sliceValue = resizableObject->GetProperty("slice");
+    JSRef<JSObject> sliceObj = JSRef<JSObject>::Cast(sliceValue);
+    if (sliceObj->IsEmpty()) {
+        ViewAbstractModel::GetInstance()->SetBackgroundImageResizableSlice(sliceResult);
+        return;
+    }
+    for (uint32_t i = 0; i < SLICE_KEYS.size(); i++) {
+        auto sliceSize = sliceObj->GetProperty(SLICE_KEYS.at(i).c_str());
+        CalcDimension sliceDimension;
+        if (!ParseJsDimensionVp(sliceSize, sliceDimension)) {
+            continue;
+        }
+        if (!sliceDimension.IsValid()) {
+            continue;
+        }
+        switch (static_cast<BorderImageDirection>(i)) {
+            case BorderImageDirection::LEFT:
+                sliceResult.left = sliceDimension;
+                break;
+            case BorderImageDirection::RIGHT:
+                sliceResult.right = sliceDimension;
+                break;
+            case BorderImageDirection::TOP:
+                sliceResult.top = sliceDimension;
+                break;
+            case BorderImageDirection::BOTTOM:
+                sliceResult.bottom = sliceDimension;
+                break;
+            default:
+                break;
+        }
+    }
+    ViewAbstractModel::GetInstance()->SetBackgroundImageResizableSlice(sliceResult);
 }
 } // namespace OHOS::Ace::Framework

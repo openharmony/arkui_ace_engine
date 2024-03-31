@@ -689,10 +689,16 @@ void RosenRenderContext::PaintBackground()
         GetHost()->GetGeometryNode()->GetFrameSize(), bgLoadingCtx_->GetImageSize(), GetBackgroundImageSize());
     OffsetF positionOffset = ImagePainter::CalculateBgImagePosition(
         GetHost()->GetGeometryNode()->GetFrameSize(), renderSize, GetBackgroundImagePosition());
+    auto slice = GetBackgroundImageResizableSliceValue(ImageResizableSlice());
+    auto srcSize = bgLoadingCtx_->GetImageSize();
+    Rosen::Vector4f rect(slice.left.ConvertToPx(), slice.top.ConvertToPx(),
+        srcSize.Width() - (slice.left + slice.right).ConvertToPx(),
+        srcSize.Height() - (slice.top + slice.bottom).ConvertToPx());
     rsNode_->SetBgImageWidth(renderSize.Width());
     rsNode_->SetBgImageHeight(renderSize.Height());
     rsNode_->SetBgImagePositionX(positionOffset.GetX());
     rsNode_->SetBgImagePositionY(positionOffset.GetY());
+    rsNode_->SetBgImageInnerRect(rect);
 }
 
 void RosenRenderContext::OnBackgroundImageUpdate(const ImageSourceInfo& src)

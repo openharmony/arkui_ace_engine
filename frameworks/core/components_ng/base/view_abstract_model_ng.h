@@ -153,6 +153,11 @@ public:
         ViewAbstract::SetBackgroundEffect(effectOption);
     }
 
+    void SetBackgroundImageResizableSlice(const ImageResizableSlice& slice) override
+    {
+        ViewAbstract::SetBackgroundImageResizableSlice(slice);
+    }
+
     void SetForegroundBlurStyle(const BlurStyleOption& fgBlurStyle) override
     {
         ViewAbstract::SetForegroundBlurStyle(fgBlurStyle);
