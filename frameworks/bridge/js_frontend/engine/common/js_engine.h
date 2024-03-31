@@ -425,6 +425,11 @@ public:
         return value;
     }
 
+    virtual napi_value GetFrameNodeValueByNodeId(int32_t nodeId)
+    {
+        return nullptr;
+    }
+
 protected:
     NativeEngine* nativeEngine_ = nullptr;
     std::function<void(JsEngine*)> mediaUpdateCallback_;
