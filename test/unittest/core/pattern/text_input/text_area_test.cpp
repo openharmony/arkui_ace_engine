@@ -1100,4 +1100,38 @@ HWTEST_F(TextFieldUXTest, TextIsEmptyRect001, TestSize.Level1)
     pattern_->TextIsEmptyRect(textAreaRect);
     EXPECT_EQ(textAreaRect, RectF(0.0f, 0.0f, 0.0f, 50.0f));
 }
+
+/**
+ * @tc.name: testWordBreak001
+ * @tc.desc: test testArea text WordBreak
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldUXTest, TextAreaWordBreak001, TestSize.Level1)
+{
+    /**
+     * @tc.step1: Create Text filed node with default text and placeholder
+     */
+    CreateTextField(DEFAULT_TEXT);
+
+    /**
+     * @tc.step: step2. Set wordBreak NORMAL
+     */
+    layoutProperty_->UpdateWordBreak(WordBreak::NORMAL);
+    frameNode_->MarkModifyDone();
+    EXPECT_EQ(layoutProperty_->GetWordBreak(), WordBreak::NORMAL);
+
+    /**
+     * @tc.step: step3. Set wordBreak BREAK_ALL
+     */
+    layoutProperty_->UpdateWordBreak(WordBreak::BREAK_ALL);
+    frameNode_->MarkModifyDone();
+    EXPECT_EQ(layoutProperty_->GetWordBreak(), WordBreak::BREAK_ALL);
+
+    /**
+     * @tc.step: step4. Set wordBreak BREAK_WORD
+     */
+    layoutProperty_->UpdateWordBreak(WordBreak::BREAK_WORD);
+    frameNode_->MarkModifyDone();
+    EXPECT_EQ(layoutProperty_->GetWordBreak(), WordBreak::BREAK_WORD);
+}
 }
