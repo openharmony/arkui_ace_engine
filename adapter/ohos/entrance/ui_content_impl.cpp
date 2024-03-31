@@ -2858,7 +2858,7 @@ void UIContentImpl::UpdateCustomPopupUIExtension(const CustomPopupUIExtensionCon
                 auto createConfig = popupConfig->second;
                 popupParam->SetShowInSubWindow(createConfig.isShowInSubWindow);
             }
-            auto targetNode = 
+            auto targetNode =
                 AceType::DynamicCast<NG::FrameNode>(ElementRegister::GetInstance()->GetUINodeById(targetId));
             CHECK_NULL_VOID(targetNode);
             NG::ViewAbstract::BindPopup(popupParam, targetNode, nullptr);
