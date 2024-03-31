@@ -8029,6 +8029,23 @@ class TextAreaLineHeightModifier extends ModifierWithKey {
     }
 }
 TextAreaLineHeightModifier.identity = Symbol('textAreaLineHeight');
+class TextAreaWordBreakModifier extends ModifierWithKey {
+    constructor(value) {
+        super(value);
+    }
+    applyPeer(node, reset) {
+        if (reset) {
+            getUINativeModule().text.resetWordBreak(node);
+        }
+        else {
+            getUINativeModule().text.setWordBreak(node, this.value);
+        }
+    }
+    checkObjectDiff() {
+        return !isBaseOrResourceEqual(this.stageValue, this.value);
+    }
+}
+TextAreaWordBreakModifier.identity = Symbol('textInputWordBreak');
 class TextAreaCopyOptionModifier extends ModifierWithKey {
   constructor(value) {
     super(value);
@@ -8446,6 +8463,10 @@ class ArkTextAreaComponent extends ArkComponent {
     modifierWithKey(this._modifiersWithKeys, TextAreaLineHeightModifier.identity, TextAreaLineHeightModifier, value);
     return this;
   }
+  wordBreak(value) {
+    modifierWithKey(this._modifiersWithKeys, TextAreaWordBreakModifier.identity, TextAreaWordBreakModifier, value);
+    return this;
+  }
 }
 // @ts-ignore
 if (globalThis.TextArea !== undefined) {
@@ -8606,6 +8627,23 @@ class TextInputUnderlineColorModifier extends ModifierWithKey {
   }
 }
 TextInputUnderlineColorModifier.identity = Symbol('textInputUnderlineColor');
+class TextInputWordBreakModifier extends ModifierWithKey {
+    constructor(value) {
+        super(value);
+    }
+    applyPeer(node, reset) {
+        if (reset) {
+            getUINativeModule().text.resetWordBreak(node);
+        }
+        else {
+            getUINativeModule().text.setWordBreak(node, this.value);
+        }
+    }
+    checkObjectDiff() {
+        return !isBaseOrResourceEqual(this.stageValue, this.value);
+    }
+}
+TextInputWordBreakModifier.identity = Symbol('textInputWordBreak');
 class TextInputShowPasswordIconModifier extends ModifierWithKey {
   constructor(value) {
     super(value);
@@ -9196,6 +9234,10 @@ class ArkTextInputComponent extends ArkComponent {
   }
   underlineColor(value) {
     modifierWithKey(this._modifiersWithKeys, TextInputUnderlineColorModifier.identity, TextInputUnderlineColorModifier, value);
+    return this;
+  }
+  wordBreak(value) {
+    modifierWithKey(this._modifiersWithKeys, TextInputWordBreakModifier.identity, TextInputWordBreakModifier, value);
     return this;
   }
 }
