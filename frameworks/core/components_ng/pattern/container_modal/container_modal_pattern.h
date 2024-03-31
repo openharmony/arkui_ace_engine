@@ -143,6 +143,13 @@ public:
         return AceType::DynamicCast<CustomTitleNode>(row->GetChildren().front());
     }
 
+    RefPtr<FrameNode> GetGestureRow()
+    {
+        auto stack = GetStackNode();
+        CHECK_NULL_RETURN(stack, nullptr);
+        return AceType::DynamicCast<FrameNode>(stack->GetChildAtIndex(1));
+    }
+
     void SetContainerModalTitleVisible(bool customTitleSettedShow, bool floatingTitleSettedShow);
     void SetContainerModalTitleHeight(int32_t height);
     int32_t GetContainerModalTitleHeight();
@@ -160,6 +167,8 @@ public:
     {
         InitTitle();
     }
+
+    void InitStackNode();
 
 protected:
     virtual RefPtr<UINode> GetTitleItemByIndex(const RefPtr<FrameNode>& controlButtonsNode, int32_t originIndex)

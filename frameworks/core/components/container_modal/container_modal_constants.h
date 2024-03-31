@@ -43,6 +43,7 @@ const Color TITLE_TEXT_COLOR_LOST_FOCUS = Color(0x66000000);
 const Color TITLE_BUTTON_BACKGROUND_COLOR = Color(0x19000000);
 const Color TITLE_BUTTON_BACKGROUND_COLOR_LOST_FOCUS = Color(0x0a000000);
 const Color TITLE_BUTTON_CLICKED_COLOR = Color(0x33000000);
+const std::string CONTAINER_MODAL_CONTENT_ID = "ContainerModalContent";
 
 } // namespace OHOS::Ace
 
