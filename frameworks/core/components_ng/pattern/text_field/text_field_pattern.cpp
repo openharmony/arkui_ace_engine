@@ -1741,12 +1741,13 @@ void TextFieldPattern::InitDragDropCallBack()
             CHECK_NULL_VOID(paintProperty);
             auto newDragValue =
                 pattern->contentController_->GetSelectedValue(pattern->dragTextStart_, pattern->dragTextEnd_);
+            auto focusHub = pattern->GetFocusHub();
+            CHECK_NULL_VOID(focusHub);
             if (event != nullptr && event->GetResult() != DragRet::DRAG_SUCCESS &&
                 newDragValue == pattern->dragValue_ &&
-                paintProperty->GetInputStyleValue(InputStyle::DEFAULT) != InputStyle::INLINE) {
+                paintProperty->GetInputStyleValue(InputStyle::DEFAULT) != InputStyle::INLINE &&
+                focusHub->IsFocusable()) {
                 pattern->ShowSelectAfterDragEvent();
-                auto focusHub = pattern->GetFocusHub();
-                CHECK_NULL_VOID(focusHub);
                 focusHub->RequestFocusImmediately();
             }
             host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
