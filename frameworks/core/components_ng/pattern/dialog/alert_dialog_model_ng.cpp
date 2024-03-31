@@ -73,6 +73,7 @@ void AlertDialogModelNG::SetShowDialog(const DialogProperties& arg)
                     Maskarg.isMask = true;
                     Maskarg.autoCancel = arg.autoCancel;
                     Maskarg.onWillDismiss = arg.onWillDismiss;
+                    Maskarg.shadow = arg.shadow;
                     auto mask = overlayManager->ShowDialog(Maskarg, nullptr, false);
                     overlayManager->SetMaskNodeId(dialog->GetId(), mask->GetId());
                     CHECK_NULL_VOID(mask);

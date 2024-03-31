@@ -84,7 +84,7 @@ private:
     void SetDialogSize(
         const RefPtr<DialogLayoutProperty>& dialogProp, const RefPtr<LayoutWrapper>& layoutWrapper, SizeF selfSize);
     void UpdateSafeArea();
-
+    void UpdateMaskRect(Shadow shadow, DimensionRect& rect);
     RectF touchRegion_;
     OffsetF topLeftPoint_;
     bool customSize_ = false;
