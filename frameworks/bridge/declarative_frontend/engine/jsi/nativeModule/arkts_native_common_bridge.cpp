@@ -814,17 +814,6 @@ void PushOuterBorderDimensionVector(const std::optional<CalcDimension>& valueDim
     }
 }
 
-void ParseOuterBorder(EcmaVM* vm, const Local<JSValueRef>& args, std::optional<CalcDimension>& optionalDimension)
-{
-    CalcDimension valueDim;
-    if (!args->IsUndefined() && ArkTSUtils::ParseJsDimensionVp(vm, args, valueDim, false)) {
-        if (valueDim.IsNegative() || valueDim.Unit() == DimensionUnit::PERCENT) {
-            valueDim.Reset();
-        }
-        optionalDimension = valueDim;
-    }
-}
-
 void ParseOuterBorderWidth(ArkUIRuntimeCallInfo *runtimeCallInfo, EcmaVM *vm, std::vector<ArkUI_Float32> &values)
 {
     Local<JSValueRef> leftArgs = runtimeCallInfo->GetCallArgRef(NUM_1);
@@ -836,10 +825,10 @@ void ParseOuterBorderWidth(ArkUIRuntimeCallInfo *runtimeCallInfo, EcmaVM *vm, st
     std::optional<CalcDimension> topDim;
     std::optional<CalcDimension> bottomDim;
 
-    ParseOuterBorder(vm, leftArgs, leftDim);
-    ParseOuterBorder(vm, rightArgs, rightDim);
-    ParseOuterBorder(vm, topArgs, topDim);
-    ParseOuterBorder(vm, bottomArgs, bottomDim);
+    ArkTSUtils::ParseOuterBorder(vm, leftArgs, leftDim);
+    ArkTSUtils::ParseOuterBorder(vm, rightArgs, rightDim);
+    ArkTSUtils::ParseOuterBorder(vm, topArgs, topDim);
+    ArkTSUtils::ParseOuterBorder(vm, bottomArgs, bottomDim);
 
     PushOuterBorderDimensionVector(leftDim, values);
     PushOuterBorderDimensionVector(rightDim, values);
@@ -905,10 +894,10 @@ void ParseOuterBorderRadius(
     std::optional<CalcDimension> bottomLeftOptional;
     std::optional<CalcDimension> bottomRightOptional;
 
-    ParseOuterBorder(vm, topLeftArgs, topLeftOptional);
-    ParseOuterBorder(vm, topRightArgs, topRightOptional);
-    ParseOuterBorder(vm, bottomLeftArgs, bottomLeftOptional);
-    ParseOuterBorder(vm, bottomRightArgs, bottomRightOptional);
+    ArkTSUtils::ParseOuterBorder(vm, topLeftArgs, topLeftOptional);
+    ArkTSUtils::ParseOuterBorder(vm, topRightArgs, topRightOptional);
+    ArkTSUtils::ParseOuterBorder(vm, bottomLeftArgs, bottomLeftOptional);
+    ArkTSUtils::ParseOuterBorder(vm, bottomRightArgs, bottomRightOptional);
 
     PushOuterBorderDimensionVector(topLeftOptional, values);
     PushOuterBorderDimensionVector(topRightOptional, values);

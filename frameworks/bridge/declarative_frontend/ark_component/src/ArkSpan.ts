@@ -97,6 +97,78 @@ class SpanTextCaseModifier extends ModifierWithKey<number> {
     return !isBaseOrResourceEqual(this.stageValue, this.value);
   }
 }
+class SpanTextBackgroundStyleModifier extends ModifierWithKey<TextBackgroundStyle> {
+  constructor(value: TextBackgroundStyle) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('spanTextBackgroundStyle');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().span.resetTextBackgroundStyle(node);
+    }
+    else {
+      let textBackgroundStyle = new ArkTextBackGroundStyle();
+      if (!textBackgroundStyle.convertTextBackGroundStyleOptions(this.value)) {
+        getUINativeModule().span.resetTextBackgroundStyle(node);
+      }
+      else {
+        getUINativeModule().span.setTextBackgroundStyle(node, textBackgroundStyle.color, textBackgroundStyle.radius.topLeft, textBackgroundStyle.radius.topRight, textBackgroundStyle.radius.bottomLeft, textBackgroundStyle.radius.bottomRight);
+      }
+    }
+  }
+  checkObjectDiff(): boolean {
+    let textBackgroundStyle = new ArkTextBackGroundStyle();
+    let stageTextBackGroundStyle = new ArkTextBackGroundStyle();
+    if (!textBackgroundStyle.convertTextBackGroundStyleOptions(this.value) || !stageTextBackGroundStyle.convertTextBackGroundStyleOptions(this.stageValue)) {
+      return false;
+    }
+    else {
+      return textBackgroundStyle.checkObjectDiff(stageTextBackGroundStyle);
+    }
+  }
+}
+class SpanTextShadowModifier extends ModifierWithKey<ShadowOptions | Array<ShadowOptions>> {
+  constructor(value: ShadowOptions | Array<ShadowOptions>) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('spanTextShadow');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().span.resetTextShadow(node);
+    } else {
+      let shadow: ArkShadowInfoToArray = new ArkShadowInfoToArray();
+      if (!shadow.convertShadowOptions(this.value)) {
+        getUINativeModule().span.resetTextShadow(node);
+      } else {
+        getUINativeModule().span.setTextShadow(node, shadow.radius,
+          shadow.type, shadow.color, shadow.offsetX, shadow.offsetY, shadow.fill, shadow.radius.length);
+      }
+    }
+  }
+
+  checkObjectDiff(): boolean {
+    let checkDiff = true;
+    let arkShadow = new ArkShadowInfoToArray();
+    if (Object.getPrototypeOf(this.stageValue).constructor === Object &&
+      Object.getPrototypeOf(this.value).constructor === Object) {
+      checkDiff = arkShadow.checkDiff(<ShadowOptions> this.stageValue, <ShadowOptions> this.value);
+    } else if (Object.getPrototypeOf(this.stageValue).constructor === Array &&
+      Object.getPrototypeOf(this.value).constructor === Array &&
+      (<Array<ShadowOptions>> this.stageValue).length === (<Array<ShadowOptions>> this.value).length) {
+      let isDiffItem = false;
+      for (let i: number = 0; i < (<Array<ShadowOptions>> this.value).length; i++) {
+        if (arkShadow.checkDiff(this.stageValue[i], this.value[1])) {
+          isDiffItem = true;
+          break;
+        }
+      }
+      if (!isDiffItem) {
+        checkDiff = false;
+      }
+    }
+    return checkDiff;
+  }
+}
 class SpanFontColorModifier extends ModifierWithKey<ResourceColor> {
   constructor(value: ResourceColor) {
     super(value);
@@ -818,6 +890,14 @@ class ArkSpanComponent implements CommonMethod<SpanAttribute> {
   }
   textCase(value: TextCase): SpanAttribute {
     modifierWithKey(this._modifiersWithKeys, SpanTextCaseModifier.identity, SpanTextCaseModifier, value);
+    return this;
+  }
+  textBackgroundStyle(value: TextBackgroundStyle): SpanAttribute {
+    modifierWithKey(this._modifiersWithKeys, SpanTextBackgroundStyleModifier.identity, SpanTextBackgroundStyleModifier, value);
+    return this;
+  }
+  textShadow(value: ShadowOptions | Array<ShadowOptions>): SpanAttribute {
+    modifierWithKey(this._modifiersWithKeys, SpanTextShadowModifier.identity, SpanTextShadowModifier, value);
     return this;
   }
 }

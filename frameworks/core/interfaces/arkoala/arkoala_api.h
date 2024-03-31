@@ -26,10 +26,10 @@
 extern "C" {
 #endif
 
-#define ARKUI_FULL_API_VERSION 86
+#define ARKUI_FULL_API_VERSION 87
 // When changing ARKUI_BASIC_API_VERSION, ARKUI_FULL_API_VERSION must be
 // increased as well.
-#define ARKUI_NODE_API_VERSION 86
+#define ARKUI_NODE_API_VERSION 87
 
 #define ARKUI_BASIC_API_VERSION 7
 #define ARKUI_EXTENDED_API_VERSION 7
@@ -2377,6 +2377,10 @@ struct ArkUIImageSpanModifier {
     void (*resetImageSpanObjectFit)(ArkUINodeHandle node);
     ArkUI_Int32 (*getImageSpanVerticalAlign)(ArkUINodeHandle node);
     ArkUI_Int32 (*getImageSpanObjectFit)(ArkUINodeHandle node);
+    void (*setImageSpanTextBackgroundStyle)(ArkUINodeHandle node, ArkUI_Uint32 color, const ArkUI_Float32* values,
+        const ArkUI_Int32* units, ArkUI_Int32 length);
+    void (*resetImageSpanTextBackgroundStyle)(ArkUINodeHandle node);
+    void (*getImageSpanTextBackgroundStyle)(ArkUINodeHandle node, ArkUITextBackgroundStyleOptions* options);
 };
 
 struct ArkUIMenuModifier {
