@@ -50,6 +50,12 @@ class ArkImageSpanComponent extends ArkComponent implements ImageSpanAttribute {
   constructor(nativePtr: KNode) {
     super(nativePtr);
   }
+  padding(value: Padding | Length): this {
+    throw new Error('Method not implemented.');
+  }
+  margin(value: Margin | Length): this {
+    throw new Error('Method not implemented.');
+  }
   objectFit(value: ImageFit): ImageSpanAttribute {
     modifierWithKey(this._modifiersWithKeys, ImageSpanObjectFitModifier.identity, ImageSpanObjectFitModifier, value);
     return this;
