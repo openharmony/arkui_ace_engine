@@ -80,6 +80,8 @@
       OHOS::Ace::Color::*;
       OHOS::Ace::NG::UIObserverHandler::*;
       OHOS::Ace::UIDisplaySync::*;
+      OHOS::Ace::Dimension::*;
+      OHOS::Ace::Matrix4::*;
 
       virtual?thunk?to?OHOS::Ace::Animator::~Animator??;
 

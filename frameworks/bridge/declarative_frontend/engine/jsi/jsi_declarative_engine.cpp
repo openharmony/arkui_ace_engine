@@ -840,6 +840,23 @@ shared_ptr<JsValue> JsiDeclarativeEngineInstance::CallGetUIContextFunc(
     return retVal;
 }
 
+shared_ptr<JsValue> JsiDeclarativeEngineInstance::CallGetFrameNodeByNodeIdFunc(
+    const shared_ptr<JsRuntime>& runtime, const std::vector<shared_ptr<JsValue>>& argv)
+{
+    shared_ptr<JsValue> global = runtime->GetGlobal();
+    shared_ptr<JsValue> func = global->GetProperty(runtime, "__getFrameNodeByNodeId__");
+    if (!func->IsFunction(runtime)) {
+        return nullptr;
+    }
+
+    shared_ptr<JsValue> retVal = func->Call(runtime, global, argv, argv.size());
+    if (!retVal) {
+        return nullptr;
+    }
+
+    return retVal;
+}
+
 void JsiDeclarativeEngineInstance::PostJsTask(const shared_ptr<JsRuntime>& runtime, std::function<void()>&& task)
 {
     if (runtime == nullptr) {
@@ -924,6 +941,32 @@ napi_value JsiDeclarativeEngineInstance::GetContextValue()
         return nullptr;
     }
     auto arkJSValue = std::static_pointer_cast<ArkJSValue>(uiContext_);
+    if (!arkJSValue) {
+        return nullptr;
+    }
+    auto arkNativeEngine = static_cast<ArkNativeEngine*>(GetNativeEngine());
+    if (!arkNativeEngine) {
+        return nullptr;
+    }
+    napi_value napiValue = ArkNativeEngine::ArkValueToNapiValue(
+        reinterpret_cast<napi_env>(GetNativeEngine()), arkJSValue->GetValue(arkJSRuntime));
+
+    return napiValue;
+}
+
+napi_value JsiDeclarativeEngineInstance::GetFrameNodeValueByNodeId(int32_t nodeId)
+{
+    auto runtime = GetJsRuntime();
+
+    // obtain frameNode instance
+    std::vector<shared_ptr<JsValue>> argv = { runtime->NewNumber(instanceId_), runtime->NewNumber(nodeId) };
+    shared_ptr<JsValue> frameNode = CallGetFrameNodeByNodeIdFunc(runtime, argv);
+
+    auto arkJSRuntime = std::static_pointer_cast<ArkJSRuntime>(runtime);
+    if (!arkJSRuntime) {
+        return nullptr;
+    }
+    auto arkJSValue = std::static_pointer_cast<ArkJSValue>(frameNode);
     if (!arkJSValue) {
         return nullptr;
     }

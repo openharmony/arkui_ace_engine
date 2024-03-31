@@ -342,6 +342,19 @@ class UIContext {
         __JSScopeUtil__.restoreInstanceId();
         return node;
     }
+
+    getFrameNodeByNodeId(id) {
+        __JSScopeUtil__.syncInstanceId(this.instanceId_);
+        let nodePtr = getUINativeModule().getFrameNodeById(id);
+        let xNode = globalThis.requireNapi('arkui.node');
+        let node = xNode.FrameNodeUtils.searchNodeInRegisterProxy(nodePtr);
+        if (!node) {
+            node = xNode.FrameNodeUtils.createFrameNode(this, nodePtr);
+        }
+        __JSScopeUtil__.restoreInstanceId();
+        return node;
+    }
+
     getFocusController() {
         if (this.focusController_ == null) {
             this.focusController_ = new FocusController(this.instanceId_);
@@ -697,6 +710,17 @@ class OverlayManager {
  */
 function __getUIContext__(instanceId) {
     return new UIContext(instanceId);
+}
+
+/**
+ * Get FrameNode by id of UIContext instance.
+ * @param nodeId the id of frameNode.
+ * @param instanceId obtained on the C++ side.
+ * @returns FrameNode instance.
+ */
+function __getFrameNodeByNodeId__(nodeId, instanceId) {
+    const uiContext = __getUIContext__(instanceId);
+    return uiContext.getFrameNodeByNodeId(nodeId);
 }
 
 /**

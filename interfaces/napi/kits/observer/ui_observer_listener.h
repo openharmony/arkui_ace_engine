@@ -41,6 +41,10 @@ public:
     void OnRouterPageStateChange(napi_value context, int32_t index,
         const std::string& name, const std::string& path, NG::RouterPageState state);
     void OnDensityChange(double density);
+    void OnWillClick(const GestureEvent& gestureEventInfo, const ClickInfo& clickInfo,
+        const RefPtr<NG::FrameNode> frameNode);
+    void OnDidClick(const GestureEvent& gestureEventInfo, const ClickInfo& clickInfo,
+        const RefPtr<NG::FrameNode> frameNode);
     void OnNavDestinationSwitch(const NG::NavDestinationSwitchInfo& switchInfo);
     bool NapiEqual(napi_value cb);
     void OnDrawOrLayout();
@@ -49,6 +53,14 @@ private:
     napi_value CreateNavDestinationSwitchInfoObj(const NG::NavDestinationSwitchInfo& switchInfo);
     napi_value CreateNavDestinationInfoObj(const NG::NavDestinationInfo& info);
     napi_value GetNapiCallback();
+    static napi_valuetype GetValueType(napi_env env, napi_value value);
+    static napi_value GetNamedProperty(napi_env env, napi_value object, const std::string& propertyName);
+    void AddBaseEventInfo(napi_value objValueClickEvent, const ClickInfo& clickInfo);
+    void AddGestureEventInfoOne(napi_value objValueClickEvent, const GestureEvent& gestureEventInfo);
+    void AddGestureEventInfoTwo(napi_value objValueClickEvent, const GestureEvent& gestureEventInfo);
+    void AddGestureEventInfoThree(napi_value objValueClickEvent, const GestureEvent& gestureEventInfo);
+    void AddClickEventInfoOne(napi_value objValueClickEvent, const ClickInfo& clickInfo);
+    void AddClickEventInfoTwo(napi_value objValueClickEvent, const ClickInfo& clickInfo);
     napi_env env_ = nullptr;
     napi_ref callback_ = nullptr;
 };
