@@ -613,6 +613,11 @@ void TextFieldModelNG::SetMaxViewLines(uint32_t value)
     ACE_UPDATE_LAYOUT_PROPERTY(TextFieldLayoutProperty, MaxViewLines, value);
 }
 
+void TextFieldModelNG::SetNormalMaxViewLines(uint32_t value)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(TextFieldLayoutProperty, NormalMaxViewLines, value);
+}
+
 void TextFieldModelNG::SetBackgroundColor(const Color& color, bool tmp)
 {
     Color backgroundColor = color;
@@ -836,6 +841,12 @@ void TextFieldModelNG::SetSelectedBackgroundColor(FrameNode* frameNode, const Co
 void TextFieldModelNG::SetMaxViewLines(FrameNode* frameNode, uint32_t value)
 {
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, MaxViewLines, value, frameNode);
+}
+
+void TextFieldModelNG::SetNormalMaxViewLines(FrameNode* frameNode, uint32_t value)
+{
+    auto normalMaxViewLines = value <= 0 ? Infinity<uint32_t>() : value;
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, NormalMaxViewLines, normalMaxViewLines, frameNode);
 }
 
 void TextFieldModelNG::SetType(FrameNode* frameNode, TextInputType value)

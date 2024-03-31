@@ -270,6 +270,7 @@ public:
     virtual void SetShowError(const std::string& errorText, bool visible) {};
     virtual void SetBarState(DisplayMode value) {};
     virtual void SetMaxViewLines(uint32_t value) {};
+    virtual void SetNormalMaxViewLines(uint32_t value) {};
 
     virtual void SetShowUnderline(bool showUnderLine) {};
     virtual void SetNormalUnderlineColor(const Color& normalColor) {};
