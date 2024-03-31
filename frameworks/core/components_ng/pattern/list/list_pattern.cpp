@@ -343,7 +343,9 @@ void ListPattern::ProcessEvent(
     paintStateFlag_ = !NearZero(finalOffset) && !isJump;
     isFramePaintStateValid_ = true;
     auto onScroll = listEventHub->GetOnScroll();
-    PrintOffsetLog(AceLogTag::ACE_LIST, host->GetId(), finalOffset);
+    if (!NearZero(finalOffset)) {
+        PrintOffsetLog(AceLogTag::ACE_LIST, host->GetId(), finalOffset);
+    }
     if (onScroll) {
         if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TEN)) {
             FireOnScroll(finalOffset, onScroll);
