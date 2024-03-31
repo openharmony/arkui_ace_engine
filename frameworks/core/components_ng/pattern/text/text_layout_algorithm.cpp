@@ -797,9 +797,10 @@ std::optional<SizeF> TextLayoutAlgorithm::BuildTextRaceParagraph(TextStyle& text
     if (contentConstraint.selfIdealSize.Width().has_value()) {
         paragraphWidth = std::max(contentConstraint.selfIdealSize.Width().value(), paragraphWidth);
     } else {
-        paragraphWidth = std::max(contentConstraint.maxSize.Width(), paragraphWidth);
+        paragraphWidth = std::max(contentConstraint.minSize.Width(), paragraphWidth);
     }
-    paragraph_->Layout(std::ceil(paragraphWidth));
+    paragraphWidth = std::ceil(paragraphWidth);
+    paragraph_->Layout(paragraphWidth);
 
     textStyle_ = textStyle;
 
