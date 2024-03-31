@@ -707,7 +707,19 @@ void OverlayManager::PopMenuAnimation(const RefPtr<FrameNode>& menu, bool showPr
                     overlayManager->OnPopMenuAnimationFinished(menuWK, rootWeak, weak, id);
                 });
         } else {
-            OnPopMenuAnimationFinished(WeakClaim(RawPtr(menu)), rootNodeWeak_, WeakClaim(this), Container::CurrentId());
+            auto context = PipelineContext::GetCurrentContext();
+            CHECK_NULL_VOID(context);
+            auto taskExecutor = context->GetTaskExecutor();
+            CHECK_NULL_VOID(taskExecutor);
+            taskExecutor->PostTask(
+                [rootWeak = rootNodeWeak_, menuWK = WeakClaim(RawPtr(menu)), id = Container::CurrentId(),
+                    weak = WeakClaim(this)] {
+                    ContainerScope scope(id);
+                    auto overlayManager = weak.Upgrade();
+                    CHECK_NULL_VOID(overlayManager);
+                    overlayManager->OnPopMenuAnimationFinished(menuWK, rootWeak, weak, id);
+                },
+                TaskExecutor::TaskType::UI);
         }
         return;
     }
