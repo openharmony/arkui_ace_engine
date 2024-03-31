@@ -74,7 +74,8 @@ constexpr int32_t BUTTON_INDEX = 4;
 const std::string EMPTY_VALUE;
 const std::string PLACEHOLDER = "DEFAULT PLACEHOLDER";
 const std::string SEARCH_SVG = "resource:///ohos_search.svg";
-const std::unordered_map<std::string, int32_t> FONT_FEATURE_VALUE = ParseFontFeatureSettings("\"ss01\" 1");
+const std::unordered_map<std::string, int32_t> FONT_FEATURE_VALUE_1 = ParseFontFeatureSettings("\"ss01\" 1");
+const std::unordered_map<std::string, int32_t> FONT_FEATURE_VALUE_0 = ParseFontFeatureSettings("\"ss01\" 0");
 } // namespace
 
 class SearchTestNg : public testing::Test {
@@ -3142,13 +3143,31 @@ HWTEST_F(SearchTestNg, SetProperty004, TestSize.Level1)
     ASSERT_NE(frameNode, nullptr);
     auto layoutProperty = frameNode->GetLayoutProperty<SearchLayoutProperty>();
     SearchModelNG searchModelInstance;
-    layoutProperty->UpdateFontFeature(ParseFontFeatureSettings("\"ss01\" 0"));
-    searchModelInstance.SetFontFeature(FONT_FEATURE_VALUE);
-    EXPECT_EQ(layoutProperty->GetFontFeature(), FONT_FEATURE_VALUE);
+    searchModelInstance.SetFontFeature(FONT_FEATURE_VALUE_1);
+    EXPECT_EQ(layoutProperty->GetFontFeature(), FONT_FEATURE_VALUE_1);
 
     layoutProperty->UpdateFontFeature(ParseFontFeatureSettings("\"ss01\" 0"));
-    SearchModelNG::SetFontFeature(frameNode, FONT_FEATURE_VALUE);
-    EXPECT_EQ(layoutProperty->GetFontFeature(), FONT_FEATURE_VALUE);
+    SearchModelNG::SetFontFeature(frameNode, FONT_FEATURE_VALUE_1);
+    EXPECT_EQ(layoutProperty->GetFontFeature(), FONT_FEATURE_VALUE_1);
+}
+
+/**
+ * @tc.name: UpdateFontFeature
+ * @tc.desc: test fontFeature
+ * @tc.type: FUNC
+ */
+HWTEST_F(SearchTestNg, SetProperty005, TestSize.Level1)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto layoutProperty = frameNode->GetLayoutProperty<SearchLayoutProperty>();
+    SearchModelNG searchModelInstance;
+    searchModelInstance.SetFontFeature(FONT_FEATURE_VALUE_0);
+    EXPECT_EQ(layoutProperty->GetFontFeature(), FONT_FEATURE_VALUE_0);
+
+    layoutProperty->UpdateFontFeature(ParseFontFeatureSettings("\"ss01\" 1"));
+    SearchModelNG::SetFontFeature(frameNode, FONT_FEATURE_VALUE_0);
+    EXPECT_EQ(layoutProperty->GetFontFeature(), FONT_FEATURE_VALUE_0);
 }
 
 /**
