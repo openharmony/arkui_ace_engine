@@ -2309,6 +2309,33 @@ HWTEST_F(FrameNodeTestNg, GetPreviewScaleVal002, TestSize.Level1)
 }
 
 /**
+ * @tc.name: FrameNodeTestNg_GetPreviewApplyVal001
+ * @tc.desc: Test frame node method GetPreviewApplyVal001
+ * @tc.type: FUNC
+ */
+HWTEST_F(FrameNodeTestNg, GetPreviewApplyVal001, TestSize.Level1)
+{
+    auto frameNode = FRAME_NODE;
+    /**
+     * @tc.steps: step1. initialize parameters.
+     */
+    frameNode->isActive_ = true;
+    frameNode->eventHub_->SetEnabled(true);
+    SystemProperties::debugEnabled_ = true;
+
+    /**
+     * @tc.steps: step2. set drag preview options and call GetDragPreviewOption.
+     * @tc.expected: expect GetDragPreviewOption return apply .
+     */
+    auto geometryNode = frameNode->GetGeometryNode();
+    geometryNode->SetFrameSize(CONTAINER_SIZE_HUGE);
+    NG::DragPreviewOption previewOption;
+    previewOption.onApply = [](WeakPtr<NG::FrameNode> frameNode) {};
+    frameNode->SetDragPreviewOptions(previewOption);
+    EXPECT_NE(frameNode->GetDragPreviewOption().onApply, nullptr);
+}
+
+/**
  * @tc.name: FrameNodeTestNg_GetPreviewScaleVal003
  * @tc.desc: Test frame node method GetPreviewScaleVal
  * @tc.type: FUNC
