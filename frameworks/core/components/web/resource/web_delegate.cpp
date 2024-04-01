@@ -2805,6 +2805,11 @@ void WebDelegate::Resize(const double& width, const double& height, bool isKeybo
         return;
     }
 
+    if ((resizeWidth_ == width) && (resizeHeight_ == height)) {
+        return;
+    }
+    resizeWidth_ = width;
+    resizeHeight_ = height;
     auto context = context_.Upgrade();
     if (!context) {
         return;
