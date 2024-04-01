@@ -256,6 +256,31 @@ bool JsonValue::Put(const char* key, double value)
     return true;
 }
 
+JsonObject* JsonValue::ReleaseJsonObject()
+{
+    JsonObject* object = object_;
+    object_ = nullptr;
+    return object;
+}
+
+bool JsonValue::Put(const char* key, std::unique_ptr<JsonValue>&& value)
+{
+    if (key == nullptr || value == nullptr) {
+        return false;
+    }
+    cJSON_AddItemToObject(object_, key, value->ReleaseJsonObject());
+    return true;
+}
+
+bool JsonValue::Put(std::unique_ptr<JsonValue>&& value)
+{
+    if (value == nullptr) {
+        return false;
+    }
+    cJSON_AddItemToArray(object_, value->ReleaseJsonObject());
+    return true;
+}
+
 bool JsonValue::Replace(const char* key, double value)
 {
     if (key == nullptr) {

@@ -144,7 +144,7 @@ void GetSpanInspector(
     auto jsonNode = JsonUtil::Create(true);
     auto jsonObject = JsonUtil::Create(true);
     parent->ToJsonValue(jsonObject);
-    jsonNode->Put(INSPECTOR_ATTRS, jsonObject);
+    jsonNode->Put(INSPECTOR_ATTRS, std::move(jsonObject));
     jsonNode->Put(INSPECTOR_TYPE, parent->GetTag().c_str());
     jsonNode->Put(INSPECTOR_ID, parent->GetId());
     RectF rect = node->GetTransformRectRelativeToWindow();
@@ -162,7 +162,7 @@ void GetSpanInspector(
     jsonNode->Put(INSPECTOR_RECT, strRec.c_str());
     jsonNode->Put(INSPECTOR_DEBUGLINE, parent->GetDebugLine().c_str());
     jsonNode->Put(INSPECTOR_VIEW_ID, parent->GetViewId().c_str());
-    jsonNodeArray->Put(jsonNode);
+    jsonNodeArray->Put(std::move(jsonNode));
 }
 
 void GetInspectorChildren(
@@ -196,7 +196,7 @@ void GetInspectorChildren(
         jsonNode->Put(INSPECTOR_VIEW_ID, node->GetViewId().c_str());
         auto jsonObject = JsonUtil::Create(true);
         parent->ToJsonValue(jsonObject);
-        jsonNode->Put(INSPECTOR_ATTRS, jsonObject);
+        jsonNode->Put(INSPECTOR_ATTRS, std::move(jsonObject));
     }
 
     std::vector<RefPtr<NG::UINode>> children;
@@ -214,9 +214,9 @@ void GetInspectorChildren(
         GetInspectorChildren(uiNode, jsonChildrenArray, pageId, isActive);
     }
     if (jsonChildrenArray->GetArraySize()) {
-        jsonNode->Put(INSPECTOR_CHILDREN, jsonChildrenArray);
+        jsonNode->Put(INSPECTOR_CHILDREN, std::move(jsonChildrenArray));
     }
-    jsonNodeArray->Put(jsonNode);
+    jsonNodeArray->Put(std::move(jsonNode));
 }
 
 #else
@@ -259,13 +259,13 @@ void GetSpanInspector(
     auto jsonNode = JsonUtil::Create(true);
     auto jsonObject = JsonUtil::Create(true);
     parent->ToJsonValue(jsonObject);
-    jsonNode->Put(INSPECTOR_ATTRS, jsonObject);
+    jsonNode->Put(INSPECTOR_ATTRS, std::move(jsonObject));
     jsonNode->Put(INSPECTOR_TYPE, parent->GetTag().c_str());
     jsonNode->Put(INSPECTOR_ID, parent->GetId());
     jsonNode->Put(INSPECTOR_DEBUGLINE, parent->GetDebugLine().c_str());
     RectF rect = node->GetTransformRectRelativeToWindow();
     jsonNode->Put(INSPECTOR_RECT, rect.ToBounds().c_str());
-    jsonNodeArray->Put(jsonNode);
+    jsonNodeArray->Put(std::move(jsonNode));
 }
 
 void GetInspectorChildren(
@@ -291,7 +291,7 @@ void GetInspectorChildren(
     jsonNode->Put(INSPECTOR_DEBUGLINE, node->GetDebugLine().c_str());
     auto jsonObject = JsonUtil::Create(true);
     parent->ToJsonValue(jsonObject);
-    jsonNode->Put(INSPECTOR_ATTRS, jsonObject);
+    jsonNode->Put(INSPECTOR_ATTRS, std::move(jsonObject));
     std::vector<RefPtr<NG::UINode>> children;
     for (const auto& item : parent->GetChildren()) {
         GetFrameNodeChildren(item, children, pageId);
@@ -305,9 +305,9 @@ void GetInspectorChildren(
         GetInspectorChildren(uiNode, jsonChildrenArray, pageId, isActive);
     }
     if (jsonChildrenArray->GetArraySize()) {
-        jsonNode->Put(INSPECTOR_CHILDREN, jsonChildrenArray);
+        jsonNode->Put(INSPECTOR_CHILDREN, std::move(jsonChildrenArray));
     }
-    jsonNodeArray->Put(jsonNode);
+    jsonNodeArray->Put(std::move(jsonNode));
 }
 #endif
 
@@ -344,13 +344,13 @@ std::string GetInspectorInfo(std::vector<RefPtr<NG::UINode>> children, int32_t p
         GetInspectorChildren(uiNode, jsonNodeArray, pageId, true);
     }
     if (jsonNodeArray->GetArraySize()) {
-        jsonRoot->Put(INSPECTOR_CHILDREN, jsonNodeArray);
+        jsonRoot->Put(INSPECTOR_CHILDREN, std::move(jsonNodeArray));
     }
 
     if (isLayoutInspector) {
         auto jsonTree = JsonUtil::Create(true);
         jsonTree->Put("type", "root");
-        jsonTree->Put("content", jsonRoot);
+        jsonTree->Put("content", std::move(jsonRoot));
         return jsonTree->ToString();
     }
 
@@ -400,7 +400,7 @@ std::string Inspector::GetInspectorNodeByKey(const std::string& key)
     std::string debugLine = inspectorElement->GetDebugLine();
     jsonNode->Put(INSPECTOR_DEBUGLINE, debugLine.c_str());
     inspectorElement->ToJsonValue(jsonAttrs);
-    jsonNode->Put(INSPECTOR_ATTRS, jsonAttrs);
+    jsonNode->Put(INSPECTOR_ATTRS, std::move(jsonAttrs));
     return jsonNode->ToString();
 }
 
@@ -534,7 +534,7 @@ void FillSimplifiedInspectorAttrs(const RefPtr<NG::UINode>& parent, std::unique_
     jsonObject->Put(INSPECTOR_OPACITY, tmpJson->GetDouble(INSPECTOR_OPACITY));
     jsonObject->Put(INSPECTOR_ZINDEX, tmpJson->GetInt(INSPECTOR_ZINDEX));
     jsonObject->Put(INSPECTOR_VISIBILITY, tmpJson->GetString(INSPECTOR_VISIBILITY).c_str());
-    jsonNode->Put(INSPECTOR_ATTRS, jsonObject);
+    jsonNode->Put(INSPECTOR_ATTRS, std::move(jsonObject));
 }
 
 void GetSimplifiedSpanInspector(
@@ -552,7 +552,7 @@ void GetSimplifiedSpanInspector(
     jsonNode->Put(INSPECTOR_TYPE, parent->GetTag().c_str());
     RectF rect = node->GetTransformRectRelativeToWindow();
     jsonNode->Put(INSPECTOR_RECT, rect.ToBounds().c_str());
-    jsonNodeArray->Put(jsonNode);
+    jsonNodeArray->Put(std::move(jsonNode));
 }
 
 void GetSimplifiedInspectorChildren(
@@ -586,9 +586,9 @@ void GetSimplifiedInspectorChildren(
         GetSimplifiedInspectorChildren(uiNode, jsonChildrenArray, pageId, isActive);
     }
     if (jsonChildrenArray->GetArraySize()) {
-        jsonNode->Put(INSPECTOR_CHILDREN, jsonChildrenArray);
+        jsonNode->Put(INSPECTOR_CHILDREN, std::move(jsonChildrenArray));
     }
-    jsonNodeArray->Put(jsonNode);
+    jsonNodeArray->Put(std::move(jsonNode));
 }
 
 std::string Inspector::GetSimplifiedInspector(int32_t containerId)
@@ -631,7 +631,7 @@ std::string Inspector::GetSimplifiedInspector(int32_t containerId)
         GetSimplifiedInspectorChildren(uiNode, jsonNodeArray, pageId, true);
     }
     if (jsonNodeArray->GetArraySize()) {
-        jsonRoot->Put(INSPECTOR_CHILDREN, jsonNodeArray);
+        jsonRoot->Put(INSPECTOR_CHILDREN, std::move(jsonNodeArray));
     }
 
     return jsonRoot->ToString();
