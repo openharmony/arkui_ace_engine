@@ -88,19 +88,21 @@ export struct EditableTitleBar {
           Navigator()
             .active(this.backActive)
 
-          ImageMenuItem({ item: {
-            value: PUBLIC_BACK,
-            isEnabled: true,
-            action: () => this.onCancel ? this.onCancel() : this.backActive = true,
-          },
+          ImageMenuItem({
+            item: {
+              value: PUBLIC_BACK,
+              isEnabled: true,
+              action: () => this.onCancel ? this.onCancel() : this.backActive = true,
+            },
             attribute: ItemType.LeftIcon,
           })
         } else {
-          ImageMenuItem({ item: {
-            value: PUBLIC_CANCEL,
-            isEnabled: true,
-            action: () => this.onCancel && this.onCancel(),
-          },
+          ImageMenuItem({
+            item: {
+              value: PUBLIC_CANCEL,
+              isEnabled: true,
+              action: () => this.onCancel && this.onCancel(),
+            },
             attribute: ItemType.LeftIcon,
           })
         }
@@ -144,8 +146,8 @@ export struct EditableTitleBar {
         }
         .justifyContent(FlexAlign.Start)
         .padding({
-          top: $r('sys.float.padding_level2'),
-          bottom: $r('sys.float.padding_level2'),
+          top: $r('sys.float.titlebar_padding_top'),
+          bottom: $r('sys.float.titlebar_padding_bottom'),
         })
         .margin({
           left: $r('sys.float.titlebar_icon_background_space_horizontal'),
@@ -272,59 +274,31 @@ struct ImageMenuItem {
   @State isOnHover: boolean = false;
   @State isOnClick: boolean = false;
 
-  getFgColor(): ResourceStr {
-    if (this.isOnClick) {
-      return $r('sys.color.titlebar_icon_background_pressed_color');
-    } else if (this.isOnHover) {
-      return $r('sys.color.titlebar_icon_background_hover_color');
-    } else {
-      return EditableTitleBar.noneColor;
-    }
+  @Styles focusedStyle() {
+    .border({
+      radius: $r('sys.float.titlebar_icon_background_shape'),
+      width: $r('sys.float.titlebar_icon_background_focus_outline_weight'),
+      color: $r('sys.color.titlebar_icon_background_focus_outline_color'),
+      style: BorderStyle.Solid,
+    })
   }
 
-  @Builder
-  IconBuilder(): void {
-    Button({ type: ButtonType.Normal, stateEffect: this.item.isEnabled }) {
-      Image(this.item.value)
-        .width($r('sys.float.titlebar_icon_width'))
-        .height($r('sys.float.titlebar_icon_height'))
-        .fillColor($r('sys.color.titlebar_icon_color'))
-        .focusable(this.item.isEnabled)
-        .enabled(this.item.isEnabled)
-    }
-    .width(ImageMenuItem.imageHotZoneWidth)
-    .height(ImageMenuItem.imageHotZoneWidth)
-    .borderRadius($r('sys.float.titlebar_icon_background_shape'))
-    .margin({
-      left: this.attribute === ItemType.LeftIcon ? EditableTitleBar.commonZero :
-        ImageMenuItem.iconBackgroundSpaceHorizontal,
+  @Styles notInFocusedStyle() {
+    .border({
+      radius: $r('sys.float.titlebar_icon_background_shape'),
+      width: EditableTitleBar.commonZero,
     })
-    .focusable(this.item.isEnabled)
-    .enabled(this.item.isEnabled)
-    .foregroundColor(this.getFgColor())
-    .backgroundColor($r('sys.color.titlebar_icon_background_color'))
+  }
+
+  @Styles buttonStateStyles() {
     .stateStyles({
-      focused: {
-        .border({
-          radius: $r('sys.float.titlebar_icon_background_shape'),
-          width: $r('sys.float.titlebar_icon_background_focus_outline_weight'),
-          color: $r('sys.color.titlebar_icon_background_focus_outline_color'),
-          style: BorderStyle.Solid,
-        })
-      },
-      normal: {
-        .border({
-          radius: $r('sys.float.titlebar_icon_background_shape'),
-          width: EditableTitleBar.commonZero,
-        })
-      },
-      pressed: {
-        .border({
-          radius: $r('sys.float.titlebar_icon_background_shape'),
-          width: EditableTitleBar.commonZero,
-        })
-      }
+      focused: this.focusedStyle,
+      normal: this.notInFocusedStyle,
+      pressed: this.notInFocusedStyle,
     })
+  }
+
+  @Styles buttonEventStyle() {
     .onFocus(() => {
       if (!this.item.isEnabled) {
         return;
@@ -366,6 +340,45 @@ struct ImageMenuItem {
     .onClick(() => this.item.isEnabled && this.item.action && this.item.action())
   }
 
+  @Styles backgroundButtonStyle() {
+    .width(ImageMenuItem.imageHotZoneWidth)
+    .height(ImageMenuItem.imageHotZoneHeight)
+    .focusable(this.item.isEnabled)
+    .enabled(this.item.isEnabled)
+  }
+
+  getFgColor(): ResourceStr {
+    if (this.isOnClick) {
+      return $r('sys.color.titlebar_icon_background_pressed_color');
+    } else if (this.isOnHover) {
+      return $r('sys.color.titlebar_icon_background_hover_color');
+    } else {
+      return EditableTitleBar.noneColor;
+    }
+  }
+
+  @Builder
+  IconBuilder(): void {
+    Button({ type: ButtonType.Normal, stateEffect: this.item.isEnabled }) {
+      Image(this.item.value)
+        .width($r('sys.float.titlebar_icon_width'))
+        .height($r('sys.float.titlebar_icon_height'))
+        .fillColor($r('sys.color.titlebar_icon_color'))
+        .focusable(this.item.isEnabled)
+        .enabled(this.item.isEnabled)
+    }
+    .backgroundButtonStyle()
+    .borderRadius($r('sys.float.titlebar_icon_background_shape'))
+    .margin({
+      left: this.attribute === ItemType.LeftIcon ? EditableTitleBar.commonZero :
+      ImageMenuItem.iconBackgroundSpaceHorizontal,
+    })
+    .foregroundColor(this.getFgColor())
+    .backgroundColor($r('sys.color.titlebar_icon_background_color'))
+    .buttonStateStyles()
+    .buttonEventStyle()
+  }
+
   @Builder
   ImageBuilder() {
     Stack({ alignContent: Alignment.Center }) {
@@ -378,72 +391,11 @@ struct ImageMenuItem {
         .objectFit(ImageFit.Cover)
 
       Button({ type: ButtonType.Circle })
-        .width(ImageMenuItem.imageHotZoneWidth)
-        .height(ImageMenuItem.imageHotZoneHeight)
+        .backgroundButtonStyle()
+        .foregroundColor(this.getFgColor())
         .backgroundColor(EditableTitleBar.noneColor)
-        .focusable(this.item.isEnabled)
-        .enabled(this.item.isEnabled)
-        .stateStyles({
-          focused: {
-            .border({
-              radius: $r('sys.float.titlebar_icon_background_shape'),
-              width: $r('sys.float.titlebar_icon_background_focus_outline_weight'),
-              color: $r('sys.color.titlebar_icon_background_focus_outline_color'),
-              style: BorderStyle.Solid,
-            })
-          },
-          normal: {
-            .border({
-              radius: $r('sys.float.titlebar_icon_background_shape'),
-              width: EditableTitleBar.commonZero,
-            })
-          },
-          pressed: {
-            .border({
-              radius: $r('sys.float.titlebar_icon_background_shape'),
-              width: EditableTitleBar.commonZero,
-            })
-          }
-        })
-        .onFocus(() => {
-          if (!this.item.isEnabled) {
-            return;
-          }
-          this.isOnFocus = true;
-        })
-        .onBlur(() => this.isOnFocus = false)
-        .onHover((isOn) => {
-          if (!this.item.isEnabled) {
-            return;
-          }
-          this.isOnHover = isOn;
-        })
-        .onKeyEvent((event) => {
-          if (!this.item.isEnabled) {
-            return;
-          }
-          if (event.keyCode !== KeyCode.KEYCODE_ENTER && event.keyCode !== KeyCode.KEYCODE_SPACE) {
-            return;
-          }
-          if (event.type === KeyType.Down) {
-            this.isOnClick = true;
-          }
-          if (event.type === KeyType.Up) {
-            this.isOnClick = false;
-          }
-        })
-        .onTouch((event) => {
-          if (!this.item.isEnabled) {
-            return;
-          }
-          if (event.type === TouchType.Down) {
-            this.isOnClick = true;
-          }
-          if (event.type === TouchType.Up) {
-            this.isOnClick = false;
-          }
-        })
-        .onClick(() => this.item.isEnabled && this.item.action && this.item.action())
+        .buttonStateStyles()
+        .buttonEventStyle()
     }
     .margin({
       left: ImageMenuItem.iconBackgroundSpaceHorizontal,
