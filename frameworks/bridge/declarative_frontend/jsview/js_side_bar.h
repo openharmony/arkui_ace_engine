@@ -31,7 +31,7 @@ class JSSideBar : public JSStack {
 public:
     static void JSBind(BindingTarget globalObj);
     static void Create(const JSCallbackInfo& info);
-    static void SetShowControlButton(const JSCallbackInfo& info);
+    static void SetShowControlButton(bool isShow);
     static void OnChange(const JSCallbackInfo& info);
     static void JsSideBarWidth(const JSCallbackInfo& info);
     static void JsMaxSideBarWidth(const JSCallbackInfo& info);
