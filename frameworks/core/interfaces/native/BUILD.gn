@@ -58,6 +58,7 @@ template("ace_core_interfaces_native_node") {
       "node/navigation_modifier.cpp",
       "node/navigator_modifier.cpp",
       "node/node_api.cpp",
+      "node/node_canvas_modifier.cpp",
       "node/node_checkbox_modifier.cpp",
       "node/node_common_modifier.cpp",
       "node/node_container_modifier.cpp",

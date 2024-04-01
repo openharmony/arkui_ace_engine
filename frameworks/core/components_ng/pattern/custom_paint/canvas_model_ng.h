@@ -25,6 +25,7 @@ public:
     RefPtr<AceType> GetTaskPool(RefPtr<AceType>& pattern) override;
     void SetOnReady(std::function<void()>&& onReady) override;
     void EnableAnalyzer(bool enable) override;
+    static void SetOnReady(FrameNode* frameNode, std::function<void()>&& onReady);
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_CUSTOM_PAINT_CANVAS_MODEL_NG_H
