@@ -486,5 +486,81 @@
     {
         "first_introduced": "12",
         "name": "OH_ArkUI_GetModuleInterface"
+    },
+    {
+        "first_introduced": "12",    
+        "name": "OH_ArkUI_NodeAdapter_Create"
+    },
+    {
+        "first_introduced": "12",
+        "name": "OH_ArkUI_NodeAdapter_Dispose"
+    },
+    {
+        "first_introduced": "12",
+        "name": "OH_ArkUI_NodeAdapter_SetTotalNodeCount"
+    },
+    {
+        "first_introduced": "12",
+        "name": "OH_ArkUI_NodeAdapter_GetTotalNodeCount"
+    },
+    {
+        "first_introduced": "12",
+        "name": "OH_ArkUI_NodeAdapter_RegisterEventReceiver"
+    },
+    {
+        "first_introduced": "12",
+        "name": "OH_ArkUI_NodeAdapter_UnregisterEventReceiver"
+    },
+    {
+        "first_introduced": "12",
+        "name": "OH_ArkUI_NodeAdapter_NotifyItemReloaded"
+    },
+    {
+        "first_introduced": "12",
+        "name": "OH_ArkUI_NodeAdapter_NotifyItemChanged"
+    },
+    {
+        "first_introduced": "12",
+        "name": "OH_ArkUI_NodeAdapter_NotifyItemRemoved"
+    },
+    {
+        "first_introduced": "12",
+        "name": "OH_ArkUI_NodeAdapter_NotifyItemInserted"
+    },
+    {
+        "first_introduced": "12",
+        "name": "OH_ArkUI_NodeAdapter_NotifyItemMoved"
+    },
+    {
+        "first_introduced": "12",
+        "name": "OH_ArkUI_NodeAdapter_GetAllItem"
+    },
+    {
+        "first_introduced": "12",
+        "name": "OH_ArkUI_NodeAdapterEvent_GetUserData"
+    },
+    {
+        "first_introduced": "12",
+        "name": "OH_ArkUI_NodeAdapterEvent_GetType"
+    },
+    {
+        "first_introduced": "12",
+        "name": "OH_ArkUI_NodeAdapterEvent_GetRemovedNode"
+    },
+    {
+        "first_introduced": "12",
+        "name": "OH_ArkUI_NodeAdapterEvent_GetItemIndex"
+    },
+    {
+        "first_introduced": "12",
+        "name": "OH_ArkUI_NodeAdapterEvent_GetHostNode"
+    },
+    {
+        "first_introduced": "12",
+        "name": "OH_ArkUI_NodeAdapterEvent_SetAddedItem"
+    },
+    {
+        "first_introduced": "12",
+        "name": "OH_ArkUI_NodeAdapterEvent_SetNodeId"
     }
 ]

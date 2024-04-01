@@ -61,6 +61,7 @@ struct _ArkUICanvas;
 struct _ArkUIPaint;
 struct _ArkUIFont;
 struct _ArkUIXComponentController;
+struct _ArkUINodeAdapter;
 
 typedef _ArkUINode* ArkUINodeHandle;
 typedef _ArkUIVMContext* ArkUIVMContext;
@@ -69,6 +70,7 @@ typedef _ArkUICanvas* ArkUICanvasHandle;
 typedef _ArkUIPaint* ArkUIPaintHandle;
 typedef _ArkUIFont* ArkUIFontHandle;
 typedef _ArkUIXComponentController* ArkUIXComponentControllerHandle;
+typedef _ArkUINodeAdapter* ArkUINodeAdapterHandle;
 
 struct ArkUIRect {
     ArkUI_Float32 x;
@@ -1529,6 +1531,10 @@ struct ArkUIListModifier {
     ArkUI_Float32 (*getListSpace)(ArkUINodeHandle node);
     void (*setListSpace)(ArkUINodeHandle node, ArkUI_Float32 space);
     void (*resetListSpace)(ArkUINodeHandle node);
+    ArkUI_Int32 (*setNodeAdapter)(ArkUINodeHandle node, ArkUINodeAdapterHandle handle);
+    void (*resetNodeAdapter)(ArkUINodeHandle node);
+    ArkUINodeAdapterHandle (*getNodeAdapter)(ArkUINodeHandle node);
+    ArkUI_Int32 (*getCachedCount)(ArkUINodeHandle node);
 };
 
 struct ArkUIListItemGroupModifier {
@@ -1589,6 +1595,12 @@ struct ArkUISwiperModifier {
     ArkUI_Int32 (*getSwiperShowIndicator)(ArkUINodeHandle node);
     ArkUI_Int32 (*getSwiperShowDisplayArrow)(ArkUINodeHandle node);
     ArkUI_Int32 (*getSwiperEffectMode)(ArkUINodeHandle node);
+    ArkUI_Int32 (*setNodeAdapter)(ArkUINodeHandle node, ArkUINodeAdapterHandle handle);
+    void (*resetNodeAdapter)(ArkUINodeHandle node);
+    ArkUINodeAdapterHandle (*getNodeAdapter)(ArkUINodeHandle node);
+    void (*setCachedCount)(ArkUINodeHandle node, ArkUI_Int32 cachedCount);
+    void (*resetCachedCount)(ArkUINodeHandle node);
+    ArkUI_Int32 (*getCachedCount)(ArkUINodeHandle node);
 };
 
 struct ArkUISwiperControllerModifier {
@@ -2272,6 +2284,12 @@ struct ArkUIWaterFlowModifier {
     ArkUI_Float32 (*getColumnsGap)(ArkUINodeHandle node);
     ArkUI_Float32 (*getRowsGap)(ArkUINodeHandle node);
     void (*getWaterFlowNestedScroll)(ArkUINodeHandle node, ArkUI_Int32* value);
+    ArkUI_Int32 (*setNodeAdapter)(ArkUINodeHandle node, ArkUINodeAdapterHandle handle);
+    void (*resetNodeAdapter)(ArkUINodeHandle node);
+    ArkUINodeAdapterHandle (*getNodeAdapter)(ArkUINodeHandle node);
+    void (*setCachedCount)(ArkUINodeHandle node, ArkUI_Int32 cachedCount);
+    void (*resetCachedCount)(ArkUINodeHandle node);
+    ArkUI_Int32 (*getCachedCount)(ArkUINodeHandle node);
 };
 
 struct ArkUIMenuItemModifier {
@@ -3283,11 +3301,11 @@ struct ArkUIBasicAPI {
     ArkUI_CharPtr (*getName)(ArkUINodeHandle node);
     void (*dump)(ArkUINodeHandle node);
 
-    void (*addChild)(ArkUINodeHandle parent, ArkUINodeHandle child);
+    ArkUI_Int32 (*addChild)(ArkUINodeHandle parent, ArkUINodeHandle child);
     void (*removeChild)(ArkUINodeHandle parent, ArkUINodeHandle child);
-    void (*insertChildAfter)(ArkUINodeHandle parent, ArkUINodeHandle child, ArkUINodeHandle sibling);
-    void (*insertChildBefore)(ArkUINodeHandle parent, ArkUINodeHandle child, ArkUINodeHandle sibling);
-    void (*insertChildAt)(ArkUINodeHandle parent, ArkUINodeHandle child, ArkUI_Int32 position);
+    ArkUI_Int32 (*insertChildAfter)(ArkUINodeHandle parent, ArkUINodeHandle child, ArkUINodeHandle sibling);
+    ArkUI_Int32 (*insertChildBefore)(ArkUINodeHandle parent, ArkUINodeHandle child, ArkUINodeHandle sibling);
+    ArkUI_Int32 (*insertChildAt)(ArkUINodeHandle parent, ArkUINodeHandle child, ArkUI_Int32 position);
 
     // Returned pointer is valid only till node is alive.
     ArkUI_CharPtr (*getAttribute)(ArkUINodeHandle node, ArkUI_CharPtr attribute);
@@ -3407,6 +3425,46 @@ struct ArkUIExtendedNodeAPI {
     void (*showCrash)(ArkUI_CharPtr message);
 };
 
+typedef enum {
+    ON_ATTACH_TO_NODE = 1,
+    ON_DETACH_FROM_NODE = 2,
+    ON_GET_NODE_ID = 3,
+    ON_ADD_NODE_TO_ADAPTER = 4,
+    ON_REMOVE_NODE_FROM_ADAPTER = 5,
+} ArkUINodeAdapterEventType;
+
+typedef struct {
+    ArkUI_Uint32 index;
+    ArkUI_Int32 id;
+    ArkUI_Int64 extraParam;
+    ArkUI_Bool idSet;
+    ArkUINodeAdapterEventType type;
+    ArkUINodeHandle handle;
+    ArkUI_Bool nodeSet;
+} ArkUINodeAdapterEvent;
+
+typedef struct {
+    ArkUINodeAdapterHandle (*create)();
+    void (*dispose)(ArkUINodeAdapterHandle handle);
+    ArkUI_Int32 (*setTotalNodeCount)(ArkUINodeAdapterHandle handle, ArkUI_Uint32 size);
+    ArkUI_Uint32 (*getTotalNodeCount)(ArkUINodeAdapterHandle handle);
+    ArkUI_Int32 (*registerEventReceiver)(
+        ArkUINodeAdapterHandle handle, void* userData, void (*receiver)(ArkUINodeAdapterEvent* event));
+    void (*unregisterEventReceiver)(ArkUINodeAdapterHandle handle);
+
+    ArkUI_Int32 (*notifyItemReloaded)(ArkUINodeAdapterHandle handle);
+    ArkUI_Int32 (*notifyItemChanged)(ArkUINodeAdapterHandle handle, ArkUI_Uint32 startPosition, ArkUI_Uint32 itemCount);
+    ArkUI_Int32 (*notifyItemRemoved)(ArkUINodeAdapterHandle handle, ArkUI_Uint32 startPosition, ArkUI_Uint32 itemCount);
+    ArkUI_Int32 (*notifyItemInserted)(
+        ArkUINodeAdapterHandle handle, ArkUI_Uint32 startPosition, ArkUI_Uint32 itemCount);
+    ArkUI_Int32 (*notifyItemMoved)(ArkUINodeAdapterHandle handle, ArkUI_Uint32 from, ArkUI_Uint32 to);
+    ArkUI_Int32 (*getAllItem)(ArkUINodeAdapterHandle handle, ArkUINodeHandle** items, ArkUI_Uint32* size);
+
+    void (*attachHostNode)(ArkUINodeAdapterHandle handle, ArkUINodeHandle host);
+    void (*detachHostNode)(ArkUINodeHandle host);
+    ArkUINodeAdapterHandle (*getNodeAdapter)(ArkUINodeHandle host);
+} ArkUINodeAdapterAPI;
+
 /**
  * An API to control an implementation. When making changes modifying binary
  * layout, i.e. adding new events - increase ARKUI_NODE_API_VERSION above for binary
@@ -3422,6 +3480,7 @@ struct ArkUIFullNodeAPI {
     const ArkUIGraphicsAPI* (*getGraphicsAPI)();
     const ArkUIDialogAPI* (*getDialogAPI)();
     const ArkUIExtendedNodeAPI* (*getExtendedAPI)();
+    const ArkUINodeAdapterAPI* (*getNodeAdapterAPI)();
 };
 
 struct ArkUIAnyAPI {

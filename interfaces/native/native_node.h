@@ -3306,6 +3306,10 @@ typedef enum {
      */
     NODE_LIST_SPACE,
 
+    NODE_LIST_NODE_ADAPTER,
+
+    NODE_LIST_CACHED_COUNT,
+
     /**
      * @brief Defines whether to enable loop playback for the swiper. This attribute can be set, reset, and obtained
      * as required through APIs.
@@ -3491,6 +3495,10 @@ typedef enum {
      *
      */
     NODE_SWIPER_EDGE_EFFECT_MODE,
+
+    NODE_SWIPER_NODE_ADAPTER,
+
+    NODE_SWIPER_CACHED_COUNT,
 
     /**
      * @brief Defines the header of the list item group.
@@ -3725,6 +3733,10 @@ typedef enum {
      *
      */
     NODE_WATER_FLOW_SECTION_OPTION,
+
+    NODE_WATER_FLOW_NODE_ADAPTER,
+
+    NODE_WATER_FLOW_CACHED_COUNT,
 } ArkUI_NodeAttributeType;
 
 #define MAX_COMPONENT_EVENT_ARG_NUM 12
@@ -4344,6 +4356,48 @@ typedef enum {
  */
 typedef struct ArkUI_NodeCustomEvent ArkUI_NodeCustomEvent;
 
+typedef struct ArkUI_NodeAdapter* ArkUI_NodeAdapterHandle;
+typedef struct ArkUI_NodeAdapterEvent ArkUI_NodeAdapterEvent;
+
+typedef enum {
+    NODE_ADAPTER_EVENT_ON_ATTACH_TO_NODE = 1,
+    NODE_ADAPTER_EVENT_ON_DETACH_FROM_NODE = 2,
+    NODE_ADAPTER_EVENT_ON_GET_NODE_ID = 3,
+    NODE_ADAPTER_EVENT_ON_ADD_NODE_TO_ADAPTER = 4,
+    NODE_ADAPTER_EVENT_ON_REMOVE_NODE_FROM_ADAPTER = 5,
+} ArkUI_NodeAdapterEventType;
+
+ArkUI_NodeAdapterHandle OH_ArkUI_NodeAdapter_Create();
+void OH_ArkUI_NodeAdapter_Dispose(ArkUI_NodeAdapterHandle handle);
+
+int32_t OH_ArkUI_NodeAdapter_SetTotalNodeCount(ArkUI_NodeAdapterHandle handle, uint32_t size);
+uint32_t OH_ArkUI_NodeAdapter_GetTotalNodeCount(ArkUI_NodeAdapterHandle handle);
+
+int32_t OH_ArkUI_NodeAdapter_RegisterEventReceiver(
+    ArkUI_NodeAdapterHandle handle, void* userData, void (*receiver)(ArkUI_NodeAdapterEvent* event));
+
+void OH_ArkUI_NodeAdapter_UnregisterEventReceiver(ArkUI_NodeAdapterHandle handle);
+
+int32_t OH_ArkUI_NodeAdapter_NotifyItemReloaded(ArkUI_NodeAdapterHandle handle);
+int32_t OH_ArkUI_NodeAdapter_NotifyItemChanged(
+    ArkUI_NodeAdapterHandle handle, uint32_t startPosition, uint32_t itemCount);
+int32_t OH_ArkUI_NodeAdapter_NotifyItemRemoved(
+    ArkUI_NodeAdapterHandle handle, uint32_t startPosition, uint32_t itemCount);
+int32_t OH_ArkUI_NodeAdapter_NotifyItemInserted(
+    ArkUI_NodeAdapterHandle handle, uint32_t startPosition, uint32_t itemCount);
+int32_t OH_ArkUI_NodeAdapter_NotifyItemMoved(ArkUI_NodeAdapterHandle handle, uint32_t from, uint32_t to);
+
+int32_t OH_ArkUI_NodeAdapter_GetAllItem(ArkUI_NodeAdapterHandle handle, ArkUI_NodeHandle** items, uint32_t* size);
+
+void* OH_ArkUI_NodeAdapterEvent_GetUserData(ArkUI_NodeAdapterEvent* event);
+ArkUI_NodeAdapterEventType OH_ArkUI_NodeAdapterEvent_GetType(ArkUI_NodeAdapterEvent* event);
+ArkUI_NodeHandle OH_ArkUI_NodeAdapterEvent_GetRemovedNode(ArkUI_NodeAdapterEvent* event);
+uint32_t OH_ArkUI_NodeAdapterEvent_GetItemIndex(ArkUI_NodeAdapterEvent* event);
+ArkUI_NodeHandle OH_ArkUI_NodeAdapterEvent_GetHostNode(ArkUI_NodeAdapterEvent* event);
+
+int32_t OH_ArkUI_NodeAdapterEvent_SetAddedItem(ArkUI_NodeAdapterEvent* event, ArkUI_NodeHandle handle);
+int32_t OH_ArkUI_NodeAdapterEvent_SetNodeId(ArkUI_NodeAdapterEvent* event, int32_t id);
+
 /**
  * @brief Declares a collection of native node APIs provided by ArkUI.
  *
@@ -4732,6 +4786,10 @@ typedef struct {
      */
     int32_t (*removeNodeCustomEventReceiver)(ArkUI_NodeHandle node,
         void (*eventReceiver)(ArkUI_NodeCustomEvent* event));
+
+    int32_t (*setUserData)(ArkUI_NodeHandle node, void* userData);
+
+    void* (*getUserData)(ArkUI_NodeHandle node);
 } ArkUI_NativeNodeAPI_1;
 
 

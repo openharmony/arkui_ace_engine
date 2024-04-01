@@ -230,6 +230,18 @@ void WaterFlowModelNG::SetCachedCount(int32_t value)
     ACE_UPDATE_LAYOUT_PROPERTY(WaterFlowLayoutProperty, CachedCount, value);
 }
 
+void WaterFlowModelNG::SetCachedCount(FrameNode* frameNode, int32_t value)
+{
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(WaterFlowLayoutProperty, CachedCount, value, frameNode);
+}
+
+int32_t WaterFlowModelNG::GetCachedCount(FrameNode* frameNode)
+{
+    int32_t cachedCount = 1;
+    ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(WaterFlowLayoutProperty, CachedCount, cachedCount, frameNode, 1);
+    return cachedCount;
+}
+
 void WaterFlowModelNG::SetEdgeEffect(EdgeEffect edgeEffect, bool alwaysEnabled)
 {
     ScrollableModelNG::SetEdgeEffect(edgeEffect, alwaysEnabled);

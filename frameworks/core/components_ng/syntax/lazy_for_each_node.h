@@ -18,10 +18,7 @@
 
 #include <list>
 #include <optional>
-#include <stdint.h>
 #include <string>
-#include <unordered_set>
-#include <utility>
 
 #include "base/utils/utils.h"
 #include "core/common/resource/resource_configuration.h"
@@ -33,10 +30,13 @@
 namespace OHOS::Ace::NG {
 
 class ACE_EXPORT LazyForEachNode : public UINode, public V2::DataChangeListener {
-    DECLARE_ACE_TYPE(LazyForEachNode, UINode);
+    DECLARE_ACE_TYPE(LazyForEachNode, UINode, DataChangeListener);
 
 public:
     static RefPtr<LazyForEachNode> GetOrCreateLazyForEachNode(
+        int32_t nodeId, const RefPtr<LazyForEachBuilder>& forEachBuilder);
+
+    static RefPtr<LazyForEachNode> CreateLazyForEachNode(
         int32_t nodeId, const RefPtr<LazyForEachBuilder>& forEachBuilder);
 
     LazyForEachNode(int32_t nodeId, const RefPtr<LazyForEachBuilder>& forEachBuilder)
@@ -74,6 +74,9 @@ public:
     void OnDataChanged(size_t index) override;
     void OnDataMoved(size_t from, size_t to) override;
     void OnDatasetChange(const std::list<V2::Operation>& DataOperations) override;
+
+    void OnDataBulkChanged(size_t index, size_t count) override;
+    void OnDataMoveToNewPlace(size_t from, size_t to) override;
 
     void PostIdleTask(std::list<int32_t>&& items, const std::optional<LayoutConstraintF>& itemConstraint = std::nullopt,
         bool longPredictTask = false);
@@ -137,6 +140,11 @@ public:
         count_ = count;
     }
     void RecycleItems(int32_t from, int32_t to);
+
+    const RefPtr<LazyForEachBuilder>& GetBuilder() const
+    {
+        return builder_;
+    }
 
 private:
     void OnAttachToMainTree(bool recursive) override

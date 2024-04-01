@@ -15,6 +15,7 @@
 
 #include "core/components_ng/pattern/swiper/swiper_model_ng.h"
 
+#include <cstdint>
 #include <functional>
 #include <memory>
 
@@ -385,6 +386,13 @@ void SwiperModelNG::SetCachedCount(FrameNode* frameNode, int32_t cachedCount)
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(SwiperLayoutProperty, CachedCount, cachedCount, frameNode);
 }
 
+int32_t SwiperModelNG::GetCachedCount(FrameNode* frameNode)
+{
+    int32_t cachedCount = 1;
+    ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(SwiperLayoutProperty, CachedCount, cachedCount, frameNode, 1);
+    return cachedCount;
+}
+
 void SwiperModelNG::SetAutoPlay(FrameNode* frameNode, bool autoPlay)
 {
     ACE_UPDATE_NODE_PAINT_PROPERTY(SwiperPaintProperty, AutoPlay, autoPlay, frameNode);
@@ -669,4 +677,13 @@ EdgeEffect SwiperModelNG::GetEffectMode(FrameNode* frameNode)
     ACE_GET_NODE_PAINT_PROPERTY_WITH_DEFAULT_VALUE(SwiperPaintProperty, EdgeEffect, mode, frameNode, mode);
     return mode;
 }
+
+int32_t SwiperModelNG::RealTotalCount(FrameNode* frameNode)
+{
+    CHECK_NULL_RETURN(frameNode, 0);
+    auto pattern = frameNode->GetPattern<SwiperPattern>();
+    CHECK_NULL_RETURN(pattern, 0);
+    return pattern->RealTotalCount();
+}
+
 } // namespace OHOS::Ace::NG
