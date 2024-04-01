@@ -411,6 +411,10 @@ void WebPattern::InitHoverEvent(const RefPtr<InputEventHub>& inputHub)
         CHECK_NULL_VOID(pattern);
         MouseInfo info;
         info.SetAction(isHover ? MouseAction::HOVER : MouseAction::HOVER_EXIT);
+        if (!isHover) {
+            OHOS::NWeb::NWebCursorInfo cursorInfo;
+            pattern->OnCursorChange(OHOS::NWeb::CursorType::CT_POINTER, cursorInfo);
+        }
         pattern->WebOnMouseEvent(info);
     };
 
