@@ -422,6 +422,7 @@ void XComponentPattern::BeforeCreateLayoutWrapper()
     auto container = Container::Current();
     CHECK_NULL_VOID(container);
     auto displayInfo = container->GetDisplayInfo();
+    CHECK_NULL_VOID(displayInfo);
     auto dmRotation = displayInfo->GetRotation();
     auto transform = CovertRotation(dmRotation);
     renderSurface_->SetTransformHint(transform);
