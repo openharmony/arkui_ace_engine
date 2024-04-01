@@ -724,13 +724,11 @@ CalcLength ContainerModalPattern::GetControlButtonRowWidth()
                       TITLE_PADDING_START + TITLE_PADDING_END);
 }
 
-void ContainerModalPattern::InitStackNode()
+void ContainerModalPattern::InitColumnTouchTestFunc()
 {
-    auto stack = GetStackNode();
-    CHECK_NULL_VOID(stack);
-    auto eventHub = stack->GetOrCreateGestureEventHub();
-    auto stackProp = stack->GetLayoutProperty();
-    stackProp->UpdateAlignment(Alignment::TOP_LEFT);
+    auto column = GetColumnNode();
+    CHECK_NULL_VOID(column);
+    auto eventHub = column->GetOrCreateGestureEventHub();
     auto func = [](const std::vector<TouchTestInfo>& touchInfo) -> TouchResult {
         TouchResult touchRes;
         TouchResult defaultRes;
@@ -738,7 +736,7 @@ void ContainerModalPattern::InitStackNode()
         defaultRes.strategy = TouchTestStrategy::DEFAULT;
         defaultRes.id = "";
         for (auto info : touchInfo) {
-            if (info.id.compare(CONTAINER_MODAL_CONTENT_ID) == 0) {
+            if (info.id.compare(CONTAINER_MODAL_STACK_ID) == 0) {
                 touchRes.id = info.id;
                 return touchRes;
             }

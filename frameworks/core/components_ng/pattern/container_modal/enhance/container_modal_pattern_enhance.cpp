@@ -121,11 +121,11 @@ void ContainerModalPatternEnhance::ShowTitle(bool isShow, bool hasDeco, bool nee
     AddOrRemovePanEvent(gestureRow);
     gestureRow->GetLayoutProperty()->UpdateVisibility(
         (isShow && customTitleSettedShow_) ? VisibleType::GONE : VisibleType::VISIBLE);
-    InitStackNode();
+    InitColumnTouchTestFunc();
     controlButtonsNode->SetHitTestMode(HitTestMode::HTMTRANSPARENT_SELF);
-    auto content = GetContentNode();
-    CHECK_NULL_VOID(content);
-    content->UpdateInspectorId(CONTAINER_MODAL_CONTENT_ID);
+    auto stack = GetStackNode();
+    CHECK_NULL_VOID(stack);
+    stack->UpdateInspectorId(CONTAINER_MODAL_STACK_ID);
 }
 
 RefPtr<UINode> ContainerModalPatternEnhance::GetTitleItemByIndex(

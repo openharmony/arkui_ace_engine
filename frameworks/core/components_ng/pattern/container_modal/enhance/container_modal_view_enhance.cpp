@@ -65,8 +65,8 @@ namespace OHOS::Ace::NG {
  *      |--stack
  *          |--container_modal_content(stage)
  *              |--page
- *          |--gesture_row(row)
  *          |--dialog(when show)
+ *      |--gesture_row(row)
  *   |--container_modal_custom_floating_title(row)
  *          |--custom_node(js)
  *   |--container_modal_control_buttons(row)
@@ -119,8 +119,8 @@ RefPtr<FrameNode> ContainerModalViewEnhance::Create(RefPtr<FrameNode>& content)
 
     column->AddChild(BuildTitle(containerModalNode));
     stack->AddChild(content);
-    stack->AddChild(BuildGestureRow(containerModalNode));
     column->AddChild(stack);
+    column->AddChild(BuildGestureRow(containerModalNode));
     containerModalNode->AddChild(column);
     containerModalNode->AddChild(BuildTitle(containerModalNode, true));
     containerModalNode->AddChild(AddControlButtons(containerModalNode, controlButtonsRow));
@@ -550,6 +550,7 @@ RefPtr<FrameNode> ContainerModalViewEnhance::BuildGestureRow(RefPtr<FrameNode>& 
         AceType::MakeRefPtr<LinearLayoutPattern>(false));
     auto renderContext = gestureRow->GetRenderContext();
     renderContext->UpdateBackgroundColor(Color::TRANSPARENT);
+    renderContext->UpdatePosition(OffsetT<Dimension>());
     SetTapGestureEvent(containerNode, gestureRow);
     auto layoutProp = gestureRow->GetLayoutProperty();
     layoutProp->UpdateUserDefinedIdealSize(

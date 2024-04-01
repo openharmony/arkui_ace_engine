@@ -126,7 +126,7 @@ public:
     {
         auto columnNode = GetColumnNode();
         CHECK_NULL_RETURN(columnNode, nullptr);
-        return AceType::DynamicCast<FrameNode>(columnNode->GetChildren().back());
+        return AceType::DynamicCast<FrameNode>(columnNode->GetChildAtIndex(1));
     }
 
     RefPtr<FrameNode> GetContentNode()
@@ -145,9 +145,9 @@ public:
 
     RefPtr<FrameNode> GetGestureRow()
     {
-        auto stack = GetStackNode();
-        CHECK_NULL_RETURN(stack, nullptr);
-        return AceType::DynamicCast<FrameNode>(stack->GetChildAtIndex(1));
+        auto column = GetColumnNode();
+        CHECK_NULL_RETURN(column, nullptr);
+        return AceType::DynamicCast<FrameNode>(column->GetChildAtIndex(2));
     }
 
     void SetContainerModalTitleVisible(bool customTitleSettedShow, bool floatingTitleSettedShow);
@@ -168,7 +168,7 @@ public:
         InitTitle();
     }
 
-    void InitStackNode();
+    void InitColumnTouchTestFunc();
 
 protected:
     virtual RefPtr<UINode> GetTitleItemByIndex(const RefPtr<FrameNode>& controlButtonsNode, int32_t originIndex)
