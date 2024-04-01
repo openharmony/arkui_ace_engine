@@ -12,6 +12,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+/* Load the UIContext module. */
+const UIContext = requireNapi("arkui.uicontext")
 
 /* If a new value is added, add it from the end. */
 var Color;
