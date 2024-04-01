@@ -2144,7 +2144,7 @@ void UIContentImpl::InitializeSubWindow(OHOS::Rosen::Window* window, bool isDial
     instanceId_ = Container::GenerateId<COMPONENT_SUBWINDOW_CONTAINER>();
 
     std::weak_ptr<OHOS::AppExecFwk::AbilityInfo> abilityInfo;
-    std::weak_ptr<OHOS::AbilityRuntime::Context> runtimeContext;
+    auto context = context_.lock();
     if (isDialog) {
         UErrorCode status = U_ZERO_ERROR;
         icu::Locale locale = icu::Locale::forLanguageTag(Global::I18n::LocaleConfig::GetSystemLanguage(), status);
@@ -2153,7 +2153,7 @@ void UIContentImpl::InitializeSubWindow(OHOS::Rosen::Window* window, bool isDial
     } else {
 #ifdef NG_BUILD
         container = AceType::MakeRefPtr<Platform::AceContainer>(instanceId_, FrontendType::DECLARATIVE_JS,
-            runtimeContext, abilityInfo, std::make_unique<ContentEventCallback>([] {
+            context, abilityInfo, std::make_unique<ContentEventCallback>([] {
                 // Sub-window ,just return.
                 LOGI("Content event callback");
             }),
@@ -2161,14 +2161,14 @@ void UIContentImpl::InitializeSubWindow(OHOS::Rosen::Window* window, bool isDial
 #else
         if (Container::IsCurrentUseNewPipeline()) {
             container = AceType::MakeRefPtr<Platform::AceContainer>(instanceId_, FrontendType::DECLARATIVE_JS,
-                runtimeContext, abilityInfo, std::make_unique<ContentEventCallback>([] {
+                context, abilityInfo, std::make_unique<ContentEventCallback>([] {
                     // Sub-window ,just return.
                     LOGI("Content event callback");
                 }),
                 false, true, true);
         } else {
             container = AceType::MakeRefPtr<Platform::AceContainer>(instanceId_, FrontendType::DECLARATIVE_JS,
-                runtimeContext, abilityInfo, std::make_unique<ContentEventCallback>([] {
+                context, abilityInfo, std::make_unique<ContentEventCallback>([] {
                     // Sub-window ,just return.
                     LOGI("Content event callback");
                 }),
