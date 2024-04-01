@@ -1016,6 +1016,7 @@ private:
     bool isNeedResetPrevMarginAndNextMargin_ = false;
     bool usePropertyAnimation_ = false;
     bool springAnimationIsRunning_ = false;
+    bool isTouchDownSpringAnimation_ = false;
     int32_t propertyAnimationIndex_ = -1;
     bool isUserFinish_ = true;
     bool isVoluntarilyClear_ = false;
