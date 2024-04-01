@@ -819,7 +819,11 @@ void JSTextPicker::SetGradientHeight(const JSCallbackInfo& info)
         }
     }
     if (info.Length() >= 1) {
-        ConvertFromJSValueNG(info[0], height);
+        if (!ConvertFromJSValueNG(info[0], height)) {
+            if (pickerTheme) {
+                height = pickerTheme->GetGradientHeight();
+            }
+        }
         if ((height.Unit() == DimensionUnit::PERCENT) &&
             ((height.Value() > 1.0f) || (height.Value() < 0.0f))) {
             if (pickerTheme) {
