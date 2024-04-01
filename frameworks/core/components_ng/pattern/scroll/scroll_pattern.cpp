@@ -264,7 +264,11 @@ OverScrollOffset ScrollPattern::GetOverScrollOffset(double delta) const
 
 bool ScrollPattern::IsOutOfBoundary(bool useCurrentDelta)
 {
-    return Positive(currentOffset_) || LessNotEqual(currentOffset_, -scrollableDistance_);
+    if (Positive(scrollableDistance_)) {
+        return Positive(currentOffset_) || LessNotEqual(currentOffset_, -scrollableDistance_);
+    } else {
+        return !NearZero(currentOffset_);
+    }
 }
 
 bool ScrollPattern::ScrollPageCheck(float delta, int32_t source)
