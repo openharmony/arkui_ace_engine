@@ -38,7 +38,6 @@ constexpr Ace::FontStyle DEFAULT_FONT_STYLE = Ace::FontStyle::NORMAL;
 constexpr DisplayMode DEFAULT_BAR_STATE_VALUE = DisplayMode::AUTO;
 constexpr bool DEFAULT_KEY_BOARD_VALUE = true;
 constexpr char DEFAULT_FONT_FAMILY[] = "HarmonyOS Sans";
-constexpr uint32_t DEFAULT_CARET_COLOR = 0xFF007DFF;
 const uint32_t ERROR_UINT_CODE = -1;
 const int32_t ERROR_INT_CODE = -1;
 constexpr TextDecoration DEFAULT_TEXT_DECORATION = TextDecoration::NONE;
@@ -314,7 +313,12 @@ void ResetTextAreaCaretColor(ArkUINodeHandle node)
 {
     auto *frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    TextFieldModelNG::SetCaretColor(frameNode, Color(DEFAULT_CARET_COLOR));
+    auto pipeline = PipelineBase::GetCurrentContextSafely();
+    CHECK_NULL_VOID(pipeline);
+    auto theme = pipeline->GetThemeManager()->GetTheme<TextFieldTheme>();
+    CHECK_NULL_VOID(theme);
+    auto caretColor = static_cast<int32_t>(theme->GetCursorColor().GetValue());
+    TextFieldModelNG::SetCaretColor(frameNode, Color(caretColor));
 }
 
 void SetTextAreaMaxLength(ArkUINodeHandle node, ArkUI_Int32 value)
