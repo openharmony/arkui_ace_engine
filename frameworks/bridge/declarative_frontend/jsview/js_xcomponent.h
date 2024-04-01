@@ -176,6 +176,7 @@ public:
     static void JsLightUpEffect(const JSCallbackInfo& args);
     static void JsPixelStretchEffect(const JSCallbackInfo& args);
     static void JsLinearGradientBlur(const JSCallbackInfo& args);
+    static void JsEnableAnalyzer(bool enable);
 
     // For xcomponent node
     static void* Create(const XComponentParams& params);

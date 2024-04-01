@@ -59,6 +59,7 @@ public:
     {
         return XComponentType::UNKNOWN;
     }
+    virtual void EnableAnalyzer(bool enable) {}
 
 private:
     static std::unique_ptr<XComponentModel> instance_;
