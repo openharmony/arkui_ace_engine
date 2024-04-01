@@ -4851,4 +4851,649 @@ HWTEST_F(RichEditorTestNg, SupportAvoidanceTest, TestSize.Level1)
     overlayManager->SetCustomKeyboardOption(support);
     EXPECT_FALSE(richEditorPattern->keyboardAvoidance_);
 }
+
+/**
+ * @tc.name: HandleOnCut002
+ * @tc.desc: test InsertValueByPaste
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorTestNg, HandleOnCut002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. init callback
+     */
+    RichEditorModelNG richEditorModel;
+    richEditorModel.Create();
+    auto host = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(host, nullptr);
+    auto richEditorPattern = host->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    auto eventHub = richEditorPattern->GetEventHub<RichEditorEventHub>();
+    ASSERT_NE(eventHub, nullptr);
+    bool isEventCalled = false;
+    auto onCutWithEvent = [&isEventCalled](NG::TextCommonEvent& event) { isEventCalled = true; };
+    richEditorModel.SetOnCut(std::move(onCutWithEvent));
+
+    /**
+     * @tc.steps: step2. call the callback function
+     * @tc.expected: UpdateType_ and isEventCalled is valid
+     */
+    richEditorPattern->copyOption_ = CopyOptions::InApp;
+    richEditorPattern->caretPosition_ = 0;
+    richEditorPattern->textSelector_.baseOffset = 0;
+    richEditorPattern->textSelector_.destinationOffset = 1;
+    richEditorPattern->caretUpdateType_ = CaretUpdateType::PRESSED;
+    richEditorPattern->HandleOnCut();
+    EXPECT_EQ(richEditorPattern->caretUpdateType_, CaretUpdateType::NONE);
+    EXPECT_EQ(isEventCalled, true);
+}
+
+/**
+ * @tc.name: HandleOnCut003
+ * @tc.desc: test InsertValueByPaste
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorTestNg, HandleOnCut003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. init callback
+     */
+    RichEditorModelNG richEditorModel;
+    richEditorModel.Create();
+    auto host = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(host, nullptr);
+    auto richEditorPattern = host->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    auto eventHub = richEditorPattern->GetEventHub<RichEditorEventHub>();
+    ASSERT_NE(eventHub, nullptr);
+    bool isEventCalled = false;
+    auto onCutWithEvent = [&isEventCalled](NG::TextCommonEvent& event) {
+        isEventCalled = true;
+        event.SetPreventDefault(true);
+    };
+    richEditorModel.SetOnCut(std::move(onCutWithEvent));
+
+    /**
+     * @tc.steps: step2. call the callback function
+     * @tc.expected: when PreventDefault is true, UpdateType_ and isEventCalled is valid
+     */
+    richEditorPattern->copyOption_ = CopyOptions::InApp;
+    richEditorPattern->caretPosition_ = 0;
+    richEditorPattern->textSelector_.baseOffset = 0;
+    richEditorPattern->textSelector_.destinationOffset = 1;
+    richEditorPattern->caretUpdateType_ = CaretUpdateType::PRESSED;
+    richEditorPattern->HandleOnCut();
+    EXPECT_EQ(richEditorPattern->caretUpdateType_, CaretUpdateType::PRESSED);
+    EXPECT_EQ(isEventCalled, true);
+}
+
+/**
+ * @tc.name: HandleOnCopy002
+ * @tc.desc: test InsertValueByPaste
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorTestNg, HandleOnCopy002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. init callback
+     */
+    RichEditorModelNG richEditorModel;
+    richEditorModel.Create();
+    auto host = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(host, nullptr);
+    auto richEditorPattern = host->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    auto pipeline = MockPipelineContext::GetCurrent();
+    auto clipboard = ClipboardProxy::GetInstance()->GetClipboard(pipeline->GetTaskExecutor());
+    richEditorPattern->clipboard_ = clipboard;
+    auto eventHub = richEditorPattern->GetEventHub<RichEditorEventHub>();
+    ASSERT_NE(eventHub, nullptr);
+    bool isEventCalled = false;
+    auto onCopyWithEvent = [&isEventCalled](NG::TextCommonEvent& event) { isEventCalled = true; };
+    richEditorModel.SetOnCopy(std::move(onCopyWithEvent));
+
+    /**
+     * @tc.steps: step2. call the callback function
+     * @tc.expected: UpdateType_ and isEventCalled is valid
+     */
+    richEditorPattern->copyOption_ = CopyOptions::InApp;
+    richEditorPattern->caretPosition_ = 0;
+    richEditorPattern->textSelector_.baseOffset = 0;
+    richEditorPattern->textSelector_.destinationOffset = 1;
+    richEditorPattern->caretUpdateType_ = CaretUpdateType::PRESSED;
+    richEditorPattern->HandleOnCopy();
+    EXPECT_EQ(richEditorPattern->caretUpdateType_, CaretUpdateType::NONE);
+    EXPECT_EQ(isEventCalled, true);
+}
+
+/**
+ * @tc.name: HandleOnCopy003
+ * @tc.desc: test InsertValueByPaste
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorTestNg, HandleOnCopy003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. init callback
+     */
+    RichEditorModelNG richEditorModel;
+    richEditorModel.Create();
+    auto host = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(host, nullptr);
+    auto richEditorPattern = host->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    auto pipeline = MockPipelineContext::GetCurrent();
+    auto clipboard = ClipboardProxy::GetInstance()->GetClipboard(pipeline->GetTaskExecutor());
+    richEditorPattern->clipboard_ = clipboard;
+    auto eventHub = richEditorPattern->GetEventHub<RichEditorEventHub>();
+    ASSERT_NE(eventHub, nullptr);
+    bool isEventCalled = false;
+    auto onCopyWithEvent = [&isEventCalled](NG::TextCommonEvent& event) {
+        isEventCalled = true;
+        event.SetPreventDefault(true);
+    };
+    richEditorModel.SetOnCopy(std::move(onCopyWithEvent));
+
+    /**
+     * @tc.steps: step2. call the callback function
+     * @tc.expected: when PreventDefault is true, UpdateType_ and isEventCalled is valid
+     */
+    richEditorPattern->copyOption_ = CopyOptions::InApp;
+    richEditorPattern->caretPosition_ = 0;
+    richEditorPattern->textSelector_.baseOffset = 0;
+    richEditorPattern->textSelector_.destinationOffset = 1;
+    richEditorPattern->caretUpdateType_ = CaretUpdateType::PRESSED;
+    richEditorPattern->HandleOnCopy();
+    EXPECT_EQ(richEditorPattern->caretUpdateType_, CaretUpdateType::PRESSED);
+    EXPECT_EQ(isEventCalled, true);
+}
+
+/**
+ * @tc.name: ChangeTextCallbackTest001
+ * @tc.desc: test for callback onWillchange/onWillDid
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorTestNg, ChangeTextCallbackTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. init callback
+     */
+    RichEditorModelNG richEditorModel;
+    richEditorModel.Create();
+    auto host = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(host, nullptr);
+    auto richEditorPattern = host->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    auto eventHub = richEditorPattern->GetEventHub<RichEditorEventHub>();
+    ASSERT_NE(eventHub, nullptr);
+    bool isWillCalled = false;
+    int32_t originalCount = 0;
+    int32_t replacedCount = 0;
+    auto onWillChange = [&isWillCalled, &originalCount, &replacedCount](const RichEditorChangeValue& beforeResult) {
+        isWillCalled = true;
+        originalCount = beforeResult.GetRichEditorOriginalSpans().size();
+        replacedCount = beforeResult.GetRichEditorReplacedSpans().size();
+        return false;
+    };
+    richEditorModel.SetOnWillChange(std::move(onWillChange));
+    bool isDidCalled = false;
+    int32_t afterCount = 0;
+    auto onDidChange = [&isDidCalled, &afterCount](const std::list<RichEditorAbstractSpanResult>& afterResult) {
+        isDidCalled = true;
+        afterCount = afterResult.size();
+    };
+    richEditorModel.SetOnDidChange(std::move(onDidChange));
+
+    /**
+     * @tc.steps: step2. change text with InsertValue When callback return false
+     * @tc.expected: return value is valid
+     */
+    richEditorPattern->InsertValue(INIT_VALUE_1);
+    EXPECT_EQ(isWillCalled, true);
+    EXPECT_EQ(isDidCalled, false);
+    EXPECT_EQ(originalCount, 0);
+    EXPECT_EQ(replacedCount, 1);
+    EXPECT_EQ(afterCount, 0);
+}
+
+/**
+ * @tc.name: ChangeTextCallbackTest002
+ * @tc.desc: test for callback onWillchange/onWillDid
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorTestNg, ChangeTextCallbackTest002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. init callback
+     */
+    RichEditorModelNG richEditorModel;
+    richEditorModel.Create();
+    auto host = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(host, nullptr);
+    auto richEditorPattern = host->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    auto eventHub = richEditorPattern->GetEventHub<RichEditorEventHub>();
+    ASSERT_NE(eventHub, nullptr);
+    bool isWillCalled = false;
+    int32_t originalCount = 0;
+    int32_t replacedCount = 0;
+    auto onWillChange = [&isWillCalled, &originalCount, &replacedCount](const RichEditorChangeValue& beforeResult) {
+        isWillCalled = true;
+        originalCount = beforeResult.GetRichEditorOriginalSpans().size();
+        replacedCount = beforeResult.GetRichEditorReplacedSpans().size();
+        return true;
+    };
+    richEditorModel.SetOnWillChange(std::move(onWillChange));
+    bool isDidCalled = false;
+    int32_t afterCount = 0;
+    auto onDidChange = [&isDidCalled, &afterCount](const std::list<RichEditorAbstractSpanResult>& afterResult) {
+        isDidCalled = true;
+        afterCount = afterResult.size();
+    };
+    richEditorModel.SetOnDidChange(std::move(onDidChange));
+
+    /**
+     * @tc.steps: step2. change text with AddTextSpan
+     * @tc.expected: return value is valid
+     */
+    TextSpanOptions textOptions;
+    textOptions.value = INIT_VALUE_1;
+    richEditorPattern->AddTextSpan(textOptions);
+    EXPECT_EQ(isWillCalled, true);
+    EXPECT_EQ(isDidCalled, true);
+    EXPECT_EQ(originalCount, 0);
+    EXPECT_EQ(replacedCount, 1);
+    EXPECT_EQ(afterCount, 1);
+
+    /**
+     * @tc.steps: step3. change text with AddTextSpan of TextStyle
+     * @tc.expected: return value is valid
+     */
+    isWillCalled = false;
+    isDidCalled = false;
+    originalCount = 0;
+    replacedCount = 0;
+    afterCount = 0;
+    TextStyle style;
+    textOptions.offset = 1;
+    textOptions.value = INIT_VALUE_2;
+    textOptions.style = style;
+    richEditorPattern->AddTextSpan(textOptions);
+    EXPECT_EQ(isWillCalled, true);
+    EXPECT_EQ(isDidCalled, true);
+    EXPECT_EQ(originalCount, 0);
+    EXPECT_EQ(replacedCount, 1);
+    EXPECT_EQ(afterCount, 1);
+}
+
+/**
+ * @tc.name: ChangeTextCallbackTest003
+ * @tc.desc: test for callback onWillchange/onWillDid
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorTestNg, ChangeTextCallbackTest003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. init callback
+     */
+    RichEditorModelNG richEditorModel;
+    richEditorModel.Create();
+    auto host = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(host, nullptr);
+    auto richEditorPattern = host->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    auto eventHub = richEditorPattern->GetEventHub<RichEditorEventHub>();
+    ASSERT_NE(eventHub, nullptr);
+    bool isWillCalled = false;
+    int32_t originalCount = 0;
+    int32_t replacedCount = 0;
+    auto onWillChange = [&isWillCalled, &originalCount, &replacedCount](const RichEditorChangeValue& beforeResult) {
+        isWillCalled = true;
+        originalCount = beforeResult.GetRichEditorOriginalSpans().size();
+        replacedCount = beforeResult.GetRichEditorReplacedSpans().size();
+        return true;
+    };
+    richEditorModel.SetOnWillChange(std::move(onWillChange));
+    bool isDidCalled = false;
+    int32_t afterCount = 0;
+    auto onDidChange = [&isDidCalled, &afterCount](const std::list<RichEditorAbstractSpanResult>& afterResult) {
+        isDidCalled = true;
+        afterCount = afterResult.size();
+    };
+    richEditorModel.SetOnDidChange(std::move(onDidChange));
+
+    /**
+     * @tc.steps: step2. change text with AddTextSpan
+     * @tc.expected: return value is valid
+     */
+    TextSpanOptions textOptions;
+    textOptions.value = INIT_VALUE_1;
+    richEditorPattern->AddTextSpan(textOptions);
+    EXPECT_EQ(isWillCalled, true);
+    EXPECT_EQ(isDidCalled, true);
+    EXPECT_EQ(originalCount, 0);
+    EXPECT_EQ(replacedCount, 1);
+    EXPECT_EQ(afterCount, 1);
+
+    /**
+     * @tc.steps: step3. change text with DeleteSpans
+     * @tc.expected: return value is valid
+     */
+    isWillCalled = false;
+    isDidCalled = false;
+    originalCount = 0;
+    replacedCount = 0;
+    afterCount = 0;
+    RangeOptions delOptions;
+    delOptions.start = 0;
+    delOptions.end = 2;
+    richEditorPattern->DeleteSpans(delOptions);
+    EXPECT_EQ(isWillCalled, true);
+    EXPECT_EQ(isDidCalled, true);
+    EXPECT_EQ(originalCount, 1);
+    EXPECT_EQ(replacedCount, 0);
+    EXPECT_EQ(afterCount, 0);
+}
+
+/**
+ * @tc.name: ChangeTextCallbackTest004
+ * @tc.desc: test for callback onWillchange/onWillDid
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorTestNg, ChangeTextCallbackTest004, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. init callback
+     */
+    RichEditorModelNG richEditorModel;
+    richEditorModel.Create();
+    auto host = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(host, nullptr);
+    auto richEditorPattern = host->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    auto eventHub = richEditorPattern->GetEventHub<RichEditorEventHub>();
+    ASSERT_NE(eventHub, nullptr);
+    bool isWillCalled = false;
+    int32_t originalCount = 0;
+    int32_t replacedCount = 0;
+    auto onWillChange = [&isWillCalled, &originalCount, &replacedCount](const RichEditorChangeValue& beforeResult) {
+        isWillCalled = true;
+        originalCount = beforeResult.GetRichEditorOriginalSpans().size();
+        replacedCount = beforeResult.GetRichEditorReplacedSpans().size();
+        return true;
+    };
+    richEditorModel.SetOnWillChange(std::move(onWillChange));
+    bool isDidCalled = false;
+    int32_t afterCount = 0;
+    auto onDidChange = [&isDidCalled, &afterCount](const std::list<RichEditorAbstractSpanResult>& afterResult) {
+        isDidCalled = true;
+        afterCount = afterResult.size();
+    };
+    richEditorModel.SetOnDidChange(std::move(onDidChange));
+
+    /**
+     * @tc.steps: step2. change text with InsertValue
+     * @tc.expected: return value is valid
+     */
+    richEditorPattern->InsertValue(INIT_VALUE_1);
+    EXPECT_EQ(isWillCalled, true);
+    EXPECT_EQ(isDidCalled, true);
+    EXPECT_EQ(originalCount, 0);
+    EXPECT_EQ(replacedCount, 1);
+    EXPECT_EQ(afterCount, 1);
+
+    /**
+     * @tc.steps: step3. change text with multiLine
+     * @tc.expected: return value is valid
+     */
+    isWillCalled = false;
+    isDidCalled = false;
+    originalCount = 0;
+    replacedCount = 0;
+    afterCount = 0;
+    richEditorPattern->InsertValue("test\nvalue");
+    EXPECT_EQ(isWillCalled, true);
+    EXPECT_EQ(isDidCalled, true);
+    EXPECT_EQ(originalCount, 0);
+    EXPECT_EQ(replacedCount, 2);
+    EXPECT_EQ(afterCount, 2);
+}
+
+/**
+ * @tc.name: ChangeTextCallbackTest005
+ * @tc.desc: test for callback onWillchange/onWillDid
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorTestNg, ChangeTextCallbackTest005, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. init callback
+     */
+    RichEditorModelNG richEditorModel;
+    richEditorModel.Create();
+    auto host = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(host, nullptr);
+    auto richEditorPattern = host->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    auto eventHub = richEditorPattern->GetEventHub<RichEditorEventHub>();
+    ASSERT_NE(eventHub, nullptr);
+    bool isWillCalled = false;
+    int32_t originalCount = 0;
+    int32_t replacedCount = 0;
+    auto onWillChange = [&isWillCalled, &originalCount, &replacedCount](const RichEditorChangeValue& beforeResult) {
+        isWillCalled = true;
+        originalCount = beforeResult.GetRichEditorOriginalSpans().size();
+        replacedCount = beforeResult.GetRichEditorReplacedSpans().size();
+        return true;
+    };
+    richEditorModel.SetOnWillChange(std::move(onWillChange));
+    bool isDidCalled = false;
+    int32_t afterCount = 0;
+    auto onDidChange = [&isDidCalled, &afterCount](const std::list<RichEditorAbstractSpanResult>& afterResult) {
+        isDidCalled = true;
+        afterCount = afterResult.size();
+    };
+    richEditorModel.SetOnDidChange(std::move(onDidChange));
+
+    /**
+     * @tc.steps: step2. change text with ResetAfterPaste
+     * @tc.expected: return value is valid
+     */
+    richEditorPattern->pasteStr_ = INIT_VALUE_1;
+    richEditorPattern->ResetAfterPaste();
+    EXPECT_EQ(isWillCalled, true);
+    EXPECT_EQ(isDidCalled, true);
+    EXPECT_EQ(originalCount, 0);
+    EXPECT_EQ(replacedCount, 1);
+    EXPECT_EQ(afterCount, 1);
+}
+
+/**
+ * @tc.name: ChangeTextCallbackTest006
+ * @tc.desc: test for callback onWillchange/onWillDid
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorTestNg, ChangeTextCallbackTest006, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. init callback
+     */
+    RichEditorModelNG richEditorModel;
+    richEditorModel.Create();
+    auto host = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(host, nullptr);
+    auto richEditorPattern = host->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    auto eventHub = richEditorPattern->GetEventHub<RichEditorEventHub>();
+    ASSERT_NE(eventHub, nullptr);
+    bool isWillCalled = false;
+    int32_t originalCount = 0;
+    int32_t replacedCount = 0;
+    auto onWillChange = [&isWillCalled, &originalCount, &replacedCount](const RichEditorChangeValue& beforeResult) {
+        isWillCalled = true;
+        originalCount = beforeResult.GetRichEditorOriginalSpans().size();
+        replacedCount = beforeResult.GetRichEditorReplacedSpans().size();
+        return true;
+    };
+    richEditorModel.SetOnWillChange(std::move(onWillChange));
+    bool isDidCalled = false;
+    int32_t afterCount = 0;
+    auto onDidChange = [&isDidCalled, &afterCount](const std::list<RichEditorAbstractSpanResult>& afterResult) {
+        isDidCalled = true;
+        afterCount = afterResult.size();
+    };
+    richEditorModel.SetOnDidChange(std::move(onDidChange));
+
+    /**
+     * @tc.steps: step2. change text with HandleOnDragDropTextOperation
+     * @tc.expected: return value is valid
+     */
+    richEditorPattern->InsertValue(INIT_VALUE_1);
+    isWillCalled = false;
+    isDidCalled = false;
+    originalCount = 0;
+    replacedCount = 0;
+    afterCount = 0;
+    richEditorPattern->caretPosition_ = 4;
+    richEditorPattern->textSelector_.baseOffset = 0;
+    richEditorPattern->textSelector_.destinationOffset = 2;
+    richEditorPattern->dragRange_.first = 0;
+    richEditorPattern->dragRange_.second = 2;
+    richEditorPattern->HandleOnDragDropTextOperation("he");
+    EXPECT_EQ(isWillCalled, true);
+    EXPECT_EQ(isDidCalled, true);
+    EXPECT_EQ(originalCount, 1);
+    EXPECT_EQ(replacedCount, 1);
+    EXPECT_EQ(afterCount, 1);
+}
+
+/**
+ * @tc.name: ChangeTextCallbackTest007
+ * @tc.desc: test for callback onWillchange/onWillDid
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorTestNg, ChangeTextCallbackTest007, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. init callback
+     */
+    RichEditorModelNG richEditorModel;
+    richEditorModel.Create();
+    auto host = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(host, nullptr);
+    auto richEditorPattern = host->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    auto eventHub = richEditorPattern->GetEventHub<RichEditorEventHub>();
+    ASSERT_NE(eventHub, nullptr);
+    bool isWillCalled = false;
+    int32_t originalCount = 0;
+    int32_t replacedCount = 0;
+    auto onWillChange = [&isWillCalled, &originalCount, &replacedCount](const RichEditorChangeValue& beforeResult) {
+        isWillCalled = true;
+        originalCount = beforeResult.GetRichEditorOriginalSpans().size();
+        replacedCount = beforeResult.GetRichEditorReplacedSpans().size();
+        return true;
+    };
+    richEditorModel.SetOnWillChange(std::move(onWillChange));
+    bool isDidCalled = false;
+    int32_t afterCount = 0;
+    auto onDidChange = [&isDidCalled, &afterCount](const std::list<RichEditorAbstractSpanResult>& afterResult) {
+        isDidCalled = true;
+        afterCount = afterResult.size();
+    };
+    richEditorModel.SetOnDidChange(std::move(onDidChange));
+
+    /**
+     * @tc.steps: step2. change text with HandleOnUndoAction
+     * @tc.expected: return value is valid
+     */
+    richEditorPattern->InsertValue(INIT_VALUE_1);
+    isWillCalled = false;
+    isDidCalled = false;
+    richEditorPattern->HandleOnUndoAction();
+    EXPECT_EQ(isWillCalled, true);
+    EXPECT_EQ(isDidCalled, true);
+
+    /**
+     * @tc.steps: step3. change text with HandleOnRedoAction
+     * @tc.expected: return value is valid
+     */
+    isWillCalled = false;
+    isDidCalled = false;
+    originalCount = 0;
+    replacedCount = 0;
+    afterCount = 0;
+    richEditorPattern->HandleOnRedoAction();
+    EXPECT_EQ(isWillCalled, true);
+    EXPECT_EQ(isDidCalled, true);
+    EXPECT_EQ(originalCount, 0);
+    EXPECT_EQ(replacedCount, 1);
+    EXPECT_EQ(afterCount, 1);
+}
+
+/**
+ * @tc.name: ChangeTextCallbackTest008
+ * @tc.desc: test for callback onWillchange/onWillDid
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorTestNg, ChangeTextCallbackTest008, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. init callback
+     */
+    RichEditorModelNG richEditorModel;
+    richEditorModel.Create();
+    auto host = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(host, nullptr);
+    auto richEditorPattern = host->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    auto eventHub = richEditorPattern->GetEventHub<RichEditorEventHub>();
+    ASSERT_NE(eventHub, nullptr);
+    bool isWillCalled = false;
+    int32_t originalCount = 0;
+    int32_t replacedCount = 0;
+    auto onWillChange = [&isWillCalled, &originalCount, &replacedCount](const RichEditorChangeValue& beforeResult) {
+        isWillCalled = true;
+        originalCount = beforeResult.GetRichEditorOriginalSpans().size();
+        replacedCount = beforeResult.GetRichEditorReplacedSpans().size();
+        return true;
+    };
+    richEditorModel.SetOnWillChange(std::move(onWillChange));
+    bool isDidCalled = false;
+    int32_t afterCount = 0;
+    auto onDidChange = [&isDidCalled, &afterCount](const std::list<RichEditorAbstractSpanResult>& afterResult) {
+        isDidCalled = true;
+        afterCount = afterResult.size();
+    };
+    richEditorModel.SetOnDidChange(std::move(onDidChange));
+
+    /**
+     * @tc.steps: step2. change text with AddTextSpan & DeleteSpans & HandleOnUndoAction
+     * @tc.expected: return value is valid
+     */
+    TextSpanOptions textOptions;
+    textOptions.value = INIT_VALUE_1;
+    richEditorPattern->AddTextSpan(textOptions);
+    RangeOptions delOptions;
+    delOptions.start = 0;
+    delOptions.end = 2;
+    richEditorPattern->DeleteSpans(delOptions);
+    richEditorPattern->HandleOnUndoAction();
+
+    /**
+     * @tc.steps: step4. change text with HandleOnRedoAction
+     * @tc.expected: return value is valid
+     */
+    isWillCalled = false;
+    isDidCalled = false;
+    originalCount = 0;
+    replacedCount = 0;
+    afterCount = 0;
+    richEditorPattern->HandleOnRedoAction();
+    EXPECT_EQ(isWillCalled, true);
+    EXPECT_EQ(isDidCalled, true);
+    EXPECT_EQ(originalCount, 1);
+    EXPECT_EQ(replacedCount, 0);
+    EXPECT_EQ(afterCount, 0);
+}
 } // namespace OHOS::Ace::NG
