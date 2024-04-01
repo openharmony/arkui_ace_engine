@@ -705,8 +705,8 @@ void GestureEventHub::HandleOnDragStart(const GestureEvent& info)
         if (frameTag == V2::WEB_ETS_TAG) {
             auto webPattern = frameNode->GetPattern<WebPattern>();
             if (webPattern) {
-                frameNodeOffset_.SetX(frameNodeOffset_.GetX(), webPattern->GetDragOffset().GetX());
-                frameNodeOffset_.SetY(frameNodeOffset_.GetY(), webPattern->GetDragOffset().GetY());
+                frameNodeOffset_.SetX(frameNodeOffset_.GetX() + webPattern->GetDragOffset().GetX());
+                frameNodeOffset_.SetY(frameNodeOffset_.GetY() + webPattern->GetDragOffset().GetY());
             }
         }
     }
