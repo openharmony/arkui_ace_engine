@@ -798,4 +798,28 @@ int32_t JSNavigationStack::LoadCurrentDestinationBuilder(
     builder->Call(thisObj, number, params);
     return res;
 }
+
+int32_t JSNavigationStack::GetJsIndexFromNativeIndex(int32_t index)
+{
+    if (dataSourceObj_->IsEmpty()) {
+        return -1;
+    }
+    auto func = JSRef<JSFunc>::Cast(dataSourceObj_->GetProperty("getJsIndexFromNativeIndex"));
+    JSRef<JSVal> param = JSRef<JSVal>::Make(ToJSValue(index));
+    auto res = func->Call(dataSourceObj_, 1, &param);
+    if (res->IsNumber()) {
+        return res->ToNumber<int32_t>();
+    }
+    return -1;
+}
+
+void JSNavigationStack::MoveIndexToTop(int32_t index)
+{
+    if (dataSourceObj_->IsEmpty()) {
+        return;
+    }
+    auto func = JSRef<JSFunc>::Cast(dataSourceObj_->GetProperty("moveIndexToTop"));
+    JSRef<JSVal> param = JSRef<JSVal>::Make(ToJSValue(index));
+    func->Call(dataSourceObj_, 1, &param);
+}
 } // namespace OHOS::Ace::Framework

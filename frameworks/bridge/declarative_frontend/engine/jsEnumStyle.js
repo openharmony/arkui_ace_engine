@@ -1793,6 +1793,14 @@ class NavPathStack {
     this.popArray = [];
     this.interception = undefined;
   }
+  getJsIndexFromNativeIndex(index) {
+    for (let i = 0; i < this.pathArray.length; i++) {
+      if (this.pathArray[i].index === index) {
+        return i;
+      }
+    }
+    return -1;
+  }
   initNavPathIndex() {
     this.popArray = [];
     for (let i = 0; i < this.pathArray.length; i++) {
