@@ -72,6 +72,7 @@ template("js_pa_engine_ark") {
       "c_utils:utils",
       "ets_runtime:libark_jsruntime",
       "eventhandler:libeventhandler",
+      "ffrt:libffrt",
       "form_fwk:form_manager",
       "hilog:libhilog",
       "hisysevent:libhisysevent",
