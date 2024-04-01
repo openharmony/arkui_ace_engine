@@ -269,7 +269,7 @@ public:
         dragWindowVisibleCallback_ = std::move(task);
     }
 
-    void FlushOnceVsyncTask();
+    void FlushOnceVsyncTask() override;
 
     void FlushDirtyNodeUpdate();
 

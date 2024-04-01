@@ -127,6 +127,7 @@ void AnimateToForStageMode(const RefPtr<PipelineBase>& pipelineContext, Animatio
     pipelineContext->SetSyncAnimationOption(option);
     // Execute the function.
     jsAnimateToFunc->Call(jsAnimateToFunc);
+    pipelineContext->FlushOnceVsyncTask();
     AceEngine::Get().NotifyContainers([triggerId](const RefPtr<Container>& container) {
         auto context = container->GetPipelineContext();
         if (!context) {
