@@ -81,11 +81,10 @@ private:
 
     SizeF UpdateHeightWithSafeArea(SizeF size);
     void UpdateSafeArea();
-    void UpdateMaskRect(Shadow shadow, DimensionRect& rect);
     void UpdateChildLayoutConstraint(const RefPtr<DialogLayoutProperty>& dialogProp,
         LayoutConstraintF& childLayoutConstraint, RefPtr<LayoutWrapper>& childLayoutWrapper);
     double GetRealSize(Dimension dialogFrame, double size);
-
+    void ClipShaderRect(LayoutWrapper* layoutWrapper);
     RectF touchRegion_;
     OffsetF topLeftPoint_;
     bool customSize_ = false;
