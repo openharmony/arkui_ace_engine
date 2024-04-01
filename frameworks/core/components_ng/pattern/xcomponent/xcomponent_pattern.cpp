@@ -393,6 +393,40 @@ void XComponentPattern::ConfigSurface(uint32_t surfaceWidth, uint32_t surfaceHei
     renderSurface_->ConfigSurface(surfaceWidth, surfaceHeight);
 }
 
+GraphicTransformType XComponentPattern::ConvertRotation(Rotation rotation)
+{
+    GraphicTransformType transform = GraphicTransformType::GRAPHIC_ROTATE_BUTT;
+    switch(rotation) {
+        case Rotation::ROTATION_0:
+            transform = GraphicTransformType::GRAPHIC_ROTATE_NONE;
+            break;
+        case Rotation::ROTATION_90:
+            transform = GraphicTransformType::GRAPHIC_ROTATE_90;
+            break;
+        case Rotation::ROTATION_180:
+            transform = GraphicTransformType::GRAPHIC_ROTATE_180;
+            break;
+        case Rotation::ROTATION_270:
+            transform = GraphicTransformType::GRAPHIC_ROTATE_270;
+            break;
+        default:
+            transform = GraphicTransformType::GRAPHIC_ROTATE_NONE;
+            break;
+    }
+    return transform;
+}
+
+void XComponentPattern::BeforeCreateLayoutWrapper()
+{
+    Pattern::BeforeCreateLayoutWrapper();
+    auto container = Container::Current();
+    CHECK_NULL_VOID(container);
+    auto displayInfo = container->GetDisplayInfo();
+    auto dmRotation = displayInfo->GetRotation();
+    auto transform = CovertRotation(dmRotation);
+    renderSurface_->SetTransformHint(transform);
+}
+
 bool XComponentPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config)
 {
     if (type_ == XComponentType::COMPONENT || type_ == XComponentType::NODE

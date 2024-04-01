@@ -261,6 +261,7 @@ public:
     void FireExternalEvent(RefPtr<NG::PipelineContext> context,
         const std::string& componentId, const uint32_t nodeId, const bool isDestroy);
     void ConfigSurface(uint32_t surfaceWidth, uint32_t surfaceHeight);
+    GraphicTransformType ConvertRotation(Rotation rotation);
 
     void SetIdealSurfaceWidth(float surfaceWidth);
     void SetIdealSurfaceHeight(float surfaceHeight);
@@ -280,6 +281,7 @@ private:
     void NativeSurfaceHide();
     void NativeSurfaceShow();
     void OnModifyDone() override;
+    void BeforeCreateLayoutWrapper();
 
     void InitNativeNodeCallbacks();
     void InitEvent();

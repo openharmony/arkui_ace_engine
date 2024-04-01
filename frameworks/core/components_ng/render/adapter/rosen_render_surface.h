@@ -123,6 +123,8 @@ public:
 
     void SetExtSurfaceCallback(const RefPtr<ExtSurfaceCallbackInterface>& extSurfaceCallback) override;
 
+    void SetTransformHint(GraphicTransformType transformHint) override;
+
 private:
     void PostRenderOnlyTaskToUI();
     void RegisterSurface() const;

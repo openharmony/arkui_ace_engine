@@ -193,6 +193,12 @@ void RosenRenderSurface::SetExtSurfaceCallback(const RefPtr<ExtSurfaceCallbackIn
     extSurfaceCallbackInterface_ = extSurfaceCallback;
 }
 
+void RosenRenderSurface::SetTransformHint(GraphicTransformType transformHint)
+{
+    CHECK_NULL_VOID(producerSurface_);
+    producerSurface_->SetTransformHint(transformHint);
+}
+
 void RosenRenderSurface::SetSurfaceDefaultSize(int32_t width, int32_t height)
 {
     if (consumerSurface_) {
