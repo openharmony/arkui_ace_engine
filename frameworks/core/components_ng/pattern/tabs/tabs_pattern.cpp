@@ -118,7 +118,7 @@ std::string TabsPattern::GetTabBarTextByIndex(int32_t index) const
     CHECK_NULL_RETURN(tabBarItem, "");
     auto node = AceType::DynamicCast<FrameNode>(tabBarItem);
     CHECK_NULL_RETURN(node, "");
-    return node->GetAccessibilityProperty<NG::AccessibilityProperty>()->GetAccessibilityText(true);
+    return node->GetAccessibilityProperty<NG::AccessibilityProperty>()->GetGroupText(true);
 }
 
 void TabsPattern::SetOnTabBarClickEvent(std::function<void(const BaseEventInfo*)>&& event)
