@@ -178,16 +178,6 @@ void SideBarContainerModelNG::SetControlButtonSwitchingIconInfo(const std::strin
     }
 }
 
-void SideBarContainerModelNG::ResetControlButtonIconInfo()
-{
-    ACE_RESET_LAYOUT_PROPERTY_WITH_FLAG(
-        SideBarContainerLayoutProperty, ControlButtonShowIconInfo, PROPERTY_UPDATE_LAYOUT);
-    ACE_RESET_LAYOUT_PROPERTY_WITH_FLAG(
-        SideBarContainerLayoutProperty, ControlButtonHiddenIconInfo, PROPERTY_UPDATE_LAYOUT);
-    ACE_RESET_LAYOUT_PROPERTY_WITH_FLAG(
-        SideBarContainerLayoutProperty, ControlButtonSwitchingIconInfo, PROPERTY_UPDATE_LAYOUT);
-}
-
 void SideBarContainerModelNG::SetDividerStrokeWidth(const Dimension& strokeWidth)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(SideBarContainerLayoutProperty, DividerStrokeWidth, strokeWidth);

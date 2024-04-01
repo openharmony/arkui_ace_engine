@@ -42,7 +42,6 @@ public:
         const std::string& hiddenIconStr, bool isPixelMap, RefPtr<PixelMap> pixMap) override;
     void SetControlButtonSwitchingIconInfo(
         const std::string& switchingIconStr, bool isPixelMap, RefPtr<PixelMap> pixMap) override;
-    void ResetControlButtonIconInfo() override;
     void SetOnChange(std::function<void(const bool)>&& onChange) override;
     void SetDividerStrokeWidth(const Dimension& strokeWidth) override;
     void SetDividerColor(const Color& color) override;
