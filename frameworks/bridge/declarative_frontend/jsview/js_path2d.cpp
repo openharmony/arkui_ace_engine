@@ -29,6 +29,12 @@ void JSPath2D::Constructor(const JSCallbackInfo& args)
     jsPath2d->IncRefCount();
     args.SetReturnValue(Referenced::RawPtr(jsPath2d));
     jsPath2d->SetCanvasPath2d(JSCanvasRenderer::JsMakePath2D(args));
+    args.SetSize(sizeof(JSPath2D));
+    EcmaVM* vm = args.GetVm();
+    CHECK_NULL_VOID(vm);
+    panda::JsiRuntimeCallInfo* runtimeCallInfo = args.GetJsiRuntimeCallInfo();
+    CHECK_NULL_VOID(runtimeCallInfo);
+    jsPath2d->thisObj_ = panda::CopyableGlobal<panda::JSValueRef>(vm, runtimeCallInfo->GetThisRef());
 }
 
 void JSPath2D::Destructor(JSPath2D* controller)
@@ -66,6 +72,7 @@ void JSPath2D::JsPath2DAddPath(const JSCallbackInfo& args)
     }
     auto canvasPath2D = jsPath2d->GetCanvasPath2d();
     path2d_->AddPath(canvasPath2D);
+    SetPathSize(args);
     if (args.Length() != JS_PATH2D_PARAMETER_COUNTS) {
         return;
     }
@@ -75,6 +82,7 @@ void JSPath2D::JsPath2DAddPath(const JSCallbackInfo& args)
         if (jsMatrix2d != nullptr) {
             path2d_->SetTransform(jsMatrix2d->JsGetScaleX(), jsMatrix2d->JsGetRotateX(), jsMatrix2d->JsGetRotateY(),
                 jsMatrix2d->JsGetScaleY(), jsMatrix2d->JsGetTranslateX(), jsMatrix2d->JsGetTranslateY());
+            SetPathSize(args);
         }
         return;
     }
@@ -82,6 +90,7 @@ void JSPath2D::JsPath2DAddPath(const JSCallbackInfo& args)
     JSRef<JSObject> jsObj = JSRef<JSObject>::Cast(args[1]);
     TransformParam param = JSMatrix2d::GetTransformInfo(jsObj);
     path2d_->SetTransform(param.scaleX, param.skewX, param.skewY, param.scaleY, param.translateX, param.translateY);
+    SetPathSize(args);
 }
 
 } // namespace OHOS::Ace::Framework
