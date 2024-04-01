@@ -1750,20 +1750,29 @@ RefPtr<NodePaintMethod> TabBarPattern::CreateNodePaintMethod()
         indicator_ >= static_cast<int32_t>(selectedModes_.size())) {
         return nullptr;
     }
-    Color backgroundColor = Color::WHITE;
+    Color bgColor;
     auto tabBarNode = GetHost();
     CHECK_NULL_RETURN(tabBarNode, nullptr);
-    auto tabBarRenderContext = tabBarNode->GetRenderContext();
-    CHECK_NULL_RETURN(tabBarRenderContext, nullptr);
-    if (tabBarRenderContext->GetBackgroundColor().has_value()) {
-        backgroundColor = tabBarRenderContext->GetBackgroundColor().value();
+    auto tabBarCtx = tabBarNode->GetRenderContext();
+    CHECK_NULL_RETURN(tabBarCtx, nullptr);
+    if (tabBarCtx->GetBackgroundColor()) {
+        bgColor = *tabBarCtx->GetBackgroundColor();
     } else {
         auto tabsNode = AceType::DynamicCast<FrameNode>(tabBarNode->GetParent());
         CHECK_NULL_RETURN(tabsNode, nullptr);
-        auto tabsRenderContext = tabsNode->GetRenderContext();
-        CHECK_NULL_RETURN(tabsRenderContext, nullptr);
-        backgroundColor = tabsRenderContext->GetBackgroundColor().value_or(Color::WHITE);
+        auto tabsCtx = tabsNode->GetRenderContext();
+        CHECK_NULL_RETURN(tabsCtx, nullptr);
+        if (tabsCtx->GetBackgroundColor()) {
+            bgColor = *tabsCtx->GetBackgroundColor();
+        } else {
+            auto pipeline = PipelineContext::GetCurrentContext();
+            CHECK_NULL_RETURN(pipeline, nullptr);
+            auto tabTheme = pipeline->GetTheme<TabTheme>();
+            CHECK_NULL_RETURN(tabTheme, nullptr);
+            bgColor = tabTheme->GetBackgroundColor().ChangeAlpha(0xff);
+        }
     }
+
     if (!tabBarModifier_) {
         tabBarModifier_ = AceType::MakeRefPtr<TabBarModifier>();
     }
@@ -1771,7 +1780,7 @@ RefPtr<NodePaintMethod> TabBarPattern::CreateNodePaintMethod()
     IndicatorStyle indicatorStyle;
     GetIndicatorStyle(indicatorStyle);
 
-    return MakeRefPtr<TabBarPaintMethod>(tabBarModifier_, gradientRegions_, backgroundColor, indicatorStyle,
+    return MakeRefPtr<TabBarPaintMethod>(tabBarModifier_, gradientRegions_, bgColor, indicatorStyle,
         currentIndicatorOffset_, selectedModes_[indicator_]);
 }
 
