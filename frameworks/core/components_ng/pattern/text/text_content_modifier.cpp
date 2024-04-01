@@ -86,6 +86,8 @@ void TextContentModifier::ChangeDragStatus()
 void TextContentModifier::SetDefaultAnimatablePropertyValue(const TextStyle& textStyle)
 {
     SetDefaultFontSize(textStyle);
+    SetDefaultAdaptMinFontSize(textStyle);
+    SetDefaultAdaptMaxFontSize(textStyle);
     SetDefaultFontWeight(textStyle);
     SetDefaultTextColor(textStyle);
     SetDefaultTextShadow(textStyle);
@@ -106,6 +108,36 @@ void TextContentModifier::SetDefaultFontSize(const TextStyle& textStyle)
 
     fontSizeFloat_ = MakeRefPtr<AnimatablePropertyFloat>(fontSizeValue);
     AttachProperty(fontSizeFloat_);
+}
+
+void TextContentModifier::SetDefaultAdaptMinFontSize(const TextStyle& textStyle)
+{
+    float fontSizeValue = textStyle.GetFontSize().Value();
+    auto pipelineContext = PipelineContext::GetCurrentContext();
+    if (pipelineContext) {
+        fontSizeValue = textStyle.GetAdaptMinFontSize().ConvertToPx();
+        if (textStyle.IsAllowScale() || textStyle.GetAdaptMinFontSize().Unit() == DimensionUnit::FP) {
+            fontSizeValue = (textStyle.GetAdaptMinFontSize() * pipelineContext->GetFontScale()).ConvertToPx();
+        }
+    }
+
+    adaptMinFontSizeFloat_ = MakeRefPtr<AnimatablePropertyFloat>(fontSizeValue);
+    AttachProperty(adaptMinFontSizeFloat_);
+}
+
+void TextContentModifier::SetDefaultAdaptMaxFontSize(const TextStyle& textStyle)
+{
+    float fontSizeValue = textStyle.GetFontSize().Value();
+    auto pipelineContext = PipelineContext::GetCurrentContext();
+    if (pipelineContext) {
+        fontSizeValue = textStyle.GetAdaptMaxFontSize().ConvertToPx();
+        if (textStyle.IsAllowScale() || textStyle.GetAdaptMaxFontSize().Unit() == DimensionUnit::FP) {
+            fontSizeValue = (textStyle.GetAdaptMaxFontSize() * pipelineContext->GetFontScale()).ConvertToPx();
+        }
+    }
+
+    adaptMaxFontSizeFloat_ = MakeRefPtr<AnimatablePropertyFloat>(fontSizeValue);
+    AttachProperty(adaptMaxFontSizeFloat_);
 }
 
 void TextContentModifier::SetDefaultFontWeight(const TextStyle& textStyle)
@@ -347,6 +379,20 @@ void TextContentModifier::ModifyFontSizeInTextStyle(TextStyle& textStyle)
     }
 }
 
+void TextContentModifier::ModifyAdaptMinFontSizeInTextStyle(TextStyle& textStyle)
+{
+    if (adaptMinFontSize_.has_value() && adaptMinFontSizeFloat_) {
+        textStyle.SetAdaptMinFontSize(Dimension(adaptMinFontSizeFloat_->Get(), DimensionUnit::PX));
+    }
+}
+
+void TextContentModifier::ModifyAdaptMaxFontSizeInTextStyle(TextStyle& textStyle)
+{
+    if (adaptMaxFontSize_.has_value() && adaptMaxFontSizeFloat_) {
+        textStyle.SetAdaptMaxFontSize(Dimension(adaptMaxFontSizeFloat_->Get(), DimensionUnit::PX));
+    }
+}
+
 void TextContentModifier::ModifyFontWeightInTextStyle(TextStyle& textStyle)
 {
     if (fontWeight_.has_value() && fontWeightFloat_) {
@@ -407,6 +453,8 @@ void TextContentModifier::ModifyBaselineOffsetInTextStyle(TextStyle& textStyle)
 void TextContentModifier::ModifyTextStyle(TextStyle& textStyle)
 {
     ModifyFontSizeInTextStyle(textStyle);
+    ModifyAdaptMinFontSizeInTextStyle(textStyle);
+    ModifyAdaptMaxFontSizeInTextStyle(textStyle);
     ModifyFontWeightInTextStyle(textStyle);
     ModifyTextColorInTextStyle(textStyle);
     ModifyTextShadowsInTextStyle(textStyle);
@@ -417,6 +465,22 @@ void TextContentModifier::ModifyTextStyle(TextStyle& textStyle)
 void TextContentModifier::UpdateFontSizeMeasureFlag(PropertyChangeFlag& flag)
 {
     if (fontSize_.has_value() && fontSizeFloat_ && !NearEqual(fontSize_.value().Value(), fontSizeFloat_->Get())) {
+        flag |= PROPERTY_UPDATE_MEASURE;
+    }
+}
+
+void TextContentModifier::UpdateAdaptMinFontSizeMeasureFlag(PropertyChangeFlag& flag)
+{
+    if (adaptMinFontSize_.has_value() && adaptMinFontSizeFloat_ &&
+        !NearEqual(adaptMinFontSize_.value().Value(), adaptMinFontSizeFloat_->Get())) {
+        flag |= PROPERTY_UPDATE_MEASURE;
+    }
+}
+
+void TextContentModifier::UpdateAdaptMaxFontSizeMeasureFlag(PropertyChangeFlag& flag)
+{
+    if (adaptMaxFontSize_.has_value() && adaptMaxFontSizeFloat_ &&
+        !NearEqual(adaptMaxFontSize_.value().Value(), adaptMaxFontSizeFloat_->Get())) {
         flag |= PROPERTY_UPDATE_MEASURE;
     }
 }
@@ -477,6 +541,8 @@ bool TextContentModifier::NeedMeasureUpdate(PropertyChangeFlag& flag)
 {
     flag = 0;
     UpdateFontSizeMeasureFlag(flag);
+    UpdateAdaptMinFontSizeMeasureFlag(flag);
+    UpdateAdaptMaxFontSizeMeasureFlag(flag);
     UpdateFontWeightMeasureFlag(flag);
     UpdateTextColorMeasureFlag(flag);
     UpdateTextShadowMeasureFlag(flag);
@@ -504,6 +570,34 @@ void TextContentModifier::SetFontSize(const Dimension& value)
     fontSize_ = Dimension(fontSizeValue);
     CHECK_NULL_VOID(fontSizeFloat_);
     fontSizeFloat_->Set(fontSizeValue);
+}
+
+void TextContentModifier::SetAdaptMinFontSize(const Dimension& value)
+{
+    float fontSizeValue;
+    auto pipelineContext = PipelineContext::GetCurrentContext();
+    if (pipelineContext) {
+        fontSizeValue = value.ConvertToPx();
+    } else {
+        fontSizeValue = value.Value();
+    }
+    adaptMinFontSize_ = Dimension(fontSizeValue);
+    CHECK_NULL_VOID(adaptMinFontSizeFloat_);
+    adaptMinFontSizeFloat_->Set(fontSizeValue);
+}
+
+void TextContentModifier::SetAdaptMaxFontSize(const Dimension& value)
+{
+    float fontSizeValue;
+    auto pipelineContext = PipelineContext::GetCurrentContext();
+    if (pipelineContext) {
+        fontSizeValue = value.ConvertToPx();
+    } else {
+        fontSizeValue = value.Value();
+    }
+    adaptMaxFontSize_ = Dimension(fontSizeValue);
+    CHECK_NULL_VOID(adaptMaxFontSizeFloat_);
+    adaptMaxFontSizeFloat_->Set(fontSizeValue);
 }
 
 void TextContentModifier::SetFontWeight(const FontWeight& value)
