@@ -187,4 +187,9 @@ void AnimationUtils::ResumeAnimation(const std::shared_ptr<AnimationUtils::Anima
         ani->Resume();
     }
 }
+
+void AnimationUtils::ExecuteWithoutAnimation(const PropertyCallback& callback)
+{
+    Rosen::RSNode::ExecuteWithoutAnimation(callback);
+}
 } // namespace OHOS::Ace
