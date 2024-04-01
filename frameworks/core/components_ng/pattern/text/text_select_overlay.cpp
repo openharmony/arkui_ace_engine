@@ -38,6 +38,7 @@ bool TextSelectOverlay::PreProcessOverlay(const OverlayRequest& request)
     auto host = textPattern->GetHost();
     CHECK_NULL_RETURN(host, false);
     pipeline->AddOnAreaChangeNode(host->GetId());
+    textPattern->CalculateHandleOffsetAndShowOverlay();
     return true;
 }
 
