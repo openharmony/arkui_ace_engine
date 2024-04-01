@@ -104,17 +104,11 @@ void UpdateFontFamily(RefPtr<TextLayoutProperty>& textProperty, RefPtr<MenuLayou
     }
 }
 
-void UpdateIconSrc(RefPtr<FrameNode>& node, const std::string& src, const Dimension& horizontalSize,
+void UpdateIconSrc(RefPtr<FrameNode>& node, const Dimension& horizontalSize,
     const Dimension& verticalSize, const Color& color, const bool& useDefaultIcon)
 {
-    ImageSourceInfo imageSourceInfo;
-    imageSourceInfo.SetSrc(src);
-    if (useDefaultIcon) {
-        imageSourceInfo.SetFillColor(color);
-    }
     auto props = node->GetLayoutProperty<ImageLayoutProperty>();
     CHECK_NULL_VOID(props);
-    props->UpdateImageSourceInfo(imageSourceInfo);
     props->UpdateAlignment(Alignment::CENTER);
     CalcSize idealSize = { CalcLength(horizontalSize), CalcLength(verticalSize) };
     MeasureProperty layoutConstraint;
@@ -652,7 +646,15 @@ void MenuItemPattern::AddSelectIcon(RefPtr<FrameNode>& row)
     auto iconPath = userIcon.empty() ? iconTheme->GetIconPath(InternalResource::ResourceId::MENU_OK_SVG) : userIcon;
     auto selectTheme = pipeline->GetTheme<SelectTheme>();
     CHECK_NULL_VOID(selectTheme);
-    UpdateIconSrc(selectIcon_, iconPath, selectTheme->GetIconSideLength(), selectTheme->GetIconSideLength(),
+    ImageSourceInfo imageSourceInfo;
+    imageSourceInfo.SetSrc(iconPath);
+    if (userIcon.empty()) {
+        imageSourceInfo.SetFillColor(selectTheme->GetMenuIconColor());
+    }
+    auto props = selectIcon_->GetLayoutProperty<ImageLayoutProperty>();
+    CHECK_NULL_VOID(props);
+    props->UpdateImageSourceInfo(imageSourceInfo);
+    UpdateIconSrc(selectIcon_, selectTheme->GetIconSideLength(), selectTheme->GetIconSideLength(),
         selectTheme->GetMenuIconColor(), userIcon.empty());
 
     auto renderContext = selectIcon_->GetRenderContext();
@@ -668,9 +670,11 @@ void MenuItemPattern::UpdateIcon(RefPtr<FrameNode>& row, bool isStart)
 {
     auto itemProperty = GetLayoutProperty<MenuItemLayoutProperty>();
     CHECK_NULL_VOID(itemProperty);
-    auto iconSrc = isStart ? itemProperty->GetStartIcon().value_or("") : itemProperty->GetEndIcon().value_or("");
+    ImageSourceInfo defaultImageSourceInfo;
+    auto iconSrc = isStart ? itemProperty->GetStartIcon().value_or(defaultImageSourceInfo)
+                           : itemProperty->GetEndIcon().value_or(defaultImageSourceInfo);
     auto& iconNode = isStart ? startIcon_ : endIcon_;
-    if (iconSrc.empty()) {
+    if (iconSrc.GetSrc().empty()) {
         row->RemoveChild(iconNode); // it's safe even if iconNode is nullptr
         iconNode = nullptr;
         row->MarkModifyDone();
@@ -689,7 +693,11 @@ void MenuItemPattern::UpdateIcon(RefPtr<FrameNode>& row, bool isStart)
     CHECK_NULL_VOID(selectTheme);
     auto iconWidth = isStart ? selectTheme->GetIconSideLength() : selectTheme->GetEndIconWidth();
     auto iconHeight = isStart ? selectTheme->GetIconSideLength() : selectTheme->GetEndIconHeight();
-    UpdateIconSrc(iconNode, iconSrc, iconWidth, iconHeight, selectTheme->GetMenuIconColor(), false);
+    ImageSourceInfo imageSourceInfo(iconSrc);
+    auto props = iconNode->GetLayoutProperty<ImageLayoutProperty>();
+    CHECK_NULL_VOID(props);
+    props->UpdateImageSourceInfo(imageSourceInfo);
+    UpdateIconSrc(iconNode, iconWidth, iconHeight, selectTheme->GetMenuIconColor(), false);
 
     iconNode->MountToParent(row, ((isStart && selectIcon_) || (!isStart && label_)) ? 1 : 0);
     iconNode->MarkModifyDone();
