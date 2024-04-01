@@ -2081,20 +2081,17 @@ void ViewAbstract::SetOverlayBuilder(std::function<void()>&& buildFunc,
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
     if (buildFunc) {
-        auto overlayNode = frameNode->GetOverlayNode();
-        if (!overlayNode) {
-            auto buildNodeFunc = [buildFunc]() -> RefPtr<UINode> {
-                ScopedViewStackProcessor builderViewStackProcessor;
-                buildFunc();
-                auto customNode = ViewStackProcessor::GetInstance()->Finish();
-                return customNode;
-            };
-            overlayNode = AceType::DynamicCast<FrameNode>(buildNodeFunc());
-            CHECK_NULL_VOID(overlayNode);
-            frameNode->SetOverlayNode(overlayNode);
-            overlayNode->SetParent(AceType::WeakClaim(frameNode));
-            overlayNode->SetActive(true);
-        }
+        auto buildNodeFunc = [func = std::move(buildFunc)]() -> RefPtr<UINode> {
+            ScopedViewStackProcessor builderViewStackProcessor;
+            func();
+            auto customNode = ViewStackProcessor::GetInstance()->Finish();
+            return customNode;
+        };
+        auto overlayNode = AceType::DynamicCast<FrameNode>(buildNodeFunc());
+        CHECK_NULL_VOID(overlayNode);
+        frameNode->SetOverlayNode(overlayNode);
+        overlayNode->SetParent(AceType::WeakClaim(frameNode));
+        overlayNode->SetActive(true);
         overlayNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
         auto layoutProperty = AceType::DynamicCast<LayoutProperty>(overlayNode->GetLayoutProperty());
         CHECK_NULL_VOID(layoutProperty);
