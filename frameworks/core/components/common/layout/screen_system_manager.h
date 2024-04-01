@@ -61,6 +61,13 @@ public:
         viewScale_ = density / dipScale;
     }
 
+    void SetWindowInfo(double density, double dipScale)
+    {
+        density_ = density;
+        dipScale_ = dipScale;
+        viewScale_ = density / dipScale;
+    }
+
     void OnSurfaceChanged(double width);
 
     double GetScreenWidth(const RefPtr<PipelineBase>& pipeline = nullptr) const
