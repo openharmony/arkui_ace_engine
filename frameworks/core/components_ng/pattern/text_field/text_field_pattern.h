@@ -906,6 +906,10 @@ public:
     }
     std::string GetShowResultImageSrc() const;
     std::string GetHideResultImageSrc() const;
+    std::string GetNormalUnderlineColorStr() const;
+    std::string GetTypingUnderlineColorStr() const;
+    std::string GetDisableUnderlineColorStr() const;
+    std::string GetErrorUnderlineColorStr() const;
     void OnAttachToFrameNode() override;
 
     bool GetTextInputFlag() const
@@ -1156,6 +1160,7 @@ private:
     void HandleLeftMouseMoveEvent(MouseInfo& info);
     void HandleLeftMouseReleaseEvent(MouseInfo& info);
     void HandleLongPress(GestureEvent& info);
+    void HanldeMaxLengthAndUnderlineTypingColor();
     void UpdateCaretPositionWithClamp(const int32_t& pos);
     void CursorMoveOnClick(const Offset& offset);
 
