@@ -660,6 +660,7 @@ void SheetPresentationPattern::SheetTransition(bool isTransitionIn, float dragVe
                 pattern->isAnimationBreak_ = false;
             }
             pattern->AvoidAiBar();
+            pattern->FireOnDetentsDidChange(pattern->height_);
         } else {
             pattern->SetAnimationProcess(false);
             const auto& overlayManager = pattern->GetOverlayManager();
@@ -1595,5 +1596,14 @@ void SheetPresentationPattern::FireOnHeightDidChange()
     } else {
         OnHeightDidChange(height_);
     }
+}
+
+void SheetPresentationPattern::FireOnDetentsDidChange(float height)
+{
+    auto sheetType = GetSheetType();
+    if (sheetType != SheetType::SHEET_BOTTOM) {
+        return;
+    }
+    OnDetentsDidChange(height);
 }
 } // namespace OHOS::Ace::NG
