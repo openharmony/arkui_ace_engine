@@ -113,7 +113,11 @@ void TextFieldManagerNG::ScrollToSafeAreaHelper(
     // caret below safeArea
     float diffBot = 0.0f;
     if (isShowKeyboard) {
-        diffBot = bottomInset.start - caretRect.Bottom() - RESERVE_BOTTOM_HEIGHT.ConvertToPx();
+        if (LessNotEqual(scrollableRect.Bottom(), bottomInset.start)) {
+            diffBot = scrollableRect.Bottom() - caretRect.Bottom() - RESERVE_BOTTOM_HEIGHT.ConvertToPx();
+        } else {
+            diffBot = bottomInset.start - caretRect.Bottom() - RESERVE_BOTTOM_HEIGHT.ConvertToPx();
+        }
     } else {
         diffBot = scrollableRect.Bottom() - caretRect.Bottom() - RESERVE_BOTTOM_HEIGHT.ConvertToPx();
     }
