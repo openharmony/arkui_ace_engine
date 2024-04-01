@@ -44,7 +44,7 @@
 #include "core/gestures/gesture_info.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
-#if defined(PIXEL_MAP_SUPPORTED)
+#if defined(PIXEL_MAP_SUPPORTED) && !defined(CROSS_PLATFORM)
 #include "image_source.h"
 #endif
 
@@ -52,7 +52,7 @@
 #include "core/components_ng/render/adapter/component_snapshot.h"
 namespace OHOS::Ace::NG {
 namespace {
-#if defined(PIXEL_MAP_SUPPORTED)
+#if defined(PIXEL_MAP_SUPPORTED) && !defined(CROSS_PLATFORM)
 constexpr int32_t CREATE_PIXELMAP_TIME = 80;
 #endif
 constexpr uint32_t EXTRA_INFO_MAX_LENGTH = 200;
@@ -740,7 +740,7 @@ void GestureEventHub::HandleOnDragStart(const GestureEvent& info)
         dragDropInfo.customNode = dragPreviewInfo.customNode;
     }
 
-#if defined(PIXEL_MAP_SUPPORTED)
+#if defined(PIXEL_MAP_SUPPORTED) && !defined(CROSS_PLATFORM)
     if (dragDropInfo.pixelMap == nullptr && dragDropInfo.customNode) {
         auto callback = [id = Container::CurrentId(), pipeline, info, gestureEventHubPtr = AceType::Claim(this),
                             frameNode, dragDropInfo, event](

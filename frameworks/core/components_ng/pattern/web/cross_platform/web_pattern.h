@@ -454,8 +454,8 @@ private:
     void ResetDragAction();
     void UpdateRelativeOffset();
     void InitSlideUpdateListener();
-    void CalculateHorizontalDrawRect(const SizeF frameSize);
-    void CalculateVerticalDrawRect(const SizeF frameSize);
+    void CalculateHorizontalDrawRect();
+    void CalculateVerticalDrawRect();
     int onDragMoveCnt = 0;
     std::chrono::time_point<std::chrono::system_clock> firstMoveInTime;
     std::chrono::time_point<std::chrono::system_clock> preMoveInTime;
