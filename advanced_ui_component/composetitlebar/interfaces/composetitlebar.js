@@ -56,7 +56,7 @@ class ComposeTitleBar extends ViewPU {
     if (typeof m === "function") {
       this.paramsGenerator_ = m;
     }
-    this.item = null;
+    this.item = undefined;
     this.title = '';
     this.subtitle = '';
     this.menuItems = undefined;
@@ -195,9 +195,8 @@ class ComposeTitleBar extends ViewPU {
       if (this.item !== undefined) {
         this.ifElseBranchUpdateFunction(0, () => {
           this.observeComponentCreation((b, c) => {
-            var d;
             ViewStackProcessor.StartGetAccessRecordingFor(b);
-            Image.create((d = this.item) === null || d === void 0 ? void 0 : d.value);
+            Image.create(this.item.value);
             Image.width(ComposeTitleBar.portraitImageSize);
             Image.height(ComposeTitleBar.portraitImageSize);
             Image.margin({
@@ -739,7 +738,7 @@ class ImageMenuItem extends ViewPU {
     if (typeof m === "function") {
       this.paramsGenerator_ = m;
     }
-    this.item = null;
+    this.item = undefined;
     this.index = 0;
     this.__isOnFocus = new ObservedPropertySimplePU(false, this, "isOnFocus");
     this.__isOnHover = new ObservedPropertySimplePU(false, this, "isOnHover");
