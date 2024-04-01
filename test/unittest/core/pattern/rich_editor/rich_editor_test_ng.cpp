@@ -1012,7 +1012,7 @@ HWTEST_F(RichEditorTestNg, RichEditorController001, TestSize.Level1)
 
     options.offset = std::nullopt;
     auto index3 = richEditorPattern->AddImageSpan(options, false, 0);
-    EXPECT_EQ(index3, 0);
+    EXPECT_EQ(index3, 4);
 
     std::optional<Ace::NG::MarginProperty> marginProp = std::nullopt;
     std::optional<Ace::NG::BorderRadiusProperty> borderRadius = std::nullopt;
@@ -1020,7 +1020,7 @@ HWTEST_F(RichEditorTestNg, RichEditorController001, TestSize.Level1)
     imageStyle.borderRadius = borderRadius;
     options.imageAttribute = imageStyle;
     auto index4 = richEditorPattern->AddImageSpan(options, false, 0);
-    EXPECT_EQ(index4, 0);
+    EXPECT_EQ(index4, 5);
 
     marginProp = { CALC_LENGTH_CALC, CALC_LENGTH_CALC, CALC_LENGTH_CALC, CALC_LENGTH_CALC };
     borderRadius = { CALC_TEST, CALC_TEST, CALC_TEST, CALC_TEST };
@@ -1028,7 +1028,7 @@ HWTEST_F(RichEditorTestNg, RichEditorController001, TestSize.Level1)
     imageStyle.borderRadius = borderRadius;
     options.imageAttribute = imageStyle;
     auto index5 = richEditorPattern->AddImageSpan(options, false, 0);
-    EXPECT_EQ(index5, 0);
+    EXPECT_EQ(index5, 6);
 
     marginProp = { ERROR_CALC_LENGTH_CALC, ERROR_CALC_LENGTH_CALC, ERROR_CALC_LENGTH_CALC, ERROR_CALC_LENGTH_CALC };
     borderRadius = { ERROR_CALC_TEST, ERROR_CALC_TEST, ERROR_CALC_TEST, ERROR_CALC_TEST };
