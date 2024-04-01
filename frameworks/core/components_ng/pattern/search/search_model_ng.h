@@ -74,6 +74,8 @@ public:
     void SetFontFeature(const FONT_FEATURES_MAP& value) override;
     void UpdateInspectorId(const std::string& key) override;
     void SetSelectedBackgroundColor(const Color& value) override;
+    static void SetAdaptMinFontSize(FrameNode* frameNode, const Dimension& value);
+    static void SetAdaptMaxFontSize(FrameNode* frameNode, const Dimension& value);
     static void RequestKeyboardOnFocus(FrameNode* frameNode, bool needToRequest);
     static void SetPlaceholderFont(FrameNode* frameNode, const Font& font);
     static void SetSearchIconSize(FrameNode* frameNode, const Dimension& value);

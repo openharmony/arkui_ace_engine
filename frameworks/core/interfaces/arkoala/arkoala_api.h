@@ -26,10 +26,10 @@
 extern "C" {
 #endif
 
-#define ARKUI_FULL_API_VERSION 88
+#define ARKUI_FULL_API_VERSION 89
 // When changing ARKUI_BASIC_API_VERSION, ARKUI_FULL_API_VERSION must be
 // increased as well.
-#define ARKUI_NODE_API_VERSION 88
+#define ARKUI_NODE_API_VERSION 89
 
 #define ARKUI_BASIC_API_VERSION 7
 #define ARKUI_EXTENDED_API_VERSION 7
@@ -2056,6 +2056,12 @@ struct ArkUITextAreaModifier {
     void (*resetTextAreaFontFeature)(ArkUINodeHandle node);
     void (*setTextAreaWordBreak)(ArkUINodeHandle node, ArkUI_Uint32 wordBreak);
     void (*resetTextAreaWordBreak)(ArkUINodeHandle node);
+    void (*setTextAreaAdaptMinFontSize)(ArkUINodeHandle node, ArkUI_Float32 value, ArkUI_Int32 unit);
+    void (*resetTextAreaAdaptMinFontSize)(ArkUINodeHandle node);
+    void (*setTextAreaAdaptMaxFontSize)(ArkUINodeHandle node, ArkUI_Float32 value, ArkUI_Int32 unit);
+    void (*resetTextAreaAdaptMaxFontSize)(ArkUINodeHandle node);
+    void (*setTextAreaHeightAdaptivePolicy)(ArkUINodeHandle node, ArkUI_Int32 value);
+    void (*resetTextAreaHeightAdaptivePolicy)(ArkUINodeHandle node);
 };
 
 struct ArkUITextInputModifier {
@@ -2162,6 +2168,12 @@ struct ArkUITextInputModifier {
     void (*setTextInputEnableAutoFill)(ArkUINodeHandle node, ArkUI_Uint32 enableAutoFill);
     void (*resetTextInputEnableAutoFill)(ArkUINodeHandle node);
     void (*resetTextInputPadding)(ArkUINodeHandle node);
+    void (*setTextInputAdaptMinFontSize)(ArkUINodeHandle node, ArkUI_Float32 value, ArkUI_Int32 unit);
+    void (*resetTextInputAdaptMinFontSize)(ArkUINodeHandle node);
+    void (*setTextInputAdaptMaxFontSize)(ArkUINodeHandle node, ArkUI_Float32 value, ArkUI_Int32 unit);
+    void (*resetTextInputAdaptMaxFontSize)(ArkUINodeHandle node);
+    void (*setTextInputHeightAdaptivePolicy)(ArkUINodeHandle node, ArkUI_Int32 value);
+    void (*resetTextInputHeightAdaptivePolicy)(ArkUINodeHandle node);
 };
 
 struct ArkUIWebModifier {
@@ -2620,6 +2632,10 @@ struct ArkUISearchModifier {
     void (*resetSearchLineHeight)(ArkUINodeHandle node);
     void (*setSearchFontFeature)(ArkUINodeHandle node, ArkUI_CharPtr value);
     void (*resetSearchFontFeature)(ArkUINodeHandle node);
+    void (*setSearchAdaptMinFontSize)(ArkUINodeHandle node, ArkUI_Float32 value, ArkUI_Int32 unit);
+    void (*resetSearchAdaptMinFontSize)(ArkUINodeHandle node);
+    void (*setSearchAdaptMaxFontSize)(ArkUINodeHandle node, ArkUI_Float32 value, ArkUI_Int32 unit);
+    void (*resetSearchAdaptMaxFontSize)(ArkUINodeHandle node);
 };
 
 struct ArkUISearchControllerModifier {
