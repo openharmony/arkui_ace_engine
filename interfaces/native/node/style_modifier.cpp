@@ -8104,7 +8104,7 @@ int32_t SetCheckboxMark(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
     }
 
     GetFullImpl()->getNodeModifiers()->getCheckboxModifier()->setMark(
-        node->uiNodeHandle, strokeColor, size, strokeWidth);
+        node->uiNodeHandle, strokeColor, size, DEFAULT_UNIT, strokeWidth, DEFAULT_UNIT);
     return ERROR_CODE_NO_ERROR;
 }
 
