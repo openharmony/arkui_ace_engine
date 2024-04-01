@@ -329,6 +329,38 @@ class TextInputShowUnderlineModifier extends ModifierWithKey<boolean> {
     return !isBaseOrResourceEqual(this.stageValue, this.value);
   }
 }
+class TextInputPasswordRulesModifier extends ModifierWithKey<string> {
+  constructor(value: string) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('textInputPasswordRules');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().textInput.resetPasswordRules(node);
+    } else {
+      getUINativeModule().textInput.setPasswordRules(node, this.value!);
+    }
+  }
+  checkObjectDiff(): boolean {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+class TextInputEnableAutoFillModifier extends ModifierWithKey<boolean> {
+  constructor(value: boolean) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('textInputEnableAutoFill');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().textInput.resetEnableAutoFill(node);
+    } else {
+      getUINativeModule().textInput.setEnableAutoFill(node, this.value!);
+    }
+  }
+  checkObjectDiff(): boolean {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
 class TextInputShowErrorModifier extends ModifierWithKey<string | undefined> {
   constructor(value: string | undefined) {
     super(value);
@@ -604,10 +636,14 @@ class ArkTextInputComponent extends ArkComponent implements CommonMethod<TextInp
     throw new Error('Method not implemented.');
   }
   enableAutoFill(value: boolean): TextInputAttribute {
-    throw new Error('Method not implemented.');
+    modifierWithKey(this._modifiersWithKeys, TextInputEnableAutoFillModifier.identity,
+      TextInputEnableAutoFillModifier, value);
+    return this;
   }
   passwordRules(value: string): TextInputAttribute {
-    throw new Error('Method not implemented.');
+    modifierWithKey(this._modifiersWithKeys, TextInputPasswordRulesModifier.identity,
+      TextInputPasswordRulesModifier, value);
+    return this;
   }
   showCounter(value: boolean): TextInputAttribute {
     throw new Error('Method not implemented.');

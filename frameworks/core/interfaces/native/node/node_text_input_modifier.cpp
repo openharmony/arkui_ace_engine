@@ -40,6 +40,7 @@ constexpr TextAlign DEFAULT_TEXT_ALIGN_VALUE = TextAlign::START;
 constexpr InputStyle DEFAULT_INPUT_STYLE = InputStyle::DEFAULT;
 constexpr bool DEFAULT_SELECTION_MENU_HIDDEN = false;
 constexpr bool DEFAULT_SHOW_UNDER_LINE = false;
+constexpr bool DEFAULT_ENABLE_AUTO_FILL = true;
 constexpr bool DEFAULT_REQUEST_KEYBOARD_ON_FOCUS = true;
 constexpr DisplayMode DEFAULT_BAR_STATE = DisplayMode::AUTO;
 constexpr FontWeight DEFAULT_FONT_WEIGHT = FontWeight::NORMAL;
@@ -265,6 +266,35 @@ void ResetTextInputShowUnderline(ArkUINodeHandle node)
     auto *frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     TextFieldModelNG::SetShowUnderline(frameNode, DEFAULT_SHOW_UNDER_LINE);
+}
+
+void SetTextInputPasswordRules(ArkUINodeHandle node, ArkUI_CharPtr passwordRules)
+{
+    auto *frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    std::string strValue = passwordRules;
+    TextFieldModelNG::SetPasswordRules(frameNode, strValue);
+}
+
+void ResetTextInputPasswordRules(ArkUINodeHandle node)
+{
+    auto *frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    TextFieldModelNG::SetPasswordRules(frameNode, "");
+}
+
+void SetTextInputEnableAutoFill(ArkUINodeHandle node, ArkUI_Uint32 enableAutoFill)
+{
+    auto *frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    TextFieldModelNG::SetEnableAutoFill(frameNode, static_cast<bool>(enableAutoFill));
+}
+
+void ResetTextInputEnableAutoFill(ArkUINodeHandle node)
+{
+    auto *frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    TextFieldModelNG::SetEnableAutoFill(frameNode, DEFAULT_ENABLE_AUTO_FILL);
 }
 
 void SetTextInputCaretStyle(ArkUINodeHandle node, const ArkUILengthType* value)
@@ -969,7 +999,8 @@ const ArkUITextInputModifier* GetTextInputModifier()
         ResetTextInputUserUnderlineColor, SetTextInputTextSelection, GetTextInputTextSelectionIndex,
         SetTextInputDecoration, ResetTextInputDecoration, SetTextInputLetterSpacing, ResetTextInputLetterSpacing,
         SetTextInputLineHeight, ResetTextInputLineHeight, SetTextInputFontFeature, ResetTextInputFontFeature,
-        SetTextInputWordBreak, ResetTextInputWordBreak };
+        SetTextInputWordBreak, ResetTextInputWordBreak, SetTextInputPasswordRules, ResetTextInputPasswordRules,
+        SetTextInputEnableAutoFill, ResetTextInputEnableAutoFill };
     return &modifier;
 }
 

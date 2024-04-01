@@ -115,6 +115,8 @@ public:
         const std::optional<std::string>& value, bool isTextArea);
     static void SetInputStyle(FrameNode* frameNode, InputStyle value);
     static void SetSelectionMenuHidden(FrameNode* frameNode, bool contextMenuHidden);
+    static void SetPasswordRules(FrameNode* frameNode, const std::string& passwordRules);
+    static void SetEnableAutoFill(FrameNode* frameNode, bool enableAutoFill);
     static void RequestKeyboardOnFocus(FrameNode* frameNode, bool needToRequest);
     static void SetBarState(FrameNode* frameNode, OHOS::Ace::DisplayMode value);
     static void SetPasswordIcon(FrameNode* frameNode, const PasswordIcon& passwordIcon);

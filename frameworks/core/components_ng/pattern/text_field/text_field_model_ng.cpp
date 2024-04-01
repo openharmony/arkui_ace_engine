@@ -1028,6 +1028,16 @@ void TextFieldModelNG::SetSelectionMenuHidden(FrameNode* frameNode, bool selecti
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, SelectionMenuHidden, selectionMenuHidden, frameNode);
 }
 
+void TextFieldModelNG::SetPasswordRules(FrameNode* frameNode, const std::string& passwordRules)
+{
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, PasswordRules, passwordRules, frameNode);
+}
+
+void TextFieldModelNG::SetEnableAutoFill(FrameNode* frameNode, bool enableAutoFill)
+{
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, EnableAutoFill, enableAutoFill, frameNode);
+}
+
 void TextFieldModelNG::SetShowCounter(FrameNode* frameNode, bool value)
 {
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, ShowCounter, value, frameNode);

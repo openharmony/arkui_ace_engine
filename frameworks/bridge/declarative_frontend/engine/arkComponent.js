@@ -8799,6 +8799,38 @@ class TextInputShowUnderlineModifier extends ModifierWithKey {
   }
 }
 TextInputShowUnderlineModifier.identity = Symbol('textInputShowUnderLine');
+class TextInputPasswordRulesModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().textInput.resetPasswordRules(node);
+    } else {
+      getUINativeModule().textInput.setPasswordRules(node, this.value);
+    }
+  }
+  checkObjectDiff() {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+TextInputPasswordRulesModifier.identity = Symbol('textInputPasswordRules');
+class TextInputEnableAutoFillModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().textInput.resetEnableAutoFill(node);
+    } else {
+      getUINativeModule().textInput.setEnableAutoFill(node, this.value);
+    }
+  }
+  checkObjectDiff() {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+TextInputEnableAutoFillModifier.identity = Symbol('textInputEnableAutoFill');
 class TextInputFontFeatureModifier extends ModifierWithKey {
   constructor(value) {
     super(value);
@@ -9072,10 +9104,12 @@ class ArkTextInputComponent extends ArkComponent {
     throw new Error('Method not implemented.');
   }
   enableAutoFill(value) {
-    throw new Error('Method not implemented.');
+    modifierWithKey(this._modifiersWithKeys, TextInputEnableAutoFillModifier.identity, TextInputEnableAutoFillModifier, value);
+    return this;
   }
   passwordRules(value) {
-    throw new Error('Method not implemented.');
+    modifierWithKey(this._modifiersWithKeys, TextInputPasswordRulesModifier.identity, TextInputPasswordRulesModifier, value);
+    return this;
   }
   showCounter(value) {
     throw new Error('Method not implemented.');
