@@ -4356,17 +4356,22 @@ void OverlayManager::AddFrameNodeToOverlay(const RefPtr<NG::FrameNode>& node, st
         frameNodeMapOnOverlay_.erase(node->GetId());
     }
     const auto& children = overlayNode_->GetChildren();
-    if (children.empty() || level < frameNodeMapOnOverlay_[overlayNode_->GetFirstChild()->GetId()]) {
-        overlayNode_->AddChild(node, 0);
-    } else if (level == -1 || level >= frameNodeMapOnOverlay_[overlayNode_->GetLastChild()->GetId()]) {
+    if (level == -1) {
         overlayNode_->AddChild(node);
+    } else if (children.empty() || frameNodeMapOnOverlay_[overlayNode_->GetFirstChild()->GetId()] == -1 ||
+               level < frameNodeMapOnOverlay_[overlayNode_->GetFirstChild()->GetId()]) {
+        overlayNode_->AddChild(node, 0);
     } else {
         for (auto it = children.rbegin(); it != children.rend(); ++it) {
             auto childLevel = frameNodeMapOnOverlay_[(*it)->GetId()];
-            if (childLevel >= 0 && childLevel <= level) {
+            if (childLevel < 0) {
+                continue;
+            }
+            if (childLevel <= level) {
                 auto beforeNode = DynamicCast<FrameNode>(*it);
                 CHECK_NULL_VOID(beforeNode);
                 overlayNode_->AddChildAfter(node, beforeNode);
+                break;
             }
         }
     }
