@@ -26,7 +26,7 @@ class StorageInterface {
 public:
     virtual ~StorageInterface() = default;
 
-    virtual RefPtr<Storage> GetStorage(const RefPtr<TaskExecutor>& taskExecutor) const
+    virtual RefPtr<Storage> GetStorage() const
     {
         return nullptr;
     }

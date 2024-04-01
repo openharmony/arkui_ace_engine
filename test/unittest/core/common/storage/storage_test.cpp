@@ -69,8 +69,7 @@ HWTEST_F(StorageTest, CastToStorageTest002, TestSize.Level1)
      */
     StorageProxy::GetInstance()->SetDelegate(nullptr);
 
-    RefPtr<TaskExecutor> taskExecutor;
-    RefPtr<Storage> stroage = StorageProxy::GetInstance()->GetStorage(taskExecutor);
+    RefPtr<Storage> stroage = StorageProxy::GetInstance()->GetStorage();
 
     EXPECT_EQ(stroage, nullptr);
 }
@@ -111,8 +110,7 @@ HWTEST_F(StorageTest, CastToStorageTest004, TestSize.Level1)
      */
     StorageProxy::GetInstance()->SetDelegate(std::make_unique<MockStorageProxyImpl>());
 
-    RefPtr<TaskExecutor> taskExecutor;
-    RefPtr<Storage> stroage = StorageProxy::GetInstance()->GetStorage(taskExecutor);
+    RefPtr<Storage> stroage = StorageProxy::GetInstance()->GetStorage();
     EXPECT_NE(stroage, nullptr);
 
     std::string testString = stroage->GetString("test");
