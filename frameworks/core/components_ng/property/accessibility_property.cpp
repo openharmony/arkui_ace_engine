@@ -316,6 +316,7 @@ static const std::set<std::string> TAGS_FOCUSABLE = {
     V2::WEB_ETS_TAG,
     V2::XCOMPONENT_ETS_TAG,
     V2::UI_EXTENSION_COMPONENT_ETS_TAG,
+    V2::EMBEDDED_COMPONENT_ETS_TAG,
     V2::FORM_ETS_TAG
 };
 
