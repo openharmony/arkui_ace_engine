@@ -178,6 +178,7 @@ RectF TextSelectOverlay::GetSelectArea()
     auto textPaintOffset = pattern->GetTextPaintOffset();
     if (selectRects.empty()) {
         res.SetOffset(res.GetOffset() + textPaintOffset);
+        GetSelectAreaFromHandle(res);
         return res;
     }
     auto contentRect = pattern->GetTextContentRect();
@@ -186,6 +187,19 @@ RectF TextSelectOverlay::GetSelectArea()
     RectF visibleContentRect(contentRect.GetOffset() + textPaintOffset, contentRect.GetSize());
     visibleContentRect = GetVisibleRect(pattern->GetHost(), visibleContentRect);
     return res.IntersectRectT(visibleContentRect);
+}
+
+void TextSelectOverlay::GetSelectAreaFromHandle(RectF& rect)
+{
+    auto firstHandle = GetFirstHandleInfo();
+    if (firstHandle) {
+        rect = firstHandle->paintRect;
+        return;
+    }
+    auto secondHandle = GetSecondHandleInfo();
+    if (secondHandle) {
+        rect = secondHandle->paintRect;
+    }
 }
 
 void TextSelectOverlay::OnUpdateMenuInfo(SelectMenuInfo& menuInfo, SelectOverlayDirtyFlag dirtyFlag)
