@@ -109,7 +109,15 @@ void TextPickerPattern::SetButtonIdeaSize()
             UpdateUserDefinedIdealSize(CalcSize(CalcLength(width - PRESS_INTERVAL.ConvertToPx() * RATE),
                 CalcLength(buttonHeight)));
         auto buttonConfirmRenderContext = buttonNode->GetRenderContext();
-        buttonConfirmRenderContext->UpdateBackgroundColor(Color::TRANSPARENT);
+        auto blendNode = DynamicCast<FrameNode>(stackNode->GetLastChild());
+        CHECK_NULL_VOID(blendNode);
+        auto columnNode = DynamicCast<FrameNode>(blendNode->GetLastChild());
+        CHECK_NULL_VOID(columnNode);
+        auto columnPattern = columnNode->GetPattern<TextPickerColumnPattern>();
+        CHECK_NULL_VOID(columnPattern);
+        if (!columnPattern->isHover()) {
+            buttonConfirmRenderContext->UpdateBackgroundColor(Color::TRANSPARENT);
+        }
         buttonNode->MarkModifyDone();
         buttonNode->MarkDirtyNode();
     }
