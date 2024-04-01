@@ -122,6 +122,8 @@ public:
     virtual void Delete() {}
     virtual void Insert(const std::string& args) {}
 
+    virtual void SetPasswordState(bool flag) {}
+
     virtual void CaretPosition(int32_t caretPosition) {}
     virtual int32_t GetCaretIndex()
     {
