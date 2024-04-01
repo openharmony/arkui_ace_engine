@@ -5950,10 +5950,12 @@ bool TextFieldPattern::CheckAutoSave()
             return true;
         }
     }
-    if (AceAutoFillType::ACE_UNSPECIFIED < autoFillType && autoFillType <= AceAutoFillType::ACE_YEAR)
+    if (AceAutoFillType::ACE_UNSPECIFIED < autoFillType && autoFillType <= AceAutoFillType::ACE_YEAR &&
+        autoFillType != AceAutoFillType::ACE_USER_NAME) {
         if (contentController_->GetTextValue() != lastAutoFillPasswordTextValue_) {
             return true;
         }
+    }
     return false;
 }
 
