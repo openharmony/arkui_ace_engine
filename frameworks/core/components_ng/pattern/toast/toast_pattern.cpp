@@ -174,7 +174,7 @@ void ToastPattern::BeforeCreateLayoutWrapper()
     auto toastTheme = context->GetTheme<ToastTheme>();
     CHECK_NULL_VOID(toastTheme);
     auto textHeight = GetTextHeight(textNode);
-    if (textHeight > toastTheme->GetMinHeight().ConvertToPx()) {
+    if (GreatNotEqual(textHeight, toastTheme->GetMinHeight().ConvertToPx())) {
         textNode->GetLayoutProperty<TextLayoutProperty>()->UpdateTextAlign(TextAlign::START);
     }
 }
