@@ -620,7 +620,7 @@ void JSViewContext::SetDynamicDimming(const JSCallbackInfo& info)
     }
     float dimming = info[1]->ToNumber<float>();
     RefPtr<Ace::NG::RenderContext> renderContext = frameNode->GetRenderContext();
-    renderContext->OnDynamicDimDegreeUpdate(std::clamp(dimming, 0.0f, 1.0f));
+    renderContext->UpdateDynamicDimDegree(std::clamp(dimming, 0.0f, 1.0f));
 }
 
 void JSViewContext::JSBind(BindingTarget globalObj)

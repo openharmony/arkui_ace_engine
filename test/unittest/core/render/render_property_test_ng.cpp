@@ -40,6 +40,7 @@ const Dimension OFFSET_Y { 80.0, DimensionUnit::PX };
 const Dimension ANCHOR_X { 100.0, DimensionUnit::PX };
 const Dimension ANCHOR_Y { 200.0, DimensionUnit::PX };
 const InvertVariant invert = 0.0f;
+const float DYNAMIC_DIMMING = 0.5f;
 
 const float VALUE_TEST = 720.0f;
 const Color WHITE = Color(0xffffffff);
@@ -60,6 +61,7 @@ void MakeGraphicsProperty(NG::GraphicsProperty& graphicsProperty)
 {
     graphicsProperty.propFrontGrayScale = POSITION_X;
     graphicsProperty.propFrontBrightness = POSITION_X;
+    graphicsProperty.propDynamicDimDegree = DYNAMIC_DIMMING;
     graphicsProperty.propFrontSaturate = POSITION_X;
     graphicsProperty.propFrontContrast = POSITION_X;
     graphicsProperty.propFrontInvert = invert;
@@ -151,6 +153,7 @@ HWTEST_F(RenderPropertyTestNg, GraphicsPropertyTest001, TestSize.Level1)
     EXPECT_EQ(json->GetValue(SHADOW_TEST)->GetString("color"), "#FF000000");
     EXPECT_EQ(json->GetValue(SHADOW_TEST)->GetString("offsetX"), "0.000000");
     EXPECT_EQ(json->GetValue(SHADOW_TEST)->GetString("offsetY"), "0.000000");
+    EXPECT_EQ(json->GetString("dynamicDimming"), "0.5");
 }
 
 /**
