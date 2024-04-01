@@ -15,10 +15,10 @@
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_text_area_bridge.h"
 
 #include "bridge/common/utils/utils.h"
-#include "core/components/common/properties/text_style.h"
 #include "bridge/declarative_frontend/engine/jsi/jsi_types.h"
 #include "bridge/declarative_frontend/jsview/js_view_abstract.h"
 #include "core/components/common/layout/constants.h"
+#include "core/components/common/properties/text_style.h"
 #include "core/components/text_field/textfield_theme.h"
 #include "core/components_ng/pattern/text_field/text_field_model.h"
 #include "frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_utils.h"
@@ -30,7 +30,8 @@ constexpr int NUM_2 = 2;
 constexpr int NUM_3 = 3;
 constexpr int NUM_4 = 4;
 constexpr uint32_t KEY_BOARD_FOCUS_DEFAULT = 1;
-constexpr uint32_t SHOW_COUNTER_DEFAULT = 0;
+constexpr uint32_t ILLEGAL_VALUE = 0;
+constexpr uint32_t DEFAULT_MODE = -1;
 const int32_t MINI_VALID_VALUE = 1;
 const int32_t MAX_VALID_VALUE = 100;
 const std::string DEFAULT_FONT_WEIGHT = "400";
@@ -358,19 +359,31 @@ ArkUINativeModuleValue TextAreaBridge::SetShowCounter(ArkUIRuntimeCallInfo *runt
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
     Local<JSValueRef> showCounterArg = runtimeCallInfo->GetCallArgRef(NUM_1);
-    Local<JSValueRef> inputNumberArg = runtimeCallInfo->GetCallArgRef(NUM_2);
+    Local<JSValueRef> inputOptionsArg = runtimeCallInfo->GetCallArgRef(NUM_2);
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
-    uint32_t value = SHOW_COUNTER_DEFAULT;
-    if (showCounterArg->IsBoolean()) {
-        value = static_cast<uint32_t>(showCounterArg->ToBoolean(vm)->Value());
-        if (inputNumberArg->IsNumber() && inputNumberArg->Int32Value(vm) > MINI_VALID_VALUE &&
-            inputNumberArg->Int32Value(vm) < MAX_VALID_VALUE) {
-            GetArkUINodeModifiers()->getTextAreaModifier()->setCounterType(nativeNode, inputNumberArg->Int32Value(vm));
-        }
-        GetArkUINodeModifiers()->getTextAreaModifier()->setTextAreaShowCounter(nativeNode, value);
-    } else {
+    if (!showCounterArg->IsBoolean() && !inputOptionsArg->IsObject()) {
         GetArkUINodeModifiers()->getTextAreaModifier()->resetTextAreaShowCounter(nativeNode);
+        return panda::JSValueRef::Undefined(vm);
     }
+    auto showCounter = showCounterArg->BooleaValue();
+    auto jsObj = inputOptionsArg->ToObject(vm);
+    auto highlightBorderArg = jsObj->Get(vm, panda::StringRef::NewFromUtf8(vm, "highlightBorder"));
+    auto isBorderArgInvalid =
+        highlightBorderArg->IsUndefined() || highlightBorderArg->IsNull() || !highlightBorderArg->IsBoolean();
+    auto highlightBorder = true;
+    if (!isBorderArgInvalid) {
+        highlightBorder = highlightBorderArg->BooleaValue();
+    }
+    auto thresholdArg = jsObj->Get(vm, panda::StringRef::NewFromUtf8(vm, "thresholdPercentage"));
+    auto thresholdValue = thresholdArg->Int32Value(vm);
+    if (thresholdArg->IsNull() || thresholdArg->IsUndefined() || !thresholdArg->IsNumber()) {
+        thresholdValue = DEFAULT_MODE;
+    } else if (thresholdValue < MINI_VALID_VALUE || thresholdValue > MAX_VALID_VALUE) {
+        thresholdValue = ILLEGAL_VALUE;
+        showCounter = false;
+    }
+    GetArkUINodeModifiers()->getTextAreaModifier()->setTextAreaShowCounterOptions(
+        nativeNode, showCounter, thresholdValue, highlightBorder);
     return panda::JSValueRef::Undefined(vm);
 }
 
