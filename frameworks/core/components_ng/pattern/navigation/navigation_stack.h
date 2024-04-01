@@ -160,6 +160,9 @@ public:
 
     virtual std::vector<std::string> DumpStackInfo() const;
 
+    virtual int32_t GetJsIndexFromNativeIndex(int32_t index) { return -1; }
+    virtual void MoveIndexToTop(int32_t index) {}
+
 protected:
     void MoveToTop(const std::string& name, const RefPtr<UINode>& navDestinationNode);
     void AddForDefault(const std::string& name, const RefPtr<UINode>& navDestinationNode,

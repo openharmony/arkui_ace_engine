@@ -16,14 +16,16 @@
 #include "core/components_ng/pattern/navigation/inner_navigation_controller.h"
 
 #include "core/components_ng/pattern/navigation/navigation_pattern.h"
+#include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS {
 namespace Ace {
 namespace {
 constexpr int32_t INVALID_HANDLE = 0;
 }
-InnerNavigationController::InnerNavigationController(const WeakPtr<NG::NavigationPattern>& pattern)
-    : weakNavigationPattern_(pattern) {}
+InnerNavigationController::InnerNavigationController(
+    const WeakPtr<NG::NavigationPattern>& pattern, int32_t containerId)
+    : weakNavigationPattern_(pattern), containerId_(containerId) {}
 
 bool InnerNavigationController::IsNavDestinationInTopStack()
 {
@@ -32,6 +34,8 @@ bool InnerNavigationController::IsNavDestinationInTopStack()
 
 int32_t InnerNavigationController::GetTopHandle()
 {
+    CHECK_RUN_ON(UI);
+    ContainerScope scope(containerId_);
     auto navigationPattern = weakNavigationPattern_.Upgrade();
     CHECK_NULL_RETURN(navigationPattern, INVALID_HANDLE);
     auto navigationStack = navigationPattern->GetNavigationStack();
@@ -49,6 +53,8 @@ int32_t InnerNavigationController::GetTopHandle()
 
 void InnerNavigationController::SetInPIPMode(int32_t handle)
 {
+    CHECK_RUN_ON(UI);
+    ContainerScope scope(containerId_);
     auto navigationPattern = weakNavigationPattern_.Upgrade();
     CHECK_NULL_VOID(navigationPattern);
     auto navigationStack = navigationPattern->GetNavigationStack();
@@ -79,6 +85,8 @@ void InnerNavigationController::SetInPIPMode(int32_t handle)
 
 void InnerNavigationController::PopInPIP(bool destroy)
 {
+    CHECK_RUN_ON(UI);
+    ContainerScope scope(containerId_);
     auto navigationPattern = weakNavigationPattern_.Upgrade();
     CHECK_NULL_VOID(navigationPattern);
     auto navigationStack = navigationPattern->GetNavigationStack();
@@ -97,6 +105,8 @@ void InnerNavigationController::PopInPIP(bool destroy)
 
 void InnerNavigationController::PushInPIP(int32_t handle)
 {
+    CHECK_RUN_ON(UI);
+    ContainerScope scope(containerId_);
     auto navigationPattern = weakNavigationPattern_.Upgrade();
     CHECK_NULL_VOID(navigationPattern);
     auto navigationStack = navigationPattern->GetNavigationStack();
@@ -116,21 +126,47 @@ void InnerNavigationController::PushInPIP(int32_t handle)
     navigationStack->ReOrderCache(cacheNode->first, cacheNode->second);
     auto context = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(context);
-    context->GetTaskExecutor()->PostTask(
-        [weakStack = AceType::WeakClaim(AceType::RawPtr(navigationStack)), name = cacheNode->first] {
-            auto stack = weakStack.Upgrade();
-            CHECK_NULL_VOID(stack);
-            stack->Push(name);
-        }, TaskExecutor::TaskType::UI);
+
+    auto nodePairs = navigationStack->GetAllNavDestinationNodes();
+    bool findPipNode = false;
+    int32_t nativeStackIndex = 0;
+    for (const auto& pair : nodePairs) {
+        if (pair.first == cacheNode->first && pair.second->GetId() == handle) {
+            findPipNode = true;
+            break;
+        }
+        nativeStackIndex++;
+    }
+
+    if (findPipNode) {
+        int32_t jsIndex = navigationStack->GetJsIndexFromNativeIndex(nativeStackIndex);
+        if (jsIndex < 0) {
+            navigationStack->Push(cacheNode->first);
+        } else {
+            navigationStack->MoveIndexToTop(jsIndex);
+        }
+    } else {
+        navigationStack->Push(cacheNode->first);
+    }
 }
 
 void InnerNavigationController::DeletePIPMode(int32_t handle)
 {
+    CHECK_RUN_ON(UI);
+    ContainerScope scope(containerId_);
     auto navigationPattern = weakNavigationPattern_.Upgrade();
     CHECK_NULL_VOID(navigationPattern);
     auto navigationStack = navigationPattern->GetNavigationStack();
     CHECK_NULL_VOID(navigationStack);
-    navigationStack->RemoveCacheNode(handle);
+    auto context = NG::PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(context);
+
+    auto task = [weakStack = AceType::WeakClaim(AceType::RawPtr(navigationStack)), handle]() {
+        auto stack = weakStack.Upgrade();
+        CHECK_NULL_VOID(stack);
+        stack->RemoveCacheNode(handle);
+    };
+    context->AddBuildFinishCallBack(task);
 }
 } // namespace Ace
 } // namespace OHOS
