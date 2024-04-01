@@ -590,11 +590,6 @@ void RadioPattern::LoadBuilder()
             childNode = AceType::DynamicCast<FrameNode>(customNode);
             CHECK_NULL_VOID(childNode);
         }
-        auto customGeometry = childNode->GetGeometryNode();
-        CHECK_NULL_VOID(customGeometry);
-        auto customProperty = childNode->GetLayoutProperty<LayoutProperty>();
-        CHECK_NULL_VOID(customProperty);
-        customProperty->UpdateUserDefinedIdealSize(GetChildContentSize());
         childNode->MountToParent(host);
         host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     }
