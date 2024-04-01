@@ -179,6 +179,7 @@ enum AceLogTag : uint8_t {
     ACE_TEXT_CLOCK,           // C03942
     ACE_FOLDER_STACK,         // C03943
     ACE_SELECT_COMPONENT,     // C03944
+    ACE_STATE_STYLE,          // C03945
 
     FORM_RENDER = 255, // C039FF FormRenderer
     END = 256,         // Last one, do not use

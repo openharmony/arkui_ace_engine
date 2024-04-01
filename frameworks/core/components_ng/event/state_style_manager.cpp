@@ -120,6 +120,8 @@ void StateStyleManager::FireStateFunc()
     auto node = host_.Upgrade();
     CHECK_NULL_VOID(node);
     auto nodeId = node->GetId();
+    TAG_LOGI(AceLogTag::ACE_STATE_STYLE, "Start execution, tag is %{public}s, id is %{public}d",
+        node->GetTag().c_str(), nodeId);
     RefPtr<CustomNodeBase> customNode;
     if (AceType::InstanceOf<CustomNodeBase>(node)) {
         customNode = DynamicCast<CustomNodeBase>(node);
@@ -152,6 +154,7 @@ void StateStyleManager::FireStateFunc()
         }
     }
     if (!customNode) {
+        TAG_LOGW(AceLogTag::ACE_STATE_STYLE, "Can not find customNode!");
         return;
     }
     ScopedViewStackProcessor processor;
@@ -173,6 +176,7 @@ void StateStyleManager::PostPressStyleTask(uint32_t delayTime)
     pressStyleTask_.Reset([weak = WeakClaim(this)] {
         auto stateStyleMgr = weak.Upgrade();
         CHECK_NULL_VOID(stateStyleMgr);
+        TAG_LOGI(AceLogTag::ACE_STATE_STYLE, "Execute press task");
         stateStyleMgr->ResetPressedPendingState();
         stateStyleMgr->UpdateCurrentUIState(UI_STATE_PRESSED);
         stateStyleMgr->PostListItemPressStyleTask(stateStyleMgr->currentState_);
@@ -196,6 +200,7 @@ void StateStyleManager::PostPressCancelStyleTask(uint32_t delayTime)
     pressCancelStyleTask_.Reset([weak = WeakClaim(this)] {
         auto stateStyleMgr = weak.Upgrade();
         CHECK_NULL_VOID(stateStyleMgr);
+        TAG_LOGI(AceLogTag::ACE_STATE_STYLE, "Execute press clear task");
         stateStyleMgr->ResetPressedCancelPendingState();
         stateStyleMgr->ResetCurrentUIState(UI_STATE_PRESSED);
         stateStyleMgr->PostListItemPressStyleTask(stateStyleMgr->currentState_);
