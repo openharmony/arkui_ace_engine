@@ -394,7 +394,14 @@ void ShowGatherAnimation(const RefPtr<FrameNode>& imageNode, const RefPtr<FrameN
     textNode->MarkModifyDone();
     auto menuPattern = GetMenuPattern(menuNode);
     CHECK_NULL_VOID(menuPattern);
-    mainPipeline->AddAfterRenderTask([imageNode, manager, textNode, menuPattern]() {
+    mainPipeline->AddAfterRenderTask([weakImageNode = AceType::WeakClaim(AceType::RawPtr(imageNode)),
+        weakManager = AceType::WeakClaim(AceType::RawPtr(manager)),
+        weakTextNode = AceType::WeakClaim(AceType::RawPtr(textNode)),
+        weakMenuPattern = AceType::WeakClaim(AceType::RawPtr(menuPattern))]() {
+        auto imageNode = weakImageNode.Upgrade();
+        auto manager = weakManager.Upgrade();
+        auto textNode = weakTextNode.Upgrade();
+        auto menuPattern = weakMenuPattern.Upgrade();
         DragAnimationHelper::PlayGatherAnimation(imageNode, manager);
         DragAnimationHelper::CalcBadgeTextPosition(menuPattern, manager, imageNode, textNode);
         DragAnimationHelper::ShowBadgeAnimation(textNode);

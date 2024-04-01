@@ -980,7 +980,7 @@ void GestureEventHub::OnDragStart(const GestureEvent& info, const RefPtr<Pipelin
         "displayId %{public}d, windowId %{public}d, summary %{public}s.",
         frameNode->GetTag().c_str(), frameNode->GetInspectorId()->c_str(), width, height, scale, udKey.c_str(),
         recordsSize, info.GetPointerId(), info.GetTargetDisplayId(), windowId, summarys.c_str());
-    dragDropManager->PushGatherPixelMap(dragData, scale, width, height);
+    dragDropManager->GetGatherPixelMap(dragData, scale, width, height);
     ret = InteractionInterface::GetInstance()->StartDrag(dragData, GetDragCallback(pipeline, eventHub));
     if (ret != 0) {
         if (dragDropManager->IsNeedDisplayInSubwindow() && subWindowOverlayManager) {
@@ -1632,10 +1632,7 @@ bool GestureEventHub::IsNeedSwitchToSubWindow() const
         return true;
     }
     CHECK_NULL_RETURN(dragEventActuator_, false);
-    if (dragEventActuator_->IsNeedGather()) {
-        return true;
-    }
-    return false;
+    return dragEventActuator_->IsNeedGather();
 }
 
 void GestureEventHub::SetDragGatherPixelMaps(const GestureEvent& info)
@@ -1661,7 +1658,7 @@ void GestureEventHub::SetMouseDragGatherPixelMaps()
     CHECK_NULL_VOID(dragDropManager);
     dragDropManager->ClearGatherPixelMap();
     CHECK_NULL_VOID(dragEventActuator_);
-    auto fatherNode = dragEventActuator_->GetItemFatherNode();
+    auto fatherNode = dragEventActuator_->GetItemParentNode();
     CHECK_NULL_VOID(fatherNode);
     auto scrollPattern = fatherNode->GetPattern<ScrollablePattern>();
     CHECK_NULL_VOID(scrollPattern);
@@ -1675,7 +1672,7 @@ void GestureEventHub::SetMouseDragGatherPixelMaps()
         DragEventActuator::GetFrameNodePreviewPixelMap(itemFrameNode);
         auto gestureHub = itemFrameNode->GetOrCreateGestureEventHub();
         CHECK_NULL_VOID(gestureHub);
-        dragDropManager->GetGatherPixelMap(gestureHub->GetDragPreviewPixelMap());
+        dragDropManager->PushGatherPixelMap(gestureHub->GetDragPreviewPixelMap());
         cnt++;
         if (cnt > 1) {
             break;
@@ -1700,7 +1697,7 @@ void GestureEventHub::SetNotMouseDragGatherPixelMaps()
         auto imageLayoutProperty = imageNode->GetLayoutProperty<ImageLayoutProperty>();
         CHECK_NULL_VOID(imageLayoutProperty);
         auto imageSourceInfo = imageLayoutProperty->GetImageSourceInfo().value_or(ImageSourceInfo());
-        dragDropManager->GetGatherPixelMap(imageSourceInfo.GetPixmap());
+        dragDropManager->PushGatherPixelMap(imageSourceInfo.GetPixmap());
         cnt++;
         if (cnt > 1) {
             break;
@@ -1714,7 +1711,7 @@ int32_t GestureEventHub::GetSelectItemSize()
     if (!dragEventActuator_->IsNeedGather()) {
         return 0;
     }
-    auto fatherNode = dragEventActuator_->GetItemFatherNode();
+    auto fatherNode = dragEventActuator_->GetItemParentNode();
     CHECK_NULL_RETURN(fatherNode, 0);
     auto scrollPattern = fatherNode->GetPattern<ScrollablePattern>();
     CHECK_NULL_RETURN(scrollPattern, 0);

@@ -1310,7 +1310,7 @@ HWTEST_F(DragEventTestNg, TestCreateGatherNode001, TestSize.Level1)
     /**
      * @tc.steps: step4. Create GatherNode.
      */
-    dragEventActuator->FindItemFatherNode(listItemNode1);
+    dragEventActuator->FindItemParentNode(listItemNode1);
     auto gatherNode = DragEventActuator::CreateGatherNode(dragEventActuator);
     EXPECT_EQ(gatherNode, nullptr);
 }
@@ -1367,7 +1367,7 @@ HWTEST_F(DragEventTestNg, TestCreateGatherNode002, TestSize.Level1)
     /**
      * @tc.steps: step4. Create GatherNode.
      */
-    dragEventActuator->FindItemFatherNode(gridItemNode1);
+    dragEventActuator->FindItemParentNode(gridItemNode1);
     auto gatherNode = DragEventActuator::CreateGatherNode(dragEventActuator);
     EXPECT_EQ(gatherNode, nullptr);
 }
@@ -1702,7 +1702,7 @@ HWTEST_F(DragEventTestNg, TestIsNeedGather001, TestSize.Level1)
      */
     dragEventActuator->IsBelongToMultiItemNode(listItemNode1);
     EXPECT_EQ(dragEventActuator->isSelectedItemNode_, true);
-    dragEventActuator->FindItemFatherNode(listItemNode1);
+    dragEventActuator->FindItemParentNode(listItemNode1);
     bool isNeedGather = dragEventActuator->IsNeedGather();
     EXPECT_EQ(isNeedGather, false);
 }

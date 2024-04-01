@@ -331,7 +331,7 @@ public:
     }
 
     static void UpdateGatherNodeAttr(const RefPtr<OverlayManager>& overlayManager,
-        OffsetF gatherNodeCenter, float scale, float previewWidth, float previewHeight);
+        const OffsetF& gatherNodeCenter, float scale, float previewWidth, float previewHeight);
     static void UpdateGatherNodePosition(const RefPtr<OverlayManager>& overlayManager,
         const RefPtr<FrameNode>& imageNode);
     static void UpdateTextNodePosition(const RefPtr<FrameNode>& textNode, const Offset& localPoint);
@@ -346,9 +346,9 @@ public:
         gatherPixelMaps_.clear();
     }
 
-    void GetGatherPixelMap(const RefPtr<PixelMap>& pixelMap);
-    void PushGatherPixelMap(DragDataCore& dragData, float scale, float previewWidth = 0.0f, float previewHeight = 0.0f);
-    bool HasGatherNode()
+    void PushGatherPixelMap(const RefPtr<PixelMap>& pixelMap);
+    void GetGatherPixelMap(DragDataCore& dragData, float scale, float previewWidth = 0.0f, float previewHeight = 0.0f);
+    bool HasGatherNode() const
     {
         return hasGatherNode_;
     }
@@ -484,8 +484,8 @@ private:
     DragPreviewInfo info_;
     PointerEvent dragDropPointerEvent_;
     bool isDragFwkShow_ { false };
-    OffsetF pixelMapOffset_ {0.0f, 0.0f};
-    OffsetF prePointerOffset_ {0.0f, 0.0f};
+    OffsetF pixelMapOffset_;
+    OffsetF prePointerOffset_;
     std::vector<RefPtr<PixelMap>> gatherPixelMaps_;
     bool hasGatherNode_ = false;
     bool isTouchGatherAnimationPlaying_ = false;

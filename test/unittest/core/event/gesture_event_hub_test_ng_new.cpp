@@ -691,7 +691,7 @@ HWTEST_F(GestureEventHubTestNg, TestSetDragGatherPixelMap001, TestSize.Level1)
      * @tc.steps: step5. Test SetDragGatherPixelMap result.
      */
     DragDataCore dragData;
-    dragDropManager->PushGatherPixelMap(dragData, 1.0f);
+    dragDropManager->GetGatherPixelMap(dragData, 1.0f);
     auto size = dragData.shadowInfos.size();
     EXPECT_EQ(size, 0);
 }
