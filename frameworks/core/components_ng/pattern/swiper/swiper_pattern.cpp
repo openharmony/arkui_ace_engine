@@ -2633,10 +2633,10 @@ void SwiperPattern::PlayPropertyTranslateAnimation(
     }
     auto finishCallback = [weak = WeakClaim(this), offset]() {
         auto swiper = weak.Upgrade();
+        CHECK_NULL_VOID(swiper);
         if (!swiper->hasTabsAncestor_) {
             PerfMonitor::GetPerfMonitor()->End(PerfConstants::APP_SWIPER_FLING, false);
         }
-        CHECK_NULL_VOID(swiper);
         swiper->targetIndex_.reset();
         swiper->OnPropertyTranslateAnimationFinish(offset);
     };
@@ -2654,11 +2654,11 @@ void SwiperPattern::PlayPropertyTranslateAnimation(
     // property callback will call immediately.
     auto propertyUpdateCallback = [swiper = WeakClaim(this), offset]() {
         auto swiperPattern = swiper.Upgrade();
-        if (!swiperPattern->hasTabsAncestor_) {
-            PerfMonitor::GetPerfMonitor()->Start(PerfConstants::APP_SWIPER_FLING, PerfActionType::FIRST_MOVE, "");
-        }
         if (!swiperPattern) {
             return;
+        }
+        if (!swiperPattern->hasTabsAncestor_) {
+            PerfMonitor::GetPerfMonitor()->Start(PerfConstants::APP_SWIPER_FLING, PerfActionType::FIRST_MOVE, "");
         }
         for (auto& item : swiperPattern->itemPosition_) {
             auto frameNode = item.second.node;
