@@ -1434,7 +1434,10 @@ void DragEventActuator::GetFrameNodePreviewPixelMap(const RefPtr<FrameNode>& fra
     auto dragPreviewInfo = frameNode->GetDragPreview();
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
-    if (dragPreviewInfo.pixelMap != nullptr) {
+    if (dragPreviewInfo.inspectorId != "") {
+        auto previewPixelMap = GetPreviewPixelMap(dragPreviewInfo.inspectorId, frameNode);
+        gestureHub->SetDragPreviewPixelMap(previewPixelMap);
+    } else if (dragPreviewInfo.pixelMap != nullptr) {
         gestureHub->SetDragPreviewPixelMap(dragPreviewInfo.pixelMap);
     } else {
         auto context = frameNode->GetRenderContext();
