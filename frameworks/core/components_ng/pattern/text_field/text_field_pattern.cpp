@@ -6442,7 +6442,7 @@ void TextFieldPattern::OnVirtualKeyboardAreaChanged()
 {
     CHECK_NULL_VOID(SelectOverlayIsOn());
     selectController_->CalculateHandleOffset();
-    ProcessOverlay();
+    ProcessOverlay({ .menuIsShow = false });
 }
 
 void TextFieldPattern::PasswordResponseKeyEvent()
