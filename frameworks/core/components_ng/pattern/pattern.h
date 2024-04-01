@@ -259,7 +259,7 @@ public:
         return true;
     }
 
-    virtual void UpdateSlideOffset() {}
+    virtual void UpdateSlideOffset(bool isNeedReset = false) {}
 
     // TODO: for temp use, need to delete this.
     virtual bool OnDirtyLayoutWrapperSwap(
