@@ -1300,6 +1300,8 @@ void PipelineContext::SetRootRect(double width, double height, double offset)
     if (Container::CurrentId() < MIN_SUBCONTAINER_ID) {
         ScreenSystemManager::GetInstance().SetWindowInfo(rootWidth_, density_, dipScale_);
         ScreenSystemManager::GetInstance().OnSurfaceChanged(width);
+    } else {
+        ScreenSystemManager::GetInstance().SetWindowInfo(density_, dipScale_);
     }
     SizeF sizeF { static_cast<float>(width), static_cast<float>(height) };
     if (rootNode_->GetGeometryNode()->GetFrameSize() != sizeF || rootNode_->IsLayoutDirtyMarked()) {
