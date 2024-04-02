@@ -43,8 +43,6 @@ const FontWeight FONT_WEIGHT_CONVERT_MAP[] = {
     FontWeight::W500,
     FontWeight::W400,
 };
-constexpr Dimension ERROR_TEXT_UNDERLINE_MARGIN = 8.0_vp;
-constexpr Dimension ERROR_TEXT_CAPSULE_MARGIN = 8.0_vp;
 constexpr float ROUND_VALUE = 0.5f;
 
 inline FontWeight ConvertFontWeight(FontWeight fontWeight)
@@ -77,12 +75,13 @@ void TextFieldContentModifier::onDraw(DrawingContext& context)
     CHECK_NULL_VOID(frameNode);
     auto layoutProperty = frameNode->GetLayoutProperty<TextFieldLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
-    if (layoutProperty->GetShowUnderlineValue(false) && showErrorState_->Get()) {
-        errorMargin = ERROR_TEXT_UNDERLINE_MARGIN.ConvertToPx();
-    } else if (textFieldPattern->NeedShowPasswordIcon() && showErrorState_->Get()) {
-        errorMargin = ERROR_TEXT_CAPSULE_MARGIN.ConvertToPx();
-    } else if (showErrorState_->Get()) {
-        errorMargin = ERROR_TEXT_CAPSULE_MARGIN.ConvertToPx();
+
+    auto pipelineContext = frameNode->GetContext();
+    CHECK_NULL_VOID(pipelineContext);
+    auto theme = pipelineContext->GetTheme<TextFieldTheme>();
+    CHECK_NULL_VOID(theme);
+    if (showErrorState_->Get()) {
+        errorMargin = theme->GetTextInputAndErrTipsSpacing().ConvertToPx();
     } else {
         errorMargin = 0;
     }
