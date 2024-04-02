@@ -78,7 +78,6 @@ base_output_path = get_label_info(":gen_js_proxyclass", "target_out_dir")
 jsproxyclass_obj_path = base_output_path + "/js_proxy_class.o"
 jsenumstyle_obj_path = base_output_path + "/js_enum_style.o"
 jsmocksystemplugin_obj_path = base_output_path + "/js_mock_system_plugin.o"
-jsuicontext_obj_path = base_output_path + "/jsUIContext.o"
 arkcomponent_obj_path = base_output_path + "/arkComponent.o"
 
 gen_obj("js_proxyclass") {
@@ -118,15 +117,6 @@ if (!is_arkui_x) {
     output = jsmocksystemplugin_obj_path
     snapshot_dep = [ "//ide/tools/previewer/automock:gen_snapshot_jsmock" ]
   }
-}
-
-gen_obj("js_uicontext") {
-  input = "engine/jsUIContext.js"
-  if (use_mac || use_mingw_win || use_linux || target_os == "ios") {
-    jsuicontext_obj_path = base_output_path + "/jsUIContext.c"
-  }
-  output = jsuicontext_obj_path
-  snapshot_dep = []
 }
 
 # build declarative javascript engine source
@@ -577,10 +567,12 @@ template("declarative_js_engine") {
       ":gen_obj_src_ark_component",
       ":gen_obj_src_js_enum_style",
       ":gen_obj_src_js_proxyclass",
-      ":gen_obj_src_js_uicontext",
     ]
 
-    deps += [ ":x_node" ]
+    deps += [
+      ":uicontext",
+      ":x_node",
+    ]
 
     deps += [ ":ark_modifier" ]
 
@@ -996,10 +988,12 @@ template("declarative_js_engine_ng") {
       ":gen_obj_src_ark_component",
       ":gen_obj_src_js_enum_style",
       ":gen_obj_src_js_proxyclass",
-      ":gen_obj_src_js_uicontext",
     ]
 
-    deps += [ ":x_node" ]
+    deps += [
+      ":uicontext",
+      ":x_node",
+    ]
 
     deps += [ ":ark_modifier" ]
 
@@ -1070,6 +1064,15 @@ foreach(item, ace_platforms) {
 ohos_abc("x_node") {
   sources = [ "engine/jsXNode.js" ]
   output_name = "node"
+  install_images = [ "system" ]
+  module_install_dir = "etc/abc/arkui"
+  subsystem_name = ace_engine_subsystem
+  part_name = ace_engine_part
+}
+
+ohos_abc("uicontext") {
+  sources = [ "engine/jsUIContext.js" ]
+  output_name = "uicontext"
   install_images = [ "system" ]
   module_install_dir = "etc/abc/arkui"
   subsystem_name = ace_engine_subsystem
