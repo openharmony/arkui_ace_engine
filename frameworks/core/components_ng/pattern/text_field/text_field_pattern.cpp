@@ -473,6 +473,7 @@ bool TextFieldPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dir
 void TextFieldPattern::ProcessOverlayAfterLayout(bool isGlobalAreaChanged)
 {
     if (processOverlayDelayTask_) {
+        CHECK_NULL_VOID(HasFocus());
         processOverlayDelayTask_();
         processOverlayDelayTask_ = nullptr;
         return;
@@ -4163,7 +4164,7 @@ void TextFieldPattern::OnAreaChangedInner()
 void TextFieldPattern::HandleParentGlobalOffsetChange()
 {
     selectController_->CalculateHandleOffset();
-    CHECK_NULL_VOID(SelectOverlayIsOn());
+    CHECK_NULL_VOID(SelectOverlayIsOn() || selectOverlay_->SelectOverlayIsCreating());
     if (selectOverlay_->IsShowMouseMenu()) {
         CloseSelectOverlay();
     } else {
