@@ -66,6 +66,8 @@ public:
             theme->placeholderColor_ = pattern->GetAttr<Color>("tips_text_color", Color(0x99000000));
             theme->caretColor_ = pattern->GetAttr<Color>("caret_color", Color(0xff007dff));
             theme->selectedBackgroundColor_ = pattern->GetAttr<Color>("selected_background_color", Color(0xff007dff));
+            theme->richeditorShowHandle_ = StringUtils::StringToInt(pattern->
+                GetAttr<std::string>("textfield_show_handle", "0"));
         }
     };
 
@@ -116,6 +118,11 @@ public:
         return selectedBackgroundColor_;
     }
 
+    bool IsRichEditorShowHandle() const
+    {
+        return richeditorShowHandle_;
+    }
+
 protected:
     RichEditorTheme() = default;
 
@@ -132,6 +139,7 @@ private:
     Color placeholderColor_ = Color(0x99000000);
     Color caretColor_ = Color(0xff007dff);
     Color selectedBackgroundColor_ = Color(0xff007dff);
+    bool richeditorShowHandle_ = false;
 };
 } // namespace OHOS::Ace::NG
 

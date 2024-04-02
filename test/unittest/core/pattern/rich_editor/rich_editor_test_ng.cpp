@@ -2811,7 +2811,7 @@ HWTEST_F(RichEditorTestNg, Selection004, TestSize.Level1)
     options.menuPolicy = MenuPolicy::DEFAULT;
     richEditorPattern->SetSelection(start, end, options);
     ClearSpan();
-    EXPECT_TRUE(richEditorPattern->SelectOverlayIsOn());
+    EXPECT_FALSE(richEditorPattern->SelectOverlayIsOn());
     EXPECT_EQ(richEditorPattern->textSelector_.baseOffset, 0);
     EXPECT_EQ(richEditorPattern->textSelector_.destinationOffset, INIT_VALUE_1.length());
 }
@@ -2928,7 +2928,7 @@ HWTEST_F(RichEditorTestNg, Selection007, TestSize.Level1)
     richEditorPattern->OnModifyDone();
     richEditorPattern->SetSelection(start, end, options);
     ClearSpan();
-    EXPECT_TRUE(richEditorPattern->SelectOverlayIsOn());
+    EXPECT_FALSE(richEditorPattern->SelectOverlayIsOn());
     EXPECT_EQ(richEditorPattern->textSelector_.baseOffset, start);
     EXPECT_EQ(richEditorPattern->textSelector_.destinationOffset, end);
 }
@@ -2973,7 +2973,7 @@ HWTEST_F(RichEditorTestNg, Selection008, TestSize.Level1)
     options.menuPolicy = MenuPolicy::ALWAYS;
     richEditorPattern->SetSelection(start, end, options);
     ClearSpan();
-    EXPECT_TRUE(richEditorPattern->SelectOverlayIsOn());
+    EXPECT_FALSE(richEditorPattern->SelectOverlayIsOn());
     EXPECT_EQ(richEditorPattern->textSelector_.baseOffset, 0);
     EXPECT_EQ(richEditorPattern->textSelector_.destinationOffset, INIT_VALUE_1.length());
 }

@@ -3916,7 +3916,7 @@ int32_t RichEditorPattern::DeleteValueSetTextSpan(
     spanResult.SetOffsetInSpan(currentPosition - contentStartPosition);
     spanResult.SetEraseLength(eraseLength);
     if (!spanItem->GetTextStyle().has_value()) {
-        TAG_LOGD(AceLogTag::ACE_TEXT_FIELD, "SpanItem text style is empty.");
+        TAG_LOGD(AceLogTag::ACE_RICH_TEXT, "SpanItem text style is empty.");
         return eraseLength;
     }
     spanResult.SetFontColor(spanItem->GetTextStyle()->GetTextColor().ColorToString());
@@ -4487,13 +4487,6 @@ void RichEditorPattern::ShowSelectOverlay(const RectF& firstHandle, const RectF&
             auto pattern = weak.Upgrade();
             CHECK_NULL_VOID(pattern);
             pattern->HandleOnCopy();
-            pattern->CloseSelectOverlay();
-            if (!usingMouse) {
-                if (!pattern->textDetectEnable_) {
-                    pattern->StartTwinkling();
-                }
-                pattern->ResetSelection();
-            }
         };
 
         selectInfo.menuCallback.onCut = [weak]() {
@@ -4630,6 +4623,7 @@ void RichEditorPattern::HandleOnCopy(bool isUsingExternalKeyboard)
         return;
     }
     OnCopyOperation(isUsingExternalKeyboard);
+    CloseSelectOverlay();
 }
 
 void RichEditorPattern::ResetAfterPaste()
@@ -5126,7 +5120,39 @@ void RichEditorPattern::HandleSelectOverlayWithOptions(const SelectionOptions& o
     }
 }
 
-void RichEditorPattern::SetSelection(int32_t start, int32_t end, const std::optional<SelectionOptions>& options)
+void RichEditorPattern::RefreshSelectOverlay(bool isMousePressed, bool selectedTypeChange)
+{
+    if (isMousePressed && !selectedTypeChange) {
+        return;
+    }
+    CalculateHandleOffsetAndShowOverlay();
+    CloseSelectOverlay();
+    auto responseType = static_cast<TextResponseType>(
+        selectOverlayProxy_->GetSelectOverlayMangerInfo().menuInfo.responseType.value_or(0));
+    ShowSelectOverlay(textSelector_.firstHandle, textSelector_.secondHandle, IsSelectAll(), responseType);
+}
+
+bool RichEditorPattern::IsShowHandle()
+{
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_RETURN(pipeline, false);
+    auto richEditorTheme = pipeline->GetTheme<RichEditorTheme>();
+    CHECK_NULL_RETURN(richEditorTheme, false);
+    return !richEditorTheme->IsRichEditorShowHandle();
+}
+
+void RichEditorPattern::SetHandles()
+{
+    CalculateHandleOffsetAndShowOverlay();
+    ResetIsMousePressed();
+    SetShowSelect(true);
+    isShowMenu_ = false;
+    ShowSelectOverlay(textSelector_.firstHandle, textSelector_.secondHandle, IsSelectAll(),
+        TextResponseType::LONG_PRESS);
+}
+
+void RichEditorPattern::SetSelection(int32_t start, int32_t end, const std::optional<SelectionOptions>& options,
+    bool isForward)
 {
     bool hasFocus = HasFocus();
     TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "range=[%{public}d,%{public}d], hasFocus=%{public}d", start, end, hasFocus);
@@ -5156,22 +5182,23 @@ void RichEditorPattern::SetSelection(int32_t start, int32_t end, const std::opti
     }
     bool isNotUseDefault =
         options.has_value() && MenuPolicy::DEFAULT != options.value().menuPolicy && !textSelector_.SelectNothing();
-    if (isNotUseDefault) {
+    bool isShowHandle = IsShowHandle();
+    if (!isShowHandle) {
+        CloseSelectOverlay();
+    } else if (isNotUseDefault) {
         HandleSelectOverlayWithOptions(options.value());
-    } else if (SelectOverlayIsOn()) {
+    } else if (SelectOverlayIsOn() && selectOverlayProxy_->IsMenuShow()) {
         isMousePressed_ = selectOverlayProxy_->GetSelectOverlayMangerInfo().isUsingMouse;
         auto selectedTypeChange = (oldSelectedType.has_value() && selectedType_.has_value() &&
                                       oldSelectedType.value() != selectedType_.value()) ||
                                   (!oldSelectedType.has_value() && selectedType_.has_value());
-        if (!isMousePressed_ || selectedTypeChange) {
-            CalculateHandleOffsetAndShowOverlay();
-            CloseSelectOverlay();
-            auto responseType = static_cast<TextResponseType>(
-                selectOverlayProxy_->GetSelectOverlayMangerInfo().menuInfo.responseType.value_or(0));
-            ShowSelectOverlay(textSelector_.firstHandle, textSelector_.secondHandle, IsSelectAll(), responseType);
-        }
+        RefreshSelectOverlay(isMousePressed_, selectedTypeChange);
     }
-    SetCaretPosition(textSelector_.GetTextEnd());
+    SetCaretPosition(isForward ? textSelector_.GetTextStart() : textSelector_.GetTextEnd());
+    if (!SelectOverlayIsOn() && isShowHandle) {
+        SetHandles();
+        isShowMenu_ = true;
+    }
     MoveCaretToContentRect();
     auto host = GetHost();
     CHECK_NULL_VOID(host);

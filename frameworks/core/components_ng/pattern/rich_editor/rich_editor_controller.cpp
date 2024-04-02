@@ -126,11 +126,11 @@ SelectionInfo RichEditorController::GetSelectionSpansInfo()
 }
 
 void RichEditorController::SetSelection(
-    int32_t selectionStart, int32_t selectionEnd, const std::optional<SelectionOptions>& options)
+    int32_t selectionStart, int32_t selectionEnd, const std::optional<SelectionOptions>& options, bool isForward)
 {
     auto richEditorPattern = pattern_.Upgrade();
     if (richEditorPattern) {
-        richEditorPattern->SetSelection(selectionStart, selectionEnd, options);
+        richEditorPattern->SetSelection(selectionStart, selectionEnd, options, isForward);
     }
 }
 
