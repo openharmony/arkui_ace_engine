@@ -606,8 +606,12 @@ void HandleOnDragStart(DragControllerAsyncCtx* asyncCtx)
 void GetShadowInfoArray(DragControllerAsyncCtx* asyncCtx,
     std::vector<Msdp::DeviceStatus::ShadowInfo>& shadowInfos)
 {
+    std::set<Media::PixelMap*> scaledPixelMaps;
     for (const auto& pixelMap: asyncCtx->pixelMapList) {
-        pixelMap->scale(asyncCtx->windowScale, asyncCtx->windowScale, Media::AntiAliasingOption::HIGH);
+        if (!scaledPixelMaps.count(pixelMap.get())) {
+            pixelMap->scale(asyncCtx->windowScale, asyncCtx->windowScale, Media::AntiAliasingOption::HIGH);
+            scaledPixelMaps.insert(pixelMap.get());
+        }
         int32_t width = pixelMap->GetWidth();
         int32_t height = pixelMap->GetHeight();
         double x = ConvertToPx(asyncCtx, asyncCtx->touchPoint.GetX(), width);
