@@ -90,6 +90,13 @@ bool BaseTextSelectOverlay::SelectOverlayIsOn()
     return manager->IsOpen();
 }
 
+bool BaseTextSelectOverlay::SelectOverlayIsCreating()
+{
+    auto manager = GetManager<SelectContentOverlayManager>();
+    CHECK_NULL_RETURN(manager, false);
+    return manager->IsCreating();
+}
+
 void BaseTextSelectOverlay::CloseOverlay(bool animation, CloseReason reason)
 {
     auto overlayManager = GetManager<SelectContentOverlayManager>();
