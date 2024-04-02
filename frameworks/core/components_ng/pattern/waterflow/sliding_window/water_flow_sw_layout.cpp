@@ -97,20 +97,20 @@ void WaterFlowSWLayout::FillBack(float viewportBound, int32_t maxChildIdx)
         }
     }
 
-    int32_t childIdx = info_->endIndex_ + 1;
+    int32_t idx = info_->endIndex_ + 1;
 
-    while (!q.empty() && childIdx <= maxChildIdx) {
+    while (!q.empty() && idx <= maxChildIdx) {
         auto [endPos, laneIdx] = q.top();
         q.pop();
-        auto child = MeasureChild(childIdx);
+        auto child = MeasureChild(idx);
 
         float size = child->GetGeometryNode()->GetMarginFrameSize().MainSize(info_->axis_);
         endPos += mainGap_ + size;
 
         auto& lane = info_->lanes_[laneIdx];
         lane.endPos = endPos;
-        info_->idxToLane_[childIdx] = laneIdx;
-        lane.items_.push_back({ childIdx++, size });
+        info_->idxToLane_[idx] = laneIdx;
+        lane.items_.push_back({ idx++, size });
         if (LessNotEqual(endPos, viewportBound)) {
             q.push({ endPos, laneIdx });
         }
@@ -128,20 +128,20 @@ void WaterFlowSWLayout::FillFront(float viewportBound, int32_t minChildIdx)
         }
     }
 
-    int32_t childIdx = info_->startIndex_ - 1;
+    int32_t idx = info_->startIndex_ - 1;
 
-    while (!q.empty() && childIdx >= minChildIdx) {
+    while (!q.empty() && idx >= minChildIdx) {
         auto [startPos, laneIdx] = q.top();
         q.pop();
-        auto child = MeasureChild(childIdx);
+        auto child = MeasureChild(idx);
 
         float size = child->GetGeometryNode()->GetMarginFrameSize().MainSize(info_->axis_);
         startPos -= mainGap_ + size;
 
         auto& lane = info_->lanes_[laneIdx];
-        info_->idxToLane_[childIdx] = laneIdx;
+        info_->idxToLane_[idx] = laneIdx;
         lane.startPos = startPos;
-        lane.items_.push_front({ childIdx--, size });
+        lane.items_.push_front({ idx--, size });
         if (GreatNotEqual(startPos - mainGap_, viewportBound)) {
             q.push({ startPos, laneIdx });
         }
@@ -235,9 +235,22 @@ void WaterFlowSWLayout::MeasureOnJump(int32_t jumpIdx, ScrollAlign align, float 
             break;
         }
         case ScrollAlign::CENTER: {
+            auto child = MeasureChild(jumpIdx);
+            float itemH = child->GetGeometryNode()->GetMarginFrameSize().MainSize(info_->axis_);
             if (inView || closeToView) {
-                MeasureOnOffset(mainSize, -info_->DistanceToTop(jumpIdx, mainGap_) - mainSize / 2.0f);
+                MeasureOnOffset(mainSize, -info_->DistanceToTop(jumpIdx, mainGap_) + (mainSize - itemH) / 2.0f);
             } else {
+                std::for_each(info_->lanes_.begin(), info_->lanes_.end(), [mainSize, itemH](auto& it) {
+                    it->items_.clear();
+                    it->startPos = (mainSize - itemH) / 2.0f;
+                    it->endPos = (mainSize + itemH) / 2.0f;
+                });
+                auto& lane = info_->lanes_[0];
+                lane.items_.push_back({ jumpIdx, itemH });
+                info_->startIndex_ = info_->endIndex_ = jumpIdx;
+
+                FillFront(0.0f, 0);
+                FillBack(mainSize, info_->childrenCount_ - 1);
             }
             break;
         }
