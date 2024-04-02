@@ -7099,6 +7099,7 @@ void JSViewAbstract::JSBind(BindingTarget globalObj)
     JSClass<JSViewAbstract>::StaticMethod("expandSafeArea", &JSViewAbstract::JsExpandSafeArea);
 
     JSClass<JSViewAbstract>::StaticMethod("drawModifier", &JSViewAbstract::JsDrawModifier);
+    JSClass<JSViewAbstract>::StaticMethod("gestureModifier", &JSViewAbstract::JsGestureModifier);
 
     JSClass<JSViewAbstract>::Bind(globalObj);
 }
@@ -8605,5 +8606,21 @@ std::function<void(NG::DrawingContext& context)> JSViewAbstract::GetDrawCallback
         }
     };
     return drawCallback;
+}
+
+void JSViewAbstract::JsGestureModifier(const JSCallbackInfo& info)
+{
+    auto* vm = info.GetExecutionContext().vm_;
+    CHECK_NULL_VOID(vm);
+    auto global = JSNApi::GetGlobalObject(vm);
+    auto gestureModifier = global->Get(vm, panda::StringRef::NewFromUtf8(vm, "__gestureModifier__"));
+    if (gestureModifier->IsUndefined() || !gestureModifier->IsFunction()) {
+        return;
+    }
+    auto obj = gestureModifier->ToObject(vm);
+    panda::Local<panda::FunctionRef> func = obj;
+    auto thisObj = info.This()->GetLocalHandle();
+    panda::Local<panda::JSValueRef> params[1] = { info[0]->GetLocalHandle() };
+    func->Call(vm, thisObj, params, 1);
 }
 } // namespace OHOS::Ace::Framework

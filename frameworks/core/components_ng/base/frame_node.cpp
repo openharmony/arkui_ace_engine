@@ -1853,9 +1853,7 @@ void FrameNode::AddJudgeToTargetComponent(RefPtr<TargetComponent>& targetCompone
     auto gestureHub = eventHub_->GetGestureEventHub();
     if (gestureHub) {
         auto callback = gestureHub->GetOnGestureJudgeBeginCallback();
-        if (callback) {
-            targetComponent->SetOnGestureJudgeBegin(std::move(callback));
-        }
+        targetComponent->SetOnGestureJudgeBegin(std::move(callback));
         auto callbackNative = gestureHub->GetOnGestureJudgeNativeBeginCallback();
         if (callbackNative) {
             targetComponent->SetOnGestureJudgeNativeBegin(std::move(callbackNative));

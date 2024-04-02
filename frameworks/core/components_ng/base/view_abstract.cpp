@@ -835,6 +835,75 @@ void ViewAbstract::DisableOnBlur()
     focusHub->ClearUserOnBlur();
 }
 
+void ViewAbstract::DisableOnClick(FrameNode* frameNode)
+{
+    auto gestureHub = frameNode->GetOrCreateGestureEventHub();
+    CHECK_NULL_VOID(gestureHub);
+    gestureHub->ClearUserOnClick();
+}
+
+void ViewAbstract::DisableOnTouch(FrameNode* frameNode)
+{
+    auto gestureHub = frameNode->GetOrCreateGestureEventHub();
+    CHECK_NULL_VOID(gestureHub);
+    gestureHub->ClearUserOnTouch();
+}
+
+void ViewAbstract::DisableOnKeyEvent(FrameNode* frameNode)
+{
+    auto focusHub = frameNode->GetOrCreateFocusHub();
+    CHECK_NULL_VOID(focusHub);
+    focusHub->ClearUserOnKey();
+}
+
+void ViewAbstract::DisableOnHover(FrameNode* frameNode)
+{
+    auto eventHub = frameNode->GetOrCreateInputEventHub();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->ClearUserOnHover();
+}
+
+void ViewAbstract::DisableOnMouse(FrameNode* frameNode)
+{
+    auto eventHub = frameNode->GetOrCreateInputEventHub();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->ClearUserOnMouse();
+}
+
+void ViewAbstract::DisableOnAppear(FrameNode* frameNode)
+{
+    auto eventHub = frameNode->GetEventHub<EventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->ClearUserOnAppear();
+}
+
+void ViewAbstract::DisableOnDisappear(FrameNode* frameNode)
+{
+    auto eventHub = frameNode->GetEventHub<EventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->ClearUserOnDisAppear();
+}
+
+void ViewAbstract::DisableOnFocus(FrameNode* frameNode)
+{
+    auto focusHub = frameNode->GetOrCreateFocusHub();
+    CHECK_NULL_VOID(focusHub);
+    focusHub->ClearUserOnFocus();
+}
+
+void ViewAbstract::DisableOnBlur(FrameNode* frameNode)
+{
+    auto focusHub = frameNode->GetOrCreateFocusHub();
+    CHECK_NULL_VOID(focusHub);
+    focusHub->ClearUserOnBlur();
+}
+
+void ViewAbstract::DisableOnAreaChange(FrameNode* frameNode)
+{
+    CHECK_NULL_VOID(frameNode);
+    frameNode->ClearUserOnAreaChange();
+}
+
 void ViewAbstract::SetOnClick(GestureEventFunc &&clickEventFunc)
 {
     auto gestureHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeGestureEventHub();
@@ -3058,9 +3127,10 @@ void ViewAbstract::SetOnAreaChanged(FrameNode* frameNode, std::function<void(con
     const OffsetF &oldOrigin, const RectF &rect, const OffsetF &origin)> &&onAreaChanged)
 {
     CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetEventHub<EventHub>();
-    CHECK_NULL_VOID(eventHub);
-    eventHub->SetOnAreaChanged(std::move(onAreaChanged));
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    frameNode->SetOnAreaChangeCallback(std::move(onAreaChanged));
+    pipeline->AddOnAreaChangeNode(frameNode->GetId());
 }
 
 void ViewAbstract::SetOnFocus(FrameNode* frameNode, OnFocusFunc &&onFocusCallback)
@@ -3089,6 +3159,27 @@ void ViewAbstract::SetOnTouch(FrameNode* frameNode, TouchEventFunc &&touchEventF
     auto gestureHub = frameNode->GetOrCreateGestureEventHub();
     CHECK_NULL_VOID(gestureHub);
     gestureHub->SetTouchEvent(std::move(touchEventFunc));
+}
+
+void ViewAbstract::SetOnMouse(FrameNode* frameNode, OnMouseEventFunc &&onMouseEventFunc)
+{
+    auto eventHub = frameNode->GetOrCreateInputEventHub();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetMouseEvent(std::move(onMouseEventFunc));
+}
+
+void ViewAbstract::SetOnHover(FrameNode* frameNode, OnHoverFunc &&onHoverEventFunc)
+{
+    auto eventHub = frameNode->GetOrCreateInputEventHub();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetHoverEvent(std::move(onHoverEventFunc));
+}
+
+void ViewAbstract::SetOnKeyEvent(FrameNode* frameNode, OnKeyCallbackFunc &&onKeyCallback)
+{
+    auto focusHub = frameNode->GetOrCreateFocusHub();
+    CHECK_NULL_VOID(focusHub);
+    focusHub->SetOnKeyCallback(std::move(onKeyCallback));
 }
 
 bool ViewAbstract::GetFocusable(FrameNode* frameNode)
@@ -3836,5 +3927,20 @@ void ViewAbstract::ClearJSFrameNodeOnSizeChange(FrameNode* frameNode)
     auto eventHub = frameNode->GetEventHub<NG::EventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->ClearJSFrameNodeOnSizeChange();
+}
+
+void ViewAbstract::SetOnGestureJudgeBegin(FrameNode* frameNode, GestureJudgeFunc&& gestureJudgeFunc)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto gestureHub = frameNode->GetOrCreateGestureEventHub();
+    CHECK_NULL_VOID(gestureHub);
+    gestureHub->SetOnGestureJudgeBegin(std::move(gestureJudgeFunc));
+}
+
+void ViewAbstract::SetOnSizeChanged(
+    FrameNode* frameNode, std::function<void(const RectF& oldRect, const RectF& rect)>&& onSizeChanged)
+{
+    CHECK_NULL_VOID(frameNode);
+    frameNode->SetOnSizeChangeCallback(std::move(onSizeChanged));
 }
 } // namespace OHOS::Ace::NG

@@ -608,6 +608,88 @@ ArkUINativeModuleValue ArkUINativeModule::GetArkUINativeModule(ArkUIRuntimeCallI
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::SetClipWithEdge));
     common->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetClipWithEdge"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::ResetClipWithEdge));
+    common->Set(vm, panda::StringRef::NewFromUtf8(vm, "setOnClick"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::SetOnClick));
+    common->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetOnClick"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::ResetOnClick));
+    common->Set(vm, panda::StringRef::NewFromUtf8(vm, "setOnTouch"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::SetOnTouch));
+    common->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetOnTouch"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::ResetOnTouch));
+    common->Set(vm, panda::StringRef::NewFromUtf8(vm, "setOnAppear"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::SetOnAppear));
+    common->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetOnAppear"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::ResetOnAppear));
+    common->Set(vm, panda::StringRef::NewFromUtf8(vm, "setOnDisappear"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::SetOnDisappear));
+    common->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetOnDisappear"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::ResetOnDisappear));
+    common->Set(vm, panda::StringRef::NewFromUtf8(vm, "setOnKeyEvent"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::SetOnKeyEvent));
+    common->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetOnKeyEvent"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::ResetOnKeyEvent));
+    common->Set(vm, panda::StringRef::NewFromUtf8(vm, "setOnFocus"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::SetOnFocus));
+        common->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetOnFocus"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::ResetOnFocus));
+    common->Set(vm, panda::StringRef::NewFromUtf8(vm, "setOnBlur"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::SetOnBlur));
+    common->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetOnBlur"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::ResetOnBlur));
+    common->Set(vm, panda::StringRef::NewFromUtf8(vm, "setOnHover"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::SetOnHover));
+    common->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetOnHover"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::ResetOnHover));
+    common->Set(vm, panda::StringRef::NewFromUtf8(vm, "setOnMouse"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::SetOnMouse));
+    common->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetOnMouse"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::ResetOnMouse));
+    common->Set(vm, panda::StringRef::NewFromUtf8(vm, "setOnSizeChange"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::SetOnSizeChange));
+    common->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetOnSizeChange"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::ResetOnSizeChange));
+    common->Set(vm, panda::StringRef::NewFromUtf8(vm, "setOnAreaChange"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::SetOnAreaChange));
+    common->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetOnAreaChange"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::ResetOnAreaChange));
+    common->Set(vm, panda::StringRef::NewFromUtf8(vm, "setOnGestureJudgeBegin"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::SetOnGestureJudgeBegin));
+    common->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetOnGestureJudgeBegin"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::ResetOnGestureJudgeBegin));
+    common->Set(vm, panda::StringRef::NewFromUtf8(vm, "addTapGesture"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::AddTapGesture));
+    common->Set(vm, panda::StringRef::NewFromUtf8(vm, "addLongPressGesture"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::AddLongPressGesture));
+    common->Set(vm, panda::StringRef::NewFromUtf8(vm, "addPanGesture"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::AddPanGesture));
+    common->Set(vm, panda::StringRef::NewFromUtf8(vm, "addSwipeGesture"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::AddSwipeGesture));
+    common->Set(vm, panda::StringRef::NewFromUtf8(vm, "addPinchGesture"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::AddPinchGesture));
+    common->Set(vm, panda::StringRef::NewFromUtf8(vm, "addRotationGesture"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::AddRotationGesture));
+    common->Set(vm, panda::StringRef::NewFromUtf8(vm, "addGestureGroup"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::AddGestureGroup));
+    common->Set(vm, panda::StringRef::NewFromUtf8(vm, "addTapGestureToGroup"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::AddTapGestureToGroup));
+    common->Set(vm, panda::StringRef::NewFromUtf8(vm, "addLongPressGestureToGroup"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::AddLongPressGestureToGroup));
+    common->Set(vm, panda::StringRef::NewFromUtf8(vm, "addPanGestureToGroup"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::AddPanGestureToGroup));
+    common->Set(vm, panda::StringRef::NewFromUtf8(vm, "addSwipeGestureToGroup"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::AddSwipeGestureToGroup));
+    common->Set(vm, panda::StringRef::NewFromUtf8(vm, "addPinchGestureToGroup"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::AddPinchGestureToGroup));
+    common->Set(vm, panda::StringRef::NewFromUtf8(vm, "addRotationGestureToGroup"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::AddRotationGestureToGroup));
+    common->Set(vm, panda::StringRef::NewFromUtf8(vm, "addGestureGroupToGroup"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::AddGestureGroupToGroup));
+    common->Set(vm, panda::StringRef::NewFromUtf8(vm, "attachGestureGroup"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::AttachGestureGroup));
+    common->Set(vm, panda::StringRef::NewFromUtf8(vm, "removeGestureByTag"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::RemoveGestureByTag));
+    common->Set(vm, panda::StringRef::NewFromUtf8(vm, "clearGestures"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::ClearGestures));
     object->Set(vm, panda::StringRef::NewFromUtf8(vm, "common"), common);
 
     auto nativeUtils = panda::ObjectRef::New(vm);

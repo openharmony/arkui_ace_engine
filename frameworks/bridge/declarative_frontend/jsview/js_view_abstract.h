@@ -365,6 +365,7 @@ public:
     static void JSRenderFit(const JSCallbackInfo& info);
 
     static void JsExpandSafeArea(const JSCallbackInfo& info);
+    static void JsGestureModifier(const JSCallbackInfo& info);
 
     static void ParseMenuOptions(
         const JSCallbackInfo& info, const JSRef<JSArray>& jsArray, std::vector<NG::MenuOptionsParam>& items);

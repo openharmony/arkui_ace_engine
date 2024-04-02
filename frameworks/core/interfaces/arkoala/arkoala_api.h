@@ -26,10 +26,10 @@
 extern "C" {
 #endif
 
-#define ARKUI_FULL_API_VERSION 87
+#define ARKUI_FULL_API_VERSION 88
 // When changing ARKUI_BASIC_API_VERSION, ARKUI_FULL_API_VERSION must be
 // increased as well.
-#define ARKUI_NODE_API_VERSION 87
+#define ARKUI_NODE_API_VERSION 88
 
 #define ARKUI_BASIC_API_VERSION 7
 #define ARKUI_EXTENDED_API_VERSION 7
@@ -2014,11 +2014,15 @@ struct ArkUIGestureModifier {
     ArkUIGesture* (*createPinchGesture)(ArkUI_Int32 fingers, ArkUI_Float64 distance);
     ArkUIGesture* (*createRotationGesture)(ArkUI_Int32 fingers, ArkUI_Float64 angle);
     ArkUIGesture* (*createSwipeGesture)(ArkUI_Int32 fingers, ArkUI_Int32 directions, ArkUI_Float64 speed);
+    ArkUIGesture* (*createGestureGroup)(ArkUI_Int32 mode);
+    void (*addGestureToGestureGroup)(ArkUIGesture* group, ArkUIGesture* child);
     void (*dispose)(ArkUIGesture* recognizer);
     // gesture event will received in common async event queue.
     void (*registerGestureEvent)(ArkUIGesture* gesture, ArkUI_Uint32 actionTypeMask, void* extraParam);
     void (*addGestureToNode)(ArkUINodeHandle node, ArkUIGesture* gesture, ArkUI_Int32 priorityNum, ArkUI_Int32 mask);
     void (*removeGestureFromNode)(ArkUINodeHandle node, ArkUIGesture* recognizer);
+    void (*removeGestureFromNodeByTag)(ArkUINodeHandle node, ArkUI_CharPtr gestureTag);
+    void (*clearGestures)(ArkUINodeHandle node);
 };
 
 struct ArkUISliderModifier {

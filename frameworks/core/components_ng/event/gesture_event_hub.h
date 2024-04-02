@@ -163,19 +163,23 @@ public:
     // call by CAPI do distinguish with AddGesture called by ARKUI;
     void AttachGesture(const RefPtr<NG::Gesture>& gesture)
     {
-        gestures_.emplace_back(gesture);
-        backupGestures_.emplace_back(gesture);
+        modifierGestures_.emplace_back(gesture);
+        backupModifierGestures_.emplace_back(gesture);
         recreateGesture_ = true;
         OnModifyDone();
     }
 
     void RemoveGesture(const RefPtr<NG::Gesture>& gesture)
     {
-        gestures_.remove(gesture);
-        backupGestures_.remove(gesture);
+        modifierGestures_.remove(gesture);
+        backupModifierGestures_.remove(gesture);
         recreateGesture_ = true;
         OnModifyDone();
     }
+
+    void RemoveGesturesByTag(const std::string& gestureTag);
+
+    void ClearModifierGesture();
 
     void AddScrollableEvent(const RefPtr<ScrollableEvent>& scrollableEvent)
     {
@@ -620,6 +624,8 @@ private:
 
     void UpdateGestureHierarchy();
 
+    void AddGestureToGestureHierarchy(const RefPtr<NG::Gesture>& gesture);
+
     // old path.
     void UpdateExternalNGGestureRecognizer();
 
@@ -645,7 +651,10 @@ private:
 
     // Set by use gesture, priorityGesture and parallelGesture attribute function.
     std::list<RefPtr<NG::Gesture>> gestures_;
+    // set by CAPI or modifier do distinguish with gestures_;
+    std::list<RefPtr<NG::Gesture>> modifierGestures_;
     std::list<RefPtr<NG::Gesture>> backupGestures_;
+    std::list<RefPtr<NG::Gesture>> backupModifierGestures_;
     std::list<RefPtr<NGGestureRecognizer>> gestureHierarchy_;
 
     // used in bindMenu, need to delete the old callback when bindMenu runs again
@@ -653,6 +662,7 @@ private:
 
     HitTestMode hitTestMode_ = HitTestMode::HTMDEFAULT;
     bool recreateGesture_ = true;
+    bool needRecollect_ = false;
     bool isResponseRegion_ = false;
     std::vector<DimensionRect> responseRegion_;
     std::vector<DimensionRect> mouseResponseRegion_;
