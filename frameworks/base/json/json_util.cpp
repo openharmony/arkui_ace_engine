@@ -263,7 +263,7 @@ JsonObject* JsonValue::ReleaseJsonObject()
     return object;
 }
 
-bool JsonValue::Put(const char* key, std::unique_ptr<JsonValue>&& value)
+bool JsonValue::PutRef(const char* key, std::unique_ptr<JsonValue>&& value)
 {
     if (key == nullptr || value == nullptr) {
         return false;
@@ -272,7 +272,7 @@ bool JsonValue::Put(const char* key, std::unique_ptr<JsonValue>&& value)
     return true;
 }
 
-bool JsonValue::Put(std::unique_ptr<JsonValue>&& value)
+bool JsonValue::PutRef(std::unique_ptr<JsonValue>&& value)
 {
     if (value == nullptr) {
         return false;

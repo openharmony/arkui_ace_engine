@@ -79,8 +79,8 @@ public:
     bool Put(const std::unique_ptr<JsonValue>& value);
 
     JsonObject* ReleaseJsonObject();
-    bool Put(const char* key, std::unique_ptr<JsonValue>&& value);
-    bool Put(std::unique_ptr<JsonValue>&& value);
+    bool PutRef(const char* key, std::unique_ptr<JsonValue>&& value);
+    bool PutRef(std::unique_ptr<JsonValue>&& value);
 
     // replace functions
     bool Replace(const char* key, const char* value);
