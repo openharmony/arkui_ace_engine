@@ -23,13 +23,29 @@
 
 namespace OHOS::Ace::Framework {
 
+bool JsFunction::MaybeRelease()
+{
+    auto taskExecutor = Container::CurrentTaskExecutor();
+    if (containerId_ == Container::CurrentId() && taskExecutor &&
+        taskExecutor->WillRunOnCurrentThread(TaskExecutor::TaskType::JS)) {
+        return true;
+    }
+    auto container = Container::GetContainer(containerId_);
+    CHECK_NULL_RETURN(container, true);
+    taskExecutor = container->GetTaskExecutor();
+    CHECK_NULL_RETURN(taskExecutor, true);
+    return !taskExecutor->PostTask([this] { delete this; }, TaskExecutor::TaskType::JS);
+}
+
 JsFunction::JsFunction(const JSRef<JSFunc>& jsFunction)
 {
+    containerId_ = Container::CurrentId();
     jsFunction_ = jsFunction;
 }
 
 JsFunction::JsFunction(const JSRef<JSObject>& jsObject, const JSRef<JSFunc>& jsFunction)
 {
+    containerId_ = Container::CurrentId();
     jsThis_ = jsObject;
     jsFunction_ = jsFunction;
 }
