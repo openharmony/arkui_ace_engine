@@ -217,6 +217,12 @@ enum class TextOverflow {
     MARQUEE,
 };
 
+enum class TextMarqueeState {
+    START = 0,
+    BOUNCE,
+    FINISH,
+};
+
 // overflow-x: visible|hidden|scroll|auto|no-display|no-content;
 enum class TextFieldOverflowX {
     VISIBLE,

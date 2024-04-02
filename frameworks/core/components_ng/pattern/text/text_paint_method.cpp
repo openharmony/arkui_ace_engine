@@ -18,6 +18,11 @@
 #include "core/components_ng/pattern/text/text_pattern.h"
 
 namespace OHOS::Ace::NG {
+    
+namespace {
+constexpr Dimension DEFAULT_MARQUEE_STEP_VP = 4.0_vp;
+} // namespace
+
 TextPaintMethod::TextPaintMethod(const WeakPtr<Pattern>& pattern, float baselineOffset,
     RefPtr<TextContentModifier> textContentModifier, RefPtr<TextOverlayModifier> textOverlayModifier)
     : pattern_(pattern), baselineOffset_(baselineOffset),
@@ -39,6 +44,30 @@ void TextPaintMethod::UpdateParagraphAndImageSpanNodeList()
 
     textContentModifier_->SetParagraph(paragraph);
     textContentModifier_->SetImageSpanNodeList(textPattern->GetImageSpanNodeList());
+}
+
+void TextPaintMethod::DoStartTextRace()
+{
+    CHECK_NULL_VOID(textContentModifier_);
+
+    auto textPattern = DynamicCast<TextPattern>(pattern_.Upgrade());
+    CHECK_NULL_VOID(textPattern);
+    auto frameNode = textPattern->GetHost();
+    CHECK_NULL_VOID(frameNode);
+    auto paragraph = textPattern->GetParagraph();
+    CHECK_NULL_VOID(paragraph);
+    auto layoutProperty = frameNode->GetLayoutProperty<TextLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+
+    auto step = layoutProperty->GetTextMarqueeStep().value_or(DEFAULT_MARQUEE_STEP_VP.ConvertToPx());
+    if (GreatNotEqual(step, paragraph->GetTextWidth())) {
+        step = DEFAULT_MARQUEE_STEP_VP.ConvertToPx();
+    }
+    auto loop = layoutProperty->GetTextMarqueeLoop().value_or(-1);
+    auto direction = layoutProperty->GetTextMarqueeDirection().value_or(MarqueeDirection::LEFT);
+    auto delay = layoutProperty->GetTextMarqueeDelay().value_or(0);
+
+    textContentModifier_->StartTextRace(step, loop, direction, delay);
 }
 
 void TextPaintMethod::UpdateContentModifier(PaintWrapper* paintWrapper)
@@ -70,12 +99,10 @@ void TextPaintMethod::UpdateContentModifier(PaintWrapper* paintWrapper)
     CHECK_NULL_VOID(pattern);
 
     auto textOverflow = layoutProperty->GetTextOverflow();
-    if (textOverflow.has_value() && textOverflow.value() == TextOverflow::MARQUEE) {
-        if (paragraph->GetTextWidth() > paintWrapper->GetContentSize().Width()) {
-            textContentModifier_->StartTextRace();
-        } else {
-            textContentModifier_->StopTextRace();
-        }
+    if (textOverflow.has_value() && textOverflow.value() == TextOverflow::MARQUEE &&
+        paragraph->GetTextWidth() > paintWrapper->GetContentSize().Width() &&
+        layoutProperty->GetTextMarqueeStart().value_or(true)) {
+        DoStartTextRace();
     } else {
         textContentModifier_->StopTextRace();
     }

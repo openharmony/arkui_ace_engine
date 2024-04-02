@@ -21,6 +21,7 @@
 #include "base/memory/ace_type.h"
 #include "core/components/common/properties/text_style.h"
 #include "core/components_ng/base/modifier.h"
+#include "core/components_ng/pattern/pattern.h"
 #include "core/components_ng/property/property.h"
 #include "core/components_ng/render/animation_utils.h"
 #include "core/components_ng/render/paragraph.h"
@@ -30,7 +31,7 @@ class TextContentModifier : public ContentModifier {
     DECLARE_ACE_TYPE(TextContentModifier, ContentModifier)
 
 public:
-    explicit TextContentModifier(const std::optional<TextStyle>& textStyle);
+    explicit TextContentModifier(const std::optional<TextStyle>& textStyle, const WeakPtr<Pattern>& pattern = nullptr);
     ~TextContentModifier() override = default;
 
     void onDraw(DrawingContext& drawingContext) override;
@@ -53,7 +54,8 @@ public:
 
     void ModifyTextStyle(TextStyle& textStyle);
 
-    void StartTextRace();
+    void StartTextRace(const double& step, const int32_t& loop,
+        const MarqueeDirection& direction, const int32_t& delay, const bool& isBounce = false);
     void StopTextRace();
 
     void SetParagraph(RefPtr<Paragraph> paragraph)
@@ -110,7 +112,8 @@ private:
     void AddDefaultShadow();
     void SetDefaultTextDecoration(const TextStyle& textStyle);
     void SetDefaultBaselineOffset(const TextStyle& textStyle);
-
+    bool SetTextRace(const double& step, const int32_t& loop,
+        const MarqueeDirection& direction, const int32_t& delay);
     float GetTextRacePercent();
 
     void ModifyFontSizeInTextStyle(TextStyle& textStyle);
@@ -172,6 +175,15 @@ private:
     RefPtr<AnimatablePropertyFloat> baselineOffsetFloat_;
 
     bool textRacing_ = false;
+    int32_t marqueeCount_ = 0;
+    WeakPtr<Pattern> pattern_;
+    double marqueeStep_ = 1;
+    int32_t marqueeLoop_ = -1;
+    MarqueeDirection marqueeDirection_ = MarqueeDirection::LEFT;
+    int32_t marqueeDelay_ = 0;
+    int32_t marqueeDuration_ = 0;
+    int32_t marqueeAnimationId_ = 0;
+    
     RefPtr<AnimatablePropertyFloat> racePercentFloat_;
     std::shared_ptr<AnimationUtils::Animation> raceAnimation_;
 
