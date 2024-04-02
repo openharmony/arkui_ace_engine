@@ -2763,7 +2763,8 @@ void TextFieldPattern::OnHover(bool isHover)
     }
 }
 
-void TextFieldPattern::ChangeMouseState(const Offset location, const RefPtr<PipelineContext>& pipeline, int32_t frameId)
+void TextFieldPattern::ChangeMouseState(
+    const Offset location, const RefPtr<PipelineContext>& pipeline, int32_t frameId, bool isByPass)
 {
     auto responseAreaWidth = (responseArea_ ? responseArea_->GetAreaRect().Width() : 0.0f) +
                              (cleanNodeResponseArea_ ? cleanNodeResponseArea_->GetAreaRect().Width() : 0.0f);
@@ -2780,7 +2781,7 @@ void TextFieldPattern::ChangeMouseState(const Offset location, const RefPtr<Pipe
             pipeline->ChangeMouseStyle(frameId, MouseFormat::DEFAULT, windowId);
         } else {
             pipeline->SetMouseStyleHoldNode(frameId);
-            pipeline->ChangeMouseStyle(frameId, MouseFormat::TEXT_CURSOR, windowId);
+            pipeline->ChangeMouseStyle(frameId, MouseFormat::TEXT_CURSOR, windowId, isByPass);
         }
     } else {
         pipeline->ChangeMouseStyle(frameId, MouseFormat::DEFAULT, windowId);
@@ -2809,7 +2810,7 @@ void TextFieldPattern::HandleMouseEvent(MouseInfo& info)
         pipeline->ChangeMouseStyle(frameId, MouseFormat::DEFAULT, windowId);
         return;
     }
-    ChangeMouseState(info.GetLocalLocation(), pipeline, frameId);
+    ChangeMouseState(info.GetLocalLocation(), pipeline, frameId, info.GetAction() == MouseAction::WINDOW_LEAVE);
 
     selectOverlay_->SetUsingMouse(true);
     if (info.GetButton() == MouseButton::RIGHT_BUTTON) {
