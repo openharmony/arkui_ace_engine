@@ -65,7 +65,10 @@ ohos_shared_library("ace_ndk") {
   cflags_cc = [ "-Wno-missing-braces" ]
 
   if (target_os == "ohos") {
-    defines = [ "OHOS_PLATFORM" ]
+    defines = [
+      "OHOS_PLATFORM",
+      "USE_HILOG",
+    ]
     sources += [ "$ace_root/adapter/ohos/osal/log_wrapper.cpp" ]
     deps += [ ":libace_ndk" ]
     external_deps = [
