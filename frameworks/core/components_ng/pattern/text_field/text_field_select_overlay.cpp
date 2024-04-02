@@ -180,7 +180,7 @@ bool TextFieldSelectOverlay::CheckHandleVisible(const RectF& paintRect)
         auto verticalEpsilon = std::max(0.0f, paintRect.Height() - contentRect.Height());
         return GreatOrEqual(paintRect.Top() + verticalEpsilon, visibleRect.Top()) &&
                LessOrEqual(paintRect.Bottom() - verticalEpsilon, visibleRect.Bottom()) &&
-               LessOrEqual(paintRect.Left(), visibleRect.Right()) &&
+               LessOrEqual(paintRect.Left() - paintRect.Width() - BOX_EPSILON, visibleRect.Right()) &&
                GreatOrEqual(paintRect.Right(), visibleRect.Left());
     }
     PointF bottomPoint = { paintRect.Left(), paintRect.Bottom() - BOX_EPSILON };
