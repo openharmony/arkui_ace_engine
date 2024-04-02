@@ -64,6 +64,7 @@ public:
     {
         return "";
     }
+    virtual void EnableAnalyzer(bool enable) {}
 
 private:
     static std::unique_ptr<XComponentModel> instance_;
