@@ -1087,4 +1087,15 @@ void CustomPaintPattern::DumpAdvanceInfo()
     }
     DumpLog::GetInstance().AddDesc(contentModifier_->GetDumpInfo());
 }
+
+void CustomPaintPattern::Reset()
+{
+    auto task = [](CanvasPaintMethod& paintMethod, PaintWrapper* paintWrapper) {
+        paintMethod.Reset();
+    };
+    paintMethod_->PushTask(task);
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+}
 } // namespace OHOS::Ace::NG

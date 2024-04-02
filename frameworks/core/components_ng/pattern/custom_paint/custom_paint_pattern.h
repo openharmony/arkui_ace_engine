@@ -160,6 +160,7 @@ public:
     void EnableAnalyzer(bool enable);
     void StartImageAnalyzer(void* config, onAnalyzedCallback& onAnalyzed);
     void StopImageAnalyzer();
+    void Reset();
 
     void DumpAdvanceInfo() override;
 
