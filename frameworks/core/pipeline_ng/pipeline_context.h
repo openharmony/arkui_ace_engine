@@ -652,6 +652,10 @@ public:
         onceVsyncListener_ = std::move(vsync);
     }
 
+    bool HasOnceVsyncListener() {
+        return onceVsyncListener_ != nullptr;
+    }
+
     const RefPtr<NavigationDumpManager>& GetNavigationDumpManager() const
     {
         return navigationDumpMgr_;
