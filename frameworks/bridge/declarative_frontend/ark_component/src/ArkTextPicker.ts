@@ -18,9 +18,6 @@ class ArkTextPickerComponent extends ArkComponent implements TextPickerAttribute
   constructor(nativePtr: KNode, classType?: ModifierType) {
     super(nativePtr, classType);
   }
-  onGestureJudgeBegin(callback: (gestureInfo: GestureInfo, event: BaseGestureEvent) => GestureJudgeResult): this {
-    throw new Error('Method not implemented.');
-  }
   defaultPickerItemHeight(value: string | number): this {
     modifierWithKey(
       this._modifiersWithKeys, TextpickerDefaultPickerItemHeightModifier.identity, TextpickerDefaultPickerItemHeightModifier, value);

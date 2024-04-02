@@ -1429,6 +1429,163 @@ class ForegroundColorModifier extends ModifierWithKey {
   }
 }
 ForegroundColorModifier.identity = Symbol('foregroundColor');
+class ClickModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().common.resetOnClick(node);
+    } else {
+      getUINativeModule().common.setOnClick(node, this.value);
+    }
+  }
+}
+ClickModifier.identity = Symbol('onClick');
+class OnTouchModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().common.resetOnTouch(node);
+    } else {
+      getUINativeModule().common.setOnTouch(node, this.value);
+    }
+  }
+}
+OnTouchModifier.identity = Symbol('onTouch');
+class OnAppearModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().common.resetOnAppear(node);
+    } else {
+      getUINativeModule().common.setOnAppear(node, this.value);
+    }
+  }
+}
+OnAppearModifier.identity = Symbol('onAppear');
+class OnDisappearModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().common.resetOnDisappear(node);
+    } else {
+      getUINativeModule().common.setOnDisappear(node, this.value);
+    }
+  }
+}
+OnDisappearModifier.identity = Symbol('onDisappear');
+class OnKeyEventModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().common.resetOnKeyEvent(node);
+    } else {
+      getUINativeModule().common.setOnKeyEvent(node, this.value);
+    }
+  }
+}
+OnKeyEventModifier.identity = Symbol('onKeyEvent');
+class OnFocusModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().common.resetOnFocus(node);
+    } else {
+      getUINativeModule().common.setOnFocus(node, this.value);
+    }
+  }
+}
+OnFocusModifier.identity = Symbol('onFocus');
+class OnBlurModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().common.resetOnBlur(node);
+    } else {
+      getUINativeModule().common.setOnBlur(node, this.value);
+    }
+  }
+}
+OnBlurModifier.identity = Symbol('onBlur');
+
+class OnHoverModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().common.resetOnHover(node);
+    } else {
+      getUINativeModule().common.setOnHover(node, this.value);
+    }
+  }
+}
+OnHoverModifier.identity = Symbol('onHover');
+class OnMouseModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().common.resetOnMouse(node);
+    } else {
+      getUINativeModule().common.setOnMouse(node, this.value);
+    }
+  }
+}
+OnMouseModifier.identity = Symbol('onMouse');
+class OnSizeChangeModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().common.resetOnSizeChange(node);
+    } else {
+      getUINativeModule().common.setOnSizeChange(node, this.value);
+    }
+  }
+}
+OnSizeChangeModifier.identity = Symbol('onSizeChange');
+class OnAreaChangeModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().common.resetOnAreaChange(node);
+    } else {
+      getUINativeModule().common.setOnAreaChange(node, this.value);
+    }
+  }
+}
+OnSizeChangeModifier.identity = Symbol('onAreaChange');
+class OnGestureJudgeBeginModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().common.resetOnGestureJudgeBegin(node);
+    } else {
+      getUINativeModule().common.setOnGestureJudgeBegin(node, this.value);
+    }
+  }
+}
+OnGestureJudgeBeginModifier.identity = Symbol('onGestureJudgeBegin');
 class MotionPathModifier extends ModifierWithKey {
   constructor(value) {
     super(value);
@@ -2393,6 +2550,13 @@ class ArkComponent {
     }
     this._nativePtrChanged = false;
   }
+  getOrCreateGestureEvent() {
+    if (this._gestureEvent !== null) {
+      this._gestureEvent = new UIGestureEvent();
+      this._gestureEvent.setNodePtr(this.nativePtr);
+    }
+    return this._gestureEvent;
+  }
   cleanStageValue(){
     if (!this._modifiersWithKeys){
       return;
@@ -2429,7 +2593,12 @@ class ArkComponent {
     });
   }
   onGestureJudgeBegin(callback) {
-    throw new Error('Method not implemented.');
+    modifierWithKey(this._modifiersWithKeys, OnGestureJudgeBeginModifier.identity, OnGestureJudgeBeginModifier, callback);
+    return this;
+  }
+  onSizeChange(callback) {
+    modifierWithKey(this._modifiersWithKeys, OnSizeChangeModifier.identity, OnSizeChangeModifier, callback);
+    return this;
   }
   outline(value) {
     modifierWithKey(this._modifiersWithKeys, OutlineModifier.identity, OutlineModifier, value);
@@ -2756,23 +2925,28 @@ class ArkComponent {
     return this;
   }
   onClick(event) {
-    throw new Error('Method not implemented.');
+    modifierWithKey(this._modifiersWithKeys, ClickModifier.identity, ClickModifier, event);
+    return this;
   }
   onHover(event) {
-    throw new Error('Method not implemented.');
+    modifierWithKey(this._modifiersWithKeys, OnHoverModifier.identity, OnHoverModifier, event);
+    return this;
   }
   hoverEffect(value) {
     modifierWithKey(this._modifiersWithKeys, HoverEffectModifier.identity, HoverEffectModifier, value);
     return this;
   }
   onMouse(event) {
-    throw new Error('Method not implemented.');
+    modifierWithKey(this._modifiersWithKeys, OnMouseModifier.identity, OnMouseModifier, event);
+    return this;
   }
   onTouch(event) {
-    throw new Error('Method not implemented.');
+    modifierWithKey(this._modifiersWithKeys, OnTouchModifier.identity, OnTouchModifier, event);
+    return this;
   }
   onKeyEvent(event) {
-    throw new Error('Method not implemented.');
+    modifierWithKey(this._modifiersWithKeys, OnKeyEventModifier.identity, OnKeyEventModifier, event);
+    return this;
   }
   focusable(value) {
     if (typeof value === 'boolean') {
@@ -2784,10 +2958,12 @@ class ArkComponent {
     return this;
   }
   onFocus(event) {
-    throw new Error('Method not implemented.');
+    modifierWithKey(this._modifiersWithKeys, OnFocusModifier.identity, OnFocusModifier, event);
+    return this;
   }
   onBlur(event) {
-    throw new Error('Method not implemented.');
+    modifierWithKey(this._modifiersWithKeys, OnBlurModifier.identity, OnBlurModifier, event);
+    return this;
   }
   tabIndex(index) {
     if (typeof index !== 'number') {
@@ -2977,13 +3153,16 @@ class ArkComponent {
     return this;
   }
   onAppear(event) {
-    throw new Error('Method not implemented.');
+    modifierWithKey(this._modifiersWithKeys, OnAppearModifier.identity, OnAppearModifier, event);
+    return this;
   }
   onDisAppear(event) {
-    throw new Error('Method not implemented.');
+    modifierWithKey(this._modifiersWithKeys, OnDisappearModifier.identity, OnDisappearModifier, event);
+    return this;
   }
   onAreaChange(event) {
-    throw new Error('Method not implemented.');
+    modifierWithKey(this._modifiersWithKeys, OnAreaChangeModifier.identity, OnAreaChangeModifier, event);
+    return this;
   }
   visibility(value) {
     modifierWithKey(this._modifiersWithKeys, VisibilityModifier.identity, VisibilityModifier, value);
@@ -3372,6 +3551,219 @@ const isInteger = (val) => Number.isInteger(val);
 const isNonEmptyMap = (val) => val instanceof Map && val.size > 0;
 const isTruthyString = (val) => typeof val === 'string' && val.trim() !== '';
 
+var CommonGestureType;
+(function (CommonGestureType) {
+    CommonGestureType[CommonGestureType["TAP_GESTURE"] = 0] = "TAP_GESTURE";
+    CommonGestureType[CommonGestureType["LONG_PRESS_GESTURE"] = 1] = "LONG_PRESS_GESTURE";
+    CommonGestureType[CommonGestureType["PAN_GESTURE"] = 2] = "PAN_GESTURE";
+    CommonGestureType[CommonGestureType["SWIPE_GESTURE"] = 3] = "SWIPE_GESTURE";
+    CommonGestureType[CommonGestureType["PINCH_GESTURE"] = 4] = "PINCH_GESTURE";
+    CommonGestureType[CommonGestureType["ROTATION_GESTURE"] = 5] = "ROTATION_GESTURE";
+    CommonGestureType[CommonGestureType["GESTURE_GROUP"] = 6] = "GESTURE_GROUP";
+})(CommonGestureType || (CommonGestureType = {}));
+
+class GestureHandler {
+  constructor(gestureType) {
+    this.gestureType = gestureType;
+  }
+}
+
+class TapGestureHandler extends GestureHandler {
+  constructor(options) {
+    super(CommonGestureType.TAP_GESTURE);
+    if (options !== undefined) {
+      this.fingers = options.fingers;
+      this.count = options.count;
+    }
+  }
+  onAction(event) {
+    this.onActionCallback = event;
+    return this;
+  }
+  tag(tag) {
+    this.gestureTag = tag;
+    return this;
+  }
+}
+
+class LongPressGestureHandler extends GestureHandler {
+  constructor(options) {
+    super(CommonGestureType.LONG_PRESS_GESTURE);
+    if (options !== undefined) {
+      this.fingers = options.fingers;
+      this.repeat = options.repeat;
+      this.duration = options.duration;
+    }
+  }
+
+  onAction(event) {
+    this.onActionCallback = event;
+    return this;
+  }
+
+  onActionEnd(event) {
+    this.onActionEndCallback = event;
+    return this;
+  }
+
+  onActionCancel(event) {
+    this.onActionCancelCallback = event;
+    return this;
+  }
+
+  tag(tag) {
+    this.gestureTag = tag;
+    return this;
+  }
+}
+
+class PanGestureHandler extends GestureHandler {
+  constructor(options) {
+    super(CommonGestureType.PAN_GESTURE);
+    if (options !== undefined) {
+      this.fingers = options.fingers;
+      this.direction = options.direction;
+      this.distance = options.distance;
+    }
+  }
+
+  onActionStart(event) {
+    this.onActionStartCallback = event;
+    return this;
+  }
+
+  onActionUpdate(event) {
+    this.onActionUpdateCallback = event;
+    return this;
+  }
+
+  onActionEnd(event) {
+    this.onActionEndCallback = event;
+    return this;
+  }
+
+  onActionCancel(event) {
+    this.onActionCancelCallback = event;
+    return this;
+  }
+
+  tag(tag) {
+    this.gestureTag = tag;
+    return this;
+  }
+}
+
+class SwipeGestureHandler extends GestureHandler {
+  constructor(options) {
+    super(CommonGestureType.SWIPE_GESTURE);
+    if (options !== undefined) {
+      this.fingers = options.fingers;
+      this.direction = options.direction;
+      this.speed = options.speed;
+    }
+  }
+
+  onAction(event) {
+    this.onActionCallback = event;
+    return this;
+  }
+
+  tag(tag) {
+    this.gestureTag = tag;
+    return this;
+  }
+}
+
+class PinchGestureHandler extends GestureHandler {
+  constructor(options) {
+    super(CommonGestureType.PINCH_GESTURE);
+    if (options !== undefined) {
+      this.fingers = options.fingers;
+      this.distance = options.distance;
+    }
+  }
+
+  onActionStart(event) {
+    this.onActionStartCallback = event;
+    return this;
+  }
+
+  onActionUpdate(event) {
+    this.onActionUpdateCallback = event;
+    return this;
+  }
+
+  onActionEnd(event) {
+    this.onActionEndCallback = event;
+    return this;
+  }
+
+  onActionCancel(event) {
+    this.onActionCancelCallback = event;
+    return this;
+  }
+
+  tag(tag) {
+    this.gestureTag = tag;
+    return this;
+  }
+}
+
+class RotationGestureHandler extends GestureHandler {
+  constructor(options) {
+    super(CommonGestureType.ROTATION_GESTURE);
+    if (options !== undefined) {
+      this.fingers = options.fingers;
+      this.angle = options.angle;
+    }
+  }
+
+  onActionStart(event) {
+    this.onActionStartCallback = event;
+    return this;
+  }
+
+  onActionUpdate(event) {
+    this.onActionUpdateCallback = event;
+    return this;
+  }
+
+  onActionEnd(event) {
+    this.onActionEndCallback = event;
+    return this;
+  }
+
+  onActionCancel(event) {
+    this.onActionCancelCallback = event;
+    return this;
+  }
+
+  tag(tag) {
+    this.gestureTag = tag;
+    return this;
+  }
+}
+
+class GestureGroupHandler extends GestureHandler {
+  constructor(options) {
+    super(CommonGestureType.GESTURE_GROUP);
+    if (options !== undefined) {
+      this.mode = options.mode;
+      this.gestures = options.gestures;
+    }
+  }
+  
+  onCancel(event) {
+    this.onCancelCallback = event;
+    return this;
+  }
+  
+  tag(tag) {
+    this.gestureTag = tag;
+    return this;
+  }
+}
+
 class UICommonEvent {
   setInstanceId(instanceId) {
     this._instanceId = instanceId;
@@ -3436,6 +3828,150 @@ function attributeModifierFunc(modifier, componentBuilder, modifierBuilder) {
     applyUIAttributes(modifier, nativeNode, component);
     component.applyModifierPatch();
   }
+}
+
+class UIGestureEvent {
+  setNodePtr(nodePtr) {
+    this._nodePtr = nodePtr;
+  }
+  addGesture(gesture, priority, mask) {
+    switch (gesture.gestureType) {
+      case CommonGestureType.TAP_GESTURE: {
+        let tapGesture = gesture;
+        getUINativeModule().common.addTapGesture(this._nodePtr, priority, mask, tapGesture.gestureTag,
+          tapGesture.fingers, tapGesture.count, tapGesture.onActionCallback);
+        break;
+      }
+      case CommonGestureType.LONG_PRESS_GESTURE: {
+        let longPressGesture = gesture;
+        getUINativeModule().common.addLongPressGesture(this._nodePtr, priority, mask, longPressGesture.gestureTag,
+          longPressGesture.fingers, longPressGesture.repeat, longPressGesture.duration,
+          longPressGesture.onActionCallback, longPressGesture.onActionEndCallback, longPressGesture.onActionCancelCallback);
+        break;
+      }
+      case CommonGestureType.PAN_GESTURE: {
+        let panGesture = gesture;
+        getUINativeModule().common.addPanGesture(this._nodePtr, priority, mask, panGesture.gestureTag,
+          panGesture.fingers, panGesture.direction, panGesture.distance, panGesture.onActionStartCallback,
+          panGesture.onActionUpdateCallback, panGesture.onActionEndCallback, panGesture.onActionCancelCallback);
+        break;
+      }
+      case CommonGestureType.SWIPE_GESTURE: {
+        let swipeGesture = gesture;
+        getUINativeModule().common.addSwipeGesture(this._nodePtr, priority, mask, swipeGesture.gestureTag,
+          swipeGesture.fingers, swipeGesture.direction, swipeGesture.speed, swipeGesture.onActionCallback);
+        break;
+      }
+      case CommonGestureType.PINCH_GESTURE: {
+        let pinchGesture = gesture;
+        getUINativeModule().common.addPinchGesture(this._nodePtr, priority, mask, pinchGesture.gestureTag,
+          pinchGesture.fingers, pinchGesture.distance, pinchGesture.onActionStartCallback,
+          pinchGesture.onActionUpdateCallback, pinchGesture.onActionEndCallback, pinchGesture.onActionCancelCallback);
+        break;
+      }
+      case CommonGestureType.ROTATION_GESTURE: {
+        let rotationGesture = gesture;
+        getUINativeModule().common.addRotationGesture(this._nodePtr, priority, mask, rotationGesture.gestureTag,
+          rotationGesture.fingers, rotationGesture.angle, rotationGesture.onActionStartCallback,
+          rotationGesture.onActionUpdateCallback, rotationGesture.onActionEndCallback,
+          rotationGesture.onActionCancelCallback);
+        break;
+      }
+      case CommonGestureType.GESTURE_GROUP: {
+        let gestureGroup = gesture;
+        let groupPtr = getUINativeModule().common.addGestureGroup(
+          gestureGroup.gestureTag, gestureGroup.onCancelCallback, gestureGroup.mode);
+        gestureGroup.gestures.forEach((item) => {
+          addGestureToGroup(item, groupPtr);
+        });
+        getUINativeModule().common.attachGestureGroup(this._nodePtr, priority, mask, groupPtr);
+        break;
+      }
+      default:
+        break;
+    }
+  }
+  addParallelGesture(gesture, mask) {
+    this.addGesture(gesture, GesturePriority.PARALLEL, mask);
+  }
+  removeGestureByTag(tag) {
+    getUINativeModule().common.removeGestureByTag(this._nodePtr, tag);
+  }
+  clearGestures() {
+    getUINativeModule().common.clearGestures(this._nodePtr);
+  }
+}
+
+function addGestureToGroup(gesture, gestureGroupPtr) {
+  switch (gesture.gestureType) {
+    case CommonGestureType.TAP_GESTURE: {
+      let tapGesture = gesture;
+      getUINativeModule().common.addTapGestureToGroup(tapGesture.gestureTag,
+        tapGesture.fingers, tapGesture.count, tapGesture.onActionCallback, gestureGroupPtr);
+      break;
+    }
+    case CommonGestureType.LONG_PRESS_GESTURE: {
+      let longPressGesture = gesture;
+      getUINativeModule().common.addLongPressGestureToGroup(longPressGesture.gestureTag,
+        longPressGesture.fingers, longPressGesture.repeat, longPressGesture.duration,
+        longPressGesture.onActionCallback, longPressGesture.onActionEndCallback, longPressGesture.onActionCancelCallback, gestureGroupPtr);
+      break;
+    }
+    case CommonGestureType.PAN_GESTURE: {
+      let panGesture = gesture;
+      getUINativeModule().common.addPanGestureToGroup(panGesture.gestureTag,
+        panGesture.fingers, panGesture.direction, panGesture.distance, panGesture.onActionStartCallback,
+        panGesture.onActionUpdateCallback, panGesture.onActionEndCallback, panGesture.onActionCancelCallback, gestureGroupPtr);
+      break;
+    }
+    case CommonGestureType.SWIPE_GESTURE: {
+      let swipeGesture = gesture;
+      getUINativeModule().common.addSwipeGestureToGroup(swipeGesture.gestureTag,
+        swipeGesture.fingers, swipeGesture.direction, swipeGesture.speed, swipeGesture.onActionCallback, gestureGroupPtr);
+      break;
+    }
+    case CommonGestureType.PINCH_GESTURE: {
+      let pinchGesture = gesture;
+      getUINativeModule().common.addPinchGestureToGroup(pinchGesture.gestureTag,
+        pinchGesture.fingers, pinchGesture.distance, pinchGesture.onActionStartCallback,
+        pinchGesture.onActionUpdateCallback, pinchGesture.onActionEndCallback, pinchGesture.onActionCancelCallback, gestureGroupPtr);
+      break;
+    }
+    case CommonGestureType.ROTATION_GESTURE: {
+      let rotationGesture = gesture;
+      getUINativeModule().common.addRotationGestureToGroup(rotationGesture.gestureTag,
+        rotationGesture.fingers, rotationGesture.angle, rotationGesture.onActionStartCallback,
+        rotationGesture.onActionUpdateCallback, rotationGesture.onActionEndCallback,
+        rotationGesture.onActionCancelCallback, gestureGroupPtr);
+      break;
+    }
+    case CommonGestureType.GESTURE_GROUP: {
+      let gestureGroup = gesture;
+      let groupPtr = getUINativeModule().common.addGestureGroupToGroup(
+        gestureGroup.gestureTag, gestureGroup.onCancelCallback, gestureGroup.mode, gestureGroupPtr);
+        gestureGroup.gestures.forEach((item) => {
+          addGestureToGroup(item, groupPtr);
+        });
+      break;
+    }
+    default:
+      break;
+  }
+}
+
+function applyGesture(modifier, component) {
+  if (modifier.applyGesture !== undefined) {
+    let gestureEvent = component.getOrCreateGestureEvent();
+    gestureEvent.clearGestures();
+    modifier.applyGesture(gestureEvent);
+  }
+}
+
+function __gestureModifier__(modifier) {
+  const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
+  let nativeNode = getUINativeModule().getFrameNodeById(elmtId);
+  let component = new ArkComponent(nativeNode);
+  applyGesture(modifier, component);
 }
 
 /// <reference path='./import.ts' />
@@ -4830,9 +5366,6 @@ ImageeResizableModifier.identity = Symbol('resizable');
 class ArkImageComponent extends ArkComponent {
   constructor(nativePtr, classType) {
     super(nativePtr, classType);
-  }
-  onGestureJudgeBegin(callback) {
-    throw new Error('Method not implemented.');
   }
   draggable(value) {
     modifierWithKey(this._modifiersWithKeys, ImageDraggableModifier.identity, ImageDraggableModifier, value);
@@ -6621,7 +7154,8 @@ class ArkSpanComponent {
     throw new Error('Method not implemented.');
   }
   onClick(event) {
-    throw new Error('Method not implemented.');
+    modifierWithKey(this._modifiersWithKeys, ClickModifier.identity, ClickModifier, event);
+    return this;
   }
   onHover(event) {
     throw new Error('Method not implemented.');
@@ -7236,9 +7770,6 @@ class ArkStackComponent extends ArkComponent {
   constructor(nativePtr, classType) {
     super(nativePtr, classType);
   }
-  onGestureJudgeBegin(callback) {
-    throw new Error('Method not implemented.');
-  }
   alignContent(value) {
     modifierWithKey(this._modifiersWithKeys, StackAlignContentModifier.identity, StackAlignContentModifier, value);
     return this;
@@ -7814,9 +8345,6 @@ class ArkTextComponent extends ArkComponent {
     return this;
   }
   dataDetectorConfig(config) {
-    throw new Error('Method not implemented.');
-  }
-  onGestureJudgeBegin(callback) {
     throw new Error('Method not implemented.');
   }
   font(value) {
@@ -9097,9 +9625,6 @@ class ArkTextInputComponent extends ArkComponent {
   cancelButton(value) {
     throw new Error('Method not implemented.');
   }
-  onGestureJudgeBegin(callback) {
-    throw new Error('Method not implemented.');
-  }
   selectAll(value) {
     throw new Error('Method not implemented.');
   }
@@ -10333,9 +10858,6 @@ class ArkButtonComponent extends ArkComponent {
   constructor(nativePtr, classType) {
     super(nativePtr, classType);
   }
-  onGestureJudgeBegin(callback) {
-    throw new Error('Method not implemented.');
-  }
   backgroundColor(value) {
     modifierWithKey(this._modifiersWithKeys, ButtonBackgroundColorModifier.identity, ButtonBackgroundColorModifier, value);
     return this;
@@ -10790,9 +11312,6 @@ class ArkLoadingProgressComponent extends ArkComponent {
   constructor(nativePtr, classType) {
     super(nativePtr, classType);
   }
-  onGestureJudgeBegin(callback) {
-    throw new Error('Method not implemented.');
-  }
   color(value) {
     modifierWithKey(this._modifiersWithKeys, LoadingProgressColorModifier.identity, LoadingProgressColorModifier, value);
     return this;
@@ -10870,9 +11389,6 @@ if (globalThis.LoadingProgress !== undefined) {
 class ArkRefreshComponent extends ArkComponent {
   constructor(nativePtr, classType) {
     super(nativePtr, classType);
-  }
-  onGestureJudgeBegin(callback) {
-    throw new Error('Method not implemented.');
   }
   onStateChange(callback) {
     throw new Error('Method not implemented.');
@@ -11123,9 +11639,6 @@ class ArkScrollComponent extends ArkComponent {
   constructor(nativePtr, classType) {
     super(nativePtr, classType);
   }
-  onGestureJudgeBegin(callback) {
-    throw new Error('Method not implemented.');
-  }
   scrollable(value) {
     modifierWithKey(this._modifiersWithKeys, ScrollScrollableModifier.identity, ScrollScrollableModifier, value);
     return this;
@@ -11236,9 +11749,6 @@ if (globalThis.Scroll !== undefined) {
 class ArkToggleComponent extends ArkComponent {
   constructor(nativePtr, classType) {
     super(nativePtr, classType);
-  }
-  onGestureJudgeBegin(callback) {
-    throw new Error('Method not implemented.');
   }
   onChange(callback) {
     throw new Error('Method not implemented.');
@@ -11508,9 +12018,6 @@ if (globalThis.Toggle !== undefined) {
 class ArkSelectComponent extends ArkComponent {
   constructor(nativePtr, classType) {
     super(nativePtr, classType);
-  }
-  onGestureJudgeBegin(callback) {
-    throw new Error('Method not implemented.');
   }
   optionWidth(value) {
     modifierWithKey(this._modifiersWithKeys, SelectOptionWidthModifier.identity, SelectOptionWidthModifier, value);
@@ -11957,9 +12464,6 @@ class ArkRadioComponent extends ArkComponent {
   constructor(nativePtr, classType) {
     super(nativePtr, classType);
   }
-  onGestureJudgeBegin(callback) {
-    throw new Error('Method not implemented.');
-  }
   checked(value) {
     modifierWithKey(this._modifiersWithKeys, RadioCheckedModifier.identity, RadioCheckedModifier, value);
     return this;
@@ -12218,9 +12722,6 @@ class ArkTimePickerComponent extends ArkComponent {
   constructor(nativePtr, classType) {
     super(nativePtr, classType);
   }
-  onGestureJudgeBegin(callback) {
-    throw new Error('Method not implemented.');
-  }
   loop(value) {
     throw new Error('Method not implemented.');
   }
@@ -12400,9 +12901,6 @@ if (globalThis.TimePicker !== undefined) {
 class ArkTextPickerComponent extends ArkComponent {
   constructor(nativePtr, classType) {
     super(nativePtr, classType);
-  }
-  onGestureJudgeBegin(callback) {
-    throw new Error('Method not implemented.');
   }
   defaultPickerItemHeight(value) {
     modifierWithKey(this._modifiersWithKeys, TextpickerDefaultPickerItemHeightModifier.identity, TextpickerDefaultPickerItemHeightModifier, value);
@@ -12656,9 +13154,6 @@ if (globalThis.TextPicker !== undefined) {
 class ArkSliderComponent extends ArkComponent {
   constructor(nativePtr, classType) {
     super(nativePtr, classType);
-  }
-  onGestureJudgeBegin(callback) {
-    throw new Error('Method not implemented.');
   }
   blockColor(value) {
     modifierWithKey(this._modifiersWithKeys, BlockColorModifier.identity, BlockColorModifier, value);
@@ -13024,9 +13519,6 @@ RatingStarStyleModifier.identity = Symbol('ratingStarStyle');
 class ArkRatingComponent extends ArkComponent {
   constructor(nativePtr, classType) {
     super(nativePtr, classType);
-  }
-  onGestureJudgeBegin(callback) {
-    throw new Error('Method not implemented.');
   }
   stars(value) {
     modifierWithKey(this._modifiersWithKeys, RatingStarsModifier.identity, RatingStarsModifier, value);
@@ -15635,9 +16127,6 @@ if (globalThis.Gauge !== undefined) {
 class ArkMarqueeComponent extends ArkComponent {
   constructor(nativePtr, classType) {
     super(nativePtr, classType);
-  }
-  onGestureJudgeBegin(callback) {
-    throw new Error('Method not implemented.');
   }
   fontSize(value) {
     modifierWithKey(this._modifiersWithKeys, MarqueeFontSizeModifier.identity, MarqueeFontSizeModifier, value);

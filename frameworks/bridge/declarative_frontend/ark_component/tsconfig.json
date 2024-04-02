@@ -50,6 +50,7 @@
         "src/ArkDatePicker.ts",
         "src/ArkFormComponent.ts",
         "src/ArkGauge.ts",
+        "src/ArkGesture.ts",
         "src/ArkMarquee.ts",
         "src/ArkMenu.ts",
         "src/ArkMenuItem.ts",

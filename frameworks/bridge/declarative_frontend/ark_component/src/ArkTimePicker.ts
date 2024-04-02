@@ -18,9 +18,6 @@ class ArkTimePickerComponent extends ArkComponent implements TimePickerAttribute
   constructor(nativePtr: KNode, classType?: ModifierType) {
     super(nativePtr, classType);
   }
-  onGestureJudgeBegin(callback: (gestureInfo: GestureInfo, event: BaseGestureEvent) => GestureJudgeResult): this {
-    throw new Error('Method not implemented.');
-  }
   loop(value: boolean): this {
     throw new Error('Method not implemented.');
   }

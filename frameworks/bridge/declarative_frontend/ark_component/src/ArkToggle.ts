@@ -18,9 +18,6 @@ class ArkToggleComponent extends ArkComponent implements ToggleAttribute {
   constructor(nativePtr: KNode, classType?: ModifierType) {
     super(nativePtr, classType);
   }
-  onGestureJudgeBegin(callback: (gestureInfo: GestureInfo, event: BaseGestureEvent) => GestureJudgeResult): this {
-    throw new Error('Method not implemented.');
-  }
   onChange(callback: (isOn: boolean) => void): this {
     throw new Error('Method not implemented.');
   }

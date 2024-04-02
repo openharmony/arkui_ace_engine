@@ -18,9 +18,6 @@ class ArkSelectComponent extends ArkComponent implements SelectAttribute {
   constructor(nativePtr: KNode, classType?: ModifierType) {
     super(nativePtr, classType);
   }
-  onGestureJudgeBegin(callback: (gestureInfo: GestureInfo, event: BaseGestureEvent) => GestureJudgeResult): this {
-    throw new Error('Method not implemented.');
-  }
   optionWidth(value: Dimension | OptionWidthMode): this {
     modifierWithKey(
       this._modifiersWithKeys, SelectOptionWidthModifier.identity, SelectOptionWidthModifier, value);
