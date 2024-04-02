@@ -695,7 +695,13 @@ RefPtr<Framework::RevSourceMap> PageRouterManager::GetCurrentPageSourceMap(const
     if (container->IsUseStageModel()) {
         auto pagePath = entryPageInfo->GetPagePath();
         auto moduleName = container->GetModuleName();
-        auto judgePath = moduleName + "/src/main/ets/" + pagePath.substr(0, pagePath.size() - 3) + ".ets";
+        std::string judgePath = "";
+        if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TWELVE)) {
+            judgePath = "entry/build/default/cache/default/default@CompileArkTS/esmodule/debug/" + moduleName +
+                        "/src/main/ets/" + pagePath.substr(0, pagePath.size() - 3) + ".ts";
+        } else {
+            judgePath = moduleName + "/src/main/ets/" + pagePath.substr(0, pagePath.size() - 3) + ".ets";
+        }
         if (Framework::GetAssetContentImpl(assetManager, "sourceMaps.map", jsSourceMap)) {
             auto jsonPages = JsonUtil::ParseJsonString(jsSourceMap);
             auto jsonPage = jsonPages->GetValue(judgePath)->ToString();

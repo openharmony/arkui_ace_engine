@@ -391,13 +391,26 @@ void DialogLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     if ((!dialogProp->GetIsModal().value_or(true) ||
             (dialogProp->GetIsModal().value_or(true) && dialogProp->GetShowInSubWindowValue(false))) &&
         !dialogProp->GetIsScenceBoardDialog().value_or(false)) {
-        ProcessMaskRect(
-            DimensionRect(Dimension(childSize.Width()), Dimension(childSize.Height()), DimensionOffset(topLeftPoint_)),
-            frameNode);
+        DimensionRect rect =
+            DimensionRect(Dimension(childSize.Width()), Dimension(childSize.Height()), DimensionOffset(topLeftPoint_));
+        if (dialogPattern->GetDialogProperties().shadow.has_value()) {
+            UpdateMaskRect(dialogPattern->GetDialogProperties().shadow.value(), rect);
+        }
+        ProcessMaskRect(rect, frameNode);
     }
     child->GetGeometryNode()->SetMarginFrameOffset(topLeftPoint_);
     child->Layout();
     SetSubWindowHotarea(dialogProp, childSize, selfSize, frameNode->GetId());
+}
+
+void DialogLayoutAlgorithm::UpdateMaskRect(Shadow shadow, DimensionRect& rect)
+{
+    auto offset = shadow.GetOffset();
+    rect.SetWidth(rect.GetWidth() + Dimension(std::abs(offset.GetX())));
+    rect.SetHeight(rect.GetHeight() + Dimension(std::abs(offset.GetY())));
+    auto offsetx = rect.GetOffset().GetX() + Dimension(std::min(offset.GetX(), 0.0));
+    auto offsety = rect.GetOffset().GetY() + Dimension(std::min(offset.GetY(), 0.0));
+    rect.SetOffset(DimensionOffset(offsetx, offsety));
 }
 
 void DialogLayoutAlgorithm::SetDialogSize(

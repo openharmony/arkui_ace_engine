@@ -40,10 +40,13 @@ namespace OHOS::Ace::NG {
 namespace {
 constexpr int32_t LONG_PRESS_DURATION = 800;
 
-RefPtr<OverlayManager> GetOverlayFromPage(const RefPtr<FrameNode>& targetNode)
+RefPtr<OverlayManager> GetOverlayFromPage(int32_t pageLevelId, bool isNav)
 {
-    std::string tag = targetNode->PageLevelIsNavDestination() ? V2::NAVDESTINATION_VIEW_ETS_TAG : V2::PAGE_ETS_TAG;
-    auto frameNode = FrameNode::GetFrameNode(tag, targetNode->GetPageLevelNodeId());
+    if (pageLevelId <= 0) {
+        return nullptr;
+    }
+    std::string tag = isNav ? V2::NAVDESTINATION_VIEW_ETS_TAG : V2::PAGE_ETS_TAG;
+    auto frameNode = FrameNode::GetFrameNode(tag, pageLevelId);
     CHECK_NULL_RETURN(frameNode, nullptr);
     if (tag == V2::PAGE_ETS_TAG) {
         auto node = AceType::DynamicCast<FrameNode>(frameNode);
@@ -57,7 +60,7 @@ RefPtr<OverlayManager> GetOverlayFromPage(const RefPtr<FrameNode>& targetNode)
 RefPtr<OverlayManager> FindPageNodeOverlay(const RefPtr<FrameNode>& targetNode, bool isShow)
 {
     if (targetNode->GetPageLevelNodeId() > 0) {
-        return GetOverlayFromPage(targetNode);
+        return GetOverlayFromPage(targetNode->GetPageLevelNodeId(), targetNode->PageLevelIsNavDestination());
     }
     auto parent = targetNode->GetParent();
     while (parent) {
@@ -66,9 +69,11 @@ RefPtr<OverlayManager> FindPageNodeOverlay(const RefPtr<FrameNode>& targetNode, 
             CHECK_NULL_RETURN(node, nullptr);
             auto pattern = node->GetPattern<PagePattern>();
             CHECK_NULL_RETURN(pattern, nullptr);
-            targetNode->SetPageLevelNodeId(node->GetId());
             pattern->CreateOverlayManager(isShow);
-            return pattern->GetOverlayManager();
+            auto overlay = pattern->GetOverlayManager();
+            CHECK_NULL_RETURN(overlay, nullptr);
+            targetNode->SetPageLevelNodeId(node->GetId());
+            return overlay;
         }
         parent = parent->GetParent();
     }
@@ -480,15 +485,17 @@ void ViewAbstractModelNG::BindSheet(bool isShow, std::function<void(const std::s
     CHECK_NULL_VOID(overlayManager);
 
     // delete Sheet when target node destroy
-    auto destructor = [targetNode, showInPage = sheetStyle.showInPage.value_or(false)]() {
+    auto destructor = [id = targetNode->GetId(), pageLevelId = targetNode->GetPageLevelNodeId(),
+                          isNav = targetNode->PageLevelIsNavDestination(),
+                          showInPage = sheetStyle.showInPage.value_or(false)]() {
         auto pipeline = NG::PipelineContext::GetCurrentContext();
         CHECK_NULL_VOID(pipeline);
         auto overlayManager = pipeline->GetOverlayManager();
         if (showInPage) {
-            overlayManager = GetOverlayFromPage(targetNode);
+            overlayManager = GetOverlayFromPage(pageLevelId, isNav);
         }
         CHECK_NULL_VOID(overlayManager);
-        overlayManager->DeleteModal(targetNode->GetId());
+        overlayManager->DeleteModal(id);
     };
     targetNode->PushDestroyCallback(destructor);
 

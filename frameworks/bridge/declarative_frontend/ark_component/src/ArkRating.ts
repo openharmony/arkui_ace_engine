@@ -96,7 +96,7 @@ class ArkRatingComponent extends ArkComponent implements RatingAttribute {
   }
 }
 // @ts-ignore
-globalThis.Rating.attributeModifier = function (modifier: ArkComponent) {
+globalThis.Rating.attributeModifier = function (modifier: ArkComponent): void {
   attributeModifierFunc.call(this, modifier, (nativePtr: KNode) => {
     return new ArkRatingComponent(nativePtr);
   }, (nativePtr: KNode, classType: ModifierType, modifierJS: ModifierJS) => {

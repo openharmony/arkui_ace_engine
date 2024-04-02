@@ -589,8 +589,9 @@ void RosenRenderContext::PaintDebugBoundary(bool flag)
             std::make_shared<Rosen::RectF>(marginOffset.GetX() - rect.GetX(), marginOffset.GetY() - rect.GetY(),
                 geometryNode->GetMarginFrameSize().Width(), geometryNode->GetMarginFrameSize().Height());
         UpdateDrawRegion(DRAW_REGION_DEBUG_BOUNDARY_MODIFIER_INDEX, drawRect);
-        debugBoundaryModifier_->SetCustomData(flag);
         rsNode_->AddModifier(debugBoundaryModifier_);
+        // SetCustomData(AttachProperty to rs modifier) must be called after AddModifier.
+        debugBoundaryModifier_->SetCustomData(flag);
     } else if (debugBoundaryModifier_) {
         debugBoundaryModifier_->SetPaintTask(std::move(paintTask));
         auto rect = GetPaintRectWithoutTransform();
@@ -2342,7 +2343,7 @@ void RosenRenderContext::PaintBorderImageGradient()
 
 void RosenRenderContext::OnModifyDone()
 {
-    auto frameNode = GetHost();
+    auto frameNode = GetUnsafeHost();
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(rsNode_);
     if (HasClickEffectLevel()) {
@@ -3572,6 +3573,13 @@ void RosenRenderContext::OnLinearGradientBlurUpdate(const NG::LinearGradientBlur
             blurRadius, blurPara.fractionStops_, static_cast<Rosen::GradientDirection>(blurPara.direction_)));
 
     rsNode_->SetLinearGradientBlurPara(rsLinearGradientBlurPara);
+    RequestNextFrame();
+}
+
+void RosenRenderContext::OnDynamicDimDegreeUpdate(const float degree)
+{
+    CHECK_NULL_VOID(rsNode_);
+    rsNode_->SetDynamicDimDegree(degree);
     RequestNextFrame();
 }
 

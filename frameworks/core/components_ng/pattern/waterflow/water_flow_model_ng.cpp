@@ -257,6 +257,15 @@ RefPtr<WaterFlowSections> WaterFlowModelNG::GetOrCreateWaterFlowSections()
     return pattern->GetOrCreateWaterFlowSections();
 }
 
+void WaterFlowModelNG::ResetSections()
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<WaterFlowPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->ResetSections();
+}
+
 void WaterFlowModelNG::SetColumnsTemplate(FrameNode* frameNode, const std::string& value)
 {
     CHECK_NULL_VOID(frameNode);

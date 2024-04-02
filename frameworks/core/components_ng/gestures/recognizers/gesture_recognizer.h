@@ -327,6 +327,9 @@ protected:
     virtual void OnSucceedCancel() {}
     bool ShouldResponse() override;
 
+    void HandleWillAccept();
+    void HandleDidAccept();
+
     RefereeState refereeState_ = RefereeState::READY;
 
     GestureDisposal disposal_ = GestureDisposal::NONE;

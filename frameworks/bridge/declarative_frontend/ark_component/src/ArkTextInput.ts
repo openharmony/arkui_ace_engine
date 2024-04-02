@@ -159,6 +159,23 @@ class TextInputUnderlineColorModifier extends ModifierWithKey<ResourceColor | Un
   }
 }
 
+class TextInputWordBreakModifier extends ModifierWithKey<WordBreak> {
+  constructor(value: WordBreak) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('textInputWordBreak');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().text.resetWordBreak(node);
+    } else {
+      getUINativeModule().text.setWordBreak(node, this.value!);
+    }
+  }
+  checkObjectDiff(): boolean {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+
 class TextInputShowPasswordIconModifier extends ModifierWithKey<boolean> {
   constructor(value: boolean) {
     super(value);
@@ -306,6 +323,38 @@ class TextInputShowUnderlineModifier extends ModifierWithKey<boolean> {
       getUINativeModule().textInput.resetShowUnderline(node);
     } else {
       getUINativeModule().textInput.setShowUnderline(node, this.value!);
+    }
+  }
+  checkObjectDiff(): boolean {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+class TextInputPasswordRulesModifier extends ModifierWithKey<string> {
+  constructor(value: string) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('textInputPasswordRules');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().textInput.resetPasswordRules(node);
+    } else {
+      getUINativeModule().textInput.setPasswordRules(node, this.value!);
+    }
+  }
+  checkObjectDiff(): boolean {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+class TextInputEnableAutoFillModifier extends ModifierWithKey<boolean> {
+  constructor(value: boolean) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('textInputEnableAutoFill');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().textInput.resetEnableAutoFill(node);
+    } else {
+      getUINativeModule().textInput.setEnableAutoFill(node, this.value!);
     }
   }
   checkObjectDiff(): boolean {
@@ -587,10 +636,14 @@ class ArkTextInputComponent extends ArkComponent implements CommonMethod<TextInp
     throw new Error('Method not implemented.');
   }
   enableAutoFill(value: boolean): TextInputAttribute {
-    throw new Error('Method not implemented.');
+    modifierWithKey(this._modifiersWithKeys, TextInputEnableAutoFillModifier.identity,
+      TextInputEnableAutoFillModifier, value);
+    return this;
   }
   passwordRules(value: string): TextInputAttribute {
-    throw new Error('Method not implemented.');
+    modifierWithKey(this._modifiersWithKeys, TextInputPasswordRulesModifier.identity,
+      TextInputPasswordRulesModifier, value);
+    return this;
   }
   showCounter(value: boolean): TextInputAttribute {
     throw new Error('Method not implemented.');
@@ -776,14 +829,19 @@ class ArkTextInputComponent extends ArkComponent implements CommonMethod<TextInp
   }
   lineHeight(value: number | string | Resource): this {
     modifierWithKey(this._modifiersWithKeys, TextInputLineHeightModifier.identity, TextInputLineHeightModifier, value);
+    return this;
   }
   underlineColor(value: ResourceColor | UnderlineColor | undefined): TextInputAttribute {
     modifierWithKey(this._modifiersWithKeys, TextInputUnderlineColorModifier.identity, TextInputUnderlineColorModifier, value);
     return this;
   }
+  wordBreak(value: WordBreak): TextInputAttribute {
+    modifierWithKey(this._modifiersWithKeys, TextInputWordBreakModifier.identity, TextInputWordBreakModifier, value);
+    return this;
+  }
 }
 // @ts-ignore
-globalThis.TextInput.attributeModifier = function (modifier: ArkComponent) {
+globalThis.TextInput.attributeModifier = function (modifier: ArkComponent): void {
   attributeModifierFunc.call(this, modifier, (nativePtr: KNode) => {
     return new ArkTextInputComponent(nativePtr);
   }, (nativePtr: KNode, classType: ModifierType, modifierJS: ModifierJS) => {

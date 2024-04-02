@@ -35,14 +35,16 @@ SvgFeGaussianBlur::SvgFeGaussianBlur() : SvgFe()
 }
 
 void SvgFeGaussianBlur::OnAsImageFilter(std::shared_ptr<RSImageFilter>& imageFilter,
-    const ColorInterpolationType& srcColor, ColorInterpolationType& currentColor) const
+    const ColorInterpolationType& srcColor, ColorInterpolationType& currentColor,
+    std::unordered_map<std::string, std::shared_ptr<RSImageFilter>>& resultHash) const
 {
     auto declaration = AceType::DynamicCast<SvgFeGaussianBlurDeclaration>(declaration_);
     CHECK_NULL_VOID(declaration);
-    imageFilter = MakeImageFilter(declaration->GetIn(), imageFilter);
+    imageFilter = MakeImageFilter(declaration->GetIn(), imageFilter, resultHash);
     imageFilter = RSRecordingImageFilter::CreateBlurImageFilter(
         declaration->GetStdDeviationX(), declaration->GetStdDeviationY(), RSTileMode::DECAL, imageFilter);
     ConverImageFilterColor(imageFilter, srcColor, currentColor);
+    RegisterResult(declaration->GetResult(), imageFilter, resultHash);
 }
 
 } // namespace OHOS::Ace::NG

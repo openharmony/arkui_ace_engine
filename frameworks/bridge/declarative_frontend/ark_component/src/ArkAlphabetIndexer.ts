@@ -119,7 +119,7 @@ class ArkAlphabetIndexerComponent extends ArkComponent implements AlphabetIndexe
   }
 }
 // @ts-ignore
-globalThis.AlphabetIndexer.attributeModifier = function (modifier: ArkComponent) {
+globalThis.AlphabetIndexer.attributeModifier = function (modifier: ArkComponent): void {
   attributeModifierFunc.call(this, modifier, (nativePtr: KNode) => {
     return new ArkAlphabetIndexerComponent(nativePtr);
   }, (nativePtr: KNode, classType: ModifierType, modifierJS: ModifierJS) => {

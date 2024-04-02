@@ -67,7 +67,7 @@ void BuildNavDestinationInfoFromContext(const std::string& navigationId, NavDest
 
 NavigationPattern::NavigationPattern()
 {
-    navigationController_ = std::make_shared<InnerNavigationController>(WeakClaim(this));
+    navigationController_ = std::make_shared<InnerNavigationController>(WeakClaim(this), Container::CurrentId());
 }
 
 RefPtr<RenderContext> NavigationPattern::GetTitleBarRenderContext()

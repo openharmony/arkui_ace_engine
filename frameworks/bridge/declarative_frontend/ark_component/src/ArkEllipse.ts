@@ -21,7 +21,7 @@ class ArkEllipseComponent extends ArkCommonShapeComponent implements EllipseAttr
 }
 
 // @ts-ignore
-globalThis.Ellipse.attributeModifier = function (modifier: ArkComponent) {
+globalThis.Ellipse.attributeModifier = function (modifier: ArkComponent): void {
   attributeModifierFunc.call(this, modifier, (nativePtr: KNode) => {
     return new ArkEllipseComponent(nativePtr);
   }, (nativePtr: KNode, classType: ModifierType, modifierJS: ModifierJS) => {

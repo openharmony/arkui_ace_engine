@@ -75,6 +75,7 @@ const std::string MENU_ITEM_GROUP_TEXT = "menuItemGroup";
 const std::string MENU_TOUCH_EVENT_TYPE = "1";
 const DirtySwapConfig configDirtySwap = { false, false, false, false, true, false };
 constexpr Color ITEM_DISABLED_COLOR = Color(0x0c182431);
+const std::string IMAGE_SRC_URL = "file://data/data/com.example.test/res/example.svg";
 
 constexpr float FULL_SCREEN_WIDTH = 720.0f;
 constexpr float FULL_SCREEN_HEIGHT = 1136.0f;
@@ -2219,9 +2220,9 @@ HWTEST_F(MenuTestNg, MenuItemLayoutPropertyTestNg001, TestSize.Level1)
 {
     MenuItemLayoutProperty property;
     EXPECT_FALSE(property.GetStartIcon().has_value());
-    property.UpdateStartIcon("test.png");
+    property.UpdateStartIcon(ImageSourceInfo(IMAGE_SRC_URL));
     ASSERT_TRUE(property.GetStartIcon().has_value());
-    EXPECT_EQ(property.GetStartIcon().value(), "test.png");
+    EXPECT_EQ(property.GetStartIcon().value().GetSrc(), IMAGE_SRC_URL);
 }
 
 /**
@@ -2247,9 +2248,9 @@ HWTEST_F(MenuTestNg, MenuItemLayoutPropertyTestNg003, TestSize.Level1)
 {
     MenuItemLayoutProperty property;
     EXPECT_FALSE(property.GetEndIcon().has_value());
-    property.UpdateEndIcon("test.png");
+    property.UpdateEndIcon(ImageSourceInfo(IMAGE_SRC_URL));
     ASSERT_TRUE(property.GetEndIcon().has_value());
-    EXPECT_EQ(property.GetEndIcon().value(), "test.png");
+    EXPECT_EQ(property.GetEndIcon().value().GetSrc(), IMAGE_SRC_URL);
 }
 
 /**
@@ -2386,9 +2387,9 @@ HWTEST_F(MenuTestNg, MenuItemLayoutPropertyTestNg012, TestSize.Level1)
 HWTEST_F(MenuTestNg, MenuItemLayoutPropertyTestNg013, TestSize.Level1)
 {
     MenuItemLayoutProperty property;
-    property.UpdateStartIcon("test.png");
+    property.UpdateStartIcon(ImageSourceInfo(IMAGE_SRC_URL));
     property.UpdateContent("content");
-    property.UpdateEndIcon("test.png");
+    property.UpdateEndIcon(ImageSourceInfo(IMAGE_SRC_URL));
     property.UpdateLabel("label");
     property.UpdateSelectIcon(true);
     property.UpdateSelectIconSrc("test.png");
@@ -2433,9 +2434,9 @@ HWTEST_F(MenuTestNg, MenuItemLayoutPropertyTestNg013, TestSize.Level1)
 HWTEST_F(MenuTestNg, MenuItemLayoutPropertyTestNg014, TestSize.Level1)
 {
     MenuItemLayoutProperty property;
-    property.UpdateStartIcon("start.png");
+    property.UpdateStartIcon(ImageSourceInfo(IMAGE_SRC_URL));
     property.UpdateContent("content");
-    property.UpdateEndIcon("end.png");
+    property.UpdateEndIcon(ImageSourceInfo(IMAGE_SRC_URL));
     property.UpdateLabel("label");
     property.UpdateSelectIcon(true);
     property.UpdateSelectIconSrc("select.png");
@@ -2470,9 +2471,9 @@ HWTEST_F(MenuTestNg, MenuItemLayoutPropertyTestNg014, TestSize.Level1)
 HWTEST_F(MenuTestNg, MenuItemLayoutPropertyTestNg015, TestSize.Level1)
 {
     MenuItemLayoutProperty property;
-    property.UpdateStartIcon("start.png");
+    property.UpdateStartIcon(ImageSourceInfo(IMAGE_SRC_URL));
     property.UpdateContent("content");
-    property.UpdateEndIcon("end.png");
+    property.UpdateEndIcon(ImageSourceInfo(IMAGE_SRC_URL));
     property.UpdateLabel("label");
     property.UpdateSelectIcon(true);
     property.UpdateSelectIconSrc("select.png");
@@ -2487,9 +2488,9 @@ HWTEST_F(MenuTestNg, MenuItemLayoutPropertyTestNg015, TestSize.Level1)
     property.ToJsonValue(json);
     auto labelFontJson = json->GetObject("labelFont");
     auto contentFontJson = json->GetObject("contentFont");
-    EXPECT_EQ(json->GetString("startIcon"), "start.png");
+    EXPECT_EQ(json->GetString("startIcon"), IMAGE_SRC_URL);
     EXPECT_EQ(json->GetString("content"), "content");
-    EXPECT_EQ(json->GetString("endIcon"), "end.png");
+    EXPECT_EQ(json->GetString("endIcon"), IMAGE_SRC_URL);
     EXPECT_EQ(json->GetString("labelInfo"), "label");
     EXPECT_EQ(json->GetString("selectIcon"), "select.png");
     EXPECT_EQ(contentFontJson->GetString("size"), Dimension(25.0f).ToString());
@@ -2738,7 +2739,7 @@ HWTEST_F(MenuTestNg, MenuItemPatternTestNgUpdateIcon001, TestSize.Level1)
 {
     MenuItemModelNG MenuItemModelInstance;
     MenuItemProperties itemOption;
-    itemOption.startIcon = "startIcon.png";
+    itemOption.startIcon = ImageSourceInfo(IMAGE_SRC_URL);
     MenuItemModelInstance.Create(itemOption);
     auto itemNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
     ASSERT_NE(itemNode, nullptr);
@@ -2765,7 +2766,7 @@ HWTEST_F(MenuTestNg, MenuItemPatternTestNgUpdateIcon001, TestSize.Level1)
     ASSERT_NE(imageLayoutProperty, nullptr);
     auto sourceInfo = imageLayoutProperty->GetImageSourceInfo();
     ASSERT_TRUE(sourceInfo.has_value());
-    EXPECT_EQ(sourceInfo.value().GetSrc(), "startIcon.png");
+    EXPECT_EQ(sourceInfo.value().GetSrc(), IMAGE_SRC_URL);
 }
 
 /**
@@ -2777,7 +2778,7 @@ HWTEST_F(MenuTestNg, MenuItemPatternTestNgUpdateIcon002, TestSize.Level1)
 {
     MenuItemModelNG MenuItemModelInstance;
     MenuItemProperties itemOption;
-    itemOption.endIcon = "endIcon.png";
+    itemOption.endIcon = ImageSourceInfo(IMAGE_SRC_URL);
     MenuItemModelInstance.Create(itemOption);
     auto itemNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
     ASSERT_NE(itemNode, nullptr);
@@ -2804,9 +2805,9 @@ HWTEST_F(MenuTestNg, MenuItemPatternTestNgUpdateIcon002, TestSize.Level1)
     ASSERT_NE(imageLayoutProperty, nullptr);
     auto sourceInfo = imageLayoutProperty->GetImageSourceInfo();
     ASSERT_TRUE(sourceInfo.has_value());
-    EXPECT_EQ(sourceInfo.value().GetSrc(), "endIcon.png");
+    EXPECT_EQ(sourceInfo.value().GetSrc(), IMAGE_SRC_URL);
 
-    itemProperty->UpdateEndIcon("endIcon2.png");
+    itemProperty->UpdateEndIcon(ImageSourceInfo(IMAGE_SRC_URL));
     // call UpdateIcon
     itemPattern->OnModifyDone();
     imagePattern = endIconNode->GetPattern<ImagePattern>();
@@ -2815,7 +2816,7 @@ HWTEST_F(MenuTestNg, MenuItemPatternTestNgUpdateIcon002, TestSize.Level1)
     ASSERT_NE(imageLayoutProperty, nullptr);
     sourceInfo = imageLayoutProperty->GetImageSourceInfo();
     ASSERT_TRUE(sourceInfo.has_value());
-    EXPECT_EQ(sourceInfo.value().GetSrc(), "endIcon2.png");
+    EXPECT_EQ(sourceInfo.value().GetSrc(), IMAGE_SRC_URL);
 }
 
 /**
@@ -2906,7 +2907,7 @@ HWTEST_F(MenuTestNg, MenuItemPatternTestNgUpdateText003, TestSize.Level1)
     // create menu item
     MenuItemModelNG MenuItemModelInstance;
     MenuItemProperties itemOption;
-    itemOption.startIcon = "startIcon.png";
+    itemOption.startIcon = ImageSourceInfo(IMAGE_SRC_URL);
     itemOption.content = "item content";
     MenuItemModelInstance.Create(itemOption);
     auto itemNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
@@ -2930,7 +2931,7 @@ HWTEST_F(MenuTestNg, MenuItemPatternTestNgUpdateText003, TestSize.Level1)
     ASSERT_NE(imageLayoutProperty, nullptr);
     auto sourceInfo = imageLayoutProperty->GetImageSourceInfo();
     ASSERT_TRUE(sourceInfo.has_value());
-    EXPECT_EQ(sourceInfo.value().GetSrc(), "startIcon.png");
+    EXPECT_EQ(sourceInfo.value().GetSrc(), IMAGE_SRC_URL);
 
     auto contentNode = AceType::DynamicCast<FrameNode>(leftRow->GetChildAtIndex(1));
     ASSERT_NE(contentNode, nullptr);
@@ -3392,9 +3393,9 @@ HWTEST_F(MenuTestNg, MenuItemViewTestNgCreate001, TestSize.Level1)
     EXPECT_EQ(rightRow->GetChildren().size(), 0);
 
     ASSERT_TRUE(itemProperty->GetStartIcon().has_value());
-    EXPECT_EQ(itemProperty->GetStartIcon().value(), "");
+    EXPECT_EQ(itemProperty->GetStartIcon().value().GetSrc(), "");
     ASSERT_TRUE(itemProperty->GetEndIcon().has_value());
-    EXPECT_EQ(itemProperty->GetEndIcon().value(), "");
+    EXPECT_EQ(itemProperty->GetEndIcon().value().GetSrc(), "");
     ASSERT_TRUE(itemProperty->GetContent().has_value());
     EXPECT_EQ(itemProperty->GetContent().value(), "");
     ASSERT_TRUE(itemProperty->GetLabel().has_value());
@@ -3411,8 +3412,8 @@ HWTEST_F(MenuTestNg, MenuItemViewTestNgCreate002, TestSize.Level1)
     MenuItemModelNG MneuItemModelInstance;
     MenuItemProperties itemOption;
     itemOption.content = "content";
-    itemOption.startIcon = "startIcon";
-    itemOption.endIcon = "endIcon";
+    itemOption.startIcon = ImageSourceInfo(IMAGE_SRC_URL);
+    itemOption.endIcon = ImageSourceInfo(IMAGE_SRC_URL);
     itemOption.labelInfo = "label";
     MneuItemModelInstance.Create(itemOption);
     auto itemNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
@@ -3423,9 +3424,9 @@ HWTEST_F(MenuTestNg, MenuItemViewTestNgCreate002, TestSize.Level1)
     ASSERT_NE(itemProperty, nullptr);
 
     ASSERT_TRUE(itemProperty->GetStartIcon().has_value());
-    EXPECT_EQ(itemProperty->GetStartIcon().value(), "startIcon");
+    EXPECT_EQ(itemProperty->GetStartIcon().value().GetSrc(), IMAGE_SRC_URL);
     ASSERT_TRUE(itemProperty->GetEndIcon().has_value());
-    EXPECT_EQ(itemProperty->GetEndIcon().value(), "endIcon");
+    EXPECT_EQ(itemProperty->GetEndIcon().value().GetSrc(), IMAGE_SRC_URL);
     ASSERT_TRUE(itemProperty->GetContent().has_value());
     EXPECT_EQ(itemProperty->GetContent().value(), "content");
     ASSERT_TRUE(itemProperty->GetLabel().has_value());

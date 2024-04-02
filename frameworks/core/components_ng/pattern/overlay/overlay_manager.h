@@ -182,6 +182,9 @@ public:
 
     void OpenCustomDialog(const DialogProperties& dialogProps, std::function<void(int32_t)> &&callback);
     void CloseCustomDialog(const int32_t dialogId);
+    void CloseCustomDialog(const WeakPtr<NG::UINode>& node, std::function<void(int32_t)> &&callback);
+    void UpdateCustomDialog(const WeakPtr<NG::UINode>& node, const DialogProperties& dialogProps,
+        std::function<void(int32_t)> &&callback);
 
     void SetSubWindowId(int32_t subWindowId)
     {
@@ -250,15 +253,9 @@ public:
         return pixmapColumnNodeWeak_.Upgrade();
     }
 
-    RefPtr<FrameNode> GetPixelMapContentNode() const
-    {
-        auto column = pixmapColumnNodeWeak_.Upgrade();
-        if (!column) {
-            return nullptr;
-        }
-        auto imageNode = AceType::DynamicCast<FrameNode>(column->GetFirstChild());
-        return imageNode;
-    }
+    RefPtr<FrameNode> GetPixelMapContentNode() const;
+
+    RefPtr<FrameNode> GetPixelMapBadgeNode() const;
 
     bool GetHasFilter()
     {
@@ -471,7 +468,8 @@ public:
     {
         return gatherNodeChildrenInfo_;
     }
-
+    void RemoveMenuBadgeNode(const RefPtr<FrameNode>& menuWrapperNode);
+    void RemovePreviewBadgeNode();
     void CreateOverlayNode();
     void AddFrameNodeToOverlay(const RefPtr<NG::FrameNode>& node, std::optional<int32_t> index = std::nullopt);
     void RemoveFrameNodeOnOverlay(const RefPtr<NG::FrameNode>& node);
@@ -573,6 +571,10 @@ private:
         const NG::ContentCoverParam& contentCoverParam, int32_t targetId,
         std::optional<ModalTransition> modalTransition);
     void HandleModalPop(std::function<void()>&& onWillDisappear, const RefPtr<UINode> rootNode, int32_t targetId);
+
+    RefPtr<FrameNode> GetDialogNodeWithExistContent(const RefPtr<UINode>& node);
+    void RegisterDialogLifeCycleCallback(const RefPtr<FrameNode>& dialog, const DialogProperties& dialogProps);
+    void CustomDialogRecordEvent(const DialogProperties& dialogProps);
 
     RefPtr<FrameNode> overlayNode_;
     // Key: frameNode Id, Value: index

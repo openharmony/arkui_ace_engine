@@ -39,6 +39,10 @@ const LIST_MIN_HEIGHT = 48;
 const CHECKBOX_CONTAINER_LENGTH = 20;
 const TEXT_MIN_HEIGHT = 48;
 const DEFAULT_IMAGE_SIZE = 64;
+const KEYCODE_UP = 2012;
+const KEYCODE_DOWN = 2013;
+const IGNORE_KEY_EVENT_TYPE = 1;
+const FIRST_ITEM_INDEX = 0;
 
 export class TipsDialog extends ViewPU {
   constructor(k19, l19, m19, n19 = -1, o19 = undefined, p19) {
@@ -62,6 +66,7 @@ export class TipsDialog extends ViewPU {
     this.marginOffset = 0;
     this.__checkBoxHeight = new ObservedPropertySimplePU(0, this, 'checkBoxHeight');
     this.buttonHeight = 0;
+    this.contentScroller = new Scroller();
     this.setInitiallyProvidedValue(l19);
     this.finalizeConstruction();
   }
@@ -113,6 +118,9 @@ export class TipsDialog extends ViewPU {
     }
     if (j19.buttonHeight !== undefined) {
       this.buttonHeight = j19.buttonHeight;
+    }
+    if (j19.contentScroller !== undefined) {
+      this.contentScroller = j19.contentScroller;
     }
   }
   updateStateVars(i19) {
@@ -298,7 +306,7 @@ export class TipsDialog extends ViewPU {
       Text.fontColor({ 'id': -1, 'type': 10001, params: ['sys.color.font_primary'], 'bundleName': '', 'moduleName': '' });
       Text.maxLines(CONTENT_MAX_LINES);
       Text.layoutWeight(1);
-      Text.focusOnTouch(true);
+      Text.focusable(false);
       Text.textOverflow({ overflow: TextOverflow.Ellipsis });
       Text.onClick(() => {
         this.isChecked = !this.isChecked;
@@ -350,7 +358,7 @@ export class TipsDialog extends ViewPU {
   textPart(w15 = null) {
     this.observeComponentCreation((a17, b17) => {
       ViewStackProcessor.StartGetAccessRecordingFor(a17);
-      Scroll.create();
+      Scroll.create(this.contentScroller);
       Scroll.margin({ right: `${this.marginOffset}vp` });
       if (!b17) {
         Scroll.pop();
@@ -427,14 +435,20 @@ export class TipsDialog extends ViewPU {
           this.observeComponentCreation((h16, i16) => {
             ViewStackProcessor.StartGetAccessRecordingFor(h16);
             Text.create(this.content);
+            Text.focusable(true);
+            Text.defaultFocus(!(this.primaryButton || this.secondaryButton));
             Text.fontSize({ 'id': -1, 'type': 10002, params: ['sys.float.Body_L'], 'bundleName': '', 'moduleName': '' });
             Text.fontWeight(FontWeight.Medium);
             Text.fontColor({ 'id': -1, 'type': 10001, params: ['sys.color.font_primary'], 'bundleName': '', 'moduleName': '' });
             Text.textAlign(this.textAlignment);
-            Text.textOverflow({ overflow: TextOverflow.Ellipsis });
             Text.width('100%');
             Text.onAreaChange((k16, l16) => {
               this.getTextAlign(Number(l16.width));
+            });
+            Text.onKeyEvent((f17) => {
+                if (f17) {
+                    resolveKeyEvent(f17, this.contentScroller);
+               }
             });
             if (!i16) {
               Text.pop();
@@ -548,6 +562,7 @@ export class SelectDialog extends ViewPU {
         p15.paramsGenerator_ = q15;
       }
     }, this);
+    this.contentScroller = new Scroller();
     this.setInitiallyProvidedValue(k15);
     this.finalizeConstruction();
   }
@@ -578,6 +593,9 @@ export class SelectDialog extends ViewPU {
     }
     if (i15.controller !== undefined) {
       this.controller = i15.controller;
+    }
+    if (i15.contentScroller !== undefined) {
+        this.contentScroller = i15.contentScroller;
     }
   }
   updateStateVars(h15) {
@@ -618,9 +636,9 @@ export class SelectDialog extends ViewPU {
             ViewStackProcessor.StartGetAccessRecordingFor(z14);
             Row.create();
             Row.padding({
-              left: { id: -1, type: 10002, params: ['sys.float.padding_level12'], bundleName: '', moduleName: '' },
-              right: { id: -1, type: 10002, params: ['sys.float.padding_level12'], bundleName: '', moduleName: '' },
-              bottom: { id: -1, type: 10002, params: ['sys.float.padding_level4'], bundleName: '', moduleName: '' }
+              left: { 'id': -1, 'type': 10002, params: ['sys.float.padding_level12'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' },
+              right: { 'id': -1, 'type': 10002, params: ['sys.float.padding_level12'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' },
+              bottom: { 'id': -1, 'type': 10002, params: ['sys.float.padding_level4'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' }
             });
             Row.width('100%');
             if (!a15) {
@@ -631,9 +649,9 @@ export class SelectDialog extends ViewPU {
           this.observeComponentCreation((x14, y14) => {
             ViewStackProcessor.StartGetAccessRecordingFor(x14);
             Text.create(this.content);
-            Text.fontSize({ id: -1, type: 10002, params: ['sys.float.Body_M'], bundleName: '', moduleName: '' });
+            Text.fontSize({ 'id': -1, 'type': 10002, params: ['sys.float.Body_M'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' });
             Text.fontWeight(FontWeight.Regular);
-            Text.fontColor({ id: -1, type: 10001, params: ['sys.color.font_primary'], bundleName: '', moduleName: '' });
+            Text.fontColor({ 'id': -1, 'type': 10001, params: ['sys.color.font_primary'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' });
             Text.textOverflow({ overflow: TextOverflow.Ellipsis });
             if (!y14) {
               Text.pop();
@@ -656,9 +674,14 @@ export class SelectDialog extends ViewPU {
     If.pop();
     this.observeComponentCreation((p14, q14) => {
       ViewStackProcessor.StartGetAccessRecordingFor(p14);
-      List.create({ space: 1 });
+      List.create({ space: 1, scroller: this.contentScroller });
       List.width('100%');
       List.clip(false);
+      List.onFocus(() => {
+          this.contentScroller.scrollToIndex(FIRST_ITEM_INDEX);
+          focusControl.requestFocus(String(FIRST_ITEM_INDEX));
+      });
+      List.defaultFocus(this.buttons?.length == 0 ? true : false);
       if (!q14) {
         List.pop();
       }
@@ -688,8 +711,8 @@ export class SelectDialog extends ViewPU {
               ViewStackProcessor.StartGetAccessRecordingFor(j14);
               Column.create();
               Column.padding({
-                left: { id: -1, type: 10002, params: ['sys.float.padding_level6'], bundleName: '', moduleName: '' },
-                right: { id: -1, type: 10002, params: ['sys.float.padding_level6'], bundleName: '', moduleName: '' }
+                left: { 'id': -1, 'type': 10002, params: ['sys.float.padding_level6'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' },
+                right: { 'id': -1, 'type': 10002, params: ['sys.float.padding_level6'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' }
               });
               if (!k14) {
                 Column.pop();
@@ -700,11 +723,11 @@ export class SelectDialog extends ViewPU {
               ViewStackProcessor.StartGetAccessRecordingFor(g14);
               Button.createWithChild();
               Button.type(ButtonType.Normal);
-              Button.borderRadius({ id: -1, type: 10002, params: ['sys.float.corner_radius_level8'], bundleName: '', moduleName: '' });
+              Button.borderRadius({ 'id': -1, 'type': 10002, params: ['sys.float.corner_radius_level8'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' });
               Button.buttonStyle(ButtonStyleMode.TEXTUAL);
               Button.padding({
-                left: { id: -1, type: 10002, params: ['sys.float.padding_level6'], bundleName: '', moduleName: '' },
-                right: { id: -1, type: 10002, params: ['sys.float.padding_level6'], bundleName: '', moduleName: '' }
+                left: { 'id': -1, 'type': 10002, params: ['sys.float.padding_level6'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' },
+                right: { 'id': -1, 'type': 10002, params: ['sys.float.padding_level6'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' }
               });
               Button.onClick(() => {
                 e13.action && e13.action();
@@ -721,8 +744,8 @@ export class SelectDialog extends ViewPU {
               Row.constraintSize({ minHeight: LIST_MIN_HEIGHT });
               Row.clip(false);
               Row.padding({
-                top: { id: -1, type: 10002, params: ['sys.float.padding_level4'], bundleName: '', moduleName: '' },
-                bottom: { id: -1, type: 10002, params: ['sys.float.padding_level4'], bundleName: '', moduleName: '' }
+                top: { 'id': -1, 'type': 10002, params: ['sys.float.padding_level4'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' },
+                bottom: { 'id': -1, 'type': 10002, params: ['sys.float.padding_level4'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' }
               });
               if (!f14) {
                 Row.pop();
@@ -732,9 +755,9 @@ export class SelectDialog extends ViewPU {
             this.observeComponentCreation((c14, d14) => {
               ViewStackProcessor.StartGetAccessRecordingFor(c14);
               Text.create(e13.title);
-              Text.fontSize({ id: -1, type: 10002, params: ['sys.float.Body_L'], bundleName: '', moduleName: '' });
+              Text.fontSize({ 'id': -1, 'type': 10002, params: ['sys.float.Body_L'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' });
               Text.fontWeight(FontWeight.Medium);
-              Text.fontColor({ id: -1, type: 10001, params: ['sys.color.font_primary'], bundleName: '', moduleName: '' });
+              Text.fontColor({ 'id': -1, 'type': 10001, params: ['sys.color.font_primary'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' });
               Text.layoutWeight(1);
               if (!d14) {
                 Text.pop();
@@ -748,6 +771,12 @@ export class SelectDialog extends ViewPU {
               Radio.size({ width: CHECKBOX_CONTAINER_LENGTH, height: CHECKBOX_CONTAINER_LENGTH });
               Radio.checked(this.selectedIndex === d13);
               Radio.hitTestBehavior(HitTestMode.None);
+              Radio.id(String(d13));
+              Radio.onFocus(() => {
+                  if (d13 == FIRST_ITEM_INDEX) {
+                      this.contentScroller.scrollToIndex(FIRST_ITEM_INDEX);
+                  }
+              });
               if (!b14) {
                 Radio.pop();
               }
@@ -763,10 +792,10 @@ export class SelectDialog extends ViewPU {
                   this.observeComponentCreation((y13, z13) => {
                     ViewStackProcessor.StartGetAccessRecordingFor(y13);
                     Divider.create();
-                    Divider.color({ id: -1, type: 10001, params: ['sys.color.comp_divider'], bundleName: '', moduleName: '' });
+                    Divider.color({ 'id': -1, 'type': 10001, params: ['sys.color.comp_divider'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' });
                     Divider.padding({
-                      left: { id: -1, type: 10002, params: ['sys.float.padding_level6'], bundleName: '', moduleName: '' },
-                      right: { id: -1, type: 10002, params: ['sys.float.padding_level6'], bundleName: '', moduleName: '' }
+                      left: { 'id': -1, 'type': 10002, params: ['sys.float.padding_level6'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' },
+                      right: { 'id': -1, 'type': 10002, params: ['sys.float.padding_level6'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' }
                     });
                     if (!z13) {
                       Divider.pop();
@@ -844,24 +873,24 @@ export class SelectDialog extends ViewPU {
   }
   initContentPadding() {
     this.contentPadding = {
-      left: { id: -1, type: 10002, params: ['sys.float.padding_level0'], bundleName: '', moduleName: '' },
-      right: { id: -1, type: 10002, params: ['sys.float.padding_level0'], bundleName: '', moduleName: '' }
+      left: { 'id': -1, 'type': 10002, params: ['sys.float.padding_level0'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' },
+      right: { 'id': -1, 'type': 10002, params: ['sys.float.padding_level0'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' }
     };
     if (!this.title && !this.confirm) {
       this.contentPadding = {
-        top: { id: -1, type: 10002, params: ['sys.float.padding_level12'], bundleName: '', moduleName: '' },
-        bottom: { id: -1, type: 10002, params: ['sys.float.padding_level12'], bundleName: '', moduleName: '' }
+        top: { 'id': -1, 'type': 10002, params: ['sys.float.padding_level12'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' },
+        bottom: { 'id': -1, 'type': 10002, params: ['sys.float.padding_level12'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' }
       };
       return;
     }
     if (!this.title) {
       this.contentPadding = {
-        top: { id: -1, type: 10002, params: ['sys.float.padding_level12'], bundleName: '', moduleName: '' }
+        top: { 'id': -1, 'type': 10002, params: ['sys.float.padding_level12'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' }
       };
     }
     else if (!this.confirm) {
       this.contentPadding = {
-        bottom: { id: -1, type: 10002, params: ['sys.float.padding_level12'], bundleName: '', moduleName: '' }
+        bottom: { 'id': -1, 'type': 10002, params: ['sys.float.padding_level12'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' }
       };
     }
   }
@@ -1021,6 +1050,8 @@ export class ConfirmDialog extends ViewPU {
         this.observeComponentCreation(((e, o) => {
           ViewStackProcessor.StartGetAccessRecordingFor(e);
           Text.create(this.content);
+          Text.focusable(true);
+          Text.defaultFocus(!(this.primaryButton?.value || this.secondaryButton?.value));
           Text.fontSize({
             id: -1,
             type: 10002,
@@ -1096,7 +1127,7 @@ export class ConfirmDialog extends ViewPU {
       });
       Text.maxLines(CONTENT_MAX_LINES);
       Text.layoutWeight(1);
-      Text.focusOnTouch(!0);
+      Text.focusable(false);
       Text.onClick((() => {
         this.isChecked = !this.isChecked;
       }));
@@ -1129,6 +1160,7 @@ export class ConfirmDialog extends ViewPU {
           });
           Button.fontWeight(FontWeight.Medium);
           Button.layoutWeight(1);
+          Button.defaultFocus(true);
           Button.backgroundColor(this.primaryButton.background ? this.primaryButton.background : {
             id: -1,
             type: 10001,
@@ -1215,6 +1247,7 @@ export class ConfirmDialog extends ViewPU {
           });
           Button.fontWeight(FontWeight.Medium);
           Button.layoutWeight(1);
+          Button.defaultFocus(true);
           Button.backgroundColor(this.secondaryButton.background ? this.secondaryButton.background : {
             id: -1,
             type: 10001,
@@ -1265,6 +1298,7 @@ export class AlertDialog extends ViewPU {
     this.secondaryButton = null;
     this.buttons = undefined;
     this.__textAlign = new ObservedPropertySimplePU(TextAlign.Start, this, 'textAlign');
+    this.contentScroller = new Scroller();
     this.setInitiallyProvidedValue(o9);
     this.finalizeConstruction();
   }
@@ -1292,6 +1326,9 @@ export class AlertDialog extends ViewPU {
     }
     if (m9.textAlign !== undefined) {
       this.textAlign = m9.textAlign;
+    }
+    if (m9.contentScroller !== undefined) {
+      this.contentScroller = m9.contentScroller;
     }
   }
   updateStateVars(l9) {
@@ -1325,7 +1362,7 @@ export class AlertDialog extends ViewPU {
               this.AlertDialogContentBuilder();
             },
             buttons: this.buttons,
-          }, undefined, c9, () => { }, { page: 'library/src/main/ets/components/mainpage/MainPage.ets', line: 57 });
+          }, undefined, c9, () => { }, { page: 'library/src/main/ets/components/mainpage/MainPage.ets', line: 58 });
           ViewPU.create(e9);
           let f9 = () => {
             return {
@@ -1352,19 +1389,26 @@ export class AlertDialog extends ViewPU {
       Column.margin({ right: `${this.getMargin()}vp`, });
     }, Column);
     this.observeComponentCreation2((x8, y8) => {
-      Scroll.create();
+      Scroll.create(this.contentScroller);
       Scroll.width('100%');
     }, Scroll);
     this.observeComponentCreation2((s8, t8) => {
       Text.create(this.content);
+      Text.focusable(true);
+      Text.defaultFocus(!(this.primaryButton || this.secondaryButton));
       Text.fontSize({ id: -1, type: 10002, params: ['sys.float.Body_L'], bundleName: '', moduleName: '' });
-      Text.fontWeight(FontWeight.Medium);
+      Text.fontWeight(this.getFontWeight());
       Text.fontColor({ id: -1, type: 10001, params: ['sys.color.font_primary'], bundleName: '', moduleName: '' });
       Text.margin({ right: { id: -1, type: 10002, params: ['sys.float.padding_level8'], bundleName: '', moduleName: '' }, });
       Text.width(`calc(100% - ${getNumberByResource('padding_level8')}vp)`);
       Text.textAlign(this.textAlign);
       Text.onAreaChange((v8, w8) => {
         this.getTextAlign(Number(w8.width));
+      });
+      Text.onKeyEvent((y8) => {
+          if (y8) {
+              resolveKeyEvent(y8, this.contentScroller);
+          }
       });
     }, Text);
     Text.pop();
@@ -1408,6 +1452,12 @@ export class AlertDialog extends ViewPU {
   }
   getMargin() {
     return 0 - getNumberByResource('padding_level8');
+  }
+  getFontWeight() {
+    if (this.primaryTitle || this.secondaryTitle) {
+      return FontWeight.Regular;
+    }
+    return FontWeight.Medium;
   }
   rerender() {
     this.updateDirtyElements();
@@ -1476,7 +1526,7 @@ export class CustomContentDialog extends ViewPU {
             },
             contentAreaPadding: this.contentAreaPadding,
             buttons: this.buttons,
-          }, undefined, u7, () => { }, { page: 'library/src/main/ets/components/mainpage/MainPage.ets', line: 143 });
+          }, undefined, u7, () => { }, { page: 'library/src/main/ets/components/mainpage/MainPage.ets', line: 151 });
           ViewPU.create(w7);
           let x7 = () => {
             return {
@@ -1514,6 +1564,7 @@ class CustomDialogContentComponent extends ViewPU {
     this.contentBuilder = this.defaultContentBuilder;
     this.buttons = undefined;
     this.contentAreaPadding = undefined;
+    this.keyIndex = 0;
     this.titleHeight = 0;
     this.__contentMaxHeight = new ObservedPropertySimplePU('', this, 'contentMaxHeight');
     this.setInitiallyProvidedValue(o7);
@@ -1537,6 +1588,9 @@ class CustomDialogContentComponent extends ViewPU {
     }
     if (m7.contentAreaPadding !== undefined) {
       this.contentAreaPadding = m7.contentAreaPadding;
+    }
+    if (m7.keyIndex !== undefined) {
+      this.keyIndex = m7.keyIndex;
     }
     if (m7.titleHeight !== undefined) {
       this.titleHeight = m7.titleHeight;
@@ -1671,6 +1725,7 @@ class CustomDialogContentComponent extends ViewPU {
             Button.createWithLabel(z4.value);
             __Button__setButtonProperties(z4, this.controller);
             Button.role(z4.role ?? ButtonRole.NORMAL);
+            Button.key(`advanced_dialog_button_${this.keyIndex++}`);
           }, Button);
           Button.pop();
         });
@@ -1682,6 +1737,7 @@ class CustomDialogContentComponent extends ViewPU {
             __Button__setButtonProperties(z4, this.controller);
             Button.backgroundColor(z4.background);
             Button.fontColor(z4.fontColor);
+            Button.key(`advanced_dialog_button_${this.keyIndex++}`);
           }, Button);
           Button.pop();
         });
@@ -1692,6 +1748,7 @@ class CustomDialogContentComponent extends ViewPU {
             Button.createWithLabel(z4.value);
             __Button__setButtonProperties(z4, this.controller);
             Button.backgroundColor(z4.background);
+            Button.key(`advanced_dialog_button_${this.keyIndex++}`);
           }, Button);
           Button.pop();
         });
@@ -1702,6 +1759,7 @@ class CustomDialogContentComponent extends ViewPU {
             Button.createWithLabel(z4.value);
             __Button__setButtonProperties(z4, this.controller);
             Button.fontColor(z4.fontColor);
+            Button.key(`advanced_dialog_button_${this.keyIndex++}`);
           }, Button);
           Button.pop();
         });
@@ -2117,6 +2175,7 @@ function __Button__setButtonProperties(p1, q1) {
     }
     q1?.close();
   });
+  Button.defaultFocus(true);
   Button.buttonStyle(p1.buttonStyle ?? getNumberByResource('alert_button_style'));
   Button.layoutWeight(BUTTON_LAYOUT_WEIGHT);
 }
@@ -2141,6 +2200,24 @@ function getEnumNumberByResource(h1) {
     hilog.error(0x3900, 'Ace', `getEnumNumberByResource error, code: ${j1}, message: ${k1}`);
     return -1;
   }
+}
+function resolveKeyEvent(h1, i1) {
+    if (h1.type == IGNORE_KEY_EVENT_TYPE) {
+        return;
+    }
+    if (h1.keyCode == KEYCODE_UP) {
+        i1.scrollPage({ next: false });
+        h1.stopPropagation();
+    }
+    else if (h1.keyCode == KEYCODE_DOWN) {
+        if (i1.isAtEnd()) {
+            return;
+        }
+        else {
+            i1.scrollPage({ next: true });
+            h1.stopPropagation();
+        }
+    }
 }
 export class LoadingDialog extends ViewPU {
   constructor(b1, c1, d1, e1 = -1, f1 = undefined, g1) {
@@ -2236,6 +2313,8 @@ export class LoadingDialog extends ViewPU {
       Text.fontColor({ id: -1, type: 10001, params: ['sys.color.font_primary'], bundleName: '', moduleName: '' });
       Text.layoutWeight(LOADING_TEXT_LAYOUT_WEIGHT);
       Text.maxLines(LOADING_MAX_LINES);
+      Text.focusable(true);
+      Text.defaultFocus(true);
       Text.textOverflow({ overflow: TextOverflow.Ellipsis });
       if (!i) {
         Text.pop();

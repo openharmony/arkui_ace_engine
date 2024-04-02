@@ -30,7 +30,7 @@ constexpr uint8_t DISABLED_ALPHA = 102;
 constexpr float CALC_RADIUS = 2.0f;
 constexpr float DEFAULT_POINT_SCALE = 0.5f;
 constexpr float DEFAULT_TOTAL_SCALE = 1.0f;
-constexpr float DEFAULT_SHRINK_SCALE = 0.9f;
+constexpr float DEFAULT_SHRINK_SCALE = 0.95f;
 constexpr int32_t DEFAULT_RADIO_ANIMATION_DURATION = 300;
 constexpr float DEFAULT_OPACITY_SCALE = 1.0f;
 constexpr float DEFAULT_OPACITY_BORDER_SCALE = 0.0f;
@@ -128,7 +128,7 @@ void RadioModifier::UpdateTotalScaleOnAnimatable(
     totalScale_->Set(DEFAULT_TOTAL_SCALE);
     AnimationUtils::Animate(halfDurationOption, [&]() { totalScale_->Set(DEFAULT_SHRINK_SCALE); });
     totalScale_->Set(DEFAULT_SHRINK_SCALE);
-    AnimationUtils::Animate(delayOption, [&]() { totalScale_->Set(1); });
+    AnimationUtils::Animate(delayOption, [&]() { totalScale_->Set(DEFAULT_TOTAL_SCALE); });
 }
 
 void RadioModifier::UpdateIsOnAnimatableProperty(bool isCheck)
@@ -177,31 +177,23 @@ void RadioModifier::UpdateIndicatorAnimation(bool isCheck)
         DEFAULT_INTERPOLATINGSPRING_MASS, DEFAULT_INTERPOLATINGSPRING_STIFFNESS, DEFAULT_INTERPOLATINGSPRING_DAMPING);
     AnimationOption halfDurationOption;
     halfDurationOption.SetCurve(springCurve);
-    halfDurationOption.SetDuration(DEFAULT_INDICATOR_ANIMATION_DURATION);
     AnimationOption delayOption;
     delayOption.SetCurve(springCurve);
     delayOption.SetDelay(DEFAULT_INDICATOR_ANIMATION_DURATION);
-    delayOption.SetDuration(DEFAULT_INDICATOR_ANIMATION_DURATION);
     if (isOnAnimationFlag_->Get()) {
-        AnimationUtils::Animate(
-            halfDurationOption, [&]() { ringPointScale_->Set(0); }, nullptr);
         AnimationUtils::Animate(
             delayOption,
             [&]() {
                 opacityScale_->Set(1);
                 borderOpacityScale_->Set(0);
-                pointScale_->Set(DEFAULT_POINT_SCALE);
             },
             nullptr);
     } else {
         AnimationUtils::Animate(
-            halfDurationOption, [&]() { pointScale_->Set(0); }, nullptr);
-        AnimationUtils::Animate(
-            delayOption,
+            halfDurationOption,
             [&]() {
                 opacityScale_->Set(0);
                 borderOpacityScale_->Set(1);
-                ringPointScale_->Set(1);
             },
             nullptr);
     }
@@ -334,7 +326,7 @@ void RadioModifier::PaintIndicator(
     RSPen outPen;
     RSBrush brush;
     pen.SetAntiAlias(true);
-    pen.SetWidth(borderWidth_);
+    pen.SetWidth(borderWidth_ * borderOpacityScale_);
     outPen.SetAntiAlias(true);
     brush.SetAntiAlias(true);
     if (uiStatus_->Get() == static_cast<int32_t>(UIStatus::SELECTED)) {

@@ -24,6 +24,8 @@ void JSTextEditableController::JSBind(BindingTarget globalObj)
     JSClass<JSTextEditableController>::Method("caretPosition", &JSTextEditableController::CaretPosition);
     JSClass<JSTextEditableController>::CustomMethod("getCaretOffset", &JSTextEditableController::GetCaretOffset);
     JSClass<JSTextEditableController>::CustomMethod("setTextSelection", &JSTextEditableController::SetTextSelection);
+    JSClass<JSTextEditableController>::CustomMethod("showPassword", &JSTextEditableController::ShowPassword);
+    JSClass<JSTextEditableController>::CustomMethod("hidePassword", &JSTextEditableController::HidePassword);
     JSClass<JSTextEditableController>::CustomMethod(
         "getTextContentRect", &JSTextEditableController::GetTextContentRect);
     JSClass<JSTextEditableController>::CustomMethod(
@@ -54,6 +56,28 @@ void JSTextEditableController::CaretPosition(int32_t caretPosition)
         controller->CaretPosition(caretPosition);
     } else {
         TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "CaretPosition: The JSTextEditableController is NULL");
+    }
+}
+
+void JSTextEditableController::ShowPassword(const JSCallbackInfo& info)
+{
+    auto controller = controllerWeak_.Upgrade();
+    if (controller) {
+        TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "begin to show password");
+        controller->SetPasswordState(false);
+    } else {
+        TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "ShowPassword: The JSTextEditableController is NULL");
+    }
+}
+
+void JSTextEditableController::HidePassword(const JSCallbackInfo& info)
+{
+    auto controller = controllerWeak_.Upgrade();
+    if (controller) {
+        TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "begin to hide password");
+        controller->SetPasswordState(true);
+    } else {
+        TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "HidePassword: The JSTextEditableController is NULL");
     }
 }
 

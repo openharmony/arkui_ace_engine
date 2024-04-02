@@ -87,7 +87,7 @@ class QRContentOpacityModifier extends ModifierWithKey<number | Resource> {
 }
 
 // @ts-ignore
-globalThis.QRCode.attributeModifier = function (modifier: ArkComponent) {
+globalThis.QRCode.attributeModifier = function (modifier: ArkComponent): void {
   attributeModifierFunc.call(this, modifier, (nativePtr: KNode) => {
     return new ArkQRCodeComponent(nativePtr);
   }, (nativePtr: KNode, classType: ModifierType, modifierJS: ModifierJS) => {

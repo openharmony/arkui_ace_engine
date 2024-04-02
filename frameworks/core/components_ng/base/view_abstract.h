@@ -181,6 +181,7 @@ public:
     static void SetBackdropBlur(const Dimension &radius, const BlurOption &blurOption);
     static void SetLinearGradientBlur(const NG::LinearGradientBlurPara& blurPara);
     static void SetDynamicLightUp(float rate, float lightUpDegree);
+    static void SetDynamicDim(float DimDegree);
     static void SetFrontBlur(const Dimension &radius, const BlurOption &blurOption);
     static void SetBackShadow(const Shadow &shadow);
     static void SetBlendMode(BlendMode blendMode);
@@ -499,6 +500,7 @@ public:
     static void SetSharedTransition(
         FrameNode* frameNode, const std::string& shareId, const std::shared_ptr<SharedTransitionOption>& option);
     static void SetTransition(FrameNode* frameNode, const TransitionOptions& options);
+    static void CleanTransition(FrameNode* frameNode);
     static void SetChainedTransition(FrameNode* frameNode, const RefPtr<NG::ChainedTransitionEffect>& effect);
     static void SetMask(FrameNode* frameNode, const RefPtr<BasicShape>& basicShape);
     static void SetProgressMask(FrameNode* frameNode, const RefPtr<ProgressMaskProperty>& progress);

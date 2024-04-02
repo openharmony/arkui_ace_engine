@@ -26,10 +26,10 @@
 extern "C" {
 #endif
 
-#define ARKUI_FULL_API_VERSION 86
+#define ARKUI_FULL_API_VERSION 87
 // When changing ARKUI_BASIC_API_VERSION, ARKUI_FULL_API_VERSION must be
 // increased as well.
-#define ARKUI_NODE_API_VERSION 86
+#define ARKUI_NODE_API_VERSION 87
 
 #define ARKUI_BASIC_API_VERSION 7
 #define ARKUI_EXTENDED_API_VERSION 7
@@ -2191,6 +2191,8 @@ struct ArkUITextAreaModifier {
     void (*resetTextAreaLineHeight)(ArkUINodeHandle node);
     void (*setTextAreaFontFeature)(ArkUINodeHandle node, ArkUI_CharPtr value);
     void (*resetTextAreaFontFeature)(ArkUINodeHandle node);
+    void (*setTextAreaWordBreak)(ArkUINodeHandle node, ArkUI_Uint32 wordBreak);
+    void (*resetTextAreaWordBreak)(ArkUINodeHandle node);
 };
 
 struct ArkUITextInputModifier {
@@ -2290,6 +2292,12 @@ struct ArkUITextInputModifier {
     void (*resetTextInputLineHeight)(ArkUINodeHandle node);
     void (*setTextInputFontFeature)(ArkUINodeHandle node, ArkUI_CharPtr value);
     void (*resetTextInputFontFeature)(ArkUINodeHandle node);
+    void (*setTextInputWordBreak)(ArkUINodeHandle node, ArkUI_Uint32 wordBreak);
+    void (*resetTextInputWordBreak)(ArkUINodeHandle node);
+    void (*setTextInputPasswordRules)(ArkUINodeHandle node, ArkUI_CharPtr passwordRules);
+    void (*resetTextInputPasswordRules)(ArkUINodeHandle node);
+    void (*setTextInputEnableAutoFill)(ArkUINodeHandle node, ArkUI_Uint32 enableAutoFill);
+    void (*resetTextInputEnableAutoFill)(ArkUINodeHandle node);
 };
 
 struct ArkUIWebModifier {
@@ -2377,6 +2385,10 @@ struct ArkUIImageSpanModifier {
     void (*resetImageSpanObjectFit)(ArkUINodeHandle node);
     ArkUI_Int32 (*getImageSpanVerticalAlign)(ArkUINodeHandle node);
     ArkUI_Int32 (*getImageSpanObjectFit)(ArkUINodeHandle node);
+    void (*setImageSpanTextBackgroundStyle)(ArkUINodeHandle node, ArkUI_Uint32 color, const ArkUI_Float32* values,
+        const ArkUI_Int32* units, ArkUI_Int32 length);
+    void (*resetImageSpanTextBackgroundStyle)(ArkUINodeHandle node);
+    void (*getImageSpanTextBackgroundStyle)(ArkUINodeHandle node, ArkUITextBackgroundStyleOptions* options);
 };
 
 struct ArkUIMenuModifier {
@@ -2832,6 +2844,8 @@ struct ArkUIMarqueeModifier {
     void (*resetMarqueeFontWeight)(ArkUINodeHandle node);
     void (*setMarqueeFontFamily)(ArkUINodeHandle node, ArkUI_CharPtr fontFamily);
     void (*resetMarqueeFontFamily)(ArkUINodeHandle node);
+    void (*setMarqueeUpdateStrategy)(ArkUINodeHandle node, ArkUI_Uint32 value);
+    void (*resetMarqueeUpdateStrategy)(ArkUINodeHandle node);
 };
 
 struct ArkUIDatePickerModifier {

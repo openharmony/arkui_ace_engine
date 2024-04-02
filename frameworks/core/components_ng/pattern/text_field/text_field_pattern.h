@@ -360,7 +360,12 @@ public:
 
     OffsetF GetCaretOffset() const override
     {
-        return selectController_->GetCaretRect().GetOffset();
+        return movingCaretOffset_;
+    }
+
+    void SetMovingCaretOffset(const OffsetF& offset)
+    {
+        movingCaretOffset_ = offset;
     }
 
     float GetCaretOffsetX() const
@@ -1448,6 +1453,7 @@ private:
     bool keyboardAvoidance_ = false;
     bool hasMousePressed_ = false;
     RefPtr<TextFieldSelectOverlay> selectOverlay_;
+    OffsetF movingCaretOffset_;
 };
 } // namespace OHOS::Ace::NG
 

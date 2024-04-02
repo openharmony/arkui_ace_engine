@@ -65,7 +65,7 @@ class PullToRefreshModifier extends ModifierWithKey<boolean> {
   }
 }
 // @ts-ignore
-globalThis.Refresh.attributeModifier = function (modifier: ArkComponent) {
+globalThis.Refresh.attributeModifier = function (modifier: ArkComponent): void {
   attributeModifierFunc.call(this, modifier, (nativePtr: KNode) => {
     return new ArkRefreshComponent(nativePtr);
   }, (nativePtr: KNode, classType: ModifierType, modifierJS: ModifierJS) => {

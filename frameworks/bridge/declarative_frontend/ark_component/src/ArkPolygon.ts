@@ -65,7 +65,7 @@ class PolygonPointsModifier extends ModifierWithKey<Array<any>> {
 }
 
 // @ts-ignore
-globalThis.Polygon.attributeModifier = function (modifier: ArkComponent) {
+globalThis.Polygon.attributeModifier = function (modifier: ArkComponent): void {
   attributeModifierFunc.call(this, modifier, (nativePtr: KNode) => {
     return new ArkPolygonComponent(nativePtr);
   }, (nativePtr: KNode, classType: ModifierType, modifierJS: ModifierJS) => {

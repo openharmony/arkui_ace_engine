@@ -67,6 +67,7 @@
 #include "core/event/key_event.h"
 #include "core/event/touch_event.h"
 #include "core/gestures/gesture_info.h"
+#include "core/components/common/properties/text_style_parser.h"
 
 #undef private
 #undef protected
@@ -107,6 +108,8 @@ const TextAlign DEFAULT_TEXT_ALIGN = TextAlign::LEFT;
 const CaretStyle DEFAULT_CARET_STYLE = { Dimension(3, DimensionUnit::VP) };
 const OHOS::Ace::DisplayMode DEFAULT_DISPLAY_MODE = OHOS::Ace::DisplayMode::AUTO;
 const TextInputAction DEFAULT_ENTER_KEY_TYPE = TextInputAction::BEGIN;
+const std::unordered_map<std::string, int32_t> FONT_FEATURE_VALUE_1 = ParseFontFeatureSettings("\"ss01\" 1");
+const std::unordered_map<std::string, int32_t> FONT_FEATURE_VALUE_0 = ParseFontFeatureSettings("\"ss01\" 0");
 template<typename CheckItem, typename Expected>
 struct TestItem {
     CheckItem item;
@@ -804,7 +807,7 @@ HWTEST_F(TextInputCursorTest, OnTextChangedListenerCaretPosition008, TestSize.Le
     pattern_->HandleExtendAction(action[2]);
     pattern_->HandleExtendAction(action[3]);
     FlushLayoutTask(frameNode_);
-    EXPECT_EQ(pattern_->GetTextValue().compare("abcdefghijfghijklmnopqrstuvwxyz"), 0)
+    EXPECT_EQ(pattern_->GetTextValue().compare("abcdefghijklmnopqrstuvwxyz"), 0)
         << "Text is " + pattern_->GetTextValue();
 }
 
@@ -4329,5 +4332,69 @@ HWTEST_F(TextFieldUXTest, HandleClickEventTest001, TestSize.Level1)
     pattern_->HandleClickEvent(info);
     Point point2(info.localLocation_.GetX(), info.localLocation_.GetY());
     EXPECT_EQ(pattern_->scrollBar_->CheckBarDirection(point2), BarDirection::PAGE_DOWN);
+}
+
+/**
+ * @tc.name: SupportAvoidanceTest
+ * @tc.desc: test whether the custom keyboard supports the collision avoidance function
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldUXTest, SupportAvoidanceTest, TestSize.Level1)
+{
+    CreateTextField(DEFAULT_TEXT);
+    auto supportAvoidance = true;
+    pattern_->SetCustomKeyboardOption(supportAvoidance);
+    EXPECT_TRUE(pattern_->keyboardAvoidance_);
+    supportAvoidance = false;
+    pattern_->SetCustomKeyboardOption(supportAvoidance);
+    EXPECT_FALSE(pattern_->keyboardAvoidance_);
+}
+
+/**
+ * @tc.name: TextFieldFontFeatureTest
+ * @tc.desc: Test the caret move right
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldUXTest, FontFeature003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Initialize text input.
+     */
+    TextFieldModelNG textFieldModelNG;
+    textFieldModelNG.CreateTextInput(DEFAULT_TEXT, "");
+
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto layoutProperty = frameNode->GetLayoutProperty<TextFieldLayoutProperty>();
+    textFieldModelNG.SetFontFeature(FONT_FEATURE_VALUE_0);
+    EXPECT_EQ(layoutProperty->GetFontFeature(), FONT_FEATURE_VALUE_0);
+
+    layoutProperty->UpdateFontFeature(ParseFontFeatureSettings("\"ss01\" 1"));
+    TextFieldModelNG::SetFontFeature(frameNode, FONT_FEATURE_VALUE_0);
+    EXPECT_EQ(layoutProperty->GetFontFeature(), FONT_FEATURE_VALUE_0);
+}
+
+/**
+ * @tc.name: TextFieldFontFeatureTest
+ * @tc.desc: Test the caret move right
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldUXTest, FontFeature004, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Initialize text input.
+     */
+    TextFieldModelNG textFieldModelNG;
+    textFieldModelNG.CreateTextInput(DEFAULT_TEXT, "");
+
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto layoutProperty = frameNode->GetLayoutProperty<TextFieldLayoutProperty>();
+    textFieldModelNG.SetFontFeature(FONT_FEATURE_VALUE_1);
+    EXPECT_EQ(layoutProperty->GetFontFeature(), FONT_FEATURE_VALUE_1);
+
+    layoutProperty->UpdateFontFeature(ParseFontFeatureSettings("\"ss01\" 0"));
+    TextFieldModelNG::SetFontFeature(frameNode, FONT_FEATURE_VALUE_1);
+    EXPECT_EQ(layoutProperty->GetFontFeature(), FONT_FEATURE_VALUE_1);
 }
 } // namespace OHOS::Ace::NG

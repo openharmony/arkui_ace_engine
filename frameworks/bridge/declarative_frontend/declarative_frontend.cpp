@@ -770,6 +770,11 @@ napi_value DeclarativeFrontend::GetContextValue()
     return jsEngine_->GetContextValue();
 }
 
+napi_value DeclarativeFrontend::GetFrameNodeValueByNodeId(int32_t nodeId)
+{
+    return jsEngine_->GetFrameNodeValueByNodeId(nodeId);
+}
+
 #if defined(PREVIEW)
 void DeclarativeFrontend::TransferJsResponseDataPreview(int callbackId, int32_t code, ResponseData responseData) const
 {

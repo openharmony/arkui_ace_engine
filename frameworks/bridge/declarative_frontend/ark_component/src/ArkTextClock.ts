@@ -149,7 +149,7 @@ class TextClockFontFamilyModifier extends ModifierWithKey<ResourceStr> {
 }
 
 // @ts-ignore
-globalThis.TextClock.attributeModifier = function (modifier: ArkComponent) {
+globalThis.TextClock.attributeModifier = function (modifier: ArkComponent): void {
   attributeModifierFunc.call(this, modifier, (nativePtr: KNode) => {
     return new ArkTextClockComponent(nativePtr);
   }, (nativePtr: KNode, classType: ModifierType, modifierJS: ModifierJS) => {

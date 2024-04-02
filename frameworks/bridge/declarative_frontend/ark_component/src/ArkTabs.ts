@@ -407,7 +407,7 @@ class TabHeightModifier extends ModifierWithKey<Length> {
 }
 
 // @ts-ignore
-globalThis.Tabs.attributeModifier = function (modifier: ArkComponent) {
+globalThis.Tabs.attributeModifier = function (modifier: ArkComponent): void {
   attributeModifierFunc.call(this, modifier, (nativePtr: KNode) => {
     return new ArkTabsComponent(nativePtr);
   }, (nativePtr: KNode, classType: ModifierType, modifierJS: ModifierJS) => {

@@ -1653,6 +1653,14 @@ void ViewAbstract::SetFrontBlur(const Dimension &radius, const BlurOption &blurO
     }
 }
 
+void ViewAbstract::SetDynamicDim(float DimDegree)
+{
+    if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
+        return;
+    }
+    ACE_UPDATE_RENDER_CONTEXT(DynamicDimDegree, DimDegree);
+}
+
 void ViewAbstract::SetFrontBlur(FrameNode *frameNode, const Dimension &radius, const BlurOption &blurOption)
 {
     CHECK_NULL_VOID(frameNode);
@@ -2073,20 +2081,17 @@ void ViewAbstract::SetOverlayBuilder(std::function<void()>&& buildFunc,
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
     if (buildFunc) {
-        auto overlayNode = frameNode->GetOverlayNode();
-        if (!overlayNode) {
-            auto buildNodeFunc = [buildFunc]() -> RefPtr<UINode> {
-                ScopedViewStackProcessor builderViewStackProcessor;
-                buildFunc();
-                auto customNode = ViewStackProcessor::GetInstance()->Finish();
-                return customNode;
-            };
-            overlayNode = AceType::DynamicCast<FrameNode>(buildNodeFunc());
-            CHECK_NULL_VOID(overlayNode);
-            frameNode->SetOverlayNode(overlayNode);
-            overlayNode->SetParent(AceType::WeakClaim(frameNode));
-            overlayNode->SetActive(true);
-        }
+        auto buildNodeFunc = [func = std::move(buildFunc)]() -> RefPtr<UINode> {
+            ScopedViewStackProcessor builderViewStackProcessor;
+            func();
+            auto customNode = ViewStackProcessor::GetInstance()->Finish();
+            return customNode;
+        };
+        auto overlayNode = AceType::DynamicCast<FrameNode>(buildNodeFunc());
+        CHECK_NULL_VOID(overlayNode);
+        frameNode->SetOverlayNode(overlayNode);
+        overlayNode->SetParent(AceType::WeakClaim(frameNode));
+        overlayNode->SetActive(true);
         overlayNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
         auto layoutProperty = AceType::DynamicCast<LayoutProperty>(overlayNode->GetLayoutProperty());
         CHECK_NULL_VOID(layoutProperty);
@@ -2924,6 +2929,15 @@ void ViewAbstract::SetSharedTransition(
 void ViewAbstract::SetTransition(FrameNode* frameNode, const TransitionOptions& options)
 {
     ACE_UPDATE_NODE_RENDER_CONTEXT(Transition, options, frameNode);
+}
+
+void ViewAbstract::CleanTransition(FrameNode* frameNode)
+{
+    CHECK_NULL_VOID(frameNode);
+    const auto& renderContext = frameNode->GetRenderContext();
+    if (renderContext) {
+        renderContext->CleanTransition();
+    }
 }
 
 void ViewAbstract::SetChainedTransition(FrameNode* frameNode, const RefPtr<NG::ChainedTransitionEffect>& effect)

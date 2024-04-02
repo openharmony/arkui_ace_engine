@@ -1517,7 +1517,7 @@ RefPtr<CanvasPath2D> JsiCanvasBridge::GetPath2D(const shared_ptr<JsRuntime>& run
 {
     if (!runtime || !value) {
         LOGE("runtime or value is null.");
-        return 0;
+        return nullptr;
     }
     auto nodeId = value->GetProperty(runtime, "__id");
     if (nodeId && nodeId->IsInt32(runtime)) {

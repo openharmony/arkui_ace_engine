@@ -652,11 +652,14 @@ void EnvelopedDragData(DragControllerAsyncCtx* asyncCtx, std::optional<Msdp::Dev
     std::vector<Msdp::DeviceStatus::ShadowInfo> shadowInfos;
     GetShadowInfoArray(asyncCtx, shadowInfos);
     if (shadowInfos.empty()) {
-        NapiThrow(asyncCtx->env, "parsing shadowInfo array is empty", ERROR_CODE_PARAM_INVALID);
+        TAG_LOGE(AceLogTag::ACE_DRAG, "shadowInfo array is empty");
         return;
     }
     if (!JudgeCoordinateCanDrag(shadowInfos[0])) {
-        NapiThrow(asyncCtx->env, "touchPoint's coordinate out of range", ERROR_CODE_PARAM_INVALID);
+        napi_handle_scope scope = nullptr;
+        napi_open_handle_scope(asyncCtx->env, &scope);
+        HandleFail(asyncCtx, ERROR_CODE_PARAM_INVALID, "touchPoint's coordinate out of range");
+        napi_close_handle_scope(asyncCtx->env, scope);
         return;
     }
     auto pointerId = asyncCtx->pointerId;
@@ -686,7 +689,10 @@ void StartDragService(DragControllerAsyncCtx* asyncCtx)
     std::optional<Msdp::DeviceStatus::DragData> dragData;
     EnvelopedDragData(asyncCtx, dragData);
     if (!dragData) {
-        NapiThrow(asyncCtx->env, "did not has any drag data.", ERROR_CODE_PARAM_INVALID);
+        napi_handle_scope scope = nullptr;
+        napi_open_handle_scope(asyncCtx->env, &scope);
+        HandleFail(asyncCtx, ERROR_CODE_PARAM_INVALID, "did not has any drag data.");
+        napi_close_handle_scope(asyncCtx->env, scope);
         return;
     }
     OnDragCallback callback = [asyncCtx](const DragNotifyMsg& dragNotifyMsg) {
@@ -743,7 +749,10 @@ void OnMultipleComplete(DragControllerAsyncCtx* asyncCtx)
                 dragState = asyncCtx->dragState;
             }
             if (dragState == DragState::REJECT) {
-                NapiThrow(asyncCtx->env, "drag state is reject.", ERROR_CODE_INTERNAL_ERROR);
+                napi_handle_scope scope = nullptr;
+                napi_open_handle_scope(asyncCtx->env, &scope);
+                HandleFail(asyncCtx, ERROR_CODE_INTERNAL_ERROR, "drag state is reject.");
+                napi_close_handle_scope(asyncCtx->env, scope);
                 return;
             }
             StartDragService(asyncCtx);
@@ -774,7 +783,10 @@ void OnComplete(DragControllerAsyncCtx* asyncCtx)
                 dragState = asyncCtx->dragState;
             }
             if (dragState == DragState::REJECT) {
-                NapiThrow(asyncCtx->env, "drag state is reject.", ERROR_CODE_INTERNAL_ERROR);
+                napi_handle_scope scope = nullptr;
+                napi_open_handle_scope(asyncCtx->env, &scope);
+                HandleFail(asyncCtx, ERROR_CODE_INTERNAL_ERROR, "drag state is reject.");
+                napi_close_handle_scope(asyncCtx->env, scope);
                 return;
             }
             CHECK_NULL_VOID(asyncCtx->pixelMap);
@@ -803,7 +815,10 @@ void OnComplete(DragControllerAsyncCtx* asyncCtx)
                 x = -width * PIXELMAP_WIDTH_RATE;
                 y = -height * PIXELMAP_HEIGHT_RATE;
             } else if (x < 0 || y < 0 || x > static_cast<double>(width) || y > static_cast<double>(height)) {
-                NapiThrow(asyncCtx->env, "touchPoint's coordinate out of range", ERROR_CODE_PARAM_INVALID);
+                napi_handle_scope scope = nullptr;
+                napi_open_handle_scope(asyncCtx->env, &scope);
+                HandleFail(asyncCtx, ERROR_CODE_PARAM_INVALID, "touchPoint's coordinate out of range");
+                napi_close_handle_scope(asyncCtx->env, scope);
                 return;
             }
             auto container = AceEngine::Get().GetContainer(asyncCtx->instanceId);
@@ -1232,7 +1247,7 @@ bool ConfirmCurPointerEventInfo(DragControllerAsyncCtx *asyncCtx, const RefPtr<C
                     CHECK_NULL_VOID(asyncCtx);
                     napi_handle_scope scope = nullptr;
                     napi_open_handle_scope(asyncCtx->env, &scope);
-                    NapiThrow(asyncCtx->env, "drag state error, stop drag.", ERROR_CODE_INTERNAL_ERROR);
+                    HandleFail(asyncCtx, ERROR_CODE_INTERNAL_ERROR, "drag state error, stop drag.");
                     napi_close_handle_scope(asyncCtx->env, scope);
                     TAG_LOGI(AceLogTag::ACE_DRAG,
                         "drag state is reject, stop drag, windowId is %{public}d.", windowId);

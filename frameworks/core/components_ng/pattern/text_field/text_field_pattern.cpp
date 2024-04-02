@@ -473,6 +473,7 @@ bool TextFieldPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dir
 void TextFieldPattern::ProcessOverlayAfterLayout(bool isGlobalAreaChanged)
 {
     if (processOverlayDelayTask_) {
+        CHECK_NULL_VOID(HasFocus());
         processOverlayDelayTask_();
         processOverlayDelayTask_ = nullptr;
         return;
@@ -1181,11 +1182,11 @@ void TextFieldPattern::HandleOnCopy(bool isUsingExternalKeyboard)
         clipboard_->SetData(value, layoutProperty->GetCopyOptionsValue(CopyOptions::Distributed));
     }
 
-    if (!IsUsingMouse() && !isUsingExternalKeyboard) {
-        selectController_->MoveCaretToContentRect(selectController_->GetSecondHandleIndex(), TextAffinity::UPSTREAM);
-        StartTwinkling();
+    if (!isUsingExternalKeyboard) {
+        selectOverlay_->HideMenu();
+    } else {
+        CloseSelectOverlay(true);
     }
-    CloseSelectOverlay(true);
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto eventHub = host->GetEventHub<TextFieldEventHub>();
@@ -1741,12 +1742,13 @@ void TextFieldPattern::InitDragDropCallBack()
             CHECK_NULL_VOID(paintProperty);
             auto newDragValue =
                 pattern->contentController_->GetSelectedValue(pattern->dragTextStart_, pattern->dragTextEnd_);
+            auto focusHub = pattern->GetFocusHub();
+            CHECK_NULL_VOID(focusHub);
             if (event != nullptr && event->GetResult() != DragRet::DRAG_SUCCESS &&
                 newDragValue == pattern->dragValue_ &&
-                paintProperty->GetInputStyleValue(InputStyle::DEFAULT) != InputStyle::INLINE) {
+                paintProperty->GetInputStyleValue(InputStyle::DEFAULT) != InputStyle::INLINE &&
+                focusHub->IsFocusable()) {
                 pattern->ShowSelectAfterDragEvent();
-                auto focusHub = pattern->GetFocusHub();
-                CHECK_NULL_VOID(focusHub);
                 focusHub->RequestFocusImmediately();
             }
             host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
@@ -4162,7 +4164,7 @@ void TextFieldPattern::OnAreaChangedInner()
 void TextFieldPattern::HandleParentGlobalOffsetChange()
 {
     selectController_->CalculateHandleOffset();
-    CHECK_NULL_VOID(SelectOverlayIsOn());
+    CHECK_NULL_VOID(SelectOverlayIsOn() || selectOverlay_->SelectOverlayIsCreating());
     if (selectOverlay_->IsShowMouseMenu()) {
         CloseSelectOverlay();
     } else {
@@ -4608,17 +4610,16 @@ void TextFieldPattern::SetSelectionFlag(
         NotifyOnEditChanged(true);
     }
 
-    if (options.has_value()) {
-        if (options.value().menuPolicy == MenuPolicy::ALWAYS) {
-            if (IsShowHandle()) {
-                SetIsSingleHandle(!IsSelected());
-                ProcessOverlay({ .menuIsShow = true, .animation = true });
-            } else {
-                CloseSelectOverlay(true);
-            }
-        } else if (options.value().menuPolicy == MenuPolicy::NEVER) {
-            CloseSelectOverlay(true);
-        }
+    SetIsSingleHandle(!IsSelected());
+    selectOverlay_->SetUsingMouse(false);
+    if (!IsShowHandle()) {
+        CloseSelectOverlay(true);
+    } else if (!options.has_value() || options.value().menuPolicy == MenuPolicy::DEFAULT) {
+        ProcessOverlay({ .menuIsShow = selectOverlay_->IsCurrentMenuVisibile(), .animation = true });
+    } else if (options.value().menuPolicy == MenuPolicy::NEVER) {
+        ProcessOverlay({ .menuIsShow = false, .animation = true });
+    } else if (options.value().menuPolicy == MenuPolicy::ALWAYS) {
+        ProcessOverlay({ .menuIsShow = true, .animation = true });
     }
     auto host = GetHost();
     CHECK_NULL_VOID(host);
@@ -5950,10 +5951,12 @@ bool TextFieldPattern::CheckAutoSave()
             return true;
         }
     }
-    if (AceAutoFillType::ACE_UNSPECIFIED < autoFillType && autoFillType <= AceAutoFillType::ACE_YEAR)
+    if (AceAutoFillType::ACE_UNSPECIFIED < autoFillType && autoFillType <= AceAutoFillType::ACE_YEAR &&
+        autoFillType != AceAutoFillType::ACE_USER_NAME) {
         if (contentController_->GetTextValue() != lastAutoFillPasswordTextValue_) {
             return true;
         }
+    }
     return false;
 }
 
@@ -6442,7 +6445,7 @@ void TextFieldPattern::OnVirtualKeyboardAreaChanged()
 {
     CHECK_NULL_VOID(SelectOverlayIsOn());
     selectController_->CalculateHandleOffset();
-    ProcessOverlay();
+    ProcessOverlay({ .menuIsShow = false });
 }
 
 void TextFieldPattern::PasswordResponseKeyEvent()

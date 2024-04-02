@@ -219,6 +219,8 @@ void PipelineContext::FlushPipelineWithoutAnimation() {}
 
 void PipelineContext::FlushFocus() {}
 
+void PipelineContext::FlushOnceVsyncTask() {}
+
 void PipelineContext::DispatchDisplaySync(uint64_t nanoTimestamp) {}
 
 void PipelineContext::FlushAnimation(uint64_t nanoTimestamp) {}

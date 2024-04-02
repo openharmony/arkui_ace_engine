@@ -1197,4 +1197,14 @@ void UINode::GetPageNodeCountAndDepth(int32_t* count, int32_t* depth)
         child->GetPageNodeCountAndDepth(count, depth);
     }
 }
+
+void UINode::DFSAllChild(const RefPtr<UINode>& root, std::vector<RefPtr<UINode>>& res)
+{
+    if (root->GetChildren().empty()) {
+        res.emplace_back(root);
+    }
+    for (const auto& child : root->GetChildren()) {
+        DFSAllChild(child, res);
+    }
+}
 } // namespace OHOS::Ace::NG

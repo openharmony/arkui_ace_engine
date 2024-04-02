@@ -124,7 +124,7 @@ class ArkShapeComponent extends ArkCommonShapeComponent implements ShapeAttribut
 }
 
 // @ts-ignore
-globalThis.Shape.attributeModifier = function (modifier: ArkComponent) {
+globalThis.Shape.attributeModifier = function (modifier: ArkComponent): void {
   attributeModifierFunc.call(this, modifier, (nativePtr: KNode) => {
     return new ArkShapeComponent(nativePtr);
   }, (nativePtr: KNode, classType: ModifierType, modifierJS: ModifierJS) => {

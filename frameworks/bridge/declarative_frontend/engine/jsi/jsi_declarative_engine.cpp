@@ -75,17 +75,14 @@ extern const char _binary_jsMockSystemPlugin_abc_end[];
 #endif
 extern const char _binary_stateMgmt_abc_start[];
 extern const char _binary_jsEnumStyle_abc_start[];
-extern const char _binary_jsUIContext_abc_start[];
 extern const char _binary_arkComponent_abc_start[];
 #if !defined(IOS_PLATFORM)
 extern const char _binary_stateMgmt_abc_end[];
 extern const char _binary_jsEnumStyle_abc_end[];
-extern const char _binary_jsUIContext_abc_end[];
 extern const char _binary_arkComponent_abc_end[];
 #else
 extern const char* _binary_stateMgmt_abc_end;
 extern const char* _binary_jsEnumStyle_abc_end;
-extern const char* _binary_jsUIContext_abc_end;
 extern const char* _binary_arkComponent_abc_end;
 #endif
 
@@ -175,13 +172,6 @@ inline bool PreloadStateManagement(const shared_ptr<JsRuntime>& runtime)
 {
     uint8_t* codeStart = (uint8_t*)_binary_stateMgmt_abc_start;
     int32_t codeLength = _binary_stateMgmt_abc_end - _binary_stateMgmt_abc_start;
-    return runtime->EvaluateJsCode(codeStart, codeLength);
-}
-
-inline bool PreloadUIContent(const shared_ptr<JsRuntime>& runtime)
-{
-    uint8_t* codeStart = const_cast<uint8_t*>(reinterpret_cast<const uint8_t*>(_binary_jsUIContext_abc_start));
-    int32_t codeLength = _binary_jsUIContext_abc_end - _binary_jsUIContext_abc_start;
     return runtime->EvaluateJsCode(codeStart, codeLength);
 }
 
@@ -376,7 +366,6 @@ void JsiDeclarativeEngineInstance::InitJsObject()
             PreloadExports(runtime_, global);
             PreloadRequireNative(runtime_, global);
             PreloadStateManagement(runtime_);
-            PreloadUIContent(runtime_);
             PreloadArkComponent(runtime_);
         }
     }
@@ -403,7 +392,6 @@ void JsiDeclarativeEngineInstance::InitAceModule()
         PreloadStateManagement(runtime_);
         PreloadJsEnums(runtime_);
         PreloadArkComponent(runtime_);
-        PreloadUIContent(runtime_);
     }
 #if defined(PREVIEW)
     std::string jsMockSystemPluginString(_binary_jsMockSystemPlugin_abc_start,
@@ -518,8 +506,6 @@ void JsiDeclarativeEngineInstance::PreloadAceModule(void* runtime)
     }
 
     bool evalResult = PreloadStateManagement(arkRuntime);
-
-    PreloadUIContent(arkRuntime);
 
     // preload ark component
     bool arkComponentResult = PreloadArkComponent(arkRuntime);
@@ -840,6 +826,23 @@ shared_ptr<JsValue> JsiDeclarativeEngineInstance::CallGetUIContextFunc(
     return retVal;
 }
 
+shared_ptr<JsValue> JsiDeclarativeEngineInstance::CallGetFrameNodeByNodeIdFunc(
+    const shared_ptr<JsRuntime>& runtime, const std::vector<shared_ptr<JsValue>>& argv)
+{
+    shared_ptr<JsValue> global = runtime->GetGlobal();
+    shared_ptr<JsValue> func = global->GetProperty(runtime, "__getFrameNodeByNodeId__");
+    if (!func->IsFunction(runtime)) {
+        return nullptr;
+    }
+
+    shared_ptr<JsValue> retVal = func->Call(runtime, global, argv, argv.size());
+    if (!retVal) {
+        return nullptr;
+    }
+
+    return retVal;
+}
+
 void JsiDeclarativeEngineInstance::PostJsTask(const shared_ptr<JsRuntime>& runtime, std::function<void()>&& task)
 {
     if (runtime == nullptr) {
@@ -924,6 +927,32 @@ napi_value JsiDeclarativeEngineInstance::GetContextValue()
         return nullptr;
     }
     auto arkJSValue = std::static_pointer_cast<ArkJSValue>(uiContext_);
+    if (!arkJSValue) {
+        return nullptr;
+    }
+    auto arkNativeEngine = static_cast<ArkNativeEngine*>(GetNativeEngine());
+    if (!arkNativeEngine) {
+        return nullptr;
+    }
+    napi_value napiValue = ArkNativeEngine::ArkValueToNapiValue(
+        reinterpret_cast<napi_env>(GetNativeEngine()), arkJSValue->GetValue(arkJSRuntime));
+
+    return napiValue;
+}
+
+napi_value JsiDeclarativeEngineInstance::GetFrameNodeValueByNodeId(int32_t nodeId)
+{
+    auto runtime = GetJsRuntime();
+
+    // obtain frameNode instance
+    std::vector<shared_ptr<JsValue>> argv = { runtime->NewNumber(instanceId_), runtime->NewNumber(nodeId) };
+    shared_ptr<JsValue> frameNode = CallGetFrameNodeByNodeIdFunc(runtime, argv);
+
+    auto arkJSRuntime = std::static_pointer_cast<ArkJSRuntime>(runtime);
+    if (!arkJSRuntime) {
+        return nullptr;
+    }
+    auto arkJSValue = std::static_pointer_cast<ArkJSValue>(frameNode);
     if (!arkJSValue) {
         return nullptr;
     }

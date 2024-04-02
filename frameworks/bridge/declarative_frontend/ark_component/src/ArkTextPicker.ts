@@ -229,7 +229,7 @@ class TextpickerDefaultPickerItemHeightModifier extends ModifierWithKey<number |
 }
 
 // @ts-ignore
-globalThis.TextPicker.attributeModifier = function (modifier: ArkComponent) {
+globalThis.TextPicker.attributeModifier = function (modifier: ArkComponent): void {
   attributeModifierFunc.call(this, modifier, (nativePtr: KNode) => {
     return new ArkTextPickerComponent(nativePtr);
   }, (nativePtr: KNode, classType: ModifierType, modifierJS: ModifierJS) => {

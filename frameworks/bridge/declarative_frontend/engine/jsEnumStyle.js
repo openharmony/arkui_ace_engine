@@ -12,6 +12,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+/* Load the UIContext module. */
+const UIContext = requireNapi("arkui.uicontext")
 
 /* If a new value is added, add it from the end. */
 var Color;
@@ -1497,7 +1499,7 @@ class ProgressMask {
     return this;
   }
 
-  enableBreathe(arg) {
+  enableBreathingAnimation(arg) {
     this.breathe = arg;
     return this;
   }
@@ -1792,6 +1794,14 @@ class NavPathStack {
     this.parentStack = undefined;
     this.popArray = [];
     this.interception = undefined;
+  }
+  getJsIndexFromNativeIndex(index) {
+    for (let i = 0; i < this.pathArray.length; i++) {
+      if (this.pathArray[i].index === index) {
+        return i;
+      }
+    }
+    return -1;
   }
   initNavPathIndex() {
     this.popArray = [];

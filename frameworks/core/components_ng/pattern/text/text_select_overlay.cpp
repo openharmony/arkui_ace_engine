@@ -38,6 +38,7 @@ bool TextSelectOverlay::PreProcessOverlay(const OverlayRequest& request)
     auto host = textPattern->GetHost();
     CHECK_NULL_RETURN(host, false);
     pipeline->AddOnAreaChangeNode(host->GetId());
+    textPattern->CalculateHandleOffsetAndShowOverlay();
     return true;
 }
 
@@ -69,7 +70,7 @@ bool TextSelectOverlay::CheckHandleVisible(const RectF& paintRect)
     CHECK_NULL_RETURN(host, false);
     auto renderContext = host->GetRenderContext();
     CHECK_NULL_RETURN(renderContext, false);
-    if (!renderContext->GetClipEdge().value_or(true)) {
+    if (!renderContext->GetClipEdge().value_or(false)) {
         return true;
     }
     auto contentRect = textPattern->GetTextContentRect();
@@ -111,7 +112,7 @@ void TextSelectOverlay::OnHandleMove(const RectF& handleRect, bool isFirst)
     auto contentRect = textPattern->GetTextContentRect();
     auto contentOffset = textPattern->GetTextPaintOffset() + contentRect.GetOffset();
     auto handleOffset = handleRect.GetOffset();
-    if (renderContext->GetClipEdge().value_or(true)) {
+    if (renderContext->GetClipEdge().value_or(false)) {
         handleOffset.SetX(
             std::clamp(handleOffset.GetX(), contentOffset.GetX(), contentOffset.GetX() + contentRect.Width()));
         handleOffset.SetY(

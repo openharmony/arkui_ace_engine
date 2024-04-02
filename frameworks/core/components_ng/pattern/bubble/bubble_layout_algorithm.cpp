@@ -503,16 +503,12 @@ void BubbleLayoutAlgorithm::InitProps(const RefPtr<BubbleLayoutProperty>& layout
     CHECK_NULL_VOID(pipelineContext);
     auto safeAreaManager = pipelineContext->GetSafeAreaManager();
     CHECK_NULL_VOID(safeAreaManager);
-    top_ = safeAreaManager->GetSystemSafeArea().top_.Length();
-    bottom_ = safeAreaManager->GetSystemSafeArea().bottom_.Length();
+    top_ = safeAreaManager->GetSafeAreaWithoutProcess().top_.Length();
+    bottom_ = safeAreaManager->GetSafeAreaWithoutProcess().bottom_.Length();
     marginStart_ = MARGIN_SPACE.ConvertToPx() + DRAW_EDGES_SPACE.ConvertToPx();
     marginEnd_ = MARGIN_SPACE.ConvertToPx() + DRAW_EDGES_SPACE.ConvertToPx();
     marginTop_ = top_ + DRAW_EDGES_SPACE.ConvertToPx();
-    if (showInSubWindow) {
-        marginBottom_ = bottom_ + DRAW_EDGES_SPACE.ConvertToPx();
-    } else {
-        marginBottom_ = DRAW_EDGES_SPACE.ConvertToPx();
-    }
+    marginBottom_ = bottom_ + DRAW_EDGES_SPACE.ConvertToPx();
     showArrow_ = false;
 }
 

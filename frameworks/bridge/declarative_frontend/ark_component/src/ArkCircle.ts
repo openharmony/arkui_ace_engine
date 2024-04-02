@@ -21,7 +21,7 @@ class ArkCircleComponent extends ArkCommonShapeComponent implements CircleAttrib
 }
 
 // @ts-ignore
-globalThis.Circle.attributeModifier = function (modifier: ArkComponent) {
+globalThis.Circle.attributeModifier = function (modifier: ArkComponent): void {
   attributeModifierFunc.call(this, modifier, (nativePtr: KNode) => {
     return new ArkCircleComponent(nativePtr);
   }, (nativePtr: KNode, classType: ModifierType, modifierJS: ModifierJS) => {

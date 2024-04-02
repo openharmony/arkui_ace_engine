@@ -240,7 +240,7 @@ HWTEST_F(SwiperLayoutTestNg, SwiperChangeWidth001, TestSize.Level1)
             model.SetNextMargin(Dimension(20));
         },
         5);
-    EXPECT_EQ(pattern_->itemPosition_.size(), 4);
+    EXPECT_EQ(pattern_->itemPosition_.size(), 5);
 
     pattern_->SwipeToWithoutAnimation(1);
     FlushLayoutTask(frameNode_);

@@ -1557,7 +1557,7 @@ void RichEditorPattern::HandleSingleClickEvent(OHOS::Ace::GestureEvent& info)
     if (!isMousePressed_) {
         HandleClickAISpanEvent(PointF(textOffset.GetX(), textOffset.GetY()));
     }
-    if (dataDetectorAdapter_->hasClickedAISpan_) {
+    if (dataDetectorAdapter_->hasClickedAISpan_ || dataDetectorAdapter_->pressedByLeftMouse_) {
         if (selectOverlayProxy_ && !selectOverlayProxy_->IsClosed()) {
             selectOverlayProxy_->DisableMenu(true);
         }
@@ -2269,9 +2269,11 @@ void RichEditorPattern::OnDragMove(const RefPtr<OHOS::Ace::DragEvent>& event)
     auto position = paragraphs_.GetIndex(textOffset);
     float caretHeight = 0.0f;
     SetCaretPosition(position);
-    OffsetF caretOffset = CalcCursorOffsetByPosition(GetCaretPosition(), caretHeight);
+    OffsetF lastTouchOffset = { static_cast<float>(textOffset.GetX()), static_cast<float>(textOffset.GetY()) };
+    OffsetF caretOffset = paragraphs_.ComputeCursorInfoByClick(position, caretHeight, lastTouchOffset);
     CHECK_NULL_VOID(overlayMod_);
-    DynamicCast<RichEditorOverlayModifier>(overlayMod_)->SetCaretOffsetAndHeight(caretOffset, caretHeight);
+    auto overlayModifier = DynamicCast<RichEditorOverlayModifier>(overlayMod_);
+    overlayModifier->SetCaretOffsetAndHeight(caretOffset + textRect.GetOffset(), caretHeight);
 
     AutoScrollParam param = { .autoScrollEvent = AutoScrollEvent::DRAG, .showScrollbar = true };
     auto localOffset = OffsetF(touchX, touchY) - parentGlobalOffset_;
@@ -3926,6 +3928,7 @@ int32_t RichEditorPattern::DeleteValueSetTextSpan(
     }
     spanResult.SetColor(spanItem->GetTextStyle()->GetTextDecorationColor().ColorToString());
     spanResult.SetTextDecoration(spanItem->GetTextStyle()->GetTextDecoration());
+    spanResult.SetFontFeature(spanItem->GetTextStyle()->GetFontFeatures());
     auto host = GetHost();
     CHECK_NULL_RETURN(host, eraseLength);
     auto uiNode = host->GetChildAtIndex(spanResult.GetSpanIndex());
@@ -6189,6 +6192,19 @@ Color RichEditorPattern::GetSelectedBackgroundColor()
 
 void RichEditorPattern::HandleOnDragDrop(const RefPtr<OHOS::Ace::DragEvent>& event)
 {
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto eventHub = host->GetEventHub<RichEditorEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    TextCommonEvent textCommonEvent;
+    eventHub->FireOnPaste(textCommonEvent);
+    if (textCommonEvent.IsPreventDefault()) {
+        CloseSelectOverlay();
+        ResetSelection();
+        StartTwinkling();
+        return;
+    }
+
     auto data = event->GetData();
     CHECK_NULL_VOID(data);
 
@@ -6234,10 +6250,31 @@ void RichEditorPattern::DeleteForward(int32_t currentPosition, int32_t length)
     DeleteByDeleteValueInfo(info);
 }
 
+int32_t RichEditorPattern::HandleOnDragDeleteForward()
+{
+    int32_t allDelLength = 0;
+    SelectionInfo textSelectInfo = GetSpansInfo(dragRange_.first, dragRange_.second, GetSpansMethod::ONSELECT);
+    std::list<ResultObject> dragResultObjects = textSelectInfo.GetSelection().resultObjects;
+    for (auto ri = dragResultObjects.rbegin(); ri != dragResultObjects.rend(); ++ri) {
+        if (SelectSpanType::TYPESPAN == ri->type || SelectSpanType::TYPEIMAGE == ri->type) {
+            int32_t spanStart = ri->offsetInSpan[RichEditorSpanRange::RANGESTART];
+            int32_t spanEnd = ri->offsetInSpan[RichEditorSpanRange::RANGEEND];
+            int32_t reStart = ri->spanPosition.spanRange[RichEditorSpanRange::RANGESTART];
+            int32_t delStart = reStart;
+            if (spanStart > 0) {
+                delStart += spanStart;
+            }
+            int32_t delLength = spanEnd - spanStart;
+            DeleteForward(delStart, delLength);
+            allDelLength += delLength;
+        }
+    }
+    return allDelLength;
+}
+
 void RichEditorPattern::HandleOnDragDropTextOperation(const std::string& insertValue)
 {
     int32_t currentPosition = caretPosition_;
-    int32_t length = dragRange_.second - dragRange_.first;
     int32_t strLength = static_cast<int32_t>(StringUtils::ToWstring(insertValue).length());
     OperationRecord record;
     record.addText = insertValue;
@@ -6246,12 +6283,14 @@ void RichEditorPattern::HandleOnDragDropTextOperation(const std::string& insertV
     CHECK_NULL_VOID(BeforeChangeText(changeValue, record, RecordType::DRAG));
     if (currentPosition < dragRange_.first) {
         HandleOnDragInsertValue(insertValue);
-        DeleteForward(dragRange_.first + strLength, length);
+        dragRange_.first += strLength;
+        dragRange_.second += strLength;
+        HandleOnDragDeleteForward();
         caretPosition_ += strLength;
     } else if (currentPosition > dragRange_.second) {
         HandleOnDragInsertValue(insertValue);
-        DeleteForward(dragRange_.first, length);
-        caretPosition_ -= (length - strLength);
+        int32_t delLength = HandleOnDragDeleteForward();
+        caretPosition_ -= (delLength - strLength);
     }
     AfterChangeText(changeValue);
 }

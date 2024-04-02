@@ -94,6 +94,23 @@ class TextAreaLineHeightModifier extends ModifierWithKey<number | string | Resou
   }
 }
 
+class TextAreaWordBreakModifier extends ModifierWithKey<WordBreak> {
+  constructor(value: WordBreak) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('textInputWordBreak');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().text.resetWordBreak(node);
+    } else {
+      getUINativeModule().text.setWordBreak(node, this.value!);
+    }
+  }
+  checkObjectDiff(): boolean {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+
 class TextAreaCopyOptionModifier extends ModifierWithKey<CopyOptions> {
   constructor(value: CopyOptions) {
     super(value);
@@ -517,9 +534,13 @@ class ArkTextAreaComponent extends ArkComponent implements CommonMethod<TextArea
     modifierWithKey(this._modifiersWithKeys, TextAreaLineHeightModifier.identity, TextAreaLineHeightModifier, value);
     return this;
   }
+  wordBreak(value: WordBreak): this {
+    modifierWithKey(this._modifiersWithKeys, TextAreaWordBreakModifier.identity, TextAreaWordBreakModifier, value);
+    return this;
+  }
 }
 // @ts-ignore
-globalThis.TextArea.attributeModifier = function (modifier: ArkComponent) {
+globalThis.TextArea.attributeModifier = function (modifier: ArkComponent): void {
   attributeModifierFunc.call(this, modifier, (nativePtr: KNode) => {
     return new ArkTextAreaComponent(nativePtr);
   }, (nativePtr: KNode, classType: ModifierType, modifierJS: ModifierJS) => {

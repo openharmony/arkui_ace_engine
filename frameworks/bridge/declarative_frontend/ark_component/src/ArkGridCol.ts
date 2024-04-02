@@ -133,7 +133,7 @@ class ArkGridColComponent extends ArkComponent implements GridColAttribute {
 }
 
 // @ts-ignore
-globalThis.GridCol.attributeModifier = function (modifier: ArkComponent) {
+globalThis.GridCol.attributeModifier = function (modifier: ArkComponent): void {
   attributeModifierFunc.call(this, modifier, (nativePtr: KNode) => {
     return new ArkGridColComponent(nativePtr);
   }, (nativePtr: KNode, classType: ModifierType, modifierJS: ModifierJS) => {

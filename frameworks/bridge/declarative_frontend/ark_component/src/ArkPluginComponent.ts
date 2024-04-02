@@ -103,7 +103,7 @@ class PluginSizeModifier extends ModifierWithKey<SizeOptions> {
 }
 
 // @ts-ignore
-globalThis.PluginComponent.attributeModifier = function (modifier: ArkComponent) {
+globalThis.PluginComponent.attributeModifier = function (modifier: ArkComponent): void {
   attributeModifierFunc.call(this, modifier, (nativePtr: KNode) => {
     return new ArkPluginComponent(nativePtr);
   }, (nativePtr: KNode, classType: ModifierType, modifierJS: ModifierJS) => {

@@ -66,7 +66,7 @@ class PolylinePointsModifier extends ModifierWithKey<Array<any>> {
 }
 
 // @ts-ignore
-globalThis.Polyline.attributeModifier = function (modifier: ArkComponent) {
+globalThis.Polyline.attributeModifier = function (modifier: ArkComponent): void {
   attributeModifierFunc.call(this, modifier, (nativePtr: KNode) => {
     return new ArkPolylineComponent(nativePtr);
   }, (nativePtr: KNode, classType: ModifierType, modifierJS: ModifierJS) => {

@@ -1963,4 +1963,36 @@ HWTEST_F(XComponentTestNg, XComponentSourceTypeTest, TestSize.Level1)
             static_cast<int>(ConvertNativeXComponentEventSourceType(sourceType)));
     }
 }
+
+/**
+ * @tc.name: XComponentImageAnalyzerTest
+ * @tc.desc: Test Enable Image Analyzer
+ * @tc.type: FUNC
+ */
+HWTEST_F(XComponentTestNg, XComponentImageAnalyzerTest, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. set type = XCOMPONENT_SURFACE_TYPE and call CreateXComponentNode
+     * @tc.expected: xcomponent frameNode create successfully
+     */
+    testProperty.xcType = XCOMPONENT_SURFACE_TYPE_VALUE;
+    auto frameNode = CreateXComponentNode(testProperty);
+    ASSERT_TRUE(frameNode);
+    auto pattern = frameNode->GetPattern<XComponentPattern>();
+    ASSERT_TRUE(pattern);
+
+    /**
+     * @tc.steps: step2. call EnableImageAnalyzer
+     * @tc.expected: IsSupportImageAnalyzerFeature() return right value
+     */
+    pattern->EnableAnalyzer(true);
+    EXPECT_TRUE(pattern->IsSupportImageAnalyzerFeature());
+
+    pattern->EnableAnalyzer(false);
+    EXPECT_FALSE(pattern->IsSupportImageAnalyzerFeature());
+
+    pattern->EnableAnalyzer(true);
+    pattern->imageAnalyzerManager_ = nullptr;
+    EXPECT_FALSE(pattern->IsSupportImageAnalyzerFeature());
+}
 } // namespace OHOS::Ace::NG

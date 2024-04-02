@@ -15,6 +15,7 @@
 
 #include "bridge/declarative_frontend/jsview/js_view_context.h"
 
+#include <algorithm>
 #include <functional>
 #include <memory>
 #include <sstream>
@@ -126,6 +127,7 @@ void AnimateToForStageMode(const RefPtr<PipelineBase>& pipelineContext, Animatio
     pipelineContext->SetSyncAnimationOption(option);
     // Execute the function.
     jsAnimateToFunc->Call(jsAnimateToFunc);
+    pipelineContext->FlushOnceVsyncTask();
     AceEngine::Get().NotifyContainers([triggerId](const RefPtr<Container>& container) {
         auto context = container->GetPipelineContext();
         if (!context) {
@@ -605,6 +607,23 @@ void JSViewContext::JSKeyframeAnimateTo(const JSCallbackInfo& info)
     pipelineContext->CloseImplicitAnimation();
 }
 
+void JSViewContext::SetDynamicDimming(const JSCallbackInfo& info)
+{
+    EcmaVM* vm = info.GetVm();
+    CHECK_NULL_VOID(vm);
+    auto jsTargetNode = info[0];
+    auto jsDimming = info[1];
+    auto* targetNodePtr = jsTargetNode->GetLocalHandle()->ToNativePointer(vm)->Value();
+    auto* frameNode = reinterpret_cast<NG::FrameNode*>(targetNodePtr);
+    CHECK_NULL_VOID(frameNode);
+    if (!info[1]->IsNumber()) {
+        return;
+    }
+    float dimming = info[1]->ToNumber<float>();
+    RefPtr<Ace::NG::RenderContext> renderContext = frameNode->GetRenderContext();
+    renderContext->OnDynamicDimDegreeUpdate(std::clamp(dimming, 0.0f, 1.0f));
+}
+
 void JSViewContext::JSBind(BindingTarget globalObj)
 {
     JSClass<JSViewContext>::Declare("Context");
@@ -612,6 +631,7 @@ void JSViewContext::JSBind(BindingTarget globalObj)
     JSClass<JSViewContext>::StaticMethod("animateTo", JSAnimateTo);
     JSClass<JSViewContext>::StaticMethod("animateToImmediately", JSAnimateToImmediately);
     JSClass<JSViewContext>::StaticMethod("keyframeAnimateTo", JSKeyframeAnimateTo);
+    JSClass<JSViewContext>::StaticMethod("setDynamicDimming", SetDynamicDimming);
     JSClass<JSViewContext>::Bind<>(globalObj);
 }
 

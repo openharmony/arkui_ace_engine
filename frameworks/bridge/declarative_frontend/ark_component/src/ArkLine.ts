@@ -66,7 +66,7 @@ class LineEndPointModifier extends ModifierWithKey<object> {
 }
 
 // @ts-ignore
-globalThis.Line.attributeModifier = function (modifier: ArkComponent) {
+globalThis.Line.attributeModifier = function (modifier: ArkComponent): void {
   attributeModifierFunc.call(this, modifier, (nativePtr: KNode) => {
     return new ArkLineComponent(nativePtr);
   }, (nativePtr: KNode, classType: ModifierType, modifierJS: ModifierJS) => {

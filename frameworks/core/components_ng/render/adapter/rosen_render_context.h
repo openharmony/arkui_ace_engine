@@ -413,6 +413,7 @@ private:
     void OnFrontColorBlendUpdate(const Color& colorBlend) override;
     void OnLinearGradientBlurUpdate(const NG::LinearGradientBlurPara& blurPara) override;
     void OnDynamicLightUpRateUpdate(const float rate) override;
+    void OnDynamicDimDegreeUpdate(const float degree) override;
     void OnDynamicLightUpDegreeUpdate(const float degree) override;
 
     void OnOverlayTextUpdate(const OverlayOptions& overlay) override;

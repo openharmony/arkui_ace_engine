@@ -3931,6 +3931,9 @@ class ObservedPropertyAbstractPU extends ObservedPropertyAbstract {
                 this.delayedNotification_ = ObservedPropertyAbstractPU.DelayedNotifyChangesEnum.delay_notification_pending;
             }
         }
+        else {
+            stateMgmtConsole.warn(`${this.debugInfo()}: will not notify change, because its owning view is destroyed already`);
+        }
         this.subscriberRefs_.forEach((subscriber) => {
             if (subscriber) {
                 if ('syncPeerHasChanged' in subscriber) {
@@ -5752,7 +5755,7 @@ class ViewPU extends NativeViewPartialUpdate {
             
         }
         let cb = this.watchedProps.get(varName);
-        if (cb) {
+        if (cb && typeof cb === "function") {
             
             cb.call(this, varName);
         }

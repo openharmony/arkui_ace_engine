@@ -93,7 +93,7 @@ class TabContentSizeModifier extends ModifierWithKey<SizeOptions> {
 }
 
 // @ts-ignore
-globalThis.TabContent.attributeModifier = function (modifier: ArkComponent) {
+globalThis.TabContent.attributeModifier = function (modifier: ArkComponent): void {
   attributeModifierFunc.call(this, modifier, (nativePtr: KNode) => {
     return new ArkTabContentComponent(nativePtr);
   }, (nativePtr: KNode, classType: ModifierType, modifierJS: ModifierJS) => {

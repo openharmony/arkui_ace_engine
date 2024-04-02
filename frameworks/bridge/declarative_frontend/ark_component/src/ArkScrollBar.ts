@@ -21,7 +21,7 @@ class ArkScrollBarComponent extends ArkComponent implements ScrollBarAttribute {
 }
 
 // @ts-ignore
-globalThis.ScrollBar.attributeModifier = function (modifier: ArkComponent) {
+globalThis.ScrollBar.attributeModifier = function (modifier: ArkComponent): void {
   attributeModifierFunc.call(this, modifier, (nativePtr: KNode) => {
     return new ArkScrollBarComponent(nativePtr);
   }, (nativePtr: KNode, classType: ModifierType, modifierJS: ModifierJS) => {

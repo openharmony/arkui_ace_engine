@@ -117,7 +117,7 @@ class ArkGridItemComponent extends ArkComponent implements GridItemAttribute {
 }
 
 // @ts-ignore
-globalThis.GridItem.attributeModifier = function (modifier: ArkComponent) {
+globalThis.GridItem.attributeModifier = function (modifier: ArkComponent): void {
   attributeModifierFunc.call(this, modifier, (nativePtr: KNode) => {
     return new ArkGridItemComponent(nativePtr);
   }, (nativePtr: KNode, classType: ModifierType, modifierJS: ModifierJS) => {

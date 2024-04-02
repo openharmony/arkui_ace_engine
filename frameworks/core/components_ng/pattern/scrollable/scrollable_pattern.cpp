@@ -82,7 +82,7 @@ void ScrollablePattern::ToJsonValue(std::unique_ptr<JsonValue>& json) const
     } else {
         json->Put("edgeEffect", "EdgeEffect.None");
     }
-    json->Put("flingSpeedLimit", Dimension(maxFlingVelocity_, DimensionUnit::PX).ToString().c_str());
+    json->Put("flingSpeedLimit", Dimension(maxFlingVelocity_, DimensionUnit::VP).ToString().c_str());
     auto JsonEdgeEffectOptions = JsonUtil::Create(true);
     JsonEdgeEffectOptions->Put("alwaysEnabled", GetAlwaysEnabled());
     json->Put("edgeEffectOptions", JsonEdgeEffectOptions);
@@ -1040,7 +1040,7 @@ void ScrollablePattern::PlaySpringAnimation(float position, float velocity, floa
     auto curve = AceType::MakeRefPtr<InterpolatingSpring>(velocity, mass, stiffness, damping);
     InitOption(option, CUSTOM_ANIMATION_DURATION, curve);
     isAnimationStop_ = false;
-    springOffsetProperty_->Set(GetTotalOffset());
+    AnimationUtils::ExecuteWithoutAnimation([this]() { springOffsetProperty_->Set(GetTotalOffset()); });
     springAnimation_ = AnimationUtils::StartAnimation(
         option,
         [weak = AceType::WeakClaim(this), position]() {
@@ -1054,6 +1054,7 @@ void ScrollablePattern::PlaySpringAnimation(float position, float velocity, floa
             CHECK_NULL_VOID(pattern);
             pattern->NotifyFRCSceneInfo(SCROLLABLE_MULTI_TASK_SCENE, pattern->GetCurrentVelocity(),
                 SceneStatus::END);
+            pattern->SetScrollEdgeType(ScrollEdgeType::SCROLL_NONE);
     });
     NotifyFRCSceneInfo(SCROLLABLE_MULTI_TASK_SCENE, GetCurrentVelocity(), SceneStatus::START);
 }

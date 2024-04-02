@@ -329,7 +329,7 @@ class TrackThicknessModifier extends ModifierWithKey<Length> {
 }
 
 // @ts-ignore
-globalThis.Slider.attributeModifier = function (modifier: ArkComponent) {
+globalThis.Slider.attributeModifier = function (modifier: ArkComponent): void {
   attributeModifierFunc.call(this, modifier, (nativePtr: KNode) => {
     return new ArkSliderComponent(nativePtr);
   }, (nativePtr: KNode, classType: ModifierType, modifierJS: ModifierJS) => {

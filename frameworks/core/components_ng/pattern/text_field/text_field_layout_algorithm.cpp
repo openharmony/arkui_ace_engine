@@ -43,6 +43,7 @@ constexpr uint32_t INLINE_DEFAULT_VIEW_MAXLINE = 3;
 constexpr uint32_t COUNTER_TEXT_MAXLINE = 1;
 constexpr int32_t DEFAULT_MODE = -1;
 constexpr int32_t SHOW_COUNTER_PERCENT = 100;
+constexpr double TEXT_DECORATION_DISABLED_COLOR_ALPHA = 0.2;
 } // namespace
 void TextFieldLayoutAlgorithm::ConstructTextStyles(
     const RefPtr<FrameNode>& frameNode, TextStyle& textStyle, std::string& textContent, bool& showPlaceHolder)
@@ -730,6 +731,8 @@ void TextFieldLayoutAlgorithm::UpdateTextStyleMore(const RefPtr<FrameNode>& fram
 {
     auto pattern = frameNode->GetPattern<TextFieldPattern>();
     CHECK_NULL_VOID(pattern);
+    auto pipeline = frameNode->GetContext();
+    CHECK_NULL_VOID(pipeline);
     if (pattern->IsInPasswordMode()) {
         return;
     }
@@ -740,13 +743,19 @@ void TextFieldLayoutAlgorithm::UpdateTextStyleMore(const RefPtr<FrameNode>& fram
         textStyle.SetTextDecorationColor(layoutProperty->GetTextDecorationColor().value());
     }
     if (layoutProperty->HasTextDecorationStyle()) {
-        textStyle.SetTextDecorationStyle(layoutProperty->GetTextDecorationStyle().value());
+        if (isDisabled) {
+            textStyle.SetTextDecorationColor(layoutProperty->GetTextDecorationColor().value()
+                .BlendOpacity(TEXT_DECORATION_DISABLED_COLOR_ALPHA));
+        } else {
+            textStyle.SetTextDecorationColor(layoutProperty->GetTextDecorationColor().value());
+        }
     }
     if (layoutProperty->HasLetterSpacing()) {
         textStyle.SetLetterSpacing(layoutProperty->GetLetterSpacing().value());
     }
     if (layoutProperty->HasLineHeight()) {
         textStyle.SetLineHeight(layoutProperty->GetLineHeight().value());
+        textStyle.SetHalfLeading(pipeline->GetHalfLeading());
     }
     if (layoutProperty->HasFontFeature()) {
         textStyle.SetFontFeatures(layoutProperty->GetFontFeature().value());
