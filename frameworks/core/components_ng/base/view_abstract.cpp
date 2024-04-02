@@ -2216,7 +2216,7 @@ void ViewAbstract::SetKeyboardShortcut(const std::string &value, const std::vect
     CHECK_NULL_VOID(eventHub);
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
-    if (value.empty() || keys.empty()) {
+    if (value.empty()) {
         eventHub->ClearSingleKeyboardShortcut();
         return;
     }
