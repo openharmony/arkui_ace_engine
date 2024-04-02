@@ -746,6 +746,7 @@ ohos_source_set("ace_components_pattern") {
     "$ace_root/frameworks/core/components_ng/pattern/overlay/keyboard_base_pattern.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/overlay/modal_presentation_layout_algorithm.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/overlay/modal_presentation_pattern.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/overlay/overlay_container_pattern.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/overlay/overlay_manager.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/overlay/popup_base_pattern.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/overlay/sheet_drag_bar_paint_method.cpp",
