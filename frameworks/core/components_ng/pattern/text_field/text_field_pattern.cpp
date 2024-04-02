@@ -2370,9 +2370,12 @@ void TextFieldPattern::OnAfterModifyDone()
     auto inspectorId = host->GetInspectorId().value_or("");
     if (!inspectorId.empty()) {
         auto layoutProperty = GetLayoutProperty<TextFieldLayoutProperty>();
-        bool isPwdType = layoutProperty ? layoutProperty->GetTextInputTypeValue(TextInputType::UNSPECIFIED) ==
-                                              TextInputType::VISIBLE_PASSWORD
-                                        : false;
+        bool isPwdType = false;
+        if (layoutProperty) {
+            auto inputType = layoutProperty->GetTextInputTypeValue(TextInputType::UNSPECIFIED);
+            isPwdType = inputType == TextInputType::VISIBLE_PASSWORD || inputType == TextInputType::NUMBER_PASSWORD ||
+                        inputType == TextInputType::SCREEN_LOCK_PASSWORD || inputType == TextInputType::NEW_PASSWORD;
+        }
         if (!isPwdType) {
             Recorder::NodeDataCache::Get().PutString(host, inspectorId, contentController_->GetTextValue());
         }
