@@ -1145,7 +1145,8 @@ private:
     void InitMouseEvent();
     void HandleHoverEffect(MouseInfo& info, bool isHover);
     void OnHover(bool isHover);
-    void ChangeMouseState(const Offset location, const RefPtr<PipelineContext>& pipeline, int32_t frameId);
+    void ChangeMouseState(
+        const Offset location, const RefPtr<PipelineContext>& pipeline, int32_t frameId, bool isByPass = false);
     void HandleMouseEvent(MouseInfo& info);
     void FocusAndUpdateCaretByMouse(MouseInfo& info);
     void HandleRightMouseEvent(MouseInfo& info);
