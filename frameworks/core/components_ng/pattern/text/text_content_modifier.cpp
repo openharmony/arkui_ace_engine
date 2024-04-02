@@ -24,7 +24,7 @@
 
 namespace OHOS::Ace::NG {
 namespace {
-constexpr double DEFAULT_MARQUEE_SCROLL_DELAY = 85.0; // Delay time between each jump.
+constexpr float RACE_DURATION_RATIO = 85.0f;
 constexpr float RACE_MOVE_PERCENT_MIN = 0.0f;
 constexpr float RACE_MOVE_PERCENT_MAX = 100.0f;
 constexpr float RACE_SPACE_WIDTH = 48.0f;
@@ -263,7 +263,7 @@ void TextContentModifier::onDraw(DrawingContext& drawingContext)
         } else {
             // Racing
             float textRacePercent = marqueeDirection_ ==
-                MarqueeDirection::LEFT? GetTextRacePercent() : RACE_MOVE_PERCENT_MAX - GetTextRacePercent();
+                MarqueeDirection::LEFT ? GetTextRacePercent() : RACE_MOVE_PERCENT_MAX - GetTextRacePercent();
             if (clip_ && clip_->Get()) {
                 canvas.ClipRect(RSRect(0, 0, drawingContext.width, drawingContext.height), RSClipOp::INTERSECT);
             }
@@ -601,8 +601,8 @@ void TextContentModifier::SetContentSize(SizeF& value)
     contentSize_->Set(value);
 }
 
-bool TextContentModifier::SetTextRace(const double& step, const int32_t& loop,
-    const MarqueeDirection& direction, const int32_t& delay)
+bool TextContentModifier::SetTextRace(
+    const double& step, const int32_t& loop, const MarqueeDirection& direction, const int32_t& delay)
 {
     CHECK_NULL_RETURN(paragraph_, false);
     textRaceSpaceWidth_ = RACE_SPACE_WIDTH;
@@ -611,23 +611,23 @@ bool TextContentModifier::SetTextRace(const double& step, const int32_t& loop,
         textRaceSpaceWidth_ *= pipeline->GetDipScale();
     }
 
-    auto duration = static_cast<int32_t>(std::abs(paragraph_->GetTextWidth() + textRaceSpaceWidth_) *
-        DEFAULT_MARQUEE_SCROLL_DELAY);
+    auto duration =
+        static_cast<int32_t>(std::abs(paragraph_->GetTextWidth() + textRaceSpaceWidth_) * RACE_DURATION_RATIO);
     if (step > 0) {
         duration = static_cast<int32_t>(duration / step);
     }
-    
+
     if (duration <= 0) {
         return false;
     }
-    if (textRacing_ && NearEqual(step, marqueeStep_) && (loop == marqueeLoop_) &&
-        (direction == marqueeDirection_) && (delay == marqueeDelay_) && (duration == marqueeDuration_)) {
+    if (textRacing_ && NearEqual(step, marqueeStep_) && (loop == marqueeLoop_) && (direction == marqueeDirection_) &&
+        (delay == marqueeDelay_) && (duration == marqueeDuration_)) {
         return false;
     }
     if (textRacing_) {
         StopTextRace();
     }
-    
+
     marqueeStep_ = step;
     marqueeDuration_ = duration;
     marqueeDirection_ = direction;
@@ -645,8 +645,8 @@ bool TextContentModifier::SetTextRace(const double& step, const int32_t& loop,
     return true;
 }
 
-void TextContentModifier::StartTextRace(const double& step, const int32_t& loop,
-    const MarqueeDirection& direction, const int32_t& delay, const bool& isBounce)
+void TextContentModifier::StartTextRace(const double& step, const int32_t& loop, const MarqueeDirection& direction,
+    const int32_t& delay, const bool& isBounce)
 {
     if (!isBounce && !SetTextRace(step, loop, direction, delay)) {
         return;
@@ -661,13 +661,8 @@ void TextContentModifier::StartTextRace(const double& step, const int32_t& loop,
 
     marqueeAnimationId_++;
     racePercentFloat_->Set(RACE_MOVE_PERCENT_MIN);
-    raceAnimation_ = AnimationUtils::StartAnimation (
-        option,
-        [weak = AceType::WeakClaim(this)]() {
-            auto modifier = weak.Upgrade();
-            CHECK_NULL_VOID(modifier);
-            modifier->racePercentFloat_->Set(RACE_MOVE_PERCENT_MAX);
-            },
+    raceAnimation_ = AnimationUtils::StartAnimation(
+        option, [&]() { racePercentFloat_->Set(RACE_MOVE_PERCENT_MAX); },
         [weak = AceType::WeakClaim(this), marqueeAnimationId = marqueeAnimationId_, id = Container::CurrentId()]() {
             auto modifier = weak.Upgrade();
             CHECK_NULL_VOID(modifier);
@@ -692,15 +687,18 @@ void TextContentModifier::StartTextRace(const double& step, const int32_t& loop,
                     textPattern->FireOnMarqueeStateChange(TextMarqueeState::FINISH);
                 } else {
                     textPattern->FireOnMarqueeStateChange(TextMarqueeState::BOUNCE);
-                    modifier->StartTextRace(modifier->marqueeStep_,
-                        modifier->marqueeLoop_, modifier->marqueeDirection_, modifier->marqueeDelay_, true);
+                    auto frameNode = textPattern->GetHost();
+                    CHECK_NULL_VOID(frameNode);
+                    frameNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+                    modifier->StartTextRace(modifier->marqueeStep_, modifier->marqueeLoop_, modifier->marqueeDirection_,
+                        modifier->marqueeDelay_, true);
                 }
             };
 
             if (taskExecutor->WillRunOnCurrentThread(TaskExecutor::TaskType::UI)) {
                 onFinish();
             } else {
-                taskExecutor->PostTask([onFinish]() {onFinish();}, TaskExecutor::TaskType::UI);
+                taskExecutor->PostTask([onFinish]() { onFinish(); }, TaskExecutor::TaskType::UI);
             }
         });
 }

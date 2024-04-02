@@ -951,58 +951,58 @@ void JSText::ParseMenuParam(
 
 void JSText::SetMarqueeOptions(const JSCallbackInfo& info)
 {
-    if (info.Length() < 1 || !info[0]->IsObject()) {
-        LOGE("SetMarqueeOptions param invalid");
+    if (info.Length() < 1) {
         return;
     }
 
-    auto paramObject = JSRef<JSObject>::Cast(info[0]);
+    auto args = info[0];
+    NG::TextMarqueeOptions options;
+
+    if (!args->IsObject()) {
+        TextModel::GetInstance()->SetMarqueeOptions(options);
+        return;
+    }
+
+    auto paramObject = JSRef<JSObject>::Cast(args);
     auto getStart = paramObject->GetProperty("start");
-    std::optional<bool> startOpt;
     if (getStart->IsBoolean()) {
-        startOpt = getStart->ToBoolean();
+        options.UpdateTextMarqueeStart(getStart->ToBoolean());
     }
 
     auto getLoop = paramObject->GetProperty("loop");
-    std::optional<int32_t> loopOpt;
     if (getLoop->IsNumber()) {
         int32_t loop = static_cast<int32_t>(getLoop->ToNumber<double>());
         if (loop == std::numeric_limits<int32_t>::max() || loop <= 0) {
             loop = -1;
         }
-        loopOpt = loop;
+        options.UpdateTextMarqueeLoop(loop);
     }
 
     auto getStep = paramObject->GetProperty("step");
-    std::optional<double> stepOpt;
     if (getStep->IsNumber()) {
         auto step = getStep->ToNumber<double>();
         if (GreatNotEqual(step, 0.0)) {
-            stepOpt = Dimension(step, DimensionUnit::VP).ConvertToPx();
+            options.UpdateTextMarqueeStep(Dimension(step, DimensionUnit::VP).ConvertToPx());
         }
     }
 
     auto delay = paramObject->GetProperty("delay");
-    std::optional<int32_t> delayOpt;
     if (delay->IsNumber()) {
         auto delayDouble = delay->ToNumber<double>();
-        int32_t delayValue = -1;
-        if (GreatNotEqual(delayDouble, 0.0)) {
-            delayValue = static_cast<int32_t>(delayDouble);
-            if (delayValue == std::numeric_limits<int32_t>::max() || delayValue < 0) {
-                delayValue = 0;
-            }
+        int32_t delayValue = static_cast<int32_t>(delayDouble);
+        if (delayValue < 0) {
+            delayValue = 0;
         }
-        delayOpt = delayValue;
+        options.UpdateTextMarqueeDelay(delayValue);
     }
 
     auto getFromStart = paramObject->GetProperty("fromStart");
-    std::optional<MarqueeDirection> directionOpt;
     if (getFromStart->IsBoolean()) {
-        directionOpt = getFromStart->ToBoolean()? MarqueeDirection::LEFT : MarqueeDirection::RIGHT;
+        options.UpdateTextMarqueeDirection(
+            getFromStart->ToBoolean() ? MarqueeDirection::LEFT : MarqueeDirection::RIGHT);
     }
 
-    TextModel::GetInstance()->SetMarqueeOptions(startOpt, stepOpt, loopOpt, delayOpt, directionOpt);
+    TextModel::GetInstance()->SetMarqueeOptions(options);
 }
 
 void JSText::SetOnMarqueeStateChange(const JSCallbackInfo& info)

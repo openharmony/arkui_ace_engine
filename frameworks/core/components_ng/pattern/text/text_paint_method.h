@@ -39,7 +39,7 @@ public:
 
     RefPtr<Modifier> GetContentModifier(PaintWrapper* paintWrapper) override;
     void UpdateContentModifier(PaintWrapper* paintWrapper) override;
-    
+
     RefPtr<Modifier> GetOverlayModifier(PaintWrapper* paintWrapper) override;
     void UpdateOverlayModifier(PaintWrapper* paintWrapper) override;
 

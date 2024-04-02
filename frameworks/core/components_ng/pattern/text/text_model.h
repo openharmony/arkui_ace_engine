@@ -104,9 +104,7 @@ public:
     };
     virtual void SetClipEdge() = 0;
     virtual void SetFontFeature(const std::unordered_map<std::string, int32_t>& value) = 0;
-    virtual void SetMarqueeOptions(const std::optional<bool>& start, const std::optional<double>& step,
-        const std::optional<int32_t>& loop, const std::optional<int32_t>& delay,
-        const std::optional<MarqueeDirection>& direction) = 0;
+    virtual void SetMarqueeOptions(const NG::TextMarqueeOptions& options) = 0;
     virtual void SetOnMarqueeStateChange(std::function<void(int32_t)>&& func) = 0;
 
 private:

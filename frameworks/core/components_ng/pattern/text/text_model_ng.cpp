@@ -543,26 +543,39 @@ void TextModelNG::SetFontFeature(FrameNode* frameNode, const FONT_FEATURES_MAP& 
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextLayoutProperty, FontFeature, value, frameNode);
 }
 
-void TextModelNG::SetMarqueeOptions(const std::optional<bool>& start, const std::optional<double>& step,
-    const std::optional<int32_t>& loop, const std::optional<int32_t>& delay,
-    const std::optional<MarqueeDirection>& direction)
+void TextModelNG::SetMarqueeOptions(const TextMarqueeOptions& options)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
-    if (start.has_value()) {
-        ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextLayoutProperty, TextMarqueeStart, start.value(), frameNode);
+    if (options.HasTextMarqueeStart()) {
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(
+            TextLayoutProperty, TextMarqueeStart, options.GetTextMarqueeStartValue(), frameNode);
+    } else {
+        ACE_RESET_NODE_LAYOUT_PROPERTY(TextLayoutProperty, TextMarqueeStart, frameNode);
     }
-    if (step.has_value()) {
-        ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextLayoutProperty, TextMarqueeStep, step.value(), frameNode);
+    if (options.HasTextMarqueeStep()) {
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(
+            TextLayoutProperty, TextMarqueeStep, options.GetTextMarqueeStepValue(), frameNode);
+    } else {
+        ACE_RESET_NODE_LAYOUT_PROPERTY(TextLayoutProperty, TextMarqueeStep, frameNode);
     }
-    if (loop.has_value()) {
-        ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextLayoutProperty, TextMarqueeLoop, loop.value(), frameNode);
+    if (options.HasTextMarqueeLoop()) {
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(
+            TextLayoutProperty, TextMarqueeLoop, options.GetTextMarqueeLoopValue(), frameNode);
+    } else {
+        ACE_RESET_NODE_LAYOUT_PROPERTY(TextLayoutProperty, TextMarqueeLoop, frameNode);
     }
-    if (direction.has_value()) {
-        ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextLayoutProperty, TextMarqueeDirection, direction.value(), frameNode);
+    if (options.HasTextMarqueeDirection()) {
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(
+            TextLayoutProperty, TextMarqueeDirection, options.GetTextMarqueeDirectionValue(), frameNode);
+    } else {
+        ACE_RESET_NODE_LAYOUT_PROPERTY(TextLayoutProperty, TextMarqueeDirection, frameNode);
     }
-    if (delay.has_value()) {
-        ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextLayoutProperty, TextMarqueeDelay, delay.value(), frameNode);
+    if (options.HasTextMarqueeDelay()) {
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(
+            TextLayoutProperty, TextMarqueeDelay, options.GetTextMarqueeDelayValue(), frameNode);
+    } else {
+        ACE_RESET_NODE_LAYOUT_PROPERTY(TextLayoutProperty, TextMarqueeDelay, frameNode);
     }
 }
 
