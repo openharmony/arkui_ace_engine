@@ -62,6 +62,7 @@ public:
     void SetOnCopy(std::function<void(const std::string&)>&& func) override {};
     void SetEllipsisMode(EllipsisMode modal) override {};
     void SetClipEdge() override {};
+    void SetFontFeature(const std::unordered_map<std::string, int32_t>& value) override {};
 
     void SetOnDragStart(NG::OnDragStartFunc&& onDragStart) override;
     void SetOnDragEnter(NG::OnDragDropFunc&& onDragEnter) override;

@@ -147,7 +147,7 @@ void NavRouterGroupNode::AddNavDestinationToNavigation()
         name = routeInfo->GetName();
         RefPtr<UINode> uiNode = navigationStack->GetFromCacheNode(name);
         if (uiNode == nullptr) {
-            uiNode = navigationStack->CreateNodeByRouteInfo(routeInfo);
+            uiNode = navigationStack->CreateNodeByRouteInfo(routeInfo, navigationPattern->GetParentCustomNode());
         }
 
         navigationPattern->AddNavDestinationNode(name, uiNode, navRouteMode, routeInfo);
@@ -170,7 +170,6 @@ void NavRouterGroupNode::AddNavDestinationToNavigation()
         WeakPtr<NavigationStack> stack = navigationPattern->GetNavigationStack();
         navDestinationPattern->SetNavigationStack(stack);
         name = navDestinationPattern->GetName();
-        navigationPattern->RemoveIfNeeded(name, navDestination);
         navigationPattern->AddNavDestinationNode(name, navDestination, navRouteMode);
     }
 

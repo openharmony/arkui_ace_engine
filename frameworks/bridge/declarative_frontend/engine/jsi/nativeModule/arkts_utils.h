@@ -32,6 +32,8 @@ public:
     static uint32_t ColorAlphaAdapt(uint32_t origin);
     static bool ParseJsColor(const EcmaVM* vm, const Local<JSValueRef>& value, Color& result);
     static bool ParseJsColorAlpha(const EcmaVM* vm, const Local<JSValueRef>& value, Color& result);
+    static bool ParseJsColorAlpha(
+        const EcmaVM* vm, const Local<JSValueRef>& value, Color& result, const Color& defaultColor);
     static bool ParseJsColorFromResource(const EcmaVM* vm, const Local<JSValueRef>& jsObj, Color& result);
     static bool ParseJsDimensionFromResource(
         const EcmaVM* vm, const Local<JSValueRef>& jsObj, DimensionUnit dimensionUnit, CalcDimension& result);
@@ -41,6 +43,7 @@ public:
         const EcmaVM* vm, const Local<JSValueRef>& arg, std::string* array, int32_t defaultLength);
     static bool ParseJsInteger(const EcmaVM *vm, const Local<JSValueRef> &value, int32_t &result);
     static bool ParseJsInteger(const EcmaVM *vm, const Local<JSValueRef> &value, uint32_t &result);
+    static bool ParseJsIntegerWithResource(const EcmaVM* vm, const Local<JSValueRef>& jsValue, int32_t& result);
     static bool ParseJsDouble(const EcmaVM *vm, const Local<JSValueRef> &value, double &result);
     static bool ParseAllBorder(const EcmaVM *vm, const Local<JSValueRef> &args, CalcDimension &result);
     static bool ParseAllRadius(const EcmaVM *vm, const Local<JSValueRef> &args, CalcDimension &result);
@@ -65,6 +68,15 @@ public:
     static bool ParseJsIntegerArray(const EcmaVM* vm, Local<JSValueRef> values, std::vector<uint32_t>& result);
     static bool ParseJsString(const EcmaVM *vm, const Local<JSValueRef> &value, std::string& result);
     static bool ParseJsStringFromResource(const EcmaVM *vm, const Local<JSValueRef> &jsValue, std::string& result);
+    static uint32_t parseShadowColor(const EcmaVM* vm, const Local<JSValueRef>& jsValue);
+    static uint32_t parseShadowFill(const EcmaVM* vm, const Local<JSValueRef>& jsValue);
+    static uint32_t parseShadowType(const EcmaVM* vm, const Local<JSValueRef>& jsValue);
+    static double parseShadowRadius(const EcmaVM* vm, const Local<JSValueRef>& jsValue);
+    static double parseShadowOffset(const EcmaVM* vm, const Local<JSValueRef>& jsValue);
+    static void ParseOuterBorder(EcmaVM* vm, const Local<JSValueRef>& args,
+        std::optional<CalcDimension>& optionalDimension);
+    static void PushOuterBorderDimensionVector(const std::optional<CalcDimension>& valueDim,
+        std::vector<ArkUI_Float32>& values, std::vector<ArkUI_Int32>& units);
     template <class T>
     static bool ParseArray(const EcmaVM *vm, const Local<JSValueRef> &arg, T *array, int32_t defaultLength,
         std::function<T(const EcmaVM *, const Local<JSValueRef> &)> getValue)

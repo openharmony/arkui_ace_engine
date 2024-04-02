@@ -23,6 +23,7 @@
 #include "core/animation/select_motion.h"
 #include "core/animation/spring_curve.h"
 #include "core/animation/bezier_variable_velocity_motion.h"
+#include "core/animation/velocity_motion.h"
 #include "core/components_ng/base/frame_scene_status.h"
 #include "core/components_ng/event/drag_event.h"
 #include "core/components_ng/pattern/navigation/nav_bar_pattern.h"
@@ -44,7 +45,7 @@ namespace OHOS::Ace::NG {
 #ifndef WEARABLE_PRODUCT
 constexpr double FRICTION = 0.6;
 constexpr double NEW_FRICTION = 0.7;
-constexpr double MAX_VELOCITY = 800000.0;
+constexpr double MAX_VELOCITY = 4200.0;
 #else
 constexpr double FRICTION = 0.9;
 constexpr double MAX_VELOCITY = 5000.0;
@@ -221,13 +222,6 @@ public:
         scrollable->ProcessScrollSnapSpringMotion(scrollSnapDelta, scrollSnapVelocity);
     }
 
-    void SetScrollFrameBeginCallback(const ScrollFrameBeginCallback& scrollFrameBeginCallback)
-    {
-        // Previous: Set to Scrollable and called in HandleScroll
-        // Now: HandleScroll moved to base class, directly store and call scrollFrameBeginCallback_ here
-        scrollFrameBeginCallback_ = scrollFrameBeginCallback;
-    }
-
     bool IsScrollableSpringEffect() const
     {
         CHECK_NULL_RETURN(scrollEffect_, false);
@@ -392,6 +386,13 @@ public:
 
     virtual void ScrollToEdge(ScrollEdgeType scrollEdgeType, bool smooth);
 
+    virtual ScrollEdgeType GetScrollEdgeType() const
+    {
+        return ScrollEdgeType::SCROLL_NONE;
+    }
+
+    virtual void SetScrollEdgeType(ScrollEdgeType scrollEdgeType) {}
+
     virtual void Fling(double flingVelocity);
 
     void SetPositionController(RefPtr<ScrollableController> control)
@@ -411,6 +412,11 @@ public:
     {
         edgeEffect_ = edgeEffect;
         edgeEffectAlwaysEnabled_ = alwaysEnabled;
+    }
+
+    EdgeEffect GetEdgeEffect()
+    {
+        return edgeEffect_;
     }
 
     bool GetAlwaysEnabled() const
@@ -473,18 +479,10 @@ public:
         auto canScroll = scrollableEvent_->GetEnable();
         animateCanOverScroll_ = canScroll && animateCanOverScroll;
     }
-
     virtual void InitScrollBarClickEvent();
     void HandleClickEvent(GestureEvent& info);
-    virtual void InitScrollBarLongPressEvent();
-    void HandleLongPress(bool smooth);
-    virtual void InitScrollBarTouchEvent();
-    void OnTouchUp();
-    void OnTouchDown();
-    void ScheduleCaretLongPress();
-    void StartLongPressEventTimer();
+    void InitScrollBarMouseEvent();
     virtual void ScrollPage(bool reverse, bool smooth = false);
-    bool AnalysisUpOrDown(Point point, bool& reverse);
     void PrintOffsetLog(AceLogTag tag, int32_t id, double finalOffset);
 
     void SetScrollToSafeAreaHelper(bool isScrollToSafeAreaHelper)
@@ -496,6 +494,11 @@ public:
     {
         return isScrollToSafeAreaHelper_;
     }
+
+    void ScrollAtFixedVelocity(float velocity);
+
+    PositionMode GetPositionMode();
+
 protected:
     void OnDetachFromFrameNode(FrameNode* frameNode) override;
     virtual DisplayMode GetDefaultScrollBarDisplayMode() const
@@ -573,6 +576,11 @@ protected:
 
     void Register2DragDropManager();
 
+    bool StopExpandMark() override
+    {
+        return true;
+    }
+
 private:
     virtual void OnScrollEndCallback() {};
 
@@ -639,7 +647,6 @@ private:
     bool HandleScrollImpl(float offset, int32_t source);
     void NotifyMoved(bool value);
 
-    ScrollFrameBeginCallback scrollFrameBeginCallback_;
     /*
      *  End of NestableScrollContainer implementations
      *******************************************************************************/
@@ -722,6 +729,7 @@ private:
     RefPtr<Animator> hotzoneAnimator_;
     float lastHonezoneOffsetPct_ = 0.0f;
     RefPtr<BezierVariableVelocityMotion> velocityMotion_;
+    RefPtr<VelocityMotion> fixedVelocityMotion_;
     void UnRegister2DragDropManager();
     float IsInHotZone(const PointF& point);
     void HotZoneScroll(const float offset);
@@ -731,8 +739,8 @@ private:
     void HandleLeaveHotzoneEvent();
     bool isVertical() const;
     void AddHotZoneSenceInterface(SceneStatus scene);
+    RefPtr<InputEvent> mouseEvent_;
     bool isMousePressed_ = false;
-    Offset locationInfo_;
 };
 } // namespace OHOS::Ace::NG
 

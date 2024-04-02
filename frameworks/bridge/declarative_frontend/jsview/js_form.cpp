@@ -16,9 +16,10 @@
 #include "frameworks/bridge/declarative_frontend/jsview/js_form.h"
 
 #include "base/geometry/dimension.h"
-#include "base/log/log_wrapper.h"
 #include "base/geometry/ng/size_t.h"
 #include "base/log/ace_scoring_log.h"
+#include "base/log/log_wrapper.h"
+#include "base/utils/string_utils.h"
 #include "bridge/declarative_frontend/jsview/models/form_model_impl.h"
 #include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/pattern/form/form_model_ng.h"
@@ -72,23 +73,37 @@ void JSForm::Create(const JSCallbackInfo& info)
     JSRef<JSVal> temporary = obj->GetProperty("temporary");
     JSRef<JSVal> wantValue = obj->GetProperty("want");
     JSRef<JSVal> renderingMode = obj->GetProperty("renderingMode");
-    RequestFormInfo fomInfo;
-    fomInfo.id = id->ToNumber<int32_t>();
-    fomInfo.cardName = name->ToString();
-    fomInfo.bundleName = bundle->ToString();
-    fomInfo.abilityName = ability->ToString();
-    fomInfo.moduleName = module->ToString();
-    if (!dimension->IsNull() && !dimension->IsEmpty()) {
-        fomInfo.dimension = dimension->ToNumber<int32_t>();
+    RequestFormInfo formInfo;
+    if (id->IsString()) {
+        if (!StringUtils::IsNumber(id->ToString())) {
+            LOGE("Invalid form id : %{public}s", id->ToString().c_str());
+            return;
+        }
+        int64_t inputFormId = StringUtils::StringToLongInt(id->ToString().c_str(), -1);
+        if (inputFormId == -1) {
+            LOGE("StringToLongInt failed : %{public}s", id->ToString().c_str());
+            return;
+        }
+        formInfo.id = inputFormId;
     }
-    fomInfo.temporary = temporary->ToBoolean();
+    if (id->IsNumber()) {
+        formInfo.id = id->ToNumber<int64_t>();
+    }
+    formInfo.cardName = name->ToString();
+    formInfo.bundleName = bundle->ToString();
+    formInfo.abilityName = ability->ToString();
+    formInfo.moduleName = module->ToString();
+    if (!dimension->IsNull() && !dimension->IsEmpty()) {
+        formInfo.dimension = dimension->ToNumber<int32_t>();
+    }
+    formInfo.temporary = temporary->ToBoolean();
     if (!wantValue->IsNull() && wantValue->IsObject()) {
-        fomInfo.wantWrap = CreateWantWrapFromNapiValue(wantValue);
+        formInfo.wantWrap = CreateWantWrapFromNapiValue(wantValue);
     }
     if (!renderingMode->IsNull() && !renderingMode->IsEmpty()) {
-        fomInfo.renderingMode = renderingMode->ToNumber<int32_t>();
+        formInfo.renderingMode = renderingMode->ToNumber<int32_t>();
     }
-    FormModel::GetInstance()->Create(fomInfo);
+    FormModel::GetInstance()->Create(formInfo);
 }
 
 void JSForm::SetSize(const JSCallbackInfo& info)
@@ -164,7 +179,7 @@ void JSForm::JsOnAcquired(const JSCallbackInfo& info)
         auto onAcquired = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc)](const std::string& param) {
             JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
             ACE_SCORING_EVENT("Form.onAcquired");
-            std::vector<std::string> keys = { "id" };
+            std::vector<std::string> keys = { "id", "idString" };
             func->Execute(keys, param);
         };
         FormModel::GetInstance()->SetOnAcquired(std::move(onAcquired));
@@ -192,7 +207,7 @@ void JSForm::JsOnUninstall(const JSCallbackInfo& info)
         auto onUninstall = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc)](const std::string& param) {
             JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
             ACE_SCORING_EVENT("Form.onUninstall");
-            std::vector<std::string> keys = { "id" };
+            std::vector<std::string> keys = { "id", "idString" };
             func->Execute(keys, param);
         };
         FormModel::GetInstance()->SetOnUninstall(std::move(onUninstall));

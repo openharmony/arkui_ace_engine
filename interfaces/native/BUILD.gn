@@ -53,7 +53,9 @@ ohos_shared_library("ace_ndk") {
     "node/event_converter.cpp",
     "node/gesture_impl.cpp",
     "node/native_impl.cpp",
+    "node/native_node_extented.cpp",
     "node/native_node_napi.cpp",
+    "node/node_extened.cpp",
     "node/node_model.cpp",
     "node/style_modifier.cpp",
   ]
@@ -63,6 +65,7 @@ ohos_shared_library("ace_ndk") {
   cflags_cc = [ "-Wno-missing-braces" ]
 
   if (target_os == "ohos") {
+    defines = [ "OHOS_PLATFORM" ]
     sources += [ "$ace_root/adapter/ohos/osal/log_wrapper.cpp" ]
     deps += [ ":libace_ndk" ]
     external_deps = [

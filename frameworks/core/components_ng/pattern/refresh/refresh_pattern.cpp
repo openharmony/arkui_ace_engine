@@ -425,6 +425,7 @@ ScrollResult RefreshPattern::HandleDragUpdate(float delta, float mainSpeed)
                 return { remain, true };
             }
             UpdateLoadingProgressStatus(RefreshAnimationState::FOLLOW_HAND, GetFollowRatio());
+            FireOnOffsetChange(Dimension(scrollOffset_).ConvertToVp());
             if (LessNotEqual(scrollOffset_, static_cast<float>(refreshOffset_.ConvertToPx())) || !pullToRefresh_) {
                 UpdateRefreshStatus(RefreshStatus::DRAG);
             } else {
@@ -504,6 +505,13 @@ void RefreshPattern::FireChangeEvent(const std::string& value)
     auto refreshEventHub = GetEventHub<RefreshEventHub>();
     CHECK_NULL_VOID(refreshEventHub);
     refreshEventHub->FireChangeEvent(value);
+}
+
+void RefreshPattern::FireOnOffsetChange(float value)
+{
+    auto refreshEventHub = GetEventHub<RefreshEventHub>();
+    CHECK_NULL_VOID(refreshEventHub);
+    refreshEventHub->FireOnOffsetChange(value);
 }
 
 void RefreshPattern::AddCustomBuilderNode(const RefPtr<NG::UINode>& builder)

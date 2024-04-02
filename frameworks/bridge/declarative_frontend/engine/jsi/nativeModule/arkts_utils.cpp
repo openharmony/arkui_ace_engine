@@ -31,6 +31,9 @@ constexpr uint32_t COLOR_ALPHA_OFFSET = 24;
 constexpr uint32_t COLOR_ALPHA_VALUE = 0xFF000000;
 const std::string DEFAULT_STR = "-1";
 constexpr  int32_t REPLACEHOLDER_INDEX = 2;
+const Color DEFAULT_TEXT_SHADOW_COLOR = Color::BLACK;
+constexpr bool DEFAULT_TEXT_SHADOW_FILL = false;
+constexpr ShadowType DEFAULT_TEXT_SHADOW_TYPE = ShadowType::COLOR;
 enum class ResourceType : uint32_t {
     COLOR = 10001,
     FLOAT,
@@ -87,6 +90,22 @@ bool ArkTSUtils::ParseJsColorAlpha(const EcmaVM* vm, const Local<JSValueRef>& va
         return ParseJsColorFromResource(vm, value, result);
     }
     return false;
+}
+
+bool ArkTSUtils::ParseJsColorAlpha(
+    const EcmaVM* vm, const Local<JSValueRef>& value, Color& result, const Color& defaultColor)
+{
+    if (!value->IsNumber() && !value->IsString() && !value->IsObject()) {
+        return false;
+    }
+    if (value->IsNumber()) {
+        result = Color(ColorAlphaAdapt(value->Uint32Value(vm)));
+        return true;
+    }
+    if (value->IsString()) {
+        return Color::ParseColorString(value->ToString(vm)->ToString(), result, defaultColor);
+    }
+    return ParseJsColorFromResource(vm, value, result);
 }
 
 std::string ToString(const EcmaVM* vm,  Local<JSValueRef>& jsVal)
@@ -404,6 +423,53 @@ bool ArkTSUtils::ParseJsInteger(const EcmaVM *vm, const Local<JSValueRef> &value
         return true;
     }
     // resource ignore by design
+    return false;
+}
+
+bool ArkTSUtils::ParseJsIntegerWithResource(const EcmaVM* vm, const Local<JSValueRef>& jsValue, int32_t& result)
+{
+    if (!jsValue->IsNumber() && !jsValue->IsObject()) {
+        return false;
+    }
+
+    if (jsValue->IsNumber()) {
+        result = jsValue->Int32Value(vm);
+        return true;
+    }
+
+    auto jsObj = jsValue->ToObject(vm);
+    auto type = jsObj->Get(vm, panda::StringRef::NewFromUtf8(vm, "type"));
+    auto id = jsObj->Get(vm, panda::StringRef::NewFromUtf8(vm, "id"));
+    int32_t resourceType = 0;
+    if (!type->IsNumber() || !id->IsNumber()) {
+        return false;
+    }
+    resourceType = type->Int32Value(vm);
+    auto resIdNum = id->Int32Value(vm);
+
+    auto resourceObject = GetResourceObject(vm, jsValue);
+    auto resourceWrapper = CreateResourceWrapper(vm, jsValue, resourceObject);
+    CHECK_NULL_RETURN(resourceWrapper, false);
+
+    if (resIdNum == -1) {
+        if (!IsGetResourceByName(vm, jsObj)) {
+            return false;
+        }
+        auto args = jsObj->Get(vm, panda::StringRef::NewFromUtf8(vm, "params"));
+        Local<panda::ArrayRef> params = static_cast<Local<panda::ArrayRef>>(args);
+        auto param = panda::ArrayRef::GetValueAt(vm, params, 0);
+        if (resourceType == static_cast<int32_t>(ResourceType::INTEGER)) {
+            result = resourceWrapper->GetIntByName(param->ToString(vm)->ToString());
+            return true;
+        }
+        return false;
+    }
+
+    if (resourceType == static_cast<int32_t>(ResourceType::INTEGER)) {
+        result = resourceWrapper->GetInt(resIdNum);
+        return true;
+    }
+
     return false;
 }
 
@@ -1105,5 +1171,75 @@ bool ArkTSUtils::ParseResponseRegion(
         regionUnits[i + 3] = static_cast<int32_t>(heightDimen.Unit()); // 3: height Unit
     }
     return true;
+}
+
+uint32_t ArkTSUtils::parseShadowColor(const EcmaVM* vm, const Local<JSValueRef>& jsValue)
+{
+    Color color = DEFAULT_TEXT_SHADOW_COLOR;
+    if (!ParseJsColorAlpha(vm, jsValue, color)) {
+        color = DEFAULT_TEXT_SHADOW_COLOR;
+    }
+    return color.GetValue();
+};
+
+uint32_t ArkTSUtils::parseShadowFill(const EcmaVM* vm, const Local<JSValueRef>& jsValue)
+{
+    if (jsValue->IsBoolean()) {
+        return static_cast<uint32_t>(jsValue->ToBoolean(vm)->Value());
+    }
+    return static_cast<uint32_t>(DEFAULT_TEXT_SHADOW_FILL);
+};
+
+uint32_t ArkTSUtils::parseShadowType(const EcmaVM* vm, const Local<JSValueRef>& jsValue)
+{
+    if (jsValue->IsInt()) {
+        return jsValue->Uint32Value(vm);
+    }
+    return static_cast<uint32_t>(DEFAULT_TEXT_SHADOW_TYPE);
+};
+
+double ArkTSUtils::parseShadowRadius(const EcmaVM* vm, const Local<JSValueRef>& jsValue)
+{
+    double radius = 0.0;
+    ArkTSUtils::ParseJsDouble(vm, jsValue, radius);
+    if (LessNotEqual(radius, 0.0)) {
+        radius = 0.0;
+    }
+    return radius;
+};
+
+double ArkTSUtils::parseShadowOffset(const EcmaVM* vm, const Local<JSValueRef>& jsValue)
+{
+    CalcDimension offset;
+    if (ArkTSUtils::ParseJsResource(vm, jsValue, offset)) {
+        return offset.Value();
+    } else if (ArkTSUtils::ParseJsDimensionVp(vm, jsValue, offset)) {
+        return offset.Value();
+    }
+    return 0.0;
+};
+
+void ArkTSUtils::ParseOuterBorder(
+    EcmaVM* vm, const Local<JSValueRef>& args, std::optional<CalcDimension>& optionalDimension)
+{
+    CalcDimension valueDim;
+    if (!args->IsUndefined() && ArkTSUtils::ParseJsDimensionVp(vm, args, valueDim, false)) {
+        if (valueDim.IsNegative() || valueDim.Unit() == DimensionUnit::PERCENT) {
+            valueDim.Reset();
+        }
+        optionalDimension = valueDim;
+    }
+}
+
+void ArkTSUtils::PushOuterBorderDimensionVector(
+    const std::optional<CalcDimension>& valueDim, std::vector<ArkUI_Float32>& values, std::vector<ArkUI_Int32>& units)
+{
+    if (valueDim.has_value()) {
+        values.emplace_back(static_cast<ArkUI_Float32>(valueDim.value().Value()));
+        units.emplace_back(static_cast<ArkUI_Float32>(valueDim.value().Unit()));
+    } else {
+        values.emplace_back(0);
+        units.emplace_back(0);
+    }
 }
 } // namespace OHOS::Ace::NG

@@ -22,13 +22,20 @@ function getUINativeModule(): any {
   return arkUINativeModule;
 }
 
+enum ModifierType {
+  ORIGIN = 0,
+  STATE = 1
+}
+
+type AttributeModifierWithKey = ModifierWithKey<number | string | boolean | object>;
+
 const UI_STATE_NORMAL = 0;
 const UI_STATE_PRESSED = 1;
 const UI_STATE_FOCUSED = 1 << 1;
 const UI_STATE_DISABLED = 1 << 2;
 const UI_STATE_SELECTED = 1 << 3;
 
-function applyUIAttributes(modifier: AttributeModifier<CommonAttribute>, nativeNode: KNode, component: ArkComponent): void {
+function applyUIAttributesInit(modifier: AttributeModifier<CommonAttribute>, nativeNode: KNode): void {
   let state = 0;
   if (modifier.applyPressedAttribute !== undefined) {
     state |= UI_STATE_PRESSED;
@@ -44,6 +51,10 @@ function applyUIAttributes(modifier: AttributeModifier<CommonAttribute>, nativeN
   }
 
   getUINativeModule().setSupportedUIState(nativeNode, state);
+}
+
+function applyUIAttributes(modifier: AttributeModifier<CommonAttribute>, nativeNode: KNode, component: ArkComponent): void {
+  applyUIAttributesInit(modifier, nativeNode);
   const currentUIState = getUINativeModule().getUIState(nativeNode);
 
   if (modifier.applyNormalAttribute !== undefined) {
@@ -222,10 +233,10 @@ class BorderWidthModifier extends ModifierWithKey<Length | EdgeWidths> {
         getUINativeModule().common.setBorderWidth(node, this.value, this.value, this.value, this.value);
       } else {
         getUINativeModule().common.setBorderWidth(node,
-          (this.value as EdgeWidths).left,
-          (this.value as EdgeWidths).right,
           (this.value as EdgeWidths).top,
-          (this.value as EdgeWidths).bottom);
+          (this.value as EdgeWidths).right,
+          (this.value as EdgeWidths).bottom,
+          (this.value as EdgeWidths).left);
       }
     }
   }
@@ -328,9 +339,9 @@ class BorderColorModifier extends ModifierWithKey<ResourceColor | EdgeColors> {
       if (valueType === 'number' || valueType === 'string' || isResource(this.value)) {
         getUINativeModule().common.setBorderColor(node, this.value, this.value, this.value, this.value);
       } else {
-        getUINativeModule().common.setBorderColor(node, (this.value as EdgeColors).left,
-          (this.value as EdgeColors).right, (this.value as EdgeColors).top,
-          (this.value as EdgeColors).bottom);
+        getUINativeModule().common.setBorderColor(node, (this.value as EdgeColors).top,
+          (this.value as EdgeColors).right, (this.value as EdgeColors).bottom,
+          (this.value as EdgeColors).left);
       }
 
     }
@@ -505,8 +516,8 @@ class AlignModifier extends ModifierWithKey<number> {
   }
 }
 
-class BackdropBlurModifier extends ModifierWithKey<number> {
-  constructor(value: number) {
+class BackdropBlurModifier extends ModifierWithKey<ArkBlurOptions> {
+  constructor(value: ArkBlurOptions) {
     super(value);
   }
   static identity: Symbol = Symbol('backdropBlur');
@@ -514,8 +525,12 @@ class BackdropBlurModifier extends ModifierWithKey<number> {
     if (reset) {
       getUINativeModule().common.resetBackdropBlur(node);
     } else {
-      getUINativeModule().common.setBackdropBlur(node, this.value);
+      getUINativeModule().common.setBackdropBlur(node, this.value.value, this.value.options?.grayscale);
     }
+  }
+  checkObjectDiff(): boolean {
+    return !((this.stageValue.value === this.value.value) &&
+      (this.stageValue.options === this.value.options));
   }
 }
 
@@ -533,8 +548,8 @@ class HueRotateModifier extends ModifierWithKey<number | string> {
   }
 }
 
-class InvertModifier extends ModifierWithKey<number> {
-  constructor(value: number) {
+class InvertModifier extends ModifierWithKey<number | InvertOptions> {
+  constructor(value: number | InvertOptions) {
     super(value);
   }
   static identity: Symbol = Symbol('invert');
@@ -542,8 +557,22 @@ class InvertModifier extends ModifierWithKey<number> {
     if (reset) {
       getUINativeModule().common.resetInvert(node);
     } else {
-      getUINativeModule().common.setInvert(node, this.value);
+      if(isNumber(this.value)) {
+        getUINativeModule().common.setInvert(node, this.value, undefined, undefined, undefined, undefined);
+      } else {
+        getUINativeModule().common.setInvert(node, undefined,
+          (this.value as InvertOptions).low,
+          (this.value as InvertOptions).high,
+          (this.value as InvertOptions).threshold,
+          (this.value as InvertOptions).thresholdRange);
+      }
     }
+  }
+  checkObjectDiff(): boolean {
+    return !((this.stageValue as InvertOptions).high == (this.value as InvertOptions).high &&
+      (this.stageValue as InvertOptions).low == (this.value as InvertOptions).low &&
+      (this.stageValue as InvertOptions).threshold == (this.value as InvertOptions).threshold &&
+      (this.stageValue as InvertOptions).thresholdRange == (this.value as InvertOptions).thresholdRange);
   }
 }
 
@@ -635,8 +664,8 @@ class BrightnessModifier extends ModifierWithKey<number> {
   }
 }
 
-class BlurModifier extends ModifierWithKey<number> {
-  constructor(value: number) {
+class BlurModifier extends ModifierWithKey<ArkBlurOptions> {
+  constructor(value: ArkBlurOptions) {
     super(value);
   }
   static identity: Symbol = Symbol('blur');
@@ -644,8 +673,12 @@ class BlurModifier extends ModifierWithKey<number> {
     if (reset) {
       getUINativeModule().common.resetBlur(node);
     } else {
-      getUINativeModule().common.setBlur(node, this.value);
+      getUINativeModule().common.setBlur(node, this.value.value, this.value.options?.grayscale);
     }
+  }
+  checkObjectDiff(): boolean {
+    return !((this.stageValue.value === this.value.value) &&
+      (this.stageValue.options === this.value.options));
   }
 }
 
@@ -1106,7 +1139,8 @@ class ForegroundBlurStyleModifier extends ModifierWithKey<ArkForegroundBlurStyle
       getUINativeModule().common.resetForegroundBlurStyle(node);
     } else {
       getUINativeModule().common.setForegroundBlurStyle(node,
-        this.value.blurStyle, this.value.colorMode, this.value.adaptiveColor, this.value.scale);
+        this.value.blurStyle, this.value.colorMode, this.value.adaptiveColor, this.value.scale,
+          this.value.blurOptions?.grayscale);
     }
   }
 
@@ -1114,7 +1148,8 @@ class ForegroundBlurStyleModifier extends ModifierWithKey<ArkForegroundBlurStyle
     return !((this.stageValue as ArkForegroundBlurStyle).blurStyle === (this.value as ArkForegroundBlurStyle).blurStyle &&
       (this.stageValue as ArkForegroundBlurStyle).colorMode === (this.value as ArkForegroundBlurStyle).colorMode &&
       (this.stageValue as ArkForegroundBlurStyle).adaptiveColor === (this.value as ArkForegroundBlurStyle).adaptiveColor &&
-      (this.stageValue as ArkForegroundBlurStyle).scale === (this.value as ArkForegroundBlurStyle).scale);
+      (this.stageValue as ArkForegroundBlurStyle).scale === (this.value as ArkForegroundBlurStyle).scale &&
+      (this.stageValue as ArkForegroundBlurStyle).blurOptions === (this.value as ArkForegroundBlurStyle).blurOptions);
   }
 }
 
@@ -1186,7 +1221,8 @@ class BackgroundBlurStyleModifier extends ModifierWithKey<ArkBackgroundBlurStyle
       getUINativeModule().common.resetBackgroundBlurStyle(node);
     } else {
       getUINativeModule().common.setBackgroundBlurStyle(node,
-        this.value.blurStyle, this.value.colorMode, this.value.adaptiveColor, this.value.scale);
+        this.value.blurStyle, this.value.colorMode, this.value.adaptiveColor, this.value.scale,
+          this.value.blurOptions?.grayscale);
     }
   }
 }
@@ -1282,8 +1318,8 @@ class RotateModifier extends ModifierWithKey<RotateOptions> {
   }
 }
 
-class GeometryTransitionModifier extends ModifierWithKey<string> {
-  constructor(value: string) {
+class GeometryTransitionModifier extends ModifierWithKey<ArkGeometryTransition> {
+  constructor(value: ArkGeometryTransition) {
     super(value);
   }
   static identity: Symbol = Symbol('geometryTransition');
@@ -1291,7 +1327,8 @@ class GeometryTransitionModifier extends ModifierWithKey<string> {
     if (reset) {
       getUINativeModule().common.resetGeometryTransition(node);
     } else {
-      getUINativeModule().common.setGeometryTransition(node, this.value);
+      getUINativeModule().common.setGeometryTransition(node, this.value.id, 
+        (this.value.options as GeometryTransitionOptions)?.follow);
     }
   }
 }
@@ -1574,11 +1611,7 @@ class FocusableModifier extends ModifierWithKey<boolean> {
   }
   static identity: Symbol = Symbol('focusable');
   applyPeer(node: KNode, reset: boolean): void {
-    if (reset) {
-      getUINativeModule().common.resetFocusable(node);
-    } else {
-      getUINativeModule().common.setFocusable(node, this.value);
-    }
+    getUINativeModule().common.setFocusable(node, this.value);
   }
 }
 
@@ -2379,7 +2412,7 @@ function modifier<T extends number | string | boolean | Equable, M extends Modif
 }
 
 function modifierWithKey<T extends number | string | boolean | object, M extends ModifierWithKey<T>>(
-  modifiers: Map<Symbol, ModifierWithKey<number | string | boolean | object>>,
+  modifiers: Map<Symbol, AttributeModifierWithKey>,
   identity: Symbol,
   modifierClass: new (value: T) => M,
   value: T
@@ -2395,24 +2428,40 @@ function modifierWithKey<T extends number | string | boolean | object, M extends
 
 class ArkComponent implements CommonMethod<CommonAttribute> {
   _modifiers: Map<Symbol, Modifier<number | string | boolean | Equable>>;
-  _modifiersWithKeys: Map<Symbol, ModifierWithKey<number | string | boolean | object>>;
+  _modifiersWithKeys: Map<Symbol, AttributeModifierWithKey>;
   _changed: boolean;
   nativePtr: KNode;
+  _weakPtr: JsPointerClass;
+  _classType: ModifierType | undefined;
+  _nativePtrChanged: boolean;
 
-  constructor(nativePtr: KNode) {
+  constructor(nativePtr: KNode, classType?: ModifierType) {
     this._modifiers = new Map();
     this._modifiersWithKeys = new Map();
     this.nativePtr = nativePtr;
     this._changed = false;
+    this._classType = classType;
+    if (classType === ModifierType.STATE) {
+      this._weakPtr = getUINativeModule().nativeUtils.createNativeWeakRef(nativePtr);
+    }
+    this._nativePtrChanged = false;
   }
 
-  cleanStageValue(){
+  cleanStageValue(): void {
     if (!this._modifiersWithKeys){
       return;
     }
     this._modifiersWithKeys.forEach((value, key) => {
         value.stageValue = undefined;
     });
+  }
+
+  applyStateUpdatePtr(instance: ArkComponent): void {
+    if (this.nativePtr !== instance.nativePtr) {
+      this.nativePtr = instance.nativePtr;
+      this._nativePtrChanged = true;
+      this._weakPtr = getUINativeModule().nativeUtils.createNativeWeakRef(instance.nativePtr);
+    }
   }
 
   applyModifierPatch(): void {
@@ -2479,6 +2528,7 @@ class ArkComponent implements CommonMethod<CommonAttribute> {
         }
         if (safeAreaType) {
           safeAreaType += '|';
+          safeAreaType += param.toString();
         } else {
           safeAreaType += param.toString();
         }
@@ -2494,6 +2544,7 @@ class ArkComponent implements CommonMethod<CommonAttribute> {
         }
         if (safeAreaEdge) {
           safeAreaEdge += '|';
+          safeAreaEdge += param.toString();
         } else {
           safeAreaEdge += param.toString();
         }
@@ -2659,6 +2710,7 @@ class ArkComponent implements CommonMethod<CommonAttribute> {
       arkBackgroundBlurStyle.colorMode = options.colorMode;
       arkBackgroundBlurStyle.adaptiveColor = options.adaptiveColor;
       arkBackgroundBlurStyle.scale = options.scale;
+      arkBackgroundBlurStyle.blurOptions = options.blurOptions;
     }
     modifierWithKey(this._modifiersWithKeys, BackgroundBlurStyleModifier.identity,
       BackgroundBlurStyleModifier, arkBackgroundBlurStyle);
@@ -2677,6 +2729,7 @@ class ArkComponent implements CommonMethod<CommonAttribute> {
       arkForegroundBlurStyle.colorMode = options.colorMode;
       arkForegroundBlurStyle.adaptiveColor = options.adaptiveColor;
       arkForegroundBlurStyle.scale = options.scale;
+      arkForegroundBlurStyle.blurOptions = options.blurOptions;
     }
     modifierWithKey(this._modifiersWithKeys, ForegroundBlurStyleModifier.identity,
       ForegroundBlurStyleModifier, arkForegroundBlurStyle);
@@ -2883,12 +2936,11 @@ class ArkComponent implements CommonMethod<CommonAttribute> {
     throw new Error('Method not implemented.');
   }
 
-  blur(value: number): this {
-    if (!isNumber(value)) {
-      modifierWithKey(this._modifiersWithKeys, BlurModifier.identity, BlurModifier, undefined);
-    } else {
-      modifierWithKey(this._modifiersWithKeys, BlurModifier.identity, BlurModifier, value);
-    }
+  blur(value: number, options?: BlurOptions): this {
+    let blur: ArkBlurOptions = new ArkBlurOptions();
+    blur.value = value;
+    blur.options = options;
+    modifierWithKey(this._modifiersWithKeys, BlurModifier.identity, BlurModifier, blur);
     return this;
   }
 
@@ -2957,11 +3009,11 @@ class ArkComponent implements CommonMethod<CommonAttribute> {
     return this;
   }
 
-  invert(value: number): this {
-    if (!isNumber(value)) {
-      modifierWithKey(this._modifiersWithKeys, InvertModifier.identity, InvertModifier, undefined);
-    } else {
+  invert(value: number | InvertOptions): this {
+    if (!isUndefined(value)) {
       modifierWithKey(this._modifiersWithKeys, InvertModifier.identity, InvertModifier, value);
+    } else {
+      modifierWithKey(this._modifiersWithKeys, InvertModifier.identity, InvertModifier, undefined);
     }
     return this;
   }
@@ -2980,12 +3032,11 @@ class ArkComponent implements CommonMethod<CommonAttribute> {
     return this;
   }
 
-  backdropBlur(value: number): this {
-    if (!isNumber(value)) {
-      modifierWithKey(this._modifiersWithKeys, BackdropBlurModifier.identity, BackdropBlurModifier, undefined);
-    } else {
-      modifierWithKey(this._modifiersWithKeys, BackdropBlurModifier.identity, BackdropBlurModifier, value);
-    }
+  backdropBlur(value: number, options?: BlurOptions): this {
+    let blur: ArkBlurOptions = new ArkBlurOptions();
+    blur.value = value;
+    blur.options = options;
+    modifierWithKey(this._modifiersWithKeys, BackdropBlurModifier.identity, BackdropBlurModifier, blur);
     return this;
   }
 
@@ -3347,10 +3398,11 @@ class ArkComponent implements CommonMethod<CommonAttribute> {
     return this;
   }
 
-  geometryTransition(id: string): this {
-    if (isString(id)) {
-      modifierWithKey(this._modifiersWithKeys, GeometryTransitionModifier.identity, GeometryTransitionModifier, id);
-    }
+  geometryTransition(id: string, options?: GeometryTransitionOptions): this {
+    let arkGeometryTransition = new ArkGeometryTransition();
+    arkGeometryTransition.id = id;
+    arkGeometryTransition.options = options;
+    modifierWithKey(this._modifiersWithKeys, GeometryTransitionModifier.identity, GeometryTransitionModifier, arkGeometryTransition);
     return this;
   }
 
@@ -3504,30 +3556,63 @@ class UICommonEvent {
     this._nodePtr = nodePtr;
   }
   setOnClick(callback: (event?: ClickEvent) => void): void {
-    getUINativeModule().frameNode.setOnClick(this._nodePtr, callback);
+    getUINativeModule().frameNode.setOnClick(this._nodePtr, callback, this._instanceId);
   }
   setOnTouch(callback: (event?: TouchEvent) => void): void {
-    getUINativeModule().frameNode.setOnTouch(this._nodePtr, callback);
+    getUINativeModule().frameNode.setOnTouch(this._nodePtr, callback, this._instanceId);
   }
   setOnAppear(callback: () => void): void {
-    getUINativeModule().frameNode.setOnAppear(this._nodePtr, callback);
+    getUINativeModule().frameNode.setOnAppear(this._nodePtr, callback, this._instanceId);
   }
   setOnDisappear(callback: () => void): void {
-    getUINativeModule().frameNode.setOnDisappear(this._nodePtr, callback);
+    getUINativeModule().frameNode.setOnDisappear(this._nodePtr, callback, this._instanceId);
   }
   setOnKeyEvent(callback: (event?: KeyEvent) => void): void {
-    getUINativeModule().frameNode.setOnKeyEvent(this._nodePtr, callback);
+    getUINativeModule().frameNode.setOnKeyEvent(this._nodePtr, callback, this._instanceId);
   }
   setOnFocus(callback: () => void): void {
-    getUINativeModule().frameNode.setOnFocus(this._nodePtr, callback);
+    getUINativeModule().frameNode.setOnFocus(this._nodePtr, callback, this._instanceId);
   }
   setOnBlur(callback: () => void): void {
-    getUINativeModule().frameNode.setOnBlur(this._nodePtr, callback);
+    getUINativeModule().frameNode.setOnBlur(this._nodePtr, callback, this._instanceId);
   }
   setOnHover(callback: (isHover?: boolean, event?: HoverEvent) => void): void {
-    getUINativeModule().frameNode.setOnHover(this._nodePtr, callback);
+    getUINativeModule().frameNode.setOnHover(this._nodePtr, callback, this._instanceId);
   }
   setOnMouse(callback: (event?: MouseEvent) => void): void {
-    getUINativeModule().frameNode.setOnMouse(this._nodePtr, callback);
+    getUINativeModule().frameNode.setOnMouse(this._nodePtr, callback, this._instanceId);
+  }
+  setOnSizeChange(callback: SizeChangeCallback): void {
+    getUINativeModule().frameNode.setOnSizeChange(this._nodePtr, callback, this._instanceId);
+  }
+}
+
+function attributeModifierFunc<T>(modifier: AttributeModifier<T>,
+  componentBuilder: (nativePtr: KNode) => ArkComponent,
+  modifierBuilder: (nativePtr: KNode, classType: ModifierType, modifierJS: ModifierJS) => ArkComponent)
+{
+  const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
+  let nativeNode = getUINativeModule().getFrameNodeById(elmtId);
+  let component = this.createOrGetNode(elmtId, () => {
+    return componentBuilder(nativeNode);
+  });
+  if (modifier.isAttributeUpdater === true) {
+    let modifierJS = globalThis.requireNapi('arkui.modifier');
+    if (modifier.modifierState === modifierJS.AttributeUpdater.StateEnum.INIT) {
+      modifier.modifierState = modifierJS.AttributeUpdater.StateEnum.UPDATE;
+      modifier.attribute = modifierBuilder(nativeNode, ModifierType.STATE, modifierJS);
+      modifierJS.ModifierUtils.applySetOnChange(modifier.attribute);
+      modifier.initializeModifier(modifier.attribute);
+      applyUIAttributesInit(modifier, nativeNode, component);
+      component.applyModifierPatch();
+    } else {
+      modifier.attribute.applyStateUpdatePtr(component);
+      modifier.attribute.applyNormalAttribute(component);
+      applyUIAttributes(modifier, nativeNode, component);
+      component.applyModifierPatch();
+    }
+  } else {
+    applyUIAttributes(modifier, nativeNode, component);
+    component.applyModifierPatch();
   }
 }

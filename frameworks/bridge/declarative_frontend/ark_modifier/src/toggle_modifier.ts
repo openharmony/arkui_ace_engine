@@ -16,12 +16,13 @@
 /// <reference path='./import.ts' />
 class ToggleModifier extends ArkToggleComponent implements AttributeModifier<ToggleAttribute> {
 
-  constructor(nativePtr: KNode) {
-    super(nativePtr);
+  constructor(nativePtr: KNode, classType: ModifierType) {
+    super(nativePtr, classType);
     this._modifiersWithKeys = new ModifierMap();
   }
 
   applyNormalAttribute(instance: ToggleAttribute): void {
-    applyAndMergeModifier<ToggleAttribute, ArkToggleComponent, ArkComponent>(instance, this);
+    ModifierUtils.applySetOnChange(this);
+    ModifierUtils.applyAndMergeModifier<ToggleAttribute, ArkToggleComponent, ArkComponent>(instance, this);
   }
 }

@@ -95,6 +95,32 @@ void UIObserverHandler::NotifyDensityChange(double density)
     densityHandleFunc_(info, density);
 }
 
+void UIObserverHandler::NotifyWillClick(
+    const GestureEvent& gestureEventInfo, const ClickInfo& clickInfo, const RefPtr<FrameNode>& frameNode)
+{
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(willClickHandleFunc_);
+    AbilityContextInfo info = {
+        AceApplicationInfo::GetInstance().GetAbilityName(),
+        AceApplicationInfo::GetInstance().GetProcessName(),
+        Container::Current()->GetModuleName()
+    };
+    willClickHandleFunc_(info, gestureEventInfo, clickInfo, frameNode);
+}
+
+void UIObserverHandler::NotifyDidClick(
+    const GestureEvent& gestureEventInfo, const ClickInfo& clickInfo, const RefPtr<FrameNode>& frameNode)
+{
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(didClickHandleFunc_);
+    AbilityContextInfo info = {
+        AceApplicationInfo::GetInstance().GetAbilityName(),
+        AceApplicationInfo::GetInstance().GetProcessName(),
+        Container::Current()->GetModuleName()
+    };
+    didClickHandleFunc_(info, gestureEventInfo, clickInfo, frameNode);
+}
+
 std::shared_ptr<NavDestinationInfo> UIObserverHandler::GetNavigationState(const RefPtr<AceType>& node)
 {
     CHECK_NULL_RETURN(node, nullptr);
@@ -231,6 +257,16 @@ void UIObserverHandler::SetLayoutDoneHandleFunc(LayoutDoneHandleFunc func)
 void UIObserverHandler::SetHandleNavDestinationSwitchFunc(NavDestinationSwitchHandleFunc func)
 {
     navDestinationSwitchHandleFunc_ = func;
+}
+
+void UIObserverHandler::SetWillClickFunc(WillClickHandleFunc func)
+{
+    willClickHandleFunc_ = func;
+}
+
+void UIObserverHandler::SetDidClickFunc(DidClickHandleFunc func)
+{
+    didClickHandleFunc_ = func;
 }
 
 napi_value UIObserverHandler::GetUIContextValue()

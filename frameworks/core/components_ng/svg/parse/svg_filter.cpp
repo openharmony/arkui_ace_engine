@@ -41,11 +41,11 @@ void SvgFilter::OnInitStyle()
     y_ = declaration->GetY();
     height_ = declaration->GetHeight();
     width_ = declaration->GetWidth();
-    OnAsPaint();
 }
 
 void SvgFilter::OnDrawTraversed(RSCanvas& canvas, const Size& viewPort, const std::optional<Color>& color)
 {
+    OnAsPaint();
 }
 
 void SvgFilter::OnDrawTraversedBefore(RSCanvas& canvas, const Size& viewPort, const std::optional<Color>& color)
@@ -73,12 +73,14 @@ void SvgFilter::OnAsPaint()
 #endif
     ColorInterpolationType currentColor = ColorInterpolationType::SRGB;
 
+    std::unordered_map<std::string, std::shared_ptr<RSImageFilter>> resultHash;
+
     for (const auto& item : children_) {
         auto nodeFe = AceType::DynamicCast<SvgFe>(item);
         if (!nodeFe) {
             continue;
         }
-        nodeFe->GetImageFilter(imageFilter, currentColor);
+        nodeFe->GetImageFilter(imageFilter, currentColor, resultHash);
     }
 
     SvgFe::ConverImageFilterColor(imageFilter, currentColor, ColorInterpolationType::SRGB);

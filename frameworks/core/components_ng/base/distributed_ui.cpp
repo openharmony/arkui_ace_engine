@@ -187,7 +187,7 @@ void DistributedUI::OnTreeUpdate()
         return;
     }
 
-#ifdef ACE_DEBUG_LOG
+#ifdef ACE_DEBUG
     auto timeStart = std::chrono::high_resolution_clock::now();
 #endif
 
@@ -206,7 +206,7 @@ void DistributedUI::OnTreeUpdate()
         updateType = UpdateType::PAGE_UPDATE;
     }
 
-#ifdef ACE_DEBUG_LOG
+#ifdef ACE_DEBUG
     auto timeEnd = std::chrono::high_resolution_clock::now();
     timeStart = timeEnd;
 #endif
@@ -215,7 +215,7 @@ void DistributedUI::OnTreeUpdate()
         onUpdateCb_(updateType, update);
     }
 
-#ifdef ACE_DEBUG_LOG
+#ifdef ACE_DEBUG
     timeEnd = std::chrono::high_resolution_clock::now();
 #endif
 }
@@ -235,7 +235,7 @@ int32_t DistributedUI::GetCurrentPageId()
 
 void DistributedUI::BypassEvent(const TouchEvent& point, bool isSubPipe)
 {
-#ifdef ACE_DEBUG_LOG
+#ifdef ACE_DEBUG
     auto timeStart = std::chrono::high_resolution_clock::now();
 #endif
 
@@ -245,7 +245,7 @@ void DistributedUI::BypassEvent(const TouchEvent& point, bool isSubPipe)
     SerializeableObjectArray eventArray;
     eventArray.push_back(std::move((std::unique_ptr<NodeObject>&)json));
 
-#ifdef ACE_DEBUG_LOG
+#ifdef ACE_DEBUG
     auto timeEnd = std::chrono::high_resolution_clock::now();
     timeStart = timeEnd;
 #endif
@@ -254,7 +254,7 @@ void DistributedUI::BypassEvent(const TouchEvent& point, bool isSubPipe)
         onEventCb_(eventArray);
     }
 
-#ifdef ACE_DEBUG_LOG
+#ifdef ACE_DEBUG
     timeEnd = std::chrono::high_resolution_clock::now();
 #endif
 }

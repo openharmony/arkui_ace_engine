@@ -147,6 +147,11 @@ void SpanModelNG::SetOnClick(std::function<void(const BaseEventInfo* info)>&& cl
     ACE_UPDATE_SPAN_PROPERTY(OnClickEvent, std::move(clickFunc), PropertyInfo::NONE);
 }
 
+void SpanModelNG::SetOnClick(UINode* uiNode, GestureEventFunc&& click)
+{
+    ACE_UPDATE_NODE_SPAN_PROPERTY(OnClickEvent, std::move(click), PropertyInfo::NONE, uiNode);
+}
+
 void SpanModelNG::ClearOnClick()
 {
     ACE_UPDATE_SPAN_PROPERTY(OnClickEvent, nullptr, PropertyInfo::NONE);

@@ -21,7 +21,7 @@
 namespace OHOS::Ace {
 bool LeastSquareImpl::GetLeastSquareParams(std::vector<double>& params)
 {
-    if (xVals_.size() < paramsNum_ || ((paramsNum_ != Matrix3::DIMENSION) && (paramsNum_ != Matrix4::DIMENSION))) {
+    if (xVals_.size() <= 1 || ((paramsNum_ != Matrix3::DIMENSION) && (paramsNum_ != Matrix4::DIMENSION))) {
         return false;
     }
     params.resize(paramsNum_, 0);

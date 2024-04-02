@@ -15,6 +15,7 @@
 
 #include "core/components_ng/pattern/rich_editor/rich_editor_content_modifier.h"
 #include "core/components_ng/pattern/rich_editor/rich_editor_pattern.h"
+#include "base/log/ace_trace.h"
 
 namespace OHOS::Ace::NG {
 RichEditorContentModifier::RichEditorContentModifier(const std::optional<TextStyle>& textStyle,
@@ -35,6 +36,7 @@ RichEditorContentModifier::RichEditorContentModifier(const std::optional<TextSty
 
 void RichEditorContentModifier::onDraw(DrawingContext& drawingContext)
 {
+    ACE_SCOPED_TRACE("RichEditorContentOnDraw");
     CHECK_NULL_VOID(pManager_);
     auto richEditorPattern = AceType::DynamicCast<RichEditorPattern>(pattern_.Upgrade());
     CHECK_NULL_VOID(richEditorPattern);

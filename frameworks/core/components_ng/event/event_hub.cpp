@@ -292,9 +292,30 @@ void EventHub::FireOnSizeChanged(const RectF& oldRect, const RectF& rect)
     }
 }
 
+void EventHub::SetJSFrameNodeOnSizeChangeCallback(OnSizeChangedFunc&& onSizeChanged)
+{
+    onJsFrameNodeSizeChanged_ = std::move(onSizeChanged);
+}
+
+void EventHub::FireJSFrameNodeOnSizeChanged(const RectF& oldRect, const RectF& rect)
+{
+    if (onJsFrameNodeSizeChanged_) {
+        // callback may be overwritten in its invoke so we copy it first
+        auto onSizeChanged = onJsFrameNodeSizeChanged_;
+        onSizeChanged(oldRect, rect);
+    }
+}
+
+void EventHub::ClearJSFrameNodeOnSizeChange()
+{
+    if (onJsFrameNodeSizeChanged_) {
+        onJsFrameNodeSizeChanged_ = nullptr;
+    }
+}
+
 bool EventHub::HasOnSizeChanged() const
 {
-    return static_cast<bool>(onSizeChanged_);
+    return static_cast<bool>(onSizeChanged_) || static_cast<bool>(onJsFrameNodeSizeChanged_);
 }
 
 void EventHub::ClearOnAreaChangedInnerCallbacks()
@@ -329,26 +350,26 @@ void EventHub::ClearJSFrameNodeOnDisappear()
 void EventHub::FireOnAppear()
 {
     if (onAppear_ || onJSFrameNodeAppear_) {
-        auto pipeline = PipelineBase::GetCurrentContextSafely();
+        auto* host = UnsafeRawPtr(host_);
+        CHECK_NULL_VOID(host);
+        auto* pipeline = host->GetContext();
         CHECK_NULL_VOID(pipeline);
         auto taskScheduler = pipeline->GetTaskExecutor();
         CHECK_NULL_VOID(taskScheduler);
-        taskScheduler->PostTask(
-            [weak = WeakClaim(this)]() {
-                auto eventHub = weak.Upgrade();
-                CHECK_NULL_VOID(eventHub);
-                if (eventHub->onAppear_) {
-                    // callback may be overwritten in its invoke so we copy it first
-                    auto onAppear = eventHub->onAppear_;
-                    onAppear();
-                }
-                if (eventHub->onJSFrameNodeAppear_) {
-                    // callback may be overwritten in its invoke so we copy it first
-                    auto onJSFrameNodeAppear = eventHub->onJSFrameNodeAppear_;
-                    onJSFrameNodeAppear();
-                }
-            },
-            TaskExecutor::TaskType::UI);
+        pipeline->SetBuildAfterCallback([weak = WeakClaim(this)]() {
+            auto eventHub = weak.Upgrade();
+            CHECK_NULL_VOID(eventHub);
+            if (eventHub->onAppear_) {
+                // callback may be overwritten in its invoke so we copy it first
+                auto onAppear = eventHub->onAppear_;
+                onAppear();
+            }
+            if (eventHub->onJSFrameNodeAppear_) {
+                // callback may be overwritten in its invoke so we copy it first
+                auto onJSFrameNodeAppear = eventHub->onJSFrameNodeAppear_;
+                onJSFrameNodeAppear();
+            }
+        });
     }
 }
 

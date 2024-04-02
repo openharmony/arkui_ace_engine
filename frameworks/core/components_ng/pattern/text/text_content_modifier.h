@@ -37,6 +37,8 @@ public:
 
     void SetFontFamilies(const std::vector<std::string>& value);
     void SetFontSize(const Dimension& value);
+    void SetAdaptMinFontSize(const Dimension& value);
+    void SetAdaptMaxFontSize(const Dimension& value);
     void SetFontWeight(const FontWeight& value);
     void SetTextColor(const Color& value);
     void SetTextShadow(const std::vector<Shadow>& value);
@@ -86,6 +88,10 @@ public:
     void SetFontReady(bool value);
     void ChangeDragStatus();
 
+    void SetImageSpanNodeList(std::vector<WeakPtr<FrameNode>> imageNodeList)
+    {
+        imageNodeList_ = imageNodeList;
+    }
 protected:
     OffsetF GetPaintOffset() const
     {
@@ -95,6 +101,8 @@ private:
     double NormalizeToPx(const Dimension& dimension);
     void SetDefaultAnimatablePropertyValue(const TextStyle& textStyle);
     void SetDefaultFontSize(const TextStyle& textStyle);
+    void SetDefaultAdaptMinFontSize(const TextStyle& textStyle);
+    void SetDefaultAdaptMaxFontSize(const TextStyle& textStyle);
     void SetDefaultFontWeight(const TextStyle& textStyle);
     void SetDefaultTextColor(const TextStyle& textStyle);
     void SetDefaultTextShadow(const TextStyle& textStyle);
@@ -106,6 +114,8 @@ private:
     float GetTextRacePercent();
 
     void ModifyFontSizeInTextStyle(TextStyle& textStyle);
+    void ModifyAdaptMinFontSizeInTextStyle(TextStyle& textStyle);
+    void ModifyAdaptMaxFontSizeInTextStyle(TextStyle& textStyle);
     void ModifyFontWeightInTextStyle(TextStyle& textStyle);
     void ModifyTextColorInTextStyle(TextStyle& textStyle);
     void ModifyTextShadowsInTextStyle(TextStyle& textStyle);
@@ -113,6 +123,8 @@ private:
     void ModifyBaselineOffsetInTextStyle(TextStyle& textStyle);
 
     void UpdateFontSizeMeasureFlag(PropertyChangeFlag& flag);
+    void UpdateAdaptMinFontSizeMeasureFlag(PropertyChangeFlag& flag);
+    void UpdateAdaptMaxFontSizeMeasureFlag(PropertyChangeFlag& flag);
     void UpdateFontWeightMeasureFlag(PropertyChangeFlag& flag);
     void UpdateTextColorMeasureFlag(PropertyChangeFlag& flag);
     void UpdateTextShadowMeasureFlag(PropertyChangeFlag& flag);
@@ -120,9 +132,18 @@ private:
     void UpdateBaselineOffsetMeasureFlag(PropertyChangeFlag& flag);
 
     void DrawObscuration(DrawingContext& drawingContext);
+    void ResetImageNodeList();
+    void DrawImageNodeList(const float drawingContextWidth,
+        const float paragraph1Offset, const float paragraph2Offset);
 
     std::optional<Dimension> fontSize_;
     RefPtr<AnimatablePropertyFloat> fontSizeFloat_;
+
+    std::optional<Dimension> adaptMinFontSize_;
+    RefPtr<AnimatablePropertyFloat> adaptMinFontSizeFloat_;
+
+    std::optional<Dimension> adaptMaxFontSize_;
+    RefPtr<AnimatablePropertyFloat> adaptMaxFontSizeFloat_;
 
     std::optional<FontWeight> fontWeight_;
     RefPtr<AnimatablePropertyFloat> fontWeightFloat_;
@@ -168,7 +189,7 @@ private:
     std::vector<ObscuredReasons> obscuredReasons_;
     bool ifHaveSpanItemChildren_ = false;
     std::vector<RectF> drawObscuredRects_;
-
+    std::vector<WeakPtr<FrameNode>> imageNodeList_;
     ACE_DISALLOW_COPY_AND_MOVE(TextContentModifier);
 };
 } // namespace OHOS::Ace::NG

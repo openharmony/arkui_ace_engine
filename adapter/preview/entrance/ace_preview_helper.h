@@ -27,10 +27,21 @@ using CallbackTypePostTask = std::function<void(const std::function<void()>&, in
 using CallbackTypeHspBufferTracker = std::function<bool(const std::string&, uint8_t**, size_t*)>;
 using CallbackTypeSetClipboardData = std::function<void(const std::string&)>;
 using CallbackTypeGetClipboardData = std::function<const std::string(void)>;
+using CallbackFlushEmpty = std::function<bool(const uint64_t)>;
 class ACE_FORCE_EXPORT AcePreviewHelper {
 public:
     static AcePreviewHelper* GetInstance();
     ~AcePreviewHelper() = default;
+
+    void SetCallbackFlushEmpty(const CallbackFlushEmpty&& flushEmpty)
+    {
+        flushEmpty_ =  flushEmpty;
+    }
+
+    CallbackFlushEmpty GetCallbackFlushEmpty()
+    {
+        return flushEmpty_;
+    }
 
     void SetCallbackOfPostTask(const CallbackTypePostTask&& postTask)
     {
@@ -92,6 +103,7 @@ private:
     CallbackTypeHspBufferTracker hspBufferTracker_ = nullptr;
     CallbackTypeSetClipboardData setClipboardData_ = nullptr;
     CallbackTypeGetClipboardData getClipboardData_ = nullptr;
+    CallbackFlushEmpty flushEmpty_ = nullptr;
 };
 } // namespace OHOS::Ace::Platform
 #endif // FOUNDATION_ACE_ADAPTER_PREVIEW_ACE_PREVIEW_HELPER_H

@@ -79,7 +79,7 @@ using AnimationEndEvent = std::function<void(int32_t index, const AnimationCallb
 using AnimationEndEventPtr = std::shared_ptr<AnimationEndEvent>;
 using GestureSwipeEvent = std::function<void(int32_t index, const AnimationCallbackInfo& info)>;
 using ContentDidScrollEvent =
-    std::function<void(int32_t selectedIndex, int32_t index, float position,float mainLength)>;
+    std::function<void(int32_t selectedIndex, int32_t index, float position, float mainAxisLength)>;
 
 class ACE_EXPORT SwiperModel {
 public:

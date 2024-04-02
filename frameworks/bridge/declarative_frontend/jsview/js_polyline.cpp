@@ -47,11 +47,12 @@ void JSPolyline::JSBind(BindingTarget globalObj)
 
 void JSPolyline::JSPoints(const JSCallbackInfo& info)
 {
+    ShapePoints points;
+    PolygonModel::GetInstance()->SetPoints(points);
     if (info.Length() < 1 || !info[0]->IsArray()) {
         return;
     }
     ShapePoint point;
-    ShapePoints points;
 
     JSRef<JSArray> pointsArray = JSRef<JSArray>::Cast(info[0]);
     if (pointsArray->Length() < 2) {

@@ -26,6 +26,8 @@
 #include "core/components_ng/pattern/button/button_layout_property.h"
 #include "core/components_ng/pattern/image/image_pattern.h"
 #include "core/components_ng/pattern/pattern.h"
+#include "core/components_ng/pattern/progress/progress_paint_property.h"
+#include "core/components_ng/pattern/side_bar/side_bar_container_paint_method.h"
 #include "core/components_ng/pattern/side_bar/side_bar_container_layout_property.h"
 #include "core/components_ng/pattern/side_bar/side_bar_container_model_ng.h"
 #include "core/components_ng/pattern/side_bar/side_bar_container_pattern.h"
@@ -1706,5 +1708,128 @@ HWTEST_F(SideBarPatternTestNg, SideBarPatternTestNg056, TestSize.Level1)
     frameNode->children_.push_back(uINode);
     auto sideBarNode = pattern->GetControlButtonNode();
     EXPECT_EQ(sideBarNode, nullptr);
+}
+
+/**
+ * @tc.name: SideBarContainerPaintMethodNg001
+ * @tc.desc: Test SideBarContainerPaintMethod ClipPadding
+ * @tc.type: FUNC
+ */
+HWTEST_F(SideBarPatternTestNg, SideBarContainerPaintMethodNg001, TestSize.Level1)
+{
+    SideBarContainerPaintMethod sideBarContainerPaintMethod;
+    auto pattern = AceType::MakeRefPtr<SideBarContainerPattern>();
+    EXPECT_FALSE(pattern == nullptr);
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode = FrameNode::CreateFrameNode("Test", nodeId, pattern);
+    EXPECT_FALSE(frameNode == nullptr);
+    WeakPtr<RenderContext> renderContext;
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    ASSERT_NE(geometryNode, nullptr);
+    auto pickerPaintProperty = frameNode->GetPaintProperty<PaintProperty>();
+    ASSERT_NE(pickerPaintProperty, nullptr);
+    PaintWrapper* paintWrapper = new PaintWrapper(renderContext, geometryNode, pickerPaintProperty);
+    ASSERT_NE(paintWrapper, nullptr);
+    RSCanvas canvas;
+    sideBarContainerPaintMethod.needClipPadding_ = false;
+    sideBarContainerPaintMethod.ClipPadding(paintWrapper, canvas);
+}
+
+/**
+ * @tc.name: SideBarContainerPaintMethodNg002
+ * @tc.desc: Test SideBarContainerPaintMethod ClipPadding
+ * @tc.type: FUNC
+ */
+HWTEST_F(SideBarPatternTestNg, SideBarContainerPaintMethodNg002, TestSize.Level1)
+{
+    SideBarContainerPaintMethod sideBarContainerPaintMethod;
+    auto pattern = AceType::MakeRefPtr<SideBarContainerPattern>();
+    EXPECT_FALSE(pattern == nullptr);
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode = FrameNode::CreateFrameNode("Test", nodeId, pattern);
+    EXPECT_FALSE(frameNode == nullptr);
+    WeakPtr<RenderContext> renderContext;
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    ASSERT_NE(geometryNode, nullptr);
+    auto pickerPaintProperty = frameNode->GetPaintProperty<PaintProperty>();
+    ASSERT_NE(pickerPaintProperty, nullptr);
+    PaintWrapper* paintWrapper = new PaintWrapper(renderContext, geometryNode, pickerPaintProperty);
+    ASSERT_NE(paintWrapper, nullptr);
+    RSCanvas canvas;
+    sideBarContainerPaintMethod.needClipPadding_ = true;
+    sideBarContainerPaintMethod.ClipPadding(paintWrapper, canvas);
+}
+
+/**
+ * @tc.name: SideBarContainerPaintMethodNg003
+ * @tc.desc: Test SideBarContainerPaintMethod ClipPadding
+ * @tc.type: FUNC
+ */
+HWTEST_F(SideBarPatternTestNg, SideBarContainerPaintMethodNg003, TestSize.Level1)
+{
+    SideBarContainerPaintMethod sideBarContainerPaintMethod;
+    auto pattern = AceType::MakeRefPtr<SideBarContainerPattern>();
+    EXPECT_FALSE(pattern == nullptr);
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode = FrameNode::CreateFrameNode("Test", nodeId, pattern);
+    EXPECT_FALSE(frameNode == nullptr);
+    auto renderContext_ = AceType::MakeRefPtr<RenderContext>();
+    WeakPtr<RenderContext> renderContext = AceType::WeakClaim(AceType::RawPtr(renderContext_));
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    ASSERT_NE(geometryNode, nullptr);
+    auto pickerPaintProperty = frameNode->GetPaintProperty<PaintProperty>();
+    ASSERT_NE(pickerPaintProperty, nullptr);
+    PaintWrapper* paintWrapper = new PaintWrapper(renderContext, geometryNode, pickerPaintProperty);
+    ASSERT_NE(paintWrapper, nullptr);
+    RSCanvas canvas;
+    sideBarContainerPaintMethod.needClipPadding_ = true;
+    sideBarContainerPaintMethod.ClipPadding(paintWrapper, canvas);
+}
+
+/**
+ * @tc.name: SideBarContainerPattern001
+ * @tc.desc: Test SideBarContainerPattern OnUpdateShowSideBar
+ * @tc.type: FUNC
+ */
+HWTEST_F(SideBarPatternTestNg, SideBarContainerPattern001, TestSize.Level1)
+{
+    SideBarContainerModelNG sideBarContainerModelInstance;
+    auto pattern = AceType::MakeRefPtr<SideBarContainerPattern>();
+    EXPECT_FALSE(pattern == nullptr);
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode = FrameNode::CreateFrameNode("Test", nodeId, pattern);
+    EXPECT_FALSE(frameNode == nullptr);
+    auto sideBarLayoutProperty = frameNode->GetLayoutProperty<SideBarContainerLayoutProperty>();
+    ASSERT_NE(sideBarLayoutProperty, nullptr);
+    pattern->hasInit_ = false;
+    pattern->showSideBar_ = false;
+    pattern->sideBarStatus_ = SideBarStatus::AUTO;
+    pattern->OnUpdateShowSideBar(sideBarLayoutProperty);
+}
+
+/**
+ * @tc.name: SideBarContainerPattern002
+ * @tc.desc: Test SideBarContainerPattern OnUpdateShowSideBar
+ * @tc.type: FUNC
+ */
+HWTEST_F(SideBarPatternTestNg, SideBarContainerPattern002, TestSize.Level1)
+{
+    SideBarContainerModelNG sideBarContainerModelInstance;
+    auto pattern = AceType::MakeRefPtr<SideBarContainerPattern>();
+    EXPECT_FALSE(pattern == nullptr);
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode = FrameNode::CreateFrameNode("Test", nodeId, pattern);
+    EXPECT_FALSE(frameNode == nullptr);
+    auto sideBarLayoutProperty = frameNode->GetLayoutProperty<SideBarContainerLayoutProperty>();
+    ASSERT_NE(sideBarLayoutProperty, nullptr);
+    pattern->hasInit_ = true;
+    pattern->showSideBar_ = false;
+    pattern->sideBarStatus_ = SideBarStatus::HIDDEN;
+    pattern->OnUpdateShowSideBar(sideBarLayoutProperty);
 }
 } // namespace OHOS::Ace::NG

@@ -72,9 +72,10 @@ void SliderModelNG::SetBlockColor(const Color& value)
 {
     ACE_UPDATE_PAINT_PROPERTY(SliderPaintProperty, BlockColor, value);
 }
-void SliderModelNG::SetTrackBackgroundColor(const Gradient& value)
+void SliderModelNG::SetTrackBackgroundColor(const Gradient& value, bool isResourceColor)
 {
     ACE_UPDATE_PAINT_PROPERTY(SliderPaintProperty, TrackBackgroundColor, value);
+    ACE_UPDATE_PAINT_PROPERTY(SliderPaintProperty, TrackBackgroundIsResourceColor, isResourceColor);
 }
 void SliderModelNG::SetSelectColor(const Color& value)
 {
@@ -88,9 +89,28 @@ void SliderModelNG::SetMaxLabel(float value)
 {
     ACE_UPDATE_PAINT_PROPERTY(SliderPaintProperty, Max, value);
 }
+void SliderModelNG::SetMinResponsiveDistance(float value)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto layoutProperty = frameNode->GetPaintProperty<SliderPaintProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    auto minResponse = 0.0f;
+    auto minValue = layoutProperty->GetMinValue(0.0f);
+    auto maxValue = layoutProperty->GetMaxValue(100.0f);
+    auto diff = maxValue - minValue;
+    if (LessOrEqual(value, diff) && GreatNotEqual(value, minResponse)) {
+        minResponse = value;
+    }
+    ACE_UPDATE_PAINT_PROPERTY(SliderPaintProperty, MinResponsiveDistance, minResponse);
+}
 void SliderModelNG::SetShowSteps(bool value)
 {
     ACE_UPDATE_PAINT_PROPERTY(SliderPaintProperty, ShowSteps, value);
+}
+void SliderModelNG::SetSliderInteractionMode(SliderInteraction mode)
+{
+    ACE_UPDATE_PAINT_PROPERTY(SliderPaintProperty, SliderInteractionMode, mode);
 }
 void SliderModelNG::SetShowTips(bool value, const std::optional<std::string>& content)
 {
@@ -113,8 +133,14 @@ void SliderModelNG::SetThickness(const Dimension& value)
         auto theme = pipeline->GetTheme<SliderTheme>();
         CHECK_NULL_VOID(theme);
         auto sliderMode = layoutProperty->GetSliderModeValue(SliderModel::SliderMode::OUTSET);
-        auto themeTrackThickness = sliderMode == SliderModel::SliderMode::OUTSET ? theme->GetOutsetTrackThickness()
-                                                                                 : theme->GetInsetTrackThickness();
+        Dimension themeTrackThickness;
+        if (sliderMode == SliderModel::SliderMode::OUTSET) {
+            themeTrackThickness = theme->GetOutsetTrackThickness();
+        } else if (sliderMode == SliderModel::SliderMode::INSET) {
+            themeTrackThickness = theme->GetInsetTrackThickness();
+        } else {
+            themeTrackThickness = theme->GetNoneTrackThickness();
+        }
         ACE_UPDATE_LAYOUT_PROPERTY(SliderLayoutProperty, Thickness, themeTrackThickness);
     } else {
         ACE_UPDATE_LAYOUT_PROPERTY(SliderLayoutProperty, Thickness, value);
@@ -135,6 +161,10 @@ void SliderModelNG::SetStepColor(const Color& value)
 void SliderModelNG::SetTrackBorderRadius(const Dimension& value)
 {
     ACE_UPDATE_PAINT_PROPERTY(SliderPaintProperty, TrackBorderRadius, value);
+}
+void SliderModelNG::SetSelectedBorderRadius(const Dimension& value)
+{
+    ACE_UPDATE_PAINT_PROPERTY(SliderPaintProperty, SelectedBorderRadius, value);
 }
 void SliderModelNG::SetBlockSize(const Dimension& width, const Dimension& height)
 {
@@ -217,6 +247,11 @@ void SliderModelNG::ResetTrackBorderRadius()
     ACE_RESET_PAINT_PROPERTY_WITH_FLAG(SliderPaintProperty, TrackBorderRadius, PROPERTY_UPDATE_RENDER);
 }
 
+void SliderModelNG::ResetSelectedBorderRadius()
+{
+    ACE_RESET_PAINT_PROPERTY_WITH_FLAG(SliderPaintProperty, SelectedBorderRadius, PROPERTY_UPDATE_RENDER);
+}
+
 void SliderModelNG::ResetBlockSize()
 {
     ACE_RESET_LAYOUT_PROPERTY_WITH_FLAG(SliderLayoutProperty, BlockSize, PROPERTY_UPDATE_MEASURE);
@@ -244,6 +279,16 @@ void SliderModelNG::ResetStepSize()
     ACE_RESET_PAINT_PROPERTY_WITH_FLAG(SliderPaintProperty, StepSize, PROPERTY_UPDATE_RENDER);
 }
 
+void SliderModelNG::ResetSliderInteractionMode()
+{
+    ACE_RESET_PAINT_PROPERTY_WITH_FLAG(SliderPaintProperty, SliderInteractionMode, PROPERTY_UPDATE_RENDER);
+}
+
+void SliderModelNG::ResetMinResponsiveDistance()
+{
+    ACE_RESET_PAINT_PROPERTY_WITH_FLAG(SliderPaintProperty, MinResponsiveDistance, PROPERTY_UPDATE_RENDER);
+}
+
 void SliderModelNG::SetShowTips(FrameNode* frameNode, bool value, const std::optional<std::string>& content)
 {
     ACE_UPDATE_NODE_PAINT_PROPERTY(SliderPaintProperty, ShowTips, value, frameNode);
@@ -265,8 +310,14 @@ void SliderModelNG::SetThickness(FrameNode* frameNode, const Dimension& value)
         auto theme = pipeline->GetTheme<SliderTheme>();
         CHECK_NULL_VOID(theme);
         auto sliderMode = layoutProperty->GetSliderModeValue(SliderModel::SliderMode::OUTSET);
-        auto themeTrackThickness = sliderMode == SliderModel::SliderMode::OUTSET ? theme->GetOutsetTrackThickness()
-                                                                                 : theme->GetInsetTrackThickness();
+        Dimension themeTrackThickness;
+        if (sliderMode == SliderModel::SliderMode::OUTSET) {
+            themeTrackThickness = theme->GetOutsetTrackThickness();
+        } else if (sliderMode == SliderModel::SliderMode::INSET) {
+            themeTrackThickness = theme->GetInsetTrackThickness();
+        } else {
+            themeTrackThickness = theme->GetNoneTrackThickness();
+        }
         ACE_UPDATE_NODE_LAYOUT_PROPERTY(SliderLayoutProperty, Thickness, themeTrackThickness, frameNode);
     } else {
         ACE_UPDATE_NODE_LAYOUT_PROPERTY(SliderLayoutProperty, Thickness, value, frameNode);
@@ -327,9 +378,10 @@ void SliderModelNG::SetBlockColor(FrameNode* frameNode, const Color& value)
 {
     ACE_UPDATE_NODE_PAINT_PROPERTY(SliderPaintProperty, BlockColor, value, frameNode);
 }
-void SliderModelNG::SetTrackBackgroundColor(FrameNode* frameNode, const Gradient& value)
+void SliderModelNG::SetTrackBackgroundColor(FrameNode* frameNode, const Gradient& value, bool isResourceColor)
 {
     ACE_UPDATE_NODE_PAINT_PROPERTY(SliderPaintProperty, TrackBackgroundColor, value, frameNode);
+    ACE_UPDATE_NODE_PAINT_PROPERTY(SliderPaintProperty, TrackBackgroundIsResourceColor, isResourceColor, frameNode);
 }
 void SliderModelNG::SetSelectColor(FrameNode* frameNode, const Color& value)
 {
@@ -339,6 +391,25 @@ void SliderModelNG::SetShowSteps(FrameNode* frameNode, bool value)
 {
     ACE_UPDATE_NODE_PAINT_PROPERTY(SliderPaintProperty, ShowSteps, value, frameNode);
 }
+void SliderModelNG::SetSliderInteractionMode(FrameNode* frameNode, SliderInteraction mode)
+{
+    ACE_UPDATE_NODE_PAINT_PROPERTY(SliderPaintProperty, SliderInteractionMode, mode, frameNode);
+}
+void SliderModelNG::SetMinResponsiveDistance(FrameNode* frameNode, float value)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto layoutProperty = frameNode->GetPaintProperty<SliderPaintProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    auto minResponse = 0.0f;
+    auto minValue = layoutProperty->GetMinValue(0.0f);
+    auto maxValue = layoutProperty->GetMaxValue(100.0f);
+    auto diff = maxValue - minValue;
+    if (LessOrEqual(value, diff) && GreatOrEqual(value, minResponse)) {
+        minResponse = value;
+    }
+    ACE_UPDATE_PAINT_PROPERTY(SliderPaintProperty, MinResponsiveDistance, minResponse);
+}
+
 void SliderModelNG::SetBlockImage(
     FrameNode* frameNode, const std::string& value, const std::string& bundleName, const std::string& moduleName)
 {

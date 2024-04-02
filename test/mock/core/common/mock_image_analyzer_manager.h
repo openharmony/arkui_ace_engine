@@ -32,7 +32,7 @@ public:
     void ReleaseImageAnalyzer();
     void SetImageAnalyzerConfig(void* config);
     void SetImageAnalyzerCallback(onAnalyzedCallback& callback);
-    bool isOverlayCreated();
+    bool IsOverlayCreated();
 };
 } // namespace OHOS::Ace
 #endif // FOUNDATION_ACE_ADAPTER_OHOS_OSAL_MOCK_IMAGE_ANALYZER_MANAGER_H

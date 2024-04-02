@@ -33,6 +33,27 @@ RefPtr<ViewDataWrap> ViewDataWrap::CreateViewDataWrap()
     return AceType::MakeRefPtr<ViewDataWrapOhos>();
 }
 
+AbilityBase::AutoFillType ViewDataWrap::ViewDataToType(const AbilityBase::ViewData& viewData)
+{
+    auto type = AbilityBase::AutoFillType::UNSPECIFIED;
+    for (auto it = viewData.nodes.begin(); it != viewData.nodes.end(); ++it) {
+        if (!it->value.empty()) {
+            if (type < it->autoFillType && it->autoFillType < AbilityBase::AutoFillType::FULL_STREET_ADDRESS) {
+                return it->autoFillType;
+            }
+        }
+    }
+    for (auto it = viewData.nodes.begin(); it != viewData.nodes.end(); ++it) {
+        if (!it->value.empty()) {
+            if (AbilityBase::AutoFillType::FULL_STREET_ADDRESS <= it->autoFillType &&
+                it->autoFillType <= AbilityBase::AutoFillType::FORMAT_ADDRESS) {
+                return it->autoFillType;
+            }
+        }
+    }
+    return type;
+}
+
 RefPtr<ViewDataWrap> ViewDataWrap::CreateViewDataWrap(const AbilityBase::ViewData& viewData)
 {
     return AceType::MakeRefPtr<ViewDataWrapOhos>(viewData);

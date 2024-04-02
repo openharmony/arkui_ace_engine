@@ -704,6 +704,51 @@ private:
     RefPtr<WebScreenCaptureRequest> request_;
 };
 
+class JSNativeEmbedGestureRequest : public Referenced {
+public:
+    static void JSBind(BindingTarget globalObj)
+    {
+        JSClass<JSNativeEmbedGestureRequest>::Declare("NativeEmbedGesture");
+        JSClass<JSNativeEmbedGestureRequest>::CustomMethod(
+            "setGestureEventResult", &JSNativeEmbedGestureRequest::SetGestureEventResult);
+        JSClass<JSNativeEmbedGestureRequest>::Bind(
+            globalObj, &JSNativeEmbedGestureRequest::Constructor, &JSNativeEmbedGestureRequest::Destructor);
+    }
+
+    void SetResult(const RefPtr<GestureEventResult>& result)
+    {
+        eventResult_ = result;
+    }
+
+    void SetGestureEventResult(const JSCallbackInfo& args)
+    {
+        if (eventResult_) {
+            bool result = true;
+            if (args.Length() == 1 && args[0]->IsBoolean()) {
+                result = args[0]->ToBoolean();
+                eventResult_->SetGestureEventResult(result);
+            }
+        }
+    }
+
+private:
+    static void Constructor(const JSCallbackInfo& args)
+    {
+        auto jSNativeEmbedGestureRequest = Referenced::MakeRefPtr<JSNativeEmbedGestureRequest>();
+        jSNativeEmbedGestureRequest->IncRefCount();
+        args.SetReturnValue(Referenced::RawPtr(jSNativeEmbedGestureRequest));
+    }
+
+    static void Destructor(JSNativeEmbedGestureRequest* jSNativeEmbedGestureRequest)
+    {
+        if (jSNativeEmbedGestureRequest != nullptr) {
+            jSNativeEmbedGestureRequest->DecRefCount();
+        }
+    }
+
+    RefPtr<GestureEventResult> eventResult_;
+};
+
 class JSWebWindowNewHandler : public Referenced {
 public:
     struct ChildWindowInfo {
@@ -1738,6 +1783,7 @@ void JSWeb::JSBind(BindingTarget globalObj)
     JSClass<JSWeb>::StaticMethod("javaScriptOnDocumentEnd", &JSWeb::JavaScriptOnDocumentEnd);
     JSClass<JSWeb>::StaticMethod("onOverrideUrlLoading", &JSWeb::OnOverrideUrlLoading);
     JSClass<JSWeb>::StaticMethod("textAutosizing", &JSWeb::TextAutosizing);
+    JSClass<JSWeb>::StaticMethod("enableNativeVideoPlayer", &JSWeb::EnableNativeVideoPlayer);
     JSClass<JSWeb>::InheritAndBind<JSViewAbstract>(globalObj);
     JSWebDialog::JSBind(globalObj);
     JSWebGeolocation::JSBind(globalObj);
@@ -1758,6 +1804,7 @@ void JSWeb::JSBind(BindingTarget globalObj)
     JSWebWindowNewHandler::JSBind(globalObj);
     JSDataResubmitted::JSBind(globalObj);
     JSScreenCaptureRequest::JSBind(globalObj);
+    JSNativeEmbedGestureRequest::JSBind(globalObj);
 }
 
 JSRef<JSVal> LoadWebConsoleLogEventToJSValue(const LoadWebConsoleLogEvent& eventInfo)
@@ -2111,6 +2158,7 @@ void JSWeb::Create(const JSCallbackInfo& info)
 
     } else {
         auto* jsWebController = controller->Unwrap<JSWebController>();
+        CHECK_NULL_VOID(jsWebController);
         WebModel::GetInstance()->Create(dstSrc.value(),
             jsWebController->GetController(), renderMode, incognitoMode);
     }
@@ -4251,6 +4299,10 @@ JSRef<JSVal> NativeEmbeadTouchToJSValue(const NativeEmbeadTouchInfo& eventInfo)
     eventObj->SetPropertyObject("touches", touchArr);
     eventObj->SetPropertyObject("changedTouches", changeTouchArr);
     obj->SetPropertyObject("touchEvent", eventObj);
+    JSRef<JSObject> requestObj = JSClass<JSNativeEmbedGestureRequest>::NewInstance();
+    auto requestEvent = Referenced::Claim(requestObj->Unwrap<JSNativeEmbedGestureRequest>());
+    requestEvent->SetResult(eventInfo.GetResult());
+    obj->SetPropertyObject("result", requestObj);
     return JSRef<JSVal>::Cast(obj);
 }
 
@@ -4466,4 +4518,28 @@ void JSWeb::TextAutosizing(const JSCallbackInfo& args)
     bool isTextAutosizing = args[0]->ToBoolean();
     WebModel::GetInstance()->SetTextAutosizing(isTextAutosizing);
 }
+
+void JSWeb::EnableNativeVideoPlayer(const JSCallbackInfo& args)
+{
+    if (args.Length() < 1 || !args[0]->IsObject()) {
+        return;
+    }
+    auto paramObject = JSRef<JSObject>::Cast(args[0]);
+    std::optional<bool> enable;
+    std::optional<bool> shouldOverlay;
+    JSRef<JSVal> enableJsValue = paramObject->GetProperty("enable");
+    if (enableJsValue->IsBoolean()) {
+        enable = enableJsValue->ToBoolean();
+    }
+    JSRef<JSVal> shouldOverlayJsValue = paramObject->GetProperty("shouldOverlay");
+    if (shouldOverlayJsValue->IsBoolean()) {
+        shouldOverlay = shouldOverlayJsValue->ToBoolean();
+    }
+    if (!enable || !shouldOverlay) {
+        // invalid NativeVideoPlayerConfig
+        return;
+    }
+    WebModel::GetInstance()->SetNativeVideoPlayerConfig(*enable, *shouldOverlay);
+}
+
 } // namespace OHOS::Ace::Framework

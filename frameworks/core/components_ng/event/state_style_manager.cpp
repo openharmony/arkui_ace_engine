@@ -212,6 +212,7 @@ void StateStyleManager::PostListItemPressStyleTask(UIState state)
     auto nodeId = node->GetId();
     if (node->GetTag() == V2::LIST_ITEM_ETS_TAG) {
         auto frameNode = node->GetAncestorNodeOfFrame();
+        CHECK_NULL_VOID(frameNode);
         if (frameNode->GetTag() == V2::LIST_ITEM_GROUP_ETS_TAG) {
             auto listGroupPattern = DynamicCast<ListItemGroupPattern>(frameNode->GetPattern());
             CHECK_NULL_VOID(listGroupPattern);

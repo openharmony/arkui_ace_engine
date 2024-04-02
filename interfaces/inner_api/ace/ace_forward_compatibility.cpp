@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,7 +16,8 @@
 #include "ace_forward_compatibility.h"
 
 #include <unordered_set>
-#include "hilog/log.h"
+
+#include "arkui_log.h"
 #ifdef OHOS_PLATFORM
 #include "parameters.h"
 #endif
@@ -24,27 +25,20 @@
 namespace OHOS {
 namespace Ace {
 namespace {
-    constexpr OHOS::HiviewDFX::HiLogLabel ACE_COMPATIBLITY_LABEL = { LOG_CORE, 0xD003900, "ACE_COMPATIBLITY" };
-    constexpr uint32_t ARKUI_NEW_PIPELINE_MIN_VERSION = 9;
+constexpr uint32_t ARKUI_NEW_PIPELINE_MIN_VERSION = 9;
 #if defined(WINDOWS_PLATFORM)
-    constexpr char ARKUI_LIB_NAME_COMPATIBLE[] = "libace_compatible.dll";
-    constexpr char ARKUI_LIB_NAME[] = "libace.dll";
+constexpr char ARKUI_LIB_NAME_COMPATIBLE[] = "libace_compatible.dll";
+constexpr char ARKUI_LIB_NAME[] = "libace.dll";
 #elif defined(MAC_PLATFORM)
-    constexpr char ARKUI_LIB_NAME_COMPATIBLE[] = "libace_compatible.dylib";
-    constexpr char ARKUI_LIB_NAME[] = "libace.dylib";
+constexpr char ARKUI_LIB_NAME_COMPATIBLE[] = "libace_compatible.dylib";
+constexpr char ARKUI_LIB_NAME[] = "libace.dylib";
 #elif defined(LINUX_PLATFORM)
-    constexpr char ARKUI_LIB_NAME_COMPATIBLE[] = "libace_compatible.so";
-    constexpr char ARKUI_LIB_NAME[] = "libace.so";
+constexpr char ARKUI_LIB_NAME_COMPATIBLE[] = "libace_compatible.so";
+constexpr char ARKUI_LIB_NAME[] = "libace.so";
 #else
-    constexpr char ARKUI_LIB_NAME_COMPATIBLE[] = "libace_compatible.z.so";
-    constexpr char ARKUI_LIB_NAME[] = "libace.z.so";
+constexpr char ARKUI_LIB_NAME_COMPATIBLE[] = "libace_compatible.z.so";
+constexpr char ARKUI_LIB_NAME[] = "libace.z.so";
 #endif
-
-#define LOGD(fmt, ...)            \
-    (void)OHOS::HiviewDFX::HiLog::Debug(ACE_COMPATIBLITY_LABEL, "[%{public}d]" fmt, __LINE__, ##__VA_ARGS__)
-
-#define LOGI(fmt, ...)            \
-    (void)OHOS::HiviewDFX::HiLog::Info(ACE_COMPATIBLITY_LABEL, "[%{public}d]" fmt, __LINE__, ##__VA_ARGS__)
 } // namespace
 
 void AceForwardCompatibility::Init(const std::string& bundleName, const uint32_t apiCompatibleVersion, bool deprecated)

@@ -618,4 +618,11 @@ void WebModelImpl::SetOnOverrideUrlLoading(std::function<bool(const BaseEventInf
     webComponent->SetOnOverrideUrlLoading(std::move(jsCallback));
 }
 
+void WebModelImpl::SetNativeVideoPlayerConfig(bool enable, bool shouldOverlay)
+{
+    auto webComponent = AceType::DynamicCast<WebComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
+    CHECK_NULL_VOID(webComponent);
+    webComponent->SetNativeVideoPlayerConfig(enable, shouldOverlay);
+}
+
 } // namespace OHOS::Ace::Framework

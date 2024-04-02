@@ -138,7 +138,7 @@ void PagePattern::ProcessHideState()
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     host->SetActive(false);
-    host->OnVisibleChange(false);
+    host->NotifyVisibleChange(false);
     host->GetLayoutProperty()->UpdateVisibility(VisibleType::INVISIBLE);
     auto parent = host->GetAncestorNodeOfFrame();
     CHECK_NULL_VOID(parent);
@@ -151,7 +151,7 @@ void PagePattern::ProcessShowState()
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     host->SetActive(true);
-    host->OnVisibleChange(true);
+    host->NotifyVisibleChange(true);
     host->GetLayoutProperty()->UpdateVisibility(VisibleType::VISIBLE);
     auto parent = host->GetAncestorNodeOfFrame();
     CHECK_NULL_VOID(parent);
@@ -275,6 +275,10 @@ void PagePattern::OnHide()
 
 bool PagePattern::OnBackPressed()
 {
+    if (RemoveOverlay()) {
+        TAG_LOGI(AceLogTag::ACE_OVERLAY, "page removes it's overlay when on backpressed");
+        return true;
+    }
     if (isPageInTransition_) {
         return true;
     }
@@ -403,5 +407,21 @@ bool PagePattern::AvoidKeyboard() const
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_RETURN(pipeline, false);
     return pipeline->GetSafeAreaManager()->KeyboardSafeAreaEnabled();
+}
+
+bool PagePattern::RemoveOverlay()
+{
+    CHECK_NULL_RETURN(overlayManager_, false);
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_RETURN(pipeline, false);
+    auto taskExecutor = pipeline->GetTaskExecutor();
+    CHECK_NULL_RETURN(taskExecutor, false);
+    return overlayManager_->RemoveOverlay(true);
+}
+
+void PagePattern::MarkDirtyOverlay()
+{
+    CHECK_NULL_VOID(overlayManager_);
+    overlayManager_->MarkDirtyOverlay();
 }
 } // namespace OHOS::Ace::NG

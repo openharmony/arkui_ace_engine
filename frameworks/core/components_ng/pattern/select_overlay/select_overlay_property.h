@@ -21,9 +21,12 @@
 #include <vector>
 
 #include "base/geometry/ng/offset_t.h"
+#include "base/geometry/ng/point_t.h"
 #include "base/geometry/ng/rect_t.h"
 #include "core/components_ng/event/gesture_event_hub.h"
 #include "core/components_ng/pattern/text/text_menu_extension.h"
+#include "core/event/ace_events.h"
+#include "core/event/touch_event.h"
 
 namespace OHOS::Ace::NG {
 
@@ -50,6 +53,44 @@ struct SelectHandleInfo {
     static Dimension GetDefaultLineWidth();
 };
 
+using SelectOverlayDirtyFlag = uint32_t;
+inline constexpr SelectOverlayDirtyFlag DIRTY_FIRST_HANDLE = 1;
+inline constexpr SelectOverlayDirtyFlag DIRTY_SECOND_HANDLE = 1 << 1;
+inline constexpr SelectOverlayDirtyFlag DIRTY_SELECT_AREA = 1 << 2;
+inline constexpr SelectOverlayDirtyFlag DIRTY_ALL_MENU_ITEM = 1 << 3;
+inline constexpr SelectOverlayDirtyFlag DIRTY_COPY_ALL_ITEM = 1 << 4;
+inline constexpr SelectOverlayDirtyFlag DIRTY_SELECT_TEXT = 1 << 5;
+inline constexpr SelectOverlayDirtyFlag DIRTY_DOUBLE_HANDLE = DIRTY_FIRST_HANDLE | DIRTY_SECOND_HANDLE;
+inline constexpr SelectOverlayDirtyFlag DIRTY_ALL =
+    DIRTY_DOUBLE_HANDLE | DIRTY_ALL_MENU_ITEM | DIRTY_SELECT_AREA | DIRTY_SELECT_TEXT;
+
+enum class OptionMenuType { NO_MENU, MOUSE_MENU, TOUCH_MENU };
+enum class OptionMenuActionId { COPY, CUT, PASTE, SELECT_ALL, CAMERA_INPUT, APPEAR, DISAPPEAR };
+enum class CloseReason {
+    CLOSE_REASON_NORMAL = 1,
+    CLOSE_REASON_HOLD_BY_OTHER,
+    CLOSE_REASON_BY_RECREATE,
+    CLOSE_REASON_TOOL_BAR,
+    CLOSE_REASON_BACK_PRESSED,
+    CLOSE_REASON_CLICK_OUTSIDE
+};
+
+struct HoldSelectionInfo {
+    std::function<bool(const PointF&)> checkTouchInArea;
+    std::function<void()> resetSelectionCallback;
+    std::function<bool(SourceType, TouchType)> eventFilter;
+
+    bool IsAcceptEvent(SourceType sourceType, TouchType touchType)
+    {
+        if (eventFilter) {
+            return eventFilter(sourceType, touchType);
+        }
+        return sourceType == SourceType::MOUSE && touchType == TouchType::DOWN;
+    }
+};
+
+// end SelectOverlayManagerNG
+
 struct SelectMenuInfo {
     bool menuDisable = false;
     bool menuIsShow = false;
@@ -60,6 +101,7 @@ struct SelectMenuInfo {
     bool showCut = true;
     bool showCameraInput = false;
     std::optional<OffsetF> menuOffset;
+    OptionMenuType menuType = OptionMenuType::TOUCH_MENU;
 
     // Customize menu information.
     std::optional<int32_t> responseType;
@@ -114,6 +156,8 @@ struct SelectOverlayInfo {
     float singleLineHeight = 10.0f;
     bool isSelectRegionVisible = false;
     bool isNewAvoid = false;
+    bool recreateOverlay = false;
+    bool isUseOverlayNG = false;
     SelectHandleInfo firstHandle;
     SelectHandleInfo secondHandle;
     std::optional<Color> handlerColor;
@@ -151,6 +195,7 @@ struct SelectOverlayInfo {
     OHOS::Ace::WeakPtr<FrameNode> callerFrameNode;
 
     bool isHandleLineShow = true;
+    std::string selectText;
 };
 
 } // namespace OHOS::Ace::NG

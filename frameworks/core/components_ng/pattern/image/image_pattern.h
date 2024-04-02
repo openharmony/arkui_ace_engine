@@ -28,6 +28,7 @@
 #include "core/components_ng/pattern/image/image_layout_property.h"
 #include "core/components_ng/pattern/image/image_render_property.h"
 #include "core/components_ng/pattern/pattern.h"
+#include "core/components_ng/manager/select_overlay/select_overlay_client.h"
 #include "core/components_ng/render/canvas_image.h"
 #include "core/image/image_source_info.h"
 #include "interfaces/inner_api/ace/ai/image_analyzer.h"
@@ -38,7 +39,7 @@ class ImageAnalyzerManager;
 
 namespace OHOS::Ace::NG {
 
-class ACE_EXPORT ImagePattern : public Pattern, public SelectionHost {
+class ACE_EXPORT ImagePattern : public Pattern, public SelectOverlayClient {
     DECLARE_ACE_TYPE(ImagePattern, Pattern, SelectionHost);
 
 public:
@@ -85,6 +86,11 @@ public:
         return image_;
     }
 
+    RefPtr<FrameNode> GetClientHost() const override
+    {
+        return GetHost();
+    }
+
     void CreateObscuredImage();
     void LoadImageDataIfNeed();
     void OnNotifyMemoryLevel(int32_t level) override;
@@ -93,6 +99,12 @@ public:
     void OnVisibleChange(bool isVisible) override;
     void OnRecycle() override;
     void OnReuse() override;
+
+    void OnAreaChangedInner() override;
+    void RemoveAreaChangeInner();
+    void CalAndUpdateSelectOverlay();
+    OffsetF GetParentGlobalOffset() const;
+    void CheckHandles(SelectHandleInfo& handleInfo);
 
     void EnableDrag();
     bool BetweenSelectedPosition(const Offset& globalOffset) override;
@@ -126,6 +138,12 @@ public:
         }
     }
 
+    std::string GetImageFitStr(ImageFit value);
+
+    std::string GetImageRepeatStr(ImageRepeat value);
+
+    std::string GetImageColorFilterStr(const std::vector<float>& colorFilter);
+
     void SetSyncLoad(bool value)
     {
         syncLoad_ = value;
@@ -135,6 +153,8 @@ public:
     void SetImageAnalyzerConfig(void* config);
     void BeforeCreatePaintWrapper() override;
     void DumpInfo() override;
+    void DumpLayoutInfo();
+    void DumpRenderInfo();
     void DumpAdvanceInfo() override;
 
     WeakPtr<ImageLoadingContext> GetImageLoadingContext()
@@ -223,6 +243,7 @@ private:
     void OnDirectionConfigurationUpdate() override;
     void OnIconConfigurationUpdate() override;
     void OnConfigurationUpdate();
+    void ClearImageCache();
     void LoadImage(const ImageSourceInfo& src);
     void LoadAltImage(const ImageSourceInfo& altImageSourceInfo);
 
@@ -262,6 +283,7 @@ private:
     bool isEnableAnalyzer_ = false;
     bool autoResizeDefault_ = true;
     ImageInterpolation interpolationDefault_ = ImageInterpolation::NONE;
+    OffsetF parentGlobalOffset_;
 
     ACE_DISALLOW_COPY_AND_MOVE(ImagePattern);
 };

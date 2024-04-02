@@ -34,6 +34,7 @@ namespace {
 constexpr uint8_t ENABLED_ALPHA = 255;
 constexpr uint8_t DISABLED_ALPHA = 102;
 const Color TMP_INACTIVE_COLOR = Color(0x337F7F7F);
+constexpr double NUM_TWO = 2.0;
 } // namespace
 
 SwitchModifier::SwitchModifier(bool isSelect, const Color& boardColor, float dragOffsetX)
@@ -52,6 +53,8 @@ SwitchModifier::SwitchModifier(bool isSelect, const Color& boardColor, float dra
     offset_ = AceType::MakeRefPtr<AnimatablePropertyOffsetF>(OffsetF());
     size_ = AceType::MakeRefPtr<AnimatablePropertySizeF>(SizeF());
     enabled_ = AceType::MakeRefPtr<PropertyBool>(true);
+    animatePointRadius_ = AceType::MakeRefPtr<PropertyFloat>(SWITCH_ERROR_RADIUS);
+    animateTrackRadius_ = AceType::MakeRefPtr<PropertyFloat>(SWITCH_ERROR_RADIUS);
 
     AttachProperty(animatableBoardColor_);
     AttachProperty(animateTouchHoverColor_);
@@ -63,6 +66,8 @@ SwitchModifier::SwitchModifier(bool isSelect, const Color& boardColor, float dra
     AttachProperty(offset_);
     AttachProperty(size_);
     AttachProperty(enabled_);
+    AttachProperty(animatePointRadius_);
+    AttachProperty(animateTrackRadius_);
 }
 
 void SwitchModifier::InitializeParam()
@@ -93,12 +98,19 @@ void SwitchModifier::PaintSwitch(RSCanvas& canvas, const OffsetF& contentOffset,
 
     auto width = contentSize.Width();
     auto height = contentSize.Height();
+    auto trackRadius =
+        (animateTrackRadius_->Get() < 0) ? (height / NUM_TWO) : animateTrackRadius_->Get();
     auto radius = height / 2;
     auto actualGap = radiusGap_.ConvertToPx() * height /
                      (switchTheme->GetHeight() - switchTheme->GetHotZoneVerticalPadding() * 2).ConvertToPx();
     auto xOffset = contentOffset.GetX();
     auto yOffset = contentOffset.GetY();
-    pointRadius_ = radius - actualGap;
+    if (animatePointRadius_->Get() < 0) {
+        pointRadius_ = radius - actualGap;
+    } else {
+        pointRadius_ = animatePointRadius_->Get();
+        actualGap = radius - pointRadius_;
+    }
     clickEffectColor_ = switchTheme->GetClickEffectColor();
     hoverColor_ = switchTheme->GetHoverColor();
     hoverRadius_ = switchTheme->GetHoverRadius();
@@ -108,10 +120,14 @@ void SwitchModifier::PaintSwitch(RSCanvas& canvas, const OffsetF& contentOffset,
         defaultWidth - (switchTheme->GetWidth() - switchTheme->GetHotZoneHorizontalPadding() * 2).ConvertToPx();
     auto defaultHeightGap =
         defaultHeight - (switchTheme->GetHeight() - switchTheme->GetHotZoneVerticalPadding() * 2).ConvertToPx();
-    actualWidth_ = width + defaultWidthGap;
-    actualHeight_ = height + defaultHeightGap;
-    hoverRadius_ =
-        hoverRadius_ * height / (switchTheme->GetHeight() - switchTheme->GetHotZoneVerticalPadding() * 2).ConvertToPx();
+    actualWidth_ = (pointRadius_ * NUM_TWO > height ? (width - (actualGap * NUM_TWO)) : width) + defaultWidthGap;
+    actualHeight_ = (pointRadius_ * NUM_TWO > height ? pointRadius_ * NUM_TWO : height) + defaultHeightGap;
+    if ((animateTrackRadius_->Get() < 0) && (animateTrackRadius_->Get() < 0)) {
+        hoverRadius_ = hoverRadius_ * height /
+                       (switchTheme->GetHeight() - switchTheme->GetHotZoneVerticalPadding() * NUM_TWO).ConvertToPx();
+    } else {
+        hoverRadius_ = Dimension(trackRadius, DimensionUnit::PX) * actualHeight_ / (actualHeight_ - defaultHeightGap);
+    }
 
     OffsetF hoverBoardOffset;
     hoverBoardOffset.SetX(xOffset - (actualWidth_ - width) / 2.0);
@@ -122,7 +138,7 @@ void SwitchModifier::PaintSwitch(RSCanvas& canvas, const OffsetF& contentOffset,
     rect.SetTop(yOffset);
     rect.SetRight(xOffset + width);
     rect.SetBottom(yOffset + height);
-    RSRoundRect roundRect(rect, radius, radius);
+    RSRoundRect roundRect(rect, trackRadius, trackRadius);
 
     RSBrush brush;
     if (!enabled_->Get()) {

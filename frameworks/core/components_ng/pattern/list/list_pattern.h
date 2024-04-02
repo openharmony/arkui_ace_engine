@@ -311,6 +311,8 @@ private:
     void RefreshLanesItemRange();
     void UpdateListDirectionInCardStyle();
     void UpdateFrameSizeToWeb();
+    bool UpdateStartListItemIndex();
+    bool UpdateEndListItemIndex();
     RefPtr<ListContentModifier> listContentModifier_;
     std::vector<std::shared_ptr<ISlideUpdateCallback>> listenerVector_;
 
@@ -374,6 +376,9 @@ private:
     bool isNeedToUpdateListDirection_ = false;
 
     bool endIndexChanged_ = false;
+
+    ListItemIndex startInfo_ = {-1, -1, -1};
+    ListItemIndex endInfo_ = {-1, -1, -1};
 };
 } // namespace OHOS::Ace::NG
 

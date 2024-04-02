@@ -28,20 +28,22 @@ struct ItemDivider final {
     Dimension startMargin = 0.0_vp;
     Dimension endMargin = 0.0_vp;
     Color color = Color::TRANSPARENT;
+    bool isRtl = false;
     bool operator==(const ItemDivider& itemDivider) const
     {
         return (strokeWidth == itemDivider.strokeWidth) && (startMargin == itemDivider.startMargin) &&
-               (endMargin == itemDivider.endMargin) && (color == itemDivider.color);
+               (endMargin == itemDivider.endMargin) && (color == itemDivider.color) &&
+               (isRtl == itemDivider.isRtl);
     }
 };
 
 struct DividerInfo {
     float startMargin = 0.0f;
     float endMargin = 0.0f;
-    float dividerHeight = 0.0f;
     float dividerWidth = 0.0f;
     float dividerLength = 0.0f;
     float dividerMargin = 0.0f;
+    double dividerHeight = 0.0f;
     Color dividerColor = Color::TRANSPARENT;
 };
 } // namespace OHOS::Ace

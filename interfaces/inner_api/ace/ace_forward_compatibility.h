@@ -27,7 +27,6 @@ public:
     ~AceForwardCompatibility() = default;
 
     static void Init(const std::string& bundleName, const uint32_t apiCompatibleVersion, bool deprecated);
-    static bool Inited();
     static bool IsForceOldPipeline();
     static bool IsNewPipeline(); // true for using libace, false for using libace_compatible
     static bool IsUseNG(); // true for using newpipeline in ace engine

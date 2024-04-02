@@ -37,6 +37,7 @@ constexpr int32_t ERROR_INT_CODE = -1;
 constexpr int32_t SCROLL_TO_INDEX_0 = 0;
 constexpr int32_t SCROLL_TO_INDEX_1 = 1;
 constexpr int32_t SCROLL_TO_INDEX_2 = 2;
+constexpr int32_t SCROLL_TO_INDEX_CURVE = 5;
 
 constexpr int32_t EDGE_NONE = -1;
 
@@ -279,8 +280,8 @@ ArkUI_Int32 GetScrollEdgeEffect(ArkUINodeHandle node, ArkUI_Int32* values)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_RETURN(frameNode, ERROR_INT_CODE);
-    values[SCROLL_TO_INDEX_0] = ScrollModelNG::GetScrollEnabled(frameNode);
-    values[SCROLL_TO_INDEX_1] = ScrollModelNG::GetEdgeEffectAlways(frameNode);
+    values[SCROLL_TO_INDEX_0] = static_cast<ArkUI_Int32>(ScrollModelNG::GetEdgeEffect(frameNode));
+    values[SCROLL_TO_INDEX_1] = static_cast<ArkUI_Int32>(ScrollModelNG::GetEdgeEffectAlways(frameNode));
     return SCROLL_TO_INDEX_2;
 }
 
@@ -312,7 +313,12 @@ void SetEnableScrollInteraction(ArkUINodeHandle node, ArkUI_Bool enableScrollInt
     ScrollModelNG::SetScrollEnabled(frameNode, enableScrollInteraction);
 }
 
-void ResetEnableScrollInteraction(ArkUINodeHandle node) {}
+void ResetEnableScrollInteraction(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ScrollModelNG::SetScrollEnabled(frameNode, true);
+}
 
 void SetScrollTo(ArkUINodeHandle node, const ArkUI_Float32* values)
 {
@@ -322,7 +328,10 @@ void SetScrollTo(ArkUINodeHandle node, const ArkUI_Float32* values)
     Dimension xOffset(values[0], static_cast<OHOS::Ace::DimensionUnit>(values[1]));
     Dimension yOffset(values[2], static_cast<OHOS::Ace::DimensionUnit>(values[3]));
     float duration = values[4];
-    RefPtr<Curve> curve = CurvesVector[static_cast<int>(values[5])];
+    RefPtr<Curve> curve = Curves::EASE;
+    if (static_cast<int>(values[SCROLL_TO_INDEX_CURVE]) < CurvesVector.size()) {
+        curve = CurvesVector[static_cast<int>(values[SCROLL_TO_INDEX_CURVE])];
+    }
     auto smooth = static_cast<bool>(values[6]);
     auto direction = scrollControllerBase->GetScrollDirection();
     auto position = direction == Axis::VERTICAL ? yOffset : xOffset;

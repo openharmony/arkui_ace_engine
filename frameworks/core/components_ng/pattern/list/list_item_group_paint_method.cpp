@@ -56,6 +56,8 @@ void ListItemGroupPaintMethod::UpdateDividerList(const DividerGroupInfo& dgInfo,
     std::list<int32_t> lastLineIndex;
     bool nextIsPressed = false;
     for (const auto& child : itemPosition_) {
+        auto nextId = child.first - dgInfo.lanes;
+        nextIsPressed = nextId < 0 ? child.second.isPressed : itemPosition_[nextId].isPressed;
         if (!isFirstItem && !(child.second.isPressed || nextIsPressed)) {
             float mainPos = child.second.startPos - dgInfo.halfSpaceWidth;
             float crossPos = dgInfo.startMargin +
@@ -69,19 +71,20 @@ void ListItemGroupPaintMethod::UpdateDividerList(const DividerGroupInfo& dgInfo,
         lastLineIndex.emplace_back(child.first);
         laneIdx = (laneIdx + 1) >= dgInfo.lanes ? 0 : laneIdx + 1;
         isFirstItem = isFirstItem ? laneIdx > 0 : false;
-        nextIsPressed = child.second.isPressed;
     }
     if (!lastLineIndex.empty() && *lastLineIndex.rbegin() < totalItemCount_ - 1) {
         int32_t laneIdx = 0;
         for (auto index : lastLineIndex) {
-            if (index + dgInfo.lanes >= totalItemCount_ || itemPosition_.at(index).isPressed) {
+            if (index + dgInfo.lanes >= totalItemCount_) {
                 break;
             }
-            float mainPos = itemPosition_.at(index).endPos + spaceWidth_ - dgInfo.halfSpaceWidth;
-            float crossPos = dgInfo.startMargin +
-                laneIdx * ((dgInfo.crossSize - fSpacingTotal_) / dgInfo.lanes + laneGutter_);
-            OffsetF offset = vertical_ ? OffsetF(mainPos, crossPos) : OffsetF(crossPos, mainPos);
-            dividerPainter.DrawLine(canvas, offset);
+            if (!itemPosition_.at(index).isPressed) {
+                float mainPos = itemPosition_.at(index).endPos + spaceWidth_ - dgInfo.halfSpaceWidth;
+                float crossPos = dgInfo.startMargin +
+                    laneIdx * ((dgInfo.crossSize - fSpacingTotal_) / dgInfo.lanes + laneGutter_);
+                OffsetF offset = vertical_ ? OffsetF(mainPos, crossPos) : OffsetF(crossPos, mainPos);
+                dividerPainter.DrawLine(canvas, offset);
+            }
             laneIdx++;
         }
     }

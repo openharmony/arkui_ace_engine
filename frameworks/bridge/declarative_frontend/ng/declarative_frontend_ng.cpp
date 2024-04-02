@@ -403,6 +403,15 @@ UIContentErrorCode DeclarativeFrontendNG::RunPage(
     return UIContentErrorCode::NULL_POINTER;
 }
 
+UIContentErrorCode DeclarativeFrontendNG::RunPageByNamedRouter(const std::string& name)
+{
+    if (delegate_) {
+        delegate_->RunPage(name, "", pageProfile_, true);
+        return UIContentErrorCode::NO_ERRORS;
+    }
+    return UIContentErrorCode::NULL_POINTER;
+}
+
 void DeclarativeFrontendNG::ReplacePage(const std::string& url, const std::string& params)
 {
     if (delegate_) {
@@ -421,6 +430,11 @@ void DeclarativeFrontendNG::PushPage(const std::string& url, const std::string& 
 napi_value DeclarativeFrontendNG::GetContextValue()
 {
     return jsEngine_->GetContextValue();
+}
+
+napi_value DeclarativeFrontendNG::GetFrameNodeValueByNodeId(int32_t nodeId)
+{
+    return jsEngine_->GetFrameNodeValueByNodeId(nodeId);
 }
 
 void DeclarativeFrontendNG::NavigatePage(uint8_t type, const PageTarget& target, const std::string& params)

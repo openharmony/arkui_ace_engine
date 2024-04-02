@@ -46,9 +46,45 @@ class ImageSpanVerticalAlignModifier extends ModifierWithKey<number> {
     return this.stageValue !== this.value;
   }
 }
+class ImageSpanTextBackgroundStyleModifier extends ModifierWithKey<TextBackgroundStyle> {
+  constructor(value: TextBackgroundStyle) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('imageSpanTextBackgroundStyle');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().imageSpan.resetTextBackgroundStyle(node);
+    }
+    else {
+      let textBackgroundStyle = new ArkTextBackGroundStyle();
+      if (!textBackgroundStyle.convertTextBackGroundStyleOptions(this.value)) {
+        getUINativeModule().imageSpan.resetTextBackgroundStyle(node);
+      }
+      else {
+        getUINativeModule().imageSpan.setTextBackgroundStyle(node, textBackgroundStyle.color, textBackgroundStyle.radius.topLeft, textBackgroundStyle.radius.topRight, textBackgroundStyle.radius.bottomLeft, textBackgroundStyle.radius.bottomRight);
+      }
+    }
+  }
+  checkObjectDiff(): boolean {
+    let textBackgroundStyle = new ArkTextBackGroundStyle();
+    let stageTextBackGroundStyle = new ArkTextBackGroundStyle();
+    if (!textBackgroundStyle.convertTextBackGroundStyleOptions(this.value) || !stageTextBackGroundStyle.convertTextBackGroundStyleOptions(this.stageValue)) {
+      return false;
+    }
+    else {
+      return textBackgroundStyle.checkObjectDiff(stageTextBackGroundStyle);
+    }
+  }
+}
 class ArkImageSpanComponent extends ArkComponent implements ImageSpanAttribute {
-  constructor(nativePtr: KNode) {
-    super(nativePtr);
+  constructor(nativePtr: KNode, classType?: ModifierType) {
+    super(nativePtr, classType);
+  }
+  padding(value: Padding | Length): this {
+    throw new Error('Method not implemented.');
+  }
+  margin(value: Margin | Length): this {
+    throw new Error('Method not implemented.');
   }
   objectFit(value: ImageFit): ImageSpanAttribute {
     modifierWithKey(this._modifiersWithKeys, ImageSpanObjectFitModifier.identity, ImageSpanObjectFitModifier, value);
@@ -58,15 +94,16 @@ class ArkImageSpanComponent extends ArkComponent implements ImageSpanAttribute {
     modifierWithKey(this._modifiersWithKeys, ImageSpanVerticalAlignModifier.identity, ImageSpanVerticalAlignModifier, value);
     return this;
   }
+  textBackgroundStyle(value: TextBackgroundStyle): ImageSpanAttribute {
+    modifierWithKey(this._modifiersWithKeys, ImageSpanTextBackgroundStyleModifier.identity, ImageSpanTextBackgroundStyleModifier, value);
+    return this;
+  }
 }
 // @ts-ignore
-globalThis.ImageSpan.attributeModifier = function (modifier) {
-  const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
-  let nativeNode = getUINativeModule().getFrameNodeById(elmtId);
-
-  let component = this.createOrGetNode(elmtId, () => {
-    return new ArkImageSpanComponent(nativeNode);
+globalThis.ImageSpan.attributeModifier = function (modifier: ArkComponent): void {
+  attributeModifierFunc.call(this, modifier, (nativePtr: KNode) => {
+    return new ArkImageSpanComponent(nativePtr);
+  }, (nativePtr: KNode, classType: ModifierType, modifierJS: ModifierJS) => {
+    return new modifierJS.ImageSpanModifier(nativePtr, classType);
   });
-  applyUIAttributes(modifier, nativeNode, component);
-  component.applyModifierPatch();
 };

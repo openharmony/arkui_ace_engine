@@ -15,6 +15,7 @@
 
 #include "core/components_ng/pattern/scrollable/scrollable_model_ng.h"
 
+#include "base/utils/utils.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/scrollable/scrollable_event_hub.h"
 #include "core/components_ng/pattern/scrollable/scrollable_pattern.h"
@@ -61,6 +62,14 @@ void ScrollableModelNG::SetOnWillScroll(OnScrollEvent&& onScroll)
     auto eventHub = frameNode->GetEventHub<ScrollableEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnWillScroll(std::move(onScroll));
+}
+
+void ScrollableModelNG::SetOnWillScroll(FrameNode* frameNode, OnScrollEvent&& event)
+{
+    CHECK_NULL_VOID(frameNode);
+    const auto& eventHub = frameNode->GetEventHub<ScrollableEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnWillScroll(std::move(event));
 }
 
 void ScrollableModelNG::SetOnDidScroll(OnScrollEvent&& onScroll)
@@ -151,4 +160,21 @@ void ScrollableModelNG::SetMaxFlingSpeed(double max)
     CHECK_NULL_VOID(pattern);
     pattern->SetMaxFlingVelocity(max);
 }
+
+int32_t ScrollableModelNG::GetEdgeEffect(FrameNode* frameNode)
+{
+    CHECK_NULL_RETURN(frameNode, 0);
+    const auto& pattern = frameNode->GetPattern<ScrollablePattern>();
+    CHECK_NULL_RETURN(pattern, 0);
+    return static_cast<int32_t>(pattern->GetEdgeEffect());
+}
+
+int32_t ScrollableModelNG::GetAlwaysEnabled(FrameNode* frameNode)
+{
+    CHECK_NULL_RETURN(frameNode, 0);
+    const auto& pattern = frameNode->GetPattern<ScrollablePattern>();
+    CHECK_NULL_RETURN(pattern, 0);
+    return pattern->GetAlwaysEnabled();
+}
+
 } // namespace OHOS::Ace::NG

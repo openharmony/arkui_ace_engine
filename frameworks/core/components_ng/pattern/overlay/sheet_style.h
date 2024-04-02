@@ -44,6 +44,11 @@ enum SheetType {
     SHEET_BOTTOM_FREE_WINDOW,
 };
 
+enum SheetLevel {
+    OVERLAY,
+    EMBEDDED,
+};
+
 struct SheetHeight {
     std::optional<Dimension> height;
     std::optional<SheetMode> sheetMode;
@@ -68,6 +73,7 @@ struct SheetStyle {
     std::optional<std::string> sheetSubtitle;
     std::vector<SheetHeight> detents;
     std::optional<bool> interactive;
+    std::optional<bool> showInPage;
 
     bool operator==(const SheetStyle& sheetStyle) const
     {
@@ -77,7 +83,7 @@ struct SheetStyle {
                 backgroundColor == sheetStyle.backgroundColor && maskColor == sheetStyle.maskColor &&
                 detents == sheetStyle.detents && backgroundBlurStyle == sheetStyle.backgroundBlurStyle &&
                 sheetTitle == sheetStyle.sheetTitle && sheetSubtitle == sheetStyle.sheetSubtitle &&
-                interactive == sheetStyle.interactive);
+                interactive == sheetStyle.interactive && showInPage == sheetStyle.showInPage);
     }
 };
 } // namespace OHOS::Ace::NG

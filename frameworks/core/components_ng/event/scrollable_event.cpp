@@ -59,6 +59,8 @@ void ScrollableActuator::CollectTouchTarget(const OffsetF& coordinateOffset, con
         }
         if (event->InBarRegion(localPoint, touchRestrict.sourceType)) {
             event->BarCollectTouchTarget(coordinateOffset, getEventTargetImpl, result, frameNode, targetComponent);
+        } else if (event->InBarRectRegion(localPoint, touchRestrict.sourceType)) {
+            event->BarCollectLongPressTarget(coordinateOffset, getEventTargetImpl, result, frameNode, targetComponent);
         } else if (event->GetScrollable()) {
             const auto& scrollable = event->GetScrollable();
             scrollable->SetGetEventTargetImpl(getEventTargetImpl);
@@ -68,17 +70,16 @@ void ScrollableActuator::CollectTouchTarget(const OffsetF& coordinateOffset, con
         if (!clickRecognizer_) {
             clickRecognizer_ = MakeRefPtr<ClickRecognizer>();
         }
+        bool isHitTestBlock = event->IsHitTestBlock();
         clickRecognizer_->SetCoordinateOffset(Offset(coordinateOffset.GetX(), coordinateOffset.GetY()));
         clickRecognizer_->SetGetEventTargetImpl(getEventTargetImpl);
         clickRecognizer_->SetNodeId(frameNode->GetId());
         clickRecognizer_->AttachFrameNode(frameNode);
         clickRecognizer_->SetTargetComponent(targetComponent);
         clickRecognizer_->SetIsSystemGesture(true);
-        clickRecognizer_->SetSysGestureJudge([weak = WeakClaim(RawPtr(event))](const RefPtr<GestureInfo>& gestureInfo,
+        clickRecognizer_->SetSysGestureJudge([isHitTestBlock](const RefPtr<GestureInfo>& gestureInfo,
                                                  const std::shared_ptr<BaseGestureEvent>&) -> GestureJudgeResult {
-            auto event = weak.Upgrade();
-            CHECK_NULL_RETURN(event, GestureJudgeResult::CONTINUE);
-            if (!event->IsHitTestBlock()) {
+            if (!isHitTestBlock) {
                 return GestureJudgeResult::REJECT;
             }
             return GestureJudgeResult::CONTINUE;

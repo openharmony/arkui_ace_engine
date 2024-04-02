@@ -46,13 +46,11 @@ class ObserveV3 {
   // bindId: UINode elmtId or watchId, depending on what is being observed
   private bindId_: number = UINodeRegisterProxy.notRecordingDependencies;
 
-  // Map bindId to ViewPU/MonitorV3
-  // FIXME use Map<number, ViewPU | MonitorV3>
+  // Map bindId to WeakRef<ViewPU> | MonitorV3
   private id2cmp_: { number: object } = {} as { number: object }
 
-  // Map bindId -> Set 0f view model object
+  // Map bindId -> Set of @observed class objects
   // reverse dependency map for quickly removing all dependencies of a bindId
-  // FIXME: string typing: Map<number, Set<Object>>
   private id2targets_: { number: object } = {} as { number: object }
 
   // queued up Set of bindId
@@ -90,13 +88,13 @@ class ObserveV3 {
     this.bindId_ = id;
     if (cmp != null) {
       this.clearBinding(id);
-      this.id2cmp_[id] = cmp;
+      this.id2cmp_[id] = (cmp instanceof ViewPU) ? new WeakRef(cmp) : cmp;
     }
   }
 
   // clear any previously created dependency view model object to elmtId
   // find these view model objects with the reverse map id2targets_
-  private clearBinding(id: number): void {
+  public clearBinding(id: number): void {
     this.id2targets_[id]?.forEach((target) => {
       for (let key in target[ObserveV3.SYMBOL_REFS]) {
         if (id in target[ObserveV3.SYMBOL_REFS][key]) {
@@ -545,7 +543,7 @@ class ObserveV3 {
  * part of SDK
  * @from 12
  */
-const track = (target: Object, propertyKey: string) => {
+const Trace = (target: Object, propertyKey: string) => {
   ConfigureStateMgmt.instance.intentUsingV3(`@track`, propertyKey);
   return trackInternal(target, propertyKey);
 }
@@ -591,7 +589,7 @@ const trackInternal = (target: any, propertyKey: string) => {
  */
 type ConstructorV3 = { new(...args: any[]): any };
 
-function observed<T extends ConstructorV3>(BaseClass: T) : ConstructorV3 {
+function ObservedV2<T extends ConstructorV3>(BaseClass: T) : ConstructorV3 {
   ConfigureStateMgmt.instance.intentUsingV3(`@observed`, BaseClass?.name);
 
   // prevent @Track inside @observed class

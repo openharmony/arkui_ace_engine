@@ -17,6 +17,7 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_MENU_MENU_ITEM_LAYOUT_PROPERTY_H
 
 #include <string>
+
 #include "base/utils/utils.h"
 #include "core/components/select/select_theme.h"
 #include "core/components_ng/base/frame_node.h"
@@ -76,9 +77,9 @@ public:
         ResetMenuWidth();
     }
 
-    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(StartIcon, std::string, PROPERTY_UPDATE_MEASURE);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(StartIcon, ImageSourceInfo, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(Content, std::string, PROPERTY_UPDATE_MEASURE);
-    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(EndIcon, std::string, PROPERTY_UPDATE_MEASURE);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(EndIcon, ImageSourceInfo, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(Label, std::string, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(MenuWidth, Dimension, PROPERTY_UPDATE_MEASURE);
 
@@ -104,10 +105,14 @@ public:
     void ToJsonValue(std::unique_ptr<JsonValue>& json) const override
     {
         LayoutProperty::ToJsonValue(json);
-        json->Put("startIcon", GetStartIcon().value_or("").c_str());
+        if (GetStartIcon().has_value()) {
+            json->Put("startIcon", GetStartIcon()->GetSrc().c_str());
+        }
         json->Put("content", GetContent().value_or("").c_str());
         json->Put("labelInfo", GetLabel().value_or("").c_str());
-        json->Put("endIcon", GetEndIcon().value_or("").c_str());
+        if (GetEndIcon().has_value()) {
+            json->Put("endIcon", GetEndIcon()->GetSrc().c_str());
+        }
         auto selectIconShow = GetSelectIcon().value_or(false);
         auto selectIconSrc = GetSelectIconSrc().value_or("");
         if (selectIconShow) {

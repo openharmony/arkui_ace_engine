@@ -29,6 +29,7 @@
 #include "core/components/search/search_theme.h"
 #include "core/components_ng/pattern/search/search_model_ng.h"
 #include "core/components_ng/pattern/text_field/text_field_model_ng.h"
+#include "core/components/common/properties/text_style_parser.h"
 
 namespace OHOS::Ace {
 
@@ -108,6 +109,9 @@ void JSSearch::JSBind(BindingTarget globalObj)
     JSClass<JSSearch>::StaticMethod("decoration", &JSSearch::SetDecoration);
     JSClass<JSSearch>::StaticMethod("letterSpacing", &JSSearch::SetLetterSpacing);
     JSClass<JSSearch>::StaticMethod("lineHeight", &JSSearch::SetLineHeight);
+    JSClass<JSSearch>::StaticMethod("fontFeature", &JSSearch::SetFontFeature);
+    JSClass<JSSearch>::StaticMethod("id", &JSSearch::SetId);
+    JSClass<JSSearch>::StaticMethod("key", &JSSearch::SetKey);
     JSClass<JSSearch>::InheritAndBind<JSViewAbstract>(globalObj);
 }
 
@@ -118,6 +122,19 @@ void ParseSearchValueObject(const JSCallbackInfo& info, const JSRef<JSVal>& chan
     JsEventCallback<void(const std::string&)> onChangeEvent(
         info.GetExecutionContext(), JSRef<JSFunc>::Cast(changeEventVal));
     SearchModel::GetInstance()->SetOnChangeEvent(std::move(onChangeEvent));
+}
+
+void JSSearch::SetFontFeature(const JSCallbackInfo& info)
+{
+    if (info.Length() < 1) {
+        return;
+    }
+    if (!info[0]->IsString()) {
+        return;
+    }
+
+    std::string fontFeatureSettings = info[0]->ToString();
+    SearchModel::GetInstance()->SetFontFeature(ParseFontFeatureSettings(fontFeatureSettings));
 }
 
 void JSSearch::Create(const JSCallbackInfo& info)
@@ -183,18 +200,32 @@ void JSSearch::SetEnableKeyboardOnFocus(const JSCallbackInfo& info)
     SearchModel::GetInstance()->RequestKeyboardOnFocus(info[0]->ToBoolean());
 }
 
+void JSSearch::SetId(const JSCallbackInfo& info)
+{
+    JSViewAbstract::JsId(info);
+    JSRef<JSVal> arg = info[0];
+    std::string id;
+    if (arg->IsString()) {
+        id = arg->ToString();
+    }
+    SearchModel::GetInstance()->UpdateInspectorId(id);
+}
+
+void JSSearch::SetKey(const std::string& key)
+{
+    JSViewAbstract::JsKey(key);
+    SearchModel::GetInstance()->UpdateInspectorId(key);
+}
+
 void JSSearch::SetSearchButton(const JSCallbackInfo& info)
 {
     auto theme = GetTheme<SearchTheme>();
     CHECK_NULL_VOID(theme);
-    std::string buttonValue;
-    if (!ParseJsString(info[0], buttonValue)) {
-        return;
+    std::string buttonValue = "";
+    if (info[0]->IsString()) {
+        buttonValue = info[0]->ToString();
     }
     SearchModel::GetInstance()->SetSearchButton(buttonValue);
-    SearchModel::GetInstance()->SetSearchButtonFontSize(theme->GetFontSize());
-    SearchModel::GetInstance()->SetSearchButtonFontColor(theme->GetSearchButtonTextColor());
-
     if (info[1]->IsObject()) {
         auto param = JSRef<JSObject>::Cast(info[1]);
 
@@ -216,6 +247,9 @@ void JSSearch::SetSearchButton(const JSCallbackInfo& info)
             fontColor = theme->GetSearchButtonTextColor();
         }
         SearchModel::GetInstance()->SetSearchButtonFontColor(fontColor);
+    } else {
+        SearchModel::GetInstance()->SetSearchButtonFontSize(theme->GetFontSize());
+        SearchModel::GetInstance()->SetSearchButtonFontColor(theme->GetSearchButtonTextColor());
     }
 }
 
@@ -323,6 +357,13 @@ void JSSearch::SetIconStyle(const JSCallbackInfo& info)
     }
     SearchModel::GetInstance()->SetCancelIconSize(iconSize);
 
+    // set icon color
+    Color iconColor;
+    auto iconColorProp = iconParam->GetProperty("color");
+    if (!iconColorProp->IsUndefined() && !iconColorProp->IsNull() && ParseJsColor(iconColorProp, iconColor)) {
+        SearchModel::GetInstance()->SetCancelIconColor(iconColor);
+    }
+
     // set icon src
     std::string iconSrc;
     auto iconSrcProp = iconParam->GetProperty("src");
@@ -330,13 +371,6 @@ void JSSearch::SetIconStyle(const JSCallbackInfo& info)
         iconSrc = "";
     }
     SearchModel::GetInstance()->SetRightIconSrcPath(iconSrc);
-
-    // set icon color
-    Color iconColor;
-    auto iconColorProp = iconParam->GetProperty("color");
-    if (!iconColorProp->IsUndefined() && !iconColorProp->IsNull() && ParseJsColor(iconColorProp, iconColor)) {
-        SearchModel::GetInstance()->SetCancelIconColor(iconColor);
-    }
 }
 
 void JSSearch::SetTextColor(const JSCallbackInfo& info)
@@ -680,9 +714,17 @@ void JSSearch::SetCustomKeyboard(const JSCallbackInfo& info)
     if (info.Length() < 1 || !info[0]->IsObject()) {
         return;
     }
+    bool supportAvoidance = false;
+    if (info.Length() == 2 && info[1]->IsObject()) {  //  2 here refers to the number of parameters
+        auto paramObject = JSRef<JSObject>::Cast(info[1]);
+        auto isSupportAvoidance = paramObject->GetProperty("supportAvoidance");
+        if (!isSupportAvoidance->IsNull() && isSupportAvoidance->IsBoolean()) {
+            supportAvoidance = isSupportAvoidance->ToBoolean();
+        }
+    }
     std::function<void()> buildFunc;
     if (JSTextField::ParseJsCustomKeyboardBuilder(info, 0, buildFunc)) {
-        SearchModel::GetInstance()->SetCustomKeyboard(std::move(buildFunc));
+        SearchModel::GetInstance()->SetCustomKeyboard(std::move(buildFunc), supportAvoidance);
     }
 }
 
@@ -747,6 +789,9 @@ void JSSearch::SetDecoration(const JSCallbackInfo& info)
     do {
         auto tmpInfo = info[0];
         if (!tmpInfo->IsObject()) {
+            SearchModel::GetInstance()->SetTextDecoration(TextDecoration::NONE);
+            SearchModel::GetInstance()->SetTextDecorationColor(Color::BLACK);
+            SearchModel::GetInstance()->SetTextDecorationStyle(TextDecorationStyle::SOLID);
             break;
         }
         JSRef<JSObject> obj = JSRef<JSObject>::Cast(tmpInfo);

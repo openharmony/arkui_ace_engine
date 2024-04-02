@@ -94,6 +94,33 @@ void ClickRecognizer::InitGlobalValue(SourceType sourceType)
     }
 }
 
+ClickInfo ClickRecognizer::GetClickInfo()
+{
+    TouchEvent touchPoint = {};
+    if (!touchPoints_.empty()) {
+        touchPoint = touchPoints_.begin()->second;
+    }
+    ClickInfo info(touchPoint.id);
+    PointF localPoint(touchPoint.GetOffset().GetX(), touchPoint.GetOffset().GetY());
+    NGGestureRecognizer::Transform(localPoint, GetAttachedNode(), false, isPostEventResult_);
+    Offset localOffset(localPoint.GetX(), localPoint.GetY());
+    info.SetTimeStamp(touchPoint.time);
+    info.SetScreenLocation(touchPoint.GetScreenOffset());
+    info.SetGlobalLocation(touchPoint.GetOffset()).SetLocalLocation(localOffset);
+    info.SetSourceDevice(deviceType_);
+    info.SetDeviceId(deviceId_);
+    info.SetTarget(GetEventTarget().value_or(EventTarget()));
+    info.SetForce(touchPoint.force);
+    if (touchPoint.tiltX.has_value()) {
+        info.SetTiltX(touchPoint.tiltX.value());
+    }
+    if (touchPoint.tiltY.has_value()) {
+        info.SetTiltY(touchPoint.tiltY.value());
+    }
+    info.SetSourceTool(touchPoint.sourceTool);
+    return info;
+}
+
 void ClickRecognizer::OnAccepted()
 {
     int64_t acceptTime = GetSysTimestamp();
@@ -123,25 +150,12 @@ void ClickRecognizer::OnAccepted()
     NGGestureRecognizer::Transform(localPoint, GetAttachedNode(), false, isPostEventResult_);
     Offset localOffset(localPoint.GetX(), localPoint.GetY());
     if (onClick_) {
-        ClickInfo info(touchPoint.id);
-        info.SetTimeStamp(touchPoint.time);
-        info.SetGlobalLocation(touchPoint.GetOffset()).SetLocalLocation(localOffset);
-        info.SetSourceDevice(deviceType_);
-        info.SetDeviceId(deviceId_);
-        info.SetTarget(GetEventTarget().value_or(EventTarget()));
-        info.SetForce(touchPoint.force);
-        if (touchPoint.tiltX.has_value()) {
-            info.SetTiltX(touchPoint.tiltX.value());
-        }
-        if (touchPoint.tiltY.has_value()) {
-            info.SetTiltY(touchPoint.tiltY.value());
-        }
-        info.SetSourceTool(touchPoint.sourceTool);
+        ClickInfo info = GetClickInfo();
         onClick_(info);
     }
 
     if (remoteMessage_) {
-        ClickInfo info(touchPoint.id);
+        ClickInfo info = GetClickInfo();
         info.SetTimeStamp(touchPoint.time);
         info.SetGlobalLocation(touchPoint.GetOffset()).SetLocalLocation(localOffset);
         remoteMessage_(info);
@@ -278,10 +292,6 @@ void ClickRecognizer::HandleTouchUpEvent(const TouchEvent& event)
     if (refereeState_ != RefereeState::PENDING && refereeState_ != RefereeState::FAIL) {
         Adjudicate(AceType::Claim(this), GestureDisposal::PENDING);
     }
-
-    if (currentTouchPointsNum_ < fingers_ && equalsToFingers_) {
-        DeadlineTimer(fingerDeadlineTimer_, MULTI_FINGER_TIMEOUT);
-    }
 }
 
 void ClickRecognizer::HandleTouchMoveEvent(const TouchEvent& event)
@@ -367,40 +377,47 @@ bool ClickRecognizer::ExceedSlop()
     return false;
 }
 
+GestureEvent ClickRecognizer::GetGestureEventInfo()
+{
+    GestureEvent info;
+    info.SetTimeStamp(time_);
+    info.SetFingerList(fingerList_);
+    TouchEvent touchPoint = {};
+    for (const auto& pointKeyVal : touchPoints_) {
+        auto pointVal = pointKeyVal.second;
+        if (pointVal.sourceType != SourceType::NONE) {
+            touchPoint = pointVal;
+            break;
+        }
+    }
+    PointF localPoint(touchPoint.GetOffset().GetX(), touchPoint.GetOffset().GetY());
+    NGGestureRecognizer::Transform(localPoint, GetAttachedNode(), false, isPostEventResult_);
+    info.SetTimeStamp(touchPoint.time);
+    info.SetScreenLocation(touchPoint.GetScreenOffset());
+    info.SetGlobalLocation(touchPoint.GetOffset()).SetLocalLocation(Offset(localPoint.GetX(), localPoint.GetY()));
+    info.SetSourceDevice(deviceType_);
+    info.SetDeviceId(deviceId_);
+    info.SetTarget(GetEventTarget().value_or(EventTarget()));
+    info.SetForce(touchPoint.force);
+    if (touchPoint.tiltX.has_value()) {
+        info.SetTiltX(touchPoint.tiltX.value());
+    }
+    if (touchPoint.tiltY.has_value()) {
+        info.SetTiltY(touchPoint.tiltY.value());
+    }
+    info.SetSourceTool(touchPoint.sourceTool);
+#ifdef SECURITY_COMPONENT_ENABLE
+    info.SetDisplayX(touchPoint.screenX);
+    info.SetDisplayY(touchPoint.screenY);
+#endif
+    info.SetPointerEvent(touchPoint.pointerEvent);
+    return info;
+}
+
 void ClickRecognizer::SendCallbackMsg(const std::unique_ptr<GestureEventFunc>& onAction)
 {
     if (onAction && *onAction) {
-        GestureEvent info;
-        info.SetTimeStamp(time_);
-        info.SetFingerList(fingerList_);
-        TouchEvent touchPoint = {};
-        for (const auto& pointKeyVal : touchPoints_) {
-            auto pointVal = pointKeyVal.second;
-            if (pointVal.sourceType != SourceType::NONE) {
-                touchPoint = pointVal;
-                break;
-            }
-        }
-        PointF localPoint(touchPoint.GetOffset().GetX(), touchPoint.GetOffset().GetY());
-        NGGestureRecognizer::Transform(localPoint, GetAttachedNode(), false, isPostEventResult_);
-        info.SetScreenLocation(touchPoint.GetScreenOffset());
-        info.SetGlobalLocation(touchPoint.GetOffset()).SetLocalLocation(Offset(localPoint.GetX(), localPoint.GetY()));
-        info.SetSourceDevice(deviceType_);
-        info.SetDeviceId(deviceId_);
-        info.SetTarget(GetEventTarget().value_or(EventTarget()));
-        info.SetForce(touchPoint.force);
-        if (touchPoint.tiltX.has_value()) {
-            info.SetTiltX(touchPoint.tiltX.value());
-        }
-        if (touchPoint.tiltY.has_value()) {
-            info.SetTiltY(touchPoint.tiltY.value());
-        }
-        info.SetSourceTool(touchPoint.sourceTool);
-#ifdef SECURITY_COMPONENT_ENABLE
-        info.SetDisplayX(touchPoint.screenX);
-        info.SetDisplayY(touchPoint.screenY);
-#endif
-        info.SetPointerEvent(touchPoint.pointerEvent);
+        GestureEvent info = GetGestureEventInfo();
         // onAction may be overwritten in its invoke so we copy it first
         auto onActionFunction = *onAction;
         onActionFunction(info);

@@ -75,17 +75,14 @@ extern const char _binary_jsMockSystemPlugin_abc_end[];
 #endif
 extern const char _binary_stateMgmt_abc_start[];
 extern const char _binary_jsEnumStyle_abc_start[];
-extern const char _binary_jsUIContext_abc_start[];
 extern const char _binary_arkComponent_abc_start[];
 #if !defined(IOS_PLATFORM)
 extern const char _binary_stateMgmt_abc_end[];
 extern const char _binary_jsEnumStyle_abc_end[];
-extern const char _binary_jsUIContext_abc_end[];
 extern const char _binary_arkComponent_abc_end[];
 #else
 extern const char* _binary_stateMgmt_abc_end;
 extern const char* _binary_jsEnumStyle_abc_end;
-extern const char* _binary_jsUIContext_abc_end;
 extern const char* _binary_arkComponent_abc_end;
 #endif
 
@@ -175,13 +172,6 @@ inline bool PreloadStateManagement(const shared_ptr<JsRuntime>& runtime)
 {
     uint8_t* codeStart = (uint8_t*)_binary_stateMgmt_abc_start;
     int32_t codeLength = _binary_stateMgmt_abc_end - _binary_stateMgmt_abc_start;
-    return runtime->EvaluateJsCode(codeStart, codeLength);
-}
-
-inline bool PreloadUIContent(const shared_ptr<JsRuntime>& runtime)
-{
-    uint8_t* codeStart = const_cast<uint8_t*>(reinterpret_cast<const uint8_t*>(_binary_jsUIContext_abc_start));
-    int32_t codeLength = _binary_jsUIContext_abc_end - _binary_jsUIContext_abc_start;
     return runtime->EvaluateJsCode(codeStart, codeLength);
 }
 
@@ -376,7 +366,6 @@ void JsiDeclarativeEngineInstance::InitJsObject()
             PreloadExports(runtime_, global);
             PreloadRequireNative(runtime_, global);
             PreloadStateManagement(runtime_);
-            PreloadUIContent(runtime_);
             PreloadArkComponent(runtime_);
         }
     }
@@ -403,7 +392,6 @@ void JsiDeclarativeEngineInstance::InitAceModule()
         PreloadStateManagement(runtime_);
         PreloadJsEnums(runtime_);
         PreloadArkComponent(runtime_);
-        PreloadUIContent(runtime_);
     }
 #if defined(PREVIEW)
     std::string jsMockSystemPluginString(_binary_jsMockSystemPlugin_abc_start,
@@ -518,8 +506,6 @@ void JsiDeclarativeEngineInstance::PreloadAceModule(void* runtime)
     }
 
     bool evalResult = PreloadStateManagement(arkRuntime);
-
-    PreloadUIContent(arkRuntime);
 
     // preload ark component
     bool arkComponentResult = PreloadArkComponent(arkRuntime);
@@ -840,6 +826,23 @@ shared_ptr<JsValue> JsiDeclarativeEngineInstance::CallGetUIContextFunc(
     return retVal;
 }
 
+shared_ptr<JsValue> JsiDeclarativeEngineInstance::CallGetFrameNodeByNodeIdFunc(
+    const shared_ptr<JsRuntime>& runtime, const std::vector<shared_ptr<JsValue>>& argv)
+{
+    shared_ptr<JsValue> global = runtime->GetGlobal();
+    shared_ptr<JsValue> func = global->GetProperty(runtime, "__getFrameNodeByNodeId__");
+    if (!func->IsFunction(runtime)) {
+        return nullptr;
+    }
+
+    shared_ptr<JsValue> retVal = func->Call(runtime, global, argv, argv.size());
+    if (!retVal) {
+        return nullptr;
+    }
+
+    return retVal;
+}
+
 void JsiDeclarativeEngineInstance::PostJsTask(const shared_ptr<JsRuntime>& runtime, std::function<void()>&& task)
 {
     if (runtime == nullptr) {
@@ -937,7 +940,34 @@ napi_value JsiDeclarativeEngineInstance::GetContextValue()
     return napiValue;
 }
 
+napi_value JsiDeclarativeEngineInstance::GetFrameNodeValueByNodeId(int32_t nodeId)
+{
+    auto runtime = GetJsRuntime();
+
+    // obtain frameNode instance
+    std::vector<shared_ptr<JsValue>> argv = { runtime->NewNumber(instanceId_), runtime->NewNumber(nodeId) };
+    shared_ptr<JsValue> frameNode = CallGetFrameNodeByNodeIdFunc(runtime, argv);
+
+    auto arkJSRuntime = std::static_pointer_cast<ArkJSRuntime>(runtime);
+    if (!arkJSRuntime) {
+        return nullptr;
+    }
+    auto arkJSValue = std::static_pointer_cast<ArkJSValue>(frameNode);
+    if (!arkJSValue) {
+        return nullptr;
+    }
+    auto arkNativeEngine = static_cast<ArkNativeEngine*>(GetNativeEngine());
+    if (!arkNativeEngine) {
+        return nullptr;
+    }
+    napi_value napiValue = ArkNativeEngine::ArkValueToNapiValue(
+        reinterpret_cast<napi_env>(GetNativeEngine()), arkJSValue->GetValue(arkJSRuntime));
+
+    return napiValue;
+}
+
 thread_local std::unordered_map<std::string, NamedRouterProperty> JsiDeclarativeEngine::namedRouterRegisterMap_;
+thread_local std::unordered_map<std::string, panda::Global<panda::ObjectRef>> JsiDeclarativeEngine::builderMap_;
 panda::Global<panda::ObjectRef> JsiDeclarativeEngine::obj_;
 
 // -----------------------
@@ -1481,6 +1511,15 @@ bool JsiDeclarativeEngine::LoadPageSource(
         return false;
     }
     return true;
+}
+
+int32_t JsiDeclarativeEngine::LoadNavDestinationSource(const std::string& bundleName,
+    const std::string& moduleName, const std::string& pageSourceFile, bool isSingleton)
+{
+    auto runtime = engineInstance_->GetJsRuntime();
+    CHECK_NULL_RETURN(runtime, false);
+    auto arkRuntime = std::static_pointer_cast<ArkJSRuntime>(runtime);
+    return arkRuntime->LoadDestinationFile(bundleName, moduleName, pageSourceFile, isSingleton);
 }
 
 void JsiDeclarativeEngine::AddToNamedRouterMap(const EcmaVM* vm, panda::Global<panda::FunctionRef> pageGenerator,
@@ -2206,6 +2245,26 @@ bool JsiDeclarativeEngine::OnRestoreData(const std::string& data)
     }
     std::vector<shared_ptr<JsValue>> argv = { jsonObj };
     return CallAppFunc("onRestoreData", argv);
+}
+
+void JsiDeclarativeEngine::AddToNavigationBuilderMap(std::string name,
+    panda::Global<panda::ObjectRef> builderFunc)
+{
+    auto ret = builderMap_.insert(std::pair<std::string, panda::Global<panda::ObjectRef>>(name, builderFunc));
+    if (!ret.second) {
+        TAG_LOGW(AceLogTag::ACE_NAVIGATION, "insert builder failed, update builder: %{public}s", name.c_str());
+        builderMap_[name] = builderFunc;
+    }
+}
+
+panda::Global<panda::ObjectRef> JsiDeclarativeEngine::GetNavigationBuilder(std::string name)
+{
+    auto targetBuilder = builderMap_.find(name);
+    if (targetBuilder == builderMap_.end()) {
+        TAG_LOGI(AceLogTag::ACE_NAVIGATION, "get navDestination builder failed: %{public}s", name.c_str());
+        return panda::Global<panda::ObjectRef>();
+    }
+    return targetBuilder->second;
 }
 
 // ArkTsCard start

@@ -120,6 +120,16 @@ private:
     Dimension defaultPaddingStart_;
     Dimension iconSize_;
     Dimension titleFontSize_;
+    Dimension iconBackgroundWidth_;
+    Dimension backButtonWidth_;
+    Dimension backButtonHeight_;
+    Dimension backIconWidth_;
+    Dimension backIconHeight_;
+    Dimension marginLeft_;
+    Dimension marginRight_;
+    Dimension menuCompPadding_;
+    Dimension paddingTopTwolines_;
+    Dimension titleSpaceVertical_;
 
     float menuHeight_ = 0.0f;
     float initialTitleOffsetY_ = 0.0f;

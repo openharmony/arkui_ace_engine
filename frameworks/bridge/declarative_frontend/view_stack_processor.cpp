@@ -536,7 +536,7 @@ void ViewStackProcessor::PopContainer()
     Pop();
 }
 
-#ifdef ACE_DEBUG_LOG
+#ifdef ACE_DEBUG
 void ViewStackProcessor::DumpStack()
 {
     if (componentsStack_.empty()) {

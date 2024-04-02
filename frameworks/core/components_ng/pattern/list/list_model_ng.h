@@ -59,6 +59,7 @@ public:
     void SetOnScrollStart(OnScrollStartEvent&& onScrollStart) override;
     void SetOnScrollStop(OnScrollStopEvent&& onScrollStop) override;
     void SetOnScrollIndex(OnScrollIndexEvent&& onScrollIndex) override;
+    void SetOnScrollVisibleContentChange(OnScrollVisibleContentChangeEvent&& onScrollVisibleContentChange) override;
     void SetOnReachStart(OnReachEvent&& onReachStart) override;
     void SetOnReachEnd(OnReachEvent&& onReachEnd) override;
     void SetOnItemDelete(OnItemDeleteEvent&& onItemDelete) override {}
@@ -106,6 +107,11 @@ public:
     static void SetContentEndOffset(FrameNode* frameNode, float endOffset);
     static void SetDivider(FrameNode* frameNode, const V2::ItemDivider& divider);
     static void SetChainAnimationOptions(FrameNode* frameNode, const ChainAnimationOptions& options);
+    static int32_t GetEdgeEffect(FrameNode* frameNode);
+    static void SetOnScroll(FrameNode* frameNode, OnScrollEvent&& onScroll);
+    static void SetOnScrollFrameBegin(FrameNode* frameNode, OnScrollFrameBeginEvent&& onScrollFrameBegin);
+    static void SetOnScrollStart(FrameNode* frameNode, OnScrollStartEvent&& onScrollStart);
+    static void SetOnScrollStop(FrameNode* frameNode, OnScrollStopEvent&& onScrollStop);
 
 private:
     void AddDragFrameNodeToManager() const;

@@ -315,7 +315,7 @@ void DialogLayoutAlgorithm::GetDialogWidth(double& width)
     if (width_.Unit() == DimensionUnit::PERCENT) {
         width = width_.ConvertToPxWithSize(widthMax_);
     } else {
-        width = width_.Value();
+        width = width_.ConvertToPx();
     }
     if (width > widthMax_) {
         width = widthMax_;
@@ -391,15 +391,26 @@ void DialogLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     if ((!dialogProp->GetIsModal().value_or(true) ||
             (dialogProp->GetIsModal().value_or(true) && dialogProp->GetShowInSubWindowValue(false))) &&
         !dialogProp->GetIsScenceBoardDialog().value_or(false)) {
-        ProcessMaskRect(
-            DimensionRect(Dimension(childSize.Width()), Dimension(childSize.Height()), DimensionOffset(topLeftPoint_)),
-            frameNode);
+        DimensionRect rect =
+            DimensionRect(Dimension(childSize.Width()), Dimension(childSize.Height()), DimensionOffset(topLeftPoint_));
+        if (dialogPattern->GetDialogProperties().shadow.has_value()) {
+            UpdateMaskRect(dialogPattern->GetDialogProperties().shadow.value(), rect);
+        }
+        ProcessMaskRect(rect, frameNode);
     }
-    topLeftPoint_.SetX(std::max(topLeftPoint_.GetX(), 0.0f));
-    topLeftPoint_.SetY(std::max(topLeftPoint_.GetY(), 0.0f));
     child->GetGeometryNode()->SetMarginFrameOffset(topLeftPoint_);
     child->Layout();
     SetSubWindowHotarea(dialogProp, childSize, selfSize, frameNode->GetId());
+}
+
+void DialogLayoutAlgorithm::UpdateMaskRect(Shadow shadow, DimensionRect& rect)
+{
+    auto offset = shadow.GetOffset();
+    rect.SetWidth(rect.GetWidth() + Dimension(std::abs(offset.GetX())));
+    rect.SetHeight(rect.GetHeight() + Dimension(std::abs(offset.GetY())));
+    auto offsetx = rect.GetOffset().GetX() + Dimension(std::min(offset.GetX(), 0.0));
+    auto offsety = rect.GetOffset().GetY() + Dimension(std::min(offset.GetY(), 0.0));
+    rect.SetOffset(DimensionOffset(offsetx, offsety));
 }
 
 void DialogLayoutAlgorithm::SetDialogSize(
@@ -417,7 +428,7 @@ void DialogLayoutAlgorithm::SetDialogSize(
         if (height_.Unit() == DimensionUnit::PERCENT) {
             heightValue = height_.ConvertToPxWithSize(height);
         } else {
-            heightValue = height_.Value();
+            heightValue = height_.ConvertToPx();
         }
         if (heightValue > height) {
             heightValue = height;
@@ -510,12 +521,12 @@ OffsetF DialogLayoutAlgorithm::ComputeChildPosition(
         ConvertToPx(CalcLength(dialogOffset_.GetY()), layoutConstraint->scaleProperty, selfSize.Height());
     OffsetF dialogOffset = OffsetF(dialogOffsetX.value_or(0.0), dialogOffsetY.value_or(0.0));
     auto maxSize = layoutConstraint->maxSize;
-    maxSize.MinusHeight(safeAreaInsets_.bottom_.Length());
+    if (!customSize_) {
+        maxSize.MinusHeight(safeAreaInsets_.bottom_.Length());
+    }
     if (!SetAlignmentSwitch(maxSize, childSize, topLeftPoint)) {
         topLeftPoint = OffsetF(maxSize.Width() - childSize.Width(), maxSize.Height() - childSize.Height()) / HALF;
     }
-    topLeftPoint.SetX(std::max(topLeftPoint.GetX(), 0.0f));
-    topLeftPoint.SetY(std::max(topLeftPoint.GetY(), 0.0f));
     const auto& expandSafeAreaOpts = prop->GetSafeAreaExpandOpts();
     bool needAvoidKeyboard = true;
     if (expandSafeAreaOpts && (expandSafeAreaOpts->type | SAFE_AREA_TYPE_KEYBOARD)) {
@@ -635,6 +646,7 @@ void DialogLayoutAlgorithm::UpdateSafeArea()
     if (container->IsSubContainer()) {
         currentId = SubwindowManager::GetInstance()->GetParentContainerId(Container::CurrentId());
         container = AceEngine::Get().GetContainer(currentId);
+        CHECK_NULL_VOID(container);
         ContainerScope scope(currentId);
     }
     auto pipelineContext = container->GetPipelineContext();

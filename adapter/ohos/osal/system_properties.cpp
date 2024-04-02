@@ -44,6 +44,7 @@ constexpr char PROPERTY_DEVICE_TYPE_TABLET[] = "tablet";
 constexpr char PROPERTY_DEVICE_TYPE_TWOINONE[] = "2in1";
 constexpr char PROPERTY_DEVICE_TYPE_WATCH[] = "watch";
 constexpr char PROPERTY_DEVICE_TYPE_CAR[] = "car";
+constexpr char PROPERTY_DEVICE_TYPE_WEARABLE[] = "wearable";
 constexpr char ENABLE_DEBUG_AUTOUI_KEY[] = "persist.ace.debug.autoui.enabled";
 constexpr char ENABLE_DEBUG_BOUNDARY_KEY[] = "persist.ace.debug.boundary.enabled";
 constexpr char ENABLE_DOWNLOAD_BY_NETSTACK_KEY[] = "persist.ace.download.netstack.enabled";
@@ -420,6 +421,8 @@ void SystemProperties::InitDeviceTypeBySystemProperty()
         deviceType_ = DeviceType::TABLET;
     } else if (deviceProp == PROPERTY_DEVICE_TYPE_TWOINONE) {
         deviceType_ = DeviceType::TWO_IN_ONE;
+    } else if (deviceProp == PROPERTY_DEVICE_TYPE_WEARABLE) {
+        deviceType_ = DeviceType::WEARABLE;
     } else {
         deviceType_ = DeviceType::PHONE;
     }

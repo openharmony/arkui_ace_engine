@@ -82,7 +82,7 @@ RefPtr<FrameNode> DialogView::CreateDialogNode(
     CHECK_NULL_RETURN(dialogContext, dialog);
     if ((dialogLayoutProp->GetShowInSubWindowValue(false) && dialogLayoutProp->GetIsModal().value_or(true)) ||
         !dialogLayoutProp->GetIsModal().value_or(true)) {
-        dialogContext->UpdateBackgroundColor(param.maskColor.value_or(Color(0x00000000)));
+        dialogContext->UpdateBackgroundColor(Color(0x00000000));
     } else {
         dialogContext->UpdateBackgroundColor(param.maskColor.value_or(dialogTheme->GetMaskColorEnd()));
     }

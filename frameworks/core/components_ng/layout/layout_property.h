@@ -123,6 +123,8 @@ public:
         return layoutDirection_.value_or(TextDirection::AUTO);
     }
 
+    TextDirection GetNonAutoLayoutDirection() const;
+
     RefPtr<GeometryTransition> GetGeometryTransition() const
     {
         return geometryTransition_.Upgrade();
@@ -288,7 +290,7 @@ public:
         isOverlayNode_ = isOverlayNode;
     }
 
-    bool IsOverlayNode()
+    bool IsOverlayNode() const
     {
         return isOverlayNode_;
     }

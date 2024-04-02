@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -113,8 +113,34 @@ public:
     {
         return pageNodeInfo_.enableAutoFill;
     }
+
+    void SetIsFocus(bool isFocus) override
+    {
+        pageNodeInfo_.isFocus = isFocus;
+    }
+
+    bool GetIsFocus() const override
+    {
+        return pageNodeInfo_.isFocus;
+    }
+
+    void SetPageNodeRect(const NG::RectF& rect) override
+    {
+        pageNodeInfo_.rect.left = rect.GetX();
+        pageNodeInfo_.rect.top = rect.GetY();
+        pageNodeInfo_.rect.width = rect.Width();
+        pageNodeInfo_.rect.height = rect.Height();
+        pageNodeRect_ = rect;
+    }
+
+    const NG::RectF& GetPageNodeRect() const override
+    {
+        return pageNodeRect_;
+    }
+
 private:
     AbilityBase::PageNodeInfo pageNodeInfo_;
+    NG::RectF pageNodeRect_;
 };
 
 class ViewDataWrapOhos : public ViewDataWrap {
@@ -176,9 +202,25 @@ public:
     {
         return pageNodeInfoWraps_;
     }
+
+    void SetPageRect(const NG::RectF& rect) override
+    {
+        viewData_.pageRect.left = rect.GetX();
+        viewData_.pageRect.top = rect.GetY();
+        viewData_.pageRect.width = rect.Width();
+        viewData_.pageRect.height = rect.Height();
+        pageRect_ = rect;
+    }
+
+    const NG::RectF& GetPageRect() const override
+    {
+        return pageRect_;
+    }
+
 private:
     std::vector<RefPtr<PageNodeInfoWrap>> pageNodeInfoWraps_;
     AbilityBase::ViewData viewData_;
+    NG::RectF pageRect_;
 };
 } // namespace OHOS::Ace
 #endif // FOUNDATION_ACE_ADAPTER_OHOS_OSAL_VIEW_DATA_WRAP_OHOS_H

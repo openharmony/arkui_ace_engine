@@ -579,8 +579,7 @@ abstract class ViewPU extends NativeViewPartialUpdate
     if (typeof updateFunc !== "function") {
       stateMgmtConsole.debug(`${this.debugInfo__()}: UpdateElement: update function of elmtId ${elmtId} not found, internal error!`);
     } else {
-      const componentName = entry.getComponentName();
-      stateMgmtConsole.debug(`${this.debugInfo__()}: UpdateElement: re-render of ${componentName} elmtId ${elmtId} start ...`);
+      stateMgmtConsole.debug(`${this.debugInfo__()}: UpdateElement: re-render of ${entry.getComponentName()} elmtId ${elmtId} start ...`);
       this.isRenderInProgress = true;
       stateMgmtProfiler.begin("ViewPU.updateFunc");
       updateFunc(elmtId, /* isFirstRender */ false);
@@ -589,7 +588,7 @@ abstract class ViewPU extends NativeViewPartialUpdate
       this.finishUpdateFunc(elmtId);
       stateMgmtProfiler.end();
       this.isRenderInProgress = false;
-      stateMgmtConsole.debug(`${this.debugInfo__()}: UpdateElement: re-render of ${componentName} elmtId ${elmtId} - DONE`);
+      stateMgmtConsole.debug(`${this.debugInfo__()}: UpdateElement: re-render of ${entry.getComponentName()} elmtId ${elmtId} - DONE`);
     }
     stateMgmtProfiler.end();
   }
@@ -699,7 +698,7 @@ abstract class ViewPU extends NativeViewPartialUpdate
     }
 
     let cb = this.watchedProps.get(varName)
-    if (cb) {
+    if (cb && typeof cb === "function") {
       stateMgmtConsole.debug(`   ... calling @Watch function`);
       cb.call(this, varName);
     }
@@ -798,6 +797,7 @@ abstract class ViewPU extends NativeViewPartialUpdate
     if (!allowOverride && this.findProvide(providedPropName)) {
       throw new ReferenceError(`${this.constructor.name}: duplicate @Provide property with name ${providedPropName}. Property with this name is provided by one of the ancestor Views already. @Provide override not allowed.`);
     }
+    store.setDecoratorInfo("@Provide");
     this.providedVars_.set(providedPropName, store);
   }
 
@@ -830,6 +830,7 @@ abstract class ViewPU extends NativeViewPartialUpdate
 
     const factory = <T>(source: ObservedPropertyAbstract<T>) => {
       const result: ObservedPropertyAbstractPU<T> = new SynchedPropertyTwoWayPU<T>(source, this, consumeVarName);
+      result.setDecoratorInfo("@Consume");
       stateMgmtConsole.debug(`The @Consume is instance of ${result.constructor.name}`);
       return result;
     };
@@ -957,7 +958,7 @@ abstract class ViewPU extends NativeViewPartialUpdate
     }
   }
 
-  public observeComponentCreation2(compilerAssignedUpdateFunc: UpdateFunc, classObject: { prototype: Object, pop?: () => void }): void {
+  public observeComponentCreation2(compilerAssignedUpdateFunc: UpdateFunc, classObject: UIClassObject): void {
     if (this.isDeleting_) {
       stateMgmtConsole.error(`View ${this.constructor.name} elmtId ${this.id__()} is already in process of destruction, will not execute observeComponentCreation2 `);
       return;
@@ -1085,13 +1086,13 @@ abstract class ViewPU extends NativeViewPartialUpdate
         this.aboutToReuse(params);
       }
     }, "aboutToReuse", this.constructor.name);
+    this.updateDirtyElements();
     this.childrenWeakrefMap_.forEach((weakRefChild) => {
       const child = weakRefChild.deref();
       if (child && !child.hasBeenRecycled_) {
         child.aboutToReuseInternal();
       }
     });
-    this.updateDirtyElements();
     this.runReuse_ = false;
   }
 
@@ -1283,6 +1284,7 @@ abstract class ViewPU extends NativeViewPartialUpdate
         ? undefined
         : new SynchedPropertyTwoWayPU<T>(source, this, viewVariableName)
     ) as ObservedPropertyAbstractPU<T>;
+    appStorageLink.setDecoratorInfo("@StorageLink");
     return appStorageLink;
   }
 
@@ -1292,6 +1294,7 @@ abstract class ViewPU extends NativeViewPartialUpdate
         ? undefined
         : new SynchedPropertyOneWayPU<T>(source, this, viewVariableName)
     ) as ObservedPropertyAbstractPU<T>;
+    appStorageProp.setDecoratorInfo("@StorageProp");
     return appStorageProp;
   }
 
@@ -1302,6 +1305,7 @@ abstract class ViewPU extends NativeViewPartialUpdate
         ? undefined
         : new SynchedPropertyTwoWayPU<T>(source, this, viewVariableName)
     ) as ObservedPropertyAbstractPU<T>;
+    localStorageLink.setDecoratorInfo("@LocalStorageLink");
     return localStorageLink;
   }
 
@@ -1312,6 +1316,7 @@ abstract class ViewPU extends NativeViewPartialUpdate
         ? undefined
         : new SynchedPropertyObjectOneWayPU<T>(source, this, viewVariableName)
     ) as ObservedPropertyAbstractPU<T>;
+    localStorageProp.setDecoratorInfo("@LocalStorageProp");
     return localStorageProp;
   }
 
@@ -1490,7 +1495,11 @@ abstract class ViewPU extends NativeViewPartialUpdate
   private debugInfoUpdateFuncByElmtIdInternal(counter: ProfileRecursionCounter, depth: number = 0, recursive: boolean = false): string {
     let retVaL: string = `\n${"  ".repeat(depth)}|--${this.constructor.name}[${this.id__()}]: {`;
     this.updateFuncByElmtId.forEach((value, key, map) => {
-      retVaL += `\n${"  ".repeat(depth + 2)}${value.getComponentName()}[${key}]`
+      let componentName: string = value.getComponentName();
+      if (componentName === "unspecified UINode") {
+        componentName = this.getChildById(key)?.constructor.name;
+      }
+      retVaL += `\n${"  ".repeat(depth + 2)}${componentName}[${key}]`
     })
     counter.total += this.updateFuncByElmtId.size;
     retVaL += `\n${"  ".repeat(depth + 1)}}[${this.updateFuncByElmtId.size}]`

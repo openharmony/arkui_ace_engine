@@ -348,6 +348,7 @@ void DialogPattern::BuildChild(const DialogProperties& props)
     // build ActionSheet child
     if (props.type == DialogType::ACTION_SHEET && !props.sheetsInfo.empty()) {
         auto sheetContainer = BuildSheet(props.sheetsInfo);
+        contentNodeMap_[DialogContentNode::SHEET] = sheetContainer;
         CHECK_NULL_VOID(sheetContainer);
         sheetContainer->MountToParent(contentColumn);
         // scrollable
@@ -403,12 +404,10 @@ RefPtr<FrameNode> DialogPattern::BuildMainTitle(const DialogProperties& dialogPr
         titlePadding.top = CalcLength(DIALOG_TWO_TITLE_SPACE);
         titlePadding.bottom = CalcLength(DIALOG_TWO_TITLE_ZERO_SPACE);
     } else {
-        titlePadding.top = CalcLength(
-            (DIALOG_ONE_TITLE_ALL_HEIGHT - Dimension(DIALOG_TITLE_CONTENT_HEIGHT.ConvertToVp(), DimensionUnit::VP)) /
-            DIALOG_TITLE_AVE_BY_2);
-        titlePadding.bottom = CalcLength(
-            (DIALOG_ONE_TITLE_ALL_HEIGHT - Dimension(DIALOG_TITLE_CONTENT_HEIGHT.ConvertToVp(), DimensionUnit::VP)) /
-            DIALOG_TITLE_AVE_BY_2);
+        auto padding =
+            DIALOG_ONE_TITLE_ALL_HEIGHT - Dimension(DIALOG_TITLE_CONTENT_HEIGHT.ConvertToVp(), DimensionUnit::VP);
+        titlePadding.top = CalcLength(padding / DIALOG_TITLE_AVE_BY_2);
+        titlePadding.bottom = CalcLength(padding / DIALOG_TITLE_AVE_BY_2);
     }
     titleProp->UpdatePadding(titlePadding);
 
@@ -425,6 +424,7 @@ RefPtr<FrameNode> DialogPattern::BuildMainTitle(const DialogProperties& dialogPr
     titleRowProps->UpdateMeasureType(MeasureType::MATCH_PARENT_MAIN_AXIS);
     title->MountToParent(titleRow);
     title->MarkModifyDone();
+    contentNodeMap_[dialogProperties.title.empty() ? DialogContentNode::SUBTITLE : DialogContentNode::TITLE] = title;
     return titleRow;
 }
 
@@ -465,6 +465,7 @@ RefPtr<FrameNode> DialogPattern::BuildSubTitle(const DialogProperties& dialogPro
     subtitleRowProps->UpdateMeasureType(MeasureType::MATCH_PARENT_MAIN_AXIS);
     subtitle->MountToParent(subtitleRow);
     subtitle->MarkModifyDone();
+    contentNodeMap_[DialogContentNode::SUBTITLE] = subtitle;
     return subtitleRow;
 }
 
@@ -520,6 +521,7 @@ RefPtr<FrameNode> DialogPattern::BuildContent(const DialogProperties& props)
     // XTS inspector value
     message_ = props.content;
     contentNode->MarkModifyDone();
+    contentNodeMap_[DialogContentNode::MESSAGE] = contentNode;
     return contentNode;
 }
 
@@ -742,8 +744,7 @@ void DialogPattern::AddButtonAndDivider(
     auto length = buttons.size();
     for (size_t i = 0; i < length; ++i) {
         if (i != 0 && !isVertical) {
-            auto dividerNode = CreateDivider(
-                dividerLength, dividerWidth, dividerColor, buttonSpace);
+            auto dividerNode = CreateDivider(dividerLength, dividerWidth, dividerColor, buttonSpace);
             CHECK_NULL_VOID(dividerNode);
             container->AddChild(dividerNode);
         }
@@ -927,7 +928,7 @@ RefPtr<FrameNode> DialogPattern::BuildMenu(const std::vector<ButtonInfo>& button
         CHECK_NULL_RETURN(button, nullptr);
         auto props = DynamicCast<FrameNode>(button)->GetLayoutProperty();
         auto buttonRow = FrameNode::CreateFrameNode(V2::ROW_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
-        AceType::MakeRefPtr<LinearLayoutPattern>(false));
+            AceType::MakeRefPtr<LinearLayoutPattern>(false));
         CHECK_NULL_RETURN(buttonRow, nullptr);
         auto buttonRowProps = buttonRow->GetLayoutProperty<LinearLayoutProperty>();
         CHECK_NULL_RETURN(buttonRowProps, nullptr);
@@ -989,9 +990,91 @@ void DialogPattern::OnColorConfigurationUpdate()
     CHECK_NULL_VOID(context);
     auto dialogTheme = context->GetTheme<DialogTheme>();
     CHECK_NULL_VOID(dialogTheme);
+    dialogTheme_ = dialogTheme;
     UpdateWrapperBackgroundStyle(host, dialogTheme);
+    UpdateButtonsProperty();
+    OnModifyDone();
+    host->MarkDirtyNode();
+}
+
+void DialogPattern::OnLanguageConfigurationUpdate()
+{
+    CHECK_NULL_VOID(dialogProperties_.onLanguageChange);
+    dialogProperties_.onLanguageChange(dialogProperties_);
+    if (!dialogProperties_.title.empty() && contentNodeMap_.find(DialogContentNode::TITLE) != contentNodeMap_.end()) {
+        UpdateNodeContent(contentNodeMap_[DialogContentNode::TITLE], dialogProperties_.title);
+        title_ = dialogProperties_.title;
+    }
+
+    if (!dialogProperties_.subtitle.empty() &&
+        contentNodeMap_.find(DialogContentNode::SUBTITLE) != contentNodeMap_.end()) {
+        UpdateNodeContent(contentNodeMap_[DialogContentNode::SUBTITLE], dialogProperties_.subtitle);
+        subtitle_ = dialogProperties_.subtitle;
+    }
+
+    if (!dialogProperties_.content.empty() &&
+        contentNodeMap_.find(DialogContentNode::MESSAGE) != contentNodeMap_.end()) {
+        UpdateNodeContent(contentNodeMap_[DialogContentNode::MESSAGE], dialogProperties_.content);
+        message_ = dialogProperties_.content;
+    }
+
+    if (!dialogProperties_.buttons.empty()) {
+        UpdateButtonsProperty();
+    }
+
+    if (dialogProperties_.type == DialogType::ACTION_SHEET) {
+        UpdateSheetIconAndText();
+    }
+}
+
+void DialogPattern::UpdateNodeContent(const RefPtr<FrameNode>& node, std::string& text)
+{
+    CHECK_NULL_VOID(node);
+    auto layoutProps = AceType::DynamicCast<TextLayoutProperty>(node->GetLayoutProperty());
+    CHECK_NULL_VOID(layoutProps);
+    layoutProps->UpdateContent(text);
+    node->MarkModifyDone();
+}
+
+void DialogPattern::UpdateSheetIconAndText()
+{
+    if (dialogProperties_.sheetsInfo.empty()) {
+        return;
+    }
+
+    auto sheetContainer = contentNodeMap_[DialogContentNode::SHEET];
+    CHECK_NULL_VOID(sheetContainer);
+    int32_t sheetIndex = 0;
+    for (const auto& sheet : sheetContainer->GetChildren()) {
+        auto itemRow = DynamicCast<FrameNode>(sheet->GetFirstChild());
+        CHECK_NULL_VOID(itemRow);
+
+        auto sheetInfo = dialogProperties_.sheetsInfo.at(sheetIndex);
+        if (!sheetInfo.icon.empty()) {
+            auto iconNode = DynamicCast<FrameNode>(itemRow->GetFirstChild());
+            CHECK_NULL_VOID(iconNode);
+            auto iconProps = iconNode->GetLayoutProperty<ImageLayoutProperty>();
+            CHECK_NULL_VOID(iconProps);
+            iconProps->UpdateImageSourceInfo(ImageSourceInfo(sheetInfo.icon));
+            iconNode->MarkModifyDone();
+        }
+        if (!sheetInfo.title.empty()) {
+            auto titleNode = DynamicCast<FrameNode>(itemRow->GetLastChild());
+            CHECK_NULL_VOID(titleNode);
+            auto titleProps = titleNode->GetLayoutProperty<TextLayoutProperty>();
+            CHECK_NULL_VOID(titleProps);
+            titleProps->UpdateContent(sheetInfo.title);
+            titleNode->MarkModifyDone();
+        }
+        ++sheetIndex;
+    }
+}
+
+void DialogPattern::UpdateButtonsProperty()
+{
     CHECK_NULL_VOID(buttonContainer_);
     int32_t btnIndex = 0;
+    isFirstDefaultFocus_ = true;
     for (const auto& buttonNode : buttonContainer_->GetChildren()) {
         if (buttonNode->GetTag() != V2::BUTTON_ETS_TAG) {
             continue;
@@ -1001,24 +1084,26 @@ void DialogPattern::OnColorConfigurationUpdate()
         auto pattern = buttonFrameNode->GetPattern<ButtonPattern>();
         CHECK_NULL_VOID(pattern);
         pattern->SetSkipColorConfigurationUpdate();
+        // parse button text color and background color
+        std::string textColorStr;
+        std::optional<Color> bgColor;
+        ParseButtonFontColorAndBgColor(dialogProperties_.buttons[btnIndex], textColorStr, bgColor);
+        // update background color
+        auto renderContext = buttonFrameNode->GetRenderContext();
+        CHECK_NULL_VOID(renderContext);
+        renderContext->UpdateBackgroundColor(bgColor.value());
         auto buttonTextNode = DynamicCast<FrameNode>(buttonFrameNode->GetFirstChild());
         CHECK_NULL_VOID(buttonTextNode);
         auto buttonTextLayoutProperty = buttonTextNode->GetLayoutProperty<TextLayoutProperty>();
         CHECK_NULL_VOID(buttonTextLayoutProperty);
-        auto textColorStr = dialogProperties_.buttons[btnIndex].textColor;
-        if (!textColorStr.empty()) {
-            Color textColor;
-            Color::ParseColorString(textColorStr, textColor);
-            buttonTextLayoutProperty->UpdateTextColor(textColor);
-        } else {
-            buttonTextLayoutProperty->UpdateTextColor(dialogTheme->GetButtonDefaultFontColor());
-        }
+        Color textColor;
+        Color::ParseColorString(textColorStr, textColor);
+        buttonTextLayoutProperty->UpdateContent(dialogProperties_.buttons[btnIndex].text);
+        buttonTextLayoutProperty->UpdateTextColor(textColor);
         buttonTextNode->MarkModifyDone();
         buttonTextNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
         ++btnIndex;
     }
-    OnModifyDone();
-    host->MarkDirtyNode();
 }
 
 void DialogPattern::SetButtonEnabled(const RefPtr<FrameNode>& buttonNode, bool enabled)

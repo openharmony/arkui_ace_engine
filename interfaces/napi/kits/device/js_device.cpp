@@ -19,8 +19,8 @@
 #include "napi/native_engine/native_value.h"
 #include "napi/native_node_api.h"
 
-#include "frameworks/base/log/log.h"
-#include "frameworks/bridge/common/plugin_adapter/plugin_bridge.h"
+#include "base/log/log.h"
+#include "bridge/common/plugin_adapter/plugin_bridge.h"
 
 namespace OHOS::Ace::Napi {
 

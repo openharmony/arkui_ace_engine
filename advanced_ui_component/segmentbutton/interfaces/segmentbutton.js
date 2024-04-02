@@ -511,7 +511,7 @@ class SelectItem extends ViewPU {
                         x: this.zoomScaleArray[this.selectedIndexes[0]],
                         y: this.zoomScaleArray[this.selectedIndexes[0]]
                     });
-                    Stack.shadow(ShadowStyle.OUTER_DEFAULT_MD);
+                    Stack.shadow(ShadowStyle.OUTER_DEFAULT_XS);
                     e || Stack.pop();
                     ViewStackProcessor.StopGetAccessRecording()
                 }));
@@ -1246,7 +1246,7 @@ class SegmentButtonItemArrayComponent extends ViewPU {
                     ViewStackProcessor.StartGetAccessRecordingFor(t);
                     Row.create({ space: 1 });
                     Row.padding(this.options.componentPadding);
-                    Row.onAreaChange(((t, e) => {
+                    Row.onSizeChange(((t, e) => {
                         this.componentSize = { width: e.width, height: e.height }
                     }));
                     e || Row.pop();
@@ -1271,12 +1271,17 @@ class SegmentButtonItemArrayComponent extends ViewPU {
                                         y: "capsule" === this.options.type && null !== (i = this.options.multiply) && void 0 !== i && i ? 1 : this.zoomScaleArray[e]
                                     });
                                     Stack.layoutWeight(1);
-                                    Stack.onAreaChange(((t, o) => {
+                                    Stack.onSizeChange(((t, o) => {
                                         this.buttonItemsSize[e] = {
                                             width: o.width,
                                             height: this.buttonItemsSize[e].height
                                         };
-                                        this.buttonItemsPosition[e] = o.position
+                                        if (o.width) {
+                                            this.buttonItemsPosition[e] = {
+                                                x: Number.parseInt(this.options.componentPadding.toString()) + (Number.parseInt(o.width.toString()) + 1) * e,
+                                                y: Number.parseInt(this.options.componentPadding.toString())
+                                            };
+                                        }
                                     }));
                                     Stack.overlay({ builder: () => {
                                         this.focusStack.call(this, e)
@@ -1343,7 +1348,7 @@ class SegmentButtonItemArrayComponent extends ViewPU {
                                 this.observeComponentCreation(((t, o) => {
                                     ViewStackProcessor.StartGetAccessRecordingFor(t);
                                     __Common__.create();
-                                    __Common__.onAreaChange(((t, o) => {
+                                    __Common__.onSizeChange(((t, o) => {
                                         this.buttonItemsRealHeight[e] = o.height;
                                         let s = Math.max(...this.buttonItemsRealHeight.slice(0, this.options.buttons ? this.options.buttons.length : 0));
                                         for (let t = 0; t < this.buttonItemsSize.length; t++) this.buttonItemsSize[t] = {

@@ -41,17 +41,11 @@ void CheckBoxGroupPattern::OnAttachToFrameNode()
 void CheckBoxGroupPattern::OnDetachFromFrameNode(FrameNode* frameNode)
 {
     CHECK_NULL_VOID(frameNode);
-    auto pipelineContext = PipelineContext::GetCurrentContext();
-    CHECK_NULL_VOID(pipelineContext);
-    auto stageManager = pipelineContext->GetStageManager();
-    CHECK_NULL_VOID(stageManager);
-    auto pageNode = stageManager->GetLastPage();
-    CHECK_NULL_VOID(pageNode);
-    auto pageEventHub = pageNode->GetEventHub<NG::PageEventHub>();
-    CHECK_NULL_VOID(pageEventHub);
+    auto groupManager = groupManager_.Upgrade();
+    CHECK_NULL_VOID(groupManager);
     auto checkBoxGroupEventHub = frameNode->GetEventHub<NG::CheckBoxGroupEventHub>();
     CHECK_NULL_VOID(checkBoxGroupEventHub);
-    pageEventHub->RemoveCheckBoxFromGroup(checkBoxGroupEventHub->GetGroupName(), frameNode->GetId());
+    groupManager->RemoveCheckBoxFromGroup(checkBoxGroupEventHub->GetGroupName(), frameNode->GetId());
 }
 
 void CheckBoxGroupPattern::OnModifyDone()
@@ -145,6 +139,7 @@ void CheckBoxGroupPattern::InitClickEvent()
     auto gesture = host->GetOrCreateGestureEventHub();
     CHECK_NULL_VOID(gesture);
     auto clickCallback = [weak = WeakClaim(this)](GestureEvent& info) {
+        TAG_LOGD(AceLogTag::ACE_SELECT_COMPONENT, "checkboxgroup onclick");
         auto checkboxPattern = weak.Upgrade();
         CHECK_NULL_VOID(checkboxPattern);
         checkboxPattern->OnClick();
@@ -228,6 +223,7 @@ void CheckBoxGroupPattern::OnClick()
 
 void CheckBoxGroupPattern::OnTouchDown()
 {
+    TAG_LOGD(AceLogTag::ACE_SELECT_COMPONENT, "checkboxgroup touch down %{public}d", isHover_);
     if (isHover_) {
         touchHoverType_ = TouchHoverAnimationType::HOVER_TO_PRESS;
     } else {
@@ -240,6 +236,7 @@ void CheckBoxGroupPattern::OnTouchDown()
 
 void CheckBoxGroupPattern::OnTouchUp()
 {
+    TAG_LOGD(AceLogTag::ACE_SELECT_COMPONENT, "checkboxgroup touch up %{public}d", isHover_);
     if (isHover_) {
         touchHoverType_ = TouchHoverAnimationType::PRESS_TO_HOVER;
     } else {
@@ -269,6 +266,8 @@ void CheckBoxGroupPattern::UpdateUIStatus(bool check)
     auto paintProperty = host->GetPaintProperty<CheckBoxGroupPaintProperty>();
     CHECK_NULL_VOID(paintProperty);
     auto selectStatus = paintProperty->GetSelectStatus();
+    TAG_LOGD(
+        AceLogTag::ACE_SELECT_COMPONENT, "checkboxgroup update ui status %{public}d %{public}d", check, selectStatus);
     if (selectStatus == CheckBoxGroupPaintProperty::SelectStatus::PART) {
         uiStatus_ = check ? UIStatus::PART_TO_ON : UIStatus::PART_TO_OFF;
     } else {
@@ -281,24 +280,17 @@ void CheckBoxGroupPattern::UpdateState()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto pattern = host->GetPattern<CheckBoxGroupPattern>();
-    CHECK_NULL_VOID(pattern);
     auto eventHub = host->GetEventHub<CheckBoxGroupEventHub>();
     CHECK_NULL_VOID(eventHub);
-
-    auto pipelineContext = PipelineContext::GetCurrentContext();
-    CHECK_NULL_VOID(pipelineContext);
-    auto stageManager = pipelineContext->GetStageManager();
-    CHECK_NULL_VOID(stageManager);
-    auto pageNode = stageManager->GetLastPage();
-    CHECK_NULL_VOID(pageNode);
-    auto pageEventHub = pageNode->GetEventHub<NG::PageEventHub>();
-    CHECK_NULL_VOID(pageEventHub);
-
-    auto preGroup = pattern->GetPreGroup();
+    if (!groupManager_.Upgrade()) {
+        groupManager_ = GroupManager::GetGroupManager();
+    }
+    auto groupManager = groupManager_.Upgrade();
+    CHECK_NULL_VOID(groupManager);
+    auto preGroup = GetPreGroup();
     auto group = eventHub->GetGroupName();
     if (!preGroup.has_value()) {
-        pageEventHub->AddCheckBoxGroupToGroup(group, host->GetId());
+        groupManager->AddCheckBoxGroupToGroup(group, host->GetId());
         auto paintProperty = host->GetPaintProperty<CheckBoxGroupPaintProperty>();
         CHECK_NULL_VOID(paintProperty);
         if (paintProperty->HasCheckBoxGroupSelect() && paintProperty->GetCheckBoxGroupSelectValue()) {
@@ -312,13 +304,13 @@ void CheckBoxGroupPattern::UpdateState()
             initSelected_ = selectAll;
         }
         isFirstCreated_ = false;
-        pattern->SetPreGroup(group);
+        SetPreGroup(group);
         return;
     }
     if (preGroup.value() != group) {
-        pageEventHub->RemoveCheckBoxFromGroup(preGroup.value(), host->GetId());
-        pageEventHub->AddCheckBoxGroupToGroup(group, host->GetId());
-        pattern->SetPreGroup(group);
+        groupManager->RemoveCheckBoxFromGroup(preGroup.value(), host->GetId());
+        groupManager->AddCheckBoxGroupToGroup(group, host->GetId());
+        SetPreGroup(group);
         return;
     }
     auto paintProperty = host->GetPaintProperty<CheckBoxGroupPaintProperty>();
@@ -336,7 +328,7 @@ void CheckBoxGroupPattern::UpdateState()
     // Setting selectAll to false when clicked requires processing, changing selectAll to false dynamically does
     // not require processing
     if (updateFlag_ || isSelected) {
-        if (pattern->GetIsAddToMap()) {
+        if (GetIsAddToMap()) {
             UpdateGroupCheckStatus(host, isSelected);
         } else {
             UpdateRepeatedGroupStatus(host, isSelected);
@@ -358,14 +350,9 @@ void CheckBoxGroupPattern::OnAfterModifyDone()
     CHECK_NULL_VOID(eventHub);
     std::vector<std::string> vec;
     if (initSelected_) {
-        auto pipelineContext = PipelineContext::GetCurrentContext();
-        CHECK_NULL_VOID(pipelineContext);
-        auto stageManager = pipelineContext->GetStageManager();
-        CHECK_NULL_VOID(stageManager);
-        auto pageNode = stageManager->GetLastPage();
-        CHECK_NULL_VOID(pageNode);
-        auto pageEventHub = pageNode->GetEventHub<NG::PageEventHub>();
-        auto checkBoxGroupMap = pageEventHub->GetCheckBoxGroupMap();
+        auto groupManager = groupManager_.Upgrade();
+        CHECK_NULL_VOID(groupManager);
+        auto checkBoxGroupMap = groupManager->GetCheckBoxGroupMap();
         const auto& list = checkBoxGroupMap[eventHub->GetGroupName()];
         for (auto&& item : list) {
             auto node = item.Upgrade();
@@ -398,17 +385,11 @@ void CheckBoxGroupPattern::UpdateGroupCheckStatus(const RefPtr<FrameNode>& frame
         paintProperty->SetSelectStatus(CheckBoxGroupPaintProperty::SelectStatus::NONE);
     }
     frameNode->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
-    auto pipelineContext = PipelineContext::GetCurrentContext();
-    CHECK_NULL_VOID(pipelineContext);
-    auto stageManager = pipelineContext->GetStageManager();
-    CHECK_NULL_VOID(stageManager);
-    auto pageNode = stageManager->GetLastPage();
-    CHECK_NULL_VOID(pageNode);
-    auto pageEventHub = pageNode->GetEventHub<NG::PageEventHub>();
-    CHECK_NULL_VOID(pageEventHub);
+    auto groupManager = groupManager_.Upgrade();
+    CHECK_NULL_VOID(groupManager);
     auto checkBoxGroupEventHub = GetEventHub<CheckBoxGroupEventHub>();
     CHECK_NULL_VOID(checkBoxGroupEventHub);
-    auto checkBoxGroupMap = pageEventHub->GetCheckBoxGroupMap();
+    auto checkBoxGroupMap = groupManager->GetCheckBoxGroupMap();
     auto group = checkBoxGroupEventHub->GetGroupName();
     UpdateCheckBoxStatus(frameNode, checkBoxGroupMap, group, select);
 }

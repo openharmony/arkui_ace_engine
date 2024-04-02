@@ -46,14 +46,14 @@ public:
 private:
     void KeepSpansOrder();
     void ApplyReplaceStringToSpans(int32_t start, int32_t length, const std::string& other, SpanStringOperation op);
-    void ApplyInsertStringToSpans(int32_t start, const std::string& other);
     void ApplyReplaceStringToSpanBase(int32_t start, int32_t length, const std::string& other, SpanStringOperation op);
     static RefPtr<SpanBase> GetDefaultSpan(SpanType type);
     static std::wstring GetWideStringSubstr(const std::wstring& content, int32_t start);
     static std::wstring GetWideStringSubstr(const std::wstring& content, int32_t start, int32_t length);
-    void UpdateSpansWithOffset(int32_t start, int32_t offset, SpanStringOperation op);
-    void UpdateSpanMapWithOffset(int32_t start, int32_t offset, SpanStringOperation op);
-    void UpdateSpanBaseWithOffset(RefPtr<SpanBase>& span, int32_t start, int32_t offset, SpanStringOperation op);
+    void UpdateSpansAndSpanMapWithOffsetAfterInsert(int32_t start, int32_t offset, bool useFrontStyle);
+    void UpdateSpansWithOffset(int32_t start, int32_t offset);
+    void UpdateSpanMapWithOffset(int32_t start, int32_t offset);
+    void UpdateSpanBaseWithOffset(RefPtr<SpanBase>& span, int32_t start, int32_t offset);
 };
 } // namespace OHOS::Ace
 

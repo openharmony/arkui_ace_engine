@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 #include "core/interfaces/native/node/node_list_modifier.h"
+#include <cstdint>
 
 #include "base/geometry/dimension.h"
 #include "core/components/common/layout/constants.h"
@@ -200,7 +201,7 @@ ArkUI_Int32 GetListEdgeEffect(ArkUINodeHandle node, ArkUI_Int32* values)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_RETURN(frameNode, ERROR_INT_CODE);
-    values[INDEX_0] = ListModelNG::GetScrollEnabled(frameNode);
+    values[INDEX_0] = ListModelNG::GetEdgeEffect(frameNode);
     values[INDEX_1] = ListModelNG::GetEdgeEffectAlways(frameNode);
     return INDEX_2;
 }
@@ -497,5 +498,73 @@ const ArkUIListModifier* GetListModifier()
         ResetChainAnimationOptions, GetListSpace, SetListSpace, ResetListSpace };
     return &modifier;
 }
+
+void SetOnListScroll(ArkUINodeHandle node, void* extraParam)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto onScroll = [node, extraParam](Dimension scrollOffset, ScrollState scrollState) {
+        ArkUINodeEvent event;
+        event.kind = COMPONENT_ASYNC_EVENT;
+        event.extraParam = reinterpret_cast<intptr_t>(extraParam);
+        event.componentAsyncEvent.subKind = ON_LIST_SCROLL;
+        event.componentAsyncEvent.data[0].f32 = static_cast<float>(scrollOffset.Value());
+        event.componentAsyncEvent.data[1].i32 = static_cast<int>(scrollState);
+        SendArkUIAsyncEvent(&event);
+    };
+    ListModelNG::SetOnScroll(frameNode, std::move(onScroll));
+}
+
+void SetOnListScrollFrameBegin(ArkUINodeHandle node, void* extraParam)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    int32_t nodeId = frameNode->GetId();
+    auto onScrollFrameBegin = [nodeId, node, extraParam](const Dimension& offset, const ScrollState& state) ->
+            ScrollFrameResult {
+        ScrollFrameResult scrollRes { .offset = offset };
+        ArkUINodeEvent event;
+        event.kind = COMPONENT_ASYNC_EVENT;
+        event.extraParam = reinterpret_cast<intptr_t>(extraParam);
+        event.componentAsyncEvent.subKind = ON_LIST_SCROLL_FRAME_BEGIN;
+        event.componentAsyncEvent.data[0].f32 = static_cast<float>(offset.Value());
+        event.componentAsyncEvent.data[1].i32 = static_cast<int>(state);
+        SendArkUIAsyncEvent(&event);
+        scrollRes.offset = Dimension(event.componentAsyncEvent.data[0].f32, DimensionUnit::VP);
+        return scrollRes;
+    };
+    ListModelNG::SetOnScrollFrameBegin(frameNode, std::move(onScrollFrameBegin));
+}
+
+void SetOnListScrollStart(ArkUINodeHandle node, void* extraParam)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    int32_t nodeId = frameNode->GetId();
+    auto onScrollStart = [nodeId, node, extraParam]() -> void {
+        ArkUINodeEvent event;
+        event.kind = COMPONENT_ASYNC_EVENT;
+        event.extraParam = reinterpret_cast<intptr_t>(extraParam);
+        event.componentAsyncEvent.subKind = ON_LIST_SCROLL_START;
+        SendArkUIAsyncEvent(&event);
+    };
+    ListModelNG::SetOnScrollStart(frameNode, std::move(onScrollStart));
+}
+
+void SetOnListScrollStop(ArkUINodeHandle node, void* extraParam)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    int32_t nodeId = frameNode->GetId();
+    auto onScrollStop = [nodeId, node, extraParam]() -> void {
+        ArkUINodeEvent event;
+        event.kind = COMPONENT_ASYNC_EVENT;
+        event.extraParam = reinterpret_cast<intptr_t>(extraParam);
+        event.componentAsyncEvent.subKind = ON_LIST_SCROLL_STOP;
+        SendArkUIAsyncEvent(&event);
+    };
+    ListModelNG::SetOnScrollStop(frameNode, std::move(onScrollStop));
+}
+
 } // namespace NodeModifier
 } // namespace OHOS::Ace::NG

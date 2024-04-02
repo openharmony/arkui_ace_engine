@@ -19,6 +19,7 @@
 #include "node/node_model.h"
 #include "node/gesture_impl.h"
 
+#include "node_extened.h"
 #include "base/log/log_wrapper.h"
 
 namespace {
@@ -33,8 +34,8 @@ ArkUI_NativeNodeAPI_1 nodeImpl_1 = {
     OHOS::Ace::NodeModel::AddChild,
     OHOS::Ace::NodeModel::RemoveChild,
     OHOS::Ace::NodeModel::InsertChildAfter,
-    nullptr,
-    nullptr,
+    OHOS::Ace::NodeModel::InsertChildBefore,
+    OHOS::Ace::NodeModel::InsertChildAt,
     OHOS::Ace::NodeModel::SetAttribute,
     OHOS::Ace::NodeModel::GetAttribute,
     OHOS::Ace::NodeModel::ResetAttribute,
@@ -43,6 +44,22 @@ ArkUI_NativeNodeAPI_1 nodeImpl_1 = {
     OHOS::Ace::NodeModel::RegisterOnEvent,
     OHOS::Ace::NodeModel::UnregisterOnEvent,
     OHOS::Ace::NodeModel::MarkDirty,
+    OHOS::Ace::NodeModel::GetTotalChildCount,
+    OHOS::Ace::NodeModel::GetChildAt,
+    OHOS::Ace::NodeModel::GetFirstChild,
+    OHOS::Ace::NodeModel::GetLastChild,
+    OHOS::Ace::NodeModel::GetPreviousSibling,
+    OHOS::Ace::NodeModel::GetNextSibling,
+    OHOS::Ace::NodeModel::RegisterNodeCustomEvent,
+    OHOS::Ace::NodeModel::UnregisterNodeCustomEvent,
+    OHOS::Ace::NodeModel::RegisterNodeCustomReceiver,
+    OHOS::Ace::NodeModel::UnregisterNodeCustomEventReceiver,
+    OHOS::Ace::NodeModel::SetMeasuredSize,
+    OHOS::Ace::NodeModel::SetLayoutPosition,
+    OHOS::Ace::NodeModel::GetMeasuredSize,
+    OHOS::Ace::NodeModel::GetLayoutPosition,
+    OHOS::Ace::NodeModel::MeasureNode,
+    OHOS::Ace::NodeModel::LayoutNode,
 };
 
 ArkUI_NativeDialogAPI_1 dialogImpl_1 = {
@@ -60,7 +77,7 @@ ArkUI_NativeDialogAPI_1 dialogImpl_1 = {
     OHOS::Ace::DialogModel::SetGridColumnCount,
     OHOS::Ace::DialogModel::EnableCustomStyle,
     OHOS::Ace::DialogModel::EnableCustomAnimation,
-    OHOS::Ace::DialogModel::RegiesterOnWillDismiss,
+    OHOS::Ace::DialogModel::RegisterOnWillDismiss,
     OHOS::Ace::DialogModel::Show,
     OHOS::Ace::DialogModel::Close,
 };
@@ -68,21 +85,21 @@ ArkUI_NativeDialogAPI_1 dialogImpl_1 = {
 constexpr int32_t CURRENT_NATIVE_GESTURE_API_VERSION = 1;
 ArkUI_NativeGestureAPI_1 gestureImpl_1 = {
     CURRENT_NATIVE_GESTURE_API_VERSION,
-    nullptr,
-    nullptr,
+    OHOS::Ace::GestureModel::CreateTapGesture,
+    OHOS::Ace::GestureModel::CreateLongPressGesture,
     OHOS::Ace::GestureModel::CreatePanGesture,
-    nullptr,
-    nullptr,
-    nullptr,
+    OHOS::Ace::GestureModel::CreatePinchGesture,
+    OHOS::Ace::GestureModel::CreateRotationGesture,
+    OHOS::Ace::GestureModel::CreateSwipeGesture,
     nullptr,
     OHOS::Ace::GestureModel::DisposeGesture,
     nullptr,
     nullptr,
     OHOS::Ace::GestureModel::SetGestureEventTarget,
     OHOS::Ace::GestureModel::AddGestureToNode,
+    OHOS::Ace::GestureModel::RemoveGestureFromNode,
     nullptr,
-    nullptr,
-    nullptr,
+    OHOS::Ace::GestureModel::GetGestureType,
 };
 
 } // namespace
@@ -127,6 +144,7 @@ ArkUI_AnyNativeAPI* OH_ArkUI_QueryModuleInterface(ArkUI_NativeAPIVariantKind typ
                     return nullptr;
                 }
             }
+            break;
         }
         case ARKUI_NATIVE_GESTURE: {
             switch (version) {

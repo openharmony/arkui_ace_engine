@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -23,7 +23,27 @@ enum class AceAutoFillType {
     ACE_UNSPECIFIED = 0,
     ACE_PASSWORD,
     ACE_USER_NAME,
-    ACE_NEW_PASSWORD
+    ACE_NEW_PASSWORD,
+    ACE_FULL_STREET_ADDRESS,
+    ACE_HOUSE_NUMBER,
+    ACE_DISTRICT_ADDRESS,
+    ACE_CITY_ADDRESS,
+    ACE_PROVINCE_ADDRESS,
+    ACE_COUNTRY_ADDRESS,
+    ACE_PERSON_FULL_NAME,
+    ACE_PERSON_LAST_NAME,
+    ACE_PERSON_FIRST_NAME,
+    ACE_PHONE_NUMBER,
+    ACE_PHONE_COUNTRY_CODE,
+    ACE_FULL_PHONE_NUMBER,
+    ACE_EMAIL_ADDRESS,
+    ACE_BANK_CARD_NUMBER,
+    ACE_ID_CARD_NUMBER,
+    ACE_PRECISE_TIME,
+    ACE_HOUR_AND_MINUTE,
+    ACE_DATE,
+    ACE_MONTH,
+    ACE_YEAR,
 };
 } // namespace OHOS::Ace
 #endif // FOUNDATION_ACE_FRAMEWORKS_BASE_ACE_AUTO_FILL_TYPE_H

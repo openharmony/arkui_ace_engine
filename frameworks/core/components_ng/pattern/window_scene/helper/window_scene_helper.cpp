@@ -19,6 +19,7 @@
 #include "pointer_event.h"
 
 #include "adapter/ohos/entrance/ace_view_ohos.h"
+#include "base/utils/utils.h"
 #include "core/common/container.h"
 #include "core/components_ng/pattern/window_scene/scene/system_window_scene.h"
 #include "core/components_v2/inspector/inspector_constants.h"
@@ -148,8 +149,8 @@ bool WindowSceneHelper::GetNeedKeyboardOnFocusFlag(const RefPtr<FrameNode> frame
 void WindowSceneHelper::IsWindowSceneCloseKeyboard(RefPtr<FrameNode> frameNode)
 {
 #if defined (ENABLE_STANDARD_INPUT)
-    if (frameNode->GetTag() == V2::UI_EXTENSION_COMPONENT_TAG || frameNode->GetTag() ==
-        V2::UI_EXTENSION_COMPONENT_ETS_TAG) {
+    if (frameNode->GetTag() == V2::UI_EXTENSION_COMPONENT_ETS_TAG ||
+        frameNode->GetTag() == V2::EMBEDDED_COMPONENT_ETS_TAG) {
         TAG_LOGD(AceLogTag::ACE_KEYBOARD, "UIExtension(%{public}s/%{public}d) notNeedSoftKeyboard.",
             frameNode->GetTag().c_str(), frameNode->GetId());
         return;
@@ -277,9 +278,9 @@ void WindowSceneHelper::InjectPointerEvent(RefPtr<FrameNode> node,
     OHOS::Ace::Platform::AceViewOhos::DispatchTouchEvent(aceView, pointerEvent, node);
 }
 
-void WindowSceneHelper::InjectKeyEvent(const std::shared_ptr<OHOS::MMI::KeyEvent>& keyEvent)
+bool WindowSceneHelper::InjectKeyEvent(const std::shared_ptr<OHOS::MMI::KeyEvent>& keyEvent, bool isPreIme)
 {
-    CHECK_NULL_VOID(keyEvent);
+    CHECK_NULL_RETURN(keyEvent, false);
     TAG_LOGI(AceLogTag::ACE_INPUTTRACKING,
         "KeyEvent Process to inject, eventInfo: id:%{public}d, "
         "keyEvent info: keyCode is %{public}d, "
@@ -287,9 +288,9 @@ void WindowSceneHelper::InjectKeyEvent(const std::shared_ptr<OHOS::MMI::KeyEvent
         keyEvent->GetId(), keyEvent->GetKeyCode(), keyEvent->GetKeyAction(), keyEvent->GetActionTime());
 
     auto container = Container::Current();
-    CHECK_NULL_VOID(container);
+    CHECK_NULL_RETURN(container, false);
     auto aceView = static_cast<OHOS::Ace::Platform::AceViewOhos*>(container->GetView());
-    CHECK_NULL_VOID(aceView);
-    OHOS::Ace::Platform::AceViewOhos::DispatchKeyEvent(aceView, keyEvent);
+    CHECK_NULL_RETURN(aceView, false);
+    return OHOS::Ace::Platform::AceViewOhos::DispatchKeyEvent(aceView, keyEvent, isPreIme);
 }
 } // namespace OHOS::Ace::NG

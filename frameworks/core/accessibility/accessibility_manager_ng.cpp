@@ -15,6 +15,8 @@
 
 #include "core/accessibility/accessibility_manager_ng.h"
 
+#include "core/accessibility/accessibility_constants.h"
+#include "core/accessibility/accessibility_session_adapter.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/property/accessibility_property.h"
 #include "core/event/mouse_event.h"
@@ -75,6 +77,20 @@ void AccessibilityManagerNG::HandleAccessibilityHoverEvent(const RefPtr<FrameNod
         }
     }
     HandleAccessibilityHoverEventInner(root, point, event.sourceType, type, event.time);
+}
+
+void AccessibilityManagerNG::HandleAccessibilityHoverEvent(const RefPtr<FrameNode>& root, float pointX, float pointY,
+    int32_t sourceType, int32_t eventType, int64_t timeMs)
+{
+    if (root == nullptr ||
+        !AceApplicationInfo::GetInstance().IsAccessibilityEnabled() ||
+        eventType < 0 || eventType >= static_cast<int32_t>(AccessibilityHoverEventType::Count)) {
+        return;
+    }
+    PointF point(pointX, pointY);
+    TimeStamp time((std::chrono::milliseconds(timeMs)));
+    HandleAccessibilityHoverEventInner(root, point, static_cast<SourceType>(sourceType),
+        static_cast<AccessibilityHoverEventType>(eventType), time);
 }
 
 void AccessibilityManagerNG::HandleAccessibilityHoverEventInner(
@@ -138,15 +154,38 @@ void AccessibilityManagerNG::HandleAccessibilityHoverEventInner(
     }
     if (lastHoveringId != INVALID_NODE_ID && lastHoveringId != currentHoveringId) {
         lastHovering->OnAccessibilityEvent(AccessibilityEventType::HOVER_EXIT_EVENT);
+        NotifyHoverEventToNodeSession(lastHovering, root, point,
+            sourceType, AccessibilityHoverEventType::EXIT, time);
     }
-    if (currentHoveringId != INVALID_NODE_ID && currentHoveringId != lastHoveringId) {
-        currentHovering->OnAccessibilityEvent(AccessibilityEventType::HOVER_ENTER_EVENT);
+    if (currentHoveringId != INVALID_NODE_ID) {
+        if (currentHoveringId != lastHoveringId) {
+            currentHovering->OnAccessibilityEvent(AccessibilityEventType::HOVER_ENTER_EVENT);
+        }
+        NotifyHoverEventToNodeSession(currentHovering, root, point,
+            sourceType, eventType, time);
     }
 
     hoverState_.nodesHovering = std::move(currentNodesHovering);
     hoverState_.time = time;
     hoverState_.source = sourceType;
     hoverState_.idle = eventType == AccessibilityHoverEventType::EXIT;
+}
+
+void AccessibilityManagerNG::NotifyHoverEventToNodeSession(const RefPtr<FrameNode>& node,
+    const RefPtr<FrameNode>& rootNode, const PointF& pointRoot,
+    SourceType sourceType, AccessibilityHoverEventType eventType, TimeStamp time)
+{
+    auto eventHub = node->GetEventHub<EventHub>();
+    if (!eventHub->IsEnabled()) {
+        // If the host component is disabled, do not transfer hover event.
+        return;
+    }
+    auto sessionAdapter = AccessibilitySessionAdapter::GetSessionAdapter(node);
+    CHECK_NULL_VOID(sessionAdapter);
+    PointF pointNode(pointRoot);
+    if (AccessibilityManagerNG::ConvertPointFromAncestorToNode(rootNode, node, pointRoot, pointNode)) {
+        sessionAdapter->TransferHoverEvent(pointNode, sourceType, eventType, time);
+    }
 }
 
 void AccessibilityManagerNG::ResetHoverState()
@@ -190,5 +229,28 @@ void AccessibilityManagerNG::HoverTestDebug(const RefPtr<FrameNode>& root, const
     std::stringstream detailFiltered;
     summary = summaryJson->ToString();
     detail = detailJson->ToString();
+}
+
+bool AccessibilityManagerNG::ConvertPointFromAncestorToNode(
+    const RefPtr<NG::FrameNode>& ancestor, const RefPtr<NG::FrameNode>& endNode,
+    const PointF& pointAncestor, PointF& pointNode)
+{
+    CHECK_NULL_RETURN(ancestor, false);
+    CHECK_NULL_RETURN(endNode, false);
+    std::vector<RefPtr<NG::FrameNode>> path;
+    RefPtr<NG::FrameNode> curr = endNode;
+    while (curr != nullptr && curr->GetId() != ancestor->GetId()) {
+        path.push_back(curr);
+        curr = curr->GetAncestorNodeOfFrame();
+    }
+    CHECK_NULL_RETURN(curr, false);
+    pointNode = pointAncestor;
+    for (const auto& node : path) {
+        auto renderContext = node->GetRenderContext();
+        renderContext->GetPointWithRevert(pointNode);
+        auto rect = renderContext->GetPaintRectWithoutTransform();
+        pointNode = pointNode - rect.GetOffset();
+    }
+    return true;
 }
 } // namespace OHOS::Ace::NG

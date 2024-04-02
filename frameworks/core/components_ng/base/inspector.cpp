@@ -407,16 +407,20 @@ std::string Inspector::GetInspectorNodeByKey(const std::string& key)
 void Inspector::GetRectangleById(const std::string& key, Rectangle& rectangle)
 {
     auto frameNode = Inspector::GetFrameNodeByKey(key);
-    CHECK_NULL_VOID(frameNode);
+    if (!frameNode) {
+        LOGW("Can't find a component that id or key are %{public}s, Please check your parameters are correct",
+            key.c_str());
+        return;
+    }
     rectangle.size = frameNode->GetGeometryNode()->GetFrameSize();
     auto context = frameNode->GetRenderContext();
-    CHECK_NULL_VOID(context);
-    rectangle.localOffset = context->GetPaintRectWithTransform().GetOffset();
-    if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
-        rectangle.windowOffset = frameNode->GetTransformRelativeOffset();
-    } else {
-        rectangle.windowOffset = frameNode->GetOffsetRelativeToWindow();
+    if (!context) {
+        LOGW("Internal error! The RenderContext returned by the component(id=%{public}s) is null",
+            key.c_str());
+        return;
     }
+    rectangle.localOffset = context->GetPaintRectWithTransform().GetOffset();
+    rectangle.windowOffset = frameNode->GetOffsetRelativeToWindow();
     auto pipeline = NG::PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
     rectangle.screenRect = pipeline->GetCurrentWindowRect();

@@ -305,9 +305,9 @@ private:
     static constexpr uint32_t PRESSED_BG_AREA_COLOR = 0x19182431;
     static constexpr uint32_t SLIP_PRESSED_BACKGROUD_COLOR = 0x19182431;
     static constexpr uint32_t POPUP_CLICKED_BG_AREA_COLOR = 0x0c182431;
-    static constexpr uint32_t POPUP_TITLE_BG_AREA_COLOR = 0x00ffffff;
+    static constexpr uint32_t POPUP_TITLE_BG_AREA_COLOR = 0x0c182431;
     static constexpr uint32_t POPUP_UNCLICKED_BG_AREA_COLOR = 0x00000000;
-    static constexpr uint32_t POPUP_BACKGROUND_COLOR_API_TWELVE = 0x00ffffff;
+    static constexpr uint32_t POPUP_BACKGROUND_COLOR_API_TWELVE = 0x66808080;
     static constexpr float HOVER_TEXT_SIZE_API_TWELVE = 10.0f;
 };
 } // namespace OHOS::Ace

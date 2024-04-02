@@ -47,6 +47,7 @@ public:
     int32_t GetTextContentLinesNum() override;
     void StopEditing() override;
 
+    void SetPasswordState(bool flag) override;
 private:
     WeakPtr<Pattern> pattern_;
 };

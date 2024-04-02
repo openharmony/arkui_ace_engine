@@ -302,14 +302,6 @@ public:
         clickEventActuator_->RemoveClickEvent(clickEvent);
     }
 
-    void RemoveLongPressEvent(const RefPtr<LongPressEvent>& longPressEvent)
-    {
-        if (!longPressEventActuator_) {
-            return;
-        }
-        longPressEventActuator_->RemoveLongPressEvent(longPressEvent);
-    }
-
     bool IsClickEventsEmpty() const
     {
         if (!clickEventActuator_) {
@@ -610,6 +602,16 @@ public:
 
     RefPtr<UnifiedData> GetUnifiedData(const std::string& frameTag, DragDropInfo& dragDropInfo,
         const RefPtr<OHOS::Ace::DragEvent>& dragEvent);
+    int32_t GetSelectItemSize();
+
+    bool IsNeedSwitchToSubWindow() const;
+    RefPtr<PixelMap> GetDragPreviewPixelMap()
+    {
+        return dragPreviewPixelMap_;
+    }
+    void SetDragGatherPixelMaps(const GestureEvent& info);
+    void SetMouseDragGatherPixelMaps();
+    void SetNotMouseDragGatherPixelMaps();
 
 private:
     void ProcessTouchTestHierarchy(const OffsetF& coordinateOffset, const TouchRestrict& touchRestrict,

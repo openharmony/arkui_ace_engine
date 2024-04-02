@@ -92,6 +92,13 @@ void ResetMenuFont(ArkUINodeHandle node)
     MenuModelNG::SetFontFamily(frameNode, Framework::ConvertStrToFontFamilies(DEFAULT_FONT_FAMILY));
 }
 
+void ResetRadius(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    MenuModelNG::ResetBorderRadius(frameNode);
+}
+
 void SetRadius(ArkUINodeHandle node, const ArkUI_Float32* values, const int32_t* units)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -104,15 +111,10 @@ void SetRadius(ArkUINodeHandle node, const ArkUI_Float32* values, const int32_t*
         Dimension(values[2], static_cast<OHOS::Ace::DimensionUnit>(units[2])); // 2: index of bottom left value
     auto bottomRight =
         Dimension(values[3], static_cast<OHOS::Ace::DimensionUnit>(units[3])); // 3: index of bottom right value
+    if (topLeft.IsNegative() || topRight.IsNegative() || bottomLeft.IsNegative() || bottomRight.IsNegative()) {
+        ResetRadius(node);
+    }
     MenuModelNG::SetBorderRadius(frameNode, topLeft, topRight, bottomLeft, bottomRight);
-}
-
-void ResetRadius(ArkUINodeHandle node)
-{
-    auto* frameNode = reinterpret_cast<FrameNode*>(node);
-    CHECK_NULL_VOID(frameNode);
-    OHOS::Ace::CalcDimension reset;
-    MenuModelNG::SetBorderRadius(frameNode, reset);
 }
 
 void SetMenuWidth(ArkUINodeHandle node, ArkUI_Float32 value, int32_t unit)

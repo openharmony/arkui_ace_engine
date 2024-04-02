@@ -30,7 +30,8 @@
 
 namespace OHOS::Ace {
 namespace {
-const char* NODE_CONTAINER_ID = "nodeContainerId_";
+const char* NODE_CONTAINER_ID = "_nodeContainerId";
+const char* INTERNAL_FIELD_VALUE = "_value";
 const char* NODEPTR_OF_UINODE = "nodePtr_";
 constexpr int32_t INVALID_NODE_CONTAINER_ID = -1;
 } // namespace
@@ -82,20 +83,27 @@ void JSNodeContainer::Create(const JSCallbackInfo& info)
             return;
         }
     }
-    // clear the nodeContainerId_ in pre controller;
+    // clear the _nodeContainerId in pre controller;
     NodeContainerModel::GetInstance()->ResetController();
 
-    // set a function to reset the nodeContainerId_ in controller;
+    // set a function to reset the _nodeContainerId in controller;
     auto resetFunc = [firstArg = JSWeak<JSObject>(object)]() {
         CHECK_NULL_VOID(!firstArg.IsEmpty());
         JSObject args = firstArg.Lock().Get();
-        args->SetProperty(NODE_CONTAINER_ID, INVALID_NODE_CONTAINER_ID);
+        auto internalField = args->GetProperty(NODE_CONTAINER_ID);
+        CHECK_NULL_VOID(internalField->IsObject());
+        auto obj = JSRef<JSObject>::Cast(internalField);
+        obj->SetProperty(INTERNAL_FIELD_VALUE, INVALID_NODE_CONTAINER_ID);
     };
     NodeContainerModel::GetInstance()->BindController(std::move(resetFunc));
     auto execCtx = info.GetExecutionContext();
     SetNodeController(object, execCtx);
-    // set the nodeContainerId_ to nodeController
-    firstArg->SetProperty(NODE_CONTAINER_ID, nodeContainerId);
+    // set the _nodeContainerId to nodeController
+    auto internalField = firstArg->GetProperty(NODE_CONTAINER_ID);
+    if (internalField->IsObject()) {
+        auto obj = JSRef<JSObject>::Cast(internalField);
+        obj->SetProperty(INTERNAL_FIELD_VALUE, nodeContainerId);
+    }
     NodeContainerModel::GetInstance()->FireMakeNode();
 }
 

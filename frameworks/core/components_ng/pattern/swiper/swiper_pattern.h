@@ -38,6 +38,7 @@
 #include "core/components_ng/pattern/swiper/swiper_model.h"
 #include "core/components_ng/pattern/swiper/swiper_paint_method.h"
 #include "core/components_ng/pattern/swiper/swiper_paint_property.h"
+#include "core/components_ng/pattern/swiper/swiper_utils.h"
 #include "core/components_ng/pattern/tabs/tab_content_transition_proxy.h"
 #include "core/components_v2/inspector/utils.h"
 
@@ -528,7 +529,6 @@ public:
     std::string ProvideRestoreInfo() override;
     void OnRestoreInfo(const std::string& restoreInfo) override;
     bool IsAutoFill() const;
-    bool HasTabsAncestor() const;
     void OnTouchTestHit(SourceType hitTestType) override;
     void SwipeToWithoutAnimation(int32_t index);
     void StopAutoPlay();
@@ -620,6 +620,11 @@ public:
     void FireWillShowEvent(int32_t willShowIndex) const;
     void SetOnHiddenChangeForParent();
 
+    void SetHasTabsAncestor(bool hasTabsAncestor)
+    {
+        hasTabsAncestor_ = hasTabsAncestor;
+    }
+
 private:
     void OnModifyDone() override;
     void OnAfterModifyDone() override;
@@ -690,11 +695,11 @@ private:
     void FireAnimationStartEvent(int32_t currentIndex, int32_t nextIndex, const AnimationCallbackInfo& info) const;
     void FireAnimationEndEvent(int32_t currentIndex, const AnimationCallbackInfo& info) const;
     void FireGestureSwipeEvent(int32_t currentIndex, const AnimationCallbackInfo& info) const;
-    void FireSwiperCustomAnimationEvent(std::set<int32_t> indexInVisibleArea);
+    void FireSwiperCustomAnimationEvent();
+    void FireContentDidScrollEvent();
     void HandleSwiperCustomAnimation(float offset);
-    std::set<int32_t> CalculateAndUpdateItemInfo(float offset);
-    void UpdateItemInfoInCustomAnimation(int32_t index, float startPos, float endPos,
-        std::set<int32_t>& indexInVisibleArea);
+    void CalculateAndUpdateItemInfo(float offset);
+    void UpdateItemInfoInCustomAnimation(int32_t index, float startPos, float endPos);
 
     float GetItemSpace() const;
     float GetPrevMargin() const;
@@ -893,7 +898,9 @@ private:
 
     bool SupportSwiperCustomAnimation()
     {
-        return (onSwiperCustomContentTransition_ || onContentDidScroll_) && !hasCachedCapture_;
+        auto swiperLayoutProperty = GetLayoutProperty<SwiperLayoutProperty>();
+        return (onSwiperCustomContentTransition_ || onContentDidScroll_) &&
+            !hasCachedCapture_ && SwiperUtils::IsStretch(swiperLayoutProperty);
     }
 
     RefPtr<PanEvent> panEvent_;
@@ -1019,6 +1026,7 @@ private:
     bool fadeAnimationIsRunning_ = false;
     bool autoLinearReachBoundary = false;
     bool needAdjustIndex_ = false;
+    bool hasTabsAncestor_ = false;
 
     std::optional<int32_t> cachedCount_;
 

@@ -95,6 +95,7 @@ const std::string VIDEO_FULLSCREEN_EVENT = "fullScreen";
 const std::string EXTRA_INFO_KEY = "extraInfo";
 const std::string VIDEO_ERROR_ID = "";
 const std::string VIDEO_CALLBACK_RESULT = "result_ok";
+const std::string VIDEO_STOP_EVENT = "stop";
 constexpr float MAX_WIDTH = 400.0f;
 constexpr float MAX_HEIGHT = 400.0f;
 constexpr float VIDEO_WIDTH = 300.0f;
@@ -291,6 +292,7 @@ HWTEST_F(VideoTestNg, VideoEventTest003, TestSize.Level1)
     video.SetOnSeeking(videoEvent);
     video.SetOnSeeked(videoEvent);
     video.SetOnUpdate(videoEvent);
+    video.SetOnStop(videoEvent);
     video.SetOnFullScreenChange(videoEvent);
 
     auto frameNode =ViewStackProcessor::GetInstance()->GetMainFrameNode();
@@ -316,6 +318,8 @@ HWTEST_F(VideoTestNg, VideoEventTest003, TestSize.Level1)
     EXPECT_EQ(unknownVideoEvent, VIDEO_UPDATE_EVENT);
     videoEventHub->FireFullScreenChangeEvent(VIDEO_FULLSCREEN_EVENT);
     EXPECT_EQ(unknownVideoEvent, VIDEO_FULLSCREEN_EVENT);
+    videoEventHub->FireStopEvent(VIDEO_STOP_EVENT);
+    EXPECT_EQ(unknownVideoEvent, VIDEO_STOP_EVENT);
 }
 
 /**
@@ -725,9 +729,12 @@ HWTEST_F(VideoTestNg, VideoPatternTest010, TestSize.Level1)
     VideoEventCallback onPause = [&pauseCheck](const std::string& /* param */) { pauseCheck = VIDEO_PAUSE_EVENT; };
     std::string finishCheck;
     VideoEventCallback onFinish = [&finishCheck](const std::string& /* param */) { finishCheck = VIDEO_FINISH_EVENT; };
+    std::string stopCheck;
+    VideoEventCallback onStop = [&stopCheck](const std::string& /* param */) { stopCheck = VIDEO_STOP_EVENT; };
     videoEventHub->SetOnStart(std::move(onStart));
     videoEventHub->SetOnPause(std::move(onPause));
     videoEventHub->SetOnFinish(std::move(onFinish));
+    videoEventHub->SetOnStop(std::move(onStop));
 
     /**
      * @tc.steps: step3. Call OnPlayerStatus status == STARTED
@@ -777,6 +784,7 @@ HWTEST_F(VideoTestNg, VideoPatternTest010, TestSize.Level1)
     pattern->OnPlayerStatus(PlaybackStatus::PREPARED);
     pattern->OnPlayerStatus(PlaybackStatus::PAUSED);
     pattern->OnPlayerStatus(PlaybackStatus::STOPPED);
+    EXPECT_EQ(stopCheck, VIDEO_STOP_EVENT);
     pattern->OnPlayerStatus(PlaybackStatus::NONE);
 }
 
@@ -870,6 +878,9 @@ HWTEST_F(VideoTestNg, VideoPatternTest012, TestSize.Level1)
     std::string updateCheck;
     VideoEventCallback onUpdate = [&updateCheck](const std::string& /* param */) { updateCheck = VIDEO_UPDATE_EVENT; };
     videoEventHub->SetOnUpdate(std::move(onUpdate));
+    std::string stopCheck;
+    VideoEventCallback onStop = [&stopCheck](const std::string& /* param */) { stopCheck = VIDEO_STOP_EVENT; };
+    videoEventHub->SetOnStop(std::move(onStop));
 
     /**
      * @tc.steps: step2. Call Start

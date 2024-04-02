@@ -16,12 +16,13 @@
 /// <reference path='./import.ts' />
 class DatePickerModifier extends ArkDatePickerComponent implements AttributeModifier<DatePickerAttribute> {
 
-  constructor(nativePtr: KNode) {
-    super(nativePtr);
+  constructor(nativePtr: KNode, classType: ModifierType) {
+    super(nativePtr, classType);
     this._modifiersWithKeys = new ModifierMap();
   }
 
   applyNormalAttribute(instance: DatePickerAttribute): void {
-    applyAndMergeModifier<DatePickerAttribute, ArkDatePickerComponent, ArkComponent>(instance, this);
+    ModifierUtils.applySetOnChange(this);
+    ModifierUtils.applyAndMergeModifier<DatePickerAttribute, ArkDatePickerComponent, ArkComponent>(instance, this);
   }
 }

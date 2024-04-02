@@ -43,6 +43,7 @@ protected:
     static RefPtr<FrameNode> BuildRightSplitMenuItem();
     static RefPtr<FrameNode> BuildMenuItemIcon(InternalResource::ResourceId resourceId);
     static RefPtr<FrameNode> BuildMenuItemPadding(PaddingProperty padding, RefPtr<FrameNode> node);
+    static RefPtr<FrameNode> BuildGestureRow(RefPtr<FrameNode>& containerNode);
     static void ResetHoverTimer();
     static bool sIsMenuPending_;
     static bool sIsForbidMenuEvent_;

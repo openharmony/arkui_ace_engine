@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -40,9 +40,11 @@
 #include "core/components/common/layout/constants.h"
 #include "core/components/text_field/textfield_theme.h"
 #include "core/components_ng/base/view_abstract.h"
+#include "core/components_ng/pattern/text_field/text_content_type.h"
 #include "core/components_ng/pattern/text_field/text_field_model.h"
 #include "core/components_ng/pattern/text_field/text_field_model_ng.h"
 #include "core/pipeline/pipeline_base.h"
+#include "core/components/common/properties/text_style_parser.h"
 
 namespace OHOS::Ace {
 
@@ -77,6 +79,7 @@ namespace {
 const std::vector<TextAlign> TEXT_ALIGNS = { TextAlign::START, TextAlign::CENTER, TextAlign::END, TextAlign::JUSTIFY };
 const std::vector<FontStyle> FONT_STYLES = { FontStyle::NORMAL, FontStyle::ITALIC };
 const std::vector<std::string> INPUT_FONT_FAMILY_VALUE = { "sans-serif" };
+const std::vector<WordBreak> WORD_BREAK_TYPES = { WordBreak::NORMAL, WordBreak::BREAK_ALL, WordBreak::BREAK_WORD };
 constexpr uint32_t MAX_LINES = 3;
 constexpr uint32_t MINI_VAILD_VALUE = 1;
 constexpr uint32_t MAX_VAILD_VALUE = 100;
@@ -203,6 +206,22 @@ void JSTextField::SetType(const JSCallbackInfo& info)
     }
     TextInputType textInputType = static_cast<TextInputType>(info[0]->ToNumber<int32_t>());
     TextFieldModel::GetInstance()->SetType(textInputType);
+}
+
+void JSTextField::SetContentType(const JSCallbackInfo& info)
+{
+    if (info.Length() < 1) {
+        return;
+    }
+    if (info[0]->IsUndefined()) {
+        TextFieldModel::GetInstance()->SetContentType(NG::TextContentType::UNSPECIFIED);
+        return;
+    }
+    if (!info[0]->IsNumber()) {
+        return;
+    }
+    NG::TextContentType textContentType = static_cast<NG::TextContentType>(info[0]->ToNumber<int32_t>());
+    TextFieldModel::GetInstance()->SetContentType(textContentType);
 }
 
 void JSTextField::SetPlaceholderColor(const JSCallbackInfo& info)
@@ -440,6 +459,21 @@ void JSTextField::SetTextColor(const JSCallbackInfo& info)
         textColor = theme->GetTextColor();
     }
     TextFieldModel::GetInstance()->SetTextColor(textColor);
+}
+
+void JSTextField::SetWordBreak(const JSCallbackInfo& info)
+{
+    if (info.Length() < 1) {
+        return;
+    }
+    if (!info[0]->IsNumber()) {
+        return;
+    }
+    auto index = info[0]->ToNumber<int32_t>();
+    if (index < 0 || index >= static_cast<int32_t>(WORD_BREAK_TYPES.size())) {
+        return;
+    }
+    TextFieldModel::GetInstance()->SetWordBreak(WORD_BREAK_TYPES[index]);
 }
 
 void JSTextField::SetForegroundColor(const JSCallbackInfo& info)
@@ -1205,9 +1239,17 @@ void JSTextField::SetCustomKeyboard(const JSCallbackInfo& info)
     if (info.Length() < 1 || !info[0]->IsObject()) {
         return;
     }
+    bool supportAvoidance = false;
+    if (info.Length() == 2 && info[1]->IsObject()) {  //  2 here refers to the number of parameters
+        auto paramObject = JSRef<JSObject>::Cast(info[1]);
+        auto isSupportAvoidance = paramObject->GetProperty("supportAvoidance");
+        if (!isSupportAvoidance->IsNull() && isSupportAvoidance->IsBoolean()) {
+            supportAvoidance = isSupportAvoidance->ToBoolean();
+        }
+    }
     std::function<void()> buildFunc;
     if (ParseJsCustomKeyboardBuilder(info, 0, buildFunc)) {
-        TextFieldModel::GetInstance()->SetCustomKeyboard(std::move(buildFunc));
+        TextFieldModel::GetInstance()->SetCustomKeyboard(std::move(buildFunc), supportAvoidance);
     }
 }
 
@@ -1312,6 +1354,9 @@ void JSTextField::SetDecoration(const JSCallbackInfo& info)
     do {
         auto tmpInfo = info[0];
         if (!tmpInfo->IsObject()) {
+            TextFieldModel::GetInstance()->SetTextDecoration(TextDecoration::NONE);
+            TextFieldModel::GetInstance()->SetTextDecorationColor(Color::BLACK);
+            TextFieldModel::GetInstance()->SetTextDecorationStyle(TextDecorationStyle::SOLID);
             break;
         }
         JSRef<JSObject> obj = JSRef<JSObject>::Cast(tmpInfo);
@@ -1364,5 +1409,18 @@ void JSTextField::SetLineHeight(const JSCallbackInfo& info)
         value.Reset();
     }
     TextFieldModel::GetInstance()->SetLineHeight(value);
+}
+
+void JSTextField::SetFontFeature(const JSCallbackInfo& info)
+{
+    if (info.Length() < 1) {
+        return;
+    }
+    if (!info[0]->IsString()) {
+        return;
+    }
+
+    std::string fontFeatureSettings = info[0]->ToString();
+    TextFieldModel::GetInstance()->SetFontFeature(ParseFontFeatureSettings(fontFeatureSettings));
 }
 } // namespace OHOS::Ace::Framework

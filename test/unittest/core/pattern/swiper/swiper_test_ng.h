@@ -78,10 +78,12 @@ public:
     void GetInstance();
 
     void Create(const std::function<void(SwiperModelNG)>& callback = nullptr);
-    void CreateWithItem(const std::function<void(SwiperModelNG)>& callback = nullptr);
+    void CreateWithItem(const std::function<void(SwiperModelNG)>& callback = nullptr, int32_t itemNumber = ITEM_NUMBER);
     static void CreateItem(int32_t itemNumber = ITEM_NUMBER);
+    static void CreateItemWithSize(float width, float height);
 
     void InitCaptureTest();
+    void CreateWithCustomAnimation();
 
     RefPtr<FrameNode> frameNode_;
     RefPtr<SwiperPattern> pattern_;

@@ -19,7 +19,6 @@
 #include "napi/native_common.h"
 #include "napi/native_node_api.h"
 
-#include "base/log/log.h"
 #include "bridge/common/utils/engine_helper.h"
 #include "bridge/js_frontend/engine/common/js_engine.h"
 

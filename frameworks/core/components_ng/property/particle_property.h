@@ -192,10 +192,21 @@ public:
         return lifeTime_;
     }
 
+    void SetLifeTimeRange(int64_t lifetimeRange)
+    {
+        lifeTimeRange_ = lifetimeRange;
+    }
+
+    const std::optional<int64_t>& GetLifeTimeRange() const
+    {
+        return lifeTimeRange_;
+    }
+
     bool operator==(const Particle& other) const
     {
         return (particleType_ == other.GetParticleType()) && (config_ == other.GetConfig()) &&
-               (count_ == other.GetCount()) && (lifeTime_ == other.GetLifeTime());
+               (count_ == other.GetCount()) && (lifeTime_ == other.GetLifeTime()) &&
+               (lifeTimeRange_ == other.GetLifeTimeRange());
     }
 
     std::string ToString() const
@@ -205,6 +216,9 @@ public:
         str.append("config: [").append(config_.ToString()).append("]");
         str.append("count: [").append(std::to_string(count_)).append("]");
         str.append("lifeTime: [").append(lifeTime_.has_value() ? std::to_string(lifeTime_.value()) : "NA").append("]");
+        str.append("lifeTimeRange: [")
+            .append(lifeTimeRange_.has_value() ? std::to_string(lifeTimeRange_.value()) : "NA")
+            .append("]");
         return str;
     }
 
@@ -213,6 +227,7 @@ private:
     ParticleConfig config_;
     int32_t count_ = DEFAULT_PARTICLE_COUNT;
     std::optional<int64_t> lifeTime_;
+    std::optional<int64_t> lifeTimeRange_;
 };
 
 struct EmitterOption {

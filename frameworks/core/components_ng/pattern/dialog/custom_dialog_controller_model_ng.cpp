@@ -31,6 +31,7 @@ void CustomDialogControllerModelNG::SetOpenDialog(DialogProperties& dialogProper
     if (container->IsSubContainer() && !dialogProperties.isShowInSubWindow) {
         currentId = SubwindowManager::GetInstance()->GetParentContainerId(Container::CurrentId());
         container = AceEngine::Get().GetContainer(currentId);
+        CHECK_NULL_VOID(container);
     }
     ContainerScope scope(currentId);
     auto pipelineContext = container->GetPipelineContext();
@@ -59,12 +60,7 @@ void CustomDialogControllerModelNG::SetOpenDialog(DialogProperties& dialogProper
         if (dialogProperties.isShowInSubWindow) {
             dialog = SubwindowManager::GetInstance()->ShowDialogNG(dialogProperties, std::move(func));
             if (dialogProperties.isModal && !dialogProperties.isScenceBoardDialog) {
-                DialogProperties Maskarg;
-                Maskarg.isMask = true;
-                Maskarg.autoCancel = dialogProperties.autoCancel;
-                Maskarg.onWillDismiss = dialogProperties.onWillDismiss;
-                Maskarg.maskColor = dialogProperties.maskColor;
-                auto mask = overlayManager->ShowDialog(Maskarg, nullptr, false);
+                auto mask = overlayManager->SetDialogMask(dialogProperties);
                 CHECK_NULL_VOID(mask);
                 overlayManager->SetMaskNodeId(dialog->GetId(), mask->GetId());
             }
@@ -86,6 +82,7 @@ RefPtr<UINode> CustomDialogControllerModelNG::SetOpenDialogWithNode(DialogProper
     if (container->IsSubContainer() && !dialogProperties.isShowInSubWindow) {
         auto currentId = SubwindowManager::GetInstance()->GetParentContainerId(Container::CurrentId());
         container = AceEngine::Get().GetContainer(currentId);
+        CHECK_NULL_RETURN(container, nullptr);
     }
     auto pipelineContext = container->GetPipelineContext();
     CHECK_NULL_RETURN(pipelineContext, nullptr);
@@ -122,6 +119,7 @@ void CustomDialogControllerModelNG::SetCloseDialog(DialogProperties& dialogPrope
     if (container->IsSubContainer() && !dialogProperties.isShowInSubWindow) {
         currentId = SubwindowManager::GetInstance()->GetParentContainerId(Container::CurrentId());
         container = AceEngine::Get().GetContainer(currentId);
+        CHECK_NULL_VOID(container);
     }
     ContainerScope scope(currentId);
     auto pipelineContext = container->GetPipelineContext();

@@ -31,7 +31,7 @@ void RenderSvgFe::SetFeCommonAttrs(const RefPtr<SvgFeDeclaration>& feDeclaration
         width_ = feDeclaration->GetWidth();
         height_ = feDeclaration->GetHeight();
         result_ = feDeclaration->GetResult();
-        in_ = feDeclaration->GetIn();
+        in_ = feDeclaration->GetIn().in;
         colorInterpolationType_ = feDeclaration->GetColorInterpolationType();
 
         SetPresentationAttrs(feDeclaration);

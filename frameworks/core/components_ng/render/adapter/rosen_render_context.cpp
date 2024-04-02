@@ -136,6 +136,12 @@ constexpr double PARENT_PAGE_OFFSET = 0.2;
 constexpr int32_t MASK_DURATION = 350;
 constexpr int32_t DEFAULT_ANIMATION_DURATION = 450;
 constexpr float REMOVE_CLIP_SIZE = 10000.0f;
+constexpr uint32_t DRAW_REGION_CONTENT_MODIFIER_INDEX = 0;
+constexpr uint32_t DRAW_REGION_OVERLAY_MODIFIER_INDEX = 1;
+constexpr uint32_t DRAW_REGION_FOCUS_MODIFIER_INDEX = 2;
+constexpr uint32_t DRAW_REGION_ACCESSIBILITY_FOCUS_MODIFIER_INDEX = 3;
+constexpr uint32_t DRAW_REGION_OVERLAY_TEXT_MODIFIER_INDEX = 4;
+constexpr uint32_t DRAW_REGION_DEBUG_BOUNDARY_MODIFIER_INDEX = 5;
 const Color MASK_COLOR = Color::FromARGB(25, 0, 0, 0);
 const Color DEFAULT_MASK_COLOR = Color::FromARGB(0, 0, 0, 0);
 const RefPtr<InterpolatingSpring> springCurve = AceType::MakeRefPtr<InterpolatingSpring>(0.0f, 1.0f, 342.0f, 37.0f);
@@ -355,11 +361,7 @@ void RosenRenderContext::SetHostNode(const WeakPtr<FrameNode>& host)
     AddFrameNodeInfoToRsNode();
 }
 
-#if defined(VIDEO_TEXTURE_SUPPORTED) && defined(XCOMPONENT_SUPPORTED)
-void RosenRenderContext::InitContext(bool isRoot, const std::optional<ContextParam>& param, bool isUseExtSurface)
-#else
 void RosenRenderContext::InitContext(bool isRoot, const std::optional<ContextParam>& param)
-#endif
 {
     // skip if node already created
     CHECK_NULL_VOID(!rsNode_);
@@ -389,13 +391,15 @@ void RosenRenderContext::InitContext(bool isRoot, const std::optional<ContextPar
             break;
         }
         case ContextType::HARDWARE_SURFACE: {
-#if defined(VIDEO_TEXTURE_SUPPORTED) && defined(XCOMPONENT_SUPPORTED)
-            rsNode_ = CreateHardwareSurface(param, isUseExtSurface, isTextureExportNode);
-#else
-            rsNode_ = CreateHardwareSurface(param, false, isTextureExportNode);
-#endif
+            rsNode_ = CreateHardwareSurface(param, isTextureExportNode);
             break;
         }
+#ifdef RENDER_EXTRACT_SUPPORTED
+        case ContextType::HARDWARE_TEXTURE: {
+            rsNode_ = CreateHardwareTexture(param, isTextureExportNode);
+            break;
+        }
+#endif
         case ContextType::EFFECT:
             rsNode_ = Rosen::RSEffectNode::Create(false, isTextureExportNode);
             break;
@@ -412,9 +416,8 @@ void RosenRenderContext::InitContext(bool isRoot, const std::optional<ContextPar
 }
 
 std::shared_ptr<Rosen::RSNode> RosenRenderContext::CreateHardwareSurface(
-    const std::optional<ContextParam>& param, bool isUseExtSurface, bool isTextureExportNode)
+    const std::optional<ContextParam>& param, bool isTextureExportNode)
 {
-#ifndef VIDEO_TEXTURE_SUPPORTED
     Rosen::RSSurfaceNodeConfig surfaceNodeConfig = { .SurfaceNodeName = param->surfaceName.value_or(""),
         .isTextureExportNode = isTextureExportNode };
     auto surfaceNode = Rosen::RSSurfaceNode::Create(surfaceNodeConfig, false);
@@ -422,32 +425,19 @@ std::shared_ptr<Rosen::RSNode> RosenRenderContext::CreateHardwareSurface(
         surfaceNode->SetHardwareEnabled(true);
     }
     return surfaceNode;
-#else
-#ifdef XCOMPONENT_SUPPORTED
-    if (isUseExtSurface) {
-        Rosen::RSSurfaceNodeConfig surfaceNodeConfig = { .SurfaceNodeName = param->surfaceName.value_or(""),
-            .isTextureExportNode = isTextureExportNode };
-        auto surfaceNode = Rosen::RSSurfaceNode::Create(surfaceNodeConfig, false);
-        if (surfaceNode) {
-            surfaceNode->SetHardwareEnabled(true);
-        }
-        return surfaceNode;
-    } else {
-        Rosen::RSSurfaceNodeConfig surfaceNodeConfig = { .SurfaceNodeName = param->surfaceName.value_or(""),
-            .isTextureExportNode = isTextureExportNode };
-        auto surfaceNode = Rosen::RSSurfaceNode::Create(surfaceNodeConfig,
-            RSSurfaceNodeType::SURFACE_TEXTURE_NODE, false);
-        return surfaceNode;
-    }
-#else
+}
+
+#ifdef RENDER_EXTRACT_SUPPORTED
+std::shared_ptr<Rosen::RSNode> RosenRenderContext::CreateHardwareTexture(
+    const std::optional<ContextParam>& param, bool isTextureExportNode)
+{
     Rosen::RSSurfaceNodeConfig surfaceNodeConfig = { .SurfaceNodeName = param->surfaceName.value_or(""),
         .isTextureExportNode = isTextureExportNode };
     auto surfaceNode = Rosen::RSSurfaceNode::Create(surfaceNodeConfig,
         RSSurfaceNodeType::SURFACE_TEXTURE_NODE, false);
     return surfaceNode;
-#endif
-#endif
 }
+#endif
 
 void RosenRenderContext::SetSandBox(const std::optional<OffsetF>& parentPosition, bool force)
 {
@@ -480,22 +470,13 @@ void RosenRenderContext::SetFrameWithoutAnimation(const RectF& paintRect)
         [&]() { rsNode_->SetFrame(paintRect.GetX(), paintRect.GetY(), paintRect.Width(), paintRect.Height()); });
 }
 
-void RosenRenderContext::SyncGeometryProperties(GeometryNode* /*geometryNode*/, bool isRound, uint8_t flag)
+void RosenRenderContext::SyncGeometryProperties(GeometryNode* /*geometryNode*/, bool /* isRound */, uint8_t /* flag */)
 {
     CHECK_NULL_VOID(rsNode_);
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto geometryNode = host->GetGeometryNode();
-    CHECK_NULL_VOID(geometryNode);
-    auto paintRect = AdjustPaintRect();
-    if (isRound && flag == 0) {
-        RoundToPixelGrid(); // call RoundToPixelGrid without param to improve performance
-    } else {
-        RoundToPixelGrid(isRound, flag);
-    }
-    paintRect.SetRect(geometryNode->GetPixelGridRoundOffset(), geometryNode->GetPixelGridRoundSize());
-    SyncGeometryProperties(paintRect);
-    host->OnPixelRoundFinish(geometryNode->GetPixelGridRoundSize());
+    SyncGeometryProperties(paintRect_);
+    host->OnPixelRoundFinish(paintRect_.GetSize());
 }
 
 void RosenRenderContext::SyncGeometryProperties(const RectF& paintRect)
@@ -527,22 +508,7 @@ void RosenRenderContext::SyncGeometryProperties(const RectF& paintRect)
         firstTransitionIn_ = false;
     }
 
-    if (propTransform_ && propTransform_->HasTransformCenter()) {
-        auto vec = propTransform_->GetTransformCenterValue();
-        float xPivot = ConvertDimensionToScaleBySize(vec.GetX(), paintRect.Width());
-        float yPivot = ConvertDimensionToScaleBySize(vec.GetY(), paintRect.Height());
-        if (vec.GetZ().has_value()) {
-            float zPivot = static_cast<float>(vec.GetZ().value().ConvertToVp());
-            SetPivot(xPivot, yPivot, zPivot);
-        } else {
-            SetPivot(xPivot, yPivot);
-        }
-    }
-
-    if (propTransform_ && propTransform_->HasTransformTranslate()) {
-        // if translate unit is percent, it is related with frameSize
-        OnTransformTranslateUpdate(propTransform_->GetTransformTranslateValue());
-    }
+    SyncPartialRsProperties();
 
     if (propPointLight_ && propPointLight_->HasLightPosition()) {
         // if lightPosition unit is percent, it is related with frameSize
@@ -595,6 +561,9 @@ void RosenRenderContext::SyncGeometryProperties(const RectF& paintRect)
 
 void RosenRenderContext::PaintDebugBoundary(bool flag)
 {
+    if (!flag && !debugBoundaryModifier_) {
+        return;
+    }
     CHECK_NULL_VOID(NeedDebugBoundary());
     CHECK_NULL_VOID(rsNode_);
     auto host = GetHost();
@@ -619,17 +588,18 @@ void RosenRenderContext::PaintDebugBoundary(bool flag)
         std::shared_ptr<Rosen::RectF> drawRect =
             std::make_shared<Rosen::RectF>(marginOffset.GetX() - rect.GetX(), marginOffset.GetY() - rect.GetY(),
                 geometryNode->GetMarginFrameSize().Width(), geometryNode->GetMarginFrameSize().Height());
-        rsNode_->SetDrawRegion(drawRect);
+        UpdateDrawRegion(DRAW_REGION_DEBUG_BOUNDARY_MODIFIER_INDEX, drawRect);
         rsNode_->AddModifier(debugBoundaryModifier_);
-    }
-    if (debugBoundaryModifier_) {
+        // SetCustomData(AttachProperty to rs modifier) must be called after AddModifier.
+        debugBoundaryModifier_->SetCustomData(flag);
+    } else if (debugBoundaryModifier_) {
         debugBoundaryModifier_->SetPaintTask(std::move(paintTask));
         auto rect = GetPaintRectWithoutTransform();
         auto marginOffset = geometryNode->GetMarginFrameOffset();
         std::shared_ptr<Rosen::RectF> drawRect =
             std::make_shared<Rosen::RectF>(marginOffset.GetX() - rect.GetX(), marginOffset.GetY() - rect.GetY(),
                 geometryNode->GetMarginFrameSize().Width(), geometryNode->GetMarginFrameSize().Height());
-        rsNode_->SetDrawRegion(drawRect);
+        UpdateDrawRegion(DRAW_REGION_DEBUG_BOUNDARY_MODIFIER_INDEX, drawRect);
         debugBoundaryModifier_->SetCustomData(flag);
     }
 }
@@ -1054,6 +1024,16 @@ Rosen::EmitterConfig RosenRenderContext::ConvertParticleEmitterOption(
     auto particleConfig = particle.GetConfig();
     auto particleCount = particle.GetCount();
     auto lifeTimeOpt = particle.GetLifeTime();
+    auto lifeTimeRangeOpt = particle.GetLifeTimeRange();
+    std::optional<int64_t> lifeTimeMin = 0;
+    std::optional<int64_t> lifeTimeMax = lifeTimeRangeOpt.value() + lifeTimeRangeOpt.value();
+    if (lifeTimeOpt.value() == -1) {
+        // when lifeTime == -1 particle life cycle is infinite
+        lifeTimeMin = -1;
+        lifeTimeMax = 0;
+    } else if (lifeTimeOpt.value() - lifeTimeRangeOpt.value() > 0) {
+        lifeTimeMin = lifeTimeOpt.value() - lifeTimeRangeOpt.value();
+    }
     auto rsPoint = pointOpt.has_value()
                        ? OHOS::Rosen::Vector2f(ConvertDimensionToPx(pointOpt.value().first, rect.Width()),
                              ConvertDimensionToPx(pointOpt.value().second, rect.Height()))
@@ -1063,7 +1043,7 @@ Rosen::EmitterConfig RosenRenderContext::ConvertParticleEmitterOption(
                                       : OHOS::Rosen::Vector2f(rect.Width(), rect.Height());
     auto shapeInt = static_cast<int32_t>(shapeOpt.value_or(ParticleEmitterShape::RECTANGLE));
     auto lifeTimeRange = OHOS::Rosen::Range<int64_t>(
-        lifeTimeOpt.value_or(PARTICLE_DEFAULT_LIFETIME), lifeTimeOpt.value_or(PARTICLE_DEFAULT_LIFETIME));
+        lifeTimeMin.value_or(PARTICLE_DEFAULT_LIFETIME), lifeTimeMax.value_or(PARTICLE_DEFAULT_LIFETIME));
     if (particleType == ParticleType::IMAGE) {
         auto imageParameter = particleConfig.GetImageParticleParameter();
         auto imageSource = imageParameter.GetImageSource();
@@ -1370,6 +1350,7 @@ public:
     void OnSurfaceCapture(std::shared_ptr<Media::PixelMap> pixelMap) override
     {
         if (pixelMap == nullptr) {
+            TAG_LOGW(AceLogTag::ACE_DRAG, "pixelMap is null!");
             thumbnailGet.notify_all();
             return;
         }
@@ -1464,16 +1445,15 @@ void RosenRenderContext::OnTransformScaleUpdate(const VectorF& scale)
     RequestNextFrame();
 }
 
-void RosenRenderContext::OnTransformTranslateUpdate(const TranslateOptions& translate)
+Vector3F RosenRenderContext::MarshallTranslate(const TranslateOptions& translate)
 {
-    CHECK_NULL_VOID(rsNode_);
     float xValue = 0.0f;
     float yValue = 0.0f;
     if (translate.x.Unit() == DimensionUnit::PERCENT || translate.y.Unit() == DimensionUnit::PERCENT) {
         auto rect = GetPaintRectWithoutTransform();
         if (rect.IsEmpty()) {
             // size is not determined yet
-            return;
+            return Vector3F();
         }
         xValue = translate.x.ConvertToPxWithSize(rect.Width());
         yValue = translate.y.ConvertToPxWithSize(rect.Height());
@@ -1483,7 +1463,14 @@ void RosenRenderContext::OnTransformTranslateUpdate(const TranslateOptions& tran
     }
     // translateZ doesn't support percentage
     float zValue = translate.z.ConvertToPx();
-    rsNode_->SetTranslate(xValue, yValue, zValue);
+    return Vector3F(xValue, yValue, zValue);
+}
+
+void RosenRenderContext::OnTransformTranslateUpdate(const TranslateOptions& translate)
+{
+    CHECK_NULL_VOID(rsNode_);
+    auto translateVec = MarshallTranslate(translate);
+    rsNode_->SetTranslate(translateVec.x, translateVec.y, translateVec.z);
     ElementRegister::GetInstance()->ReSyncGeometryTransition(GetHost());
     RequestNextFrame();
 }
@@ -1807,11 +1794,7 @@ void RosenRenderContext::GetPointWithTransform(PointF& point)
 
 RectF RosenRenderContext::GetPaintRectWithoutTransform()
 {
-    RectF rect;
-    CHECK_NULL_RETURN(rsNode_, rect);
-    auto paintRectVector = rsNode_->GetStagingProperties().GetBounds();
-    rect.SetRect(paintRectVector[0], paintRectVector[1], paintRectVector[2], paintRectVector[3]);
-    return rect;
+    return paintRect_;
 }
 
 void RosenRenderContext::UpdateTranslateInXY(const OffsetF& offset)
@@ -2149,7 +2132,7 @@ void RosenRenderContext::BdImagePaintTask(RSCanvas& canvas)
     CHECK_NULL_VOID(layoutProps);
     const auto& widthProp = layoutProps->GetBorderWidthProperty();
 
-    auto pipeline = host->GetContext();
+    auto pipeline = host->GetContextRefPtr();
     CHECK_NULL_VOID(pipeline);
     auto dipScale = pipeline->GetDipScale();
 
@@ -2360,7 +2343,7 @@ void RosenRenderContext::PaintBorderImageGradient()
 
 void RosenRenderContext::OnModifyDone()
 {
-    auto frameNode = GetHost();
+    auto frameNode = GetUnsafeHost();
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(rsNode_);
     if (HasClickEffectLevel()) {
@@ -2774,14 +2757,11 @@ void RosenRenderContext::SetPositionToRSNode()
     auto frameNode = GetHost();
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(rsNode_);
-    const auto& size = frameNode->GetGeometryNode()->GetFrameSize();
-    if (!size.IsPositive()) {
-        return;
-    }
     auto rect = AdjustPaintRect();
     if (!rect.GetSize().IsPositive()) {
         return;
     }
+    paintRect_ = rect;
     rsNode_->SetBounds(rect.GetX(), rect.GetY(), rect.Width(), rect.Height());
     if (useContentRectForRSFrame_) {
         SetContentRectToFrame(rect);
@@ -2946,16 +2926,18 @@ void RosenRenderContext::PaintFocusState(
             accessibilityFocusStateModifier_ = std::make_shared<FocusStateModifier>();
         }
         modifier = accessibilityFocusStateModifier_;
+        modifier->SetRoundRect(paintRect, borderWidthPx);
+        UpdateDrawRegion(DRAW_REGION_ACCESSIBILITY_FOCUS_MODIFIER_INDEX, modifier->GetOverlayRect());
     } else {
         if (!focusStateModifier_) {
             // TODO: Add property data
             focusStateModifier_ = std::make_shared<FocusStateModifier>();
         }
         modifier = focusStateModifier_;
+        modifier->SetRoundRect(paintRect, borderWidthPx);
+        UpdateDrawRegion(DRAW_REGION_FOCUS_MODIFIER_INDEX, modifier->GetOverlayRect());
     }
-    modifier->SetRoundRect(paintRect, borderWidthPx);
     modifier->SetPaintTask(std::move(paintTask));
-    rsNode_->SetDrawRegion(modifier->GetOverlayRect());
     rsNode_->AddModifier(modifier);
     RequestNextFrame();
 }
@@ -3015,7 +2997,7 @@ void RosenRenderContext::ClearFocusState()
     CHECK_NULL_VOID(context);
     CHECK_NULL_VOID(focusStateModifier_);
 
-    rsNode_->SetDrawRegion(focusStateModifier_->GetOverlayRect());
+    UpdateDrawRegion(DRAW_REGION_FOCUS_MODIFIER_INDEX, focusStateModifier_->GetOverlayRect());
     rsNode_->RemoveModifier(focusStateModifier_);
     RequestNextFrame();
 }
@@ -3049,7 +3031,7 @@ void RosenRenderContext::FlushContentModifier(const RefPtr<Modifier>& modifier)
     if (rect.has_value()) {
         std::shared_ptr<Rosen::RectF> overlayRect =
             std::make_shared<Rosen::RectF>(rect->GetX(), rect->GetY(), rect->Width(), rect->Height());
-        rsNode_->SetDrawRegion(overlayRect);
+        UpdateDrawRegion(DRAW_REGION_CONTENT_MODIFIER_INDEX, overlayRect);
     }
     rsNode_->SetIsCustomTextType(contentModifier->GetIsCustomFont());
     rsNode_->AddModifier(modifierAdapter);
@@ -3102,13 +3084,7 @@ void RosenRenderContext::FlushOverlayModifier(const RefPtr<Modifier>& modifier)
     auto rect = overlayModifier->GetBoundsRect();
     std::shared_ptr<Rosen::RectF> overlayRect =
         std::make_shared<Rosen::RectF>(rect.GetX(), rect.GetY(), rect.Width(), rect.Height());
-    if (focusStateModifier_) {
-        auto focusRect = focusStateModifier_->GetOverlayRect();
-        if (focusRect) {
-            *overlayRect = overlayRect->JoinRect(*focusRect);
-        }
-    }
-    rsNode_->SetDrawRegion(overlayRect);
+    UpdateDrawRegion(DRAW_REGION_OVERLAY_MODIFIER_INDEX, overlayRect);
     rsNode_->AddModifier(modifierAdapter);
     modifierAdapter->AttachProperties();
 }
@@ -3600,6 +3576,13 @@ void RosenRenderContext::OnLinearGradientBlurUpdate(const NG::LinearGradientBlur
     RequestNextFrame();
 }
 
+void RosenRenderContext::OnDynamicDimDegreeUpdate(const float degree)
+{
+    CHECK_NULL_VOID(rsNode_);
+    rsNode_->SetDynamicDimDegree(degree);
+    RequestNextFrame();
+}
+
 void RosenRenderContext::OnDynamicLightUpRateUpdate(const float rate)
 {
     CHECK_NULL_VOID(rsNode_);
@@ -3633,6 +3616,12 @@ void RosenRenderContext::UpdateTransition(const TransitionOptions& options)
         }
         propTransitionDisappearing_->Type = TransitionType::DISAPPEARING;
     }
+}
+
+void RosenRenderContext::CleanTransition()
+{
+    propTransitionDisappearing_.reset();
+    propTransitionDisappearing_.reset();
 }
 
 std::shared_ptr<Rosen::RSTransitionEffect> RosenRenderContext::GetRSTransitionWithoutType(
@@ -4034,14 +4023,15 @@ bool RosenRenderContext::TriggerPageTransition(PageTransitionType type, const st
         auto pipeline = PipelineBase::GetCurrentContext();
         if (pipeline) {
             const int32_t nanoToMilliSeconds = 1000000;
-            const int32_t minTransitionDuration = pageTransitionDuration / 2;
+            const int32_t minTransitionDuration = DEFAULT_ANIMATION_DURATION / 2;
             const int32_t frameDelayTime = 32;
             int32_t startDelayTime =
                 static_cast<int32_t>(pipeline->GetTimeFromExternalTimer() - pipeline->GetLastTouchTime()) /
                 nanoToMilliSeconds;
             startDelayTime = std::max(0, startDelayTime);
-            int32_t delayedDuration = pageTransitionDuration > startDelayTime ? pageTransitionDuration - startDelayTime
-                                                                              : pageTransitionDuration;
+            int32_t delayedDuration = DEFAULT_ANIMATION_DURATION > startDelayTime
+                                      ? DEFAULT_ANIMATION_DURATION - startDelayTime
+                                      : DEFAULT_ANIMATION_DURATION;
             delayedDuration = std::max(minTransitionDuration, delayedDuration - frameDelayTime);
             LOGI("Use quick push delayedDuration:%{public}d", delayedDuration);
             option.SetDuration(delayedDuration);
@@ -4108,7 +4098,8 @@ void RosenRenderContext::PaintOverlayText()
             overlayRect = std::make_shared<Rosen::RectF>(overlayOffset.GetX(), overlayOffset.GetY(),
                 std::max(paragraphSize.Width(), paintRect.Width()),
                 std::max(paragraphSize.Height(), paintRect.Height()));
-            rsNode_->SetDrawRegion(overlayRect);
+            rsNode_->SetIsCustomTextType(modifier_->IsCustomFont());
+            UpdateDrawRegion(DRAW_REGION_OVERLAY_TEXT_MODIFIER_INDEX, overlayRect);
         } else {
             modifier_ = std::make_shared<OverlayTextModifier>();
             rsNode_->AddModifier(modifier_);
@@ -4118,7 +4109,8 @@ void RosenRenderContext::PaintOverlayText()
             overlayRect = std::make_shared<Rosen::RectF>(overlayOffset.GetX(), overlayOffset.GetY(),
                 std::max(paragraphSize.Width(), paintRect.Width()),
                 std::max(paragraphSize.Height(), paintRect.Height()));
-            rsNode_->SetDrawRegion(overlayRect);
+            rsNode_->SetIsCustomTextType(modifier_->IsCustomFont());
+            UpdateDrawRegion(DRAW_REGION_OVERLAY_TEXT_MODIFIER_INDEX, overlayRect);
         }
     }
 }
@@ -4252,6 +4244,7 @@ void RosenRenderContext::ClearChildren()
 void RosenRenderContext::SetBounds(float positionX, float positionY, float width, float height)
 {
     CHECK_NULL_VOID(rsNode_);
+    paintRect_ = RectF(positionX, positionY, width, height);
     rsNode_->SetBounds(positionX, positionY, width, height);
 }
 
@@ -5285,5 +5278,65 @@ void RosenRenderContext::ResetSurface()
     auto rsCanvasDrawingNode = Rosen::RSNode::ReinterpretCast<Rosen::RSCanvasDrawingNode>(rsNode_);
     CHECK_NULL_VOID(rsCanvasDrawingNode);
     rsCanvasDrawingNode->ResetSurface();
+}
+
+void RosenRenderContext::SavePaintRect(bool isRound, uint8_t flag)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    const auto& geometryNode = host->GetGeometryNode();
+    CHECK_NULL_VOID(geometryNode);
+    AdjustPaintRect();
+    if (isRound && flag == 0) {
+        RoundToPixelGrid(); // call RoundToPixelGrid without param to improve performance
+    } else {
+        RoundToPixelGrid(isRound, flag);
+    }
+    paintRect_ = RectF(geometryNode->GetPixelGridRoundOffset(), geometryNode->GetPixelGridRoundSize());
+}
+
+void RosenRenderContext::SyncPartialRsProperties()
+{
+    if (propTransform_ && propTransform_->HasTransformCenter()) {
+        auto vec = propTransform_->GetTransformCenterValue();
+        float xPivot = ConvertDimensionToScaleBySize(vec.GetX(), paintRect_.Width());
+        float yPivot = ConvertDimensionToScaleBySize(vec.GetY(), paintRect_.Height());
+        if (vec.GetZ().has_value()) {
+            float zPivot = static_cast<float>(vec.GetZ().value().ConvertToVp());
+            SetPivot(xPivot, yPivot, zPivot);
+        } else {
+            SetPivot(xPivot, yPivot);
+        }
+    }
+
+    if (propTransform_ && propTransform_->HasTransformTranslate()) {
+        // if translate unit is percent, it is related with frameSize
+        OnTransformTranslateUpdate(propTransform_->GetTransformTranslateValue());
+    }
+}
+
+void RosenRenderContext::UpdateDrawRegion(uint32_t index, const std::shared_ptr<Rosen::RectF>& rect)
+{
+    if (drawRegionRects_[index] && rect && *drawRegionRects_[index] == *rect) {
+        return;
+    } else if (!drawRegionRects_[index] && !rect) {
+        return;
+    }
+    // the drawRegion of this index has changed
+    drawRegionRects_[index] = rect;
+    std::shared_ptr<Rosen::RectF> result;
+    for (size_t index = 0; index < DRAW_REGION_RECT_COUNT; ++index) {
+        if (drawRegionRects_[index]) {
+            if (result) {
+                *result = result->JoinRect(*drawRegionRects_[index]);
+            } else {
+                result = std::make_shared<Rosen::RectF>(*drawRegionRects_[index]);
+            }
+        }
+    }
+    if (!result) {
+        return;
+    }
+    rsNode_->SetDrawRegion(result);
 }
 } // namespace OHOS::Ace::NG

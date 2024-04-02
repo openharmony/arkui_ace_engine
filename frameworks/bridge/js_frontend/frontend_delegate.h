@@ -172,6 +172,14 @@ public:
     virtual void RemoveCustomDialog() {};
     virtual void OpenCustomDialog(const PromptDialogAttr &dialogAttr, std::function<void(int32_t)> &&callback) {};
     virtual void CloseCustomDialog(const int32_t dialogId) {};
+    virtual void CloseCustomDialog(const WeakPtr<NG::UINode>& node, std::function<void(int32_t)> &&callback) {};
+    virtual void UpdateCustomDialog(const WeakPtr<NG::UINode>& node, const PromptDialogAttr &dialogAttr,
+        std::function<void(int32_t)> &&callback) {};
+
+    virtual RefPtr<NG::ChainedTransitionEffect> GetTransitionEffect(void* value)
+    {
+        return nullptr;
+    }
 
     virtual void EnableAlertBeforeBackPage(const std::string& message, std::function<void(int32_t)>&& callback) = 0;
     virtual void DisableAlertBeforeBackPage() = 0;
@@ -247,6 +255,14 @@ public:
     virtual bool GetSystemFont(const std::string& fontName, FontInfo& fontInfo) = 0;
 
     virtual void GetUIFontConfig(FontConfigJsonInfo& fontConfigJsonInfo) {}
+
+    virtual void AddFrameNodeToOverlay(
+        const RefPtr<NG::FrameNode>& node, std::optional<int32_t> index = std::nullopt) {}
+    virtual void RemoveFrameNodeOnOverlay(const RefPtr<NG::FrameNode>& node) {}
+    virtual void ShowNodeOnOverlay(const RefPtr<NG::FrameNode>& node) {}
+    virtual void HideNodeOnOverlay(const RefPtr<NG::FrameNode>& node) {}
+    virtual void ShowAllNodesOnOverlay() {}
+    virtual void HideAllNodesOnOverlay() {}
 
     virtual SingleTaskExecutor GetAnimationJsTask() = 0;
 

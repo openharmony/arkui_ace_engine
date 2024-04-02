@@ -47,6 +47,7 @@ public:
     UIContentErrorCode RunPage(const std::string& url, const std::string& params) override;
     UIContentErrorCode RunPage(
         const std::shared_ptr<std::vector<uint8_t>>& content, const std::string& params) override;
+    UIContentErrorCode RunPageByNamedRouter(const std::string& name) override;
 
     void ReplacePage(const std::string& url, const std::string& params) override;
 
@@ -67,6 +68,7 @@ public:
     void TransferComponentResponseData(int32_t callbackId, int32_t code, std::vector<uint8_t>&& data) const override {}
     void TransferJsResponseData(int32_t callbackId, int32_t code, std::vector<uint8_t>&& data) const override {}
     napi_value GetContextValue() override;
+    napi_value GetFrameNodeValueByNodeId(int32_t nodeId) override;
     
 #if defined(PREVIEW)
     void RunNativeEngineLoop() override

@@ -49,12 +49,18 @@ public:
 
     void SetOnFocusTextField(const WeakPtr<Pattern>& onFocusTextField)
     {
+        const auto& pattern = onFocusTextField.Upgrade();
+        if (pattern && pattern->GetHost()) {
+            onFocusTextFieldId = pattern->GetHost()->GetId();
+        }
         onFocusTextField_ = onFocusTextField;
     }
 
     void ScrollTextFieldToSafeArea();
 
     void ClearOnFocusTextField();
+
+    void ClearOnFocusTextField(int32_t id);
 
     bool ResetSlidingPanelParentHeight();
 
@@ -93,11 +99,12 @@ public:
 
     void UpdatePrevHasTextFieldPattern()
     {
-        if (onFocusTextField_.Upgrade()) {
-            prevHasTextFieldPattern_ = true;
-        } else {
-            prevHasTextFieldPattern_ = false;
-        }
+        prevHasTextFieldPattern_ = onFocusTextField_.Upgrade();
+    }
+
+    bool HasKeyboard() const override
+    {
+        return imeShow_ || uiExtensionImeShow_;
     }
 
 private:
@@ -111,6 +118,7 @@ private:
     Offset position_;
     float height_ = 0.0f;
     WeakPtr<Pattern> onFocusTextField_;
+    int32_t onFocusTextFieldId = -1;
 };
 
 } // namespace OHOS::Ace::NG

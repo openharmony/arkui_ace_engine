@@ -112,7 +112,7 @@ std::shared_ptr<RSImage> DrawingImage::MakeRSImageFromPixmap(const RefPtr<PixelM
     RSAlphaType alphaType = AlphaTypeToRSAlphaType(pixmap);
     RSBitmapFormat bitmapFormat = { colorType, alphaType };
     auto bitmap = std::make_shared<RSBitmap>();
-    bitmap->Build(pixmap->GetWidth(), pixmap->GetHeight(), bitmapFormat);
+    bitmap->Build(pixmap->GetWidth(), pixmap->GetHeight(), bitmapFormat, pixmap->GetRowStride());
     bitmap->SetPixels(const_cast<void*>(reinterpret_cast<const void*>(pixmap->GetPixels())));
 
     auto image = std::make_shared<RSImage>();

@@ -74,6 +74,7 @@ class PixelMap;
 
 namespace AbilityBase {
 struct ViewData;
+enum class AutoFillType;
 } // namespace AbilityBase
 
 class RefBase;
@@ -126,7 +127,7 @@ public:
     // UI content event process
     virtual bool ProcessBackPressed() = 0;
     virtual bool ProcessPointerEvent(const std::shared_ptr<OHOS::MMI::PointerEvent>& pointerEvent) = 0;
-    virtual bool ProcessKeyEvent(const std::shared_ptr<OHOS::MMI::KeyEvent>& keyEvent) = 0;
+    virtual bool ProcessKeyEvent(const std::shared_ptr<OHOS::MMI::KeyEvent>& keyEvent, bool isPreIme = false) = 0;
     virtual bool ProcessAxisEvent(const std::shared_ptr<OHOS::MMI::AxisEvent>& axisEvent) = 0;
     virtual bool ProcessVsyncEvent(uint64_t timeStampNanos) = 0;
     virtual void SetIsFocusActive(bool isFocusActive) = 0;
@@ -152,6 +153,8 @@ public:
     {
         return false;
     }
+
+    virtual void ChangeSensitiveNodes(bool isSensitive) {}
 
     virtual void SetOnWindowFocused(const std::function<void()>& callback) {};
 
@@ -244,7 +247,7 @@ public:
      */
     virtual sptr<IRemoteObject> GetParentToken();
 
-    virtual bool DumpViewData(AbilityBase::ViewData& viewData)
+    virtual bool DumpViewData(AbilityBase::ViewData& viewData, AbilityBase::AutoFillType& type)
     {
         return false;
     }
@@ -334,6 +337,9 @@ public:
     {
         return false;
     }
+
+    virtual void HandleAccessibilityHoverEvent(float pointX, float pointY, int32_t sourceType,
+        int32_t eventType, int64_t timeMs) {}
 #endif
 
     /**
@@ -364,7 +370,13 @@ public:
      * @param config Indicates the ID of the UI node which bind the pupop
      */
     virtual void DestroyCustomPopupUIExtension(int32_t nodeId) {}
-
+    
+    /**
+     * @description: Update the custom popup.
+     * @param config Indicates the custom popup configs.
+      */
+    virtual void UpdateCustomPopupUIExtension(const CustomPopupUIExtensionConfig& config) {}
+    
     virtual SerializedGesture GetFormSerializedGesture()
     {
         return SerializedGesture();

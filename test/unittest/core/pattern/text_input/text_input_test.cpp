@@ -44,6 +44,7 @@
 #include "base/memory/referenced.h"
 #include "base/utils/string_utils.h"
 #include "base/utils/type_definition.h"
+#include "core/common/ace_application_info.h"
 #include "core/common/ai/data_detector_mgr.h"
 #include "core/common/ime/constant.h"
 #include "core/common/ime/text_editing_value.h"
@@ -66,6 +67,7 @@
 #include "core/event/key_event.h"
 #include "core/event/touch_event.h"
 #include "core/gestures/gesture_info.h"
+#include "core/components/common/properties/text_style_parser.h"
 
 #undef private
 #undef protected
@@ -106,6 +108,8 @@ const TextAlign DEFAULT_TEXT_ALIGN = TextAlign::LEFT;
 const CaretStyle DEFAULT_CARET_STYLE = { Dimension(3, DimensionUnit::VP) };
 const OHOS::Ace::DisplayMode DEFAULT_DISPLAY_MODE = OHOS::Ace::DisplayMode::AUTO;
 const TextInputAction DEFAULT_ENTER_KEY_TYPE = TextInputAction::BEGIN;
+const std::unordered_map<std::string, int32_t> FONT_FEATURE_VALUE_1 = ParseFontFeatureSettings("\"ss01\" 1");
+const std::unordered_map<std::string, int32_t> FONT_FEATURE_VALUE_0 = ParseFontFeatureSettings("\"ss01\" 0");
 template<typename CheckItem, typename Expected>
 struct TestItem {
     CheckItem item;
@@ -295,6 +299,7 @@ HWTEST_F(TextFiledAttrsTest, LayoutProperty001, TestSize.Level1)
         model.SetShowUnderline(true);
         model.SetSelectAllValue(true);
         model.SetShowCounterBorder(true);
+        model.SetWordBreak(WordBreak::BREAK_ALL);
     });
 
     /**
@@ -319,6 +324,7 @@ HWTEST_F(TextFiledAttrsTest, LayoutProperty001, TestSize.Level1)
     EXPECT_EQ(json->GetString("caretPosition"), "");
     EXPECT_TRUE(json->GetBool("showUnderline"));
     EXPECT_TRUE(json->GetBool("selectAll"));
+    EXPECT_EQ(json->GetString("wordBreak"), "break-all");
 }
 
 /**
@@ -801,7 +807,7 @@ HWTEST_F(TextInputCursorTest, OnTextChangedListenerCaretPosition008, TestSize.Le
     pattern_->HandleExtendAction(action[2]);
     pattern_->HandleExtendAction(action[3]);
     FlushLayoutTask(frameNode_);
-    EXPECT_EQ(pattern_->GetTextValue().compare("abcdefghijfghijklmnopqrstuvwxyz"), 0)
+    EXPECT_EQ(pattern_->GetTextValue().compare("abcdefghijklmnopqrstuvwxyz"), 0)
         << "Text is " + pattern_->GetTextValue();
 }
 
@@ -2685,7 +2691,8 @@ HWTEST_F(TextFieldUXTest, onDraw001, TestSize.Level1)
     /**
      * @tc.steps: step7. When handle move done
      */
-    pattern_->OnHandleMoveDone(handleRect, true);
+    pattern_->ProcessOverlay();
+    pattern_->selectOverlay_->OnHandleMoveDone(handleRect, true);
 
     /**
      * @tc.steps: step8. Test magnifier open or close
@@ -2696,11 +2703,11 @@ HWTEST_F(TextFieldUXTest, onDraw001, TestSize.Level1)
 }
 
 /**
- * @tc.name: ShowMenu001
- * @tc.desc: Test close menu after ShowMenu()
+ * @tc.name: HandleOnShowMenu001
+ * @tc.desc: Test close menu after HandleOnShowMenu()
  * @tc.type: FUNC
  */
-HWTEST_F(TextFieldUXTest, ShowMenu001, TestSize.Level1)
+HWTEST_F(TextFieldUXTest, HandleOnShowMenu001, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. Initialize text input and get focus
@@ -2709,70 +2716,66 @@ HWTEST_F(TextFieldUXTest, ShowMenu001, TestSize.Level1)
     GetFocus();
 
     /**
-     * @tc.steps: step2. Create selectOverlayProxy
+     * @tc.steps: step2. Do HandleOnShowMenu()
      */
-    pattern_->ProcessOverlay(true, true, true);
+    pattern_->HandleOnShowMenu();
 
     /**
-     * @tc.steps: step3. Do ShowMenu()
-     */
-    pattern_->ShowMenu();
-
-    /**
-     * @tc.steps: step4. Press esc
+     * @tc.steps: step3. Press esc
      */
     KeyEvent event;
     event.code = KeyCode::KEY_ESCAPE;
+    event.action = KeyAction::DOWN;
     pattern_->OnKeyEvent(event);
 
     /**
-     * @tc.steps: step5. Test menu open or close
+     * @tc.steps: step4. Test menu open or close
      * @tc.expected: text menu is close
      */
-    auto ret = pattern_->GetSelectOverlayProxy()->IsMenuShow();
-    EXPECT_TRUE(ret);
-
-    /**
-     * @tc.steps: step6. Show menu when select all value
-     */
-    pattern_->HandleOnSelectAll(true);
-    pattern_->ShowMenu();
-
-    /**
-     * @tc.steps: step7. Select all value again
-     */
-    pattern_->HandleOnSelectAll(true);
-
-    /**
-     * @tc.steps: step8. Test menu open or close
-     * @tc.expected: text menu is close
-     */
-    ret = pattern_->GetSelectOverlayProxy()->IsMenuShow();
+    auto ret = pattern_->selectOverlay_->IsCurrentMenuVisibile();
     EXPECT_FALSE(ret);
 
     /**
-     * @tc.steps: step9. emulate Press shift + F10 key event
+     * @tc.steps: step5. Show menu when select all value
+     */
+    pattern_->HandleOnSelectAll(true);
+    pattern_->HandleOnShowMenu();
+
+    /**
+     * @tc.steps: step6. Select all value again
+     */
+    pattern_->HandleOnSelectAll(true);
+
+    /**
+     * @tc.steps: step7. Test menu open or close
+     * @tc.expected: text menu is close
+     */
+    ret = pattern_->selectOverlay_->IsCurrentMenuVisibile();
+    EXPECT_FALSE(ret);
+
+    /**
+     * @tc.steps: step8. emulate Press shift + F10 key event
      */
     event.code = KeyCode::KEY_F10;
     event.pressedCodes.emplace_back(KeyCode::KEY_SHIFT_LEFT);
     event.pressedCodes.emplace_back(KeyCode::KEY_F10);
 
     /**
-     * @tc.steps: step10. call OnKeyEvent
+     * @tc.steps: step9. call OnKeyEvent
      */
     ret = pattern_->OnKeyEvent(event);
-    EXPECT_FALSE(ret);
+    EXPECT_TRUE(ret);
 
     /**
-     * @tc.steps: step11. Inset value
+     * @tc.steps: step10. Inset value
      */
     pattern_->InsertValue("abc");
 
     /**
-     * @tc.steps: step12. Test menu open or close
+     * @tc.steps: step11. Test menu open or close
      * @tc.expected: text menu is close
      */
-    ret = pattern_->GetSelectOverlayProxy()->IsMenuShow();
+    ret = pattern_->selectOverlay_->IsCurrentMenuVisibile();
     EXPECT_FALSE(ret);
 }
 
@@ -2977,9 +2980,9 @@ HWTEST_F(TextFieldControllerTest, TextFieldPatternOnTextInputScroll001, TestSize
     pattern_->contentRect_.x_ = 20.0f;
     pattern_->contentRect_.width_ = 100.0f;
     pattern_->OnTextInputScroll(-1000.0f);
-    pattern_->isSingleHandle_ = false;
+    pattern_->SetIsSingleHandle(false);
     pattern_->OnTextInputScroll(0.0f);
-    pattern_->isSingleHandle_ = true;
+    pattern_->SetIsSingleHandle(true);
     pattern_->OnTextInputScroll(0.0f);
     EXPECT_EQ(pattern_->selectController_->GetCaretRect().GetX(), -90.0f);
     EXPECT_EQ(pattern_->textRect_.GetOffset(), OffsetF(pattern_->currentOffset_, pattern_->textRect_.GetY()));
@@ -3647,6 +3650,43 @@ HWTEST_F(TextFieldUXTest, testTextAlign001, TestSize.Level1)
 }
 
 /**
+ * @tc.name: testWordBreak001
+ * @tc.desc: test testInput text WordBreak
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldUXTest, testWordBreak001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: Create Text filed node
+     * @tc.expected: style is Inline
+     */
+    CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) {
+        model.SetInputStyle(DEFAULT_INPUT_STYLE);
+    });
+
+    /**
+     * @tc.step: step2. Set wordBreak BREAK_ALL
+     */
+    layoutProperty_->UpdateWordBreak(WordBreak::NORMAL);
+    frameNode_->MarkModifyDone();
+    EXPECT_EQ(layoutProperty_->GetWordBreak(), WordBreak::NORMAL);
+
+    /**
+     * @tc.step: step2. Set wordBreak BREAK_ALL
+     */
+    layoutProperty_->UpdateWordBreak(WordBreak::BREAK_ALL);
+    frameNode_->MarkModifyDone();
+    EXPECT_EQ(layoutProperty_->GetWordBreak(), WordBreak::BREAK_ALL);
+
+    /**
+     * @tc.step: step2. Set wordBreak BREAK_ALL
+     */
+    layoutProperty_->UpdateWordBreak(WordBreak::BREAK_WORD);
+    frameNode_->MarkModifyDone();
+    EXPECT_EQ(layoutProperty_->GetWordBreak(), WordBreak::BREAK_WORD);
+}
+
+/**
  * @tc.name: testShowUnderline001
  * @tc.desc: test testInput showUnderline
  * @tc.type: FUNC
@@ -3673,6 +3713,53 @@ HWTEST_F(TextFieldUXTest, testShowUnderline001, TestSize.Level1)
     layoutProperty_->UpdateShowUnderline(false);
     frameNode_->MarkModifyDone();
     EXPECT_EQ(layoutProperty_->GetShowUnderline(), false);
+}
+
+/**
+ * @tc.name: testUnderlineColor001
+ * @tc.desc: test testInput underlineColor
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldUXTest, testUnderlineColor001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: Create Text filed node
+     * @tc.expected: underlineColor is Red
+     */
+    CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) {
+        model.SetShowUnderline(true);
+    });
+
+    /**
+     * @tc.step: step2. Set normalUnderlineColor is Red
+     */
+    pattern_->SetNormalUnderlineColor(Color::RED);
+    frameNode_->MarkModifyDone();
+    EXPECT_EQ(pattern_->GetUserUnderlineColor().normal, Color::RED);
+
+    /**
+     * @tc.step: step3. Set userUnderlineColor is RED, GREEN, BLUE, BLACK
+     */
+    UserUnderlineColor userColor = {Color::RED, Color::GREEN, Color::BLUE, Color::BLACK};
+    pattern_->SetUserUnderlineColor(userColor);
+    frameNode_->MarkModifyDone();
+    UserUnderlineColor userColorRes = pattern_->GetUserUnderlineColor();
+    EXPECT_EQ(userColorRes.typing, Color::RED);
+    EXPECT_EQ(userColorRes.normal, Color::GREEN);
+    EXPECT_EQ(userColorRes.error, Color::BLUE);
+    EXPECT_EQ(userColorRes.disable, Color::BLACK);
+
+    /**
+     * @tc.step: step4. Set userUnderlineColor is null
+     */
+    UserUnderlineColor userColorNull = UserUnderlineColor();
+    pattern_->SetUserUnderlineColor(userColorNull);
+    frameNode_->MarkModifyDone();
+    UserUnderlineColor userColorNullRes = pattern_->GetUserUnderlineColor();
+    EXPECT_EQ(userColorNullRes.typing, std::nullopt);
+    EXPECT_EQ(userColorNullRes.normal, std::nullopt);
+    EXPECT_EQ(userColorNullRes.error, std::nullopt);
+    EXPECT_EQ(userColorNullRes.disable, std::nullopt);
 }
 
 /**
@@ -4007,9 +4094,9 @@ HWTEST_F(TextFieldUXTest, HandleOnEscape001, TestSize.Level1)
     GetFocus();
 
     /**
-     * @tc.steps: step2. Create selectOverlayProxy
+     * @tc.steps: step2. Call ProcessOverlay
      */
-    pattern_->ProcessOverlay(true, true, true);
+    pattern_->ProcessOverlay();
 
 
     /**
@@ -4105,5 +4192,209 @@ HWTEST_F(TextFieldUXTest, HandleOnUndoAction001, TestSize.Level1)
     pattern_->UpdateEditingValueToRecord();
     pattern_->HandleOnUndoAction();
     EXPECT_EQ(pattern_->selectController_->GetCaretIndex(), 0);
+}
+
+/**
+ * @tc.name: TextInputToJsonValue001
+ * @tc.desc: test attrs on ToJsonValue
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldUXTest, TextInputToJsonValue001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: Create Text filed node with default attrs
+     */
+    CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) {
+        model.SetTextDecoration(TextDecoration::LINE_THROUGH);
+        model.SetTextDecorationColor(Color::BLUE);
+        model.SetTextDecorationStyle(TextDecorationStyle::DOTTED);
+        model.SetLetterSpacing(1.0_px);
+        model.SetLineHeight(2.0_px);
+    });
+
+    /**
+     * @tc.expected: Check if all set properties are displayed in the corresponding JSON
+     */
+    int32_t backupApiVersion = AceApplicationInfo::GetInstance().GetApiTargetVersion();
+    AceApplicationInfo::GetInstance().SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWELVE));
+    auto json = JsonUtil::Create(true);
+    layoutProperty_->ToJsonValue(json);
+    EXPECT_TRUE(json->Contains("decoration"));
+    EXPECT_TRUE(json->Contains("letterSpacing"));
+    EXPECT_TRUE(json->Contains("lineHeight"));
+    AceApplicationInfo::GetInstance().SetApiTargetVersion(backupApiVersion);
+}
+
+/**
+ * @tc.name: TextInputLetterSpacing001
+ * @tc.desc: test TextInput letterSpacing
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldUXTest, TextInputLetterSpacing001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: Create Text filed node with set letterSpacing 1.0_fp
+     * @tc.expected: letterSpacing is 1.0_fp
+     */
+    CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) {
+        model.SetLetterSpacing(1.0_fp);
+    });
+
+    /**
+     * @tc.step: step2. test letterSpacing
+     */
+    EXPECT_EQ(layoutProperty_->GetLetterSpacing(), 1.0_fp);
+}
+
+/**
+ * @tc.name: TextInputLineHeight001
+ * @tc.desc: test TextInput lineHeight
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldUXTest, TextInputLineHeight001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: Create Text filed node with set lineHeight 2.0_fp
+     * @tc.expected: lineHeight is 2.0_fp
+     */
+    CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) {
+        model.SetLineHeight(2.0_fp);
+    });
+
+    /**
+     * @tc.step: step2. test maxLength
+     */
+    EXPECT_EQ(layoutProperty_->GetLineHeight(), 2.0_fp);
+}
+
+/**
+ * @tc.name: TextInputTextDecoration001
+ * @tc.desc: test TextInput decoration
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldUXTest, TextInputTextDecoration001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: Create Text filed node with set decoration(LINE_THROUGH, BLUE, DOTTED)
+     * @tc.expected: maxLength is decoration(LINE_THROUGH, BLUE, DOTTED)
+     */
+    CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) {
+        model.SetTextDecoration(TextDecoration::LINE_THROUGH);
+        model.SetTextDecorationColor(Color::BLUE);
+        model.SetTextDecorationStyle(TextDecorationStyle::DOTTED);
+    });
+    TextEditingValue value;
+    TextSelection selection;
+    value.text = "1234567890";
+    selection.baseOffset = value.text.length();
+    value.selection = selection;
+    pattern_->UpdateEditingValue(std::make_shared<TextEditingValue>(value));
+    FlushLayoutTask(frameNode_);
+
+    /**
+     * @tc.step: step2. test decoration
+     */
+    EXPECT_EQ(layoutProperty_->GetTextDecoration(), TextDecoration::LINE_THROUGH);
+    EXPECT_EQ(layoutProperty_->GetTextDecorationColor(), Color::BLUE);
+    EXPECT_EQ(layoutProperty_->GetTextDecorationStyle(), TextDecorationStyle::DOTTED);
+}
+
+/**
+ * @tc.name: HandleClickEventTest001
+ * @tc.desc: test scrolling when clicking on the scroll bar
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldUXTest, HandleClickEventTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create CreateTextField , GestureEvent and ScrollBars.
+     * @tc.expected: create CreateTextField , GestureEvent and ScrollBars created successfully.
+     */
+    CreateTextField(DEFAULT_TEXT);
+    pattern_->scrollBar_ = AceType::MakeRefPtr<ScrollBar>();
+    GestureEvent info;
+    info.localLocation_ = Offset(1.0f, 110.0f);
+    pattern_->scrollBar_->barRect_ = Rect(0.0f, 0.0f, 30.0f, 500.0f);
+    pattern_->scrollBar_->touchRegion_ = Rect(10.0f, 100.0f, 30.0f, 100.0f);
+    // /**
+    //  * @tc.steps: step2. Test HandleClickEvent.
+    //  * @tc.expect: CheckBarDirection equal BarDirection's Value.
+    //  */
+    pattern_->hasMousePressed_ = true;
+    pattern_->HandleClickEvent(info);
+    Point point(info.localLocation_.GetX(), info.localLocation_.GetY());
+    EXPECT_EQ(pattern_->scrollBar_->CheckBarDirection(point), BarDirection::BAR_NONE);
+    info.localLocation_ = Offset(1.0f, 1.0f);
+    pattern_->HandleClickEvent(info);
+    Point point1(info.localLocation_.GetX(), info.localLocation_.GetY());
+    EXPECT_EQ(pattern_->scrollBar_->CheckBarDirection(point1), BarDirection::PAGE_UP);
+    info.localLocation_ = Offset(1.0f, 300.0f);
+    pattern_->HandleClickEvent(info);
+    Point point2(info.localLocation_.GetX(), info.localLocation_.GetY());
+    EXPECT_EQ(pattern_->scrollBar_->CheckBarDirection(point2), BarDirection::PAGE_DOWN);
+}
+
+/**
+ * @tc.name: SupportAvoidanceTest
+ * @tc.desc: test whether the custom keyboard supports the collision avoidance function
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldUXTest, SupportAvoidanceTest, TestSize.Level1)
+{
+    CreateTextField(DEFAULT_TEXT);
+    auto supportAvoidance = true;
+    pattern_->SetCustomKeyboardOption(supportAvoidance);
+    EXPECT_TRUE(pattern_->keyboardAvoidance_);
+    supportAvoidance = false;
+    pattern_->SetCustomKeyboardOption(supportAvoidance);
+    EXPECT_FALSE(pattern_->keyboardAvoidance_);
+}
+
+/**
+ * @tc.name: TextFieldFontFeatureTest
+ * @tc.desc: Test the caret move right
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldUXTest, FontFeature003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Initialize text input.
+     */
+    TextFieldModelNG textFieldModelNG;
+    textFieldModelNG.CreateTextInput(DEFAULT_TEXT, "");
+
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto layoutProperty = frameNode->GetLayoutProperty<TextFieldLayoutProperty>();
+    textFieldModelNG.SetFontFeature(FONT_FEATURE_VALUE_0);
+    EXPECT_EQ(layoutProperty->GetFontFeature(), FONT_FEATURE_VALUE_0);
+
+    layoutProperty->UpdateFontFeature(ParseFontFeatureSettings("\"ss01\" 1"));
+    TextFieldModelNG::SetFontFeature(frameNode, FONT_FEATURE_VALUE_0);
+    EXPECT_EQ(layoutProperty->GetFontFeature(), FONT_FEATURE_VALUE_0);
+}
+
+/**
+ * @tc.name: TextFieldFontFeatureTest
+ * @tc.desc: Test the caret move right
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldUXTest, FontFeature004, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Initialize text input.
+     */
+    TextFieldModelNG textFieldModelNG;
+    textFieldModelNG.CreateTextInput(DEFAULT_TEXT, "");
+
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto layoutProperty = frameNode->GetLayoutProperty<TextFieldLayoutProperty>();
+    textFieldModelNG.SetFontFeature(FONT_FEATURE_VALUE_1);
+    EXPECT_EQ(layoutProperty->GetFontFeature(), FONT_FEATURE_VALUE_1);
+
+    layoutProperty->UpdateFontFeature(ParseFontFeatureSettings("\"ss01\" 0"));
+    TextFieldModelNG::SetFontFeature(frameNode, FONT_FEATURE_VALUE_1);
+    EXPECT_EQ(layoutProperty->GetFontFeature(), FONT_FEATURE_VALUE_1);
 }
 } // namespace OHOS::Ace::NG

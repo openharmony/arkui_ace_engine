@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -137,7 +137,7 @@ public:                                                                         
     }
 
 namespace OHOS::Ace::NG {
-
+using FONT_FEATURES_MAP = std::unordered_map<std::string, int32_t>;
 class Paragraph;
 
 struct SpanItem : public AceType {
@@ -193,6 +193,7 @@ public:
     virtual void StartDrag(int32_t start, int32_t end);
     virtual void EndDrag();
     virtual bool IsDragging();
+    TextStyle InheritParentProperties(const RefPtr<FrameNode>& frameNode);
     RefPtr<SpanItem> GetSameStyleSpanItem() const;
     std::optional<std::pair<int32_t, int32_t>> GetIntersectionInterval(std::pair<int32_t, int32_t> interval) const;
     std::optional<TextStyle> GetTextStyle() const
@@ -260,6 +261,7 @@ enum class PropertyInfo {
     SYMBOL_RENDERING_STRATEGY,
     SYMBOL_EFFECT_STRATEGY,
     WORD_BREAK,
+    FONTFEATURE,
 };
 
 class ACE_EXPORT BaseSpan : public virtual AceType {
@@ -361,6 +363,7 @@ public:
     DEFINE_SPAN_FONT_STYLE_ITEM(TextDecoration, TextDecoration);
     DEFINE_SPAN_FONT_STYLE_ITEM(TextDecorationStyle, TextDecorationStyle);
     DEFINE_SPAN_FONT_STYLE_ITEM(TextDecorationColor, Color);
+    DEFINE_SPAN_FONT_STYLE_ITEM(FontFeature, FONT_FEATURES_MAP);
     DEFINE_SPAN_FONT_STYLE_ITEM(TextCase, TextCase);
     DEFINE_SPAN_FONT_STYLE_ITEM(TextShadow, std::vector<Shadow>);
     DEFINE_SPAN_FONT_STYLE_ITEM(LetterSpacing, Dimension);
@@ -413,18 +416,7 @@ public:
         RequestTextFlushDirty();
     }
 
-    std::set<PropertyInfo> CalculateInheritPropertyInfo()
-    {
-        std::set<PropertyInfo> inheritPropertyInfo;
-        const std::set<PropertyInfo> propertyInfoContainer = { PropertyInfo::FONTSIZE, PropertyInfo::FONTCOLOR,
-            PropertyInfo::FONTSTYLE, PropertyInfo::FONTWEIGHT, PropertyInfo::FONTFAMILY, PropertyInfo::TEXTDECORATION,
-            PropertyInfo::TEXTCASE, PropertyInfo::LETTERSPACE, PropertyInfo::LINEHEIGHT, PropertyInfo::TEXT_ALIGN,
-            PropertyInfo::LEADING_MARGIN, PropertyInfo::TEXTSHADOW, PropertyInfo::SYMBOL_COLOR,
-            PropertyInfo::SYMBOL_RENDERING_STRATEGY, PropertyInfo::SYMBOL_EFFECT_STRATEGY, PropertyInfo::WORD_BREAK };
-        set_difference(propertyInfoContainer.begin(), propertyInfoContainer.end(), propertyInfo_.begin(),
-            propertyInfo_.end(), inserter(inheritPropertyInfo, inheritPropertyInfo.begin()));
-        return inheritPropertyInfo;
-    }
+    std::set<PropertyInfo> CalculateInheritPropertyInfo();
 
 private:
     std::list<RefPtr<SpanNode>> spanChildren_;

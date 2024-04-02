@@ -47,6 +47,8 @@ public:
         }
         if (!pixelMap) {
             callback_(nullptr, ERROR_CODE_INTERNAL_ERROR, [node = node_]() {
+                TAG_LOGW(AceLogTag::ACE_COMPONENT_SNAPSHOT,
+                    "Internal error! The pixelmap returned by the system is null");
                 auto frameNode = node.Upgrade();
                 CHECK_NULL_VOID(frameNode);
                 Inspector::RemoveOffscreenNode(frameNode);
@@ -94,6 +96,9 @@ void ComponentSnapshot::Get(const std::string& componentId, JsCallback&& callbac
     auto node = Inspector::GetFrameNodeByKey(componentId);
     if (!node) {
         callback(nullptr, ERROR_CODE_INTERNAL_ERROR, nullptr);
+        TAG_LOGW(AceLogTag::ACE_COMPONENT_SNAPSHOT,
+            "Can't find a component that id or key are %{public}s, Please check your parameters are correct",
+            componentId.c_str());
         return;
     }
     auto rsNode = GetRsNode(node);

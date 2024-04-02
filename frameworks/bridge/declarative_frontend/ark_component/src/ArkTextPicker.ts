@@ -15,8 +15,8 @@
 
 /// <reference path='./import.ts' />
 class ArkTextPickerComponent extends ArkComponent implements TextPickerAttribute {
-  constructor(nativePtr: KNode) {
-    super(nativePtr);
+  constructor(nativePtr: KNode, classType?: ModifierType) {
+    super(nativePtr, classType);
   }
   onGestureJudgeBegin(callback: (gestureInfo: GestureInfo, event: BaseGestureEvent) => GestureJudgeResult): this {
     throw new Error('Method not implemented.');
@@ -60,6 +60,11 @@ class ArkTextPickerComponent extends ArkComponent implements TextPickerAttribute
       this._modifiersWithKeys, TextpickerSelectedIndexModifier.identity, TextpickerSelectedIndexModifier, value);
     return this;
   }
+  divider(value: DividerOptions | null): this {
+    modifierWithKey(
+      this._modifiersWithKeys, TextpickerDividerModifier.identity, TextpickerDividerModifier, value);
+    return this;
+  }
 }
 
 class TextpickerCanLoopModifier extends ModifierWithKey<boolean> {
@@ -99,6 +104,27 @@ class TextpickerSelectedIndexModifier extends ModifierWithKey<number | number[]>
     }
   }
 
+}
+
+class TextpickerDividerModifier extends ModifierWithKey<DividerOptions | null> {
+  constructor(value: DividerOptions | null) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('textpickerDivider');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().textpicker.resetDivider(node);
+    } else {
+      getUINativeModule().textpicker.setDivider(node, this.value?.strokeWidth, this.value?.color, this.value?.startMargin, this.value?.endMargin);
+    }
+  }
+
+  checkObjectDiff(): boolean {
+    return !(this.stageValue?.strokeWidth === this.value?.strokeWidth &&
+      this.stageValue?.color === this.value?.color &&
+      this.stageValue?.startMargin === this.value?.startMargin &&
+      this.stageValue?.endMargin === this.value?.endMargin);
+  }
 }
 
 class TextpickerTextStyleModifier extends ModifierWithKey<PickerTextStyle> {
@@ -203,12 +229,10 @@ class TextpickerDefaultPickerItemHeightModifier extends ModifierWithKey<number |
 }
 
 // @ts-ignore
-globalThis.TextPicker.attributeModifier = function (modifier) {
-  const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
-  let nativeNode = getUINativeModule().getFrameNodeById(elmtId);
-  let component = this.createOrGetNode(elmtId, () => {
-    return new ArkTextPickerComponent(nativeNode);
+globalThis.TextPicker.attributeModifier = function (modifier: ArkComponent): void {
+  attributeModifierFunc.call(this, modifier, (nativePtr: KNode) => {
+    return new ArkTextPickerComponent(nativePtr);
+  }, (nativePtr: KNode, classType: ModifierType, modifierJS: ModifierJS) => {
+    return new modifierJS.TextPickerModifier(nativePtr, classType);
   });
-  applyUIAttributes(modifier, nativeNode, component);
-  component.applyModifierPatch();
 };

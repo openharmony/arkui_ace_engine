@@ -30,19 +30,7 @@ OffscreenCanvasPattern::OffscreenCanvasPattern(int32_t width, int32_t height)
     if (height < 0) {
         height = 0;
     }
-    offscreenPaintMethod_ = MakeRefPtr<OffscreenCanvasPaintMethod>(nullptr, width, height);
-}
-
-OffscreenCanvasPattern::OffscreenCanvasPattern(const RefPtr<PipelineBase> context, int32_t width, int32_t height)
-{
-    CHECK_NULL_VOID(context);
-    if (width < 0) {
-        width = 0;
-    }
-    if (height < 0) {
-        height = 0;
-    }
-    offscreenPaintMethod_ = MakeRefPtr<OffscreenCanvasPaintMethod>(context, width, height);
+    offscreenPaintMethod_ = MakeRefPtr<OffscreenCanvasPaintMethod>(width, height);
 }
 
 void OffscreenCanvasPattern::UpdateSize(int32_t width, int32_t height)

@@ -42,6 +42,9 @@
 #include "core/pipeline_ng/pipeline_context.h"
 #include "core/components_ng/manager/display_sync/ui_display_sync.h"
 
+namespace OHOS::Ace {
+class ImageAnalyzerManager;
+}
 namespace OHOS::Ace::NG {
 class XComponentExtSurfaceCallbackClient;
 class XComponentPattern : public Pattern {
@@ -268,6 +271,9 @@ public:
     void SetIdealSurfaceOffsetY(float offsetY);
     void ClearIdealSurfaceOffset(bool isXAxis);
     void UpdateSurfaceBounds(bool needForceRender = false);
+    void EnableAnalyzer(bool enable);
+    void StartImageAnalyzer(void* config, onAnalyzedCallback& onAnalyzed);
+    void StopImageAnalyzer();
 
 private:
     void OnAttachToFrameNode() override;
@@ -310,8 +316,15 @@ private:
     bool StopTextureExport();
     void InitializeRenderContext();
     void SetSurfaceNodeToGraphic();
+    bool IsSupportImageAnalyzerFeature();
+    void CreateAnalyzerOverlay();
+    void DestroyAnalyzerOverlay();
+    void UpdateAnalyzerOverlay();
+    void UpdateAnalyzerUIConfig(const RefPtr<NG::GeometryNode>& geometryNode);
+    void ReleaseImageAnalyzer();
 
-#if defined(VIDEO_TEXTURE_SUPPORTED) && defined(XCOMPONENT_SUPPORTED)
+#ifdef RENDER_EXTRACT_SUPPORTED
+    RenderSurface::RenderSurfaceType CovertToRenderSurfaceType(const XComponentType& hostType);
     void RegisterRenderContextCallBack();
     void RequestFocus();
 #endif
@@ -358,6 +371,8 @@ private:
     NodeRenderType renderType_ = NodeRenderType::RENDER_TYPE_DISPLAY;
     uint64_t exportTextureSurfaceId_ = 0U;
     bool hasReleasedSurface_ = false;
+    std::shared_ptr<ImageAnalyzerManager> imageAnalyzerManager_;
+    bool isEnableAnalyzer_ = false;
 #ifdef OHOS_PLATFORM
     int64_t startIncreaseTime_ = 0;
 #endif

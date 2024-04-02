@@ -37,6 +37,7 @@ template("ace_core_source_set") {
       # accessibility
       "accessibility/accessibility_manager_ng.cpp",
       "accessibility/accessibility_node.cpp",
+      "accessibility/accessibility_session_adapter.cpp",
       "accessibility/accessibility_utils.cpp",
 
       # animation
@@ -261,7 +262,9 @@ template("ace_core_source_set") {
     ]
 
     external_deps = []
-
+    if (use_hilog) {
+      external_deps += [ "hilog:libhilog" ]
+    }
     if (defined(config.build_for_preview) && config.build_for_preview) {
       sources -= [ "common/task_runner_adapter_impl.cpp" ]
     }
@@ -601,6 +604,7 @@ template("ace_core_ng_source_set") {
       # accessibility
       "accessibility/accessibility_manager_ng.cpp",
       "accessibility/accessibility_node.cpp",
+      "accessibility/accessibility_session_adapter.cpp",
       "accessibility/accessibility_utils.cpp",
 
       # animation

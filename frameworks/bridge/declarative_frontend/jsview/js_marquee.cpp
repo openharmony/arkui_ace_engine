@@ -17,6 +17,7 @@
 #include <limits>
 #include <optional>
 #include <string>
+#include <vector>
 
 #include "base/geometry/dimension.h"
 #include "base/log/ace_scoring_log.h"
@@ -54,6 +55,9 @@ MarqueeModel* MarqueeModel::GetInstance()
 } // namespace OHOS::Ace
 
 namespace OHOS::Ace::Framework {
+
+const std::vector<MarqueeUpdateStrategy> MARQUEE_UPDATE_STRATEGYS = { MarqueeUpdateStrategy::DEFAULT,
+    MarqueeUpdateStrategy::PRESERVE_POSITION};
 
 void JSMarquee::Create(const JSCallbackInfo& info)
 {
@@ -120,6 +124,7 @@ void JSMarquee::JSBind(BindingTarget globalObj)
     JSClass<JSMarquee>::StaticMethod("fontSize", &JSMarquee::SetFontSize);
     JSClass<JSMarquee>::StaticMethod("fontWeight", &JSMarquee::SetFontWeight);
     JSClass<JSMarquee>::StaticMethod("fontFamily", &JSMarquee::SetFontFamily);
+    JSClass<JSMarquee>::StaticMethod("marqueeUpdateStrategy", &JSMarquee::SetMarqueeUpdateStrategy);
     JSClass<JSMarquee>::StaticMethod("onStart", &JSMarquee::OnStart);
     JSClass<JSMarquee>::StaticMethod("onBounce", &JSMarquee::OnBounce);
     JSClass<JSMarquee>::StaticMethod("onFinish", &JSMarquee::OnFinish);
@@ -189,6 +194,20 @@ void JSMarquee::SetFontFamily(const JSCallbackInfo& info)
         fontFamiliesOpt = fontFamilies;
     }
     MarqueeModel::GetInstance()->SetFontFamily(fontFamiliesOpt);
+}
+
+void JSMarquee::SetMarqueeUpdateStrategy(const std::string& value)
+{
+    static const LinearMapNode<MarqueeUpdateStrategy> marqueeUpdateStrategyTable[] = {
+        { "default", MarqueeUpdateStrategy::DEFAULT },
+        { "preserve_position", MarqueeUpdateStrategy::PRESERVE_POSITION },
+    };
+    auto marqueeUpdateStrategyIter = BinarySearchFindIndex(marqueeUpdateStrategyTable,
+        ArraySize(marqueeUpdateStrategyTable), value.c_str());
+    auto marqueeUpdateStrategyValue = marqueeUpdateStrategyIter != -1 ?
+        std::make_optional(MARQUEE_UPDATE_STRATEGYS[marqueeUpdateStrategyIter]) :
+        std::make_optional(MarqueeUpdateStrategy::DEFAULT);
+    MarqueeModel::GetInstance()->SetMarqueeUpdateStrategy(marqueeUpdateStrategyValue);
 }
 
 void JSMarquee::OnStart(const JSCallbackInfo& info)

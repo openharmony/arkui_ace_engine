@@ -31,6 +31,7 @@
 
 namespace OHOS::Ace::NG {
 namespace {
+const std::vector<float> DEFAULT_COLOR_FILTER = { 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0 };
 ImageSourceInfo CreateSourceInfo(const std::string &src, RefPtr<PixelMap> &pixmap, const std::string &bundleName,
     const std::string &moduleName)
 {
@@ -286,6 +287,11 @@ void ImageModelNG::SetResizableSlice(const ImageResizableSlice& slice)
     ACE_UPDATE_PAINT_PROPERTY(ImageRenderProperty, ImageResizableSlice, slice);
 }
 
+void ImageModelNG::SetResizableSlice(FrameNode *frameNode, const ImageResizableSlice& slice)
+{
+    ACE_UPDATE_NODE_PAINT_PROPERTY(ImageRenderProperty, ImageResizableSlice, slice, frameNode);
+}
+
 void ImageModelNG::SetImageRepeat(FrameNode *frameNode, ImageRepeat imageRepeat)
 {
     ACE_UPDATE_NODE_PAINT_PROPERTY(ImageRenderProperty, ImageRepeat, imageRepeat, frameNode);
@@ -429,6 +435,7 @@ ImageInterpolation ImageModelNG::GetInterpolation(FrameNode* frameNode)
     CHECK_NULL_RETURN(frameNode, ImageInterpolation::NONE);
     auto paintProperty = frameNode->GetPaintProperty<ImageRenderProperty>();
     CHECK_NULL_RETURN(paintProperty, ImageInterpolation::NONE);
+    CHECK_NULL_RETURN(paintProperty->GetImagePaintStyle(), ImageInterpolation::NONE);
     return paintProperty->GetImagePaintStyle()->GetImageInterpolation().value_or(ImageInterpolation::NONE);
 }
 
@@ -437,16 +444,17 @@ ImageRepeat ImageModelNG::GetObjectRepeat(FrameNode* frameNode)
     CHECK_NULL_RETURN(frameNode, ImageRepeat::NO_REPEAT);
     auto paintProperty = frameNode->GetPaintProperty<ImageRenderProperty>();
     CHECK_NULL_RETURN(paintProperty, ImageRepeat::NO_REPEAT);
+    CHECK_NULL_RETURN(paintProperty->GetImagePaintStyle(), ImageRepeat::NO_REPEAT);
     return paintProperty->GetImagePaintStyle()->GetImageRepeat().value_or(ImageRepeat::NO_REPEAT);
 }
 
 std::vector<float> ImageModelNG::GetColorFilter(FrameNode* frameNode)
 {
-    std::vector<float> defaultColorFilter;
-    CHECK_NULL_RETURN(frameNode, defaultColorFilter);
+    CHECK_NULL_RETURN(frameNode, DEFAULT_COLOR_FILTER);
     auto paintProperty = frameNode->GetPaintProperty<ImageRenderProperty>();
-    CHECK_NULL_RETURN(paintProperty, defaultColorFilter);
-    return paintProperty->GetImagePaintStyle()->GetColorFilter().value_or(defaultColorFilter);
+    CHECK_NULL_RETURN(paintProperty, DEFAULT_COLOR_FILTER);
+    CHECK_NULL_RETURN(paintProperty->GetImagePaintStyle(), DEFAULT_COLOR_FILTER);
+    return paintProperty->GetImagePaintStyle()->GetColorFilter().value_or(DEFAULT_COLOR_FILTER);
 }
 
 bool ImageModelNG::GetAutoResize(FrameNode* frameNode)
@@ -454,6 +462,7 @@ bool ImageModelNG::GetAutoResize(FrameNode* frameNode)
     CHECK_NULL_RETURN(frameNode, true);
     auto layoutProperty = frameNode->GetLayoutProperty<ImageLayoutProperty>();
     CHECK_NULL_RETURN(layoutProperty, true);
+    CHECK_NULL_RETURN(layoutProperty->GetImageSizeStyle(), true);
     return layoutProperty->GetImageSizeStyle()->GetAutoResize().value_or(true);
 }
 
@@ -477,6 +486,7 @@ ImageRenderMode ImageModelNG::GetImageRenderMode(FrameNode* frameNode)
     CHECK_NULL_RETURN(frameNode, ImageRenderMode::ORIGINAL);
     auto paintProperty = frameNode->GetPaintProperty<ImageRenderProperty>();
     CHECK_NULL_RETURN(paintProperty, ImageRenderMode::ORIGINAL);
+    CHECK_NULL_RETURN(paintProperty->GetImagePaintStyle(), ImageRenderMode::ORIGINAL);
     return paintProperty->GetImagePaintStyle()->GetImageRenderMode().value_or(ImageRenderMode::ORIGINAL);
 }
 } // namespace OHOS::Ace::NG

@@ -25,6 +25,8 @@ public:
     static void Checked(const JSCallbackInfo& info);
     static void JSBind(BindingTarget globalObj);
     static void Create(const JSCallbackInfo& info);
+    static void ParseIndicator(const JSCallbackInfo& info, std::optional<int32_t>& indicator,
+        std::function<void()>& customBuilderFunc, JSRef<JSVal>& builderObject);
     static void JsPadding(const JSCallbackInfo& info);
     static void JsRadioStyle(const JSCallbackInfo& info);
     static void JsResponseRegion(const JSCallbackInfo& info);

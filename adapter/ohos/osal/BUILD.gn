@@ -123,6 +123,7 @@ template("ace_osal_ohos_source_set") {
         sources += [ "js_accessibility_manager.cpp" ]
         deps += [ "$ace_root/frameworks/bridge/common/accessibility:bridge_accessibility_$platform" ]
         external_deps += [
+          "accessibility:accessibility_common",
           "accessibility:accessibilityclient",
           "accessibility:accessibilityconfig",
         ]
@@ -145,6 +146,7 @@ template("ace_osal_ohos_source_set") {
       "image_source_ohos.cpp",
       "input_manager.cpp",
       "mouse_style_ohos.cpp",
+      "navigation_route_ohos.cpp",
       "page_url_checker_ohos.cpp",
       "pixel_map_ohos.cpp",
     ]

@@ -16,13 +16,40 @@
 
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_common_bridge.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_utils.h"
+#include "core/components/picker/picker_theme.h"
 
 namespace OHOS::Ace::NG {
+namespace {
 const std::string FORMAT_FONT = "%s|%s|%s";
 const std::string DEFAULT_ERR_CODE = "-1";
 const int32_t DEFAULT_NEGATIVE_NUM = -1;
 constexpr uint32_t DEFAULT_TIME_PICKER_TEXT_COLOR = 0xFF182431;
 constexpr uint32_t DEFAULT_TIME_PICKER_SELECTED_TEXT_COLOR = 0xFF007DFF;
+
+constexpr int32_t NODE_INDEX = 0;
+constexpr int32_t STROKE_WIDTH_INDEX = 1;
+constexpr int32_t COLOR_INDEX = 2;
+constexpr int32_t START_MARGIN_INDEX = 3;
+constexpr int32_t END_MARGIN_INDEX = 4;
+
+constexpr int32_t ARG_GROUP_LENGTH = 3;
+bool ParseDividerDimension(const EcmaVM* vm, const Local<JSValueRef>& value, CalcDimension& valueDim)
+{
+    return !ArkTSUtils::ParseJsDimensionVpNG(vm, value, valueDim, false) || LessNotEqual(valueDim.Value(), 0.0f) ||
+           (valueDim.Unit() != DimensionUnit::PX && valueDim.Unit() != DimensionUnit::VP);
+}
+
+void PopulateValuesAndUnits(const CalcDimension& dividerStrokeWidth, const CalcDimension& dividerStartMargin,
+    const CalcDimension& dividerEndMargin, ArkUI_Float32 values[], int32_t units[])
+{
+    values[NODE_INDEX] = static_cast<ArkUI_Float32>(dividerStrokeWidth.Value());
+    values[STROKE_WIDTH_INDEX] = static_cast<ArkUI_Float32>(dividerStartMargin.Value());
+    values[COLOR_INDEX] = static_cast<ArkUI_Float32>(dividerEndMargin.Value());
+    units[NODE_INDEX] = static_cast<int32_t>(dividerStrokeWidth.Unit());
+    units[STROKE_WIDTH_INDEX] = static_cast<int32_t>(dividerStartMargin.Unit());
+    units[COLOR_INDEX] = static_cast<int32_t>(dividerEndMargin.Unit());
+}
+} // namespace
 
 ArkUINativeModuleValue TextPickerBridge::SetBackgroundColor(ArkUIRuntimeCallInfo* runtimeCallInfo)
 {
@@ -328,6 +355,64 @@ ArkUINativeModuleValue TextPickerBridge::ResetDefaultPickerItemHeight(ArkUIRunti
     Local<JSValueRef> nodeArg = runtimeCallInfo->GetCallArgRef(0);
     auto nativeNode = nodePtr(nodeArg->ToNativePointer(vm)->Value());
     GetArkUINodeModifiers()->getTextPickerModifier()->resetTextPickerDefaultPickerItemHeight(nativeNode);
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue TextPickerBridge::SetDivider(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> nodeArg = runtimeCallInfo->GetCallArgRef(NODE_INDEX);
+    auto nativeNode = nodePtr(nodeArg->ToNativePointer(vm)->Value());
+    Local<JSValueRef> dividerStrokeWidthArgs = runtimeCallInfo->GetCallArgRef(STROKE_WIDTH_INDEX);
+    Local<JSValueRef> colorArg = runtimeCallInfo->GetCallArgRef(COLOR_INDEX);
+    Local<JSValueRef> dividerStartMarginArgs = runtimeCallInfo->GetCallArgRef(START_MARGIN_INDEX);
+    Local<JSValueRef> dividerEndMarginArgs = runtimeCallInfo->GetCallArgRef(END_MARGIN_INDEX);
+    CalcDimension dividerStrokeWidth;
+    CalcDimension dividerStartMargin;
+    CalcDimension dividerEndMargin;
+    Color colorObj;
+    auto context = reinterpret_cast<FrameNode*>(nativeNode)->GetContext();
+    auto themeManager = context->GetThemeManager();
+    CHECK_NULL_RETURN(themeManager, panda::NativePointerRef::New(vm, nullptr));
+    auto pickerTheme = themeManager->GetTheme<PickerTheme>();
+    CHECK_NULL_RETURN(pickerTheme, panda::NativePointerRef::New(vm, nullptr));
+    if (ParseDividerDimension(vm, dividerStrokeWidthArgs, dividerStrokeWidth)) {
+        if (pickerTheme) {
+            dividerStrokeWidth = pickerTheme->GetDividerThickness();
+        } else {
+            dividerStrokeWidth = 0.0_vp;
+        }
+    }
+    if (!ArkTSUtils::ParseJsColorAlpha(vm, colorArg, colorObj)) {
+        if (pickerTheme) {
+            colorObj = pickerTheme->GetDividerColor();
+        } else {
+            colorObj = Color::TRANSPARENT;
+        }
+    }
+    if (ParseDividerDimension(vm, dividerStartMarginArgs, dividerStartMargin)) {
+        dividerStartMargin = 0.0_vp;
+    }
+    if (ParseDividerDimension(vm, dividerEndMarginArgs, dividerEndMargin)) {
+        dividerEndMargin = 0.0_vp;
+    }
+    uint32_t size = ARG_GROUP_LENGTH;
+    ArkUI_Float32 values[size];
+    int32_t units[size];
+    PopulateValuesAndUnits(dividerStrokeWidth, dividerStartMargin, dividerEndMargin, values, units);
+    GetArkUINodeModifiers()->getTextPickerModifier()->setTextPickerDivider(
+        nativeNode, colorObj.GetValue(), values, units, size);
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue TextPickerBridge::ResetDivider(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> nodeArg = runtimeCallInfo->GetCallArgRef(NODE_INDEX);
+    auto nativeNode = nodePtr(nodeArg->ToNativePointer(vm)->Value());
+    GetArkUINodeModifiers()->getTextPickerModifier()->resetTextPickerDivider(nativeNode);
     return panda::JSValueRef::Undefined(vm);
 }
 } // namespace OHOS::Ace::NG

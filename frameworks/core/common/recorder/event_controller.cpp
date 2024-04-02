@@ -37,14 +37,16 @@ void EventController::Register(const std::string& config, const std::shared_ptr<
         return;
     }
     client.observer = observer;
-    std::unique_lock<std::mutex> lock(cacheLock_);
+    std::unique_lock<std::shared_mutex> lock(cacheLock_);
     clientList_.emplace_back(std::move(client));
+    lock.unlock();
     NotifyConfigChange();
     TAG_LOGI(AceLogTag::ACE_UIEVENT, "Register config end");
 }
 
 void EventController::NotifyConfigChange()
 {
+    std::shared_lock<std::shared_mutex> lock(cacheLock_);
     auto mergedConfig = std::make_shared<MergedConfig>();
     EventSwitch eventSwitch;
     for (auto&& client : clientList_) {
@@ -87,7 +89,7 @@ void EventController::NotifyConfigChange()
 
 void EventController::Unregister(const std::shared_ptr<UIEventObserver>& observer)
 {
-    std::unique_lock<std::mutex> lock(cacheLock_);
+    std::unique_lock<std::shared_mutex> lock(cacheLock_);
     auto iter = std::remove_if(clientList_.begin(), clientList_.end(),
         [&observer](UIEventClient client) { return client.observer == observer; });
     bool change = iter != clientList_.end();
@@ -101,7 +103,7 @@ void EventController::NotifyEvent(EventCategory category, int32_t eventType,
     const std::shared_ptr<std::unordered_map<std::string, std::string>>& eventParams)
 {
     {
-        std::unique_lock<std::mutex> lock(cacheLock_);
+        std::shared_lock<std::shared_mutex> lock(cacheLock_);
         if (clientList_.empty()) {
             return;
         }
@@ -114,7 +116,7 @@ void EventController::NotifyEvent(EventCategory category, int32_t eventType,
 void EventController::NotifyEventSync(EventCategory category, int32_t eventType,
     const std::shared_ptr<std::unordered_map<std::string, std::string>>& eventParams)
 {
-    std::unique_lock<std::mutex> lock(cacheLock_);
+    std::shared_lock<std::shared_mutex> lock(cacheLock_);
     for (auto&& client : clientList_) {
         if (client.config.IsEnable() && client.config.IsCategoryEnable(category)) {
             client.observer->NotifyUIEvent(eventType, *eventParams);

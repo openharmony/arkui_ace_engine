@@ -28,6 +28,7 @@
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/text/text_layout_adapter.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
+#include "core/components_ng/pattern/text/text_styles.h"
 #include "core/components_ng/pattern/text_field/text_field_content_modifier.h"
 #include "core/components_ng/pattern/text_field/text_field_layout_property.h"
 #include "core/components_ng/pattern/text_field/text_field_pattern.h"
@@ -42,6 +43,7 @@ constexpr uint32_t INLINE_DEFAULT_VIEW_MAXLINE = 3;
 constexpr uint32_t COUNTER_TEXT_MAXLINE = 1;
 constexpr int32_t DEFAULT_MODE = -1;
 constexpr int32_t SHOW_COUNTER_PERCENT = 100;
+constexpr double TEXT_DECORATION_DISABLED_COLOR_ALPHA = 0.2;
 } // namespace
 void TextFieldLayoutAlgorithm::ConstructTextStyles(
     const RefPtr<FrameNode>& frameNode, TextStyle& textStyle, std::string& textContent, bool& showPlaceHolder)
@@ -64,6 +66,10 @@ void TextFieldLayoutAlgorithm::ConstructTextStyles(
             textStyle.SetTextOverflow(TextOverflow::ELLIPSIS);
         } else {
             textStyle.SetTextOverflow(TextOverflow::CLIP);
+        }
+
+        if (pattern->IsTextArea() || isInlineStyle) {
+            textStyle.SetWordBreak(textFieldLayoutProperty->GetWordBreak().value_or(WordBreak::BREAK_WORD));
         }
     } else {
         UpdatePlaceholderTextStyle(
@@ -600,6 +606,9 @@ void TextFieldLayoutAlgorithm::CreateParagraph(const TextStyle& textStyle, const
         if (splitStr.empty()) {
             continue;
         }
+        if (style->GetMaxLines() == 1) {
+            std::replace(splitStr.begin(), splitStr.end(), '\n', ' ');
+        }
         auto& style = textStyles[i];
         paragraph_->PushStyle(style);
         StringUtils::TransformStrCase(splitStr, static_cast<int32_t>(style.GetTextCase()));
@@ -722,6 +731,8 @@ void TextFieldLayoutAlgorithm::UpdateTextStyleMore(const RefPtr<FrameNode>& fram
 {
     auto pattern = frameNode->GetPattern<TextFieldPattern>();
     CHECK_NULL_VOID(pattern);
+    auto pipeline = frameNode->GetContext();
+    CHECK_NULL_VOID(pipeline);
     if (pattern->IsInPasswordMode()) {
         return;
     }
@@ -732,13 +743,22 @@ void TextFieldLayoutAlgorithm::UpdateTextStyleMore(const RefPtr<FrameNode>& fram
         textStyle.SetTextDecorationColor(layoutProperty->GetTextDecorationColor().value());
     }
     if (layoutProperty->HasTextDecorationStyle()) {
-        textStyle.SetTextDecorationStyle(layoutProperty->GetTextDecorationStyle().value());
+        if (isDisabled) {
+            textStyle.SetTextDecorationColor(layoutProperty->GetTextDecorationColor().value()
+                .BlendOpacity(TEXT_DECORATION_DISABLED_COLOR_ALPHA));
+        } else {
+            textStyle.SetTextDecorationColor(layoutProperty->GetTextDecorationColor().value());
+        }
     }
     if (layoutProperty->HasLetterSpacing()) {
         textStyle.SetLetterSpacing(layoutProperty->GetLetterSpacing().value());
     }
     if (layoutProperty->HasLineHeight()) {
         textStyle.SetLineHeight(layoutProperty->GetLineHeight().value());
+        textStyle.SetHalfLeading(pipeline->GetHalfLeading());
+    }
+    if (layoutProperty->HasFontFeature()) {
+        textStyle.SetFontFeatures(layoutProperty->GetFontFeature().value());
     }
 }
 

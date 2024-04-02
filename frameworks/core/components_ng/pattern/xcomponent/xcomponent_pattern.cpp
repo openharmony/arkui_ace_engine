@@ -24,6 +24,7 @@
 #include "base/ressched/ressched_report.h"
 #include "base/utils/system_properties.h"
 #include "base/utils/utils.h"
+#include "core/common/ai/image_analyzer_manager.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components_ng/event/gesture_event_hub.h"
 #include "core/components_ng/pattern/xcomponent/xcomponent_controller_ng.h"
@@ -149,8 +150,8 @@ void XComponentPattern::Initialize(int32_t instanceId)
     if (type_ == XComponentType::SURFACE || type_ == XComponentType::TEXTURE) {
         renderContext->SetClipToFrame(true);
         renderContext->SetClipToBounds(true);
-#if defined(VIDEO_TEXTURE_SUPPORTED) && defined(XCOMPONENT_SUPPORTED)
-        renderSurface_ = RenderSurface::Create(SystemProperties::GetExtSurfaceEnabled());
+#ifdef RENDER_EXTRACT_SUPPORTED
+        renderSurface_ = RenderSurface::Create(CovertToRenderSurfaceType(type_));
 #else
         renderSurface_ = RenderSurface::Create();
 #endif
@@ -165,7 +166,7 @@ void XComponentPattern::Initialize(int32_t instanceId)
                 pipelineContext->AddOnAreaChangeNode(host->GetId());
                 extSurfaceClient_ = MakeRefPtr<XComponentExtSurfaceCallbackClient>(WeakClaim(this));
                 renderSurface_->SetExtSurfaceCallback(extSurfaceClient_);
-#if defined(VIDEO_TEXTURE_SUPPORTED) && defined(XCOMPONENT_SUPPORTED)
+#ifdef RENDER_EXTRACT_SUPPORTED
                 RegisterRenderContextCallBack();
 #endif
             }
@@ -194,16 +195,32 @@ void XComponentPattern::Initialize(int32_t instanceId)
 void XComponentPattern::InitializeRenderContext()
 {
     renderContextForSurface_ = RenderContext::Create();
-    static RenderContext::ContextParam param = { RenderContext::ContextType::HARDWARE_SURFACE, id_ + "Surface" };
-#if defined(VIDEO_TEXTURE_SUPPORTED) && defined(XCOMPONENT_SUPPORTED)
-    renderContextForSurface_->InitContext(false, param, SystemProperties::GetExtSurfaceEnabled());
+#ifdef RENDER_EXTRACT_SUPPORTED
+    auto contextType = type_ == XComponentType::TEXTURE ?
+        RenderContext::ContextType::HARDWARE_TEXTURE : RenderContext::ContextType::HARDWARE_SURFACE;
+    static RenderContext::ContextParam param = { contextType, id_ + "Surface" };
 #else
-    renderContextForSurface_->InitContext(false, param);
+    static RenderContext::ContextParam param = { RenderContext::ContextType::HARDWARE_SURFACE, id_ + "Surface" };
 #endif
+
+    renderContextForSurface_->InitContext(false, param);
+
     renderContextForSurface_->UpdateBackgroundColor(Color::BLACK);
 }
 
-#if defined(VIDEO_TEXTURE_SUPPORTED) && defined(XCOMPONENT_SUPPORTED)
+#ifdef RENDER_EXTRACT_SUPPORTED
+RenderSurface::RenderSurfaceType XComponentPattern::CovertToRenderSurfaceType(const XComponentType& hostType)
+{
+    switch (hostType) {
+        case XComponentType::SURFACE:
+            return RenderSurface::RenderSurfaceType::SURFACE;
+        case XComponentType::TEXTURE:
+            return RenderSurface::RenderSurfaceType::TEXTURE;
+        default:
+            return RenderSurface::RenderSurfaceType::UNKNOWN;
+    }
+}
+
 void XComponentPattern::RegisterRenderContextCallBack()
 {
     CHECK_NULL_VOID(renderContextForSurface_);
@@ -267,7 +284,7 @@ void XComponentPattern::OnModifyDone()
 
 void XComponentPattern::OnAreaChangedInner()
 {
-#if !(defined(VIDEO_TEXTURE_SUPPORTED) && defined(XCOMPONENT_SUPPORTED))
+#ifndef RENDER_EXTRACT_SUPPORTED
     if (SystemProperties::GetExtSurfaceEnabled()) {
         auto host = GetHost();
         CHECK_NULL_VOID(host);
@@ -341,7 +358,7 @@ void XComponentPattern::OnDetachFromFrameNode(FrameNode* frameNode)
         CHECK_NULL_VOID(eventHub);
         eventHub->FireDestroyEvent();
         eventHub->FireDetachEvent(id_);
-#if defined(VIDEO_TEXTURE_SUPPORTED) && defined(XCOMPONENT_SUPPORTED)
+#ifdef RENDER_EXTRACT_SUPPORTED
         if (renderContextForSurface_) {
             renderContextForSurface_->RemoveSurfaceChangedCallBack();
         }
@@ -390,6 +407,10 @@ bool XComponentPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& di
         return false;
     }
 
+    if (IsSupportImageAnalyzerFeature()) {
+        UpdateAnalyzerUIConfig(dirty->GetGeometryNode());
+    }
+
     if (!hasXComponentInit_) {
         initSize_ = drawSize_;
         globalPosition_ = geometryNode->GetContentOffset() + geometryNode->GetFrameOffset();
@@ -410,7 +431,7 @@ bool XComponentPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& di
         }
     }
     localPosition_ = geometryNode->GetContentOffset();
-#if !(defined(VIDEO_TEXTURE_SUPPORTED) && defined(XCOMPONENT_SUPPORTED))
+#ifndef RENDER_EXTRACT_SUPPORTED
     if (SystemProperties::GetExtSurfaceEnabled()) {
         auto host = GetHost();
         CHECK_NULL_RETURN(host, false);
@@ -456,7 +477,7 @@ void XComponentPattern::NativeXComponentChange(float width, float height)
     CHECK_NULL_VOID(callback);
     CHECK_NULL_VOID(callback->OnSurfaceChanged);
     callback->OnSurfaceChanged(nativeXComponent_.get(), surface);
-#if defined(VIDEO_TEXTURE_SUPPORTED) && defined(XCOMPONENT_SUPPORTED)
+#ifdef RENDER_EXTRACT_SUPPORTED
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
@@ -521,7 +542,7 @@ void XComponentPattern::XComponentSizeInit()
     auto context = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(context);
     InitNativeWindow(initSize_.Width(), initSize_.Height());
-#if defined(VIDEO_TEXTURE_SUPPORTED) && defined(XCOMPONENT_SUPPORTED)
+#ifdef RENDER_EXTRACT_SUPPORTED
     if (xcomponentController_ && renderSurface_) {
         xcomponentController_->SetSurfaceId(renderSurface_->GetUniqueId());
     }
@@ -599,7 +620,7 @@ void XComponentPattern::InitEvent()
 
 void XComponentPattern::InitFocusEvent(const RefPtr<FocusHub>& focusHub)
 {
-#if defined(VIDEO_TEXTURE_SUPPORTED) && defined(XCOMPONENT_SUPPORTED)
+#ifdef RENDER_EXTRACT_SUPPORTED
     focusHub->SetFocusable(true);
 #endif
 
@@ -733,17 +754,17 @@ void XComponentPattern::HandleTouchEvent(const TouchEventInfo& info)
     if (touchInfoList.empty()) {
         return;
     }
-    const auto& locationInfo = touchInfoList.front();
-    const auto& screenOffset = locationInfo.GetGlobalLocation();
-    const auto& localOffset = locationInfo.GetLocalLocation();
-    touchEventPoint_.id = locationInfo.GetFingerId();
+    const auto& touchInfo = touchInfoList.front();
+    const auto& screenOffset = touchInfo.GetGlobalLocation();
+    const auto& localOffset = touchInfo.GetLocalLocation();
+    touchEventPoint_.id = touchInfo.GetFingerId();
     touchEventPoint_.screenX = static_cast<float>(screenOffset.GetX());
     touchEventPoint_.screenY = static_cast<float>(screenOffset.GetY());
     touchEventPoint_.x = static_cast<float>(localOffset.GetX());
     touchEventPoint_.y = static_cast<float>(localOffset.GetY());
-    touchEventPoint_.size = locationInfo.GetSize();
-    touchEventPoint_.force = locationInfo.GetForce();
-    touchEventPoint_.deviceId = locationInfo.GetTouchDeviceId();
+    touchEventPoint_.size = touchInfo.GetSize();
+    touchEventPoint_.force = touchInfo.GetForce();
+    touchEventPoint_.deviceId = touchInfo.GetTouchDeviceId();
     const auto timeStamp = info.GetTimeStamp().time_since_epoch().count();
     touchEventPoint_.timeStamp = timeStamp;
     auto touchType = touchInfoList.front().GetTouchType();
@@ -766,10 +787,12 @@ void XComponentPattern::HandleTouchEvent(const TouchEventInfo& info)
 
     if (nativeXComponent_ && nativeXComponentImpl_) {
         nativeXComponentImpl_->SetHistoricalPoint(SetHistoryPoint(info.GetHistory()));
+        nativeXComponentImpl_->SetCurrentSourceType(
+            { touchInfo.GetFingerId(), ConvertNativeXComponentEventSourceType(info.GetSourceDevice()) });
     }
     NativeXComponentDispatchTouchEvent(touchEventPoint_, nativeXComponentTouchPoints_);
 
-#if defined(VIDEO_TEXTURE_SUPPORTED) && defined(XCOMPONENT_SUPPORTED)
+#ifdef RENDER_EXTRACT_SUPPORTED
     if (touchType == TouchType::DOWN) {
         RequestFocus();
     }
@@ -1254,5 +1277,101 @@ void XComponentPattern::OnWindowShow()
     }
     NativeSurfaceShow();
     hasReleasedSurface_ = false;
+}
+
+void XComponentPattern::EnableAnalyzer(bool enable)
+{
+    isEnableAnalyzer_ = enable;
+    if (!isEnableAnalyzer_) {
+        DestroyAnalyzerOverlay();
+        return;
+    }
+
+    if (imageAnalyzerManager_) {
+        return;
+    }
+
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    imageAnalyzerManager_ = std::make_shared<ImageAnalyzerManager>(host, ImageAnalyzerHolder::CANVAS);
+    CHECK_NULL_VOID(imageAnalyzerManager_);
+}
+
+void XComponentPattern::StartImageAnalyzer(void* config, onAnalyzedCallback& onAnalyzed)
+{
+    if (!IsSupportImageAnalyzerFeature()) {
+        CHECK_NULL_VOID(onAnalyzed);
+        (onAnalyzed.value())(ImageAnalyzerState::UNSUPPORTED);
+        return;
+    }
+
+    CHECK_NULL_VOID(imageAnalyzerManager_);
+    imageAnalyzerManager_->SetImageAnalyzerConfig(config);
+    imageAnalyzerManager_->SetImageAnalyzerCallback(onAnalyzed);
+
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto context = host->GetContext();
+    CHECK_NULL_VOID(context);
+    auto uiTaskExecutor = SingleTaskExecutor::Make(context->GetTaskExecutor(), TaskExecutor::TaskType::UI);
+    uiTaskExecutor.PostTask([weak = WeakClaim(this)] {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        pattern->CreateAnalyzerOverlay();
+    });
+}
+
+void XComponentPattern::StopImageAnalyzer()
+{
+    DestroyAnalyzerOverlay();
+}
+
+bool XComponentPattern::IsSupportImageAnalyzerFeature()
+{
+    return isEnableAnalyzer_ && imageAnalyzerManager_ && imageAnalyzerManager_->IsSupportImageAnalyzerFeature();
+}
+
+void XComponentPattern::CreateAnalyzerOverlay()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto context = host->GetRenderContext();
+    CHECK_NULL_VOID(context);
+    auto pixelMap = context->GetThumbnailPixelMap();
+    CHECK_NULL_VOID(pixelMap);
+    if (IsSupportImageAnalyzerFeature()) {
+        CHECK_NULL_VOID(imageAnalyzerManager_);
+        imageAnalyzerManager_->CreateAnalyzerOverlay(pixelMap);
+    }
+}
+
+void XComponentPattern::UpdateAnalyzerOverlay()
+{
+    auto context = GetHost()->GetRenderContext();
+    CHECK_NULL_VOID(context);
+    auto pixelMap = context->GetThumbnailPixelMap();
+    CHECK_NULL_VOID(pixelMap);
+    CHECK_NULL_VOID(imageAnalyzerManager_);
+    imageAnalyzerManager_->UpdateAnalyzerOverlay(pixelMap);
+}
+
+void XComponentPattern::UpdateAnalyzerUIConfig(const RefPtr<NG::GeometryNode>& geometryNode)
+{
+    if (IsSupportImageAnalyzerFeature()) {
+        CHECK_NULL_VOID(imageAnalyzerManager_);
+        imageAnalyzerManager_->UpdateAnalyzerUIConfig(geometryNode);
+    }
+}
+
+void XComponentPattern::DestroyAnalyzerOverlay()
+{
+    CHECK_NULL_VOID(imageAnalyzerManager_);
+    imageAnalyzerManager_->DestroyAnalyzerOverlay();
+}
+
+void XComponentPattern::ReleaseImageAnalyzer()
+{
+    CHECK_NULL_VOID(imageAnalyzerManager_);
+    imageAnalyzerManager_->ReleaseImageAnalyzer();
 }
 } // namespace OHOS::Ace::NG

@@ -162,4 +162,22 @@ HWTEST_F(ObserverTestNg, ObserverTestNg005, TestSize.Level1)
     UIObserverHandler::GetInstance().NotifyDensityChange(targetDensity);
     EXPECT_EQ(testDensity, targetDensity);
 }
+
+/**
+ * @tc.name: ObserverTestNg006
+ * @tc.desc: Test the operation of Observer
+ * @tc.type: FUNC
+ */
+HWTEST_F(ObserverTestNg, ObserverTestNg006, TestSize.Level1)
+{
+    bool hasNotified = false;
+    std::optional<NavDestinationInfo> from;
+    std::optional<NavDestinationInfo> to;
+    NavigationOperation operation = NavigationOperation::PUSH;
+    UIObserverHandler::NavDestinationSwitchHandleFunc handleFunc =
+        [&hasNotified](const AbilityContextInfo&, NavDestinationSwitchInfo&) -> void { hasNotified = true; };
+    UIObserverHandler::GetInstance().navDestinationSwitchHandleFunc_ = handleFunc;
+    UIObserverHandler::GetInstance().NotifyNavDestinationSwitch(std::move(from), std::move(to), operation);
+    EXPECT_TRUE(hasNotified);
+}
 }

@@ -94,8 +94,8 @@ Dimension ToastPattern::GetOffsetX(const RefPtr<LayoutWrapper>& layoutWrapper)
     if (alignment == Alignment::TOP_LEFT || alignment == Alignment::CENTER_LEFT ||
         alignment == Alignment::BOTTOM_LEFT) {
         offsetX = Dimension(0.0);
-    } else if (alignment == Alignment::TOP_LEFT || alignment == Alignment::CENTER_LEFT ||
-               alignment == Alignment::BOTTOM_LEFT) {
+    } else if (alignment == Alignment::TOP_RIGHT || alignment == Alignment::CENTER_RIGHT ||
+               alignment == Alignment::BOTTOM_RIGHT) {
         offsetX = Dimension(rootWidth - textWidth);
     } else {
         offsetX = Dimension((rootWidth - textWidth) / 2.0f);
@@ -174,7 +174,7 @@ void ToastPattern::BeforeCreateLayoutWrapper()
     auto toastTheme = context->GetTheme<ToastTheme>();
     CHECK_NULL_VOID(toastTheme);
     auto textHeight = GetTextHeight(textNode);
-    if (textHeight > toastTheme->GetMinHeight().ConvertToPx()) {
+    if (GreatNotEqual(textHeight, toastTheme->GetMinHeight().ConvertToPx())) {
         textNode->GetLayoutProperty<TextLayoutProperty>()->UpdateTextAlign(TextAlign::START);
     }
 }

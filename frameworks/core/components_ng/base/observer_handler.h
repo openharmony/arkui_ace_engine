@@ -32,6 +32,9 @@ namespace OHOS::Ace::NG {
 enum class NavDestinationState {
     ON_SHOWN = 0,
     ON_HIDDEN = 1,
+    ON_APPEAR = 2,
+    ON_DISAPPEAR = 3,
+    ON_BACKPRESS = 100,
 };
 
 struct NavDestinationInfo {
@@ -112,6 +115,10 @@ public:
     void NotifyScrollEventStateChange(const WeakPtr<AceType>& weakPattern, ScrollEventType scrollEvent);
     void NotifyRouterPageStateChange(const RefPtr<PageInfo>& pageInfo, RouterPageState state);
     void NotifyDensityChange(double density);
+    void NotifyWillClick(const GestureEvent& gestureEventInfo,
+        const ClickInfo& clickInfo, const RefPtr<FrameNode>& frameNode);
+    void NotifyDidClick(const GestureEvent& gestureEventInfo,
+        const ClickInfo& clickInfo, const RefPtr<FrameNode>& frameNode);
     std::shared_ptr<NavDestinationInfo> GetNavigationState(const RefPtr<AceType>& node);
     std::shared_ptr<ScrollEventInfo> GetScrollEventState(const RefPtr<AceType>& node);
     std::shared_ptr<RouterPageInfoNG> GetRouterPageState(const RefPtr<AceType>& node);
@@ -123,8 +130,11 @@ public:
         AbilityContextInfo&, napi_value, int32_t, const std::string&, const std::string&, RouterPageState);
     using DrawCommandSendHandleFunc = void (*)();
     using LayoutDoneHandleFunc = void (*)();
-    using NavDestinationSwitchHandleFunc = void (*)(
-        const AbilityContextInfo&, NavDestinationSwitchInfo&);
+    using NavDestinationSwitchHandleFunc = std::function<void(const AbilityContextInfo&, NavDestinationSwitchInfo&)>;
+    using WillClickHandleFunc = void (*)(
+        AbilityContextInfo&, const GestureEvent&, const ClickInfo&, const RefPtr<FrameNode>&);
+    using DidClickHandleFunc = void (*)(
+        AbilityContextInfo&, const GestureEvent&, const ClickInfo&, const RefPtr<FrameNode>&);
     void SetHandleNavigationChangeFunc(NavigationHandleFunc func);
     void SetHandleScrollEventChangeFunc(ScrollEventHandleFunc func);
     void SetHandleRouterPageChangeFunc(RouterPageHandleFunc func);
@@ -135,6 +145,8 @@ public:
     void SetDrawCommandSendHandleFunc(LayoutDoneHandleFunc func);
     void HandleDrawCommandSendCallBack();
     void SetHandleNavDestinationSwitchFunc(NavDestinationSwitchHandleFunc func);
+    void SetWillClickFunc(WillClickHandleFunc func);
+    void SetDidClickFunc(DidClickHandleFunc func);
 private:
     NavigationHandleFunc navigationHandleFunc_ = nullptr;
     ScrollEventHandleFunc scrollEventHandleFunc_ = nullptr;
@@ -142,7 +154,9 @@ private:
     LayoutDoneHandleFunc layoutDoneHandleFunc_ = nullptr;
     DrawCommandSendHandleFunc drawCommandSendHandleFunc_ = nullptr;
     DensityHandleFunc densityHandleFunc_;
-    NavDestinationSwitchHandleFunc navDestinationSwitchHandleFunc_ = nullptr;
+    NavDestinationSwitchHandleFunc navDestinationSwitchHandleFunc_;
+    WillClickHandleFunc willClickHandleFunc_ = nullptr;
+    DidClickHandleFunc didClickHandleFunc_ = nullptr;
 
     napi_value GetUIContextValue();
 };

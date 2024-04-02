@@ -42,6 +42,9 @@ std::optional<SizeF> TextAreaLayoutAlgorithm::MeasureContent(
     ConstructTextStyles(frameNode, textStyle, textContent_, showPlaceHolder_);
 
     auto isInlineStyle = pattern->IsNormalInlineState();
+    if (!isInlineStyle && textFieldLayoutProperty->HasNormalMaxViewLines()) {
+        textStyle.SetMaxLines(textFieldLayoutProperty->GetNormalMaxViewLines().value());
+    }
 
     direction_ = textFieldLayoutProperty->GetLayoutDirection();
 
@@ -165,7 +168,8 @@ void TextAreaLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
         textRect_.SetOffset(OffsetF(0.0f, textRectOffSet.GetY()) + offsetBase);
         content->SetOffset(OffsetF(0.0f, textRectOffSet.GetY()) + offsetBase);
     } else {
-        textRect_.SetOffset(OffsetF(offsetBase.GetX(), pattern->GetTextRect().GetOffset().GetY()));
+        textRect_.SetOffset(
+            showPlaceHolder_ ? offsetBase : OffsetF(offsetBase.GetX(), pattern->GetTextRect().GetOffset().GetY()));
         content->SetOffset(offsetBase);
     }
     // CounterNode Layout.

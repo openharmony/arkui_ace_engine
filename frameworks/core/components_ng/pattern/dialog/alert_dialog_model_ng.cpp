@@ -55,6 +55,7 @@ void AlertDialogModelNG::SetShowDialog(const DialogProperties& arg)
             if (container->IsSubContainer()) {
                 currentId = SubwindowManager::GetInstance()->GetParentContainerId(currentId);
                 container = AceEngine::Get().GetContainer(currentId);
+                CHECK_NULL_VOID(container);
             }
             ContainerScope scope(currentId);
             RefPtr<NG::FrameNode> dialog;
@@ -72,6 +73,7 @@ void AlertDialogModelNG::SetShowDialog(const DialogProperties& arg)
                     Maskarg.isMask = true;
                     Maskarg.autoCancel = arg.autoCancel;
                     Maskarg.onWillDismiss = arg.onWillDismiss;
+                    Maskarg.shadow = arg.shadow;
                     auto mask = overlayManager->ShowDialog(Maskarg, nullptr, false);
                     overlayManager->SetMaskNodeId(dialog->GetId(), mask->GetId());
                     CHECK_NULL_VOID(mask);

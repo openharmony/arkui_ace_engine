@@ -21,24 +21,37 @@
 #include "node/gesture_impl.h"
 #include "node/node_model.h"
 #include "securec.h"
-
+#include "node_extened.h"
 #include "base/log/log_wrapper.h"
 #include "core/interfaces/arkoala/arkoala_api.h"
 
 namespace OHOS::Ace::NodeModel {
 
-ArkUI_Int32 ConvertOriginEventType(ArkUI_NodeEventType type)
+ArkUI_Int32 ConvertOriginEventType(ArkUI_NodeEventType type, int32_t nodeType)
 {
+    auto arkUINodeType = static_cast<ArkUI_NodeType>(nodeType);
     switch (type) {
         case NODE_TEXT_INPUT_ON_CHANGE:
             return ON_TEXT_INPUT_CHANGE;
         case NODE_SCROLL_EVENT_ON_SCROLL:
+            if (arkUINodeType == ARKUI_NODE_LIST) {
+                return ON_LIST_SCROLL;
+            }
             return ON_SCROLL;
         case NODE_SCROLL_EVENT_ON_SCROLL_FRAME_BEGIN:
+            if (arkUINodeType == ARKUI_NODE_LIST) {
+                return ON_LIST_SCROLL_FRAME_BEGIN;
+            }
             return ON_SCROLL_FRAME_BEGIN;
         case NODE_SCROLL_EVENT_ON_SCROLL_START:
+            if (arkUINodeType == ARKUI_NODE_LIST) {
+                return ON_LIST_SCROLL_START;
+            }
             return ON_SCROLL_START;
         case NODE_SCROLL_EVENT_ON_SCROLL_STOP:
+            if (arkUINodeType == ARKUI_NODE_LIST) {
+                return ON_LIST_SCROLL_STOP;
+            }
             return ON_SCROLL_STOP;
         case NODE_EVENT_ON_APPEAR:
             return ON_APPEAR;
@@ -98,6 +111,8 @@ ArkUI_Int32 ConvertOriginEventType(ArkUI_NodeEventType type)
             return ON_SWIPER_ANIMATION_END;
         case NODE_SWIPER_EVENT_ON_GESTURE_SWIPE:
             return ON_SWIPER_GESTURE_SWIPE;
+        case NODE_ON_WILL_SCROLL:
+            return ON_WILL_SCROLL;
         default:
             return -1;
     }
@@ -174,6 +189,16 @@ ArkUI_Int32 ConvertToNodeEventType(ArkUIEventSubKind type)
             return NODE_SWIPER_EVENT_ON_ANIMATION_END;
         case ON_SWIPER_GESTURE_SWIPE:
             return NODE_SWIPER_EVENT_ON_GESTURE_SWIPE;
+        case ON_LIST_SCROLL:
+            return NODE_SCROLL_EVENT_ON_SCROLL;
+        case ON_LIST_SCROLL_FRAME_BEGIN:
+            return NODE_SCROLL_EVENT_ON_SCROLL_FRAME_BEGIN;
+        case ON_LIST_SCROLL_START:
+            return NODE_SCROLL_EVENT_ON_SCROLL_START;
+        case ON_LIST_SCROLL_STOP:
+            return NODE_SCROLL_EVENT_ON_SCROLL_STOP;
+        case ON_WILL_SCROLL:
+            return NODE_ON_WILL_SCROLL;
         default:
             return -1;
     }
@@ -211,7 +236,7 @@ bool ConvertEvent(ArkUINodeEvent* origin, ArkUI_NodeEvent* event)
             ArkUIEventSubKind subKind = static_cast<ArkUIEventSubKind>(origin->componentAsyncEvent.subKind);
             event->kind = ConvertToNodeEventType(subKind);
             if (memcpy_sp(event->componentEvent.data, MAX_COMPONENT_EVENT_ARG_NUM * sizeof(ArkUI_NumberValue),
-                origin->componentAsyncEvent.data, MAX_COMPONENT_EVENT_ARG_NUM * sizeof(ArkUI_NumberValue)) != 0) {
+                    origin->componentAsyncEvent.data, MAX_COMPONENT_EVENT_ARG_NUM * sizeof(ArkUI_NumberValue)) != 0) {
                 TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "fail to convert origin event data");
                 return false;
             }
@@ -226,7 +251,7 @@ bool ConvertEvent(ArkUINodeEvent* origin, ArkUI_NodeEvent* event)
         case TOUCH_EVENT:
             event->kind = ConvertToNodeEventType(ON_TOUCH);
             if (memcpy_sp(&(event->touchEvent), sizeof(ArkUI_NodeTouchEvent), &(origin->touchEvent),
-                sizeof(ArkUITouchEvent)) != 0) {
+                    sizeof(ArkUITouchEvent)) != 0) {
                 TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "fail to convert origin event data");
                 return false;
             }
@@ -264,7 +289,7 @@ bool ConvertEventResult(ArkUI_NodeEvent* event, ArkUINodeEvent* origin)
     }
     if (!IsStringEvent(event->kind)) {
         if (memcpy_sp(origin->componentAsyncEvent.data, MAX_COMPONENT_EVENT_ARG_NUM * sizeof(ArkUI_NumberValue),
-            event->componentEvent.data, MAX_COMPONENT_EVENT_ARG_NUM * sizeof(ArkUI_NumberValue)) != 0) {
+                event->componentEvent.data, MAX_COMPONENT_EVENT_ARG_NUM * sizeof(ArkUI_NumberValue)) != 0) {
             TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "fail to convert event result data");
             return false;
         }

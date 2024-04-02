@@ -709,21 +709,25 @@ int32_t DatePickerModelNG::getLunar(FrameNode* frameNode)
 LunarDate DatePickerModelNG::getStartDate(FrameNode* frameNode)
 {
     LunarDate lunarDate;
-    auto theme = PipelineBase::GetCurrentContext()->GetTheme<PickerTheme>();
-    CHECK_NULL_RETURN(theme, lunarDate);
     auto datePickerPattern = frameNode->GetPattern<DatePickerPattern>();
     CHECK_NULL_RETURN(datePickerPattern, lunarDate);
-    return datePickerPattern->GetStartDateLunar();
+    auto dateSolar = datePickerPattern->GetStartDateSolar();
+    lunarDate.year = dateSolar.GetYear();
+    lunarDate.month = dateSolar.GetMonth();
+    lunarDate.day = dateSolar.GetDay();
+    return lunarDate;
 }
 
 LunarDate DatePickerModelNG::getEndDate(FrameNode* frameNode)
 {
     LunarDate lunarDate;
-    auto theme = PipelineBase::GetCurrentContext()->GetTheme<PickerTheme>();
-    CHECK_NULL_RETURN(theme, lunarDate);
     auto datePickerPattern = frameNode->GetPattern<DatePickerPattern>();
     CHECK_NULL_RETURN(datePickerPattern, lunarDate);
-    return datePickerPattern->GetEndDateLunar();
+    auto dateSolar = datePickerPattern->GetEndDateSolar();
+    lunarDate.year = dateSolar.GetYear();
+    lunarDate.month = dateSolar.GetMonth();
+    lunarDate.day = dateSolar.GetDay();
+    return lunarDate;
 }
 
 LunarDate DatePickerModelNG::getSelectedDate(FrameNode* frameNode)

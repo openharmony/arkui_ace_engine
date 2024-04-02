@@ -33,6 +33,7 @@ class ObservedPropertyPU<T> extends ObservedPropertyAbstractPU<T>
     super(owningView, propertyName);
    
     this.setValueInternal(localInitValue);
+    this.setDecoratorInfo("@State");
   }
 
   aboutToBeDeleted(unsubscribeMe?: IPropertySubscriber) {
@@ -40,12 +41,6 @@ class ObservedPropertyPU<T> extends ObservedPropertyAbstractPU<T>
     this.removeSubscriber(unsubscribeMe);
     super.aboutToBeDeleted();
   }
-
-  
-  public debugInfoDecorator() : string {
-    return `@State/@Provide (class ObservedPropertyPU)`;
-  }
-
 
   /**
    * Called by a SynchedPropertyObjectTwoWayPU (@Link, @Consume) that uses this as sync peer when it has changed

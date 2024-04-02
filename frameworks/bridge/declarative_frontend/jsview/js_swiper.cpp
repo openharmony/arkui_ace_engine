@@ -1171,10 +1171,10 @@ void JSSwiper::SetOnContentDidScroll(const JSCallbackInfo& info)
     auto contentDidScrollHandler = AceType::MakeRefPtr<JsSwiperFunction>(JSRef<JSFunc>::Cast(info[0]));
     auto onContentDidScroll = [execCtx = info.GetExecutionContext(),
                                 func = std::move(contentDidScrollHandler)](
-                                int32_t selectedIndex, int32_t index, float position, float mainLength) {
+                                int32_t selectedIndex, int32_t index, float position, float mainAxisLength) {
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
         ACE_SCORING_EVENT("Swiper.onContentDidScroll");
-        func->Execute(selectedIndex, index, position, mainLength);
+        func->Execute(selectedIndex, index, position, mainAxisLength);
     };
     SwiperModel::GetInstance()->SetOnContentDidScroll(std::move(onContentDidScroll));
 }

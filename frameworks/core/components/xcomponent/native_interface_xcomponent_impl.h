@@ -374,6 +374,20 @@ public:
         return needSoftKeyboard_;
     }
 
+    void SetCurrentSourceType(std::pair<int32_t, OH_NativeXComponent_EventSourceType>&& curSourceType)
+    {
+        curSourceType_ = std::move(curSourceType);
+    }
+
+    bool GetSourceType(int32_t pointId, OH_NativeXComponent_EventSourceType* sourceType) const
+    {
+        if (curSourceType_.first != pointId) {
+            return false;
+        }
+        (*sourceType) = curSourceType_.second;
+        return true;
+    }
+
 private:
     std::string xcomponentId_;
     void* window_ = nullptr;
@@ -401,6 +415,8 @@ private:
     OnTouchIntercept_Callback onTouchInterceptCallback_ = nullptr;
     void* container_;
     bool needSoftKeyboard_ = false;
+    std::pair<int32_t, OH_NativeXComponent_EventSourceType> curSourceType_ { -1,
+        OH_NativeXComponent_EventSourceType::OH_NATIVEXCOMPONENT_SOURCE_TYPE_UNKNOWN };
 };
 } // namespace OHOS::Ace
 
@@ -436,6 +452,7 @@ struct OH_NativeXComponent {
     int32_t SetNeedSoftKeyboard(bool needSoftKeyboard);
     int32_t RegisterOnTouchInterceptCallback(
         HitTestMode (*callback)(OH_NativeXComponent* component, ArkUI_UIInputEvent* event));
+    int32_t GetSourceType(int32_t pointId, OH_NativeXComponent_EventSourceType* sourceType);
 
 private:
     OHOS::Ace::NativeXComponentImpl* xcomponentImpl_ = nullptr;

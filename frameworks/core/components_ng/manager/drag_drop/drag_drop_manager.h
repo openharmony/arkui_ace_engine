@@ -27,6 +27,9 @@
 #include "core/components_ng/manager/drag_drop/drag_drop_proxy.h"
 #include "core/gestures/velocity_tracker.h"
 
+namespace OHOS::Ace {
+class UnifiedData;
+}
 namespace OHOS::Ace::NG {
 enum class DragDropMgrState : int32_t {
     IDLE,
@@ -78,9 +81,16 @@ public:
     void OnDragStart(const Point& point, const RefPtr<FrameNode>& frameNode);
     void OnDragMove(const PointerEvent& pointerEvent, const std::string& extraInfo);
     void OnDragEnd(const PointerEvent& pointerEvent, const std::string& extraInfo);
-    void OnDragDrop(const RefPtr<FrameNode>& dragFrameNode, const Point& point);
+    void DoDropAction(const RefPtr<FrameNode>& dragFrameNode, const Point& point,
+        const RefPtr<UnifiedData>& unifiedData, const std::string& udKey);
+    void RequestDragSummaryInfoAndPrivilege();
+    RefPtr<UnifiedData> RequestUDMFDataWithUDKey(const std::string& udKey);
+    void TryGetDataBackGround(
+        const RefPtr<FrameNode>& dragFrameNode, const Point& point, const std::string& udKey, int32_t count = 0);
+    void OnDragDrop(RefPtr<OHOS::Ace::DragEvent>& event, const RefPtr<FrameNode>& dragFrameNode, const Point& point);
     void ResetDragDropStatus(const Point& point, const DragDropRet& dragDropRet, int32_t windowId);
-    bool CheckRemoteData(const RefPtr<FrameNode>& dragFrameNode, const PointerEvent& pointerEvent);
+    bool CheckRemoteData(
+        const RefPtr<FrameNode>& dragFrameNode, const PointerEvent& pointerEvent, const std::string& udKey);
     void OnDragMoveOut(const PointerEvent& pointerEvent);
     void OnTextDragEnd(float globalX, float globalY, const std::string& extraInfo);
     void onDragCancel();
@@ -262,6 +272,7 @@ public:
         double maxWidth { 0.0 };
         double scale { -1.0 };
         RefPtr<FrameNode> imageNode { nullptr };
+        RefPtr<FrameNode> textNode { nullptr };
     } DragPreviewInfo;
     bool IsNeedScaleDragPreview();
     void DoDragMoveAnimate(const PointerEvent& pointerEvent);
@@ -303,6 +314,41 @@ public:
         return isPullMoveReceivedForCurrentDrag_;
     }
 
+    static void UpdateGatherNodeAttr(const RefPtr<OverlayManager>& overlayManager,
+        OffsetF gatherNodeCenter, float scale);
+    double CalcGatherNodeMaxDistanceWithPoint(const RefPtr<OverlayManager>& overlayManager, int32_t x, int32_t y);
+
+    void SetPixelMapOffset(OffsetF pixelMapOffset) {
+        pixelMapOffset_ = pixelMapOffset;
+    }
+    bool IsNeedDisplayInSubwindow();
+    void ClearGatherPixelMap()
+    {
+        gatherPixelMaps_.clear();
+    }
+
+    void GetGatherPixelMap(const RefPtr<PixelMap>& pixelMap);
+    void PushGatherPixelMap(DragDataCore& dragData, float scale);
+    bool HasGatherNode()
+    {
+        return hasGatherNode_;
+    }
+
+    void SetHasGatherNode(bool hasGatherNode)
+    {
+        hasGatherNode_ = hasGatherNode;
+    }
+
+    void SetIsShowBadgeAnimation(bool isShowBadgeAnimation)
+    {
+        isShowBadgeAnimation_ = isShowBadgeAnimation;
+    }
+
+    bool IsShowBadgeAnimation()
+    {
+        return isShowBadgeAnimation_;
+    }
+
 private:
     double CalcDragPreviewDistanceWithPoint(
         const OHOS::Ace::Dimension& preserverHeight, int32_t x, int32_t y, const DragPreviewInfo& info);
@@ -323,12 +369,14 @@ private:
     void ClearVelocityInfo();
     void UpdateVelocityTrackerPoint(const Point& point, bool isEnd = false);
     void PrintDragFrameNode(const Point& point, const RefPtr<FrameNode>& dragFrameNode);
+    void PrintGridDragFrameNode(const float globalX, const float globalY, const RefPtr<FrameNode>& dragFrameNode);
     void FireOnDragEventWithDragType(const RefPtr<EventHub>& eventHub, DragEventType type,
         RefPtr<OHOS::Ace::DragEvent>& event, const std::string& extraParams);
     void NotifyDragFrameNode(
         const Point& point, const DragEventType& dragEventType, const DragRet& dragRet = DragRet::DRAG_DEFAULT);
     void TransDragWindowToDragFwk(int32_t windowContainerId);
-
+    void ResetDragDrop(int32_t windowId, const Point& point);
+    
     std::map<int32_t, WeakPtr<FrameNode>> dragFrameNodes_;
     std::map<int32_t, WeakPtr<FrameNode>> gridDragFrameNodes_;
     std::map<int32_t, WeakPtr<FrameNode>> listDragFrameNodes_;
@@ -369,6 +417,10 @@ private:
     Rect previewRect_ { -1, -1, -1, -1 };
     DragPreviewInfo info_;
     bool isDragFwkShow_ { false };
+    OffsetF pixelMapOffset_ {0.0f, 0.0f};
+    std::vector<RefPtr<PixelMap>> gatherPixelMaps_;
+    bool hasGatherNode_ = false;
+    bool isShowBadgeAnimation_ = true;
 
     ACE_DISALLOW_COPY_AND_MOVE(DragDropManager);
 };

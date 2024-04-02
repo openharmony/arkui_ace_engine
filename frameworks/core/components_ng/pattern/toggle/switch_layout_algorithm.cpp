@@ -16,6 +16,7 @@
 #include "core/components_ng/pattern/toggle/switch_layout_algorithm.h"
 
 #include "base/geometry/ng/size_t.h"
+#include "core/common/container.h"
 #include "core/components/checkable/checkable_theme.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/pipeline/base/constants.h"
@@ -56,17 +57,7 @@ std::optional<SizeF> SwitchLayoutAlgorithm::MeasureContent(
     }
     float width = 0.0f;
     float height = 0.0f;
-    auto ratio = switchTheme->GetRatio();
-    if ((frameWidth / frameHeight) < ratio) {
-        width = frameWidth;
-        height = width / ratio;
-    } else if ((frameWidth / frameHeight) > ratio) {
-        height = frameHeight;
-        width = height * ratio;
-    } else {
-        height = frameHeight;
-        width = frameWidth;
-    }
+    CalcHeightAndWidth(height, width, frameHeight, frameWidth);
 
     width_ = width;
     height_ = height;
@@ -74,4 +65,40 @@ std::optional<SizeF> SwitchLayoutAlgorithm::MeasureContent(
     return SizeF(width, height);
 }
 
+void SwitchLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
+{
+    // switch does not have child nodes. If a child is added to a toggle, then hide the child.
+    for (const auto& child : layoutWrapper->GetAllChildrenWithBuild()) {
+        child->GetGeometryNode()->SetFrameSize(SizeF());
+    }
+    PerformMeasureSelf(layoutWrapper);
+}
+
+void SwitchLayoutAlgorithm::CalcHeightAndWidth(float& height, float& width, float frameHeight, float frameWidth)
+{
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto switchTheme = pipeline->GetTheme<SwitchTheme>();
+    CHECK_NULL_VOID(switchTheme);
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
+        width = frameWidth;
+        height = frameHeight;
+    } else {
+        auto ratio = switchTheme->GetRatio();
+        if (frameWidth < (frameHeight * ratio)) {
+            width = frameWidth;
+            if (ratio == 0) {
+                height = 0.0f;
+            } else {
+                height = NearZero(ratio) ? 0 : width / ratio;
+            }
+        } else if (frameWidth > (frameHeight * ratio)) {
+            height = frameHeight;
+            width = height * ratio;
+        } else {
+            height = frameHeight;
+            width = frameWidth;
+        }
+    }
+}
 } // namespace OHOS::Ace::NG

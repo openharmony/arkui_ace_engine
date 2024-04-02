@@ -352,10 +352,10 @@ globalThis.__AttachToMainTree__ = function __AttachToMainTree__(nodeId) {
     if (FrameNodeFinalizationRegisterProxy.ElementIdToOwningFrameNode_.has(nodeId)) {
         FrameNodeFinalizationRegisterProxy.FrameNodeInMainTree_.set(nodeId, FrameNodeFinalizationRegisterProxy.ElementIdToOwningFrameNode_.get(nodeId).deref());
     }
-}
+};
 globalThis.__DetachToMainTree__ = function __DetachToMainTree__(nodeId) {
     FrameNodeFinalizationRegisterProxy.FrameNodeInMainTree_.delete(nodeId);
-}
+};
 /*
  * Copyright (c) 2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -370,17 +370,18 @@ globalThis.__DetachToMainTree__ = function __DetachToMainTree__(nodeId) {
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+class __InternalField__ {
+    constructor() {
+        this._value = -1;
+    }
+}
 class NodeController {
     constructor() {
-        this.nodeContainerId_ = -1;
+        this._nodeContainerId = new __InternalField__();
     }
-    aboutToResize(size) { }
-    aboutToAppear() { }
-    aboutToDisappear() { }
-    onTouchEvent(event) { }
     rebuild() {
-        if (this.nodeContainerId_ >= 0) {
-            getUINativeModule().nodeContainer.rebuild(this.nodeContainerId_);
+        if (this._nodeContainerId != undefined && this._nodeContainerId !== null && this._nodeContainerId._value >= 0) {
+            getUINativeModule().nodeContainer.rebuild(this._nodeContainerId._value);
         }
     }
 }
@@ -456,6 +457,7 @@ class FrameNodeModifier extends ArkComponent {
                 return;
             }
             value.applyStage(this.nativePtr);
+            getUINativeModule().frameNode.propertyUpdate(this.nativePtr);
         });
     }
     setNodePtr(nodePtr) {
@@ -577,7 +579,7 @@ class FrameNode {
         if (!flag) {
             throw { message: 'The FrameNode is not modifiable.', code: 100021 };
         }
-        this._childList.set(sibling.nodeId_, sibling);
+        this._childList.set(child.nodeId_, child);
     }
     removeChild(node) {
         this.checkType();
@@ -782,7 +784,7 @@ class RenderNode {
         this.childrenList = [];
         this.parentRenderNode = null;
         this.backgroundColorValue = 0;
-        this.clipToFrameValue = false;
+        this.clipToFrameValue = true;
         this.frameValue = { x: 0, y: 0, width: 0, height: 0 };
         this.opacityValue = 1.0;
         this.pivotValue = { x: 0.5, y: 0.5 };
@@ -804,13 +806,14 @@ class RenderNode {
         this.baseNode_ = new __JSBaseNode__();
         this.baseNode_.draw = this.draw;
         this.nodePtr = this.baseNode_.createRenderNode(this);
+        this.clipToFrame = true;
     }
     set backgroundColor(color) {
         this.backgroundColorValue = this.checkUndefinedOrNullWithDefaultValue(color, 0);
         getUINativeModule().renderNode.setBackgroundColor(this.nodePtr, this.backgroundColorValue);
     }
     set clipToFrame(useClip) {
-        this.clipToFrameValue = this.checkUndefinedOrNullWithDefaultValue(useClip, false);
+        this.clipToFrameValue = this.checkUndefinedOrNullWithDefaultValue(useClip, true);
         getUINativeModule().renderNode.setClipToFrame(this.nodePtr, this.clipToFrameValue);
     }
     set frame(frame) {
@@ -1000,7 +1003,7 @@ class RenderNode {
             return;
         }
         this.childrenList.push(node);
-        node.parentRenderNode = this;
+        node.parentRenderNode = new WeakRef(this);
         getUINativeModule().renderNode.appendChild(this.nodePtr, node.nodePtr);
     }
     insertChildAfter(child, sibling) {
@@ -1011,7 +1014,7 @@ class RenderNode {
         if (indexOfNode !== -1) {
             return;
         }
-        child.parentRenderNode = this;
+        child.parentRenderNode = new WeakRef(this);
         let indexOfSibling = this.childrenList.findIndex(element => element === sibling);
         if (indexOfSibling === -1) {
             sibling === null;
@@ -1058,23 +1061,31 @@ class RenderNode {
         if (this.parentRenderNode === undefined || this.parentRenderNode === null) {
             return null;
         }
-        let siblingList = this.parentRenderNode.childrenList;
+        let parent = this.parentRenderNode.deref();
+        if (parent === undefined || parent === null) {
+            return null;
+        }
+        let siblingList = parent.childrenList;
         const index = siblingList.findIndex(element => element === this);
         if (index === -1) {
             return null;
         }
-        return this.parentRenderNode.getChild(index + 1);
+        return parent.getChild(index + 1);
     }
     getPreviousSibling() {
         if (this.parentRenderNode === undefined || this.parentRenderNode === null) {
             return null;
         }
-        let siblingList = this.parentRenderNode.childrenList;
+        let parent = this.parentRenderNode.deref();
+        if (parent === undefined || parent === null) {
+            return null;
+        }
+        let siblingList = parent.childrenList;
         const index = siblingList.findIndex(element => element === this);
         if (index === -1) {
             return null;
         }
-        return this.parentRenderNode.getChild(index - 1);
+        return parent.getChild(index - 1);
     }
     setNodePtr(nodePtr) {
         this.nodePtr = nodePtr;
@@ -1229,5 +1240,34 @@ class XComponentNode extends FrameNode {
         return false;
     }
 }
+/*
+ * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+/// <reference path="../../state_mgmt/src/lib/common/ifelse_native.d.ts" />
+/// <reference path="../../state_mgmt/src/lib/partial_update/pu_viewstack_processor.d.ts" />
+class ComponentContent {
+    constructor(uiContext, builder, params) {
+        let builderNode = new BuilderNode(uiContext, {});
+        this.builderNode_ = builderNode;
+        this.builderNode_.build(builder, params !== null && params !== void 0 ? params : {});
+    }
+    update(params) {
+        this.builderNode_.update(params);
+    }
+    getFrameNode() {
+        return this.builderNode_.getFrameNode();
+    }
+}
 
-export default { NodeController, BuilderNode, BaseNode, RenderNode, FrameNode, FrameNodeUtils, NodeRenderType, XComponentNode, ShapeMask, edgeColors, edgeWidths, borderStyles, borderRadiuses };
+export default { NodeController, BuilderNode, BaseNode, RenderNode, FrameNode, FrameNodeUtils, NodeRenderType, XComponentNode, ShapeMask, edgeColors, edgeWidths, borderStyles, borderRadiuses, ComponentContent };

@@ -21,14 +21,9 @@ template("napi_configuration_static") {
     defines += invoker.defines
     cflags_cc += invoker.cflags_cc
 
-    include_dirs = [
-      "//commonlibrary/c_utils/base/include",
-      "$ace_root",
-      "$ace_root/frameworks",
-    ]
+    configs = [ "$ace_root/interfaces/napi/kits:ace_napi_config" ]
 
     sources = [ "js_configuration.cpp" ]
-
     deps = []
     external_deps = []
     if (platform != "" && is_arkui_x) {

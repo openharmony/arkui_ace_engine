@@ -401,8 +401,9 @@ bool UIContentImpl::ProcessPointerEventWithCallback(
     return result;
 }
 
-bool UIContentImpl::ProcessKeyEvent(const std::shared_ptr<OHOS::MMI::KeyEvent>& keyEvent)
+bool UIContentImpl::ProcessKeyEvent(const std::shared_ptr<OHOS::MMI::KeyEvent>& keyEvent, bool isPreIme)
 {
+    // previewer never gets preIme-key event because there is no window
     return EventDispatcher::GetInstance().DispatchKeyEvent(keyEvent);
 }
 

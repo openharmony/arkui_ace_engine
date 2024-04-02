@@ -136,6 +136,28 @@ public:
         }
     }
 
+    void UpdateOnHeightDidChange(std::function<void(const float)>&& onHeightDidChange)
+    {
+        onHeightDidChange_ = std::move(onHeightDidChange);
+    }
+
+    void OnHeightDidChange(float currentHeight) const
+    {
+        if (onHeightDidChange_) {
+            onHeightDidChange_(currentHeight);
+        }
+    }
+
+    void FireOnHeightDidChange();
+
+    bool HasOnHeightDidChange()
+    {
+        if (onHeightDidChange_) {
+            return true;
+        }
+        return false;
+    }
+
     void CallShouldDismiss()
     {
         if (shouldDismiss_) {
@@ -177,6 +199,8 @@ public:
 
     void SheetTransition(bool isTransitionIn, float dragVelocity = 0.0f);
 
+    void ModifyFireSheetTransition(float dragVelocity = 0.0f);
+
     void SheetInteractiveDismiss(bool isDragClose, float dragVelocity = 0.0f);
 
     void SetCurrentOffset(float currentOffset)
@@ -195,9 +219,7 @@ public:
 
     void SetCurrentHeightToOverlay(float height)
     {
-        auto context = PipelineContext::GetCurrentContext();
-        CHECK_NULL_VOID(context);
-        auto overlayManager = context->GetOverlayManager();
+        auto overlayManager = GetOverlayManager();
         CHECK_NULL_VOID(overlayManager);
         overlayManager->SetSheetHeight(height);
     }
@@ -310,9 +332,21 @@ public:
         return isAnimationProcess_;
     }
 
-    float GetSheetMaxHeight()
+    float GetPageHeightWithoutOffset() const
     {
         return pageHeight_;
+    }
+
+    float GetPageHeight()
+    {
+        auto parentOffsetY = GetRootOffsetYToWindow();
+        return pageHeight_ - parentOffsetY;
+    }
+
+    float GetSheetMaxHeight()
+    {
+        // pageHeight - statusBarHeight
+        return sheetMaxHeight_;
     }
 
     float GetSheetMaxWidth()
@@ -358,6 +392,10 @@ public:
         return height_;
     }
 
+    RefPtr<OverlayManager> GetOverlayManager();
+    RefPtr<FrameNode> GetOverlayRoot();
+    float GetRootOffsetYToWindow();
+
     bool IsAvoidingKeyboard() const
     {
         return Positive(keyboardHeight_);
@@ -395,6 +433,7 @@ private:
     void ChangeSheetHeight(float height);
     void StartSheetTransitionAnimation(const AnimationOption& option, bool isTransitionIn, float offset);
     void ClipSheetNode();
+    void CreatePropertyCallback();
     std::string GetPopupStyleSheetClipPath(SizeF sheetSize, Dimension sheetRadius);
     std::string GetCenterStyleSheetClipPath(SizeF sheetSize, Dimension sheetRadius);
     std::string GetBottomStyleSheetClipPath(SizeF sheetSize, Dimension sheetRadius);
@@ -411,6 +450,7 @@ private:
     std::function<void()> onDisappear_;
     std::function<void()> onWillDisappear_;
     std::function<void()> shouldDismiss_;
+    std::function<void(const float)> onHeightDidChange_;
     std::function<void()> onAppear_;
     RefPtr<PanEvent> panEvent_;
     float currentOffset_ = 0.0f;
@@ -446,6 +486,9 @@ private:
 
     bool show_ = true;
     bool isDrag_ = false;
+
+    double start_ = 0.0; // start position of detents changed
+    RefPtr<NodeAnimatablePropertyFloat> property_;
 
     ACE_DISALLOW_COPY_AND_MOVE(SheetPresentationPattern);
 };

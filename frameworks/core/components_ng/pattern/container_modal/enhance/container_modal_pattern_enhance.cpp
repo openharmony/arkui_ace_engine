@@ -58,7 +58,7 @@ void ContainerModalPatternEnhance::ShowTitle(bool isShow, bool hasDeco, bool nee
     auto windowManager = pipelineContext->GetWindowManager();
     CHECK_NULL_VOID(windowManager);
     windowMode_ = windowManager->GetWindowMode();
-    isShow =isShow && hasDeco;
+    isShow = isShow && hasDeco;
     // set container window show state to RS
     pipelineContext->SetContainerWindow(isShow);
     // update container modal padding and border
@@ -77,11 +77,13 @@ void ContainerModalPatternEnhance::ShowTitle(bool isShow, bool hasDeco, bool nee
     auto renderContext = containerNode->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
     renderContext->UpdateBackgroundColor(isFocus_ ? CONTAINER_BACKGROUND_COLOR : CONTAINER_BACKGROUND_COLOR_LOST_FOCUS);
+    // only floating window show border
+    bool isFloatingWindow = windowManager->GetWindowMode() == WindowMode::WINDOW_MODE_FLOATING;
     BorderRadiusProperty borderRadius;
-    borderRadius.SetRadius(isShow ? CONTAINER_OUTER_RADIUS : 0.0_vp);
+    borderRadius.SetRadius((isFloatingWindow && isShow) ? CONTAINER_OUTER_RADIUS : 0.0_vp);
     renderContext->UpdateBorderRadius(borderRadius);
     BorderColorProperty borderColor;
-    borderColor.SetColor(isShow ? CONTAINER_BORDER_COLOR : Color::TRANSPARENT);
+    borderColor.SetColor((isFloatingWindow && isShow) ? CONTAINER_BORDER_COLOR : Color::TRANSPARENT);
     renderContext->UpdateBorderColor(borderColor);
 
     // update stack content border
@@ -96,8 +98,8 @@ void ContainerModalPatternEnhance::ShowTitle(bool isShow, bool hasDeco, bool nee
     stackRenderContext->SetClipToBounds(true);
     auto customTitleLayoutProperty = customTitleRow->GetLayoutProperty();
     CHECK_NULL_VOID(customTitleLayoutProperty);
-    customTitleLayoutProperty->UpdateVisibility((isShow && customTitleSettedShow_) ? VisibleType::VISIBLE
-        : VisibleType::GONE);
+    customTitleLayoutProperty->UpdateVisibility(
+        (isShow && customTitleSettedShow_) ? VisibleType::VISIBLE : VisibleType::GONE);
 
     auto floatingLayoutProperty = floatingTitleRow->GetLayoutProperty();
     CHECK_NULL_VOID(floatingLayoutProperty);
@@ -106,13 +108,24 @@ void ContainerModalPatternEnhance::ShowTitle(bool isShow, bool hasDeco, bool nee
     CHECK_NULL_VOID(controlButtonsNode);
     auto controlButtonsLayoutProperty = controlButtonsNode->GetLayoutProperty();
     CHECK_NULL_VOID(controlButtonsLayoutProperty);
-    AddOrRemovePanEvent(controlButtonsNode);
     ChangeFloatingTitle(isFocus_);
     ChangeControlButtons(isFocus_);
     auto controlButtonsContext = controlButtonsNode->GetRenderContext();
     CHECK_NULL_VOID(controlButtonsContext);
     controlButtonsContext->OnTransformTranslateUpdate({ 0.0f, 0.0f, 0.0f });
     controlButtonsLayoutProperty->UpdateVisibility(isShow ? VisibleType::VISIBLE : VisibleType::GONE);
+    auto gestureRow = GetGestureRow();
+    CHECK_NULL_VOID(gestureRow);
+    AddOrRemovePanEvent(customTitleRow);
+    AddOrRemovePanEvent(floatingTitleRow);
+    AddOrRemovePanEvent(gestureRow);
+    gestureRow->GetLayoutProperty()->UpdateVisibility(
+        (isShow && customTitleSettedShow_) ? VisibleType::GONE : VisibleType::VISIBLE);
+    InitColumnTouchTestFunc();
+    controlButtonsNode->SetHitTestMode(HitTestMode::HTMTRANSPARENT_SELF);
+    auto stack = GetStackNode();
+    CHECK_NULL_VOID(stack);
+    stack->UpdateInspectorId(CONTAINER_MODAL_STACK_ID);
 }
 
 RefPtr<UINode> ContainerModalPatternEnhance::GetTitleItemByIndex(
@@ -163,10 +176,9 @@ void ContainerModalPatternEnhance::ChangeControlButtons(bool isFocus)
     auto windowManager = pipeline->GetWindowManager();
     MaximizeMode mode = windowManager->GetCurrentWindowMaximizeMode();
     InternalResource::ResourceId maxId =
-        (mode == MaximizeMode::MODE_AVOID_SYSTEM_BAR
-            || windowMode_ == WindowMode::WINDOW_MODE_FULLSCREEN
-            || windowMode_ == WindowMode::WINDOW_MODE_SPLIT_PRIMARY
-            || windowMode_ == WindowMode::WINDOW_MODE_SPLIT_SECONDARY)
+        (mode == MaximizeMode::MODE_AVOID_SYSTEM_BAR || windowMode_ == WindowMode::WINDOW_MODE_FULLSCREEN ||
+            windowMode_ == WindowMode::WINDOW_MODE_SPLIT_PRIMARY ||
+            windowMode_ == WindowMode::WINDOW_MODE_SPLIT_SECONDARY)
             ? InternalResource::ResourceId::IC_WINDOW_RESTORES
             : InternalResource::ResourceId::IC_WINDOW_MAX;
     ChangeTitleButtonIcon(maximizeButton, maxId, isFocus);
@@ -257,28 +269,30 @@ void ContainerModalPatternEnhance::UpdateTitleInTargetPos(bool isShow, int32_t h
         floatingContext->OnTransformTranslateUpdate({ 0.0f, height - static_cast<float>(titlePopupDistance), 0.0f });
         floatingLayoutProperty->UpdateVisibility(floatingTitleSettedShow_ ? VisibleType::VISIBLE : VisibleType::GONE);
         AnimationUtils::Animate(option, [floatingContext, height]() {
-            floatingContext->OnTransformTranslateUpdate({ 0.0f, height, 0.0f });
+            auto rect = floatingContext->GetPaintRectWithoutTransform();
+            floatingContext->OnTransformTranslateUpdate({ 0.0f, static_cast<float>(height - rect.GetY()), 0.0f });
         });
         buttonsContext->OnTransformTranslateUpdate({ 0.0f, height - static_cast<float>(titlePopupDistance), 0.0f });
         SetControlButtonVisibleBeforeAnim(controlButtonsLayoutProperty->GetVisibilityValue());
         controlButtonsLayoutProperty->UpdateVisibility(VisibleType::VISIBLE);
         AnimationUtils::Animate(option, [buttonsContext, height]() {
-            buttonsContext->OnTransformTranslateUpdate({ 0.0f, height, 0.0f });
+            auto rect = buttonsContext->GetPaintRectWithoutTransform();
+            buttonsContext->OnTransformTranslateUpdate({ 0.0f, static_cast<float>(height - rect.GetY()), 0.0f });
         });
     }
 
     if (!isShow && CanHideFloatingTitle()) {
+        auto beforeVisible = GetControlButtonVisibleBeforeAnim();
         AnimationUtils::Animate(
             option,
-            [floatingContext, buttonsContext, titlePopupDistance, height]() {
-                floatingContext->OnTransformTranslateUpdate({ 0.0f, static_cast<float>(titlePopupDistance)- height,
-                    0.0f });
-                buttonsContext->OnTransformTranslateUpdate({ 0.0f, 0.0f, 0.0f });
+            [floatingContext, buttonsContext, titlePopupDistance, beforeVisible]() {
+                floatingContext->OnTransformTranslateUpdate({ 0.0f, static_cast<float>(-titlePopupDistance), 0.0f });
+                buttonsContext->OnTransformTranslateUpdate({ 0.0f,
+                    beforeVisible == VisibleType::VISIBLE ? 0.0f : static_cast<float>(-titlePopupDistance), 0.0f });
             },
-            [floatingLayoutProperty, controlButtonsLayoutProperty, weak = WeakClaim(this)]() {
-                auto enhancePattern = weak.Upgrade();
+            [floatingLayoutProperty, controlButtonsLayoutProperty, beforeVisible]() {
                 floatingLayoutProperty->UpdateVisibility(VisibleType::GONE);
-                controlButtonsLayoutProperty->UpdateVisibility(enhancePattern->GetControlButtonVisibleBeforeAnim());
+                controlButtonsLayoutProperty->UpdateVisibility(beforeVisible);
             });
     }
 }
