@@ -165,7 +165,7 @@ frameworks/core/components/coverage/  @
 frameworks/core/components/custom_dialog/  @luoying_ace_admin
 frameworks/core/components/custom_paint/  @keerecles
 frameworks/core/components/data_panel/  @Hu_ZeQi
-frameworks/core/components/declaration/  @cc520bf
+frameworks/core/components/declaration/  @wu-yinxiao
 frameworks/core/components/dialog/  @luoying_ace_admin
 frameworks/core/components/dialog_modal/  @luoying_ace_admin
 frameworks/core/components/dialog_tween/  @luoying_ace_admin
@@ -232,7 +232,7 @@ frameworks/core/components/split_container/  @
 frameworks/core/components/stack/  @nickyjd
 frameworks/core/components/stage/  @yan-shuifeng
 frameworks/core/components/stepper/  @tsj_2020
-frameworks/core/components/svg/  @xiexiyun
+frameworks/core/components/svg/  @wu-yinxiao
 frameworks/core/components/swiper/  @xuzhidan
 frameworks/core/components/tab_bar/  @xuzhidan
 frameworks/core/components/text/  @lijuan124
