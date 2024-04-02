@@ -78,12 +78,16 @@ void SheetPresentationPattern::OnModifyDone()
 
 void SheetPresentationPattern::InitPageHeight()
 {
-    auto context = PipelineContext::GetCurrentContext();
-    CHECK_NULL_VOID(context);
-    auto safeAreaInsets = context->GetSafeAreaWithoutProcess();
+    auto pipelineContext = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipelineContext);
+    auto safeAreaInsets = pipelineContext->GetSafeAreaWithoutProcess();
     statusBarHeight_ =
         GetSheetType() != SheetType::SHEET_BOTTOMLANDSPACE ? safeAreaInsets.top_.Length() : .0f;
-    auto sheetTheme = context->GetTheme<SheetTheme>();
+    auto windowManager = pipelineContext->GetWindowManager();
+    if (windowManager && windowManager->GetWindowMode() == WindowMode::WINDOW_MODE_FLOATING) {
+        statusBarHeight_ = SHEET_BLANK_FLOATING_STATUS_BAR.ConvertToPx();
+    }
+    auto sheetTheme = pipelineContext->GetTheme<SheetTheme>();
     CHECK_NULL_VOID(sheetTheme);
     sheetThemeType_ = sheetTheme->GetSheetType();
 }
@@ -1016,6 +1020,15 @@ SheetType SheetPresentationPattern::GetSheetType()
     auto layoutProperty = GetLayoutProperty<SheetPresentationProperty>();
     CHECK_NULL_RETURN(layoutProperty, sheetType);
     auto sheetStyle = layoutProperty->GetSheetStyleValue();
+
+    auto windowManager = pipelineContext->GetWindowManager();
+    auto windowGlobalRect = pipelineContext->GetDisplayWindowRectInfo();
+    if (windowManager && windowManager->GetWindowMode() == WindowMode::WINDOW_MODE_FLOATING &&
+        windowGlobalRect.Width() < windowGlobalRect.Height() &&
+        windowGlobalRect.Width() < SHEET_DEVICE_WIDTH_BREAKPOINT.ConvertToPx()) {
+        return SheetType::SHEET_BOTTOM;
+    }
+
     if (sheetThemeType_ == "auto") {
         if (IsFold()) {
             sheetType = SheetType::SHEET_CENTER;
@@ -1263,6 +1276,15 @@ void SheetPresentationPattern::OnWindowSizeChanged(int32_t width, int32_t height
     if (type == WindowSizeChangeReason::ROTATION || type == WindowSizeChangeReason::UNDEFINED ||
         type == WindowSizeChangeReason::DRAG) {
         windowChanged_ = true;
+    }
+
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipelineContext = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipelineContext);
+    auto windowManager = pipelineContext->GetWindowManager();
+    if (windowManager && windowManager->GetWindowMode() == WindowMode::WINDOW_MODE_FLOATING) {
+        host->MarkDirtyNode(PROPERTY_UPDATE_LAYOUT);
     }
 }
 
