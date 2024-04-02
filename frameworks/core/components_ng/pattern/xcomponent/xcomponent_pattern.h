@@ -49,6 +49,9 @@ class XComponentPattern : public Pattern {
 
 public:
     XComponentPattern() = default;
+    XComponentPattern(const std::string& id, XComponentType type, 
+        const std::shared_ptr<InnerXComponentController>& xcomponentController, float initWidth = 0.0f,
+        float initHeight = 0.0f);
     XComponentPattern(const std::string& id, XComponentType type, const std::string& libraryname,
         const std::shared_ptr<InnerXComponentController>& xcomponentController, float initWidth = 0.0f,
         float initHeight = 0.0f);
@@ -157,6 +160,11 @@ public:
     const std::string& GetLibraryName() const
     {
         return libraryname_;
+    }
+
+    void SetLibraryName(const std::string& libraryname)
+    {
+        libraryname_ = libraryname;
     }
 
     const std::optional<std::string>& GetSoPath() const

@@ -45,6 +45,7 @@ public:
     {
         return nullptr;
     };
+    virtual void SetLibraryName(const std::string& libraryName) = 0;
     virtual void SetSoPath(const std::string& soPath) = 0;
     virtual void SetOnLoad(LoadEvent&& onLoad) = 0;
     virtual void SetOnDestroy(DestroyEvent&& onDestroy) = 0;
@@ -58,6 +59,10 @@ public:
     virtual XComponentType GetType()
     {
         return XComponentType::UNKNOWN;
+    }
+    virtual std::string GetLibraryName()
+    {
+        return "";
     }
 
 private:
