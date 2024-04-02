@@ -47,6 +47,8 @@ public:
     
     RefPtr<NGGestureRecognizer> CreateRecognizer() override;
 
+    void RemoveChildrenByTag(const std::string& gestureTag, bool& needRecollect);
+
 private:
     GestureMode mode_;
     std::vector<RefPtr<Gesture>> gestures_;

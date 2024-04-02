@@ -303,7 +303,7 @@ void GestureEventHub::UpdateGestureHierarchy()
 {
     auto host = GetFrameNode();
     CHECK_NULL_VOID(host);
-    bool success = gestures_.size() == gestureHierarchy_.size();
+    bool success = (gestures_.size() + modifierGestures_.size()) == gestureHierarchy_.size() && !needRecollect_;
     if (success) {
         auto iter = gestures_.begin();
         auto recognizerIter = gestureHierarchy_.begin();
@@ -314,44 +314,50 @@ void GestureEventHub::UpdateGestureHierarchy()
                 break;
             }
         }
-    }
-
-    if (success) {
-        gestures_.clear();
         return;
     }
 
     gestureHierarchy_.clear();
-    for (auto const& gesture : gestures_) {
-        if (!gesture) {
-            continue;
-        }
-        auto recognizer = gesture->CreateRecognizer();
-
-        auto clickRecognizer = AceType::DynamicCast<ClickRecognizer>(recognizer);
-        if (clickRecognizer) {
-            clickRecognizer->SetOnAccessibility(GetOnAccessibilityEventFunc());
-        }
-
-        auto longPressRecognizer = AceType::DynamicCast<LongPressRecognizer>(recognizer);
-        if (longPressRecognizer) {
-            longPressRecognizer->SetOnAccessibility(GetOnAccessibilityEventFunc());
-            auto pattern = host->GetPattern();
-            if (pattern && longPressRecognizer->HasAction()) {
-                longPressRecognizer->SetOnLongPressRecorder(pattern->GetLongPressEventRecorder());
-            }
-        }
-
-        if (!recognizer) {
-            continue;
-        }
-        auto priority = gesture->GetPriority();
-        auto gestureMask = gesture->GetGestureMask();
-        recognizer->SetPriority(priority);
-        recognizer->SetPriorityMask(gestureMask);
-        gestureHierarchy_.emplace_back(recognizer);
+    for (const auto& gesture : gestures_) {
+        AddGestureToGestureHierarchy(gesture);
     }
-    gestures_.clear();
+    for (const auto& gesture : modifierGestures_) {
+        AddGestureToGestureHierarchy(gesture);
+    }
+    needRecollect_ = false;
+}
+
+void GestureEventHub::AddGestureToGestureHierarchy(const RefPtr<NG::Gesture>& gesture)
+{
+    if (!gesture) {
+        return;
+    }
+    auto recognizer = gesture->CreateRecognizer();
+
+    auto clickRecognizer = AceType::DynamicCast<ClickRecognizer>(recognizer);
+    if (clickRecognizer) {
+        clickRecognizer->SetOnAccessibility(GetOnAccessibilityEventFunc());
+    }
+
+    auto longPressRecognizer = AceType::DynamicCast<LongPressRecognizer>(recognizer);
+    if (longPressRecognizer) {
+        longPressRecognizer->SetOnAccessibility(GetOnAccessibilityEventFunc());
+        auto host = GetFrameNode();
+        CHECK_NULL_VOID(host);
+        auto pattern = host->GetPattern();
+        if (pattern && longPressRecognizer->HasAction()) {
+            longPressRecognizer->SetOnLongPressRecorder(pattern->GetLongPressEventRecorder());
+        }
+    }
+
+    if (!recognizer) {
+        return;
+    }
+    auto priority = gesture->GetPriority();
+    auto gestureMask = gesture->GetGestureMask();
+    recognizer->SetPriority(priority);
+    recognizer->SetPriorityMask(gestureMask);
+    gestureHierarchy_.emplace_back(recognizer);
 }
 
 void GestureEventHub::CombineIntoExclusiveRecognizer(
@@ -1386,6 +1392,7 @@ void GestureEventHub::CopyGestures(const RefPtr<GestureEventHub>& gestureEventHu
 {
     CHECK_NULL_VOID(gestureEventHub);
     gestures_ = gestureEventHub->backupGestures_;
+    modifierGestures_ = gestureEventHub->backupModifierGestures_;
     recreateGesture_ = true;
 }
 
@@ -1628,5 +1635,37 @@ int32_t GestureEventHub::GetSelectItemSize()
     CHECK_NULL_RETURN(scrollPattern, 0);
     auto children = scrollPattern->GetVisibleSelectedItems();
     return children.size();
+}
+
+void GestureEventHub::RemoveGesturesByTag(const std::string& gestureTag)
+{
+    bool needRecollect = false;
+    for (auto iter = modifierGestures_.begin(); iter != modifierGestures_.end();) {
+        auto tag = (*iter)->GetTag();
+        if (tag.has_value() && tag.value() == gestureTag) {
+            iter = modifierGestures_.erase(iter);
+            backupModifierGestures_.remove(*iter);
+            needRecollect = true;
+        } else {
+            auto group = AceType::DynamicCast<GestureGroup>(*iter);
+            if (group) {
+                group->RemoveChildrenByTag(gestureTag, needRecollect);
+            }
+            iter++;
+        }
+    }
+    if (needRecollect) {
+        recreateGesture_ = true;
+        needRecollect_ = true;
+        OnModifyDone();
+    }
+}
+
+void GestureEventHub::ClearModifierGesture()
+{
+    modifierGestures_.clear();
+    backupModifierGestures_.clear();
+    recreateGesture_ = true;
+    OnModifyDone();
 }
 } // namespace OHOS::Ace::NG

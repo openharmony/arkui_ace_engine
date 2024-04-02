@@ -133,5 +133,21 @@ int32_t GestureGroup::Serialize(char* buff)
     }
     return total;
 }
-    
+
+void GestureGroup::RemoveChildrenByTag(const std::string& gestureTag, bool& needRecollect)
+{
+    for (auto iter = gestures_.begin(); iter != gestures_.end();) {
+        auto tag = (*iter)->GetTag();
+        if (tag.has_value() && tag.value() == gestureTag) {
+            iter = gestures_.erase(iter);
+            needRecollect = true;
+        } else {
+            auto group = AceType::DynamicCast<GestureGroup>(*iter);
+            if (group) {
+                group->RemoveChildrenByTag(gestureTag, needRecollect);
+            }
+            iter++;
+        }
+    }
+}
 } // namespace OHOS::Ace::NG

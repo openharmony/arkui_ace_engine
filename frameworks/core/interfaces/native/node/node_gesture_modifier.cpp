@@ -103,6 +103,21 @@ ArkUIGesture* createSwipeGesture(ArkUI_Int32 fingers, ArkUI_Int32 directions, Ar
     return reinterpret_cast<ArkUIGesture*>(AceType::RawPtr(swipeGestureObject));
 }
 
+ArkUIGesture* createGestureGroup(ArkUI_Int32 mode)
+{
+    auto gestureMode = static_cast<GestureMode>(mode);
+    auto gestureGroupObject = AceType::MakeRefPtr<GestureGroup>(gestureMode);
+    gestureGroupObject->IncRefCount();
+    return reinterpret_cast<ArkUIGesture*>(AceType::RawPtr(gestureGroupObject));
+}
+
+void addGestureToGestureGroup(ArkUIGesture* group, ArkUIGesture* child)
+{
+    auto* gestureGroup = reinterpret_cast<GestureGroup*>(group);
+    auto* childGesture = reinterpret_cast<Gesture*>(child);
+    gestureGroup->AddGesture(AceType::Claim(childGesture));
+}
+
 void dispose(ArkUIGesture* recognizer)
 {
     Gesture* gestureRef = reinterpret_cast<Gesture*>(recognizer);
@@ -214,6 +229,21 @@ void removeGestureFromNode(ArkUINodeHandle node, ArkUIGesture* gesture)
     gestureHub->RemoveGesture(gesturePtr);
 }
 
+void removeGestureFromNodeByTag(ArkUINodeHandle node, ArkUI_CharPtr gestureTag)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    auto gestureHub = frameNode->GetOrCreateGestureEventHub();
+    std::string tag(gestureTag);
+    gestureHub->RemoveGesturesByTag(tag);
+}
+
+void clearGestures(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    auto gestureHub = frameNode->GetOrCreateGestureEventHub();
+    gestureHub->ClearModifierGesture();
+}
+
 namespace NodeModifier {
 const ArkUIGestureModifier* GetGestureModifier()
 {
@@ -224,10 +254,14 @@ const ArkUIGestureModifier* GetGestureModifier()
         createPinchGesture,
         createRotationGesture,
         createSwipeGesture,
+        createGestureGroup,
+        addGestureToGestureGroup,
         dispose,
         registerGestureEvent,
         addGestureToNode,
         removeGestureFromNode,
+        removeGestureFromNodeByTag,
+        clearGestures,
         };
     return &modifier;
 }
