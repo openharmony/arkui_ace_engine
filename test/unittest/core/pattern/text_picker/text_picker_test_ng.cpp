@@ -5808,7 +5808,7 @@ HWTEST_F(TextPickerTestNg, TextPickerPatternTest016, TestSize.Level1)
      * @tc.step: step3. call ChangeCurrentOptionValue(), cover branch replaceColumn less or equals curColumn.
      * @tc.expected: expect successfully.
      */
-    pickerPattern->ChangeCurrentOptionValue(option, 16, 1, 0);
+    pickerPattern->ChangeCurrentOptionValue(optionsChild1, 16, 1, 0);
     EXPECT_EQ(pickerPattern->selecteds_[1], 16);
 
     /**
