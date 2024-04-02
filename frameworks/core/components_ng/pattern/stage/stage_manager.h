@@ -59,6 +59,12 @@ public:
 
     void ReloadStage();
 
+    RefPtr<FrameNode> GetLastPageWithTransition() const;
+
+    void SetStageInTrasition (bool stageInTrasition) {
+        stageInTrasition_ = stageInTrasition;
+    }
+
 private:
     // ace performance check
     void PerformanceCheck(const RefPtr<FrameNode>& pageNode, int64_t vsyncTimeout);
@@ -69,6 +75,7 @@ private:
     RefPtr<StagePattern> stagePattern_;
     WeakPtr<FrameNode> destPageNode_;
     WeakPtr<FrameNode> srcPageNode_;
+    bool stageInTrasition_ = false;
 
     ACE_DISALLOW_COPY_AND_MOVE(StageManager);
 };
