@@ -118,11 +118,27 @@ void SystemWindowScene::RegisterEventCallback()
         [weakThis = WeakClaim(this), instanceId = instanceId_](std::shared_ptr<MMI::PointerEvent> PointerEvent) {
             ContainerScope Scope(instanceId);
             auto pipelineContext = PipelineContext::GetCurrentContext();
-            CHECK_NULL_VOID(pipelineContext);
+            if (!pipelineContext) {
+                TAG_LOGE(AceLogTag::ACE_INPUTTRACKING,
+                    "PipelineContext GetCurrentContext null,id:%{public}d", PointerEvent->GetId());
+                PointerEvent->MarkProcessed();
+                return;
+            }
             pipelineContext->PostAsyncEvent([weakThis, PointerEvent]() {
                 auto self = weakThis.Upgrade();
+            if (!self) {
+                TAG_LOGE(AceLogTag::ACE_INPUTTRACKING,
+                    "weakThis Upgrade null,id:%{public}d", PointerEvent->GetId());
+                PointerEvent->MarkProcessed();
+                return;
+            }
                 auto host = self->GetHost();
-                CHECK_NULL_VOID(host);
+            if (!host) {
+                TAG_LOGE(AceLogTag::ACE_INPUTTRACKING,
+                    "GetHost null,id:%{public}d", PointerEvent->GetId());
+                PointerEvent->MarkProcessed();
+                return;
+            }
                 WindowSceneHelper::InjectPointerEvent(host, PointerEvent);
             },
                 TaskExecutor::TaskType::UI);
