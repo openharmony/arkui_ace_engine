@@ -4639,6 +4639,8 @@ void RichEditorPattern::ResetAfterPaste()
     record.beforeCaretPosition = caretPosition_ + moveLength_;
     auto pasteStr = GetPasteStr();
     record.addText = pasteStr;
+    RichEditorChangeValue changeValue;
+    CHECK_NULL_VOID(BeforeChangeText(changeValue, record, RecordType::INSERT));
     SetCaretSpanIndex(-1);
     StartTwinkling();
     CloseSelectOverlay();
@@ -4650,8 +4652,6 @@ void RichEditorPattern::ResetAfterPaste()
         record.deleteText = StringUtils::ToString(DeleteForwardOperation(length));
         ResetSelection();
     }
-    RichEditorChangeValue changeValue;
-    CHECK_NULL_VOID(BeforeChangeText(changeValue, record, RecordType::INSERT));
     InsertValueByPaste(pasteStr);
     ClearPasteStr();
     record.afterCaretPosition = caretPosition_ + moveLength_;
@@ -6445,24 +6445,55 @@ TextInputAction RichEditorPattern::GetDefaultTextInputAction() const
     return TextInputAction::NEW_LINE;
 }
 
+void RichEditorPattern::GetChangeSpanStyle(RichEditorChangeValue& changeValue, std::optional<TextStyle>& spanTextStyle,
+    const RefPtr<SpanNode>& spanNode, int32_t spanIndex)
+{
+    spanTextStyle = std::nullopt;
+    auto originalSpans = changeValue.GetRichEditorOriginalSpans();
+    if (spanIndex == 0 && originalSpans.size()) {
+        const RichEditorAbstractSpanResult& firstInfo = originalSpans.front();
+        const RichEditorAbstractSpanResult& lastInfo = originalSpans.back();
+        int32_t firstLength = static_cast<int32_t>(StringUtils::ToWstring(firstInfo.GetValue()).length());
+        int32_t lastLength = static_cast<int32_t>(StringUtils::ToWstring(lastInfo.GetValue()).length());
+        if (firstInfo.GetEraseLength() == firstLength && lastInfo.GetEraseLength() == lastLength) {
+            if (spans_.size() == originalSpans.size() ||
+                static_cast<int32_t>(spans_.size()) == (lastInfo.GetSpanIndex() + 1)) {
+                return; // all spanNode be deleted, set default style
+            }
+            spanIndex = lastInfo.GetSpanIndex() + 1;
+        } else if (firstInfo.GetEraseLength() == firstLength) {
+            spanIndex = lastInfo.GetSpanIndex();
+        }
+        auto it = spans_.begin();
+        std::advance(it, spanIndex);
+        if ((*it)->unicode != 0 || DynamicCast<PlaceholderSpanItem>(*it)) {
+            return; // is not a textSpan(Image/Symbol/other)
+        }
+        spanTextStyle = (*it)->GetTextStyle();
+    } else if (spanNode && spanNode->GetSpanItem()) {
+        spanTextStyle = spanNode->GetSpanItem()->GetTextStyle();
+    }
+}
+
 void RichEditorPattern::GetReplacedSpan(RichEditorChangeValue& changeValue, int32_t& innerPosition,
     const std::string& insertValue, int32_t textIndex, std::optional<TextStyle> style, bool isCreate, bool fixDel)
 {
     std::string originalStr;
     int32_t originalPos = 0;
-    RefPtr<SpanItem> spanItem = nullptr;
-    if (fixDel) {
-        spanItem = GetDelPartiallySpanItem(changeValue, originalStr, originalPos);
-    }
-
+    RefPtr<SpanItem> spanItem = fixDel ? GetDelPartiallySpanItem(changeValue, originalStr, originalPos) : nullptr;
     TextInsertValueInfo info;
     CalcInsertValueObj(info, textIndex, isCreate);
     int32_t spanIndex = info.GetSpanIndex();
     int32_t offsetInSpan = info.GetOffsetInSpan();
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto spanNode = DynamicCast<SpanNode>(host->GetChildAtIndex(spanIndex));
-
+    auto uiNode = host->GetChildAtIndex(spanIndex);
+    RefPtr<SpanNode> spanNode = DynamicCast<SpanNode>(uiNode);
+    if (uiNode && uiNode->GetTag() != V2::SPAN_ETS_TAG) {
+        spanNode = nullptr;
+        ++spanIndex; // create a new span When the span is not a textSpan(Image/Symbol/other)
+        offsetInSpan = 0;
+    }
     if (!style.has_value()) {
         if (typingStyle_.has_value() && !HasSameTypingStyle(spanNode)) {
             style = typingTextStyle_;
@@ -6488,10 +6519,8 @@ void RichEditorPattern::GetReplacedSpan(RichEditorChangeValue& changeValue, int3
         offsetInSpan = 0;
         GetReplacedSpanFission(changeValue, innerPosition, content, spanIndex, offsetInSpan, style);
     } else {
-        std::optional<TextStyle> spanTextStyle = std::nullopt;
-        if (spanNode && spanNode->GetSpanItem()) {
-            spanTextStyle = spanNode->GetSpanItem()->GetTextStyle();
-        }
+        std::optional<TextStyle> spanTextStyle;
+        GetChangeSpanStyle(changeValue, spanTextStyle, spanNode, spanIndex);
         CreateSpanResult(changeValue, innerPosition, spanIndex, offsetInSpan, offsetInSpan + wInsertValue.length(),
             content, spanTextStyle);
         innerPosition += wInsertValue.length();
@@ -6538,6 +6567,14 @@ void RichEditorPattern::CreateSpanResult(RichEditorChangeValue& changeValue, int
     RichEditorAbstractSpanResult retInfo;
     if (style) {
         SetTextStyleToRet(retInfo, *style);
+    } else {
+        retInfo.SetFontColor((Color::BLACK).ColorToString());
+        retInfo.SetFontSize(Dimension(16.0f, DimensionUnit::VP).ConvertToVp());
+        retInfo.SetFontStyle(OHOS::Ace::FontStyle::NORMAL);
+        retInfo.SetFontWeight(static_cast<int32_t>(FontWeight::NORMAL));
+        retInfo.SetTextDecoration(TextDecoration::NONE);
+        retInfo.SetColor((Color::BLACK).ColorToString());
+        retInfo.SetFontFamily("HarmonyOS Sans");
     }
     retInfo.SetSpanIndex(spanIndex);
     retInfo.SetValue(content);
@@ -6556,6 +6593,12 @@ void RichEditorPattern::SetTextStyleToRet(RichEditorAbstractSpanResult& retInfo,
     retInfo.SetColor(textStyle.GetTextDecorationColor().ColorToString());
     retInfo.SetFontSize(textStyle.GetFontSize().ConvertToVp());
     retInfo.SetFontStyle(textStyle.GetFontStyle());
+    TextStyleResult textStyleResult;
+    textStyleResult.lineHeight = textStyle.GetLineHeight().ConvertToVp();
+    textStyleResult.letterSpacing = textStyle.GetLetterSpacing().ConvertToVp();
+    retInfo.SetTextStyle(textStyleResult);
+    retInfo.SetLineHeight(textStyle.GetLineHeight().ConvertToVp());
+    retInfo.SetLetterspacing(textStyle.GetLetterSpacing().ConvertToVp());
     std::string fontFamilyValue;
     auto fontFamily = textStyle.GetFontFamilies();
     for (const auto& str : fontFamily) {
@@ -6573,7 +6616,7 @@ void RichEditorPattern::CalcInsertValueObj(TextInsertValueInfo& info, int textIn
         return;
     }
     auto it = std::find_if(
-        spans_.begin(), spans_.end(), [caretPosition = textIndex, isCreate](const RefPtr<SpanItem>& spanItem) {
+        spans_.begin(), spans_.end(), [caretPosition = textIndex](const RefPtr<SpanItem>& spanItem) {
             auto spanLength = static_cast<int32_t>(StringUtils::ToWstring(spanItem->content).length());
             if (spanLength == 0) {
                 return spanItem->position == caretPosition;
@@ -6626,15 +6669,46 @@ RefPtr<SpanItem> RichEditorPattern::GetDelPartiallySpanItem(
     if (changeValue.GetRichEditorOriginalSpans().size() == 0) {
         return retItem;
     }
-    const RichEditorAbstractSpanResult& firstResult = changeValue.GetRichEditorOriginalSpans().front();
+    std::wstring textTemp;
+    auto originalSpans = changeValue.GetRichEditorOriginalSpans();
+    const RichEditorAbstractSpanResult& firstResult = originalSpans.front();
     auto it = spans_.begin();
     std::advance(it, firstResult.GetSpanIndex());
-    if (firstResult.GetEraseLength() != static_cast<int32_t>(StringUtils::ToWstring((*it)->content).length())) {
-        retItem = *it;
-        originalStr = retItem->content;
-        originalPos = retItem->position;
-        retItem->content.erase(firstResult.OffsetInSpan(), firstResult.GetEraseLength());
-        retItem->position -= firstResult.GetEraseLength();
+    retItem = *it;
+    originalStr = retItem->content;
+    originalPos = retItem->position;
+    textTemp = StringUtils::ToWstring(originalStr).erase(firstResult.OffsetInSpan(), firstResult.GetEraseLength());
+    retItem->content = StringUtils::ToString(textTemp);
+    retItem->position -= firstResult.GetEraseLength();
+    if (firstResult.GetEraseLength() != static_cast<int32_t>(StringUtils::ToWstring(firstResult.GetValue()).length())) {
+        return retItem;
+    }
+
+    if (firstResult.GetSpanIndex() == 0) {
+        int32_t spanIndex = 0;
+        for (auto& orgIt : originalSpans) {
+            spanIndex = orgIt.GetSpanIndex();
+            if (orgIt.GetEraseLength() != static_cast<int32_t>(StringUtils::ToWstring(orgIt.GetValue()).length())) {
+                // find the deleted(Partially) spanItem
+                auto findIt = spans_.begin();
+                std::advance(findIt, spanIndex);
+                textTemp = StringUtils::ToWstring((*findIt)->content);
+                textTemp.erase(orgIt.OffsetInSpan(), orgIt.GetEraseLength());
+                retItem->content = StringUtils::ToString(textTemp);
+                retItem->position = textTemp.length();
+                return retItem;
+            }
+        }
+        if (spans_.size() == originalSpans.size() || static_cast<int32_t>(spans_.size()) == (spanIndex + 1)) {
+            return retItem; // all spanNode be deleted
+        }
+        auto nextIt = spans_.begin();
+        std::advance(nextIt, spanIndex + 1);
+        if ((*nextIt)->unicode != 0 || DynamicCast<PlaceholderSpanItem>(*nextIt)) {
+            return retItem; // is not a textSpan(Image/Symbol/other)
+        }
+        retItem->content = (*nextIt)->content;
+        retItem->position = StringUtils::ToWstring(retItem->content).length();
     }
     return retItem;
 }
@@ -6651,7 +6725,7 @@ bool RichEditorPattern::BeforeChangeText(RichEditorChangeValue& changeValue, con
     // AddTextSpan
     std::optional<TextStyle> textStyle = std::nullopt;
     if (options.style.has_value()) {
-        textStyle = options.style.value();
+        textStyle = options.style;
     }
     if (options.offset.has_value()) {
         if (spans_.empty()) {
