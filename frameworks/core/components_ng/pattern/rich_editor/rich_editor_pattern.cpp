@@ -2759,7 +2759,7 @@ void RichEditorPattern::InsertDiffStyleValueInSpan(
     options.value = insertValue;
     options.offset = caretPosition_;
     options.style = typingTextStyle_;
-    auto newSpanIndex = AddTextSpanOperation(options, false, -1,  true);
+    auto newSpanIndex = AddTextSpanOperation(options, false, -1,  true, false);
     auto newSpanNode = DynamicCast<SpanNode>(host->GetChildAtIndex(newSpanIndex));
     CopyTextSpanLineStyle(spanNode, newSpanNode, true);
     AfterInsertValue(spanNode, static_cast<int32_t>(StringUtils::ToWstring(insertValue).length()), true, isIME);
