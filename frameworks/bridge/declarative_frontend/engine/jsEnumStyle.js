@@ -1418,6 +1418,9 @@ var ContentType;
   ContentType[ContentType['DATE'] = 20] = 'DATE';
   ContentType[ContentType['MONTH'] = 21] = 'MONTH';
   ContentType[ContentType['YEAR'] = 22] = 'YEAR';
+  ContentType[ContentType['NICKNAME'] = 23] = 'NICKNAME';
+  ContentType[ContentType['DETAIL_INFO_WITHOUT_STREET'] = 24] = 'DETAIL_INFO_WITHOUT_STREET';
+  ContentType[ContentType['FORMAT_ADDRESS'] = 25] = 'FORMAT_ADDRESS';
 })(ContentType || (ContentType = {}));
 
 var GestureJudgeResult;
