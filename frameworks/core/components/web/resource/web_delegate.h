@@ -545,6 +545,8 @@ public:
         : WebResource(type, context, std::move(onError))
     {}
 
+    void UnRegisterScreenLockFunction();
+
     void SetObserver(const RefPtr<WebDelegateObserver>& observer)
     {
         observer_ = observer;
