@@ -50,7 +50,9 @@
 
 #include "core/common/udmf/udmf_client.h"
 #include "core/components_ng/render/adapter/component_snapshot.h"
+#ifdef WEB_SUPPORTED
 #include "core/components_ng/pattern/web/web_pattern.h"
+#endif
 namespace OHOS::Ace::NG {
 namespace {
 #if defined(PIXEL_MAP_SUPPORTED)
@@ -702,6 +704,7 @@ void GestureEventHub::HandleOnDragStart(const GestureEvent& info)
         auto rectCenter = frameNode->GetPaintRectCenter();
         frameNodeOffset_ = OffsetF(rectCenter.GetX() - frameNodeSize_.Width() / 2.0f,
             rectCenter.GetY() - frameNodeSize_.Height() / 2.0f);
+#ifdef WEB_SUPPORTED
         if (frameTag == V2::WEB_ETS_TAG) {
             auto webPattern = frameNode->GetPattern<WebPattern>();
             if (webPattern) {
@@ -709,6 +712,7 @@ void GestureEventHub::HandleOnDragStart(const GestureEvent& info)
                 frameNodeOffset_.SetY(frameNodeOffset_.GetY() + webPattern->GetDragOffset().GetY());
             }
         }
+#endif
     }
     /*
      * Users may remove frameNode in the js callback function "onDragStart "triggered below,
