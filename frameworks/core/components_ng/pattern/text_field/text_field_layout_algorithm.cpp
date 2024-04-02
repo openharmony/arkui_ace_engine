@@ -149,7 +149,9 @@ void TextFieldLayoutAlgorithm::GetInlineMeasureItem(
         // The maximum height of the inline mode defaults to a maximum of three rows.
         inlineIdealHeight =
             pattern->GetSingleLineHeight() * textFieldLayoutProperty->GetMaxViewLinesValue(INLINE_DEFAULT_VIEW_MAXLINE);
-        inlineMeasureItem_.inlineSizeHeight = inlineIdealHeight;
+        inlineMeasureItem_.inlineSizeHeight = pattern->GetSingleLineHeight() * std::min(
+            static_cast<uint32_t>(paragraph_->GetLineCount()),
+            textFieldLayoutProperty->GetMaxViewLinesValue(INLINE_DEFAULT_VIEW_MAXLINE));
     } else {
         // calc inline status in advance
         CalcInlineMeasureItem(layoutWrapper);
@@ -162,7 +164,8 @@ void TextFieldLayoutAlgorithm::CalcInlineMeasureItem(LayoutWrapper* layoutWrappe
     CHECK_NULL_VOID(textFieldLayoutProperty);
     auto lineCount = inlineParagraph_->GetLineCount() != 0 ? inlineParagraph_->GetLineCount() : 1;
     inlineMeasureItem_.inlineSizeHeight = inlineParagraph_->GetHeight() / lineCount
-        * textFieldLayoutProperty->GetMaxViewLinesValue(INLINE_DEFAULT_VIEW_MAXLINE);
+        * std::min(static_cast<uint32_t>(lineCount),
+            textFieldLayoutProperty->GetMaxViewLinesValue(INLINE_DEFAULT_VIEW_MAXLINE));
     inlineMeasureItem_.inlineContentRectHeight = GreatNotEqual(inlineParagraph_->GetLongestLine(), 0.0)
         ? inlineParagraph_->GetHeight() : std::max(preferredHeight_, inlineParagraph_->GetHeight());
     inlineMeasureItem_.inlineLastOffsetY =
