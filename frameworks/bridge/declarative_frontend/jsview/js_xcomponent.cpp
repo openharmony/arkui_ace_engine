@@ -18,6 +18,7 @@
 #include "base/log/ace_scoring_log.h"
 #include "base/memory/referenced.h"
 #include "base/utils/utils.h"
+#include "bridge/declarative_frontend/engine/js_converter.h"
 #include "bridge/declarative_frontend/engine/js_ref_ptr.h"
 #include "bridge/declarative_frontend/jsview/js_view_common_def.h"
 #include "bridge/declarative_frontend/jsview/js_xcomponent_controller.h"
@@ -71,6 +72,54 @@ XComponentModel* XComponentModel::GetInstance()
 } // namespace OHOS::Ace
 
 namespace OHOS::Ace::Framework {
+void SetControllerCallback(const JSRef<JSObject>& object, const JsiExecutionContext& execCtx)
+{
+    WeakPtr<NG::FrameNode> targetNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    auto jsCreatedFunc = object->GetProperty("onSurfaceCreated");
+    if (jsCreatedFunc->IsFunction()) {
+        auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(object), JSRef<JSFunc>::Cast(jsCreatedFunc));
+        auto onSurfaceCreated = [execCtx, func = std::move(jsFunc), node = targetNode](const std::string& surfaceId) {
+            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+            ACE_SCORING_EVENT("XComponentController.onSurfaceCreated");
+            PipelineContext::SetCallBackNode(node);
+            auto jsVal = JSRef<JSVal>::Make(ToJSValue(surfaceId));
+            func->ExecuteJS(1, &jsVal);
+        };
+        XComponentModel::GetInstance()->SetControllerOnCreated(std::move(onSurfaceCreated));
+    }
+    auto jsChangedFunc = object->GetProperty("onSurfaceChanged");
+    if (jsChangedFunc->IsFunction()) {
+        auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(object), JSRef<JSFunc>::Cast(jsChangedFunc));
+        auto onSurfaceChanged = [execCtx, func = std::move(jsFunc), node = targetNode](
+                                    const std::string& surfaceId, const NG::RectF& rect) {
+            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+            ACE_SCORING_EVENT("XComponentController.onSurfaceChanged");
+            PipelineContext::SetCallBackNode(node);
+            JSRef<JSObject> rectObj = JSRef<JSObject>::New();
+            rectObj->SetProperty("offsetX", rect.Left());
+            rectObj->SetProperty("offsetY", rect.Top());
+            rectObj->SetProperty("surfaceWidth", rect.Width());
+            rectObj->SetProperty("surfaceHeight", rect.Height());
+            auto jsSurfaceId = JSRef<JSVal>::Make(ToJSValue(surfaceId));
+            JSRef<JSVal> params[2] = { jsSurfaceId, rectObj };
+            func->ExecuteJS(2, params);
+        };
+        XComponentModel::GetInstance()->SetControllerOnChanged(std::move(onSurfaceChanged));
+    }
+    auto jsDestroyedFunc = object->GetProperty("onSurfaceDestroyed");
+    if (jsDestroyedFunc->IsFunction()) {
+        auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(object), JSRef<JSFunc>::Cast(jsDestroyedFunc));
+        auto onSurfaceDestroyed = [execCtx, func = std::move(jsFunc), node = targetNode](const std::string& surfaceId) {
+            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+            ACE_SCORING_EVENT("XComponentController.onSurfaceDestroyed");
+            PipelineContext::SetCallBackNode(node);
+            auto jsVal = JSRef<JSVal>::Make(ToJSValue(surfaceId));
+            func->ExecuteJS(1, &jsVal);
+        };
+        XComponentModel::GetInstance()->SetControllerOnDestroyed(std::move(onSurfaceDestroyed));
+    }
+}
+
 void JSXComponent::JSBind(BindingTarget globalObj)
 {
     JSClass<JSXComponent>::Declare("XComponent");
@@ -125,10 +174,12 @@ void JSXComponent::Create(const JSCallbackInfo& info)
 
     auto type = paramObject->GetProperty("type");
     auto libraryname = paramObject->GetProperty("libraryname");
-    auto controllerObj = paramObject->GetProperty("controller");
+    auto controller = paramObject->GetProperty("controller");
     std::shared_ptr<InnerXComponentController> xcomponentController = nullptr;
-    if (controllerObj->IsObject()) {
-        auto* jsXComponentController = JSRef<JSObject>::Cast(controllerObj)->Unwrap<JSXComponentController>();
+    JSRef<JSObject> controllerObj;
+    if (controller->IsObject()) {
+        controllerObj = JSRef<JSObject>::Cast(controller);
+        auto* jsXComponentController = controllerObj->Unwrap<JSXComponentController>();
         if (jsXComponentController) {
             jsXComponentController->SetInstanceId(Container::CurrentId());
             XComponentClient::GetInstance().AddControllerToJSXComponentControllersMap(
@@ -144,6 +195,9 @@ void JSXComponent::Create(const JSCallbackInfo& info)
     }
     XComponentModel::GetInstance()->Create(
         id->ToString(), xcomponentType, libraryname->ToString(), xcomponentController);
+    if (libraryname->IsEmpty() && xcomponentController && !controllerObj->IsUndefined()) {
+        SetControllerCallback(controllerObj, info.GetExecutionContext());
+    }
 
     auto detachCallback = [](const std::string& xcomponentId) {
         XComponentClient::GetInstance().DeleteControllerFromJSXComponentControllersMap(xcomponentId);

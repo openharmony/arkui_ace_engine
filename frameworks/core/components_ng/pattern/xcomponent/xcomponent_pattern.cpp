@@ -181,6 +181,7 @@ void XComponentPattern::Initialize(int32_t instanceId)
         }
         renderSurface_->InitSurface();
         renderSurface_->UpdateSurfaceConfig();
+        surfaceId_ = renderSurface_->GetUniqueId();
         InitEvent();
         SetMethodCall();
     } else if (type_ == XComponentType::NODE) {
@@ -358,6 +359,7 @@ void XComponentPattern::OnDetachFromFrameNode(FrameNode* frameNode)
         CHECK_NULL_VOID(eventHub);
         eventHub->FireDestroyEvent();
         eventHub->FireDetachEvent(id_);
+        eventHub->FireControllerDestroyedEvent(surfaceId_);
 #ifdef RENDER_EXTRACT_SUPPORTED
         if (renderContextForSurface_) {
             renderContextForSurface_->RemoveSurfaceChangedCallBack();
@@ -386,7 +388,7 @@ void XComponentPattern::SetMethodCall()
             });
         });
 
-    xcomponentController_->SetSurfaceId(renderSurface_->GetUniqueId());
+    xcomponentController_->SetSurfaceId(surfaceId_);
 }
 
 void XComponentPattern::ConfigSurface(uint32_t surfaceWidth, uint32_t surfaceHeight)
@@ -406,6 +408,8 @@ bool XComponentPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& di
     if (!drawSize_.IsPositive()) {
         return false;
     }
+    globalPosition_ = geometryNode->GetFrameOffset();
+    localPosition_ = geometryNode->GetContentOffset();
 
     if (IsSupportImageAnalyzerFeature()) {
         UpdateAnalyzerUIConfig(dirty->GetGeometryNode());
@@ -413,24 +417,13 @@ bool XComponentPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& di
 
     if (!hasXComponentInit_) {
         initSize_ = drawSize_;
-        globalPosition_ = geometryNode->GetContentOffset() + geometryNode->GetFrameOffset();
         if (!SystemProperties::GetExtSurfaceEnabled()) {
             XComponentSizeInit();
         }
-        NativeXComponentOffset(globalPosition_.GetX(), globalPosition_.GetY());
+        auto offset = globalPosition_ + localPosition_;
+        NativeXComponentOffset(offset.GetX(), offset.GetY());
         hasXComponentInit_ = true;
-    } else {
-        if (config.frameOffsetChange || config.contentOffsetChange) {
-            globalPosition_ = geometryNode->GetContentOffset() + geometryNode->GetFrameOffset();
-            NativeXComponentOffset(globalPosition_.GetX(), globalPosition_.GetY());
-        }
-        if (config.contentSizeChange) {
-            if (!SystemProperties::GetExtSurfaceEnabled()) {
-                XComponentSizeChange(drawSize_.Width(), drawSize_.Height());
-            }
-        }
     }
-    localPosition_ = geometryNode->GetContentOffset();
 #ifndef RENDER_EXTRACT_SUPPORTED
     if (SystemProperties::GetExtSurfaceEnabled()) {
         auto host = GetHost();
@@ -442,7 +435,7 @@ bool XComponentPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& di
             static_cast<int32_t>(drawSize_.Width()), static_cast<int32_t>(drawSize_.Height()));
     }
 #endif
-    UpdateSurfaceBounds();
+    UpdateSurfaceBounds(false, config.frameOffsetChange);
     // XComponentType::SURFACE has set surface default size in RSSurfaceNode->SetBounds()
     if (type_ == XComponentType::TEXTURE) {
         renderSurface_->SetSurfaceDefaultSize(
@@ -553,17 +546,26 @@ void XComponentPattern::XComponentSizeInit()
     CHECK_NULL_VOID(eventHub);
     eventHub->FireSurfaceInitEvent(id_, host->GetId());
     eventHub->FireLoadEvent(id_);
+    eventHub->FireControllerCreatedEvent(surfaceId_);
 }
 
-void XComponentPattern::XComponentSizeChange(float textureWidth, float textureHeight)
+void XComponentPattern::XComponentSizeChange(const RectF& surfaceRect, bool needFireNativeEvent)
 {
-    ContainerScope scope(instanceId_);
-    auto context = PipelineContext::GetCurrentContext();
-    CHECK_NULL_VOID(context);
-    auto viewScale = context->GetViewScale();
-    renderSurface_->AdjustNativeWindowSize(
-        static_cast<uint32_t>(textureWidth * viewScale), static_cast<uint32_t>(textureHeight * viewScale));
-    NativeXComponentChange(textureWidth, textureHeight);
+    // do not trigger when the size is first initialized
+    if (needFireNativeEvent) {
+        ContainerScope scope(instanceId_);
+        auto context = PipelineContext::GetCurrentContext();
+        CHECK_NULL_VOID(context);
+        auto viewScale = context->GetViewScale();
+        renderSurface_->AdjustNativeWindowSize(static_cast<uint32_t>(surfaceRect.Width() * viewScale),
+            static_cast<uint32_t>(surfaceRect.Height() * viewScale));
+        NativeXComponentChange(surfaceRect.Width(), surfaceRect.Height());
+    }
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto eventHub = host->GetEventHub<XComponentEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->FireControllerChangedEvent(surfaceId_, surfaceRect);
 }
 
 void XComponentPattern::InitNativeNodeCallbacks()
@@ -1196,11 +1198,13 @@ void XComponentPattern::ClearIdealSurfaceOffset(bool isXAxis)
     }
 }
 
-void XComponentPattern::UpdateSurfaceBounds(bool needForceRender)
+void XComponentPattern::UpdateSurfaceBounds(bool needForceRender, bool frameOffsetChange)
 {
     if (!drawSize_.IsPositive()) {
         return;
     }
+    auto preSurfaceSize = surfaceSize_;
+    auto preLocalPosition = localPosition_;
     if (selfIdealSurfaceWidth_.has_value() && Positive(selfIdealSurfaceWidth_.value()) &&
         selfIdealSurfaceHeight_.has_value() && Positive(selfIdealSurfaceHeight_.value())) {
         localPosition_.SetX(selfIdealSurfaceOffsetX_.has_value()
@@ -1213,6 +1217,13 @@ void XComponentPattern::UpdateSurfaceBounds(bool needForceRender)
         surfaceSize_ = { selfIdealSurfaceWidth_.value(), selfIdealSurfaceHeight_.value() };
     } else {
         surfaceSize_ = drawSize_;
+    }
+    if (frameOffsetChange || preLocalPosition != localPosition_) {
+        auto offset = globalPosition_ + localPosition_;
+        NativeXComponentOffset(offset.GetX(), offset.GetY());
+    }
+    if (preSurfaceSize != surfaceSize_) {
+        XComponentSizeChange({ localPosition_, surfaceSize_ }, preSurfaceSize.IsPositive());
     }
     if (handlingSurfaceRenderContext_) {
         handlingSurfaceRenderContext_->SetBounds(
