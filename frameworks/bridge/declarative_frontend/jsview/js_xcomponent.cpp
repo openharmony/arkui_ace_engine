@@ -143,7 +143,7 @@ void JSXComponent::Create(const JSCallbackInfo& info)
     XComponentModel::GetInstance()->Create(
         id->ToString(), xcomponentType, libraryNameValue->ToString(), xcomponentController);
 
-    if(libraryNameValue->IsString()) {
+    if (libraryNameValue->IsString()) {
         auto libraryName = libraryNameValue->ToString();
         XComponentModel::GetInstance()->SetLibraryName(libraryName);
     }
@@ -284,7 +284,8 @@ void JSXComponent::JsOnAppear(const JSCallbackInfo& args)
 {
     auto type = XComponentModel::GetInstance()->GetType();
     auto libraryName = XComponentModel::GetInstance()->GetLibraryName();
-    if (type != XComponentType::NODE && (Container::LessThanAPIVersion(PlatformVersion::VERSION_TWELVE) || libraryName != "")) {
+    if (type != XComponentType::NODE &&
+        (Container::LessThanAPIVersion(PlatformVersion::VERSION_TWELVE) || libraryName != "")) {
         return;
     }
     JSInteractableView::JsOnAppear(args);
@@ -294,7 +295,8 @@ void JSXComponent::JsOnDisAppear(const JSCallbackInfo& args)
 {
     auto type = XComponentModel::GetInstance()->GetType();
     auto libraryName = XComponentModel::GetInstance()->GetLibraryName();
-    if (type != XComponentType::NODE && (Container::LessThanAPIVersion(PlatformVersion::VERSION_TWELVE) || libraryName != "")) {
+    if (type != XComponentType::NODE &&
+        (Container::LessThanAPIVersion(PlatformVersion::VERSION_TWELVE) || libraryName != "")) {
         return;
     }
     JSInteractableView::JsOnDisAppear(args);
@@ -304,7 +306,8 @@ void JSXComponent::JsOnTouch(const JSCallbackInfo& args)
 {
     auto type = XComponentModel::GetInstance()->GetType();
     auto libraryName = XComponentModel::GetInstance()->GetLibraryName();
-    if (type != XComponentType::NODE && (Container::LessThanAPIVersion(PlatformVersion::VERSION_TWELVE) || libraryName != "")) {
+    if (type != XComponentType::NODE &&
+        (Container::LessThanAPIVersion(PlatformVersion::VERSION_TWELVE) || libraryName != "")) {
         return;
     }
     JSInteractableView::JsOnTouch(args);
@@ -314,7 +317,8 @@ void JSXComponent::JsOnClick(const JSCallbackInfo& args)
 {
     auto type = XComponentModel::GetInstance()->GetType();
     auto libraryName = XComponentModel::GetInstance()->GetLibraryName();
-    if (type != XComponentType::NODE && (Container::LessThanAPIVersion(PlatformVersion::VERSION_TWELVE) || libraryName != "")) {
+    if (type != XComponentType::NODE &&
+        (Container::LessThanAPIVersion(PlatformVersion::VERSION_TWELVE) || libraryName != "")) {
         return;
     }
     JSViewAbstract::JsOnClick(args);
@@ -324,7 +328,8 @@ void JSXComponent::JsOnKeyEvent(const JSCallbackInfo& args)
 {
     auto type = XComponentModel::GetInstance()->GetType();
     auto libraryName = XComponentModel::GetInstance()->GetLibraryName();
-    if (type != XComponentType::NODE && (Container::LessThanAPIVersion(PlatformVersion::VERSION_TWELVE) || libraryName != "")) {
+    if (type != XComponentType::NODE &&
+        (Container::LessThanAPIVersion(PlatformVersion::VERSION_TWELVE) || libraryName != "")) {
         return;
     }
     JSViewAbstract::JsOnKeyEvent(args);
@@ -334,7 +339,8 @@ void JSXComponent::JsOnMouse(const JSCallbackInfo& args)
 {
     auto type = XComponentModel::GetInstance()->GetType();
     auto libraryName = XComponentModel::GetInstance()->GetLibraryName();
-    if (type != XComponentType::NODE && (Container::LessThanAPIVersion(PlatformVersion::VERSION_TWELVE) || libraryName != "")) {
+    if (type != XComponentType::NODE &&
+        (Container::LessThanAPIVersion(PlatformVersion::VERSION_TWELVE) || libraryName != "")) {
         return;
     }
     JSViewAbstract::JsOnMouse(args);
@@ -344,7 +350,8 @@ void JSXComponent::JsOnHover(const JSCallbackInfo& args)
 {
     auto type = XComponentModel::GetInstance()->GetType();
     auto libraryName = XComponentModel::GetInstance()->GetLibraryName();
-    if (type != XComponentType::NODE && (Container::LessThanAPIVersion(PlatformVersion::VERSION_TWELVE) || libraryName != "")) {
+    if (type != XComponentType::NODE &&
+        (Container::LessThanAPIVersion(PlatformVersion::VERSION_TWELVE) || libraryName != "")) {
         return;
     }
     JSViewAbstract::JsOnHover(args);
@@ -355,7 +362,8 @@ void JSXComponent::JsOnFocus(const JSCallbackInfo& args)
 {
     auto type = XComponentModel::GetInstance()->GetType();
     auto libraryName = XComponentModel::GetInstance()->GetLibraryName();
-    if (type != XComponentType::NODE && (Container::LessThanAPIVersion(PlatformVersion::VERSION_TWELVE) || libraryName != "")) {
+    if (type != XComponentType::NODE &&
+        (Container::LessThanAPIVersion(PlatformVersion::VERSION_TWELVE) || libraryName != "")) {
         return;
     }
     JSViewAbstract::JsOnFocus(args);
@@ -365,7 +373,8 @@ void JSXComponent::JsOnBlur(const JSCallbackInfo& args)
 {
     auto type = XComponentModel::GetInstance()->GetType();
     auto libraryName = XComponentModel::GetInstance()->GetLibraryName();
-    if (type != XComponentType::NODE && (Container::LessThanAPIVersion(PlatformVersion::VERSION_TWELVE) || libraryName != "")) {
+    if (type != XComponentType::NODE &&
+        (Container::LessThanAPIVersion(PlatformVersion::VERSION_TWELVE) || libraryName != "")) {
         return;
     }
     JSViewAbstract::JsOnBlur(args);
