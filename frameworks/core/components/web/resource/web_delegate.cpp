@@ -61,6 +61,8 @@
 #include "frameworks/base/utils/system_properties.h"
 #endif
 
+#include "base/notification/eventhandler/interfaces/inner_api/event_handler.h"
+
 namespace OHOS::Ace {
 
 namespace {
@@ -662,6 +664,18 @@ WebDelegateObserver::~WebDelegateObserver() {}
 void WebDelegateObserver::NotifyDestory()
 {
     auto context = context_.Upgrade();
+    if (!context) {
+        auto currentHandler = OHOS::AppExecFwk::EventHandler::Current();
+        currentHandler->PostTask(
+            [weak = WeakClaim(this)]() {
+                auto observer = weak.Upgrade();
+                CHECK_NULL_VOID(observer);
+                if (observer->delegate_) {
+                    observer->delegate_.Reset();
+                }
+            },
+            DESTRUCT_DELAY_MILLISECONDS);
+    }
     CHECK_NULL_VOID(context);
     auto taskExecutor = context->GetTaskExecutor();
     CHECK_NULL_VOID(taskExecutor);
