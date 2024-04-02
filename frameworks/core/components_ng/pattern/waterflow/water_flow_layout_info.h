@@ -22,6 +22,7 @@
 #include <sstream>
 
 #include "core/components/scroll/scroll_controller_base.h"
+#include "core/components_ng/pattern/waterflow/water_flow_layout_info_base.h"
 #include "core/components_ng/pattern/waterflow/water_flow_sections.h"
 #include "core/components_ng/property/measure_property.h"
 
@@ -36,9 +37,7 @@ struct FlowItemPosition {
     float startMainPos = 0;
 };
 
-constexpr int32_t EMPTY_JUMP_INDEX = -2;
-
-class WaterFlowLayoutInfo {
+class WaterFlowLayoutInfo: public WaterFlowLayoutInfoBase {
 public:
     int32_t GetCrossIndex(int32_t itemIndex) const;
     void UpdateStartIndex();
