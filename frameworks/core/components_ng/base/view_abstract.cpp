@@ -3289,7 +3289,7 @@ RefPtr<ProgressMaskProperty> ViewAbstract::GetMaskProgress(FrameNode* frameNode)
 
 BlendMode ViewAbstract::GetBlendMode(FrameNode* frameNode)
 {
-    BlendMode value = BlendMode::CLEAR;
+    BlendMode value = BlendMode::NONE;
     auto target = frameNode->GetRenderContext();
     CHECK_NULL_RETURN(target, value);
     return target->GetBackBlendModeValue(value);
@@ -3542,7 +3542,7 @@ Alignment ViewAbstract::GetAlign(FrameNode *frameNode)
 
 float ViewAbstract::GetWidth(FrameNode* frameNode)
 {
-    float value = 0.0f;
+    float value = -1.0f;
     const auto& layoutProperty = frameNode->GetLayoutProperty();
     CHECK_NULL_RETURN(layoutProperty, value);
     const auto& property = layoutProperty->GetCalcLayoutConstraint();
@@ -3559,7 +3559,7 @@ float ViewAbstract::GetWidth(FrameNode* frameNode)
 
 float ViewAbstract::GetHeight(FrameNode* frameNode)
 {
-    float value = 0.0f;
+    float value = -1.0f;
     const auto& layoutProperty = frameNode->GetLayoutProperty();
     CHECK_NULL_RETURN(layoutProperty, value);
     const auto& property = layoutProperty->GetCalcLayoutConstraint();
@@ -3586,7 +3586,10 @@ std::string ViewAbstract::GetBackgroundImageSrc(FrameNode* frameNode)
 {
     auto target = frameNode->GetRenderContext();
     CHECK_NULL_RETURN(target, "");
-    return target->GetBackgroundImage()->GetSrc();
+    if (target->GetBackgroundImage().has_value()) {
+        return target->GetBackgroundImage()->GetSrc();
+    }
+    return "";
 }
 
 ImageRepeat ViewAbstract::GetBackgroundImageRepeat(FrameNode* frameNode)
@@ -3594,7 +3597,10 @@ ImageRepeat ViewAbstract::GetBackgroundImageRepeat(FrameNode* frameNode)
     ImageRepeat value = ImageRepeat::NO_REPEAT;
     auto target = frameNode->GetRenderContext();
     CHECK_NULL_RETURN(target, value);
-    return target->GetBackgroundImageRepeat().value();
+    if (target->GetBackgroundImageRepeat().has_value()) {
+        return target->GetBackgroundImageRepeat().value();
+    }
+    return value;
 }
 
 PaddingProperty ViewAbstract::GetPadding(FrameNode* frameNode)
