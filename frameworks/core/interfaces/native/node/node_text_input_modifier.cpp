@@ -968,6 +968,12 @@ void ResetTextInputWordBreak(ArkUINodeHandle node)
     CHECK_NULL_VOID(frameNode);
     TextFieldModelNG::SetWordBreak(frameNode, WORD_BREAK_TYPES[2]); // 2 is the default value of WordBreak::BREAK_WORD
 }
+
+void ResetTextInputPadding(ArkUINodeHandle node)
+{
+    auto *frameNode = reinterpret_cast<FrameNode *>(node);
+    TextFieldModelNG::ResetTextInputPadding(frameNode);
+}
 } // namespace
 
 namespace NodeModifier {
@@ -1000,7 +1006,7 @@ const ArkUITextInputModifier* GetTextInputModifier()
         SetTextInputDecoration, ResetTextInputDecoration, SetTextInputLetterSpacing, ResetTextInputLetterSpacing,
         SetTextInputLineHeight, ResetTextInputLineHeight, SetTextInputFontFeature, ResetTextInputFontFeature,
         SetTextInputWordBreak, ResetTextInputWordBreak, SetTextInputPasswordRules, ResetTextInputPasswordRules,
-        SetTextInputEnableAutoFill, ResetTextInputEnableAutoFill };
+        SetTextInputEnableAutoFill, ResetTextInputEnableAutoFill, ResetTextInputPadding };
     return &modifier;
 }
 

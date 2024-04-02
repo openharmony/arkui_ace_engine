@@ -1395,4 +1395,22 @@ void TextFieldModelNG::TextFieldModelNG::SetWordBreak(FrameNode* frameNode, Ace:
 {
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, WordBreak, value, frameNode);
 }
+
+void TextFieldModelNG::ResetTextInputPadding(FrameNode* frameNode)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pipeline = frameNode->GetContext();
+    CHECK_NULL_VOID(pipeline);
+    auto themeManager = pipeline->GetThemeManager();
+    CHECK_NULL_VOID(themeManager);
+    auto textFieldTheme = themeManager->GetTheme<TextFieldTheme>();
+    CHECK_NULL_VOID(textFieldTheme);
+    auto themePadding = textFieldTheme->GetPadding();
+    PaddingProperty paddings;
+    paddings.top = NG::CalcLength(themePadding.Top().ConvertToPx());
+    paddings.bottom = NG::CalcLength(themePadding.Bottom().ConvertToPx());
+    paddings.left = NG::CalcLength(themePadding.Left().ConvertToPx());
+    paddings.right = NG::CalcLength(themePadding.Right().ConvertToPx());
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, Padding, paddings, frameNode);
+}
 } // namespace OHOS::Ace::NG

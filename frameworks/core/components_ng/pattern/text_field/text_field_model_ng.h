@@ -195,6 +195,7 @@ public:
     static int32_t GetTextSelectionIndex(FrameNode* frameNode, bool isEnd);
     static void SetFontFeature(FrameNode* frameNode, const FONT_FEATURES_MAP& value);
     static void SetWordBreak(FrameNode* frameNode, Ace::WordBreak value);
+    static void ResetTextInputPadding(FrameNode* frameNode);
 
 private:
     void AddDragFrameNodeToManager() const;

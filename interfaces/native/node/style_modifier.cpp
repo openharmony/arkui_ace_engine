@@ -725,7 +725,11 @@ int32_t SetPadding(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
 void ResetPadding(ArkUI_NodeHandle node)
 {
     auto* fullImpl = GetFullImpl();
-    fullImpl->getNodeModifiers()->getCommonModifier()->resetPadding(node->uiNodeHandle);
+    if (node->type == ARKUI_NODE_TEXT_INPUT) {
+        fullImpl->getNodeModifiers()->getTextInputModifier()->resetTextInputPadding(node->uiNodeHandle);
+    } else {
+        fullImpl->getNodeModifiers()->getCommonModifier()->resetPadding(node->uiNodeHandle);
+    }
 }
 
 const ArkUI_AttributeItem* GetPadding(ArkUI_NodeHandle node)
@@ -2984,7 +2988,6 @@ int32_t SetShowUnderline(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
     if (actualSize < 0 || !InRegion(NUM_0, NUM_1, item->value[NUM_0].i32)) {
         return ERROR_CODE_PARAM_INVALID;
     }
-    // already check in entry point.
     auto* fullImpl = GetFullImpl();
     fullImpl->getNodeModifiers()->getTextInputModifier()->setTextInputShowUnderline(
         node->uiNodeHandle, item->value[NUM_0].i32);
