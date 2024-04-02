@@ -4207,6 +4207,9 @@ void RosenRenderContext::ResetPageTransitionEffect()
     UpdateTransformScale(VectorF(1.0f, 1.0f));
     UpdateTransformTranslate({ 0.0f, 0.0f, 0.0f });
     UpdateOpacity(1.0);
+    ClipWithRRect(RectF(0.0f, 0.0f, REMOVE_CLIP_SIZE, REMOVE_CLIP_SIZE),
+        RadiusF(EdgeF(0.0f, 0.0f)));
+    UpdateBackgroundColor(DEFAULT_MASK_COLOR);
 }
 
 void RosenRenderContext::AddChild(const RefPtr<RenderContext>& renderContext, int index)

@@ -72,6 +72,9 @@ void FirePageTransition(const RefPtr<FrameNode>& page, PageTransitionType transi
                 pattern->SetPageInTransition(false);
                 pattern->ProcessHideState();
                 context->MarkNeedFlushMouseEvent();
+                constexpr float REMOVE_CLIP_SIZE = 10000.0f;
+                page->GetRenderContext()->ClipWithRRect(RectF(0.0f, 0.0f, REMOVE_CLIP_SIZE, REMOVE_CLIP_SIZE),
+                    RadiusF(EdgeF(0.0f, 0.0f)));
             });
         return;
     }
