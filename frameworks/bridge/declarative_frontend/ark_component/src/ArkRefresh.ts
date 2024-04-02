@@ -19,9 +19,6 @@ class ArkRefreshComponent extends ArkComponent implements RefreshAttribute {
   constructor(nativePtr: KNode, classType?: ModifierType) {
     super(nativePtr, classType);
   }
-  onGestureJudgeBegin(callback: (gestureInfo: GestureInfo, event: BaseGestureEvent) => GestureJudgeResult): this {
-    throw new Error('Method not implemented.');
-  }
   onStateChange(callback: (state: RefreshStatus) => void): this {
     throw new Error('Method not implemented.');
   }

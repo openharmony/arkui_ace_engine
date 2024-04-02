@@ -629,9 +629,6 @@ class ArkTextInputComponent extends ArkComponent implements CommonMethod<TextInp
   cancelButton(value: { style?: CancelButtonStyle, icon?: IconOptions }): TextInputAttribute {
     throw new Error('Method not implemented.');
   }
-  onGestureJudgeBegin(callback: (gestureInfo: GestureInfo, event: BaseGestureEvent) => GestureJudgeResult): this {
-    throw new Error('Method not implemented.');
-  }
   selectAll(value: boolean): TextInputAttribute {
     throw new Error('Method not implemented.');
   }

@@ -551,9 +551,6 @@ class ArkTextComponent extends ArkComponent implements TextAttribute {
   dataDetectorConfig(config: any): this {
     throw new Error('Method not implemented.');
   }
-  onGestureJudgeBegin(callback: (gestureInfo: GestureInfo, event: BaseGestureEvent) => GestureJudgeResult): this {
-    throw new Error('Method not implemented.');
-  }
   font(value: Font): TextAttribute {
     modifierWithKey(this._modifiersWithKeys, TextFontModifier.identity, TextFontModifier, value);
     return this;

@@ -511,8 +511,11 @@ var GestureMask;
 var GesturePriority;
 (function (GesturePriority) {
   GesturePriority[GesturePriority["Low"] = 0] = "Low";
+  GesturePriority[GesturePriority["NORMAL"] = 0] = "NORMAL";
   GesturePriority[GesturePriority["High"] = 1] = "High";
+  GesturePriority[GesturePriority["PRIORITY"] = 1] = "PRIORITY";
   GesturePriority[GesturePriority["Parallel"] = 2] = "Parallel";
+  GesturePriority[GesturePriority["PARALLEL"] = 2] = "PARALLEL";
 })(GesturePriority || (GesturePriority = {}));
 
 var Visibility;

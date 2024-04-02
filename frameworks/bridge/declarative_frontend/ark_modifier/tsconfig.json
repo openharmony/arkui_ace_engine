@@ -21,6 +21,7 @@
         "src/flex_modifier.ts",
         "src/form_component_modifier.ts",
         "src/gauge_modifier.ts",
+        "src/gesture_modifier.ts",
         "src/grid_modifier.ts",
         "src/grid_col_modifier.ts",
         "src/griditem_modifier.ts",
