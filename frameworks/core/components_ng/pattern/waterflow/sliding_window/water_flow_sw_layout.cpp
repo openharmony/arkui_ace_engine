@@ -22,16 +22,25 @@
 #include "core/components/scroll/scroll_controller_base.h"
 #include "core/components_ng/layout/layout_wrapper.h"
 #include "core/components_ng/pattern/waterflow/water_flow_layout_info_base.h"
+#include "core/components_ng/pattern/waterflow/water_flow_layout_property.h"
 namespace OHOS::Ace::NG {
 void WaterFlowSWLayout::Measure(LayoutWrapper* wrapper)
 {
     wrapper_ = wrapper;
+    auto props = DynamicCast<WaterFlowLayoutProperty>(wrapper->GetLayoutProperty());
+
     float mainSize = Init();
     if (info_->jumpIndex_ != EMPTY_JUMP_INDEX) {
         MeasureOnJump(info_->jumpIndex_, info_->align_, mainSize);
+    } else if (info_->targetIndex_) {
+        MeasureToTarget(*info_->targetIndex_);
     } else {
-        MeasureOnOffset(mainSize, info_->delta_);
+        ApplyOffset(mainSize, info_->delta_);
+        if (!overScroll_) {
+            AdjustOverScroll(mainSize);
+        }
     }
+    wrapper->SetCacheCount(props->GetCachedCountValue(1));
 }
 
 void WaterFlowSWLayout::Layout(LayoutWrapper* wrapper)
@@ -55,7 +64,7 @@ void WaterFlowSWLayout::Layout(LayoutWrapper* wrapper)
     wrapper->SetActiveChildRange(info_->startIndex_, info_->endIndex_);
 }
 
-void WaterFlowSWLayout::MeasureOnOffset(float mainSize, float offset)
+void WaterFlowSWLayout::ApplyOffset(float mainSize, float offset)
 {
     for (auto& lane : info_->lanes_) {
         lane.startPos += offset;
@@ -221,7 +230,7 @@ void WaterFlowSWLayout::MeasureOnJump(int32_t jumpIdx, ScrollAlign align, float 
     switch (align) {
         case ScrollAlign::START: {
             if (inView || closeToView) {
-                MeasureOnOffset(mainSize, -info_->DistanceToTop(jumpIdx, mainGap_));
+                ApplyOffset(mainSize, -info_->DistanceToTop(jumpIdx, mainGap_));
             } else {
                 std::for_each(info_->lanes_.begin(), info_->lanes_.end(), [](auto& it) {
                     it->items_.clear();
@@ -238,7 +247,7 @@ void WaterFlowSWLayout::MeasureOnJump(int32_t jumpIdx, ScrollAlign align, float 
             auto child = MeasureChild(jumpIdx);
             float itemH = child->GetGeometryNode()->GetMarginFrameSize().MainSize(info_->axis_);
             if (inView || closeToView) {
-                MeasureOnOffset(mainSize, -info_->DistanceToTop(jumpIdx, mainGap_) + (mainSize - itemH) / 2.0f);
+                ApplyOffset(mainSize, -info_->DistanceToTop(jumpIdx, mainGap_) + (mainSize - itemH) / 2.0f);
             } else {
                 std::for_each(info_->lanes_.begin(), info_->lanes_.end(), [mainSize, itemH](auto& it) {
                     it->items_.clear();
@@ -256,7 +265,7 @@ void WaterFlowSWLayout::MeasureOnJump(int32_t jumpIdx, ScrollAlign align, float 
         }
         case ScrollAlign::END: {
             if (inView || closeToView) {
-                MeasureOnOffset(mainSize, info_->DistanceToBottom(jumpIdx, mainSize, mainGap_));
+                ApplyOffset(mainSize, info_->DistanceToBottom(jumpIdx, mainSize, mainGap_));
             } else {
                 std::for_each(info_->lanes_.begin(), info_->lanes_.end(), [mainSize](auto& it) {
                     it->items_.clear();
@@ -271,6 +280,25 @@ void WaterFlowSWLayout::MeasureOnJump(int32_t jumpIdx, ScrollAlign align, float 
         }
         default:
             break;
+    }
+    info_->SyncRange();
+    AdjustOverScroll(mainSize);
+}
+
+void WaterFlowSWLayout::AdjustOverScroll(float mainSize)
+{
+    if (info_->lanes_.empty()) {
+        return;
+    }
+    auto minStart = std::min_element(info_->lanes_.begin(), info_->lanes_.end(),
+        [](const auto& a, const auto& b) { return LessNotEqual(a.startPos, b.startPos); });
+    auto maxEnd = std::max_element(info_->lanes_.begin(), info_->lanes_.end(),
+        [](const auto& a, const auto& b) { return LessNotEqual(a.endPos, b.endPos); });
+
+    if (Positive(minStart->startPos)) {
+        ApplyOffset(mainSize, -minStart->startPos);
+    } else if (LessNotEqual(maxEnd->endPos, mainSize)) {
+        ApplyOffset(mainSize, mainSize - maxEnd->endPos);
     }
 }
 } // namespace OHOS::Ace::NG

@@ -16,17 +16,16 @@
 
 #include <algorithm>
 
-#include "base/utils/utils.h"
 namespace OHOS::Ace::NG {
 void WaterFlowLayoutInfoSW::SyncRange()
 {
-    auto min = std::min_element(lanes_.begin(), lanes_.end(),
-        [](const auto& lhs, const auto& rhs) { return LessNotEqual(lhs.startPos, rhs.startPos); });
-    auto max = std::max_element(lanes_.begin(), lanes_.end(),
-        [](const auto& lhs, const auto& rhs) { return LessNotEqual(lhs.endPos, rhs.endPos); });
-
-    startIndex_ = min->items_.front().idx;
-    endIndex_ = max->items_.back().idx;
+    for (const auto& lane : lanes_) {
+        if (lane.items_.empty()) {
+            continue;
+        }
+        startIndex_ = std::min(startIndex_, lane.items_.front().idx);
+        endIndex_ = std::max(endIndex_, lane.items_.back().idx);
+    }
 }
 
 float WaterFlowLayoutInfoSW::DistanceToTop(size_t item, float mainGap) const

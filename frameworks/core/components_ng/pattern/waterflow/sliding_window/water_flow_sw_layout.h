@@ -34,7 +34,7 @@ public:
 private:
     float Init();
 
-    void MeasureOnOffset(float mainSize, float offset);
+    void ApplyOffset(float mainSize, float offset);
 
     void MeasureToTarget(int32_t targetIdx);
 
@@ -69,6 +69,8 @@ private:
     void ClearFront();
     void ClearBack(float mainSize);
 
+    void AdjustOverScroll(float mainSize);
+
     RefPtr<LayoutWrapper> MeasureChild(int32_t idx);
 
     LayoutWrapper* wrapper_;
@@ -76,6 +78,8 @@ private:
 
     float mainGap_ = 0.0f;
     float crossGap_ = 0.0f;
+
+    bool overScroll_ = true;
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_WATERFLOW_WATER_FLOW_SW_LAYOUT_H
