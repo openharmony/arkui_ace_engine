@@ -24,7 +24,6 @@
 #include "base/utils/noncopyable.h"
 #include "core/components_ng/render/ext_surface_callback_interface.h"
 #include "core/components_ng/render/render_context.h"
-#include "foundation/graphic/graphic_2d/interfaces/inner_api/surface/surface_type.h"
 
 namespace OHOS::Ace::NG {
 // RenderSurface is used for SurfaceNode
@@ -86,7 +85,7 @@ public:
 
     virtual void SetExtSurfaceCallback(const RefPtr<ExtSurfaceCallbackInterface>& extSurfaceCallback) {}
 
-    virtual void SetTransformHint(GraphicTransformType transformHint) {}
+    virtual void SetTransformHint(Rotation dmRotation) {}
 
     virtual void SetIsTexture(bool isTexture) {}
 

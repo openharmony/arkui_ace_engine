@@ -123,7 +123,9 @@ public:
 
     void SetExtSurfaceCallback(const RefPtr<ExtSurfaceCallbackInterface>& extSurfaceCallback) override;
 
-    void SetTransformHint(GraphicTransformType transformHint) override;
+    GraphicTransformType ConvertRotation(Rotation rotation);
+
+    void SetTransformHint(Rotation dmRotation) override;
 
 private:
     void PostRenderOnlyTaskToUI();

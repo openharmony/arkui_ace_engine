@@ -197,10 +197,34 @@ void RosenRenderSurface::SetExtSurfaceCallback(const RefPtr<ExtSurfaceCallbackIn
     extSurfaceCallbackInterface_ = extSurfaceCallback;
 }
 
-void RosenRenderSurface::SetTransformHint(GraphicTransformType transformHint)
+GraphicTransformType RosenRenderSurface::ConvertRotation(Rotation rotation)
 {
+    GraphicTransformType transform = GraphicTransformType::GRAPHIC_ROTATE_BUTT;
+    switch (rotation) {
+        case Rotation::ROTATION_0:
+            transform = GraphicTransformType::GRAPHIC_ROTATE_NONE;
+            break;
+        case Rotation::ROTATION_90:
+            transform = GraphicTransformType::GRAPHIC_ROTATE_90;
+            break;
+        case Rotation::ROTATION_180:
+            transform = GraphicTransformType::GRAPHIC_ROTATE_180;
+            break;
+        case Rotation::ROTATION_270:
+            transform = GraphicTransformType::GRAPHIC_ROTATE_270;
+            break;
+        default:
+            transform = GraphicTransformType::GRAPHIC_ROTATE_NONE;
+            break;
+    }
+    return transform;
+}
+
+void RosenRenderSurface::SetTransformHint(Rotation dmRotation)
+{
+    auto transform = ConvertRotation(dmRotation);
     CHECK_NULL_VOID(producerSurface_);
-    producerSurface_->SetTransformHint(transformHint);
+    producerSurface_->SetTransformHint(transform);
 }
 
 void RosenRenderSurface::SetSurfaceDefaultSize(int32_t width, int32_t height)
