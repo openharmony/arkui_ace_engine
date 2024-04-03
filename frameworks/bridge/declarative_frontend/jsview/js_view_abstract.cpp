@@ -6949,6 +6949,13 @@ void JSViewAbstract::JsPointLight(const JSCallbackInfo& info)
     }
 }
 
+void JSViewAbstract::JsSetDragEventStrictReportingEnabled(const JSCallbackInfo& info)
+{
+    if (info[0]->IsBoolean()) {
+        ViewAbstractModel::GetInstance()->SetDragEventStrictReportingEnabled(info[0]->ToBoolean());
+    }
+}
+
 void JSViewAbstract::JSBind(BindingTarget globalObj)
 {
     JSClass<JSViewAbstract>::Declare("JSViewAbstract");
@@ -7137,6 +7144,9 @@ void JSViewAbstract::JSBind(BindingTarget globalObj)
 
     JSClass<JSViewAbstract>::StaticMethod("drawModifier", &JSViewAbstract::JsDrawModifier);
     JSClass<JSViewAbstract>::StaticMethod("gestureModifier", &JSViewAbstract::JsGestureModifier);
+
+    JSClass<JSViewAbstract>::StaticMethod(
+        "setDragEventStrictReportingEnabled", &JSViewAbstract::JsSetDragEventStrictReportingEnabled);
 
     JSClass<JSViewAbstract>::Bind(globalObj);
 }

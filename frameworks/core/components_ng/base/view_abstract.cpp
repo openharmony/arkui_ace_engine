@@ -3943,4 +3943,13 @@ void ViewAbstract::SetOnSizeChanged(
     CHECK_NULL_VOID(frameNode);
     frameNode->SetOnSizeChangeCallback(std::move(onSizeChanged));
 }
+
+void ViewAbstract::SetDragEventStrictReportingEnabled(bool dragEventStrictReportingEnabled)
+{
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto dragDropManager = pipeline->GetDragDropManager();
+    CHECK_NULL_VOID(dragDropManager);
+    dragDropManager->SetEventStrictReportingEnabled(dragEventStrictReportingEnabled);
+}
 } // namespace OHOS::Ace::NG
