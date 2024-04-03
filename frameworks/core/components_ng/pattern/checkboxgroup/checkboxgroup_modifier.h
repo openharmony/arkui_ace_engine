@@ -226,6 +226,13 @@ public:
         hoverEffectType_ = hoverEffectType;
     }
 
+    void SetCheckboxGroupStyle(CheckBoxStyle checkBoxGroupStyle)
+    {
+        checkBoxGroupStyle_ = checkBoxGroupStyle;
+        CHECK_NULL_VOID(checkBoxGroupShape_);
+        checkBoxGroupShape_->Set(static_cast<int32_t>(checkBoxGroupStyle));
+    }
+
 private:
     RefPtr<AnimatablePropertyColor> activeColor_;
     RefPtr<AnimatablePropertyColor> pointColor_;
@@ -240,6 +247,8 @@ private:
     RefPtr<PropertyInt> status_;
     RefPtr<PropertyOffsetF> offset_;
     RefPtr<PropertySizeF> size_;
+    RefPtr<PropertyInt> checkBoxGroupShape_;
+    CheckBoxStyle checkBoxGroupStyle_ = CheckBoxStyle::CIRCULAR_STYLE;
     float borderWidth_;
     float borderRadius_;
     Color shadowColor_;

@@ -41,7 +41,6 @@
 #include "core/components_ng/property/property.h"
 #include "core/interfaces/native/node/node_api.h"
 #include "core/pipeline/base/element_register.h"
-#include "frameworks/core/components_ng/pattern/checkboxgroup/checkboxgroup_model_ng.h"
 #include "frameworks/core/components_ng/pattern/panel/sliding_panel_model_ng.h"
 #include "frameworks/core/pipeline/base/element.h"
 

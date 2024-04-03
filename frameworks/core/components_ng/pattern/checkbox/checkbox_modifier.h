@@ -181,6 +181,7 @@ public:
     {
         touchHoverType_ = touchHoverType;
     }
+
     void SetCheckboxStyle(CheckBoxStyle checkBoxStyle)
     {
         checkBoxStyle_ = checkBoxStyle;

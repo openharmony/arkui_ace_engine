@@ -27,6 +27,7 @@
 #include "core/components_ng/pattern/checkbox/checkbox_layout_algorithm.h"
 #include "core/components_ng/pattern/checkbox/checkbox_paint_method.h"
 #include "core/components_ng/pattern/checkbox/checkbox_paint_property.h"
+#include "core/components_ng/pattern/checkboxgroup/checkboxgroup_paint_property.h"
 #include "core/components_ng/pattern/pattern.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
@@ -171,6 +172,16 @@ public:
         json->Put("select", select ? "true" : "false");
     }
 
+    void SetOriginalCheckboxStyle(OriginalCheckBoxStyle style)
+    {
+        originalStyle_ = style;
+    }
+
+    OriginalCheckBoxStyle GetOriginalCheckboxStyle()
+    {
+        return originalStyle_;
+    }
+
     FocusPattern GetFocusPattern() const override;
     void UpdateUIStatus(bool check);
 
@@ -240,7 +251,7 @@ private:
     OffsetF hotZoneOffset_;
     SizeF hotZoneSize_;
     TouchHoverAnimationType touchHoverType_ = TouchHoverAnimationType::NONE;
-
+    OriginalCheckBoxStyle originalStyle_ = OriginalCheckBoxStyle::CIRCULAR_STYLE;
     RefPtr<CheckBoxModifier> checkboxModifier_;
     WeakPtr<GroupManager> groupManager_;
 
