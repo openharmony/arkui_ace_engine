@@ -3504,7 +3504,7 @@ void WebPattern::RegisterVisibleAreaChangeCallback()
         CHECK_NULL_VOID(webPattern);
         webPattern->OnVisibleAreaChange(visible);
     };
-    std::vector<double> ratioList = {0.0};
+    std::vector<double> ratioList = {0.0, 1.0};
     pipeline->AddVisibleAreaChangeNode(host, ratioList, callback, false);
 }
 } // namespace OHOS::Ace::NG
