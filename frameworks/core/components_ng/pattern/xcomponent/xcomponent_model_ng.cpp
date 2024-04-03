@@ -23,15 +23,15 @@
 
 namespace OHOS::Ace::NG {
 const uint32_t DEFAULT_SURFACE_SIZE = 0;
-void XComponentModelNG::Create(const std::string& id, XComponentType type, const std::string& libraryname,
+void XComponentModelNG::Create(const std::string& id, XComponentType type, const std::string& /* libraryname */,
     const std::shared_ptr<InnerXComponentController>& xcomponentController)
 {
     auto* stack = ViewStackProcessor::GetInstance();
     auto nodeId = stack->ClaimNodeId();
     ACE_LAYOUT_SCOPED_TRACE("Create[%s][self:%d]", V2::XCOMPONENT_ETS_TAG, nodeId);
     auto frameNode = FrameNode::GetOrCreateFrameNode(
-        V2::XCOMPONENT_ETS_TAG, nodeId, [id, type, /* libraryname, */ xcomponentController]() {
-            return AceType::MakeRefPtr<XComponentPattern>(id, type, /* libraryname, */ xcomponentController);
+        V2::XCOMPONENT_ETS_TAG, nodeId, [id, type, xcomponentController]() {
+            return AceType::MakeRefPtr<XComponentPattern>(id, type, xcomponentController);
         });
     stack->Push(frameNode);
     ACE_UPDATE_LAYOUT_PROPERTY(XComponentLayoutProperty, XComponentType, type);
