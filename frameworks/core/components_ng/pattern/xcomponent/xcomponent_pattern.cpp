@@ -16,7 +16,7 @@
 #include "core/components_ng/pattern/xcomponent/xcomponent_pattern.h"
 
 #include "interfaces/native/native_event.h"
-#include "interfaces/native/ui_input_event.h"
+#include "interfaces/native/event/ui_input_event_impl.h"
 
 #include "base/geometry/ng/size_t.h"
 #include "base/log/log_wrapper.h"
@@ -714,11 +714,10 @@ void XComponentPattern::InitOnTouchIntercept(const RefPtr<GestureEventHub>& gest
         [pattern = Claim(this)](
             const TouchEventInfo& touchEvent) -> HitTestMode {
             auto event = touchEvent.ConvertToTouchEvent();
-            auto* uiEvent = static_cast<ArkUI_UIInputEvent*>(&event);
-            CHECK_NULL_RETURN(uiEvent, NG::HitTestMode::HTMDEFAULT);
+            ArkUI_UIInputEvent uiEvent { ARKUI_UIINPUTEVENT_TYPE_TOUCH, TOUCH_EVENT_ID, &event };
             const auto onTouchInterceptCallback = pattern->nativeXComponentImpl_->GetOnTouchInterceptCallback();
             CHECK_NULL_RETURN(onTouchInterceptCallback, NG::HitTestMode::HTMDEFAULT);
-            return static_cast<NG::HitTestMode>(onTouchInterceptCallback(pattern->nativeXComponent_.get(), uiEvent));
+            return static_cast<NG::HitTestMode>(onTouchInterceptCallback(pattern->nativeXComponent_.get(), &uiEvent));
         });
 }
 
@@ -881,8 +880,8 @@ void XComponentPattern::NativeXComponentDispatchAxisEvent(AxisEvent* axisEvent)
     CHECK_NULL_VOID(nativeXComponentImpl_);
     const auto callback = nativeXComponentImpl_->GetUIAxisEventCallback();
     CHECK_NULL_VOID(callback);
-    auto* uiEvent = static_cast<ArkUI_UIInputEvent*>(axisEvent);
-    callback(nativeXComponent_.get(), uiEvent, ArkUI_UIInputEvent_Type::ARKUI_UIINPUTEVENT_TYPE_AXIS);
+    ArkUI_UIInputEvent uiEvent { ARKUI_UIINPUTEVENT_TYPE_AXIS, AXIS_EVENT_ID, axisEvent };
+    callback(nativeXComponent_.get(), &uiEvent, ArkUI_UIInputEvent_Type::ARKUI_UIINPUTEVENT_TYPE_AXIS);
 }
 
 void XComponentPattern::SetTouchPoint(

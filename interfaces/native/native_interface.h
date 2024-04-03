@@ -43,88 +43,66 @@ extern "C" {
 #endif
 
 /**
- * @brief Defines the native API type of any version.
- *
- * @since 12
- */
-typedef struct {
-    /**
-     * @brief Defines the version information of the native API set.
-     *
-     * Unlike the NDK version, the version field of the NativeNode API indicates the version of its own structure.
-     */
-    int32_t version;
-} ArkUI_AnyNativeAPI;
-
-/**
  * @brief Defines the native API types.
  *
  * @since 12
  */
 typedef enum {
-    /** API related to UI components. */
+    /** API related to UI components. For details, see the struct definition in <arkui/native_node.h>. */
     ARKUI_NATIVE_NODE,
-    /** API related to dialog boxes. */
+    /** API related to dialog boxes. For details, see the struct definition in <arkui/native_dialog.h>. */
     ARKUI_NATIVE_DIALOG,
-     /** API type related to UI gesture system. */
+    /** API related to gestures. For details, see the struct definition in <arkui/native_gesture.h>. */
     ARKUI_NATIVE_GESTURE,
 } ArkUI_NativeAPIVariantKind;
 
 /**
- * @brief Defines the version information supported by the ARKUI_NATIVE_NODE type.
+ * @brief Obtains the native API set of a specified type.
  *
- * @since 12
- */
-typedef enum {
-    /** The ARKUI_NATIVE_NODE type supports the structure {@link ArkUI_NativeNodeAPI_1} of version 1. */
-    ARKUI_NATIVE_NODE_VERSION_1 = 1,
-} ArkUI_NativeNodeAPIVersion;
-
-/**
- * @brief Obtains the native API set of a specified version.
- *
- * @param type Indicates the type of the native API set provided by ArkUI, for example, ARKUI_NATIVE_NODE
- * (API type related to UI components).
- * @param version Indicates the version of the native API structure, which is obtained through the suffix defined in the
- * structure. For example, for the ArkUI_NativeNodeAPI_1 structure, the version is 1.
- * @return Returns the pointer to the native API abstract object that carries the version.
+ * @param type Indicates the type of the native API set provided by ArkUI, for example, <b>ARKUI_NATIVE_NODE</b>
+ * and <b>ARKUI_NATIVE_GESTURE</b>.
+ * @param sturctName Indicates the name of a native struct defined in the corresponding header file, for example,
+ * <b>ArkUI_NativeNodeAPI_1</b> in <arkui/native_node.h>.
+ * @return Returns the pointer to the abstract native API, which can be used after being converted into a specific type.
  * @code {.cpp}
  * #include<arkui/native_interface.h>
  * #include<arkui/native_node.h>
+ * #include<arkui/native_gesture.h>
  *
- * auto anyNativeAPI = OH_ArkUI_GetNativeAPI(ARKUI_NATIVE_NODE, 1);
- * if (anyNativeAPI->version == 1) {
- *     auto basicNodeApi = reinterpret_cast<ArkUI_NativeNodeAPI_1*>(anyNativeAPI);
- * }
- * @endcode
- * @deprecated This API is deprecated since API version 12.
- * You are advised to use {@link OH_ArkUI_QueryModuleInterface} instead.
- * @since 12
- */
-ArkUI_AnyNativeAPI* OH_ArkUI_GetNativeAPI(ArkUI_NativeAPIVariantKind type, int32_t version);
-
-/**
- * @brief Obtains the native module API set of a specified version.
- *
- * @param type Indicates the type of the native API set provided by ArkUI, for example, ARKUI_NATIVE_NODE
- * (API type related to UI components).
- * @param version Indicates the version of the native API structure, which is obtained through the version enums
- * supported by the structure. For example, the available version of ARKUI_NATIVE_NODE is
- * {@link ArkUI_NativeNodeAPIVersion}.
- * @return Returns the pointer to the native API abstract object that carries the version.
- * @code {.cpp}
- * #include<arkui/native_interface.h>
- * #include<arkui/native_node.h>
- *
- * auto anyNativeAPI = OH_ArkUI_QueryModuleInterface(ARKUI_NATIVE_NODE, ARKUI_NATIVE_NODE_VERSION_1);
- * if (anyNativeAPI->version == ARKUI_NATIVE_NODE_VERSION_1) {
+ * auto* anyNativeAPI = OH_ArkUI_QueryModuleInterfaceByName(ARKUI_NATIVE_NODE, "ArkUI_NativeNodeAPI_1");
+ * if (anyNativeAPI) {
  *     auto nativeNodeApi = reinterpret_cast<ArkUI_NativeNodeAPI_1*>(anyNativeAPI);
  * }
+ * auto anyGestureAPI = OH_ArkUI_QueryModuleInterface(ARKUI_NATIVE_GESTURE, "ArkUI_NativeGestureAPI_1");
+ * if (anyNativeAPI) {
+ *     auto basicGestureApi = reinterpret_cast<ArkUI_NativeGestureAPI_1*>(anyGestureAPI);
+ * }
  * @endcode
  *
  * @since 12
  */
-ArkUI_AnyNativeAPI* OH_ArkUI_QueryModuleInterface(ArkUI_NativeAPIVariantKind type, int32_t version);
+void* OH_ArkUI_QueryModuleInterfaceByName(ArkUI_NativeAPIVariantKind type, const char* structName);
+
+/**
+ * @brief Obtains the macro function corresponding to a struct pointer based on the struct type.
+ *
+ * @code {.cpp}
+ * #include<arkui/native_interface.h>
+ * #include<arkui/native_node.h>
+ *
+ * ArkUI_NativeNodeAPI_1* nativeNodeApi = nullptr;
+ * OH_ArkUI_GetModuleInterface(ARKUI_NATIVE_NODE, ArkUI_NativeNodeAPI_1, nativeNodeApi);
+ * @endcode
+ *
+ * @since 12
+ */
+#define OH_ArkUI_GetModuleInterface(nativeAPIVariantKind, structType, structPtr)                     \
+    do {                                                                                             \
+        void* anyNativeAPI = OH_ArkUI_QueryModuleInterfaceByName(nativeAPIVariantKind, #structType); \
+        if (anyNativeAPI) {                                                                          \
+            structPtr = (structType*)(anyNativeAPI);                                                 \
+        }                                                                                            \
+    } while (0)
 
 #ifdef __cplusplus
 };
