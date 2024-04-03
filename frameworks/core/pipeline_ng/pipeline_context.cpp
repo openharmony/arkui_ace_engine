@@ -779,20 +779,7 @@ void PipelineContext::FlushFocus()
     ACE_FUNCTION_TRACK();
     ACE_FUNCTION_TRACE();
 
-    auto requestFocusNode = dirtyRequestFocusNode_.Upgrade();
-    if (!requestFocusNode) {
-        dirtyRequestFocusNode_.Reset();
-    } else {
-        auto focusNodeHub = requestFocusNode->GetFocusHub();
-        if (focusNodeHub && !focusNodeHub->RequestFocusImmediately()) {
-            TAG_LOGI(AceLogTag::ACE_FOCUS, "Request focus by id on node: %{public}s/%{public}d return false",
-                requestFocusNode->GetTag().c_str(), requestFocusNode->GetId());
-        }
-        dirtyFocusNode_.Reset();
-        dirtyFocusScope_.Reset();
-        dirtyRequestFocusNode_.Reset();
-        return;
-    }
+    FlushRequestFocus();
 
     auto focusNode = dirtyFocusNode_.Upgrade();
     if (!focusNode || focusNode->GetFocusType() != FocusType::NODE) {
@@ -816,6 +803,26 @@ void PipelineContext::FlushFocus()
         if (focusScopeHub && !focusScopeHub->RequestFocusImmediately()) {
             TAG_LOGI(AceLogTag::ACE_FOCUS, "Request focus on scope: %{public}s/%{public}d return false",
                 focusScope->GetTag().c_str(), focusScope->GetId());
+        }
+        dirtyFocusNode_.Reset();
+        dirtyFocusScope_.Reset();
+        dirtyRequestFocusNode_.Reset();
+        return;
+    }
+}
+
+void PipelineContext::FlushRequestFocus()
+{
+    CHECK_RUN_ON(UI);
+
+    auto requestFocusNode = dirtyRequestFocusNode_.Upgrade();
+    if (!requestFocusNode) {
+        dirtyRequestFocusNode_.Reset();
+    } else {
+        auto focusNodeHub = requestFocusNode->GetFocusHub();
+        if (focusNodeHub && !focusNodeHub->RequestFocusImmediately()) {
+            TAG_LOGI(AceLogTag::ACE_FOCUS, "Request focus by id on node: %{public}s/%{public}d return false",
+                requestFocusNode->GetTag().c_str(), requestFocusNode->GetId());
         }
         dirtyFocusNode_.Reset();
         dirtyFocusScope_.Reset();
@@ -1069,6 +1076,14 @@ const RefPtr<DragDropManager>& PipelineContext::GetDragDropManager()
 
 const RefPtr<FocusManager>& PipelineContext::GetFocusManager() const
 {
+    return focusManager_;
+}
+
+const RefPtr<FocusManager>& PipelineContext::GetOrCreateFocusManager()
+{
+    if (!focusManager_) {
+        focusManager_ = MakeRefPtr<FocusManager>();
+    }
     return focusManager_;
 }
 
@@ -2430,12 +2445,12 @@ bool PipelineContext::OnKeyEvent(const KeyEvent& event)
     return false;
 }
 
-bool PipelineContext::RequestFocus(const std::string& targetNodeId)
+bool PipelineContext::RequestFocus(const std::string& targetNodeId, bool isSyncRequest)
 {
     CHECK_NULL_RETURN(rootNode_, false);
     auto focusHub = rootNode_->GetFocusHub();
     CHECK_NULL_RETURN(focusHub, false);
-    auto currentFocusChecked = focusHub->RequestFocusImmediatelyById(targetNodeId);
+    auto currentFocusChecked = focusHub->RequestFocusImmediatelyById(targetNodeId, isSyncRequest);
     if (!isSubPipeline_ || currentFocusChecked) {
         return currentFocusChecked;
     }
@@ -2443,7 +2458,7 @@ bool PipelineContext::RequestFocus(const std::string& targetNodeId)
     CHECK_NULL_RETURN(parentPipelineBase, false);
     auto parentPipelineContext = AceType::DynamicCast<NG::PipelineContext>(parentPipelineBase);
     CHECK_NULL_RETURN(parentPipelineContext, false);
-    return parentPipelineContext->RequestFocus(targetNodeId);
+    return parentPipelineContext->RequestFocus(targetNodeId, isSyncRequest);
 }
 
 void PipelineContext::AddDirtyFocus(const RefPtr<FrameNode>& node)

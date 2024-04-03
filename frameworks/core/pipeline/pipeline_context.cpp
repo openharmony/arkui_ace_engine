@@ -2557,7 +2557,7 @@ bool PipelineContext::RequestFocus(const RefPtr<Element>& targetElement)
     return false;
 }
 
-bool PipelineContext::RequestFocus(const std::string& targetNodeId)
+bool PipelineContext::RequestFocus(const std::string& targetNodeId, bool isSyncRequest)
 {
     CHECK_NULL_RETURN(rootElement_, false);
     auto currentFocusChecked = rootElement_->RequestFocusImmediatelyById(targetNodeId);
