@@ -35,6 +35,29 @@ constexpr int32_t MAX_BUFFER_SIZE = 3;
 const std::string PATTERN_TYPE_WEB = "WEBPATTERN";
 const uint32_t ADJUST_WEB_DRAW_LENGTH = 3000;
 const uint32_t DEFAULT_WEB_DRAW_LENGTH = 6167;
+
+GraphicTransformType ConvertRotation(Rotation rotation)
+{
+    GraphicTransformType transform = GraphicTransformType::GRAPHIC_ROTATE_BUTT;
+    switch (rotation) {
+        case Rotation::ROTATION_0:
+            transform = GraphicTransformType::GRAPHIC_ROTATE_NONE;
+            break;
+        case Rotation::ROTATION_90:
+            transform = GraphicTransformType::GRAPHIC_ROTATE_90;
+            break;
+        case Rotation::ROTATION_180:
+            transform = GraphicTransformType::GRAPHIC_ROTATE_180;
+            break;
+        case Rotation::ROTATION_270:
+            transform = GraphicTransformType::GRAPHIC_ROTATE_270;
+            break;
+        default:
+            transform = GraphicTransformType::GRAPHIC_ROTATE_NONE;
+            break;
+    }
+    return transform;
+}
 } // namespace
 
 #ifdef OHOS_PLATFORM
@@ -191,29 +214,6 @@ void RosenRenderSurface::SetExtSurfaceBounds(int32_t left, int32_t top, int32_t 
 void RosenRenderSurface::SetExtSurfaceCallback(const RefPtr<ExtSurfaceCallbackInterface>& extSurfaceCallback)
 {
     extSurfaceCallbackInterface_ = extSurfaceCallback;
-}
-
-GraphicTransformType RosenRenderSurface::ConvertRotation(Rotation rotation)
-{
-    GraphicTransformType transform = GraphicTransformType::GRAPHIC_ROTATE_BUTT;
-    switch (rotation) {
-        case Rotation::ROTATION_0:
-            transform = GraphicTransformType::GRAPHIC_ROTATE_NONE;
-            break;
-        case Rotation::ROTATION_90:
-            transform = GraphicTransformType::GRAPHIC_ROTATE_90;
-            break;
-        case Rotation::ROTATION_180:
-            transform = GraphicTransformType::GRAPHIC_ROTATE_180;
-            break;
-        case Rotation::ROTATION_270:
-            transform = GraphicTransformType::GRAPHIC_ROTATE_270;
-            break;
-        default:
-            transform = GraphicTransformType::GRAPHIC_ROTATE_NONE;
-            break;
-    }
-    return transform;
 }
 
 void RosenRenderSurface::SetTransformHint(Rotation dmRotation)

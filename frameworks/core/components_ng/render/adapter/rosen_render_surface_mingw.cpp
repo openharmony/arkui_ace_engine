@@ -73,11 +73,6 @@ void RosenRenderSurface::SetExtSurfaceCallback(const RefPtr<ExtSurfaceCallbackIn
 {
 }
 
-GraphicTransformType RosenRenderSurface::ConvertRotation(Rotation rotation)
-{
-    return GraphicTransformType::GRAPHIC_ROTATE_BUTT;
-}
-
 void RosenRenderSurface::SetTransformHint(Rotation dmRotation)
 {
 }
