@@ -390,7 +390,7 @@ void TextPattern::HandleOnCopy()
     }
     auto value = GetSelectedText(textSelector_.GetTextStart(), textSelector_.GetTextEnd());
     if (value.empty()) {
-        HandleSelectionChange(-1, -1);
+        selectOverlay_->HideMenu();
         return;
     }
     if (copyOption_ != CopyOptions::None) {
