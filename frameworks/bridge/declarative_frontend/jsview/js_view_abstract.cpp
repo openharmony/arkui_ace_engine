@@ -1090,15 +1090,13 @@ void CompleteResourceObjectFromParams(
     }
     JSRef<JSVal> bundleName = jsObj->GetProperty("bundleName");
     JSRef<JSVal> moduleName = jsObj->GetProperty("moduleName");
-    if (moduleName->IsString() && moduleName->ToString().empty()) {
-        std::regex resNameRegex(RESOURCE_NAME_PATTERN);
-        std::smatch resNameResults;
-        if (std::regex_match(targetModule, resNameResults, resNameRegex)) {
-            jsObj->SetProperty<std::string>("moduleName", resNameResults[1]);
-        } else {
-            jsObj->SetProperty<std::string>("moduleName", "");
-        }
+
+    std::regex resNameRegex(RESOURCE_NAME_PATTERN);
+    std::smatch resNameResults;
+    if (std::regex_match(targetModule, resNameResults, resNameRegex)) {
+        jsObj->SetProperty<std::string>("moduleName", resNameResults[1]);
     }
+
     if (typeNum == UNKNOWN_RESOURCE_TYPE) {
         jsObj->SetProperty<int32_t>("type", static_cast<int32_t>(resType));
     }
