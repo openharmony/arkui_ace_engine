@@ -52,12 +52,16 @@ struct TestProperty {
     std::optional<std::string> soPath = std::nullopt;
     std::optional<LoadEvent> loadEvent = std::nullopt;
     std::optional<DestroyEvent> destroyEvent = std::nullopt;
+    std::optional<SurfaceCreatedEvent> surfaceCreatedEvent = std::nullopt;
+    std::optional<SurfaceChangedEvent> surfaceChangedEvent = std::nullopt;
+    std::optional<SurfaceDestroyedEvent> surfaceDestroyedEvent = std::nullopt;
 };
 namespace {
 const std::string CHECK_KEY = "HI";
 const std::string XCOMPONENT_ID = "xcomponent";
 const std::string XCOMPONENT_LIBRARY_NAME = "native_render";
 const std::string XCOMPONENT_SO_PATH = "com.example.xcomponentmultihap/entry";
+const std::string SURFACE_ID = "2430951489577";
 constexpr XComponentType XCOMPONENT_SURFACE_TYPE_VALUE = XComponentType::SURFACE;
 constexpr XComponentType XCOMPONENT_COMPONENT_TYPE_VALUE = XComponentType::COMPONENT;
 constexpr XComponentType XCOMPONENT_TEXTURE_TYPE_VALUE = XComponentType::TEXTURE;
@@ -170,7 +174,15 @@ RefPtr<FrameNode> XComponentTestNg::CreateXComponentNode(TestProperty& testPrope
     if (testProperty.destroyEvent.has_value()) {
         XComponentModelNG().SetOnDestroy(std::move(testProperty.destroyEvent.value()));
     }
-
+    if (testProperty.surfaceCreatedEvent.has_value()) {
+        XComponentModelNG().SetControllerOnCreated(std::move(testProperty.surfaceCreatedEvent.value()));
+    }
+    if (testProperty.surfaceChangedEvent.has_value()) {
+        XComponentModelNG().SetControllerOnChanged(std::move(testProperty.surfaceChangedEvent.value()));
+    }
+    if (testProperty.surfaceDestroyedEvent.has_value()) {
+        XComponentModelNG().SetControllerOnDestroyed(std::move(testProperty.surfaceDestroyedEvent.value()));
+    }
     RefPtr<UINode> element = ViewStackProcessor::GetInstance()->Finish(); // pop
     return AceType::DynamicCast<FrameNode>(element);
 }
@@ -515,15 +527,18 @@ HWTEST_F(XComponentTestNg, XComponentLayoutAlgorithmTest006, TestSize.Level1)
      */
     bool frameOffsetChanges[2] = { false, true };
     bool contentOffsetChanges[2] = { false, true };
-    EXPECT_CALL(*AceType::DynamicCast<MockRenderSurface>(pattern->renderSurface_),
-        AdjustNativeWindowSize(MAX_WIDTH, MAX_HEIGHT))
-        .WillOnce(Return());
     pattern->type_ = XCOMPONENT_SURFACE_TYPE_VALUE;
     for (bool frameOffsetChange : frameOffsetChanges) {
         for (bool contentOffsetChange : contentOffsetChanges) {
             config.frameOffsetChange = frameOffsetChange;
             config.contentOffsetChange = contentOffsetChange;
             config.contentSizeChange = frameOffsetChange && contentOffsetChange;
+            if (config.contentSizeChange) {
+                geometryNode->SetContentSize(CHILD_SIZE);
+                EXPECT_CALL(*AceType::DynamicCast<MockRenderSurface>(pattern->renderSurface_),
+                    AdjustNativeWindowSize(CHILD_WIDTH, CHILD_HEIGHT))
+                    .WillOnce(Return());
+            }
             flag = pattern->OnDirtyLayoutWrapperSwap(layoutWrapper, config);
             EXPECT_FALSE(flag);
         }
@@ -1352,6 +1367,7 @@ HWTEST_F(XComponentTestNg, XComponentOnAreaChangedInnerTest019, TestSize.Level1)
         .WillOnce(Return());
     SystemProperties::SetExtSurfaceEnabled(true);
     pattern->OnAreaChangedInner();
+    SystemProperties::SetExtSurfaceEnabled(false);
 }
 
 /**
@@ -1994,5 +2010,70 @@ HWTEST_F(XComponentTestNg, XComponentImageAnalyzerTest, TestSize.Level1)
     pattern->EnableAnalyzer(true);
     pattern->imageAnalyzerManager_ = nullptr;
     EXPECT_FALSE(pattern->IsSupportImageAnalyzerFeature());
+}
+
+/**
+ * @tc.name: XComponentSurfaceLifeCycleCallback
+ * @tc.desc: Test XComponentController's surface life cycle callback
+ * @tc.type: FUNC
+ */
+HWTEST_F(XComponentTestNg, XComponentSurfaceLifeCycleCallback, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. set surface life cycle callback and create XComponent
+     * @tc.expected: xcomponent frameNode create successfully
+     */
+    testProperty.xcType = XCOMPONENT_SURFACE_TYPE_VALUE;
+    std::string onSurfaceCreatedSurfaceId;
+    std::string onSurfaceChangedSurfaceId;
+    std::string onSurfaceDestroyedSurfaceId;
+    auto onSurfaceCreated = [&onSurfaceCreatedSurfaceId](
+                                const std::string& surfaceId) { onSurfaceCreatedSurfaceId = surfaceId; };
+    auto onSurfaceChanged = [&onSurfaceChangedSurfaceId](const std::string& surfaceId, const RectF& /* rect */) {
+        onSurfaceChangedSurfaceId = surfaceId;
+    };
+    auto onSurfaceDestroyed = [&onSurfaceDestroyedSurfaceId](
+                                  const std::string& surfaceId) { onSurfaceDestroyedSurfaceId = surfaceId; };
+    testProperty.surfaceCreatedEvent = std::move(onSurfaceCreated);
+    testProperty.surfaceChangedEvent = std::move(onSurfaceChanged);
+    testProperty.surfaceDestroyedEvent = std::move(onSurfaceDestroyed);
+    auto frameNode = CreateXComponentNode(testProperty);
+    ASSERT_TRUE(frameNode);
+    auto pattern = frameNode->GetPattern<XComponentPattern>();
+    ASSERT_TRUE(pattern);
+    pattern->surfaceId_ = SURFACE_ID;
+
+    /**
+     * @tc.steps: step2. call onDirtyLayoutWrapper
+     * @tc.expected: onSurfaceCreated & onSurfaceChanged has called
+     */
+    DirtySwapConfig config;
+    auto xComponentLayoutAlgorithm = AceType::MakeRefPtr<XComponentLayoutAlgorithm>();
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    geometryNode->SetFrameSize(MAX_SIZE);
+    geometryNode->SetContentSize(MAX_SIZE);
+    auto layoutProperty = frameNode->GetLayoutProperty<XComponentLayoutProperty>();
+    EXPECT_TRUE(layoutProperty);
+    auto layoutWrapper = AceType::MakeRefPtr<LayoutWrapperNode>(frameNode, geometryNode, layoutProperty);
+    auto layoutAlgorithmWrapper = AceType::MakeRefPtr<LayoutAlgorithmWrapper>(xComponentLayoutAlgorithm, false);
+    layoutWrapper->SetLayoutAlgorithm(layoutAlgorithmWrapper);
+    EXPECT_CALL(*AceType::DynamicCast<MockRenderSurface>(pattern->renderSurface_), IsSurfaceValid())
+        .WillOnce(Return(true));
+    EXPECT_CALL(*AceType::DynamicCast<MockRenderSurface>(pattern->renderSurface_),
+        AdjustNativeWindowSize(MAX_WIDTH, MAX_HEIGHT))
+        .WillOnce(Return());
+    EXPECT_CALL(*AceType::DynamicCast<MockRenderContext>(pattern->handlingSurfaceRenderContext_),
+        SetBounds(0, 0, MAX_WIDTH, MAX_HEIGHT))
+        .WillOnce(Return());
+    pattern->OnDirtyLayoutWrapperSwap(layoutWrapper, config);
+    EXPECT_EQ(onSurfaceCreatedSurfaceId, SURFACE_ID);
+    EXPECT_EQ(onSurfaceChangedSurfaceId, SURFACE_ID);
+
+    /**
+     * @tc.steps: step3. call OnDetachFromFrameNode
+     * @tc.expected: onSurfaceDestroyed has called
+     */
+    pattern->OnDetachFromFrameNode(AceType::RawPtr(frameNode));
+    EXPECT_EQ(onSurfaceDestroyedSurfaceId, SURFACE_ID);
 }
 } // namespace OHOS::Ace::NG

@@ -485,6 +485,9 @@ void RosenRenderContext::SyncGeometryProperties(const RectF& paintRect)
     if (isDisappearing_ && !paintRect.IsValid()) {
         return;
     }
+    auto host = GetHost();
+    ACE_LAYOUT_SCOPED_TRACE("SyncGeometryProperties [%s][self:%d] set bounds %s", host->GetTag().c_str(), host->GetId(),
+        paintRect.ToString().c_str());
     rsNode_->SetBounds(paintRect.GetX(), paintRect.GetY(), paintRect.Width(), paintRect.Height());
     if (useContentRectForRSFrame_) {
         SetContentRectToFrame(paintRect);
@@ -4505,6 +4508,35 @@ void RosenRenderContext::DumpInfo()
                     std::string("Alpha has difference,arkui:").append(std::to_string(arkAlpha.value())));
             }
         }
+        if (HasPosition()) {
+            auto position = GetPosition();
+            DumpLog::GetInstance().AddDesc(std::string("PositionX :")
+                .append(position->GetX().ToString().c_str())
+                .append(std::string(",PositionY :"))
+                .append(position->GetY().ToString().c_str()));
+        }
+        if (HasOffset()) {
+            auto offset = GetOffset();
+            DumpLog::GetInstance().AddDesc(std::string("OffsetX :")
+                .append(offset->GetX().ToString().c_str())
+                .append(std::string(",OffsetY :"))
+                .append(offset->GetY().ToString().c_str()));
+        }
+        if (HasPositionEdges()) {
+            auto positionEdges = GetPositionEdges();
+            DumpLog::GetInstance().AddDesc(std::string("positionEdges :").append(positionEdges->ToString().c_str()));
+        }
+        if (HasOffsetEdges()) {
+            auto offsetEdges = GetOffsetEdges();
+            DumpLog::GetInstance().AddDesc(std::string("offsetEdges :").append(offsetEdges->ToString().c_str()));
+        }
+        if (HasAnchor()) {
+            auto anchor = GetAnchor();
+            DumpLog::GetInstance().AddDesc(std::string("anchorX :")
+                .append(anchor->GetX().ToString().c_str())
+                .append(std::string(",anchorY :"))
+                .append(anchor->GetX().ToString().c_str()));
+        }
     }
 }
 
@@ -5293,6 +5325,8 @@ void RosenRenderContext::SavePaintRect(bool isRound, uint8_t flag)
         RoundToPixelGrid(isRound, flag);
     }
     paintRect_ = RectF(geometryNode->GetPixelGridRoundOffset(), geometryNode->GetPixelGridRoundSize());
+    ACE_LAYOUT_SCOPED_TRACE("SavePaintRect[%s][self:%d] rs SavePaintRect %s", host->GetTag().c_str(), host->GetId(),
+        paintRect_.ToString().c_str());
 }
 
 void RosenRenderContext::SyncPartialRsProperties()

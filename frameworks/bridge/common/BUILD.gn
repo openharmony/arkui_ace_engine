@@ -165,6 +165,9 @@ template("bridge_common") {
     }
 
     deps = [ "$ace_root/frameworks/core/components/theme:build_theme_code" ]
+    if (use_hilog) {
+      external_deps = [ "hilog:libhilog" ]
+    }
   }
 }
 
@@ -204,6 +207,9 @@ template("bridge_common_ng") {
     ]
 
     deps = [ "$ace_root/frameworks/core/components/theme:build_theme_code" ]
+    if (use_hilog) {
+      external_deps = [ "hilog:libhilog" ]
+    }
   }
 }
 
