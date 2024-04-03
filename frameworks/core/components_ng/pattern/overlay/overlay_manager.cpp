@@ -2228,9 +2228,6 @@ bool OverlayManager::RemoveOverlay(bool isBackPressed, bool isPageRouter)
         // stage node is at index 0, remove overlay at last
         auto overlay = DynamicCast<FrameNode>(rootNode->GetLastChild());
         CHECK_NULL_RETURN(overlay, false);
-        if (overlay->GetTag() == V2::OVERLAY_ETS_TAG) {
-            return false;
-        }
         // close dialog with animation
         auto pattern = overlay->GetPattern();
         if (InstanceOf<ToastPattern>(pattern)) {
@@ -2243,6 +2240,9 @@ bool OverlayManager::RemoveOverlay(bool isBackPressed, bool isPageRouter)
             } else {
                 return false;
             }
+        }
+        if (overlay->GetTag() == V2::OVERLAY_ETS_TAG) {
+            return false;
         }
         if (InstanceOf<DialogPattern>(pattern)) {
             if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE) && isPageRouter) {

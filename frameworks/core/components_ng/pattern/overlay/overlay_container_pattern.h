@@ -20,12 +20,14 @@
 #include "core/components_ng/pattern/pattern.h"
 
 namespace OHOS::Ace::NG {
-class OverlayContainerPattern : public Pattern, public FocusView {
+class ACE_EXPORT OverlayContainerPattern : public Pattern, public FocusView {
     DECLARE_ACE_TYPE(OverlayContainerPattern, Pattern, FocusView);
 
 public:
     OverlayContainerPattern() = default;
     ~OverlayContainerPattern() override = default;
+
+    void BeforeCreateLayoutWrapper() override;
 
     FocusPattern GetFocusPattern() const override
     {
