@@ -3037,8 +3037,29 @@ void OverlayManager::OnBindSheet(bool isShow, std::function<void(const std::stri
             if (sheetStyle.backgroundColor.has_value()) {
                 topModalNode->GetRenderContext()->UpdateBackgroundColor(sheetStyle.backgroundColor.value());
             }
+            auto topModalRenderContext = topModalNode->GetRenderContext();
+            CHECK_NULL_VOID(topModalRenderContext);
             if (sheetStyle.backgroundBlurStyle.has_value()) {
                 SetSheetBackgroundBlurStyle(topModalNode, sheetStyle.backgroundBlurStyle.value());
+            }
+            BorderRadiusProperty radius;
+            radius.SetRadius(sheetTheme->GetSheetRadius());
+            topModalRenderContext->UpdateBorderRadius(radius);
+            auto layoutProperty = topModalNode->GetLayoutProperty<SheetPresentationProperty>();
+            if (sheetStyle.borderWidth.has_value()) {
+                layoutProperty->UpdateBorderWidth(sheetStyle.borderWidth.value());
+                topModalRenderContext->UpdateBorderWidth(sheetStyle.borderWidth.value());
+            }
+            if (sheetStyle.borderStyle.has_value()) {
+                topModalRenderContext->UpdateBorderStyle(sheetStyle.borderStyle.value());
+            }
+            if (sheetStyle.borderColor.has_value()) {
+                topModalRenderContext->UpdateBorderColor(sheetStyle.borderColor.value());
+            }
+            if (sheetStyle.shadow.has_value()) {
+                topModalRenderContext->UpdateBackShadow(sheetStyle.shadow.value());
+            } else {
+                topModalRenderContext->UpdateBackShadow(ShadowConfig::NoneShadow);
             }
             auto maskNode = GetSheetMask(topModalNode);
             if (maskNode) {
@@ -3051,7 +3072,6 @@ void OverlayManager::OnBindSheet(bool isShow, std::function<void(const std::stri
             topModalNode->GetPattern<SheetPresentationPattern>()->UpdateOnWillDisappear(std::move(onWillDisappear));
             topModalNode->GetPattern<SheetPresentationPattern>()->UpdateOnHeightDidChange(std::move(onHeightDidChange));
             topModalNode->GetPattern<SheetPresentationPattern>()->UpdateOnAppear(std::move(onAppear));
-            auto layoutProperty = topModalNode->GetLayoutProperty<SheetPresentationProperty>();
             layoutProperty->UpdateSheetStyle(sheetStyle);
             topModalNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
             pipeline->FlushUITasks();
@@ -3077,11 +3097,30 @@ void OverlayManager::OnBindSheet(bool isShow, std::function<void(const std::stri
     auto sheetNode = SheetView::CreateSheetPage(
         targetId, targetNode->GetTag(), builder, titlebuilder, std::move(callback), sheetStyle);
     CHECK_NULL_VOID(sheetNode);
+    auto sheetRenderContext = sheetNode->GetRenderContext();
+    CHECK_NULL_VOID(sheetRenderContext);
     if (sheetStyle.backgroundColor.has_value()) {
         sheetNode->GetRenderContext()->UpdateBackgroundColor(sheetStyle.backgroundColor.value());
     }
     if (sheetStyle.backgroundBlurStyle.has_value()) {
         SetSheetBackgroundBlurStyle(sheetNode, sheetStyle.backgroundBlurStyle.value());
+    }
+    BorderRadiusProperty radius;
+    radius.SetRadius(sheetTheme->GetSheetRadius());
+    sheetRenderContext->UpdateBorderRadius(radius);
+    if (sheetStyle.borderWidth.has_value()) {
+        auto sheetLayoutProps = sheetNode->GetLayoutProperty<SheetPresentationProperty>();
+        sheetLayoutProps->UpdateBorderWidth(sheetStyle.borderWidth.value());
+        sheetRenderContext->UpdateBorderWidth(sheetStyle.borderWidth.value());
+    }
+    if (sheetStyle.borderStyle.has_value()) {
+        sheetRenderContext->UpdateBorderStyle(sheetStyle.borderStyle.value());
+    }
+    if (sheetStyle.borderColor.has_value()) {
+        sheetRenderContext->UpdateBorderColor(sheetStyle.borderColor.value());
+    }
+    if (sheetStyle.shadow.has_value()) {
+        sheetRenderContext->UpdateBackShadow(sheetStyle.shadow.value());
     }
     sheetNode->GetPattern<SheetPresentationPattern>()->UpdateOnDisappear(std::move(onDisappear));
     sheetNode->GetPattern<SheetPresentationPattern>()->UpdateShouldDismiss(std::move(shouldDismiss));

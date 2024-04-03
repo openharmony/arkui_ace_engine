@@ -1231,6 +1231,10 @@ void SheetPresentationPattern::ClipSheetNode()
     CHECK_NULL_VOID(renderContext);
     auto sheetType = GetSheetType();
     std::string clipPath;
+    float half = 0.5f;
+    if (sheetSize.Width() * half < sheetRadius.Value()) {
+        sheetRadius = Dimension(sheetSize.Width() * half);
+    }
     if (sheetType == SheetType::SHEET_POPUP) {
         clipPath = GetPopupStyleSheetClipPath(sheetSize, sheetRadius);
     } else if (sheetType == SheetType::SHEET_CENTER) {
@@ -1463,7 +1467,8 @@ void SheetPresentationPattern::ProcessColumnRect(float height)
         sheetHeight = sheetSize.Height();
     } else if ((sheetType == SheetType::SHEET_BOTTOM) || (sheetType == SheetType::SHEET_BOTTOM_FREE_WINDOW)) {
         sheetOffsetY = pageHeight_ - height;
-        sheetWidth = sheetMaxWidth_;
+        sheetWidth = sheetSize.Width();
+        sheetOffsetX = sheetOffsetX_;
         sheetHeight = height;
     } else if (sheetType == SheetType::SHEET_BOTTOMLANDSPACE) {
         sheetOffsetX = sheetOffsetX_;
