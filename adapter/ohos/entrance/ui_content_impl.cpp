@@ -610,7 +610,7 @@ void UIContentImpl::RunFormPage()
     LOGI("[%{public}s][%{public}s][%{public}d]: Initialize startUrl = %{public}s",
         bundleName_.c_str(), moduleName_.c_str(), instanceId_, startUrl_.c_str());
     // run page.
-    Platform::AceContainer::RunPage(instanceId_, startUrl_, formData_, false);
+    Platform::AceContainer::RunPage(instanceId_, startUrl_, "", false);
     auto distributedUI = std::make_shared<NG::DistributedUI>();
     uiManager_ = std::make_unique<DistributedUIManager>(instanceId_, distributedUI);
     auto container = Platform::AceContainer::GetContainer(instanceId_);
