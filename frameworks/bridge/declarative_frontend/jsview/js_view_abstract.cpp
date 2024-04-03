@@ -1067,6 +1067,13 @@ void ParseCustomPopupParam(
 }
 #endif
 
+std::string GetBundleNameFromContainer()
+{
+    auto container = Container::Current();
+    CHECK_NULL_RETURN(container, "");
+    return container->GetBundleName();
+}
+
 void CompleteResourceObjectFromParams(
     int32_t resId, JSRef<JSObject>& jsObj, std::string& targetModule, ResourceType& resType, std::string& resName)
 {
@@ -1088,8 +1095,17 @@ void CompleteResourceObjectFromParams(
     if (!isParseDollarResourceSuccess) {
         return;
     }
-    JSRef<JSVal> bundleName = jsObj->GetProperty("bundleName");
-    JSRef<JSVal> moduleName = jsObj->GetProperty("moduleName");
+
+    std::string bundleName;
+    std::string moduleName;
+    JSViewAbstract::GetJsMediaBundleInfo(jsObj, bundleName, moduleName);
+
+    if (bundleName.empty() && moduleName.empty()) {
+        // process the resource in har with obfuscation.
+    } else if (bundleName.empty()) {
+        bundleName = GetBundleNameFromContainer();
+        jsObj->SetProperty<std::string>("bundleName", bundleName);
+    }
 
     std::regex resNameRegex(RESOURCE_NAME_PATTERN);
     std::smatch resNameResults;

@@ -203,6 +203,16 @@ public:
         firstUpdateData_ = false;
     }
 
+    void SetBundleName(const std::string& bundleName)
+    {
+        bundleName_ = bundleName;
+    }
+
+    const std::string& GetBundleName() const
+    {
+        return bundleName_;
+    }
+
     void SetModuleName(const std::string& moduleName)
     {
         moduleName_ = moduleName;
@@ -507,6 +517,7 @@ protected:
     bool isDynamicRender_ = false;
 
 private:
+    std::string bundleName_;
     std::string moduleName_;
     std::string bundlePath_;
     std::string filesDataPath_;
