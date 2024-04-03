@@ -666,6 +666,90 @@ class FrameNode {
         const position = getUINativeModule().frameNode.getPositionToWindow(this.nodePtr_);
         return { x: position[0], y: position[1] };
     }
+    getMeasuredSize() {
+        const size = getUINativeModule().frameNode.getMeasuredSize(this.nodePtr_);
+        if (size) {
+            return { width: size[0], height: size[1] };
+        }
+        return null;
+      }
+    getLayoutPosition() {
+        const position = getUINativeModule().frameNode.getLayoutPosition(this.nodePtr_);
+        if (position) {
+            return { x: position[0], y: position[1] };
+        }
+        return null;
+      }
+    getUserConfigBorderWidth() {
+        const borderWidth = getUINativeModule().frameNode.getConfigBorderWidth(this.nodePtr_);
+        if (borderWidth) {
+            return {
+                top: new LengthMetric(borderWidth[0], borderWidth[1]),
+                right: new LengthMetric(borderWidth[2], borderWidth[3]),
+                bottom: new LengthMetric(borderWidth[4], borderWidth[5]),
+                left: new LengthMetric(borderWidth[6], borderWidth[7])
+              };
+        }
+        return null;
+    }
+    getUserConfigPadding() {
+        const padding = getUINativeModule().frameNode.getConfigPadding(this.nodePtr_);
+        if (padding) {
+            return {
+                top: new LengthMetric(padding[0], padding[1]),
+                right: new LengthMetric(padding[2], padding[3]),
+                bottom: new LengthMetric(padding[4], padding[5]),
+                left: new LengthMetric(padding[6], padding[7])
+              };
+        }
+        return null;
+    }
+    getUserConfigMargin() {
+        const margin = getUINativeModule().frameNode.getConfigMargin(this.nodePtr_);
+        if (margin) {
+            return {
+                top: new LengthMetric(margin[0], margin[1]),
+                right: new LengthMetric(margin[2], margin[3]),
+                bottom: new LengthMetric(margin[4], margin[5]),
+                left: new LengthMetric(margin[6], margin[7])
+              };
+        }
+        return null;
+    }
+    getUserConfigSize() {
+        const size = getUINativeModule().frameNode.getConfigSize(this.nodePtr_);
+        if (size) {
+            return {
+                width: new LengthMetric(size[0], size[1]),
+                height: new LengthMetric(size[2], size[3])
+            };
+        }
+        return null;
+    }
+    getId() {
+        return getUINativeModule().frameNode.getId(this.nodePtr_);
+    }
+    getNodeType() {
+        return getUINativeModule().frameNode.getNodeType(this.nodePtr_);
+    }
+    getOpacity() {
+        return getUINativeModule().frameNode.getOpacity(this.nodePtr_);
+    }
+    isVisible() {
+        return getUINativeModule().frameNode.isVisible(this.nodePtr_);
+    }
+    isClipToFrame() {
+        return getUINativeModule().frameNode.isClipToFrame(this.nodePtr_);
+    }
+    isAttached() {
+        return getUINativeModule().frameNode.isAttached(this.nodePtr_);
+    }
+    getInspectorInfo() {
+        const inspectorInfoStr = getUINativeModule().frameNode.getInspectorInfo(this.nodePtr_);
+        const inspectorInfo = JSON.parse(inspectorInfoStr);
+        return inspectorInfo;
+    }
+
     get commonAttribute() {
         if (this._commonAttribute === undefined) {
             this._commonAttribute = new FrameNodeModifier(this.nodePtr_);
@@ -731,6 +815,42 @@ var BorderStyle;
     BorderStyle[BorderStyle["DOTTED"] = 2] = "DOTTED";
     BorderStyle[BorderStyle["NONE"] = 3] = "NONE";
 })(BorderStyle || (BorderStyle = {}));
+
+var LengthUnit;
+(function (LengthUnit) {
+    LengthUnit[LengthUnit["PX"] = 0] = "PX";
+    LengthUnit[LengthUnit["VP"] = 1] = "VP";
+    LengthUnit[LengthUnit["FP"] = 2] = "FP";
+    LengthUnit[LengthUnit["PERCENT"] = 3] = "PERCENT";
+    LengthUnit[LengthUnit["LPX"] = 4] = "LPX";
+})(LengthUnit || (LengthUnit = {}));
+
+class LengthMetric {
+    constructor(value, unit) {
+        if (unit in LengthUnit) {
+            this.unit = unit;
+            this.value = value;
+        } else {
+            this.unit = LengthUnit.VP;
+            this.value = 0;
+        }
+    }
+    static px(value) {
+        return new LengthMetric(value, LengthUnit.PX);
+    }
+    static vp(value) {
+        return new LengthMetric(value, LengthUnit.VP);
+    }
+    static fp(value) {
+        return new LengthMetric(value, LengthUnit.FP);
+    }
+    static percent(value) {
+        return new LengthMetric(value, LengthUnit.PERCENT);
+    }
+    static lpx(value) {
+        return new LengthMetric(value, LengthUnit.LPX);
+    }
+}
 class ShapeMask {
     constructor() {
         this.rect = null;

@@ -173,6 +173,8 @@ HWTEST_F(InspectorTestNg, InspectorTestNg003, TestSize.Level1)
     EXPECT_NE(test1, "");
     auto test3 = Inspector::GetInspector(true);
     EXPECT_NE(test3, "");
+    auto test4 = Inspector::GetInspectorOfNode(TWO);
+    EXPECT_NE(test4, "");
 
     context1->stageManager_ = nullptr;
 }

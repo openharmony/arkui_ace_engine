@@ -3251,6 +3251,25 @@ BorderWidthProperty ViewAbstract::GetBorderWidth(FrameNode* frameNode)
     return target->GetBorderWidthValue(borderWidths);
 }
 
+BorderWidthProperty ViewAbstract::GetLayoutBorderWidth(FrameNode* frameNode)
+{
+    Dimension defaultDimen = Dimension(0, DimensionUnit::VP);
+    BorderWidthProperty borderWidths;
+    borderWidths.topDimen = std::optional<Dimension>(defaultDimen);
+    borderWidths.rightDimen = std::optional<Dimension>(defaultDimen);
+    borderWidths.bottomDimen = std::optional<Dimension>(defaultDimen);
+    borderWidths.leftDimen = std::optional<Dimension>(defaultDimen);
+    const auto& layoutProperty = frameNode->GetLayoutProperty();
+    CHECK_NULL_RETURN(layoutProperty, borderWidths);
+    const auto& property = layoutProperty->GetBorderWidthProperty();
+    CHECK_NULL_RETURN(property, borderWidths);
+    borderWidths.topDimen = std::optional<Dimension>(property->topDimen);
+    borderWidths.rightDimen = std::optional<Dimension>(property->rightDimen);
+    borderWidths.bottomDimen = std::optional<Dimension>(property->bottomDimen);
+    borderWidths.leftDimen = std::optional<Dimension>(property->leftDimen);
+    return borderWidths;
+}
+
 BorderRadiusProperty ViewAbstract::GetBorderRadius(FrameNode* frameNode)
 {
     Dimension defaultDimension(0);
@@ -3697,15 +3716,25 @@ PaddingProperty ViewAbstract::GetPadding(FrameNode* frameNode)
     CHECK_NULL_RETURN(layoutProperty, paddings);
     const auto& property = layoutProperty->GetPaddingProperty();
     CHECK_NULL_RETURN(property, paddings);
-    CalcLength top = CalcLength(property->top->GetDimension().Value(), DimensionUnit::VP);
-    CalcLength right = CalcLength(property->right->GetDimension().Value(), DimensionUnit::VP);
-    CalcLength bottom = CalcLength(property->bottom->GetDimension().Value(), DimensionUnit::VP);
-    CalcLength left = CalcLength(property->left->GetDimension().Value(), DimensionUnit::VP);
-    paddings.top = std::optional<CalcLength>(top);
-    paddings.right = std::optional<CalcLength>(right);
-    paddings.bottom = std::optional<CalcLength>(bottom);
-    paddings.left = std::optional<CalcLength>(left);
+    paddings.top = std::optional<CalcLength>(property->top);
+    paddings.right = std::optional<CalcLength>(property->right);
+    paddings.bottom = std::optional<CalcLength>(property->bottom);
+    paddings.left = std::optional<CalcLength>(property->left);
     return paddings;
+}
+
+std::optional<CalcSize> ViewAbstract::GetConfigSize(FrameNode* frameNode)
+{
+    auto value = std::optional<CalcSize>();
+    const auto& layoutProperty = frameNode->GetLayoutProperty();
+    CHECK_NULL_RETURN(layoutProperty, value);
+    const auto& property = layoutProperty->GetCalcLayoutConstraint();
+    CHECK_NULL_RETURN(property, value);
+    auto size = property->selfIdealSize;
+    if (size.has_value()) {
+        value = size;
+    }
+    return value;
 }
 
 std::string ViewAbstract::GetKey(FrameNode* frameNode)
@@ -3734,14 +3763,10 @@ MarginProperty ViewAbstract::GetMargin(FrameNode* frameNode)
     CHECK_NULL_RETURN(layoutProperty, margins);
     const auto& property = layoutProperty->GetMarginProperty();
     CHECK_NULL_RETURN(property, margins);
-    CalcLength top = CalcLength(property->top->GetDimension().Value(), DimensionUnit::VP);
-    CalcLength right = CalcLength(property->right->GetDimension().Value(), DimensionUnit::VP);
-    CalcLength bottom = CalcLength(property->bottom->GetDimension().Value(), DimensionUnit::VP);
-    CalcLength left = CalcLength(property->left->GetDimension().Value(), DimensionUnit::VP);
-    margins.top = std::optional<CalcLength>(top);
-    margins.right = std::optional<CalcLength>(right);
-    margins.bottom = std::optional<CalcLength>(bottom);
-    margins.left = std::optional<CalcLength>(left);
+    margins.top = std::optional<CalcLength>(property->top);
+    margins.right = std::optional<CalcLength>(property->right);
+    margins.bottom = std::optional<CalcLength>(property->bottom);
+    margins.left = std::optional<CalcLength>(property->left);
     return margins;
 }
 

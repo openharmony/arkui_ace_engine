@@ -691,6 +691,7 @@ HWTEST_F(ViewAbstractTestNg, ViewAbstractTest011, TestSize.Level1)
     ViewAbstract::GetNeedFocus(AceType::RawPtr(FRAME_NODE_REGISTER));
     ViewAbstract::GetOpacity(AceType::RawPtr(FRAME_NODE_REGISTER));
     ViewAbstract::GetBorderWidth(AceType::RawPtr(FRAME_NODE_REGISTER));
+    ViewAbstract::GetLayoutBorderWidth(AceType::RawPtr(FRAME_NODE_REGISTER));
     ViewAbstract::GetBorderRadius(AceType::RawPtr(FRAME_NODE_REGISTER));
     ViewAbstract::GetBorderColor(AceType::RawPtr(FRAME_NODE_REGISTER));
     ViewAbstract::GetBorderStyle(AceType::RawPtr(FRAME_NODE_REGISTER));
@@ -848,6 +849,7 @@ HWTEST_F(ViewAbstractTestNg, ViewAbstractTest013, TestSize.Level1)
     ViewAbstract::SetBackgroundImageRepeat(AceType::RawPtr(FRAME_NODE_REGISTER), repeat);
     ViewAbstract::GetBackgroundImageRepeat(AceType::RawPtr(FRAME_NODE_REGISTER));
     ViewAbstract::GetPadding(AceType::RawPtr(FRAME_NODE_REGISTER));
+    ViewAbstract::GetConfigSize(AceType::RawPtr(FRAME_NODE_REGISTER));
     ViewAbstract::GetEnabled(AceType::RawPtr(FRAME_NODE_REGISTER));
 
     /**

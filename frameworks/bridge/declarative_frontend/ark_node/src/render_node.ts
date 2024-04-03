@@ -64,16 +64,28 @@ type EdgeStyles = {
   left?: BorderStyle;
 };
 
-interface Edges {
-  left: number,
-  right: number,
-  top: number,
-  bottom: number,
+interface EdgesT<T> {
+  left: T,
+  right: T,
+  top: T,
+  bottom: T,
+}
+interface SizeT<T> {
+  width: T;
+  height: T;
 }
 
-type EdgeWidths = Edges;
+enum LengthUnit {
+  PX = 0,
+  VP = 1,
+  FP = 2,
+  PERCENT = 3,
+  LPX = 4,
+}
 
-type EdgeColors = Edges;
+type EdgeWidths = EdgesT<Number>;
+
+type EdgeColors = EdgesT<Number>;
 
 interface Corners {
   topLeft: number,
@@ -111,6 +123,35 @@ interface Circle {
 
 interface CommandPath {
   commands: string
+}
+
+class LengthMetric {
+  public unit: LengthUnit;
+  public value: number;
+  constructor(value: number, unit?: LengthUnit) {
+      if (unit in LengthUnit) {
+          this.unit = unit;
+          this.value = value;
+      } else {
+          this.unit = LengthUnit.VP;
+          this.value = 0;
+      }
+  }
+  static px(value: number) {
+      return new LengthMetric(value, LengthUnit.PX);
+  }
+  static vp(value: number) {
+      return new LengthMetric(value, LengthUnit.VP);
+  }
+  static fp(value: number) {
+      return new LengthMetric(value, LengthUnit.FP);
+  }
+  static percent(value: number) {
+      return new LengthMetric(value, LengthUnit.PERCENT);
+  }
+  static lpx(value: number) {
+      return new LengthMetric(value, LengthUnit.LPX);
+  }
 }
 
 class ShapeMask {

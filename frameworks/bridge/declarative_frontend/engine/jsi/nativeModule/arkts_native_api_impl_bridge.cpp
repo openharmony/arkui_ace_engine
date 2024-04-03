@@ -2370,6 +2370,32 @@ void ArkUINativeModule::RegisterFrameNodeAttributes(Local<panda::ObjectRef> obje
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), FrameNodeBridge::GetPositionToParent));
     frameNode->Set(vm, panda::StringRef::NewFromUtf8(vm, "getPositionToWindow"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), FrameNodeBridge::GetPositionToWindow));
+    frameNode->Set(vm, panda::StringRef::NewFromUtf8(vm, "getMeasuredSize"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), FrameNodeBridge::GetMeasuredSize));
+    frameNode->Set(vm, panda::StringRef::NewFromUtf8(vm, "getLayoutPosition"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), FrameNodeBridge::GetLayoutPosition));
+    frameNode->Set(vm, panda::StringRef::NewFromUtf8(vm, "getConfigBorderWidth"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), FrameNodeBridge::GetConfigBorderWidth));
+    frameNode->Set(vm, panda::StringRef::NewFromUtf8(vm, "getConfigPadding"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), FrameNodeBridge::GetConfigPadding));
+    frameNode->Set(vm, panda::StringRef::NewFromUtf8(vm, "getConfigMargin"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), FrameNodeBridge::GetConfigMargin));
+    frameNode->Set(vm, panda::StringRef::NewFromUtf8(vm, "getConfigSize"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), FrameNodeBridge::GetConfigSize));
+    frameNode->Set(vm, panda::StringRef::NewFromUtf8(vm, "getId"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), FrameNodeBridge::GetId));
+    frameNode->Set(vm, panda::StringRef::NewFromUtf8(vm, "getNodeType"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), FrameNodeBridge::GetNodeType));
+    frameNode->Set(vm, panda::StringRef::NewFromUtf8(vm, "getOpacity"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), FrameNodeBridge::GetOpacity));
+    frameNode->Set(vm, panda::StringRef::NewFromUtf8(vm, "isVisible"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), FrameNodeBridge::IsVisible));
+    frameNode->Set(vm, panda::StringRef::NewFromUtf8(vm, "isClipToFrame"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), FrameNodeBridge::IsClipToFrame));
+    frameNode->Set(vm, panda::StringRef::NewFromUtf8(vm, "isAttached"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), FrameNodeBridge::IsAttached));
+    frameNode->Set(vm, panda::StringRef::NewFromUtf8(vm, "getInspectorInfo"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), FrameNodeBridge::GetInspectorInfo));
     frameNode->Set(vm, panda::StringRef::NewFromUtf8(vm, "setOnClick"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), FrameNodeBridge::SetOnClick));
     frameNode->Set(vm, panda::StringRef::NewFromUtf8(vm, "setOnTouch"),

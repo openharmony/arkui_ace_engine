@@ -1277,6 +1277,7 @@ struct ArkUICommonModifier {
     ArkUI_Bool (*getNeedFocus)(ArkUINodeHandle node);
     ArkUI_Float32 (*getOpacity)(ArkUINodeHandle node);
     void (*getBorderWidth)(ArkUINodeHandle node, ArkUI_Float32* values);
+    void (*getBorderWidthDimension)(ArkUINodeHandle node, ArkUI_Float32* values, ArkUI_Int32* units);
     void (*getBorderRadius)(ArkUINodeHandle node, ArkUI_Float32* values);
     void (*getBorderColor)(ArkUINodeHandle node, ArkUI_Uint32* values);
     void (*getBorderStyle)(ArkUINodeHandle node, ArkUI_Int32* values);
@@ -1331,9 +1332,12 @@ struct ArkUICommonModifier {
     ArkUI_Uint32 (*getBackgroundColor)(ArkUINodeHandle node);
     void (*getBackgroundImage)(ArkUINodeHandle node, ArkUIBackgroundImage* options);
     void (*getPadding)(ArkUINodeHandle node, ArkUI_Float32* values, ArkUI_Int32 length);
+    void (*getPaddingDimension)(ArkUINodeHandle node, ArkUI_Float32* values, ArkUI_Int32* units);
+    void (*getConfigSize)(ArkUINodeHandle node, ArkUI_Float32* values, ArkUI_Int32* units);
     ArkUI_CharPtr (*getKey)(ArkUINodeHandle node);
     ArkUI_Int32 (*getEnabled)(ArkUINodeHandle node);
     void (*getMargin)(ArkUINodeHandle node, ArkUI_Float32* values, ArkUI_Int32 length);
+    void (*getMarginDimension)(ArkUINodeHandle node, ArkUI_Float32* values, ArkUI_Int32* units);
     void (*getTranslate)(ArkUINodeHandle node, ArkUI_Float32* values);
     void (*setMoveTransition)(ArkUINodeHandle node, ArkUI_Int32 value, const ArkUIAnimationOptionType* opacityOption);
     ArkUIMoveTransitionType (*getMoveTransition)(ArkUINodeHandle node);
@@ -3249,6 +3253,13 @@ struct ArkUIFrameNodeModifier {
     ArkUI_Int32 (*getIdByNodePtr)(ArkUINodeHandle node);
     ArkUI_Float32* (*getPositionToParent)(ArkUINodeHandle node);
     ArkUI_Float32* (*getPositionToWindow)(ArkUINodeHandle node);
+    ArkUI_Float32* (*getMeasuredSize)(ArkUINodeHandle node);
+    ArkUI_Float32* (*getLayoutPosition)(ArkUINodeHandle node);
+    ArkUI_CharPtr (*getInspectorId)(ArkUINodeHandle node);
+    ArkUI_CharPtr (*getNodeType)(ArkUINodeHandle node);
+    ArkUI_Bool (*isVisible)(ArkUINodeHandle node);
+    ArkUI_Bool (*isAttached)(ArkUINodeHandle node);
+    ArkUI_CharPtr (*getInspectorInfo)(ArkUINodeHandle node);
     ArkUINodeHandle (*getFrameNodeById)(ArkUI_Int32 nodeId);
     ArkUINodeHandle (*getFrameNodeByKey)(ArkUI_CharPtr key);
     void (*propertyUpdate)(ArkUINodeHandle node);

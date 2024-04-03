@@ -498,6 +498,26 @@ std::string Inspector::GetInspector(bool isLayoutInspector)
     return GetInspectorInfo(children, pageId, std::move(jsonRoot), isLayoutInspector);
 }
 
+std::string Inspector::GetInspectorOfNode(RefPtr<NG::UINode> node)
+{
+    auto jsonRoot = JsonUtil::Create(true);
+
+    auto context = NG::PipelineContext::GetCurrentContext();
+    CHECK_NULL_RETURN(context, jsonRoot->ToString());
+    GetContextInfo(context, jsonRoot);
+    CHECK_NULL_RETURN(node, jsonRoot->ToString());
+    auto pageId = context->GetStageManager()->GetLastPage()->GetPageId();
+    auto jsonNodeArray = JsonUtil::CreateArray(true);
+    GetInspectorChildren(node, jsonNodeArray, pageId, true);
+    if (jsonNodeArray->GetArraySize()) {
+        jsonRoot = jsonNodeArray->GetArrayItem(0);
+        jsonRoot->Delete(INSPECTOR_CHILDREN);
+        GetContextInfo(context, jsonRoot);
+    }
+
+    return jsonRoot->ToString();
+}
+
 std::string Inspector::GetSubWindowInspector(bool isLayoutInspector)
 {
     auto jsonRoot = JsonUtil::Create(true);
