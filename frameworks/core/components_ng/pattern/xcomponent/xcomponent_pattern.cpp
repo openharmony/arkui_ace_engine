@@ -1279,7 +1279,9 @@ void XComponentPattern::OnWindowHide()
     }
     CHECK_NULL_VOID(renderSurface_);
     NativeSurfaceHide();
-    renderSurface_->releaseSurfaceBuffers();
+    if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TWELVE)) {
+        renderSurface_->releaseSurfaceBuffers();
+    }
     hasReleasedSurface_ = true;
 }
 
