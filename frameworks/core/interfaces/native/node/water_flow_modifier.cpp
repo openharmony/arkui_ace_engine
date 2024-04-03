@@ -14,10 +14,12 @@
  */
 #include "core/interfaces/native/node/water_flow_modifier.h"
 
-#include "core/components_ng/pattern/waterflow/water_flow_model_ng.h"
-#include "core/interfaces/arkoala/arkoala_api.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/scrollable/scrollable_model_ng.h"
+#include "core/components_ng/pattern/waterflow/water_flow_model_ng.h"
+#include "core/interfaces/arkoala/arkoala_api.h"
+#include "core/interfaces/native/node/node_adapter_impl.h"
+
 namespace OHOS::Ace::NG {
 namespace {
 constexpr ArkUI_Float64 FRICTION_DEFAULT = -1.0;
@@ -25,7 +27,6 @@ constexpr ArkUI_Float64 DIMENSION_DEFAULT = 0.0;
 const int32_t ERROR_INT_CODE = -1;
 const float ERROR_FLOAT_CODE = -1.0f;
 std::string g_strValue;
-} // namespace
 
 void ResetColumnsTemplate(ArkUINodeHandle node)
 {
@@ -272,6 +273,51 @@ void GetWaterFlowNestedScroll(ArkUINodeHandle node, ArkUI_Int32* values)
     values[0] = static_cast<ArkUI_Int32>(options.forward);
     values[1] = static_cast<ArkUI_Int32>(options.backward);
 }
+
+ArkUI_Int32 SetNodeAdapter(ArkUINodeHandle node, ArkUINodeAdapterHandle handle)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, ERROR_CODE_PARAM_INVALID);
+    auto totalChildCount = frameNode->TotalChildCount();
+    if (totalChildCount > 0) {
+        return ERROR_CODE_NATIVE_IMPL_NODE_ADAPTER_CHILD_NODE_EXIST;
+    }
+    NodeAdapter::GetNodeAdapterAPI()->attachHostNode(handle, node);
+    return ERROR_CODE_NO_ERROR;
+}
+
+void ResetNodeAdapter(ArkUINodeHandle node)
+{
+    NodeAdapter::GetNodeAdapterAPI()->detachHostNode(node);
+}
+
+ArkUINodeAdapterHandle GetNodeAdapter(ArkUINodeHandle node)
+{
+    return NodeAdapter::GetNodeAdapterAPI()->getNodeAdapter(node);
+}
+
+void SetCachedCount(ArkUINodeHandle node, ArkUI_Int32 cachedCount)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    WaterFlowModelNG::SetCachedCount(frameNode, cachedCount);
+}
+
+void ResetCachedCount(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    WaterFlowModelNG::SetCachedCount(frameNode, 1);
+}
+
+ArkUI_Int32 GetCachedCount(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, 1);
+    return WaterFlowModelNG::GetCachedCount(frameNode);
+}
+
+} // namespace
 namespace NodeModifier {
 const ArkUIWaterFlowModifier* GetWaterFlowModifier()
 {
@@ -305,7 +351,13 @@ const ArkUIWaterFlowModifier* GetWaterFlowModifier()
         GetRowsTemplate,
         GetColumnsGap,
         GetRowsGap,
-        GetWaterFlowNestedScroll
+        GetWaterFlowNestedScroll,
+        SetNodeAdapter,
+        ResetNodeAdapter,
+        GetNodeAdapter,
+        SetCachedCount,
+        ResetCachedCount,
+        GetCachedCount,
     };
     return &modifier;
 }

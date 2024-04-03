@@ -15,6 +15,8 @@
 
 #include "core/components_ng/pattern/list/list_model_ng.h"
 
+#include <cstdint>
+
 #include "base/utils/utils.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/view_stack_processor.h"
@@ -424,6 +426,13 @@ void ListModelNG::SetChainAnimation(FrameNode* frameNode, bool chainAnimation)
 void ListModelNG::SetCachedCount(FrameNode* frameNode, int32_t cachedCount)
 {
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(ListLayoutProperty, CachedCount, cachedCount, frameNode);
+}
+
+int32_t ListModelNG::GetCachedCount(FrameNode* frameNode)
+{
+    int32_t cachedCount = 1;
+    ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(ListLayoutProperty, CachedCount, cachedCount, frameNode, 1);
+    return cachedCount;
 }
 
 void ListModelNG::SetScrollEnabled(FrameNode* frameNode, bool enableScrollInteraction)
