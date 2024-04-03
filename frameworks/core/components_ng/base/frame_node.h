@@ -946,7 +946,7 @@ private:
 
     std::unordered_map<std::string, int32_t> sceneRateMap_;
 
-    DragPreviewOption previewOption_ { DragPreviewMode::AUTO };
+    DragPreviewOption previewOption_ { DragPreviewMode::AUTO, false, false, false, { .isShowBadge = true } };
 
     RefPtr<Recorder::ExposureProcessor> exposureProcessor_;
 

@@ -339,6 +339,16 @@ public:
         return isShowBadgeAnimation_;
     }
 
+    void SetBadgeNumber(int32_t badgeNumber)
+    {
+        badgeNumber_ = badgeNumber;
+    }
+
+    int32_t GetBadgeNumber() const
+    {
+        return badgeNumber_;
+    }
+
 private:
     double CalcDragPreviewDistanceWithPoint(
         const OHOS::Ace::Dimension& preserverHeight, int32_t x, int32_t y, const DragPreviewInfo& info);
@@ -410,6 +420,7 @@ private:
     std::vector<RefPtr<PixelMap>> gatherPixelMaps_;
     bool hasGatherNode_ = false;
     bool isShowBadgeAnimation_ = true;
+    int32_t badgeNumber_ = -1;
 
     ACE_DISALLOW_COPY_AND_MOVE(DragDropManager);
 };

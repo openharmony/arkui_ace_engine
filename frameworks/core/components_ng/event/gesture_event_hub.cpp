@@ -837,6 +837,11 @@ void GestureEventHub::OnDragStart(const GestureEvent& info, const RefPtr<Pipelin
             pixelMap = pixelMap_;
         }
     }
+    auto dragPreviewOptions = frameNode->GetDragPreviewOption();
+    auto badgeNumber = dragPreviewOptions.GetCustomerBadgeNumber();
+    if (badgeNumber.has_value()) {
+        recordsSize = badgeNumber.value();
+    }
     float defaultPixelMapScale =
         info.GetInputEventType() == InputEventType::MOUSE_BUTTON ? 1.0f : DEFALUT_DRAG_PPIXELMAP_SCALE;
     float scale = GetPixelMapScale(pixelMap->GetHeight(), pixelMap->GetWidth()) * defaultPixelMapScale;
@@ -865,7 +870,7 @@ void GestureEventHub::OnDragStart(const GestureEvent& info, const RefPtr<Pipelin
             previewScale = static_cast<float>(imageNode->GetPreviewScaleVal());
             scale = previewScale * windowScale;
         }
-        auto childSize = GetSelectItemSize();
+        auto childSize = badgeNumber.has_value() ? badgeNumber.value() : GetSelectItemSize();
         if (childSize > 1) {
             recordsSize = childSize;
         }
