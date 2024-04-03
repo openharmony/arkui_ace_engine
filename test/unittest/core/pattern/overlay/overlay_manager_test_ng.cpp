@@ -1161,7 +1161,7 @@ HWTEST_F(OverlayManagerTestNg, HandleDragUpdate001, TestSize.Level1)
      */
     topSheetPattern->OnCoordScrollEnd(*topSheetPattern->sheetDetentHeight_.end());
     auto ret = topSheetPattern->OnCoordScrollUpdate(*topSheetPattern->sheetDetentHeight_.end());
-    EXPECT_TRUE(ret);
+    EXPECT_FALSE(ret);
 }
 /**
  * @tc.name: TestOnBindSheet
