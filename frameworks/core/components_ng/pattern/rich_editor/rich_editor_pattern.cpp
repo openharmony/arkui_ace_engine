@@ -4623,7 +4623,11 @@ void RichEditorPattern::HandleOnCopy(bool isUsingExternalKeyboard)
         return;
     }
     OnCopyOperation(isUsingExternalKeyboard);
-    CloseSelectOverlay();
+    if (IsShowSelectMenuUsingMouse()) {
+        CloseSelectOverlay();
+    } else {
+        selectOverlayProxy_->ShowOrHiddenMenu(true);
+    }
 }
 
 void RichEditorPattern::ResetAfterPaste()
