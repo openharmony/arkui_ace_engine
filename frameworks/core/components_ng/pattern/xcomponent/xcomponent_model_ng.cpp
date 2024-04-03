@@ -30,8 +30,8 @@ void XComponentModelNG::Create(const std::string& id, XComponentType type, const
     auto nodeId = stack->ClaimNodeId();
     ACE_LAYOUT_SCOPED_TRACE("Create[%s][self:%d]", V2::XCOMPONENT_ETS_TAG, nodeId);
     auto frameNode = FrameNode::GetOrCreateFrameNode(
-        V2::XCOMPONENT_ETS_TAG, nodeId, [id, type, xcomponentController]() {
-            return AceType::MakeRefPtr<XComponentPattern>(id, type, xcomponentController);
+        V2::XCOMPONENT_ETS_TAG, nodeId, [id, type, /* libraryname, */ xcomponentController]() {
+            return AceType::MakeRefPtr<XComponentPattern>(id, type, /* libraryname, */ xcomponentController);
         });
     stack->Push(frameNode);
     ACE_UPDATE_LAYOUT_PROPERTY(XComponentLayoutProperty, XComponentType, type);
@@ -75,10 +75,10 @@ void XComponentModelNG::SetLibraryName(const std::string& libraryName)
 std::string XComponentModelNG::GetLibraryName()
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
-    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_RETURN(frameNode, "");
     auto type = GetTypeImpl(frameNode);
     if (type == XComponentType::COMPONENT || type == XComponentType::NODE) {
-        return;
+        return "";
     }
     auto xcPattern = AceType::DynamicCast<XComponentPattern>(frameNode->GetPattern());
     CHECK_NULL_RETURN(xcPattern, "");

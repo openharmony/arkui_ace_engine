@@ -134,18 +134,14 @@ OH_NativeXComponent_KeyEvent ConvertNativeXComponentKeyEvent(const KeyEvent& eve
 
 XComponentPattern::XComponentPattern(const std::string& id, XComponentType type,
     const std::shared_ptr<InnerXComponentController>& xcomponentController, float initWidth, float initHeight)
-    : id_(id), type_(type), xcomponentController_(xcomponentController)
-{
-    initSize_.SetWidth(initWidth);
-    initSize_.SetHeight(initHeight);
-}
+    : id_(id), type_(type), xcomponentController_(xcomponentController), initSize_(initWidth, initHeight)
+{}
 
 XComponentPattern::XComponentPattern(const std::string& id, XComponentType type, const std::string& libraryname,
     const std::shared_ptr<InnerXComponentController>& xcomponentController, float initWidth, float initHeight)
-    : id_(id), type_(type), libraryname_(libraryname), xcomponentController_(xcomponentController)
+    : XComponentPattern(id, type, xcomponentController, initWidth, initHeight)
 {
-    initSize_.SetWidth(initWidth);
-    initSize_.SetHeight(initHeight);
+    SetLibraryName(libraryname);
 }
 
 void XComponentPattern::Initialize(int32_t instanceId)

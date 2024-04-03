@@ -35,6 +35,11 @@ public:
         return type == XComponentType::TEXTURE || type == XComponentType::NODE ||
                (type == XComponentType::SURFACE && Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN));
     }
+    static bool IsCommonEventAvailable(const XComponentType& type, std::string& libraryName)
+    {
+        return type == XComponentType::NODE ||
+               (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TWELVE) && libraryName == "");
+    }
     virtual ~XComponentModel() = default;
 
     virtual void Create(const std::string& id, XComponentType type, const std::string& libraryname,
