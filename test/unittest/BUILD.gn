@@ -80,6 +80,7 @@ config("ace_unittest_config") {
     "ACE_UNITTEST",
     "OHOS_STANDARD_SYSTEM",
     "ACE_INSTANCE_LOG",
+    "USE_HILOG",
   ]
 }
 

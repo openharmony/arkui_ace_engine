@@ -33,7 +33,10 @@ ohos_shared_library("plugincomponent") {
     "js_plugin_want.cpp",
   ]
 
-  defines = [ "OHOS_PLATFORM" ]
+  defines = [
+    "OHOS_PLATFORM",
+    "USE_HILOG",
+  ]
   sources += [ "$ace_root/adapter/ohos/osal/log_wrapper.cpp" ]
 
   deps = [ "$ace_root/build:libace_compatible" ]

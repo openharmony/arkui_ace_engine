@@ -32,6 +32,9 @@ template("bridge_accessibility") {
       "$ace_root/frameworks/core/accessibility/js_inspector:js_inspector_$platform",
       "$ace_root/frameworks/core/components/theme:build_theme_code",
     ]
+    if (use_hilog) {
+      external_deps = [ "hilog:libhilog" ]
+    }
   }
 }
 

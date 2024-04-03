@@ -25,32 +25,8 @@
 #include "core/common/container_scope.h"
 #endif
 
-extern "C" {
-int HiLogPrintArgs(LogType type, LogLevel level, unsigned int domain, const char* tag, const char* fmt, va_list ap);
-}
-
 namespace OHOS::Ace {
 namespace {
-const ::LogLevel LOG_LEVELS[] = {
-    LOG_DEBUG,
-    LOG_INFO,
-    LOG_WARN,
-    LOG_ERROR,
-    LOG_FATAL,
-};
-
-constexpr char APP_DOMAIN_CONTENT[] = "JSAPP";
-
-constexpr uint32_t LOG_DOMAINS[] = {
-    0xD003900,
-    0xC0D0,
-};
-
-constexpr LogType LOG_TYPES[] = {
-    LOG_CORE,
-    LOG_APP,
-};
-
 #ifdef ACE_INSTANCE_LOG
 constexpr const char* INSTANCE_ID_GEN_REASONS[] = {
     "scope",
@@ -140,14 +116,6 @@ LogLevel LogWrapper::level_ = LogLevel::DEBUG;
 char LogWrapper::GetSeparatorCharacter()
 {
     return '/';
-}
-
-void LogWrapper::PrintLog(LogDomain domain, LogLevel level, AceLogTag tag, const char* fmt, va_list args)
-{
-    uint32_t hilogDomain = LOG_DOMAINS[static_cast<uint32_t>(domain)] + static_cast<uint32_t>(tag);
-    const char* domainContent = domain == LogDomain::FRAMEWORK ? g_DOMAIN_CONTENTS_MAP.at(tag) : APP_DOMAIN_CONTENT;
-    HiLogPrintArgs(LOG_TYPES[static_cast<uint32_t>(domain)], LOG_LEVELS[static_cast<uint32_t>(level)],
-        hilogDomain, domainContent, fmt, args);
 }
 
 #ifdef ACE_INSTANCE_LOG

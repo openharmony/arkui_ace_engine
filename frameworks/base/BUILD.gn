@@ -34,6 +34,9 @@ template("ace_base_source_set") {
       "resource:ace_resource",
     ]
     external_deps = []
+    if (use_hilog) {
+      external_deps += [ "hilog:libhilog" ]
+    }
     configs = [ "$ace_root:ace_config" ]
 
     # add base source file here
@@ -160,6 +163,7 @@ foreach(item, ace_platforms) {
 
     if (platform == "ohos") {
       external_deps = [
+        "hilog:libhilog",
         "i18n:intl_util",
         "init:libbeget_proxy",
         "init:libbegetutil",

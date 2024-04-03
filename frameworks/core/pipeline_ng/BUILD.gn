@@ -48,7 +48,9 @@ template("ace_core_pipeline_ng_source_set") {
       "$skia_root_new:skia_$platform",
     ]
     external_deps = []
-
+    if (use_hilog) {
+      external_deps += [ "hilog:libhilog" ]
+    }
     if (defined(config.enable_rosen_backend) && config.enable_rosen_backend) {
       if (is_arkui_x) {
         deps += [ "//foundation/graphic/graphic_2d/rosen/modules/render_service_client:librender_service_client_static" ]
