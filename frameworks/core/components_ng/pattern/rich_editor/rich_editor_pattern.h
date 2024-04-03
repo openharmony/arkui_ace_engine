@@ -256,7 +256,11 @@ public:
     void AddSpanItem(const RefPtr<SpanItem>& item, int32_t offset);
     int32_t AddPlaceholderSpan(const RefPtr<UINode>& customNode, const SpanOptionBase& options);
     void HandleSelectOverlayWithOptions(const SelectionOptions& options);
-    void SetSelection(int32_t start, int32_t end, const std::optional<SelectionOptions>& options = std::nullopt);
+    void SetSelection(int32_t start, int32_t end, const std::optional<SelectionOptions>& options = std::nullopt,
+        bool isForward = false);
+    void RefreshSelectOverlay(bool isMousePressed, bool selectedTypeChange);
+    bool IsShowHandle();
+    void SetHandles();
     bool IsEditing();
     void OnHandleMoveDone(const RectF& handleRect, bool isFirstHandle) override;
     std::u16string GetLeftTextOfCursor(int32_t number) override;
