@@ -61,7 +61,7 @@ RefPtr<AceType> XComponentModelNG::Create(int32_t nodeId, float width, float hei
 
 void XComponentModelNG::SetLibraryName(const std::string& libraryName)
 {
-    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    auto frameNode = AceType::Claim(ViewStackProcessor::GetInstance()->GetMainFrameNode());
     CHECK_NULL_VOID(frameNode);
     auto type = GetTypeImpl(frameNode);
     if (type == XComponentType::COMPONENT || type == XComponentType::NODE) {
@@ -74,7 +74,7 @@ void XComponentModelNG::SetLibraryName(const std::string& libraryName)
 
 std::string XComponentModelNG::GetLibraryName()
 {
-    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    auto frameNode = AceType::Claim(ViewStackProcessor::GetInstance()->GetMainFrameNode());
     CHECK_NULL_RETURN(frameNode, "");
     auto type = GetTypeImpl(frameNode);
     if (type == XComponentType::COMPONENT || type == XComponentType::NODE) {
