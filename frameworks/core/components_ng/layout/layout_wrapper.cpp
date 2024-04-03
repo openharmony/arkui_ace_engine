@@ -171,6 +171,8 @@ void LayoutWrapper::ExpandSafeArea(bool isFocusOnPage)
         CHECK_NULL_VOID(safeAreaManager);
         if (!(host->GetId() == safeAreaManager->GetRootMeasureNodeId() && geometryTransition != nullptr) &&
             CheckValidSafeArea()) {
+            ACE_LAYOUT_SCOPED_TRACE("ExpandSafeArea[%s][self:%d] save cache success res %s", host->GetTag().c_str(),
+                host->GetId(), GetGeometryNode()->GetFrameRect().ToString().c_str());
             auto syncCasheSuccess = GetGeometryNode()->RestoreCache();
             auto renderContext = host->GetRenderContext();
             CHECK_NULL_VOID(renderContext);
@@ -263,6 +265,9 @@ void LayoutWrapper::AdjustChild(RefPtr<UINode> childUI, const OffsetF& offset)
     child->SaveGeoState();
     childGeo->SetFrameOffset(childGeo->GetFrameOffset() + offset);
     child->SetNeedRestoreSafeArea(true);
+    auto host = GetHostNode();
+    ACE_SCOPED_TRACE("AdjustChild[%s][self:%d] adjust child %s %d", host->GetTag().c_str(), host->GetId(),
+        child->GetTag().c_str(), child->GetId());
     auto renderContext = child->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
     renderContext->SavePaintRect();
@@ -292,6 +297,9 @@ void LayoutWrapper::RestoreExpansiveChild(const RefPtr<UINode>& childUI)
     }
     auto childGeo = child->GetGeometryNode();
     childGeo->Restore();
+    auto host = GetHostNode();
+    ACE_SCOPED_TRACE("RestoreExpansiveChild[%s][self:%d] RestoreExpansiveChild %s %d", host->GetTag().c_str(),
+        host->GetId(), child->GetTag().c_str(), child->GetId());
     child->SetNeedRestoreSafeArea(false);
     auto renderContext = child->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
