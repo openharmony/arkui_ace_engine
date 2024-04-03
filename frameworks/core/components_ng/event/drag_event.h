@@ -220,8 +220,9 @@ private:
     RefPtr<LongPressRecognizer> previewLongPressRecognizer_;
     RefPtr<SequencedRecognizer> SequencedRecognizer_;
     RefPtr<FrameNode> gatherNode_;
-    std::function<void(GestureEvent&)> actionStart_;
 
+    RefPtr<PixelMap> textPixelMap_;
+    std::function<void(GestureEvent&)> actionStart_;
     std::function<void(GestureEvent&)> longPressUpdate_;
     std::function<void()> actionCancel_;
     std::function<void(Offset)> textDragCallback_;
