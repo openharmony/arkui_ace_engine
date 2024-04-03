@@ -503,6 +503,7 @@ HWTEST_F(SelectOverlayTestNg, HandleOperator002, TestSize.Level1)
     info.localLocation_ = Offset(1, 1);
     pattern->HandleOnClick(info);
     EXPECT_TRUE(pattern->GetSelectOverlayInfo()->menuInfo.menuIsShow);
+    pattern->isFirstHandleTouchDown_ = true;
     pattern->HandlePanStart(info);
     EXPECT_TRUE(pattern->firstHandleDrag_);
     const auto& offset = OffsetF(info.GetDelta().GetX(), info.GetDelta().GetY());
@@ -520,6 +521,7 @@ HWTEST_F(SelectOverlayTestNg, HandleOperator002, TestSize.Level1)
     info2.localLocation_ = Offset(11, 11);
     ASSERT_NE(pattern->info_, nullptr);
     pattern->info_->isHandleLineShow = false;
+    pattern->isSecondHandleTouchDown_ = true;
     pattern->HandlePanStart(info2);
     EXPECT_TRUE(pattern->secondHandleDrag_);
     const auto& offset2 = OffsetF(info2.GetDelta().GetX(), info2.GetDelta().GetY());
@@ -549,12 +551,14 @@ HWTEST_F(SelectOverlayTestNg, HandleOperator002, TestSize.Level1)
     pattern->info_->onHandleMoveStart = [&](bool isFirst) {
         callBackFlag = 1;
     };
+    pattern->isFirstHandleTouchDown_ = true;
     pattern->HandlePanStart(info4);
     EXPECT_EQ(callBackFlag, 1);
 
     // not in first region and in second region
     info4.localLocation_ = Offset(11, 11);
     callBackFlag = 0;
+    pattern->isSecondHandleTouchDown_ = true;
     pattern->HandlePanStart(info4);
     EXPECT_EQ(callBackFlag, 1);
 
