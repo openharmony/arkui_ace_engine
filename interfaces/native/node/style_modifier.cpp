@@ -594,6 +594,9 @@ const ArkUI_AttributeItem* GetWidth(ArkUI_NodeHandle node)
 {
     auto modifier = GetFullImpl()->getNodeModifiers()->getCommonModifier();
     g_numberValues[0].f32 = modifier->getWidth(node->uiNodeHandle);
+    if (LessNotEqual(g_numberValues[0].f32, 0.0f)) {
+        return nullptr;
+    }
     return &g_attributeItem;
 }
 
@@ -621,6 +624,9 @@ const ArkUI_AttributeItem* GetHeight(ArkUI_NodeHandle node)
 {
     auto modifier = GetFullImpl()->getNodeModifiers()->getCommonModifier();
     g_numberValues[0].f32 = modifier->getHeight(node->uiNodeHandle);
+    if (LessNotEqual(g_numberValues[0].f32, 0.0f)) {
+        return nullptr;
+    }
     return &g_attributeItem;
 }
 
@@ -2233,7 +2239,6 @@ const ArkUI_AttributeItem* GetMask(ArkUI_NodeHandle node)
             g_numberValues[NUM_6].f32 = options.radiusWidth;
             g_numberValues[NUM_7].f32 = options.radiusHeight;
             break;
-
         case BasicShapeType::CIRCLE:
             g_numberValues[NUM_0].u32 = options.fill;
             g_numberValues[NUM_1].u32 = options.strokeColor;
@@ -2242,7 +2247,6 @@ const ArkUI_AttributeItem* GetMask(ArkUI_NodeHandle node)
             g_numberValues[NUM_4].f32 = options.width;
             g_numberValues[NUM_5].f32 = options.height;
             break;
-
         case BasicShapeType::ELLIPSE:
             g_numberValues[NUM_0].u32 = options.fill;
             g_numberValues[NUM_1].u32 = options.strokeColor;
@@ -2251,7 +2255,6 @@ const ArkUI_AttributeItem* GetMask(ArkUI_NodeHandle node)
             g_numberValues[NUM_4].f32 = options.width;
             g_numberValues[NUM_5].f32 = options.height;
             break;
-        
         case BasicShapeType::PATH:
             g_numberValues[NUM_0].u32 = options.fill;
             g_numberValues[NUM_1].u32 = options.strokeColor;
@@ -2261,15 +2264,17 @@ const ArkUI_AttributeItem* GetMask(ArkUI_NodeHandle node)
             g_numberValues[NUM_5].f32 = options.height;
             g_attributeItem.string = options.commands;
             break;
-
         default:
             g_numberValues[NUM_0].i32 = static_cast<ArkUI_Int32>(ArkUI_MaskType::ARKUI_MASK_TYPE_PROGRESS);
             g_numberValues[NUM_1].f32 = options.value;
             g_numberValues[NUM_2].f32 = options.maxValue;
             g_numberValues[NUM_3].u32 = options.color;
-        break;
+            break;
     }
-
+    if (!InRegion(static_cast<ArkUI_Int32>(ArkUI_MaskType::ARKUI_MASK_TYPE_RECTANGLE),
+        static_cast<ArkUI_Int32>(ArkUI_MaskType::ARKUI_MASK_TYPE_PATH), g_numberValues[NUM_3].i32)) {
+        return nullptr;
+    }
     return &g_attributeItem;
 }
 
