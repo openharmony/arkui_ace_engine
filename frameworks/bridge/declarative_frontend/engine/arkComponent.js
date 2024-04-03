@@ -12939,6 +12939,10 @@ class ArkTextPickerComponent extends ArkComponent {
     modifierWithKey(this._modifiersWithKeys, TextpickerDividerModifier.identity, TextpickerDividerModifier, value);
     return this;
   }
+  gradientHeight(value) {
+    modifierWithKey(this._modifiersWithKeys, TextpickerGradientHeightModifier.identity, TextpickerGradientHeightModifier, value);
+    return this;
+  }
 }
 class TextpickerCanLoopModifier extends ModifierWithKey {
   constructor(value) {
@@ -13001,6 +13005,24 @@ class TextpickerDividerModifier extends ModifierWithKey {
     }
 }
 TextpickerDividerModifier.identity = Symbol('textpickerDivider');
+
+class TextpickerGradientHeightModifier extends ModifierWithKey {
+  constructor(value) {
+      super(value);
+  }
+  applyPeer(node, reset) {
+      if (reset) {
+          getUINativeModule().textpicker.resetGradientHeight(node);
+      }
+      else {
+          getUINativeModule().textpicker.setGradientHeight(node, this.value);
+      }
+  }
+  checkObjectDiff() {
+      return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+TextpickerGradientHeightModifier.identity = Symbol('textpickerGradientHeight');
 class TextpickerTextStyleModifier extends ModifierWithKey {
   constructor(value) {
     super(value);
