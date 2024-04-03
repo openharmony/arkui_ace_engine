@@ -2149,6 +2149,7 @@ struct ArkUITextInputModifier {
     void (*resetTextInputPasswordRules)(ArkUINodeHandle node);
     void (*setTextInputEnableAutoFill)(ArkUINodeHandle node, ArkUI_Uint32 enableAutoFill);
     void (*resetTextInputEnableAutoFill)(ArkUINodeHandle node);
+    void (*resetTextInputPadding)(ArkUINodeHandle node);
 };
 
 struct ArkUIWebModifier {
