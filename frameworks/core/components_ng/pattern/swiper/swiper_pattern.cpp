@@ -1766,11 +1766,11 @@ void SwiperPattern::InitPanEvent(const RefPtr<GestureEventHub>& gestureHub)
         auto pattern = weak.Upgrade();
         pattern->InitIndexCanChangeMap();
         if (pattern) {
+            TAG_LOGI(AceLogTag::ACE_SWIPER, "Swiper drag start. SourceTool: %{public}d", info.GetSourceTool());
             if (info.GetInputEventType() == InputEventType::AXIS && info.GetSourceTool() == SourceTool::MOUSE) {
                 return;
             }
             pattern->FireAndCleanScrollingListener();
-            TAG_LOGI(AceLogTag::ACE_SWIPER, "Swiper drag start");
             pattern->HandleDragStart(info);
             // notify scrollStart upwards
             pattern->NotifyParentScrollStart(pattern->direction_ == Axis::HORIZONTAL ? info.GetGlobalLocation().GetX()
@@ -1803,10 +1803,11 @@ void SwiperPattern::InitPanEvent(const RefPtr<GestureEventHub>& gestureHub)
             return;
         }
         if (pattern) {
+            TAG_LOGI(AceLogTag::ACE_SWIPER, "Swiper drag end. Velocity: %{public}f px/s, SourceTool: %{public}d",
+                info.GetMainVelocity(), info.GetSourceTool());
             if (info.GetInputEventType() == InputEventType::AXIS && info.GetSourceTool() == SourceTool::MOUSE) {
                 return;
             }
-            TAG_LOGI(AceLogTag::ACE_SWIPER, "Swiper drag end. Velocity: %{public}f px/s", info.GetMainVelocity());
             pattern->HandleDragEnd(info.GetMainVelocity());
         }
     };
