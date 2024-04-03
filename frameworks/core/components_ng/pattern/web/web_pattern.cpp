@@ -1744,6 +1744,10 @@ void WebPattern::OnModifyDone()
         delegate_->UpdateNativeEmbedModeEnabled(GetNativeEmbedModeEnabledValue(false));
         delegate_->UpdateNativeEmbedRuleTag(GetNativeEmbedRuleTagValue(""));
         delegate_->UpdateNativeEmbedRuleType(GetNativeEmbedRuleTypeValue(""));
+
+        std::tuple<bool, bool> config = GetNativeVideoPlayerConfigValue({false, false});
+        delegate_->UpdateNativeVideoPlayerConfig(std::get<0>(config), std::get<1>(config));
+
         accessibilityState_ = AceApplicationInfo::GetInstance().IsAccessibilityEnabled();
         if (accessibilityState_) {
             delegate_->SetAccessibilityState(true);
