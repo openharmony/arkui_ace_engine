@@ -254,6 +254,7 @@ int32_t TextPattern::GetTextContentLength()
 
 void TextPattern::HandleLongPress(GestureEvent& info)
 {
+    HandleSpanLongPressEvent(info);
     if (copyOption_ == CopyOptions::None || isMousePressed_) {
         return;
     }
@@ -283,6 +284,53 @@ void TextPattern::HandleLongPress(GestureEvent& info)
     CloseSelectOverlay(true);
     ShowSelectOverlay({ .animation = true });
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+}
+
+void TextPattern::HandleSpanLongPressEvent(GestureEvent& info)
+{
+    RectF textContentRect = contentRect_;
+    textContentRect.SetTop(contentRect_.GetY() - std::min(baselineOffset_, 0.0f));
+    textContentRect.SetHeight(contentRect_.Height() - std::max(baselineOffset_, 0.0f));
+
+    auto localLocation = info.GetLocalLocation();
+
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto renderContext = host->GetRenderContext();
+    CHECK_NULL_VOID(host);
+    PointF textOffset = { static_cast<float>(localLocation.GetX()) - textContentRect.GetX(),
+        static_cast<float>(localLocation.GetY()) - textContentRect.GetY() };
+    if (renderContext->GetClipEdge().has_value() && !renderContext->GetClipEdge().value() && overlayMod_) {
+        textContentRect = overlayMod_->GetBoundsRect();
+        textContentRect.SetTop(contentRect_.GetY() - std::min(baselineOffset_, 0.0f));
+    }
+    auto longPressFunc = [](RefPtr<SpanItem> item, GestureEvent& info, const RectF& rect,
+                             const PointF& textOffset) -> bool {
+        if (rect.IsInRegion(textOffset)) {
+            if (item && item->onLongPress) {
+                item->onLongPress(info);
+            }
+            return true;
+        }
+        return false;
+    };
+
+    if (textContentRect.IsInRegion(
+        PointF(static_cast<float>(localLocation.GetX()), static_cast<float>(localLocation.GetY()))) &&
+        !spans_.empty() && paragraph_) {
+        int32_t start = 0;
+        for (const auto& item : spans_) {
+            if (!item) {
+                continue;
+            }
+            std::vector<RectF> selectedRects;
+            paragraph_->GetRectsForRange(start, item->position, selectedRects);
+            for (auto && rect : selectedRects) {
+                CHECK_NULL_VOID(!longPressFunc(item, info, rect, textOffset));
+            }
+            start = item->position;
+        }
+    }
 }
 
 // Deprecated: Use the TextSelectOverlay::OnHandleMove() instead.
@@ -2024,6 +2072,14 @@ void TextPattern::BeforeCreateLayoutWrapper()
         host->Clean();
         for (const auto& span : spans_) {
             textForDisplay_ += span->content;
+            if (span->onClick) {
+                auto gestureEventHub = host->GetOrCreateGestureEventHub();
+                InitClickEvent(gestureEventHub);
+            }
+            if (span->onLongPress) {
+                auto gestureEventHub = host->GetOrCreateGestureEventHub();
+                InitLongPressEvent(gestureEventHub);
+            }
         }
         if (dataDetectorAdapter_->textForAI_ != textForDisplay_) {
             dataDetectorAdapter_->textForAI_ = textForDisplay_;

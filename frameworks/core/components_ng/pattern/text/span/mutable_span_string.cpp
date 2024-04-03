@@ -387,9 +387,10 @@ RefPtr<SpanBase> MutableSpanString::GetDefaultSpan(SpanType type)
     switch (type) {
         case SpanType::Font:
             return MakeRefPtr<FontSpan>();
+        case SpanType::Gesture:
+            return MakeRefPtr<GestureSpan>();
         case SpanType::Background:
         case SpanType::Decoration:
-        case SpanType::Gesture:
             return nullptr;
     }
 }
