@@ -3149,6 +3149,9 @@ void WebPattern::OnRootLayerChanged(int width, int height)
 
 void WebPattern::ReleaseResizeHold()
 {
+    if (layoutMode_ != WebLayoutMode::FIT_CONTENT) {
+        return;
+    }
     drawSize_.SetSize(rootLayerChangeSize_);
     auto frameNode = GetHost();
     CHECK_NULL_VOID(frameNode);
