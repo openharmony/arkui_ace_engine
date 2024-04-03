@@ -59,6 +59,7 @@ namespace {
 const std::string IMAGE_POINTER_CONTEXT_MENU_PATH = "etc/webview/ohos_nweb/context-menu.svg";
 const std::string IMAGE_POINTER_ALIAS_PATH = "etc/webview/ohos_nweb/alias.svg";
 constexpr int32_t UPDATE_WEB_LAYOUT_DELAY_TIME = 20;
+constexpr int32_t IMAGE_POINTER_CUSTOM_CHANNEL = 4;
 const LinearEnumMapNode<OHOS::NWeb::CursorType, MouseFormat> g_cursorTypeMap[] = {
     { OHOS::NWeb::CursorType::CT_CROSS, MouseFormat::CROSS },
     { OHOS::NWeb::CursorType::CT_HAND, MouseFormat::HAND_POINTING },
@@ -2370,7 +2371,7 @@ void WebPattern::OnTouchSelectionChanged(std::shared_ptr<OHOS::NWeb::NWebTouchHa
 
 bool WebPattern::OnCursorChange(const OHOS::NWeb::CursorType& type, const OHOS::NWeb::NWebCursorInfo& info)
 {
-    (void)info;
+    TAG_LOGD(AceLogTag::ACE_WEB, "OnCursorChange type: %{public}d", type);
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_RETURN(pipeline, false);
     auto windowId = pipeline->GetWindowId();
@@ -2379,8 +2380,11 @@ bool WebPattern::OnCursorChange(const OHOS::NWeb::CursorType& type, const OHOS::
     if (mouseStyle->GetPointerStyle(windowId, curPointerStyle) == -1) {
         return false;
     }
+
     if ((type == OHOS::NWeb::CursorType::CT_CONTEXTMENU) || (type == OHOS::NWeb::CursorType::CT_ALIAS)) {
         UpdateLocalCursorStyle(windowId, type);
+    } else if (type == OHOS::NWeb::CursorType::CT_CUSTOM) {
+        UpdateCustomCursor(windowId, info);
     } else {
         MouseFormat pointStyle = MouseFormat::DEFAULT;
         int64_t idx = BinarySearchFindIndex(g_cursorTypeMap, ArraySize(g_cursorTypeMap), type);
@@ -2408,6 +2412,27 @@ void WebPattern::UpdateLocalCursorStyle(int32_t windowId, const OHOS::NWeb::Curs
         pixelMap = CreatePixelMapFromString(IMAGE_POINTER_ALIAS_PATH);
         mouseStyle->SetMouseIcon(windowId, pointStyle, pixelMap);
     }
+}
+
+void WebPattern::UpdateCustomCursor(int32_t windowId, const OHOS::NWeb::NWebCursorInfo& info)
+{
+    Media::InitializationOptions opt;
+    opt.size.width = info.width;
+    opt.size.height = info.height;
+    opt.editable = true;
+    auto pixelMap = Media::PixelMap::Create(opt);
+    CHECK_NULL_VOID(pixelMap);
+    uint64_t bufferSize = info.width * info.height * IMAGE_POINTER_CUSTOM_CHANNEL;
+    uint32_t status = pixelMap->WritePixels(static_cast<const uint8_t*>(info.buff), bufferSize);
+    if (status != 0) {
+        TAG_LOGE(AceLogTag::ACE_WEB, "write pixel map failed %{public}u", status);
+        return;
+    }
+    std::shared_ptr<Media::PixelMap> cursorPixelMap(pixelMap.release());
+    CHECK_NULL_VOID(cursorPixelMap);
+    auto mouseStyle = MouseStyle::CreateMouseStyle();
+    CHECK_NULL_VOID(mouseStyle);
+    mouseStyle->SetCustomCursor(windowId, info.x, info.y, cursorPixelMap);
 }
 
 std::shared_ptr<OHOS::Media::PixelMap> WebPattern::CreatePixelMapFromString(const std::string& filePath)
