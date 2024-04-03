@@ -1458,6 +1458,7 @@ void RichEditorPattern::UpdateParagraphStyle(RefPtr<SpanNode> spanNode, const st
 
 void RichEditorPattern::ScheduleCaretTwinkling()
 {
+    ContainerScope scope(richEditorInstanceId_);
     auto context = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(context);
 
@@ -1470,7 +1471,8 @@ void RichEditorPattern::ScheduleCaretTwinkling()
     }
 
     auto weak = WeakClaim(this);
-    caretTwinklingTask_.Reset([weak] {
+    caretTwinklingTask_.Reset([weak, instanceId = richEditorInstanceId_] {
+        ContainerScope scope(instanceId);
         auto client = weak.Upgrade();
         CHECK_NULL_VOID(client);
         client->OnCaretTwinkling();

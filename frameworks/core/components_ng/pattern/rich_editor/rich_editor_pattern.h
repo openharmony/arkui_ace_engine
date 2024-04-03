@@ -383,6 +383,7 @@ public:
     void OnAttachToFrameNode() override
     {
         TextPattern::OnAttachToFrameNode();
+        richEditorInstanceId_ = Container::CurrentIdSafely();
     }
 
     void OnDetachFromFrameNode(FrameNode* node) override
@@ -780,6 +781,7 @@ private:
     TextInputType keyboard_ = TextInputType::UNSPECIFIED;
     ACE_DISALLOW_COPY_AND_MOVE(RichEditorPattern);
     bool keyboardAvoidance_ = false;
+    int32_t richEditorInstanceId_;
 };
 } // namespace OHOS::Ace::NG
 
