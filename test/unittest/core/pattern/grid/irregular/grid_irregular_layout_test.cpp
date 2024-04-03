@@ -20,6 +20,7 @@
 #include "core/components_ng/pattern/grid/grid_layout_info.h"
 #include "core/components_ng/pattern/grid/irregular/grid_irregular_layout_algorithm.h"
 #include "core/components_ng/pattern/grid/irregular/grid_layout_range_solver.h"
+#include "core/components_ng/property/measure_property.h"
 
 namespace OHOS::Ace::NG {
 class GridIrregularLayoutTest : public GridTestNg {};
@@ -1484,7 +1485,7 @@ HWTEST_F(GridIrregularLayoutTest, Gaps001, TestSize.Level1)
         model.SetLayoutOptions(GetOptionDemo6());
         model.SetColumnsGap(Dimension { 1.0f });
         model.SetRowsGap(Dimension { 1.0f });
-        CreateItem(12, -1, 200.0f);
+        CreateItem(12, -2, 200.0f);
     });
 
     EXPECT_EQ(GetChildRect(frameNode_, 1).GetX(), 240.5f);
@@ -1500,5 +1501,28 @@ HWTEST_F(GridIrregularLayoutTest, Gaps001, TestSize.Level1)
     FlushLayoutTask(frameNode_);
     EXPECT_EQ(GetChildRect(frameNode_, 1).GetX(), 242.5f);
     EXPECT_EQ(GetChildRect(frameNode_, 4).GetY(), 406.0f);
+}
+
+/**
+ * @tc.name: GridIrregularLayout::Width001
+ * @tc.desc: Test width priority of gridItem
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridIrregularLayoutTest, Width001, TestSize.Level1)
+{
+    // GridItem's own ideal size has higher priority
+    Create([](GridModelNG model) {
+        model.SetColumnsTemplate("1fr 1fr");
+        model.SetLayoutOptions(GetOptionDemo6());
+        model.SetColumnsGap(Dimension { 1.0f });
+        model.SetRowsGap(Dimension { 1.0f });
+        CreateItem(12, 300.0f, 200.0f);
+    });
+
+    FlushLayoutTask(frameNode_);
+    for (int32_t i = 0; i < 6; i++) {
+        EXPECT_EQ(GetChildSize(frameNode_, i).Width(), 300.0f);
+    }
+    EXPECT_EQ(GetChildSize(frameNode_, 1).Width(), 300.0f);
 }
 } // namespace OHOS::Ace::NG
