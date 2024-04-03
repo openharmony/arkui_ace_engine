@@ -396,7 +396,7 @@ void XComponentPattern::ConfigSurface(uint32_t surfaceWidth, uint32_t surfaceHei
 GraphicTransformType XComponentPattern::ConvertRotation(Rotation rotation)
 {
     GraphicTransformType transform = GraphicTransformType::GRAPHIC_ROTATE_BUTT;
-    switch(rotation) {
+    switch (rotation) {
         case Rotation::ROTATION_0:
             transform = GraphicTransformType::GRAPHIC_ROTATE_NONE;
             break;
