@@ -400,7 +400,7 @@ void XComponentPattern::BeforeCreateLayoutWrapper()
     CHECK_NULL_VOID(container);
     auto displayInfo = container->GetDisplayInfo();
     CHECK_NULL_VOID(displayInfo);
-    auto dmRotation = displayInfo->GetRotation();    
+    auto dmRotation = displayInfo->GetRotation();
     CHECK_NULL_VOID(renderSurface_);
     renderSurface_->SetTransformHint(dmRotation);
 }
