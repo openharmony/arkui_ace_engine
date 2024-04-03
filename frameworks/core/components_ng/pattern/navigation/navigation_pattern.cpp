@@ -309,7 +309,9 @@ void NavigationPattern::RefreshNavDestination()
     pipeline->AddPredictTask([weak = WeakClaim(this), weakNode = WeakPtr<FrameNode>(hostNode),
         navDestinationName](int64_t deadline, bool canUseLongPredictTask) {
             auto navigationPattern = weak.Upgrade();
+            CHECK_NULL_VOID(navigationPattern);
             auto navigationNode = weakNode.Upgrade();
+            CHECK_NULL_VOID(navigationNode);
             int32_t count = 0;
             int32_t depth = 0;
             navigationNode->GetPageNodeCountAndDepth(&count, &depth);
