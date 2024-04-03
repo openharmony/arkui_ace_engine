@@ -94,6 +94,7 @@ void EventController::Unregister(const std::shared_ptr<UIEventObserver>& observe
         [&observer](UIEventClient client) { return client.observer == observer; });
     bool change = iter != clientList_.end();
     clientList_.erase(iter, clientList_.end());
+    lock.unlock();
     if (change) {
         NotifyConfigChange();
     }
