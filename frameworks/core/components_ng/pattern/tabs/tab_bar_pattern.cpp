@@ -948,17 +948,20 @@ void TabBarPattern::UpdateBottomTabBarImageColor(const std::vector<int32_t>& sel
     CHECK_NULL_VOID(selectedImagePaintProperty);
     auto unselectedImagePaintProperty = imageNode->GetPaintProperty<ImageRenderProperty>();
     CHECK_NULL_VOID(unselectedImagePaintProperty);
-    if (iconStyles_[selectedIndexes[maskIndex]].selectedColor.has_value()) {
-        selectedImagePaintProperty->UpdateSvgFillColor(iconStyles_[selectedIndexes[maskIndex]].selectedColor.value());
-    } else {
-        selectedImagePaintProperty->UpdateSvgFillColor(tabTheme->GetBottomTabIconOn());
-    }
+    if (selectedIndexes[maskIndex] >= 0 && selectedIndexes[maskIndex] < static_cast<int32_t>(iconStyles_.size())) {
+        if (iconStyles_[selectedIndexes[maskIndex]].selectedColor.has_value()) {
+            selectedImagePaintProperty->UpdateSvgFillColor(
+                iconStyles_[selectedIndexes[maskIndex]].selectedColor.value());
+        } else {
+            selectedImagePaintProperty->UpdateSvgFillColor(tabTheme->GetBottomTabIconOn());
+        }
 
-    if (iconStyles_[selectedIndexes[maskIndex]].unselectedColor.has_value()) {
-        unselectedImagePaintProperty->UpdateSvgFillColor(
-            iconStyles_[selectedIndexes[maskIndex]].unselectedColor.value());
-    } else {
-        unselectedImagePaintProperty->UpdateSvgFillColor(tabTheme->GetBottomTabIconOff());
+        if (iconStyles_[selectedIndexes[maskIndex]].unselectedColor.has_value()) {
+            unselectedImagePaintProperty->UpdateSvgFillColor(
+                iconStyles_[selectedIndexes[maskIndex]].unselectedColor.value());
+        } else {
+            unselectedImagePaintProperty->UpdateSvgFillColor(tabTheme->GetBottomTabIconOff());
+        }
     }
 }
 
@@ -1040,17 +1043,19 @@ void TabBarPattern::MaskAnimationFinish(const RefPtr<FrameNode>& host, int32_t s
     auto tabBarPattern = host->GetPattern<TabBarPattern>();
     CHECK_NULL_VOID(tabBarPattern);
     auto iconStyles = tabBarPattern->GetIconStyle();
-    if (isSelected) {
-        if (iconStyles[selectedIndex].selectedColor.has_value()) {
-            imagePaintProperty->UpdateSvgFillColor(iconStyles[selectedIndex].selectedColor.value());
+    if (selectedIndex >= 0 && selectedIndex < static_cast<int32_t>(iconStyles.size())) {
+        if (isSelected) {
+            if (iconStyles[selectedIndex].selectedColor.has_value()) {
+                imagePaintProperty->UpdateSvgFillColor(iconStyles[selectedIndex].selectedColor.value());
+            } else {
+                imagePaintProperty->UpdateSvgFillColor(tabTheme->GetBottomTabIconOn());
+            }
         } else {
-            imagePaintProperty->UpdateSvgFillColor(tabTheme->GetBottomTabIconOn());
-        }
-    } else {
-        if (iconStyles[selectedIndex].unselectedColor.has_value()) {
-            imagePaintProperty->UpdateSvgFillColor(iconStyles[selectedIndex].unselectedColor.value());
-        } else {
-            imagePaintProperty->UpdateSvgFillColor(tabTheme->GetBottomTabIconOff());
+            if (iconStyles[selectedIndex].unselectedColor.has_value()) {
+                imagePaintProperty->UpdateSvgFillColor(iconStyles[selectedIndex].unselectedColor.value());
+            } else {
+                imagePaintProperty->UpdateSvgFillColor(tabTheme->GetBottomTabIconOff());
+            }
         }
     }
     imageLayoutProperty->UpdateImageSourceInfo(imageSourceInfo);
@@ -1423,17 +1428,13 @@ void TabBarPattern::UpdateTextColorAndFontWeight(int32_t indicator)
         auto textLayoutProperty = textNode->GetLayoutProperty<TextLayoutProperty>();
         CHECK_NULL_VOID(textLayoutProperty);
         auto isSelected = columnNode->GetId() == selectedColumnId;
-        if (isSelected) {
-            if (labelStyles_[index].selectedColor.has_value()) {
-                textLayoutProperty->UpdateTextColor(labelStyles_[index].selectedColor.value());
+        if (index >= 0 && index < static_cast<int32_t>(labelStyles_.size())) {
+            if (isSelected) {
+                textLayoutProperty->UpdateTextColor(labelStyles_[index].selectedColor.has_value() ?
+                    labelStyles_[index].selectedColor.value() : tabTheme->GetSubTabTextOnColor());
             } else {
-                textLayoutProperty->UpdateTextColor(tabTheme->GetSubTabTextOnColor());
-            }
-        } else {
-            if (labelStyles_[index].unselectedColor.has_value()) {
-                textLayoutProperty->UpdateTextColor(labelStyles_[index].unselectedColor.value());
-            } else {
-                textLayoutProperty->UpdateTextColor(tabTheme->GetSubTabTextOffColor());
+                textLayoutProperty->UpdateTextColor(labelStyles_[index].unselectedColor.has_value() ?
+                    labelStyles_[index].unselectedColor.value() : tabTheme->GetSubTabTextOffColor());
             }
         }
         if (IsNeedUpdateFontWeight(index)) {
@@ -1486,17 +1487,13 @@ void TabBarPattern::UpdateImageColor(int32_t indicator)
         CHECK_NULL_VOID(imagePaintProperty);
         ImageSourceInfo info;
         auto imageSourceInfo = imageLayoutProperty->GetImageSourceInfo().value_or(info);
-        if (isSelected) {
-            if (iconStyles_[index].selectedColor.has_value()) {
-                imagePaintProperty->UpdateSvgFillColor(iconStyles_[index].selectedColor.value());
+        if (index >= 0 && index < static_cast<int32_t>(iconStyles_.size())) {
+            if (isSelected) {
+                imagePaintProperty->UpdateSvgFillColor(iconStyles_[index].selectedColor.has_value() ?
+                    iconStyles_[index].selectedColor.value() : tabTheme->GetBottomTabIconOn());
             } else {
-                imagePaintProperty->UpdateSvgFillColor(tabTheme->GetBottomTabIconOn());
-            }
-        } else {
-            if (iconStyles_[index].unselectedColor.has_value()) {
-                imagePaintProperty->UpdateSvgFillColor(iconStyles_[index].unselectedColor.value());
-            } else {
-                imagePaintProperty->UpdateSvgFillColor(tabTheme->GetBottomTabIconOff());
+                imagePaintProperty->UpdateSvgFillColor(iconStyles_[index].unselectedColor.has_value() ?
+                    iconStyles_[index].unselectedColor.value() : tabTheme->GetBottomTabIconOff());
             }
         }
         imageLayoutProperty->UpdateImageSourceInfo(imageSourceInfo);
