@@ -393,6 +393,11 @@ void SetPixelMap(const RefPtr<FrameNode>& target, const RefPtr<FrameNode>& menuN
     if (menuWrapperPattern->HasPreviewTransitionEffect()) {
         auto layoutProperty = imageNode->GetLayoutProperty();
         layoutProperty->UpdateVisibility(VisibleType::VISIBLE, true);
+        auto pipeline = PipelineBase::GetCurrentContext();
+        CHECK_NULL_VOID(pipeline);
+        auto menuTheme = pipeline->GetTheme<NG::MenuTheme>();
+        CHECK_NULL_VOID(menuTheme);
+        ShowBorderRadiusAndShadowAnimation(menuTheme, imageContext);
     } else {
         ShowPixelMapAnimation(imageNode, menuNode);
         ShowGatherAnimation(imageNode, menuNode);
