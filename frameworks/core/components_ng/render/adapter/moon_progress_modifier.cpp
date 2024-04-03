@@ -72,6 +72,10 @@ void MoonProgressModifier::onDraw(DrawingContext& context)
     frameSize_.SetWidth(contentSize.Width());
     frameSize_.SetHeight(contentSize.Height());
     SetBigRadius();
+    if (GreatOrEqual(ratio_->Get(), bigRadius_ / smallRadius_) || hideMask_) {
+        hideMask_ = true;
+        return;
+    }
     PaintSquareMoon(context.canvas);
 }
 
@@ -199,10 +203,6 @@ void MoonProgressModifier::SetBigRadius()
 
 void MoonProgressModifier::PaintSquareMoon(RSCanvas& canvas)
 {
-    if (GreatOrEqual(ratio_->Get(), bigRadius_ / smallRadius_) || hideMask_) {
-        hideMask_ = true;
-        return;
-    }
     PointF centerPt = PointF(frameSize_.Width() / INT32_TWO, frameSize_.Height() / INT32_TWO);
     RSBrush brush;
     double angle = value_->Get() / maxValue_->Get();
