@@ -49,6 +49,7 @@ void GridIrregularLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
         MeasureOnOffset(mainSize);
     }
 
+    UpdateLayoutInfo();
     wrapper_->SetCacheCount(static_cast<int32_t>(props->GetCachedCountValue(1) * gridLayoutInfo_.crossCount_));
 }
 
@@ -61,7 +62,6 @@ void GridIrregularLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
 
     LayoutChildren(gridLayoutInfo_.currentOffset_);
     wrapper_->SetActiveChildRange(gridLayoutInfo_.startIndex_, gridLayoutInfo_.endIndex_);
-    UpdateLayoutInfo();
 }
 
 float GridIrregularLayoutAlgorithm::MeasureSelf(const RefPtr<GridLayoutProperty>& props)
@@ -234,10 +234,11 @@ void GridIrregularLayoutAlgorithm::MeasureForward(float mainSize)
 
     // adjust offset
     if (!overScroll_ && info.endIndex_ == info.childrenCount_ - 1) {
-        float overDis = mainSize - info.contentEndPadding_ - (info.GetTotalHeightOfItemsInView(mainGap_) + res.pos);
-        if (LessOrEqual(overDis, 0.0f)) {
+        float overDis = -GetDistanceToBottom(mainSize, info.GetTotalHeightOfItemsInView(mainGap_));
+        if (Negative(overDis)) {
             return;
         }
+        std::cout << "overDis = " << overDis << std::endl;
         info.currentOffset_ += overDis;
         res = solver.FindStartingRow(mainGap_);
         UpdateStartInfo(info, res);
@@ -275,6 +276,7 @@ bool GridIrregularLayoutAlgorithm::TrySkipping(float mainSize)
         if (LessOrEqual(offset, info.GetTotalHeightOfItemsInView(mainGap_))) {
             return false;
         }
+        std::cout << "offset = " << offset << ", totalHeight = " << info.GetTotalHeightOfItemsInView(mainGap_) << std::endl;
         info.jumpIndex_ = (info.currentOffset_ < 0.0f) ? SkipLinesForward() : SkipLinesBackward();
         info.scrollAlign_ = ScrollAlign::START;
         info.currentOffset_ = 0.0f;
@@ -320,19 +322,22 @@ void GridIrregularLayoutAlgorithm::MeasureOnJump(float mainSize)
     }
 }
 
-bool GridIrregularLayoutAlgorithm::ReachedEnd() const
+float GridIrregularLayoutAlgorithm::GetDistanceToBottom(float mainSize, float heightInView)
 {
-    const auto& info = gridLayoutInfo_;
-    if (info.endIndex_ < info.childrenCount_ - 1) {
-        return false;
+    auto& info = gridLayoutInfo_;
+    if (info.lineHeightMap_.empty() || info.endMainLineIndex_ < info.lineHeightMap_.rbegin()->first) {
+        return mainSize;
     }
-    auto child = wrapper_->GetChildByIndex(info.endIndex_);
-    CHECK_NULL_RETURN(child, false);
 
-    float bottom = wrapper_->GetGeometryNode()->GetFrameSize().MainSize(info.axis_) - info.contentEndPadding_;
-    float itemBot = info.axis_ == Axis::HORIZONTAL ? child->GetGeometryNode()->GetFrameRect().Right()
-                                                   : child->GetGeometryNode()->GetFrameRect().Bottom();
-    return itemBot <= bottom;
+    float offset = info.currentOffset_;
+    // currentOffset_ is relative to startMainLine, which might be entirely above viewport
+    auto it = info.lineHeightMap_.find(info.startMainLineIndex_);
+    while (it != info.lineHeightMap_.end() && Negative(offset + it->second + mainGap_)) {
+        offset += it->second + mainGap_;
+        ++it;
+    }
+    float bottomPos = offset + heightInView;
+    return bottomPos - mainSize;
 }
 
 void GridIrregularLayoutAlgorithm::UpdateLayoutInfo()
@@ -343,10 +348,16 @@ void GridIrregularLayoutAlgorithm::UpdateLayoutInfo()
     // GridLayoutInfo::reachEnd_ has a different meaning
     info.reachEnd_ = info.endIndex_ == info.childrenCount_ - 1;
 
-    info.offsetEnd_ = ReachedEnd();
+    float mainSize = wrapper_->GetGeometryNode()->GetContentSize().MainSize(info.axis_);
 
-    info.lastMainSize_ = wrapper_->GetGeometryNode()->GetContentSize().MainSize(info.axis_);
+    info.lastMainSize_ = mainSize;
     info.totalHeightOfItemsInView_ = info.GetTotalHeightOfItemsInView(mainGap_);
+
+    if (info.reachEnd_) {
+        info.offsetEnd_ = NonPositive(GetDistanceToBottom(mainSize, info.totalHeightOfItemsInView_));
+    } else {
+        info.offsetEnd_ = false;
+    }
 }
 
 void GridIrregularLayoutAlgorithm::LayoutChildren(float mainOffset)

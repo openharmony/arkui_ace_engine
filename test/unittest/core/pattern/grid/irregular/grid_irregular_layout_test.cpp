@@ -943,6 +943,7 @@ HWTEST_F(GridIrregularLayoutTest, Layout001, TestSize.Level1)
     info.startIndex_ = 0;
     info.endIndex_ = 9;
     info.currentOffset_ = 10.0f;
+    algorithm->UpdateLayoutInfo();
     algorithm->Layout(AceType::RawPtr(frameNode_));
 
     EXPECT_TRUE(info.reachStart_);
@@ -1524,5 +1525,54 @@ HWTEST_F(GridIrregularLayoutTest, Width001, TestSize.Level1)
         EXPECT_EQ(GetChildSize(frameNode_, i).Width(), 300.0f);
     }
     EXPECT_EQ(GetChildSize(frameNode_, 1).Width(), 300.0f);
+}
+
+/**
+ * @tc.name: GridIrregularLayout::OverScroll001
+ * @tc.desc: Test overScroll disabled with long item
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridIrregularLayoutTest, OverScroll001, TestSize.Level1)
+{
+    // GridItem's own ideal size has higher priority
+    Create([](GridModelNG model) {
+        model.SetColumnsTemplate("1fr 1fr 1fr");
+        model.SetLayoutOptions(GetOptionDemo12());
+        model.SetColumnsGap(Dimension { 1.0f });
+        model.SetEdgeEffect(EdgeEffect::NONE, true);
+        CreateItem(1, -2, 600.0f);
+        CreateItem(1, -2, 300.0f);
+        CreateItem(1, -2, 1800.0f);
+        CreateItem(4, -2, 300.0f);
+    });
+
+    FlushLayoutTask(frameNode_);
+    UpdateCurrentOffset(-450.0f);
+    auto& info = pattern_->gridLayoutInfo_;
+    EXPECT_EQ(info.gridMatrix_, MATRIX_DEMO_12);
+    EXPECT_EQ(info.startIndex_, 0);
+    EXPECT_EQ(info.currentOffset_, -450.0f);
+    EXPECT_FALSE(info.offsetEnd_);
+    EXPECT_TRUE(info.reachEnd_);
+
+    UpdateCurrentOffset(200.0f);
+    EXPECT_EQ(info.currentOffset_, -250.0f);
+    EXPECT_EQ(info.startIndex_, 0);
+
+    UpdateCurrentOffset(-300.0f);
+    EXPECT_EQ(info.currentOffset_, -550.0f);
+    EXPECT_EQ(info.startIndex_, 0);
+    EXPECT_FALSE(info.offsetEnd_);
+    EXPECT_TRUE(info.reachEnd_);
+
+    UpdateCurrentOffset(200.0f);
+    EXPECT_EQ(info.currentOffset_, -350.0f);
+    EXPECT_EQ(info.startIndex_, 0);
+
+    UpdateCurrentOffset(-300.0f);
+    EXPECT_EQ(info.startIndex_, 2);
+    EXPECT_EQ(info.currentOffset_, -350.0f);
+    EXPECT_FALSE(info.offsetEnd_);
+    EXPECT_TRUE(info.reachEnd_);
 }
 } // namespace OHOS::Ace::NG

@@ -161,5 +161,16 @@ const decltype(GridLayoutInfo::gridMatrix_) MATRIX_DEMO_11 = {
     { 6, { { 0, 7 }, { 1, 8 }, { 2, 9 } } },    // 7 | 8 | 9
 };
 
+GridLayoutOptions GetOptionDemo12();
+const decltype(GridLayoutInfo::gridMatrix_) MATRIX_DEMO_12 = {
+    { 0, { { 0, 0 }, { 1, 0 }, { 2, 1 } } },  // 0 | 0 | 1
+    { 1, { { 0, 0 }, { 1, 0 }, { 2, 2 } } },  // 0 | 0 | 2
+    { 2, { { 0, 3 }, { 1, 4 }, { 2, -2 } } }, // 3 | 4 | 2
+    { 3, { { 0, 5 }, { 1, 6 }, { 2, -2 } } }, // 5 | 6 | 2
+    { 4, { { 2, -2 } } },                     // x | x | 2
+    { 5, { { 2, -2 } } },                     // x | x | 2
+    { 6, { { 2, -2 } } },                     // x | x | 2
+};
+
 } // namespace OHOS::Ace::NG
 #endif

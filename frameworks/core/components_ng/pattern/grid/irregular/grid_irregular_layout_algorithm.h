@@ -24,7 +24,9 @@
 /**
  * @brief GridIrregularLayout class supports irregular grid items that take multiple rows and multiple columns.
  *
- * INVARIANT: The gridMatrix_ is always filled from the first row up to endIndex_ at the beginning of each layout.
+ * INVARIANT: gridMatrix_ is always filled from the first row up to endIndex_ at the beginning of each layout.
+ * INVARIANT: startMainLineIndex_ always corresponds to where Item [startIndex_] is placed.
+ * But endMainLineIndex_ corresponds to the last line in viewport.
  */
 namespace OHOS::Ace::NG {
 class GridIrregularLayoutAlgorithm : public GridLayoutBaseAlgorithm {
@@ -104,10 +106,13 @@ private:
     std::vector<float> CalculateCrossPositions(const PaddingPropertyF& padding);
 
     /**
-     * @brief Checks if Grid has scrolled to the end of its content.
-     * @return True if Grid has reached the end, false otherwise.
+     * @brief Calculate the distance from content's end to the viewport bottom.
+     *
+     * @param mainSize of the viewport.
+     * @param heightInView total height of items inside the viewport.
+     * @return The distance. Positive when content's end is below viewport. Return [mainSize] if last line is not in viewport.
      */
-    inline bool ReachedEnd() const;
+    float GetDistanceToBottom(float mainSize, float heightInView);
 
     // ========================================== MeasureOnJump functions =====================================
 

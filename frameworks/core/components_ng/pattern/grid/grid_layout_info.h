@@ -38,17 +38,7 @@ constexpr float HALF = 0.5f;
 // Try not to add more variables in [GridLayoutInfo] because the more state variables, the more problematic and the
 // harder it is to maintain
 struct GridLayoutInfo {
-    float GetTotalHeightOfItemsInView(float mainGap) const
-    {
-        float lengthOfItemsInViewport = 0.0;
-        for (auto i = startMainLineIndex_; i <= endMainLineIndex_; i++) {
-            if (lineHeightMap_.find(i) == lineHeightMap_.end()) {
-                continue;
-            }
-            lengthOfItemsInViewport += (lineHeightMap_.at(i) + mainGap);
-        }
-        return lengthOfItemsInViewport - mainGap;
-    }
+    float GetTotalHeightOfItemsInView(float mainGap) const;
 
     void UpdateStartIndexByStartLine()
     {

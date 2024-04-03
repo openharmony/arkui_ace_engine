@@ -384,6 +384,7 @@ bool GridPattern::UpdateCurrentOffset(float offset, int32_t source)
     }
     FireOnWillScroll(-offset);
     gridLayoutInfo_.currentOffset_ += offset;
+    std::cout << "current offset = " << gridLayoutInfo_.currentOffset_ << std::endl;
     host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
     return true;
 }

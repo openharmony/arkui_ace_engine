@@ -571,4 +571,20 @@ void GridLayoutInfo::ClearMatrixToEnd(int32_t idx, int32_t lineIdx)
     }
     gridMatrix_.erase(it, gridMatrix_.end());
 }
+
+float GridLayoutInfo::GetTotalHeightOfItemsInView(float mainGap) const
+{
+    float len = 0.0f;
+    float offset = currentOffset_;
+
+    auto endIt = lineHeightMap_.find(endMainLineIndex_ + 1);
+    for (auto it = lineHeightMap_.find(startMainLineIndex_); it != endIt; ++it) {
+        if (Negative(it->second + offset + mainGap)) {
+            offset += it->second + mainGap;
+            continue;
+        }
+        len += it->second + mainGap;
+    }
+    return len - mainGap;
+}
 } // namespace OHOS::Ace::NG
