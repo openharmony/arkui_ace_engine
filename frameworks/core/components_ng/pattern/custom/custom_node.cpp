@@ -65,10 +65,7 @@ void CustomNode::Render()
             // first create child node and wrapper.
             ScopedViewStackProcessor scopedViewStackProcessor;
             auto parent = GetParent();
-            bool parentNeedExportTexture = false;
-            if (parent && parent->GetTag() == V2::COMMON_VIEW_ETS_TAG) {
-                parentNeedExportTexture = parent->IsNeedExportTexture();
-            }
+            bool parentNeedExportTexture = parent ? parent->IsNeedExportTexture() : false;
             ViewStackProcessor::GetInstance()->SetIsExportTexture(parentNeedExportTexture || IsNeedExportTexture());
             auto child = renderFunction();
             if (child) {
