@@ -107,8 +107,7 @@ private:
     void FireOnLoadEvent() const;
     void FireOnErrorEvent(const std::string& code, const std::string& msg) const;
     void FireOnUninstallEvent(int64_t id) const;
-    void FireFormSurfaceNodeCallback(const std::shared_ptr<Rosen::RSSurfaceNode>& node, bool isDynamic, 
-        bool isRecover);
+    void FireFormSurfaceNodeCallback(const std::shared_ptr<Rosen::RSSurfaceNode>& node, bool isDynamic, bool isRecover);
     void FireFormSurfaceChangeCallback(float width, float height);
     void FireFormSurfaceDetachCallback();
     void UpdateBackgroundColorWhenUnTrustForm();

@@ -758,8 +758,8 @@ void FormPattern::InitFormManagerDelegate()
     });
 
     formManagerBridge_->AddFormSurfaceNodeCallback(
-        [weak = WeakClaim(this), instanceID](const std::shared_ptr<Rosen::RSSurfaceNode>& node, bool isDynamic, 
-            bool isRecover) {
+        [weak = WeakClaim(this), instanceID](
+            const std::shared_ptr<Rosen::RSSurfaceNode>& node, bool isDynamic, bool isRecover) {
             ContainerScope scope(instanceID);
             auto form = weak.Upgrade();
             CHECK_NULL_VOID(form);
@@ -838,7 +838,8 @@ void FormPattern::InitFormManagerDelegate()
         });
 }
 
-void FormPattern::FireFormSurfaceNodeCallback(const std::shared_ptr<Rosen::RSSurfaceNode>& node, bool isDynamic, bool isRecover)
+void FormPattern::FireFormSurfaceNodeCallback(
+    const std::shared_ptr<Rosen::RSSurfaceNode>& node, bool isDynamic, bool isRecover)
 {
     CHECK_NULL_VOID(node);
     node->CreateNodeInRenderThread();
@@ -885,7 +886,7 @@ void FormPattern::FireFormSurfaceNodeCallback(const std::shared_ptr<Rosen::RSSur
     } else {
         DeleteImageNode();
     }
-    
+
     host->MarkDirtyNode(PROPERTY_UPDATE_LAYOUT);
     auto parent = host->GetParent();
     CHECK_NULL_VOID(parent);
@@ -895,7 +896,7 @@ void FormPattern::FireFormSurfaceNodeCallback(const std::shared_ptr<Rosen::RSSur
     OnLoadEvent();
 }
 
-void DelayDeleteImageNode()
+void FormPattern::DelayDeleteImageNode()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
@@ -903,11 +904,13 @@ void DelayDeleteImageNode()
     CHECK_NULL_VOID(context);
 
     auto uiTaskExecutor = SingleTaskExecutor::Make(context->GetTaskExecutor(), TaskExecutor::TaskType::UI);
-    uiTaskExecutor.PostDelayedTask([weak = WeakClaim(this)] {
-        auto pattern = weak.Upgrade();
-        CHECK_NULL_VOID(pattern);
-        pattern->DeleteImageNodeAfterRecover();
-    }, DELAY_TIME_FOR_DELETE_IMAGE_NODE);
+    uiTaskExecutor.PostDelayedTask(
+        [weak = WeakClaim(this)] {
+            auto pattern = weak.Upgrade();
+            CHECK_NULL_VOID(pattern);
+            pattern->DeleteImageNodeAfterRecover();
+        },
+        DELAY_TIME_FOR_DELETE_IMAGE_NODE);
 }
 
 void FormPattern::FireFormSurfaceChangeCallback(float width, float height)

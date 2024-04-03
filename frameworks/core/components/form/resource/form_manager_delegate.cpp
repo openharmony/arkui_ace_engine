@@ -205,8 +205,8 @@ void FormManagerDelegate::OnSurfaceCreate(const AppExecFwk::FormJsInfo& formInfo
         return;
     }
 
-    bool isRecoverFormToHandleClickEvent = want.GetBoolParam(
-        OHOS::AppExecFwk::Constants::FORM_IS_RECOVER_FORM_TO_HANDLE_CLICK_EVENT, false);
+    bool isRecoverFormToHandleClickEvent =
+        want.GetBoolParam(OHOS::AppExecFwk::Constants::FORM_IS_RECOVER_FORM_TO_HANDLE_CLICK_EVENT, false);
     bool isRecover = recycleStatus_ == RecycleStatus::RECYCLED || isRecoverFormToHandleClickEvent;
 
     onFormSurfaceNodeCallback_(rsSurfaceNode, formInfo.isDynamic, isRecover);
