@@ -1750,6 +1750,7 @@ HWTEST_F(XComponentTestNg, XComponentSurfaceTest, TestSize.Level1)
     ASSERT_TRUE(frameNode);
     auto pattern = frameNode->GetPattern<XComponentPattern>();
     ASSERT_TRUE(pattern);
+    MockPipelineContext::pipeline_->SetMinPlatformVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWELVE));
 
     /**
      * @tc.steps: step2. create nativeXComponent instance
