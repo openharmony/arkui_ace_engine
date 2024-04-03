@@ -784,7 +784,7 @@ class RenderNode {
         this.childrenList = [];
         this.parentRenderNode = null;
         this.backgroundColorValue = 0;
-        this.clipToFrameValue = false;
+        this.clipToFrameValue = true;
         this.frameValue = { x: 0, y: 0, width: 0, height: 0 };
         this.opacityValue = 1.0;
         this.pivotValue = { x: 0.5, y: 0.5 };
@@ -806,13 +806,14 @@ class RenderNode {
         this.baseNode_ = new __JSBaseNode__();
         this.baseNode_.draw = this.draw;
         this.nodePtr = this.baseNode_.createRenderNode(this);
+        this.clipToFrame = true;
     }
     set backgroundColor(color) {
         this.backgroundColorValue = this.checkUndefinedOrNullWithDefaultValue(color, 0);
         getUINativeModule().renderNode.setBackgroundColor(this.nodePtr, this.backgroundColorValue);
     }
     set clipToFrame(useClip) {
-        this.clipToFrameValue = this.checkUndefinedOrNullWithDefaultValue(useClip, false);
+        this.clipToFrameValue = this.checkUndefinedOrNullWithDefaultValue(useClip, true);
         getUINativeModule().renderNode.setClipToFrame(this.nodePtr, this.clipToFrameValue);
     }
     set frame(frame) {
@@ -1239,5 +1240,34 @@ class XComponentNode extends FrameNode {
         return false;
     }
 }
+/*
+ * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+/// <reference path="../../state_mgmt/src/lib/common/ifelse_native.d.ts" />
+/// <reference path="../../state_mgmt/src/lib/partial_update/pu_viewstack_processor.d.ts" />
+class ComponentContent {
+    constructor(uiContext, builder, params) {
+        let builderNode = new BuilderNode(uiContext, {});
+        this.builderNode_ = builderNode;
+        this.builderNode_.build(builder, params !== null && params !== void 0 ? params : {});
+    }
+    update(params) {
+        this.builderNode_.update(params);
+    }
+    getFrameNode() {
+        return this.builderNode_.getFrameNode();
+    }
+}
 
-export default { NodeController, BuilderNode, BaseNode, RenderNode, FrameNode, FrameNodeUtils, NodeRenderType, XComponentNode, ShapeMask, edgeColors, edgeWidths, borderStyles, borderRadiuses };
+export default { NodeController, BuilderNode, BaseNode, RenderNode, FrameNode, FrameNodeUtils, NodeRenderType, XComponentNode, ShapeMask, edgeColors, edgeWidths, borderStyles, borderRadiuses, ComponentContent };

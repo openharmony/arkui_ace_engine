@@ -43,6 +43,7 @@ constexpr uint32_t INLINE_DEFAULT_VIEW_MAXLINE = 3;
 constexpr uint32_t COUNTER_TEXT_MAXLINE = 1;
 constexpr int32_t DEFAULT_MODE = -1;
 constexpr int32_t SHOW_COUNTER_PERCENT = 100;
+constexpr double TEXT_DECORATION_DISABLED_COLOR_ALPHA = 0.2;
 } // namespace
 void TextFieldLayoutAlgorithm::ConstructTextStyles(
     const RefPtr<FrameNode>& frameNode, TextStyle& textStyle, std::string& textContent, bool& showPlaceHolder)
@@ -148,7 +149,9 @@ void TextFieldLayoutAlgorithm::GetInlineMeasureItem(
         // The maximum height of the inline mode defaults to a maximum of three rows.
         inlineIdealHeight =
             pattern->GetSingleLineHeight() * textFieldLayoutProperty->GetMaxViewLinesValue(INLINE_DEFAULT_VIEW_MAXLINE);
-        inlineMeasureItem_.inlineSizeHeight = inlineIdealHeight;
+        inlineMeasureItem_.inlineSizeHeight = pattern->GetSingleLineHeight() * std::min(
+            static_cast<uint32_t>(paragraph_->GetLineCount()),
+            textFieldLayoutProperty->GetMaxViewLinesValue(INLINE_DEFAULT_VIEW_MAXLINE));
     } else {
         // calc inline status in advance
         CalcInlineMeasureItem(layoutWrapper);
@@ -161,7 +164,8 @@ void TextFieldLayoutAlgorithm::CalcInlineMeasureItem(LayoutWrapper* layoutWrappe
     CHECK_NULL_VOID(textFieldLayoutProperty);
     auto lineCount = inlineParagraph_->GetLineCount() != 0 ? inlineParagraph_->GetLineCount() : 1;
     inlineMeasureItem_.inlineSizeHeight = inlineParagraph_->GetHeight() / lineCount
-        * textFieldLayoutProperty->GetMaxViewLinesValue(INLINE_DEFAULT_VIEW_MAXLINE);
+        * std::min(static_cast<uint32_t>(lineCount),
+            textFieldLayoutProperty->GetMaxViewLinesValue(INLINE_DEFAULT_VIEW_MAXLINE));
     inlineMeasureItem_.inlineContentRectHeight = GreatNotEqual(inlineParagraph_->GetLongestLine(), 0.0)
         ? inlineParagraph_->GetHeight() : std::max(preferredHeight_, inlineParagraph_->GetHeight());
     inlineMeasureItem_.inlineLastOffsetY =
@@ -730,6 +734,8 @@ void TextFieldLayoutAlgorithm::UpdateTextStyleMore(const RefPtr<FrameNode>& fram
 {
     auto pattern = frameNode->GetPattern<TextFieldPattern>();
     CHECK_NULL_VOID(pattern);
+    auto pipeline = frameNode->GetContext();
+    CHECK_NULL_VOID(pipeline);
     if (pattern->IsInPasswordMode()) {
         return;
     }
@@ -740,13 +746,19 @@ void TextFieldLayoutAlgorithm::UpdateTextStyleMore(const RefPtr<FrameNode>& fram
         textStyle.SetTextDecorationColor(layoutProperty->GetTextDecorationColor().value());
     }
     if (layoutProperty->HasTextDecorationStyle()) {
-        textStyle.SetTextDecorationStyle(layoutProperty->GetTextDecorationStyle().value());
+        if (isDisabled) {
+            textStyle.SetTextDecorationColor(layoutProperty->GetTextDecorationColor().value()
+                .BlendOpacity(TEXT_DECORATION_DISABLED_COLOR_ALPHA));
+        } else {
+            textStyle.SetTextDecorationColor(layoutProperty->GetTextDecorationColor().value());
+        }
     }
     if (layoutProperty->HasLetterSpacing()) {
         textStyle.SetLetterSpacing(layoutProperty->GetLetterSpacing().value());
     }
     if (layoutProperty->HasLineHeight()) {
         textStyle.SetLineHeight(layoutProperty->GetLineHeight().value());
+        textStyle.SetHalfLeading(pipeline->GetHalfLeading());
     }
     if (layoutProperty->HasFontFeature()) {
         textStyle.SetFontFeatures(layoutProperty->GetFontFeature().value());

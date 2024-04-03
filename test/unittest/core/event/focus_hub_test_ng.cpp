@@ -2321,7 +2321,7 @@ HWTEST_F(FocusHubTestNg, FocusHubTestNg0055, TestSize.Level1)
     EXPECT_FALSE(focusHub->OnKeyEventScope(keyEvent));
     keyEvent.pressedCodes.emplace_back(KeyCode::KEY_SHIFT_LEFT);
     keyEvent.pressedCodes.emplace_back(KeyCode::KEY_TAB);
-    EXPECT_TRUE(focusHub->OnKeyEventScope(keyEvent));
+    EXPECT_FALSE(focusHub->OnKeyEventScope(keyEvent));
 }
 
 /**

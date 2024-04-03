@@ -983,6 +983,14 @@ void WebClientImpl::OnIntelligentTrackingPreventionResult(
     delegate->OnIntelligentTrackingPreventionResult(websiteHost, trackerHost);
 }
 
+void WebClientImpl::OnTooltip(const std::string& tooltip)
+{
+    ContainerScope scope(instanceId_);
+    auto delegate = webDelegate_.Upgrade();
+    CHECK_NULL_VOID(delegate);
+    delegate->OnTooltip(tooltip);
+}
+
 bool WebClientImpl::OnHandleOverrideUrlLoading(std::shared_ptr<OHOS::NWeb::NWebUrlResourceRequest> request)
 {
     ContainerScope scope(instanceId_);

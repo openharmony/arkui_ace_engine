@@ -45,7 +45,7 @@ namespace OHOS::Ace::NG {
 #ifndef WEARABLE_PRODUCT
 constexpr double FRICTION = 0.6;
 constexpr double NEW_FRICTION = 0.7;
-constexpr double MAX_VELOCITY = 800000.0;
+constexpr double MAX_VELOCITY = 4200.0;
 #else
 constexpr double FRICTION = 0.9;
 constexpr double MAX_VELOCITY = 5000.0;
@@ -386,6 +386,13 @@ public:
 
     virtual void ScrollToEdge(ScrollEdgeType scrollEdgeType, bool smooth);
 
+    virtual ScrollEdgeType GetScrollEdgeType() const
+    {
+        return ScrollEdgeType::SCROLL_NONE;
+    }
+
+    virtual void SetScrollEdgeType(ScrollEdgeType scrollEdgeType) {}
+
     virtual void Fling(double flingVelocity);
 
     void SetPositionController(RefPtr<ScrollableController> control)
@@ -490,6 +497,8 @@ public:
 
     void ScrollAtFixedVelocity(float velocity);
 
+    PositionMode GetPositionMode();
+
 protected:
     void OnDetachFromFrameNode(FrameNode* frameNode) override;
     virtual DisplayMode GetDefaultScrollBarDisplayMode() const
@@ -566,6 +575,11 @@ protected:
     bool isInitialized_ = false;
 
     void Register2DragDropManager();
+
+    bool StopExpandMark() override
+    {
+        return true;
+    }
 
 private:
     virtual void OnScrollEndCallback() {};

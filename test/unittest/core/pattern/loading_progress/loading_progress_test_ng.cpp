@@ -670,4 +670,84 @@ HWTEST_F(LoadingProgressTestNg, LoadingProgressModifierTest009, TestSize.Level1)
     EXPECT_EQ(loadingProgressModifier->cometSizeScale_, nullptr);
     loadingProgressModifier->StartRecycleCometAnimation();
 }
+
+/**
+ * @tc.name: LoadingProgressModifierTest010
+ * @tc.desc: Test LoadingProgressModifier DrawRing function. ColorMode = DARK
+ * @tc.type: FUNC
+ */
+HWTEST_F(LoadingProgressTestNg, LoadingProgressModifierTest010, TestSize.Level1)
+{
+    SystemProperties::SetColorMode(ColorMode::DARK);
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
+    auto progressTheme = AceType::MakeRefPtr<ProgressTheme>();
+    progressTheme->loadingColor_ = COLOR_DEFAULT;
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(progressTheme));
+    LoadingProgressModifier loadingProgressModifier;
+    Testing::MockCanvas rsCanvas;
+    DrawingContext context = { rsCanvas, 10.0f, 10.0f };
+    RingParam ringParam;
+    /**
+     * @tc.cases: case1. ringColor == defaultColor.
+     */
+    loadingProgressModifier.SetColor(LinearColor(COLOR_DEFAULT));
+    EXPECT_CALL(rsCanvas, Save()).Times(2);
+    EXPECT_CALL(rsCanvas, AttachPen(_)).WillRepeatedly(ReturnRef(rsCanvas));
+    EXPECT_CALL(rsCanvas, DrawCircle(_, _)).Times(2);
+    EXPECT_CALL(rsCanvas, DetachPen()).WillRepeatedly(ReturnRef(rsCanvas));
+    EXPECT_CALL(rsCanvas, Restore()).Times(2);
+    loadingProgressModifier.DrawRing(context, ringParam);
+    /**
+     * @tc.cases: case2. ringColor != defaultColor.
+     */
+    loadingProgressModifier.SetColor(LinearColor(Color::BLUE));
+    EXPECT_CALL(rsCanvas, Save()).Times(2);
+    EXPECT_CALL(rsCanvas, AttachPen(_)).WillRepeatedly(ReturnRef(rsCanvas));
+    EXPECT_CALL(rsCanvas, DrawCircle(_, _)).Times(2);
+    EXPECT_CALL(rsCanvas, DetachPen()).WillRepeatedly(ReturnRef(rsCanvas));
+    EXPECT_CALL(rsCanvas, Restore()).Times(2);
+    loadingProgressModifier.DrawRing(context, ringParam);
+}
+
+/**
+ * @tc.name: LoadingProgressModifierTest011
+ * @tc.desc: Test LoadingProgressModifier DrawOrbit function.ColorMode = DARK
+ * @tc.type: FUNC
+ */
+HWTEST_F(LoadingProgressTestNg, LoadingProgressModifierTest011, TestSize.Level1)
+{
+    SystemProperties::SetColorMode(ColorMode::DARK);
+    LoadingProgressModifier loadingProgressModifier;
+    Testing::MockCanvas rsCanvas;
+    DrawingContext context { rsCanvas, 10.0f, 10.0f };
+    /**
+     * @tc.cases: case1. date > 0 && date < COUNT.
+     */
+    EXPECT_CALL(rsCanvas, Save()).Times(1);
+    EXPECT_CALL(rsCanvas, Translate(_, _)).Times(1);
+    EXPECT_CALL(rsCanvas, AttachBrush(_)).WillRepeatedly(ReturnRef(rsCanvas));
+    EXPECT_CALL(rsCanvas, DetachBrush()).WillOnce(ReturnRef(rsCanvas));
+    EXPECT_CALL(rsCanvas, Restore()).Times(1);
+    CometParam cometParam;
+    loadingProgressModifier.DrawOrbit(context, cometParam, 1.0f, 2.0f);
+    /**
+     * @tc.cases: case2. date > 0 && date >= COUNT.
+     */
+    EXPECT_CALL(rsCanvas, Save()).Times(1);
+    EXPECT_CALL(rsCanvas, Translate(_, _)).Times(1);
+    EXPECT_CALL(rsCanvas, AttachBrush(_)).WillRepeatedly(ReturnRef(rsCanvas));
+    EXPECT_CALL(rsCanvas, DetachBrush()).WillOnce(ReturnRef(rsCanvas));
+    EXPECT_CALL(rsCanvas, Restore()).Times(1);
+    loadingProgressModifier.DrawOrbit(context, cometParam, 50.0f, 2.0f);
+    /**
+     * @tc.cases: case3. date <= 0.
+     */
+    EXPECT_CALL(rsCanvas, Save()).Times(1);
+    EXPECT_CALL(rsCanvas, Translate(_, _)).Times(1);
+    EXPECT_CALL(rsCanvas, AttachBrush(_)).WillRepeatedly(ReturnRef(rsCanvas));
+    EXPECT_CALL(rsCanvas, DetachBrush()).WillOnce(ReturnRef(rsCanvas));
+    EXPECT_CALL(rsCanvas, Restore()).Times(1);
+    loadingProgressModifier.DrawOrbit(context, cometParam, .0f, 2.0f);
+}
 } // namespace OHOS::Ace::NG

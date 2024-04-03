@@ -28,10 +28,12 @@ struct ItemDivider final {
     Dimension startMargin = 0.0_vp;
     Dimension endMargin = 0.0_vp;
     Color color = Color::TRANSPARENT;
+    bool isRtl = false;
     bool operator==(const ItemDivider& itemDivider) const
     {
         return (strokeWidth == itemDivider.strokeWidth) && (startMargin == itemDivider.startMargin) &&
-               (endMargin == itemDivider.endMargin) && (color == itemDivider.color);
+               (endMargin == itemDivider.endMargin) && (color == itemDivider.color) &&
+               (isRtl == itemDivider.isRtl);
     }
 };
 

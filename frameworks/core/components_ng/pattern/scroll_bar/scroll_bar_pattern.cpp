@@ -563,9 +563,9 @@ void ScrollBarPattern::InitMouseEvent()
     auto mouseCallback = [weak = WeakClaim(this)](MouseInfo& info) {
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
-        if (info.GetButton() == MouseButton::LEFT_BUTTON) {
+        if (info.GetButton() == MouseButton::LEFT_BUTTON && info.GetAction() == MouseAction::PRESS) {
             pattern->isMousePressed_ = true;
-        } else if (info.GetButton() != MouseButton::LEFT_BUTTON) {
+        } else {
             pattern->isMousePressed_ = false;
             pattern->scrollingUp_ = false;
             pattern->scrollingDown_ = false;

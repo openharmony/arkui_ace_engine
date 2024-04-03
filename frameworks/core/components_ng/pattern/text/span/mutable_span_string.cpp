@@ -84,29 +84,19 @@ void MutableSpanString::ReplaceSpan(int32_t start, int32_t length, const RefPtr<
     AddSpan(span->GetSubSpan(start, start+length));
 }
 
-void MutableSpanString::UpdateSpansWithOffset(int32_t start, int32_t offset, SpanStringOperation op)
+void MutableSpanString::UpdateSpansWithOffset(int32_t start, int32_t offset)
 {
     for (auto& span : spans_) {
-        if (op == SpanStringOperation::REMOVE || op == SpanStringOperation::REPLACE) {
-            if (span->interval.second > start && span->interval.first != start) {
-                span->interval.second += offset;
-            }
-            if (span->interval.first > start) {
-                span->interval.first += offset;
-            }
+        if (span->interval.second > start && span->interval.first != start) {
+            span->interval.second += offset;
         }
-        if (op == SpanStringOperation::INSERT) {
-            if (span->interval.first > start || (span->interval.first == start && start != 0)) {
-                span->interval.first += offset;
-            }
-            if (span->interval.second >= start) {
-                span->interval.second += offset;
-            }
+        if (span->interval.first > start) {
+            span->interval.first += offset;
         }
     }
 }
 
-void MutableSpanString::UpdateSpanMapWithOffset(int32_t start, int32_t offset, SpanStringOperation op)
+void MutableSpanString::UpdateSpanMapWithOffset(int32_t start, int32_t offset)
 {
     for (auto& iter : spansMap_) {
         if (spansMap_.find(iter.first) == spansMap_.end()) {
@@ -114,30 +104,20 @@ void MutableSpanString::UpdateSpanMapWithOffset(int32_t start, int32_t offset, S
         }
         auto spans = spansMap_[iter.first];
         for (auto& it : spans) {
-            UpdateSpanBaseWithOffset(it, start, offset, op);
+            UpdateSpanBaseWithOffset(it, start, offset);
         }
         spansMap_[iter.first] = spans;
     }
 }
 
 void MutableSpanString::UpdateSpanBaseWithOffset(RefPtr<SpanBase>& span, int32_t start,
-    int32_t offset, SpanStringOperation op)
+    int32_t offset)
 {
-    if (op == SpanStringOperation::REMOVE || op == SpanStringOperation::REPLACE) {
-        if (span->GetEndIndex() > start && span->GetStartIndex() != start) {
-            span->UpdateEndIndex(span->GetEndIndex() + offset);
-        }
-        if (span->GetStartIndex() > start) {
-            span->UpdateStartIndex(span->GetStartIndex() + offset);
-        }
+    if (span->GetEndIndex() > start && span->GetStartIndex() != start) {
+        span->UpdateEndIndex(span->GetEndIndex() + offset);
     }
-    if (op == SpanStringOperation::INSERT) {
-        if (span->GetStartIndex() > start || (span->GetStartIndex() == start && start != 0)) {
-            span->UpdateStartIndex(span->GetStartIndex() + offset);
-        }
-        if (span->GetEndIndex() >= start) {
-            span->UpdateEndIndex(span->GetEndIndex() + offset);
-        }
+    if (span->GetStartIndex() > start) {
+        span->UpdateStartIndex(span->GetStartIndex() + offset);
     }
 }
 
@@ -255,8 +235,8 @@ void MutableSpanString::ReplaceString(int32_t start, int32_t length, const std::
     SetString(StringUtils::ToString(text.substr(0, start) + wOther + text.substr(end)));
     ApplyReplaceStringToSpans(start, length, other, op);
     ApplyReplaceStringToSpanBase(start, length, other, op);
-    UpdateSpansWithOffset(start, otherLength - length, op);
-    UpdateSpanMapWithOffset(start, otherLength - length, op);
+    UpdateSpansWithOffset(start, otherLength - length);
+    UpdateSpanMapWithOffset(start, otherLength - length);
     NotifySpanWatcher();
     KeepSpansOrder();
 }
@@ -267,7 +247,7 @@ void MutableSpanString::UpdateSpansAndSpanMapWithOffsetAfterInsert(int32_t start
         if (span->interval.first > start || (span->interval.first == start && useFrontStyle)) {
             span->interval.first += offset;
         }
-        if (span->interval.second >= start) {
+        if (span->interval.second > start || (span->interval.second == start && useFrontStyle)) {
             span->interval.second += offset;
         }
     }
@@ -280,7 +260,7 @@ void MutableSpanString::UpdateSpansAndSpanMapWithOffsetAfterInsert(int32_t start
             if (span->GetStartIndex() > start || (span->GetStartIndex() == start && useFrontStyle)) {
                 span->UpdateStartIndex(span->GetStartIndex() + offset);
             }
-            if (span->GetEndIndex() >= start) {
+            if (span->GetEndIndex() > start || (span->GetEndIndex() == start && useFrontStyle)) {
                 span->UpdateEndIndex(span->GetEndIndex() + offset);
             }
         }
@@ -288,29 +268,36 @@ void MutableSpanString::UpdateSpansAndSpanMapWithOffsetAfterInsert(int32_t start
     }
 }
 
-void MutableSpanString::InsertString(int32_t start, const std::string& other)
+bool MutableSpanString::InsertUseFrontStyle(int32_t start)
 {
-    if (other.length() == 0 || start > GetLength()) {
-        return;
+    if (start == GetLength()) {
+        return true;
     }
-    auto text = GetWideString();
-    auto wOther = StringUtils::ToWstring(other);
-    text = GetWideStringSubstr(text, 0, start) + wOther + GetWideStringSubstr(text, start);
-    SetString(StringUtils::ToString(text));
-    auto otherLength = wOther.length();
-    bool useFrontStyle = false;
     for (auto& iter : spansMap_) {
-        if (useFrontStyle || spansMap_.find(iter.first) == spansMap_.end()) {
+        if (spansMap_.find(iter.first) == spansMap_.end()) {
             continue;
         }
         auto spans = spansMap_[iter.first];
         for (auto& span : spans) {
             if (span->GetStartIndex() <= start - 1 && span->GetEndIndex() > start - 1) {
-                useFrontStyle = true;
-                break;
+                return true;
             }
         }
     }
+    return false;
+}
+
+void MutableSpanString::InsertString(int32_t start, const std::string& other)
+{
+    if (other.length() == 0 || start > GetLength()) {
+        return;
+    }
+    bool useFrontStyle = InsertUseFrontStyle(start);
+    auto text = GetWideString();
+    auto wOther = StringUtils::ToWstring(other);
+    text = GetWideStringSubstr(text, 0, start) + wOther + GetWideStringSubstr(text, start);
+    SetString(StringUtils::ToString(text));
+    auto otherLength = wOther.length();
     for (auto& span : spans_) {
         auto spanItemStart = span->interval.first;
         auto spanItemEnd = span->interval.second;

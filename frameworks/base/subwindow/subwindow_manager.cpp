@@ -292,19 +292,11 @@ void SubwindowManager::ShowPopupNG(int32_t targetId, const NG::PopupInfo& popupI
     CHECK_NULL_VOID(manager);
     auto subwindow = manager->GetSubwindow(containerId);
     if (!subwindow) {
-        auto taskExecutor = Container::CurrentTaskExecutor();
-        CHECK_NULL_VOID(taskExecutor);
-        taskExecutor->PostTask(
-            [containerId, targetId, popupInfo, manager] {
-                auto subwindow = Subwindow::CreateSubwindow(containerId);
-                subwindow->InitContainer();
-                manager->AddSubwindow(containerId, subwindow);
-                subwindow->ShowPopupNG(targetId, popupInfo);
-            },
-            TaskExecutor::TaskType::PLATFORM);
-    } else {
-        subwindow->ShowPopupNG(targetId, popupInfo);
+        subwindow = Subwindow::CreateSubwindow(containerId);
+        subwindow->InitContainer();
+        manager->AddSubwindow(containerId, subwindow);
     }
+    subwindow->ShowPopupNG(targetId, popupInfo);
 }
 
 void SubwindowManager::HidePopupNG(int32_t targetId, int32_t instanceId)
@@ -519,6 +511,40 @@ void SubwindowManager::CloseCustomDialogNG(int32_t dialogId)
         if (overlay->GetDialogMap().find(dialogId) != overlay->GetDialogMap().end()) {
             return overlay->CloseCustomDialog(dialogId);
         }
+        iter++;
+    }
+}
+
+void SubwindowManager::CloseCustomDialogNG(const WeakPtr<NG::UINode>& node, std::function<void(int32_t)>&& callback)
+{
+    TAG_LOGD(AceLogTag::ACE_SUB_WINDOW, "close customDialog ng enter");
+    auto iter = subwindowMap_.begin();
+    while (iter != subwindowMap_.end()) {
+        auto overlay = iter->second->GetOverlayManager();
+        overlay->CloseCustomDialog(node, std::move(callback));
+        iter++;
+    }
+}
+
+void SubwindowManager::UpdateCustomDialogNG(
+    const WeakPtr<NG::UINode>& node, const PromptDialogAttr &dialogAttr, std::function<void(int32_t)>&& callback)
+{
+    TAG_LOGD(AceLogTag::ACE_SUB_WINDOW, "update customDialog ng enter");
+    DialogProperties dialogProperties = {
+        .isSysBlurStyle = false,
+        .autoCancel = dialogAttr.autoCancel,
+        .maskColor = dialogAttr.maskColor
+    };
+    if (dialogAttr.alignment.has_value()) {
+        dialogProperties.alignment = dialogAttr.alignment.value();
+    }
+    if (dialogAttr.offset.has_value()) {
+        dialogProperties.offset = dialogAttr.offset.value();
+    }
+    auto iter = subwindowMap_.begin();
+    while (iter != subwindowMap_.end()) {
+        auto overlay = iter->second->GetOverlayManager();
+        overlay->UpdateCustomDialog(node, dialogProperties, std::move(callback));
         iter++;
     }
 }
@@ -777,6 +803,17 @@ void SubwindowManager::CloseCustomDialog(const int32_t dialogId)
     return;
 }
 
+void SubwindowManager::CloseCustomDialog(const WeakPtr<NG::UINode>& node, std::function<void(int32_t)> &&callback)
+{
+    auto containerId = Container::CurrentId();
+    auto subwindow = GetDialogSubwindow(containerId);
+    if (!subwindow) {
+        return;
+    }
+    subwindow->CloseCustomDialog(node, std::move(callback));
+    return;
+}
+
 void SubwindowManager::HideSubWindowNG()
 {
     RefPtr<Subwindow> subwindow;
@@ -829,5 +866,16 @@ void SubwindowManager::ResizeWindowForFoldStatus(int32_t parentContainerId)
         return;
     }
     subwindow->ResizeWindowForFoldStatus(parentContainerId);
+}
+
+
+void SubwindowManager::MarkDirtyDialogSafeArea()
+{
+    auto containerId = Container::CurrentId();
+    auto manager = SubwindowManager::GetInstance();
+    CHECK_NULL_VOID(manager);
+    auto subwindow = manager->GetSubwindow(containerId);
+    CHECK_NULL_VOID(subwindow);
+    subwindow->MarkDirtyDialogSafeArea();
 }
 } // namespace OHOS::Ace

@@ -1354,6 +1354,9 @@ void JSTextField::SetDecoration(const JSCallbackInfo& info)
     do {
         auto tmpInfo = info[0];
         if (!tmpInfo->IsObject()) {
+            TextFieldModel::GetInstance()->SetTextDecoration(TextDecoration::NONE);
+            TextFieldModel::GetInstance()->SetTextDecorationColor(Color::BLACK);
+            TextFieldModel::GetInstance()->SetTextDecorationStyle(TextDecorationStyle::SOLID);
             break;
         }
         JSRef<JSObject> obj = JSRef<JSObject>::Cast(tmpInfo);

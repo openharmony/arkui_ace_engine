@@ -35,6 +35,7 @@
 #include "core/components_ng/pattern/overlay/modal_presentation_pattern.h"
 #include "core/components_ng/pattern/overlay/modal_style.h"
 #include "core/components_ng/pattern/overlay/sheet_style.h"
+#include "core/components_ng/pattern/overlay/group_manager.h"
 #include "core/components_ng/pattern/picker/datepicker_event_hub.h"
 #include "core/components_ng/pattern/picker/picker_type_define.h"
 #include "core/components_ng/pattern/text_picker/textpicker_event_hub.h"
@@ -62,6 +63,13 @@ struct PopupInfo {
     SizeF targetSize;
     OffsetF targetOffset;
     bool focusable = false;
+};
+
+struct GatherNodeChildInfo {
+    WeakPtr<FrameNode> imageNode;
+    OffsetF offset;
+    float width = 0.0;
+    float height = 0.0;
 };
 
 // StageManager is the base class for root render node to perform page switch.
@@ -174,6 +182,9 @@ public:
 
     void OpenCustomDialog(const DialogProperties& dialogProps, std::function<void(int32_t)> &&callback);
     void CloseCustomDialog(const int32_t dialogId);
+    void CloseCustomDialog(const WeakPtr<NG::UINode>& node, std::function<void(int32_t)> &&callback);
+    void UpdateCustomDialog(const WeakPtr<NG::UINode>& node, const DialogProperties& dialogProps,
+        std::function<void(int32_t)> &&callback);
 
     void SetSubWindowId(int32_t subWindowId)
     {
@@ -187,26 +198,9 @@ public:
     {
         maskNodeIdMap_[dialogId] = maskId;
     }
-    bool isMaskNode(int32_t maskId)
-    {
-        for (auto it = maskNodeIdMap_.begin(); it != maskNodeIdMap_.end(); it++) {
-            if (it->second == maskId) {
-                return true;
-            }
-        }
-        return false;
-    }
-    int32_t GetMaskNodeIdWithDialogId(int32_t dialogId)
-    {
-        int32_t maskNodeId = -1;
-        for (auto it = maskNodeIdMap_.begin(); it != maskNodeIdMap_.end(); it++) {
-            if (it->first == dialogId) {
-                maskNodeId = it->second;
-                break;
-            }
-        }
-        return maskNodeId;
-    }
+    bool isMaskNode(int32_t maskId);
+    int32_t GetMaskNodeIdWithDialogId(int32_t dialogId);
+
     /**  pop overlays (if any) on back press
      *
      *   @return    true if popup was removed, false if no overlay exists
@@ -259,15 +253,9 @@ public:
         return pixmapColumnNodeWeak_.Upgrade();
     }
 
-    RefPtr<FrameNode> GetPixelMapContentNode() const
-    {
-        auto column = pixmapColumnNodeWeak_.Upgrade();
-        if (!column) {
-            return nullptr;
-        }
-        auto imageNode = AceType::DynamicCast<FrameNode>(column->GetFirstChild());
-        return imageNode;
-    }
+    RefPtr<FrameNode> GetPixelMapContentNode() const;
+
+    RefPtr<FrameNode> GetPixelMapBadgeNode() const;
 
     bool GetHasFilter()
     {
@@ -369,12 +357,14 @@ public:
         std::function<RefPtr<UINode>()>&& buildNodeFunc, std::function<RefPtr<UINode>()>&& buildTitleNodeFunc,
         NG::SheetStyle& sheetStyle, std::function<void()>&& onAppear, std::function<void()>&& onDisappear,
         std::function<void()>&& shouldDismiss, std::function<void()>&& onWillAppear,
-        std::function<void()>&& onWillDisappear, const RefPtr<FrameNode>& targetNode);
+        std::function<void()>&& onWillDisappear, std::function<void(const float)>&& onHeightDidChange,
+        const RefPtr<FrameNode>& targetNode);
     void OnBindSheet(bool isShow, std::function<void(const std::string&)>&& callback,
         std::function<RefPtr<UINode>()>&& buildNodeFunc, std::function<RefPtr<UINode>()>&& buildtitleNodeFunc,
         NG::SheetStyle& sheetStyle, std::function<void()>&& onAppear, std::function<void()>&& onDisappear,
         std::function<void()>&& shouldDismiss, std::function<void()>&& onWillAppear,
-        std::function<void()>&& onWillDisappear, const RefPtr<FrameNode>& targetNode);
+        std::function<void()>&& onWillDisappear, std::function<void(const float)>&& onHeightDidChange,
+        const RefPtr<FrameNode>& targetNode);
     void CloseSheet(int32_t targetId);
 
     void DismissSheet();
@@ -402,7 +392,6 @@ public:
 
     void BindKeyboard(const std::function<void()>& keyboardBuilder, int32_t targetId);
     void CloseKeyboard(int32_t targetId);
-    void DestroyKeyboard();
 
     RefPtr<UINode> FindWindowScene(RefPtr<FrameNode> targetNode);
 
@@ -418,6 +407,7 @@ public:
         int32_t menuSize, const RefPtr<NG::FrameNode>& targetNode);
 
     void MarkDirty(PropertyChangeFlag flag);
+    void MarkDirtyOverlay();
     float GetRootHeight() const;
 
     void PlaySheetMaskTransition(RefPtr<FrameNode> maskNode, bool isTransitionIn, bool needTransparent = false);
@@ -436,10 +426,8 @@ public:
         sheetHeight_ = height;
     }
 
-    const WeakPtr<UINode>& GetRootNode() const
-    {
-        return rootNodeWeak_;
-    }
+    const WeakPtr<UINode>& GetRootNode() const;
+    const RefPtr<GroupManager>& GetGroupManager() const;
 
     void ModalPageLostFocus(const RefPtr<FrameNode>& node);
 
@@ -447,12 +435,12 @@ public:
     {
         keyboardAvoidance_ = supportAvoidance;
     }
-    
+
     void SupportCustomKeyboardAvoidance(RefPtr<RenderContext> context, AnimationOption option,
         RefPtr<FrameNode> customKeyboard);
 
     void SetCustomKeybroadHeight(float customHeight = 0.0);
-	
+
     void SetFilterActive(bool actived)
     {
         hasFilterActived = actived;
@@ -464,6 +452,37 @@ public:
     }
 
     void DismissPopup();
+
+    void MountGatherNodeToRootNode(const RefPtr<FrameNode>& frameNode,
+        std::vector<GatherNodeChildInfo>& gatherNodeChildrenInfo);
+    void MountGatherNodeToWindowScene(const RefPtr<FrameNode>& frameNode,
+        std::vector<GatherNodeChildInfo>& gatherNodeChildrenInfo,
+        const RefPtr<UINode>& windowScene);
+    void RemoveGatherNode();
+    void RemoveGatherNodeWithAnimation();
+    RefPtr<FrameNode> GetGatherNode() const
+    {
+        return gatherNodeWeak_.Upgrade();
+    }
+    std::vector<GatherNodeChildInfo> GetGatherNodeChildrenInfo()
+    {
+        return gatherNodeChildrenInfo_;
+    }
+    void RemoveMenuBadgeNode(const RefPtr<FrameNode>& menuWrapperNode);
+    void RemovePreviewBadgeNode();
+    void CreateOverlayNode();
+    void AddFrameNodeToOverlay(const RefPtr<NG::FrameNode>& node, std::optional<int32_t> index = std::nullopt);
+    void RemoveFrameNodeOnOverlay(const RefPtr<NG::FrameNode>& node);
+    void ShowNodeOnOverlay(const RefPtr<NG::FrameNode>& node);
+    void HideNodeOnOverlay(const RefPtr<NG::FrameNode>& node);
+    void ShowAllNodesOnOverlay();
+    void HideAllNodesOnOverlay();
+    RefPtr<FrameNode> GetOverlayNode()
+    {
+        return overlayNode_;
+    }
+    bool CheckPageNeedAvoidKeyboard() const;
+
 private:
     void PopToast(int32_t targetId);
 
@@ -553,6 +572,13 @@ private:
         std::optional<ModalTransition> modalTransition);
     void HandleModalPop(std::function<void()>&& onWillDisappear, const RefPtr<UINode> rootNode, int32_t targetId);
 
+    RefPtr<FrameNode> GetDialogNodeWithExistContent(const RefPtr<UINode>& node);
+    void RegisterDialogLifeCycleCallback(const RefPtr<FrameNode>& dialog, const DialogProperties& dialogProps);
+    void CustomDialogRecordEvent(const DialogProperties& dialogProps);
+
+    RefPtr<FrameNode> overlayNode_;
+    // Key: frameNode Id, Value: index
+    std::unordered_map<int32_t, int32_t> frameNodeMapOnOverlay_;
     // Key: target Id, Value: PopupInfo
     std::unordered_map<int32_t, NG::PopupInfo> popupMap_;
     // K: target frameNode ID, V: menuNode
@@ -589,6 +615,7 @@ private:
     std::set<WeakPtr<UINode>> windowSceneSet_;
 
     RefPtr<NG::ClickEvent> sheetMaskClickEvent_;
+    RefPtr<GroupManager> groupManager_ = MakeRefPtr<GroupManager>();
 
     // native modal ui extension
     bool isProhibitBack_ = false;
@@ -600,6 +627,10 @@ private:
     bool hasFilterActived {false};
 
     int32_t dismissPopupId_ = 0;
+
+    bool hasGatherNode_ {false};
+    WeakPtr<FrameNode> gatherNodeWeak_;
+    std::vector<GatherNodeChildInfo> gatherNodeChildrenInfo_;
 };
 } // namespace OHOS::Ace::NG
 

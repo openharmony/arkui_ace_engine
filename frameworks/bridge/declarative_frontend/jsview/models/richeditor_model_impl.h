@@ -39,6 +39,12 @@ class ACE_EXPORT RichEditorModelImpl : public RichEditorModel {
     void SetSelectedBackgroundColor(const Color& selectedColor) override;
     void SetCaretColor(const Color& color) override;
     void SetOnEditingChange(std::function<void(const bool&)>&& func) override;
+    void SetOnSubmit(std::function<void(int32_t, NG::TextFieldCommonEvent&)>&& func) override;
+    void SetEnterKeyType(TextInputAction value) override;
+    void SetOnWillChange(std::function<bool(const NG::RichEditorChangeValue&)>&& func) override;
+    void SetOnDidChange(std::function<void(const std::list<NG::RichEditorAbstractSpanResult>&)>&& func) override;
+    void SetOnCut(std::function<void(NG::TextCommonEvent&)>&& func) override;
+    void SetOnCopy(std::function<void(NG::TextCommonEvent&)>&& func) override;
 };
 } // namespace OHOS::Ace::Framework
 

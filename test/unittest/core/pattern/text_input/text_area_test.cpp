@@ -66,6 +66,7 @@
 #include "core/event/key_event.h"
 #include "core/event/touch_event.h"
 #include "core/gestures/gesture_info.h"
+#include "core/components/common/properties/text_style_parser.h"
 
 #undef private
 #undef protected
@@ -88,6 +89,8 @@ const std::string DEFAULT_PLACE_HOLDER = "please input text here";
 const std::string LOWERCASE_FILTER = "[a-z]";
 const std::string NUMBER_FILTER = "^[0-9]*$";
 const std::string DEFAULT_INPUT_FILTER = "[a-z]";
+const std::unordered_map<std::string, int32_t> FONT_FEATURE_VALUE_1 = ParseFontFeatureSettings("\"ss01\" 1");
+const std::unordered_map<std::string, int32_t> FONT_FEATURE_VALUE_0 = ParseFontFeatureSettings("\"ss01\" 0");
 template<typename CheckItem, typename Expected>
 struct TestItem {
     CheckItem item;
@@ -502,10 +505,9 @@ HWTEST_F(TextFieldUXTest, InitSurfaceChangedCallback001, TestSize.Level1)
     /**
      * @tc.steps: step4. test touch down
      */
-    pattern_->ProcessOverlay(true, true, true);
+    pattern_->ProcessOverlay();
     pattern_->HandleSurfaceChanged(0, 0, 0, 0);
     pattern_->processOverlayDelayTask_.operator()();
-    EXPECT_FALSE(pattern_->GetOriginIsMenuShow());
 }
 
 /**
@@ -658,18 +660,18 @@ HWTEST_F(TextFieldUXTest, OnHandleMove004, TestSize.Level1)
     CreateTextField(DEFAULT_TEXT);
 
     /**
-     * @tc.steps: step2. Create selectOverlayProxy.
+     * @tc.steps: step2. Call ProcessOverlay.
      */
-    pattern_->ProcessOverlay(true, true, true);
+    pattern_->ProcessOverlay();
 
     /**
      * @tc.steps: step2. set two handle and call OnHandleMove
      * tc.expected: step2. Check if the value is created.
      */
     pattern_->HandleSetSelection(5, 10, false);
-    pattern_->isSingleHandle_ = false;
+    pattern_->SetIsSingleHandle(false);
     RectF handleRect;
-    pattern_->OnHandleMove(handleRect, true);
+    pattern_->selectOverlay_->OnHandleMove(handleRect, true);
 }
 
 
@@ -760,7 +762,7 @@ HWTEST_F(TextFieldUXTest, SetSelectionFlag001, TestSize.Level1)
     end = 10;
     pattern_->SetSelectionFlag(start, end);
     EXPECT_EQ(pattern_->selectController_->GetFirstHandleInfo().index, 5);
-    EXPECT_EQ(pattern_->selectController_->GetSecondHandleInfo().index, 10);
+    EXPECT_EQ(pattern_->selectController_->GetSecondHandleInfo().index, 5);
 }
 
 /**
@@ -787,7 +789,7 @@ HWTEST_F(TextFieldUXTest, SelectTextShowMenu001, TestSize.Level1)
      * @tc.steps: step3. Test menu open or close
      * @tc.expected: text menu is open
      */
-    auto ret = pattern_->GetSelectOverlayProxy()->IsMenuShow();
+    auto ret = pattern_->selectOverlay_->IsCurrentMenuVisibile();
     EXPECT_TRUE(ret);
 
     /**
@@ -807,7 +809,7 @@ HWTEST_F(TextFieldUXTest, SelectTextShowMenu001, TestSize.Level1)
      * @tc.steps: step6. Test menu open or close
      * @tc.expected: text menu is close
      */
-    ret = pattern_->GetSelectOverlayProxy()->IsMenuShow();
+    ret = pattern_->selectOverlay_->IsCurrentMenuVisibile();
     EXPECT_FALSE(ret);
 
     /**
@@ -826,7 +828,7 @@ HWTEST_F(TextFieldUXTest, SelectTextShowMenu001, TestSize.Level1)
      * @tc.steps: step9. Test menu open or close
      * @tc.expected: text menu is close
      */
-    ret = pattern_->GetSelectOverlayProxy()->IsMenuShow();
+    ret = pattern_->selectOverlay_->IsCurrentMenuVisibile();
     EXPECT_FALSE(ret);
 }
 
@@ -947,5 +949,155 @@ HWTEST_F(TextFieldUXTest, TextInputTypeToString005, TestSize.Level1)
      * @tc.steps: step2. Call TextInputTypeToString.
      */
     EXPECT_EQ(pattern_->TextInputTypeToString(), "InputType.NEW_PASSWORD");
+}
+
+/**
+ * @tc.name: AreaSupportAvoidanceTest
+ * @tc.desc: test whether the custom keyboard supports the collision avoidance function
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldUXTest, AreaSupportAvoidanceTest, TestSize.Level1)
+{
+    CreateTextField(DEFAULT_TEXT_THREE_LINE);
+    auto supportAvoidance = true;
+    pattern_->SetCustomKeyboardOption(supportAvoidance);
+    EXPECT_TRUE(pattern_->keyboardAvoidance_);
+    supportAvoidance = false;
+    pattern_->SetCustomKeyboardOption(supportAvoidance);
+    EXPECT_FALSE(pattern_->keyboardAvoidance_);
+}
+
+/**
+ * @tc.name: TextFieldFontFeatureTest
+ * @tc.desc: Test the caret move right
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldUXTest, FontFeature001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Initialize text area.
+     */
+    TextFieldModelNG textFieldModelNG;
+    textFieldModelNG.CreateTextArea(DEFAULT_TEXT, "");
+
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto layoutProperty = frameNode->GetLayoutProperty<TextFieldLayoutProperty>();
+    textFieldModelNG.SetFontFeature(FONT_FEATURE_VALUE_0);
+    EXPECT_EQ(layoutProperty->GetFontFeature(), FONT_FEATURE_VALUE_0);
+
+    layoutProperty->UpdateFontFeature(ParseFontFeatureSettings("\"ss01\" 1"));
+    TextFieldModelNG::SetFontFeature(frameNode, FONT_FEATURE_VALUE_0);
+    EXPECT_EQ(layoutProperty->GetFontFeature(), FONT_FEATURE_VALUE_0);
+}
+
+/**
+ * @tc.name: TextFieldFontFeatureTest
+ * @tc.desc: Test the caret move right
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldUXTest, FontFeature002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Initialize text area.
+     */
+    TextFieldModelNG textFieldModelNG;
+    textFieldModelNG.CreateTextArea(DEFAULT_TEXT, "");
+
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto layoutProperty = frameNode->GetLayoutProperty<TextFieldLayoutProperty>();
+    textFieldModelNG.SetFontFeature(FONT_FEATURE_VALUE_1);
+    EXPECT_EQ(layoutProperty->GetFontFeature(), FONT_FEATURE_VALUE_1);
+
+    layoutProperty->UpdateFontFeature(ParseFontFeatureSettings("\"ss01\" 0"));
+    TextFieldModelNG::SetFontFeature(frameNode, FONT_FEATURE_VALUE_1);
+    EXPECT_EQ(layoutProperty->GetFontFeature(), FONT_FEATURE_VALUE_1);
+}
+
+/**
+ * @tc.name: TextAreaInputRectUpdate001
+ * @tc.desc: Test TextAreaInputRectUpdate
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldUXTest, TextAreaInputRectUpdate001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Initialize text area.
+     */
+    CreateTextField(DEFAULT_TEXT);
+
+    /**
+     * @tc.steps: step2. Update text align.
+     */
+    layoutProperty_->UpdateTextAlign(TextAlign::START);
+    RectF textAreaRect = RectF(2.0f, 2.0f, 2.0f, 2.0f);
+    pattern_->TextAreaInputRectUpdate(textAreaRect);
+    EXPECT_EQ(textAreaRect, RectF(2.0f, 2.0f, 0.0f, 2.0f));
+}
+
+/**
+ * @tc.name: TextAreaInputRectUpdate002
+ * @tc.desc: Test TextAreaInputRectUpdate
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldUXTest, TextAreaInputRectUpdate002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Initialize text area.
+     */
+    CreateTextField(DEFAULT_TEXT);
+
+    /**
+     * @tc.steps: step2. Update text align.
+     */
+    layoutProperty_->UpdateTextAlign(TextAlign::CENTER);
+    RectF textAreaRect = RectF(2.0f, 2.0f, 2.0f, 2.0f);
+    pattern_->TextAreaInputRectUpdate(textAreaRect);
+    EXPECT_EQ(textAreaRect, RectF(232.0f, 2.0f, 0.0f, 2.0f));
+}
+
+/**
+ * @tc.name: TextAreaInputRectUpdate003
+ * @tc.desc: Test TextAreaInputRectUpdate
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldUXTest, TextAreaInputRectUpdate003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Initialize text area.
+     */
+    CreateTextField(DEFAULT_TEXT);
+
+    /**
+     * @tc.steps: step2. Update text align.
+     */
+    layoutProperty_->UpdateTextAlign(TextAlign::END);
+    RectF textAreaRect = RectF(2.0f, 2.0f, 2.0f, 2.0f);
+    pattern_->TextAreaInputRectUpdate(textAreaRect);
+    EXPECT_EQ(textAreaRect, RectF(462.0f, 2.0f, 0.0f, 2.0f));
+
+    layoutProperty_->UpdateTextAlign(TextAlign::LEFT);
+    EXPECT_EQ(textAreaRect, RectF(462.0f, 2.0f, 0.0f, 2.0f));
+}
+
+/**
+ * @tc.name: TextIsEmptyRect001
+ * @tc.desc: Test TextAreaInputRectUpdate
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldUXTest, TextIsEmptyRect001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Initialize text area.
+     */
+    CreateTextField(DEFAULT_TEXT);
+
+    /**
+     * @tc.steps: step2. call TextIsEmptyRect.
+     */
+    RectF textAreaRect = RectF(2.0f, 2.0f, 2.0f, 2.0f);
+    pattern_->TextIsEmptyRect(textAreaRect);
+    EXPECT_EQ(textAreaRect, RectF(0.0f, 0.0f, 0.0f, 50.0f));
 }
 }

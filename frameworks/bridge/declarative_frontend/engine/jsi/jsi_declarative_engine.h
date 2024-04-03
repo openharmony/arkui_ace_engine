@@ -68,6 +68,7 @@ public:
     void DestroyAllRootViewHandle();
     void FlushReload();
     napi_value GetContextValue();
+    napi_value GetFrameNodeValueByNodeId(int32_t nodeId);
 
     static std::unique_ptr<JsonValue> GetI18nStringResource(
         const std::string& targetStringKey, const std::string& targetStringValue);
@@ -203,6 +204,8 @@ private:
     static shared_ptr<JsRuntime> InnerGetCurrentRuntime();
     shared_ptr<JsValue> CallGetUIContextFunc(
         const shared_ptr<JsRuntime>& runtime, const std::vector<shared_ptr<JsValue>>& argv);
+    shared_ptr<JsValue> CallGetFrameNodeByNodeIdFunc(
+        const shared_ptr<JsRuntime>& runtime, const std::vector<shared_ptr<JsValue>>& argv);
     std::unordered_map<int32_t, panda::Global<panda::ObjectRef>> rootViewMap_;
     static std::unique_ptr<JsonValue> currentConfigResourceData_;
     static std::map<std::string, std::string> mediaResourceFileMap_;
@@ -267,6 +270,8 @@ public:
         const std::function<void(const std::string&, int32_t)>& errorCallback = nullptr) override;
     bool LoadPageSource(const std::shared_ptr<std::vector<uint8_t>>& content,
         const std::function<void(const std::string&, int32_t)>& errorCallback = nullptr) override;
+    int32_t LoadNavDestinationSource(const std::string& pageUrl, const std::string& bundleName,
+        const std::string& moduleName, bool isSingleton) override;
 
     bool LoadCard(const std::string& url, int64_t cardId, const std::string& entryPoint) override;
 
@@ -385,6 +390,11 @@ public:
         return engineInstance_->GetContextValue();
     }
 
+    napi_value GetFrameNodeValueByNodeId(int32_t nodeId) override
+    {
+        return engineInstance_->GetFrameNodeValueByNodeId(nodeId);
+    }
+
 #if defined(PREVIEW)
     void ReplaceJSContent(const std::string& url, const std::string componentName) override;
     RefPtr<Component> GetNewComponentWithJsCode(const std::string& jsCode, const std::string& viewID) override;
@@ -406,6 +416,8 @@ public:
 #endif
     static void AddToNamedRouterMap(const EcmaVM* vm, panda::Global<panda::FunctionRef> pageGenerator,
         const std::string& namedRoute, panda::Local<panda::ObjectRef> params);
+    static void AddToNavigationBuilderMap(std::string name,
+        panda::Global<panda::ObjectRef> builderFunc);
     bool LoadNamedRouterSource(const std::string& namedRoute, bool isTriggeredByJs) override;
     std::string SearchRouterRegisterMap(const std::string& pageName) override;
     bool UpdateRootComponent() override;
@@ -415,6 +427,8 @@ public:
         obj_ = obj;
     }
     bool ExecuteJs(const uint8_t* content, int32_t size) override;
+
+    panda::Global<panda::ObjectRef> GetNavigationBuilder(std::string name);
 
 private:
     bool CallAppFunc(const std::string& appFuncName);
@@ -452,6 +466,7 @@ private:
     std::string pluginBundleName_;
     std::string pluginModuleName_;
     static thread_local std::unordered_map<std::string, NamedRouterProperty> namedRouterRegisterMap_;
+    static thread_local std::unordered_map<std::string, panda::Global<panda::ObjectRef>> builderMap_;
     bool isFirstCallShow_ = true;
     static panda::Global<panda::ObjectRef> obj_;
     ACE_DISALLOW_COPY_AND_MOVE(JsiDeclarativeEngine);

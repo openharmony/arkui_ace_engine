@@ -113,12 +113,12 @@ ArkUINodeHandle GetChild(ArkUINodeHandle node, ArkUI_Int32 index)
 ArkUINodeHandle GetFirst(ArkUINodeHandle node)
 {
     auto* currentNode = reinterpret_cast<FrameNode*>(node);
-    CHECK_NULL_RETURN(currentNode, nullptr);
     auto* frameNode = AceType::DynamicCast<FrameNode>(currentNode);
     CHECK_NULL_RETURN(frameNode, nullptr);
     frameNode->GetAllChildrenWithBuild(false);
     auto child = frameNode->GetChildByIndex(0);
     auto childNode = AceType::DynamicCast<FrameNode>(child);
+    CHECK_NULL_RETURN(childNode, nullptr);
     return reinterpret_cast<ArkUINodeHandle>(OHOS::Ace::AceType::RawPtr(childNode));
 }
 
@@ -207,13 +207,25 @@ void PropertyUpdate(ArkUINodeHandle node)
     }
 }
 
+ArkUINodeHandle GetLast(ArkUINodeHandle node)
+{
+    auto* currentNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(currentNode, nullptr);
+    auto* frameNode = AceType::DynamicCast<FrameNode>(currentNode);
+    CHECK_NULL_RETURN(frameNode, nullptr);
+    auto size = frameNode->GetAllChildrenWithBuild(false).size();
+    auto child = frameNode->GetChildByIndex(size - 1);
+    auto childNode = AceType::DynamicCast<FrameNode>(child);
+    return reinterpret_cast<ArkUINodeHandle>(OHOS::Ace::AceType::RawPtr(childNode));
+}
+
 namespace NodeModifier {
 const ArkUIFrameNodeModifier* GetFrameNodeModifier()
 {
     static const ArkUIFrameNodeModifier modifier = { IsModifiable, AppendChildInFrameNode, InsertChildAfterInFrameNode,
         RemoveChildInFrameNode, ClearChildrenInFrameNode, GetChildrenCount, GetChild, GetFirst, GetNextSibling,
         GetPreviousSibling, GetParent, GetIdByNodePtr, GetPositionToParent, GetPositionToWindow,
-        GetFrameNodeById, GetFrameNodeByKey, PropertyUpdate };
+        GetFrameNodeById, GetFrameNodeByKey, PropertyUpdate, GetLast };
     return &modifier;
 }
 } // namespace NodeModifier

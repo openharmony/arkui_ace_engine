@@ -15,8 +15,8 @@
 
 /// <reference path='./import.ts' />
 class ArkCheckboxComponent extends ArkComponent implements CheckboxAttribute {
-  constructor(nativePtr: KNode) {
-    super(nativePtr);
+  constructor(nativePtr: KNode, classType?: ModifierType) {
+    super(nativePtr, classType);
   }
   shape(value: CheckBoxShape): this {
     throw new Error('Method not implemented.');
@@ -294,12 +294,10 @@ class CheckboxUnselectedColorModifier extends ModifierWithKey<ResourceColor> {
 }
 
 // @ts-ignore
-globalThis.Checkbox.attributeModifier = function (modifier) {
-  const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
-  let nativeNode = getUINativeModule().getFrameNodeById(elmtId);
-  let component = this.createOrGetNode(elmtId, () => {
-    return new ArkCheckboxComponent(nativeNode);
+globalThis.Checkbox.attributeModifier = function (modifier: ArkComponent): void {
+  attributeModifierFunc.call(this, modifier, (nativePtr: KNode) => {
+    return new ArkCheckboxComponent(nativePtr);
+  }, (nativePtr: KNode, classType: ModifierType, modifierJS: ModifierJS) => {
+    return new modifierJS.CheckboxModifier(nativePtr, classType);
   });
-  applyUIAttributes(modifier, nativeNode, component);
-  component.applyModifierPatch();
 };

@@ -1318,7 +1318,7 @@ RefPtr<CanvasPath2D> JsiOffscreenCanvasBridge::GetPath2D(
 {
     if (!runtime || !value) {
         LOGE("runtime or value is null.");
-        return 0;
+        return nullptr;
     }
     auto nodeId = value->GetProperty(runtime, "__id");
     if (nodeId && nodeId->IsInt32(runtime)) {

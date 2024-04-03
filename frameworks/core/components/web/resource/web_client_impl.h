@@ -231,6 +231,7 @@ public:
     void OnNativeEmbedGestureEvent(std::shared_ptr<NWeb::NWebNativeEmbedTouchEvent> event) override;
     void OnIntelligentTrackingPreventionResult(
         const std::string& websiteHost, const std::string& trackerHost) override;
+    void OnTooltip(const std::string& tooltip) override;
     bool OnHandleOverrideUrlLoading(std::shared_ptr<OHOS::NWeb::NWebUrlResourceRequest> request) override;
 
     void SetWebDelegate(const WeakPtr<WebDelegate>& delegate)

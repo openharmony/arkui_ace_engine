@@ -79,6 +79,8 @@ public:
 
     static RefPtr<PipelineContext> GetCurrentContextSafely();
 
+    static PipelineContext* GetCurrentContextPtrSafely();
+
     static RefPtr<PipelineContext> GetMainPipelineContext();
 
     static RefPtr<PipelineContext> GetContextByContainerId(int32_t containerId);
@@ -267,6 +269,8 @@ public:
         dragWindowVisibleCallback_ = std::move(task);
     }
 
+    void FlushOnceVsyncTask() override;
+
     void FlushDirtyNodeUpdate();
 
     void SetRootRect(double width, double height, double offset) override;
@@ -350,10 +354,9 @@ public:
 
     void RemoveWindowSizeChangeCallback(int32_t nodeId);
 
-    void AddNavigationStateCallback(
-        int32_t pageId, int32_t nodeId, const std::function<void()>& callback, bool isOnShow);
+    void AddNavigationNode(int32_t pageId, WeakPtr<UINode> navigationNode);
 
-    void RemoveNavigationStateCallback(int32_t pageId, int32_t nodeId);
+    void RemoveNavigationNode(int32_t pageId, int32_t nodeId);
 
     void FirePageChanged(int32_t pageId, bool isOnShow);
 
@@ -395,7 +398,7 @@ public:
         return onShow_;
     }
 
-    bool ChangeMouseStyle(int32_t nodeId, MouseFormat format);
+    bool ChangeMouseStyle(int32_t nodeId, MouseFormat format, int32_t windowId = 0, bool isByPass = false);
 
     bool RequestFocus(const std::string& targetNodeId) override;
     void AddDirtyFocus(const RefPtr<FrameNode>& node);
@@ -536,6 +539,7 @@ public:
     bool DumpPageViewData(const RefPtr<FrameNode>& node, RefPtr<ViewDataWrap> viewDataWrap);
     bool CheckNeedAutoSave();
     bool CheckPageFocus();
+    bool CheckOverlayFocus();
     void NotifyFillRequestSuccess(AceAutoFillType autoFillType, RefPtr<ViewDataWrap> viewDataWrap);
     void NotifyFillRequestFailed(RefPtr<FrameNode> node, int32_t errCode);
 
@@ -641,6 +645,15 @@ public:
     void SetVsyncListener(VsyncCallbackFun vsync)
     {
         vsyncListener_ = std::move(vsync);
+    }
+
+    void SetOnceVsyncListener(VsyncCallbackFun vsync)
+    {
+        onceVsyncListener_ = std::move(vsync);
+    }
+
+    bool HasOnceVsyncListener() {
+        return onceVsyncListener_ != nullptr;
     }
 
     const RefPtr<NavigationDumpManager>& GetNavigationDumpManager() const
@@ -787,8 +800,6 @@ private:
     std::unordered_set<int32_t> onAreaChangeNodeIds_;
     std::unordered_set<int32_t> onVisibleAreaChangeNodeIds_;
     std::unordered_set<int32_t> onFormVisibleChangeNodeIds_;
-    std::unordered_map<int32_t, std::list<std::pair<int32_t, std::function<void()>>>> pageIdOnShowMap_;
-    std::unordered_map<int32_t, std::list<std::pair<int32_t, std::function<void()>>>> pageIdOnHideMap_;
 
     RefPtr<AccessibilityManagerNG> accessibilityManagerNG_;
     RefPtr<StageManager> stageManager_;
@@ -841,7 +852,7 @@ private:
 
     std::unordered_map<int32_t, WeakPtr<FrameNode>> storeNode_;
     std::unordered_map<int32_t, std::string> restoreNodeInfo_;
-
+    std::unordered_map<int32_t, std::vector<WeakPtr<UINode>>> pageToNavigationNodes_;
     std::unordered_map<int32_t, std::vector<TouchEvent>> historyPointsById_;
 
     std::list<FrameInfo> dumpFrameInfos_;
@@ -858,6 +869,7 @@ private:
     std::unordered_map<int32_t, uint64_t> lastDispatchTime_;
 
     VsyncCallbackFun vsyncListener_;
+    VsyncCallbackFun onceVsyncListener_;
     ACE_DISALLOW_COPY_AND_MOVE(PipelineContext);
 
     int32_t preNodeId_ = -1;

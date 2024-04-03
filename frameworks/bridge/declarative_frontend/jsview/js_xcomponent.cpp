@@ -107,6 +107,7 @@ void JSXComponent::JSBind(BindingTarget globalObj)
     JSClass<JSXComponent>::StaticMethod("lightUpEffect", &JSXComponent::JsLightUpEffect);
     JSClass<JSXComponent>::StaticMethod("pixelStretchEffect", &JSXComponent::JsPixelStretchEffect);
     JSClass<JSXComponent>::StaticMethod("linearGradientBlur", &JSXComponent::JsLinearGradientBlur);
+    JSClass<JSXComponent>::StaticMethod("enableAnalyzer", &JSXComponent::JsEnableAnalyzer);
 
     JSClass<JSXComponent>::InheritAndBind<JSContainerBase>(globalObj);
 }
@@ -129,6 +130,7 @@ void JSXComponent::Create(const JSCallbackInfo& info)
     if (controllerObj->IsObject()) {
         auto* jsXComponentController = JSRef<JSObject>::Cast(controllerObj)->Unwrap<JSXComponentController>();
         if (jsXComponentController) {
+            jsXComponentController->SetInstanceId(Container::CurrentId());
             XComponentClient::GetInstance().AddControllerToJSXComponentControllersMap(
                 id->ToString(), jsXComponentController);
             xcomponentController = jsXComponentController->GetController();
@@ -548,6 +550,15 @@ void JSXComponent::JsLinearGradientBlur(const JSCallbackInfo& args)
         return;
     }
     JSViewAbstract::JsLinearGradientBlur(args);
+}
+
+void JSXComponent::JsEnableAnalyzer(bool enable)
+{
+    auto type = XComponentModel::GetInstance()->GetType();
+    if (type == XComponentType::COMPONENT || type == XComponentType::NODE) {
+        return;
+    }
+    XComponentModel::GetInstance()->EnableAnalyzer(enable);
 }
 
 } // namespace OHOS::Ace::Framework

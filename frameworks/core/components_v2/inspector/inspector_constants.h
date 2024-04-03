@@ -59,6 +59,8 @@ ACE_EXPORT extern const char ROOT_ETS_TAG[];
 ACE_EXPORT extern const char STAGE_ETS_TAG[];
 // page view
 ACE_EXPORT extern const char PAGE_ETS_TAG[];
+// overlay view
+ACE_EXPORT extern const char OVERLAY_ETS_TAG[];
 // container modal view (title bar)
 ACE_EXPORT extern const char CONTAINER_MODAL_ETS_TAG[];
 
@@ -555,6 +557,10 @@ ACE_EXPORT extern const char WINDOW_SCENE_ETS_TAG[];
 ACE_EXPORT extern const char UI_EXTENSION_COMPONENT_TAG[];
 ACE_EXPORT extern const char UI_EXTENSION_SURFACE_TAG[];
 ACE_EXPORT extern const char UI_EXTENSION_COMPONENT_ETS_TAG[];
+
+// embedded_component
+ACE_EXPORT extern const char EMBEDDED_COMPONENT_TAG[];
+ACE_EXPORT extern const char EMBEDDED_COMPONENT_ETS_TAG[];
 
 // LocationButton
 ACE_EXPORT extern const char LOCATION_BUTTON_COMPONENT_TAG[];

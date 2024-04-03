@@ -67,12 +67,11 @@ void JSToggle::JSBind(BindingTarget globalObj)
     JSClass<JSToggle>::StaticMethod("responseRegion", &JSToggle::JsResponseRegion);
     JSClass<JSToggle>::StaticMethod("size", &JSToggle::JsSize);
     JSClass<JSToggle>::StaticMethod("padding", &JSToggle::JsPadding);
+    JSClass<JSToggle>::StaticMethod("pop", &JSToggle::Pop);
     JSClass<JSToggle>::StaticMethod("switchPointColor", &JSToggle::SwitchPointColor);
     JSClass<JSToggle>::StaticMethod("backgroundColor", &JSToggle::SetBackgroundColor);
     JSClass<JSToggle>::StaticMethod("hoverEffect", &JSToggle::JsHoverEffect);
-    JSClass<JSToggle>::StaticMethod("pop", &JSToggle::Pop);
     JSClass<JSToggle>::StaticMethod("switchStyle", &JSToggle::SwitchStyle);
-
     JSClass<JSToggle>::StaticMethod("onTouch", &JSInteractableView::JsOnTouch);
     JSClass<JSToggle>::StaticMethod("onClick", &JSInteractableView::JsOnClick);
     JSClass<JSToggle>::StaticMethod("onHover", &JSInteractableView::JsOnHover);
@@ -417,8 +416,8 @@ void JSToggle::SwitchStyle(const JSCallbackInfo& info)
     JSRef<JSObject> jsObj = JSRef<JSObject>::Cast(info[0]);
 
     CalcDimension pointRadius;
-    if (jsObj->HasProperty("pointRadius") && ParseJsDimensionVp(jsObj->GetProperty("pointRadius"), pointRadius) &&
-        !pointRadius.IsNegative()) {
+    if (jsObj->HasProperty("pointRadius") &&
+        ParseJsDimensionVpNG(jsObj->GetProperty("pointRadius"), pointRadius, false) && !pointRadius.IsNegative()) {
         ToggleModel::GetInstance()->SetPointRadius(pointRadius);
     } else {
         ToggleModel::GetInstance()->ResetPointRadius();
@@ -449,7 +448,8 @@ void JSToggle::SwitchStyle(const JSCallbackInfo& info)
 
     CalcDimension trackRadius;
     if (jsObj->HasProperty("trackBorderRadius") &&
-        ParseJsDimensionVp(jsObj->GetProperty("trackBorderRadius"), trackRadius) && !trackRadius.IsNegative()) {
+        ParseJsDimensionVpNG(jsObj->GetProperty("trackBorderRadius"), trackRadius, false) &&
+        !trackRadius.IsNegative()) {
         ToggleModel::GetInstance()->SetTrackBorderRadius(trackRadius);
     } else {
         ToggleModel::GetInstance()->ResetTrackBorderRadius();

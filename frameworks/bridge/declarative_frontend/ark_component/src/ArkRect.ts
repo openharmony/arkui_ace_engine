@@ -59,8 +59,8 @@ class RectRadiusModifier extends ModifierWithKey<string | number | Array<any>> {
   }
 }
 class ArkRectComponent extends ArkCommonShapeComponent implements RectAttribute {
-  constructor(nativePtr: KNode) {
-    super(nativePtr);
+  constructor(nativePtr: KNode, classType?: ModifierType) {
+    super(nativePtr, classType);
   }
   radiusWidth(value: string | number): this {
     modifierWithKey(this._modifiersWithKeys, RectRadiusWidthModifier.identity, RectRadiusWidthModifier, value);
@@ -77,12 +77,10 @@ class ArkRectComponent extends ArkCommonShapeComponent implements RectAttribute 
 }
 
 // @ts-ignore
-globalThis.Rect.attributeModifier = function (modifier) {
-  const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
-  let nativeNode = getUINativeModule().getFrameNodeById(elmtId);
-  let component = this.createOrGetNode(elmtId, () => {
-    return new ArkRectComponent(nativeNode);
+globalThis.Rect.attributeModifier = function (modifier: ArkComponent): void {
+  attributeModifierFunc.call(this, modifier, (nativePtr: KNode) => {
+    return new ArkRectComponent(nativePtr);
+  }, (nativePtr: KNode, classType: ModifierType, modifierJS: ModifierJS) => {
+    return new modifierJS.RectModifier(nativePtr, classType);
   });
-  applyUIAttributes(modifier, nativeNode, component);
-  component.applyModifierPatch();
 };

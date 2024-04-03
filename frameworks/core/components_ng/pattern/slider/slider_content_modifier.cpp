@@ -137,6 +137,21 @@ void SliderContentModifier::onDraw(DrawingContext& context)
     DrawHoverOrPress(context);
 }
 
+void SetStartEndPointLocation(Axis& direction, RSRect& trackRect, RSPoint& startPoint, RSPoint& endPoint)
+{
+    if (direction == Axis::HORIZONTAL) {
+        startPoint.SetX(trackRect.GetLeft());
+        startPoint.SetY(trackRect.GetTop());
+        endPoint.SetX(trackRect.GetRight());
+        endPoint.SetY(trackRect.GetTop());
+    } else {
+        startPoint.SetX(trackRect.GetLeft());
+        startPoint.SetY(trackRect.GetTop());
+        endPoint.SetX(trackRect.GetLeft());
+        endPoint.SetY(trackRect.GetBottom());
+    }
+}
+
 void SliderContentModifier::DrawBackground(DrawingContext& context)
 {
     auto& canvas = context.canvas;
@@ -149,14 +164,10 @@ void SliderContentModifier::DrawBackground(DrawingContext& context)
         pos.emplace_back(gradientColors[i].GetDimension().Value());
     }
     RSRect trackRect = GetTrackRect();
-
+    auto direction = static_cast<Axis>(directionAxis_->Get());
     RSPoint startPoint;
-    startPoint.SetX(trackRect.GetLeft());
-    startPoint.SetY(trackRect.GetTop());
     RSPoint endPoint;
-    endPoint.SetX(trackRect.GetRight());
-    endPoint.SetY(trackRect.GetBottom());
-
+    SetStartEndPointLocation(direction, trackRect, startPoint, endPoint);
     RSBrush brush;
     brush.SetAntiAlias(true);
     if (reverse_) {

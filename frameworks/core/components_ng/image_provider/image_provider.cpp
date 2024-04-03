@@ -295,7 +295,7 @@ RefPtr<ImageObject> ImageProvider::BuildImageObject(const ImageSourceInfo& src, 
 #endif
     if (!size.IsPositive()) {
         TAG_LOGW(AceLogTag::ACE_IMAGE,
-            "Image of src: %{public}s decode failed, imageData's size is invalid %{public}s, frameCount is %{public}d",
+            "Image of src: %{public}s, imageData's size is invalid %{public}s, frameCount is %{public}d",
             src.ToString().c_str(), size.ToString().c_str(), frameCount);
         return nullptr;
     }

@@ -67,6 +67,8 @@ public:
     void SetOnContentWillChange(std::function<bool(int32_t, int32_t)>&& callback) override;
     static RefPtr<TabsNode> GetOrCreateTabsNode(
         const std::string& tag, int32_t nodeId, const std::function<RefPtr<Pattern>(void)>& patternCreator);
+    static void SetWidthAuto(FrameNode* frameNode, bool isAuto);
+    static void SetHeightAuto(FrameNode* frameNode, bool isAuto);
     static void SetTabBarMode(FrameNode* frameNode, TabBarMode tabBarMode);
     static void SetBarGridAlign(FrameNode* frameNode, const BarGridColumnOptions& BarGridColumnOptions);
     static void SetDivider(FrameNode* frameNode, const TabsItemDivider& divider);

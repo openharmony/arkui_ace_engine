@@ -149,7 +149,7 @@ int32_t TxtParagraph::AddPlaceholder(const PlaceholderRun& span)
 #endif
     auto position = static_cast<size_t>(placeholderCnt_) + text_.length();
     placeholderPosition_.emplace_back(position);
-    return ++placeholderCnt_;
+    return placeholderCnt_++;
 }
 
 void TxtParagraph::Build()
@@ -455,7 +455,8 @@ bool TxtParagraph::ComputeOffsetForCaretUpstream(int32_t extent, CaretMetricsF& 
 #else
     double caretStart = isLtr ? textBox.rect.GetRight() : textBox.rect.GetLeft();
 #endif
-    float offsetX = std::min(static_cast<float>(caretStart), GetLongestLine());
+    float offsetX = std::min(
+        static_cast<float>(caretStart), std::max(GetLongestLine(), static_cast<float>(paragraph_->GetMaxWidth())));
     result.offset.SetX(offsetX);
 #ifndef USE_GRAPHIC_TEXT_GINE
     result.offset.SetY(textBox.rect.fTop);

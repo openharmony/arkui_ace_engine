@@ -17,13 +17,13 @@
 #include "bridge/common/utils/utils.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components/common/properties/text_style.h"
+#include "core/components/common/properties/text_style_parser.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/view_abstract.h"
 #include "core/pipeline/base/element_register.h"
 #include "frameworks/core/components/common/layout/constants.h"
 #include "frameworks/core/components/common/properties/text_style.h"
 #include "frameworks/core/components_ng/pattern/text/text_model_ng.h"
-#include "core/components/common/properties/text_style_parser.h"
 
 namespace OHOS::Ace::NG {
 constexpr Dimension DEFAULT_LINE_HEIGHT = Dimension(0.0, DimensionUnit::PX);
@@ -168,6 +168,24 @@ uint32_t GetFontColor(ArkUINodeHandle node)
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_RETURN(frameNode, Color::BLACK.GetValue());
     return TextModelNG::GetFontColor(frameNode).GetValue();
+}
+
+void SetTextForegroundColor(ArkUINodeHandle node, ArkUI_Bool isColor, uint32_t color)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    if (isColor) {
+        TextModelNG::SetTextColor(frameNode, Color(color));
+    } else {
+        TextModelNG::SetTextColor(frameNode, Color::FOREGROUND);
+        auto strategy = static_cast<ForegroundColorStrategy>(color);
+        ViewAbstract::SetForegroundColorStrategy(frameNode, strategy);
+    }
+}
+
+void ResetTextForegroundColor(ArkUINodeHandle node)
+{
+    ResetFontColor(node);
 }
 
 void SetFontSize(ArkUINodeHandle node, ArkUI_Float32 fontSize, ArkUI_Int32 unit)
@@ -752,6 +770,8 @@ const ArkUITextModifier* GetTextModifier()
         ResetTextAlign,
         SetFontColor,
         ResetFontColor,
+        SetTextForegroundColor,
+        ResetTextForegroundColor,
         SetFontSize,
         ResetFontSize,
         SetTextLineHeight,

@@ -287,6 +287,11 @@ void ImageModelNG::SetResizableSlice(const ImageResizableSlice& slice)
     ACE_UPDATE_PAINT_PROPERTY(ImageRenderProperty, ImageResizableSlice, slice);
 }
 
+void ImageModelNG::SetResizableSlice(FrameNode *frameNode, const ImageResizableSlice& slice)
+{
+    ACE_UPDATE_NODE_PAINT_PROPERTY(ImageRenderProperty, ImageResizableSlice, slice, frameNode);
+}
+
 void ImageModelNG::SetImageRepeat(FrameNode *frameNode, ImageRepeat imageRepeat)
 {
     ACE_UPDATE_NODE_PAINT_PROPERTY(ImageRenderProperty, ImageRepeat, imageRepeat, frameNode);

@@ -163,9 +163,9 @@ public:
     virtual void SetTransition(const NG::TransitionOptions& transitionOptions, bool passThrough = false) = 0;
     virtual void CleanTransition() {};
     virtual void SetChainedTransition(const RefPtr<NG::ChainedTransitionEffect>& effect, bool passThrough = false) = 0;
-    virtual void SetOverlay(const std::string& text, const std::function<void()>&& buildFunc,
+    virtual void SetOverlay(const std::string& text, std::function<void()>&& buildFunc,
         const std::optional<Alignment>& align, const std::optional<Dimension>& offsetX,
-        const std::optional<Dimension>& offsetY) = 0;
+        const std::optional<Dimension>& offsetY, NG::OverlayType type) = 0;
     virtual void SetVisibility(VisibleType visible, std::function<void(int32_t)>&& changeEventFunc) = 0;
     virtual void SetSharedTransition(
         const std::string& shareId, const std::shared_ptr<SharedTransitionOption>& option) = 0;
@@ -196,6 +196,7 @@ public:
     virtual void SetBackdropBlur(const Dimension& radius, const BlurOption& blurOption) = 0;
     virtual void SetLinearGradientBlur(NG::LinearGradientBlurPara blurPara) = 0;
 
+    virtual void SetDynamicDim(float DimDegree) = 0;
     virtual void SetDynamicLightUp(float rate, float lightUpDegree) = 0;
 
     virtual void SetFrontBlur(const Dimension& radius, const BlurOption& blurOption) = 0;
@@ -289,6 +290,7 @@ public:
     virtual void SetKeyboardShortcut(const std::string& value, const std::vector<ModifierKey>& keys,
         std::function<void()>&& onKeyboardShortcutAction) = 0;
     virtual void SetMonopolizeEvents(bool monopolizeEvents) = 0;
+    virtual void SetDragEventStrictReportingEnabled(bool dragEventStrictReportingEnabled) = 0;
 
     // obscured
     virtual void SetObscured(const std::vector<ObscuredReasons>& reasons) = 0;
@@ -311,7 +313,8 @@ public:
     virtual void BindSheet(bool isShow, std::function<void(const std::string&)>&& callback,
         std::function<void()>&& buildFunc, std::function<void()>&& titleBuildFunc, NG::SheetStyle& sheetStyle,
         std::function<void()>&& onAppear, std::function<void()>&& onDisappear, std::function<void()>&& shouldDismiss,
-        std::function<void()>&& onWillAppear, std::function<void()>&& onWillDisappear) = 0;
+        std::function<void()>&& onWillAppear, std::function<void()>&& onWillDisappear,
+        std::function<void(const float)>&& onHeightDidChange) = 0;
     virtual void DismissContentCover() = 0;
     virtual void DismissSheet() = 0;
     virtual void DismissDialog() {};

@@ -65,18 +65,23 @@ public:
         return ptr.rawPtr_;
     }
 
-    int32_t IncRefCount()
+    template<class T>
+    static T* UnsafeRawPtr(const WeakPtr<T>& ptr)
     {
-        return refCounter_->IncStrongRef();
+        return ptr.unsafeRawPtr_;
     }
-    int32_t DecRefCount()
+
+    void IncRefCount()
+    {
+        refCounter_->IncStrongRef();
+    }
+    void DecRefCount()
     {
         int32_t refCount = refCounter_->DecStrongRef();
         if (refCount == 0 && MaybeRelease()) {
             // Release this instance, while its strong reference have reduced to zero.
             delete this;
         }
-        return refCount;
     }
 
     int32_t RefCount() const
@@ -358,7 +363,7 @@ public:
     RefPtr<T> Upgrade() const
     {
         // A 'WeakPtr' could upgrade to 'RefPtr' if this instance is still alive.
-        return refCounter_ != nullptr && refCounter_->TryIncStrongRef() > 0 ? RefPtr<T>(unsafeRawPtr_, false) : nullptr;
+        return refCounter_ != nullptr && refCounter_->TryIncStrongRef() ? RefPtr<T>(unsafeRawPtr_, false) : nullptr;
     }
     bool Invalid() const
     {

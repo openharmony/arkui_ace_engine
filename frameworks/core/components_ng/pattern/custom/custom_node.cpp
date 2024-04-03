@@ -167,4 +167,23 @@ RefPtr<UINode> CustomNode::GetFrameChildByIndex(uint32_t index, bool needBuild, 
     Render();
     return UINode::GetFrameChildByIndex(index, needBuild, isCache);
 }
+
+void CustomNode::DoSetActiveChildRange(int32_t start, int32_t end)
+{
+    if (start <= end) {
+        if (start > 0 || end < 0) {
+            SetActive(false);
+            SetJSViewActive(false);
+        } else {
+            SetJSViewActive(true);
+        }
+    } else {
+        if (end < 0 && start > 0) {
+            SetActive(false);
+            SetJSViewActive(false);
+        } else {
+            SetJSViewActive(true);
+        }
+    }
+}
 } // namespace OHOS::Ace::NG

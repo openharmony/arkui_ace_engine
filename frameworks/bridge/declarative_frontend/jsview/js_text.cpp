@@ -169,6 +169,20 @@ void JSText::SetFontWeight(const std::string& value)
     TextModel::GetInstance()->SetFontWeight(ConvertStrToFontWeight(value));
 }
 
+void JSText::SetForegroundColor(const JSCallbackInfo& info)
+{
+    if (info.Length() < 1) {
+        return;
+    }
+    ForegroundColorStrategy strategy;
+    if (ParseJsColorStrategy(info[0], strategy)) {
+        TextModel::GetInstance()->SetTextColor(Color::FOREGROUND);
+        ViewAbstractModel::GetInstance()->SetForegroundColorStrategy(strategy);
+        return;
+    }
+    SetTextColor(info);
+}
+
 void JSText::SetTextColor(const JSCallbackInfo& info)
 {
     if (info.Length() < 1) {
@@ -878,6 +892,9 @@ void JSText::JSBind(BindingTarget globalObj)
     JSClass<JSText>::StaticMethod("onTextSelectionChange", &JSText::SetOnTextSelectionChange);
     JSClass<JSText>::StaticMethod("clip", &JSText::JsClip);
     JSClass<JSText>::StaticMethod("fontFeature", &JSText::SetFontFeature);
+    JSClass<JSText>::StaticMethod("foregroundColor", &JSText::SetForegroundColor);
+    JSClass<JSText>::StaticMethod("marqueeOptions", &JSText::SetMarqueeOptions);
+    JSClass<JSText>::StaticMethod("onMarqueeStateChange", &JSText::SetOnMarqueeStateChange);
     JSClass<JSText>::InheritAndBind<JSContainerBase>(globalObj);
 }
 
@@ -931,4 +948,81 @@ void JSText::ParseMenuParam(
         menuParam.onDisappear = std::move(onDisappear);
     }
 }
+
+void JSText::SetMarqueeOptions(const JSCallbackInfo& info)
+{
+    if (info.Length() < 1) {
+        return;
+    }
+
+    auto args = info[0];
+    NG::TextMarqueeOptions options;
+
+    if (!args->IsObject()) {
+        TextModel::GetInstance()->SetMarqueeOptions(options);
+        return;
+    }
+
+    auto paramObject = JSRef<JSObject>::Cast(args);
+    auto getStart = paramObject->GetProperty("start");
+    if (getStart->IsBoolean()) {
+        options.UpdateTextMarqueeStart(getStart->ToBoolean());
+    }
+
+    auto getLoop = paramObject->GetProperty("loop");
+    if (getLoop->IsNumber()) {
+        int32_t loop = static_cast<int32_t>(getLoop->ToNumber<double>());
+        if (loop == std::numeric_limits<int32_t>::max() || loop <= 0) {
+            loop = -1;
+        }
+        options.UpdateTextMarqueeLoop(loop);
+    }
+
+    auto getStep = paramObject->GetProperty("step");
+    if (getStep->IsNumber()) {
+        auto step = getStep->ToNumber<double>();
+        if (GreatNotEqual(step, 0.0)) {
+            options.UpdateTextMarqueeStep(Dimension(step, DimensionUnit::VP).ConvertToPx());
+        }
+    }
+
+    auto delay = paramObject->GetProperty("delay");
+    if (delay->IsNumber()) {
+        auto delayDouble = delay->ToNumber<double>();
+        int32_t delayValue = static_cast<int32_t>(delayDouble);
+        if (delayValue < 0) {
+            delayValue = 0;
+        }
+        options.UpdateTextMarqueeDelay(delayValue);
+    }
+
+    auto getFromStart = paramObject->GetProperty("fromStart");
+    if (getFromStart->IsBoolean()) {
+        options.UpdateTextMarqueeDirection(
+            getFromStart->ToBoolean() ? MarqueeDirection::LEFT : MarqueeDirection::RIGHT);
+    }
+
+    TextModel::GetInstance()->SetMarqueeOptions(options);
+}
+
+void JSText::SetOnMarqueeStateChange(const JSCallbackInfo& info)
+{
+    if (!info[0]->IsFunction()) {
+        return;
+    }
+
+    auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(info[0]));
+    WeakPtr<NG::FrameNode> targetNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    auto onMarqueeStateChange = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc), node = targetNode](
+                             int32_t value) {
+        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+        ACE_SCORING_EVENT("Text.onMarqueeStateChange");
+        PipelineContext::SetCallBackNode(node);
+        auto newJSVal = JSRef<JSVal>::Make(ToJSValue(value));
+        func->ExecuteJS(1, &newJSVal);
+    };
+
+    TextModel::GetInstance()->SetOnMarqueeStateChange(std::move(onMarqueeStateChange));
+}
+
 } // namespace OHOS::Ace::Framework

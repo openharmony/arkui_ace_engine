@@ -18,6 +18,7 @@
 #include <algorithm>
 
 #include "base/i18n/localization.h"
+#include "core/common/ace_application_info.h"
 #include "core/common/container.h"
 #include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/pattern/bubble/bubble_pattern.h"
@@ -70,12 +71,14 @@ RefPtr<FrameNode> NavigationTitleUtil::CreateMenuItems(const int32_t menuNodeId,
     if (needMoreButton) {
         auto barItemNode = CreateBarItemNode(isButtonEnabled);
         CHECK_NULL_RETURN(barItemNode, nullptr);
-        MenuParam menuParam;
-        menuParam.isShowInSubWindow = false;
-        auto barMenuNode = MenuView::Create(
-            std::move(params), barItemNode->GetId(), V2::BAR_ITEM_ETS_TAG, MenuType::NAVIGATION_MENU, menuParam);
         auto menuItemNode = CreateMenuItemButton(theme);
         CHECK_NULL_RETURN(menuItemNode, nullptr);
+        MenuParam menuParam;
+        menuParam.isShowInSubWindow = false;
+        menuParam.placement = Placement::BOTTOM_RIGHT;
+        auto barMenuNode = MenuView::Create(
+            std::move(params), menuItemNode->GetId(), menuItemNode->GetTag(), MenuType::NAVIGATION_MENU, menuParam);
+
         BuildMoreItemNodeAction(menuItemNode, barItemNode, barMenuNode, titleBarNode);
         InitTitleBarButtonEvent(menuItemNode, true);
         barItemNode->MountToParent(menuItemNode);
@@ -121,30 +124,10 @@ void NavigationTitleUtil::BuildMoreItemNodeAction(const RefPtr<FrameNode>& butto
         auto menu = weakMenu.Upgrade();
         CHECK_NULL_VOID(menu);
 
-        auto barItemNode = weakBarItemNode.Upgrade();
-        CHECK_NULL_VOID(barItemNode);
-
-        auto imageNode = barItemNode->GetChildAtIndex(0);
-        CHECK_NULL_VOID(imageNode);
-
-        auto imageFrameNode = AceType::DynamicCast<FrameNode>(imageNode);
-        CHECK_NULL_VOID(imageFrameNode);
-        auto imgOffset = imageFrameNode->GetOffsetRelativeToWindow();
-        auto imageSize = imageFrameNode->GetGeometryNode()->GetFrameSize();
-
         auto menuNode = AceType::DynamicCast<FrameNode>(menu->GetChildAtIndex(0));
         CHECK_NULL_VOID(menuNode);
-        auto menuLayoutProperty = menuNode->GetLayoutProperty<MenuLayoutProperty>();
-        CHECK_NULL_VOID(menuLayoutProperty);
-        menuLayoutProperty->UpdateTargetSize(imageSize);
-        auto menuPattern = menuNode->GetPattern<MenuPattern>();
-        CHECK_NULL_VOID(menuPattern);
-        // navigation menu show like select.
-        menuPattern->SetIsSelectMenu(true);
 
-        imgOffset.SetX(imgOffset.GetX());
-        imgOffset.SetY(imgOffset.GetY() + imageSize.Height());
-        overlayManager->ShowMenu(id, imgOffset, menu);
+        overlayManager->ShowMenu(id, OffsetF(0.0f, 0.0f), menu);
 
         auto titleBarNode = weakTitleBarNode.Upgrade();
         CHECK_NULL_VOID(titleBarNode);
@@ -197,23 +180,44 @@ RefPtr<FrameNode> NavigationTitleUtil::CreateMenuItemButton(RefPtr<NavigationBar
     auto buttonPattern = AceType::MakeRefPtr<NG::ButtonPattern>();
     CHECK_NULL_RETURN(buttonPattern, nullptr);
     buttonPattern->setComponentButtonType(ComponentButtonType::NAVIGATION);
-    buttonPattern->SetFocusBorderColor(theme->GetToolBarItemFocusColor());
-    buttonPattern->SetFocusBorderWidth(theme->GetToolBarItemFocusBorderWidth());
+    if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
+        buttonPattern->SetBlendColor(theme->GetBackgroundPressedColor(), theme->GetBackgroundHoverColor());
+        buttonPattern->SetFocusBorderColor(theme->GetBackgroundFocusOutlineColor());
+        buttonPattern->SetFocusBorderWidth(theme->GetBackgroundFocusOutlineWeight());
+    } else {
+        buttonPattern->SetFocusBorderColor(theme->GetToolBarItemFocusColor());
+        buttonPattern->SetFocusBorderWidth(theme->GetToolBarItemFocusBorderWidth());
+    }
     auto menuItemNode = FrameNode::CreateFrameNode(
         V2::MENU_ITEM_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), buttonPattern);
     CHECK_NULL_RETURN(menuItemNode, nullptr);
     auto menuItemLayoutProperty = menuItemNode->GetLayoutProperty<ButtonLayoutProperty>();
     CHECK_NULL_RETURN(menuItemLayoutProperty, nullptr);
-    menuItemLayoutProperty->UpdateUserDefinedIdealSize(
-        CalcSize(CalcLength(BACK_BUTTON_SIZE), CalcLength(BACK_BUTTON_SIZE)));
     menuItemLayoutProperty->UpdateType(ButtonType::NORMAL);
-    menuItemLayoutProperty->UpdateBorderRadius(BorderRadiusProperty(BUTTON_RADIUS_SIZE));
     auto renderContext = menuItemNode->GetRenderContext();
     CHECK_NULL_RETURN(renderContext, nullptr);
-    renderContext->UpdateBackgroundColor(Color::TRANSPARENT);
-    PaddingProperty padding;
-    padding.SetEdges(CalcLength(BUTTON_PADDING));
-    menuItemLayoutProperty->UpdatePadding(padding);
+    if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
+        auto iconBackgroundWidth = theme->GetIconBackgroundWidth();
+        auto iconBackgroundHeight = theme->GetIconBackgroundHeight();
+        menuItemLayoutProperty->UpdateUserDefinedIdealSize(
+            CalcSize(CalcLength(iconBackgroundWidth), CalcLength(iconBackgroundHeight)));
+        menuItemLayoutProperty->UpdateBorderRadius(BorderRadiusProperty(theme->GetCornerRadius()));
+        renderContext->UpdateBackgroundColor(theme->GetCompBackgroundColor());
+        PaddingProperty padding;
+        padding.SetEdges(CalcLength(MENU_BUTTON_PADDING));
+        menuItemLayoutProperty->UpdatePadding(padding);
+        MarginProperty margin;
+        margin.right = CalcLength(theme->GetCompPadding());
+        menuItemLayoutProperty->UpdateMargin(margin);
+    } else {
+        menuItemLayoutProperty->UpdateUserDefinedIdealSize(
+            CalcSize(CalcLength(BACK_BUTTON_SIZE), CalcLength(BACK_BUTTON_SIZE)));
+        menuItemLayoutProperty->UpdateBorderRadius(BorderRadiusProperty(BUTTON_RADIUS_SIZE));
+        renderContext->UpdateBackgroundColor(Color::TRANSPARENT);
+        PaddingProperty padding;
+        padding.SetEdges(CalcLength(BUTTON_PADDING));
+        menuItemLayoutProperty->UpdatePadding(padding);
+    }
     return menuItemNode;
 }
 
@@ -240,16 +244,24 @@ RefPtr<FrameNode> NavigationTitleUtil::CreateBarItemIconNode(const std::string& 
     auto theme = NavigationGetTheme();
     CHECK_NULL_RETURN(theme, nullptr);
 
+    Color iconColor = theme->GetMenuIconColor();
+    double iconOpacity = theme->GetAlphaDisabled();
+    auto iconWidth = theme->GetMenuIconSize();
+    auto iconHeight = theme->GetMenuIconSize();
+    if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
+        iconColor = theme->GetIconColor();
+        iconOpacity = theme->GetIconDisableAlpha();
+        iconWidth = theme->GetIconWidth();
+        iconHeight = theme->GetIconHeight();
+    }
     if (isButtonEnabled) {
-        info.SetFillColor(theme->GetMenuIconColor());
+        info.SetFillColor(iconColor);
     } else {
-        info.SetFillColor(theme->GetMenuIconColor().BlendOpacity(theme->GetAlphaDisabled()));
+        info.SetFillColor(iconColor.BlendOpacity(iconOpacity));
     }
 
     imageLayoutProperty->UpdateImageSourceInfo(info);
-
-    auto iconSize = theme->GetMenuIconSize();
-    imageLayoutProperty->UpdateUserDefinedIdealSize(CalcSize(CalcLength(iconSize), CalcLength(iconSize)));
+    imageLayoutProperty->UpdateUserDefinedIdealSize(CalcSize(CalcLength(iconWidth), CalcLength(iconHeight)));
     iconNode->MarkModifyDone();
     return iconNode;
 }
@@ -353,5 +365,4 @@ RefPtr<BarItemNode> NavigationTitleUtil::CreateBarItemNode(const bool isButtonEn
     BuildMoreIemNode(barItemNode, isButtonEnabled);
     return barItemNode;
 }
-
 } // namespace OHOS::Ace::NG

@@ -15,11 +15,8 @@
 
 /// <reference path='./import.ts' />
 class ArkSliderComponent extends ArkComponent implements SliderAttribute {
-  constructor(nativePtr: KNode) {
-    super(nativePtr);
-  }
-  onGestureJudgeBegin(callback: (gestureInfo: GestureInfo, event: BaseGestureEvent) => GestureJudgeResult): this {
-    throw new Error('Method not implemented.');
+  constructor(nativePtr: KNode, classType?: ModifierType) {
+    super(nativePtr, classType);
   }
   blockColor(value: ResourceColor): this {
     modifierWithKey(this._modifiersWithKeys, BlockColorModifier.identity, BlockColorModifier, value);
@@ -329,12 +326,10 @@ class TrackThicknessModifier extends ModifierWithKey<Length> {
 }
 
 // @ts-ignore
-globalThis.Slider.attributeModifier = function (modifier) {
-  const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
-  let nativeNode = getUINativeModule().getFrameNodeById(elmtId);
-  let component = this.createOrGetNode(elmtId, () => {
-    return new ArkSliderComponent(nativeNode);
+globalThis.Slider.attributeModifier = function (modifier: ArkComponent): void {
+  attributeModifierFunc.call(this, modifier, (nativePtr: KNode) => {
+    return new ArkSliderComponent(nativePtr);
+  }, (nativePtr: KNode, classType: ModifierType, modifierJS: ModifierJS) => {
+    return new modifierJS.SliderModifier(nativePtr, classType);
   });
-  applyUIAttributes(modifier, nativeNode, component);
-  component.applyModifierPatch();
 };

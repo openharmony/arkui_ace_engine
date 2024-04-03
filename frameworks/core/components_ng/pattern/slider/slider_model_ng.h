@@ -29,7 +29,7 @@ public:
     void SetReverse(bool value) override;
     void SetBlockColor(const Color& value) override;
     void SetTrackBackgroundColor(const Color& value) override {};
-    void SetTrackBackgroundColor(const Gradient& value) override;
+    void SetTrackBackgroundColor(const Gradient& value, bool isResourceColor = false) override;
     void SetSelectColor(const Color& value) override;
     void SetMinLabel(float value) override;
     void SetMaxLabel(float value) override;
@@ -76,7 +76,7 @@ public:
     static void SetBlockBorderColor(FrameNode* frameNode, const Color& value);
     static void SetBlockBorderWidth(FrameNode* frameNode, const Dimension& value);
     static void SetBlockColor(FrameNode* frameNode, const Color& value);
-    static void SetTrackBackgroundColor(FrameNode* frameNode, const Gradient& value);
+    static void SetTrackBackgroundColor(FrameNode* frameNode, const Gradient& value, bool isResourceColor = false);
     static void SetSelectColor(FrameNode* frameNode, const Color& value);
     static void SetShowSteps(FrameNode* frameNode, bool value);
     static void SetSliderInteractionMode(FrameNode* frameNode, SliderInteraction mode);

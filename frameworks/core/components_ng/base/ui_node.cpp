@@ -87,6 +87,26 @@ UINode::~UINode()
     }
 }
 
+void UINode::AttachContext(PipelineContext* context, bool recursive)
+{
+    context_ = context;
+    if (recursive) {
+        for (auto& child : children_) {
+            child->AttachContext(context, recursive);
+        }
+    }
+}
+
+void UINode::DetachContext(bool recursive)
+{
+    context_ = nullptr;
+    if (recursive) {
+        for (auto& child : children_) {
+            child->DetachContext(recursive);
+        }
+    }
+}
+
 void UINode::AddChild(const RefPtr<UINode>& child, int32_t slot, bool silently, bool addDefaultTransition)
 {
     CHECK_NULL_VOID(child);
@@ -312,7 +332,7 @@ void UINode::DoAddChild(
     }
 
     if (!silently && onMainTree_) {
-        child->AttachToMainTree(!addDefaultTransition);
+        child->AttachToMainTree(!addDefaultTransition, context_);
     }
     MarkNeedSyncRenderTree(true);
 }
@@ -369,7 +389,41 @@ void UINode::GetFocusChildren(std::list<RefPtr<FrameNode>>& children) const
     }
 }
 
-void UINode::AttachToMainTree(bool recursive)
+void UINode::GetChildrenFocusHub(std::list<RefPtr<FocusHub>>& focusNodes)
+{
+    for (const auto& uiChild : GetChildren()) {
+        auto frameChild = AceType::DynamicCast<FrameNode>(uiChild.GetRawPtr());
+        if (frameChild && frameChild->GetFocusType() != FocusType::DISABLE) {
+            const auto focusHub = frameChild->GetFocusHub();
+            if (focusHub) {
+                focusNodes.emplace_back(focusHub);
+            }
+        } else {
+            uiChild->GetChildrenFocusHub(focusNodes);
+        }
+    }
+}
+
+void UINode::AttachToMainTree(bool recursive, PipelineContext* context)
+{
+    if (onMainTree_) {
+        return;
+    }
+    context_ = context;
+    onMainTree_ = true;
+    if (nodeStatus_ == NodeStatus::BUILDER_NODE_OFF_MAINTREE) {
+        nodeStatus_ = NodeStatus::BUILDER_NODE_ON_MAINTREE;
+    }
+    isRemoving_ = false;
+    OnAttachToMainTree(recursive);
+    // if recursive = false, recursively call AttachToMainTree(false), until we reach the first FrameNode.
+    bool isRecursive = recursive || AceType::InstanceOf<FrameNode>(this);
+    for (const auto& child : GetChildren()) {
+        child->AttachToMainTree(isRecursive, context);
+    }
+}
+
+[[deprecated]] void UINode::AttachToMainTree(bool recursive)
 {
     if (onMainTree_) {
         return;
@@ -397,6 +451,7 @@ void UINode::DetachFromMainTree(bool recursive)
         nodeStatus_ = NodeStatus::BUILDER_NODE_OFF_MAINTREE;
     }
     isRemoving_ = true;
+    context_ = nullptr;
     OnDetachFromMainTree(recursive);
     // if recursive = false, recursively call DetachFromMainTree(false), until we reach the first FrameNode.
     bool isRecursive = recursive || AceType::InstanceOf<FrameNode>(this);
@@ -625,9 +680,18 @@ void UINode::GenerateOneDepthAllFrame(std::list<RefPtr<FrameNode>>& visibleList)
     }
 }
 
-RefPtr<PipelineContext> UINode::GetContext()
+PipelineContext* UINode::GetContext()
 {
-    return PipelineContext::GetCurrentContextSafely();
+    if (context_) {
+        return context_;
+    }
+    return PipelineContext::GetCurrentContextPtrSafely();
+}
+
+RefPtr<PipelineContext> UINode::GetContextRefPtr()
+{
+    auto* context = GetContext();
+    return Claim(context);
 }
 
 HitTestResult UINode::TouchTest(const PointF& globalPoint, const PointF& parentLocalPoint,
@@ -1101,9 +1165,12 @@ void UINode::CollectRemovedChildren(const std::list<RefPtr<UINode>>& children,
 
 void UINode::CollectRemovedChild(const RefPtr<UINode>& child, std::list<int32_t>& removedElmtId)
 {
+    if (child->GetNodeStatus() != NodeStatus::NORMAL_NODE) {
+        return;
+    }
     removedElmtId.emplace_back(child->GetId());
     // Fetch all the child elementIDs recursively
-    if (child->GetTag() != V2::JS_VIEW_ETS_TAG && child->GetNodeStatus() != NodeStatus::NORMAL_NODE) {
+    if (child->GetTag() != V2::JS_VIEW_ETS_TAG) {
         // add CustomNode but do not recurse into its children
         // add node create by BuilderNode do not recurse into its children
         CollectRemovedChildren(child->GetChildren(), removedElmtId, false);
@@ -1115,6 +1182,32 @@ void UINode::PaintDebugBoundaryTreeAll(bool flag)
     PaintDebugBoundary(flag);
     for (const auto& child : GetChildren()) {
         child->PaintDebugBoundaryTreeAll(flag);
+    }
+}
+
+void UINode::GetPageNodeCountAndDepth(int32_t* count, int32_t* depth)
+{
+    ACE_SCOPED_TRACE("GetPageNodeCountAndDepth");
+    auto children = GetChildren();
+    if (*depth < depth_) {
+        *depth = depth_;
+    }
+    if (InstanceOf<FrameNode>(this)) {
+        (*count)++;
+    }
+
+    for (const auto& child : children) {
+        child->GetPageNodeCountAndDepth(count, depth);
+    }
+}
+
+void UINode::DFSAllChild(const RefPtr<UINode>& root, std::vector<RefPtr<UINode>>& res)
+{
+    if (root->GetChildren().empty()) {
+        res.emplace_back(root);
+    }
+    for (const auto& child : root->GetChildren()) {
+        DFSAllChild(child, res);
     }
 }
 } // namespace OHOS::Ace::NG

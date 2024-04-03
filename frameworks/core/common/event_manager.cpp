@@ -217,6 +217,14 @@ void EventManager::LogTouchTestResultRecognizers(const TouchTestResult& result)
         }
     }
     TAG_LOGI(AceLogTag::ACE_INPUTTRACKING, "%{public}s", hittedRecognizerTypeInfo.c_str());
+    if (hittedRecognizerInfo.empty()) {
+        TAG_LOGI(AceLogTag::ACE_INPUTTRACKING, "Hitted recognizer info is empty.");
+        std::list<std::pair<int32_t, std::string>> dumpList;
+        eventTree_.Dump(dumpList, 0, DUMP_START_NUMBER);
+        for (auto& item : dumpList) {
+            TAG_LOGI(AceLogTag::ACE_INPUTTRACKING, "EventTreeDumpInfo: %{public}s", item.second.c_str());
+        }
+    }
 }
 
 bool EventManager::PostEventTouchTest(
@@ -540,6 +548,10 @@ bool EventManager::DispatchTouchEvent(const TouchEvent& event)
     for (auto entry = iter->second.rbegin(); entry != iter->second.rend(); ++entry) {
         if (!(*entry)->DispatchMultiContainerEvent(point)) {
             dispatchSuccess = false;
+            if ((*entry)->GetAttachedNode().Upgrade()) {
+                TAG_LOGI(AceLogTag::ACE_INPUTTRACKING, "FrameNode %{public}s dispatch multi container event fail.",
+                    (*entry)->GetAttachedNode().Upgrade()->GetTag().c_str());
+            }
             break;
         }
     }
@@ -1439,7 +1451,7 @@ bool TriggerKeyboardShortcut(const KeyEvent& event, const std::vector<NG::Keyboa
             // Handle the keys order problem.
             do {
                 keyCode.emplace_back(event.code);
-                if (!event.IsKey(keyCode)) {
+                if (!event.IsExactlyKey(keyCode)) {
                     keyCode.pop_back();
                     std::next_permutation(keyCode.begin(), keyCode.end());
                     continue;

@@ -55,8 +55,6 @@ void ForEachNode::CreateTempItems()
 // same as foundation/arkui/ace_engine/frameworks/core/components_part_upd/foreach/foreach_element.cpp.
 void ForEachNode::CompareAndUpdateChildren()
 {
-    ACE_SCOPED_TRACE("ForEachNode::CompareAndUpdateChildren");
-
     // result of id gen function of most re-recent render
     // create a map for quicker find/search
     std::unordered_set<std::string> newIdsSet(ids_.begin(), ids_.end());
@@ -113,6 +111,9 @@ void ForEachNode::CompareAndUpdateChildren()
             RemoveChild(iter->second, true);
         }
     }
+
+    ACE_SCOPED_TRACE("ForEachNode::Update Id[%d] preIds[%zu] newIds[%zu] oldIdsSet[%zu] additionalChildComps[%zu]",
+        GetId(), tempIds_.size(), ids_.size(), oldIdsSet.size(), additionalChildComps.size());
 
     if (IsOnMainTree()) {
         for (const auto& newChild : additionalChildComps) {

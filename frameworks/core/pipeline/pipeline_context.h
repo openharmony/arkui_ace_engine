@@ -240,6 +240,8 @@ public:
 
     void FlushPipelineImmediately() override;
 
+    void FlushOnceVsyncTask() override {}
+
     void RegisterEventHandler(const RefPtr<AceEventHandler>& handler)
     {
         eventTrigger_.RegisterEventHandler(handler);

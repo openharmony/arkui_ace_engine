@@ -38,7 +38,8 @@ void SvgStopDeclaration::InitSpecialized()
 void SvgStopDeclaration::InitializeStyle()
 {
     // self attribute must be initialized first. Otherwise, may be initialized as a base attribute.
-    MaybeResetAttribute<SvgStopAttribute>(AttributeTag::SPECIALIZED_ATTR);
+    auto& attribute = MaybeResetAttribute<SvgStopAttribute>(AttributeTag::SPECIALIZED_ATTR);
+    attribute.gradientColor.SetDimension(0.0);
 }
 
 bool SvgStopDeclaration::SetSpecializedAttr(const std::pair<std::string, std::string>& attr)

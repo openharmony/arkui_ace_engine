@@ -75,7 +75,7 @@ DrawableItem LayeredDrawableDescriptor::PreGetDrawableItem(
     std::string itemStr = item;
     std::string idStr = itemStr.substr(itemStr.find(':') + 1);
     DrawableItem resItem;
-    if (IsNumber(idStr)) {
+    if (!IsNumber(idStr)) {
         return resItem;
     }
 

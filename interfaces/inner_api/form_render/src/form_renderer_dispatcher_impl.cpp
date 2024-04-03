@@ -101,6 +101,7 @@ void FormRendererDispatcherImpl::DispatchSurfaceChangeEvent(float width, float h
     }
 
     handler->PostTask([content = uiContent_, width, height]() {
+        HILOG_INFO("Root node update, width: %{public}f, height: %{public}f.", width, height);
         auto uiContent = content.lock();
         if (!uiContent) {
             HILOG_ERROR("uiContent is nullptr");

@@ -16,12 +16,13 @@
 /// <reference path='./import.ts' />
 class StepperItemModifier extends ArkStepperItemComponent implements AttributeModifier<StepperItemAttribute> {
 
-  constructor(nativePtr: KNode) {
-    super(nativePtr);
+  constructor(nativePtr: KNode, classType: ModifierType) {
+    super(nativePtr, classType);
     this._modifiersWithKeys = new ModifierMap();
   }
 
   applyNormalAttribute(instance: StepperItemAttribute): void {
-    applyAndMergeModifier<StepperItemAttribute, ArkStepperItemComponent, ArkComponent>(instance, this);
+    ModifierUtils.applySetOnChange(this);
+    ModifierUtils.applyAndMergeModifier<StepperItemAttribute, ArkStepperItemComponent, ArkComponent>(instance, this);
   }
 }

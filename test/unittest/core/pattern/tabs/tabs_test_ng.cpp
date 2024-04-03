@@ -5515,12 +5515,8 @@ HWTEST_F(TabsTestNg, TabBarOnAttachToMainTree001, TestSize.Level1)
     /**
      * @tc.steps: step2. Invoke OnAttachToMainTree.
      */
-    tabContentFrameNode->useOffscreenProcess_ = false;
     tabContentFrameNode->OnAttachToMainTree(true);
     EXPECT_FALSE(tabContentFrameNode->useOffscreenProcess_);
-    tabContentFrameNode->useOffscreenProcess_ = true;
-    tabContentFrameNode->OnAttachToMainTree(true);
-    EXPECT_TRUE(tabContentFrameNode->useOffscreenProcess_);
 }
 
 /**

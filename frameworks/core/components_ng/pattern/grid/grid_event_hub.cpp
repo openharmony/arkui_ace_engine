@@ -311,9 +311,6 @@ bool GridEventHub::FireOnItemDrop(const ItemDragInfo& dragInfo, int32_t itemInde
         pattern->ClearDragState();
     }
 
-    if (draggingItem_) {
-        draggingItem_->GetLayoutProperty()->UpdateVisibility(VisibleType::VISIBLE);
-    }
     if (onItemDrop_) {
         onItemDrop_(dragInfo, itemIndex, insertIndex, isSuccess);
         host->ChildrenUpdatedFrom(0);

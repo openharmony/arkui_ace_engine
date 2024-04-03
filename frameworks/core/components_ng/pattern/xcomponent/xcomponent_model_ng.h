@@ -40,6 +40,7 @@ public:
     void RegisterOnDestroy(const RefPtr<AceType>& node, DestroyEvent&& onDestroy) override;
     bool IsTexture() override;
     void SetDetachCallback(DetachCallback&& onDetach) override;
+    void EnableAnalyzer(bool enable) override;
 
     static bool IsTexture(FrameNode* frameNode);
     static XComponentType GetType(FrameNode* frameNode);

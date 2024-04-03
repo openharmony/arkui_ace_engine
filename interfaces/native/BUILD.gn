@@ -53,7 +53,10 @@ ohos_shared_library("ace_ndk") {
     "node/event_converter.cpp",
     "node/gesture_impl.cpp",
     "node/native_impl.cpp",
+    "node/native_node_extented.cpp",
     "node/native_node_napi.cpp",
+    "node/node_adapter_impl.cpp",
+    "node/node_extened.cpp",
     "node/node_model.cpp",
     "node/style_modifier.cpp",
   ]

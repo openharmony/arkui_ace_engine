@@ -124,7 +124,7 @@ public:
 
     bool NeedSoftKeyboard() const override;
 
-    void UpdateSlideOffset() override;
+    void UpdateSlideOffset(bool isNeedReset = false) override;
 
     RefPtr<EventHub> CreateEventHub() override
     {
@@ -422,7 +422,7 @@ public:
         selectOverlayDragging_ = selectOverlayDragging;
     }
     void UpdateLocale();
-    void SetDrawRect(int32_t x, int32_t y, int32_t width, int32_t height);
+    void SetDrawRect(int32_t x, int32_t y, int32_t width, int32_t height, bool isNeedReset);
     void SetSelectPopupMenuShowing(bool showing)
     {
         selectPopupMenuShowing_ = showing;
@@ -473,6 +473,7 @@ public:
     RefPtr<WebAccessibilityNode> GetAccessibilityNodeByFocusMove(int64_t accessibilityId, int32_t direction);
     void ExecuteAction(int64_t accessibilityId, AceAction action) const;
     void SetAccessibilityState(bool state);
+    void OnTooltip(const std::string& tooltip);
     bool IsRootNeedExportTexture();
 
 private:
@@ -574,8 +575,8 @@ private:
     void ResetDragAction();
     void UpdateRelativeOffset();
     void InitSlideUpdateListener();
-    void CalculateHorizontalDrawRect();
-    void CalculateVerticalDrawRect();
+    void CalculateHorizontalDrawRect(bool isNeedReset);
+    void CalculateVerticalDrawRect(bool isNeedReset);
 
     NG::DragDropInfo HandleOnDragStart(const RefPtr<OHOS::Ace::DragEvent>& info);
     void HandleOnDragEnter(const RefPtr<OHOS::Ace::DragEvent>& info);
@@ -650,6 +651,7 @@ private:
     bool FilterScrollEventHandleOffset(const float offset);
     bool FilterScrollEventHandlevVlocity(const float velocity);
     void UpdateFlingReachEdgeState(const float value, bool status);
+    void CalculateToolTipMargin(RefPtr<FrameNode>& textNode, MarginProperty& textMargin);
     void RegisterVisibleAreaChangeCallback();
 
     std::optional<std::string> webSrc_;
@@ -683,10 +685,12 @@ private:
     Size drawSize_;
     Size rootLayerChangeSize_;
     Size drawSizeCache_;
+    bool isNeedReDrawRect_ = false;
     bool needUpdateWeb_ = true;
     bool isFocus_ = false;
     VkState isVirtualKeyBoardShow_ { VkState::VK_NONE };
     bool isDragging_ = false;
+    bool isDisableSlide_ = false;
     bool isW3cDragEvent_ = false;
     bool isWindowShow_ = true;
     bool isActive_ = true;
@@ -699,6 +703,10 @@ private:
     bool selectPopupMenuShowing_ = false;
     bool isCurrentStartHandleDragging_ = false;
     bool isPopup_ = false;
+    int32_t tooltipTextId_ = -1;
+    bool tooltipEnabled_ = false;
+    int32_t mouseHoveredX_ = -1;
+    int32_t mouseHoveredY_ = -1;
     int32_t parentNWebId_ = -1;
     bool isInWindowDrag_ = false;
     bool isWaiting_ = false;
@@ -711,14 +719,12 @@ private:
     OffsetF relativeOffsetOfScroll_;
     bool isFirstFlingScrollVelocity_ = true;
     bool isNeedUpdateScrollAxis_ = true;
-    bool isNeedUpdateFilterScrolAxis_ = true;
     bool isScrollStarted_ = false;
     WebLayoutMode layoutMode_ = WebLayoutMode::NONE;
     bool scrollState_ = false;
     Axis axis_ = Axis::FREE;
     Axis syncAxis_ = Axis::NONE;
     Axis expectedScrollAxis_ = Axis::FREE;
-    Axis expectedFilterScrollAxis_ = Axis::FREE;
     int32_t rootLayerWidth_ = 0;
     int32_t rootLayerHeight_ = 0;
     int32_t drawRectWidth_ = 0;
@@ -726,7 +732,6 @@ private:
     std::unordered_map<Axis, WeakPtr<NestableScrollContainer>> parentsMap_;
     RefPtr<WebDelegate> delegate_;
     RefPtr<WebDelegateObserver> observer_;
-    std::set<OHOS::Ace::KeyCode> KeyCodeSet_;
     std::optional<ScriptItems> onDocumentStartScriptItems_;
     std::optional<ScriptItems> onDocumentEndScriptItems_;
     bool isOfflineMode_ = false;

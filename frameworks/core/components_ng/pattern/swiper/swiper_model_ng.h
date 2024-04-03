@@ -16,6 +16,8 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_SWIPER_SWIPER_MODEL_NG_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_SWIPER_SWIPER_MODEL_NG_H
 
+#include <cstdint>
+
 #include "base/geometry/axis.h"
 #include "base/geometry/dimension.h"
 #include "base/memory/referenced.h"
@@ -80,6 +82,7 @@ public:
     static void SetAutoPlayInterval(FrameNode* frameNode, uint32_t interval);
     static void SetDuration(FrameNode* frameNode, uint32_t duration);
     static void SetCachedCount(FrameNode* frameNode, int32_t cachedCount);
+    static int32_t GetCachedCount(FrameNode* frameNode);
     static void SetAutoPlay(FrameNode* frameNode, bool autoPlay);
     static void SetLoop(FrameNode* frameNode, bool loop);
     static void SetDirection(FrameNode* frameNode, Axis axis);
@@ -119,6 +122,8 @@ public:
     static bool GetShowIndicator(FrameNode* frameNode);
     static int GetShowDisplayArrow(FrameNode* frameNode);
     static EdgeEffect GetEffectMode(FrameNode* frameNode);
+
+    static int32_t RealTotalCount(FrameNode* frameNode);
 };
 
 } // namespace OHOS::Ace::NG

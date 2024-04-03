@@ -27,12 +27,19 @@ namespace OHOS::Ace::NG {
 void FocusManager::FocusViewShow(const RefPtr<FocusView>& focusView)
 {
     CHECK_NULL_VOID(focusView);
+    if (!focusView->HasParentFocusHub()) {
+        TAG_LOGD(AceLogTag::ACE_FOCUS, "FocusView: %{public}s/%{public}d has no parent. Do not need show.",
+            focusView->GetFrameName().c_str(), focusView->GetFrameId());
+        return;
+    }
     auto lastFocusView = lastFocusView_.Upgrade();
     if (lastFocusView) {
-        if (lastFocusView == focusView) {
+        if (lastFocusView == focusView || lastFocusView->IsChildFocusViewOf(focusView)) {
             return;
         }
-        lastFocusView->LostViewFocus();
+        if (!focusView->IsChildFocusViewOf(lastFocusView)) {
+            lastFocusView->LostViewFocus();
+        }
     }
 
     auto focusViewWeak = AceType::WeakClaim(AceType::RawPtr(focusView));
@@ -46,9 +53,9 @@ void FocusManager::FocusViewShow(const RefPtr<FocusView>& focusView)
 void FocusManager::FocusViewHide(const RefPtr<FocusView>& focusView)
 {
     CHECK_NULL_VOID(focusView);
+    focusView->LostViewFocus();
     auto lastFocusView = lastFocusView_.Upgrade();
-    if (lastFocusView && lastFocusView == focusView) {
-        lastFocusView->LostViewFocus();
+    if (lastFocusView && (lastFocusView == focusView || lastFocusView->IsChildFocusViewOf(focusView))) {
         lastFocusView_ = nullptr;
     }
 }
@@ -56,13 +63,14 @@ void FocusManager::FocusViewHide(const RefPtr<FocusView>& focusView)
 void FocusManager::FocusViewClose(const RefPtr<FocusView>& focusView)
 {
     CHECK_NULL_VOID(focusView);
-    auto lastFocusView = lastFocusView_.Upgrade();
-    if (lastFocusView && lastFocusView == focusView) {
-        lastFocusView->LostViewFocus();
-    }
-    auto focusViewWeak = AceType::WeakClaim(AceType::RawPtr(focusView));
-    if (std::find(focusViewStack_.begin(), focusViewStack_.end(), focusViewWeak) != focusViewStack_.end()) {
-        focusViewStack_.remove(focusViewWeak);
+    focusView->LostViewFocus();
+    for (auto iter = focusViewStack_.begin(); iter != focusViewStack_.end();) {
+        auto view = (*iter).Upgrade();
+        if (view && (view == focusView || view->IsChildFocusViewOf(focusView))) {
+            iter = focusViewStack_.erase(iter);
+        } else {
+            ++iter;
+        }
     }
     if (focusViewStack_.empty()) {
         lastFocusView_ = nullptr;

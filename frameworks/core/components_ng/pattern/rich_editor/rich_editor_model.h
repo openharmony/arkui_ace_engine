@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -22,17 +22,18 @@
 
 #include "base/image/pixel_map.h"
 #include "base/memory/ace_type.h"
+#include "core/common/ime/text_input_action.h"
+#include "core/common/resource/resource_object.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components/common/properties/text_style.h"
 #include "core/components_ng/base/view_abstract_model.h"
 #include "core/components_ng/pattern/rich_editor/rich_editor_event_hub.h"
 #include "core/components_ng/pattern/rich_editor/selection_info.h"
+#include "core/components_ng/pattern/text_field/text_field_event_hub.h"
 #include "core/components_ng/pattern/text_field/text_field_model.h"
 #include "core/components_ng/pattern/text_field/text_selector.h"
 #include "core/components_ng/property/border_property.h"
 #include "core/components_ng/render/paragraph.h"
-#include "core/common/resource/resource_object.h"
-
 namespace OHOS::Ace {
 struct UserGestureOptions {
     GestureEventFunc onClick;
@@ -150,6 +151,7 @@ struct UpdateSpanStyle {
         updateTextDecoration.reset();
         updateTextDecorationColor.reset();
         updateTextShadows.reset();
+        updateFontFeature.reset();
 
         updateLineHeight.reset();
         updateLetterSpacing.reset();
@@ -174,6 +176,7 @@ struct UpdateSpanStyle {
     std::optional<TextDecoration> updateTextDecoration = std::nullopt;
     std::optional<Color> updateTextDecorationColor = std::nullopt;
     std::optional<std::vector<Shadow>> updateTextShadows = std::nullopt;
+    std::optional<NG::FONT_FEATURES_MAP> updateFontFeature = std::nullopt;
 
     std::optional<CalcDimension> updateLineHeight = std::nullopt;
     std::optional<CalcDimension> updateLetterSpacing = std::nullopt;
@@ -328,8 +331,9 @@ public:
     virtual void CloseSelectionMenu() = 0;
     virtual SelectionInfo GetSelectionSpansInfo() = 0;
     virtual void SetSelection(int32_t selectionStart, int32_t selectionEnd,
-        const std::optional<SelectionOptions>& options = std::nullopt) = 0;
+        const std::optional<SelectionOptions>& options = std::nullopt, bool isForward = false) = 0;
     virtual bool IsEditing() = 0;
+    virtual void StopEditing() = 0;
 };
 
 class ACE_EXPORT RichEditorModel {
@@ -356,6 +360,12 @@ public:
     virtual void SetSelectedBackgroundColor(const Color& selectedColor) = 0;
     virtual void SetCaretColor(const Color& color) = 0;
     virtual void SetOnEditingChange(std::function<void(const bool&)>&& func) = 0;
+    virtual void SetEnterKeyType(TextInputAction value) = 0;
+    virtual void SetOnSubmit(std::function<void(int32_t, NG::TextFieldCommonEvent&)>&& func) = 0;
+    virtual void SetOnWillChange(std::function<bool(const NG::RichEditorChangeValue&)>&& func) = 0;
+    virtual void SetOnDidChange(std::function<void(const std::list<NG::RichEditorAbstractSpanResult>&)>&& func) = 0;
+    virtual void SetOnCut(std::function<void(NG::TextCommonEvent&)>&& func) = 0;
+    virtual void SetOnCopy(std::function<void(NG::TextCommonEvent&)>&& func) = 0;
 private:
     static std::unique_ptr<RichEditorModel> instance_;
     static std::mutex mutex_;

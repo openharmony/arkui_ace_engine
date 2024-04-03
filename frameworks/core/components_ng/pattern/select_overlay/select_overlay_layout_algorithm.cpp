@@ -336,23 +336,11 @@ OffsetF SelectOverlayLayoutAlgorithm::AdjustSelectMenuOffset(
     auto offset = layoutWrapper->GetGeometryNode()->GetFrameOffset();
     auto upHandle = info_->handleReverse ? info_->secondHandle : info_->firstHandle;
     auto downHandle = info_->handleReverse ? info_->firstHandle : info_->secondHandle;
-    // the menu is too far away.
-    auto pipeline = PipelineContext::GetCurrentContext();
-    auto hostFrameNode = info_->callerFrameNode.Upgrade();
-    if (pipeline && hostFrameNode) {
-        auto hostFrameRect = hostFrameNode->GetGeometryNode()->GetFrameRect();
-        auto hostGlobalOffset = hostFrameNode->GetPaintRectOffset() - pipeline->GetRootRect().GetOffset();
-        auto centerX = menuRect.Width() / 2.0f;
-        if (GreatNotEqual(menuRect.GetX() + centerX, hostGlobalOffset.GetX() + hostFrameRect.Width())) {
-            menuOffset.SetX(hostGlobalOffset.GetX() + hostFrameRect.Width() - centerX);
-        } else if (LessNotEqual(menuRect.GetX() + centerX, hostGlobalOffset.GetX())) {
-            menuOffset.SetX(hostGlobalOffset.GetX() - centerX);
-        }
-    }
+    AdjustMenuTooFarAway(menuOffset, menuRect);
     // menu cover up handle
     auto upPaint = upHandle.paintRect - offset;
     auto downPaint = downHandle.paintRect - offset;
-    if (upHandle.isShow && !downHandle.isShow) {
+    if (!info_->isSingleHandle && upHandle.isShow && !downHandle.isShow) {
         auto circleOffset = OffsetF(
             upPaint.GetX() - (spaceBetweenHandle - upPaint.Width()) / 2.0f, upPaint.GetY() - spaceBetweenHandle);
         auto upCircleRect = RectF(circleOffset, SizeF(spaceBetweenHandle, spaceBetweenHandle));
@@ -363,6 +351,7 @@ OffsetF SelectOverlayLayoutAlgorithm::AdjustSelectMenuOffset(
     }
     // avoid soft keyboard and root bottom
     if ((!upHandle.isShow && downHandle.isShow) || info_->menuInfo.menuBuilder) {
+        auto pipeline = PipelineContext::GetCurrentContext();
         CHECK_NULL_RETURN(pipeline, menuOffset);
         auto safeAreaManager = pipeline->GetSafeAreaManager();
         CHECK_NULL_RETURN(safeAreaManager, menuOffset);
@@ -378,6 +367,25 @@ OffsetF SelectOverlayLayoutAlgorithm::AdjustSelectMenuOffset(
         }
     }
     return menuOffset;
+}
+
+void SelectOverlayLayoutAlgorithm::AdjustMenuTooFarAway(OffsetF& menuOffset, const RectF& menuRect)
+{
+    // the menu is too far away.
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto hostFrameNode = info_->callerFrameNode.Upgrade();
+    CHECK_NULL_VOID(hostFrameNode);
+    auto hostFrameRect = hostFrameNode->GetGeometryNode()->GetFrameRect();
+    auto hostGlobalOffset = hostFrameNode->GetPaintRectOffset() - pipeline->GetRootRect().GetOffset();
+    auto centerX = menuRect.Width() / 2.0f;
+    if (GreatNotEqual(menuRect.GetX() + centerX, hostGlobalOffset.GetX() + hostFrameRect.Width())) {
+        menuOffset.SetX(hostGlobalOffset.GetX() + hostFrameRect.Width() - centerX);
+        return;
+    }
+    if (LessNotEqual(menuRect.GetX() + centerX, hostGlobalOffset.GetX())) {
+        menuOffset.SetX(hostGlobalOffset.GetX() - centerX);
+    }
 }
 
 OffsetF SelectOverlayLayoutAlgorithm::ComputeExtensionMenuPosition(LayoutWrapper* layoutWrapper, const OffsetF& offset)

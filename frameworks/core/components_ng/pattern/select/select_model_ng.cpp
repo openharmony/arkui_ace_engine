@@ -41,8 +41,8 @@ void SetSelectDefaultSize(const RefPtr<FrameNode>& select)
     } else {
         auto pattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<SelectPattern>();
         CHECK_NULL_VOID(pattern);
-        layoutProperty->UpdateCalcMinSize(
-            CalcSize(CalcLength(theme->GetSelectMinWidth(pattern->GetControlSize())), std::nullopt));
+        layoutProperty->UpdateCalcMinSize(CalcSize(CalcLength(theme->GetSelectMinWidth(pattern->GetControlSize())),
+            CalcLength(theme->GetSelectDefaultHeight(pattern->GetControlSize()))));
     }
 }
 

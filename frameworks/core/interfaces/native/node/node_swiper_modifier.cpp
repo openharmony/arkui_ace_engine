@@ -16,16 +16,20 @@
 
 #include <vector>
 
+#include "base/error/error_code.h"
 #include "base/geometry/axis.h"
 #include "base/log/log_wrapper.h"
 #include "base/memory/type_info_base.h"
 #include "base/utils/string_utils.h"
+#include "base/utils/utils.h"
 #include "bridge/common/utils/utils.h"
 #include "core/animation/curve.h"
 #include "core/components/swiper/swiper_component.h"
 #include "core/components/swiper/swiper_indicator_theme.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/swiper/swiper_model_ng.h"
+#include "core/interfaces/arkoala/arkoala_api.h"
+#include "core/interfaces/native/node/node_adapter_impl.h"
 #include "core/interfaces/native/node/node_api.h"
 #include "core/pipeline/base/element_register.h"
 
@@ -291,15 +295,20 @@ SwiperDigitalParameters GetDigitIndicatorInfo(const std::vector<std::string>& di
     auto fontColorValue =
         digitIndicatorInfo[DIGIT_INDICATOR_FONT_COLOR] == "-" ? "" : digitIndicatorInfo[DIGIT_INDICATOR_FONT_COLOR];
     auto selectedFontColorValue = digitIndicatorInfo[DIGIT_INDICATOR_SELECTED_FONT_COLOR] == "-"
-                                      ? "" : digitIndicatorInfo[DIGIT_INDICATOR_SELECTED_FONT_COLOR];
+                                      ? ""
+                                      : digitIndicatorInfo[DIGIT_INDICATOR_SELECTED_FONT_COLOR];
     auto digitFontSize = digitIndicatorInfo[DIGIT_INDICATOR_DIGIT_FONT_SIZE] == "-"
-                             ? "" : digitIndicatorInfo[DIGIT_INDICATOR_DIGIT_FONT_SIZE];
+                             ? ""
+                             : digitIndicatorInfo[DIGIT_INDICATOR_DIGIT_FONT_SIZE];
     auto digitFontWeight = digitIndicatorInfo[DIGIT_INDICATOR_DIGIT_FONT_WEIGHT] == "-"
-                               ? "" : digitIndicatorInfo[DIGIT_INDICATOR_DIGIT_FONT_WEIGHT];
+                               ? ""
+                               : digitIndicatorInfo[DIGIT_INDICATOR_DIGIT_FONT_WEIGHT];
     auto selectedDigitFontSize = digitIndicatorInfo[DIGIT_INDICATOR_SELECTED_DIGIT_FONT_SIZE] == "-"
-                                     ? "" : digitIndicatorInfo[DIGIT_INDICATOR_SELECTED_DIGIT_FONT_SIZE];
+                                     ? ""
+                                     : digitIndicatorInfo[DIGIT_INDICATOR_SELECTED_DIGIT_FONT_SIZE];
     auto selectedDigitFontWeight = digitIndicatorInfo[DIGIT_INDICATOR_SELECTED_DIGIT_FONT_WEIGHT] == "-"
-                                       ? "" : digitIndicatorInfo[DIGIT_INDICATOR_SELECTED_DIGIT_FONT_WEIGHT];
+                                       ? ""
+                                       : digitIndicatorInfo[DIGIT_INDICATOR_SELECTED_DIGIT_FONT_WEIGHT];
     auto pipelineContext = PipelineBase::GetCurrentContext();
     CHECK_NULL_RETURN(pipelineContext, SwiperDigitalParameters());
     auto swiperIndicatorTheme = pipelineContext->GetTheme<SwiperIndicatorTheme>();
@@ -783,6 +792,50 @@ ArkUI_Int32 GetSwiperEffectMode(ArkUINodeHandle node)
     CHECK_NULL_RETURN(frameNode, ERROR_INT_CODE);
     return static_cast<ArkUI_Int32>(SwiperModelNG::GetEffectMode(frameNode));
 }
+
+ArkUI_Int32 SetNodeAdapter(ArkUINodeHandle node, ArkUINodeAdapterHandle handle)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, ERROR_CODE_PARAM_INVALID);
+    auto totalChildCount = SwiperModelNG::RealTotalCount(frameNode);
+    if (totalChildCount > 0) {
+        return ERROR_CODE_NATIVE_IMPL_NODE_ADAPTER_CHILD_NODE_EXIST;
+    }
+    NodeAdapter::GetNodeAdapterAPI()->attachHostNode(handle, node);
+    return ERROR_CODE_NO_ERROR;
+}
+
+void ResetNodeAdapter(ArkUINodeHandle node)
+{
+    NodeAdapter::GetNodeAdapterAPI()->detachHostNode(node);
+}
+
+ArkUINodeAdapterHandle GetNodeAdapter(ArkUINodeHandle node)
+{
+    return NodeAdapter::GetNodeAdapterAPI()->getNodeAdapter(node);
+}
+
+void SetCachedCount(ArkUINodeHandle node, ArkUI_Int32 cachedCount)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    SwiperModelNG::SetCachedCount(frameNode, cachedCount);
+}
+
+void ResetCachedCount(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    SwiperModelNG::SetCachedCount(frameNode, 1);
+}
+
+ArkUI_Int32 GetCachedCount(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, 1);
+    return SwiperModelNG::GetCachedCount(frameNode);
+}
+
 } // namespace
 
 namespace NodeModifier {
@@ -798,7 +851,8 @@ const ArkUISwiperModifier* GetSwiperModifier()
         ResetSwiperDuration, SetSwiperEnabled, ResetSwiperEnabled, GetSwiperLoop, GetSwiperAutoPlay, GetSwiperIndex,
         GetSwiperVertical, GetSwiperDuration, GetSwiperDisplayCount, GetSwiperInterval, GetSwiperCurve,
         GetSwiperDisableSwipe, GetSwiperItemSpace, GetSwiperShowIndicator, GetSwiperShowDisplayArrow,
-        GetSwiperEffectMode };
+        GetSwiperEffectMode, SetNodeAdapter, ResetNodeAdapter, GetNodeAdapter, SetCachedCount, ResetCachedCount,
+        GetCachedCount };
     return &modifier;
 }
 

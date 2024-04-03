@@ -28,6 +28,10 @@ void PixelMapImageObject::MakeCanvasImage(
         ctx->FailCallback("pixmap is null when PixelMapImageObject try MakeCanvasImage");
         return;
     }
+    if (!AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
+        ctx->SuccessCallback(CanvasImage::Create(pixmap_));
+        return;
+    }
     if (syncLoad) {
         ctx->SuccessCallback(CanvasImage::Create(pixmap_));
     } else {

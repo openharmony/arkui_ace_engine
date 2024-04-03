@@ -25,6 +25,7 @@
 #include "test/mock/core/common/mock_theme_manager.h"
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
 
+#include "base/error/error_code.h"
 #include "base/geometry/dimension.h"
 #include "base/geometry/ng/offset_t.h"
 #include "base/geometry/ng/rect_t.h"
@@ -499,6 +500,71 @@ HWTEST_F(OverlayTestNg, OnBindContentCover004, TestSize.Level1)
     topModalPattern = topModalNode->GetPattern<ModalPresentationPattern>();
     EXPECT_EQ(topModalPattern->HasOnWillDismiss(), true);
     EXPECT_EQ(topModalPattern->HasTransitionEffect(), true);
+}
+
+/**
+ * @tc.name: OnBindContentCover005
+ * @tc.desc: Test OverlayManager::OnBindContentCover improvement supplement.
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayTestNg, OnBindContentCover005, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create target node.
+     */
+    auto targetNode = CreateTargetNode();
+    auto stageNode = FrameNode::CreateFrameNode(
+        V2::STAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<StagePattern>());
+    auto rootNode = FrameNode::CreateFrameNode(V2::ROOT_ETS_TAG, 1, AceType::MakeRefPtr<RootPattern>());
+    stageNode->MountToParent(rootNode);
+    targetNode->MountToParent(stageNode);
+    rootNode->MarkDirtyNode();
+
+    /**
+     * @tc.steps: step2. create modal page node.
+     */
+    auto builderFunc = []() -> RefPtr<UINode> {
+        auto frameNode =
+            FrameNode::GetOrCreateFrameNode(V2::COLUMN_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+                []() { return AceType::MakeRefPtr<LinearLayoutPattern>(true); });
+        auto childFrameNode = FrameNode::GetOrCreateFrameNode(V2::BUTTON_ETS_TAG,
+            ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<ButtonPattern>(); });
+        frameNode->AddChild(childFrameNode);
+        return frameNode;
+    };
+
+    /**
+     * @tc.steps: step3. create modal node and call DismissContentCover.
+     * @tc.expected: destroy modal page successfully
+     */
+    ModalStyle modalStyle;
+    bool isShow = true;
+    auto overlayManager = AceType::MakeRefPtr<OverlayManager>(rootNode);
+    overlayManager->OnBindContentCover(isShow, nullptr, std::move(builderFunc), modalStyle, nullptr, nullptr, nullptr,
+        nullptr, ContentCoverParam(), targetNode);
+    EXPECT_FALSE(overlayManager->modalStack_.empty());
+    auto topModalNode = overlayManager->modalStack_.top().Upgrade();
+    ASSERT_NE(topModalNode, nullptr);
+    auto topModalPattern = topModalNode->GetPattern<ModalPresentationPattern>();
+    ASSERT_NE(topModalPattern, nullptr);
+    auto targetId = topModalPattern->GetTargetId();
+    overlayManager->SetDismissTargetId(targetId);
+    overlayManager->DismissContentCover();
+    EXPECT_TRUE(overlayManager->modalStack_.empty());
+
+    /**
+     * @tc.steps: step4. call RemoveModal.
+     * @tc.expected: modal node is nullptr
+     */
+    overlayManager->OnBindContentCover(isShow, nullptr, std::move(builderFunc), modalStyle, nullptr, nullptr, nullptr,
+        nullptr, ContentCoverParam(), targetNode);
+    topModalNode = overlayManager->modalStack_.top().Upgrade();
+    topModalPattern = topModalNode->GetPattern<ModalPresentationPattern>();
+    topModalPattern->ModalInteractiveDismiss();
+    targetId = topModalPattern->GetTargetId();
+    EXPECT_NE(overlayManager->GetModal(targetId), nullptr);
+    overlayManager->RemoveModal(targetId);
+    EXPECT_EQ(overlayManager->GetModal(targetId), nullptr);
 }
 
 /**
@@ -1751,6 +1817,145 @@ HWTEST_F(OverlayTestNg, DialogTest006, TestSize.Level1)
 }
 
 /**
+ * @tc.name: DialogTest007
+ * @tc.desc: Test OverlayManager::OpenCustomDialog->CloseCustomDialog.
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayTestNg, DialogTest007, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create root node and overlayManager.
+     */
+    auto rootNode = FrameNode::CreateFrameNode(V2::ROOT_ETS_TAG, 1, AceType::MakeRefPtr<RootPattern>());
+    auto overlayManager = AceType::MakeRefPtr<OverlayManager>(rootNode);
+
+    /**
+     * @tc.steps: step2. create dialog content node.
+     */
+    auto contentNode = FrameNode::CreateFrameNode(
+        V2::COLUMN_ETS_TAG, 2, AceType::MakeRefPtr<LinearLayoutPattern>(true));
+    DialogProperties dialogParam;
+    dialogParam.contentNode = contentNode;
+    auto contentNodeNew = FrameNode::CreateFrameNode(
+        V2::COLUMN_ETS_TAG, 3, AceType::MakeRefPtr<LinearLayoutPattern>(true));
+    DialogProperties dialogParamNew;
+    dialogParamNew.contentNode = contentNodeNew;
+
+    /**
+     * @tc.steps: step3. call OpenCustomDialog for contentNode.
+     * @tc.expected: OpenCustomDialog succeed and dialog of contentNode is in the dialogMap_.
+     */
+    auto openCallbackFst = [](int32_t errorCode) {
+        EXPECT_EQ(errorCode, ERROR_CODE_NO_ERROR);
+    };
+    overlayManager->OpenCustomDialog(dialogParam, openCallbackFst);
+    EXPECT_EQ(overlayManager->dialogMap_.size(), 1);
+    auto dialogNode = overlayManager->GetDialogNodeWithExistContent(contentNode);
+    EXPECT_NE(dialogNode, nullptr);
+
+    /**
+     * @tc.steps: step4. call OpenCustomDialog for contentNode again.
+     * @tc.expected: cannot open again and dialogMap_ is still 1.
+     */
+    auto openCallbackSnd = [](int32_t errorCode) {
+        EXPECT_EQ(errorCode, ERROR_CODE_DIALOG_CONTENT_ALREADY_EXIST);
+    };
+    overlayManager->OpenCustomDialog(dialogParam, openCallbackSnd);
+    EXPECT_EQ(overlayManager->dialogMap_.size(), 1);
+
+    /**
+     * @tc.steps: step5. call CloseCustomDialog for contentNodeNew.
+     * @tc.expected: contentNodeNew has not been open before, so CloseCustomDialog failed.
+     */
+    auto closeCallbackFst = [](int32_t errorCode) {
+        EXPECT_EQ(errorCode, ERROR_CODE_DIALOG_CONTENT_NOT_FOUND);
+    };
+    overlayManager->CloseCustomDialog(contentNodeNew, closeCallbackFst);
+    EXPECT_EQ(overlayManager->dialogMap_.size(), 1);
+
+    /**
+     * @tc.steps: step6. call CloseCustomDialog for contentNode.
+     * @tc.expected: CloseCustomDialog succeed.
+     */
+    auto closeCallbackSnd = [](int32_t errorCode) {
+        EXPECT_EQ(errorCode, ERROR_CODE_NO_ERROR);
+    };
+    overlayManager->CloseCustomDialog(contentNode, closeCallbackSnd);
+    EXPECT_TRUE(overlayManager->dialogMap_.empty());
+}
+
+/**
+ * @tc.name: DialogTest008
+ * @tc.desc: Test OverlayManager::OpenCustomDialog->UpdateCustomDialog.
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayTestNg, DialogTest008, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create root node and overlayManager.
+     */
+    auto rootNode = FrameNode::CreateFrameNode(V2::ROOT_ETS_TAG, 1, AceType::MakeRefPtr<RootPattern>());
+    auto overlayManager = AceType::MakeRefPtr<OverlayManager>(rootNode);
+
+    /**
+     * @tc.steps: step2. create dialog content node.
+     */
+    auto contentNode = FrameNode::CreateFrameNode(
+        V2::COLUMN_ETS_TAG, 2, AceType::MakeRefPtr<LinearLayoutPattern>(true));
+    DialogProperties dialogParam;
+    dialogParam.contentNode = contentNode;
+    dialogParam.alignment = DialogAlignment::TOP_START;
+    dialogParam.offset = DimensionOffset(Dimension(0.0), Dimension(0.0));
+    dialogParam.autoCancel = false;
+    auto contentNodeNew = FrameNode::CreateFrameNode(
+        V2::COLUMN_ETS_TAG, 3, AceType::MakeRefPtr<LinearLayoutPattern>(true));
+    DialogProperties dialogParamNew;
+    dialogParamNew.contentNode = contentNodeNew;
+    dialogParamNew.alignment = DialogAlignment::BOTTOM_END;
+    dialogParamNew.offset = DimensionOffset(Dimension(10.0), Dimension(10.0));
+    dialogParamNew.autoCancel = true;
+
+    /**
+     * @tc.steps: step3. call OpenCustomDialog and then check dialogLayoutProp.
+     * @tc.expected: OpenCustomDialog succeed and dialogLayoutProp is correct.
+     */
+    auto openCallback = [](int32_t errorCode) {};
+    overlayManager->OpenCustomDialog(dialogParam, openCallback);
+    EXPECT_EQ(overlayManager->dialogMap_.size(), 1);
+    auto dialogNode = overlayManager->GetDialogNodeWithExistContent(contentNode);
+    EXPECT_NE(dialogNode, nullptr);
+    auto dialogLayoutProp = AceType::DynamicCast<DialogLayoutProperty>(dialogNode->GetLayoutProperty());
+    EXPECT_NE(dialogLayoutProp, nullptr);
+    EXPECT_EQ(dialogLayoutProp->propDialogAlignment_, DialogAlignment::TOP_START);
+    EXPECT_EQ(dialogLayoutProp->propDialogOffset_, DimensionOffset(Dimension(0.0), Dimension(0.0)));
+    EXPECT_EQ(dialogLayoutProp->propAutoCancel_, false);
+
+    /**
+     * @tc.steps: step4. call UpdateCustomDialog for contentNodeNew.
+     * @tc.expected: UpdateCustomDialog failed because contentNodeNew has not been opened.
+     */
+    auto updateCallbackFst = [](int32_t errorCode) {
+        EXPECT_EQ(errorCode, ERROR_CODE_DIALOG_CONTENT_NOT_FOUND);
+    };
+    overlayManager->UpdateCustomDialog(contentNodeNew, dialogParamNew, updateCallbackFst);
+    EXPECT_EQ(dialogLayoutProp->propDialogAlignment_, DialogAlignment::TOP_START);
+    EXPECT_EQ(dialogLayoutProp->propDialogOffset_, DimensionOffset(Dimension(0.0), Dimension(0.0)));
+    EXPECT_EQ(dialogLayoutProp->propAutoCancel_, false);
+
+    /**
+     * @tc.steps: step5. call UpdateCustomDialog for contentNode.
+     * @tc.expected: UpdateCustomDialog succeed and dialogLayoutProp is updated.
+     */
+    auto updateCallbackSnd = [](int32_t errorCode) {
+        EXPECT_EQ(errorCode, ERROR_CODE_NO_ERROR);
+    };
+    overlayManager->UpdateCustomDialog(contentNode, dialogParamNew, updateCallbackSnd);
+    EXPECT_EQ(dialogLayoutProp->propDialogAlignment_, DialogAlignment::BOTTOM_END);
+    EXPECT_EQ(dialogLayoutProp->propDialogOffset_, DimensionOffset(Dimension(10.0), Dimension(10.0)));
+    EXPECT_EQ(dialogLayoutProp->propAutoCancel_, true);
+}
+
+/**
  * @tc.name: CaculateMenuSize
  * @tc.desc: Test OverlayManager::CaculateMenuSize.
  * @tc.type: FUNC
@@ -1879,5 +2084,385 @@ HWTEST_F(OverlayTestNg, OnBindKeyboard001, TestSize.Level1)
      */
     overlay->CloseKeyboard(textFieldNode->GetId());
     EXPECT_EQ(overlay->customKeyboardMap_.size(), 0);
+}
+
+/**
+ * @tc.name: CreateOverlayNode001
+ * @tc.desc: Test OverlayManager::CreateOverlayNode.
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayTestNg, CreateOverlayNode001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create rootNode, overlayManager and stageNode.
+     */
+    auto rootNode = FrameNode::CreateFrameNode(V2::ROOT_ETS_TAG, 1, AceType::MakeRefPtr<RootPattern>());
+    ASSERT_NE(rootNode, nullptr);
+    auto pipelineContext = MockPipelineContext::GetCurrentContext();
+    ASSERT_NE(pipelineContext, nullptr);
+    auto overlayManager = AceType::MakeRefPtr<OverlayManager>(rootNode);
+    ASSERT_NE(overlayManager, nullptr);
+    auto stageNode = FrameNode::CreateFrameNode(
+        V2::STAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<StagePattern>());
+    ASSERT_NE(stageNode, nullptr);
+    pipelineContext->stageManager_->stageNode_ = nullptr;
+
+    /**
+     * @tc.steps: step2. create overlayManager and call AddFrameNodeToOverlay.
+     * @tc.expected: overlayNode_ is nullptr
+     */
+    overlayManager->CreateOverlayNode();
+    EXPECT_TRUE(overlayManager->overlayNode_ == nullptr);
+
+    /**
+     * @tc.steps: step3. set stageManager and call CreateOverlayNode.
+     * @tc.expected: overlayManager->overlayNode_ is not nullptr and the size of root's children equals childSize + 1.
+     */
+    pipelineContext->stageManager_->stageNode_ = stageNode;
+    stageNode->MountToParent(rootNode);
+    int32_t childrenSize = rootNode->GetChildren().size();
+    overlayManager->CreateOverlayNode();
+    EXPECT_FALSE(overlayManager->overlayNode_ == nullptr);
+    EXPECT_EQ(rootNode->GetChildren().size(), childrenSize + 1);
+
+    /**
+     * @tc.steps: step4.call CreateOverlayNode again.
+     * @tc.expected: the size of root's children also equals childSize + 1.
+     */
+    overlayManager->CreateOverlayNode();
+    EXPECT_EQ(rootNode->GetChildren().size(), childrenSize + 1);
+}
+
+/**
+ * @tc.name: AddFrameNodeToOverlay001
+ * @tc.desc: Test OverlayManager::AddFrameNodeToOverlay when index is null.
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayTestNg, AddFrameNodeToOverlay001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create frameNode, rootNode, overlayManager and stageNode.
+     */
+    auto frameNode = CreateTargetNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto rootNode = FrameNode::CreateFrameNode(V2::ROOT_ETS_TAG, 1, AceType::MakeRefPtr<RootPattern>());
+    ASSERT_NE(rootNode, nullptr);
+    auto pipelineContext = MockPipelineContext::GetCurrentContext();
+    ASSERT_NE(pipelineContext, nullptr);
+    auto overlayManager = AceType::MakeRefPtr<OverlayManager>(rootNode);
+    ASSERT_NE(overlayManager, nullptr);
+    auto stageNode = FrameNode::CreateFrameNode(
+        V2::STAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<StagePattern>());
+    ASSERT_NE(stageNode, nullptr);
+    pipelineContext->stageManager_->stageNode_ = stageNode;
+    stageNode->MountToParent(rootNode);
+
+    /**
+     * @tc.steps: step2. call AddFrameNodeToOverlay to add the frameNode to the overlayNode_.
+     * @tc.expected: overlayNode_ is not nullptr, both the size of overlayNode_'s children and
+     * the size of frameNodeMapOnOverlay_ equal 1.
+     */
+    overlayManager->AddFrameNodeToOverlay(frameNode);
+    EXPECT_FALSE(overlayManager->overlayNode_ == nullptr);
+    EXPECT_EQ(overlayManager->overlayNode_->GetChildren().size(), 1);
+    EXPECT_EQ(overlayManager->frameNodeMapOnOverlay_.size(), 1);
+
+    /**
+     * @tc.steps: step3. call AddFrameNodeToOverlay to add the frameNode to the overlayNode_ again.
+     * @tc.expected: both the size of overlayNode_'s children and the size of frameNodeMapOnOverlay_ equal 2.
+     */
+    overlayManager->AddFrameNodeToOverlay(frameNode);
+    EXPECT_EQ(overlayManager->overlayNode_->GetChildren().size(), 1);
+    EXPECT_EQ(overlayManager->frameNodeMapOnOverlay_.size(), 1);
+
+    /**
+     * @tc.steps: step4. create frameNode2 and call AddFrameNodeToOverlay to add frameNode2.
+     * @tc.expected: both the size of overlayNode_'s children and the size of frameNodeMapOnOverlay_ also equal 2.
+     */
+    auto frameNode2 = CreateTargetNode();
+    ASSERT_NE(frameNode2, nullptr);
+    overlayManager->AddFrameNodeToOverlay(frameNode2);
+    EXPECT_EQ(overlayManager->overlayNode_->GetChildren().size(), 2);
+    EXPECT_EQ(overlayManager->frameNodeMapOnOverlay_.size(), 2);
+}
+
+/**
+ * @tc.name: AddFrameNodeToOverlay002
+ * @tc.desc: Test OverlayManager::AddFrameNodeToOverlay when index is not null.
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayTestNg, AddFrameNodeToOverlay002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create frameNode, rootNode, overlayManager, stageNode and index.
+     */
+    auto frameNode = CreateTargetNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto rootNode = FrameNode::CreateFrameNode(V2::ROOT_ETS_TAG, 1, AceType::MakeRefPtr<RootPattern>());
+    ASSERT_NE(rootNode, nullptr);
+    auto pipelineContext = MockPipelineContext::GetCurrentContext();
+    ASSERT_NE(pipelineContext, nullptr);
+    auto overlayManager = AceType::MakeRefPtr<OverlayManager>(rootNode);
+    ASSERT_NE(overlayManager, nullptr);
+    auto stageNode = FrameNode::CreateFrameNode(
+        V2::STAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<StagePattern>());
+    ASSERT_NE(stageNode, nullptr);
+    pipelineContext->stageManager_->stageNode_ = stageNode;
+    stageNode->MountToParent(rootNode);
+    int32_t index = 0;
+
+    /**
+     * @tc.steps: step2. call AddFrameNodeToOverlay to add the frameNode to the overlayNode_.
+     * @tc.expected: overlayNode_ is not nullptr.
+     */
+    overlayManager->AddFrameNodeToOverlay(frameNode, index);
+    EXPECT_FALSE(overlayManager->overlayNode_ == nullptr);
+
+    /**
+     * @tc.steps: step3. set the index to -1, create frameNode2 and call AddFrameNodeToOverlay again.
+     * @tc.expected: the frameNode2 is added to the end of the overlayNode_.
+     */
+    index = -1;
+    auto frameNode2 = CreateTargetNode();
+    ASSERT_NE(frameNode2, nullptr);
+    overlayManager->AddFrameNodeToOverlay(frameNode2, index);
+    EXPECT_EQ(overlayManager->overlayNode_->GetLastChild()->GetId(), frameNode2->GetId());
+
+    /**
+     * @tc.steps: step4. create frameNode3 and call AddFrameNodeToOverlay without index.
+     * @tc.expected: the frameNode is added to the end of the overlayNode_.
+     */
+    auto frameNode3 = CreateTargetNode();
+    ASSERT_NE(frameNode3, nullptr);
+    overlayManager->AddFrameNodeToOverlay(frameNode3);
+    EXPECT_EQ(overlayManager->overlayNode_->GetLastChild()->GetId(), frameNode3->GetId());
+
+    /**
+     * @tc.steps: step5. set index = 2, create frameNode4 and call AddFrameNodeToOverlay to add frameNode4.
+     * @tc.expected: the index of frameNode4 of overlayNode_'s children equals 1.
+     */
+    index = 2;
+    auto frameNode4 = CreateTargetNode();
+    ASSERT_NE(frameNode4, nullptr);
+    overlayManager->AddFrameNodeToOverlay(frameNode4, index);
+    EXPECT_EQ(overlayManager->overlayNode_->GetChildIndexById(frameNode4->GetId()), 1);
+
+    /**
+     * @tc.steps: step6. set index = 2, create frameNode4 and call AddFrameNodeToOverlay to add frameNode4.
+     * @tc.expected: the index of frameNode4 of overlayNode_'s children equals 1.
+     */
+    index = 1;
+    auto frameNode5 = CreateTargetNode();
+    ASSERT_NE(frameNode5, nullptr);
+    overlayManager->AddFrameNodeToOverlay(frameNode5, index);
+    EXPECT_EQ(overlayManager->overlayNode_->GetChildIndexById(frameNode5->GetId()), 1);
+    EXPECT_EQ(overlayManager->overlayNode_->GetChildIndexById(frameNode4->GetId()), 2);
+
+    /**
+     * @tc.steps: step7. call AddFrameNodeToOverlay to add frameNode again when index = 1.
+     * @tc.expected: the index of frameNode5 of overlayNode_'s children equals 0,
+     * and the index of frameNode5 of overlayNode_'s children equals 1.
+     */
+    overlayManager->AddFrameNodeToOverlay(frameNode, index);
+    EXPECT_EQ(overlayManager->overlayNode_->GetChildIndexById(frameNode5->GetId()), 0);
+    EXPECT_EQ(overlayManager->overlayNode_->GetChildIndexById(frameNode->GetId()), 1);
+}
+
+/**
+ * @tc.name: RemoveFrameNodeOnOverlay001
+ * @tc.desc: Test OverlayManager::RemoveFrameNodeOnOverlay.
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayTestNg, RemoveFrameNodeOnOverlay001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create frameNodes, rootNode, overlayManager and stageNode.
+     */
+    auto frameNode1 = CreateTargetNode();
+    ASSERT_NE(frameNode1, nullptr);
+    auto frameNode2 = CreateTargetNode();
+    ASSERT_NE(frameNode2, nullptr);
+    auto rootNode = FrameNode::CreateFrameNode(V2::ROOT_ETS_TAG, 1, AceType::MakeRefPtr<RootPattern>());
+    ASSERT_NE(rootNode, nullptr);
+    auto pipelineContext = MockPipelineContext::GetCurrentContext();
+    ASSERT_NE(pipelineContext, nullptr);
+    auto overlayManager = AceType::MakeRefPtr<OverlayManager>(rootNode);
+    ASSERT_NE(overlayManager, nullptr);
+    auto stageNode = FrameNode::CreateFrameNode(
+        V2::STAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<StagePattern>());
+    ASSERT_NE(stageNode, nullptr);
+    pipelineContext->stageManager_->stageNode_ = stageNode;
+    stageNode->MountToParent(rootNode);
+
+    /**
+     * @tc.steps: step2. add frameNode1 and frameNode2 to the overlayNode_,
+     * then call RemoveFrameNodeOnOverlay to remove frameNode1.
+     * @tc.expected: both the size of overlayNode_'s children and frameNodeMapOnOverlay_ equal 1.
+     */
+    overlayManager->AddFrameNodeToOverlay(frameNode1);
+    overlayManager->AddFrameNodeToOverlay(frameNode2);
+    overlayManager->RemoveFrameNodeOnOverlay(frameNode1);
+    EXPECT_EQ(overlayManager->overlayNode_->GetChildren().size(), 1);
+    EXPECT_EQ(overlayManager->frameNodeMapOnOverlay_.size(), 1);
+
+    /**
+     * @tc.steps: step3. call RemoveFrameNodeOnOverlay to remove frameNode1 again.
+     * @tc.expected: both the size of overlayNode_'s children and frameNodeMapOnOverlay_ equal 1.
+     */
+    overlayManager->RemoveFrameNodeOnOverlay(frameNode1);
+    EXPECT_EQ(overlayManager->overlayNode_->GetChildren().size(), 1);
+    EXPECT_EQ(overlayManager->frameNodeMapOnOverlay_.size(), 1);
+
+    /**
+     * @tc.steps: step4. call RemoveFrameNodeOnOverlay to remove frameNode2.
+     * @tc.expected: overlayNode_ is nullptr and the size of frameNodeMapOnOverlay_ equal 0.
+     */
+    overlayManager->RemoveFrameNodeOnOverlay(frameNode2);
+    EXPECT_TRUE(overlayManager->overlayNode_ == nullptr);
+    EXPECT_EQ(overlayManager->frameNodeMapOnOverlay_.size(), 0);
+    ;
+}
+
+/**
+ * @tc.name: HideNodeOnOverlay001
+ * @tc.desc: Test OverlayManager::HideNodeOnOverlay.
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayTestNg, HideNodeOnOverlay001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create frameNode, rootNode, overlayManager and stageNode.
+     */
+    auto frameNode = CreateTargetNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto stageNode = FrameNode::CreateFrameNode(
+        V2::STAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<StagePattern>());
+    ASSERT_NE(stageNode, nullptr);
+    auto rootNode = FrameNode::CreateFrameNode(V2::ROOT_ETS_TAG, 1, AceType::MakeRefPtr<RootPattern>());
+    ASSERT_NE(rootNode, nullptr);
+    auto pipelineContext = MockPipelineContext::GetCurrentContext();
+    ASSERT_NE(pipelineContext, nullptr);
+    auto overlayManager = AceType::MakeRefPtr<OverlayManager>(rootNode);
+    ASSERT_NE(overlayManager, nullptr);
+    pipelineContext->stageManager_->stageNode_ = stageNode;
+    stageNode->MountToParent(rootNode);
+
+    /**
+     * @tc.steps: step2. add frameNode to the overlayNode_, then call HideNodeOnOverlay.
+     * @tc.expected: the frameNode is set to VisibleType::GONE.
+     */
+    overlayManager->AddFrameNodeToOverlay(frameNode);
+    overlayManager->HideNodeOnOverlay(frameNode);
+    EXPECT_EQ(frameNode->layoutProperty_->GetVisibility(), VisibleType::GONE);
+}
+
+/**
+ * @tc.name: ShowNodeOnOverlay001
+ * @tc.desc: Test OverlayManager::ShowNodeOnOverlay.
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayTestNg, ShowNodeOnOverlay001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create frameNode, rootNode, overlayManager and stageNode.
+     */
+    auto frameNode = CreateTargetNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto stageNode = FrameNode::CreateFrameNode(
+        V2::STAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<StagePattern>());
+    ASSERT_NE(stageNode, nullptr);
+    auto rootNode = FrameNode::CreateFrameNode(V2::ROOT_ETS_TAG, 1, AceType::MakeRefPtr<RootPattern>());
+    ASSERT_NE(rootNode, nullptr);
+    auto pipelineContext = MockPipelineContext::GetCurrentContext();
+    ASSERT_NE(pipelineContext, nullptr);
+    auto overlayManager = AceType::MakeRefPtr<OverlayManager>(rootNode);
+    ASSERT_NE(overlayManager, nullptr);
+    pipelineContext->stageManager_->stageNode_ = stageNode;
+    stageNode->MountToParent(rootNode);
+
+    /**
+     * @tc.steps: step2. add frameNode to the overlayNode_ and hide it, then call ShowNodeOnOverlay.
+     * @tc.expected: the frameNode is set to VisibleType::VISIBLE.
+     */
+    overlayManager->AddFrameNodeToOverlay(frameNode);
+    overlayManager->HideNodeOnOverlay(frameNode);
+    overlayManager->ShowNodeOnOverlay(frameNode);
+    EXPECT_EQ(frameNode->layoutProperty_->GetVisibility(), VisibleType::VISIBLE);
+}
+
+/**
+ * @tc.name: HideAllNodesOnOverlay001
+ * @tc.desc: Test OverlayManager::HideAllNodesOnOverlay.
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayTestNg, HideAllNodesOnOverlay001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create frameNodes, rootNode, overlayManager and stageNode.
+     */
+    auto frameNode1 = CreateTargetNode();
+    ASSERT_NE(frameNode1, nullptr);
+    auto frameNode2 = CreateTargetNode();
+    ASSERT_NE(frameNode2, nullptr);
+    auto rootNode = FrameNode::CreateFrameNode(V2::ROOT_ETS_TAG, 1, AceType::MakeRefPtr<RootPattern>());
+    ASSERT_NE(rootNode, nullptr);
+    auto pipelineContext = MockPipelineContext::GetCurrentContext();
+    ASSERT_NE(pipelineContext, nullptr);
+    auto overlayManager = AceType::MakeRefPtr<OverlayManager>(rootNode);
+    ASSERT_NE(overlayManager, nullptr);
+    auto stageNode = FrameNode::CreateFrameNode(
+        V2::STAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<StagePattern>());
+    ASSERT_NE(stageNode, nullptr);
+    pipelineContext->stageManager_->stageNode_ = stageNode;
+    stageNode->MountToParent(rootNode);
+
+    /**
+     * @tc.steps: step2. add frameNode1 and frameNode2 to the overlayNode_, then call HideAllNodesOnOverlay.
+     * @tc.expected: both frameNode1 and frameNode2 are set to VisibleType::GONE.
+     */
+    overlayManager->AddFrameNodeToOverlay(frameNode1);
+    overlayManager->AddFrameNodeToOverlay(frameNode2);
+    overlayManager->HideAllNodesOnOverlay();
+    EXPECT_EQ(frameNode1->layoutProperty_->GetVisibility(), VisibleType::GONE);
+    EXPECT_EQ(frameNode2->layoutProperty_->GetVisibility(), VisibleType::GONE);
+}
+
+/**
+ * @tc.name: ShowAllNodesOnOverlay001
+ * @tc.desc: Test OverlayManager::ShowAllNodesOnOverlay.
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayTestNg, ShowAllNodesOnOverlay001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create frameNodes, rootNode, overlayManager and stageNode.
+     */
+    auto frameNode1 = CreateTargetNode();
+    ASSERT_NE(frameNode1, nullptr);
+    auto frameNode2 = CreateTargetNode();
+    ASSERT_NE(frameNode2, nullptr);
+    auto rootNode = FrameNode::CreateFrameNode(V2::ROOT_ETS_TAG, 1, AceType::MakeRefPtr<RootPattern>());
+    ASSERT_NE(rootNode, nullptr);
+    auto pipelineContext = MockPipelineContext::GetCurrentContext();
+    ASSERT_NE(pipelineContext, nullptr);
+    auto overlayManager = AceType::MakeRefPtr<OverlayManager>(rootNode);
+    ASSERT_NE(overlayManager, nullptr);
+    auto stageNode = FrameNode::CreateFrameNode(
+        V2::STAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<StagePattern>());
+    ASSERT_NE(stageNode, nullptr);
+    pipelineContext->stageManager_->stageNode_ = stageNode;
+    stageNode->MountToParent(rootNode);
+
+    /**
+     * @tc.steps: step2. add frameNode1 and frameNode2 to the overlayNode_, and call hide them,
+     * then call ShowAllNodesOnOverlay.
+     * @tc.expected: both frameNode1 and frameNode2 are set to VisibleType::VISIBLE.
+     */
+    overlayManager->AddFrameNodeToOverlay(frameNode1);
+    overlayManager->AddFrameNodeToOverlay(frameNode2);
+    overlayManager->HideAllNodesOnOverlay();
+    overlayManager->ShowAllNodesOnOverlay();
+    EXPECT_EQ(frameNode1->layoutProperty_->GetVisibility(), VisibleType::VISIBLE);
+    EXPECT_EQ(frameNode2->layoutProperty_->GetVisibility(), VisibleType::VISIBLE);
 }
 } // namespace OHOS::Ace::NG

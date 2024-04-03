@@ -73,6 +73,7 @@ public:
 
     virtual void SetHostNode(const WeakPtr<FrameNode>& host);
     RefPtr<FrameNode> GetHost() const;
+    FrameNode* GetUnsafeHost() const;
 
     virtual void SetNeedDebugBoundary(bool flag) {}
     virtual bool NeedDebugBoundary() const
@@ -134,18 +135,27 @@ public:
 
     virtual void OnModifyDone() {}
 
-    enum class ContextType : int8_t { CANVAS, ROOT, SURFACE, EFFECT, EXTERNAL, INCREMENTAL_CANVAS, HARDWARE_SURFACE };
+    enum class ContextType : int8_t {
+        CANVAS,
+        ROOT,
+        SURFACE,
+        EFFECT,
+        EXTERNAL,
+        INCREMENTAL_CANVAS,
+        HARDWARE_SURFACE,
+#ifdef RENDER_EXTRACT_SUPPORTED
+        HARDWARE_TEXTURE,
+#endif
+    };
+
     enum class PatternType : int8_t { DEFAULT, VIDEO };
     struct ContextParam {
         ContextType type;
         std::optional<std::string> surfaceName;
         PatternType patternType = PatternType::DEFAULT;
     };
-#if defined(VIDEO_TEXTURE_SUPPORTED) && defined(XCOMPONENT_SUPPORTED)
-    virtual void InitContext(bool isRoot, const std::optional<ContextParam>& param, bool isUseExtSurface = false) {}
-#else
+
     virtual void InitContext(bool isRoot, const std::optional<ContextParam>& param) {}
-#endif
 
     virtual void SetSurfaceChangedCallBack(
         const std::function<void(float, float, float, float)>& callback) {}
@@ -289,6 +299,9 @@ public:
         return {};
     }
 
+    virtual void SavePaintRect(bool isRound = true, uint8_t flag = 0) {}
+    virtual void SyncPartialRsProperties() {}
+
     virtual std::pair<RectF, bool> GetPaintRectWithTranslate()
     {
         return {};
@@ -413,12 +426,14 @@ public:
     virtual void OnRenderGroupUpdate(bool isRenderGroup) {}
     virtual void UpdateRenderGroup(bool isRenderGroup, bool isForced, bool includeProperty) {}
     virtual void OnSuggestedRenderGroupUpdate(bool isRenderGroup) {}
+    virtual void OnDynamicDimDegreeUpdate(const float degree) {}
     virtual void OnRenderFitUpdate(RenderFit renderFit) {}
     virtual void OnNodeNameUpdate(const std::string& id) {}
     virtual void OnParticleOptionArrayUpdate(const std::list<ParticleOption>& optionArray) {}
     ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(SphericalEffect, double);
     ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(PixelStretchEffect, PixStretchEffectOption);
     ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(LightUpEffect, double);
+    ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(DynamicDimDegree, float);
     ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(ParticleOptionArray, std::list<ParticleOption>);
     ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(ClickEffectLevel, ClickEffectInfo);
     virtual RefPtr<PixelMap> GetThumbnailPixelMap(bool needScale = false)

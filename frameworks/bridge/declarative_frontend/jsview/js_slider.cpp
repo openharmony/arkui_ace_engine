@@ -240,6 +240,7 @@ void JSSlider::SetTrackColor(const JSCallbackInfo& info)
         return;
     }
     NG::Gradient gradient;
+    bool isResourceColor = false;
     if (!ConvertGradientColor(info[0], gradient)) {
         Color colorVal;
         if (info[0]->IsNull() || info[0]->IsUndefined() || !ParseJsColor(info[0], colorVal)) {
@@ -247,12 +248,13 @@ void JSSlider::SetTrackColor(const JSCallbackInfo& info)
             CHECK_NULL_VOID(theme);
             colorVal = theme->GetTrackBgColor();
         }
+        isResourceColor = true;
         gradient = NG::SliderModelNG::CreateSolidGradient(colorVal);
         // Set track color to Framework::SliderModelImpl. Need to backward compatibility with old pipeline.
         SliderModel::GetInstance()->SetTrackBackgroundColor(colorVal);
     }
     // Set track gradient color to NG::SliderModelNG
-    SliderModel::GetInstance()->SetTrackBackgroundColor(gradient);
+    SliderModel::GetInstance()->SetTrackBackgroundColor(gradient, isResourceColor);
 }
 
 bool JSSlider::ConvertGradientColor(const JsiRef<JsiValue>& param, NG::Gradient& gradient)
@@ -454,7 +456,7 @@ void JSSlider::SetSelectedBorderRadius(const JSCallbackInfo& info)
     }
 
     CalcDimension selectedBorderRadius;
-    if (!ParseJsDimensionVpNG(info[0], selectedBorderRadius, true)) {
+    if (!ParseJsDimensionVpNG(info[0], selectedBorderRadius, false)) {
         SliderModel::GetInstance()->ResetSelectedBorderRadius();
         return;
     }

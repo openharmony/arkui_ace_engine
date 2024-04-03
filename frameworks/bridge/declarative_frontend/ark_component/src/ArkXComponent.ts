@@ -15,7 +15,7 @@
 
 /// <reference path='./import.ts' />
 class ArkXComponentComponent implements CommonMethod<XComponentAttribute> {
-  _modifiersWithKeys: Map<Symbol, ModifierWithKey<number | string | boolean | object>>;
+  _modifiersWithKeys: Map<Symbol, AttributeModifierWithKey>;
   nativePtr: KNode;
 
   constructor(nativePtr: KNode) {

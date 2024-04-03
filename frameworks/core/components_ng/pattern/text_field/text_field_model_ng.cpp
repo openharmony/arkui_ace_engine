@@ -613,9 +613,14 @@ void TextFieldModelNG::SetMaxViewLines(uint32_t value)
     ACE_UPDATE_LAYOUT_PROPERTY(TextFieldLayoutProperty, MaxViewLines, value);
 }
 
+void TextFieldModelNG::SetNormalMaxViewLines(uint32_t value)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(TextFieldLayoutProperty, NormalMaxViewLines, value);
+}
+
 void TextFieldModelNG::SetBackgroundColor(const Color& color, bool tmp)
 {
-    Color backgroundColor;
+    Color backgroundColor = color;
     if (tmp) {
         auto pipeline = PipelineBase::GetCurrentContext();
         CHECK_NULL_VOID(pipeline);
@@ -624,11 +629,10 @@ void TextFieldModelNG::SetBackgroundColor(const Color& color, bool tmp)
         auto theme = themeManager->GetTheme<TextFieldTheme>();
         CHECK_NULL_VOID(theme);
         backgroundColor = theme->GetBgColor();
-        return;
     }
 
-    NG::ViewAbstract::SetBackgroundColor(color);
-    ACE_UPDATE_PAINT_PROPERTY(TextFieldPaintProperty, BackgroundColor, color);
+    NG::ViewAbstract::SetBackgroundColor(backgroundColor);
+    ACE_UPDATE_PAINT_PROPERTY(TextFieldPaintProperty, BackgroundColor, backgroundColor);
 }
 
 void TextFieldModelNG::SetBackgroundColor(FrameNode* frameNode, const Color& color)
@@ -839,6 +843,12 @@ void TextFieldModelNG::SetMaxViewLines(FrameNode* frameNode, uint32_t value)
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, MaxViewLines, value, frameNode);
 }
 
+void TextFieldModelNG::SetNormalMaxViewLines(FrameNode* frameNode, uint32_t value)
+{
+    auto normalMaxViewLines = value <= 0 ? Infinity<uint32_t>() : value;
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, NormalMaxViewLines, normalMaxViewLines, frameNode);
+}
+
 void TextFieldModelNG::SetType(FrameNode* frameNode, TextInputType value)
 {
     CHECK_NULL_VOID(frameNode);
@@ -1016,6 +1026,16 @@ void TextFieldModelNG::SetCaretColor(FrameNode* frameNode, const Color& value)
 void TextFieldModelNG::SetSelectionMenuHidden(FrameNode* frameNode, bool selectionMenuHidden)
 {
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, SelectionMenuHidden, selectionMenuHidden, frameNode);
+}
+
+void TextFieldModelNG::SetPasswordRules(FrameNode* frameNode, const std::string& passwordRules)
+{
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, PasswordRules, passwordRules, frameNode);
+}
+
+void TextFieldModelNG::SetEnableAutoFill(FrameNode* frameNode, bool enableAutoFill)
+{
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, EnableAutoFill, enableAutoFill, frameNode);
 }
 
 void TextFieldModelNG::SetShowCounter(FrameNode* frameNode, bool value)
@@ -1369,5 +1389,10 @@ void TextFieldModelNG::SetLetterSpacing(FrameNode* frameNode, const Dimension& v
 void TextFieldModelNG::SetLineHeight(FrameNode* frameNode, const Dimension& value)
 {
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, LineHeight, value, frameNode);
+}
+
+void TextFieldModelNG::TextFieldModelNG::SetWordBreak(FrameNode* frameNode, Ace::WordBreak value)
+{
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, WordBreak, value, frameNode);
 }
 } // namespace OHOS::Ace::NG

@@ -15,8 +15,8 @@
 
 /// <reference path='./import.ts' />
 class ArkWebComponent extends ArkComponent implements WebAttribute {
-  constructor(nativePtr: KNode) {
-    super(nativePtr);
+  constructor(nativePtr: KNode, classType?: ModifierType) {
+    super(nativePtr, classType);
   }
   javaScriptAccess(javaScriptAccess: boolean): this {
     throw new Error('Method not implemented.');
@@ -307,12 +307,10 @@ class ArkWebComponent extends ArkComponent implements WebAttribute {
 }
 
 // @ts-ignore
-globalThis.Web.attributeModifier = function (modifier) {
-  const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
-  let nativeNode = getUINativeModule().getFrameNodeById(elmtId);
-  let component = this.createOrGetNode(elmtId, () => {
-    return new ArkWebComponent(nativeNode);
+globalThis.Web.attributeModifier = function (modifier: ArkComponent): void {
+  attributeModifierFunc.call(this, modifier, (nativePtr: KNode) => {
+    return new ArkWebComponent(nativePtr);
+  }, (nativePtr: KNode, classType: ModifierType, modifierJS: ModifierJS) => {
+    return new modifierJS.CommonModifier(nativePtr, classType);
   });
-  applyUIAttributes(modifier, nativeNode, component);
-  component.applyModifierPatch();
 };

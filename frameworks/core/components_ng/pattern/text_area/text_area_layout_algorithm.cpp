@@ -42,6 +42,9 @@ std::optional<SizeF> TextAreaLayoutAlgorithm::MeasureContent(
     ConstructTextStyles(frameNode, textStyle, textContent_, showPlaceHolder_);
 
     auto isInlineStyle = pattern->IsNormalInlineState();
+    if (!isInlineStyle && textFieldLayoutProperty->HasNormalMaxViewLines()) {
+        textStyle.SetMaxLines(textFieldLayoutProperty->GetNormalMaxViewLines().value());
+    }
 
     direction_ = textFieldLayoutProperty->GetLayoutDirection();
 

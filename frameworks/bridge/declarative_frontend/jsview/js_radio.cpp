@@ -21,6 +21,7 @@
 #include "bridge/declarative_frontend/jsview/models/radio_model_impl.h"
 #include "core/components/checkable/checkable_theme.h"
 #include "core/components_ng/base/view_abstract.h"
+#include "core/components_ng/base/view_stack_model.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/radio/radio_model_ng.h"
 
@@ -28,6 +29,12 @@ namespace OHOS::Ace {
 
 std::unique_ptr<RadioModel> RadioModel::instance_ = nullptr;
 std::mutex RadioModel::mutex_;
+
+enum class RadioIndicatorType {
+    TICK = 0,
+    DOT,
+    CUSTOM,
+};
 
 RadioModel* RadioModel::GetInstance()
 {
@@ -58,10 +65,14 @@ void JSRadio::Create(const JSCallbackInfo& info)
 
     std::optional<std::string> value;
     std::optional<std::string> group;
+    std::optional<int32_t> indicator;
+    std::function<void()> customBuilderFunc = nullptr;
     if ((info.Length() >= 1) && info[0]->IsObject()) {
         auto paramObject = JSRef<JSObject>::Cast(info[0]);
         auto valueTemp = paramObject->GetProperty("value");
         auto groupTemp = paramObject->GetProperty("group");
+        auto indicatorTemp = paramObject->GetProperty("indicatorType");
+        auto builderObject = paramObject->GetProperty("indicatorBuilder");
         if (valueTemp->IsString()) {
             value = valueTemp->ToString();
         } else {
@@ -72,8 +83,34 @@ void JSRadio::Create(const JSCallbackInfo& info)
         } else {
             group = "";
         }
+        indicator = indicatorTemp->ToNumber<int32_t>();
+        ParseIndicator(info, indicator, customBuilderFunc, builderObject);
     }
-    RadioModel::GetInstance()->Create(value, group);
+    RadioModel::GetInstance()->Create(value, group, indicator);
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
+        RadioModel::GetInstance()->SetBuilder(std::move(customBuilderFunc));
+    }
+}
+
+void JSRadio::ParseIndicator(const JSCallbackInfo& info, std::optional<int32_t>& indicator,
+    std::function<void()>& customBuilderFunc, JSRef<JSVal>& builderObject)
+{
+    if (indicator.value() == static_cast<int32_t>(RadioIndicatorType::CUSTOM)) {
+        if (builderObject->IsFunction()) {
+            auto builderFunc = AceType::MakeRefPtr<JsFunction>(info.This(), JSRef<JSFunc>::Cast(builderObject));
+            CHECK_NULL_VOID(builderFunc);
+            auto targetNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
+            customBuilderFunc = [execCtx = info.GetExecutionContext(), func = std::move(builderFunc),
+                                    node = targetNode]() {
+                JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+                ACE_SCORING_EVENT("Radio.builder");
+                PipelineContext::SetCallBackNode(node);
+                func->Execute();
+            };
+        } else {
+            indicator = static_cast<int32_t>(RadioIndicatorType::TICK);
+        }
+    }
 }
 
 void JSRadio::JSBind(BindingTarget globalObj)
@@ -157,8 +194,8 @@ NG::PaddingPropertyF JSRadio::GetOldPadding(const JSCallbackInfo& info)
     NG::PaddingPropertyF padding({ 0.0f, 0.0f, 0.0f, 0.0f });
     if (info[0]->IsObject()) {
         JSRef<JSObject> jsObj = JSRef<JSObject>::Cast(info[0]);
-        if (jsObj->HasProperty("top") || jsObj->HasProperty("bottom")
-            || jsObj->HasProperty("left") || jsObj->HasProperty("right")) {
+        if (jsObj->HasProperty("top") || jsObj->HasProperty("bottom") || jsObj->HasProperty("left") ||
+            jsObj->HasProperty("right")) {
             CalcDimension topDimen = CalcDimension(0.0, DimensionUnit::VP);
             CalcDimension leftDimen = CalcDimension(0.0, DimensionUnit::VP);
             CalcDimension rightDimen = CalcDimension(0.0, DimensionUnit::VP);

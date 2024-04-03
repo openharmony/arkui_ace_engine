@@ -13,7 +13,16 @@
 
 import("//foundation/arkui/ace_engine/ace_config.gni")
 
-source_set("ace_resource") {
+ohos_source_set("ace_resource") {
+  if (current_os == "ohos") {
+    sanitize = {
+      integer_overflow = true
+      boundary_sanitize = true
+      debug = ace_sanitize_debug
+    }
+  }
+  subsystem_name = ace_engine_subsystem
+  part_name = ace_engine_part
   include_dirs = [ "//third_party/bounds_checking_function/include" ]
 
   # add resource file here
@@ -21,25 +30,28 @@ source_set("ace_resource") {
     "ace_res_config.cpp",
     "ace_res_key_parser.cpp",
     "data_provider_manager.cpp",
-    "internal_resource.cpp",
     "shared_image_manager.cpp",
   ]
   if (current_os == "mac" || current_os == "mingw" || current_os == "ios" ||
       current_os == "linux" || current_os == "android") {
     deps = [ ":binary_resource_mac_and_windows" ]
-    sources -= [ "internal_resource.cpp" ]
     sources += [ "internal_resource_previewer.cpp" ]
   } else {
+    sources += [ "internal_resource.cpp" ]
     deps = [ ":binary_resource" ]
   }
-  configs += [ "$ace_root:ace_config" ]
+  configs = [ "$ace_root:ace_config" ]
 
   if (current_os == "mingw") {
     cflags_cc = [ "-std=c++17" ]
   }
+
+  if (use_hilog) {
+    external_deps = [ "hilog:libhilog" ]
+  }
 }
 
-source_set("binary_resource") {
+ohos_source_set("binary_resource") {
   deps = [ ":objcopy_resource" ]
   ace_resource_dir =
       get_label_info(":binary_resource($current_toolchain)", "target_out_dir")
@@ -48,9 +60,11 @@ source_set("binary_resource") {
     "$ace_resource_dir/errorcode.o",
     "$ace_resource_dir/indexletter_bar.o",
   ]
+  subsystem_name = ace_engine_subsystem
+  part_name = ace_engine_part
 }
 
-source_set("binary_resource_mac_and_windows") {
+ohos_source_set("binary_resource_mac_and_windows") {
   deps = [ ":objcopy_resource_mac_and_windows" ]
   ace_resource_dir =
       get_label_info(":binary_resource($current_toolchain)", "target_out_dir")
@@ -59,6 +73,8 @@ source_set("binary_resource_mac_and_windows") {
     "$ace_resource_dir/errorcode.c",
     "$ace_resource_dir/indexletter_bar.c",
   ]
+  subsystem_name = ace_engine_subsystem
+  part_name = ace_engine_part
 }
 
 action_foreach("objcopy_resource") {

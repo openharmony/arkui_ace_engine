@@ -173,6 +173,12 @@ HWTEST_F(DrawableDescriptorTest, DrawableDescTest004, TestSize.Level1)
     std::tuple<const char *, uint32_t, uint32_t> drawableInfoName(nullptr, ICONTYPE, DENSITY);
     auto res4 = drawableDescriptorFactory.Create(drawableInfoName, resourceMgr, state, drawableType);
     EXPECT_EQ(res4, nullptr);
+
+    std::pair<std::unique_ptr<uint8_t[]>, size_t> foregroundInfo = { nullptr, 0 };
+    std::pair<std::unique_ptr<uint8_t[]>, size_t> backgroundInfo = { nullptr, 0 };
+    std::string path = "path";
+    auto res5 = drawableDescriptorFactory.Create(foregroundInfo, backgroundInfo, path, drawableType, resourceMgr);
+    ASSERT_NE(res5, nullptr);
 }
 
 /**
@@ -201,5 +207,39 @@ HWTEST_F(DrawableDescriptorTest, DrawableDescTest005, TestSize.Level1)
     EXPECT_EQ(layeredDrawableDescriptor.maskPath_, path);
     EXPECT_EQ(layeredDrawableDescriptor.iconType_, iconType);
     EXPECT_EQ(layeredDrawableDescriptor.density_, density);
+}
+
+/**
+ * @tc.name: DrawableDescTest006
+ * @tc.desc: test LayeredDrawableDescriptor's member functions;
+ * @tc.type: FUNC
+ */
+HWTEST_F(DrawableDescriptorTest, DrawableDescTest006, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create layeredDrawableDescriptor and call SetMaskPath
+     * @tc.expected:return path.
+     */
+    std::unique_ptr<uint8_t[]> jsonBuf;
+    size_t len = 0;
+    std::shared_ptr<Global::Resource::ResourceManager> resourceMgr;
+    std::string path = "path";
+    uint32_t iconType = 1;
+    uint32_t density = 2;
+    auto layeredDrawableDescriptor =
+        Napi::LayeredDrawableDescriptor(std::move(jsonBuf), len, std::move(resourceMgr), path, iconType, density);
+
+    /**
+     * @tc.steps: step2. check
+     */
+    std::pair<std::unique_ptr<uint8_t[]>, size_t> foregroundInfo = { nullptr, 0 };
+    std::pair<std::unique_ptr<uint8_t[]>, size_t> backgroundInfo = { nullptr, 0 };
+    layeredDrawableDescriptor.InitLayeredParam(foregroundInfo, backgroundInfo);
+
+    /**
+     * @tc.steps: step2. check
+     */
+    EXPECT_EQ(layeredDrawableDescriptor.foreground_, std::nullopt);
+    EXPECT_EQ(layeredDrawableDescriptor.background_, std::nullopt);
 }
 } // namespace OHOS::Ace

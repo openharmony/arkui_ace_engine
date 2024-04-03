@@ -40,6 +40,11 @@ public:
     void SetUnselectedColor(const Color& unselectedColor) override;
     void SetTrackBorderRadius(const Dimension& borderRadius) override;
     void ResetTrackBorderRadius() override;
+    static void SetPointRadius(FrameNode* frameNode, const Dimension& switchPointRadius);
+    static void ResetPointRadius(FrameNode* frameNode);
+    static void SetUnselectedColor(FrameNode* frameNode, const Color& unselectedColor);
+    static void SetTrackBorderRadius(FrameNode* frameNode, const Dimension& borderRadius);
+    static void ResetTrackBorderRadius(FrameNode* frameNode);
     static RefPtr<FrameNode> CreateFrameNode(int32_t nodeId, ToggleType toggleType, bool isOn);
     static void SetSelectedColor(FrameNode* frameNode, const std::optional<Color>& selectedColor);
     static void SetSwitchPointColor(FrameNode* frameNode, const Color& switchPointColor);
@@ -54,16 +59,19 @@ public:
     static Color GetSelectedColor(FrameNode* frameNode);
     static Color GetSwitchPointColor(FrameNode* frameNode);
     static bool GetSwitchIsOn(FrameNode* frameNode);
+
 private:
-    static void CreateCheckbox(int32_t nodeId);
-    static void CreateSwitch(int32_t nodeId);
-    static void CreateButton(int32_t nodeId);
+    static void ReCreateFrameNode(
+        const RefPtr<FrameNode>& childFrameNode, int32_t nodeId, ToggleType toggleType, bool isOn);
     static RefPtr<FrameNode> CreateCheckboxFrameNode(int32_t nodeId, bool isOn);
     static RefPtr<FrameNode> CreateSwitchFrameNode(int32_t nodeId, bool isOn);
     static RefPtr<FrameNode> CreateButtonFrameNode(int32_t nodeId, bool isOn);
     static void AddNewChild(const RefPtr<UINode>& parentFrame, int32_t nodeId, int32_t index);
     static int32_t RemoveNode(const RefPtr<FrameNode>& childFrameNode, int32_t nodeId);
-    static void SetSwitchSelected(RefPtr<FrameNode>& childFrameNode, bool isOn);
+    static void UpdateSwitchIsOn(const RefPtr<FrameNode>& frameNode, bool isOn);
+    static void UpdateCheckboxIsOn(const RefPtr<FrameNode>& frameNode, bool isOn);
+    static void UpdateToggleButtonIsOn(const RefPtr<FrameNode>& frameNode, bool isOn);
+    static void ReplaceAllChild(const RefPtr<FrameNode>& oldFrameNode);
 };
 
 } // namespace OHOS::Ace::NG

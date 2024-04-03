@@ -168,31 +168,22 @@ public:
     virtual void OnModifyDone()
     {
 #if (defined(__aarch64__) || defined(__x86_64__))
-        FrameNode::PostTask(
-            [weak = WeakClaim(this)]() {
-                if (Recorder::IsCacheAvaliable()) {
-                    auto pattern = weak.Upgrade();
-                    CHECK_NULL_VOID(pattern);
-                    pattern->OnAfterModifyDone();
-                }
-            },
-            TaskExecutor::TaskType::UI);
         if (IsNeedInitClickEventRecorder()) {
             InitClickEventRecorder();
         }
 #endif
-        auto frameNode = frameNode_.Upgrade();
-        auto children = frameNode->GetChildren();
+        auto* frameNode = GetUnsafeHostPtr();
+        const auto& children = frameNode->GetChildren();
         if (children.empty()) {
             return;
         }
-        auto renderContext = frameNode->GetRenderContext();
+        const auto& renderContext = frameNode->GetRenderContext();
         if (!renderContext->HasForegroundColor() && !renderContext->HasForegroundColorStrategy()) {
             return;
         }
         std::list<RefPtr<FrameNode>> childrenList {};
         std::queue<RefPtr<FrameNode>> queue {};
-        queue.emplace(frameNode);
+        queue.emplace(Claim(frameNode));
         RefPtr<FrameNode> parentNode;
         while (!queue.empty()) {
             parentNode = queue.front();
@@ -268,7 +259,7 @@ public:
         return true;
     }
 
-    virtual void UpdateSlideOffset() {}
+    virtual void UpdateSlideOffset(bool isNeedReset = false) {}
 
     // TODO: for temp use, need to delete this.
     virtual bool OnDirtyLayoutWrapperSwap(
@@ -332,6 +323,11 @@ public:
     RefPtr<FrameNode> GetHost() const
     {
         return frameNode_.Upgrade();
+    }
+
+    FrameNode* GetUnsafeHostPtr() const
+    {
+        return UnsafeRawPtr(frameNode_);
     }
 
     virtual void DumpInfo() {}
@@ -509,7 +505,7 @@ public:
             auto host = pattern->GetHost();
             CHECK_NULL_VOID(host);
             auto inspectorId = host->GetInspectorId().value_or("");
-            auto text = host->GetAccessibilityProperty<NG::AccessibilityProperty>()->GetAccessibilityText(true);
+            auto text = host->GetAccessibilityProperty<NG::AccessibilityProperty>()->GetGroupText(true);
             auto desc = host->GetAutoEventParamValue("");
             if (inspectorId.empty() && text.empty() && desc.empty()) {
                 return;
@@ -558,7 +554,7 @@ protected:
             auto host = pattern->GetHost();
             CHECK_NULL_VOID(host);
             auto inspectorId = host->GetInspectorId().value_or("");
-            auto text = host->GetAccessibilityProperty<NG::AccessibilityProperty>()->GetAccessibilityText(true);
+            auto text = host->GetAccessibilityProperty<NG::AccessibilityProperty>()->GetGroupText(true);
             auto desc = host->GetAutoEventParamValue("");
             if (inspectorId.empty() && text.empty() && desc.empty()) {
                 return;

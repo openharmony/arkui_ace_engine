@@ -49,15 +49,16 @@ public:
         Gradient colors;
         if (HasTrackBackgroundColor()) {
             colors = GetTrackBackgroundColor().value();
+            if (GetTrackBackgroundIsResourceColor()) {
+                return colors.GetColors()[0].GetLinearColor().ToColor().ColorToString();
+            }
             return GradientToJson(colors);
         }
         auto pipeline = PipelineBase::GetCurrentContext();
         CHECK_NULL_RETURN(pipeline, "");
         auto theme = pipeline->GetTheme<SliderTheme>();
         CHECK_NULL_RETURN(theme, "");
-
-        colors = SliderModelNG::CreateSolidGradient(theme->GetTrackBgColor());
-        return GradientToJson(colors);
+        return theme->GetTrackBgColor().ColorToString();
     }
 
     std::string GradientToJson(Gradient colors) const
@@ -148,6 +149,7 @@ public:
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(SliderPaintStyle, Direction, Axis, PROPERTY_UPDATE_RENDER)
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(SliderPaintStyle, BlockColor, Color, PROPERTY_UPDATE_RENDER)
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(SliderPaintStyle, TrackBackgroundColor, Gradient, PROPERTY_UPDATE_RENDER)
+    ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(SliderPaintStyle, TrackBackgroundIsResourceColor, bool, PROPERTY_UPDATE_RENDER)
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(SliderPaintStyle, SelectColor, Color, PROPERTY_UPDATE_RENDER)
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(SliderPaintStyle, ShowSteps, bool, PROPERTY_UPDATE_RENDER)
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(

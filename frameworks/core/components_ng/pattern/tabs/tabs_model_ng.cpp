@@ -94,6 +94,7 @@ void TabsModelNG::Create(BarPosition barPosition, int32_t index, const RefPtr<Ta
     }
     swiperPattern->SetSwiperController(controller);
     swiperPattern->SetFinishCallbackType(FinishCallbackType::LOGICALLY);
+    swiperPattern->SetHasTabsAncestor(true);
 
     auto dividerNode = FrameNode::GetOrCreateFrameNode(
         V2::DIVIDER_ETS_TAG, dividerId, []() { return AceType::MakeRefPtr<DividerPattern>(); });
@@ -241,11 +242,23 @@ void TabsModelNG::SetWidthAuto(bool isAuto)
     ACE_UPDATE_LAYOUT_PROPERTY(TabsLayoutProperty, WidthAuto, isAuto);
 }
 
+void TabsModelNG::SetWidthAuto(FrameNode* frameNode, bool isAuto)
+{
+    CHECK_NULL_VOID(frameNode);
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TabsLayoutProperty, WidthAuto, isAuto, frameNode);
+}
+
 void TabsModelNG::SetHeightAuto(bool isAuto)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
     ACE_UPDATE_LAYOUT_PROPERTY(TabsLayoutProperty, HeightAuto, isAuto);
+}
+
+void TabsModelNG::SetHeightAuto(FrameNode* frameNode, bool isAuto)
+{
+    CHECK_NULL_VOID(frameNode);
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TabsLayoutProperty, HeightAuto, isAuto, frameNode);
 }
 
 void TabsModelNG::SetBarAdaptiveHeight(bool barAdaptiveHeight)
@@ -286,10 +299,6 @@ void TabsModelNG::SetIndex(int32_t index)
     auto swiperLayoutProperty = swiperNode->GetLayoutProperty<SwiperLayoutProperty>();
     CHECK_NULL_VOID(swiperLayoutProperty);
     swiperLayoutProperty->UpdateIndex(index);
-    auto tabContentNum = swiperNode->TotalChildCount();
-    if (tabContentNum == 0) {
-        return;
-    }
     auto tabBarNode = AceType::DynamicCast<FrameNode>(tabsNode->GetTabBar());
     CHECK_NULL_VOID(tabBarNode);
     auto tabBarPattern = tabBarNode->GetPattern<TabBarPattern>();

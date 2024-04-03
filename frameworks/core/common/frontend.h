@@ -297,6 +297,10 @@ public:
         return value;
     }
 
+    virtual napi_value GetFrameNodeValueByNodeId(int32_t nodeId)
+    {
+        return nullptr;
+    }
 #ifdef PREVIEW
     virtual void RunNativeEngineLoop() {}
 #endif

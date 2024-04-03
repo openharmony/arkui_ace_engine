@@ -18,7 +18,6 @@
 #include <cstdint>
 #include <string>
 #include <vector>
-
 #include "base/geometry/ng/vector.h"
 #include "base/geometry/shape.h"
 #include "base/log/log_wrapper.h"
@@ -41,6 +40,7 @@
 #include "core/components_ng/pattern/shape/shape_abstract_model_ng.h"
 #include "core/components_ng/pattern/text/span_model_ng.h"
 #include "core/components_ng/property/transition_property.h"
+#include "core/event/axis_event.h"
 #include "core/image/image_source_info.h"
 #include "core/interfaces/arkoala/arkoala_api.h"
 #include "core/interfaces/native/node/node_api.h"
@@ -92,6 +92,7 @@ constexpr float DEFAULT_BRIGHTNESS = 1.0f;
 
 const int32_t ERROR_INT_CODE = -1;
 const float ERROR_FLOAT_CODE = -1.0f;
+constexpr int32_t MAX_POINTS = 10;
 const std::vector<OHOS::Ace::RefPtr<OHOS::Ace::Curve>> CURVES = {
     OHOS::Ace::Curves::LINEAR,
     OHOS::Ace::Curves::EASE,
@@ -324,15 +325,15 @@ GradientDirection convertToLinearGradientDirection(std::shared_ptr<LinearGradien
  * values[3] : repeating
  * @param valuesLength values length
  */
-void SetLinearGradientValues(NG::Gradient& gradient, const ArkUI_Float32* values, ArkUI_Int32 valuesLength)
+void SetLinearGradientValues(NG::Gradient& gradient, const ArkUIInt32orFloat32* values, ArkUI_Int32 valuesLength)
 {
     if ((values == nullptr) || (valuesLength != NUM_4)) {
         return;
     }
-    auto angleHasValue = values[NUM_0];
-    auto angleValue = values[NUM_1];
-    auto directionValue = values[NUM_2];
-    auto repeating = values[NUM_3];
+    auto angleHasValue = values[NUM_0].i32;
+    auto angleValue = values[NUM_1].f32;
+    auto directionValue = values[NUM_2].i32;
+    auto repeating = values[NUM_3].i32;
     auto linearGradient = gradient.GetLinearGradient();
     if (linearGradient == nullptr) {
         return;
@@ -365,24 +366,24 @@ ArkUI_Float32 CheckAngle(const ArkUI_Float32 angle)
  * values[12] : repeating
  * @param valuesLength values length
  */
-void SetSweepGradientValues(NG::Gradient& gradient, const ArkUI_Float32* values, ArkUI_Int32 valuesLength)
+void SetSweepGradientValues(NG::Gradient& gradient, const ArkUIInt32orFloat32* values, ArkUI_Int32 valuesLength)
 {
     if ((values == nullptr) || (valuesLength != NUM_13)) {
         return;
     }
-    auto centerXHasValue = values[NUM_0];
-    auto centerXValue = values[NUM_1];
-    auto centerXUnit = values[NUM_2];
-    auto centerYHasValue = values[NUM_3];
-    auto centerYValue = values[NUM_4];
-    auto centerYUnit = values[NUM_5];
-    auto startHasValue = values[NUM_6];
-    auto startValue = values[NUM_7];
-    auto endHasValue = values[NUM_8];
-    auto endValue = values[NUM_9];
-    auto rotationHasValue = values[NUM_10];
-    auto rotationValue = values[NUM_11];
-    auto repeating = values[NUM_12];
+    auto centerXHasValue = values[NUM_0].i32;
+    auto centerXValue = values[NUM_1].f32;
+    auto centerXUnit = values[NUM_2].i32;
+    auto centerYHasValue = values[NUM_3].i32;
+    auto centerYValue = values[NUM_4].f32;
+    auto centerYUnit = values[NUM_5].i32;
+    auto startHasValue = values[NUM_6].i32;
+    auto startValue = values[NUM_7].f32;
+    auto endHasValue = values[NUM_8].i32;
+    auto endValue = values[NUM_9].f32;
+    auto rotationHasValue = values[NUM_10].i32;
+    auto rotationValue = values[NUM_11].f32;
+    auto repeating = values[NUM_12].i32;
     if (static_cast<bool>(centerXHasValue)) {
         auto unit = static_cast<DimensionUnit>(centerXUnit);
         auto value = (unit == DimensionUnit::PERCENT) ? (centerXValue * PERCENT_100) : centerXValue;
@@ -413,21 +414,23 @@ void SetSweepGradientValues(NG::Gradient& gradient, const ArkUI_Float32* values,
  * values[9] : repeating
  * @param valuesLength values length
  */
-void SetRadialGradientValues(NG::Gradient& gradient, const ArkUI_Float32* values, ArkUI_Int32 valuesLength)
+void SetRadialGradientValues(NG::Gradient& gradient, const ArkUIInt32orFloat32* values, ArkUI_Int32 valuesLength)
 {
     if ((values == nullptr) || (valuesLength != NUM_10)) {
         return;
     }
-    auto centerXHasValue = values[NUM_0];
-    auto centerXValue = values[NUM_1];
-    auto centerXUnit = values[NUM_2];
-    auto centerYHasValue = values[NUM_3];
-    auto centerYValue = values[NUM_4];
-    auto centerYUnit = values[NUM_5];
-    auto radiusHasValue = values[NUM_6];
-    auto radiusValue = values[NUM_7];
-    auto radiusUnit = values[NUM_8];
-    auto repeating = values[NUM_9];
+
+    auto centerXHasValue = values[NUM_0].i32;
+    auto centerXValue = values[NUM_1].f32;
+    auto centerXUnit = values[NUM_2].i32;
+    auto centerYHasValue = values[NUM_3].i32;
+    auto centerYValue = values[NUM_4].f32;
+    auto centerYUnit = values[NUM_5].i32;
+    auto radiusHasValue = values[NUM_6].i32;
+    auto radiusValue = values[NUM_7].f32;
+    auto radiusUnit = values[NUM_8].i32;
+    auto repeating = values[NUM_9].i32;
+
     if (static_cast<bool>(centerXHasValue)) {
         auto unit = static_cast<DimensionUnit>(centerXUnit);
         auto value = (unit == DimensionUnit::PERCENT) ? (centerXValue * PERCENT_100) : centerXValue;
@@ -604,15 +607,15 @@ void SetBorderImage(FrameNode* frameNode, const RefPtr<BorderImage>& borderImage
  * values[3] : repeating
  * @param valuesLength values length
  */
-void SetBorderImageGradientValues(NG::Gradient& gradient, const ArkUI_Float32* values, ArkUI_Int32 valuesLength)
+void SetBorderImageGradientValues(NG::Gradient& gradient, const ArkUIInt32orFloat32* values, ArkUI_Int32 valuesLength)
 {
     if ((values == nullptr) || (valuesLength != NUM_4)) {
         return;
     }
-    auto angleHasValue = values[NUM_0];
-    auto angleValue = values[NUM_1];
-    auto directionValue = values[NUM_2];
-    auto repeating = values[NUM_3];
+    auto angleHasValue = values[NUM_0].i32;
+    auto angleValue = values[NUM_1].f32;
+    auto directionValue = values[NUM_2].i32;
+    auto repeating = values[NUM_3].i32;
     auto linearGradient = gradient.GetLinearGradient();
     if (linearGradient == nullptr) {
         return;
@@ -686,7 +689,7 @@ void ResetHeight(ArkUINodeHandle node)
  * value[0] : radius value for TopLeft，value[1] : radius value for TopRight
  * value[2] : radius value for BottomLeft，value[3] : radius value for BottomRight
  * @param units radius units
- * units[0]: radius unit for TopLeft ,units[1] : radius unit for TopRight
+ * units[0]: radius unit for TopLeft, units[1] : radius unit for TopRight
  * units[2]: radius unit for BottomLeft, units[3] : radius unit for TopRight
  */
 void SetBorderRadius(ArkUINodeHandle node, const ArkUI_Float32* values, const ArkUI_Int32* units, ArkUI_Int32 length)
@@ -718,7 +721,7 @@ void ResetBorderRadius(ArkUINodeHandle node)
  * value[0] : BorderWidth value for left，value[1] : BorderWidth value for right
  * value[2] : BorderWidth value for top，value[3] : BorderWidth value for bottom
  * @param units radius units
- * units[0]: BorderWidth unit for left ,units[1] : BorderWidth unit for right
+ * units[0]: BorderWidth unit for left, units[1] : BorderWidth unit for right
  * units[2]: BorderWidth unit for top, units[3] : BorderWidth unit for bottom
  */
 void SetBorderWidth(ArkUINodeHandle node, const ArkUI_Float32* values, const ArkUI_Int32* units, ArkUI_Int32 length)
@@ -1226,7 +1229,7 @@ void ResetBlur(ArkUINodeHandle node)
  * ...
  * @param colorsLength colors length
  */
-void SetLinearGradient(ArkUINodeHandle node, const ArkUI_Float32* values, ArkUI_Int32 valuesLength,
+void SetLinearGradient(ArkUINodeHandle node, const ArkUIInt32orFloat32* values, ArkUI_Int32 valuesLength,
     const ArkUIInt32orFloat32* colors, ArkUI_Int32 colorsLength)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -1265,7 +1268,7 @@ void ResetLinearGradient(ArkUINodeHandle node)
  * ...
  * @param colorsLength colors length
  */
-void SetSweepGradient(ArkUINodeHandle node, const ArkUI_Float32* values, ArkUI_Int32 valuesLength,
+void SetSweepGradient(ArkUINodeHandle node, const ArkUIInt32orFloat32* values, ArkUI_Int32 valuesLength,
     const ArkUIInt32orFloat32* colors, ArkUI_Int32 colorsLength)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -1302,7 +1305,7 @@ void ResetSweepGradient(ArkUINodeHandle node)
  * ...
  * @param colorsLength colors length
  */
-void SetRadialGradient(ArkUINodeHandle node, const ArkUI_Float32* values, ArkUI_Int32 valuesLength,
+void SetRadialGradient(ArkUINodeHandle node, const ArkUIInt32orFloat32* values, ArkUI_Int32 valuesLength,
     const ArkUIInt32orFloat32* colors, ArkUI_Int32 colorsLength)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -1445,7 +1448,7 @@ void ResetBorderImage(ArkUINodeHandle node)
     SetBorderImage(frameNode, borderImage, imageBorderBitsets);
 }
 
-void SetBorderImageGradient(ArkUINodeHandle node, const ArkUI_Float32* values, ArkUI_Int32 valuesLength,
+void SetBorderImageGradient(ArkUINodeHandle node, const ArkUIInt32orFloat32* values, ArkUI_Int32 valuesLength,
     const ArkUIInt32orFloat32* colors, ArkUI_Int32 colorsLength)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -1460,11 +1463,14 @@ void SetBorderImageGradient(ArkUINodeHandle node, const ArkUI_Float32* values, A
     ViewAbstract::SetBorderImageGradient(frameNode, gradient);
 }
 
-void SetForegroundBlurStyle(
-    ArkUINodeHandle node, ArkUI_Int32 blurStyle, ArkUI_Int32 colorMode, ArkUI_Int32 adaptiveColor, ArkUI_Float32 scale)
+void SetForegroundBlurStyle(ArkUINodeHandle node, ArkUI_Int32* intArray, ArkUI_Float32 scale,
+    const ArkUI_Float32* blurValues, ArkUI_Int32 blurValuesSize)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
+    ArkUI_Int32 blurStyle = intArray[NUM_0];
+    ArkUI_Int32 colorMode = intArray[NUM_1];
+    ArkUI_Int32 adaptiveColor = intArray[NUM_2];
     BlurStyleOption fgBlurStyle;
     if (blurStyle >= 0) {
         if (blurStyle >= static_cast<int>(BlurStyle::NO_MATERIAL) &&
@@ -1472,7 +1478,7 @@ void SetForegroundBlurStyle(
             fgBlurStyle.blurStyle = static_cast<BlurStyle>(blurStyle);
         }
     }
-    bool isHasOptions = !((colorMode < 0) && (adaptiveColor < 0) && (scale < 0));
+    bool isHasOptions = !((colorMode < 0) && (adaptiveColor < 0) && (scale < 0) && (blurValuesSize == 0));
     if (isHasOptions) {
         if (colorMode >= static_cast<int32_t>(ThemeColorMode::SYSTEM) &&
             colorMode <= static_cast<int32_t>(ThemeColorMode::DARK)) {
@@ -1485,6 +1491,9 @@ void SetForegroundBlurStyle(
         if (scale >= 0) {
             fgBlurStyle.scale = std::clamp(scale, 0.0f, 1.0f);
         }
+        BlurOption blurOption;
+        blurOption.grayscale.assign(blurValues, blurValues + blurValuesSize);
+        fgBlurStyle.blurOption = blurOption;
     }
     ViewAbstract::SetForegroundBlurStyle(frameNode, fgBlurStyle);
 }
@@ -1555,11 +1564,14 @@ void ResetLinearGradientBlur(ArkUINodeHandle node)
     ViewAbstract::SetLinearGradientBlur(frameNode, blurPara);
 }
 
-void SetBackgroundBlurStyle(
-    ArkUINodeHandle node, ArkUI_Int32 blurStyle, ArkUI_Int32 colorMode, ArkUI_Int32 adaptiveColor, ArkUI_Float32 scale)
+void SetBackgroundBlurStyle(ArkUINodeHandle node, ArkUI_Int32* intArray, ArkUI_Float32 scale,
+    const ArkUI_Float32* blurValues, ArkUI_Int32 blurValuesSize)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
+    ArkUI_Int32 blurStyle = intArray[NUM_0];
+    ArkUI_Int32 colorMode = intArray[NUM_1];
+    ArkUI_Int32 adaptiveColor = intArray[NUM_2];
     BlurStyleOption bgBlurStyle;
     if (blurStyle >= 0) {
         if (blurStyle >= static_cast<int>(BlurStyle::NO_MATERIAL) &&
@@ -1567,7 +1579,7 @@ void SetBackgroundBlurStyle(
             bgBlurStyle.blurStyle = static_cast<BlurStyle>(blurStyle);
         }
     }
-    bool isHasOptions = !((colorMode < 0) && (adaptiveColor < 0) && (scale < 0));
+    bool isHasOptions = !((colorMode < 0) && (adaptiveColor < 0) && (scale < 0) && (blurValuesSize == 0));
     if (isHasOptions) {
         if (colorMode >= static_cast<int32_t>(ThemeColorMode::SYSTEM) &&
             colorMode <= static_cast<int32_t>(ThemeColorMode::DARK)) {
@@ -1578,6 +1590,9 @@ void SetBackgroundBlurStyle(
             bgBlurStyle.adaptiveColor = static_cast<AdaptiveColor>(adaptiveColor);
         }
         bgBlurStyle.scale = std::clamp(scale, 0.0f, 1.0f);
+        BlurOption blurOption;
+        blurOption.grayscale.assign(blurValues, blurValues + blurValuesSize);
+        bgBlurStyle.blurOption = blurOption;
     }
     ViewAbstract::SetBackgroundBlurStyle(frameNode, bgBlurStyle);
 }
@@ -1595,7 +1610,7 @@ ArkUIBlurStyleOptionType GetBackgroundBlurStyle(ArkUINodeHandle node)
     styleOptionType.blurStyle = static_cast<int32_t>(renderContext->GetBackBlurStyle()->blurStyle);
     styleOptionType.colorMode = static_cast<int32_t>(renderContext->GetBackBlurStyle()->colorMode);
     styleOptionType.adaptiveColor = static_cast<int32_t>(renderContext->GetBackBlurStyle()->adaptiveColor);
-    styleOptionType.scale = static_cast<int32_t>(renderContext->GetBackBlurStyle()->scale);
+    styleOptionType.scale = renderContext->GetBackBlurStyle()->scale;
     return styleOptionType;
 }
 
@@ -1608,7 +1623,7 @@ void ResetBackgroundBlurStyle(ArkUINodeHandle node)
 }
 
 /**
- * @param src source borderWidthand and BorderRadius value
+ * @param src source borderWidth and and BorderRadius value
  * @param options option value
  * values[offset + 0], option[offset + 1], option[offset + 2]: borderWidth left(hasValue, value, unit)
  * values[offset + 3], option[offset + 4], option[offset + 5]: borderWidth right(hasValue, value, unit)
@@ -1743,8 +1758,8 @@ ArkUIImageSizeType GetBackgroundImageSize(ArkUINodeHandle node)
     CHECK_NULL_RETURN(renderContext->GetBackground(), imageSizeType);
     auto imageSize = renderContext->GetBackground()->GetBackgroundImageSize();
     CHECK_NULL_RETURN(imageSize, imageSizeType);
-    imageSizeType.xValue = Dimension(imageSize->GetSizeValueX(), DimensionUnit::PX).ConvertToVp();
-    imageSizeType.yValue = Dimension(imageSize->GetSizeValueY(), DimensionUnit::PX).ConvertToVp();
+    imageSizeType.xValue = imageSize->GetSizeValueX();
+    imageSizeType.yValue = imageSize->GetSizeValueY();
     imageSizeType.xType = static_cast<int32_t>(imageSize->GetSizeTypeX());
     imageSizeType.yType = static_cast<int32_t>(imageSize->GetSizeTypeY());
     return imageSizeType;
@@ -2822,7 +2837,7 @@ void SetFlexBasis(ArkUINodeHandle node, const struct ArkUIStringAndFloat* flexBa
     Dimension result;
     if (flexBasisValue->valueStr != nullptr) {
         result = StringUtils::StringToDimensionWithUnit(std::string(flexBasisValue->valueStr), DimensionUnit::VP);
-        // flexbasis don't support percent case.
+        // flex basis don't support percent case.
         if (result.Unit() == DimensionUnit::PERCENT) {
             result.SetUnit(DimensionUnit::AUTO);
         }
@@ -2884,35 +2899,35 @@ void GetAlignRules(ArkUINodeHandle node, ArkUIAlignRulesType* alignRulesType)
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     auto alignRules = ViewAbstract::GetAlignRules(frameNode);
-    auto leftIteractor = alignRules.find(AlignDirection::LEFT);
-    if (leftIteractor != alignRules.end()) {
-        alignRulesType->leftAlignAnchor = std::atoi(leftIteractor->second.anchor.c_str());
-        alignRulesType->leftAlignType = static_cast<int32_t>(leftIteractor->second.horizontal);
+    auto leftIterator = alignRules.find(AlignDirection::LEFT);
+    if (leftIterator != alignRules.end()) {
+        alignRulesType->leftAlignAnchor = std::atoi(leftIterator->second.anchor.c_str());
+        alignRulesType->leftAlignType = static_cast<int32_t>(leftIterator->second.horizontal);
     }
-    auto middleIteractor = alignRules.find(AlignDirection::MIDDLE);
+    auto middleIterator = alignRules.find(AlignDirection::MIDDLE);
     if (alignRules.find(AlignDirection::MIDDLE) != alignRules.end()) {
-        alignRulesType->middleAlignAnchor = std::atoi(middleIteractor->second.anchor.c_str());
-        alignRulesType->middleAlignType = static_cast<int32_t>(middleIteractor->second.horizontal);
+        alignRulesType->middleAlignAnchor = std::atoi(middleIterator->second.anchor.c_str());
+        alignRulesType->middleAlignType = static_cast<int32_t>(middleIterator->second.horizontal);
     }
-    auto rightIteractor = alignRules.find(AlignDirection::RIGHT);
-    if (rightIteractor != alignRules.end()) {
-        alignRulesType->rightAlignAnchor = std::atoi(rightIteractor->second.anchor.c_str());
-        alignRulesType->rightAlignType = static_cast<int32_t>(rightIteractor->second.horizontal);
+    auto rightIterator = alignRules.find(AlignDirection::RIGHT);
+    if (rightIterator != alignRules.end()) {
+        alignRulesType->rightAlignAnchor = std::atoi(rightIterator->second.anchor.c_str());
+        alignRulesType->rightAlignType = static_cast<int32_t>(rightIterator->second.horizontal);
     }
-    auto topIteractor = alignRules.find(AlignDirection::TOP);
-    if (topIteractor != alignRules.end()) {
-        alignRulesType->topAlignAnchor = std::atoi(topIteractor->second.anchor.c_str());
-        alignRulesType->topAlignType = static_cast<int32_t>(topIteractor->second.vertical);
+    auto topIterator = alignRules.find(AlignDirection::TOP);
+    if (topIterator != alignRules.end()) {
+        alignRulesType->topAlignAnchor = std::atoi(topIterator->second.anchor.c_str());
+        alignRulesType->topAlignType = static_cast<int32_t>(topIterator->second.vertical);
     }
-    auto centerIteractor = alignRules.find(AlignDirection::CENTER);
-    if (centerIteractor != alignRules.end()) {
-        alignRulesType->verticalCenterAlignAnchor = std::atoi(centerIteractor->second.anchor.c_str());
-        alignRulesType->verticalCenterAlignType = static_cast<int32_t>(centerIteractor->second.vertical);
+    auto centerIterator = alignRules.find(AlignDirection::CENTER);
+    if (centerIterator != alignRules.end()) {
+        alignRulesType->verticalCenterAlignAnchor = std::atoi(centerIterator->second.anchor.c_str());
+        alignRulesType->verticalCenterAlignType = static_cast<int32_t>(centerIterator->second.vertical);
     }
-    auto bottomIteractor = alignRules.find(AlignDirection::BOTTOM);
-    if (bottomIteractor != alignRules.end()) {
-        alignRulesType->bottomAlignAnchor = std::atoi(bottomIteractor->second.anchor.c_str());
-        alignRulesType->bottomAlignType = static_cast<int32_t>(bottomIteractor->second.vertical);
+    auto bottomIterator = alignRules.find(AlignDirection::BOTTOM);
+    if (bottomIterator != alignRules.end()) {
+        alignRulesType->bottomAlignAnchor = std::atoi(bottomIterator->second.anchor.c_str());
+        alignRulesType->bottomAlignType = static_cast<int32_t>(bottomIterator->second.vertical);
     }
 }
 
@@ -4033,10 +4048,7 @@ void SetOutline(ArkUINodeHandle node, const ArkUI_Float32* values, int32_t value
     SetOptionalBorder(borderWidth.topDimen, values, valuesSize, offset);
     SetOptionalBorder(borderWidth.bottomDimen, values, valuesSize, offset);
     borderWidth.multiValued = true;
-    if (borderWidth.leftDimen.has_value() || borderWidth.rightDimen.has_value() || borderWidth.topDimen.has_value() ||
-        borderWidth.bottomDimen.has_value()) {
-        ViewAbstract::SetOuterBorderWidth(frameNode, borderWidth);
-    }
+    ViewAbstract::SetOuterBorderWidth(frameNode, borderWidth);
 
     NG::BorderRadiusProperty borderRadius;
     SetOptionalBorder(borderRadius.radiusTopLeft, values, valuesSize, offset);
@@ -4044,10 +4056,7 @@ void SetOutline(ArkUINodeHandle node, const ArkUI_Float32* values, int32_t value
     SetOptionalBorder(borderRadius.radiusBottomLeft, values, valuesSize, offset);
     SetOptionalBorder(borderRadius.radiusBottomRight, values, valuesSize, offset);
     borderRadius.multiValued = true;
-    if (borderRadius.radiusTopLeft.has_value() || borderRadius.radiusTopRight.has_value() ||
-        borderRadius.radiusBottomLeft.has_value() || borderRadius.radiusBottomRight.has_value()) {
-        ViewAbstract::SetOuterBorderRadius(frameNode, borderRadius);
-    }
+    ViewAbstract::SetOuterBorderRadius(frameNode, borderRadius);
 
     int32_t colorAndStyleOffset = NUM_0; // offset for outline color and outline style
     NG::BorderColorProperty borderColors;
@@ -4418,8 +4427,8 @@ void GetMask(ArkUINodeHandle node, ArkUIMaskOptions* options)
     auto basicShape = ViewAbstract::GetMask(frameNode);
     options->type = static_cast<ArkUI_Int32>(basicShape->GetBasicShapeType());
     options->fill = basicShape->GetColor().GetValue();
-    options->strockColor = basicShape->GetStrokeColor();
-    options->strockWidth = basicShape->GetStrokeWidth();
+    options->strokeColor = basicShape->GetStrokeColor();
+    options->strokeWidth = basicShape->GetStrokeWidth();
     options->width = basicShape->GetWidth().Value();
     options->height = basicShape->GetHeight().Value();
     if (basicShape->GetBasicShapeType() == BasicShapeType::PATH) {
@@ -4437,12 +4446,12 @@ void GetMask(ArkUINodeHandle node, ArkUIMaskOptions* options)
     }
 }
 
-ArkUI_Int32 GetBlendMode(ArkUINodeHandle node)
+void GetBlendMode(ArkUINodeHandle node, ArkUIBlendModeOptions* options)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
-    CHECK_NULL_RETURN(frameNode, ERROR_INT_CODE);
-    int blendMode = static_cast<ArkUI_Int32>(ViewAbstract::GetBlendMode(frameNode));
-    return blendMode;
+    CHECK_NULL_VOID(frameNode);
+    options->blendMode = static_cast<ArkUI_Int32>(ViewAbstract::GetBlendMode(frameNode));
+    options->blendApplyType = static_cast<ArkUI_Int32>(ViewAbstract::GetBlendApplyType(frameNode));
 }
 
 ArkUI_Int32 GetDirection(ArkUINodeHandle node)
@@ -4863,6 +4872,20 @@ void SetOnClick(ArkUINodeHandle node, void* extraParam)
     }
 }
 
+void ConvertTouchLocationInfoToPoint(const TouchLocationInfo& locationInfo, ArkUITouchPoint& touchPoint)
+{
+    const OHOS::Ace::Offset& globalLocation = locationInfo.GetGlobalLocation();
+    const OHOS::Ace::Offset& localLocation = locationInfo.GetLocalLocation();
+    const OHOS::Ace::Offset& screenLocation = locationInfo.GetScreenLocation();
+    touchPoint.id = locationInfo.GetFingerId();
+    touchPoint.nodeX = PipelineBase::Px2VpWithCurrentDensity(localLocation.GetX());
+    touchPoint.nodeY = PipelineBase::Px2VpWithCurrentDensity(localLocation.GetY());
+    touchPoint.windowX = PipelineBase::Px2VpWithCurrentDensity(globalLocation.GetX());
+    touchPoint.windowY = PipelineBase::Px2VpWithCurrentDensity(globalLocation.GetY());
+    touchPoint.screenX = PipelineBase::Px2VpWithCurrentDensity(screenLocation.GetX());
+    touchPoint.screenY = PipelineBase::Px2VpWithCurrentDensity(screenLocation.GetY());
+}
+
 void SetOnTouch(ArkUINodeHandle node, void* extraParam)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -4877,41 +4900,29 @@ void SetOnTouch(ArkUINodeHandle node, void* extraParam)
         const std::list<TouchLocationInfo>& changeTouch = eventInfo.GetChangedTouches();
         if (changeTouch.size() > 0) {
             TouchLocationInfo front = changeTouch.front();
-            event.touchEvent.action = static_cast<ArkUITouchEventAction>(front.GetTouchType());
-            const OHOS::Ace::Offset& globalLocation = front.GetGlobalLocation();
-            const OHOS::Ace::Offset& localLocation = front.GetLocalLocation();
-            const OHOS::Ace::Offset& screenLocation = front.GetScreenLocation();
-            event.touchEvent.actionTouch.id = front.GetFingerId();
-            event.touchEvent.actionTouch.nodeX = PipelineBase::Px2VpWithCurrentDensity(localLocation.GetX());
-            event.touchEvent.actionTouch.nodeY = PipelineBase::Px2VpWithCurrentDensity(localLocation.GetY());
-            event.touchEvent.actionTouch.windowX = PipelineBase::Px2VpWithCurrentDensity(globalLocation.GetX());
-            event.touchEvent.actionTouch.windowY = PipelineBase::Px2VpWithCurrentDensity(globalLocation.GetY());
-            event.touchEvent.actionTouch.screenX = PipelineBase::Px2VpWithCurrentDensity(screenLocation.GetX());
-            event.touchEvent.actionTouch.screenY = PipelineBase::Px2VpWithCurrentDensity(screenLocation.GetY());
+            event.touchEvent.action = static_cast<int32_t>(front.GetTouchType());
+            ConvertTouchLocationInfoToPoint(front, event.touchEvent.actionTouchPoint);
         }
-        event.touchEvent.timeStamp = static_cast<double>(eventInfo.GetTimeStamp().time_since_epoch().count());
-        event.touchEvent.sourceType = static_cast<ArkUISourceType>(eventInfo.GetSourceDevice());
-
-        auto getTouchPoints = [](ArkUITouchPoint** points) -> ArkUI_Int32 {
-            const std::list<TouchLocationInfo>& touchList = globalEventInfo.GetTouches();
-            int index = 0;
-            *points = new ArkUITouchPoint[touchList.size()];
-            for (const auto& touchInfo : touchList) {
-                const OHOS::Ace::Offset& globalLocation = touchInfo.GetGlobalLocation();
-                const OHOS::Ace::Offset& localLocation = touchInfo.GetLocalLocation();
-                const OHOS::Ace::Offset& screenLocation = touchInfo.GetScreenLocation();
-                (*points)[index].id = touchInfo.GetFingerId();
-                (*points)[index].nodeX = PipelineBase::Px2VpWithCurrentDensity(localLocation.GetX());
-                (*points)[index].nodeY = PipelineBase::Px2VpWithCurrentDensity(localLocation.GetY());
-                (*points)[index].windowX = PipelineBase::Px2VpWithCurrentDensity(globalLocation.GetX());
-                (*points)[index].windowY = PipelineBase::Px2VpWithCurrentDensity(globalLocation.GetY());
-                (*points)[index].screenX = PipelineBase::Px2VpWithCurrentDensity(screenLocation.GetX());
-                (*points)[index].screenY = PipelineBase::Px2VpWithCurrentDensity(screenLocation.GetY());
-                index++;
+        event.touchEvent.timeStamp = eventInfo.GetTimeStamp().time_since_epoch().count();
+        event.touchEvent.sourceType = static_cast<int32_t>(eventInfo.GetSourceDevice());
+        std::array<ArkUITouchPoint, MAX_POINTS> touchPoints;
+        if (!eventInfo.GetTouches().empty()) {
+            size_t index = 0;
+            for (auto& touchLocationInfo: eventInfo.GetTouches()) {
+                if (index >= MAX_POINTS) {
+                    break;
+                }
+                ConvertTouchLocationInfoToPoint(touchLocationInfo, touchPoints[index++]);
             }
-            return index;
-        };
-        event.touchEvent.getTouches = std::move(getTouchPoints);
+            event.touchEvent.touchPointes = &touchPoints[0];
+            event.touchEvent.touchPointSize = eventInfo.GetTouches().size() < MAX_POINTS ?
+            eventInfo.GetTouches().size() : MAX_POINTS;
+        } else {
+            event.touchEvent.touchPointes = nullptr;
+            event.touchEvent.touchPointSize = 0;
+        }
+        event.touchEvent.historyEvents = nullptr;
+        event.touchEvent.historySize = 0;
         SendArkUIAsyncEvent(&event);
     };
     ViewAbstract::SetOnTouch(frameNode, std::move(onEvent));

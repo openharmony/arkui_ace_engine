@@ -37,9 +37,11 @@ enum class DragPreviewMode : int32_t {
     DISABLE_SCALE = 2,
 };
 
-typedef struct {
+struct DragPreviewOption {
     DragPreviewMode mode;
-} DragPreviewOption;
+    bool defaultAnimationBeforeLifting = false;
+    bool isMultiSelectionEnabled = false;
+};
 
 class ACE_EXPORT Gesture : public virtual AceType {
     DECLARE_ACE_TYPE(Gesture, AceType);
@@ -100,6 +102,14 @@ public:
         } else {
             gestureInfo_ = MakeRefPtr<GestureInfo>(tag);
         }
+    }
+
+    std::optional<std::string> GetTag()
+    {
+        if (gestureInfo_) {
+            return gestureInfo_->GetTag();
+        }
+        return std::nullopt;
     }
 
     virtual int32_t SizeofMe()

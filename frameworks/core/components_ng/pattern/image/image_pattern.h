@@ -138,6 +138,12 @@ public:
         }
     }
 
+    std::string GetImageFitStr(ImageFit value);
+
+    std::string GetImageRepeatStr(ImageRepeat value);
+
+    std::string GetImageColorFilterStr(const std::vector<float>& colorFilter);
+
     void SetSyncLoad(bool value)
     {
         syncLoad_ = value;
@@ -147,6 +153,8 @@ public:
     void SetImageAnalyzerConfig(void* config);
     void BeforeCreatePaintWrapper() override;
     void DumpInfo() override;
+    void DumpLayoutInfo();
+    void DumpRenderInfo();
     void DumpAdvanceInfo() override;
 
     WeakPtr<ImageLoadingContext> GetImageLoadingContext()
@@ -235,6 +243,7 @@ private:
     void OnDirectionConfigurationUpdate() override;
     void OnIconConfigurationUpdate() override;
     void OnConfigurationUpdate();
+    void ClearImageCache();
     void LoadImage(const ImageSourceInfo& src);
     void LoadAltImage(const ImageSourceInfo& altImageSourceInfo);
 

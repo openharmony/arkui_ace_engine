@@ -168,7 +168,8 @@ HWTEST_F(StageTestNg, PageEventHubTest002, TestSize.Level1)
      * @tc.expected: The CheckBoxGroupMap size meets expectations .
      */
     PageEventHub pageEventHub;
-    EXPECT_EQ(pageEventHub.GetCheckBoxGroupMap().size(), 0);
+    auto groupManager = pageEventHub.GetGroupManager();
+    EXPECT_EQ(groupManager->GetCheckBoxGroupMap().size(), 0);
 
     /**
      * @tc.steps: step2. build error pattern and add to the group.
@@ -177,17 +178,17 @@ HWTEST_F(StageTestNg, PageEventHubTest002, TestSize.Level1)
     auto errorPattern = AceType::MakeRefPtr<RadioPattern>();
     auto errorNode = FrameNode::CreateFrameNode(V2::CHECKBOXGROUP_ETS_TAG, CHECK_BOX_ID_FIRST, errorPattern);
     ElementRegister::GetInstance()->AddReferenced(CHECK_BOX_ID_FIRST, errorNode);
-    pageEventHub.RemoveCheckBoxFromGroup(TEST_GROUP_NAME, CHECK_BOX_ID_FIRST);
-    pageEventHub.AddCheckBoxGroupToGroup(TEST_GROUP_NAME, CHECK_BOX_ID_FIRST);
-    EXPECT_EQ(pageEventHub.GetCheckBoxGroupMap()[TEST_GROUP_NAME].size(), 0);
+    groupManager->RemoveCheckBoxFromGroup(TEST_GROUP_NAME, CHECK_BOX_ID_FIRST);
+    groupManager->AddCheckBoxGroupToGroup(TEST_GROUP_NAME, CHECK_BOX_ID_FIRST);
+    EXPECT_EQ(groupManager->GetCheckBoxGroupMap()[TEST_GROUP_NAME].size(), 0);
 
     /**
      * @tc.steps: step3. remove error pattern.
      * @tc.expected: The CheckBoxGroupMap[TEST_GROUP_NAME] has the error pattern.
      */
     ElementRegister::GetInstance()->RemoveItem(CHECK_BOX_ID_FIRST);
-    pageEventHub.RemoveCheckBoxFromGroup(TEST_GROUP_NAME, CHECK_BOX_ID_FIRST);
-    EXPECT_EQ(pageEventHub.GetCheckBoxGroupMap()[TEST_GROUP_NAME].size(), 0);
+    groupManager->RemoveCheckBoxFromGroup(TEST_GROUP_NAME, CHECK_BOX_ID_FIRST);
+    EXPECT_EQ(groupManager->GetCheckBoxGroupMap()[TEST_GROUP_NAME].size(), 0);
 
     /**
      * @tc.steps: step4. add real checkBoxGroup and add to the group.
@@ -196,31 +197,31 @@ HWTEST_F(StageTestNg, PageEventHubTest002, TestSize.Level1)
     auto checkBoxGroup = AceType::MakeRefPtr<CheckBoxGroupPattern>();
     auto checkBoxGroupNode = FrameNode::CreateFrameNode(V2::CHECKBOXGROUP_ETS_TAG, CHECK_BOX_ID_THIRD, checkBoxGroup);
     ElementRegister::GetInstance()->AddReferenced(CHECK_BOX_ID_THIRD, checkBoxGroupNode);
-    pageEventHub.AddCheckBoxGroupToGroup(TEST_GROUP_NAME, CHECK_BOX_ID_THIRD);
-    EXPECT_EQ(pageEventHub.GetCheckBoxGroupMap()[TEST_GROUP_NAME].size(), 1);
+    groupManager->AddCheckBoxGroupToGroup(TEST_GROUP_NAME, CHECK_BOX_ID_THIRD);
+    EXPECT_EQ(groupManager->GetCheckBoxGroupMap()[TEST_GROUP_NAME].size(), 1);
 
     /**
      * @tc.steps: step5. add checkBox to group
      * @tc.expected: add success.
      */
-    pageEventHub.AddCheckBoxToGroup(TEST_GROUP_NAME, CHECK_BOX_ID_SECOND);
-    EXPECT_EQ(pageEventHub.GetCheckBoxGroupMap()[TEST_GROUP_NAME].size(), 2);
+    groupManager->AddCheckBoxToGroup(TEST_GROUP_NAME, CHECK_BOX_ID_SECOND);
+    EXPECT_EQ(groupManager->GetCheckBoxGroupMap()[TEST_GROUP_NAME].size(), 2);
 
     /**
      * @tc.steps: step6. remove the checkBoxGroup from group.
      * @tc.expected: remove success.
      */
     ElementRegister::GetInstance()->RemoveItem(CHECK_BOX_ID_THIRD);
-    pageEventHub.RemoveCheckBoxFromGroup(TEST_GROUP_NAME, CHECK_BOX_ID_THIRD);
-    EXPECT_EQ(pageEventHub.GetCheckBoxGroupMap()[TEST_GROUP_NAME].size(), 1);
+    groupManager->RemoveCheckBoxFromGroup(TEST_GROUP_NAME, CHECK_BOX_ID_THIRD);
+    EXPECT_EQ(groupManager->GetCheckBoxGroupMap()[TEST_GROUP_NAME].size(), 1);
 
     /**
      * @tc.steps: step7. add checkBoxGroup to group again.
      * @tc.expected: add success.
      */
     ElementRegister::GetInstance()->AddReferenced(CHECK_BOX_ID_THIRD, checkBoxGroupNode);
-    pageEventHub.AddCheckBoxGroupToGroup(TEST_GROUP_NAME, CHECK_BOX_ID_THIRD);
-    EXPECT_EQ(pageEventHub.GetCheckBoxGroupMap()[TEST_GROUP_NAME].size(), 2);
+    groupManager->AddCheckBoxGroupToGroup(TEST_GROUP_NAME, CHECK_BOX_ID_THIRD);
+    EXPECT_EQ(groupManager->GetCheckBoxGroupMap()[TEST_GROUP_NAME].size(), 2);
 
     /**
      * @tc.steps: step8. build second checkBoxGroup to group.
@@ -230,8 +231,8 @@ HWTEST_F(StageTestNg, PageEventHubTest002, TestSize.Level1)
     auto checkBoxGroupNode2 =
         FrameNode::CreateFrameNode(V2::CHECKBOXGROUP_ETS_TAG, CHECK_BOX_ID_FOURTH, checkBoxGroup2);
     ElementRegister::GetInstance()->AddReferenced(CHECK_BOX_ID_FOURTH, checkBoxGroupNode2);
-    pageEventHub.RemoveCheckBoxFromGroup(TEST_GROUP_NAME, CHECK_BOX_ID_FIRST);
-    EXPECT_EQ(pageEventHub.GetCheckBoxGroupMap()[TEST_GROUP_NAME].size(), 2);
+    groupManager->RemoveCheckBoxFromGroup(TEST_GROUP_NAME, CHECK_BOX_ID_FIRST);
+    EXPECT_EQ(groupManager->GetCheckBoxGroupMap()[TEST_GROUP_NAME].size(), 2);
 }
 
 /**
@@ -246,7 +247,8 @@ HWTEST_F(StageTestNg, PageEventHubTest003, TestSize.Level1)
      * @tc.expected: The CheckBoxGroupMap size meets expectations .
      */
     PageEventHub pageEventHub;
-    EXPECT_EQ(pageEventHub.GetCheckBoxGroupMap().size(), 0);
+    auto groupManager = pageEventHub.GetGroupManager();
+    EXPECT_EQ(groupManager->GetCheckBoxGroupMap().size(), 0);
 
     /**
      * @tc.steps: step2. add real checkBoxGroup and add to the group.
@@ -255,15 +257,15 @@ HWTEST_F(StageTestNg, PageEventHubTest003, TestSize.Level1)
     auto checkBoxGroup = AceType::MakeRefPtr<CheckBoxGroupPattern>();
     auto checkBoxGroupNode = FrameNode::CreateFrameNode("CheckboxGroup2", CHECK_BOX_ID_FIRST, checkBoxGroup);
     ElementRegister::GetInstance()->AddReferenced(CHECK_BOX_ID_FIRST, checkBoxGroupNode);
-    pageEventHub.AddCheckBoxToGroup(TEST_GROUP_NAME, CHECK_BOX_ID_FIRST);
-    EXPECT_EQ(pageEventHub.GetCheckBoxGroupMap()[TEST_GROUP_NAME].size(), 1);
+    groupManager->AddCheckBoxToGroup(TEST_GROUP_NAME, CHECK_BOX_ID_FIRST);
+    EXPECT_EQ(groupManager->GetCheckBoxGroupMap()[TEST_GROUP_NAME].size(), 1);
 
     /**
      * @tc.steps: step3. add checkBox to group
      * @tc.expected: add success.
      */
-    pageEventHub.AddCheckBoxToGroup(TEST_GROUP_NAME, CHECK_BOX_ID_SECOND);
-    EXPECT_EQ(pageEventHub.GetCheckBoxGroupMap()[TEST_GROUP_NAME].size(), 2);
+    groupManager->AddCheckBoxToGroup(TEST_GROUP_NAME, CHECK_BOX_ID_SECOND);
+    EXPECT_EQ(groupManager->GetCheckBoxGroupMap()[TEST_GROUP_NAME].size(), 2);
 
     /**
      * @tc.steps: step4. add checkBoxGroup to group
@@ -271,8 +273,8 @@ HWTEST_F(StageTestNg, PageEventHubTest003, TestSize.Level1)
      */
     auto checkBoxGroupNode2 = FrameNode::CreateFrameNode(V2::CHECKBOXGROUP_ETS_TAG, CHECK_BOX_ID_FIRST, checkBoxGroup);
     ElementRegister::GetInstance()->AddReferenced(12, checkBoxGroupNode2);
-    pageEventHub.AddCheckBoxGroupToGroup(TEST_GROUP_NAME, 12);
-    EXPECT_EQ(pageEventHub.GetCheckBoxGroupMap()[TEST_GROUP_NAME].size(), 3);
+    groupManager->AddCheckBoxGroupToGroup(TEST_GROUP_NAME, 12);
+    EXPECT_EQ(groupManager->GetCheckBoxGroupMap()[TEST_GROUP_NAME].size(), 3);
     auto framenode = AccessibilityManager::DynamicCast<FrameNode>(checkBoxGroupNode);
     EXPECT_NE(framenode->GetTag(), V2::CHECKBOXGROUP_ETS_TAG);
 
@@ -280,16 +282,16 @@ HWTEST_F(StageTestNg, PageEventHubTest003, TestSize.Level1)
      * @tc.steps: step5. add checkBoxGroup to group
      * @tc.expected: add success.
      */
-    pageEventHub.AddCheckBoxGroupToGroup(TEST_GROUP_NAME, CHECK_BOX_ID_FIRST);
-    EXPECT_EQ(pageEventHub.GetCheckBoxGroupMap()[TEST_GROUP_NAME].size(), 3);
+    groupManager->AddCheckBoxGroupToGroup(TEST_GROUP_NAME, CHECK_BOX_ID_FIRST);
+    EXPECT_EQ(groupManager->GetCheckBoxGroupMap()[TEST_GROUP_NAME].size(), 3);
 
     /**
      * @tc.steps: step6. add checkBoxGroup to group
      * @tc.expected: add fail.
      */
     ElementRegister::GetInstance()->AddReferenced(CHECK_BOX_ID_SECOND, checkBoxGroupNode2);
-    pageEventHub.AddCheckBoxGroupToGroup(TEST_GROUP_NAME, 12);
-    EXPECT_EQ(pageEventHub.GetCheckBoxGroupMap()[TEST_GROUP_NAME].size(), 3);
+    groupManager->AddCheckBoxGroupToGroup(TEST_GROUP_NAME, 12);
+    EXPECT_EQ(groupManager->GetCheckBoxGroupMap()[TEST_GROUP_NAME].size(), 3);
 }
 
 /**

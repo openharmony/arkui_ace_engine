@@ -15,10 +15,34 @@
 
 #include "core/components_ng/base/modifier.h"
 
+#include "core/components_ng/base/extension_handler.h"
+
 namespace OHOS::Ace::NG {
 Modifier::Modifier()
 {
     static std::atomic<int32_t> genId = 0;
     id_ = genId.fetch_add(1, std::memory_order_relaxed);
 }
+
+void ContentModifier::Draw(DrawingContext& context)
+{
+    if (extensionHandler_) {
+        extensionHandler_->Draw(context);
+    } else {
+        onDraw(context);
+    }
 }
+
+void ContentModifier::SetExtensionHandler(ExtensionHandler* extensionHandler)
+{
+    extensionHandler_ = extensionHandler;
+    extensionHandler_->SetInvalidateRenderImpl([weak = WeakClaim(this)]() {
+        auto modifier = weak.Upgrade();
+        if (modifier) {
+            modifier->SetContentChange();
+        }
+    });
+    extensionHandler_->SetInnerDrawImpl([this](DrawingContext& context) { onDraw(context); });
+}
+
+} // namespace OHOS::Ace::NG

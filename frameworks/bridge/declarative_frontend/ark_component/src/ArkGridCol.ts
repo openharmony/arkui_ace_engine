@@ -115,8 +115,8 @@ class GridColOrderModifier extends ModifierWithKey<ArkGridColColumnOption> {
 }
 
 class ArkGridColComponent extends ArkComponent implements GridColAttribute {
-  constructor(nativePtr: KNode) {
-    super(nativePtr);
+  constructor(nativePtr: KNode, classType?: ModifierType) {
+    super(nativePtr, classType);
   }
   span(value: number | GridColColumnOption): GridColAttribute {
     modifierWithKey(this._modifiersWithKeys, GridColSpanModifier.identity, GridColSpanModifier, value);
@@ -133,13 +133,10 @@ class ArkGridColComponent extends ArkComponent implements GridColAttribute {
 }
 
 // @ts-ignore
-globalThis.GridCol.attributeModifier = function (modifier) {
-  const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
-  let nativeNode = getUINativeModule().getFrameNodeById(elmtId);
-
-  let component = this.createOrGetNode(elmtId, () => {
-    return new ArkGridColComponent(nativeNode);
+globalThis.GridCol.attributeModifier = function (modifier: ArkComponent): void {
+  attributeModifierFunc.call(this, modifier, (nativePtr: KNode) => {
+    return new ArkGridColComponent(nativePtr);
+  }, (nativePtr: KNode, classType: ModifierType, modifierJS: ModifierJS) => {
+    return new modifierJS.GridColModifier(nativePtr, classType);
   });
-  applyUIAttributes(modifier, nativeNode, component);
-  component.applyModifierPatch();
 };

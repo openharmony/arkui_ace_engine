@@ -165,6 +165,10 @@ public:
         isOnAnimation_ = isOnAnimation;
     }
 
+    WeakPtr<UINode> GetCustomNode() const {
+        return customNode_;
+    }
+
     void OnDetachFromMainTree(bool recursive) override;
     void OnAttachToMainTree(bool recursive) override;
 
@@ -178,10 +182,12 @@ private:
         RefPtr<FrameNode>& navigationContentNode, int32_t& slot, bool& hasChanged);
     void RemoveRedundantNavDestination(RefPtr<FrameNode>& navigationContentNode,
         const RefPtr<UINode>& remainChild, size_t slot, bool& hasChanged);
+    bool FindNavigationParent(const std::string& parentName);
 
     RefPtr<UINode> navBarNode_;
     RefPtr<UINode> contentNode_;
     RefPtr<UINode> dividerNode_;
+    WeakPtr<UINode> customNode_;
     std::vector<RefPtr<NavDestinationGroupNode>> hideNodes_; // dialog destination hide pages.
     int32_t lastStandardIndex_ = -1;
     bool isOnAnimation_ { false };

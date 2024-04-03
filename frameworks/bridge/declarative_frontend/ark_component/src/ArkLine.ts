@@ -16,8 +16,8 @@
 /// <reference path='./import.ts' />
 /// <reference path='./ArkCommonShape.ts' />
 class ArkLineComponent extends ArkCommonShapeComponent implements LineAttribute {
-  constructor(nativePtr: KNode) {
-    super(nativePtr);
+  constructor(nativePtr: KNode, classType?: ModifierType) {
+    super(nativePtr, classType);
   }
   startPoint(value: Array<Length>): this {
     modifierWithKey(this._modifiersWithKeys, LineStartPointModifier.identity, LineStartPointModifier, value);
@@ -66,12 +66,10 @@ class LineEndPointModifier extends ModifierWithKey<object> {
 }
 
 // @ts-ignore
-globalThis.Line.attributeModifier = function (modifier) {
-  const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
-  let nativeNode = getUINativeModule().getFrameNodeById(elmtId);
-  let component = this.createOrGetNode(elmtId, () => {
-    return new ArkLineComponent(nativeNode);
+globalThis.Line.attributeModifier = function (modifier: ArkComponent): void {
+  attributeModifierFunc.call(this, modifier, (nativePtr: KNode) => {
+    return new ArkLineComponent(nativePtr);
+  }, (nativePtr: KNode, classType: ModifierType, modifierJS: ModifierJS) => {
+    return new modifierJS.LineModifier(nativePtr, classType);
   });
-  applyUIAttributes(modifier, nativeNode, component);
-  component.applyModifierPatch();
 };

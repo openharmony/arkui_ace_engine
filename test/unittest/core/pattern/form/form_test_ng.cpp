@@ -498,7 +498,8 @@ HWTEST_F(FormTestNg, CreateCardContainer002, TestSize.Level1)
      */
     FormManager::GetInstance().AddSubContainer(1, subContainer);
     ASSERT_EQ(Container::IsCurrentUseNewPipeline(), true);
-    ASSERT_EQ(frameNode->GetContext()->GetInstanceId(), FormManager::GetInstance().GetSubContainer(1)->GetInstanceId());
+    ASSERT_EQ(
+        frameNode->GetContextRefPtr()->GetInstanceId(), FormManager::GetInstance().GetSubContainer(1)->GetInstanceId());
     pattern->CreateCardContainer();
     ASSERT_EQ(FormManager::GetInstance().GetSubContainer(1), nullptr);
 

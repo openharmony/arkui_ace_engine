@@ -43,8 +43,9 @@ public:
     void CloseSelectionMenu() override;
     void UpdateParagraphStyle(int32_t start, int32_t end, const struct UpdateParagraphStyle& style) override;
     void SetSelection(int32_t selectionStart, int32_t selectionEnd,
-        const std::optional<SelectionOptions>& options = std::nullopt) override;
+        const std::optional<SelectionOptions>& options = std::nullopt, bool isForward = false) override;
     bool IsEditing() override;
+    void StopEditing() override;
 
 private:
     WeakPtr<RichEditorPattern> pattern_;

@@ -92,6 +92,12 @@ public:
         isSetClickedColor_ = true;
     }
 
+    void SetBlendColor(const std::optional<Color>& blendClickColor, const std::optional<Color>& blendHoverColor)
+    {
+        blendClickColor_ = blendClickColor;
+        blendHoverColor_ = blendHoverColor;
+    }
+
     void SetFocusBorderColor(const Color& color)
     {
         focusBorderColor_ = color;
@@ -314,8 +320,15 @@ protected:
     void OnTouchUp();
     void HandleHoverEvent(bool isHover);
     void HandleBackgroundColor();
+    void HandleBorderColorAndWidth();
     void HandleEnabled();
     void InitButtonLabel();
+    void InitFocusEvent();
+    void HandleFocusEvent(RefPtr<ButtonLayoutProperty>,
+        RefPtr<RenderContext>, RefPtr<ButtonTheme>, RefPtr<TextLayoutProperty>, RefPtr<FrameNode>);
+    void HandleBlurEvent(RefPtr<ButtonLayoutProperty>,
+        RefPtr<RenderContext>, RefPtr<ButtonTheme>, RefPtr<TextLayoutProperty>, RefPtr<FrameNode>);
+    Color GetColorFromType(const RefPtr<ButtonTheme>& theme, const int32_t& type);
     void AnimateTouchAndHover(RefPtr<RenderContext>& renderContext, int32_t typeFrom, int32_t typeTo, int32_t duration,
         const RefPtr<Curve>& curve);
     Color clickedColor_;
@@ -330,6 +343,7 @@ private:
     Color focusBorderColor_;
     Color themeBgColor_;
     Color themeTextColor_;
+    Color borderColor_;
     bool isSetClickedColor_ = false;
     ComponentButtonType buttonType_ = ComponentButtonType::BUTTON;
 
@@ -341,10 +355,19 @@ private:
     bool isInHover_ = false;
     Offset localLocation_;
     Dimension focusBorderWidth_;
+    Dimension borderWidth_;
+
+    std::optional<Color> blendClickColor_ = std::nullopt;
+    std::optional<Color> blendHoverColor_ = std::nullopt;
 
     bool isColorUpdateFlag_ = false;
     SizeF preFrameSize_;
     ACE_DISALLOW_COPY_AND_MOVE(ButtonPattern);
+    bool focusEventInitialized_ = false;
+    bool focusTextColorModify_ = false;
+    bool bgColorModify_ = false;
+    bool scaleModify_ = false;
+    bool shadowModify_ = false;
 };
 } // namespace OHOS::Ace::NG
 

@@ -84,6 +84,9 @@ public:
     void CloseDialogNG(const RefPtr<NG::FrameNode>& dialogNode);
     void OpenCustomDialogNG(const DialogProperties& dialogProps, std::function<void(int32_t)>&& callback);
     void CloseCustomDialogNG(int32_t dialogId);
+    void CloseCustomDialogNG(const WeakPtr<NG::UINode>& node, std::function<void(int32_t)>&& callback);
+    void UpdateCustomDialogNG(const WeakPtr<NG::UINode>& node, const PromptDialogAttr &dialogAttr,
+        std::function<void(int32_t)>&& callback);
     void HideSubWindowNG();
     void HideDialogSubWindow(int32_t instanceId);
     void SetDialogHotAreas(const std::vector<Rect>& rects, int32_t overlayId, int32_t instanceId);
@@ -120,9 +123,11 @@ public:
     void RequestFocusSubwindow(int32_t instanceId);
     void OpenCustomDialog(const PromptDialogAttr &dialogAttr, std::function<void(int32_t)> &&callback);
     void CloseCustomDialog(const int32_t dialogId);
+    void CloseCustomDialog(const WeakPtr<NG::UINode>& node, std::function<void(int32_t)> &&callback);
 
     bool GetShown();
     void ResizeWindowForFoldStatus(int32_t parentContainerId);
+    void MarkDirtyDialogSafeArea();
 private:
     RefPtr<Subwindow> GetOrCreateSubWindow();
 

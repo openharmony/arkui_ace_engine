@@ -81,8 +81,8 @@ class GridItemColumnEndModifier extends ModifierWithKey<number> {
 }
 
 class ArkGridItemComponent extends ArkComponent implements GridItemAttribute {
-  constructor(nativePtr: KNode) {
-    super(nativePtr);
+  constructor(nativePtr: KNode, classType?: ModifierType) {
+    super(nativePtr, classType);
   }
   rowStart(value: number): this {
     modifierWithKey(this._modifiersWithKeys, GridItemRowStartModifier.identity, GridItemRowStartModifier, value);
@@ -117,12 +117,10 @@ class ArkGridItemComponent extends ArkComponent implements GridItemAttribute {
 }
 
 // @ts-ignore
-globalThis.GridItem.attributeModifier = function (modifier) {
-  const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
-  let nativeNode = getUINativeModule().getFrameNodeById(elmtId);
-  let component = this.createOrGetNode(elmtId, () => {
-    return new ArkGridItemComponent(nativeNode);
+globalThis.GridItem.attributeModifier = function (modifier: ArkComponent): void {
+  attributeModifierFunc.call(this, modifier, (nativePtr: KNode) => {
+    return new ArkGridItemComponent(nativePtr);
+  }, (nativePtr: KNode, classType: ModifierType, modifierJS: ModifierJS) => {
+    return new modifierJS.GridItemModifier(nativePtr, classType);
   });
-  applyUIAttributes(modifier, nativeNode, component);
-  component.applyModifierPatch();
 };
