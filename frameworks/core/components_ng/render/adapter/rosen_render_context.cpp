@@ -3791,7 +3791,9 @@ void RosenRenderContext::PaintProgressMask()
 {
     CHECK_NULL_VOID(rsNode_);
     if (!moonProgressModifier_) {
-        moonProgressModifier_ = AceType::MakeRefPtr<MoonProgressModifier>();
+        auto host = GetHost();
+        CHECK_NULL_VOID(host);
+        moonProgressModifier_ = AceType::MakeRefPtr<MoonProgressModifier>(host);
         auto modifierAdapter =
             std::static_pointer_cast<OverlayModifierAdapter>(ConvertOverlayModifier(moonProgressModifier_));
         rsNode_->AddModifier(modifierAdapter);
