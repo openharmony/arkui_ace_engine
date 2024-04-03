@@ -121,6 +121,10 @@ public:
         }
         json->Put("wordBreak",
             V2::ConvertWrapWordBreakToString(GetWordBreak().value_or(WordBreak::BREAK_WORD)).c_str());
+        json->Put("textOverflow",
+            V2::ConvertWrapTextOverflowToString(GetTextOverflow().value_or(TextOverflow::CLIP)).c_str());
+        json->Put("textIndent",
+            std::to_string(static_cast<int32_t>(GetTextIndent().value_or(0.0_vp).Value())).c_str());
     }
 
     ACE_DEFINE_PROPERTY_GROUP(FontStyle, FontStyle);
@@ -145,6 +149,8 @@ public:
         TextLineStyle, HeightAdaptivePolicy, TextHeightAdaptivePolicy, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(TextLineStyle, LineHeight, Dimension, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(TextLineStyle, WordBreak, WordBreak, PROPERTY_UPDATE_MEASURE);
+    ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(TextLineStyle, TextOverflow, TextOverflow, PROPERTY_UPDATE_MEASURE);
+    ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(TextLineStyle, TextIndent, Dimension, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(Value, std::string, PROPERTY_UPDATE_NORMAL);
 
     ACE_DEFINE_PROPERTY_GROUP(PlaceholderFontStyle, FontStyle);

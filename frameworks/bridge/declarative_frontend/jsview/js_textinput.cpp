@@ -114,6 +114,8 @@ void JSTextInput::JSBind(BindingTarget globalObj)
     JSClass<JSTextInput>::StaticMethod("letterSpacing", &JSTextField::SetLetterSpacing);
     JSClass<JSTextInput>::StaticMethod("lineHeight", &JSTextField::SetLineHeight);
     JSClass<JSTextInput>::StaticMethod("fontFeature", &JSTextField::SetFontFeature);
+    JSClass<JSTextInput>::StaticMethod("textOverflow", &JSTextField::SetTextOverflow);
+    JSClass<JSTextInput>::StaticMethod("textIndent", &JSTextField::SetTextIndent);
 
     JSClass<JSTextInput>::InheritAndBind<JSViewAbstract>(globalObj);
 }

@@ -80,6 +80,8 @@ const std::vector<TextAlign> TEXT_ALIGNS = { TextAlign::START, TextAlign::CENTER
 const std::vector<FontStyle> FONT_STYLES = { FontStyle::NORMAL, FontStyle::ITALIC };
 const std::vector<std::string> INPUT_FONT_FAMILY_VALUE = { "sans-serif" };
 const std::vector<WordBreak> WORD_BREAK_TYPES = { WordBreak::NORMAL, WordBreak::BREAK_ALL, WordBreak::BREAK_WORD };
+const std::vector<TextOverflow> TEXT_OVERFLOWS = { TextOverflow::NONE, TextOverflow::CLIP, TextOverflow::ELLIPSIS,
+    TextOverflow::MARQUEE };
 constexpr uint32_t MAX_LINES = 3;
 constexpr uint32_t MINI_VAILD_VALUE = 1;
 constexpr uint32_t MAX_VAILD_VALUE = 100;
@@ -1460,5 +1462,31 @@ void JSTextField::SetFontFeature(const JSCallbackInfo& info)
 
     std::string fontFeatureSettings = info[0]->ToString();
     TextFieldModel::GetInstance()->SetFontFeature(ParseFontFeatureSettings(fontFeatureSettings));
+}
+
+void JSTextField::SetTextOverflow(const JSCallbackInfo& info)
+{
+    do {
+        auto tmpInfo = info[0];
+        if (info.Length() < 1 || !tmpInfo->IsNumber() || tmpInfo->IsUndefined()) {
+            break;
+        }
+        auto overflow = tmpInfo->ToNumber<int32_t>();
+        if (overflow < 0 || overflow >= static_cast<int32_t>(TEXT_OVERFLOWS.size())) {
+            break;
+        }
+        TextFieldModel::GetInstance()->SetTextOverflow(TEXT_OVERFLOWS[overflow]);
+    } while (false);
+
+    info.SetReturnValue(info.This());
+}
+
+void JSTextField::SetTextIndent(const JSCallbackInfo& info)
+{
+    CalcDimension value;
+    if (!ParseJsDimensionVpNG(info[0], value, true)) {
+        value.Reset();
+    }
+    TextFieldModel::GetInstance()->SetTextIndent(value);
 }
 } // namespace OHOS::Ace::Framework

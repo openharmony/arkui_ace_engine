@@ -456,6 +456,45 @@ void SearchModelNG::SetTextColor(const Color& color)
     textFieldChild->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
 }
 
+void SearchModelNG::SetInputFilter(const std::string& value, const std::function<void(const std::string&)>& onError)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto textFieldChild = AceType::DynamicCast<FrameNode>(frameNode->GetChildren().front());
+    CHECK_NULL_VOID(textFieldChild);
+    auto textFieldLayoutProperty = textFieldChild->GetLayoutProperty<TextFieldLayoutProperty>();
+    CHECK_NULL_VOID(textFieldLayoutProperty);
+    textFieldLayoutProperty->UpdateInputFilter(value);
+    textFieldChild->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+
+    auto textFieldEventHub = textFieldChild->GetEventHub<TextFieldEventHub>();
+    CHECK_NULL_VOID(textFieldEventHub);
+    textFieldEventHub->SetOnInputFilterError(onError);
+}
+
+void SearchModelNG::SetOnEditChanged(std::function<void(bool)>&& func)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto textFieldChild = AceType::DynamicCast<FrameNode>(frameNode->GetChildren().front());
+    CHECK_NULL_VOID(textFieldChild);
+    auto textFieldEventHub = textFieldChild->GetEventHub<TextFieldEventHub>();
+    CHECK_NULL_VOID(textFieldEventHub);
+    textFieldEventHub->SetOnEditChanged(std::move(func));
+}
+
+void SearchModelNG::SetTextIndent(const Dimension& value)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto textFieldChild = AceType::DynamicCast<FrameNode>(frameNode->GetChildren().front());
+    CHECK_NULL_VOID(textFieldChild);
+    auto textFieldLayoutProperty = textFieldChild->GetLayoutProperty<TextFieldLayoutProperty>();
+    CHECK_NULL_VOID(textFieldLayoutProperty);
+    textFieldLayoutProperty->UpdateTextIndent(value);
+    textFieldChild->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+}
+
 void SearchModelNG::SetTextAlign(const TextAlign& textAlign)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();

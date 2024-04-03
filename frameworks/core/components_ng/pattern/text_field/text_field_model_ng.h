@@ -116,6 +116,8 @@ public:
     static void SetTextDecorationStyle(FrameNode* frameNode, TextDecorationStyle value);
     static void SetLetterSpacing(FrameNode* frameNode, const Dimension& value);
     static void SetLineHeight(FrameNode* frameNode, const Dimension& value);
+    void SetTextOverflow(Ace::TextOverflow value) override;
+    void SetTextIndent(const Dimension& value) override;
     static RefPtr<FrameNode> CreateFrameNode(int32_t nodeId, const std::optional<std::string>& placeholder,
         const std::optional<std::string>& value, bool isTextArea);
     static void SetAdaptMinFontSize(FrameNode* frameNode, const Dimension& value);

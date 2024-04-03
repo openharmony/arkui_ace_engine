@@ -306,6 +306,8 @@ public:
     virtual void SetTextDecorationStyle(Ace::TextDecorationStyle value) {};
     virtual void SetFontFeature(const std::unordered_map<std::string, int32_t>& value) = 0;
 
+    virtual void SetTextOverflow(Ace::TextOverflow value) {};
+    virtual void SetTextIndent(const Dimension& value) {};
 private:
     static std::unique_ptr<TextFieldModel> instance_;
     static std::mutex mutex_;
