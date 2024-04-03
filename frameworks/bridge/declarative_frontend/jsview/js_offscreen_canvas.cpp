@@ -301,8 +301,8 @@ napi_value JSOffscreenCanvas::onTransferToImageBitmap(napi_env env)
         return nullptr;
     }
     uint32_t id = offscreenCanvasContext_->GetId();
-    auto final_height = static_cast<uint32_t>(GetHeight());
-    auto final_width = static_cast<uint32_t>(GetWidth());
+    auto final_height = static_cast<uint32_t>(PipelineBase::Px2VpWithCurrentDensity(GetHeight()));
+    auto final_width = static_cast<uint32_t>(PipelineBase::Px2VpWithCurrentDensity(GetWidth()));
     napi_value renderImage = nullptr;
     napi_value jsType = nullptr;
     napi_value jsId = nullptr;
@@ -317,6 +317,7 @@ napi_value JSOffscreenCanvas::onTransferToImageBitmap(napi_env env)
     napi_set_named_property(env, renderImage, "__id", jsId);
     napi_set_named_property(env, renderImage, "height", jsHeight);
     napi_set_named_property(env, renderImage, "width", jsWidth);
+    BindNativeFunction(env, renderImage, "close", JSRenderImage::JsClose);
     return renderImage;
 }
 

@@ -53,6 +53,22 @@ namespace OHOS::Ace::NG {
 namespace {
 constexpr float PAN_MAX_VELOCITY = 2000.0f;
 
+void SetSelfAndChildDraggableFalse(const RefPtr<UINode>& customNode)
+{
+    CHECK_NULL_VOID(customNode);
+    auto frameNode = AceType::DynamicCast<FrameNode>(customNode);
+    if (frameNode) {
+        auto eventHub = frameNode->GetEventHub<EventHub>();
+        CHECK_NULL_VOID(eventHub);
+        auto gestureEventHub = eventHub->GetGestureEventHub();
+        CHECK_NULL_VOID(gestureEventHub);
+        gestureEventHub->SetDragForbiddenForcely(true);
+    }
+    for (const auto& child : customNode->GetChildren()) {
+        SetSelfAndChildDraggableFalse(child);
+    }
+}
+
 // create menuWrapper and menu node, update menu props
 std::pair<RefPtr<FrameNode>, RefPtr<FrameNode>> CreateMenu(int32_t targetId, const std::string& targetTag = "",
     MenuType type = MenuType::MENU, const bool hasPreviewTransitionEffect = false,
@@ -87,6 +103,19 @@ std::pair<RefPtr<FrameNode>, RefPtr<FrameNode>> CreateMenu(int32_t targetId, con
         previewNode->AddChild(previewCustomNode);
         previewNode->MountToParent(wrapperNode);
         previewNode->MarkModifyDone();
+        SetSelfAndChildDraggableFalse(previewCustomNode);
+        
+        auto pipeline = PipelineContext::GetMainPipelineContext();
+        CHECK_NULL_RETURN(pipeline, std::make_pair(wrapperNode, menuNode));
+        auto manager = pipeline->GetOverlayManager();
+        CHECK_NULL_RETURN(manager, std::make_pair(wrapperNode, menuNode));
+        auto gatherNode = manager->GetGatherNode();
+        CHECK_NULL_RETURN(gatherNode, std::make_pair(wrapperNode, menuNode));
+        auto textNode = FrameNode::GetOrCreateFrameNode(V2::TEXT_ETS_TAG,
+            ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<TextPattern>(); });
+        CHECK_NULL_RETURN(textNode, std::make_pair(wrapperNode, menuNode));
+        textNode->MountToParent(wrapperNode);
+        textNode->MarkModifyDone();
     }
 
     return { wrapperNode, menuNode };
@@ -275,14 +304,25 @@ void ShowPixelMapAnimation(const RefPtr<FrameNode>& imageNode, const RefPtr<Fram
     ShowBorderRadiusAndShadowAnimation(menuTheme, imageContext);
 }
 
-void ShowGatherAnimation(const RefPtr<FrameNode>& imageNode)
+void ShowGatherAnimation(const RefPtr<FrameNode>& imageNode, const RefPtr<FrameNode>& menuNode)
 {
     auto mainPipeline = PipelineContext::GetMainPipelineContext();
     CHECK_NULL_VOID(mainPipeline);
     auto manager = mainPipeline->GetOverlayManager();
     CHECK_NULL_VOID(manager);
-    mainPipeline->AddAfterRenderTask([imageNode, manager]() {
+    auto gatherNode = manager->GetGatherNode();
+    CHECK_NULL_VOID(gatherNode);
+    auto textNode = FrameNode::GetOrCreateFrameNode(V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        []() { return AceType::MakeRefPtr<TextPattern>(); });
+    CHECK_NULL_VOID(textNode);
+    textNode->MountToParent(menuNode);
+    textNode->MarkModifyDone();
+    auto menuPattern = GetMenuPattern(menuNode);
+    CHECK_NULL_VOID(menuPattern);
+    mainPipeline->AddAfterRenderTask([imageNode, manager, textNode, menuPattern]() {
         DragAnimationHelper::PlayGatherAnimation(imageNode, manager);
+        DragAnimationHelper::CalcBadgeTextPosition(menuPattern, manager, imageNode, textNode);
+        DragAnimationHelper::ShowBadgeAnimation(textNode);
     });
 }
 
@@ -355,7 +395,7 @@ void SetPixelMap(const RefPtr<FrameNode>& target, const RefPtr<FrameNode>& menuN
         layoutProperty->UpdateVisibility(VisibleType::VISIBLE, true);
     } else {
         ShowPixelMapAnimation(imageNode, menuNode);
-        ShowGatherAnimation(imageNode);
+        ShowGatherAnimation(imageNode, menuNode);
     }
 }
 

@@ -148,6 +148,11 @@ public:
     void ShowDialog(const PromptDialogAttr &dialogAttr, const std::vector<ButtonInfo> &buttons,
         std::function<void(int32_t, int32_t)> &&callback, const std::set<std::string> &callbacks,
         std::function<void(bool)>&& onStatusChanged) override;
+    void OpenCustomDialog(const PromptDialogAttr &dialogAttr, std::function<void(int32_t)> &&callback) override;
+    void CloseCustomDialog(const int32_t dialogId) override;
+    void CloseCustomDialog(const WeakPtr<NG::UINode>& node, std::function<void(int32_t)> &&callback) override;
+    void UpdateCustomDialog(const WeakPtr<NG::UINode>& node, const PromptDialogAttr &dialogAttr,
+        std::function<void(int32_t)> &&callback) override;
 
     void EnableAlertBeforeBackPage(const std::string& message, std::function<void(int32_t)>&& callback) override;
 
@@ -293,6 +298,8 @@ public:
     void RebuildAllPages();
 
 private:
+    DialogProperties ParsePropertiesFromAttr(const PromptDialogAttr &dialogAttr);
+
     PipelineContextHolder pipelineContextHolder_;
     RefPtr<TaskExecutor> taskExecutor_;
     RefPtr<NG::PageRouterManager> pageRouterManager_;

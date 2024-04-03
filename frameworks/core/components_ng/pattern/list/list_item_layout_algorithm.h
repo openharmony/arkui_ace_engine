@@ -84,6 +84,8 @@ public:
         return indexInListItemGroup_;
     }
 
+    void Initialize(LayoutWrapper* layoutWrapper);
+
 private:
     int32_t startNodeIndex_;
     int32_t endNodeIndex_;

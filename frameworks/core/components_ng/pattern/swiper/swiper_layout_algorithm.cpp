@@ -443,12 +443,13 @@ void SwiperLayoutAlgorithm::MeasureSwiper(
         currentIndex_ = jumpIndex_.value();
     } else if (hasCachedCapture_) {
         if (targetIndex_.has_value()) {
+            auto firstItemIndex = prevItemPosition_.begin()->first;
             // Swipe to the left, layout forward from (targetIndex - 1)
-            if (targetIndex_.value() > startIndexInVisibleWindow) {
+            if (targetIndex_.value() > firstItemIndex) {
                 LayoutForward(layoutWrapper, layoutConstraint, axis, targetIndex_.value() - 1,
                     prevItemPosition_[targetIndex_.value() - 1].startPos);
                 // Swipe to the right, layout backward from (endIndex - 1)
-            } else if (targetIndex_.value() < startIndexInVisibleWindow) {
+            } else if (targetIndex_.value() < firstItemIndex) {
                 auto basicItem = ++prevItemPosition_.rbegin();
                 LayoutBackward(layoutWrapper, layoutConstraint, axis, basicItem->first, basicItem->second.endPos);
                 // captures need not to be updated

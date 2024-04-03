@@ -146,8 +146,7 @@ enum class VsyncExcepType {
 enum class RawEventType { WARNING, FREEZE, RECOVER };
 
 enum class PerformanceExecpType {
-    PAGE_LAYOUT_TIMEOUT = 0,
-    PAGE_NODE_OVERFLOW,
+    PAGE_NODE_OVERFLOW = 0,
     PAGE_DEPTH_OVERFLOW,
     FUNCTION_TIMEOUT
 };

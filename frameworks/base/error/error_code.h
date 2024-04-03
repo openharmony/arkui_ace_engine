@@ -43,10 +43,12 @@ constexpr int32_t ERROR_CODE_UIEXTENSION_NOT_REGISTER_SYNC_CALLBACK = 100011;
 constexpr int32_t ERROR_CODE_UIEXTENSION_TRANSFER_DATA_FAILED = 100012;
 // Forbid cascade uiextension
 constexpr int32_t ERROR_CODE_UIEXTENSION_FORBID_CASCADE = 100013;
-// The uiextension provider exited abnormally.
+// The uiextension ability exited abnormally.
 constexpr int32_t ERROR_CODE_UIEXTENSION_EXITED_ABNORMALLY = 100014;
-// The lifecycle of uiextension provider is timeout.
+// The lifecycle of uiextension ability is timeout.
 constexpr int32_t ERROR_CODE_UIEXTENSION_LIFECYCLE_TIMEOUT = 100015;
+// The uiextension ability has timed out processing the key event.
+constexpr int32_t ERROR_CODE_UIEXTENSION_EVENT_TIMEOUT = 100016;
 
 // C-API errors
 constexpr int32_t ERROR_CODE_NATIVE_IMPL_LIBRARY_NOT_FOUND = 106101;
@@ -62,4 +64,8 @@ constexpr int32_t ERROR_CODE_AI_ANALYSIS_IS_STOPPED = 110003;
 constexpr int32_t ERROR_CODE_DRAG_DATA_NOT_FOUND = 190001; // GetData failed, data not found.
 constexpr int32_t ERROR_CODE_DRAG_DATA_ERROR = 190002;     // GetData failed, data error.
 
+// custom dialog error code
+constexpr int32_t ERROR_CODE_DIALOG_CONTENT_ERROR = 103301;
+constexpr int32_t ERROR_CODE_DIALOG_CONTENT_ALREADY_EXIST = 103302;
+constexpr int32_t ERROR_CODE_DIALOG_CONTENT_NOT_FOUND = 103303;
 } // namespace OHOS::Ace

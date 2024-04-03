@@ -16,12 +16,13 @@
 /// <reference path='./import.ts' />
 class VideoModifier extends ArkVideoComponent implements AttributeModifier<VideoAttribute> {
 
-  constructor(nativePtr: KNode) {
-    super(nativePtr);
+  constructor(nativePtr: KNode, classType: ModifierType) {
+    super(nativePtr, classType);
     this._modifiersWithKeys = new ModifierMap();
   }
 
   applyNormalAttribute(instance: VideoAttribute): void {
-    applyAndMergeModifier<VideoAttribute, ArkVideoComponent, ArkComponent>(instance, this);
+    ModifierUtils.applySetOnChange(this);
+    ModifierUtils.applyAndMergeModifier<VideoAttribute, ArkVideoComponent, ArkComponent>(instance, this);
   }
 }

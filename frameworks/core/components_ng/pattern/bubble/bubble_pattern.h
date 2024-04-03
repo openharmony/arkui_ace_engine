@@ -203,6 +203,12 @@ protected:
     {
         return false;
     }
+
+    bool AvoidBottom() const override
+    {
+        return false;
+    }
+
 private:
     void OnModifyDone() override;
     void OnAttachToFrameNode() override;

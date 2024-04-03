@@ -16,12 +16,13 @@
 /// <reference path='./import.ts' />
 class ProgressModifier extends ArkProgressComponent implements AttributeModifier<ProgressAttribute> {
 
-  constructor(nativePtr: KNode) {
-    super(nativePtr);
+  constructor(nativePtr: KNode, classType: ModifierType) {
+    super(nativePtr, classType);
     this._modifiersWithKeys = new ModifierMap();
   }
 
   applyNormalAttribute(instance: ProgressAttribute): void {
-    applyAndMergeModifier<ProgressAttribute, ArkProgressComponent, ArkComponent>(instance, this);
+    ModifierUtils.applySetOnChange(this);
+    ModifierUtils.applyAndMergeModifier<ProgressAttribute, ArkProgressComponent, ArkComponent>(instance, this);
   }
 }

@@ -112,17 +112,20 @@ public:
     // use for navRouter case
     void AddNavDestinationNode(const std::string& name, const RefPtr<UINode>& navDestinationNode)
     {
+        addByNavRouter_ = true;
         navigationStack_->Add(name, navDestinationNode);
     }
 
     void AddNavDestinationNode(const std::string& name, const RefPtr<UINode>& navDestinationNode, NavRouteMode mode)
     {
+        addByNavRouter_ = true;
         navigationStack_->Add(name, navDestinationNode, mode);
     }
 
     void AddNavDestinationNode(const std::string& name, const RefPtr<UINode>& navDestinationNode, NavRouteMode mode,
         const RefPtr<RouteInfo>& routeInfo)
     {
+        addByNavRouter_ = true;
         navigationStack_->Add(name, navDestinationNode, mode, routeInfo);
     }
 
@@ -309,6 +312,10 @@ public:
 
     static void FireNavigationStateChange(const RefPtr<UINode>& node, bool isShow);
 
+    static void FireNavigationChange(const RefPtr<UINode>& node, bool isShow, bool isFirst);
+
+    static void FireNavigationInner(const RefPtr<UINode>& node, bool isShow);
+
     static void FireNavigationLifecycleChange(const RefPtr<UINode>& node, NavDestinationLifecycle lifecycle);
 
     // type: will_show + on_show, will_hide + on_hide, hide, show, willShow, willHide
@@ -360,7 +367,8 @@ public:
 
 private:
     void CheckTopNavPathChange(const std::optional<std::pair<std::string, RefPtr<UINode>>>& preTopNavPath,
-        const std::optional<std::pair<std::string, RefPtr<UINode>>>& newTopNavPath);
+        const std::optional<std::pair<std::string, RefPtr<UINode>>>& newTopNavPath,
+        std::string navDestinationName = "");
     void TransitionWithAnimation(const RefPtr<NavDestinationGroupNode>& preTopNavDestination,
         const RefPtr<NavDestinationGroupNode>& newTopNavDestination, bool isPopPage);
     bool TriggerCustomAnimation(const RefPtr<NavDestinationGroupNode>& preTopNavDestination,
@@ -402,6 +410,7 @@ private:
     void StartTransition(const RefPtr<NavDestinationGroupNode>& preDestination,
     const RefPtr<NavDestinationGroupNode>& topDestination,
     bool isAnimated, bool isPopPage, bool isNeedVisible = false);
+    void PerformanceEventReport(int32_t nodeCount, int32_t depth, const std::string& navDestinationName);
 
     NavigationMode navigationMode_ = NavigationMode::AUTO;
     std::function<void(std::string)> builder_;
@@ -410,6 +419,7 @@ private:
     RefPtr<DragEvent> dragEvent_;
     RefPtr<NavigationTransitionProxy> currentProxy_;
     RectF dragRect_;
+    bool addByNavRouter_ = false;
     bool ifNeedInit_ = true;
     float preNavBarWidth_ = 0.0f;
     float realNavBarWidth_ = DEFAULT_NAV_BAR_WIDTH.ConvertToPx();

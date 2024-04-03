@@ -52,6 +52,13 @@ enum class AlphaType : int32_t {
     IMAGE_ALPHA_TYPE_UNPREMUL = 3, // image have alpha component, and all pixels stored without premultiply alpha value.
 };
 
+enum class ResizableOption {
+    LEFT,
+    RIGHT,
+    TOP,
+    BOTTOM,
+};
+
 struct ImageResizableSlice {
     Dimension left;
     Dimension right;
@@ -79,6 +86,41 @@ struct ImageResizableSlice {
     bool Valid() const
     {
         return left.IsValid() || right.IsValid() || top.IsValid() || bottom.IsValid();
+    }
+    void SetResizableLeft(const Dimension& sliceDimension)
+    {
+        left = sliceDimension;
+    }
+    void SetResizableRight(const Dimension& sliceDimension)
+    {
+        right = sliceDimension;
+    }
+    void SetResizableBottom(const Dimension& sliceDimension)
+    {
+        bottom = sliceDimension;
+    }
+    void SetResizableTop(const Dimension& sliceDimension)
+    {
+        top = sliceDimension;
+    }
+    void SetEdgeSlice(ResizableOption direction, const Dimension& sliceDimension)
+    {
+        switch (direction) {
+            case ResizableOption::TOP:
+                SetResizableTop(sliceDimension);
+                break;
+            case ResizableOption::BOTTOM:
+                SetResizableBottom(sliceDimension);
+                break;
+            case ResizableOption::LEFT:
+                SetResizableLeft(sliceDimension);
+                break;
+            case ResizableOption::RIGHT:
+                SetResizableRight(sliceDimension);
+                break;
+            default:
+                break;
+        }
     }
 };
 

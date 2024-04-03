@@ -74,29 +74,8 @@ void TabsPattern::SetOnChangeEvent(std::function<void(const BaseEventInfo*)>&& e
         auto tabsLayoutProperty = tabsNode->GetLayoutProperty<TabsLayoutProperty>();
         CHECK_NULL_VOID(tabsLayoutProperty);
         tabsLayoutProperty->UpdateIndex(index);
-        tabBarPattern->ResetIndicatorAnimationState();
-        auto tabBarLayoutProperty = tabBarPattern->GetLayoutProperty<TabBarLayoutProperty>();
-        CHECK_NULL_VOID(tabBarLayoutProperty);
-        if (!tabBarPattern->IsMaskAnimationByCreate()) {
-            tabBarPattern->HandleBottomTabBarChange(index);
-        }
-        tabBarPattern->SetMaskAnimationByCreate(false);
-        tabBarPattern->SetIndicator(index);
-        tabBarPattern->UpdateIndicator(index);
-        tabBarPattern->UpdateTextColorAndFontWeight(index);
-        if (tabBarLayoutProperty->GetTabBarMode().value_or(TabBarMode::FIXED) == TabBarMode::SCROLLABLE) {
-            if (tabBarPattern->GetTabBarStyle() == TabBarStyle::SUBTABBATSTYLE &&
-                tabBarLayoutProperty->GetAxisValue(Axis::HORIZONTAL) == Axis::HORIZONTAL) {
-                if (!tabBarPattern->GetChangeByClick()) {
-                    tabBarPattern->PlayTabBarTranslateAnimation(index);
-                    tabBarNode->MarkDirtyNode(PROPERTY_UPDATE_LAYOUT);
-                } else {
-                    tabBarPattern->SetChangeByClick(false);
-                }
-            } else {
-                tabBarNode->MarkDirtyNode(PROPERTY_UPDATE_LAYOUT);
-            }
-        }
+        tabBarPattern->OnTabBarIndexChange(index);
+
         /* js callback */
         if (jsEvent && tabsNode->IsOnMainTree()) {
             if (Recorder::EventRecorder::Get().IsComponentRecordEnable() && weak.Upgrade()) {
@@ -139,7 +118,7 @@ std::string TabsPattern::GetTabBarTextByIndex(int32_t index) const
     CHECK_NULL_RETURN(tabBarItem, "");
     auto node = AceType::DynamicCast<FrameNode>(tabBarItem);
     CHECK_NULL_RETURN(node, "");
-    return node->GetAccessibilityProperty<NG::AccessibilityProperty>()->GetAccessibilityText(true);
+    return node->GetAccessibilityProperty<NG::AccessibilityProperty>()->GetGroupText(true);
 }
 
 void TabsPattern::SetOnTabBarClickEvent(std::function<void(const BaseEventInfo*)>&& event)
@@ -446,11 +425,7 @@ void TabsPattern::BeforeCreateLayoutWrapper()
         swiperPattern->SetOnHiddenChangeForParent();
         auto parent = tabsNode->GetAncestorNodeOfFrame();
         CHECK_NULL_VOID(parent);
-        while (parent) {
-            auto navTag = parent->GetTag();
-            if (navTag == V2::NAVDESTINATION_VIEW_ETS_TAG) {
-                break;
-            }
+        while (parent && parent->GetTag() != V2::NAVDESTINATION_VIEW_ETS_TAG) {
             parent = parent->GetAncestorNodeOfFrame();
         }
         if (!parent) {
@@ -541,5 +516,4 @@ void TabsPattern::HandleMaskAnimationByCreate(const RefPtr<FrameNode>& tabBarNod
     swiperLayoutProperty->UpdateIndex(index);
     tabsLayoutProperty->UpdateIndex(index);
 }
-
 } // namespace OHOS::Ace::NG

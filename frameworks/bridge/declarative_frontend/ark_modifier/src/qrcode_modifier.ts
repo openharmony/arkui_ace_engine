@@ -16,12 +16,13 @@
 /// <reference path='./import.ts' />
 class QRCodeModifier extends ArkQRCodeComponent implements AttributeModifier<QRCodeAttribute> {
 
-  constructor(nativePtr: KNode) {
-    super(nativePtr);
+  constructor(nativePtr: KNode, classType: ModifierType) {
+    super(nativePtr, classType);
     this._modifiersWithKeys = new ModifierMap();
   }
 
   applyNormalAttribute(instance: QRCodeAttribute): void {
-    applyAndMergeModifier<QRCodeAttribute, ArkQRCodeComponent, ArkComponent>(instance, this);
+    ModifierUtils.applySetOnChange(this);
+    ModifierUtils.applyAndMergeModifier<QRCodeAttribute, ArkQRCodeComponent, ArkComponent>(instance, this);
   }
 }

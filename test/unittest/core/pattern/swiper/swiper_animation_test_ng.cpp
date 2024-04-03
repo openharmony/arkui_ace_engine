@@ -83,6 +83,9 @@ HWTEST_F(SwiperAnimationTestNg, SwiperPatternSpringAnimation003, TestSize.Level1
     pattern_->PlaySpringAnimation(dragVelocity);
     pattern_->StopSpringAnimationAndFlushImmediately();
     EXPECT_FALSE(pattern_->springAnimationIsRunning_);
+    pattern_->springAnimationIsRunning_ = true;
+    pattern_->StopSpringAnimationAndFlushImmediately();
+    EXPECT_FALSE(pattern_->springAnimationIsRunning_);
 }
 
 /**
@@ -398,6 +401,9 @@ HWTEST_F(SwiperAnimationTestNg, SwiperPatternPlayTranslateAnimation001, TestSize
         pattern_->controller_ = AceType::MakeRefPtr<Animator>();
         frameNode_->GetPaintProperty<SwiperPaintProperty>()->UpdateCurve(curve1);
     }
+    pattern_->PlayTranslateAnimation(startPos, startPos, nextIndex, restartAutoPlay, velocity);
+    pattern_->translateAnimationIsRunning_ = true;
+    pattern_->PlayTranslateAnimation(startPos, endPos, nextIndex, restartAutoPlay, velocity);
 }
 
 /**
@@ -634,18 +640,19 @@ HWTEST_F(SwiperAnimationTestNg, SwiperPatternSwipeToWithoutAnimation001, TestSiz
 HWTEST_F(SwiperAnimationTestNg, SwiperPatternPlayPropertyTranslateAnimation002, TestSize.Level1)
 {
     CreateWithItem([](SwiperModelNG model) {});
-    pattern_->usePropertyAnimation_ = true;
     float translate = 0.1f;
     int32_t nextIndex = 1;
     float velocity = 0.1f;
     pattern_->usePropertyAnimation_ = true;
-    pattern_->itemPositionInAnimation_.clear();
     pattern_->targetIndex_ = 1;
+    pattern_->itemPositionInAnimation_ = pattern_->itemPosition_;
+    pattern_->PlayPropertyTranslateAnimation(translate, nextIndex, velocity);
 
     /**
      * @tc.steps: step2. call HandleTouchDown.
      * @tc.expected: Related function runs ok.
      */
+    pattern_->itemPositionInAnimation_.clear();
     pattern_->PlayPropertyTranslateAnimation(translate, nextIndex, velocity);
 }
 
@@ -671,24 +678,70 @@ HWTEST_F(SwiperAnimationTestNg, SwiperPatternPlaySpringAnimation001, TestSize.Le
 }
 
 /**
+ * @tc.name: SwiperAutoLinearAnimationNeedReset001
+ * @tc.desc: AutoLinearAnimationNeedReset
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperAnimationTestNg, SwiperAutoLinearAnimationNeedReset001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Empty items
+     * @tc.expected: AutoLinearAnimationNeedReset return false
+     */
+    Create([](SwiperModelNG model) {
+    });
+    EXPECT_TRUE(pattern_->itemPosition_.empty());
+    EXPECT_FALSE(pattern_->AutoLinearAnimationNeedReset(1.f));
+}
+
+/**
  * @tc.name: SwiperAutoLinearAnimationNeedReset002
- * @tc.desc: OnDirtyLayoutWrapperSwap
+ * @tc.desc: AutoLinearAnimationNeedReset
  * @tc.type: FUNC
  */
 HWTEST_F(SwiperAnimationTestNg, SwiperAutoLinearAnimationNeedReset002, TestSize.Level1)
 {
     /**
-     * @tc.steps: step1. Default value
+     * @tc.steps: step1. Has items, but !IsAutoLinear
+     * @tc.expected: AutoLinearAnimationNeedReset return false
      */
     CreateWithItem([](SwiperModelNG model) {});
-    EXPECT_EQ(frameNode_->children_.size(), 5);
-    pattern_->itemPosition_.clear();
+    EXPECT_FALSE(pattern_->AutoLinearAnimationNeedReset(1.f));
+}
+
+/**
+ * @tc.name: SwiperAutoLinearAnimationNeedReset003
+ * @tc.desc: AutoLinearAnimationNeedReset
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperAnimationTestNg, SwiperAutoLinearAnimationNeedReset003, TestSize.Level1)
+{
     /**
-     * @tc.steps: step2. Calling the AutoLinearAnimationNeedReset interface
-     * @tc.expected: ItemPosition_ Empty() condition is true
+     * @tc.steps: step1. Has items and IsAutoLinear
      */
-    pattern_->AutoLinearAnimationNeedReset(0);
-    EXPECT_TRUE(pattern_->itemPosition_.empty());
+    CreateWithItem([](SwiperModelNG model) {
+        model.SetDisplayMode(SwiperDisplayMode::AUTO_LINEAR);
+    });
+
+    /**
+     * @tc.steps: step2. translate <= 0
+     * @tc.expected: AutoLinearAnimationNeedReset return false
+     */
+    EXPECT_FALSE(pattern_->AutoLinearAnimationNeedReset(0.f));
+
+    /**
+     * @tc.steps: step3. translate > 0, but endPos - CalculateVisibleSize() > translate
+     * @tc.expected: AutoLinearAnimationNeedReset return false
+     */
+    EXPECT_FALSE(pattern_->AutoLinearAnimationNeedReset(1.f));
+
+    /**
+     * @tc.steps: step4. translate > 0 and endPos - CalculateVisibleSize() < translate
+     * @tc.expected: AutoLinearAnimationNeedReset return false
+     */
+    controller_->ChangeIndex(3, false);
+    FlushLayoutTask(frameNode_);
+    EXPECT_FALSE(pattern_->AutoLinearAnimationNeedReset(SWIPER_WIDTH * 100 + 1.f));
 }
 
 /**

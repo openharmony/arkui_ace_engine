@@ -89,6 +89,11 @@ public:
         weakButtonCancel_ = buttonCancelNode;
     }
 
+    void SetLunarSwitchTextNode(WeakPtr<FrameNode> lunarSwitchTextNode)
+    {
+        weakLunarSwitchText_ = lunarSwitchTextNode;
+    }
+
     void OnLanguageConfigurationUpdate() override;
 
     void OnColorConfigurationUpdate() override;
@@ -620,6 +625,7 @@ private:
     EventMarker OnDialogChange_;
     WeakPtr<FrameNode> weakButtonConfirm_;
     WeakPtr<FrameNode> weakButtonCancel_;
+    WeakPtr<FrameNode> weakLunarSwitchText_;
     PickerDate startDateSolar_ = PickerDate(1970, 1, 1); // default start date is 1970-1-1 from FA document.
     LunarDate startDateLunar_;
     PickerDate endDateSolar_ = PickerDate(2100, 12, 31); // default end date is 2100-12-31 from FA document.

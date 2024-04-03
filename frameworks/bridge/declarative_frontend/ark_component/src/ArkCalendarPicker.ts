@@ -111,8 +111,8 @@ class CalendarPickerBorderModifier extends ModifierWithKey<ArkBorder> {
 }
 
 class ArkCalendarPickerComponent extends ArkComponent implements CalendarPickerAttribute {
-  constructor(nativePtr: KNode) {
-    super(nativePtr);
+  constructor(nativePtr: KNode, classType?: ModifierType) {
+    super(nativePtr, classType);
   }
   edgeAlign(alignType: CalendarAlign, offset?: Offset | undefined): this {
     let arkEdgeAlign = new ArkEdgeAlign();
@@ -216,12 +216,10 @@ class ArkCalendarPickerComponent extends ArkComponent implements CalendarPickerA
   }
 }
 // @ts-ignore
-globalThis.CalendarPicker.attributeModifier = function (modifier) {
-  const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
-  let nativeNode = getUINativeModule().getFrameNodeById(elmtId);
-  let component = this.createOrGetNode(elmtId, () => {
-    return new ArkCalendarPickerComponent(nativeNode);
+globalThis.CalendarPicker.attributeModifier = function (modifier: ArkComponent): void {
+  attributeModifierFunc.call(this, modifier, (nativePtr: KNode) => {
+    return new ArkCalendarPickerComponent(nativePtr);
+  }, (nativePtr: KNode, classType: ModifierType, modifierJS: ModifierJS) => {
+    return new modifierJS.CalendarPickerModifier(nativePtr, classType);
   });
-  applyUIAttributes(modifier, nativeNode, component);
-  component.applyModifierPatch();
 };

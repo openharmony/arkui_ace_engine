@@ -77,6 +77,7 @@ public:
     void SetObscured(bool isObscured)
     {
         isObscured_ = isObscured;
+        ChangeObscuredState();
     }
 
     void Refresh() override;
@@ -98,6 +99,7 @@ public:
 
 private:
     void LoadImageSourceInfo();
+    void ChangeObscuredState();
     ImageSourceInfo GetDefaultSourceInfo(bool isObscured);
     void UpdateImageSource();
     bool IsShowPasswordIcon();

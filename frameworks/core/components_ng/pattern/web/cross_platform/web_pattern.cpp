@@ -1181,7 +1181,7 @@ void WebPattern::OnTextAutosizingUpdate(bool isTextAutosizing)
    // cross platform is not support now;
 }
 
-void WebPattern::UpdateRelativeOffset();
+void WebPattern::UpdateRelativeOffset()
 {
     // cross platform is not support now;
 }

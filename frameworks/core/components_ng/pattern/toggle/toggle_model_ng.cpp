@@ -138,7 +138,12 @@ void ToggleModelNG::SetSelectedColor(const std::optional<Color>& selectedColor)
 
 void ToggleModelNG::SetSwitchPointColor(const Color& switchPointColor)
 {
-    ACE_UPDATE_PAINT_PROPERTY(SwitchPaintProperty, SwitchPointColor, switchPointColor);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto paintProperty = frameNode->GetPaintProperty<SwitchPaintProperty>();
+    if (paintProperty) {
+        paintProperty->UpdateSwitchPointColor(switchPointColor);
+    }
 }
 void ToggleModelNG::OnChange(ChangeEvent&& onChange)
 {
@@ -311,56 +316,108 @@ void ToggleModelNG::SetHoverEffect(HoverEffectType hoverEffect)
     NG::ViewAbstract::SetHoverEffect(hoverEffect);
 }
 
+void ToggleModelNG::Pop()
+{
+    ViewStackProcessor::GetInstance()->PopContainer();
+}
+
 void ToggleModelNG::SetPointRadius(const Dimension& switchPointRadius)
 {
-    ACE_UPDATE_PAINT_PROPERTY(SwitchPaintProperty, PointRadius, switchPointRadius);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto paintProperty = frameNode->GetPaintProperty<SwitchPaintProperty>();
+    if (paintProperty) {
+        paintProperty->UpdatePointRadius(switchPointRadius);
+    }
 }
 
 void ToggleModelNG::ResetPointRadius()
 {
-    ACE_RESET_PAINT_PROPERTY_WITH_FLAG(SwitchPaintProperty, PointRadius, PROPERTY_UPDATE_RENDER);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto paintProperty = frameNode->GetPaintProperty<SwitchPaintProperty>();
+    if (paintProperty) {
+        paintProperty->ResetPointRadius();
+        paintProperty->UpdatePropertyChangeFlag(PROPERTY_UPDATE_RENDER);
+    }
 }
 
 void ToggleModelNG::SetPointRadius(FrameNode* frameNode, const Dimension& switchPointRadius)
 {
-    ACE_UPDATE_NODE_PAINT_PROPERTY(SwitchPaintProperty, PointRadius, switchPointRadius, frameNode);
+    CHECK_NULL_VOID(frameNode);
+    auto paintProperty = frameNode->GetPaintProperty<SwitchPaintProperty>();
+    if (paintProperty) {
+        paintProperty->UpdatePointRadius(switchPointRadius);
+    }
 }
 
 void ToggleModelNG::ResetPointRadius(FrameNode* frameNode)
 {
-    ACE_RESET_NODE_PAINT_PROPERTY_WITH_FLAG(SwitchPaintProperty, PointRadius, PROPERTY_UPDATE_RENDER, frameNode);
+    CHECK_NULL_VOID(frameNode);
+    auto paintProperty = frameNode->GetPaintProperty<SwitchPaintProperty>();
+    if (paintProperty) {
+        paintProperty->ResetPointRadius();
+        paintProperty->UpdatePropertyChangeFlag(PROPERTY_UPDATE_RENDER);
+    }
 }
 
 void ToggleModelNG::SetUnselectedColor(const Color& unselectedColor)
 {
-    ACE_UPDATE_PAINT_PROPERTY(SwitchPaintProperty, UnselectedColor, unselectedColor);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto paintProperty = frameNode->GetPaintProperty<SwitchPaintProperty>();
+    if (paintProperty) {
+        paintProperty->UpdateUnselectedColor(unselectedColor);
+    }
 }
 
 void ToggleModelNG::SetUnselectedColor(FrameNode* frameNode, const Color& unselectedColor)
 {
-    ACE_UPDATE_NODE_PAINT_PROPERTY(SwitchPaintProperty, UnselectedColor, unselectedColor, frameNode);
+    CHECK_NULL_VOID(frameNode);
+    auto paintProperty = frameNode->GetPaintProperty<SwitchPaintProperty>();
+    if (paintProperty) {
+        paintProperty->UpdateUnselectedColor(unselectedColor);
+    }
 }
-
-
 
 void ToggleModelNG::SetTrackBorderRadius(const Dimension& borderRadius)
 {
-    ACE_UPDATE_PAINT_PROPERTY(SwitchPaintProperty, TrackBorderRadius, borderRadius);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto paintProperty = frameNode->GetPaintProperty<SwitchPaintProperty>();
+    if (paintProperty) {
+        paintProperty->UpdateTrackBorderRadius(borderRadius);
+    }
 }
 
 void ToggleModelNG::ResetTrackBorderRadius()
 {
-    ACE_RESET_PAINT_PROPERTY_WITH_FLAG(SwitchPaintProperty, TrackBorderRadius, PROPERTY_UPDATE_RENDER);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto paintProperty = frameNode->GetPaintProperty<SwitchPaintProperty>();
+    if (paintProperty) {
+        paintProperty->ResetTrackBorderRadius();
+        paintProperty->UpdatePropertyChangeFlag(PROPERTY_UPDATE_RENDER);
+    }
 }
 
 void ToggleModelNG::SetTrackBorderRadius(FrameNode* frameNode, const Dimension& borderRadius)
 {
-    ACE_UPDATE_NODE_PAINT_PROPERTY(SwitchPaintProperty, TrackBorderRadius, borderRadius, frameNode);
+    CHECK_NULL_VOID(frameNode);
+    auto paintProperty = frameNode->GetPaintProperty<SwitchPaintProperty>();
+    if (paintProperty) {
+        paintProperty->UpdateTrackBorderRadius(borderRadius);
+    }
 }
 
 void ToggleModelNG::ResetTrackBorderRadius(FrameNode* frameNode)
 {
-    ACE_RESET_NODE_PAINT_PROPERTY_WITH_FLAG(SwitchPaintProperty, TrackBorderRadius, PROPERTY_UPDATE_RENDER, frameNode);
+    CHECK_NULL_VOID(frameNode);
+    auto paintProperty = frameNode->GetPaintProperty<SwitchPaintProperty>();
+    if (paintProperty) {
+        paintProperty->ResetTrackBorderRadius();
+        paintProperty->UpdatePropertyChangeFlag(PROPERTY_UPDATE_RENDER);
+    }
 }
 
 void ToggleModelNG::SetSelectedColor(FrameNode* frameNode, const std::optional<Color>& selectedColor)
@@ -408,7 +465,11 @@ void ToggleModelNG::SetSelectedColor(FrameNode* frameNode, const std::optional<C
 
 void ToggleModelNG::SetSwitchPointColor(FrameNode* frameNode, const Color& switchPointColor)
 {
-    ACE_UPDATE_NODE_PAINT_PROPERTY(SwitchPaintProperty, SwitchPointColor, switchPointColor, frameNode);
+    CHECK_NULL_VOID(frameNode);
+    auto paintProperty = frameNode->GetPaintProperty<SwitchPaintProperty>();
+    if (paintProperty) {
+        paintProperty->UpdateSwitchPointColor(switchPointColor);
+    }
 }
 
 void ToggleModelNG::SetBackgroundColor(FrameNode* frameNode, const Color& color)

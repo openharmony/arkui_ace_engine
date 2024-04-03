@@ -32,7 +32,12 @@
 #include "core/components_ng/pattern/overlay/popup_base_pattern.h"
 
 namespace OHOS::Ace::NG {
-    
+enum class DialogContentNode {
+    TITLE = 0,
+    SUBTITLE,
+    MESSAGE,
+    SHEET,
+};
 enum class DialogDismissReason {
     DIALOG_PRESS_BACK = 0,
     DIALOG_TOUCH_OUTSIDE,
@@ -156,11 +161,13 @@ public:
 
     void OnColorConfigurationUpdate() override;
 
+    void OnLanguageConfigurationUpdate() override;
+
     bool AvoidBottom() const override
     {
         return false;
     }
-    
+
     void RegisterDialogDidAppearCallback(std::function<void()>&& onDidAppear)
     {
         onDidAppearCallback_ = std::move(onDidAppear);
@@ -256,6 +263,9 @@ private:
     RefPtr<FrameNode> BuildMenu(const std::vector<ButtonInfo>& buttons, bool hasTitle);
     void RecordEvent(int32_t btnIndex) const;
     void ParseBorderRadius(BorderRadiusProperty& raidus);
+    void UpdateSheetIconAndText();
+    void UpdateButtonsProperty();
+    void UpdateNodeContent(const RefPtr<FrameNode>& node, std::string& text);
     RefPtr<DialogTheme> dialogTheme_;
     WeakPtr<UINode> customNode_;
     RefPtr<ClickEvent> onClick_;
@@ -280,6 +290,7 @@ private:
     std::function<void()> onDidDisappearCallback_ = nullptr;
     std::function<void()> onWillAppearCallback_ = nullptr;
     std::function<void()> onWillDisappearCallback_ = nullptr;
+    std::unordered_map<DialogContentNode, RefPtr<FrameNode>> contentNodeMap_;
 };
 } // namespace OHOS::Ace::NG
 

@@ -361,11 +361,7 @@ void RosenRenderContext::SetHostNode(const WeakPtr<FrameNode>& host)
     AddFrameNodeInfoToRsNode();
 }
 
-#if defined(VIDEO_TEXTURE_SUPPORTED) && defined(XCOMPONENT_SUPPORTED)
-void RosenRenderContext::InitContext(bool isRoot, const std::optional<ContextParam>& param, bool isUseExtSurface)
-#else
 void RosenRenderContext::InitContext(bool isRoot, const std::optional<ContextParam>& param)
-#endif
 {
     // skip if node already created
     CHECK_NULL_VOID(!rsNode_);
@@ -395,13 +391,15 @@ void RosenRenderContext::InitContext(bool isRoot, const std::optional<ContextPar
             break;
         }
         case ContextType::HARDWARE_SURFACE: {
-#if defined(VIDEO_TEXTURE_SUPPORTED) && defined(XCOMPONENT_SUPPORTED)
-            rsNode_ = CreateHardwareSurface(param, isUseExtSurface, isTextureExportNode);
-#else
-            rsNode_ = CreateHardwareSurface(param, false, isTextureExportNode);
-#endif
+            rsNode_ = CreateHardwareSurface(param, isTextureExportNode);
             break;
         }
+#ifdef RENDER_EXTRACT_SUPPORTED
+        case ContextType::HARDWARE_TEXTURE: {
+            rsNode_ = CreateHardwareTexture(param, isTextureExportNode);
+            break;
+        }
+#endif
         case ContextType::EFFECT:
             rsNode_ = Rosen::RSEffectNode::Create(false, isTextureExportNode);
             break;
@@ -418,9 +416,8 @@ void RosenRenderContext::InitContext(bool isRoot, const std::optional<ContextPar
 }
 
 std::shared_ptr<Rosen::RSNode> RosenRenderContext::CreateHardwareSurface(
-    const std::optional<ContextParam>& param, bool isUseExtSurface, bool isTextureExportNode)
+    const std::optional<ContextParam>& param, bool isTextureExportNode)
 {
-#ifndef VIDEO_TEXTURE_SUPPORTED
     Rosen::RSSurfaceNodeConfig surfaceNodeConfig = { .SurfaceNodeName = param->surfaceName.value_or(""),
         .isTextureExportNode = isTextureExportNode };
     auto surfaceNode = Rosen::RSSurfaceNode::Create(surfaceNodeConfig, false);
@@ -428,32 +425,19 @@ std::shared_ptr<Rosen::RSNode> RosenRenderContext::CreateHardwareSurface(
         surfaceNode->SetHardwareEnabled(true);
     }
     return surfaceNode;
-#else
-#ifdef XCOMPONENT_SUPPORTED
-    if (isUseExtSurface) {
-        Rosen::RSSurfaceNodeConfig surfaceNodeConfig = { .SurfaceNodeName = param->surfaceName.value_or(""),
-            .isTextureExportNode = isTextureExportNode };
-        auto surfaceNode = Rosen::RSSurfaceNode::Create(surfaceNodeConfig, false);
-        if (surfaceNode) {
-            surfaceNode->SetHardwareEnabled(true);
-        }
-        return surfaceNode;
-    } else {
-        Rosen::RSSurfaceNodeConfig surfaceNodeConfig = { .SurfaceNodeName = param->surfaceName.value_or(""),
-            .isTextureExportNode = isTextureExportNode };
-        auto surfaceNode = Rosen::RSSurfaceNode::Create(surfaceNodeConfig,
-            RSSurfaceNodeType::SURFACE_TEXTURE_NODE, false);
-        return surfaceNode;
-    }
-#else
+}
+
+#ifdef RENDER_EXTRACT_SUPPORTED
+std::shared_ptr<Rosen::RSNode> RosenRenderContext::CreateHardwareTexture(
+    const std::optional<ContextParam>& param, bool isTextureExportNode)
+{
     Rosen::RSSurfaceNodeConfig surfaceNodeConfig = { .SurfaceNodeName = param->surfaceName.value_or(""),
         .isTextureExportNode = isTextureExportNode };
     auto surfaceNode = Rosen::RSSurfaceNode::Create(surfaceNodeConfig,
         RSSurfaceNodeType::SURFACE_TEXTURE_NODE, false);
     return surfaceNode;
-#endif
-#endif
 }
+#endif
 
 void RosenRenderContext::SetSandBox(const std::optional<OffsetF>& parentPosition, bool force)
 {
@@ -577,6 +561,9 @@ void RosenRenderContext::SyncGeometryProperties(const RectF& paintRect)
 
 void RosenRenderContext::PaintDebugBoundary(bool flag)
 {
+    if (!flag && !debugBoundaryModifier_) {
+        return;
+    }
     CHECK_NULL_VOID(NeedDebugBoundary());
     CHECK_NULL_VOID(rsNode_);
     auto host = GetHost();
@@ -602,8 +589,9 @@ void RosenRenderContext::PaintDebugBoundary(bool flag)
             std::make_shared<Rosen::RectF>(marginOffset.GetX() - rect.GetX(), marginOffset.GetY() - rect.GetY(),
                 geometryNode->GetMarginFrameSize().Width(), geometryNode->GetMarginFrameSize().Height());
         UpdateDrawRegion(DRAW_REGION_DEBUG_BOUNDARY_MODIFIER_INDEX, drawRect);
-        debugBoundaryModifier_->SetCustomData(flag);
         rsNode_->AddModifier(debugBoundaryModifier_);
+        // SetCustomData(AttachProperty to rs modifier) must be called after AddModifier.
+        debugBoundaryModifier_->SetCustomData(flag);
     } else if (debugBoundaryModifier_) {
         debugBoundaryModifier_->SetPaintTask(std::move(paintTask));
         auto rect = GetPaintRectWithoutTransform();
@@ -1036,6 +1024,16 @@ Rosen::EmitterConfig RosenRenderContext::ConvertParticleEmitterOption(
     auto particleConfig = particle.GetConfig();
     auto particleCount = particle.GetCount();
     auto lifeTimeOpt = particle.GetLifeTime();
+    auto lifeTimeRangeOpt = particle.GetLifeTimeRange();
+    std::optional<int64_t> lifeTimeMin = 0;
+    std::optional<int64_t> lifeTimeMax = lifeTimeRangeOpt.value() + lifeTimeRangeOpt.value();
+    if (lifeTimeOpt.value() == -1) {
+        // when lifeTime == -1 particle life cycle is infinite
+        lifeTimeMin = -1;
+        lifeTimeMax = 0;
+    } else if (lifeTimeOpt.value() - lifeTimeRangeOpt.value() > 0) {
+        lifeTimeMin = lifeTimeOpt.value() - lifeTimeRangeOpt.value();
+    }
     auto rsPoint = pointOpt.has_value()
                        ? OHOS::Rosen::Vector2f(ConvertDimensionToPx(pointOpt.value().first, rect.Width()),
                              ConvertDimensionToPx(pointOpt.value().second, rect.Height()))
@@ -1045,7 +1043,7 @@ Rosen::EmitterConfig RosenRenderContext::ConvertParticleEmitterOption(
                                       : OHOS::Rosen::Vector2f(rect.Width(), rect.Height());
     auto shapeInt = static_cast<int32_t>(shapeOpt.value_or(ParticleEmitterShape::RECTANGLE));
     auto lifeTimeRange = OHOS::Rosen::Range<int64_t>(
-        lifeTimeOpt.value_or(PARTICLE_DEFAULT_LIFETIME), lifeTimeOpt.value_or(PARTICLE_DEFAULT_LIFETIME));
+        lifeTimeMin.value_or(PARTICLE_DEFAULT_LIFETIME), lifeTimeMax.value_or(PARTICLE_DEFAULT_LIFETIME));
     if (particleType == ParticleType::IMAGE) {
         auto imageParameter = particleConfig.GetImageParticleParameter();
         auto imageSource = imageParameter.GetImageSource();
@@ -2134,7 +2132,7 @@ void RosenRenderContext::BdImagePaintTask(RSCanvas& canvas)
     CHECK_NULL_VOID(layoutProps);
     const auto& widthProp = layoutProps->GetBorderWidthProperty();
 
-    auto pipeline = host->GetContext();
+    auto pipeline = host->GetContextRefPtr();
     CHECK_NULL_VOID(pipeline);
     auto dipScale = pipeline->GetDipScale();
 
@@ -2345,7 +2343,7 @@ void RosenRenderContext::PaintBorderImageGradient()
 
 void RosenRenderContext::OnModifyDone()
 {
-    auto frameNode = GetHost();
+    auto frameNode = GetUnsafeHost();
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(rsNode_);
     if (HasClickEffectLevel()) {
@@ -3575,6 +3573,13 @@ void RosenRenderContext::OnLinearGradientBlurUpdate(const NG::LinearGradientBlur
             blurRadius, blurPara.fractionStops_, static_cast<Rosen::GradientDirection>(blurPara.direction_)));
 
     rsNode_->SetLinearGradientBlurPara(rsLinearGradientBlurPara);
+    RequestNextFrame();
+}
+
+void RosenRenderContext::OnDynamicDimDegreeUpdate(const float degree)
+{
+    CHECK_NULL_VOID(rsNode_);
+    rsNode_->SetDynamicDimDegree(degree);
     RequestNextFrame();
 }
 

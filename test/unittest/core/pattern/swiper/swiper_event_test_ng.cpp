@@ -21,7 +21,56 @@ namespace {} // namespace
 
 class SwiperEventTestNg : public SwiperTestNg {
 public:
+    void HandleDrag(GestureEvent info);
 };
+
+void SwiperEventTestNg::HandleDrag(GestureEvent info)
+{
+    auto HandleDragStart = pattern_->panEvent_->GetActionStartEventFunc();
+    auto HandleDragUpdate = pattern_->panEvent_->GetActionUpdateEventFunc();
+    auto HandleDragEnd = pattern_->panEvent_->GetActionEndEventFunc();
+    HandleDragStart(info);
+    HandleDragUpdate(info);
+    HandleDragEnd(info);
+    FlushLayoutTask(frameNode_);
+}
+
+/**
+ * @tc.name: HandleDrag001
+ * @tc.desc: HandleDrag with AXIS and MOUSE, will trigger ShowPrevious or ShowNext
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperEventTestNg, HandleDrag001, TestSize.Level1)
+{
+    CreateWithItem([](SwiperModelNG model) {});
+    GestureEvent info;
+    info.SetInputEventType(InputEventType::AXIS);
+    info.SetSourceTool(SourceTool::MOUSE);
+
+    /**
+     * @tc.steps: step1. SetMainDelta > 0
+     * @tc.expected: Trigger ShowPrevious
+     */
+    info.SetMainDelta(10.f);
+    HandleDrag(info);
+    EXPECT_EQ(pattern_->GetCurrentIndex(), 3);
+
+    /**
+     * @tc.steps: step2. SetMainDelta < 0
+     * @tc.expected: Trigger ShowNext
+     */
+    info.SetMainDelta(-10.f);
+    HandleDrag(info);
+    EXPECT_EQ(pattern_->GetCurrentIndex(), 0);
+
+    /**
+     * @tc.steps: step2. SetMainDelta == 0
+     * @tc.expected: CurrentIndex not changed
+     */
+    info.SetMainDelta(0.f);
+    HandleDrag(info);
+    EXPECT_EQ(pattern_->GetCurrentIndex(), 0);
+}
 
 /**
  * @tc.name: SwiperEvent001
@@ -394,7 +443,9 @@ HWTEST_F(SwiperEventTestNg, SwiperPatternHandleTouchUp003, TestSize.Level1)
      * @tc.expected: Related function runs ok.
      */
     pattern_->springAnimationIsRunning_ = false;
+    pattern_->isTouchDownSpringAnimation_ = true;
     pattern_->HandleTouchUp();
+    EXPECT_FALSE(pattern_->isTouchDownSpringAnimation_);
     EXPECT_TRUE(pattern_->springAnimationIsRunning_);
 }
 

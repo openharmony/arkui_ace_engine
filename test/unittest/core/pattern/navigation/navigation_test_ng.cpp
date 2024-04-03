@@ -16,6 +16,7 @@
 #include <optional>
 
 #include "gtest/gtest.h"
+#include "mock_navigation_route.h"
 #include "mock_navigation_stack.h"
 
 #include "base/memory/ace_type.h"
@@ -3805,7 +3806,7 @@ HWTEST_F(NavigationTestNg, NavigationInterceptionTest005, TestSize.Level1)
     EXPECT_NE(navigationPattern, nullptr);
     auto mockStack = AceType::DynamicCast<MockNavigationStack>(navigationPattern->GetNavigationStack());
     EXPECT_NE(mockStack, nullptr);
-    
+
     mockStack->SetInterceptionModeCallback([](NavigationMode mode) {
         EXPECT_EQ(mode, NavigationMode::SPLIT);
     });
@@ -5429,7 +5430,7 @@ HWTEST_F(NavigationTestNg, UpdateNavDestinationVisibility002, TestSize.Level1)
         "navDestinationNode", 201, []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
     int32_t index = 0;
     size_t destinationSize = 1;
-    
+
     EXPECT_NE(navDestinationNode->GetEventHub<NavDestinationEventHub>(), nullptr);
     EXPECT_EQ(index, static_cast<int32_t>(destinationSize) - 1);
     EXPECT_TRUE(CheckNeedMeasure(navDestinationNode->GetLayoutProperty()->GetPropertyChangeFlag()));
@@ -5460,7 +5461,7 @@ HWTEST_F(NavigationTestNg, UpdateNavDestinationVisibility003, TestSize.Level1)
     size_t destinationSize = 1;
     // Make hasChanged false
     navDestinationNode->GetLayoutProperty()->propertyChangeFlag_ = PROPERTY_UPDATE_NORMAL;
-    
+
     EXPECT_NE(navDestinationNode->GetEventHub<NavDestinationEventHub>(), nullptr);
     EXPECT_EQ(index, static_cast<int32_t>(destinationSize) - 1);
     EXPECT_FALSE(CheckNeedMeasure(navDestinationNode->GetLayoutProperty()->GetPropertyChangeFlag()));
@@ -5918,7 +5919,6 @@ HWTEST_F(NavigationTestNg, SetToolbarConfiguration002, TestSize.Level1)
     auto context = PipelineBase::GetCurrentContext();
     ASSERT_NE(context, nullptr);
     int32_t preVersion = context->GetMinPlatformVersion();
-    std::cout << "SetToolbarConfiguration002 preVersion is " << preVersion << "\n";
     context->minPlatformVersion_ = static_cast<int32_t>(PlatformVersion::VERSION_ELEVEN) - 1;
     EXPECT_TRUE(Container::LessThanAPIVersion(PlatformVersion::VERSION_ELEVEN));
     navigationModel.SetToolbarConfiguration(std::move(toolBarItems));
@@ -6700,5 +6700,200 @@ HWTEST_F(NavigationTestNg, SetSubtitle001, TestSize.Level1)
     EXPECT_TRUE(navBarNode->GetPrevTitleIsCustomValue(false));
     EXPECT_TRUE(titleBarLayoutProperty->HasTitleHeight());
     NavigationModelNG::SetSubtitle(&(*frameNode), "");
+}
+
+/**
+ * @tc.name: NavigationLoadPage001
+ * @tc.desc: Test navigation page load success or not.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationTestNg, NavigationLoadPage001, TestSize.Level1)
+{
+    /**
+     * @tc.steps:step1. create navigation node and set navigation stack
+     */
+    MockPipelineContextGetTheme();
+    NavigationModelNG navigationModel;
+    navigationModel.Create();
+
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    auto navigationNode = AceType::DynamicCast<NavigationGroupNode>(frameNode);
+    ASSERT_NE(navigationNode, nullptr);
+    auto stackCreator = []() -> RefPtr<MockNavigationStack> {
+        return AceType::MakeRefPtr<MockNavigationStack>();
+    };
+    auto stackUpdater = [&navigationModel](RefPtr<NG::NavigationStack> stack) {
+        navigationModel.SetNavigationStackProvided(false);
+        auto mockStack = AceType::DynamicCast<MockNavigationStack>(stack);
+        ASSERT_NE(mockStack, nullptr);
+    };
+    navigationModel.SetNavigationStackWithCreatorAndUpdater(stackCreator, stackUpdater);
+    auto pattern = AceType::DynamicCast<NavigationPattern>(navigationNode->GetPattern());
+    auto navigationStack = pattern->GetNavigationStack();
+
+    /**
+     * @tc.steps:step2. set navigation route add add pageOne to navigation stack
+     */
+    auto route = AceType::MakeRefPtr<MockNavigationRoute>("");
+    EXPECT_NE(route, nullptr);
+    MockContainer::Current()->SetNavigationRoute(route);
+    std::string name = "pageOne";
+    navigationStack->Push(name, 0);
+
+    /**
+     * @tc.steps: step3. load pageOne
+     * @tc.expected: step3. navigationRoute names size is one
+     */
+    EXPECT_NE(pattern, nullptr);
+    pattern->UpdateNavPathList();
+    EXPECT_EQ(route->GetPageNames().size(), 1);
+
+    /**
+     * @tc.steps: step4. push pageOne
+     * @tc.expected: step4. navigation route name size is one
+     */
+    navigationStack->Push("pageOne", 1);
+    pattern->UpdateNavPathList();
+    EXPECT_EQ(route->GetPageNames().size(), 1);
+}
+
+/**
+ * @tc.name: NavigationLoadPage002
+ * @tc.desc: Test navigation page load success or not.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationTestNg, NavigationLoadPage002, TestSize.Level1)
+{
+    /**
+     * @tc.steps:step1. create navigation node and set navigation stack
+     */
+    MockPipelineContextGetTheme();
+    NavigationModelNG navigationModel;
+    navigationModel.Create();
+
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    auto navigationNode = AceType::DynamicCast<NavigationGroupNode>(frameNode);
+    ASSERT_NE(navigationNode, nullptr);
+    auto stackCreator = []() -> RefPtr<MockNavigationStack> {
+        return AceType::MakeRefPtr<MockNavigationStack>();
+    };
+    auto stackUpdater = [&navigationModel](RefPtr<NG::NavigationStack> stack) {
+        navigationModel.SetNavigationStackProvided(false);
+        auto mockStack = AceType::DynamicCast<MockNavigationStack>(stack);
+        ASSERT_NE(mockStack, nullptr);
+    };
+    navigationModel.SetNavigationStackWithCreatorAndUpdater(stackCreator, stackUpdater);
+    auto pattern = AceType::DynamicCast<NavigationPattern>(navigationNode->GetPattern());
+    auto navigationStack = pattern->GetNavigationStack();
+
+    /**
+     * @tc.steps:step2. set navigation route add add error page to navigation stack
+     */
+    auto route = AceType::MakeRefPtr<MockNavigationRoute>("");
+    MockContainer::Current()->SetNavigationRoute(route);
+    navigationStack->Push("error", 0);
+
+    /**
+     * @tc.steps: step3. load pageOne
+     * @tc.expected: step3. navigationRoute names size is zero
+     */
+    EXPECT_NE(pattern, nullptr);
+    pattern->UpdateNavPathList();
+    EXPECT_EQ(route->GetPageNames().size(), 0);
+}
+
+/**
+ * @tc.name: NavigationLoadPage003
+ * @tc.desc: Test navigation page load success or not.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationTestNg, NavigationLoadPage003, TestSize.Level1)
+{
+    /**
+     * @tc.steps:step1. create navigation node and set navigation stack
+     */
+    MockPipelineContextGetTheme();
+    NavigationModelNG navigationModel;
+    navigationModel.Create();
+
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    auto navigationNode = AceType::DynamicCast<NavigationGroupNode>(frameNode);
+    ASSERT_NE(navigationNode, nullptr);
+    auto stackCreator = []() -> RefPtr<MockNavigationStack> {
+        return AceType::MakeRefPtr<MockNavigationStack>();
+    };
+    auto stackUpdater = [&navigationModel](RefPtr<NG::NavigationStack> stack) {
+        navigationModel.SetNavigationStackProvided(false);
+        auto mockStack = AceType::DynamicCast<MockNavigationStack>(stack);
+        ASSERT_NE(mockStack, nullptr);
+    };
+    navigationModel.SetNavigationStackWithCreatorAndUpdater(stackCreator, stackUpdater);
+    auto pattern = AceType::DynamicCast<NavigationPattern>(navigationNode->GetPattern());
+    auto navigationStack = pattern->GetNavigationStack();
+
+    /**
+     * @tc.steps:step2. set navigation route add add pageOne to navigation stack
+     */
+    auto route = AceType::MakeRefPtr<MockNavigationRoute>("");
+    MockContainer::Current()->SetNavigationRoute(route);
+    navigationStack->Push("error", 0);
+
+    /**
+     * @tc.steps: step3. create pageOne destination
+     * @tc.expected: step3. navigation name is empty
+     */
+    EXPECT_NE(pattern, nullptr);
+    auto destinationNode = AceType::DynamicCast<FrameNode>(pattern->GenerateUINodeByIndex(0));
+    EXPECT_NE(destinationNode, nullptr);
+    auto destinationPattern = AceType::DynamicCast<NavDestinationPattern>(destinationNode->GetPattern());
+    EXPECT_NE(destinationPattern, nullptr);
+    EXPECT_TRUE(destinationPattern->GetName().empty());
+}
+
+/**
+ * @tc.name: NavigationLoadPage004
+ * @tc.desc: Test navigation page load success or not.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationTestNg, NavigationLoadPage004, TestSize.Level1)
+{
+    /**
+     * @tc.steps:step1. create navigation node and set navigation stack
+     */
+    MockPipelineContextGetTheme();
+    NavigationModelNG navigationModel;
+    navigationModel.Create();
+
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    auto navigationNode = AceType::DynamicCast<NavigationGroupNode>(frameNode);
+    ASSERT_NE(navigationNode, nullptr);
+    auto stackCreator = []() -> RefPtr<MockNavigationStack> {
+        return AceType::MakeRefPtr<MockNavigationStack>();
+    };
+    auto stackUpdater = [&navigationModel](RefPtr<NG::NavigationStack> stack) {
+        navigationModel.SetNavigationStackProvided(false);
+        auto mockStack = AceType::DynamicCast<MockNavigationStack>(stack);
+        ASSERT_NE(mockStack, nullptr);
+    };
+    navigationModel.SetNavigationStackWithCreatorAndUpdater(stackCreator, stackUpdater);
+    auto pattern = AceType::DynamicCast<NavigationPattern>(navigationNode->GetPattern());
+    auto navigationStack = pattern->GetNavigationStack();
+
+    /**
+     * @tc.steps:step2. set navigation route add add pageOne to navigation stack add push pageOne
+     */
+    auto route = AceType::MakeRefPtr<MockNavigationRoute>("");
+    MockContainer::Current()->SetNavigationRoute(route);
+    navigationStack->Push("pageOne", 0);
+
+    /**
+     * @tc.steps: step3. create pageOne destination
+     * @tc.expected: step3. navdestination name is pageOne
+     */
+    auto destinationNode = AceType::DynamicCast<FrameNode>(pattern->GenerateUINodeByIndex(0));
+    EXPECT_NE(destinationNode, nullptr);
+    auto destinationPattern = AceType::DynamicCast<NavDestinationPattern>(destinationNode->GetPattern());
+    EXPECT_NE(destinationPattern, nullptr);
+    EXPECT_EQ(destinationPattern->GetName(), "pageOne");
 }
 } // namespace OHOS::Ace::NG

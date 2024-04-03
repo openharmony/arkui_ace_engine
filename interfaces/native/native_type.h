@@ -1369,6 +1369,34 @@ typedef struct {
 } ArkUI_IntOffset;
 
 /**
+ * @brief 嵌套滚动选项.
+ *
+ * @since 12
+ */
+typedef enum {
+    /** 只自身滚动，不与父组件联动. */
+    ARKUI_SELF_ONLY = 0,
+    /** 自身先滚动，自身滚动到边缘以后父组件滚动. */
+    ARKUI_SELF_FIRST,
+    /** 父组件先滚动，父组件滚动到边缘以后自身滚动. */
+    ARKUI_PARENT_FIRST,
+    /** 自身和父组件同时滚动. */
+    ARKUI_PARALLEL,
+} ArkUI_NestedScrollMode;
+
+/**
+ * @brief 指定的混合模式应用于视图的内容选项.
+ *
+ * @since 12
+ */
+typedef enum {
+    /** 在目标图像上按顺序混合视图的内容. */
+    ARKUI_BLEND_APPLY_TYPE_FAST = 0,
+    /** 将此组件和子组件内容绘制到离屏画布上，然后整体进行混合. */
+    ARKUI_BLEND_APPLY_TYPE_OFFSCREEN,
+} ArkUI_BlendApplyType;
+
+/**
 * @brief Creates a size constraint.
 *
 * @since 12

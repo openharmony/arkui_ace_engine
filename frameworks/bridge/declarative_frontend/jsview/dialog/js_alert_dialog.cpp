@@ -67,17 +67,16 @@ void SetParseStyle(ButtonInfo& buttonInfo, const int32_t styleValue)
     }
 }
 
-void ParseButtonObj(
-    const JSCallbackInfo& args, DialogProperties& properties, JSRef<JSVal> jsVal, const std::string& property)
+void ParseButtonObj(const JsiExecutionContext& execContext, DialogProperties& properties, JSRef<JSVal> jsVal,
+    const std::string& property)
 {
     if (!jsVal->IsObject()) {
         return;
     }
     auto objInner = JSRef<JSObject>::Cast(jsVal);
-    auto value = objInner->GetProperty("value");
     std::string buttonValue;
     ButtonInfo buttonInfo;
-    if (JSAlertDialog::ParseJsString(value, buttonValue)) {
+    if (JSAlertDialog::ParseJsString(objInner->GetProperty("value"), buttonValue)) {
         buttonInfo.text = buttonValue;
     }
 
@@ -96,19 +95,16 @@ void ParseButtonObj(
     // Parse style
     auto style = objInner->GetProperty("style");
     if (style->IsNumber()) {
-        auto styleValue = style->ToNumber<int32_t>();
-        SetParseStyle(buttonInfo, styleValue);
+        SetParseStyle(buttonInfo, style->ToNumber<int32_t>());
     }
 
-    auto fontColorValue = objInner->GetProperty("fontColor");
     Color textColor;
-    if (JSAlertDialog::ParseJsColor(fontColorValue, textColor)) {
+    if (JSAlertDialog::ParseJsColor(objInner->GetProperty("fontColor"), textColor)) {
         buttonInfo.textColor = textColor.ColorToString();
     }
 
-    auto backgroundColorValue = objInner->GetProperty("backgroundColor");
     Color backgroundColor;
-    if (JSAlertDialog::ParseJsColor(backgroundColorValue, backgroundColor)) {
+    if (JSAlertDialog::ParseJsColor(objInner->GetProperty("backgroundColor"), backgroundColor)) {
         buttonInfo.isBgColorSetted = true;
         buttonInfo.bgColor = backgroundColor;
     }
@@ -117,8 +113,7 @@ void ParseButtonObj(
     if (actionValue->IsFunction()) {
         auto frameNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
         auto actionFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(actionValue));
-        auto eventFunc = [execCtx = args.GetExecutionContext(), func = std::move(actionFunc), property,
-                            node = frameNode]() {
+        auto eventFunc = [execCtx = execContext, func = std::move(actionFunc), property, node = frameNode]() {
             JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
             ACE_SCORING_EVENT("AlertDialog.[" + property + "].onAction");
             auto pipelineContext = PipelineContext::GetCurrentContextSafely();
@@ -134,8 +129,8 @@ void ParseButtonObj(
     }
 }
 
-void ParseButtonArray(
-    const JSCallbackInfo& args, DialogProperties& properties, JSRef<JSObject> obj, const std::string& property)
+void ParseButtonArray(const JsiExecutionContext& execContext, DialogProperties& properties, JSRef<JSObject> obj,
+    const std::string& property)
 {
     auto jsVal = obj->GetProperty(property.c_str());
     if (!jsVal->IsArray()) {
@@ -151,7 +146,59 @@ void ParseButtonArray(
         if (!buttonItem->IsObject()) {
             break;
         }
-        ParseButtonObj(args, properties, buttonItem, property + std::to_string(i));
+        ParseButtonObj(execContext, properties, buttonItem, property + std::to_string(i));
+    }
+}
+
+void ParseButtons(const JsiExecutionContext& execContext, DialogProperties& properties, JSRef<JSObject> obj)
+{
+    properties.buttons.clear();
+    if (obj->GetProperty("confirm")->IsObject()) {
+        // Parse confirm.
+        auto objInner = obj->GetProperty("confirm");
+        ParseButtonObj(execContext, properties, objInner, "confirm");
+    } else if (obj->GetProperty("buttons")->IsArray()) {
+        // Parse buttons array.
+        ParseButtonArray(execContext, properties, obj, "buttons");
+    } else {
+        // Parse primaryButton and secondaryButton.
+        auto objInner = obj->GetProperty("primaryButton");
+        ParseButtonObj(execContext, properties, objInner, "primaryButton");
+        objInner = obj->GetProperty("secondaryButton");
+        ParseButtonObj(execContext, properties, objInner, "secondaryButton");
+    }
+
+    // Parse buttons direction.
+    auto directionValue = obj->GetProperty("buttonDirection");
+    if (directionValue->IsNumber()) {
+        auto buttonDirection = directionValue->ToNumber<int32_t>();
+        if (buttonDirection >= 0 && buttonDirection <= static_cast<int32_t>(DIALOG_BUTTONS_DIRECTION.size())) {
+            properties.buttonDirection = DIALOG_BUTTONS_DIRECTION[buttonDirection];
+        }
+    }
+}
+
+void ParseDialogTitleAndMessage(DialogProperties& properties, JSRef<JSObject> obj)
+{
+    // Parse title.
+    auto titleValue = obj->GetProperty("title");
+    std::string title;
+    if (JSAlertDialog::ParseJsString(titleValue, title)) {
+        properties.title = title;
+    }
+
+    // Parse subtitle.
+    auto subtitleValue = obj->GetProperty("subtitle");
+    std::string subtitle;
+    if (JSAlertDialog::ParseJsString(subtitleValue, subtitle)) {
+        properties.subtitle = subtitle;
+    }
+
+    // Parses message.
+    auto messageValue = obj->GetProperty("message");
+    std::string message;
+    if (JSAlertDialog::ParseJsString(messageValue, message)) {
+        properties.content = message;
     }
 }
 
@@ -167,27 +214,23 @@ void JSAlertDialog::Show(const JSCallbackInfo& args)
     DialogProperties properties { .type = DialogType::ALERT_DIALOG };
     if (args[0]->IsObject()) {
         auto obj = JSRef<JSObject>::Cast(args[0]);
+        auto dialogNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
+        auto execContext = args.GetExecutionContext();
 
-        // Parse title.
-        auto titleValue = obj->GetProperty("title");
-        std::string title;
-        if (ParseJsString(titleValue, title)) {
-            properties.title = title;
-        }
+        ParseDialogTitleAndMessage(properties, obj);
+        ParseButtons(execContext, properties, obj);
 
-        // Parse subtitle.
-        auto subtitleValue = obj->GetProperty("subtitle");
-        std::string subtitle;
-        if (ParseJsString(subtitleValue, subtitle)) {
-            properties.subtitle = subtitle;
-        }
-
-        // Parses message.
-        auto messageValue = obj->GetProperty("message");
-        std::string message;
-        if (ParseJsString(messageValue, message)) {
-            properties.content = message;
-        }
+        auto onLanguageChange = [execContext, obj, parseContent = ParseDialogTitleAndMessage,
+                                    parseButton = ParseButtons, node = dialogNode](DialogProperties& dialogProps) {
+            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execContext);
+            ACE_SCORING_EVENT("AlertDialog.property.onLanguageChange");
+            auto pipelineContext = PipelineContext::GetCurrentContextSafely();
+            CHECK_NULL_VOID(pipelineContext);
+            pipelineContext->UpdateCurrentActiveNode(node);
+            parseContent(dialogProps, obj);
+            parseButton(execContext, dialogProps, obj);
+        };
+        properties.onLanguageChange = std::move(onLanguageChange);
 
         // Parses gridCount.
         auto gridCountValue = obj->GetProperty("gridCount");
@@ -204,10 +247,9 @@ void JSAlertDialog::Show(const JSCallbackInfo& args)
         // Parse cancel.
         auto cancelValue = obj->GetProperty("cancel");
         if (cancelValue->IsFunction()) {
-            auto frameNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
             auto cancelFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(cancelValue));
-            auto eventFunc = [execCtx = args.GetExecutionContext(), func = std::move(cancelFunc), node = frameNode]() {
-                JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+            auto eventFunc = [execContext, func = std::move(cancelFunc), node = dialogNode]() {
+                JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execContext);
                 ACE_SCORING_EVENT("AlertDialog.property.cancel");
                 auto pipelineContext = PipelineContext::GetCurrentContextSafely();
                 CHECK_NULL_VOID(pipelineContext);
@@ -216,34 +258,10 @@ void JSAlertDialog::Show(const JSCallbackInfo& args)
             };
             AlertDialogModel::GetInstance()->SetOnCancel(eventFunc, properties);
         }
-        
+
         std::function<void(const int32_t& info)> onWillDismissFunc = nullptr;
         ParseDialogCallback(obj, onWillDismissFunc);
         AlertDialogModel::GetInstance()->SetOnWillDismiss(std::move(onWillDismissFunc), properties);
-
-        if (obj->GetProperty("confirm")->IsObject()) {
-            // Parse confirm.
-            auto objInner = obj->GetProperty("confirm");
-            ParseButtonObj(args, properties, objInner, "confirm");
-        } else if (obj->GetProperty("buttons")->IsArray()) {
-            // Parse buttons array.
-            ParseButtonArray(args, properties, obj, "buttons");
-        } else {
-            // Parse primaryButton and secondaryButton.
-            auto objInner = obj->GetProperty("primaryButton");
-            ParseButtonObj(args, properties, objInner, "primaryButton");
-            objInner = obj->GetProperty("secondaryButton");
-            ParseButtonObj(args, properties, objInner, "secondaryButton");
-        }
-
-        // Parse buttons direction.
-        auto directionValue = obj->GetProperty("buttonDirection");
-        if (directionValue->IsNumber()) {
-            auto buttonDirection = directionValue->ToNumber<int32_t>();
-            if (buttonDirection >= 0 && buttonDirection <= static_cast<int32_t>(DIALOG_BUTTONS_DIRECTION.size())) {
-                properties.buttonDirection = DIALOG_BUTTONS_DIRECTION[buttonDirection];
-            }
-        }
 
         // Parse alignment
         auto alignmentValue = obj->GetProperty("alignment");
@@ -291,7 +309,7 @@ void JSAlertDialog::Show(const JSCallbackInfo& args)
             LOGI("Parse isModalValue");
             properties.isModal = isModalValue->ToBoolean();
         }
-        
+
         auto backgroundColorValue = obj->GetProperty("backgroundColor");
         Color backgroundColor;
         if (JSViewAbstract::ParseJsColor(backgroundColorValue, backgroundColor)) {

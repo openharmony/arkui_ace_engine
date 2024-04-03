@@ -79,8 +79,8 @@ class DividerStrokeWidthModifier extends ModifierWithKey<number | string> {
   }
 }
 class ArkDividerComponent extends ArkComponent implements DividerAttribute {
-  constructor(nativePtr: KNode) {
-    super(nativePtr);
+  constructor(nativePtr: KNode, classType?: ModifierType) {
+    super(nativePtr, classType);
   }
   vertical(value: boolean): DividerAttribute {
     modifierWithKey(this._modifiersWithKeys, DividerVerticalModifier.identity, DividerVerticalModifier, value);
@@ -100,13 +100,10 @@ class ArkDividerComponent extends ArkComponent implements DividerAttribute {
   }
 }
 // @ts-ignore
-globalThis.Divider.attributeModifier = function (modifier) {
-  const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
-  let nativeNode = getUINativeModule().getFrameNodeById(elmtId);
-
-  let component = this.createOrGetNode(elmtId, () => {
-    return new ArkDividerComponent(nativeNode);
+globalThis.Divider.attributeModifier = function (modifier: ArkComponent): void {
+  attributeModifierFunc.call(this, modifier, (nativePtr: KNode) => {
+    return new ArkDividerComponent(nativePtr);
+  }, (nativePtr: KNode, classType: ModifierType, modifierJS: ModifierJS) => {
+    return new modifierJS.DividerModifier(nativePtr, classType);
   });
-  applyUIAttributes(modifier, nativeNode, component);
-  component.applyModifierPatch();
 };

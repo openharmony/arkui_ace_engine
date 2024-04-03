@@ -79,6 +79,9 @@ public:
     void CloseDialogNG(const RefPtr<NG::FrameNode>& dialogNode) override;
     void OpenCustomDialogNG(const DialogProperties& dialogProps, std::function<void(int32_t)>&& callback) override;
     void CloseCustomDialogNG(int32_t dialogId) override;
+    void CloseCustomDialogNG(const WeakPtr<NG::UINode>& node, std::function<void(int32_t)>&& callback) override;
+    void UpdateCustomDialogNG(const WeakPtr<NG::UINode>& node, const DialogProperties& dialogProps,
+        std::function<void(int32_t)>&& callback) override;
     void HideSubWindowNG() override;
     bool GetShown() override
     {
@@ -101,6 +104,7 @@ public:
     void CloseDialog(int32_t instanceId) override;
     void OpenCustomDialog(const PromptDialogAttr& dialogAttr, std::function<void(int32_t)>&& callback) override;
     void CloseCustomDialog(const int32_t dialogId) override;
+    void CloseCustomDialog(const WeakPtr<NG::UINode>& node, std::function<void(int32_t)>&& callback) override;
     const RefPtr<NG::OverlayManager> GetOverlayManager() override;
 
     int32_t GetChildContainerId() const override

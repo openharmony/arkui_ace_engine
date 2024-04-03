@@ -16,12 +16,13 @@
 /// <reference path='./import.ts' />
 class TimePickerModifier extends ArkTimePickerComponent implements AttributeModifier<TimePickerAttribute> {
 
-  constructor(nativePtr: KNode) {
-    super(nativePtr);
+  constructor(nativePtr: KNode, classType: ModifierType) {
+    super(nativePtr, classType);
     this._modifiersWithKeys = new ModifierMap();
   }
 
   applyNormalAttribute(instance: TimePickerAttribute): void {
-    applyAndMergeModifier<TimePickerAttribute, ArkTimePickerComponent, ArkComponent>(instance, this);
+    ModifierUtils.applySetOnChange(this);
+    ModifierUtils.applyAndMergeModifier<TimePickerAttribute, ArkTimePickerComponent, ArkComponent>(instance, this);
   }
 }

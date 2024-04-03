@@ -54,6 +54,8 @@ constexpr char EXIT_ABNORMALLY_NAME[] = "extension_exit_abnormally";
 constexpr char EXIT_ABNORMALLY_MESSAGE[] = "the extension ability exited abnormally, please check AMS log.";
 constexpr char LIFECYCLE_TIMEOUT_NAME[] = "extension_lifecycle_timeout";
 constexpr char LIFECYCLE_TIMEOUT_MESSAGE[] = "the lifecycle of extension ability is timeout, please check AMS log.";
+constexpr char EVENT_TIMEOUT_NAME[] = "handle_event_timeout";
+constexpr char EVENT_TIMEOUT_MESSAGE[] = "the extension ability has timed out processing the key event.";
 // Defines the want parameter to control the soft-keyboard area change of the provider.
 constexpr char OCCUPIED_AREA_CHANGE_KEY[] = "ability.want.params.IsNotifyOccupiedAreaChange";
 // Set the UIExtension type of the EmbeddedComponent.
@@ -337,7 +339,13 @@ bool SessionWrapperImpl::NotifyKeyEventSync(const std::shared_ptr<OHOS::MMI::Key
 {
     CHECK_NULL_RETURN(session_, false);
     bool isConsumed = false;
-    session_->TransferKeyEventForConsumed(keyEvent, isConsumed, isPreIme);
+    bool isTimeout = false;
+    session_->TransferKeyEventForConsumed(keyEvent, isConsumed, isTimeout, isPreIme);
+    auto pattern = hostPattern_.Upgrade();
+    if (isTimeout && pattern) {
+        pattern->FireOnErrorCallback(ERROR_CODE_UIEXTENSION_EVENT_TIMEOUT, EVENT_TIMEOUT_NAME, EVENT_TIMEOUT_MESSAGE);
+        return false;
+    }
     UIEXT_LOGD("The key evnet is notified to the provider and %{public}s consumed.", isConsumed ? "is" : "is not");
     return isConsumed;
 }
@@ -453,7 +461,7 @@ void SessionWrapperImpl::OnDisconnect(bool isAbnormal)
         TaskExecutor::TaskType::UI);
 }
 
-void SessionWrapperImpl::OnExtensionTimeout(int32_t errorCode)
+void SessionWrapperImpl::OnExtensionTimeout(int32_t /* errorCode */)
 {
     taskExecutor_->PostTask(
         [weak = hostPattern_]() {

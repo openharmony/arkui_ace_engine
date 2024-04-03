@@ -55,6 +55,7 @@
 #include "core/components_ng/pattern/xcomponent/xcomponent_model_ng.h"
 #include "core/components_ng/pattern/slider/slider_model_ng.h"
 #include "core/components_ng/pattern/waterflow/water_flow_model_ng.h"
+#include "core/components_ng/pattern/waterflow/water_flow_item_model_ng.h"
 #include "core/interfaces/native/node/node_api.h"
 #include "core/pipeline/base/element_register.h"
 
@@ -292,6 +293,13 @@ void* createWaterFlowNode(ArkUI_Int32 nodeId)
     return AceType::RawPtr(frameNode);
 }
 
+void* createFlowItemNode(ArkUI_Int32 nodeId)
+{
+    auto frameNode = WaterFlowItemModelNG::CreateFrameNode(nodeId);
+    frameNode->IncRefCount();
+    return AceType::RawPtr(frameNode);
+}
+
 void* createCircleNode(ArkUI_Int32 nodeId)
 {
     auto frameNode = CircleModelNG::CreateFrameNode(nodeId);
@@ -347,6 +355,7 @@ void* CreateNode(ArkUINodeType tag, ArkUI_Int32 nodeId)
         nullptr, // GridItem
         createCustomNode,
         createWaterFlowNode,
+        createFlowItemNode,
         createCircleNode,
     };
     if (tag >= sizeof(createArkUIFrameNodes) / sizeof(createArkUIFrameNode*)) {

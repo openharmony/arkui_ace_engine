@@ -33,7 +33,7 @@ namespace {
 constexpr int FOR_HOTZONESIZE_CALCULATE_MULTIPLY_TWO = 2;
 const Color ITEM_FILL_COLOR = Color::TRANSPARENT;
 
-constexpr int32_t DEFAULT_RADIO_ANIMATION_DURATION = 150;
+constexpr int32_t DEFAULT_RADIO_ANIMATION_DURATION = 200;
 constexpr float DEFAULT_CUSTOM_SCALE = 0.7F;
 constexpr float INDICATOR_MIN_SCALE = 0.8F;
 constexpr float INDICATOR_MAX_SCALE = 1.0F;
@@ -98,7 +98,12 @@ void RadioPattern::UpdateIndicatorType()
     } else {
         ImageNodeCreate();
     }
-    if (!radioPaintProperty->GetRadioCheckValue()) {
+    if (radioPaintProperty->HasRadioCheck()) {
+        if (!radioPaintProperty->GetRadioCheckValue()) {
+            SetBuilderState();
+        }
+    } else {
+        radioPaintProperty->UpdateRadioCheck(false);
         SetBuilderState();
     }
 }
@@ -169,6 +174,14 @@ void RadioPattern::ImageNodeCreate()
     imageProperty->UpdateUserDefinedIdealSize(GetChildContentSize());
     auto imageSourceInfo = GetImageSourceInfoFromTheme(radioPaintProperty->GetRadioIndicator().value_or(0));
     UpdateInternalResource(imageSourceInfo);
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto radioTheme = pipeline->GetTheme<RadioTheme>();
+    CHECK_NULL_VOID(radioTheme);
+    auto indicatorColor = radioPaintProperty->GetRadioIndicatorColor().value_or(Color(radioTheme->GetPointColor()));
+    auto imageRenderProperty = childNode->GetPaintProperty<ImageRenderProperty>();
+    CHECK_NULL_VOID(imageRenderProperty);
+    imageRenderProperty->UpdateSvgFillColor(indicatorColor);
     imageProperty->UpdateImageSourceInfo(imageSourceInfo);
     childNode->MountToParent(host);
     childNode->MarkModifyDone();
@@ -478,7 +491,6 @@ void RadioPattern::startEnterAnimation()
     AnimationOption delayOption;
     delayOption.SetCurve(springCurve);
     delayOption.SetDelay(DEFAULT_RADIO_ANIMATION_DURATION);
-    delayOption.SetDuration(DEFAULT_RADIO_ANIMATION_DURATION);
     auto host = GetHost();
     auto childNode = DynamicCast<FrameNode>(host->GetFirstChild());
     CHECK_NULL_VOID(childNode);
@@ -508,8 +520,6 @@ void RadioPattern::startExitAnimation()
         DEFAULT_INTERPOLATINGSPRING_MASS, DEFAULT_INTERPOLATINGSPRING_STIFFNESS, DEFAULT_INTERPOLATINGSPRING_DAMPING);
     AnimationOption delayOption;
     delayOption.SetCurve(springCurve);
-    delayOption.SetDelay(DEFAULT_RADIO_ANIMATION_DURATION);
-    delayOption.SetDuration(DEFAULT_RADIO_ANIMATION_DURATION);
     auto host = GetHost();
     auto childNode = DynamicCast<FrameNode>(host->GetFirstChild());
     CHECK_NULL_VOID(childNode);

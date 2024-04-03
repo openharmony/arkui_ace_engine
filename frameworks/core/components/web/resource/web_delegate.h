@@ -545,6 +545,8 @@ public:
         : WebResource(type, context, std::move(onError))
     {}
 
+    void UnRegisterScreenLockFunction();
+
     void SetObserver(const RefPtr<WebDelegateObserver>& observer)
     {
         observer_ = observer;
@@ -1011,6 +1013,8 @@ private:
     std::string tag_;
     std::string tag_type_;
     bool isSmoothDragResizeEnabled_ = false;
+    double resizeWidth_ = 0.0;
+    double resizeHeight_ = 0.0;
 #endif
 };
 

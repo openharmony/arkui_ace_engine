@@ -142,7 +142,8 @@ bool UdmfClientImpl::GetRemoteStatus(std::string& key)
     queryOption.key = key;
     int32_t ret = client.IsRemoteData(queryOption, isRemoteData);
     if (ret != 0) {
-        return false;
+        // if ret is not 0, udmf client has not been sync, so return true to use remote getData.
+        return true;
     }
     return isRemoteData;
 }

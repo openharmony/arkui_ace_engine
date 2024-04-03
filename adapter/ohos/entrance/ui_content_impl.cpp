@@ -33,6 +33,7 @@
 #include "base/log/log_wrapper.h"
 #include "base/utils/utils.h"
 #include "core/components/common/layout/constants.h"
+#include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/property/safe_area_insets.h"
 
 #ifdef ENABLE_ROSEN_BACKEND
@@ -2144,7 +2145,7 @@ void UIContentImpl::InitializeSubWindow(OHOS::Rosen::Window* window, bool isDial
     instanceId_ = Container::GenerateId<COMPONENT_SUBWINDOW_CONTAINER>();
 
     std::weak_ptr<OHOS::AppExecFwk::AbilityInfo> abilityInfo;
-    std::weak_ptr<OHOS::AbilityRuntime::Context> runtimeContext;
+    auto context = context_.lock();
     if (isDialog) {
         UErrorCode status = U_ZERO_ERROR;
         icu::Locale locale = icu::Locale::forLanguageTag(Global::I18n::LocaleConfig::GetSystemLanguage(), status);
@@ -2153,7 +2154,7 @@ void UIContentImpl::InitializeSubWindow(OHOS::Rosen::Window* window, bool isDial
     } else {
 #ifdef NG_BUILD
         container = AceType::MakeRefPtr<Platform::AceContainer>(instanceId_, FrontendType::DECLARATIVE_JS,
-            runtimeContext, abilityInfo, std::make_unique<ContentEventCallback>([] {
+            context, abilityInfo, std::make_unique<ContentEventCallback>([] {
                 // Sub-window ,just return.
                 LOGI("Content event callback");
             }),
@@ -2161,14 +2162,14 @@ void UIContentImpl::InitializeSubWindow(OHOS::Rosen::Window* window, bool isDial
 #else
         if (Container::IsCurrentUseNewPipeline()) {
             container = AceType::MakeRefPtr<Platform::AceContainer>(instanceId_, FrontendType::DECLARATIVE_JS,
-                runtimeContext, abilityInfo, std::make_unique<ContentEventCallback>([] {
+                context, abilityInfo, std::make_unique<ContentEventCallback>([] {
                     // Sub-window ,just return.
                     LOGI("Content event callback");
                 }),
                 false, true, true);
         } else {
             container = AceType::MakeRefPtr<Platform::AceContainer>(instanceId_, FrontendType::DECLARATIVE_JS,
-                runtimeContext, abilityInfo, std::make_unique<ContentEventCallback>([] {
+                context, abilityInfo, std::make_unique<ContentEventCallback>([] {
                     // Sub-window ,just return.
                     LOGI("Content event callback");
                 }),
@@ -2740,6 +2741,13 @@ void UIContentImpl::OnPopupStateChange(
     taskExecutor->PostDelayedTask([config, nodeId]() { RemoveOldPopInfoIfExsited(config.isShowInSubWindow, nodeId); },
         TaskExecutor::TaskType::UI, 100); // delay 100ms
     customPopupConfigMap_.erase(nodeId);
+    popupUIExtensionRecords_.erase(nodeId);
+}
+
+void UIContentImpl::SetCustomPopupConfig(int32_t nodeId, const CustomPopupUIExtensionConfig& config, int32_t popupId)
+{
+    customPopupConfigMap_[nodeId] = config;
+    popupUIExtensionRecords_[nodeId] = popupId;
 }
 
 int32_t UIContentImpl::CreateCustomPopupUIExtension(
@@ -2787,9 +2795,8 @@ int32_t UIContentImpl::CreateCustomPopupUIExtension(
             nodeId = nodeIdLabel;
             popupParam->SetOnStateChange(
                 [config, nodeId, this](const std::string& event) { this->OnPopupStateChange(event, config, nodeId); });
-
             NG::ViewAbstract::BindPopup(popupParam, targetNode, AceType::DynamicCast<NG::UINode>(uiExtNode));
-            customPopupConfigMap_[nodeId] = config;
+            SetCustomPopupConfig(nodeId, config, uiExtNode->GetId());
         },
         TaskExecutor::TaskType::UI);
     LOGI("Create custom popup with UIExtension end, nodeId=%{public}d", nodeId);
@@ -2820,6 +2827,41 @@ void UIContentImpl::DestroyCustomPopupUIExtension(int32_t nodeId)
             NG::ViewAbstract::BindPopup(popupParam, targetNode, nullptr);
             RemoveOldPopInfoIfExsited(config.isShowInSubWindow, nodeId);
             customPopupConfigMap_.erase(nodeId);
+            popupUIExtensionRecords_.erase(nodeId);
+        },
+        TaskExecutor::TaskType::UI);
+}
+
+void UIContentImpl::UpdateCustomPopupUIExtension(const CustomPopupUIExtensionConfig& config)
+{
+    ContainerScope scope(instanceId_);
+    auto taskExecutor = Container::CurrentTaskExecutor();
+    CHECK_NULL_VOID(taskExecutor);
+    taskExecutor->PostSyncTask(
+        [config, this]() {
+            int32_t targetId = config.nodeId;
+            auto record = popupUIExtensionRecords_.find(targetId);
+            int32_t uiExtNodeId = (record != popupUIExtensionRecords_.end()) ? record->second : 0;
+            auto uiExtNode = NG::FrameNode::GetFrameNode(V2::UI_EXTENSION_COMPONENT_ETS_TAG, uiExtNodeId);
+            if (config.targetSize.has_value()) {
+                auto layoutProperty = uiExtNode->GetLayoutProperty();
+                CHECK_NULL_VOID(layoutProperty);
+                PopupSize targetSize = config.targetSize.value();
+                DimensionUnit unit = static_cast<DimensionUnit>(targetSize.unit);
+                auto width = NG::CalcLength(targetSize.width, unit);
+                auto height = NG::CalcLength(targetSize.height, unit);
+                layoutProperty->UpdateUserDefinedIdealSize(NG::CalcSize(width, height));
+            }
+            auto popupParam = CreateCustomPopupParam(true, config);
+            auto popupConfig = customPopupConfigMap_.find(targetId);
+            if (popupConfig != customPopupConfigMap_.end()) {
+                auto createConfig = popupConfig->second;
+                popupParam->SetShowInSubWindow(createConfig.isShowInSubWindow);
+            }
+            auto targetNode =
+                AceType::DynamicCast<NG::FrameNode>(ElementRegister::GetInstance()->GetUINodeById(targetId));
+            CHECK_NULL_VOID(targetNode);
+            NG::ViewAbstract::BindPopup(popupParam, targetNode, nullptr);
         },
         TaskExecutor::TaskType::UI);
 }

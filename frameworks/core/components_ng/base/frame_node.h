@@ -288,7 +288,7 @@ public:
         return type;
     }
 
-    static void PostTask(std::function<void()>&& task, TaskExecutor::TaskType taskType = TaskExecutor::TaskType::UI);
+    void PostIdleTask(std::function<void(int64_t deadline, bool canUseLongPredictTask)>&& task);
 
     void AddJudgeToTargetComponent(RefPtr<TargetComponent>& targetComponent);
 
@@ -873,6 +873,10 @@ private:
     HitTestMode TriggerOnTouchIntercept(const TouchEvent& touchEvent);
 
     void AddTouchEventAllFingersInfo(TouchEventInfo& event, const TouchEvent& touchEvent);
+
+    RectF ApplyFrameNodeTranformToRect(const RectF& rect, const RefPtr<FrameNode>& parent) const;
+
+    void GetVisibleRect(RectF& visibleRect, RectF& frameRect) const;
 
     // sort in ZIndex.
     std::multiset<WeakPtr<FrameNode>, ZIndexComparator> frameChildren_;

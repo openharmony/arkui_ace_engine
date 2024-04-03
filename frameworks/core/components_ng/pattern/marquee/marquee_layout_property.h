@@ -47,6 +47,7 @@ public:
         value->propFontWeight_ = CloneFontWeight();
         value->propFontColor_ = CloneFontColor();
         value->propFontFamily_ = CloneFontFamily();
+        value->propMarqueeUpdateStrategy_ = CloneMarqueeUpdateStrategy();
         return value;
     }
 
@@ -63,6 +64,7 @@ public:
         ResetFontWeight();
         ResetFontColor();
         ResetFontFamily();
+        ResetMarqueeUpdateStrategy();
     }
 
     void ToJsonValue(std::unique_ptr<JsonValue>& json) const override
@@ -91,6 +93,8 @@ public:
             fontFamily += ',' + fontFamilyVector.at(i);
         }
         json->Put("fontFamily", fontFamily.c_str());
+        json->Put("marqueeUpdateStrategy", V2::ConvertWrapMarqueeUpdateStrategyToStirng(
+            propMarqueeUpdateStrategy_.value_or(MarqueeUpdateStrategy::DEFAULT)).c_str());
     }
 
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(PlayerStatus, bool, PROPERTY_UPDATE_MEASURE);
@@ -103,6 +107,7 @@ public:
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(FontWeight, FontWeight, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(FontColor, Color, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(FontFamily, std::vector<std::string>, PROPERTY_UPDATE_MEASURE);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(MarqueeUpdateStrategy, MarqueeUpdateStrategy, PROPERTY_UPDATE_MEASURE);
 
 private:
     ACE_DISALLOW_COPY_AND_MOVE(MarqueeLayoutProperty);

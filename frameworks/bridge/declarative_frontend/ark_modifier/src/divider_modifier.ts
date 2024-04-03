@@ -16,12 +16,13 @@
 /// <reference path='./import.ts' />
 class DividerModifier extends ArkDividerComponent implements AttributeModifier<DividerAttribute> {
 
-  constructor(nativePtr: KNode) {
-    super(nativePtr);
+  constructor(nativePtr: KNode, classType: ModifierType) {
+    super(nativePtr, classType);
     this._modifiersWithKeys = new ModifierMap();
   }
 
   applyNormalAttribute(instance: DividerAttribute): void {
-    applyAndMergeModifier<DividerAttribute, ArkDividerComponent, ArkComponent>(instance, this);
+    ModifierUtils.applySetOnChange(this);
+    ModifierUtils.applyAndMergeModifier<DividerAttribute, ArkDividerComponent, ArkComponent>(instance, this);
   }
 }

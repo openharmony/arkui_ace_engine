@@ -95,7 +95,7 @@ void TabBarPattern::InitSurfaceChangedCallback()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto pipeline = host->GetContext();
+    auto pipeline = host->GetContextRefPtr();
     CHECK_NULL_VOID(pipeline);
     if (!HasSurfaceChangedCallback()) {
         auto callbackId = pipeline->RegisterSurfaceChangedCallback(
@@ -196,7 +196,7 @@ void TabBarPattern::InitScrollable(const RefPtr<GestureEventHub>& gestureHub)
     scrollableEvent_ = MakeRefPtr<ScrollableEvent>(axis);
     auto scrollable = MakeRefPtr<Scrollable>(task, axis);
     scrollable->SetNodeId(host->GetAccessibilityId());
-    scrollable->Initialize(host->GetContext());
+    scrollable->Initialize(host->GetContextRefPtr());
     scrollableEvent_->SetScrollable(scrollable);
     gestureHub->AddScrollableEvent(scrollableEvent_);
     scrollableEvent_->GetScrollable()->SetEdgeEffect(EdgeEffect::SPRING);
@@ -1309,6 +1309,42 @@ void TabBarPattern::PlayPressAnimation(int32_t index, const Color& pressColor, A
     });
 }
 
+void TabBarPattern::OnTabBarIndexChange(int32_t index)
+{
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    pipeline->AddAfterRenderTask([weak = WeakClaim(this), index]() {
+        auto tabBarPattern = weak.Upgrade();
+        CHECK_NULL_VOID(tabBarPattern);
+        auto tabBarNode = tabBarPattern->GetHost();
+        CHECK_NULL_VOID(tabBarNode);
+        tabBarPattern->ResetIndicatorAnimationState();
+        auto tabBarLayoutProperty = tabBarPattern->GetLayoutProperty<TabBarLayoutProperty>();
+        CHECK_NULL_VOID(tabBarLayoutProperty);
+        if (!tabBarPattern->IsMaskAnimationByCreate()) {
+            tabBarPattern->HandleBottomTabBarChange(index);
+        }
+        tabBarPattern->SetMaskAnimationByCreate(false);
+        tabBarPattern->SetIndicator(index);
+        tabBarPattern->UpdateIndicator(index);
+        tabBarPattern->UpdateTextColorAndFontWeight(index);
+        if (tabBarLayoutProperty->GetTabBarMode().value_or(TabBarMode::FIXED) == TabBarMode::SCROLLABLE) {
+            if (tabBarPattern->GetTabBarStyle() == TabBarStyle::SUBTABBATSTYLE &&
+                tabBarLayoutProperty->GetAxisValue(Axis::HORIZONTAL) == Axis::HORIZONTAL) {
+                if (!tabBarPattern->GetChangeByClick()) {
+                    tabBarPattern->PlayTabBarTranslateAnimation(index);
+                    tabBarNode->MarkDirtyNode(PROPERTY_UPDATE_LAYOUT);
+                } else {
+                    tabBarPattern->SetChangeByClick(false);
+                }
+            } else {
+                tabBarNode->MarkDirtyNode(PROPERTY_UPDATE_LAYOUT);
+            }
+        }
+    });
+    pipeline->RequestFrame();
+}
+
 void TabBarPattern::UpdateCurrentOffset(float offset)
 {
     auto host = GetHost();
@@ -1714,20 +1750,29 @@ RefPtr<NodePaintMethod> TabBarPattern::CreateNodePaintMethod()
         indicator_ >= static_cast<int32_t>(selectedModes_.size())) {
         return nullptr;
     }
-    Color backgroundColor = Color::WHITE;
+    Color bgColor;
     auto tabBarNode = GetHost();
     CHECK_NULL_RETURN(tabBarNode, nullptr);
-    auto tabBarRenderContext = tabBarNode->GetRenderContext();
-    CHECK_NULL_RETURN(tabBarRenderContext, nullptr);
-    if (tabBarRenderContext->GetBackgroundColor().has_value()) {
-        backgroundColor = tabBarRenderContext->GetBackgroundColor().value();
+    auto tabBarCtx = tabBarNode->GetRenderContext();
+    CHECK_NULL_RETURN(tabBarCtx, nullptr);
+    if (tabBarCtx->GetBackgroundColor()) {
+        bgColor = *tabBarCtx->GetBackgroundColor();
     } else {
         auto tabsNode = AceType::DynamicCast<FrameNode>(tabBarNode->GetParent());
         CHECK_NULL_RETURN(tabsNode, nullptr);
-        auto tabsRenderContext = tabsNode->GetRenderContext();
-        CHECK_NULL_RETURN(tabsRenderContext, nullptr);
-        backgroundColor = tabsRenderContext->GetBackgroundColor().value_or(Color::WHITE);
+        auto tabsCtx = tabsNode->GetRenderContext();
+        CHECK_NULL_RETURN(tabsCtx, nullptr);
+        if (tabsCtx->GetBackgroundColor()) {
+            bgColor = *tabsCtx->GetBackgroundColor();
+        } else {
+            auto pipeline = PipelineContext::GetCurrentContext();
+            CHECK_NULL_RETURN(pipeline, nullptr);
+            auto tabTheme = pipeline->GetTheme<TabTheme>();
+            CHECK_NULL_RETURN(tabTheme, nullptr);
+            bgColor = tabTheme->GetBackgroundColor().ChangeAlpha(0xff);
+        }
     }
+
     if (!tabBarModifier_) {
         tabBarModifier_ = AceType::MakeRefPtr<TabBarModifier>();
     }
@@ -1735,7 +1780,7 @@ RefPtr<NodePaintMethod> TabBarPattern::CreateNodePaintMethod()
     IndicatorStyle indicatorStyle;
     GetIndicatorStyle(indicatorStyle);
 
-    return MakeRefPtr<TabBarPaintMethod>(tabBarModifier_, gradientRegions_, backgroundColor, indicatorStyle,
+    return MakeRefPtr<TabBarPaintMethod>(tabBarModifier_, gradientRegions_, bgColor, indicatorStyle,
         currentIndicatorOffset_, selectedModes_[indicator_]);
 }
 
@@ -2260,6 +2305,7 @@ void TabBarPattern::InitTurnPageRateEvent()
     if (!animationEndEvent_) {
         AnimationEndEvent animationEndEvent =
             [weak = WeakClaim(this)](int32_t index, const AnimationCallbackInfo& info) {
+                PerfMonitor::GetPerfMonitor()->End(PerfConstants::APP_TAB_SWITCH, false);
                 auto pattern = weak.Upgrade();
                 if (pattern && (NearZero(pattern->turnPageRate_) || NearEqual(pattern->turnPageRate_, 1.0f))) {
                     pattern->isTouchingSwiper_ = false;

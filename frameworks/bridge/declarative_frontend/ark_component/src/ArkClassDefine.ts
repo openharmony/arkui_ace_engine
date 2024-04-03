@@ -1139,3 +1139,45 @@ class ArkGeometryTransition {
     return (this.id === another.id && this.options === another.options);
   }
 }
+
+class ArkTextBackGroundStyle {
+  color: ResourceColor;
+  radius: Dimension | BorderRadiuses;
+  constructor() {
+    this.color = undefined;
+    this.radius = new ArkBorderRadius();
+  }
+  isEqual(another) {
+    return (this.color === another.color &&
+      this.radius.isEqual(another.radius));
+  }
+  checkObjectDiff(another) {
+    return !this.isEqual(another);
+  }
+  convertTextBackGroundStyleOptions(value) {
+    if (isUndefined(value)) {
+      return false;
+    }
+    if (!isUndefined(value?.color) && value?.color !== null) {
+      if (isNumber(value.color) || isString(value.color) || isResource(value.color)) {
+        this.color = value.color;
+      }
+    }
+
+    if (!isUndefined(value?.radius) && value?.radius !== null) {
+      if (isNumber(value.radius) || isString(value.radius) || isResource(value.radius)) {
+        this.radius.topLeft = value.radius;
+        this.radius.topRight = value.radius;
+        this.radius.bottomLeft = value.radius;
+        this.radius.bottomRight = value.radius;
+      }
+      else {
+        this.radius.topLeft = (value.radius as BorderRadiuses)?.topLeft;
+        this.radius.topRight = (value.radius as BorderRadiuses)?.topRight;
+        this.radius.bottomLeft = (value.radius as BorderRadiuses)?.bottomLeft;
+        this.radius.bottomRight = (value.radius as BorderRadiuses)?.bottomRight;
+      }
+    }
+    return true;
+  }
+}

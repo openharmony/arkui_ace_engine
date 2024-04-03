@@ -14,10 +14,19 @@
  */
 
 #include "ui_observer_listener.h"
+#include <cstdint>
+
+#include "core/pipeline/pipeline_base.h"
+#include "frameworks/bridge/declarative_frontend/engine/jsi/jsi_types.h"
+#include "frameworks/bridge/declarative_frontend/engine/jsi/jsi_declarative_engine.h"
+#include "core/interfaces/native/node/node_api.h"
+#include "core/components_ng/common_napi_utils/common_napi_utils.h"
+#include "frameworks/base/geometry/dimension.h"
 
 namespace OHOS::Ace::Napi {
 namespace {
 constexpr char NAV_BAR[] = "navBar";
+constexpr int32_t PARAM_SIZE_TWO = 2;
 }
 
 void UIObserverListener::OnNavigationStateChange(const NG::NavDestinationInfo& info)
@@ -156,6 +165,338 @@ napi_value UIObserverListener::CreateNavDestinationSwitchInfoObj(const NG::NavDe
     napi_set_named_property(env_, objValue, "to", napiTo);
     napi_set_named_property(env_, objValue, "operation", napiOperation);
     return objValue;
+}
+
+void UIObserverListener::OnWillClick(
+    const GestureEvent& gestureEventInfo, const ClickInfo& clickInfo, const RefPtr<NG::FrameNode> frameNode)
+{
+    if (!env_ || !callback_) {
+        TAG_LOGW(AceLogTag::ACE_OBSERVER,
+            "Handle density change failed, runtime or callback function invalid!");
+        return;
+    }
+    napi_handle_scope scope = nullptr;
+    auto status = napi_open_handle_scope(env_, &scope);
+    if (status != napi_ok) {
+        return;
+    }
+
+    napi_value callback = nullptr;
+    napi_get_reference_value(env_, callback_, &callback);
+    
+    napi_value objValueClickEvent = nullptr;
+    napi_create_object(env_, &objValueClickEvent);
+
+    AddBaseEventInfo(objValueClickEvent, clickInfo);
+    AddGestureEventInfoOne(objValueClickEvent, gestureEventInfo);
+    AddGestureEventInfoTwo(objValueClickEvent, gestureEventInfo);
+    AddGestureEventInfoThree(objValueClickEvent, gestureEventInfo);
+    AddClickEventInfoOne(objValueClickEvent, clickInfo);
+    AddClickEventInfoTwo(objValueClickEvent, clickInfo);
+
+    napi_value objValueFrameNode = nullptr;
+    napi_create_object(env_, &objValueFrameNode);
+
+    auto container = Container::Current();
+    CHECK_NULL_VOID(container);
+    auto frontEnd = container->GetFrontend();
+    CHECK_NULL_VOID(frontEnd);
+    auto nodeId = frameNode->GetId();
+    objValueFrameNode = frontEnd->GetFrameNodeValueByNodeId(nodeId);
+
+    napi_value argv[] = { objValueClickEvent, objValueFrameNode };
+    napi_call_function(env_, nullptr, callback, PARAM_SIZE_TWO, argv, nullptr);
+    napi_close_handle_scope(env_, scope);
+}
+
+void UIObserverListener::OnDidClick(
+    const GestureEvent& gestureEventInfo, const ClickInfo& clickInfo, const RefPtr<NG::FrameNode> frameNode)
+{
+    if (!env_ || !callback_) {
+        TAG_LOGW(AceLogTag::ACE_OBSERVER,
+            "Handle density change failed, runtime or callback function invalid!");
+        return;
+    }
+    napi_handle_scope scope = nullptr;
+    auto status = napi_open_handle_scope(env_, &scope);
+    if (status != napi_ok) {
+        return;
+    }
+
+    napi_value callback = nullptr;
+    napi_get_reference_value(env_, callback_, &callback);
+    
+    napi_value objValueClickEvent = nullptr;
+    napi_create_object(env_, &objValueClickEvent);
+
+    AddBaseEventInfo(objValueClickEvent, clickInfo);
+    AddGestureEventInfoOne(objValueClickEvent, gestureEventInfo);
+    AddGestureEventInfoTwo(objValueClickEvent, gestureEventInfo);
+    AddGestureEventInfoThree(objValueClickEvent, gestureEventInfo);
+    AddClickEventInfoOne(objValueClickEvent, clickInfo);
+    AddClickEventInfoTwo(objValueClickEvent, clickInfo);
+
+    napi_value objValueFrameNode = nullptr;
+    napi_create_object(env_, &objValueFrameNode);
+
+    auto container = Container::Current();
+    CHECK_NULL_VOID(container);
+    auto frontEnd = container->GetFrontend();
+    CHECK_NULL_VOID(frontEnd);
+    auto nodeId = frameNode->GetId();
+    objValueFrameNode = frontEnd->GetFrameNodeValueByNodeId(nodeId);
+
+    napi_value argv[] = { objValueClickEvent, objValueFrameNode };
+    napi_call_function(env_, nullptr, callback, PARAM_SIZE_TWO, argv, nullptr);
+    napi_close_handle_scope(env_, scope);
+}
+
+napi_valuetype UIObserverListener::GetValueType(napi_env env, napi_value value)
+{
+    if (value == nullptr) {
+        return napi_undefined;
+    }
+
+    napi_valuetype valueType = napi_undefined;
+    NAPI_CALL_BASE(env, napi_typeof(env, value, &valueType), napi_undefined);
+    return valueType;
+}
+
+napi_value UIObserverListener::GetNamedProperty(napi_env env, napi_value object, const std::string& propertyName)
+{
+    if (GetValueType(env, object) != napi_object) {
+        napi_value undefined = nullptr;
+        NAPI_CALL(env, napi_get_undefined(env, &undefined));
+        return undefined;
+    }
+
+    napi_value value = nullptr;
+    NAPI_CALL(env, napi_get_named_property(env, object, propertyName.c_str(), &value));
+    return value;
+}
+
+void UIObserverListener::AddBaseEventInfo(napi_value objValueClickEvent, const ClickInfo& clickInfo)
+{
+    napi_handle_scope scope = nullptr;
+    auto status = napi_open_handle_scope(env_, &scope);
+    if (status != napi_ok) {
+        return;
+    }
+
+    napi_value napiTimeStamp = nullptr;
+    napi_value napiSource = nullptr;
+    napi_value napiPressure = nullptr;
+    napi_value napiTiltX = nullptr;
+    napi_value napiTiltY = nullptr;
+    napi_value napiSourceTool = nullptr;
+
+    napi_create_double(env_,
+        static_cast<double>(clickInfo.GetTimeStamp().time_since_epoch().count()), &napiTimeStamp);
+    napi_create_double(env_, static_cast<int32_t>(clickInfo.GetForce()), &napiSource);
+    napi_create_double(env_, clickInfo.GetForce(), &napiPressure);
+    napi_create_double(env_, clickInfo.GetTiltX().value(), &napiTiltX);
+    napi_create_double(env_, clickInfo.GetTiltY().value(), &napiTiltY);
+    napi_create_double(env_, static_cast<int32_t>(clickInfo.GetSourceTool()), &napiSourceTool);
+
+    napi_set_named_property(env_, objValueClickEvent, "timestamp", napiTimeStamp);
+    napi_set_named_property(env_, objValueClickEvent, "source", napiSource);
+    napi_set_named_property(env_, objValueClickEvent, "pressure", napiPressure);
+    napi_set_named_property(env_, objValueClickEvent, "tiltX", napiTiltX);
+    napi_set_named_property(env_, objValueClickEvent, "tiltY", napiTiltY);
+    napi_set_named_property(env_, objValueClickEvent, "sourceTool", napiSourceTool);
+
+    napi_close_handle_scope(env_, scope);
+}
+
+void UIObserverListener::AddGestureEventInfoOne(napi_value objValueClickEvent, const GestureEvent& gestureEventInfo)
+{
+    napi_handle_scope scope = nullptr;
+    auto status = napi_open_handle_scope(env_, &scope);
+    if (status != napi_ok) {
+        return;
+    }
+    double scale = Dimension(1.0, DimensionUnit::VP).ConvertToPx();
+    if (scale == 0) {
+        scale = 1.0;
+    }
+    napi_value napiRepeat = GetNamedProperty(env_, objValueClickEvent, "repeat");
+    if (GetValueType(env_, napiRepeat) != napi_null) {
+        napi_get_boolean(env_, gestureEventInfo.GetRepeat(), &napiRepeat);
+        napi_set_named_property(env_, objValueClickEvent, "repeat", napiRepeat);
+    }
+    napi_value napiOffsetX = GetNamedProperty(env_, objValueClickEvent, "offsetX");
+    if (GetValueType(env_, napiOffsetX) != napi_null) {
+        napi_create_double(env_, gestureEventInfo.GetOffsetX() / scale, &napiOffsetX);
+        napi_set_named_property(env_, objValueClickEvent, "offsetX", napiOffsetX);
+    }
+    napi_value napiOffsetY = GetNamedProperty(env_, objValueClickEvent, "offsetY");
+    if (GetValueType(env_, napiOffsetY) != napi_null) {
+        napi_create_double(env_, gestureEventInfo.GetOffsetY() / scale, &napiOffsetY);
+        napi_set_named_property(env_, objValueClickEvent, "offsetY", napiOffsetY);
+    }
+    napi_value napiScale = GetNamedProperty(env_, objValueClickEvent, "scale");
+    if (GetValueType(env_, napiScale) != napi_null) {
+        napi_create_double(env_, gestureEventInfo.GetScale() / scale, &napiScale);
+        napi_set_named_property(env_, objValueClickEvent, "scale", napiScale);
+    }
+    napi_value napiAngle = GetNamedProperty(env_, objValueClickEvent, "angle");
+    if (GetValueType(env_, napiAngle) != napi_null) {
+        napi_create_double(env_, gestureEventInfo.GetAngle() / scale, &napiAngle);
+        napi_set_named_property(env_, objValueClickEvent, "angle", napiAngle);
+    }
+    napi_value napiSpeed = GetNamedProperty(env_, objValueClickEvent, "speed");
+    if (GetValueType(env_, napiSpeed) != napi_null) {
+        napi_create_double(env_, gestureEventInfo.GetSpeed() / scale, &napiSpeed);
+        napi_set_named_property(env_, objValueClickEvent, "speed", napiSpeed);
+    }
+    napi_close_handle_scope(env_, scope);
+}
+
+void UIObserverListener::AddGestureEventInfoTwo(napi_value objValueClickEvent, const GestureEvent& gestureEventInfo)
+{
+    napi_handle_scope scope = nullptr;
+    auto status = napi_open_handle_scope(env_, &scope);
+    if (status != napi_ok) {
+        return;
+    }
+    double scale = Dimension(1.0, DimensionUnit::VP).ConvertToPx();
+    if (scale == 0) {
+        scale = 1.0;
+    }
+    napi_value napiGlobalX = GetNamedProperty(env_, objValueClickEvent, "globalX");
+    if (GetValueType(env_, napiGlobalX) != napi_null) {
+        napi_create_double(env_, gestureEventInfo.GetGlobalLocation().GetX() / scale, &napiGlobalX);
+        napi_set_named_property(env_, objValueClickEvent, "globalX", napiGlobalX);
+    }
+    napi_value napiGlobalY = GetNamedProperty(env_, objValueClickEvent, "globalY");
+    if (GetValueType(env_, napiGlobalY) != napi_null) {
+        napi_create_double(env_, gestureEventInfo.GetGlobalLocation().GetY() / scale, &napiGlobalY);
+        napi_set_named_property(env_, objValueClickEvent, "globalY", napiGlobalY);
+    }
+    napi_value napiLocalX = GetNamedProperty(env_, objValueClickEvent, "localX");
+    if (GetValueType(env_, napiLocalX) != napi_null) {
+        napi_create_double(env_, gestureEventInfo.GetLocalLocation().GetX() / scale, &napiLocalX);
+        napi_set_named_property(env_, objValueClickEvent, "localX", napiLocalX);
+    }
+    napi_value napiLocalY = GetNamedProperty(env_, objValueClickEvent, "localY");
+    if (GetValueType(env_, napiLocalY) != napi_null) {
+        napi_create_double(env_, gestureEventInfo.GetLocalLocation().GetY() / scale, &napiLocalY);
+        napi_set_named_property(env_, objValueClickEvent, "localY", napiLocalY);
+    }
+    napi_value napiPinchCenterX = GetNamedProperty(env_, objValueClickEvent, "pinchCenterX");
+    if (GetValueType(env_, napiPinchCenterX) != napi_null) {
+        napi_create_double(env_, gestureEventInfo.GetPinchCenter().GetX() / scale, &napiPinchCenterX);
+        napi_set_named_property(env_, objValueClickEvent, "pinchCenterX", napiPinchCenterX);
+    }
+    napi_value napiPinchCenterY = GetNamedProperty(env_, objValueClickEvent, "pinchCenterY");
+    if (GetValueType(env_, napiPinchCenterY) != napi_null) {
+        napi_create_double(env_, gestureEventInfo.GetPinchCenter().GetY() / scale, &napiPinchCenterY);
+        napi_set_named_property(env_, objValueClickEvent, "pinchCenterY", napiPinchCenterY);
+    }
+    napi_close_handle_scope(env_, scope);
+}
+
+void UIObserverListener::AddGestureEventInfoThree(napi_value objValueClickEvent, const GestureEvent& gestureEventInfo)
+{
+    napi_handle_scope scope = nullptr;
+    auto status = napi_open_handle_scope(env_, &scope);
+    if (status != napi_ok) {
+        return;
+    }
+    double scale = Dimension(1.0, DimensionUnit::VP).ConvertToPx();
+    if (scale == 0) {
+        scale = 1.0;
+    }
+    napi_value napiVelocityX = GetNamedProperty(env_, objValueClickEvent, "velocityX");
+    if (GetValueType(env_, napiVelocityX) != napi_null) {
+        napi_create_double(env_, gestureEventInfo.GetVelocity().GetVelocityX() / scale, &napiVelocityX);
+        napi_set_named_property(env_, objValueClickEvent, "velocityX", napiVelocityX);
+    }
+    napi_value napiVelocityY = GetNamedProperty(env_, objValueClickEvent, "velocityY");
+    if (GetValueType(env_, napiVelocityY) != napi_null) {
+        napi_create_double(env_, gestureEventInfo.GetVelocity().GetVelocityY() / scale, &napiVelocityY);
+        napi_set_named_property(env_, objValueClickEvent, "velocityY", napiVelocityY);
+    }
+    napi_value napiVelocity = GetNamedProperty(env_, objValueClickEvent, "velocity");
+    if (GetValueType(env_, napiVelocity) != napi_null) {
+        napi_create_double(env_, gestureEventInfo.GetVelocity().GetVelocityValue() / scale, &napiVelocity);
+        napi_set_named_property(env_, objValueClickEvent, "velocity", napiVelocity);
+    }
+    napi_close_handle_scope(env_, scope);
+}
+
+void UIObserverListener::AddClickEventInfoOne(napi_value objValueClickEvent, const ClickInfo& clickInfo)
+{
+    napi_handle_scope scope = nullptr;
+    auto status = napi_open_handle_scope(env_, &scope);
+    if (status != napi_ok) {
+        return;
+    }
+
+    double scale = Dimension(1.0, DimensionUnit::VP).ConvertToPx();
+    if (scale == 0) {
+        scale = 1.0;
+    }
+    Offset globalOffset = clickInfo.GetGlobalLocation();
+    Offset screenOffset = clickInfo.GetScreenLocation();
+    napi_value napiDisplayX = GetNamedProperty(env_, objValueClickEvent, "displayX");
+    if (GetValueType(env_, napiDisplayX) != napi_null) {
+        napi_create_double(env_, screenOffset.GetX() / scale, &napiDisplayX);
+        napi_set_named_property(env_, objValueClickEvent, "displayX", napiDisplayX);
+    }
+    napi_value napiDisplayY = GetNamedProperty(env_, objValueClickEvent, "displayY");
+    if (GetValueType(env_, napiDisplayY) != napi_null) {
+        napi_create_double(env_, screenOffset.GetY() / scale, &napiDisplayY);
+        napi_set_named_property(env_, objValueClickEvent, "displayY", napiDisplayY);
+    }
+    napi_value napiWindowX = GetNamedProperty(env_, objValueClickEvent, "windowX");
+    if (GetValueType(env_, napiWindowX) != napi_null) {
+        napi_create_double(env_, globalOffset.GetX() / scale, &napiWindowX);
+        napi_set_named_property(env_, objValueClickEvent, "windowX", napiWindowX);
+    }
+    napi_value napiWindowY = GetNamedProperty(env_, objValueClickEvent, "windowY");
+    if (GetValueType(env_, napiWindowY) != napi_null) {
+        napi_create_double(env_, globalOffset.GetY() / scale, &napiWindowY);
+        napi_set_named_property(env_, objValueClickEvent, "windowY", napiWindowY);
+    }
+    napi_close_handle_scope(env_, scope);
+}
+
+void UIObserverListener::AddClickEventInfoTwo(napi_value objValueClickEvent, const ClickInfo& clickInfo)
+{
+    napi_handle_scope scope = nullptr;
+    auto status = napi_open_handle_scope(env_, &scope);
+    if (status != napi_ok) {
+        return;
+    }
+
+    double scale = Dimension(1.0, DimensionUnit::VP).ConvertToPx();
+    if (scale == 0) {
+        scale = 1.0;
+    }
+    Offset globalOffset = clickInfo.GetGlobalLocation();
+    Offset localOffset = clickInfo.GetLocalLocation();
+    napi_value napiScreenX = GetNamedProperty(env_, objValueClickEvent, "screenX");
+    if (GetValueType(env_, napiScreenX) != napi_null) {
+        napi_create_double(env_, globalOffset.GetX() / scale, &napiScreenX);
+        napi_set_named_property(env_, objValueClickEvent, "screenX", napiScreenX);
+    }
+    napi_value napiScreenY = GetNamedProperty(env_, objValueClickEvent, "screenY");
+    if (GetValueType(env_, napiScreenY) != napi_null) {
+        napi_create_double(env_, globalOffset.GetY() / scale, &napiScreenY);
+        napi_set_named_property(env_, objValueClickEvent, "screenY", napiScreenY);
+    }
+    napi_value napiX = GetNamedProperty(env_, objValueClickEvent, "x");
+    if (GetValueType(env_, napiX) != napi_null) {
+        napi_create_double(env_, localOffset.GetX() / scale, &napiX);
+        napi_set_named_property(env_, objValueClickEvent, "x", napiX);
+    }
+    napi_value napiY = GetNamedProperty(env_, objValueClickEvent, "y");
+    if (GetValueType(env_, napiY) != napi_null) {
+        napi_create_double(env_, localOffset.GetY() / scale, &napiY);
+        napi_set_named_property(env_, objValueClickEvent, "y", napiY);
+    }
+    napi_close_handle_scope(env_, scope);
 }
 
 napi_value UIObserverListener::CreateNavDestinationInfoObj(const NG::NavDestinationInfo& info)

@@ -170,7 +170,7 @@ JSRef<JSObject> JSRichEditor::CreateJSTextStyleResult(const TextStyleResult& tex
 {
     JSRef<JSObject> textStyleObj = JSRef<JSObject>::New();
     textStyleObj->SetProperty<std::string>("fontColor", textStyleResult.fontColor);
-    textStyleObj->SetProperty<NG::FONT_FEATURES_MAP>("fontFeature", textStyleResult.fontFeature);
+    textStyleObj->SetProperty<std::string>("fontFeature", UnParseFontFeatureSetting(textStyleResult.fontFeature));
     textStyleObj->SetProperty<double>("fontSize", textStyleResult.fontSize);
     textStyleObj->SetProperty<int32_t>("fontStyle", textStyleResult.fontStyle);
     textStyleObj->SetProperty<double>("lineHeight", textStyleResult.lineHeight);
@@ -561,10 +561,10 @@ JSRef<JSVal> JSRichEditor::CreateJsOnIMEInputComplete(const NG::RichEditorAbstra
         1, JSRef<JSVal>::Make(ToJSValue(textSpanResult.OffsetInSpan() + textSpanResult.GetEraseLength())));
     spanPositionObj->SetPropertyObject("spanRange", spanRange);
     spanPositionObj->SetProperty<int32_t>("spanIndex", textSpanResult.GetSpanIndex());
-    decorationObj->SetProperty<TextDecoration>("type", textSpanResult.GetTextDecoration());
+    decorationObj->SetProperty<int32_t>("type", static_cast<int32_t>(textSpanResult.GetTextDecoration()));
     decorationObj->SetProperty<std::string>("color", textSpanResult.GetColor());
     textStyleObj->SetProperty<std::string>("fontColor", textSpanResult.GetFontColor());
-    textStyleObj->SetProperty<NG::FONT_FEATURES_MAP>("fontFeature", textSpanResult.GetFontFeatures());
+    textStyleObj->SetProperty<std::string>("fontFeature", UnParseFontFeatureSetting(textSpanResult.GetFontFeatures()));
     textStyleObj->SetProperty<double>("fontSize", textSpanResult.GetFontSize());
     textStyleObj->SetProperty<double>("lineHeight", textSpanResult.GetTextStyle().lineHeight);
     textStyleObj->SetProperty<double>("letterSpacing", textSpanResult.GetTextStyle().letterSpacing);
@@ -689,7 +689,7 @@ void JSRichEditor::CreateTextStyleObj(JSRef<JSObject>& textStyleObj, const NG::R
     decorationObj->SetProperty<int32_t>("type", (int32_t)(spanResult.GetTextDecoration()));
     decorationObj->SetProperty<std::string>("color", spanResult.GetColor());
     textStyleObj->SetProperty<std::string>("fontColor", spanResult.GetFontColor());
-    textStyleObj->SetProperty<NG::FONT_FEATURES_MAP>("fontFeature", spanResult.GetFontFeatures());
+    textStyleObj->SetProperty<std::string>("fontFeature", UnParseFontFeatureSetting(spanResult.GetFontFeatures()));
     textStyleObj->SetProperty<double>("fontSize", spanResult.GetFontSize());
     textStyleObj->SetProperty<double>("lineHeight", spanResult.GetTextStyle().lineHeight);
     textStyleObj->SetProperty<double>("letterSpacing", spanResult.GetTextStyle().letterSpacing);
@@ -1160,6 +1160,12 @@ void JSRichEditorController::ParseJsFontFeatureTextStyle(const JSRef<JSObject>& 
     std::string feature;
     if (!fontFeature->IsNull() && JSContainerBase::ParseJsString(fontFeature, feature)) {
         NG::FONT_FEATURES_MAP fontFeatures = ParseFontFeatureSettings(feature);
+        updateSpanStyle.updateFontFeature = fontFeatures;
+        style.SetFontFeatures(fontFeatures);
+    } else {
+        auto theme = JSContainerBase::GetTheme<TextTheme>();
+        CHECK_NULL_VOID(theme);
+        auto fontFeatures = theme->GetTextStyle().GetFontFeatures();
         updateSpanStyle.updateFontFeature = fontFeatures;
         style.SetFontFeatures(fontFeatures);
     }

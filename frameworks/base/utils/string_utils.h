@@ -38,6 +38,9 @@ ACE_EXPORT extern const std::u16string DEFAULT_USTRING;
 constexpr int32_t TEXT_CASE_LOWERCASE = 1;
 constexpr int32_t TEXT_CASE_UPPERCASE = 2;
 constexpr double PERCENT_VALUE = 100.0;
+constexpr double DEGREES_VALUE = 360.0; // one turn means 360 deg
+constexpr double GRADIANS_VALUE = 400.0; // one turn means 400 grad
+constexpr double RADIANS_VALUE = 2 * M_PI; // one turn means 2*pi rad
 const char ELLIPSIS[] = "...";
 
 inline std::u16string Str8ToStr16(const std::string& str)
@@ -176,13 +179,13 @@ inline int32_t StringToInt(const std::string& value)
     }
 }
 
-inline int64_t StringToLongInt(const std::string& value)
+inline int64_t StringToLongInt(const std::string& value, int64_t defaultErr = 0)
 {
     errno = 0;
     char* pEnd = nullptr;
     int64_t result = std::strtoll(value.c_str(), &pEnd, 10);
     if (pEnd == value.c_str() || errno == ERANGE) {
-        return 0;
+        return defaultErr;
     } else {
         return result;
     }
@@ -413,9 +416,6 @@ inline std::string ReplaceChar(std::string str, char old_char, char new_char)
 inline double StringToDegree(const std::string& value)
 {
     // https://developer.mozilla.org/zh-CN/docs/Web/CSS/angle
-    constexpr static double DEGREES = 360.0;
-    constexpr static double GRADIANS = 400.0;
-    constexpr static double RADIUS = 2 * M_PI;
 
     errno = 0;
     char* pEnd = nullptr;
@@ -426,14 +426,47 @@ inline double StringToDegree(const std::string& value)
         if ((std::strcmp(pEnd, "deg")) == 0) {
             return result;
         } else if (std::strcmp(pEnd, "grad") == 0) {
-            return result / GRADIANS * DEGREES;
+            return result / GRADIANS_VALUE * DEGREES_VALUE;
         } else if (std::strcmp(pEnd, "rad") == 0) {
-            return result / RADIUS * DEGREES;
+            return result / RADIANS_VALUE * DEGREES_VALUE;
         } else if (std::strcmp(pEnd, "turn") == 0) {
-            return result * DEGREES;
+            return result * DEGREES_VALUE;
         }
     }
     return StringToDouble(value);
+}
+
+// StringToDegree with check. If the string is valid, change result and return true, otherwise return false.
+inline bool StringToDegree(const std::string& value, double& result)
+{
+    errno = 0;
+    char* pEnd = nullptr;
+    double temp = std::strtod(value.c_str(), &pEnd);
+    if (pEnd == value.c_str() || errno == ERANGE) {
+        return false;
+    } else if (pEnd) {
+        if (*pEnd == '\0') {
+            result = temp;
+            return true;
+        }
+        if (std::strcmp(pEnd, "deg") == 0) {
+            result = temp;
+            return true;
+        }
+        if (std::strcmp(pEnd, "grad") == 0) {
+            result = temp / GRADIANS_VALUE * DEGREES_VALUE;
+            return true;
+        }
+        if (std::strcmp(pEnd, "rad") == 0) {
+            result = temp / RADIANS_VALUE * DEGREES_VALUE;
+            return true;
+        }
+        if (std::strcmp(pEnd, "turn") == 0) {
+            result = temp * DEGREES_VALUE;
+            return true;
+        }
+    }
+    return false;
 }
 
 template<class T>

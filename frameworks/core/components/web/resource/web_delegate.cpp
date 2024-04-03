@@ -61,6 +61,8 @@
 #include "frameworks/base/utils/system_properties.h"
 #endif
 
+#include "base/notification/eventhandler/interfaces/inner_api/event_handler.h"
+
 namespace OHOS::Ace {
 
 namespace {
@@ -649,7 +651,7 @@ NWebScreenLockCallbackImpl::NWebScreenLockCallbackImpl(const WeakPtr<PipelineBas
 
 void NWebScreenLockCallbackImpl::Handle(bool key)
 {
-    TAG_LOGD(AceLogTag::ACE_WEB, "SetKeepScreenOn %{public}d", key);
+    TAG_LOGI(AceLogTag::ACE_WEB, "SetKeepScreenOn %{public}d", key);
     auto weakContext = context_.Upgrade();
     CHECK_NULL_VOID(weakContext);
     auto window = weakContext->GetWindow();
@@ -661,7 +663,22 @@ WebDelegateObserver::~WebDelegateObserver() {}
 
 void WebDelegateObserver::NotifyDestory()
 {
+    if (delegate_) {
+        delegate_->UnRegisterScreenLockFunction();
+    }
     auto context = context_.Upgrade();
+    if (!context) {
+        auto currentHandler = OHOS::AppExecFwk::EventHandler::Current();
+        currentHandler->PostTask(
+            [weak = WeakClaim(this)]() {
+                auto observer = weak.Upgrade();
+                CHECK_NULL_VOID(observer);
+                if (observer->delegate_) {
+                    observer->delegate_.Reset();
+                }
+            },
+            DESTRUCT_DELAY_MILLISECONDS);
+    }
     CHECK_NULL_VOID(context);
     auto taskExecutor = context->GetTaskExecutor();
     CHECK_NULL_VOID(taskExecutor);
@@ -684,6 +701,13 @@ void GestureEventResultOhos::SetGestureEventResult(bool result)
     }
 }
 
+void WebDelegate::UnRegisterScreenLockFunction()
+{
+    if (nweb_) {
+        nweb_->UnRegisterScreenLockFunction(Container::CurrentId());
+    }
+}
+
 WebDelegate::~WebDelegate()
 {
     OnNativeEmbedAllDestory();
@@ -692,7 +716,6 @@ WebDelegate::~WebDelegate()
         OHOS::Rosen::RSInterfaces::GetInstance().UnRegisterSurfaceOcclusionChangeCallback(surfaceNodeId_);
     }
     if (nweb_) {
-        nweb_->UnRegisterScreenLockFunction(GetRosenWindowId());
         nweb_->OnDestroy();
     }
     UnregisterSurfacePositionChangedCallback();
@@ -2716,7 +2739,7 @@ void WebDelegate::InitWebViewWithSurface()
             delegate->nweb_->PutDownloadCallback(downloadListenerImpl);
 #ifdef OHOS_STANDARD_SYSTEM
             auto screenLockCallback = std::make_shared<NWebScreenLockCallbackImpl>(context);
-            delegate->nweb_->RegisterScreenLockFunction(delegate->GetRosenWindowId(), screenLockCallback);
+            delegate->nweb_->RegisterScreenLockFunction(Container::CurrentId(), screenLockCallback);
 #endif
             auto findListenerImpl = std::make_shared<FindListenerImpl>(Container::CurrentId());
             findListenerImpl->SetWebDelegate(weak);
@@ -2805,6 +2828,11 @@ void WebDelegate::Resize(const double& width, const double& height, bool isKeybo
         return;
     }
 
+    if ((resizeWidth_ == width) && (resizeHeight_ == height)) {
+        return;
+    }
+    resizeWidth_ = width;
+    resizeHeight_ = height;
     auto context = context_.Upgrade();
     if (!context) {
         return;

@@ -29,6 +29,8 @@ std::unordered_map<std::string, int32_t> ParseFontVariants(const std::string& fo
 void ParseFontFeatureSetting(const std::string& fontFeatureSetting, std::map<std::string, int32_t>& fontFeatures);
 std::unordered_map<std::string, int32_t> ParseFontFeatureSettings(const std::string& fontFeatureSettings);
 
+std::string UnParseFontFeatureSetting(const std::unordered_map<std::string, int32_t>& fontFeatureSettings);
+std::unordered_map<std::string, int32_t> ParseFontFeatureSettings(const std::string& fontFeatureSettings);
 } // namespace OHOS::Ace
 
 #endif // FOUNDATION_ACE_ACE_ENGINE_FRAMEWORKS_CORE_COMPONENTS_COMMON_PROPERTIES_TEXT_STYLE_PARSER_H

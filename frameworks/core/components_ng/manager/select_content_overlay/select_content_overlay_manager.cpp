@@ -316,21 +316,22 @@ void SelectContentOverlayManager::UpdateHandleInfosWithFlag(int32_t updateFlag)
 void SelectContentOverlayManager::CreateSelectOverlay(SelectOverlayInfo& info, bool animation)
 {
     shareOverlayInfo_ = std::make_shared<SelectOverlayInfo>(info);
+    auto overlayNode = SelectOverlayNode::CreateSelectOverlayNode(shareOverlayInfo_);
+    selectOverlayNode_ = overlayNode;
     auto taskExecutor = Container::CurrentTaskExecutor();
     taskExecutor->PostTask(
-        [animation, weak = WeakClaim(this)] {
+        [animation, weak = WeakClaim(this), node = overlayNode] {
             auto manager = weak.Upgrade();
             CHECK_NULL_VOID(manager);
-            manager->CreateAndMountNode(animation);
+            manager->CreateAndMountNode(node, animation);
         },
         TaskExecutor::TaskType::UI);
 }
 
-void SelectContentOverlayManager::CreateAndMountNode(bool animation)
+void SelectContentOverlayManager::CreateAndMountNode(const RefPtr<FrameNode>& overlayNode, bool animation)
 {
-    auto overlayNode = SelectOverlayNode::CreateSelectOverlayNode(shareOverlayInfo_);
     CHECK_NULL_VOID(overlayNode);
-    selectOverlayNode_ = WeakClaim(AceType::RawPtr(overlayNode));
+    CHECK_NULL_VOID(overlayNode == selectOverlayNode_);
     auto rootNode = GetSelectOverlayRoot();
     CHECK_NULL_VOID(rootNode);
     // get keyboard index to put selet_overlay before keyboard node
@@ -525,7 +526,14 @@ void SelectContentOverlayManager::HideHandle()
 
 bool SelectContentOverlayManager::IsOpen()
 {
-    return selectOverlayNode_.Upgrade();
+    auto overlayNode = selectOverlayNode_.Upgrade();
+    return overlayNode && overlayNode->GetParent();
+}
+
+bool SelectContentOverlayManager::IsCreating()
+{
+    auto overlayNode = selectOverlayNode_.Upgrade();
+    return overlayNode && !overlayNode->GetParent();
 }
 
 bool SelectContentOverlayManager::IsMenuShow()

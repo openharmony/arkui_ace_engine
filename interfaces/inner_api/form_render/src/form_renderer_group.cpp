@@ -98,13 +98,19 @@ void FormRendererGroup::OnUnlock()
 {
     HILOG_INFO("The user is verified, OnUnlock called.");
     FormRequest currentFormRequest;
+    bool hasValidRequest = false;
     for (auto& formRequest : formRequests_) {
         if (currentCompId_ == formRequest.compId) {
             currentFormRequest = formRequest;
             formRequest.want.SetParam(FORM_RENDER_STATE, true);
+            hasValidRequest = true;
         }
     }
-    HILOG_DEBUG("start rendering form.");
+
+    if (!hasValidRequest) {
+        HILOG_ERROR("Without valid form requests, current compId is %{public}s", currentCompId_.c_str());
+        return;
+    }
     InnerAddForm(currentFormRequest);
 }
 

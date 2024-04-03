@@ -99,6 +99,9 @@ void TextFieldSelectOverlay::OnAfterSelectOverlayShow(bool isCreate)
 void TextFieldSelectOverlay::OnCloseOverlay(OptionMenuType menuType, CloseReason reason)
 {
     CloseMagnifier();
+    if (CloseReason::CLOSE_REASON_BACK_PRESSED == reason) {
+        OnResetTextSelection();
+    }
 }
 
 void TextFieldSelectOverlay::OnHandleGlobalTouchEvent(SourceType sourceType, TouchType touchType)
@@ -177,7 +180,7 @@ bool TextFieldSelectOverlay::CheckHandleVisible(const RectF& paintRect)
         auto verticalEpsilon = std::max(0.0f, paintRect.Height() - contentRect.Height());
         return GreatOrEqual(paintRect.Top() + verticalEpsilon, visibleRect.Top()) &&
                LessOrEqual(paintRect.Bottom() - verticalEpsilon, visibleRect.Bottom()) &&
-               LessOrEqual(paintRect.Left(), visibleRect.Right()) &&
+               LessOrEqual(paintRect.Left() - paintRect.Width() - BOX_EPSILON, visibleRect.Right()) &&
                GreatOrEqual(paintRect.Right(), visibleRect.Left());
     }
     PointF bottomPoint = { paintRect.Left(), paintRect.Bottom() - BOX_EPSILON };
@@ -366,10 +369,13 @@ void TextFieldSelectOverlay::OnHandleMove(const RectF& handleRect, bool isFirst)
     CHECK_NULL_VOID(pattern);
     CHECK_NULL_VOID(pattern->IsOperation());
     auto localOffset = handleRect.GetOffset() - pattern->GetTextPaintOffset();
+    auto selectController = pattern->GetTextSelectController();
     if (pattern->GetMagnifierController()) {
+        auto movingCaretOffset =
+            selectController->CalcCaretOffsetByOffset(Offset(localOffset.GetX(), localOffset.GetY()));
+        pattern->SetMovingCaretOffset(movingCaretOffset);
         pattern->GetMagnifierController()->SetLocalOffset(localOffset);
     }
-    auto selectController = pattern->GetTextSelectController();
     if (IsSingleHandle()) {
         selectController->UpdateCaretInfoByOffset(Offset(localOffset.GetX(), localOffset.GetY()));
     } else {

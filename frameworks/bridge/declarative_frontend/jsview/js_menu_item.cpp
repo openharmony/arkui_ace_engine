@@ -80,14 +80,22 @@ void JSMenuItem::Create(const JSCallbackInfo& info)
         auto label = menuItemObj->GetProperty("labelInfo");
 
         if (ParseJsMedia(startIcon, startIconPath)) {
-            menuItemProps.startIcon = startIconPath;
+            std::string bundleName;
+            std::string moduleName;
+            GetJsMediaBundleInfo(startIcon, bundleName, moduleName);
+            ImageSourceInfo imageSourceInfo(startIconPath, bundleName, moduleName);
+            menuItemProps.startIcon = imageSourceInfo;
         }
 
         ParseJsString(content, contentStr);
         menuItemProps.content = contentStr;
 
         if (ParseJsMedia(endIcon, endIconPath)) {
-            menuItemProps.endIcon = endIconPath;
+            std::string bundleName;
+            std::string moduleName;
+            GetJsMediaBundleInfo(endIcon, bundleName, moduleName);
+            ImageSourceInfo imageSourceInfo(endIconPath, bundleName, moduleName);
+            menuItemProps.endIcon = imageSourceInfo;
         }
 
         if (ParseJsString(label, labelStr)) {
