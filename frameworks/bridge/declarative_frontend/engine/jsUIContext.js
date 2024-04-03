@@ -120,6 +120,12 @@ class DragController {
         __JSScopeUtil__.restoreInstanceId();
         return dragPreview;
     }
+
+    setDragEventStrictReportingEnabled(enable) {
+        __JSScopeUtil__.syncInstanceId(this.instanceId_);
+        JSViewAbstract.setDragEventStrictReportingEnabled(enable);
+        __JSScopeUtil__.restoreInstanceId();
+    }
 }
 
 class UIObserver {
@@ -342,11 +348,30 @@ class UIContext {
         __JSScopeUtil__.restoreInstanceId();
         return node;
     }
+
+    getFrameNodeByNodeId(id) {
+        __JSScopeUtil__.syncInstanceId(this.instanceId_);
+        let nodePtr = getUINativeModule().getFrameNodeById(id);
+        let xNode = globalThis.requireNapi('arkui.node');
+        let node = xNode.FrameNodeUtils.searchNodeInRegisterProxy(nodePtr);
+        if (!node) {
+            node = xNode.FrameNodeUtils.createFrameNode(this, nodePtr);
+        }
+        __JSScopeUtil__.restoreInstanceId();
+        return node;
+    }
+
     getFocusController() {
         if (this.focusController_ == null) {
             this.focusController_ = new FocusController(this.instanceId_);
         }
         return this.focusController_;
+    }
+
+    setDynamicDimming(id, number) {
+        __JSScopeUtil__.syncInstanceId(this.instanceId_);
+        let nodePtr = getUINativeModule().getFrameNodeByKey(id);
+        Context.setDynamicDimming(nodePtr, number);
     }
 }
 
@@ -581,6 +606,34 @@ class PromptAction {
         }
     }
 
+    openCustomDialog(content, options) {
+        __JSScopeUtil__.syncInstanceId(this.instanceId_);
+        if (arguments.length === 2) {
+            let result_ = this.ohos_prompt.openCustomDialog(content.getFrameNode(), options);
+            __JSScopeUtil__.restoreInstanceId();
+            return result_;
+        }
+        else {
+            let result_ = this.ohos_prompt.openCustomDialog(content.getFrameNode());
+            __JSScopeUtil__.restoreInstanceId();
+            return result_;
+        }
+    }
+
+    updateCustomDialog(content, options) {
+        __JSScopeUtil__.syncInstanceId(this.instanceId_);
+        let result_ = this.ohos_prompt.updateCustomDialog(content.getFrameNode(), options);
+        __JSScopeUtil__.restoreInstanceId();
+        return result_;
+    }
+
+    closeCustomDialog(content) {
+        __JSScopeUtil__.syncInstanceId(this.instanceId_);
+        let result_ = this.ohos_prompt.closeCustomDialog(content.getFrameNode());
+        __JSScopeUtil__.restoreInstanceId();
+        return result_;
+    }
+
     showActionMenu(options, callback) {
         __JSScopeUtil__.syncInstanceId(this.instanceId_);
         if (typeof callback !== 'undefined') {
@@ -678,13 +731,13 @@ class OverlayManager {
         __JSScopeUtil__.restoreInstanceId();
     }
 
-    showAllComponentContent() {
+    showAllComponentContents() {
         __JSScopeUtil__.syncInstanceId(this.instanceId_);
         this.ohos_overlayManager.showAllFrameNodes();
         __JSScopeUtil__.restoreInstanceId();
     }
 
-    hideAllComponentContent() {
+    hideAllComponentContents() {
         __JSScopeUtil__.syncInstanceId(this.instanceId_);
         this.ohos_overlayManager.hideAllFrameNodes();
         __JSScopeUtil__.restoreInstanceId();
@@ -697,6 +750,17 @@ class OverlayManager {
  */
 function __getUIContext__(instanceId) {
     return new UIContext(instanceId);
+}
+
+/**
+ * Get FrameNode by id of UIContext instance.
+ * @param nodeId the id of frameNode.
+ * @param instanceId obtained on the C++ side.
+ * @returns FrameNode instance.
+ */
+function __getFrameNodeByNodeId__(nodeId, instanceId) {
+    const uiContext = __getUIContext__(instanceId);
+    return uiContext.getFrameNodeByNodeId(nodeId);
 }
 
 /**
@@ -714,3 +778,10 @@ function __checkRegexValid__(pattern) {
         return result;
     }
 }
+
+export default { Font, MediaQuery, UIInspector, DragController, UIObserver, MeasureUtils, UIContext,
+    FocusController, ComponentUtils, Router, PromptAction, AtomicServiceBar, OverlayManager };
+
+globalThis.__getUIContext__ = __getUIContext__;
+globalThis.__getFrameNodeByNodeId__ = __getFrameNodeByNodeId__;
+globalThis.__checkRegexValid__ = __checkRegexValid__;

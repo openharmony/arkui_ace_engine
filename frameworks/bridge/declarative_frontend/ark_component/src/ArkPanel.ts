@@ -15,8 +15,8 @@
 
 /// <reference path='./import.ts' />
 class ArkPanelComponent extends ArkComponent implements PanelAttribute {
-  constructor(nativePtr: KNode) {
-    super(nativePtr);
+  constructor(nativePtr: KNode, classType?: ModifierType) {
+    super(nativePtr, classType);
   }
   mode(value: PanelMode): this {
     modifierWithKey(this._modifiersWithKeys, PanelModeModifier.identity, PanelModeModifier, value);
@@ -247,12 +247,10 @@ class ShowModifier extends ModifierWithKey<boolean> {
 }
 
 // @ts-ignore
-globalThis.Panel.attributeModifier = function (modifier) {
-  const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
-  let nativeNode = getUINativeModule().getFrameNodeById(elmtId);
-  let component = this.createOrGetNode(elmtId, () => {
-    return new ArkPanelComponent(nativeNode);
+globalThis.Panel.attributeModifier = function (modifier: ArkComponent): void {
+  attributeModifierFunc.call(this, modifier, (nativePtr: KNode) => {
+    return new ArkPanelComponent(nativePtr);
+  }, (nativePtr: KNode, classType: ModifierType, modifierJS: ModifierJS) => {
+    return new modifierJS.PanelModifier(nativePtr, classType);
   });
-  applyUIAttributes(modifier, nativeNode, component);
-  component.applyModifierPatch();
 };

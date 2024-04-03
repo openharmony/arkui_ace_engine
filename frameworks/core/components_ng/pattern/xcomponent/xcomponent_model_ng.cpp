@@ -236,4 +236,17 @@ uint32_t XComponentModelNG::GetXComponentSurfaceHeight(FrameNode* frameNode)
     auto drawSize = xcPattern->GetDrawSize();
     return drawSize.Height();
 }
+
+void XComponentModelNG::EnableAnalyzer(bool enable)
+{
+    auto frameNode = AceType::Claim(ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    CHECK_NULL_VOID(frameNode);
+    auto type = GetTypeImpl(frameNode);
+    if (type == XComponentType::COMPONENT || type == XComponentType::NODE) {
+        return;
+    }
+    auto xcPattern = AceType::DynamicCast<XComponentPattern>(frameNode->GetPattern());
+    CHECK_NULL_VOID(xcPattern);
+    xcPattern->EnableAnalyzer(enable);
+}
 } // namespace OHOS::Ace::NG

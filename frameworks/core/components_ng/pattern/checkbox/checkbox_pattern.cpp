@@ -80,6 +80,7 @@ void CheckBoxPattern::OnModifyDone()
     InitClickEvent();
     InitTouchEvent();
     InitMouseEvent();
+    InitFocusEvent();
     auto focusHub = host->GetFocusHub();
     CHECK_NULL_VOID(focusHub);
     InitOnKeyEvent(focusHub);
@@ -224,6 +225,43 @@ void CheckBoxPattern::HandleMouseEvent(bool isHover)
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+}
+
+void CheckBoxPattern::InitFocusEvent()
+{
+    if (focusEventInitialized_) {
+        return;
+    }
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto focusHub = host->GetOrCreateFocusHub();
+    auto focusTask = [weak = WeakClaim(this)]() {
+        auto pattern = weak.Upgrade();
+        if (pattern) {
+            pattern->HandleFocusEvent();
+        }
+    };
+    focusHub->SetOnFocusInternal(focusTask);
+    auto blurTask = [weak = WeakClaim(this)]() {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        pattern->HandleBlurEvent();
+    };
+    focusHub->SetOnBlurInternal(blurTask);
+
+    focusEventInitialized_ = true;
+}
+
+void CheckBoxPattern::HandleFocusEvent()
+{
+    CHECK_NULL_VOID(checkboxModifier_);
+    checkboxModifier_->SetIsFocused(true);
+}
+
+void CheckBoxPattern::HandleBlurEvent()
+{
+    CHECK_NULL_VOID(checkboxModifier_);
+    checkboxModifier_->SetIsFocused(false);
 }
 
 void CheckBoxPattern::OnClick()

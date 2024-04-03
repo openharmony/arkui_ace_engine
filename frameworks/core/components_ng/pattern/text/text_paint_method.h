@@ -52,7 +52,8 @@ protected:
 private:
     void UpdateParagraphAndImageSpanNodeList();
 
-private:
+    void DoStartTextRace();
+
     WeakPtr<Pattern> pattern_;
     float baselineOffset_;
 

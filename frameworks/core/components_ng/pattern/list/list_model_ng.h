@@ -76,6 +76,7 @@ public:
     static void SetMultiSelectable(FrameNode* frameNode, bool selectable);
     static void SetChainAnimation(FrameNode* frameNode, bool chainAnimation);
     static void SetCachedCount(FrameNode* frameNode, int32_t cachedCount);
+    static int32_t GetCachedCount(FrameNode* frameNode);
     static int32_t GetScrollEnabled(FrameNode* frameNode);
     static void SetScrollEnabled(FrameNode* frameNode, bool enableScrollInteraction);
     static int32_t GetSticky(FrameNode* frameNode);

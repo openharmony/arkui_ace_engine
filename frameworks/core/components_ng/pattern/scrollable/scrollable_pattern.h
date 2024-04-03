@@ -45,7 +45,7 @@ namespace OHOS::Ace::NG {
 #ifndef WEARABLE_PRODUCT
 constexpr double FRICTION = 0.6;
 constexpr double NEW_FRICTION = 0.7;
-constexpr double MAX_VELOCITY = 800000.0;
+constexpr double MAX_VELOCITY = 4200.0;
 #else
 constexpr double FRICTION = 0.9;
 constexpr double MAX_VELOCITY = 5000.0;
@@ -385,6 +385,13 @@ public:
     virtual void ScrollToIndex(int32_t index, bool smooth = false, ScrollAlign align = ScrollAlign::START) {}
 
     virtual void ScrollToEdge(ScrollEdgeType scrollEdgeType, bool smooth);
+
+    virtual ScrollEdgeType GetScrollEdgeType() const
+    {
+        return ScrollEdgeType::SCROLL_NONE;
+    }
+
+    virtual void SetScrollEdgeType(ScrollEdgeType scrollEdgeType) {}
 
     virtual void Fling(double flingVelocity);
 

@@ -188,9 +188,11 @@ VisibleContentInfo ListItemGroupPattern::GetStartListItemIndex()
     auto startArea = ListItemGroupArea::IN_LIST_ITEM_AREA;
     if (startPositionSize == 0 && startFooterMainSize > 0) {
         startArea = ListItemGroupArea::IN_FOOTER_AREA;
+        startItemIndexInGroup = -1;
     }
-    if (startItemIndexInGroup == 0 && isHeader && startHeaderMainSize > 0) {
+    if (GetDisplayStartIndexInGroup() == 0 && isHeader && startHeaderMainSize > 0) {
         startArea = ListItemGroupArea::IN_HEADER_AREA;
+        startItemIndexInGroup = -1;
     }
     if (startHeaderMainSize == 0 && startFooterMainSize == 0 && GetTotalItemCount() == 0) {
         startArea = ListItemGroupArea::NONE_AREA;
@@ -209,9 +211,11 @@ VisibleContentInfo ListItemGroupPattern::GetEndListItemIndex()
     auto endArea = ListItemGroupArea::IN_LIST_ITEM_AREA;
     if (endPositionSize == 0 && endHeaderMainSize > 0) {
         endArea = ListItemGroupArea::IN_HEADER_AREA;
+        endItemIndexInGroup = -1;
     }
     if (isFooter && endFooterMainSize > 0) {
         endArea = ListItemGroupArea::IN_FOOTER_AREA;
+        endItemIndexInGroup = -1;
     }
     if (endHeaderMainSize == 0 && endFooterMainSize == 0 && GetTotalItemCount() == 0) {
         endArea = ListItemGroupArea::NONE_AREA;

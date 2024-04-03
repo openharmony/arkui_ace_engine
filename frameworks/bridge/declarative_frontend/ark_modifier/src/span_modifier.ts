@@ -16,22 +16,13 @@
 /// <reference path='./import.ts' />
 class SpanModifier extends ArkSpanComponent implements AttributeModifier<SpanAttribute> {
 
-  private _changed: boolean = false;
-
-  constructor(nativePtr: KNode) {
-    super(nativePtr);
-    this._changed = false;
+  constructor(nativePtr: KNode, classType: ModifierType) {
+    super(nativePtr, classType);
     this._modifiersWithKeys = new ModifierMap();
   }
 
   applyNormalAttribute(instance: SpanAttribute): void {
-    let myMap = this._modifiersWithKeys as ModifierMap;
-    myMap.setOnChange(() => {
-      this._changed = !this._changed;
-    });
-
-    // @ts-ignore
-    let component: ArkSpanComponent = instance as ArkSpanComponent;
-    mergeMaps(component._modifiersWithKeys, this._modifiersWithKeys);
+    ModifierUtils.applySetOnChange(this);
+    ModifierUtils.applyAndMergeModifier<SpanAttribute, ArkSpanComponent, ArkSpanComponent>(instance, this);
   }
 }

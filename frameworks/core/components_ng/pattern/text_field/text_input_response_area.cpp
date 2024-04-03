@@ -191,6 +191,11 @@ void PasswordResponseArea::Refresh()
 void PasswordResponseArea::OnPasswordIconClicked()
 {
     isObscured_ = !isObscured_;
+    ChangeObscuredState();
+}
+
+void PasswordResponseArea::ChangeObscuredState()
+{
     UpdateImageSource();
     auto textFieldPattern = DynamicCast<TextFieldPattern>(hostPattern_.Upgrade());
     CHECK_NULL_VOID(textFieldPattern);

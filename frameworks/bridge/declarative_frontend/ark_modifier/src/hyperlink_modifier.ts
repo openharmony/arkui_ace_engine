@@ -16,12 +16,13 @@
 /// <reference path='./import.ts' />
 class HyperlinkModifier extends ArkHyperlinkComponent implements AttributeModifier<HyperlinkAttribute> {
 
-  constructor(nativePtr: KNode) {
-    super(nativePtr);
+  constructor(nativePtr: KNode, classType: ModifierType) {
+    super(nativePtr, classType);
     this._modifiersWithKeys = new ModifierMap();
   }
 
   applyNormalAttribute(instance: HyperlinkAttribute): void {
-    applyAndMergeModifier<HyperlinkAttribute, ArkHyperlinkComponent, ArkComponent>(instance, this);
+    ModifierUtils.applySetOnChange(this);
+    ModifierUtils.applyAndMergeModifier<HyperlinkAttribute, ArkHyperlinkComponent, ArkComponent>(instance, this);
   }
 }

@@ -202,66 +202,152 @@ void JSSelect::Value(const JSCallbackInfo& info)
     SelectModel::GetInstance()->SetValue(value);
 }
 
-void ResetFont(void)
+void JSSelect::Font(const JSCallbackInfo& info)
+{
+    if (!info[0]->IsObject()) {
+        ResetFont(SelectFontType::SELECT);
+        return;
+    }
+    auto param = JSRef<JSObject>::Cast(info[0]);
+    ParseFontSize(param->GetProperty("size"), SelectFontType::SELECT);
+    ParseFontWeight(param->GetProperty("weight"), SelectFontType::SELECT);
+    ParseFontFamily(param->GetProperty("family"), SelectFontType::SELECT);
+    ParseFontStyle(param->GetProperty("style"), SelectFontType::SELECT);
+}
+
+void JSSelect::ParseFontSize(const JSRef<JSVal>& jsValue, SelectFontType type)
+{
+    CalcDimension fontSize;
+    if (!ParseJsDimensionFp(jsValue, fontSize)) {
+        ResetFontSize(type);
+        return;
+    }
+    if (type == SelectFontType::SELECT) {
+        SelectModel::GetInstance()->SetFontSize(fontSize);
+    } else if (type == SelectFontType::OPTION) {
+        SelectModel::GetInstance()->SetOptionFontSize(fontSize);
+    } else if (type == SelectFontType::SELECTED_OPTION) {
+        SelectModel::GetInstance()->SetSelectedOptionFontSize(fontSize);
+    }
+}
+
+void JSSelect::ParseFontWeight(const JSRef<JSVal>& jsValue, SelectFontType type)
+{
+    std::string weight;
+    if (jsValue->IsNumber()) {
+        weight = std::to_string(jsValue->ToNumber<int32_t>());
+    } else {
+        ParseJsString(jsValue, weight);
+    }
+    if (type == SelectFontType::SELECT) {
+        SelectModel::GetInstance()->SetFontWeight(ConvertStrToFontWeight(weight, FontWeight::MEDIUM));
+    } else if (type == SelectFontType::OPTION) {
+        SelectModel::GetInstance()->SetOptionFontWeight(ConvertStrToFontWeight(weight, FontWeight::REGULAR));
+    } else if (type == SelectFontType::SELECTED_OPTION) {
+        SelectModel::GetInstance()->SetSelectedOptionFontWeight(ConvertStrToFontWeight(weight, FontWeight::REGULAR));
+    }
+}
+
+void JSSelect::ParseFontFamily(const JSRef<JSVal>& jsValue, SelectFontType type)
+{
+    if (!jsValue->IsString()) {
+        ResetFontFamily(type);
+        return;
+    }
+    auto family = ConvertStrToFontFamilies(jsValue->ToString());
+    if (type == SelectFontType::SELECT) {
+        SelectModel::GetInstance()->SetFontFamily(family);
+    } else if (type == SelectFontType::OPTION) {
+        SelectModel::GetInstance()->SetOptionFontFamily(family);
+    } else if (type == SelectFontType::SELECTED_OPTION) {
+        SelectModel::GetInstance()->SetSelectedOptionFontFamily(family);
+    }
+}
+
+void JSSelect::ParseFontStyle(const JSRef<JSVal>& jsValue, SelectFontType type)
+{
+    if (!jsValue->IsNumber()) {
+        ResetFontStyle(type);
+        return;
+    }
+    auto styleVal = static_cast<FontStyle>(jsValue->ToNumber<int32_t>());
+    if (type == SelectFontType::SELECT) {
+        SelectModel::GetInstance()->SetItalicFontStyle(styleVal);
+    } else if (type == SelectFontType::OPTION) {
+        SelectModel::GetInstance()->SetOptionItalicFontStyle(styleVal);
+    } else if (type == SelectFontType::SELECTED_OPTION) {
+        SelectModel::GetInstance()->SetSelectedOptionItalicFontStyle(styleVal);
+    }
+}
+
+void JSSelect::ResetFontSize(SelectFontType type)
 {
     auto pipeline = PipelineBase::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
     auto selectTheme = pipeline->GetTheme<SelectTheme>();
     CHECK_NULL_VOID(selectTheme);
-    auto textTheme = pipeline->GetTheme<TextTheme>();
-    CHECK_NULL_VOID(textTheme);
+    if (type == SelectFontType::OPTION) {
+        SelectModel::GetInstance()->SetOptionFontSize(selectTheme->GetMenuFontSize());
+        return;
+    } else if (type == SelectFontType::SELECTED_OPTION) {
+        SelectModel::GetInstance()->SetSelectedOptionFontSize(selectTheme->GetMenuFontSize());
+        return;
+    }
     if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
         SelectModel::GetInstance()->SetFontSize(selectTheme->GetFontSize());
     } else {
         auto controlSize = SelectModel::GetInstance()->GetControlSize();
         SelectModel::GetInstance()->SetFontSize(selectTheme->GetFontSize(controlSize));
     }
-    SelectModel::GetInstance()->SetFontWeight(FontWeight::MEDIUM);
-    SelectModel::GetInstance()->SetFontFamily(textTheme->GetTextStyle().GetFontFamilies());
-    SelectModel::GetInstance()->SetItalicFontStyle(textTheme->GetTextStyle().GetFontStyle());
-    return;
 }
 
-void JSSelect::Font(const JSCallbackInfo& info)
+void JSSelect::ResetFontWeight(SelectFontType type)
 {
-    if (info[0]->IsUndefined() || info[0]->IsNull()) {
-        ResetFont();
+    if (type == SelectFontType::SELECT) {
+        SelectModel::GetInstance()->SetFontWeight(FontWeight::MEDIUM);
+    } else if (type == SelectFontType::OPTION) {
+        SelectModel::GetInstance()->SetOptionFontWeight(FontWeight::REGULAR);
+    } else if (type == SelectFontType::SELECTED_OPTION) {
+        SelectModel::GetInstance()->SetSelectedOptionFontWeight(FontWeight::REGULAR);
     }
+}
 
-    if (!info[0]->IsObject()) {
-        return;
+void JSSelect::ResetFontFamily(SelectFontType type)
+{
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto textTheme = pipeline->GetTheme<TextTheme>();
+    CHECK_NULL_VOID(textTheme);
+    if (type == SelectFontType::SELECT) {
+        SelectModel::GetInstance()->SetFontFamily(textTheme->GetTextStyle().GetFontFamilies());
+    } else if (type == SelectFontType::OPTION) {
+        SelectModel::GetInstance()->SetOptionFontFamily(textTheme->GetTextStyle().GetFontFamilies());
+    } else if (type == SelectFontType::SELECTED_OPTION) {
+        SelectModel::GetInstance()->SetSelectedOptionFontFamily(textTheme->GetTextStyle().GetFontFamilies());
     }
+}
 
-    auto param = JSRef<JSObject>::Cast(info[0]);
-    auto size = param->GetProperty("size");
-    if (!size->IsNull()) {
-        CalcDimension fontSize;
-        if (ParseJsDimensionFp(size, fontSize)) {
-            SelectModel::GetInstance()->SetFontSize(fontSize);
-        }
+void JSSelect::ResetFontStyle(SelectFontType type)
+{
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto textTheme = pipeline->GetTheme<TextTheme>();
+    CHECK_NULL_VOID(textTheme);
+    if (type == SelectFontType::SELECT) {
+        SelectModel::GetInstance()->SetItalicFontStyle(textTheme->GetTextStyle().GetFontStyle());
+    } else if (type == SelectFontType::OPTION) {
+        SelectModel::GetInstance()->SetOptionItalicFontStyle(textTheme->GetTextStyle().GetFontStyle());
+    } else if (type == SelectFontType::SELECTED_OPTION) {
+        SelectModel::GetInstance()->SetSelectedOptionItalicFontStyle(textTheme->GetTextStyle().GetFontStyle());
     }
-    std::string weight;
-    auto fontWeight = param->GetProperty("weight");
-    if (!fontWeight->IsNull()) {
-        if (fontWeight->IsNumber()) {
-            weight = std::to_string(fontWeight->ToNumber<int32_t>());
-        } else {
-            ParseJsString(fontWeight, weight);
-        }
-        SelectModel::GetInstance()->SetFontWeight(ConvertStrToFontWeight(weight));
-    }
+}
 
-    auto family = param->GetProperty("family");
-    if (!family->IsNull() && family->IsString()) {
-        auto familyVal = family->ToString();
-        SelectModel::GetInstance()->SetFontFamily(ConvertStrToFontFamilies(familyVal));
-    }
-
-    auto style = param->GetProperty("style");
-    if (!style->IsNull() && style->IsNumber()) {
-        auto styleVal = static_cast<FontStyle>(style->ToNumber<int32_t>());
-        SelectModel::GetInstance()->SetItalicFontStyle(styleVal);
-    }
+void JSSelect::ResetFont(SelectFontType type)
+{
+    ResetFontSize(type);
+    ResetFontWeight(type);
+    ResetFontFamily(type);
+    ResetFontStyle(type);
 }
 
 void JSSelect::FontColor(const JSCallbackInfo& info)
@@ -308,55 +394,15 @@ void JSSelect::SelectedOptionBgColor(const JSCallbackInfo& info)
 
 void JSSelect::SelectedOptionFont(const JSCallbackInfo& info)
 {
-    if (info.Length() < 1) {
-        return;
-    }
-    auto pipeline = PipelineBase::GetCurrentContext();
-    CHECK_NULL_VOID(pipeline);
-    auto selectTheme = pipeline->GetTheme<SelectTheme>();
-    CHECK_NULL_VOID(selectTheme);
-    if (info[0]->IsUndefined() || info[0]->IsNull()) {
-        auto textTheme = pipeline->GetTheme<TextTheme>();
-        CHECK_NULL_VOID(textTheme);
-        SelectModel::GetInstance()->SetSelectedOptionFontSize(selectTheme->GetFontSize());
-        SelectModel::GetInstance()->SetSelectedOptionFontWeight(textTheme->GetTextStyle().GetFontWeight());
-        SelectModel::GetInstance()->SetSelectedOptionFontFamily(textTheme->GetTextStyle().GetFontFamilies());
-        SelectModel::GetInstance()->SetSelectedOptionItalicFontStyle(textTheme->GetTextStyle().GetFontStyle());
-        return;
-    }
     if (!info[0]->IsObject()) {
+        ResetFont(SelectFontType::SELECTED_OPTION);
         return;
     }
     auto param = JSRef<JSObject>::Cast(info[0]);
-    auto size = param->GetProperty("size");
-    if (!size->IsNull()) {
-        CalcDimension fontSize;
-        if (ParseJsDimensionFp(size, fontSize)) {
-            SelectModel::GetInstance()->SetSelectedOptionFontSize(fontSize);
-        } else if (size->IsUndefined()) {
-            SelectModel::GetInstance()->SetSelectedOptionFontSize(selectTheme->GetFontSize());
-        }
-    }
-    std::string weight;
-    auto fontWeight = param->GetProperty("weight");
-    if (!fontWeight->IsNull()) {
-        if (fontWeight->IsNumber()) {
-            weight = std::to_string(fontWeight->ToNumber<int32_t>());
-        } else {
-            ParseJsString(fontWeight, weight);
-        }
-        SelectModel::GetInstance()->SetSelectedOptionFontWeight(ConvertStrToFontWeight(weight));
-    }
-    auto family = param->GetProperty("family");
-    if (!family->IsNull() && family->IsString()) {
-        auto familyVal = family->ToString();
-        SelectModel::GetInstance()->SetSelectedOptionFontFamily(ConvertStrToFontFamilies(familyVal));
-    }
-    auto style = param->GetProperty("style");
-    if (!style->IsNull() && style->IsNumber()) {
-        auto styleVal = static_cast<FontStyle>(style->ToNumber<int32_t>());
-        SelectModel::GetInstance()->SetSelectedOptionItalicFontStyle(styleVal);
-    }
+    ParseFontSize(param->GetProperty("size"), SelectFontType::SELECTED_OPTION);
+    ParseFontWeight(param->GetProperty("weight"), SelectFontType::SELECTED_OPTION);
+    ParseFontFamily(param->GetProperty("family"), SelectFontType::SELECTED_OPTION);
+    ParseFontStyle(param->GetProperty("style"), SelectFontType::SELECTED_OPTION);
 }
 
 void JSSelect::SelectedOptionFontColor(const JSCallbackInfo& info)
@@ -402,61 +448,15 @@ void JSSelect::OptionBgColor(const JSCallbackInfo& info)
 
 void JSSelect::OptionFont(const JSCallbackInfo& info)
 {
-    if (info[0]->IsUndefined() || info[0]->IsNull()) {
-        auto pipeline = PipelineBase::GetCurrentContext();
-        CHECK_NULL_VOID(pipeline);
-        auto selectTheme = pipeline->GetTheme<SelectTheme>();
-        CHECK_NULL_VOID(selectTheme);
-        auto textTheme = pipeline->GetTheme<TextTheme>();
-        CHECK_NULL_VOID(textTheme);
-        SelectModel::GetInstance()->SetOptionFontSize(selectTheme->GetMenuFontSize());
-        SelectModel::GetInstance()->SetOptionFontWeight(textTheme->GetTextStyle().GetFontWeight());
-        SelectModel::GetInstance()->SetOptionFontFamily(textTheme->GetTextStyle().GetFontFamilies());
-        SelectModel::GetInstance()->SetOptionItalicFontStyle(textTheme->GetTextStyle().GetFontStyle());
-        return;
-    }
-
     if (!info[0]->IsObject()) {
+        ResetFont(SelectFontType::OPTION);
         return;
     }
     auto param = JSRef<JSObject>::Cast(info[0]);
-
-    auto size = param->GetProperty("size");
-    if (!size->IsNull()) {
-        CalcDimension fontSize;
-        if (ParseJsDimensionFp(size, fontSize)) {
-            SelectModel::GetInstance()->SetOptionFontSize(fontSize);
-        }
-        if (size->IsUndefined()) {
-            auto pipeline = PipelineBase::GetCurrentContext();
-            CHECK_NULL_VOID(pipeline);
-            auto theme = pipeline->GetTheme<SelectTheme>();
-            CHECK_NULL_VOID(theme);
-            SelectModel::GetInstance()->SetOptionFontSize(theme->GetMenuFontSize());
-        }
-    }
-    std::string weight;
-    auto fontWeight = param->GetProperty("weight");
-    if (!fontWeight->IsNull()) {
-        if (fontWeight->IsNumber()) {
-            weight = std::to_string(fontWeight->ToNumber<int32_t>());
-        } else {
-            ParseJsString(fontWeight, weight);
-        }
-        SelectModel::GetInstance()->SetOptionFontWeight(ConvertStrToFontWeight(weight));
-    }
-
-    auto family = param->GetProperty("family");
-    if (!family->IsNull() && family->IsString()) {
-        auto familyVal = family->ToString();
-        SelectModel::GetInstance()->SetOptionFontFamily(ConvertStrToFontFamilies(familyVal));
-    }
-
-    auto style = param->GetProperty("style");
-    if (!style->IsNull() && style->IsNumber()) {
-        auto styleVal = static_cast<FontStyle>(style->ToNumber<int32_t>());
-        SelectModel::GetInstance()->SetOptionItalicFontStyle(styleVal);
-    }
+    ParseFontSize(param->GetProperty("size"), SelectFontType::OPTION);
+    ParseFontWeight(param->GetProperty("weight"), SelectFontType::OPTION);
+    ParseFontFamily(param->GetProperty("family"), SelectFontType::OPTION);
+    ParseFontStyle(param->GetProperty("style"), SelectFontType::OPTION);
 }
 
 void JSSelect::OptionFontColor(const JSCallbackInfo& info)

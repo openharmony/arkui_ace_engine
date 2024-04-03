@@ -61,6 +61,7 @@ public:
     void SetScrollBarWidth(const std::string& value) override;
 
     RefPtr<WaterFlowSections> GetOrCreateWaterFlowSections() override;
+    void ResetSections() override;
     static RefPtr<FrameNode> CreateFrameNode(int32_t nodeId);
     static void SetColumnsTemplate(FrameNode* frameNode, const std::string& value);
     static void SetRowsTemplate(FrameNode* frameNode, const std::string& value);
@@ -80,6 +81,8 @@ public:
     static float GetColumnsGap(FrameNode* frameNode);
     static float GetRowsGap(FrameNode* frameNode);
     static NestedScrollOptions GetNestedScroll(FrameNode* frameNode);
+    static void SetCachedCount(FrameNode* frameNode, int32_t value);
+    static int32_t GetCachedCount(FrameNode* frameNode);
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_WATERFLOW_WATER_FLOW_MODEL_NG_H

@@ -40,6 +40,8 @@ public:
             if (!themeConstants) {
                 return theme;
             }
+
+            theme->backBtnResourceId_ = InternalResource::ResourceId::TITLEBAR_BACK;
             theme->backResourceId_ = themeConstants->GetResourceId(THEME_NAVIGATION_BAR_RESOURCE_ID_BACK);
             theme->moreResourceId_ = themeConstants->GetResourceId(THEME_NAVIGATION_BAR_RESOURCE_ID_MORE);
 
@@ -136,8 +138,10 @@ public:
                 pattern->GetAttr<double>("title_subheader_weight", subTitleDefaultFontWeit)));
             theme->iconWidth_ = pattern->GetAttr<Dimension>("icon_width", 24.0_vp);
             theme->iconHeight_ = pattern->GetAttr<Dimension>("icon_height", 24.0_vp);
+            theme->backButtonWidth_ = pattern->GetAttr<Dimension>("icon_background_width", 40.0_vp);
+            theme->backButtonHeight_ = pattern->GetAttr<Dimension>("icon_background_height", 40.0_vp);
             theme->iconBackgroundWidth_ = pattern->GetAttr<Dimension>("icon_background_width", 40.0_vp);
-            theme->iconBackgroundHeight_ = pattern->GetAttr<Dimension>("icon_background_width", 40.0_vp);
+            theme->iconBackgroundHeight_ = pattern->GetAttr<Dimension>("icon_background_height", 40.0_vp);
             theme->paddingTopTwolines_ = pattern->GetAttr<Dimension>("padding_top_twolines", 8.0_vp);
             theme->titleSpaceVertical_ = pattern->GetAttr<Dimension>("title_sapce_vertical", 2.0_vp);
             theme->iconDisableAlpha_ = pattern->GetAttr<double>("icon_disable_alpha", 0.0);
@@ -190,6 +194,10 @@ public:
     const Dimension& GetHeightEmphasize() const
     {
         return heightEmphasize_;
+    }
+    InternalResource::ResourceId GetBackBtnResourceId() const
+    {
+        return backBtnResourceId_;
     }
     InternalResource::ResourceId GetBackResourceId() const
     {
@@ -466,6 +474,14 @@ public:
     {
         return iconBackgroundHeight_;
     }
+    const Dimension& GetBackButtonWidth() const
+    {
+        return backButtonWidth_;
+    }
+    const Dimension& GetBackButtonHeight() const
+    {
+        return backButtonHeight_;
+    }
     const Dimension& GetPaddingTopTwolines() const
     {
         return paddingTopTwolines_;
@@ -510,6 +526,7 @@ private:
     Dimension subTitleFontSize_;
     Dimension height_;
     Dimension heightEmphasize_;
+    InternalResource::ResourceId backBtnResourceId_ = InternalResource::ResourceId::NO_ID;
     InternalResource::ResourceId backResourceId_ = InternalResource::ResourceId::NO_ID;
     InternalResource::ResourceId moreResourceId_ = InternalResource::ResourceId::NO_ID;
     Dimension menuZoneSize_;
@@ -579,6 +596,8 @@ private:
     Color iconColor_;
     Dimension iconWidth_;
     Dimension iconHeight_;
+    Dimension backButtonWidth_;
+    Dimension backButtonHeight_;
     Dimension iconBackgroundWidth_;
     Dimension iconBackgroundHeight_;
     Dimension paddingTopTwolines_;

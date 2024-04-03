@@ -776,8 +776,16 @@ std::optional<SizeF> TextLayoutAlgorithm::BuildTextRaceParagraph(TextStyle& text
     // create a paragraph with all text in 1 line
     textStyle.SetTextOverflow(TextOverflow::CLIP);
     textStyle.SetMaxLines(1);
-    if (!CreateParagraph(textStyle, layoutProperty->GetContent().value_or(""), layoutWrapper)) {
-        return std::nullopt;
+
+    if (!textStyle.GetAdaptTextSize()) {
+        if (!CreateParagraph(textStyle, layoutProperty->GetContent().value_or(""), layoutWrapper)) {
+            return std::nullopt;
+        }
+    } else {
+        if (!AdaptMinTextSize(
+            textStyle, layoutProperty->GetContent().value_or(""), contentConstraint, pipeline, layoutWrapper)) {
+            return std::nullopt;
+        }
     }
     if (!paragraph_) {
         return std::nullopt;
@@ -789,9 +797,10 @@ std::optional<SizeF> TextLayoutAlgorithm::BuildTextRaceParagraph(TextStyle& text
     if (contentConstraint.selfIdealSize.Width().has_value()) {
         paragraphWidth = std::max(contentConstraint.selfIdealSize.Width().value(), paragraphWidth);
     } else {
-        paragraphWidth = std::max(contentConstraint.maxSize.Width(), paragraphWidth);
+        paragraphWidth = std::max(contentConstraint.minSize.Width(), paragraphWidth);
     }
-    paragraph_->Layout(std::ceil(paragraphWidth));
+    paragraphWidth = std::ceil(paragraphWidth);
+    paragraph_->Layout(paragraphWidth);
 
     textStyle_ = textStyle;
 
@@ -827,6 +836,14 @@ void TextLayoutAlgorithm::SetPropertyToModifier(
     auto fontSize = layoutProperty->GetFontSize();
     if (fontSize.has_value()) {
         modifier->SetFontSize(fontSize.value());
+    }
+    auto adaptMinFontSize = layoutProperty->GetAdaptMinFontSize();
+    if (adaptMinFontSize.has_value()) {
+        modifier->SetAdaptMinFontSize(adaptMinFontSize.value());
+    }
+    auto adaptMaxFontSize = layoutProperty->GetAdaptMaxFontSize();
+    if (adaptMaxFontSize.has_value()) {
+        modifier->SetAdaptMaxFontSize(adaptMaxFontSize.value());
     }
     auto fontWeight = layoutProperty->GetFontWeight();
     if (fontWeight.has_value()) {

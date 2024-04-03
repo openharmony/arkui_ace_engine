@@ -27,10 +27,18 @@ void InitFilterColor(const RefPtr<SvgFeDeclaration>& fe, ColorInterpolationType&
 {
     CHECK_NULL_VOID(fe);
 
-    if (fe->GetIn() == FeInType::SOURCE_GRAPHIC) {
+    if (fe->GetIn().in == FeInType::SOURCE_GRAPHIC) {
         currentColor = ColorInterpolationType::SRGB;
     } else {
         currentColor = fe->GetColorInterpolationType();
+    }
+}
+
+void SvgFe::RegisterResult(const std::string& id, std::shared_ptr<RSImageFilter>& imageFilter,
+    std::unordered_map<std::string, std::shared_ptr<RSImageFilter>>& resultHash) const
+{
+    if (!id.empty()) {
+        resultHash[id] = imageFilter;
     }
 }
 
@@ -39,12 +47,13 @@ SvgFe::SvgFe() : SvgNode()
     InitNoneFlag();
 }
 
-void SvgFe::GetImageFilter(std::shared_ptr<RSImageFilter>& imageFilter, ColorInterpolationType& currentColor)
+void SvgFe::GetImageFilter(std::shared_ptr<RSImageFilter>& imageFilter, ColorInterpolationType& currentColor,
+    std::unordered_map<std::string, std::shared_ptr<RSImageFilter>>& resultHash)
 {
     ColorInterpolationType srcColor = currentColor;
     OnInitStyle();
     InitFilterColor(AceType::DynamicCast<SvgFeDeclaration>(declaration_), currentColor);
-    OnAsImageFilter(imageFilter, srcColor, currentColor);
+    OnAsImageFilter(imageFilter, srcColor, currentColor, resultHash);
     currentColor = srcColor;
 }
 
@@ -62,9 +71,10 @@ void SvgFe::ConverImageFilterColor(std::shared_ptr<RSImageFilter>& imageFilter, 
     }
 }
 
-std::shared_ptr<RSImageFilter> SvgFe::MakeImageFilter(const FeInType& in, std::shared_ptr<RSImageFilter>& imageFilter)
+std::shared_ptr<RSImageFilter> SvgFe::MakeImageFilter(const FeIn& in, std::shared_ptr<RSImageFilter>& imageFilter,
+    std::unordered_map<std::string, std::shared_ptr<RSImageFilter>>& resultHash)
 {
-    switch (in) {
+    switch (in.in) {
         case FeInType::SOURCE_GRAPHIC:
             return nullptr;
         case FeInType::SOURCE_ALPHA: {
@@ -83,6 +93,12 @@ std::shared_ptr<RSImageFilter> SvgFe::MakeImageFilter(const FeInType& in, std::s
         case FeInType::STROKE_PAINT:
             break;
         case FeInType::PRIMITIVE:
+            if (!in.id.empty()) {
+                auto it = resultHash.find(in.id);
+                if (it != resultHash.end()) {
+                    return it->second;
+                }
+            }
             break;
         default:
             break;

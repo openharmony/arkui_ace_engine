@@ -139,6 +139,7 @@ public:
 
     void SetBackdropBlur(const Dimension& radius, const BlurOption& blurOption) override;
     void SetLinearGradientBlur(NG::LinearGradientBlurPara blurPara) override {};
+    void SetDynamicDim(float DimDegree) override {};
     void SetDynamicLightUp(float rate, float lightUpDegree) override {};
     void SetFrontBlur(const Dimension& radius, const BlurOption& blurOption) override;
     void SetBackShadow(const std::vector<Shadow>& shadows) override;
@@ -271,7 +272,7 @@ public:
     void UpdateAnimatableArithmeticProperty(const std::string& propertyName,
         RefPtr<NG::CustomAnimatableArithmetic>& value) override {};
     void UpdateSafeAreaExpandOpts(const NG::SafeAreaExpandOpts& opts) override {};
-
+    void SetDragEventStrictReportingEnabled(bool dragEventStrictReportingEnabled) override {};
     // global light
     void SetLightPosition(
         const CalcDimension& positionX, const CalcDimension& positionY, const CalcDimension& positionZ) override {};

@@ -12,6 +12,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+/* Load the UIContext module. */
+const UIContext = requireNapi("arkui.uicontext")
 
 /* If a new value is added, add it from the end. */
 var Color;
@@ -509,8 +511,11 @@ var GestureMask;
 var GesturePriority;
 (function (GesturePriority) {
   GesturePriority[GesturePriority["Low"] = 0] = "Low";
+  GesturePriority[GesturePriority["NORMAL"] = 0] = "NORMAL";
   GesturePriority[GesturePriority["High"] = 1] = "High";
+  GesturePriority[GesturePriority["PRIORITY"] = 1] = "PRIORITY";
   GesturePriority[GesturePriority["Parallel"] = 2] = "Parallel";
+  GesturePriority[GesturePriority["PARALLEL"] = 2] = "PARALLEL";
 })(GesturePriority || (GesturePriority = {}));
 
 var Visibility;
@@ -1497,7 +1502,7 @@ class ProgressMask {
     return this;
   }
 
-  enableBreathe(arg) {
+  enableBreathingAnimation(arg) {
     this.breathe = arg;
     return this;
   }
@@ -1792,6 +1797,14 @@ class NavPathStack {
     this.parentStack = undefined;
     this.popArray = [];
     this.interception = undefined;
+  }
+  getJsIndexFromNativeIndex(index) {
+    for (let i = 0; i < this.pathArray.length; i++) {
+      if (this.pathArray[i].index === index) {
+        return i;
+      }
+    }
+    return -1;
   }
   initNavPathIndex() {
     this.popArray = [];
@@ -2686,6 +2699,13 @@ let TextResponseType;
   TextResponseType[TextResponseType['LONG_PRESS'] = 1] = 'LONG_PRESS';
   TextResponseType[TextResponseType['SELECT'] = 2] = 'SELECT';
 })(TextResponseType || (TextResponseType = {}));
+
+let MarqueeState;
+(function (MarqueeState) {
+  MarqueeState[MarqueeState['START'] = 0] = 'START';
+  MarqueeState[MarqueeState['BOUNCE'] = 1] = 'BOUNCE';
+  MarqueeState[MarqueeState['FINISH'] = 2] = 'FINISH';
+})(MarqueeState || (MarqueeState = {}));
 
 let NativeEmbedStatus;
 (function (NativeEmbedStatus) {

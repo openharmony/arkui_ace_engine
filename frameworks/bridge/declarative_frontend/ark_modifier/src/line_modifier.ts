@@ -16,12 +16,13 @@
 /// <reference path='./import.ts' />
 class LineModifier extends ArkLineComponent implements AttributeModifier<LineAttribute> {
 
-  constructor(nativePtr: KNode) {
-    super(nativePtr);
+  constructor(nativePtr: KNode, classType: ModifierType) {
+    super(nativePtr, classType);
     this._modifiersWithKeys = new ModifierMap();
   }
 
   applyNormalAttribute(instance: LineAttribute): void {
-    applyAndMergeModifier<LineAttribute, ArkLineComponent, ArkCommonShapeComponent>(instance, this);
+    ModifierUtils.applySetOnChange(this);
+    ModifierUtils.applyAndMergeModifier<LineAttribute, ArkLineComponent, ArkComponent>(instance, this);
   }
 }

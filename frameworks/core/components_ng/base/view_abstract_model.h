@@ -196,6 +196,7 @@ public:
     virtual void SetBackdropBlur(const Dimension& radius, const BlurOption& blurOption) = 0;
     virtual void SetLinearGradientBlur(NG::LinearGradientBlurPara blurPara) = 0;
 
+    virtual void SetDynamicDim(float DimDegree) = 0;
     virtual void SetDynamicLightUp(float rate, float lightUpDegree) = 0;
 
     virtual void SetFrontBlur(const Dimension& radius, const BlurOption& blurOption) = 0;
@@ -289,6 +290,7 @@ public:
     virtual void SetKeyboardShortcut(const std::string& value, const std::vector<ModifierKey>& keys,
         std::function<void()>&& onKeyboardShortcutAction) = 0;
     virtual void SetMonopolizeEvents(bool monopolizeEvents) = 0;
+    virtual void SetDragEventStrictReportingEnabled(bool dragEventStrictReportingEnabled) = 0;
 
     // obscured
     virtual void SetObscured(const std::vector<ObscuredReasons>& reasons) = 0;

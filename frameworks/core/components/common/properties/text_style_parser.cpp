@@ -27,7 +27,6 @@ constexpr int32_t FONT_FEATURE_PARENTHESES_LENGTH = 2; // length of ()
 const char FONT_FEATURE_NONE[] = "none";
 const char FONT_FEATURE_NORMAL[] = "normal";
 const char FONT_FEATURE_ON[] = "on";
-const char FONT_FEATURE_OFF[] = "off";
 
 } // namespace
 
@@ -239,6 +238,14 @@ bool ParseFontVariantEastAsian(const std::string& fontVariant, std::unordered_ma
     return false;
 }
 
+int32_t ParseFontFeatureParameters(std::string& value)
+{
+    if ((value == FONT_FEATURE_ON) || (StringUtils::StringToInt(value) == 1)) {
+        return 1;
+    }
+    return 0;
+}
+
 void ParseFontVariant(const std::string& fontVariant, std::unordered_map<std::string, int32_t>& fontFeatures)
 {
     if (fontVariant.empty()) {
@@ -319,9 +326,7 @@ void ParseFontFeatureSetting(
             fontFeatures.try_emplace(value[0], 1);
             break;
         case 2:
-            fontFeatures.try_emplace(value[0],
-                value[1] == FONT_FEATURE_ON ? 1
-                                            : (value[1] == FONT_FEATURE_OFF ? 0 : StringUtils::StringToInt(value[1])));
+            fontFeatures.try_emplace(value[0], ParseFontFeatureParameters(value[1]));
             break;
         default:
             LOGW("ParseFontFeatureSetting format of font-feature-settings is invalid");
@@ -349,4 +354,16 @@ std::unordered_map<std::string, int32_t> ParseFontFeatureSettings(const std::str
     return fontFeatures;
 }
 
+std::string UnParseFontFeatureSetting(const std::unordered_map<std::string, int32_t>& fontFeatureSettings)
+{
+    std::stringstream str_temp;
+    for (const auto& kv:fontFeatureSettings) {
+        str_temp << kv.first << " " << kv.second << ",";
+    }
+    std::string fontFeatures = str_temp.str();
+    if (!fontFeatures.empty()) {
+        fontFeatures.pop_back();
+    }
+    return fontFeatures;
+}
 } // namespace OHOS::Ace

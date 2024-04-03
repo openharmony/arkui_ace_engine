@@ -105,6 +105,8 @@ public:
         const RefPtr<NG::NavDestinationContext>& to, NG::NavigationOperation operation, bool isAnimated) override;
     void FireNavigationModeChange(NG::NavigationMode mode) override;
     JSRef<JSVal> GetParamByIndex(int32_t index) const;
+    int32_t GetJsIndexFromNativeIndex(int32_t index) override;
+    void MoveIndexToTop(int32_t index) override;
 
 protected:
     JSRef<JSObject> dataSourceObj_;

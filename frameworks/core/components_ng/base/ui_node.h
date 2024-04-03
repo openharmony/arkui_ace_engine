@@ -552,6 +552,7 @@ public:
     virtual void SetNodeIndexOffset(int32_t start, int32_t count) {}
 
     virtual void PaintDebugBoundaryTreeAll(bool flag);
+    static void DFSAllChild(const RefPtr<UINode>& root, std::vector<RefPtr<UINode>>& res);
 
     void AddFlag(uint32_t flag)
     {
@@ -582,6 +583,9 @@ public:
     {
         return isLevelNavDest_;
     }
+
+    void GetPageNodeCountAndDepth(int32_t* count, int32_t* depth);
+    
 protected:
     std::list<RefPtr<UINode>>& ModifyChildren()
     {

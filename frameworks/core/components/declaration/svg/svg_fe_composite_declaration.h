@@ -31,7 +31,7 @@ enum class FeOperatorType {
 };
 
 struct SvgFeCompositeAttribute : SvgFeAttribute {
-    FeInType in2 = FeInType::PRIMITIVE;
+    FeIn in2;
     FeOperatorType operatorType = FeOperatorType::FE_OVER;
     double k1 = 0.0;
     double k2 = 0.0;
@@ -82,9 +82,11 @@ public:
             { "StrokePaint", FeInType::STROKE_PAINT },
         };
         int64_t inIndex = BinarySearchFindIndex(IN_TABLE, ArraySize(IN_TABLE), In2.c_str());
+        auto& attribute = MaybeResetAttribute<SvgFeCompositeAttribute>(AttributeTag::SPECIALIZED_ATTR);
         if (inIndex != -1) {
-            auto& attribute = MaybeResetAttribute<SvgFeCompositeAttribute>(AttributeTag::SPECIALIZED_ATTR);
-            attribute.in2 = IN_TABLE[inIndex].value;
+            attribute.in2.in = IN_TABLE[inIndex].value;
+        } else {
+            attribute.in2.id = In2;
         }
     }
 
@@ -130,7 +132,7 @@ public:
         return attribute.k4;
     }
 
-    const FeInType& GetIn2() const
+    const FeIn& GetIn2() const
     {
         auto& attribute = static_cast<SvgFeCompositeAttribute&>(GetAttribute(AttributeTag::SPECIALIZED_ATTR));
         return attribute.in2;

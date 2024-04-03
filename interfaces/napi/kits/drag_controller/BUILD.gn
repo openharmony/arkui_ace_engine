@@ -48,7 +48,7 @@ template("napi_dragcontroller_static") {
     }
     if (is_arkui_x) {
       if (defined(config.pixel_map_support) && config.pixel_map_support) {
-        configs = [ "$crossplatform_multimedia_root/image_framework/interfaces/innerkits:image_external_config" ]
+        configs += [ "$crossplatform_multimedia_root/image_framework/interfaces/innerkits:image_external_config" ]
       }
     } else {
       if (defined(config.pixel_map_support)) {

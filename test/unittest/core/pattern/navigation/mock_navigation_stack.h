@@ -21,9 +21,13 @@
 #define protected public
 #define private public
 #include "core/components_ng/pattern/navigation/navigation_stack.h"
+#include "core/components_ng/pattern/navrouter/navdestination_pattern.h"
+#include "core/components_ng/pattern/navrouter/navdestination_model_ng.h"
+#include "test/mock/core/common/mock_container.h"
 struct MockReplace {
     int32_t isReplace_ = 0;
 };
+
 using NavigationInterceptionEvent = std::function<void(const OHOS::Ace::RefPtr<OHOS::Ace::NG::NavDestinationContext>,
     const OHOS::Ace::RefPtr<OHOS::Ace::NG::NavDestinationContext>, OHOS::Ace::NG::NavigationOperation, bool)>;
 class MockNavigationStack : public OHOS::Ace::NG::NavigationStack {
@@ -94,11 +98,61 @@ public:
     MOCK_METHOD1(OnAttachToParent, void(OHOS::Ace::RefPtr<OHOS::Ace::NG::NavigationStack>));
     MOCK_METHOD0(OnDetachFromParent, void());
 
+    OHOS::Ace::RefPtr<OHOS::Ace::NG::UINode> CreateNodeByIndex(int32_t index,
+        const OHOS::Ace::WeakPtr<OHOS::Ace::NG::UINode>& customNode) override
+    {
+        auto* stack = OHOS::Ace::NG::ViewStackProcessor::GetInstance();
+        // navDestination node
+        int32_t nodeId = stack->ClaimNodeId();
+        auto frameNode = OHOS::Ace::NG::NavDestinationGroupNode::GetOrCreateGroupNode(
+            OHOS::Ace::V2::NAVDESTINATION_VIEW_ETS_TAG, nodeId, []() {
+                return OHOS::Ace::AceType::MakeRefPtr<OHOS::Ace::NG::NavDestinationPattern>();
+            });
+        EXPECT_NE(frameNode, nullptr);
+        auto name = names_[index];
+        auto container = OHOS::Ace::MockContainer::Current();
+        auto navigationRoute = container->GetNavigationRoute();
+        if (!navigationRoute) {
+            return nullptr;
+        }
+        if (!navigationRoute->HasLoaded(name)) {
+            int32_t res = navigationRoute->LoadPage(name);
+            if (res != 0) {
+                return frameNode;
+            }
+        }
+        auto pattern = OHOS::Ace::AceType::DynamicCast<OHOS::Ace::NG::NavDestinationPattern>(frameNode->GetPattern());
+        EXPECT_NE(pattern, nullptr);
+        pattern->SetName(name);
+        return frameNode;
+    }
+
+    void Push(const std::string& name, int32_t index) override
+    {
+        names_.push_back(name);
+    }
+
+    void Push(const std::string& name, const OHOS::Ace::RefPtr<OHOS::Ace::NG::RouteInfo>& routeInfo = nullptr) override
+    {
+        names_.push_back(name);
+    }
+
+    std::vector<std::string> GetAllPathName() override
+    {
+        return names_;
+    }
+
+    void Pop() override
+    {
+        names_.pop_back();
+    }
+
 private:
     std::function<void()> onStateChangedCallback_;
     NavigationInterceptionEvent beforeCallback_;
     NavigationInterceptionEvent afterCallback_;
     std::function<void(OHOS::Ace::NG::NavigationMode)> modeCallback_;
     MockReplace *mockReplace_ = new MockReplace();
+    std::vector<std::string> names_;
 };
 #endif

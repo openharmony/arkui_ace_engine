@@ -17,7 +17,9 @@
 #include <string>
 
 #include "base/geometry/dimension.h"
+#include "base/log/ace_checker.h"
 #include "base/log/dump_log.h"
+#include "base/log/event_report.h"
 #include "base/perfmonitor/perf_constants.h"
 #include "base/perfmonitor/perf_monitor.h"
 #include "core/common/container.h"
@@ -65,7 +67,7 @@ void BuildNavDestinationInfoFromContext(const std::string& navigationId, NavDest
 
 NavigationPattern::NavigationPattern()
 {
-    navigationController_ = std::make_shared<InnerNavigationController>(WeakClaim(this));
+    navigationController_ = std::make_shared<InnerNavigationController>(WeakClaim(this), Container::CurrentId());
 }
 
 RefPtr<RenderContext> NavigationPattern::GetTitleBarRenderContext()
@@ -286,12 +288,15 @@ void NavigationPattern::RefreshNavDestination()
 {
     auto hostNode = AceType::DynamicCast<NavigationGroupNode>(GetHost());
     CHECK_NULL_VOID(hostNode);
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
     auto preTopNavPath = std::move(preTopNavPath_);
     auto& navPathList = navigationStack_->GetAllNavDestinationNodes();
     hostNode->UpdateNavDestinationNodeWithoutMarkDirty(
         preTopNavPath.has_value() ? preTopNavPath->second : nullptr, navigationModeChange_);
     auto newTopNavPath = navigationStack_->GetTopNavPath();
-    CheckTopNavPathChange(preTopNavPath, newTopNavPath);
+    std::string navDestinationName = "";
+    CheckTopNavPathChange(preTopNavPath, newTopNavPath, navDestinationName);
 
     /* if first navDestination is removed, the new one will be refreshed */
     if (!navPathList.empty()) {
@@ -300,11 +305,23 @@ void NavigationPattern::RefreshNavDestination()
         CHECK_NULL_VOID(firstNavDesNode);
         firstNavDesNode->MarkModifyDone();
     }
+
+    pipeline->AddPredictTask([weak = WeakClaim(this), weakNode = WeakPtr<FrameNode>(hostNode),
+        navDestinationName](int64_t deadline, bool canUseLongPredictTask) {
+            auto navigationPattern = weak.Upgrade();
+            CHECK_NULL_VOID(navigationPattern);
+            auto navigationNode = weakNode.Upgrade();
+            CHECK_NULL_VOID(navigationNode);
+            int32_t count = 0;
+            int32_t depth = 0;
+            navigationNode->GetPageNodeCountAndDepth(&count, &depth);
+            navigationPattern->PerformanceEventReport(count, depth, navDestinationName);
+        });
 }
 
 void NavigationPattern::CheckTopNavPathChange(
     const std::optional<std::pair<std::string, RefPtr<UINode>>>& preTopNavPath,
-    const std::optional<std::pair<std::string, RefPtr<UINode>>>& newTopNavPath)
+    const std::optional<std::pair<std::string, RefPtr<UINode>>>& newTopNavPath, std::string navDestinationName)
 {
     auto replaceValue = navigationStack_->GetReplaceValue();
     if (preTopNavPath == newTopNavPath && replaceValue != 1) {
@@ -357,6 +374,7 @@ void NavigationPattern::CheckTopNavPathChange(
             auto navDestinationPattern = newTopNavDestination->GetPattern<NavDestinationPattern>();
             auto navDestinationFocusView = AceType::DynamicCast<FocusView>(navDestinationPattern);
             CHECK_NULL_VOID(navDestinationFocusView);
+            navDestinationName = navDestinationPattern->GetName();
             navDestinationFocusView->SetIsViewRootScopeFocused(false);
             navDestinationFocusView->FocusViewShow();
         } else {
@@ -1724,6 +1742,19 @@ void NavigationPattern::NotifyDestinationLifecycle(const RefPtr<UINode>& uiNode,
         eventHub->FireOnHiddenEvent(navDestinationPattern->GetName());
         NotifyPageHide(navDestinationPattern->GetName());
         navDestinationPattern->SetIsOnShow(false);
+    }
+}
+
+void NavigationPattern::PerformanceEventReport(int32_t nodeCount, int32_t depth, const std::string& navDestinationName)
+{
+    std::string msg;
+    if (nodeCount > AceChecker::GetPageNodes()) {
+        msg = "page node is " + std::to_string(nodeCount) + ",it's overflow.";
+        EventReport::PerformanceEventReport(PerformanceExecpType::PAGE_DEPTH_OVERFLOW, navDestinationName, msg);
+    }
+    if (depth >= AceChecker::GetPageDepth()) {
+        std::string msg = "page depth is " + std::to_string(depth) + ",it's overflow.";
+        EventReport::PerformanceEventReport(PerformanceExecpType::PAGE_DEPTH_OVERFLOW, navDestinationName, msg);
     }
 }
 } // namespace OHOS::Ace::NG

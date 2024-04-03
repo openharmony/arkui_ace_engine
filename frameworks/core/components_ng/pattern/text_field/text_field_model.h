@@ -122,6 +122,8 @@ public:
     virtual void Delete() {}
     virtual void Insert(const std::string& args) {}
 
+    virtual void SetPasswordState(bool flag) {}
+
     virtual void CaretPosition(int32_t caretPosition) {}
     virtual int32_t GetCaretIndex()
     {
@@ -270,6 +272,7 @@ public:
     virtual void SetShowError(const std::string& errorText, bool visible) {};
     virtual void SetBarState(DisplayMode value) {};
     virtual void SetMaxViewLines(uint32_t value) {};
+    virtual void SetNormalMaxViewLines(uint32_t value) {};
 
     virtual void SetShowUnderline(bool showUnderLine) {};
     virtual void SetNormalUnderlineColor(const Color& normalColor) {};

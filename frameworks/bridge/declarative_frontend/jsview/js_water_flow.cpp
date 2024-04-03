@@ -24,6 +24,7 @@
 #include "bridge/declarative_frontend/jsview/js_water_flow_sections.h"
 #include "bridge/declarative_frontend/jsview/models/water_flow_model_impl.h"
 #include "core/common/container.h"
+#include "core/components_ng/pattern/waterflow/water_flow_model.h"
 #include "core/components_ng/pattern/waterflow/water_flow_model_ng.h"
 #include "core/components_ng/pattern/waterflow/water_flow_sections.h"
 
@@ -109,34 +110,40 @@ void JSWaterFlow::Create(const JSCallbackInfo& args)
 
     WaterFlowModel::GetInstance()->Create();
 
-    if (args.Length() == 1) {
-        if (!args[0]->IsObject()) {
-            LOGE("The arg must be object");
-            return;
-        }
-        JSRef<JSObject> obj = JSRef<JSObject>::Cast(args[0]);
+    if (args.Length() == 0) {
+        return;
+    }
 
-        auto scroller = obj->GetProperty("scroller");
-        if (scroller->IsObject()) {
-            auto* jsScroller = JSRef<JSObject>::Cast(scroller)->Unwrap<JSScroller>();
-            CHECK_NULL_VOID(jsScroller);
-            jsScroller->SetInstanceId(Container::CurrentId());
-            auto positionController = WaterFlowModel::GetInstance()->CreateScrollController();
-            jsScroller->SetController(positionController);
+    if (!args[0]->IsObject()) {
+        LOGE("The arg must be object");
+        return;
+    }
+    JSRef<JSObject> obj = JSRef<JSObject>::Cast(args[0]);
 
-            // Init scroll bar proxy.
-            auto proxy = jsScroller->GetScrollBarProxy();
-            if (!proxy) {
-                proxy = WaterFlowModel::GetInstance()->CreateScrollBarProxy();
-                jsScroller->SetScrollBarProxy(proxy);
-            }
-            WaterFlowModel::GetInstance()->SetScroller(positionController, proxy);
+    auto scroller = obj->GetProperty("scroller");
+    if (scroller->IsObject()) {
+        auto* jsScroller = JSRef<JSObject>::Cast(scroller)->Unwrap<JSScroller>();
+        CHECK_NULL_VOID(jsScroller);
+        jsScroller->SetInstanceId(Container::CurrentId());
+        auto positionController = WaterFlowModel::GetInstance()->CreateScrollController();
+        jsScroller->SetController(positionController);
+
+        // Init scroll bar proxy.
+        auto proxy = jsScroller->GetScrollBarProxy();
+        if (!proxy) {
+            proxy = WaterFlowModel::GetInstance()->CreateScrollBarProxy();
+            jsScroller->SetScrollBarProxy(proxy);
         }
-        auto sections = obj->GetProperty("sections");
-        auto footerObject = obj->GetProperty("footer");
-        if (sections->IsObject()) {
-            UpdateWaterFlowSections(args, sections);
-        } else if (footerObject->IsFunction()) {
+        WaterFlowModel::GetInstance()->SetScroller(positionController, proxy);
+    }
+    auto sections = obj->GetProperty("sections");
+    auto footerObject = obj->GetProperty("footer");
+    if (sections->IsObject()) {
+        UpdateWaterFlowSections(args, sections);
+    } else {
+        WaterFlowModel::GetInstance()->ResetSections();
+
+        if (footerObject->IsFunction()) {
             // ignore footer if sections are present
             auto builderFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSFunc>::Cast(footerObject));
             auto footerAction = [builderFunc]() { builderFunc->Execute(); };

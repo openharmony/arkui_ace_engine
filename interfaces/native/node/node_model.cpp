@@ -29,6 +29,7 @@
 #include "core/components_ng/base/ui_node.h"
 #include "core/components_ng/property/property.h"
 #include "core/interfaces/arkoala/arkoala_api.h"
+#include "interfaces/native/event/ui_input_event_impl.h"
 
 namespace OHOS::Ace::NodeModel {
 namespace {
@@ -114,8 +115,9 @@ ArkUIFullNodeAPI* GetFullImpl()
 }
 
 struct InnerEventExtraParam {
-    int32_t eventId;
+    int32_t targetId;
     ArkUI_NodeHandle nodePtr;
+    void* userData;
 };
 
 struct ExtraData {
@@ -262,7 +264,7 @@ const ArkUI_AttributeItem* GetAttribute(ArkUI_NodeHandle node, ArkUI_NodeAttribu
     return GetNodeAttribute(node, attribute);
 }
 
-int32_t RegisterNodeEvent(ArkUI_NodeHandle nodePtr, ArkUI_NodeEventType eventType, int32_t eventId)
+int32_t RegisterNodeEvent(ArkUI_NodeHandle nodePtr, ArkUI_NodeEventType eventType, int32_t targetId, void* userData)
 {
     auto originEventType = ConvertOriginEventType(eventType, nodePtr->type);
     if (originEventType < 0) {
@@ -274,12 +276,13 @@ int32_t RegisterNodeEvent(ArkUI_NodeHandle nodePtr, ArkUI_NodeEventType eventTyp
     if (impl->getBasicAPI()->isBuilderNode(nodePtr->uiNodeHandle)) {
         return ERROR_CODE_NATIVE_IMPL_BUILDER_NODE_ERROR;
     }
-    auto* extraParam = new InnerEventExtraParam({eventId});
+    auto* extraParam = new InnerEventExtraParam({targetId, nodePtr, userData});
     if (nodePtr->extraData) {
         auto* extraData = reinterpret_cast<ExtraData*>(nodePtr->extraData);
         auto result = extraData->eventMap.try_emplace(eventType, extraParam);
         if (!result.second) {
-            result.first->second->eventId = eventId;
+            result.first->second->targetId = targetId;
+            result.first->second->userData = userData;
             delete extraParam;
         }
     } else {
@@ -327,10 +330,14 @@ void UnregisterOnEvent()
 
 void HandleInnerNodeEvent(ArkUINodeEvent* innerEvent)
 {
+    if (!innerEvent) {
+        return;
+    }
     if (!g_eventReceiver) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "event receiver is not register");
         return;
     }
+
     ArkUI_NodeEvent event;
     auto* nodePtr = reinterpret_cast<ArkUI_NodeHandle>(innerEvent->extraParam);
     if (g_nodeSet.count(nodePtr) == 0) {
@@ -352,7 +359,7 @@ void HandleInnerNodeEvent(ArkUINodeEvent* innerEvent)
             subKind = ON_TOUCH;
             break;
         default:
-            ; /* Empty */
+            break; /* Empty */
     }
     ArkUI_NodeEventType eventType = static_cast<ArkUI_NodeEventType>(ConvertToNodeEventType(subKind));
     auto innerEventExtraParam = extraData->eventMap.find(eventType);
@@ -361,10 +368,20 @@ void HandleInnerNodeEvent(ArkUINodeEvent* innerEvent)
         return;
     }
     event.node = nodePtr;
-    event.eventId = innerEventExtraParam->second->eventId;
+    event.eventId = innerEventExtraParam->second->targetId;
+    event.userData = innerEventExtraParam->second->userData;
     if (ConvertEvent(innerEvent, &event)) {
+        event.targetId = innerEvent->nodeId;
+        ArkUI_UIInputEvent uiEvent;
+        if (eventType == NODE_TOUCH_EVENT) {
+            uiEvent.inputType = ARKUI_UIINPUTEVENT_TYPE_TOUCH;
+            uiEvent.eventTypeId = C_TOUCH_EVENT_ID;
+            uiEvent.inputEvent = &(innerEvent->touchEvent);
+            event.origin = &uiEvent;
+        } else {
+            event.origin = innerEvent;
+        }
         g_eventReceiver(&event);
-        ConvertEventResult(&event, innerEvent);
     }
 }
 
@@ -377,6 +394,9 @@ int32_t CheckEvent(ArkUI_NodeEvent* event)
 void ApplyModifierFinish(ArkUI_NodeHandle nodePtr)
 {
     // already check in entry point.
+    if (!nodePtr) {
+        return;
+    }
     auto* impl = GetFullImpl();
     impl->getBasicAPI()->applyModifierFinish(nodePtr->uiNodeHandle);
 }
@@ -384,6 +404,9 @@ void ApplyModifierFinish(ArkUI_NodeHandle nodePtr)
 void MarkDirty(ArkUI_NodeHandle nodePtr, ArkUI_NodeDirtyFlag dirtyFlag)
 {
     // spanNode inherited from UINode
+    if (!nodePtr) {
+        return;
+    }
     ArkUIDirtyFlag flag = ARKUI_DIRTY_FLAG_MEASURE;
     switch (dirtyFlag) {
         case NODE_NEED_MEASURE: {

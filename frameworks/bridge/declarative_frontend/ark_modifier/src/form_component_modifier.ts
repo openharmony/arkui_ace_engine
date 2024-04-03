@@ -16,12 +16,13 @@
 /// <reference path='./import.ts' />
 class FormComponentModifier extends ArkFormComponentComponent implements AttributeModifier<FormComponentAttribute> {
 
-  constructor(nativePtr: KNode) {
-    super(nativePtr);
+  constructor(nativePtr: KNode, classType: ModifierType) {
+    super(nativePtr, classType);
     this._modifiersWithKeys = new ModifierMap();
   }
 
   applyNormalAttribute(instance: FormComponentAttribute): void {
-    applyAndMergeModifier<FormComponentAttribute, ArkFormComponentComponent, ArkComponent>(instance, this);
+    ModifierUtils.applySetOnChange(this);
+    ModifierUtils.applyAndMergeModifier<FormComponentAttribute, ArkFormComponentComponent, ArkComponent>(instance, this);
   }
 }

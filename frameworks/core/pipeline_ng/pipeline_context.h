@@ -269,7 +269,7 @@ public:
         dragWindowVisibleCallback_ = std::move(task);
     }
 
-    void FlushOnceVsyncTask();
+    void FlushOnceVsyncTask() override;
 
     void FlushDirtyNodeUpdate();
 
@@ -398,7 +398,7 @@ public:
         return onShow_;
     }
 
-    bool ChangeMouseStyle(int32_t nodeId, MouseFormat format, int32_t windowId = 0);
+    bool ChangeMouseStyle(int32_t nodeId, MouseFormat format, int32_t windowId = 0, bool isByPass = false);
 
     bool RequestFocus(const std::string& targetNodeId) override;
     void AddDirtyFocus(const RefPtr<FrameNode>& node);
@@ -539,6 +539,7 @@ public:
     bool DumpPageViewData(const RefPtr<FrameNode>& node, RefPtr<ViewDataWrap> viewDataWrap);
     bool CheckNeedAutoSave();
     bool CheckPageFocus();
+    bool CheckOverlayFocus();
     void NotifyFillRequestSuccess(AceAutoFillType autoFillType, RefPtr<ViewDataWrap> viewDataWrap);
     void NotifyFillRequestFailed(RefPtr<FrameNode> node, int32_t errCode);
 
@@ -649,6 +650,10 @@ public:
     void SetOnceVsyncListener(VsyncCallbackFun vsync)
     {
         onceVsyncListener_ = std::move(vsync);
+    }
+
+    bool HasOnceVsyncListener() {
+        return onceVsyncListener_ != nullptr;
     }
 
     const RefPtr<NavigationDumpManager>& GetNavigationDumpManager() const

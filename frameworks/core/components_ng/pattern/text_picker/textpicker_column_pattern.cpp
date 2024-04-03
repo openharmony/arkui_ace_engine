@@ -297,6 +297,7 @@ void TextPickerColumnPattern::HandleMouseEvent(bool isHover)
     } else {
         PlayPressAnimation(Color::TRANSPARENT);
     }
+    isHover_ = isHover;
 }
 
 void TextPickerColumnPattern::SetButtonBackgroundColor(const Color& pressColor)

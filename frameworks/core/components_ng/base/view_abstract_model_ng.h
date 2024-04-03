@@ -651,6 +651,10 @@ public:
         ViewAbstract::SetLinearGradientBlur(blurPara);
     }
 
+    void SetDynamicDim(float DimDegree) override
+    {
+        ViewAbstract::SetDynamicDim(DimDegree);
+    }
     void SetDynamicLightUp(float rate, float lightUpDegree) override
     {
         ViewAbstract::SetDynamicLightUp(rate, lightUpDegree);
@@ -1155,6 +1159,11 @@ public:
     void SetBloom(const float value) override
     {
         ViewAbstract::SetBloom(value);
+    }
+
+    void SetDragEventStrictReportingEnabled(bool dragEventStrictReportingEnabled) override
+    {
+        ViewAbstract::SetDragEventStrictReportingEnabled(dragEventStrictReportingEnabled);
     }
 
     static void SetAccessibilityGroup(FrameNode* frameNode, bool accessible);

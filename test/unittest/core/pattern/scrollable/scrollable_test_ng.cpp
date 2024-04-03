@@ -2052,6 +2052,7 @@ HWTEST_F(ScrollableTestNg, InitMouseEvent001, TestSize.Level1)
     mockScroll_->pattern_ = mockPn;
     auto scrollPn = scroll_->GetPattern<PartiallyMockedScrollable>();
     EXPECT_TRUE(scrollPn);
+    scrollPn->scrollBar_ = AceType::MakeRefPtr<ScrollBar>();
     scrollPn->parent_ = mockPn;
     scrollPn->InitScrollBarMouseEvent();
     // /**

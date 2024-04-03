@@ -26,10 +26,10 @@
 extern "C" {
 #endif
 
-#define ARKUI_FULL_API_VERSION 86
+#define ARKUI_FULL_API_VERSION 88
 // When changing ARKUI_BASIC_API_VERSION, ARKUI_FULL_API_VERSION must be
 // increased as well.
-#define ARKUI_NODE_API_VERSION 86
+#define ARKUI_NODE_API_VERSION 88
 
 #define ARKUI_BASIC_API_VERSION 7
 #define ARKUI_EXTENDED_API_VERSION 7
@@ -61,6 +61,7 @@ struct _ArkUICanvas;
 struct _ArkUIPaint;
 struct _ArkUIFont;
 struct _ArkUIXComponentController;
+struct _ArkUINodeAdapter;
 
 typedef _ArkUINode* ArkUINodeHandle;
 typedef _ArkUIVMContext* ArkUIVMContext;
@@ -69,6 +70,7 @@ typedef _ArkUICanvas* ArkUICanvasHandle;
 typedef _ArkUIPaint* ArkUIPaintHandle;
 typedef _ArkUIFont* ArkUIFontHandle;
 typedef _ArkUIXComponentController* ArkUIXComponentControllerHandle;
+typedef _ArkUINodeAdapter* ArkUINodeAdapterHandle;
 
 struct ArkUIRect {
     ArkUI_Float32 x;
@@ -86,172 +88,28 @@ struct ArkUICornerRadius {
 
 typedef struct _ArkUIDialog* ArkUIDialogHandle;
 
-/**
- * ToolType
- */
-enum TouchEventToolType {
-    /**
-     * UNKNOWN
-     */
-    TOOL_TYPE_UNKNOWN = 0,
-
-    /**
-     * Finger
-     */
-    TOOL_TYPE_FINGER = 1,
-
-    /**
-     * Pen
-     *
-     */
-    TOOL_TYPE_PEN = 2,
-};
-
-/**
- * SourceType
- *
- */
-enum ArkUISourceType {
-    SOURCE_TYPE_UNKNOWN = 0,
-    /**
-     * Touchscreen
-     */
-    SOURCE_TYPE_TOUCH_SCREEN = 1,
-
-    /**
-     * Stylus
-     */
-    SOURCE_TYPE_PEN = 2,
-
-    /**
-     * TouchPad
-     */
-    SOURCE_TYPE_TOUCH_PAD = 3
-};
 
 struct ArkUITouchPoint {
-    /**
-     * Pointer identifier
-     */
     ArkUI_Int32 id;
-
-    /**
-     * Time stamp when touch is pressed
-     */
     ArkUI_Int64 pressedTime;
-
-    /**
-     * X coordinate of the touch position on the screen
-     *
-     */
-    ArkUI_Int32 screenX;
-
-    /**
-     * Y coordinate of the touch position on the screen
-     *
-     */
-    ArkUI_Int32 screenY;
-
-    /**
-     * X coordinate of the touch position in the window
-     *
-     */
-    ArkUI_Int32 windowX;
-
-    /**
-     * Y coordinate of the touch position in the window
-     *
-     */
-    ArkUI_Int32 windowY;
-
-    /**
-     * X coordinate of the touch position in the node
-     *
-     */
-    ArkUI_Int32 nodeX;
-
-    /**
-     * Y coordinate of the touch position in the node
-     *
-     */
-    ArkUI_Int32 nodeY;
-
-    /**
-     * Pressure value. The value range is [0.0, 1.0]. The value 0.0 indicates that the pressure is not supported.
-     *
-     */
-    double pressure;
-
-    /**
-     * Width of the contact area when touch is pressed
-     *
-     */
-    ArkUI_Int32 contactAreaWidth;
-
-    /**
-     * Height of the contact area when touch is pressed
-     *
-     */
-    ArkUI_Int32 contactAreaHeight;
-
-    /**
-     * Angle relative to the YZ plane. The value range is [-90, 90]. A positive value indicates a rightward tilt.
-     *
-     */
-    double tiltX;
-
-    /**
-     * Angle relative to the XZ plane. The value range is [-90, 90]. A positive value indicates a downward tilt.
-     */
-    double tiltY;
-
-    /**
-     * Center point X of the tool area
-     */
-    ArkUI_Int32 toolX;
-
-    /**
-     * Center point Y of the tool area
-     *
-     */
-    ArkUI_Int32 toolY;
-
-    /**
-     * Width of the tool area
-     *
-     */
-    ArkUI_Int32 toolWidth;
-
-    /**
-     * Height of the tool area
-     *
-     */
-    ArkUI_Int32 toolHeight;
-
-    /**
-     * X coordinate of the input device
-     *
-     */
-    ArkUI_Int32 rawX;
-
-    /**
-     * Y coordinate of the input device
-     *
-     */
-    ArkUI_Int32 rawY;
-
-    /**
-     * Tool type
-     *
-     */
-    TouchEventToolType toolType;
-};
-
-enum ArkUITouchEventAction {
-    ACTION_DOWN = 0,
-    ACTION_UP,
-    ACTION_MOVE,
-    ACTION_CANCEL,
+    ArkUI_Float32 screenX;
+    ArkUI_Float32 screenY;
+    ArkUI_Float32 windowX;
+    ArkUI_Float32 windowY;
+    ArkUI_Float32 nodeX;
+    ArkUI_Float32 nodeY;
+    ArkUI_Float64 pressure;
+    ArkUI_Float32 contactAreaWidth;
+    ArkUI_Float32 contactAreaHeight;
+    ArkUI_Float64 tiltX;
+    ArkUI_Float64 tiltY;
+    ArkUI_Float32 toolX;
+    ArkUI_Float32 toolY;
+    ArkUI_Float32 toolWidth;
+    ArkUI_Float32 toolHeight;
+    ArkUI_Float32 rawX;
+    ArkUI_Float32 rawY;
+    ArkUI_Int32 toolType;
 };
 
 /**
@@ -273,48 +131,25 @@ typedef enum {
     ARKUI_GESTURE_EVENT_ACTION_CANCEL = 0x08,
 } ArkUIGestureEventActionType;
 
-
-struct ArkUIHistoricalTouchPoint {
-    /**
-     * Touch action
-     */
-    ArkUITouchEventAction action;
-    /** Time stamp of the historical event. */
+struct ArkUIHistoryTouchEvent {
+    ArkUI_Int32 action;
+    ArkUI_Int32 sourceType;
     ArkUI_Int64 timeStamp;
-    /** touch point info of the historical event. */
-    ArkUITouchPoint actionTouch;
-    ArkUISourceType sourceType;
+    ArkUITouchPoint actionTouchPoint;
+    ArkUITouchPoint* touchPointes;
+    ArkUI_Uint32 touchPointSize;
 };
 
 struct ArkUITouchEvent {
-    /**
-     * Touch action
-     *
-     */
-    ArkUITouchEventAction action;
-
+    ArkUI_Int32  action;
     /** Time stamp of the current event. */
     ArkUI_Int64 timeStamp;
-
-    /**
-     * curent action touch point info.
-     */
-    ArkUITouchPoint actionTouch;
-
-    /**
-     * @brief Returns information about all screen touch points when this event occurs.
-     *
-     */
-    ArkUI_Int32 (*getTouches)(ArkUITouchPoint** points);
-
-    /**
-     * @brief Returns the historical point information in this event.
-     * These are the movements that occurred between this event and the previous event.
-     *
-     */
-    ArkUI_Int32 (*getHistoricalPoints)(ArkUIHistoricalTouchPoint** historicalPoints);
-
-    ArkUISourceType sourceType;
+    ArkUITouchPoint actionTouchPoint;
+    ArkUITouchPoint* touchPointes;
+    ArkUI_Uint32 touchPointSize;
+    ArkUIHistoryTouchEvent* historyEvents;
+    ArkUI_Uint32 historySize;
+    ArkUI_Int32 sourceType;
 
     /**
      * @brief Prevents events from bubbling further to the parent node for processing.
@@ -883,6 +718,7 @@ struct ArkUIAPIEventMultiPointer {
 };
 
 struct ArkUIAPIEventTextInput {
+    // used by c-api, should be the first place.
     ArkUI_Int64 nativeStringPtr;
     ArkUI_Int32 subKind; // ArkUIEventSubKind actually
 };
@@ -899,8 +735,9 @@ struct ArkUIAPIEventCallback {
 #define ARKUI_ASYNC_EVENT_ARGS_COUNT 12
 
 struct ArkUINodeAsyncEvent {
-    ArkUI_Int32 subKind; // ArkUIEventSubKind actually
+    // used by c-api, should be the first place.
     ArkUIEventCallbackArg data[ARKUI_ASYNC_EVENT_ARGS_COUNT];
+    ArkUI_Int32 subKind; // ArkUIEventSubKind actually
 };
 
 struct ArkUIAPIEventGestureAsyncEvent {
@@ -1694,6 +1531,10 @@ struct ArkUIListModifier {
     ArkUI_Float32 (*getListSpace)(ArkUINodeHandle node);
     void (*setListSpace)(ArkUINodeHandle node, ArkUI_Float32 space);
     void (*resetListSpace)(ArkUINodeHandle node);
+    ArkUI_Int32 (*setNodeAdapter)(ArkUINodeHandle node, ArkUINodeAdapterHandle handle);
+    void (*resetNodeAdapter)(ArkUINodeHandle node);
+    ArkUINodeAdapterHandle (*getNodeAdapter)(ArkUINodeHandle node);
+    ArkUI_Int32 (*getCachedCount)(ArkUINodeHandle node);
 };
 
 struct ArkUIListItemGroupModifier {
@@ -1754,6 +1595,12 @@ struct ArkUISwiperModifier {
     ArkUI_Int32 (*getSwiperShowIndicator)(ArkUINodeHandle node);
     ArkUI_Int32 (*getSwiperShowDisplayArrow)(ArkUINodeHandle node);
     ArkUI_Int32 (*getSwiperEffectMode)(ArkUINodeHandle node);
+    ArkUI_Int32 (*setNodeAdapter)(ArkUINodeHandle node, ArkUINodeAdapterHandle handle);
+    void (*resetNodeAdapter)(ArkUINodeHandle node);
+    ArkUINodeAdapterHandle (*getNodeAdapter)(ArkUINodeHandle node);
+    void (*setCachedCount)(ArkUINodeHandle node, ArkUI_Int32 cachedCount);
+    void (*resetCachedCount)(ArkUINodeHandle node);
+    ArkUI_Int32 (*getCachedCount)(ArkUINodeHandle node);
 };
 
 struct ArkUISwiperControllerModifier {
@@ -2014,11 +1861,15 @@ struct ArkUIGestureModifier {
     ArkUIGesture* (*createPinchGesture)(ArkUI_Int32 fingers, ArkUI_Float64 distance);
     ArkUIGesture* (*createRotationGesture)(ArkUI_Int32 fingers, ArkUI_Float64 angle);
     ArkUIGesture* (*createSwipeGesture)(ArkUI_Int32 fingers, ArkUI_Int32 directions, ArkUI_Float64 speed);
+    ArkUIGesture* (*createGestureGroup)(ArkUI_Int32 mode);
+    void (*addGestureToGestureGroup)(ArkUIGesture* group, ArkUIGesture* child);
     void (*dispose)(ArkUIGesture* recognizer);
     // gesture event will received in common async event queue.
     void (*registerGestureEvent)(ArkUIGesture* gesture, ArkUI_Uint32 actionTypeMask, void* extraParam);
     void (*addGestureToNode)(ArkUINodeHandle node, ArkUIGesture* gesture, ArkUI_Int32 priorityNum, ArkUI_Int32 mask);
     void (*removeGestureFromNode)(ArkUINodeHandle node, ArkUIGesture* recognizer);
+    void (*removeGestureFromNodeByTag)(ArkUINodeHandle node, ArkUI_CharPtr gestureTag);
+    void (*clearGestures)(ArkUINodeHandle node);
 };
 
 struct ArkUISliderModifier {
@@ -2191,6 +2042,8 @@ struct ArkUITextAreaModifier {
     void (*resetTextAreaLineHeight)(ArkUINodeHandle node);
     void (*setTextAreaFontFeature)(ArkUINodeHandle node, ArkUI_CharPtr value);
     void (*resetTextAreaFontFeature)(ArkUINodeHandle node);
+    void (*setTextAreaWordBreak)(ArkUINodeHandle node, ArkUI_Uint32 wordBreak);
+    void (*resetTextAreaWordBreak)(ArkUINodeHandle node);
 };
 
 struct ArkUITextInputModifier {
@@ -2290,6 +2143,12 @@ struct ArkUITextInputModifier {
     void (*resetTextInputLineHeight)(ArkUINodeHandle node);
     void (*setTextInputFontFeature)(ArkUINodeHandle node, ArkUI_CharPtr value);
     void (*resetTextInputFontFeature)(ArkUINodeHandle node);
+    void (*setTextInputWordBreak)(ArkUINodeHandle node, ArkUI_Uint32 wordBreak);
+    void (*resetTextInputWordBreak)(ArkUINodeHandle node);
+    void (*setTextInputPasswordRules)(ArkUINodeHandle node, ArkUI_CharPtr passwordRules);
+    void (*resetTextInputPasswordRules)(ArkUINodeHandle node);
+    void (*setTextInputEnableAutoFill)(ArkUINodeHandle node, ArkUI_Uint32 enableAutoFill);
+    void (*resetTextInputEnableAutoFill)(ArkUINodeHandle node);
 };
 
 struct ArkUIWebModifier {
@@ -2377,6 +2236,10 @@ struct ArkUIImageSpanModifier {
     void (*resetImageSpanObjectFit)(ArkUINodeHandle node);
     ArkUI_Int32 (*getImageSpanVerticalAlign)(ArkUINodeHandle node);
     ArkUI_Int32 (*getImageSpanObjectFit)(ArkUINodeHandle node);
+    void (*setImageSpanTextBackgroundStyle)(ArkUINodeHandle node, ArkUI_Uint32 color, const ArkUI_Float32* values,
+        const ArkUI_Int32* units, ArkUI_Int32 length);
+    void (*resetImageSpanTextBackgroundStyle)(ArkUINodeHandle node);
+    void (*getImageSpanTextBackgroundStyle)(ArkUINodeHandle node, ArkUITextBackgroundStyleOptions* options);
 };
 
 struct ArkUIMenuModifier {
@@ -2421,6 +2284,12 @@ struct ArkUIWaterFlowModifier {
     ArkUI_Float32 (*getColumnsGap)(ArkUINodeHandle node);
     ArkUI_Float32 (*getRowsGap)(ArkUINodeHandle node);
     void (*getWaterFlowNestedScroll)(ArkUINodeHandle node, ArkUI_Int32* value);
+    ArkUI_Int32 (*setNodeAdapter)(ArkUINodeHandle node, ArkUINodeAdapterHandle handle);
+    void (*resetNodeAdapter)(ArkUINodeHandle node);
+    ArkUINodeAdapterHandle (*getNodeAdapter)(ArkUINodeHandle node);
+    void (*setCachedCount)(ArkUINodeHandle node, ArkUI_Int32 cachedCount);
+    void (*resetCachedCount)(ArkUINodeHandle node);
+    ArkUI_Int32 (*getCachedCount)(ArkUINodeHandle node);
 };
 
 struct ArkUIMenuItemModifier {
@@ -2797,6 +2666,8 @@ struct ArkUITextPickerModifier {
     void (*setTextPickerDivider)(ArkUINodeHandle node, ArkUI_Uint32 color, const ArkUI_Float32* values,
         const ArkUI_Int32* units, ArkUI_Int32 length);
     void (*resetTextPickerDivider)(ArkUINodeHandle node);
+    void (*setTextPickerGradientHeight)(ArkUINodeHandle node, ArkUI_Float32 dVal, ArkUI_Int32 dUnit);
+    void (*resetTextPickerGradientHeight)(ArkUINodeHandle node);
 };
 
 struct ArkUITextTimerModifier {
@@ -2832,6 +2703,8 @@ struct ArkUIMarqueeModifier {
     void (*resetMarqueeFontWeight)(ArkUINodeHandle node);
     void (*setMarqueeFontFamily)(ArkUINodeHandle node, ArkUI_CharPtr fontFamily);
     void (*resetMarqueeFontFamily)(ArkUINodeHandle node);
+    void (*setMarqueeUpdateStrategy)(ArkUINodeHandle node, ArkUI_Uint32 value);
+    void (*resetMarqueeUpdateStrategy)(ArkUINodeHandle node);
 };
 
 struct ArkUIDatePickerModifier {
@@ -3430,11 +3303,11 @@ struct ArkUIBasicAPI {
     ArkUI_CharPtr (*getName)(ArkUINodeHandle node);
     void (*dump)(ArkUINodeHandle node);
 
-    void (*addChild)(ArkUINodeHandle parent, ArkUINodeHandle child);
+    ArkUI_Int32 (*addChild)(ArkUINodeHandle parent, ArkUINodeHandle child);
     void (*removeChild)(ArkUINodeHandle parent, ArkUINodeHandle child);
-    void (*insertChildAfter)(ArkUINodeHandle parent, ArkUINodeHandle child, ArkUINodeHandle sibling);
-    void (*insertChildBefore)(ArkUINodeHandle parent, ArkUINodeHandle child, ArkUINodeHandle sibling);
-    void (*insertChildAt)(ArkUINodeHandle parent, ArkUINodeHandle child, ArkUI_Int32 position);
+    ArkUI_Int32 (*insertChildAfter)(ArkUINodeHandle parent, ArkUINodeHandle child, ArkUINodeHandle sibling);
+    ArkUI_Int32 (*insertChildBefore)(ArkUINodeHandle parent, ArkUINodeHandle child, ArkUINodeHandle sibling);
+    ArkUI_Int32 (*insertChildAt)(ArkUINodeHandle parent, ArkUINodeHandle child, ArkUI_Int32 position);
 
     // Returned pointer is valid only till node is alive.
     ArkUI_CharPtr (*getAttribute)(ArkUINodeHandle node, ArkUI_CharPtr attribute);
@@ -3554,6 +3427,46 @@ struct ArkUIExtendedNodeAPI {
     void (*showCrash)(ArkUI_CharPtr message);
 };
 
+typedef enum {
+    ON_ATTACH_TO_NODE = 1,
+    ON_DETACH_FROM_NODE = 2,
+    ON_GET_NODE_ID = 3,
+    ON_ADD_NODE_TO_ADAPTER = 4,
+    ON_REMOVE_NODE_FROM_ADAPTER = 5,
+} ArkUINodeAdapterEventType;
+
+typedef struct {
+    ArkUI_Uint32 index;
+    ArkUI_Int32 id;
+    ArkUI_Int64 extraParam;
+    ArkUI_Bool idSet;
+    ArkUINodeAdapterEventType type;
+    ArkUINodeHandle handle;
+    ArkUI_Bool nodeSet;
+} ArkUINodeAdapterEvent;
+
+typedef struct {
+    ArkUINodeAdapterHandle (*create)();
+    void (*dispose)(ArkUINodeAdapterHandle handle);
+    ArkUI_Int32 (*setTotalNodeCount)(ArkUINodeAdapterHandle handle, ArkUI_Uint32 size);
+    ArkUI_Uint32 (*getTotalNodeCount)(ArkUINodeAdapterHandle handle);
+    ArkUI_Int32 (*registerEventReceiver)(
+        ArkUINodeAdapterHandle handle, void* userData, void (*receiver)(ArkUINodeAdapterEvent* event));
+    void (*unregisterEventReceiver)(ArkUINodeAdapterHandle handle);
+
+    ArkUI_Int32 (*notifyItemReloaded)(ArkUINodeAdapterHandle handle);
+    ArkUI_Int32 (*notifyItemChanged)(ArkUINodeAdapterHandle handle, ArkUI_Uint32 startPosition, ArkUI_Uint32 itemCount);
+    ArkUI_Int32 (*notifyItemRemoved)(ArkUINodeAdapterHandle handle, ArkUI_Uint32 startPosition, ArkUI_Uint32 itemCount);
+    ArkUI_Int32 (*notifyItemInserted)(
+        ArkUINodeAdapterHandle handle, ArkUI_Uint32 startPosition, ArkUI_Uint32 itemCount);
+    ArkUI_Int32 (*notifyItemMoved)(ArkUINodeAdapterHandle handle, ArkUI_Uint32 from, ArkUI_Uint32 to);
+    ArkUI_Int32 (*getAllItem)(ArkUINodeAdapterHandle handle, ArkUINodeHandle** items, ArkUI_Uint32* size);
+
+    void (*attachHostNode)(ArkUINodeAdapterHandle handle, ArkUINodeHandle host);
+    void (*detachHostNode)(ArkUINodeHandle host);
+    ArkUINodeAdapterHandle (*getNodeAdapter)(ArkUINodeHandle host);
+} ArkUINodeAdapterAPI;
+
 /**
  * An API to control an implementation. When making changes modifying binary
  * layout, i.e. adding new events - increase ARKUI_NODE_API_VERSION above for binary
@@ -3569,6 +3482,7 @@ struct ArkUIFullNodeAPI {
     const ArkUIGraphicsAPI* (*getGraphicsAPI)();
     const ArkUIDialogAPI* (*getDialogAPI)();
     const ArkUIExtendedNodeAPI* (*getExtendedAPI)();
+    const ArkUINodeAdapterAPI* (*getNodeAdapterAPI)();
 };
 
 struct ArkUIAnyAPI {

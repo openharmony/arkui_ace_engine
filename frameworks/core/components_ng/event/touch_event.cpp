@@ -150,6 +150,7 @@ bool TouchEventActuator::TriggerTouchCallBack(const TouchEvent& point)
         }
         historyInfo.SetSourceTool(item.sourceTool);
         event.AddHistoryLocationInfo(std::move(historyInfo));
+        event.AddHistoryPointerEvent(item.pointerEvent);
     }
     if (lastPoint.tiltX.has_value()) {
         event.SetTiltX(lastPoint.tiltX.value());

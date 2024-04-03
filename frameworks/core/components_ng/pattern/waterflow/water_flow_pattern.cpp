@@ -37,7 +37,8 @@ bool WaterFlowPattern::UpdateCurrentOffset(float delta, int32_t source)
     CHECK_NULL_RETURN(host, false);
     auto layoutProperty = host->GetLayoutProperty<WaterFlowLayoutProperty>();
     if (layoutProperty->IsReverse()) {
-        if (source != SCROLL_FROM_ANIMATION_SPRING) {
+        if (source != SCROLL_FROM_ANIMATION_SPRING && source != SCROLL_FROM_ANIMATION_CONTROLLER &&
+            source != SCROLL_FROM_JUMP) {
             delta = -delta;
         }
     }
@@ -457,6 +458,13 @@ void WaterFlowPattern::OnSectionChanged(int32_t start)
 {
     layoutInfo_.InitSegments(sections_->GetSectionInfo(), start);
     layoutInfo_.margins_.clear();
+    MarkDirtyNodeSelf();
+}
+
+void WaterFlowPattern::ResetSections()
+{
+    layoutInfo_.Reset();
+    sections_.Reset();
     MarkDirtyNodeSelf();
 }
 

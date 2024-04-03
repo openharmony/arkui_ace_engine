@@ -124,7 +124,7 @@ public:
 
     bool NeedSoftKeyboard() const override;
 
-    void UpdateSlideOffset() override;
+    void UpdateSlideOffset(bool isNeedReset = false) override;
 
     RefPtr<EventHub> CreateEventHub() override
     {
@@ -422,7 +422,7 @@ public:
         selectOverlayDragging_ = selectOverlayDragging;
     }
     void UpdateLocale();
-    void SetDrawRect(int32_t x, int32_t y, int32_t width, int32_t height);
+    void SetDrawRect(int32_t x, int32_t y, int32_t width, int32_t height, bool isNeedReset);
     void SetSelectPopupMenuShowing(bool showing)
     {
         selectPopupMenuShowing_ = showing;
@@ -575,8 +575,8 @@ private:
     void ResetDragAction();
     void UpdateRelativeOffset();
     void InitSlideUpdateListener();
-    void CalculateHorizontalDrawRect();
-    void CalculateVerticalDrawRect();
+    void CalculateHorizontalDrawRect(bool isNeedReset);
+    void CalculateVerticalDrawRect(bool isNeedReset);
 
     NG::DragDropInfo HandleOnDragStart(const RefPtr<OHOS::Ace::DragEvent>& info);
     void HandleOnDragEnter(const RefPtr<OHOS::Ace::DragEvent>& info);
@@ -685,6 +685,7 @@ private:
     Size drawSize_;
     Size rootLayerChangeSize_;
     Size drawSizeCache_;
+    bool isNeedReDrawRect_ = false;
     bool needUpdateWeb_ = true;
     bool isFocus_ = false;
     VkState isVirtualKeyBoardShow_ { VkState::VK_NONE };

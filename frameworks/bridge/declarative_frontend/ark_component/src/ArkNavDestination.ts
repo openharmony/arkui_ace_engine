@@ -16,8 +16,8 @@
 /// <reference path='./import.ts' />
 
 class ArkNavDestinationComponent extends ArkComponent implements NavDestinationAttribute {
-  constructor(nativePtr: KNode) {
-    super(nativePtr);
+  constructor(nativePtr: KNode, classType?: ModifierType) {
+    super(nativePtr, classType);
   }
   title(value: any): this {
     throw new Error('Method not implemented.');
@@ -52,12 +52,10 @@ class HideTitleBarModifier extends ModifierWithKey<boolean> {
   }
 }
 //@ts-ignore
-globalThis.NavDestination.attributeModifier = function (modifier) {
-  const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
-  let nativeNode = getUINativeModule().getFrameNodeById(elmtId);
-  let component = this.createOrGetNode(elmtId, () => {
-    return new ArkNavDestinationComponent(nativeNode);
+globalThis.NavDestination.attributeModifier = function (modifier: ArkComponent): void {
+  attributeModifierFunc.call(this, modifier, (nativePtr: KNode) => {
+    return new ArkNavDestinationComponent(nativePtr);
+  }, (nativePtr: KNode, classType: ModifierType, modifierJS: ModifierJS) => {
+    return new modifierJS.NavDestinationModifier(nativePtr, classType);
   });
-  applyUIAttributes(modifier, nativeNode, component);
-  component.applyModifierPatch();
 };

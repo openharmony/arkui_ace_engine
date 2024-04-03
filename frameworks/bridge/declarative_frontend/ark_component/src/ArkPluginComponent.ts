@@ -15,8 +15,8 @@
 
 /// <reference path='./import.ts' />
 class ArkPluginComponent extends ArkComponent implements PluginComponentAttribute {
-  constructor(nativePtr: KNode) {
-    super(nativePtr);
+  constructor(nativePtr: KNode, classType?: ModifierType) {
+    super(nativePtr, classType);
   }
   onComplete(callback: () => void): this {
     throw new Error('Method not implemented.');
@@ -103,12 +103,10 @@ class PluginSizeModifier extends ModifierWithKey<SizeOptions> {
 }
 
 // @ts-ignore
-globalThis.PluginComponent.attributeModifier = function (modifier) {
-  const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
-  let nativeNode = getUINativeModule().getFrameNodeById(elmtId);
-  let component = this.createOrGetNode(elmtId, () => {
-    return new ArkPluginComponent(nativeNode);
+globalThis.PluginComponent.attributeModifier = function (modifier: ArkComponent): void {
+  attributeModifierFunc.call(this, modifier, (nativePtr: KNode) => {
+    return new ArkPluginComponent(nativePtr);
+  }, (nativePtr: KNode, classType: ModifierType, modifierJS: ModifierJS) => {
+    return new modifierJS.PluginComponentModifier(nativePtr, classType);
   });
-  applyUIAttributes(modifier, nativeNode, component);
-  component.applyModifierPatch();
 };

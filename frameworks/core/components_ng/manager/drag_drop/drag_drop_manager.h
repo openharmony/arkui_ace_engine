@@ -27,6 +27,9 @@
 #include "core/components_ng/manager/drag_drop/drag_drop_proxy.h"
 #include "core/gestures/velocity_tracker.h"
 
+namespace OHOS::Ace {
+class UnifiedData;
+}
 namespace OHOS::Ace::NG {
 enum class DragDropMgrState : int32_t {
     IDLE,
@@ -73,14 +76,31 @@ public:
         textFieldDragFrameNodes_.try_emplace(id, dragFrameNode);
     }
 
+    void SetEventStrictReportingEnabled(bool dragEventStrictReportingEnabled)
+    {
+        eventStrictReportingEnabled_ = dragEventStrictReportingEnabled;
+    }
+
+    bool IsEventStrictReportingEnabled()
+    {
+        return eventStrictReportingEnabled_;
+    }
+
     void UpdateDragWindowPosition(int32_t globalX, int32_t globalY);
     void OnDragStart(const Point& point);
     void OnDragStart(const Point& point, const RefPtr<FrameNode>& frameNode);
     void OnDragMove(const PointerEvent& pointerEvent, const std::string& extraInfo);
     void OnDragEnd(const PointerEvent& pointerEvent, const std::string& extraInfo);
-    void OnDragDrop(const RefPtr<FrameNode>& dragFrameNode, const Point& point);
+    void DoDropAction(const RefPtr<FrameNode>& dragFrameNode, const Point& point,
+        const RefPtr<UnifiedData>& unifiedData, const std::string& udKey);
+    void RequestDragSummaryInfoAndPrivilege();
+    RefPtr<UnifiedData> RequestUDMFDataWithUDKey(const std::string& udKey);
+    void TryGetDataBackGround(
+        const RefPtr<FrameNode>& dragFrameNode, const Point& point, const std::string& udKey, int32_t count = 0);
+    void OnDragDrop(RefPtr<OHOS::Ace::DragEvent>& event, const RefPtr<FrameNode>& dragFrameNode, const Point& point);
     void ResetDragDropStatus(const Point& point, const DragDropRet& dragDropRet, int32_t windowId);
-    bool CheckRemoteData(const RefPtr<FrameNode>& dragFrameNode, const PointerEvent& pointerEvent);
+    bool CheckRemoteData(
+        const RefPtr<FrameNode>& dragFrameNode, const PointerEvent& pointerEvent, const std::string& udKey);
     void OnDragMoveOut(const PointerEvent& pointerEvent);
     void OnTextDragEnd(float globalX, float globalY, const std::string& extraInfo);
     void onDragCancel();
@@ -117,6 +137,8 @@ public:
         RefPtr<NotifyDragEvent>& notifyEvent, const Point& point, const DragEventType dragEventType);
     bool CheckDragDropProxy(int64_t id) const;
     void FireOnEditableTextComponent(const RefPtr<FrameNode>& frameNode, DragEventType type);
+    void FireOnDragLeave(const RefPtr<FrameNode>& preTargetFrameNode_, const Point& point,
+        const std::string& extraInfo);
 
     bool IsWindowConsumed() const
     {
@@ -262,6 +284,7 @@ public:
         double maxWidth { 0.0 };
         double scale { -1.0 };
         RefPtr<FrameNode> imageNode { nullptr };
+        RefPtr<FrameNode> textNode { nullptr };
     } DragPreviewInfo;
     bool IsNeedScaleDragPreview();
     void DoDragMoveAnimate(const PointerEvent& pointerEvent);
@@ -328,6 +351,15 @@ public:
         hasGatherNode_ = hasGatherNode;
     }
 
+    void SetIsShowBadgeAnimation(bool isShowBadgeAnimation)
+    {
+        isShowBadgeAnimation_ = isShowBadgeAnimation;
+    }
+
+    bool IsShowBadgeAnimation()
+    {
+        return isShowBadgeAnimation_;
+    }
 
 private:
     double CalcDragPreviewDistanceWithPoint(
@@ -399,6 +431,8 @@ private:
     OffsetF pixelMapOffset_ {0.0f, 0.0f};
     std::vector<RefPtr<PixelMap>> gatherPixelMaps_;
     bool hasGatherNode_ = false;
+    bool isShowBadgeAnimation_ = true;
+    bool eventStrictReportingEnabled_ = false;
 
     ACE_DISALLOW_COPY_AND_MOVE(DragDropManager);
 };

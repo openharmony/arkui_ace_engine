@@ -558,6 +558,10 @@ ACE_EXPORT extern const char UI_EXTENSION_COMPONENT_TAG[];
 ACE_EXPORT extern const char UI_EXTENSION_SURFACE_TAG[];
 ACE_EXPORT extern const char UI_EXTENSION_COMPONENT_ETS_TAG[];
 
+// embedded_component
+ACE_EXPORT extern const char EMBEDDED_COMPONENT_TAG[];
+ACE_EXPORT extern const char EMBEDDED_COMPONENT_ETS_TAG[];
+
 // LocationButton
 ACE_EXPORT extern const char LOCATION_BUTTON_COMPONENT_TAG[];
 ACE_EXPORT extern const char LOCATION_BUTTON_ETS_TAG[];

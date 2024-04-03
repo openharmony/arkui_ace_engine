@@ -16,7 +16,7 @@
 #include "core/components_ng/pattern/xcomponent/xcomponent_pattern.h"
 
 #include "interfaces/native/native_event.h"
-#include "interfaces/native/ui_input_event.h"
+#include "interfaces/native/event/ui_input_event_impl.h"
 
 #include "base/geometry/ng/size_t.h"
 #include "base/log/log_wrapper.h"
@@ -24,6 +24,7 @@
 #include "base/ressched/ressched_report.h"
 #include "base/utils/system_properties.h"
 #include "base/utils/utils.h"
+#include "core/common/ai/image_analyzer_manager.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components_ng/event/gesture_event_hub.h"
 #include "core/components_ng/pattern/xcomponent/xcomponent_controller_ng.h"
@@ -406,6 +407,10 @@ bool XComponentPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& di
         return false;
     }
 
+    if (IsSupportImageAnalyzerFeature()) {
+        UpdateAnalyzerUIConfig(dirty->GetGeometryNode());
+    }
+
     if (!hasXComponentInit_) {
         initSize_ = drawSize_;
         globalPosition_ = geometryNode->GetContentOffset() + geometryNode->GetFrameOffset();
@@ -709,11 +714,10 @@ void XComponentPattern::InitOnTouchIntercept(const RefPtr<GestureEventHub>& gest
         [pattern = Claim(this)](
             const TouchEventInfo& touchEvent) -> HitTestMode {
             auto event = touchEvent.ConvertToTouchEvent();
-            auto* uiEvent = static_cast<ArkUI_UIInputEvent*>(&event);
-            CHECK_NULL_RETURN(uiEvent, NG::HitTestMode::HTMDEFAULT);
+            ArkUI_UIInputEvent uiEvent { ARKUI_UIINPUTEVENT_TYPE_TOUCH, TOUCH_EVENT_ID, &event };
             const auto onTouchInterceptCallback = pattern->nativeXComponentImpl_->GetOnTouchInterceptCallback();
             CHECK_NULL_RETURN(onTouchInterceptCallback, NG::HitTestMode::HTMDEFAULT);
-            return static_cast<NG::HitTestMode>(onTouchInterceptCallback(pattern->nativeXComponent_.get(), uiEvent));
+            return static_cast<NG::HitTestMode>(onTouchInterceptCallback(pattern->nativeXComponent_.get(), &uiEvent));
         });
 }
 
@@ -876,8 +880,8 @@ void XComponentPattern::NativeXComponentDispatchAxisEvent(AxisEvent* axisEvent)
     CHECK_NULL_VOID(nativeXComponentImpl_);
     const auto callback = nativeXComponentImpl_->GetUIAxisEventCallback();
     CHECK_NULL_VOID(callback);
-    auto* uiEvent = static_cast<ArkUI_UIInputEvent*>(axisEvent);
-    callback(nativeXComponent_.get(), uiEvent, ArkUI_UIInputEvent_Type::ARKUI_UIINPUTEVENT_TYPE_AXIS);
+    ArkUI_UIInputEvent uiEvent { ARKUI_UIINPUTEVENT_TYPE_AXIS, AXIS_EVENT_ID, axisEvent };
+    callback(nativeXComponent_.get(), &uiEvent, ArkUI_UIInputEvent_Type::ARKUI_UIINPUTEVENT_TYPE_AXIS);
 }
 
 void XComponentPattern::SetTouchPoint(
@@ -987,8 +991,10 @@ void XComponentPattern::SetHandlingRenderContextForSurface(const RefPtr<RenderCo
     auto renderContext = host->GetRenderContext();
     renderContext->ClearChildren();
     renderContext->AddChild(handlingSurfaceRenderContext_, 0);
+    auto paintRect = AdjustPaintRect(
+        localPosition_.GetX(), localPosition_.GetY(), drawSize_.Width(), drawSize_.Height(), true);
     handlingSurfaceRenderContext_->SetBounds(
-        localPosition_.GetX(), localPosition_.GetY(), drawSize_.Width(), drawSize_.Height());
+        paintRect.GetX(), paintRect.GetY(), paintRect.Width(), paintRect.Height());
 }
 
 OffsetF XComponentPattern::GetOffsetRelativeToWindow()
@@ -1210,8 +1216,10 @@ void XComponentPattern::UpdateSurfaceBounds(bool needForceRender)
         surfaceSize_ = drawSize_;
     }
     if (handlingSurfaceRenderContext_) {
+        auto paintRect = AdjustPaintRect(
+            localPosition_.GetX(), localPosition_.GetY(), surfaceSize_.Width(), surfaceSize_.Height(), true);
         handlingSurfaceRenderContext_->SetBounds(
-            localPosition_.GetX(), localPosition_.GetY(), surfaceSize_.Width(), surfaceSize_.Height());
+            paintRect.GetX(), paintRect.GetY(), paintRect.Width(), paintRect.Height());
 #ifdef ENABLE_ROSEN_BACKEND
         auto* transactionProxy = Rosen::RSTransactionProxy::GetInstance();
         if (transactionProxy != nullptr) {
@@ -1272,5 +1280,183 @@ void XComponentPattern::OnWindowShow()
     }
     NativeSurfaceShow();
     hasReleasedSurface_ = false;
+}
+
+void XComponentPattern::EnableAnalyzer(bool enable)
+{
+    isEnableAnalyzer_ = enable;
+    if (!isEnableAnalyzer_) {
+        DestroyAnalyzerOverlay();
+        return;
+    }
+
+    if (imageAnalyzerManager_) {
+        return;
+    }
+
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    imageAnalyzerManager_ = std::make_shared<ImageAnalyzerManager>(host, ImageAnalyzerHolder::CANVAS);
+    CHECK_NULL_VOID(imageAnalyzerManager_);
+}
+
+void XComponentPattern::StartImageAnalyzer(void* config, onAnalyzedCallback& onAnalyzed)
+{
+    if (!IsSupportImageAnalyzerFeature()) {
+        CHECK_NULL_VOID(onAnalyzed);
+        (onAnalyzed.value())(ImageAnalyzerState::UNSUPPORTED);
+        return;
+    }
+
+    CHECK_NULL_VOID(imageAnalyzerManager_);
+    imageAnalyzerManager_->SetImageAnalyzerConfig(config);
+    imageAnalyzerManager_->SetImageAnalyzerCallback(onAnalyzed);
+
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto context = host->GetContext();
+    CHECK_NULL_VOID(context);
+    auto uiTaskExecutor = SingleTaskExecutor::Make(context->GetTaskExecutor(), TaskExecutor::TaskType::UI);
+    uiTaskExecutor.PostTask([weak = WeakClaim(this)] {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        pattern->CreateAnalyzerOverlay();
+    });
+}
+
+void XComponentPattern::StopImageAnalyzer()
+{
+    DestroyAnalyzerOverlay();
+}
+
+bool XComponentPattern::IsSupportImageAnalyzerFeature()
+{
+    return isEnableAnalyzer_ && imageAnalyzerManager_ && imageAnalyzerManager_->IsSupportImageAnalyzerFeature();
+}
+
+void XComponentPattern::CreateAnalyzerOverlay()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto context = host->GetRenderContext();
+    CHECK_NULL_VOID(context);
+    auto pixelMap = context->GetThumbnailPixelMap();
+    CHECK_NULL_VOID(pixelMap);
+    if (IsSupportImageAnalyzerFeature()) {
+        CHECK_NULL_VOID(imageAnalyzerManager_);
+        imageAnalyzerManager_->CreateAnalyzerOverlay(pixelMap);
+    }
+}
+
+void XComponentPattern::UpdateAnalyzerOverlay()
+{
+    auto context = GetHost()->GetRenderContext();
+    CHECK_NULL_VOID(context);
+    auto pixelMap = context->GetThumbnailPixelMap();
+    CHECK_NULL_VOID(pixelMap);
+    CHECK_NULL_VOID(imageAnalyzerManager_);
+    imageAnalyzerManager_->UpdateAnalyzerOverlay(pixelMap);
+}
+
+void XComponentPattern::UpdateAnalyzerUIConfig(const RefPtr<NG::GeometryNode>& geometryNode)
+{
+    if (IsSupportImageAnalyzerFeature()) {
+        CHECK_NULL_VOID(imageAnalyzerManager_);
+        imageAnalyzerManager_->UpdateAnalyzerUIConfig(geometryNode);
+    }
+}
+
+void XComponentPattern::DestroyAnalyzerOverlay()
+{
+    CHECK_NULL_VOID(imageAnalyzerManager_);
+    imageAnalyzerManager_->DestroyAnalyzerOverlay();
+}
+
+void XComponentPattern::ReleaseImageAnalyzer()
+{
+    CHECK_NULL_VOID(imageAnalyzerManager_);
+    imageAnalyzerManager_->ReleaseImageAnalyzer();
+}
+
+RectF XComponentPattern::AdjustPaintRect(float positionX, float positionY, float width, float height, bool isRound)
+{
+    RectF rect;
+    float relativeLeft = positionX;
+    float relativeTop = positionY;
+    float nodeWidth = width;
+    float nodeHeight = height;
+    float absoluteRight = relativeLeft + nodeWidth;
+    float absoluteBottom = relativeTop + nodeHeight;
+    float roundToPixelErrorX = 0;
+    float roundToPixelErrorY = 0;
+
+    float nodeLeftI = RoundValueToPixelGrid(relativeLeft, isRound, false, false);
+    float nodeTopI = RoundValueToPixelGrid(relativeTop, isRound, false, false);
+    roundToPixelErrorX += nodeLeftI -relativeLeft;
+    roundToPixelErrorY += nodeTopI -relativeTop;
+    rect.SetLeft(nodeLeftI);
+    rect.SetTop(nodeTopI);
+
+    float nodeWidthI = RoundValueToPixelGrid(absoluteRight, isRound, false, false) - nodeLeftI;
+    float nodeWidthTemp = RoundValueToPixelGrid(nodeWidth, isRound, false, false);
+    roundToPixelErrorX += nodeWidthI - nodeWidth;
+    if (roundToPixelErrorX > 0.5f) {
+        nodeWidthI -= 1.0f;
+        roundToPixelErrorX -= 1.0f;
+    }
+    if (roundToPixelErrorX < -0.5f) {
+        nodeWidthI += 1.0f;
+        roundToPixelErrorX += 1.0f;
+    }
+    if (nodeWidthI < nodeWidthTemp) {
+        roundToPixelErrorX += nodeWidthTemp - nodeWidthI;
+        nodeWidthI = nodeWidthTemp;
+    }
+
+    float nodeHeightI = RoundValueToPixelGrid(absoluteBottom, isRound, false, false) - nodeTopI;
+    float nodeHeightTemp = RoundValueToPixelGrid(nodeHeight, isRound, false, false);
+    roundToPixelErrorY += nodeHeightI - nodeHeight;
+    if (roundToPixelErrorY > 0.5f) {
+        nodeHeightI -= 1.0f;
+        roundToPixelErrorY -= 1.0f;
+    }
+    if (roundToPixelErrorY < -0.5f) {
+        nodeHeightI += 1.0f;
+        roundToPixelErrorY += 1.0f;
+    }
+    if (nodeHeightI < nodeHeightTemp) {
+        roundToPixelErrorY += nodeHeightTemp - nodeHeightI;
+        nodeHeightI = nodeHeightTemp;
+    }
+    if (roundToPixelErrorX >= 1.0f || roundToPixelErrorX <= -1.0f) {
+        LOGI("roundToPixelErrorX is %{public}f", roundToPixelErrorX);
+    }
+    if (roundToPixelErrorY >= 1.0f || roundToPixelErrorY <= -1.0f) {
+        LOGI("roundToPixelErrorY is %{public}f", roundToPixelErrorY);
+    }
+
+    rect.SetWidth(nodeWidthI);
+    rect.SetHeight(nodeHeightI);
+    return rect;
+}
+
+float XComponentPattern::RoundValueToPixelGrid(float value, bool isRound, bool forceCeil, bool forceFloor)
+{
+    float fractials = fmod(value, 1.0f);
+    if (fractials < 0.0f) {
+        ++fractials;
+    }
+    if (forceCeil) {
+        return (value - fractials + 1.0f);
+    } else if (forceFloor) {
+        return (value - fractials);
+    } else if (isRound) {
+        if (NearEqual(fractials, 1.0f) || GreatOrEqual(fractials, 0.50f)) {
+            return (value - fractials + 1.0f);
+        } else {
+            return (value - fractials);
+        }
+    }
+    return value;
 }
 } // namespace OHOS::Ace::NG

@@ -219,6 +219,8 @@ void PipelineContext::FlushPipelineWithoutAnimation() {}
 
 void PipelineContext::FlushFocus() {}
 
+void PipelineContext::FlushOnceVsyncTask() {}
+
 void PipelineContext::DispatchDisplaySync(uint64_t nanoTimestamp) {}
 
 void PipelineContext::FlushAnimation(uint64_t nanoTimestamp) {}
@@ -246,6 +248,11 @@ void PipelineContext::OnLayoutCompleted(const std::string& componentId) {}
 bool PipelineContext::CheckPageFocus()
 {
     return true;
+}
+
+bool PipelineContext::CheckOverlayFocus()
+{
+    return false;
 }
 
 void PipelineContext::OnDrawCompleted(const std::string& componentId) {}
@@ -393,7 +400,7 @@ void PipelineContext::RemoveFormVisibleChangeNode(int32_t nodeId) {}
 void PipelineContext::HandleVisibleAreaChangeEvent() {}
 void PipelineContext::HandleFormVisibleChangeEvent(bool isVisible) {}
 
-bool PipelineContext::ChangeMouseStyle(int32_t nodeId, MouseFormat format, int32_t windowId)
+bool PipelineContext::ChangeMouseStyle(int32_t nodeId, MouseFormat format, int32_t windowId, bool isBypass)
 {
     return true;
 }

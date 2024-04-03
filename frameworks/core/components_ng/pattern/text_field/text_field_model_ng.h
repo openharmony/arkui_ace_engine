@@ -76,6 +76,7 @@ public:
     void SetShowError(const std::string& errorText, bool visible) override;
     void SetBarState(OHOS::Ace::DisplayMode value) override;
     void SetMaxViewLines(uint32_t value) override;
+    void SetNormalMaxViewLines(uint32_t value) override;
 
     void SetShowUnderline(bool showUnderLine) override;
     void SetNormalUnderlineColor(const Color& normalColor) override;
@@ -114,11 +115,14 @@ public:
         const std::optional<std::string>& value, bool isTextArea);
     static void SetInputStyle(FrameNode* frameNode, InputStyle value);
     static void SetSelectionMenuHidden(FrameNode* frameNode, bool contextMenuHidden);
+    static void SetPasswordRules(FrameNode* frameNode, const std::string& passwordRules);
+    static void SetEnableAutoFill(FrameNode* frameNode, bool enableAutoFill);
     static void RequestKeyboardOnFocus(FrameNode* frameNode, bool needToRequest);
     static void SetBarState(FrameNode* frameNode, OHOS::Ace::DisplayMode value);
     static void SetPasswordIcon(FrameNode* frameNode, const PasswordIcon& passwordIcon);
     static void SetSelectedBackgroundColor(FrameNode* frameNode, const Color& value);
     static void SetMaxViewLines(FrameNode* frameNode, uint32_t value);
+    static void SetNormalMaxViewLines(FrameNode* frameNode, uint32_t value);
     static void SetType(FrameNode* frameNode, TextInputType value);
     static void SetContentType(const FrameNode* frameNode, const TextContentType& value);
     static void SetCopyOption(FrameNode* frameNode, CopyOptions copyOption);
@@ -190,6 +194,7 @@ public:
     static void SetTextSelection(FrameNode* frameNode, int32_t start, int32_t end);
     static int32_t GetTextSelectionIndex(FrameNode* frameNode, bool isEnd);
     static void SetFontFeature(FrameNode* frameNode, const FONT_FEATURES_MAP& value);
+    static void SetWordBreak(FrameNode* frameNode, Ace::WordBreak value);
 
 private:
     void AddDragFrameNodeToManager() const;

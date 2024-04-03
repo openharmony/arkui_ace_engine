@@ -16,10 +16,11 @@
 #include "core/components_ng/pattern/menu/preview/menu_preview_pattern.h"
 
 #include "core/animation/animation_pub.h"
+#include "core/components_ng/manager/drag_drop/utils/drag_animation_helper.h"
 #include "core/components_ng/pattern/menu/menu_pattern.h"
 #include "core/components_ng/pattern/menu/menu_theme.h"
 #include "core/components_ng/pattern/menu/wrapper/menu_wrapper_pattern.h"
-#include "core/components_ng/manager/drag_drop/utils/drag_animation_helper.h"
+#include "core/components_ng/pattern/text/text_pattern.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -70,16 +71,27 @@ void ShowScaleAnimation(
         scaleOption.GetOnFinishEvent());
 }
 
-void ShowGatherAnimation(const RefPtr<FrameNode>& imageNode)
+void ShowGatherAnimation(const RefPtr<FrameNode>& imageNode, const RefPtr<FrameNode>& menuNode)
 {
     auto mainPipeline = PipelineContext::GetMainPipelineContext();
     CHECK_NULL_VOID(mainPipeline);
     auto manager = mainPipeline->GetOverlayManager();
     CHECK_NULL_VOID(manager);
-    mainPipeline->AddAfterRenderTask([imageNode, manager]() {
+    auto gatherNode = manager->GetGatherNode();
+    CHECK_NULL_VOID(gatherNode);
+    auto menuWrapperPattern = menuNode->GetPattern<MenuWrapperPattern>();
+    CHECK_NULL_VOID(menuWrapperPattern);
+    auto textNode = menuWrapperPattern->GetBadgeNode();
+    CHECK_NULL_VOID(textNode);
+    auto menuPattern = GetMenuPattern(menuNode);
+    CHECK_NULL_VOID(menuPattern);
+    mainPipeline->AddAfterRenderTask([imageNode, manager, textNode, menuPattern]() {
         DragAnimationHelper::PlayGatherAnimation(imageNode, manager);
+        DragAnimationHelper::CalcBadgeTextPosition(menuPattern, manager, imageNode, textNode);
+        DragAnimationHelper::ShowBadgeAnimation(textNode);
     });
 }
+
 } // namespace
 void MenuPreviewPattern::OnModifyDone()
 {
@@ -136,7 +148,7 @@ bool MenuPreviewPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& d
         auto menuWrapper = GetMenuWrapper();
         auto menuPattern = GetMenuPattern(menuWrapper);
         ShowScaleAnimation(context, menuTheme, menuPattern);
-        ShowGatherAnimation(host);
+        ShowGatherAnimation(host, menuWrapper);
     }
     isFirstShow_ = false;
     return false;

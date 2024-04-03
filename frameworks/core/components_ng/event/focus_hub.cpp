@@ -534,7 +534,8 @@ bool FocusHub::OnKeyPreIme(KeyEventInfo& info, const KeyEvent& keyEvent)
             eventManager->SetIsKeyConsumed(retPreIme);
         }
         return info.IsStopPropagation();
-    } else if (GetFrameName() == V2::UI_EXTENSION_COMPONENT_ETS_TAG) {
+    } else if (GetFrameName() == V2::UI_EXTENSION_COMPONENT_ETS_TAG ||
+               GetFrameName() == V2::EMBEDDED_COMPONENT_ETS_TAG) {
         return ProcessOnKeyEventInternal(keyEvent);
     } else {
         return false;
@@ -560,7 +561,7 @@ bool FocusHub::OnKeyEventNode(const KeyEvent& keyEvent)
 
     bool isBypassInner = keyEvent.IsKey({ KeyCode::KEY_TAB }) && pipeline && pipeline->IsTabJustTriggerOnKeyEvent();
     auto retInternal = false;
-    if (GetFrameNode() && GetFrameNode()->GetTag() == V2::UI_EXTENSION_COMPONENT_TAG) {
+    if (GetFrameName() == V2::UI_EXTENSION_COMPONENT_ETS_TAG || GetFrameName() == V2::EMBEDDED_COMPONENT_ETS_TAG) {
         isBypassInner = false;
     }
     if (!isBypassInner && !onKeyEventsInternal_.empty()) {

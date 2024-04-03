@@ -228,12 +228,22 @@ void WrapLayoutAlgorithm::PerformLayoutInitialize(const RefPtr<LayoutProperty>& 
         }
         return;
     }
-    if (isHorizontal_) {
-        mainLengthLimit_ = constraint->maxSize.Width();
-        crossLengthLimit_ = constraint->maxSize.Height();
+    if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
+        if (isHorizontal_) {
+            mainLengthLimit_ = constraint->percentReference.Width();
+            crossLengthLimit_ = constraint->percentReference.Height();
+        } else {
+            mainLengthLimit_ = constraint->percentReference.Height();
+            crossLengthLimit_ = constraint->percentReference.Width();
+        }
     } else {
-        mainLengthLimit_ = constraint->maxSize.Height();
-        crossLengthLimit_ = constraint->maxSize.Width();
+        if (isHorizontal_) {
+            mainLengthLimit_ = constraint->maxSize.Width();
+            crossLengthLimit_ = constraint->maxSize.Height();
+        } else {
+            mainLengthLimit_ = constraint->maxSize.Height();
+            crossLengthLimit_ = constraint->maxSize.Width();
+        }
     }
 }
 

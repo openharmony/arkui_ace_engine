@@ -71,18 +71,17 @@ public:
         return ptr.unsafeRawPtr_;
     }
 
-    int32_t IncRefCount()
+    void IncRefCount()
     {
-        return refCounter_->IncStrongRef();
+        refCounter_->IncStrongRef();
     }
-    int32_t DecRefCount()
+    void DecRefCount()
     {
         int32_t refCount = refCounter_->DecStrongRef();
         if (refCount == 0 && MaybeRelease()) {
             // Release this instance, while its strong reference have reduced to zero.
             delete this;
         }
-        return refCount;
     }
 
     int32_t RefCount() const
@@ -364,7 +363,7 @@ public:
     RefPtr<T> Upgrade() const
     {
         // A 'WeakPtr' could upgrade to 'RefPtr' if this instance is still alive.
-        return refCounter_ != nullptr && refCounter_->TryIncStrongRef() > 0 ? RefPtr<T>(unsafeRawPtr_, false) : nullptr;
+        return refCounter_ != nullptr && refCounter_->TryIncStrongRef() ? RefPtr<T>(unsafeRawPtr_, false) : nullptr;
     }
     bool Invalid() const
     {

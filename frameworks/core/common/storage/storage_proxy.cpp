@@ -38,10 +38,10 @@ void StorageProxy::SetDistributedDelegate(std::unique_ptr<StorageInterface>&& de
     distributedDelegate_ = std::move(delegate);
 }
 
-RefPtr<Storage> StorageProxy::GetStorage(const RefPtr<TaskExecutor>& taskExecutor) const
+RefPtr<Storage> StorageProxy::GetStorage() const
 {
     CHECK_NULL_RETURN(delegate_, nullptr);
-    return delegate_->GetStorage(taskExecutor);
+    return delegate_->GetStorage();
 }
 
 RefPtr<Storage> StorageProxy::GetStorage(const std::string& sessionId,

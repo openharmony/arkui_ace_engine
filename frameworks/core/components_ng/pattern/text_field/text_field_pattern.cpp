@@ -92,7 +92,6 @@ const BorderRadiusProperty ZERO_BORDER_RADIUS_PROPERTY(0.0_vp);
 // need to be moved to TextFieldTheme
 constexpr Dimension BORDER_DEFAULT_WIDTH = 0.0_vp;
 constexpr Dimension TYPING_UNDERLINE_WIDTH = 2.0_px;
-constexpr Dimension ERROR_BORDER_WIDTH = 1.0_vp;
 constexpr Dimension OVER_COUNT_BORDER_WIDTH = 1.0_vp;
 constexpr Dimension INLINE_BORDER_WIDTH = 2.0_vp;
 constexpr Dimension ERROR_UNDERLINE_WIDTH = 2.0_px;
@@ -473,6 +472,7 @@ bool TextFieldPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dir
 void TextFieldPattern::ProcessOverlayAfterLayout(bool isGlobalAreaChanged)
 {
     if (processOverlayDelayTask_) {
+        CHECK_NULL_VOID(HasFocus());
         processOverlayDelayTask_();
         processOverlayDelayTask_ = nullptr;
         return;
@@ -1181,11 +1181,11 @@ void TextFieldPattern::HandleOnCopy(bool isUsingExternalKeyboard)
         clipboard_->SetData(value, layoutProperty->GetCopyOptionsValue(CopyOptions::Distributed));
     }
 
-    if (!IsUsingMouse() && !isUsingExternalKeyboard) {
-        selectController_->MoveCaretToContentRect(selectController_->GetSecondHandleIndex(), TextAffinity::UPSTREAM);
-        StartTwinkling();
+    if (!isUsingExternalKeyboard) {
+        selectOverlay_->HideMenu();
+    } else {
+        CloseSelectOverlay(true);
     }
-    CloseSelectOverlay(true);
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto eventHub = host->GetEventHub<TextFieldEventHub>();
@@ -1741,12 +1741,13 @@ void TextFieldPattern::InitDragDropCallBack()
             CHECK_NULL_VOID(paintProperty);
             auto newDragValue =
                 pattern->contentController_->GetSelectedValue(pattern->dragTextStart_, pattern->dragTextEnd_);
+            auto focusHub = pattern->GetFocusHub();
+            CHECK_NULL_VOID(focusHub);
             if (event != nullptr && event->GetResult() != DragRet::DRAG_SUCCESS &&
                 newDragValue == pattern->dragValue_ &&
-                paintProperty->GetInputStyleValue(InputStyle::DEFAULT) != InputStyle::INLINE) {
+                paintProperty->GetInputStyleValue(InputStyle::DEFAULT) != InputStyle::INLINE &&
+                focusHub->IsFocusable()) {
                 pattern->ShowSelectAfterDragEvent();
-                auto focusHub = pattern->GetFocusHub();
-                CHECK_NULL_VOID(focusHub);
                 focusHub->RequestFocusImmediately();
             }
             host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
@@ -2360,6 +2361,20 @@ void TextFieldPattern::InitBackGroundColorAndBorderRadius()
         BorderRadiusProperty borderRadius { radius.GetX(), radius.GetY(), radius.GetY(), radius.GetX() };
         renderContext->UpdateBorderRadius(borderRadius);
     }
+
+    if (!renderContext->HasBorderWidth()) {
+        auto layoutProperty = host->GetLayoutProperty<TextFieldLayoutProperty>();
+        BorderWidthProperty borderWidth;
+        borderWidth.SetBorderWidth(textFieldTheme->GetTextInputWidth());
+        layoutProperty->UpdateBorderWidth(borderWidth);
+        renderContext->UpdateBorderWidth(borderWidth);
+    }
+
+    if (!renderContext->HasBorderColor()) {
+        BorderColorProperty borderColor;
+        borderColor.SetColor(textFieldTheme->GetTextInputColor());
+        renderContext->UpdateBorderColor(borderColor);
+    }
 }
 
 void TextFieldPattern::OnAfterModifyDone()
@@ -2369,9 +2384,12 @@ void TextFieldPattern::OnAfterModifyDone()
     auto inspectorId = host->GetInspectorId().value_or("");
     if (!inspectorId.empty()) {
         auto layoutProperty = GetLayoutProperty<TextFieldLayoutProperty>();
-        bool isPwdType = layoutProperty ? layoutProperty->GetTextInputTypeValue(TextInputType::UNSPECIFIED) ==
-                                              TextInputType::VISIBLE_PASSWORD
-                                        : false;
+        bool isPwdType = false;
+        if (layoutProperty) {
+            auto inputType = layoutProperty->GetTextInputTypeValue(TextInputType::UNSPECIFIED);
+            isPwdType = inputType == TextInputType::VISIBLE_PASSWORD || inputType == TextInputType::NUMBER_PASSWORD ||
+                        inputType == TextInputType::SCREEN_LOCK_PASSWORD || inputType == TextInputType::NEW_PASSWORD;
+        }
         if (!isPwdType) {
             Recorder::NodeDataCache::Get().PutString(host, inspectorId, contentController_->GetTextValue());
         }
@@ -2761,7 +2779,8 @@ void TextFieldPattern::OnHover(bool isHover)
     }
 }
 
-void TextFieldPattern::ChangeMouseState(const Offset location, const RefPtr<PipelineContext>& pipeline, int32_t frameId)
+void TextFieldPattern::ChangeMouseState(
+    const Offset location, const RefPtr<PipelineContext>& pipeline, int32_t frameId, bool isByPass)
 {
     auto responseAreaWidth = (responseArea_ ? responseArea_->GetAreaRect().Width() : 0.0f) +
                              (cleanNodeResponseArea_ ? cleanNodeResponseArea_->GetAreaRect().Width() : 0.0f);
@@ -2778,7 +2797,7 @@ void TextFieldPattern::ChangeMouseState(const Offset location, const RefPtr<Pipe
             pipeline->ChangeMouseStyle(frameId, MouseFormat::DEFAULT, windowId);
         } else {
             pipeline->SetMouseStyleHoldNode(frameId);
-            pipeline->ChangeMouseStyle(frameId, MouseFormat::TEXT_CURSOR, windowId);
+            pipeline->ChangeMouseStyle(frameId, MouseFormat::TEXT_CURSOR, windowId, isByPass);
         }
     } else {
         pipeline->ChangeMouseStyle(frameId, MouseFormat::DEFAULT, windowId);
@@ -2807,7 +2826,7 @@ void TextFieldPattern::HandleMouseEvent(MouseInfo& info)
         pipeline->ChangeMouseStyle(frameId, MouseFormat::DEFAULT, windowId);
         return;
     }
-    ChangeMouseState(info.GetLocalLocation(), pipeline, frameId);
+    ChangeMouseState(info.GetLocalLocation(), pipeline, frameId, info.GetAction() == MouseAction::WINDOW_LEAVE);
 
     selectOverlay_->SetUsingMouse(true);
     if (info.GetButton() == MouseButton::RIGHT_BUTTON) {
@@ -4162,7 +4181,7 @@ void TextFieldPattern::OnAreaChangedInner()
 void TextFieldPattern::HandleParentGlobalOffsetChange()
 {
     selectController_->CalculateHandleOffset();
-    CHECK_NULL_VOID(SelectOverlayIsOn());
+    CHECK_NULL_VOID(SelectOverlayIsOn() || selectOverlay_->SelectOverlayIsCreating());
     if (selectOverlay_->IsShowMouseMenu()) {
         CloseSelectOverlay();
     } else {
@@ -4608,17 +4627,16 @@ void TextFieldPattern::SetSelectionFlag(
         NotifyOnEditChanged(true);
     }
 
-    if (options.has_value()) {
-        if (options.value().menuPolicy == MenuPolicy::ALWAYS) {
-            if (IsShowHandle()) {
-                SetIsSingleHandle(!IsSelected());
-                ProcessOverlay({ .menuIsShow = true, .animation = true });
-            } else {
-                CloseSelectOverlay(true);
-            }
-        } else if (options.value().menuPolicy == MenuPolicy::NEVER) {
-            CloseSelectOverlay(true);
-        }
+    SetIsSingleHandle(!IsSelected());
+    selectOverlay_->SetUsingMouse(false);
+    if (!IsShowHandle()) {
+        CloseSelectOverlay(true);
+    } else if (!options.has_value() || options.value().menuPolicy == MenuPolicy::DEFAULT) {
+        ProcessOverlay({ .menuIsShow = selectOverlay_->IsCurrentMenuVisibile(), .animation = true });
+    } else if (options.value().menuPolicy == MenuPolicy::NEVER) {
+        ProcessOverlay({ .menuIsShow = false, .animation = true });
+    } else if (options.value().menuPolicy == MenuPolicy::ALWAYS) {
+        ProcessOverlay({ .menuIsShow = true, .animation = true });
     }
     auto host = GetHost();
     CHECK_NULL_VOID(host);
@@ -5097,7 +5115,7 @@ void TextFieldPattern::SetShowError()
         } else if (passWordMode) {
             BorderWidthProperty borderWidth;
             BorderColorProperty borderColor;
-            borderWidth.SetBorderWidth(ERROR_BORDER_WIDTH);
+            borderWidth.SetBorderWidth(textFieldTheme->GetErrorTextInputBorderWidth());
             layoutProperty->UpdateBorderWidth(borderWidth);
             borderColor.SetColor(textFieldTheme->GetPasswordErrorBorderColor());
             renderContext->UpdateBorderColor(borderColor);
@@ -5950,10 +5968,12 @@ bool TextFieldPattern::CheckAutoSave()
             return true;
         }
     }
-    if (AceAutoFillType::ACE_UNSPECIFIED < autoFillType && autoFillType <= AceAutoFillType::ACE_YEAR)
+    if (AceAutoFillType::ACE_UNSPECIFIED < autoFillType && autoFillType <= AceAutoFillType::ACE_YEAR &&
+        autoFillType != AceAutoFillType::ACE_USER_NAME) {
         if (contentController_->GetTextValue() != lastAutoFillPasswordTextValue_) {
             return true;
         }
+    }
     return false;
 }
 
@@ -6193,7 +6213,10 @@ bool TextFieldPattern::IsShowPasswordIcon() const
 {
     auto layoutProperty = GetLayoutProperty<TextFieldLayoutProperty>();
     CHECK_NULL_RETURN(layoutProperty, false);
-    return layoutProperty->GetShowPasswordIconValue(true) && IsInPasswordMode();
+
+    auto textfieldTheme = GetTheme();
+    bool isShowPasswordIcon = textfieldTheme->IsShowPasswordIcon();
+    return layoutProperty->GetShowPasswordIconValue(isShowPasswordIcon) && IsInPasswordMode();
 }
 
 bool TextFieldPattern::IsShowCancelButtonMode() const
@@ -6442,7 +6465,7 @@ void TextFieldPattern::OnVirtualKeyboardAreaChanged()
 {
     CHECK_NULL_VOID(SelectOverlayIsOn());
     selectController_->CalculateHandleOffset();
-    ProcessOverlay();
+    ProcessOverlay({ .menuIsShow = false });
 }
 
 void TextFieldPattern::PasswordResponseKeyEvent()

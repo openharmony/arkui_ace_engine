@@ -181,6 +181,7 @@ public:
     static void SetBackdropBlur(const Dimension &radius, const BlurOption &blurOption);
     static void SetLinearGradientBlur(const NG::LinearGradientBlurPara& blurPara);
     static void SetDynamicLightUp(float rate, float lightUpDegree);
+    static void SetDynamicDim(float DimDegree);
     static void SetFrontBlur(const Dimension &radius, const BlurOption &blurOption);
     static void SetBackShadow(const Shadow &shadow);
     static void SetBlendMode(BlendMode blendMode);
@@ -279,6 +280,7 @@ public:
 
     static void SetOnDragEnd(std::function<void(const RefPtr<OHOS::Ace::DragEvent> &)> &&onDragEnd);
     static void SetMonopolizeEvents(bool monopolizeEvents);
+    static void SetDragEventStrictReportingEnabled(bool dragEventStrictReportingEnabled);
 
     // flex properties
     static void SetAlignSelf(FlexAlign value);
@@ -347,6 +349,16 @@ public:
     static void DisableOnAreaChange();
     static void DisableOnFocus();
     static void DisableOnBlur();
+    static void DisableOnClick(FrameNode* frameNode);
+    static void DisableOnTouch(FrameNode* frameNode);
+    static void DisableOnKeyEvent(FrameNode* frameNode);
+    static void DisableOnHover(FrameNode* frameNode);
+    static void DisableOnMouse(FrameNode* frameNode);
+    static void DisableOnAppear(FrameNode* frameNode);
+    static void DisableOnDisappear(FrameNode* frameNode);
+    static void DisableOnFocus(FrameNode* frameNode);
+    static void DisableOnBlur(FrameNode* frameNode);
+    static void DisableOnAreaChange(FrameNode* frameNode);
 
     // useEffect
     static void SetUseEffect(bool useEffect);
@@ -499,6 +511,7 @@ public:
     static void SetSharedTransition(
         FrameNode* frameNode, const std::string& shareId, const std::shared_ptr<SharedTransitionOption>& option);
     static void SetTransition(FrameNode* frameNode, const TransitionOptions& options);
+    static void CleanTransition(FrameNode* frameNode);
     static void SetChainedTransition(FrameNode* frameNode, const RefPtr<NG::ChainedTransitionEffect>& effect);
     static void SetMask(FrameNode* frameNode, const RefPtr<BasicShape>& basicShape);
     static void SetProgressMask(FrameNode* frameNode, const RefPtr<ProgressMaskProperty>& progress);
@@ -521,6 +534,12 @@ public:
     static void SetOnBlur(FrameNode* frameNode, OnBlurFunc &&onBlurCallback);
     static void SetOnClick(FrameNode* frameNode, GestureEventFunc &&clickEventFunc);
     static void SetOnTouch(FrameNode* frameNode, TouchEventFunc &&touchEventFunc);
+    static void SetOnMouse(FrameNode* frameNode, OnMouseEventFunc &&onMouseEventFunc);
+    static void SetOnHover(FrameNode* frameNode, OnHoverFunc &&onHoverEventFunc);
+    static void SetOnKeyEvent(FrameNode* frameNode, OnKeyCallbackFunc &&onKeyCallback);
+    static void SetOnGestureJudgeBegin(FrameNode* frameNode, GestureJudgeFunc&& gestureJudgeFunc);
+    static void SetOnSizeChanged(
+        FrameNode* frameNode, std::function<void(const RectF& oldRect, const RectF& rect)>&& onSizeChanged);
 
     static bool GetFocusable(FrameNode* frameNode);
     static bool GetDefaultFocus(FrameNode* frameNode);

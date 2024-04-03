@@ -38,6 +38,7 @@ bool TextSelectOverlay::PreProcessOverlay(const OverlayRequest& request)
     auto host = textPattern->GetHost();
     CHECK_NULL_RETURN(host, false);
     pipeline->AddOnAreaChangeNode(host->GetId());
+    textPattern->CalculateHandleOffsetAndShowOverlay();
     return true;
 }
 
@@ -69,7 +70,7 @@ bool TextSelectOverlay::CheckHandleVisible(const RectF& paintRect)
     CHECK_NULL_RETURN(host, false);
     auto renderContext = host->GetRenderContext();
     CHECK_NULL_RETURN(renderContext, false);
-    if (!renderContext->GetClipEdge().value_or(true)) {
+    if (!renderContext->GetClipEdge().value_or(false)) {
         return true;
     }
     auto contentRect = textPattern->GetTextContentRect();
@@ -111,7 +112,7 @@ void TextSelectOverlay::OnHandleMove(const RectF& handleRect, bool isFirst)
     auto contentRect = textPattern->GetTextContentRect();
     auto contentOffset = textPattern->GetTextPaintOffset() + contentRect.GetOffset();
     auto handleOffset = handleRect.GetOffset();
-    if (renderContext->GetClipEdge().value_or(true)) {
+    if (renderContext->GetClipEdge().value_or(false)) {
         handleOffset.SetX(
             std::clamp(handleOffset.GetX(), contentOffset.GetX(), contentOffset.GetX() + contentRect.Width()));
         handleOffset.SetY(
@@ -177,6 +178,7 @@ RectF TextSelectOverlay::GetSelectArea()
     auto textPaintOffset = pattern->GetTextPaintOffset();
     if (selectRects.empty()) {
         res.SetOffset(res.GetOffset() + textPaintOffset);
+        GetSelectAreaFromHandle(res);
         return res;
     }
     auto contentRect = pattern->GetTextContentRect();
@@ -185,6 +187,19 @@ RectF TextSelectOverlay::GetSelectArea()
     RectF visibleContentRect(contentRect.GetOffset() + textPaintOffset, contentRect.GetSize());
     visibleContentRect = GetVisibleRect(pattern->GetHost(), visibleContentRect);
     return res.IntersectRectT(visibleContentRect);
+}
+
+void TextSelectOverlay::GetSelectAreaFromHandle(RectF& rect)
+{
+    auto firstHandle = GetFirstHandleInfo();
+    if (firstHandle) {
+        rect = firstHandle->paintRect;
+        return;
+    }
+    auto secondHandle = GetSecondHandleInfo();
+    if (secondHandle) {
+        rect = secondHandle->paintRect;
+    }
 }
 
 void TextSelectOverlay::OnUpdateMenuInfo(SelectMenuInfo& menuInfo, SelectOverlayDirtyFlag dirtyFlag)

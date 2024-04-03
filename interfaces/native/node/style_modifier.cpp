@@ -594,6 +594,9 @@ const ArkUI_AttributeItem* GetWidth(ArkUI_NodeHandle node)
 {
     auto modifier = GetFullImpl()->getNodeModifiers()->getCommonModifier();
     g_numberValues[0].f32 = modifier->getWidth(node->uiNodeHandle);
+    if (LessNotEqual(g_numberValues[0].f32, 0.0f)) {
+        return nullptr;
+    }
     return &g_attributeItem;
 }
 
@@ -621,6 +624,9 @@ const ArkUI_AttributeItem* GetHeight(ArkUI_NodeHandle node)
 {
     auto modifier = GetFullImpl()->getNodeModifiers()->getCommonModifier();
     g_numberValues[0].f32 = modifier->getHeight(node->uiNodeHandle);
+    if (LessNotEqual(g_numberValues[0].f32, 0.0f)) {
+        return nullptr;
+    }
     return &g_attributeItem;
 }
 
@@ -2233,7 +2239,6 @@ const ArkUI_AttributeItem* GetMask(ArkUI_NodeHandle node)
             g_numberValues[NUM_6].f32 = options.radiusWidth;
             g_numberValues[NUM_7].f32 = options.radiusHeight;
             break;
-
         case BasicShapeType::CIRCLE:
             g_numberValues[NUM_0].u32 = options.fill;
             g_numberValues[NUM_1].u32 = options.strokeColor;
@@ -2242,7 +2247,6 @@ const ArkUI_AttributeItem* GetMask(ArkUI_NodeHandle node)
             g_numberValues[NUM_4].f32 = options.width;
             g_numberValues[NUM_5].f32 = options.height;
             break;
-
         case BasicShapeType::ELLIPSE:
             g_numberValues[NUM_0].u32 = options.fill;
             g_numberValues[NUM_1].u32 = options.strokeColor;
@@ -2251,7 +2255,6 @@ const ArkUI_AttributeItem* GetMask(ArkUI_NodeHandle node)
             g_numberValues[NUM_4].f32 = options.width;
             g_numberValues[NUM_5].f32 = options.height;
             break;
-        
         case BasicShapeType::PATH:
             g_numberValues[NUM_0].u32 = options.fill;
             g_numberValues[NUM_1].u32 = options.strokeColor;
@@ -2261,15 +2264,17 @@ const ArkUI_AttributeItem* GetMask(ArkUI_NodeHandle node)
             g_numberValues[NUM_5].f32 = options.height;
             g_attributeItem.string = options.commands;
             break;
-
         default:
             g_numberValues[NUM_0].i32 = static_cast<ArkUI_Int32>(ArkUI_MaskType::ARKUI_MASK_TYPE_PROGRESS);
             g_numberValues[NUM_1].f32 = options.value;
             g_numberValues[NUM_2].f32 = options.maxValue;
             g_numberValues[NUM_3].u32 = options.color;
-        break;
+            break;
     }
-
+    if (!InRegion(static_cast<ArkUI_Int32>(ArkUI_MaskType::ARKUI_MASK_TYPE_RECTANGLE),
+        static_cast<ArkUI_Int32>(ArkUI_MaskType::ARKUI_MASK_TYPE_PATH), g_numberValues[NUM_3].i32)) {
+        return nullptr;
+    }
     return &g_attributeItem;
 }
 
@@ -3968,6 +3973,55 @@ void ResetListSpace(ArkUI_NodeHandle node)
     fullImpl->getNodeModifiers()->getListModifier()->resetListSpace(node->uiNodeHandle);
 }
 
+int32_t SetListNodeAdapter(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
+{
+    CHECK_NULL_RETURN(item, ERROR_CODE_PARAM_INVALID);
+    CHECK_NULL_RETURN(item->object, ERROR_CODE_PARAM_INVALID);
+    auto* nodeAdapter = reinterpret_cast<ArkUINodeAdapterHandle>(item->object);
+    return GetFullImpl()->getNodeModifiers()->getListModifier()->setNodeAdapter(node->uiNodeHandle, nodeAdapter);
+}
+
+void ResetListNodeAdapter(ArkUI_NodeHandle node)
+{
+    // already check in entry point.
+    auto* fullImpl = GetFullImpl();
+
+    fullImpl->getNodeModifiers()->getListModifier()->resetNodeAdapter(node->uiNodeHandle);
+}
+
+const ArkUI_AttributeItem* GetListNodeAdapter(ArkUI_NodeHandle node)
+{
+    ArkUINodeAdapterHandle adapter =
+        GetFullImpl()->getNodeModifiers()->getListModifier()->getNodeAdapter(node->uiNodeHandle);
+    g_attributeItem.object = &adapter;
+    return &g_attributeItem;
+}
+
+int32_t SetListCachedCount(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
+{
+    CHECK_NULL_RETURN(item, ERROR_CODE_PARAM_INVALID);
+    if (item->size != 1) {
+        return ERROR_CODE_PARAM_INVALID;
+    }
+    GetFullImpl()->getNodeModifiers()->getListModifier()->setCachedCount(node->uiNodeHandle, item->value[0].i32);
+    return ERROR_CODE_NO_ERROR;
+}
+
+void ResetListCachedCount(ArkUI_NodeHandle node)
+{
+    // already check in entry point.
+    auto* fullImpl = GetFullImpl();
+
+    fullImpl->getNodeModifiers()->getListModifier()->resetCachedCount(node->uiNodeHandle);
+}
+
+const ArkUI_AttributeItem* GetListCachedCount(ArkUI_NodeHandle node)
+{
+    ArkUI_Int32 value = GetFullImpl()->getNodeModifiers()->getListModifier()->getCachedCount(node->uiNodeHandle);
+    g_numberValues[0].i32 = value;
+    return &g_attributeItem;
+}
+
 int32_t SetTextAreaPlaceholderFont(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
 {
     auto* fullImpl = GetFullImpl();
@@ -5074,6 +5128,55 @@ const ArkUI_AttributeItem* GetSwiperEffectMode(ArkUI_NodeHandle node)
 {
     auto modifier = GetFullImpl()->getNodeModifiers()->getSwiperModifier();
     g_numberValues[0].i32 = modifier->getSwiperEffectMode(node->uiNodeHandle);
+    return &g_attributeItem;
+}
+
+int32_t SetSwiperNodeAdapter(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
+{
+    CHECK_NULL_RETURN(item, ERROR_CODE_PARAM_INVALID);
+    CHECK_NULL_RETURN(item->object, ERROR_CODE_PARAM_INVALID);
+    auto* nodeAdapter = reinterpret_cast<ArkUINodeAdapterHandle>(item->object);
+    return GetFullImpl()->getNodeModifiers()->getSwiperModifier()->setNodeAdapter(node->uiNodeHandle, nodeAdapter);
+}
+
+void ResetSwiperNodeAdapter(ArkUI_NodeHandle node)
+{
+    // already check in entry point.
+    auto* fullImpl = GetFullImpl();
+
+    fullImpl->getNodeModifiers()->getSwiperModifier()->resetNodeAdapter(node->uiNodeHandle);
+}
+
+const ArkUI_AttributeItem* GetSwiperNodeAdapter(ArkUI_NodeHandle node)
+{
+    ArkUINodeAdapterHandle adapter =
+        GetFullImpl()->getNodeModifiers()->getSwiperModifier()->getNodeAdapter(node->uiNodeHandle);
+    g_attributeItem.object = &adapter;
+    return &g_attributeItem;
+}
+
+int32_t SetSwiperCachedCount(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
+{
+    CHECK_NULL_RETURN(item, ERROR_CODE_PARAM_INVALID);
+    if (item->size != 1) {
+        return ERROR_CODE_PARAM_INVALID;
+    }
+    GetFullImpl()->getNodeModifiers()->getSwiperModifier()->setCachedCount(node->uiNodeHandle, item->value[0].i32);
+    return ERROR_CODE_NO_ERROR;
+}
+
+void ResetSwiperCachedCount(ArkUI_NodeHandle node)
+{
+    // already check in entry point.
+    auto* fullImpl = GetFullImpl();
+
+    fullImpl->getNodeModifiers()->getSwiperModifier()->resetCachedCount(node->uiNodeHandle);
+}
+
+const ArkUI_AttributeItem* GetSwiperCachedCount(ArkUI_NodeHandle node)
+{
+    ArkUI_Int32 value = GetFullImpl()->getNodeModifiers()->getSwiperModifier()->getCachedCount(node->uiNodeHandle);
+    g_numberValues[0].i32 = value;
     return &g_attributeItem;
 }
 
@@ -8517,6 +8620,55 @@ const ArkUI_AttributeItem* GetWaterFlowRowsGap(ArkUI_NodeHandle node)
     return &g_attributeItem;
 }
 
+int32_t SetWaterFlowNodeAdapter(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
+{
+    CHECK_NULL_RETURN(item, ERROR_CODE_PARAM_INVALID);
+    CHECK_NULL_RETURN(item->object, ERROR_CODE_PARAM_INVALID);
+    auto* nodeAdapter = reinterpret_cast<ArkUINodeAdapterHandle>(item->object);
+    return GetFullImpl()->getNodeModifiers()->getWaterFlowModifier()->setNodeAdapter(node->uiNodeHandle, nodeAdapter);
+}
+
+void ResetWaterFlowNodeAdapter(ArkUI_NodeHandle node)
+{
+    // already check in entry point.
+    auto* fullImpl = GetFullImpl();
+
+    fullImpl->getNodeModifiers()->getWaterFlowModifier()->resetNodeAdapter(node->uiNodeHandle);
+}
+
+const ArkUI_AttributeItem* GetWaterFlowNodeAdapter(ArkUI_NodeHandle node)
+{
+    ArkUINodeAdapterHandle adapter =
+        GetFullImpl()->getNodeModifiers()->getWaterFlowModifier()->getNodeAdapter(node->uiNodeHandle);
+    g_attributeItem.object = &adapter;
+    return &g_attributeItem;
+}
+
+int32_t SetWaterFlowCachedCount(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
+{
+    CHECK_NULL_RETURN(item, ERROR_CODE_PARAM_INVALID);
+    if (item->size != 1) {
+        return ERROR_CODE_PARAM_INVALID;
+    }
+    GetFullImpl()->getNodeModifiers()->getWaterFlowModifier()->setCachedCount(node->uiNodeHandle, item->value[0].i32);
+    return ERROR_CODE_NO_ERROR;
+}
+
+void ResetWaterFlowCachedCount(ArkUI_NodeHandle node)
+{
+    // already check in entry point.
+    auto* fullImpl = GetFullImpl();
+
+    fullImpl->getNodeModifiers()->getSwiperModifier()->resetCachedCount(node->uiNodeHandle);
+}
+
+const ArkUI_AttributeItem* GetWaterFlowCachedCount(ArkUI_NodeHandle node)
+{
+    ArkUI_Int32 value = GetFullImpl()->getNodeModifiers()->getWaterFlowModifier()->getCachedCount(node->uiNodeHandle);
+    g_numberValues[0].i32 = value;
+    return &g_attributeItem;
+}
+
 bool CheckIfAttributeLegal(ArkUI_NodeHandle node, int32_t type)
 {
     if (node->type == ARKUI_NODE_SPAN) {
@@ -9418,7 +9570,8 @@ int32_t SetSwiperAttribute(ArkUI_NodeHandle node, int32_t subTypeId, const ArkUI
 {
     static Setter* setters[] = { SetSwiperLoop, SetSwiperAutoPlay, SetSwiperShowIndicator, SetSwiperInterval,
         SetSwiperVertical, SetSwiperDuration, SetSwiperCurve, SetSwiperItemSpace, SetSwiperIndex, SetSwiperDisplayCount,
-        SetSwiperDisableSwipe, SetSwiperShowDisplayArrow, SetSwiperEffectMode };
+        SetSwiperDisableSwipe, SetSwiperShowDisplayArrow, SetSwiperEffectMode, SetSwiperNodeAdapter,
+        SetSwiperCachedCount };
     if (subTypeId >= sizeof(setters) / sizeof(Setter*)) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "swiper node attribute: %{public}d NOT IMPLEMENT", subTypeId);
         return ERROR_CODE_NATIVE_IMPL_TYPE_NOT_SUPPORTED;
@@ -9431,7 +9584,7 @@ void ResetSwiperAttribute(ArkUI_NodeHandle node, int32_t subTypeId)
     static Resetter* resetters[] = { ResetSwiperLoop, ResetSwiperAutoPlay, ResetSwiperShowIndicator,
         ResetSwiperInterval, ResetSwiperVertical, ResetSwiperDuration, ResetSwiperCurve, ResetSwiperItemSpace,
         ResetSwiperIndex, ResetSwiperDisplayCount, ResetSwiperDisableSwipe, ResetSwiperShowDisplayArrow,
-        ResetSwiperEffectMode };
+        ResetSwiperEffectMode, ResetSwiperNodeAdapter, ResetSwiperCachedCount };
     if (static_cast<uint32_t>(subTypeId) >= sizeof(resetters) / sizeof(Resetter*)) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "swiper node attribute: %{public}d NOT IMPLEMENT", subTypeId);
         return;
@@ -9443,7 +9596,8 @@ const ArkUI_AttributeItem* GetSwiperAttribute(ArkUI_NodeHandle node, int32_t sub
 {
     static Getter* getters[] = { GetSwiperLoop, GetSwiperAutoPlay, GetSwiperShowIndicator, GetSwiperInterval,
         GetSwiperVertical, GetSwiperDuration, GetSwiperCurve, GetSwiperItemSpace, GetSwiperIndex, GetSwiperDisplayCount,
-        GetSwiperDisableSwipe, GetSwiperShowDisplayArrow, GetSwiperEffectMode };
+        GetSwiperDisableSwipe, GetSwiperShowDisplayArrow, GetSwiperEffectMode, GetSwiperNodeAdapter,
+        GetSwiperCachedCount };
     if (subTypeId >= sizeof(getters) / sizeof(Getter*)) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "swiper node attribute: %{public}d NOT IMPLEMENT", subTypeId);
         return nullptr;
@@ -9491,7 +9645,8 @@ void ResetScrollAttribute(ArkUI_NodeHandle node, int32_t subTypeId)
 
 int32_t SetListAttribute(ArkUI_NodeHandle node, int32_t subTypeId, const ArkUI_AttributeItem* value)
 {
-    static Setter* setters[] = { SetListDirection, SetListSticky, SetListSpace };
+    static Setter* setters[] = { SetListDirection, SetListSticky, SetListSpace, SetListNodeAdapter,
+        SetListCachedCount };
     if (subTypeId >= sizeof(setters) / sizeof(Setter*)) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "list node attribute: %{public}d NOT IMPLEMENT", subTypeId);
         return ERROR_CODE_NATIVE_IMPL_TYPE_NOT_SUPPORTED;
@@ -9501,7 +9656,8 @@ int32_t SetListAttribute(ArkUI_NodeHandle node, int32_t subTypeId, const ArkUI_A
 
 const ArkUI_AttributeItem* GetListAttribute(ArkUI_NodeHandle node, int32_t subTypeId)
 {
-    static Getter* getters[] = { GetListDirection, GetListSticky, GetListSpace };
+    static Getter* getters[] = { GetListDirection, GetListSticky, GetListSpace, GetListNodeAdapter,
+        GetListCachedCount };
     if (subTypeId >= sizeof(getters) / sizeof(Getter*)) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "loadingprogress node attribute: %{public}d NOT IMPLEMENT", subTypeId);
         return &g_attributeItem;
@@ -9511,7 +9667,8 @@ const ArkUI_AttributeItem* GetListAttribute(ArkUI_NodeHandle node, int32_t subTy
 
 void ResetListAttribute(ArkUI_NodeHandle node, int32_t subTypeId)
 {
-    static Resetter* resetters[] = { ResetListDirection, ResetListSticky, ResetListSpace };
+    static Resetter* resetters[] = { ResetListDirection, ResetListSticky, ResetListSpace, ResetListNodeAdapter,
+        ResetListCachedCount };
     if (subTypeId >= sizeof(resetters) / sizeof(Resetter*)) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "list node attribute: %{public}d NOT IMPLEMENT", subTypeId);
         return;
@@ -9673,7 +9830,7 @@ void ResetRefreshAttribute(ArkUI_NodeHandle node, int32_t subTypeId)
 int32_t SetWaterFlowAttribute(ArkUI_NodeHandle node, int32_t subTypeId, const ArkUI_AttributeItem* item)
 {
     static Setter* setters[] = { SetLayoutDirection, SetColumnsTemplate, SetRowsTemplate, SetWaterFlowColumnsGap,
-        SetWaterFlowRowsGap };
+        SetWaterFlowRowsGap, SetWaterFlowNodeAdapter, SetWaterFlowCachedCount };
     if (subTypeId >= sizeof(setters) / sizeof(Setter*)) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "waterFlow node attribute: %{public}d NOT IMPLEMENT", subTypeId);
         return ERROR_CODE_NATIVE_IMPL_TYPE_NOT_SUPPORTED;
@@ -9684,7 +9841,7 @@ int32_t SetWaterFlowAttribute(ArkUI_NodeHandle node, int32_t subTypeId, const Ar
 void ResetWaterFlowAttribute(ArkUI_NodeHandle node, int32_t subTypeId)
 {
     static Resetter* resetters[] = { ResetLayoutDirection, ResetColumnsTemplate, ResetRowsTemplate,
-        ResetWaterFlowColumnsGap, ResetWaterFlowRowsGap };
+        ResetWaterFlowColumnsGap, ResetWaterFlowRowsGap, ResetWaterFlowNodeAdapter, ResetWaterFlowCachedCount };
     if (subTypeId >= sizeof(resetters) / sizeof(Resetter*)) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "waterFlow node attribute: %{public}d NOT IMPLEMENT", subTypeId);
         return;
@@ -9695,7 +9852,7 @@ void ResetWaterFlowAttribute(ArkUI_NodeHandle node, int32_t subTypeId)
 const ArkUI_AttributeItem* GetWaterFlowAttribute(ArkUI_NodeHandle node, int32_t subTypeId)
 {
     static Getter* getters[] = { GetLayoutDirection, GetColumnsTemplate, GetRowsTemplate, GetWaterFlowColumnsGap,
-        GetWaterFlowRowsGap };
+        GetWaterFlowRowsGap, GetWaterFlowNodeAdapter, GetWaterFlowCachedCount };
     if (subTypeId >= sizeof(getters) / sizeof(Getter*)) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "waterFlow node attribute: %{public}d NOT IMPLEMENT", subTypeId);
         return nullptr;
@@ -9830,6 +9987,7 @@ int32_t ResetNodeAttribute(ArkUI_NodeHandle node, ArkUI_NodeAttributeType type)
         return ERROR_CODE_PARAM_INVALID;
     }
     resetterClasses[nodeSubTypeClass](node, subTypeId);
+    GetFullImpl()->getBasicAPI()->markDirty(node->uiNodeHandle, ARKUI_DIRTY_FLAG_ATTRIBUTE_DIFF);
     return ERROR_CODE_NO_ERROR;
 }
 

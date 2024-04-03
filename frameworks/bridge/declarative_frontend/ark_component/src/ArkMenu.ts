@@ -68,13 +68,14 @@ class RadiusModifier extends ModifierWithKey<Dimension | BorderRadiuses> {
       getUINativeModule().menu.resetRadius(node);
     } else {
       if (isNumber(this.value) || isString(this.value) || isResource(this.value)) {
-        getUINativeModule().menu.setRadius(node, this.value, this.value, this.value, this.value);
+        getUINativeModule().menu.setRadius(node, this.value, this.value, this.value, this.value, false);
       } else {
         getUINativeModule().menu.setRadius(node,
           (this.value as BorderRadiuses).topLeft,
           (this.value as BorderRadiuses).topRight,
           (this.value as BorderRadiuses).bottomLeft,
-          (this.value as BorderRadiuses).bottomRight);
+          (this.value as BorderRadiuses).bottomRight,
+          true);
       }
     }
   }
@@ -112,8 +113,8 @@ class MenuWidthModifier extends ModifierWithKey<Length> {
 }
 
 class ArkMenuComponent extends ArkComponent implements MenuAttribute {
-  constructor(nativePtr: KNode) {
-    super(nativePtr);
+  constructor(nativePtr: KNode, classType?: ModifierType) {
+    super(nativePtr, classType);
   }
   width(value: Length): this {
     modifierWithKey(this._modifiersWithKeys, MenuWidthModifier.identity, MenuWidthModifier, value);
@@ -137,12 +138,10 @@ class ArkMenuComponent extends ArkComponent implements MenuAttribute {
 }
 
 // @ts-ignore
-globalThis.Menu.attributeModifier = function (modifier) {
-  const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
-  let nativeNode = getUINativeModule().getFrameNodeById(elmtId);
-  let component = this.createOrGetNode(elmtId, () => {
-    return new ArkMenuComponent(nativeNode);
+globalThis.Menu.attributeModifier = function (modifier: ArkComponent): void {
+  attributeModifierFunc.call(this, modifier, (nativePtr: KNode) => {
+    return new ArkMenuComponent(nativePtr);
+  }, (nativePtr: KNode, classType: ModifierType, modifierJS: ModifierJS) => {
+    return new modifierJS.MenuModifier(nativePtr, classType);
   });
-  applyUIAttributes(modifier, nativeNode, component);
-  component.applyModifierPatch();
 };

@@ -4904,6 +4904,52 @@ HWTEST_F(TextPickerTestNg, TextPickerModelNGSetColumns004, TestSize.Level1)
 }
 
 /**
+ * @tc.name: TextPickerModelNGSetGradientHeight001
+ * @tc.desc: Test TextPickerModelNG SetGradientHeight(set Dimension).
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextPickerTestNg, TextPickerModelNGSetGradientHeight001, TestSize.Level1)
+{
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
+    TextPickerModelNG::GetInstance()->Create(theme, TEXT);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    frameNode->MarkModifyDone();
+    auto textPickerLayoutProperty = frameNode->GetLayoutProperty<TextPickerLayoutProperty>();
+    ASSERT_NE(textPickerLayoutProperty, nullptr);
+    auto textPickerPattern = frameNode->GetPattern<TextPickerPattern>();
+    ASSERT_NE(textPickerPattern, nullptr);
+
+    auto height = Dimension(10.0f, DimensionUnit::VP);
+    TextPickerModelNG::GetInstance()->SetGradientHeight(height);
+    ASSERT_TRUE(textPickerLayoutProperty->HasGradientHeight());
+    EXPECT_EQ(height, textPickerLayoutProperty->GetGradientHeightValue());
+}
+
+/**
+ * @tc.name: TextPickerModelNGSetGradientHeight002
+ * @tc.desc: Test TextPickerModelNG SetGradientHeight(set Dimension).
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextPickerTestNg, TextPickerModelNGSetGradientHeight002, TestSize.Level1)
+{
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
+    TextPickerModelNG::GetInstance()->Create(theme, TEXT);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    frameNode->MarkModifyDone();
+    auto textPickerLayoutProperty = frameNode->GetLayoutProperty<TextPickerLayoutProperty>();
+    ASSERT_NE(textPickerLayoutProperty, nullptr);
+    auto textPickerPattern = frameNode->GetPattern<TextPickerPattern>();
+    ASSERT_NE(textPickerPattern, nullptr);
+
+    auto height = Dimension(10.0f, DimensionUnit::PERCENT);
+    TextPickerModelNG::GetInstance()->SetGradientHeight(height);
+    ASSERT_TRUE(textPickerLayoutProperty->HasGradientHeight());
+    EXPECT_EQ(height, textPickerLayoutProperty->GetGradientHeightValue());
+}
+
+/**
  * @tc.name: TextPickerPatternTest004
  * @tc.desc: Test OnColumnsBuilding.
  * @tc.type: FUNC
@@ -5762,7 +5808,7 @@ HWTEST_F(TextPickerTestNg, TextPickerPatternTest016, TestSize.Level1)
      * @tc.step: step3. call ChangeCurrentOptionValue(), cover branch replaceColumn less or equals curColumn.
      * @tc.expected: expect successfully.
      */
-    pickerPattern->ChangeCurrentOptionValue(option, 16, 1, 0);
+    pickerPattern->ChangeCurrentOptionValue(optionsChild1, 16, 1, 0);
     EXPECT_EQ(pickerPattern->selecteds_[1], 16);
 
     /**

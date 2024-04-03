@@ -1510,6 +1510,13 @@ RefPtr<NG::ChainedTransitionEffect> JSViewAbstract::ParseJsTransitionEffect(cons
     return chainedEffect;
 }
 
+RefPtr<NG::ChainedTransitionEffect> JSViewAbstract::ParseNapiChainedTransition(const JSRef<JSObject>& object,
+    const JSExecutionContext& context)
+{
+    auto chainedEffect = ParseChainedTransition(object, context);
+    return chainedEffect;
+}
+
 void JSViewAbstract::JsTransition(const JSCallbackInfo& info)
 {
     if (info.Length() != 1 || !info[0]->IsObject()) {
@@ -3357,7 +3364,11 @@ void JSViewAbstract::ParseBorderImageLinearGradient(const JSRef<JSVal>& args, ui
     lineGradient.CreateGradientWithType(NG::GradientType::LINEAR);
     // angle
     std::optional<float> degree;
-    GetJsAngle("angle", jsObj, degree);
+    if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
+        GetJsAngle("angle", jsObj, degree);
+    } else {
+        GetJsAngleWithDefault("angle", jsObj, degree, 180.0f);
+    }
     if (degree) {
         lineGradient.GetLinearGradient()->angle = CalcDimension(degree.value(), DimensionUnit::PX);
         degree.reset();
@@ -5386,7 +5397,11 @@ void JSViewAbstract::NewJsLinearGradient(const JSCallbackInfo& info, NG::Gradien
     newGradient.CreateGradientWithType(NG::GradientType::LINEAR);
     // angle
     std::optional<float> degree;
-    GetJsAngle("angle", jsObj, degree);
+    if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
+        GetJsAngle("angle", jsObj, degree);
+    } else {
+        GetJsAngleWithDefault("angle", jsObj, degree, 180.0f);
+    }
     if (degree) {
         newGradient.GetLinearGradient()->angle = CalcDimension(degree.value(), DimensionUnit::PX);
         degree.reset();
@@ -5526,33 +5541,41 @@ void JSViewAbstract::NewJsSweepGradient(const JSCallbackInfo& info, NG::Gradient
             }
         }
     }
-    std::optional<float> degree;
-    // start
-    GetJsAngle("start", jsObj, degree);
-    if (degree) {
-        CheckAngle(degree);
-        newGradient.GetSweepGradient()->startAngle = CalcDimension(degree.value(), DimensionUnit::PX);
-        degree.reset();
-    }
-    // end
-    GetJsAngle("end", jsObj, degree);
-    if (degree) {
-        CheckAngle(degree);
-        newGradient.GetSweepGradient()->endAngle = CalcDimension(degree.value(), DimensionUnit::PX);
-        degree.reset();
-    }
-    // rotation
-    GetJsAngle("rotation", jsObj, degree);
-    if (degree) {
-        CheckAngle(degree);
-        newGradient.GetSweepGradient()->rotation = CalcDimension(degree.value(), DimensionUnit::PX);
-        degree.reset();
-    }
+    // start, end and rotation
+    ParseSweepGradientPartly(jsObj, newGradient);
     // repeating
     auto repeating = jsObj->GetPropertyValue<bool>("repeating", false);
     newGradient.SetRepeat(repeating);
     // color stops
     NewGetJsGradientColorStops(newGradient, jsObj->GetProperty("colors"));
+}
+
+void JSViewAbstract::ParseSweepGradientPartly(const JSRef<JSObject>& obj, NG::Gradient& newGradient)
+{
+    std::optional<float> degreeStart;
+    std::optional<float> degreeEnd;
+    std::optional<float> degreeRotation;
+    if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
+        GetJsAngle("start", obj, degreeStart);
+        GetJsAngle("end", obj, degreeEnd);
+        GetJsAngle("rotation", obj, degreeRotation);
+    } else {
+        GetJsAngleWithDefault("start", obj, degreeStart, 0.0f);
+        GetJsAngleWithDefault("end", obj, degreeEnd, 0.0f);
+        GetJsAngleWithDefault("rotation", obj, degreeRotation, 0.0f);
+    }
+    if (degreeStart) {
+        CheckAngle(degreeStart);
+        newGradient.GetSweepGradient()->startAngle = CalcDimension(degreeStart.value(), DimensionUnit::PX);
+    }
+    if (degreeEnd) {
+        CheckAngle(degreeEnd);
+        newGradient.GetSweepGradient()->endAngle = CalcDimension(degreeEnd.value(), DimensionUnit::PX);
+    }
+    if (degreeRotation) {
+        CheckAngle(degreeRotation);
+        newGradient.GetSweepGradient()->rotation = CalcDimension(degreeRotation.value(), DimensionUnit::PX);
+    }
 }
 
 void JSViewAbstract::JsMotionPath(const JSCallbackInfo& info)
@@ -6492,6 +6515,43 @@ void JSViewAbstract::ParseSheetStyle(const JSRef<JSObject>& paramObj, NG::SheetS
         sheetStyle.height = sheetHeight;
         sheetStyle.sheetMode.reset();
     }
+
+    // Parse border width
+    auto borderWidthValue = paramObj->GetProperty("borderWidth");
+    NG::BorderWidthProperty borderWidth;
+    if (ParseBorderWidthProps(borderWidthValue, borderWidth)) {
+        sheetStyle.borderWidth = borderWidth;
+        // Parse border color
+        auto colorValue = paramObj->GetProperty("borderColor");
+        NG::BorderColorProperty borderColor;
+        if (ParseBorderColorProps(colorValue, borderColor)) {
+            sheetStyle.borderColor = borderColor;
+        } else {
+            sheetStyle.borderColor =
+                NG::BorderColorProperty({ Color::BLACK, Color::BLACK, Color::BLACK, Color::BLACK });
+        }
+        // Parse border style
+        auto styleValue = paramObj->GetProperty("borderStyle");
+        NG::BorderStyleProperty borderStyle;
+        if (ParseBorderStyleProps(styleValue, borderStyle)) {
+            sheetStyle.borderStyle = borderStyle;
+        } else {
+            sheetStyle.borderStyle = NG::BorderStyleProperty(
+                { BorderStyle::SOLID, BorderStyle::SOLID, BorderStyle::SOLID, BorderStyle::SOLID });
+        }
+    }
+    // Parse shadow
+    Shadow shadow;
+    auto shadowValue = paramObj->GetProperty("shadow");
+    if ((shadowValue->IsObject() || shadowValue->IsNumber()) && ParseShadowProps(shadowValue, shadow)) {
+            sheetStyle.shadow = shadow;
+    }
+
+    auto widthValue = paramObj->GetProperty("width");
+    CalcDimension width;
+    if (ParseJsDimensionVpNG(widthValue, width, true)) {
+        sheetStyle.width = width;
+    }
 }
 
 bool JSViewAbstract::ParseSheetDetents(const JSRef<JSVal>& args, std::vector<NG::SheetHeight>& sheetDetents)
@@ -6889,6 +6949,13 @@ void JSViewAbstract::JsPointLight(const JSCallbackInfo& info)
     }
 }
 
+void JSViewAbstract::JsSetDragEventStrictReportingEnabled(const JSCallbackInfo& info)
+{
+    if (info[0]->IsBoolean()) {
+        ViewAbstractModel::GetInstance()->SetDragEventStrictReportingEnabled(info[0]->ToBoolean());
+    }
+}
+
 void JSViewAbstract::JSBind(BindingTarget globalObj)
 {
     JSClass<JSViewAbstract>::Declare("JSViewAbstract");
@@ -7076,6 +7143,10 @@ void JSViewAbstract::JSBind(BindingTarget globalObj)
     JSClass<JSViewAbstract>::StaticMethod("expandSafeArea", &JSViewAbstract::JsExpandSafeArea);
 
     JSClass<JSViewAbstract>::StaticMethod("drawModifier", &JSViewAbstract::JsDrawModifier);
+    JSClass<JSViewAbstract>::StaticMethod("gestureModifier", &JSViewAbstract::JsGestureModifier);
+
+    JSClass<JSViewAbstract>::StaticMethod(
+        "setDragEventStrictReportingEnabled", &JSViewAbstract::JsSetDragEventStrictReportingEnabled);
 
     JSClass<JSViewAbstract>::Bind(globalObj);
 }
@@ -7663,13 +7734,26 @@ void JSViewAbstract::GetJsAngle(
     }
 }
 
-void JSViewAbstract::CheckAngle(std::optional<float>& angle)
+// if angle is not string or number, return directly. If angle is invalid string, use defaultValue.
+void JSViewAbstract::GetJsAngleWithDefault(
+    const std::string& key, const JSRef<JSObject>& jsObj, std::optional<float>& angle, float defaultValue)
 {
-    if (LessNotEqual(angle.value(), 0.0f)) {
-        angle = 0.0f;
-    } else if (GreatNotEqual(angle.value(), MAX_ANGLE)) {
-        angle = MAX_ANGLE;
+    JSRef<JSVal> value = jsObj->GetProperty(key.c_str());
+    if (value->IsString()) {
+        double temp = 0.0;
+        if (StringUtils::StringToDegree(value->ToString(), temp)) {
+            angle = static_cast<float>(temp);
+        } else {
+            angle = defaultValue;
+        }
+    } else if (value->IsNumber()) {
+        angle = value->ToNumber<float>();
     }
+}
+
+inline void JSViewAbstract::CheckAngle(std::optional<float>& angle)
+{
+    angle = std::clamp(angle.value(), 0.0f, MAX_ANGLE);
 }
 
 void JSViewAbstract::GetPerspective(
@@ -8568,5 +8652,21 @@ std::function<void(NG::DrawingContext& context)> JSViewAbstract::GetDrawCallback
         }
     };
     return drawCallback;
+}
+
+void JSViewAbstract::JsGestureModifier(const JSCallbackInfo& info)
+{
+    auto* vm = info.GetExecutionContext().vm_;
+    CHECK_NULL_VOID(vm);
+    auto global = JSNApi::GetGlobalObject(vm);
+    auto gestureModifier = global->Get(vm, panda::StringRef::NewFromUtf8(vm, "__gestureModifier__"));
+    if (gestureModifier->IsUndefined() || !gestureModifier->IsFunction()) {
+        return;
+    }
+    auto obj = gestureModifier->ToObject(vm);
+    panda::Local<panda::FunctionRef> func = obj;
+    auto thisObj = info.This()->GetLocalHandle();
+    panda::Local<panda::JSValueRef> params[1] = { info[0]->GetLocalHandle() };
+    func->Call(vm, thisObj, params, 1);
 }
 } // namespace OHOS::Ace::Framework

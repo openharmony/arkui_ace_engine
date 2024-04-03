@@ -113,9 +113,9 @@ void MenuItemModelNG::Create(const MenuItemProperties& menuItemProps)
 
     auto menuProperty = menuItem->GetLayoutProperty<MenuItemLayoutProperty>();
     CHECK_NULL_VOID(menuProperty);
-    menuProperty->UpdateStartIcon(menuItemProps.startIcon.value_or(""));
+    menuProperty->UpdateStartIcon(menuItemProps.startIcon.value_or(ImageSourceInfo("")));
     menuProperty->UpdateContent(menuItemProps.content);
-    menuProperty->UpdateEndIcon(menuItemProps.endIcon.value_or(""));
+    menuProperty->UpdateEndIcon(menuItemProps.endIcon.value_or(ImageSourceInfo("")));
     menuProperty->UpdateLabel(menuItemProps.labelInfo.value_or(""));
 }
 

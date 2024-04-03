@@ -891,6 +891,33 @@ void SubwindowOhos::CloseCustomDialogNG(int32_t dialogId)
     return overlay->CloseCustomDialog(dialogId);
 }
 
+void SubwindowOhos::CloseCustomDialogNG(const WeakPtr<NG::UINode>& node, std::function<void(int32_t)>&& callback)
+{
+    TAG_LOGD(AceLogTag::ACE_SUB_WINDOW, "close customDialog ng subwindow enter");
+    auto aceContainer = Platform::AceContainer::GetContainer(childContainerId_);
+    CHECK_NULL_VOID(aceContainer);
+    auto context = DynamicCast<NG::PipelineContext>(aceContainer->GetPipelineContext());
+    CHECK_NULL_VOID(context);
+    auto overlay = context->GetOverlayManager();
+    CHECK_NULL_VOID(overlay);
+    ContainerScope scope(childContainerId_);
+    return overlay->CloseCustomDialog(node, std::move(callback));
+}
+
+void SubwindowOhos::UpdateCustomDialogNG(
+    const WeakPtr<NG::UINode>& node, const DialogProperties& dialogProps, std::function<void(int32_t)>&& callback)
+{
+    TAG_LOGD(AceLogTag::ACE_SUB_WINDOW, "update customDialog ng subwindow enter");
+    auto aceContainer = Platform::AceContainer::GetContainer(childContainerId_);
+    CHECK_NULL_VOID(aceContainer);
+    auto context = DynamicCast<NG::PipelineContext>(aceContainer->GetPipelineContext());
+    CHECK_NULL_VOID(context);
+    auto overlay = context->GetOverlayManager();
+    CHECK_NULL_VOID(overlay);
+    ContainerScope scope(childContainerId_);
+    return overlay->UpdateCustomDialog(node, dialogProps, std::move(callback));
+}
+
 void SubwindowOhos::HideSubWindowNG()
 {
     ContainerScope scope(childContainerId_);
@@ -1322,6 +1349,18 @@ void SubwindowOhos::CloseCustomDialog(const int32_t dialogId)
     CHECK_NULL_VOID(overlay);
     ContainerScope scope(childContainerId_);
     return overlay->CloseCustomDialog(dialogId);
+}
+
+void SubwindowOhos::CloseCustomDialog(const WeakPtr<NG::UINode>& node, std::function<void(int32_t)>&& callback)
+{
+    auto aceContainer = Platform::AceContainer::GetContainer(childContainerId_);
+    CHECK_NULL_VOID(aceContainer);
+    auto context = DynamicCast<NG::PipelineContext>(aceContainer->GetPipelineContext());
+    CHECK_NULL_VOID(context);
+    auto overlay = context->GetOverlayManager();
+    CHECK_NULL_VOID(overlay);
+    ContainerScope scope(childContainerId_);
+    return overlay->CloseCustomDialog(node, std::move(callback));
 }
 
 void SubwindowOhos::ShowActionMenuForAbility(

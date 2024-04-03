@@ -74,7 +74,9 @@ public:
         const std::string& key, const std::unique_ptr<JsonValue>& jsonValue, std::optional<float>& angle);
     static void GetJsAngle(
         const std::string& key, const JSRef<JSVal>& jsValue, std::optional<float>& angle);
-    static void CheckAngle(std::optional<float>& angle);
+    static void GetJsAngleWithDefault(
+        const std::string& key, const JSRef<JSObject>& jsObj, std::optional<float>& angle, float defaultValue);
+    static inline void CheckAngle(std::optional<float>& angle);
     static void GetPerspective(const std::string& key, const std::unique_ptr<JsonValue>& jsonValue, float& perspective);
     static void GetJsPerspective(const std::string& key, const JSRef<JSVal>& jsValue, float& perspective);
     static void GetGradientColorStops(Gradient& gradient, const std::unique_ptr<JsonValue>& jsonValue);
@@ -305,6 +307,7 @@ public:
     static void NewJsLinearGradient(const JSCallbackInfo& info, NG::Gradient& gradient);
     static void NewJsRadialGradient(const JSCallbackInfo& info, NG::Gradient& gradient);
     static void NewJsSweepGradient(const JSCallbackInfo& info, NG::Gradient& gradient);
+    static void ParseSweepGradientPartly(const JSRef<JSObject>& obj, NG::Gradient& newGradient);
     static void JsMotionPath(const JSCallbackInfo& info);
     static void JsShadow(const JSCallbackInfo& info);
     static void JsBlendMode(const JSCallbackInfo& info);
@@ -362,9 +365,12 @@ public:
     static void JSRenderFit(const JSCallbackInfo& info);
 
     static void JsExpandSafeArea(const JSCallbackInfo& info);
+    static void JsGestureModifier(const JSCallbackInfo& info);
 
     static void ParseMenuOptions(
         const JSCallbackInfo& info, const JSRef<JSArray>& jsArray, std::vector<NG::MenuOptionsParam>& items);
+
+    static void JsSetDragEventStrictReportingEnabled(const JSCallbackInfo& info);
 
 #ifndef WEARABLE_PRODUCT
     static void JsBindPopup(const JSCallbackInfo& info);
@@ -509,6 +515,9 @@ public:
     static void SetDialogProperties(const JSRef<JSObject>& obj, DialogProperties& properties);
     static std::function<void(NG::DrawingContext& context)> GetDrawCallback(
         const RefPtr<JsFunction>& jsDraw, const JSExecutionContext& execCtx);
+
+    static RefPtr<NG::ChainedTransitionEffect> ParseNapiChainedTransition(
+        const JSRef<JSObject>& object, const JSExecutionContext& context);
 };
 } // namespace OHOS::Ace::Framework
 #endif // JS_VIEW_ABSTRACT_H

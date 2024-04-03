@@ -470,11 +470,8 @@ class ImageTransitionModifier extends ModifierWithKey<object> {
 }
 
 class ArkImageComponent extends ArkComponent implements ImageAttribute {
-  constructor(nativePtr: KNode) {
-    super(nativePtr);
-  }
-  onGestureJudgeBegin(callback): this {
-    throw new Error('Method not implemented.');
+  constructor(nativePtr: KNode, classType?: ModifierType) {
+    super(nativePtr, classType);
   }
   draggable(value: boolean): this {
     modifierWithKey(this._modifiersWithKeys, ImageDraggableModifier.identity, ImageDraggableModifier, value);
@@ -591,12 +588,10 @@ class ArkImageComponent extends ArkComponent implements ImageAttribute {
   }
 }
 // @ts-ignore
-globalThis.Image.attributeModifier = function (modifier) {
-  const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
-  let nativeNode = getUINativeModule().getFrameNodeById(elmtId);
-  let component = this.createOrGetNode(elmtId, () => {
-    return new ArkImageComponent(nativeNode);
+globalThis.Image.attributeModifier = function (modifier: ArkComponent): void {
+  attributeModifierFunc.call(this, modifier, (nativePtr: KNode) => {
+    return new ArkImageComponent(nativePtr);
+  }, (nativePtr: KNode, classType: ModifierType, modifierJS: ModifierJS) => {
+    return new modifierJS.ImageModifier(nativePtr, classType);
   });
-  applyUIAttributes(modifier, nativeNode, component);
-  component.applyModifierPatch();
 };

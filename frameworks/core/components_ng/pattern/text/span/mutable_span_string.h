@@ -50,6 +50,7 @@ private:
     static RefPtr<SpanBase> GetDefaultSpan(SpanType type);
     static std::wstring GetWideStringSubstr(const std::wstring& content, int32_t start);
     static std::wstring GetWideStringSubstr(const std::wstring& content, int32_t start, int32_t length);
+    bool InsertUseFrontStyle(int32_t start);
     void UpdateSpansAndSpanMapWithOffsetAfterInsert(int32_t start, int32_t offset, bool useFrontStyle);
     void UpdateSpansWithOffset(int32_t start, int32_t offset);
     void UpdateSpanMapWithOffset(int32_t start, int32_t offset);

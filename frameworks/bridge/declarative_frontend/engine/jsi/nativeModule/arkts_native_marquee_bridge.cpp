@@ -19,6 +19,9 @@
 #include "core/components/common/properties/text_style.h"
 
 static const std::string DEFAULT_FONT_WEIGHT = "400";
+static const std::vector<OHOS::Ace::MarqueeUpdateStrategy> MARQUEE_UPDATE_STRATEGYS = {
+    OHOS::Ace::MarqueeUpdateStrategy::DEFAULT, OHOS::Ace::MarqueeUpdateStrategy::PRESERVE_POSITION
+};
 
 namespace OHOS::Ace::NG {
 ArkUINativeModuleValue MarqueeBridge::SetAllowScale(ArkUIRuntimeCallInfo* runtimeCallInfo)
@@ -105,8 +108,8 @@ ArkUINativeModuleValue MarqueeBridge::SetFontSize(ArkUIRuntimeCallInfo* runtimeC
     Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(1);
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     CalcDimension fontSize;
-    if (!ArkTSUtils::ParseJsDimensionFp(vm, secondArg, fontSize) || fontSize.IsNegative()
-        || fontSize.Unit() == DimensionUnit::PERCENT) {
+    if (!ArkTSUtils::ParseJsDimensionFp(vm, secondArg, fontSize) || fontSize.IsNegative() ||
+        fontSize.Unit() == DimensionUnit::PERCENT) {
         GetArkUINodeModifiers()->getMarqueeModifier()->resetMarqueeFontSize(nativeNode);
     } else {
         GetArkUINodeModifiers()->getMarqueeModifier()->setMarqueeFontSize(
@@ -148,6 +151,38 @@ ArkUINativeModuleValue MarqueeBridge::ResetFontColor(ArkUIRuntimeCallInfo* runti
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     GetArkUINodeModifiers()->getMarqueeModifier()->resetMarqueeFontColor(nativeNode);
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue MarqueeBridge::SetMarqueeUpdateStrategy(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
+    Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(1);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    auto value = secondArg->ToString(vm)->ToString();
+    static const LinearMapNode<MarqueeUpdateStrategy> marqueeUpdateStrategyTable[] = {
+        { "default", MarqueeUpdateStrategy::DEFAULT },
+        { "preserve_position", MarqueeUpdateStrategy::PRESERVE_POSITION },
+    };
+    auto marqueeUpdateStrategyIter =
+        BinarySearchFindIndex(marqueeUpdateStrategyTable, ArraySize(marqueeUpdateStrategyTable), value.c_str());
+    if (marqueeUpdateStrategyIter != -1) {
+        GetArkUINodeModifiers()->getMarqueeModifier()->setMarqueeUpdateStrategy(nativeNode, marqueeUpdateStrategyIter);
+    } else {
+        GetArkUINodeModifiers()->getMarqueeModifier()->resetMarqueeUpdateStrategy(nativeNode);
+    }
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue MarqueeBridge::ResetMarqueeUpdateStrategy(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    GetArkUINodeModifiers()->getMarqueeModifier()->resetMarqueeUpdateStrategy(nativeNode);
     return panda::JSValueRef::Undefined(vm);
 }
 } // namespace OHOS::Ace::NG

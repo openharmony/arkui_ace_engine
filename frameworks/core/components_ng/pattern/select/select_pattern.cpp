@@ -1279,8 +1279,7 @@ void SelectPattern::ResetParams()
     auto layoutProperty = select->GetLayoutProperty();
     CHECK_NULL_VOID(layoutProperty);
     layoutProperty->UpdateCalcMinSize(CalcSize(CalcLength(selectTheme->GetSelectMinWidth(controlSize_)),
-        std::nullopt));
-    ViewAbstract::SetHeight(NG::CalcLength(selectTheme->GetSelectDefaultHeight(controlSize_)));
+        CalcLength(selectTheme->GetSelectDefaultHeight(controlSize_))));
     SetFontSize(selectTheme->GetFontSize(controlSize_));
     auto spinnerLayoutProperty = spinner_->GetLayoutProperty<ImageLayoutProperty>();
     CHECK_NULL_VOID(spinnerLayoutProperty);

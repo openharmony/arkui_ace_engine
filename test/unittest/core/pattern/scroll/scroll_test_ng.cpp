@@ -873,6 +873,46 @@ HWTEST_F(ScrollTestNg, ScrollPositionControlle003, TestSize.Level1)
     EXPECT_TRUE(IsEqualCurrentPosition(0));
 }
 
+namespace {
+constexpr float SCROLL_FIXED_VELOCITY = 200.f;
+constexpr float OFFSET_TIME = 100.f;
+constexpr int32_t TIME_CHANGED_COUNTS = 20;
+} // namespace
+/**
+ * @tc.name: ScrollPositionController004
+ * @tc.desc: Test ScrollPositionController with Axis::VERTICAL
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollTestNg, ScrollPositionController004, TestSize.Level1)
+{
+    CreateWithContent([](ScrollModelNG model) { model.SetAxis(Axis::VERTICAL); });
+    auto controller = pattern_->GetScrollPositionController();
+    controller->ScrollToEdge(ScrollEdgeType::SCROLL_LEFT, SCROLL_FIXED_VELOCITY);
+    EXPECT_FALSE(pattern_->fixedVelocityMotion_);
+    controller->ScrollToEdge(ScrollEdgeType::SCROLL_RIGHT, SCROLL_FIXED_VELOCITY);
+    EXPECT_FALSE(pattern_->fixedVelocityMotion_);
+    controller->ScrollToEdge(ScrollEdgeType::SCROLL_BOTTOM, SCROLL_FIXED_VELOCITY);
+    EXPECT_TRUE(pattern_->fixedVelocityMotion_);
+    EXPECT_EQ(pattern_->fixedVelocityMotion_->GetCurrentVelocity(), -SCROLL_FIXED_VELOCITY);
+    int32_t offsetTime = OFFSET_TIME;
+    for (int i = 0; i < TIME_CHANGED_COUNTS; i++) {
+        pattern_->fixedVelocityMotion_->OnTimestampChanged(offsetTime, 0.0f, false);
+        offsetTime = offsetTime + OFFSET_TIME;
+        FlushLayoutTask(frameNode_);
+    }
+    EXPECT_TRUE(pattern_->IsAtBottom());
+    controller->ScrollToEdge(ScrollEdgeType::SCROLL_TOP, SCROLL_FIXED_VELOCITY);
+    EXPECT_TRUE(pattern_->fixedVelocityMotion_);
+    EXPECT_EQ(pattern_->fixedVelocityMotion_->GetCurrentVelocity(), SCROLL_FIXED_VELOCITY);
+    offsetTime = OFFSET_TIME;
+    for (int i = 0; i < TIME_CHANGED_COUNTS; i++) {
+        pattern_->fixedVelocityMotion_->OnTimestampChanged(offsetTime, 0.0f, false);
+        offsetTime = offsetTime + OFFSET_TIME;
+        FlushLayoutTask(frameNode_);
+    }
+    EXPECT_TRUE(pattern_->IsAtTop());
+}
+
 /**
  * @tc.name: ScrollBarAnimation001
  * @tc.desc: Test ScrollBar Hover Animation

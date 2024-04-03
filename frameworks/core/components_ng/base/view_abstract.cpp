@@ -835,6 +835,75 @@ void ViewAbstract::DisableOnBlur()
     focusHub->ClearUserOnBlur();
 }
 
+void ViewAbstract::DisableOnClick(FrameNode* frameNode)
+{
+    auto gestureHub = frameNode->GetOrCreateGestureEventHub();
+    CHECK_NULL_VOID(gestureHub);
+    gestureHub->ClearUserOnClick();
+}
+
+void ViewAbstract::DisableOnTouch(FrameNode* frameNode)
+{
+    auto gestureHub = frameNode->GetOrCreateGestureEventHub();
+    CHECK_NULL_VOID(gestureHub);
+    gestureHub->ClearUserOnTouch();
+}
+
+void ViewAbstract::DisableOnKeyEvent(FrameNode* frameNode)
+{
+    auto focusHub = frameNode->GetOrCreateFocusHub();
+    CHECK_NULL_VOID(focusHub);
+    focusHub->ClearUserOnKey();
+}
+
+void ViewAbstract::DisableOnHover(FrameNode* frameNode)
+{
+    auto eventHub = frameNode->GetOrCreateInputEventHub();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->ClearUserOnHover();
+}
+
+void ViewAbstract::DisableOnMouse(FrameNode* frameNode)
+{
+    auto eventHub = frameNode->GetOrCreateInputEventHub();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->ClearUserOnMouse();
+}
+
+void ViewAbstract::DisableOnAppear(FrameNode* frameNode)
+{
+    auto eventHub = frameNode->GetEventHub<EventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->ClearUserOnAppear();
+}
+
+void ViewAbstract::DisableOnDisappear(FrameNode* frameNode)
+{
+    auto eventHub = frameNode->GetEventHub<EventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->ClearUserOnDisAppear();
+}
+
+void ViewAbstract::DisableOnFocus(FrameNode* frameNode)
+{
+    auto focusHub = frameNode->GetOrCreateFocusHub();
+    CHECK_NULL_VOID(focusHub);
+    focusHub->ClearUserOnFocus();
+}
+
+void ViewAbstract::DisableOnBlur(FrameNode* frameNode)
+{
+    auto focusHub = frameNode->GetOrCreateFocusHub();
+    CHECK_NULL_VOID(focusHub);
+    focusHub->ClearUserOnBlur();
+}
+
+void ViewAbstract::DisableOnAreaChange(FrameNode* frameNode)
+{
+    CHECK_NULL_VOID(frameNode);
+    frameNode->ClearUserOnAreaChange();
+}
+
 void ViewAbstract::SetOnClick(GestureEventFunc &&clickEventFunc)
 {
     auto gestureHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeGestureEventHub();
@@ -1653,6 +1722,14 @@ void ViewAbstract::SetFrontBlur(const Dimension &radius, const BlurOption &blurO
     }
 }
 
+void ViewAbstract::SetDynamicDim(float DimDegree)
+{
+    if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
+        return;
+    }
+    ACE_UPDATE_RENDER_CONTEXT(DynamicDimDegree, DimDegree);
+}
+
 void ViewAbstract::SetFrontBlur(FrameNode *frameNode, const Dimension &radius, const BlurOption &blurOption)
 {
     CHECK_NULL_VOID(frameNode);
@@ -2073,20 +2150,17 @@ void ViewAbstract::SetOverlayBuilder(std::function<void()>&& buildFunc,
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
     if (buildFunc) {
-        auto overlayNode = frameNode->GetOverlayNode();
-        if (!overlayNode) {
-            auto buildNodeFunc = [buildFunc]() -> RefPtr<UINode> {
-                ScopedViewStackProcessor builderViewStackProcessor;
-                buildFunc();
-                auto customNode = ViewStackProcessor::GetInstance()->Finish();
-                return customNode;
-            };
-            overlayNode = AceType::DynamicCast<FrameNode>(buildNodeFunc());
-            CHECK_NULL_VOID(overlayNode);
-            frameNode->SetOverlayNode(overlayNode);
-            overlayNode->SetParent(AceType::WeakClaim(frameNode));
-            overlayNode->SetActive(true);
-        }
+        auto buildNodeFunc = [func = std::move(buildFunc)]() -> RefPtr<UINode> {
+            ScopedViewStackProcessor builderViewStackProcessor;
+            func();
+            auto customNode = ViewStackProcessor::GetInstance()->Finish();
+            return customNode;
+        };
+        auto overlayNode = AceType::DynamicCast<FrameNode>(buildNodeFunc());
+        CHECK_NULL_VOID(overlayNode);
+        frameNode->SetOverlayNode(overlayNode);
+        overlayNode->SetParent(AceType::WeakClaim(frameNode));
+        overlayNode->SetActive(true);
         overlayNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
         auto layoutProperty = AceType::DynamicCast<LayoutProperty>(overlayNode->GetLayoutProperty());
         CHECK_NULL_VOID(layoutProperty);
@@ -2211,7 +2285,7 @@ void ViewAbstract::SetKeyboardShortcut(const std::string &value, const std::vect
     CHECK_NULL_VOID(eventHub);
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
-    if (value.empty() || keys.empty()) {
+    if (value.empty()) {
         eventHub->ClearSingleKeyboardShortcut();
         return;
     }
@@ -2926,6 +3000,15 @@ void ViewAbstract::SetTransition(FrameNode* frameNode, const TransitionOptions& 
     ACE_UPDATE_NODE_RENDER_CONTEXT(Transition, options, frameNode);
 }
 
+void ViewAbstract::CleanTransition(FrameNode* frameNode)
+{
+    CHECK_NULL_VOID(frameNode);
+    const auto& renderContext = frameNode->GetRenderContext();
+    if (renderContext) {
+        renderContext->CleanTransition();
+    }
+}
+
 void ViewAbstract::SetChainedTransition(FrameNode* frameNode, const RefPtr<NG::ChainedTransitionEffect>& effect)
 {
     ACE_UPDATE_NODE_RENDER_CONTEXT(ChainedTransition, effect, frameNode);
@@ -3044,9 +3127,10 @@ void ViewAbstract::SetOnAreaChanged(FrameNode* frameNode, std::function<void(con
     const OffsetF &oldOrigin, const RectF &rect, const OffsetF &origin)> &&onAreaChanged)
 {
     CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetEventHub<EventHub>();
-    CHECK_NULL_VOID(eventHub);
-    eventHub->SetOnAreaChanged(std::move(onAreaChanged));
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    frameNode->SetOnAreaChangeCallback(std::move(onAreaChanged));
+    pipeline->AddOnAreaChangeNode(frameNode->GetId());
 }
 
 void ViewAbstract::SetOnFocus(FrameNode* frameNode, OnFocusFunc &&onFocusCallback)
@@ -3075,6 +3159,27 @@ void ViewAbstract::SetOnTouch(FrameNode* frameNode, TouchEventFunc &&touchEventF
     auto gestureHub = frameNode->GetOrCreateGestureEventHub();
     CHECK_NULL_VOID(gestureHub);
     gestureHub->SetTouchEvent(std::move(touchEventFunc));
+}
+
+void ViewAbstract::SetOnMouse(FrameNode* frameNode, OnMouseEventFunc &&onMouseEventFunc)
+{
+    auto eventHub = frameNode->GetOrCreateInputEventHub();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetMouseEvent(std::move(onMouseEventFunc));
+}
+
+void ViewAbstract::SetOnHover(FrameNode* frameNode, OnHoverFunc &&onHoverEventFunc)
+{
+    auto eventHub = frameNode->GetOrCreateInputEventHub();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetHoverEvent(std::move(onHoverEventFunc));
+}
+
+void ViewAbstract::SetOnKeyEvent(FrameNode* frameNode, OnKeyCallbackFunc &&onKeyCallback)
+{
+    auto focusHub = frameNode->GetOrCreateFocusHub();
+    CHECK_NULL_VOID(focusHub);
+    focusHub->SetOnKeyCallback(std::move(onKeyCallback));
 }
 
 bool ViewAbstract::GetFocusable(FrameNode* frameNode)
@@ -3272,7 +3377,7 @@ RefPtr<ProgressMaskProperty> ViewAbstract::GetMaskProgress(FrameNode* frameNode)
 
 BlendMode ViewAbstract::GetBlendMode(FrameNode* frameNode)
 {
-    BlendMode value = BlendMode::CLEAR;
+    BlendMode value = BlendMode::NONE;
     auto target = frameNode->GetRenderContext();
     CHECK_NULL_RETURN(target, value);
     return target->GetBackBlendModeValue(value);
@@ -3525,7 +3630,7 @@ Alignment ViewAbstract::GetAlign(FrameNode *frameNode)
 
 float ViewAbstract::GetWidth(FrameNode* frameNode)
 {
-    float value = 0.0f;
+    float value = -1.0f;
     const auto& layoutProperty = frameNode->GetLayoutProperty();
     CHECK_NULL_RETURN(layoutProperty, value);
     const auto& property = layoutProperty->GetCalcLayoutConstraint();
@@ -3542,7 +3647,7 @@ float ViewAbstract::GetWidth(FrameNode* frameNode)
 
 float ViewAbstract::GetHeight(FrameNode* frameNode)
 {
-    float value = 0.0f;
+    float value = -1.0f;
     const auto& layoutProperty = frameNode->GetLayoutProperty();
     CHECK_NULL_RETURN(layoutProperty, value);
     const auto& property = layoutProperty->GetCalcLayoutConstraint();
@@ -3569,7 +3674,10 @@ std::string ViewAbstract::GetBackgroundImageSrc(FrameNode* frameNode)
 {
     auto target = frameNode->GetRenderContext();
     CHECK_NULL_RETURN(target, "");
-    return target->GetBackgroundImage()->GetSrc();
+    if (target->GetBackgroundImage().has_value()) {
+        return target->GetBackgroundImage()->GetSrc();
+    }
+    return "";
 }
 
 ImageRepeat ViewAbstract::GetBackgroundImageRepeat(FrameNode* frameNode)
@@ -3577,7 +3685,10 @@ ImageRepeat ViewAbstract::GetBackgroundImageRepeat(FrameNode* frameNode)
     ImageRepeat value = ImageRepeat::NO_REPEAT;
     auto target = frameNode->GetRenderContext();
     CHECK_NULL_RETURN(target, value);
-    return target->GetBackgroundImageRepeat().value();
+    if (target->GetBackgroundImageRepeat().has_value()) {
+        return target->GetBackgroundImageRepeat().value();
+    }
+    return value;
 }
 
 PaddingProperty ViewAbstract::GetPadding(FrameNode* frameNode)
@@ -3822,5 +3933,29 @@ void ViewAbstract::ClearJSFrameNodeOnSizeChange(FrameNode* frameNode)
     auto eventHub = frameNode->GetEventHub<NG::EventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->ClearJSFrameNodeOnSizeChange();
+}
+
+void ViewAbstract::SetOnGestureJudgeBegin(FrameNode* frameNode, GestureJudgeFunc&& gestureJudgeFunc)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto gestureHub = frameNode->GetOrCreateGestureEventHub();
+    CHECK_NULL_VOID(gestureHub);
+    gestureHub->SetOnGestureJudgeBegin(std::move(gestureJudgeFunc));
+}
+
+void ViewAbstract::SetOnSizeChanged(
+    FrameNode* frameNode, std::function<void(const RectF& oldRect, const RectF& rect)>&& onSizeChanged)
+{
+    CHECK_NULL_VOID(frameNode);
+    frameNode->SetOnSizeChangeCallback(std::move(onSizeChanged));
+}
+
+void ViewAbstract::SetDragEventStrictReportingEnabled(bool dragEventStrictReportingEnabled)
+{
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto dragDropManager = pipeline->GetDragDropManager();
+    CHECK_NULL_VOID(dragDropManager);
+    dragDropManager->SetEventStrictReportingEnabled(dragEventStrictReportingEnabled);
 }
 } // namespace OHOS::Ace::NG

@@ -181,6 +181,23 @@ void ButtonLayoutAlgorithm::PerformMeasureSelf(LayoutWrapper* layoutWrapper)
         auto bottomPadding = padding.bottom.value_or(0.0);
         auto buttonTheme = PipelineBase::GetCurrentContext()->GetTheme<ButtonTheme>();
         CHECK_NULL_VOID(buttonTheme);
+
+        ButtonStyleMode buttonStyle = buttonLayoutProperty->GetButtonStyle().value_or(ButtonStyleMode::EMPHASIZE);
+        ControlSize controlSize = buttonLayoutProperty->GetControlSize().value_or(ControlSize::NORMAL);
+        if (buttonStyle == ButtonStyleMode::TEXT && controlSize == ControlSize::SMALL) {
+            padding.left =  buttonTheme->GetPaddingText().ConvertToPx();
+            padding.right = buttonTheme->GetPaddingText().ConvertToPx();
+        } else {
+            padding.left = buttonTheme->GetPadding(controlSize).Left().ConvertToPx();
+            padding.right = buttonTheme->GetPadding(controlSize).Right().ConvertToPx();
+        }
+        PaddingProperty defaultPadding = {
+            CalcLength(padding.left.value_or(0)),
+            CalcLength(padding.right.value_or(0)),
+            CalcLength(padding.top.value_or(0)),
+            CalcLength(padding.bottom.value_or(0)) };
+        layoutWrapper->GetLayoutProperty()->UpdatePadding(defaultPadding);
+
         auto defaultHeight = GetDefaultHeight(layoutWrapper);
         if (buttonLayoutProperty->GetType().value_or(ButtonType::CAPSULE) == ButtonType::CIRCLE) {
             HandleLabelCircleButtonFrameSize(layoutConstraint, frameSize, defaultHeight);

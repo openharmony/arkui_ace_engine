@@ -20,18 +20,10 @@ template("napi_performancemonitor_static") {
   ohos_source_set(target_name) {
     defines += invoker.defines
     cflags_cc += invoker.cflags_cc
-    if (is_mac) {
-      cflags_cc += [ "-O0" ]
-    }
+    configs = [ "$ace_root/interfaces/napi/kits:ace_napi_config" ]
 
-    include_dirs = [
-      "./",
-      "$ace_root",
-      "$ace_root/frameworks",
-      "$root_out_dir/arkui/framework",
-      "../$ace_root",
-      "$ace_root/interfaces/inner_api/ui_service_manager/include",
-    ]
+    include_dirs =
+        [ "$ace_root/interfaces/inner_api/ui_service_manager/include" ]
 
     sources = [ "napi_perf_monitor.cpp" ]
 

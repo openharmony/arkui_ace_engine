@@ -16,16 +16,17 @@
 #include "core/components_ng/pattern/text/text_content_modifier.h"
 
 #include "base/utils/utils.h"
+#include "core/components_ng/pattern/text/text_layout_property.h"
+#include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/components_ng/render/drawing.h"
 #include "core/components_v2/inspector/utils.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
 namespace {
+constexpr float RACE_DURATION_RATIO = 85.0f;
 constexpr float RACE_MOVE_PERCENT_MIN = 0.0f;
 constexpr float RACE_MOVE_PERCENT_MAX = 100.0f;
-constexpr float RACE_TEMPO = 0.2f;
-constexpr uint32_t RACE_DURATION = 2000;
 constexpr float RACE_SPACE_WIDTH = 48.0f;
 constexpr float ROUND_VALUE = 0.5f;
 constexpr uint32_t POINT_COUNT = 4;
@@ -54,7 +55,8 @@ inline FontWeight ConvertFontWeight(FontWeight fontWeight)
 }
 } // namespace
 
-TextContentModifier::TextContentModifier(const std::optional<TextStyle>& textStyle)
+TextContentModifier::TextContentModifier(const std::optional<TextStyle>& textStyle,
+    const WeakPtr<Pattern>& pattern):pattern_(pattern)
 {
     contentChange_ = MakeRefPtr<PropertyInt>(0);
     AttachProperty(contentChange_);
@@ -70,7 +72,7 @@ TextContentModifier::TextContentModifier(const std::optional<TextStyle>& textSty
 
     racePercentFloat_ = MakeRefPtr<AnimatablePropertyFloat>(0.0f);
     AttachProperty(racePercentFloat_);
-    clip_ = MakeRefPtr<PropertyBool>(true);
+    clip_ = MakeRefPtr<PropertyBool>(false);
     AttachProperty(clip_);
     fontFamilyString_ = MakeRefPtr<PropertyString>("");
     AttachProperty(fontFamilyString_);
@@ -86,6 +88,8 @@ void TextContentModifier::ChangeDragStatus()
 void TextContentModifier::SetDefaultAnimatablePropertyValue(const TextStyle& textStyle)
 {
     SetDefaultFontSize(textStyle);
+    SetDefaultAdaptMinFontSize(textStyle);
+    SetDefaultAdaptMaxFontSize(textStyle);
     SetDefaultFontWeight(textStyle);
     SetDefaultTextColor(textStyle);
     SetDefaultTextShadow(textStyle);
@@ -106,6 +110,36 @@ void TextContentModifier::SetDefaultFontSize(const TextStyle& textStyle)
 
     fontSizeFloat_ = MakeRefPtr<AnimatablePropertyFloat>(fontSizeValue);
     AttachProperty(fontSizeFloat_);
+}
+
+void TextContentModifier::SetDefaultAdaptMinFontSize(const TextStyle& textStyle)
+{
+    float fontSizeValue = textStyle.GetFontSize().Value();
+    auto pipelineContext = PipelineContext::GetCurrentContext();
+    if (pipelineContext) {
+        fontSizeValue = textStyle.GetAdaptMinFontSize().ConvertToPx();
+        if (textStyle.IsAllowScale() || textStyle.GetAdaptMinFontSize().Unit() == DimensionUnit::FP) {
+            fontSizeValue = (textStyle.GetAdaptMinFontSize() * pipelineContext->GetFontScale()).ConvertToPx();
+        }
+    }
+
+    adaptMinFontSizeFloat_ = MakeRefPtr<AnimatablePropertyFloat>(fontSizeValue);
+    AttachProperty(adaptMinFontSizeFloat_);
+}
+
+void TextContentModifier::SetDefaultAdaptMaxFontSize(const TextStyle& textStyle)
+{
+    float fontSizeValue = textStyle.GetFontSize().Value();
+    auto pipelineContext = PipelineContext::GetCurrentContext();
+    if (pipelineContext) {
+        fontSizeValue = textStyle.GetAdaptMaxFontSize().ConvertToPx();
+        if (textStyle.IsAllowScale() || textStyle.GetAdaptMaxFontSize().Unit() == DimensionUnit::FP) {
+            fontSizeValue = (textStyle.GetAdaptMaxFontSize() * pipelineContext->GetFontScale()).ConvertToPx();
+        }
+    }
+
+    adaptMaxFontSizeFloat_ = MakeRefPtr<AnimatablePropertyFloat>(fontSizeValue);
+    AttachProperty(adaptMaxFontSizeFloat_);
 }
 
 void TextContentModifier::SetDefaultFontWeight(const TextStyle& textStyle)
@@ -260,7 +294,8 @@ void TextContentModifier::onDraw(DrawingContext& drawingContext)
             }
         } else {
             // Racing
-            float textRacePercent = GetTextRacePercent();
+            float textRacePercent = marqueeDirection_ ==
+                MarqueeDirection::LEFT ? GetTextRacePercent() : RACE_MOVE_PERCENT_MAX - GetTextRacePercent();
             if (clip_ && clip_->Get()) {
                 canvas.ClipRect(RSRect(0, 0, drawingContext.width, drawingContext.height), RSClipOp::INTERSECT);
             }
@@ -347,6 +382,20 @@ void TextContentModifier::ModifyFontSizeInTextStyle(TextStyle& textStyle)
     }
 }
 
+void TextContentModifier::ModifyAdaptMinFontSizeInTextStyle(TextStyle& textStyle)
+{
+    if (adaptMinFontSize_.has_value() && adaptMinFontSizeFloat_) {
+        textStyle.SetAdaptMinFontSize(Dimension(adaptMinFontSizeFloat_->Get(), DimensionUnit::PX));
+    }
+}
+
+void TextContentModifier::ModifyAdaptMaxFontSizeInTextStyle(TextStyle& textStyle)
+{
+    if (adaptMaxFontSize_.has_value() && adaptMaxFontSizeFloat_) {
+        textStyle.SetAdaptMaxFontSize(Dimension(adaptMaxFontSizeFloat_->Get(), DimensionUnit::PX));
+    }
+}
+
 void TextContentModifier::ModifyFontWeightInTextStyle(TextStyle& textStyle)
 {
     if (fontWeight_.has_value() && fontWeightFloat_) {
@@ -407,6 +456,8 @@ void TextContentModifier::ModifyBaselineOffsetInTextStyle(TextStyle& textStyle)
 void TextContentModifier::ModifyTextStyle(TextStyle& textStyle)
 {
     ModifyFontSizeInTextStyle(textStyle);
+    ModifyAdaptMinFontSizeInTextStyle(textStyle);
+    ModifyAdaptMaxFontSizeInTextStyle(textStyle);
     ModifyFontWeightInTextStyle(textStyle);
     ModifyTextColorInTextStyle(textStyle);
     ModifyTextShadowsInTextStyle(textStyle);
@@ -417,6 +468,22 @@ void TextContentModifier::ModifyTextStyle(TextStyle& textStyle)
 void TextContentModifier::UpdateFontSizeMeasureFlag(PropertyChangeFlag& flag)
 {
     if (fontSize_.has_value() && fontSizeFloat_ && !NearEqual(fontSize_.value().Value(), fontSizeFloat_->Get())) {
+        flag |= PROPERTY_UPDATE_MEASURE;
+    }
+}
+
+void TextContentModifier::UpdateAdaptMinFontSizeMeasureFlag(PropertyChangeFlag& flag)
+{
+    if (adaptMinFontSize_.has_value() && adaptMinFontSizeFloat_ &&
+        !NearEqual(adaptMinFontSize_.value().Value(), adaptMinFontSizeFloat_->Get())) {
+        flag |= PROPERTY_UPDATE_MEASURE;
+    }
+}
+
+void TextContentModifier::UpdateAdaptMaxFontSizeMeasureFlag(PropertyChangeFlag& flag)
+{
+    if (adaptMaxFontSize_.has_value() && adaptMaxFontSizeFloat_ &&
+        !NearEqual(adaptMaxFontSize_.value().Value(), adaptMaxFontSizeFloat_->Get())) {
         flag |= PROPERTY_UPDATE_MEASURE;
     }
 }
@@ -477,6 +544,8 @@ bool TextContentModifier::NeedMeasureUpdate(PropertyChangeFlag& flag)
 {
     flag = 0;
     UpdateFontSizeMeasureFlag(flag);
+    UpdateAdaptMinFontSizeMeasureFlag(flag);
+    UpdateAdaptMaxFontSizeMeasureFlag(flag);
     UpdateFontWeightMeasureFlag(flag);
     UpdateTextColorMeasureFlag(flag);
     UpdateTextShadowMeasureFlag(flag);
@@ -504,6 +573,34 @@ void TextContentModifier::SetFontSize(const Dimension& value)
     fontSize_ = Dimension(fontSizeValue);
     CHECK_NULL_VOID(fontSizeFloat_);
     fontSizeFloat_->Set(fontSizeValue);
+}
+
+void TextContentModifier::SetAdaptMinFontSize(const Dimension& value)
+{
+    float fontSizeValue;
+    auto pipelineContext = PipelineContext::GetCurrentContext();
+    if (pipelineContext) {
+        fontSizeValue = value.ConvertToPx();
+    } else {
+        fontSizeValue = value.Value();
+    }
+    adaptMinFontSize_ = Dimension(fontSizeValue);
+    CHECK_NULL_VOID(adaptMinFontSizeFloat_);
+    adaptMinFontSizeFloat_->Set(fontSizeValue);
+}
+
+void TextContentModifier::SetAdaptMaxFontSize(const Dimension& value)
+{
+    float fontSizeValue;
+    auto pipelineContext = PipelineContext::GetCurrentContext();
+    if (pipelineContext) {
+        fontSizeValue = value.ConvertToPx();
+    } else {
+        fontSizeValue = value.Value();
+    }
+    adaptMaxFontSize_ = Dimension(fontSizeValue);
+    CHECK_NULL_VOID(adaptMaxFontSizeFloat_);
+    adaptMaxFontSizeFloat_->Set(fontSizeValue);
 }
 
 void TextContentModifier::SetFontWeight(const FontWeight& value)
@@ -598,28 +695,106 @@ void TextContentModifier::SetContentSize(SizeF& value)
     contentSize_->Set(value);
 }
 
-void TextContentModifier::StartTextRace()
+bool TextContentModifier::SetTextRace(
+    const double& step, const int32_t& loop, const MarqueeDirection& direction, const int32_t& delay)
 {
-    if (textRacing_) {
-        return;
-    }
-
-    textRacing_ = true;
-
+    CHECK_NULL_RETURN(paragraph_, false);
     textRaceSpaceWidth_ = RACE_SPACE_WIDTH;
     auto pipeline = PipelineContext::GetCurrentContext();
     if (pipeline) {
         textRaceSpaceWidth_ *= pipeline->GetDipScale();
     }
 
+    auto duration =
+        static_cast<int32_t>(std::abs(paragraph_->GetTextWidth() + textRaceSpaceWidth_) * RACE_DURATION_RATIO);
+    if (step > 0) {
+        duration = static_cast<int32_t>(duration / step);
+    }
+
+    if (duration <= 0) {
+        return false;
+    }
+    if (textRacing_ && NearEqual(step, marqueeStep_) && (loop == marqueeLoop_) && (direction == marqueeDirection_) &&
+        (delay == marqueeDelay_) && (duration == marqueeDuration_)) {
+        return false;
+    }
+    if (textRacing_) {
+        StopTextRace();
+    }
+
+    marqueeStep_ = step;
+    marqueeDuration_ = duration;
+    marqueeDirection_ = direction;
+    marqueeDelay_ = delay;
+    marqueeLoop_ = loop;
+    if (marqueeLoop_ > 0 && marqueeCount_ >= marqueeLoop_) {
+        return false;
+    }
+
+    textRacing_ = true;
+    auto textPattern = DynamicCast<TextPattern>(pattern_.Upgrade());
+    CHECK_NULL_RETURN(textPattern, false);
+    textPattern->FireOnMarqueeStateChange(TextMarqueeState::START);
+
+    return true;
+}
+
+void TextContentModifier::StartTextRace(const double& step, const int32_t& loop, const MarqueeDirection& direction,
+    const int32_t& delay, const bool& isBounce)
+{
+    if (!isBounce && !SetTextRace(step, loop, direction, delay)) {
+        return;
+    }
+
     AnimationOption option = AnimationOption();
     RefPtr<Curve> curve = MakeRefPtr<LinearCurve>();
-    option.SetDuration(RACE_DURATION);
-    option.SetDelay(0);
+    option.SetDuration(marqueeDuration_);
+    option.SetDelay(isBounce ? marqueeDelay_ : 0);
     option.SetCurve(curve);
-    option.SetIteration(-1);
-    option.SetTempo(RACE_TEMPO);
-    raceAnimation_ = AnimationUtils::StartAnimation(option, [&]() { racePercentFloat_->Set(RACE_MOVE_PERCENT_MAX); });
+    option.SetIteration(1);
+
+    marqueeAnimationId_++;
+    racePercentFloat_->Set(RACE_MOVE_PERCENT_MIN);
+    raceAnimation_ = AnimationUtils::StartAnimation(
+        option, [&]() { racePercentFloat_->Set(RACE_MOVE_PERCENT_MAX); },
+        [weak = AceType::WeakClaim(this), marqueeAnimationId = marqueeAnimationId_, id = Container::CurrentId()]() {
+            auto modifier = weak.Upgrade();
+            CHECK_NULL_VOID(modifier);
+
+            ContainerScope scope(id);
+            auto taskExecutor = Container::CurrentTaskExecutor();
+            CHECK_NULL_VOID(taskExecutor);
+
+            auto onFinish = [weak, marqueeAnimationId]() {
+                auto modifier = weak.Upgrade();
+                CHECK_NULL_VOID(modifier);
+
+                if (marqueeAnimationId != modifier->marqueeAnimationId_) {
+                    return;
+                }
+
+                modifier->marqueeCount_++;
+                auto textPattern = DynamicCast<TextPattern>(modifier->pattern_.Upgrade());
+                CHECK_NULL_VOID(textPattern);
+
+                if (modifier->marqueeLoop_ > 0 && modifier->marqueeCount_ >= modifier->marqueeLoop_) {
+                    textPattern->FireOnMarqueeStateChange(TextMarqueeState::FINISH);
+                } else {
+                    textPattern->FireOnMarqueeStateChange(TextMarqueeState::BOUNCE);
+                    auto frameNode = textPattern->GetHost();
+                    CHECK_NULL_VOID(frameNode);
+                    frameNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+                    modifier->StartTextRace(modifier->marqueeStep_, modifier->marqueeLoop_, modifier->marqueeDirection_,
+                        modifier->marqueeDelay_, true);
+                }
+            };
+
+            if (taskExecutor->WillRunOnCurrentThread(TaskExecutor::TaskType::UI)) {
+                onFinish();
+            } else {
+                taskExecutor->PostTask([onFinish]() { onFinish(); }, TaskExecutor::TaskType::UI);
+            }
+        });
 }
 
 void TextContentModifier::StopTextRace()

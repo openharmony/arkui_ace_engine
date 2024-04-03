@@ -29,6 +29,9 @@ template("plugin_frontend") {
     ]
 
     deps = [ "$ace_root/frameworks/core/components/theme:build_theme_code" ]
+    if (use_hilog) {
+      external_deps = [ "hilog:libhilog" ]
+    }
   }
 }
 

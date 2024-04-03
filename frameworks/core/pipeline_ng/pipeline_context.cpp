@@ -284,7 +284,7 @@ void PipelineContext::FlushDirtyNodeUpdate()
     // use maxFlushTimes to avoid dead cycle.
     int maxFlushTimes = 3;
     while (!dirtyNodes_.empty() && maxFlushTimes > 0) {
-        ArkUIPerfMonitor::GetInstance().RecordNodeNum(dirtyNodes_.size());
+        ArkUIPerfMonitor::GetInstance().RecordStateMgmtNode(dirtyNodes_.size());
         decltype(dirtyNodes_) dirtyNodes(std::move(dirtyNodes_));
         for (const auto& node : dirtyNodes) {
             if (AceType::InstanceOf<NG::CustomNodeBase>(node)) {
@@ -592,7 +592,6 @@ void PipelineContext::IsCloseSCBKeyboard()
 void PipelineContext::FlushOnceVsyncTask()
 {
     if (onceVsyncListener_ != nullptr) {
-        ACE_SCOPED_TRACE("arkoala build");
         onceVsyncListener_();
         onceVsyncListener_ = nullptr;
     }
@@ -1301,6 +1300,8 @@ void PipelineContext::SetRootRect(double width, double height, double offset)
     if (Container::CurrentId() < MIN_SUBCONTAINER_ID) {
         ScreenSystemManager::GetInstance().SetWindowInfo(rootWidth_, density_, dipScale_);
         ScreenSystemManager::GetInstance().OnSurfaceChanged(width);
+    } else {
+        ScreenSystemManager::GetInstance().SetWindowInfo(density_, dipScale_);
     }
     SizeF sizeF { static_cast<float>(width), static_cast<float>(height) };
     if (rootNode_->GetGeometryNode()->GetFrameSize() != sizeF || rootNode_->IsLayoutDirtyMarked()) {
@@ -1421,7 +1422,7 @@ PipelineBase::SafeAreaInsets PipelineContext::GetSafeAreaWithoutProcess() const
 void PipelineContext::SyncSafeArea(bool onKeyboard)
 {
     CHECK_NULL_VOID(stageManager_);
-    auto page = stageManager_->GetLastPage();
+    auto page = stageManager_->GetLastPageWithTransition();
     if (page) {
         page->MarkDirtyNode(onKeyboard && !safeAreaManager_->KeyboardSafeAreaEnabled() ? PROPERTY_UPDATE_LAYOUT
                                                                                        : PROPERTY_UPDATE_MEASURE);
@@ -2050,6 +2051,14 @@ bool PipelineContext::CheckPageFocus()
     return pageNode->GetFocusHub() && pageNode->GetFocusHub()->IsCurrentFocus();
 }
 
+bool PipelineContext::CheckOverlayFocus()
+{
+    CHECK_NULL_RETURN(overlayManager_, false);
+    auto overlayNode = overlayManager_->GetOverlayNode();
+    CHECK_NULL_RETURN(overlayNode, false);
+    return overlayNode->GetFocusHub() && overlayNode->GetFocusHub()->IsCurrentFocus();
+}
+
 void PipelineContext::NotifyFillRequestSuccess(AceAutoFillType autoFillType, RefPtr<ViewDataWrap> viewDataWrap)
 {
     CHECK_NULL_VOID(viewDataWrap);
@@ -2336,13 +2345,13 @@ void PipelineContext::FlushMouseEvent()
     eventManager_->DispatchMouseHoverAnimationNG(scaleEvent);
 }
 
-bool PipelineContext::ChangeMouseStyle(int32_t nodeId, MouseFormat format, int32_t windowId)
+bool PipelineContext::ChangeMouseStyle(int32_t nodeId, MouseFormat format, int32_t windowId, bool isByPass)
 {
     auto window = GetWindow();
     if (window && window->IsUserSetCursor()) {
         return false;
     }
-    if (mouseStyleNodeId_ != nodeId) {
+    if (mouseStyleNodeId_ != nodeId || isByPass) {
         return false;
     }
     auto mouseStyle = MouseStyle::CreateMouseStyle();
@@ -2593,14 +2602,8 @@ void PipelineContext::HandleOnAreaChangeEvent(uint64_t nanoTimestamp)
     if (onAreaChangeNodeIds_.empty()) {
         return;
     }
-    if (!isOnAreaChangeNodesCacheVaild_) {
-        onAreaChangeNodesCache_ = FrameNode::GetNodesPtrById(onAreaChangeNodeIds_);
-        isOnAreaChangeNodesCacheVaild_ = true;
-    }
-    for (auto && frameNode : onAreaChangeNodesCache_) {
-        if (!frameNode) {
-            continue;
-        }
+    auto nodes = FrameNode::GetNodesById(onAreaChangeNodeIds_);
+    for (auto&& frameNode : nodes) {
         frameNode->TriggerOnAreaChangeCallback(nanoTimestamp);
     }
     UpdateFormLinkInfos();
