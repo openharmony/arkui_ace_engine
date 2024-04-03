@@ -62,12 +62,13 @@ constexpr float SWIPER_HEIGHT = 800.f;
 constexpr int32_t ITEM_NUMBER = 4;
 constexpr int32_t DEFAULT_INTERVAL = 3000;
 constexpr int32_t DEFAULT_DURATION = 400;
-constexpr float DRAG_SPEED = 500.0f;
-constexpr float DRAG_OFFSET_X = 50.0f;
 constexpr float CAPTURE_MARGIN_SIZE = 15.0f;
 const SwiperArrowParameters ARROW_PARAMETERS = {
     true, true, Dimension(24.f), Color::BLACK, Dimension(18.f), Color::FromString("#182431")
 };
+const Color HOVER_ARROW_COLOR = Color::GRAY;
+const Color CLICK_ARROW_COLOR = Color::FromString("#19182431");
+constexpr double ARROW_DISABLED_ALPHA = 0.5;
 
 class SwiperTestNg : public TestNG {
 public:

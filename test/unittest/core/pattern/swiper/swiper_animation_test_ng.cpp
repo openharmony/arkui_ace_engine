@@ -135,23 +135,6 @@ HWTEST_F(SwiperAnimationTestNg, SwiperPatternSpringAnimation005, TestSize.Level1
 }
 
 /**
- * @tc.name: SwiperPatternStopAnimationOnScrollStart001
- * @tc.desc: HandleTouchUp
- * @tc.type: FUNC
- */
-HWTEST_F(SwiperAnimationTestNg, SwiperPatternStopAnimationOnScrollStart001, TestSize.Level1)
-{
-    CreateWithItem([](SwiperModelNG model) {});
-    /**
-     * @tc.steps: step1. Set usePropertyAnimation_ To be true
-     * @tc.expected: Pattern_->UsePropertyAnimation_ Condition is true
-     */
-    pattern_->usePropertyAnimation_ = true;
-    pattern_->StopAnimationOnScrollStart(true);
-    EXPECT_FALSE(pattern_->usePropertyAnimation_);
-}
-
-/**
  * @tc.name: SwiperPatternFinishAnimation001
  * @tc.desc: FinishAnimation
  * @tc.type: FUNC

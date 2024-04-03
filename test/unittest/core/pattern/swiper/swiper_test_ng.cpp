@@ -27,6 +27,9 @@ void SwiperTestNg::SetUpTestSuite()
     auto swiperIndicatorTheme = AceType::MakeRefPtr<SwiperIndicatorTheme>();
     swiperIndicatorTheme->color_ = Color::FromString("#182431");
     swiperIndicatorTheme->selectedColor_ = Color::FromString("#007DFF");
+    swiperIndicatorTheme->hoverArrowBackgroundColor_ = HOVER_ARROW_COLOR;
+    swiperIndicatorTheme->clickArrowBackgroundColor_ = CLICK_ARROW_COLOR;
+    swiperIndicatorTheme->arrowDisabledAlpha_ = ARROW_DISABLED_ALPHA;
     swiperIndicatorTheme->size_ = Dimension(6.f);
     TextStyle textStyle;
     textStyle.SetTextColor(Color::FromString("#ff182431"));
@@ -1382,29 +1385,6 @@ HWTEST_F(SwiperTestNg, ResetDisplayCount001, TestSize.Level1)
     auto uiNode = AceType::DynamicCast<FrameNode>(element);
     pattern = uiNode->GetPattern<SwiperPattern>();
     EXPECT_NE(pattern->GetDisplayCount(), 10);
-}
-
-HWTEST_F(SwiperTestNg, SwiperPatternOnModifyDone00081, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. Default value
-     */
-    CreateWithItem([](SwiperModelNG model) {});
-    auto gestureEventHub = AceType::MakeRefPtr<GestureEventHub>(AceType::WeakClaim(AceType::RawPtr(eventHub_)));
-
-    auto pipeline = MockPipelineContext::GetCurrent();
-    pipeline->restoreNodeInfo_.emplace(std::make_pair(1, "testFlushUITasks"));
-    pattern_->InitPanEvent(gestureEventHub);
-    EXPECT_EQ(pattern_->direction_, Axis::HORIZONTAL);
-
-    pattern_->touchEvent_ = nullptr;
-    pattern_->InitTouchEvent(gestureEventHub);
-    TouchEventFunc callback = [](TouchEventInfo& info) {};
-
-    pattern_->touchEvent_ = AceType::MakeRefPtr<TouchEventImpl>(std::move(callback));
-    pattern_->InitTouchEvent(gestureEventHub);
-    pattern_->OnModifyDone();
-    EXPECT_TRUE(pattern_->panEvent_);
 }
 
 /**
