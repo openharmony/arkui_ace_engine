@@ -554,6 +554,7 @@ private:
     void InitCommonDragDropEvent(const RefPtr<GestureEventHub>& gestureHub);
     void InitWebEventHubDragDropStart(const RefPtr<WebEventHub>& eventHub);
     void InitWebEventHubDragDropEnd(const RefPtr<WebEventHub>& eventHub);
+    void InitWebEventHubDragMove(const RefPtr<WebEventHub>& eventHub);
     void InitPanEvent(const RefPtr<GestureEventHub>& gestureHub);
     void HandleDragMove(const GestureEvent& event);
     void InitDragEvent(const RefPtr<GestureEventHub>& gestureHub);

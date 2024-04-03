@@ -105,7 +105,11 @@ void DragEventActuator::StartDragTaskForWeb(const GestureEvent& info)
 {
     auto gestureInfo = const_cast<GestureEvent&>(info);
     if (actionStart_) {
+        TAG_LOGI(AceLogTag::ACE_WEB, "DragDrop start drag task for web success");
         actionStart_(gestureInfo);
+    } else {
+        TAG_LOGE(AceLogTag::ACE_WEB, "DragDrop start drag task for web failed,"
+            "because actionStart function is null");
     }
 }
 
