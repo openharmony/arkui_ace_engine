@@ -282,7 +282,8 @@ bool IsResourceDecoupling()
 
 bool IsAcePerformanceMonitorEnabled()
 {
-    return system::GetBoolParameter("persist.ace.performance.monitor.enabled", false);
+    return system::GetParameter("const.logsystem.versiontype", "commercial") == "beta" ||
+           system::GetBoolParameter("persist.ace.performance.monitor.enabled", false);
 }
 } // namespace
 
@@ -466,6 +467,7 @@ void SystemProperties::InitDeviceInfo(
     navigationBlurEnabled_ = IsNavigationBlurEnabled();
     gridCacheEnabled_ = IsGridCacheEnabled();
     sideBarContainerBlurEnable_ = IsSideBarContainerBlurEnable();
+    acePerformanceMonitorEnable_ = IsAcePerformanceMonitorEnabled();
 
     if (isRound_) {
         screenShape_ = ScreenShape::ROUND;

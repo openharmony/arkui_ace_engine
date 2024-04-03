@@ -20,6 +20,7 @@
 #include "base/geometry/dimension.h"
 #include "base/geometry/ng/offset_t.h"
 #include "base/geometry/ng/point_t.h"
+#include "base/log/ace_performance_monitor.h"
 #include "base/log/ace_trace.h"
 #include "base/log/dump_log.h"
 #include "base/log/log_wrapper.h"
@@ -1312,6 +1313,7 @@ std::optional<UITask> FrameNode::CreateRenderTask(bool forceUseMainThread)
     auto task = [weak = WeakClaim(this), wrapper, paintProperty = paintProperty_]() {
         auto self = weak.Upgrade();
         ACE_SCOPED_TRACE("FrameNode[%s][id:%d]::RenderTask", self->GetTag().c_str(), self->GetId());
+        ArkUIPerfMonitor::GetInstance().RecordRenderNode();
         wrapper->FlushRender();
         paintProperty->CleanDirty();
 
@@ -2880,6 +2882,7 @@ void FrameNode::Measure(const std::optional<LayoutConstraintF>& parentConstraint
 {
     ACE_LAYOUT_SCOPED_TRACE("Measure[%s][self:%d][parent:%d][key:%s]", GetTag().c_str(),
         GetId(), GetAncestorNodeOfFrame() ? GetAncestorNodeOfFrame()->GetId() : 0, GetInspectorIdValue("").c_str());
+    ArkUIPerfMonitor::GetInstance().RecordLayoutNode();
 
     if (SelfOrParentExpansive() && needRestoreSafeArea_) {
         RestoreGeoState();
