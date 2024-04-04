@@ -318,12 +318,32 @@ OffsetF SelectOverlayLayoutAlgorithm::ComputeSelectMenuPosition(LayoutWrapper* l
     auto menuRect = RectF(menuPosition, SizeF(menuWidth, menuHeight));
     menuPosition = info_->isNewAvoid && !info_->isSingleHandle ? NewMenuAvoidStrategy(menuWidth, menuHeight) :
         AdjustSelectMenuOffset(layoutWrapper, menuRect, menuSpacingBetweenText, menuSpacingBetweenHandle);
-    adjustPositionXWithViewPort(menuPosition);
+    AdjustMenuInRootRect(menuPosition, menuRect.GetSize(), layoutWrapper->GetGeometryNode()->GetFrameSize());
     defaultMenuEndOffset_ = menuPosition + OffsetF(menuWidth, 0.0f);
     if (isExtension) {
         return defaultMenuEndOffset_ - OffsetF(width, 0);
     }
     return menuPosition;
+}
+
+void SelectOverlayLayoutAlgorithm::AdjustMenuInRootRect(
+    OffsetF& menuOffset, const SizeF& menuSize, const SizeF& rootSize)
+{
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto theme = pipeline->GetTheme<TextOverlayTheme>();
+    CHECK_NULL_VOID(theme);
+    // adjust x
+    auto defaultPositionX = theme->GetDefaultMenuPositionX();
+    auto menuX = LessOrEqual(menuOffset.GetX(), 0.0f) ? defaultPositionX : menuOffset.GetX();
+    menuX = GreatOrEqual(menuX + menuSize.Width(), rootSize.Width())
+                ? rootSize.Width() - defaultPositionX - menuSize.Width()
+                : menuX;
+    menuOffset.SetX(menuX);
+    // adjust y
+    auto menuY = LessNotEqual(menuOffset.GetY(), 0.0f) ? 0.0f : menuOffset.GetY();
+    menuY = GreatNotEqual(menuY + menuSize.Height(), rootSize.Height()) ? rootSize.Height() - menuSize.Height() : menuY;
+    menuOffset.SetY(menuY);
 }
 
 OffsetF SelectOverlayLayoutAlgorithm::AdjustSelectMenuOffset(
