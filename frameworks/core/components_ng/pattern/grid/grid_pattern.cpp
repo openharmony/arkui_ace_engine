@@ -79,7 +79,7 @@ RefPtr<LayoutAlgorithm> GridPattern::CreateLayoutAlgorithm()
         result = MakeRefPtr<GridScrollLayoutAlgorithm>(gridLayoutInfo_, crossCount, mainCount);
     } else if (SystemProperties::GetGridIrregularLayoutEnabled()) {
         auto algo = MakeRefPtr<GridIrregularLayoutAlgorithm>(gridLayoutInfo_, CanOverScroll(GetScrollSource()));
-        algo->SetEnableSkip(ScrollablePattern::AnimateRunning());
+        algo->SetEnableSkip(!ScrollablePattern::AnimateRunning());
         return algo;
     } else {
         result = MakeRefPtr<GridScrollWithOptionsLayoutAlgorithm>(gridLayoutInfo_, crossCount, mainCount);
@@ -255,8 +255,8 @@ bool GridPattern::IsItemSelected(const GestureEvent& info)
 
 void GridPattern::FireOnScrollStart()
 {
-    UIObserverHandler::GetInstance().NotifyScrollEventStateChange(AceType::WeakClaim(this),
-        ScrollEventType::SCROLL_START);
+    UIObserverHandler::GetInstance().NotifyScrollEventStateChange(
+        AceType::WeakClaim(this), ScrollEventType::SCROLL_START);
     PerfMonitor::GetPerfMonitor()->Start(PerfConstants::APP_LIST_FLING, PerfActionType::FIRST_MOVE, "");
     if (GetScrollAbort()) {
         return;
@@ -343,8 +343,8 @@ bool GridPattern::UpdateCurrentOffset(float offset, int32_t source)
     // When finger moves up, offset is negative.
     auto itemsHeight = gridLayoutInfo_.GetTotalHeightOfItemsInView(GetMainGap());
     if (gridLayoutInfo_.offsetEnd_) {
-        auto overScroll = gridLayoutInfo_.currentOffset_ - (GetMainContentSize() - itemsHeight);
         if (source == SCROLL_FROM_UPDATE) {
+            auto overScroll = gridLayoutInfo_.currentOffset_ - (GetMainContentSize() - itemsHeight);
             auto friction = ScrollablePattern::CalculateFriction(std::abs(overScroll) / GetMainContentSize());
             offset *= friction;
         }
@@ -384,7 +384,6 @@ bool GridPattern::UpdateCurrentOffset(float offset, int32_t source)
     }
     FireOnWillScroll(-offset);
     gridLayoutInfo_.currentOffset_ += offset;
-    std::cout << "current offset = " << gridLayoutInfo_.currentOffset_ << std::endl;
     host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
     return true;
 }
@@ -1499,10 +1498,8 @@ float GridPattern::GetEndOffset()
 {
     float contentHeight = gridLayoutInfo_.lastMainSize_ - gridLayoutInfo_.contentEndPadding_;
     float mainGap = GetMainGap();
-    if (GetAlwaysEnabled() &&
-        GreatNotEqual(contentHeight, gridLayoutInfo_.GetTotalLineHeight(mainGap))) {
-        return gridLayoutInfo_.GetTotalLineHeight(mainGap) -
-                gridLayoutInfo_.GetTotalHeightOfItemsInView(mainGap);
+    if (GetAlwaysEnabled() && GreatNotEqual(contentHeight, gridLayoutInfo_.GetTotalLineHeight(mainGap))) {
+        return gridLayoutInfo_.GetTotalLineHeight(mainGap) - gridLayoutInfo_.GetTotalHeightOfItemsInView(mainGap);
     }
     return contentHeight - gridLayoutInfo_.GetTotalHeightOfItemsInView(mainGap);
 }
@@ -1551,8 +1548,8 @@ OverScrollOffset GridPattern::GetOverScrollOffset(double delta) const
     }
     if (gridLayoutInfo_.endIndex_ == gridLayoutInfo_.childrenCount_ - 1) {
         auto endPos = gridLayoutInfo_.currentOffset_ + gridLayoutInfo_.totalHeightOfItemsInView_;
-        if (GreatNotEqual(GetMainContentSize(),
-            gridLayoutInfo_.currentOffset_ + gridLayoutInfo_.totalHeightOfItemsInView_)) {
+        if (GreatNotEqual(
+                GetMainContentSize(), gridLayoutInfo_.currentOffset_ + gridLayoutInfo_.totalHeightOfItemsInView_)) {
             endPos = gridLayoutInfo_.currentOffset_ + GetMainContentSize();
         }
         auto newEndPos = endPos + delta;

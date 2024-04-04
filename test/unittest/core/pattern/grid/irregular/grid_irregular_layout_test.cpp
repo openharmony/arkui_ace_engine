@@ -16,6 +16,7 @@
 #include "irregular_matrices.h"
 #include "test/unittest/core/pattern/grid/grid_test_ng.h"
 
+#include "core/components/common/layout/constants.h"
 #include "core/components/scroll/scroll_controller_base.h"
 #include "core/components_ng/pattern/grid/grid_layout_info.h"
 #include "core/components_ng/pattern/grid/irregular/grid_irregular_layout_algorithm.h"
@@ -136,6 +137,7 @@ HWTEST_F(GridIrregularLayoutTest, SolveForward001, TestSize.Level1)
     info.startMainLineIndex_ = 3;
     auto res = solver.FindStartingRow(1.0f);
     EXPECT_EQ(res.row, 3);
+    EXPECT_EQ(res.idx, 4);
     EXPECT_EQ(res.pos, 0.0f);
 
     info.currentOffset_ = -20.0f;
@@ -164,6 +166,7 @@ HWTEST_F(GridIrregularLayoutTest, SolveForward001, TestSize.Level1)
         info.startMainLineIndex_ = 3;
         res = solver.FindStartingRow(1.0f);
         EXPECT_EQ(res.row, 4);
+        EXPECT_EQ(res.idx, 5);
         EXPECT_EQ(res.pos, 1.0f - i * 1.0f);
     }
 
@@ -576,15 +579,18 @@ HWTEST_F(GridIrregularLayoutTest, Measure004, TestSize.Level1)
         EXPECT_EQ(info.endIndex_, 4);
     }
 
-    info.startMainLineIndex_ = 2;
-    info.startIndex_ = 2;
-    info.currentOffset_ = -400.0f;
+    info.startMainLineIndex_ = 0;
+    info.startIndex_ = 0;
+    info.currentOffset_ = -1000.0f;
     algorithm->Measure(AceType::RawPtr(frameNode_));
     EXPECT_EQ(info.currentOffset_, -303.5f);
     EXPECT_EQ(info.startMainLineIndex_, 0);
     EXPECT_EQ(info.endMainLineIndex_, 5);
     EXPECT_EQ(info.startIndex_, 0);
     EXPECT_EQ(info.endIndex_, 7);
+    std::map<int32_t, float> EXPECTED_MAP = { { 0, 99.5 }, { 1, 99.5 }, { 2, 200.0f }, { 3, 200.0f }, { 4, 200.0f },
+        { 5, 99.5f } };
+    EXPECT_EQ(info.lineHeightMap_, EXPECTED_MAP);
 }
 
 /**
@@ -925,6 +931,7 @@ HWTEST_F(GridIrregularLayoutTest, Layout001, TestSize.Level1)
     });
     frameNode_->GetGeometryNode()->UpdatePaddingWithBorder(PaddingPropertyF { .left = 1.0f, .top = 1.0f });
     frameNode_->GetGeometryNode()->SetFrameSize(SizeF { 200.0f, 500.0f });
+    frameNode_->GetGeometryNode()->SetContentSize(SizeF { 200.0f, 500.0f });
 
     auto algorithm = AceType::MakeRefPtr<GridIrregularLayoutAlgorithm>(GridLayoutInfo {});
     algorithm->crossLens_ = { 50.0f, 50.0f, 50.0f };
@@ -943,8 +950,8 @@ HWTEST_F(GridIrregularLayoutTest, Layout001, TestSize.Level1)
     info.startIndex_ = 0;
     info.endIndex_ = 9;
     info.currentOffset_ = 10.0f;
-    algorithm->UpdateLayoutInfo();
     algorithm->Layout(AceType::RawPtr(frameNode_));
+    algorithm->UpdateLayoutInfo();
 
     EXPECT_TRUE(info.reachStart_);
     EXPECT_TRUE(info.reachEnd_);
@@ -1455,23 +1462,27 @@ HWTEST_F(GridIrregularLayoutTest, Integrated001, TestSize.Level1)
         model.SetColumnsTemplate("1fr 1fr 1fr");
         model.SetLayoutOptions(GetOptionDemo8());
         model.SetColumnsGap(Dimension { 5.0f });
-        model.SetRowsGap(Dimension { 1.0f });
+        // model.SetRowsGap(Dimension { 1.0f });
         CreateFixedItem(7);
+        model.SetEdgeEffect(EdgeEffect::NONE, true);
     });
+    const std::map<int32_t, float> HEIGHT_MAP = { { 0, 200.0f }, { 1, 100.0f }, { 2, 100.0f }, { 3, 200.0f },
+        { 4, 200.0f }, { 5, 200.0f / 3 } };
     auto& info = pattern_->gridLayoutInfo_;
-    EXPECT_EQ(info.currentOffset_, 0.0f);
     EXPECT_EQ(info.startIndex_, 0);
     EXPECT_EQ(info.endIndex_, 6);
     EXPECT_EQ(info.startMainLineIndex_, 0);
     EXPECT_EQ(info.endMainLineIndex_, 4);
+    EXPECT_EQ(info.lineHeightMap_, HEIGHT_MAP);
+    EXPECT_EQ(info.gridMatrix_, MATRIX_DEMO_8);
 
-    UpdateCurrentOffset(-1000.0f);
-    EXPECT_EQ(info.currentOffset_, -70.0f);
+    UpdateCurrentOffset(-200.0f);
+    EXPECT_FLOAT_EQ(info.currentOffset_, -200.0f / 3);
     EXPECT_EQ(info.endIndex_, 6);
     EXPECT_EQ(info.startIndex_, 0);
     EXPECT_EQ(info.startMainLineIndex_, 0);
     EXPECT_EQ(info.endMainLineIndex_, 5);
-    EXPECT_EQ(info.gridMatrix_, MATRIX_DEMO_8);
+    EXPECT_TRUE(info.offsetEnd_);
 }
 
 /**
@@ -1568,6 +1579,7 @@ HWTEST_F(GridIrregularLayoutTest, OverScroll001, TestSize.Level1)
     UpdateCurrentOffset(200.0f);
     EXPECT_EQ(info.currentOffset_, -350.0f);
     EXPECT_EQ(info.startIndex_, 0);
+    EXPECT_EQ(info.startMainLineIndex_, 0);
 
     UpdateCurrentOffset(-300.0f);
     EXPECT_EQ(info.startIndex_, 2);

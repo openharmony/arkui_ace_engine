@@ -579,6 +579,7 @@ float GridLayoutInfo::GetTotalHeightOfItemsInView(float mainGap) const
 
     auto endIt = lineHeightMap_.find(endMainLineIndex_ + 1);
     for (auto it = lineHeightMap_.find(startMainLineIndex_); it != endIt; ++it) {
+        // skip adding starting lines that are outside viewport in LayoutIrregular
         if (Negative(it->second + offset + mainGap)) {
             offset += it->second + mainGap;
             continue;
