@@ -91,6 +91,7 @@ void ListLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     paddingAfterContent_ = axis_ == Axis::HORIZONTAL ? padding.right.value_or(0) : padding.bottom.value_or(0);
     contentMainSize_ = 0.0f;
     totalItemCount_ = layoutWrapper->GetTotalChildCount();
+    isSnapCenter_ = IsScrollSnapAlignCenter(layoutWrapper);
     if (!GetMainAxisSize(contentIdealSize, axis_)) {
         if (totalItemCount_ == 0) {
             contentMainSize_ = 0.0f;
@@ -1313,7 +1314,7 @@ void ListLayoutAlgorithm::SetListItemGroupParam(const RefPtr<LayoutWrapper>& lay
     }
     itemGroup->SetListMainSize(startMainPos_, endMainPos_, referencePos, forwardLayout);
     itemGroup->SetListLayoutProperty(layoutProperty);
-    if (!IsScrollSnapAlignCenter(RawPtr(layoutWrapper))) {
+    if (!isSnapCenter_) {
         itemGroup->SetContentOffset(contentStartOffset_, contentEndOffset_);
     }
     if (jumpIndex_.has_value() && jumpIndex_.value() == index) {
