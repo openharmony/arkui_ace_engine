@@ -14323,6 +14323,23 @@ class CheckboxGroupHeightModifier extends ModifierWithKey {
   }
 }
 CheckboxGroupHeightModifier.identity = Symbol('checkboxGroupHeight');
+class CheckboxGroupStyleModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().checkboxgroup.resetCheckboxGroupStyle(node);
+    } else {
+      getUINativeModule().checkboxgroup.setCheckboxGroupStyle(node, this.value);
+    }
+  }
+
+  checkObjectDiff() {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+CheckboxGroupStyleModifier.identity = Symbol('checkboxgroupStyle');
 class ArkCheckboxGroupComponent extends ArkComponent {
   constructor(nativePtr, classType) {
     super(nativePtr, classType);
@@ -14356,6 +14373,10 @@ class ArkCheckboxGroupComponent extends ArkComponent {
   }
   height(value) {
     modifierWithKey(this._modifiersWithKeys, CheckboxGroupHeightModifier.identity, CheckboxGroupHeightModifier, value);
+    return this;
+  }
+  checkboxShape(value) {
+    modifierWithKey(this._modifiersWithKeys, CheckboxGroupStyleModifier.identity, CheckboxGroupStyleModifier, value);
     return this;
   }
 }
