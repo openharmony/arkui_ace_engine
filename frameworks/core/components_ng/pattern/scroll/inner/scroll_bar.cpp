@@ -332,11 +332,12 @@ double ScrollBar::GetNormalWidthToPx() const
 
 float ScrollBar::CalcPatternOffset(float scrollBarOffset) const
 {
-    if (!isDriving_ || NearZero(barRegionSize_ - activeRect_.Height())) {
+    auto activeRectLength = positionMode_ == PositionMode::BOTTOM ? activeRect_.Width() : activeRect_.Height();
+    if (!isDriving_ || NearZero(barRegionSize_ - activeRectLength)) {
         return scrollBarOffset;
     }
     auto mainSize = (positionMode_ == PositionMode::BOTTOM ? viewPortSize_.Width() : viewPortSize_.Height());
-    return -scrollBarOffset * (estimatedHeight_ - mainSize) / (barRegionSize_ - activeRect_.Height());
+    return -scrollBarOffset * (estimatedHeight_ - mainSize) / (barRegionSize_ - activeRectLength);
 }
 
 double ScrollBar::NormalizeToPx(const Dimension& dimension) const
