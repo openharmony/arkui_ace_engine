@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -14,8 +14,6 @@
  */
 
 #include "core/components_ng/pattern/grid/grid_scroll/grid_scroll_with_options_layout_algorithm.h"
-
-#include <algorithm>
 
 #include "core/components_ng/pattern/grid/grid_item_pattern.h"
 
@@ -254,5 +252,20 @@ void GridScrollWithOptionsLayoutAlgorithm::SkipLargeOffset(float mainSize, Layou
 {
     SkipForwardLines(mainSize, layoutWrapper);
     SkipBackwardLines(mainSize, layoutWrapper);
+}
+
+void GridScrollWithOptionsLayoutAlgorithm::SkipIrregularLines(LayoutWrapper* layoutWrapper, bool forward)
+{
+    auto layoutProperty = DynamicCast<GridLayoutProperty>(layoutWrapper->GetLayoutProperty());
+    CHECK_NULL_VOID(layoutProperty);
+    const auto& options = *layoutProperty->GetLayoutOptions();
+    if (options.irregularIndexes.empty()) {
+        return SkipRegularLines(forward);
+    }
+    if (options.getSizeByIndex) {
+        return GridScrollLayoutAlgorithm::SkipIrregularLines(layoutWrapper, forward);
+    }
+
+    gridLayoutInfo_.SkipStartIndexByOffset(options, mainGap_);
 }
 } // namespace OHOS::Ace::NG

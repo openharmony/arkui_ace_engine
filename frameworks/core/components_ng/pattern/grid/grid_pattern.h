@@ -290,9 +290,6 @@ private:
     double GetNearestDistanceFromChildToCurFocusItemInCrossAxis(int32_t targetIndex, GridItemIndexInfo itemIndexInfo);
     void ResetAllDirectionsStep();
 
-    float prevHeight_ = 0;
-    float currentHeight_ = 0;
-
     bool supportAnimation_ = false;
     bool isConfigScrollable_ = false;
 
