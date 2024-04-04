@@ -145,6 +145,27 @@ void ImageFileCache::SaveCacheInner(const std::string& cacheKey, const std::stri
     }
 }
 
+void ImageFileCache::EraseCacheFile(const std::string &url)
+{
+    auto fileCacheKey = std::to_string(std::hash<std::string> {}(url));
+    {
+        std::scoped_lock<std::mutex> lock(cacheFileInfoMutex_);
+        // 1. first check if file has been cached.
+        auto iter = fileNameToFileInfoPos_.find(fileCacheKey);
+        if (iter != fileNameToFileInfoPos_.end()) {
+            auto infoIter = iter->second;
+            auto removeFile = ConstructCacheFilePath(infoIter->fileName);
+            if (remove(removeFile.c_str()) != 0) {
+                TAG_LOGW(AceLogTag::ACE_IMAGE, "remove file %{private}s failed.", removeFile.c_str());
+                return;
+            }
+            cacheFileInfo_.erase(infoIter);
+            cacheFileSize_ -= infoIter->fileSize;
+            fileNameToFileInfoPos_.erase(fileCacheKey);
+        }
+    }
+}
+
 void ImageFileCache::WriteCacheFile(
     const std::string& url, const void* const data, size_t size, const std::string& suffix)
 {

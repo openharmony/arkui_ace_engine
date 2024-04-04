@@ -59,6 +59,7 @@ public:
     void SetCacheFileInfo();
     void WriteCacheFile(
         const std::string& url, const void* data, size_t size, const std::string& suffix = std::string());
+    void EraseCacheFile(const std::string& url);
     void ClearCacheFile(const std::vector<std::string>& removeFiles);
     std::string ConstructCacheFilePath(const std::string& fileName);
     void DumpCacheInfo();

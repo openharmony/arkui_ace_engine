@@ -244,6 +244,14 @@ void ImageLoadingContext::PerformDownload()
     NetworkImageLoader::DownloadImage(std::move(downloadCallback), src_.GetSrc(), syncLoad_);
 }
 
+void ImageLoadingContext::CacheDownloadedImage()
+{
+    CHECK_NULL_VOID(Downloadable());
+    ImageProvider::CacheImageObject(imageObj_);
+    ImageLoader::CacheImageData(GetSourceInfo().GetKey(), imageObj_->GetData());
+    ImageLoader::WriteCacheToFile(GetSourceInfo().GetSrc(), imageDataCopy_);
+}
+
 void ImageLoadingContext::DownloadImageSuccess(const std::string& imageData)
 {
     TAG_LOGI(AceLogTag::ACE_IMAGE, "Download image successfully, srcInfo = %{public}s, ImageData length=%{public}zu",
@@ -259,9 +267,7 @@ void ImageLoadingContext::DownloadImageSuccess(const std::string& imageData)
         FailCallback("ImageObject null");
         return;
     }
-    ImageProvider::CacheImageObject(imageObj);
-    ImageLoader::CacheImageData(GetSourceInfo().GetKey(), data);
-    ImageLoader::WriteCacheToFile(GetSourceInfo().GetSrc(), imageData);
+    imageDataCopy_ = imageData;
     DataReadyCallback(imageObj);
 }
 
@@ -337,6 +343,7 @@ void ImageLoadingContext::DataReadyCallback(const RefPtr<ImageObject>& imageObj)
 void ImageLoadingContext::SuccessCallback(const RefPtr<CanvasImage>& canvasImage)
 {
     canvasImage_ = canvasImage;
+    CacheDownloadedImage();
     stateManager_->HandleCommand(ImageLoadingCommand::MAKE_CANVAS_IMAGE_SUCCESS);
 }
 
@@ -345,6 +352,9 @@ void ImageLoadingContext::FailCallback(const std::string& errorMsg)
     errorMsg_ = errorMsg;
     TAG_LOGW(AceLogTag::ACE_IMAGE, "Image LoadFail, source = %{public}s, reason: %{public}s", src_.ToString().c_str(),
         errorMsg.c_str());
+    if (Downloadable()) {
+        ImageFileCache::GetInstance().EraseCacheFile(GetSourceInfo().GetSrc());
+    }
     stateManager_->HandleCommand(ImageLoadingCommand::LOAD_FAIL);
 }
 
