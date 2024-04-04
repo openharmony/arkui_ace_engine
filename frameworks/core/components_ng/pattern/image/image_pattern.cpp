@@ -308,6 +308,18 @@ void ImagePattern::OnImageLoadSuccess()
     host->MarkNeedRenderOnly();
 }
 
+bool ImagePattern::CheckIfNeeedLayout()
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, true);
+    CHECK_NULL_RETURN(host->GetGeometryNode()->GetContent(), true);
+    const auto& props = DynamicCast<ImageLayoutProperty>(host->GetLayoutProperty());
+    CHECK_NULL_RETURN(props, true);
+    const auto& layoutConstraint = props->GetCalcLayoutConstraint();
+    CHECK_NULL_RETURN(layoutConstraint, true);
+    return !(layoutConstraint->selfIdealSize && layoutConstraint->selfIdealSize->IsValid());
+}
+
 void ImagePattern::OnImageDataReady()
 {
     CHECK_NULL_VOID(loadingCtx_);
@@ -323,18 +335,10 @@ void ImagePattern::OnImageDataReady()
         geometryNode->GetContentOffset().GetX(), geometryNode->GetContentOffset().GetY());
     imageEventHub->FireCompleteEvent(event);
 
-    const auto& props = DynamicCast<ImageLayoutProperty>(host->GetLayoutProperty());
-    if (!props) {
+    if (CheckIfNeeedLayout()) {
         host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
-        return;
-    }
-    auto&& layoutConstraint = props->GetCalcLayoutConstraint();
-
-    if (layoutConstraint && layoutConstraint->selfIdealSize && layoutConstraint->selfIdealSize->IsValid()) {
-        auto geo = host->GetGeometryNode();
-        StartDecoding(geo->GetContentSize());
     } else {
-        host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+        StartDecoding(geometryNode->GetContentSize());
     }
 }
 
