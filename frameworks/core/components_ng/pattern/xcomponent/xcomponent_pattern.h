@@ -292,6 +292,7 @@ private:
     void NativeSurfaceHide();
     void NativeSurfaceShow();
     void OnModifyDone() override;
+    void BeforeCreateLayoutWrapper() override;
 
     void InitNativeNodeCallbacks();
     void InitEvent();

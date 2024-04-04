@@ -85,6 +85,8 @@ public:
 
     virtual void SetExtSurfaceCallback(const RefPtr<ExtSurfaceCallbackInterface>& extSurfaceCallback) {}
 
+    virtual void SetTransformHint(Rotation dmRotation) {}
+
     virtual void SetIsTexture(bool isTexture) {}
 
     virtual void SetIsFullScreen(bool isFullScreen) {}

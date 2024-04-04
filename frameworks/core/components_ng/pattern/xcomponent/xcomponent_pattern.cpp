@@ -400,6 +400,18 @@ void XComponentPattern::ConfigSurface(uint32_t surfaceWidth, uint32_t surfaceHei
     renderSurface_->ConfigSurface(surfaceWidth, surfaceHeight);
 }
 
+void XComponentPattern::BeforeCreateLayoutWrapper()
+{
+    Pattern::BeforeCreateLayoutWrapper();
+    auto container = Container::Current();
+    CHECK_NULL_VOID(container);
+    auto displayInfo = container->GetDisplayInfo();
+    CHECK_NULL_VOID(displayInfo);
+    auto dmRotation = displayInfo->GetRotation();
+    CHECK_NULL_VOID(renderSurface_);
+    renderSurface_->SetTransformHint(dmRotation);
+}
+
 bool XComponentPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config)
 {
     if (type_ == XComponentType::COMPONENT || type_ == XComponentType::NODE
