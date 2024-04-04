@@ -173,7 +173,7 @@ void JSXComponent::Create(const JSCallbackInfo& info)
     }
 
     auto type = paramObject->GetProperty("type");
-    auto libraryname = paramObject->GetProperty("libraryname");
+    auto libraryNameValue = paramObject->GetProperty("libraryname");
     auto controller = paramObject->GetProperty("controller");
     std::shared_ptr<InnerXComponentController> xcomponentController = nullptr;
     JSRef<JSObject> controllerObj;
@@ -194,8 +194,14 @@ void JSXComponent::Create(const JSCallbackInfo& info)
         xcomponentType = static_cast<XComponentType>(type->ToNumber<int32_t>());
     }
     XComponentModel::GetInstance()->Create(
-        id->ToString(), xcomponentType, libraryname->ToString(), xcomponentController);
-    if (libraryname->IsEmpty() && xcomponentController && !controllerObj->IsUndefined()) {
+        id->ToString(), xcomponentType, libraryNameValue->ToString(), xcomponentController);
+
+    if (libraryNameValue->IsString()) {
+        auto libraryName = libraryNameValue->ToString();
+        XComponentModel::GetInstance()->SetLibraryName(libraryName);
+    }
+
+    if (libraryNameValue->IsEmpty() && xcomponentController && !controllerObj->IsUndefined()) {
         SetControllerCallback(controllerObj, info.GetExecutionContext());
     }
 
@@ -334,7 +340,8 @@ void JSXComponent::JsOnDestroy(const JSCallbackInfo& args)
 void JSXComponent::JsOnAppear(const JSCallbackInfo& args)
 {
     auto type = XComponentModel::GetInstance()->GetType();
-    if (type != XComponentType::NODE) {
+    auto libraryName = XComponentModel::GetInstance()->GetLibraryName();
+    if (!XComponentModel::IsCommonEventAvailable(type, libraryName)) {
         return;
     }
     JSInteractableView::JsOnAppear(args);
@@ -343,7 +350,8 @@ void JSXComponent::JsOnAppear(const JSCallbackInfo& args)
 void JSXComponent::JsOnDisAppear(const JSCallbackInfo& args)
 {
     auto type = XComponentModel::GetInstance()->GetType();
-    if (type != XComponentType::NODE) {
+    auto libraryName = XComponentModel::GetInstance()->GetLibraryName();
+    if (!XComponentModel::IsCommonEventAvailable(type, libraryName)) {
         return;
     }
     JSInteractableView::JsOnDisAppear(args);
@@ -352,7 +360,8 @@ void JSXComponent::JsOnDisAppear(const JSCallbackInfo& args)
 void JSXComponent::JsOnTouch(const JSCallbackInfo& args)
 {
     auto type = XComponentModel::GetInstance()->GetType();
-    if (type != XComponentType::NODE) {
+    auto libraryName = XComponentModel::GetInstance()->GetLibraryName();
+    if (!XComponentModel::IsCommonEventAvailable(type, libraryName)) {
         return;
     }
     JSInteractableView::JsOnTouch(args);
@@ -361,7 +370,8 @@ void JSXComponent::JsOnTouch(const JSCallbackInfo& args)
 void JSXComponent::JsOnClick(const JSCallbackInfo& args)
 {
     auto type = XComponentModel::GetInstance()->GetType();
-    if (type != XComponentType::NODE) {
+    auto libraryName = XComponentModel::GetInstance()->GetLibraryName();
+    if (!XComponentModel::IsCommonEventAvailable(type, libraryName)) {
         return;
     }
     JSViewAbstract::JsOnClick(args);
@@ -370,7 +380,8 @@ void JSXComponent::JsOnClick(const JSCallbackInfo& args)
 void JSXComponent::JsOnKeyEvent(const JSCallbackInfo& args)
 {
     auto type = XComponentModel::GetInstance()->GetType();
-    if (type != XComponentType::NODE) {
+    auto libraryName = XComponentModel::GetInstance()->GetLibraryName();
+    if (!XComponentModel::IsCommonEventAvailable(type, libraryName)) {
         return;
     }
     JSViewAbstract::JsOnKeyEvent(args);
@@ -379,7 +390,8 @@ void JSXComponent::JsOnKeyEvent(const JSCallbackInfo& args)
 void JSXComponent::JsOnMouse(const JSCallbackInfo& args)
 {
     auto type = XComponentModel::GetInstance()->GetType();
-    if (type != XComponentType::NODE) {
+    auto libraryName = XComponentModel::GetInstance()->GetLibraryName();
+    if (!XComponentModel::IsCommonEventAvailable(type, libraryName)) {
         return;
     }
     JSViewAbstract::JsOnMouse(args);
@@ -388,7 +400,8 @@ void JSXComponent::JsOnMouse(const JSCallbackInfo& args)
 void JSXComponent::JsOnHover(const JSCallbackInfo& args)
 {
     auto type = XComponentModel::GetInstance()->GetType();
-    if (type != XComponentType::NODE) {
+    auto libraryName = XComponentModel::GetInstance()->GetLibraryName();
+    if (!XComponentModel::IsCommonEventAvailable(type, libraryName)) {
         return;
     }
     JSViewAbstract::JsOnHover(args);
@@ -398,7 +411,8 @@ void JSXComponent::JsOnHover(const JSCallbackInfo& args)
 void JSXComponent::JsOnFocus(const JSCallbackInfo& args)
 {
     auto type = XComponentModel::GetInstance()->GetType();
-    if (type != XComponentType::NODE) {
+    auto libraryName = XComponentModel::GetInstance()->GetLibraryName();
+    if (!XComponentModel::IsCommonEventAvailable(type, libraryName)) {
         return;
     }
     JSViewAbstract::JsOnFocus(args);
@@ -407,7 +421,8 @@ void JSXComponent::JsOnFocus(const JSCallbackInfo& args)
 void JSXComponent::JsOnBlur(const JSCallbackInfo& args)
 {
     auto type = XComponentModel::GetInstance()->GetType();
-    if (type != XComponentType::NODE) {
+    auto libraryName = XComponentModel::GetInstance()->GetLibraryName();
+    if (!XComponentModel::IsCommonEventAvailable(type, libraryName)) {
         return;
     }
     JSViewAbstract::JsOnBlur(args);

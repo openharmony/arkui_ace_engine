@@ -39,6 +39,11 @@ public:
         return type == XComponentType::TEXTURE || type == XComponentType::NODE ||
                (type == XComponentType::SURFACE && Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN));
     }
+    static bool IsCommonEventAvailable(const XComponentType& type, std::string& libraryName)
+    {
+        return type == XComponentType::NODE ||
+               (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TWELVE) && libraryName == "");
+    }
     virtual ~XComponentModel() = default;
 
     virtual void Create(const std::string& id, XComponentType type, const std::string& libraryname,
@@ -49,6 +54,7 @@ public:
     {
         return nullptr;
     };
+    virtual void SetLibraryName(const std::string& libraryName) = 0;
     virtual void SetSoPath(const std::string& soPath) = 0;
     virtual void SetOnLoad(LoadEvent&& onLoad) = 0;
     virtual void SetOnDestroy(DestroyEvent&& onDestroy) = 0;
@@ -62,6 +68,10 @@ public:
     virtual XComponentType GetType()
     {
         return XComponentType::UNKNOWN;
+    }
+    virtual std::string GetLibraryName()
+    {
+        return "";
     }
     virtual void EnableAnalyzer(bool enable) {}
     virtual void SetControllerOnCreated(SurfaceCreatedEvent&& onCreated) {}

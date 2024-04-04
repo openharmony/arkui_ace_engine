@@ -23,15 +23,15 @@
 
 namespace OHOS::Ace::NG {
 const uint32_t DEFAULT_SURFACE_SIZE = 0;
-void XComponentModelNG::Create(const std::string& id, XComponentType type, const std::string& libraryname,
+void XComponentModelNG::Create(const std::string& id, XComponentType type, const std::string& /* libraryname */,
     const std::shared_ptr<InnerXComponentController>& xcomponentController)
 {
     auto* stack = ViewStackProcessor::GetInstance();
     auto nodeId = stack->ClaimNodeId();
     ACE_LAYOUT_SCOPED_TRACE("Create[%s][self:%d]", V2::XCOMPONENT_ETS_TAG, nodeId);
     auto frameNode = FrameNode::GetOrCreateFrameNode(
-        V2::XCOMPONENT_ETS_TAG, nodeId, [id, type, libraryname, xcomponentController]() {
-            return AceType::MakeRefPtr<XComponentPattern>(id, type, libraryname, xcomponentController);
+        V2::XCOMPONENT_ETS_TAG, nodeId, [id, type, xcomponentController]() {
+            return AceType::MakeRefPtr<XComponentPattern>(id, type, xcomponentController);
         });
     stack->Push(frameNode);
     ACE_UPDATE_LAYOUT_PROPERTY(XComponentLayoutProperty, XComponentType, type);
@@ -57,6 +57,32 @@ RefPtr<AceType> XComponentModelNG::Create(int32_t nodeId, float width, float hei
         layoutProperty->UpdateUserDefinedIdealSize(CalcSize(calcWidth, calcHeight));
     }
     return frameNode;
+}
+
+void XComponentModelNG::SetLibraryName(const std::string& libraryName)
+{
+    auto frameNode = AceType::Claim(ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    CHECK_NULL_VOID(frameNode);
+    auto type = GetTypeImpl(frameNode);
+    if (type == XComponentType::COMPONENT || type == XComponentType::NODE) {
+        return;
+    }
+    auto xcPattern = AceType::DynamicCast<XComponentPattern>(frameNode->GetPattern());
+    CHECK_NULL_VOID(xcPattern);
+    xcPattern->SetLibraryName(libraryName);
+}
+
+std::string XComponentModelNG::GetLibraryName()
+{
+    auto frameNode = AceType::Claim(ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    CHECK_NULL_RETURN(frameNode, "");
+    auto type = GetTypeImpl(frameNode);
+    if (type == XComponentType::COMPONENT || type == XComponentType::NODE) {
+        return "";
+    }
+    auto xcPattern = AceType::DynamicCast<XComponentPattern>(frameNode->GetPattern());
+    CHECK_NULL_RETURN(xcPattern, "");
+    return xcPattern->GetLibraryName();
 }
 
 XComponentType XComponentModelNG::GetTypeImpl(const RefPtr<FrameNode>& frameNode)
