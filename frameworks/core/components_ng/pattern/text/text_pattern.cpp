@@ -2520,11 +2520,21 @@ RefPtr<NodePaintMethod> TextPattern::CreateNodePaintMethod()
         auto frameSize = geometryNode->GetFrameSize();
         CHECK_NULL_RETURN(paragraph_, paintMethod);
         RectF boundsRect = overlayMod_->GetBoundsRect();
-        auto boundsWidth = contentRect_.GetX() + static_cast<float>(paragraph_->GetLongestLine());
+        auto boundsWidth = contentRect_.GetX() + std::ceil(static_cast<float>(paragraph_->GetLongestLine()));
         auto boundsHeight =
             contentRect_.GetY() + static_cast<float>(paragraph_->GetHeight() + std::fabs(baselineOffset_));
         boundsRect.SetWidth(boundsWidth);
         boundsRect.SetHeight(boundsHeight);
+
+        auto gestureHub = host->GetOrCreateGestureEventHub();
+        CHECK_NULL_RETURN(gestureHub, paintMethod);
+        std::vector<DimensionRect> hotZoneRegions;
+        DimensionRect hotZoneRegion;
+        hotZoneRegion.SetSize(DimensionSize(Dimension(std::max(boundsWidth, frameSize.Width())),
+            Dimension(std::max(frameSize.Height(), boundsRect.Height()))));
+        hotZoneRegions.emplace_back(hotZoneRegion);
+        gestureHub->SetResponseRegion(hotZoneRegions);
+
         ProcessBoundRectByTextShadow(boundsRect);
         ProcessBoundRectByTextMarquee(boundsRect);
         if ((LessNotEqual(frameSize.Width(), boundsRect.Width()) ||
@@ -2533,18 +2543,11 @@ RefPtr<NodePaintMethod> TextPattern::CreateNodePaintMethod()
             boundsHeight = std::max(frameSize.Height(), boundsRect.Height());
             boundsRect.SetWidth(boundsWidth);
             boundsRect.SetHeight(boundsHeight);
-            overlayMod_->SetBoundsRect(boundsRect);
-
-            auto gestureHub = host->GetOrCreateGestureEventHub();
-            CHECK_NULL_RETURN(gestureHub, paintMethod);
-            std::vector<DimensionRect> hotZoneRegions;
-            DimensionRect hotZoneRegion;
-            hotZoneRegion.SetSize(DimensionSize(Dimension(boundsWidth), Dimension(boundsHeight)));
-            hotZoneRegion.SetOffset(
-                DimensionOffset(Dimension(contentOffset_.GetX()), Dimension(contentOffset_.GetY())));
-            hotZoneRegions.emplace_back(hotZoneRegion);
-            gestureHub->SetResponseRegion(hotZoneRegions);
+        } else {
+            boundsRect.SetWidth(frameSize.Width());
+            boundsRect.SetHeight(frameSize.Height());
         }
+        overlayMod_->SetBoundsRect(boundsRect);
     }
     return paintMethod;
 }
