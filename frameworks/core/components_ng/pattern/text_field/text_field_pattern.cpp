@@ -913,8 +913,9 @@ void TextFieldPattern::InitDisableColor()
     auto theme = GetTheme();
     CHECK_NULL_VOID(theme);
     if (layoutProperty->GetShowUnderlineValue(false) && IsUnspecifiedOrTextType()) {
-        underlineWidth_ = UNDERLINE_WIDTH;
-        Color underlineColor = userUnderlineColor_.normal.value_or(theme->GetUnderlineColor());
+        underlineWidth_ = HasFocus() ? TYPING_UNDERLINE_WIDTH : UNDERLINE_WIDTH;
+        Color underlineColor = HasFocus() ? userUnderlineColor_.typing.value_or(theme->GetUnderlineTypingColor())
+            : userUnderlineColor_.normal.value_or(theme->GetUnderlineColor());
         if (userUnderlineColor_.disable) {
             underlineColor_ = IsDisabled() ? userUnderlineColor_.disable.value() : underlineColor;
         } else {
@@ -3437,7 +3438,7 @@ void TextFieldPattern::UpdateCounterBorderStyle(int32_t& textLength, uint32_t& m
     auto showBorder = textFieldLayoutProperty->GetShowHighlightBorderValue(true);
     if (static_cast<uint32_t>(textLength) >= (maxLength - ONE_CHARACTER) && !IsTextArea() && showBorder &&
         textFieldLayoutProperty->GetShowCounterValue(false)) {
-        SetUnderlineColor(theme->GetErrorUnderlineColor());
+        SetUnderlineColor(userUnderlineColor_.error.value_or(theme->GetErrorUnderlineColor()));
     } else if (textLength >= static_cast<int32_t>(maxLength) && IsTextArea() && showBorder) {
         HandleCounterBorder();
     }
@@ -3966,13 +3967,9 @@ void TextFieldPattern::Delete(int32_t start, int32_t end)
     CloseSelectOverlay(true);
     StartTwinkling();
     UpdateEditingValueToRecord();
+    HanldeMaxLengthAndUnderlineTypingColor();
     auto tmpHost = GetHost();
     CHECK_NULL_VOID(tmpHost);
-    auto layoutProperty = tmpHost->GetLayoutProperty<TextFieldLayoutProperty>();
-    CHECK_NULL_VOID(layoutProperty);
-    if (layoutProperty->HasMaxLength()) {
-        HandleCounterBorder();
-    }
     tmpHost->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_PARENT);
 }
 
@@ -4293,10 +4290,6 @@ void TextFieldPattern::HandleOnDelete(bool backward)
 
 void TextFieldPattern::DeleteBackward(int32_t length)
 {
-    auto tmpHost = GetHost();
-    CHECK_NULL_VOID(tmpHost);
-    auto layoutProperty = tmpHost->GetLayoutProperty<TextFieldLayoutProperty>();
-    CHECK_NULL_VOID(layoutProperty);
     ResetObscureTickCountDown();
     if (IsSelected()) {
         lockRecord_ = true;
@@ -4309,17 +4302,11 @@ void TextFieldPattern::DeleteBackward(int32_t length)
     }
     inputOperations_.emplace(InputOperation::DELETE_BACKWARD);
     deleteBackwardOperations_.emplace(length);
-    if (layoutProperty->HasMaxLength()) {
-        if (layoutProperty->GetShowUnderlineValue(false) && !IsTextArea()) {
-            auto textFieldTheme = GetTheme();
-            CHECK_NULL_VOID(textFieldTheme);
-            underlineColor_ = userUnderlineColor_.normal.value_or(textFieldTheme->GetUnderlineColor());
-        }
-        counterChange_ = false;
-        HandleCounterBorder();
-    }
     CloseSelectOverlay();
     ScrollToSafeArea();
+    HanldeMaxLengthAndUnderlineTypingColor();
+    auto tmpHost = GetHost();
+    CHECK_NULL_VOID(tmpHost);
     tmpHost->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_PARENT);
 }
 
@@ -4369,14 +4356,29 @@ void TextFieldPattern::DeleteForward(int32_t length)
     inputOperations_.emplace(InputOperation::DELETE_FORWARD);
     deleteForwardOperations_.emplace(length);
     CloseSelectOverlay();
+    HanldeMaxLengthAndUnderlineTypingColor();
+    auto tmpHost = GetHost();
+    CHECK_NULL_VOID(tmpHost);
+    tmpHost->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_PARENT);
+}
+
+void TextFieldPattern::HanldeMaxLengthAndUnderlineTypingColor()
+{
     auto tmpHost = GetHost();
     CHECK_NULL_VOID(tmpHost);
     auto layoutProperty = tmpHost->GetLayoutProperty<TextFieldLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
     if (layoutProperty->HasMaxLength()) {
+        auto visible = layoutProperty->GetShowErrorTextValue(false);
+        if (!visible && layoutProperty->GetShowUnderlineValue(false) && !IsTextArea()) {
+            auto textFieldTheme = GetTheme();
+            CHECK_NULL_VOID(textFieldTheme);
+            underlineColor_ = userUnderlineColor_.typing.value_or(textFieldTheme->GetUnderlineTypingColor());
+            underlineWidth_ = TYPING_UNDERLINE_WIDTH;
+        }
+        counterChange_ = false;
         HandleCounterBorder();
     }
-    tmpHost->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_PARENT);
 }
 
 std::u16string TextFieldPattern::GetLeftTextOfCursor(int32_t number)
@@ -5318,6 +5320,38 @@ std::string TextFieldPattern::GetShowResultImageSrc() const
     return SHOW_PASSWORD_SVG;
 }
 
+std::string TextFieldPattern::GetNormalUnderlineColorStr() const
+{
+    auto theme = GetTheme();
+    CHECK_NULL_RETURN(theme, "");
+    Color normal = userUnderlineColor_.normal.value_or(theme->GetUnderlineColor());
+    return normal.ColorToString();
+}
+
+std::string TextFieldPattern::GetTypingUnderlineColorStr() const
+{
+    auto theme = GetTheme();
+    CHECK_NULL_RETURN(theme, "");
+    Color typing = userUnderlineColor_.typing.value_or(theme->GetUnderlineTypingColor());
+    return typing.ColorToString();
+}
+
+std::string TextFieldPattern::GetDisableUnderlineColorStr() const
+{
+    auto theme = GetTheme();
+    CHECK_NULL_RETURN(theme, "");
+    Color disable = userUnderlineColor_.disable.value_or(theme->GetDisableUnderlineColor());
+    return disable.ColorToString();
+}
+
+std::string TextFieldPattern::GetErrorUnderlineColorStr() const
+{
+    auto theme = GetTheme();
+    CHECK_NULL_RETURN(theme, "");
+    Color error = userUnderlineColor_.error.value_or(theme->GetErrorUnderlineColor());
+    return error.ColorToString();
+}
+
 std::string TextFieldPattern::GetHideResultImageSrc() const
 {
     auto tmpHost = GetHost();
@@ -5624,6 +5658,10 @@ void TextFieldPattern::ToJsonValue(std::unique_ptr<JsonValue>& json) const
     json->Put("maxLines", GreatOrEqual(maxLines, Infinity<uint32_t>()) ? "INF" : std::to_string(maxLines).c_str());
     json->Put("barState", GetBarStateString().c_str());
     json->Put("caretPosition", std::to_string(GetCaretIndex()).c_str());
+    json->Put("normalUnderlineColor", GetNormalUnderlineColorStr().c_str());
+    json->Put("typingUnderlineColor", GetTypingUnderlineColorStr().c_str());
+    json->Put("errorUnderlineColor", GetErrorUnderlineColorStr().c_str());
+    json->Put("disableUnderlineColor", GetDisableUnderlineColorStr().c_str());
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto layoutProperty = host->GetLayoutProperty<TextFieldLayoutProperty>();
