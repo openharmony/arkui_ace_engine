@@ -479,18 +479,6 @@ void SwiperLayoutAlgorithm::MeasureSwiper(
                 LayoutBackward(layoutWrapper, layoutConstraint, axis, GetStartIndex() - 1, GetStartPosition());
             }
         } else if (GreatNotEqual(startIndexInVisibleWindow, targetIndex_.value())) {
-            int32_t stepsFromCurrentToTarget = endIndex - targetIndex_.value();
-            endIndex -= (stepsFromCurrentToTarget > (totalItemCount_ - 1))
-                            ? (stepsFromCurrentToTarget - totalItemCount_ + 1)
-                            : 0;
-
-            auto swiperLayoutProperty = AceType::DynamicCast<SwiperLayoutProperty>(layoutWrapper->GetLayoutProperty());
-            auto iter = prevItemPosition_.find(endIndex);
-            if (swiperLayoutProperty && !SwiperUtils::IsStretch(swiperLayoutProperty) &&
-                iter != prevItemPosition_.end()) {
-                endPos = iter->second.endPos;
-            }
-
             LayoutBackward(layoutWrapper, layoutConstraint, axis, endIndex, endPos);
             if (LessNotEqualCustomPrecision(GetEndPosition(), endMainPos_, -0.01f)) {
                 LayoutForward(layoutWrapper, layoutConstraint, axis, GetEndIndex() + 1, GetEndPosition());
