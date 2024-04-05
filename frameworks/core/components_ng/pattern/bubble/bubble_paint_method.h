@@ -86,6 +86,11 @@ public:
         clipPath_ = clipPath;
     }
 
+    void SetBorder(const Border& border)
+    {
+        border_ = border;
+    }
+
     void SetClipFrameNode(RefPtr<FrameNode>& clipFrameNode)
     {
         clipFrameNode_ = clipFrameNode;
