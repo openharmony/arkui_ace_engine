@@ -232,7 +232,7 @@ void AceAbility::InitEnv()
             ContainerScope scope(id);
             taskExecutor->PostTask(task, TaskExecutor::TaskType::UI);
         };
-        director->SetUITaskRunner(func);
+        director->SetUITaskRunner(func, id);
         director->Init();
         context->SetRSUIDirector(director);
     };
