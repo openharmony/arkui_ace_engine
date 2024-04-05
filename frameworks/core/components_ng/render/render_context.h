@@ -465,6 +465,7 @@ public:
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(Background, BackgroundImageRepeat, ImageRepeat);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(Background, BackgroundImageSize, BackgroundImageSize);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(Background, BackgroundImagePosition, BackgroundImagePosition);
+    ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(Background, BackgroundImageResizableSlice, ImageResizableSlice);
 
     // BorderImage
     ACE_DEFINE_PROPERTY_GROUP(BdImage, BorderImageProperty);
@@ -626,6 +627,7 @@ protected:
     virtual void OnBackgroundImageRepeatUpdate(const ImageRepeat& imageRepeat) {}
     virtual void OnBackgroundImageSizeUpdate(const BackgroundImageSize& bgImgSize) {}
     virtual void OnBackgroundImagePositionUpdate(const BackgroundImagePosition& bgImgPosition) {}
+    virtual void OnBackgroundImageResizableSliceUpdate(const ImageResizableSlice& slice) {}
 
     virtual void OnForegroundColorUpdate(const Color& value) {}
     virtual void OnForegroundColorStrategyUpdate(const ForegroundColorStrategy& value) {}

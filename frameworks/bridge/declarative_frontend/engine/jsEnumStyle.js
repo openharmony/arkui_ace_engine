@@ -191,6 +191,7 @@ var ImageSize;
   ImageSize[ImageSize["Contain"] = 0] = "Contain";
   ImageSize[ImageSize["Cover"] = 1] = "Cover";
   ImageSize[ImageSize["Auto"] = 2] = "Auto";
+  ImageSize[ImageSize["FILL"] = 3] = "FILL";
 })(ImageSize || (ImageSize = {}));
 
 var ImageRenderMode;

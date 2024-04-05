@@ -466,6 +466,7 @@ bool ParseBackgroundImageSize(const std::string& value, BackgroundImageSize& bgI
         { DOM_BACKGROUND_IMAGE_SIZE_AUTO, BackgroundImageSizeType::AUTO },
         { DOM_BACKGROUND_IMAGE_SIZE_CONTAIN, BackgroundImageSizeType::CONTAIN },
         { DOM_BACKGROUND_IMAGE_SIZE_COVER, BackgroundImageSizeType::COVER },
+        { DOM_BACKGROUND_IMAGE_SIZE_FILL, BackgroundImageSizeType::FILL },
     };
     auto spaceIndex = value.find(' ', 0);
     if (spaceIndex != std::string::npos) {

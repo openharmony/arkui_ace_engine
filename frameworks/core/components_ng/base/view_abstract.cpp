@@ -3958,4 +3958,17 @@ void ViewAbstract::SetDragEventStrictReportingEnabled(bool dragEventStrictReport
     CHECK_NULL_VOID(dragDropManager);
     dragDropManager->SetEventStrictReportingEnabled(dragEventStrictReportingEnabled);
 }
+
+void ViewAbstract::SetBackgroundImageResizableSlice(const ImageResizableSlice& slice)
+{
+    if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
+        return;
+    }
+    ACE_UPDATE_RENDER_CONTEXT(BackgroundImageResizableSlice, slice);
+}
+
+void ViewAbstract::SetBackgroundImageResizableSlice(FrameNode* frameNode, const ImageResizableSlice& slice)
+{
+    ACE_UPDATE_NODE_RENDER_CONTEXT(BackgroundImageResizableSlice, slice, frameNode);
+}
 } // namespace OHOS::Ace::NG

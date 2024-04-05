@@ -42,6 +42,7 @@ struct BackgroundProperty {
     ACE_DEFINE_PROPERTY_GROUP_ITEM(BackgroundImageRepeat, ImageRepeat);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(BackgroundImageSize, BackgroundImageSize);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(BackgroundImagePosition, BackgroundImagePosition);
+    ACE_DEFINE_PROPERTY_GROUP_ITEM(BackgroundImageResizableSlice, ImageResizableSlice);
     bool CheckBlurStyleOption(const std::optional<BlurStyleOption>& option) const
     {
         if (!option.has_value()) {
