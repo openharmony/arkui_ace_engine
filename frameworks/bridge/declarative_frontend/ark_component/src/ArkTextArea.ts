@@ -98,12 +98,12 @@ class TextAreaWordBreakModifier extends ModifierWithKey<WordBreak> {
   constructor(value: WordBreak) {
     super(value);
   }
-  static identity: Symbol = Symbol('textInputWordBreak');
+  static identity: Symbol = Symbol('textAreaWordBreak');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
-      getUINativeModule().text.resetWordBreak(node);
+      getUINativeModule().textArea.resetWordBreak(node);
     } else {
-      getUINativeModule().text.setWordBreak(node, this.value!);
+      getUINativeModule().textArea.setWordBreak(node, this.value!);
     }
   }
   checkObjectDiff(): boolean {
