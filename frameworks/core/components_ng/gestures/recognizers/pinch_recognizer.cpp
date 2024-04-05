@@ -165,7 +165,8 @@ void PinchRecognizer::HandleTouchUpEvent(const TouchEvent& event)
 void PinchRecognizer::HandleTouchUpEvent(const AxisEvent& event)
 {
     TAG_LOGI(AceLogTag::ACE_GESTURE, "Pinch recognizer receives axis end event");
-    if (isPinchEnd_) {
+    // if axisEvent received rotateEvent, no need to active Pinch recognizer.
+    if (isPinchEnd_ || event.isRotationEvent) {
         return;
     }
     if ((refereeState_ != RefereeState::SUCCEED) && (refereeState_ != RefereeState::FAIL)) {

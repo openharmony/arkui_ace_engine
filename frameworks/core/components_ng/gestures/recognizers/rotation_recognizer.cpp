@@ -149,6 +149,10 @@ void RotationRecognizer::HandleTouchUpEvent(const TouchEvent& event)
 void RotationRecognizer::HandleTouchUpEvent(const AxisEvent& event)
 {
     TAG_LOGI(AceLogTag::ACE_GESTURE, "Rotation recognizer receives axis end event");
+    // if rotation recognizer received another axisEvent, no need to active.
+    if (!event.isRotationEvent) {
+        return;
+    }
     if ((refereeState_ != RefereeState::SUCCEED) && (refereeState_ != RefereeState::FAIL)) {
         Adjudicate(AceType::Claim(this), GestureDisposal::REJECT);
         return;

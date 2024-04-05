@@ -318,6 +318,10 @@ void PanRecognizer::HandleTouchUpEvent(const TouchEvent& event)
 void PanRecognizer::HandleTouchUpEvent(const AxisEvent& event)
 {
     TAG_LOGI(AceLogTag::ACE_GESTURE, "Pan recognizer receives axis end event");
+    // if axisEvent received rotateEvent, no need to active Pan recognizer.
+    if (event.isRotationEvent) {
+        return;
+    }
     globalPoint_ = Point(event.x, event.y);
 
     UpdateAxisPointInVelocityTracker(event, true);
