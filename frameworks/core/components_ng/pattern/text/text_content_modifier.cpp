@@ -15,6 +15,7 @@
 
 #include "core/components_ng/pattern/text/text_content_modifier.h"
 
+#include "base/log/ace_trace.h"
 #include "base/utils/utils.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
@@ -272,6 +273,7 @@ void TextContentModifier::DrawImageNodeList(const float drawingContextWidth,
 
 void TextContentModifier::onDraw(DrawingContext& drawingContext)
 {
+    ACE_SCOPED_TRACE("Text::onDraw");
     bool ifPaintObscuration = std::any_of(obscuredReasons_.begin(), obscuredReasons_.end(),
         [](const auto& reason) { return reason == ObscuredReasons::PLACEHOLDER; });
     if (!ifPaintObscuration || ifHaveSpanItemChildren_) {

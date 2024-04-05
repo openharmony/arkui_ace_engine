@@ -45,8 +45,6 @@ void TextFieldModelNG::CreateNode(
     auto pattern = frameNode->GetPattern<TextFieldPattern>();
     pattern->SetModifyDoneStatus(false);
     auto textValue = pattern->GetTextValue();
-    TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "new text:%{public}s, old text:%{public}s", value.value_or("NA").c_str(),
-        textValue.c_str());
     if (value.has_value() && value.value() != textValue) {
         pattern->InitValueText(value.value());
     }
