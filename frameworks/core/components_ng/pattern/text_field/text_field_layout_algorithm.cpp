@@ -757,5 +757,16 @@ void TextFieldLayoutAlgorithm::UpdatePlaceholderTextStyleMore(const RefPtr<Frame
     const RefPtr<TextFieldLayoutProperty>& layoutProperty, const RefPtr<TextFieldTheme>& theme,
     TextStyle& placeholderTextStyle, bool isDisabled)
 {
+    auto pattern = frameNode->GetPattern<TextFieldPattern>();
+    CHECK_NULL_VOID(pattern);
+    auto pipeline = frameNode->GetContext();
+    CHECK_NULL_VOID(pipeline);
+    if (pattern->IsInPasswordMode()) {
+        return;
+    }
+    if (layoutProperty->HasLineHeight()) {
+        placeholderTextStyle.SetLineHeight(layoutProperty->GetLineHeight().value());
+        placeholderTextStyle.SetHalfLeading(pipeline->GetHalfLeading());
+    }
 }
 } // namespace OHOS::Ace::NG
