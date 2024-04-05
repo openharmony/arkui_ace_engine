@@ -387,6 +387,9 @@ private:
     void NotifyDragFrameNode(
         const Point& point, const DragEventType& dragEventType, const DragRet& dragRet = DragRet::DRAG_DEFAULT);
     void TransDragWindowToDragFwk(int32_t windowContainerId);
+    bool isDistanceLimited(const Point& point);
+    bool isTimeLimited(const PointerEvent& pointerEvent, const Point& point);
+    bool ReachMoveLimit(const PointerEvent& pointerEvent, const Point& point);
 
     std::map<int32_t, WeakPtr<FrameNode>> dragFrameNodes_;
     std::map<int32_t, WeakPtr<FrameNode>> gridDragFrameNodes_;
@@ -399,6 +402,8 @@ private:
     RefPtr<FrameNode> preGridTargetFrameNode_;
     RefPtr<FrameNode> dragWindowRootNode_;
     RefPtr<Clipboard> clipboard_;
+    Point preMovePoint_ = Point(0, 0);
+    int64_t preTimeStamp_ = 0L;
     WeakPtr<FrameNode> prepareDragFrameNode_;
     std::function<void(const std::string&)> addDataCallback_ = nullptr;
     std::function<void(const std::string&)> getDataCallback_ = nullptr;

@@ -412,6 +412,7 @@ void ConvertPointerEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent,
     event.force = static_cast<float>(pointerItem.GetPressure());
     event.deviceId = pointerItem.GetDeviceId();
     event.downTime = TimeStamp(std::chrono::microseconds(pointerItem.GetDownTime()));
+    event.time = TimeStamp(std::chrono::microseconds(pointerEvent->GetActionTime()));
     event.sourceTool = GetSourceTool(pointerItem.GetToolType());
     event.targetWindowId = pointerItem.GetTargetWindowId();
 }
