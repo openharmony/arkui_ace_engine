@@ -33,6 +33,7 @@ public:
     virtual void SetSelect(bool isSelected);
     virtual void SetSelectedColor(const Color& color);
     virtual void SetUnSelectedColor(const Color& color) {}
+    virtual void SetBuilder(std::optional<std::function<void(void)>>& buildFunc) {};
     virtual void SetCheckMarkColor(const Color& color) {}
     virtual void SetCheckMarkSize(const Dimension& size) {}
     virtual void SetCheckMarkWidth(const Dimension& width) {}

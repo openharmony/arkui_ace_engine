@@ -250,8 +250,13 @@ public:
             theme->width_ = checkboxPattern->GetAttr<Dimension>("checkbox_size", 0.0_vp);
             theme->height_ = theme->width_;
             theme->hotZoneHorizontalPadding_ = checkboxPattern->GetAttr<Dimension>("checkbox_hotzone_padding", 0.0_vp);
-            theme->hotZoneVerticalPadding_ = theme->hotZoneHorizontalPadding_;
             theme->defaultWidth_ = checkboxPattern->GetAttr<Dimension>("checkbox_default_size", 0.0_vp);
+            if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
+                theme->hotZoneHorizontalPadding_ =
+                    checkboxPattern->GetAttr<Dimension>("checkbox_hotzone_padding_twelve", 2.0_vp);
+                theme->defaultWidth_ = checkboxPattern->GetAttr<Dimension>("checkbox_default_size_twelve", 24.0_vp);
+            }
+            theme->hotZoneVerticalPadding_ = theme->hotZoneHorizontalPadding_;
             theme->defaultHeight_ = theme->defaultWidth_;
             theme->needFocus_ = static_cast<bool>(checkboxPattern->GetAttr<double>("checkbox_need_focus", 0.0));
             theme->backgroundSolid_ =
@@ -284,6 +289,12 @@ public:
             if (SystemProperties::GetDeviceType() != DeviceType::CAR) {
                 return;
             }
+            SetCheckboxSize(themeConstants, theme);
+        }
+
+        void SetCheckboxSize(const RefPtr<ThemeConstants>& themeConstants, const RefPtr<CheckboxTheme>& theme) const
+        {
+            RefPtr<ThemeStyle> checkboxPattern = themeConstants->GetPatternByName(THEME_PATTERN_CHECKBOX);
             // width/height/borderRadius not exist in theme
             theme->width_ = checkboxPattern->GetAttr<Dimension>("width", 26.0_vp);
             theme->height_ = theme->width_;
@@ -291,6 +302,11 @@ public:
             theme->hotZoneHorizontalPadding_ =
                 checkboxPattern->GetAttr<Dimension>("hotzone_padding_horizontal", 11.0_vp);
             theme->hotZoneVerticalPadding_ = theme->hotZoneHorizontalPadding_;
+            if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
+                theme->hotZoneHorizontalPadding_ =
+                    checkboxPattern->GetAttr<Dimension>("checkbox_hotzone_padding_twelve", 2.0_vp);
+                theme->hotZoneVerticalPadding_ = theme->hotZoneHorizontalPadding_;
+            }
         }
     };
 
