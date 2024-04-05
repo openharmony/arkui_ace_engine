@@ -33,6 +33,11 @@ public:
     static RefPtr<SvgNode> CreateAnimateMotion();
     static RefPtr<SvgNode> CreateAnimateTransform();
 
+    void AddOnFinishCallBack(const std::function<void()>& onFinishCallback)
+    {
+        animator_->AddStopListener(onFinishCallback);
+    }
+
     void SetAttr(const std::string& name, const std::string& value) override;
     void UpdateAttr();
 

@@ -51,6 +51,7 @@ public:
     }
 
     virtual void SetAnimationCallback(std::function<void()>&& funcAnimateFlush, const WeakPtr<CanvasImage>& imagePtr) {}
+    virtual void SetAnimationOnFinishCallback(const std::function<void()>& onFinishCallback) {}
     virtual void ControlAnimation(bool play) {}
 
     virtual void DrawImage(
