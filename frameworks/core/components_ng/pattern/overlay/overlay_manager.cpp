@@ -2287,7 +2287,9 @@ bool OverlayManager::RemoveOverlay(bool isBackPressed, bool isPageRouter)
             }
         }
         if (!InstanceOf<KeyboardPattern>(pattern)) {
-            rootNode->RemoveChild(overlay);
+            if (overlay->GetTag() != V2::SHEET_WRAPPER_TAG) {
+                rootNode->RemoveChild(overlay);
+            }
             rootNode->MarkDirtyNode(PROPERTY_UPDATE_BY_CHILD_REQUEST);
             return true;
         }
@@ -2299,6 +2301,13 @@ bool OverlayManager::RemoveModalInOverlay()
 {
     auto topModalNode = modalStack_.top().Upgrade();
     CHECK_NULL_RETURN(topModalNode, false);
+    auto rootNode = FindWindowScene(topModalNode);
+    CHECK_NULL_RETURN(rootNode, true);
+    auto overlay = DynamicCast<FrameNode>(rootNode->GetLastChild());
+    if (overlay && overlay->GetTag() == V2::SHEET_WRAPPER_TAG && overlay->GetFirstChild() != topModalNode) {
+        TAG_LOGD(AceLogTag::ACE_OVERLAY, "Refuse to back because sheet is in animation");
+        return true;
+    }
     if (topModalNode->GetTag() == V2::SHEET_PAGE_TAG) {
         auto sheetPattern = topModalNode->GetPattern<SheetPresentationPattern>();
         CHECK_NULL_RETURN(sheetPattern, false);
@@ -2313,13 +2322,6 @@ bool OverlayManager::RemoveModalInOverlay()
             modalPattern->ModalInteractiveDismiss();
             return true;
         }
-    }
-    auto rootNode = FindWindowScene(topModalNode);
-    CHECK_NULL_RETURN(rootNode, true);
-    auto overlay = DynamicCast<FrameNode>(rootNode->GetLastChild());
-    if (overlay && overlay->GetTag() == V2::SHEET_WRAPPER_TAG && overlay->GetFirstChild() != topModalNode) {
-        TAG_LOGD(AceLogTag::ACE_OVERLAY, "Refuse to back because sheet is in animation");
-        return true;
     }
     ModalPageLostFocus(topModalNode);
     auto pattern = topModalNode->GetPattern<PopupBasePattern>();
