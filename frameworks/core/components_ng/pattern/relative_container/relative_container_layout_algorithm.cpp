@@ -81,6 +81,7 @@ void RelativeContainerLayoutAlgorithm::DetermineTopologicalOrder(LayoutWrapper* 
     incomingDegreeMap_.clear();
     horizontalChainNodeMap_.clear();
     verticalChainNodeMap_.clear();
+    renderList_.clear();
     auto layoutConstraint = relativeContainerLayoutProperty->GetLayoutConstraint();
     CHECK_NULL_VOID(layoutConstraint.has_value());
     bool idealWidthValid = layoutConstraint.value().selfIdealSize.Width().has_value();
