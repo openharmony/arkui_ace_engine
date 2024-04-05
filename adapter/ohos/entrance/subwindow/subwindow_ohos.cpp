@@ -547,7 +547,6 @@ void SubwindowOhos::HideMenuNG(bool showPreviewAnimation, bool startDrag)
     if (!isShowed_) {
         return;
     }
-    isShowed_ = false;
     auto aceContainer = Platform::AceContainer::GetContainer(childContainerId_);
     CHECK_NULL_VOID(aceContainer);
     auto context = DynamicCast<NG::PipelineContext>(aceContainer->GetPipelineContext());
@@ -567,7 +566,6 @@ void SubwindowOhos::HideMenuNG(const RefPtr<NG::FrameNode>& menu, int32_t target
     if (!isShowed_) {
         return;
     }
-    isShowed_ = false;
     TAG_LOGI(AceLogTag::ACE_SUB_WINDOW, "Subwindow hide menu for target id %{public}d", targetId);
     targetId_ = targetId;
     auto aceContainer = Platform::AceContainer::GetContainer(childContainerId_);
