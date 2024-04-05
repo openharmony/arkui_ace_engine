@@ -2758,10 +2758,12 @@ void PipelineContext::SetAppBgColor(const Color& color)
         }
     }
 #endif
-    CHECK_NULL_VOID(rootNode_);
-    auto rootPattern = rootNode_->GetPattern<RootPattern>();
-    CHECK_NULL_VOID(rootPattern);
-    rootPattern->SetAppBgColor(appBgColor_, windowModal_ == WindowModal::CONTAINER_MODAL);
+    CHECK_NULL_VOID(stageManager_);
+    auto stage = stageManager_->GetStageNode();
+    CHECK_NULL_VOID(stage);
+    auto renderContext = stage->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    renderContext->UpdateBackgroundColor(color);
 }
 
 void PipelineContext::SetAppTitle(const std::string& title)
