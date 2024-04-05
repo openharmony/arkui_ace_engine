@@ -377,6 +377,8 @@ public:
 
     static ScrollState GetScrollState(int32_t scrollSource);
 
+    static ScrollSource ConvertScrollSource(int32_t source);
+
     static float CalculateFriction(float gamma)
     {
         constexpr float RATIO = 1.848f;
@@ -563,7 +565,7 @@ protected:
 
     virtual void OnScrollStop(const OnScrollStopEvent& onScrollStop);
 
-    void FireOnWillScroll(float offset) const;
+    float FireOnWillScroll(float offset) const;
 
     // select with mouse
     struct ItemSelectedStatus {

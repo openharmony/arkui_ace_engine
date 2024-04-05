@@ -69,9 +69,9 @@ bool WaterFlowPattern::UpdateCurrentOffset(float delta, int32_t source)
             delta = std::min(delta, -layoutInfo_.currentOffset_);
         }
     }
-    FireOnWillScroll(-delta);
+    auto userOffset = FireOnWillScroll(-delta);
     layoutInfo_.prevOffset_ = layoutInfo_.currentOffset_;
-    layoutInfo_.currentOffset_ += delta;
+    layoutInfo_.currentOffset_ -= userOffset;
     host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
     return true;
 };

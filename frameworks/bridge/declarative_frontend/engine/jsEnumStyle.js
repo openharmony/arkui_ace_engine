@@ -455,6 +455,18 @@ var ScrollState;
   ScrollState[ScrollState["Fling"] = 2] = "Fling";
 })(ScrollState || (ScrollState = {}));
 
+var ScrollSource;
+(function (ScrollSource) {
+  ScrollSource[ScrollSource["DRAG"] = 0] = "DRAG";
+  ScrollSource[ScrollSource["FLING"] = 1] = "FLING";
+  ScrollSource[ScrollSource["EDGE_EFFECT"] = 2] = "EDGE_EFFECT";
+  ScrollSource[ScrollSource["OHTER_USER_INPUT"] = 3] = "OHTER_USER_INPUT";
+  ScrollSource[ScrollSource["SCROLL_BAR"] = 4] = "SCROLL_BAR";
+  ScrollSource[ScrollSource["SCROLL_BAR_FLING"] = 5] = "SCROLL_BAR_FLING";
+  ScrollSource[ScrollSource["SCROLLER"] = 6] = "SCROLLER";
+  ScrollSource[ScrollSource["SCROLLER_ANIMATION"] = 7] = "SCROLLER_ANIMATION";
+})(ScrollSource || (ScrollSource = {}));
+
 var TouchType;
 (function (TouchType) {
   TouchType[TouchType["Down"] = 0] = "Down";

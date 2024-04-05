@@ -319,7 +319,7 @@ private:
     RefPtr<ScrollBarOverlayModifier> scrollBarOverlayModifier_;
     RefPtr<ScrollBar> scrollBar_;
 
-    float childOffset_ = 0.0f;
+    float childOffset_ = 0.0f;  // main size of child
     RefPtr<PanRecognizer> panRecognizer_;
     RefPtr<FrictionMotion> frictionMotion_;
     RefPtr<Animator> frictionController_;

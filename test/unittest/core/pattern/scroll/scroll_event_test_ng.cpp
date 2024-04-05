@@ -371,10 +371,14 @@ HWTEST_F(ScrolleEventTestNg, onWillScrollAndOnDidScroll001, TestSize.Level1)
     Dimension didOffsetX;
     Dimension didOffsetY;
     auto willEvent = [&isWillScrollTrigger, &willOffsetX, &willOffsetY](
-                         Dimension offsetX, Dimension offsetY, ScrollState state) {
+                         Dimension offsetX, Dimension offsetY, ScrollState state, ScrollSource source) {
         isWillScrollTrigger = true;
         willOffsetX = offsetX;
         willOffsetY = offsetY;
+        TwoDimensionScrollResult result;
+        result.xOffset = offsetX;
+        result.yOffset = offsetY;
+        return result;
     };
     auto didEvent = [&isDidScrollTrigger, &didOffsetX, &didOffsetY](
                         Dimension offsetX, Dimension offsetY, ScrollState state) {
@@ -438,10 +442,14 @@ HWTEST_F(ScrolleEventTestNg, onWillScrollAndOnDidScroll002, TestSize.Level1)
     Dimension didOffsetX;
     Dimension didOffsetY;
     auto willEvent = [&isWillScrollTrigger, &willOffsetX, &willOffsetY](
-                         Dimension offsetX, Dimension offsetY, ScrollState state) {
+                         Dimension offsetX, Dimension offsetY, ScrollState state, ScrollSource source) {
         isWillScrollTrigger = true;
         willOffsetX = offsetX;
         willOffsetY = offsetY;
+        TwoDimensionScrollResult result;
+        result.xOffset = offsetX;
+        result.yOffset = offsetY;
+        return result;
     };
     auto didEvent = [&isDidScrollTrigger, &didOffsetX, &didOffsetY](
                         Dimension offsetX, Dimension offsetY, ScrollState state) {

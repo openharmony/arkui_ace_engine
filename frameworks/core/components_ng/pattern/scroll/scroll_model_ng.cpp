@@ -20,10 +20,8 @@
 #include "base/utils/utils.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components_ng/base/view_stack_processor.h"
-#include "core/components_ng/pattern/scroll/effect/scroll_fade_effect.h"
 #include "core/components_ng/pattern/scroll/scroll_event_hub.h"
 #include "core/components_ng/pattern/scroll/scroll_pattern.h"
-#include "core/components_ng/pattern/scroll/scroll_spring_effect.h"
 #include "core/components_ng/pattern/scroll_bar/proxy/scroll_bar_proxy.h"
 #include "core/components_ng/pattern/scrollable/scrollable_model_ng.h"
 #include "core/components_ng/pattern/scrollable/scrollable_properties.h"
@@ -168,7 +166,7 @@ void ScrollModelNG::SetOnScroll(NG::ScrollEvent&& event)
     SetOnScroll(frameNode, std::move(event));
 }
 
-void ScrollModelNG::SetOnWillScroll(NG::ScrollEventWithState&& event)
+void ScrollModelNG::SetOnWillScroll(NG::ScrollEventWithReturn&& event)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
@@ -177,7 +175,7 @@ void ScrollModelNG::SetOnWillScroll(NG::ScrollEventWithState&& event)
     eventHub->SetOnWillScrollEvent(std::move(event));
 }
 
-void ScrollModelNG::SetOnWillScroll(FrameNode* frameNode, ScrollEventWithState&& event)
+void ScrollModelNG::SetOnWillScroll(FrameNode* frameNode, ScrollEventWithReturn&& event)
 {
     CHECK_NULL_VOID(frameNode);
     const auto& eventHub = frameNode->GetEventHub<ScrollEventHub>();
