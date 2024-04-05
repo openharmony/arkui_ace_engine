@@ -6519,7 +6519,7 @@ class ViewPU extends PUV2ViewBase {
     }
     // add current JS object to it's parent recycle manager
     recycleSelf(name) {
-        if (this.getParent() && !this.getParent().isDeleting() && this.getParent() instanceof ViewPU) {
+        if (this.getParent() && this.getParent() instanceof ViewPU && !this.getParent().isDeleting_) {
             const parentPU = this.getParent();
             parentPU.getOrCreateRecycleManager().pushRecycleNode(name, this);
             this.hasBeenRecycled_ = true;

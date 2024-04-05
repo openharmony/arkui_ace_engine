@@ -862,7 +862,7 @@ abstract class ViewPU extends PUV2ViewBase
   // add current JS object to it's parent recycle manager
   public recycleSelf(name: string): void {
     
-    if (this.getParent() && !this.getParent().isDeleting() && this.getParent() instanceof ViewPU) {
+    if (this.getParent() && this.getParent() instanceof ViewPU && !(this.getParent() as ViewPU).isDeleting_) {
       const parentPU : ViewPU = this.getParent() as ViewPU;
       parentPU.getOrCreateRecycleManager().pushRecycleNode(name, this);
       this.hasBeenRecycled_ = true;
