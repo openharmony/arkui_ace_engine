@@ -1525,7 +1525,7 @@ UIContentErrorCode UIContentImpl::CommonInitialize(
                     [taskExecutor = container->GetTaskExecutor(), id](const std::function<void()>& task) {
                         ContainerScope scope(id);
                         taskExecutor->PostTask(task, TaskExecutor::TaskType::UI);
-                    });
+                    }, id);
                 auto context = AceType::DynamicCast<PipelineContext>(container->GetPipelineContext());
                 if (context != nullptr) {
                     context->SetRSUIDirector(rsUiDirector);
