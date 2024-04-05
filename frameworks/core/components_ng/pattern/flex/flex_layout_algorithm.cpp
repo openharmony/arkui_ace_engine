@@ -229,15 +229,6 @@ void FlexLayoutAlgorithm::InitFlexProperties(LayoutWrapper* layoutWrapper)
 
 void FlexLayoutAlgorithm::TravelChildrenFlexProps(LayoutWrapper* layoutWrapper, const SizeF& realSize)
 {
-    if (!magicNodes_.empty()) {
-        const auto& childLayoutConstraint = layoutWrapper->GetLayoutProperty()->CreateChildConstraint();
-        for (auto& [index, children] : magicNodes_) {
-            for (auto& item : children) {
-                item.layoutConstraint = childLayoutConstraint;
-            }
-        }
-        return;
-    }
     maxDisplayPriority_ = 0;
     totalFlexWeight_ = 0.0f;
     outOfLayoutChildren_.clear();
