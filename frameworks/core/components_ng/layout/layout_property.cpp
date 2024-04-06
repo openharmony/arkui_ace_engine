@@ -565,6 +565,17 @@ PaddingPropertyF LayoutProperty::CreatePaddingWithoutBorder()
         padding_, ScaleProperty::CreateScaleProperty(), PipelineContext::GetCurrentRootWidth());
 }
 
+BorderWidthPropertyF LayoutProperty::CreateBorder()
+{
+    if (layoutConstraint_.has_value()) {
+        return ConvertToBorderWidthPropertyF(
+            borderWidth_, layoutConstraint_->scaleProperty, layoutConstraint_->percentReference.Width());
+    }
+
+    return ConvertToBorderWidthPropertyF(
+        borderWidth_, ScaleProperty::CreateScaleProperty(), PipelineContext::GetCurrentRootWidth());
+}
+
 MarginPropertyF LayoutProperty::CreateMargin()
 {
     CHECK_NULL_RETURN(margin_, MarginPropertyF());
