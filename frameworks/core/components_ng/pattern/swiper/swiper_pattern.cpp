@@ -4319,7 +4319,8 @@ void SwiperPattern::ResetAndUpdateIndexOnAnimationEnd(int32_t nextIndex)
             currentFocusIndex_ = currentIndex_;
         }
         do {
-            auto curChildFrame = GetCurrentFrameNode(currentFocusIndex_);
+            auto curChildFrame = DynamicCast<FrameNode>(
+                host->GetOrCreateChildByIndex(GetLoopIndex(currentFocusIndex_)));
             if (!curChildFrame || !IsContentFocused()) {
                 break;
             }
