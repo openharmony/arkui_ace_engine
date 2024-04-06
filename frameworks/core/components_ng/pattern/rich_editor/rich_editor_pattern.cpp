@@ -4632,7 +4632,7 @@ void RichEditorPattern::HandleOnCopy(bool isUsingExternalKeyboard)
         return;
     }
     OnCopyOperation(isUsingExternalKeyboard);
-    if (IsShowSelectMenuUsingMouse()) {
+    if (IsShowSelectMenuUsingMouse() || isUsingExternalKeyboard) {
         CloseSelectOverlay();
     } else {
         selectOverlayProxy_->ShowOrHiddenMenu(true);
