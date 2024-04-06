@@ -1573,7 +1573,12 @@ bool JSViewAbstract::JsWidth(const JSRef<JSVal>& jsValue)
     }
 
     if (LessNotEqual(value.Value(), 0.0)) {
-        value.SetValue(0.0);
+        if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
+            ViewAbstractModel::GetInstance()->ClearWidthOrHeight(true);
+            return true;
+        } else {
+            value.SetValue(0.0);
+        }
     }
 
     ViewAbstractModel::GetInstance()->SetWidth(value);
@@ -1602,7 +1607,12 @@ bool JSViewAbstract::JsHeight(const JSRef<JSVal>& jsValue)
     }
 
     if (LessNotEqual(value.Value(), 0.0)) {
-        value.SetValue(0.0);
+        if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
+            ViewAbstractModel::GetInstance()->ClearWidthOrHeight(false);
+            return true;
+        } else {
+            value.SetValue(0.0);
+        }
     }
 
     ViewAbstractModel::GetInstance()->SetHeight(value);
@@ -2152,7 +2162,9 @@ void JSViewAbstract::JsDisplayPriority(const JSCallbackInfo& info)
 {
     double value = 0.0;
     if (!ParseJsDouble(info[0], value)) {
-        ViewAbstractModel::GetInstance()->SetDisplayIndex(0);
+        if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
+            ViewAbstractModel::GetInstance()->SetDisplayIndex(0);
+        }
         return;
     }
     ViewAbstractModel::GetInstance()->SetDisplayIndex(static_cast<int32_t>(value));
