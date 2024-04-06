@@ -221,8 +221,6 @@ void TextSelectOverlay::OnUpdateSelectOverlayInfo(SelectOverlayInfo& overlayInfo
     BaseTextSelectOverlay::OnUpdateSelectOverlayInfo(overlayInfo, requestCode);
     auto textPattern = GetPattern<TextPattern>();
     CHECK_NULL_VOID(textPattern);
-    auto menuIsShow = overlayInfo.menuInfo.menuIsShow;
-    overlayInfo.menuInfo.menuIsShow = menuIsShow && (overlayInfo.firstHandle.isShow || overlayInfo.secondHandle.isShow);
     overlayInfo.menuOptionItems = textPattern->GetMenuOptionItems();
     textPattern->CopySelectionMenuParams(overlayInfo);
 }
