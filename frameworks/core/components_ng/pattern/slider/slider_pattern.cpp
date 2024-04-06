@@ -1079,6 +1079,7 @@ void SliderPattern::UpdateImagePositionX(float centerX)
     auto offset = geometryNode->GetMarginFrameOffset();
     offset.SetX(centerX - blockSize_.Width() * HALF);
     geometryNode->SetMarginFrameOffset(offset);
+    renderContext->SavePaintRect();
     renderContext->SyncGeometryProperties(nullptr);
 }
 
@@ -1093,6 +1094,7 @@ void SliderPattern::UpdateImagePositionY(float centerY)
     auto offset = geometryNode->GetMarginFrameOffset();
     offset.SetY(centerY - blockSize_.Height() * HALF);
     geometryNode->SetMarginFrameOffset(offset);
+    renderContext->SavePaintRect();
     renderContext->SyncGeometryProperties(nullptr);
 }
 
