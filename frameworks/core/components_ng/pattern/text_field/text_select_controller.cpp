@@ -485,6 +485,10 @@ void TextSelectController::UpdateCaretOffset(const OffsetF& offset)
 void TextSelectController::UpdateSecondHandleInfoByMouseOffset(const Offset& localOffset)
 {
     auto index = ConvertTouchOffsetToPosition(localOffset);
+    if (localOffset.GetX() > contentRect_.GetX() + contentRect_.Width() && paragraph_) {
+        float boundaryAdjustment = paragraph_->GetCharacterWidth(caretInfo_.index);
+        index = ConvertTouchOffsetToPosition({localOffset.GetX() + boundaryAdjustment, localOffset.GetY()});
+    }
     MoveSecondHandleToContentRect(index);
     caretInfo_.index = index;
     UpdateCaretOffset(TextAffinity::UPSTREAM);
