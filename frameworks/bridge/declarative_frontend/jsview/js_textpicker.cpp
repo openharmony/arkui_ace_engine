@@ -1328,6 +1328,11 @@ void JSTextPickerDialog::Show(const JSCallbackInfo& info)
             textPickerDialog.backgroundBlurStyle = blurStyle;
         }
     }
+    auto shadowValue = paramObject->GetProperty("shadow");
+    Shadow shadow;
+    if ((shadowValue->IsObject() || shadowValue->IsNumber()) && JSViewAbstract::ParseShadowProps(shadowValue, shadow)) {
+        textPickerDialog.shadow = shadow;
+    }
 
     TextPickerDialogEvent textPickerDialogEvent { nullptr, nullptr, nullptr, nullptr };
     TextPickerDialogAppearEvent(info, textPickerDialogEvent);

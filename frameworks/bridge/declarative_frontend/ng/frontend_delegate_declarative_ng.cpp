@@ -682,6 +682,9 @@ void FrontendDelegateDeclarativeNG::ShowDialog(const PromptDialogAttr& dialogAtt
     if (dialogAttr.offset.has_value()) {
         dialogProperties.offset = dialogAttr.offset.value();
     }
+    if (dialogAttr.shadow.has_value()) {
+        dialogProperties.shadow = dialogAttr.shadow.value();
+    }
     ShowDialogInner(dialogProperties, std::move(callback), callbacks);
 }
 

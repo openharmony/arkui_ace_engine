@@ -216,6 +216,12 @@ public:
             theme->marginBottom_ = dialogPattern->GetAttr<Dimension>("dialog_dimension_bottom", 16.0_vp);
             theme->marginLeft_ = dialogPattern->GetAttr<Dimension>("dialog_dimension_start", 12.0_vp);
             theme->marginRight_ = dialogPattern->GetAttr<Dimension>("dialog_dimension_end", 12.0_vp);
+            theme->defaultShadowOn_ =
+                static_cast<uint32_t>(dialogPattern->GetAttr<double>("dialog_background_shadow_on",
+                static_cast<double>(ShadowStyle::None)));
+            theme->defaultShadowOff_ =
+                static_cast<uint32_t>(dialogPattern->GetAttr<double>("dialog_background_shadow_off",
+                static_cast<double>(ShadowStyle::None)));
         }
     };
 
@@ -549,6 +555,16 @@ public:
     {
         return buttonWithContentPadding_;
     }
+    
+    uint32_t GetDefaultShadowOn() const
+    {
+        return defaultShadowOn_;
+    }
+
+    uint32_t GetDefaultShadowOff() const
+    {
+        return defaultShadowOff_;
+    }
 protected:
     DialogTheme() = default;
 
@@ -621,6 +637,8 @@ private:
     std::string multipleDialogDisplay_;
     bool expandDisplay_ = false;
     Dimension buttonWithContentPadding_;
+    uint32_t defaultShadowOn_ = 6;
+    uint32_t defaultShadowOff_ = 6;
 };
 
 } // namespace OHOS::Ace

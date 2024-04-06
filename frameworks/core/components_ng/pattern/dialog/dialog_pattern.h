@@ -227,6 +227,9 @@ private:
     void HandleClick(const GestureEvent& info);
     void RegisterOnKeyEvent(const RefPtr<FocusHub>& focusHub);
     bool OnKeyEvent(const KeyEvent& event);
+    void InitFocusEvent(const RefPtr<FocusHub>& focusHub);
+    void HandleBlurEvent();
+    void HandleFocusEvent();
 
     void PopDialog(int32_t buttonIdx);
 
@@ -283,6 +286,7 @@ private:
     WeakPtr<FrameNode> menuNode_;
     bool isFirstDefaultFocus_ = true;
     RefPtr<FrameNode> buttonContainer_;
+    RefPtr<RenderContext> contentRenderContext_;
 
     ACE_DISALLOW_COPY_AND_MOVE(DialogPattern);
 

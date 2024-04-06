@@ -1010,6 +1010,7 @@ napi_value JSPromptShowDialog(napi_env env, napi_callback_info info)
     std::optional<DialogAlignment> alignment;
     std::optional<DimensionOffset> offset;
     std::optional<DimensionRect> maskRect;
+    std::optional<Shadow> shadowProps;
 
     for (size_t i = 0; i < argc; i++) {
         napi_valuetype valueType = napi_undefined;
@@ -1028,9 +1029,11 @@ napi_value JSPromptShowDialog(napi_env env, napi_callback_info info)
             napi_get_named_property(env, argv[0], "alignment", &asyncContext->alignmentApi);
             napi_get_named_property(env, argv[0], "offset", &asyncContext->offsetApi);
             napi_get_named_property(env, argv[0], "maskRect", &asyncContext->maskRectApi);
+            napi_get_named_property(env, argv[0], "shadow", &asyncContext->shadowApi);
             GetNapiString(env, asyncContext->titleNApi, asyncContext->titleString, valueType);
             GetNapiString(env, asyncContext->messageNApi, asyncContext->messageString, valueType);
             GetNapiDialogProps(env, asyncContext, alignment, offset, maskRect);
+            shadowProps = GetShadowProps(env, asyncContext);
             bool isBool = false;
             napi_is_array(env, asyncContext->buttonsNApi, &isBool);
             napi_typeof(env, asyncContext->buttonsNApi, &valueType);
@@ -1149,6 +1152,7 @@ napi_value JSPromptShowDialog(napi_env env, napi_callback_info info)
         .alignment = alignment,
         .offset = offset,
         .maskRect = maskRect,
+        .shadow = shadowProps,
     };
 
 #ifdef OHOS_STANDARD_SYSTEM
