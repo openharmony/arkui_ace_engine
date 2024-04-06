@@ -666,11 +666,28 @@ void DragDropManager::OnDragEnd(const PointerEvent& pointerEvent, const std::str
         TAG_LOGI(AceLogTag::ACE_DRAG,
             "DragDropManager onDragEnd, not find drop target, stop drag. WindowId is %{public}d.",
             container->GetWindowId());
-        DragDropRet dragDropRet { DragRet::DRAG_FAIL, isMouseDragged_, container->GetWindowId(),
-            DragBehavior::UNKNOWN };
-        ResetDragDropStatus(point, dragDropRet, container->GetWindowId());
-        dragCursorStyleCore_ = DragCursorStyleCore::DEFAULT;
+        ResetDragDrop(container->GetWindowId(), point);
         return;
+    }
+    bool isDisallowDropForcedly = dragFrameNode->GetDisallowDropForcedly();
+    if (isDisallowDropForcedly) {
+        TAG_LOGI(AceLogTag::ACE_DRAG,
+            "DragDropManager onDragEnd, target data is not allowed to fall into. WindowId is %{public}d.",
+            container->GetWindowId());
+        ResetDragDrop(container->GetWindowId(), point);
+        return;
+    }
+    const auto& dragFrameNodeAllowDrop = dragFrameNode->GetAllowDrop();
+    if (!dragFrameNodeAllowDrop.empty()) {
+        for (const auto& it : summaryMap_) {
+            if (dragFrameNodeAllowDrop.find(it.first) == dragFrameNodeAllowDrop.end()) {
+                TAG_LOGI(AceLogTag::ACE_DRAG,
+                    "DragDropManager onDragEnd, target data is not allowed to fall into. WindowId is %{public}d.",
+                    container->GetWindowId());
+                ResetDragDrop(container->GetWindowId(), point);
+                return;
+            }
+        }
     }
     TAG_LOGI(AceLogTag::ACE_DRAG, "Current windowId is %{public}d, drag position is (%{public}f, %{public}f)."
         "TargetNode is %{public}s, id is %{public}s",
@@ -1695,6 +1712,13 @@ void DragDropManager::PushGatherPixelMap(DragDataCore& dragData, float scale)
     }
     gatherPixelMaps_.clear();
     return;
+}
+
+void DragDropManager::ResetDragDrop(int32_t windowId, const Point& point)
+{
+    DragDropRet dragDropRet { DragRet::DRAG_FAIL, isMouseDragged_, windowId, DragBehavior::UNKNOWN };
+    ResetDragDropStatus(point, dragDropRet, windowId);
+    dragCursorStyleCore_ = DragCursorStyleCore::DEFAULT;
 }
 
 void DragDropManager::FireOnDragLeave(

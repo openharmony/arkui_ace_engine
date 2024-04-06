@@ -366,6 +366,8 @@ public:
 
     static void SetFreeze(bool freeze);
 
+    static void SetDisallowDropForcedly(bool isDisallowDropForcedly);
+
     // useShadowBatching
     static void SetUseShadowBatching(bool useShadowBatching);
 

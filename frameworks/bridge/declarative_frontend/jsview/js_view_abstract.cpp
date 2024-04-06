@@ -7230,6 +7230,8 @@ void JSViewAbstract::JsAllowDrop(const JSCallbackInfo& info)
             allowDrop = allowDropArray->GetValueAt(i)->ToString();
             allowDropSet.insert(allowDrop);
         }
+    } else if (info[0]->IsNull()) {
+        ViewAbstractModel::GetInstance()->SetDisallowDropForcedly(true);
     }
     ViewAbstractModel::GetInstance()->SetAllowDrop(allowDropSet);
 }
