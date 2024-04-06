@@ -177,6 +177,7 @@ public:
     std::string ProvideRestoreInfo() override;
     void OnRestoreInfo(const std::string& restoreInfo) override;
     void OnColorConfigurationUpdate() override;
+    void OnAttachToMainTree() override;
 
 private:
     void OnAttachToFrameNode() override;
@@ -215,9 +216,11 @@ private:
         std::unordered_map<std::string, std::list<WeakPtr<FrameNode>>> checkBoxGroupMap);
     void ChangeGroupStatusAndNotify(const RefPtr<FrameNode>& checkBoxGroupNode, const std::vector<std::string>& vec,
         bool haveCheckBoxSelected, bool isAllCheckBoxSelected);
+    std::string GetGroupNameWithNavId();
 
     std::optional<std::string> preName_;
     std::optional<std::string> preGroup_;
+    std::string navId_ = "";
     int32_t prePageId_ = 0;
     bool lastSelect_ = false;
 
