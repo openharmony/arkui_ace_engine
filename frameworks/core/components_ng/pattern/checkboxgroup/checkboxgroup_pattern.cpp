@@ -43,9 +43,7 @@ void CheckBoxGroupPattern::OnDetachFromFrameNode(FrameNode* frameNode)
     CHECK_NULL_VOID(frameNode);
     auto groupManager = groupManager_.Upgrade();
     CHECK_NULL_VOID(groupManager);
-    auto checkBoxGroupEventHub = frameNode->GetEventHub<NG::CheckBoxGroupEventHub>();
-    CHECK_NULL_VOID(checkBoxGroupEventHub);
-    groupManager->RemoveCheckBoxFromGroup(checkBoxGroupEventHub->GetGroupName(), frameNode->GetId());
+    groupManager->RemoveCheckBoxFromGroup(GetGroupNameWithNavId(), frameNode->GetId());
 }
 
 void CheckBoxGroupPattern::OnModifyDone()
@@ -288,7 +286,7 @@ void CheckBoxGroupPattern::UpdateState()
     auto groupManager = groupManager_.Upgrade();
     CHECK_NULL_VOID(groupManager);
     auto preGroup = GetPreGroup();
-    auto group = eventHub->GetGroupName();
+    auto group = GetGroupNameWithNavId();
     if (!preGroup.has_value()) {
         groupManager->AddCheckBoxGroupToGroup(group, host->GetId());
         auto paintProperty = host->GetPaintProperty<CheckBoxGroupPaintProperty>();
@@ -353,7 +351,7 @@ void CheckBoxGroupPattern::OnAfterModifyDone()
         auto groupManager = groupManager_.Upgrade();
         CHECK_NULL_VOID(groupManager);
         auto checkBoxGroupMap = groupManager->GetCheckBoxGroupMap();
-        const auto& list = checkBoxGroupMap[eventHub->GetGroupName()];
+        const auto& list = checkBoxGroupMap[GetGroupNameWithNavId()];
         for (auto&& item : list) {
             auto node = item.Upgrade();
             if (!node || node == host) {
@@ -387,10 +385,8 @@ void CheckBoxGroupPattern::UpdateGroupCheckStatus(const RefPtr<FrameNode>& frame
     frameNode->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
     auto groupManager = groupManager_.Upgrade();
     CHECK_NULL_VOID(groupManager);
-    auto checkBoxGroupEventHub = GetEventHub<CheckBoxGroupEventHub>();
-    CHECK_NULL_VOID(checkBoxGroupEventHub);
     auto checkBoxGroupMap = groupManager->GetCheckBoxGroupMap();
-    auto group = checkBoxGroupEventHub->GetGroupName();
+    auto group = GetGroupNameWithNavId();
     UpdateCheckBoxStatus(frameNode, checkBoxGroupMap, group, select);
 }
 
@@ -625,4 +621,27 @@ void CheckBoxGroupPattern::OnColorConfigurationUpdate()
     host->MarkDirtyNode();
 }
 
+void CheckBoxGroupPattern::OnAttachToMainTree()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto parent = host->GetParent();
+    while (parent) {
+        if (parent->GetTag() == V2::NAVDESTINATION_CONTENT_ETS_TAG) {
+            navId_ = std::to_string(parent->GetId());
+            UpdateState();
+            return;
+        }
+        parent = parent->GetParent();
+    }
+}
+
+std::string CheckBoxGroupPattern::GetGroupNameWithNavId()
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, "");
+    auto eventHub = host->GetEventHub<CheckBoxGroupEventHub>();
+    CHECK_NULL_RETURN(eventHub, "");
+    return eventHub->GetGroupName() + navId_;
+}
 } // namespace OHOS::Ace::NG
