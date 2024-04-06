@@ -674,7 +674,7 @@ HWTEST_F(GestureEventHubTestNg, GestureEventHubTest009, TestSize.Level1)
     EXPECT_FALSE(gestureEventHub->recreateGesture_);
     auto sizeGestures = static_cast<int32_t>(gestureEventHub->gestures_.size());
     auto sizeGestureHierarchy = static_cast<int32_t>(gestureEventHub->gestureHierarchy_.size());
-    EXPECT_EQ(sizeGestures, 1);
+    EXPECT_EQ(sizeGestures, 0);
     EXPECT_EQ(sizeGestureHierarchy, 1);
 }
 

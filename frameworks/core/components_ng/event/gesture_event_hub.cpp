@@ -317,6 +317,9 @@ void GestureEventHub::UpdateGestureHierarchy()
                 break;
             }
         }
+    }
+    if (success) {
+        gestures_.clear();
         return;
     }
 
@@ -328,6 +331,7 @@ void GestureEventHub::UpdateGestureHierarchy()
         AddGestureToGestureHierarchy(gesture);
     }
     needRecollect_ = false;
+    gestures_.clear();
 }
 
 void GestureEventHub::AddGestureToGestureHierarchy(const RefPtr<NG::Gesture>& gesture)

@@ -687,6 +687,13 @@ enum ArkUIGestureDirection {
     ArkUI_GESTURE_DIRECTION_ALL = 15,
 };
 
+enum ArkUISwipeGestureDirection {
+    ArkUI_SWIPE_GESTURE_DIRECTION_NONE = 0,
+    ArkUI_SWIPE_GESTURE_DIRECTION_HORIZONTAL = 1,
+    ArkUI_SWIPE_GESTURE_DIRECTION_VERTICAL = 2,
+    ArkUI_SWIPE_GESTURE_DIRECTION_ALL = 3,
+};
+
 enum ArkUIAPICustomOp { MEASURE = 1, LAYOUT = 2, DRAW = 3 };
 
 enum ArkUIVMKind {
@@ -1861,6 +1868,7 @@ struct ArkUIGestureModifier {
     ArkUIGesture* (*createPinchGesture)(ArkUI_Int32 fingers, ArkUI_Float64 distance);
     ArkUIGesture* (*createRotationGesture)(ArkUI_Int32 fingers, ArkUI_Float64 angle);
     ArkUIGesture* (*createSwipeGesture)(ArkUI_Int32 fingers, ArkUI_Int32 directions, ArkUI_Float64 speed);
+    ArkUIGesture* (*createSwipeGestureByModifier)(ArkUI_Int32 fingers, ArkUI_Int32 direction, ArkUI_Float64 speed);
     ArkUIGesture* (*createGestureGroup)(ArkUI_Int32 mode);
     void (*addGestureToGestureGroup)(ArkUIGesture* group, ArkUIGesture* child);
     void (*dispose)(ArkUIGesture* recognizer);
