@@ -4243,6 +4243,21 @@ void GetBorderWidth(ArkUINodeHandle node, ArkUI_Float32* values)
     values[NUM_3] = width.leftDimen->Value();
 }
 
+void GetBorderWidthDimension(ArkUINodeHandle node, ArkUI_Float32* values, ArkUI_Int32* units)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto borderWidth = ViewAbstract::GetLayoutBorderWidth(frameNode);
+    values[NUM_0] = borderWidth.topDimen->Value();
+    units[NUM_0] = static_cast<ArkUI_Int32>(borderWidth.topDimen->Unit());
+    values[NUM_1] = borderWidth.rightDimen->Value();
+    units[NUM_1] = static_cast<ArkUI_Int32>(borderWidth.rightDimen->Unit());
+    values[NUM_2] = borderWidth.bottomDimen->Value();
+    units[NUM_2] = static_cast<ArkUI_Int32>(borderWidth.bottomDimen->Unit());
+    values[NUM_3] = borderWidth.leftDimen->Value();
+    units[NUM_3] = static_cast<ArkUI_Int32>(borderWidth.leftDimen->Unit());
+}
+
 void GetBorderRadius(ArkUINodeHandle node, ArkUI_Float32* values)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -4615,6 +4630,32 @@ void GetPadding(ArkUINodeHandle node, ArkUI_Float32* values, ArkUI_Int32 length)
     length = NUM_4;
 }
 
+void GetPaddingDimension(ArkUINodeHandle node, ArkUI_Float32* values, ArkUI_Int32* units)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto padding = ViewAbstract::GetPadding(frameNode);
+    values[NUM_0] = padding.top->GetDimension().Value();
+    units[NUM_0] = static_cast<ArkUI_Int32>(padding.top->GetDimension().Unit());
+    values[NUM_1] = padding.right->GetDimension().Value();
+    units[NUM_1] = static_cast<ArkUI_Int32>(padding.right->GetDimension().Unit());
+    values[NUM_2] = padding.bottom->GetDimension().Value();
+    units[NUM_2] = static_cast<ArkUI_Int32>(padding.bottom->GetDimension().Unit());
+    values[NUM_3] = padding.left->GetDimension().Value();
+    units[NUM_3] = static_cast<ArkUI_Int32>(padding.left->GetDimension().Unit());
+}
+
+void GetConfigSize(ArkUINodeHandle node, ArkUI_Float32* values, ArkUI_Int32* units)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto size = ViewAbstract::GetConfigSize(frameNode);
+    values[NUM_0] = size->Width()->GetDimension().Value();
+    units[NUM_0] = static_cast<ArkUI_Int32>(size->Width()->GetDimension().Unit());
+    values[NUM_1] = size->Height()->GetDimension().Value();
+    units[NUM_1] = static_cast<ArkUI_Int32>(size->Height()->GetDimension().Unit());
+}
+
 ArkUI_CharPtr GetKey(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -4640,6 +4681,21 @@ void GetMargin(ArkUINodeHandle node, ArkUI_Float32* values, ArkUI_Int32 length)
     values[NUM_2] = margin.bottom->GetDimension().Value();
     values[NUM_3] = margin.left->GetDimension().Value();
     length = NUM_4;
+}
+
+void GetMarginDimension(ArkUINodeHandle node, ArkUI_Float32* values, ArkUI_Int32* units)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto margin = ViewAbstract::GetMargin(frameNode);
+    values[NUM_0] = margin.top->GetDimension().Value();
+    units[NUM_0] = static_cast<ArkUI_Int32>(margin.top->GetDimension().Unit());
+    values[NUM_1] = margin.right->GetDimension().Value();
+    units[NUM_1] = static_cast<ArkUI_Int32>(margin.right->GetDimension().Unit());
+    values[NUM_2] = margin.bottom->GetDimension().Value();
+    units[NUM_2] = static_cast<ArkUI_Int32>(margin.bottom->GetDimension().Unit());
+    values[NUM_3] = margin.left->GetDimension().Value();
+    units[NUM_3] = static_cast<ArkUI_Int32>(margin.left->GetDimension().Unit());
 }
 
 void GetTranslate(ArkUINodeHandle node, ArkUI_Float32* values)
@@ -4707,16 +4763,17 @@ const ArkUICommonModifier* GetCommonModifier()
         SetOutlineColor, ResetOutlineColor, SetOutlineRadius, ResetOutlineRadius, SetOutlineWidth, ResetOutlineWidth,
         SetOutlineStyle, ResetOutlineStyle, SetOutline, ResetOutline, GetFocusable, GetDefaultFocus, GetResponseRegion,
         GetOverlay, GetAccessibilityGroup, GetAccessibilityText, GetAccessibilityDescription, GetAccessibilityLevel,
-        SetNeedFocus, GetNeedFocus, GetOpacity, GetBorderWidth, GetBorderRadius, GetBorderColor, GetBorderStyle,
-        GetZIndex, GetVisibility, GetClip, GetClipShape, GetTransform, GetHitTestBehavior, GetPosition, GetShadow,
-        GetCustomShadow, GetSweepGradient, GetRadialGradient, GetMask, GetBlendMode, GetDirection, GetAlignSelf,
-        GetTransformCenter, GetOpacityTransition, GetRotateTransition, GetScaleTransition, GetTranslateTransition,
-        GetOffset, GetMarkAnchor, GetAlignRules, GetBackgroundBlurStyle, GetBackgroundImageSize,
-        GetBackgroundImageSizeWidthStyle, GetScale, GetRotate, GetBrightness, GetSaturate, GetBackgroundImagePosition,
-        GetFlexGrow, GetFlexShrink, GetFlexBasis, GetConstraintSize, GetGrayScale, GetInvert, GetSepia, GetContrast,
-        GetForegroundColor, GetBlur, GetLinearGradient, GetAlign, GetWidth, GetHeight, GetBackgroundColor,
-        GetBackgroundImage, GetPadding, GetKey, GetEnabled, GetMargin, GetTranslate, SetMoveTransition,
-        GetMoveTransition, ResetMask, GetAspectRatio };
+        SetNeedFocus, GetNeedFocus, GetOpacity, GetBorderWidth, GetBorderWidthDimension,
+        GetBorderRadius, GetBorderColor, GetBorderStyle, GetZIndex, GetVisibility, GetClip, GetClipShape, GetTransform,
+        GetHitTestBehavior, GetPosition, GetShadow, GetCustomShadow, GetSweepGradient, GetRadialGradient, GetMask,
+        GetBlendMode, GetDirection, GetAlignSelf, GetTransformCenter, GetOpacityTransition, GetRotateTransition,
+        GetScaleTransition, GetTranslateTransition, GetOffset, GetMarkAnchor, GetAlignRules, GetBackgroundBlurStyle,
+        GetBackgroundImageSize, GetBackgroundImageSizeWidthStyle, GetScale, GetRotate, GetBrightness, GetSaturate,
+        GetBackgroundImagePosition, GetFlexGrow, GetFlexShrink, GetFlexBasis, GetConstraintSize, GetGrayScale,
+        GetInvert, GetSepia, GetContrast, GetForegroundColor, GetBlur, GetLinearGradient, GetAlign, GetWidth,
+        GetHeight, GetBackgroundColor, GetBackgroundImage, GetPadding, GetPaddingDimension, GetConfigSize, GetKey,
+        GetEnabled, GetMargin, GetMarginDimension, GetTranslate, SetMoveTransition, GetMoveTransition, ResetMask,
+        GetAspectRatio };
 
     return &modifier;
 }
