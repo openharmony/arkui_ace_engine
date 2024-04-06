@@ -45,6 +45,7 @@
 #include "core/components_ng/base/ui_node.h"
 #include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/base/view_stack_processor.h"
+#include "core/components_ng/event/focus_hub.h"
 #include "core/components_ng/pattern/bubble/bubble_event_hub.h"
 #include "core/components_ng/pattern/bubble/bubble_pattern.h"
 #include "core/components_ng/pattern/calendar_picker/calendar_dialog_view.h"
@@ -68,6 +69,7 @@
 #include "core/components_ng/pattern/overlay/sheet_view.h"
 #include "core/components_ng/pattern/picker/datepicker_dialog_view.h"
 #include "core/components_ng/pattern/stage/stage_pattern.h"
+#include "core/components_ng/pattern/text_field/text_field_manager.h"
 #include "core/components_ng/pattern/text_picker/textpicker_dialog_view.h"
 #include "core/components_ng/pattern/time_picker/timepicker_dialog_view.h"
 #include "core/components_ng/pattern/toast/toast_pattern.h"
@@ -2721,7 +2723,20 @@ void OverlayManager::FireModalPageShow()
     topModalFocusView->FocusViewShow();
 }
 
-void OverlayManager::ModalPageLostFocus(const RefPtr<FrameNode>& node) {}
+void OverlayManager::ModalPageLostFocus(const RefPtr<FrameNode>& node)
+{
+    auto container = Container::Current();
+    CHECK_NULL_VOID(container);
+    if (container->IsUIExtensionWindow()) {
+        FocusHub::NavCloseKeyboard();
+    } else {
+        auto pipeline = PipelineContext::GetCurrentContextSafely();
+        CHECK_NULL_VOID(pipeline);
+        auto textfieldManager = DynamicCast<TextFieldManagerNG>(pipeline->GetTextFieldManager());
+        CHECK_NULL_VOID(textfieldManager);
+        textfieldManager->ProcessNavKeyboard();
+    }
+}
 
 void OverlayManager::FireModalPageHide() {}
 
