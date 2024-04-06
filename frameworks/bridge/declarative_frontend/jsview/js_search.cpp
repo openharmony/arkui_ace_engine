@@ -475,14 +475,16 @@ void JSSearch::SetPlaceholderFont(const JSCallbackInfo& info)
 
 void JSSearch::SetTextFont(const JSCallbackInfo& info)
 {
-    if (info.Length() < 1 || !info[0]->IsObject()) {
-        return;
-    }
-    auto param = JSRef<JSObject>::Cast(info[0]);
     auto theme = GetTheme<SearchTheme>();
     CHECK_NULL_VOID(theme);
     auto themeFontSize = theme->GetFontSize();
-    Font font;
+    auto themeFontWeight = theme->GetFontWeight();
+    Font font {.fontSize = themeFontSize, .fontWeight = themeFontWeight, .fontStyle = Ace::FontStyle::NORMAL};
+    if (info.Length() < 1 || !info[0]->IsObject()) {
+        SearchModel::GetInstance()->SetTextFont(font);
+        return;
+    }
+    auto param = JSRef<JSObject>::Cast(info[0]);
     auto fontSize = param->GetProperty("size");
     CalcDimension size = themeFontSize;
     if (ParseJsDimensionVpNG(fontSize, size) && size.Unit() != DimensionUnit::PERCENT &&

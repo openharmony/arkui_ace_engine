@@ -84,8 +84,9 @@ RectF TextSelectController::CalculateEmptyValueCaretRect() const
     }
     OffsetF offset = Alignment::GetAlignPosition(contentRect_.GetSize(), rect.GetSize(), align);
     rect.SetTop(offset.GetY() + contentRect_.GetY());
-
-    AdjustHandleAtEdge(rect);
+    if (textAlign != TextAlign::END) {
+        AdjustHandleAtEdge(rect);
+    }
     return rect;
 }
 
