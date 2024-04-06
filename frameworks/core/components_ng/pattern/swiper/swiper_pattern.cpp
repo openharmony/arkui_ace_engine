@@ -917,6 +917,11 @@ bool SwiperPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty,
                     currentOffset_, currentOffset_ - targetPos, iter->first, false, velocity_.value_or(0.0f));
             }
             velocity_.reset();
+        } else if (!itemPosition_.empty() && SwiperUtils::IsStretch(layoutProperty)) {
+            auto targetPos = itemPosition_.begin()->second.startPos +
+                             (targetIndexValue - itemPosition_.begin()->first) * placeItemWidth_.value();
+            PlayTranslateAnimation(
+                currentOffset_, currentOffset_ - targetPos, targetIndexValue, false, velocity_.value_or(0.0f));
         }
         pauseTargetIndex_ = targetIndex_;
     }
