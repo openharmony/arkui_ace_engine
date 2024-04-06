@@ -155,7 +155,14 @@ void ImageModelNG::SetOnError(std::function<void(const LoadImageFailEvent &info)
     eventHub->SetOnError(std::move(callback));
 }
 
-void ImageModelNG::SetSvgAnimatorFinishEvent(std::function<void()> &&callback) {}
+void ImageModelNG::SetSvgAnimatorFinishEvent(std::function<void()>&& callback)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetEventHub<ImageEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnFinish(std::move(callback));
+}
 
 void ImageModelNG::SetImageSourceSize(const std::pair<Dimension, Dimension> &size)
 {

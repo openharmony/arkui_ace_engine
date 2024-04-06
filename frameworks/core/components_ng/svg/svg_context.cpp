@@ -55,6 +55,7 @@ const AttrMap& SvgContext::GetAttrMap(const std::string& key) const
 
 void SvgContext::AddAnimator(int32_t key, const RefPtr<Animator>& animator)
 {
+    ++animatorSumCnt_;
     animators_[key] = animator;
 }
 

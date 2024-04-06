@@ -27,6 +27,8 @@ void SvgCanvasImage::DrawToRSCanvas(
 
 void SvgCanvasImage::SetRedrawCallback(std::function<void()>&& callback) {}
 
+void SvgCanvasImage::SetOnFinishCallback(std::function<void ()> &&callback) {}
+
 void SvgCanvasImage::ControlAnimation(bool play) {}
 
 bool SvgCanvasImage::IsStatic()

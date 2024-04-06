@@ -93,8 +93,20 @@ public:
         return viewPort_;
     }
 
+    uint32_t ReleaseAndGetAnimatorNeedFinishCnt()
+    {
+        return --animatorNeedFinishCnt_;
+    }
+
+    void InitAnimatorNeedFinishCnt()
+    {
+        animatorNeedFinishCnt_ = animatorSumCnt_;
+    }
+
 private:
     std::unordered_map<std::string, WeakPtr<SvgNode>> idMapper_;
+    uint32_t animatorNeedFinishCnt_ = 0;
+    uint32_t animatorSumCnt_ = 0;
     // weak references to animators in svgDom
     std::unordered_map<int32_t, WeakPtr<Animator>> animators_;
     ClassStyleMap styleMap_;

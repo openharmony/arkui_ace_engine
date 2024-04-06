@@ -218,6 +218,7 @@ private:
 
     void PrepareAnimation(const RefPtr<CanvasImage>& image);
     void SetRedrawCallback(const RefPtr<CanvasImage>& image);
+    void SetOnFinishCallback(const RefPtr<CanvasImage>& image);
     void RegisterVisibleAreaChange();
 
     void InitCopy();
