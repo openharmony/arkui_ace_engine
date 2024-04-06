@@ -76,6 +76,8 @@ RefPtr<UINode> GetInspectorByKey(const RefPtr<FrameNode>& root, const std::strin
             elements.push(child);
         }
     }
+    LOGW("Internal error! Can'nt find a component that id or key are %{public}s from rootNode[%{public}d]",
+        key.c_str(), root->GetId());
     return nullptr;
 }
 
@@ -371,9 +373,15 @@ RefPtr<FrameNode> Inspector::GetFrameNodeByKey(const std::string& key)
         }
     }
     auto context = NG::PipelineContext::GetCurrentContext();
-    CHECK_NULL_RETURN(context, nullptr);
+    if (!context) {
+        LOGW("Internal error! The PipelineContext returned by the system is null. param: %{public}s", key.c_str());
+        return nullptr;
+    }
     auto rootNode = context->GetRootElement();
-    CHECK_NULL_RETURN(rootNode, nullptr);
+    if (!rootNode) {
+        LOGW("Internal error! The rootNode returned by the system is null. param: %{public}s", key.c_str());
+        return nullptr;
+    }
 
     return AceType::DynamicCast<FrameNode>(GetInspectorByKey(rootNode, key));
 }
