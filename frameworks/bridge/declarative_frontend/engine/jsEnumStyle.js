@@ -13,7 +13,12 @@
  * limitations under the License.
  */
 /* Load the UIContext module. */
-const UIContext = requireNapi("arkui.uicontext")
+
+if (globalThis.requireNapi === undefined) {
+    const UIContext = globalThis.requireNapiPreview('arkui.uicontext');
+} else {
+    const UIContext = globalThis.requireNapi('arkui.uicontext');
+}
 
 /* If a new value is added, add it from the end. */
 var Color;
