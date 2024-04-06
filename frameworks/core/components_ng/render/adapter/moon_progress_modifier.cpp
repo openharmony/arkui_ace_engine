@@ -45,7 +45,7 @@ constexpr float INITIAL_OPACITY = 0.0f;
 constexpr int32_t PICTURE_DURATION = 750;
 } // namespace
 
-MoonProgressModifier::MoonProgressModifier()
+MoonProgressModifier::MoonProgressModifier(const WeakPtr<FrameNode>& maskNode)
     : maskColor_(AceType::MakeRefPtr<AnimatablePropertyColor>(LinearColor(Color::TRANSPARENT))),
       ratio_(AceType::MakeRefPtr<AnimatablePropertyFloat>(INITIAL_RATIO)),
       value_(AceType::MakeRefPtr<AnimatablePropertyFloat>(.0f)),
@@ -53,6 +53,7 @@ MoonProgressModifier::MoonProgressModifier()
       maxValue_(AceType::MakeRefPtr<PropertyFloat>(DEFAULT_MAXVALUE)),
       enableBreathe_(AceType::MakeRefPtr<PropertyBool>(DEFAULT_ENABLE_BREATHE))
 {
+    maskNode_ = maskNode;
     AttachProperty(maskColor_);
     AttachProperty(ratio_);
     AttachProperty(value_);
@@ -63,9 +64,18 @@ MoonProgressModifier::MoonProgressModifier()
 
 void MoonProgressModifier::onDraw(DrawingContext& context)
 {
-    frameSize_.SetWidth(context.width);
-    frameSize_.SetHeight(context.height);
+    auto node = maskNode_.Upgrade();
+    CHECK_NULL_VOID(node);
+    auto geometryNode = node->GetGeometryNode();
+    CHECK_NULL_VOID(geometryNode);
+    auto contentSize = geometryNode->GetFrameSize();
+    frameSize_.SetWidth(contentSize.Width());
+    frameSize_.SetHeight(contentSize.Height());
     SetBigRadius();
+    if (GreatOrEqual(ratio_->Get(), bigRadius_ / smallRadius_) || hideMask_) {
+        hideMask_ = true;
+        return;
+    }
     PaintSquareMoon(context.canvas);
 }
 
@@ -77,7 +87,7 @@ void MoonProgressModifier::SetMaskColor(LinearColor color)
 void MoonProgressModifier::SetValue(float value)
 {
     auto finishCallback = [weak = AceType::WeakClaim(this), bigRadius = bigRadius_, smallRadius = smallRadius_,
-                              animationEnd = animationEnd_, id = Container::CurrentId()]() {
+                              id = Container::CurrentId()]() {
         ContainerScope scope(id);
         auto pipeline = PipelineContext::GetCurrentContext();
         CHECK_NULL_VOID(pipeline);
@@ -88,8 +98,7 @@ void MoonProgressModifier::SetValue(float value)
             modifier->StopPictureAnimate();
             return;
         }
-        if (modifier->enableBreathe_->Get() && Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TWELVE) &&
-            !animationEnd) {
+        if (modifier->enableBreathe_->Get() && Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TWELVE)) {
             modifier->StartPictureAnimate();
         } else {
             modifier->StopPictureAnimate();
@@ -140,6 +149,8 @@ void MoonProgressModifier::InitRatio()
 {
     ratio_->Set(INITIAL_RATIO);
     animationEnd_ = false;
+    hideMask_ = false;
+    RemoveVisibleChange();
 }
 
 void MoonProgressModifier::SetMoonAnimate(float value)
@@ -160,17 +171,19 @@ void MoonProgressModifier::SetMoonAnimate(float value)
 
 void MoonProgressModifier::StartPictureAnimate() const
 {
-    AnimationOption option;
-    option.SetDuration(PICTURE_DURATION);
-    option.SetDelay(0);
-    option.SetCurve(Curves::SHARP);
-    option.SetIteration(-1);
-    option.SetAnimationDirection(AnimationDirection::ALTERNATE);
-    AnimationUtils::Animate(option, [weak = AceType::WeakClaim(AceType::RawPtr(opacity_))]() {
-        auto opacity = weak.Upgrade();
-        CHECK_NULL_VOID(opacity);
-        opacity->Set(1.0f);
-    });
+    if (GreatOrEqual(value_->Get(), maxValue_->Get()) && !animationEnd_) {
+        AnimationOption option;
+        option.SetDuration(PICTURE_DURATION);
+        option.SetDelay(0);
+        option.SetCurve(Curves::SHARP);
+        option.SetIteration(-1);
+        option.SetAnimationDirection(AnimationDirection::ALTERNATE);
+        AnimationUtils::Animate(option, [weak = AceType::WeakClaim(AceType::RawPtr(opacity_))]() {
+            auto opacity = weak.Upgrade();
+            CHECK_NULL_VOID(opacity);
+            opacity->Set(1.0f);
+        });
+    }
 }
 
 void MoonProgressModifier::StopPictureAnimate() const
@@ -188,7 +201,7 @@ void MoonProgressModifier::SetBigRadius()
     smallRadius_ = radius * INITIAL_RATIO * FLOAT_ZERO_SEVEN;
 }
 
-void MoonProgressModifier::PaintSquareMoon(RSCanvas& canvas) const
+void MoonProgressModifier::PaintSquareMoon(RSCanvas& canvas)
 {
     PointF centerPt = PointF(frameSize_.Width() / INT32_TWO, frameSize_.Height() / INT32_TWO);
     RSBrush brush;
@@ -236,14 +249,15 @@ void MoonProgressModifier::PaintSquareMoon(RSCanvas& canvas) const
         canvas.DrawPath(path);
     }
     canvas.DetachBrush();
+    canvas.Restore();
     if (GreatOrEqual(angle, 1.0f)) {
-        canvas.Restore();
         PaintSquareMoonShadow(canvas, brush);
     }
 }
 
-void MoonProgressModifier::PaintSquareMoonShadow(RSCanvas& canvas, RSBrush& brush) const
+void MoonProgressModifier::PaintSquareMoonShadow(RSCanvas& canvas, RSBrush& brush)
 {
+    RegisterVisibleChange();
     Color color = Color::WHITE.ChangeOpacity(opacity_->Get());
     brush.SetColor(ToRSColor(color));
     auto radius = (std::min(frameSize_.Width() / INT32_TWO, frameSize_.Height() / INT32_TWO));
@@ -265,5 +279,40 @@ void MoonProgressModifier::PaintSquareMoonShadow(RSCanvas& canvas, RSBrush& brus
     canvas.DrawPath(path);
     canvas.DetachBrush();
     canvas.Restore();
+}
+
+void MoonProgressModifier::RegisterVisibleChange()
+{
+    if (hasVisibleChangeRegister_) {
+        return;
+    }
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto callback = [weak = WeakClaim(this)](bool visible, double ratio) {
+        auto modifier = weak.Upgrade();
+        CHECK_NULL_VOID(modifier);
+        if (visible) {
+            modifier->StartPictureAnimate();
+        } else {
+            modifier->StopPictureAnimate();
+        }
+    };
+    std::vector<double> ratioList = { 0.0 };
+    auto node = maskNode_.Upgrade();
+    CHECK_NULL_VOID(node);
+    pipeline->AddVisibleAreaChangeNode(node, ratioList, callback, false);
+    pipeline->AddWindowStateChangedCallback(node->GetId());
+    hasVisibleChangeRegister_ = true;
+}
+
+void MoonProgressModifier::RemoveVisibleChange()
+{
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto node = maskNode_.Upgrade();
+    CHECK_NULL_VOID(node);
+    pipeline->RemoveVisibleAreaChangeNode(node->GetId());
+    pipeline->RemoveWindowStateChangedCallback(node->GetId());
+    hasVisibleChangeRegister_ = false;
 }
 } // namespace OHOS::Ace::NG
