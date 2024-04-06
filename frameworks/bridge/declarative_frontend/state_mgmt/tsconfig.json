@@ -72,6 +72,8 @@
     // stateMgmt vers 3
     "src/lib/v3/v3_observed_track.ts",
     "src/lib/v3/v3_monitor.ts",
+    "src/lib/v3/v3_computed.ts",
+    "src/lib/v3/v3_variable_decorators.ts",
 
     // init
     "src/index.ts",

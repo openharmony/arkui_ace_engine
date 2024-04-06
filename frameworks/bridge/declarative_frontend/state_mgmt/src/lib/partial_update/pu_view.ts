@@ -125,6 +125,12 @@ abstract class ViewPU extends NativeViewPartialUpdate
   // inActive means updates are delayed
   private isActive_: boolean = true;
 
+  /*
+  private elmtIdsDelayedUpdate: Set<number> = new Set()
+  private monitorIdsDelayedUpdate: Set<number> = new Set()
+  private computedIdsDelayedUpdate: Set<number> = new Set()
+  */
+
   private runReuse_: boolean = false;
   private hasBeenRecycled_: boolean = false;
 
@@ -173,7 +179,11 @@ abstract class ViewPU extends NativeViewPartialUpdate
     let usesStateMgmtVersion = 0;
     Object.getOwnPropertyNames(this)
       .filter((propName) => {
-        return (propName.startsWith("__") && !propName.startsWith(ObserveV3.OB_PREFIX))
+        // do not include backing store, and ObserveV3/MonitorV3/ComputedV3 meta data objects
+        return (propName.startsWith("__") 
+        && !propName.startsWith(ObserveV3.OB_PREFIX) 
+        && !propName.startsWith(MonitorV3.WATCH_PREFIX)
+        && !propName.startsWith(ComputedV3.COMPUTED_PREFIX))
       })
       .forEach((propName) => {
         const stateVar = Reflect.get(this, propName) as Object;
@@ -343,6 +353,8 @@ abstract class ViewPU extends NativeViewPartialUpdate
     // in case ViewPU is currently frozen
     ViewPU.inactiveComponents_.delete(`${this.constructor.name}[${this.id__()}]`);
 
+    MonitorV3.clearWatchesFromTarget(this);
+    
     this.updateFuncByElmtId.clear();
     this.watchedProps.clear();
     this.providedVars_.clear();
@@ -413,6 +425,10 @@ abstract class ViewPU extends NativeViewPartialUpdate
         }
       });
     return result;
+  }
+
+  public isViewActive(): boolean {
+    return this.isActive_;
   }
 
   /**
@@ -563,7 +579,7 @@ abstract class ViewPU extends NativeViewPartialUpdate
     stateMgmtProfiler.end();
   }
 
-  private UpdateElement(elmtId: number): void {
+  public UpdateElement(elmtId: number): void {
     stateMgmtProfiler.begin("ViewPU.UpdateElement");
     if (elmtId == this.id__()) {
       // do not attempt to update itself.
@@ -712,6 +728,8 @@ abstract class ViewPU extends NativeViewPartialUpdate
    *  inform that UINode with given elmtId needs rerender
    *  does NOT exec @Watch function.
    *  only used on V3 code path from ObserveV3.fireChange.
+   * 
+   * FIXME will still use in the future?
    */
   public uiNodeNeedUpdateV3(elmtId: number): void {
     if (this.isFirstRender()) {
@@ -719,7 +737,7 @@ abstract class ViewPU extends NativeViewPartialUpdate
     }
 
     stateMgmtProfiler.begin(`ViewPU.uiNodeNeedUpdate ${this.debugInfoElmtId(elmtId)}`);
-    
+
     if (!this.dirtDescendantElementIds_.size && !this.runReuse_) {
       // mark ComposedElement dirty when first elmtIds are added
       // do not need to do this every time
@@ -728,15 +746,45 @@ abstract class ViewPU extends NativeViewPartialUpdate
       this.restoreInstanceId();
     }
     if (this.hasRecycleManager()) {
-        this.dirtDescendantElementIds_.add(this.recycleManager_.proxyNodeId(elmtId));
-      } else {
-        this.dirtDescendantElementIds_.add(elmtId);
-      }
-      stateMgmtConsole.debug(`ViewPU.uiNodeNeedUpdate: updated full list of elmtIds that need re-render [${this.debugInfoElmtIds(Array.from(this.dirtDescendantElementIds_))}].`)
+      this.dirtDescendantElementIds_.add(this.recycleManager_.proxyNodeId(elmtId));
+    } else {
+      this.dirtDescendantElementIds_.add(elmtId);
+    }
+    stateMgmtConsole.debug(`ViewPU.uiNodeNeedUpdate: updated full list of elmtIds that need re-render [${this.debugInfoElmtIds(Array.from(this.dirtDescendantElementIds_))}].`)
 
-    // FIXME dito: this.restoreInstanceId();
     stateMgmtProfiler.end();
   }
+
+
+  /*
+  private performDelayedUpdateV3(): void {
+    FIXME Component freeze 
+    if(this.computedIdsDelayedUpdate.size) {
+      // exec computed functions
+      ObserveV3.getObserve().updateDirtyComputedProps(this.computedIdsDelayedUpdate);
+    }
+    if(this.monitorIdsDelayedUpdate.size) {
+      // exec  monitor functions
+      ObserveV3.getObserve().updateDirtyMonitors(this.monitorIdsDelayedUpdate);
+    }
+    if(this.elmtIdsDelayedUpdate.size) {
+      // update re-render of updated element ids once the view gets active
+      if(this.dirtDescendantElementIds_.size === 0) {
+        this.dirtDescendantElementIds_ = new Set(this.elmtIdsDelayedUpdate);
+      }
+      else {
+        this.elmtIdsDelayedUpdate.forEach((element) => {
+          this.dirtDescendantElementIds_.add(element);
+        });
+      }
+    }
+    this.markNeedUpdate();
+    this.elmtIdsDelayedUpdate.clear();
+    this.monitorIdsDelayedUpdate.clear();
+    this.computedIdsDelayedUpdate.clear();
+  }
+}
+   */
 
   private performDelayedUpdate(): void {
     if (!this.ownObservedPropertiesStore_.size) {
@@ -777,7 +825,7 @@ abstract class ViewPU extends NativeViewPartialUpdate
 
   /**
    * Function to be called from the constructor of the sub component
-   * to register a @Watch varibale
+   * to register a @Watch variable
    * @param propStr name of the variable. Note from @Provide and @Consume this is
    *      the variable name and not the alias!
    * @param callback application defined member function of sub-class
@@ -884,7 +932,7 @@ abstract class ViewPU extends NativeViewPartialUpdate
       }
     } while (this.dirtDescendantElementIds_.size);
     stateMgmtConsole.debug(`${this.debugInfo__()}: updateDirtyElements (re-render) - DONE, dump of ViewPU in next lines`);
-    this.dumpStateVars();
+    //this.dumpStateVars();
     stateMgmtProfiler.end();
   }
 
@@ -967,16 +1015,23 @@ abstract class ViewPU extends NativeViewPartialUpdate
     const _popFunc: () => void = (classObject && "pop" in classObject) ? classObject.pop! : () => { };
     const updateFunc = (elmtId: number, isFirstRender: boolean) => {
       this.syncInstanceId();
-      stateMgmtConsole.debug(`${this.debugInfo__()}: ${isFirstRender ? `First render` : `Re-render/update`} ${_componentName}[${elmtId}] start ....`);
+      stateMgmtConsole.debug(`${this.debugInfo__()}: ${isFirstRender ? `First render` : `Re-render/update`} ${_componentName}[${elmtId}] ${!this.isViewV3 ? '(enable PU state observe) ' : ''} ${ConfigureStateMgmt.instance.needsV2Observe() ? '(enabled V2 state observe) ' : ''} - start ....`);
 
       ViewStackProcessor.StartGetAccessRecordingFor(elmtId);
-      // FIXME: Because ReactNative dynamic viewer app library uses V3 @observe within V2 @Component, 
-      // the framework needs to enable both V2 recording and 
-      // V3 recording with startBind as well.
-      this.currentlyRenderedElmtIdStack_.push(elmtId);
-      // FIXME: like in V2 setting bindId_ in ObserveV3 does not work with 'stacked' 
-      // update + initial render calls, ike in if and ForEach case, convert to stack as well
-      ObserveV3.getObserve().startBind(this, elmtId);
+
+      if (!this.isViewV3) {
+        // Enable PU state tracking only in PU @Components
+        this.currentlyRenderedElmtIdStack_.push(elmtId);
+      }
+
+      // if V2 @Observed/@Track used anywhere in the app (there is no more fine grained criteria), 
+      // enable V2 object deep observation
+      // FIXME: A @Component should only use PU or V2 state, but ReactNative dynamic viewer uses both.
+      if (ConfigureStateMgmt.instance.needsV2Observe()) {
+        // FIXME: like in V2 setting bindId_ in ObserveV3 does not work with 'stacked' 
+        // update + initial render calls, like in if and ForEach case, convert to stack as well
+        ObserveV3.getObserve().startBind(this, elmtId);
+      }
 
       compilerAssignedUpdateFunc(elmtId, isFirstRender);
       if (!isFirstRender) {
@@ -988,8 +1043,12 @@ abstract class ViewPU extends NativeViewPartialUpdate
         (node as ArkComponent).cleanStageValue();
       }
 
-      ObserveV3.getObserve().startBind(null, UINodeRegisterProxy.notRecordingDependencies);
-      this.currentlyRenderedElmtIdStack_.pop();
+      if (ConfigureStateMgmt.instance.needsV2Observe()) {
+        ObserveV3.getObserve().startBind(null, UINodeRegisterProxy.notRecordingDependencies);
+      }
+      if (!this.isViewV3) {
+        this.currentlyRenderedElmtIdStack_.pop();
+      }
       ViewStackProcessor.StopGetAccessRecording();
 
       stateMgmtConsole.debug(`${this.debugInfo__()}: ${isFirstRender ? `First render` : `Re-render/update`}  ${_componentName}[${elmtId}] - DONE ....`);
@@ -1561,9 +1620,14 @@ abstract class ViewPU extends NativeViewPartialUpdate
    * especially after init variables from parent ViewPU has been done
    */
   protected finalizeConstruction(): void {
-    if (ConfigureStateMgmt.instance.needsV3Observe()) {
-      ObserveV3.getObserve().constructMonitor(this, this.constructor.name);
-    }
+    // FIXME, can we skip for apps that do not use V3 at all?
+    ObserveV3.getObserve().constructMonitor(this, this.constructor.name);
+    ObserveV3.getObserve().constructComputed(this, this.constructor.name);
+
+    // FIME ProvideConsumeUtilV3.setupConsumeVarsV3(this);
+
+    // Always use ID_REFS in ViewPU
+    this[ObserveV3.ID_REFS] = {};
   }
 
   /**
@@ -1574,6 +1638,22 @@ abstract class ViewPU extends NativeViewPartialUpdate
   public findProvideV3(provideName: string): [ViewPU | undefined, string, boolean] {
     // FIXME unimplemented
     return [ undefined, provideName, true]
+  }
+
+  // WatchIds that needs to be fired later gets added to monitorIdsDelayedUpdate
+  // monitor firechange will be triggered for all these watchIds once this view gets active
+  public addDelayedMonitorIds(watchId: number) {
+    /* FIXME @Component freeze 
+    stateMgmtConsole.debug(`${this.debugInfo__()} addDelayedMonitorIds called for watchId: ${watchId}`);
+    this.monitorIdsDelayedUpdate.add(watchId);
+    */
+  }
+
+  public addDelayedComputedIds(watchId: number) {
+    /* FIXME @Component freeze 
+    stateMgmtConsole.debug(`${this.debugInfo__()} addDelayedComputedIds called for watchId: ${watchId}`);
+    this.computedIdsDelayedUpdate.add(watchId);
+    */
   }
 }  // class ViewPU
 
