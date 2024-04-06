@@ -242,6 +242,7 @@ inline double StringToDouble(const std::string& value)
 // string to double method with success check, and support for parsing number string with percentage case
 inline bool StringToDouble(const std::string& value, double& result)
 {
+    errno = 0;
     char* pEnd = nullptr;
     double res = std::strtod(value.c_str(), &pEnd);
     if (pEnd == value.c_str() || errno == ERANGE) {
@@ -260,6 +261,7 @@ inline bool StringToDouble(const std::string& value, double& result)
 
 inline float StringToFloat(const std::string& value)
 {
+    errno = 0;
     char* pEnd = nullptr;
     float result = std::strtof(value.c_str(), &pEnd);
     if (pEnd == value.c_str() || errno == ERANGE) {
