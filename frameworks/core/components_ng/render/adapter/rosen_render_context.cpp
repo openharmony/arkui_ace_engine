@@ -1036,11 +1036,11 @@ Rosen::EmitterConfig RosenRenderContext::ConvertParticleEmitterOption(
     auto lifeTimeOpt = particle.GetLifeTime();
     auto lifeTimeRangeOpt = particle.GetLifeTimeRange();
     std::optional<int64_t> lifeTimeMin = 0;
-    std::optional<int64_t> lifeTimeMax = lifeTimeRangeOpt.value() + lifeTimeRangeOpt.value();
+    std::optional<int64_t> lifeTimeMax = lifeTimeOpt.value() + lifeTimeRangeOpt.value();
     if (lifeTimeOpt.value() == -1) {
         // when lifeTime == -1 particle life cycle is infinite
         lifeTimeMin = -1;
-        lifeTimeMax = 0;
+        lifeTimeMax = -1;
     } else if (lifeTimeOpt.value() - lifeTimeRangeOpt.value() > 0) {
         lifeTimeMin = lifeTimeOpt.value() - lifeTimeRangeOpt.value();
     }
