@@ -278,7 +278,9 @@ void CheckBoxGroupPattern::UpdateState()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    UpdateCheckBoxStyle();
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
+        UpdateCheckBoxStyle();
+    }
     auto eventHub = host->GetEventHub<CheckBoxGroupEventHub>();
     CHECK_NULL_VOID(eventHub);
     if (!groupManager_.Upgrade()) {
@@ -340,7 +342,6 @@ void CheckBoxGroupPattern::OnAfterModifyDone()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    UpdateCheckBoxStyle();
     auto inspectorId = host->GetInspectorId().value_or("");
     if (inspectorId.empty()) {
         return;
@@ -493,7 +494,7 @@ void CheckBoxGroupPattern::GetInnerFocusPaintRect(RoundRect& paintRect)
 {
     auto groupPaintProperty = GetPaintProperty<CheckBoxGroupPaintProperty>();
     CHECK_NULL_VOID(groupPaintProperty);
-    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_ELEVEN)) {
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
         auto checkboxGroupStyle = groupPaintProperty->GetCheckBoxGroupSelectedStyleValue(CheckBoxStyle::CIRCULAR_STYLE);
         if (checkboxGroupStyle == CheckBoxStyle::CIRCULAR_STYLE) {
             InnerFocusPaintCircle(paintRect);

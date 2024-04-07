@@ -101,7 +101,9 @@ public:
         if (!isUserSetResponseRegion_) {
             AddHotZoneRect();
         }
-        UpdateCheckBoxStyle();
+        if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
+            UpdateCheckBoxStyle();
+        }
         return true;
     }
 
