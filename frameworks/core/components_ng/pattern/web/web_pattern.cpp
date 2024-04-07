@@ -642,12 +642,16 @@ void WebPattern::InitCommonDragDropEvent(const RefPtr<GestureEventHub>& gestureH
     gestureHub->InitDragDropEvent();
     InitWebEventHubDragDropStart(eventHub);
     InitWebEventHubDragDropEnd(eventHub);
+    InitWebEventHubDragMove(eventHub);
+    TAG_LOGI(AceLogTag::ACE_WEB, "DragDrop WebEventHub init drag event ok");
 }
 
 void WebPattern::InitWebEventHubDragDropStart(const RefPtr<WebEventHub>& eventHub)
 {
     auto onDragStartId = [weak = WeakClaim(this)](const RefPtr<OHOS::Ace::DragEvent>& info,
                              const std::string& extraParams) -> NG::DragDropInfo {
+        TAG_LOGI(AceLogTag::ACE_WEB, "DragDrop WebEventHub drag start,"
+            " x:%{public}lf, y:%{public}lf", info->GetX(), info->GetY());
         NG::DragDropInfo dragDropInfo;
         auto pattern = weak.Upgrade();
         if (pattern) {
@@ -663,6 +667,8 @@ void WebPattern::InitWebEventHubDragDropStart(const RefPtr<WebEventHub>& eventHu
 
     auto onDragEnterId = [weak = WeakClaim(this)](const RefPtr<OHOS::Ace::DragEvent>& info,
                              const std::string& extraParams) {
+        TAG_LOGI(AceLogTag::ACE_WEB, "DragDrop WebEventHub drag enter,"
+            " x:%{public}lf, y:%{public}lf", info->GetX(), info->GetY());
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
         TAG_LOGI(AceLogTag::ACE_WEB,
@@ -676,11 +682,22 @@ void WebPattern::InitWebEventHubDragDropStart(const RefPtr<WebEventHub>& eventHu
         return pattern->HandleOnDragEnter(info);
     };
 
+    // set custom OnDragStart function
+    eventHub->SetOnDragStart(std::move(onDragStartId));
+    eventHub->SetOnDragEnter(std::move(onDragEnterId));
+}
+
+void WebPattern::InitWebEventHubDragMove(const RefPtr<WebEventHub>& eventHub)
+{
     auto onDragMoveId = [weak = WeakClaim(this)](const RefPtr<OHOS::Ace::DragEvent>& info,
                              const std::string& extraParams) {
+        static uint32_t dragMoveCnt = 0;
+        if ((dragMoveCnt % DEBUG_DRAGMOVEID_TIMER) == 0) {
+            TAG_LOGI(AceLogTag::ACE_WEB, "DragDrop  WebEventHub drag move,"
+                " x:%{public}lf, y:%{public}lf", info->GetX(), info->GetY());
+        }
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
-        static uint32_t dragMoveCnt = 0;
         if ((dragMoveCnt++ % DEBUG_DRAGMOVEID_TIMER) == 0) {
             TAG_LOGI(AceLogTag::ACE_WEB,
                 "DragDrop event WebEventHub onDragMoveId, x:%{public}lf, y:%{public}lf, webId:%{public}d",
@@ -697,8 +714,6 @@ void WebPattern::InitWebEventHubDragDropStart(const RefPtr<WebEventHub>& eventHu
         pattern->HandleOnDropMove(info);
     };
     // set custom OnDragStart function
-    eventHub->SetOnDragStart(std::move(onDragStartId));
-    eventHub->SetOnDragEnter(std::move(onDragEnterId));
     eventHub->SetOnDragMove(std::move(onDragMoveId));
 }
 
@@ -706,6 +721,8 @@ void WebPattern::InitWebEventHubDragDropEnd(const RefPtr<WebEventHub>& eventHub)
 {
     auto onDragDropId = [weak = WeakClaim(this)](const RefPtr<OHOS::Ace::DragEvent>& info,
                              const std::string& extraParams) {
+        TAG_LOGI(AceLogTag::ACE_WEB, "DragDrop WebEventHub drag drop,"
+            " x:%{public}lf, y:%{public}lf", info->GetX(), info->GetY());
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
         TAG_LOGI(AceLogTag::ACE_WEB,
@@ -721,6 +738,8 @@ void WebPattern::InitWebEventHubDragDropEnd(const RefPtr<WebEventHub>& eventHub)
 
     auto onDragLeaveId = [weak = WeakClaim(this)](const RefPtr<OHOS::Ace::DragEvent>& info,
                              const std::string& extraParams) {
+        TAG_LOGI(AceLogTag::ACE_WEB, "DragDrop WebEventHub drag leave,"
+            " x:%{public}lf, y:%{public}lf", info->GetX(), info->GetY());
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
         TAG_LOGI(AceLogTag::ACE_WEB,
@@ -730,6 +749,8 @@ void WebPattern::InitWebEventHubDragDropEnd(const RefPtr<WebEventHub>& eventHub)
     };
 
     auto onDragEndId = [weak = WeakClaim(this)](const RefPtr<OHOS::Ace::DragEvent>& info) {
+        TAG_LOGI(AceLogTag::ACE_WEB, "DragDrop WebEventHub drag end,"
+            " x:%{public}lf, y:%{public}lf", info->GetX(), info->GetY());
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
         TAG_LOGI(AceLogTag::ACE_WEB,
@@ -765,6 +786,7 @@ DragRet WebPattern::GetDragAcceptableStatus()
 bool WebPattern::NotifyStartDragTask()
 {
     if (isDisableDrag_) {
+        TAG_LOGW(AceLogTag::ACE_WEB, "DragDrop disable drag in web");
         return false;
     }
     isDragging_ = true;
@@ -781,6 +803,7 @@ bool WebPattern::NotifyStartDragTask()
         // mouse drag does not need long press action
         gestureHub->StartLongPressActionForWeb();
     }
+    TAG_LOGI(AceLogTag::ACE_WEB, "DragDrop enable drag, and start drag task for web");
     gestureHub->StartDragTaskForWeb();
     return true;
 }
