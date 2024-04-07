@@ -176,6 +176,15 @@
                     "header": {
                         "header_base": "//foundation/arkui/ace_engine/",
                         "header_files": [
+                            "interfaces/native/native_interface_xcomponent.h"
+                        ]
+                    },
+                    "name": "//foundation/arkui/ace_engine/interfaces/native:ace_ndk"
+                },
+                {
+                    "header": {
+                        "header_base": "//foundation/arkui/ace_engine/",
+                        "header_files": [
                             "adapter/preview/entrance/ace_ability.h",
                             "adapter/preview/entrance/ace_run_args.h"
                         ]
