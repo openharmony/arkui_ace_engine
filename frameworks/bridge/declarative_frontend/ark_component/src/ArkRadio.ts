@@ -16,6 +16,9 @@
 /// <reference path='./import.ts' />
 
 class ArkRadioComponent extends ArkComponent implements RadioAttribute {
+  builder: WrappedBuilder<Object[]> | null = null;
+  radioNode: BuilderNode<[RadioConfiguration]> | null = null;
+  modifier: ContentModifier<RadioConfiguration>;
   constructor(nativePtr: KNode, classType?: ModifierType) {
     super(nativePtr, classType);
   }
@@ -54,6 +57,22 @@ class ArkRadioComponent extends ArkComponent implements RadioAttribute {
     modifierWithKey(this._modifiersWithKeys, RadioResponseRegionModifier.identity,
       RadioResponseRegionModifier, value);
     return this;
+  }
+  setContentModifier(modifier: ContentModifier<RadioConfiguration>): this {
+    this.builder = modifier.applyContent();
+    this.modifier = modifier;
+    getUINativeModule().radio.setContentModifierBuilder(this.nativePtr, this);
+  }
+  makeContentModifierNode(context: UIContext, radioConfiguration: RadioConfiguration): FrameNode | null {
+    radioConfiguration.contentModifier = this.modifier;
+    if (isUndefined(this.radioNode)) {
+      const xNode = globalThis.requireNapi('arkui.node');
+      this.radioNode = new xNode.BuilderNode(context);
+      this.radioNode.build(this.builder, radioConfiguration);
+    } else {
+      this.radioNode.update(radioConfiguration);
+    }
+    return this.radioNode.getFrameNode();
   }
 }
 
@@ -279,4 +298,14 @@ globalThis.Radio.attributeModifier = function (modifier: ArkComponent): void {
   }, (nativePtr: KNode, classType: ModifierType, modifierJS: ModifierJS) => {
     return new modifierJS.RadioModifier(nativePtr, classType);
   });
+};
+
+// @ts-ignore
+globalThis.Radio.contentModifier = function (modifier) {
+  const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
+  let nativeNode = getUINativeModule().getFrameNodeById(elmtId);
+  let component = this.createOrGetNode(elmtId, () => {
+    return new ArkRadioComponent(nativeNode);
+  });
+  component.setContentModifier(modifier);
 };

@@ -12524,6 +12524,22 @@ class ArkRadioComponent extends ArkComponent {
     modifierWithKey(this._modifiersWithKeys, RadioResponseRegionModifier.identity, RadioResponseRegionModifier, value);
     return this;
   }
+  setContentModifier(modifier) {
+    this.builder = modifier.applyContent();
+    this.modifier = modifier;
+    getUINativeModule().radio.setContentModifierBuilder(this.nativePtr, this);
+  }
+  makeContentModifierNode(context, radioConfiguration) {
+    radioConfiguration.contentModifier = this.modifier;
+    if (isUndefined(this.radioNode)) {
+      const xNode = globalThis.requireNapi('arkui.node');
+      this.radioNode = new xNode.BuilderNode(context);
+      this.radioNode.build(this.builder, radioConfiguration);
+    } else {
+      this.radioNode.update(radioConfiguration);
+    }
+    return this.radioNode.getFrameNode();
+  }
 }
 class RadioCheckedModifier extends ModifierWithKey {
   constructor(value) {
@@ -12741,6 +12757,16 @@ if (globalThis.Radio !== undefined) {
     });
   };
 }
+
+// @ts-ignore
+globalThis.Radio.contentModifier = function (modifier) {
+    const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
+    let nativeNode = getUINativeModule().getFrameNodeById(elmtId);
+    let component = this.createOrGetNode(elmtId, () => {
+      return new ArkRadioComponent(nativeNode);
+    });
+    component.setContentModifier(modifier);
+  };
 
 /// <reference path='./import.ts' />
 class ArkTimePickerComponent extends ArkComponent {
