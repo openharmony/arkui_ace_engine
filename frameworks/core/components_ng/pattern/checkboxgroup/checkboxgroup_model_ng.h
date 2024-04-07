@@ -34,6 +34,7 @@ public:
     void SetPadding(const NG::PaddingPropertyF& args, const NG::PaddingProperty& newArgs, bool flag) override;
     void SetChangeEvent(GroupChangeEvent&& changeEvent) override;
     void SetResponseRegion(const std::vector<DimensionRect>& responseRegion) override;
+    void SetCheckboxGroupStyle(CheckBoxStyle checkboxGroupStyle) override;
     static void SetSelectAll(FrameNode* frameNode, bool isSelected);
     static void SetSelectedColor(FrameNode* frameNode, const Color& color);
     static void SetUnSelectedColor(FrameNode* frameNode, const Color& color);

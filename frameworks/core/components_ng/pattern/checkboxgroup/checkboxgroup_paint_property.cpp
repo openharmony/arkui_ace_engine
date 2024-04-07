@@ -43,6 +43,8 @@ void CheckBoxGroupPaintProperty::ToJsonValue(std::unique_ptr<JsonValue>& json) c
     markJsValue->Put("strokeWidth", GetCheckBoxGroupCheckMarkWidth().value_or(
         checkboxTheme->GetCheckStroke()).ToString().c_str());
     json->Put("mark", markJsValue->ToString().c_str());
+    json->Put("checkboxShape",
+        std::to_string((int)(GetCheckBoxGroupSelectedStyleValue(CheckBoxStyle::CIRCULAR_STYLE))).c_str());
 }
 
 } // namespace OHOS::Ace::NG
