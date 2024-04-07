@@ -4004,7 +4004,11 @@ void OverlayManager::RemovePixelMap()
         return;
     }
     auto columnNode = pixmapColumnNodeWeak_.Upgrade();
-    CHECK_NULL_VOID(columnNode);
+    if (!columnNode) {
+        hasPixelMap_ = false;
+        isOnAnimation_ = false;
+        return;
+    }
     auto rootNode = columnNode->GetParent();
     CHECK_NULL_VOID(rootNode);
     rootNode->RemoveChild(columnNode);
@@ -4023,7 +4027,11 @@ void OverlayManager::RemovePixelMapAnimation(bool startDrag, double x, double y)
         return;
     }
     auto columnNode = pixmapColumnNodeWeak_.Upgrade();
-    CHECK_NULL_VOID(columnNode);
+    if (!columnNode) {
+        RemoveEventColumn();
+        hasPixelMap_ = false;
+        return;
+    }
     auto imageNode = AceType::DynamicCast<FrameNode>(columnNode->GetFirstChild());
     CHECK_NULL_VOID(imageNode);
     auto imageContext = imageNode->GetRenderContext();
