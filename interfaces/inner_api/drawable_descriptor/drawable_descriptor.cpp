@@ -46,6 +46,7 @@ const char DRAWABLEDESCRIPTOR_JSON_KEY_BACKGROUND[] = "background";
 const char DRAWABLEDESCRIPTOR_JSON_KEY_FOREGROUND[] = "foreground";
 #endif
 constexpr float SIDE = 192.0f;
+const int DEFAULT_DURATION = 1000;
 
 // define for get resource path in preview scenes
 const static char PREVIEW_LOAD_RESOURCE_ID[] = "ohos_drawable_descriptor_path";
@@ -559,5 +560,34 @@ std::string LayeredDrawableDescriptor::GetStaticMaskClipPath()
 #endif
     resMgr->GetStringByName(PREVIEW_LOAD_RESOURCE_ID, data);
     return data;
+}
+
+std::shared_ptr<Media::PixelMap> AnimatedDrawableDescriptor::GetPixelMap()
+{
+    if (pixelMapList_.empty()) {
+        return nullptr;
+    }
+    return pixelMapList_[0];
+}
+
+std::vector<std::shared_ptr<Media::PixelMap>> AnimatedDrawableDescriptor::GetPixelMapList()
+{
+    return pixelMapList_;
+}
+
+int32_t AnimatedDrawableDescriptor::GetDuration()
+{
+    if (duration_ <= 0) {
+        duration_ = DEFAULT_DURATION * pixelMapList_.size();
+    }
+    return duration_;
+}
+
+int32_t AnimatedDrawableDescriptor::GetIterations()
+{
+    if (iterations_ < -1) {
+        iterations_ = 1;
+    }
+    return iterations_;
 }
 } // namespace OHOS::Ace::Napi

@@ -25,6 +25,7 @@
 #include "core/components/common/layout/constants.h"
 #include "core/components/common/properties/border.h"
 #include "core/components/common/properties/color.h"
+#include "core/components/declaration/image/image_animator_declaration.h"
 #include "core/components/image/image_event.h"
 #include "core/components_ng/event/gesture_event_hub.h"
 #include "interfaces/inner_api/ace/ai/image_analyzer.h"
@@ -47,6 +48,8 @@ public:
     virtual void SetSvgAnimatorFinishEvent(std::function<void()> &&callback) = 0;
     virtual void Create(const std::string &src, RefPtr<PixelMap> &pixmap, const std::string &bundleName,
         const std::string &moduleName, bool isUriPureNumber = false) = 0;
+    virtual void CreateAnimation(const std::vector<ImageProperties>& imageList,
+        int32_t duration, int32_t iteration) = 0;
     virtual void SetImageSourceSize(const std::pair<Dimension, Dimension> &size) = 0;
     virtual void SetImageFill(const Color &color) = 0;
     virtual void SetImageInterpolation(ImageInterpolation interpolation) = 0;
@@ -69,7 +72,7 @@ public:
     virtual void SetImageAnalyzerConfig(const ImageAnalyzerConfig& config) = 0;
     virtual void SetImageAnalyzerConfig(void* config) = 0;
     virtual void SetSmoothEdge(float value) = 0;
-
+    virtual bool GetIsAnimation() = 0;
 private:
     static std::unique_ptr<ImageModel> instance_;
     static std::mutex mutex_;

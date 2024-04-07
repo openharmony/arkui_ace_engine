@@ -141,6 +141,8 @@ public:
      * @param ptr: drawable pointer of type Napi::DrawableDescriptor&
      */
     static RefPtr<PixelMap> GetFromDrawable(void* ptr);
+    static bool GetPxielMapListFromAnimatedDrawable(void* ptr, std::vector<RefPtr<PixelMap>>& pixelMaps,
+        int32_t& duration, int32_t& iterations);
     static RefPtr<PixelMap> CreatePixelMapFromDataAbility(void* uniquePtr);
     static RefPtr<PixelMap> ConvertSkImageToPixmap(
         const uint32_t* colors, uint32_t colorLength, int32_t width, int32_t height);

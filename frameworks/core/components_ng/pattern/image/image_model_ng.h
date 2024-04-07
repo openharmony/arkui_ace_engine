@@ -16,9 +16,10 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_IMAGE_IMAGE_MODEL_NG_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_IMAGE_IMAGE_MODEL_NG_H
 
-#include "core/components_ng/pattern/image/image_model.h"
-
+#include "core/components/declaration/image/image_animator_declaration.h"
 #include "core/components_ng/base/frame_node.h"
+#include "core/components_ng/pattern/image/image_model.h"
+#include "core/components_ng/pattern/image/image_pattern.h"
 
 namespace OHOS::Ace::NG {
 // ImageModel is essentially the same class as ImageView
@@ -28,6 +29,8 @@ class ACE_EXPORT ImageModelNG : public OHOS::Ace::ImageModel {
 public:
     void Create(const std::string &src, RefPtr<PixelMap> &pixMap, const std::string &bundleName,
         const std::string &moduleName, bool isUriPureNumber = false) override;
+    void CreateAnimation(const std::vector<ImageProperties>& imageList, int32_t duration, int32_t iteration) override;
+    bool GetIsAnimation() override;
     void SetAlt(const ImageSourceInfo &src) override;
     void SetBorder(const Border &border) override;
     void SetBackBorder() override;
@@ -92,6 +95,8 @@ public:
     static bool GetDraggable(FrameNode* frameNode);
     static ImageRenderMode GetImageRenderMode(FrameNode* frameNode);
     static void SetResizableSlice(FrameNode *frameNode, const ImageResizableSlice& slice);
+private:
+    RefPtr<ImagePattern> GetImagePattern();
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_IMAGE_IMAGE_MODEL_NG_H
