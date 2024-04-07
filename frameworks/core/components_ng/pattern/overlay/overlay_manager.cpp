@@ -4322,7 +4322,7 @@ RefPtr<FrameNode> OverlayManager::BindUIExtensionToMenu(const RefPtr<FrameNode>&
         overlayManager->DeleteMenu(id);
     };
     targetNode->PushDestroyCallback(destructor);
-    return menuNode;
+    return menuWrapperNode;
 }
 
 SizeF OverlayManager::CaculateMenuSize(
@@ -4381,14 +4381,14 @@ bool OverlayManager::ShowUIExtensionMenu(const RefPtr<NG::FrameNode>& uiExtNode,
             return false;
         }
     }
-    auto menuNode = BindUIExtensionToMenu(uiExtNode, targetNode, longestContent, menuSize);
+    auto menuWrapperNode = BindUIExtensionToMenu(uiExtNode, targetNode, longestContent, menuSize);
+    CHECK_NULL_RETURN(menuWrapperNode, false);
+    auto menuNode = DynamicCast<FrameNode>(menuWrapperNode->GetFirstChild());
     CHECK_NULL_RETURN(menuNode, false);
     auto menuLayoutProperty = menuNode->GetLayoutProperty<MenuLayoutProperty>();
     CHECK_NULL_RETURN(menuLayoutProperty, false);
     menuLayoutProperty->UpdateIsRectInTarget(true);
     menuLayoutProperty->UpdateTargetSize(aiRect.GetSize());
-    auto menuWrapperNode = DynamicCast<FrameNode>(menuNode->GetParent());
-    CHECK_NULL_RETURN(menuWrapperNode, false);
     ShowMenu(targetNode->GetId(), aiRect.GetOffset(), menuWrapperNode);
     return true;
 }
