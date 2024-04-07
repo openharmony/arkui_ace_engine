@@ -11785,6 +11785,22 @@ class ArkToggleComponent extends ArkComponent {
     modifierWithKey(this._modifiersWithKeys, ToggleSwitchStyleModifier.identity, ToggleSwitchStyleModifier, value);
     return this;
   }
+  setContentModifier(modifier) {
+    this.builder = modifier.applyContent();
+    this.modifier = modifier;
+    getUINativeModule().toggle.setContentModifierBuilder(this.nativePtr, this);
+  }
+  makeContentModifierNode(context, toggleConfiguration) {
+    toggleConfiguration.contentModifier = this.modifier;
+    if (isUndefined(this.toggleNode)) {
+      const xNode = globalThis.requireNapi('arkui.node');
+      this.toggleNode = new xNode.BuilderNode(context);
+      this.toggleNode.build(this.builder, toggleConfiguration);
+    } else {
+      this.toggleNode.update(toggleConfiguration);
+    }
+    return this.toggleNode.getFrameNode();
+  }
 }
 class ToggleSelectedColorModifier extends ModifierWithKey {
   constructor(value) {
@@ -12013,6 +12029,15 @@ if (globalThis.Toggle !== undefined) {
     });
   };
 }
+// @ts-ignore
+globalThis.Toggle.contentModifier = function (modifier) {
+  const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
+  let nativeNode = getUINativeModule().getFrameNodeById(elmtId);
+  let component = this.createOrGetNode(elmtId, () => {
+    return new ArkToggleComponent(nativeNode);
+  });
+  component.setContentModifier(modifier);
+};
 
 /// <reference path='./import.ts' />
 class ArkSelectComponent extends ArkComponent {
