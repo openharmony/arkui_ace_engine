@@ -473,10 +473,13 @@ void TextFieldContentModifier::ProcessErrorParagraph(DrawingContext& context, fl
     }
 }
 
-void TextFieldContentModifier::SetTextDecoration(const TextDecoration& value)
+void TextFieldContentModifier::SetTextDecoration(const TextDecoration& value, const Color& color,
+    const TextDecorationStyle& style)
 {
     auto oldTextDecoration = textDecoration_.value_or(TextDecoration::NONE);
-    if (oldTextDecoration == value) {
+    auto oldTextDecorationColor = textDecorationColor_.value_or(Color::BLACK);
+    auto oldTextDecorationStyle = textDecorationStyle_.value_or(TextDecorationStyle::SOLID);
+    if ((oldTextDecoration == value) && (oldTextDecorationColor == color) && (oldTextDecorationStyle == style)) {
         return;
     }
 
@@ -484,6 +487,8 @@ void TextFieldContentModifier::SetTextDecoration(const TextDecoration& value)
                                 (oldTextDecoration == TextDecoration::UNDERLINE && value == TextDecoration::NONE);
 
     textDecoration_ = value;
+    textDecorationColor_ = color;
+    textDecorationStyle_ = style;
     CHECK_NULL_VOID(textDecorationColorAlpha_);
 
     oldColorAlpha_ = textDecorationColorAlpha_->Get();
@@ -492,16 +497,6 @@ void TextFieldContentModifier::SetTextDecoration(const TextDecoration& value)
     } else {
         textDecorationColorAlpha_->Set(static_cast<float>(textDecorationColor_.value().GetAlpha()));
     }
-}
-
-void TextFieldContentModifier::SetTextDecorationStyle(const TextDecorationStyle value)
-{
-    textDecorationStyle_ = value;
-}
-
-void TextFieldContentModifier::SetTextDecorationColor(const Color& value)
-{
-    textDecorationColor_ = value;
 }
 
 void TextFieldContentModifier::ModifyDecorationInTextStyle(TextStyle& textStyle)

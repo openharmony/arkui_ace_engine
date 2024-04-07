@@ -60,9 +60,7 @@ public:
     void SetShowUnderlineState(bool value);
     void SetFontReady(bool value);
     void SetTextOverflow(const TextOverflow value);
-    void SetTextDecoration(const TextDecoration& value);
-    void SetTextDecorationStyle(const TextDecorationStyle value);
-    void SetTextDecorationColor(const Color& value);
+    void SetTextDecoration(const TextDecoration& value, const Color& color, const TextDecorationStyle& style);
     void ContentChange();
 
 private:

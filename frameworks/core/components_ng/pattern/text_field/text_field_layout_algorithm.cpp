@@ -704,9 +704,8 @@ void TextFieldLayoutAlgorithm::SetPropertyToModifier(
     modifier->SetTextColor(textStyle.GetTextColor());
     modifier->SetFontStyle(textStyle.GetFontStyle());
     modifier->SetTextOverflow(textStyle.GetTextOverflow());
-    modifier->SetTextDecorationColor(textStyle.GetTextDecorationColor());
-    modifier->SetTextDecorationStyle(textStyle.GetTextDecorationStyle());
-    modifier->SetTextDecoration(textStyle.GetTextDecoration());
+    modifier->SetTextDecoration(textStyle.GetTextDecoration(), textStyle.GetTextDecorationColor(),
+        textStyle.GetTextDecorationStyle());
 }
 
 void TextFieldLayoutAlgorithm::UpdateUnitLayout(LayoutWrapper* layoutWrapper)
@@ -754,15 +753,15 @@ void TextFieldLayoutAlgorithm::UpdateTextStyleMore(const RefPtr<FrameNode>& fram
         textStyle.SetTextDecoration(layoutProperty->GetTextDecoration().value());
     }
     if (layoutProperty->HasTextDecorationColor()) {
-        textStyle.SetTextDecorationColor(layoutProperty->GetTextDecorationColor().value());
-    }
-    if (layoutProperty->HasTextDecorationStyle()) {
         if (isDisabled) {
             textStyle.SetTextDecorationColor(layoutProperty->GetTextDecorationColor().value()
                 .BlendOpacity(TEXT_DECORATION_DISABLED_COLOR_ALPHA));
         } else {
             textStyle.SetTextDecorationColor(layoutProperty->GetTextDecorationColor().value());
         }
+    }
+    if (layoutProperty->HasTextDecorationStyle()) {
+        textStyle.SetTextDecorationStyle(layoutProperty->GetTextDecorationStyle().value());
     }
     if (layoutProperty->HasLetterSpacing()) {
         textStyle.SetLetterSpacing(layoutProperty->GetLetterSpacing().value());
