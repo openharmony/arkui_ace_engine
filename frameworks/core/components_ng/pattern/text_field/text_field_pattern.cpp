@@ -1041,7 +1041,7 @@ void TextFieldPattern::HandleBlurEvent()
     StopTwinkling();
     if ((customKeyboardBuilder_ && isCustomKeyboardAttached_)) {
         CloseKeyboard(true);
-        TAG_LOGI(AceLogTag::ACE_KEYBOARD, "TextFieldPattern Blur, Close Keyboard.");
+        TAG_LOGI(AceLogTag::ACE_KEYBOARD, "TextFile on blur, close custom keyboard");
     }
 #ifndef OHOS_PLATFORM
     if (HasConnection()) {
@@ -1205,7 +1205,6 @@ bool TextFieldPattern::IsShowHandle()
 
 void TextFieldPattern::HandleOnPaste()
 {
-    TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "HandleOnPaste");
     auto pasteCallback = [weak = WeakClaim(this)](const std::string& data) {
         if (data.empty()) {
             return;
@@ -1261,6 +1260,7 @@ void TextFieldPattern::HandleOnPaste()
         textfield->StartTwinkling();
     };
     CHECK_NULL_VOID(clipboard_);
+    TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "HandleOnPaste");
     clipboard_->GetData(pasteCallback);
 }
 
@@ -1988,7 +1988,7 @@ bool TextFieldPattern::CheckAutoFill()
 bool TextFieldPattern::ProcessAutoFill(bool& isPopup)
 {
     if (!CheckAutoFill()) {
-        TAG_LOGI(AceLogTag::ACE_AUTO_FILL, "No nedd to auto fill.");
+        TAG_LOGI(AceLogTag::ACE_AUTO_FILL, "No need to auto fill.");
         return false;
     }
     auto host = GetHost();
@@ -4344,7 +4344,6 @@ void TextFieldPattern::DeleteForwardOperation(int32_t length)
 
 void TextFieldPattern::DeleteForward(int32_t length)
 {
-    TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "Handle DeleteForward %{public}d characters", length);
     ResetObscureTickCountDown();
     if (IsSelected()) {
         Delete(selectController_->GetStartIndex(), selectController_->GetEndIndex());
@@ -5830,6 +5829,7 @@ void TextFieldPattern::StopEditing()
     if (!HasFocus()) {
         return;
     }
+    TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "Stop Editing");
 #if defined(OHOS_STANDARD_SYSTEM) && !defined(PREVIEW)
     if (HasConnection() || isCustomKeyboardAttached_) {
 #else

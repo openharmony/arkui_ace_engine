@@ -539,7 +539,6 @@ void PipelineContext::IsNotSCBWindowKeyboard(RefPtr<FrameNode> curFrameNode)
         windowFocus_.reset();
         windowShow_.reset();
         focusOnNodeCallback_();
-        FocusHub::IsCloseKeyboard(curFrameNode);
         preNodeId_ = curFrameNode->GetId();
         return;
     }
