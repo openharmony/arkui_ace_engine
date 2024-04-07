@@ -304,6 +304,7 @@ private:
     {
         animation_.reset();
     }
+    void UpdateBackgroundStyle(RefPtr<FrameNode>& host);
 
     RefPtr<PanEvent> panEvent_;
     std::shared_ptr<AnimationUtils::Animation> springAnimation_;
