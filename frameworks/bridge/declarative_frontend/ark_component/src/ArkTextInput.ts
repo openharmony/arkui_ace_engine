@@ -166,9 +166,9 @@ class TextInputWordBreakModifier extends ModifierWithKey<WordBreak> {
   static identity: Symbol = Symbol('textInputWordBreak');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
-      getUINativeModule().text.resetWordBreak(node);
+      getUINativeModule().textInput.resetWordBreak(node);
     } else {
-      getUINativeModule().text.setWordBreak(node, this.value!);
+      getUINativeModule().textInput.setWordBreak(node, this.value!);
     }
   }
   checkObjectDiff(): boolean {

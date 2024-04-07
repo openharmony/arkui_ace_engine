@@ -8563,17 +8563,17 @@ class TextAreaWordBreakModifier extends ModifierWithKey {
     }
     applyPeer(node, reset) {
         if (reset) {
-            getUINativeModule().text.resetWordBreak(node);
+            getUINativeModule().textArea.resetWordBreak(node);
         }
         else {
-            getUINativeModule().text.setWordBreak(node, this.value);
+            getUINativeModule().textArea.setWordBreak(node, this.value);
         }
     }
     checkObjectDiff() {
         return !isBaseOrResourceEqual(this.stageValue, this.value);
     }
 }
-TextAreaWordBreakModifier.identity = Symbol('textInputWordBreak');
+TextAreaWordBreakModifier.identity = Symbol('textAreaWordBreak');
 class TextAreaCopyOptionModifier extends ModifierWithKey {
   constructor(value) {
     super(value);
@@ -9161,10 +9161,10 @@ class TextInputWordBreakModifier extends ModifierWithKey {
     }
     applyPeer(node, reset) {
         if (reset) {
-            getUINativeModule().text.resetWordBreak(node);
+            getUINativeModule().textInput.resetWordBreak(node);
         }
         else {
-            getUINativeModule().text.setWordBreak(node, this.value);
+            getUINativeModule().textInput.setWordBreak(node, this.value);
         }
     }
     checkObjectDiff() {
