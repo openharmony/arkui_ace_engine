@@ -19,6 +19,31 @@
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_api_bridge.h"
 
 namespace OHOS::Ace::NG {
+struct NativeWeakRef {
+    explicit NativeWeakRef(AceType* ptr) : rawPtr(ptr)
+    {
+        weakRef = AceType::WeakClaim(ptr);
+    }
+
+    bool Invalid() const
+    {
+        return weakRef.Invalid();
+    }
+
+    AceType* rawPtr = nullptr;
+    WeakPtr<AceType> weakRef;
+};
+
+struct NativeStrongRef {
+    explicit NativeStrongRef(const RefPtr<AceType>& ref) : strongRef(ref) {}
+
+    AceType* RawPtr() const
+    {
+        return AceType::RawPtr(strongRef);
+    }
+
+    RefPtr<AceType> strongRef;
+};
 
 template<typename T>
 void DestructorInterceptor(void* nativePtr, void* data)
