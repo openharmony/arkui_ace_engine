@@ -215,7 +215,8 @@ ArkUI_CharPtr GetInspectorId(ArkUINodeHandle node)
     CHECK_NULL_RETURN(currentNode, "");
     auto inspectorIdProp = currentNode->GetInspectorId();
     if (inspectorIdProp.has_value()) {
-        static auto inspectorId = inspectorIdProp.value();
+        static std::string inspectorId;
+        inspectorId = inspectorIdProp.value();
         return inspectorId.c_str();
     }
     
@@ -226,7 +227,8 @@ ArkUI_CharPtr GetNodeType(ArkUINodeHandle node)
 {
     auto* currentNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_RETURN(currentNode, "");
-    static auto nodeType = currentNode->GetTag();
+    static std::string nodeType;
+    nodeType = currentNode->GetTag();
     return nodeType.c_str();
 }
 
@@ -254,7 +256,8 @@ ArkUI_CharPtr GetInspectorInfo(ArkUINodeHandle node)
 {
     auto* currentNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_RETURN(currentNode, "{}");
-    static auto inspectorInfo = NG::Inspector::GetInspectorOfNode(OHOS::Ace::AceType::Claim<FrameNode>(currentNode));
+    static std::string inspectorInfo;
+    inspectorInfo = NG::Inspector::GetInspectorOfNode(OHOS::Ace::AceType::Claim<FrameNode>(currentNode));
     return inspectorInfo.c_str();
 }
 
