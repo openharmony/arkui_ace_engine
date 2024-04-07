@@ -367,8 +367,7 @@ public:
 
 private:
     void CheckTopNavPathChange(const std::optional<std::pair<std::string, RefPtr<UINode>>>& preTopNavPath,
-        const std::optional<std::pair<std::string, RefPtr<UINode>>>& newTopNavPath,
-        std::string navDestinationName = "");
+        const std::optional<std::pair<std::string, RefPtr<UINode>>>& newTopNavPath);
     void TransitionWithAnimation(const RefPtr<NavDestinationGroupNode>& preTopNavDestination,
         const RefPtr<NavDestinationGroupNode>& newTopNavDestination, bool isPopPage);
     bool TriggerCustomAnimation(const RefPtr<NavDestinationGroupNode>& preTopNavDestination,
