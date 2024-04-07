@@ -230,7 +230,7 @@ bool ImageFileCache::ConvertToAstcAndWriteToFile(const void* const data, size_t 
 {
     ACE_FUNCTION_TRACE();
     RefPtr<ImageSource> imageSource = ImageSource::Create(static_cast<const uint8_t*>(data), size);
-    if (imageSource->GetFrameCount() != 1) {
+    if (!imageSource || imageSource->GetFrameCount() != 1) {
         TAG_LOGI(AceLogTag::ACE_IMAGE, "Image frame count is not 1, will not convert to astc. %{public}s",
             fileCacheKey.c_str());
         return false;

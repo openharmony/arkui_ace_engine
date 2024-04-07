@@ -253,7 +253,7 @@ int32_t GetAstcPsnrProp()
 
 bool GetImageFileCacheConvertToAstcEnabled()
 {
-    return system::GetParameter("persist.image.filecache.astc.enable", "true") == "true";
+    return system::GetParameter("persist.image.filecache.astc.enable", "false") == "true";
 }
 
 bool IsUseMemoryMonitor()
