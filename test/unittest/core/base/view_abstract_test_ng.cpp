@@ -1393,6 +1393,7 @@ HWTEST_F(ViewAbstractTestNg, ViewAbstractTest025, TestSize.Level1)
     auto popupNode1 = FrameNode::CreateFrameNode(
         V2::POPUP_ETS_TAG, info.popupId, AceType::MakeRefPtr<BubblePattern>(targetNode->GetId(), targetNode->GetTag()));
     info.popupNode = popupNode1;
+    info.target = targetNode2;
     overlayManager->ShowPopup(targetNode->GetId(), info);
 
     /**
@@ -1904,7 +1905,7 @@ HWTEST_F(ViewAbstractTestNg, ViewAbstractTest036, TestSize.Level1)
     ViewAbstract::SetLightUpEffect(RATIO);
     ViewAbstract::SetLightUpEffect(nullptr, RATIO);
     ViewAbstract::SetForegroundColor(BLUE);
-    ViewAbstract::SetForegroundColor(nullptr, BLUE);
+    ViewAbstract::SetForegroundColor(AceType::RawPtr(FRAME_NODE_REGISTER), BLUE);
     ViewAbstract::ClearWidthOrHeight(true);
     ViewAbstract::SetUseEffect(false);
     ViewAbstract::SetUseEffect(nullptr, false);
@@ -1958,7 +1959,7 @@ HWTEST_F(ViewAbstractTestNg, ViewAbstractTest037, TestSize.Level1)
     ViewAbstract::SetProgressMask(nullptr, std::move(progress));
     auto strategy = static_cast<ForegroundColorStrategy>(INDEX);
     ViewAbstract::SetForegroundColorStrategy(std::move(strategy));
-    ViewAbstract::SetForegroundColorStrategy(nullptr, std::move(strategy));
+    ViewAbstract::SetForegroundColorStrategy(AceType::RawPtr(FRAME_NODE_REGISTER), std::move(strategy));
     OverlayOptions overlay;
     ViewAbstract::SetOverlay(std::move(overlay));
 
