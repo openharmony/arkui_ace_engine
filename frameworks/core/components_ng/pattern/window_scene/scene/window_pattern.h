@@ -22,11 +22,11 @@
 #include "session/host/include/session.h"
 
 #include "core/common/container.h"
-#include "core/components_ng/pattern/pattern.h"
+#include "core/components_ng/pattern/stack/stack_pattern.h"
 
 namespace OHOS::Ace::NG {
-class WindowPattern : public Pattern {
-    DECLARE_ACE_TYPE(WindowPattern, Pattern);
+class WindowPattern : public StackPattern {
+    DECLARE_ACE_TYPE(WindowPattern, StackPattern);
 
 public:
     WindowPattern() = default;
