@@ -17,6 +17,7 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_EVENT_AXIS_EVENT_H
 
 #include <list>
+#include <utility>
 
 #include "base/geometry/offset.h"
 #include "base/memory/ace_type.h"
@@ -168,6 +169,12 @@ struct AxisEvent final : public UIInputEvent {
             result = Offset(-horizontalAxis, -verticalAxis);
         }
         return result * (LINE_HEIGHT_DESKTOP * LINE_NUMBER_DESKTOP / MOUSE_WHEEL_DEGREES).ConvertToPx();
+    }
+
+    // MMI has the different direction, need to check truth direction.
+    std::pair<float, float> ConvertToSummationAxisValue(const AxisEvent& event) const
+    {
+        return std::make_pair(event.horizontalAxis - horizontalAxis, event.verticalAxis - verticalAxis);
     }
 };
 

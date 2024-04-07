@@ -125,6 +125,7 @@ private:
     GestureAcceptResult IsPanGestureAccept() const;
     bool CalculateTruthFingers(bool isDirectionUp) const;
     void UpdateTouchPointInVelocityTracker(const TouchEvent& event, bool end = false);
+    void UpdateAxisPointInVelocityTracker(const AxisEvent& event, bool end = false);
 
     void SendCallbackMsg(const std::unique_ptr<GestureEventFunc>& callback);
     GestureJudgeResult TriggerGestureJudgeCallback();
