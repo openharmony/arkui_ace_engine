@@ -19,6 +19,7 @@
 #include "interfaces/native/event/ui_input_event_impl.h"
 
 #include "base/geometry/ng/size_t.h"
+#include "base/log/frame_report.h"
 #include "base/log/log_wrapper.h"
 #include "base/memory/ace_type.h"
 #include "base/ressched/ressched_report.h"
@@ -273,6 +274,9 @@ void XComponentPattern::OnAttachToFrameNode()
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
     pipeline->AddWindowStateChangedCallback(host->GetId());
+    if (FrameReport::GetInstance().GetEnable()) {
+        FrameReport::GetInstance().EnableSelfRender();
+    }
 }
 
 void XComponentPattern::OnModifyDone()
@@ -375,6 +379,9 @@ void XComponentPattern::OnDetachFromFrameNode(FrameNode* frameNode)
     auto pipeline = AceType::DynamicCast<PipelineContext>(PipelineBase::GetCurrentContext());
     CHECK_NULL_VOID(pipeline);
     pipeline->RemoveWindowStateChangedCallback(id);
+    if (FrameReport::GetInstance().GetEnable()) {
+        FrameReport::GetInstance().DisableSelfRender();
+    }
 }
 
 void XComponentPattern::SetMethodCall()
