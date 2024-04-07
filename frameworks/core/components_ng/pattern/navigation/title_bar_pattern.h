@@ -296,11 +296,18 @@ private:
     float CalculateHandledOffsetMinTitle(float offset, float lastCordScrollOffset);
     float CalculateHandledOffsetMaxTitle(float offset, float lastCordScrollOffset);
     float CalculateHandledOffsetBetweenMinAndMaxTitle(float offset, float lastCordScrollOffset);
+    void CleanSpringAnimation()
+    {
+        springAnimation_.reset();
+    }
+    void CleanAnimation()
+    {
+        animation_.reset();
+    }
 
     RefPtr<PanEvent> panEvent_;
-    RefPtr<SpringMotion> springMotion_;
-    RefPtr<Animator> springController_;
-    RefPtr<Animator> animator_;
+    std::shared_ptr<AnimationUtils::Animation> springAnimation_;
+    std::shared_ptr<AnimationUtils::Animation> animation_;
     std::optional<Dimension> fontSize_ = 0.0_fp;
     std::optional<float> opacity_;
 

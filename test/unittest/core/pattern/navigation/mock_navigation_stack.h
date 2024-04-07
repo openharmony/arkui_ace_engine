@@ -142,6 +142,24 @@ public:
         return names_;
     }
 
+    std::vector<int32_t> GetAllPathIndex() override
+    {
+        if (names_.empty()) {
+            return {};
+        }
+        std::vector<int32_t> pathIndex;
+        for (int32_t i = 0; i < static_cast<int32_t>(names_.size()); i++) {
+            pathIndex.emplace_back(i);
+        }
+        return pathIndex;
+    }
+
+    void Clear() override
+    {
+        OHOS::Ace::NG::NavigationStack::Clear();
+        names_.clear();
+    }
+
     void Pop() override
     {
         names_.pop_back();
