@@ -396,6 +396,7 @@ void ImagePattern::StartDecoding(const SizeF& dstSize)
 void ImagePattern::SetImagePaintConfig(const RefPtr<CanvasImage>& canvasImage, const RectF& srcRect,
     const RectF& dstRect, const ImageSourceInfo& sourceInfo, int32_t frameCount)
 {
+    CHECK_NULL_VOID(canvasImage);
     auto layoutProps = GetLayoutProperty<ImageLayoutProperty>();
     CHECK_NULL_VOID(layoutProps);
 
