@@ -299,11 +299,7 @@ void ContainerModalPattern::AddOrRemovePanEvent(const RefPtr<FrameNode>& control
         };
         panEvent_ = MakeRefPtr<PanEvent>(std::move(panActionStart), nullptr, nullptr, nullptr);
     }
-    if (windowMode_ != WindowMode::WINDOW_MODE_FULLSCREEN) {
-        eventHub->AddPanEvent(panEvent_, panDirection, DEFAULT_PAN_FINGER, DEFAULT_PAN_DISTANCE);
-    } else {
-        eventHub->RemovePanEvent(panEvent_);
-    }
+    eventHub->AddPanEvent(panEvent_, panDirection, DEFAULT_PAN_FINGER, DEFAULT_PAN_DISTANCE);
 }
 
 void ContainerModalPattern::OnWindowFocused()
