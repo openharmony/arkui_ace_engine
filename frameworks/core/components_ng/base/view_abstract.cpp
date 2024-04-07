@@ -3985,6 +3985,13 @@ void ViewAbstract::SetDragEventStrictReportingEnabled(bool dragEventStrictReport
     dragDropManager->SetEventStrictReportingEnabled(dragEventStrictReportingEnabled);
 }
 
+void ViewAbstract::SetDisallowDropForcedly(bool isDisallowDropForcedly)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    frameNode->SetDisallowDropForcedly(isDisallowDropForcedly);
+}
+
 void ViewAbstract::SetBackgroundImageResizableSlice(const ImageResizableSlice& slice)
 {
     if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {

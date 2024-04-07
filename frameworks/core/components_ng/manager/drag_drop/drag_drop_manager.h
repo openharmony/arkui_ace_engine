@@ -387,6 +387,7 @@ private:
     void NotifyDragFrameNode(
         const Point& point, const DragEventType& dragEventType, const DragRet& dragRet = DragRet::DRAG_DEFAULT);
     void TransDragWindowToDragFwk(int32_t windowContainerId);
+    void ResetDragDrop(int32_t windowId, const Point& point);
     bool isDistanceLimited(const Point& point);
     bool isTimeLimited(const PointerEvent& pointerEvent, const Point& point);
     bool ReachMoveLimit(const PointerEvent& pointerEvent, const Point& point);

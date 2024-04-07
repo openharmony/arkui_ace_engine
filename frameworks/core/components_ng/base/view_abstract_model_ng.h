@@ -176,6 +176,11 @@ public:
         ViewAbstract::SetLightUpEffect(radio);
     }
 
+    void SetDisallowDropForcedly(bool isDisallowDropForcedly) override
+    {
+        ViewAbstract::SetDisallowDropForcedly(isDisallowDropForcedly);
+    }
+
     void SetPadding(const CalcDimension& value) override
     {
         if (value.Unit() == DimensionUnit::CALC) {
