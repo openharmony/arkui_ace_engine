@@ -130,9 +130,12 @@ public:
     static void ParseSheetDetentHeight(const JSRef<JSVal>& args, NG::SheetHeight& detent);
     static bool ParseSheetBackgroundBlurStyle(const JSRef<JSVal>& args, BlurStyleOption& blurStyleOptions);
     static void ParseSheetLevel(const JSRef<JSVal>& args, NG::SheetLevel& sheetLevel);
+    static void ParseSheetHeightCallback(const JSRef<JSObject>& paramObj,
+        std::function<void(const float)>& heightDidChange, const char* prop);
     static void ParseSheetCallback(const JSRef<JSObject>& paramObj, std::function<void()>& onAppear,
         std::function<void()>& onDisappear, std::function<void()>& shouldDismiss, std::function<void()>& onWillAppear,
-        std::function<void()>& onWillDisappear, std::function<void(const float)>& onHeightDidChange);
+        std::function<void()>& onWillDisappear, std::function<void(const float)>& onHeightDidChange,
+        std::function<void(const float)>& onDetentsDidChange);
     static void ParseSheetTitle(const JSRef<JSObject>& paramObj, NG::SheetStyle& sheetStyle,
         std::function<void()>& titleBuilderFunction);
     static panda::Local<panda::JSValueRef> JsDismissSheet(panda::JsiRuntimeCallInfo* runtimeCallInfo);
