@@ -2046,7 +2046,8 @@ void RichEditorPattern::HandleDoubleClickOrLongPress(GestureEvent& info)
     if (caretUpdateType_ == CaretUpdateType::LONG_PRESSED) {
         HandleUserLongPressEvent(info);
     }
-    if (JudgeDraggable(info) || isMousePressed_) {
+    bool isLongpressedByMouse = isMousePressed_ && caretUpdateType_== CaretUpdateType::LONG_PRESSED;
+    if (JudgeDraggable(info) || isLongpressedByMouse) {
         return;
     }
     auto host = GetHost();
