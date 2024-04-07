@@ -79,8 +79,6 @@ config("ace_unittest_config") {
   defines = [
     "ACE_UNITTEST",
     "OHOS_STANDARD_SYSTEM",
-    "ACE_INSTANCE_LOG",
-    "USE_HILOG",
   ]
 }
 
@@ -89,8 +87,10 @@ ohos_source_set("ace_unittest_log") {
   testonly = true
   subsystem_name = ace_engine_subsystem
   part_name = ace_engine_part
-  sources = [ "$ace_root/adapter/ohos/osal/log_wrapper.cpp" ]
-  external_deps = [ "hilog:libhilog" ]
+  sources = [
+    "$ace_root/adapter/ohos/osal/log_wrapper.cpp",
+    "$ace_root/test/mock/adapter/mock_log_wrapper.cpp",
+  ]
   configs = [ ":ace_unittest_config" ]
 }
 
@@ -428,11 +428,10 @@ ohos_source_set("ace_engine_unittest_flutter_deps") {
   external_deps = [ "eventhandler:libeventhandler" ]
 }
 
-source_set("ace_components_mock") {
+ohos_source_set("ace_components_mock") {
   testonly = true
   sources = [
     "$ace_root/test/mock/adapter/mock_app_bar_helper_impl.cpp",
-    "$ace_root/test/mock/adapter/mock_log_wrapper.cpp",
     "$ace_root/test/mock/adapter/mock_modal_ui_extension.cpp",
     "$ace_root/test/mock/adapter/mock_view_data_wrap_ohos.cpp",
     "$ace_root/test/mock/base/mock_ace_performance_check.cpp",
@@ -499,9 +498,10 @@ source_set("ace_components_mock") {
   ]
   deps = [
     "$ace_root/frameworks/core/components/theme:build_theme_code",
+    "$ace_root/test/unittest:ace_unittest_log",
     "//third_party/googletest:gmock_main",
   ]
-  configs += [ ":ace_unittest_config" ]
+  configs = [ ":ace_unittest_config" ]
 }
 
 ohos_source_set("ace_components_pattern") {
