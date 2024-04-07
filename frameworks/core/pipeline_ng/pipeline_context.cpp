@@ -662,8 +662,8 @@ void PipelineContext::FlushVsync(uint64_t nanoTimestamp, uint32_t frameCount)
         dragWindowVisibleCallback_ = nullptr;
     }
     FlushMessages();
-    UIObserverHandler::GetInstance().HandleDrawCommandSendCallBack();
     InspectDrew();
+    UIObserverHandler::GetInstance().HandleDrawCommandSendCallBack();
     if (!isFormRender_ && onShow_ && onFocus_) {
         FlushFocusView();
         FlushFocus();
