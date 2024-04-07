@@ -316,6 +316,11 @@ private:
     RefPtr<ListContentModifier> listContentModifier_;
     std::vector<std::shared_ptr<ISlideUpdateCallback>> listenerVector_;
 
+    void UpdateFadingEdge(const RefPtr<ListPaintMethod> paint);
+    bool isFadingEdge_ = false;
+    bool isTopEdgeFading_ = false;
+    bool isLowerEdgeFading_ = false;
+
     int32_t maxListItemIndex_ = 0;
     int32_t startIndex_ = -1;
     int32_t endIndex_ = -1;

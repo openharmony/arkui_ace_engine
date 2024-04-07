@@ -51,6 +51,8 @@ constexpr double CHAIN_SPRING_DAMPING = 30.0;
 constexpr double CHAIN_SPRING_STIFFNESS = 228;
 constexpr float DEFAULT_MIN_SPACE_SCALE = 0.75f;
 constexpr float DEFAULT_MAX_SPACE_SCALE = 2.0f;
+constexpr float LIST_FADINGEDGE_DEFAULT = 32.0f;
+constexpr float LIST_START_MAIN_POS = 0.0f;
 } // namespace
 
 void ListPattern::OnModifyDone()
@@ -97,9 +99,9 @@ void ListPattern::OnModifyDone()
     auto listTheme = conlist->GetTheme<ListTheme>();
     CHECK_NULL_VOID(listTheme);
     auto listThemeFadingEdge = listTheme->GetFadingEdge();
-    auto fadingEdge = listLayoutProperty->GetFadingEdge().value_or(listThemeFadingEdge);
+    isFadingEdge_ = listLayoutProperty->GetFadingEdge().value_or(listThemeFadingEdge);
     auto overlayNode = host->GetOverlayNode();
-    if (!overlayNode && fadingEdge) {
+    if (!overlayNode && isFadingEdge_) {
         CreateAnalyzerOverlay(host);
     }
 }
@@ -364,7 +366,36 @@ RefPtr<NodePaintMethod> ListPattern::CreateNodePaintMethod()
     paint->SetLaneGutter(laneGutter_);
     paint->SetItemsPosition(itemPosition_, pressedItem_);
     paint->SetContentModifier(listContentModifier_);
+
+    UpdateFadingEdge(paint);
     return paint;
+}
+
+void ListPattern::UpdateFadingEdge(const RefPtr<ListPaintMethod> paint)
+{
+    if (!isFadingEdge_ || LIST_START_MAIN_POS == contentMainSize_) {
+        return;
+    }
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto overlayNode = host->GetOverlayNode();
+    CHECK_NULL_VOID(overlayNode);
+    auto overlayRenderContext = overlayNode->GetRenderContext();
+    CHECK_NULL_VOID(overlayRenderContext);
+    if (Negative(startMainPos_) || GreatNotEqual(endMainPos_, contentMainSize_)) {
+        auto isTopEdgeFadingUpdate = isTopEdgeFading_ != (startMainPos_ < LIST_START_MAIN_POS);
+        auto isLowerEdgeFadingUpdate = isLowerEdgeFading_ != (endMainPos_ > contentMainSize_);
+        if (isTopEdgeFadingUpdate || isLowerEdgeFadingUpdate) {
+            auto isFadingTop = startMainPos_ < LIST_START_MAIN_POS;
+            auto isFadingBottom = endMainPos_ > contentMainSize_;
+            auto percentFading = CalcDimension(LIST_FADINGEDGE_DEFAULT, DimensionUnit::VP).ConvertToPx() /
+                std::abs(contentMainSize_ - LIST_START_MAIN_POS);
+            paint->SetOverlayRenderContext(overlayRenderContext);
+            paint->SetFadingInfo(isFadingTop, isFadingBottom, percentFading);
+        }
+    }
+    isTopEdgeFading_ = (startMainPos_ < LIST_START_MAIN_POS);
+    isLowerEdgeFading_ = (endMainPos_ > contentMainSize_);
 }
 
 void ListPattern::ProcessEvent(

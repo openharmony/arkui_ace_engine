@@ -117,6 +117,20 @@ public:
 
     void UpdateOverlayModifier(PaintWrapper* paintWrapper) override;
 
+    void SetOverlayRenderContext(const RefPtr<RenderContext>& overlayRenderContext)
+    {
+        overlayRenderContext_ = overlayRenderContext;
+    }
+
+    void SetFadingInfo(bool isFadingTop, bool isFadingBottom, float percentFading)
+    {
+        isFadingTop_ = isFadingTop;
+        isFadingBottom_ = isFadingBottom;
+        percentFading_ = percentFading;
+    }
+
+    void UpdateFadingGradient(const RefPtr<RenderContext>& listRenderContext);
+
 private:
     V2::ItemDivider divider_;
     bool vertical_ = false;
@@ -130,6 +144,11 @@ private:
     WeakPtr<ScrollBar> scrollBar_;
     WeakPtr<ScrollEdgeEffect> edgeEffect_;
     WeakPtr<ScrollBarOverlayModifier> scrollBarOverlayModifier_;
+
+    RefPtr<RenderContext> overlayRenderContext_;
+    bool isFadingTop_ = false;
+    bool isFadingBottom_ = false;
+    float percentFading_ = 0.0f;
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_LIST_LIST_PAINT_METHOD_H

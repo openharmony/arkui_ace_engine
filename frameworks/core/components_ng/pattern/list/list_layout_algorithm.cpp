@@ -41,21 +41,8 @@
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/components_v2/list/list_properties.h"
 #include "core/pipeline_ng/pipeline_context.h"
-#include "core/components/list/list_theme.h"
 
 namespace OHOS::Ace::NG {
-constexpr double PERCENT_100 = 100.0;
-constexpr float LIST_FADINGEDGE_DEFAULT = 32.0;
-constexpr float LINEAR_GRADIENT_ANGLE = 90.0;
-
-namespace {
-    GradientColor CreatePercentGradientColor(float percent, Color color)
-    {
-        NG::GradientColor gredient = GradientColor(color);
-        gredient.SetDimension(CalcDimension(percent * PERCENT_100, DimensionUnit::PERCENT));
-        return gredient;
-    }
-} // namespace
 
 void ListLayoutAlgorithm::UpdateListItemConstraint(
     Axis axis, const OptionalSizeF& selfIdealSize, LayoutConstraintF& contentConstraint)
@@ -179,35 +166,6 @@ void ListLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
 
     // set list cache info.
     SetCacheCount(layoutWrapper, listLayoutProperty->GetCachedCountValue(1));
-
-    UpdateFadingEdge(layoutWrapper);
-}
-
-void ListLayoutAlgorithm::UpdateFadingEdge(LayoutWrapper* layoutWrapper)
-{
-    auto listLayoutProperty = AceType::DynamicCast<ListLayoutProperty>(layoutWrapper->GetLayoutProperty());
-    CHECK_NULL_VOID(listLayoutProperty);
-    auto conlist = PipelineBase::GetCurrentContextSafely();
-    CHECK_NULL_VOID(conlist);
-    auto listTheme = conlist->GetTheme<ListTheme>();
-    CHECK_NULL_VOID(listTheme);
-    auto listThemeFadingEdge = listTheme->GetFadingEdge();
-    auto fadingEdge = listLayoutProperty->GetFadingEdge().value_or(listThemeFadingEdge);
-    if (!fadingEdge) {
-        return;
-    }
-    auto listNode = layoutWrapper->GetHostNode();
-    CHECK_NULL_VOID(listNode);
-    auto overlayNode = listNode->GetOverlayNode();
-    CHECK_NULL_VOID(overlayNode);
-    if (GetStartPosition() < startMainPos_ || GetEndPosition() > endMainPos_) {
-        if (isFadingEdgeUpdate_) {
-            InitGradient(overlayNode, listNode);
-            isFadingEdgeUpdate_ = !isFadingEdgeUpdate_;
-        }
-    } else {
-        isFadingEdgeUpdate_ = !isFadingEdgeUpdate_;
-    }
 }
 
 void ListLayoutAlgorithm::SetCacheCount(LayoutWrapper* layoutWrapper, int32_t cacheCount)
@@ -1738,41 +1696,5 @@ void ListLayoutAlgorithm::OnItemPositionAddOrUpdate(LayoutWrapper* layoutWrapper
     if (!NearEqual(predictSnapEndPos, predictSnapEndPos_.value())) {
         predictSnapEndPos_ = predictSnapEndPos;
     }
-}
-
-void ListLayoutAlgorithm::InitGradient(const RefPtr<FrameNode> overlayGeometryNode, const RefPtr<FrameNode> listNode)
-{
-    auto overlayRenderContext = overlayGeometryNode->GetRenderContext();
-    auto listRenderContext = listNode->GetRenderContext();
-    CHECK_NULL_VOID(overlayRenderContext);
-    CHECK_NULL_VOID(listRenderContext);
-
-    if (startMainPos_ == endMainPos_) {
-        return;
-    }
-    auto percentFading = CalcDimension(LIST_FADINGEDGE_DEFAULT, DimensionUnit::VP).ConvertToPx() /
-        std::abs(endMainPos_ - startMainPos_);
-
-    NG::Gradient gradient;
-    gradient.CreateGradientWithType(NG::GradientType::LINEAR);
-    if (GetStartPosition() < startMainPos_) {
-        gradient.AddColor(CreatePercentGradientColor(0, Color::TRANSPARENT));
-        gradient.AddColor(CreatePercentGradientColor(percentFading, Color::WHITE));
-    }
-    if (GetEndPosition() > endMainPos_) {
-        gradient.AddColor(CreatePercentGradientColor(1 - percentFading, Color::WHITE));
-        gradient.AddColor(CreatePercentGradientColor(1, Color::TRANSPARENT));
-    }
-    if (axis_ == Axis::HORIZONTAL) {
-        gradient.GetLinearGradient()->angle = CalcDimension(LINEAR_GRADIENT_ANGLE, DimensionUnit::PX);
-    }
-
-    listRenderContext->UpdateBackBlendMode(BlendMode::SRC_OVER);
-    listRenderContext->UpdateBackBlendApplyType(BlendApplyType::OFFSCREEN);
-
-    overlayRenderContext->UpdateZIndex(INT32_MAX);
-    overlayRenderContext->UpdateLinearGradient(gradient);
-    overlayRenderContext->UpdateBackBlendMode(BlendMode::DST_IN);
-    overlayRenderContext->UpdateBackBlendApplyType(BlendApplyType::OFFSCREEN);
 }
 } // namespace OHOS::Ace::NG
