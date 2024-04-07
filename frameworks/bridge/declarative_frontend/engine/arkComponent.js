@@ -13290,6 +13290,22 @@ class ArkSliderComponent extends ArkComponent {
     modifierWithKey(this._modifiersWithKeys, StepSizeModifier.identity, StepSizeModifier, value);
     return this;
   }
+  setContentModifier(modifier) {
+    this.builder = modifier.applyContent();
+    this.modifier = modifier;
+    getUINativeModule().slider.setContentModifierBuilder(this.nativePtr, this);
+  }
+  makeContentModifierNode(context, sliderConfiguration) {
+    sliderConfiguration.contentModifier = this.modifier;
+    if (isUndefined(this.sliderNode)) {
+      const xNode = globalThis.requireNapi('arkui.node');
+      this.sliderNode = new xNode.BuilderNode(context);
+      this.sliderNode.build(this.builder, sliderConfiguration);
+    } else {
+      this.sliderNode.update(sliderConfiguration);
+    }
+    return this.sliderNode.getFrameNode();
+  }
 }
 class BlockStyleModifier extends ModifierWithKey {
   constructor(value) {
@@ -13530,6 +13546,14 @@ if (globalThis.Slider !== undefined) {
     }, (nativePtr, classType, modifierJS) => {
       return new modifierJS.SliderModifier(nativePtr, classType);
     });
+  };
+  globalThis.Slider.contentModifier = function (modifier) {
+    const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
+    let nativeNode = getUINativeModule().getFrameNodeById(elmtId);
+    let component = this.createOrGetNode(elmtId, () => {
+      return new ArkSliderComponent(nativeNode);
+    });
+    component.setContentModifier(modifier);
   };
 }
 

@@ -15,6 +15,9 @@
 
 /// <reference path='./import.ts' />
 class ArkSliderComponent extends ArkComponent implements SliderAttribute {
+  builder: WrappedBuilder<Object[]> | null = null;
+  sliderNode: BuilderNode<[SliderConfiguration]> | null = null;
+  modifier: ContentModifier<SliderConfiguration>;
   constructor(nativePtr: KNode, classType?: ModifierType) {
     super(nativePtr, classType);
   }
@@ -79,6 +82,22 @@ class ArkSliderComponent extends ArkComponent implements SliderAttribute {
   stepSize(value: Length): this {
     modifierWithKey(this._modifiersWithKeys, StepSizeModifier.identity, StepSizeModifier, value);
     return this;
+  }
+  setContentModifier(modifier: ContentModifier<SliderConfiguration>): this {
+    this.builder = modifier.applyContent();
+    this.modifier = modifier;
+    getUINativeModule().slider.setContentModifierBuilder(this.nativePtr, this);
+  }
+  makeContentModifierNode(context: UIContext, sliderConfiguration: SliderConfiguration): FrameNode | null {
+    sliderConfiguration.contentModifier = this.modifier;
+    if (isUndefined(this.sliderNode)) {
+      const xNode = globalThis.requireNapi('arkui.node');
+      this.sliderNode = new xNode.BuilderNode(context);
+      this.sliderNode.build(this.builder, sliderConfiguration);
+    } else {
+      this.sliderNode.update(sliderConfiguration);
+    }
+    return this.sliderNode.getFrameNode();
   }
 }
 
@@ -332,4 +351,14 @@ globalThis.Slider.attributeModifier = function (modifier: ArkComponent): void {
   }, (nativePtr: KNode, classType: ModifierType, modifierJS: ModifierJS) => {
     return new modifierJS.SliderModifier(nativePtr, classType);
   });
+};
+
+// @ts-ignore
+globalThis.Slider.contentModifier = function (modifier) {
+  const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
+  let nativeNode = getUINativeModule().getFrameNodeById(elmtId);
+  let component = this.createOrGetNode(elmtId, () => {
+    return new ArkSliderComponent(nativeNode);
+  });
+  component.setContentModifier(modifier);
 };

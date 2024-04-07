@@ -78,6 +78,7 @@ void SliderPattern::OnModifyDone()
     InitOnKeyEvent(focusHub);
     InitializeBubble();
     SetAccessibilityAction();
+    FireBuilder();
 }
 
 void SliderPattern::CalcSliderValue()
@@ -179,6 +180,9 @@ bool SliderPattern::UpdateParameters()
 
 void SliderPattern::InitClickEvent(const RefPtr<GestureEventHub>& gestureHub)
 {
+    if (UseContentModifier()) {
+        return;
+    }
     if (clickListener_) {
         return;
     }
@@ -189,6 +193,9 @@ void SliderPattern::InitClickEvent(const RefPtr<GestureEventHub>& gestureHub)
 
 void SliderPattern::InitTouchEvent(const RefPtr<GestureEventHub>& gestureHub)
 {
+    if (UseContentModifier()) {
+        return;
+    }
     if (touchEvent_) {
         return;
     }
@@ -824,6 +831,9 @@ bool SliderPattern::MoveStep(int32_t stepCount)
 
 void SliderPattern::InitMouseEvent(const RefPtr<InputEventHub>& inputEventHub)
 {
+    if (UseContentModifier()) {
+        return;
+    }
     auto hoverEvent = [weak = WeakClaim(this)](bool isHover) {
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
@@ -1172,6 +1182,21 @@ void SliderPattern::SetAccessibilityAction()
     });
 }
 
+void SliderPattern::SetSliderValue(double value, int32_t mode)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto eventHub = host->GetEventHub<EventHub>();
+    CHECK_NULL_VOID(eventHub);
+    auto enabled = eventHub->IsEnabled();
+    if (!enabled) {
+        return;
+    }
+    UpdateValue(value);
+    FireChangeEvent(mode);
+    OnModifyDone();
+}
+
 void SliderPattern::UpdateValue(float value)
 {
     TAG_LOGD(AceLogTag::ACE_SELECT_COMPONENT, "slider update value %{public}d %{public}f", panMoveFlag_, value_);
@@ -1181,6 +1206,7 @@ void SliderPattern::UpdateValue(float value)
         sliderPaintProperty->UpdateValue(value);
     }
     CalcSliderValue();
+    FireBuilder();
 }
 
 void SliderPattern::OnVisibleChange(bool isVisible)
@@ -1289,5 +1315,37 @@ void SliderPattern::RemoveIsFocusActiveUpdateEvent()
     auto pipline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipline);
     pipline->RemoveIsFocusActiveUpdateEvent(GetHost());
+}
+
+void SliderPattern::FireBuilder()
+{
+    CHECK_NULL_VOID(makeFunc_);
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    host->RemoveChildAtIndex(0);
+    contentModifierNode_ = BuildContentModifierNode();
+    CHECK_NULL_VOID(contentModifierNode_);
+    host->AddChild(contentModifierNode_, 0);
+    host->MarkNeedFrameFlushDirty(PROPERTY_UPDATE_MEASURE);
+}
+
+RefPtr<FrameNode> SliderPattern::BuildContentModifierNode()
+{
+    if (!makeFunc_.has_value()) {
+        return nullptr;
+    }
+    auto sliderPaintProperty = GetPaintProperty<SliderPaintProperty>();
+    CHECK_NULL_RETURN(sliderPaintProperty, nullptr);
+    auto min = sliderPaintProperty->GetMin().value_or(0.0f);
+    auto max = sliderPaintProperty->GetMax().value_or(100.0f);
+    auto step = sliderPaintProperty->GetStep().value_or(1.0f);
+    auto value = sliderPaintProperty->GetValue().value_or(min);
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, nullptr);
+    auto eventHub = host->GetEventHub<EventHub>();
+    CHECK_NULL_RETURN(eventHub, nullptr);
+    auto enabled = eventHub->IsEnabled();
+    SliderConfiguration sliderConfiguration(value, min, max, step, enabled);
+    return (makeFunc_.value())(sliderConfiguration);
 }
 } // namespace OHOS::Ace::NG
