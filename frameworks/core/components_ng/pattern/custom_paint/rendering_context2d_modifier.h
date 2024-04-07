@@ -41,7 +41,7 @@ public:
     void onDraw(DrawingContext& drawingContext) override;
     std::string GetDumpInfo();
     bool needResetSurface_ = false;
-    RefPtr<RenderContext> renderContext_ = nullptr;
+    WeakPtr<RenderContext> renderContext_ = nullptr;
 
     void MarkModifierDirty()
     {
