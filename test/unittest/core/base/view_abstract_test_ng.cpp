@@ -2956,16 +2956,14 @@ HWTEST_F(ViewAbstractTestNg, ViewAbstractDisableBlurByFrameNodeTest, TestSize.Le
     ViewStackProcessor::GetInstance()->Push(FRAME_NODE_ROOT);
     ViewStackProcessor::GetInstance()->Push(FRAME_NODE_CHILD);
 
-    auto topFrameNodeOne = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    auto topFrameNodeOne = ViewStackProcessor::GetInstance()->GetMainElementNode();
     EXPECT_EQ(strcmp(topFrameNodeOne->GetTag().c_str(), TAG_CHILD), 0);
-    auto frameNodeOne = static_cast<FrameNode*>(ViewAbstract::GetFrameNode());
-    EXPECT_EQ(strcmp(frameNodeOne->GetTag().c_str(), TAG_CHILD), 0);
     auto frameNode = AceType::DynamicCast<FrameNode>(topFrameNodeOne);
     ASSERT_NE(frameNode, nullptr);
     auto node = AceType::DynamicCast<NG::FrameNode>(frameNode);
     ASSERT_NE(node, nullptr);
     OnBlurFunc onBlurCallback = []() {};
-    ViewAbstract::SetOnBlur(node, std::move(onBlurCallback));
+    ViewAbstract::SetOnBlur(AceType::RawPtr(node), std::move(onBlurCallback));
     auto focusHub = node->GetOrCreateFocusHub();
     auto& callback = focusHub->focusCallbackEvents_->onBlurCallback_;
     EXPECT_TRUE(callback);
@@ -2974,7 +2972,7 @@ HWTEST_F(ViewAbstractTestNg, ViewAbstractDisableBlurByFrameNodeTest, TestSize.Le
      * @tc.steps: step2. Disable callback.
      * @tc.expected: callback is null.
      */
-    ViewAbstract::DisableOnBlur(node);
+    ViewAbstract::DisableOnBlur(AceType::RawPtr(node));
     EXPECT_FALSE(callback);
 }
 
