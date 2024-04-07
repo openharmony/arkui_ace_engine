@@ -18,6 +18,9 @@
 #include <cstdint>
 #include <string>
 #include <vector>
+#ifndef PREVIEW
+#include "adapter/ohos/entrance/mmi_event_convertor.h"
+#endif
 #include "base/geometry/ng/vector.h"
 #include "base/geometry/shape.h"
 #include "base/log/log_wrapper.h"
@@ -93,6 +96,7 @@ constexpr float DEFAULT_BRIGHTNESS = 1.0f;
 const int32_t ERROR_INT_CODE = -1;
 const float ERROR_FLOAT_CODE = -1.0f;
 constexpr int32_t MAX_POINTS = 10;
+constexpr int32_t MAX_HISTORY_EVENT_COUNT = 20;
 const std::vector<OHOS::Ace::RefPtr<OHOS::Ace::Curve>> CURVES = {
     OHOS::Ace::Curves::LINEAR,
     OHOS::Ace::Curves::EASE,
@@ -4943,6 +4947,34 @@ void ConvertTouchLocationInfoToPoint(const TouchLocationInfo& locationInfo, ArkU
     touchPoint.screenY = PipelineBase::Px2VpWithCurrentDensity(screenLocation.GetY());
 }
 
+void ConvertTouchPointsToPoints(std::vector<TouchPoint>& touchPointes,
+    std::array<ArkUITouchPoint, MAX_POINTS>& points, const TouchLocationInfo& historyLoaction)
+{
+    if (touchPointes.empty()) {
+        return;
+    }
+    size_t i = 0;
+    for (auto& touchPoint : touchPointes) {
+        if (i >= MAX_POINTS) {
+            break;
+        }
+        points[i].id = touchPoint.id;
+        points[i].nodeX = PipelineBase::Px2VpWithCurrentDensity(historyLoaction.GetLocalLocation().GetX());
+        points[i].nodeY = PipelineBase::Px2VpWithCurrentDensity(historyLoaction.GetLocalLocation().GetY());
+        points[i].windowX = PipelineBase::Px2VpWithCurrentDensity(historyLoaction.GetGlobalLocation().GetX());
+        points[i].windowY = PipelineBase::Px2VpWithCurrentDensity(historyLoaction.GetGlobalLocation().GetY());
+        points[i].screenX = touchPoint.screenX;
+        points[i].screenY = touchPoint.screenY;
+        points[i].contactAreaWidth = touchPoint.size;
+        points[i].contactAreaHeight = touchPoint.size;
+        points[i].pressure = touchPoint.force;
+        points[i].tiltX = touchPoint.tiltX.value_or(0.0f);
+        points[i].tiltY = touchPoint.tiltY.value_or(0.0f);
+        points[i].pressedTime = touchPoint.downTime.time_since_epoch().count();
+        i++;
+    }
+}
+
 void SetOnTouch(ArkUINodeHandle node, void* extraParam)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -4978,8 +5010,55 @@ void SetOnTouch(ArkUINodeHandle node, void* extraParam)
             event.touchEvent.touchPointes = nullptr;
             event.touchEvent.touchPointSize = 0;
         }
-        event.touchEvent.historyEvents = nullptr;
-        event.touchEvent.historySize = 0;
+        std::array<ArkUIHistoryTouchEvent, MAX_HISTORY_EVENT_COUNT> allHistoryEvents;
+        std::array<std::array<ArkUITouchPoint, MAX_POINTS>, MAX_HISTORY_EVENT_COUNT> allHistoryPoints;
+        if (!eventInfo.GetHistoryPointerEvent().empty() && eventInfo.GetHistoryPointerEvent().size() ==
+            eventInfo.GetHistory().size()) {
+            auto historyLoacationIterator = std::begin(eventInfo.GetHistory());
+            auto historyMMIPointerEventIterator = std::begin(eventInfo.GetHistoryPointerEvent());
+            for (size_t i = 0; i < eventInfo.GetHistory().size() && i < MAX_HISTORY_EVENT_COUNT; i++) {
+                if (!(*historyMMIPointerEventIterator)) {
+                    historyLoacationIterator++;
+                    historyMMIPointerEventIterator++;
+                    continue;
+                }
+                #if !defined(PREVIEW)
+                    auto tempTouchEvent = Platform::ConvertTouchEvent((*historyMMIPointerEventIterator));
+                    allHistoryEvents[i].action = static_cast<int32_t>(tempTouchEvent.type);
+                    allHistoryEvents[i].sourceType = static_cast<int32_t>(tempTouchEvent.sourceType);
+                    allHistoryEvents[i].timeStamp = tempTouchEvent.time.time_since_epoch().count();
+                    allHistoryEvents[i].actionTouchPoint.nodeX = PipelineBase::Px2VpWithCurrentDensity(
+                        (*historyLoacationIterator).GetLocalLocation().GetX());
+                    allHistoryEvents[i].actionTouchPoint.nodeY = PipelineBase::Px2VpWithCurrentDensity(
+                        (*historyLoacationIterator).GetLocalLocation().GetY());
+                    allHistoryEvents[i].actionTouchPoint.windowX = PipelineBase::Px2VpWithCurrentDensity(
+                        (*historyLoacationIterator).GetGlobalLocation().GetX());
+                    allHistoryEvents[i].actionTouchPoint.windowY = PipelineBase::Px2VpWithCurrentDensity(
+                        (*historyLoacationIterator).GetGlobalLocation().GetY());
+                    allHistoryEvents[i].actionTouchPoint.screenX = tempTouchEvent.screenX;
+                    allHistoryEvents[i].actionTouchPoint.screenY = tempTouchEvent.screenY;
+                    allHistoryEvents[i].actionTouchPoint.pressure = tempTouchEvent.force;
+                    ConvertTouchPointsToPoints(tempTouchEvent.pointers, allHistoryPoints[i],
+                        *historyLoacationIterator);
+                    if (tempTouchEvent.pointers.size() > 0) {
+                        allHistoryEvents[i].touchPointes = &(allHistoryPoints[i][0]);
+                    }
+                    allHistoryEvents[i].touchPointSize = tempTouchEvent.pointers.size() < MAX_POINTS ?
+                    tempTouchEvent.pointers.size() : MAX_POINTS;
+                #else
+                    allHistoryEvents[i].touchPointes = &(allHistoryPoints[i][0]);
+                    allHistoryEvents[i].touchPointSize = MAX_POINTS;
+                #endif
+                historyLoacationIterator++;
+                historyMMIPointerEventIterator++;
+            }
+            event.touchEvent.historyEvents = &allHistoryEvents[0];
+            event.touchEvent.historySize = eventInfo.GetHistoryPointerEvent().size() < MAX_HISTORY_EVENT_COUNT ?
+                eventInfo.GetHistoryPointerEvent().size() : MAX_HISTORY_EVENT_COUNT;
+        } else {
+            event.touchEvent.historyEvents = nullptr;
+            event.touchEvent.historySize = 0;
+        }
         SendArkUIAsyncEvent(&event);
     };
     ViewAbstract::SetOnTouch(frameNode, std::move(onEvent));
