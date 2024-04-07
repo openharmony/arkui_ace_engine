@@ -192,6 +192,20 @@ void ToggleModelNG::OnChange(FrameNode* frameNode, ChangeEvent&& onChange)
     eventHub->SetOnChange(std::move(onChange));
 }
 
+void ToggleModelNG::SetBuilderFunc(FrameNode* frameNode, NG::SwitchMakeCallback&& makeFunc)
+{
+    auto pattern = frameNode->GetPattern<SwitchPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetBuilderFunc(std::move(makeFunc));
+}
+
+void ToggleModelNG::SetChangeValue(FrameNode* frameNode, bool value)
+{
+    auto pattern = frameNode->GetPattern<SwitchPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetSwitchIsOn(value);
+}
+
 void ToggleModelNG::SetWidth(const Dimension& width)
 {
     NG::ViewAbstract::SetWidth(NG::CalcLength(width));
