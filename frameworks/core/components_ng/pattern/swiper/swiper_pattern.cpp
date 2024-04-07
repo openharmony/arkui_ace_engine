@@ -1714,6 +1714,9 @@ void SwiperPattern::InitIndicator()
     radius.SetRadius(INDICATOR_BORDER_RADIUS);
     renderContext->UpdateBorderRadius(radius);
 
+    auto indicatorPattern = indicatorNode->GetPattern<SwiperIndicatorPattern>();
+    indicatorPattern->SetIndicatorInteractive(isIndicatorInteractive_);
+
     indicatorNode->MarkModifyDone();
     indicatorNode->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }

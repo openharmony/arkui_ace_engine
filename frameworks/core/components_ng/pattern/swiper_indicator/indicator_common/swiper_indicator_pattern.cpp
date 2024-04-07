@@ -513,6 +513,19 @@ void SwiperIndicatorPattern::HandleDragEnd(double dragVelocity)
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
+void SwiperIndicatorPattern::SetIndicatorInteractive(bool isInteractive)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto eventHub = host->GetEventHub<EventHub>();
+    CHECK_NULL_VOID(eventHub);
+    if (isInteractive) {
+        eventHub->SetEnabled(true);
+    } else {
+        eventHub->SetEnabled(false);
+    }
+}
+
 bool SwiperIndicatorPattern::CheckIsTouchBottom(const GestureEvent& info)
 {
     auto swiperNode = GetSwiperNode();

@@ -34,6 +34,7 @@ public:
     RefPtr<SwiperController> Create() override;
     void SetDirection(Axis axis) override;
     void SetIndex(uint32_t index) override;
+    void SetIndicatorInteractive(bool interactive) override;
     void SetAutoPlay(bool autoPlay) override;
     void SetAutoPlayInterval(uint32_t interval) override;
     void SetDuration(uint32_t duration) override;
