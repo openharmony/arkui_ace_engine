@@ -47,6 +47,7 @@ namespace OHOS::Ace::NG {
 namespace {
 constexpr float NORMAL_LENGTH = 100.0f;
 constexpr int64_t FORM_ID_OF_TDD = 123456;
+const std::string FORM_ID_STRING_OF_TDD = "123456";
 constexpr int32_t NODE_ID_OF_PARENT_NODE = 654321;
 RequestFormInfo formInfo;
 DirtySwapConfig config;
@@ -633,6 +634,7 @@ HWTEST_F(FormTestNg, FireOnEvent, TestSize.Level1)
     eventHub->SetOnUninstall([](const std::string& string) {
         auto json = JsonUtil::Create(true);
         json->Put("id", std::to_string(FORM_ID_OF_TDD).c_str());
+        json->Put("idString", FORM_ID_STRING_OF_TDD.c_str());
         ASSERT_EQ(string, json->ToString());
     });
     pattern->FireOnUninstallEvent(FORM_ID_OF_TDD);
@@ -644,6 +646,7 @@ HWTEST_F(FormTestNg, FireOnEvent, TestSize.Level1)
     eventHub->SetOnAcquired([](const std::string& string) {
         auto json = JsonUtil::Create(true);
         json->Put("id", std::to_string(FORM_ID_OF_TDD).c_str());
+        json->Put("idString", FORM_ID_STRING_OF_TDD.c_str());
         ASSERT_EQ(string, json->ToString());
     });
     pattern->FireOnAcquiredEvent(FORM_ID_OF_TDD);
