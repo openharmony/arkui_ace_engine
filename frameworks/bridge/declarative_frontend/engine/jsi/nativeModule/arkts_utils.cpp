@@ -1278,6 +1278,15 @@ void ArkTSUtils::ParsePadding(
     }
 }
 
+panda::Local<panda::ObjectRef> ArkTSUtils::GetContext(EcmaVM* vm)
+{
+    auto container = Container::Current();
+    CHECK_NULL_RETURN(container, panda::JSValueRef::Undefined(vm));
+    auto frontend = container->GetFrontend();
+    CHECK_NULL_RETURN(frontend, panda::JSValueRef::Undefined(vm));
+    return NapiValueToLocalValue(frontend->GetContextValue());
+}
+
 bool ArkTSUtils::ParseResponseRegion(
     const EcmaVM* vm, const Local<JSValueRef>& jsValue, ArkUI_Float32* regionValues,
     int32_t* regionUnits, uint32_t length)

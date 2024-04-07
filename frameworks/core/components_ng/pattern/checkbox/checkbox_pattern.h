@@ -25,13 +25,13 @@
 #include "core/components_ng/pattern/checkbox/checkbox_accessibility_property.h"
 #include "core/components_ng/pattern/checkbox/checkbox_event_hub.h"
 #include "core/components_ng/pattern/checkbox/checkbox_layout_algorithm.h"
+#include "core/components_ng/pattern/checkbox/checkbox_model_ng.h"
 #include "core/components_ng/pattern/checkbox/checkbox_paint_method.h"
 #include "core/components_ng/pattern/checkbox/checkbox_paint_property.h"
 #include "core/components_ng/pattern/pattern.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
-
 class CheckBoxPattern : public Pattern {
     DECLARE_ACE_TYPE(CheckBoxPattern, Pattern);
 
@@ -56,6 +56,9 @@ public:
 
     RefPtr<NodePaintMethod> CreateNodePaintMethod() override
     {
+        if (UseContentModifier()) {
+            return nullptr;
+        }
         auto host = GetHost();
         CHECK_NULL_RETURN(host, nullptr);
         auto paintProperty = host->GetPaintProperty<CheckBoxPaintProperty>();
@@ -150,6 +153,18 @@ public:
         lastSelect_ = select;
     }
 
+    void SetBuilderFunc(CheckBoxMakeCallback&& makeFunc)
+    {
+        makeFunc_ = std::move(makeFunc);
+    }
+
+    bool UseContentModifier()
+    {
+        return contentModifierNode_ != nullptr;
+    }
+
+    void SetCheckBoxSelect(bool value);
+
     void SetIsUserSetResponseRegion(bool isUserSetResponseRegion)
     {
         isUserSetResponseRegion_ = isUserSetResponseRegion;
@@ -217,7 +232,11 @@ private:
     void ChangeGroupStatusAndNotify(const RefPtr<FrameNode>& checkBoxGroupNode, const std::vector<std::string>& vec,
         bool haveCheckBoxSelected, bool isAllCheckBoxSelected);
     std::string GetGroupNameWithNavId();
+    void FireBuilder();
+    RefPtr<FrameNode> BuildContentModifierNode();
 
+    std::optional<CheckBoxMakeCallback> makeFunc_;
+    RefPtr<FrameNode> contentModifierNode_;
     std::optional<std::string> preName_;
     std::optional<std::string> preGroup_;
     std::string navId_ = "";

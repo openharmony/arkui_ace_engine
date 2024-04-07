@@ -16,10 +16,21 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_CHECKBOX_CHECKBOX_MODEL_NG_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_CHECKBOX_CHECKBOX_MODEL_NG_H
 
+#include "core/components_ng/base/common_configuration.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/checkbox/checkbox_model.h"
 
 namespace OHOS::Ace::NG {
+class CheckBoxConfiguration : public CommonConfiguration {
+    public:
+        CheckBoxConfiguration(const std::string& name, bool selected, bool enabled)
+            : CommonConfiguration(enabled), name_(name), selected_(selected)
+        {}
+        std::string name_;
+        bool selected_;
+};
+using CheckBoxMakeCallback =
+    std::function<RefPtr<FrameNode>(const CheckBoxConfiguration& checkBoxConfiguration)>;
 class ACE_EXPORT CheckBoxModelNG : public OHOS::Ace::CheckBoxModel {
 public:
     void Create(const std::optional<std::string>& name, const std::optional<std::string>& groupName,
@@ -49,6 +60,8 @@ public:
     static void SetCheckMarkWidth(FrameNode* frameNode, const Dimension& width);
     static void SetPadding(FrameNode* frameNode, const NG::PaddingProperty& padding);
     static void SetResponseRegion(FrameNode* frameNode, const std::vector<DimensionRect>& responseRegion);
+    static void SetBuilderFunc(FrameNode* frameNode, NG::CheckBoxMakeCallback&& jsMake);
+    static void SetChangeValue(FrameNode* frameNode, bool value);
     static void SetCheckboxStyle(FrameNode* frameNode, CheckBoxStyle checkboxStyle);
 
     static bool GetSelect(FrameNode* frameNode);
