@@ -1564,6 +1564,7 @@ void PipelineContext::OnVirtualKeyboardHeightChange(
     auto func = [weak, keyboardHeight, positionY, height, manager]() mutable {
         auto context = weak.Upgrade();
         CHECK_NULL_VOID(context);
+        context->SetIsLayouting(false);
         context->safeAreaManager_->UpdateKeyboardSafeArea(keyboardHeight);
         if (keyboardHeight > 0) {
             // add height of navigation bar
@@ -1605,6 +1606,7 @@ void PipelineContext::OnVirtualKeyboardHeightChange(
         context->FlushUITasks();
     };
     AnimationOption option = AnimationUtil::CreateKeyboardAnimationOption(keyboardAnimationConfig_, keyboardHeight);
+    SetIsLayouting(true);
     Animate(option, option.GetCurve(), func);
 
 #ifdef ENABLE_ROSEN_BACKEND
