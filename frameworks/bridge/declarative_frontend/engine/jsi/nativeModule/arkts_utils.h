@@ -56,6 +56,8 @@ public:
         DimensionUnit defaultUnit, bool isSupportPercent = true, bool enableCheckInvalidvalue = true);
     static bool ParseJsDimensionFp(const EcmaVM *vm, const Local<JSValueRef> &jsValue, CalcDimension &result,
         bool isSupportPercent = true, bool enableCheckInvalidvalue = true);
+    static bool ParseJsDimensionFpNG(const EcmaVM *vm, const Local<JSValueRef> &jsValue, CalcDimension &result,
+        bool isSupportPercent = true);
     static bool ParseJsDimensionVp(
         const EcmaVM *vm, const Local<JSValueRef> &value, CalcDimension &result, bool enableCheckInvalidvalue = true);
     static bool ParseJsDimensionNG(const EcmaVM *vm, const Local<JSValueRef> &jsValue, CalcDimension &result,

@@ -651,6 +651,12 @@ bool ArkTSUtils::ParseJsDimensionFp(const EcmaVM* vm, const Local<JSValueRef>& j
         vm, jsValue, result, DimensionUnit::FP, isSupportPercent, enableCheckInvalidvalue);
 }
 
+bool ArkTSUtils::ParseJsDimensionFpNG(const EcmaVM *vm, const Local<JSValueRef> &jsValue, CalcDimension &result,
+    bool isSupportPercent)
+{
+    return ArkTSUtils::ParseJsDimensionNG(vm, jsValue, result, DimensionUnit::FP, isSupportPercent);
+}
+
 bool ArkTSUtils::ParseJsFontFamiliesToString(const EcmaVM* vm, const Local<JSValueRef>& jsValue, std::string& result)
 {
     if (jsValue->IsNull() || jsValue->IsUndefined()) {
