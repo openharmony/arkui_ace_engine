@@ -27,7 +27,7 @@ public:
     static void Create(const JSCallbackInfo& info);
 
 protected:
-    static void SetIndicatorInteractive(bool interactive);
+    static void SetIndicatorInteractive(const JSCallbackInfo& info);
     static void SetAutoPlay(bool autoPlay);
     static void SetDuration(const JSCallbackInfo& info);
     static void SetIndex(const JSCallbackInfo& info);
