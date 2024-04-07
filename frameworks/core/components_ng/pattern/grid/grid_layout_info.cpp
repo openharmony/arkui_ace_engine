@@ -530,7 +530,7 @@ GridLayoutInfo::EndIndexInfo GridLayoutInfo::FindEndIdx(int32_t endLine) const
             }
         }
     }
-    return {};
+    return { .itemIdx = 0, .y = 0, .x = 0 };
 }
 
 void GridLayoutInfo::ClearMapsToEnd(int32_t idx)

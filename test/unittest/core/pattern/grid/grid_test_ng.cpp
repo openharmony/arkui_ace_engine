@@ -90,6 +90,7 @@ void GridTestNg::CreateItem(int32_t itemNumber, float width, float height, GridI
     for (int32_t i = 0; i < itemNumber; i++) {
         GridItemModelNG itemModel;
         itemModel.Create(gridItemStyle);
+        // -2 corresponds to 100%
         if (width == -2) {
             ViewAbstract::SetWidth(CalcLength(FILL_LENGTH));
         } else if (width != NULL_VALUE) {

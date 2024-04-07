@@ -231,4 +231,27 @@ GridLayoutOptions GetOptionDemo12()
     option.getSizeByIndex = std::move(onGetIrregularSizeByIndex);
     return option;
 }
+
+GridLayoutOptions GetOptionDemo13()
+{
+    GridLayoutOptions option;
+    option.irregularIndexes = {
+        0, // [5 x 3]
+        2, // [2 x 2]
+        3, // [3 x 6]
+    };
+
+    auto onGetIrregularSizeByIndex = [](int32_t index) -> GridItemSize {
+        if (index == 0) {
+            return { .rows = 3, .columns = 5 };
+        }
+        if (index == 2) {
+            return { .rows = 2, .columns = 2 };
+        }
+        return { .rows = 6, .columns = 3 };
+    };
+
+    option.getSizeByIndex = std::move(onGetIrregularSizeByIndex);
+    return option;
+}
 } // namespace OHOS::Ace::NG

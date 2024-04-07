@@ -1486,6 +1486,47 @@ HWTEST_F(GridIrregularLayoutTest, Integrated001, TestSize.Level1)
 }
 
 /**
+ * @tc.name: GridIrregularLayout::Integrated002
+ * @tc.desc: Test full layout process
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridIrregularLayoutTest, Integrated002, TestSize.Level1)
+{
+    Create([](GridModelNG model) {
+        model.SetColumnsTemplate("1fr 1fr 1fr 1fr 1fr");
+        model.SetLayoutOptions(GetOptionDemo13());
+        model.SetColumnsGap(Dimension { 5.0f });
+        CreateItem(1, -2, 300.0f);
+        CreateItem(1, -2, 100.0f);
+        CreateItem(1, -2, 200.0f);
+        CreateItem(1, -2, 600.0f);
+        CreateItem(5, -2, 100.0f);
+        model.SetEdgeEffect(EdgeEffect::SPRING, true);
+        ViewAbstract::SetHeight(CalcLength(300.0f));
+    });
+    auto& info = pattern_->gridLayoutInfo_;
+    EXPECT_EQ(info.startIndex_, 0);
+    EXPECT_EQ(info.endIndex_, 0);
+    EXPECT_EQ(info.startMainLineIndex_, 0);
+    EXPECT_EQ(info.endMainLineIndex_, 2);
+    pattern_->scrollableEvent_->scrollable_->isTouching_ = true;
+    UpdateCurrentOffset(-5.0f);
+    EXPECT_EQ(info.startIndex_, 0);
+    EXPECT_EQ(info.endIndex_, 2);
+    UpdateCurrentOffset(3.0f);
+    EXPECT_EQ(info.startIndex_, 0);
+    EXPECT_EQ(info.endIndex_, 2);
+    for (int i = 0; i < 5; ++i) {
+        UpdateCurrentOffset(3.0f);
+        EXPECT_EQ(info.startIndex_, 0);
+        EXPECT_EQ(info.endIndex_, 0);
+    }
+    EXPECT_EQ(info.startMainLineIndex_, 0);
+    EXPECT_EQ(info.endMainLineIndex_, 1);
+    EXPECT_TRUE(info.reachStart_);
+}
+
+/**
  * @tc.name: GridIrregularLayout::Gaps001
  * @tc.desc: Test changing gaps
  * @tc.type: FUNC
