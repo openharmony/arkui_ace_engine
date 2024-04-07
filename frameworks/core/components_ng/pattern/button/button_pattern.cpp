@@ -279,6 +279,7 @@ void ButtonPattern::InitFocusEvent()
 void ButtonPattern::OnModifyDone()
 {
     Pattern::OnModifyDone();
+    FireBuilder();
     InitButtonLabel();
     HandleBackgroundColor();
     HandleBorderColorAndWidth();
@@ -290,6 +291,9 @@ void ButtonPattern::OnModifyDone()
 
 void ButtonPattern::HandleBackgroundColor()
 {
+    if (UseContentModifier()) {
+        return;
+    }
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto pipeline = PipelineBase::GetCurrentContext();
@@ -311,6 +315,9 @@ void ButtonPattern::HandleBackgroundColor()
 
 void ButtonPattern::HandleBorderColorAndWidth()
 {
+    if (UseContentModifier()) {
+        return;
+    }
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto pipeline = PipelineBase::GetCurrentContext();
@@ -383,6 +390,9 @@ void ButtonPattern::OnAfterModifyDone()
 
 void ButtonPattern::InitHoverEvent()
 {
+    if (UseContentModifier()) {
+        return;
+    }
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto eventHub = host->GetEventHub<ButtonEventHub>();
@@ -406,6 +416,10 @@ void ButtonPattern::InitHoverEvent()
 void ButtonPattern::OnTouchDown()
 {
     isPress_ = true;
+    FireBuilder();
+    if (UseContentModifier()) {
+        return;
+    }
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto buttonEventHub = GetEventHub<ButtonEventHub>();
@@ -429,6 +443,10 @@ void ButtonPattern::OnTouchDown()
 void ButtonPattern::OnTouchUp()
 {
     isPress_ = false;
+    FireBuilder();
+    if (UseContentModifier()) {
+        return;
+    }
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto buttonEventHub = GetEventHub<ButtonEventHub>();
@@ -476,6 +494,9 @@ void ButtonPattern::HandleHoverEvent(bool isHover)
 
 void ButtonPattern::HandleEnabled()
 {
+    if (UseContentModifier()) {
+        return;
+    }
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto eventHub = host->GetEventHub<EventHub>();
@@ -506,6 +527,81 @@ void ButtonPattern::AnimateTouchAndHover(RefPtr<RenderContext>& renderContext, i
     option.SetDuration(duration);
     option.SetCurve(curve);
     AnimationUtils::Animate(option, [renderContext, blendColorTo]() { renderContext->BlendBgColor(blendColorTo); });
+}
+
+void ButtonPattern::SetButtonPress(double xPos, double yPos)
+{
+    CHECK_NULL_VOID(contentModifierNode_);
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto eventHub = host->GetEventHub<EventHub>();
+    CHECK_NULL_VOID(eventHub);
+    auto enabled = eventHub->IsEnabled();
+    if (!enabled) {
+        return;
+    }
+    GestureEvent info;
+    std::chrono::microseconds microseconds(GetMicroTickCount());
+    TimeStamp time(microseconds);
+    info.SetTimeStamp(time);
+    auto x = Dimension(xPos, DimensionUnit::VP);
+    auto y = Dimension(yPos, DimensionUnit::VP);
+    info.SetLocalLocation(Offset(xPos, yPos));
+    auto currFrameRect = host->GetRectWithRender();
+    auto frameGlobalOffset = currFrameRect.GetOffset();
+    auto globalX = Dimension(x.ConvertToPx() + frameGlobalOffset.GetX());
+    auto globalY = Dimension(y.ConvertToPx() + frameGlobalOffset.GetY());
+    info.SetGlobalLocation(Offset(globalX.ConvertToVp(), globalY.ConvertToVp()));
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto windowOffset = pipeline->GetCurrentWindowRect().GetOffset();
+    auto screenX = Dimension(windowOffset.GetX()) + globalX;
+    auto screenY = Dimension(windowOffset.GetY()) + globalY;
+    info.SetScreenLocation(Offset(screenX.ConvertToVp(), screenY.ConvertToVp()));
+    if (clickEventFunc_.has_value()) {
+        (clickEventFunc_.value())(info);
+    }
+}
+
+void ButtonPattern::FireBuilder()
+{
+    if (!makeFunc_.has_value()) {
+        return;
+    }
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto gestureEventHub = host->GetOrCreateGestureEventHub();
+    CHECK_NULL_VOID(gestureEventHub);
+    if (!makeFunc_) {
+        gestureEventHub->SetRedirectClick(false);
+        return;
+    } else {
+        gestureEventHub->SetRedirectClick(true);
+    }
+    host->RemoveChildAtIndex(0);
+    contentModifierNode_ = BuildContentModifierNode();
+    CHECK_NULL_VOID(contentModifierNode_);
+    host->AddChild(contentModifierNode_, 0);
+    host->MarkNeedFrameFlushDirty(PROPERTY_UPDATE_MEASURE);
+    clickEventFunc_ = gestureEventHub->GetClickEvent();
+}
+
+RefPtr<FrameNode> ButtonPattern::BuildContentModifierNode()
+{
+    if (!makeFunc_.has_value()) {
+        return nullptr;
+    }
+    CHECK_NULL_RETURN(makeFunc_, nullptr);
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, nullptr);
+    auto layoutProperty = GetLayoutProperty<ButtonLayoutProperty>();
+    CHECK_NULL_RETURN(layoutProperty, nullptr);
+    auto label = layoutProperty->GetLabel().value_or("");
+    auto eventHub = host->GetEventHub<EventHub>();
+    CHECK_NULL_RETURN(eventHub, nullptr);
+    auto enabled = eventHub->IsEnabled();
+    ButtonConfiguration buttonConfiguration(label, isPress_, enabled);
+    return (makeFunc_.value())(buttonConfiguration);
 }
 
 void ButtonPattern::OnColorConfigurationUpdate()
