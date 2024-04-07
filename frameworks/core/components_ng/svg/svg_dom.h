@@ -49,6 +49,7 @@ public:
 
     void SetFillColor(const std::optional<Color>& color) override;
     void SetSmoothEdge(float value) override;
+    void SetColorFilter(const std::optional<ImageColorFilter>& colorFilter) override;
 
     void DrawImage(
         RSCanvas& canvas, const ImageFit& imageFit, const Size& layout) override;
@@ -78,6 +79,7 @@ private:
     PushAttr attrCallback_;
     std::optional<Color> fillColor_;
     float smoothEdge_ = 0.0f;
+    std::optional<ImageColorFilter> colorFilter_;
     std::function<void()> onFinishCallback_;
 };
 } // namespace OHOS::Ace::NG

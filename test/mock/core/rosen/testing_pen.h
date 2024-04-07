@@ -65,6 +65,12 @@ public:
     {
         return .0f;
     }
+
+    virtual TestingFilter GetFilter()
+    {
+        TestingFilter filter = {};
+        return filter;
+    }
 };
 } // namespace OHOS::Ace::Testing
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_MOCK_ROSEN_TEST_TESTING_PEN_H

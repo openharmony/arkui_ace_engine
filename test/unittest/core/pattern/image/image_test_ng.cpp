@@ -794,7 +794,7 @@ HWTEST_F(ImageTestNg, ImagePaintMethod001, TestSize.Level1)
     EXPECT_EQ(config->imageInterpolation_, IMAGE_INTERPOLATION_DEFAULT);
     EXPECT_EQ(config->imageRepeat_, IMAGE_REPEAT_DEFAULT);
     EXPECT_EQ(config->flipHorizontally_, MATCHTEXTDIRECTION_DEFAULT);
-    EXPECT_EQ(*config->colorFilter_, COLOR_FILTER_DEFAULT);
+    EXPECT_EQ(*config->colorFilter_.colorFilterMatrix_, COLOR_FILTER_DEFAULT);
     EXPECT_EQ(config->obscuredReasons_, std::vector<ObscuredReasons>());
 
     /**
