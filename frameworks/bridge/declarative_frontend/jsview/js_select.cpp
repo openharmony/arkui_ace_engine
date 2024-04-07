@@ -204,8 +204,11 @@ void JSSelect::Value(const JSCallbackInfo& info)
 
 void JSSelect::Font(const JSCallbackInfo& info)
 {
-    if (!info[0]->IsObject()) {
+    if (info[0]->IsNull() || info[0]->IsUndefined()) {
         ResetFont(SelectFontType::SELECT);
+        return;
+    }
+    if (!info[0]->IsObject()) {
         return;
     }
     auto param = JSRef<JSObject>::Cast(info[0]);
@@ -394,8 +397,11 @@ void JSSelect::SelectedOptionBgColor(const JSCallbackInfo& info)
 
 void JSSelect::SelectedOptionFont(const JSCallbackInfo& info)
 {
-    if (!info[0]->IsObject()) {
+    if (info[0]->IsNull() || info[0]->IsUndefined()) {
         ResetFont(SelectFontType::SELECTED_OPTION);
+        return;
+    }
+    if (!info[0]->IsObject()) {
         return;
     }
     auto param = JSRef<JSObject>::Cast(info[0]);
@@ -448,8 +454,11 @@ void JSSelect::OptionBgColor(const JSCallbackInfo& info)
 
 void JSSelect::OptionFont(const JSCallbackInfo& info)
 {
-    if (!info[0]->IsObject()) {
+    if (info[0]->IsNull() || info[0]->IsUndefined()) {
         ResetFont(SelectFontType::OPTION);
+        return;
+    }
+    if (!info[0]->IsObject()) {
         return;
     }
     auto param = JSRef<JSObject>::Cast(info[0]);
@@ -727,7 +736,7 @@ void JSSelect::SetOptionWidth(const JSCallbackInfo& info)
 void JSSelect::SetOptionHeight(const JSCallbackInfo& info)
 {
     CalcDimension value;
-    if (info[0]->IsUndefined()|| info[0]->IsNull()) {
+    if (info[0]->IsUndefined() || info[0]->IsNull()) {
         return;
     } else if (info[0]->IsString()) {
         std::string modeFlag = info[0]->ToString();
@@ -755,7 +764,7 @@ void JSSelect::SetOptionWidthFitTrigger(const JSCallbackInfo& info)
     if (info[0]->IsBoolean()) {
         isFitTrigger = info[0]->ToBoolean();
     }
-    
+
     SelectModel::GetInstance()->SetOptionWidthFitTrigger(isFitTrigger);
 }
 
