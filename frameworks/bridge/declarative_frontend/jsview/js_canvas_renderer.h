@@ -139,6 +139,7 @@ public:
     void JsSetFilter(const JSCallbackInfo& info);
     void JsGetDirection(const JSCallbackInfo& info);
     void JsSetDirection(const JSCallbackInfo& info);
+    void JsReset(const JSCallbackInfo& info);
 
     void SetCanvasPattern(const RefPtr<AceType>& canvas)
     {
