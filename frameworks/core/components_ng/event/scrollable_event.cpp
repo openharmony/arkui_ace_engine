@@ -20,6 +20,7 @@
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/event/gesture_event_hub.h"
 #include "core/pipeline_ng/pipeline_context.h"
+#include "core/components_ng/pattern/list/list_pattern.h"
 
 namespace OHOS::Ace::NG {
 
@@ -54,7 +55,36 @@ void ScrollableActuator::CollectTouchTarget(const OffsetF& coordinateOffset, con
     const RefPtr<FrameNode>& frameNode, const RefPtr<TargetComponent>& targetComponent)
 {
     for (const auto& [axis, event] : scrollableEvents_) {
-        if (!event || !event->GetEnable()) {
+        if (!event) {
+            continue;
+        }
+        if (!clickRecognizer_) {
+            clickRecognizer_ = MakeRefPtr<ClickRecognizer>();
+        }
+        bool isHitTestBlock = event->IsHitTestBlock();
+        bool clickJudge = event->ClickJudge(localPoint);
+        clickRecognizer_->SetCoordinateOffset(Offset(coordinateOffset.GetX(), coordinateOffset.GetY()));
+        clickRecognizer_->SetGetEventTargetImpl(getEventTargetImpl);
+        clickRecognizer_->SetNodeId(frameNode->GetId());
+        clickRecognizer_->AttachFrameNode(frameNode);
+        clickRecognizer_->SetTargetComponent(targetComponent);
+        clickRecognizer_->SetIsSystemGesture(true);
+        clickRecognizer_->SetSysGestureJudge([isHitTestBlock, clickJudge](const RefPtr<GestureInfo>& gestureInfo,
+                                                 const std::shared_ptr<BaseGestureEvent>&) -> GestureJudgeResult {
+            if (isHitTestBlock || clickJudge) {
+                return GestureJudgeResult::CONTINUE;
+            }
+            return GestureJudgeResult::REJECT;
+        });
+        clickRecognizer_->SetOnClick([frameNode](const ClickInfo&) {
+            auto pattern = frameNode->GetPattern<ListPattern>();
+            CHECK_NULL_VOID(pattern);
+            auto item = pattern->GetSwiperItem().Upgrade();
+            CHECK_NULL_VOID(item);
+            item->SwiperReset(true);
+        });
+        result.emplace_front(clickRecognizer_);
+        if (!event->GetEnable()) {
             continue;
         }
         if (event->InBarRegion(localPoint, touchRestrict.sourceType)) {
@@ -67,24 +97,6 @@ void ScrollableActuator::CollectTouchTarget(const OffsetF& coordinateOffset, con
             scrollable->SetCoordinateOffset(Offset(coordinateOffset.GetX(), coordinateOffset.GetY()));
             scrollable->OnCollectTouchTarget(result, frameNode, targetComponent);
         }
-        if (!clickRecognizer_) {
-            clickRecognizer_ = MakeRefPtr<ClickRecognizer>();
-        }
-        bool isHitTestBlock = event->IsHitTestBlock();
-        clickRecognizer_->SetCoordinateOffset(Offset(coordinateOffset.GetX(), coordinateOffset.GetY()));
-        clickRecognizer_->SetGetEventTargetImpl(getEventTargetImpl);
-        clickRecognizer_->SetNodeId(frameNode->GetId());
-        clickRecognizer_->AttachFrameNode(frameNode);
-        clickRecognizer_->SetTargetComponent(targetComponent);
-        clickRecognizer_->SetIsSystemGesture(true);
-        clickRecognizer_->SetSysGestureJudge([isHitTestBlock](const RefPtr<GestureInfo>& gestureInfo,
-                                                 const std::shared_ptr<BaseGestureEvent>&) -> GestureJudgeResult {
-            if (!isHitTestBlock) {
-                return GestureJudgeResult::REJECT;
-            }
-            return GestureJudgeResult::CONTINUE;
-        });
-        result.emplace_front(clickRecognizer_);
         break;
     }
 }
