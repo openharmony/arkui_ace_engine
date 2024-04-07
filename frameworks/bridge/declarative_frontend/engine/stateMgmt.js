@@ -2027,6 +2027,9 @@ class stateMgmtConsole {
     static applicationError(...args) {
         aceConsole.error(`FIX THIS APPLICATION ERROR \n`, ...args);
     }
+    static applicationWarn(...args) {
+        aceConsole.warn(...args);
+    }
     static featureCombinationError(msg) {
         aceConsole.warn(msg);
     }
@@ -4455,8 +4458,8 @@ class SynchedPropertyOneWayPU extends ObservedPropertyAbstractPU {
                 // 1- source is of same type C in parent, source is its value, not the backing store ObservedPropertyObject
                 // 2- nested Object/Array inside observed another object/array in parent, source is its value
                 if (typeof sourceValue == "object" && !((sourceValue instanceof SubscribableAbstract) || ObservedObject.IsObservedObject(sourceValue))) {
-                    stateMgmtConsole.applicationError(`${this.debugInfo()}:  Provided source object's class is not instance of SubscribableAbstract,
-              it also lacks @Observed class decorator. Object property changes will not be observed. Application error!`);
+                    stateMgmtConsole.applicationWarn(`${this.debugInfo()}: Provided source object's class lacks @Observed class decorator.
+            Object property changes will not be observed.`);
                 }
                 
                 this.createSourceDependency(sourceValue);
@@ -5089,8 +5092,8 @@ class SynchedPropertyNestedObjectPU extends ObservedPropertyAbstractPU {
                 this.shouldInstallTrackedObjectReadCb = TrackedObject.needsPropertyReadCb(this.obsObject_);
             }
             else {
-                stateMgmtConsole.applicationError(`${this.debugInfo()}: set/init (method setValueInternal): assigned value is neither ObservedObject nor SubscribableAbstract. \
-      value changes will bot be observed and UI will not update. forgot @Observed class decorator? Application error.`);
+                stateMgmtConsole.applicationWarn(`${this.debugInfo()}: set/init (method setValueInternal): assigned value is not
+          be decorated by @Observed. Value changes will not be observed and UI will not update.`);
             }
         }
         return true;
@@ -5675,8 +5678,6 @@ class ViewPU extends NativeViewPartialUpdate {
      * framework internal functions, apps must not call
      */
     forceCompleteRerender(deep = false) {
-        
-        stateMgmtConsole.warn(`${this.debugInfo__()}: forceCompleteRerender - start.`);
         // see which elmtIds are managed by this View
         // and clean up all book keeping for them
         this.purgeDeletedElmtIds();
@@ -5689,8 +5690,6 @@ class ViewPU extends NativeViewPartialUpdate {
                 }
             });
         }
-        stateMgmtConsole.warn(`${this.debugInfo__()}: forceCompleteRerender - end`);
-        
     }
     /**
      * force a complete rerender / update on specific node by executing update function.
