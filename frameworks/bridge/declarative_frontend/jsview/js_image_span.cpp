@@ -115,6 +115,8 @@ void JSImageSpan::JSBind(BindingTarget globalObj)
     JSClass<JSImageSpan>::StaticMethod("textBackgroundStyle", &JSImageSpan::SetTextBackgroundStyle);
     JSClass<JSImageSpan>::StaticMethod("onComplete", &JSImageSpan::OnComplete);
     JSClass<JSImageSpan>::StaticMethod("onError", &JSImageSpan::OnError);
+    JSClass<JSImageSpan>::StaticMethod("border", &JSImage::JsBorder);
+    JSClass<JSImageSpan>::StaticMethod("borderRadius", &JSImage::JsBorderRadius);
     JSClass<JSImageSpan>::InheritAndBind<JSViewAbstract>(globalObj);
 }
 } // namespace OHOS::Ace::Framework

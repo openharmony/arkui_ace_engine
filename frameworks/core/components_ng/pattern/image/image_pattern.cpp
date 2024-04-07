@@ -404,10 +404,6 @@ void ImagePattern::SetImagePaintConfig(const RefPtr<CanvasImage>& canvasImage, c
         return;
     }
 
-    auto renderProps = host->GetPaintProperty<ImageRenderProperty>();
-    if (renderProps) {
-        renderProps->UpdateNeedBorderRadius(true);
-    }
     canvasImage->SetPaintConfig(config);
 }
 
