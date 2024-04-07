@@ -571,6 +571,7 @@ private:
     Dimension inactiveWidth_;
     Dimension activeWidth_;
     Dimension normalWidth_;
+    Dimension themeNormalWidth_;
     Dimension touchWidth_;
     Dimension hoverWidth_;
 

@@ -49,8 +49,9 @@ void ScrollBar::InitTheme()
     CHECK_NULL_VOID(pipelineContext);
     auto theme = pipelineContext->GetTheme<ScrollBarTheme>();
     CHECK_NULL_VOID(theme);
-    SetInactiveWidth(theme->GetNormalWidth());
-    SetNormalWidth(theme->GetNormalWidth());
+    themeNormalWidth_ = theme->GetNormalWidth();
+    SetInactiveWidth(themeNormalWidth_);
+    SetNormalWidth(themeNormalWidth_);
     SetActiveWidth(theme->GetActiveWidth());
     SetTouchWidth(theme->GetTouchWidth());
     SetMinHeight(theme->GetMinHeight());
@@ -206,12 +207,7 @@ void ScrollBar::SetRectTrickRegion(
     double normalWidth = NormalizeToPx(normalWidth_);
     if (LessOrEqual(activeSize, normalWidth)) {
         if (GreatNotEqual(normalWidth, mainSize)) {
-            auto pipelineContext = PipelineContext::GetCurrentContext();
-            CHECK_NULL_VOID(pipelineContext);
-            auto theme = pipelineContext->GetTheme<ScrollBarTheme>();
-            CHECK_NULL_VOID(theme);
-            normalWidth_ = theme->GetNormalWidth();
-            normalWidth = NormalizeToPx(normalWidth_);
+            normalWidth = NormalizeToPx(themeNormalWidth_);
         } else {
             activeSize = normalWidth;
         }
