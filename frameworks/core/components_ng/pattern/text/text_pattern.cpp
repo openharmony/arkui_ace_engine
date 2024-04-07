@@ -390,18 +390,27 @@ void TextPattern::HandleOnCopy()
     }
     auto value = GetSelectedText(textSelector_.GetTextStart(), textSelector_.GetTextEnd());
     if (value.empty()) {
-        selectOverlay_->HideMenu();
+        HiddenMenu();
         return;
     }
     if (copyOption_ != CopyOptions::None) {
         clipboard_->SetData(value, copyOption_);
     }
-    selectOverlay_->HideMenu();
+    HiddenMenu();
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto eventHub = host->GetEventHub<TextEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->FireOnCopy(value);
+}
+
+void TextPattern::HiddenMenu()
+{
+    if (IsUsingMouse()) {
+        CloseSelectOverlay();
+    } else {
+        selectOverlay_->HideMenu();
+    }
 }
 
 void TextPattern::SetTextSelection(int32_t selectionStart, int32_t selectionEnd)
