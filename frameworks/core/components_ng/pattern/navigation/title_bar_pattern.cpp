@@ -346,13 +346,13 @@ void TitleBarPattern::ProcessTitleDragStart(float offset)
         IsHidden()) {
         return;
     }
-    if (springController_ && !springController_->IsStopped()) {
-        // clear stop listener before stop
-        springController_->ClearStopListeners();
-        springController_->Stop();
+    if (springAnimation_) {
+        AnimationUtils::StopAnimation(springAnimation_);
+        springAnimation_.reset();
     }
-    if (animator_ && !animator_->IsStopped()) {
-        animator_->Stop();
+    if (animation_) {
+        AnimationUtils::StopAnimation(animation_);
+        animation_.reset();
     }
 
     defaultTitleBarHeight_ = currentTitleBarHeight_;
@@ -489,41 +489,45 @@ float TitleBarPattern::GetMappedOffset(float offset)
 
 void TitleBarPattern::SpringAnimation(float startPos, float endPos)
 {
-    float mass = 1.0f;        // The move animation spring curve mass is 1.0f
-    float stiffness = 228.0f; // The move animation spring curve stiffness is 228.0f
-    float damping = 30.0f;    // The move animation spring curve damping is 30.0f
-    const RefPtr<SpringProperty> DEFAULT_OVER_SPRING_PROPERTY =
-        AceType::MakeRefPtr<SpringProperty>(mass, stiffness, damping);
-    if (!springMotion_) {
-        springMotion_ = AceType::MakeRefPtr<SpringMotion>(overDragOffset_, 0, 0, DEFAULT_OVER_SPRING_PROPERTY);
-    } else {
-        springMotion_->Reset(overDragOffset_, 0, 0, DEFAULT_OVER_SPRING_PROPERTY);
-        springMotion_->ClearListeners();
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    SetOverDragOffset(overDragOffset_);
+    SetTempTitleBarHeightVp(maxTitleBarHeight_ + overDragOffset_ / 6.0f);
+    UpdateScaleByDragOverDragOffset(overDragOffset_);
+    host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    auto pipeline = PipelineContext::GetCurrentContext();
+    if (pipeline) {
+        pipeline->FlushUITasks();
     }
-    springMotion_->AddListener([weak = AceType::WeakClaim(this)](float value) {
-        auto titlebar = weak.Upgrade();
-        CHECK_NULL_VOID(titlebar);
-        titlebar->SetOverDragOffset(value);
-        titlebar->SetTempTitleBarHeightVp(titlebar->maxTitleBarHeight_ + value / 6.0f);
-        titlebar->UpdateScaleByDragOverDragOffset(value);
-        auto host = titlebar->GetHost();
-        CHECK_NULL_VOID(host);
-        host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
-    });
 
-    if (!springController_) {
-        springController_ = AceType::MakeRefPtr<Animator>(PipelineBase::GetCurrentContext());
-    }
-    springController_->ClearStopListeners();
-    springController_->PlayMotion(springMotion_);
-    springController_->AddStopListener([weak = AceType::WeakClaim(this)]() {
-        auto titlebar = weak.Upgrade();
-        CHECK_NULL_VOID(titlebar);
-        titlebar->ClearDragState();
-        auto host = titlebar->GetHost();
-        CHECK_NULL_VOID(host);
-        host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
-    });
+    constexpr float velocity = 0.0f;
+    constexpr float mass = 1.0f;        // The move animation spring curve mass is 1.0f
+    constexpr float stiffness = 228.0f; // The move animation spring curve stiffness is 228.0f
+    constexpr float damping = 30.0f;    // The move animation spring curve damping is 30.0f
+    auto springCurve = AceType::MakeRefPtr<InterpolatingSpring>(velocity, mass, stiffness, damping);
+    AnimationOption option;
+    option.SetCurve(springCurve);
+
+    springAnimation_ = AnimationUtils::StartAnimation(
+        option,
+        [weakPattern = AceType::WeakClaim(this)]() {
+            auto pattern = weakPattern.Upgrade();
+            CHECK_NULL_VOID(pattern);
+            auto host = pattern->GetHost();
+            CHECK_NULL_VOID(host);
+            pattern->SetOverDragOffset(0.0f);
+            pattern->SetTempTitleBarHeightVp(pattern->GetMaxTitleBarHeight());
+            pattern->UpdateScaleByDragOverDragOffset(0.0f);
+            host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+            auto pipeline = PipelineContext::GetCurrentContext();
+            if (pipeline) {
+                pipeline->FlushUITasks();
+            }
+        }, [weakPattern = AceType::WeakClaim(this)]() {
+            auto pattern = weakPattern.Upgrade();
+            CHECK_NULL_VOID(pattern);
+            pattern->CleanSpringAnimation();
+        });
 }
 
 void TitleBarPattern::ClearDragState()
@@ -576,26 +580,28 @@ void TitleBarPattern::TransformScale(float overDragOffset, const RefPtr<FrameNod
 
 void TitleBarPattern::AnimateTo(float offset)
 {
-    if (!animator_) {
-        animator_ = CREATE_ANIMATOR(PipelineBase::GetCurrentContext());
-    }
-    auto animation = AceType::MakeRefPtr<CurveAnimation<float>>(GetCurrentOffset(), offset, Curves::FAST_OUT_SLOW_IN);
-    animation->AddListener([weakScroll = AceType::WeakClaim(this)](float value) {
-        auto titlebar = weakScroll.Upgrade();
-        CHECK_NULL_VOID(titlebar);
-        titlebar->ProcessTitleDragUpdate(value);
-        auto host = titlebar->GetHost();
-        CHECK_NULL_VOID(host);
-        host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
-        auto pipeline = PipelineContext::GetCurrentContext();
-        if (pipeline) {
-            pipeline->FlushUITasks();
-        }
-    });
-    animator_->ClearInterpolators();
-    animator_->AddInterpolator(animation);
-    animator_->SetDuration(DEFAULT_ANIMATION_DURATION);
-    animator_->Play();
+    AnimationOption option;
+    option.SetCurve(Curves::FAST_OUT_SLOW_IN);
+    option.SetDuration(DEFAULT_ANIMATION_DURATION);
+
+    animation_ = AnimationUtils::StartAnimation(
+        option,
+        [weakPattern = AceType::WeakClaim(this), offset]() {
+            auto pattern = weakPattern.Upgrade();
+            CHECK_NULL_VOID(pattern);
+            auto host = pattern->GetHost();
+            CHECK_NULL_VOID(host);
+            pattern->ProcessTitleDragUpdate(offset);
+            host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+            auto pipeline = PipelineContext::GetCurrentContext();
+            if (pipeline) {
+                pipeline->FlushUITasks();
+            }
+        }, [weakPattern = AceType::WeakClaim(this)]() {
+            auto pattern = weakPattern.Upgrade();
+            CHECK_NULL_VOID(pattern);
+            pattern->CleanAnimation();
+        });
 }
 
 void TitleBarPattern::SetMaxTitleBarHeight()
@@ -791,13 +797,13 @@ void TitleBarPattern::OnCoordScrollStart()
     if (titleBarLayoutProperty->GetTitleModeValue(NavigationTitleMode::FREE) != NavigationTitleMode::FREE) {
         return;
     }
-    if (springController_ && !springController_->IsStopped()) {
-        // clear stop listener before stop
-        springController_->ClearStopListeners();
-        springController_->Stop();
+    if (springAnimation_) {
+        AnimationUtils::StopAnimation(springAnimation_);
+        springAnimation_.reset();
     }
-    if (animator_ && !animator_->IsStopped()) {
-        animator_->Stop();
+    if (animation_) {
+        AnimationUtils::StopAnimation(animation_);
+        animation_.reset();
     }
 
     defaultTitleBarHeight_ = currentTitleBarHeight_;

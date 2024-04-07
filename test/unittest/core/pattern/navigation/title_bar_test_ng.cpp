@@ -409,12 +409,9 @@ HWTEST_F(TitleBarTestNg, TitleBarPatternProcessTitleDragStartTest002, TestSize.L
     ASSERT_NE(titleBarLayoutProperty, nullptr);
     titleBarLayoutProperty->GetTitleModeValue(NavigationTitleMode::FREE);
     frameNode_->GetSubtitle();
-    titleBarPattern_->springController_ = nullptr;
-    titleBarPattern_->animator_  = nullptr;
     titleBarPattern_->ProcessTitleDragStart(offset);
     EXPECT_EQ(titleBarPattern_->GetTempTitleBarHeight(), titleBarPattern_->maxTitleBarHeight_);
 
-    titleBarPattern_->springMotion_ = nullptr;
     titleBarPattern_->SpringAnimation(100.0f, 0);
     titleBarPattern_->AnimateTo(offset);
     titleBarPattern_->ProcessTitleDragStart(offset);
@@ -457,7 +454,6 @@ HWTEST_F(TitleBarTestNg, TitleBarPattern004, TestSize.Level1)
     auto titleBarPattern = AceType::MakeRefPtr<TitleBarPattern>();
     ASSERT_NE(titleBarPattern, nullptr);
     RefPtr<SpringProperty> DEFAULT_OVER_SPRING_PROPERTY = AceType::MakeRefPtr<SpringProperty>(mass, stiffness, damping);
-    titleBarPattern->springMotion_ = AceType::MakeRefPtr<SpringMotion>(startPos, 0, 0, DEFAULT_OVER_SPRING_PROPERTY);
     titleBarPattern->SpringAnimation(startPos, 0);
     titleBarPattern->SetOverDragOffset(startPos);
     EXPECT_EQ(titleBarPattern->GetOverDragOffset(), startPos);
@@ -484,19 +480,6 @@ HWTEST_F(TitleBarTestNg, TitleBarPattern005, TestSize.Level1)
     ASSERT_NE(renderContext, nullptr);
     renderContext->UpdateTransformScale(VectorF(1.0f, 1.0f));
     EXPECT_EQ(renderContext->GetTransformScale(), VectorF(1.0f, 1.0f));
-}
-
-/**
- * @tc.name: TitleBarPattern006
- * @tc.desc: Test AnimateTo function.
- * @tc.type: FUNC
- */
-HWTEST_F(TitleBarTestNg, TitleBarPattern006, TestSize.Level1)
-{
-    InitTitleBarTestNg();
-    CreateNavBar();
-    titleBarPattern_->AnimateTo(0);
-    EXPECT_NE(titleBarPattern_->animator_, nullptr);
 }
 
 /**
@@ -771,7 +754,6 @@ HWTEST_F(TitleBarTestNg, TitleBarPatternOnCoordScrollStartTest024, TestSize.Leve
     auto titleBarLayoutProperty = frameNode_->GetLayoutProperty<TitleBarLayoutProperty>();
     ASSERT_NE(titleBarLayoutProperty, nullptr);
     titleBarLayoutProperty->GetTitleModeValue(NavigationTitleMode::FREE);
-    titleBarPattern_->springMotion_ = nullptr;
     titleBarPattern_->SpringAnimation(100.0f, 0);
     titleBarPattern_->AnimateTo(offset);
     titleBarPattern_->OnCoordScrollStart();
