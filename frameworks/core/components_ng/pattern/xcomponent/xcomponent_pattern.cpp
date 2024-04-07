@@ -1009,10 +1009,15 @@ void XComponentPattern::SetHandlingRenderContextForSurface(const RefPtr<RenderCo
     auto renderContext = host->GetRenderContext();
     renderContext->ClearChildren();
     renderContext->AddChild(handlingSurfaceRenderContext_, 0);
-    auto paintRect = AdjustPaintRect(
-        localPosition_.GetX(), localPosition_.GetY(), drawSize_.Width(), drawSize_.Height(), true);
-    handlingSurfaceRenderContext_->SetBounds(
-        paintRect.GetX(), paintRect.GetY(), paintRect.Width(), paintRect.Height());
+    if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
+        auto paintRect = AdjustPaintRect(
+            localPosition_.GetX(), localPosition_.GetY(), drawSize_.Width(), drawSize_.Height(), true);
+        handlingSurfaceRenderContext_->SetBounds(
+            paintRect.GetX(), paintRect.GetY(), paintRect.Width(), paintRect.Height());
+    } else {
+        handlingSurfaceRenderContext_->SetBounds(
+            localPosition_.GetX(), localPosition_.GetY(), drawSize_.Width(), drawSize_.Height());
+    }
 }
 
 OffsetF XComponentPattern::GetOffsetRelativeToWindow()
@@ -1243,10 +1248,15 @@ void XComponentPattern::UpdateSurfaceBounds(bool needForceRender, bool frameOffs
         XComponentSizeChange({ localPosition_, surfaceSize_ }, preSurfaceSize.IsPositive());
     }
     if (handlingSurfaceRenderContext_) {
-        auto paintRect = AdjustPaintRect(
-            localPosition_.GetX(), localPosition_.GetY(), surfaceSize_.Width(), surfaceSize_.Height(), true);
-        handlingSurfaceRenderContext_->SetBounds(
-            paintRect.GetX(), paintRect.GetY(), paintRect.Width(), paintRect.Height());
+        if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
+            auto paintRect = AdjustPaintRect(
+                localPosition_.GetX(), localPosition_.GetY(), surfaceSize_.Width(), surfaceSize_.Height(), true);
+            handlingSurfaceRenderContext_->SetBounds(
+                paintRect.GetX(), paintRect.GetY(), paintRect.Width(), paintRect.Height());
+        } else {
+            handlingSurfaceRenderContext_->SetBounds(
+                localPosition_.GetX(), localPosition_.GetY(), surfaceSize_.Width(), surfaceSize_.Height());
+        }
 #ifdef ENABLE_ROSEN_BACKEND
         auto* transactionProxy = Rosen::RSTransactionProxy::GetInstance();
         if (transactionProxy != nullptr) {
@@ -1421,8 +1431,8 @@ RectF XComponentPattern::AdjustPaintRect(float positionX, float positionY, float
 
     float nodeLeftI = RoundValueToPixelGrid(relativeLeft, isRound, false, false);
     float nodeTopI = RoundValueToPixelGrid(relativeTop, isRound, false, false);
-    roundToPixelErrorX += nodeLeftI -relativeLeft;
-    roundToPixelErrorY += nodeTopI -relativeTop;
+    roundToPixelErrorX += nodeLeftI - relativeLeft;
+    roundToPixelErrorY += nodeTopI - relativeTop;
     rect.SetLeft(nodeLeftI);
     rect.SetTop(nodeTopI);
 
@@ -1456,12 +1466,6 @@ RectF XComponentPattern::AdjustPaintRect(float positionX, float positionY, float
     if (nodeHeightI < nodeHeightTemp) {
         roundToPixelErrorY += nodeHeightTemp - nodeHeightI;
         nodeHeightI = nodeHeightTemp;
-    }
-    if (roundToPixelErrorX >= 1.0f || roundToPixelErrorX <= -1.0f) {
-        LOGI("roundToPixelErrorX is %{public}f", roundToPixelErrorX);
-    }
-    if (roundToPixelErrorY >= 1.0f || roundToPixelErrorY <= -1.0f) {
-        LOGI("roundToPixelErrorY is %{public}f", roundToPixelErrorY);
     }
 
     rect.SetWidth(nodeWidthI);
