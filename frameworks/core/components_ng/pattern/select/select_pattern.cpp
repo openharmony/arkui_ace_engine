@@ -1091,9 +1091,8 @@ void SelectPattern::OnColorConfigurationUpdate()
     CHECK_NULL_VOID(menuPattern);
 
     auto renderContext = menuNode->GetRenderContext();
-    if (Container::LessThanAPIVersion(PlatformVersion::VERSION_ELEVEN) || !renderContext->IsUniRenderEnabled()) {
-        renderContext->UpdateBackgroundColor(selectTheme->GetBackgroundColor());
-    } else {
+    renderContext->UpdateBackgroundColor(selectTheme->GetBackgroundColor());
+    if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN) && renderContext->IsUniRenderEnabled()) {
         renderContext->UpdateBackBlurStyle(renderContext->GetBackBlurStyle());
     }
 
