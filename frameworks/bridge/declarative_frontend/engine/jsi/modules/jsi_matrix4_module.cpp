@@ -265,8 +265,6 @@ shared_ptr<JsValue> SetPolyToPoly(const shared_ptr<JsRuntime>& runtime, const sh
         return thisObj;
     }
     auto matrix = ConvertToMatrix(runtime, thisObj->GetProperty(runtime, MATRIX_4X4));
-    auto srcIndexJSValue = argv[0]->GetProperty(runtime, "srcIndex");
-    auto dstIndexJSValue = argv[0]->GetProperty(runtime, "dstIndex");
     auto pointCountJSValue = argv[0]->GetProperty(runtime, "pointCount");
     shared_ptr<JsValue> srcJsValue = argv[0]->GetProperty(runtime, "src");
     shared_ptr<JsValue> dstJsValue = argv[0]->GetProperty(runtime, "dst");
@@ -274,8 +272,8 @@ shared_ptr<JsValue> SetPolyToPoly(const shared_ptr<JsRuntime>& runtime, const sh
         LOGE("setpPolyToPoly src or dst is not array");
         return thisObj;
     }
-    int32_t srcIndex = srcIndexJSValue->ToInt32(runtime);
-    int32_t dstIndex = dstIndexJSValue->ToInt32(runtime);
+    int32_t srcIndex = argv[0]->GetProperty(runtime, "srcIndex")->ToInt32(runtime);
+    int32_t dstIndex = argv[0]->GetProperty(runtime, "dstIndex")->ToInt32(runtime);
     int32_t pointCount = srcJsValue->GetArrayLength(runtime)/2;
     if (!pointCountJSValue->IsUndefined(runtime)) {
         pointCount = pointCountJSValue->ToInt32(runtime);
@@ -285,19 +283,27 @@ shared_ptr<JsValue> SetPolyToPoly(const shared_ptr<JsRuntime>& runtime, const sh
     ParsePoint(srcJsValue, srcPoint, runtime);
     ParsePoint(dstJsValue, dstPoint, runtime);
     if (pointCount <= 0 || pointCount > srcPoint.size() || pointCount > dstPoint.size()) {
-        LOGE("setpPolyToPoly pointCount less than 0");
+        LOGE("setpPolyToPoly pointCount out of range pointCount:%{public}d, src size:%{public}d, dst size:%{public}d",
+            pointCount, static_cast<int>(srcPoint.size()), static_cast<int>(dstPoint.size()));
         return thisObj;
     }
-    if (srcIndex < 0 || (pointCount + srcIndex) > srcPoint.size() || dstIndex < 0 ||
-        (pointCount + dstIndex) > dstPoint.size()) {
-        LOGE("setpPolyToPoly srcIndex or dstIndex is wrong value");
+    if (srcIndex < 0 || (pointCount + srcIndex) > srcPoint.size()) {
+        LOGE("setpPolyToPoly srcIndex out of range srcIndex:%{public}d, pointCount:%{public}d, src size%{public}d",
+            srcIndex, pointCount, static_cast<int>(srcPoint.size()));
+        return thisObj;
+    }
+    if (dstIndex < 0 || (pointCount + dstIndex) > dstPoint.size()) {
+        LOGE("setpPolyToPoly dstIndex out of range dstIndex:%{public}d, pointCount:%{public}d, dst size%{public}d",
+            dstIndex, pointCount, static_cast<int>(dstPoint.size()));
         return thisObj;
     }
     std::vector<OHOS::Ace::NG::PointT<int32_t>> totalPoint;
-    for (int i = srcIndex; i < pointCount; i++) {
+    int srcLastIndex = pointCount + srcIndex;
+    for (int i = srcIndex; i < srcLastIndex; i++) {
         totalPoint.push_back(srcPoint[i]);
     }
-    for (int i = dstIndex; i < pointCount; i++) {
+    int dstLastIndex = pointCount + srcIndex;
+    for (int i = dstIndex; i < dstLastIndex; i++) {
         totalPoint.push_back(dstPoint[i]);
     }
     Matrix4 ret = OHOS::Ace::NG::SetMatrixPolyToPoly(matrix, totalPoint);
