@@ -1267,7 +1267,7 @@ void JSRichEditorController::ParseJsSymbolSpanStyle(
     uint32_t symbolEffectStrategy;
     if (!effectStrategy->IsNull() && JSContainerBase::ParseJsInteger(effectStrategy, symbolEffectStrategy)) {
         updateSpanStyle.updateSymbolEffectStrategy = symbolEffectStrategy;
-        style.SetEffectStrategy(symbolEffectStrategy);
+        style.SetEffectStrategy(0);
     }
 }
 
