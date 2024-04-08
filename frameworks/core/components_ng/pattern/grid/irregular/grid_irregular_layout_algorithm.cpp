@@ -212,14 +212,13 @@ float GetPrevHeight(const GridLayoutInfo& info, float mainGap)
 void GridIrregularLayoutAlgorithm::MeasureForward(float mainSize)
 {
     auto& info = gridLayoutInfo_;
-    GridLayoutRangeSolver solver(&info, wrapper_);
-    auto res = solver.FindStartingRow(mainGap_);
-    UpdateStartInfo(info, res);
     if (info.endIndex_ == -1) {
         info.endMainLineIndex_ = -1;
     }
     float targetLen = mainSize - info.currentOffset_;
     float heightToFill = targetLen - GetPrevHeight(info, mainGap_);
+
+    GridLayoutRangeSolver solver(&info, wrapper_);
     if (Positive(heightToFill)) {
         GridIrregularFiller filler(&gridLayoutInfo_, wrapper_);
         auto fillRes = filler.Fill({ crossLens_, crossGap_, mainGap_ }, heightToFill, info.endMainLineIndex_ + 1);
@@ -231,9 +230,11 @@ void GridIrregularLayoutAlgorithm::MeasureForward(float mainSize)
         info.endIndex_ = endIdx;
     }
 
+    auto res = solver.FindStartingRow(mainGap_);
+    UpdateStartInfo(info, res);
     // adjust offset
     if (!overScroll_ && info.endIndex_ == info.childrenCount_ - 1) {
-        float overDis = -GetDistanceToBottom(mainSize, info.GetTotalHeightOfItemsInView(mainGap_));
+        float overDis = -info.GetDistanceToBottom(mainSize, info.GetTotalHeightOfItemsInView(mainGap_), mainGap_);
         if (Negative(overDis)) {
             return;
         }
@@ -319,24 +320,6 @@ void GridIrregularLayoutAlgorithm::MeasureOnJump(float mainSize)
     }
 }
 
-float GridIrregularLayoutAlgorithm::GetDistanceToBottom(float mainSize, float heightInView)
-{
-    auto& info = gridLayoutInfo_;
-    if (info.lineHeightMap_.empty() || info.endMainLineIndex_ < info.lineHeightMap_.rbegin()->first) {
-        return mainSize;
-    }
-
-    float offset = info.currentOffset_;
-    // currentOffset_ is relative to startMainLine, which might be entirely above viewport
-    auto it = info.lineHeightMap_.find(info.startMainLineIndex_);
-    while (it != info.lineHeightMap_.end() && Negative(offset + it->second + mainGap_)) {
-        offset += it->second + mainGap_;
-        ++it;
-    }
-    float bottomPos = offset + heightInView;
-    return bottomPos - mainSize;
-}
-
 void GridIrregularLayoutAlgorithm::UpdateLayoutInfo()
 {
     auto& info = gridLayoutInfo_;
@@ -351,7 +334,7 @@ void GridIrregularLayoutAlgorithm::UpdateLayoutInfo()
     info.totalHeightOfItemsInView_ = info.GetTotalHeightOfItemsInView(mainGap_);
 
     if (info.reachEnd_) {
-        info.offsetEnd_ = NonPositive(GetDistanceToBottom(mainSize, info.totalHeightOfItemsInView_));
+        info.offsetEnd_ = NonPositive(info.GetDistanceToBottom(mainSize, info.totalHeightOfItemsInView_, mainGap_));
     } else {
         info.offsetEnd_ = false;
     }
