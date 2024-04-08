@@ -15,18 +15,22 @@
 
 #include "bridge/declarative_frontend/jsview/js_node_container.h"
 
+#include <functional>
+#include <mutex>
 #include <unistd.h>
 
 #include "base/geometry/ng/size_t.h"
 #include "base/utils/utils.h"
+#include "bridge/common/utils/engine_helper.h"
+#include "bridge/declarative_frontend/engine/functions/js_function.h"
+#include "bridge/declarative_frontend/engine/js_converter.h"
 #include "bridge/declarative_frontend/jsview/js_base_node.h"
+#include "bridge/declarative_frontend/jsview/utils/node_container_helper.h"
+#include "core/common/container_scope.h"
 #include "core/components_ng/base/view_abstract_model.h"
 #include "core/components_ng/base/view_stack_processor.h"
+#include "core/components_ng/pattern/node_container/node_container_model_ng.h"
 #include "core/components_ng/pattern/node_container/node_container_pattern.h"
-#include "frameworks/bridge/declarative_frontend/engine/functions/js_function.h"
-#include "frameworks/bridge/declarative_frontend/engine/js_converter.h"
-#include "frameworks/core/common/container_scope.h"
-#include "frameworks/core/components_ng/pattern/node_container/node_container_model_ng.h"
 
 namespace OHOS::Ace {
 namespace {
@@ -34,6 +38,17 @@ const char* NODE_CONTAINER_ID = "_nodeContainerId";
 const char* INTERNAL_FIELD_VALUE = "_value";
 const char* NODEPTR_OF_UINODE = "nodePtr_";
 constexpr int32_t INVALID_NODE_CONTAINER_ID = -1;
+
+Framework::JSRef<Framework::JSVal> GetCurrentUIContext()
+{
+    auto container = Container::Current();
+    CHECK_NULL_RETURN(container, Framework::JSRef<Framework::JSVal>::Make());
+    auto frontend = container->GetFrontend();
+    CHECK_NULL_RETURN(frontend, Framework::JSRef<Framework::JSVal>::Make());
+    auto context = frontend->GetContextValue();
+    auto jsVal = Framework::JsConverter::ConvertNapiValueToJsVal(context);
+    return jsVal;
+}
 } // namespace
 
 std::unique_ptr<NodeContainerModel> NodeContainerModel::instance_;
@@ -62,6 +77,12 @@ NodeContainerModel* NodeContainerModel::GetInstance()
 namespace OHOS::Ace::Framework {
 void JSNodeContainer::Create(const JSCallbackInfo& info)
 {
+    static std::once_flag onceFlag;
+    std::call_once(onceFlag, []() -> void {
+        std::function<void(int32_t)> removeUIContextFunc = NodeContainerHelper::RemoveUIContext;
+        EngineHelper::RegisterRemoveUIContextFunc(removeUIContextFunc);
+    });
+
     NodeContainerModel::GetInstance()->Create();
     auto frameNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
@@ -97,6 +118,12 @@ void JSNodeContainer::Create(const JSCallbackInfo& info)
     };
     NodeContainerModel::GetInstance()->BindController(std::move(resetFunc));
     auto execCtx = info.GetExecutionContext();
+
+    if (!NodeContainerHelper::HasUIContext(ContainerScope::CurrentId())) {
+        JSRef<JSVal> context = GetCurrentUIContext();
+        NodeContainerHelper::AddUIContext(ContainerScope::CurrentId(), context);
+    }
+
     SetNodeController(object, execCtx);
     // set the _nodeContainerId to nodeController
     auto internalField = firstArg->GetProperty(NODE_CONTAINER_ID);
@@ -123,12 +150,7 @@ void JSNodeContainer::SetNodeController(const JSRef<JSObject>& object, JsiExecut
         [func = std::move(jsMake), containerId, execCtx]() -> RefPtr<NG::UINode> {
             JAVASCRIPT_EXECUTION_SCOPE(execCtx);
             ContainerScope scope(containerId);
-            auto container = Container::Current();
-            CHECK_NULL_RETURN(container, nullptr);
-            auto frontend = container->GetFrontend();
-            CHECK_NULL_RETURN(frontend, nullptr);
-            auto context = frontend->GetContextValue();
-            auto jsVal = JsConverter::ConvertNapiValueToJsVal(context);
+            auto jsVal = NodeContainerHelper::GetUIContext(containerId);
             JSRef<JSVal> result = func->ExecuteJS(1, &jsVal);
             if (result.IsEmpty() || !result->IsObject()) {
                 return nullptr;
