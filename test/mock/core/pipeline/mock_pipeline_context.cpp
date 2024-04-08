@@ -209,6 +209,8 @@ void PipelineContext::NotifyMemoryLevel(int32_t level) {}
 
 void PipelineContext::FlushMessages() {}
 
+void PipelineContext::FlushModifier() {}
+
 void PipelineContext::FlushUITasks() {}
 
 void PipelineContext::Finish(bool autoFinish) const {}
