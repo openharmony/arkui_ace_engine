@@ -3330,6 +3330,28 @@ HWTEST_F(RichEditorTestNg, DoubleHandleClickEvent001, TestSize.Level1)
 }
 
 /*
+ * @tc.name: DoubleHandleClickEvent002
+ * @tc.desc: test Double click to AdjustWordSelection
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorTestNg, DoubleHandleClickEvent002, TestSize.Level1)
+{
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    AddSpan(INIT_VALUE_1);
+    richEditorPattern->caretPosition_ = 0;
+    GestureEvent info;
+    info.SetSourceDevice(SourceType::MOUSE);
+    info.SetGlobalLocation(Offset(0, 0));
+    richEditorPattern->HandleDoubleClickOrLongPress(info);
+    EXPECT_EQ(richEditorPattern->GetCaretPosition(), 0);
+
+    richEditorPattern->isMousePressed_ = true;
+    richEditorPattern->caretUpdateType_= CaretUpdateType::LONG_PRESSED;
+    richEditorPattern->HandleDoubleClickOrLongPress(info);
+    EXPECT_EQ(richEditorPattern->GetCaretPosition(), 0);
+}
+
+/*
  * @tc.name: DoubleHandleClickEvent001
  * @tc.desc: test double click
  * @tc.type: FUNC
