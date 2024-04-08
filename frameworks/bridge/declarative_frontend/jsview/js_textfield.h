@@ -103,6 +103,9 @@ public:
     static void CreateJsTextFieldCommonEvent(const JSCallbackInfo& info);
     static Local<JSValueRef> JsKeepEditableState(panda::JsiRuntimeCallInfo *info);
     static void SetDecoration(const JSCallbackInfo& info);
+    static void SetMinFontSize(const JSCallbackInfo& info);
+    static void SetMaxFontSize(const JSCallbackInfo& info);
+    static void SetHeightAdaptivePolicy(int32_t value);
     static void SetLetterSpacing(const JSCallbackInfo& info);
     static void SetLineHeight(const JSCallbackInfo& info);
     static void SetFontFeature(const JSCallbackInfo& info);

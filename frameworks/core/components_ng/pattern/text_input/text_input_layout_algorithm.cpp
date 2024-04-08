@@ -34,18 +34,18 @@ std::optional<SizeF> TextInputLayoutAlgorithm::MeasureContent(
 
     auto isInlineStyle = pattern->IsNormalInlineState();
 
-    auto isPasswordType = pattern->IsInPasswordMode();
-    
     direction_ = textFieldLayoutProperty->GetLayoutDirection();
 
     // Create paragraph.
     auto disableTextAlign = !pattern->IsTextArea() && !showPlaceHolder_ && !isInlineStyle;
-    if (pattern->IsDragging() && !showPlaceHolder_ && !isInlineStyle) {
-        CreateParagraph(textStyle, pattern->GetDragContents(), textContent_,
-            isPasswordType && pattern->GetTextObscured() && !showPlaceHolder_, disableTextAlign);
+    auto textFieldContentConstraint = CalculateContentMaxSizeWithCalculateConstraint(contentConstraint, layoutWrapper);
+    if (textStyle.GetAdaptTextSize()) {
+        if (!AddAdaptFontSizeAndAnimations(textStyle, textFieldLayoutProperty, textFieldContentConstraint,
+            layoutWrapper)) {
+            return std::nullopt;
+        }
     } else {
-        CreateParagraph(textStyle, textContent_, isPasswordType && pattern->GetTextObscured() && !showPlaceHolder_,
-            pattern->GetNakedCharPosition(), disableTextAlign);
+        CreateParagraphEx(textStyle, textContent_, contentConstraint, layoutWrapper);
     }
 
     autoWidth_ = textFieldLayoutProperty->GetWidthAutoValue(false);
@@ -55,7 +55,6 @@ std::optional<SizeF> TextInputLayoutAlgorithm::MeasureContent(
         preferredHeight_ = pattern->PreferredLineHeight(true);
     }
 
-    auto textFieldContentConstraint = CalculateContentMaxSizeWithCalculateConstraint(contentConstraint, layoutWrapper);
     // Paragraph layout.
     if (isInlineStyle) {
         CreateInlineParagraph(textStyle, textContent_, false, pattern->GetNakedCharPosition(), disableTextAlign);
@@ -233,5 +232,27 @@ float TextInputLayoutAlgorithm::GetDefaultHeightByType(LayoutWrapper* layoutWrap
         return static_cast<float>(textFieldTheme->GetPasswordTypeHeight().ConvertToPx());
     }
     return static_cast<float>(textFieldTheme->GetHeight().ConvertToPx());
+}
+
+bool TextInputLayoutAlgorithm::CreateParagraphEx(const TextStyle& textStyle, const std::string& content,
+    const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper)
+{
+    // update child position.
+    auto frameNode = layoutWrapper->GetHostNode();
+    CHECK_NULL_RETURN(frameNode, false);
+    auto pattern = frameNode->GetPattern<TextFieldPattern>();
+    CHECK_NULL_RETURN(pattern, false);
+    auto isInlineStyle = pattern->IsNormalInlineState();
+    auto isPasswordType = pattern->IsInPasswordMode();
+    auto disableTextAlign = !pattern->IsTextArea() && !showPlaceHolder_ && !isInlineStyle;
+
+    if (pattern->IsDragging() && !showPlaceHolder_ && !isInlineStyle) {
+        CreateParagraph(textStyle, pattern->GetDragContents(), content,
+            isPasswordType && pattern->GetTextObscured() && !showPlaceHolder_, disableTextAlign);
+    } else {
+        CreateParagraph(textStyle, content, isPasswordType && pattern->GetTextObscured() && !showPlaceHolder_,
+            pattern->GetNakedCharPosition(), disableTextAlign);
+    }
+    return true;
 }
 } // namespace OHOS::Ace::NG
