@@ -2674,11 +2674,11 @@ void ArkUINativeModule::RegisterTabAttributes(Local<panda::ObjectRef> object, Ec
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TabsBridge::ResetTabClip));
     tabs->Set(vm, panda::StringRef::NewFromUtf8(vm, "setTabWidth"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TabsBridge::SetWidthAuto));
-    tabs->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetWidth"),
+    tabs->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetTabWidth"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TabsBridge::ResetWidthAuto));
-    tabs->Set(vm, panda::StringRef::NewFromUtf8(vm, "setHeight"),
+    tabs->Set(vm, panda::StringRef::NewFromUtf8(vm, "setTabHeight"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TabsBridge::SetHeightAuto));
-    tabs->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetHeight"),
+    tabs->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetTabHeight"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TabsBridge::ResetHeightAuto));
     object->Set(vm, panda::StringRef::NewFromUtf8(vm, "tabs"), tabs);
 }
