@@ -30,6 +30,9 @@ namespace OHOS::Ace::NG {
 RefPtr<SvgImageObject> SvgImageObject::Create(const ImageSourceInfo& src, const RefPtr<ImageData>& data)
 {
     auto obj = AceType::MakeRefPtr<SvgImageObject>(src, SizeF(), data);
+    if (!obj->MakeSvgDom(data, src.GetFillColor())) {
+        return nullptr;
+    }
     return obj;
 }
 
