@@ -4147,15 +4147,15 @@ void TextFieldPattern::HandleOnDelete(bool backward)
 {
     if (backward) {
 #if defined(PREVIEW)
-        DeleteForward(GetGraphemeClusterLength(GetWideText(), GetCaretIndex()));
+        DeleteForward(1);
 #else
-        DeleteBackward(GetGraphemeClusterLength(GetWideText(), GetCaretIndex(), true));
+        DeleteBackward(1);
 #endif
     } else {
 #if defined(PREVIEW)
-        DeleteBackward(GetGraphemeClusterLength(GetWideText(), GetCaretIndex(), true));
+        DeleteBackward(1);
 #else
-        DeleteForward(GetGraphemeClusterLength(GetWideText(), GetCaretIndex()));
+        DeleteForward(1);
 #endif
     }
 }
@@ -4184,10 +4184,10 @@ void TextFieldPattern::DeleteBackward(int32_t length)
 
 void TextFieldPattern::DeleteBackwardOperation(int32_t length)
 {
-    auto start = std::max(selectController_->GetCaretIndex() - length, 0);
-    contentController_->erase(start, length);
+    int32_t idx = selectController_->GetCaretIndex();
+    int32_t count = contentController_->Delete(selectController_->GetCaretIndex(), length, true);
     lockRecord_ = true;
-    selectController_->UpdateCaretIndex(start);
+    selectController_->UpdateCaretIndex(std::max(idx - count, 0));
     lockRecord_ = false;
     StartTwinkling();
     UpdateEditingValueToRecord();
@@ -4202,7 +4202,7 @@ void TextFieldPattern::DeleteBackwardOperation(int32_t length)
 
 void TextFieldPattern::DeleteForwardOperation(int32_t length)
 {
-    contentController_->erase(selectController_->GetCaretIndex(), length);
+    contentController_->Delete(selectController_->GetCaretIndex(), length, false);
     StartTwinkling();
     UpdateEditingValueToRecord();
     auto tmpHost = GetHost();
