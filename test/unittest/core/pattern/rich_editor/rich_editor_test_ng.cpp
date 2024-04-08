@@ -120,6 +120,8 @@ const float BUILDER_WIDTH = 150.0f;
 const float BUILDER_HEIGHT = 75.0f;
 const SizeF BUILDER_SIZE(BUILDER_WIDTH, BUILDER_HEIGHT);
 const uint32_t SYMBOL_ID = 1;
+std::unordered_map<std::string, int32_t> TEXT_FONTFEATURE = {{ "subs", 1 }};
+std::unordered_map<std::string, int32_t> TEXT_FONTFEATURE_2 = {{ "subs", 0 }};
 std::vector<Color> SYMBOL_COLOR_LIST_1 = { Color::FromRGB(255, 100, 100) };
 std::vector<Color> SYMBOL_COLOR_LIST_2 = { Color::FromRGB(255, 100, 100), Color::FromRGB(255, 255, 100) };
 const uint32_t RENDER_STRATEGY_SINGLE = 0;
@@ -4311,9 +4313,11 @@ HWTEST_F(RichEditorTestNg, onIMEInputComplete002, TestSize.Level1)
     TextStyle style;
     style.SetLineHeight(LINE_HEIGHT_VALUE);
     style.SetLetterSpacing(LETTER_SPACING);
+    style.SetFontFeatures(TEXT_FONTFEATURE);
     TextSpanOptions options;
     options.value = INIT_VALUE_1;
     options.style = style;
+    richEditorController->AddTextSpan(options);
     /**
      * @tc.steps: step3. add text span
      */
@@ -4322,7 +4326,10 @@ HWTEST_F(RichEditorTestNg, onIMEInputComplete002, TestSize.Level1)
     TextStyleResult textStyle1 = info.selection_.resultObjects.front().textStyle;
     EXPECT_EQ(textStyle1.lineHeight, LINE_HEIGHT_VALUE.ConvertToVp());
     EXPECT_EQ(textStyle1.letterSpacing, LETTER_SPACING.ConvertToVp());
-
+    for (const auto& pair : textStyle1.fontFeature) {
+        EXPECT_EQ(pair.first, "subs");
+        EXPECT_EQ(pair.second, 1);
+    }
     auto eventHub = richEditorPattern->GetEventHub<RichEditorEventHub>();
     ASSERT_NE(eventHub, nullptr);
     TextStyleResult textStyle;
@@ -4332,6 +4339,60 @@ HWTEST_F(RichEditorTestNg, onIMEInputComplete002, TestSize.Level1)
     richEditorPattern->AfterIMEInsertValue(it1, 1, false);
     EXPECT_EQ(textStyle.lineHeight, LINE_HEIGHT_VALUE.ConvertToVp());
     EXPECT_EQ(textStyle.letterSpacing, LETTER_SPACING.ConvertToVp());
+    for (const auto& pair : textStyle1.fontFeature) {
+        EXPECT_EQ(pair.first, "subs");
+        EXPECT_EQ(pair.second, 1);
+    }
+    while (!ViewStackProcessor::GetInstance()->elementsStack_.empty()) {
+        ViewStackProcessor::GetInstance()->elementsStack_.pop();
+    }
+    ClearSpan();
+}
+
+/**
+ * @tc.name: onIMEInputComplete
+ * @tc.desc: test onIMEInputComplete
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorTestNg, onIMEInputComplete003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. get richEditor controller
+     */
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    auto richEditorController = richEditorPattern->GetRichEditorController();
+    ASSERT_NE(richEditorController, nullptr);
+    /**
+     * @tc.steps: step2. initalize span properties
+     */
+    TextStyle style;
+    style.SetFontFeatures(TEXT_FONTFEATURE_2);
+    TextSpanOptions options;
+    options.value = INIT_VALUE_1;
+    options.style = style;
+    richEditorController->AddTextSpan(options);
+    /**
+     * @tc.steps: step3. add text span
+     */
+    auto info = richEditorController->GetSpansInfo(1, 5);
+    TextStyleResult textStyle1 = info.selection_.resultObjects.front().textStyle;
+    for (const auto& pair : textStyle1.fontFeature) {
+        EXPECT_EQ(pair.first, "subs");
+        EXPECT_EQ(pair.second, 0);
+    }
+    auto eventHub = richEditorPattern->GetEventHub<RichEditorEventHub>();
+    ASSERT_NE(eventHub, nullptr);
+    TextStyleResult textStyle;
+    auto func = [&textStyle](const RichEditorAbstractSpanResult& info) { textStyle = info.GetTextStyle(); };
+    eventHub->SetOnIMEInputComplete(std::move(func));
+    auto it1 = AceType::DynamicCast<SpanNode>(richEditorNode_->GetLastChild());
+    richEditorPattern->AfterIMEInsertValue(it1, 1, false);
+    for (const auto& pair : textStyle1.fontFeature) {
+        EXPECT_EQ(pair.first, "subs");
+        EXPECT_EQ(pair.second, 0);
+    }
     while (!ViewStackProcessor::GetInstance()->elementsStack_.empty()) {
         ViewStackProcessor::GetInstance()->elementsStack_.pop();
     }
@@ -4354,19 +4415,53 @@ HWTEST_F(RichEditorTestNg, UpdateTextStyle, TestSize.Level1)
     auto newSpan1 = AceType::DynamicCast<SpanNode>(richEditorNode_->GetChildAtIndex(0));
     TextStyle textStyle;
     ImageSpanAttribute imageStyle;
+    textStyle.SetFontFeatures(TEXT_FONTFEATURE);
     textStyle.SetLineHeight(LINE_HEIGHT_VALUE);
     textStyle.SetLetterSpacing(LETTER_SPACING);
+
     struct UpdateSpanStyle updateSpanStyle;
     updateSpanStyle.updateLineHeight = LINE_HEIGHT_VALUE;
     updateSpanStyle.updateLetterSpacing = LETTER_SPACING;
+    updateSpanStyle.updateFontFeature = TEXT_FONTFEATURE;
 
     richEditorPattern->UpdateTextStyle(newSpan1, updateSpanStyle, textStyle);
     ASSERT_NE(newSpan1, nullptr);
     EXPECT_EQ(newSpan1->GetLineHeight(), LINE_HEIGHT_VALUE);
     EXPECT_EQ(newSpan1->GetLetterSpacing(), LETTER_SPACING);
+    for (const auto& pair : *newSpan1->GetFontFeature()) {
+        EXPECT_EQ(pair.first, "subs");
+        EXPECT_EQ(pair.second, 1);
+    }
     ClearSpan();
 }
 
+/**
+ * @tc.name: UpdateTextStyle
+ * @tc.desc: test update span style
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorTestNg, UpdateTextStyle2, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    auto richEditorController = richEditorPattern->GetRichEditorController();
+    ASSERT_NE(richEditorController, nullptr);
+    AddSpan(INIT_VALUE_1);
+    auto newSpan1 = AceType::DynamicCast<SpanNode>(richEditorNode_->GetChildAtIndex(0));
+    TextStyle textStyle;
+    ImageSpanAttribute imageStyle;
+    textStyle.SetFontFeatures(TEXT_FONTFEATURE_2);
+    struct UpdateSpanStyle updateSpanStyle;
+    updateSpanStyle.updateFontFeature = TEXT_FONTFEATURE;
+    richEditorPattern->UpdateTextStyle(newSpan1, updateSpanStyle, textStyle);
+    ASSERT_NE(newSpan1, nullptr);
+    for (const auto& pair : *newSpan1->GetFontFeature()) {
+        EXPECT_EQ(pair.first, "subs");
+        EXPECT_EQ(pair.second, 0);
+    }
+    ClearSpan();
+}
 /**
  * @tc.name: SetOnSelect
  * @tc.desc: test set on select
@@ -4382,9 +4477,11 @@ HWTEST_F(RichEditorTestNg, SetOnSelect, TestSize.Level1)
     TextStyle style;
     style.SetLineHeight(LINE_HEIGHT_VALUE);
     style.SetLetterSpacing(LETTER_SPACING);
+    style.SetFontFeatures(TEXT_FONTFEATURE);
     TextSpanOptions options;
     options.value = INIT_VALUE_1;
     options.style = style;
+    richEditorController->AddTextSpan(options);
     AddSpan(INIT_VALUE_1);
     auto info = richEditorController->GetSpansInfo(1, 5);
     TextStyleResult textStyle1 = info.selection_.resultObjects.front().textStyle;
@@ -4401,6 +4498,49 @@ HWTEST_F(RichEditorTestNg, SetOnSelect, TestSize.Level1)
     EXPECT_EQ(testOnSelect, 1);
     EXPECT_EQ(textStyle1.lineHeight, LINE_HEIGHT_VALUE.ConvertToVp());
     EXPECT_EQ(textStyle1.letterSpacing, LETTER_SPACING.ConvertToVp());
+    for (const auto& pair : textStyle1.fontFeature) {
+        EXPECT_EQ(pair.first, "subs");
+        EXPECT_EQ(pair.second, 1);
+    }
+    while (!ViewStackProcessor::GetInstance()->elementsStack_.empty()) {
+        ViewStackProcessor::GetInstance()->elementsStack_.pop();
+    }
+    ClearSpan();
+}
+
+/**
+ * @tc.name: SetOnSelect
+ * @tc.desc: test set on select
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorTestNg, SetOnSelect2, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    auto richEditorController = richEditorPattern->GetRichEditorController();
+    ASSERT_NE(richEditorController, nullptr);
+    TextStyle style;
+    style.SetFontFeatures(TEXT_FONTFEATURE_2);
+    TextSpanOptions options;
+    options.value = INIT_VALUE_1;
+    options.style = style;
+    richEditorController->AddTextSpan(options);
+    auto info = richEditorController->GetSpansInfo(1, 5);
+    TextStyleResult textStyle1 = info.selection_.resultObjects.front().textStyle;
+    RichEditorModelNG richEditorModel;
+    richEditorModel.Create();
+    auto func = [](const BaseEventInfo* info) { testOnSelect = 1; };
+    richEditorModel.SetOnSelect(std::move(func));
+    auto eventHub = richEditorPattern->GetEventHub<RichEditorEventHub>();
+    ASSERT_NE(eventHub, nullptr);
+    SelectionInfo selection;
+    eventHub->FireOnSelect(&selection);
+    EXPECT_EQ(testOnSelect, 1);
+    for (const auto& pair : textStyle1.fontFeature) {
+        EXPECT_EQ(pair.first, "subs");
+        EXPECT_EQ(pair.second, 0);
+    }
     while (!ViewStackProcessor::GetInstance()->elementsStack_.empty()) {
         ViewStackProcessor::GetInstance()->elementsStack_.pop();
     }
@@ -4425,9 +4565,11 @@ HWTEST_F(RichEditorTestNg, SetTypingStyle, TestSize.Level1)
     TextStyle style;
     style.SetLineHeight(LINE_HEIGHT_VALUE);
     style.SetLetterSpacing(LETTER_SPACING);
+    style.SetFontFeatures(TEXT_FONTFEATURE);
     TextSpanOptions options;
     options.value = INIT_VALUE_1;
     options.style = style;
+    richEditorController->AddTextSpan(options);
     AddSpan(INIT_VALUE_1);
     auto info = richEditorController->GetSpansInfo(1, 5);
     TextStyleResult textStyle1 = info.selection_.resultObjects.front().textStyle;
@@ -4440,6 +4582,46 @@ HWTEST_F(RichEditorTestNg, SetTypingStyle, TestSize.Level1)
     TextStyleResult textStyle2 = info1.selection_.resultObjects.front().textStyle;
     EXPECT_EQ(textStyle2.lineHeight, LINE_HEIGHT_VALUE.ConvertToVp());
     EXPECT_EQ(textStyle2.letterSpacing, LETTER_SPACING.ConvertToVp());
+    for (const auto& pair : textStyle1.fontFeature) {
+        EXPECT_EQ(pair.first, "subs");
+        EXPECT_EQ(pair.second, 1);
+    }
+    ClearSpan();
+}
+
+/**
+ * @tc.name: SetTypingStyle
+ * @tc.desc: test Typing Style
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorTestNg, SetTypingStyle2, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. get richEditor controller
+     */
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    auto richEditorController = richEditorPattern->GetRichEditorController();
+    ASSERT_NE(richEditorController, nullptr);
+    TextStyle style;
+    style.SetFontFeatures(TEXT_FONTFEATURE_2);
+    TextSpanOptions options;
+    options.value = INIT_VALUE_1;
+    options.style = style;
+    richEditorController->AddTextSpan(options);
+    auto info = richEditorController->GetSpansInfo(1, 5);
+    TextStyleResult textStyle1 = info.selection_.resultObjects.front().textStyle;
+    UpdateSpanStyle typingStyle;
+    richEditorPattern->SetTypingStyle(typingStyle, style);
+    TextSpanOptions options1;
+    options1.style = richEditorPattern->typingTextStyle_;
+    auto info1 = richEditorController->GetSpansInfo(1, 5);
+    TextStyleResult textStyle2 = info1.selection_.resultObjects.front().textStyle;
+    for (const auto& pair : textStyle1.fontFeature) {
+        EXPECT_EQ(pair.first, "subs");
+        EXPECT_EQ(pair.second, 0);
+    }
     ClearSpan();
 }
 
@@ -4461,9 +4643,11 @@ HWTEST_F(RichEditorTestNg, SetOnSelect003, TestSize.Level1)
     TextStyle style;
     style.SetLineHeight(LINE_HEIGHT_VALUE);
     style.SetLetterSpacing(LETTER_SPACING);
+    style.SetFontFeatures(TEXT_FONTFEATURE);
     TextSpanOptions options;
     options.value = INIT_VALUE_1;
     options.style = style;
+    richEditorController->AddTextSpan(options);
     AddSpan(INIT_VALUE_1);
     auto info = richEditorController->GetSpansInfo(1, 5);
     TextStyleResult textStyle1 = info.selection_.resultObjects.front().textStyle;
@@ -4474,6 +4658,45 @@ HWTEST_F(RichEditorTestNg, SetOnSelect003, TestSize.Level1)
     richEditorModel.SetOnSelect(std::move(func));
     EXPECT_EQ(textStyle1.lineHeight, LINE_HEIGHT_VALUE.ConvertToVp());
     EXPECT_EQ(textStyle1.letterSpacing, LETTER_SPACING.ConvertToVp());
+    for (const auto& pair : textStyle1.fontFeature) {
+        EXPECT_EQ(pair.first, "subs");
+        EXPECT_EQ(pair.second, 1);
+    }
+    ClearSpan();
+}
+
+/**
+ * @tc.name: SetOnSelect
+ * @tc.desc: test Set On Select
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorTestNg, SetOnSelect004, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. get richEditor controller
+     */
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    auto richEditorController = richEditorPattern->GetRichEditorController();
+    ASSERT_NE(richEditorController, nullptr);
+    TextStyle style;
+    style.SetFontFeatures(TEXT_FONTFEATURE_2);
+    TextSpanOptions options;
+    options.value = INIT_VALUE_1;
+    options.style = style;
+    richEditorController->AddTextSpan(options);
+    auto info = richEditorController->GetSpansInfo(1, 5);
+    TextStyleResult textStyle1 = info.selection_.resultObjects.front().textStyle;
+    RichEditorModelNG richEditorModel;
+    richEditorModel.Create();
+    auto spanNode = AceType::DynamicCast<SpanNode>(richEditorNode_->GetChildAtIndex(0));
+    auto func = [](const BaseEventInfo* info) { testOnSelect = 1; };
+    richEditorModel.SetOnSelect(std::move(func));
+    for (const auto& pair : textStyle1.fontFeature) {
+        EXPECT_EQ(pair.first, "subs");
+        EXPECT_EQ(pair.second, 0);
+    }
     ClearSpan();
 }
 
@@ -4484,22 +4707,56 @@ HWTEST_F(RichEditorTestNg, SetOnSelect003, TestSize.Level1)
  */
 HWTEST_F(RichEditorTestNg, SetSelection, TestSize.Level1)
 {
-    TextStyle style;
-    style.SetLineHeight(LINE_HEIGHT_VALUE);
-    style.SetLetterSpacing(LETTER_SPACING);
-    TextSpanOptions options;
-    options.value = INIT_VALUE_1;
-    options.style = style;
-    AddSpan(INIT_VALUE_1);
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
     ASSERT_NE(richEditorPattern, nullptr);
     auto richEditorController = richEditorPattern->GetRichEditorController();
     ASSERT_NE(richEditorController, nullptr);
+    TextStyle style;
+    style.SetLineHeight(LINE_HEIGHT_VALUE);
+    style.SetLetterSpacing(LETTER_SPACING);
+    style.SetFontFeatures(TEXT_FONTFEATURE);
+    TextSpanOptions options;
+    options.value = INIT_VALUE_1;
+    options.style = style;
+    richEditorController->AddTextSpan(options);
+    AddSpan(INIT_VALUE_1);
     richEditorPattern->SetSelection(1, 3);
     auto info1 = richEditorController->GetSpansInfo(1, 2);
     EXPECT_EQ(info1.selection_.resultObjects.front().textStyle.lineHeight, LINE_HEIGHT_VALUE.ConvertToVp());
     EXPECT_EQ(info1.selection_.resultObjects.front().textStyle.letterSpacing, LETTER_SPACING.ConvertToVp());
+    for (const auto& pair : info1.selection_.resultObjects.front().textStyle.fontFeature) {
+        EXPECT_EQ(pair.first, "subs");
+        EXPECT_EQ(pair.second, 1);
+    }
+    ClearSpan();
+}
+
+/**
+ * @tc.name: SetSelection
+ * @tc.desc: test Set Selection
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorTestNg, SetSelection2, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    auto richEditorController = richEditorPattern->GetRichEditorController();
+    ASSERT_NE(richEditorController, nullptr);
+    TextStyle style;
+    style.SetFontFeatures(TEXT_FONTFEATURE_2);
+    TextSpanOptions options;
+    options.value = INIT_VALUE_1;
+    options.style = style;
+    richEditorController->AddTextSpan(options);
+    AddSpan(INIT_VALUE_1);
+    richEditorPattern->SetSelection(1, 3);
+    auto info1 = richEditorController->GetSpansInfo(1, 2);
+    for (const auto& pair : info1.selection_.resultObjects.front().textStyle.fontFeature) {
+        EXPECT_EQ(pair.first, "subs");
+        EXPECT_EQ(pair.second, 0);
+    }
     ClearSpan();
 }
 
