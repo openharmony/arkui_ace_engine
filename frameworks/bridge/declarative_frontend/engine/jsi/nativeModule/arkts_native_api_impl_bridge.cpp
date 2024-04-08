@@ -142,6 +142,20 @@ ArkUINativeModuleValue ArkUINativeModule::GetFrameNodeById(ArkUIRuntimeCallInfo*
     return panda::NativePointerRef::New(vm, nodePtr);
 }
 
+ArkUINativeModuleValue ArkUINativeModule::GetFrameNodeByUniqueId(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
+    int nodeId = firstArg->ToNumber(vm)->Value();
+    auto nodePtr = GetArkUINodeModifiers()->getFrameNodeModifier()->getFrameNodeByUniqueId(nodeId);
+    if (nodePtr) {
+        return panda::NativePointerRef::New(vm, nodePtr);
+    }
+    
+    return panda::JSValueRef::Undefined(vm);
+}
+
 ArkUINativeModuleValue ArkUINativeModule::GetUIState(ArkUIRuntimeCallInfo* runtimeCallInfo)
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
@@ -180,6 +194,8 @@ ArkUINativeModuleValue ArkUINativeModule::GetArkUINativeModule(ArkUIRuntimeCallI
     auto object = panda::ObjectRef::New(vm);
     object->Set(vm, panda::StringRef::NewFromUtf8(vm, "getFrameNodeById"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), GetFrameNodeById));
+    object->Set(vm, panda::StringRef::NewFromUtf8(vm, "getFrameNodeByUniqueId"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), GetFrameNodeByUniqueId));
     object->Set(vm, panda::StringRef::NewFromUtf8(vm, "getUIState"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), GetUIState));
     object->Set(vm, panda::StringRef::NewFromUtf8(vm, "setSupportedUIState"),
