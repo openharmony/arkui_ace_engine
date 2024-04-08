@@ -1098,17 +1098,6 @@ void CompleteResourceObjectFromParams(
         return;
     }
 
-    std::string bundleName;
-    std::string moduleName;
-    JSViewAbstract::GetJsMediaBundleInfo(jsObj, bundleName, moduleName);
-
-    if (bundleName.empty() && moduleName.empty()) {
-        // process the resource in har with obfuscation.
-    } else if (bundleName.empty()) {
-        bundleName = GetBundleNameFromContainer();
-        jsObj->SetProperty<std::string>("bundleName", bundleName);
-    }
-
     std::regex resNameRegex(RESOURCE_NAME_PATTERN);
     std::smatch resNameResults;
     if (std::regex_match(targetModule, resNameResults, resNameRegex)) {
@@ -4017,6 +4006,14 @@ void JSViewAbstract::CompleteResourceObject(JSRef<JSObject>& jsObj)
         if (resIdValue == -1) {
             CompleteResourceObjectFromParams(resIdValue, jsObj, targetModule, resType, resName);
         }
+    }
+
+    std::string bundleName;
+    std::string moduleName;
+    JSViewAbstract::GetJsMediaBundleInfo(jsObj, bundleName, moduleName);
+    if (bundleName.empty() && !moduleName.empty()) {
+        bundleName = GetBundleNameFromContainer();
+        jsObj->SetProperty<std::string>("bundleName", bundleName);
     }
 }
 
