@@ -758,9 +758,7 @@ export struct ChipComponent {
         this.deleteChipNodeAnimate()
       }
     })
-    .onClick(() => {
-      this.onClicked()
-    })
+    .onClick(this.onClicked === noop ? undefined : this.onClicked.bind(this))
   }
 
   build() {

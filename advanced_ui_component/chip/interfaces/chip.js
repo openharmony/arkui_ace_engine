@@ -1054,9 +1054,7 @@ export class ChipComponent extends ViewPU {
                     this.deleteChipNodeAnimate();
                 }
             });
-            Row.onClick(() => {
-                this.onClicked();
-            });
+            Row.onClick(this.onClicked === noop ? undefined : this.onClicked.bind(this));
         }, Row);
         this.observeComponentCreation2((u, v) => {
             var w;
