@@ -182,7 +182,6 @@ JSRef<JSObject> JSRichEditor::CreateJSTextStyleResult(const TextStyleResult& tex
     decorationObj->SetProperty<std::string>("color", textStyleResult.decorationColor);
     textStyleObj->SetPropertyObject("decoration", decorationObj);
     textStyleObj->SetProperty<int32_t>("textAlign", textStyleResult.textAlign);
-    textStyleObj->SetProperty<int32_t>("wordBreak", textStyleResult.wordBreak);
     JSRef<JSArray> leadingMarginArray = JSRef<JSArray>::New();
     leadingMarginArray->SetValueAt(0, JSRef<JSVal>::Make(ToJSValue(textStyleResult.leadingMarginSize[0])));
     leadingMarginArray->SetValueAt(1, JSRef<JSVal>::Make(ToJSValue(textStyleResult.leadingMarginSize[1])));
